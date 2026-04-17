@@ -1,0 +1,14 @@
+{
+  "framework": "gsd-hybrid",
+  "version": "1.0.0",
+  "active": true,
+  "paths": {
+    "planning": ".planning",
+    "requirements": "REQUIREMENTS.md",
+    "roadmap": ".planning/ROADMAP.md"
+  },
+  "settings": {
+    "auto_research": true,
+    "quality_gates": true
+  }
+}
