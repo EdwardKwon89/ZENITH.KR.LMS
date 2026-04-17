@@ -14,12 +14,16 @@
 ### 1. 개발 방법론: ZEN_A4 (GSD Hybrid)
 에이전트는 모든 작업 수행 시 다음 4단계 워크플로우를 반드시 따릅니다.
 - **Phase 1 (Design)**: 설계 및 `Self Check` (필수)
-  - 참조: [docs/09_TEMPLATES/050_CHECKLISTS_TEMPLATE/PHASE_1_DESIGN_CHECKLIST.md](docs/09_TEMPLATES/050_CHECKLISTS_TEMPLATE/PHASE_1_DESIGN_CHECKLIST.md)
 - **Phase 2 (Implement)**: 구현 및 `Self Test` (필수)
-  - 참조: [docs/09_TEMPLATES/050_CHECKLISTS_TEMPLATE/PHASE_2_EXECUTE_CHECKLIST.md](docs/09_TEMPLATES/050_CHECKLISTS_TEMPLATE/PHASE_2_EXECUTE_CHECKLIST.md)
-- **Phase 3 (Verify)**: 결과 검증 및 교차 체크
-  - 참조: [docs/09_TEMPLATES/050_CHECKLISTS_TEMPLATE/PHASE_3_VERIFY_CHECKLIST.md](docs/09_TEMPLATES/050_CHECKLISTS_TEMPLATE/PHASE_3_VERIFY_CHECKLIST.md)
+- **Phase 3 (Verify)**: 결과 검증 및 교차 체크 (Audit Agent 검증 필수)
 - **Phase 4 (Commit)**: 규정에 맞는 깃 커밋
+
+#### 🤖 에이전트 역할 및 모델 할당 (Role-Agent Mapping)
+역할별 최적화된 모델을 사용하여 품질과 속도를 동시에 확보합니다. (상세: [103_AGENT_ROLES_SPEC.md](docs/00_GUIDE/103_AGENT_ROLES_SPEC.md))
+- **Leadership (High)**: CEO, CTO, CIO - Gemini 3.1 Pro (High)
+- **Product (Low)**: CPO - Gemini 3.1 Pro (Low)
+- **Audit (Low/High)**: Audit Agent - Phase 1~2 (Low) / **Phase 3 (High)**
+- **Operation (Fast)**: PM, Execution - Gemini 3 Flash
 
 ### 2. 코드 가이드라인 (ZEN_A4 Core Principles)
 - **불변성 우선**: 데이터 구조는 가능한 한 불변(Immutable) 상태로 설계합니다.

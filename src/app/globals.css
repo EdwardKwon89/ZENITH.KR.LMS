@@ -1,26 +1,89 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@theme {
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  /* ZENITH Brand Colors (Ethereal Blue Base) */
+  --color-brand-50: #eff6ff;
+  --color-brand-100: #dbeafe;
+  --color-brand-500: #3b82f6; 
+  --color-brand-600: #2563eb;
+  --color-brand-700: #1d4ed8;
+  --color-brand-900: #1e3a8a;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  --color-accent: #f59e0b; /* Logistics Amber */
+  
+  /* Neomorphic Shadow Tokens (Tactile Flow) */
+  --zen-shadow-light: -5px -5px 10px #ffffff;
+  --zen-shadow-dark: 5px 5px 12px #d1d5db;
+  --zen-shadow-inner-light: inset -2px -2px 5px #ffffff;
+  --zen-shadow-inner-dark: inset 2px 2px 5px #d1d5db;
+
+  /* Glassmorphism Tokens (Ethereal Clarity) */
+  --zen-glass-bg: rgba(255, 255, 255, 0.6);
+  --zen-glass-border: rgba(255, 255, 255, 0.3);
+
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+  --radius-3xl: 2rem;
+
+  /* Animations */
+  --animate-aurora: aurora 20s linear infinite;
+  --animate-subtle-float: float 3s ease-in-out infinite;
+
+  @keyframes aurora {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Custom Base Styles */
+@layer base {
+  body {
+    background-color: #f8fafc; /* slate-50 */
+    color: #0f172a; /* slate-900 */
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+}
+
+/* Premium Utilities (Visual WOW Factor) */
+@layer utilities {
+  .zen-glass {
+    background-color: var(--zen-glass-bg);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--zen-glass-border);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
+  }
+  
+  .zen-tactile {
+    background: #f8fafc;
+    box-shadow: var(--zen-shadow-light), var(--zen-shadow-dark);
+    transition: all 0.2s ease-in-out;
+  }
+
+  .zen-tactile:active {
+    box-shadow: var(--zen-shadow-inner-light), var(--zen-shadow-inner-dark);
+    transform: scale(0.98);
+  }
+
+  .zen-aurora-bg {
+    background: linear-gradient(-45deg, #dbeafe, #eff6ff, #fdf2f8, #f0f9ff);
+    background-size: 400% 400%;
+    animation: aurora 15s ease infinite;
+  }
+
+  .text-gradient {
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    background-image: linear-gradient(to right, #2563eb, #f59e0b);
+  }
 }

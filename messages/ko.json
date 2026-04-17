@@ -1,0 +1,25 @@
+{
+  "Common": {
+    "title": "ZENITH LMS",
+    "description": "SNTL 통합 물류 플랫폼",
+    "login": "로그인",
+    "signup": "회원가입",
+    "logout": "로그아웃"
+  },
+  "Navigation": {
+    "home": "홈",
+    "orders": "오더 관리",
+    "warehouse": "창고 관리",
+    "tracking": "트래킹",
+    "finance": "정산 관리",
+    "system": "시스템 관리"
+  },
+  "Auth": {
+    "login_title": "제니스 로그인",
+    "login_subtitle": "글로벌 통합 물류 플랫폼",
+    "login_email_label": "이메일 주소",
+    "login_password_label": "비밀번호",
+    "login_button": "로그인",
+    "signup_button": "신규 계정 생성"
+  }
+}
