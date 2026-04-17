@@ -1,0 +1,17 @@
+{
+  "Common": {
+    "title": "ZENITH LMS",
+    "description": "SNTL 综合物流平台",
+    "login": "登录",
+    "signup": "注册",
+    "logout": "登出"
+  },
+  "Navigation": {
+    "home": "首页",
+    "orders": "订单管理",
+    "warehouse": "仓库管理",
+    "tracking": "物流追踪",
+    "finance": "财务结算",
+    "system": "系统管理"
+  }
+}

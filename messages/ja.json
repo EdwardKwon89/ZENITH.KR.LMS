@@ -1,0 +1,17 @@
+{
+  "Common": {
+    "title": "ZENITH LMS",
+    "description": "SNTL 統合物流プラットフォーム",
+    "login": "ログイン",
+    "signup": "会員登録",
+    "logout": "ログアウト"
+  },
+  "Navigation": {
+    "home": "ホーム",
+    "orders": "オーダ管理",
+    "warehouse": "倉庫管理",
+    "tracking": "トラッキング",
+    "finance": "精算管理",
+    "system": "システム管理"
+  }
+}

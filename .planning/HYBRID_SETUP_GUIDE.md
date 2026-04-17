@@ -119,13 +119,10 @@ echo "**결정:** PostgreSQL 선택" >> .planning/DECISIONS.md
 설정: A++++ + GSD Plan + 상세 CONTEXT.md
 비용: 1주일에 1-2시간
 프로세스: 자동화 + 주간 계획 + 팀 협업
-
-실행:
-  1. 코드 작성 (A++++ 자동화)
-  2. 주간 계획 (GSD Plan, 15분)
-  3. 팀 의사결정 기록 (DECISIONS.md)
-  4. 주 1회 기술 의사결정 미팅
-  5. CONTEXT.md 유지 (100줄)
+모델 권장: 
+  - 리더십(CEO/CTO/CIO): Gemini 3.1 Pro (High)
+  - 감사(Audit Agent): Gemini 3.1 Pro (High - Phase 3)
+  - 제품/실행(CPO/Execution): Gemini 3.1 Pro (Low) / Flash
 ```
 
 **체크리스트**

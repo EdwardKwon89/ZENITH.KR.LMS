@@ -1,0 +1,25 @@
+{
+  "Common": {
+    "title": "ZENITH LMS",
+    "description": "SNTL Integrated Logistics Platform",
+    "login": "Login",
+    "signup": "Sign Up",
+    "logout": "Logout"
+  },
+  "Navigation": {
+    "home": "Home",
+    "orders": "Orders",
+    "warehouse": "Warehouse",
+    "tracking": "Tracking",
+    "finance": "Finance",
+    "system": "System"
+  },
+  "Auth": {
+    "login_title": "Sign in to Zenith",
+    "login_subtitle": "Global Integrated Logistics Platform",
+    "login_email_label": "Email Address",
+    "login_password_label": "Password",
+    "login_button": "Sign In",
+    "signup_button": "Create Account"
+  }
+}
