@@ -1,54 +1,34 @@
-# ✅ LIVE Phase 2: 구현 체크리스트 (Cumulative Execute Checklist)
+# LIVE 체크리스트 - PHASE 2: EXECUTE
 
-> **프로젝트:** ZENITH_LMS  
-> **상태:** [ACTIVE] - 프로젝트 전역 공통 적용 및 축적 중
+본 문서는 Phase 2(실행) 단계에서 준수해야 할 정교한 검증 항목들을 축적(Cumulative)하는 진실의 근거(Source of Truth)입니다. 가이드 템플릿을 기반으로 현장 피드백을 실시간으로 반영합니다.
 
----
+## 🛡️ 미들웨어 및 프록시 거버넌스 (Middleware & Proxy) [CRITICAL]
+- [x] **Next.js 16.2.4+ 규격**: `src/proxy.ts` 엔트리 포인트 유효성 및 `proxy` 함수 익스포트 여부 (SAR-2026-04-20-002)
+- [ ] **Physical Route Check**: 미들웨어 리다이렉트 대상이 `src/app/` 하위에 물리적으로 존재하는가? (ls 명령 검증 필수)
+- [ ] **Loop Guard**: 리다이렉트 조건문에 `!purePath.startsWith(target)` 배타적 가드가 포함되어 무한 루프를 방지하는가?
+- [ ] **Guard-Middleware Sync**: 페이지 내의 보안 가드(`requireAuth/Admin`)와 미들웨어의 리다이렉트 정책이 충돌하지 않는가? (SAR-2026-04-20-003)
 
-## 📌 목적
-구현 단계에서 발생할 수 있는 휴먼 에러를 방지하고, 코드의 무결성을 보장합니다.
+## 🟢 환경 및 동기화 (Environment & Sync)
+- [ ] **PATH 검증**: `npm`, `supabase` 등 필수 도구가 현재 세션에서 인식되는가? (SAR-2026-04-20-001)
+- [ ] **세션 초기화**: `export PATH=$PATH:/opt/homebrew/bin` 절차를 수행했는가? (SAR-2026-04-20-001)
+- [ ] **인증 확인**: `rtk supabase login`을 통해 원격 저장소 접근 권한을 확보했는가? (R-02)
 
----
+## 🔵 구현 표준 (Implementation Standard)
+- [ ] **불변성**: 데이터 구조가 불변(Immutable) 상태로 설계/구현되었는가?
+- [ ] **길이 제한**: 개별 함수가 50줄 이하로 유지되고 있는가?
+- [ ] **파일 무결성**: 단일 파일이 1,000줄을 초과하지 않는가? (넘을 경우 Overview/Detail 분리)
+- [ ] **Import Guard**: 코드 수정 시 `import` 구문이 우발적으로 삭제되지 않았으며, 런타임 `ReferenceError`가 없는가? (SAR-2026-04-20-003)
 
-## ✅ [Core] 기본 구현 항목
+## 🔴 보안 및 권한 (Security & Permission)
+- [ ] **ADMIN 가드**: 마스터 데이터 엔드포인트에 `requireAdmin` 보호가 적용되었는가?
+- [ ] **RBAC UI**: 사이드바 및 네비게이션이 사용자 역할에 따라 동적으로 필터링되는가?
+- [ ] **Sensitive Data**: 환경 변수나 API 키가 클라이언트 코드에 노출되지 않았는가?
 
-### 1. 코드 품질 및 로직
-- [ ] Null Check: 모든 외부 API 및 DB 응답에 대한 검증이 이루어졌는가?
-- [ ] Error Handling: 모든 예외 상황에 대한 `try-catch` 및 로깅이 적용되었는가?
-- [ ] 가독성: 함수는 50줄 이내, 파일은 800~1,000줄 이내를 유지하는가?
-
-### 2. 테스트 및 커버리지
-- [ ] 유닛 테스트가 작성되었으며 통과하는가?
-- [ ] 커버리지가 80% 이상을 달성했는가?
-- [ ] Edge Case 및 에러 케이스에 대한 테스트가 포함되었는가?
-
----
-
-## 🛡️ [Vault] 축적된 오류 방지 항목 (Added from SARs)
-
-> [!IMPORTANT]
-> **이 섹션은 우리의 실패가 자산으로 변한 결과물입니다.**
-
-- [ ] **[SAR-2026-04-19-001] i18n Path Integrity**: 모든 리다이렉트 및 링크가 로케일 접두사(예: `/ko`, `/en`)를 포함하거나 감지하는 로직을 거치는가?
-- [ ] **[SAR-2026-04-19-001] Redirect Guard**: 인증 및 상태 변경 가드 로직이 다국어 경로 이탈 없이 올바른 대상지로 안내하는가?
-- [ ] **[SAR-2026-04-19-003] Server Action Redirect Guard**: 서버 액션의 `redirect()` 출력 신호를 클라이언트 `catch` 블록에서 필터링하여 사용자에게 기술적 메시지(NEXT_REDIRECT)가 노출되지 않도록 조치했는가?
-- [ ] **[SAR-2026-04-19-004] Next.js 16.2.4 Proxy Convention**: `middleware.ts` 대신 `proxy.ts`를 사용하고 있는가? 또한 내부 함수명이 `export async function proxy()`로 정확히 익스포트되었는가? (엔트리 포인트 매핑 보장)
-- [ ] **[SAR-2026-04-19-004] Infrastructure Cache Integrity**: 핵심 인프라 파일명/경로 변경 시 반드시 `.next` 캐시 삭제 및 서버 재시작을 수행했는가? (유령 모듈 에러 방지)
-
-- [ ] **[SAR-2026-04-19-001] Navigation Hook Guard**: App Router 환경에서 `useRouter` 사용 시 `next/navigation` 임포트 및 컴포넌트 내 상수 정의 여부 확인.
-- [ ] **[SAR-2026-04-18-001] Step-Form Integrity**: 다단계 폼(Multi-step) 개발 시 모든 상태(`SignupStep` 등)에 대응하는 렌더링 블록(`switch/if`)이 존재하는가?
-- [ ] **[SAR-2026-04-18-001] Hydration Defense**: 브라우저 에이전트 도구와의 충돌 방지를 위해 `<body>` 등에 `suppressHydrationWarning` 속성이 필요한지 검토했는가?
-- [ ] **[SAR-2026-04-18-001] Header Fidelity Logic**: `mergeHeaders` 함수를 사용하여 쿠키 보안 속성(Path, HttpOnly)이 유실 없이 전파되는가?
+## 🟡 검증 및 빌드 (Verification & Build)
+- [ ] **Turbopack Build**: `npm run build` 결과가 오류 없이 완료되는가?
+- [ ] **Server Action**: 서버 액션의 예외 처리(try-catch)가 유저 피드백과 연동되는가?
+- [ ] **i18n**: 모든 신규 메뉴와 레이블이 다국어 파일(`ko.json`)에 등록되었는가?
 
 ---
-
-## 📊 점검 기록 (Audit Summary)
-
-| 점검일 | 기능명/버전 | 수행자 | 결과 | 로그 링크 |
-|--------|------------|--------|------|----------|
-|        |            |        |      | [Link]   |
-
----
-**작성 가이드:**
-1. 작업 완료 전 이 `LIVE` 문서를 전수 체크하십시오.
-2. 발견된 버그의 예방책은 반드시 **[Vault]** 섹션에 영구히 추가하십시오.
+*마지막 업데이트: 2026-04-20*
+*작성자: Antigravity (AI Agent)*

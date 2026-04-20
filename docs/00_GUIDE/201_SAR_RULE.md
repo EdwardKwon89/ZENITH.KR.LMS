@@ -25,7 +25,7 @@
 ## 🗂️ 파일 저장 위치
 
 ```
-docs/081_Self_Audit/SAR_reports/
+docs/08_Self_Audit/SAR_reports/
 ├── SAR_2026-04-08_001_Design_설계누락.md
 ├── SAR_2026-04-08_002_NullReference_토큰검증.md
 ├── SAR_2026-04-09_003_Security_환경변수미설정.md
@@ -331,7 +331,7 @@ npm test -- refreshToken.test.js
 
 - [Check List 관리 절차](./CHECK_LIST_PROCEDURE.md)
 - [통합 개발 방법론](./INTEGRATED_DEVELOPMENT_METHODOLOGY.md)
-- [SAR 저장소](../081_Self_Audit/SAR_reports/)
+- [SAR 저장소](../08_Self_Audit/SAR_reports/)
 
 ---
 

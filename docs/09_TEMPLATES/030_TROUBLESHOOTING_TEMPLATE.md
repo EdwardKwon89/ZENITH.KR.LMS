@@ -124,7 +124,7 @@ npm test
 상황: Self Test에서 Null Reference 오류 발생
 
 1단계: SAR 파일 생성
-  위치: docs/081_Self_Audit/SAR_reports/
+  위치: docs/08_Self_Audit/SAR_reports/
   파일명: SAR_YYYY-MM-DD_NNN_NullReference.md
   예: SAR_2026-04-09_001_NullReference.md
 
@@ -159,7 +159,7 @@ npm test
   추가:
   □ Null 체크: 모든 외부 입력 (SAR-001)
 
-4단계: 000_SAR_README.md 업데이트
+4단계: 000_README.md 업데이트
   SAR 목록에 이 항목 추가
 ```
 

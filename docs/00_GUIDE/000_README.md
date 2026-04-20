@@ -147,7 +147,7 @@
 
 ### 상단 네비게이션
 ```markdown
-[← 목록으로 돌아가기](./000_GUIDE_README.md) | [이전 문서](./001_*.md) | [다음 문서](./002_*.md)
+[← 목록으로 돌아가기](./000_README.md) | [이전 문서](./001_*.md) | [다음 문서](./002_*.md)
 
 ---
 ```
@@ -156,7 +156,7 @@
 ```markdown
 ---
 
-[← 목록으로 돌아가기](./000_GUIDE_README.md)
+[← 목록으로 돌아가기](./000_README.md)
 ```
 
 ---
@@ -243,7 +243,7 @@
 - [프로젝트 가이드](../../CLAUDE.md) - CLAUDE.md
 - [기술 의사결정 기록](../../.planning/DECISIONS.md)
 - [프로젝트 컨텍스트](../../.planning/CONTEXT.md)
-- [참조 문서](../10_Reference/000_Reference_README.md) - 완전한 문서 작성 규칙
+- [참조 문서](../10_Reference/000_README.md) - 완전한 문서 작성 규칙
 
 ---
 

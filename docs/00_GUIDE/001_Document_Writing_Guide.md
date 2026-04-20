@@ -11,7 +11,7 @@
 
 ---
 
-[← 목록으로 돌아가기](./000_GUIDE_README.md)
+[← 목록으로 돌아가기](./000_README.md)
 
 ---
 
@@ -51,7 +51,7 @@
 
 예:
 ✅ 000_GUIDE
-✅ 081_Self_Audit
+✅ 08_Self_Audit
 ✅ 090_TEMPLATES
 ✅ 093_Reference
 ```
@@ -81,7 +81,7 @@
 [세자리숫자]_[파일명].md
 
 예:
-✅ 000_GUIDE_README.md
+✅ 000_README.md
 ✅ 001_Document_Writing_Guide.md
 ✅ 201_SAR_RULE.md
 ✅ 202_Check_List_Procedure.md
@@ -98,9 +98,9 @@
 
 #### 특수 파일
 ```
-각 폴더의 인덱스: 000_[폴더명]_README.md
-예: 000_GUIDE_README.md
-    000_TEMPLATES_README.md
+각 폴더의 인덱스: 000_README.md
+예: 000_README.md
+    000_README.md
 ```
 
 ---
@@ -126,7 +126,7 @@
 040-049: 기타 템플릿
 ```
 
-#### 📊 docs/081_Self_Audit/ (오류 관리)
+#### 📊 docs/08_Self_Audit/ (오류 관리)
 ```
 SAR_YYYY-MM-DD_NNN_[Category]_[설명].md
 예: SAR_2026-04-10_001_Implementation_NullCheck누락.md
@@ -276,7 +276,7 @@ v2.0  → 주요 개정 (Major revision)
 
 ---
 
-[← 목록으로 돌아가기](./000_GUIDE_README.md)
+[← 목록으로 돌아가기](./000_README.md)
 
 ---
 ```
@@ -293,7 +293,7 @@ v2.0  → 주요 개정 (Major revision)
 ```markdown
 ---
 
-[← 목록으로 돌아가기](./000_GUIDE_README.md)
+[← 목록으로 돌아가기](./000_README.md)
 ```
 
 #### 규칙
@@ -547,7 +547,7 @@ function hello() {
 
 ---
 
-[← 목록으로 돌아가기](./000_GUIDE_README.md)
+[← 목록으로 돌아가기](./000_README.md)
 
 ---
 
@@ -568,7 +568,7 @@ function hello() {
 
 ---
 
-[← 목록으로 돌아가기](./000_GUIDE_README.md)
+[← 목록으로 돌아가기](./000_README.md)
 ```
 
 ### 예시 2: 폴더 인덱스
@@ -637,7 +637,7 @@ function hello() {
 
 예:
 git add docs/000_GUIDE/001_Document_Writing_Guide.md
-git add docs/000_GUIDE/000_GUIDE_README.md
+git add docs/000_GUIDE/000_README.md
 git commit -m "docs: Add document writing guide"
 ```
 
@@ -679,11 +679,11 @@ git commit -m "docs: Add document writing guide"
 
 4. **네비게이션 추가**
    ```markdown
-   [← 목록으로 돌아가기](./000_GUIDE_README.md)
+   [← 목록으로 돌아가기](./000_README.md)
    
    --- (내용)
    
-   [← 목록으로 돌아가기](./000_GUIDE_README.md)
+   [← 목록으로 돌아가기](./000_README.md)
    ```
 
 5. **README 업데이트**
@@ -710,7 +710,7 @@ git commit -m "docs: Add document writing guide"
 
 ---
 
-[← 목록으로 돌아가기](./000_GUIDE_README.md)
+[← 목록으로 돌아가기](./000_README.md)
 
 **마지막 업데이트**: 2026-04-08  
 **작성자**: Claude Code (AI)

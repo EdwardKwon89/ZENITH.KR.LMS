@@ -51,13 +51,13 @@
 
 ```
 □ SAR 저장소 준비
-  위치: docs/081_Self_Audit/SAR_reports/
+  위치: docs/08_Self_Audit/SAR_reports/
   
   □ 디렉토리 생성 (이미 있으면 스킵)
-    mkdir -p docs/081_Self_Audit/SAR_reports
+    mkdir -p docs/08_Self_Audit/SAR_reports
   
   □ .gitkeep 파일 생성 (디렉토리 유지)
-    touch docs/081_Self_Audit/SAR_reports/.gitkeep
+    touch docs/08_Self_Audit/SAR_reports/.gitkeep
   
   □ README.md 생성 (선택)
     내용: "이 디렉토리에 모든 SAR을 저장합니다"
@@ -143,7 +143,7 @@ Step 3: 오류 처리
 어느 Phase에서든 오류 발견 시:
 
 Step 1: SAR 작성 (10-20분)
-  파일: docs/081_Self_Audit/SAR_reports/
+  파일: docs/08_Self_Audit/SAR_reports/
   파일명: SAR_YYYY-MM-DD_NNN_Category_설명.md
   
   예: SAR_2026-04-10_001_Implementation_NullCheck누락.md
@@ -181,7 +181,7 @@ Step 3: 수정 및 재테스트 (30분~)
 소요: 1-2시간
 
 Step 1: SAR 통계 (30분)
-  파일: docs/081_Self_Audit/SAR_reports/
+  파일: docs/08_Self_Audit/SAR_reports/
   
   분석:
   □ 이번 달 총 SAR: ___개

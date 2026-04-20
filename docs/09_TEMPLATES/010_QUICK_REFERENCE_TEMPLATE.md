@@ -291,7 +291,7 @@ gh pr merge [pr-number]
 ├─ docs/
 │  ├─ 000_GUIDE/     [공통 방법론]
 │  ├─ 090_TEMPLATES/ [Template 모음]
-│  ├─ 081_Self_Audit/ [SAR 관리]
+│  ├─ 08_Self_Audit/ [SAR 관리]
 │  └─ 082_METRICS/   [통계]
 ├─ .planning/
 │  ├─ DECISIONS.md   [기술 결정]

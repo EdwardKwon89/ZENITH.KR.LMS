@@ -62,5 +62,20 @@
 | origin_port_id| UUID | REFERENCES zen_ports(id) | 출발지 ID |
 | dest_port_id | UUID | REFERENCES zen_ports(id) | 도착지 ID |
 | status | TEXT | DEFAULT 'REGISTERED' | 상태 |
-| cargo_details | JSONB | NOT NULL | 중량, 부피, 품명 등 |
+| cargo_details | JSONB | NOT NULL | 중량, 부피, 품명 등 (LEGACY: 별도 테이블 권장) |
 | created_at | TIMESTAMPTZ | DEFAULT now() | 생성일 |
+
+## 5. zen_order_items (오더 상세 항목)
+| Column Name | Data Type | Constraints | Description |
+| :--- | :--- | :--- | :--- |
+| id | UUID | PRIMARY KEY, DEFAULT gen_random_uuid() | 고유 ID |
+| order_id | UUID | REFERENCES zen_orders(id) | 소속 오더 ID |
+| sku_code | TEXT | - | 품목 코드 |
+| item_name | TEXT | NOT NULL | 품목명 |
+| quantity | INTEGER | DEFAULT 1 | 수량 |
+| unit_price | NUMERIC | - | 단가 |
+| currency | TEXT | DEFAULT 'USD' | 화폐 |
+| weight | NUMERIC | - | 중량 (kg) |
+| volume | NUMERIC | - | 부피 (CBM) |
+| created_at | TIMESTAMPTZ | DEFAULT now() | 생성일 |
+| updated_at | TIMESTAMPTZ | DEFAULT now() | 수정일 |
