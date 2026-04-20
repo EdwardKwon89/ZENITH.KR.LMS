@@ -39,6 +39,7 @@
 | **101** | **개발 방법론 개요** | (추가 예정) | GSD + ZEN_A4 하이브리드 방법론 개요 |
 | **101** | **ZEN_A4 자동 리뷰 시스템** | [101_ZEN_A4_METHODOLOGY.md](./101_ZEN_A4_METHODOLOGY.md) | 3가지 Hook을 통한 자동 코드 리뷰 및 품질 관리 |
 | **102** | **통합 개발 방법론** | [102_INTEGRATED_DEVELOPMENT_METHODOLOGY.md](./102_INTEGRATED_DEVELOPMENT_METHODOLOGY.md) | Phase 1-4 상세 운영 절차 및 체크리스트 |
+| **120** | **MCP & Skill 가이드** | [120_MCP_SKILL_GUIDE.md](./120_MCP_SKILL_GUIDE.md) | Java 기반 플랫폼 개발을 위한 MCP 도구 및 Skill 활용 표준 |
 
 ---
 
@@ -203,6 +204,9 @@
 - ✅ 201_SAR_RULE.md
 - ✅ 202_CHECK_LIST_PROCEDURE.md
 - ✅ 203_PROJECT_APPLICATION_CHECKLIST.md
+
+### ✅ 완료 (2026-04-20)
+- ✅ 120_MCP_SKILL_GUIDE.md
 
 ### 🔜 계획 중 (추가 예정)
 - 101_Development_Methodology_Overview.md
