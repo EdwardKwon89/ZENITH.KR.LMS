@@ -18,11 +18,13 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { checkPermission } from "@/lib/auth/rbac";
 
 interface NavItem {
   title: string;
   href: string;
   icon: React.ElementType;
+  isAdminOnly?: boolean;
   children?: { title: string; href: string }[];
 }
 
@@ -38,8 +40,10 @@ export default function NaviSidebar({ user, profile }: { user?: any; profile?: a
       title: t("master"), 
       href: "/master", 
       icon: Database,
+      isAdminOnly: true,
       children: [
         { title: t("master_codes"), href: "/master/codes" },
+        { title: t("master_geo"), href: "/master/geo" },
         { title: t("master_mapping"), href: "/master/mapping" },
         { title: t("master_rates"), href: "/master/rates" },
       ]
@@ -55,7 +59,7 @@ export default function NaviSidebar({ user, profile }: { user?: any; profile?: a
     },
     { title: t("logistics"), href: "/logistics", icon: Truck },
     { title: t("finance"), href: "/finance", icon: Calculator },
-    { title: t("governance"), href: "/governance", icon: ShieldCheck },
+    { title: t("governance"), href: "/governance", icon: ShieldCheck, isAdminOnly: true },
     { title: t("settings"), href: "/settings", icon: Settings },
   ];
 
@@ -110,7 +114,7 @@ export default function NaviSidebar({ user, profile }: { user?: any; profile?: a
       </div>
 
       <nav className="flex-1 px-4 space-y-1.5 overflow-y-auto overflow-x-hidden scrollbar-hide py-2">
-        {NAV_ITEMS.map((item) => {
+        {NAV_ITEMS.filter(item => checkPermission(profile?.role || "GUEST", item.href)).map((item) => {
           const isActive = pathname.startsWith(item.href);
           const isOpen = openMenus.includes(item.title);
           const hasChildren = item.children && item.children.length > 0;

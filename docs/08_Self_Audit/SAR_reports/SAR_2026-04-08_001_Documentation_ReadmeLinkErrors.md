@@ -1,6 +1,6 @@
 ---
 name: Documentation README Link Mismatches
-description: 000_GUIDE_README.md의 파일 링크가 실제 파일명과 불일치
+description: 000_README.md의 파일 링크가 실제 파일명과 불일치
 category: Documentation
 severity: MEDIUM
 date: 2026-04-08
@@ -11,9 +11,9 @@ author: Claude Code
 
 ## 현상 (What)
 
-**발생 위치:** `docs/00_GUIDE/000_GUIDE_README.md`
+**발생 위치:** `docs/00_GUIDE/000_README.md`
 
-000_GUIDE_README.md 파일의 여러 링크가 실제 파일명과 일치하지 않음:
+000_README.md 파일의 여러 링크가 실제 파일명과 일치하지 않음:
 
 ### 링크 오류 목록
 

@@ -23,6 +23,8 @@
 - **체크리스트 기반 최종 검증 의무 (Verification Compliance, R-04)**: 모든 에이전트는 기능 개발, 수정, 버그 픽스 완료 보고 전 **반드시 최신 `LIVE_` 체크리스트(예: docs/08_Self_Audit/Checklists/LIVE_PHASE_2_EXECUTE.md)를 기반으로 자가 점검**을 마쳐야 합니다. 가이드 문서(`docs/00_GUIDE/`)는 마스터 템플릿으로 활용하며, 실제 검증은 축적된 `LIVE_` 문서를 진실의 근거(Source of Truth)로 삼습니다. (R-05 연계)
 - **문서 이원화 준수 의무 (Hierarchy Compliance, R-05)**: 에이전트는 `GUIDE`와 `LIVE_` 문서의 차이를 명확히 이해하고 행동합니다. (상세: 제5항 참조)
 - **최신 기술 자료 확인 의무 (Documentation Compliance, R-06)**: 라이브러리, 프레임워크, API 등 모든 기술 사양 확인 시, 에이전트의 내부 지식보다 **Context7 MCP를 우선적으로 호출**하여 최신 문서와 모범 사례를 기반으로 작업을 수행해야 합니다.
+- **언어 표준 준수 의무 (Language Standard, R-07)**: 모든 실행 계획(Implementation Plan), 작업 목록(Task), 변화 보고서(Walkthrough), 오류 보고서(SAR) 등 핵심 문서는 **반드시 한글로 작성**하여 사용자의 가독성과 소통 효율을 극대화합니다.
+- **품질 검증 의무 (Mandatory Regression, R-08)**: 모든 에이전트는 작업 완료 및 진척 보고 전 반드시 표준 명령어(`npm run test:regression`)를 수행하여 기존 기능의 파괴 여부를 자가 점검하고, 성공 결과를 보고서에 증거로 첨부해야 합니다.
 
 #### 🤖 에이전트 역할 및 모델 할당 (Role-Agent Mapping)
 역할별 최적화된 모델을 사용하여 품질과 속도를 동시에 확보합니다. (상세: [103_AGENT_ROLES_SPEC.md](docs/00_GUIDE/103_AGENT_ROLES_SPEC.md))
@@ -73,3 +75,4 @@
 | v1.4 | 2026-04-18 | Antigravity | PM 작업 완료 보고 시 WBS 및 ROADMAP 업데이트 룰(R-03) 추가                    |
 | v1.5 | 2026-04-19 | Antigravity | 체크리스트 기반 최종 검증 및 i18n 경로 오류 방지 의무(R-04) 추가              |
 | v1.6 | 2026-04-19 | Antigravity | 문서 체계 이원화(GUIDE vs LIVE) 수립 및 R-05(Source of Truth) 규정 추가       |
+| v1.7 | 2026-04-20 | Antigravity | 모든 계획 및 보고서 한글 작성 의무화 규정(R-07) 추가                            |

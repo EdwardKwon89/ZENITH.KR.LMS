@@ -11,7 +11,7 @@
 
 ---
 
-[← 상위 목록으로 돌아가기](../000_GUIDE/000_GUIDE_README.md)
+[← 상위 목록으로 돌아가기](../000_GUIDE/000_README.md)
 
 ---
 
@@ -31,9 +31,9 @@
 | 파일명 | 개요 |
 |--------|------|
 | [SAR_2026-04-08_001_Documentation_ReadmeLinkErrors.md](./SAR_reports/SAR_2026-04-08_001_Documentation_ReadmeLinkErrors.md) | 인덱스 링크 오류 분석 |
-| [SAR_2026-04-17_001_Implementation_npm실행오류.md](./SAR_reports/SAR_2026-04-17_001_Implementation_npm실행오류.md) | npm 실행 환경 장애 분석 |
-| [SAR_2026-04-17_002_Design_조직계층구조누락.md](./SAR_reports/SAR_2026-04-17_002_Design_조직계층구조누락.md) | 조직 가시성 설계 누락 분석 |
-| [SAR_2026-04-17_003_Quality_작업완료보고_정합성불일치.md](./SAR_reports/SAR_2026-04-17_003_Quality_작업완료보고_정합성불일치.md) | 작업 완료 보고 불일치 분석 |
+| [SAR_2026-04-17_001_Implementation_NPM_Install_Error.md](./SAR_reports/SAR_2026-04-17_001_Implementation_NPM_Install_Error.md) | npm 실행 환경 장애 분석 |
+| [SAR_2026-04-17_002_Design_Org_Hierarchy_Missing.md](./SAR_reports/SAR_2026-04-17_002_Design_Org_Hierarchy_Missing.md) | 조직 가시성 설계 누락 분석 |
+| [SAR_2026-04-17_003_Quality_Implementation_Consistency_Error.md](./SAR_reports/SAR_2026-04-17_003_Quality_Implementation_Consistency_Error.md) | 작업 완료 보고 불일치 분석 |
 | [SAR_2026-04-18-002_Auth_Redirection_Bug.md](./SAR_reports/SAR_2026-04-18-002_Auth_Redirection_Bug.md) | 인증 리다이렉션 버그 분석 |
 | **기타 최신 리포트** | `SAR_reports/` 폴더 참조 |
 
@@ -50,4 +50,4 @@
 
 ---
 
-[← 상위 목록으로 돌아가기](../000_GUIDE/000_GUIDE_README.md)
+[← 상위 목록으로 돌아가기](../000_GUIDE/000_README.md)

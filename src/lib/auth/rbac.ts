@@ -1,0 +1,55 @@
+/**
+ * 🔐 ZENITH RBAC Engine (rbac.ts)
+ * 8대 표준 역할 및 메뉴 접근 권한을 관리하는 중앙 브레인입니다.
+ */
+
+export const USER_ROLES = {
+  ZENITH_SUPER_ADMIN: 'ZENITH_SUPER_ADMIN',
+  ADMIN: 'ADMIN',
+  MANAGER: 'MANAGER',
+  OPERATOR: 'OPERATOR',
+  CARRIER: 'CARRIER',
+  CORPORATE: 'CORPORATE',
+  INDIVIDUAL: 'INDIVIDUAL',
+  USER: 'USER',
+} as const;
+
+export type UserRole = keyof typeof USER_ROLES;
+
+/**
+ * 특정 경로(Path)에 대한 역할별 접근 권한을 검증합니다.
+ * @param role 사용자의 역할
+ * @param path 접근하려는 경로
+ */
+export async function checkPermission(role: string | null | undefined, path: string): Promise<boolean> {
+  if (!role) return false;
+
+  // 1. ZENITH_SUPER_ADMIN (Bypass) - 모든 권한 허용
+  if (role === USER_ROLES.ZENITH_SUPER_ADMIN) {
+    return true;
+  }
+
+  // 2. 공통 접근 가능 경로 (Common Access)
+  // '/' 경로는 완전 일치해야 하며, 나머지는 접두어 기반으로 검사합니다.
+  const commonPaths = ['/dashboard', '/profile', '/notifications', '/support'];
+  if (path === '/' || commonPaths.some(cp => path.startsWith(cp))) {
+    return true;
+  }
+
+  // 3. 역할별 동적 권한 검증 (추후 Table 기반으로 확장 가능)
+  // 현재는 시스템의 안정적 기동을 위해 기본 매핑 정책을 적용합니다.
+  const permissions: Record<string, string[]> = {
+    [USER_ROLES.ADMIN]: ['/master', '/admin', '/orders', '/logistics', '/billing'],
+    [USER_ROLES.MANAGER]: ['/orders', '/logistics', '/billing', '/reports'],
+    [USER_ROLES.OPERATOR]: ['/orders', '/logistics'],
+    [USER_ROLES.CARRIER]: ['/logistics/delivery', '/orders/assigned'],
+    [USER_ROLES.CORPORATE]: ['/orders/register', '/orders/history', '/billing/invoice'],
+    [USER_ROLES.INDIVIDUAL]: ['/orders/register', '/orders/history'],
+    [USER_ROLES.USER]: [],
+  };
+
+  const allowedPaths = permissions[role] || [];
+  
+  // 요청한 경로가 허용된 경로 목록에 포함되어 있는지 확인
+  return allowedPaths.some(ap => path.startsWith(ap));
+}
