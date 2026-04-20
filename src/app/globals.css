@@ -1,28 +1,36 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui;
+  --font-sans: var(--font-inter), var(--font-geist-sans), ui-sans-serif, system-ui;
+  --font-heading: var(--font-outfit), var(--font-geist-sans), serif;
   --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular;
 
-  /* ZENITH Brand Colors (Ethereal Blue Base) */
-  --color-brand-50: #eff6ff;
-  --color-brand-100: #dbeafe;
+  /* ZENITH v2.1 Premium Palette (High-Contrast White Base) */
+  --color-brand-50: #f8fafc;
+  --color-brand-100: #e2e8f0;
   --color-brand-500: #3b82f6; 
   --color-brand-600: #2563eb;
   --color-brand-700: #1d4ed8;
-  --color-brand-900: #1e3a8a;
+  --color-brand-900: #1e1b4b; /* Indigo-950 for Max Contrast */
 
   --color-accent: #f59e0b; /* Logistics Amber */
   
-  /* Neomorphic Shadow Tokens (Tactile Flow) */
-  --zen-shadow-light: -5px -5px 10px #ffffff;
-  --zen-shadow-dark: 5px 5px 12px #d1d5db;
-  --zen-shadow-inner-light: inset -2px -2px 5px #ffffff;
-  --zen-shadow-inner-dark: inset 2px 2px 5px #d1d5db;
+  /* Layout Variables for Hybrid Sidebar */
+  --sidebar-width: 280px;
+  --sidebar-collapsed-width: 80px;
+  --header-height: 64px;
+  --zen-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
-  /* Glassmorphism Tokens (Ethereal Clarity) */
-  --zen-glass-bg: rgba(255, 255, 255, 0.6);
-  --zen-glass-border: rgba(255, 255, 255, 0.3);
+  /* Tactile Visibility Tokens (Border & Shadow) */
+  --zen-border-light: rgba(226, 232, 240, 1); /* slate-200 */
+  --zen-border-strong: rgba(148, 163, 184, 0.3); /* slate-400 with alpha */
+  
+  --zen-shadow-premium: 0 10px 25px -5px rgba(0, 0, 0, 0.04), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+  --zen-shadow-tactile: -2px -2px 5px #ffffff, 2px 2px 5px rgba(0, 0, 0, 0.05);
+
+  /* Glassmorphism Optimization (White High-Contrast) */
+  --zen-glass-bg: rgba(255, 255, 255, 0.85);
+  --zen-glass-border: rgba(255, 255, 255, 0.5);
 
   --radius-xl: 1rem;
   --radius-2xl: 1.5rem;
@@ -47,10 +55,17 @@
 /* Custom Base Styles */
 @layer base {
   body {
-    background-color: #f8fafc; /* slate-50 */
-    color: #0f172a; /* slate-900 */
+    background-color: #ffffff; /* pure white for premium clarity */
+    color: #020617; /* slate-950 for maximum readability */
+    font-family: var(--font-inter);
     min-height: 100vh;
     overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    letter-spacing: -0.02em;
+    font-weight: 600;
   }
 }
 
@@ -58,24 +73,29 @@
 @layer utilities {
   .zen-glass {
     background-color: var(--zen-glass-bg);
-    backdrop-filter: blur(12px);
+    backdrop-filter: blur(20px);
     border: 1px solid var(--zen-glass-border);
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
+    box-shadow: var(--zen-shadow-premium);
   }
   
   .zen-tactile {
-    background: #f8fafc;
-    box-shadow: var(--zen-shadow-light), var(--zen-shadow-dark);
-    transition: all 0.2s ease-in-out;
+    background: #ffffff;
+    border: 1px solid var(--zen-border-light);
+    box-shadow: var(--zen-shadow-tactile);
+    transition: var(--zen-transition);
+  }
+
+  .zen-tactile:hover {
+    border-color: var(--color-brand-500);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
   }
 
   .zen-tactile:active {
-    box-shadow: var(--zen-shadow-inner-light), var(--zen-shadow-inner-dark);
     transform: scale(0.98);
   }
 
   .zen-aurora-bg {
-    background: linear-gradient(-45deg, #dbeafe, #eff6ff, #fdf2f8, #f0f9ff);
+    background: linear-gradient(-45deg, #f8fafc, #eff6ff, #f1f5f9, #ffffff);
     background-size: 400% 400%;
     animation: aurora 15s ease infinite;
   }
@@ -84,6 +104,10 @@
     background-clip: text;
     -webkit-background-clip: text;
     color: transparent;
-    background-image: linear-gradient(to right, #2563eb, #f59e0b);
+    background-image: linear-gradient(to right, #1d4ed8, #2563eb);
   }
+
+  .sidebar-expand { width: var(--sidebar-width); }
+  .sidebar-collapse { width: var(--sidebar-collapsed-width); }
 }
+

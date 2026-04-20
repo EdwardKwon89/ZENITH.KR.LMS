@@ -4,22 +4,66 @@
     "description": "SNTL 통합 물류 플랫폼",
     "login": "로그인",
     "signup": "회원가입",
-    "logout": "로그아웃"
+    "logout": "로그아웃",
+    "welcome_verified": "이메일 인증이 성공적으로 완료되었습니다!",
+    "welcome_verified_desc": "이제 제니스의 지능형 물류 플랫폼을 자유롭게 이용하실 수 있습니다.",
+    "hero_title": "지능형 통합 물류의 정점",
+    "hero_subtitle": "SNTL이 제시하는 차세대 글로벌 물류 표준, ZENITH LMS와 시작하세요.",
+    "go_to_dashboard": "대시보드로 시작하기",
+    "trusted_partners": "ZENITH와 함께하는 글로벌 파트너",
+    "feature_tracking_title": "실시간 통합 트래킹",
+    "feature_tracking_desc": "SNTL의 전 세계 망을 거치는 모든 화물을 실시간으로 추적하고 이상 징후를 즉시 감지합니다.",
+    "feature_security_title": "비즈니스 보안 가드",
+    "feature_security_desc": "철저한 회원사 심사를 통해 검증된 가입자만이 활동하는 신뢰 기반의 물류 생태계를 보장합니다.",
+    "feature_settlement_title": "글로벌 표준 정산",
+    "feature_settlement_desc": "국가별 세율 및 결제 수단을 통합 관리하는 지능형 정산 시스템으로 회계 업무를 자동화합니다."
   },
   "Navigation": {
     "home": "홈",
-    "orders": "오더 관리",
-    "warehouse": "창고 관리",
-    "tracking": "트래킹",
+    "dashboard": "대시보드",
+    "master": "기본 정보",
+    "master_codes": "공통 코드",
+    "master_mapping": "표준 매핑",
+    "master_rates": "슬랩 구간율",
+    "order_mgmt": "오더 관리",
+    "orders": "오더 목록",
+    "order_house": "하우스 오더",
+    "order_import": "일괄 업로드",
+    "logistics": "물류 실행",
     "finance": "정산 관리",
-    "system": "시스템 관리"
+    "governance": "거버넌스",
+    "settings": "설정"
+  },
+  "Header": {
+    "home": "홈",
+    "search_placeholder": "빠른 검색 (⌘+K)",
+    "signed_in_as": "접속 계정",
+    "my_profile": "내 프로필",
+    "workspace_settings": "워크스페이스 설정",
+    "support_center": "고객 지원",
+    "logout": "로그아웃"
   },
   "Auth": {
     "login_title": "제니스 로그인",
     "login_subtitle": "글로벌 통합 물류 플랫폼",
     "login_email_label": "이메일 주소",
     "login_password_label": "비밀번호",
+    "feature_tracking": "실시간 통합 트래킹",
+    "feature_ai": "AI 기반 경로 최적화",
+    "feature_system": "글로벌 표준 정산 시스템",
+    "login_email_placeholder": "example@company.com",
     "login_button": "로그인",
     "signup_button": "신규 계정 생성"
+  },
+  "Pending": {
+    "title_pending": "가입 심사 중",
+    "title_supplement": "서류 보완 요청",
+    "title_rejected": "가입 승인 반려",
+    "desc_pending": "현재 관리자가 귀하의 서류를 심사하고 있습니다. 잠시만 기다려 주십시오.",
+    "desc_supplement": "제출하신 서류에 미비한 점이 발견되었습니다. 관리자의 코멘트를 확인하고 서류를 보완해 주십시오.",
+    "desc_rejected": "죄송합니다. 가입 승인이 반려되었습니다. 아래 사유를 확인 후 다시 신청해 주십시오.",
+    "button_modify": "신청 정보 수정하기",
+    "button_reapply": "재신청하기",
+    "button_logout": "로그아웃"
   }
 }

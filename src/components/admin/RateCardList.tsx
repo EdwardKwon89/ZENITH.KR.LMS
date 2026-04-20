@@ -1,0 +1,200 @@
+'use client';
+
+import React from 'react';
+import { ZenCard } from '@/components/ui/ZenUI';
+import { 
+  Ship, 
+  Plane, 
+  Box, 
+  ChevronRight, 
+  MoreVertical, 
+  Trash2, 
+  Edit3,
+  Globe,
+  MapPin,
+  Truck,
+  Calendar,
+  User,
+  Settings2
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
+
+interface RateCard {
+  id: string;
+  version_no: number;
+  carrier_id: string;
+  origin_port: string;
+  destination_port: string;
+  service_type: string;
+  base_rate: number;
+  status: string;
+  valid_from: string;
+  valid_to: string;
+  organizations?: {
+    name: string;
+  };
+  base_date_rule?: string;
+  customer_id?: string;
+  priority?: number;
+}
+
+interface RateCardListProps {
+  rates: RateCard[];
+  loading: boolean;
+  onEdit?: (rate: RateCard) => void;
+  onDelete?: (id: string) => void;
+}
+
+export const RateCardList: React.FC<RateCardListProps> = ({ rates, loading, onEdit, onDelete }) => {
+  if (loading) {
+    return (
+      <div className="space-y-4">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="h-24 bg-white/5 rounded-2xl animate-pulse" />
+        ))}
+      </div>
+    );
+  }
+
+  if (rates.length === 0) {
+    return (
+      <ZenCard className="bg-black/20 border-white/5 flex flex-col items-center justify-center py-20 text-white/20">
+        <Globe className="w-12 h-12 mb-4 opacity-5" />
+        <p className="text-sm font-medium">검색된 요율 정보가 없습니다.</p>
+      </ZenCard>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {rates.map((rate) => (
+        <ZenCard 
+          key={rate.id} 
+          className="bg-[#111112] border-white/5 hover:border-blue-500/20 transition-all group p-0 overflow-hidden"
+        >
+          <div className="flex flex-col md:flex-row items-stretch">
+            {/* Service Icon Tag */}
+            <div className={cn(
+              "w-2 md:w-1.5",
+              rate.service_type === 'AIR' ? "bg-blue-500" : 
+              rate.service_type === 'SEA' ? "bg-emerald-500" : "bg-amber-500"
+            )} />
+
+            <div className="flex-1 p-5 flex flex-col md:flex-row items-center gap-6">
+              {/* Carrier Info */}
+              <div className="flex items-center gap-4 min-w-[200px]">
+                <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-white/40 group-hover:text-blue-400 transition-colors border border-white/5">
+                  <Truck className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <p className="text-[10px] font-black text-white/20 uppercase tracking-widest">Carrier</p>
+                    <span className="text-[9px] bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded border border-blue-500/20 font-mono">
+                      v{rate.version_no}
+                    </span>
+                  </div>
+                  <p className="text-sm font-bold text-white truncate max-w-[150px]">
+                    {rate.organizations?.name || 'Unknown Partner'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Route Info */}
+              <div className="flex-1 flex flex-col items-center justify-center gap-1">
+                <div className="flex items-center justify-center gap-6 w-full">
+                  <div className="text-center">
+                    <div className="flex items-center gap-1.5 text-emerald-400 mb-1">
+                      <MapPin className="w-3 h-3" />
+                      <span className="text-[10px] font-bold uppercase tracking-tighter">Origin</span>
+                    </div>
+                    <p className="text-xl font-black text-white tracking-widest">{rate.origin_port}</p>
+                  </div>
+
+                  <div className="flex flex-col items-center gap-1 px-4">
+                    <div className="flex items-center gap-1">
+                      {rate.service_type === 'AIR' ? <Plane className="w-4 h-4 text-blue-500/40" /> : 
+                       rate.service_type === 'SEA' ? <Ship className="w-4 h-4 text-emerald-500/40" /> : 
+                       <Box className="w-4 h-4 text-amber-500/40" />}
+                      <div className="w-16 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                      <ChevronRight className="w-3 h-3 text-white/20" />
+                    </div>
+                    <span className="text-[8px] font-black text-white/10 uppercase tracking-[0.3em]">{rate.service_type}</span>
+                  </div>
+
+                  <div className="text-center">
+                    <div className="flex items-center justify-end gap-1.5 text-blue-400 mb-1">
+                      <span className="text-[10px] font-bold uppercase tracking-tighter">Dest</span>
+                      <Globe className="w-3 h-3" />
+                    </div>
+                    <p className="text-xl font-black text-white tracking-widest">{rate.destination_port}</p>
+                  </div>
+                </div>
+                
+                {/* Validity Period Display */}
+                <div className="flex items-center gap-3 mt-2">
+                  <div className="flex items-center gap-2 px-3 py-1 bg-white/5 rounded-full border border-white/5">
+                    <span className="text-[9px] font-mono text-white/30">
+                      {new Date(rate.valid_from).toLocaleDateString()} - {rate.valid_to.startsWith('9999') ? 'UNTIL EXPIRED' : new Date(rate.valid_to).toLocaleDateString()}
+                    </span>
+                  </div>
+                  
+                  {/* TISA Rule Badge */}
+                  <div className="flex items-center gap-1.5 px-2 py-0.5 bg-amber-500/10 text-amber-500 border border-amber-500/20 rounded text-[8px] font-black uppercase tracking-wider">
+                    <Calendar className="w-2.5 h-2.5" />
+                    {rate.base_date_rule || 'RECEIPT_DATE'}
+                  </div>
+
+                  {rate.customer_id && (
+                    <div className="flex items-center gap-1.5 px-2 py-0.5 bg-purple-500/10 text-purple-400 border border-purple-500/20 rounded text-[8px] font-black uppercase tracking-wider">
+                      <User className="w-2.5 h-2.5" />
+                      Special
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Price & Status Info */}
+              <div className="text-right min-w-[150px] space-y-2">
+                <div>
+                  <p className="text-[10px] font-black text-white/20 uppercase tracking-widest">Base Rate</p>
+                  <p className="text-2xl font-mono font-black text-white group-hover:text-emerald-400 transition-colors">
+                    <span className="text-xs text-white/40 mr-1">$</span>
+                    {rate.base_rate.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                  </p>
+                </div>
+                
+                {/* Status Badge */}
+                <div className="flex justify-end">
+                  <span className={cn(
+                    "text-[10px] font-black px-2 py-0.5 rounded-md border",
+                    rate.status === 'ACTIVE' ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" :
+                    rate.status === 'SUPERSEDED' ? "bg-amber-500/10 text-amber-500 border-amber-500/20" :
+                    "bg-white/10 text-white/40 border-white/10"
+                  )}>
+                    {rate.status}
+                  </span>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex items-center gap-2 pl-4 border-l border-white/5">
+                <button 
+                  onClick={() => onEdit?.(rate)}
+                  className="p-2 text-white/20 hover:text-white hover:bg-white/5 rounded-lg transition-all"
+                >
+                  <Edit3 className="w-4 h-4" />
+                </button>
+                <button 
+                  onClick={() => onDelete?.(rate.id)}
+                  className="p-2 text-white/20 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </ZenCard>
+      ))}
+    </div>
+  );
+};

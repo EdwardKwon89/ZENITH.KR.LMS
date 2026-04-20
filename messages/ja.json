@@ -13,5 +13,13 @@
     "tracking": "トラッキング",
     "finance": "精算管理",
     "system": "システム管理"
+  },
+  "Auth": {
+    "login_title": "Zenithにサインイン",
+    "login_subtitle": "グローバル統合物流プラットフォーム",
+    "login_email_label": "メールアドレス",
+    "login_password_label": "パスワード",
+    "login_button": "ログイン",
+    "signup_button": "アカウント作成"
   }
 }

@@ -25,21 +25,21 @@
 ### 1. Phase 1: Identity & Foundation (기반 구축)
 > **Goal**: 보안 인증 체계를 확립하고, 모든 비즈니스 로직의 기초가 되는 마스터 데이터를 수립합니다.
 
-#### 1.1 [Infra & DB] 기초 환경 구축 (5 MD)
-- **1.1.1 프로젝트 초기화 및 CI/CD** (2 MD)
-    - 1.1.1.1 Next.js (FE) & Supabase 연결 설정
-    - 1.1.1.2 Vercel 배포 자동화 및 환경 변수 구성
-- **1.1.2 상위 수준 DB Schema 설계** (3 MD)
-    - 1.1.2.1 Auth, Profiles, Organizations 테이블 설계
-    - 1.1.2.2 기본 Audit 필드(created_by, updated_at 등) 공통화
+#### 1.1 [Infra & DB] 기초 환경 구축 (5 MD) [DONE]
+- [x] **1.1.1 프로젝트 초기화 및 CI/CD** (2 MD)
+    - [x] 1.1.1.1 Next.js (FE) & Supabase 연결 설정
+    - [x] 1.1.1.2 Vercel 배포 자동화 및 환경 변수 구성
+- [x] **1.1.2 상위 수준 DB Schema 설계** (3 MD)
+    - [x] 1.1.2.1 Auth, Profiles, Organizations 테이블 설계
+    - [x] 1.1.2.2 기본 Audit 필드(created_by, updated_at 등) 공통화
 
-#### 1.2 [Master Data] 공통 코드 및 기준 정보 (10 MD) [최우선]
-- **1.2.1 공통 코드 시스템 구현** (4 MD)
-    - 1.2.1.1 국가, 항구, 화물 상태, 운송 수단 코드 정의
-    - 1.2.1.2 기초 코드 관리 API (CRUD) 및 UI 구현
-- **1.2.2 물류 기준 정보 모듈** (6 MD)
-    - 1.2.2.1 회원 등급(Iron~Gold) 및 등급별 할인율 마스터 구축
-    - 1.2.2.2 서비스별(AIR, SEA, CIR) 기본 운송 요율 테이블 설계
+#### 1.2 [Master Data] 공통 코드 및 기준 정보 (10 MD) [DONE]
+- [x] **1.2.1 공통 코드 시스템 구현** (4 MD)
+    - [x] 1.2.1.1 국가, 항구, 화물 상태, 운송 수단 코드 정의
+    - [x] 1.2.1.2 기초 코드 관리 API (CRUD) 및 UI 구현 (Backend 완비)
+- [x] **1.2.2 물류 기준 정보 모듈** (6 MD)
+    - [x] 1.2.2.1 회원 등급(Iron~Gold) 및 등급별 할인율 마스터 구축
+    - [x] 1.2.2.2 서비스별(AIR, SEA, CIR) 기본 운송 요율 테이블 설계 (Backend 완비)
 
 #### 1.3 [Identity] 인증 및 회원 관리 (10 MD)
 - **1.3.1 Supabase Auth 기반 인증** (4 MD)
