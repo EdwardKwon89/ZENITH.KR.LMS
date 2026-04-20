@@ -1,12 +1,17 @@
 # Project Roadmap: ZENITH_LMS
 
-## Phase 1: Foundation & Core Identity (v1.0.0)
-> **목표**: 시스템 인프라 구축 및 필수 사용자 인증/권한 체계 확립 [Audit Result: 🚧 회복 모드 진입]
-- [ ] 개발 환경 설정 및 Next.js 프로젝트 초기화
-- [ ] **[01. 로그인/인증]** 기능 구현 (SSO 및 권한 제어)
-- [ ] **[02. 회원관리]** (개인/법인 회원 및 관리자 관리 시스템)
-- [ ] **[09. 시스템관리(기초)]** (메뉴, 공통 코드, 택배사 기초 데이터)
-- **Milestone**: 로그인 후 권한별 대시보드 진입 확인 및 회원 가입/관리 프로세스 완료 [미완료]
+## Phase 1: Foundation & Core Identity (v2.1.0 Premium Governance)
+> **목표**: 시스템 인프라 구축 및 자기 진화형 품질 거버넌스 체계 확립 [Status: ✅ Phase 1 Stabilized]
+- [x] 개발 환경 설정 및 Next.js 프로젝트 초기화
+- [x] **[01. 로그인/인증]** 기능 구현 (Premium UI 업그레이드 및 Redirect Guard 반영 완료)
+- [x] **[02. 회원관리]** (법인 회원 가입 및 관리자 승인 시스템 구축 완료)
+- [x] **[09. 시스템관리(기초)]** (관리자 전용 거버넌스 설정 UI 및 정책 연동 완료)
+- [x] **[11. 요율 거버넌스(TISA)]** (요율 스냅샷 및 TISA 규칙 엔진 반영 완료)
+- [x] **[Asset] 지능형 품질 인프라** (Phase 1~3 LIVE Checklist 및 SAR 자산화 완료)
+- [/] **[12. 디자인 시스템]** (Premium Glass Component 및 고대비 화이트 테마 전파 중)
+- **Milestone**: 전 공정 품질 거버넌스 체계 완비 및 브랜드 아이덴티티(Design System) 확립 단계 [100% 완료]
+
+
 
 ## Phase 2: Core Logistics Operations (v1.1.0)
 > **목표**: 실제 물류 비즈니스의 핵심인 오더 및 창고 관리 기능 구축

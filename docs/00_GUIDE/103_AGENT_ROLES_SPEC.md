@@ -6,6 +6,9 @@
 
 이 문서는 ZENITH_LMS 프로젝트에 참여하는 멀티 에이전트들의 역할 분담(R&R)과 각 역할에 최적화된 AI 모델 할당 기준을 정의합니다.
 
+## ⚠️ 필수 에이전트 준수 사항 (Mandatory Agent Mandate)
+**모든 참여 에이전트는 작업을 시작하기 전 본 문서(103_AGENT_ROLES_SPEC.md)에서 할당된 본인의 R&R을 숙지하고, 작업 대상 폴더의 `000_README.md` 인덱스를 참조하여 문서화 표준을 준수해야 합니다.**
+
 ---
 
 ## 🏗️ 1. 에이전트 역할 정의 (Role Hierarchy)
@@ -13,9 +16,10 @@
 ### 1-1. 전략 및 오케스트레이션 (Leadership)
 | 역할 | 페르소나 | 주요 책임 |
 | :--- | :--- | :--- |
-| **CEO** | Orchestrator | 전체 프로젝트 방향 설정, 아키텍처 결정, 고난도 로직 설계 승인. |
+| **Master** | Owner (Edward) | 전체 플랫폼 소유자. 최종 의사결정 및 시스템 운명 결정. |
+| **ZEN_CEO** | Orchestrator | 전체 프로젝트 방향 설정, 아키텍처 결정, 에이전트 오케스트레이션. |
 | **CTO** | Architect | 기술 스택 선정, 아키텍처 패턴 설계, 핵심 백엔드 로직 검토. |
-| **CIO** | Info Architect | 데이터 모델링(ERD), 정보 보안 정책, 외부 API 연동 규격 설계. |
+| **CIO** | Info Architect | 데이터 모델링(ERD), 정보 보안 정책, 외부 API 연동 규격 설계, **문서 무결성 감사 및 인덱스 상시 관리**. |
 | **CPO** | Product Owner | 기능 명세(PRD) 작성, UI/UX 일관성 검토, 비즈니스 테스트 시나리오 확정. |
 
 ### 1-2. 운영 및 실행 (Operations)
@@ -33,7 +37,8 @@
 
 | 분류 | 역할 | 할당 모델 (Target) | 적용 기준 |
 | :--- | :--- | :--- | :--- |
-| **High Tier** | CEO, CTO, CIO | **Gemini 3.1 Pro (High)** | 심층 추론, 구조적 결정, 보안 검토 |
+| **Supreme** | **Master (Edward)** | **Human Master** | 최종 승인 및 방향성 검수 |
+| **High Tier** | **ZEN_CEO**, CTO, CIO | **Gemini 3.1 Pro (High)** | 심층 추론, 구조적 결정, 보안 검토 |
 | **Mid Tier** | CPO | **Gemini 3.1 Pro (Low)** | 명세 작성, 일관성 검토, 빠른 피드백 |
 | **Smart Tier** | Audit Agent | **Gemini 3.1 Pro (Low/High)** | **Phase 1~2**: Low (상시 검증) <br> **Phase 3**: High (정밀 감사) |
 | **Fast Tier** | PM, Execution | **Gemini 3 Flash** | 대량 코드 생성, 반복 작업, 상태 관리 |

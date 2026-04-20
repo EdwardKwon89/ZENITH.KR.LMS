@@ -1,13 +1,17 @@
 'use server';
 
 import { createClient } from '@/utils/supabase/server';
+import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { redirect } from 'next/navigation';
+import { revalidatePath } from 'next/cache';
+
 
 export async function login(formData: FormData) {
   const supabase = await createClient();
 
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
+  const locale = formData.get('locale') as string || 'ko';
 
   const { error } = await supabase.auth.signInWithPassword({
     email,
@@ -18,23 +22,93 @@ export async function login(formData: FormData) {
     throw new Error(error.message);
   }
 
-  redirect('/');
+  // Redirect to orders as the primary dashboard view with locale prefix
+  revalidatePath('/', 'layout');
+  redirect(`/${locale}/orders`);
 }
 
-export async function signup(formData: FormData) {
+export async function signup(formData: FormData, locale: string = 'ko') {
   const supabase = await createClient();
 
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
+  const fullName = formData.get('full_name') as string;
+  const orgId = formData.get('org_id') as string | null;
+  const isNewOrg = formData.get('is_new_org') === 'true';
+  const orgName = formData.get('org_name') as string | null;
+  const businessNumber = formData.get('business_number') as string | null;
+  
+  // Master Edward's Policy: Personal accounts are assigned 'SHIPPER' by default.
+  let orgType = formData.get('org_type') as string | null;
+  if (!orgType && !isNewOrg && !orgId) {
+    orgType = 'SHIPPER';
+  }
 
-  const { error } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email,
     password,
+    options: {
+      data: {
+        full_name: fullName,
+        org_id: orgId,
+        is_new_org: isNewOrg,
+        org_name: orgName,
+        business_number: businessNumber,
+        org_type: orgType,
+        // Individual users are ACTIVE immediately; Corporate/New Org users are PENDING.
+        status: (orgId === null && !isNewOrg) ? 'ACTIVE' : 'PENDING',
+        // New Org creators are ADMIN; Joinees are MEMBER; Individuals are USER.
+        role: isNewOrg ? 'ADMIN' : (orgId === null ? 'USER' : 'MEMBER'),
+      }
+    }
   });
 
   if (error) {
-    throw new Error(error.message);
+    return { error: error.message };
   }
 
-  redirect('/login?message=Check email to continue sign in process');
+  // Handle Document Upload if present
+  const docFile = formData.get('doc_file') as File | null;
+  if (docFile && data?.user) {
+    const adminClient = createSupabaseClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
+    // Wait a brief moment to ensure trigger created the profile
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    const { data: profile } = await adminClient
+      .from('profiles')
+      .select('org_id')
+      .eq('id', data.user.id)
+      .single();
+
+    if (profile?.org_id) {
+      const fileExt = docFile.name.split('.').pop();
+      const filePath = `${profile.org_id}/${Date.now()}_${docFile.name}`;
+      
+      const { error: uploadError } = await adminClient.storage
+        .from('business_docs')
+        .upload(filePath, docFile, {
+          contentType: docFile.type,
+          upsert: false
+        });
+      
+      if (!uploadError) {
+        await adminClient
+          .from('organization_documents')
+          .insert({
+            org_id: profile.org_id,
+            doc_type: 'BIZ_REG',
+            file_path: filePath,
+            status: 'PENDING'
+          });
+      } else {
+        console.error('Upload Error:', uploadError);
+      }
+    }
+  }
+
+  return { success: true };
 }

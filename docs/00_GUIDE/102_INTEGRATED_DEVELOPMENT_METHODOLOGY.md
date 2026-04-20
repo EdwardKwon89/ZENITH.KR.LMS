@@ -733,12 +733,22 @@ Step 5: 코드 수정 & 재테스트
 
 ---
 
-### Phase 3: 검증 (Verify) - 30분
+### Phase 3: 검증 (Verify) - 30분~1시간
 
 > **진행 조건:** Phase 2 Self Test를 **모두 통과**해야만 Phase 3 진행  
-> **목표:** Claude Code 최종 검증 후 커밋 & 배포
+> **목표:** Edward CEO의 '이원화/데이터 기반 검증' 원칙을 준수하여 최종 품질 게이트 통과
 
-#### 3-1. 자동 품질 게이트 (ZEN_A4 Stop)
+#### 3-1. 이원화 테스트 원칙 (Dual-Track Testing) ⭐
+모든 가입/인증 기능은 다음 두 가지 트랙을 각각 독립적으로 구성하여 검증해야 한다.
+- **Shared/Corporate Track**: 신청 -> 승인 대기 -> 관리자 승인 -> 활성화의 전체 라이프사이클 검증.
+- **Independent/Personal Track**: 가입 즉시 활성화 및 기능 진입의 민첩성 검증.
+
+#### 3-2. 데이터 기반 증적 확보 (Evidence-Based Audit) ⭐
+UI 상의 성공 메시지(Toast, Alert) 확인만으로는 완료로 인정하지 않는다.
+- 반드시 **SQL 직접 조회**를 통해 실제 DB 필드값(status, org_id, role 등)이 로직과 일치하는지 확인해야 한다.
+- 법인 ID 발급 시 정해진 규격(예: `ZEN-XXXXXX`)을 충족하는지 정규표현식으로 전수 검증한다.
+
+#### 3-3. 자동 품질 게이트 (ZEN_A4 Stop)
 
 ```bash
 # 커밋 전에 자동으로 실행됨
@@ -817,7 +827,12 @@ Claude 제안 사항 구현:
 - 상태: Production Ready
 ```
 
-#### 3-5. 커밋 & 병합
+#### 3-5. 영구 결과 보고서 작성 (Permanent Reporting) ⭐
+`walkthrough.md`와 같은 휘발성 로그 외에, 프로젝트의 공식 결과 문서를 생성한다.
+- **경로**: `docs/08_Self_Audit/UAT/UAT_X.X_Result_파일명.md`
+- **내용**: 시나리오 ID별 기대 결과 vs 실제 결과 매핑, SQL 증적 스냅샷 포함.
+
+#### 3-6. 커밋 & 병합
 
 ```bash
 # Git 커밋
@@ -1109,6 +1124,10 @@ gh pr create --ready
      □ Check List 항목 추가
 
 □ 검증 단계 (Verify)
+  □ 이원화 테스트 수행 (법인/개인 트랙 독립 검증) ⭐
+  □ 데이터 기반 실측 (SQL 조회를 통한 DB Ground Truth 확보) ⭐
+  □ 법인 ID 및 상태값 정규 규격 확인 ⭐
+  □ 영구 결과 보고서 작성 (UAT_X.X_Result_...md) ⭐
   □ ZEN_A4 Stop 게이트 통과
   □ Claude 최종 검증 (@codebase)
   □ VERIFICATION.md 작성

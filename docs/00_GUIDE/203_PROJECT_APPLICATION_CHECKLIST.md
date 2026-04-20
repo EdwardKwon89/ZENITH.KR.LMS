@@ -109,6 +109,11 @@ Step 2: 구현 중 확인
   □ Null Check: 모든 응답 검증? YES
   □ Error Handling: try-catch? YES
   □ Unit Test: 작성했나? YES (커버리지 80%?)
+  □ **[필수] i18n Path Integrity**: 모든 리다이렉트 및 링크가 로케일 접두사(예: /ko, /en)를 포함하는가? (SAR-2026-04-19-001)
+  □ **[필수] Middleware Naming**: 미들웨어 파일명이 `src/middleware.ts`로 정확히 설정되어 엔진이 감지 가능한가? (SAR-2026-04-19-002)
+  □ **[필수] Server Action Redirect Guard**: 서버 액션의 redirect() 동작이 클라이언트 catch 블록에서 필터링되어 흐름을 방해하지 않는가? (SAR-2026-04-19-003)
+  □ **[필수] Redirect Guard**: 인증 상태 변경 시 가드 로직이 올바른 다국어 경로로 안내하는가?
+  □ **[필수] Header Fidelity**: `mergeHeaders`를 사용하여 쿠키 속성(HttpOnly, Path 등)이 유실 없이 병합되는가? (SAR-2026-04-18-001)
   
 Step 3: Self Test
   테스트 실패? YES → 원인 분석 → SAR 작성 → 수정 → 재테스트

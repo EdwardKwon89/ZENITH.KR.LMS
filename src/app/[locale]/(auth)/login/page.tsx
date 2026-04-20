@@ -6,9 +6,12 @@ import { ZenAurora, ZenCard, ZenButton, ZenInput } from '@/components/ui/ZenUI';
 import { useAuth } from '@/hooks/useAuth';
 import { ShieldCheck, Truck, ArrowRight } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { useParams } from 'next/navigation';
 
 function LoginForm() {
   const t = useTranslations('Auth');
+  const params = useParams();
+  const locale = params?.locale as string || 'ko';
   const { error, setError } = useAuth();
   const [isPending, setIsPending] = useState(false);
 
@@ -27,6 +30,9 @@ function LoginForm() {
         await login(formData);
       }
     } catch (err: any) {
+      if (err.message?.includes('NEXT_REDIRECT')) {
+        return;
+      }
       setError(err.message || '인증 과정에서 오류가 발생했습니다.');
     } finally {
       setIsPending(false);
@@ -42,11 +48,12 @@ function LoginForm() {
           </div>
           <h1 className="text-3xl font-bold text-stone-800 tracking-tight">ZENITH LMS</h1>
           <p className="text-stone-500 mt-2 text-sm text-center">
-            SNTL 통합 물류 정보망 - 지능형 트래킹 시스템
+            지능형 통합 물류 플랫폼 - Intelligent Logistics Ecosystem
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          <input type="hidden" name="locale" value={locale} />
           <div className="space-y-2">
             <label className="text-xs font-bold text-stone-500 uppercase tracking-widest ml-1">{t('login_email_label') || 'Email'}</label>
             <ZenInput 
@@ -89,9 +96,9 @@ function LoginForm() {
             <ZenButton 
               type="submit" 
               data-action="signup"
-              variant="ghost" 
+              variant="glass" 
               disabled={isPending}
-              className="w-full text-xs"
+              className="w-full text-sm py-3.5 mt-2"
             >
               {t('signup_button') || 'Create Corporate Account'}
             </ZenButton>
@@ -100,7 +107,7 @@ function LoginForm() {
 
         <div className="mt-8 pt-6 border-t border-stone-200/50 text-center">
           <p className="text-[10px] text-stone-400 uppercase tracking-widest">
-            © 2026 SNTL GLOBAL. ADVANCED AGENTIC LOGISTICS.
+            © 2026 INTELLIGENT LOGISTICS PLATFORM. ADVANCED AGENTIC SYSTEMS.
           </p>
         </div>
       </ZenCard>

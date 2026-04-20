@@ -1,4 +1,6 @@
 -- 0. 공통 함수 및 트리거 (Common Functions & Triggers)
+CREATE EXTENSION IF NOT EXISTS btree_gist;
+
 CREATE OR REPLACE FUNCTION public.handle_updated_at()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -17,6 +19,7 @@ CREATE TABLE IF NOT EXISTS public.common_code_groups (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+DROP TRIGGER IF EXISTS set_code_group_updated_at ON public.common_code_groups;
 CREATE TRIGGER set_code_group_updated_at BEFORE UPDATE ON public.common_code_groups
     FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
 
@@ -36,6 +39,7 @@ CREATE TABLE IF NOT EXISTS public.common_codes (
     PRIMARY KEY (group_code, code_value)
 );
 
+DROP TRIGGER IF EXISTS set_code_updated_at ON public.common_codes;
 CREATE TRIGGER set_code_updated_at BEFORE UPDATE ON public.common_codes
     FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
 
@@ -52,6 +56,7 @@ CREATE TABLE IF NOT EXISTS public.grade_master (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+DROP TRIGGER IF EXISTS set_grade_updated_at ON public.grade_master;
 CREATE TRIGGER set_grade_updated_at BEFORE UPDATE ON public.grade_master
     FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
 
@@ -78,6 +83,7 @@ CREATE TABLE IF NOT EXISTS public.nations (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+DROP TRIGGER IF EXISTS set_nations_updated_at ON public.nations;
 CREATE TRIGGER set_nations_updated_at BEFORE UPDATE ON public.nations
     FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
 
@@ -95,6 +101,7 @@ CREATE TABLE IF NOT EXISTS public.ports (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+DROP TRIGGER IF EXISTS set_ports_updated_at ON public.ports;
 CREATE TRIGGER set_ports_updated_at BEFORE UPDATE ON public.ports
     FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
 
@@ -110,6 +117,7 @@ CREATE TABLE IF NOT EXISTS public.order_status_master (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+DROP TRIGGER IF EXISTS set_order_status_updated_at ON public.order_status_master;
 CREATE TRIGGER set_order_status_updated_at BEFORE UPDATE ON public.order_status_master
     FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
 
@@ -130,6 +138,7 @@ CREATE TABLE IF NOT EXISTS public.organizations (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+DROP TRIGGER IF EXISTS set_org_updated_at ON public.organizations;
 CREATE TRIGGER set_org_updated_at BEFORE UPDATE ON public.organizations
     FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
 
@@ -146,6 +155,7 @@ CREATE TABLE IF NOT EXISTS public.profiles (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+DROP TRIGGER IF EXISTS set_profile_updated_at ON public.profiles;
 CREATE TRIGGER set_profile_updated_at BEFORE UPDATE ON public.profiles
     FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
 
@@ -163,6 +173,7 @@ CREATE TABLE IF NOT EXISTS public.standard_code_mapping (
     UNIQUE(category, external_org, external_code)
 );
 
+DROP TRIGGER IF EXISTS set_mapping_updated_at ON public.standard_code_mapping;
 CREATE TRIGGER set_mapping_updated_at BEFORE UPDATE ON public.standard_code_mapping
     FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
 
@@ -180,6 +191,7 @@ CREATE TABLE IF NOT EXISTS public.grade_promotion_request (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+DROP TRIGGER IF EXISTS set_request_updated_at ON public.grade_promotion_request;
 CREATE TRIGGER set_request_updated_at BEFORE UPDATE ON public.grade_promotion_request
     FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
 
@@ -191,6 +203,7 @@ CREATE TABLE IF NOT EXISTS public.system_config (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+DROP TRIGGER IF EXISTS set_config_updated_at ON public.system_config;
 CREATE TRIGGER set_config_updated_at BEFORE UPDATE ON public.system_config
     FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
 
@@ -198,3 +211,98 @@ CREATE TRIGGER set_config_updated_at BEFORE UPDATE ON public.system_config
 INSERT INTO public.system_config (config_key, config_value, description) VALUES
 ('DEFAULT_PROFIT_RATE', '0.15', 'Default profit rate for logistics calculation (15%)')
 ON CONFLICT (config_key) DO NOTHING;
+
+-- 12. 요율 카드 마스터 (rate_cards)
+-- TISA (Temporal Invariant Snapshot Architecture) 반영
+CREATE TABLE IF NOT EXISTS public.rate_cards (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    version_no INTEGER DEFAULT 1,
+    carrier_id UUID NOT NULL REFERENCES public.organizations(id) ON DELETE CASCADE,
+    origin_port CHAR(5) NOT NULL REFERENCES public.ports(port_code),
+    destination_port CHAR(5) NOT NULL REFERENCES public.ports(port_code),
+    service_type VARCHAR(20) NOT NULL, -- AIR, SEA, EXPRESS
+    base_rate DECIMAL(15, 2) DEFAULT 0.00,
+    currency VARCHAR(3) DEFAULT 'USD',
+    valid_from TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    valid_to TIMESTAMP WITH TIME ZONE DEFAULT '9999-12-31 23:59:59+00',
+    status VARCHAR(20) DEFAULT 'ACTIVE', -- DRAFT, ACTIVE, EXPIRED, SUPERSEDED
+    priority INTEGER DEFAULT 0,
+    customer_id UUID REFERENCES public.organizations(id) ON DELETE SET NULL,
+    parent_version_id UUID REFERENCES public.rate_cards(id) ON DELETE SET NULL,
+    base_date_rule VARCHAR(20) DEFAULT 'RECEIPT_DATE',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    
+    -- 유효기간 중첩 방지 (동일 경로/운송사/서비스/고객 기준)
+    CONSTRAINT rate_cards_overlap_exclude EXCLUDE USING gist (
+        carrier_id WITH =, 
+        origin_port WITH =, 
+        destination_port WITH =, 
+        service_type WITH =, 
+        COALESCE(customer_id, '00000000-0000-0000-0000-000000000000') WITH =, 
+        tstzrange(valid_from, valid_to) WITH &&
+    )
+);
+
+DROP TRIGGER IF EXISTS set_rate_card_updated_at ON public.rate_cards;
+CREATE TRIGGER set_rate_card_updated_at BEFORE UPDATE ON public.rate_cards
+    FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
+
+-- 12.1 요율 변경 로그 (Audit Log)
+CREATE TABLE IF NOT EXISTS public.rate_card_logs (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    rate_card_id UUID REFERENCES public.rate_cards(id) ON DELETE CASCADE,
+    action VARCHAR(20), -- CREATE, UPDATE, EXPIRE
+    old_data JSONB,
+    new_data JSONB,
+    change_reason TEXT,
+    created_by TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 13. 중량/부피구간 요율 상세 (rate_slabs)
+CREATE TABLE IF NOT EXISTS public.rate_slabs (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    rate_card_id UUID NOT NULL REFERENCES public.rate_cards(id) ON DELETE CASCADE,
+    weight_min DECIMAL(15, 2) NOT NULL, -- 해당 구간 시작 중량
+    unit_price DECIMAL(15, 2) NOT NULL, -- 해당 구간 단가
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 14. 법인 승인 및 6자리 ID 발급 RPC (approve_organization)
+DROP FUNCTION IF EXISTS public.approve_organization(UUID);
+CREATE OR REPLACE FUNCTION public.approve_organization(target_org_id UUID)
+RETURNS VARCHAR(6) AS $$
+DECLARE
+    new_code VARCHAR(6);
+    count_limit INTEGER := 100; -- 무한 루프 방지용
+    i INTEGER := 0;
+BEGIN
+    -- 1. 중복되지 않는 6자리 숫자 코드 생성
+    LOOP
+        new_code := lpad(floor(random() * 1000000)::text, 6, '0');
+        EXIT WHEN NOT EXISTS (SELECT 1 FROM public.organizations WHERE org_code = new_code);
+        i := i + 1;
+        IF i > count_limit THEN
+            RAISE EXCEPTION 'Failed to generate unique org_code after % attempts', count_limit;
+        END IF;
+    END LOOP;
+
+    -- 2. Organizations 테이블 업데이트
+    UPDATE public.organizations
+    SET 
+        org_code = new_code,
+        status = 'ACTIVE',
+        updated_at = NOW()
+    WHERE id = target_org_id;
+
+    -- 3. 관련 프로필(Profiles) 승인 상태 업데이트
+    UPDATE public.profiles
+    SET 
+        is_approved = true,
+        updated_at = NOW()
+    WHERE org_id = target_org_id;
+
+    RETURN new_code;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;

@@ -13,5 +13,13 @@
     "tracking": "物流追踪",
     "finance": "财务结算",
     "system": "系统管理"
+  },
+  "Auth": {
+    "login_title": "登录 Zenith",
+    "login_subtitle": "全球综合物流平台",
+    "login_email_label": "电子邮件地址",
+    "login_password_label": "密码",
+    "login_button": "登录",
+    "signup_button": "创建账户"
   }
 }

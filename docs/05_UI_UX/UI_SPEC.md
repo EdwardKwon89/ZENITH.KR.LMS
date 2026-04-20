@@ -43,5 +43,26 @@
 - **Emerald/Forest**: 물동량 및 환경 지표 강조 테마.
 - **Amber/Gold**: 프리미엄 VIP 고객사 전용 테마.
 
+## 📐 Resolution & Responsive Strategy
+
+ZENITH_LMS는 다양한 환경에서 운영되는 물류 플랫폼 특성을 고려하여 **Fluid Layout(유체 레이아웃)** 방식을 채택합니다.
+
+### 1. 그리드 시스템 (Grid System)
+- **Base Unit**: 모든 간격과 크기는 `8px` 단위를 기준으로 설계합니다. (예: Padding 16px, 24px ...)
+- **Column**: 데스크탑 기준 12컬럼 시스템을 사용하며, 화면 너비에 따라 컬럼 수가 가변적으로 조정됩니다.
+
+### 2. 표준 브레이크포인트 (Breakpoints)
+| Device | Breakpoint | Strategy |
+|:---:|:---|:---|
+| **Mobile** | `< 640px` | 단일 컬럼 스택, 하단 탭 바 위주 네비게이션 |
+| **Tablet** | `640px ~ 1023px` | 2컬럼 레이아웃, 사이드바 자동 접힘 적용 |
+| **Laptop** | `1024px ~ 1439px` | **[Primary Target]** 고정 사이드바, 가로형 데이터 테이블 최적화 |
+| **Desktop** | `1440px ~ 1919px` | 정보 밀도를 높인 다중 대시보드 위젯 배치 |
+| **UltraWide** | `>= 1920px` | 컨테이너 최대 너비 제한(max-width: 1600px) 또는 다중 뷰포트 분할 |
+
+### 3. 고해상도 대응 (High DPI)
+- **Vector First**: 모든 로고와 아이콘은 `SVG` 포맷을 사용하여 배율에 관계없이 선명도를 유지합니다.
+- **Image Assets**: 비트맵 이미지가 필요한 경우 `2x`, `3x` 크기의 자산을 함께 서빙하여 레티나 디스플레이에 대응합니다.
+
 ---
 **Audit Note**: 위 명세는 `Tailwind v4`와 `@theme` 레이어를 통해 중앙 집중식으로 관리됩니다.
