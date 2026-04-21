@@ -1,22 +1,22 @@
 "use server";
 
-import { validateAdminAction } from "@/lib/auth/guards";
+import { validateAdminAction, validateUserAction } from "@/lib/auth/guards";
 import { revalidatePath } from "next/cache";
 import { generateOrderNo } from "./master";
 
 import { OrderRegistrationInput, orderRegistrationSchema } from "@/lib/validation/order";
 
 /**
- * 신규 하우스 오더를 생성합니다. (헤더 + 아이템)
+ * 신규 하우스 오더를 생성합니다. (Header -> Packages -> Items 계층형 저장)
  */
 export async function createOrder(payload: OrderRegistrationInput) {
-  const { supabase, user } = await validateAdminAction();
+  const { supabase, user, profile } = await validateUserAction();
   
   // 1. 데이터 검증 (Server-side validation)
   const validated = orderRegistrationSchema.parse(payload);
   const order_no = await generateOrderNo(supabase);
 
-  // 2. 주문 헤더 삽입
+  // 2. 주문 헤더 삽입 (수취인 상세 정보 포함)
   const { data: order, error: orderError } = await supabase
     .from("zen_orders")
     .insert({
@@ -26,38 +26,73 @@ export async function createOrder(payload: OrderRegistrationInput) {
       origin_port_id: validated.origin_port_id,
       dest_port_id: validated.dest_port_id,
       description: validated.description,
+      
+      // 송하인(화주) 담당자/연락처 (v2)
+      shipper_contact_name: validated.shipper_contact_name,
+      shipper_contact_phone: validated.shipper_contact_phone,
+      
+      // 수취인 상세 (v2)
+      recipient_name: validated.recipient_name,
+      recipient_address: validated.recipient_address,
+      recipient_phone: validated.recipient_phone,
+      recipient_zipcode: validated.recipient_zipcode,
+      
       recipient_pccc: validated.recipient_pccc,
-      recipient_contact: validated.recipient_contact,
       recipient_email: validated.recipient_email,
       delivery_notes: validated.delivery_notes,
+      
       status: "REGISTERED",
-      created_by: user.id
+      created_by: user.id,
+      org_id: profile?.org_id
     })
     .select()
     .single();
 
-  if (orderError) throw new Error(`Header insertion failed: ${orderError.message}`);
+  if (orderError) throw new Error(`Order header failed: ${orderError.message}`);
 
-  // 3. 주문 아이템 삽입 (복수 아이템 대응)
-  if (validated.items && validated.items.length > 0) {
-    const itemsToInsert = validated.items.map(item => ({
-      order_id: order.id,
-      sku_code: item.sku_code,
-      item_name: item.item_name,
-      quantity: item.quantity,
-      weight: item.weight,
-      volume: item.volume,
-      unit_price: item.unit_price,
-      currency: item.currency || 'USD'
-    }));
+  // 3. 계층형 패킹 및 아이템 삽입
+  if (validated.packages && validated.packages.length > 0) {
+    for (const pkg of validated.packages) {
+      // 3.1 패킹 단위 삽입
+      const { data: packageData, error: pkgError } = await supabase
+        .from("zen_order_packages")
+        .insert({
+          order_id: order.id,
+          packing_unit: pkg.packing_unit,
+          packing_count: pkg.packing_count,
+          length: pkg.length,
+          width: pkg.width,
+          height: pkg.height,
+          gross_weight: pkg.gross_weight,
+          volume: pkg.volume
+        })
+        .select()
+        .single();
 
-    const { error: itemsError } = await supabase
-      .from("zen_order_items")
-      .insert(itemsToInsert);
+      if (pkgError) {
+        console.error("Package insertion failed:", pkgError);
+        continue;
+      }
 
-    if (itemsError) {
-      console.error("Items insertion failed:", itemsError);
-      // 참고: 헤더는 생성되었으나 아이템이 실패한 사례 발생 시 로깅/알림 필요
+      // 3.2 해당 패킹에 속한 아이템들 삽입
+      if (pkg.items && pkg.items.length > 0) {
+        const itemsToInsert = pkg.items.map(item => ({
+          order_id: order.id,
+          package_id: packageData.id,
+          item_name: item.item_name,
+          quantity: item.quantity,
+          unit_price: item.unit_price,
+          currency: item.currency || 'USD',
+          hs_code: item.hs_code,
+          item_packing_unit: item.item_packing_unit
+        }));
+
+        const { error: itemsError } = await supabase
+          .from("zen_order_items")
+          .insert(itemsToInsert);
+
+        if (itemsError) console.error("Items insertion failed for package:", packageData.id, itemsError);
+      }
     }
   }
 
@@ -66,7 +101,7 @@ export async function createOrder(payload: OrderRegistrationInput) {
 }
 
 /**
- * 주문 목록을 조회합니다. (페이지네이션 및 역할 기반 필터링 지원)
+ * 주문 목록을 조회합니다. (v2 수취인명 검색 지원)
  */
 export async function getOrders({
   page = 1,
@@ -81,9 +116,8 @@ export async function getOrders({
   order_type?: string;
   search?: string;
 } = {}) {
-  const { supabase, profile, user } = await validateAdminAction();
+  const { supabase, profile, user } = await validateUserAction();
 
-  // 1. 시스템 설정에서 페이지 사이즈 조회 (기본값 전략)
   let effectivePageSize = pageSize || 20;
   const { data: setting } = await supabase
     .from("zen_system_settings")
@@ -93,7 +127,6 @@ export async function getOrders({
   
   if (setting) effectivePageSize = parseInt(setting.setting_value, 10);
 
-  // 2. 쿼리 빌더 시작
   let query = supabase
     .from("zen_orders")
     .select(`
@@ -103,25 +136,20 @@ export async function getOrders({
       dest_port:zen_ports!dest_port_id(name, code)
     `, { count: "exact" });
 
-  // 3. 역할 기반 데이터 격리 (RBAC Scoping)
-  if (profile.role === "CARRIER") {
-    // 운송사는 본인에게 할당된 오더만 (할당 테이블이 따로 있다면 Join 필요, 현재는 단순 예시)
-    // query = query.eq("carrier_id", profile.org_id); 
-  } else if (profile.role === "CORPORATE") {
-    // 법인 화주는 본인 조직의 오더만
-    query = query.eq("shipper_id", profile.org_id);
-  } else if (profile.role === "INDIVIDUAL") {
-    // 개인 화주는 본인이 직접 등록한 오더만
+  // 3. 권한별 필터링 (Role-based Filtering)
+  if (!profile) throw new Error("User profile not found");
+
+  const userProfile = profile as any; // 타입 캐스팅을 통한 속성 접근 허용 (v2)
+  if (userProfile.role === "CORPORATE") {
+    query = query.eq("shipper_id", userProfile.org_id);
+  } else if (userProfile.role === "INDIVIDUAL") {
     query = query.eq("created_by", user.id);
   }
-  // ZENITH_SUPER_ADMIN, ADMIN, MANAGER, OPERATOR는 전역 조회 가능
 
-  // 4. 필터링 로직
   if (status) query = query.eq("status", status);
   if (order_type) query = query.eq("order_type", order_type);
   if (search) query = query.or(`order_no.ilike.%${search}%,recipient_name.ilike.%${search}%`);
 
-  // 5. 페이지네이션 계산
   const from = (page - 1) * effectivePageSize;
   const to = from + effectivePageSize - 1;
 
@@ -140,10 +168,10 @@ export async function getOrders({
 }
 
 /**
- * 주문 상세 정보를 조회합니다.
+ * 주문 상세 정보를 조회합니다. (계층형 데이터 포함)
  */
 export async function getOrderDetails(orderId: string) {
-  const { supabase } = await validateAdminAction();
+  const { supabase } = await validateUserAction();
   
   const { data: order, error: orderError } = await supabase
     .from("zen_orders")
@@ -158,6 +186,15 @@ export async function getOrderDetails(orderId: string) {
 
   if (orderError) throw new Error(orderError.message);
 
+  // 계층형 데이터 로드: Packages -> Items
+  const { data: packages, error: pkgError } = await supabase
+    .from("zen_order_packages")
+    .select("*")
+    .eq("order_id", orderId)
+    .order("created_at", { ascending: true });
+
+  if (pkgError) throw new Error(pkgError.message);
+
   const { data: items, error: itemsError } = await supabase
     .from("zen_order_items")
     .select("*")
@@ -166,5 +203,11 @@ export async function getOrderDetails(orderId: string) {
 
   if (itemsError) throw new Error(itemsError.message);
 
-  return { ...order, items };
+  // 데이터 가공: 각 패키지에 소속 아이템 매핑
+  const packagesWithItems = packages.map(pkg => ({
+    ...pkg,
+    items: items.filter(item => item.package_id === pkg.id)
+  }));
+
+  return { ...order, packages: packagesWithItems };
 }

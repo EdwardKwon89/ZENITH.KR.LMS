@@ -4,16 +4,16 @@ import React, { useMemo, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useForm, useFieldArray } from 'react-hook-form';
+import { useForm, useFieldArray, Control } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast, Toaster } from 'sonner';
 import { 
   Package, User, Globe, Plus, Trash2, Save, 
-  ChevronRight, AlertCircle, CheckCircle2 
+  ChevronRight, AlertCircle, CheckCircle2, Box, Layers
 } from 'lucide-react';
-import { calculateSlabRate } from '@/lib/logistics/rate-engine';
 import { ZenCard, ZenButton, ZenInput, ZenBadge } from '@/components/ui/ZenUI';
 import { createOrder } from '@/app/actions/orders';
+import { getCurrentUserAffiliation } from '@/app/actions/master';
 import { orderRegistrationSchema, OrderRegistrationInput } from '@/lib/validation/order';
 
 interface OrderRegistrationFormProps {
@@ -22,6 +22,101 @@ interface OrderRegistrationFormProps {
   onSuccess?: () => void;
 }
 
+type Affiliation = {
+  userId: string;
+  userName: string;
+  userEmail: string;
+  role: string | null;
+  orgId: string | null;
+  orgName: string | null;
+  orgAddress: string | null;
+  orgBizNo: string | null;
+  isIndividual: boolean;
+  dummyIndividualId: string;
+} | null;
+
+/**
+ * 📦 패킹 단위 내부의 아이템 리스트 관리 컴포넌트 (Nested Field Array)
+ */
+const NestedItems: React.FC<{
+  nestIndex: number;
+  control: any; // 타각적 타입 에러 방지 (Complex Generic mismatch)
+  register: any;
+  errors: any;
+  t: any;
+}> = ({ nestIndex, control, register, errors, t }) => {
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: `packages.${nestIndex}.items` as any
+  });
+
+  return (
+    <div className="space-y-2 mt-3 ml-4 border-l-2 border-slate-100 pl-4">
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-[11px] font-bold text-slate-400 uppercase tracking-tighter flex items-center gap-1">
+          <Layers size={12} /> {t('section_items')} ({fields.length})
+        </span>
+        <button 
+          type="button" 
+          onClick={() => append({ item_name: '', quantity: 1, unit_price: 0, currency: 'USD', item_packing_unit: 'EA' })}
+          className="text-[10px] bg-blue-50 text-blue-600 px-2 py-1 rounded-md hover:bg-blue-100 transition-colors flex items-center gap-1"
+        >
+          <Plus size={10} /> {t('add_item')}
+        </button>
+      </div>
+
+      <div className="space-y-2">
+        {fields.map((item, k) => (
+          <div key={item.id} className="grid grid-cols-12 gap-2 items-start bg-slate-50/50 p-2 rounded-xl border border-dashed border-slate-200 group">
+            <div className="col-span-4">
+              <ZenInput 
+                placeholder={t('item_name')}
+                {...register(`packages.${nestIndex}.items.${k}.item_name`)}
+                className="bg-white py-2 text-xs"
+              />
+            </div>
+            <div className="col-span-2">
+              <ZenInput 
+                type="number"
+                placeholder="Qty"
+                {...register(`packages.${nestIndex}.items.${k}.quantity`, { valueAsNumber: true })}
+                className="bg-white py-2 text-xs"
+              />
+            </div>
+            <div className="col-span-3">
+              <ZenInput 
+                placeholder="HS Code"
+                {...register(`packages.${nestIndex}.items.${k}.hs_code`)}
+                className="bg-white py-2 text-xs"
+              />
+            </div>
+            <div className="col-span-2">
+              <select 
+                {...register(`packages.${nestIndex}.items.${k}.item_packing_unit`)}
+                className="w-full text-xs h-9 bg-white border border-slate-200 rounded-lg focus:outline-none"
+              >
+                <option value="EA">EA</option>
+                <option value="SET">SET</option>
+                <option value="PCS">PCS</option>
+              </select>
+            </div>
+            <div className="col-span-1 flex justify-center pt-2">
+              <button 
+                type="button" 
+                onClick={() => remove(k)}
+                disabled={fields.length === 1}
+                className="text-slate-300 hover:text-rose-500 transition-colors disabled:opacity-0"
+              >
+                <Trash2 size={14} />
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
   shippers,
   ports,
@@ -29,8 +124,9 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
 }) => {
   const t = useTranslations('Orders');
   const router = useRouter();
+  const [affiliation, setAffiliation] = React.useState<Affiliation>(null);
+  const [isLoadingAffiliation, setIsLoadingAffiliation] = React.useState(true);
 
-  // 1. Form Initialization with Zod
   const { 
     register, 
     control, 
@@ -39,318 +135,341 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
     setValue,
     formState: { errors, isSubmitting } 
   } = useForm<OrderRegistrationInput>({
-    resolver: zodResolver(orderRegistrationSchema),
+    resolver: zodResolver(orderRegistrationSchema) as any,
     defaultValues: {
       order_type: 'B2B',
-      items: [{ item_name: '', quantity: 1, unit_price: 0, weight: 0, volume: 0, currency: 'USD' }]
+      packages: [{ 
+        packing_unit: 'BOX', 
+        packing_count: 1, 
+        gross_weight: 0, 
+        items: [{ item_name: '', quantity: 1, unit_price: 0, currency: 'USD', item_packing_unit: 'EA' }] 
+      }]
     }
   });
-
-  const { fields, append, remove } = useFieldArray({
-    control,
-    name: "items"
-  });
-
-  const orderType = watch('order_type');
-  const items = watch('items');
-
-  // 2. Real-time Aggregation
-  const totalWeight = useMemo(() => 
-    items?.reduce((acc, item) => acc + (Number(item.weight) || 0) * (Number(item.quantity) || 0), 0) || 0
-  , [items]);
-
-  const totalVolume = useMemo(() => 
-    items?.reduce((acc, item) => acc + (Number(item.volume) || 0) * (Number(item.quantity) || 0), 0) || 0
-  , [items]);
-
-  // 2.1 Intelligent Rate Advisor
-  const originPortId = watch('origin_port_id');
-  const destPortId = watch('dest_port_id');
 
   useEffect(() => {
-    if (originPortId && destPortId && totalWeight > 0) {
-      const suggestedPrice = calculateSlabRate(totalWeight);
-      if (items?.[0] && (items[0].unit_price === 0 || items[0].unit_price === null)) {
-        setValue('items.0.unit_price', suggestedPrice);
-        toast.info(`Intelligent Rate Applied: $${suggestedPrice}`, {
-          description: `Based on total weight ${totalWeight}kg`
-        });
-      }
+    async function loadAffiliation() {
+      try {
+        const data = await getCurrentUserAffiliation();
+        setAffiliation(data);
+        if (data.isIndividual) {
+          setValue('order_type', 'B2C_ECOM');
+          setValue('shipper_id', data.dummyIndividualId);
+          setValue('shipper_contact_name', data.userName);
+          setValue('shipper_contact_email', data.userEmail);
+        } else {
+          setValue('order_type', 'B2B');
+          setValue('shipper_id', data.orgId as string);
+          setValue('shipper_contact_name', data.userName);
+          setValue('shipper_contact_email', data.userEmail);
+        }
+      } catch (err) { console.error(err); } finally { setIsLoadingAffiliation(false); }
     }
-  }, [totalWeight, originPortId, destPortId, setValue, items]);
+    loadAffiliation();
+  }, [setValue]);
 
-  // 3. Submission Handler
-  const onSubmit = async (data: OrderRegistrationInput) => {
+  const { fields: packageFields, append: appendPackage, remove: removePackage } = useFieldArray({
+    control,
+    name: "packages"
+  });
+
+  const packages = watch('packages');
+
+  // 📐 치수 기반 합산 엔진 (v2)
+  const totals = useMemo(() => {
+    let weight = 0;
+    let volume = 0;
+    packages?.forEach(pkg => {
+      weight += (Number(pkg.gross_weight) || 0) * (Number(pkg.packing_count) || 0);
+      
+      // LWH 기반 혹은 수동 Volume 계산
+      const pkgVol = (pkg.length && pkg.width && pkg.height)
+        ? (pkg.length * pkg.width * pkg.height) / 1000000 
+        : (Number(pkg.volume) || 0);
+      volume += pkgVol * (Number(pkg.packing_count) || 0);
+    });
+    return { weight, volume };
+  }, [packages]);
+
+  const onSubmit = async (data: any) => {
     try {
-      const result = await createOrder(data);
-      toast.success(t('success_create'), {
-        description: `Order No: ${result.order_no}`,
-        icon: <CheckCircle2 className="text-emerald-500" />
-      });
-      
+      const result = await createOrder(data as OrderRegistrationInput);
+      toast.success(t('success_create'), { description: `Order No: ${result.order_no}` });
       if (onSuccess) onSuccess();
-      
-      // Redirect to Order Detail (Simulated)
-      setTimeout(() => {
-        router.push(`/orders/${result.id}`);
-      }, 1500);
-
+      setTimeout(() => router.push(`/orders/${result.id}`), 1000);
     } catch (err: any) {
-      toast.error('Submission Failed', {
-        description: err.message,
-        icon: <AlertCircle className="text-rose-500" />
-      });
+      toast.error('Submission Failed', { description: err.message });
     }
   };
 
   return (
     <>
       <Toaster position="top-right" richColors />
-      <form onSubmit={handleSubmit(onSubmit)} className="w-full max-w-5xl mx-auto space-y-8 pb-20">
+      <form onSubmit={handleSubmit(onSubmit)} className="w-full max-w-6xl mx-auto space-y-4 pb-20 px-4">
         
-        {/* 1. Order Type Selection */}
-        <div className="flex justify-center gap-4 mb-10">
-          {(['B2B', 'B2C_ECOM', 'B2C_EXPRESS'] as const).map((type) => (
-            <button
-              key={type}
-              type="button"
-              onClick={() => setValue('order_type', type)}
-              className={`
-                relative px-8 py-4 rounded-2xl transition-all duration-500 overflow-hidden
-                ${orderType === type 
-                  ? 'text-white shadow-lg scale-105' 
-                  : 'bg-white/40 text-slate-500 hover:bg-white/60'}
-              `}
-            >
-              {orderType === type && (
-                <motion.div 
-                  layoutId="active-bg"
-                  className="absolute inset-0 bg-gradient-to-br from-blue-600 to-indigo-700"
-                  transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                />
-              )}
-              <span className="relative z-10 font-bold tracking-tight">
+        {/* 🚀 Top Action Bar: Type selection (Left) & Save Action (Right) */}
+        <div className="flex justify-between items-center mb-8">
+          <div className="flex gap-2">
+            {(['B2B', 'B2C_ECOM', 'B2C_EXPRESS'] as const).map((type) => (
+              <button
+                key={type}
+                type="button"
+                disabled={affiliation ? (affiliation.isIndividual && type === 'B2B') || (!affiliation.isIndividual && type !== 'B2B') : false}
+                onClick={() => setValue('order_type', type)}
+                className={`px-6 py-2 rounded-xl text-xs font-bold transition-all ${watch('order_type') === type ? 'bg-slate-800 text-white shadow-lg' : 'bg-white text-slate-400 border border-slate-200 hover:bg-slate-50'}`}
+              >
                 {t(`type_${type.toLowerCase()}`)}
-              </span>
-            </button>
-          ))}
+              </button>
+            ))}
+          </div>
+
+          <ZenButton 
+            type="submit" 
+            loading={isSubmitting}
+            className="px-8 py-2 text-xs font-bold rounded-xl shadow-lg shadow-blue-500/10 border-2 border-blue-600/20"
+          >
+            <Save size={16} className="mr-2" /> {t('submit')}
+          </ZenButton>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          <div className="lg:col-span-12 space-y-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+          {/* Left Column: Basic & Consignee */}
+          <div className="lg:col-span-4 space-y-4">
             
-            {/* 2. Route & Shipper */}
-            <ZenCard>
-              <div className="flex items-center gap-3 mb-6">
-                <div className="p-2 bg-blue-100 rounded-lg text-blue-600">
-                  <Globe size={20} />
-                </div>
-                <h3 className="text-xl font-bold text-slate-800">{t('section_header')}</h3>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold text-slate-500 ml-1">{t('shipper_label')}</label>
+            {/* Header 섹션 (Compact) */}
+            <ZenCard className="p-4 bg-slate-50/30 border-slate-200">
+              <h4 className="text-xs font-bold text-slate-800 mb-4 flex items-center gap-2 uppercase tracking-wide">
+                <Globe size={14} className="text-blue-500" /> {t('section_header')}
+              </h4>
+              <div className="space-y-3">
+                <div>
+                  <div className="flex justify-between items-center mb-1">
+                    <label className="text-[10px] font-bold text-slate-500">{t('shipper_label')}</label>
+                    <ZenBadge variant={affiliation?.isIndividual ? "info" : "success"} className="text-[9px] py-0 px-1">
+                      {affiliation ? (affiliation.isIndividual ? "개인 화주" : (affiliation.orgName || "법인 화주")) : "Checking..."}
+                    </ZenBadge>
+                  </div>
                   <select 
                     {...register('shipper_id')}
-                    className={`w-full bg-slate-50/50 backdrop-blur-sm border px-4 py-3 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-400/30 transition-all ${errors.shipper_id ? 'border-rose-400 ring-rose-100' : 'border-white/20'}`}
+                    disabled={!!affiliation}
+                    className="w-full bg-white border border-slate-200 text-sm px-3 py-2 rounded-xl focus:ring-2 focus:ring-blue-100 outline-none transition-all mb-3"
                   >
-                    <option value="">Select Shipper</option>
-                    {shippers.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                    {shippers.map(s => {
+                      const displayName = (s.id === affiliation?.dummyIndividualId && affiliation?.isIndividual)
+                        ? affiliation.userName 
+                        : (s.id === affiliation?.orgId && !affiliation?.isIndividual)
+                          ? affiliation.orgName
+                          : s.name;
+                      return <option key={s.id} value={s.id}>{displayName}</option>
+                    })}
                   </select>
-                  {errors.shipper_id && <p className="text-xs text-rose-500 ml-1">{errors.shipper_id.message}</p>}
-                </div>
 
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold text-slate-500 ml-1">{t('origin_port')}</label>
-                  <select 
-                    {...register('origin_port_id')}
-                    className={`w-full bg-slate-50/50 backdrop-blur-sm border px-4 py-3 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-400/30 transition-all ${errors.origin_port_id ? 'border-rose-400 ring-rose-100' : 'border-white/20'}`}
-                  >
-                    <option value="">Select Port</option>
-                    {ports.map(p => <option key={p.id} value={p.id}>[{p.port_code}] {p.port_name_ko}</option>)}
-                  </select>
-                  {errors.origin_port_id && <p className="text-xs text-rose-500 ml-1">{errors.origin_port_id.message}</p>}
+                  {/* 🏢 Detailed Shipper Information Card (New) */}
+                  <div className="bg-white/60 border border-white rounded-2xl p-4 shadow-sm space-y-3">
+                    {/* [v2] 화주 정보 중복 배지 제거 (상단으로 이동) */}
+                    
+                    <div className="flex flex-col gap-y-4 text-[11px]">
+                      <div>
+                        <p className="text-slate-400 font-bold uppercase tracking-tighter mb-1">{t('contact_person')}</p>
+                        <ZenInput 
+                          placeholder="담당자명"
+                          {...register('shipper_contact_name')}
+                          className="bg-white/80 py-1.5 text-[11px]"
+                        />
+                      </div>
+                      <div>
+                        <p className="text-slate-400 font-bold uppercase tracking-tighter mb-1">{t('shipper_contact')} (Phone)</p>
+                        <ZenInput 
+                          placeholder="010-XXXX-XXXX"
+                          {...register('shipper_contact_phone')}
+                          className="bg-white/80 py-1.5 text-[11px]"
+                        />
+                      </div>
+                      <div>
+                        <p className="text-slate-400 font-bold uppercase tracking-tighter mb-1">E-mail (Reference)</p>
+                        <ZenInput 
+                          placeholder="example@email.com"
+                          {...register('shipper_contact_email')}
+                          className="bg-white/80 py-1.5 text-[11px]"
+                        />
+                      </div>
+                      {!affiliation?.isIndividual && (
+                        <>
+                          <div>
+                            <p className="text-slate-400 font-bold uppercase tracking-tighter">{t('shipper_address')}</p>
+                            <p className="text-slate-700 font-semibold leading-relaxed">{affiliation?.orgAddress || 'N/A'}</p>
+                          </div>
+                          <div>
+                            <p className="text-slate-400 font-bold uppercase tracking-tighter">{t('shipper_biz_no')}</p>
+                            <p className="text-slate-700 font-semibold">{affiliation?.orgBizNo || 'N/A'}</p>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </div>
                 </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold text-slate-500 ml-1">{t('dest_port')}</label>
-                  <select 
-                    {...register('dest_port_id')}
-                    className={`w-full bg-slate-50/50 backdrop-blur-sm border px-4 py-3 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-400/30 transition-all ${errors.dest_port_id ? 'border-rose-400 ring-rose-100' : 'border-white/20'}`}
-                  >
-                    <option value="">Select Port</option>
-                    {ports.map(p => <option key={p.id} value={p.id}>[{p.port_code}] {p.port_name_ko}</option>)}
-                  </select>
-                  {errors.dest_port_id && <p className="text-xs text-rose-500 ml-1">{errors.dest_port_id.message}</p>}
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-slate-500">{t('origin_port')}</label>
+                    <select {...register('origin_port_id')} className="w-full bg-white border border-slate-200 text-xs px-2 py-2 rounded-xl outline-none">
+                      <option value="">Origin</option>
+                      {ports.map(p => <option key={p.id} value={p.id}>[{p.code}] {p.name}</option>)}
+                    </select>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-slate-500">{t('dest_port')}</label>
+                    <select {...register('dest_port_id')} className="w-full bg-white border border-slate-200 text-xs px-2 py-2 rounded-xl outline-none">
+                      <option value="">Dest</option>
+                      {ports.map(p => <option key={p.id} value={p.id}>[{p.code}] {p.name}</option>)}
+                    </select>
+                  </div>
                 </div>
               </div>
             </ZenCard>
 
-            {/* 3. B2C Extra Info */}
-            <AnimatePresence mode="wait">
-              {orderType.startsWith('B2C') && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.4 }}
-                >
-                  <ZenCard className="border-l-4 border-l-blue-500">
-                    <div className="flex items-center gap-3 mb-6">
-                      <div className="p-2 bg-indigo-100 rounded-lg text-indigo-600">
-                        <User size={20} />
-                      </div>
-                      <h3 className="text-xl font-bold text-slate-800">{t('section_recipient')}</h3>
-                      <ZenBadge variant="info">B2C Required</ZenBadge>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      <div className="space-y-2">
-                        <label className="text-sm font-semibold text-slate-500 ml-1">{t('recipient_pccc')}</label>
-                        <ZenInput 
-                          {...register('recipient_pccc')}
-                          placeholder="P123456789012"
-                          error={!!errors.recipient_pccc}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-sm font-semibold text-slate-500 ml-1">{t('recipient_contact')}</label>
-                        <ZenInput 
-                          {...register('recipient_contact')}
-                          placeholder="010-1234-5678"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-sm font-semibold text-slate-500 ml-1">E-mail</label>
-                        <ZenInput 
-                          {...register('recipient_email')}
-                          type="email"
-                          placeholder="recipient@example.com"
-                          error={!!errors.recipient_email}
-                        />
-                      </div>
-                      <div className="md:col-span-2 lg:col-span-3 space-y-2">
-                        <label className="text-sm font-semibold text-slate-500 ml-1">{t('delivery_notes')}</label>
-                        <textarea 
-                          {...register('delivery_notes')}
-                          className="w-full bg-slate-50/50 backdrop-blur-sm border border-white/20 px-4 py-3 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-400/30"
-                          rows={3}
-                        />
-                      </div>
-                    </div>
-                  </ZenCard>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            {/* 4. Items Management */}
-            <ZenCard>
-              <div className="flex items-center justify-between mb-8">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-emerald-100 rounded-lg text-emerald-600">
-                    <Package size={20} />
+            {/* 수취인 상세 정보 (Essential Consignee Info) */}
+            <ZenCard className="p-4 border-blue-100 shadow-sm">
+              <h4 className="text-xs font-bold text-slate-800 mb-4 flex items-center gap-2 uppercase tracking-wide">
+                <User size={14} className="text-indigo-500" /> {t('section_recipient')}
+              </h4>
+              <div className="space-y-3">
+                <div>
+                  <label className="text-[10px] font-bold text-slate-500 mb-1 block">Recipient Name</label>
+                  <ZenInput placeholder="Full Name" {...register('recipient_name')} error={!!errors.recipient_name} className="py-2 text-xs" />
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold text-slate-500 mb-1 block">Phone</label>
+                  <ZenInput placeholder="010-XXXX-XXXX" {...register('recipient_phone')} error={!!errors.recipient_phone} className="py-2 text-xs" />
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-500 mb-1 block">PCCC</label>
+                    <ZenInput placeholder="P1234..." {...register('recipient_pccc')} className="py-2 text-xs" />
                   </div>
-                  <h3 className="text-xl font-bold text-slate-800">{t('section_items')}</h3>
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-500 mb-1 block">Zipcode</label>
+                    <ZenInput placeholder="12345" {...register('recipient_zipcode')} className="py-2 text-xs" />
+                  </div>
                 </div>
-                <ZenButton 
-                  type="button" 
-                  variant="glass" 
-                  onClick={() => append({ item_name: '', quantity: 1, unit_price: 0, weight: 0, volume: 0, currency: 'USD' })} 
-                  className="py-2 px-4 text-sm scale-90"
-                >
-                  <Plus size={16} /> {t('add_item')}
-                </ZenButton>
-              </div>
-
-              <div className="space-y-4">
-                {fields.map((field, idx) => (
-                  <motion.div 
-                    key={field.id}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    className="group relative grid grid-cols-1 md:grid-cols-6 gap-4 p-5 bg-white/30 rounded-2xl border border-white/10 hover:border-blue-200 transition-colors"
-                  >
-                    <div className="md:col-span-2">
-                      <ZenInput 
-                        placeholder={t('item_name')}
-                        {...register(`items.${idx}.item_name`)}
-                        error={!!errors.items?.[idx]?.item_name}
-                      />
-                    </div>
-                    <div>
-                      <ZenInput 
-                        type="number"
-                        placeholder={t('quantity')}
-                        {...register(`items.${idx}.quantity`, { valueAsNumber: true })}
-                        error={!!errors.items?.[idx]?.quantity}
-                      />
-                    </div>
-                    <div>
-                      <ZenInput 
-                        type="number"
-                        step="0.01"
-                        placeholder={t('unit_price')}
-                        {...register(`items.${idx}.unit_price`, { valueAsNumber: true })}
-                      />
-                    </div>
-                    <div>
-                      <ZenInput 
-                        type="number"
-                        step="0.001"
-                        placeholder={t('weight')}
-                        {...register(`items.${idx}.weight`, { valueAsNumber: true })}
-                        error={!!errors.items?.[idx]?.weight}
-                      />
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <ZenInput 
-                        type="number"
-                        step="0.0001"
-                        placeholder={t('volume')}
-                        {...register(`items.${idx}.volume`, { valueAsNumber: true })}
-                        error={!!errors.items?.[idx]?.volume}
-                      />
-                      {fields.length > 1 && (
-                        <button 
-                          type="button" 
-                          onClick={() => remove(idx)}
-                          className="p-2 text-rose-400 hover:text-rose-600 transition-colors"
-                        >
-                          <Trash2 size={18} />
-                        </button>
-                      )}
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-
-              {/* Aggregated Totals */}
-              <div className="mt-8 flex justify-end gap-10 px-6 py-4 bg-slate-800/5 rounded-2xl">
-                <div className="text-right">
-                  <p className="text-xs font-semibold text-slate-400 uppercase">{t('weight')}</p>
-                  <p className="text-lg font-bold text-slate-700">{totalWeight.toFixed(3)} kg</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-xs font-semibold text-slate-400 uppercase">{t('volume')}</p>
-                  <p className="text-lg font-bold text-slate-700">{totalVolume.toFixed(4)} CBM</p>
+                <div>
+                  <label className="text-[10px] font-bold text-slate-500 mb-1 block">Full Address</label>
+                  <textarea 
+                    {...register('recipient_address')}
+                    className="w-full text-xs p-2 border border-slate-200 rounded-xl bg-white resize-none h-16 outline-none focus:ring-2 focus:ring-blue-100"
+                    placeholder="Physical delivery address"
+                  />
+                  {errors.recipient_address && <p className="text-[9px] text-rose-500 mt-1">{errors.recipient_address.message}</p>}
                 </div>
               </div>
             </ZenCard>
           </div>
+
+          {/* Right Column: Packages & Items (Hierarchical) */}
+          <div className="lg:col-span-8 space-y-4">
+            <ZenCard className="p-5 border-emerald-100 min-h-[400px]">
+              <div className="flex items-center justify-between mb-4">
+                <h4 className="text-sm font-bold text-slate-800 flex items-center gap-2 uppercase tracking-wide">
+                  <Box size={16} className="text-emerald-500" /> 📦 패킹 및 품목 관리
+                </h4>
+                <ZenButton 
+                  type="button" 
+                  variant="glass" 
+                  onClick={() => appendPackage({ packing_unit: 'BOX', packing_count: 1, gross_weight: 0, items: [{ item_name: '', quantity: 1, unit_price: 0, currency: 'USD', item_packing_unit: 'EA' }] })}
+                  className="px-3 py-1 text-xs"
+                >
+                  <Plus size={14} /> 패키지 추가
+                </ZenButton>
+              </div>
+
+              <div className="space-y-6">
+                {packageFields.map((pkg, i) => (
+                  <motion.div 
+                    key={pkg.id} 
+                    layout
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="relative bg-white border border-slate-100 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all"
+                  >
+                    <div className="flex items-start justify-between absolute -top-3 left-4">
+                      <ZenBadge variant="info" className="px-3 py-1 shadow-sm border border-white">PKG #{i + 1}</ZenBadge>
+                    </div>
+
+                    <div className="grid grid-cols-12 gap-3 mt-4 items-end">
+                      <div className="col-span-2 space-y-1">
+                        <label className="text-[9px] font-bold text-slate-400">UNIT</label>
+                        <select {...register(`packages.${i}.packing_unit`)} className="w-full text-xs h-9 bg-slate-50 border border-slate-100 rounded-lg">
+                          <option value="BOX">BOX</option><option value="PLT">PLT</option><option value="CRT">CRT</option>
+                        </select>
+                      </div>
+                      <div className="col-span-2">
+                        <label className="text-[9px] font-bold text-slate-400">COUNT</label>
+                        <ZenInput type="number" {...register(`packages.${i}.packing_count`, { valueAsNumber: true })} className="py-2 text-xs" />
+                      </div>
+                      <div className="col-span-4">
+                        <label className="text-[9px] font-bold text-slate-400">DIMENSIONS (L/W/H)</label>
+                        <div className="grid grid-cols-3 gap-1">
+                          <ZenInput type="number" placeholder="L" {...register(`packages.${i}.length`, { valueAsNumber: true })} className="py-2 text-xs" />
+                          <ZenInput type="number" placeholder="W" {...register(`packages.${i}.width`, { valueAsNumber: true })} className="py-2 text-xs" />
+                          <ZenInput type="number" placeholder="H" {...register(`packages.${i}.height`, { valueAsNumber: true })} className="py-2 text-xs" />
+                        </div>
+                      </div>
+                      <div className="col-span-2">
+                        <label className="text-[9px] font-bold text-slate-400">WEIGHT(kg)</label>
+                        <ZenInput type="number" {...register(`packages.${i}.gross_weight`, { valueAsNumber: true })} className="py-2 text-xs" />
+                      </div>
+                      <div className="col-span-2 flex items-center justify-end h-9">
+                        <button 
+                          type="button" 
+                          onClick={() => removePackage(i)}
+                          disabled={packageFields.length === 1}
+                          className="p-2 text-rose-300 hover:text-rose-500 transition-colors disabled:opacity-0"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* 📦 Nested Items for this Package */}
+                    <NestedItems 
+                      nestIndex={i}
+                      control={control}
+                      register={register}
+                      errors={errors}
+                      t={t}
+                    />
+                  </motion.div>
+                ))}
+              </div>
+
+              {/* 📊 Aggregated Stats (Live) */}
+              <div className="mt-8 flex justify-between items-center px-6 py-4 bg-slate-900 rounded-2xl text-white">
+                <span className="text-xs font-bold text-slate-400">SHIPMENT SUMMARY</span>
+                <div className="flex gap-8">
+                  <div className="text-right">
+                    <p className="text-[10px] text-slate-400">TOTAL WEIGHT</p>
+                    <p className="text-lg font-bold">{totals.weight.toFixed(2)} <span className="text-[10px]">KG</span></p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[10px] text-slate-400">TOTAL VOLUME</p>
+                    <p className="text-lg font-bold">{totals.volume.toFixed(4)} <span className="text-[10px]">CBM</span></p>
+                  </div>
+                </div>
+              </div>
+            </ZenCard>
+            {/* 📝 Remarks / Special Instructions */}
+            <ZenCard className="p-4 border-slate-200">
+              <h4 className="text-xs font-bold text-slate-800 mb-4 flex items-center gap-2 uppercase tracking-wide">
+                <AlertCircle size={14} className="text-slate-400" /> {t('description')}
+              </h4>
+              <textarea 
+                {...register('description')}
+                className="w-full text-xs p-3 border border-slate-200 rounded-xl bg-white resize-none h-24 outline-none focus:ring-2 focus:ring-blue-100"
+                placeholder="Ex) 배송 시 경비실에 맡겨주세요. / 특정 시간대 배송 요망 등"
+              />
+            </ZenCard>
+          </div>
         </div>
 
-        {/* Footer Actions */}
-        <div className="flex justify-center pt-10">
-          <ZenButton 
-            type="submit" 
-            loading={isSubmitting}
-            disabled={isSubmitting}
-            className="w-full max-w-xs py-5 text-lg shadow-2xl shadow-blue-500/20"
-          >
-            <Save size={20} /> {isSubmitting ? t('processing') : t('submit')}
-          </ZenButton>
-        </div>
       </form>
     </>
   );

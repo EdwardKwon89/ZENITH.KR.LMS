@@ -17,12 +17,17 @@
 - [ ] **불변성**: 데이터 구조가 불변(Immutable) 상태로 설계/구현되었는가?
 - [ ] **길이 제한**: 개별 함수가 50줄 이하로 유지되고 있는가?
 - [ ] **파일 무결성**: 단일 파일이 1,000줄을 초과하지 않는가? (넘을 경우 Overview/Detail 분리)
-- [ ] **Import Guard**: 코드 수정 시 `import` 구문이 우발적으로 삭제되지 않았으며, 런타임 `ReferenceError`가 없는가? (SAR-2026-04-20-003)
+- [ ] **Import Guard**: 코드 수정 시 `import` 구문이 우발적으로 삭제되지 않았으며, 특히 서버 가드/미들웨어 내 유틸리티 함수의 런타임 `ReferenceError`가 없는가? (SAR-2026-04-20-004)
+- [ ] **UI Prop Safety**: 공용 UI 컴포넌트 확장 시 `...props` 전달 전 사용자 정의 속성(error, loading 등)을 구조 분해하여 DOM 전이 및 React Warning을 차단했는가? (SAR-2026-04-20-005)
+- [ ] **Schema-DB Sync**: Zod 스키마의 식별자 타입(UUID 등)과 실제 조회하는 DB 테이블 및 서버 액션의 데이터 규격이 완벽히 일치하는가? (SAR-2026-04-21-007)
+- [ ] **Complex Grid UI**: 3개 이상의 입력 필드가 결합된 그리드 UI에 고정 헤더와 명확한 단위 레이블(kg, EA, $, CBM 등)이 포함되었는가? (SAR-2026-04-21-007)
 
 ## 🔴 보안 및 권한 (Security & Permission)
 - [ ] **ADMIN 가드**: 마스터 데이터 엔드포인트에 `requireAdmin` 보호가 적용되었는가?
 - [ ] **RBAC UI**: 사이드바 및 네비게이션이 사용자 역할에 따라 동적으로 필터링되는가?
 - [ ] **Sensitive Data**: 환경 변수나 API 키가 클라이언트 코드에 노출되지 않았는가?
+- [ ] **Role Data Sync**: 권한 기반 기능 테스트 전, DB 상의 실제 사용자 역할(Profile Role)과 세션/UI 상태가 일치하는지 선제적으로 확인했는가? (SAR-2026-04-20-006)
+- [ ] **Master RLS**: 신규 마스터 테이블(zen_ports, zen_organizations 등) 생성 시 `authenticated` 이상의 역할에 대해 명시적인 `SELECT` 정책(Policy)이 수립되었는가? (SAR-2026-04-21-007)
 
 ## 🟡 검증 및 빌드 (Verification & Build)
 - [ ] **Turbopack Build**: `npm run build` 결과가 오류 없이 완료되는가?
@@ -30,5 +35,5 @@
 - [ ] **i18n**: 모든 신규 메뉴와 레이블이 다국어 파일(`ko.json`)에 등록되었는가?
 
 ---
-*마지막 업데이트: 2026-04-20*
+*마지막 업데이트: 2026-04-21*
 *작성자: Antigravity (AI Agent)*

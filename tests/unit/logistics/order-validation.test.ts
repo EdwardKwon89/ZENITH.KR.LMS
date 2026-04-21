@@ -9,13 +9,21 @@ describe('ZENITH Order Integrity: Registration Schema Validation', () => {
     shipper_id: validUUID,
     origin_port_id: validUUID,
     dest_port_id: validUUID,
-    items: [
+    recipient_name: 'Hong Gil-dong',
+    recipient_address: '123 Zenith St, Seoul',
+    recipient_phone: '010-1234-5678',
+    packages: [
       {
-        item_name: 'Industrial Robot Arm',
-        quantity: 2,
-        unit_price: 15000,
-        weight: 500.5,
-        volume: 2.1,
+        packing_unit: 'BOX',
+        packing_count: 1,
+        gross_weight: 10.5,
+        items: [
+          {
+            item_name: 'Industrial Robot Arm',
+            quantity: 2,
+            unit_price: 15000,
+          }
+        ]
       }
     ]
   };
@@ -37,9 +45,34 @@ describe('ZENITH Order Integrity: Registration Schema Validation', () => {
     expect(result.success).toBe(false);
   });
 
-  it('TC-O.1: 아이템이 최소 1개 이상 존재해야 함', () => {
-    const invalidPayload = { ...validPayload, items: [] };
+  it('TC-O.1: 패키지가 최소 1개 이상 존재해야 함', () => {
+    const invalidPayload = { ...validPayload, packages: [] };
     const result = orderRegistrationSchema.safeParse(invalidPayload);
     expect(result.success).toBe(false);
+  });
+  
+  it('TC-O.2: 송하인 담당자 정보 및 비고 필드가 포함된 경우 통과해야 함 (v2)', () => {
+    const payloadWithNewFields = {
+      ...validPayload,
+      shipper_contact_name: 'Manager Kim',
+      shipper_contact_phone: '010-9999-8888',
+      description: 'Handle with care. Fragile items inside.'
+    };
+    const result = orderRegistrationSchema.safeParse(payloadWithNewFields);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.shipper_contact_name).toBe('Manager Kim');
+      expect(result.data.shipper_contact_phone).toBe('010-9999-8888');
+      expect(result.data.description).toContain('Fragile');
+    }
+  });
+
+  it('TC-O.3: 송하인 정보가 누락되어도 optional이므로 통과해야 함 (v2)', () => {
+    const payloadWithoutNewFields = { ...validPayload };
+    const result = orderRegistrationSchema.safeParse(payloadWithoutNewFields);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.shipper_contact_name).toBeUndefined();
+    }
   });
 });
