@@ -11,7 +11,6 @@ CREATE TABLE common_code_groups (
     created_at TIMESTAMPTZ DEFAULT now(),
     updated_at TIMESTAMPTZ DEFAULT now()
 );
-
 -- 2. 공통 코드 상세 테이블 (소분류)
 CREATE TABLE common_codes (
     group_id TEXT REFERENCES common_code_groups(id) ON DELETE CASCADE,
@@ -25,7 +24,6 @@ CREATE TABLE common_codes (
     updated_at TIMESTAMPTZ DEFAULT now(),
     PRIMARY KEY (group_id, code)
 );
-
 -- 3. Audit 필드 자동 업데이트 함수 (기존에 없으면 생성)
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
@@ -34,26 +32,20 @@ BEGIN
     RETURN NEW;
 END;
 $$ language 'plpgsql';
-
 CREATE TRIGGER update_common_code_groups_modtime
     BEFORE UPDATE ON common_code_groups
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
 CREATE TRIGGER update_common_codes_modtime
     BEFORE UPDATE ON common_codes
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
 -- 4. 보안 설정 (RLS)
 ALTER TABLE common_code_groups ENABLE ROW LEVEL SECURITY;
 ALTER TABLE common_codes ENABLE ROW LEVEL SECURITY;
-
 -- 모든 사용자는 코드 정보를 조회할 수 있음
 CREATE POLICY "Common code groups are viewable by all authenticated users" ON common_code_groups
     FOR SELECT USING (auth.role() = 'authenticated');
-
 CREATE POLICY "Common codes are viewable by all authenticated users" ON common_codes
     FOR SELECT USING (auth.role() = 'authenticated');
-
 -- 오직 ADMIN만 코드 정보를 수정할 수 있음 (profiles 테이블의 role 필드 참조)
 CREATE POLICY "Only admins can modify code groups" ON common_code_groups
     FOR ALL USING (
@@ -62,7 +54,6 @@ CREATE POLICY "Only admins can modify code groups" ON common_code_groups
             WHERE profiles.id = auth.uid() AND profiles.role = 'ADMIN'
         )
     );
-
 CREATE POLICY "Only admins can modify codes" ON common_codes
     FOR ALL USING (
         EXISTS (
