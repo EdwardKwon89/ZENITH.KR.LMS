@@ -94,6 +94,12 @@
     "submit": "오더 등록하기",
     "processing": "등록 중...",
     "success_create": "오더가 성공적으로 등록 되었습니다.",
-    "pccc_help": "해외 배송 시 필수 항목입니다."
+    "pccc_help": "해외 배송 시 필수 항목입니다.",
+    "shipper_name": "송하인 성명/법인명",
+    "shipper_contact": "화주 연락처",
+    "shipper_address": "화주 주소",
+    "shipper_biz_no": "사업자 등록번호",
+    "contact_person": "담당자",
+    "description": "비고/특이사항"
   }
 }

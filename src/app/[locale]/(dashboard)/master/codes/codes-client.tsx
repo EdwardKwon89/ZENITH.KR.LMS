@@ -8,6 +8,7 @@ import { upsertCommonCode, deleteCommonCode } from "@/app/actions/master";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface CommonCode {
+  id: string;
   group_code: string;
   code_value: string;
   code_name_ko: string;
@@ -94,8 +95,8 @@ export default function CommonCodeClient({ initialData }: { initialData: any[] }
     if (!confirm(`'${code.code_name_ko}' 코드를 삭제하시겠습니까?`)) return;
 
     try {
-      await deleteCommonCode(code.group_code, code.code_value);
-      setData(prev => prev.filter(c => !(c.group_code === code.group_code && c.code_value === code.code_value)));
+      await deleteCommonCode(code.id);
+      setData(prev => prev.filter(c => c.id !== code.id));
     } catch (error) {
       alert("삭제 중 오류가 발생했습니다.");
     }

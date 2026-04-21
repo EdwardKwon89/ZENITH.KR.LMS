@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { createClient } from "@/utils/supabase/server";
 import { checkPermission, USER_ROLES } from "./rbac";
 
 /**
@@ -58,19 +59,43 @@ export async function validateAdminAction() {
 
   if (!user) {
     redirect("/login");
+    throw new Error("Login required");
   }
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("role")
+    .select("*")
     .eq("id", user.id)
     .single();
 
   const isAllowed = await checkPermission(profile?.role, "/admin");
+  console.log(`[AUTH_TRACE] User: ${user.email}, Role: ${profile?.role}, Path: /admin, Allowed: ${isAllowed}`);
 
   if (!isAllowed) {
+    console.error(`[AUTH_DENIED] Access blocked for ${user.email} (Role: ${profile?.role})`);
     throw new Error("Unauthorized access");
   }
+
+  return { user, profile, supabase };
+}
+
+/**
+ * 일반 사용자 세션을 검증하는 서버 액션용 가드입니다.
+ */
+export async function validateUserAction() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    console.error("[AUTH_REQUIRED] Session not found");
+    throw new Error("Login required");
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", user.id)
+    .single();
 
   return { user, profile, supabase };
 }
