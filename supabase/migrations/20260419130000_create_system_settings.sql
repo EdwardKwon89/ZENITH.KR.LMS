@@ -11,21 +11,17 @@ CREATE TABLE IF NOT EXISTS public.system_settings (
     description TEXT,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
-
 -- 2. 보안 정책 (RLS)
 ALTER TABLE public.system_settings ENABLE ROW LEVEL SECURITY;
-
 -- 2-1. 조회 권한: 모든 인증된 사용자
 DROP POLICY IF EXISTS "Enable read access for all users" ON public.system_settings;
 CREATE POLICY "Enable read access for all users" ON public.system_settings
     FOR SELECT TO authenticated USING (true);
-
 -- 2-2. 수정 권한: PLATFORM 관리자만 허용
 DROP POLICY IF EXISTS "Enable update for platform admins only" ON public.system_settings;
 CREATE POLICY "Enable update for platform admins only" ON public.system_settings
     FOR UPDATE TO authenticated
     USING ( (auth.jwt() -> 'app_metadata' ->> 'org_type')::text = 'PLATFORM' );
-
 -- 3. [Policy Seeding] 초기 운영 정책 데이터
 INSERT INTO public.system_settings (key, value, category, label, description) VALUES
 ('SESSION_IDLE_TIMEOUT_MIN', '10', 'AUTH', '세션 유휴 타임아웃', '사용자 활동이 없을 경우 세션이 만료되는 시간 (분 단위)'),

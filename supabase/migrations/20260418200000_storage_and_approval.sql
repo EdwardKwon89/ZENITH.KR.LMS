@@ -5,14 +5,12 @@
 INSERT INTO storage.buckets (id, name, public) 
 VALUES ('business_docs', 'business_docs', false)
 ON CONFLICT (id) DO NOTHING;
-
 -- Policies for business_docs bucket
 -- Allow authenticated users to upload documents
 CREATE POLICY "Allow authenticated uploads" 
 ON storage.objects FOR INSERT 
 TO authenticated 
 WITH CHECK (bucket_id = 'business_docs');
-
 -- Allow admins to read documents
 CREATE POLICY "Allow admin read access" 
 ON storage.objects FOR SELECT 
@@ -24,7 +22,6 @@ USING (
         WHERE id = auth.uid() AND role = 'ADMIN'
     )
 );
-
 -- Allow users to read their own uploaded documents
 CREATE POLICY "Allow users to read their own uploaded documents" 
 ON storage.objects FOR SELECT 
@@ -33,7 +30,6 @@ USING (
     bucket_id = 'business_docs' 
     AND owner = auth.uid()
 );
-
 -- 2. Enhance the approve_organization RPC to update user metadata
 DROP FUNCTION IF EXISTS public.approve_organization(UUID);
 CREATE OR REPLACE FUNCTION public.approve_organization(target_org_id UUID)

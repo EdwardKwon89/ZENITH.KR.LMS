@@ -66,7 +66,6 @@ BEGIN
     RETURN new;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
-
 -- 트리거 재등록 (존재하지 않을 경우를 대비)
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created

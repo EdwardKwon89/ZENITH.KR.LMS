@@ -3,7 +3,6 @@
 
 -- 1. Add approval_comment to organizations for transparency (Rejection why? Supplement what?)
 ALTER TABLE public.organizations ADD COLUMN IF NOT EXISTS approval_comment TEXT;
-
 -- 2. Create RPC for requesting supplement
 -- This status will trigger a specific UI in the /register/pending page
 CREATE OR REPLACE FUNCTION public.request_organization_supplement(
@@ -41,7 +40,6 @@ BEGIN
     RETURN TRUE;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
-
 -- 3. Create RPC for rejection (with reason)
 CREATE OR REPLACE FUNCTION public.reject_organization(
     target_org_id UUID,

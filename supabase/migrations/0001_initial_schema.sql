@@ -7,7 +7,6 @@ CREATE TABLE organizations (
     status TEXT DEFAULT 'PENDING',
     created_at TIMESTAMPTZ DEFAULT now()
 );
-
 CREATE TABLE profiles (
     id UUID PRIMARY KEY REFERENCES auth.users(id),
     org_id UUID REFERENCES organizations(id),
@@ -17,7 +16,6 @@ CREATE TABLE profiles (
     status TEXT DEFAULT 'ACTIVE',
     created_at TIMESTAMPTZ DEFAULT now()
 );
-
 -- 2. 물류 마스터 데이터: 항구/공항 정보
 CREATE TABLE ports (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -27,7 +25,6 @@ CREATE TABLE ports (
     country_code CHAR(2),
     created_at TIMESTAMPTZ DEFAULT now()
 );
-
 -- 3. 계약 및 요율 관리 (Multimodal Support)
 CREATE TABLE contracts (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -39,7 +36,6 @@ CREATE TABLE contracts (
     terms_metadata JSONB DEFAULT '{}'::jsonb,
     created_at TIMESTAMPTZ DEFAULT now()
 );
-
 CREATE TABLE rate_cards (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     contract_id UUID REFERENCES contracts(id),
@@ -52,7 +48,6 @@ CREATE TABLE rate_cards (
     currency TEXT DEFAULT 'USD',
     created_at TIMESTAMPTZ DEFAULT now()
 );
-
 -- 4. 운항/배차 스케줄 정보
 CREATE TABLE transport_schedules (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -66,7 +61,6 @@ CREATE TABLE transport_schedules (
     schedule_metadata JSONB DEFAULT '{}'::jsonb,
     created_at TIMESTAMPTZ DEFAULT now()
 );
-
 -- 5. 오더 관리 (계약 및 스케줄 배정 연계)
 CREATE TABLE orders (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -80,17 +74,13 @@ CREATE TABLE orders (
     actual_cost NUMERIC,
     created_at TIMESTAMPTZ DEFAULT now()
 );
-
 -- 6. 보안 설정 (RLS)
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE organizations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
-
 CREATE POLICY "Users can view their own profile" ON profiles
     FOR SELECT USING (auth.uid() = id);
-
 CREATE POLICY "Organizations are viewable by assigned members" ON organizations
     FOR SELECT USING (EXISTS (SELECT 1 FROM profiles WHERE profiles.id = auth.uid() AND profiles.org_id = organizations.id));
-
 CREATE POLICY "Shippers can view their own orders" ON orders
     FOR SELECT USING (EXISTS (SELECT 1 FROM profiles WHERE profiles.id = auth.uid() AND (profiles.org_id = orders.shipper_id OR profiles.role = 'ADMIN')));
