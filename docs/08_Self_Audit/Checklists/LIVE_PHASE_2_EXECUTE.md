@@ -34,8 +34,14 @@
 ## 🟡 검증 및 빌드 (Verification & Build)
 - [ ] **Turbopack Build**: `npm run build` 결과가 오류 없이 완료되는가?
 - [ ] **Server Action**: 서버 액션의 예외 처리(try-catch)가 유저 피드백과 연동되는가?
-- [ ] **i18n**: 모든 신규 메뉴와 레이블이 다국어 파일(`ko.json`)에 등록되었는가?
+- [ ] **i18n Path Guard**: 모든 `Link`, `redirect`, `window.location.href` 생성 시 현재 `locale`이 명시적으로 포함되어 `/undefined/` 경로 리다이렉트가 발생하지 않는가? (SAR-2026-04-22-001)
+- [ ] **i18n Locale Dictionary**: 모든 신규 메뉴와 레이블이 다국어 파일(`ko.json`)에 등록되었는가?
+
+## 🟣 테스트 및 품질 (Test & Quality) [NEW]
+- [ ] **Server Action Mocking**: `cookies()`를 사용하는 서버 액션 단위 테스트 시 `next/headers`를 모킹하여 request scope 에러를 방지했는가? (SAR-2026-04-22-001)
+- [ ] **Env Dependency**: DB 연결 등 환경 변수에 의존하는 로직을 단위 테스트 시 Mocking 하여 테스트 독립성을 확보했는가? (SAR-2026-04-22-001)
+- [ ] **Regression Coverage**: 신규 기능 개발 완료 후 해당 로직을 검증하는 신규 회귀 테스트 케이스를 1개 이상 추가했는가? (R-09)
 
 ---
-*마지막 업데이트: 2026-04-21*
+*마지막 업데이트: 2026-04-22*
 *작성자: Antigravity (AI Agent)*

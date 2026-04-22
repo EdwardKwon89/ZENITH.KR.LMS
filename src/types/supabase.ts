@@ -12,31 +12,6 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
   public: {
     Tables: {
       common_code_groups: {
@@ -840,6 +815,163 @@ export type Database = {
         }
         Relationships: []
       }
+      zen_inventory: {
+        Row: {
+          available_qty: number | null
+          created_at: string | null
+          id: string
+          item_name: string
+          min_stock_level: number | null
+          on_hand_qty: number
+          org_id: string
+          reserved_qty: number
+          sku_code: string
+          updated_at: string | null
+          warehouse_location: string | null
+        }
+        Insert: {
+          available_qty?: number | null
+          created_at?: string | null
+          id?: string
+          item_name: string
+          min_stock_level?: number | null
+          on_hand_qty?: number
+          org_id: string
+          reserved_qty?: number
+          sku_code: string
+          updated_at?: string | null
+          warehouse_location?: string | null
+        }
+        Update: {
+          available_qty?: number | null
+          created_at?: string | null
+          id?: string
+          item_name?: string
+          min_stock_level?: number | null
+          on_hand_qty?: number
+          org_id?: string
+          reserved_qty?: number
+          sku_code?: string
+          updated_at?: string | null
+          warehouse_location?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "zen_inventory_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "zen_organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      zen_inventory_history: {
+        Row: {
+          change_qty: number
+          created_at: string | null
+          created_by: string | null
+          id: string
+          inventory_id: string
+          org_id: string
+          reference_id: string | null
+          remarks: string | null
+          result_qty: number
+          transaction_type: string
+        }
+        Insert: {
+          change_qty: number
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          inventory_id: string
+          org_id: string
+          reference_id?: string | null
+          remarks?: string | null
+          result_qty: number
+          transaction_type: string
+        }
+        Update: {
+          change_qty?: number
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          inventory_id?: string
+          org_id?: string
+          reference_id?: string | null
+          remarks?: string | null
+          result_qty?: number
+          transaction_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "zen_inventory_history_inventory_id_fkey"
+            columns: ["inventory_id"]
+            isOneToOne: false
+            referencedRelation: "zen_inventory"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "zen_inventory_history_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "zen_organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      zen_invoices: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          currency: string
+          due_date: string
+          id: string
+          invoice_no: string
+          metadata: Json | null
+          paid_amount: number
+          shipper_id: string
+          status: string
+          total_amount: number
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          currency?: string
+          due_date: string
+          id?: string
+          invoice_no: string
+          metadata?: Json | null
+          paid_amount?: number
+          shipper_id: string
+          status?: string
+          total_amount?: number
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          currency?: string
+          due_date?: string
+          id?: string
+          invoice_no?: string
+          metadata?: Json | null
+          paid_amount?: number
+          shipper_id?: string
+          status?: string
+          total_amount?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "zen_invoices_shipper_id_fkey"
+            columns: ["shipper_id"]
+            isOneToOne: false
+            referencedRelation: "zen_organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       zen_master_orders: {
         Row: {
           carrier_id: string | null
@@ -915,6 +1047,60 @@ export type Database = {
             columns: ["origin_port_id"]
             isOneToOne: false
             referencedRelation: "zen_ports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      zen_order_costs: {
+        Row: {
+          cost_type: string
+          created_at: string | null
+          currency: string
+          id: string
+          invoice_id: string | null
+          is_revenue: boolean | null
+          order_id: string
+          quantity: number
+          total_amount: number | null
+          unit_price: number
+        }
+        Insert: {
+          cost_type: string
+          created_at?: string | null
+          currency?: string
+          id?: string
+          invoice_id?: string | null
+          is_revenue?: boolean | null
+          order_id: string
+          quantity?: number
+          total_amount?: number | null
+          unit_price?: number
+        }
+        Update: {
+          cost_type?: string
+          created_at?: string | null
+          currency?: string
+          id?: string
+          invoice_id?: string | null
+          is_revenue?: boolean | null
+          order_id?: string
+          quantity?: number
+          total_amount?: number | null
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "zen_order_costs_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "zen_invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "zen_order_costs_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "zen_orders"
             referencedColumns: ["id"]
           },
         ]
@@ -1100,6 +1286,7 @@ export type Database = {
       }
       zen_orders: {
         Row: {
+          billing_status: string | null
           cargo_details: Json
           carrier_id: string | null
           confirmed_at: string | null
@@ -1128,6 +1315,7 @@ export type Database = {
           transport_mode: string | null
         }
         Insert: {
+          billing_status?: string | null
           cargo_details: Json
           carrier_id?: string | null
           confirmed_at?: string | null
@@ -1156,6 +1344,7 @@ export type Database = {
           transport_mode?: string | null
         }
         Update: {
+          billing_status?: string | null
           cargo_details?: Json
           carrier_id?: string | null
           confirmed_at?: string | null
@@ -1224,28 +1413,34 @@ export type Database = {
       zen_organizations: {
         Row: {
           created_at: string | null
+          iata_code: string | null
           id: string
           metadata: Json | null
           name: string
           parent_id: string | null
+          prefix_code: string | null
           status: string | null
           type: string
         }
         Insert: {
           created_at?: string | null
+          iata_code?: string | null
           id?: string
           metadata?: Json | null
           name: string
           parent_id?: string | null
+          prefix_code?: string | null
           status?: string | null
           type: string
         }
         Update: {
           created_at?: string | null
+          iata_code?: string | null
           id?: string
           metadata?: Json | null
           name?: string
           parent_id?: string | null
+          prefix_code?: string | null
           status?: string | null
           type?: string
         }
@@ -1470,6 +1665,24 @@ export type Database = {
         }
         Relationships: []
       }
+      zen_sequences: {
+        Row: {
+          last_value: number | null
+          prefix: string
+          year: string
+        }
+        Insert: {
+          last_value?: number | null
+          prefix: string
+          year: string
+        }
+        Update: {
+          last_value?: number | null
+          prefix?: string
+          year?: string
+        }
+        Relationships: []
+      }
       zen_system_settings: {
         Row: {
           created_at: string | null
@@ -1491,6 +1704,137 @@ export type Database = {
           setting_key?: string
           setting_value?: string
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      zen_tracking_configs: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          metadata: Json | null
+          order_id: string | null
+          provider_name: string | null
+          provider_type: string
+          tracking_no: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          metadata?: Json | null
+          order_id?: string | null
+          provider_name?: string | null
+          provider_type: string
+          tracking_no?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          metadata?: Json | null
+          order_id?: string | null
+          provider_name?: string | null
+          provider_type?: string
+          tracking_no?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "zen_tracking_configs_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "zen_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      zen_tracking_events: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          event_code: string
+          event_time: string
+          id: string
+          location: string | null
+          order_id: string | null
+          source_type: string | null
+          tracking_config_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          event_code: string
+          event_time: string
+          id?: string
+          location?: string | null
+          order_id?: string | null
+          source_type?: string | null
+          tracking_config_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          event_code?: string
+          event_time?: string
+          id?: string
+          location?: string | null
+          order_id?: string | null
+          source_type?: string | null
+          tracking_config_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "zen_tracking_events_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "zen_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "zen_tracking_events_tracking_config_id_fkey"
+            columns: ["tracking_config_id"]
+            isOneToOne: false
+            referencedRelation: "zen_tracking_configs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      zen_tracking_scenarios: {
+        Row: {
+          created_at: string | null
+          description_template: string | null
+          event_code: string
+          id: string
+          location_template: string | null
+          order_status: string
+          relative_minutes: number
+          sequence_no: number
+          transport_mode: string
+        }
+        Insert: {
+          created_at?: string | null
+          description_template?: string | null
+          event_code: string
+          id?: string
+          location_template?: string | null
+          order_status: string
+          relative_minutes: number
+          sequence_no: number
+          transport_mode: string
+        }
+        Update: {
+          created_at?: string | null
+          description_template?: string | null
+          event_code?: string
+          id?: string
+          location_template?: string | null
+          order_status?: string
+          relative_minutes?: number
+          sequence_no?: number
+          transport_mode?: string
         }
         Relationships: []
       }
@@ -1539,6 +1883,7 @@ export type Database = {
     }
     Functions: {
       approve_organization: { Args: { target_org_id: string }; Returns: string }
+      calculate_order_costs: { Args: { p_order_id: string }; Returns: Json }
       fn_get_best_matching_rate: {
         Args: {
           p_carrier_id: string
@@ -1556,6 +1901,17 @@ export type Database = {
         }[]
       }
       generate_master_order_no: { Args: never; Returns: string }
+      get_next_order_sequence: {
+        Args: { p_prefix: string; p_year: string }
+        Returns: string
+      }
+      get_orders_aggregation: {
+        Args: { order_ids: string[] }
+        Returns: {
+          total_volume: number
+          total_weight: number
+        }[]
+      }
       reject_organization: {
         Args: { comment: string; target_org_id: string }
         Returns: boolean
@@ -1692,9 +2048,6 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {},
   },

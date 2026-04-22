@@ -41,7 +41,7 @@
     - [x] 1.2.2.1 회원 등급(Iron~Gold) 및 등급별 할인율 마스터 구축
     - [x] 1.2.2.2 서비스별(AIR, SEA, CIR) 기본 운송 요율 테이블 설계 (Backend 완비)
 
-#### 1.3 [Identity] 인증 및 회원 관리 (10 MD)
+#### 1.3 [Identity] 인증 및 회원 관리 (10 MD) [DONE]
 - **1.3.1 Supabase Auth 기반 인증** (4 MD)
     - 1.3.1.1 API 명세 수립 (Auth/Login/Join) 및 Contract 확정 (1 MD)
     - 1.3.1.2 JWT 기반 회원 로그인 및 세션 관리 로직 구현 (3 MD)
@@ -58,9 +58,10 @@
 - **2.1.1 하우스 오더(House Order) 등록** (12 MD)
     - 2.1.1.1 API 명세 수립 (Order Create/Update) (2 MD)
     - 2.1.1.2 송하인/수하인 주소록 연동 및 오더 확정 로직 구현 (10 MD)
-- **2.1.2 오더 상태 추적 및 이력 관리** (8 MD)
-    - 2.1.2.1 API 명세 수립 (Status/Audit Log) (1 MD)
-    - 2.1.2.2 상태값 기반 상태 천이도(Statemachine) 구현 (7 MD)
+- **2.1.2 오더 상태 추적 및 이력 관리** (8 MD) [DONE]
+    - [x] 2.1.2.1 API 명세 수립 (Status/Audit Log) (1 MD)
+    - [x] 2.1.2.2 상태값 기반 상태 천이도(Statemachine) 구현 (7 MD)
+    - [x] 2.1.2.3 [Added] 오더 수정 및 인벤토리 동기화 로직 구현 (Ds-11 3.7)
 
 #### 2.2 [Packing] 마스터 오더 및 창고 운영 (15 MD)
 - **2.2.1 마스터 오더 구성 (Packing)** (8 MD)

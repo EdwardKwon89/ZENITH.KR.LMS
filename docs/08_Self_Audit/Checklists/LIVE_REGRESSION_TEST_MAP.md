@@ -1,7 +1,7 @@
 # 🗺️ LIVE Regression Test Master Map
 
 > **상태:** [ACTIVE]  
-> **총 테스트 케이스:** 52 Cases  
+> **총 테스트 케이스:** 58 Cases  
 > **최종 검증일:** 2026-04-22  
 
 제니스 플랫폼의 비즈니스 영속성을 보장하는 회귀 테스트 케이스의 통합 명세서입니다. 모든 신규 개발 및 수정 시 이 맵에 케이스가 추가되어야 하며, 전체 테스트가 통과되어야 합니다.
@@ -83,12 +83,24 @@
 
 ---
 
+### 9. 지능형 트래킹 가시성 (Intelligent Tracking)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-TR.1** | 공급자 실시간 전환 | `VIRTUAL` <-> `MANUAL` 전환 시 데이터 가시성 및 정합성 보장 | `tests/integration/tracking.test.ts` |
+| **TC-TR.2** | 시뮬레이션 타임스탬프 역산 | 오더 상태 변경 시 과거 시점으로 논리적 이벤트 자동 생성 검증 | `tests/integration/tracking.test.ts` |
+| **TC-TR.3** | 수동 이벤트 오버라이드 | 어드민이 직접 입력한 이벤트의 시각적 최우선 순위 반영 확인 | `tests/integration/tracking.test.ts` |
+| **TC-TR.4** | 운송 모드별 노드 매핑 | AIR, SEA 등 모드에 따른 타임라인 아이콘/코드 논리적 일치 확인 | `tests/integration/tracking.test.ts` |
+| **TC-TR.5** | 화주별 권한 기반 격리 | 타 화주가 다른 화주의 트래킹 정보를 조회할 수 없도록 보안 검증 | `tests/integration/tracking.test.ts` |
+| **TC-TR.6** | 수동 이벤트 감사 추적 | 이벤트 소스(Manual vs Auto) 정보 유실 없는 보존 확인 | `tests/integration/tracking.test.ts` |
+
+---
+
 ## 📊 최신 검증 이력 (Execution History)
 
 | 검증일 | 버전 | 성공/실패 | 총 소요시간 | 결과 리포트 |
 | :--- | :--- | :---: | :--- | :--- |
 | 2026-04-21 | v1.1 | ✅ PASS | 1.88s | 28/28 Passed |
-| 2026-04-22 | v2.0 | ✅ PASS | - | 49/49 Fully Registered & Verified |
+| 2026-04-22 | v2.1 | ✅ PASS | 2.81s | 58/58 Fully Registered & Verified |
 
 ---
 

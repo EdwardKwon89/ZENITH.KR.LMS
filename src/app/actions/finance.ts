@@ -1,124 +1,128 @@
-"use server";
+'use server';
 
-import { validateUserAction, validateAdminAction } from "@/lib/auth/guards";
-import { revalidatePath } from "next/cache";
+import { SettlementEngine, InvoiceGenerator } from '@/lib/finance/settlement';
+import { revalidatePath } from 'next/cache';
+import { validateUserAction, validateAdminAction } from '@/lib/auth/guards';
 
 /**
- * [WBS 3.2] 특정 오더에 대한 정산 비용을 계산하고 자동 청구서(Invoice)를 생성합니다.
- * 주로 오더가 RELEASED(출고) 상태가 될 때 호출됩니다.
+ * [WBS 3.2] 오더 완료 시 정산서를 자동 생성합니다.
  */
 export async function generateInvoicesForOrder(orderId: string) {
-  const { supabase, profile } = await validateUserAction();
-  if (!profile) throw new Error("User profile not found");
+  await validateUserAction();
 
-  // 1. RPC 호출을 통한 비용 계산 및 기록
-  const { data: costResult, error: costError } = await supabase
-    .rpc('calculate_order_costs', { p_order_id: orderId });
+  const generator = new InvoiceGenerator();
+  const result = await generator.generateInvoice(orderId);
 
-  if (costError) throw new Error(`Cost calculation failed: ${costError.message}`);
-  if (!costResult.success) throw new Error(costResult.message);
+  if (!result.success) {
+    throw new Error(result.message || "정산서 생성 실패");
+  }
 
-  // 2. 오더 기본 정보 조회 (화주 ID 및 금액 확인용)
-  const { data: order, error: orderError } = await supabase
-    .from("zen_orders")
-    .select("shipper_id, order_no")
-    .eq("id", orderId)
-    .single();
-
-  if (orderError || !order) throw new Error("Order not found");
-
-  // 3. 인보이스 본체 생성
-  const invoiceNo = `INV-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${order.order_no.split('-').pop()}`;
-  const { data: invoice, error: invError } = await supabase
-    .from("zen_invoices")
-    .insert({
-      invoice_no: invoiceNo,
-      shipper_id: order.shipper_id,
-      total_amount: costResult.total_freight,
-      currency: costResult.currency || 'USD',
-      due_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(), // 기본 14일 이내
-      status: 'UNPAID',
-      metadata: { source_order_id: orderId }
-    })
-    .select()
-    .single();
-
-  if (invError) throw new Error(`Invoice creation failed: ${invError.message}`);
-
-  // 4. 생성된 비용 항목에 인보이스 ID 연결
-  const { error: linkError } = await supabase
-    .from("zen_order_costs")
-    .update({ invoice_id: invoice.id })
-    .eq("order_id", orderId);
-
-  if (linkError) console.error("Failed to link costs to invoice:", linkError);
-
-  // 5. 오더의 빌링 상태 업데이트
-  await supabase
-    .from("zen_orders")
-    .update({ billing_status: 'INVOICED' })
-    .eq("id", orderId);
-
-  revalidatePath("/(dashboard)/settlement", "page");
-  revalidatePath(`/(dashboard)/orders/${orderId}`, "page");
-
-  return { success: true, invoice_no: invoiceNo };
+  revalidatePath("/finance/invoices");
+  revalidatePath(`/(dashboard)/orders/${orderId}`);
+  
+  return result;
 }
 
 /**
- * 인보이스 상태를 PAID(결제 완료)로 업데이트하고 오더 상태를 동기화합니다.
+ * [WBS 3.2] 인보이스 결제 상태를 업데이트하고 오더 상태를 동기화합니다.
  */
-export async function updatePaymentStatus(invoiceId: string, status: 'PAID' | 'CANCELED', paidAmount?: number) {
+export async function updatePaymentStatus(
+  invoiceId: string, 
+  status: string, 
+  amount: number
+) {
   const { supabase } = await validateAdminAction();
 
   // 1. 인보이스 상태 업데이트
-  const updateData: any = { status };
-  if (status === 'PAID') updateData.paid_amount = paidAmount || 0;
-
   const { data: invoice, error: invError } = await supabase
-    .from("zen_invoices")
-    .update(updateData)
-    .eq("id", invoiceId)
-    .select("metadata")
+    .from('zen_invoices')
+    .update({
+      status,
+      paid_amount: amount,
+      paid_at: status === 'PAID' ? new Date().toISOString() : null,
+      updated_at: new Date().toISOString()
+    })
+    .eq('id', invoiceId)
+    .select('metadata')
     .single();
 
-  if (invError) throw new Error(`Status update failed: ${invError.message}`);
+  if (invError) throw new Error(`결제 상태 업데이트 실패: ${invError.message}`);
 
-  // 2. 연결된 오더가 있을 경우 오더의 빌링 상태도 PAID로 변경
-  const sourceOrderId = invoice.metadata?.source_order_id;
-  if (sourceOrderId && status === 'PAID') {
+  // 2. 결제 완료 시 오더의 정산 상태 동기화 (Data Integrity)
+  const orderId = (invoice?.metadata as any)?.source_order_id;
+  if (status === 'PAID' && orderId) {
     await supabase
-      .from("zen_orders")
+      .from('zen_orders')
       .update({ billing_status: 'PAID' })
-      .eq("id", sourceOrderId);
+      .eq('id', orderId);
+    
+    revalidatePath(`/orders/${orderId}`);
   }
 
-  revalidatePath("/(dashboard)/settlement", "page");
+  revalidatePath('/finance/invoices');
   return { success: true };
 }
 
 /**
- * 화주 대시보드용 정산 리스트 조회
+ * 특정 오더의 비용을 계산합니다. (UI 수동 호출용)
+ */
+export async function calculateSettlementAction(orderId: string) {
+  const engine = new SettlementEngine();
+  const result = await engine.calculateOrderCosts(orderId);
+  
+  if (result.success) {
+    revalidatePath(`/orders/${orderId}`);
+  }
+  
+  return result;
+}
+
+/**
+ * 특정 오더의 인보이스를 생성합니다. (UI 수동 호출용)
+ */
+export async function generateInvoiceAction(orderId: string) {
+  const generator = new InvoiceGenerator();
+  const result = await generator.generateInvoice(orderId);
+  
+  if (result.success) {
+    revalidatePath(`/orders/${orderId}`);
+    revalidatePath('/finance/invoices');
+  }
+  
+  return result;
+}
+
+/**
+ * [WBS 3.2] 정산 대시보드 및 리스트용 요약 데이터를 조회합니다.
  */
 export async function getSettlementOverview() {
   const { supabase, profile } = await validateUserAction();
-  if (!profile) throw new Error("Authentication required");
+  if (!profile) throw new Error("User profile not found");
 
-  let query = supabase
+  // 1. 전체 미결제 금액 합산 (UNPAID, PARTIAL)
+  const { data: unpaidSum, error: unpaidError } = await supabase
     .from("zen_invoices")
-    .select(`
-      *,
-      shipper:zen_organizations!shipper_id(name)
-    `)
-    .order("created_at", { ascending: false });
+    .select("total_amount")
+    .eq("shipper_id", profile.org_id)
+    .in("status", ["UNPAID", "PARTIAL"]);
 
-  // 일반 사용자는 본인 조직 데이터만 확인
-  if (profile.role !== 'ADMIN') {
-    query = query.eq("shipper_id", profile.org_id);
+  // 2. 최근 인보이스 5건
+  const { data: recentInvoices, error: recentError } = await supabase
+    .from("zen_invoices")
+    .select("*")
+    .eq("shipper_id", profile.org_id)
+    .order("created_at", { ascending: false })
+    .limit(5);
+
+  if (unpaidError || recentError) {
+    throw new Error("Failed to fetch settlement overview");
   }
 
-  const { data, error } = await query;
-  if (error) throw new Error(error.message);
+  const totalUnpaid = unpaidSum?.reduce((sum, inv) => sum + Number(inv.total_amount), 0) || 0;
 
-  return data || [];
+  return {
+    totalUnpaid,
+    recentInvoices: recentInvoices || [],
+    currency: recentInvoices?.[0]?.currency || "USD"
+  };
 }
