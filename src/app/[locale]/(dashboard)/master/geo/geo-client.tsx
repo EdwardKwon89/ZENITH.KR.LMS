@@ -23,6 +23,7 @@ interface Port {
   port_type: string;
   is_active: boolean;
   nations?: { name_ko: string; name_en: string };
+  iata_code?: string; // 항공 전용 IATA 3자리
 }
 
 export default function GeoClient({ 
@@ -65,8 +66,17 @@ export default function GeoClient({
   const portColumns: ColumnDef<Port>[] = [
     {
       accessorKey: "port_code",
-      header: "항구/공항 코드",
-      cell: ({ row }) => <span className="font-mono font-bold text-brand-700">{row.original.port_code}</span>,
+      header: "거점 코드 (IATA)",
+      cell: ({ row }) => (
+        <div className="flex flex-col">
+          <span className="font-mono font-bold text-brand-700 tracking-wider">
+            {row.original.port_code}
+          </span>
+          {row.original.port_type === "AIR" && (
+            <span className="text-[9px] text-brand-400 font-medium">IATA 3-LETTER</span>
+          )}
+        </div>
+      ),
     },
     {
       accessorKey: "port_type",
@@ -139,26 +149,24 @@ export default function GeoClient({
   return (
     <div className="space-y-6">
       {/* 탭 네비게이션 */}
-      <div className="flex bg-slate-100/50 p-1 rounded-2xl w-fit">
+      <div className="flex bg-slate-100/80 p-1.5 rounded-2xl w-fit mb-8 backdrop-blur-sm border border-slate-200/50">
         <button
           onClick={() => setActiveTab("nations")}
           className={cn(
-            "flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold transition-all",
-            activeTab === "nations" ? "bg-white text-brand-600 shadow-sm" : "text-slate-500 hover:text-slate-700"
+            "px-6 py-2.5 rounded-xl text-sm font-black transition-all duration-300",
+            activeTab === "nations" ? "bg-white text-brand-600 shadow-md ring-1 ring-black/5 scale-[1.02]" : "text-slate-500 hover:text-brand-500"
           )}
         >
-          <Globe size={18} />
-          국가 정보
+          NATIONS
         </button>
         <button
           onClick={() => setActiveTab("ports")}
           className={cn(
-            "flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold transition-all",
-            activeTab === "ports" ? "bg-white text-brand-600 shadow-sm" : "text-slate-500 hover:text-slate-700"
+            "px-6 py-2.5 rounded-xl text-sm font-black transition-all duration-300",
+            activeTab === "ports" ? "bg-white text-brand-600 shadow-md ring-1 ring-black/5 scale-[1.02]" : "text-slate-500 hover:text-brand-500"
           )}
         >
-          <Anchor size={18} />
-          항구/공항 거점
+          PORTS / AIRPORTS
         </button>
       </div>
 
@@ -220,14 +228,16 @@ export default function GeoClient({
               <form onSubmit={handleSubmitPort} className="p-6 space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <label className="text-xs font-bold text-slate-500 uppercase tracking-tight">거점 코드</label>
+                    <label className="text-xs font-bold text-slate-500 uppercase tracking-tight">
+                      거점 코드 {editingPort?.port_type === "AIR" ? "(IATA 3글자)" : "(5글자)"}
+                    </label>
                     <input
                       name="port_code"
                       defaultValue={editingPort?.port_code}
-                      placeholder="e.g. KRPUS"
+                      placeholder={editingPort?.port_type === "AIR" ? "e.g. ICN" : "e.g. KRPUS"}
                       required
                       readOnly={!!editingPort}
-                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-500/10 focus:border-brand-500 transition-all read-only:opacity-60"
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-mono focus:ring-2 focus:ring-brand-500/10 focus:border-brand-500 transition-all read-only:opacity-60"
                     />
                   </div>
                   <div className="space-y-1">

@@ -56,11 +56,29 @@ export default function MasterOrderTable({ masters, locale }: MasterOrderTablePr
               masters.map(master => (
                 <tr key={master.id} className="hover:bg-slate-50/50 transition-colors group">
                   <td className="px-6 py-5">
-                    <div className="flex flex-col">
-                      <span className="text-sm font-black text-slate-900 group-hover:text-blue-600 transition-colors uppercase">{master.master_no}</span>
-                      <span className="text-[10px] font-medium text-slate-400">
-                        Created: {master.created_at ? new Date(master.created_at).toLocaleDateString() : 'N/A'}
-                      </span>
+                    <div className="flex flex-col gap-1.5 focus-within:ring-2 focus-within:ring-brand-500/20 rounded-lg transition-all">
+                      <div className="flex items-center gap-2">
+                        {master.carrier?.iata_code ? (
+                          <div className="flex items-center justify-center min-w-[24px] h-5 px-1 rounded-md bg-brand-600 text-[10px] font-black text-white shadow-sm ring-1 ring-brand-700/50 uppercase tracking-tighter">
+                            {master.carrier.iata_code}
+                          </div>
+                        ) : (
+                          <div className="w-5 h-5 flex items-center justify-center rounded-md bg-slate-100 text-slate-400">
+                            <Hash size={12} />
+                          </div>
+                        )}
+                        <span className="text-[15px] font-black text-slate-900 group-hover:text-brand-600 transition-colors uppercase tracking-tight">
+                          {master.master_no}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[9px] font-black text-white bg-slate-950 px-2 py-0.5 rounded-[4px] uppercase tracking-widest shadow-sm">
+                          {master.transport_mode || 'AIR'}
+                        </span>
+                        <span className="text-[10px] font-bold text-slate-400 tracking-tighter">
+                          {master.created_at ? new Date(master.created_at).toLocaleDateString() : 'N/A'}
+                        </span>
+                      </div>
                     </div>
                   </td>
                   <td className="px-6 py-5">

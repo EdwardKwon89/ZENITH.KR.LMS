@@ -3,6 +3,7 @@
 import { ORDER_STATUS_META, OrderStatus } from '@/types/orders';
 import Link from 'next/link';
 import { useState } from 'react';
+import { useParams } from 'next/navigation';
 import { StatusChangeModal } from './StatusChangeModal';
 import { canChangeStatus } from '@/lib/logistics/status-machine';
 import { UserRole } from '@/lib/auth/rbac';
@@ -27,6 +28,8 @@ export default function OrderDataTable({
 }: OrderDataTableProps) {
   const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const params = useParams();
+  const safeLocale = (params?.locale as string) || locale || 'ko';
   const totalPages = Math.ceil(totalCount / pageSize);
 
   const getStatusInfo = (status: string) => {
@@ -121,7 +124,7 @@ export default function OrderDataTable({
                   </td>
                   <td className="px-6 py-2.5 text-right">
                     <Link 
-                      href={`/${locale}/orders/${order.id}`}
+                      href={`/${safeLocale}/orders/${order.id}`}
                       className="inline-flex items-center gap-1 text-[12px] font-bold text-blue-600 hover:text-blue-700 transition-colors border-b border-transparent hover:border-blue-600"
                     >
                       View Details
@@ -144,7 +147,7 @@ export default function OrderDataTable({
           {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
             <Link
               key={p}
-              href={`?page=${p}`}
+              href={`/${safeLocale}/orders?page=${p}`}
               className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold transition-all ${
                 currentPage === p 
                 ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20' 

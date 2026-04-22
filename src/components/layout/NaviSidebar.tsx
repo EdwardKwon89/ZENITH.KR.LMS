@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
@@ -14,7 +14,8 @@ import {
   Calculator, 
   ShieldCheck, 
   Settings,
-  Menu
+  Menu,
+  Package
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -31,6 +32,8 @@ interface NavItem {
 export default function NaviSidebar({ user, profile }: { user?: any; profile?: any }) {
   const t = useTranslations("Navigation");
   const pathname = usePathname();
+  const params = useParams();
+  const locale = params?.locale as string || "ko";
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [openMenus, setOpenMenus] = useState<string[]>([]);
 
@@ -58,6 +61,7 @@ export default function NaviSidebar({ user, profile }: { user?: any; profile?: a
       ]
     },
     { title: t("logistics"), href: "/logistics", icon: Truck },
+    { title: t("inventory"), href: "/inventory", icon: Package },
     { title: t("finance"), href: "/finance", icon: Calculator },
     { title: t("governance"), href: "/governance", icon: ShieldCheck, isAdminOnly: true },
     { title: t("settings"), href: "/settings", icon: Settings },
@@ -122,10 +126,16 @@ export default function NaviSidebar({ user, profile }: { user?: any; profile?: a
           return (
             <div key={item.title} className="group">
               <div
-                onClick={() => hasChildren && toggleMenu(item.title)}
+                onClick={() => {
+                  if (hasChildren) {
+                    toggleMenu(item.title);
+                  } else {
+                    window.location.href = `/${locale}${item.href}`;
+                  }
+                }}
                 className={cn(
                   "flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer transition-all duration-200 relative",
-                  isActive 
+                  pathname.startsWith(`/${locale}${item.href}`) 
                     ? "bg-brand-50 text-brand-700 font-semibold" 
                     : "text-slate-600 hover:bg-slate-50 hover:text-slate-900",
                   isCollapsed && "justify-center px-0"
@@ -163,10 +173,10 @@ export default function NaviSidebar({ user, profile }: { user?: any; profile?: a
                     {item.children?.map((child) => (
                       <Link
                         key={child.href}
-                        href={child.href}
+                        href={`/${locale}${child.href}`}
                         className={cn(
                           "block py-1.5 text-sm text-slate-500 hover:text-brand-600 transition-colors",
-                          pathname === child.href && "text-brand-700 font-medium"
+                          pathname === `/${locale}${child.href}` && "text-brand-700 font-medium"
                         )}
                       >
                         {child.title}

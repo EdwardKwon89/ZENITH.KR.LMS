@@ -66,10 +66,16 @@ export type OrderListItem = Database['public']['Tables']['zen_orders']['Row'] & 
   dest_port: { name: string, code: string };
 };
 
+export type OrganizationItem = Database['public']['Tables']['zen_organizations']['Row'] & {
+  iata_code?: string | null;
+  prefix_code?: string | null;
+};
+
 export type MasterOrderListItem = Database['public']['Tables']['zen_master_orders']['Row'] & {
   origin_port?: { name: string, code: string } | null;
   dest_port?: { name: string, code: string } | null;
-  carrier?: { name: string } | null;
+  carrier?: { name: string, iata_code?: string | null } | null;
+  transport_mode?: string | null;
 };
 
 export type MasterOrderStatus = 'CREATED' | 'SCHEDULED' | 'RELEASED' | 'COMPLETED';

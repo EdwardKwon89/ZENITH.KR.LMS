@@ -9,6 +9,8 @@ import { UserRole } from "@/lib/auth/rbac";
 import { generateInvoicesForOrder } from "./finance";
 
 import { OrderRegistrationInput, orderRegistrationSchema } from "@/lib/validation/order";
+import { VirtualTrackingProvider } from "@/lib/logistics/tracking";
+import { syncInventoryFromOrder } from "./inventory";
 
 /**
  * 신규 하우스 오더를 생성합니다. (Header -> Packages -> Items 계층형 저장)
@@ -56,6 +58,14 @@ export async function createOrder(payload: OrderRegistrationInput) {
 
   if (orderError) throw new Error(`Order header failed: ${orderError.message}`);
 
+  // [Phase 3.1] 트래킹 초기 설정 (기본적으로 VIRTUAL 시뮬레이터 할당)
+  await supabase.from("zen_tracking_configs").insert({
+    order_id: order.id,
+    tracking_no: `ZN-${order.order_no}`,
+    provider_type: 'VIRTUAL',
+    provider_name: 'ZSim (Virtual)'
+  });
+
   // 3. 계층형 패킹 및 아이템 삽입
   if (validated.packages && validated.packages.length > 0) {
     for (const pkg of validated.packages) {
@@ -85,6 +95,7 @@ export async function createOrder(payload: OrderRegistrationInput) {
         const itemsToInsert = pkg.items.map(item => ({
           order_id: order.id,
           package_id: packageData.id,
+          sku_code: item.sku_code,
           item_name: item.item_name,
           quantity: item.quantity,
           unit_price: item.unit_price,
@@ -102,8 +113,123 @@ export async function createOrder(payload: OrderRegistrationInput) {
     }
   }
 
+  // [WBS 2.4] 인벤토리 예약 처리 (REGISTERED 상태)
+  await syncInventoryFromOrder(order.id, OrderStatus.REGISTERED);
+
   revalidatePath("/(dashboard)/orders", "page");
+  revalidatePath("/(dashboard)/inventory", "page");
   return order;
+}
+
+/**
+ * [WBS 2.1 / Ds-11 3.7] 기존 오더를 수정하고 인벤토리를 재조정합니다.
+ */
+export async function updateOrder(orderId: string, payload: OrderRegistrationInput) {
+  const { supabase, profile } = await validateUserAction();
+  if (!profile) throw new Error("User profile not found");
+
+  // 1. 기존 오더 아이템 데이터 조회 (재고 차이 계산용)
+  const { data: oldItems } = await supabase
+    .from("zen_order_items")
+    .select("sku_code, quantity")
+    .eq("order_id", orderId);
+
+  // 2. 검증 및 헤더 업데이트
+  const validated = orderRegistrationSchema.parse(payload);
+  const { error: orderError } = await supabase
+    .from("zen_orders")
+    .update({
+      order_type: validated.order_type,
+      shipper_id: validated.shipper_id,
+      origin_port_id: validated.origin_port_id,
+      dest_port_id: validated.dest_port_id,
+      description: validated.description,
+      shipper_contact_name: validated.shipper_contact_name,
+      shipper_contact_phone: validated.shipper_contact_phone,
+      recipient_name: validated.recipient_name,
+      recipient_address: validated.recipient_address,
+      recipient_phone: validated.recipient_phone,
+      recipient_zipcode: validated.recipient_zipcode,
+      recipient_pccc: validated.recipient_pccc,
+      recipient_email: validated.recipient_email,
+      delivery_notes: validated.delivery_notes,
+      transport_mode: validated.transport_mode,
+      estimated_cost: validated.estimated_cost,
+      updated_at: new Date().toISOString()
+    })
+    .eq("id", orderId);
+
+  if (orderError) throw new Error(`Order update failed: ${orderError.message}`);
+
+  // 3. 기존 패키지 및 아이템 삭제 (단순화를 위한 Re-insert 방식, 실제 운영시에는 ID 기반 Update 권장)
+  await supabase.from("zen_order_items").delete().eq("order_id", orderId);
+  await supabase.from("zen_order_packages").delete().eq("order_id", orderId);
+
+  // 4. 새로운 패키지 및 아이템 삽입
+  if (validated.packages && validated.packages.length > 0) {
+    for (const pkg of validated.packages) {
+      const { data: packageData, error: pkgError } = await supabase
+        .from("zen_order_packages")
+        .insert({
+          order_id: orderId,
+          packing_unit: pkg.packing_unit,
+          packing_count: pkg.packing_count,
+          length: pkg.length,
+          width: pkg.width,
+          height: pkg.height,
+          gross_weight: pkg.gross_weight,
+          volume: pkg.volume
+        })
+        .select()
+        .single();
+
+      if (pkgError) continue;
+
+      if (pkg.items && pkg.items.length > 0) {
+        const itemsToInsert = pkg.items.map(item => ({
+          order_id: orderId,
+          package_id: packageData.id,
+          sku_code: item.sku_code,
+          item_name: item.item_name,
+          quantity: item.quantity,
+          unit_price: item.unit_price,
+          currency: item.currency || 'USD',
+          hs_code: item.hs_code,
+          item_packing_unit: item.item_packing_unit
+        }));
+
+        await supabase.from("zen_order_items").insert(itemsToInsert);
+      }
+    }
+  }
+
+  // 5. [Critical] 인벤토리 예약 수량 재조정 (Diff 계산)
+  const itemDiffs: { sku: string; diff: number }[] = [];
+  const newItems: any[] = [];
+  validated.packages.forEach(p => newItems.push(...p.items));
+
+  // 모든 SKU 후보군 추출
+  const allSkus = Array.from(new Set([
+    ...(oldItems?.map(i => i.sku_code) || []),
+    ...newItems.map(i => i.sku_code)
+  ])).filter(Boolean) as string[];
+
+  for (const sku of allSkus) {
+    const oldQty = oldItems?.filter(i => i.sku_code === sku).reduce((sum, i) => sum + i.quantity, 0) || 0;
+    const newQty = newItems.filter(i => i.sku_code === sku).reduce((sum, i) => sum + i.quantity, 0) || 0;
+    const diff = newQty - oldQty;
+    if (diff !== 0) {
+      itemDiffs.push({ sku, diff });
+    }
+  }
+
+  if (itemDiffs.length > 0) {
+    await syncInventoryFromOrder(orderId, 'UPDATED', itemDiffs);
+  }
+
+  revalidatePath("/(dashboard)/orders", "page");
+  revalidatePath(`/(dashboard)/orders/${orderId}`, "page");
+  return { success: true };
 }
 
 /**
@@ -256,7 +382,7 @@ export async function updateOrderStatus(
   // 1. 현재 상태 조회
   const { data: currentOrder, error: fetchError } = await supabase
     .from("zen_orders")
-    .select("status")
+    .select("status, transport_mode")
     .eq("id", orderId)
     .single();
 
@@ -289,14 +415,16 @@ export async function updateOrderStatus(
       order_id: orderId,
       prev_status: currentOrder.status,
       next_status: nextStatus,
-      changed_by: user.id,
-      reason: reason
+      remarks: reason,
+      changed_by: user.id
     });
 
   if (historyError) {
-    console.error("History logging failed:", historyError);
-    // 히스토리 기록 실패가 비즈니스 로직 중단으로 이어질지는 정책에 따라 결정 (현재는 로그만 남김)
+    console.error("[ERROR] History recording failed:", historyError);
   }
+
+  // [WBS 2.4] 인벤토리 동기화 처리
+  await syncInventoryFromOrder(orderId, nextStatus);
 
   // 4. [Finance Integration] 출고 시 자동 정산 생성
   if (nextStatus === OrderStatus.RELEASED) {
@@ -306,6 +434,23 @@ export async function updateOrderStatus(
       console.error("[CRITICAL] Finance automation failed during release:", financeError);
       // 오더 상태 변경은 성공했으므로 중단하지 않으나 로그 기록
     }
+  }
+
+  // 5. [Tracking Integration] 지능형 트래킹 시뮬레이션 트리거
+  // 상태 변경 시점에 맞춘 과거 기록 생성 (사용자 지침 준수)
+  try {
+    // [Optimization] 이미 266라인에서 상세 정보를 조회하도록 코드를 개선하여 재사용
+    if (currentOrder && (currentOrder as any).transport_mode) {
+      const tracker = new VirtualTrackingProvider();
+      await tracker.generateHistory(
+        supabase, 
+        orderId, 
+        nextStatus, 
+        (currentOrder as any).transport_mode
+      );
+    }
+  } catch (trackError) {
+    console.error("[ERROR] Tracking simulation failed:", trackError);
   }
 
   revalidatePath("/(dashboard)/orders", "page");
@@ -414,7 +559,7 @@ export async function getMasterOrders() {
       *,
       origin_port:zen_ports!origin_port_id(code, name),
       dest_port:zen_ports!dest_port_id(code, name),
-      carrier:zen_organizations!carrier_id(name)
+      carrier:zen_organizations!carrier_id(name, iata_code)
     `)
     .order("created_at", { ascending: false });
 
@@ -500,7 +645,7 @@ export async function getMasterOrderWithHouses(masterId: string) {
       *,
       origin_port:zen_ports!origin_port_id(code, name),
       dest_port:zen_ports!dest_port_id(code, name),
-      carrier:zen_organizations!carrier_id(name)
+      carrier:zen_organizations!carrier_id(name, iata_code)
     `)
     .eq("id", masterId)
     .single();

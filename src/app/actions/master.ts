@@ -99,7 +99,24 @@ export async function getOrganizations() {
   
   const { data, error } = await supabase
     .from("zen_organizations")
+    .select("*, iata_code, prefix_code")
+    .order("name", { ascending: true });
+
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+/**
+ * 항공사(CARRIER 중 iata_code 보유) 목록을 조회합니다.
+ */
+export async function getAirlines() {
+  const { supabase } = await validateUserAction();
+  
+  const { data, error } = await supabase
+    .from("zen_organizations")
     .select("*")
+    .eq("type", "CARRIER")
+    .not("iata_code", "is", null)
     .order("name", { ascending: true });
 
   if (error) throw new Error(error.message);

@@ -4,6 +4,7 @@ import { z } from 'zod';
  * 오더 상세 항목(Item) 검증 스키마 (패킹 하위)
  */
 export const orderItemSchema = z.object({
+  sku_code: z.string().optional(), // 재고 연동을 위한 SKU 코드
   item_name: z.string().min(1, 'Item name is required'),
   quantity: z.number().int().positive('Quantity must be at least 1'),
   unit_price: z.number().nonnegative('Unit price cannot be negative').default(0),
