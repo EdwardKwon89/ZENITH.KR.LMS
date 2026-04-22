@@ -2,7 +2,7 @@
 
 **작성일**: 2026-04-19
 **승인 주체**: ZEN_CEO
-**버전**: v1.0
+**버전**: v1.2 (v2.2 구현 동기화)
 
 ---
 
@@ -36,12 +36,16 @@
 *   **유효 기간 필터**: `valid_from` ~ `valid_to` 범위 내에서 `ACTIVE` 상태인 요율만 추출.
 
 ### 3. 슬랩 및 부피 중량 연산 (Slab & Volume Weight Calculator)
-*   **Chargeable Weight 결정**:
-    *   `Actual Weight` vs `Volume Weight` (Dimension / Divisor) 중 큰 값을 채택.
-    *   Air 표준 Divisor: 6000 / Courier 표준 Divisor: 5000 (설정 가능)
+*   **Chargeable Weight 결정 (v2.2 표준)**:
+    *   **Air/Express (AIR/EXP)**:
+        - 공식: `MAX(Actual Gross Weight, (L * W * H * Total Pcs) / 6,000)`
+        - 비고: 글로벌 IATA 표준 계수 6,000($167kg/CBM$)을 적용하여 소수점 2자리에서 올림 처리(Ceiling).
+    *   **Sea (LCL/FCL)**:
+        - 공식: `MAX(Gross Weight(Ton), Volume(CBM))`
+        - 비고: 1,000kg 또는 1CBM 중 큰 값을 **Revenue Ton (R.T)**으로 정의하며, 최소 부과 단위인 minimum R.T 정책과 연동. 
 *   **Slab 적용**:
-    *   `zen_rate_tiers`에서 해당 중량이 속하는 구간(`weight_min`)을 찾아 `unit_price` 적용.
-    *   `Total Leg Rate = MAX(Weight * Unit Price, Min Price)`
+    *   `zen_rate_tiers`에서 산출된 Chargeable Weight가 속하는 중량 구간(`weight_min` ~ `weight_max`)을 매칭하여 `unit_price` 적용.
+    *   **Total Leg Rate**: `MAX((Chargeable Weight * Unit Price), Min Price)` – 구간별 최소 요금 정책 보장.
 
 ### 4. 할증료 레이어 (Surcharge Overlaying)
 *   **Add-on**: 유류할증료(Fuel Surcharge), 보안할증료, 통관대행료 등.

@@ -20,21 +20,22 @@ export default async function NewOrderPage() {
   ]);
 
   return (
-    <div className="relative min-h-screen">
-      <div className="sticky top-0 z-20 bg-white/40 backdrop-blur-md border-b border-white/20 px-8 py-4 mb-8">
+    <div className="relative min-h-screen animate-in fade-in duration-500">
+      <div className="sticky top-0 z-20 bg-white/60 backdrop-blur-md border-b border-slate-100 px-8 py-3 mb-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Link 
               href="/orders"
-              className="p-2 bg-white/60 rounded-xl hover:bg-white hover:shadow-md transition-all text-slate-500"
+              className="p-1.5 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 hover:shadow-sm transition-all text-slate-400 hover:text-slate-600"
             >
-              <ChevronLeft size={20} />
+              <ChevronLeft size={16} />
             </Link>
             <div>
-              <h1 className="text-2xl font-black text-slate-800 tracking-tight">
+              <h1 className="text-xl font-black text-slate-950 tracking-tight flex items-center gap-2">
+                <span className="w-1.5 h-6 bg-blue-600 rounded-full"></span>
                 {t('title_new')}
               </h1>
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest opacity-70">
+              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest opacity-70 ml-3.5">
                 {navT('order_mgmt')} — {navT('order_house')}
               </p>
             </div>

@@ -75,4 +75,19 @@ describe('ZENITH Order Integrity: Registration Schema Validation', () => {
       expect(result.data.shipper_contact_name).toBeUndefined();
     }
   });
+
+  it('TC-O.4: [Negative] 패키지 중량 또는 아이템 수량이 0 이하일 때 실패해야 함', () => {
+    const invalidPayload = JSON.parse(JSON.stringify(validPayload));
+    invalidPayload.packages[0].gross_weight = -1;
+    invalidPayload.packages[0].items[0].quantity = 0;
+
+    const result = orderRegistrationSchema.safeParse(invalidPayload);
+    expect(result.success).toBe(false);
+  });
+
+  it('TC-O.5: [Negative] 필수 수취인 정보(name, address) 누락 시 실패해야 함', () => {
+    const invalidPayload = { ...validPayload, recipient_name: '', recipient_address: undefined };
+    const result = orderRegistrationSchema.safeParse(invalidPayload);
+    expect(result.success).toBe(false);
+  });
 });

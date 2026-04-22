@@ -52,6 +52,12 @@ export const orderRegistrationSchema = z.object({
   description: z.string().optional(),
   delivery_notes: z.string().optional(),
   
+  // 운송 수단 (v2.1)
+  transport_mode: z.enum(['AIR', 'SEA', 'EXP', 'LAND']).default('AIR'),
+  
+  // 물류 요약 정보 (v2.2)
+  estimated_cost: z.number().optional(),
+  
   // 계층형 패킹 데이터
   packages: z.array(orderPackageSchema).min(1, 'At least one package is required'),
 });

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { createOrder } from '@/app/actions/orders';
+import { createOrder, updateOrderStatus } from '@/app/actions/orders';
 import { validateUserAction } from '@/lib/auth/guards';
 import { generateOrderNo } from '@/app/actions/master';
 import { revalidatePath } from 'next/cache';
@@ -31,8 +31,13 @@ describe('ZENITH Logistics: Order Creation Logic', () => {
     mockSupabase = {
       from: vi.fn().mockReturnThis(),
       insert: vi.fn().mockReturnThis(),
+      update: vi.fn().mockReturnThis(),
+      in: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
       select: vi.fn().mockReturnThis(),
+      rpc: vi.fn().mockReturnThis(),
       single: vi.fn(),
+      maybeSingle: vi.fn(),
     };
 
     (validateUserAction as any).mockResolvedValue({ 
@@ -59,7 +64,13 @@ describe('ZENITH Logistics: Order Creation Logic', () => {
           packing_unit: 'BOX',
           packing_count: 1,
           gross_weight: 10.5,
-          items: [{ item_name: 'Industrial Robot Arm', quantity: 1, unit_price: 1000 }]
+          items: [{ 
+            item_name: 'Industrial Robot Arm', 
+            quantity: 1, 
+            unit_price: 1000,
+            currency: 'USD',
+            item_packing_unit: 'UNIT'
+          }]
         }
       ]
     };
@@ -67,7 +78,7 @@ describe('ZENITH Logistics: Order Creation Logic', () => {
     mockSupabase.single.mockResolvedValue({ data: { id: 'new-order-id', order_no: mockOrderNo } });
 
     // When
-    const result = await createOrder(payload);
+    const result = await createOrder(payload as any);
 
     // Then
     expect(result.order_no).toBe(mockOrderNo);
@@ -86,7 +97,7 @@ describe('ZENITH Logistics: Order Creation Logic', () => {
     (validateUserAction as any).mockRejectedValue(new Error('Login required'));
 
     // When & Then
-    await expect(createOrder({})).rejects.toThrow('Login required');
+    await expect(createOrder({} as any)).rejects.toThrow('Login required');
   });
 
   it('TC-A.3: [Success] 송하인 담당자명, 연락처, 비고 필드가 DB 삽입 시 포함되어야 함 (v2)', async () => {
@@ -110,7 +121,13 @@ describe('ZENITH Logistics: Order Creation Logic', () => {
           packing_unit: 'BOX',
           packing_count: 5,
           gross_weight: 50,
-          items: [{ item_name: 'Electronics', quantity: 5, unit_price: 200 }]
+          items: [{ 
+            item_name: 'Electronics', 
+            quantity: 5, 
+            unit_price: 200,
+            currency: 'KRW',
+            item_packing_unit: 'PCS'
+          }]
         }
       ]
     };
@@ -118,12 +135,28 @@ describe('ZENITH Logistics: Order Creation Logic', () => {
     mockSupabase.single.mockResolvedValue({ data: { id: 'order-v2-id', order_no: mockOrderNo } });
 
     // When
-    await createOrder(payload);
+    await createOrder(payload as any);
 
     // Then
     const insertCall = mockSupabase.insert.mock.calls[0][0];
     expect(insertCall.shipper_contact_name).toBe('Manager Kim');
     expect(insertCall.shipper_contact_phone).toBe('010-1111-2222');
     expect(insertCall.description).toBe('Special delivery instruction: Ring the bell');
+  });
+
+  describe('Order Status Update: Exception Resilience', () => {
+
+    it('TC-A.4: [Failure] 마스터에 결합된 오더의 상태 변경 시도 시 예외를 발생시켜야 함', async () => {
+      // Given
+      const orderId = 'mastered-order';
+      mockSupabase.maybeSingle.mockResolvedValue({ 
+        data: { master_order_id: 'm-123' }, 
+        error: null 
+      });
+
+      // When & Then
+      await expect(updateOrderStatus(orderId, 'SHIPPED'))
+        .rejects.toThrow(/마스터 오더에 결합된 상태입니다/);
+    });
   });
 });

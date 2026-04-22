@@ -26,6 +26,22 @@ export async function generateOrderNo(supabase: any) {
   return data;
 }
 
+/**
+ * 마스터 오더 번호를 생성합니다. (WBS 2.2)
+ * 형식: M-YYMMDD-NNNN (SQL Function 호출)
+ */
+export async function generateMasterOrderNo(supabase: any) {
+  const { data, error } = await supabase.rpc("generate_master_order_no");
+
+  if (error) {
+    console.error("Master Sequence error:", error);
+    const datePart = new Date().toISOString().slice(2, 10).replace(/-/g, '');
+    return `M${datePart}-${Math.floor(1000 + Math.random() * 9000)}`;
+  }
+
+  return data;
+}
+
 
 /**
  * 모든 항구/공항 정보를 조회합니다. (ZEN 기반 마스터 데이터)

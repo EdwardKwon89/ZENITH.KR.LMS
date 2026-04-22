@@ -21,6 +21,8 @@
 - [ ] **UI Prop Safety**: 공용 UI 컴포넌트 확장 시 `...props` 전달 전 사용자 정의 속성(error, loading 등)을 구조 분해하여 DOM 전이 및 React Warning을 차단했는가? (SAR-2026-04-20-005)
 - [ ] **Schema-DB Sync**: Zod 스키마의 식별자 타입(UUID 등)과 실제 조회하는 DB 테이블 및 서버 액션의 데이터 규격이 완벽히 일치하는가? (SAR-2026-04-21-007)
 - [ ] **Complex Grid UI**: 3개 이상의 입력 필드가 결합된 그리드 UI에 고정 헤더와 명확한 단위 레이블(kg, EA, $, CBM 등)이 포함되었는가? (SAR-2026-04-21-007)
+- [ ] **Dynamic UI Guard**: 운송 모드(AIR/SEA) 변경 시 하위 항구 노드 리스트가 필터링되고, 기 선택값이 자동으로 초기화(Reset)되는가? (Data Integrity)
+- [ ] **Real-time Reactive watch**: `useMemo`나 `useEffect` 내에서 참조하는 모든 폼 필드가 `watch`를 통해 리액티브하게 관리되고 있는가? (ReferenceError 방지)
 
 ## 🔴 보안 및 권한 (Security & Permission)
 - [ ] **ADMIN 가드**: 마스터 데이터 엔드포인트에 `requireAdmin` 보호가 적용되었는가?
