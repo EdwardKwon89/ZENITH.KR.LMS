@@ -14,7 +14,7 @@ export default async function OrdersPage({
   searchParams: { [key: string]: string | string[] | undefined };
 }) {
   // 1. 보안 가드 (세션 확인)
-  await requireAuth();
+  const { profile } = await requireAuth();
 
   // 2. 검색 파라미터 파싱
   const page = typeof searchParams.page === 'string' ? parseInt(searchParams.page) : 1;
@@ -31,21 +31,18 @@ export default async function OrdersPage({
   });
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6 px-8 py-10">
-      {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
+    <div className="space-y-4 animate-in fade-in duration-700">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-2">
         <div>
-          <h1 className="text-5xl font-black text-white tracking-tighter mb-2 drop-shadow-sm">
+          <h1 className="text-xl font-black text-slate-950 tracking-tight flex items-center gap-3">
+            <span className="w-1.5 h-6 bg-blue-600 rounded-full"></span>
             ORDER CONTROL
           </h1>
-          <p className="text-white/50 font-medium">
-            Real-time global logistics monitoring & management
-          </p>
+          <p className="text-slate-500 font-medium ml-4 text-xs">Manage and track your global logistics shipments</p>
         </div>
         <Link href="/orders/new">
-          <ZenButton className="bg-white text-slate-900 hover:bg-white/90 shadow-2xl shadow-white/10 px-8">
-            <Plus size={20} className="mr-2" />
-            Create New Order
+          <ZenButton className="bg-white text-slate-900 border border-slate-200 hover:bg-slate-50 hover:shadow-md px-8 py-2 text-xs font-bold rounded-xl shadow-sm transition-all focus:ring-2 focus:ring-blue-100 outline-none">
+            <Plus size={14} className="mr-2" /> CREATE NEW ORDER
           </ZenButton>
         </Link>
       </div>
@@ -60,6 +57,7 @@ export default async function OrdersPage({
         currentPage={page}
         pageSize={pageSize}
         locale={locale} 
+        userRole={profile?.role}
       />
     </div>
   );

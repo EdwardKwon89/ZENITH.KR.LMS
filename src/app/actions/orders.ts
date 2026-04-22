@@ -2,7 +2,11 @@
 
 import { validateAdminAction, validateUserAction } from "@/lib/auth/guards";
 import { revalidatePath } from "next/cache";
-import { generateOrderNo } from "./master";
+import { generateOrderNo, generateMasterOrderNo } from "./master";
+import { OrderStatus } from "@/types/orders";
+import { canChangeStatus } from "@/lib/logistics/status-machine";
+import { UserRole } from "@/lib/auth/rbac";
+import { generateInvoicesForOrder } from "./finance";
 
 import { OrderRegistrationInput, orderRegistrationSchema } from "@/lib/validation/order";
 
@@ -40,8 +44,10 @@ export async function createOrder(payload: OrderRegistrationInput) {
       recipient_pccc: validated.recipient_pccc,
       recipient_email: validated.recipient_email,
       delivery_notes: validated.delivery_notes,
+      transport_mode: validated.transport_mode,
+      estimated_cost: validated.estimated_cost,
       
-      status: "REGISTERED",
+      status: OrderStatus.REGISTERED,
       created_by: user.id,
       org_id: profile?.org_id
     })
@@ -108,12 +114,14 @@ export async function getOrders({
   pageSize,
   status,
   order_type,
+  transport_mode,
   search
 }: {
   page?: number;
   pageSize?: number;
   status?: string;
   order_type?: string;
+  transport_mode?: string;
   search?: string;
 } = {}) {
   const { supabase, profile, user } = await validateUserAction();
@@ -148,6 +156,12 @@ export async function getOrders({
 
   if (status) query = query.eq("status", status);
   if (order_type) query = query.eq("order_type", order_type);
+
+  // [v2.1] transport_mode 필터링 지원
+  if (transport_mode) {
+    query = query.eq("transport_mode", transport_mode);
+  }
+
   if (search) query = query.or(`order_no.ilike.%${search}%,recipient_name.ilike.%${search}%`);
 
   const from = (page - 1) * effectivePageSize;
@@ -210,4 +224,306 @@ export async function getOrderDetails(orderId: string) {
   }));
 
   return { ...order, packages: packagesWithItems };
+}
+
+/**
+ * 오더의 상태를 업데이트하고 히스토리를 기록합니다.
+ */
+export async function updateOrderStatus(
+  orderId: string, 
+  nextStatus: OrderStatus, 
+  reason?: string
+) {
+  const { supabase, user, profile } = await validateUserAction();
+  if (!profile) throw new Error("User profile not found");
+
+  // [WBS 2.2] Immutable Guard: 마스터 결합 상태 확인 (최우선 순위)
+  // 304_GS1_128 설계 규정: 마스터에 결합된 오더는 개별 상태 변경을 금지함
+  const { data: orderData, error: masterCheckError } = await supabase
+    .from("zen_orders")
+    .select("master_order_id")
+    .eq("id", orderId)
+    .maybeSingle(); // single() 대신 maybeSingle()을 사용하여 데이터 부재 시 null 반환 처리
+
+  if (masterCheckError) {
+    console.error("[ERROR] Failed to check master connection:", masterCheckError);
+  }
+
+  if (orderData?.master_order_id) {
+    throw new Error("⚠️ 마스터 오더에 결합된 상태입니다. 수정을 위해 먼저 마스터를 해체(Dissolve)하십시오.");
+  }
+
+  // 1. 현재 상태 조회
+  const { data: currentOrder, error: fetchError } = await supabase
+    .from("zen_orders")
+    .select("status")
+    .eq("id", orderId)
+    .single();
+
+  if (fetchError || !currentOrder) throw new Error("Order not found");
+
+  // 2. 상태 전이 검증 (Status Machine)
+  const validation = canChangeStatus(
+    currentOrder.status as OrderStatus, 
+    nextStatus, 
+    profile.role as UserRole
+  );
+
+  if (!validation.allowed) {
+    throw new Error(validation.message || "상태 변경 권한이 없거나 유효하지 않은 전이입니다.");
+  }
+
+  // 3. 트랜잭션 처리 (RPC 또는 개별 호출)
+  // 3.1 오더 상태 업데이트
+  const { error: updateError } = await supabase
+    .from("zen_orders")
+    .update({ status: nextStatus })
+    .eq("id", orderId);
+
+  if (updateError) throw new Error(`Update failed: ${updateError.message}`);
+
+  // 3.2 히스토리 기록
+  const { error: historyError } = await supabase
+    .from("order_status_history")
+    .insert({
+      order_id: orderId,
+      prev_status: currentOrder.status,
+      next_status: nextStatus,
+      changed_by: user.id,
+      reason: reason
+    });
+
+  if (historyError) {
+    console.error("History logging failed:", historyError);
+    // 히스토리 기록 실패가 비즈니스 로직 중단으로 이어질지는 정책에 따라 결정 (현재는 로그만 남김)
+  }
+
+  // 4. [Finance Integration] 출고 시 자동 정산 생성
+  if (nextStatus === OrderStatus.RELEASED) {
+    try {
+      await generateInvoicesForOrder(orderId);
+    } catch (financeError) {
+      console.error("[CRITICAL] Finance automation failed during release:", financeError);
+      // 오더 상태 변경은 성공했으므로 중단하지 않으나 로그 기록
+    }
+  }
+
+  revalidatePath("/(dashboard)/orders", "page");
+  revalidatePath(`/(dashboard)/orders/${orderId}`, "page");
+
+  return { success: true };
+}
+
+/**
+ * [WBS 2.2] 마스터 오더를 생성하고 하우스 오더들을 바인딩합니다.
+ */
+export async function createMasterOrder(payload: {
+  houseOrderIds: string[];
+  carrier_id?: string;
+  vessel_flight_no?: string;
+  origin_port_id?: string;
+  dest_port_id?: string;
+  remarks?: string;
+}) {
+  const { supabase, user } = await validateUserAction();
+
+  // 1. 마스터 번호 생성
+  const master_no = await generateMasterOrderNo(supabase);
+
+  // 2. 하부 오더들의 합산 중량/량 계산
+  const { data: stats, error: statsError } = await supabase
+    .rpc('get_orders_aggregation', { order_ids: payload.houseOrderIds });
+
+  if (statsError) throw new Error(`Aggregation failed: ${statsError.message}`);
+
+  // 3. 마스터 오더 삽입
+  const { data: master, error: masterError } = await supabase
+    .from("zen_master_orders")
+    .insert({
+      master_no,
+      status: 'CREATED',
+      total_house_count: payload.houseOrderIds.length,
+      total_gross_weight: stats?.[0]?.total_weight || 0,
+      total_volume: stats?.[0]?.total_volume || 0,
+      carrier_id: payload.carrier_id,
+      vessel_flight_no: payload.vessel_flight_no,
+      origin_port_id: payload.origin_port_id,
+      dest_port_id: payload.dest_port_id,
+      remarks: payload.remarks,
+      created_by: user.id
+    })
+    .select()
+    .single();
+
+  if (masterError) throw new Error(`Master creation failed: ${masterError.message}`);
+
+  // 4. 하우스 오더들에 마스터 ID 바인딩 및 상태 변경 (MASTERED)
+  const { error: bindingError } = await supabase
+    .from("zen_orders")
+    .update({ 
+      master_order_id: master.id,
+      status: OrderStatus.MASTERED 
+    })
+    .in("id", payload.houseOrderIds);
+
+  if (bindingError) throw new Error(`Binding failed: ${bindingError.message}`);
+
+  revalidatePath("/(dashboard)/logistics/master", "page");
+  return master;
+}
+
+/**
+ * [WBS 2.2] 마스터 오더를 해체(Dissolve)합니다.
+ * 하위 하우스 오더들을 다시 수정 가능 상태(PACKED)로 복구합니다.
+ */
+export async function dissolveMasterOrder(masterId: string) {
+  const { supabase } = await validateUserAction();
+
+  // 1. 바인딩된 하우스 오더 복구 (수정 가능하게 NULL 처리 및 상태 원복)
+  const { error: unbindingError } = await supabase
+    .from("zen_orders")
+    .update({ 
+      master_order_id: null,
+      status: OrderStatus.REGISTERED // 해체 시 초기 등록 상태로 복구 (재스케줄링 유도)
+    })
+    .eq("master_order_id", masterId);
+
+  if (unbindingError) throw new Error(`Unbinding failed: ${unbindingError.message}`);
+
+  // 2. 마스터 오더 삭제
+  const { error: deleteError } = await supabase
+    .from("zen_master_orders")
+    .delete()
+    .eq("id", masterId);
+
+  if (deleteError) throw new Error(`Master deletion failed: ${deleteError.message}`);
+
+  revalidatePath("/(dashboard)/logistics/master", "page");
+  return { success: true };
+}
+
+/**
+ * [WBS 2.2] 마스터 오더 목록을 조회합니다.
+ */
+export async function getMasterOrders() {
+  const { supabase } = await validateUserAction();
+  
+  const { data, error } = await supabase
+    .from("zen_master_orders")
+    .select(`
+      *,
+      origin_port:zen_ports!origin_port_id(code, name),
+      dest_port:zen_ports!dest_port_id(code, name),
+      carrier:zen_organizations!carrier_id(name)
+    `)
+    .order("created_at", { ascending: false });
+
+  if (error) throw new Error(error.message);
+  return data || [];
+}
+
+/**
+ * [WBS 2.2] 마스터에 바인딩 가능한 하우스 오더 목록을 조회합니다.
+ * (PACKED 상태이며 master_order_id가 없는 오더 대상)
+ */
+export async function getPendingHouseOrders() {
+  const { supabase } = await validateUserAction();
+
+  const { data, error } = await supabase
+    .from("zen_orders")
+    .select(`
+      *,
+      shipper:zen_organizations!shipper_id(name),
+      origin_port:zen_ports!origin_port_id(code, name),
+      dest_port:zen_ports!dest_port_id(code, name)
+    `)
+    .eq("status", OrderStatus.PACKED)
+    .is("master_order_id", null)
+    .order("created_at", { ascending: true });
+
+  if (error) throw new Error(error.message);
+  return data || [];
+}
+
+/**
+ * [WBS 2.2] 마스터 오더의 상태를 업데이트합니다.
+ * 'CANCELED' 상태로 변경 시, 하위 하우스 오더들을 자동으로 해체(Dissolve)합니다.
+ */
+export async function updateMasterOrderStatus(
+  masterId: string,
+  nextStatus: string,
+  reason?: string
+) {
+  const { supabase } = await validateUserAction();
+
+  // 1. 상태 업데이트
+  const { error: updateError } = await supabase
+    .from("zen_master_orders")
+    .update({ 
+      status: nextStatus,
+      remarks: reason ? `[Status Change: ${nextStatus}] ${reason}` : undefined 
+    })
+    .eq("id", masterId);
+
+  if (updateError) throw new Error(`Master status update failed: ${updateError.message}`);
+
+  // 2. [Auto-Dissolve Policy] 취소 시 자동 해체
+  if (nextStatus === 'CANCELED') {
+    const { error: dissolveError } = await supabase
+      .from("zen_orders")
+      .update({ 
+        master_order_id: null,
+        status: OrderStatus.REGISTERED // 취소 시 초기 상태로 복구하여 재작업 가능케 함
+      })
+      .eq("master_order_id", masterId);
+
+    if (dissolveError) {
+      console.error("[ERROR] Auto-dissolve failed for master:", masterId, dissolveError);
+    }
+  }
+
+  revalidatePath("/(dashboard)/logistics/master", "page");
+  return { success: true };
+}
+
+/**
+ * [WBS 2.2] 특정 마스터 오더 상세 정보와 소속된 하우스 오더 목록을 조회합니다.
+ * 감사 및 출력(Label/Manifest)을 위해 사용됩니다.
+ */
+export async function getMasterOrderWithHouses(masterId: string) {
+  const { supabase } = await validateUserAction();
+
+  // 1. 마스터 본체 조회
+  const { data: master, error: masterError } = await supabase
+    .from("zen_master_orders")
+    .select(`
+      *,
+      origin_port:zen_ports!origin_port_id(code, name),
+      dest_port:zen_ports!dest_port_id(code, name),
+      carrier:zen_organizations!carrier_id(name)
+    `)
+    .eq("id", masterId)
+    .single();
+
+  if (masterError || !master) {
+    throw new Error(`Master order not found: ${masterError?.message}`);
+  }
+
+  // 2. 소속된 하우스 오더 목록 조회
+  const { data: houses, error: housesError } = await supabase
+    .from("zen_orders")
+    .select(`
+      *,
+      shipper:zen_organizations!shipper_id(name),
+      origin_port:zen_ports!origin_port_id(code, name),
+      dest_port:zen_ports!dest_port_id(code, name)
+    `)
+    .eq("master_order_id", masterId);
+
+  if (housesError) throw new Error(`Failed to fetch linked houses: ${housesError.message}`);
+
+  return {
+    ...master,
+    houses: houses || []
+  };
 }

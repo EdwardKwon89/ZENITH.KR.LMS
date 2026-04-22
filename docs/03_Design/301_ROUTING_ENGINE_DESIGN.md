@@ -62,6 +62,7 @@ sequenceDiagram
 | **Cheapest** | `min(Base Cost + Surcharges)` | 전체 비용 합계 기준 |
 | **Fastest** | `min(Transit Days)` | 리드타임 기준 |
 | **Best Value** | `(Cost Score * 0.6) + (Days Score * 0.4)` | 가성비 종합 점수 |
+| **Node Filter** | `transport_mode` 기반 인프라(AIR-Airport, SEA-Seaport) 자동 필터링 | 정합성 가드레일 |
 
 ## 4. 데이터 모델 연동 (ERD Reference)
 - `zen_rate_cards`: 기본 서비스 메타데이터 (POL, POD, Transit Days, Carrier)
@@ -73,3 +74,9 @@ sequenceDiagram
 
 ---
 **Audit Note**: 본 설계는 Phase 2 구현 단계의 백엔드 서비스 개발 규격으로 활용됩니다.
+
+## 6. 개정 이력 (Revision History)
+| 버전 | 날짜 | 작성자 | 설명 |
+|:---|:---|:---|:---|
+| v1.0 | 2026-04-17 | Execution Agent | 초기 설계 수립 |
+| v1.1 | 2026-04-21 | Antigravity | 동적 노드 제약 로직 및 모드별 초기화 UX 추가 |

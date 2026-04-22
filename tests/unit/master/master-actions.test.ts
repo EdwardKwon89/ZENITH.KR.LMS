@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { getNations, getPorts, upsertCommonCode, deleteCommonCode } from '@/app/actions/master';
+import { createMasterOrder, dissolveMasterOrder } from '@/app/actions/orders';
 import { validateAdminAction, validateUserAction } from '@/lib/auth/guards';
 import { revalidatePath } from 'next/cache';
 
@@ -22,15 +23,19 @@ describe('ZENITH Master Data: CRUD Operations', () => {
     mockSupabase = {
       from: vi.fn().mockReturnThis(),
       select: vi.fn().mockReturnThis(),
+      insert: vi.fn().mockReturnThis(),
       order: vi.fn().mockReturnThis(),
       upsert: vi.fn().mockReturnThis(),
       delete: vi.fn().mockReturnThis(),
+      update: vi.fn().mockReturnThis(),
+      rpc: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
       single: vi.fn(),
+      maybeSingle: vi.fn(),
     };
 
-    (validateAdminAction as any).mockResolvedValue({ supabase: mockSupabase });
-    (validateUserAction as any).mockResolvedValue({ supabase: mockSupabase });
+    (validateAdminAction as any).mockResolvedValue({ supabase: mockSupabase, user: { id: 'admin-1' } });
+    (validateUserAction as any).mockResolvedValue({ supabase: mockSupabase, user: { id: 'user-1' } });
   });
 
   it('TC-M.1: [Success] getNations는 국가 목록을 이름 순으로 반환해야 함', async () => {
@@ -86,5 +91,28 @@ describe('ZENITH Master Data: CRUD Operations', () => {
     expect(mockSupabase.from).toHaveBeenCalledWith('common_codes');
     expect(mockSupabase.delete).toHaveBeenCalled();
     expect(mockSupabase.eq).toHaveBeenCalledWith('id', 'target-id');
+  });
+
+  describe('Master Order Actions: Exception Resilience', () => {
+
+    it('TC-A.5: [Failure] 마스터 오더 생성 시 DB 에러 발생 시 예외를 던져야 함', async () => {
+      // Given
+      const payload = { houseOrderIds: ['h-1', 'h-2'] };
+      mockSupabase.rpc.mockResolvedValue({ data: [{ total_weight: 100, total_volume: 10 }], error: null });
+      mockSupabase.single.mockResolvedValue({ data: null, error: { message: 'Database Insert Error' } });
+
+      // When & Then
+      await expect(createMasterOrder(payload))
+        .rejects.toThrow(/Master creation failed: Database Insert Error/);
+    });
+
+    it('TC-A.6: [Failure] 마스터 해체(Dissolve) 시 바인딩 해제 실패 시 예외를 던져야 함', async () => {
+      // Given
+      mockSupabase.eq.mockResolvedValue({ error: { message: 'Network Timeout' } });
+
+      // When & Then
+      await expect(dissolveMasterOrder('m-789'))
+        .rejects.toThrow(/Unbinding failed: Network Timeout/);
+    });
   });
 });

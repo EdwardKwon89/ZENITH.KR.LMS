@@ -4,17 +4,18 @@ import React, { useMemo, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useForm, useFieldArray, Control } from 'react-hook-form';
+import { useForm, useFieldArray, Control, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast, Toaster } from 'sonner';
 import { 
   Package, User, Globe, Plus, Trash2, Save, 
-  ChevronRight, AlertCircle, CheckCircle2, Box, Layers
+  ChevronRight, AlertCircle, CheckCircle2, Box, Layers, Plane, Ship, Zap, Truck
 } from 'lucide-react';
 import { ZenCard, ZenButton, ZenInput, ZenBadge } from '@/components/ui/ZenUI';
 import { createOrder } from '@/app/actions/orders';
 import { getCurrentUserAffiliation } from '@/app/actions/master';
 import { orderRegistrationSchema, OrderRegistrationInput } from '@/lib/validation/order';
+import { estimateFreightCost, TransportMode } from '@/utils/logistics/freight-calculator';
 
 interface OrderRegistrationFormProps {
   shippers: any[];
@@ -138,6 +139,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
     resolver: zodResolver(orderRegistrationSchema) as any,
     defaultValues: {
       order_type: 'B2B',
+      transport_mode: 'AIR',
       packages: [{ 
         packing_unit: 'BOX', 
         packing_count: 1, 
@@ -173,39 +175,90 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
     name: "packages"
   });
 
-  const packages = watch('packages');
-
-  // 📐 치수 기반 합산 엔진 (v2)
+  // 📐 치수 기반 합산 및 예상 운임 엔진 (v2.2 - Chargeable Weight 반영)
+  const transportMode = watch('transport_mode') as TransportMode;
+  const watchedPackages = watch('packages');
+  
   const totals = useMemo(() => {
     let weight = 0;
     let volume = 0;
-    packages?.forEach(pkg => {
-      weight += (Number(pkg.gross_weight) || 0) * (Number(pkg.packing_count) || 0);
+    
+    if (!watchedPackages) return { weight: 0, volume: 0, freight: 0 };
+
+    watchedPackages.forEach(pkg => {
+      const count = Number(pkg.packing_count) || 0;
+      const grossWeight = Number(pkg.gross_weight) || 0;
       
-      // LWH 기반 혹은 수동 Volume 계산
+      weight += grossWeight * count;
+      
       const pkgVol = (pkg.length && pkg.width && pkg.height)
-        ? (pkg.length * pkg.width * pkg.height) / 1000000 
+        ? (Number(pkg.length) * Number(pkg.width) * Number(pkg.height)) / 1000000 
         : (Number(pkg.volume) || 0);
-      volume += pkgVol * (Number(pkg.packing_count) || 0);
+      volume += pkgVol * count;
     });
-    return { weight, volume };
-  }, [packages]);
+
+    const freight = estimateFreightCost({
+      weight,
+      volume,
+      mode: transportMode || 'AIR'
+    });
+
+    return { weight, volume, freight };
+  }, [watchedPackages, transportMode]);
+
+  // 🔄 Transport Mode 변경 시 항구 선택 초기화 (정합성 유지)
+  useEffect(() => {
+    setValue('origin_port_id', '');
+    setValue('dest_port_id', '');
+  }, [transportMode, setValue]);
+
+  const filteredPorts = useMemo(() => {
+    if (!transportMode) return ports;
+    const mappedType = transportMode === 'EXP' ? 'AIR' : transportMode;
+    return ports.filter(p => p.type === mappedType);
+  }, [ports, transportMode]);
 
   const onSubmit = async (data: any) => {
     try {
-      const result = await createOrder(data as OrderRegistrationInput);
-      toast.success(t('success_create'), { description: `Order No: ${result.order_no}` });
+      // 📐 예상 운임(v2.2)을 데이터에 포함하여 전송
+      const finalData = {
+        ...data,
+        estimated_cost: totals.freight
+      };
+      
+      const result = await createOrder(finalData as OrderRegistrationInput);
+      toast.success(t('success_create'), { 
+        description: `Order No: ${result.order_no}`,
+        icon: <CheckCircle2 className="text-green-500" />
+      });
       if (onSuccess) onSuccess();
       setTimeout(() => router.push(`/orders/${result.id}`), 1000);
     } catch (err: any) {
-      toast.error('Submission Failed', { description: err.message });
+      console.error('Registration failed:', err);
+      toast.error('Submission Failed', { 
+        description: err.message,
+        icon: <AlertCircle className="text-red-500" />
+      });
     }
+  };
+
+  const onError = (errors: any) => {
+    console.error('Validation Errors:', errors);
+    const firstError = Object.values(errors)[0] as any;
+    const errorMessage = firstError?.message || 'Check required fields';
+    toast.error('Validation Error', { 
+      description: errorMessage,
+      action: {
+        label: 'Retry',
+        onClick: () => console.log('Retry clicked')
+      }
+    });
   };
 
   return (
     <>
       <Toaster position="top-right" richColors />
-      <form onSubmit={handleSubmit(onSubmit)} className="w-full max-w-6xl mx-auto space-y-4 pb-20 px-4">
+      <form onSubmit={handleSubmit(onSubmit, onError)} className="w-full max-w-6xl mx-auto space-y-4 pb-20 px-4">
         
         {/* 🚀 Top Action Bar: Type selection (Left) & Save Action (Right) */}
         <div className="flex justify-between items-center mb-8">
@@ -256,9 +309,9 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                   >
                     {shippers.map(s => {
                       const displayName = (s.id === affiliation?.dummyIndividualId && affiliation?.isIndividual)
-                        ? affiliation.userName 
+                        ? affiliation?.userName 
                         : (s.id === affiliation?.orgId && !affiliation?.isIndividual)
-                          ? affiliation.orgName
+                          ? affiliation?.orgName
                           : s.name;
                       return <option key={s.id} value={s.id}>{displayName}</option>
                     })}
@@ -307,21 +360,46 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                       )}
                     </div>
                   </div>
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-slate-500">{t('origin_port')}</label>
-                    <select {...register('origin_port_id')} className="w-full bg-white border border-slate-200 text-xs px-2 py-2 rounded-xl outline-none">
-                      <option value="">Origin</option>
-                      {ports.map(p => <option key={p.id} value={p.id}>[{p.code}] {p.name}</option>)}
-                    </select>
+
+                  {/* 🚢 Transport Mode Selection (Restored v2.1) */}
+                  <div className="mt-4 mb-4">
+                    <label className="text-[10px] font-bold text-slate-500 mb-1.5 block uppercase tracking-wider">Transport Mode</label>
+                    <div className="grid grid-cols-4 gap-1.5">
+                      {[
+                        { code: 'AIR', icon: Plane, label: '항공' },
+                        { code: 'SEA', icon: Ship, label: '해상' },
+                        { code: 'EXP', icon: Zap, label: '특송' },
+                        { code: 'LAND', icon: Truck, label: '육상' }
+                      ].map((mode) => (
+                        <button
+                          key={mode.code}
+                          type="button"
+                          onClick={() => setValue('transport_mode', mode.code as any)}
+                          className={`flex flex-col items-center justify-center py-2.5 rounded-xl border transition-all ${watch('transport_mode') === mode.code ? 'bg-slate-800 border-slate-800 text-white shadow-md' : 'bg-white border-slate-200 text-slate-400 hover:bg-slate-50'}`}
+                        >
+                          <mode.icon size={14} className="mb-1" />
+                          <span className="text-[9px] font-bold">{mode.label}</span>
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-slate-500">{t('dest_port')}</label>
-                    <select {...register('dest_port_id')} className="w-full bg-white border border-slate-200 text-xs px-2 py-2 rounded-xl outline-none">
-                      <option value="">Dest</option>
-                      {ports.map(p => <option key={p.id} value={p.id}>[{p.code}] {p.name}</option>)}
-                    </select>
+
+                   {/* 🚢 Port Selection UI (Restored with Dynamic Filtering) */}
+                  <div className="grid grid-cols-2 gap-2 mt-4 pt-4 border-t border-slate-100">
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{t('origin_port')}</label>
+                      <select {...register('origin_port_id')} className="w-full bg-white border border-slate-200 text-xs px-2 py-2 rounded-xl outline-none focus:ring-2 focus:ring-blue-50">
+                        <option value="">{transportMode === 'AIR' || transportMode === 'EXP' ? 'Origin Airport' : 'Origin Port'}</option>
+                        {filteredPorts.map(p => <option key={p.id} value={p.id}>[{p.code}] {p.name}</option>)}
+                      </select>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{t('dest_port')}</label>
+                      <select {...register('dest_port_id')} className="w-full bg-white border border-slate-200 text-xs px-2 py-2 rounded-xl outline-none focus:ring-2 focus:ring-blue-50">
+                        <option value="">{transportMode === 'AIR' || transportMode === 'EXP' ? 'Dest Airport' : 'Dest Port'}</option>
+                        {filteredPorts.map(p => <option key={p.id} value={p.id}>[{p.code}] {p.name}</option>)}
+                      </select>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -394,10 +472,10 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                       <ZenBadge variant="info" className="px-3 py-1 shadow-sm border border-white">PKG #{i + 1}</ZenBadge>
                     </div>
 
-                    <div className="grid grid-cols-12 gap-3 mt-4 items-end">
+                    <div className="grid grid-cols-12 gap-2 mt-4 items-end">
                       <div className="col-span-2 space-y-1">
                         <label className="text-[9px] font-bold text-slate-400">UNIT</label>
-                        <select {...register(`packages.${i}.packing_unit`)} className="w-full text-xs h-9 bg-slate-50 border border-slate-100 rounded-lg">
+                        <select {...register(`packages.${i}.packing_unit`)} className="w-full text-[11px] h-9 bg-slate-50 border border-slate-100 rounded-lg px-2 outline-none focus:ring-1 focus:ring-blue-100">
                           <option value="BOX">BOX</option><option value="PLT">PLT</option><option value="CRT">CRT</option>
                         </select>
                       </div>
@@ -405,19 +483,31 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                         <label className="text-[9px] font-bold text-slate-400">COUNT</label>
                         <ZenInput type="number" {...register(`packages.${i}.packing_count`, { valueAsNumber: true })} className="py-2 text-xs" />
                       </div>
-                      <div className="col-span-4">
-                        <label className="text-[9px] font-bold text-slate-400">DIMENSIONS (L/W/H)</label>
-                        <div className="grid grid-cols-3 gap-1">
-                          <ZenInput type="number" placeholder="L" {...register(`packages.${i}.length`, { valueAsNumber: true })} className="py-2 text-xs" />
-                          <ZenInput type="number" placeholder="W" {...register(`packages.${i}.width`, { valueAsNumber: true })} className="py-2 text-xs" />
-                          <ZenInput type="number" placeholder="H" {...register(`packages.${i}.height`, { valueAsNumber: true })} className="py-2 text-xs" />
+                      <div className="col-span-5">
+                        <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Dimensions (L/W/H) <span className="text-[8px] text-slate-300 ml-1">cm</span></label>
+                        <div className="grid grid-cols-3 gap-1 relative">
+                          <div className="relative">
+                            <ZenInput type="number" placeholder="L" {...register(`packages.${i}.length`, { valueAsNumber: true })} className="py-2 text-xs pr-4" />
+                            <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[8px] text-slate-300 font-bold">L</span>
+                          </div>
+                          <div className="relative">
+                            <ZenInput type="number" placeholder="W" {...register(`packages.${i}.width`, { valueAsNumber: true })} className="py-2 text-xs pr-4" />
+                            <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[8px] text-slate-300 font-bold">W</span>
+                          </div>
+                          <div className="relative">
+                            <ZenInput type="number" placeholder="H" {...register(`packages.${i}.height`, { valueAsNumber: true })} className="py-2 text-xs pr-4" />
+                            <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[8px] text-slate-300 font-bold">H</span>
+                          </div>
                         </div>
                       </div>
-                      <div className="col-span-2">
-                        <label className="text-[9px] font-bold text-slate-400">WEIGHT(kg)</label>
-                        <ZenInput type="number" {...register(`packages.${i}.gross_weight`, { valueAsNumber: true })} className="py-2 text-xs" />
+                      <div className="col-span-2 ml-1">
+                        <label className="text-[9px] font-bold text-slate-400">WEIGHT <span className="text-[8px] text-slate-300">kg</span></label>
+                        <div className="relative">
+                          <ZenInput type="number" step="0.01" {...register(`packages.${i}.gross_weight`, { valueAsNumber: true })} className="py-2 text-xs pr-6" />
+                          <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[9px] text-slate-300 font-bold">kg</span>
+                        </div>
                       </div>
-                      <div className="col-span-2 flex items-center justify-end h-9">
+                      <div className="col-span-1 flex items-center justify-end h-9">
                         <button 
                           type="button" 
                           onClick={() => removePackage(i)}
@@ -442,16 +532,22 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
               </div>
 
               {/* 📊 Aggregated Stats (Live) */}
-              <div className="mt-8 flex justify-between items-center px-6 py-4 bg-slate-900 rounded-2xl text-white">
-                <span className="text-xs font-bold text-slate-400">SHIPMENT SUMMARY</span>
-                <div className="flex gap-8">
+              <div className="mt-8 flex justify-between items-center px-6 py-4 bg-slate-900 rounded-3xl text-white shadow-2xl ring-1 ring-white/10">
+                <span className="text-xs font-bold text-slate-500 tracking-widest">SHIPMENT SUMMARY</span>
+                <div className="flex gap-10 items-center">
                   <div className="text-right">
-                    <p className="text-[10px] text-slate-400">TOTAL WEIGHT</p>
-                    <p className="text-lg font-bold">{totals.weight.toFixed(2)} <span className="text-[10px]">KG</span></p>
+                    <p className="text-[9px] text-slate-500 font-bold tracking-tight mb-0.5">TOTAL WEIGHT</p>
+                    <p className="text-xl font-black">{totals.weight.toFixed(2)}<span className="text-[10px] text-slate-500 ml-1">KG</span></p>
                   </div>
                   <div className="text-right">
-                    <p className="text-[10px] text-slate-400">TOTAL VOLUME</p>
-                    <p className="text-lg font-bold">{totals.volume.toFixed(4)} <span className="text-[10px]">CBM</span></p>
+                    <p className="text-[9px] text-slate-500 font-bold tracking-tight mb-0.5">TOTAL VOLUME</p>
+                    <p className="text-xl font-black">{totals.volume.toFixed(4)}<span className="text-[10px] text-slate-500 ml-1">CBM</span></p>
+                  </div>
+                  <div className="text-right pl-10 border-l border-white/10">
+                    <p className="text-[9px] text-indigo-400 font-bold tracking-tight mb-0.5 uppercase">Estimated Freight</p>
+                    <p className="text-2xl font-black text-indigo-400 leading-none">
+                      {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(totals.freight)}
+                    </p>
                   </div>
                 </div>
               </div>

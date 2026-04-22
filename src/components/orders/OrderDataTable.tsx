@@ -1,6 +1,12 @@
 'use client';
 
+import { ORDER_STATUS_META, OrderStatus } from '@/types/orders';
 import Link from 'next/link';
+import { useState } from 'react';
+import { StatusChangeModal } from './StatusChangeModal';
+import { canChangeStatus } from '@/lib/logistics/status-machine';
+import { UserRole } from '@/lib/auth/rbac';
+import { AnimatePresence } from 'framer-motion';
 
 interface OrderDataTableProps {
   orders: any[];
@@ -8,6 +14,7 @@ interface OrderDataTableProps {
   currentPage: number;
   pageSize: number;
   locale: string;
+  userRole?: string;
 }
 
 export default function OrderDataTable({ 
@@ -15,35 +22,33 @@ export default function OrderDataTable({
   totalCount, 
   currentPage, 
   pageSize, 
-  locale 
+  locale,
+  userRole
 }: OrderDataTableProps) {
+  const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const totalPages = Math.ceil(totalCount / pageSize);
 
-  const getStatusBadge = (status: string) => {
-    const styles: Record<string, string> = {
-      REGISTERED: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-      CONFIRMED: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
-      PENDING: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
-      CANCELLED: 'bg-rose-500/20 text-rose-400 border-rose-500/30',
-    };
-    return styles[status] || 'bg-slate-500/20 text-slate-400 border-slate-500/30';
+  const getStatusInfo = (status: string) => {
+    return ORDER_STATUS_META[status as OrderStatus] || { label: status, color: 'bg-slate-100 text-slate-600 border-slate-200' };
   };
 
   return (
-    <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-500">
+    <div className="bg-white zen-tactile border border-slate-200 rounded-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-500">
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="bg-white/5 border-b border-white/10">
-              <th className="px-6 py-4 text-xs font-semibold text-white/40 uppercase tracking-widest">Order No</th>
-              <th className="px-6 py-4 text-xs font-semibold text-white/40 uppercase tracking-widest">Type</th>
-              <th className="px-6 py-4 text-xs font-semibold text-white/40 uppercase tracking-widest">Shipper</th>
-              <th className="px-6 py-4 text-xs font-semibold text-white/40 uppercase tracking-widest">Route (Origin-Dest)</th>
-              <th className="px-6 py-4 text-xs font-semibold text-white/40 uppercase tracking-widest">Status</th>
-              <th className="px-6 py-4 text-xs font-semibold text-white/40 uppercase tracking-widest text-right">Actions</th>
+            <tr className="bg-slate-50 border-b border-slate-200">
+              <th className="px-6 py-2.5 text-[11px] font-bold text-slate-500 uppercase tracking-widest">Order No</th>
+              <th className="px-6 py-2.5 text-[11px] font-bold text-slate-500 uppercase tracking-widest">Type</th>
+              <th className="px-6 py-2.5 text-[11px] font-bold text-slate-500 uppercase tracking-widest">Shipper</th>
+              <th className="px-6 py-2.5 text-[11px] font-bold text-slate-500 uppercase tracking-widest">Route (Origin-Dest)</th>
+              <th className="px-6 py-2.5 text-[11px] font-bold text-slate-500 uppercase tracking-widest">Status</th>
+              <th className="px-6 py-2.5 text-[11px] font-bold text-slate-500 uppercase tracking-widest">Billing</th>
+              <th className="px-6 py-2.5 text-[11px] font-bold text-slate-500 uppercase tracking-widest text-right">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-white/5">
+          <tbody className="divide-y divide-slate-100">
             {orders.length === 0 ? (
               <tr>
                 <td colSpan={6} className="px-6 py-20 text-center text-white/30 italic">
@@ -52,32 +57,72 @@ export default function OrderDataTable({
               </tr>
             ) : (
               orders.map((order) => (
-                <tr key={order.id} className="hover:bg-white/5 transition-colors group">
-                  <td className="px-6 py-4">
-                    <span className="text-white font-medium group-hover:text-blue-400 transition-colors">{order.order_no}</span>
+                <tr key={order.id} className="hover:bg-slate-50/80 transition-colors group">
+                  <td className="px-6 py-2.5">
+                    <span className="text-[13px] text-slate-900 font-bold group-hover:text-blue-600 transition-colors">{order.order_no}</span>
                   </td>
-                  <td className="px-6 py-4">
-                    <span className="text-sm text-white/70">{order.order_type}</span>
+                  <td className="px-6 py-2.5">
+                    <span className="text-[12px] text-slate-600 font-medium">{order.order_type}</span>
                   </td>
-                  <td className="px-6 py-4">
-                    <span className="text-sm text-white/80 font-medium">{order.shipper?.name || '-'}</span>
+                  <td className="px-6 py-2.5">
+                    <span className="text-[13px] text-slate-800 font-bold">{order.shipper?.name || '-'}</span>
                   </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-2 text-sm text-white/60">
-                      <span className="text-white/90">{order.origin_port?.code}</span>
-                      <span className="text-white/30">→</span>
-                      <span className="text-white/90">{order.dest_port?.code}</span>
+                  <td className="px-6 py-2.5">
+                    <div className="flex items-center gap-2 text-[12px] font-medium">
+                      <span className="text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">{order.origin_port?.code}</span>
+                      <span className="text-slate-400">→</span>
+                      <span className="text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">{order.dest_port?.code}</span>
                     </div>
                   </td>
-                  <td className="px-6 py-4">
-                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold border ${getStatusBadge(order.status)}`}>
-                      {order.status}
-                    </span>
+                  <td className="px-6 py-2.5">
+                    {(() => {
+                      const statusInfo = getStatusInfo(order.status);
+                      // 현재 역할에서 가능한 다음 상태가 하나라도 있는지 확인
+                      const nextStatuses = Object.values(OrderStatus).filter(s => 
+                        canChangeStatus(order.status as OrderStatus, s, (userRole as UserRole) || 'USER').allowed
+                      );
+                      const hasPermission = nextStatuses.length > 0;
+
+                      return (
+                        <span 
+                          onClick={() => {
+                            if (hasPermission) {
+                              setSelectedOrder(order);
+                              setIsModalOpen(true);
+                            }
+                          }}
+                          className={`px-2 py-0.5 rounded text-[10px] font-bold border ${statusInfo.color} ${hasPermission ? 'cursor-pointer hover:ring-2 hover:ring-offset-1 ring-blue-400 transition-all' : 'cursor-default'}`}
+                          title={hasPermission ? `${statusInfo.description} (클릭하여 상태 변경)` : statusInfo.description}
+                        >
+                          {statusInfo.label}
+                        </span>
+                      );
+                    })()}
                   </td>
-                  <td className="px-6 py-4 text-right">
+                  <td className="px-6 py-2.5">
+                    {(() => {
+                      const status = order.billing_status || 'PENDING';
+                      const styles: Record<string, string> = {
+                        PENDING: 'bg-slate-50 text-slate-400 border-slate-200',
+                        INVOICED: 'bg-amber-50 text-amber-700 border-amber-200 shadow-sm',
+                        PAID: 'bg-emerald-50 text-emerald-700 border-emerald-200 shadow-sm'
+                      };
+                      const labels: Record<string, string> = {
+                        PENDING: '정산대기',
+                        INVOICED: '청구완료',
+                        PAID: '결제완료'
+                      };
+                      return (
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${styles[status]}`}>
+                          {labels[status]}
+                        </span>
+                      );
+                    })()}
+                  </td>
+                  <td className="px-6 py-2.5 text-right">
                     <Link 
                       href={`/${locale}/orders/${order.id}`}
-                      className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-400 hover:text-blue-300 transition-colors"
+                      className="inline-flex items-center gap-1 text-[12px] font-bold text-blue-600 hover:text-blue-700 transition-colors border-b border-transparent hover:border-blue-600"
                     >
                       View Details
                     </Link>
@@ -90,20 +135,20 @@ export default function OrderDataTable({
       </div>
 
       {/* Pagination Controls */}
-      <div className="px-6 py-4 bg-white/5 flex items-center justify-between border-t border-white/5">
-        <span className="text-xs text-white/40">
-          Showing <span className="text-white/70">{orders.length}</span> of <span className="text-white/70">{totalCount}</span> results
+      <div className="px-6 py-4 bg-slate-50 flex items-center justify-between border-t border-slate-100">
+        <span className="text-xs text-slate-500">
+          Showing <span className="text-slate-900 font-bold">{orders.length}</span> of <span className="text-slate-900 font-bold">{totalCount}</span> results
         </span>
         
-        <div className="flex gap-2">
+        <div className="flex gap-1.5">
           {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
             <Link
               key={p}
               href={`?page=${p}`}
               className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold transition-all ${
                 currentPage === p 
-                ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' 
-                : 'bg-white/5 text-white/40 hover:bg-white/10 hover:text-white'
+                ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20' 
+                : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900'
               }`}
             >
               {p}
@@ -111,6 +156,25 @@ export default function OrderDataTable({
           ))}
         </div>
       </div>
+
+      <AnimatePresence>
+        {isModalOpen && selectedOrder && (
+          <StatusChangeModal
+            orderId={selectedOrder.id}
+            currentStatus={selectedOrder.status as OrderStatus}
+            allowedNextStatuses={Object.values(OrderStatus).filter(s => 
+              canChangeStatus(selectedOrder.status as OrderStatus, s, (userRole as UserRole) || 'USER').allowed
+            )}
+            onClose={() => {
+              setIsModalOpen(false);
+              setSelectedOrder(null);
+            }}
+            onSuccess={() => {
+              // 페이지 새로고침은 서버 액션에서 revalidatePath로 처리됨
+            }}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
