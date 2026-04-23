@@ -29,6 +29,7 @@
     "order_house": "House Order",
     "order_import": "Bulk Import",
     "logistics": "Logistics",
+    "logistics_tracking": "Tracking Dashboard",
     "inventory": "Inventory",
     "finance": "Settlement",
     "governance": "Governance",

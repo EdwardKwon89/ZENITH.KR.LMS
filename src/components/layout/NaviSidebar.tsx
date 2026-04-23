@@ -61,6 +61,7 @@ export default function NaviSidebar({ user, profile }: { user?: any; profile?: a
       ]
     },
     { title: t("logistics"), href: "/logistics", icon: Truck },
+    { title: t("logistics_tracking"), href: "/tracking", icon: LayoutDashboard },
     { title: t("inventory"), href: "/inventory", icon: Package },
     { title: t("finance"), href: "/finance", icon: Calculator },
     { title: t("governance"), href: "/governance", icon: ShieldCheck, isAdminOnly: true },

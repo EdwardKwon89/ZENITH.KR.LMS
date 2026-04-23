@@ -1,11 +1,13 @@
 import React from 'react';
 import { getOrderDetails } from '@/app/actions/orders';
-import { getTrackingEvents } from '@/app/actions/tracking';
+import { getTrackingEvents, getTrackingRawLogs } from '@/app/actions/tracking';
 import { requireAuth, checkPermission } from '@/lib/auth/guards';
 import { OrderTisaDashboard } from '@/components/orders/OrderTisaDashboard';
 import TrackingTimeline from '@/components/tracking/TrackingTimeline';
 import AdminTrackingControl from '@/components/tracking/AdminTrackingControl';
+import RawLogViewer from '@/components/tracking/RawLogViewer';
 import OrderFinanceSummary from '@/components/finance/OrderFinanceSummary';
+
 import { Package, MapPin, Truck, ShieldCheck } from 'lucide-react';
 
 export default async function OrderDetailPage({ params }: { params: { orderId: string } }) {
@@ -39,6 +41,7 @@ export default async function OrderDetailPage({ params }: { params: { orderId: s
     .single();
 
   const isAdmin = await checkPermission(profile?.role, "/admin");
+  const rawLogs = isAdmin ? await getTrackingRawLogs(orderId) : [];
 
   // Mock initial TISA state (액션 통합 전 브릿지용)
   const snapshot = {
@@ -163,10 +166,13 @@ export default async function OrderDetailPage({ params }: { params: { orderId: s
         <div className="lg:col-span-4 space-y-8">
           {/* 1. Admin Logic (Phase 3.3 핵심) */}
           {isAdmin && (
-            <AdminTrackingControl 
-              orderId={orderId} 
-              currentProvider={config?.provider_type || 'VIRTUAL'} 
-            />
+            <div className="space-y-8">
+              <AdminTrackingControl 
+                orderId={orderId} 
+                currentProvider={config?.provider_type || 'VIRTUAL'} 
+              />
+              <RawLogViewer logs={rawLogs as any} />
+            </div>
           )}
 
           {/* 2. TISA Governance Dashboard */}

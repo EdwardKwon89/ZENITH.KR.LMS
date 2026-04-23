@@ -1,3 +1,7 @@
+---
+tags: ["methodology"]
+---
+
 # GSD + ZEN_A4 + Claude Code + Ollama 통합 개발 방법론
 
 > 1~5명 팀을 위한 최적화된 개발 워크플로우 가이드  

@@ -144,9 +144,31 @@
 
 ### getTrackingEvents(orderId)
 - **설명**: 특정 오더의 전체 트래킹 히스토리 조회
+- **Output**: `Promise<TrackingEvent[]>`
 
-### addTrackingEvent(payload)
-- **설명**: 신규 트래킹 이벤트 수동 등록 (또는 Webhook 연동)
+### addTrackingEvent(orderId, payload)
+- **설명**: [Admin] 신규 트래킹 이벤트 수동 등록 (또는 Webhook 연동)
+- **Input**: `orderId`, `{ event_code, location, description, event_time? }`
+
+### updateTrackingConfig(orderId, providerType, providerName?)
+- **설명**: [Admin] 오더의 트래킹 Provider 설정을 변경 (VIRTUAL, MANUAL, API)
+
+### syncExternalTracking()
+- **설명**: [Admin/System] API 공급자가 설정된 모든 활성 트래킹 데이터를 일괄 동기화
+- **Process**: `TrackingManager.getTrackingData` 호출 및 오더 상태 자동 동기화
+
+### refreshTrackingData(orderId)
+- **설명**: 특정 오더의 트래킹 데이터를 강제로 외부 API와 동기화
+- **Input**: `orderId`
+- **Output**: `Promise<{ success: boolean, count?: number, error?: string }>`
+
+### getTrackingRawLogs(orderId)
+- **설명**: [Admin] 문제 발생 시 디버깅을 위한 원본(Raw JSON) 응답 내역 조회
+- **Output**: `Promise<RawLog[]>`
+
+### getGlobalTrackingOverview()
+- **설명**: 대시보드용 전체 트래킹 현황 요약 조회 (최신 이벤트 포함)
+- **Output**: `Promise<TrackingOverview[]>`
 
 ---
 

@@ -114,3 +114,86 @@ export async function updateTrackingConfig(
   revalidatePath(`/(dashboard)/orders/${orderId}`, "page");
   return { success: true };
 }
+
+/**
+ * [Phase 3.1] 주기적 폴링 또는 수동 호출을 통해 외부 API 데이터를 동기화합니다.
+ */
+export async function syncExternalTracking() {
+  const { supabase } = await validateAdminAction();
+  
+  // 1. API 공급자가 설정된 활성 트래킹 설정 조회
+  const { data: configs, error } = await supabase
+    .from("zen_tracking_configs")
+    .select("*")
+    .eq("provider_type", "API");
+
+  if (error) throw new Error(`Failed to fetch tracking configs: ${error.message}`);
+
+  let processed = 0;
+  let errors = 0;
+
+  for (const config of configs) {
+    try {
+      // 2. TrackingManager를 통해 데이터 수집 및 오더 상태 동기화
+      await trackingManager.getTrackingData(supabase, config.order_id);
+      processed++;
+    } catch (e) {
+      console.error(`[SYNC_TRACKING] Error processing order ${config.order_id}:`, e);
+      errors++;
+    }
+  }
+
+  return { success: true, processed, errors };
+}
+
+/**
+ * [Phase 3.1] 문제 발생 시 디버깅을 위한 원본(Raw JSON) 응답 내역 조회
+ */
+export async function getTrackingRawLogs(orderId: string) {
+  const { supabase } = await validateAdminAction();
+
+  const { data: logs, error } = await supabase
+    .from("zen_tracking_raw_logs")
+    .select("*")
+    .eq("order_id", orderId)
+    .order("created_at", { ascending: false });
+
+  if (error) throw new Error(`Failed to fetch raw logs: ${error.message}`);
+
+  return logs;
+}
+
+/**
+ * [Phase 3.1] 모든 활성 트래킹 현황을 요약 조회합니다. (대시보드용)
+ */
+export async function getGlobalTrackingOverview() {
+  const { supabase } = await validateUserAction();
+
+  const { data, error } = await supabase
+    .from("zen_tracking_configs")
+    .select(`
+      *,
+      order:zen_orders(id, order_number, customer_id)
+    `)
+    .order("updated_at", { ascending: false });
+
+  if (error) throw new Error(`Failed to fetch tracking overview: ${error.message}`);
+
+  // 각 설정에 대한 최신 이벤트 1개씩 추가 조회
+  const configsWithEvents = await Promise.all(data.map(async (config) => {
+    const { data: latestEvent } = await supabase
+      .from("zen_tracking_events")
+      .select("*")
+      .eq("order_id", config.order_id)
+      .order("event_time", { ascending: false })
+      .limit(1)
+      .single();
+    
+    return {
+      ...config,
+      latest_event: latestEvent || null
+    };
+  }));
+
+  return configsWithEvents;
+}

@@ -1,3 +1,7 @@
+---
+tags: ["procedure"]
+---
+
 # ✅ Check List 관리 절차 (CHECK_LIST_PROCEDURE)
 
 > **문서 목적:** SAR로부터 Check List를 체계적으로 생성하고 관리하는 절차  

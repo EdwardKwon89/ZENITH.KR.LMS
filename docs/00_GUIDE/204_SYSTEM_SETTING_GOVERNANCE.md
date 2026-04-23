@@ -1,3 +1,7 @@
+---
+tags: ["procedure"]
+---
+
 # ⚙️ ZENITH System Setting Governance (제니스 운영 설정 관리 가이드)
 
 > **문서번호:** ZEN-GOV-02

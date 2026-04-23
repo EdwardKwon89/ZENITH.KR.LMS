@@ -1,6 +1,10 @@
-# 📚 ZENITH Common Code Governance (제니스 공통 코드 거버넌스)
+---
+tags: ["procedure"]
+---
 
-> **문서번호:** ZEN-GOV-01
+# [207] ZENITH Common Code Governance (제니스 공통 코드 거버넌스)
+
+> **문서번호:** 207
 > **관할:** CIO (Chief Information Officer)
 > **대상:** 모든 업무 분기 및 상태 관리 로직
 
