@@ -31,6 +31,7 @@
     "order_house": "하우스 오더",
     "order_import": "일괄 업로드",
     "logistics": "물류 실행",
+    "logistics_tracking": "통합 트래킹",
     "inventory": "재고 관리",
     "finance": "정산 관리",
     "governance": "거버넌스",

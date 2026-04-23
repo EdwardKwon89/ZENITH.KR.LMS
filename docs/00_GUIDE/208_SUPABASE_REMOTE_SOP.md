@@ -1,7 +1,11 @@
-# [SOP-01] Supabase Remote Database Operation Guide
+---
+tags: ["procedure"]
+---
+
+# [208] Supabase Remote Database Operation Guide
 
 > **프로젝트:** ZENITH_LMS
-> **문서번호:** SOP-01
+> **문서번호:** 208
 > **작성자:** Antigravity (AI Agent)
 > **대상:** 개발자 및 AI 에이전트
 > **최종 수정일:** 2026-04-18

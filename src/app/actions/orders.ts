@@ -9,7 +9,7 @@ import { UserRole } from "@/lib/auth/rbac";
 import { generateInvoicesForOrder } from "./finance";
 
 import { OrderRegistrationInput, orderRegistrationSchema } from "@/lib/validation/order";
-import { VirtualTrackingProvider } from "@/lib/logistics/tracking";
+import { generateTrackingHistory } from "@/lib/logistics/tracking";
 import { syncInventoryFromOrder } from "./inventory";
 
 /**
@@ -441,8 +441,7 @@ export async function updateOrderStatus(
   try {
     // [Optimization] 이미 266라인에서 상세 정보를 조회하도록 코드를 개선하여 재사용
     if (currentOrder && (currentOrder as any).transport_mode) {
-      const tracker = new VirtualTrackingProvider();
-      await tracker.generateHistory(
+      await generateTrackingHistory(
         supabase, 
         orderId, 
         nextStatus, 

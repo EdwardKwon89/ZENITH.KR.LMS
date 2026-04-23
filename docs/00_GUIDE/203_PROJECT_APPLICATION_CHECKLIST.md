@@ -1,3 +1,7 @@
+---
+tags: ["procedure"]
+---
+
 # 🚀 실 프로젝트 적용 체크리스트 (SAR & Check List 운영)
 
 > **문서 목적:** 기존 프로젝트에 SAR & Check List 절차를 적용하기 위한 체크리스트  

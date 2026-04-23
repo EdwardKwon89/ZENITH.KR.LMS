@@ -42,3 +42,20 @@ next-env.d.ts
 
 # mcp configuration & specific settings
 .claude/
+
+# ─── Temporary DB Dumps (do not commit) ───────────────────
+db_dump*.sql
+db_data*.sql
+scratch_*.sql
+_temp_*.sql
+_tmp_*.sql
+
+# ─── Temporary Python Scripts ─────────────────────────────
+scratch_*.py
+_temp_*.py
+_tmp_*.py
+
+# ─── Obsidian Vault ───────────────────────────────────────
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+

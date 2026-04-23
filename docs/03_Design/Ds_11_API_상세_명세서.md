@@ -259,6 +259,18 @@
 - **권한**: System/User
 - **응답**: `MatchingRateRecord`
 
+### 6.6 syncExternalTracking (Cron/Action) [Phase 3.1]
+- **설명**: 주기적 폴링 워커를 통해 외부(또는 Mock) 운송사 API를 호출하여 트래킹 상태 동기화
+- **권한**: System/Admin
+- **동작**: `zen_tracking_configs`의 활성 목록 순회 -> 어댑터 호출 -> `zen_tracking_raw_logs` 저장 -> `zen_tracking_events` 업데이트
+- **응답**: `{ success: boolean, processed: number, errors: number }`
+
+### 6.7 getTrackingRawLogs (Action) [Phase 3.1]
+- **설명**: [An_02 3.2.1 대응] 문제 발생 시 디버깅 및 감사(Audit) 목적으로 외부 API 원본(Raw JSON) 응답 내역 조회
+- **권한**: Admin
+- **파라미터**: `trackingConfigId` (uuid)
+- **응답**: `Array<TrackingRawLog>`
+
 ---
 
 ## 7. 마스터 데이터 (Master Data)
@@ -351,3 +363,105 @@
 > [!NOTE]
 > v1.8 업데이트 사항: 마스터 데이터(국가, 조직, 항공사, 코드 삭제) API 구현 및 인벤토리 수정(UPDATED) 로직 동기화 완료.
 > 상세한 TypeScript 타입 정의는 `src/types/` 및 `src/lib/validation/`을 참조하십시오.
+
+## 11. 통합 트래킹 (Tracking & Visibility)
+
+### 11.1 getGlobalTrackingOverview (Action)
+- **설명**: 마스터 오더 및 하우스 오더 전체에 대한 실시간 트래킹 요약 데이터 조회
+- **권한**: User (조직 권한 기반)
+- **파라미터**:
+  - : (uuid) 조회 대상 조직 ID
+- **응답**:
+  ```typescript
+  {
+    totalActive: number;      // 현재 운송 중인 오더 총 수
+    byStatus: {               // 상태별 집계
+      booked: number;
+      picked_up: number;
+      in_transit: number;
+      arrived: number;
+      delivered: number;
+    };
+    recentEvents: Array<{      // 최근 발생한 주요 트래킹 이벤트
+      orderId: string;
+      orderNo: string;
+      status: string;
+      location: string;
+      timestamp: string;
+    }>;
+  }
+  ```
+
+### 11.2 syncExternalTracking (Action)
+- **설명**: 외부 운송사(Carrier) API를 호출하여 최신 트래킹 정보를 동기화하고 로컬 DB 및 Raw Log에 저장
+- **권한**: User/System (폴링 연동)
+- **파라미터**:
+  - `trackingNo`: (string) 송장 번호
+  - `carrierCode`: (string) 운송사 코드 (e.g., 'UPS', 'DHL', 'HMM')
+- **프로세스**:
+  1. `TrackingAdapter`를 통한 외부 API 호출
+  2. 응답 원본을 `zen_tracking_raw_logs` 테이블에 저장 (Business QA 대응)
+  3. `orders` 및 `order_tracking_events` 테이블 업데이트
+- **응답**: `{ success: true, currentStatus: string, lastLocation: string }`
+
+### 11.3 getTrackingRawLogs (Action)
+- **설명**: 특정 오더의 외부 API 응답 원본(Raw Data) 이력 조회 (디버깅 및 정합성 검증용)
+- **권한**: Admin
+- **파라미터**: `orderId` (uuid)
+- **응답**: `Array<{ id: uuid, raw_payload: JSON, created_at: string }>`
+
+---
+
+> [!NOTE]
+> v1.9 업데이트 사항: 통합 트래킹 대시보드 및 외부 API 어댑터 패턴(TrackingManager) 관련 인터페이스 명세 추가.
+
+## 11. 통합 트래킹 (Tracking & Visibility)
+
+### 11.1 getGlobalTrackingOverview (Action)
+- **설명**: 마스터 오더 및 하우스 오더 전체에 대한 실시간 트래킹 요약 데이터 조회
+- **권한**: User (조직 권한 기반)
+- **파라미터**:
+  - `orgId`: (uuid) 조회 대상 조직 ID
+- **응답**:
+  ```typescript
+  {
+    totalActive: number;      // 현재 운송 중인 오더 총 수
+    byStatus: {               // 상태별 집계
+      booked: number;
+      picked_up: number;
+      in_transit: number;
+      arrived: number;
+      delivered: number;
+    };
+    recentEvents: Array<{      // 최근 발생한 주요 트래킹 이벤트
+      orderId: string;
+      orderNo: string;
+      status: string;
+      location: string;
+      timestamp: string;
+    }>;
+  }
+  ```
+
+### 11.2 syncExternalTracking (Action)
+- **설명**: 외부 운송사(Carrier) API를 호출하여 최신 트래킹 정보를 동기화하고 로컬 DB 및 Raw Log에 저장
+- **권한**: User/System (폴링 연동)
+- **파라미터**:
+  - `trackingNo`: (string) 송장 번호
+  - `carrierCode`: (string) 운송사 코드 (e.g., 'UPS', 'DHL', 'HMM')
+- **프로세스**:
+  1. `TrackingAdapter`를 통한 외부 API 호출
+  2. 응답 원본을 `zen_tracking_raw_logs` 테이블에 저장 (Business QA 대응)
+  3. `orders` 및 `order_tracking_events` 테이블 업데이트
+- **응답**: `{ success: true, currentStatus: string, lastLocation: string }`
+
+### 11.3 getTrackingRawLogs (Action)
+- **설명**: 특정 오더의 외부 API 응답 원본(Raw Data) 이력 조회 (디버깅 및 정합성 검증용)
+- **권한**: Admin
+- **파라미터**: `orderId` (uuid)
+- **응답**: `Array<{ id: uuid, raw_payload: JSON, created_at: string }>`
+
+---
+
+> [!NOTE]
+> v1.9 업데이트 사항: 통합 트래킹 대시보드 및 외부 API 어댑터 패턴(TrackingManager) 관련 인터페이스 명세 추가.

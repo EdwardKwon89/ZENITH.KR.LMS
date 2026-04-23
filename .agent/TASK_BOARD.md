@@ -30,7 +30,7 @@
 | ENV-06 | **Riley** | Aiden | TASK_BOARD archive 구조 구축 | ✅ 완료 | `.agent/archive/` 생성 + ENV 태스크 이관 + 메시지 이관 |
 | ENV-07 | **Claude** | Aiden | ACTIVE_AGENT.md IDLE 초기화 | ✅ 완료 | ACTIVE_AGENT.md Status=IDLE + 업데이트 기록 추가 |
 | ENV-08 | **Claude** | Aiden | Tag Frontmatter 누락 보완 | ✅ 완료 | 7개 파일 tags frontmatter 추가 (000, 001, 106, 120, 301~303) |
-| ENV-09 | **Riley** | Aiden | Phase 3.1 전체 커밋 | ⚠️ 소급 불가 — HANDOFF_BOX Aiden 판단 요청 | SAR 등록 여부 결정 필요 |
+| ENV-09 | **Riley** | Aiden | Phase 3.1 전체 커밋 | ✅ 완료 (Option A) | SAR_2026-04-23_002 등록 — 소급 불가, 재발 방지 완료 |
 | ENV-10 | **Claude** | Aiden | GEMINI.md 커밋 규약 추가 | ✅ 완료 | GEMINI.md v1.12 — 커밋 & 브랜치 규약 섹션 추가 |
 
 ---

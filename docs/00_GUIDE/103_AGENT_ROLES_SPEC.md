@@ -1,8 +1,15 @@
+---
+tags: ["governance"]
+---
+
 # 📚 103_AGENT_ROLES_SPEC (에이전트 역할 및 모델 명세)
 
 > **프로젝트**: ZENITH_LMS  
 > **방법론**: ZEN_A4 (GSD Hybrid v2.0)  
-> **최종 업데이트**: 2026-04-17
+> **최종 업데이트**: 2026-04-23
+
+> [!NOTE]
+> 상세 R&R 및 협업 절차는 [104_MULTIAGENT_RNR_GUIDE.md](./104_MULTIAGENT_RNR_GUIDE.md)를 참조하십시오. 본 문서는 역할 요약 및 모델 할당 기준을 정의합니다.
 
 이 문서는 ZENITH_LMS 프로젝트에 참여하는 멀티 에이전트들의 역할 분담(R&R)과 각 역할에 최적화된 AI 모델 할당 기준을 정의합니다.
 
@@ -13,14 +20,23 @@
 
 ## 🏗️ 1. 에이전트 역할 정의 (Role Hierarchy)
 
+### 1-0. 페르소나 이름 (확정)
+
+| 페르소나 | 역할 | 플랫폼 |
+| :--- | :--- | :--- |
+| **Aiden (에이든)** | ZEN_CEO | Claude Opus 4.7 |
+| **Riley (라일리)** | CPO + Header Agent | Gemini Pro High |
+
+---
+
 ### 1-1. 전략 및 오케스트레이션 (Leadership)
 | 역할 | 페르소나 | 주요 책임 |
 | :--- | :--- | :--- |
 | **Master** | Owner (Edward) | 전체 플랫폼 소유자. 최종 의사결정 및 시스템 운명 결정. |
-| **ZEN_CEO** | Orchestrator | 전체 프로젝트 방향 설정, 아키텍처 결정, 에이전트 오케스트레이션. |
-| **CTO** | Architect | 기술 스택 선정, 아키텍처 패턴 설계, 핵심 백엔드 로직 검토. |
-| **CIO** | Info Architect | 데이터 모델링(ERD), 정보 보안 정책, 외부 API 연동 규격 설계, **문서 무결성 감사 및 인덱스 상시 관리**. |
-| **CPO** | Product Owner | 기능 명세(PRD) 작성, UI/UX 일관성 검토, 비즈니스 테스트 시나리오 확정. |
+| **ZEN_CEO** | Aiden (Claude Opus 4.7) | 전체 프로젝트 방향 설정, 아키텍처 결정, 에이전트 오케스트레이션. |
+| **CTO** | Claude Sonnet 4.6 | 기술 스택 선정, 아키텍처 패턴 설계, Frontend Execution 겸임. |
+| **CIO** | Gemini Pro High | 데이터 모델링(ERD), 정보 보안 정책, 외부 API 연동 규격 설계, **문서 무결성 감사 및 인덱스 상시 관리**. |
+| **CPO** | Riley (Gemini Pro High) | **Header Agent** (Gemini 단일 창구), 기능 명세(PRD), UI/UX 일관성, 도메인 지식 관리, UAT 시나리오 확정. |
 
 ### 1-2. 운영 및 실행 (Operations)
 | 역할 | 페르소나 | 주요 책임 |
@@ -37,14 +53,15 @@
 
 | 분류 | 역할 | 할당 모델 (Target) | 적용 기준 |
 | :--- | :--- | :--- | :--- |
-| **Supreme** | **Master (Edward)** | **Human Master** | 최종 승인 및 방향성 검수 |
-| **High Tier** | **ZEN_CEO**, CTO, CIO | **Gemini 3.1 Pro (High)** | 심층 추론, 구조적 결정, 보안 검토 |
-| **Mid Tier** | CPO | **Gemini 3.1 Pro (Low)** | 명세 작성, 일관성 검토, 빠른 피드백 |
-| **Smart Tier** | Audit Agent | **Gemini 3.1 Pro (Low/High)** | **Phase 1~2**: Low (상시 검증) <br> **Phase 3**: High (정밀 감사) |
-| **Fast Tier** | PM, Execution | **Gemini 3 Flash** | 대량 코드 생성, 반복 작업, 상태 관리 |
+| **Supreme** | **Master (Edward)** | **Human** | 최종 승인 및 방향성 검수 |
+| **Claude Strategic** | **ZEN_CEO (Aiden)** | **Claude Opus 4.7** | 심층 추론, 전략 결정, 에이전트 오케스트레이션 |
+| **Claude Execution** | **CTO** (Frontend Execution 겸임) | **Claude Sonnet 4.6** | 기술 결정, React/Next.js 구현, 품질 게이트 |
+| **Gemini Strategic** | **CPO (Riley)** — Header Agent, **CIO** | **Gemini Pro High** | 장기 컨텍스트, 도메인·정보 아키텍처, 내부 위임 총괄 |
+| **Gemini Execution** | **PM**, Backend Execution, **Audit** | **Gemini Flash** | 대량 코드 생성, 반복 작업, Business QA |
+| **Sub-Agent** | gsd-nyquist-auditor (Technical QA) | **Claude Haiku 4.5** | 커버리지 측정, Playwright, 자동 테스트 생성 |
 
 ### ⚠️ 특별 운영 조건: Audit Agent Model Swap
-Audit Agent는 평시(설계/구현)에는 신속한 피드백을 위해 **Low** 모델을 사용하나, **Phase 3 (Verify)** 단계의 최종 품질 게이트 및 보안 감사 시에는 **Gemini 3.1 Pro (High)**로 자동 전환하여 무결성을 보증합니다.
+Audit Agent(Business QA)는 평시(설계/구현)에는 신속한 피드백을 위해 **Gemini Flash**를 사용하나, **Phase 3 (Verify)** 단계의 최종 품질 게이트 및 보안 감사 시에는 **Gemini Pro High**로 자동 전환하여 무결성을 보증합니다.
 
 ---
 

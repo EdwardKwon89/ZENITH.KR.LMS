@@ -1,3 +1,7 @@
+---
+tags: ["procedure"]
+---
+
 # 🔐 ZENITH RBAC & Menu Governance (제니스 권한 및 메뉴 관리 가이드)
 
 > **문서번호:** ZEN-GOV-03
