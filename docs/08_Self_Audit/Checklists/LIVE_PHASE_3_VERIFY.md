@@ -33,7 +33,7 @@
 
 | 점검일 | 검증 대상/버전 | 수행자 | 결과 | 로그 링크 |
 |--------|--------------|--------|------|----------|
-|        |              |        |      |          |
+| 2026-04-23 | QA-02 트래킹 통합 검증 / v2.2 | Claude (Antigravity) | ✅ PASS | [LIVE_REGRESSION_TEST_MAP.md](LIVE_REGRESSION_TEST_MAP.md) |
 
 ---
 **작성 가이드:**

@@ -1,8 +1,8 @@
 # 🗺️ LIVE Regression Test Master Map
 
 > **상태:** [ACTIVE]  
-> **총 테스트 케이스:** 58 Cases  
-> **최종 검증일:** 2026-04-22  
+> **총 테스트 케이스:** 60 Cases  
+> **최종 검증일:** 2026-04-23  
 
 제니스 플랫폼의 비즈니스 영속성을 보장하는 회귀 테스트 케이스의 통합 명세서입니다. 모든 신규 개발 및 수정 시 이 맵에 케이스가 추가되어야 하며, 전체 테스트가 통과되어야 합니다.
 
@@ -93,6 +93,12 @@
 | **TC-TR.5** | 화주별 권한 기반 격리 | 타 화주가 다른 화주의 트래킹 정보를 조회할 수 없도록 보안 검증 | `tests/integration/tracking.test.ts` |
 | **TC-TR.6** | 수동 이벤트 감사 추적 | 이벤트 소스(Manual vs Auto) 정보 유실 없는 보존 확인 | `tests/integration/tracking.test.ts` |
 
+### 10. QA-02 트래킹 비즈니스 통합 (Tracking Business QA)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-QA.1** | Raw 로그 영속성 | `MockCarrierProvider` 호출 시 `zen_tracking_raw_logs`에 JSON 원본 저장 확인 | `tests/integration/tracking-business-qa.test.ts` |
+| **TC-QA.2** | 동기화 무결성 (중복 방지) | 동일 이벤트 2회 동기화 시 `zen_tracking_events` 중복 삽입 차단 확인 | `tests/integration/tracking-business-qa.test.ts` |
+
 ---
 
 ## 📊 최신 검증 이력 (Execution History)
@@ -101,6 +107,7 @@
 | :--- | :--- | :---: | :--- | :--- |
 | 2026-04-21 | v1.1 | ✅ PASS | 1.88s | 28/28 Passed |
 | 2026-04-22 | v2.1 | ✅ PASS | 2.81s | 58/58 Fully Registered & Verified |
+| 2026-04-23 | v2.2 | ✅ PASS | 7.9s | 60/60 QA-02 통합 2건 추가, 데이터 레이스 픽스 |
 
 ---
 
