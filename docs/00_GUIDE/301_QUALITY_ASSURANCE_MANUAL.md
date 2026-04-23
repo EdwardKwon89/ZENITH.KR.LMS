@@ -1,3 +1,7 @@
+---
+tags: ["procedure"]
+---
+
 # ZENITH Quality Assurance Manual (QAM)
 
 **문서번호**: ZEN-QA-01

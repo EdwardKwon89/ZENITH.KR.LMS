@@ -1,3 +1,7 @@
+---
+tags: ["procedure"]
+---
+
 # API 설계 우선 개발 가이드라인 (API-First Development Guide)
 
 > **프로젝트:** ZENITH_LMS (SNTL 통합 물류 플랫폼)

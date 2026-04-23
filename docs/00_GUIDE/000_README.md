@@ -1,3 +1,7 @@
+---
+tags: ["governance"]
+---
+
 # 📚 000_GUIDE 문서 인덱스
 
 > **폴더명**: 000_GUIDE (개발 방법론 & 절차 & 규칙)  
@@ -39,7 +43,10 @@
 | **101** | **개발 방법론 개요** | (추가 예정) | GSD + ZEN_A4 하이브리드 방법론 개요 |
 | **101** | **ZEN_A4 자동 리뷰 시스템** | [101_ZEN_A4_METHODOLOGY.md](./101_ZEN_A4_METHODOLOGY.md) | 3가지 Hook을 통한 자동 코드 리뷰 및 품질 관리 |
 | **102** | **통합 개발 방법론** | [102_INTEGRATED_DEVELOPMENT_METHODOLOGY.md](./102_INTEGRATED_DEVELOPMENT_METHODOLOGY.md) | Phase 1-4 상세 운영 절차 및 체크리스트 |
-| **120** | **MCP & Skill 가이드** | [120_MCP_SKILL_GUIDE.md](./120_MCP_SKILL_GUIDE.md) | Java 기반 플랫폼 개발을 위한 MCP 도구 및 Skill 활용 표준 |
+| **103** | **에이전트 역할 명세** | [103_AGENT_ROLES_SPEC.md](./103_AGENT_ROLES_SPEC.md) | 에이전트 역할(R&R) 및 모델 할당 기준 |
+| **104** | **멀티 에이전트 R&R 가이드** | [104_MULTIAGENT_RNR_GUIDE.md](./104_MULTIAGENT_RNR_GUIDE.md) | 전체 멀티 에이전트 역할, 협업 절차, 5계층 컴플라이언스 강제 구조 |
+| **105** | **물류 도메인 지식 베이스** | [105_DOMAIN_KNOWLEDGE.md](./105_DOMAIN_KNOWLEDGE.md) | 물류 용어·계산 규칙·상태 전이·RBAC·엣지케이스 카탈로그 (CPO 관리) |
+| **120** | **MCP & Skill 가이드** | [120_MCP_SKILL_GUIDE.md](./120_MCP_SKILL_GUIDE.md) | MCP 도구 및 Skill 활용 표준 |
 
 ---
 
@@ -50,6 +57,11 @@
 | **201** | **SAR 작성 규칙** | [201_SAR_RULE.md](./201_SAR_RULE.md) | Self_Audit_Report 작성 방법 (파일명, 분류, 심각도, 필수 섹션) |
 | **202** | **Check List 관리 절차** | [202_CHECK_LIST_PROCEDURE.md](./202_CHECK_LIST_PROCEDURE.md) | SAR으로부터 Check List 생성 및 관리 절차 (4단계) |
 | **203** | **실 프로젝트 적용 체크리스트** | [203_PROJECT_APPLICATION_CHECKLIST.md](./203_PROJECT_APPLICATION_CHECKLIST.md) | SAR & Check List 절차를 기존 프로젝트에 적용하는 실행 가이드 |
+| **204** | **시스템 설정 거버넌스** | [204_SYSTEM_SETTING_GOVERNANCE.md](./204_SYSTEM_SETTING_GOVERNANCE.md) | 시스템 설정 관리 규칙 |
+| **205** | **RBAC 메뉴 거버넌스** | [205_RBAC_MENU_GOVERNANCE.md](./205_RBAC_MENU_GOVERNANCE.md) | 역할 기반 메뉴 접근 제어 규칙 |
+| **206** | **문서 구조 및 스크립트 관리 거버넌스** | [206_DOCS_AND_SCRIPT_GOVERNANCE.md](./206_DOCS_AND_SCRIPT_GOVERNANCE.md) | docs/ 문서 유형 분류 체계, 번호 충돌 해소, SQL/py 관리 규칙, Obsidian Vault 적용 방안 |
+| **207** | **공통 코드 거버넌스** | [207_COMMON_CODE_GOVERNANCE.md](./207_COMMON_CODE_GOVERNANCE.md) | 공통 코드 정의 및 관리 규칙 |
+| **208** | **Supabase 원격 SOP** | [208_SUPABASE_REMOTE_SOP.md](./208_SUPABASE_REMOTE_SOP.md) | Supabase 원격 접속 및 운영 절차 |
 
 ---
 

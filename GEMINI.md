@@ -1,3 +1,7 @@
+---
+tags: ["governance"]
+---
+
 # GEMINI.md - Antigravity & Gemini Work Regulations
 
 > **프로젝트:** ZENITH_LMS (SNTL 통합 물류 플랫폼)
@@ -68,6 +72,28 @@
 
 ---
 
+## 🔑 커밋 & 브랜치 규약 (Commit Convention, ENV-10)
+
+> **목적**: Gemini 에이전트의 작업 이력을 git에 명확히 추적하기 위한 커밋 표준입니다.
+
+- **커밋 태그**: 모든 커밋에 `[Gemini]` 접두사 필수 (R-01, commit-msg 훅 강제)
+- **커밋 시점**: **Task 완료마다 즉시 커밋** (Phase 완료까지 미루지 않음 — ENV-09 위반 재발 방지)
+- **메시지 형식**: `[Gemini] <type>: <description>`
+  - type: `feat`, `fix`, `refactor`, `docs`, `test`, `chore`
+  - 예시: `[Gemini] feat: BE-02 zen_tracking_raw_logs 테이블 생성 및 RLS 정책 적용`
+- **커밋 전 필수**: `rtk npm run test:regression` PASS 확인 (R-08, pre-commit 훅 강제)
+- **LAST_REGRESSION_RESULT**: 커밋 전 `.agent/LAST_REGRESSION_RESULT` 파일이 `PASS`여야 함
+
+```bash
+# 표준 커밋 절차
+rtk npm run test:regression          # R-08 회귀 테스트 통과 확인
+echo "PASS" > .agent/LAST_REGRESSION_RESULT   # 결과 기록
+git add <변경파일>
+git commit -m "[Gemini] feat: <작업 설명>"   # commit-msg 훅이 [Gemini] 태그 자동 검증
+```
+
+---
+
 ## 📝 개정 이력 (Revision History)
 
 | 버전 | 날짜       | 작성자      | 설명                                                                          |
@@ -84,3 +110,5 @@
 | v1.9 | 2026-04-22 | Antigravity | 기능-UI 결합 검증 의무화 규정(R-10) 추가 및 UI 증적 필수화                       |
 | v1.10| 2026-04-22 | Antigravity | API 설계 우선 원칙(R-11) 추가 및 개발 프로세스 내 명세 우선 준수 명시              |
 | v1.11| 2026-04-22 | Antigravity | 명세-코드 동기화 의무(R-12) 추가 및 API First 가이드라인 구체화                    |
+| v1.12| 2026-04-23 | Claude (Antigravity) | 커밋 & 브랜치 규약 섹션 추가 (ENV-10, Aiden 지시). commit-msg 훅 연동 명시. |
+

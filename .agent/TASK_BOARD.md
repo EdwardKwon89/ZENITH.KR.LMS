@@ -1,7 +1,7 @@
 # Multi-Agent Task Board
 
 > **프로젝트:** ZENITH_LMS
-> **업데이트:** 2026-04-23 14:17 (KST)
+> **업데이트:** 2026-04-23 14:35 (KST)
 > **운영 원칙:** 각 에이전트는 작업 완료 시 본 보드를 즉시 최신화한다. Handoff 메시지는 하단 섹션에 누적 기록한다.
 > **관리 규칙:**
 > - 완료 태스크: Phase 전환 시 또는 섹션 내 5개 초과 시 → `.agent/archive/TASKS_[PHASE명].md` 이관
@@ -28,10 +28,10 @@
 | Task ID | 담당 (Worker) | 검증 (Auditor) | Task 명 | 상태 | Done 조건 |
 |:---|:---|:---|:---|:---|:---|
 | ENV-06 | **Riley** | Aiden | TASK_BOARD archive 구조 구축 | ✅ 완료 | `.agent/archive/` 생성 + ENV 태스크 이관 + 메시지 이관 |
-| ENV-07 | **Riley** | Aiden | ACTIVE_AGENT.md IDLE 초기화 | 작업 완료 후 Status: IDLE로 미초기화 — 즉시 수정 | ⏳ 대기 | ACTIVE_AGENT.md Status=IDLE + 잠금 경로 해제 |
-| ENV-08 | **Riley** | Aiden | Tag Frontmatter 누락 보완 | 106, 120, 000_README, 001, 300번대, CLAUDE.md, GEMINI.md | ⏳ 대기 | 전체 00_GUIDE 파일 tags 완료 확인 |
-| ENV-09 | **Riley** | Aiden | Phase 3.1 전체 커밋 | BE-02~FE-01, BUG-01~03 미커밋 상태 — `[Gemini]` 태그로 즉시 커밋 | ⏳ 대기 | git log에 `[Gemini]` 커밋 확인 |
-| ENV-10 | **Riley** | Aiden | GEMINI.md 커밋 규약 추가 | 커밋 의무, 태그 형식, 시점 기준(Task 완료마다) 명시 | ⏳ 대기 | GEMINI.md 내 커밋 섹션 추가 확인 |
+| ENV-07 | **Claude** | Aiden | ACTIVE_AGENT.md IDLE 초기화 | ✅ 완료 | ACTIVE_AGENT.md Status=IDLE + 업데이트 기록 추가 |
+| ENV-08 | **Claude** | Aiden | Tag Frontmatter 누락 보완 | ✅ 완료 | 7개 파일 tags frontmatter 추가 (000, 001, 106, 120, 301~303) |
+| ENV-09 | **Riley** | Aiden | Phase 3.1 전체 커밋 | ⚠️ 소급 불가 — HANDOFF_BOX Aiden 판단 요청 | SAR 등록 여부 결정 필요 |
+| ENV-10 | **Claude** | Aiden | GEMINI.md 커밋 규약 추가 | ✅ 완료 | GEMINI.md v1.12 — 커밋 & 브랜치 규약 섹션 추가 |
 
 ---
 
