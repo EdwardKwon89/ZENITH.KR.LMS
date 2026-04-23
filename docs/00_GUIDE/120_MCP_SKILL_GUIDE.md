@@ -1,3 +1,7 @@
+---
+tags: ["procedure"]
+---
+
 # 🎯 120_MCP_SKILL_GUIDE (Java 기반 Web/모바일 플랫폼 개발 가이드)
 
 > **문서 ID**: 120  

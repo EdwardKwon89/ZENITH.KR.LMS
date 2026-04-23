@@ -23,29 +23,27 @@ describe('QA-02 Tracking Business Integration', () => {
   beforeAll(async () => {
     supabase = createClient(supabaseUrl, supabaseKey);
 
-    // [Cleanup] Ensure single configuration for deterministic testing
-    const { data: configs } = await supabase
+    // [Cleanup] ALWAYS delete and re-insert to guarantee single, clean configuration.
+    // This prevents .single() failures from duplicate rows in any run scenario.
+    await supabase
       .from('zen_tracking_configs')
-      .select('*')
+      .delete()
       .eq('order_id', testOrderId);
 
-    if (configs && configs.length > 1) {
-      await supabase.from('zen_tracking_configs').delete().eq('order_id', testOrderId);
-      await supabase.from('zen_tracking_configs').insert({
+    const { error: insertError } = await supabase
+      .from('zen_tracking_configs')
+      .insert({
         order_id: testOrderId,
         provider_type: 'API',
         provider_name: 'MockCarrier',
         tracking_no: 'TRK-MOCK-12345'
       });
-    } else if (!configs || configs.length === 0) {
-      await supabase.from('zen_tracking_configs').insert({
-        order_id: testOrderId,
-        provider_type: 'API',
-        provider_name: 'MockCarrier',
-        tracking_no: 'TRK-MOCK-12345'
-      });
+
+    if (insertError) {
+      console.error('[QA-02] beforeAll setup failed:', insertError.message);
     }
   });
+
 
   it('should preserve raw JSON logs in zen_tracking_raw_logs', async () => {
     // 1. Clear existing logs for this order to ensure clean test

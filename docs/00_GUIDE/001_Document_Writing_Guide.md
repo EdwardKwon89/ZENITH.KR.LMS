@@ -1,3 +1,7 @@
+---
+tags: ["methodology"]
+---
+
 # 📖 프로젝트 문서 작성 가이드 (Document Writing Guide)
 
 > **문서 ID**: 001  

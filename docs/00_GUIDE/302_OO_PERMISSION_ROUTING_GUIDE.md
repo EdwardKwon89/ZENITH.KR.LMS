@@ -1,3 +1,7 @@
+---
+tags: ["procedure"]
+---
+
 # ZEN-GUIDE-302: 객체 지향적 권한 및 라우팅 설계 가이드
 
 > **문서번호**: ZEN-GUIDE-302
