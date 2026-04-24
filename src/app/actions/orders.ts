@@ -436,7 +436,15 @@ export async function updateOrderStatus(
     }
   }
 
-  // 5. [Tracking Integration] 지능형 트래킹 시뮬레이션 트리거
+  // 5. [Notification Integration] 상태 변경 알림 트리거 (WBS 3.1.2.2)
+  try {
+    const { triggerStatusChangeNotification } = await import("@/app/actions/notifications");
+    await triggerStatusChangeNotification(orderId, nextStatus);
+  } catch (notifError) {
+    console.error("[ERROR] Notification trigger failed:", notifError);
+  }
+
+  // 6. [Tracking Integration] 지능형 트래킹 시뮬레이션 트리거
   // 상태 변경 시점에 맞춘 과거 기록 생성 (사용자 지침 준수)
   try {
     // [Optimization] 이미 266라인에서 상세 정보를 조회하도록 코드를 개선하여 재사용

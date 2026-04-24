@@ -12,5 +12,7 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, './src'),
     },
+    // Integration tests share remote DB state — sequential to prevent data races
+    fileParallelism: false,
   },
 });

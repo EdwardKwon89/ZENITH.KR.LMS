@@ -159,7 +159,7 @@
     - [x] (완료) 3.1.1.2 주기적 Tracking 데이터 폴링(Polling) 및 Sync 액션 구현 (3 MD) | 완료: 2026-04-23 | 비고: syncExternalTracking 액션 완료
 - **3.1.2 통합 가시성 강화** (6 MD)
     - [x] (완료) 3.1.2.1 단일 오더 및 마스터 오더 단위 통합 트래킹 화면 (3 MD) | 완료: 2026-04-23 | 비고: /tracking 대시보드 및 OrderDetail 통합 완료
-    - [ ] (대기) 3.1.2.2 상태 변경 시 자동 알림(Notification) 엔진 연동 (3 MD) | 완료: - | 비고: -
+    - [x] (완료) 3.1.2.2 상태 변경 시 자동 알림(Notification) 엔진 연동 (3 MD) | 완료: 2026-04-24 | 비고: Resend 이메일 + IN_APP 알림 + /notifications 페이지 구현 완료
 - **3.1.3 외부 데이터 보존 정책 구현** (3 MD)
     - [x] (완료) 3.1.3.1 외부 API 응답 원본(Raw JSON) 저장 로직 (An_02 3.2.1 대응) (1.5 MD) | 완료: 2026-04-23 | 비고: zen_tracking_raw_logs 테이블 및 저장 로직 완료
     - [x] (완료) 3.1.3.2 Raw 데이터 기반 정합성 검증 및 RawLogViewer 구축 (1.5 MD) | 완료: 2026-04-23 | 비고: RawLogViewer 및 Admin 컨트롤 연동 완료

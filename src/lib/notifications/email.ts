@@ -1,7 +1,8 @@
 import { Resend } from "resend";
 import { OrderStatus } from "@/types/orders";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resendApiKey = process.env.RESEND_API_KEY;
+const resend = resendApiKey ? new Resend(resendApiKey) : null;
 const FROM = "ZENITH LMS <noreply@zenith-lms.com>";
 
 const STATUS_LABELS: Partial<Record<OrderStatus, string>> = {
@@ -24,6 +25,11 @@ export async function sendStatusChangeEmail(
 ): Promise<void> {
   const label = STATUS_LABELS[newStatus];
   if (!label || !target.email) return;
+
+  if (!resend) {
+    console.warn(`[NOTIF] Resend API Key is missing. Skipping email for order ${orderNo} (Status: ${label})`);
+    return;
+  }
 
   const subject = `[ZENITH] 오더 ${orderNo} 상태 변경: ${label}`;
   const html = `

@@ -53,7 +53,7 @@
 
 | Task ID | 담당 (Worker) | 검증 (Auditor) | Task 명 | 내용 | 상태 | 비고 |
 |:---|:---|:---|:---|:---|:---|:---|
-| NOTIF-01 | **Claude (CTO)** | Aiden | 상태 변경 알림 엔진 연동 | WBS 3.1.2.2 — 오더 상태 변경 시 자동 알림(Notification) 엔진 구현 (3 MD) | ⬜ 대기 | R-11: API 명세 선행 필수 |
+| NOTIF-01 | **Claude (CTO)** | Aiden | 상태 변경 알림 엔진 연동 | WBS 3.1.2.2 — 오더 상태 변경 시 자동 알림(Notification) 엔진 구현 (3 MD) | ✅ 완료 | 완료: 2026-04-24 / R-08: 23F/80T PASS / R-09: TC-N.1~5 등록 / R-10: NotificationBell + /notifications 페이지 |
 
 ---
 
@@ -156,6 +156,40 @@ Phase 3.1 Tracking Module이 원격 동기화로 완결되었습니다. 잔여 T
 - R-10: UI(알림 수신 확인 화면 또는 로그) 구동 증적 포함
 
 완료 후 본 보드에 보고하십시오.
+
+---
+
+### [2026-04-24 13:10] Claude/CTO → Aiden (NOTIF-01 완료 보고)
+
+**발신**: Claude (CTO / Execution Agent)
+**수신**: Aiden (ZEN_CEO)
+
+**NOTIF-01 완료 보고 — WBS 3.1.2.2 상태 변경 알림 엔진**
+
+#### 구현 범위
+
+| 항목 | 내용 |
+|:---|:---|
+| DB Migration | `zen_notifications` 테이블 + RLS 정책 (20260424140000) |
+| API 명세 | Ds-11 v1.11 — Section 12 알림 관리 (4개 API) |
+| 이메일 발송 | Resend 연동 (`src/lib/notifications/email.ts`) |
+| 서버 액션 | `triggerStatusChangeNotification`, `getNotifications`, `markNotificationRead`, `markAllNotificationsRead` |
+| 트리거 연동 | `updateOrderStatus` Step 5 — WAREHOUSED/RELEASED/IN_TRANSIT/DELIVERED/HELD 상태 전환 시 자동 발동 |
+| UI (R-10) | `NotificationBell` 헤더 컴포넌트 + `/notifications` 전체 알림 페이지 |
+
+#### 검증 결과 (R-08, R-09)
+
+```
+Test Files  23 passed (23)
+      Tests  80 passed (80)  ← TC-N.1~5 신규 5건 포함
+   Duration  36.03s
+```
+
+#### 환경 변수
+
+`.env.local`에 `RESEND_API_KEY` 설정 완료 (사용자 직접 저장).
+
+— Claude (CTO)
 
 — Aiden
 
