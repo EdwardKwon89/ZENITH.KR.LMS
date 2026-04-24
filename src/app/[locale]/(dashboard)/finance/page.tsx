@@ -12,6 +12,7 @@ import {
   DollarSign
 } from 'lucide-react';
 import { format } from 'date-fns';
+import { InvoiceTable } from '@/components/finance/InvoiceTable';
 
 export default async function FinanceDashboardPage() {
   const { supabase, profile } = await requireAuth();
@@ -109,63 +110,8 @@ export default async function FinanceDashboardPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Recent Invoices List */}
-        <div className="lg:col-span-8 bg-white dark:bg-neutral-900/50 rounded-[2.5rem] border border-slate-100 dark:border-neutral-800 p-8">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-xl font-bold flex items-center gap-2">
-              <FileText className="w-5 h-5 text-blue-500" />
-              Recent Invoices
-            </h2>
-            <button className="text-xs font-bold text-blue-600 hover:underline">View All Invoices</button>
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full text-left">
-              <thead>
-                <tr className="border-b border-slate-100 dark:border-neutral-800">
-                  <th className="pb-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Invoice No.</th>
-                  <th className="pb-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Date</th>
-                  <th className="pb-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Amount</th>
-                  <th className="pb-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-50 dark:divide-neutral-800">
-                {invoices && invoices.length > 0 ? (
-                  invoices.map((inv) => (
-                    <tr key={inv.id} className="group hover:bg-slate-50 dark:hover:bg-neutral-800/50 transition-colors">
-                      <td className="py-5 font-mono text-sm text-slate-600 dark:text-slate-400">
-                        {inv.invoice_no}
-                      </td>
-                      <td className="py-5 text-sm text-slate-500">
-                        {format(new Date(inv.created_at), 'yyyy.MM.dd')}
-                      </td>
-                      <td className="py-5 font-black text-slate-900 dark:text-white">
-                        {inv.currency} {Number(inv.total_amount).toLocaleString()}
-                      </td>
-                      <td className="py-5">
-                        <div className="flex justify-center">
-                          <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${
-                            inv.status === 'PAID' 
-                              ? 'bg-green-50 text-green-600 border-green-100' 
-                              : inv.status === 'UNPAID'
-                              ? 'bg-orange-50 text-orange-600 border-orange-100'
-                              : 'bg-slate-50 text-slate-600 border-slate-100'
-                          }`}>
-                            {inv.status}
-                          </span>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={4} className="py-20 text-center text-slate-400 italic">
-                      No invoices generated yet.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+        <div className="lg:col-span-8">
+          <InvoiceTable invoices={invoices || []} />
         </div>
 
         {/* Financial Sidebar */}
