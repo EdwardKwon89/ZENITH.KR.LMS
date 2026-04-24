@@ -1,7 +1,7 @@
 # Multi-Agent Task Board
 
 > **프로젝트:** ZENITH_LMS
-> **업데이트:** 2026-04-23 14:35 (KST)
+> **업데이트:** 2026-04-24 12:20 (KST)
 > **운영 원칙:** 각 에이전트는 작업 완료 시 본 보드를 즉시 최신화한다. Handoff 메시지는 하단 섹션에 누적 기록한다.
 > **관리 규칙:**
 > - 완료 태스크: Phase 전환 시 또는 섹션 내 5개 초과 시 → `.agent/archive/TASKS_[PHASE명].md` 이관
@@ -49,6 +49,25 @@
 
 ---
 
+## 📋 Phase 3.1 — 잔여 (Sprint B)
+
+| Task ID | 담당 (Worker) | 검증 (Auditor) | Task 명 | 내용 | 상태 | 비고 |
+|:---|:---|:---|:---|:---|:---|:---|
+| NOTIF-01 | **Claude (CTO)** | Aiden | 상태 변경 알림 엔진 연동 | WBS 3.1.2.2 — 오더 상태 변경 시 자동 알림(Notification) 엔진 구현 (3 MD) | ⬜ 대기 | R-11: API 명세 선행 필수 |
+
+---
+
+## 📋 Phase 3.2 — Finance Sprint A (Riley)
+
+| Task ID | 담당 (Worker) | 검증 (Auditor) | Task 명 | 내용 | 상태 | 비고 |
+|:---|:---|:---|:---|:---|:---|:---|
+| FIN-00 | **Riley** | Aiden | Finance API 명세 (PDF/Excel) | Ds-11 v1.10 업데이트 | ✅ 완료 | R-11 준수 완료 |
+| FIN-01 | **Riley** | Aiden | PDF 청구서 자동 발행 & 이력 관리 | WBS 3.2.2.3 — PDF 청구서 자동 발행, 인보이스 이력 관리 시스템 (7 MD) | ⬜ 대기 | R-11: API 명세 완료 / R-10: UI 결합 필수 |
+| FIN-02 | **Riley** | Aiden | 정산 데이터 엑셀 Export | WBS 3.2.4.1~3.2.4.2 — 조건별 필터링 + 대용량 스트리밍 다운로드 (3 MD) | ⬜ 대기 | API 명세 완료 / FIN-01 완료 후 착수 |
+| FIN-03 | **Riley** | Aiden | 세금계산서 템플릿 & 메일 발송 | WBS 3.2.5.1~3.2.5.2 — 표준 세금계산서 규격 + SENT/SUCCESS 이력 관리 (2 MD) | ⬜ 대기 | FIN-02 완료 후 착수 |
+
+---
+
 ## 🐛 Phase 3.1 — 결함 수정 (BUG)
 
 | Task ID | 담당 (Worker) | 검증 (Auditor) | Task 명 | 내용 | 상태 | 심각도 |
@@ -60,6 +79,120 @@
 ---
 
 ## 🤝 Handoff Messages
+
+### [2026-04-24 12:20] Riley → Aiden (Phase 3.2 Finance Sprint A - API 명세 완료 보고)
+
+**발신**: Riley (CPO, Header Agent)
+**수신**: Aiden (ZEN_CEO)
+
+**Phase 3.2 Finance Sprint A (FIN-01~02) 착수 준비 및 API 명세 완료 보고**
+
+Aiden, 지시하신 Finance Sprint A 작업을 위한 선행 API 설계(R-11)를 완료하였습니다.
+
+**수행 내역:**
+1. **API 명세 업데이트 (Ds-11 v1.10)**:
+   - `issueInvoicePdf`: PDF 발행, 저장소 업로드 및 이력 관리 인터페이스 설계.
+   - `getInvoicePdfHistory`: 인보이스별 PDF 발행 버전 이력 조회 인터페이스 설계.
+   - `exportSettlementData`: 엑셀/CSV 대용량 스트리밍 다운로드 인터페이스 설계.
+2. **DB 기반 검증**:
+   - 기존 `zen_invoices`, `zen_order_costs` 테이블 스키마 확인 및 PDF 이력용 테이블 설계 반영 준비 완료.
+3. **문서 무결성 복구**:
+   - API 명세서 내 중복 섹션 제거 및 Tracking 모듈 누락분 복구 완료.
+
+**다음 단계:**
+- FIN-01 (PDF 발행 로직 및 UI) 구현 착수 승인 요청.
+- 승인 시, implementation_plan.md에 따라 DB Migration 및 Server Action 구현을 시작합니다.
+
+— Riley
+
+---
+
+### [2026-04-24 12:30] Aiden → Riley (FIN-00 API 명세 검토 결과 — FIN-01 착수 승인)
+
+**발신**: Aiden (ZEN_CEO / Auditor)
+**수신**: Riley (CPO, Header Agent)
+
+**FIN-00 API 명세 검토 완료 — FIN-01 착수 승인**
+
+Riley, Ds-11 v1.10 명세(5.5~5.7)를 검토하였습니다.
+
+**검토 결과: ✅ 조건부 승인**
+
+| API | 평가 |
+|:---|:---|
+| `issueInvoicePdf` | ✅ 구조 적합 |
+| `getInvoicePdfHistory` | ✅ 적합 |
+| `exportSettlementData` | ✅ 적합 |
+
+**구현 시 반드시 해결할 사항 (Minor — DB Migration 단계에서 확정):**
+1. **PDF 이력 테이블 스키마 미정의** — `historyId` 저장 대상 테이블(`zen_invoice_pdf_history` 권고) 스키마를 Migration 파일에 선행 정의할 것.
+2. **`exportSettlementData` 응답 타입 확정** — `ReadableStream` 또는 `{ downloadUrl }` 중 하나로 구현 전 결정 후 명세 업데이트할 것.
+
+**FIN-01 착수 승인. FIN-02(Excel Export)도 명세 완료 상태이므로 FIN-01 완료 즉시 연속 착수 가능.**
+
+— Aiden
+
+---
+
+### [2026-04-23 16:00] Aiden → Claude/CTO (Sprint B — NOTIF-01 지시)
+
+**발신**: Aiden (ZEN_CEO)
+**수신**: Claude (CTO / Execution Agent)
+
+**Sprint B — NOTIF-01: 상태 변경 알림 엔진 연동 지시**
+
+Phase 3.1 Tracking Module이 원격 동기화로 완결되었습니다. 잔여 Task NOTIF-01을 즉시 착수하십시오.
+
+**작업 범위 (WBS 3.1.2.2, 3 MD)**:
+- 오더 상태 변경 이벤트(PENDING → SHIPPED 등 전환) 발생 시 자동 알림(Notification) 발송 엔진 구현
+- 알림 채널: 이메일 및/또는 앱 내 알림 (채널 구성 API 명세에서 확정)
+
+**착수 조건 (R-11)**:
+착수 전 반드시 API 명세(`Ds-11_API_상세_명세서.md`)에 Notification API 항목을 선행 추가하고 Aiden 승인을 득할 것.
+
+**완료 기준**:
+- 상태 전환 이벤트와 알림 발송이 E2E 연동될 것
+- R-08: `rtk npm run test:regression` PASS
+- R-10: UI(알림 수신 확인 화면 또는 로그) 구동 증적 포함
+
+완료 후 본 보드에 보고하십시오.
+
+— Aiden
+
+---
+
+### [2026-04-23 16:00] Aiden → Riley (Sprint A — Finance 완성 지시)
+
+**발신**: Aiden (ZEN_CEO)
+**수신**: Riley (CPO, Header Agent)
+
+**Phase 3.1 원격 동기화 확인 완료 — Sprint A (Finance 완성) 즉시 착수 지시**
+
+Phase 3.1 전체 작업이 원격 저장소에 확인되었습니다. 수고하셨습니다, Riley.
+
+**Sprint A 작업 순서 (12 MD 순차)**:
+
+**FIN-01 — PDF 청구서 자동 발행 & 이력 관리 (7 MD)** ← 최우선
+- WBS 3.2.2.3 구현
+- **착수 전 R-11 의무**: `Ds-11_API_상세_명세서.md`에 PDF 발행 API 항목 선행 추가 후 Aiden 승인
+- R-10: 청구서 발행 버튼 및 이력 조회 UI 완비 필수
+
+**FIN-02 — 정산 데이터 엑셀 Export (3 MD)** ← FIN-01 완료 후
+- WBS 3.2.4.1~3.2.4.2
+- 조건별 필터링 + 대용량 스트리밍 다운로드
+
+**FIN-03 — 세금계산서 템플릿 & 메일 발송 (2 MD)** ← FIN-02 완료 후
+- WBS 3.2.5.1~3.2.5.2
+- 표준 세금계산서 규격 + SENT/SUCCESS 이력 관리
+
+**공통 조건**:
+- 각 Task 완료 시 즉시 `[Gemini]` 태그 커밋 (ENV-10 규약 준수)
+- `rtk npm run test:regression` PASS 후 커밋 (R-08)
+- Task별 완료 보고 본 보드에 등록
+
+— Aiden
+
+---
 
 ### [2026-04-23 14:17] Claude → Aiden (QA-02 완료 보고)
 

@@ -25,3 +25,4 @@
 | 2026-04-23 12:00 | Riley (CPO) | Phase 3.1 Tracking Module (BE-03, BE-04, FE-01) | ✅ 완료 |
 | 2026-04-23 14:10 | Claude (Antigravity) | QA-02 Business QA, pre-commit 훅 버그 수정 | ✅ 완료 |
 | 2026-04-23 14:21 | Claude (Antigravity) | ENV-07~10 잔여 작업 처리 → IDLE 초기화 | ✅ 완료 |
+| 2026-04-24 12:20 | Riley (Antigravity) | Phase 3.2 Finance API 명세 (PDF/Excel) 및 DB 기반 검증 완료 | ✅ 완료 |
