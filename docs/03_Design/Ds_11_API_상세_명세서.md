@@ -3,8 +3,8 @@
 > **프로젝트:** ZENITH_LMS (SNTL 통합 물류 플랫폼)
 > **문서번호:** Ds-11
 > **작성자:** Antigravity (AI Agent)
-> **작성일:** 2026-04-24
-> **버전:** v1.10
+> **작성일:** 2026-04-28
+> **버전:** v1.12
 
 본 문서는 `Ds_10 API 인벤토리`에 등록된 모든 인터페이스의 구체적인 명세를 기술합니다. 모든 파라미터는 `camelCase`를 기본으로 하며, DB 필드와 직접 매핑되는 경우 `snake_case`를 사용합니다.
 
@@ -238,13 +238,17 @@
 - **파라미터**: `invoiceId` (uuid)
 - **응답**: `Array<{ id: uuid, filePath: string, version: number, createdAt: string, createdBy: string }>`
 
-### 5.7 exportSettlementData (Action)
-- **설명**: [WBS 3.2.4] 정산 데이터를 조건별로 필터링하여 Excel(CSV/XLSX) 형식으로 내보냄 (Streaming 지원)
-- **권한**: User
-- **파라미터**:
-  - `filters`: { status?: string, dateFrom?: string, dateTo?: string, shipperId?: string }
-  - `format`: 'csv' | 'xlsx'
-- **응답**: `ReadableStream` 또는 `{ downloadUrl: string }`
+### 5.7 exportSettlementData (Route Handler)
+- **설명**: [WBS 3.2.4] 정산 데이터를 조건별로 필터링하여 Excel(XLSX) 형식으로 내보냄. 대용량 처리를 위해 Route Handler(`/api/finance/export`)로 구현함.
+- **권한**: Admin/Partner/User (소속 조직 데이터만 접근 가능)
+- **파라미터 (Query Params)**:
+  - `status`: (string, optional) PAID, UNPAID, CANCELED
+  - `dateFrom`: (string, optional, YYYY-MM-DD) 시작일
+  - `dateTo`: (string, optional, YYYY-MM-DD) 종료일
+  - `shipperId`: (uuid, optional) 특정 화주 필터링 (Admin 전용)
+- **응답**: Binary File (Blob)
+  - `Content-Type`: `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`
+  - `Content-Disposition`: `attachment; filename=settlement_export_YYYYMMDD.xlsx`
 
 ---
 
@@ -495,8 +499,33 @@ CREATE TABLE zen_notifications (
 - **파라미터**: 없음
 - **응답**: `{ success: boolean, updatedCount: number }`
 
+### 5.8 issueTaxInvoice (Action)
+- **설명**: [WBS 3.2.5.1] 특정 인보이스를 기반으로 표준 세금계산서 데이터를 생성함.
+- **권한**: Admin/Partner
+- **파라미터**:
+  - `invoiceId`: (uuid) 대상 인보이스 ID
+- **응답**: `{ success: true, taxInvoiceId: uuid }`
+
+### 5.9 sendTaxInvoiceEmail (Action)
+- **설명**: [WBS 3.2.5.2] 생성된 세금계산서를 고객 이메일로 발송함. Resend를 사용하며 발송 성공 여부를 추적함.
+- **권한**: Admin/Partner
+- **파라미터**:
+  - `taxInvoiceId`: (uuid) 세금계산서 ID
+  - `recipientEmail`: (string) 수신자 이메일
+- **응답**: `{ success: true, messageId: string }`
+
+### 5.10 getTaxInvoiceHistory (Action)
+- **설명**: 특정 인보이스와 연결된 세금계산서 발행 및 발송 이력을 조회함.
+- **권한**: User (소속 조직 데이터만 가능)
+- **파라미터**: `invoiceId` (uuid)
+- **응답**: `Array<TaxInvoiceRecord>`
+
 ---
+
+## 6. 물류 트래킹 및 로직 (Logistics Logic)
 
 > [!NOTE]
 > v1.10 업데이트 사항: Finance(인보이스 PDF 발행, 엑셀 내보내기) API 명세 추가 및 통합 트래킹(Section 11) 구조 정비 완료.
 > v1.11 업데이트 사항: Section 12 알림 관리(Notification) API 명세 추가 — WBS 3.1.2.2 대응.
+> v1.12 업데이트 사항: FIN-02 엑셀 Export 응답 상세화 및 버전 최신화.
+> v1.13 업데이트 사항: FIN-03 세금계산서(Tax Invoice) 발행 및 메일 발송 API 명세 추가.
