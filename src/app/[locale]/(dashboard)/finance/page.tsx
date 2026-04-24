@@ -14,6 +14,8 @@ import {
 import { format } from 'date-fns';
 import { InvoiceTable } from '@/components/finance/InvoiceTable';
 
+import { ExportButton } from '@/components/finance/ExportButton';
+
 export default async function FinanceDashboardPage() {
   const { supabase, profile } = await requireAuth();
 
@@ -73,10 +75,7 @@ export default async function FinanceDashboardPage() {
         </div>
         
         <div className="flex gap-3">
-           <button className="px-6 py-3 bg-white dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800 rounded-2xl text-sm font-bold flex items-center gap-2 hover:shadow-lg transition-all active:scale-95">
-             <FileText className="w-4 h-4" />
-             Export Report
-           </button>
+           <ExportButton />
            <button className="px-6 py-3 bg-slate-900 dark:bg-blue-600 text-white rounded-2xl text-sm font-bold flex items-center gap-2 hover:shadow-xl hover:shadow-blue-500/20 transition-all active:scale-95">
              <CreditCard className="w-4 h-4" />
              Bulk Settlement

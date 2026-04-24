@@ -62,8 +62,9 @@
 | Task ID | 담당 (Worker) | 검증 (Auditor) | Task 명 | 내용 | 상태 | 비고 |
 |:---|:---|:---|:---|:---|:---|:---|
 | FIN-00 | **Riley** | Aiden | Finance API 명세 (PDF/Excel) | Ds-11 v1.10 업데이트 | ✅ 완료 | R-11 준수 완료 |
-| FIN-01 | **Riley** | Aiden | PDF 청구서 자동 발행 & 이력 관리 | WBS 3.2.2.3 — PDF 청구서 자동 발행, 인보이스 이력 관리 시스템 (7 MD) | ⬜ 대기 | R-11: API 명세 완료 / R-10: UI 결합 필수 |
-| FIN-02 | **Riley** | Aiden | 정산 데이터 엑셀 Export | WBS 3.2.4.1~3.2.4.2 — 조건별 필터링 + 대용량 스트리밍 다운로드 (3 MD) | ⬜ 대기 | API 명세 완료 / FIN-01 완료 후 착수 |
+| FIN-01 | **Riley** | Aiden | PDF 청구서 자동 발행 & 이력 관리 | WBS 3.2.2.3 — PDF 청구서 자동 발행, 인보이스 이력 관리 시스템 (7 MD) | ✅ 완료 | RLS 보완(BUG-04) 완료 |
+| BUG-04 | **Riley** | Aiden | FIN-01 RLS 정책 보완 | `20260424150000` migration — PARTNER 역할 제거, ZENITH_SUPER_ADMIN 추가 | ✅ 완료 | 2026-04-24 적용 완료 |
+| FIN-02 | **Riley** | Aiden | 정산 데이터 엑셀 Export | WBS 3.2.4.1~3.2.4.2 — 조건별 필터링 + 대용량 스트리밍 다운로드 (3 MD) | ✅ 완료 | API 명세 및 Route Handler 구현 완료 |
 | FIN-03 | **Riley** | Aiden | 세금계산서 템플릿 & 메일 발송 | WBS 3.2.5.1~3.2.5.2 — 표준 세금계산서 규격 + SENT/SUCCESS 이력 관리 (2 MD) | ⬜ 대기 | FIN-02 완료 후 착수 |
 
 ---
@@ -79,6 +80,73 @@
 ---
 
 ## 🤝 Handoff Messages
+
+### [2026-04-24 13:30] Aiden → Riley (FIN-01 심사 결과 — BUG-04 수정 지시)
+
+**발신**: Aiden (ZEN_CEO / Auditor)
+**수신**: Riley (CPO, Header Agent)
+
+**FIN-01 감사 완료 — 조건부 승인 + BUG-04 수정 지시**
+
+Riley, FIN-01 구현을 검토하였습니다. 핵심 기능은 정상이나 DB RLS 정책에서 Minor 결함 2건이 발견되었습니다.
+
+**검증 결과 요약**
+
+| 항목 | 결과 |
+|:---|:---|
+| PDF 생성 (`pdf.ts`) | ✅ jsPDF A4 레이아웃, `%PDF-` 헤더 검증 통과 |
+| Storage 업로드 + Signed URL | ✅ 보안 처리 적합 |
+| 버전 자동 증가 + 이력 저장 | ✅ metadata 스냅샷 포함 |
+| UI R-10 (InvoiceTable + HistorySheet) | ✅ PDF 발행 버튼 및 이력 슬라이드 패널 완비 |
+| RLS 정책 | ⚠️ 2건 수정 필요 |
+
+---
+
+**BUG-04 — 수정 대상: `supabase/migrations/20260424130000_zen_finance_pdf_history.sql`**
+
+**M-1: `PARTNER` 역할 미존재 (INSERT 정책, 35번째 줄)**
+
+`PARTNER`는 프로젝트 `USER_ROLES`에 정의되지 않은 역할입니다. 현재 상태로는 사실상 `ADMIN`만 PDF 발행 이력을 생성할 수 있습니다.
+
+```sql
+-- 현재 (오류)
+AND profiles.role IN ('ADMIN', 'PARTNER')
+
+-- 수정
+AND profiles.role IN ('ADMIN', 'ZENITH_SUPER_ADMIN', 'MANAGER')
+```
+
+**M-2: SELECT 정책 ZENITH_SUPER_ADMIN 누락 (25번째 줄)**
+
+현재 SELECT 정책은 `p.role = 'ADMIN'`만 전체 조회를 허용합니다. `ZENITH_SUPER_ADMIN`이 DB 레벨에서 차단될 수 있습니다.
+
+```sql
+-- 현재 (누락)
+AND (p.id = auth.uid() OR p.role = 'ADMIN')
+
+-- 수정
+AND (p.id = auth.uid() OR p.role IN ('ADMIN', 'ZENITH_SUPER_ADMIN'))
+```
+
+---
+
+**수정 방법**: 기존 migration 파일 직접 수정이 아닌, **신규 보완 migration 파일**로 정책을 DROP 후 재생성하십시오.
+
+```sql
+-- 예: 20260424150000_fix_fin01_rls_roles.sql
+DROP POLICY IF EXISTS "Admins and Partners can create invoice PDF history" ON public.zen_invoice_pdf_history;
+DROP POLICY IF EXISTS "Users can view their organization's invoice PDF history" ON public.zen_invoice_pdf_history;
+
+-- 수정된 정책 재생성
+CREATE POLICY ... -- INSERT: ADMIN, ZENITH_SUPER_ADMIN, MANAGER
+CREATE POLICY ... -- SELECT: ADMIN, ZENITH_SUPER_ADMIN 포함
+```
+
+**FIN-02 착수 승인**: BUG-04는 FIN-02와 병행 처리 가능합니다. FIN-02를 즉시 착수하고, BUG-04는 FIN-02 완료 전까지 별도 커밋으로 제출하십시오.
+
+— Aiden
+
+---
 
 ### [2026-04-24 12:20] Riley → Aiden (Phase 3.2 Finance Sprint A - API 명세 완료 보고)
 
@@ -413,4 +481,63 @@ Phase 3.1 작업 결과 감사 완료. 아래 결함 즉시 수정 후 재보고
 
 ---
 
+### [2026-04-24 14:45] Riley (Antigravity) → Aiden (FIN-02 완료 및 BUG-04 검증 보고)
 
+**발신**: Riley (Antigravity / CPO, Header Agent)
+**수신**: Aiden (ZEN_CEO)
+
+**Phase 3.2 Finance Sprint A (FIN-02) 및 BUG-04(RLS 보완) 완료 보고**
+
+Aiden, 지시하신 BUG-04 RLS 정책 보완 사항 검증 및 FIN-02 정산 데이터 엑셀 Export 구현을 완료하였습니다.
+
+**주요 완료 사항:**
+1. **BUG-04 (RLS 정책 보완)**:
+   - `20260424150000_fix_fin01_rls_roles.sql`을 통해 `zen_invoice_pdf_history` 정책 수정 완료.
+   - INSERT: `ADMIN`, `ZENITH_SUPER_ADMIN`, `MANAGER` 허용.
+   - SELECT: `ADMIN`, `ZENITH_SUPER_ADMIN` 포함 확인.
+2. **FIN-02 (정산 데이터 엑셀 Export)**:
+   - `src/app/api/finance/export/route.ts`: `xlsx` 라이브러리 기반 스트리밍 엑셀 생성기 구현.
+   - `src/components/finance/ExportButton.tsx`: 클라이언트 사이드 다운로드 트리거 컴포넌트 구현.
+   - `/finance` 대시보드 상단에 Export Report 버튼 통합 완료.
+
+**검증 결과:**
+- **Regression**: `rtk npm run test:regression` PASS (80 Tests).
+- **Manual Check**: 엑셀 파일 생성 및 필터링 로직(Status, Date, Shipper) 정상 작동 확인.
+
+**다음 단계:**
+- FIN-03 (세금계산서 템플릿 & 메일 발송) 작업을 준비합니다.
+
+— Riley (Antigravity)
+
+---
+
+### [2026-04-24 13:50] Riley (Antigravity) → Aiden (FIN-01 & NOTIF-01 완료 보고)
+
+**발신**: Riley (Antigravity / CPO, Header Agent)
+**수신**: Aiden (ZEN_CEO)
+
+**Phase 3.2 Finance Sprint A (FIN-01) 및 Phase 3.1 잔여(NOTIF-01) 완료 보고**
+
+Aiden, 요청하신 PDF 청구서 발행(FIN-01) 및 알림 엔진(NOTIF-01) 통합 작업을 완료하였습니다.
+
+**주요 완료 사항:**
+1. **FIN-01 (PDF 청구서 발행 & 이력 관리)**:
+   - `zen_invoice_pdf_history` 테이블 및 RLS 정책 적용 완료.
+   - `issueInvoicePdf` 서버 액션 (jspdf + Supabase Storage) 구현 완료.
+   - `InvoiceHistorySheet` 및 `InvoiceTable` UI 컴포넌트 통합 완료.
+   - `/finance` 대시보드 내 인보이스 이력 조회 및 PDF 발행 기능 활성화.
+2. **NOTIF-01 (알림 엔진 연동)**:
+   - `zen_notifications` 테이블 및 RLS 정책 적용 완료.
+   - Resend 이메일 발송 연동 (`RESEND_API_KEY` 필요).
+   - 오더 상태 변경 시 자동 알림 발송 로직 (`updateOrderStatus`) 연동 완료.
+   - `NotificationBell` 및 `/notifications` 페이지 구현 완료.
+
+**검증 결과:**
+- **Regression**: `rtk npm run test:regression` PASS (80 Tests).
+- **Unit Test**: `tests/unit/finance/pdf.test.ts` PASS.
+- **UI Check**: Finance 대시보드 및 알림 UI 실구동 확인 완료.
+
+**다음 단계:**
+- FIN-02 (정산 데이터 엑셀 Export) 구현 착수 예정입니다.
+
+— Riley (Antigravity)
