@@ -3,8 +3,8 @@
 > **프로젝트:** ZENITH_LMS (SNTL 통합 물류 플랫폼)
 > **문서번호:** Ds-11
 > **작성자:** Antigravity (AI Agent)
-> **작성일:** 2026-04-22
-> **버전:** v1.8
+> **작성일:** 2026-04-24
+> **버전:** v1.10
 
 본 문서는 `Ds_10 API 인벤토리`에 등록된 모든 인터페이스의 구체적인 명세를 기술합니다. 모든 파라미터는 `camelCase`를 기본으로 하며, DB 필드와 직접 매핑되는 경우 `snake_case`를 사용합니다.
 
@@ -225,6 +225,27 @@
 - **파라미터**: `p_order_id` (uuid)
 - **응답**: `{ success: boolean, total_freight: numeric, currency: string, message: string }`
 
+### 5.5 issueInvoicePdf (Action)
+- **설명**: [WBS 3.2.2.3] 특정 인보이스의 PDF 파일을 생성하고 Supabase Storage에 업로드 후 이력을 기록함.
+- **권한**: Admin/Partner
+- **파라미터**:
+  - `invoiceId`: (uuid) 대상 인보이스 ID
+- **응답**: `{ success: true, pdfUrl: string, historyId: uuid }`
+
+### 5.6 getInvoicePdfHistory (Action)
+- **설명**: [WBS 3.2.2.3] 특정 인보이스에 대해 발행된 PDF 이력(버전, 생성일, 생성자, 파일 경로) 조회
+- **권한**: User (소속 조직 인보이스만 조회 가능)
+- **파라미터**: `invoiceId` (uuid)
+- **응답**: `Array<{ id: uuid, filePath: string, version: number, createdAt: string, createdBy: string }>`
+
+### 5.7 exportSettlementData (Action)
+- **설명**: [WBS 3.2.4] 정산 데이터를 조건별로 필터링하여 Excel(CSV/XLSX) 형식으로 내보냄 (Streaming 지원)
+- **권한**: User
+- **파라미터**:
+  - `filters`: { status?: string, dateFrom?: string, dateTo?: string, shipperId?: string }
+  - `format`: 'csv' | 'xlsx'
+- **응답**: `ReadableStream` 또는 `{ downloadUrl: string }`
+
 ---
 
 ## 6. 물류 트래킹 및 로직 (Logistics Logic)
@@ -360,61 +381,6 @@
 
 ---
 
-> [!NOTE]
-> v1.8 업데이트 사항: 마스터 데이터(국가, 조직, 항공사, 코드 삭제) API 구현 및 인벤토리 수정(UPDATED) 로직 동기화 완료.
-> 상세한 TypeScript 타입 정의는 `src/types/` 및 `src/lib/validation/`을 참조하십시오.
-
-## 11. 통합 트래킹 (Tracking & Visibility)
-
-### 11.1 getGlobalTrackingOverview (Action)
-- **설명**: 마스터 오더 및 하우스 오더 전체에 대한 실시간 트래킹 요약 데이터 조회
-- **권한**: User (조직 권한 기반)
-- **파라미터**:
-  - : (uuid) 조회 대상 조직 ID
-- **응답**:
-  ```typescript
-  {
-    totalActive: number;      // 현재 운송 중인 오더 총 수
-    byStatus: {               // 상태별 집계
-      booked: number;
-      picked_up: number;
-      in_transit: number;
-      arrived: number;
-      delivered: number;
-    };
-    recentEvents: Array<{      // 최근 발생한 주요 트래킹 이벤트
-      orderId: string;
-      orderNo: string;
-      status: string;
-      location: string;
-      timestamp: string;
-    }>;
-  }
-  ```
-
-### 11.2 syncExternalTracking (Action)
-- **설명**: 외부 운송사(Carrier) API를 호출하여 최신 트래킹 정보를 동기화하고 로컬 DB 및 Raw Log에 저장
-- **권한**: User/System (폴링 연동)
-- **파라미터**:
-  - `trackingNo`: (string) 송장 번호
-  - `carrierCode`: (string) 운송사 코드 (e.g., 'UPS', 'DHL', 'HMM')
-- **프로세스**:
-  1. `TrackingAdapter`를 통한 외부 API 호출
-  2. 응답 원본을 `zen_tracking_raw_logs` 테이블에 저장 (Business QA 대응)
-  3. `orders` 및 `order_tracking_events` 테이블 업데이트
-- **응답**: `{ success: true, currentStatus: string, lastLocation: string }`
-
-### 11.3 getTrackingRawLogs (Action)
-- **설명**: 특정 오더의 외부 API 응답 원본(Raw Data) 이력 조회 (디버깅 및 정합성 검증용)
-- **권한**: Admin
-- **파라미터**: `orderId` (uuid)
-- **응답**: `Array<{ id: uuid, raw_payload: JSON, created_at: string }>`
-
----
-
-> [!NOTE]
-> v1.9 업데이트 사항: 통합 트래킹 대시보드 및 외부 API 어댑터 패턴(TrackingManager) 관련 인터페이스 명세 추가.
-
 ## 11. 통합 트래킹 (Tracking & Visibility)
 
 ### 11.1 getGlobalTrackingOverview (Action)
@@ -463,5 +429,74 @@
 
 ---
 
+---
+
+## 12. 알림 관리 (Notification Management) [WBS 3.1.2.2]
+
+### 12.0 DB 스키마
+
+```sql
+CREATE TABLE zen_notifications (
+  id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id     uuid NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  order_id    uuid REFERENCES zen_orders(id) ON DELETE SET NULL,
+  type        TEXT NOT NULL,        -- 'STATUS_CHANGE' | 'HELD' | 'DELIVERED'
+  title       TEXT NOT NULL,
+  message     TEXT NOT NULL,
+  channel     TEXT NOT NULL,        -- 'EMAIL' | 'IN_APP'
+  is_read     BOOLEAN DEFAULT false,
+  sent_at     TIMESTAMPTZ DEFAULT now(),
+  created_at  TIMESTAMPTZ DEFAULT now()
+);
+-- RLS: 본인 알림만 조회 가능
+```
+
+**알림 트리거 대상 상태 전환:**
+
+| OrderStatus | 수신자 | 채널 |
+|:---|:---|:---|
+| WAREHOUSED | 송하인(shipper) | EMAIL + IN_APP |
+| RELEASED | 송하인 | EMAIL + IN_APP |
+| IN_TRANSIT | 수하인(recipient_email) | EMAIL + IN_APP |
+| DELIVERED | 송하인 + 수하인 | EMAIL + IN_APP |
+| HELD | 송하인 + Admin | EMAIL + IN_APP |
+
+### 12.1 triggerStatusChangeNotification (Internal Action)
+- **설명**: `updateOrderStatus` 완료 시 내부 호출 — 알림 생성 및 Resend 이메일 발송
+- **권한**: System (외부 직접 호출 불가)
+- **파라미터**:
+  - `orderId`: (uuid)
+  - `newStatus`: (OrderStatus)
+  - `previousStatus`: (OrderStatus)
+- **프로세스**:
+  1. 트리거 대상 상태 여부 확인
+  2. `zen_orders`에서 shipper/recipient 정보 조회
+  3. `zen_notifications` 테이블에 IN_APP 알림 삽입
+  4. Resend API로 이메일 발송 (실패 시 로그만, 상태 변경 롤백 없음)
+- **응답**: `void`
+
+### 12.2 getNotifications (Action)
+- **설명**: 로그인 사용자의 알림 목록 조회 (미읽음 우선 정렬)
+- **권한**: User
+- **파라미터**:
+  - `limit?`: number (default 20)
+  - `offset?`: number (default 0)
+- **응답**: `{ notifications: NotificationItem[], unreadCount: number }`
+
+### 12.3 markNotificationRead (Action)
+- **설명**: 특정 알림 읽음 처리
+- **권한**: User (본인 알림만)
+- **파라미터**: `notificationId` (uuid)
+- **응답**: `{ success: boolean }`
+
+### 12.4 markAllNotificationsRead (Action)
+- **설명**: 전체 미읽음 알림 일괄 읽음 처리
+- **권한**: User
+- **파라미터**: 없음
+- **응답**: `{ success: boolean, updatedCount: number }`
+
+---
+
 > [!NOTE]
-> v1.9 업데이트 사항: 통합 트래킹 대시보드 및 외부 API 어댑터 패턴(TrackingManager) 관련 인터페이스 명세 추가.
+> v1.10 업데이트 사항: Finance(인보이스 PDF 발행, 엑셀 내보내기) API 명세 추가 및 통합 트래킹(Section 11) 구조 정비 완료.
+> v1.11 업데이트 사항: Section 12 알림 관리(Notification) API 명세 추가 — WBS 3.1.2.2 대응.

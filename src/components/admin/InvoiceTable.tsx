@@ -5,6 +5,11 @@ import { format } from "date-fns";
 import { ConfirmPaymentModal } from "@/components/admin/ConfirmPaymentModal";
 import { ZenButton } from "@/components/ui/ZenUI";
 import { useRouter } from "next/navigation";
+import { AnimatePresence } from 'framer-motion';
+import { FileText, History, Download, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
+import { issueInvoicePdf } from '@/app/actions/finance';
+import { InvoiceHistorySheet } from '@/components/finance/InvoiceHistorySheet';
 
 interface InvoiceTableProps {
   invoices: any[];
@@ -13,10 +18,27 @@ interface InvoiceTableProps {
 
 export const InvoiceTable: React.FC<InvoiceTableProps> = ({ invoices, isAdmin }) => {
   const [selectedInvoice, setSelectedInvoice] = useState<any | null>(null);
+  const [historyInvoice, setHistoryInvoice] = useState<any | null>(null);
+  const [issuingId, setIssuingId] = useState<string | null>(null);
   const router = useRouter();
 
   const handleSuccess = () => {
     router.refresh();
+  };
+
+  const handleIssuePdf = async (invoiceId: string) => {
+    setIssuingId(invoiceId);
+    try {
+      const result = await issueInvoicePdf(invoiceId);
+      if (result.success) {
+        toast.success('인보이스 PDF가 성공적으로 발행되었습니다.');
+        setHistoryInvoice(invoices.find(inv => inv.id === invoiceId));
+      }
+    } catch (err: any) {
+      toast.error(`발행 실패: ${err.message}`);
+    } finally {
+      setIssuingId(null);
+    }
   };
 
   return (
@@ -85,8 +107,22 @@ export const InvoiceTable: React.FC<InvoiceTableProps> = ({ invoices, isAdmin })
                           Confirm Payment
                         </ZenButton>
                       )}
-                      <button className="px-4 py-1.5 bg-slate-900 text-white text-[11px] font-bold rounded-xl hover:bg-blue-600 transition-all hover:shadow-lg hover:shadow-blue-500/25">
-                        Download PDF
+                      {isAdmin && (
+                        <ZenButton 
+                          onClick={() => handleIssuePdf(inv.id)}
+                          loading={issuingId === inv.id}
+                          className="px-4 py-1.5 bg-slate-900 text-white text-[11px] font-bold rounded-xl hover:bg-blue-600 transition-all hover:shadow-lg hover:shadow-blue-500/25"
+                        >
+                          <FileText className="w-3 h-3" />
+                          Issue PDF
+                        </ZenButton>
+                      )}
+                      <button 
+                        onClick={() => setHistoryInvoice(inv)}
+                        className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all"
+                        title="History"
+                      >
+                        <History className="w-4 h-4" />
                       </button>
                     </td>
                   </tr>
@@ -96,6 +132,13 @@ export const InvoiceTable: React.FC<InvoiceTableProps> = ({ invoices, isAdmin })
           </table>
         </div>
       </div>
+
+      <InvoiceHistorySheet
+        invoiceId={historyInvoice?.id}
+        invoiceNo={historyInvoice?.invoice_no}
+        isOpen={!!historyInvoice}
+        onClose={() => setHistoryInvoice(null)}
+      />
 
       <AnimatePresence>
         {selectedInvoice && (
