@@ -1,8 +1,8 @@
 # 🗺️ LIVE Regression Test Master Map
 
 > **상태:** [ACTIVE]  
-> **총 테스트 케이스:** 60 Cases  
-> **최종 검증일:** 2026-04-23  
+> **총 테스트 케이스:** 65 Cases  
+> **최종 검증일:** 2026-04-24  
 
 제니스 플랫폼의 비즈니스 영속성을 보장하는 회귀 테스트 케이스의 통합 명세서입니다. 모든 신규 개발 및 수정 시 이 맵에 케이스가 추가되어야 하며, 전체 테스트가 통과되어야 합니다.
 
@@ -99,6 +99,15 @@
 | **TC-QA.1** | Raw 로그 영속성 | `MockCarrierProvider` 호출 시 `zen_tracking_raw_logs`에 JSON 원본 저장 확인 | `tests/integration/tracking-business-qa.test.ts` |
 | **TC-QA.2** | 동기화 무결성 (중복 방지) | 동일 이벤트 2회 동기화 시 `zen_tracking_events` 중복 삽입 차단 확인 | `tests/integration/tracking-business-qa.test.ts` |
 
+### 11. 알림 엔진 (Notification Engine)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-N.1** | 비트리거 상태 미발송 | REGISTERED 등 비대상 상태에서 DB/이메일 호출 없음 보장 | `tests/integration/notifications.test.ts` |
+| **TC-N.2** | WAREHOUSED 송하인 알림 생성 | 입고 완료 시 송하인 IN_APP 알림 및 이메일 정상 발송 확인 | `tests/integration/notifications.test.ts` |
+| **TC-N.3** | IN_TRANSIT 수하인 이메일 전용 | 운송 중 상태에서 수하인 이메일만 발송, 송하인 IN_APP 미생성 확인 | `tests/integration/notifications.test.ts` |
+| **TC-N.4** | 단건 알림 읽음 처리 | markNotificationRead 호출 시 is_read=true 업데이트 확인 | `tests/integration/notifications.test.ts` |
+| **TC-N.5** | 전체 알림 읽음 처리 | markAllNotificationsRead 호출 시 미읽음 건수 반환 및 일괄 처리 확인 | `tests/integration/notifications.test.ts` |
+
 ---
 
 ## 📊 최신 검증 이력 (Execution History)
@@ -108,6 +117,7 @@
 | 2026-04-21 | v1.1 | ✅ PASS | 1.88s | 28/28 Passed |
 | 2026-04-22 | v2.1 | ✅ PASS | 2.81s | 58/58 Fully Registered & Verified |
 | 2026-04-23 | v2.2 | ✅ PASS | 7.9s | 60/60 QA-02 통합 2건 추가, 데이터 레이스 픽스 |
+| 2026-04-24 | v3.0 | ✅ PASS | 36.03s | 80/80 NOTIF-01 알림 엔진 TC-N.1~5 (5건) 신규 등록 |
 
 ---
 

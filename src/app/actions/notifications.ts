@@ -1,6 +1,6 @@
 "use server";
 
-import { createServerClient } from "@/lib/supabase/server";
+import { createClient as createServerClient } from "@/utils/supabase/server";
 import { OrderStatus } from "@/types/orders";
 import { sendStatusChangeEmail } from "@/lib/notifications/email";
 import { revalidatePath } from "next/cache";

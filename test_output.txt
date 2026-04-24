@@ -1,0 +1,33 @@
+> vitest run tests/integration/finance.test.ts
+ RUN  v4.1.4 /Users/edward.kwon/WorkSpace/ZENITH_LMS_001
+ ✓ tests/integration/finance.test.ts (6 tests) 156ms
+ Test Files  1 passed (1)
+      Tests  6 passed (6)
+   Start at  12:49:12
+   Duration  1.64s (transform 130ms, setup 87ms, import 202ms, tests 156ms, environment 924ms)
+(node:25273) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+stderr | tests/integration/finance.test.ts > ZENITH Finance Integration: WBS 3.2 Integrity Test > Scenario 1: Auto-Invoicing on Order Release > TC-F.1: [Success] 오더가 RELEASED 상태가 될 때 정산서가 자동 생성되어야 함
+[ERROR] Notification trigger failed: Error: Missing API key. Pass it to the constructor `new Resend("re_123")`
+    at new Resend (file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/node_modules/resend/dist/index.mjs:1063:25)
+    at /Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/lib/notifications/email.ts:4:16
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at VitestModuleEvaluator._runInlinedModule (file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/node_modules/vitest/dist/module-evaluator.js:206:4)
+    at VitestModuleRunner.directRequest (file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/node_modules/vite/dist/node/module-runner.js:1247:59)
+    at VitestModuleRunner.cachedRequest (file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/node_modules/vite/dist/node/module-runner.js:1154:73)
+    at /Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/app/actions/notifications.ts:5:1
+    at VitestModuleEvaluator._runInlinedModule (file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/node_modules/vitest/dist/module-evaluator.js:206:4)
+    at VitestModuleRunner.directRequest (file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/node_modules/vite/dist/node/module-runner.js:1247:59)
+    at VitestModuleRunner.cachedRequest (file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/node_modules/vite/dist/node/module-runner.js:1154:73)
+stderr | tests/integration/finance.test.ts > ZENITH Finance Integration: WBS 3.2 Integrity Test > Scenario 4: Multi-Currency & Security Expansion (TC-F.4~6) > TC-F.6: [Policy] 인보이스가 생성된 오더는 상태 변경이 제한되어야 함 (Data Integrity)
+[ERROR] Notification trigger failed: Error: Missing API key. Pass it to the constructor `new Resend("re_123")`
+    at new Resend (file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/node_modules/resend/dist/index.mjs:1063:25)
+    at /Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/lib/notifications/email.ts:4:16
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at VitestModuleEvaluator._runInlinedModule (file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/node_modules/vitest/dist/module-evaluator.js:206:4)
+    at VitestModuleRunner.directRequest (file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/node_modules/vite/dist/node/module-runner.js:1247:59)
+    at VitestModuleRunner.cachedRequest (file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/node_modules/vite/dist/node/module-runner.js:1154:73)
+    at /Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/app/actions/notifications.ts:5:1
+    at VitestModuleEvaluator._runInlinedModule (file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/node_modules/vitest/dist/module-evaluator.js:206:4)
+    at VitestModuleRunner.directRequest (file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/node_modules/vite/dist/node/module-runner.js:1247:59)
+    at VitestModuleRunner.cachedRequest (file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/node_modules/vite/dist/node/module-runner.js:1154:73)
