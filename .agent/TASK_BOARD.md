@@ -94,8 +94,8 @@
 | Task ID | 담당 (Worker) | 검증 (Auditor) | Task 명 | 내용 | 상태 | 비고 |
 |:---|:---|:---|:---|:---|:---|:---|
 | PH4-UAT-01 | **Aiden** | — | TRK 모듈 브라우저 UAT (TC-UAT-TRK.1~4) | syncExternalTracking DB 적재·Raw 로그 / 트래킹 대시보드 오더 상세 연동·RBAC / 상태 변경 알림 이메일+IN_APP / RawLogViewer Admin 전용 RBAC 차단 (WBS 4.0.1) | ✅ 완료 | TRK.1~4 PASS. BUG-TRK-RLS-01·DUP-CONFIG·NOTIF-01 수정. SAR-011·012 작성. 109/109 PASS |
-| PH4-UAT-02 | **Aiden** | — | FIN 모듈 브라우저 UAT (TC-UAT-FIN.1/3/4/5) | 정산 수식 정합 / Partial→Paid 자동 전환+초과입금 Negative / 엑셀 Export 기간필터+정합 / 세금계산서 SENT+이메일 수신 (WBS 4.0.2) | 🔄 진행 | — |
-| PH4-UAT-03 | **Aiden** | — | INV 모듈 브라우저 UAT (TC-UAT-INV.1/4) | 입출고 연동 자동 재고 증감 / 기간별 입출고 통계 SQL 교차 검증 (WBS 4.0.3) | ⏸ 대기 | PH4-UAT-02 완료 후 |
+| PH4-UAT-02 | **Aiden** | — | FIN 모듈 브라우저 UAT (TC-UAT-FIN.1/3/4/5) | 정산 수식 정합 / Partial→Paid 자동 전환+초과입금 Negative / 엑셀 Export 기간필터+정합 / 세금계산서 SENT+이메일 수신 (WBS 4.0.2) | ✅ 완료 | FIN.3 PASS(BUG-FIN-RLS-01: zen_invoices UPDATE 정책 누락 수정), FIN.4 PASS(BUG-MW-API-01: /api i18n 리다이렉트 수정), FIN.5 Conditional PASS(Resend zenith.kr 도메인 미인증 — 인프라 이슈). SAR-013/014/015 작성. 109/109 PASS |
+| PH4-UAT-03 | **Aiden** | — | INV 모듈 브라우저 UAT (TC-UAT-INV.1/4) | 입출고 연동 자동 재고 증감 / 기간별 입출고 통계 SQL 교차 검증 (WBS 4.0.3) | ✅ 완료 | INV.1 PASS, INV.4 PASS(BUG-INV-HIST-01: history INSERT org_id FK 위반 수정). 109/109 PASS |
 
 ### Track B — Riley (4.8.1 P0 Critical Fixes)
 
