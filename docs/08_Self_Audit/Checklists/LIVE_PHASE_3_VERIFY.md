@@ -51,6 +51,9 @@
 - [x] **TC-UAT-E2E.1**: 완전 물류 사이클 (오더→경로→트래킹→정산→세금계산서) — 통합 테스트(`uat-phase3-e2e.test.ts`) PASS
 - [x] **TC-UAT-E2E.2**: 재고 관리 사이클 (입고→동기화→부족알림→조정→출고) — Claude 검증 완료 2026-04-26 (on_hand 1→11[Healthy]→5[LowStock]→7[Healthy]→0[OutOfStock] 전 구간 PASS)
 - [x] **TC-UAT-E2E.3**: Admin 감시 플로우 (경로 정합성+Raw로그+알림) — Claude 검증 완료 2026-04-26 (Order Detail 오더 #ZEN-2026-000002: Tracking Timeline, Route Optimization+ADMIN badge, AdminTrackingControl, RawLogViewer, TISA Snapshot, Settlement Preview, /notifications 페이지 PASS)
+- [x] **TC-UAT-OPS.1**: 시스템 파라미터 UI 연동 (PH4-OPS-03) — `/settings` 페이지 파라미터 수정 및 실시간 반영 확인
+- [x] **TC-UAT-OPS.2**: 비즈니스 로직 동적화 (PH4-OPS-04/05) — 부피 계수(`volumeFactor`), 환율, 라우팅 가중치(`α/β`) DB 연동 및 정산/스코어링 반영 확인
+- [x] **TC-UAT-OPS.3**: Feature Flag 시스템 (PH4-OPS-06) — `MAINTENANCE_MODE` 미들웨어 차단 및 `AI_RECOMMENDATION` UI 배지 노출 확인
 
 ---
 
@@ -108,6 +111,7 @@
 | 2026-04-25 | UAT-03 BUG-15-A/16-A 수정 (isSelected + mode 아이콘) | Aiden | ✅ PASS | 108/108 회귀 테스트 PASS |
 | 2026-04-26 | Playwright UAT: FIN.2 + INV.2 + E2E.2 + E2E.3 브라우저 검증 | Claude (Antigravity) | ✅ PASS | BUG-INV-01~04, BUG-RLS-01~04, BUG-FIN-01~02 수정 (migration 4건 적용) |
 | 2026-04-26 | Playwright UAT: FIN.3/4/5 + INV.1/4 브라우저 검증 (PH4-UAT-02/03) | Claude (Antigravity) | ✅ PASS (FIN.5 Conditional) | BUG-FIN-RLS-01(SAR-013), BUG-MW-API-01(SAR-015), BUG-INV-HIST-01(SAR-014) 수정. 109/109 PASS |
+| 2026-04-26 | Phase 4 Sprint 4: OPS 파라미터 시스템 최종 검증 (PH4-OPS-01~06) | Claude (Antigravity) | ✅ PASS | 시스템 파라미터 UI + 비즈니스 로직 연동 + Feature Flag 전체 PASS (회귀 테스트 111/111 PASS) |
 
 ---
 **작성 가이드:**

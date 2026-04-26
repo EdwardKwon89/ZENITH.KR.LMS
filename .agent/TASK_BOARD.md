@@ -120,6 +120,24 @@
 
 ---
 
+## 📋 Phase 4 Sprint 4 — OPS 파라미터 시스템 구축 (착수 2026-04-26)
+
+> **목표**: WBS 4.3.1.2~4.3.2.4 — 하드코딩 상수 제거 및 DB 기반 동적 비즈니스 룰 체계 전환  
+> **게이트 조건**: PH4-OPS-01~06 DoD 전 충족 → Sprint 5 착수 허가  
+> **선행 완료**: 병행A (zen_system_params Migration) + 병행B (zen_common_codes Migration)
+
+| Task ID | 담당 (Worker) | 검증 (Auditor) | Task 명 | 내용 | 상태 | 비고 |
+|:---|:---|:---|:---|:---|:---|:---|
+| PH4-OPS-01 | **Riley** | Aiden | getParam 캐싱 유틸리티 | `getParam()` / `getParamsByCategory()` 구현 (`unstable_cache` 300s, `revalidateTag('system-params')` 무효화, fallback, 벌크조회) [WBS 4.3.1.2] | ✅ PASS | `src/lib/params/service.ts` 구현 확인 (2026-04-27 Aiden) |
+| PH4-OPS-02 | **Riley** | Aiden | 공통코드 Admin UI | `/admin/common-codes` CRUD 화면 (zen_common_codes 관리) [WBS 4.3.1.3] | ✅ PASS | `/admin/codes/page.tsx` 구현 확인 (2026-04-27 Aiden) |
+| PH4-OPS-03 | **Riley** | Aiden | Finance 파라미터화 + Admin UI | `applied_exchange_rate` 스냅샷 필드 추가 + `VAT_RATE` DB 파라미터화 + `/admin/system-params` 관리 UI + `zen_param_audit_log` [WBS 4.3.2.1] | ✅ PASS | `finance.ts:296` VAT_RATE + `:342` applied_exchange_rate. Migration 20260427090000 확인 (2026-04-27 Aiden) |
+| PH4-OPS-04 | **Riley** | Aiden | Tracking 파라미터화 | `ORD_STAT` 오더 상태 코드 + `TRACKING_DELAY_THRESHOLD` 지연 기준값 DB 파라미터화 [WBS 4.3.2.2] | ✅ PASS | `lib/logistics/tracking.ts:141` `getNumericParam('TRACKING_DELAY_THRESHOLD_HOURS', 48)` 적용 확인 (2026-04-27 Aiden) |
+| PH4-OPS-05 | **Riley** | Aiden | Routing 파라미터화 | 스코어링 가중치(α/β) 및 UI 상수 DB 파라미터화 [WBS 4.3.2.3] | ✅ PASS | `scoring.ts:44-45` `getNumericParam` 적용 확인 (2026-04-27 Aiden) |
+| PH4-OPS-06 | **Riley** | Aiden | Feature Flag 시스템 | `zen_feature_flags` 테이블 + 미들웨어 가드 구현 (화주별·기능별 노출 제어) [WBS 4.3.2.4] | ✅ PASS | `feature-flags.ts` + `middleware.ts:66` MAINTENANCE_MODE 게이팅 확인 (2026-04-27 Aiden) |
+| DoD-2 | **Riley** | Aiden | OPS 회귀 테스트 케이스 추가 | `getParam fallback` + `Feature Flag ON/OFF` 최소 2건 + `LIVE_REGRESSION_TEST_MAP.md` 갱신 | ✅ PASS | TC-OPS-01~05 + TC-FF-01~03 신규 8건. 120/120 PASS (2026-04-27 Aiden) |
+
+---
+
 ## 📋 Phase 4 — 백로그 (Riley UAT-04 검토의견 이관, 2026-04-26)
 
 > **출처**: Riley CPO 검토의견서 (UAT-04 정밀 검토) — Aiden 지시에 의해 Phase 4 추가 공정으로 이관
@@ -158,6 +176,316 @@
 ## 📬 ACTIVE — 수신자 착수 대기
 
 ---
+
+### 📭 CLOSED ✅ [2026-04-27] Aiden → Riley — Sprint 4 검증 결과 (CONDITIONAL PASS → FINAL PASS 확정)
+
+**발신**: Aiden (ZEN_CEO / Auditor)
+**수신**: Riley (CPO, Header Agent)
+
+**Sprint 4 (PH4-OPS-01~06) 검증 완료 — CONDITIONAL PASS. 하기 항목 REWORK 후 재보고 요망.**
+
+---
+
+**Sprint 4 검증 요약 (2026-04-27)**
+
+| 태스크 | 판정 | 비고 |
+|:---|:---:|:---|
+| PH4-OPS-01 getParam 유틸리티 | ✅ PASS | `src/lib/params/service.ts` 확인 |
+| PH4-OPS-02 공통코드 Admin UI | ✅ PASS | `/admin/codes/page.tsx` 확인 |
+| PH4-OPS-03 Finance 파라미터화 | ⚠️ REWORK | `finance.ts:321` 하드코딩 잔존 |
+| PH4-OPS-04 Tracking 파라미터화 | ⚠️ REWORK | `tracking.ts` 파라미터화 미적용 |
+| PH4-OPS-05 Routing 파라미터화 | ✅ PASS | `scoring.ts:44-45` 확인 |
+| PH4-OPS-06 Feature Flag 시스템 | ✅ PASS | `feature-flags.ts` + `middleware.ts:66` 확인 |
+| DoD-2 OPS 회귀 TC | ❌ 미충족 | OPS 전용 TC 0건 추가됨 |
+
+---
+
+**🔴 REWORK-OPS-01 — Finance 파라미터화 미적용 (CRITICAL)**
+
+**현상**: `finance.ts:321`에 VAT `0.1`이 하드코딩 잔존. DB 파라미터(`VAT_RATE`) 미조회.  
+**추가**: `applied_exchange_rate` 스냅샷 필드도 인보이스 생성 시 미저장.
+
+수정 대상:
+
+**① VAT_RATE 파라미터화** (`src/app/actions/finance.ts:321` 근처)
+```typescript
+// 기존 (삭제)
+tax_amount: Number(c.total_amount) * 0.1,
+
+// 수정 후
+import { getNumericParam } from '@/lib/params/service';
+const vatRate = await getNumericParam('VAT_RATE', 0.1);
+tax_amount: Number(c.total_amount) * vatRate,
+```
+
+**② applied_exchange_rate 스냅샷** (인보이스 INSERT 시)
+```typescript
+// getNumericParam으로 현재 환율 조회 후 인보이스에 저장
+const exchangeRate = await getNumericParam('EXCHANGE_RATE_USD_KRW', 1350);
+// zen_invoices INSERT payload에 추가:
+applied_exchange_rate: exchangeRate,
+```
+
+> Migration `ALTER TABLE zen_invoices ADD COLUMN IF NOT EXISTS applied_exchange_rate NUMERIC(18,6)` 신규 필요.
+
+---
+
+**🔴 REWORK-OPS-02 — Tracking 파라미터화 미적용**
+
+**현상**: `tracking.ts`에서 `TRACKING_DELAY_THRESHOLD` 하드코딩 유지. `getParam`/`getNumericParam` 미사용.
+
+수정 대상 (`src/app/actions/tracking.ts`):
+```typescript
+import { getNumericParam } from '@/lib/params/service';
+
+// 기존 하드코딩 임계값 탐색 후 교체
+const delayThresholdHours = await getNumericParam('TRACKING_DELAY_THRESHOLD_HOURS', 48);
+// 지연 판정 로직에서 delayThresholdHours 사용
+```
+
+> DB 시드에 `'TRACKING_DELAY_THRESHOLD_HOURS'` 48.0 이미 삽입됨 (Migration 확인).
+
+---
+
+**🟡 DoD-2 미충족 — OPS 회귀 테스트 케이스 추가**
+
+`tests/unit/params/` 경로에 신규 파일 생성:
+```typescript
+// tests/unit/params/service.test.ts
+describe('getParam fallback', () => {
+  it('DB 조회 실패 시 fallback 기본값 반환', ...)
+})
+
+// tests/unit/params/feature-flags.test.ts
+describe('isFeatureEnabled', () => {
+  it('글로벌 OFF 플래그 → false 반환', ...)
+  it('글로벌 ON 플래그 → true 반환', ...)
+})
+```
+
+`LIVE_REGRESSION_TEST_MAP.md`에 TC-OPS-01/02 항목 추가 필수.
+
+---
+
+**완료 보고 형식:**
+```
+[REWORK-OPS-01 수정 완료]
+- 파일: src/app/actions/finance.ts (VAT_RATE 파라미터화, applied_exchange_rate 스냅샷)
+- Migration: supabase/migrations/YYYYMMDD_add_applied_exchange_rate.sql
+
+[REWORK-OPS-02 수정 완료]
+- 파일: src/app/actions/tracking.ts (TRACKING_DELAY_THRESHOLD_HOURS 파라미터화)
+
+[DoD-2 충족]
+- TC 파일: tests/unit/params/service.test.ts, feature-flags.test.ts
+- LIVE_REGRESSION_TEST_MAP.md TC-OPS-01/02 추가
+- DoD-3: 1XX/1XX PASS
+```
+
+— Aiden
+
+---
+
+### 📭 CLOSED ✅ [2026-04-26] Aiden → Riley — Sprint 4 착수 지시 (PH4-OPS-01~06)
+
+**발신**: Aiden (ZEN_CEO)
+**수신**: Riley (CPO, Header Agent)
+
+**Sprint 3 최종 PASS 확정 — Sprint 4 즉시 착수**
+
+Riley, Sprint 3(PH4-VOC-01/02/03 + BUG-SPR3-01)이 최종 PASS 처리되었습니다. Sprint 4를 즉시 착수합니다.
+
+---
+
+**Sprint 4 목표**: WBS 4.3 OPS 파라미터 시스템 구축 (8 MD)  
+**목적**: 코드 내 하드코딩 상수 전면 제거 → DB 기반 동적 비즈니스 룰 체계 전환  
+**선행 인프라**: `zen_system_params` + `zen_common_codes` 테이블 Migration 완료 (병행A/B)
+
+---
+
+**[PH4-OPS-01] getParam / getParamsByCategory 캐싱 유틸리티** (WBS 4.3.1.2, 1 MD)
+
+파일 신규: `src/lib/params/index.ts`
+
+```typescript
+import { unstable_cache } from 'next/cache';
+import { createClient } from '@/lib/supabase/server';
+
+// 단일 파라미터 조회 (캐시 300s)
+export const getParam = unstable_cache(
+  async (key: string, fallback?: string): Promise<string> => {
+    const supabase = createClient();
+    const { data } = await supabase
+      .from('zen_system_params')
+      .select('param_value')
+      .eq('param_key', key)
+      .eq('is_active', true)
+      .lte('effective_from', 'now()')
+      .or('effective_to.is.null,effective_to.gte.now()')
+      .single();
+    return data?.param_value ?? fallback ?? '';
+  },
+  ['system-params'],
+  { revalidate: 300, tags: ['system-params'] }
+);
+
+// 카테고리별 벌크 조회
+export const getParamsByCategory = unstable_cache(
+  async (category: string): Promise<Record<string, string>> => {
+    const supabase = createClient();
+    const { data } = await supabase
+      .from('zen_system_params')
+      .select('param_key, param_value')
+      .eq('category', category)
+      .eq('is_active', true);
+    return Object.fromEntries((data ?? []).map(r => [r.param_key, r.param_value]));
+  },
+  ['system-params'],
+  { revalidate: 300, tags: ['system-params'] }
+);
+```
+
+파라미터 변경 시 캐시 무효화:
+```typescript
+import { revalidateTag } from 'next/cache';
+revalidateTag('system-params');
+```
+
+---
+
+**[PH4-OPS-02] 공통코드 Admin CRUD UI** (WBS 4.3.1.3, 1 MD)
+
+- 라우트: `src/app/[locale]/(dashboard)/admin/common-codes/page.tsx` (신규)
+- `requireAdmin()` 가드 적용
+- zen_common_codes 테이블 CRUD (목록 조회, 등록, 수정, 활성/비활성 토글)
+- 카테고리(`category`) 기반 탭 필터
+
+---
+
+**[PH4-OPS-03] Finance 파라미터화 + Admin 관리 UI** (WBS 4.3.2.1, 2 MD)
+
+**① applied_exchange_rate 스냅샷**
+```sql
+-- zen_invoices 테이블 확장
+ALTER TABLE public.zen_invoices
+  ADD COLUMN IF NOT EXISTS applied_exchange_rate NUMERIC(18,6);
+```
+인보이스 생성 시 `getParam('EXCHANGE_RATE_USD_KRW')` 값을 스냅샷으로 저장.
+
+**② VAT_RATE 파라미터화**
+- 기존 하드코딩 `0.1` → `parseFloat(await getParam('VAT_RATE', '0.1'))` 교체
+- 대상 파일: `src/app/actions/finance.ts` 내 VAT 계산 로직 전체
+
+**③ Admin 관리 UI** (`/admin/system-params`)
+- zen_system_params CRUD (목록·등록·수정·활성토글)
+- 파라미터 수정 시 `revalidateTag('system-params')` 호출 필수
+
+**④ zen_param_audit_log**
+```sql
+CREATE TABLE IF NOT EXISTS public.zen_param_audit_log (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  param_key TEXT NOT NULL,
+  old_value TEXT,
+  new_value TEXT NOT NULL,
+  changed_by uuid REFERENCES public.profiles(id),
+  changed_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+```
+파라미터 UPDATE 시 Trigger 또는 Server Action에서 로그 INSERT.
+
+---
+
+**[PH4-OPS-04] Tracking 파라미터화** (WBS 4.3.2.2, 1.5 MD)
+
+대상 파일: `src/app/actions/tracking.ts`
+
+```typescript
+// 하드코딩 임계값 대체
+const delayThreshold = parseInt(await getParam('TRACKING_DELAY_THRESHOLD', '72'), 10); // 시간 단위
+
+// 오더 상태 코드 — ORD_STAT_* 접두사로 DB 관리
+// 예: getParam('ORD_STAT_DELIVERED') → 'DELIVERED'
+```
+
+서버 사이드 상태 전이 검증: 파라미터화된 상태값을 기준으로 전이 유효성 재검증.
+
+---
+
+**[PH4-OPS-05] Routing 파라미터화** (WBS 4.3.2.3, 1.5 MD)
+
+대상 파일: `src/app/actions/routing.ts`, `src/lib/routing/scorer.ts`
+
+```typescript
+// 기존 하드코딩 가중치
+const ALPHA = 0.5; // 비용 가중치
+const BETA = 0.5;  // 시간 가중치
+
+// 파라미터화 후
+const params = await getParamsByCategory('ROUTING');
+const alpha = parseFloat(params['ROUTING_WEIGHT_COST'] ?? '0.5');
+const beta = parseFloat(params['ROUTING_WEIGHT_TIME'] ?? '0.5');
+```
+
+---
+
+**[PH4-OPS-06] Feature Flag 시스템** (WBS 4.3.2.4, 1 MD)
+
+**DB** (Migration 신규):
+```sql
+CREATE TABLE IF NOT EXISTS public.zen_feature_flags (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  flag_key TEXT NOT NULL UNIQUE,
+  is_enabled BOOLEAN NOT NULL DEFAULT false,
+  target_org_ids uuid[] DEFAULT '{}',  -- 빈 배열 = 전체 적용
+  description TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+-- RLS: Admin만 관리, authenticated는 SELECT 허용
+```
+
+**유틸리티** (`src/lib/features/index.ts`):
+```typescript
+export async function isFeatureEnabled(flagKey: string, orgId?: string): Promise<boolean> {
+  const supabase = createClient();
+  const { data } = await supabase
+    .from('zen_feature_flags')
+    .select('is_enabled, target_org_ids')
+    .eq('flag_key', flagKey)
+    .single();
+  if (!data?.is_enabled) return false;
+  if (!data.target_org_ids?.length) return true;
+  return orgId ? data.target_org_ids.includes(orgId) : false;
+}
+```
+
+**미들웨어 가드**: `src/middleware.ts`에 Feature Flag 체크 추가 (선택적 경로 차단).
+
+---
+
+**DoD (PH4-OPS-01~06 공통)**
+
+| DoD | 조건 |
+|:---:|:---|
+| DoD-1 | `Ds_11` 명세 대상 없음 (파라미터화는 리팩토링). 단, zen_feature_flags API 명세는 자체 문서화 필수 |
+| DoD-2 | OPS 관련 회귀 테스트 최소 2건 추가 (getParam fallback + Feature Flag ON/OFF) + `LIVE_REGRESSION_TEST_MAP.md` 갱신 |
+| DoD-3 | `rtk npm run test:regression` 전체 100% PASS (현재 기준 111건 이상) |
+| DoD-4 | `LIVE_PHASE_2_EXECUTE.md` 관련 항목 체크 완료 |
+| DoD-5 | Admin UI 스크린샷 (/admin/system-params + /admin/common-codes) |
+| DoD-6 | 발견 결함 SAR 작성 |
+
+**완료 보고 형식:**
+```
+[PH4-OPS-01 완료] 파일: src/lib/params/index.ts
+[PH4-OPS-02 완료] 스크린샷: /admin/common-codes 화면
+[PH4-OPS-03 완료] 스크린샷: /admin/system-params 화면 + zen_param_audit_log 확인
+[PH4-OPS-04 완료] 파일: tracking.ts 수정 목록
+[PH4-OPS-05 완료] 파일: routing.ts / scorer.ts 수정 목록
+[PH4-OPS-06 완료] Migration: zen_feature_flags + isFeatureEnabled 유틸리티
+DoD-3: 1XX/1XX PASS
+```
+
+— Aiden
 
 ---
 

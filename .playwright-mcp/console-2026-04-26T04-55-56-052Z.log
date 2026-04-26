@@ -233,3 +233,42 @@ Parsing ecmascript source code failed @ http://localhost:3000/_next/static/chunk
 [27274486ms] [LOG] [Fast Refresh] done in 127ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
 [27561406ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
 [27561411ms] [LOG] [Fast Refresh] done in 105ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[28258571ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[28259799ms] [LOG] [Fast Refresh] done in 1329ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[28261203ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[28262352ms] [LOG] [Fast Refresh] done in 1250ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[28262597ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[28263080ms] [LOG] [Fast Refresh] done in 585ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[28263607ms] [LOG] %c%s%c [AUTH_TRACE] User: governance_master@zenith.kr, Role: ADMIN, Path: /admin, Allowed: true background: #e6e6e6;background: light-dark(rgba(0,0,0,0.1), rgba(255,255,255,0.25));color: #000000;color: light-dark(#000000, #ffffff);border-radius: 2px  Server   @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[28269382ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[28269823ms] [LOG] [Fast Refresh] done in 542ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[28270457ms] [ERROR] %o
+
+%s Error: Could not find the table 'public.zen_nations' in the schema cache
+    at getNations (about://React/Server/file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/.next/dev/server/chunks/ssr/%5Broot-of-the-server%5D__114lyd1._.js?164:273:22)
+    at  GeoMasterPage (about://React/Server/file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/.next/dev/server/chunks/ssr/%5Broot-of-the-server%5D__07r9xf8._.js?165:81:30)
+    at resolveErrorDev (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_0p3wegg._.js:1919:150)
+    at processFullStringRow (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_0p3wegg._.js:2434:29)
+    at processFullBinaryRow (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_0p3wegg._.js:2393:9)
+    at processBinaryChunk (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_0p3wegg._.js:2502:221)
+    at progress (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_0p3wegg._.js:2689:13) The above error occurred in the <GeoMasterPage> component. It was handled by the <ErrorBoundaryHandler> error boundary. @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:1998
+[28270469ms] [ERROR] Dashboard Runtime Error: Error: Could not find the table 'public.zen_nations' in the schema cache
+    at getNations (about://React/Server/file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/.next/dev/server/chunks/ssr/%5Broot-of-the-server%5D__114lyd1._.js?164:273:22)
+    at  GeoMasterPage (about://React/Server/file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/.next/dev/server/chunks/ssr/%5Broot-of-the-server%5D__07r9xf8._.js?165:81:30)
+    at resolveErrorDev (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_0p3wegg._.js:1919:150)
+    at processFullStringRow (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_0p3wegg._.js:2434:29)
+    at processFullBinaryRow (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_0p3wegg._.js:2393:9)
+    at processBinaryChunk (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_0p3wegg._.js:2502:221)
+    at progress (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_0p3wegg._.js:2689:13) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[28270470ms] [ERROR] Dashboard Runtime Error: Error: Could not find the table 'public.zen_nations' in the schema cache
+    at getNations (about://React/Server/file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/.next/dev/server/chunks/ssr/%5Broot-of-the-server%5D__114lyd1._.js?164:273:22)
+    at  GeoMasterPage (about://React/Server/file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/.next/dev/server/chunks/ssr/%5Broot-of-the-server%5D__07r9xf8._.js?165:81:30)
+    at resolveErrorDev (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_0p3wegg._.js:1919:150)
+    at processFullStringRow (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_0p3wegg._.js:2434:29)
+    at processFullBinaryRow (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_0p3wegg._.js:2393:9)
+    at processBinaryChunk (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_0p3wegg._.js:2502:221)
+    at progress (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_0p3wegg._.js:2689:13) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3272
+[28272332ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/ko/master/mapping?_rsc=1dr1a:0
+[28272531ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/ko/master/mapping:0
+[28272556ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[28272566ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431

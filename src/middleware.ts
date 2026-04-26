@@ -4,6 +4,7 @@ import { updateSession } from '@/utils/supabase/middleware';
 import { type NextRequest, NextResponse } from 'next/server';
 import { ORG_ROUTE_MAP, DEFAULT_REDIRECTS } from '@/config/routes';
 import { createClient } from '@/utils/supabase/server';
+import { isFeatureEnabled } from '@/lib/params/feature-flags';
 
 const handleI18nRouting = createMiddleware(routing);
 
@@ -58,6 +59,20 @@ export async function middleware(request: NextRequest) {
     console.log(`[MIDDLEWARE] Unauthorized Access. Redirecting to Login.`);
     const url = request.nextUrl.clone();
     url.pathname = `/${locale}${DEFAULT_REDIRECTS.UNAUTHENTICATED}`;
+    return mergeHeaders(NextResponse.redirect(url), supabaseResponse);
+  }
+
+  // 2.1 플랫폼 점검 모드 (Maintenance Mode) Feature Flag 확인 (PH4-OPS-06)
+  const isMaintenanceMode = await isFeatureEnabled('MAINTENANCE_MODE');
+  const isPlatformUser = user?.app_metadata?.role === 'ZENITH_SUPER_ADMIN' || user?.app_metadata?.role === 'ADMIN';
+
+  if (isMaintenanceMode && !isPlatformUser && !isAuthPage && !isApi && purePath !== '/') {
+    console.log(`[MIDDLEWARE] Maintenance Mode Active. Blocking non-admin access.`);
+    const url = request.nextUrl.clone();
+    url.pathname = `/${locale}/maintenance`; // 점검 페이지 (아직 없으므로 루트로 보내거나 403 처리 가능)
+    // 임시로 홈으로 보내거나 에러 메시지 쿼리 파라미터 추가
+    url.pathname = `/${locale}`;
+    url.searchParams.set('error', 'maintenance');
     return mergeHeaders(NextResponse.redirect(url), supabaseResponse);
   }
 

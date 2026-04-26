@@ -18,9 +18,10 @@ Object.defineProperty(window, 'matchMedia', {
 });
 
 // Next.js Cache & Navigation Mocks
-vi.mock('next/cache', () => ({
+vi.mock('next/cache', () => ({ unstable_cache: (fn: any) => fn,
   revalidatePath: vi.fn(),
   revalidateTag: vi.fn(),
+  unstable_cache: (fn: any) => fn, // 캐시 레이어 무시하고 원본 함수 실행
 }));
 
 vi.mock('next/navigation', () => ({

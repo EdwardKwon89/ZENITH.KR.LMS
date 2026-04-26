@@ -7,6 +7,7 @@
 
 import { createClient } from '@/utils/supabase/server';
 import { calculateSlabRate } from '../logistics/rate-engine';
+import { getNumericParam } from '../params/service';
 
 export interface CostCalculationResult {
   success: boolean;
@@ -48,7 +49,7 @@ export class SettlementEngine {
       }
 
       // 2. Chargeable Weight 계산
-      const { chargeableWeight } = this.calculateChargeableWeight(order);
+      const { chargeableWeight } = await this.calculateChargeableWeight(order);
 
       // 3. 요율 매칭 (가장 적합한 Rate Card 검색)
       // 우선순위: 1. 고객 전용 요율(customer_id 매칭), 2. 일반 요율(customer_id IS NULL)
@@ -124,7 +125,7 @@ export class SettlementEngine {
   /**
    * 화물의 실제 중량과 부피 중량을 비교하여 청구 중량(Chargeable Weight)을 산출합니다.
    */
-  private calculateChargeableWeight(order: any) {
+  private async calculateChargeableWeight(order: any) {
     let totalGrossWeight = 0;
     let totalVolume = 0;
 
@@ -142,7 +143,10 @@ export class SettlementEngine {
     // Volume Weight 계산 (물류 표준 계수 적용)
     // AIR: 1 CBM = 166.67 kg (1:6000 기준)
     // SEA: 1 CBM = 1000 kg (1:1000 기준)
-    const volumeFactor = order.transport_mode === 'SEA' ? 1000 : 166.67;
+    const seaFactor = await getNumericParam('VOLUME_FACTOR_SEA', 1000);
+    const airFactor = await getNumericParam('VOLUME_FACTOR_AIR', 166.67);
+    
+    const volumeFactor = order.transport_mode === 'SEA' ? seaFactor : airFactor;
     const volumeWeight = totalVolume * volumeFactor;
 
     // 실제 중량과 부피 중량 중 큰 값을 선택
@@ -205,6 +209,8 @@ export class InvoiceGenerator {
       const invoiceNo = `INV-${today}-${randomSuffix}`;
       
       // 4. 인보이스 레코드 생성
+      const exchangeRate = await getNumericParam('EXCHANGE_RATE_USD_KRW', 1350);
+      
       const { data: invoice, error: invError } = await supabase
         .from('zen_invoices')
         .insert({
@@ -212,11 +218,16 @@ export class InvoiceGenerator {
           shipper_id: order.shipper_id,
           total_amount: totalAmount,
           currency: currency,
+          applied_exchange_rate: exchangeRate,
           status: 'UNPAID',
           due_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
           metadata: { 
             source_order_id: orderId, 
-            order_no: order.order_no 
+            order_no: order.order_no,
+            rate_snapshot: {
+              exchange_rate: exchangeRate,
+              is_fallback: exchangeRate === 1350 // 간단한 체크
+            }
           }
         })
         .select()

@@ -1,7 +1,8 @@
 "use server";
 
 import { validateAdminAction, validateUserAction } from "@/lib/auth/guards";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
+import { updateSystemParam as updateParam } from "@/lib/params/service";
 import { SYSTEM_INDIVIDUAL_SHIPPER_ID } from "@/lib/constants";
 
 /**
@@ -123,6 +124,19 @@ export async function getAirlines() {
   return data;
 }
 /**
+ * 모든 공통 코드 그룹을 조회합니다.
+ */
+export async function getCodeGroups() {
+  const { supabase } = await validateAdminAction();
+  const { data, error } = await supabase
+    .from("common_code_groups")
+    .select("*")
+    .order("id", { ascending: true });
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+/**
  * 모든 공통 코드 목록을 조회합니다.
  */
 export async function getCommonCodes() {
@@ -130,8 +144,8 @@ export async function getCommonCodes() {
   
   const { data, error } = await supabase
     .from("common_codes")
-    .select("*")
-    .order("group_code", { ascending: true })
+    .select("*, group:common_code_groups(name)")
+    .order("group_id", { ascending: true })
     .order("sort_order", { ascending: true });
 
   if (error) throw new Error(error.message);
@@ -141,13 +155,13 @@ export async function getCommonCodes() {
 /**
  * 특정 그룹의 공통 코드 목록을 조회합니다.
  */
-export async function getCommonCodesByGroup(groupCode: string) {
-  const { supabase } = await validateAdminAction();
+export async function getCommonCodesByGroup(groupId: string) {
+  const { supabase } = await validateUserAction();
   
   const { data, error } = await supabase
     .from("common_codes")
     .select("*")
-    .eq("group_code", groupCode)
+    .eq("group_id", groupId)
     .eq("is_active", true)
     .order("sort_order", { ascending: true });
 
@@ -169,24 +183,37 @@ export async function upsertCommonCode(payload: any) {
 
   if (error) throw new Error(error.message);
   
-  revalidatePath("/(dashboard)/master/codes", "page");
+  revalidatePath("/admin/codes", "page");
+  return data;
+}
+
+/**
+ * 시스템 파라미터를 업데이트합니다. (PH4-OPS-03)
+ */
+export async function updateSystemParam(key: string, payload: any) {
+  const { profile } = await validateAdminAction();
+  
+  const data = await updateParam(key, payload, profile.id);
+  
+  revalidatePath("/admin/settings", "page");
   return data;
 }
 
 /**
  * 공통 코드를 삭제(비활성화 추천)합니다.
  */
-export async function deleteCommonCode(id: string) {
+export async function deleteCommonCode(groupId: string, code: string) {
   const { supabase } = await validateAdminAction();
   
   const { error } = await supabase
     .from("common_codes")
     .delete()
-    .eq("id", id);
+    .eq("group_id", groupId)
+    .eq("code", code);
 
   if (error) throw new Error(error.message);
   
-  revalidatePath("/(dashboard)/master/codes", "page");
+  revalidatePath("/admin/codes", "page");
   return { success: true };
 }
 

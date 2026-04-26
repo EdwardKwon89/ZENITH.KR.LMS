@@ -8,7 +8,7 @@ vi.mock('@/lib/notifications/email', () => ({
   sendStatusChangeEmail: mockSendStatusChangeEmail,
 }));
 
-vi.mock('next/cache', () => ({
+vi.mock('next/cache', () => ({ unstable_cache: (fn: any) => fn,
   revalidatePath: vi.fn(),
 }));
 

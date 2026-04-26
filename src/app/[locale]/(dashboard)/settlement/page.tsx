@@ -20,7 +20,7 @@ export default async function SettlementPage({ params }: { params: Promise<{ loc
           <Wallet size={24} />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Settlement Control</h1>
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">정산 관리</h1>
           <p className="text-slate-500 font-medium text-xs">
             Manage your financial transactions and payouts 
             {isAdmin && <span className="ml-2 text-[10px] bg-brand-100 text-brand-600 px-2 py-0.5 rounded-full uppercase font-black tracking-tighter">Admin View</span>}

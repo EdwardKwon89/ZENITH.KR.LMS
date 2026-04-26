@@ -2,6 +2,7 @@
  * ROU-01 Logistics Scoring Module
  * 명세 근거: Ds-11 Section 13 — Architecture & Algorithms
  */
+import { getNumericParam } from '../params/service';
 
 export interface Candidate {
   carrier?: string;
@@ -37,11 +38,11 @@ export function selectTimeOptimal<T extends Candidate>(candidates: T[]): T {
  * 3. Balanced (최적, 기본 추천)
  * 스코어: α × norm_cost + β × norm_time (α=0.6, β=0.4)
  */
-export function selectBalanced<T extends Candidate>(candidates: T[]): { candidate: T; score: number } {
+export async function selectBalanced<T extends Candidate>(candidates: T[]): Promise<{ candidate: T; score: number }> {
   if (candidates.length === 0) throw new Error("No candidates for scoring");
 
-  const α = 0.6;
-  const β = 0.4;
+  const α = await getNumericParam('ROUTING_WEIGHT_ALPHA', 0.6);
+  const β = await getNumericParam('ROUTING_WEIGHT_BETA', 0.4);
   
   const costs = candidates.map((c) => c.total_cost);
   const days = candidates.map((c) => c.total_transit_days);

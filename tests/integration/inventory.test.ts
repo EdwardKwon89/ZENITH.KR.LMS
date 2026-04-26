@@ -9,7 +9,7 @@ vi.mock('@/lib/auth/guards', () => ({
   validateAdminAction: vi.fn(),
 }));
 
-vi.mock('next/cache', () => ({
+vi.mock('next/cache', () => ({ unstable_cache: (fn: any) => fn,
   revalidatePath: vi.fn(),
 }));
 

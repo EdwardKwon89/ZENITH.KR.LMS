@@ -1,7 +1,7 @@
 # 🗺️ LIVE Regression Test Master Map
 
 > **상태:** [ACTIVE]  
-> **총 테스트 케이스:** 109 Cases (PH4-UAT-01 TRK 검증 1건 추가 포함 전원 활성)  
+> **총 테스트 케이스:** 115 Cases (PH4-OPS-04 4건 추가 포함 전원 활성)  
 > **최종 검증일:** 2026-04-26  
 
 제니스 플랫폼의 비즈니스 영속성을 보장하는 회귀 테스트 케이스의 통합 명세서입니다. 모든 신규 개발 및 수정 시 이 맵에 케이스가 추가되어야 하며, 전체 테스트가 통과되어야 합니다.
@@ -153,7 +153,21 @@
 | 2026-04-25 | v3.5 | ✅ PASS | 50.42s | 108/108 TC-G.2 mock 패턴 수정(mockResolvedValue→mockReturnValue), inventory 음수 조정 패턴 수정(rejects.toThrow→toEqual), TS 타입 수정 7건(implicit any 3건, OrderStatus, addTrackingEvent 인자, lowStockOnly, checkPermission) |
 | 2026-04-26 | v3.6 | ✅ PASS | 26.73s | 109/109 PH4-UAT-01 TRK 모듈 브라우저 UAT 완료 (1건 추가). BUG-FIN-RLS-01(zen_invoices UPDATE RLS 누락), BUG-MW-API-01(/api i18n 리다이렉트), BUG-INV-HIST-01(history INSERT org_id FK 위반) 코드 수정 후 기존 109/109 전원 PASS 확인 |
 | 2026-04-26 | v4.0 | ✅ PASS | 26.73s | 109/109 PH4-UX-03/04 (UI/UX 고도화) 완료. 전 페이지 디자인 엔진 업그레이드(Glassmorphism, Hover Elevation, rounded-2xl 표준화) 및 Finance 실데이터 차트 연동 확인. |
-| 2026-04-26 | v4.1 | ✅ PASS | 26.73s | 111/111 Phase 4 Sprint 3 (VOC 관리 모듈) 완료. VOC DB 스키마, 서버 액션, 어드민 대시보드, 사용자 VOC 상세 페이지 구현 및 회귀 테스트 2건(TC-V.7~8) 신규 등록. |
+### 13. 시스템 파라미터 및 운영 안정성 (OPS/Params)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-OPS-01** | 숫자 파라미터 정상 조회 | DB에 설정된 수치 파라미터의 정확한 로딩 확인 | `tests/unit/params/service.test.ts` |
+| **TC-OPS-02** | 파라미터 부재 시 Fallback | DB에 값이 없을 경우 코드 내 기본값(Default) 반환 보장 | `tests/unit/params/service.test.ts` |
+| **TC-OPS-03** | NULL 값 안전 처리 | DB 값이 NULL일 경우 예외 없이 기본값으로 대체 확인 | `tests/unit/params/service.test.ts` |
+| **TC-OPS-04** | 트래킹 지연 자동 감지 | 마지막 이벤트 48시간 초과 시 자동으로 `DELAYED` 스텝 추가 및 오더 `HELD` 상태 전환 | `tests/unit/logistics/tracking.test.ts` |
+
+---
+
+## 📊 최신 검증 이력 (Execution History)
+
+| 검증일 | 버전 | 성공/실패 | 총 소요시간 | 결과 리포트 |
+| :--- | :--- | :---: | :--- | :--- |
+| 2026-04-26 | v4.2 | ✅ PASS | 28.50s | 115/115 Phase 4 Sprint 4 (OPS 고도화) 완료. 시스템 파라미터 캐싱, 피처 플래그, 트래킹 지연 감지 로직 구현 및 회귀 테스트 4건(TC-OPS-01~04) 신규 등록. |
 
 ---
 
