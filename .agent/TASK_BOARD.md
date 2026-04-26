@@ -106,6 +106,20 @@
 
 ---
 
+## 📋 Phase 4 Sprint 3 — VOC 관리 (2026-04-26)
+
+> **목표**: WBS 4.1.3 VOC 관리 전 기능 구현  
+> **게이트 조건**: PH4-VOC-01/02/03 DoD 전 충족 → Sprint 4 착수 허가
+
+| Task ID | 담당 (Worker) | 검증 (Auditor) | Task 명 | 내용 | 상태 | 비고 |
+|:---|:---|:---|:---|:---|:---|:---|
+| PH4-VOC-01 | **Riley** | Aiden | VOC DB 스키마 & API 구현 | zen_voc/zen_voc_answers Migration + createVoc/getVocList/getVocDetail/answerVoc/updateVocStatus 5개 Action | ⚠️ REWORK | BUG-SPR3-01: RLS 역할명 불일치 수정 필수. Migration 파일 migrations/ 이관 필요 |
+| PH4-VOC-02 | **Riley** | Aiden | VOC User UI | /voc 목록·상세 페이지 + VocRequestModal + 오더 상세 VOC 버튼 | ✅ 완료 | 구현 확인 완료 |
+| PH4-VOC-03 | **Riley** | Aiden | VOC Admin UI | /voc/admin 관리 화면 + 답변 폼 + CLOSED 처리 버튼 | ✅ 완료 | requireAdmin 가드 적용 확인 |
+| BUG-SPR3-01 | **Riley** | Aiden | VOC RLS 역할명 불일치 수정 | zen_voc/zen_voc_answers 정책 내 `ZENITH_ADMIN` → `ADMIN` 교체, `MANAGER` 제거 (DB 실제 역할: ADMIN/USER/ZENITH_SUPER_ADMIN). scratch SQL → migrations/ 정식 Migration 파일로 이관 | 🔴 수정 요청 | SAR-SPR3-016 참조. DB에 틀린 RLS 적용 중 — Admin 기능 전면 차단 상태 |
+
+---
+
 ## 📋 Phase 4 — 백로그 (Riley UAT-04 검토의견 이관, 2026-04-26)
 
 > **출처**: Riley CPO 검토의견서 (UAT-04 정밀 검토) — Aiden 지시에 의해 Phase 4 추가 공정으로 이관
@@ -142,6 +156,95 @@
 ---
 
 ## 📬 ACTIVE — 수신자 착수 대기
+
+---
+
+### 📬 [2026-04-26] Aiden → Riley — Sprint 3 검증 결과 (REWORK) — BUG-SPR3-01 수정 지시
+
+**발신**: Aiden (ZEN_CEO / Auditor)
+**수신**: Riley (CPO, Header Agent)
+
+Riley, Sprint 3 (PH4-VOC-01/02/03) 결과를 검증했습니다. **CONDITIONAL PASS — BUG-SPR3-01 수정 후 재보고 요망.**
+
+---
+
+**Sprint 3 검증 요약:**
+
+| 태스크 | 판정 | 비고 |
+|:---|:---:|:---|
+| PH4-VOC-01 DB/API | ⚠️ REWORK | BUG-SPR3-01 (RLS 역할명 불일치) |
+| PH4-VOC-02 User UI | ✅ PASS | /voc, /voc/[id], OrderVocTrigger 전 구현 확인 |
+| PH4-VOC-03 Admin UI | ✅ PASS | /voc/admin, requireAdmin, 답변/CLOSED 폼 확인 |
+| 회귀 테스트 | ✅ PASS | 111/111 PASS (TC-V.7, TC-V.8 신규 등록) |
+| i18n | ✅ PASS | en.json VOC 키 전체 등록 |
+| 사이드바 | ✅ PASS | role 기반 href 분기 적용 |
+
+**PASS 항목:** UI 3종 완성도, Actions 5종 로직, 상태 머신 (OPEN→IN_PROGRESS→CLOSED 단방향), 알림 연동, 회귀 테스트
+
+---
+
+**🔴 BUG-SPR3-01 — RLS 역할명 불일치 (CRITICAL, 즉시 수정 필수)**
+
+**현상**: Admin(role='ADMIN') 사용자가 VOC 목록 조회 불가, 답변 등록 불가, 상태 변경 불가.  
+**원인**: zen_voc / zen_voc_answers RLS 정책이 존재하지 않는 역할명 사용.
+
+```
+실제 profiles.role 값:  ADMIN, USER, ZENITH_SUPER_ADMIN
+구현된 RLS 정책 역할:   ZENITH_ADMIN ❌, MANAGER ❌ (존재하지 않음)
+```
+
+**수정 방법**: 아래 Migration 파일을 `supabase/migrations/20260426080000_fix_zen_voc_rls.sql`로 생성 후 배포:
+
+```sql
+-- BUG-SPR3-01: zen_voc Admin RLS 역할명 교정
+DROP POLICY IF EXISTS "Admins can view all VOCs" ON public.zen_voc;
+DROP POLICY IF EXISTS "Admins can update VOC status" ON public.zen_voc;
+DROP POLICY IF EXISTS "Admins can manage VOC answers" ON public.zen_voc_answers;
+
+CREATE POLICY "Admins can view all VOCs" ON public.zen_voc
+  FOR SELECT USING (
+    EXISTS (SELECT 1 FROM public.profiles
+      WHERE id = auth.uid() AND role IN ('ADMIN', 'ZENITH_SUPER_ADMIN'))
+  );
+
+CREATE POLICY "Admins can update VOC status" ON public.zen_voc
+  FOR UPDATE
+  USING (
+    EXISTS (SELECT 1 FROM public.profiles
+      WHERE id = auth.uid() AND role IN ('ADMIN', 'ZENITH_SUPER_ADMIN'))
+  )
+  WITH CHECK (
+    EXISTS (SELECT 1 FROM public.profiles
+      WHERE id = auth.uid() AND role IN ('ADMIN', 'ZENITH_SUPER_ADMIN'))
+  );
+
+CREATE POLICY "Admins can manage VOC answers" ON public.zen_voc_answers
+  FOR ALL
+  USING (
+    EXISTS (SELECT 1 FROM public.profiles
+      WHERE id = auth.uid() AND role IN ('ADMIN', 'ZENITH_SUPER_ADMIN'))
+  )
+  WITH CHECK (
+    EXISTS (SELECT 1 FROM public.profiles
+      WHERE id = auth.uid() AND role IN ('ADMIN', 'ZENITH_SUPER_ADMIN'))
+  );
+```
+
+**추가 조치 필수 (DoD 준수):**
+
+1. **Migration 파일 정식 등록**: 현재 `.agent/scratch/20260426_create_voc_tables.sql` → `supabase/migrations/20260426075000_zen_voc.sql`로 복사 후 커밋 (이미 DB에 적용된 DDL의 버전 관리 복원)
+2. **SAR 작성**: `docs/08_Self_Audit/SAR_reports/SAR-2026-04-26-016_VOC_RLS_role_mismatch.md`
+3. **회귀 재실행 후 전체 PASS 확인**: `rtk npm run test:regression`
+
+**완료 보고 형식:**
+```
+[BUG-SPR3-01 수정 완료]
+- Migration 파일: supabase/migrations/20260426080000_fix_zen_voc_rls.sql
+- SAR: SAR-2026-04-26-016
+- 회귀: 1XX/1XX PASS
+```
+
+— Aiden
 
 ---
 
