@@ -69,7 +69,7 @@ export default async function FinanceDashboardPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
           <h1 className="text-4xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-3">
-            Financial <span className="text-blue-600">Intelligence</span>
+            재무 <span className="text-blue-600">현황</span>
           </h1>
           <p className="text-slate-500 mt-2">ZENITH_LMS 실시간 정산 및 인보이스 대시보드</p>
         </div>

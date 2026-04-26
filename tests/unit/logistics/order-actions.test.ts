@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { createOrder, updateOrderStatus } from '@/app/actions/orders';
+import { OrderStatus } from '@/types/orders';
 import { validateUserAction } from '@/lib/auth/guards';
 import { generateOrderNo } from '@/app/actions/master';
 import { revalidatePath } from 'next/cache';
@@ -155,7 +156,7 @@ describe('ZENITH Logistics: Order Creation Logic', () => {
       });
 
       // When & Then
-      await expect(updateOrderStatus(orderId, 'SHIPPED'))
+      await expect(updateOrderStatus(orderId, OrderStatus.IN_TRANSIT))
         .rejects.toThrow(/마스터 오더에 결합된 상태입니다/);
     });
   });

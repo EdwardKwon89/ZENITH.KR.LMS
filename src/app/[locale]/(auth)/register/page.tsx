@@ -341,7 +341,7 @@ export default function RegisterPage() {
                   : '이메일 인증 후 바로 서비스를 이용하실 수 있습니다.'}
               </p>
             </div>
-            <ZenButton onClick={() => window.location.href = '/login'} className="w-full">로그인 화면으로 이동</ZenButton>
+            <ZenButton onClick={() => router.push(`/${locale}/login`)} className="w-full">로그인 화면으로 이동</ZenButton>
           </div>
         )}
 

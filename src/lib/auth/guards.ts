@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 import { checkPermission, USER_ROLES } from "./rbac";
+export { checkPermission };
 
 /**
  * 일반적인 인증을 강제하는 서버사이드 보안 가드입니다.
@@ -20,7 +21,7 @@ export async function requireAuth() {
     .eq("id", user.id)
     .single();
 
-  return { user, profile };
+  return { user, profile, supabase };
 }
 
 /**
@@ -41,13 +42,13 @@ export async function requireAdmin() {
     .eq("id", user.id)
     .single();
 
-  const isAllowed = await checkPermission(profile?.role, "/admin");
+  const isAllowed = checkPermission(profile?.role, "/admin");
 
   if (!isAllowed) {
     redirect("/");
   }
 
-  return { user, profile };
+  return { user, profile, supabase };
 }
 
 /**
@@ -68,7 +69,7 @@ export async function validateAdminAction() {
     .eq("id", user.id)
     .single();
 
-  const isAllowed = await checkPermission(profile?.role, "/admin");
+  const isAllowed = checkPermission(profile?.role, "/admin");
   console.log(`[AUTH_TRACE] User: ${user.email}, Role: ${profile?.role}, Path: /admin, Allowed: ${isAllowed}`);
 
   if (!isAllowed) {

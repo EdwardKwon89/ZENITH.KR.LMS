@@ -5,7 +5,7 @@
  * 정산 비용을 산출하고 인보이스를 생성하는 핵심 로직을 담당합니다.
  */
 
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/utils/supabase/server';
 import { calculateSlabRate } from '../logistics/rate-engine';
 
 export interface CostCalculationResult {
@@ -25,6 +25,7 @@ export class SettlementEngine {
    */
   async calculateOrderCosts(orderId: string): Promise<CostCalculationResult> {
     try {
+      const supabase = await createClient();
       // 1. 오더 정보 조회 (포트 코드 및 패키지 정보 포함)
       const { data: order, error: orderError } = await supabase
         .from('zen_orders')
@@ -40,6 +41,10 @@ export class SettlementEngine {
       if (orderError || !order) {
         console.error('SettlementEngine: Order not found', orderError);
         return { success: false, message: '오더 정보를 찾을 수 없습니다.' };
+      }
+
+      if (!order.origin_port || !order.dest_port || !order.transport_mode) {
+        return { success: false, message: '출발지/도착지 또는 운송 모드 정보가 누락되어 정산을 계산할 수 없습니다.' };
       }
 
       // 2. Chargeable Weight 계산
@@ -93,11 +98,7 @@ export class SettlementEngine {
           unit_price: unitPrice,
           quantity: chargeableWeight,
           currency: bestRate.currency || 'USD',
-          is_revenue: true,
-          metadata: {
-            rate_card_id: bestRate.id,
-            is_slab_applied: bestRate.tiers && bestRate.tiers.length > 0
-          }
+          is_revenue: true
         })
         .select()
         .single();
@@ -111,7 +112,7 @@ export class SettlementEngine {
         chargeableWeight,
         unitPrice,
         totalFreight,
-        currency: bestRate.currency,
+        currency: bestRate.currency ?? undefined,
         costId: costData.id
       };
     } catch (err: any) {
@@ -162,6 +163,7 @@ export class InvoiceGenerator {
    */
   async generateInvoice(orderId: string) {
     try {
+      const supabase = await createClient();
       // 1. 오더 및 비용 정보 조회
       const { data: order, error: orderError } = await supabase
         .from('zen_orders')
@@ -191,6 +193,8 @@ export class InvoiceGenerator {
       if (unbilledCosts.length === 0) {
         throw new Error('이미 모든 비용이 인보이스에 포함되었습니다.');
       }
+
+      if (!order.shipper_id) throw new Error('오더에 송하인 정보가 없어 인보이스를 생성할 수 없습니다.');
 
       const totalAmount = unbilledCosts.reduce((sum: number, cost: any) => sum + Number(cost.total_amount), 0);
       const currency = unbilledCosts[0].currency;

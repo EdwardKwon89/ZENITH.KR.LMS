@@ -159,7 +159,7 @@ Step 1: SAR 작성 (10-20분)
   - 검증 (Verification)
   - 예방 (Prevention)
   
-  참고: [SAR 작성 규칙](SAR_RULE.md)
+  참고: [SAR 작성 규칙](201_SAR_RULE.md)
 
 Step 2: Check List 항목 생성 (5-10분)
   출처: SAR의 "Prevention" 섹션
@@ -172,7 +172,7 @@ Step 2: Check List 항목 생성 (5-10분)
   
   저장: 해당 Phase의 체크리스트에 추가
   
-  참고: [Check List 관리 절차](CHECK_LIST_PROCEDURE.md)
+  참고: [Check List 관리 절차](202_CHECK_LIST_PROCEDURE.md)
 
 Step 3: 수정 및 재테스트 (30분~)
   코드 수정 → 테스트 → 통과 확인
@@ -407,10 +407,10 @@ ELSE:
 
 ```
 "SAR 뭐하는 거죠?"
-→ [SAR 작성 규칙](SAR_RULE.md)의 개요 섹션
+→ [SAR 작성 규칙](201_SAR_RULE.md)의 개요 섹션
 
 "Check List 항목을 어떻게 만들죠?"
-→ [Check List 관리 절차](CHECK_LIST_PROCEDURE.md)의 Step 2
+→ [Check List 관리 절차](202_CHECK_LIST_PROCEDURE.md)의 Step 2
 
 "월간 검토는 뭘 하나요?"
 → 이 문서의 "월간 검토" 섹션

@@ -20,10 +20,15 @@ export async function getInventoryList(payload: InventoryFilterInput) {
   const validated = inventoryFilterSchema.parse(payload);
   const { page, pageSize, search, lowStockOnly } = validated;
 
+  const isAdmin = profile.role === 'ZENITH_SUPER_ADMIN' || profile.role === 'ADMIN';
+
   let query = supabase
     .from("zen_inventory")
-    .select("*", { count: "exact" })
-    .eq("org_id", profile.org_id);
+    .select("*", { count: "exact" });
+
+  if (!isAdmin && profile.org_id) {
+    query = query.eq("org_id", profile.org_id);
+  }
 
   if (search) {
     query = query.or(`sku_code.ilike.%${search}%,item_name.ilike.%${search}%`);
@@ -58,10 +63,7 @@ export async function getInventoryHistory(inventoryId: string) {
 
   const { data, error } = await supabase
     .from("zen_inventory_history")
-    .select(`
-      *,
-      created_by_profile:profiles!created_by(full_name)
-    `)
+    .select("*")
     .eq("inventory_id", inventoryId)
     .order("created_at", { ascending: false });
 
@@ -77,54 +79,58 @@ export async function getInventoryHistory(inventoryId: string) {
  * 관리자에 의한 수동 재고 조정을 처리합니다.
  */
 export async function adjustInventory(payload: InventoryAdjustmentInput) {
-  const { supabase, user, profile } = await validateAdminAction();
-  if (!profile) throw new Error("User profile not found");
+  try {
+    const { supabase, user, profile } = await validateAdminAction();
+    if (!profile) throw new Error("User profile not found");
 
-  const validated = inventoryAdjustmentSchema.parse(payload);
-  const { inventoryId, adjustmentQty, reason } = validated;
+    const validated = inventoryAdjustmentSchema.parse(payload);
+    const { inventoryId, adjustmentQty, reason } = validated;
 
-  // 1. 현재 재고 조회
-  const { data: inventory, error: fetchError } = await supabase
-    .from("zen_inventory")
-    .select("on_hand_qty")
-    .eq("id", inventoryId)
-    .single();
+    // 1. 현재 재고 조회
+    const { data: inventory, error: fetchError } = await supabase
+      .from("zen_inventory")
+      .select("on_hand_qty, org_id")
+      .eq("id", inventoryId)
+      .single();
 
-  if (fetchError || !inventory) throw new Error("Inventory item not found");
+    if (fetchError || !inventory) throw new Error("Inventory item not found");
 
-  const newQty = inventory.on_hand_qty + adjustmentQty;
-  if (newQty < 0) throw new Error("재고 수량은 0 미만이 될 수 없습니다.");
+    const newQty = inventory.on_hand_qty + adjustmentQty;
+    if (newQty < 0) throw new Error("재고 수량은 0 미만이 될 수 없습니다.");
 
-  // 2. 재고 수량 업데이트
-  const { error: updateError } = await supabase
-    .from("zen_inventory")
-    .update({ 
-      on_hand_qty: newQty,
-      updated_at: new Date().toISOString()
-    })
-    .eq("id", inventoryId);
+    // 2. 재고 수량 업데이트
+    const { error: updateError } = await supabase
+      .from("zen_inventory")
+      .update({ 
+        on_hand_qty: newQty,
+        updated_at: new Date().toISOString()
+      })
+      .eq("id", inventoryId);
 
-  if (updateError) throw new Error(`Update failed: ${updateError.message}`);
+    if (updateError) throw new Error(`Update failed: ${updateError.message}`);
 
-  // 3. 이력 기록
-  const { error: historyError } = await supabase
-    .from("zen_inventory_history")
-    .insert({
-      inventory_id: inventoryId,
-      org_id: profile.org_id,
-      transaction_type: 'ADJUSTMENT',
-      change_qty: adjustmentQty,
-      result_qty: newQty,
-      remarks: reason,
-      created_by: user.id
-    });
+    // 3. 이력 기록
+    const { error: historyError } = await supabase
+      .from("zen_inventory_history")
+      .insert({
+        inventory_id: inventoryId,
+        org_id: profile.org_id ?? inventory.org_id,
+        transaction_type: 'ADJUSTMENT',
+        change_qty: adjustmentQty,
+        result_qty: newQty,
+        remarks: reason,
+        created_by: user.id
+      });
 
-  if (historyError) {
-    console.error("Failed to record inventory history:", historyError);
+    if (historyError) {
+      console.error("[INV-HIST] Insert failed - code:", historyError.code, "msg:", historyError.message, "details:", historyError.details);
+    }
+
+    revalidatePath("/(dashboard)/inventory", "page");
+    return { success: true, finalQty: newQty };
+  } catch (err: any) {
+    return { success: false, error: err.message || "Failed to adjust inventory" };
   }
-
-  revalidatePath("/(dashboard)/inventory", "page");
-  return { success: true, finalQty: newQty };
 }
 
 /**
@@ -171,6 +177,18 @@ export async function syncInventoryFromOrder(
     };
 
     switch (nextStatus) {
+      case OrderStatus.WAREHOUSED:
+        // 입고 처리 (on_hand_qty 증가)
+        updatePayload = { on_hand_qty: inventory.on_hand_qty + item.quantity };
+        historyPayload = {
+          ...historyPayload,
+          transaction_type: 'INBOUND',
+          change_qty: item.quantity,
+          result_qty: inventory.on_hand_qty + item.quantity,
+          remarks: `Order Warehoused: ${orderId}`
+        };
+        break;
+
       case OrderStatus.REGISTERED:
         // 재고 예약 (reserved_qty 증가)
         updatePayload = { reserved_qty: inventory.reserved_qty + item.quantity };
@@ -198,7 +216,7 @@ export async function syncInventoryFromOrder(
         };
         break;
 
-      case OrderStatus.CANCELLED:
+      case OrderStatus.CANCELED:
         // 예약 취소 (reserved_qty 차감)
         updatePayload = { 
           reserved_qty: Math.max(0, inventory.reserved_qty - item.quantity) 

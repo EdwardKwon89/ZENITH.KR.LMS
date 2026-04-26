@@ -1,0 +1,39 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e6]: v2.1 Premium Paradigm
+      - heading "지능형 통합 물류의 정점" [level=1] [ref=e7]
+      - paragraph [ref=e8]: SNTL이 제시하는 차세대 글로벌 물류 표준, ZENITH LMS와 시작하세요.
+      - generic [ref=e9]:
+        - link "대시보드로 시작하기" [ref=e10] [cursor=pointer]:
+          - /url: /login
+          - button "대시보드로 시작하기" [ref=e11]:
+            - generic [ref=e12]:
+              - text: 대시보드로 시작하기
+              - img [ref=e13]
+        - link "회원가입" [ref=e15] [cursor=pointer]:
+          - /url: /register
+          - button "회원가입" [ref=e16]:
+            - generic [ref=e17]: 회원가입
+    - generic [ref=e18]:
+      - generic [ref=e19]:
+        - img [ref=e21]
+        - heading "실시간 통합 트래킹" [level=3] [ref=e26]
+        - paragraph [ref=e27]: SNTL의 전 세계 망을 거치는 모든 화물을 실시간으로 추적하고 이상 징후를 즉시 감지합니다.
+      - generic [ref=e28]:
+        - img [ref=e30]
+        - heading "비즈니스 보안 가드" [level=3] [ref=e32]
+        - paragraph [ref=e33]: 철저한 회원사 심사를 통해 검증된 가입자만이 활동하는 신뢰 기반의 물류 생태계를 보장합니다.
+      - generic [ref=e34]:
+        - img [ref=e36]
+        - heading "글로벌 표준 정산" [level=3] [ref=e39]
+        - paragraph [ref=e40]: 국가별 세율 및 결제 수단을 통합 관리하는 지능형 정산 시스템으로 회계 업무를 자동화합니다.
+    - generic [ref=e41]:
+      - paragraph [ref=e42]: ZENITH와 함께하는 글로벌 파트너
+      - generic [ref=e43]:
+        - img "SNTL" [ref=e45] [cursor=pointer]
+        - img "GlobalLink" [ref=e47] [cursor=pointer]
+        - img "ZenithLink" [ref=e49] [cursor=pointer]
+  - button "Open Next.js Dev Tools" [ref=e55] [cursor=pointer]:
+    - img [ref=e56]
+  - alert [ref=e59]

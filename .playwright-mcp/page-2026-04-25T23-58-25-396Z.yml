@@ -1,0 +1,240 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - generic [ref=e4]:
+        - generic [ref=e5]: ZENITH_LMS
+        - button [ref=e6]:
+          - img [ref=e7]
+      - navigation [ref=e9]:
+        - generic [ref=e11] [cursor=pointer]:
+          - img [ref=e12]
+          - generic [ref=e17]: 대시보드
+        - generic [ref=e19] [cursor=pointer]:
+          - img [ref=e20]
+          - generic [ref=e24]: 기본 정보
+          - img [ref=e25]
+        - generic [ref=e28] [cursor=pointer]:
+          - img [ref=e29]
+          - generic [ref=e33]: 오더 관리
+          - img [ref=e34]
+        - generic [ref=e37] [cursor=pointer]:
+          - img [ref=e38]
+          - generic [ref=e43]: 물류 관리
+          - img [ref=e44]
+        - generic [ref=e47] [cursor=pointer]:
+          - img [ref=e48]
+          - generic [ref=e50]: 정산/재무
+          - img [ref=e51]
+        - generic [ref=e54] [cursor=pointer]:
+          - img [ref=e55]
+          - generic [ref=e58]: 거버넌스
+        - generic [ref=e60] [cursor=pointer]:
+          - img [ref=e61]
+          - generic [ref=e64]: 설정
+      - generic [ref=e66]:
+        - generic [ref=e67]: Ze
+        - generic [ref=e68]:
+          - paragraph [ref=e69]: Zenith.Admin
+          - paragraph [ref=e70]: ZENITH_LMS
+    - generic [ref=e71]:
+      - banner [ref=e72]:
+        - generic [ref=e73]:
+          - navigation [ref=e74]:
+            - generic [ref=e75]: Home
+            - img [ref=e76]
+            - generic [ref=e78]: Orders
+            - img [ref=e79]
+            - generic [ref=e81]: 3ff5b116 29cd 4d90 8dd0 0e99c36a2155
+          - generic [ref=e82]:
+            - img [ref=e83]
+            - textbox "빠른 검색 (⌘+K)" [ref=e86]
+        - generic [ref=e87]:
+          - button "알림" [ref=e89]:
+            - img [ref=e90]
+          - button "Zenith.Admin ZENITH_LMS ZE" [ref=e95]:
+            - generic [ref=e96]:
+              - generic [ref=e97]: Zenith.Admin
+              - generic [ref=e98]:
+                - img [ref=e99]
+                - text: ZENITH_LMS
+            - generic [ref=e102]: ZE
+      - main [ref=e103]:
+        - generic [ref=e105]:
+          - generic [ref=e106]:
+            - generic [ref=e107]:
+              - generic [ref=e108]:
+                - generic [ref=e109]: B2C_ECOM
+                - generic [ref=e110]: /
+                - generic [ref=e111]: AIR
+              - 'heading "Order #ZEN-2026-000001" [level=1] [ref=e112]':
+                - text: Order
+                - generic [ref=e113]: "#ZEN-2026-000001"
+              - paragraph [ref=e114]:
+                - img [ref=e115]
+                - text: System Verified & Authenticated Detail
+            - generic [ref=e118]:
+              - generic [ref=e119]:
+                - paragraph [ref=e120]: Origin
+                - paragraph [ref=e121]: ICN
+              - generic [ref=e122]:
+                - paragraph [ref=e123]: Destination
+                - paragraph [ref=e124]: LAX
+          - generic [ref=e125]:
+            - generic [ref=e126]:
+              - generic [ref=e127]:
+                - img [ref=e129]
+                - generic [ref=e135]:
+                  - heading "Live Logistics Journey" [level=2] [ref=e136]
+                  - paragraph [ref=e137]: 지능형 시뮬레이션 및 실제 트래킹 통합 타임라인
+                - generic [ref=e138]:
+                  - img [ref=e140]
+                  - heading "준비된 트래킹 정보가 없습니다" [level=3] [ref=e142]
+                  - paragraph [ref=e143]: 오더가 아직 접수 단계이거나 시뮬레이션 데이터가 생성되지 않았습니다.
+              - generic [ref=e146]:
+                - generic [ref=e147]:
+                  - generic [ref=e148]:
+                    - heading "경로 최적화 (Route Optimization)" [level=3] [ref=e149]
+                    - generic [ref=e150]:
+                      - generic [ref=e151]:
+                        - img [ref=e152]
+                        - generic [ref=e155]: ADMIN MONITORING
+                      - generic [ref=e156]:
+                        - img [ref=e157]
+                        - text: 경로 정합
+                  - paragraph [ref=e160]: 오더 요건에 가장 적합한 운송 경로를 선택하십시오.
+                - button "경로 계산하기" [ref=e161]:
+                  - generic [ref=e162]:
+                    - img [ref=e163]
+                    - text: 경로 계산하기
+              - generic [ref=e165]:
+                - heading "Cargo & Handover Details" [level=2] [ref=e166]:
+                  - img [ref=e167]
+                  - text: Cargo & Handover Details
+                - generic [ref=e171]:
+                  - generic [ref=e172]:
+                    - generic [ref=e173]:
+                      - paragraph [ref=e174]: Shipper
+                      - paragraph [ref=e175]: (주) 제니스 글로벌
+                    - generic [ref=e176]:
+                      - paragraph [ref=e177]: Recipient
+                      - paragraph
+                      - paragraph
+                  - generic [ref=e178]:
+                    - generic [ref=e179]:
+                      - paragraph [ref=e180]: Transport
+                      - generic [ref=e181]:
+                        - img [ref=e182]
+                        - text: Incheon International Airport → Los Angeles International Airport
+                    - generic [ref=e185]:
+                      - generic [ref=e186]:
+                        - paragraph [ref=e187]: Total Weight
+                        - paragraph [ref=e188]: kg
+                      - generic [ref=e189]:
+                        - paragraph [ref=e190]: Total Volume
+                        - paragraph [ref=e191]: cbm
+            - generic [ref=e192]:
+              - generic [ref=e193]:
+                - generic [ref=e194]:
+                  - generic [ref=e195]:
+                    - generic [ref=e196]:
+                      - img [ref=e197]
+                      - heading "트래킹 공급자 관리" [level=3] [ref=e200]
+                    - generic [ref=e201]:
+                      - button "VIRTUAL" [ref=e202]
+                      - button "MANUAL" [ref=e203]
+                      - button "API" [ref=e204]
+                  - button "수동 트래킹 이벤트 추가" [ref=e206]:
+                    - img [ref=e207]
+                    - text: 수동 트래킹 이벤트 추가
+                  - generic [ref=e208]:
+                    - img [ref=e209]
+                    - paragraph [ref=e211]:
+                      - strong [ref=e212]: "수동 오버라이드 안내:"
+                      - text: 관리자가 입력한 이벤트는 시스템 자동 시뮬레이션보다 우선적으로 사용자에게 노출됩니다. 현장 상황에 맞게 신중히 입력하십시오.
+                - generic [ref=e213]:
+                  - generic [ref=e214]:
+                    - img [ref=e215]
+                    - heading "External API Raw Logs (3)" [level=3] [ref=e219]
+                  - generic [ref=e220]:
+                    - button "MockCarrier eae44970 08:58:04 (2026.04.26)" [ref=e222]:
+                      - generic [ref=e223]:
+                        - img [ref=e225]
+                        - generic [ref=e227]:
+                          - generic [ref=e228]:
+                            - generic [ref=e229]: MockCarrier
+                            - generic [ref=e230]: eae44970
+                          - generic [ref=e232]:
+                            - img [ref=e233]
+                            - text: 08:58:04 (2026.04.26)
+                      - img [ref=e236]
+                    - button "MockCarrier 0a8fd319 08:58:04 (2026.04.26)" [ref=e239]:
+                      - generic [ref=e240]:
+                        - img [ref=e242]
+                        - generic [ref=e244]:
+                          - generic [ref=e245]:
+                            - generic [ref=e246]: MockCarrier
+                            - generic [ref=e247]: 0a8fd319
+                          - generic [ref=e249]:
+                            - img [ref=e250]
+                            - text: 08:58:04 (2026.04.26)
+                      - img [ref=e253]
+                    - button "MockCarrier 44e21c01 08:58:04 (2026.04.26)" [ref=e256]:
+                      - generic [ref=e257]:
+                        - img [ref=e259]
+                        - generic [ref=e261]:
+                          - generic [ref=e262]:
+                            - generic [ref=e263]: MockCarrier
+                            - generic [ref=e264]: 44e21c01
+                          - generic [ref=e266]:
+                            - img [ref=e267]
+                            - text: 08:58:04 (2026.04.26)
+                      - img [ref=e270]
+              - generic [ref=e272]:
+                - generic [ref=e273]:
+                  - generic [ref=e274]:
+                    - heading "TISA Rate Snapshot" [level=3] [ref=e275]
+                    - paragraph [ref=e276]: Temporal Invariant Snapshot Architecture
+                  - generic [ref=e277]: Auto Matched
+                - generic [ref=e278]:
+                  - generic [ref=e279]:
+                    - generic [ref=e280]: Rate Card ID
+                    - generic [ref=e281]: RC-STD-01
+                  - generic [ref=e282]:
+                    - generic [ref=e283]: Version
+                    - generic [ref=e284]: v1
+                  - generic [ref=e285]:
+                    - generic [ref=e286]: Priority Level
+                    - generic [ref=e287]: "10"
+                  - generic [ref=e288]:
+                    - generic [ref=e289]: Base Amount
+                    - generic [ref=e290]: $1,250.00
+                  - generic [ref=e291]:
+                    - text: Validity Period
+                    - paragraph [ref=e292]: 4/20/2026 ~ Open Ends
+                - button "Override Rate" [ref=e294]:
+                  - generic [ref=e295]: Override Rate
+              - generic [ref=e298]:
+                - generic [ref=e299]:
+                  - heading "Settlement Preview" [level=3] [ref=e300]:
+                    - img [ref=e301]
+                    - text: Settlement Preview
+                  - button "Recalculate Costs" [ref=e303]:
+                    - img [ref=e304]
+                - generic [ref=e306]:
+                  - generic [ref=e307]: No costs calculated yet. Click recalculate.
+                  - generic [ref=e309]:
+                    - paragraph [ref=e310]: Total Estimated
+                    - generic [ref=e311]: $0.00
+                - button "Generate Final Invoice" [disabled] [ref=e312]:
+                  - img [ref=e313]
+                  - text: Generate Final Invoice
+                  - img [ref=e316]
+                - paragraph [ref=e318]: "* Settlement preview is subject to change based on actual logistics events."
+      - region "Notifications alt+T"
+      - contentinfo [ref=e319]:
+        - generic [ref=e320]: © 2026 SNTL LOGISTICS. All rights reserved.
+        - generic [ref=e321]:
+          - generic [ref=e322] [cursor=pointer]: Privacy Policy
+          - generic [ref=e323] [cursor=pointer]: Terms of Service
+  - button "Open Next.js Dev Tools" [ref=e329] [cursor=pointer]:
+    - img [ref=e330]

@@ -1,6 +1,7 @@
 "use client";
 
 import React from 'react';
+import { useRouter, useParams } from 'next/navigation';
 import { AlertCircle, RefreshCcw, Home, MessageSquare } from 'lucide-react';
 import { ZenCard, ZenButton } from './ZenUI';
 
@@ -21,6 +22,10 @@ export const ZenErrorView: React.FC<ZenErrorViewProps> = ({
   title = "System Interruption",
   message = "We encountered an unexpected issue while processing your request. Our engineering team has been notified."
 }) => {
+  const router = useRouter();
+  const params = useParams();
+  const locale = params?.locale as string || "ko";
+
   return (
     <div className="min-h-[70vh] flex items-center justify-center p-6">
       <ZenCard className="max-w-xl w-full p-12 text-center border-red-100/50 shadow-2xl shadow-red-500/5 bg-white/80 backdrop-blur-xl">
@@ -58,7 +63,7 @@ export const ZenErrorView: React.FC<ZenErrorViewProps> = ({
           
           <ZenButton 
             variant="ghost" 
-            onClick={() => window.location.href = '/dashboard'}
+            onClick={() => router.push(`/${locale}/dashboard`)}
             className="w-full h-14 border-slate-200 text-slate-600 hover:bg-slate-50"
           >
             <Home size={20} />

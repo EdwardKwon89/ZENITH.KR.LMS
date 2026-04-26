@@ -129,7 +129,7 @@ export default function InventoryDataTable({
                         <History size={16} />
                       </button>
                       
-                      {userRole === 'ADMIN' && (
+                      {(userRole === 'ADMIN' || userRole === 'ZENITH_SUPER_ADMIN') && (
                         <button 
                           onClick={() => handleOpenAdjustment(item)}
                           className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"

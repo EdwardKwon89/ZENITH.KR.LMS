@@ -124,14 +124,14 @@ tags: ["governance"]
 
 ### 2-4. CPO / Header Agent (Riley) | Gemini Pro High
 
-| 항목 | 내용 |
-| :--- | :--- |
-| **역할** | **Header Agent** (Gemini 측 단일 창구) + 제품 명세, UI/UX 디자인 기준, UAT 시나리오 정의 |
-| **모델** | Gemini Pro High (Header 책임 반영, Low → High 조정) |
-| **핵심 책임** | PRD 작성, 비즈니스 테스트 케이스 확정, 사용자 스토리 관리 |
-| **테스트 소유권** | UAT 시나리오 도출 및 합격 기준 정의 (실행은 QA Architect에 위임) |
-| **참조 규정** | GEMINI.md R-04, R-10 |
-| **Git 태그** | `[Gemini]` |
+| 항목          | 내용                                                                   |
+| :---------- | :------------------------------------------------------------------- |
+| **역할**      | **Header Agent** (Gemini 측 단일 창구) + 제품 명세, UI/UX 디자인 기준, UAT 시나리오 정의 |
+| **모델**      | Gemini Pro High (Header 책임 반영, Low → High 조정)                        |
+| **핵심 책임**   | PRD 작성, 비즈니스 테스트 케이스 확정, 사용자 스토리 관리                                  |
+| **테스트 소유권** | UAT 시나리오 도출 및 합격 기준 정의 (실행은 QA Architect에 위임)                        |
+| **참조 규정**   | GEMINI.md R-04, R-10                                                 |
+| **Git 태그**  | `[Gemini]`                                                           |
 
 **UI/UX 디자인 및 일관성 관리 상세**:
 

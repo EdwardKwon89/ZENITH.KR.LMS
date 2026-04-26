@@ -439,7 +439,7 @@ Step 5: 설계 수정 & Phase 2로 진행
 ```
 
 **참고:**
-- SAR 작성 규칙: [docs/08_Self_Audit/SAR_RP_개요.md](../08_Self_Audit/SAR_RP_개요.md)
+- SAR 작성 규칙: [do../08_Self_Audit/001_Self_Audit_Overview.md](../08_Self_Audit/001_Self_Audit_Overview.md)
 - SAR 목록 관리: [docs/08_Self_Audit/000_README.md](../08_Self_Audit/000_README.md)
 
 
@@ -732,7 +732,7 @@ Step 5: 코드 수정 & 재테스트
 ```
 
 **참고:**
-- SAR 작성 규칙: [docs/08_Self_Audit/SAR_RP_개요.md](../08_Self_Audit/SAR_RP_개요.md)
+- SAR 작성 규칙: [do../08_Self_Audit/001_Self_Audit_Overview.md](../08_Self_Audit/001_Self_Audit_Overview.md)
 - SAR 목록 관리: [docs/08_Self_Audit/000_README.md](../08_Self_Audit/000_README.md)
 
 ---
@@ -1316,8 +1316,7 @@ XP와의 관계:
 
 ### 프로젝트 내 문서
 
-- [SMALL_TEAM_SETUP-EVALUATION.md](./SMALL_TEAM_SETUP-EVALUATION.md)
-- [README.md](./README.md)
+- [README.md](./000_README.md)
 - [CLAUDE.md](../../CLAUDE.md)
 
 ---

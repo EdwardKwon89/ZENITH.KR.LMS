@@ -165,6 +165,7 @@ export async function getTrackingRawLogs(orderId: string) {
 
 /**
  * [Phase 3.1] 모든 활성 트래킹 현황을 요약 조회합니다. (대시보드용)
+ * shipper_id 또는 recipient_name이 없는 오더는 'Unassigned'로 분류하여 통계 누락을 방지합니다.
  */
 export async function getGlobalTrackingOverview() {
   const { supabase } = await validateUserAction();
@@ -173,27 +174,36 @@ export async function getGlobalTrackingOverview() {
     .from("zen_tracking_configs")
     .select(`
       *,
-      order:zen_orders(id, order_number, customer_id)
+      order:zen_orders(
+        id,
+        order_no,
+        shipper_id,
+        recipient_name
+      )
     `)
     .order("updated_at", { ascending: false });
 
   if (error) throw new Error(`Failed to fetch tracking overview: ${error.message}`);
 
-  // 각 설정에 대한 최신 이벤트 1개씩 추가 조회
-  const configsWithEvents = await Promise.all(data.map(async (config) => {
-    const { data: latestEvent } = await supabase
-      .from("zen_tracking_events")
-      .select("*")
-      .eq("order_id", config.order_id)
-      .order("event_time", { ascending: false })
-      .limit(1)
-      .single();
-    
-    return {
-      ...config,
-      latest_event: latestEvent || null
-    };
-  }));
+  const configsWithEvents = await Promise.all(
+    (data ?? []).map(async (config) => {
+      const { data: latestEvent } = await supabase
+        .from("zen_tracking_events")
+        .select("*")
+        .eq("order_id", config.order_id)
+        .order("event_time", { ascending: false })
+        .limit(1)
+        .single();
+
+      const isUnassigned = !config.order?.shipper_id && !config.order?.recipient_name;
+
+      return {
+        ...config,
+        latest_event: latestEvent ?? null,
+        is_unassigned: isUnassigned,
+      };
+    })
+  );
 
   return configsWithEvents;
 }

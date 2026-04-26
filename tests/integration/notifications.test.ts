@@ -23,10 +23,13 @@ describe('ZENITH Notification Engine: WBS 3.1.2.2', () => {
   const mockOrderId = 'order-test-uuid-001';
   const mockOrder = {
     order_no:        'ZEN-2026-TEST-001',
-    shipper_id:      'shipper-uuid-001',
+    shipper_id:      'shipper-org-uuid-001',   // org_id, NOT user_id
     recipient_email: 'recipient@test.com',
-    shipper:         { full_name: '테스트 화주', email: 'shipper@test.com' },
   };
+  // 실제 송하인 사용자 (profiles.org_id = shipper_id)
+  const mockShipperUsers = [
+    { id: 'shipper-user-uuid-001', email: 'shipper@test.com' },
+  ];
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -39,6 +42,13 @@ describe('ZENITH Notification Engine: WBS 3.1.2.2', () => {
             select: vi.fn().mockReturnThis(),
             eq:     vi.fn().mockReturnThis(),
             single: vi.fn().mockResolvedValue({ data: mockOrder, error: null }),
+          };
+        }
+        if (table === 'profiles') {
+          // profiles WHERE org_id = shipper_id 쿼리 시뮬레이션
+          return {
+            select: vi.fn().mockReturnThis(),
+            eq:     vi.fn().mockResolvedValue({ data: mockShipperUsers, error: null }),
           };
         }
         if (table === 'zen_notifications') {
@@ -64,13 +74,14 @@ describe('ZENITH Notification Engine: WBS 3.1.2.2', () => {
     expect(mockSendStatusChangeEmail).not.toHaveBeenCalled();
   });
 
-  // TC-N.2: WAREHOUSED → 송하인 IN_APP 알림 생성 + 이메일
-  it('[TC-N.2] should create IN_APP notification and send email to shipper on WAREHOUSED', async () => {
+  // TC-N.2: WAREHOUSED → 송하인 org 사용자에게 IN_APP 알림 + 이메일 (profiles.org_id 기반)
+  it('[TC-N.2] should create IN_APP notification and send email to shipper org users on WAREHOUSED', async () => {
     await triggerStatusChangeNotification(mockOrderId, OrderStatus.WAREHOUSED);
 
+    // 실제 user_id (profiles.id)로 알림 저장, org_id가 아님
     expect(mockInsert).toHaveBeenCalledWith(
       expect.objectContaining({
-        user_id: mockOrder.shipper_id,
+        user_id: mockShipperUsers[0].id,
         channel: 'IN_APP',
         type:    'STATUS_CHANGE',
         title:   '입고 완료',
@@ -78,7 +89,7 @@ describe('ZENITH Notification Engine: WBS 3.1.2.2', () => {
     );
 
     expect(mockSendStatusChangeEmail).toHaveBeenCalledWith(
-      expect.objectContaining({ email: mockOrder.shipper!.email }),
+      expect.objectContaining({ email: mockShipperUsers[0].email }),
       mockOrder.order_no,
       OrderStatus.WAREHOUSED
     );

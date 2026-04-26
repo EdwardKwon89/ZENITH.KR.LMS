@@ -1,0 +1,277 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e33] [cursor=pointer]:
+    - button "Open Next.js Dev Tools" [ref=e34]:
+      - img [ref=e35]
+    - generic [ref=e43]:
+      - button "Open issues overlay" [ref=e44]:
+        - generic [ref=e45]:
+          - generic [ref=e46]: "0"
+          - generic [ref=e47]: "1"
+        - generic [ref=e48]: Issue
+      - button "Collapse issues badge" [ref=e49]:
+        - img [ref=e50]
+  - alert [ref=e38]
+  - generic [ref=e52]:
+    - complementary [ref=e53]:
+      - generic [ref=e54]:
+        - generic [ref=e55]: ZENITH_LMS
+        - button [ref=e56]:
+          - img [ref=e57]
+      - navigation [ref=e59]:
+        - generic [ref=e61] [cursor=pointer]:
+          - img [ref=e62]
+          - generic [ref=e67]: 대시보드
+      - generic [ref=e69]:
+        - generic [ref=e70]: Te
+        - generic [ref=e71]:
+          - paragraph [ref=e72]: Test User
+          - paragraph [ref=e73]: ZENITH_LMS
+    - generic [ref=e74]:
+      - banner [ref=e75]:
+        - generic [ref=e76]:
+          - navigation [ref=e77]:
+            - generic [ref=e78]: Home
+            - img [ref=e79]
+            - generic [ref=e81]: Orders
+          - generic [ref=e82]:
+            - img [ref=e83]
+            - textbox "빠른 검색 (⌘+K)" [ref=e86]
+        - generic [ref=e87]:
+          - button "알림" [ref=e89]:
+            - img [ref=e90]
+          - button "Test User ZENITH_LMS TE" [ref=e95]:
+            - generic [ref=e96]:
+              - generic [ref=e97]: Test User
+              - generic [ref=e98]:
+                - img [ref=e99]
+                - text: ZENITH_LMS
+            - generic [ref=e102]: TE
+      - main [ref=e103]:
+        - generic [ref=e105]:
+          - generic [ref=e106]:
+            - generic [ref=e107]:
+              - heading "ORDER CONTROL" [level=1] [ref=e108]: ORDER CONTROL
+              - paragraph [ref=e110]: Manage and track your global logistics shipments
+            - link "CREATE NEW ORDER" [ref=e111] [cursor=pointer]:
+              - /url: /orders/new
+              - button "CREATE NEW ORDER" [ref=e112]:
+                - generic [ref=e113]:
+                  - img [ref=e114]
+                  - text: CREATE NEW ORDER
+          - generic [ref=e115]:
+            - generic [ref=e116]:
+              - generic [ref=e117]: Search
+              - textbox "Order No, Recipient..." [ref=e118]
+            - generic [ref=e119]:
+              - generic [ref=e120]: Status
+              - combobox [ref=e121] [cursor=pointer]:
+                - option "All Status" [selected]
+            - generic [ref=e122]:
+              - generic [ref=e123]: Type
+              - combobox [ref=e124] [cursor=pointer]:
+                - option "All Types" [selected]
+            - button "Apply Filters" [ref=e125]
+          - generic [ref=e126]:
+            - table [ref=e128]:
+              - rowgroup [ref=e129]:
+                - row "Order No Type Shipper Route (Origin-Dest) Status Billing Actions" [ref=e130]:
+                  - columnheader "Order No" [ref=e131]
+                  - columnheader "Type" [ref=e132]
+                  - columnheader "Shipper" [ref=e133]
+                  - columnheader "Route (Origin-Dest)" [ref=e134]
+                  - columnheader "Status" [ref=e135]
+                  - columnheader "Billing" [ref=e136]
+                  - columnheader "Actions" [ref=e137]
+              - rowgroup [ref=e138]:
+                - row "ORD-2026-0001 B2B (주) 제니스 글로벌 ICN → LAX 접수 정산대기 View Details" [ref=e139]:
+                  - cell "ORD-2026-0001" [ref=e140]
+                  - cell "B2B" [ref=e141]
+                  - cell "(주) 제니스 글로벌" [ref=e142]
+                  - cell "ICN → LAX" [ref=e143]:
+                    - generic [ref=e144]:
+                      - generic [ref=e145]: ICN
+                      - generic [ref=e146]: →
+                      - generic [ref=e147]: LAX
+                  - cell "접수" [ref=e148]
+                  - cell "정산대기" [ref=e149]
+                  - cell "View Details" [ref=e150]:
+                    - link "View Details" [ref=e151] [cursor=pointer]:
+                      - /url: /ko/orders/e55e5612-e1dc-4c8d-94b3-430eeebefec6
+                - row "ORD-2026-0002 B2B (주) 제니스 글로벌 ICN → LAX 입고완료 청구완료 View Details" [ref=e152]:
+                  - cell "ORD-2026-0002" [ref=e153]
+                  - cell "B2B" [ref=e154]
+                  - cell "(주) 제니스 글로벌" [ref=e155]
+                  - cell "ICN → LAX" [ref=e156]:
+                    - generic [ref=e157]:
+                      - generic [ref=e158]: ICN
+                      - generic [ref=e159]: →
+                      - generic [ref=e160]: LAX
+                  - cell "입고완료" [ref=e161]
+                  - cell "청구완료" [ref=e162]
+                  - cell "View Details" [ref=e163]:
+                    - link "View Details" [ref=e164] [cursor=pointer]:
+                      - /url: /ko/orders/ad838680-37d5-4c8e-85b2-f14ec75bcc58
+                - row "ORD-2026-0003 B2B (주) 제니스 글로벌 ICN → SIN 접수 정산대기 View Details" [ref=e165]:
+                  - cell "ORD-2026-0003" [ref=e166]
+                  - cell "B2B" [ref=e167]
+                  - cell "(주) 제니스 글로벌" [ref=e168]
+                  - cell "ICN → SIN" [ref=e169]:
+                    - generic [ref=e170]:
+                      - generic [ref=e171]: ICN
+                      - generic [ref=e172]: →
+                      - generic [ref=e173]: SIN
+                  - cell "접수" [ref=e174]
+                  - cell "정산대기" [ref=e175]
+                  - cell "View Details" [ref=e176]:
+                    - link "View Details" [ref=e177] [cursor=pointer]:
+                      - /url: /ko/orders/f09dca7a-e8a4-406c-a4ac-015a91f2c610
+                - row "ZEN-2026-000005 B2C_EXPRESS (주) 제니스 글로벌 ICN → LAX 접수 정산대기 View Details" [ref=e178]:
+                  - cell "ZEN-2026-000005" [ref=e179]
+                  - cell "B2C_EXPRESS" [ref=e180]
+                  - cell "(주) 제니스 글로벌" [ref=e181]
+                  - cell "ICN → LAX" [ref=e182]:
+                    - generic [ref=e183]:
+                      - generic [ref=e184]: ICN
+                      - generic [ref=e185]: →
+                      - generic [ref=e186]: LAX
+                  - cell "접수" [ref=e187]
+                  - cell "정산대기" [ref=e188]
+                  - cell "View Details" [ref=e189]:
+                    - link "View Details" [ref=e190] [cursor=pointer]:
+                      - /url: /ko/orders/b4c0cb43-08ea-4fa3-81e9-14df0f4b0eba
+                - row "ZEN-2026-000006 B2B (주) 제니스 글로벌 ICN → LAX 접수 정산대기 View Details" [ref=e191]:
+                  - cell "ZEN-2026-000006" [ref=e192]
+                  - cell "B2B" [ref=e193]
+                  - cell "(주) 제니스 글로벌" [ref=e194]
+                  - cell "ICN → LAX" [ref=e195]:
+                    - generic [ref=e196]:
+                      - generic [ref=e197]: ICN
+                      - generic [ref=e198]: →
+                      - generic [ref=e199]: LAX
+                  - cell "접수" [ref=e200]
+                  - cell "정산대기" [ref=e201]
+                  - cell "View Details" [ref=e202]:
+                    - link "View Details" [ref=e203] [cursor=pointer]:
+                      - /url: /ko/orders/ea4650eb-c9d7-48c6-ae6b-f6343ec81ced
+                - row "ZEN-2026-000007 B2C_ECOM (주) 제니스 글로벌 ICN → LAX 접수 정산대기 View Details" [ref=e204]:
+                  - cell "ZEN-2026-000007" [ref=e205]
+                  - cell "B2C_ECOM" [ref=e206]
+                  - cell "(주) 제니스 글로벌" [ref=e207]
+                  - cell "ICN → LAX" [ref=e208]:
+                    - generic [ref=e209]:
+                      - generic [ref=e210]: ICN
+                      - generic [ref=e211]: →
+                      - generic [ref=e212]: LAX
+                  - cell "접수" [ref=e213]
+                  - cell "정산대기" [ref=e214]
+                  - cell "View Details" [ref=e215]:
+                    - link "View Details" [ref=e216] [cursor=pointer]:
+                      - /url: /ko/orders/7dc0002f-82c2-442e-a53d-fdfe91da9b8f
+                - row "ZEN-2026-000002 B2C_EXPRESS (주) 제니스 글로벌 ICN → LAX CONFIRMED 정산대기 View Details" [ref=e217]:
+                  - cell "ZEN-2026-000002" [ref=e218]
+                  - cell "B2C_EXPRESS" [ref=e219]
+                  - cell "(주) 제니스 글로벌" [ref=e220]
+                  - cell "ICN → LAX" [ref=e221]:
+                    - generic [ref=e222]:
+                      - generic [ref=e223]: ICN
+                      - generic [ref=e224]: →
+                      - generic [ref=e225]: LAX
+                  - cell "CONFIRMED" [ref=e226]
+                  - cell "정산대기" [ref=e227]
+                  - cell "View Details" [ref=e228]:
+                    - link "View Details" [ref=e229] [cursor=pointer]:
+                      - /url: /ko/orders/01281340-5b0e-42d3-8e79-032dbc769b9e
+                - row "ZEN-2026-000009 B2B (주) 제니스 글로벌 ICN → LAX 접수 정산대기 View Details" [ref=e230]:
+                  - cell "ZEN-2026-000009" [ref=e231]
+                  - cell "B2B" [ref=e232]
+                  - cell "(주) 제니스 글로벌" [ref=e233]
+                  - cell "ICN → LAX" [ref=e234]:
+                    - generic [ref=e235]:
+                      - generic [ref=e236]: ICN
+                      - generic [ref=e237]: →
+                      - generic [ref=e238]: LAX
+                  - cell "접수" [ref=e239]
+                  - cell "정산대기" [ref=e240]
+                  - cell "View Details" [ref=e241]:
+                    - link "View Details" [ref=e242] [cursor=pointer]:
+                      - /url: /ko/orders/260a296a-203b-4179-b20e-506bdd70b868
+                - row "ZEN-2026-000010 B2C_ECOM (주) 제니스 글로벌 ICN → LAX 접수 정산대기 View Details" [ref=e243]:
+                  - cell "ZEN-2026-000010" [ref=e244]
+                  - cell "B2C_ECOM" [ref=e245]
+                  - cell "(주) 제니스 글로벌" [ref=e246]
+                  - cell "ICN → LAX" [ref=e247]:
+                    - generic [ref=e248]:
+                      - generic [ref=e249]: ICN
+                      - generic [ref=e250]: →
+                      - generic [ref=e251]: LAX
+                  - cell "접수" [ref=e252]
+                  - cell "정산대기" [ref=e253]
+                  - cell "View Details" [ref=e254]:
+                    - link "View Details" [ref=e255] [cursor=pointer]:
+                      - /url: /ko/orders/313ee5b1-752c-4a5a-8b7d-1938f3d76b2c
+                - row "ZEN-2026-000001 B2C_ECOM (주) 제니스 글로벌 ICN → LAX 운송중 정산대기 View Details" [ref=e256]:
+                  - cell "ZEN-2026-000001" [ref=e257]
+                  - cell "B2C_ECOM" [ref=e258]
+                  - cell "(주) 제니스 글로벌" [ref=e259]
+                  - cell "ICN → LAX" [ref=e260]:
+                    - generic [ref=e261]:
+                      - generic [ref=e262]: ICN
+                      - generic [ref=e263]: →
+                      - generic [ref=e264]: LAX
+                  - cell "운송중" [ref=e265]
+                  - cell "정산대기" [ref=e266]
+                  - cell "View Details" [ref=e267]:
+                    - link "View Details" [ref=e268] [cursor=pointer]:
+                      - /url: /ko/orders/3ff5b116-29cd-4d90-8dd0-0e99c36a2155
+                - row "ZEN-2026-000008 B2C_EXPRESS (주) 제니스 글로벌 ICN → LAX 접수 정산대기 View Details" [ref=e269]:
+                  - cell "ZEN-2026-000008" [ref=e270]
+                  - cell "B2C_EXPRESS" [ref=e271]
+                  - cell "(주) 제니스 글로벌" [ref=e272]
+                  - cell "ICN → LAX" [ref=e273]:
+                    - generic [ref=e274]:
+                      - generic [ref=e275]: ICN
+                      - generic [ref=e276]: →
+                      - generic [ref=e277]: LAX
+                  - cell "접수" [ref=e278]
+                  - cell "정산대기" [ref=e279]
+                  - cell "View Details" [ref=e280]:
+                    - link "View Details" [ref=e281] [cursor=pointer]:
+                      - /url: /ko/orders/51fc4a31-7d26-429a-b4ee-4713745ff517
+                - row "ZEN-2026-000003 B2B (주) 제니스 글로벌 ICN → LAX PENDING 정산대기 View Details" [ref=e282]:
+                  - cell "ZEN-2026-000003" [ref=e283]
+                  - cell "B2B" [ref=e284]
+                  - cell "(주) 제니스 글로벌" [ref=e285]
+                  - cell "ICN → LAX" [ref=e286]:
+                    - generic [ref=e287]:
+                      - generic [ref=e288]: ICN
+                      - generic [ref=e289]: →
+                      - generic [ref=e290]: LAX
+                  - cell "PENDING" [ref=e291]
+                  - cell "정산대기" [ref=e292]
+                  - cell "View Details" [ref=e293]:
+                    - link "View Details" [ref=e294] [cursor=pointer]:
+                      - /url: /ko/orders/3fb92cc9-6b1a-41bb-bb49-7634b15d316c
+                - row "ZEN-2026-000004 B2C_ECOM (주) 제니스 글로벌 ICN → LAX 접수 정산대기 View Details" [ref=e295]:
+                  - cell "ZEN-2026-000004" [ref=e296]
+                  - cell "B2C_ECOM" [ref=e297]
+                  - cell "(주) 제니스 글로벌" [ref=e298]
+                  - cell "ICN → LAX" [ref=e299]:
+                    - generic [ref=e300]:
+                      - generic [ref=e301]: ICN
+                      - generic [ref=e302]: →
+                      - generic [ref=e303]: LAX
+                  - cell "접수" [ref=e304]
+                  - cell "정산대기" [ref=e305]
+                  - cell "View Details" [ref=e306]:
+                    - link "View Details" [ref=e307] [cursor=pointer]:
+                      - /url: /ko/orders/73ecd0be-ff5f-482b-9e44-cda55c54648b
+            - generic [ref=e308]:
+              - generic [ref=e309]: Showing 13 of 13 results
+              - link "1" [ref=e311] [cursor=pointer]:
+                - /url: /ko/orders?page=1
+      - region "Notifications alt+T"
+      - contentinfo [ref=e312]:
+        - generic [ref=e313]: © 2026 SNTL LOGISTICS. All rights reserved.
+        - generic [ref=e314]:
+          - generic [ref=e315] [cursor=pointer]: Privacy Policy
+          - generic [ref=e316] [cursor=pointer]: Terms of Service

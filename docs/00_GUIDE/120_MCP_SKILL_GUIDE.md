@@ -15,7 +15,7 @@ tags: ["procedure"]
 
 ---
 
-[← 목록으로 돌아가기](./000_GUIDE_README.md)
+[← 목록으로 돌아가기](./000_README.md)
 
 ---
 
@@ -123,4 +123,4 @@ tags: ["procedure"]
 
 ---
 
-[← 목록으로 돌아가기](./000_GUIDE_README.md)
+[← 목록으로 돌아가기](./000_README.md)

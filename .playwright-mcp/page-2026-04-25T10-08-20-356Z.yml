@@ -1,0 +1,24 @@
+- generic [active] [ref=e1]:
+  - button "Open Next.js Dev Tools" [ref=e55] [cursor=pointer]:
+    - img [ref=e56]
+  - alert [ref=e59]
+  - generic [ref=e63]:
+    - generic [ref=e64]:
+      - img [ref=e66]
+      - heading "ZENITH LMS" [level=1] [ref=e71]
+      - paragraph [ref=e72]: 지능형 통합 물류 플랫폼 - Intelligent Logistics Ecosystem
+    - generic [ref=e73]:
+      - generic [ref=e74]:
+        - text: 이메일 주소
+        - textbox "example@zenith.kr" [ref=e75]
+      - generic [ref=e76]:
+        - text: 비밀번호
+        - textbox [ref=e77]
+      - generic [ref=e78]:
+        - button "로그인" [ref=e79]:
+          - generic [ref=e80]:
+            - text: 로그인
+            - img [ref=e81]
+        - button "신규 계정 생성" [ref=e83]:
+          - generic [ref=e84]: 신규 계정 생성
+    - paragraph [ref=e86]: © 2026 INTELLIGENT LOGISTICS PLATFORM. ADVANCED AGENTIC SYSTEMS.

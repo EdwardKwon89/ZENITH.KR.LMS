@@ -52,12 +52,12 @@ export default function OrderFinanceSummary({
     
     setIsCalculating(true);
     try {
-      const result = await calculateSettlementAction(orderId);
+      const result = await calculateSettlementAction(orderId) as any;
       if (result.success) {
-        setCosts(result.costs);
+        setCosts(result.costs || []);
         toast.success('Settlement recalculated successfully');
       } else {
-        toast.error(result.error || 'Failed to recalculate settlement');
+        toast.error(result.message || result.error || 'Failed to recalculate settlement');
       }
     } catch (error) {
       toast.error('An unexpected error occurred');
@@ -71,12 +71,12 @@ export default function OrderFinanceSummary({
 
     setIsInvoicing(true);
     try {
-      const result = await generateInvoiceAction(orderId);
+      const result = await generateInvoiceAction(orderId) as any;
       if (result.success) {
         setInvoice(result.invoice);
         toast.success(`Invoice ${result.invoice.invoice_no} generated`);
       } else {
-        toast.error(result.error || 'Failed to generate invoice');
+        toast.error(result.message || result.error || 'Failed to generate invoice');
       }
     } catch (error) {
       toast.error('An unexpected error occurred');

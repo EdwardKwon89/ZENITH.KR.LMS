@@ -25,7 +25,7 @@ export const commonCodeSchema = z.object({
   name_en: z.string().optional(),
   sort_order: z.number().int().default(0),
   is_active: z.boolean().default(true),
-  metadata: z.record(z.any()).optional(),
+  metadata: z.record(z.string(), z.any()).optional(),
 });
 
 export type CommonCodeInput = z.infer<typeof commonCodeSchema>;

@@ -1,0 +1,72 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e395] [cursor=pointer]:
+    - button "Open Next.js Dev Tools" [ref=e396]:
+      - img [ref=e397]
+    - generic [ref=e400]:
+      - button "Open issues overlay" [ref=e401]:
+        - generic [ref=e402]:
+          - generic [ref=e403]: "0"
+          - generic [ref=e404]: "1"
+        - generic [ref=e405]: Issue
+      - button "Collapse issues badge" [ref=e406]:
+        - img [ref=e407]
+  - generic [ref=e409]:
+    - complementary [ref=e410]:
+      - generic [ref=e411]:
+        - generic [ref=e412]: ZENITH_LMS
+        - button [ref=e413]:
+          - img [ref=e414]
+      - navigation [ref=e416]:
+        - generic [ref=e418] [cursor=pointer]:
+          - img [ref=e419]
+          - generic [ref=e424]: 대시보드
+        - generic [ref=e426] [cursor=pointer]:
+          - img [ref=e427]
+          - generic [ref=e431]: 기본 정보
+          - img [ref=e432]
+        - generic [ref=e435] [cursor=pointer]:
+          - img [ref=e436]
+          - generic [ref=e441]: 물류 관리
+          - img [ref=e442]
+        - generic [ref=e445] [cursor=pointer]:
+          - img [ref=e446]
+          - generic [ref=e448]: 정산/재무
+          - img [ref=e449]
+      - generic [ref=e452]:
+        - generic [ref=e453]: go
+        - generic [ref=e454]:
+          - paragraph [ref=e455]: governance_master
+          - paragraph [ref=e456]: ZENITH_LMS
+    - generic [ref=e457]:
+      - banner [ref=e458]:
+        - generic [ref=e459]:
+          - navigation [ref=e460]:
+            - generic [ref=e461]: Home
+            - img [ref=e462]
+            - generic [ref=e464]: Orders
+            - img [ref=e465]
+            - generic [ref=e467]: 3ff5b116 29cd 4d90 8dd0 0e99c36a2155
+          - generic [ref=e468]:
+            - img [ref=e469]
+            - textbox "빠른 검색 (⌘+K)" [ref=e472]
+        - generic [ref=e473]:
+          - button "알림" [ref=e475]:
+            - img [ref=e476]
+          - button "governance_master ZENITH_LMS GO" [ref=e481]:
+            - generic [ref=e482]
+            - generic [ref=e488]: GO
+      - main [ref=e489]:
+        - generic [ref=e491]:
+          - generic [ref=e492]:
+            - generic [ref=e493]
+            - generic [ref=e504]
+          - generic [ref=e511]:
+            - generic [ref=e512]
+            - generic [ref=e649]
+      - region "Notifications alt+T"
+      - contentinfo [ref=e793]:
+        - generic [ref=e794]: © 2026 SNTL LOGISTICS. All rights reserved.
+        - generic [ref=e795]:
+          - generic [ref=e796] [cursor=pointer]: Privacy Policy
+          - generic [ref=e797] [cursor=pointer]: Terms of Service
+  - alert [ref=e798]

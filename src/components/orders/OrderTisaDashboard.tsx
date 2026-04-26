@@ -22,7 +22,7 @@ interface TisaSnapshot {
 interface OrderTisaDashboardProps {
   orderId: string;
   snapshot: TisaSnapshot | null;
-  onOverrideSubmit: (data: any) => Promise<void>;
+  onOverrideSubmit?: (data: any) => Promise<void>;
 }
 
 export const OrderTisaDashboard: React.FC<OrderTisaDashboardProps> = ({ 
@@ -106,7 +106,7 @@ export const OrderTisaDashboard: React.FC<OrderTisaDashboardProps> = ({
         orderId={orderId}
         currentSnapshot={snapshot}
         onSubmit={async (data) => {
-          await onOverrideSubmit(data);
+          if (onOverrideSubmit) await onOverrideSubmit(data);
           setIsModalOpen(false);
         }}
       />

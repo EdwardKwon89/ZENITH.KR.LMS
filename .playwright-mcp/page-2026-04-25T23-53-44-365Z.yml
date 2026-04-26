@@ -1,0 +1,107 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - generic [ref=e4]:
+        - generic [ref=e5]: ZENITH_LMS
+        - button [ref=e6]:
+          - img [ref=e7]
+      - navigation [ref=e9]:
+        - generic [ref=e11] [cursor=pointer]:
+          - img [ref=e12]
+          - generic [ref=e17]: 대시보드
+        - generic [ref=e19] [cursor=pointer]:
+          - img [ref=e20]
+          - generic [ref=e24]: 기본 정보
+          - img [ref=e25]
+        - generic [ref=e28] [cursor=pointer]:
+          - img [ref=e29]
+          - generic [ref=e33]: 오더 관리
+          - img [ref=e34]
+        - generic [ref=e37] [cursor=pointer]:
+          - img [ref=e38]
+          - generic [ref=e43]: 물류 실행
+        - generic [ref=e45] [cursor=pointer]:
+          - img [ref=e46]
+          - generic [ref=e51]: 통합 트래킹
+        - generic [ref=e53] [cursor=pointer]:
+          - img [ref=e54]
+          - generic [ref=e58]: 재고 관리
+        - generic [ref=e60] [cursor=pointer]:
+          - img [ref=e61]
+          - generic [ref=e63]: 정산 관리
+        - generic [ref=e65] [cursor=pointer]:
+          - img [ref=e66]
+          - generic [ref=e69]: 거버넌스
+        - generic [ref=e71] [cursor=pointer]:
+          - img [ref=e72]
+          - generic [ref=e75]: 설정
+      - generic [ref=e77]:
+        - generic [ref=e78]: Ze
+        - generic [ref=e79]:
+          - paragraph [ref=e80]: Zenith.Admin
+          - paragraph [ref=e81]: ZENITH_LMS
+    - generic [ref=e82]:
+      - banner [ref=e83]:
+        - generic [ref=e84]:
+          - navigation [ref=e85]:
+            - generic [ref=e86]: Home
+            - img [ref=e87]
+            - generic [ref=e89]: Tracking
+          - generic [ref=e90]:
+            - img [ref=e91]
+            - textbox "빠른 검색 (⌘+K)" [ref=e94]
+        - generic [ref=e95]:
+          - button "알림" [ref=e97]:
+            - img [ref=e98]
+          - button "Zenith.Admin ZENITH_LMS ZE" [ref=e103]:
+            - generic [ref=e104]:
+              - generic [ref=e105]: Zenith.Admin
+              - generic [ref=e106]:
+                - img [ref=e107]
+                - text: ZENITH_LMS
+            - generic [ref=e110]: ZE
+      - main [ref=e111]:
+        - generic [ref=e113]:
+          - generic [ref=e114]:
+            - heading "통합 트래킹" [level=1] [ref=e115]
+            - paragraph [ref=e116]: Monitor and manage all active logistics tracks and API sync status.
+          - generic [ref=e117]:
+            - generic [ref=e131]:
+              - generic [ref=e132]:
+                - img [ref=e133]
+                - 'textbox "Search Order # or Tracking #" [ref=e136]'
+              - generic [ref=e137]:
+                - button "Refresh List" [ref=e138]:
+                  - img [ref=e139]
+                - button "Sync All API" [ref=e144]:
+                  - img [ref=e145]
+                  - text: Sync All API
+            - table [ref=e152]:
+              - rowgroup [ref=e153]:
+                - row "Order Info Tracking Number Carrier / Mode Latest Status Last Updated" [ref=e154]:
+                  - columnheader "Order Info" [ref=e155]
+                  - columnheader "Tracking Number" [ref=e156]
+                  - columnheader "Carrier / Mode" [ref=e157]
+                  - columnheader "Latest Status" [ref=e158]
+                  - columnheader "Last Updated" [ref=e159]
+                  - columnheader [ref=e160]
+              - rowgroup [ref=e161]:
+                - row [ref=e162]:
+                  - cell [ref=e163]
+                - row [ref=e165]:
+                  - cell [ref=e166]
+                - row [ref=e168]:
+                  - cell [ref=e169]
+                - row [ref=e171]:
+                  - cell [ref=e172]
+                - row [ref=e174]:
+                  - cell [ref=e175]
+      - region "Notifications alt+T"
+      - contentinfo [ref=e177]:
+        - generic [ref=e178]: © 2026 SNTL LOGISTICS. All rights reserved.
+        - generic [ref=e179]:
+          - generic [ref=e180] [cursor=pointer]: Privacy Policy
+          - generic [ref=e181] [cursor=pointer]: Terms of Service
+  - button "Open Next.js Dev Tools" [ref=e187] [cursor=pointer]:
+    - img [ref=e188]
+  - alert [ref=e191]

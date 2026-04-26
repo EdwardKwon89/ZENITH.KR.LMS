@@ -82,11 +82,12 @@ describe('ZENITH Inventory Integration', () => {
         error: null
       });
 
-      await expect(adjustInventory({
+      const result = await adjustInventory({
         inventoryId: '123e4567-e89b-12d3-a456-426614174000',
         adjustmentQty: -20,
         reason: 'Damage'
-      })).rejects.toThrow('재고 수량은 0 미만이 될 수 없습니다.');
+      });
+      expect(result).toEqual({ success: false, error: '재고 수량은 0 미만이 될 수 없습니다.' });
     });
   });
 

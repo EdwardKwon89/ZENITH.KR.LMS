@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { usePathname, useParams } from "next/navigation";
+import { usePathname, useParams, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
@@ -33,6 +33,7 @@ export default function NaviSidebar({ user, profile }: { user?: any; profile?: a
   const t = useTranslations("Navigation");
   const pathname = usePathname();
   const params = useParams();
+  const router = useRouter();
   const locale = params?.locale as string || "ko";
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [openMenus, setOpenMenus] = useState<string[]>([]);
@@ -60,10 +61,24 @@ export default function NaviSidebar({ user, profile }: { user?: any; profile?: a
         { title: t("order_import"), href: "/order/import" },
       ]
     },
-    { title: t("logistics"), href: "/logistics", icon: Truck },
-    { title: t("logistics_tracking"), href: "/tracking", icon: LayoutDashboard },
-    { title: t("inventory"), href: "/inventory", icon: Package },
-    { title: t("finance"), href: "/finance", icon: Calculator },
+    { 
+      title: t("logistics_group"), 
+      href: "/tracking", 
+      icon: Truck,
+      children: [
+        { title: t("logistics_tracking"), href: "/tracking" },
+        { title: t("inventory"), href: "/inventory" },
+      ]
+    },
+    { 
+      title: t("finance_group"), 
+      href: "/finance", 
+      icon: Calculator,
+      children: [
+        { title: t("finance"), href: "/finance" },
+        { title: t("settlement"), href: "/settlement" },
+      ]
+    },
     { title: t("governance"), href: "/governance", icon: ShieldCheck, isAdminOnly: true },
     { title: t("settings"), href: "/settings", icon: Settings },
   ];
@@ -120,7 +135,7 @@ export default function NaviSidebar({ user, profile }: { user?: any; profile?: a
 
       <nav className="flex-1 px-4 space-y-1.5 overflow-y-auto overflow-x-hidden scrollbar-hide py-2">
         {NAV_ITEMS.filter(item => checkPermission(profile?.role || "GUEST", item.href)).map((item) => {
-          const isActive = pathname.startsWith(item.href);
+          const isActive = pathname.startsWith(`/${locale}${item.href}`);
           const isOpen = openMenus.includes(item.title);
           const hasChildren = item.children && item.children.length > 0;
 
@@ -131,12 +146,12 @@ export default function NaviSidebar({ user, profile }: { user?: any; profile?: a
                   if (hasChildren) {
                     toggleMenu(item.title);
                   } else {
-                    window.location.href = `/${locale}${item.href}`;
+                    router.push(`/${locale}${item.href}`);
                   }
                 }}
                 className={cn(
                   "flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer transition-all duration-200 relative",
-                  pathname.startsWith(`/${locale}${item.href}`) 
+                  isActive 
                     ? "bg-brand-50 text-brand-700 font-semibold" 
                     : "text-slate-600 hover:bg-slate-50 hover:text-slate-900",
                   isCollapsed && "justify-center px-0"

@@ -278,7 +278,7 @@ Stop 훅 실행
 
 ## 📖 참조 문서
 
-- [INTEGRATED_DEVELOPMENT_METHODOLOGY.md](./INTEGRATED_DEVELOPMENT_METHODOLOGY.md) - 전체 워크플로우
+- [INTEGRATED_DEVELOPMENT_METHODOLOGY.md](./102_INTEGRATED_DEVELOPMENT_METHODOLOGY.md) - 전체 워크플로우
 - [DECISIONS.md](../../.planning/DECISIONS.md) - 기술 의사결정
 - [SAR 관리](../08_Self_Audit/000_README.md) - 오류 추적 및 재발 방지
 

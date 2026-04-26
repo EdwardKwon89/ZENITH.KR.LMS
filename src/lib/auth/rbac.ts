@@ -21,7 +21,7 @@ export type UserRole = keyof typeof USER_ROLES;
  * @param role 사용자의 역할
  * @param path 접근하려는 경로
  */
-export async function checkPermission(role: string | null | undefined, path: string): Promise<boolean> {
+export function checkPermission(role: string | null | undefined, path: string): boolean {
   if (!role) return false;
 
   // 1. ZENITH_SUPER_ADMIN (Bypass) - 모든 권한 허용
@@ -39,12 +39,12 @@ export async function checkPermission(role: string | null | undefined, path: str
   // 3. 역할별 동적 권한 검증 (추후 Table 기반으로 확장 가능)
   // 현재는 시스템의 안정적 기동을 위해 기본 매핑 정책을 적용합니다.
   const permissions: Record<string, string[]> = {
-    [USER_ROLES.ADMIN]: ['/master', '/admin', '/orders', '/logistics', '/billing'],
-    [USER_ROLES.MANAGER]: ['/orders', '/logistics', '/billing', '/reports'],
-    [USER_ROLES.OPERATOR]: ['/orders', '/logistics'],
+    [USER_ROLES.ADMIN]: ['/master', '/admin', '/orders', '/logistics', '/billing', '/tracking', '/inventory', '/finance', '/settlement'],
+    [USER_ROLES.MANAGER]: ['/orders', '/logistics', '/billing', '/reports', '/tracking', '/inventory', '/finance', '/settlement'],
+    [USER_ROLES.OPERATOR]: ['/orders', '/logistics', '/tracking'],
     [USER_ROLES.CARRIER]: ['/logistics/delivery', '/orders/assigned'],
-    [USER_ROLES.CORPORATE]: ['/orders/register', '/orders/history', '/billing/invoice'],
-    [USER_ROLES.INDIVIDUAL]: ['/orders/register', '/orders/history'],
+    [USER_ROLES.CORPORATE]: ['/orders/register', '/orders/history', '/billing/invoice', '/tracking', '/finance', '/settlement'],
+    [USER_ROLES.INDIVIDUAL]: ['/orders/register', '/orders/history', '/tracking'],
     [USER_ROLES.USER]: [],
   };
 
