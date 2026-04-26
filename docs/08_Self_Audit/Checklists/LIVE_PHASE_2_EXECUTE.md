@@ -42,6 +42,12 @@
 - [x] **Env Dependency**: DB 연결 등 환경 변수에 의존하는 로직을 단위 테스트 시 Mocking 하여 테스트 독립성을 확보했는가? (SAR-2026-04-22-001)
 - [x] **Regression Coverage**: 신규 기능 개발 완료 후 해당 로직을 검증하는 신규 회귀 테스트 케이스를 1개 이상 추가했는가? (R-09)
 
+## 🔒 RLS 정책 완전성 (RLS Policy Completeness) [SAR-013, 2026-04-26]
+- [x] **RLS CRUD 전 정책**: RLS 활성화된 테이블 생성 시 SELECT/INSERT/UPDATE/DELETE 중 실제 필요한 **모든 DML에 대한 정책을 동시에 작성**했는가? SELECT만 있는 상태는 UPDATE/INSERT를 완전 차단한다. (SAR-013)
+- [x] **API Route i18n 제외**: `src/middleware.ts`에서 `handleI18nRouting()` 호출 전 `isApi` 체크로 `/api/*` 경로를 조기 반환 처리했는가? API 경로는 i18n 로케일 접두어를 받아서는 안 된다. (SAR-015)
+- [x] **이력 INSERT org_id 출처**: 이력/로그 테이블 INSERT 시 `org_id`는 반드시 **대상 리소스(inventory, order 등)의 `org_id`**를 사용했는가? acting user의 `profile.org_id`는 PLATFORM 관리자에게 유효하지 않을 수 있다. (SAR-014)
+- [x] **PostgREST 조인 관계 검증**: `profiles!<column>` 조인 사용 시 해당 컬럼이 `profiles.id`에 FK를 갖는지 확인했는가? `auth.users` 참조 컬럼은 PostgREST 스키마 캐시에서 관계를 인식하지 못한다. (SAR-014)
+
 ## 🚢 라우팅 구현 품질 (Routing Quality) [SAR-2026-04-24-003~005]
 - [x] **API 응답 형식**: Server Action의 반환값 구조(배열 vs 객체, success 필드 유무)가 Ds-11 명세와 일치하는가? (SAR-2026-04-24-003)
 - [x] **인터페이스 명세 동기화**: TypeScript 인터페이스/타입 필드명이 Ds-11 Architecture 섹션의 정의와 일치하는가? 임시 선정의 후 동기화 누락 여부 확인 (SAR-2026-04-24-004)
@@ -49,5 +55,5 @@
 - [x] **TC 반환값 정합성**: 반환값의 존재(`toBeDefined`)만 검증하는 테스트가 없는가? 값의 출처(origin)까지 명시적으로 검증하는가? (SAR-2026-04-24-005)
 
 ---
-*마지막 업데이트: 2026-04-24*
-*작성자: Aiden (AI Agent) — SAR-2026-04-24-003/004/005 반영*
+*마지막 업데이트: 2026-04-26*
+*작성자: Aiden (AI Agent) — SAR-2026-04-24-003/004/005 반영, SAR-013/014/015 추가 (2026-04-26)*

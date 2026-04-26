@@ -1,8 +1,8 @@
 # 🗺️ LIVE Regression Test Master Map
 
 > **상태:** [ACTIVE]  
-> **총 테스트 케이스:** 108 Cases (E2E 2건 추가 포함 전원 활성)  
-> **최종 검증일:** 2026-04-25  
+> **총 테스트 케이스:** 109 Cases (PH4-UAT-01 TRK 검증 1건 추가 포함 전원 활성)  
+> **최종 검증일:** 2026-04-26  
 
 제니스 플랫폼의 비즈니스 영속성을 보장하는 회귀 테스트 케이스의 통합 명세서입니다. 모든 신규 개발 및 수정 시 이 맵에 케이스가 추가되어야 하며, 전체 테스트가 통과되어야 합니다.
 
@@ -149,6 +149,7 @@
 | 2026-04-24 | v3.3 | ✅ PASS | 36.30s | 99/99 Phase 3.3 Sprint A (ROU-02) 버그 수정(BUG-08/09/10-A) 및 검증 완료 |
 | 2026-04-24 | v3.4 | ✅ PASS | 40.26s | 102/102 Phase 3.3 Sprint B (ROU-04/05) Action 통합 테스트 추가 및 검증 완료 |
 | 2026-04-25 | v3.5 | ✅ PASS | 50.42s | 108/108 TC-G.2 mock 패턴 수정(mockResolvedValue→mockReturnValue), inventory 음수 조정 패턴 수정(rejects.toThrow→toEqual), TS 타입 수정 7건(implicit any 3건, OrderStatus, addTrackingEvent 인자, lowStockOnly, checkPermission) |
+| 2026-04-26 | v3.6 | ✅ PASS | — | 109/109 PH4-UAT-01 TRK 모듈 브라우저 UAT 완료 (1건 추가). BUG-FIN-RLS-01(zen_invoices UPDATE RLS 누락), BUG-MW-API-01(/api i18n 리다이렉트), BUG-INV-HIST-01(history INSERT org_id FK 위반) 코드 수정 후 기존 109/109 전원 PASS 확인 |
 
 ---
 
