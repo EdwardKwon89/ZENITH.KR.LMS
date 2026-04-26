@@ -114,7 +114,7 @@ export async function adjustInventory(payload: InventoryAdjustmentInput) {
       .from("zen_inventory_history")
       .insert({
         inventory_id: inventoryId,
-        org_id: profile.org_id ?? inventory.org_id,
+        org_id: inventory.org_id,
         transaction_type: 'ADJUSTMENT',
         change_qty: adjustmentQty,
         result_qty: newQty,
@@ -123,7 +123,7 @@ export async function adjustInventory(payload: InventoryAdjustmentInput) {
       });
 
     if (historyError) {
-      console.error("[INV-HIST] Insert failed - code:", historyError.code, "msg:", historyError.message, "details:", historyError.details);
+      console.error("Failed to record inventory history:", historyError.message);
     }
 
     revalidatePath("/(dashboard)/inventory", "page");

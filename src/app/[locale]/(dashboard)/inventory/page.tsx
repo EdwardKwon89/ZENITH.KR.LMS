@@ -33,16 +33,14 @@ export default async function InventoryPage({
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Header & Stats Summary */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-        <div>
-          <h1 className="text-3xl font-black text-slate-950 tracking-tight flex items-center gap-4">
-            <div className="p-2 bg-blue-600 rounded-2xl shadow-lg shadow-blue-200">
-              <Package className="text-white" size={24} />
-            </div>
-            INVENTORY CONTROL
-          </h1>
-          <p className="text-slate-500 font-medium ml-14 mt-1 text-sm">
-            Monitor real-time stock levels and warehouse distribution
-          </p>
+        <div className="flex items-center gap-4">
+          <div className="p-2.5 bg-brand-600 rounded-xl text-white shadow-lg shadow-brand-200">
+            <Box size={24} strokeWidth={2.5} />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-slate-950 tracking-tight">Inventory Control</h1>
+            <p className="text-slate-500 font-medium text-xs">Real-time asset tracking & stock management</p>
+          </div>
         </div>
 
         <div className="flex gap-4">
