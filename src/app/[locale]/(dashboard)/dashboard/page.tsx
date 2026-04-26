@@ -4,6 +4,7 @@ import ZenDataGrid from "@/components/ui/ZenDataGrid";
 import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "lucide-react"; 
 import { cn } from "@/lib/utils";
+import { ZenButton } from "@/components/ui/ZenUI";
 
 
 // Mock Data Structure for Logistics Orders
@@ -62,7 +63,7 @@ const columns: ColumnDef<Order>[] = [
     cell: ({ row }) => {
       const status = row.getValue("status") as string;
       const theme = {
-        READY: "bg-blue-50 text-blue-600 border-blue-200",
+        READY: "bg-brand-50 text-brand-600 border-brand-200",
         IN_TRANSIT: "bg-amber-50 text-amber-600 border-amber-200",
         COMPLETED: "bg-emerald-50 text-emerald-600 border-emerald-200",
         CANCELLED: "bg-red-50 text-red-600 border-red-200",
@@ -98,12 +99,12 @@ export default function DashboardPage() {
           </div>
           
           <div className="flex gap-3">
-            <button className="px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-50 transition-all zen-shadow-tactile">
+            <ZenButton variant="ghost" className="px-4 py-2 text-sm font-bold text-slate-500 hover:text-slate-800">
               Export Report
-            </button>
-            <button className="px-5 py-2 bg-brand-600 text-white rounded-xl text-sm font-bold hover:bg-brand-700 transition-all zen-shadow-premium">
+            </ZenButton>
+            <ZenButton variant="tactile" className="px-5 py-2 bg-brand-600 text-white rounded-xl text-sm font-bold hover:bg-brand-700 transition-all shadow-lg shadow-brand-100">
               Create New Order
-            </button>
+            </ZenButton>
           </div>
         </div>
 
@@ -115,13 +116,13 @@ export default function DashboardPage() {
             { label: "Transit Failure", value: "0.2%", change: "-1.1%", color: "text-red-600" },
             { label: "Carrier Reliability", value: "99.4%", change: "+0.3%", color: "text-brand-600" },
           ].map((stat, i) => (
-            <div key={i} className="bg-white p-6 rounded-2xl border border-slate-200 zen-shadow-premium hover:border-brand-300 transition-all cursor-default group">
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{stat.label}</p>
+            <div key={i} className="zen-glass p-6 rounded-2xl border border-white/20 shadow-sm hover:shadow-xl hover:-translate-y-0.5 hover:border-white/40 transition-all duration-300 cursor-default group">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{stat.label}</p>
               <div className="flex items-end justify-between mt-2">
-                <p className="text-3xl font-bold font-heading text-slate-900">{stat.value}</p>
+                <p className="text-3xl font-black font-heading text-slate-900">{stat.value}</p>
                 <p className={cn("text-xs font-bold mb-1", stat.color)}>{stat.change}</p>
               </div>
-              <div className="mt-4 h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+              <div className="mt-4 h-1.5 w-full bg-slate-100/50 rounded-full overflow-hidden">
                 <div 
                   className={cn("h-full transition-all duration-1000", i === 3 ? "bg-brand-500 w-[94%]" : "bg-brand-500 w-[60%]")}
                 ></div>

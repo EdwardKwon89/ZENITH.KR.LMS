@@ -9,6 +9,7 @@ import RawLogViewer from '@/components/tracking/RawLogViewer';
 import OrderFinanceSummary from '@/components/finance/OrderFinanceSummary';
 import RouteOptimizationSection from '@/components/routing/RouteOptimizationSection';
 import RouteConsistencyBadge from '@/components/routing/RouteConsistencyBadge';
+import { OrderVocTrigger } from '@/components/voc/OrderVocTrigger';
 
 import { Package, MapPin, Truck, ShieldCheck } from 'lucide-react';
 
@@ -202,7 +203,10 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ or
             snapshot={snapshot}
           />
 
-          {/* 3. Finance Summary */}
+          {/* 3. VOC Trigger */}
+          <OrderVocTrigger orderId={orderId} orderNo={order.order_no} />
+
+          {/* 4. Finance Summary */}
           <OrderFinanceSummary 
             orderId={orderId}
             initialCosts={costs || []}

@@ -3,7 +3,7 @@ import { requireAuth } from "@/lib/auth/guards";
 import { USER_ROLES } from "@/lib/auth/rbac";
 import { InvoiceTable } from "@/components/admin/InvoiceTable";
 
-import { Wallet } from "lucide-react";
+import { Wallet, CreditCard, DollarSign, CheckCircle2 } from "lucide-react";
 
 export default async function SettlementPage({ params }: { params: Promise<{ locale: string }> }) {
   await params; // Next.js 16: params is a Promise
@@ -29,34 +29,36 @@ export default async function SettlementPage({ params }: { params: Promise<{ loc
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* 통계 카드 (Glassmorphism) */}
+        {/* Statistics Cards */}
         {[
           { 
             label: 'Unpaid Invoices', 
             value: invoices.recentInvoices.filter((i: any) => i.status !== 'PAID').length, 
             color: 'from-amber-500 to-orange-600', 
-            icon: '💳' 
+            icon: CreditCard 
           },
           { 
             label: 'Total Outstanding', 
             value: `${invoices.currency} ${invoices.totalUnpaid.toLocaleString()}`, 
-            color: 'from-blue-600 to-indigo-700', 
-            icon: '💰' 
+            color: 'from-brand-600 to-indigo-700', 
+            icon: DollarSign 
           },
           { 
             label: 'Recently Paid', 
             value: invoices.recentInvoices.filter((i: any) => i.status === 'PAID').length, 
             color: 'from-emerald-500 to-teal-600', 
-            icon: '✅' 
+            icon: CheckCircle2 
           },
         ].map((stat, idx) => (
-          <div key={idx} className="zen-tactile bg-white border border-slate-200 rounded-3xl p-6 relative overflow-hidden group hover:scale-[1.02] transition-all duration-300">
+          <div key={idx} className="bg-white border border-slate-200 rounded-2xl p-6 relative overflow-hidden group hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300">
             <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${stat.color} opacity-[0.03] group-hover:opacity-[0.08] transition-opacity rounded-bl-full`} />
             <div className="flex items-center justify-between mb-4">
-              <span className="text-2xl">{stat.icon}</span>
+              <div className={`p-2 rounded-lg bg-gradient-to-br ${stat.color} bg-opacity-10`}>
+                <stat.icon className="w-5 h-5 text-slate-700" />
+              </div>
               <div className={`w-8 h-8 rounded-full bg-gradient-to-br ${stat.color} opacity-20`} />
             </div>
-            <p className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-1">{stat.label}</p>
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">{stat.label}</p>
             <p className="text-3xl font-black text-slate-900">{stat.value}</p>
           </div>
         ))}
