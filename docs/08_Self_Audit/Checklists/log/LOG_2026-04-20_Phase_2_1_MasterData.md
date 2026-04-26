@@ -39,7 +39,7 @@
 - 빌드 검증 초기 단계에서 `npm` 명령어 미인식 문제 발생. 즉시 **SAR-2026-04-20-001** 발행 후 조치 완료.
 
 ## 🔗 연관 SAR
-- [SAR-2026-04-20-001: npm 명령어 미인식 및 PATH 누락 오류](../SAR_reports/SAR_2026-04-20_001_Other_NPM_PATH_Error.md)
+- [SAR-2026-04-20-001: npm 명령어 미인식 및 PATH 누락 오류](../../SAR_reports/SAR_2026-04-20_001_Other_NPM_PATH_Error.md)
 
 ---
 **최종 판정: 통과 (PASS)**

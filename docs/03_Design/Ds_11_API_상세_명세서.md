@@ -1,10 +1,24 @@
 # 전사적 API 상세 명세서 (API Detailed Specification)
 
+> **[DEPRECATED]** 본 파일은 2026-04-24부로 INDEX + DETAIL 분리 구조로 이관되었습니다.
+>
+> **신규 문서 사용 바랍니다:**
+> - [Ds_11_INDEX.md](Ds_11_INDEX.md) — API 전체 카탈로그
+> - [Ds_11_DETAIL_AUTH.md](Ds_11_DETAIL_AUTH.md) — 공통 응답 + 인증/사용자
+> - [Ds_11_DETAIL_ORDER.md](Ds_11_DETAIL_ORDER.md) — 오더 관리 + 마스터 오더
+> - [Ds_11_DETAIL_FINANCE.md](Ds_11_DETAIL_FINANCE.md) — 정산/재무 + 세금계산서
+> - [Ds_11_DETAIL_LOGISTICS.md](Ds_11_DETAIL_LOGISTICS.md) — 물류 로직 + 마스터 데이터 + 시스템
+> - [Ds_11_DETAIL_INVENTORY.md](Ds_11_DETAIL_INVENTORY.md) — 재고 관리
+> - [Ds_11_DETAIL_TRACKING.md](Ds_11_DETAIL_TRACKING.md) — 통합 트래킹
+> - [Ds_11_DETAIL_NOTIFICATION.md](Ds_11_DETAIL_NOTIFICATION.md) — 알림 관리
+
+---
+
 > **프로젝트:** ZENITH_LMS (SNTL 통합 물류 플랫폼)
 > **문서번호:** Ds-11
 > **작성자:** Antigravity (AI Agent)
 > **작성일:** 2026-04-28
-> **버전:** v1.12
+> **버전:** v1.12 (최종 — 이하 내용은 참조용으로만 유지)
 
 본 문서는 `Ds_10 API 인벤토리`에 등록된 모든 인터페이스의 구체적인 명세를 기술합니다. 모든 파라미터는 `camelCase`를 기본으로 하며, DB 필드와 직접 매핑되는 경우 `snake_case`를 사용합니다.
 

@@ -224,7 +224,7 @@ gh pr merge [pr-number]
 ```
 
 **도움 받기:**
-- [Troubleshooting Guide](./TROUBLESHOOTING_TEMPLATE.md)
+- [Troubleshooting Guide](./030_TROUBLESHOOTING_TEMPLATE.md)
 - Claude Code: `@codebase 이 에러 뭐야?`
 - 팀 리더: Slack/회의
 
@@ -241,11 +241,11 @@ gh pr merge [pr-number]
 
 ## 📚 필독 문서
 
-- ✅ [온보딩 가이드](./ONBOARDING_TEMPLATE.md) - 첫 기능 개발
+- ✅ [온보딩 가이드](./020_ONBOARDING_TEMPLATE.md) - 첫 기능 개발
 - ✅ [체크리스트](./CHECKLISTS_TEMPLATE/) - Phase별 상세 체크
-- ⚠️ [문제 해결](./TROUBLESHOOTING_TEMPLATE.md) - 문제 발생 시
-- 📖 [통합 개발 방법론](../000_GUIDE/INTEGRATED_DEVELOPMENT_METHODOLOGY.md) - 상세 설명
-- 📖 [ZEN_A4 방법론](../000_GUIDE/ZEN_A4_METHODOLOGY.md) - 자동화 시스템
+- ⚠️ [문제 해결](./030_TROUBLESHOOTING_TEMPLATE.md) - 문제 발생 시
+- 📖 [통합 개발 방법론](../00_GUIDE/102_INTEGRATED_DEVELOPMENT_METHODOLOGY.md) - 상세 설명
+- 📖 [ZEN_A4 방법론](../00_GUIDE/101_ZEN_A4_METHODOLOGY.md) - 자동화 시스템
 
 ---
 

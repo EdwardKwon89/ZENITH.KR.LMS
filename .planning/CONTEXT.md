@@ -33,7 +33,7 @@
 
 - **Code Style:** 불변성 우선, 함수 50줄 이하, 파일 800줄 이하.
 - **오류 관리:** 발견된 오류는 즉시 SAR(Self Audit Report)로 기록하여 재발 방지.
-- **도구 활용:** `rtk`를 통한 토큰 최적화 및 `GEMINI.md` 규정 준수.
+- **도구 활용:** `rtk`를 통한 토큰 최적화 및 `../GEMINI.md` 규정 준수.
 
 ## 5. 제약사항 & 위험요소
 
@@ -43,4 +43,4 @@
     - 마스터 오더 배치 생성 및 GS1-128 국제 표준 바코드 라벨 시스템 구축 완료
 
 ---
-**작업자 규정:** [CLAUDE.md](CLAUDE.md) / [GEMINI.md](GEMINI.md) 참조
+**작업자 규정:** [../CLAUDE.md](../CLAUDE.md) / [../GEMINI.md](../GEMINI.md) 참조

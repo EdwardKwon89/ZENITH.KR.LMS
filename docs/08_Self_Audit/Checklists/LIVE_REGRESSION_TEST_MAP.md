@@ -1,8 +1,8 @@
 # 🗺️ LIVE Regression Test Master Map
 
 > **상태:** [ACTIVE]  
-> **총 테스트 케이스:** 65 Cases  
-> **최종 검증일:** 2026-04-24  
+> **총 테스트 케이스:** 108 Cases (E2E 2건 추가 포함 전원 활성)  
+> **최종 검증일:** 2026-04-25  
 
 제니스 플랫폼의 비즈니스 영속성을 보장하는 회귀 테스트 케이스의 통합 명세서입니다. 모든 신규 개발 및 수정 시 이 맵에 케이스가 추가되어야 하며, 전체 테스트가 통과되어야 합니다.
 
@@ -80,6 +80,9 @@
 | **TC-F.4** | 다중 통화 환전 무결성 | USD/KRW 등 이종 통화 간 환산 산식 정확성 검증 | `tests/integration/finance.test.ts` |
 | **TC-F.5** | 결제 승인 보안 가드 | 비관리자(Shipper)의 결제 상태 강제 변경 차단 | `tests/integration/finance.test.ts` |
 | **TC-F.6** | 정산 후 데이터 수정 제한 | 인보이스 발행 후 오더 핵심 물류 데이터 수정 불가 정책 | `tests/integration/finance.test.ts` |
+| **TC-F.7** | 세금계산서 데이터 발행 | 인보이스 기반 표준 세금계산서 DB 생성 검증 | `tests/integration/fin-03.test.ts` |
+| **TC-F.8** | 세금계산서 메일 발송 | Resend 연동 및 SENT/FAILED 상태 전환 확인 | `tests/integration/fin-03.test.ts` |
+| **TC-F.9** | 세금계산서 이력 조회 | 화주/어드민별 발행 및 발송 히스토리 조회 검증 | `tests/integration/fin-03.test.ts` |
 
 ---
 
@@ -98,6 +101,29 @@
 | :--- | :--- | :--- | :--- |
 | **TC-QA.1** | Raw 로그 영속성 | `MockCarrierProvider` 호출 시 `zen_tracking_raw_logs`에 JSON 원본 저장 확인 | `tests/integration/tracking-business-qa.test.ts` |
 | **TC-QA.2** | 동기화 무결성 (중복 방지) | 동일 이벤트 2회 동기화 시 `zen_tracking_events` 중복 삽입 차단 확인 | `tests/integration/tracking-business-qa.test.ts` |
+
+### 12. 라우팅 엔진 (Routing Engine)
+
+#### 🟢 즉시 활성 (scoring.test.ts — routing.ts 불필요)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-R.1** | Cost-Optimal 선택 | 후보 중 total_cost 최소값 캐리어 선택 + 불변성 보장 | `tests/unit/routing/scoring.test.ts` |
+| **TC-R.2** | Time-Optimal 선택 | 후보 중 total_transit_days 최소값 캐리어 선택 + 불변성 보장 | `tests/unit/routing/scoring.test.ts` |
+| **TC-R.3** | Balanced 스코어 산출 | α=0.6·norm_cost + β=0.4·norm_time 가중치 정규화 수식 검증 (단일 후보 경계 포함) | `tests/unit/routing/scoring.test.ts` |
+
+#### 🟢 활성 (ACTIVE)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-R.4a** | getRouteOptions 3종 옵션 반환 | COST/TIME/BALANCED 키가 모두 응답에 포함됨 확인 | `tests/integration/rou-01.test.ts` |
+| **TC-R.4b** | COST ≤ TIME (비용) | COST 옵션의 total_cost ≤ TIME 옵션의 total_cost | `tests/integration/rou-01.test.ts` |
+| **TC-R.4c** | TIME ≤ COST (소요일) | TIME 옵션의 total_transit_days ≤ COST 옵션의 total_transit_days | `tests/integration/rou-01.test.ts` |
+| **TC-R.4d** | UPSERT 정책 (재호출 교체) | insert 대신 upsert 호출 확인 (UNIQUE order_id+option_type 기준 교체) | `tests/integration/rou-01.test.ts` |
+| **TC-R.5a** | selectRoute 저장 | optionId로 zen_order_routes 레코드 생성 확인 | `tests/integration/rou-01.test.ts` |
+| **TC-R.5b** | appliedRouteId 반환 (BUG-10-A) | `zen_order_routes` 실제 레코드 UUID 반환 확인 (`orderId`와 다른 값) | `tests/integration/rou-01.test.ts` |
+| **TC-R.6** | getRouteVisualization 시각화 | 세그먼트 -> 마일스톤 변환 및 Mock 좌표 매핑 확인 | `tests/integration/rou-02.test.ts` |
+| **TC-R.7** | getRouteConsistencyStatus 정합성 | Mock 기반 상시 정합(isConsistent: true) 반환 확인 | `tests/integration/rou-02.test.ts` |
+| **TC-UAT-E2E.1** | 완전 물류 사이클 통합 | 오더→경로→트래킹→정산→세금계산서 전 단계 서버 액션 연동 확인 | `tests/integration/uat-phase3-e2e.test.ts` |
+| **TC-UAT-ROU.3/4** | 라우팅 타임라인 & 배지 UAT | getRouteVisualization 마일스톤 배열 + getRouteConsistencyStatus 정합성 확인 | `tests/integration/uat-phase3-e2e.test.ts` |
 
 ### 11. 알림 엔진 (Notification Engine)
 | ID | 테스트 항목 | 목적 | 파일 경로 |
@@ -118,6 +144,11 @@
 | 2026-04-22 | v2.1 | ✅ PASS | 2.81s | 58/58 Fully Registered & Verified |
 | 2026-04-23 | v2.2 | ✅ PASS | 7.9s | 60/60 QA-02 통합 2건 추가, 데이터 레이스 픽스 |
 | 2026-04-24 | v3.0 | ✅ PASS | 36.03s | 80/80 NOTIF-01 알림 엔진 TC-N.1~5 (5건) 신규 등록 |
+| 2026-04-24 | v3.1 | ✅ PASS | 44.13s | 93/93 ROU-01 스코어링 TC-R.1~3 (단위) + TC-R.4~5 (통합) 신규 등록 |
+| 2026-04-24 | v3.2 | ✅ PASS | 45.11s | 95/95 ROU-01 통합 테스트 3건 추가 및 Mocking 정책 수정 완료 |
+| 2026-04-24 | v3.3 | ✅ PASS | 36.30s | 99/99 Phase 3.3 Sprint A (ROU-02) 버그 수정(BUG-08/09/10-A) 및 검증 완료 |
+| 2026-04-24 | v3.4 | ✅ PASS | 40.26s | 102/102 Phase 3.3 Sprint B (ROU-04/05) Action 통합 테스트 추가 및 검증 완료 |
+| 2026-04-25 | v3.5 | ✅ PASS | 50.42s | 108/108 TC-G.2 mock 패턴 수정(mockResolvedValue→mockReturnValue), inventory 음수 조정 패턴 수정(rejects.toThrow→toEqual), TS 타입 수정 7건(implicit any 3건, OrderStatus, addTrackingEvent 인자, lowStockOnly, checkPermission) |
 
 ---
 

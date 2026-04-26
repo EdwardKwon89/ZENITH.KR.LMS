@@ -1,0 +1,147 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - generic [ref=e4]:
+        - generic [ref=e5]: ZENITH_LMS
+        - button [ref=e6]:
+          - img [ref=e7]
+      - navigation [ref=e9]:
+        - generic [ref=e11] [cursor=pointer]:
+          - img [ref=e12]
+          - generic [ref=e17]: 대시보드
+      - generic [ref=e19]:
+        - generic [ref=e20]: Te
+        - generic [ref=e21]:
+          - paragraph [ref=e22]: Test User
+          - paragraph [ref=e23]: ZENITH_LMS
+    - generic [ref=e24]:
+      - banner [ref=e25]:
+        - generic [ref=e26]:
+          - navigation [ref=e27]:
+            - generic [ref=e28]: Home
+            - img [ref=e29]
+            - generic [ref=e31]: Orders
+            - img [ref=e32]
+            - generic [ref=e34]: 3ff5b116 29cd 4d90 8dd0 0e99c36a2155
+          - generic [ref=e35]:
+            - img [ref=e36]
+            - textbox "빠른 검색 (⌘+K)" [ref=e39]
+        - generic [ref=e40]:
+          - button "알림" [ref=e42]:
+            - img [ref=e43]
+          - button "Test User ZENITH_LMS TE" [ref=e48]:
+            - generic [ref=e49]:
+              - generic [ref=e50]: Test User
+              - generic [ref=e51]:
+                - img [ref=e52]
+                - text: ZENITH_LMS
+            - generic [ref=e55]: TE
+      - main [ref=e56]:
+        - generic [ref=e58]:
+          - generic [ref=e59]:
+            - generic [ref=e60]:
+              - generic [ref=e61]:
+                - generic [ref=e62]: B2C_ECOM
+                - generic [ref=e63]: /
+                - generic [ref=e64]: AIR
+              - 'heading "Order #ZEN-2026-000001" [level=1] [ref=e65]':
+                - text: Order
+                - generic [ref=e66]: "#ZEN-2026-000001"
+              - paragraph [ref=e67]:
+                - img [ref=e68]
+                - text: System Verified & Authenticated Detail
+            - generic [ref=e71]:
+              - generic [ref=e72]:
+                - paragraph [ref=e73]: Origin
+                - paragraph [ref=e74]: ICN
+              - generic [ref=e75]:
+                - paragraph [ref=e76]: Destination
+                - paragraph [ref=e77]: LAX
+          - generic [ref=e78]:
+            - generic [ref=e79]:
+              - generic [ref=e80]:
+                - img [ref=e82]
+                - generic [ref=e88]:
+                  - heading "Live Logistics Journey" [level=2] [ref=e89]
+                  - paragraph [ref=e90]: 지능형 시뮬레이션 및 실제 트래킹 통합 타임라인
+                - generic [ref=e91]:
+                  - img [ref=e93]
+                  - heading "준비된 트래킹 정보가 없습니다" [level=3] [ref=e95]
+                  - paragraph [ref=e96]: 오더가 아직 접수 단계이거나 시뮬레이션 데이터가 생성되지 않았습니다.
+              - generic [ref=e99]:
+                - generic [ref=e100]:
+                  - heading "경로 최적화 (Route Optimization)" [level=3] [ref=e102]
+                  - paragraph [ref=e103]: 오더 요건에 가장 적합한 운송 경로를 선택하십시오.
+                - button "경로 계산하기" [ref=e104]:
+                  - generic [ref=e105]:
+                    - img [ref=e106]
+                    - text: 경로 계산하기
+              - generic [ref=e108]:
+                - heading "Cargo & Handover Details" [level=2] [ref=e109]:
+                  - img [ref=e110]
+                  - text: Cargo & Handover Details
+                - generic [ref=e114]:
+                  - generic [ref=e115]:
+                    - generic [ref=e116]:
+                      - paragraph [ref=e117]: Shipper
+                      - paragraph [ref=e118]: (주) 제니스 글로벌
+                    - generic [ref=e119]:
+                      - paragraph [ref=e120]: Recipient
+                      - paragraph
+                      - paragraph
+                  - generic [ref=e121]:
+                    - generic [ref=e122]:
+                      - paragraph [ref=e123]: Transport
+                      - generic [ref=e124]:
+                        - img [ref=e125]
+                        - text: Incheon International Airport → Los Angeles International Airport
+                    - generic [ref=e128]:
+                      - generic [ref=e129]:
+                        - paragraph [ref=e130]: Total Weight
+                        - paragraph [ref=e131]: kg
+                      - generic [ref=e132]:
+                        - paragraph [ref=e133]: Total Volume
+                        - paragraph [ref=e134]: cbm
+            - generic [ref=e135]:
+              - generic [ref=e136]:
+                - generic [ref=e137]:
+                  - generic [ref=e138]:
+                    - heading "TISA Rate Snapshot" [level=3] [ref=e139]
+                    - paragraph [ref=e140]: Temporal Invariant Snapshot Architecture
+                  - generic [ref=e141]: Auto Matched
+                - generic [ref=e142]:
+                  - generic [ref=e143]:
+                    - generic [ref=e144]: Rate Card ID
+                    - generic [ref=e145]: RC-STD-01
+                  - generic [ref=e146]:
+                    - generic [ref=e147]: Version
+                    - generic [ref=e148]: v1
+                  - generic [ref=e149]:
+                    - generic [ref=e150]: Priority Level
+                    - generic [ref=e151]: "10"
+                  - generic [ref=e152]:
+                    - generic [ref=e153]: Base Amount
+                    - generic [ref=e154]: $1,250.00
+                  - generic [ref=e155]:
+                    - text: Validity Period
+                    - paragraph [ref=e156]: 4/20/2026 ~ Open Ends
+                - button "Override Rate" [ref=e158]:
+                  - generic [ref=e159]: Override Rate
+              - generic [ref=e162]:
+                - heading "Settlement Preview" [level=3] [ref=e164]:
+                  - img [ref=e165]
+                  - text: Settlement Preview
+                - generic [ref=e167]:
+                  - generic [ref=e168]: No costs calculated yet. Click recalculate.
+                  - generic [ref=e170]:
+                    - paragraph [ref=e171]: Total Estimated
+                    - generic [ref=e172]: $0.00
+                - paragraph [ref=e173]: "* Settlement preview is subject to change based on actual logistics events."
+      - region "Notifications alt+T"
+      - contentinfo [ref=e174]:
+        - generic [ref=e175]: © 2026 SNTL LOGISTICS. All rights reserved.
+        - generic [ref=e176]:
+          - generic [ref=e177] [cursor=pointer]: Privacy Policy
+          - generic [ref=e178] [cursor=pointer]: Terms of Service
+  - button "Open Next.js Dev Tools" [ref=e184] [cursor=pointer]:
+    - img [ref=e185]

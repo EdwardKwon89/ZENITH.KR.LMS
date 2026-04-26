@@ -124,7 +124,7 @@ export default function InventoryHistorySheet({
                       <div className="flex items-center gap-2 text-slate-500">
                         <FileText size={14} className="opacity-50" />
                         <p className="text-sm font-medium leading-relaxed italic">
-                          "{record.reason || 'No description provided'}"
+                          "{record.remarks || 'No description provided'}"
                         </p>
                       </div>
                       

@@ -5,6 +5,7 @@ import { format } from 'date-fns';
 import { FileText, History, FileDown, MoreHorizontal, CheckCircle2, Clock } from 'lucide-react';
 import { ZenButton, ZenBadge } from '@/components/ui/ZenUI';
 import { InvoiceHistorySheet } from './InvoiceHistorySheet';
+import { TaxInvoiceSheet } from './TaxInvoiceSheet';
 import { issueInvoicePdf } from '@/app/actions/finance';
 import { toast } from 'sonner';
 
@@ -15,6 +16,7 @@ interface InvoiceTableProps {
 export const InvoiceTable: React.FC<InvoiceTableProps> = ({ invoices }) => {
   const [selectedInvoice, setSelectedInvoice] = useState<{ id: string; no: string } | null>(null);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [isTaxSheetOpen, setIsTaxSheetOpen] = useState(false);
   const [issuingIds, setIssuingIds] = useState<Set<string>>(new Set());
 
   const handleIssuePdf = async (invoiceId: string) => {
@@ -40,6 +42,11 @@ export const InvoiceTable: React.FC<InvoiceTableProps> = ({ invoices }) => {
   const openHistory = (id: string, no: string) => {
     setSelectedInvoice({ id, no });
     setIsHistoryOpen(true);
+  };
+
+  const openTaxInvoice = (id: string, no: string) => {
+    setSelectedInvoice({ id, no });
+    setIsTaxSheetOpen(true);
   };
 
   return (
@@ -95,9 +102,17 @@ export const InvoiceTable: React.FC<InvoiceTableProps> = ({ invoices }) => {
                         variant="tactile" 
                         className="p-2 rounded-xl border-slate-100"
                         onClick={() => openHistory(inv.id, inv.invoice_no)}
-                        title="History"
+                        title="PDF History"
                       >
                         <History className="w-4 h-4" />
+                      </ZenButton>
+                      <ZenButton 
+                        variant="tactile" 
+                        className="p-2 rounded-xl border-slate-100 bg-amber-50/50 text-amber-600 hover:bg-amber-600 hover:text-white"
+                        onClick={() => openTaxInvoice(inv.id, inv.invoice_no)}
+                        title="Tax Invoice"
+                      >
+                        <FileText className="w-4 h-4" />
                       </ZenButton>
                       <ZenButton 
                         variant="tactile" 
@@ -124,13 +139,22 @@ export const InvoiceTable: React.FC<InvoiceTableProps> = ({ invoices }) => {
       </div>
 
       {selectedInvoice && (
-        <InvoiceHistorySheet
-          invoiceId={selectedInvoice.id}
-          invoiceNo={selectedInvoice.no}
-          isOpen={isHistoryOpen}
-          onClose={() => setIsHistoryOpen(false)}
-        />
+        <>
+          <InvoiceHistorySheet
+            invoiceId={selectedInvoice.id}
+            invoiceNo={selectedInvoice.no}
+            isOpen={isHistoryOpen}
+            onClose={() => setIsHistoryOpen(false)}
+          />
+          <TaxInvoiceSheet
+            invoiceId={selectedInvoice.id}
+            invoiceNo={selectedInvoice.no}
+            isOpen={isTaxSheetOpen}
+            onClose={() => setIsTaxSheetOpen(false)}
+          />
+        </>
       )}
     </div>
+
   );
 };

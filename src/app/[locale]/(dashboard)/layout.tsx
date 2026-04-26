@@ -1,6 +1,8 @@
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import ZenShell from "@/components/layout/ZenShell";
+import GlobalHeader from "@/components/layout/GlobalHeader";
+import NaviSidebar from "@/components/layout/NaviSidebar";
 
 export default async function DashboardGroupLayout({
   children,
@@ -25,7 +27,12 @@ export default async function DashboardGroupLayout({
     .single();
 
   return (
-    <ZenShell user={user} profile={profile}>
+    <ZenShell 
+      user={user} 
+      profile={profile}
+      header={<GlobalHeader user={user} profile={profile} />}
+      sidebar={<NaviSidebar user={user} profile={profile} />}
+    >
       {children}
     </ZenShell>
   );

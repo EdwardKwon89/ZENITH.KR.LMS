@@ -4,6 +4,15 @@ import { SettlementEngine, InvoiceGenerator } from '@/lib/finance/settlement';
 import { revalidatePath } from 'next/cache';
 import { validateUserAction, validateAdminAction } from '@/lib/auth/guards';
 import { generateInvoicePdfBuffer } from '@/lib/finance/pdf';
+import { Resend } from 'resend';
+
+const getResend = () => {
+  if (process.env.RESEND_API_KEY) {
+    return new Resend(process.env.RESEND_API_KEY);
+  }
+  return null;
+};
+
 
 /**
  * [WBS 3.2] 오더 완료 시 정산서를 자동 생성합니다.
@@ -40,7 +49,6 @@ export async function updatePaymentStatus(
     .update({
       status,
       paid_amount: amount,
-      paid_at: status === 'PAID' ? new Date().toISOString() : null,
       updated_at: new Date().toISOString()
     })
     .eq('id', invoiceId)
@@ -68,11 +76,18 @@ export async function updatePaymentStatus(
  * 특정 오더의 비용을 계산합니다. (UI 수동 호출용)
  */
 export async function calculateSettlementAction(orderId: string) {
+  const { supabase } = await validateAdminAction();
   const engine = new SettlementEngine();
   const result = await engine.calculateOrderCosts(orderId);
   
   if (result.success) {
+    const { data: costs } = await supabase
+      .from('zen_order_costs')
+      .select('*')
+      .eq('order_id', orderId);
+    
     revalidatePath(`/orders/${orderId}`);
+    return { ...result, costs: costs || [] };
   }
   
   return result;
@@ -82,12 +97,14 @@ export async function calculateSettlementAction(orderId: string) {
  * 특정 오더의 인보이스를 생성합니다. (UI 수동 호출용)
  */
 export async function generateInvoiceAction(orderId: string) {
+  await validateAdminAction();
   const generator = new InvoiceGenerator();
   const result = await generator.generateInvoice(orderId);
   
   if (result.success) {
     revalidatePath(`/orders/${orderId}`);
     revalidatePath('/finance/invoices');
+    return { ...result, invoice: result.invoice };
   }
   
   return result;
@@ -100,20 +117,24 @@ export async function getSettlementOverview() {
   const { supabase, profile } = await validateUserAction();
   if (!profile) throw new Error("User profile not found");
 
+  const isAdmin = profile.role === 'ZENITH_SUPER_ADMIN' || profile.role === 'ADMIN';
+
   // 1. 전체 미결제 금액 합산 (UNPAID, PARTIAL)
-  const { data: unpaidSum, error: unpaidError } = await supabase
+  const unpaidQuery = supabase
     .from("zen_invoices")
     .select("total_amount")
-    .eq("shipper_id", profile.org_id)
     .in("status", ["UNPAID", "PARTIAL"]);
+  if (!isAdmin && profile.org_id) unpaidQuery.eq("shipper_id", profile.org_id);
+  const { data: unpaidSum, error: unpaidError } = await unpaidQuery;
 
   // 2. 최근 인보이스 5건
-  const { data: recentInvoices, error: recentError } = await supabase
+  const recentQuery = supabase
     .from("zen_invoices")
     .select("*")
-    .eq("shipper_id", profile.org_id)
     .order("created_at", { ascending: false })
     .limit(5);
+  if (!isAdmin && profile.org_id) recentQuery.eq("shipper_id", profile.org_id);
+  const { data: recentInvoices, error: recentError } = await recentQuery;
 
   if (unpaidError || recentError) {
     throw new Error("Failed to fetch settlement overview");
@@ -139,7 +160,7 @@ export async function issueInvoicePdf(invoiceId: string) {
     .from('zen_invoices')
     .select(`
       *,
-      shipper:shipper_id(name, address, business_number),
+      shipper:shipper_id(name, metadata),
       costs:zen_order_costs(*)
     `)
     .eq('id', invoiceId)
@@ -150,15 +171,16 @@ export async function issueInvoicePdf(invoiceId: string) {
   }
 
   // 2. PDF 생성 데이터 구성
+  const shipperMeta = (invoice.shipper as any)?.metadata || {};
   const pdfData = {
     invoice_no: invoice.invoice_no,
     due_date: invoice.due_date,
     total_amount: invoice.total_amount,
     currency: invoice.currency,
     shipper: {
-      name: invoice.shipper?.name || 'N/A',
-      address: invoice.shipper?.address,
-      business_number: invoice.shipper?.business_number
+      name: (invoice.shipper as any)?.name || 'N/A',
+      address: shipperMeta.address,
+      business_number: shipperMeta.business_number
     },
     costs: (invoice.costs || []).map((c: any) => ({
       cost_type: c.cost_type,
@@ -246,4 +268,175 @@ export async function getInvoicePdfHistory(invoiceId: string) {
 
   return historyWithUrls;
 }
+
+/**
+ * [FIN-03] 특정 인보이스를 기반으로 세금계산서 데이터를 생성합니다.
+ */
+export async function issueTaxInvoice(invoiceId: string) {
+  const { supabase, profile } = await validateAdminAction();
+
+  // 1. 인보이스 및 조직 정보 조회
+  const { data: invoice, error: invError } = await supabase
+    .from('zen_invoices')
+    .select(`
+      *,
+      shipper:shipper_id(*),
+      costs:zen_order_costs(*)
+    `)
+    .eq('id', invoiceId)
+    .single();
+
+  if (invError || !invoice) {
+    throw new Error(`인보이스 정보를 찾을 수 없습니다: ${invError?.message}`);
+  }
+
+  // 2. 세금계산서 데이터 구성
+  const taxInvoiceNo = `TX-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${Math.floor(1000 + Math.random() * 9000)}`;
+  
+  const supplierInfo = {
+    business_number: "123-45-67890", // 시스템 설정에서 가져와야 함 (Mock)
+    name: "ZENITH LOGISTICS",
+    ceo_name: "Aiden",
+    address: "Seoul, South Korea",
+    business_type: "Logistics",
+    business_item: "Freight Forwarding"
+  };
+
+  const buyerInfo = {
+    business_number: invoice.shipper?.business_number || 'N/A',
+    name: invoice.shipper?.name || 'N/A',
+    ceo_name: 'N/A',
+    address: invoice.shipper?.address || 'N/A',
+    business_type: 'N/A',
+    business_item: 'N/A'
+  };
+
+  const items = (invoice.costs || []).map((c: any) => ({
+    date: new Date().toISOString().slice(5, 10).replace('-', '/'),
+    item_name: c.cost_type,
+    spec: 'Standard',
+    quantity: Number(c.quantity),
+    unit_price: Number(c.unit_price),
+    supply_amount: Number(c.total_amount),
+    tax_amount: Number(c.total_amount) * 0.1, // 부가세 10% 가정
+    remarks: ''
+  }));
+
+  const supplyTotal = items.reduce((sum: number, item: any) => sum + item.supply_amount, 0);
+  const vatTotal = items.reduce((sum: number, item: any) => sum + item.tax_amount, 0);
+
+  // 3. DB 저장
+  const { data: taxInvoice, error: txError } = await supabase
+    .from('zen_tax_invoices')
+    .insert({
+      invoice_id: invoiceId,
+      tax_invoice_no: taxInvoiceNo,
+      status: 'ISSUED',
+      supplier_info: supplierInfo,
+      buyer_info: buyerInfo,
+      items: items,
+      total_amount: supplyTotal + vatTotal,
+      vat_amount: vatTotal,
+      recipient_email: invoice.shipper?.email || 'test@example.com',
+      issued_by: profile.id
+    })
+    .select()
+    .single();
+
+  if (txError) {
+    throw new Error(`세금계산서 생성 실패: ${txError.message}`);
+  }
+
+  revalidatePath('/finance/invoices');
+  return { success: true, taxInvoiceId: taxInvoice.id };
+}
+
+/**
+ * [FIN-03] 생성된 세금계산서를 이메일로 발송합니다.
+ */
+export async function sendTaxInvoiceEmail(taxInvoiceId: string, recipientEmail: string) {
+  const { supabase } = await validateAdminAction();
+
+  // 1. 세금계산서 데이터 조회
+  const { data: tx, error: txError } = await supabase
+    .from('zen_tax_invoices')
+    .select('*')
+    .eq('id', taxInvoiceId)
+    .single();
+
+  if (txError || !tx) {
+    throw new Error(`세금계산서 정보를 찾을 수 없습니다: ${txError?.message}`);
+  }
+
+  try {
+    // 2. Resend 발송 (Inline HTML 사용)
+    const resendInstance = getResend();
+    if (!resendInstance) {
+      throw new Error('이메일 발송 서비스(Resend)가 설정되지 않았습니다.');
+    }
+    const { data: emailData, error: emailError } = await resendInstance.emails.send({
+      from: 'ZENITH LMS <notifications@zenith.kr>',
+      to: [recipientEmail],
+      subject: `[ZENITH] 세금계산서가 발행되었습니다 (No. ${tx.tax_invoice_no})`,
+      html: `
+        <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee;">
+          <h2>세금계산서 발행 안내</h2>
+          <p>안녕하세요, ZENITH LOGISTICS입니다.</p>
+          <p>귀사의 인보이스에 대한 세금계산서가 다음과 같이 발행되었습니다.</p>
+          <ul>
+            <li>번호: ${tx.tax_invoice_no}</li>
+            <li>금액: ${Number(tx.total_amount).toLocaleString()} ${tx.currency || 'KRW'}</li>
+          </ul>
+          <p>자세한 내용은 시스템에 접속하여 확인해 주시기 바랍니다.</p>
+        </div>
+      `
+    });
+
+    if (emailError) throw emailError;
+
+    // 3. 상태 업데이트
+    await supabase
+      .from('zen_tax_invoices')
+      .update({
+        status: 'SENT',
+        sent_at: new Date().toISOString(),
+        metadata: { ...tx.metadata, resend_id: emailData?.id }
+      })
+      .eq('id', taxInvoiceId);
+
+    revalidatePath('/finance/invoices');
+    return { success: true, messageId: emailData?.id };
+  } catch (error: any) {
+    // 실패 기록
+    await supabase
+      .from('zen_tax_invoices')
+      .update({
+        status: 'FAILED',
+        metadata: { ...tx.metadata, error: error.message }
+      })
+      .eq('id', taxInvoiceId);
+
+    throw new Error(`이메일 발송 실패: ${error.message}`);
+  }
+}
+
+/**
+ * [FIN-03] 인보이스와 연결된 세금계산서 발행 이력을 조회합니다.
+ */
+export async function getTaxInvoiceHistory(invoiceId: string) {
+  const { supabase } = await validateUserAction();
+
+  const { data, error } = await supabase
+    .from('zen_tax_invoices')
+    .select('*')
+    .eq('invoice_id', invoiceId)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    throw new Error(`이력 조회 실패: ${error.message}`);
+  }
+
+  return data;
+}
+
 

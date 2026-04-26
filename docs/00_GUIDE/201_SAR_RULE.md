@@ -333,8 +333,8 @@ npm test -- refreshToken.test.js
 
 ## 📚 참고 자료
 
-- [Check List 관리 절차](./CHECK_LIST_PROCEDURE.md)
-- [통합 개발 방법론](./INTEGRATED_DEVELOPMENT_METHODOLOGY.md)
+- [Check List 관리 절차](./202_CHECK_LIST_PROCEDURE.md)
+- [통합 개발 방법론](./102_INTEGRATED_DEVELOPMENT_METHODOLOGY.md)
 - [SAR 저장소](../08_Self_Audit/SAR_reports/)
 
 ---

@@ -6,20 +6,23 @@ import { Package, Truck, AlertCircle } from "lucide-react";
 import { ZenCard } from "@/components/ui/ZenUI";
 
 export default async function InventoryPage({
-  params: { locale },
+  params,
   searchParams
 }: {
-  params: { locale: string };
-  searchParams: { [key: string]: string | string[] | undefined };
+  params: Promise<{ locale: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
+  const { locale } = await params;
+  const resolvedSearch = await searchParams;
   const { profile } = await requireAuth();
 
-  const page = typeof searchParams.page === "string" ? parseInt(searchParams.page) : 1;
-  const search = typeof searchParams.search === "string" ? searchParams.search : undefined;
-  const lowStockOnly = searchParams.lowStock === "true";
+  const page = typeof resolvedSearch.page === "string" ? parseInt(resolvedSearch.page) : 1;
+  const search = typeof resolvedSearch.search === "string" ? resolvedSearch.search : undefined;
+  const lowStockOnly = resolvedSearch.lowStock === "true";
 
   const { items, totalCount } = await getInventoryList({
     page,
+    pageSize: 10,
     search,
     lowStockOnly
   });

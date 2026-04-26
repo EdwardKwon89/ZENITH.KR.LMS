@@ -135,7 +135,7 @@ describe('ZENITH Phase 3 UAT: E2E + Routing Integrated Validation', () => {
 
     // Step 5: Admin syncs external tracking -> IN_TRANSIT
     mockResultQueue.push({ error: null }); // insert tracking
-    const trkRes = await addTrackingEvent('master-1', 'DEP', 'ICN', 'IN_TRANSIT', { raw: true });
+    const trkRes = await addTrackingEvent('master-1', { event_code: 'DEP', location: 'ICN', description: 'IN_TRANSIT' });
     expect(trkRes.success).toBe(true);
 
     // Step 6: calculateSettlementAction — SettlementEngine이 모킹되어 mock queue 불필요

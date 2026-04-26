@@ -101,7 +101,7 @@ describe('ZENITH Finance Integration: WBS 3.2 Integrity Test', () => {
       await updatePaymentStatus('inv-101', 'PAID', 1250.55);
 
       expect(mockSupabase.from).toHaveBeenCalledWith('zen_orders');
-      const updateCall = mockSupabase.update.mock.calls.find(call => call[0].billing_status === 'PAID');
+      const updateCall = mockSupabase.update.mock.calls.find((call: unknown[]) => (call[0] as Record<string, unknown>).billing_status === 'PAID');
       expect(updateCall).toBeDefined();
     });
   });

@@ -74,7 +74,7 @@ describe('ZENITH Tracking Visibility: Phase 3.3 Multi-Agent Cases', () => {
       await updateOrderStatus('order-simulation', OrderStatus.SCHEDULED);
 
       // zen_tracking_events 테이블에 인서트가 발생했는지 확인
-      const trackingInsert = mockSupabase.from.mock.calls.find(c => c[0] === 'zen_tracking_events');
+      const trackingInsert = mockSupabase.from.mock.calls.find((c: unknown[]) => c[0] === 'zen_tracking_events');
       expect(trackingInsert).toBeDefined();
     });
   });
@@ -109,7 +109,7 @@ describe('ZENITH Tracking Visibility: Phase 3.3 Multi-Agent Cases', () => {
 
       await updateOrderStatus('order-sea', OrderStatus.SCHEDULED);
       
-      const trackingInsert = mockSupabase.from.mock.calls.find(c => c[0] === 'zen_tracking_events');
+      const trackingInsert = mockSupabase.from.mock.calls.find((c: unknown[]) => c[0] === 'zen_tracking_events');
       expect(trackingInsert).toBeDefined();
     });
   });
@@ -140,7 +140,7 @@ describe('ZENITH Tracking Visibility: Phase 3.3 Multi-Agent Cases', () => {
       
       await addTrackingEvent('order-1', eventData);
       
-      const insertCall = mockSupabase.insert.mock.calls.find(c => c[0].event_code === 'EX_HOLD');
+      const insertCall = mockSupabase.insert.mock.calls.find((c: unknown[]) => (c[0] as Record<string, unknown>).event_code === 'EX_HOLD');
       expect(insertCall[0].source_type).toBe('MANUAL');
       expect(insertCall[0].order_id).toBe('order-1');
     });

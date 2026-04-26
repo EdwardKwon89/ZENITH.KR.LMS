@@ -65,7 +65,7 @@ describe('ZENITH Security Guard: Server Action Authorization', () => {
     // Given
     mockSupabase.auth.getUser.mockResolvedValue({ data: { user: mockUser } });
     mockSupabase.single.mockResolvedValue({ data: { ...mockProfile, role: 'CUSTOMER' } });
-    (checkPermission as any).mockResolvedValue(false);
+    (checkPermission as any).mockReturnValue(false);
 
     // When & Then
     await expect(validateAdminAction()).rejects.toThrow('Unauthorized access');

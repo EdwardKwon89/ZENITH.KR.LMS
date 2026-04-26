@@ -30,11 +30,10 @@ const STATUS_TITLES: Partial<Record<OrderStatus, string>> = {
   [OrderStatus.HELD]:       "보류 처리",
 };
 
-interface OrderNotificationData {
+interface OrderBasicData {
   order_no: string;
   shipper_id: string;
   recipient_email?: string;
-  shipper: { full_name: string; email: string } | null;
 }
 
 export async function triggerStatusChangeNotification(
@@ -45,11 +44,12 @@ export async function triggerStatusChangeNotification(
 
   const supabase = await createServerClient();
 
+  // 1. 오더 기본 정보 조회 (shipper_id = zen_organizations.id)
   const { data: order, error } = await supabase
     .from("zen_orders")
-    .select("order_no, shipper_id, recipient_email, shipper:profiles!shipper_id(full_name, email)")
+    .select("order_no, shipper_id, recipient_email")
     .eq("id", orderId)
-    .single<OrderNotificationData>();
+    .single<OrderBasicData>();
 
   if (error || !order) {
     console.error("[NOTIF] Failed to fetch order for notification:", error);
@@ -62,9 +62,16 @@ export async function triggerStatusChangeNotification(
   // 수신자 목록 구성
   const targets: { userId: string; email?: string }[] = [];
 
-  // 송하인: WAREHOUSED, RELEASED, DELIVERED, HELD
+  // 송하인 org 소속 사용자 조회 (profiles.org_id = zen_orders.shipper_id)
   if ([OrderStatus.WAREHOUSED, OrderStatus.RELEASED, OrderStatus.DELIVERED, OrderStatus.HELD].includes(newStatus)) {
-    targets.push({ userId: order.shipper_id, email: order.shipper?.email });
+    const { data: shipperUsers } = await supabase
+      .from("profiles")
+      .select("id, email")
+      .eq("org_id", order.shipper_id);
+
+    for (const u of shipperUsers ?? []) {
+      targets.push({ userId: u.id, email: u.email ?? undefined });
+    }
   }
 
   // 수하인: IN_TRANSIT, DELIVERED

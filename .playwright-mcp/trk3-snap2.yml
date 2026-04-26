@@ -1,0 +1,58 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e413] [cursor=pointer]:
+    - button "Open Next.js Dev Tools" [ref=e414]:
+      - img [ref=e415]
+    - generic [ref=e418]:
+      - button "Open issues overlay" [ref=e419]:
+        - generic [ref=e420]:
+          - generic [ref=e421]: "0"
+          - generic [ref=e422]: "1"
+        - generic [ref=e423]: Issue
+      - button "Collapse issues badge" [ref=e424]:
+        - img [ref=e425]
+  - generic [ref=e427]:
+    - complementary [ref=e428]:
+      - generic [ref=e429]:
+        - generic [ref=e430]: ZENITH_LMS
+        - button [ref=e431]:
+          - img [ref=e432]
+      - navigation [ref=e434]:
+        - generic [ref=e436] [cursor=pointer]:
+          - img [ref=e437]
+          - generic [ref=e442]: 대시보드
+        - generic [ref=e444] [cursor=pointer]:
+          - img [ref=e445]
+          - generic [ref=e449]: 기본 정보
+          - img [ref=e450]
+        - generic [ref=e453] [cursor=pointer]:
+          - img [ref=e454]
+          - generic [ref=e459]: 물류 관리
+          - img [ref=e460]
+        - generic [ref=e463] [cursor=pointer]:
+          - img [ref=e464]
+          - generic [ref=e466]: 정산/재무
+          - img [ref=e467]
+      - generic [ref=e470]:
+        - generic [ref=e471]: go
+        - generic [ref=e472]:
+          - paragraph [ref=e473]: governance_master
+          - paragraph [ref=e474]: ZENITH_LMS
+    - generic [ref=e475]:
+      - banner [ref=e476]:
+        - generic [ref=e477]:
+          - navigation [ref=e478]
+          - generic [ref=e486]
+        - generic [ref=e491]:
+          - button "알림" [ref=e493]
+          - button "governance_master ZENITH_LMS GO" [ref=e500]
+      - main [ref=e508]:
+        - generic [ref=e510]:
+          - generic [ref=e511]
+          - generic [ref=e530]
+      - region "Notifications alt+T"
+      - contentinfo [ref=e829]:
+        - generic [ref=e830]: © 2026 SNTL LOGISTICS. All rights reserved.
+        - generic [ref=e831]:
+          - generic [ref=e832] [cursor=pointer]: Privacy Policy
+          - generic [ref=e833] [cursor=pointer]: Terms of Service
+  - alert [ref=e834]

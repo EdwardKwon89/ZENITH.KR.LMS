@@ -19,20 +19,19 @@ function mergeHeaders(targetResponse: NextResponse, sourceResponse: NextResponse
 }
 
 /**
- * 🛡️ [ZENITH Unified Proxy]
- * Next.js 16.2.4 Secondary Entry (Redundant Guard)
- * Note: Providing this for compatibility with Next.js 16 internal manifest.
+ * 🛡️ [ZENITH Unified Middleware]
+ * Next.js Unified Entry for Auth, i18n, and RBAC
  */
-export async function proxy(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
-  console.log(`[PROXY-DUAL] Entry: ${pathname}`);
+  console.log(`[MIDDLEWARE] Entry: ${pathname}`);
 
   // 1. Supabase 세션 업데이트 및 사용자 획득
   let sessionResult;
   try {
     sessionResult = await updateSession(request);
   } catch (e) {
-    console.error(`[PROXY-DUAL] Session Sync Failed:`, e);
+    console.error(`[MIDDLEWARE] Session Sync Failed:`, e);
     return handleI18nRouting(request);
   }
   
@@ -49,9 +48,14 @@ export async function proxy(request: NextRequest) {
   const isAuthPage = purePath.startsWith('/login') || purePath.startsWith('/register');
   const isApi = purePath.startsWith('/api');
 
+  // API 경로는 i18n 라우팅 제외 — handleI18nRouting이 /ko/api/... 로 잘못 리다이렉트하는 것 방지
+  if (isApi) {
+    return mergeHeaders(supabaseResponse, supabaseResponse);
+  }
+
   // 2. 인증 가드 (Public Path 제외)
   if (!user && !isAuthPage && !isApi && purePath !== '/') {
-    console.log(`[PROXY-DUAL] Unauthorized Access. Redirecting to Login.`);
+    console.log(`[MIDDLEWARE] Unauthorized Access. Redirecting to Login.`);
     const url = request.nextUrl.clone();
     url.pathname = `/${locale}${DEFAULT_REDIRECTS.UNAUTHENTICATED}`;
     return mergeHeaders(NextResponse.redirect(url), supabaseResponse);
@@ -68,8 +72,9 @@ export async function proxy(request: NextRequest) {
       const { data: profile, error } = await supabase
         .from('profiles')
         .select(`
-          status, 
-          org_id, 
+          status,
+          org_id,
+          role,
           organizations (
             org_type
           )
@@ -80,27 +85,29 @@ export async function proxy(request: NextRequest) {
       if (profile) {
         userStatus = profile.status || userStatus;
         const dbOrgType = (profile.organizations as any)?.org_type;
-        
-        if (dbOrgType) {
+
+        if ((profile as any).role === 'ZENITH_SUPER_ADMIN') {
+          // 플랫폼 슈퍼 관리자는 조직 소속 없이도 PLATFORM 전체 권한 부여
+          orgType = 'PLATFORM';
+        } else if (dbOrgType) {
           orgType = dbOrgType;
         } else if (!profile.org_id && userStatus === 'ACTIVE') {
-          // 🚀 [Critical Fix] 개인 사용자의 경우 SHIPPER 권한을 강제 부여하여 대시보드 진입 보장
           orgType = 'SHIPPER';
-          console.log(`[PROXY-DUAL] Individual Master detected. Promoting to SHIPPER.`);
+          console.log(`[MIDDLEWARE] Individual Master detected. Promoting to SHIPPER.`);
         }
       }
     } catch (e) {
-      console.warn(`[PROXY-DUAL] Robust Fallback active due to query error:`, e);
+      console.warn(`[MIDDLEWARE] Robust Fallback active due to query error:`, e);
     }
 
     const allowedRoot = ORG_ROUTE_MAP[orgType as keyof typeof ORG_ROUTE_MAP] || '/';
-    console.log(`[PROXY-DUAL] Auth Result: user=${user.id}, status=${userStatus}, orgType=${orgType}, allowedRoot=${allowedRoot}`);
+    console.log(`[MIDDLEWARE] Auth Result: user=${user.id}, status=${userStatus}, orgType=${orgType}, allowedRoot=${allowedRoot}`);
 
     // [Status Guard]
     if (userStatus === 'PENDING' || userStatus === 'SUPPLEMENT_REQUIRED') {
       const pendingPath = DEFAULT_REDIRECTS.PENDING;
       if (purePath !== pendingPath && !isAuthPage && !purePath.startsWith('/orders') && !purePath.startsWith('/dashboard')) {
-        console.log(`[PROXY-DUAL] Guard: Redirecting Pending user.`);
+        console.log(`[MIDDLEWARE] Guard: Redirecting Pending user.`);
         const url = request.nextUrl.clone();
         url.pathname = `/${locale}${pendingPath}`;
         return mergeHeaders(NextResponse.redirect(url), supabaseResponse);
@@ -109,10 +116,17 @@ export async function proxy(request: NextRequest) {
 
     // [Org Guard]
     if (orgType !== 'PLATFORM') {
-      // /orders 와 allowedRoot 모두 허용 루틴 추가
-      const isAllowedPath = purePath === '/' || purePath.startsWith(allowedRoot) || isAuthPage || purePath.startsWith('/orders');
+      // 🚀 [Critical Fix] /tracking 및 /orders 경로 모두 허용
+      const isAllowedPath = 
+        purePath === '/' || 
+        purePath.startsWith(allowedRoot) || 
+        isAuthPage || 
+        purePath.startsWith('/orders') || 
+        purePath.startsWith('/tracking') ||
+        purePath.startsWith('/inventory'); // 재고관리도 허용 목록에 추가
+
       if (!isAllowedPath) {
-        console.log(`[PROXY-DUAL] Path Violation (${purePath}). Redirecting to ${allowedRoot}`);
+        console.log(`[MIDDLEWARE] Path Violation (${purePath}). Redirecting to ${allowedRoot}`);
         const url = request.nextUrl.clone();
         url.pathname = `/${locale}${allowedRoot}`;
         return mergeHeaders(NextResponse.redirect(url), supabaseResponse);

@@ -7,11 +7,13 @@ import TrackingTimeline from '@/components/tracking/TrackingTimeline';
 import AdminTrackingControl from '@/components/tracking/AdminTrackingControl';
 import RawLogViewer from '@/components/tracking/RawLogViewer';
 import OrderFinanceSummary from '@/components/finance/OrderFinanceSummary';
+import RouteOptimizationSection from '@/components/routing/RouteOptimizationSection';
+import RouteConsistencyBadge from '@/components/routing/RouteConsistencyBadge';
 
 import { Package, MapPin, Truck, ShieldCheck } from 'lucide-react';
 
-export default async function OrderDetailPage({ params }: { params: { orderId: string } }) {
-  const { orderId } = params;
+export default async function OrderDetailPage({ params }: { params: Promise<{ orderId: string }> }) {
+  const { orderId } = await params;
   
   // 1. 서버 사이드 데이터 페칭
   const { profile, supabase } = await requireAuth();
@@ -32,16 +34,23 @@ export default async function OrderDetailPage({ params }: { params: { orderId: s
     .select('*')
     .eq('order_id', orderId);
 
-  const { data: invoice } = await supabase
-    .from('zen_invoices')
-    .select('*')
-    .eq('shipper_id', order.shipper_id)
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .single();
+  // Look up invoice via cost's invoice_id (ground truth) to avoid RLS/shipper-id mismatch
+  const linkedInvoiceId = costs?.find((c: any) => c.invoice_id)?.invoice_id ?? null;
+  const { data: invoice } = linkedInvoiceId
+    ? await supabase.from('zen_invoices').select('*').eq('id', linkedInvoiceId).single()
+    : { data: null };
 
-  const isAdmin = await checkPermission(profile?.role, "/admin");
+  const isAdmin = checkPermission(profile?.role, "/admin");
   const rawLogs = isAdmin ? await getTrackingRawLogs(orderId) : [];
+
+  // 4. 적용된 경로 정보 가져오기 (Sprint B)
+  const { data: routeData } = await supabase
+    .from("zen_order_routes")
+    .select("selected_option_id")
+    .eq("order_id", orderId)
+    .maybeSingle();
+  
+  const appliedRouteId = routeData?.selected_option_id || null;
 
   // Mock initial TISA state (액션 통합 전 브릿지용)
   const snapshot = {
@@ -49,7 +58,7 @@ export default async function OrderDetailPage({ params }: { params: { orderId: s
     orderId: orderId,
     rateCardId: 'RC-STD-01',
     versionNo: 1,
-    status: 'AUTO',
+    status: 'AUTO' as const,
     priority: 10,
     baseAmount: 1250.00,
     currency: 'USD',
@@ -114,7 +123,19 @@ export default async function OrderDetailPage({ params }: { params: { orderId: s
               )}
             </div>
 
-            <TrackingTimeline events={events} />
+          <TrackingTimeline events={events} />
+          </section>
+
+          {/* 1.1 Route Optimization Section (Phase 3.3 Sprint B 신규) */}
+          <section className="bg-white dark:bg-neutral-900/50 rounded-[2.5rem] border border-slate-100 dark:border-neutral-800 p-8 shadow-sm">
+            <RouteOptimizationSection 
+              orderId={orderId} 
+              initialAppliedRouteId={appliedRouteId}
+              isAdmin={isAdmin}
+              headerBadge={
+                <RouteConsistencyBadge orderId={orderId} isAdmin={isAdmin} />
+              }
+            />
           </section>
 
           {/* 2. Order Information Details */}
@@ -176,10 +197,9 @@ export default async function OrderDetailPage({ params }: { params: { orderId: s
           )}
 
           {/* 2. TISA Governance Dashboard */}
-          <OrderTisaDashboard 
-            orderId={orderId} 
-            snapshot={snapshot} 
-            onOverrideSubmit={async () => {}} // Integration in next phase
+          <OrderTisaDashboard
+            orderId={orderId}
+            snapshot={snapshot}
           />
 
           {/* 3. Finance Summary */}

@@ -48,22 +48,49 @@ describe('ZENITH Logistics: Inventory Management Logic', () => {
     });
   });
 
-  it('TC-I.1: [Success] 재고 목록 조회 시 조직 ID로 필터링되어야 함', async () => {
-    // Given
-    mockSupabase.range.mockResolvedValue({ 
-      data: [{ id: 'inv-1', sku_code: 'SKU-001' }], 
+  it('TC-I.1: [Success] 일반 사용자의 재고 조회는 조직 ID로 필터링되어야 함', async () => {
+    // Given — non-admin user with org_id
+    (validateUserAction as any).mockResolvedValue({
+      user: mockUser,
+      profile: { ...mockProfile, role: 'MEMBER' },
+      supabase: mockSupabase
+    });
+    mockSupabase.range.mockResolvedValue({
+      data: [{ id: 'inv-1', sku_code: 'SKU-001' }],
       count: 1,
-      error: null 
+      error: null
     });
 
     // When
-    const result = await getInventoryList({ page: 1, pageSize: 10 });
+    const result = await getInventoryList({ page: 1, pageSize: 10, lowStockOnly: false });
 
-    // Then
+    // Then — non-admin must filter by org_id
     expect(mockSupabase.from).toHaveBeenCalledWith('zen_inventory');
     expect(mockSupabase.eq).toHaveBeenCalledWith('org_id', mockProfile.org_id);
     expect(result.items).toHaveLength(1);
     expect(result.totalCount).toBe(1);
+  });
+
+  it('TC-I.4: [Success] Admin/ZENITH_SUPER_ADMIN은 org_id 필터 없이 전체 재고를 조회해야 함', async () => {
+    // Given — admin user (org_id=null in real scenario)
+    (validateUserAction as any).mockResolvedValue({
+      user: mockUser,
+      profile: { ...mockProfile, role: 'ZENITH_SUPER_ADMIN', org_id: null },
+      supabase: mockSupabase
+    });
+    mockSupabase.range.mockResolvedValue({
+      data: [{ id: 'inv-1' }, { id: 'inv-2' }],
+      count: 2,
+      error: null
+    });
+
+    // When
+    const result = await getInventoryList({ page: 1, pageSize: 10, lowStockOnly: false });
+
+    // Then — admin must NOT apply org_id filter
+    expect(mockSupabase.from).toHaveBeenCalledWith('zen_inventory');
+    expect(mockSupabase.eq).not.toHaveBeenCalledWith('org_id', expect.anything());
+    expect(result.items).toHaveLength(2);
   });
 
   it('TC-I.2: [Success] 관리자가 재고 조정 시 이력이 기록되어야 함', async () => {
@@ -119,6 +146,7 @@ describe('ZENITH Logistics: Inventory Management Logic', () => {
     };
 
     // When & Then
-    await expect(adjustInventory(payload)).rejects.toThrow('재고 수량은 0 미만이 될 수 없습니다.');
+    const result = await adjustInventory(payload);
+    expect(result).toEqual({ success: false, error: '재고 수량은 0 미만이 될 수 없습니다.' });
   });
 });

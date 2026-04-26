@@ -592,7 +592,7 @@ function hello() {
 | # | 문서명 | Link | 개요 |
 |---|--------|------|------|
 | **001** | 프로젝트 문서 작성 가이드 | [001_Document_Writing_Guide.md](./001_Document_Writing_Guide.md) | 모든 문서 작성 규칙 |
-| **102** | ZEN_A4 방법론 | [102_ZEN_A4_METHODOLOGY.md](./102_ZEN_A4_METHODOLOGY.md) | 자동 코드 리뷰 |
+| **101** | ZEN_A4 방법론 | [101_ZEN_A4_METHODOLOGY.md](./101_ZEN_A4_METHODOLOGY.md) | 자동 코드 리뷰 |
 
 ---
 ```
@@ -700,7 +700,7 @@ git commit -m "docs: Add document writing guide"
 문서 작성 규칙에 대해 질문이 있으면:
 
 1. 이 문서 참고
-2. [Complete_Document_Writing_Guide.md](../093_Reference/Complete_Document_Writing_Guide.md) 참조
+2. [001_Complete_Document_Writing_Guide.md](../10_Reference/001_Complete_Document_Writing_Guide.md) 참조
 3. Team Lead에게 문의
 
 ---

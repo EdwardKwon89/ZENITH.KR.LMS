@@ -1,0 +1,101 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e6] [cursor=pointer]:
+    - button "Open Next.js Dev Tools" [ref=e7]:
+      - img [ref=e8]
+    - generic [ref=e11]:
+      - button "Open issues overlay" [ref=e12]:
+        - generic [ref=e13]:
+          - generic [ref=e14]: "0"
+          - generic [ref=e15]: "1"
+        - generic [ref=e16]: Issue
+      - button "Collapse issues badge" [ref=e17]:
+        - img [ref=e18]
+  - generic [ref=e20]:
+    - complementary [ref=e21]:
+      - generic [ref=e22]:
+        - generic [ref=e23]: ZENITH_LMS
+        - button [ref=e24]:
+          - img [ref=e25]
+      - navigation [ref=e27]:
+        - generic [ref=e29] [cursor=pointer]:
+          - img [ref=e30]
+          - generic [ref=e35]: 대시보드
+        - generic [ref=e37] [cursor=pointer]:
+          - img [ref=e38]
+          - generic [ref=e42]: 기본 정보
+          - img [ref=e43]
+        - generic [ref=e46] [cursor=pointer]:
+          - img [ref=e47]
+          - generic [ref=e51]: 오더 관리
+          - img [ref=e52]
+        - generic [ref=e55] [cursor=pointer]:
+          - img [ref=e56]
+          - generic [ref=e61]: 물류 실행
+        - generic [ref=e63] [cursor=pointer]:
+          - img [ref=e64]
+          - generic [ref=e69]: 통합 트래킹
+        - generic [ref=e71] [cursor=pointer]:
+          - img [ref=e72]
+          - generic [ref=e76]: 재고 관리
+        - generic [ref=e78] [cursor=pointer]:
+          - img [ref=e79]
+          - generic [ref=e81]: 정산 관리
+        - generic [ref=e83] [cursor=pointer]:
+          - img [ref=e84]
+          - generic [ref=e87]: 거버넌스
+        - generic [ref=e89] [cursor=pointer]:
+          - img [ref=e90]
+          - generic [ref=e93]: 설정
+      - generic [ref=e95]:
+        - generic [ref=e96]: Ze
+        - generic [ref=e97]:
+          - paragraph [ref=e98]: Zenith.Admin
+          - paragraph [ref=e99]: ZENITH_LMS
+    - generic [ref=e100]:
+      - banner [ref=e101]:
+        - generic [ref=e102]:
+          - navigation [ref=e103]:
+            - generic [ref=e104]: Home
+            - img [ref=e105]
+            - generic [ref=e107]: Inventory
+          - generic [ref=e108]:
+            - img [ref=e109]
+            - textbox "빠른 검색 (⌘+K)" [ref=e112]
+        - generic [ref=e113]:
+          - button "알림" [ref=e115]:
+            - img [ref=e116]
+          - button "Zenith.Admin ZENITH_LMS ZE" [ref=e121]:
+            - generic [ref=e122]:
+              - generic [ref=e123]: Zenith.Admin
+              - generic [ref=e124]:
+                - img [ref=e125]
+                - text: ZENITH_LMS
+            - generic [ref=e128]: ZE
+      - main [ref=e129]:
+        - generic [ref=e133]:
+          - img [ref=e138]
+          - heading "System Interruption" [level=2] [ref=e140]
+          - paragraph [ref=e141]:
+            - text: We encountered an unexpected issue while processing your request. Our engineering team has been notified.
+            - generic [ref=e142]: "Error Digest: 3693706959"
+          - generic [ref=e143]:
+            - button "Try Reconnecting" [ref=e144]:
+              - generic [ref=e145]:
+                - img [ref=e146]
+                - text: Try Reconnecting
+            - button "Back to Home" [ref=e151]:
+              - generic [ref=e152]:
+                - img [ref=e153]
+                - text: Back to Home
+          - generic [ref=e156]:
+            - button "Contact Support" [ref=e157]:
+              - img [ref=e158]
+              - text: Contact Support
+            - generic [ref=e161]: Zenith Infrastructure Alpha
+      - region "Notifications alt+T"
+      - contentinfo [ref=e162]:
+        - generic [ref=e163]: © 2026 SNTL LOGISTICS. All rights reserved.
+        - generic [ref=e164]:
+          - generic [ref=e165] [cursor=pointer]: Privacy Policy
+          - generic [ref=e166] [cursor=pointer]: Terms of Service
+  - alert [ref=e167]

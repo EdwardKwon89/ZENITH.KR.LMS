@@ -4,7 +4,7 @@
 - **이름**: ZENITH_LMS (Logistics Management System)
 - **성격**: 항공·해운·통관·택배를 아우르는 차세대 통합 물류 관리 플랫폼
 - **상태**: Phase 3 (Intelligence & Finance) 진행 중 [진척도: 79%]
-- **최신 스냅샷**: [.planning/CONTEXT_SNAPSHOT_20260423.md](.planning/CONTEXT_SNAPSHOT_20260423.md)
+- **최신 스냅샷**: [.planning/CONTEXT_SNAPSHOT_20260423.md](./CONTEXT_SNAPSHOT_20260423.md)
 - **업데이트**: 2026-04-23
 
 ## 2. 핵심 기능 모듈 (10 Modules)
@@ -29,7 +29,7 @@
 ## 4. 운영 정책
 - **코드 스타일**: 불변성 우선, 함수 50줄/파일 800줄 이하 준수
 - **품질 관리**: Phase별 Self Check/Test 필수, 테스트 커버리지 80% 목표
-- **에이전트 규정**: [GEMINI.md](GEMINI.md) 및 [CLAUDE.md](CLAUDE.md) 준수
+- **에이전트 규정**: [GEMINI.md](../GEMINI.md) 및 [CLAUDE.md](../CLAUDE.md) 준수
 
 ---
 *Last Updated: 2026-04-16*

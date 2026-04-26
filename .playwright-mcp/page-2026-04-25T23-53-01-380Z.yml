@@ -1,0 +1,94 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - generic [ref=e4]:
+        - generic [ref=e5]: ZENITH_LMS
+        - button [ref=e6]:
+          - img [ref=e7]
+      - navigation [ref=e9]:
+        - generic [ref=e11] [cursor=pointer]:
+          - img [ref=e12]
+          - generic [ref=e17]: 대시보드
+        - generic [ref=e19] [cursor=pointer]:
+          - img [ref=e20]
+          - generic [ref=e24]: 기본 정보
+          - img [ref=e25]
+        - generic [ref=e28] [cursor=pointer]:
+          - img [ref=e29]
+          - generic [ref=e34]: 물류 실행
+        - generic [ref=e36] [cursor=pointer]:
+          - img [ref=e37]
+          - generic [ref=e42]: 통합 트래킹
+        - generic [ref=e44] [cursor=pointer]:
+          - img [ref=e45]
+          - generic [ref=e49]: 재고 관리
+      - generic [ref=e51]:
+        - generic [ref=e52]: go
+        - generic [ref=e53]:
+          - paragraph [ref=e54]: governance_master
+          - paragraph [ref=e55]: ZENITH_LMS
+    - generic [ref=e56]:
+      - banner [ref=e57]:
+        - generic [ref=e58]:
+          - navigation [ref=e59]:
+            - generic [ref=e60]: Home
+            - img [ref=e61]
+            - generic [ref=e63]: Tracking
+          - generic [ref=e64]:
+            - img [ref=e65]
+            - textbox "빠른 검색 (⌘+K)" [ref=e68]
+        - generic [ref=e69]:
+          - button "알림" [ref=e71]:
+            - img [ref=e72]
+          - button "governance_master ZENITH_LMS GO" [ref=e77]:
+            - generic [ref=e78]:
+              - generic [ref=e79]: governance_master
+              - generic [ref=e80]:
+                - img [ref=e81]
+                - text: ZENITH_LMS
+            - generic [ref=e84]: GO
+      - main [ref=e85]:
+        - generic [ref=e87]:
+          - generic [ref=e88]:
+            - heading "통합 트래킹" [level=1] [ref=e89]
+            - paragraph [ref=e90]: Monitor and manage all active logistics tracks and API sync status.
+          - generic [ref=e91]:
+            - generic [ref=e105]:
+              - generic [ref=e106]:
+                - img [ref=e107]
+                - 'textbox "Search Order # or Tracking #" [ref=e110]'
+              - generic [ref=e111]:
+                - button "Refresh List" [ref=e112]:
+                  - img [ref=e113]
+                - button "Sync All API" [ref=e118]:
+                  - img [ref=e119]
+                  - text: Sync All API
+            - table [ref=e126]:
+              - rowgroup [ref=e127]:
+                - row "Order Info Tracking Number Carrier / Mode Latest Status Last Updated" [ref=e128]:
+                  - columnheader "Order Info" [ref=e129]
+                  - columnheader "Tracking Number" [ref=e130]
+                  - columnheader "Carrier / Mode" [ref=e131]
+                  - columnheader "Latest Status" [ref=e132]
+                  - columnheader "Last Updated" [ref=e133]
+                  - columnheader [ref=e134]
+              - rowgroup [ref=e135]:
+                - row [ref=e136]:
+                  - cell [ref=e137]
+                - row [ref=e139]:
+                  - cell [ref=e140]
+                - row [ref=e142]:
+                  - cell [ref=e143]
+                - row [ref=e145]:
+                  - cell [ref=e146]
+                - row [ref=e148]:
+                  - cell [ref=e149]
+      - region "Notifications alt+T"
+      - contentinfo [ref=e151]:
+        - generic [ref=e152]: © 2026 SNTL LOGISTICS. All rights reserved.
+        - generic [ref=e153]:
+          - generic [ref=e154] [cursor=pointer]: Privacy Policy
+          - generic [ref=e155] [cursor=pointer]: Terms of Service
+  - button "Open Next.js Dev Tools" [ref=e161] [cursor=pointer]:
+    - img [ref=e162]
+  - alert [ref=e165]

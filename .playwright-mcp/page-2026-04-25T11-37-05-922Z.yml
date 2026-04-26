@@ -1,0 +1,141 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - generic [ref=e4]:
+        - generic [ref=e5]: ZENITH_LMS
+        - button [ref=e6]:
+          - img [ref=e7]
+      - navigation [ref=e9]:
+        - generic [ref=e11] [cursor=pointer]:
+          - img [ref=e12]
+          - generic [ref=e17]: 대시보드
+        - generic [ref=e19] [cursor=pointer]:
+          - img [ref=e20]
+          - generic [ref=e24]: 기본 정보
+          - img [ref=e25]
+        - generic [ref=e28] [cursor=pointer]:
+          - img [ref=e29]
+          - generic [ref=e33]: 오더 관리
+          - img [ref=e34]
+        - generic [ref=e37] [cursor=pointer]:
+          - img [ref=e38]
+          - generic [ref=e43]: 물류 실행
+        - generic [ref=e45] [cursor=pointer]:
+          - img [ref=e46]
+          - generic [ref=e51]: 통합 트래킹
+        - generic [ref=e53] [cursor=pointer]:
+          - img [ref=e54]
+          - generic [ref=e58]: 재고 관리
+        - generic [ref=e60] [cursor=pointer]:
+          - img [ref=e61]
+          - generic [ref=e63]: 정산 관리
+        - generic [ref=e65] [cursor=pointer]:
+          - img [ref=e66]
+          - generic [ref=e69]: 거버넌스
+        - generic [ref=e71] [cursor=pointer]:
+          - img [ref=e72]
+          - generic [ref=e75]: 설정
+      - generic [ref=e77]:
+        - generic [ref=e78]: Ze
+        - generic [ref=e79]:
+          - paragraph [ref=e80]: Zenith.Admin
+          - paragraph [ref=e81]: ZENITH_LMS
+    - generic [ref=e82]:
+      - banner [ref=e83]:
+        - generic [ref=e84]:
+          - navigation [ref=e85]:
+            - generic [ref=e86]: Home
+            - img [ref=e87]
+            - generic [ref=e89]: Inventory
+          - generic [ref=e90]:
+            - img [ref=e91]
+            - textbox "빠른 검색 (⌘+K)" [ref=e94]
+        - generic [ref=e95]:
+          - button "알림" [ref=e97]:
+            - img [ref=e98]
+          - button "Zenith.Admin ZENITH_LMS ZE" [ref=e103]:
+            - generic [ref=e104]:
+              - generic [ref=e105]: Zenith.Admin
+              - generic [ref=e106]:
+                - img [ref=e107]
+                - text: ZENITH_LMS
+            - generic [ref=e110]: ZE
+      - main [ref=e111]:
+        - generic [ref=e113]:
+          - generic [ref=e114]:
+            - generic [ref=e115]:
+              - heading "INVENTORY CONTROL" [level=1] [ref=e116]:
+                - img [ref=e118]
+                - text: INVENTORY CONTROL
+              - paragraph [ref=e122]: Monitor real-time stock levels and warehouse distribution
+            - generic [ref=e123]:
+              - generic [ref=e124]:
+                - img [ref=e126]
+                - generic [ref=e131]:
+                  - paragraph [ref=e132]: Total SKU
+                  - paragraph [ref=e133]: "1"
+              - generic [ref=e134]:
+                - img [ref=e136]
+                - generic [ref=e138]:
+                  - paragraph [ref=e139]: Low Stock
+                  - paragraph [ref=e140]: "1"
+          - generic [ref=e141]:
+            - generic [ref=e142]:
+              - img [ref=e143]
+              - textbox "Search by SKU or Item Name..." [ref=e146]
+            - generic [ref=e147]:
+              - button "Low Stock Only" [ref=e148]:
+                - img [ref=e149]
+                - text: Low Stock Only
+              - button "Filters" [ref=e151]:
+                - img [ref=e152]
+                - text: Filters
+          - generic [ref=e154]:
+            - table [ref=e156]:
+              - rowgroup [ref=e157]:
+                - row "Product / SKU On Hand Reserved Available Status Actions" [ref=e158]:
+                  - columnheader "Product / SKU" [ref=e159]
+                  - columnheader "On Hand" [ref=e160]
+                  - columnheader "Reserved" [ref=e161]
+                  - columnheader "Available" [ref=e162]
+                  - columnheader "Status" [ref=e163]
+                  - columnheader "Actions" [ref=e164]
+              - rowgroup [ref=e165]:
+                - row "UAT Verification Item SKU-UAT-001 1 0 1 Low Stock" [ref=e166]:
+                  - cell "UAT Verification Item SKU-UAT-001" [ref=e167]:
+                    - generic [ref=e168]:
+                      - generic [ref=e169]: UAT Verification Item
+                      - generic [ref=e170]: SKU-UAT-001
+                  - cell "1" [ref=e171]
+                  - cell "0" [ref=e172]
+                  - cell "1" [ref=e173]:
+                    - generic [ref=e174]:
+                      - generic [ref=e175]: "1"
+                      - img [ref=e176]
+                  - cell "Low Stock" [ref=e178]:
+                    - generic [ref=e179]: Low Stock
+                  - cell [ref=e180]:
+                    - generic [ref=e181]:
+                      - button "View History" [ref=e182]:
+                        - img [ref=e183]
+                      - button "Adjust Inventory" [ref=e187]:
+                        - img [ref=e188]
+                      - button [ref=e191]:
+                        - img [ref=e192]
+            - generic [ref=e196]:
+              - paragraph [ref=e197]: Showing 1 to 1 of 1 items
+              - generic [ref=e198]:
+                - button [disabled] [ref=e199]:
+                  - img [ref=e201]
+                - button "1" [ref=e204]
+                - button [disabled] [ref=e205]:
+                  - img [ref=e207]
+      - region "Notifications alt+T"
+      - contentinfo [ref=e209]:
+        - generic [ref=e210]: © 2026 SNTL LOGISTICS. All rights reserved.
+        - generic [ref=e211]:
+          - generic [ref=e212] [cursor=pointer]: Privacy Policy
+          - generic [ref=e213] [cursor=pointer]: Terms of Service
+  - button "Open Next.js Dev Tools" [ref=e219] [cursor=pointer]:
+    - img [ref=e220]
+  - alert [ref=e223]

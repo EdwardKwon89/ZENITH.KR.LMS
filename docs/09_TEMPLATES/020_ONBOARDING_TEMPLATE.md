@@ -141,8 +141,8 @@ tree -L 2
 ```
 
 **읽을 문서:**
-- [ ] [Quick Reference](./QUICK_REFERENCE_TEMPLATE.md) (5분)
-- [ ] [ZEN_A4 방법론](../000_GUIDE/ZEN_A4_METHODOLOGY.md) (10분)
+- [ ] [Quick Reference](./010_QUICK_REFERENCE_TEMPLATE.md) (5분)
+- [ ] [ZEN_A4 방법론](../00_GUIDE/101_ZEN_A4_METHODOLOGY.md) (10분)
 
 ### Step 2-2: 개발 플로우 이해
 
@@ -284,7 +284,7 @@ def test_first_feature():
 
 **도움 받기:**
 - `Claude Code: @codebase "[기능명]" 테스트 코드 작성해줄래?`
-- [체크리스트](./CHECKLISTS_TEMPLATE/PHASE_2_EXECUTE_CHECKLIST.md) 참고
+- [체크리스트](./050_CHECKLISTS_TEMPLATE/PHASE_2_EXECUTE_CHECKLIST.md) 참고
 
 **Step 3-4-2: 기능 구현**
 
@@ -358,7 +358,7 @@ npm test (또는 해당 명령어)
 ```
 
 **문제 발생:**
-- 테스트 실패 → [Troubleshooting](./TROUBLESHOOTING_TEMPLATE.md) 참고
+- 테스트 실패 → [Troubleshooting](./030_TROUBLESHOOTING_TEMPLATE.md) 참고
 - 커버리지 부족 → 테스트 추가
 - 보안 문제 → Claude에 상담
 
@@ -507,7 +507,7 @@ PR 생성 후:
 
 | 상황 | 해결 방법 |
 |------|---------|
-| **"Self Test 실패"** | [Troubleshooting](./TROUBLESHOOTING_TEMPLATE.md) 참고 |
+| **"Self Test 실패"** | [Troubleshooting](./030_TROUBLESHOOTING_TEMPLATE.md) 참고 |
 | **"Ollama 응답 느림"** | 로컬 GPU 활용 설정 확인 |
 | **"테스트 커버리지 부족"** | 테스트 추가 (Claude에게 도움 요청) |
 | **"PR 리뷰 의견 받음"** | 수정 후 재커밋 (자동 업데이트) |

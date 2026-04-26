@@ -1,0 +1,108 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - generic [ref=e4]:
+        - generic [ref=e5]: ZENITH_LMS
+        - button [ref=e6]:
+          - img [ref=e7]
+      - navigation [ref=e9]:
+        - generic [ref=e11] [cursor=pointer]:
+          - img [ref=e12]
+          - generic [ref=e17]: 대시보드
+        - generic [ref=e19] [cursor=pointer]:
+          - img [ref=e20]
+          - generic [ref=e24]: 기본 정보
+          - img [ref=e25]
+        - generic [ref=e28] [cursor=pointer]:
+          - img [ref=e29]
+          - generic [ref=e34]: 물류 관리
+          - img [ref=e35]
+        - generic [ref=e38] [cursor=pointer]:
+          - img [ref=e39]
+          - generic [ref=e41]: 정산/재무
+          - img [ref=e42]
+      - generic [ref=e45]:
+        - generic [ref=e46]: go
+        - generic [ref=e47]:
+          - paragraph [ref=e48]: governance_master
+          - paragraph [ref=e49]: ZENITH_LMS
+    - generic [ref=e50]:
+      - banner [ref=e51]:
+        - generic [ref=e52]:
+          - navigation [ref=e53]:
+            - generic [ref=e54]: Home
+            - img [ref=e55]
+            - generic [ref=e57]: Settlement
+          - generic [ref=e58]:
+            - img [ref=e59]
+            - textbox "빠른 검색 (⌘+K)" [ref=e62]
+        - generic [ref=e63]:
+          - button "알림" [ref=e65]:
+            - img [ref=e66]
+            - generic [ref=e69]: "1"
+          - button "governance_master ZENITH_LMS GO" [ref=e72]:
+            - generic [ref=e73]:
+              - generic [ref=e74]: governance_master
+              - generic [ref=e75]:
+                - img [ref=e76]
+                - text: ZENITH_LMS
+            - generic [ref=e79]: GO
+      - main [ref=e80]:
+        - generic [ref=e82]:
+          - generic [ref=e83]:
+            - heading "Finance & Settlement" [level=1] [ref=e84]
+            - paragraph [ref=e85]: 정산 현황 및 청구서 관리 Admin View
+          - generic [ref=e86]:
+            - generic [ref=e87]:
+              - generic [ref=e90]: 💳
+              - paragraph [ref=e92]: Unpaid Invoices
+              - paragraph [ref=e93]: "0"
+            - generic [ref=e94]:
+              - generic [ref=e97]: 💰
+              - paragraph [ref=e99]: Total Outstanding
+              - paragraph [ref=e100]: KRW 0
+            - generic [ref=e101]:
+              - generic [ref=e104]: ✅
+              - paragraph [ref=e106]: Recently Paid
+              - paragraph [ref=e107]: "1"
+          - table [ref=e110]:
+            - rowgroup [ref=e111]:
+              - row "Invoice No Shipper Amount Due Date Status Actions" [ref=e112]:
+                - columnheader "Invoice No" [ref=e113]
+                - columnheader "Shipper" [ref=e114]
+                - columnheader "Amount" [ref=e115]
+                - columnheader "Due Date" [ref=e116]
+                - columnheader "Status" [ref=e117]
+                - columnheader "Actions" [ref=e118]
+            - rowgroup [ref=e119]:
+              - row "INV-UAT-001 $83,350 KRW May 09, 2026 PAID Issue PDF" [ref=e197]:
+                - cell "INV-UAT-001" [ref=e121]
+                - cell [ref=e122]
+                - cell "$83,350 KRW" [ref=e123]:
+                  - generic [ref=e124]:
+                    - generic [ref=e125]: $83,350
+                    - generic [ref=e126]: KRW
+                - cell "May 09, 2026" [ref=e127]
+                - cell "PAID" [ref=e198]
+                - cell "Issue PDF" [ref=e199]:
+                  - button "Issue PDF" [ref=e132]:
+                    - generic [ref=e133]:
+                      - img [ref=e134]
+                      - text: Issue PDF
+                  - button "History" [ref=e137]:
+                    - img [ref=e138]
+      - region "Notifications alt+T":
+        - list:
+          - listitem [ref=e200]:
+            - img [ref=e202]
+            - generic [ref=e205]:
+              - generic [ref=e206]: 입금 확인이 완료되었습니다.
+              - generic [ref=e207]: INV-UAT-001 - 결제 상태가 PAID로 변경되었습니다.
+      - contentinfo [ref=e142]:
+        - generic [ref=e143]: © 2026 SNTL LOGISTICS. All rights reserved.
+        - generic [ref=e144]:
+          - generic [ref=e145] [cursor=pointer]: Privacy Policy
+          - generic [ref=e146] [cursor=pointer]: Terms of Service
+  - button "Open Next.js Dev Tools" [ref=e152] [cursor=pointer]:
+    - img [ref=e153]
+  - alert [ref=e196]
