@@ -34,9 +34,9 @@ export default async function OrdersPage({
     <div className="space-y-4 animate-in fade-in duration-700">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-2">
         <div>
-          <h1 className="text-xl font-black text-slate-950 tracking-tight flex items-center gap-3">
-            <span className="w-1.5 h-6 bg-blue-600 rounded-full"></span>
-            ORDER CONTROL
+          <h1 className="text-2xl font-bold text-slate-950 tracking-tight flex items-center gap-3">
+            <span className="w-1.5 h-6 bg-brand-600 rounded-full"></span>
+            Order Control
           </h1>
           <p className="text-slate-500 font-medium ml-4 text-xs">Manage and track your global logistics shipments</p>
         </div>

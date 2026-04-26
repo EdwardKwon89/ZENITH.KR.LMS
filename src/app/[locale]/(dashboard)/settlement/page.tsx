@@ -3,6 +3,8 @@ import { requireAuth } from "@/lib/auth/guards";
 import { USER_ROLES } from "@/lib/auth/rbac";
 import { InvoiceTable } from "@/components/admin/InvoiceTable";
 
+import { Wallet } from "lucide-react";
+
 export default async function SettlementPage({ params }: { params: Promise<{ locale: string }> }) {
   await params; // Next.js 16: params is a Promise
   const { profile } = await requireAuth();
@@ -13,11 +15,17 @@ export default async function SettlementPage({ params }: { params: Promise<{ loc
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <div className="flex flex-col gap-1 px-2">
-        <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 drop-shadow-sm">
-          정산 관리
-        </h1>
-        <p className="text-slate-500 font-medium">정산 현황 및 청구서 관리 {isAdmin && <span className="ml-2 text-[10px] bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full uppercase font-black tracking-tighter">Admin View</span>}</p>
+      <div className="flex items-center gap-4 px-2">
+        <div className="p-2.5 bg-brand-600 rounded-xl text-white shadow-lg shadow-brand-200">
+          <Wallet size={24} />
+        </div>
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Settlement Control</h1>
+          <p className="text-slate-500 font-medium text-xs">
+            Manage your financial transactions and payouts 
+            {isAdmin && <span className="ml-2 text-[10px] bg-brand-100 text-brand-600 px-2 py-0.5 rounded-full uppercase font-black tracking-tighter">Admin View</span>}
+          </p>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

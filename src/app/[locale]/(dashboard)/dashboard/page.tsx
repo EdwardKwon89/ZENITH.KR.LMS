@@ -91,7 +91,7 @@ export default function DashboardPage() {
         {/* Page Heading */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold font-heading text-slate-950 tracking-tight">
+            <h1 className="text-2xl font-bold font-heading text-slate-950 tracking-tight">
               Logistics Dashboard
             </h1>
             <p className="text-slate-500 mt-1">Real-time monitoring of your global logistics flow.</p>
@@ -110,7 +110,7 @@ export default function DashboardPage() {
         {/* Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {[
-            { label: "Active Orders", value: "1,284", change: "+12.5%", color: "text-blue-600" },
+            { label: "Active Orders", value: "1,284", change: "+12.5%", color: "text-brand-600" },
             { label: "Total Revenue", value: "$42.5k", change: "+8.2%", color: "text-emerald-600" },
             { label: "Transit Failure", value: "0.2%", change: "-1.1%", color: "text-red-600" },
             { label: "Carrier Reliability", value: "99.4%", change: "+0.3%", color: "text-brand-600" },
