@@ -31,17 +31,19 @@ export default async function OrdersPage({
   });
 
   return (
-    <div className="space-y-4 animate-in fade-in duration-700">
+    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-2">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-950 tracking-tight flex items-center gap-3">
-            <span className="w-1.5 h-6 bg-brand-600 rounded-full"></span>
-            Order Control
-          </h1>
-          <p className="text-slate-500 font-medium ml-4 text-xs">Manage and track your global logistics shipments</p>
+        <div className="flex items-center gap-4">
+          <div className="p-2.5 bg-brand-600 rounded-xl text-white shadow-lg shadow-brand-200">
+            <Plus size={24} />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Order Control</h1>
+            <p className="text-slate-500 font-medium text-xs">Manage and track your global logistics shipments</p>
+          </div>
         </div>
         <Link href="/orders/new">
-          <ZenButton className="bg-white text-slate-900 border border-slate-200 hover:bg-slate-50 hover:shadow-md px-8 py-2 text-xs font-bold rounded-xl shadow-sm transition-all focus:ring-2 focus:ring-blue-100 outline-none">
+          <ZenButton variant="tactile" className="bg-brand-600 text-white hover:bg-brand-700 px-8 py-2 text-xs font-bold rounded-xl shadow-lg shadow-brand-100 transition-all">
             <Plus size={14} className="mr-2" /> CREATE NEW ORDER
           </ZenButton>
         </Link>

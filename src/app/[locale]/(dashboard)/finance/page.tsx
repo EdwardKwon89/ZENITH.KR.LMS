@@ -1,11 +1,11 @@
 import React from 'react';
 import { requireAuth } from '@/lib/auth/guards';
-import { 
-  CreditCard, 
-  ArrowUpRight, 
-  ArrowDownRight, 
-  Clock, 
-  CheckCircle2, 
+import {
+  CreditCard,
+  ArrowUpRight,
+  ArrowDownRight,
+  Clock,
+  CheckCircle2,
   AlertCircle,
   FileText,
   TrendingUp,
@@ -13,8 +13,10 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { InvoiceTable } from '@/components/finance/InvoiceTable';
-
 import { ExportButton } from '@/components/finance/ExportButton';
+import { RevenueChart } from '@/components/finance/RevenueChart';
+import { Download, TrendingDown, LayoutDashboard } from 'lucide-react';
+import { getWeeklyRevenueChart } from '@/app/actions/finance';
 
 export default async function FinanceDashboardPage() {
   const { supabase, profile } = await requireAuth();
@@ -43,7 +45,7 @@ export default async function FinanceDashboardPage() {
       trend: '+12.5%',
       up: true,
       icon: DollarSign,
-      color: 'blue'
+      color: 'brand'
     },
     {
       title: 'Unpaid Invoices',
@@ -59,9 +61,12 @@ export default async function FinanceDashboardPage() {
       trend: '+2.1%',
       up: true,
       icon: CheckCircle2,
-      color: 'green'
+      color: 'emerald'
     }
   ];
+
+  // 2. 차트용 데이터 가공 (실제 DB 연동)
+  const chartData = await getWeeklyRevenueChart();
 
   return (
     <div className="max-w-7xl mx-auto p-6 md:p-10 space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -83,32 +88,29 @@ export default async function FinanceDashboardPage() {
             <span className="text-xl font-black text-slate-900">$1,284,500.00</span>
           </div>
           <div className="h-10 w-[1px] bg-slate-200 mx-2"></div>
-          <button className="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl font-bold text-sm transition-all shadow-lg shadow-brand-100 flex items-center gap-2">
-            <Download size={16} />
-            Export Report
-          </button>
+          <ExportButton />
         </div>
       </div>
 
       {/* KPI Section */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {kpis.map((kpi, idx) => (
-          <div key={idx} className="group bg-white p-8 rounded-[2.5rem] border border-slate-200/60 shadow-sm hover:shadow-2xl hover:shadow-slate-200/50 transition-all duration-500 relative overflow-hidden">
-            <div className={`absolute top-0 right-0 w-32 h-32 -mr-8 -mt-8 bg-${kpi.color}-500/5 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-700`} />
+          <div key={idx} className="group zen-glass p-8 rounded-2xl border border-white/20 shadow-sm hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 relative overflow-hidden">
+            <div className={`absolute top-0 right-0 w-32 h-32 -mr-8 -mt-8 bg-brand-500/5 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-700`} />
             
             <div className="flex justify-between items-start mb-6">
-              <div className={`p-4 bg-${kpi.color}-50 rounded-2xl`}>
-                <kpi.icon className={`w-6 h-6 text-${kpi.color}-600`} />
+              <div className={`p-4 bg-brand-50 rounded-2xl`}>
+                <kpi.icon className={`w-6 h-6 text-brand-600`} />
               </div>
               {kpi.up ? (
                 <div className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-600 rounded-full text-xs font-black">
                   <TrendingUp className="w-3.5 h-3.5" />
-                  +12.5%
+                  {kpi.trend}
                 </div>
               ) : (
-                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-50 text-rose-600 rounded-full text-xs font-black">
-                  <TrendingDown className="w-3.5 h-3.5" />
-                  -2.4%
+                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 text-orange-600 rounded-full text-xs font-black">
+                  <Clock className="w-3.5 h-3.5" />
+                  {kpi.trend}
                 </div>
               )}
             </div>
@@ -132,36 +134,22 @@ export default async function FinanceDashboardPage() {
 
         {/* Financial Sidebar */}
         <div className="lg:col-span-4 space-y-8">
-           {/* Revenue Insight Chart Simulation */}
-           <div className="bg-slate-900 rounded-[2.5rem] p-8 text-white relative overflow-hidden">
+           {/* Revenue Insight Chart Implementation */}
+           <div className="bg-slate-900 rounded-2xl p-8 text-white relative overflow-hidden shadow-2xl">
               <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-brand-600/20 rounded-full blur-3xl" />
               <div className="relative z-10">
-                <h3 className="text-lg font-bold mb-6 flex items-center gap-2">
+                <h3 className="text-lg font-bold mb-2 flex items-center gap-2">
                   <TrendingUp className="w-5 h-5 text-brand-400" />
                   Monthly Trend
                 </h3>
+                <p className="text-slate-400 text-xs mb-6">Revenue analytics for last 7 days</p>
                 
-                <div className="flex items-end justify-between h-40 gap-2 mb-6">
-                   {[40, 70, 45, 90, 65, 80, 55].map((h, i) => (
-                     <div key={i} className="flex-1 bg-white/10 rounded-t-lg group relative cursor-pointer hover:bg-brand-500/50 transition-all duration-300" style={{ height: `${h}%` }}>
-                        <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-white text-slate-900 text-[10px] font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                          {h * 100} USD
-                        </div>
-                     </div>
-                   ))}
-                </div>
-                
-                <div className="flex justify-between text-[10px] font-bold text-slate-500 uppercase tracking-widest">
-                  <span>Mon</span>
-                  <span>Wed</span>
-                  <span>Fri</span>
-                  <span>Sun</span>
-                </div>
+                <RevenueChart data={chartData} />
               </div>
            </div>
 
            {/* Quick Actions */}
-           <div className="bg-white rounded-[2.5rem] border border-slate-200/60 p-8 shadow-sm">
+           <div className="zen-glass rounded-2xl border border-white/20 p-8 shadow-sm hover:shadow-xl transition-all duration-300">
               <h3 className="font-bold mb-6 text-slate-900">Settlement Health</h3>
               <div className="space-y-4">
                  <div className="p-4 bg-slate-50 rounded-2xl flex items-center justify-between">

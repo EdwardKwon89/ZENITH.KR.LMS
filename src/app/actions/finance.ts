@@ -440,3 +440,60 @@ export async function getTaxInvoiceHistory(invoiceId: string) {
 }
 
 
+
+/**
+ * [WBS 4.8.3.3] 최근 7일간의 요일별 매출 데이터를 조회하여 차트 형식으로 반환합니다.
+ */
+export async function getWeeklyRevenueChart() {
+  const { supabase, profile } = await validateUserAction();
+  if (!profile) throw new Error("User profile not found");
+
+  const isAdmin = profile.role === 'ZENITH_SUPER_ADMIN' || profile.role === 'ADMIN';
+
+  // 1. 최근 7일 날짜 범위 계산
+  const now = new Date();
+  const sevenDaysAgo = new Date(now);
+  sevenDaysAgo.setDate(now.getDate() - 6);
+  sevenDaysAgo.setHours(0, 0, 0, 0);
+
+  // 2. PAID 상태인 인보이스 조회
+  const query = supabase
+    .from('zen_invoices')
+    .select('total_amount, created_at')
+    .eq('status', 'PAID')
+    .gte('created_at', sevenDaysAgo.toISOString())
+    .lte('created_at', now.toISOString());
+
+  if (!isAdmin && profile.org_id) {
+    query.eq('shipper_id', profile.org_id);
+  }
+
+  const { data: invoices, error } = await query;
+  if (error) throw new Error(`매출 통계 조회 실패: ${error.message}`);
+
+  // 3. 요일별 집계 (Mon, Tue, Wed...)
+  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const chartDataMap: Record<string, number> = {};
+
+  // 최근 7일을 순서대로 초기화 (오늘이 마지막에 오도록)
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(now);
+    d.setDate(now.getDate() - i);
+    chartDataMap[dayNames[d.getDay()]] = 0;
+  }
+
+  invoices?.forEach(inv => {
+    const day = dayNames[new Date(inv.created_at).getDay()];
+    if (chartDataMap[day] !== undefined) {
+      chartDataMap[day] += Number(inv.total_amount);
+    }
+  });
+
+  // 4. 차트용 배열로 변환 (날짜 순서 유지)
+  const result = Object.entries(chartDataMap).map(([name, revenue]) => ({
+    name,
+    revenue
+  }));
+
+  return result;
+}

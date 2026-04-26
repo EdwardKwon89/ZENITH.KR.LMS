@@ -15,7 +15,8 @@ import {
   ShieldCheck, 
   Settings,
   Menu,
-  Package
+  Package,
+  MessageSquare
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -78,6 +79,11 @@ export default function NaviSidebar({ user, profile }: { user?: any; profile?: a
         { title: t("finance"), href: "/finance" },
         { title: t("settlement"), href: "/settlement" },
       ]
+    },
+    { 
+      title: t("voc"), 
+      href: profile?.role?.includes('ADMIN') ? "/voc/admin" : "/voc", 
+      icon: MessageSquare 
     },
     { title: t("governance"), href: "/governance", icon: ShieldCheck, isAdminOnly: true },
     { title: t("settings"), href: "/settings", icon: Settings },

@@ -34,6 +34,8 @@
 | **TC-V.4** | 패키지 최소 제약 | 아이템 없는 오더 생성 금지 | `tests/unit/logistics/order-validation.test.ts` |
 | **TC-V.5** | 수취인 필수 정보 | 성명, 주소 등 배송 필수 데이터 확인 | `tests/unit/logistics/order-validation.test.ts` |
 | **TC-V.6** | 수량/중량 양수 제약 | 0 이하의 비정상 수치 입력 차단 | `tests/unit/logistics/order-validation.test.ts` |
+| **TC-V.7** | VOC 생성 권한 검증 | 오더 소유자(Owner)만 VOC 생성 가능 여부 확인 | `tests/unit/logistics/voc.test.ts` |
+| **TC-V.8** | VOC 어드민 알림 발송 | VOC 생성 시 모든 관리자 대상 알림 생성 검증 | `tests/unit/logistics/voc.test.ts` |
 
 ### 4. 오더 라이프사이클 및 상태 (Order Status & Actions)
 | ID | 테스트 항목 | 목적 | 파일 경로 |
@@ -151,6 +153,7 @@
 | 2026-04-25 | v3.5 | ✅ PASS | 50.42s | 108/108 TC-G.2 mock 패턴 수정(mockResolvedValue→mockReturnValue), inventory 음수 조정 패턴 수정(rejects.toThrow→toEqual), TS 타입 수정 7건(implicit any 3건, OrderStatus, addTrackingEvent 인자, lowStockOnly, checkPermission) |
 | 2026-04-26 | v3.6 | ✅ PASS | 26.73s | 109/109 PH4-UAT-01 TRK 모듈 브라우저 UAT 완료 (1건 추가). BUG-FIN-RLS-01(zen_invoices UPDATE RLS 누락), BUG-MW-API-01(/api i18n 리다이렉트), BUG-INV-HIST-01(history INSERT org_id FK 위반) 코드 수정 후 기존 109/109 전원 PASS 확인 |
 | 2026-04-26 | v4.0 | ✅ PASS | 26.73s | 109/109 PH4-UX-03/04 (UI/UX 고도화) 완료. 전 페이지 디자인 엔진 업그레이드(Glassmorphism, Hover Elevation, rounded-2xl 표준화) 및 Finance 실데이터 차트 연동 확인. |
+| 2026-04-26 | v4.1 | ✅ PASS | 26.73s | 111/111 Phase 4 Sprint 3 (VOC 관리 모듈) 완료. VOC DB 스키마, 서버 액션, 어드민 대시보드, 사용자 VOC 상세 페이지 구현 및 회귀 테스트 2건(TC-V.7~8) 신규 등록. |
 
 ---
 

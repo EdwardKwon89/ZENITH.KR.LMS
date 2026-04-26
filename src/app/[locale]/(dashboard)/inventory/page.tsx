@@ -2,7 +2,7 @@ import { getInventoryList } from "@/app/actions/inventory";
 import { requireAuth } from "@/lib/auth/guards";
 import InventoryFilterBar from "@/components/inventory/InventoryFilterBar";
 import InventoryDataTable from "@/components/inventory/InventoryDataTable";
-import { Package, Truck, AlertCircle } from "lucide-react";
+import { Package, Truck, AlertCircle, Box } from "lucide-react";
 import { ZenCard } from "@/components/ui/ZenUI";
 
 export default async function InventoryPage({
@@ -44,9 +44,9 @@ export default async function InventoryPage({
         </div>
 
         <div className="flex gap-4">
-          <ZenCard className="p-4 flex items-center gap-4 border-slate-100 min-w-[180px]">
+          <ZenCard className="p-4 flex items-center gap-4 border-white/20 min-w-[180px] hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300">
             <div className="p-2 bg-emerald-50 text-emerald-600 rounded-xl">
-              <Truck size={20} />
+              <Package size={20} />
             </div>
             <div>
               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total SKU</p>
@@ -54,7 +54,7 @@ export default async function InventoryPage({
             </div>
           </ZenCard>
           
-          <ZenCard className="p-4 flex items-center gap-4 border-slate-100 min-w-[180px]">
+          <ZenCard className="p-4 flex items-center gap-4 border-white/20 min-w-[180px] hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300">
             <div className="p-2 bg-rose-50 text-rose-600 rounded-xl">
               <AlertCircle size={20} />
             </div>
