@@ -1,6 +1,6 @@
 # Ds-11 API 카탈로그 (Index)
 
-> **프로젝트:** ZENITH_LMS | **버전:** v1.13 | **최종 수정:** 2026-04-24
+> **프로젝트:** ZENITH_LMS | **버전:** v1.14 | **최종 수정:** 2026-04-26
 >
 > **구조:** 본 INDEX는 전체 API 목록 및 링크만 관리합니다. 파라미터·응답 상세는 각 DETAIL 파일을 참조하십시오.
 >
@@ -13,6 +13,9 @@
 > - [TRACKING](Ds_11_DETAIL_TRACKING.md) — 통합 트래킹
 > - [NOTIFICATION](Ds_11_DETAIL_NOTIFICATION.md) — 알림 관리
 > - [ROUTING](Ds_11_DETAIL_ROUTING.md) — 경로 최적화 및 시각화
+> - [VOC](Ds_11_DETAIL_VOC.md) — 고객 불만 관리 (Phase 4 Sprint 3)
+> - [SUPPORT](Ds_11_DETAIL_SUPPORT.md) — 고객지원 포털 QnA/FAQ/공지사항 (Phase 4 Sprint 4)
+> - [OPS_PARAMS](Ds_11_DETAIL_OPS_PARAMS.md) — 운영 파라미터 & Feature Flag (Phase 4 Sprint 5)
 
 ---
 
@@ -81,6 +84,25 @@
 | 13.3 | Routing | `calculateRouteCost` | Action | User/System | 단일 경로 세그먼트 비용 계산 | [ROUTING](Ds_11_DETAIL_ROUTING.md#133-calculateroutecost) |
 | 13.4 | Routing | `getRouteVisualization` | Action | User | 오더 적용 경로의 마일스톤 + 시각화 데이터 반환 | [ROUTING](Ds_11_DETAIL_ROUTING.md#134-getroutevisualization) |
 | 13.5 | Routing | `getRouteConsistencyStatus` | Action | Admin | 트래킹 실적 vs 라우팅 계획 정합성 점검 | [ROUTING](Ds_11_DETAIL_ROUTING.md#135-getrouteconsistencystatus) |
+| 14.1 | VOC | `createVoc` | Action | User | 오더별 고객 불만(VOC) 등록 + Admin 알림 | [VOC](Ds_11_DETAIL_VOC.md#141-createvoc-action) |
+| 14.2 | VOC | `getVocList` | Action | User/Admin | VOC 목록 조회 (RBAC: User=본인 org, Admin=전체) | [VOC](Ds_11_DETAIL_VOC.md#142-getvoclist-action) |
+| 14.3 | VOC | `getVocDetail` | Action | User/Admin | VOC 단건 상세 + 답변 이력 조회 | [VOC](Ds_11_DETAIL_VOC.md#143-getvocdetail-action) |
+| 14.4 | VOC | `answerVoc` | Action | Admin | VOC 답변 등록 + 상태 자동 전환 + 고객 알림 | [VOC](Ds_11_DETAIL_VOC.md#144-answervoc-action) |
+| 14.5 | VOC | `updateVocStatus` | Action | Admin | VOC 처리 상태 직접 변경 (OPEN→IN_PROGRESS→CLOSED) | [VOC](Ds_11_DETAIL_VOC.md#145-updatevocstatus-action) |
+| 15.1 | Support | `createQna` | Action | User | 1:1 문의 등록 (오더 연계 선택) | [SUPPORT](Ds_11_DETAIL_SUPPORT.md#151-createqna-action) |
+| 15.2 | Support | `getQnaList` | Action | User/Admin | 문의 목록 조회 | [SUPPORT](Ds_11_DETAIL_SUPPORT.md#152-getqnalist-action) |
+| 15.3 | Support | `getQnaDetail` | Action | User/Admin | 문의 단건 상세 + 답변 이력 | [SUPPORT](Ds_11_DETAIL_SUPPORT.md#153-getqnadetail-action) |
+| 15.4 | Support | `answerQna` | Action | Admin | 문의 답변 등록 + 상태 전환 + 고객 알림 | [SUPPORT](Ds_11_DETAIL_SUPPORT.md#154-answerqna-action) |
+| 15.5 | Support | `upsertFaq` | Action | Admin | FAQ 등록/수정 | [SUPPORT](Ds_11_DETAIL_SUPPORT.md#155-upsertfaq-action) |
+| 15.6 | Support | `getFaqList` | Action | User/Admin | FAQ 목록 조회 (User=활성만) | [SUPPORT](Ds_11_DETAIL_SUPPORT.md#156-getfaqlist-action) |
+| 15.7 | Support | `deleteFaq` | Action | Admin | FAQ 소프트 삭제 (is_active=false) | [SUPPORT](Ds_11_DETAIL_SUPPORT.md#157-deletefaq-action) |
+| 15.8 | Support | `upsertNotice` | Action | Admin | 공지사항 등록/수정 + 발행 처리 | [SUPPORT](Ds_11_DETAIL_SUPPORT.md#158-upsertnotice-action) |
+| 15.9 | Support | `getNoticeList` | Action | User/Admin | 공지사항 목록 (User=발행분만) | [SUPPORT](Ds_11_DETAIL_SUPPORT.md#159-getnoticelist-action) |
+| 16.1 | OpsParams | `getSystemParam` | Action | Admin | 시스템 파라미터 단건 조회 | [OPS_PARAMS](Ds_11_DETAIL_OPS_PARAMS.md#161-getsystemparam-action) |
+| 16.2 | OpsParams | `getParamsByCategory` | Action | System/Admin | 카테고리별 파라미터 일괄 조회 (캐시 대상) | [OPS_PARAMS](Ds_11_DETAIL_OPS_PARAMS.md#162-getparamsbycategory-action) |
+| 16.3 | OpsParams | `updateSystemParam` | Action | Admin | 파라미터 수정 + 감사 로그 + 캐시 무효화 | [OPS_PARAMS](Ds_11_DETAIL_OPS_PARAMS.md#163-updatesystemparam-action) |
+| 16.4 | OpsParams | `getFeatureFlags` | Action | Admin/User | Feature Flag 목록 조회 | [OPS_PARAMS](Ds_11_DETAIL_OPS_PARAMS.md#164-getfeatureflags-action) |
+| 16.5 | OpsParams | `updateFeatureFlag` | Action | Admin | Feature Flag 활성화/비활성화 (org별 또는 전역) | [OPS_PARAMS](Ds_11_DETAIL_OPS_PARAMS.md#165-updatefeatureflag-action) |
 
 ---
 
