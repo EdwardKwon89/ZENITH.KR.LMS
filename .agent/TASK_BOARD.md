@@ -112,8 +112,8 @@
 
 | Task ID | 담당 (Worker) | 검증 (Auditor) | Task 명 | 내용 | 상태 | 비고 |
 |:---|:---|:---|:---|:---|:---|:---|
-| PH4-TRK-01 | **Riley** | Aiden | TrackingDashboard Virtual Scroll 도입 | 렌더링 데이터 100건 초과 시 브라우저 메인 스레드 점유 방지. `tanstack/virtual` 또는 동등 라이브러리 도입. 현 페이지네이션 유지 혹은 가상 스크롤 전환 여부를 Aiden과 설계 협의 후 결정 | ⏸ 대기 | Riley UAT-04 검토의견 P2 → Ph4 이관 |
-| PH4-TEST-01 | **Riley** | Aiden | Playwright CI 전략 수립 및 Retry 로직 강화 | CI 환경의 Supabase 원격 DB 레이턴시로 인한 Flaky Test 방지. `waitForSelector` 타임아웃 정비 + 재시도 로직 추가. Mock 서버 vs 실 DB 운영 전략을 Aiden과 협의하여 결정 | ⏸ 대기 | Riley UAT-04 검토의견 P4 → Ph4 이관 |
+| PH4-TRK-01 | **Riley** | Aiden | TrackingDashboard 서버사이드 페이지네이션 전환 | **[설계 확정]** 가상 스크롤 기각 → 서버사이드 페이지네이션 채택. ① `getGlobalTrackingOverview(page, limit)` N+1 → 중첩 SELECT 최적화 ② react-table pagination 컨트롤 적용 (페이지당 20건) ③ 검색 필터 서버 쿼리 이관. 설계 근거: `.planning/DECISIONS.md #11` | 🔵 착수 가능 | Aiden 설계 확정 2026-04-26. 가상 스크롤 기각 (N+1 해결 불가) |
+| PH4-TEST-01 | **Riley** | Aiden | Playwright E2E 환경 구축 (MSW 모킹 기반) | **[설계 확정]** 실 DB 연결 기각 → MSW 모킹 기반 E2E 채택. ① `playwright.config.ts` 신규 (retries:2, timeout:30s, workers:1) ② `e2e/mocks/handlers.ts` Supabase REST 모킹 ③ auth/tracking/finance 시나리오 3종 spec 작성. 설계 근거: `.planning/DECISIONS.md #12` | 🔵 착수 가능 | Aiden 설계 확정 2026-04-26. Playwright devDep 추가 필요 |
 
 ---
 

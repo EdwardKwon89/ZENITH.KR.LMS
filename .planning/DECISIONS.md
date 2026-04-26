@@ -495,3 +495,92 @@ Check List 업데이트:
 
 *추가 의사결정을 이 곳에 기록하세요*
 
+---
+
+### 11. PH4-TRK-01 — TrackingDashboard 렌더링 전략: 서버사이드 페이지네이션 채택 (2026-04-26)
+
+**컨텍스트:**
+- `getGlobalTrackingOverview` 가 `limit` 없이 전건 조회하며, 건별로 `zen_tracking_events` 최신 이벤트를 별도 조회 (N+1 패턴).
+- `TrackingDashboard.tsx` 는 전체 데이터를 클라이언트 메모리에 올린 후 `filter()` 로 화면 내 검색.
+- 100건 초과 시 서버 N+1 왕복(100회+) 과 클라이언트 DOM 렌더링 부하가 동시 발생.
+- `@tanstack/react-virtual` 은 미설치 상태이며 `@tanstack/react-table` 은 기설치됨.
+
+**결정:**
+- **서버사이드 페이지네이션** 채택 (가상 스크롤 미도입).
+- `getGlobalTrackingOverview(page, limit)` 파라미터 추가 + `.range()` 기반 서버 페이지네이션.
+- N+1 쿼리 → Supabase `select()` 중첩 조인 또는 단일 RPC 쿼리로 대체.
+- 클라이언트 `filter()` → 검색어를 서버 쿼리 파라미터로 이관 (`.ilike()` 활용).
+- UI: `@tanstack/react-table` 의 내장 `pagination` 기능 사용 (페이지당 20건, 이전/다음 버튼).
+
+**기각된 대안:**
+- `@tanstack/react-virtual` (가상 스크롤): 클라이언트 DOM 최적화만 가능, 서버 N+1 해결 불가. 현재 데이터 규모에서 과도한 복잡성 추가.
+- 페이지네이션 없는 무한 스크롤: 전건 조회 유지 시 서버 부하 동일.
+
+**구현 지침 (Riley 전달):**
+1. `src/app/actions/tracking.ts` — `getGlobalTrackingOverview(page=1, limit=20)` 시그니처 변경, `.range((page-1)*limit, page*limit-1)` 적용, 이벤트 N+1 → `zen_tracking_events!order_id(*, order_by: event_time.desc, limit: 1)` 중첩 select로 최적화.
+2. `TrackingDashboard.tsx` — `page`, `searchQuery` 상태 추가, 상태 변경 시 서버 액션 재호출, react-table pagination 컨트롤 렌더링.
+3. 총 건수(`count`) 반환 필요 → `supabase.from(...).select('...', { count: 'exact', head: false })`.
+
+**영향범위:**
+- `src/app/actions/tracking.ts:getGlobalTrackingOverview`
+- `src/components/tracking/TrackingDashboard.tsx`
+
+**상태:** 설계 확정 (Riley 구현 대기)
+
+---
+
+### 12. PH4-TEST-01 — Playwright CI 전략: MSW 모킹 기반 E2E 채택 (2026-04-26)
+
+**컨텍스트:**
+- 현재 Playwright 미설치. 테스트 스택: Vitest + @testing-library (Unit + Integration).
+- Vitest Integration 테스트는 Supabase 클라이언트 Mock으로 환경 독립성 확보됨.
+- CI에서 Supabase 원격 DB 직접 연결 시 레이턴시 편차 → Flaky Test 위험.
+- 실 DB Playwright 운영 시: 테스트 간 데이터 오염, 격리 어려움, Supabase 과금.
+
+**결정:**
+- **MSW(Mock Service Worker) 기반 Playwright E2E** 채택 (실 DB 연결 안 함).
+- Playwright 는 UI 인터랙션 · 라우팅 · 폼 흐름 검증에 집중; 비즈니스 로직은 Vitest Integration 이 담당.
+- MSW 핸들러로 Supabase REST API 응답 모킹 → 결정론적(Deterministic) 테스트.
+- 초기 E2E 커버리지 3개 시나리오: ① 로그인 플로우, ② 오더 생성 → 트래킹 확인, ③ 인보이스 조회.
+
+**기각된 대안:**
+- 실 DB 연결 Playwright: Supabase 레이턴시·데이터 상태 의존으로 Flaky 위험 높음. CI 격리 비용 과다.
+- Cypress: 기존 Vitest 스택과 이원화, MSW 연동 복잡도 높음. Playwright 가 Next.js App Router 환경에서 우위.
+
+**CI 설정 표준 (`playwright.config.ts`):**
+```typescript
+export default defineConfig({
+  testDir: './e2e',
+  retries: process.env.CI ? 2 : 0,       // CI 환경 재시도 2회
+  timeout: 30_000,                         // 단일 테스트 30초 제한
+  workers: process.env.CI ? 1 : undefined, // CI 직렬 실행 (Flaky 최소화)
+  use: {
+    baseURL: 'http://localhost:3000',
+    actionTimeout: 10_000,
+  },
+});
+```
+
+**파일 구조 (Riley 구현 대상):**
+```
+e2e/
+  mocks/
+    handlers.ts      # MSW 핸들러 (Supabase REST 응답 모킹)
+    server.ts        # MSW 서버 인스턴스
+  auth.spec.ts       # 로그인 플로우
+  tracking.spec.ts   # 오더 → 트래킹 시나리오
+  finance.spec.ts    # 인보이스 조회 시나리오
+playwright.config.ts
+```
+
+**package.json 추가 의존성:**
+- `@playwright/test` (devDependencies)
+- `msw` (이미 Vitest Integration에서 사용 중인 경우 재활용, 미사용 시 신규 추가)
+
+**영향범위:**
+- `playwright.config.ts` (신규)
+- `e2e/` 디렉토리 (신규)
+- `.github/workflows/` CI 파이프라인 (Playwright 스텝 추가 시)
+
+**상태:** 설계 확정 (Riley 구현 대기)
+
