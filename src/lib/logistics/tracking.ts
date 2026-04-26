@@ -4,6 +4,7 @@ import {
   ManualTrackingProvider, 
   MockCarrierProvider 
 } from './tracking-adapters';
+import { getNumericParam } from '../params/service';
 
 export type TrackingEventCode = 'BOOKED' | 'PICKED_UP' | 'TERMINAL_IN' | 'DEPARTED' | 'IN_TRANSIT' | 'ARRIVED' | 'OUT_FOR_DELIVERY' | 'DELIVERED' | 'DELAYED' | 'EXCEPTION';
 
@@ -128,6 +129,33 @@ export class TrackingManager {
         // 3. 최신 이벤트 기준으로 오더 상태 동기화
         const latest = steps.sort((a, b) => b.event_time.getTime() - a.event_time.getTime())[0];
         await this.syncOrderStatus(supabase, orderId, latest.event_code);
+      }
+    }
+
+    // 4. 지연 판정 (Delay Detection)
+    if (steps.length > 0) {
+      const latest = steps.sort((a, b) => b.event_time.getTime() - a.event_time.getTime())[0];
+      
+      // 이미 배송 완료된 경우는 제외
+      if (latest.event_code !== 'DELIVERED') {
+        const threshold = await getNumericParam('TRACKING_DELAY_THRESHOLD_HOURS', 48);
+        const hoursSinceLastEvent = (Date.now() - latest.event_time.getTime()) / (1000 * 60 * 60);
+        
+        if (hoursSinceLastEvent > threshold) {
+          console.log(`[TRACKING_MANAGER] Order ${orderId} is delayed. Last event was ${hoursSinceLastEvent.toFixed(1)}h ago (Threshold: ${threshold}h)`);
+          
+          // 상태가 아직 HELD가 아니라면 업데이트
+          await this.syncOrderStatus(supabase, orderId, 'DELAYED');
+          
+          // 가상의 DELAYED 스텝 추가 (UI 노출용, DB 저장은 하지 않음 - 필요 시 추후 확장)
+          steps.unshift({
+            event_code: 'DELAYED',
+            event_time: new Date(),
+            location: latest.location,
+            description: `트래킹 업데이트가 ${threshold}시간 이상 지체되었습니다. 물류 센터 확인이 필요합니다.`,
+            source: 'SYSTEM'
+          });
+        }
       }
     }
 

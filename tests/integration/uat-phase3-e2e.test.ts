@@ -26,7 +26,7 @@ vi.mock('@/lib/auth/guards', () => ({
   checkPermission: vi.fn(),
 }));
 
-vi.mock('next/cache', () => ({
+vi.mock('next/cache', () => ({ unstable_cache: (fn: any) => fn,
   revalidatePath: vi.fn(),
 }));
 
@@ -81,6 +81,8 @@ describe('ZENITH Phase 3 UAT: E2E + Routing Integrated Validation', () => {
         resolve(mockResultQueue.shift() || { data: null, error: null, count: 0 });
       }
     };
+    (global as any).mockSupabase = mockSupabase;
+
 
     (validateUserAction as any).mockResolvedValue({
       user: mockShipperUser,
@@ -93,6 +95,9 @@ describe('ZENITH Phase 3 UAT: E2E + Routing Integrated Validation', () => {
       profile: mockAdminProfile,
       supabase: mockSupabase
     });
+
+    // global에 mockSupabase 주입하여 service.ts에서 참조 가능하게 함
+    (global as any).mockSupabase = mockSupabase;
   });
 
   it('TC-UAT-E2E.1: 완전 물류 사이클 (오더 → 경로 → 트래킹 → 정산 → 세금계산서)', async () => {
@@ -101,6 +106,8 @@ describe('ZENITH Phase 3 UAT: E2E + Routing Integrated Validation', () => {
     // Step 3: Shipper calculates route -> selects BALANCED. (ROU.1, ROU.2)
     mockResultQueue.push(
       { data: { origin_port_id: 'port-1', dest_port_id: 'port-2' }, error: null }, // order single
+      { data: { key: 'ROUTING_WEIGHT_ALPHA', value_numeric: 0.6 }, error: null }, // getParam ALPHA
+      { data: { key: 'ROUTING_WEIGHT_BETA', value_numeric: 0.4 }, error: null },  // getParam BETA
       { error: null }, // upsert COST
       { error: null }, // upsert TIME
       { error: null }, // upsert BALANCED
@@ -165,6 +172,8 @@ describe('ZENITH Phase 3 UAT: E2E + Routing Integrated Validation', () => {
     //  3) tax_invoices select single  4) tax_invoices update
     mockResultQueue.push(
       { data: { id: 'invoice-1', total_amount: 1000, currency: 'USD', shipper_id: 'sh-1', shipper: { name: 'A', address: 'Seoul', business_number: '111', email: 'shipper@test.com' }, costs: [] }, error: null },
+      { data: { value_numeric: 0.1 }, error: null }, // getParam('VAT_RATE')
+      { data: { value_numeric: 1350 }, error: null }, // getParam('EXCHANGE_RATE_USD_KRW')
       { data: { id: 'tax-inv-uuid-1', tax_invoice_no: 'TX-20260424-0001' }, error: null },
     );
     const taxRes = await issueTaxInvoice('invoice-1');

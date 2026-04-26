@@ -7,7 +7,7 @@ vi.mock('@/lib/auth/guards', () => ({
   validateUserAction: vi.fn(),
 }));
 
-vi.mock('next/cache', () => ({
+vi.mock('next/cache', () => ({ unstable_cache: (fn: any) => fn,
   revalidatePath: vi.fn(),
 }));
 

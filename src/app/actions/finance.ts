@@ -3,6 +3,7 @@
 import { SettlementEngine, InvoiceGenerator } from '@/lib/finance/settlement';
 import { revalidatePath } from 'next/cache';
 import { validateUserAction, validateAdminAction } from '@/lib/auth/guards';
+import { getNumericParam } from "@/lib/params/service";
 import { generateInvoicePdfBuffer } from '@/lib/finance/pdf';
 import { Resend } from 'resend';
 
@@ -292,6 +293,8 @@ export async function issueTaxInvoice(invoiceId: string) {
 
   // 2. 세금계산서 데이터 구성
   const taxInvoiceNo = `TX-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${Math.floor(1000 + Math.random() * 9000)}`;
+  const vatRate = await getNumericParam('VAT_RATE', 0.1);
+  const exchangeRate = invoice.applied_exchange_rate || await getNumericParam('EXCHANGE_RATE_USD_KRW', 1350);
   
   const supplierInfo = {
     business_number: "123-45-67890", // 시스템 설정에서 가져와야 함 (Mock)
@@ -310,7 +313,6 @@ export async function issueTaxInvoice(invoiceId: string) {
     business_type: 'N/A',
     business_item: 'N/A'
   };
-
   const items = (invoice.costs || []).map((c: any) => ({
     date: new Date().toISOString().slice(5, 10).replace('-', '/'),
     item_name: c.cost_type,
@@ -318,7 +320,7 @@ export async function issueTaxInvoice(invoiceId: string) {
     quantity: Number(c.quantity),
     unit_price: Number(c.unit_price),
     supply_amount: Number(c.total_amount),
-    tax_amount: Number(c.total_amount) * 0.1, // 부가세 10% 가정
+    tax_amount: Number(c.total_amount) * vatRate,
     remarks: ''
   }));
 
@@ -337,8 +339,16 @@ export async function issueTaxInvoice(invoiceId: string) {
       items: items,
       total_amount: supplyTotal + vatTotal,
       vat_amount: vatTotal,
+      applied_exchange_rate: exchangeRate,
       recipient_email: invoice.shipper?.email || 'test@example.com',
-      issued_by: profile.id
+      issued_by: profile.id,
+      metadata: {
+        ...invoice.metadata,
+        snapshot: {
+          applied_exchange_rate: exchangeRate,
+          vat_rate: vatRate
+        }
+      }
     })
     .select()
     .single();

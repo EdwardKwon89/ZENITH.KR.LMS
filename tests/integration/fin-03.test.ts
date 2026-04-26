@@ -12,7 +12,7 @@ vi.mock('@/lib/auth/guards', () => ({
 }));
 
 // Mock next/cache
-vi.mock('next/cache', () => ({
+vi.mock('next/cache', () => ({ unstable_cache: (fn: any) => fn,
   revalidatePath: vi.fn(),
 }));
 
@@ -60,6 +60,7 @@ describe('FIN-03 Tax Invoice Regression Tests', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     activeMockSupabase = createMockSupabase();
+    (global as any).mockSupabase = activeMockSupabase;
   });
 
   describe('TC-F.7: issueTaxInvoice', () => {
@@ -74,6 +75,14 @@ describe('FIN-03 Tax Invoice Regression Tests', () => {
           shipper: { business_number: '111-22-33333', name: 'Shipper Co', address: 'Seoul' },
           costs: [{ cost_type: 'Freight', quantity: 1, unit_price: 100000 }]
         },
+        error: null
+      });
+      activeMockSupabase.single.mockResolvedValueOnce({
+        data: { value_numeric: 0.1 },
+        error: null
+      });
+      activeMockSupabase.single.mockResolvedValueOnce({
+        data: { value_numeric: 1350 },
         error: null
       });
       activeMockSupabase.single.mockResolvedValueOnce({

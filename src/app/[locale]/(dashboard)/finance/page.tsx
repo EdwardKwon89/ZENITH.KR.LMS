@@ -77,7 +77,7 @@ export default async function FinanceDashboardPage() {
             <TrendingUp size={24} />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Finance Dashboard</h1>
+            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">재무 현황</h1>
             <p className="text-slate-500 text-sm font-medium">Real-time revenue & expense tracking</p>
           </div>
         </div>

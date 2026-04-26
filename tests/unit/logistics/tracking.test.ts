@@ -90,5 +90,55 @@ describe('TrackingManager', () => {
     expect(mockSupabase.from).toHaveBeenCalledWith('zen_orders');
     expect(mockSupabase.update).toHaveBeenCalledWith({ status: 'DELIVERED' });
   });
+
+  it('TC-OPS-04: [Success] should detect delay when last event is older than threshold', async () => {
+    const orderId = 'delay-order-id';
+    const oldTime = new Date(Date.now() - 50 * 60 * 60 * 1000); // 50 hours ago (> 48h)
+
+    // 1. Mock Config & Param
+    mockSupabase.single.mockImplementation(async () => {
+      // getTrackingData: zen_tracking_configs
+      // getNumericParam: zen_system_params
+      const lastFrom = mockSupabase.from.mock.calls[mockSupabase.from.mock.calls.length - 1][0];
+      if (lastFrom === 'zen_tracking_configs') {
+        return { data: { id: 'cfg-1', order_id: orderId, provider_type: 'API', tracking_no: 'TRK-DELAY' }, error: null };
+      }
+      if (lastFrom === 'zen_system_params') {
+        return { data: { key: 'TRACKING_DELAY_THRESHOLD_HOURS', value_numeric: 48 }, error: null };
+      }
+      return { data: null, error: null };
+    });
+
+    // 2. Mock Existing Events
+    mockSupabase.eq.mockReturnValue(mockSupabase);
+    mockSupabase.select.mockImplementation(() => {
+      const lastFrom = mockSupabase.from.mock.calls[mockSupabase.from.mock.calls.length - 1][0];
+      if (lastFrom === 'zen_tracking_events') {
+        return {
+          eq: vi.fn().mockResolvedValue({ 
+            data: [{ event_code: 'DEPARTED', event_time: oldTime.toISOString() }] 
+          })
+        };
+      }
+      return mockSupabase;
+    });
+
+    // 3. Provider returns same old event (no new updates)
+    const mockProvider: ITrackingProvider = {
+      name: 'Mock',
+      track: vi.fn().mockResolvedValue([{ event_code: 'DEPARTED', event_time: oldTime, location: 'Loc1', description: 'Desc1', source: 'Mock' }])
+    };
+    (trackingManager as any).providers.set('API', mockProvider);
+
+    // 4. Set mockSupabase to global for getNumericParam
+    (global as any).mockSupabase = mockSupabase;
+
+    // Act
+    const steps = await trackingManager.getTrackingData(mockSupabase, orderId);
+
+    // Assert
+    expect(steps[0].event_code).toBe('DELAYED');
+    expect(mockSupabase.update).toHaveBeenCalledWith({ status: 'HELD' });
+  });
 });
 

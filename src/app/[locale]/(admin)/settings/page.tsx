@@ -1,12 +1,10 @@
 'use client';
 
 import { useEffect, useState, use } from 'react';
-import { createClient } from '@/utils/supabase/client';
 import { ZenCard, ZenButton } from '@/components/ui/ZenUI';
 import { 
   Settings, 
   Shield, 
-  Clock, 
   Globe, 
   Save, 
   RotateCcw, 
@@ -14,101 +12,114 @@ import {
   Terminal,
   Info,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  Hash,
+  FileJson,
+  Type,
+  Zap
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { updateSystemParam } from '@/app/actions/master';
+import { createClient } from '@/utils/supabase/client';
 
-interface SystemSetting {
+interface SystemParam {
+  id: string;
   key: string;
-  value: string;
   category: string;
-  label: string;
+  value_text: string | null;
+  value_numeric: number | null;
+  value_jsonb: any | null;
   description: string;
   updated_at: string;
 }
 
 export default function AdminSettingsPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = use(params);
-  const [settings, setSettings] = useState<SystemSetting[]>([]);
+  const [paramsList, setParamsList] = useState<SystemParam[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<string | null>(null);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   
   const supabase = createClient();
 
-  // 1. 설정값 로드
-  const fetchSettings = async () => {
+  const fetchParams = async () => {
     setLoading(true);
     const { data, error } = await supabase
-      .from('system_settings')
+      .from('zen_system_params')
       .select('*')
-      .order('category', { ascending: true });
+      .order('category', { ascending: true })
+      .order('key', { ascending: true });
     
-    if (data) setSettings(data);
+    if (data) setParamsList(data);
     if (error) showToast('설정을 불러오는 중 오류가 발생했습니다.', 'error');
     setLoading(false);
   };
 
   useEffect(() => {
-    fetchSettings();
+    fetchParams();
   }, []);
 
-  // 2. 개별 설정값 변경 핸들러
-  const handleValueChange = (key: string, newValue: string) => {
-    setSettings(prev => prev.map(s => s.key === key ? { ...s, value: newValue } : s));
+  const handleValueChange = (key: string, field: 'value_text' | 'value_numeric' | 'value_jsonb', value: any) => {
+    setParamsList(prev => prev.map(p => {
+      if (p.key === key) {
+        return { ...p, [field]: value };
+      }
+      return p;
+    }));
   };
 
-  // 3. 단일 설정값 저장
   const handleSave = async (key: string) => {
-    const setting = settings.find(s => s.key === key);
-    if (!setting) return;
+    const param = paramsList.find(p => p.key === key);
+    if (!param) return;
 
     setSaving(key);
-    const { error } = await supabase
-      .from('system_settings')
-      .update({ value: setting.value, updated_at: new Date().toISOString() })
-      .eq('key', key);
-
-    if (error) {
-      showToast(`${setting.label} 저장 실패: ${error.message}`, 'error');
-    } else {
-      showToast(`${setting.label} 정책이 즉시 반영되었습니다.`, 'success');
+    try {
+      const payload = {
+        value_text: param.value_text,
+        value_numeric: param.value_numeric,
+        value_jsonb: param.value_jsonb,
+        description: param.description
+      };
+      
+      await updateSystemParam(key, payload);
+      showToast(`${param.key} 정책이 성공적으로 업데이트되었습니다.`, 'success');
+    } catch (error: any) {
+      showToast(`저장 실패: ${error.message}`, 'error');
     }
     setSaving(null);
   };
 
-  // 4. 토스트 알림
   const showToast = (message: string, type: 'success' | 'error') => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3000);
   };
 
-  const categories = Array.from(new Set(settings.map(s => s.category)));
+  const categories = Array.from(new Set(paramsList.map(p => p.category)));
 
   return (
     <div className="min-h-screen bg-[#0A0A0B] p-8 space-y-12">
       {/* Premium Header */}
-      <header className="max-w-5xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+      <header className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div className="space-y-2">
           <div className="flex items-center gap-2 text-blue-500 font-bold tracking-widest text-[10px] uppercase">
-            <Terminal className="w-3.5 h-3.5" />
-            System Governance Controller
+            <Zap className="w-3.5 h-3.5 animate-pulse" />
+            Core Governance Controller
           </div>
           <h1 className="text-4xl font-black text-white tracking-tight flex items-center gap-4">
-            플랫폼 운영 설정
-            <span className="text-[10px] bg-white/10 text-white/40 px-3 py-1 rounded-full border border-white/5 font-mono uppercase">
-              v2.1 Premium Logic
+            시스템 파라미터 제어
+            <span className="text-[10px] bg-blue-500/10 text-blue-400 px-3 py-1 rounded-full border border-blue-500/20 font-mono uppercase">
+              OPS_v4_STABLE
             </span>
           </h1>
           <p className="text-white/40 max-w-xl text-sm leading-relaxed">
-            ZENITH LMS의 핵심 보안 정책 및 환경 변수를 실시간으로 제어합니다. <br/>
-            변경 사항은 전체 시스템 엔드포인트에 즉각적으로 집행됩니다.
+            재무 요율, 부피 계수, 라우팅 가중치 등 ZENITH LMS의 핵심 비즈니스 로직 상수를 관리합니다.<br/>
+            수정된 값은 캐시 무효화 기술을 통해 전 시스템에 실시간 반영됩니다.
           </p>
         </div>
         
         <div className="flex items-center gap-4">
           <button 
-            onClick={fetchSettings}
+            onClick={fetchParams}
             className="p-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl text-white/40 hover:text-white transition-all group"
           >
             <RotateCcw className="w-5 h-5 group-active:rotate-180 transition-transform duration-500" />
@@ -117,57 +128,115 @@ export default function AdminSettingsPage({ params }: { params: Promise<{ locale
       </header>
 
       {/* Settings Grid */}
-      <main className="max-w-5xl mx-auto space-y-10">
+      <main className="max-w-6xl mx-auto space-y-12">
         {loading ? (
           <div className="h-[40vh] flex flex-col items-center justify-center gap-4">
             <div className="w-10 h-10 border-2 border-blue-500/20 border-t-blue-500 rounded-full animate-spin" />
-            <p className="text-white/20 font-mono text-[10px] tracking-widest uppercase">FETCHING_GOVERNANCE_DATA...</p>
+            <p className="text-white/20 font-mono text-[10px] tracking-widest uppercase italic">SYNCHRONIZING_SYSTEM_CORE...</p>
           </div>
         ) : (
           categories.map(category => (
-            <section key={category} className="space-y-5">
-              <div className="flex items-center gap-3 px-2">
-                <div className="h-4 w-1 bg-blue-500 rounded-full" />
-                <h2 className="text-lg font-bold text-white/80 tracking-tight flex items-center gap-2">
-                  {category === 'AUTH' && <Shield className="w-4 h-4 text-blue-500" />}
-                  {category === 'UI' && <Globe className="w-4 h-4 text-blue-500" />}
-                  {category === 'GENERAL' && <Settings className="w-4 h-4 text-blue-500" />}
-                  {category} POLICIES
-                </h2>
+            <section key={category} className="space-y-6">
+              <div className="flex items-center justify-between px-2">
+                <div className="flex items-center gap-3">
+                  <div className="h-5 w-1.5 bg-blue-500 rounded-full shadow-[0_0_10px_rgba(59,130,246,0.5)]" />
+                  <h2 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
+                    {category} PARAMETERS
+                  </h2>
+                </div>
+                <span className="text-[10px] font-mono text-white/10 italic">#CATEGORY_{category}</span>
               </div>
 
-              <div className="grid gap-4">
-                {settings.filter(s => s.category === category).map(setting => (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                {paramsList.filter(p => p.category === category).map(param => (
                   <ZenCard 
-                    key={setting.key}
-                    className="bg-[#111112] border-white/5 hover:border-white/10 transition-all duration-300 p-6 flex flex-col md:flex-row items-start md:items-center gap-6"
+                    key={param.key}
+                    className="bg-[#111112] border-white/5 hover:border-white/10 hover:bg-[#141415] transition-all duration-300 p-6 flex flex-col gap-5 relative overflow-hidden group"
                   >
-                    <div className="flex-1 space-y-1">
-                      <div className="flex items-center gap-2">
-                        <label className="text-sm font-bold text-white tracking-tight">{setting.label}</label>
-                        <span className="text-[10px] font-mono text-white/20">{setting.key}</span>
+                    <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                       <Activity className="w-4 h-4 text-white/5" />
+                    </div>
+
+                    <div className="flex-1 space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <label className="text-[15px] font-bold text-white tracking-tight">{param.key}</label>
+                        </div>
+                        <span className="text-[10px] font-mono bg-white/5 px-2 py-0.5 rounded text-white/30 border border-white/5">
+                          {param.category}
+                        </span>
                       </div>
-                      <p className="text-xs text-white/40 flex items-center gap-1.5">
-                        <Info className="w-3 h-3 text-blue-500/50" />
-                        {setting.description}
+                      <p className="text-xs text-white/40 leading-relaxed min-h-[32px]">
+                        {param.description}
                       </p>
                     </div>
 
-                    <div className="w-full md:w-[320px] flex items-center gap-3">
-                      <input 
-                        type="text"
-                        value={setting.value}
-                        onChange={(e) => handleValueChange(setting.key, e.target.value)}
-                        className="flex-1 bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white font-mono focus:outline-none focus:border-blue-500/50 transition-colors"
-                        disabled={saving === setting.key}
-                      />
-                      <ZenButton 
-                        onClick={() => handleSave(setting.key)}
-                        loading={saving === setting.key}
-                        className="bg-blue-600/10 hover:bg-blue-600 text-blue-400 hover:text-white border border-blue-500/20 h-10 px-4 rounded-xl transition-all"
-                      >
-                        <Save className="w-4 h-4" />
-                      </ZenButton>
+                    <div className="flex flex-col gap-3">
+                      <div className="flex items-center gap-2">
+                        {param.value_numeric !== null ? (
+                          <div className="flex-1 relative">
+                            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-500/50">
+                              <Hash className="w-3.5 h-3.5" />
+                            </div>
+                            <input 
+                              type="number"
+                              step="any"
+                              value={param.value_numeric ?? ''}
+                              onChange={(e) => handleValueChange(param.key, 'value_numeric', parseFloat(e.target.value))}
+                              className="w-full bg-black/40 border border-white/10 rounded-xl pl-9 pr-4 py-2.5 text-sm text-blue-400 font-mono focus:outline-none focus:border-blue-500/50 transition-colors"
+                              placeholder="Numeric Value"
+                            />
+                          </div>
+                        ) : param.value_jsonb !== null ? (
+                          <div className="flex-1 relative">
+                             <div className="absolute left-3 top-1/2 -translate-y-1/2 text-purple-500/50">
+                              <FileJson className="w-3.5 h-3.5" />
+                            </div>
+                            <textarea 
+                              value={typeof param.value_jsonb === 'string' ? param.value_jsonb : JSON.stringify(param.value_jsonb, null, 2)}
+                              onChange={(e) => {
+                                try {
+                                  handleValueChange(param.key, 'value_jsonb', JSON.parse(e.target.value));
+                                } catch (err) {
+                                  handleValueChange(param.key, 'value_jsonb', e.target.value);
+                                }
+                              }}
+                              className="w-full bg-black/40 border border-white/10 rounded-xl pl-9 pr-4 py-2.5 text-xs text-purple-400 font-mono focus:outline-none focus:border-purple-500/50 transition-colors min-h-[80px]"
+                              placeholder="JSON Config"
+                            />
+                          </div>
+                        ) : (
+                          <div className="flex-1 relative">
+                            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-emerald-500/50">
+                              <Type className="w-3.5 h-3.5" />
+                            </div>
+                            <input 
+                              type="text"
+                              value={param.value_text ?? ''}
+                              onChange={(e) => handleValueChange(param.key, 'value_text', e.target.value)}
+                              className="w-full bg-black/40 border border-white/10 rounded-xl pl-9 pr-4 py-2.5 text-sm text-emerald-400 font-mono focus:outline-none focus:border-emerald-500/50 transition-colors"
+                              placeholder="Text Value"
+                            />
+                          </div>
+                        )}
+
+                        <ZenButton 
+                          onClick={() => handleSave(param.key)}
+                          loading={saving === param.key}
+                          className="bg-blue-600/10 hover:bg-blue-600 text-blue-400 hover:text-white border border-blue-500/20 h-[42px] px-5 rounded-xl transition-all flex items-center gap-2 group"
+                        >
+                          <Save className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                          <span className="text-xs font-bold uppercase tracking-tighter">Apply</span>
+                        </ZenButton>
+                      </div>
+                      
+                      <div className="flex items-center justify-between text-[10px] font-mono text-white/10 px-1">
+                        <span className="flex items-center gap-1">
+                          <Info className="w-2.5 h-2.5" />
+                          Last Update: {new Date(param.updated_at).toLocaleString()}
+                        </span>
+                        <span className="group-hover:text-blue-500/30 transition-colors uppercase">Real-time Hook Active</span>
+                      </div>
                     </div>
                   </ZenCard>
                 ))}
@@ -180,7 +249,7 @@ export default function AdminSettingsPage({ params }: { params: Promise<{ locale
       {/* Global Toast Notification */}
       {toast && (
         <div className={cn(
-          "fixed bottom-10 right-10 z-50 flex items-center gap-3 px-6 py-4 rounded-2xl border shadow-2xl animate-in slide-in-from-bottom-5 duration-300",
+          "fixed bottom-10 right-10 z-50 flex items-center gap-3 px-6 py-4 rounded-2xl border shadow-2xl animate-in slide-in-from-bottom-5 duration-300 backdrop-blur-xl",
           toast.type === 'success' ? "bg-blue-500/10 border-blue-500/20 text-blue-400" : "bg-red-500/10 border-red-500/20 text-red-400"
         )}>
           {toast.type === 'success' ? <CheckCircle2 className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
@@ -189,15 +258,15 @@ export default function AdminSettingsPage({ params }: { params: Promise<{ locale
       )}
 
       {/* Footer / Status */}
-      <footer className="max-w-5xl mx-auto pt-10 border-t border-white/5 flex justify-between items-center opacity-20">
+      <footer className="max-w-6xl mx-auto pt-10 border-t border-white/5 flex justify-between items-center opacity-20">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2 text-[10px] font-mono text-white tracking-tighter">
             <Activity className="w-3 h-3 text-emerald-500" />
-            LIVE_GOVERNANCE_SYSTEM
+            NODE_PARAMS_ACTIVE
           </div>
         </div>
         <p className="text-[10px] font-mono text-white tracking-tighter uppercase">
-          Secret_Key_Validated: {locale.toUpperCase()}
+          Governance_Locale: {locale.toUpperCase()} | Secure_Handoff_Ready
         </p>
       </footer>
     </div>
