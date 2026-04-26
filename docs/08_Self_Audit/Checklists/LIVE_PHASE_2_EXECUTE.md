@@ -23,6 +23,8 @@
 - [x] **Complex Grid UI**: 3개 이상의 입력 필드가 결합된 그리드 UI에 고정 헤더와 명확한 단위 레이블(kg, EA, $, CBM 등)이 포함되었는가? (SAR-2026-04-21-007)
 - [x] **Dynamic UI Guard**: 운송 모드(AIR/SEA) 변경 시 하위 항구 노드 리스트가 필터링되고, 기 선택값이 자동으로 초기화(Reset)되는가? (Data Integrity)
 - [x] **Real-time Reactive watch**: `useMemo`나 `useEffect` 내에서 참조하는 모든 폼 필드가 `watch`를 통해 리액티브하게 관리되고 있는가? (ReferenceError 방지)
+- [x] **UI 표준화 (PH4-UX-03)**: 모든 신규/수정 페이지의 보더 반경이 `rounded-2xl`로 통일되었으며, 이모지가 Lucide 아이콘으로 교체되었는가? (Standardization)
+- [x] **디자인 엔진 고도화 (PH4-UX-04)**: 통계 카드 및 주요 컨테이너에 `zen-glass` 및 Hover Elevation(`hover:shadow-xl hover:-translate-y-0.5`)이 적용되었는가? (Fancy UI)
 
 ## 🔴 보안 및 권한 (Security & Permission)
 - [x] **ADMIN 가드**: 마스터 데이터 엔드포인트에 `requireAdmin` 보호가 적용되었는가?
