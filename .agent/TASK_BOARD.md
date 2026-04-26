@@ -126,8 +126,8 @@
 
 | Task ID | 담당 (Worker) | 검증 (Auditor) | Task 명 | 내용 | 상태 | 비고 |
 |:---|:---|:---|:---|:---|:---|:---|
-| PH4-UX-03 | **Riley** | Aiden | P1 디자인 시스템 통일화 | WBS 4.8.2.1~4.8.2.5 — ① 헤딩 패턴 표준화(6페이지 text-2xl font-bold) ② brand-* 토큰 치환 ③ 보더 반경 임의값 제거 ④ Finance 다크모드 클래스 삭제 ⑤ Settlement 이모지→Lucide 아이콘 (3 MD) | ⏸ 대기 | Handoff 지시 참조 |
-| PH4-UX-04 | **Riley** | Aiden | P2 Proposal 5 Fancy 완성도 | WBS 4.8.3.1~4.8.3.4 — ① 통계 카드 Glassmorphism ② Hover Elevation 통일 ③ Finance Monthly Trend recharts 교체 ④ AnimatePresence 확장 (3 MD) | ⏸ 대기 | PH4-UX-03 완료 후 |
+| PH4-UX-03 | **Riley** | Aiden | P1 디자인 시스템 통일화 | WBS 4.8.2.1~4.8.2.5 — ① 헤딩 패턴 표준화(6페이지 text-2xl font-bold) ② brand-* 토큰 치환 ③ 보더 반경 임의값 제거 ④ Finance 다크모드 클래스 삭제 ⑤ Settlement 이모지→Lucide 아이콘 (3 MD) | ✅ 완료 | 2026-04-26 완료, 전 페이지 표준화 적용 |
+| PH4-UX-04 | **Riley** | Aiden | P2 Proposal 5 Fancy 완성도 | WBS 4.8.3.1~4.8.3.4 — ① 통계 카드 Glassmorphism ② Hover Elevation 통일 ③ Finance Monthly Trend recharts 교체 ④ AnimatePresence 확장 (3 MD) | ✅ 완료 | 2026-04-26 완료, Glassmorphism & 실데이터 차트 연동 |
 
 ---
 

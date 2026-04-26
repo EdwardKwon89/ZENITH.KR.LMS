@@ -95,17 +95,17 @@ export default function TrackingDashboard() {
               variants={statCardVariants}
               initial="hidden"
               animate="visible"
-              className="bg-white p-6 rounded-2xl border border-slate-100 zen-shadow-sm"
+              className="zen-glass p-6 rounded-2xl border border-white/20 shadow-sm hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300"
             >
-              <p className="text-sm font-medium text-slate-500 mb-1">{stat.label}</p>
-              <p className={cn("text-3xl font-bold", stat.color)}>{stat.value}</p>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{stat.label}</p>
+              <p className={cn("text-3xl font-black", stat.color)}>{stat.value}</p>
             </motion.div>
           ))
         )}
       </div>
 
       {/* Toolbar */}
-      <div className="flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between bg-white p-4 rounded-2xl border border-slate-100">
+      <div className="flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between bg-white/60 backdrop-blur-md p-4 rounded-2xl border border-white/20 shadow-sm">
         <div className="relative w-full md:w-96">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
           <input
@@ -136,7 +136,7 @@ export default function TrackingDashboard() {
       </div>
 
       {/* Table */}
-      <div className="relative bg-white rounded-2xl border border-slate-100 overflow-hidden zen-shadow-md">
+      <div className="relative zen-glass rounded-2xl border border-white/20 overflow-hidden shadow-xl">
         {/* Syncing overlay */}
         <AnimatePresence>
           {syncing && (
