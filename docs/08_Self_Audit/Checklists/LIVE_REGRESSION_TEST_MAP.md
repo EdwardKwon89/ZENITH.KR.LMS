@@ -1,8 +1,8 @@
 # 🗺️ LIVE Regression Test Master Map
 
 > **상태:** [ACTIVE]  
-> **총 테스트 케이스:** 115 Cases (PH4-OPS-04 4건 추가 포함 전원 활성)  
-> **최종 검증일:** 2026-04-26  
+> **총 테스트 케이스:** 124 Cases (PH4-WAL-05 9건 추가 포함 전원 활성)  
+> **최종 검증일:** 2026-04-27  
 
 제니스 플랫폼의 비즈니스 영속성을 보장하는 회귀 테스트 케이스의 통합 명세서입니다. 모든 신규 개발 및 수정 시 이 맵에 케이스가 추가되어야 하며, 전체 테스트가 통과되어야 합니다.
 
@@ -161,16 +161,25 @@
 | **TC-OPS-03** | NULL 값 안전 처리 | DB 값이 NULL일 경우 예외 없이 기본값으로 대체 확인 | `tests/unit/params/service.test.ts` |
 | **TC-OPS-04** | 트래킹 지연 자동 감지 | 마지막 이벤트 48시간 초과 시 자동으로 `DELAYED` 스텝 추가 및 오더 `HELD` 상태 전환 | `tests/unit/logistics/tracking.test.ts` |
 
+### 14. 선불 지갑 연동 (Wallet Integration)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-WAL.1** | 지갑 자동 생성 (Lazy Init) | 신규 화주의 첫 지갑 접근 시 레코드 자동 생성 보장 | `tests/unit/finance/wallet.test.ts` |
+| **TC-WAL.2** | 지갑 결제 무결성 | 인보이스 금액만큼 지갑 잔액 차단 및 상태 전이 확인 | `tests/unit/finance/wallet.test.ts` |
+| **TC-WAL.3** | 잔액 부족 결제 차단 | 잔액보다 큰 금액 결제 시도 시 트랜잭션 롤백 및 오류 반환 | `tests/unit/finance/wallet.test.ts` |
+| **TC-WAL.4** | 중복 결제 방지 가드 | 이미 `PAID` 상태인 인보이스에 대한 재결제 시도 차단 | `tests/unit/finance/wallet.test.ts` |
+
 ---
 
 ## 📊 최신 검증 이력 (Execution History)
 
 | 검증일 | 버전 | 성공/실패 | 총 소요시간 | 결과 리포트 |
 | :--- | :--- | :---: | :--- | :--- |
-| 2026-04-26 | v4.2 | ✅ PASS | 28.50s | 115/115 Phase 4 Sprint 4 (OPS 고도화) 완료. 시스템 파라미터 캐싱, 피처 플래그, 트래킹 지연 감지 로직 구현 및 회귀 테스트 4건(TC-OPS-01~04) 신규 등록. |
+| 2026-04-27 | v5.0 | ✅ PASS | 29.10s | 124/124 Phase 4 Sprint 5 (선불 지갑) 완료. 지갑 연동, 충전/결제 액션, 마이페이지 대시보드 구현 및 회귀 테스트 9건(Wallet 관련 9개 TC) 신규 등록. |
 
 ---
 
 ## 📝 가이드라인 (R-09 Enforcement)
 1. **추가 의무**: 신규 기능 개발 시 위 카테고리에 맞는 테스트를 반드시 추가하십시오.
 2. **실행 의무**: 모든 커밋 전 `npm run test:regression`을 실행하여 위 명세 전원이 초록색인지 확인하십시오.
+

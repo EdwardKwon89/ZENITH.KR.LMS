@@ -16,7 +16,8 @@ import {
   Settings,
   Menu,
   Package,
-  MessageSquare
+  MessageSquare,
+  UserCircle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -86,6 +87,7 @@ export default function NaviSidebar({ user, profile }: { user?: any; profile?: a
       icon: MessageSquare 
     },
     { title: t("governance"), href: "/governance", icon: ShieldCheck, isAdminOnly: true },
+    { title: t("mypage"), href: "/mypage", icon: UserCircle },
     { title: t("settings"), href: "/settings", icon: Settings },
   ];
 

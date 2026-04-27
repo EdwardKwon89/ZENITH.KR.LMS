@@ -38,7 +38,8 @@
     "settlement": "Settlement",
     "voc": "VOC Management",
     "governance": "Governance",
-    "settings": "Settings"
+    "settings": "Settings",
+    "mypage": "My Page"
   },
   "VOC": {
     "title": "VOC Management",
@@ -113,5 +114,32 @@
     "processing": "Processing...",
     "success_create": "Order registered successfully.",
     "pccc_help": "Mandatory for international shipping."
+  },
+  "Wallet": {
+    "title": "My Wallet",
+    "balance": "Current Balance",
+    "topup": "Top Up",
+    "refund": "Request Refund",
+    "transactions": "Transaction History",
+    "date": "Date",
+    "type": "Type",
+    "amount": "Amount",
+    "status": "Status",
+    "description": "Description",
+    "type_topup": "Top Up",
+    "type_deduct": "Deduction",
+    "type_refund_request": "Refund Request",
+    "type_refund": "Refund Completed",
+    "status_pending": "Pending",
+    "status_completed": "Completed",
+    "status_approved": "Approved",
+    "status_rejected": "Rejected",
+    "pay_now": "Pay with Wallet",
+    "insufficient_balance": "Insufficient balance.",
+    "success_pay": "Payment completed from wallet.",
+    "success_topup": "Top-up completed.",
+    "success_refund_request": "Refund request has been submitted.",
+    "my_page": "My Page",
+    "my_page_desc": "Manage your wallet balance and account information."
   }
 }

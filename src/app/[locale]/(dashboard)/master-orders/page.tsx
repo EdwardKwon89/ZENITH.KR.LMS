@@ -6,10 +6,11 @@ import HouseOrderSelectionTable from '@/components/master-orders/HouseOrderSelec
 import { Layers, PlusSquare, Info } from 'lucide-react';
 
 export default async function MasterOrdersPage({
-  params: { locale }
+  params
 }: {
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
 }) {
+  const { locale } = await params;
   // 1. 보안 가드 및 권한 시스템 확인
   await requireAuth();
 

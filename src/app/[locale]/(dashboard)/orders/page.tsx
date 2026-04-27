@@ -8,20 +8,22 @@ import Link from 'next/link';
 import { isFeatureEnabled } from '@/lib/params/feature-flags';
 
 export default async function OrdersPage({
-  params: { locale },
+  params,
   searchParams
 }: {
-  params: { locale: string };
-  searchParams: { [key: string]: string | string[] | undefined };
+  params: Promise<{ locale: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
+  const { locale } = await params;
+  const resolvedSearchParams = await searchParams;
   // 1. 보안 가드 (세션 확인)
   const { profile } = await requireAuth();
 
   // 2. 검색 파라미터 파싱
-  const page = typeof searchParams.page === 'string' ? parseInt(searchParams.page) : 1;
-  const status = typeof searchParams.status === 'string' ? searchParams.status : undefined;
-  const order_type = typeof searchParams.order_type === 'string' ? searchParams.order_type : undefined;
-  const search = typeof searchParams.search === 'string' ? searchParams.search : undefined;
+  const page = typeof resolvedSearchParams.page === 'string' ? parseInt(resolvedSearchParams.page) : 1;
+  const status = typeof resolvedSearchParams.status === 'string' ? resolvedSearchParams.status : undefined;
+  const order_type = typeof resolvedSearchParams.order_type === 'string' ? resolvedSearchParams.order_type : undefined;
+  const search = typeof resolvedSearchParams.search === 'string' ? resolvedSearchParams.search : undefined;
 
   // 3. 지능형 데이터 엔진 호출 (20-Row Standard)
   const { orders, totalCount, pageSize } = await getOrders({
@@ -40,7 +42,6 @@ export default async function OrdersPage({
         <div className="flex items-center gap-4">
           <div className="p-2.5 bg-brand-600 rounded-xl text-white shadow-lg shadow-brand-200">
             <Plus size={24} />
-          </div>
           </div>
         </div>
         

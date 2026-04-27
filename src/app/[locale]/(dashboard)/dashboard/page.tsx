@@ -1,3 +1,5 @@
+'use client';
+
 import React from "react";
 import ZenShell from "@/components/layout/ZenShell";
 import ZenDataGrid from "@/components/ui/ZenDataGrid";
@@ -36,57 +38,57 @@ const MOCK_ORDERS: Order[] = [
   }))
 ];
 
-const columns: ColumnDef<Order>[] = [
-  {
-    header: "Order No",
-    accessorKey: "orderNo",
-    cell: ({ row }) => <span className="font-bold text-slate-900">{row.getValue("orderNo")}</span>
-  },
-  {
-    header: "Carrier",
-    accessorKey: "carrier",
-  },
-  {
-    header: "Route",
-    accessorKey: "route",
-    cell: ({ row }) => (
-      <div className="flex items-center gap-2">
-        <span className="px-2 py-0.5 bg-slate-100 rounded text-xs font-medium">{row.original.route.split(" -> ")[0]}</span>
-        <span className="text-slate-300">→</span>
-        <span className="px-2 py-0.5 bg-slate-100 rounded text-xs font-medium">{row.original.route.split(" -> ")[1]}</span>
-      </div>
-    )
-  },
-  {
-    header: "Status",
-    accessorKey: "status",
-    cell: ({ row }) => {
-      const status = row.getValue("status") as string;
-      const theme = {
-        READY: "bg-brand-50 text-brand-600 border-brand-200",
-        IN_TRANSIT: "bg-amber-50 text-amber-600 border-amber-200",
-        COMPLETED: "bg-emerald-50 text-emerald-600 border-emerald-200",
-        CANCELLED: "bg-red-50 text-red-600 border-red-200",
-      }[status] || "bg-slate-50 text-slate-600 border-slate-200";
-      
-      return (
-        <span className={`px-2.5 py-1 rounded-full text-xs font-bold border ${theme}`}>
-          {status}
-        </span>
-      );
-    }
-  },
-  {
-    header: "Customer",
-    accessorKey: "customer",
-  },
-  {
-    header: "Est. Date",
-    accessorKey: "estimatedDate",
-  },
-];
-
 export default function DashboardPage() {
+  const columns: ColumnDef<Order>[] = [
+    {
+      header: "Order No",
+      accessorKey: "orderNo",
+      cell: ({ row }) => <span className="font-bold text-slate-900">{row.getValue("orderNo")}</span>
+    },
+    {
+      header: "Carrier",
+      accessorKey: "carrier",
+    },
+    {
+      header: "Route",
+      accessorKey: "route",
+      cell: ({ row }) => (
+        <div className="flex items-center gap-2">
+          <span className="px-2 py-0.5 bg-slate-100 rounded text-xs font-medium">{row.original.route.split(" -> ")[0]}</span>
+          <span className="text-slate-300">→</span>
+          <span className="px-2 py-0.5 bg-slate-100 rounded text-xs font-medium">{row.original.route.split(" -> ")[1]}</span>
+        </div>
+      )
+    },
+    {
+      header: "Status",
+      accessorKey: "status",
+      cell: ({ row }) => {
+        const status = row.getValue("status") as string;
+        const theme = {
+          READY: "bg-brand-50 text-brand-600 border-brand-200",
+          IN_TRANSIT: "bg-amber-50 text-amber-600 border-amber-200",
+          COMPLETED: "bg-emerald-50 text-emerald-600 border-emerald-200",
+          CANCELLED: "bg-red-50 text-red-600 border-red-200",
+        }[status] || "bg-slate-50 text-slate-600 border-slate-200";
+        
+        return (
+          <span className={`px-2.5 py-1 rounded-full text-xs font-bold border ${theme}`}>
+            {status}
+          </span>
+        );
+      }
+    },
+    {
+      header: "Customer",
+      accessorKey: "customer",
+    },
+    {
+      header: "Est. Date",
+      accessorKey: "estimatedDate",
+    },
+  ];
+
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
         {/* Page Heading */}
