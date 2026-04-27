@@ -1,11 +1,13 @@
 "use client";
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
-import { FileText, History, FileDown, MoreHorizontal, CheckCircle2, Clock } from 'lucide-react';
+import { FileText, History, FileDown, MoreHorizontal, CheckCircle2, Clock, CreditCard } from 'lucide-react';
 import { ZenButton, ZenBadge } from '@/components/ui/ZenUI';
 import { InvoiceHistorySheet } from './InvoiceHistorySheet';
 import { TaxInvoiceSheet } from './TaxInvoiceSheet';
+import { PaymentModal } from './PaymentModal';
 import { issueInvoicePdf } from '@/app/actions/finance';
 import { toast } from 'sonner';
 
@@ -14,9 +16,11 @@ interface InvoiceTableProps {
 }
 
 export const InvoiceTable: React.FC<InvoiceTableProps> = ({ invoices }) => {
+  const router = useRouter();
   const [selectedInvoice, setSelectedInvoice] = useState<{ id: string; no: string } | null>(null);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [isTaxSheetOpen, setIsTaxSheetOpen] = useState(false);
+  const [isPaymentOpen, setIsPaymentOpen] = useState(false);
   const [issuingIds, setIssuingIds] = useState<Set<string>>(new Set());
 
   const handleIssuePdf = async (invoiceId: string) => {
@@ -47,6 +51,11 @@ export const InvoiceTable: React.FC<InvoiceTableProps> = ({ invoices }) => {
   const openTaxInvoice = (id: string, no: string) => {
     setSelectedInvoice({ id, no });
     setIsTaxSheetOpen(true);
+  };
+
+  const openPayment = (invoice: any) => {
+    setSelectedInvoice({ id: invoice.id, no: invoice.invoice_no, amount: invoice.total_amount, currency: invoice.currency } as any);
+    setIsPaymentOpen(true);
   };
 
   return (
@@ -123,6 +132,16 @@ export const InvoiceTable: React.FC<InvoiceTableProps> = ({ invoices }) => {
                       >
                         <FileDown className="w-4 h-4" />
                       </ZenButton>
+                      {inv.status === 'UNPAID' && (
+                        <ZenButton 
+                          variant="tactile" 
+                          className="p-2 rounded-xl bg-emerald-50/50 border-emerald-100 text-emerald-600 hover:bg-emerald-600 hover:text-white"
+                          onClick={() => openPayment(inv)}
+                          title="Pay Now"
+                        >
+                          <CreditCard className="w-4 h-4" />
+                        </ZenButton>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -151,6 +170,18 @@ export const InvoiceTable: React.FC<InvoiceTableProps> = ({ invoices }) => {
             invoiceNo={selectedInvoice.no}
             isOpen={isTaxSheetOpen}
             onClose={() => setIsTaxSheetOpen(false)}
+          />
+          <PaymentModal
+            isOpen={isPaymentOpen}
+            onClose={() => setIsPaymentOpen(false)}
+            invoiceId={selectedInvoice.id}
+            invoiceNo={selectedInvoice.no}
+            amount={(selectedInvoice as any).amount}
+            currency={(selectedInvoice as any).currency}
+            onSuccess={() => {
+              // Refresh or show success
+              router.refresh(); // Standard Next.js refresh
+            }}
           />
         </>
       )}

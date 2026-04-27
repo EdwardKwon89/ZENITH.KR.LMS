@@ -1,6 +1,6 @@
 # Ds-11 API 상세 명세 — FINANCE (정산/재무 + 세금계산서)
 
-> **프로젝트:** ZENITH_LMS | **버전:** v1.13 | **최종 수정:** 2026-04-24
+> **프로젝트:** ZENITH_LMS | **버전:** v1.14 | **최종 수정:** 2026-04-27
 >
 > **상위 목록:** [API 카탈로그 (INDEX)](Ds_11_INDEX.md)
 
@@ -88,6 +88,22 @@
 ---
 
 ## DB Schema & Types
+
+### zen_invoices (Table)
+
+| Column | Type | Default | Description |
+|:---|:---|:---|:---|
+| `id` | uuid | gen_random_uuid() | PK |
+| `order_id` | uuid | - | FK (public.zen_orders.id) |
+| `invoice_no` | text | - | 인보이스 고유 번호 (Unique) |
+| `status` | text | 'UNPAID' | UNPAID, PAID, PARTIAL, CANCELED, OVERDUE |
+| `payment_method` | text | 'BANK_TRANSFER' | BANK_TRANSFER, WALLET |
+| `total_amount` | numeric | 0 | 합계 금액 |
+| `paid_amount` | numeric | 0 | 실 입금액 |
+| `currency` | text | 'KRW' | 통화 |
+| `due_date` | date | - | 결제 기한 |
+| `paid_at` | timestamptz | null | 실제 결제 완료 시각 |
+| `created_at` | timestamptz | now() | |
 
 ### TaxInvoiceRecord (Type)
 

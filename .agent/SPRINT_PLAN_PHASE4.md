@@ -85,8 +85,8 @@
 
 ---
 
-### SPR 5 — 선불 지갑 & Finance 연동 (6.5 MD) ⏸ 대기
-> **담당**: Riley | **선행 완료**: 병행C (zen_wallet Migration)
+### SPR 5 — 선불 지갑 & Finance 연동 (6.5 MD) 🔵 착수 지시
+> **담당**: Riley | **선행 완료**: 병행C (zen_wallet Migration) | **착수일**: 2026-04-27
 
 | Task | WBS | MD |
 |:---|:---|:---:|
@@ -184,7 +184,7 @@
 | SPR 3 | VOC 관리 전체 | 5 | Riley | ✅ 완료 |
 | 병행 A~D | 인프라 사전 작업 | — | Aiden | ✅ 완료 |
 | **SPR 4** | **OPS 파라미터 시스템** | **8** | **Riley** | **✅ 완료** |
-| SPR 5 | 선불 지갑 & Finance 연동 | 6.5 | Riley | ⏸ 대기 |
+| **SPR 5** | **선불 지갑 & Finance 연동** | **6.5** | **Riley** | **🔵 착수 지시 (2026-04-27)** |
 | SPR 6 | 고객지원 포털 (QnA/FAQ/공지) | 6 | Riley | ⏸ 대기 |
 | SPR 7 | 재무 확장 + 통계 대시보드 | 10 | Riley | ⏸ 대기 |
 | SPR 8 | 클레임 + 문서 엔진 | 8 | Riley | ⏸ 대기 |

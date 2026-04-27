@@ -1,6 +1,6 @@
 # Ds-11 API 카탈로그 (Index)
 
-> **프로젝트:** ZENITH_LMS | **버전:** v1.14 | **최종 수정:** 2026-04-26
+> **프로젝트:** ZENITH_LMS | **버전:** v1.15 | **최종 수정:** 2026-04-27
 >
 > **구조:** 본 INDEX는 전체 API 목록 및 링크만 관리합니다. 파라미터·응답 상세는 각 DETAIL 파일을 참조하십시오.
 >
@@ -16,6 +16,7 @@
 > - [VOC](Ds_11_DETAIL_VOC.md) — 고객 불만 관리 (Phase 4 Sprint 3)
 > - [SUPPORT](Ds_11_DETAIL_SUPPORT.md) — 고객지원 포털 QnA/FAQ/공지사항 (Phase 4 Sprint 4)
 > - [OPS_PARAMS](Ds_11_DETAIL_OPS_PARAMS.md) — 운영 파라미터 & Feature Flag (Phase 4 Sprint 5)
+- [WALLET](Ds_11_DETAIL_WALLET.md) — 선불 지갑 및 거래 관리 (Phase 4 Sprint 5)
 
 ---
 
@@ -103,6 +104,11 @@
 | 16.3 | OpsParams | `updateSystemParam` | Action | Admin | 파라미터 수정 + 감사 로그 + 캐시 무효화 | [OPS_PARAMS](Ds_11_DETAIL_OPS_PARAMS.md#163-updatesystemparam-action) |
 | 16.4 | OpsParams | `getFeatureFlags` | Action | Admin/User | Feature Flag 목록 조회 | [OPS_PARAMS](Ds_11_DETAIL_OPS_PARAMS.md#164-getfeatureflags-action) |
 | 16.5 | OpsParams | `updateFeatureFlag` | Action | Admin | Feature Flag 활성화/비활성화 (org별 또는 전역) | [OPS_PARAMS](Ds_11_DETAIL_OPS_PARAMS.md#165-updatefeatureflag-action) |
+| 17.1 | Wallet | `getWalletBalance` | Action | User | 현재 사용자의 조직 지갑 잔액 조회 | [WALLET](Ds_11_DETAIL_WALLET.md#171-getwalletbalance-action) |
+| 17.2 | Wallet | `topUpWallet` | Action | Admin | 특정 조직의 지갑 금액 충전 (관리자 전용) | [WALLET](Ds_11_DETAIL_WALLET.md#172-topupwallet-action) |
+| 17.3 | Wallet | `requestRefund` | Action | User | 지갑 잔액 환불 요청 (PENDING 상태 생성) | [WALLET](Ds_11_DETAIL_WALLET.md#173-requestrefund-action) |
+| 17.4 | Wallet | `payInvoiceFromWallet` | Action | User | 지갑 잔액으로 인보이스 결제 (원자적 처리) | [WALLET](Ds_11_DETAIL_WALLET.md#174-payinvoicefromwallet-action) |
+| 17.5 | Wallet | `getWalletTransactions` | Action | User | 지갑 거래 내역 조회 | [WALLET](Ds_11_DETAIL_WALLET.md#175-getwallettransactions-action) |
 
 ---
 

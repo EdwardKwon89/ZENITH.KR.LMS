@@ -6,10 +6,11 @@ import { MessageSquare, User, CheckCircle2, Clock, ArrowLeft } from 'lucide-reac
 import Link from 'next/link';
 
 export default async function UserVocDetailPage({
-  params: { locale, id }
+  params
 }: {
-  params: { locale: string; id: string };
+  params: Promise<{ locale: string; id: string }>;
 }) {
+  const { locale, id } = await params;
   const { profile } = await requireAuth();
   const voc = await getVocDetail(id);
   const messages = await getMessages() as any;

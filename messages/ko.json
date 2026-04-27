@@ -38,7 +38,8 @@
     "settlement": "정산 관리",
     "voc": "VOC 관리",
     "governance": "거버넌스",
-    "settings": "설정"
+    "settings": "설정",
+    "mypage": "마이페이지"
   },
   "VOC": {
     "title": "VOC 관리",
@@ -130,5 +131,32 @@
     "shipper_biz_no": "사업자 등록번호",
     "contact_person": "담당자",
     "description": "비고/특이사항"
+  },
+  "Wallet": {
+    "title": "내 지갑",
+    "balance": "현재 잔액",
+    "topup": "충전하기",
+    "refund": "환불 요청",
+    "transactions": "거래 내역",
+    "date": "거래 일시",
+    "type": "유형",
+    "amount": "금액",
+    "status": "상태",
+    "description": "설명",
+    "type_topup": "충전",
+    "type_deduct": "차감",
+    "type_refund_request": "환불 요청",
+    "type_refund": "환불 완료",
+    "status_pending": "대기",
+    "status_completed": "완료",
+    "status_approved": "승인",
+    "status_rejected": "반려",
+    "pay_now": "지갑으로 결제",
+    "insufficient_balance": "잔액이 부족합니다.",
+    "success_pay": "지갑 결제가 완료되었습니다.",
+    "success_topup": "충전이 완료되었습니다.",
+    "success_refund_request": "환불 요청이 접수되었습니다.",
+    "my_page": "마이페이지",
+    "my_page_desc": "귀하의 지갑 잔액 및 계정 정보를 관리합니다."
   }
 }

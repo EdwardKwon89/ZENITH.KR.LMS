@@ -40,7 +40,8 @@ export async function generateInvoicesForOrder(orderId: string) {
 export async function updatePaymentStatus(
   invoiceId: string, 
   status: string, 
-  amount: number
+  amount: number,
+  paymentMethod: string = 'BANK_TRANSFER'
 ) {
   const { supabase } = await validateAdminAction();
 
@@ -50,6 +51,7 @@ export async function updatePaymentStatus(
     .update({
       status,
       paid_amount: amount,
+      payment_method: paymentMethod,
       updated_at: new Date().toISOString()
     })
     .eq('id', invoiceId)

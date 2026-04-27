@@ -188,6 +188,34 @@
 
 ---
 
+
+## 8. 선불 지갑 관리 (Wallet Management)
+화주 조직의 자금 충전, 환불 및 인보이스 결제를 관리합니다.
+- **Path**: `src/app/actions/wallet.ts`
+
+### getWalletBalance(orgId)
+- **설명**: 특정 조직의 지갑 잔액 및 통화 정보 조회 (최초 접근 시 자동 생성)
+- **Input**: `orgId (uuid)`
+- **Output**: `Promise<{ balance: number, currency: string, updatedAt: string }>`
+
+### topUpWallet(orgId, amount, description?)
+- **설명**: 지갑 잔액 충전 (Admin 전용)
+- **Input**: `orgId`, `amount (number)`, `description?`
+- **Output**: `Promise<ActionResult>`
+
+### requestRefund(walletId, amount, description?)
+- **설명**: 지갑 잔액 환불 요청 (PENDING 상태로 거래 생성)
+- **Input**: `walletId`, `amount`, `description?`
+- **Output**: `Promise<ActionResult>`
+
+### payInvoiceFromWallet(invoiceId)
+- **설명**: 지갑 잔액을 사용하여 인보이스 결제 처리 (원자적 트랜잭션)
+- **Input**: `invoiceId (uuid)`
+- **Output**: `Promise<ActionResult>`
+- **Error**: `INSUFFICIENT_BALANCE` (잔액 부족 시)
+
+---
+
 ## ⚠️ 확인된 사항 (Findings & Gaps)
 
 ### 1. 인벤토리(Inventory) 모듈 상태

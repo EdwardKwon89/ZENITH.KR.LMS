@@ -2,7 +2,8 @@ import React from "react";
 import TrackingDashboard from "@/components/tracking/TrackingDashboard";
 import { getTranslations } from "next-intl/server";
 
-export async function generateMetadata({ params: { locale } }: { params: { locale: string } }) {
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "Common" });
   return {
     title: `Tracking Dashboard | ${t("title")}`,

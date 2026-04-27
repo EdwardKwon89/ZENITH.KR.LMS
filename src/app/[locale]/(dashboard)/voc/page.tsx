@@ -7,19 +7,21 @@ import { getMessages } from 'next-intl/server';
 import { VocStatus, VocType } from '@/app/actions/voc';
 
 export default async function VocPage({
-  params: { locale },
+  params,
   searchParams
 }: {
-  params: { locale: string };
-  searchParams: { [key: string]: string | string[] | undefined };
+  params: Promise<{ locale: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
+  const { locale } = await params;
+  const resolvedSearchParams = await searchParams;
   const { profile } = await requireAuth();
   const messages = await getMessages() as any;
   const t = messages.VOC;
 
-  const page = typeof searchParams.page === 'string' ? parseInt(searchParams.page) : 1;
-  const status = typeof searchParams.status === 'string' ? searchParams.status as VocStatus : undefined;
-  const type = typeof searchParams.type === 'string' ? searchParams.type as VocType : undefined;
+  const page = typeof resolvedSearchParams.page === 'string' ? parseInt(resolvedSearchParams.page) : 1;
+  const status = typeof resolvedSearchParams.status === 'string' ? resolvedSearchParams.status as VocStatus : undefined;
+  const type = typeof resolvedSearchParams.type === 'string' ? resolvedSearchParams.type as VocType : undefined;
 
   const { vocs, total } = await getVocList({
     status,

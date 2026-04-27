@@ -38,8 +38,8 @@ tags:
 | **Phase 1** | 글로벌 인프라 & 디자인 시스템 |    100%    |    0 MD    |   **완료**  |
 | **Phase 2** | 실무 최적화 & 핵심 물류       |    100%    |    0 MD    |   **완료**  |
 | **Phase 3** | 정산 엔진 기초 기반           |    100%    |    0 MD    |   **완료**  |
-| **Phase 4** | 운영 최적화 및 안정화         |     3%     |   77 MD    |   **진행**  |
-|  **Total**  | **전체 프로젝트 공정**        |  **71%**   | **77 MD**  | **진행 중** |
+| **Phase 4** | 운영 최적화 및 안정화         |    13%     |   69 MD    |   **진행**  |
+|  **Total**  | **전체 프로젝트 공정**        |  **73%**   | **69 MD**  | **진행 중** |
 
 
 ---
@@ -281,15 +281,15 @@ tags:
 #### 4.4 [Payment] 선불 잔액 & 포인트 지급 시스템 (8 MD) [+]
 > **추가 사유 (2026-04-26)**: An-12 2.1.4(잔액 충전)·2.1.5(잔액 환불) WBS 미등재 확인. 청구서 지급 시 잔액 차감 로직 미구현. Finance 정산 모듈 연계 필수.
 
-- **4.4.1 DB 설계 및 잔액 관리 API** (3 MD)
-    - [+] (추가) 4.4.1.1 `zen_wallet` / `zen_wallet_transactions` 테이블 설계 및 DB 마이그레이션 (1.5 MD) | 추가: 2026-04-26 | 비고: 잔액(balance), 충전/차감/환불 이력, org_id 기반 RLS
-    - [+] (추가) 4.4.1.2 `topUpWallet` / `getWalletBalance` / `requestRefund` Server Action 구현 (1.5 MD) | 추가: 2026-04-26 | 비고: Admin 환불 승인 워크플로우 포함
-- **4.4.2 Finance 정산 연동** (3 MD)
-    - [+] (추가) 4.4.2.1 인보이스 지급 수단(`payment_method: WALLET | BANK_TRANSFER`) 분기 로직 및 `zen_invoices` 스키마 확장 (2 MD) | 추가: 2026-04-26 | 비고: 기존 paid_amount 흐름 유지하며 wallet 차감 트랜잭션 추가
-    - [+] (추가) 4.4.2.2 `payInvoiceFromWallet` Action + 잔액 부족 예외 처리 + 부분 잔액 사용 로직 (1 MD) | 추가: 2026-04-26 | 비고: 잔액 < 청구액 시 잔액 선차감 후 나머지 은행 이체 처리 옵션
-- **4.4.3 UI 구현** (2 MD)
-    - [+] (추가) 4.4.3.1 마이페이지 잔액 조회·충전·환불 신청 화면 (1 MD) | 추가: 2026-04-26 | 비고: 충전 이력 테이블 포함
-    - [+] (추가) 4.4.3.2 인보이스 지급 시 결제 수단 선택 UI (WALLET 잔액 표시 포함) (1 MD) | 추가: 2026-04-26 | 비고: 기존 Admin 입금 확인 UI에 WALLET 분기 추가
+- **4.4.1 DB 설계 및 잔액 관리 API** (3 MD) [x]
+    - [x] (완료) 4.4.1.1 `zen_wallet` / `zen_wallet_transactions` 테이블 설계 및 DB 마이그레이션 (1.5 MD) | 완료: 2026-04-27 | 비고: 잔액(balance), 충전/차감/환불 이력, org_id 기반 RLS
+    - [x] (완료) 4.4.1.2 `topUpWallet` / `getWalletBalance` / `requestRefund` Server Action 구현 (1.5 MD) | 완료: 2026-04-27 | 비고: Admin 환불 승인 워크플로우 포함
+- **4.4.2 Finance 정산 연동** (3 MD) [x]
+    - [x] (완료) 4.4.2.1 인보이스 지급 수단(`payment_method: WALLET | BANK_TRANSFER`) 분기 로직 및 `zen_invoices` 스키마 확장 (2 MD) | 완료: 2026-04-27 | 비고: 기존 paid_amount 흐름 유지하며 wallet 차감 트랜잭션 추가
+    - [x] (완료) 4.4.2.2 `payInvoiceFromWallet` Action + 잔액 부족 예외 처리 + 부분 잔액 사용 로직 (1 MD) | 완료: 2026-04-27 | 비고: 잔액 < 청구액 시 잔액 선차감 후 나머지 은행 이체 처리 옵션
+- **4.4.3 UI 구현** (2 MD) [x]
+    - [x] (완료) 4.4.3.1 마이페이지 잔액 조회·충전·환불 신청 화면 (1 MD) | 완료: 2026-04-27 | 비고: 충전 이력 테이블 포함
+    - [x] (완료) 4.4.3.2 인보이스 지급 시 결제 수단 선택 UI (WALLET 잔액 표시 포함) (1 MD) | 완료: 2026-04-27 | 비고: 기존 Admin 입금 확인 UI에 WALLET 분기 추가
 
 ---
 
@@ -389,4 +389,5 @@ tags:
 | v4.6 | 2026-04-26 | Aiden | Phase 4 추가 공정 2종 등재 — [4.0] Phase 3 잔여 UAT 10개 시나리오 게이트 (3 MD) + [4.3] 운영 파라미터/공통 코드 동적 체계 전환 3-Phase (9 MD) / 대시보드 갱신 (Phase 4: 0%, 27 MD / 전체: 87%, 잔여 27 MD) |
 | v4.7 | 2026-04-26 | Aiden | Phase 4 전체 공정 재편 — 분석 문서 vs WBS 전수 점검 결과 누락 7개 도메인 등재. [4.1] VOC+고객지원+Adaptive Polling 확장(8→23 MD), [4.3] 공통코드Admin UI+FeatureFlag+알림관리UI 흡수(9→12 MD), [4.4] 선불잔액·포인트 지급(8 MD 신규), [4.5] 재무조회확장 A·B·C(6 MD 신규), [4.6] 통계 대시보드(4 MD 신규), [4.7] 클레임·CI/PL 문서 엔진(8 MD 신규). 통관 모듈은 Phase 5/Milestone으로 분리. 대시보드 갱신 (Phase 4: 0%, 71 MD / 전체: 72%, 잔여 71 MD) |
 | v4.8 | 2026-04-26 | Aiden | [4.8] UI/UX 일관성 및 디자인 완성도 개선 신규 등재 (8 MD) — 6개 핵심 페이지 전수 검토 결과: P0 기능 결함(네비 전새로고침·Settlement 미등재·/logistics 404·메뉴 재편) 2 MD, P1 디자인 시스템 통일화(헤딩·컬러·반경·다크모드·이모지) 3 MD, P2 Proposal5 Fancy 완성도(Glassmorphism·Hover·Chart·AnimatePresence) 3 MD. 대시보드 갱신 (Phase 4: 71→79 MD / 전체: 72%→70%, 잔여 79 MD) |
+| v4.9 | 2026-04-27 | Antigravity | [4.4] 선불 잔액 & 포인트 지급 시스템 (Wallet Integration) 구축 완료 반영. 124건 회귀 테스트 PASS 확인. |
 

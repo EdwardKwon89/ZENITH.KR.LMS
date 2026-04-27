@@ -31,7 +31,7 @@ export function checkPermission(role: string | null | undefined, path: string): 
 
   // 2. 공통 접근 가능 경로 (Common Access)
   // '/' 경로는 완전 일치해야 하며, 나머지는 접두어 기반으로 검사합니다.
-  const commonPaths = ['/dashboard', '/profile', '/notifications', '/support'];
+  const commonPaths = ['/dashboard', '/profile', '/notifications', '/support', '/mypage'];
   if (path === '/' || commonPaths.some(cp => path.startsWith(cp))) {
     return true;
   }
