@@ -40,7 +40,15 @@
 - [x] **[14. 재무 확장]** (수입/비용 리포트, 원가 Admin, 운항스케줄, 선불 잔액, 포인트 시스템 완료)
 - [x] **[15. 클레임 & 문서]** (클레임 워크플로우 + CI/PL 다국어 문서 엔진 — Sprint 8 FINAL PASS ✅)
 - [x] **[16. 오더 QnA]** (어드민 Quick Reply 및 인라인 답변 기능 — Sprint 9 FINAL PASS ✅)
+- [x] **[17. 개인회원 등급 승급]** (INDIVIDUAL 승급 신청 + Admin 심사·이력 관리 UI — Sprint 11 FINAL PASS ✅)
 - **Milestone**: 전 사적 물동량 통계 리포트 생성 및 운영 프로세스 최적화 [100% 완료 - **Stabilized**]
+
+## Phase 5: Customs Clearance & Finalization (v1.4.0)
+> **목표**: 통관 처리 표준화 및 시스템 완결 — Adapter 패턴 기반 CCL 모듈 + 사용자 매뉴얼 + 종합 E2E 검증
+- [x] **[18. 통관 관리(CCL)]** Adapter 패턴 기반 통관 신고·상태 관리·이력 조회 + ManualAdapter 구현 — Sprint 12 FINAL PASS ✅
+- [x] **[사용자 매뉴얼]** 역할별(Manager/Oper/User) 가이드 작성 — Sprint 13 FINAL PASS ✅
+- [ ] **[종합 E2E]** Phase 1~5 전 구간 시나리오 검증 (Playwright MCP) — Sprint 14
+- **Milestone**: 전 도메인 통합 완결 및 운영 인계 준비
 
 ---
 *참조 분석 문서: `docs/02_Analysis/` 하위 전체*

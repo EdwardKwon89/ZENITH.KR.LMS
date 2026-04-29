@@ -109,9 +109,20 @@ export default function NaviSidebar({ user, profile }: { user?: any; profile?: a
       ]
     },
     { title: t("claims"), href: "/admin/claims", icon: ShieldAlert, isAdminOnly: true },
+    { title: t("grade_promotion_requests"), href: "/admin/upgrade-requests", icon: TrendingUp, isAdminOnly: true },
+    { title: t("customs_management"), href: "/admin/customs", icon: FileText, isAdminOnly: true },
     { title: t("governance"), href: "/governance", icon: ShieldCheck, isAdminOnly: true },
     { title: t("admin_error_logs"), href: "/admin/error-logs", icon: ShieldAlert, isAdminOnly: true },
-    { title: t("mypage"), href: "/mypage", icon: UserCircle },
+    { 
+      title: t("mypage"), 
+      href: "/mypage", 
+      icon: UserCircle,
+      children: [
+        { title: t("my_profile"), href: "/mypage" },
+        { title: t("my_grade"), href: "/mypage/grade" },
+        { title: t("my_customs"), href: "/mypage/customs" },
+      ]
+    },
     { title: t("settings"), href: "/settings", icon: Settings },
   ];
 

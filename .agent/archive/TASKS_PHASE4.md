@@ -110,3 +110,107 @@
 | PH5-WAL-03 | Riley | Aiden | 지갑 결제 Action | payInvoiceFromWallet + INSUFFICIENT_BALANCE | ✅ PASS | 원자적 처리 |
 | PH5-WAL-04 | Riley | Aiden | 마이페이지 지갑 UI | /mypage 잔액·충전·환불·이력 | ✅ PASS | NaviSidebar:90 등록, named import 수정 |
 | PH5-WAL-05 | Riley | Aiden | 인보이스 결제 수단 선택 UI | PaymentModal WALLET/BANK_TRANSFER | ✅ PASS | InvoiceTable:183 router.refresh() |
+
+---
+
+## Phase 4 Sprint 6 — 고객지원 포털 QnA/FAQ/공지사항 ✅ (2026-04-27)
+
+## 📋 Phase 4 Sprint 6 — 고객지원 포털 QnA/FAQ/공지사항 (착수 2026-04-27)
+
+> **목표**: WBS 4.1.4 — 1:1 문의(QnA) / FAQ / 공지사항 3채널 고객지원 포털 구축
+> **게이트 조건**: PH6-CS-01~05 DoD 전 충족 → Sprint 7 착수 허가
+> **선행 완료**: API 명세 `Ds_11_DETAIL_SUPPORT.md` 섹션 15 완비 ✅ (사전 설계 2026-04-26)
+
+| Task ID | 담당 (Worker) | 검증 (Auditor) | Task 명 | 내용 | 상태 | 비고 |
+|:---|:---|:---|:---|:---|:---|:---|
+| PH6-CS-01 | **Riley** | Aiden | DB Migration | `zen_qna` / `zen_qna_answers` / `zen_faq` / `zen_notices` + RLS [WBS 4.1.4] | ✅ 완료 | `20260427200000_zen_support_portal.sql` |
+| PH6-CS-02 | **Riley** | Aiden | Support Server Actions | `createQna` / `getQnaList` / `getQnaDetail` / `answerQna` / `upsertFaq` / `getFaqList` / `deleteFaq` / `upsertNotice` / `getNoticeList` 9개 [WBS 4.1.4.1~3] | ✅ 완료 | `src/app/actions/support.ts` |
+| PH6-CS-03 | **Riley** | Aiden | QnA UI | `/support/qna` 목록·등록 + `/support/qna/[qnaId]` 상세·답변 이력 [WBS 4.1.4.1] | ✅ 완료 | i18n 적용, 주문번호 연동 |
+| PH6-CS-04 | **Riley** | Aiden | FAQ UI | `/support/faq` 카테고리 탭·키워드 검색 + Admin CRUD [WBS 4.1.4.2] | ✅ 완료 | i18n 적용, Admin CRUD 완비 |
+| PH6-CS-05 | **Riley** | Aiden | 공지사항 UI | `/support/notices` 목록·상세 + Admin 발행 관리 [WBS 4.1.4.3] | ✅ 완료 | i18n 적용, 중요공지 배지 |
+
+---
+
+---
+
+## Phase 4 Sprint 7 — 재무 조회 확장 + 통계 대시보드 ✅ (2026-04-27)
+
+## 📋 Phase 4 Sprint 7 — 재무 조회 확장 + 통계 대시보드 (착수 2026-04-27)
+
+> **목표**: WBS 4.5 [Finance+] + WBS 4.6 [Statistics] — 수입/비용 조회·운송원가 CRUD·운항스케줄·운송/비용 통계 대시보드 구축
+> **게이트 조건**: PH7-FIN-01~04 + PH7-STAT-01~02 DoD 전 충족 → Sprint 8 착수 허가
+> **선행 완료**: Sprint 6 FINAL PASS ✅ (2026-04-27)
+
+| Task ID | 담당 (Worker) | 검증 (Auditor) | Task 명 | 내용 | 상태 | 비고 |
+|:---|:---|:---|:---|:---|:---|:---|
+| PH7-FIN-01 | **Riley** | Aiden | 수입 현황 조회 UI | 기간·운송수단·거래처별 필터링 + 매출 집계 화면 `/finance/revenue` [WBS 4.5.1.1] | ✅ 완료 | KPI 3종 연동 완료 |
+| PH7-FIN-02 | **Riley** | Aiden | 비용 현황 조회 UI | AIR/SEA/CIR 원가별 조회 + 구간별 비용 내역 `/finance/costs` [WBS 4.5.1.2] | ✅ 완료 | 원가 집계 연동 완료 |
+| PH7-FIN-03 | **Riley** | Aiden | 운송원가 Admin CRUD | 운송원가 등록·수정·삭제·조회 Admin 화면 `/admin/transport-costs` [WBS 4.5.2.1] | ✅ 완료 | Master CRUD 완비 |
+| PH7-FIN-04 | **Riley** | Aiden | 운항스케줄 조회 | ETD/ETA·운항사·노선 기반 필터링 조회 `/schedules` [WBS 4.5.3.1] | ✅ 완료 | Admin 편집 기능 포함 |
+| PH7-STAT-01 | **Riley** | Aiden | 운송 통계 대시보드 | 물동량·운송수단·운임 통계 차트 (바·라인 차트) `/admin/statistics` [WBS 4.6.1.1] | ✅ 완료 | Recharts 연동 완료 |
+| PH7-STAT-02 | **Riley** | Aiden | 비용 통계 대시보드 | 원가·수익·마진 통계 시각화 (파이차트·매트릭스) [WBS 4.6.2.1] | ✅ 완료 | 수익성 분석 차트 완비 |
+
+---
+
+---
+
+## Phase 4 Sprint 8 — 클레임 처리 & CI/PL 문서 엔진 ✅ (2026-04-29)
+
+## 📋 Phase 4 Sprint 8 — 클레임 처리 & CI/PL 문서 엔진 (착수 2026-04-28)
+
+> **목표**: WBS 4.7.1 [Claims] + WBS 4.7.2 [Documents] — 클레임 워크플로우 및 다국어 CI/PL 문서 엔진 구축
+> **게이트 조건**: PH8-CLM-01 + PH8-DOC-01 DoD 전 충족 → Sprint 9 착수 허가
+> **선행 완료**: Sprint 7 FINAL PASS ✅ (2026-04-28)
+
+| Task ID | 담당 (Worker) | 검증 (Auditor) | Task 명 | 내용 | 상태 | 비고 |
+|:---|:---|:---|:---|:---|:---|:---|
+| PH8-GOV-01 | **Riley** | Aiden | API 명세 업데이트 | Ds_11 Section 18(Claims), 19(Documents) 명세 추가 | ✅ 완료 | R-11 준수 |
+| PH8-DB-01 | **Riley** | Aiden | DB 마이그레이션 | zen_claims, zen_incident_fees 테이블 생성 및 RLS 적용 | ✅ 완료 | 20260428100000_zen_claims.sql |
+| PH8-CLM-01 | **Riley** | Aiden | 클레임 워크플로우 BE | 클레임 생성, 상태 변경, 사고비 정산 연동 Server Actions | ✅ 완료 | src/app/actions/claims.ts |
+| PH8-CLM-02 | **Riley** | Aiden | 클레임 관리 UI | Admin 클레임 목록 및 상세 처리 화면 (/admin/claims) | ✅ 완료 | ZenUI 표준 적용 |
+| PH8-DOC-01 | **Riley** | Aiden | CI/PL 문서 엔진 | react-pdf 기반 다국어 템플릿 및 데이터 바인딩 | ✅ 완료 | CommercialInvoice/PackingList |
+| PH8-DOC-02 | **Riley** | Aiden | 문서 리스트 UI | 오더별 문서 조회 및 PDF 생성/다운로드 UI (/finance/documents) | ✅ 완료 | locale별 분기 지원 |
+| PH8-TST-01 | **Riley** | Aiden | Sprint 8 회귀 테스트 | TC-CLM, TC-DOC 신규 작성 및 전체 147 TC 통과 확인 | ✅ 완료 | 147/147 PASS |
+| PH8-PASS | **AuditAgent** | Aiden | Sprint 8 FINAL PASS | 코드 품질, 빌드 오류, 테스트 성공 여부 최종 검증 | ✅ 완료 | Sprint 8 FINAL PASS |
+
+---
+
+---
+
+## Phase 4 Sprint 9 — 오더 연계형 고객 문의 ✅ (2026-04-29)
+
+## 📋 Phase 4 Sprint 9 — 오더 연계형 고객 문의 (착수 2026-04-29)
+
+> **목표**: WBS 4.1.1.2 — 오더 상세 페이지에서 직접 문의 접수 + 해당 오더의 상담 이력 조회
+> **게이트 조건**: PH9-BE-01 + PH9-UI-01 + PH9-UI-02 DoD 전 충족 → Aiden 검증 후 FINAL PASS
+> **선행 완료**: Sprint 8 FINAL PASS ✅ (2026-04-29)
+
+| Task ID | 담당 (Worker) | 검증 (Auditor) | Task 명 | 내용 | 상태 | 비고 |
+|:---|:---|:---|:---|:---|:---|:---|
+| PH9-BE-01 | **Riley** | Aiden | 오더 연계 QnA BE 확장 | `getOrderQnaList(orderId)` Action 추가 + `createQna` order_id 자동 주입 검증 | ✅ 완료 | support.ts L454 |
+| PH9-UI-01 | **Riley** | Aiden | 오더 상세 — 문의 탭 | 오더 상세 페이지에 "문의 이력" 탭 + "문의하기" 버튼 추가 | ✅ 완료 | URL 파라미터 자동 주입 수정 |
+| PH9-UI-02 | **Riley** | Aiden | Admin 오더 상세 — 문의 이력 | Admin 오더 상세에 연계 문의 목록 + 바로 답변 기능 | ✅ 완료 | isAdmin 분기 구현 |
+| PH9-TST-01 | **Riley** | Aiden | Sprint 9 회귀 테스트 | TC-ORD-QNA-01~03 작성 + REGRESSION MAP 섹션 20 등록 | ✅ 완료 | 151/151 PASS |
+| PH9-PASS | **AuditAgent** | Aiden | Sprint 9 FINAL PASS | 코드 품질·빌드·테스트 최종 검증 | ✅ 완료 | FINAL PASS (2026-04-29) |
+
+---
+
+---
+
+## Phase 4 Sprint 10 — Sentry 에러 로깅 연동 ✅ (2026-04-29)
+
+## 📋 Phase 4 Sprint 10 — Sentry 에러 로깅 연동 (착수 2026-04-29)
+
+> **목표**: WBS 4.1.2.1 — Sentry SDK 연동 + 에러 바운더리 캡처 + Admin 알림 체계 구축
+> **게이트 조건**: PH10-SENTRY-01~03 DoD 전 충족 → Aiden 검증 후 FINAL PASS
+> **선행 완료**: Sprint 9 FINAL PASS ✅ (2026-04-29)
+
+| Task ID | 담당 (Worker) | 검증 (Auditor) | Task 명 | 내용 | 상태 | 비고 |
+|:---|:---|:---|:---|:---|:---|:---|
+| PH10-SENTRY-01 | **Riley** | Aiden | Sentry SDK 설치·초기화 | @sentry/nextjs 설치, instrumentation.ts, sentry config 3종 | ✅ 완료 | SENTRY_DSN env var |
+| PH10-SENTRY-02 | **Riley** | Aiden | 에러 바운더리 연동 | error.tsx + global-error.tsx → captureException 연동 | ✅ 완료 | console.error 대체 |
+| PH10-SENTRY-03 | **Riley** | Aiden | Admin 알림 + 에러 로그 UI | zen_error_logs 테이블 + /admin/error-logs 페이지 | ✅ 완료 | 기존 zen_notifications 재활용 |
+| PH10-TST-01 | **Riley** | Aiden | Sprint 10 회귀 테스트 | TC-ERR-01~04 작성 (명세 대비 +2) | ✅ 완료 | REGRESSION MAP 섹션 21 등록 완료 |
+| PH10-PASS | **AuditAgent** | Aiden | Sprint 10 FINAL PASS | 코드 품질·빌드·테스트 최종 검증 | ✅ 완료 | 155/155 PASS, Ds-11 동기화 완료 |
+
+---

@@ -38,8 +38,9 @@ tags:
 | **Phase 1** | 글로벌 인프라 & 디자인 시스템 |    100%    |    0 MD    |   **완료**  |
 | **Phase 2** | 실무 최적화 & 핵심 물류       |    100%    |    0 MD    |   **완료**  |
 | **Phase 3** | 정산 엔진 기초 기반           |    100%    |    0 MD    |   **완료**  |
-| **Phase 4** | 운영 최적화 및 안정화         |    27%     |   58 MD    |   **진행**  |
-|  **Total**  | **전체 프로젝트 공정**        |  **76%**   | **58 MD**  | **진행 중** |
+| **Phase 4** | 운영 최적화 및 안정화         |    100%    |    0 MD    |   **완료**  |
+| **Phase 5** | 통관 완결 & 시스템 인계       |     0%     |   15 MD    |   **대기**  |
+|  **Total**  | **전체 프로젝트 공정**        |  **88%**   | **15 MD**  | **진행 중** |
 
 
 ---
@@ -238,7 +239,7 @@ tags:
 > **확장 사유 (2026-04-26)**: An-18 VOC 관리(Phase 3 정의, WBS 미등재) + An-20 고객지원(Phase 4 정의, WBS 미등재) + Riley Adaptive Polling 제안(채택) 통합. 기존 8 MD → 23 MD.
 
 - **4.1.1 고객 만족 및 관리 고도화** (5 MD)
-    - [ ] (대기) 4.1.1.1 [SCR-094] 개인회원 승급 대상자 심사 및 관리 UI 개발 (2 MD) | 완료: - | 비고: -
+    - [x] (완료) 4.1.1.1 [SCR-094] 개인회원 승급 대상자 심사 및 관리 UI 개발 (2 MD) | 완료: 2026-04-29 | 비고: Sprint 11 FINAL PASS
     - [ ] (대기) 4.1.1.2 오더 연계형 고객 문의 접수 및 상담 이력 관리 (3 MD) | 완료: - | 비고: -
 - **4.1.2 시스템 모니터링 및 로깅** (3 MD) [x]
     - [x] (완료) 4.1.2.1 에러 로깅 서비스(Sentry 등) 연동 및 관리자 알림 (3 MD) | 완료: 2026-04-29 | 비고: validateAdminAction 표준화 및 인앱 알림 연동 완료 (Sprint 10)
@@ -255,9 +256,9 @@ tags:
 
 #### 4.2 [Closing] 프로젝트 완료 및 인계 (7 MD)
 - **4.2.1 최종 통합 테스트 및 보완** (5 MD)
-    - [ ] (대기) 4.2.1.1 전 구간 End-to-End 시나리오 검증 (5 MD) | 완료: - | 비고: -
+    - [>] (Deferred) 4.2.1.1 전 구간 End-to-End 시나리오 검증 (5 MD) | 완료: - | 비고: Phase 5 완료 후 종합 E2E로 이관 (Sprint 14, Aiden/Playwright MCP)
 - **4.2.2 사용자 매뉴얼 및 운영 이관** (2 MD)
-    - [ ] (대기) 4.2.2.1 각 역할별(Manager, Oper, User) 가이드 작성 (2 MD) | 완료: - | 비고: -
+    - [>] (Deferred) 4.2.2.1 각 역할별(Manager, Oper, User) 가이드 작성 (2 MD) | 완료: - | 비고: Phase 5 Sprint 13으로 이관
 
 #### 4.3 [Ops] 운영 파라미터 및 공통 코드 동적 체계 전환 (12 MD) [+]
 > **추가 사유 (2026-04-26)**: 코드 내 하드코딩 상수 전면 제거 및 DB 기반 동적 비즈니스 룰 체계 전환. An-19 9.2 공통코드 Admin UI·9.5 알림 관리 UI·Feature Flag 시스템 흡수. 기존 9 MD → 12 MD.
@@ -351,6 +352,49 @@ tags:
 
 ---
 
+### 5. Phase 5: Customs Clearance & Finalization (통관 완결 & 시스템 인계)
+> **Goal**: Adapter 패턴 기반 통관 CCL 모듈 구축 + 사용자 매뉴얼 + 종합 E2E 검증으로 시스템 완결
+> **총 공수**: 15 MD | **착수일**: 2026-04-29 | **상태**: 🔵 진행 중
+
+#### 5.1 [CCL] 통관 관리 시스템 (8 MD)
+> **설계 원칙**: ICustomsAdapter 표준 인터페이스 → ManualAdapter(기본) + ExternalAPIAdapter(확장 예정)
+> Phase 3 Tracking 모듈(어댑터 패턴) 동일 아키텍처 적용
+
+- **5.1.1 DB 스키마 및 Adapter 인터페이스** (2 MD)
+    - [+] (추가) 5.1.1.1 `customs_declarations` / `customs_adapters` 테이블 Migration 작성 (1 MD) | 추가: 2026-04-29 | 비고: 통관 신고 상태 PENDING/SUBMITTED/APPROVED/HELD/REJECTED
+    - [+] (추가) 5.1.1.2 `ICustomsAdapter` 인터페이스 정의 + `ManualAdapter` 구현 (1 MD) | 추가: 2026-04-29 | 비고: 향후 외부 CCL API(UNIPASS 등) 연계 시 Adapter 교체만으로 대응
+
+- **5.1.2 통관 Server Actions** (2 MD)
+    - [+] (추가) 5.1.2.1 `createDeclaration` / `getDeclarations` / `getDeclarationByOrder` Server Actions (1 MD) | 추가: 2026-04-29 | 비고: validateAdminAction / validateUserAction 가드 패턴 적용
+    - [+] (추가) 5.1.2.2 `updateDeclarationStatus` / `submitDeclaration` Server Actions (1 MD) | 추가: 2026-04-29 | 비고: 어댑터 호출을 통한 상태 전이 (ManualAdapter 기본)
+
+- **5.1.3 Admin UI — 통관 신고 관리** (2 MD)
+    - [+] (추가) 5.1.3.1 통관 신고 목록 + 상태 처리 Admin 페이지 `/admin/customs` (1.5 MD) | 추가: 2026-04-29 | 비고: ZenDataGrid 기반, 상태별 필터 탭 (ALL/PENDING/SUBMITTED/APPROVED/HELD/REJECTED)
+    - [+] (추가) 5.1.3.2 신고 상세 모달 — 화물 정보, 상태 변경, 관세청 번호 입력 (0.5 MD) | 추가: 2026-04-29 | 비고: -
+
+- **5.1.4 User UI — 오더별 통관 현황 조회 + 오더 연계** (2 MD)
+    - [+] (추가) 5.1.4.1 오더 상세 페이지 내 통관 현황 섹션 추가 (1 MD) | 추가: 2026-04-29 | 비고: 오더 상태 흐름에 통관 단계(CUSTOMS_PENDING/CUSTOMS_CLEARED) 추가
+    - [+] (추가) 5.1.4.2 마이페이지 통관 이력 조회 UI (1 MD) | 추가: 2026-04-29 | 비고: 개인 화주 전용, 오더 연계 조회
+
+#### 5.2 [Manual] 사용자 매뉴얼 (2 MD)
+> Phase 4 WBS 4.2.2.1에서 이관 (2026-04-29)
+
+- **5.2.1 역할별 가이드 작성** (2 MD)
+    - [x] (완료) 5.2.1.1 Manager 가이드 — 오더 관리, 통관, 재무, 클레임 (0.75 MD) | 완료: 2026-04-30 | 비고: MANUAL_MANAGER.md (86줄, 7섹션)
+    - [x] (완료) 5.2.1.2 Operator 가이드 — 창고 입출고, 트래킹, VOC 처리 (0.75 MD) | 완료: 2026-04-30 | 비고: MANUAL_OPER.md (58줄, 5섹션)
+    - [x] (완료) 5.2.1.3 User(화주) 가이드 — 오더 접수, 통관 확인, 고객지원 (0.5 MD) | 완료: 2026-04-30 | 비고: MANUAL_USER.md (49줄, 6섹션)
+
+#### 5.3 [E2E] 종합 End-to-End 검증 (5 MD)
+> Phase 4 WBS 4.2.1.1에서 이관 (2026-04-29) | 담당: Aiden (Playwright MCP 직접 수행)
+
+- **5.3.1 E2E 시나리오 검증** (5 MD)
+    - [+] (추가) 5.3.1.1 인증 시나리오 — 로그인/로그아웃/권한별 접근 제어 (1 MD) | 추가: 2026-04-29 | 비고: -
+    - [+] (추가) 5.3.1.2 오더 플로우 — 오더 접수 → 창고 입고 → 출고 → 운송 → 통관 (2 MD) | 추가: 2026-04-29 | 비고: 전 구간 Golden Path
+    - [+] (추가) 5.3.1.3 재무/정산 플로우 — 청구서 발행 → 입금 확인 → 세금계산서 (1 MD) | 추가: 2026-04-29 | 비고: -
+    - [+] (추가) 5.3.1.4 고객지원 플로우 — VOC 등록 → 답변 → 등급 승급 신청 (1 MD) | 추가: 2026-04-29 | 비고: -
+
+---
+
 ## 📝 개정 이력 (Revision History)
 
 | 버전 | 날짜       | 작성자      | 설명                                                                |
@@ -392,4 +436,5 @@ tags:
 | v4.9 | 2026-04-27 | Antigravity | [4.4] 선불 잔액 & 포인트 지급 시스템 (Wallet Integration) 구축 완료 반영. 124건 회귀 테스트 PASS 확인. |
 | v5.0 | 2026-04-28 | Antigravity | [4.5] 재무 조회 확장 (수입/비용 현황, 운송원가 CRUD, 운항스케줄) + [4.6] 운송/비용 통계 대시보드 + [6.지원] 고객지원 포털 (QnA/FAQ/공지사항) Sprint 6+7 FINAL PASS 확정. 140/140 회귀 테스트 PASS, TSC 오류 0건. Phase 4: 13%→23% (61 MD 잔여). |
 | v5.1 | 2026-04-29 | Antigravity | [4.1.2.1] 시스템 모니터링 안정화 및 관리자 알림 연동 (Sprint 10) FINAL PASS. validateAdminAction 인증 표준화 및 알림 타입(SYSTEM) 확장 완료. 155/155 회귀 테스트 PASS. Phase 4: 23%→27% (58 MD 잔여). |
+| v5.2 | 2026-04-29 | Aiden | Phase 4 완료 반영 (Sprint 11 FINAL PASS, 159/159 PASS) + Phase 5 등재 (통관 CCL 15 MD) + 4.2.1.1/4.2.2.1 Phase 5 이관 처리. 대시보드 갱신 (Phase 4: 100% / Phase 5: 0%, 15 MD 잔여 / 전체: 88%, 잔여 15 MD). |
 

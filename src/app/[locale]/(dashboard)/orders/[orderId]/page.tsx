@@ -15,6 +15,8 @@ import { OrderVocTrigger } from '@/components/voc/OrderVocTrigger';
 import DocumentDownloadButton from '@/components/documents/DocumentDownloadButton';
 import CommercialInvoicePDF from '@/components/documents/CommercialInvoicePDF';
 import PackingListPDF from '@/components/documents/PackingListPDF';
+import { getDeclarations } from '@/app/actions/customs';
+import OrderCustomsSection from '@/components/customs/OrderCustomsSection';
 
 import { Package, MapPin, Truck, ShieldCheck, FileText } from 'lucide-react';
 
@@ -29,6 +31,8 @@ export default async function OrderDetailPage({
   const { profile, supabase } = await requireAuth();
   const order = await getOrderDetails(orderId);
   const events = await getTrackingEvents(orderId);
+  const { declarations } = await getDeclarations({ orderId });
+  const declaration = declarations[0] || null;
 
   // 2. 권한 확인 (Admin 여부)
   // note: requireAuth에서 가져온 profile.role을 기반으로 rbac 체크
@@ -281,7 +285,10 @@ export default async function OrderDetailPage({
             snapshot={snapshot}
           />
 
-          {/* 3. VOC Trigger */}
+          {/* 3. Customs Section (Sprint 12) */}
+          <OrderCustomsSection declaration={declaration} />
+
+          {/* 4. VOC Trigger */}
           <OrderVocTrigger orderId={orderId} orderNo={order.order_no} />
 
           {/* 4. Finance Summary */}
