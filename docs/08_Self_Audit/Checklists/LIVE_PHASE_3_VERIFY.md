@@ -93,6 +93,7 @@
 - [ ] **[SAR-2026-04-19-001] Next.js Redirect Loop Test**: 인증 미들웨어 및 리다이렉트 로직이 무한 루프에 빠지지 않고 최종 목적지에 도달하는가?
 - [x] **[SAR-008] Routing 경로 선택 후 isSelected 피드백**: `RouteOptimizationSection`에서 경로 선택 직후 카드 선택 상태(isSelected)가 시각적으로 반영되는가? (BUG-15-A) — Aiden 수정 완료 2026-04-25
 - [x] **[SAR-009] Routing 마일스톤 운송 수단 아이콘**: `RouteMilestoneTimeline`에서 각 마일스톤의 운송 수단(AIR/SEA/LAND) 아이콘이 표시되는가? (BUG-16-A) — Aiden 수정 완료 2026-04-25
+- [ ] **[SAR-2026-04-29-001/002] 거버넌스 프로세스 준수 (R-03)**: `TASK_BOARD`, `ROADMAP`, `WBS` 등 진척 관리 문서를 '완료'로 변경하기 전, 반드시 검증 주체(Auditor)의 명시적 승인 메시지(**"FINAL PASS"**)를 세션 로그에서 직접 확인했는가? (5회 반복 위반에 따른 **필수** 점검 항목)
 
 ---
 

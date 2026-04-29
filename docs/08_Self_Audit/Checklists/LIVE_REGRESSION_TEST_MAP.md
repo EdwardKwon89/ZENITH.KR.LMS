@@ -1,7 +1,7 @@
 # 🗺️ LIVE Regression Test Master Map
 
 > **상태:** [ACTIVE]  
-> **총 테스트 케이스:** 155 Cases (Phase 4 Sprint 10 모니터링 4건 추가 포함 전원 활성)  
+> **총 테스트 케이스:** 163 Cases (Phase 5 Sprint 12 통관 4건 추가 포함 전원 활성)  
 > **최종 검증일:** 2026-04-29  
 
 제니스 플랫폼의 비즈니스 영속성을 보장하는 회귀 테스트 케이스의 통합 명세서입니다. 모든 신규 개발 및 수정 시 이 맵에 케이스가 추가되어야 하며, 전체 테스트가 통과되어야 합니다.
@@ -218,6 +218,22 @@
 | **TC-ERR-03** | 에러 로그 조회 보안 | 관리자 권한(`validateAdminAction`) 기반 로그 목록 접근 통제 확인 | `tests/unit/monitoring/error-log.test.ts` |
 | **TC-ERR-04** | 에러 조치 완료 처리 | `resolveErrorLog`를 통한 해결 상태(`resolved: true`) 업데이트 검증 | `tests/unit/monitoring/error-log.test.ts` |
 
+### 22. 회원 등급 및 승급 (Member Grade)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-GRADE-01** | requestGradePromotion — INSERT 및 알림 | 승급 신청 시 DB 적재 및 Admin 알림 발송 검증 | `tests/unit/member/grade-promotion.test.ts` |
+| **TC-GRADE-02** | reviewGradePromotion — APPROVED 처리 | 승인 시 상태 업데이트 및 프로필 등급 갱신 검증 | `tests/unit/member/grade-promotion.test.ts` |
+| **TC-GRADE-03** | requestGradePromotion — 중복 신청 차단 | PENDING 상태 신청 존재 시 추가 신청 차단 로직 검증 | `tests/unit/member/grade-promotion.test.ts` |
+| **TC-GRADE-04** | getGradeMaster 조회 | 등급 마스터 목록 정상 반환 확인 | `tests/unit/member/grade-promotion.test.ts` |
+
+### 23. 통관 관리 (Customs Clearance)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-CCL-01** | createDeclaration — 초기 상태 PENDING | 신고 생성 시 대기 상태 및 오더 연계 확인 | `tests/unit/customs/customs-declaration.test.ts` |
+| **TC-CCL-02** | updateDeclarationStatus — 상태/메모 업데이트 | 관리자의 수동 상태 변경 및 신고번호 입력 검증 | `tests/unit/customs/customs-declaration.test.ts` |
+| **TC-CCL-03** | submitDeclaration — 어댑터 연동 및 SUBMITTED 전환 | 외부 어댑터 호출 및 상태 전이 확인 | `tests/unit/customs/customs-declaration.test.ts` |
+| **TC-CCL-04** | getDeclarations — 화주별 권한 격리 | 본인 오더와 연계된 신고만 조회 가능 여부 확인 | `tests/unit/customs/customs-declaration.test.ts` |
+
 
 
 ---
@@ -232,6 +248,8 @@
 | 2026-04-29 | v8.0 | ✅ PASS | 34.57s | 148/148 — Phase 4 Sprint 8 클레임+문서 완료. TC-CLM-01~03, TC-DOC-01 신규 등록 및 전체 검증 통과. |
 | 2026-04-29 | v9.0 | ✅ PASS | 35.45s | 151/151 — Phase 4 Sprint 9 오더 연계 QnA 완료. TC-ORD-QNA-01~03 신규 등록 및 전체 회귀 테스트 통과. |
 | 2026-04-29 | v10.0 | ✅ PASS | 38.12s | 155/155 — Phase 4 Sprint 10 Sentry 통합 및 에러 모니터링 완료. TC-ERR-01~04 신규 등록 및 전체 회귀 테스트 통과. |
+| 2026-04-29 | v11.0 | ✅ PASS | 31.00s | 159/159 — Phase 4 Sprint 11 개인회원 등급 승급 완료. TC-GRADE-01~04 신규 등록 및 전체 회귀 테스트 통과. |
+| 2026-04-29 | v12.0 | ✅ PASS | 33.50s | 163/163 — Phase 5 Sprint 12 통관 모달 및 마이페이지 이력 완료. TC-CCL-01~04 신규 등록 및 전체 회귀 테스트 통과. |
 
 
 ---

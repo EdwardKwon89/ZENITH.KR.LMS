@@ -112,8 +112,28 @@
 
 ---
 
+### 5. Phase 5: Customs Clearance & Finalization (통관 및 완결)
+> **Goal**: 통관 프로세스를 표준화하고 시스템 전 구간의 무결성을 검증하여 프로젝트를 완결합니다.
+
+#### 5.1 [Customs] 통관 관리 시스템 (CCL) (10 MD) [DONE]
+- **5.1.1 통관 어댑터 아키텍처** (4 MD) [DONE]
+    - [x] 5.1.1.1 ICustomsAdapter 인터페이스 및 ManualAdapter 구현 (어댑터 패턴)
+    - [x] 5.1.1.2 customs_declarations, customs_adapters DB 스키마 및 RLS 수립
+- **5.1.2 통관 신고 및 이력 관리** (6 MD) [DONE]
+    - [x] 5.1.2.1 어드민 통관 관리 대시보드 및 상태 업데이트 API 구현
+    - [x] 5.1.2.2 사용자용 통관 이력 조회 UI 및 오더 상세 섹션 연동
+    - [x] 5.1.2.3 [Rework] Server Actions 보안 가드(Auth Guard) 강화
+    - [x] 5.1.2.4 [Rework] i18n 중복 키 제거 및 테스트 명칭 TC-CCL 표준화
+
+#### 5.2 [Finalization] 최종 완결 (7 MD)
+- **5.2.1 사용자 매뉴얼 및 가이드** (2 MD) [DONE]
+- **5.2.2 종합 E2E 시나리오 검증** (5 MD)
+
+---
+
 ## 📝 개정 이력 (Revision History)
 
 | 버전 | 날짜 | 작성자 | 설명 |
 |:---|:---|:---|:---|
 | v1.0 | 2026-04-16 | Antigravity | 초기 상세 WBS 수립 (5레벨 체계 및 Man-Day 반영) |
+| v1.1 | 2026-04-29 | Antigravity | Phase 5 통관 관리(Sprint 12) 완료 및 Rework 사항 반영 |
