@@ -509,3 +509,200 @@ export async function getWeeklyRevenueChart() {
 
   return result;
 }
+
+/**
+ * [WBS 4.5.1] 필터용 조직 목록을 조회합니다.
+ */
+export async function getOrganizations() {
+  const { supabase } = await validateUserAction();
+  const { data, error } = await supabase
+    .from('zen_organizations')
+    .select('id, name')
+    .order('name');
+  
+  if (error) throw new Error(`조직 조회 실패: ${error.message}`);
+  return data || [];
+}
+
+/**
+ * [WBS 4.5.1.1] 수입 현황 리포트 데이터를 조회합니다.
+ */
+export async function getRevenueReport(filters: {
+  startDate: string;
+  endDate: string;
+  transMode?: string;
+  shipperId?: string;
+}) {
+  const { supabase, profile } = await validateAdminAction();
+
+  let query = supabase
+    .from('zen_invoices')
+    .select(`
+      id,
+      invoice_no,
+      total_amount,
+      currency,
+      status,
+      created_at,
+      shipper:shipper_id(name),
+      order:zen_orders!inner(id, trans_mode)
+    `)
+    .gte('created_at', filters.startDate)
+    .lte('created_at', filters.endDate);
+
+  if (filters.transMode && filters.transMode !== 'ALL') {
+    query = query.eq('order.trans_mode', filters.transMode);
+  }
+  if (filters.shipperId) {
+    query = query.eq('shipper_id', filters.shipperId);
+  }
+
+  const { data, error } = await query.order('created_at', { ascending: false });
+  if (error) throw new Error(`수입 리포트 조회 실패: ${error.message}`);
+
+  const totalRevenue = data?.reduce((sum, inv) => sum + Number(inv.total_amount), 0) || 0;
+  const count = data?.length || 0;
+  const avgRevenue = count > 0 ? totalRevenue / count : 0;
+
+  return {
+    items: data || [],
+    summary: { totalRevenue, count, avgRevenue }
+  };
+}
+
+/**
+ * [WBS 4.5.1.2] 비용 현황 리포트 데이터를 조회합니다.
+ */
+export async function getCostReport(filters: {
+  startDate: string;
+  endDate: string;
+  serviceType?: string;
+}) {
+  const { supabase } = await validateAdminAction();
+
+  let query = supabase
+    .from('zen_order_costs')
+    .select(`
+      *,
+      order:order_id(order_no, trans_mode, shipper:shipper_id(name))
+    `)
+    .gte('created_at', filters.startDate)
+    .lte('created_at', filters.endDate);
+
+  if (filters.serviceType && filters.serviceType !== 'ALL') {
+    query = query.eq('cost_type', filters.serviceType); // Simplified mapping
+  }
+
+  const { data, error } = await query.order('created_at', { ascending: false });
+  if (error) throw new Error(`비용 리포트 조회 실패: ${error.message}`);
+
+  const totalCost = data?.reduce((sum, cost) => sum + Number(cost.total_amount), 0) || 0;
+
+  return {
+    items: data || [],
+    summary: { totalCost }
+  };
+}
+
+/**
+ * [WBS 4.5.2] 운송원가 마스터 정보를 조회합니다.
+ */
+export async function getTransportCosts() {
+  const { supabase } = await validateAdminAction();
+  const { data, error } = await supabase
+    .from('zen_transport_costs')
+    .select(`
+      *,
+      carrier:carrier_id(name),
+      origin_port:origin_port_id(name, code),
+      destination_port:destination_port_id(name, code)
+    `)
+    .order('created_at', { ascending: false });
+
+  if (error) throw new Error(`운송원가 조회 실패: ${error.message}`);
+  return data;
+}
+
+/**
+ * [WBS 4.5.2] 운송원가 정보를 저장하거나 수정합니다.
+ */
+export async function upsertTransportCost(payload: any) {
+  const { supabase } = await validateAdminAction();
+  const { data, error } = await supabase
+    .from('zen_transport_costs')
+    .upsert({
+      ...payload,
+      updated_at: new Date().toISOString()
+    })
+    .select()
+    .single();
+
+  if (error) throw new Error(`운송원가 저장 실패: ${error.message}`);
+  revalidatePath('/admin/transport-costs');
+  return { success: true, data };
+}
+
+/**
+ * [WBS 4.5.2] 운송원가 정보를 삭제합니다.
+ */
+export async function deleteTransportCost(id: string) {
+  const { supabase } = await validateAdminAction();
+  const { error } = await supabase
+    .from('zen_transport_costs')
+    .delete()
+    .eq('id', id);
+
+  if (error) throw new Error(`운송원가 삭제 실패: ${error.message}`);
+  revalidatePath('/admin/transport-costs');
+  return { success: true };
+}
+
+/**
+ * [REWORK-SPR8-02] 무역서류(CI/PL) 생성을 위한 오더 상세 데이터를 조회합니다.
+ */
+export async function getOrderDocumentData(orderNo: string) {
+  const { supabase } = await validateUserAction();
+
+  // 1. 오더 기본 정보 조회 (송하인, 항구 정보 포함)
+  const { data: order, error: orderError } = await supabase
+    .from('zen_orders')
+    .select(`
+      *,
+      shipper:zen_organizations!shipper_id(*),
+      origin_port:zen_ports!origin_port_id(*),
+      dest_port:zen_ports!dest_port_id(*)
+    `)
+    .eq('order_no', orderNo)
+    .maybeSingle();
+
+  if (orderError) throw new Error(`오더 조회 중 오류 발생: ${orderError.message}`);
+  if (!order) throw new Error(`해당 번호(${orderNo})의 오더를 찾을 수 없습니다.`);
+
+  // 2. 패킹 및 아이템 정보 조회
+  const { data: packages, error: pkgError } = await supabase
+    .from('zen_order_packages')
+    .select('*')
+    .eq('order_id', order.id)
+    .order('created_at', { ascending: true });
+
+  if (pkgError) throw new Error(`패킹 정보 조회 실패: ${pkgError.message}`);
+
+  const { data: items, error: itemsError } = await supabase
+    .from('zen_order_items')
+    .select('*')
+    .eq('order_id', order.id)
+    .order('created_at', { ascending: true });
+
+  if (itemsError) throw new Error(`아이템 정보 조회 실패: ${itemsError.message}`);
+
+  // 3. 데이터 매핑 (PDF 컴포넌트 규격에 맞춤)
+  const packagesWithItems = packages.map(pkg => ({
+    ...pkg,
+    items: items.filter(item => item.package_id === pkg.id)
+  }));
+
+  return {
+    ...order,
+    packages: packagesWithItems
+  };
+}

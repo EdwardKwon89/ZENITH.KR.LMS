@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { InvoiceTable } from '@/components/finance/InvoiceTable';
-import { ExportButton } from '@/components/finance/ExportButton';
+import ExportButton from '@/components/finance/ExportButton';
 import { RevenueChart } from '@/components/finance/RevenueChart';
 import { Download, TrendingDown, LayoutDashboard } from 'lucide-react';
 import { getWeeklyRevenueChart } from '@/app/actions/finance';

@@ -55,6 +55,12 @@
 - [x] **TC-UAT-OPS.2**: 비즈니스 로직 동적화 (PH4-OPS-04/05) — 부피 계수(`volumeFactor`), 환율, 라우팅 가중치(`α/β`) DB 연동 및 정산/스코어링 반영 확인
 - [x] **TC-UAT-OPS.3**: Feature Flag 시스템 (PH4-OPS-06) — `MAINTENANCE_MODE` 미들웨어 차단 및 `AI_RECOMMENDATION` UI 배지 노출 확인
 
+### Phase 4.1.5 — Claims & Documents (Sprint 8)
+- [x] **TC-UAT-CLM.1**: 클레임 어드민 대시보드 — 사고비 시각화 및 고밀도 그리드 확인 (Premium UI)
+- [x] **TC-UAT-CLM.2**: 사고비-인보이스 연동 — 등록 시 `zen_invoices.total_amount` 차감 및 정합성 확인
+- [x] **TC-UAT-DOC.1**: CI/PL PDF 엔진 — `Noto Sans KR` 폰트 적용 및 다국어(CJK) 렌더링 확인
+- [x] **TC-UAT-DOC.2**: PDF 다운로드 안정성 — SSR/Hydration 오류 방지 로직 (`isMounted`) 확인
+
 ---
 
 ## 🐛 UAT 중 발견 및 수정된 버그 [2026-04-26 Playwright UAT]
@@ -112,6 +118,7 @@
 | 2026-04-26 | Playwright UAT: FIN.2 + INV.2 + E2E.2 + E2E.3 브라우저 검증 | Claude (Antigravity) | ✅ PASS | BUG-INV-01~04, BUG-RLS-01~04, BUG-FIN-01~02 수정 (migration 4건 적용) |
 | 2026-04-26 | Playwright UAT: FIN.3/4/5 + INV.1/4 브라우저 검증 (PH4-UAT-02/03) | Claude (Antigravity) | ✅ PASS (FIN.5 Conditional) | BUG-FIN-RLS-01(SAR-013), BUG-MW-API-01(SAR-015), BUG-INV-HIST-01(SAR-014) 수정. 109/109 PASS |
 | 2026-04-26 | Phase 4 Sprint 4: OPS 파라미터 시스템 최종 검증 (PH4-OPS-01~06) | Claude (Antigravity) | ✅ PASS | 시스템 파라미터 UI + 비즈니스 로직 연동 + Feature Flag 전체 PASS (회귀 테스트 111/111 PASS) |
+| 2026-04-29 | Phase 4 Sprint 8: Claims & Document Engine 최종 검증 | Claude (Antigravity) | ✅ PASS | 클레임 UI 고도화 + CJK PDF 엔진 + 사고비 벨리데이션 전체 PASS (회귀 테스트 122/122 PASS) |
 
 ---
 **작성 가이드:**

@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS zen_voc (
   id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   order_id    uuid NOT NULL REFERENCES zen_orders(id) ON DELETE RESTRICT,
   org_id      uuid NOT NULL REFERENCES zen_organizations(id),
-  created_by  uuid NOT NULL REFERENCES profiles(id),
+  created_by  uuid NOT NULL REFERENCES zen_profiles(id),
   type        TEXT NOT NULL CHECK (type IN ('DELAY','DAMAGE','MISDELIVERY','OTHER')),
   title       TEXT NOT NULL,
   description TEXT NOT NULL,
@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS zen_voc (
 CREATE TABLE IF NOT EXISTS zen_voc_answers (
   id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   voc_id      uuid NOT NULL REFERENCES zen_voc(id) ON DELETE CASCADE,
-  answered_by uuid NOT NULL REFERENCES profiles(id),
+  answered_by uuid NOT NULL REFERENCES zen_profiles(id),
   content     TEXT NOT NULL,
   created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
@@ -47,16 +47,16 @@ CREATE POLICY "Users can view own organization's VOCs"
 ON zen_voc FOR SELECT
 USING (
   org_id IN (
-    SELECT org_id FROM profiles WHERE id = auth.uid()
+    SELECT org_id FROM zen_profiles WHERE id = auth.uid()
   )
 );
 
 -- User: VOC 등록 (본인 조직 오더에 대해서만)
-DROP POLICY IF EXISTS "Users can create VOCs for own organization orders" ON zen_voc;
-CREATE POLICY "Users can create VOCs for own organization orders"
+DROP POLICY IF EXISTS "Users can create VOCs for own organization zen_orders" ON zen_voc;
+CREATE POLICY "Users can create VOCs for own organization zen_orders"
 ON zen_voc FOR INSERT
 WITH CHECK (
   org_id IN (
-    SELECT org_id FROM profiles WHERE id = auth.uid()
+    SELECT org_id FROM zen_profiles WHERE id = auth.uid()
   )
 );

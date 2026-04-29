@@ -1,5 +1,5 @@
 -- BUG-TRK-RLS-01: zen_tracking_configs / zen_tracking_events RLS 참조 테이블 수정
--- 문제: RLS 정책이 zen_profiles(빈 테이블)를 참조 → profiles 테이블로 교체
+-- 문제: RLS 정책이 zen_profiles(빈 테이블)를 참조 → zen_profiles 테이블로 교체
 -- 영향: 트래킹 대시보드 0건, 트래킹 이벤트 INSERT 불가
 -- 작성일: 2026-04-26
 
@@ -9,15 +9,15 @@ CREATE POLICY "Admins have full access to tracking configs" ON public.zen_tracki
     FOR ALL
     USING (
         EXISTS (
-            SELECT 1 FROM public.profiles
+            SELECT 1 FROM public.zen_profiles
             WHERE id = auth.uid()
               AND role IN ('ADMIN', 'ZENITH_SUPER_ADMIN', 'MANAGER')
         )
     );
 
--- 2. zen_tracking_configs: 사용자 조회 정책 교체 (zen_profiles → profiles)
-DROP POLICY IF EXISTS "Users can view tracking of their own orders" ON public.zen_tracking_configs;
-CREATE POLICY "Users can view tracking of their own orders" ON public.zen_tracking_configs
+-- 2. zen_tracking_configs: 사용자 조회 정책 교체 (zen_profiles → zen_profiles)
+DROP POLICY IF EXISTS "Users can view tracking of their own zen_orders" ON public.zen_tracking_configs;
+CREATE POLICY "Users can view tracking of their own zen_orders" ON public.zen_tracking_configs
     FOR SELECT
     USING (
         EXISTS (
@@ -26,7 +26,7 @@ CREATE POLICY "Users can view tracking of their own orders" ON public.zen_tracki
               AND (
                 o.shipper_id = auth.uid()
                 OR o.shipper_id IN (
-                    SELECT org_id FROM public.profiles WHERE id = auth.uid()
+                    SELECT org_id FROM public.zen_profiles WHERE id = auth.uid()
                 )
               )
         )
@@ -38,7 +38,7 @@ CREATE POLICY "Admins can manage tracking events" ON public.zen_tracking_events
     FOR ALL
     USING (
         EXISTS (
-            SELECT 1 FROM public.profiles
+            SELECT 1 FROM public.zen_profiles
             WHERE id = auth.uid()
               AND role IN ('ADMIN', 'ZENITH_SUPER_ADMIN', 'MANAGER')
         )
@@ -55,7 +55,7 @@ CREATE POLICY "Users can view relevant tracking events" ON public.zen_tracking_e
               AND (
                 o.shipper_id = auth.uid()
                 OR o.shipper_id IN (
-                    SELECT org_id FROM public.profiles WHERE id = auth.uid()
+                    SELECT org_id FROM public.zen_profiles WHERE id = auth.uid()
                 )
               )
         )
@@ -68,7 +68,7 @@ CREATE POLICY "Admins have full access to tracking raw logs" ON public.zen_track
     FOR ALL
     USING (
         EXISTS (
-            SELECT 1 FROM public.profiles
+            SELECT 1 FROM public.zen_profiles
             WHERE id = auth.uid()
               AND role IN ('ADMIN', 'ZENITH_SUPER_ADMIN', 'MANAGER')
         )

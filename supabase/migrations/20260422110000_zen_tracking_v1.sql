@@ -65,7 +65,7 @@ VALUES
 ALTER TABLE public.zen_tracking_configs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.zen_tracking_events ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Users can view tracking of their own orders" ON public.zen_tracking_configs
+CREATE POLICY "Users can view tracking of their own zen_orders" ON public.zen_tracking_configs
     FOR SELECT USING (
         EXISTS (
             SELECT 1 FROM public.zen_orders o 

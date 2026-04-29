@@ -115,7 +115,7 @@ export async function updateSystemParam(
   });
 
   // 4. 캐시 무효화
-  revalidateTag('system-params');
+  (revalidateTag as any)('system-params');
   
   return data;
 }

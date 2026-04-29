@@ -8,11 +8,11 @@ CREATE POLICY "Users can view inventory history of their own organization"
 ON public.zen_inventory_history FOR SELECT
 USING (
     EXISTS (
-        SELECT 1 FROM public.profiles
-        WHERE profiles.id = auth.uid()
+        SELECT 1 FROM public.zen_profiles
+        WHERE zen_profiles.id = auth.uid()
         AND (
-            profiles.org_id = zen_inventory_history.org_id
-            OR profiles.role IN ('ADMIN', 'ZENITH_SUPER_ADMIN')
+            zen_profiles.org_id = zen_inventory_history.org_id
+            OR zen_profiles.role IN ('ADMIN', 'ZENITH_SUPER_ADMIN')
         )
     )
 );
@@ -23,8 +23,8 @@ ON public.zen_inventory_history FOR INSERT
 TO authenticated
 WITH CHECK (
     EXISTS (
-        SELECT 1 FROM public.profiles
-        WHERE profiles.id = auth.uid()
-        AND profiles.role IN ('ADMIN', 'ZENITH_SUPER_ADMIN', 'MANAGER', 'MEMBER', 'PARTNER')
+        SELECT 1 FROM public.zen_profiles
+        WHERE zen_profiles.id = auth.uid()
+        AND zen_profiles.role IN ('ADMIN', 'ZENITH_SUPER_ADMIN', 'MANAGER', 'MEMBER', 'PARTNER')
     )
 );

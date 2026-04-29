@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, Variants } from "framer-motion";
 import {
   Search,
   RefreshCw,
@@ -22,7 +22,7 @@ const statCardVariants = {
   visible: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { delay: i * 0.07, duration: 0.3, ease: "easeOut" },
+    transition: { delay: i * 0.07, duration: 0.3, ease: "easeOut" as const },
   }),
 };
 

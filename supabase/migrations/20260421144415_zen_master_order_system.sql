@@ -50,7 +50,7 @@ $$ LANGUAGE plpgsql;
 -- 5. RLS 설정 (기존 거버넌스 정책 계승)
 ALTER TABLE public.zen_master_orders ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Allow authenticated full access to master orders"
+CREATE POLICY "Allow authenticated full access to master zen_orders"
 ON public.zen_master_orders FOR ALL
 TO authenticated
 USING (true)

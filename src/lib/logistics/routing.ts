@@ -84,7 +84,8 @@ export class RoutingEngine {
     // Ds-11 Scoring Policy 적용
     const costWinner = selectCostOptimal(candidates);
     const timeWinner = selectTimeOptimal(candidates);
-    const balancedResult = selectBalanced(candidates);
+    const balancedResult = await selectBalanced(candidates);
+    const balancedScore = typeof balancedResult.score === 'number' ? balancedResult.score : 0;
 
     return [
       { 
@@ -100,7 +101,7 @@ export class RoutingEngine {
       { 
         ...balancedResult.candidate, 
         option_type: 'BALANCED', 
-        score: balancedResult.score 
+        score: balancedScore
       }
     ];
   }

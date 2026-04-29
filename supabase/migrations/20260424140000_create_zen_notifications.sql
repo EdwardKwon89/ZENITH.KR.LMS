@@ -1,7 +1,7 @@
 -- WBS 3.1.2.2: 알림 관리 테이블 생성
 CREATE TABLE IF NOT EXISTS zen_notifications (
   id         uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id    uuid        NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  user_id    uuid        NOT NULL REFERENCES zen_profiles(id) ON DELETE CASCADE,
   order_id   uuid        REFERENCES zen_orders(id) ON DELETE SET NULL,
   type       TEXT        NOT NULL CHECK (type IN ('STATUS_CHANGE', 'HELD', 'DELIVERED')),
   title      TEXT        NOT NULL,
@@ -36,7 +36,7 @@ CREATE POLICY "ZENITH_SUPER_ADMIN can view all notifications"
   ON zen_notifications FOR SELECT
   USING (
     EXISTS (
-      SELECT 1 FROM profiles
+      SELECT 1 FROM zen_profiles
       WHERE id = auth.uid() AND role = 'ZENITH_SUPER_ADMIN'
     )
   );

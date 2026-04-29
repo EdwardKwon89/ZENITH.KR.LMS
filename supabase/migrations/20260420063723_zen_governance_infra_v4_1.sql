@@ -21,8 +21,8 @@ CREATE TABLE IF NOT EXISTS zen_role_permissions (
 -- 3. 프로필 테이블 확장 (다국어 선호도)
 DO $$ 
 BEGIN 
-    IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE table_name='profiles' AND column_name='preferred_language') THEN
-        ALTER TABLE profiles ADD COLUMN preferred_language TEXT DEFAULT 'ko';
+    IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE table_name='zen_profiles' AND column_name='preferred_language') THEN
+        ALTER TABLE zen_profiles ADD COLUMN preferred_language TEXT DEFAULT 'ko';
     END IF;
 END $$;
 

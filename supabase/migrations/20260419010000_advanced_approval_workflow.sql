@@ -1,8 +1,8 @@
 -- WBS 1.3.1: Enhancement of Approval Workflow (Supplement Request & Re-apply)
 -- [W] Execution Agent / [A] CTO
 
--- 1. Add approval_comment to organizations for transparency (Rejection why? Supplement what?)
-ALTER TABLE public.organizations ADD COLUMN IF NOT EXISTS approval_comment TEXT;
+-- 1. Add approval_comment to zen_organizations for transparency (Rejection why? Supplement what?)
+ALTER TABLE public.zen_organizations ADD COLUMN IF NOT EXISTS approval_comment TEXT;
 -- 2. Create RPC for requesting supplement
 -- This status will trigger a specific UI in the /register/pending page
 CREATE OR REPLACE FUNCTION public.request_organization_supplement(
@@ -15,19 +15,19 @@ DECLARE
     meta_data JSONB;
 BEGIN
     -- [1] Update organization status and comment
-    UPDATE public.organizations
+    UPDATE public.zen_organizations
     SET 
         status = 'SUPPLEMENT_REQUIRED',
         approval_comment = comment
     WHERE id = target_org_id;
 
     -- [2] Update profile status for all users in this org
-    UPDATE public.profiles
+    UPDATE public.zen_profiles
     SET status = 'PENDING' -- Profiles remain pending until final approval
     WHERE org_id = target_org_id;
 
     -- [3] Sync with Auth Metadata so Proxy (Middleware) knows the detailed status
-    FOR target_user_id IN (SELECT id FROM public.profiles WHERE org_id = target_org_id)
+    FOR target_user_id IN (SELECT id FROM public.zen_profiles WHERE org_id = target_org_id)
     LOOP
         SELECT raw_app_meta_data INTO meta_data FROM auth.users WHERE id = target_user_id;
         IF meta_data IS NULL THEN meta_data := '{}'::jsonb; END IF;
@@ -50,13 +50,13 @@ DECLARE
     target_user_id UUID;
     meta_data JSONB;
 BEGIN
-    UPDATE public.organizations
+    UPDATE public.zen_organizations
     SET 
         status = 'REJECTED',
         approval_comment = comment
     WHERE id = target_org_id;
 
-    FOR target_user_id IN (SELECT id FROM public.profiles WHERE org_id = target_org_id)
+    FOR target_user_id IN (SELECT id FROM public.zen_profiles WHERE org_id = target_org_id)
     LOOP
         SELECT raw_app_meta_data INTO meta_data FROM auth.users WHERE id = target_user_id;
         IF meta_data IS NULL THEN meta_data := '{}'::jsonb; END IF;

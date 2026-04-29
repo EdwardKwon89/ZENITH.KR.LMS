@@ -28,6 +28,7 @@ interface ZenDataGridProps<TData, TValue> {
   title?: string;
   description?: string;
   className?: string;
+  loading?: boolean;
 }
 
 export default function ZenDataGrid<TData, TValue>({
@@ -36,6 +37,7 @@ export default function ZenDataGrid<TData, TValue>({
   title,
   description,
   className,
+  loading = false,
 }: ZenDataGridProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
@@ -117,7 +119,15 @@ export default function ZenDataGrid<TData, TValue>({
               ))}
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {table.getRowModel().rows.length > 0 ? (
+              {loading ? (
+                Array(5).fill(0).map((_, i) => (
+                  <tr key={i} className="animate-pulse">
+                    <td colSpan={columns.length} className="px-6 py-4">
+                      <div className="h-4 bg-slate-100 rounded w-full" />
+                    </td>
+                  </tr>
+                ))
+              ) : table.getRowModel().rows.length > 0 ? (
                 table.getRowModel().rows.map((row) => (
                   <tr 
                     key={row.id} 

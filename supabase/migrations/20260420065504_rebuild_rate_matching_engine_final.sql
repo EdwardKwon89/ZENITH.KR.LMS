@@ -21,7 +21,7 @@ BEGIN
         rc.currency,
         rc.base_date_rule
     FROM 
-        public.rate_cards rc
+        public.zen_rate_cards rc
     -- zen_ports와 조인하여 ID 기반 매칭 수행
     JOIN 
         public.zen_ports p_origin ON rc.origin_port = p_origin.code

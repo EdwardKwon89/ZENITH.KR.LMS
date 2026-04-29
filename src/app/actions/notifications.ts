@@ -177,3 +177,39 @@ export async function markAllNotificationsRead() {
   revalidatePath("/", "layout");
   return { success: true, updatedCount: data?.length ?? 0 };
 }
+
+/**
+ * 범용 인앱 알림 발송 함수
+ */
+export async function sendInAppNotification(params: {
+  userId: string;
+  title: string;
+  message: string;
+  type: string;
+  orderId?: string;
+  link?: string;
+}) {
+  const supabase = await createServerClient();
+  
+  const { data, error } = await supabase
+    .from("zen_notifications")
+    .insert({
+      user_id: params.userId,
+      order_id: params.orderId,
+      type: params.type,
+      title: params.title,
+      message: params.message,
+      channel: "IN_APP",
+      // link는 현재 스키마에 없으므로 message에 포함하거나 추후 스키마 확장 필요
+      // 일단은 데이터 일관성을 위해 스키마에 정의된 필드만 입력
+    })
+    .select()
+    .single();
+
+  if (error) {
+    console.error("[NOTIF] sendInAppNotification failed:", error);
+    return { success: false, error: error.message };
+  }
+
+  return { success: true, notificationId: data.id };
+}

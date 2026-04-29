@@ -7,11 +7,11 @@ DROP POLICY IF EXISTS "Shippers can view their own zen_invoices" ON public.zen_i
 CREATE POLICY "Shippers can view their own zen_invoices" ON public.zen_invoices
     FOR SELECT USING (
         EXISTS (
-            SELECT 1 FROM public.profiles
-            WHERE profiles.id = auth.uid()
+            SELECT 1 FROM public.zen_profiles
+            WHERE zen_profiles.id = auth.uid()
             AND (
-                profiles.org_id = zen_invoices.shipper_id
-                OR profiles.role IN ('ADMIN', 'ZENITH_SUPER_ADMIN')
+                zen_profiles.org_id = zen_invoices.shipper_id
+                OR zen_profiles.role IN ('ADMIN', 'ZENITH_SUPER_ADMIN')
             )
         )
     );
@@ -23,13 +23,13 @@ CREATE POLICY "Shippers can view their order costs" ON public.zen_order_costs
     FOR SELECT USING (
         EXISTS (
             SELECT 1 FROM public.zen_orders
-            JOIN public.profiles ON profiles.org_id = zen_orders.shipper_id
+            JOIN public.zen_profiles ON zen_profiles.org_id = zen_orders.shipper_id
             WHERE zen_orders.id = zen_order_costs.order_id
-            AND (profiles.id = auth.uid() OR profiles.role IN ('ADMIN', 'ZENITH_SUPER_ADMIN'))
+            AND (zen_profiles.id = auth.uid() OR zen_profiles.role IN ('ADMIN', 'ZENITH_SUPER_ADMIN'))
         )
         OR EXISTS (
-            SELECT 1 FROM public.profiles
-            WHERE profiles.id = auth.uid()
-            AND profiles.role IN ('ADMIN', 'ZENITH_SUPER_ADMIN')
+            SELECT 1 FROM public.zen_profiles
+            WHERE zen_profiles.id = auth.uid()
+            AND zen_profiles.role IN ('ADMIN', 'ZENITH_SUPER_ADMIN')
         )
     );

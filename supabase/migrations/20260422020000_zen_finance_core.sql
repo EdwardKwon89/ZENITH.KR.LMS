@@ -60,7 +60,7 @@ BEGIN
 
     -- 2. 요율 매칭 (Air/Sea/Express 구분 및 최우선 순위 검색)
     SELECT * INTO v_rate 
-    FROM public.rate_cards 
+    FROM public.zen_rate_cards 
     WHERE origin_port = v_order.origin_port_id 
       AND destination_port = v_order.dest_port_id
       AND service_type = v_order.transport_mode -- 'AIR', 'SEA' 등
@@ -97,9 +97,9 @@ ALTER TABLE public.zen_order_costs ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Shippers can view their own zen_invoices" ON public.zen_invoices
     FOR SELECT USING (
         EXISTS (
-            SELECT 1 FROM public.profiles 
-            WHERE profiles.id = auth.uid() 
-            AND (profiles.org_id = zen_invoices.shipper_id OR profiles.role = 'ADMIN')
+            SELECT 1 FROM public.zen_profiles 
+            WHERE zen_profiles.id = auth.uid() 
+            AND (zen_profiles.org_id = zen_invoices.shipper_id OR zen_profiles.role = 'ADMIN')
         )
     );
 
@@ -107,8 +107,8 @@ CREATE POLICY "Shippers can view their order costs" ON public.zen_order_costs
     FOR SELECT USING (
         EXISTS (
             SELECT 1 FROM public.zen_orders 
-            JOIN public.profiles ON profiles.org_id = zen_orders.shipper_id
+            JOIN public.zen_profiles ON zen_profiles.org_id = zen_orders.shipper_id
             WHERE zen_orders.id = zen_order_costs.order_id 
-            AND (profiles.id = auth.uid() OR profiles.role = 'ADMIN')
+            AND (zen_profiles.id = auth.uid() OR zen_profiles.role = 'ADMIN')
         )
     );
