@@ -18,7 +18,7 @@ TO authenticated
 USING (
     bucket_id = 'business_docs' 
     AND EXISTS (
-        SELECT 1 FROM public.profiles 
+        SELECT 1 FROM public.zen_profiles 
         WHERE id = auth.uid() AND role = 'ADMIN'
     )
 );
@@ -43,7 +43,7 @@ BEGIN
     -- In production: Ensure auth.uid() has ADMIN role
 
     -- [2] Check if already active
-    IF EXISTS (SELECT 1 FROM public.organizations WHERE id = target_org_id AND status = 'ACTIVE') THEN
+    IF EXISTS (SELECT 1 FROM public.zen_organizations WHERE id = target_org_id AND status = 'ACTIVE') THEN
         RETURN 'ALREADY_ACTIVE';
     END IF;
 
@@ -51,7 +51,7 @@ BEGIN
     new_id := LPAD(nextval('corporate_id_seq')::TEXT, 6, '0');
 
     -- [4] Update organization status and ID
-    UPDATE public.organizations
+    UPDATE public.zen_organizations
     SET 
         status = 'ACTIVE',
         corporate_id = new_id,
@@ -59,13 +59,13 @@ BEGIN
     WHERE id = target_org_id;
 
     -- [5] Update profile statuses (for all users tied to this org)
-    UPDATE public.profiles
+    UPDATE public.zen_profiles
     SET status = 'ACTIVE'
     WHERE org_id = target_org_id;
 
     -- [6] Update auth.users raw_app_meta_data for these users so AuthGuard lets them pass
     -- We must use a loop if multiple users are in the same org
-    FOR target_user_id IN (SELECT id FROM public.profiles WHERE org_id = target_org_id)
+    FOR target_user_id IN (SELECT id FROM public.zen_profiles WHERE org_id = target_org_id)
     LOOP
         SELECT raw_app_meta_data INTO meta_data FROM auth.users WHERE id = target_user_id;
 

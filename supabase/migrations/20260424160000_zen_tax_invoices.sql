@@ -31,9 +31,9 @@ CREATE POLICY "Shippers can view their own tax invoices" ON public.zen_tax_invoi
     FOR SELECT USING (
         EXISTS (
             SELECT 1 FROM public.zen_invoices 
-            JOIN public.profiles ON profiles.id = auth.uid()
+            JOIN public.zen_profiles ON zen_profiles.id = auth.uid()
             WHERE zen_invoices.id = zen_tax_invoices.invoice_id 
-            AND (profiles.org_id = zen_invoices.shipper_id OR profiles.role = 'ADMIN')
+            AND (zen_profiles.org_id = zen_invoices.shipper_id OR zen_profiles.role = 'ADMIN')
         )
     );
 
@@ -41,9 +41,9 @@ CREATE POLICY "Shippers can view their own tax invoices" ON public.zen_tax_invoi
 CREATE POLICY "Admins can issue and update tax invoices" ON public.zen_tax_invoices
     FOR ALL USING (
         EXISTS (
-            SELECT 1 FROM public.profiles 
-            WHERE profiles.id = auth.uid() 
-            AND profiles.role = 'ADMIN'
+            SELECT 1 FROM public.zen_profiles 
+            WHERE zen_profiles.id = auth.uid() 
+            AND zen_profiles.role = 'ADMIN'
         )
     );
 

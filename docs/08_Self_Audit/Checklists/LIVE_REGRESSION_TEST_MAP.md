@@ -1,8 +1,8 @@
 # 🗺️ LIVE Regression Test Master Map
 
 > **상태:** [ACTIVE]  
-> **총 테스트 케이스:** 124 Cases (PH4-WAL-05 9건 추가 포함 전원 활성)  
-> **최종 검증일:** 2026-04-27  
+> **총 테스트 케이스:** 155 Cases (Phase 4 Sprint 10 모니터링 4건 추가 포함 전원 활성)  
+> **최종 검증일:** 2026-04-29  
 
 제니스 플랫폼의 비즈니스 영속성을 보장하는 회귀 테스트 케이스의 통합 명세서입니다. 모든 신규 개발 및 수정 시 이 맵에 케이스가 추가되어야 하며, 전체 테스트가 통과되어야 합니다.
 
@@ -169,6 +169,57 @@
 | **TC-WAL.3** | 잔액 부족 결제 차단 | 잔액보다 큰 금액 결제 시도 시 트랜잭션 롤백 및 오류 반환 | `tests/unit/finance/wallet.test.ts` |
 | **TC-WAL.4** | 중복 결제 방지 가드 | 이미 `PAID` 상태인 인보이스에 대한 재결제 시도 차단 | `tests/unit/finance/wallet.test.ts` |
 
+### 15. 고객지원 포털 (CS)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-CS-01** | createQna — PENDING 상태 반환 | 문의 등록 시 초기 상태 보장 | `tests/unit/support/support-actions.test.ts` |
+| **TC-CS-02** | answerQna — 첫 답변 시 IN_PROGRESS 자동 전환 | 답변 등록 시 상태 전이 검증 | `tests/unit/support/support-actions.test.ts` |
+| **TC-CS-03** | getFaqList — keyword 검색 필터 동작 | 키워드 필터 정확성 검증 | `tests/unit/support/support-actions.test.ts` |
+| **TC-CS-04** | upsertNotice — is_published=true 시 published_at 자동 설정 | 발행일 자동 기록 보장 | `tests/unit/support/support-actions.test.ts` |
+
+### 16. 재무 조회 확장 (Finance+)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-FIN7-01** | getRevenueReport — startDate 필터 시 해당 기간 데이터만 반환 | 기간 필터 정확성 | `tests/unit/finance/report.test.ts` |
+| **TC-FIN7-02** | getCostReport — serviceType 필터 시 해당 모드 데이터만 반환 | 모드 필터 정확성 | `tests/unit/finance/report.test.ts` |
+| **TC-FIN7-03** | upsertTransportCost — 신규 등록 시 { success: true, data } 반환 | CRUD 무결성 | `tests/unit/finance/report.test.ts` |
+| **TC-FIN7-04** | getVesselSchedules — originPortId 필터 동작 검증 | 스케줄 필터 | `tests/unit/finance/report.test.ts` |
+
+### 17. 통계 대시보드 (Statistics)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-STAT-01** | getCostProfitStats('MONTH') — statsByMode AIR/SEA/CIR 3종 반환 | 집계 정확성 | `tests/unit/statistics/stats-actions.test.ts` |
+| **TC-STAT-02** | getCostProfitStats 마진율 — revenue > 0 시 margin = (rev-cost)/rev*100 | 마진율 계산 | `tests/unit/statistics/stats-actions.test.ts` |
+
+### 18. 클레임 워크플로우 (Claims)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-CLM-01** | createClaim — status=OPEN 반환 + zen_orders.status CLAIMED 업데이트 확인 | 클레임 생성 및 오더 상태 전이 | `tests/unit/claims/claims-actions.test.ts` |
+| **TC-CLM-02** | updateClaimStatus — Admin only, OPEN → INVESTIGATING 상태 전이 검증 | 관리자 전용 상태 관리 | `tests/unit/claims/claims-actions.test.ts` |
+| **TC-CLM-03** | addIncidentFee — fee_amount 등록 후 연계 invoice total_amount 차감 반영 | 사고비 정산 연동 | `tests/unit/claims/claims-actions.test.ts` |
+
+### 19. 무역서류 엔진 (Documents)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-DOC-01** | getOrderDocumentData — orderId 기반 shipper/consignee 포함 전체 데이터 반환 | 문서용 데이터 애그리게이션 | `tests/unit/documents/document-actions.test.ts` |
+
+### 20. 오더 연계 QnA (Order-Linked QnA)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-ORD-QNA-01** | getOrderQnaList — 특정 오더 ID 필터링 검증 | 오더 상세 탭의 데이터 정확성 | `tests/unit/support/order-qna.test.ts` |
+| **TC-ORD-QNA-02** | getOrderQnaList — 권한 없는 오더 조회 차단 | 화주 간 데이터 격리 보안 검증 | `tests/unit/support/order-qna.test.ts` |
+| **TC-ORD-QNA-03** | getOrderQnaList — Admin 권한 바이패스 | 관리자의 전역 오더 문의 조회 보장 | `tests/unit/support/order-qna.test.ts` |
+
+### 21. 모니터링 및 장애 감지 (Monitoring)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-ERR-01** | 에러 로그 DB 저장 | `logClientError` 호출 시 `zen_error_logs` 테이블 적재 확인 | `tests/unit/monitoring/error-log.test.ts` |
+| **TC-ERR-02** | 중대 에러 알림 연동 | `CRITICAL` 등급 에러 발생 시 관리자 인앱 알림 발송 검증 | `tests/unit/monitoring/error-log.test.ts` |
+| **TC-ERR-03** | 에러 로그 조회 보안 | 관리자 권한(`validateAdminAction`) 기반 로그 목록 접근 통제 확인 | `tests/unit/monitoring/error-log.test.ts` |
+| **TC-ERR-04** | 에러 조치 완료 처리 | `resolveErrorLog`를 통한 해결 상태(`resolved: true`) 업데이트 검증 | `tests/unit/monitoring/error-log.test.ts` |
+
+
+
 ---
 
 ## 📊 최신 검증 이력 (Execution History)
@@ -176,6 +227,12 @@
 | 검증일 | 버전 | 성공/실패 | 총 소요시간 | 결과 리포트 |
 | :--- | :--- | :---: | :--- | :--- |
 | 2026-04-27 | v5.0 | ✅ PASS | 29.10s | 124/124 Phase 4 Sprint 5 (선불 지갑) 완료. 지갑 연동, 충전/결제 액션, 마이페이지 대시보드 구현 및 회귀 테스트 9건(Wallet 관련 9개 TC) 신규 등록. |
+| 2026-04-27 | v6.0 | ✅ PASS | 32.15s | 133/133 Phase 4 Sprint 6 (고객지원 포털) 완료. QnA/FAQ/공지사항 기능 구현 및 TC-CS-01~04 신규 등록. |
+| 2026-04-28 | v7.0 | ✅ PASS | 34.20s | 140/140 — Phase 4 Sprint 7 재무+통계 완료. TC-FIN7-01~04, TC-STAT-01~02 신규 등록. |
+| 2026-04-29 | v8.0 | ✅ PASS | 34.57s | 148/148 — Phase 4 Sprint 8 클레임+문서 완료. TC-CLM-01~03, TC-DOC-01 신규 등록 및 전체 검증 통과. |
+| 2026-04-29 | v9.0 | ✅ PASS | 35.45s | 151/151 — Phase 4 Sprint 9 오더 연계 QnA 완료. TC-ORD-QNA-01~03 신규 등록 및 전체 회귀 테스트 통과. |
+| 2026-04-29 | v10.0 | ✅ PASS | 38.12s | 155/155 — Phase 4 Sprint 10 Sentry 통합 및 에러 모니터링 완료. TC-ERR-01~04 신규 등록 및 전체 회귀 테스트 통과. |
+
 
 ---
 

@@ -31,6 +31,7 @@ interface OrderFinanceSummaryProps {
   orderId: string;
   initialCosts: CostItem[];
   initialInvoice: Invoice | null;
+  incidentFees?: any[];
   isAdmin: boolean;
 }
 
@@ -38,6 +39,7 @@ export default function OrderFinanceSummary({
   orderId, 
   initialCosts, 
   initialInvoice,
+  incidentFees = [],
   isAdmin 
 }: OrderFinanceSummaryProps) {
   const [costs, setCosts] = useState<CostItem[]>(initialCosts);
@@ -125,6 +127,24 @@ export default function OrderFinanceSummary({
           ) : (
             <div className="py-4 text-center text-slate-500 text-xs italic">
               No costs calculated yet. Click recalculate.
+            </div>
+          )}
+
+          {/* Incident Fees (Claims) */}
+          {incidentFees.length > 0 && (
+            <div className="pt-4 mt-4 border-t border-slate-700/50 space-y-3">
+              <p className="text-[10px] text-rose-400 font-bold uppercase tracking-widest">Financial Adjustments (Claims)</p>
+              {incidentFees.map((fee) => (
+                <div key={fee.id} className="flex justify-between items-center text-rose-400 text-sm">
+                  <span className="flex items-center gap-1.5">
+                    <AlertCircle className="w-3 h-3" />
+                    {fee.description || 'Claim Settlement'}
+                  </span>
+                  <span className="font-mono">
+                    -{fee.currency} {Number(fee.fee_amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                  </span>
+                </div>
+              ))}
             </div>
           )}
 

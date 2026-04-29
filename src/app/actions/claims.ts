@@ -20,8 +20,14 @@ export async function getClaims({
     .from("zen_claims")
     .select(`
       *,
-      order:zen_orders(order_no, status),
-      shipper:zen_organizations(name)
+      order:zen_orders(
+        order_no, 
+        status, 
+        recipient_name, 
+        recipient_address,
+        packages:zen_order_packages(*, items:zen_order_items(*))
+      ),
+      shipper:zen_organizations(name, metadata)
     `)
     .order("created_at", { ascending: false });
 
@@ -171,4 +177,75 @@ export async function addIncidentFee(payload: {
   revalidatePath("/(dashboard)/admin/claims");
 
   return fee;
+}
+
+/**
+ * [PH8-BE-01] 클레임 상세 정보를 조회합니다.
+ */
+export async function getClaimDetails(claimId: string) {
+  const { supabase, profile } = await validateUserAction();
+  if (!profile) throw new Error("User profile not found");
+
+  const { data, error } = await supabase
+    .from("zen_claims")
+    .select(`
+      *,
+      order:zen_orders(
+        *, 
+        origin_port:zen_ports!origin_port_id(code, name), 
+        dest_port:zen_ports!dest_port_id(code, name),
+        packages:zen_order_packages(*, items:zen_order_items(*)),
+        costs:zen_order_costs(
+          invoice:zen_invoices(id, invoice_no, total_amount, currency, status)
+        )
+      ),
+      shipper:zen_organizations(name, metadata),
+      incident_fees:zen_incident_fees(*)
+    `)
+    .eq("id", claimId)
+    .single();
+
+  if (error) throw new Error(error.message);
+  
+  // 권한 필터링
+  if (profile.role !== 'ADMIN' && profile.role !== 'ZENITH_SUPER_ADMIN' && data.org_id !== profile.org_id) {
+    throw new Error("You do not have permission to view this claim.");
+  }
+
+  return data;
+}
+
+/**
+ * [PH8-BE-01] 클레임을 삭제합니다. (상태가 OPEN일 때만 가능)
+ */
+export async function deleteClaim(claimId: string) {
+  const { supabase, profile } = await validateUserAction();
+  if (!profile) throw new Error("User profile not found");
+
+  // 1. 상태 확인
+  const { data: claim, error: fetchError } = await supabase
+    .from("zen_claims")
+    .select("status, org_id")
+    .eq("id", claimId)
+    .single();
+
+  if (fetchError || !claim) throw new Error("Claim not found");
+  if (profile.role !== 'ADMIN' && claim.org_id !== profile.org_id) {
+    throw new Error("Unauthorized");
+  }
+  if (claim.status !== 'OPEN' && profile.role !== 'ADMIN') {
+    throw new Error("Cannot delete a claim that is already being investigated or resolved.");
+  }
+
+  const { error: deleteError } = await supabase
+    .from("zen_claims")
+    .delete()
+    .eq("id", claimId);
+
+  if (deleteError) throw new Error(deleteError.message);
+
+  revalidatePath("/(dashboard)/claims");
+  revalidatePath("/(dashboard)/admin/claims");
+
+  return { success: true };
 }

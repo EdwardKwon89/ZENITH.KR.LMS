@@ -3,6 +3,8 @@ import { getOrderDetails } from '@/app/actions/orders';
 import { getTrackingEvents, getTrackingRawLogs } from '@/app/actions/tracking';
 import { requireAuth, checkPermission } from '@/lib/auth/guards';
 import { OrderTisaDashboard } from '@/components/orders/OrderTisaDashboard';
+import { OrderQnaSection } from '@/components/orders/OrderQnaSection';
+import { OrderMainTabs } from '@/components/orders/OrderMainTabs';
 import TrackingTimeline from '@/components/tracking/TrackingTimeline';
 import AdminTrackingControl from '@/components/tracking/AdminTrackingControl';
 import RawLogViewer from '@/components/tracking/RawLogViewer';
@@ -10,11 +12,18 @@ import OrderFinanceSummary from '@/components/finance/OrderFinanceSummary';
 import RouteOptimizationSection from '@/components/routing/RouteOptimizationSection';
 import RouteConsistencyBadge from '@/components/routing/RouteConsistencyBadge';
 import { OrderVocTrigger } from '@/components/voc/OrderVocTrigger';
+import DocumentDownloadButton from '@/components/documents/DocumentDownloadButton';
+import CommercialInvoicePDF from '@/components/documents/CommercialInvoicePDF';
+import PackingListPDF from '@/components/documents/PackingListPDF';
 
-import { Package, MapPin, Truck, ShieldCheck } from 'lucide-react';
+import { Package, MapPin, Truck, ShieldCheck, FileText } from 'lucide-react';
 
-export default async function OrderDetailPage({ params }: { params: Promise<{ orderId: string }> }) {
-  const { orderId } = await params;
+export default async function OrderDetailPage({ 
+  params 
+}: { 
+  params: Promise<{ orderId: string; locale: string }> 
+}) {
+  const { orderId, locale } = await params;
   
   // 1. 서버 사이드 데이터 페칭
   const { profile, supabase } = await requireAuth();
@@ -41,6 +50,11 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ or
     ? await supabase.from('zen_invoices').select('*').eq('id', linkedInvoiceId).single()
     : { data: null };
 
+  // Fetch incident fees associated with the invoice (if any)
+  const { data: incidentFees } = linkedInvoiceId
+    ? await supabase.from('zen_incident_fees').select('*').eq('invoice_id', linkedInvoiceId)
+    : { data: [] };
+
   const isAdmin = checkPermission(profile?.role, "/admin");
   const rawLogs = isAdmin ? await getTrackingRawLogs(orderId) : [];
 
@@ -65,6 +79,58 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ or
     currency: 'USD',
     validFrom: order.created_at,
     validTo: '9999-12-31T23:59:59Z'
+  };
+
+  // 5. 무역 서류 데이터 준비 (Sprint 8)
+  const ciData = {
+    invoice_no: invoice?.invoice_no || `CI-${order.order_no}`,
+    date: new Date().toISOString().split('T')[0],
+    shipper: {
+      name: order.shipper?.name || 'ZENITH LOGISTICS',
+      address: (order.shipper as any)?.address || 'Seoul, South Korea'
+    },
+    consignee: {
+      name: order.recipient_name,
+      address: order.recipient_address
+    },
+    order_no: order.order_no,
+    items: order.packages.flatMap((pkg: any) => 
+      pkg.items.map((item: any) => ({
+        description: item.item_name,
+        hs_code: item.hs_code,
+        quantity: item.quantity,
+        unit_price: item.unit_price,
+        amount: item.quantity * item.unit_price
+      }))
+    ),
+    total_amount: invoice?.total_amount || order.packages.reduce((sum: number, pkg: any) => 
+      sum + pkg.items.reduce((pSum: number, item: any) => pSum + (item.quantity * item.unit_price), 0), 0
+    ),
+    currency: order.packages[0]?.items[0]?.currency || 'USD'
+  };
+
+  const plData = {
+    pl_no: `PL-${order.order_no}`,
+    date: new Date().toISOString().split('T')[0],
+    shipper: {
+      name: order.shipper?.name || 'ZENITH LOGISTICS',
+      address: (order.shipper as any)?.address || 'Seoul, South Korea'
+    },
+    consignee: {
+      name: order.recipient_name,
+      address: order.recipient_address
+    },
+    order_no: order.order_no,
+    items: order.packages.map((pkg: any) => ({
+      description: pkg.items.map((i: any) => i.item_name).join(', ') || 'General Cargo',
+      quantity: pkg.items.reduce((sum: number, i: any) => sum + i.quantity, 0),
+      pkgs: pkg.packing_count,
+      net_weight: pkg.gross_weight * 0.9, // Estimated net weight
+      gross_weight: pkg.gross_weight
+    })),
+    total_pkgs: order.packages.reduce((sum: number, pkg: any) => sum + pkg.packing_count, 0),
+    total_net_weight: order.packages.reduce((sum: number, pkg: any) => sum + (pkg.gross_weight * 0.9), 0),
+    total_gross_weight: order.packages.reduce((sum: number, pkg: any) => sum + pkg.gross_weight, 0)
   };
 
   return (
@@ -139,49 +205,61 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ or
             />
           </section>
 
-          {/* 2. Order Information Details */}
-          <section className="bg-white dark:bg-neutral-900/50 rounded-[2.5rem] border border-slate-100 dark:border-neutral-800 p-8">
-             <h2 className="text-xl font-bold text-slate-800 dark:text-white mb-6 flex items-center gap-2">
-                <Package className="w-5 h-5 text-blue-500" />
-                Cargo & Handover Details
-             </h2>
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="space-y-4">
-                    <div className="p-4 bg-slate-50 dark:bg-neutral-800/50 rounded-2xl">
-                        <p className="text-[11px] text-slate-400 uppercase font-bold mb-1">Shipper</p>
-                        <p className="font-semibold">{order.shipper?.name}</p>
+          {/* 2. Order Tabs Section (Sprint 9) */}
+          <OrderMainTabs 
+            cargoDetails={
+              <div>
+                <h2 className="text-xl font-bold text-slate-800 dark:text-white mb-6 flex items-center gap-2">
+                    <Package className="w-5 h-5 text-blue-500" />
+                    Cargo & Handover Details
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="space-y-4">
+                        <div className="p-4 bg-slate-50 dark:bg-neutral-800/50 rounded-2xl">
+                            <p className="text-[11px] text-slate-400 uppercase font-bold mb-1">Shipper</p>
+                            <p className="font-semibold">{order.shipper?.name}</p>
+                        </div>
+                        <div className="p-4 bg-slate-50 dark:bg-neutral-800/50 rounded-2xl">
+                            <p className="text-[11px] text-slate-400 uppercase font-bold mb-1">Recipient</p>
+                            <p className="font-semibold">{order.recipient_name}</p>
+                            <p className="text-xs text-slate-500 mt-1">{order.recipient_address}</p>
+                        </div>
                     </div>
-                    <div className="p-4 bg-slate-50 dark:bg-neutral-800/50 rounded-2xl">
-                        <p className="text-[11px] text-slate-400 uppercase font-bold mb-1">Recipient</p>
-                        <p className="font-semibold">{order.recipient_name}</p>
-                        <p className="text-xs text-slate-500 mt-1">{order.recipient_address}</p>
+                    <div className="space-y-4">
+                        <div className="p-4 bg-slate-50 dark:bg-neutral-800/50 rounded-2xl">
+                            <p className="text-[11px] text-slate-400 uppercase font-bold mb-1">Transport</p>
+                            <div className="flex items-center gap-2 font-semibold">
+                                <MapPin className="w-4 h-4 text-red-500" />
+                                {order.origin_port?.name} → {order.dest_port?.name}
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="p-4 bg-blue-50 dark:bg-blue-900/10 rounded-2xl">
+                                <p className="text-[11px] text-blue-400 uppercase font-bold mb-1">Total Weight</p>
+                                <p className="text-lg font-black text-blue-700 dark:text-blue-400">
+                                    {order.total_gross_weight} <span className="text-xs font-normal">kg</span>
+                                </p>
+                            </div>
+                            <div className="p-4 bg-purple-50 dark:bg-purple-900/10 rounded-2xl">
+                                <p className="text-[11px] text-purple-400 uppercase font-bold mb-1">Total Volume</p>
+                                <p className="text-lg font-black text-purple-700 dark:text-purple-400">
+                                    {order.total_volume} <span className="text-xs font-normal">cbm</span>
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div className="space-y-4">
-                    <div className="p-4 bg-slate-50 dark:bg-neutral-800/50 rounded-2xl">
-                        <p className="text-[11px] text-slate-400 uppercase font-bold mb-1">Transport</p>
-                        <div className="flex items-center gap-2 font-semibold">
-                            <MapPin className="w-4 h-4 text-red-500" />
-                            {order.origin_port?.name} → {order.dest_port?.name}
-                        </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="p-4 bg-blue-50 dark:bg-blue-900/10 rounded-2xl">
-                            <p className="text-[11px] text-blue-400 uppercase font-bold mb-1">Total Weight</p>
-                            <p className="text-lg font-black text-blue-700 dark:text-blue-400">
-                                {order.total_gross_weight} <span className="text-xs font-normal">kg</span>
-                            </p>
-                        </div>
-                        <div className="p-4 bg-purple-50 dark:bg-purple-900/10 rounded-2xl">
-                            <p className="text-[11px] text-purple-400 uppercase font-bold mb-1">Total Volume</p>
-                            <p className="text-lg font-black text-purple-700 dark:text-purple-400">
-                                {order.total_volume} <span className="text-xs font-normal">cbm</span>
-                            </p>
-                        </div>
-                    </div>
-                </div>
-             </div>
-          </section>
+              </div>
+            }
+            supportSection={
+              <OrderQnaSection 
+                orderId={orderId} 
+                orderNo={order.order_no} 
+                isAdmin={isAdmin} 
+                locale={locale} 
+              />
+            }
+          />
         </div>
 
         {/* Sidebar: 4 Columns */}
@@ -211,10 +289,43 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ or
             orderId={orderId}
             initialCosts={costs || []}
             initialInvoice={invoice || null}
+            incidentFees={incidentFees || []}
             isAdmin={isAdmin}
           />
+
+          {/* 5. Trade Documents Section (Sprint 8) */}
+          <section className="bg-white dark:bg-neutral-900/50 rounded-[2.5rem] border border-slate-100 dark:border-neutral-800 p-8 shadow-sm">
+             <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                   <FileText className="w-5 h-5 text-blue-500" />
+                   Trade Documents
+                </h2>
+                <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest bg-slate-50 dark:bg-neutral-800 px-3 py-1 rounded-full">
+                   Auto-Generated
+                </span>
+             </div>
+             
+             <div className="grid grid-cols-1 gap-3">
+                <p className="text-xs text-slate-500 italic mb-4">
+                  무역 상업 송장(CI) 및 패킹 리스트(PL)가 오더 정보를 기반으로 자동 생성되었습니다.
+                </p>
+                <div className="flex flex-col gap-3">
+                   <DocumentDownloadButton 
+                     document={<CommercialInvoicePDF data={ciData} />}
+                     fileName={`CI_${order.order_no}.pdf`}
+                     label="Commercial Invoice (CI)"
+                   />
+                   <DocumentDownloadButton 
+                     document={<PackingListPDF data={plData} />}
+                     fileName={`PL_${order.order_no}.pdf`}
+                     label="Packing List (PL)"
+                   />
+                </div>
+             </div>
+          </section>
         </div>
       </div>
     </div>
   );
 }
+

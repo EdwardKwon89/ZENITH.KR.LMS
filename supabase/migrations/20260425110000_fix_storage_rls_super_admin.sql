@@ -11,7 +11,7 @@ TO authenticated
 WITH CHECK (
     bucket_id = 'invoices'
     AND EXISTS (
-        SELECT 1 FROM public.profiles
+        SELECT 1 FROM public.zen_profiles
         WHERE id = auth.uid()
         AND role IN ('ADMIN', 'PARTNER', 'ZENITH_SUPER_ADMIN', 'MANAGER')
     )
@@ -25,14 +25,14 @@ USING (
     bucket_id = 'invoices'
     AND (
         EXISTS (
-            SELECT 1 FROM public.profiles p
+            SELECT 1 FROM public.zen_profiles p
             JOIN public.zen_invoices i ON i.shipper_id = p.org_id
             WHERE p.id = auth.uid()
             AND (storage.objects.name LIKE i.invoice_no || '/%')
         )
         OR
         EXISTS (
-            SELECT 1 FROM public.profiles
+            SELECT 1 FROM public.zen_profiles
             WHERE id = auth.uid()
             AND role IN ('ADMIN', 'ZENITH_SUPER_ADMIN', 'MANAGER')
         )

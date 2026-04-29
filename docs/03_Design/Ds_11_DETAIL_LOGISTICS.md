@@ -112,3 +112,33 @@
 
 - **설명**: `updated_at` 컬럼 자동 갱신 트리거용 함수
 - **권한**: System
+
+### 8.3 logClientError (Action) [Phase 4.1.2.1]
+
+- **설명**: 클라이언트 또는 서버에서 발생한 에러를 DB(`zen_error_logs`)에 기록하고, 중대 에러(`CRITICAL`) 시 관리자에게 알림 발송
+- **권한**: All (Public/User)
+- **파라미터**:
+  - `message`: (string) 에러 메시지
+  - `stack`: (string, optional) 스택 트레이스
+  - `url`: (string, optional) 에러 발생 URL
+  - `severity`: (string) 'WARNING' | 'ERROR' | 'CRITICAL'
+  - `error_type`: (string) 'CLIENT' | 'SERVER' | 'EDGE'
+- **응답**: `{ success: boolean, logId?: string }`
+
+### 8.4 getErrorLogs (Action) [Phase 4.1.2.1]
+
+- **설명**: 관리자용 에러 로그 목록 조회 (페이징 및 필터링 지원)
+- **권한**: Admin
+- **파라미터**:
+  - `page`: (number, optional) 페이지 번호
+  - `pageSize`: (number, optional) 페이지 크기
+  - `severity`: (string, optional) 심각도 필터
+  - `resolved`: (boolean, optional) 해결 여부 필터
+- **응답**: `{ data: Array<ErrorLog>, count: number, page: number, pageSize: number }`
+
+### 8.5 resolveErrorLog (Action) [Phase 4.1.2.1]
+
+- **설명**: 특정 에러 로그를 '해결됨'(`resolved=true`) 상태로 변경
+- **권한**: Admin
+- **파라미터**: `id` (uuid)
+- **응답**: `{ success: true }`

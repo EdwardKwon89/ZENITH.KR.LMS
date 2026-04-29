@@ -16,7 +16,7 @@ CREATE TABLE public.zen_system_params (
   description     TEXT NOT NULL,
   effective_from  TIMESTAMPTZ NOT NULL DEFAULT now(),
   effective_to    TIMESTAMPTZ,
-  updated_by      uuid REFERENCES public.profiles(id),
+  updated_by      uuid REFERENCES public.zen_profiles(id),
   updated_at      TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
@@ -26,24 +26,24 @@ ALTER TABLE public.zen_system_params ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Admins can select zen_system_params" ON public.zen_system_params
   FOR SELECT USING (
     EXISTS (
-      SELECT 1 FROM public.profiles
-      WHERE profiles.id = auth.uid()
-      AND profiles.role IN ('ADMIN', 'ZENITH_SUPER_ADMIN')
+      SELECT 1 FROM public.zen_profiles
+      WHERE zen_profiles.id = auth.uid()
+      AND zen_profiles.role IN ('ADMIN', 'ZENITH_SUPER_ADMIN')
     )
   );
 
 CREATE POLICY "Admins can update zen_system_params" ON public.zen_system_params
   FOR UPDATE USING (
     EXISTS (
-      SELECT 1 FROM public.profiles
-      WHERE profiles.id = auth.uid()
-      AND profiles.role IN ('ADMIN', 'ZENITH_SUPER_ADMIN')
+      SELECT 1 FROM public.zen_profiles
+      WHERE zen_profiles.id = auth.uid()
+      AND zen_profiles.role IN ('ADMIN', 'ZENITH_SUPER_ADMIN')
     )
   ) WITH CHECK (
     EXISTS (
-      SELECT 1 FROM public.profiles
-      WHERE profiles.id = auth.uid()
-      AND profiles.role IN ('ADMIN', 'ZENITH_SUPER_ADMIN')
+      SELECT 1 FROM public.zen_profiles
+      WHERE zen_profiles.id = auth.uid()
+      AND zen_profiles.role IN ('ADMIN', 'ZENITH_SUPER_ADMIN')
     )
   );
 
@@ -65,7 +65,7 @@ CREATE TABLE public.zen_param_audit_log (
   param_key   TEXT NOT NULL,
   old_value   TEXT,
   new_value   TEXT,
-  changed_by  uuid NOT NULL REFERENCES public.profiles(id),
+  changed_by  uuid NOT NULL REFERENCES public.zen_profiles(id),
   changed_at  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
@@ -75,9 +75,9 @@ ALTER TABLE public.zen_param_audit_log ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Admins can select zen_param_audit_log" ON public.zen_param_audit_log
   FOR SELECT USING (
     EXISTS (
-      SELECT 1 FROM public.profiles
-      WHERE profiles.id = auth.uid()
-      AND profiles.role IN ('ADMIN', 'ZENITH_SUPER_ADMIN')
+      SELECT 1 FROM public.zen_profiles
+      WHERE zen_profiles.id = auth.uid()
+      AND zen_profiles.role IN ('ADMIN', 'ZENITH_SUPER_ADMIN')
     )
   );
 
@@ -94,7 +94,7 @@ CREATE TABLE public.zen_feature_flags (
   is_enabled  BOOLEAN NOT NULL DEFAULT false,
   org_id      uuid REFERENCES public.zen_organizations(id) ON DELETE CASCADE,
   description TEXT NOT NULL,
-  updated_by  uuid REFERENCES public.profiles(id),
+  updated_by  uuid REFERENCES public.zen_profiles(id),
   updated_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
   UNIQUE (key, org_id)
 );
@@ -105,42 +105,42 @@ ALTER TABLE public.zen_feature_flags ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Admins can select zen_feature_flags" ON public.zen_feature_flags
   FOR SELECT USING (
     EXISTS (
-      SELECT 1 FROM public.profiles
-      WHERE profiles.id = auth.uid()
-      AND profiles.role IN ('ADMIN', 'ZENITH_SUPER_ADMIN')
+      SELECT 1 FROM public.zen_profiles
+      WHERE zen_profiles.id = auth.uid()
+      AND zen_profiles.role IN ('ADMIN', 'ZENITH_SUPER_ADMIN')
     )
   );
 
 CREATE POLICY "Admins can insert zen_feature_flags" ON public.zen_feature_flags
   FOR INSERT WITH CHECK (
     EXISTS (
-      SELECT 1 FROM public.profiles
-      WHERE profiles.id = auth.uid()
-      AND profiles.role IN ('ADMIN', 'ZENITH_SUPER_ADMIN')
+      SELECT 1 FROM public.zen_profiles
+      WHERE zen_profiles.id = auth.uid()
+      AND zen_profiles.role IN ('ADMIN', 'ZENITH_SUPER_ADMIN')
     )
   );
 
 CREATE POLICY "Admins can update zen_feature_flags" ON public.zen_feature_flags
   FOR UPDATE USING (
     EXISTS (
-      SELECT 1 FROM public.profiles
-      WHERE profiles.id = auth.uid()
-      AND profiles.role IN ('ADMIN', 'ZENITH_SUPER_ADMIN')
+      SELECT 1 FROM public.zen_profiles
+      WHERE zen_profiles.id = auth.uid()
+      AND zen_profiles.role IN ('ADMIN', 'ZENITH_SUPER_ADMIN')
     )
   ) WITH CHECK (
     EXISTS (
-      SELECT 1 FROM public.profiles
-      WHERE profiles.id = auth.uid()
-      AND profiles.role IN ('ADMIN', 'ZENITH_SUPER_ADMIN')
+      SELECT 1 FROM public.zen_profiles
+      WHERE zen_profiles.id = auth.uid()
+      AND zen_profiles.role IN ('ADMIN', 'ZENITH_SUPER_ADMIN')
     )
   );
 
 CREATE POLICY "Admins can delete zen_feature_flags" ON public.zen_feature_flags
   FOR DELETE USING (
     EXISTS (
-      SELECT 1 FROM public.profiles
-      WHERE profiles.id = auth.uid()
-      AND profiles.role IN ('ADMIN', 'ZENITH_SUPER_ADMIN')
+      SELECT 1 FROM public.zen_profiles
+      WHERE zen_profiles.id = auth.uid()
+      AND zen_profiles.role IN ('ADMIN', 'ZENITH_SUPER_ADMIN')
     )
   );
 
@@ -149,7 +149,7 @@ CREATE POLICY "Users can read own org feature flags" ON public.zen_feature_flags
   FOR SELECT USING (
     org_id IS NULL OR
     org_id = (
-      SELECT org_id FROM public.profiles WHERE id = auth.uid()
+      SELECT org_id FROM public.zen_profiles WHERE id = auth.uid()
     )
   );
 

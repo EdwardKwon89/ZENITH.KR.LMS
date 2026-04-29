@@ -20,7 +20,7 @@ CREATE POLICY "Users can view their organization's invoice PDF history" ON publi
     FOR SELECT USING (
         EXISTS (
             SELECT 1 FROM public.zen_invoices i
-            JOIN public.profiles p ON p.org_id = i.shipper_id
+            JOIN public.zen_profiles p ON p.org_id = i.shipper_id
             WHERE i.id = zen_invoice_pdf_history.invoice_id
             AND (p.id = auth.uid() OR p.role = 'ADMIN')
         )
@@ -30,8 +30,8 @@ CREATE POLICY "Users can view their organization's invoice PDF history" ON publi
 CREATE POLICY "Admins and Partners can create invoice PDF history" ON public.zen_invoice_pdf_history
     FOR INSERT WITH CHECK (
         EXISTS (
-            SELECT 1 FROM public.profiles
-            WHERE profiles.id = auth.uid()
-            AND profiles.role IN ('ADMIN', 'PARTNER')
+            SELECT 1 FROM public.zen_profiles
+            WHERE zen_profiles.id = auth.uid()
+            AND zen_profiles.role IN ('ADMIN', 'PARTNER')
         )
     );

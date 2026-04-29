@@ -8,16 +8,16 @@
 CREATE POLICY "Admins can update zen_invoices" ON public.zen_invoices
     FOR UPDATE USING (
         EXISTS (
-            SELECT 1 FROM public.profiles
-            WHERE profiles.id = auth.uid()
-            AND profiles.role IN ('ADMIN', 'ZENITH_SUPER_ADMIN')
+            SELECT 1 FROM public.zen_profiles
+            WHERE zen_profiles.id = auth.uid()
+            AND zen_profiles.role IN ('ADMIN', 'ZENITH_SUPER_ADMIN')
         )
     )
     WITH CHECK (
         EXISTS (
-            SELECT 1 FROM public.profiles
-            WHERE profiles.id = auth.uid()
-            AND profiles.role IN ('ADMIN', 'ZENITH_SUPER_ADMIN')
+            SELECT 1 FROM public.zen_profiles
+            WHERE zen_profiles.id = auth.uid()
+            AND zen_profiles.role IN ('ADMIN', 'ZENITH_SUPER_ADMIN')
         )
     );
 
@@ -25,8 +25,8 @@ CREATE POLICY "Admins can update zen_invoices" ON public.zen_invoices
 CREATE POLICY "Admins can insert zen_invoices" ON public.zen_invoices
     FOR INSERT WITH CHECK (
         EXISTS (
-            SELECT 1 FROM public.profiles
-            WHERE profiles.id = auth.uid()
-            AND profiles.role IN ('ADMIN', 'ZENITH_SUPER_ADMIN')
+            SELECT 1 FROM public.zen_profiles
+            WHERE zen_profiles.id = auth.uid()
+            AND zen_profiles.role IN ('ADMIN', 'ZENITH_SUPER_ADMIN')
         )
     );

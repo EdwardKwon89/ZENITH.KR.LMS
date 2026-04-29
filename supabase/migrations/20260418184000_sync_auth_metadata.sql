@@ -14,7 +14,7 @@ BEGIN
     -- 개인 회원(is_new_org/org_id 없음)인 경우 SHIPPER로 고정
     IF (new.raw_user_meta_data->>'is_new_org')::boolean = true THEN
         -- 신규 법인 생성
-        INSERT INTO public.organizations (name, biz_no, type, status)
+        INSERT INTO public.zen_organizations (name, biz_no, type, status)
         VALUES (
             new.raw_user_meta_data->>'org_name',
             new.raw_user_meta_data->>'business_number',
@@ -31,7 +31,7 @@ BEGIN
         target_org_id := (new.raw_user_meta_data->>'org_id')::UUID;
         
         -- 조직 테이블에서 타입 조회
-        SELECT type INTO final_org_type FROM public.organizations WHERE id = target_org_id;
+        SELECT type INTO final_org_type FROM public.zen_organizations WHERE id = target_org_id;
         final_role := 'MEMBER';
 
     ELSE
@@ -41,8 +41,8 @@ BEGIN
         -- 개인 회원은 즉시 활성화할지, 심사할지 정책에 따라 다르나 안전을 위해 PENDING 기본값 유지
     END IF;
 
-    -- [B] public.profiles 테이블 생성
-    INSERT INTO public.profiles (id, email, full_name, role, status, org_id)
+    -- [B] public.zen_profiles 테이블 생성
+    INSERT INTO public.zen_profiles (id, email, full_name, role, status, org_id)
     VALUES (
         new.id, 
         new.email, 

@@ -63,6 +63,7 @@ export async function topUpWallet(orgId: string, amount: number, description?: s
     wallet = newWallet;
   }
 
+  if (!wallet) throw new Error("지갑 정보를 가져올 수 없습니다.");
   const newBalance = Number(wallet.balance) + amount;
 
   // 2. 트랜잭션 처리 (잔액 업데이트 + 이력 생성)

@@ -17,6 +17,8 @@
 > - [SUPPORT](Ds_11_DETAIL_SUPPORT.md) — 고객지원 포털 QnA/FAQ/공지사항 (Phase 4 Sprint 4)
 > - [OPS_PARAMS](Ds_11_DETAIL_OPS_PARAMS.md) — 운영 파라미터 & Feature Flag (Phase 4 Sprint 5)
 - [WALLET](Ds_11_DETAIL_WALLET.md) — 선불 지갑 및 거래 관리 (Phase 4 Sprint 5)
+- [CLAIMS](Ds_11_DETAIL_CLAIMS.md) — 클레임 워크플로우 및 사고비 관리 (Phase 4 Sprint 8)
+- [DOCUMENTS](Ds_11_DETAIL_DOCUMENTS.md) — 다국어 CI/PL 문서 엔진 (Phase 4 Sprint 8)
 
 ---
 
@@ -109,6 +111,15 @@
 | 17.3 | Wallet | `requestRefund` | Action | User | 지갑 잔액 환불 요청 (PENDING 상태 생성) | [WALLET](Ds_11_DETAIL_WALLET.md#173-requestrefund-action) |
 | 17.4 | Wallet | `payInvoiceFromWallet` | Action | User | 지갑 잔액으로 인보이스 결제 (원자적 처리) | [WALLET](Ds_11_DETAIL_WALLET.md#174-payinvoicefromwallet-action) |
 | 17.5 | Wallet | `getWalletTransactions` | Action | User | 지갑 거래 내역 조회 | [WALLET](Ds_11_DETAIL_WALLET.md#175-getwallettransactions-action) |
+| 18.1 | Claims | `getClaims` | Action | User/Admin | 클레임 목록 조회 | [CLAIMS](Ds_11_DETAIL_CLAIMS.md#181-getclaims-action) |
+| 18.2 | Claims | `createClaim` | Action | User | 신규 클레임 등록 | [CLAIMS](Ds_11_DETAIL_CLAIMS.md#182-createclaim-action) |
+| 18.3 | Claims | `updateClaimStatus` | Action | Admin | 클레임 상태 변경 | [CLAIMS](Ds_11_DETAIL_CLAIMS.md#183-updateclaimstatus-action) |
+| 18.4 | Claims | `addIncidentFee` | Action | Admin | 사고 비용 등록 및 인보이스 차감 | [CLAIMS](Ds_11_DETAIL_CLAIMS.md#184-addincidentfee-action) |
+| 18.5 | Claims | `getClaimDetails` | Action | User/Admin | 클레임 상세 정보 조회 | [CLAIMS](Ds_11_DETAIL_CLAIMS.md#185-getclaimdetails-action) |
+| 18.6 | Claims | `deleteClaim` | Action | User/Admin | 클레임 삭제 | [CLAIMS](Ds_11_DETAIL_CLAIMS.md#186-deleteclaim-action) |
+| 19.1 | Documents | `generateCI` | Action | User | Commercial Invoice 데이터 생성 | [DOCUMENTS](Ds_11_DETAIL_DOCUMENTS.md#191-generateci-action) |
+| 19.2 | Documents | `generatePL` | Action | User | Packing List 데이터 생성 | [DOCUMENTS](Ds_11_DETAIL_DOCUMENTS.md#192-generatepl-action) |
+| 19.3 | Documents | `getDocumentsByOrder` | Action | User | 오더별 문서 목록 조회 | [DOCUMENTS](Ds_11_DETAIL_DOCUMENTS.md#193-getdocumentsbyorder-action) |
 
 ---
 

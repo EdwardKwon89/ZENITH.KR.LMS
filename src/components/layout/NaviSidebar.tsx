@@ -13,11 +13,18 @@ import {
   Truck, 
   Calculator, 
   ShieldCheck, 
+  ShieldAlert,
   Settings,
   Menu,
   Package,
   MessageSquare,
-  UserCircle
+  UserCircle,
+  HelpCircle,
+  TrendingUp,
+  TrendingDown,
+  BarChartBig,
+  CalendarDays,
+  FileText
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -77,16 +84,33 @@ export default function NaviSidebar({ user, profile }: { user?: any; profile?: a
       href: "/finance", 
       icon: Calculator,
       children: [
-        { title: t("finance"), href: "/finance" },
+        { title: t("finance_revenue"), href: "/finance/revenue" },
+        { title: t("finance_costs"), href: "/finance/costs" },
+        { title: t("finance_transport_costs"), href: "/admin/transport-costs" },
+        { title: t("finance_documents"), href: "/finance/documents" },
         { title: t("settlement"), href: "/settlement" },
       ]
     },
+    { title: t("statistics"), href: "/admin/statistics", icon: BarChartBig, isAdminOnly: true },
+    { title: t("schedules"), href: "/schedules", icon: CalendarDays },
     { 
       title: t("voc"), 
       href: profile?.role?.includes('ADMIN') ? "/voc/admin" : "/voc", 
       icon: MessageSquare 
     },
+    { 
+      title: t("support_group"), 
+      href: "/support", 
+      icon: HelpCircle,
+      children: [
+        { title: t("support_qna"), href: "/support/qna" },
+        { title: t("support_faq"), href: "/support/faq" },
+        { title: t("support_notices"), href: "/support/notices" },
+      ]
+    },
+    { title: t("claims"), href: "/admin/claims", icon: ShieldAlert, isAdminOnly: true },
     { title: t("governance"), href: "/governance", icon: ShieldCheck, isAdminOnly: true },
+    { title: t("admin_error_logs"), href: "/admin/error-logs", icon: ShieldAlert, isAdminOnly: true },
     { title: t("mypage"), href: "/mypage", icon: UserCircle },
     { title: t("settings"), href: "/settings", icon: Settings },
   ];

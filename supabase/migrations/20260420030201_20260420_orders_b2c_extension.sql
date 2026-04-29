@@ -29,7 +29,7 @@ CREATE INDEX idx_zen_order_items_order_id ON public.zen_order_items(order_id);
 ALTER TABLE public.zen_order_items ENABLE ROW LEVEL SECURITY;
 
 -- 모든 사용자가 자신의 오더에 속한 아이템을 볼 수 있도록 정책 설정 (초기 단계는 단순 허용)
-CREATE POLICY "Users can view items of accessible orders" ON public.zen_order_items
+CREATE POLICY "Users can view items of accessible zen_orders" ON public.zen_order_items
     FOR SELECT USING (true); -- 추후 zen_orders의 RLS와 연동 필요
 
 COMMENT ON TABLE public.zen_order_items IS '복수 아이템을 관리하는 오더 상세 테이블 (B2C 대응)';

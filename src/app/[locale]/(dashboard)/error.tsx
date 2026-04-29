@@ -1,7 +1,9 @@
 "use client";
 
 import React, { useEffect } from 'react';
+import * as Sentry from "@sentry/nextjs";
 import { ZenErrorView } from '@/components/ui/ZenErrorView';
+import { logClientError } from '@/app/actions/monitoring';
 
 export default function GlobalDashboardError({
   error,
@@ -11,7 +13,19 @@ export default function GlobalDashboardError({
   reset: () => void;
 }) {
   useEffect(() => {
-    // 실제 운영 환경에서는 Sentry 등의 외부 로깅 서비스로 전송할 지점입니다.
+    // Sentry에 에러 전송
+    const eventId = Sentry.captureException(error);
+
+    // 로컬 DB 모니터링 시스템에 에러 기록
+    logClientError({
+      message: error.message || "Unknown Dashboard Error",
+      stack: error.stack,
+      url: window.location.href,
+      severity: "ERROR",
+      error_type: "CLIENT",
+      sentry_id: eventId
+    });
+
     console.error("Dashboard Runtime Error:", error);
   }, [error]);
 

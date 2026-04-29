@@ -20,42 +20,42 @@ ALTER TABLE public.zen_wallet ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Admins can select zen_wallet" ON public.zen_wallet
   FOR SELECT USING (
     EXISTS (
-      SELECT 1 FROM public.profiles
-      WHERE profiles.id = auth.uid()
-      AND profiles.role IN ('ADMIN', 'ZENITH_SUPER_ADMIN')
+      SELECT 1 FROM public.zen_profiles
+      WHERE zen_profiles.id = auth.uid()
+      AND zen_profiles.role IN ('ADMIN', 'ZENITH_SUPER_ADMIN')
     )
   );
 
 CREATE POLICY "Admins can insert zen_wallet" ON public.zen_wallet
   FOR INSERT WITH CHECK (
     EXISTS (
-      SELECT 1 FROM public.profiles
-      WHERE profiles.id = auth.uid()
-      AND profiles.role IN ('ADMIN', 'ZENITH_SUPER_ADMIN')
+      SELECT 1 FROM public.zen_profiles
+      WHERE zen_profiles.id = auth.uid()
+      AND zen_profiles.role IN ('ADMIN', 'ZENITH_SUPER_ADMIN')
     )
   );
 
 CREATE POLICY "Admins can update zen_wallet" ON public.zen_wallet
   FOR UPDATE USING (
     EXISTS (
-      SELECT 1 FROM public.profiles
-      WHERE profiles.id = auth.uid()
-      AND profiles.role IN ('ADMIN', 'ZENITH_SUPER_ADMIN')
+      SELECT 1 FROM public.zen_profiles
+      WHERE zen_profiles.id = auth.uid()
+      AND zen_profiles.role IN ('ADMIN', 'ZENITH_SUPER_ADMIN')
     )
   ) WITH CHECK (
     EXISTS (
-      SELECT 1 FROM public.profiles
-      WHERE profiles.id = auth.uid()
-      AND profiles.role IN ('ADMIN', 'ZENITH_SUPER_ADMIN')
+      SELECT 1 FROM public.zen_profiles
+      WHERE zen_profiles.id = auth.uid()
+      AND zen_profiles.role IN ('ADMIN', 'ZENITH_SUPER_ADMIN')
     )
   );
 
 CREATE POLICY "Admins can delete zen_wallet" ON public.zen_wallet
   FOR DELETE USING (
     EXISTS (
-      SELECT 1 FROM public.profiles
-      WHERE profiles.id = auth.uid()
-      AND profiles.role IN ('ADMIN', 'ZENITH_SUPER_ADMIN')
+      SELECT 1 FROM public.zen_profiles
+      WHERE zen_profiles.id = auth.uid()
+      AND zen_profiles.role IN ('ADMIN', 'ZENITH_SUPER_ADMIN')
     )
   );
 
@@ -63,7 +63,7 @@ CREATE POLICY "Admins can delete zen_wallet" ON public.zen_wallet
 CREATE POLICY "Users can read own org wallet" ON public.zen_wallet
   FOR SELECT USING (
     org_id = (
-      SELECT org_id FROM public.profiles WHERE id = auth.uid()
+      SELECT org_id FROM public.zen_profiles WHERE id = auth.uid()
     )
   );
 
@@ -84,7 +84,7 @@ CREATE TABLE public.zen_wallet_transactions (
                   CHECK (status IN ('PENDING', 'APPROVED', 'REJECTED', 'COMPLETED')),
   reference_id  uuid,  -- 연관 인보이스 등 외부 참조 (nullable)
   description   TEXT,
-  created_by    uuid REFERENCES public.profiles(id),
+  created_by    uuid REFERENCES public.zen_profiles(id),
   created_at    TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
@@ -94,33 +94,33 @@ ALTER TABLE public.zen_wallet_transactions ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Admins can select zen_wallet_transactions" ON public.zen_wallet_transactions
   FOR SELECT USING (
     EXISTS (
-      SELECT 1 FROM public.profiles
-      WHERE profiles.id = auth.uid()
-      AND profiles.role IN ('ADMIN', 'ZENITH_SUPER_ADMIN')
+      SELECT 1 FROM public.zen_profiles
+      WHERE zen_profiles.id = auth.uid()
+      AND zen_profiles.role IN ('ADMIN', 'ZENITH_SUPER_ADMIN')
     )
   );
 
 CREATE POLICY "Admins can insert zen_wallet_transactions" ON public.zen_wallet_transactions
   FOR INSERT WITH CHECK (
     EXISTS (
-      SELECT 1 FROM public.profiles
-      WHERE profiles.id = auth.uid()
-      AND profiles.role IN ('ADMIN', 'ZENITH_SUPER_ADMIN')
+      SELECT 1 FROM public.zen_profiles
+      WHERE zen_profiles.id = auth.uid()
+      AND zen_profiles.role IN ('ADMIN', 'ZENITH_SUPER_ADMIN')
     )
   );
 
 CREATE POLICY "Admins can update zen_wallet_transactions" ON public.zen_wallet_transactions
   FOR UPDATE USING (
     EXISTS (
-      SELECT 1 FROM public.profiles
-      WHERE profiles.id = auth.uid()
-      AND profiles.role IN ('ADMIN', 'ZENITH_SUPER_ADMIN')
+      SELECT 1 FROM public.zen_profiles
+      WHERE zen_profiles.id = auth.uid()
+      AND zen_profiles.role IN ('ADMIN', 'ZENITH_SUPER_ADMIN')
     )
   ) WITH CHECK (
     EXISTS (
-      SELECT 1 FROM public.profiles
-      WHERE profiles.id = auth.uid()
-      AND profiles.role IN ('ADMIN', 'ZENITH_SUPER_ADMIN')
+      SELECT 1 FROM public.zen_profiles
+      WHERE zen_profiles.id = auth.uid()
+      AND zen_profiles.role IN ('ADMIN', 'ZENITH_SUPER_ADMIN')
     )
   );
 
@@ -129,7 +129,7 @@ CREATE POLICY "Users can read own wallet transactions" ON public.zen_wallet_tran
   FOR SELECT USING (
     wallet_id IN (
       SELECT w.id FROM public.zen_wallet w
-      JOIN public.profiles p ON p.org_id = w.org_id
+      JOIN public.zen_profiles p ON p.org_id = w.org_id
       WHERE p.id = auth.uid()
     )
   );
@@ -141,7 +141,7 @@ CREATE POLICY "Users can insert refund requests" ON public.zen_wallet_transactio
     AND status = 'PENDING'
     AND wallet_id IN (
       SELECT w.id FROM public.zen_wallet w
-      JOIN public.profiles p ON p.org_id = w.org_id
+      JOIN public.zen_profiles p ON p.org_id = w.org_id
       WHERE p.id = auth.uid()
     )
   );

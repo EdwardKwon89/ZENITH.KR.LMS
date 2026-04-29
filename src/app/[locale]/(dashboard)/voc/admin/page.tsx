@@ -1,7 +1,7 @@
 import { getVocList } from '@/app/actions/voc';
 import { requireAdmin } from '@/lib/auth/guards';
 import { getMessages } from 'next-intl/server';
-import AdminVocClient from './admin-client';
+import AdminVocClient from '../admin-client';
 import { MessageSquare } from 'lucide-react';
 
 export default async function AdminVocPage() {

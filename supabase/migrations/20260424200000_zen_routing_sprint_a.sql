@@ -26,42 +26,42 @@ ALTER TABLE zen_route_options ENABLE ROW LEVEL SECURITY;
 ALTER TABLE zen_order_routes ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies for zen_route_options
-CREATE POLICY "Users can view route options for their org's orders" ON zen_route_options
+CREATE POLICY "Users can view route options for their org's zen_orders" ON zen_route_options
     FOR SELECT USING (
         EXISTS (
             SELECT 1 FROM public.zen_orders o
-            JOIN public.profiles p ON p.id = auth.uid()
+            JOIN public.zen_profiles p ON p.id = auth.uid()
             WHERE o.id = zen_route_options.order_id
             AND (p.org_id = o.shipper_id OR p.role = 'ADMIN')
         )
     );
 
-CREATE POLICY "Users can manage route options for their org's orders" ON zen_route_options
+CREATE POLICY "Users can manage route options for their org's zen_orders" ON zen_route_options
     FOR ALL USING (
         EXISTS (
             SELECT 1 FROM public.zen_orders o
-            JOIN public.profiles p ON p.id = auth.uid()
+            JOIN public.zen_profiles p ON p.id = auth.uid()
             WHERE o.id = zen_route_options.order_id
             AND (p.org_id = o.shipper_id OR p.role = 'ADMIN')
         )
     );
 
 -- RLS Policies for zen_order_routes
-CREATE POLICY "Users can view order routes for their org's orders" ON zen_order_routes
+CREATE POLICY "Users can view order routes for their org's zen_orders" ON zen_order_routes
     FOR SELECT USING (
         EXISTS (
             SELECT 1 FROM public.zen_orders o
-            JOIN public.profiles p ON p.id = auth.uid()
+            JOIN public.zen_profiles p ON p.id = auth.uid()
             WHERE o.id = zen_order_routes.order_id
             AND (p.org_id = o.shipper_id OR p.role = 'ADMIN')
         )
     );
 
-CREATE POLICY "Users can manage order routes for their org's orders" ON zen_order_routes
+CREATE POLICY "Users can manage order routes for their org's zen_orders" ON zen_order_routes
     FOR ALL USING (
         EXISTS (
             SELECT 1 FROM public.zen_orders o
-            JOIN public.profiles p ON p.id = auth.uid()
+            JOIN public.zen_profiles p ON p.id = auth.uid()
             WHERE o.id = zen_order_routes.order_id
             AND (p.org_id = o.shipper_id OR p.role = 'ADMIN')
         )
