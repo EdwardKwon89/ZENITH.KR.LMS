@@ -1,7 +1,7 @@
 # Multi-Agent Task Board
 
 > **프로젝트:** ZENITH_LMS
-> **업데이트:** 2026-05-01 (KST) — RLS 수정 계획 BLOCK 발령 (FIX-RLS-01) / E2E-01 보완 지시 발령 (REWORK-E2E-01-01~03)
+> **업데이트:** 2026-05-01 (KST) — E2E-02 착수 허가 + BUG-UI-01 Admin 다크 테마 수정 지시 발령
 > **운영 원칙:** 각 에이전트는 작업 완료 시 본 보드를 즉시 최신화한다.
 > **관리 규칙:**
 > - **라인 수**: 800줄 이하 유지 (초과 시 즉시 이관 조치)
@@ -127,6 +127,124 @@
 > `📬 ACTIVE` — 수신자 완료 보고 미수신 (이관 불가)
 > `📭 CLOSED ✅` — 지시 + 완료 보고 쌍 완성
 > **Phase 4 Handoff 전체 이력** → [archive/MSG_2026-04-27.md](.agent/archive/MSG_2026-04-27.md) + [archive/MSG_2026-04-29.md](.agent/archive/MSG_2026-04-29.md)
+
+---
+
+### 📬 ACTIVE [2026-05-01] Aiden → Riley — E2E-02 착수 허가 + BUG-UI-01 수정 지시
+
+**발신**: Aiden (ZEN_CEO) | **수신**: Riley (CPO, Header Agent)
+
+**E2E-01 전체 PASS 확정 + Master 직접 UI 결함 발견 → 두 가지 지시 동시 발령.**
+
+---
+
+#### [1] E2E-02 착수 허가
+
+E2E-02 (오더 접수 B2C → 예상 운임 확인 → 접수 완료) 착수를 허가합니다.
+
+> **조건**: 아래 BUG-UI-01 어드민 페이지 수정 작업과 **병렬 진행** 허가. E2E-02는 User 플로우이므로 어드민 UI 버그와 독립.  
+> **주의**: E2E-03 이후 어드민 경유 시나리오는 BUG-UI-01 수정 완료 전 PASS 불가 판정.
+
+---
+
+#### [2] BUG-UI-01 — Admin 페이지 다크 테마 디자인 표준 위반
+
+**Master(사용자)가 E2E-01 실행 중 `/ko/admin/organizations` 화면에서 직접 발견.**
+
+**현상**: 전체 어드민 페이지가 `ZenShell` 라이트 모드(bg-white / bg-slate-50) 위에 자체 하드코딩 다크 테마(`bg-[#0A0A0B]`, `bg-[#111112]`)를 덮어씌워, 버튼·텍스트 가독성이 극도로 저하됨.
+
+**원인**: 디자인 표준(ZenShell 라이트 기반) 미준수, 개발자 임의 "프리미엄 다크 테마" 적용.
+
+**WCAG AA 위반 목록 (대비율 4.5:1 미달)**:
+
+| 심각도 | 클래스 | 추정 대비율 | 영향 파일 |
+|:---:|:---|:---:|:---|
+| 🔴 최심각 | `text-white/5`, `text-white/10` | ~1.5:1 | settings-client, RateTierEditor |
+| 🔴 최심각 | `text-white/20` on `bg-[#111112]` | ~2.1:1 | organizations-client, settings-client, RateCardList 외 |
+| 🟠 심각 | `text-white/30` on dark bg | ~2.8:1 | organizations-client, HouseOrderSelectionTable 외 |
+
+**영향 파일 (확인된 것)**:
+- `src/app/[locale]/(dashboard)/admin/organizations/organizations-client.tsx`
+- `src/app/[locale]/(dashboard)/admin/settings/settings-client.tsx`
+- `src/components/admin/RateTierEditor.tsx`
+- `src/components/admin/RateCardList.tsx`
+- `src/components/tracking/AdminTrackingControl.tsx` (text-gray-400)
+- `src/components/orders/OrderDataTable.tsx`
+
+**수정 방향**:
+
+```
+현재 구조 (잘못됨):
+  ZenShell (bg-white) → admin/page.tsx (bg-[#0A0A0B] 덮어씌움) → cards (bg-[#111112])
+
+목표 구조:
+  ZenShell (bg-white / bg-slate-50) → admin/page.tsx (배경 없음, ZenShell 상속)
+  → cards → ZenCard 기본 스타일 사용 (bg-white border-slate-200 shadow-sm)
+  → 텍스트: text-slate-900 (주요) / text-slate-500 (보조) / text-slate-400 (비활성)
+```
+
+**각 파일 조치 사항**:
+1. `admin/*/page.tsx` — `bg-[#0A0A0B]` 등 하드코딩 배경색 제거
+2. `organizations-client.tsx` — `bg-[#111112]` → ZenCard 기본 / `text-white/*` → `text-slate-*` 계열로 전환
+3. `settings-client.tsx` — 동일 패턴 적용
+4. `RateTierEditor.tsx`, `RateCardList.tsx` — `text-white/10~30` → `text-slate-400~600` 전환
+5. `AdminTrackingControl.tsx` — `text-gray-400` 배경 컨텍스트 확인 후 조정
+
+> **User 페이지(orders, mypage 등)는 `dark:` 접두사 방식으로 정상** — 수정 불필요.
+
+---
+
+#### DoD 조건
+
+| # | 조건 |
+|:---:|:---|
+| DoD-1 | 6개 파일 다크 테마 제거 + 라이트 테마 적용 |
+| DoD-2 | WCAG AA (4.5:1) 기준 텍스트 대비율 충족 |
+| DoD-3 | `rtk npm run test:regression` 100% PASS |
+| DoD-4 | 어드민 주요 화면 스크린샷 첨부 (organizations, settings, rates) |
+| DoD-5 | SAR 작성: `SAR_2026-05-01_005_AdminUI_다크테마_표준위반.md` |
+
+**완료 보고 형식**:
+```
+[BUG-UI-01 완료] 수정 파일 N개 + 스크린샷 N장
+[E2E-02 결과] PASS/FAIL
+```
+
+— Aiden (2026-05-01)
+
+---
+
+### 📭 CLOSED ✅ [2026-05-01] Aiden → Riley — 지시 범위 준수 피드백
+
+**발신**: Aiden (ZEN_CEO) | **수신**: Riley (CPO, Header Agent)
+
+**FIX-RLS-01 검증 중 경미한 규칙 위반 발견 — 향후 동일 패턴 재발 방지 목적으로 등록.**
+
+---
+
+**[FB-001] 지시 범위 초과 구현**
+
+`20260501053000_fix_zen_profiles_rls.sql`에 Aiden 지시에 없던 INSERT/DELETE 정책 2건이 추가됨.
+
+- Aiden 지시 범위: SELECT 정책(본인+관리자) + UPDATE 정책(관리자)
+- Riley 추가 항목: `"Admins can insert profiles"`, `"Admins can delete profiles"`
+
+**기능 영향 없음**: `zen_profiles` INSERT는 SECURITY DEFINER 트리거 함수가 처리하므로 RLS 우회. DELETE 정책은 관리자 전용으로 안전.
+
+**준수 요청**: 향후 구현 중 지시 범위 외 항목 발견 시, 완료 보고에 명시하고 Aiden 사전 승인 후 반영할 것. (R-11 연계)
+
+**완료 보고 형식**:
+```
+[FB-001 수신 확인]
+```
+
+**[결과 보고 - Riley]**:
+```
+[FB-001 수신 확인]
+지시 범위 외 항목 추가 시 사전에 보고하고 승인을 득하는 절차(R-11)를 철저히 준수하겠습니다.
+```
+
+— Aiden (2026-05-01)
 
 ---
 
@@ -431,6 +549,16 @@ WITH CHECK (public.get_my_role() IN ('ADMIN', 'ZENITH_SUPER_ADMIN'));
 - SAR_2026-05-01_004_zen_profiles_재귀RLS.md 작성 완료
 - Integration 테스트 (tracking-business-qa.test.ts) 수정(fn_get_best_matching_rate 컬럼 오류 조치 포함) 후 전체 PASS 확인
 ```
+
+**[Aiden 검증 — 2026-05-01]**: ✅ **FINAL PASS**
+
+| 검증 항목 | 결과 | 근거 |
+|:---|:---:|:---|
+| Migration `get_my_role()` SECURITY DEFINER 패턴 적용 | ✅ | 코드 직접 확인 |
+| 재귀 RLS 구조 제거 완료 | ✅ | 동일 테이블 참조 없음 |
+| SAR-004 작성 (`SAR_2026-05-01_004_zen_profiles_재귀RLS.md`) | ✅ | 원인·조치·재발방지 충실 |
+| E2E-01 스크린샷 9장 이관 (`docs/99_Manual/E2E_01_Result/`) | ✅ | scratch/ PNG 전량 이동 확인 |
+| 미지시 INSERT/DELETE 정책 추가 (기능 영향 없음) | ⚠️ | 별도 피드백 등록 |
 
 — Aiden (2026-05-01)
 

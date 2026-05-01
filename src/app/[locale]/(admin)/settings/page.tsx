@@ -97,7 +97,7 @@ export default function AdminSettingsPage({ params }: { params: Promise<{ locale
   const categories = Array.from(new Set(paramsList.map(p => p.category)));
 
   return (
-    <div className="min-h-screen bg-[#0A0A0B] p-8 space-y-12">
+    <div className="min-h-screen bg-slate-50 p-8 space-y-12">
       {/* Premium Header */}
       <header className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div className="space-y-2">
@@ -105,13 +105,13 @@ export default function AdminSettingsPage({ params }: { params: Promise<{ locale
             <Zap className="w-3.5 h-3.5 animate-pulse" />
             Core Governance Controller
           </div>
-          <h1 className="text-4xl font-black text-white tracking-tight flex items-center gap-4">
+          <h1 className="text-4xl font-black text-slate-900 tracking-tight flex items-center gap-4">
             시스템 파라미터 제어
-            <span className="text-[10px] bg-blue-500/10 text-blue-400 px-3 py-1 rounded-full border border-blue-500/20 font-mono uppercase">
+            <span className="text-[10px] bg-blue-500/10 text-blue-600 px-3 py-1 rounded-full border border-blue-500/20 font-mono uppercase">
               OPS_v4_STABLE
             </span>
           </h1>
-          <p className="text-white/40 max-w-xl text-sm leading-relaxed">
+          <p className="text-slate-500 max-w-xl text-sm leading-relaxed">
             재무 요율, 부피 계수, 라우팅 가중치 등 ZENITH LMS의 핵심 비즈니스 로직 상수를 관리합니다.<br/>
             수정된 값은 캐시 무효화 기술을 통해 전 시스템에 실시간 반영됩니다.
           </p>
@@ -120,7 +120,7 @@ export default function AdminSettingsPage({ params }: { params: Promise<{ locale
         <div className="flex items-center gap-4">
           <button 
             onClick={fetchParams}
-            className="p-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl text-white/40 hover:text-white transition-all group"
+            className="p-3 bg-slate-50 hover:bg-slate-100 border border-slate-300 rounded-2xl text-slate-500 hover:text-slate-900 transition-all group"
           >
             <RotateCcw className="w-5 h-5 group-active:rotate-180 transition-transform duration-500" />
           </button>
@@ -132,7 +132,7 @@ export default function AdminSettingsPage({ params }: { params: Promise<{ locale
         {loading ? (
           <div className="h-[40vh] flex flex-col items-center justify-center gap-4">
             <div className="w-10 h-10 border-2 border-blue-500/20 border-t-blue-500 rounded-full animate-spin" />
-            <p className="text-white/20 font-mono text-[10px] tracking-widest uppercase italic">SYNCHRONIZING_SYSTEM_CORE...</p>
+            <p className="text-slate-400 font-mono text-[10px] tracking-widest uppercase italic">SYNCHRONIZING_SYSTEM_CORE...</p>
           </div>
         ) : (
           categories.map(category => (
@@ -140,33 +140,33 @@ export default function AdminSettingsPage({ params }: { params: Promise<{ locale
               <div className="flex items-center justify-between px-2">
                 <div className="flex items-center gap-3">
                   <div className="h-5 w-1.5 bg-blue-500 rounded-full shadow-[0_0_10px_rgba(59,130,246,0.5)]" />
-                  <h2 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
+                  <h2 className="text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
                     {category} PARAMETERS
                   </h2>
                 </div>
-                <span className="text-[10px] font-mono text-white/10 italic">#CATEGORY_{category}</span>
+                <span className="text-[10px] font-mono text-slate-300 italic">#CATEGORY_{category}</span>
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {paramsList.filter(p => p.category === category).map(param => (
                   <ZenCard 
                     key={param.key}
-                    className="bg-[#111112] border-white/5 hover:border-white/10 hover:bg-[#141415] transition-all duration-300 p-6 flex flex-col gap-5 relative overflow-hidden group"
+                    className="bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-all duration-300 p-6 flex flex-col gap-5 relative overflow-hidden group"
                   >
                     <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                       <Activity className="w-4 h-4 text-white/5" />
+                       <Activity className="w-4 h-4 text-slate-900/5" />
                     </div>
 
                     <div className="flex-1 space-y-1.5">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <label className="text-[15px] font-bold text-white tracking-tight">{param.key}</label>
+                          <label className="text-[15px] font-bold text-slate-900 tracking-tight">{param.key}</label>
                         </div>
-                        <span className="text-[10px] font-mono bg-white/5 px-2 py-0.5 rounded text-white/30 border border-white/5">
+                        <span className="text-[10px] font-mono bg-slate-50 px-2 py-0.5 rounded text-slate-400 border border-slate-200">
                           {param.category}
                         </span>
                       </div>
-                      <p className="text-xs text-white/40 leading-relaxed min-h-[32px]">
+                      <p className="text-xs text-slate-500 leading-relaxed min-h-[32px]">
                         {param.description}
                       </p>
                     </div>
@@ -183,7 +183,7 @@ export default function AdminSettingsPage({ params }: { params: Promise<{ locale
                               step="any"
                               value={param.value_numeric ?? ''}
                               onChange={(e) => handleValueChange(param.key, 'value_numeric', parseFloat(e.target.value))}
-                              className="w-full bg-black/40 border border-white/10 rounded-xl pl-9 pr-4 py-2.5 text-sm text-blue-400 font-mono focus:outline-none focus:border-blue-500/50 transition-colors"
+                              className="w-full bg-slate-100 border border-slate-300 rounded-xl pl-9 pr-4 py-2.5 text-sm text-blue-600 font-mono focus:outline-none focus:border-blue-500/50 transition-colors"
                               placeholder="Numeric Value"
                             />
                           </div>
@@ -201,7 +201,7 @@ export default function AdminSettingsPage({ params }: { params: Promise<{ locale
                                   handleValueChange(param.key, 'value_jsonb', e.target.value);
                                 }
                               }}
-                              className="w-full bg-black/40 border border-white/10 rounded-xl pl-9 pr-4 py-2.5 text-xs text-purple-400 font-mono focus:outline-none focus:border-purple-500/50 transition-colors min-h-[80px]"
+                              className="w-full bg-slate-100 border border-slate-300 rounded-xl pl-9 pr-4 py-2.5 text-xs text-purple-600 font-mono focus:outline-none focus:border-purple-500/50 transition-colors min-h-[80px]"
                               placeholder="JSON Config"
                             />
                           </div>
@@ -214,7 +214,7 @@ export default function AdminSettingsPage({ params }: { params: Promise<{ locale
                               type="text"
                               value={param.value_text ?? ''}
                               onChange={(e) => handleValueChange(param.key, 'value_text', e.target.value)}
-                              className="w-full bg-black/40 border border-white/10 rounded-xl pl-9 pr-4 py-2.5 text-sm text-emerald-400 font-mono focus:outline-none focus:border-emerald-500/50 transition-colors"
+                              className="w-full bg-slate-100 border border-slate-300 rounded-xl pl-9 pr-4 py-2.5 text-sm text-emerald-600 font-mono focus:outline-none focus:border-emerald-500/50 transition-colors"
                               placeholder="Text Value"
                             />
                           </div>
@@ -223,14 +223,14 @@ export default function AdminSettingsPage({ params }: { params: Promise<{ locale
                         <ZenButton 
                           onClick={() => handleSave(param.key)}
                           loading={saving === param.key}
-                          className="bg-blue-600/10 hover:bg-blue-600 text-blue-400 hover:text-white border border-blue-500/20 h-[42px] px-5 rounded-xl transition-all flex items-center gap-2 group"
+                          className="bg-blue-600/10 hover:bg-blue-600 text-blue-600 hover:text-slate-900 border border-blue-500/20 h-[42px] px-5 rounded-xl transition-all flex items-center gap-2 group"
                         >
                           <Save className="w-4 h-4 group-hover:scale-110 transition-transform" />
                           <span className="text-xs font-bold uppercase tracking-tighter">Apply</span>
                         </ZenButton>
                       </div>
                       
-                      <div className="flex items-center justify-between text-[10px] font-mono text-white/10 px-1">
+                      <div className="flex items-center justify-between text-[10px] font-mono text-slate-300 px-1">
                         <span className="flex items-center gap-1">
                           <Info className="w-2.5 h-2.5" />
                           Last Update: {new Date(param.updated_at).toLocaleString()}
@@ -250,7 +250,7 @@ export default function AdminSettingsPage({ params }: { params: Promise<{ locale
       {toast && (
         <div className={cn(
           "fixed bottom-10 right-10 z-50 flex items-center gap-3 px-6 py-4 rounded-2xl border shadow-2xl animate-in slide-in-from-bottom-5 duration-300 backdrop-blur-xl",
-          toast.type === 'success' ? "bg-blue-500/10 border-blue-500/20 text-blue-400" : "bg-red-500/10 border-red-500/20 text-red-400"
+          toast.type === 'success' ? "bg-blue-500/10 border-blue-500/20 text-blue-600" : "bg-red-500/10 border-red-500/20 text-red-400"
         )}>
           {toast.type === 'success' ? <CheckCircle2 className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
           <p className="font-bold text-sm tracking-tight">{toast.message}</p>
@@ -258,14 +258,14 @@ export default function AdminSettingsPage({ params }: { params: Promise<{ locale
       )}
 
       {/* Footer / Status */}
-      <footer className="max-w-6xl mx-auto pt-10 border-t border-white/5 flex justify-between items-center opacity-20">
+      <footer className="max-w-6xl mx-auto pt-10 border-t border-slate-200 flex justify-between items-center opacity-20">
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 text-[10px] font-mono text-white tracking-tighter">
+          <div className="flex items-center gap-2 text-[10px] font-mono text-slate-900 tracking-tighter">
             <Activity className="w-3 h-3 text-emerald-500" />
             NODE_PARAMS_ACTIVE
           </div>
         </div>
-        <p className="text-[10px] font-mono text-white tracking-tighter uppercase">
+        <p className="text-[10px] font-mono text-slate-900 tracking-tighter uppercase">
           Governance_Locale: {locale.toUpperCase()} | Secure_Handoff_Ready
         </p>
       </footer>

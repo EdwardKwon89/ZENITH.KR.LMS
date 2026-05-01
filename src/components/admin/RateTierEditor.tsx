@@ -33,13 +33,13 @@ export const RateTierEditor: React.FC<RateTierEditorProps> = ({ tiers, onChange 
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center mb-2">
-        <h4 className="text-xs font-black text-white/30 uppercase tracking-[0.2em] flex items-center gap-2">
+        <h4 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
           <Weight className="w-3 h-3 text-blue-500" /> Weight Slab Configuration
         </h4>
         <ZenButton 
           onClick={addTier} 
           variant="ghost" 
-          className="text-[10px] text-blue-400 hover:text-blue-300 py-1"
+          className="text-[10px] text-blue-600 hover:text-blue-300 py-1"
         >
           <Plus className="w-3 h-3 mr-1" /> Add Tier
         </ZenButton>
@@ -47,34 +47,34 @@ export const RateTierEditor: React.FC<RateTierEditorProps> = ({ tiers, onChange 
 
       <div className="space-y-3">
         {tiers.length === 0 ? (
-          <div className="text-center py-8 border border-dashed border-white/5 rounded-2xl text-white/10 text-xs italic">
+          <div className="text-center py-8 border border-dashed border-slate-200 rounded-2xl text-slate-300 text-xs italic">
             No tiers defined. Base rate will apply for all weights.
           </div>
         ) : (
           tiers.sort((a, b) => a.weight_min - b.weight_min).map((tier, index) => (
-            <div key={index} className="flex gap-4 items-end bg-black/20 p-4 rounded-2xl border border-white/5 animate-in fade-in slide-in-from-top-2">
+            <div key={index} className="flex gap-4 items-end bg-slate-50 p-4 rounded-2xl border border-slate-200 animate-in fade-in slide-in-from-top-2">
               <div className="flex-1 space-y-2">
-                <label className="text-[10px] text-white/20 font-bold uppercase ml-1">Min Weight (kg)</label>
+                <label className="text-[10px] text-slate-400 font-bold uppercase ml-1">Min Weight (kg)</label>
                 <div className="relative">
-                  <Hash className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20" />
+                  <Hash className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <ZenInput 
                     type="number" 
                     value={tier.weight_min}
                     onChange={(e) => updateTier(index, 'weight_min', Number(e.target.value))}
-                    className="pl-12 bg-white/5 border-white/10 text-white"
+                    className="pl-12 bg-slate-50 border-slate-300 text-slate-900"
                   />
                 </div>
               </div>
               
               <div className="flex-1 space-y-2">
-                <label className="text-[10px] text-white/20 font-bold uppercase ml-1">Unit Price ($/kg)</label>
+                <label className="text-[10px] text-slate-400 font-bold uppercase ml-1">Unit Price ($/kg)</label>
                 <div className="relative">
                   <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-500/50" />
                   <ZenInput 
                     type="number" 
                     value={tier.unit_price}
                     onChange={(e) => updateTier(index, 'unit_price', Number(e.target.value))}
-                    className="pl-12 bg-white/5 border-white/10 text-emerald-400 font-bold"
+                    className="pl-12 bg-slate-50 border-slate-300 text-emerald-600 font-bold"
                   />
                 </div>
               </div>
@@ -82,7 +82,7 @@ export const RateTierEditor: React.FC<RateTierEditorProps> = ({ tiers, onChange 
               <ZenButton 
                 onClick={() => removeTier(index)}
                 variant="ghost"
-                className="p-3 text-white/20 hover:text-red-400 transition-colors"
+                className="p-3 text-slate-400 hover:text-red-400 transition-colors"
               >
                 <Trash2 className="w-4 h-4" />
               </ZenButton>
