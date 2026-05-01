@@ -39,7 +39,7 @@ export const RateTierEditor: React.FC<RateTierEditorProps> = ({ tiers, onChange 
         <ZenButton 
           onClick={addTier} 
           variant="ghost" 
-          className="text-[10px] text-blue-600 hover:text-blue-300 py-1"
+          className="text-[10px] text-blue-600 hover:text-blue-700 py-1"
         >
           <Plus className="w-3 h-3 mr-1" /> Add Tier
         </ZenButton>

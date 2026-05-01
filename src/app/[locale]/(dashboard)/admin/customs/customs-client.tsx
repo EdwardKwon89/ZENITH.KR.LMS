@@ -172,7 +172,7 @@ export default function CustomsClient({ initialData, initialTotal }: CustomsClie
             {item.status === 'PENDING' && (
               <ZenButton 
                 variant="tactile" 
-                className="p-2 h-auto bg-slate-900 text-white"
+                className="p-2 h-auto bg-blue-600 text-white hover:bg-blue-700"
                 onClick={() => handleSubmit(item.id)}
               >
                 <Send size={16} />
@@ -198,7 +198,7 @@ export default function CustomsClient({ initialData, initialTotal }: CustomsClie
               "px-6 py-2.5 rounded-xl text-sm font-bold transition-all",
               activeTab === tab 
                 ? "bg-white text-brand-600 shadow-sm" 
-                : "text-slate-500 hover:text-slate-700 hover:bg-white/40"
+                : "text-slate-500 hover:text-slate-700 hover:bg-white hover:shadow-sm"
             )}
           >
             {tab === 'ALL' ? '전체' : t(`customs_status_${tab.toLowerCase()}`)}
@@ -321,7 +321,7 @@ function CustomsDetailModal({
             <ZenButton variant="ghost" onClick={onClose} className="flex-1">취ce</ZenButton>
             <ZenButton 
               variant="tactile" 
-              className="flex-1 bg-slate-900 text-white"
+              className="flex-1 bg-blue-600 text-white hover:bg-blue-700"
               onClick={() => onUpdate(item.id, { status, declarationNo, adminNote })}
               loading={isUpdating}
             >

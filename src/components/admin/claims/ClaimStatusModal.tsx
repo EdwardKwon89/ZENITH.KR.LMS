@@ -80,7 +80,7 @@ export const ClaimStatusModal: React.FC<ClaimStatusModalProps> = ({
                 onClick={() => setStatus(s)}
                 className={`w-full p-4 rounded-2xl border text-left transition-all flex justify-between items-center ${
                   status === s 
-                  ? 'bg-slate-900 border-slate-900 text-white shadow-lg' 
+                  ? 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-500/20' 
                   : 'bg-white border-slate-100 text-slate-600 hover:border-slate-200'
                 }`}
               >

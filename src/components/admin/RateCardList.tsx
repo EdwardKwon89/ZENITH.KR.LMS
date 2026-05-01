@@ -115,7 +115,7 @@ export const RateCardList: React.FC<RateCardListProps> = ({ rates, loading, onEd
                       {rate.service_type === 'AIR' ? <Plane className="w-4 h-4 text-blue-500/40" /> : 
                        rate.service_type === 'SEA' ? <Ship className="w-4 h-4 text-emerald-500/40" /> : 
                        <Box className="w-4 h-4 text-amber-500/40" />}
-                      <div className="w-16 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                      <div className="w-16 h-[1px] bg-gradient-to-r from-transparent via-slate-300 to-transparent" />
                       <ChevronRight className="w-3 h-3 text-slate-400" />
                     </div>
                     <span className="text-[8px] font-black text-slate-300 uppercase tracking-[0.3em]">{rate.service_type}</span>
@@ -139,13 +139,13 @@ export const RateCardList: React.FC<RateCardListProps> = ({ rates, loading, onEd
                   </div>
                   
                   {/* TISA Rule Badge */}
-                  <div className="flex items-center gap-1.5 px-2 py-0.5 bg-amber-500/10 text-amber-500 border border-amber-500/20 rounded text-[8px] font-black uppercase tracking-wider">
+                  <div className="flex items-center gap-1.5 px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-200 rounded text-[8px] font-black uppercase tracking-wider">
                     <Calendar className="w-2.5 h-2.5" />
                     {rate.base_date_rule || 'RECEIPT_DATE'}
                   </div>
 
                   {rate.customer_id && (
-                    <div className="flex items-center gap-1.5 px-2 py-0.5 bg-purple-500/10 text-purple-600 border border-purple-500/20 rounded text-[8px] font-black uppercase tracking-wider">
+                    <div className="flex items-center gap-1.5 px-2 py-0.5 bg-purple-50 text-purple-700 border border-purple-200 rounded text-[8px] font-black uppercase tracking-wider">
                       <User className="w-2.5 h-2.5" />
                       Special
                     </div>
@@ -167,8 +167,8 @@ export const RateCardList: React.FC<RateCardListProps> = ({ rates, loading, onEd
                 <div className="flex justify-end">
                   <span className={cn(
                     "text-[10px] font-black px-2 py-0.5 rounded-md border",
-                    rate.status === 'ACTIVE' ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" :
-                    rate.status === 'SUPERSEDED' ? "bg-amber-500/10 text-amber-500 border-amber-500/20" :
+                    rate.status === 'ACTIVE' ? "bg-emerald-50 text-emerald-700 border-emerald-200" :
+                    rate.status === 'SUPERSEDED' ? "bg-amber-50 text-amber-700 border-amber-200" :
                     "bg-slate-100 text-slate-500 border-slate-300"
                   )}>
                     {rate.status}

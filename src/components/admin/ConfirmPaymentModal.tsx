@@ -121,7 +121,7 @@ export const ConfirmPaymentModal: React.FC<ConfirmPaymentModalProps> = ({
                     onClick={() => setPaymentMethod(method)}
                     className={`py-2 text-[10px] font-black rounded-xl border transition-all ${
                       paymentMethod === method 
-                      ? 'bg-slate-900 text-white border-slate-900 shadow-lg' 
+                      ? 'bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-500/20' 
                       : 'bg-white text-slate-400 border-slate-100 hover:border-slate-200'
                     }`}
                   >

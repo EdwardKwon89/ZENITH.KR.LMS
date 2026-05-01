@@ -111,7 +111,7 @@ export const InvoiceTable: React.FC<InvoiceTableProps> = ({ invoices, isAdmin })
                         <ZenButton 
                           onClick={() => handleIssuePdf(inv.id)}
                           loading={issuingId === inv.id}
-                          className="px-4 py-1.5 bg-slate-900 text-white text-[11px] font-bold rounded-xl hover:bg-blue-600 transition-all hover:shadow-lg hover:shadow-blue-500/25"
+                          className="px-4 py-1.5 bg-slate-700 text-white text-[11px] font-bold rounded-xl hover:bg-blue-600 transition-all hover:shadow-lg hover:shadow-blue-500/25"
                         >
                           <FileText className="w-3 h-3" />
                           Issue PDF
