@@ -76,7 +76,7 @@ export async function createVoc(payload: {
   // 3. Admin 대상 알림 발송
   try {
     const { data: admins } = await supabase
-      .from("profiles")
+      .from("zen_profiles")
       .select("id")
       .in("role", ["ZENITH_ADMIN", "ZENITH_SUPER_ADMIN", "MANAGER"]);
 

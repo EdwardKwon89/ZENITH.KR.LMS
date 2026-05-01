@@ -447,9 +447,12 @@ alter table "public"."common_codes" alter column "updated_at" set default CURREN
 
 alter table "public"."organization_documents" disable row level security;
 
-alter table "public"."zen_inventory" alter column "available_qty" set data type integer using "available_qty"::integer;
+
+
+alter table "public"."zen_inventory" drop column "available_qty";
 
 alter table "public"."zen_inventory" alter column "min_stock_level" set default 5;
+
 
 alter table "public"."zen_inventory" alter column "min_stock_level" set data type integer using "min_stock_level"::integer;
 
@@ -457,7 +460,10 @@ alter table "public"."zen_inventory" alter column "on_hand_qty" set data type in
 
 alter table "public"."zen_inventory" alter column "reserved_qty" set data type integer using "reserved_qty"::integer;
 
+alter table "public"."zen_inventory" add column "available_qty" integer generated always as (on_hand_qty - reserved_qty) stored;
+
 alter table "public"."zen_inventory_history" alter column "change_qty" set data type integer using "change_qty"::integer;
+
 
 alter table "public"."zen_inventory_history" alter column "reference_id" set data type uuid using "reference_id"::uuid;
 

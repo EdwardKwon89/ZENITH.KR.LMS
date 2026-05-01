@@ -9,32 +9,17 @@ import { revalidatePath } from "next/cache";
 export async function approveOrganization(orgId: string) {
   const { supabase, user } = await validateAdminAction();
 
-  // 1. 조직 상태 업데이트
-  const { error: orgError } = await supabase
-    .from("zen_organizations")
-    .update({ 
-      status: "ACTIVE",
-      updated_at: new Date().toISOString()
-    })
-    .eq("id", orgId);
+  // RPC를 통해 승인 처리 (Corporate ID 생성 및 Auth 메타데이터 동기화 포함)
+  const { data: newId, error } = await supabase.rpc("approve_organization", {
+    target_org_id: orgId
+  });
 
-  if (orgError) throw new Error(`Org approval failed: ${orgError.message}`);
+  if (error) throw new Error(`Org approval RPC failed: ${error.message}`);
 
-  // 2. 소속된 사용자들의 프로필 상태도 ACTIVE로 변경
-  const { error: profileError } = await supabase
-    .from("profiles")
-    .update({ status: "ACTIVE" })
-    .eq("org_id", orgId);
+  console.log(`Organization ${orgId} approved by admin ${user.id}. Assigned ID: ${newId}`);
 
-  if (profileError) {
-    console.error("Failed to update member profiles status:", profileError);
-  }
-
-  // 3. 감사 로그 기록 (선택 사항)
-  console.log(`Organization ${orgId} approved by admin ${user.id}`);
-
-  revalidatePath("/(admin)/organizations");
-  return { success: true };
+  revalidatePath("/admin/organizations");
+  return { success: true, corporateId: newId };
 }
 
 /**
@@ -43,18 +28,14 @@ export async function approveOrganization(orgId: string) {
 export async function rejectOrganization(orgId: string, reason: string) {
   const { supabase } = await validateAdminAction();
 
-  const { error } = await supabase
-    .from("zen_organizations")
-    .update({ 
-      status: "REJECTED",
-      remarks: `[REJECTED] ${reason}`,
-      updated_at: new Date().toISOString()
-    })
-    .eq("id", orgId);
+  const { error } = await supabase.rpc("reject_organization", {
+    target_org_id: orgId,
+    comment: reason
+  });
 
-  if (error) throw new Error(`Org rejection failed: ${error.message}`);
+  if (error) throw new Error(`Org rejection RPC failed: ${error.message}`);
 
-  revalidatePath("/(admin)/organizations");
+  revalidatePath("/admin/organizations");
   return { success: true };
 }
 
@@ -64,32 +45,41 @@ export async function rejectOrganization(orgId: string, reason: string) {
 export async function requestOrganizationSupplement(orgId: string, reason: string) {
   const { supabase } = await validateAdminAction();
 
-  const { error } = await supabase
-    .from("zen_organizations")
-    .update({ 
-      status: "PENDING_SUPPLEMENT",
-      remarks: `[SUPPLEMENT REQUESTED] ${reason}`,
-      updated_at: new Date().toISOString()
-    })
-    .eq("id", orgId);
+  const { error } = await supabase.rpc("request_organization_supplement", {
+    target_org_id: orgId,
+    comment: reason
+  });
 
-  if (error) throw new Error(`Supplement request failed: ${error.message}`);
+  if (error) throw new Error(`Supplement request RPC failed: ${error.message}`);
 
-  revalidatePath("/(admin)/organizations");
+  revalidatePath("/admin/organizations");
   return { success: true };
 }
 
 /**
  * 조직 목록을 조회합니다 (가입 대기 중인 조직 우선).
  */
-export async function getOrganizations(status?: string) {
+export async function getOrganizations(status?: string | string[]) {
   const { supabase } = await validateAdminAction();
 
-  let query = supabase.from("zen_organizations").select("*");
-  if (status) query = query.eq("status", status);
+  let query = supabase
+    .from("zen_organizations")
+    .select(`
+      *,
+      zen_organization_documents(*)
+    `);
+  
+  if (status) {
+    if (Array.isArray(status)) {
+      query = query.in("status", status);
+    } else {
+      query = query.eq("status", status);
+    }
+  }
 
   const { data, error } = await query.order("created_at", { ascending: false });
   if (error) throw new Error(`Failed to fetch organizations: ${error.message}`);
 
   return data || [];
 }
+

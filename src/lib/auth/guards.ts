@@ -16,7 +16,7 @@ export async function requireAuth() {
   }
 
   const { data: profile } = await supabase
-    .from("profiles")
+    .from("zen_profiles")
     .select("*")
     .eq("id", user.id)
     .single();
@@ -37,12 +37,13 @@ export async function requireAdmin() {
   }
 
   const { data: profile } = await supabase
-    .from("profiles")
+    .from("zen_profiles")
     .select("*")
     .eq("id", user.id)
     .single();
 
   const isAllowed = checkPermission(profile?.role, "/admin");
+  console.log(`[AUTH_DEBUG] requireAdmin: email=${user.email}, role=${profile?.role}, isAllowed=${isAllowed}`);
 
   if (!isAllowed) {
     redirect("/");
@@ -64,7 +65,7 @@ export async function validateAdminAction() {
   }
 
   const { data: profile } = await supabase
-    .from("profiles")
+    .from("zen_profiles")
     .select("*")
     .eq("id", user.id)
     .single();
@@ -93,7 +94,7 @@ export async function validateUserAction() {
   }
 
   const { data: profile } = await supabase
-    .from("profiles")
+    .from("zen_profiles")
     .select("*")
     .eq("id", user.id)
     .single();

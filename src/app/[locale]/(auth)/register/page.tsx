@@ -321,9 +321,12 @@ export default function RegisterPage() {
                 {docFile ? docFile.name : '파일 선택'}
               </ZenButton>
             </div>
+            {error && <div className="text-red-500 text-xs text-center">{error}</div>}
             <div className="flex gap-3">
-                <ZenButton variant="ghost" onClick={handleBack} className="flex-1">이전</ZenButton>
-                <ZenButton onClick={handleFinalSubmit} className="flex-[2]">가입 신청 완료</ZenButton>
+                <ZenButton variant="ghost" onClick={handleBack} className="flex-1" disabled={isPending}>이전</ZenButton>
+                <ZenButton onClick={handleFinalSubmit} className="flex-[2]" disabled={isPending}>
+                  {isPending ? '처리 중...' : '가입 신청 완료'}
+                </ZenButton>
             </div>
           </div>
         )}

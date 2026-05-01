@@ -24,7 +24,8 @@ import {
   TrendingDown,
   BarChartBig,
   CalendarDays,
-  FileText
+  FileText,
+  Building
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -51,14 +52,14 @@ export default function NaviSidebar({ user, profile }: { user?: any; profile?: a
     { title: t("dashboard"), href: "/dashboard", icon: LayoutDashboard },
     { 
       title: t("master"), 
-      href: "/master", 
+      href: "/admin/codes", 
       icon: Database,
       isAdminOnly: true,
       children: [
-        { title: t("master_codes"), href: "/master/codes" },
-        { title: t("master_geo"), href: "/master/geo" },
-        { title: t("master_mapping"), href: "/master/mapping" },
-        { title: t("master_rates"), href: "/master/rates" },
+        { title: t("master_codes"), href: "/admin/codes" },
+        { title: t("master_geo"), href: "/admin/geo" },
+        { title: t("master_mapping"), href: "/admin/mapping" },
+        { title: t("master_rates"), href: "/admin/rates" },
       ]
     },
     { 
@@ -110,6 +111,7 @@ export default function NaviSidebar({ user, profile }: { user?: any; profile?: a
     },
     { title: t("claims"), href: "/admin/claims", icon: ShieldAlert, isAdminOnly: true },
     { title: t("grade_promotion_requests"), href: "/admin/upgrade-requests", icon: TrendingUp, isAdminOnly: true },
+    { title: t("org_approval"), href: "/admin/organizations", icon: Building, isAdminOnly: true },
     { title: t("customs_management"), href: "/admin/customs", icon: FileText, isAdminOnly: true },
     { title: t("governance"), href: "/governance", icon: ShieldCheck, isAdminOnly: true },
     { title: t("admin_error_logs"), href: "/admin/error-logs", icon: ShieldAlert, isAdminOnly: true },
@@ -123,7 +125,7 @@ export default function NaviSidebar({ user, profile }: { user?: any; profile?: a
         { title: t("my_customs"), href: "/mypage/customs" },
       ]
     },
-    { title: t("settings"), href: "/settings", icon: Settings },
+    { title: t("settings"), href: "/admin/settings", icon: Settings, isAdminOnly: true },
   ];
 
   useEffect(() => {

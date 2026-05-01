@@ -43,10 +43,10 @@
 > [!NOTE]
 > 지갑 연동 UI 실구동 화면입니다. (캡처 준비 중 또는 로컬 확인 완료)
 
-![Wallet Dashboard](file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/PH4_SPR5_WALLET_DASHBOARD.png)
+![Wallet Dashboard](file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/docs/98_images/PH4_SPR5_WALLET_DASHBOARD.png)
 *사용자 지갑 대시보드 - 잔액 및 거래 내역*
 
-![Payment Modal](file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/PH4_SPR5_PAYMENT_MODAL.png)
+![Payment Modal](file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/docs/98_images/PH4_SPR5_PAYMENT_MODAL.png)
 *결제 수단 선택 및 지갑 결제 플로우*
 
 ---

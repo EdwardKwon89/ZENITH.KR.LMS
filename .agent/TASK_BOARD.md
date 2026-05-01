@@ -1,11 +1,24 @@
 # Multi-Agent Task Board
 
 > **프로젝트:** ZENITH_LMS
-> **업데이트:** 2026-05-01 (KST) — E2E-02 착수 허가 + BUG-UI-01 Admin 다크 테마 수정 지시 발령
-> **운영 원칙:** 각 에이전트는 작업 완료 시 본 보드를 즉시 최신화한다.
+> **업데이트:** 2026-05-01 (KST) — 보드 2-Section 구조 개편
+> **운영 원칙:**
+> - 각 에이전트는 작업 완료 시 **SECTION 1 상태 대시보드를 최우선 갱신**한 뒤 SECTION 2 상세를 업데이트한다.
+> - Riley는 완료 보고 시 반드시 `## 🔔 Aiden 검토 대기` 테이블에 항목을 추가한다.
+> - Aiden은 새 세션 시작 시 SECTION 1만 읽어 즉시 현황을 파악한다.
+>
+> **Git 운영 규칙:**
+> - **커밋 접두사**: Riley → `[Gemini]` / Aiden → `[Aiden]` — 에이전트 식별 필수
+> - **커밋 단위**: Task ID 단위 원자적 커밋. 메시지에 Task ID 포함 필수
+>   - 형식: `[Gemini] fix: BUG-UI-01 Admin 다크테마 제거` / `[Aiden] docs: E2E-01 FINAL PASS 검증 결과`
+> - **완료 보고 전 git status 확인 의무**: `git status` 실행 → untracked·unstaged 파일 없음 확인 후 보고
+>   - 미커밋 파일 잔류 상태에서의 완료 보고는 **불인정**
+> - **결과물 정리 후 커밋**: 스크린샷·로그 커밋 시 실패 run artifact(`*_error.png` 등) 제거 후 커밋
+> - **브랜치**: `main` 단일 브랜치 운영. 대규모 변경(100줄↑ 신규 기능) 시 `feature/*` 분기 후 PR
+>
 > **관리 규칙:**
 > - **라인 수**: 800줄 이하 유지 (초과 시 즉시 이관 조치)
-> - **완료 태스크**: 섹션 내 **3개** 초과 시 → `.agent/archive/TASKS_[PHASE명].md` 이관
+> - **완료 태스크**: SECTION 2 섹션 내 **3개** 초과 시 → `.agent/archive/TASKS_[PHASE명].md` 이관
 > - **Handoff 메시지 — 2-Tier 관리**:
 >   - **Active 지시** (수신자 완료 보고 미수신): 이관 불가
 >   - **Closed 교환** (지시 + 완료 보고 쌍 완성): **3개** 초과 시 → `.agent/archive/MSG_YYYY-MM-DD.md` 이관
@@ -15,6 +28,49 @@
 > - **Phase 4 Handoff 이력 (2026-04-29)** → [archive/MSG_2026-04-29.md](.agent/archive/MSG_2026-04-29.md)
 > - **Phase 4 완료 Sprint 태스크 (SPR6~10)** → [archive/TASKS_PHASE4.md](.agent/archive/TASKS_PHASE4.md) 갱신됨
 > - **Sprint 12 CLOSED 이관 (2026-04-30)** → [archive/MSG_2026-04-30.md](.agent/archive/MSG_2026-04-30.md)
+
+---
+
+# SECTION 1 — 상태 대시보드
+
+> **Aiden 세션 시작 시 이 섹션만 읽으면 현황 파악 완료.**
+> Riley는 완료 보고 시 아래 두 테이블을 반드시 갱신한다.
+
+---
+
+## 🔔 Aiden 검토 대기
+
+> Riley가 완료 보고 후 Aiden 검증이 필요한 항목. Aiden 검증 완료 시 행 삭제.
+
+| 등록 시각 | Task ID | 검토 내용 | 상태 |
+|:---|:---|:---|:---:|
+| 2026-05-01 21:05 | E2E-02 후속 4건 | SAR-006 (OrderRegistrationForm watch 버그) + REGRESSION_TEST_MAP 갱신 + e2e_02_error.png 제거 + LIVE 작성자 수정 | 🔴 대기 |
+
+---
+
+## 📊 전체 활성 태스크 현황
+
+> 현재 진행 중이거나 대기 중인 전체 태스크. 완료 시 ✅로 변경 후 SECTION 2로 이관.
+
+| Task ID | 담당 | Task 명 | 상태 | 블로커 |
+|:---|:---|:---|:---:|:---|
+| **E2E-02 후속** | Riley | SAR-006 + REGRESSION MAP + 결과폴더 정리 + LIVE 작성자 수정 | 🔴 Aiden 검토 대기 | — |
+| **PH14-EXEC-01** | Aiden | Playwright MCP E2E 실행 (E2E-01~08) | 🔵 착수 중 | — |
+| **PH14-E2E-03** | Riley | 마스터오더 그룹핑 → 창고 입고 → 바코드 스캔 | ⏳ 대기 | E2E-02 후속 완료 후 착수 |
+| **PH14-E2E-04** | Riley | 트래킹 동기화 → 마일스톤 갱신 → 화주 알림 | ⏳ 대기 | — |
+| **PH14-E2E-05** | Riley | 청구서 발행 → 세금계산서 → 엑셀 Export | ⏳ 대기 | — |
+| **PH14-E2E-06** | Riley | VOC 등록 → 관리자 Quick Reply → 화주 확인 | ⏳ 대기 | — |
+| **PH14-E2E-07** | Riley | 통관 신고 생성 → 제출 → APPROVED | ⏳ 대기 | — |
+| **PH14-E2E-08** | Riley | 화주 통관 이력 조회 → 관리자 메모 확인 | ⏳ 대기 | — |
+| **PH14-PASS** | AuditAgent | Sprint 14 FINAL PASS | ⏳ 대기 | 전 E2E 시나리오 완료 후 |
+| **PH4-TRK-01** | Riley | TrackingDashboard 서버사이드 페이지네이션 | 🔵 착수 가능 | — |
+
+---
+
+# SECTION 2 — 작업 상세
+
+> 태스크 상세 내용 · Handoff 메시지 · 아카이브. 상태 파악은 SECTION 1 참조.
+
 ---
 
 ## ✅ 작업 완료 조건 (Definition of Done)
@@ -254,6 +310,45 @@ E2E-02 (오더 접수 B2C → 예상 운임 확인 → 접수 완료) 착수를 
 - 결과: 예상 운임 실시간 계산 및 오더 등록 상세 페이지 이동 확인
 
 — Riley (2026-05-01)
+
+**[Aiden 검증 — E2E-02 — 2026-05-01]**: 🟡 **CONDITIONAL PASS**
+
+| 검증 항목 | 결과 | 근거 |
+|:---|:---:|:---|
+| useWatch 코드 수정 기술 정확성 | ✅ | `watch` → `useWatch({ control, name:"packages" })` — RHF 깊은 감지 정상화 |
+| E2E-02 시나리오 전 단계 통과 | ✅ | `e2e_02_01~06_final_verify.png` 6장 순차 확인 |
+| BUG-UI-01 미커밋 파일 후속 조치 | ✅ | `eaff9a8` + `3196e51` — organizations/settings/codes 전량 커밋 완료 |
+| `e2e_02_error.png` 실패 artifact 잔류 | ⚠️ | catch 블록 캡처본 — 수정 전 실패 시도 잔여물. 결과 폴더에서 제거 바람 |
+| `e2e_02_estimated_freight.png` 출처 불명 | ⚠️ | 스크립트 내 캡처 지점 없음 — 보고서 미언급 |
+| **SAR 미작성 (BUG-E2E-02-01)** | ❌ | E2E 중 발견 버그 (OrderRegistrationForm watch 깊은 감지 실패) → SAR-006 작성 의무 (R-04) |
+| **REGRESSION_TEST_MAP 미갱신** | ❌ | useWatch 수정 관련 TC 미등록 (R-09) |
+| LIVE_PHASE_3_VERIFY.md 작성자 오류 | ⚠️ | "Claude (Antigravity)" → "Riley (Gemini)"로 수정 필요 |
+
+**후속 조치 요청 (Riley)** — E2E-03 착수 전 완료 필수:
+
+```
+[E2E-02 후속-1] SAR 작성:
+  SAR_2026-05-01_006_OrderRegistrationForm_watch_깊은감지실패.md
+  - 현상: watch('packages') 깊은 감지 지연으로 totalWeight 미갱신
+  - 조치: useWatch({ control, name: "packages" }) 전환
+  - 재발방지: RHF 배열 필드 깊은 감지 시 useWatch 우선 사용 가이드라인 추가
+
+[E2E-02 후속-2] REGRESSION_TEST_MAP 갱신:
+  TC-ORDER-FORM-01: OrderRegistrationForm 패키지 추가 시 운임 실시간 계산 확인
+
+[E2E-02 후속-3] 결과 폴더 정리:
+  docs/99_Manual/E2E_02_Result/e2e_02_error.png 제거 (실패 artifact)
+
+[E2E-02 후속-4] LIVE_PHASE_3_VERIFY.md 작성자 수정:
+  "Claude (Antigravity)" → "Riley (Gemini)"
+
+완료 보고 형식:
+[E2E-02 후속 완료] SAR-006 + REGRESSION MAP + 폴더 정리
+```
+
+후속 조치 완료 확인 후 E2E-02 FINAL PASS 확정 및 E2E-03 착수 허가 예정.
+
+— Aiden (2026-05-01)
 
 
 ---

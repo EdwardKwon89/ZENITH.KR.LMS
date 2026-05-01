@@ -106,8 +106,8 @@ describe('ZENITH Master Data: CRUD Operations', () => {
     // Then
     expect(supabaseMock.from).toHaveBeenCalledWith('common_codes');
     expect(supabaseMock.delete).toHaveBeenCalled();
-    expect(deleteMock.eq).toHaveBeenCalledWith('group_id', 'G001');
-    expect(deleteMock.eq).toHaveBeenCalledWith('code', 'C001');
+    expect(deleteMock.eq).toHaveBeenCalledWith('group_code', 'G001');
+    expect(deleteMock.eq).toHaveBeenCalledWith('code_value', 'C001');
   });
 
   describe('Master Order Actions: Exception Resilience', () => {

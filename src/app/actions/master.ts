@@ -2,7 +2,7 @@
 
 import { validateAdminAction, validateUserAction } from "@/lib/auth/guards";
 import { revalidatePath, revalidateTag } from "next/cache";
-import { updateSystemParam as updateParam } from "@/lib/params/service";
+import { updateSystemParam as updateParam, getAllParams } from "@/lib/params/service";
 import { SYSTEM_INDIVIDUAL_SHIPPER_ID } from "@/lib/constants";
 
 /**
@@ -131,10 +131,11 @@ export async function getCodeGroups() {
   const { data, error } = await supabase
     .from("common_code_groups")
     .select("*")
-    .order("id", { ascending: true });
+    .order("group_code", { ascending: true });
   if (error) throw new Error(error.message);
   return data;
 }
+
 
 /**
  * 모든 공통 코드 목록을 조회합니다.
@@ -144,30 +145,32 @@ export async function getCommonCodes() {
   
   const { data, error } = await supabase
     .from("common_codes")
-    .select("*, group:common_code_groups(name)")
-    .order("group_id", { ascending: true })
+    .select("*, group:common_code_groups(group_name)")
+    .order("group_code", { ascending: true })
     .order("sort_order", { ascending: true });
 
   if (error) throw new Error(error.message);
   return data;
 }
 
+
 /**
  * 특정 그룹의 공통 코드 목록을 조회합니다.
  */
-export async function getCommonCodesByGroup(groupId: string) {
+export async function getCommonCodesByGroup(groupCode: string) {
   const { supabase } = await validateUserAction();
   
   const { data, error } = await supabase
     .from("common_codes")
     .select("*")
-    .eq("group_id", groupId)
+    .eq("group_code", groupCode)
     .eq("is_active", true)
     .order("sort_order", { ascending: true });
 
   if (error) throw new Error(error.message);
   return data;
 }
+
 
 /**
  * 공통 코드를 생성하거나 업데이트합니다.
@@ -200,22 +203,31 @@ export async function updateSystemParam(key: string, payload: any) {
 }
 
 /**
+ * 모든 시스템 파라미터를 조회합니다.
+ */
+export async function getSystemParams() {
+  await validateAdminAction();
+  return await getAllParams();
+}
+
+/**
  * 공통 코드를 삭제(비활성화 추천)합니다.
  */
-export async function deleteCommonCode(groupId: string, code: string) {
+export async function deleteCommonCode(groupCode: string, codeValue: string) {
   const { supabase } = await validateAdminAction();
   
   const { error } = await supabase
     .from("common_codes")
     .delete()
-    .eq("group_id", groupId)
-    .eq("code", code);
+    .eq("group_code", groupCode)
+    .eq("code_value", codeValue);
 
   if (error) throw new Error(error.message);
   
   revalidatePath("/admin/codes", "page");
   return { success: true };
 }
+
 
 /**
  * 현재 로그인한 사용자의 소속 및 권한 컨텍스트를 조회합니다.
