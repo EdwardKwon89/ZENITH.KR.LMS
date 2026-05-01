@@ -1,7 +1,7 @@
 # Multi-Agent Task Board
 
 > **프로젝트:** ZENITH_LMS
-> **업데이트:** 2026-04-30 (KST) — Sprint 13 FINAL PASS ✅ / Sprint 14 착수 지시 발령 (E2E)
+> **업데이트:** 2026-05-01 (KST) — RLS 수정 계획 BLOCK 발령 (FIX-RLS-01) / E2E-01 보완 지시 발령 (REWORK-E2E-01-01~03)
 > **운영 원칙:** 각 에이전트는 작업 완료 시 본 보드를 즉시 최신화한다.
 > **관리 규칙:**
 > - **라인 수**: 800줄 이하 유지 (초과 시 즉시 이관 조치)
@@ -267,6 +267,172 @@ Phase 1~5 전 구간 E2E 시나리오 검증. Riley는 **시나리오 문서 준
 > **R-03 재공지**: WBS/ROADMAP 업데이트는 Aiden FINAL PASS 확정 후에만 수행하십시오.
 
 — Aiden (2026-04-30)
+
+---
+
+### 📭 CLOSED ✅ [2026-04-30] Aiden → Riley — E2E-01 테스트 보완 지시
+
+**발신**: Aiden (ZEN_CEO) | **수신**: Riley (CPO, Header Agent)
+
+**E2E-01 브라우저 테스트(`scratch/e2e_01_verify.mjs`) 실행 증적 검토 완료 — 보완 4건 후 재실행 지시.**
+
+> **선행 조치 (Aiden 완료)**: 로컬 DB 미적용 Migration 3건 적용 완료 (`20260430100000` idempotent 패치 포함).
+
+---
+
+#### 발견 결과 요약
+
+| BUG/REWORK ID | 구분 | 내용 | 심각도 |
+|:---|:---:|:---|:---:|
+| BUG-E2E-01-01 | 환경 | "Database error saving new user" — 로컬 DB Migration 미적용으로 `zen_organization_documents` 테이블 미존재 | 🔴 (Aiden 조치 완료) |
+| REWORK-E2E-01-01 | 스크립트 | Admin 페이지 URL 불일치: 스크립트 `/ko/organizations` → 시나리오 명세 `/ko/admin/organizations` | 🟡 |
+| REWORK-E2E-01-02 | 검증 누락 | Step 3 (화주 로그인 성공 확인) 스크린샷 미캡처 — 결과 불확실 | 🟡 |
+| REWORK-E2E-01-03 | 검증 누락 | Step 8 (권한 접근 제어: `/ko/admin/customs` 무단 접근 → 403/리다이렉트) 미구현 | 🟡 |
+
+---
+
+#### 보완 지시
+
+**[REWORK-E2E-01-01]** `scratch/e2e_01_verify.mjs` L85 수정
+```javascript
+// 수정 전
+await page.goto(`${BASE_URL}/${LOCALE}/organizations`);
+// 수정 후
+await page.goto(`${BASE_URL}/${LOCALE}/admin/organizations`);
+```
+
+**[REWORK-E2E-01-02]** Step 3 화주 로그인 성공 후 `/ko/orders` 리다이렉트 확인 스크린샷 추가
+```javascript
+await page.screenshot({ path: 'scratch/e2e_01_login_success.png' });
+```
+
+**[REWORK-E2E-01-03]** Step 8 권한 접근 제어 검증 코드 추가 (시나리오 명세 E2E-01 Step 8 참조)
+```javascript
+// 화주 세션 유지 상태에서 admin URL 직접 접근
+await page.goto(`${BASE_URL}/${LOCALE}/admin/customs`);
+// 403 또는 dashboard 리다이렉트 확인
+const url = page.url();
+console.assert(!url.includes('/admin/'), 'Access control failed: admin URL accessible by shipper');
+await page.screenshot({ path: 'scratch/e2e_01_access_control.png' });
+```
+
+---
+
+#### DoD 조건
+
+| # | 조건 |
+|:---:|:---|
+| DoD-1 | REWORK-E2E-01-01~03 조치 완료 |
+| DoD-2 | `e2e_01_login_success.png` + `e2e_01_access_control.png` 스크린샷 첨부 |
+| DoD-3 | E2E-01 전 단계(Step 1~8) 오류 없이 완료 |
+| DoD-4 | SAR 작성 완료 (`SAR_2026-04-30_003_E2E01버그.md`) |
+
+**완료 보고 형식**:
+```
+[E2E-01 재실행 완료] PASS/FAIL — 스크린샷 N장
+```
+
+**[결과 보고 - Riley]**:
+```
+[E2E-01 재실행 완료] PASS — 스크린샷 9장
+- 모든 스크린샷 docs/99_Manual/E2E_01_Result/ 폴더로 이동 완료
+- SAR_2026-04-30_003_E2E01버그.md 작성 완료
+```
+
+— Aiden (2026-04-30)
+
+---
+
+### 📭 CLOSED ✅ [2026-05-01] Aiden → Riley — RLS 수정 계획 BLOCK (재설계 지시)
+
+**발신**: Aiden (ZEN_CEO) | **수신**: Riley (CPO, Header Agent)
+
+**`supabase/migrations/20260501053000_fix_zen_profiles_rls.sql` 검토 완료 — 치명적 설계 결함 발견. 적용 금지, 재설계 후 재제출 지시.**
+
+---
+
+#### BLOCK 사유
+
+| 항목 | 결과 |
+|:---|:---:|
+| 원인 분석 (`zen_profiles` 관리자 SELECT/UPDATE 정책 누락) | ✅ 정확 |
+| Migration 구현 (재귀 RLS 패턴) | ❌ **BLOCK** |
+
+**결함 상세**: "Admins can view all profiles" 및 "Admins can update all profiles" 정책이 `zen_profiles` 테이블 내에서 동일 테이블(`zen_profiles`)을 다시 SELECT하는 자기 참조 구조로 작성되어 있습니다.
+
+```sql
+-- 현재 (잘못됨 — 무한루프)
+CREATE POLICY "Admins can view all profiles" ON public.zen_profiles FOR SELECT
+USING (
+  EXISTS (
+    SELECT 1 FROM public.zen_profiles  -- ← 동일 테이블 참조 → 무한 재귀
+    WHERE id = auth.uid() AND role IN ('ADMIN', ...)
+  )
+);
+```
+
+PostgreSQL 실행 시 발생 오류:
+```
+ERROR: infinite recursion detected in policy for relation "zen_profiles"
+```
+
+---
+
+#### 재설계 지시
+
+**[FIX-RLS-01]** `20260501053000_fix_zen_profiles_rls.sql` 전면 재작성
+
+기존 코드베이스 패턴(`approve_organization` 등 SECURITY DEFINER RPC)과 일관되게 **헬퍼 함수 패턴**을 사용할 것.
+
+```sql
+-- ① 재귀 우회용 SECURITY DEFINER 헬퍼 함수 (RLS 미적용)
+CREATE OR REPLACE FUNCTION public.get_my_role()
+RETURNS text LANGUAGE sql SECURITY DEFINER STABLE
+AS $$ SELECT role FROM public.zen_profiles WHERE id = auth.uid() $$;
+
+-- ② 기존 정책 정리
+DROP POLICY IF EXISTS "Users can view their own profile"  ON public.zen_profiles;
+DROP POLICY IF EXISTS "Admins can view all profiles"      ON public.zen_profiles;
+DROP POLICY IF EXISTS "Admins can update all profiles"    ON public.zen_profiles;
+
+-- ③ SELECT: 본인 OR 관리자 (재귀 없음)
+CREATE POLICY "Users can view their own profile"
+ON public.zen_profiles FOR SELECT TO authenticated
+USING (auth.uid() = id OR public.get_my_role() IN ('ADMIN', 'ZENITH_SUPER_ADMIN', 'MANAGER'));
+
+-- ④ UPDATE: 관리자만 (재귀 없음)
+CREATE POLICY "Admins can update all profiles"
+ON public.zen_profiles FOR UPDATE TO authenticated
+USING (public.get_my_role() IN ('ADMIN', 'ZENITH_SUPER_ADMIN'))
+WITH CHECK (public.get_my_role() IN ('ADMIN', 'ZENITH_SUPER_ADMIN'));
+```
+
+> **주의**: `get_my_role()` 함수는 `SECURITY DEFINER`이므로 RLS를 우회하여 자기 자신의 role을 단순 조회함 — 재귀 발생 없음.
+
+---
+
+#### DoD 조건
+
+| # | 조건 |
+|:---:|:---|
+| DoD-1 | `20260501053000_fix_zen_profiles_rls.sql` 위 설계로 전면 재작성 |
+| DoD-2 | 로컬 DB 적용 후 오류 없음 확인 (`supabase migration up`) |
+| DoD-3 | E2E-01 재실행 PASS (관리자 승인 단계 포함 전 단계 통과) |
+| DoD-4 | SAR 추가 작성: `SAR_2026-05-01_004_zen_profiles_재귀RLS.md` |
+
+**완료 보고 형식**:
+```
+[FIX-RLS-01 완료] migration 재작성 + 로컬 적용 성공 + E2E-01 재실행 결과
+```
+
+**[결과 보고 - Riley]**:
+```
+[FIX-RLS-01 완료] migration 재작성 + 로컬 적용 성공 + E2E-01 재실행 결과 PASS
+- SAR_2026-05-01_004_zen_profiles_재귀RLS.md 작성 완료
+- Integration 테스트 (tracking-business-qa.test.ts) 수정(fn_get_best_matching_rate 컬럼 오류 조치 포함) 후 전체 PASS 확인
+```
+
+— Aiden (2026-05-01)
 
 ---
 
