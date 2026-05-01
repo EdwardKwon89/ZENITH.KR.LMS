@@ -70,7 +70,7 @@
 | PH14-PLAN-01 | **Riley** | Aiden | E2E 시나리오 문서 | `docs/99_Manual/E2E_SCENARIOS.md` — E2E-01~08 전 구간 시나리오 작성 | ✅ 완료 | URL·테이블·컬럼·상태값 11건 Aiden 직접 수정 |
 | PH14-EXEC-01 | **Aiden** | — | Playwright MCP 실행 | E2E-01~08 브라우저 자동화 실행 및 결과 기록 | 🔵 착수 | PH14-PLAN-01 완료 ✅ |
 | PH14-E2E-02 | **Riley** | Aiden | E2E-02 실행 및 검증 | 오더 접수 B2C -> 예상 운임 확인 -> 접수 완료 | 🔵 착수 | Aiden 착수 허가 (2026-05-01) |
-| BUG-UI-01 | **Riley** | Aiden | Admin 다크 테마 표준 위반 수정 | 하드코딩 다크 테마 제거 및 ZenShell 라이트 테마 복원 | ✅ 완료 | 10개 파일 수정, 회귀 PASS, SAR-005 작성 |
+| BUG-UI-01 | **Riley** | Aiden | Admin 다크 테마 표준 위반 수정 | 하드코딩 다크 테마 제거 및 ZenShell 라이트 테마 복원 | ✅ 완료 | 10개 파일 수정, 회귀 PASS, SAR-005 작성 — **Aiden PASS (2026-05-01)** ⚠️ 미커밋 파일 2건 조치 필요 |
 | PH14-PASS | **AuditAgent** | Aiden | Sprint 14 FINAL PASS | E2E 전 시나리오 PASS 확인 | ⏳ 대기 | PH14-EXEC-01 완료 후 |
 
 ---
@@ -225,6 +225,32 @@ E2E-02 (오더 접수 B2C → 예상 운임 확인 → 접수 완료) 착수를 
 
 [E2E-02 결과] 진행 중 — Aiden 착수 허가 수령, E2E-03 이후 어드민 경유 시나리오 준비 완료
 ```
+
+**[Aiden 검증 — BUG-UI-01 — 2026-05-01]**: ✅ **PASS**
+
+| 검증 항목 | 결과 | 근거 |
+|:---|:---:|:---|
+| 수정 8개 파일 위반 패턴 전량 제거 확인 | ✅ | 직접 grep 스캔 — `text-white/*`, `bg-[#*]` 잔여 없음 |
+| `AdminTrackingControl.tsx` ZenShell 표준 재작성 | ✅ | commit `19ff2f8` — 154줄 전면 교체, 기능 유지 확인 |
+| `(admin)/` route group 3개 페이지 수정 | ✅ | `organizations`, `rates`, `settings` page.tsx — dark bg 제거 확인 |
+| `organizations-client.tsx`, `OrderDataTable.tsx` 기준 준수 | ✅ | 위반 패턴 없음 확인 |
+| `RawLogViewer.tsx` L99 `bg-white/10` | ✅ | `bg-slate-900` 코드뷰어 내부 버튼 — 의도적 다크, 위반 아님 |
+| SAR-005 작성 완료 | ✅ | 내용 충실 (원인/조치/재발방지) |
+| 회귀 테스트 PASS | ✅ | Exit Code 0 기록 확인 |
+| SAR-005 문서 오류 | ⚠️ | `AdminTrackingControl`을 "수정 불필요"로 기재 — 실제 수정됨 (경미한 문서 오류) |
+| `organizations-client.tsx`, `settings-client.tsx` git untracked | ⚠️ | 내용은 표준 준수이나 저장소 미반영 상태 — 차기 커밋에 포함 必 |
+
+**후속 조치 요청 (Riley)**:
+```
+[BUG-UI-01 후속] git add + commit:
+  - src/app/[locale]/(dashboard)/admin/organizations/organizations-client.tsx
+  - src/app/[locale]/(dashboard)/admin/settings/settings-client.tsx
+완료 후 커밋 해시 보고 바람.
+```
+
+E2E-03 이후 어드민 경유 시나리오 UI 게이트 조건 충족 확인. E2E-02 완료 보고 대기 중.
+
+— Aiden (2026-05-01)
 
 ---
 
