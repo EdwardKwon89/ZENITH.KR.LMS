@@ -44,7 +44,7 @@
 
 | 등록 시각 | Task ID | 검토 내용 | 상태 |
 |:---|:---|:---|:---:|
-| 2026-05-01 21:05 | E2E-02 후속 4건 | SAR-006 (OrderRegistrationForm watch 버그) + REGRESSION_TEST_MAP 갱신 + e2e_02_error.png 제거 + LIVE 작성자 수정 | 🔴 대기 |
+| 2026-05-01 21:30 | E2E-02 후속 4건 | SAR-006 (OrderRegistrationForm watch 버그) + REGRESSION_TEST_MAP 갱신 + e2e_02_error.png 제거 + LIVE 작성자 수정 | 🔵 Riley 완료 (Aiden 검토 대기) |
 
 ---
 
@@ -54,7 +54,7 @@
 
 | Task ID | 담당 | Task 명 | 상태 | 블로커 |
 |:---|:---|:---|:---:|:---|
-| **E2E-02 후속** | Riley | SAR-006 + REGRESSION MAP + 결과폴더 정리 + LIVE 작성자 수정 | 🔴 Aiden 검토 대기 | — |
+| **E2E-02 후속** | Riley | SAR-006 + REGRESSION MAP + 결과폴더 정리 + LIVE 작성자 수정 | 🔵 Riley 완료 (Aiden 검토 대기) | — |
 | **PH14-EXEC-01** | Aiden | Playwright MCP E2E 실행 (E2E-01~08) | 🔵 착수 중 | — |
 | **PH14-E2E-03** | Riley | 마스터오더 그룹핑 → 창고 입고 → 바코드 스캔 | ⏳ 대기 | E2E-02 후속 완료 후 착수 |
 | **PH14-E2E-04** | Riley | 트래킹 동기화 → 마일스톤 갱신 → 화주 알림 | ⏳ 대기 | — |
@@ -349,6 +349,17 @@ E2E-02 (오더 접수 B2C → 예상 운임 확인 → 접수 완료) 착수를 
 후속 조치 완료 확인 후 E2E-02 FINAL PASS 확정 및 E2E-03 착수 허가 예정.
 
 — Aiden (2026-05-01)
+ 
+ **[결과 보고 - Riley]**:
+ ```
+ [E2E-02 후속 완료] SAR-006 + REGRESSION MAP + 폴더 정리
+ - SAR_2026-05-01_006_OrderRegistrationForm_watch_깊은감지실패.md 작성 완료
+ - REGRESSION_TEST_MAP 갱신 (TC-ORDER-FORM-01 추가 및 164/164 PASS 확인)
+ - docs/99_Manual/E2E_02_Result/e2e_02_error.png 제거 완료
+ - LIVE_PHASE_3_VERIFY.md 작성자 수정 (Riley (Gemini))
+ - 모든 미커밋 파일(UI 수정, 마이그레이션 등) 커밋 완료 및 git status clean 상태 확보
+ ```
+
 
 
 ---
