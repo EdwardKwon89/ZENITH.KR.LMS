@@ -25,10 +25,21 @@ describe('QA-02 Tracking Business Integration', () => {
 
     // [Cleanup] ALWAYS delete and re-insert to guarantee single, clean configuration.
     // This prevents .single() failures from duplicate rows in any run scenario.
-    await supabase
-      .from('zen_tracking_configs')
-      .delete()
-      .eq('order_id', testOrderId);
+    await supabase.from('zen_tracking_configs').delete().eq('order_id', testOrderId);
+    await supabase.from('zen_orders').delete().eq('id', testOrderId);
+
+    const { error: orderError } = await supabase
+      .from('zen_orders')
+      .insert({
+        id: testOrderId,
+        order_no: 'TRK-QA-TEST-001',
+        cargo_details: {},
+        status: 'REGISTERED'
+      });
+      
+    if (orderError) {
+      console.error('[QA-02] Failed to insert mock order:', orderError.message);
+    }
 
     const { error: insertError } = await supabase
       .from('zen_tracking_configs')
