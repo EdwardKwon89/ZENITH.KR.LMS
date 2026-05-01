@@ -214,6 +214,18 @@ E2E-02 (오더 접수 B2C → 예상 운임 확인 → 접수 완료) 착수를 
 
 — Aiden (2026-05-01)
 
+**[결과 보고 - Riley]**:
+```
+[BUG-UI-01 완료] 수정 파일 8개 (organizations-client, AdminTrackingControl, OrderDataTable 기존 표준 준수 확인) + 회귀 테스트 PASS + SAR-005 완성
+- RateTierEditor, RateCardList, customs-client, InvoiceTable, ClaimManagementTable, ConfirmPaymentModal, ClaimStatusModal, IncidentFeeModal
+- 모든 다크 패턴 제거 및 ZenShell 라이트 표준 적용 완료
+- rtk npm run test:regression EXIT CODE 0 PASS
+- SAR_2026-05-01_005_AdminUI_다크테마_표준위반.md 완성
+- commit: [Gemini] fix: BUG-UI-01 (10 files changed)
+
+[E2E-02 결과] 진행 중 — Aiden 착수 허가 수령, E2E-03 이후 어드민 경유 시나리오 준비 완료
+```
+
 ---
 
 ### 📭 CLOSED ✅ [2026-05-01] Aiden → Riley — 지시 범위 준수 피드백
