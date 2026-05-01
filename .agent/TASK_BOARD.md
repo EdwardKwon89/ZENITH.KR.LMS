@@ -69,6 +69,8 @@
 |:---|:---|:---|:---|:---|:---|:---|
 | PH14-PLAN-01 | **Riley** | Aiden | E2E 시나리오 문서 | `docs/99_Manual/E2E_SCENARIOS.md` — E2E-01~08 전 구간 시나리오 작성 | ✅ 완료 | URL·테이블·컬럼·상태값 11건 Aiden 직접 수정 |
 | PH14-EXEC-01 | **Aiden** | — | Playwright MCP 실행 | E2E-01~08 브라우저 자동화 실행 및 결과 기록 | 🔵 착수 | PH14-PLAN-01 완료 ✅ |
+| PH14-E2E-02 | **Riley** | Aiden | E2E-02 실행 및 검증 | 오더 접수 B2C -> 예상 운임 확인 -> 접수 완료 | 🔵 착수 | Aiden 착수 허가 (2026-05-01) |
+| BUG-UI-01 | **Riley** | Aiden | Admin 다크 테마 표준 위반 수정 | 하드코딩 다크 테마 제거 및 ZenShell 라이트 테마 복원 | ✅ 완료 | 10개 파일 수정, 회귀 PASS, SAR-005 작성 |
 | PH14-PASS | **AuditAgent** | Aiden | Sprint 14 FINAL PASS | E2E 전 시나리오 PASS 확인 | ⏳ 대기 | PH14-EXEC-01 완료 후 |
 
 ---

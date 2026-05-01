@@ -155,7 +155,7 @@ export const ClaimManagementTable: React.FC<ClaimManagementTableProps> = ({ init
       accessorKey: 'reason_code',
       cell: ({ row }) => (
         <div className="flex flex-col gap-1">
-          <span className="px-2 py-0.5 bg-slate-900 text-white rounded-md text-[10px] font-black w-fit uppercase tracking-wider">
+          <span className="px-2 py-0.5 bg-slate-100 text-slate-800 border border-slate-300 rounded-md text-[10px] font-black w-fit uppercase tracking-wider">
             {t(`reason_${row.original.reason_code.toLowerCase()}`)}
           </span>
           <span className="text-[11px] text-slate-500 font-medium line-clamp-1 max-w-[150px]">

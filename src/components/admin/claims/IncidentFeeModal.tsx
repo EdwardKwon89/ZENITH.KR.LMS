@@ -112,7 +112,7 @@ export const IncidentFeeModal: React.FC<IncidentFeeModalProps> = ({
               <select
                 value={invoiceId}
                 onChange={(e) => setInvoiceId(e.target.value)}
-                className="w-full bg-slate-50/50 backdrop-blur-sm border border-white/20 px-4 py-3 rounded-2xl shadow-[inset_2px_2px_5px_rgba(0,0,0,0.05)] focus:outline-none focus:ring-2 focus:ring-blue-400/30 transition-all font-bold"
+                className="w-full bg-slate-50 border border-slate-200 px-4 py-3 rounded-2xl shadow-inner focus:outline-none focus:ring-2 focus:ring-blue-400/30 transition-all font-bold"
               >
                 {invoices.map(inv => (
                   <option key={inv.id} value={inv.id}>
@@ -151,7 +151,7 @@ export const IncidentFeeModal: React.FC<IncidentFeeModalProps> = ({
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="w-full bg-slate-50/50 backdrop-blur-sm border border-white/20 px-4 py-3 rounded-2xl shadow-[inset_2px_2px_5px_rgba(0,0,0,0.05)] focus:outline-none focus:ring-2 focus:ring-blue-400/30 transition-all text-sm min-h-[100px]"
+                className="w-full bg-slate-50 border border-slate-200 px-4 py-3 rounded-2xl shadow-inner focus:outline-none focus:ring-2 focus:ring-blue-400/30 transition-all text-sm min-h-[100px]"
                 placeholder="비용 발생 사유 등을 입력하세요."
               />
             </div>
@@ -167,7 +167,7 @@ export const IncidentFeeModal: React.FC<IncidentFeeModalProps> = ({
             </ZenButton>
             <ZenButton 
               variant="tactile" 
-              className="flex-1 bg-slate-900 text-white shadow-lg hover:bg-slate-800 font-black rounded-2xl"
+              className="flex-1 bg-rose-600 text-white shadow-lg hover:bg-rose-700 font-black rounded-2xl"
               disabled={isSubmitting || invoices.length === 0}
               loading={isSubmitting}
               onClick={handleConfirm}
