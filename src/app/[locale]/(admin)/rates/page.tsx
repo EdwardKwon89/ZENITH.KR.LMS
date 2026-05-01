@@ -209,7 +209,7 @@ export default function RatesManagementPage() {
   );
 
   return (
-    <div className="min-h-screen bg-[#0A0A0B] p-8 space-y-10">
+    <div className="min-h-screen bg-slate-50 p-8 space-y-10">
       {/* Header */}
       <header className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
         <div className="space-y-2">
@@ -217,13 +217,13 @@ export default function RatesManagementPage() {
             <DollarSign className="w-4 h-4" />
             Pricing Strategy & Master Data
           </div>
-          <h1 className="text-4xl font-black text-white tracking-tight flex items-center gap-4">
+          <h1 className="text-4xl font-black text-slate-900 tracking-tight flex items-center gap-4">
             물류 요율 마스터 등록
-            <span className="text-xs bg-white/10 text-white/40 px-3 py-1 rounded-full border border-white/5 font-mono">
+            <span className="text-xs bg-slate-100 text-slate-500 px-3 py-1 rounded-full border border-slate-200 font-mono">
               V-Engine 1.0
             </span>
           </h1>
-          <p className="text-white/40 max-w-xl">
+          <p className="text-slate-500 max-w-xl">
             운송사별, 항로별 기본 요율 및 중량구간(Slab) 할인 체계를 관리합니다. 이 데이터는 견적 엔진의 핵심 소스로 사용됩니다.
           </p>
         </div>
@@ -232,31 +232,31 @@ export default function RatesManagementPage() {
       <main className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10">
         {/* Left: Configuration Form */}
         <div className="lg:col-span-8 space-y-8">
-          <ZenCard className="bg-[#111112] border-white/5 space-y-8">
+          <ZenCard className="bg-white border-slate-200 space-y-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Carrier Selection */}
               <div className="space-y-3">
-                <label className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] flex items-center gap-2">
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
                   <Truck className="w-3 h-3 text-blue-500" /> Carrier Partner
                 </label>
                 <select 
                   value={selectedCarrier}
                   onChange={(e) => setSelectedCarrier(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 text-white px-4 py-3 rounded-2xl focus:ring-2 focus:ring-blue-500/30 transition-all appearance-none"
+                  className="w-full bg-slate-50 border border-slate-300 text-slate-900 px-4 py-3 rounded-2xl focus:ring-2 focus:ring-blue-500/30 transition-all appearance-none"
                 >
-                  <option value="" className="bg-[#111112]">선택하세요...</option>
+                  <option value="" className="bg-white">선택하세요...</option>
                   {carriers.map(c => (
-                    <option key={c.id} value={c.id} className="bg-[#111112]">{c.name} ({c.org_id})</option>
+                    <option key={c.id} value={c.id} className="bg-white">{c.name} ({c.org_id})</option>
                   ))}
                 </select>
               </div>
 
               {/* Service Type */}
               <div className="space-y-3">
-                <label className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] flex items-center gap-2">
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
                   <Settings2 className="w-3 h-3 text-blue-500" /> Service Mode
                 </label>
-                <div className="flex gap-2 p-1 bg-black/40 rounded-2xl border border-white/5">
+                <div className="flex gap-2 p-1 bg-slate-100 rounded-2xl border border-slate-200">
                   {[
                     { id: 'AIR', icon: Plane, label: 'Air' },
                     { id: 'SEA', icon: Ship, label: 'Sea' },
@@ -268,8 +268,8 @@ export default function RatesManagementPage() {
                       className={cn(
                         "flex-1 flex items-center justify-center gap-2 py-2 rounded-xl text-xs font-bold transition-all",
                         serviceType === mode.id 
-                          ? "bg-white/10 text-white shadow-lg" 
-                          : "text-white/20 hover:text-white/40"
+                          ? "bg-slate-100 text-slate-900 shadow-lg" 
+                          : "text-slate-400 hover:text-slate-500"
                       )}
                     >
                       <mode.icon className="w-3 h-3" /> {mode.label}
@@ -280,50 +280,50 @@ export default function RatesManagementPage() {
 
               {/* Customer Targeting (Optional) */}
               <div className="space-y-3">
-                <label className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] flex items-center gap-2">
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
                   <Box className="w-3 h-3 text-amber-500" /> Target Customer (Optional)
                 </label>
                 <select 
                   value={selectedCustomer}
                   onChange={(e) => setSelectedCustomer(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 text-white px-4 py-3 rounded-2xl appearance-none"
+                  className="w-full bg-slate-50 border border-slate-300 text-slate-900 px-4 py-3 rounded-2xl appearance-none"
                 >
-                  <option value="" className="bg-[#111112]">All Customers (General Rate)</option>
+                  <option value="" className="bg-white">All Customers (General Rate)</option>
                   {shippers.map(s => (
-                    <option key={s.id} value={s.id} className="bg-[#111112]">{s.org_name_ko} ({s.org_code})</option>
+                    <option key={s.id} value={s.id} className="bg-white">{s.org_name_ko} ({s.org_code})</option>
                   ))}
                 </select>
               </div>
 
               {/* Priority */}
               <div className="space-y-3">
-                <label className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] flex items-center gap-2">
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
                   <Settings2 className="w-3 h-3 text-amber-500" /> Rate Priority
                 </label>
                 <input 
                   type="number"
                   value={priority}
                   onChange={(e) => setPriority(Number(e.target.value))}
-                  className="w-full bg-white/5 border border-white/10 text-white px-4 py-3 rounded-2xl focus:outline-none focus:ring-2 focus:ring-amber-500/30"
+                  className="w-full bg-slate-50 border border-slate-300 text-slate-900 px-4 py-3 rounded-2xl focus:outline-none focus:ring-2 focus:ring-amber-500/30"
                   placeholder="0 (Highest priority wins overlaps)"
                 />
               </div>
 
               {/* Settlement Base Date Rule */}
               <div className="space-y-3">
-                <label className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] flex items-center gap-2">
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
                   <Calendar className="w-3 h-3 text-amber-500" /> Settlement Base Date
                 </label>
                 <select 
                   value={baseDateRule}
                   onChange={(e) => setBaseDateRule(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 text-white px-4 py-3 rounded-2xl appearance-none focus:ring-2 focus:ring-amber-500/30"
+                  className="w-full bg-slate-50 border border-slate-300 text-slate-900 px-4 py-3 rounded-2xl appearance-none focus:ring-2 focus:ring-amber-500/30"
                 >
-                  <option value="RECEIPT_DATE" className="bg-[#111112]">Cargo Receipt Date (Default)</option>
-                  <option value="ORDER_DATE" className="bg-[#111112]">Order Date</option>
-                  <option value="CONFIRM_DATE" className="bg-[#111112]">Confirmation Date</option>
+                  <option value="RECEIPT_DATE" className="bg-white">Cargo Receipt Date (Default)</option>
+                  <option value="ORDER_DATE" className="bg-white">Order Date</option>
+                  <option value="CONFIRM_DATE" className="bg-white">Confirmation Date</option>
                 </select>
-                <p className="text-[9px] text-white/40 leading-relaxed px-1">
+                <p className="text-[9px] text-slate-500 leading-relaxed px-1">
                   * Determines which date on the order determines the applicable rate version.
                 </p>
               </div>
@@ -332,40 +332,40 @@ export default function RatesManagementPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Origin */}
               <div className="space-y-3">
-                <label className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] flex items-center gap-2">
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
                   <MapPin className="w-3 h-3 text-emerald-500" /> Loading Port (Origin)
                 </label>
                 <select 
                   value={originPort}
                   onChange={(e) => setOriginPort(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 text-white px-4 py-3 rounded-2xl appearance-none"
+                  className="w-full bg-slate-50 border border-slate-300 text-slate-900 px-4 py-3 rounded-2xl appearance-none"
                 >
-                  <option value="" className="bg-[#111112]">Origin Select...</option>
+                  <option value="" className="bg-white">Origin Select...</option>
                   {ports.map(p => (
-                    <option key={p.port_code} value={p.port_code} className="bg-[#111112]">{p.port_code} - {p.port_name_ko}</option>
+                    <option key={p.port_code} value={p.port_code} className="bg-white">{p.port_code} - {p.port_name_ko}</option>
                   ))}
                 </select>
               </div>
 
               {/* Destination */}
               <div className="space-y-3">
-                <label className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] flex items-center gap-2">
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
                   <Globe className="w-3 h-3 text-emerald-500" /> Discharge Port (Dest)
                 </label>
                 <select 
                   value={destPort}
                   onChange={(e) => setDestPort(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 text-white px-4 py-3 rounded-2xl appearance-none"
+                  className="w-full bg-slate-50 border border-slate-300 text-slate-900 px-4 py-3 rounded-2xl appearance-none"
                 >
-                  <option value="" className="bg-[#111112]">Dest Select...</option>
+                  <option value="" className="bg-white">Dest Select...</option>
                   {ports.map(p => (
-                    <option key={p.port_code} value={p.port_code} className="bg-[#111112]">{p.port_code} - {p.port_name_ko}</option>
+                    <option key={p.port_code} value={p.port_code} className="bg-white">{p.port_code} - {p.port_name_ko}</option>
                   ))}
                 </select>
               </div>
             </div>
 
-            <div className="pt-6 border-t border-white/5">
+            <div className="pt-6 border-t border-slate-200">
               <RateTierEditor tiers={tiers} onChange={setTiers} />
             </div>
           </ZenCard>
@@ -373,35 +373,35 @@ export default function RatesManagementPage() {
 
         {/* Right: Summary & Action */}
         <div className="lg:col-span-4 space-y-6">
-          <ZenCard className="bg-[#111112] border-white/5 sticky top-8">
-            <h3 className="text-xl font-bold text-white mb-6">요율 정보 요약</h3>
+          <ZenCard className="bg-white border-slate-200 sticky top-8">
+            <h3 className="text-xl font-bold text-slate-900 mb-6">요율 정보 요약</h3>
             
             <div className="space-y-6">
-              <div className="flex justify-between items-center text-sm p-4 bg-white/5 rounded-2xl">
-                <span className="text-white/40">기본 단가</span>
+              <div className="flex justify-between items-center text-sm p-4 bg-slate-50 rounded-2xl">
+                <span className="text-slate-500">기본 단가</span>
                 <div className="flex items-center gap-2">
-                  <span className="text-white font-mono">$</span>
+                  <span className="text-slate-900 font-mono">$</span>
                   <input 
                     type="number" 
                     value={baseRate}
                     onChange={(e) => setBaseRate(Number(e.target.value))}
-                    className="bg-transparent text-white font-mono text-right w-20 focus:outline-none focus:text-emerald-400"
+                    className="bg-transparent text-slate-900 font-mono text-right w-20 focus:outline-none focus:text-emerald-600"
                   />
                 </div>
               </div>
 
-              <div className="p-4 bg-white/5 rounded-2xl space-y-2">
-                <p className="text-[10px] text-white/20 font-bold uppercase tracking-widest">Active Route</p>
+              <div className="p-4 bg-slate-50 rounded-2xl space-y-2">
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Active Route</p>
                 <div className="flex items-center gap-3">
-                  <span className="text-lg font-black text-white">{originPort || '???'}</span>
-                  <ChevronRight className="w-4 h-4 text-white/10" />
-                  <span className="text-lg font-black text-white">{destPort || '???'}</span>
+                  <span className="text-lg font-black text-slate-900">{originPort || '???'}</span>
+                  <ChevronRight className="w-4 h-4 text-slate-300" />
+                  <span className="text-lg font-black text-slate-900">{destPort || '???'}</span>
                 </div>
               </div>
 
-              <div className="p-4 border border-dashed border-white/10 rounded-2xl space-y-3">
-                <p className="text-[10px] text-white/20 font-bold uppercase tracking-widest">Pricing Formula</p>
-                <div className="text-xs text-white/40 leading-relaxed font-mono">
+              <div className="p-4 border border-dashed border-slate-300 rounded-2xl space-y-3">
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Pricing Formula</p>
+                <div className="text-xs text-slate-500 leading-relaxed font-mono">
                   {tiers.length === 0 ? (
                     `BASE_VAL: $${baseRate}/KG (Flat)`
                   ) : (
@@ -416,7 +416,7 @@ export default function RatesManagementPage() {
                 className="w-full h-16 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-2xl shadow-xl shadow-blue-500/20 flex items-center justify-center gap-3 disabled:opacity-50"
               >
                 {loading ? (
-                  <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                  <div className="w-5 h-5 border-2 border-slate-300 border-t-slate-200 rounded-full animate-spin" />
                 ) : (
                   <Save className="w-5 h-5" />
                 )}
@@ -431,16 +431,16 @@ export default function RatesManagementPage() {
       <section className="max-w-7xl mx-auto space-y-6">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div className="space-y-1">
-            <h2 className="text-2xl font-bold text-white flex items-center gap-3">
+            <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-3">
               <LayoutGrid className="w-6 h-6 text-blue-500" />
               Registered Pricing Masters
             </h2>
-            <p className="text-sm text-white/30">시스템에 배포되어 현재 유효한 운송사별 요율 정보 목록입니다.</p>
+            <p className="text-sm text-slate-400">시스템에 배포되어 현재 유효한 운송사별 요율 정보 목록입니다.</p>
           </div>
 
           <div className="flex items-center gap-4 w-full md:w-auto">
             {/* TISA Status Tabs */}
-            <div className="flex gap-1 p-1 bg-white/5 rounded-2xl border border-white/10 overflow-hidden">
+            <div className="flex gap-1 p-1 bg-slate-50 rounded-2xl border border-slate-300 overflow-hidden">
               {['ACTIVE', 'ALL'].map((s) => (
                 <button
                   key={s}
@@ -449,7 +449,7 @@ export default function RatesManagementPage() {
                     "px-4 py-2 rounded-xl text-[10px] font-black tracking-widest transition-all",
                     statusFilter === s 
                       ? "bg-blue-600 text-white shadow-lg" 
-                      : "text-white/20 hover:text-white/40"
+                      : "text-slate-400 hover:text-slate-500"
                   )}
                 >
                   {s}
@@ -458,16 +458,16 @@ export default function RatesManagementPage() {
             </div>
 
             <div className="relative flex-1 md:w-64">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <ZenInput 
                 placeholder="Search route or carrier..."
-                className="pl-12 bg-white/5 border-white/10"
+                className="pl-12 bg-slate-50 border-slate-300"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
             <ZenButton variant="glass" className="aspect-square p-0 w-12 h-12 rounded-2xl">
-              <ListFilter className="w-5 h-5 text-white/40" />
+              <ListFilter className="w-5 h-5 text-slate-500" />
             </ZenButton>
           </div>
         </div>
