@@ -177,7 +177,10 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
 
   // 📐 치수 기반 합산 및 예상 운임 엔진 (v2.2 - Chargeable Weight 반영)
   const transportMode = watch('transport_mode') as TransportMode;
-  const watchedPackages = watch('packages');
+  const watchedPackages = useWatch({
+    control,
+    name: "packages"
+  });
   
   const totals = useMemo(() => {
     let weight = 0;
