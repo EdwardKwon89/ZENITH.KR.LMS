@@ -45,7 +45,7 @@ describe('Customs Server Actions', () => {
         getUser: vi.fn().mockResolvedValue({ data: { user: mockUser } }),
       },
       from: vi.fn().mockImplementation((table) => {
-        if (table === 'profiles') return profileQueryChain;
+        if (table === 'zen_profiles') return profileQueryChain;
         return mockQueryChain;
       }),
       ...mockQueryChain, // 기본 메서드 노출

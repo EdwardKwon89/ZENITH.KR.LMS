@@ -37,6 +37,8 @@ export async function signup(formData: FormData, locale: string = 'ko') {
   const isNewOrg = formData.get('is_new_org') === 'true';
   const orgName = formData.get('org_name') as string | null;
   const businessNumber = formData.get('business_number') as string | null;
+
+  console.log('[SIGNUP_ACTION] Received signup request:', { email, fullName, isNewOrg, orgName });
   
   // Master Edward's Policy: Personal accounts are assigned 'SHIPPER' by default.
   let orgType = formData.get('org_type') as string | null;
@@ -79,7 +81,7 @@ export async function signup(formData: FormData, locale: string = 'ko') {
     await new Promise(resolve => setTimeout(resolve, 500));
 
     const { data: profile } = await adminClient
-      .from('profiles')
+      .from('zen_profiles')
       .select('org_id')
       .eq('id', data.user.id)
       .single();
@@ -97,7 +99,7 @@ export async function signup(formData: FormData, locale: string = 'ko') {
       
       if (!uploadError) {
         await adminClient
-          .from('organization_documents')
+          .from('zen_organization_documents')
           .insert({
             org_id: profile.org_id,
             doc_type: 'BIZ_REG',

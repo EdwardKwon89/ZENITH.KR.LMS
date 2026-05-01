@@ -64,7 +64,7 @@ export default function CustomsHistoryClient({
         
         switch (status) {
           case 'PENDING':
-            return <ZenBadge variant="secondary" className="gap-1"><Clock className="w-3 h-3" />{t(`customs_status_${statusKey}`)}</ZenBadge>;
+            return <ZenBadge variant="default" className="gap-1"><Clock className="w-3 h-3" />{t(`customs_status_${statusKey}`)}</ZenBadge>;
           case 'SUBMITTED':
             return <ZenBadge variant="info" className="gap-1 animate-pulse"><Clock className="w-3 h-3" />{t(`customs_status_${statusKey}`)}</ZenBadge>;
           case 'APPROVED':
@@ -72,7 +72,7 @@ export default function CustomsHistoryClient({
           case 'HELD':
             return <ZenBadge variant="warning" className="gap-1"><AlertCircle className="w-3 h-3" />{t(`customs_status_${statusKey}`)}</ZenBadge>;
           case 'REJECTED':
-            return <ZenBadge variant="error" className="gap-1"><XCircle className="w-3 h-3" />{t(`customs_status_${statusKey}`)}</ZenBadge>;
+            return <ZenBadge variant="danger" className="gap-1"><XCircle className="w-3 h-3" />{t(`customs_status_${statusKey}`)}</ZenBadge>;
           default:
             return <ZenBadge>{status}</ZenBadge>;
         }

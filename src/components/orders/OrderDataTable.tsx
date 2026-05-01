@@ -54,7 +54,7 @@ export default function OrderDataTable({
           <tbody className="divide-y divide-slate-100">
             {orders.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-6 py-20 text-center text-white/30 italic">
+                <td colSpan={6} className="px-6 py-20 text-center text-slate-400 italic">
                   No orders found. Use the filters to refine your search.
                 </td>
               </tr>

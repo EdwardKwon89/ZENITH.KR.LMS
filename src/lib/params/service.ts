@@ -77,6 +77,33 @@ export const getParamsByCategory = unstable_cache(
 );
 
 /**
+ * 모든 시스템 파라미터를 조회합니다. (캐싱 적용)
+ */
+export const getAllParams = unstable_cache(
+  async (): Promise<SystemParam[]> => {
+    const supabase = isTest ? (global as any).mockSupabase : await createServerClient();
+    if (!supabase) return [];
+
+    const { data, error } = await supabase
+      .from('zen_system_params')
+      .select('*')
+      .order('category', { ascending: true })
+      .order('key', { ascending: true });
+
+    if (error) {
+      console.error(`[PARAM_SERVICE] Error fetching all params:`, error.message);
+      return [];
+    }
+    return data || [];
+  },
+  ['system-params-all'],
+  {
+    tags: ['system-params'],
+    revalidate: 3600,
+  }
+);
+
+/**
  * 파라미터 값을 업데이트하고 캐시를 무효화합니다.
  */
 export async function updateSystemParam(

@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS customs_adapters (
 -- 2. 통관 신고 정보 테이블
 CREATE TABLE IF NOT EXISTS customs_declarations (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  order_id UUID NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+  order_id UUID NOT NULL REFERENCES zen_orders(id) ON DELETE CASCADE,
   adapter_type TEXT NOT NULL DEFAULT 'MANUAL', -- 'MANUAL' | 'EXTERNAL'
   status TEXT NOT NULL DEFAULT 'PENDING',
   -- PENDING / SUBMITTED / APPROVED / HELD / REJECTED
@@ -60,7 +60,7 @@ CREATE POLICY "Allow select for owners on customs_declarations"
   TO authenticated
   USING (
     EXISTS (
-      SELECT 1 FROM orders
+      SELECT 1 FROM zen_orders
       WHERE id = customs_declarations.order_id AND shipper_id = auth.uid()
     )
   );
