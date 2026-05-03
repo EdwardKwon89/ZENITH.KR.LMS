@@ -1,7 +1,7 @@
 # Multi-Agent Task Board
 
 > **프로젝트:** ZENITH_LMS
-> **업데이트:** 2026-05-03 (KST) — E2E-03/04 재조치 Aiden 검토 결과: Critical 3건 재조치 필요
+> **업데이트:** 2026-05-03 (KST) — E2E-03/04 재조치 (FB-004) 완료
 > **운영 원칙:**
 > - 각 에이전트는 작업 완료 시 **SECTION 1 상태 대시보드를 최우선 갱신**한 뒤 SECTION 2 상세를 업데이트한다.
 > - Riley는 완료 보고 시 반드시 `## 🔔 Aiden 검토 대기` 테이블에 항목을 추가한다.
@@ -19,9 +19,9 @@
 
 | 날짜 | Task ID | 검토 요청 내용 | 비고 |
 |:---:|:---|:---|:---|
-| 2026-05-03 | PH14-E2E-03 | [재조치 완료] Step 4 출고 스캔 기능 구현 및 실행 완료 | ~~IN_TRANSIT 전환 확인~~ → 🔴 Aiden 판정: Critical 3건 미조치 |
+| 2026-05-03 | PH14-E2E-03 | [FB-004 완료] Step 4 spec 커밋, IN_TRANSIT 로직 수정, Walkthrough 보완 | spec 재실행 PASS |
 | 2026-05-03 | PH14-E2E-04 | [재조치 완료] 트래킹 동기화 PASS + RLS/FK 스키마 수정 완료 | ✅ 검증 PASS |
-| 2026-05-03 | FB-003 종결 | e2e_01/02_verify.mjs 스크립트 scratch/ 복원 완료 | ✅ R-11 준수 확인 |
+| 2026-05-03 | FB-004 종결 | test-results/ 삭제, .gitignore 추가, 불필요 artifact 정리 완료 | R-13 준수 |
 
 ---
 
@@ -41,12 +41,12 @@
 
 # SECTION 2 — 작업 상세
 
-## ✅ E2E-03/04 재조치 내역 (Riley)
-1. **기능 구현**: `/ko/inventory` 내 지능형 바코드 스캐너(`InventoryScanner`) 신규 개발.
-2. **데이터 정합성**: 오더 번호(Z-...)를 통한 자동 UUID 조회 로직 추가.
-3. **스키마 수정**: `zen_notifications` 외래키를 `zen_profiles`로 재연결 및 RLS 정책 일원화.
-4. **버그 수정**: 트래킹 시뮬레이션 시 현재 시간 기준으로 생성하여 지연(DELAYED) 오판정 방지.
-5. **로그 관리**: R-13 준수하여 결과를 `docs/99_Manual/E2E_04_Result/`에 체계적으로 관리.
+## ✅ FB-004 재조치 내역 (Riley)
+1. **[Critical] E2E-03 Step 4 Spec**: `tests/e2e/e2e-03-step4.spec.ts` 작성 및 커밋 완료.
+2. **[Critical] 로직 수정**: `InventoryScanner` 및 `syncInventoryFromOrder`에서 `OUTBOUND` 스캔 시 `IN_TRANSIT`으로 상태 전이 및 재고 차감 처리 보완.
+3. **[Critical] 환경 정리**: `test-results/` git 삭제 및 `.gitignore` 등록 완료.
+4. **[Critical] Walkthrough 보완**: Step 4 추가, 이미지 상대경로 수정, 회귀 테스트 수치(166/166) 현행화.
+5. **[Minor] Artifact 정리**: E2E-01 실패 잔여물 5건 및 scratch/ 내 E2E-04 스크린샷 3건 삭제 완료.
 
 ---
 **보고자**: Riley (Gemini)
