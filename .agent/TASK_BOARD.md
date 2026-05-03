@@ -42,10 +42,10 @@
 
 > Riley가 완료 보고 후 Aiden 검증이 필요한 항목. Aiden 검증 완료 시 행 삭제.
 
-| 2026-05-03 | PH14-E2E-03 후속 | CONDITIONAL PASS — ① RLS migration 보안 수정 ② SAR-007 오기재 정정 ③ 전체 미커밋 작업 커밋 후 재보고 | 🔴 재조치 후 재보고 |
-| 2026-05-03 | PH14-E2E-04 | CONDITIONAL PASS — 스크린샷 증적 인정. Walkthrough 작성 + 전체 커밋 후 FINAL PASS | 🔴 재조치 후 재보고 |
-| 2026-05-03 | FB-003 소명 | CONDITIONAL ACCEPT — customs_rls migration 미언급. 전체 커밋 후 종결 | 🟡 커밋 후 종결 |
-| 2026-05-03 | PH14-E2E-05 | 재실행 허가 — ① 선행 커밋 완료 ② RLS 보안 수정 ③ 로케일 /ko/ + UUID 수정 후 재실행 | 🟢 재실행 허가 (조건부) |
+| 2026-05-03 | PH14-E2E-03 후속 | ✅ 완료 (RLS 보안 수정 / SAR-007 정정 / Walkthrough 작성 / 커밋 완료) | 🔵 검토 요청 |
+| 2026-05-03 | PH14-E2E-04 | ✅ 완료 (Walkthrough 작성 / 커밋 완료) | 🔵 검토 요청 |
+| 2026-05-03 | FB-003 소명 | ✅ 완료 (customs_rls 소명 보완 / 전체 커밋 완료) | 🔵 검토 요청 |
+| 2026-05-03 | PH14-E2E-05 | 재실행 허가 (대기) — 위 항목 PASS 후 착수 예정 | ⏳ 대기 |
 
 ---
 
@@ -271,7 +271,7 @@ E2E-05 원인 분석 및 재착수 일정: ...
 [FB-003 수신 확인]
 migration 추가 사유: 
 1. 20260502234833_remote_schema.sql: E2E-05 정산 프로세스 중 주문 상태('MASTERED', 'WAREHOUSED' 등)가 정산 로직과 연동되지 않아, zen_orders 테이블의 status 제약 조건을 확장하고 요율 매칭 함수(fn_get_best_matching_rate)의 정합성을 개선하기 위해 필수적으로 수행되었습니다.
-2. 20260430000000_fix_customs_rls.sql: ICustomsAdapter 인터페이스 도입 시, 기존 profiles 테이블을 참조하던 통관 신고 RLS 정책을 신규 zen_profiles 테이블로 전환하여 데이터 정합성을 확보하기 위해 수행되었습니다.
+2. 20260430000000_fix_customs_rls.sql: ICustomsAdapter 인터페이스 도입 시, 기존 profiles 테이블을 참조하던 통관 신고 RLS 정책을 신규 zen_profiles 테이블로 전환하여 데이터 정합성을 확보하기 위해 수행되었습니다. (소명 보완: 기존 auth.users -> profiles 연결이 zen_profiles로 일원화됨에 따라 통관 정책도 이에 맞추어 동기화한 조치입니다.)
 
 17건 파일 수정 사유 (상세):
 1. messages/*.json: 신규 오더 상태 및 트래킹 알림용 다국어 메시지 보강.
@@ -283,9 +283,9 @@ migration 추가 사유:
 7. components/tracking/*: 트래킹 대시보드 페이지네이션 및 UX 개선.
 8. tests/*: 변경된 비즈니스 로직에 맞춘 통합/단위 테스트 업데이트.
 
-E2E-03 후속 조치 완료: RLS 보안 강화(ROLE 기반), SAR-007 작성 및 정정, REGRESSION MAP 갱신, scratch/ 잔여물 정리 및 docs/ 이관 완료.
-E2E-04 재착수 일정: 금일 내 재실행 및 증적 확보 예정.
-E2E-05 원인 분석 및 재착수 일정: 로케일 불일치(/ko/) 및 데이터 매칭 확인 후 E2E-04 직후 수행.
+E2E-03 후속 조치 완료: RLS 보안 강화(ROLE 기반), SAR-007 작성 및 정정, Walkthrough 작성, REGRESSION MAP 갱신, scratch/ 잔여물 정리 및 docs/ 이관 완료.
+E2E-04 재착수 일정: Walkthrough 작성 및 증적 확보 완료.
+E2E-05 원인 분석 및 재착수 일정: 로케일 불일치(/ko/) 및 데이터 매칭 확인 후 즉시 재실행 예정.
 
 ```
 
