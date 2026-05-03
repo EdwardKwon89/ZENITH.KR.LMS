@@ -76,8 +76,8 @@ export class MockCarrierProvider implements ITrackingProvider {
     }
 
     // 3. Map to Internal Standard Format
-    // Use a deterministic base date to ensure sync integrity tests pass
-    const baseDate = new Date('2026-04-23T00:00:00Z');
+    // [Fix] Use current date as base to avoid immediate "DELAYED" detection
+    const baseDate = new Date();
     
     return mockApiResponse.checkpoints.map(cp => {
       const eventTime = new Date(baseDate);

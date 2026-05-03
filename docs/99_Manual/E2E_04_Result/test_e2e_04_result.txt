@@ -1,0 +1,8 @@
+
+Running 1 test using 1 worker
+
+Current Order Numbers in list: Z-HOU-E2E03-01
+Navigating to detail: /orders/3ff5b116-29cd-4d90-8dd0-0e99c36a2155
+  ✓  1 [chromium] › tests/e2e/e2e-04-tracking-sync.spec.ts:31:7 › E2E-04: Tracking Sync & Notification Engine › should synchronize external tracking data and update status (18.9s)
+
+  1 passed (19.9s)

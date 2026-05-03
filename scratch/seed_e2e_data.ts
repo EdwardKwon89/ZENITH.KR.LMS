@@ -48,7 +48,7 @@ async function seedE2E() {
 
   // 2. Create E2E-04 Order
   const order04 = {
-    id: '3ff5b116-29cd-4d90-8dd0-0e99c36a2155', // Existing ID from check_order_state.ts
+    id: '3ff5b116-29cd-4d90-8dd0-0e99c36a2155', 
     order_no: 'Z-HOU-E2E03-01',
     status: 'WAREHOUSED',
     order_type: 'B2C',
@@ -63,7 +63,7 @@ async function seedE2E() {
   await supabase.from('zen_tracking_configs').upsert({
     order_id: order04.id,
     provider_type: 'API',
-    tracking_number: 'TRK-E2E04-API-01',
+    tracking_no: 'TRK-E2E04-API-01',
     is_active: true,
     metadata: { carrier: 'ZENITH_EXPRESS' }
   });

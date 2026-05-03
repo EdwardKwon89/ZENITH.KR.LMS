@@ -66,7 +66,7 @@ export async function triggerStatusChangeNotification(
   // 송하인 org 소속 사용자 조회 (profiles.org_id = zen_orders.shipper_id)
   if ([OrderStatus.WAREHOUSED, OrderStatus.RELEASED, OrderStatus.IN_TRANSIT, OrderStatus.DELIVERED, OrderStatus.HELD].includes(newStatus)) {
     const { data: shipperUsers } = await supabase
-      .from("profiles")
+      .from("zen_profiles")
       .select("id, email")
       .eq("org_id", order.shipper_id);
 
