@@ -41,15 +41,15 @@ export default function PendingPage() {
       
       // 🔍 2. DB(profiles)에서 최신 상태 확인 (메타데이터 지연 방지)
       const { data: profile } = await supabase
-        .from('profiles')
-        .select('status, organizations(approval_comment)')
+        .from('zen_profiles')
+        .select('status, zen_organizations(approval_comment)')
         .eq('id', user.id)
         .single();
       
       if (profile) {
         currentStatus = profile.status;
-        if (profile.organizations) {
-           setComment((profile.organizations as any).approval_comment);
+        if (profile.zen_organizations) {
+           setComment((profile.zen_organizations as any).approval_comment);
         }
       }
 

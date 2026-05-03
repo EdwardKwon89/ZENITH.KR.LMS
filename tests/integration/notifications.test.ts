@@ -106,8 +106,14 @@ describe('ZENITH Notification Engine: WBS 3.1.2.2', () => {
       OrderStatus.IN_TRANSIT
     );
 
-    // 송하인은 IN_TRANSIT 대상이 아님 → IN_APP insert 없음
-    expect(mockInsert).not.toHaveBeenCalled();
+    // 송하인도 IN_TRANSIT 대상임 → IN_APP + EMAIL insert 발생 확인
+    expect(mockInsert).toHaveBeenCalledTimes(2);
+    expect(mockInsert).toHaveBeenCalledWith(
+      expect.objectContaining({ channel: 'IN_APP', user_id: mockShipperUsers[0].id })
+    );
+    expect(mockInsert).toHaveBeenCalledWith(
+      expect.objectContaining({ channel: 'EMAIL', user_id: mockShipperUsers[0].id })
+    );
   });
 
   // TC-N.4: markNotificationRead → 단건 읽음 처리

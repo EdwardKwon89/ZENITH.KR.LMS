@@ -13,6 +13,7 @@ BEGIN
     ) THEN
         CREATE POLICY "Enable update for authenticated users" ON public.zen_orders
         FOR UPDATE TO authenticated
-        USING (auth.role() = 'authenticated');
+        USING (public.get_my_role() IN ('ZENITH_SUPER_ADMIN', 'ADMIN', 'MANAGER'))
+        WITH CHECK (public.get_my_role() IN ('ZENITH_SUPER_ADMIN', 'ADMIN', 'MANAGER'));
     END IF;
 END $$;

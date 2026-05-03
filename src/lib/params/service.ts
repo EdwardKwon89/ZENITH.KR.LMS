@@ -3,7 +3,7 @@
  * 캐싱 레이어를 포함한 시스템 파라미터 조회 및 업데이트 로직
  */
 
-import { createClient as createServerClient } from '@/utils/supabase/server';
+import { createClient as createServerClient, createAdminClient } from '@/utils/supabase/server';
 import { unstable_cache } from 'next/cache';
 import { revalidateTag } from 'next/cache';
 
@@ -27,7 +27,7 @@ export interface SystemParam {
 export const getParam = unstable_cache(
   async (key: string): Promise<SystemParam | null> => {
     // 테스트 환경에서는 전역 mockSupabase를 사용하거나(있다면), 에러 방지를 위해 조건부 처리
-    const supabase = isTest ? (global as any).mockSupabase : await createServerClient();
+    const supabase = isTest ? (global as any).mockSupabase : await createAdminClient();
     if (!supabase) return null;
 
     const { data, error } = await supabase
@@ -54,7 +54,7 @@ export const getParam = unstable_cache(
  */
 export const getParamsByCategory = unstable_cache(
   async (category: ParamCategory): Promise<SystemParam[]> => {
-    const supabase = isTest ? (global as any).mockSupabase : await createServerClient();
+    const supabase = isTest ? (global as any).mockSupabase : await createAdminClient();
     if (!supabase) return [];
 
     const { data, error } = await supabase
@@ -81,7 +81,7 @@ export const getParamsByCategory = unstable_cache(
  */
 export const getAllParams = unstable_cache(
   async (): Promise<SystemParam[]> => {
-    const supabase = isTest ? (global as any).mockSupabase : await createServerClient();
+    const supabase = isTest ? (global as any).mockSupabase : await createAdminClient();
     if (!supabase) return [];
 
     const { data, error } = await supabase

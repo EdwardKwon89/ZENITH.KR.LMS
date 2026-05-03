@@ -80,7 +80,7 @@ describe('Customs Server Actions', () => {
         status: 'PENDING',
         order: {
           order_no: 'ORD-001',
-          shipper: { full_name: 'John Doe' }
+          shipper: { name: 'John Doe' }
         }
       }
     ];

@@ -1,0 +1,714 @@
+
+> zenith-lms@1.0.0 dev
+> next dev
+
+▲ Next.js 16.2.4 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://172.16.248.107:3000
+- Environments: .env.local
+✓ Ready in 624ms
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+- Experiments (use with caution):
+  · clientTraceMetadata
+
+[MIDDLEWARE] Entry: /login
+[MIDDLEWARE] Entry: /en/login
+[MIDDLEWARE] Entry: /en/login
+ GET /en/login 200 in 4.7s (next.js: 3.6s, proxy.ts: 347ms, application-code: 718ms)
+ GET /en/login 200 in 4.2s (next.js: 3.4s, proxy.ts: 40ms, application-code: 721ms)
+[MIDDLEWARE] Entry: /en/login
+ GET /en/login 200 in 204ms (next.js: 15ms, proxy.ts: 83ms, application-code: 106ms)
+[MIDDLEWARE] Entry: /en/login
+[MIDDLEWARE] Entry: /en/orders
+[MIDDLEWARE] Auth Result: user=6824b4b7-2cd0-4901-b504-6ac95dd9c338, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ GET /en/orders 200 in 2.3s (next.js: 1482ms, proxy.ts: 155ms, application-code: 708ms)
+ POST /en/login 303 in 2.8s (next.js: 18ms, proxy.ts: 45ms, application-code: 2.7s)
+  └─ ƒ login({}) in 312ms src/app/[locale]/(auth)/login/actions.ts
+[MIDDLEWARE] Entry: /en/orders
+[MIDDLEWARE] Entry: /en/orders/d197352a-ba9f-4640-9176-c50c852d8138
+[MIDDLEWARE] Auth Result: user=6824b4b7-2cd0-4901-b504-6ac95dd9c338, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+[MIDDLEWARE] Auth Result: user=6824b4b7-2cd0-4901-b504-6ac95dd9c338, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ POST /en/orders 200 in 375ms (next.js: 14ms, proxy.ts: 176ms, application-code: 185ms)
+  └─ ƒ getCommonCodesByGroup("ORDER_STATUS") in 172ms src/app/actions/master.ts
+[MIDDLEWARE] Entry: /en/orders
+[MIDDLEWARE] Auth Result: user=6824b4b7-2cd0-4901-b504-6ac95dd9c338, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ POST /en/orders 200 in 236ms (next.js: 17ms, proxy.ts: 114ms, application-code: 105ms)
+  └─ ƒ getCommonCodesByGroup("ORDER_TYPE") in 88ms src/app/actions/master.ts
+[MIDDLEWARE] Entry: /en/orders
+[MIDDLEWARE] Auth Result: user=6824b4b7-2cd0-4901-b504-6ac95dd9c338, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ POST /en/orders 200 in 281ms (next.js: 54ms, proxy.ts: 111ms, application-code: 117ms)
+  └─ ƒ getCommonCodesByGroup("ORDER_STATUS") in 101ms src/app/actions/master.ts
+[MIDDLEWARE] Entry: /en/orders
+[MIDDLEWARE] Auth Result: user=6824b4b7-2cd0-4901-b504-6ac95dd9c338, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ POST /en/orders 200 in 238ms (next.js: 10ms, proxy.ts: 117ms, application-code: 111ms)
+  └─ ƒ getCommonCodesByGroup("ORDER_TYPE") in 91ms src/app/actions/master.ts
+[TRACKING] No config found for order: d197352a-ba9f-4640-9176-c50c852d8138
+Error fetching declarations: {
+  code: 'PGRST200',
+  details: "Searched for a foreign key relationship between 'zen_orders' and 'zen_profiles' using the hint 'shipper_id' in the schema 'public', but no matches were found.",
+  hint: "Perhaps you meant 'zen_ports' instead of 'zen_profiles'.",
+  message: "Could not find a relationship between 'zen_orders' and 'zen_profiles' in the schema cache"
+}
+[AUTH_TRACE] User: admin@zenith.kr, Role: ADMIN, Path: /admin, Allowed: true
+ GET /en/orders/d197352a-ba9f-4640-9176-c50c852d8138 200 in 2.8s (next.js: 1355ms, proxy.ts: 204ms, application-code: 1224ms)
+[browser] Error: Could not resolve font for Noto Sans KR, fontWeight 400, fontStyle italic
+    at Array.map (<anonymous>)
+    at Array.map (<anonymous>)
+    at Array.map (<anonymous>)
+[browser] Error: Could not resolve font for Noto Sans KR, fontWeight 400, fontStyle italic
+    at Array.map (<anonymous>)
+    at Array.map (<anonymous>)
+    at Array.map (<anonymous>)
+[MIDDLEWARE] Entry: /en/orders/d197352a-ba9f-4640-9176-c50c852d8138
+[MIDDLEWARE] Auth Result: user=6824b4b7-2cd0-4901-b504-6ac95dd9c338, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+[Action] calculateSettlementAction started for order: d197352a-ba9f-4640-9176-c50c852d8138
+[browser] Error: Failed to fetch font from https://fonts.gstatic.com/s/notosanskr/v27/PpkLp3gh9_iS_mH2_vN0_lD7p66_pYw.woff2: 404 
+[AUTH_TRACE] User: admin@zenith.kr, Role: ADMIN, Path: /admin, Allowed: true
+[Settlement] Order Loaded: Z-FIN-E2E05-01 (ICN -> LAX, AIR)
+[Settlement] Shipper ID: d67d59b9-440b-40b2-be21-3dac462d8961, Type: string
+SettlementEngine Error: Error: Route /[locale]/orders/[orderId] used `cookies()` inside a function cached with `unstable_cache()`. Accessing Dynamic data sources inside a cache scope is not supported. If you need this data inside a cached function use `cookies()` outside of the cached function and pass the required dynamic data in as an argument. See more info here: https://nextjs.org/docs/app/api-reference/functions/unstable_cache
+    at createClient (src/utils/supabase/server.ts:5:36)
+    at module.exports.getParam.tags (src/lib/params/service.ts:30:86)
+    at async getNumericParam (src/lib/params/service.ts:154:17)
+    at async SettlementEngine.calculateChargeableWeight (src/lib/finance/settlement.ts:166:23)
+    at async SettlementEngine.calculateOrderCosts (src/lib/finance/settlement.ts:58:36)
+    at async calculateSettlementAction (src/app/actions/finance.ts:85:18)
+  3 |
+  4 | export async function createClient() {
+> 5 |   const cookieStore = await cookies();
+    |                                    ^
+  6 |
+  7 |   return createServerClient(
+  8 |     process.env.NEXT_PUBLIC_SUPABASE_URL!,
+[Action] Settlement result for d197352a-ba9f-4640-9176-c50c852d8138: {
+  success: false,
+  message: 'Route /[locale]/orders/[orderId] used `cookies()` inside a function cached with `unstable_cache()`. Accessing Dynamic data sources inside a cache scope is not supported. If you need this data inside a cached function use `cookies()` outside of the cached function and pass the required dynamic data in as an argument. See more info here: https://nextjs.org/docs/app/api-reference/functions/unstable_cache'
+}
+ POST /en/orders/d197352a-ba9f-4640-9176-c50c852d8138 200 in 943ms (next.js: 11ms, proxy.ts: 182ms, application-code: 751ms)
+  └─ ƒ calculateSettlementAction("d197352a-ba9f-4640-9176-c50c852d8138") in 716ms src/app/actions/finance.ts
+[MIDDLEWARE] Entry: /en/login
+✓ Compiled in 1037ms
+[MIDDLEWARE] Entry: /en/login
+ GET /en/login 200 in 976ms (next.js: 436ms, proxy.ts: 360ms, application-code: 180ms)
+[MIDDLEWARE] Entry: /en/login
+ GET /en/login 200 in 161ms (next.js: 18ms, proxy.ts: 58ms, application-code: 84ms)
+[MIDDLEWARE] Entry: /en/login
+ GET /en/login 200 in 92ms (next.js: 9ms, proxy.ts: 34ms, application-code: 49ms)
+[MIDDLEWARE] Entry: /en/login
+ GET /en/login 200 in 77ms (next.js: 8ms, proxy.ts: 23ms, application-code: 46ms)
+[MIDDLEWARE] Entry: /en/login
+ GET /en/login 200 in 81ms (next.js: 11ms, proxy.ts: 25ms, application-code: 45ms)
+[MIDDLEWARE] Entry: /en/login
+ GET /en/login 200 in 70ms (next.js: 11ms, proxy.ts: 20ms, application-code: 39ms)
+[MIDDLEWARE] Entry: /en/login
+ GET /en/login 200 in 83ms (next.js: 8ms, proxy.ts: 27ms, application-code: 48ms)
+ GET /en/login 200 in 66ms (next.js: 8ms, proxy.ts: 19ms, application-code: 38ms)
+[MIDDLEWARE] Entry: /en/login
+✓ Compiled in 1108ms
+[MIDDLEWARE] Entry: /en/login
+ GET /en/login 200 in 192ms (next.js: 21ms, proxy.ts: 80ms, application-code: 90ms)
+[MIDDLEWARE] Entry: /en/login
+ GET /en/login 200 in 95ms (next.js: 8ms, proxy.ts: 29ms, application-code: 57ms)
+[MIDDLEWARE] Entry: /en/login
+ GET /en/login 200 in 154ms (next.js: 10ms, proxy.ts: 28ms, application-code: 116ms)
+ GET /en/login 200 in 92ms (next.js: 10ms, proxy.ts: 42ms, application-code: 39ms)
+[MIDDLEWARE] Entry: /en/login
+✓ Compiled in 179ms
+[MIDDLEWARE] Entry: /en/login
+ GET /en/login 200 in 165ms (next.js: 19ms, proxy.ts: 86ms, application-code: 59ms)
+[MIDDLEWARE] Entry: /en/login
+ GET /en/login 200 in 68ms (next.js: 8ms, proxy.ts: 24ms, application-code: 36ms)
+[MIDDLEWARE] Entry: /en/login
+ GET /en/login 200 in 203ms (next.js: 6ms, proxy.ts: 18ms, application-code: 178ms)
+ GET /en/login 200 in 158ms (next.js: 9ms, proxy.ts: 104ms, application-code: 45ms)
+[MIDDLEWARE] Entry: /
+[MIDDLEWARE] Entry: /login
+[MIDDLEWARE] Entry: /en/login
+ GET /en/login 200 in 427ms (next.js: 23ms, proxy.ts: 28ms, application-code: 376ms)
+[MIDDLEWARE] Entry: /en/login
+[MIDDLEWARE] Entry: /en/orders
+[MIDDLEWARE] Auth Result: user=6824b4b7-2cd0-4901-b504-6ac95dd9c338, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ GET /en/orders 200 in 1706ms (next.js: 160ms, proxy.ts: 105ms, application-code: 1441ms)
+ POST /en/login 303 in 2.1s (next.js: 48ms, proxy.ts: 23ms, application-code: 2.0s)
+  └─ ƒ login({}) in 250ms src/app/[locale]/(auth)/login/actions.ts
+[MIDDLEWARE] Entry: /en/orders
+[MIDDLEWARE] Auth Result: user=6824b4b7-2cd0-4901-b504-6ac95dd9c338, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ POST /en/orders 200 in 557ms (next.js: 21ms, proxy.ts: 361ms, application-code: 175ms)
+  └─ ƒ getCommonCodesByGroup("ORDER_STATUS") in 158ms src/app/actions/master.ts
+[MIDDLEWARE] Entry: /en/orders
+[MIDDLEWARE] Entry: /en/orders/d197352a-ba9f-4640-9176-c50c852d8138
+[MIDDLEWARE] Auth Result: user=6824b4b7-2cd0-4901-b504-6ac95dd9c338, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+[MIDDLEWARE] Auth Result: user=6824b4b7-2cd0-4901-b504-6ac95dd9c338, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ POST /en/orders 200 in 1015ms (next.js: 16ms, proxy.ts: 178ms, application-code: 820ms)
+  └─ ƒ getCommonCodesByGroup("ORDER_TYPE") in 794ms src/app/actions/master.ts
+[MIDDLEWARE] Entry: /en/orders
+[MIDDLEWARE] Auth Result: user=6824b4b7-2cd0-4901-b504-6ac95dd9c338, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+[TRACKING] No config found for order: d197352a-ba9f-4640-9176-c50c852d8138
+Error fetching declarations: {
+  code: 'PGRST200',
+  details: "Searched for a foreign key relationship between 'zen_orders' and 'zen_profiles' using the hint 'shipper_id' in the schema 'public', but no matches were found.",
+  hint: "Perhaps you meant 'zen_ports' instead of 'zen_profiles'.",
+  message: "Could not find a relationship between 'zen_orders' and 'zen_profiles' in the schema cache"
+}
+[AUTH_TRACE] User: admin@zenith.kr, Role: ADMIN, Path: /admin, Allowed: true
+ POST /en/orders 200 in 759ms (next.js: 24ms, proxy.ts: 478ms, application-code: 258ms)
+  └─ ƒ getCommonCodesByGroup("ORDER_STATUS") in 227ms src/app/actions/master.ts
+[MIDDLEWARE] Entry: /en/orders
+[MIDDLEWARE] Auth Result: user=6824b4b7-2cd0-4901-b504-6ac95dd9c338, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ GET /en/orders/d197352a-ba9f-4640-9176-c50c852d8138 200 in 2.3s (next.js: 230ms, proxy.ts: 237ms, application-code: 1861ms)
+[browser] Error: Could not resolve font for Noto Sans KR, fontWeight 400, fontStyle italic
+    at Array.map (<anonymous>)
+    at Array.map (<anonymous>)
+    at Array.map (<anonymous>)
+[browser] Error: Could not resolve font for Noto Sans KR, fontWeight 400, fontStyle italic
+    at Array.map (<anonymous>)
+    at Array.map (<anonymous>)
+    at Array.map (<anonymous>)
+[MIDDLEWARE] Entry: /en/orders/d197352a-ba9f-4640-9176-c50c852d8138
+[MIDDLEWARE] Auth Result: user=6824b4b7-2cd0-4901-b504-6ac95dd9c338, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+[Action] calculateSettlementAction started for order: d197352a-ba9f-4640-9176-c50c852d8138
+[AUTH_TRACE] User: admin@zenith.kr, Role: ADMIN, Path: /admin, Allowed: true
+[browser] Error: Failed to fetch font from https://fonts.gstatic.com/s/notosanskr/v27/PpkLp3gh9_iS_mH2_vN0_lD7p66_pYw.woff2: 404 
+[Settlement] Order Loaded: Z-FIN-E2E05-01 (ICN -> LAX, AIR)
+[Settlement] Shipper ID: d67d59b9-440b-40b2-be21-3dac462d8961, Type: string
+[PARAM_SERVICE] Error fetching param VOLUME_FACTOR_SEA: Cannot coerce the result to a single JSON object
+[PARAM_SERVICE] Error fetching param VOLUME_FACTOR_AIR: Cannot coerce the result to a single JSON object
+[Settlement] Chargeable Weight: 120kg
+[Settlement] Found 1 potential rate cards
+[Settlement] Order Shipper ID: d67d59b9-440b-40b2-be21-3dac462d8961
+[Settlement] Rate Card 0: ID=77a1588b-6083-407c-aa05-a67bec2069dd, Customer=null, Priority=10
+[Settlement] Selected Best Rate: ID=77a1588b-6083-407c-aa05-a67bec2069dd
+[Settlement] Raw Unit Price from DB: 10.5 Type: number
+[Settlement] Calculated Unit Price: 10.5
+[Settlement] Calculation Success: 10.5 * 120 = 1260 USD
+[Action] Settlement result for d197352a-ba9f-4640-9176-c50c852d8138: {
+  success: true,
+  chargeableWeight: 120,
+  unitPrice: 10.5,
+  totalFreight: 1260,
+  currency: 'USD',
+  costId: '97cd0ad6-2325-4b0e-a791-fc14d38abd81'
+}
+[TRACKING] No config found for order: d197352a-ba9f-4640-9176-c50c852d8138
+Error fetching declarations: {
+  code: 'PGRST200',
+  details: "Searched for a foreign key relationship between 'zen_orders' and 'zen_profiles' using the hint 'shipper_id' in the schema 'public', but no matches were found.",
+  hint: "Perhaps you meant 'zen_ports' instead of 'zen_profiles'.",
+  message: "Could not find a relationship between 'zen_orders' and 'zen_profiles' in the schema cache"
+}
+[AUTH_TRACE] User: admin@zenith.kr, Role: ADMIN, Path: /admin, Allowed: true
+ POST /en/orders/d197352a-ba9f-4640-9176-c50c852d8138 200 in 1065ms (next.js: 12ms, proxy.ts: 181ms, application-code: 872ms)
+  └─ ƒ calculateSettlementAction("d197352a-ba9f-4640-9176-c50c852d8138") in 303ms src/app/actions/finance.ts
+[browser] Error: Could not resolve font for Noto Sans KR, fontWeight 400, fontStyle italic
+    at Array.map (<anonymous>)
+    at Array.map (<anonymous>)
+    at Array.map (<anonymous>)
+[browser] Error: Failed to fetch font from https://fonts.gstatic.com/s/notosanskr/v27/PpkLp3gh9_iS_mH2_vN0_lD7p66_pYw.woff2: 404 
+[browser] Error: Could not resolve font for Noto Sans KR, fontWeight 400, fontStyle italic
+    at Array.map (<anonymous>)
+    at Array.map (<anonymous>)
+    at Array.map (<anonymous>)
+[browser] Error: Failed to fetch font from https://fonts.gstatic.com/s/notosanskr/v27/PpkLp3gh9_iS_mH2_vN0_lD7p66_pYw.woff2: 404 
+[MIDDLEWARE] Entry: /login
+[MIDDLEWARE] Entry: /en/login
+ GET /en/login 200 in 117ms (next.js: 14ms, proxy.ts: 60ms, application-code: 43ms)
+[MIDDLEWARE] Entry: /en/login
+[MIDDLEWARE] Entry: /en/orders
+[MIDDLEWARE] Auth Result: user=6824b4b7-2cd0-4901-b504-6ac95dd9c338, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ GET /en/orders 200 in 403ms (next.js: 12ms, proxy.ts: 114ms, application-code: 277ms)
+ POST /en/login 303 in 742ms (next.js: 15ms, proxy.ts: 26ms, application-code: 701ms)
+  └─ ƒ login({}) in 276ms src/app/[locale]/(auth)/login/actions.ts
+[MIDDLEWARE] Entry: /en/orders
+[MIDDLEWARE] Entry: /en/orders/d197352a-ba9f-4640-9176-c50c852d8138
+[MIDDLEWARE] Auth Result: user=6824b4b7-2cd0-4901-b504-6ac95dd9c338, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+[MIDDLEWARE] Auth Result: user=6824b4b7-2cd0-4901-b504-6ac95dd9c338, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ POST /en/orders 200 in 371ms (next.js: 33ms, proxy.ts: 134ms, application-code: 204ms)
+  └─ ƒ getCommonCodesByGroup("ORDER_STATUS") in 177ms src/app/actions/master.ts
+[MIDDLEWARE] Entry: /en/orders
+[TRACKING] No config found for order: d197352a-ba9f-4640-9176-c50c852d8138
+[MIDDLEWARE] Auth Result: user=6824b4b7-2cd0-4901-b504-6ac95dd9c338, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+Error fetching declarations: {
+  code: 'PGRST200',
+  details: "Searched for a foreign key relationship between 'zen_orders' and 'zen_profiles' using the hint 'shipper_id' in the schema 'public', but no matches were found.",
+  hint: "Perhaps you meant 'zen_ports' instead of 'zen_profiles'.",
+  message: "Could not find a relationship between 'zen_orders' and 'zen_profiles' in the schema cache"
+}
+[AUTH_TRACE] User: admin@zenith.kr, Role: ADMIN, Path: /admin, Allowed: true
+[MIDDLEWARE] Entry: /en/orders
+ POST /en/orders 200 in 421ms (next.js: 53ms, proxy.ts: 218ms, application-code: 150ms)
+  └─ ƒ getCommonCodesByGroup("ORDER_TYPE") in 127ms src/app/actions/master.ts
+ GET /en/orders/d197352a-ba9f-4640-9176-c50c852d8138 200 in 1059ms (next.js: 44ms, proxy.ts: 144ms, application-code: 871ms)
+[MIDDLEWARE] Auth Result: user=6824b4b7-2cd0-4901-b504-6ac95dd9c338, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+[browser] Error: Could not resolve font for Noto Sans KR, fontWeight 400, fontStyle italic
+    at Array.map (<anonymous>)
+    at Array.map (<anonymous>)
+    at Array.map (<anonymous>)
+[browser] Error: Could not resolve font for Noto Sans KR, fontWeight 400, fontStyle italic
+    at Array.map (<anonymous>)
+    at Array.map (<anonymous>)
+    at Array.map (<anonymous>)
+[MIDDLEWARE] Entry: /en/orders/d197352a-ba9f-4640-9176-c50c852d8138
+[MIDDLEWARE] Auth Result: user=6824b4b7-2cd0-4901-b504-6ac95dd9c338, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+[Action] calculateSettlementAction started for order: d197352a-ba9f-4640-9176-c50c852d8138
+[AUTH_TRACE] User: admin@zenith.kr, Role: ADMIN, Path: /admin, Allowed: true
+[Settlement] Order Loaded: Z-FIN-E2E05-01 (ICN -> LAX, AIR)
+[Settlement] Shipper ID: d67d59b9-440b-40b2-be21-3dac462d8961, Type: string
+[PARAM_SERVICE] Error fetching param VOLUME_FACTOR_SEA: Cannot coerce the result to a single JSON object
+[PARAM_SERVICE] Error fetching param VOLUME_FACTOR_AIR: Cannot coerce the result to a single JSON object
+[Settlement] Chargeable Weight: 120kg
+[Settlement] Found 1 potential rate cards
+[Settlement] Order Shipper ID: d67d59b9-440b-40b2-be21-3dac462d8961
+[Settlement] Rate Card 0: ID=77a1588b-6083-407c-aa05-a67bec2069dd, Customer=null, Priority=10
+[Settlement] Selected Best Rate: ID=77a1588b-6083-407c-aa05-a67bec2069dd
+[Settlement] Raw Unit Price from DB: 10.5 Type: number
+[Settlement] Calculated Unit Price: 10.5
+[Settlement] Calculation Success: 10.5 * 120 = 1260 USD
+[Action] Settlement result for d197352a-ba9f-4640-9176-c50c852d8138: {
+  success: true,
+  chargeableWeight: 120,
+  unitPrice: 10.5,
+  totalFreight: 1260,
+  currency: 'USD',
+  costId: 'a9c33a71-37fe-4421-a90f-b07264b31e88'
+}
+[TRACKING] No config found for order: d197352a-ba9f-4640-9176-c50c852d8138
+Error fetching declarations: {
+  code: 'PGRST200',
+  details: "Searched for a foreign key relationship between 'zen_orders' and 'zen_profiles' using the hint 'shipper_id' in the schema 'public', but no matches were found.",
+  hint: "Perhaps you meant 'zen_ports' instead of 'zen_profiles'.",
+  message: "Could not find a relationship between 'zen_orders' and 'zen_profiles' in the schema cache"
+}
+[AUTH_TRACE] User: admin@zenith.kr, Role: ADMIN, Path: /admin, Allowed: true
+ POST /en/orders/d197352a-ba9f-4640-9176-c50c852d8138 200 in 692ms (next.js: 28ms, proxy.ts: 125ms, application-code: 539ms)
+  └─ ƒ calculateSettlementAction("d197352a-ba9f-4640-9176-c50c852d8138") in 163ms src/app/actions/finance.ts
+[browser] Error: Could not resolve font for Noto Sans KR, fontWeight 400, fontStyle italic
+    at Array.map (<anonymous>)
+    at Array.map (<anonymous>)
+    at Array.map (<anonymous>)
+[browser] Error: Could not resolve font for Noto Sans KR, fontWeight 400, fontStyle italic
+    at Array.map (<anonymous>)
+    at Array.map (<anonymous>)
+    at Array.map (<anonymous>)
+[browser] Error: Failed to fetch font from https://fonts.gstatic.com/s/notosanskr/v27/PpkLp3gh9_iS_mH2_vN0_lD7p66_pYw.woff2: 404 
+[browser] Error: Failed to fetch font from https://fonts.gstatic.com/s/notosanskr/v27/PpkLp3gh9_iS_mH2_vN0_lD7p66_pYw.woff2: 404 
+[MIDDLEWARE] Entry: /en/login
+✓ Compiled in 123ms
+[MIDDLEWARE] Entry: /en/login
+ GET /en/login 200 in 139ms (next.js: 19ms, proxy.ts: 63ms, application-code: 58ms)
+ GET /en/login 200 in 67ms (next.js: 7ms, proxy.ts: 39ms, application-code: 21ms)
+[MIDDLEWARE] Entry: /login
+[MIDDLEWARE] Entry: /en/login
+ GET /en/login 200 in 105ms (next.js: 13ms, proxy.ts: 36ms, application-code: 56ms)
+[MIDDLEWARE] Entry: /en/login
+[MIDDLEWARE] Entry: /en/orders
+[MIDDLEWARE] Auth Result: user=6824b4b7-2cd0-4901-b504-6ac95dd9c338, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ GET /en/orders 200 in 440ms (next.js: 14ms, proxy.ts: 86ms, application-code: 341ms)
+ POST /en/login 303 in 791ms (next.js: 30ms, proxy.ts: 24ms, application-code: 737ms)
+  └─ ƒ login({}) in 257ms src/app/[locale]/(auth)/login/actions.ts
+[MIDDLEWARE] Entry: /en/orders
+[MIDDLEWARE] Entry: /en/orders/d197352a-ba9f-4640-9176-c50c852d8138
+[MIDDLEWARE] Auth Result: user=6824b4b7-2cd0-4901-b504-6ac95dd9c338, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+[MIDDLEWARE] Auth Result: user=6824b4b7-2cd0-4901-b504-6ac95dd9c338, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ POST /en/orders 200 in 351ms (next.js: 16ms, proxy.ts: 152ms, application-code: 183ms)
+  └─ ƒ getCommonCodesByGroup("ORDER_STATUS") in 164ms src/app/actions/master.ts
+[MIDDLEWARE] Entry: /en/orders
+[MIDDLEWARE] Auth Result: user=6824b4b7-2cd0-4901-b504-6ac95dd9c338, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+[TRACKING] No config found for order: d197352a-ba9f-4640-9176-c50c852d8138
+[AUTH_TRACE] User: admin@zenith.kr, Role: ADMIN, Path: /admin, Allowed: true
+ POST /en/orders 200 in 628ms (next.js: 127ms, proxy.ts: 249ms, application-code: 252ms)
+  └─ ƒ getCommonCodesByGroup("ORDER_TYPE") in 191ms src/app/actions/master.ts
+[MIDDLEWARE] Entry: /en/orders
+[MIDDLEWARE] Entry: /en/orders
+[MIDDLEWARE] Auth Result: user=6824b4b7-2cd0-4901-b504-6ac95dd9c338, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+[MIDDLEWARE] Auth Result: user=6824b4b7-2cd0-4901-b504-6ac95dd9c338, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ GET /en/orders/d197352a-ba9f-4640-9176-c50c852d8138 200 in 1250ms (next.js: 43ms, proxy.ts: 151ms, application-code: 1056ms)
+[browser] Error: Could not resolve font for Noto Sans KR, fontWeight 400, fontStyle italic
+    at Array.map (<anonymous>)
+    at Array.map (<anonymous>)
+    at Array.map (<anonymous>)
+[browser] Error: Could not resolve font for Noto Sans KR, fontWeight 400, fontStyle italic
+    at Array.map (<anonymous>)
+    at Array.map (<anonymous>)
+    at Array.map (<anonymous>)
+[MIDDLEWARE] Entry: /en/orders/d197352a-ba9f-4640-9176-c50c852d8138
+[MIDDLEWARE] Auth Result: user=6824b4b7-2cd0-4901-b504-6ac95dd9c338, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+[Action] calculateSettlementAction started for order: d197352a-ba9f-4640-9176-c50c852d8138
+[AUTH_TRACE] User: admin@zenith.kr, Role: ADMIN, Path: /admin, Allowed: true
+[Settlement] Order Loaded: Z-FIN-E2E05-01 (ICN -> LAX, AIR)
+[Settlement] Shipper ID: d67d59b9-440b-40b2-be21-3dac462d8961, Type: string
+[PARAM_SERVICE] Error fetching param VOLUME_FACTOR_SEA: Cannot coerce the result to a single JSON object
+[browser] Error: Failed to fetch font from https://fonts.gstatic.com/s/notosanskr/v27/PpkLp3gh9_iS_mH2_vN0_lD7p66_pYw.woff2: 404 
+[PARAM_SERVICE] Error fetching param VOLUME_FACTOR_AIR: Cannot coerce the result to a single JSON object
+[Settlement] Chargeable Weight: 120kg
+[Settlement] Found 1 potential rate cards
+[Settlement] Order Shipper ID: d67d59b9-440b-40b2-be21-3dac462d8961
+[Settlement] Rate Card 0: ID=77a1588b-6083-407c-aa05-a67bec2069dd, Customer=null, Priority=10
+[Settlement] Selected Best Rate: ID=77a1588b-6083-407c-aa05-a67bec2069dd
+[Settlement] Raw Unit Price from DB: 10.5 Type: number
+[Settlement] Calculated Unit Price: 10.5
+[Settlement] Calculation Success: 10.5 * 120 = 1260 USD
+[Action] Settlement result for d197352a-ba9f-4640-9176-c50c852d8138: {
+  success: true,
+  chargeableWeight: 120,
+  unitPrice: 10.5,
+  totalFreight: 1260,
+  currency: 'USD',
+  costId: '67fa9ee4-9eaf-44a7-83de-3183e40f10fd'
+}
+[TRACKING] No config found for order: d197352a-ba9f-4640-9176-c50c852d8138
+[AUTH_TRACE] User: admin@zenith.kr, Role: ADMIN, Path: /admin, Allowed: true
+ POST /en/orders/d197352a-ba9f-4640-9176-c50c852d8138 200 in 838ms (next.js: 18ms, proxy.ts: 184ms, application-code: 636ms)
+  └─ ƒ calculateSettlementAction("d197352a-ba9f-4640-9176-c50c852d8138") in 192ms src/app/actions/finance.ts
+[browser] Error: Could not resolve font for Noto Sans KR, fontWeight 400, fontStyle italic
+    at Array.map (<anonymous>)
+    at Array.map (<anonymous>)
+    at Array.map (<anonymous>)
+[browser] Error: Failed to fetch font from https://fonts.gstatic.com/s/notosanskr/v27/PpkLp3gh9_iS_mH2_vN0_lD7p66_pYw.woff2: 404 
+[browser] Error: Could not resolve font for Noto Sans KR, fontWeight 400, fontStyle italic
+    at Array.map (<anonymous>)
+    at Array.map (<anonymous>)
+    at Array.map (<anonymous>)
+[browser] Error: Failed to fetch font from https://fonts.gstatic.com/s/notosanskr/v27/PpkLp3gh9_iS_mH2_vN0_lD7p66_pYw.woff2: 404 
+[MIDDLEWARE] Entry: /Users/edward.kwon/WorkSpace/ZENITH_LMS_001/node_modules/playwright/lib/index.js
+[MIDDLEWARE] Unauthorized Access. Redirecting to Login.
+[MIDDLEWARE] Entry: /ko/login
+ GET /ko/login 200 in 183ms (next.js: 32ms, proxy.ts: 92ms, application-code: 59ms)
+[MIDDLEWARE] Entry: /Users/edward.kwon/WorkSpace/ZENITH_LMS_001/tests/e2e/e2e-05-settlement.spec.ts
+[MIDDLEWARE] Unauthorized Access. Redirecting to Login.
+[MIDDLEWARE] Entry: /ko/login
+ GET /ko/login 200 in 179ms (next.js: 20ms, proxy.ts: 50ms, application-code: 109ms)
+[MIDDLEWARE] Entry: /Users/edward.kwon/WorkSpace/ZENITH_LMS_001/node_modules/playwright/lib/index.js
+[MIDDLEWARE] Unauthorized Access. Redirecting to Login.
+[MIDDLEWARE] Entry: /ko/login
+ GET /ko/login 200 in 74ms (next.js: 8ms, proxy.ts: 25ms, application-code: 41ms)
+[MIDDLEWARE] Entry: /Users/edward.kwon/WorkSpace/ZENITH_LMS_001/tests/e2e/e2e-01-registration.spec.ts
+[MIDDLEWARE] Unauthorized Access. Redirecting to Login.
+[MIDDLEWARE] Entry: /ko/login
+ GET /ko/login 200 in 160ms (next.js: 37ms, proxy.ts: 26ms, application-code: 98ms)
+[MIDDLEWARE] Entry: /Users/edward.kwon/WorkSpace/ZENITH_LMS_001/node_modules/playwright/lib/index.js
+[MIDDLEWARE] Unauthorized Access. Redirecting to Login.
+[MIDDLEWARE] Entry: /ko/login
+ GET /ko/login 200 in 194ms (next.js: 17ms, proxy.ts: 27ms, application-code: 150ms)
+[MIDDLEWARE] Entry: /Users/edward.kwon/WorkSpace/ZENITH_LMS_001/tests/e2e/e2e-04-tracking-sync.spec.ts
+[MIDDLEWARE] Unauthorized Access. Redirecting to Login.
+[MIDDLEWARE] Entry: /ko/login
+ GET /ko/login 200 in 132ms (next.js: 14ms, proxy.ts: 30ms, application-code: 87ms)
+[MIDDLEWARE] Entry: /Users/edward.kwon/WorkSpace/ZENITH_LMS_001/node_modules/playwright/lib/index.js
+[MIDDLEWARE] Unauthorized Access. Redirecting to Login.
+[MIDDLEWARE] Entry: /ko/login
+ GET /ko/login 200 in 136ms (next.js: 17ms, proxy.ts: 54ms, application-code: 65ms)
+[MIDDLEWARE] Entry: /Users/edward.kwon/WorkSpace/ZENITH_LMS_001/tests/e2e/e2e-01-registration.spec.ts
+[MIDDLEWARE] Unauthorized Access. Redirecting to Login.
+[MIDDLEWARE] Entry: /ko/login
+ GET /ko/login 200 in 95ms (next.js: 13ms, proxy.ts: 33ms, application-code: 49ms)
+[MIDDLEWARE] Entry: /Users/edward.kwon/WorkSpace/ZENITH_LMS_001/node_modules/playwright/lib/index.js
+[MIDDLEWARE] Unauthorized Access. Redirecting to Login.
+[MIDDLEWARE] Entry: /ko/login
+ GET /ko/login 200 in 58ms (next.js: 7ms, proxy.ts: 13ms, application-code: 38ms)
+[MIDDLEWARE] Entry: /Users/edward.kwon/WorkSpace/ZENITH_LMS_001/tests/e2e/e2e-04-tracking-sync.spec.ts
+[MIDDLEWARE] Unauthorized Access. Redirecting to Login.
+[MIDDLEWARE] Entry: /ko/login
+ GET /ko/login 200 in 59ms (next.js: 6ms, proxy.ts: 15ms, application-code: 38ms)
+[MIDDLEWARE] Entry: /Users/edward.kwon/WorkSpace/ZENITH_LMS_001/node_modules/playwright/lib/index.js
+[MIDDLEWARE] Unauthorized Access. Redirecting to Login.
+[MIDDLEWARE] Entry: /ko/login
+ GET /ko/login 200 in 57ms (next.js: 7ms, proxy.ts: 17ms, application-code: 34ms)
+[MIDDLEWARE] Entry: /Users/edward.kwon/WorkSpace/ZENITH_LMS_001/tests/e2e/e2e-05-settlement.spec.ts
+[MIDDLEWARE] Unauthorized Access. Redirecting to Login.
+[MIDDLEWARE] Entry: /ko/login
+ GET /ko/login 200 in 66ms (next.js: 4ms, proxy.ts: 15ms, application-code: 47ms)
+[MIDDLEWARE] Entry: /Users/edward.kwon/WorkSpace/ZENITH_LMS_001/node_modules/playwright/lib/index.js
+[MIDDLEWARE] Unauthorized Access. Redirecting to Login.
+[MIDDLEWARE] Entry: /ko/login
+ GET /ko/login 200 in 150ms (next.js: 13ms, proxy.ts: 64ms, application-code: 73ms)
+[MIDDLEWARE] Entry: /Users/edward.kwon/WorkSpace/ZENITH_LMS_001/tests/e2e/e2e-01-registration.spec.ts
+[MIDDLEWARE] Unauthorized Access. Redirecting to Login.
+[MIDDLEWARE] Entry: /ko/login
+ GET /ko/login 200 in 68ms (next.js: 4ms, proxy.ts: 26ms, application-code: 38ms)
+[MIDDLEWARE] Entry: /Users/edward.kwon/WorkSpace/ZENITH_LMS_001/node_modules/playwright/lib/index.js
+[MIDDLEWARE] Unauthorized Access. Redirecting to Login.
+[MIDDLEWARE] Entry: /ko/login
+ GET /ko/login 200 in 104ms (next.js: 18ms, proxy.ts: 17ms, application-code: 69ms)
+[MIDDLEWARE] Entry: /Users/edward.kwon/WorkSpace/ZENITH_LMS_001/tests/e2e/e2e-04-tracking-sync.spec.ts
+[MIDDLEWARE] Unauthorized Access. Redirecting to Login.
+[MIDDLEWARE] Entry: /ko/login
+ GET /ko/login 200 in 80ms (next.js: 6ms, proxy.ts: 12ms, application-code: 62ms)
+[MIDDLEWARE] Entry: /Users/edward.kwon/WorkSpace/ZENITH_LMS_001/node_modules/playwright/lib/index.js
+[MIDDLEWARE] Unauthorized Access. Redirecting to Login.
+[MIDDLEWARE] Entry: /ko/login
+ GET /ko/login 200 in 69ms (next.js: 7ms, proxy.ts: 11ms, application-code: 51ms)
+[MIDDLEWARE] Entry: /Users/edward.kwon/WorkSpace/ZENITH_LMS_001/tests/e2e/e2e-05-settlement.spec.ts
+[MIDDLEWARE] Unauthorized Access. Redirecting to Login.
+[MIDDLEWARE] Entry: /ko/login
+ GET /ko/login 200 in 57ms (next.js: 7ms, proxy.ts: 12ms, application-code: 39ms)
+[MIDDLEWARE] Entry: /ko/login
+ GET /ko/login 200 in 221ms (next.js: 23ms, proxy.ts: 92ms, application-code: 106ms)
+[MIDDLEWARE] Entry: /ko/login
+[MIDDLEWARE] Entry: /ko/orders
+[MIDDLEWARE] Auth Result: user=adfdc543-38ed-42a1-9d03-6234428df74e, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ GET /ko/orders 200 in 543ms (next.js: 15ms, proxy.ts: 92ms, application-code: 436ms)
+ POST /ko/login 303 in 869ms (next.js: 8ms, proxy.ts: 46ms, application-code: 815ms)
+  └─ ƒ login({}) in 243ms src/app/[locale]/(auth)/login/actions.ts
+[MIDDLEWARE] Entry: /ko/orders
+[MIDDLEWARE] Auth Result: user=adfdc543-38ed-42a1-9d03-6234428df74e, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ POST /ko/orders 200 in 773ms (next.js: 16ms, proxy.ts: 412ms, application-code: 344ms)
+  └─ ƒ getCommonCodesByGroup("ORDER_STATUS") in 307ms src/app/actions/master.ts
+[MIDDLEWARE] Entry: /ko/orders
+[MIDDLEWARE] Entry: /ko/tracking
+[MIDDLEWARE] Auth Result: user=adfdc543-38ed-42a1-9d03-6234428df74e, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+[MIDDLEWARE] Auth Result: user=adfdc543-38ed-42a1-9d03-6234428df74e, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ POST /ko/orders 200 in 1209ms (next.js: 29ms, proxy.ts: 580ms, application-code: 600ms)
+  └─ ƒ getCommonCodesByGroup("ORDER_TYPE") in 544ms src/app/actions/master.ts
+[MIDDLEWARE] Entry: /ko/orders
+[MIDDLEWARE] Auth Result: user=adfdc543-38ed-42a1-9d03-6234428df74e, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ POST /ko/orders 200 in 525ms (next.js: 32ms, proxy.ts: 140ms, application-code: 353ms)
+  └─ ƒ getCommonCodesByGroup("ORDER_STATUS") in 218ms src/app/actions/master.ts
+[MIDDLEWARE] Entry: /ko/orders
+[MIDDLEWARE] Auth Result: user=adfdc543-38ed-42a1-9d03-6234428df74e, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ POST /ko/orders 200 in 395ms (next.js: 24ms, proxy.ts: 171ms, application-code: 199ms)
+  └─ ƒ getCommonCodesByGroup("ORDER_TYPE") in 166ms src/app/actions/master.ts
+ GET /ko/tracking 200 in 4.2s (next.js: 2.7s, proxy.ts: 664ms, application-code: 829ms)
+[MIDDLEWARE] Entry: /ko/tracking
+[MIDDLEWARE] Auth Result: user=adfdc543-38ed-42a1-9d03-6234428df74e, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ POST /ko/tracking 200 in 525ms (next.js: 21ms, proxy.ts: 234ms, application-code: 270ms)
+  └─ ƒ getGlobalTrackingOverview() in 252ms src/app/actions/tracking.ts
+[MIDDLEWARE] Entry: /ko/tracking
+[MIDDLEWARE] Auth Result: user=adfdc543-38ed-42a1-9d03-6234428df74e, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+[AUTH_TRACE] User: temp_admin@zenith.kr, Role: ADMIN, Path: /admin, Allowed: true
+[TRACKING_MANAGER] Found config for c663c6b8-4b9f-408c-b425-cc3c41a6f9bb: provider_type=API
+[MOCK_CARRIER] Attempting to insert raw log for order c663c6b8-4b9f-408c-b425-cc3c41a6f9bb
+[MOCK_CARRIER] Raw log saved successfully for c663c6b8-4b9f-408c-b425-cc3c41a6f9bb
+[TRACKING_MANAGER] Order c663c6b8-4b9f-408c-b425-cc3c41a6f9bb is delayed. Last event was 246.2h ago (Threshold: 48h)
+[TRACKING_SYNC] Order c663c6b8-4b9f-408c-b425-cc3c41a6f9bb status updated to HELD
+[TRACKING_MANAGER] Found config for d197352a-ba9f-4640-9176-c50c852d8138: provider_type=API
+[MOCK_CARRIER] Attempting to insert raw log for order d197352a-ba9f-4640-9176-c50c852d8138
+[MOCK_CARRIER] Raw log saved successfully for d197352a-ba9f-4640-9176-c50c852d8138
+[TRACKING_SYNC] Order d197352a-ba9f-4640-9176-c50c852d8138 status updated to IN_TRANSIT
+[TRACKING_MANAGER] Order d197352a-ba9f-4640-9176-c50c852d8138 is delayed. Last event was 246.2h ago (Threshold: 48h)
+[TRACKING_SYNC] Order d197352a-ba9f-4640-9176-c50c852d8138 status updated to HELD
+[TRACKING_MANAGER] Found config for 3ff5b116-29cd-4d90-8dd0-0e99c36a2155: provider_type=API
+[MOCK_CARRIER] Attempting to insert raw log for order 3ff5b116-29cd-4d90-8dd0-0e99c36a2155
+[MOCK_CARRIER] Raw log saved successfully for 3ff5b116-29cd-4d90-8dd0-0e99c36a2155
+[TRACKING_MANAGER] Order 3ff5b116-29cd-4d90-8dd0-0e99c36a2155 is delayed. Last event was 246.2h ago (Threshold: 48h)
+[TRACKING_SYNC] Order 3ff5b116-29cd-4d90-8dd0-0e99c36a2155 status updated to HELD
+ POST /ko/tracking 200 in 602ms (next.js: 23ms, proxy.ts: 158ms, application-code: 421ms)
+  └─ ƒ syncExternalTracking() in 401ms src/app/actions/tracking.ts
+[MIDDLEWARE] Entry: /ko/tracking
+[MIDDLEWARE] Auth Result: user=adfdc543-38ed-42a1-9d03-6234428df74e, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ POST /ko/tracking 200 in 371ms (next.js: 15ms, proxy.ts: 146ms, application-code: 210ms)
+  └─ ƒ getGlobalTrackingOverview() in 193ms src/app/actions/tracking.ts
+[MIDDLEWARE] Entry: /orders/c663c6b8-4b9f-408c-b425-cc3c41a6f9bb
+[MIDDLEWARE] Auth Result: user=adfdc543-38ed-42a1-9d03-6234428df74e, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+[MIDDLEWARE] Entry: /ko/orders/c663c6b8-4b9f-408c-b425-cc3c41a6f9bb
+[MIDDLEWARE] Auth Result: user=adfdc543-38ed-42a1-9d03-6234428df74e, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+[TRACKING_MANAGER] Found config for c663c6b8-4b9f-408c-b425-cc3c41a6f9bb: provider_type=API
+[MOCK_CARRIER] Attempting to insert raw log for order c663c6b8-4b9f-408c-b425-cc3c41a6f9bb
+[MOCK_CARRIER] Raw log saved successfully for c663c6b8-4b9f-408c-b425-cc3c41a6f9bb
+[TRACKING_MANAGER] Order c663c6b8-4b9f-408c-b425-cc3c41a6f9bb is delayed. Last event was 246.2h ago (Threshold: 48h)
+[TRACKING_SYNC] Order c663c6b8-4b9f-408c-b425-cc3c41a6f9bb status updated to HELD
+[AUTH_TRACE] User: temp_admin@zenith.kr, Role: ADMIN, Path: /admin, Allowed: true
+ GET /ko/orders/c663c6b8-4b9f-408c-b425-cc3c41a6f9bb 200 in 788ms (next.js: 23ms, proxy.ts: 119ms, application-code: 646ms)
+[browser] Error: Could not resolve font for Noto Sans KR, fontWeight 400, fontStyle italic
+    at Array.map (<anonymous>)
+    at Array.map (<anonymous>)
+    at Array.map (<anonymous>)
+[browser] Error: Could not resolve font for Noto Sans KR, fontWeight 400, fontStyle italic
+    at Array.map (<anonymous>)
+    at Array.map (<anonymous>)
+    at Array.map (<anonymous>)
+[MIDDLEWARE] Entry: /ko/login
+ GET /ko/login 200 in 123ms (next.js: 16ms, proxy.ts: 29ms, application-code: 78ms)
+[MIDDLEWARE] Entry: /ko/login
+ HEAD /ko/login 200 in 369ms (next.js: 45ms, proxy.ts: 143ms, application-code: 181ms)
+[MIDDLEWARE] Entry: /ko/login
+ GET /ko/login 200 in 198ms (next.js: 21ms, proxy.ts: 116ms, application-code: 61ms)
+[MIDDLEWARE] Entry: /ko/login
+[MIDDLEWARE] Entry: /ko/orders
+[MIDDLEWARE] Auth Result: user=adfdc543-38ed-42a1-9d03-6234428df74e, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ GET /ko/orders 200 in 431ms (next.js: 15ms, proxy.ts: 102ms, application-code: 314ms)
+ POST /ko/login 303 in 666ms (next.js: 9ms, proxy.ts: 42ms, application-code: 616ms)
+  └─ ƒ login({}) in 170ms src/app/[locale]/(auth)/login/actions.ts
+[MIDDLEWARE] Entry: /ko/orders
+[MIDDLEWARE] Auth Result: user=adfdc543-38ed-42a1-9d03-6234428df74e, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ POST /ko/orders 200 in 138ms (next.js: 6ms, proxy.ts: 69ms, application-code: 64ms)
+  └─ ƒ getCommonCodesByGroup("ORDER_STATUS") in 54ms src/app/actions/master.ts
+[MIDDLEWARE] Entry: /ko/orders
+[MIDDLEWARE] Entry: /ko/tracking
+[MIDDLEWARE] Auth Result: user=adfdc543-38ed-42a1-9d03-6234428df74e, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+[MIDDLEWARE] Auth Result: user=adfdc543-38ed-42a1-9d03-6234428df74e, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ POST /ko/orders 200 in 177ms (next.js: 11ms, proxy.ts: 74ms, application-code: 92ms)
+  └─ ƒ getCommonCodesByGroup("ORDER_TYPE") in 80ms src/app/actions/master.ts
+[MIDDLEWARE] Entry: /ko/orders
+[MIDDLEWARE] Entry: /ko/orders
+[MIDDLEWARE] Auth Result: user=adfdc543-38ed-42a1-9d03-6234428df74e, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+[MIDDLEWARE] Auth Result: user=adfdc543-38ed-42a1-9d03-6234428df74e, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ GET /ko/tracking 200 in 498ms (next.js: 16ms, proxy.ts: 83ms, application-code: 399ms)
+[MIDDLEWARE] Entry: /ko/tracking
+[MIDDLEWARE] Auth Result: user=adfdc543-38ed-42a1-9d03-6234428df74e, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ POST /ko/tracking 200 in 156ms (next.js: 9ms, proxy.ts: 76ms, application-code: 71ms)
+  └─ ƒ getGlobalTrackingOverview() in 62ms src/app/actions/tracking.ts
+[MIDDLEWARE] Entry: /ko/tracking
+[MIDDLEWARE] Auth Result: user=adfdc543-38ed-42a1-9d03-6234428df74e, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+[AUTH_TRACE] User: temp_admin@zenith.kr, Role: ADMIN, Path: /admin, Allowed: true
+[TRACKING_MANAGER] Found config for c663c6b8-4b9f-408c-b425-cc3c41a6f9bb: provider_type=API
+[MOCK_CARRIER] Attempting to insert raw log for order c663c6b8-4b9f-408c-b425-cc3c41a6f9bb
+[MOCK_CARRIER] Raw log saved successfully for c663c6b8-4b9f-408c-b425-cc3c41a6f9bb
+[TRACKING_MANAGER] Order c663c6b8-4b9f-408c-b425-cc3c41a6f9bb is delayed. Last event was 246.4h ago (Threshold: 48h)
+[TRACKING_SYNC] Order c663c6b8-4b9f-408c-b425-cc3c41a6f9bb status updated to HELD
+[TRACKING_MANAGER] Found config for d197352a-ba9f-4640-9176-c50c852d8138: provider_type=API
+[MOCK_CARRIER] Attempting to insert raw log for order d197352a-ba9f-4640-9176-c50c852d8138
+[MOCK_CARRIER] Raw log saved successfully for d197352a-ba9f-4640-9176-c50c852d8138
+[TRACKING_MANAGER] Order d197352a-ba9f-4640-9176-c50c852d8138 is delayed. Last event was 246.4h ago (Threshold: 48h)
+[TRACKING_SYNC] Order d197352a-ba9f-4640-9176-c50c852d8138 status updated to HELD
+[TRACKING_MANAGER] Found config for 3ff5b116-29cd-4d90-8dd0-0e99c36a2155: provider_type=API
+[MOCK_CARRIER] Attempting to insert raw log for order 3ff5b116-29cd-4d90-8dd0-0e99c36a2155
+[MOCK_CARRIER] Raw log saved successfully for 3ff5b116-29cd-4d90-8dd0-0e99c36a2155
+[TRACKING_MANAGER] Order 3ff5b116-29cd-4d90-8dd0-0e99c36a2155 is delayed. Last event was 246.4h ago (Threshold: 48h)
+[TRACKING_SYNC] Order 3ff5b116-29cd-4d90-8dd0-0e99c36a2155 status updated to HELD
+ POST /ko/tracking 200 in 319ms (next.js: 10ms, proxy.ts: 104ms, application-code: 205ms)
+  └─ ƒ syncExternalTracking() in 196ms src/app/actions/tracking.ts
+[MIDDLEWARE] Entry: /ko/tracking
+[MIDDLEWARE] Auth Result: user=adfdc543-38ed-42a1-9d03-6234428df74e, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ POST /ko/tracking 200 in 140ms (next.js: 7ms, proxy.ts: 66ms, application-code: 67ms)
+  └─ ƒ getGlobalTrackingOverview() in 53ms src/app/actions/tracking.ts
+[MIDDLEWARE] Entry: /orders/c663c6b8-4b9f-408c-b425-cc3c41a6f9bb
+[MIDDLEWARE] Auth Result: user=adfdc543-38ed-42a1-9d03-6234428df74e, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+[MIDDLEWARE] Entry: /ko/orders/c663c6b8-4b9f-408c-b425-cc3c41a6f9bb
+[MIDDLEWARE] Auth Result: user=adfdc543-38ed-42a1-9d03-6234428df74e, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+[TRACKING_MANAGER] Found config for c663c6b8-4b9f-408c-b425-cc3c41a6f9bb: provider_type=API
+[MOCK_CARRIER] Attempting to insert raw log for order c663c6b8-4b9f-408c-b425-cc3c41a6f9bb
+[MOCK_CARRIER] Raw log saved successfully for c663c6b8-4b9f-408c-b425-cc3c41a6f9bb
+[TRACKING_MANAGER] Order c663c6b8-4b9f-408c-b425-cc3c41a6f9bb is delayed. Last event was 246.4h ago (Threshold: 48h)
+[TRACKING_SYNC] Order c663c6b8-4b9f-408c-b425-cc3c41a6f9bb status updated to HELD
+[AUTH_TRACE] User: temp_admin@zenith.kr, Role: ADMIN, Path: /admin, Allowed: true
+ GET /ko/orders/c663c6b8-4b9f-408c-b425-cc3c41a6f9bb 200 in 545ms (next.js: 13ms, proxy.ts: 70ms, application-code: 462ms)
+[browser] Error: Could not resolve font for Noto Sans KR, fontWeight 400, fontStyle italic
+    at Array.map (<anonymous>)
+    at Array.map (<anonymous>)
+    at Array.map (<anonymous>)
+[browser] Error: Could not resolve font for Noto Sans KR, fontWeight 400, fontStyle italic
+    at Array.map (<anonymous>)
+    at Array.map (<anonymous>)
+    at Array.map (<anonymous>)
+[MIDDLEWARE] Entry: /login
+[MIDDLEWARE] Entry: /en/login
+ GET /en/login 200 in 121ms (next.js: 12ms, proxy.ts: 27ms, application-code: 82ms)
+[MIDDLEWARE] Entry: /en/login
+[MIDDLEWARE] Entry: /en/orders
+[MIDDLEWARE] Auth Result: user=6824b4b7-2cd0-4901-b504-6ac95dd9c338, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ GET /en/orders 200 in 438ms (next.js: 9ms, proxy.ts: 193ms, application-code: 236ms)
+ POST /en/login 303 in 795ms (next.js: 8ms, proxy.ts: 38ms, application-code: 749ms)
+  └─ ƒ login({}) in 287ms src/app/[locale]/(auth)/login/actions.ts
+[MIDDLEWARE] Entry: /en/orders
+[MIDDLEWARE] Entry: /en/orders/d197352a-ba9f-4640-9176-c50c852d8138
+[MIDDLEWARE] Auth Result: user=6824b4b7-2cd0-4901-b504-6ac95dd9c338, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+[MIDDLEWARE] Auth Result: user=6824b4b7-2cd0-4901-b504-6ac95dd9c338, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ POST /en/orders 200 in 416ms (next.js: 16ms, proxy.ts: 223ms, application-code: 177ms)
+  └─ ƒ getCommonCodesByGroup("ORDER_STATUS") in 157ms src/app/actions/master.ts
+[MIDDLEWARE] Entry: /en/orders
+[MIDDLEWARE] Auth Result: user=6824b4b7-2cd0-4901-b504-6ac95dd9c338, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+[TRACKING] No config found for order: d197352a-ba9f-4640-9176-c50c852d8138
+[AUTH_TRACE] User: admin@zenith.kr, Role: ADMIN, Path: /admin, Allowed: true
+ POST /en/orders 200 in 441ms (next.js: 31ms, proxy.ts: 228ms, application-code: 182ms)
+  └─ ƒ getCommonCodesByGroup("ORDER_TYPE") in 162ms src/app/actions/master.ts
+[MIDDLEWARE] Entry: /en/orders
+[MIDDLEWARE] Entry: /en/orders
+[MIDDLEWARE] Auth Result: user=6824b4b7-2cd0-4901-b504-6ac95dd9c338, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+[MIDDLEWARE] Auth Result: user=6824b4b7-2cd0-4901-b504-6ac95dd9c338, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ GET /en/orders/d197352a-ba9f-4640-9176-c50c852d8138 200 in 965ms (next.js: 51ms, proxy.ts: 147ms, application-code: 767ms)
+[browser] Error: Could not resolve font for Noto Sans KR, fontWeight 400, fontStyle italic
+    at Array.map (<anonymous>)
+    at Array.map (<anonymous>)
+    at Array.map (<anonymous>)
+[browser] Error: Could not resolve font for Noto Sans KR, fontWeight 400, fontStyle italic
+    at Array.map (<anonymous>)
+    at Array.map (<anonymous>)
+    at Array.map (<anonymous>)
+[MIDDLEWARE] Entry: /en/orders/d197352a-ba9f-4640-9176-c50c852d8138
+[MIDDLEWARE] Auth Result: user=6824b4b7-2cd0-4901-b504-6ac95dd9c338, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+[Action] calculateSettlementAction started for order: d197352a-ba9f-4640-9176-c50c852d8138
+[AUTH_TRACE] User: admin@zenith.kr, Role: ADMIN, Path: /admin, Allowed: true
+[Settlement] Order Loaded: Z-FIN-E2E05-01 (ICN -> LAX, AIR)
+[Settlement] Shipper ID: d67d59b9-440b-40b2-be21-3dac462d8961, Type: string
+[Settlement] Chargeable Weight: 120kg
+[Settlement] Found 1 potential rate cards
+[Settlement] Order Shipper ID: d67d59b9-440b-40b2-be21-3dac462d8961
+[Settlement] Rate Card 0: ID=77a1588b-6083-407c-aa05-a67bec2069dd, Customer=null, Priority=10
+[Settlement] Selected Best Rate: ID=77a1588b-6083-407c-aa05-a67bec2069dd
+[Settlement] Raw Unit Price from DB: 10.5 Type: number
+[Settlement] Calculated Unit Price: 10.5
+[Settlement] Calculation Success: 10.5 * 120 = 1260 USD
+[Action] Settlement result for d197352a-ba9f-4640-9176-c50c852d8138: {
+  success: true,
+  chargeableWeight: 120,
+  unitPrice: 10.5,
+  totalFreight: 1260,
+  currency: 'USD',
+  costId: 'b8bf9879-9c96-486f-a973-e78e449c9393'
+}
+[TRACKING] No config found for order: d197352a-ba9f-4640-9176-c50c852d8138
+[AUTH_TRACE] User: admin@zenith.kr, Role: ADMIN, Path: /admin, Allowed: true
+ POST /en/orders/d197352a-ba9f-4640-9176-c50c852d8138 200 in 663ms (next.js: 29ms, proxy.ts: 174ms, application-code: 459ms)
+  └─ ƒ calculateSettlementAction("d197352a-ba9f-4640-9176-c50c852d8138") in 131ms src/app/actions/finance.ts
+[browser] Error: Could not resolve font for Noto Sans KR, fontWeight 400, fontStyle italic
+    at Array.map (<anonymous>)
+    at Array.map (<anonymous>)
+    at Array.map (<anonymous>)
+[browser] Error: Could not resolve font for Noto Sans KR, fontWeight 400, fontStyle italic
+    at Array.map (<anonymous>)
+    at Array.map (<anonymous>)
+    at Array.map (<anonymous>)
+✓ Compiled in 365ms
+[MIDDLEWARE] Entry: /ko/login
+[MIDDLEWARE] Entry: /en/login
+ GET /en/login 200 in 371ms (next.js: 31ms, proxy.ts: 144ms, application-code: 196ms)
+ GET /ko/login 200 in 409ms (next.js: 27ms, proxy.ts: 310ms, application-code: 72ms)
+[MIDDLEWARE] Entry: /en/login
+✓ Compiled in 299ms
+[MIDDLEWARE] Entry: /ko/login
+[MIDDLEWARE] Entry: /ko/login
+ GET /ko/login 200 in 818ms (next.js: 407ms, proxy.ts: 344ms, application-code: 66ms)
+[MIDDLEWARE] Entry: /ko/login
+ GET /ko/login 200 in 101ms (next.js: 6ms, proxy.ts: 26ms, application-code: 68ms)
+[MIDDLEWARE] Entry: /ko/login
+ GET /ko/login 200 in 154ms (next.js: 14ms, proxy.ts: 37ms, application-code: 103ms)
+[MIDDLEWARE] Entry: /ko/login
+ GET /ko/login 200 in 106ms (next.js: 11ms, proxy.ts: 27ms, application-code: 68ms)
+[MIDDLEWARE] Entry: /ko/login
+ GET /ko/login 200 in 69ms (next.js: 9ms, proxy.ts: 21ms, application-code: 40ms)
+ GET /ko/login 200 in 60ms (next.js: 6ms, proxy.ts: 19ms, application-code: 35ms)
+[MIDDLEWARE] Entry: /ko/login
+✓ Compiled in 247ms
+[MIDDLEWARE] Entry: /ko/login
+ GET /ko/login 200 in 420ms (next.js: 154ms, proxy.ts: 143ms, application-code: 123ms)
+[MIDDLEWARE] Entry: /ko/login
+ GET /ko/login 200 in 297ms (next.js: 77ms, proxy.ts: 93ms, application-code: 127ms)
+[MIDDLEWARE] Entry: /ko/login
+ GET /ko/login 200 in 94ms (next.js: 8ms, proxy.ts: 33ms, application-code: 53ms)
+[MIDDLEWARE] Entry: /ko/login
+ GET /ko/login 200 in 84ms (next.js: 7ms, proxy.ts: 23ms, application-code: 54ms)
+[MIDDLEWARE] Entry: /ko/login
+ GET /ko/login 200 in 93ms (next.js: 14ms, proxy.ts: 22ms, application-code: 58ms)
+ GET /ko/login 200 in 60ms (next.js: 11ms, proxy.ts: 18ms, application-code: 31ms)
+[MIDDLEWARE] Entry: /en/login
+[MIDDLEWARE] Entry: /en/login
+[MIDDLEWARE] Entry: /en/login
+[MIDDLEWARE] Entry: /en/login
+[MIDDLEWARE] Entry: /en/login
+ GET /en/login 200 in 250ms (next.js: 23ms, proxy.ts: 50ms, application-code: 178ms)
+ GET /en/login 200 in 252ms (next.js: 59ms, proxy.ts: 45ms, application-code: 148ms)
+ GET /en/login 200 in 254ms (next.js: 48ms, proxy.ts: 137ms, application-code: 68ms)
+ GET /en/login 200 in 233ms (next.js: 67ms, proxy.ts: 118ms, application-code: 48ms)
+ GET /en/login 200 in 259ms (next.js: 24ms, proxy.ts: 139ms, application-code: 96ms)
+[MIDDLEWARE] Entry: /en/login
+ GET /en/login 200 in 76ms (next.js: 10ms, proxy.ts: 27ms, application-code: 40ms)
+[MIDDLEWARE] Entry: /en/login
+[MIDDLEWARE] Entry: /en/login
+[MIDDLEWARE] Entry: /en/login
+[MIDDLEWARE] Entry: /en/login
+[MIDDLEWARE] Entry: /en/login
+ GET /en/login 200 in 263ms (next.js: 30ms, proxy.ts: 43ms, application-code: 190ms)
+ GET /en/login 200 in 256ms (next.js: 90ms, proxy.ts: 46ms, application-code: 119ms)
+ GET /en/login 200 in 263ms (next.js: 67ms, proxy.ts: 51ms, application-code: 145ms)
+ GET /en/login 200 in 263ms (next.js: 113ms, proxy.ts: 53ms, application-code: 96ms)
+ GET /en/login 200 in 253ms (next.js: 144ms, proxy.ts: 43ms, application-code: 66ms)

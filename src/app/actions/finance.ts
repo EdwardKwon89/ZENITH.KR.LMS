@@ -79,9 +79,12 @@ export async function updatePaymentStatus(
  * 특정 오더의 비용을 계산합니다. (UI 수동 호출용)
  */
 export async function calculateSettlementAction(orderId: string) {
+  console.log(`[Action] calculateSettlementAction started for order: ${orderId}`);
   const { supabase } = await validateAdminAction();
   const engine = new SettlementEngine();
   const result = await engine.calculateOrderCosts(orderId);
+  
+  console.log(`[Action] Settlement result for ${orderId}:`, result);
   
   if (result.success) {
     const { data: costs } = await supabase

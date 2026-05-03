@@ -98,6 +98,14 @@ rtk npm run test:regression
 
 API 사양 변경 시 반드시 `Ds-11_API_상세_명세서.md`를 선제적으로 업데이트해야 합니다. 코드와 명세의 불일치는 심각한 결함으로 간주됩니다.
 
+### R-13 | 테스트 결과물 관리 의무 (Artifact Management)
+
+모든 테스트 결과(로그, 스크린샷 등)는 ROOT 폴더가 아닌 지정된 `docs/` 하부 폴더에 저장해야 합니다.
+- **E2E 테스트**: `docs/99_Manual/E2E_NN_Result/` (NN: 시나리오 번호)
+- **회귀 테스트**: `docs/08_Self_Audit/Regression_Results/`
+- **서버 로그**: `docs/archive/logs/`
+- **기타 임시 파일**: `scratch/` (디버그 스크립트 등)
+
 ---
 
 ## 🔥 오류 대응 및 재발 방지 (SAR Procedure)

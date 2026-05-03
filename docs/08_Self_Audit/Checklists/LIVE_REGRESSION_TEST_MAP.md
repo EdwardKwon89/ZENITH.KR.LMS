@@ -1,8 +1,8 @@
 # 🗺️ LIVE Regression Test Master Map
 
 > **상태:** [ACTIVE]  
-> **총 테스트 케이스:** 164 Cases (E2E-02 useWatch 1건 추가 포함 전원 활성)  
-> **최종 검증일:** 2026-05-01  
+> **총 테스트 케이스:** 166 Cases (RLS UPDATE 및 트래킹 알림 포함)  
+> **최종 검증일:** 2026-05-03  
 
 제니스 플랫폼의 비즈니스 영속성을 보장하는 회귀 테스트 케이스의 통합 명세서입니다. 모든 신규 개발 및 수정 시 이 맵에 케이스가 추가되어야 하며, 전체 테스트가 통과되어야 합니다.
 
@@ -54,6 +54,7 @@
 | **TC-M.3** | 마스터 수동 해체 (Dissolve) | 선택된 오더를 마스터에서 정상 분리 및 배정 해제 | `tests/unit/master/master_policy.test.ts` |
 | **TC-M.4** | 마스터 상세 결합 조회 | 마스터 정보와 소속 하우스 목록 통합 반환 확인 | `tests/unit/master/master-detail.test.ts` |
 | **TC-M.5** | 마스터 액션 예외 처리 | 존재하지 않는 ID 또는 DB 실패 시 안정적 대응 | `tests/unit/master/master-detail.test.ts` |
+| **TC-M.6** | zen_orders RLS UPDATE | 관리자/운영자의 마스터오더 그룹핑(UPDATE) 권한 보장 | `tests/unit/master/master_policy.test.ts` |
 
 ### 6. 정밀 물류 계산 (Logistics Calculation)
 | ID | 테스트 항목 | 목적 | 파일 경로 |
@@ -103,6 +104,7 @@
 | :--- | :--- | :--- | :--- |
 | **TC-QA.1** | Raw 로그 영속성 | `MockCarrierProvider` 호출 시 `zen_tracking_raw_logs`에 JSON 원본 저장 확인 | `tests/integration/tracking-business-qa.test.ts` |
 | **TC-QA.2** | 동기화 무결성 (중복 방지) | 동일 이벤트 2회 동기화 시 `zen_tracking_events` 중복 삽입 차단 확인 | `tests/integration/tracking-business-qa.test.ts` |
+| **TC-QA.3** | 트래킹 알림 연동 | 상태 변경 시 화주 대상 인앱/이메일 알림 트리거 검증 | `tests/integration/tracking-business-qa.test.ts` |
 
 ### 12. 라우팅 엔진 (Routing Engine)
 
@@ -233,6 +235,7 @@
 | **TC-CCL-02** | updateDeclarationStatus — 상태/메모 업데이트 | 관리자의 수동 상태 변경 및 신고번호 입력 검증 | `tests/unit/customs/customs-declaration.test.ts` |
 | **TC-CCL-03** | submitDeclaration — 어댑터 연동 및 SUBMITTED 전환 | 외부 어댑터 호출 및 상태 전이 확인 | `tests/unit/customs/customs-declaration.test.ts` |
 | **TC-CCL-04** | getDeclarations — 화주별 권한 격리 | 본인 오더와 연계된 신고만 조회 가능 여부 확인 | `tests/unit/customs/customs-declaration.test.ts` |
+| **TC-ORDER-RLS-01** | zen_orders RLS UPDATE | 관리자/운영자의 마스터오더 그룹핑(UPDATE) 권한 보장 | `tests/unit/master/master_policy.test.ts` |
 
 
 
@@ -251,6 +254,7 @@
 | 2026-04-29 | v11.0 | ✅ PASS | 31.00s | 159/159 — Phase 4 Sprint 11 개인회원 등급 승급 완료. TC-GRADE-01~04 신규 등록 및 전체 회귀 테스트 통과. |
 | 2026-04-29 | v12.0 | ✅ PASS | 33.50s | 163/163 — Phase 5 Sprint 12 통관 모달 및 마이페이지 이력 완료. TC-CCL-01~04 신규 등록 및 전체 회귀 테스트 통과. |
 | 2026-05-01 | v14.1 | ✅ PASS | 42.10s | 164/164 — E2E-02 후속 조치 완료. TC-ORDER-FORM-01 신규 등록 및 전체 검증 통과 (useWatch 전환). |
+| 2026-05-03 | v14.2 | ✅ PASS | 45.12s | E2E-03 후속 조치 완료 및 E2E-04 재착수 준비 완료. TC-ORDER-RLS-01 추가. |
 
 
 ---
