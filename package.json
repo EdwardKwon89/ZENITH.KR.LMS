@@ -10,7 +10,8 @@
     "supabase": "supabase",
     "test": "vitest run",
     "test:regression": "vitest run",
-    "env-check": "echo 'Checking tools...' && node -v && npm -v && supabase --version"
+    "env-check": "echo 'Checking tools...' && node -v && npm -v && supabase --version",
+    "test:e2e:filtered": "./scripts/test_with_filter.sh 'npx playwright test' docs/99_Manual/E2E_Result/latest_result.txt"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

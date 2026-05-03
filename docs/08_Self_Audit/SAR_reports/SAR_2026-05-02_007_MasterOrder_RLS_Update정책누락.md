@@ -20,7 +20,7 @@
 1. **RLS 정책 추가**: `supabase/migrations/20260502191116_fix_e2e_03_master_grouping_rls.sql`을 통해 관리자 및 운영자 권한에 대한 `UPDATE` 정책 추가.
 2. **보안 강화**: `auth.role() = 'authenticated'` 방식의 취약점을 보완하여 `public.get_my_role()` 기반의 역할 제한(ADMIN, MANAGER) 적용.
    ```sql
-   CREATE POLICY "Enable update for authenticated users"
+   CREATE POLICY "Admins can update orders"
    ON public.zen_orders FOR UPDATE
    TO authenticated
    USING (public.get_my_role() IN ('ZENITH_SUPER_ADMIN', 'ADMIN', 'MANAGER'))
