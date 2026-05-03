@@ -13,7 +13,7 @@ test.describe('E2E-04: Tracking Sync & Notification Engine', () => {
     await page.fill('input#password', adminPassword);
     
     // Screenshot before login attempt
-    await page.screenshot({ path: 'scratch/e2e_04_00_login_before.png' });
+    await page.screenshot({ path: 'docs/99_Manual/E2E_04_Result/e2e_04_00_login_before.png' });
     
     await page.click('button[data-action="login"]');
     
@@ -24,14 +24,14 @@ test.describe('E2E-04: Tracking Sync & Notification Engine', () => {
     ]);
     
     await page.waitForLoadState('networkidle');
-    await page.screenshot({ path: 'scratch/e2e_04_00_login_after.png' });
+    await page.screenshot({ path: 'docs/99_Manual/E2E_04_Result/e2e_04_00_login_after.png' });
   });
 
   test('should synchronize external tracking data and update status', async ({ page }) => {
     // 2. Navigate to Tracking Dashboard
     await page.goto('/ko/tracking');
     await page.waitForLoadState('networkidle');
-    await page.screenshot({ path: 'scratch/e2e_04_01_tracking_list_before.png' });
+    await page.screenshot({ path: 'docs/99_Manual/E2E_04_Result/e2e_04_01_tracking_list_before.png' });
     
     // 3. Search for the target order
     const searchInput = page.locator('input[placeholder*="Search Order"]');
@@ -40,7 +40,7 @@ test.describe('E2E-04: Tracking Sync & Notification Engine', () => {
     
     // Verify target order is in the list
     await expect(page.locator(`text=${targetOrderNo}`)).toBeVisible();
-    await page.screenshot({ path: 'scratch/e2e_04_02_search_result.png' });
+    await page.screenshot({ path: 'docs/99_Manual/E2E_04_Result/e2e_04_02_search_result.png' });
     
     // 4. Click Sync All API
     const syncButton = page.locator('button:has-text("Sync All API")');
@@ -51,7 +51,7 @@ test.describe('E2E-04: Tracking Sync & Notification Engine', () => {
     await expect(page.locator('text=Syncing external data...')).not.toBeVisible({ timeout: 20000 });
     
     // 6. Verify status update in the table
-    await page.screenshot({ path: 'scratch/e2e_04_03_after_sync.png' });
+    await page.screenshot({ path: 'docs/99_Manual/E2E_04_Result/e2e_04_03_after_sync.png' });
     await expect(page.locator(`tr:has-text("${targetOrderNo}")`)).toContainText('API');
     
     // 7. Navigate to Detail page to verify milestone
@@ -61,6 +61,6 @@ test.describe('E2E-04: Tracking Sync & Notification Engine', () => {
     
     // Scroll to timeline if needed
     await page.evaluate(() => window.scrollTo(0, 500));
-    await page.screenshot({ path: 'scratch/e2e_04_04_tracking_timeline.png' });
+    await page.screenshot({ path: 'docs/99_Manual/E2E_04_Result/e2e_04_04_tracking_timeline.png' });
   });
 });
