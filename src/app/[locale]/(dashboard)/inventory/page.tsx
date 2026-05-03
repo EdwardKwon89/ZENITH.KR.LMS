@@ -2,6 +2,7 @@ import { getInventoryList } from "@/app/actions/inventory";
 import { requireAuth } from "@/lib/auth/guards";
 import InventoryFilterBar from "@/components/inventory/InventoryFilterBar";
 import InventoryDataTable from "@/components/inventory/InventoryDataTable";
+import InventoryScanner from "@/components/inventory/InventoryScanner";
 import { Package, Truck, AlertCircle, Box } from "lucide-react";
 import { ZenCard } from "@/components/ui/ZenUI";
 
@@ -30,7 +31,7 @@ export default async function InventoryPage({
   const pageSize = 10;
 
   return (
-    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20">
       {/* Header & Stats Summary */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div className="flex items-center gap-4">
@@ -67,6 +68,11 @@ export default async function InventoryPage({
           </ZenCard>
         </div>
       </div>
+
+      {/* [NEW] Intelligent Barcode Scanner */}
+      {(profile?.role === 'ADMIN' || profile?.role === 'ZENITH_SUPER_ADMIN' || profile?.role === 'MANAGER') && (
+        <InventoryScanner />
+      )}
 
       {/* Filter Bar */}
       <InventoryFilterBar locale={locale} />

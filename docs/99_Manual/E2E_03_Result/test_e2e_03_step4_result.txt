@@ -1,0 +1,6 @@
+
+Running 1 test using 1 worker
+
+  ✓  1 [chromium] › tests/e2e/e2e-03-step4.spec.ts:3:5 › E2E-03 Step 4: Inventory Outbound Scan (5.8s)
+
+  1 passed (6.6s)

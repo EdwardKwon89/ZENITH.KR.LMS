@@ -415,7 +415,7 @@ export async function updateOrderStatus(
       order_id: orderId,
       prev_status: currentOrder.status,
       next_status: nextStatus,
-      remarks: reason,
+      reason: reason,
       changed_by: user.id
     });
 
