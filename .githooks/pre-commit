@@ -1,0 +1,47 @@
+#!/bin/bash
+# ZENITH_LMS — Pre-commit Gate
+# R-08: 회귀 테스트 통과 필수 (R-01 에이전트 태그는 commit-msg 훅에서 검증)
+# R-TB: TASK_BOARD 관리 규칙 보호
+
+set -e
+
+# ── R-08: 회귀 테스트 결과 확인 ──────────────────────────────────
+REGRESSION_FILE=".agent/LAST_REGRESSION_RESULT"
+
+if [ -f "$REGRESSION_FILE" ]; then
+  RESULT=$(cat "$REGRESSION_FILE" | tr -d '[:space:]')
+  if [ "$RESULT" != "PASS" ]; then
+    echo ""
+    echo "❌ BLOCKED: 회귀 테스트 미통과 (R-08 위반)"
+    echo "   마지막 결과: $RESULT"
+    echo "   실행: rtk npm run test:regression"
+    echo ""
+    exit 1
+  fi
+fi
+
+# ── R-TB: TASK_BOARD 관리 규칙 보호 ──────────────────────────────
+TASK_BOARD=".agent/TASK_BOARD.md"
+
+if git diff --cached --name-only | grep -q "^\.agent/TASK_BOARD\.md$"; then
+  MISSING=()
+
+  grep -q "관리 규칙"    "$TASK_BOARD" || MISSING+=("관리 규칙")
+  grep -q "800줄"        "$TASK_BOARD" || MISSING+=("800줄 제한")
+  grep -q "이관 불가"    "$TASK_BOARD" || MISSING+=("Active 지시 이관 불가")
+  grep -q "Git 운영 규칙" "$TASK_BOARD" || MISSING+=("Git 운영 규칙")
+
+  if [ ${#MISSING[@]} -gt 0 ]; then
+    echo ""
+    echo "❌ BLOCKED: TASK_BOARD 필수 섹션 누락 (R-TB 위반)"
+    for item in "${MISSING[@]}"; do
+      echo "   누락: $item"
+    done
+    echo "   .agent/TASK_BOARD.md 헤더의 관리 규칙/Git 운영 규칙 섹션을 복원하십시오."
+    echo ""
+    exit 1
+  fi
+fi
+
+echo "✅ Pre-commit 게이트 통과 — 커밋 진행"
+exit 0
