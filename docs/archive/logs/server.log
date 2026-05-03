@@ -712,3 +712,56 @@ Error fetching declarations: {
  GET /en/login 200 in 263ms (next.js: 67ms, proxy.ts: 51ms, application-code: 145ms)
  GET /en/login 200 in 263ms (next.js: 113ms, proxy.ts: 53ms, application-code: 96ms)
  GET /en/login 200 in 253ms (next.js: 144ms, proxy.ts: 43ms, application-code: 66ms)
+[MIDDLEWARE] Entry: /ko/login
+ GET /ko/login 200 in 946ms (next.js: 32ms, proxy.ts: 143ms, application-code: 772ms)
+[MIDDLEWARE] Entry: /ko/login
+⨯ Error: Invalid login credentials
+    at login (src/app/[locale]/(auth)/login/actions.ts:22:11)
+  20 |
+  21 |   if (error) {
+> 22 |     throw new Error(error.message);
+     |           ^
+  23 |   }
+  24 |
+  25 |   // Redirect to orders as the primary dashboard view with locale prefix {
+  digest: '4235986974'
+}
+ POST /ko/login 500 in 1626ms (next.js: 19ms, proxy.ts: 162ms, application-code: 1446ms)
+  └─ ƒ login({}) in 406ms src/app/[locale]/(auth)/login/actions.ts
+[MIDDLEWARE] Entry: /ko/login
+ GET /ko/login 200 in 320ms (next.js: 30ms, proxy.ts: 172ms, application-code: 119ms)
+[MIDDLEWARE] Entry: /ko/login
+[MIDDLEWARE] Entry: /ko/orders
+ POST /ko/login 303 in 6.4s (next.js: 11ms, proxy.ts: 78ms, application-code: 6.3s)
+  └─ ƒ login({}) in 2635ms src/app/[locale]/(auth)/login/actions.ts
+[MIDDLEWARE] Auth Result: user=9bc0732e-eb06-4986-aa71-72f7cdbe1854, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ GET /ko/orders 200 in 5.6s (next.js: 637ms, proxy.ts: 4.2s, application-code: 762ms)
+[MIDDLEWARE] Entry: /ko/login
+ GET /ko/login 200 in 194ms (next.js: 18ms, proxy.ts: 64ms, application-code: 113ms)
+[MIDDLEWARE] Entry: /ko/login
+[MIDDLEWARE] Entry: /ko/orders
+[MIDDLEWARE] Auth Result: user=9bc0732e-eb06-4986-aa71-72f7cdbe1854, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ GET /ko/orders 200 in 1613ms (next.js: 31ms, proxy.ts: 466ms, application-code: 1117ms)
+ POST /ko/login 303 in 3.2s (next.js: 130ms, proxy.ts: 335ms, application-code: 2.8s)
+  └─ ƒ login({}) in 987ms src/app/[locale]/(auth)/login/actions.ts
+[MIDDLEWARE] Entry: /ko/orders
+[MIDDLEWARE] Auth Result: user=9bc0732e-eb06-4986-aa71-72f7cdbe1854, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+[MIDDLEWARE] Entry: /ko/tracking
+ POST /ko/orders 200 in 483ms (next.js: 24ms, proxy.ts: 196ms, application-code: 263ms)
+  └─ ƒ getCommonCodesByGroup("ORDER_STATUS") in 217ms src/app/actions/master.ts
+[MIDDLEWARE] Entry: /ko/orders
+[MIDDLEWARE] Auth Result: user=9bc0732e-eb06-4986-aa71-72f7cdbe1854, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+[MIDDLEWARE] Auth Result: user=9bc0732e-eb06-4986-aa71-72f7cdbe1854, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ POST /ko/orders 200 in 3.8s (next.js: 682ms, proxy.ts: 2.5s, application-code: 626ms)
+  └─ ƒ getCommonCodesByGroup("ORDER_TYPE") in 552ms src/app/actions/master.ts
+[MIDDLEWARE] Entry: /ko/orders
+[MIDDLEWARE] Entry: /ko/orders
+[MIDDLEWARE] Auth Result: user=9bc0732e-eb06-4986-aa71-72f7cdbe1854, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+⨯ Error: aborted
+    at ignore-listed frames
+ GET /ko/tracking 200 in 6.2s (next.js: 1949ms, proxy.ts: 486ms, application-code: 3.8s)
+[MIDDLEWARE] Entry: /ko/tracking
+[MIDDLEWARE] Auth Result: user=9bc0732e-eb06-4986-aa71-72f7cdbe1854, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+[MIDDLEWARE] Auth Result: user=9bc0732e-eb06-4986-aa71-72f7cdbe1854, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ POST /ko/tracking 200 in 4.2s (next.js: 111ms, proxy.ts: 3.1s, application-code: 1026ms)
+  └─ ƒ getGlobalTrackingOverview() in 940ms src/app/actions/tracking.ts
