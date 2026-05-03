@@ -1301,3 +1301,12 @@ Error: aborted
  GET /en/login 200 in 849ms (next.js: 317ms, proxy.ts: 45ms, application-code: 487ms)
  GET /en/login 200 in 977ms (next.js: 487ms, proxy.ts: 49ms, application-code: 441ms)
  GET /ko/login 200 in 938ms (next.js: 606ms, proxy.ts: 36ms, application-code: 296ms)
+[MIDDLEWARE] Entry: /login
+[MIDDLEWARE] Entry: /en/login
+ GET /en/login 200 in 5.2s (next.js: 39ms, proxy.ts: 385ms, application-code: 4.8s)
+[MIDDLEWARE] Entry: /en/login
+[MIDDLEWARE] Entry: /en/orders
+[MIDDLEWARE] Auth Result: user=702858d5-9d9f-4ae1-8516-2e07a12d57d7, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ POST /en/login 303 in 8.7s (next.js: 415ms, proxy.ts: 1655ms, application-code: 6.6s)
+  └─ ƒ login({}) in 1406ms src/app/[locale]/(auth)/login/actions.ts
+ GET /en/orders 200 in 5.8s (next.js: 2.7s, proxy.ts: 913ms, application-code: 2.3s)
