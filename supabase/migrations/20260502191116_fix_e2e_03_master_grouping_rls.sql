@@ -1,8 +1,12 @@
--- Migration: Fix Master Order Grouping RLS
--- Description: Enable UPDATE on zen_orders for authenticated users to allow binding house orders to master orders.
+-- Migration: Enforce Strong RLS on zen_orders
+-- Description: Replace broad authenticated role check with explicit role-based check for UPDATE.
 
--- [PH14-E2E-03] Fix: Master Order Grouping 실패 해결
--- zen_orders 테이블에 UPDATE 정책이 없어 house_order_id를 master_order_id에 바인딩하지 못하는 문제 해결
+-- Ensure get_my_role() exists (SECURITY DEFINER to avoid recursion)
+CREATE OR REPLACE FUNCTION public.get_my_role()
+RETURNS text LANGUAGE sql SECURITY DEFINER STABLE
+AS $$ 
+  SELECT role FROM public.zen_profiles WHERE id = auth.uid();
+$$;
 
 DROP POLICY IF EXISTS "Enable update for authenticated users" ON public.zen_orders;
 DROP POLICY IF EXISTS "Admins can update orders" ON public.zen_orders;

@@ -38,11 +38,12 @@ interface OrderBasicData {
 
 export async function triggerStatusChangeNotification(
   orderId: string,
-  newStatus: OrderStatus
+  newStatus: OrderStatus,
+  providedSupabase?: any
 ): Promise<void> {
   if (!TRIGGER_STATUSES.has(newStatus)) return;
 
-  const supabase = await createServerClient();
+  const supabase = providedSupabase || await createServerClient();
 
   // 1. 오더 기본 정보 조회 (shipper_id = zen_organizations.id)
   const { data: order, error } = await supabase
