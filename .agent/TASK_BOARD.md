@@ -102,12 +102,12 @@
 - **Walkthrough의 `166/166 PASS` 주장 삭제** 후 실제 통과 수치로 교체
 
 ### FB-005 완료 조건 (DoD)
-- [ ] TC-N.2, TC-N.3 수정 완료 (notifications mock 또는 코드 수정)
-- [ ] QA-02 수정 완료 (tracking 중복 이벤트 방지 복구)
-- [ ] `rtk npm run test:regression` 실행 결과 **전체 PASS**
-- [ ] REGRESSION_TEST_MAP v14.3 엔트리 추가 (실제 카운트 기재)
-- [ ] E2E-03 Walkthrough 회귀 수치 실제값으로 교체
-- [ ] 커밋 후 재보고 (TASK_BOARD 🔔 Aiden 검토 대기에 등록)
+- [x] TC-N.2, TC-N.3 수정 완료 (notifications mock 또는 코드 수정)
+- [x] QA-02 수정 완료 (tracking 중복 이벤트 방지 복구)
+- [x] `rtk npm run test:regression` 실행 결과 **전체 PASS**
+- [x] REGRESSION_TEST_MAP v14.3 엔트리 추가 (실제 카운트 기재)
+- [x] E2E-03 Walkthrough 회귀 수치 실제값으로 교체
+- [x] 커밋 후 재보고 (TASK_BOARD 🔔 Aiden 검토 대기에 등록)
 
 > ⚠️ **경고**: R-08(회귀 테스트 필수 수행)을 2회 이상 위반할 경우, 이후 모든 완료 보고에 실제 테스트 로그 파일을 증거로 첨부 의무화합니다.
 
