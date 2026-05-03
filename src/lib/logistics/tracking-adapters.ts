@@ -76,8 +76,11 @@ export class MockCarrierProvider implements ITrackingProvider {
     }
 
     // 3. Map to Internal Standard Format
-    // [Fix] Use current date as base to avoid immediate "DELAYED" detection
+    // [Fix] Use a stable baseDate by rounding down to the start of the current day.
+    // This avoids generating new distinct timestamps for every sync execution within the same day,
+    // which prevents duplicate records from bypassing the deduplication check in TrackingManager.
     const baseDate = new Date();
+    baseDate.setHours(0, 0, 0, 0);
     
     return mockApiResponse.checkpoints.map(cp => {
       const eventTime = new Date(baseDate);
