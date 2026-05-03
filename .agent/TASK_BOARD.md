@@ -1,7 +1,7 @@
 # Multi-Agent Task Board
 
 > **프로젝트:** ZENITH_LMS
-> **업데이트:** 2026-05-04 (KST) — FB-005 Aiden 검토: 163/163 PASS — E2E-03 CLOSED, E2E-05 착수 허가
+> **업데이트:** 2026-05-04 (KST) — E2E-05 작업 지시서 발령 (청구서→세금계산서→엑셀Export)
 > **운영 원칙:**
 > - 각 에이전트는 작업 완료 시 **SECTION 1 상태 대시보드를 최우선 갱신**한 뒤 SECTION 2 상세를 업데이트한다.
 > - Riley는 완료 보고 시 반드시 `## 🔔 Aiden 검토 대기` 테이블에 항목을 추가한다.
@@ -29,7 +29,7 @@
 |:---|:---|:---|:---:|:---|
 | ~~**PH14-E2E-03**~~ | Riley | 마스터오더 그룹핑 → 창고 입고 → 바코드 스캔 | ✅ 완료 | FB-005 CLOSED (2026-05-04) |
 | ~~**PH14-E2E-04**~~ | Riley | 트래킹 동기화 → 마일스톤 갱신 → 화주 알림 | ✅ 완료 | Aiden 검증 PASS (2026-05-04) |
-| **PH14-E2E-05** | Riley | 청구서 발행 → 세금계산서 → 엑셀 Export | 🔵 **착수 가능** | ✅ 블로커 해소 |
+| **PH14-E2E-05** | Riley | 청구서 발행 → 세금계산서 → 엑셀 Export | 🔵 **지시 발령** | 작업 지시서 발령 완료 |
 | **PH14-E2E-06** | Riley | VOC 등록 → 관리자 Quick Reply → 화주 확인 | ⏳ 대기 | — |
 | **PH14-E2E-07** | Riley | 통관 신고 생성 → 제출 → APPROVED | ⏳ 대기 | — |
 | **PH14-E2E-08** | Riley | 화주 통관 이력 조회 → 관리자 메모 확인 | ⏳ 대기 | — |
@@ -38,6 +38,81 @@
 ---
 
 # SECTION 2 — 작업 상세
+
+---
+
+## 📬 PH14-E2E-05 작업 지시서 (Aiden → Riley, 2026-05-04)
+
+> **발령**: Aiden (2026-05-04)
+> **수신**: Riley
+> **우선순위**: Normal
+> **시나리오**: 청구서 발행 → 세금계산서 발행 → 정산 데이터 엑셀 Export
+
+### 사전 컨텍스트 (Riley 필독)
+
+1. **기존 스펙 상태**: `tests/e2e/e2e-05-settlement.spec.ts` 파일이 존재하나 Step 1(청구서 발행)만 커버하며 현재 **1 FAILED** 상태. 수정 및 확장 필요.
+2. **테스트 오더**: `Z-FIN-E2E05-01` (UUID: `d197352a-ba9f-4640-9176-c50c852d8138`) — DB에 `DELIVERED` 또는 `RELEASED` 상태로 준비 확인 필요.
+3. **⚠️ 잠재 버그**: `src/app/api/finance/export/route.ts:26`에서 `.from("profiles")` 사용 중. `zen_profiles` 테이블 사용 여부 확인 후 필요 시 수정.
+
+---
+
+### Step 1: 정산 계산 및 청구서(인보이스) 발행
+
+- **URL**: `/ko/orders/{TEST_ORDER_ID}`
+- **작업 흐름**:
+  1. 오더 상세 페이지 접속 — Finance/Settlement 섹션 확인
+  2. 비용 항목이 없으면 "Recalculate Costs" 버튼 클릭 → 비용 목록 표시 확인
+  3. "Generate Final Invoice" 버튼 클릭 → `Invoiced` 뱃지 표시 확인
+  4. 인보이스 번호(`#INV-...`) 생성 확인
+- **기대 결과**: `zen_invoices` 레코드 생성, 오더 상태 `Invoiced` 반영
+- **캡처**: `docs/99_Manual/E2E_05_Result/e2e_05_01_invoice_generated.png`
+
+### Step 2: 세금계산서 발행
+
+- **URL**: `/ko/finance` 또는 오더 상세 내 TaxInvoiceSheet
+- **작업 흐름**:
+  1. 재무 대시보드 또는 오더 상세에서 발행된 인보이스 선택
+  2. "세금계산서 발행" 버튼 클릭 → `issueTaxInvoice` 액션 호출
+  3. 세금계산서 번호 생성 확인 (`zen_tax_invoices` 레코드)
+  4. (선택) "이메일 발송" 클릭 → `sendTaxInvoiceEmail` 정상 호출 확인
+- **기대 결과**: `zen_tax_invoices` 테이블에 레코드 생성, 상태 `ISSUED` 또는 `SENT`
+- **캡처**: `docs/99_Manual/E2E_05_Result/e2e_05_02_tax_invoice_issued.png`
+
+### Step 3: 정산 데이터 엑셀 Export
+
+- **URL**: `/ko/finance` — Export 버튼 (`ExportButton` 컴포넌트)
+- **작업 흐름**:
+  1. 재무 대시보드에서 Export 버튼 클릭
+  2. `GET /api/finance/export` 호출 → `.xlsx` 파일 다운로드 확인
+  3. 응답 헤더 `Content-Disposition: attachment; filename=settlement_export_*.xlsx` 확인
+- **기대 결과**: XLSX 파일 정상 다운로드 (상태코드 200)
+- **캡처**: `docs/99_Manual/E2E_05_Result/e2e_05_03_excel_exported.png`
+
+---
+
+### 스펙 파일 수정 지침
+
+- **대상 파일**: `tests/e2e/e2e-05-settlement.spec.ts` (기존 파일 수정)
+- Step 1 테스트 수정: 기존 실패 원인 분석 후 통과 처리
+- Step 2 추가: `test('should issue tax invoice for generated invoice', ...)`
+- Step 3 추가: `test('should download excel export from finance dashboard', ...)`
+- 테스트 오더 데이터가 없으면 `beforeAll`에서 사전 준비 로직 추가
+
+### PH14-E2E-05 완료 조건 (DoD)
+
+- [ ] Step 1: 청구서 발행 E2E 테스트 PASS (기존 실패 수정)
+- [ ] Step 2: 세금계산서 발행 E2E 테스트 PASS (신규 추가)
+- [ ] Step 3: 엑셀 Export E2E 테스트 PASS (신규 추가)
+- [ ] `export/route.ts` `.from("profiles")` 버그 여부 확인 및 필요 시 수정
+- [ ] `rtk npm run test:regression` 전체 PASS (R-08)
+- [ ] REGRESSION_TEST_MAP 업데이트 (R-09)
+- [ ] Walkthrough 작성: `docs/08_Self_Audit/Walkthroughs/PH14_E2E05_SETTLEMENT.md` (R-10)
+- [ ] 커밋 후 🔔 Aiden 검토 대기 테이블에 등록 (**필수 — 미등록 시 반려**)
+
+---
+**발령자**: Aiden (Claude)
+
+---
 
 ## ✅ FB-005 검증 결과 (Aiden, 2026-05-04)
 
