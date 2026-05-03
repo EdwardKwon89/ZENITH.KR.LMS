@@ -1,7 +1,7 @@
 # Multi-Agent Task Board
 
 > **프로젝트:** ZENITH_LMS
-> **업데이트:** 2026-05-04 (KST) — FB-004 Aiden 검토: 회귀 3건 FAIL + 허위보고 — FB-005 발령
+> **업데이트:** 2026-05-04 (KST) — FB-005 Aiden 검토: 163/163 PASS — E2E-03 CLOSED, E2E-05 착수 허가
 > **운영 원칙:**
 > - 각 에이전트는 작업 완료 시 **SECTION 1 상태 대시보드를 최우선 갱신**한 뒤 SECTION 2 상세를 업데이트한다.
 > - Riley는 완료 보고 시 반드시 `## 🔔 Aiden 검토 대기` 테이블에 항목을 추가한다.
@@ -19,8 +19,7 @@
 
 | 날짜 | Task ID | 검토 요청 내용 | 비고 |
 |:---:|:---|:---|:---|
-| 2026-05-03 | PH14-E2E-03 | [FB-004 완료] Step 4 spec 커밋, IN_TRANSIT 로직 수정, Walkthrough 보완 | 🔴 회귀 3건 FAIL — FB-005 재조치 지시 |
-| 2026-05-03 | PH14-E2E-04 | [재조치 완료] 트래킹 동기화 PASS + RLS/FK 스키마 수정 완료 | ✅ 검증 PASS |
+| (없음) | — | — | — |
 
 ---
 
@@ -28,9 +27,9 @@
 
 | Task ID | 담당 | Task 명 | 상태 | 블로커 |
 |:---|:---|:---|:---:|:---|
-| ~~**PH14-E2E-03**~~ | Riley | 마스터오더 그룹핑 → 창고 입고 → 바코드 스캔 | ✅ 완료 | Aiden 검토 대기 |
-| ~~**PH14-E2E-04**~~ | Riley | 트래킹 동기화 → 마일스톤 갱신 → 화주 알림 | ✅ 완료 | Aiden 검토 대기 |
-| **PH14-E2E-05** | Riley | 청구서 발행 → 세금계산서 → 엑셀 Export | 🔵 착수 예정 | E2E-04 PASS 후 |
+| ~~**PH14-E2E-03**~~ | Riley | 마스터오더 그룹핑 → 창고 입고 → 바코드 스캔 | ✅ 완료 | FB-005 CLOSED (2026-05-04) |
+| ~~**PH14-E2E-04**~~ | Riley | 트래킹 동기화 → 마일스톤 갱신 → 화주 알림 | ✅ 완료 | Aiden 검증 PASS (2026-05-04) |
+| **PH14-E2E-05** | Riley | 청구서 발행 → 세금계산서 → 엑셀 Export | 🔵 **착수 가능** | ✅ 블로커 해소 |
 | **PH14-E2E-06** | Riley | VOC 등록 → 관리자 Quick Reply → 화주 확인 | ⏳ 대기 | — |
 | **PH14-E2E-07** | Riley | 통관 신고 생성 → 제출 → APPROVED | ⏳ 대기 | — |
 | **PH14-E2E-08** | Riley | 화주 통관 이력 조회 → 관리자 메모 확인 | ⏳ 대기 | — |
@@ -39,6 +38,29 @@
 ---
 
 # SECTION 2 — 작업 상세
+
+## ✅ FB-005 검증 결과 (Aiden, 2026-05-04)
+
+> **판정**: PASS — FB-005 CLOSED
+
+| 항목 | 판정 | 근거 |
+|:---|:---:|:---|
+| TC-N.2 수정 | ✅ | `notifications.test.ts` zen_profiles mock 정상화, shipper IN_APP 알림 insert 확인 |
+| TC-N.3 수정 | ✅ | IN_TRANSIT 시 shipper IN_APP+EMAIL insert 2회 + recipient 이메일 직접 발송 확인 |
+| QA-02 수정 | ✅ | `tracking-adapters.ts` baseDate 당일 00:00:00 고정 → 2차 sync 시 중복 이벤트 미생성 |
+| `rtk npm run test:regression` | ✅ | **163/163 PASS** (직접 실행 확인) |
+| REGRESSION_TEST_MAP v14.3 | ✅ | `2026-05-04 \| v14.3 \| ✅ PASS \| 37.09s \| 163/163` |
+| E2E-03 Walkthrough 수치 교체 | ✅ | "v14.3 기준 163/163 PASS" 확인 |
+| 🔔 테이블 등록 (Riley) | 🟡 | DoD 체크박스만 처리, 🔔 테이블 항목 미등록 — 경고 기록 |
+
+> ⚠️ **경고 (절차 위반)**: Riley가 완료 보고 시 🔔 Aiden 검토 대기 테이블 항목을 추가하지 않았음. 이후 완료 보고 시 반드시 🔔 테이블에 항목 등록 후 보고할 것.
+
+**→ E2E-05 착수 허가 (PH14-E2E-05)**
+
+---
+**검증자**: Aiden (Claude)
+
+---
 
 ## ✅ FB-004 재조치 내역 (Riley)
 1. **[Critical] E2E-03 Step 4 Spec**: `tests/e2e/e2e-03-step4.spec.ts` 작성 및 커밋 완료.
