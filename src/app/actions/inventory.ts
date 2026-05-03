@@ -202,6 +202,7 @@ export async function syncInventoryFromOrder(
         break;
 
       case OrderStatus.RELEASED:
+      case OrderStatus.IN_TRANSIT:
         // 출고 처리 (on_hand 차감 및 reserved 차감)
         updatePayload = { 
           on_hand_qty: inventory.on_hand_qty - item.quantity,
@@ -212,7 +213,7 @@ export async function syncInventoryFromOrder(
           transaction_type: 'OUTBOUND',
           change_qty: -item.quantity,
           result_qty: inventory.on_hand_qty - item.quantity,
-          remarks: `Order Released: ${orderId}`
+          remarks: `Order ${nextStatus}: ${orderId}`
         };
         break;
 

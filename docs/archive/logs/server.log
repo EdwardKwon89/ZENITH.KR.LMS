@@ -2568,3 +2568,332 @@ InvoiceGenerator Error: Error: 출발지/도착지 또는 운송 모드 정보�
     at Array.map (<anonymous>)
     at Array.map (<anonymous>)
     at Array.map (<anonymous>)
+[MIDDLEWARE] Entry: /ko/login
+ GET /ko/login 200 in 228ms (next.js: 21ms, proxy.ts: 90ms, application-code: 118ms)
+[MIDDLEWARE] Entry: /ko/login
+[MIDDLEWARE] Entry: /ko/orders
+[MIDDLEWARE] Auth Result: user=702858d5-9d9f-4ae1-8516-2e07a12d57d7, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ GET /ko/orders 200 in 453ms (next.js: 9ms, proxy.ts: 62ms, application-code: 383ms)
+ POST /ko/login 303 in 772ms (next.js: 13ms, proxy.ts: 60ms, application-code: 699ms)
+  └─ ƒ login({}) in 204ms src/app/[locale]/(auth)/login/actions.ts
+[MIDDLEWARE] Entry: /ko/inventory
+[MIDDLEWARE] Entry: /ko/orders
+[MIDDLEWARE] Auth Result: user=702858d5-9d9f-4ae1-8516-2e07a12d57d7, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+[MIDDLEWARE] Auth Result: user=702858d5-9d9f-4ae1-8516-2e07a12d57d7, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ POST /ko/orders 200 in 157ms (next.js: 5ms, proxy.ts: 54ms, application-code: 98ms)
+  └─ ƒ getCommonCodesByGroup("ORDER_STATUS") in 88ms src/app/actions/master.ts
+[MIDDLEWARE] Entry: /ko/orders
+[MIDDLEWARE] Auth Result: user=702858d5-9d9f-4ae1-8516-2e07a12d57d7, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+Error: aborted
+    at ignore-listed frames {
+  code: 'ECONNRESET'
+}
+⨯ uncaughtException: Error: aborted
+    at ignore-listed frames {
+  code: 'ECONNRESET'
+}
+⨯ uncaughtException:  Error: aborted
+    at ignore-listed frames {
+  code: 'ECONNRESET'
+}
+[MIDDLEWARE] Entry: /ko/orders
+ GET /ko/inventory 200 in 731ms (next.js: 16ms, proxy.ts: 67ms, application-code: 649ms)
+[MIDDLEWARE] Auth Result: user=702858d5-9d9f-4ae1-8516-2e07a12d57d7, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+[MIDDLEWARE] Entry: /ko/login
+ GET /ko/login 200 in 167ms (next.js: 19ms, proxy.ts: 65ms, application-code: 83ms)
+[MIDDLEWARE] Entry: /ko/login
+[MIDDLEWARE] Entry: /ko/orders
+[MIDDLEWARE] Auth Result: user=702858d5-9d9f-4ae1-8516-2e07a12d57d7, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ GET /ko/orders 200 in 292ms (next.js: 8ms, proxy.ts: 56ms, application-code: 229ms)
+ POST /ko/login 303 in 648ms (next.js: 7ms, proxy.ts: 165ms, application-code: 476ms)
+  └─ ƒ login({}) in 172ms src/app/[locale]/(auth)/login/actions.ts
+[MIDDLEWARE] Entry: /ko/inventory
+[MIDDLEWARE] Entry: /ko/orders
+[MIDDLEWARE] Auth Result: user=702858d5-9d9f-4ae1-8516-2e07a12d57d7, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+[MIDDLEWARE] Auth Result: user=702858d5-9d9f-4ae1-8516-2e07a12d57d7, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ POST /ko/orders 200 in 234ms (next.js: 12ms, proxy.ts: 97ms, application-code: 125ms)
+  └─ ƒ getCommonCodesByGroup("ORDER_STATUS") in 111ms src/app/actions/master.ts
+[MIDDLEWARE] Entry: /ko/orders
+ GET /ko/inventory 200 in 377ms (next.js: 8ms, proxy.ts: 67ms, application-code: 302ms)
+[MIDDLEWARE] Auth Result: user=702858d5-9d9f-4ae1-8516-2e07a12d57d7, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+[MIDDLEWARE] Entry: /ko/login
+ GET /ko/login 200 in 339ms (next.js: 16ms, proxy.ts: 87ms, application-code: 235ms)
+[MIDDLEWARE] Entry: /ko/login
+[MIDDLEWARE] Entry: /ko/orders
+[MIDDLEWARE] Auth Result: user=702858d5-9d9f-4ae1-8516-2e07a12d57d7, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ GET /ko/orders 200 in 278ms (next.js: 11ms, proxy.ts: 68ms, application-code: 198ms)
+ POST /ko/login 303 in 472ms (next.js: 10ms, proxy.ts: 29ms, application-code: 432ms)
+  └─ ƒ login({}) in 140ms src/app/[locale]/(auth)/login/actions.ts
+[MIDDLEWARE] Entry: /ko/inventory
+[MIDDLEWARE] Entry: /ko/orders
+[MIDDLEWARE] Auth Result: user=702858d5-9d9f-4ae1-8516-2e07a12d57d7, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+[MIDDLEWARE] Auth Result: user=702858d5-9d9f-4ae1-8516-2e07a12d57d7, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ POST /ko/orders 200 in 224ms (next.js: 11ms, proxy.ts: 59ms, application-code: 154ms)
+  └─ ƒ getCommonCodesByGroup("ORDER_STATUS") in 119ms src/app/actions/master.ts
+[MIDDLEWARE] Entry: /ko/orders
+[MIDDLEWARE] Entry: /ko/orders
+[MIDDLEWARE] Auth Result: user=702858d5-9d9f-4ae1-8516-2e07a12d57d7, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+[MIDDLEWARE] Auth Result: user=702858d5-9d9f-4ae1-8516-2e07a12d57d7, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ GET /ko/inventory 200 in 474ms (next.js: 33ms, proxy.ts: 75ms, application-code: 366ms)
+[MIDDLEWARE] Entry: /ko/inventory
+[MIDDLEWARE] Auth Result: user=702858d5-9d9f-4ae1-8516-2e07a12d57d7, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+[Settlement] Order Loaded: Z-HOU-E2E03-01 (undefined -> undefined, AIR)
+[Settlement] Shipper ID: 79bab7b4-fc0f-4da8-b1e2-441c1a467ef6, Type: string
+InvoiceGenerator Error: Error: 출발지/도착지 또는 운송 모드 정보가 누락되어 정산을 계산할 수 없습니다.
+    at InvoiceGenerator.generateInvoice (src/lib/finance/settlement.ts:204:40)
+    at async generateInvoicesForOrder (src/app/actions/finance.ts:25:18)
+    at async updateOrderStatus (src/app/actions/orders.ts:432:7)
+  202 |         const engine = new SettlementEngine();
+  203 |         const calcResult = await engine.calculateOrderCosts(orderId);
+> 204 |         if (!calcResult.success) throw new Error(calcResult.message || '비용 산출 실패');
+      |                                        ^
+  205 |         
+  206 |         // 다시 조회
+  207 |         const { data: updatedOrder } = await supabase
+[CRITICAL] Finance automation failed during release: Error: 출발지/도착지 또는 운송 모드 정보가 누락되어 정산을 계산할 수 없습니다.
+    at generateInvoicesForOrder (src/app/actions/finance.ts:28:11)
+    at async updateOrderStatus (src/app/actions/orders.ts:432:7)
+  26 |
+  27 |   if (!result.success) {
+> 28 |     throw new Error(result.message || "정산서 생성 실패");
+     |           ^
+  29 |   }
+  30 |
+  31 |   revalidatePath("/finance/invoices");
+ POST /ko/inventory 200 in 1426ms (next.js: 7ms, proxy.ts: 57ms, application-code: 1362ms)
+  └─ ƒ updateOrderStatus("3ff5b116-29cd-4d90-8dd0-0e99c36a2155", "RELEASED", "Barcode Scanned: OUTBOUND (Z-HOU-E2E03-01)") in 1237ms src/app/actions/orders.ts
+[MIDDLEWARE] Entry: /ko/inventory
+[MIDDLEWARE] Auth Result: user=702858d5-9d9f-4ae1-8516-2e07a12d57d7, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ GET /ko/inventory 200 in 341ms (next.js: 7ms, proxy.ts: 66ms, application-code: 268ms)
+[MIDDLEWARE] Entry: /ko/login
+ GET /ko/login 200 in 230ms (next.js: 29ms, proxy.ts: 56ms, application-code: 145ms)
+[MIDDLEWARE] Entry: /ko/login
+[MIDDLEWARE] Entry: /ko/orders
+[MIDDLEWARE] Auth Result: user=702858d5-9d9f-4ae1-8516-2e07a12d57d7, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ GET /ko/orders 200 in 471ms (next.js: 9ms, proxy.ts: 70ms, application-code: 392ms)
+ POST /ko/login 303 in 739ms (next.js: 8ms, proxy.ts: 17ms, application-code: 713ms)
+  └─ ƒ login({}) in 219ms src/app/[locale]/(auth)/login/actions.ts
+[MIDDLEWARE] Entry: /ko/inventory
+[MIDDLEWARE] Entry: /ko/orders
+[MIDDLEWARE] Auth Result: user=702858d5-9d9f-4ae1-8516-2e07a12d57d7, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+[MIDDLEWARE] Auth Result: user=702858d5-9d9f-4ae1-8516-2e07a12d57d7, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ POST /ko/orders 200 in 406ms (next.js: 107ms, proxy.ts: 116ms, application-code: 184ms)
+  └─ ƒ getCommonCodesByGroup("ORDER_STATUS") in 159ms src/app/actions/master.ts
+[MIDDLEWARE] Entry: /ko/orders
+[MIDDLEWARE] Auth Result: user=702858d5-9d9f-4ae1-8516-2e07a12d57d7, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ GET /ko/inventory 200 in 602ms (next.js: 11ms, proxy.ts: 122ms, application-code: 470ms)
+[MIDDLEWARE] Entry: /ko/inventory
+[MIDDLEWARE] Auth Result: user=702858d5-9d9f-4ae1-8516-2e07a12d57d7, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+[Settlement] Order Loaded: Z-HOU-E2E03-01 (undefined -> undefined, AIR)
+[Settlement] Shipper ID: 79bab7b4-fc0f-4da8-b1e2-441c1a467ef6, Type: string
+InvoiceGenerator Error: Error: 출발지/도착지 또는 운송 모드 정보가 누락되어 정산을 계산할 수 없습니다.
+    at InvoiceGenerator.generateInvoice (src/lib/finance/settlement.ts:204:40)
+    at async generateInvoicesForOrder (src/app/actions/finance.ts:25:18)
+    at async updateOrderStatus (src/app/actions/orders.ts:432:7)
+  202 |         const engine = new SettlementEngine();
+  203 |         const calcResult = await engine.calculateOrderCosts(orderId);
+> 204 |         if (!calcResult.success) throw new Error(calcResult.message || '비용 산출 실패');
+      |                                        ^
+  205 |         
+  206 |         // 다시 조회
+  207 |         const { data: updatedOrder } = await supabase
+[CRITICAL] Finance automation failed during release: Error: 출발지/도착지 또는 운송 모드 정보가 누락되어 정산을 계산할 수 없습니다.
+    at generateInvoicesForOrder (src/app/actions/finance.ts:28:11)
+    at async updateOrderStatus (src/app/actions/orders.ts:432:7)
+  26 |
+  27 |   if (!result.success) {
+> 28 |     throw new Error(result.message || "정산서 생성 실패");
+     |           ^
+  29 |   }
+  30 |
+  31 |   revalidatePath("/finance/invoices");
+ POST /ko/inventory 200 in 1644ms (next.js: 15ms, proxy.ts: 61ms, application-code: 1568ms)
+  └─ ƒ updateOrderStatus("3ff5b116-29cd-4d90-8dd0-0e99c36a2155", "RELEASED", "Barcode Scanned: OUTBOUND (Z-HOU-E2E03-01)") in 1382ms src/app/actions/orders.ts
+[MIDDLEWARE] Entry: /ko/inventory
+[MIDDLEWARE] Auth Result: user=702858d5-9d9f-4ae1-8516-2e07a12d57d7, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ GET /ko/inventory 200 in 834ms (next.js: 9ms, proxy.ts: 69ms, application-code: 756ms)
+[MIDDLEWARE] Entry: /ko/login
+ GET /ko/login 200 in 266ms (next.js: 19ms, proxy.ts: 125ms, application-code: 122ms)
+[MIDDLEWARE] Entry: /ko/login
+[MIDDLEWARE] Entry: /ko/orders
+[MIDDLEWARE] Auth Result: user=702858d5-9d9f-4ae1-8516-2e07a12d57d7, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ GET /ko/orders 200 in 390ms (next.js: 9ms, proxy.ts: 134ms, application-code: 247ms)
+ POST /ko/login 303 in 646ms (next.js: 11ms, proxy.ts: 34ms, application-code: 600ms)
+  └─ ƒ login({}) in 162ms src/app/[locale]/(auth)/login/actions.ts
+[MIDDLEWARE] Entry: /ko/inventory
+[MIDDLEWARE] Entry: /ko/orders
+[MIDDLEWARE] Auth Result: user=702858d5-9d9f-4ae1-8516-2e07a12d57d7, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+[MIDDLEWARE] Auth Result: user=702858d5-9d9f-4ae1-8516-2e07a12d57d7, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ POST /ko/orders 200 in 276ms (next.js: 7ms, proxy.ts: 76ms, application-code: 192ms)
+  └─ ƒ getCommonCodesByGroup("ORDER_STATUS") in 126ms src/app/actions/master.ts
+[MIDDLEWARE] Entry: /ko/orders
+[MIDDLEWARE] Entry: /ko/orders
+[MIDDLEWARE] Auth Result: user=702858d5-9d9f-4ae1-8516-2e07a12d57d7, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+[MIDDLEWARE] Auth Result: user=702858d5-9d9f-4ae1-8516-2e07a12d57d7, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ GET /ko/inventory 200 in 467ms (next.js: 18ms, proxy.ts: 81ms, application-code: 368ms)
+[MIDDLEWARE] Entry: /ko/inventory
+[MIDDLEWARE] Auth Result: user=702858d5-9d9f-4ae1-8516-2e07a12d57d7, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+[Settlement] Order Loaded: Z-HOU-E2E03-01 (undefined -> undefined, AIR)
+[Settlement] Shipper ID: 79bab7b4-fc0f-4da8-b1e2-441c1a467ef6, Type: string
+InvoiceGenerator Error: Error: 출발지/도착지 또는 운송 모드 정보가 누락되어 정산을 계산할 수 없습니다.
+    at InvoiceGenerator.generateInvoice (src/lib/finance/settlement.ts:204:40)
+    at async generateInvoicesForOrder (src/app/actions/finance.ts:25:18)
+    at async updateOrderStatus (src/app/actions/orders.ts:432:7)
+  202 |         const engine = new SettlementEngine();
+  203 |         const calcResult = await engine.calculateOrderCosts(orderId);
+> 204 |         if (!calcResult.success) throw new Error(calcResult.message || '비용 산출 실패');
+      |                                        ^
+  205 |         
+  206 |         // 다시 조회
+  207 |         const { data: updatedOrder } = await supabase
+[CRITICAL] Finance automation failed during release: Error: 출발지/도착지 또는 운송 모드 정보가 누락되어 정산을 계산할 수 없습니다.
+    at generateInvoicesForOrder (src/app/actions/finance.ts:28:11)
+    at async updateOrderStatus (src/app/actions/orders.ts:432:7)
+  26 |
+  27 |   if (!result.success) {
+> 28 |     throw new Error(result.message || "정산서 생성 실패");
+     |           ^
+  29 |   }
+  30 |
+  31 |   revalidatePath("/finance/invoices");
+ POST /ko/inventory 200 in 1541ms (next.js: 10ms, proxy.ts: 57ms, application-code: 1474ms)
+  └─ ƒ updateOrderStatus("3ff5b116-29cd-4d90-8dd0-0e99c36a2155", "RELEASED", "Barcode Scanned: OUTBOUND (Z-HOU-E2E03-01)") in 1290ms src/app/actions/orders.ts
+[MIDDLEWARE] Entry: /ko/inventory
+[MIDDLEWARE] Auth Result: user=702858d5-9d9f-4ae1-8516-2e07a12d57d7, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ GET /ko/inventory 200 in 349ms (next.js: 12ms, proxy.ts: 82ms, application-code: 256ms)
+[MIDDLEWARE] Entry: /ko/login
+ GET /ko/login 200 in 347ms (next.js: 16ms, proxy.ts: 86ms, application-code: 245ms)
+[MIDDLEWARE] Entry: /ko/login
+[MIDDLEWARE] Entry: /ko/orders
+[MIDDLEWARE] Auth Result: user=702858d5-9d9f-4ae1-8516-2e07a12d57d7, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ GET /ko/orders 200 in 282ms (next.js: 10ms, proxy.ts: 53ms, application-code: 219ms)
+ POST /ko/login 303 in 556ms (next.js: 14ms, proxy.ts: 77ms, application-code: 465ms)
+  └─ ƒ login({}) in 169ms src/app/[locale]/(auth)/login/actions.ts
+[MIDDLEWARE] Entry: /ko/inventory
+[MIDDLEWARE] Entry: /ko/orders
+[MIDDLEWARE] Auth Result: user=702858d5-9d9f-4ae1-8516-2e07a12d57d7, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+[MIDDLEWARE] Auth Result: user=702858d5-9d9f-4ae1-8516-2e07a12d57d7, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ POST /ko/orders 200 in 254ms (next.js: 8ms, proxy.ts: 112ms, application-code: 134ms)
+  └─ ƒ getCommonCodesByGroup("ORDER_STATUS") in 120ms src/app/actions/master.ts
+[MIDDLEWARE] Entry: /ko/orders
+[MIDDLEWARE] Auth Result: user=702858d5-9d9f-4ae1-8516-2e07a12d57d7, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ GET /ko/inventory 200 in 400ms (next.js: 11ms, proxy.ts: 69ms, application-code: 319ms)
+[MIDDLEWARE] Entry: /ko/inventory
+[MIDDLEWARE] Auth Result: user=702858d5-9d9f-4ae1-8516-2e07a12d57d7, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+[Settlement] Order Loaded: Z-HOU-E2E03-01 (undefined -> undefined, AIR)
+[Settlement] Shipper ID: 79bab7b4-fc0f-4da8-b1e2-441c1a467ef6, Type: string
+InvoiceGenerator Error: Error: 출발지/도착지 또는 운송 모드 정보가 누락되어 정산을 계산할 수 없습니다.
+    at InvoiceGenerator.generateInvoice (src/lib/finance/settlement.ts:204:40)
+    at async generateInvoicesForOrder (src/app/actions/finance.ts:25:18)
+    at async updateOrderStatus (src/app/actions/orders.ts:432:7)
+  202 |         const engine = new SettlementEngine();
+  203 |         const calcResult = await engine.calculateOrderCosts(orderId);
+> 204 |         if (!calcResult.success) throw new Error(calcResult.message || '비용 산출 실패');
+      |                                        ^
+  205 |         
+  206 |         // 다시 조회
+  207 |         const { data: updatedOrder } = await supabase
+[CRITICAL] Finance automation failed during release: Error: 출발지/도착지 또는 운송 모드 정보가 누락되어 정산을 계산할 수 없습니다.
+    at generateInvoicesForOrder (src/app/actions/finance.ts:28:11)
+    at async updateOrderStatus (src/app/actions/orders.ts:432:7)
+  26 |
+  27 |   if (!result.success) {
+> 28 |     throw new Error(result.message || "정산서 생성 실패");
+     |           ^
+  29 |   }
+  30 |
+  31 |   revalidatePath("/finance/invoices");
+ POST /ko/inventory 200 in 1471ms (next.js: 17ms, proxy.ts: 66ms, application-code: 1388ms)
+  └─ ƒ updateOrderStatus("3ff5b116-29cd-4d90-8dd0-0e99c36a2155", "RELEASED", "Barcode Scanned: OUTBOUND (Z-HOU-E2E03-01)") in 1229ms src/app/actions/orders.ts
+[MIDDLEWARE] Entry: /ko/inventory
+[MIDDLEWARE] Auth Result: user=702858d5-9d9f-4ae1-8516-2e07a12d57d7, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ GET /ko/inventory 200 in 361ms (next.js: 8ms, proxy.ts: 69ms, application-code: 283ms)
+[MIDDLEWARE] Entry: /ko/login
+✓ Compiled in 394ms
+[MIDDLEWARE] Entry: /ko/login
+ GET /ko/login 200 in 697ms (next.js: 395ms, proxy.ts: 107ms, application-code: 195ms)
+[MIDDLEWARE] Entry: /ko/login
+ GET /ko/login 200 in 191ms (next.js: 7ms, proxy.ts: 145ms, application-code: 39ms)
+[MIDDLEWARE] Entry: /ko/login
+ GET /ko/login 200 in 53ms (next.js: 8ms, proxy.ts: 18ms, application-code: 27ms)
+[MIDDLEWARE] Entry: /ko/login
+ GET /ko/login 200 in 107ms (next.js: 4ms, proxy.ts: 9ms, application-code: 95ms)
+ GET /ko/login 200 in 39ms (next.js: 6ms, proxy.ts: 14ms, application-code: 18ms)
+[MIDDLEWARE] Entry: /en/login
+[MIDDLEWARE] Entry: /en/login
+[MIDDLEWARE] Entry: /en/login
+[MIDDLEWARE] Entry: /en/login
+[MIDDLEWARE] Entry: /en/login
+ GET /en/login 200 in 304ms (next.js: 35ms, proxy.ts: 72ms, application-code: 197ms)
+ GET /en/login 200 in 294ms (next.js: 69ms, proxy.ts: 62ms, application-code: 164ms)
+ GET /en/login 200 in 243ms (next.js: 96ms, proxy.ts: 22ms, application-code: 125ms)
+ GET /en/login 200 in 133ms (next.js: 24ms, proxy.ts: 77ms, application-code: 32ms)
+ GET /en/login 200 in 140ms (next.js: 10ms, proxy.ts: 80ms, application-code: 50ms)
+[MIDDLEWARE] Entry: /ko/login
+ GET /ko/login 200 in 1165ms (next.js: 20ms, proxy.ts: 111ms, application-code: 1034ms)
+[MIDDLEWARE] Entry: /ko/login
+[MIDDLEWARE] Entry: /ko/orders
+[MIDDLEWARE] Auth Result: user=702858d5-9d9f-4ae1-8516-2e07a12d57d7, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ GET /ko/orders 200 in 944ms (next.js: 436ms, proxy.ts: 92ms, application-code: 416ms)
+ POST /ko/login 303 in 1256ms (next.js: 15ms, proxy.ts: 56ms, application-code: 1185ms)
+  └─ ƒ login({}) in 219ms src/app/[locale]/(auth)/login/actions.ts
+[MIDDLEWARE] Entry: /ko/inventory
+[MIDDLEWARE] Entry: /ko/orders
+[MIDDLEWARE] Auth Result: user=702858d5-9d9f-4ae1-8516-2e07a12d57d7, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+[MIDDLEWARE] Auth Result: user=702858d5-9d9f-4ae1-8516-2e07a12d57d7, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ POST /ko/orders 200 in 672ms (next.js: 9ms, proxy.ts: 68ms, application-code: 595ms)
+  └─ ƒ getCommonCodesByGroup("ORDER_STATUS") in 354ms src/app/actions/master.ts
+[MIDDLEWARE] Entry: /ko/orders
+[MIDDLEWARE] Entry: /ko/orders
+[MIDDLEWARE] Auth Result: user=702858d5-9d9f-4ae1-8516-2e07a12d57d7, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+[MIDDLEWARE] Auth Result: user=702858d5-9d9f-4ae1-8516-2e07a12d57d7, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ GET /ko/inventory 200 in 1294ms (next.js: 56ms, proxy.ts: 76ms, application-code: 1161ms)
+[MIDDLEWARE] Entry: /ko/inventory
+[MIDDLEWARE] Auth Result: user=702858d5-9d9f-4ae1-8516-2e07a12d57d7, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ POST /ko/inventory 200 in 1105ms (next.js: 18ms, proxy.ts: 221ms, application-code: 866ms)
+  └─ ƒ updateOrderStatus("3ff5b116-29cd-4d90-8dd0-0e99c36a2155", "IN_TRANSIT", "Barcode Scanned: OUTBOUND (Z-HOU-E2E03-01)") in 708ms src/app/actions/orders.ts
+[MIDDLEWARE] Entry: /ko/orders
+[MIDDLEWARE] Auth Result: user=702858d5-9d9f-4ae1-8516-2e07a12d57d7, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ GET /ko/orders 200 in 426ms (next.js: 10ms, proxy.ts: 78ms, application-code: 338ms)
+[MIDDLEWARE] Entry: /ko/orders
+[MIDDLEWARE] Auth Result: user=702858d5-9d9f-4ae1-8516-2e07a12d57d7, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ POST /ko/orders 200 in 122ms (next.js: 7ms, proxy.ts: 55ms, application-code: 60ms)
+  └─ ƒ getCommonCodesByGroup("ORDER_STATUS") in 51ms src/app/actions/master.ts
+[MIDDLEWARE] Entry: /ko/orders
+[MIDDLEWARE] Auth Result: user=702858d5-9d9f-4ae1-8516-2e07a12d57d7, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ POST /ko/orders 200 in 99ms (next.js: 4ms, proxy.ts: 49ms, application-code: 46ms)
+  └─ ƒ getCommonCodesByGroup("ORDER_TYPE") in 39ms src/app/actions/master.ts
+[MIDDLEWARE] Entry: /ko/login
+ GET /ko/login 200 in 252ms (next.js: 21ms, proxy.ts: 129ms, application-code: 102ms)
+[MIDDLEWARE] Entry: /ko/login
+[MIDDLEWARE] Entry: /ko/orders
+[MIDDLEWARE] Auth Result: user=702858d5-9d9f-4ae1-8516-2e07a12d57d7, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ GET /ko/orders 200 in 432ms (next.js: 16ms, proxy.ts: 79ms, application-code: 338ms)
+ POST /ko/login 303 in 657ms (next.js: 5ms, proxy.ts: 33ms, application-code: 619ms)
+  └─ ƒ login({}) in 174ms src/app/[locale]/(auth)/login/actions.ts
+[MIDDLEWARE] Entry: /ko/inventory
+[MIDDLEWARE] Entry: /ko/orders
+[MIDDLEWARE] Auth Result: user=702858d5-9d9f-4ae1-8516-2e07a12d57d7, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+[MIDDLEWARE] Auth Result: user=702858d5-9d9f-4ae1-8516-2e07a12d57d7, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ POST /ko/orders 200 in 269ms (next.js: 6ms, proxy.ts: 75ms, application-code: 188ms)
+  └─ ƒ getCommonCodesByGroup("ORDER_STATUS") in 140ms src/app/actions/master.ts
+[MIDDLEWARE] Entry: /ko/orders
+[MIDDLEWARE] Entry: /ko/orders
+[MIDDLEWARE] Auth Result: user=702858d5-9d9f-4ae1-8516-2e07a12d57d7, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+[MIDDLEWARE] Auth Result: user=702858d5-9d9f-4ae1-8516-2e07a12d57d7, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ GET /ko/inventory 200 in 455ms (next.js: 23ms, proxy.ts: 80ms, application-code: 352ms)
+[MIDDLEWARE] Entry: /ko/inventory
+[MIDDLEWARE] Auth Result: user=702858d5-9d9f-4ae1-8516-2e07a12d57d7, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ POST /ko/inventory 200 in 1343ms (next.js: 9ms, proxy.ts: 55ms, application-code: 1279ms)
+  └─ ƒ updateOrderStatus("3ff5b116-29cd-4d90-8dd0-0e99c36a2155", "IN_TRANSIT", "Barcode Scanned: OUTBOUND (Z-HOU-E2E03-01)") in 1145ms src/app/actions/orders.ts
+[MIDDLEWARE] Entry: /ko/orders
+[MIDDLEWARE] Auth Result: user=702858d5-9d9f-4ae1-8516-2e07a12d57d7, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ GET /ko/orders 200 in 247ms (next.js: 7ms, proxy.ts: 62ms, application-code: 178ms)
+[MIDDLEWARE] Entry: /ko/orders
+[MIDDLEWARE] Auth Result: user=702858d5-9d9f-4ae1-8516-2e07a12d57d7, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ POST /ko/orders 200 in 137ms (next.js: 13ms, proxy.ts: 76ms, application-code: 48ms)
+  └─ ƒ getCommonCodesByGroup("ORDER_STATUS") in 41ms src/app/actions/master.ts
+[MIDDLEWARE] Entry: /ko/orders
+[MIDDLEWARE] Auth Result: user=702858d5-9d9f-4ae1-8516-2e07a12d57d7, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ POST /ko/orders 200 in 98ms (next.js: 5ms, proxy.ts: 45ms, application-code: 48ms)
+  └─ ƒ getCommonCodesByGroup("ORDER_TYPE") in 42ms src/app/actions/master.ts
