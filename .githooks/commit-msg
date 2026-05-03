@@ -1,0 +1,21 @@
+#!/bin/bash
+# ZENITH_LMS — Commit-msg Gate (R-01)
+# 커밋 메시지 파일을 $1로 올바르게 수신
+
+set -e
+
+COMMIT_MSG_FILE="$1"
+COMMIT_MSG=$(cat "$COMMIT_MSG_FILE")
+
+# ── R-01: 에이전트 태그 확인 ─────────────────────────────────────
+if ! echo "$COMMIT_MSG" | grep -qE '^\[(Claude|Gemini)\]'; then
+  echo ""
+  echo "❌ BLOCKED: 에이전트 태그 누락 (R-01 위반)"
+  echo "   커밋 메시지 형식: [Claude] 또는 [Gemini] 접두사 필수"
+  echo "   예시: [Claude] feat: Order API 설계 완료"
+  echo ""
+  exit 1
+fi
+
+echo "✅ Commit-msg 게이트 통과 — 커밋 진행"
+exit 0
