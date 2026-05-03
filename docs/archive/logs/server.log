@@ -765,3 +765,38 @@ Error fetching declarations: {
 [MIDDLEWARE] Auth Result: user=9bc0732e-eb06-4986-aa71-72f7cdbe1854, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
  POST /ko/tracking 200 in 4.2s (next.js: 111ms, proxy.ts: 3.1s, application-code: 1026ms)
   └─ ƒ getGlobalTrackingOverview() in 940ms src/app/actions/tracking.ts
+[MIDDLEWARE] Entry: /ko/login
+ GET /ko/login 200 in 1237ms (next.js: -30715µs, proxy.ts: 784ms, application-code: 484ms)
+[MIDDLEWARE] Entry: /ko/login
+[MIDDLEWARE] Entry: /ko/orders
+[MIDDLEWARE] Auth Result: user=702858d5-9d9f-4ae1-8516-2e07a12d57d7, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ GET /ko/orders 200 in 2.1s (next.js: 35ms, proxy.ts: 524ms, application-code: 1509ms)
+ POST /ko/login 303 in 4.0s (next.js: 437ms, proxy.ts: 855ms, application-code: 2.7s)
+  └─ ƒ login({}) in 536ms src/app/[locale]/(auth)/login/actions.ts
+[MIDDLEWARE] Entry: /ko/orders
+[MIDDLEWARE] Entry: /ko/tracking
+[MIDDLEWARE] Auth Result: user=702858d5-9d9f-4ae1-8516-2e07a12d57d7, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+[MIDDLEWARE] Auth Result: user=702858d5-9d9f-4ae1-8516-2e07a12d57d7, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ POST /ko/orders 200 in 3.0s (next.js: 63ms, proxy.ts: 1509ms, application-code: 1472ms)
+  └─ ƒ getCommonCodesByGroup("ORDER_STATUS") in 1411ms src/app/actions/master.ts
+[MIDDLEWARE] Entry: /ko/orders
+[MIDDLEWARE] Auth Result: user=702858d5-9d9f-4ae1-8516-2e07a12d57d7, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+Error: aborted
+    at ignore-listed frames {
+  code: 'ECONNRESET'
+}
+⨯ uncaughtException: Error: aborted
+    at ignore-listed frames {
+  code: 'ECONNRESET'
+}
+⨯ uncaughtException:  Error: aborted
+    at ignore-listed frames {
+  code: 'ECONNRESET'
+}
+[MIDDLEWARE] Entry: /ko/orders
+ GET /ko/tracking 200 in 3.7s (next.js: 76ms, proxy.ts: 1670ms, application-code: 1976ms)
+[MIDDLEWARE] Entry: /ko/tracking
+[MIDDLEWARE] Auth Result: user=702858d5-9d9f-4ae1-8516-2e07a12d57d7, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+[MIDDLEWARE] Auth Result: user=702858d5-9d9f-4ae1-8516-2e07a12d57d7, status=ACTIVE, orgType=PLATFORM, allowedRoot=/admin
+ POST /ko/tracking 200 in 1162ms (next.js: 34ms, proxy.ts: 761ms, application-code: 367ms)
+  └─ ƒ getGlobalTrackingOverview() in 339ms src/app/actions/tracking.ts

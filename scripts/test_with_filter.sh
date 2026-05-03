@@ -12,8 +12,10 @@ mkdir -p $(dirname "$OUTPUT_PATH")
 
 echo "🚀 Running test with filtering..."
 
-eval "$COMMAND" 2>&1 | grep -Ev "MISSING_MESSAGE|at getFallbackFromErrorAndNotify|at translateBaseFn|at translateFn|at NaviSidebar|at renderWithHooks|at updateFunctionComponent|at beginWork|at runWithFiberInDEV|at performUnitOfWork|at workLoopConcurrentByScheduler|at renderRootConcurrent|at performWorkOnRoot|at MessagePort.performWorkUntilDeadline" | tee "$OUTPUT_PATH"
+FILTER="MISSING_MESSAGE|at getFallbackFromErrorAndNotify|at translateBaseFn|at translateFn|at NaviSidebar|at renderWithHooks|at updateFunctionComponent|at beginWork|at runWithFiberInDEV|at performUnitOfWork|at workLoopConcurrentByScheduler|at renderRootConcurrent|at performWorkOnRoot|at MessagePort.performWorkUntilDeadline"
 
-echo "---
-✅ Test completed. Log saved to $OUTPUT_PATH"
+eval "$COMMAND" 2>&1 | grep -Ev "$FILTER" | tee "$OUTPUT_PATH"
+
+echo "---"
+echo "✅ Test completed."
 ls -lh "$OUTPUT_PATH"
