@@ -6,6 +6,27 @@
 > - 각 에이전트는 작업 완료 시 **SECTION 1 상태 대시보드를 최우선 갱신**한 뒤 SECTION 2 상세를 업데이트한다.
 > - Riley는 완료 보고 시 반드시 `## 🔔 Aiden 검토 대기` 테이블에 항목을 추가한다.
 > - Aiden은 새 세션 시작 시 SECTION 1만 읽어 즉시 현황을 파악한다.
+>
+> **Git 운영 규칙:**
+> - **커밋 접두사**: Riley → `[Gemini]` / Aiden → `[Claude]` — 에이전트 식별 필수
+> - **커밋 단위**: Task ID 단위 원자적 커밋. 메시지에 Task ID 포함 필수
+>   - 형식: `[Gemini] fix: BUG-UI-01 Admin 다크테마 제거` / `[Claude] docs: E2E-01 FINAL PASS 검증 결과`
+> - **완료 보고 전 git status 확인 의무**: `git status` 실행 → untracked·unstaged 파일 없음 확인 후 보고
+>   - 미커밋 파일 잔류 상태에서의 완료 보고는 **불인정**
+> - **결과물 정리 후 커밋**: 스크린샷·로그 커밋 시 실패 run artifact(`*_error.png` 등) 제거 후 커밋
+> - **브랜치**: `main` 단일 브랜치 운영. 대규모 변경(100줄↑ 신규 기능) 시 `feature/*` 분기 후 PR
+>
+> **관리 규칙:**
+> - **라인 수**: 800줄 이하 유지 (초과 시 즉시 이관 조치)
+> - **완료 태스크**: SECTION 2 섹션 내 **3개** 초과 시 → `.agent/archive/TASKS_[PHASE명].md` 이관
+> - **Handoff 메시지 — 2-Tier 관리**:
+>   - **Active 지시** (수신자 완료 보고 미수신): 이관 불가
+>   - **Closed 교환** (지시 + 완료 보고 쌍 완성): **3개** 초과 시 → `.agent/archive/MSG_YYYY-MM-DD.md` 이관
+> - TASK_BOARD는 **활성·대기 태스크 + Active 지시 전체 + Closed 교환 최대 3개**까지 유지
+> - **Phase 3~4 완료 Sprint 태스크 이력** → [archive/TASKS_PHASE4.md](.agent/archive/TASKS_PHASE4.md)
+> - **Phase 4 Handoff 이력 (2026-04-29)** → [archive/MSG_2026-04-29.md](.agent/archive/MSG_2026-04-29.md)
+> - **Sprint 12 CLOSED 이관 (2026-04-30)** → [archive/MSG_2026-04-30.md](.agent/archive/MSG_2026-04-30.md)
+> - **CLOSED 이관 (2026-05-03)** → [archive/MSG_2026-05-03.md](.agent/archive/MSG_2026-05-03.md)
 
 ---
 
