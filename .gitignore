@@ -59,3 +59,4 @@ _tmp_*.py
 .obsidian/workspace.json
 .obsidian/workspace-mobile.json
 
+test-results/

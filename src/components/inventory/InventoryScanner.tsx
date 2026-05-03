@@ -35,7 +35,8 @@ export default function InventoryScanner() {
       }
 
       // 2. Update Status
-      const nextStatus = mode === 'INBOUND' ? OrderStatus.WAREHOUSED : OrderStatus.RELEASED;
+      // E2E-03 Step 4 Requirement: Outbound scan results in IN_TRANSIT
+      const nextStatus = mode === 'INBOUND' ? OrderStatus.WAREHOUSED : OrderStatus.IN_TRANSIT;
       const result = await updateOrderStatus(targetId, nextStatus, `Barcode Scanned: ${mode} (${barcode})`);
       
       if (result) {

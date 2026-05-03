@@ -35,11 +35,11 @@ UI 상에서 트래킹 타임라인이 실시간으로 갱신되는지 확인합
 
 | 단계 | 설명 | 이미지 링크 |
 |:---:|:---|:---|
-| 1 | 로그인 성공 | [e2e_04_00_login_after.png](file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/docs/99_Manual/E2E_04_Result/e2e_04_00_login_after.png) |
-| 2 | 동기화 전 목록 | [e2e_04_01_tracking_list_before.png](file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/docs/99_Manual/E2E_04_Result/e2e_04_01_tracking_list_before.png) |
-| 3 | 검색 결과 확인 | [e2e_04_02_search_result.png](file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/docs/99_Manual/E2E_04_Result/e2e_04_02_search_result.png) |
-| 4 | 동기화 후 결과 | [e2e_04_03_after_sync.png](file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/docs/99_Manual/E2E_04_Result/e2e_04_03_after_sync.png) |
-| 5 | 트래킹 타임라인 | [e2e_04_04_tracking_timeline.png](file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/docs/99_Manual/E2E_04_Result/e2e_04_04_tracking_timeline.png) |
+| 1 | 로그인 성공 | [e2e_04_00_login_after.png](../../99_Manual/E2E_04_Result/e2e_04_00_login_after.png) |
+| 2 | 동기화 전 목록 | [e2e_04_01_tracking_list_before.png](../../99_Manual/E2E_04_Result/e2e_04_01_tracking_list_before.png) |
+| 3 | 검색 결과 확인 | [e2e_04_02_search_result.png](../../99_Manual/E2E_04_Result/e2e_04_02_search_result.png) |
+| 4 | 동기화 후 결과 | [e2e_04_03_after_sync.png](../../99_Manual/E2E_04_Result/e2e_04_03_after_sync.png) |
+| 5 | 트래킹 타임라인 | [e2e_04_04_tracking_timeline.png](../../99_Manual/E2E_04_Result/e2e_04_04_tracking_timeline.png) |
 
 ## 5. 자가 검증 결과
 - **RLS 정책 준수**: ✅ (get_my_role() 기반 보안 강화 적용 완료)
