@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('E2E-04: Tracking Sync & Notification Engine', () => {
-  const adminEmail = 'temp_admin@zenith.kr';
-  const adminPassword = 'password123';
+  const adminEmail = 'admin@zenith.kr';
+  const adminPassword = 'password1234';
   const targetOrderNo = 'Z-HOU-E2E03-01';
   const trackingNo = 'TRK-E2E04-API-01';
 
@@ -11,10 +11,20 @@ test.describe('E2E-04: Tracking Sync & Notification Engine', () => {
     await page.goto('/ko/login');
     await page.fill('input#email', adminEmail);
     await page.fill('input#password', adminPassword);
+    
+    // Screenshot before login attempt
+    await page.screenshot({ path: 'scratch/e2e_04_00_login_before.png' });
+    
     await page.click('button[data-action="login"]');
     
-    // Wait for navigation after login (can be dashboard or orders depending on profile)
-    await expect(page).toHaveURL(/.*(dashboard|orders)/);
+    // Wait for either success navigation or error alert
+    await Promise.race([
+      page.waitForURL(/.*(dashboard|orders)/, { timeout: 30000 }),
+      page.waitForSelector('.alert-error', { timeout: 30000 }).then(() => { throw new Error('Login failed with error alert'); })
+    ]);
+    
+    await page.waitForLoadState('networkidle');
+    await page.screenshot({ path: 'scratch/e2e_04_00_login_after.png' });
   });
 
   test('should synchronize external tracking data and update status', async ({ page }) => {
