@@ -1,39 +1,36 @@
-# 🐞 Self-Audit Report (SAR-007)
+# SAR-2026-05-02-007: Master Order RLS Update 정책 누락
 
-> **ID**: SAR_2026-05-02_007
-> **문제명**: 마스터오더 그룹핑(Grouping) 시 `zen_orders` RLS UPDATE 정책 누락
-> **총 테스트 케이스:** 166 Cases (RLS 보안 강화 및 트래킹 알림 포함)
-> **상태**: ✅ 조치 완료
 > **작성자**: Riley (Gemini)
+> **날짜**: 2026-05-02 (KST)
+> **관련 Task**: PH14-E2E-03 (Master Order Grouping)
 
----
+## 1. 문제 현상
+- **현상**: E2E-03 테스트(마스터 오더 그룹핑) 수행 중, 하우스 오더를 마스터 오더에 바인딩(UPDATE `zen_orders.master_order_id`)하는 과정에서 `Permission Denied` 오류 발생.
+- **원인**: `zen_orders` 테이블에 `UPDATE` 권한에 대한 Row Level Security (RLS) 정책이 수립되어 있지 않아, `authenticated` 역할의 사용자가 데이터를 수정할 수 없었음.
 
-## 1. 개요 (Overview)
-- **발견 시점**: 2026-05-02 E2E-03 (마스터오더 그룹핑) 브라우저 테스트 중
-- **현상**: 관리자(ADMIN) 권한으로 여러 하우스 오더를 선택하여 마스터 오더로 그룹핑 시도 시, `new row violates row-level security policy for table "zen_orders"` 에러 발생하며 실패함.
+## 2. 근본 원인 분석
+- **정책 누락**: 초기 DB 설계 시 `zen_orders`는 생성(INSERT) 및 조회(SELECT) 위주로 정책이 수립되었으나, 마스터 오더 바인딩과 같은 수정(UPDATE) 시나리오에 대한 관리자 정책이 누락됨.
+- **보안 가이드라인 미준수**: 임시 조치 과정에서 `auth.role() = 'authenticated'`와 같은 광범위한 정책을 사용하려 했으나, 이는 `CUSTOMER` 권한을 가진 사용자도 모든 오더를 수정할 수 있게 하는 보안 취약점을 야기함 (Aiden 지적 사항).
 
-## 2. 원인 분석 (Root Cause)
-1. **TC-ORDER-RLS-01**: zen_orders RLS UPDATE | 관리자/운영자의 마스터오더 그룹핑(UPDATE) 권한 보장 (보안 강화형) | `tests/unit/master/master_policy.test.ts`
-2. **권한 제약**: 마스터오더 그룹핑은 다수의 하우스 오더를 하나의 마스터 오더에 귀속시키는 과정에서 `UPDATE` 연산이 필수적이나, RLS가 활성화된 상태에서 관리자의 수정 권한이 누락되어 데이터베이스 수준에서 거부됨.
+## 3. 조치 내용
+- **Migration 적용**: `supabase/migrations/20260502191116_fix_e2e_03_master_grouping_rls.sql` 파일을 생성/수정하여 보안이 강화된 정책 적용.
+- **정책 상세**:
+  ```sql
+  DROP POLICY IF EXISTS "Enable update for authenticated users" ON public.zen_orders;
+  DROP POLICY IF EXISTS "Admins can update orders" ON public.zen_orders;
 
-## 3. 조치 내용 (Resolution)
-1. **RLS 정책 추가**: `supabase/migrations/20260502191116_fix_e2e_03_master_grouping_rls.sql`을 통해 관리자 및 운영자 권한에 대한 `UPDATE` 정책 추가.
-2. **보안 강화**: `auth.role() = 'authenticated'` 방식의 취약점을 보완하여 `public.get_my_role()` 기반의 역할 제한(ADMIN, MANAGER) 적용.
-   ```sql
-   CREATE POLICY "Admins can update orders"
-   ON public.zen_orders FOR UPDATE
-   TO authenticated
-   USING (public.get_my_role() IN ('ZENITH_SUPER_ADMIN', 'ADMIN', 'MANAGER'))
-   WITH CHECK (public.get_my_role() IN ('ZENITH_SUPER_ADMIN', 'ADMIN', 'MANAGER'));
-   ```
-2. **검증**: 정책 적용 후 E2E-03 시나리오 재실행하여 그룹핑 및 마스터 오더 생성 성공 확인.
+  CREATE POLICY "Admins can update orders" ON public.zen_orders
+  FOR UPDATE TO authenticated
+  USING (public.get_my_role() IN ('ZENITH_SUPER_ADMIN', 'ADMIN', 'MANAGER'))
+  WITH CHECK (public.get_my_role() IN ('ZENITH_SUPER_ADMIN', 'ADMIN', 'MANAGER'));
+  ```
+- **검증**: SQL 쿼리를 통해 정책이 올바르게 반영되었음을 확인하고, E2E-03 시나리오 재실행 시 바인딩 성공 확인.
 
-## 4. 재발 방지 대책 (Prevention)
-- **가이드라인 수립**: 신규 테이블 생성 또는 컬럼 추가 시, 해당 데이터를 수정하는 행위(UPDATE)가 포함된 모든 역할을 전수 조사하여 RLS 정책을 선제적으로 수립함.
-- **체크리스트 보강**: `LIVE_PHASE_2_EXECUTE.md`의 DB 보안 항목에 "연관된 모든 연산(C/R/U/D)에 대한 RLS 정책 검토" 항목을 필수 체크 사항으로 유지.
+## 4. 재발 방지 대책
+- **체크리스트 업데이트**: `LIVE_PHASE_2_EXECUTE.md` 및 `LIVE_PHASE_3_VERIFY.md`에 RLS 정책 수립 시 `UPDATE` 권한 및 역할 기반 필터링(`public.get_my_role()`) 필수 확인 항목 추가.
+- **보안 검토**: 모든 신규 테이블 또는 기존 테이블의 상태 변경 로직 추가 시, 반드시 권한별 RLS 정책을 선제적으로 검토(API-First Design 준수).
 
----
-
-## 5. 관련 증적 (Evidence)
-- **수정 파일**: `supabase/migrations/` 내 관련 RLS 수정 스크립트
-- **테스트 결과**: `docs/99_Manual/E2E_03_Result/e2e_03_after_click.png` (마스터 오더 생성 성공 확인)
+## 5. 관련 문서
+- [WBS_01_상세_공정표.md](file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/docs/01_WBS/WBS_01_%EC%83%81%EC%84%B8_%EA%B3%B5%EC%A0%95%ED%91%9C.md)
+- [TASK_BOARD.md](file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/.agent/TASK_BOARD.md)
+- [20260502191116_fix_e2e_03_master_grouping_rls.sql](file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/supabase/migrations/20260502191116_fix_e2e_03_master_grouping_rls.sql)

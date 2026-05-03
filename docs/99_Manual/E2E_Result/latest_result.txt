@@ -1,0 +1,167 @@
+
+Running 3 tests using 1 worker
+
+--- Step 1: Registration ---
+  ✘  1 [chromium] › tests/e2e/e2e-01-registration.spec.ts:9:7 › E2E-01: Corporate Registration & Admin Approval › should register a new corporate user and be approved by admin (10.7s)
+  ✘  2 [chromium] › tests/e2e/e2e-04-tracking-sync.spec.ts:30:7 › E2E-04: Tracking Sync & Notification Engine › should synchronize external tracking data and update status (15.5s)
+Logging in as admin@zenith.kr...
+[BROWSER] info: %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[BROWSER] log: [HMR] connected
+[BROWSER] log: [Fast Refresh] rebuilding
+[BROWSER] log: [Fast Refresh] done in 138ms
+Login successful.
+Navigating to order detail: /en/orders/d197352a-ba9f-4640-9176-c50c852d8138
+[BROWSER] info: %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[BROWSER] log: [HMR] connected
+[BROWSER] warning: %c%s%c [TRACKING] No config found for order: d197352a-ba9f-4640-9176-c50c852d8138 background: #e6e6e6;background: light-dark(rgba(0,0,0,0.1), rgba(255,255,255,0.25));color: #000000;color: light-dark(#000000, #ffffff);border-radius: 2px  Server  
+[BROWSER] log: %c%s%c [AUTH_TRACE] User: admin@zenith.kr, Role: ZENITH_SUPER_ADMIN, Path: /admin, Allowed: true background: #e6e6e6;background: light-dark(rgba(0,0,0,0.1), rgba(255,255,255,0.25));color: #000000;color: light-dark(#000000, #ffffff);border-radius: 2px  Server  
+[BROWSER] log: [Fast Refresh] rebuilding
+[BROWSER] log: [Fast Refresh] done in 118ms
+Arrived at order Z-FIN-E2E05-01 detail page.
+Initial cost count: 0
+No costs found. Triggering recalculation...
+[BROWSER] error: Error: Could not resolve font for Noto Sans KR, fontWeight 400, fontStyle italic
+    at FontFamily.resolve (http://localhost:3000/_next/static/chunks/node_modules_%40react-pdf_0~dc-vw._.js:446:19)
+    at FontStore.getFont (http://localhost:3000/_next/static/chunks/node_modules_%40react-pdf_0~dc-vw._.js:627:46)
+    at FontStore.load (http://localhost:3000/_next/static/chunks/node_modules_%40react-pdf_0~dc-vw._.js:630:27)
+    at http://localhost:3000/_next/static/chunks/node_modules_%40react-pdf_layout_lib_index_00m-a9~.js:989:71
+    at Array.map (<anonymous>)
+    at fetchAssets (http://localhost:3000/_next/static/chunks/node_modules_%40react-pdf_layout_lib_index_00m-a9~.js:989:43)
+    at http://localhost:3000/_next/static/chunks/node_modules_%40react-pdf_layout_lib_index_00m-a9~.js:1017:40
+    at Array.map (<anonymous>)
+    at fetchPageAssets (http://localhost:3000/_next/static/chunks/node_modules_%40react-pdf_layout_lib_index_00m-a9~.js:1017:27)
+    at http://localhost:3000/_next/static/chunks/node_modules_%40react-pdf_layout_lib_index_00m-a9~.js:1027:48
+    at Array.map (<anonymous>)
+    at Array.resolveAssets (http://localhost:3000/_next/static/chunks/node_modules_%40react-pdf_layout_lib_index_00m-a9~.js:1027:36)
+    at http://localhost:3000/_next/static/chunks/node_modules_%40react-pdf_0~dc-vw._.js:722:34
+    at async render (http://localhost:3000/_next/static/chunks/node_modules_%40react-pdf_0~dc-vw._.js:10026:24)
+    at async Object.toBlob (http://localhost:3000/_next/static/chunks/node_modules_%40react-pdf_0~dc-vw._.js:10043:76)
+[BROWSER] error: Error: Could not resolve font for Noto Sans KR, fontWeight 400, fontStyle italic
+    at FontFamily.resolve (http://localhost:3000/_next/static/chunks/node_modules_%40react-pdf_0~dc-vw._.js:446:19)
+    at FontStore.getFont (http://localhost:3000/_next/static/chunks/node_modules_%40react-pdf_0~dc-vw._.js:627:46)
+    at FontStore.load (http://localhost:3000/_next/static/chunks/node_modules_%40react-pdf_0~dc-vw._.js:630:27)
+    at http://localhost:3000/_next/static/chunks/node_modules_%40react-pdf_layout_lib_index_00m-a9~.js:989:71
+    at Array.map (<anonymous>)
+    at fetchAssets (http://localhost:3000/_next/static/chunks/node_modules_%40react-pdf_layout_lib_index_00m-a9~.js:989:43)
+    at http://localhost:3000/_next/static/chunks/node_modules_%40react-pdf_layout_lib_index_00m-a9~.js:1017:40
+    at Array.map (<anonymous>)
+    at fetchPageAssets (http://localhost:3000/_next/static/chunks/node_modules_%40react-pdf_layout_lib_index_00m-a9~.js:1017:27)
+    at http://localhost:3000/_next/static/chunks/node_modules_%40react-pdf_layout_lib_index_00m-a9~.js:1027:48
+    at Array.map (<anonymous>)
+    at Array.resolveAssets (http://localhost:3000/_next/static/chunks/node_modules_%40react-pdf_layout_lib_index_00m-a9~.js:1027:36)
+    at http://localhost:3000/_next/static/chunks/node_modules_%40react-pdf_0~dc-vw._.js:722:34
+    at async render (http://localhost:3000/_next/static/chunks/node_modules_%40react-pdf_0~dc-vw._.js:10026:24)
+    at async Object.toBlob (http://localhost:3000/_next/static/chunks/node_modules_%40react-pdf_0~dc-vw._.js:10043:76)
+Clicked recalculate. Waiting for response...
+Server action response received.
+Waiting for costs to appear in UI...
+[BROWSER] log: [Fast Refresh] rebuilding
+[BROWSER] log: [Fast Refresh] done in 138ms
+FAILED: Costs did not appear after recalculation.
+[BROWSER] log: [Fast Refresh] rebuilding
+[BROWSER] log: [Fast Refresh] done in 288ms
+  ✘  3 [chromium] › tests/e2e/e2e-05-settlement.spec.ts:25:7 › E2E-05: Settlement & Finance Workflow › should calculate settlement and generate invoice for a completed order (28.7s)
+
+
+  1) [chromium] › tests/e2e/e2e-01-registration.spec.ts:9:7 › E2E-01: Corporate Registration & Admin Approval › should register a new corporate user and be approved by admin 
+
+    Error: [2mexpect([22m[31mpage[39m[2m).[22mtoHaveURL[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Expected pattern: [32m/\/register\/pending/[39m
+    Received string:  [31m"http://localhost:3000/ko/register"[39m
+    Timeout: 5000ms
+
+    Call log:
+    [2m  - Expect "toHaveURL" with timeout 5000ms[22m
+    [2m    9 × unexpected value "http://localhost:3000/ko/register"[22m
+
+
+      41 |     
+      42 |     // Verify redirect to pending
+    > 43 |     await expect(page).toHaveURL(/\/register\/pending/);
+         |                        ^
+      44 |     // Note: Pending page might have localized text, we check for part of it or the icon
+      45 |     // Since we fixed the locale to /ko, let's look for "심사"
+      46 |     await expect(page.locator('h1')).toContainText('심사');
+        at /Users/edward.kwon/WorkSpace/ZENITH_LMS_001/tests/e2e/e2e-01-registration.spec.ts:43:24
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/e2e-01-registration-E2E-01-14140-er-and-be-approved-by-admin-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/e2e-01-registration-E2E-01-14140-er-and-be-approved-by-admin-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/e2e-01-registration-E2E-01-14140-er-and-be-approved-by-admin-chromium/error-context.md
+
+  2) [chromium] › tests/e2e/e2e-04-tracking-sync.spec.ts:30:7 › E2E-04: Tracking Sync & Notification Engine › should synchronize external tracking data and update status 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: locator('text=Z-HOU-E2E03-01')
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for locator('text=Z-HOU-E2E03-01')[22m
+
+
+      40 |     
+      41 |     // Verify target order is in the list
+    > 42 |     await expect(page.locator(`text=${targetOrderNo}`)).toBeVisible();
+         |                                                         ^
+      43 |     await page.screenshot({ path: 'scratch/e2e_04_02_search_result.png' });
+      44 |     
+      45 |     // 4. Click Sync All API
+        at /Users/edward.kwon/WorkSpace/ZENITH_LMS_001/tests/e2e/e2e-04-tracking-sync.spec.ts:42:57
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/e2e-04-tracking-sync-E2E-0-5918e-king-data-and-update-status-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/e2e-04-tracking-sync-E2E-0-5918e-king-data-and-update-status-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/e2e-04-tracking-sync-E2E-0-5918e-king-data-and-update-status-chromium/error-context.md
+
+  3) [chromium] › tests/e2e/e2e-05-settlement.spec.ts:25:7 › E2E-05: Settlement & Finance Workflow › should calculate settlement and generate invoice for a completed order 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: locator('h3:has-text("Settlement Preview")').locator('..').locator('..').locator('.text-slate-400.text-sm').first()
+    Expected: visible
+    Timeout: 15000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 15000ms[22m
+    [2m  - waiting for locator('h3:has-text("Settlement Preview")').locator('..').locator('..').locator('.text-slate-400.text-sm').first()[22m
+
+
+      67 |       console.log('Waiting for costs to appear in UI...');
+      68 |       try {
+    > 69 |         await expect(financeSection.locator(costItemsSelector).first()).toBeVisible({ timeout: 15000 });
+         |                                                                         ^
+      70 |         costCount = await financeSection.locator(costItemsSelector).count();
+      71 |         console.log(`Costs updated. New count: ${costCount}`);
+      72 |       } catch (e) {
+        at /Users/edward.kwon/WorkSpace/ZENITH_LMS_001/tests/e2e/e2e-05-settlement.spec.ts:69:73
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/e2e-05-settlement-E2E-05-S-81226-voice-for-a-completed-order-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/e2e-05-settlement-E2E-05-S-81226-voice-for-a-completed-order-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/e2e-05-settlement-E2E-05-S-81226-voice-for-a-completed-order-chromium/error-context.md
+
+  3 failed
+    [chromium] › tests/e2e/e2e-01-registration.spec.ts:9:7 › E2E-01: Corporate Registration & Admin Approval › should register a new corporate user and be approved by admin 
+    [chromium] › tests/e2e/e2e-04-tracking-sync.spec.ts:30:7 › E2E-04: Tracking Sync & Notification Engine › should synchronize external tracking data and update status 
+    [chromium] › tests/e2e/e2e-05-settlement.spec.ts:25:7 › E2E-05: Settlement & Finance Workflow › should calculate settlement and generate invoice for a completed order 

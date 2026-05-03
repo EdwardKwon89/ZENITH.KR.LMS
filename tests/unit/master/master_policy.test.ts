@@ -90,4 +90,30 @@ describe('ZENITH Master Order: Policy & Integrity Audit', () => {
     await expect(updateOrderStatus('h-101', OrderStatus.SCHEDULED))
       .rejects.toThrow(/마스터 오더에 결합된 상태입니다/);
   });
+
+  it('TC-ORDER-RLS-01: [Role-Guard] 관리자/운영자 이외의 역할은 오더 정보를 업데이트할 수 없어야 함', async () => {
+    const supabase = createMockSupabase();
+    // Simulate CUSTOMER role
+    (validateUserAction as any).mockResolvedValue({ 
+      supabase,
+      profile: { role: 'CUSTOMER' } 
+    });
+
+    // 1. master_order_id 존재 확인 (Guard check)
+    supabase.maybeSingle.mockResolvedValueOnce({ 
+      data: { master_order_id: null }, 
+      error: null 
+    });
+
+    // 2. 현재 상태 조회 (Status machine check)
+    supabase.single.mockResolvedValueOnce({
+      data: { status: OrderStatus.REGISTERED, transport_mode: 'AIR' },
+      error: null
+    });
+
+    // We expect the guard or the action to block this before it even hits the DB update
+    // because of the role-based check in the server action.
+    await expect(updateOrderStatus('h-101', OrderStatus.SCHEDULED))
+      .rejects.toThrow(/권한이 없습니다/);
+  });
 });

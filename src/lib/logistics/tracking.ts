@@ -181,7 +181,7 @@ export class TrackingManager {
     } else {
       console.log(`[TRACKING_SYNC] Order ${orderId} status updated to ${nextStatus}`);
       // 상태 변경 알림 트리거 (Async)
-      triggerStatusChangeNotification(orderId, nextStatus as OrderStatus).catch(e => {
+      triggerStatusChangeNotification(orderId, nextStatus as OrderStatus, supabase).catch(e => {
         console.error(`[TRACKING_SYNC] Notification trigger failed for ${orderId}:`, e);
       });
     }
