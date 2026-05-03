@@ -34,7 +34,7 @@ export default function CustomsHistoryClient({
   const columns: ColumnDef<CustomsDeclaration>[] = [
     {
       accessorKey: 'order_no',
-      header: 'Order #',
+      header: t('order_no'),
       cell: ({ row }) => (
         <Link 
           href={`/${locale}/orders/${row.original.order_id}`}
@@ -52,12 +52,12 @@ export default function CustomsHistoryClient({
     },
     {
       accessorKey: 'cargo_description',
-      header: 'Cargo',
+      header: t('cargo'),
       cell: ({ row }) => <span className="truncate max-w-[200px] block">{row.getValue('cargo_description')}</span>,
     },
     {
       accessorKey: 'status',
-      header: 'Status',
+      header: t('status'),
       cell: ({ row }) => {
         const status = row.getValue('status') as CustomsStatus;
         const statusKey = status.toLowerCase();
@@ -80,7 +80,7 @@ export default function CustomsHistoryClient({
     },
     {
       accessorKey: 'created_at',
-      header: 'Date',
+      header: t('date'),
       cell: ({ row }) => (
         <span className="text-slate-500 text-xs">
           {new Date(row.getValue('created_at')).toLocaleDateString()}
@@ -96,7 +96,7 @@ export default function CustomsHistoryClient({
           <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-xl text-blue-600">
             <FileCheck className="w-5 h-5" />
           </div>
-          <h2 className="text-lg font-bold">Customs Declarations</h2>
+          <h2 className="text-lg font-bold">{t('history_title')}</h2>
         </div>
       </div>
 
@@ -108,7 +108,7 @@ export default function CustomsHistoryClient({
       {initialTotal === 0 && (
         <div className="flex flex-col items-center justify-center py-20 text-center">
           <FileCheck className="w-16 h-16 text-slate-100 dark:text-neutral-800 mb-4" />
-          <p className="text-slate-400 font-medium">통관 신고 내역이 없습니다.</p>
+          <p className="text-slate-400 font-medium">{t('no_data')}</p>
         </div>
       )}
     </div>

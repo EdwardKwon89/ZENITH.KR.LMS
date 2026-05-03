@@ -33,6 +33,11 @@ tags: ["governance"]
 - **품질 검증 의무 (Mandatory Regression, R-08)**: 모든 에이전트는 작업 완료 및 진척 보고 전 반드시 표준 명령어(`npm run test:regression`)를 수행하여 기존 기능의 파괴 여부를 자가 점검하고, 성공 결과를 보고서에 증거로 첨부해야 합니다.
 - **회귀 테스트 확장 의무 (Cumulative Verification, R-09)**: 모든 신규 기능 개발 및 수정 작업 이후에는 반드시 관련 **회귀 테스트 케이스를 신규 추가**하고, [회귀 테스트 마스터 맵](docs/08_Self_Audit/Checklists/LIVE_REGRESSION_TEST_MAP.md)을 업데이트해야 합니다. 최종 보고 전 전체 회귀 테스트 재실행 및 성공 확인은 필수입니다.
 - **기능-UI 결합 검증 의무 (UI-Backend Coupling, R-10)**: 모든 기능 개발 시 백엔드 로직(API/RPC)의 완성이 '완료'를 의미하지 않습니다. 해당 기능을 최종 사용자가 호출하고 결과를 확인할 수 있는 **물리적 UI(버튼, 페이지, 모달 등)가 완비**되고 실구동이 확인된 경우에만 WBS를 완료로 변경할 수 있습니다. 완료 보고 시 반드시 UI 구동 증적(스크린샷/녹화)을 포함해야 합니다.
+- **테스트 결과물 관리 의무 (Artifact Management, R-13)**: 모든 테스트 결과(로그, 스크린샷 등)는 ROOT 폴더가 아닌 지정된 `docs/` 하부 폴더에 저장해야 합니다.
+  - **E2E 테스트**: `docs/99_Manual/E2E_NN_Result/` (NN: 시나리오 번호)
+  - **회귀 테스트**: `docs/08_Self_Audit/Regression_Results/`
+  - **서버 로그**: `docs/archive/logs/`
+  - **기타 임시 파일**: `scratch/` (디버그 스크립트 등)
 
 #### 🤖 에이전트 역할 및 모델 할당 (Role-Agent Mapping)
 역할별 최적화된 모델을 사용하여 품질과 속도를 동시에 확보합니다. (상세: [103_AGENT_ROLES_SPEC.md](docs/00_GUIDE/103_AGENT_ROLES_SPEC.md))

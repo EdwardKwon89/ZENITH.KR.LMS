@@ -58,10 +58,10 @@ export async function getDeclarations(params?: {
     .from('customs_declarations')
     .select(`
       *,
-      order:orders (
+      order:zen_orders!order_id (
         order_no,
-        shipper:profiles!shipper_id (
-          full_name
+        shipper:zen_organizations!shipper_id (
+          name
         )
       )
     `, { count: 'exact' });
@@ -90,7 +90,7 @@ export async function getDeclarations(params?: {
   const declarations: CustomsDeclaration[] = data.map((item: any) => ({
     ...item,
     order_no: item.order?.order_no,
-    shipper_name: item.order?.shipper?.full_name,
+    shipper_name: item.order?.shipper?.name,
   }));
 
   return { declarations, total: count ?? 0 };

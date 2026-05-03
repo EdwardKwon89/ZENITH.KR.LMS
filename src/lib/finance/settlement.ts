@@ -5,7 +5,7 @@
  * 정산 비용을 산출하고 인보이스를 생성하는 핵심 로직을 담당합니다.
  */
 
-import { createClient } from '@/utils/supabase/server';
+import { createClient, createAdminClient } from '@/utils/supabase/server';
 import { calculateSlabRate } from '../logistics/rate-engine';
 import { getNumericParam } from '../params/service';
 
@@ -26,7 +26,7 @@ export class SettlementEngine {
    */
   async calculateOrderCosts(orderId: string): Promise<CostCalculationResult> {
     try {
-      const supabase = await createClient();
+      const supabase = await createAdminClient();
       // 1. 오더 정보 조회 (포트 코드 및 패키지 정보 포함)
       const { data: order, error: orderError } = await supabase
         .from('zen_orders')
@@ -40,8 +40,14 @@ export class SettlementEngine {
         .single();
 
       if (orderError || !order) {
-        console.error('SettlementEngine: Order not found', orderError);
+        console.error('[Settlement] Order not found:', orderId, orderError);
         return { success: false, message: '오더 정보를 찾을 수 없습니다.' };
+      }
+
+      console.log(`[Settlement] Order Loaded: ${order.order_no} (${order.origin_port?.code} -> ${order.dest_port?.code}, ${order.transport_mode})`);
+      console.log(`[Settlement] Shipper ID: ${order.shipper_id}, Type: ${typeof order.shipper_id}`);
+      if (Array.isArray(order.shipper_id)) {
+        console.log(`[Settlement] Shipper ID is an array! Length: ${order.shipper_id.length}`);
       }
 
       if (!order.origin_port || !order.dest_port || !order.transport_mode) {
@@ -50,6 +56,7 @@ export class SettlementEngine {
 
       // 2. Chargeable Weight 계산
       const { chargeableWeight } = await this.calculateChargeableWeight(order);
+      console.log(`[Settlement] Chargeable Weight: ${chargeableWeight}kg`);
 
       // 3. 요율 매칭 (가장 적합한 Rate Card 검색)
       // 우선순위: 1. 고객 전용 요율(customer_id 매칭), 2. 일반 요율(customer_id IS NULL)
@@ -69,19 +76,32 @@ export class SettlementEngine {
         .order('created_at', { ascending: false });
 
       if (rateError || !rateCard || rateCard.length === 0) {
-        console.warn('SettlementEngine: No matching rate card found for order:', orderId);
+        console.warn(`[Settlement] No matching rate card found for ${order.origin_port.code}->${order.dest_port.code} (${order.transport_mode}). Error: ${rateError?.message}`);
         return { success: false, message: '매칭되는 유효한 요율 카드가 없습니다.' };
       }
 
+      console.log(`[Settlement] Found ${rateCard.length} potential rate cards`);
+      console.log(`[Settlement] Order Shipper ID: ${order.shipper_id}`);
+      rateCard.forEach((r, idx) => {
+        console.log(`[Settlement] Rate Card ${idx}: ID=${r.id}, Customer=${r.customer_id}, Priority=${r.priority}`);
+      });
+
       // 여러 개가 나올 수 있으므로 고객 전용 요율을 우선 선택
       const bestRate = rateCard.find(r => r.customer_id === order.shipper_id) || rateCard[0];
+      console.log(`[Settlement] Selected Best Rate: ID=${bestRate.id}`);
 
       // 4. 단가 결정 (슬랩 요율 적용)
+      console.log(`[Settlement] Raw Unit Price from DB:`, bestRate.unit_price, `Type:`, typeof bestRate.unit_price);
       const unitPrice = bestRate.tiers && bestRate.tiers.length > 0
         ? calculateSlabRate(chargeableWeight, bestRate.tiers)
-        : Number(bestRate.unit_price);
+        : (typeof bestRate.unit_price === 'object' && bestRate.unit_price !== null && 'Int' in bestRate.unit_price 
+            ? Number(bestRate.unit_price.Int) * Math.pow(10, bestRate.unit_price.Exp)
+            : Number(bestRate.unit_price));
+      
+      console.log(`[Settlement] Calculated Unit Price: ${unitPrice}`);
 
       const totalFreight = unitPrice * chargeableWeight;
+      console.log(`[Settlement] Calculation Success: ${unitPrice} * ${chargeableWeight} = ${totalFreight} ${bestRate.currency}`);
 
       // 5. 비용 데이터 저장 (기존 FREIGHT 항목이 있으면 삭제 후 재입력)
       await supabase
@@ -167,7 +187,7 @@ export class InvoiceGenerator {
    */
   async generateInvoice(orderId: string) {
     try {
-      const supabase = await createClient();
+      const supabase = await createAdminClient();
       // 1. 오더 및 비용 정보 조회
       const { data: order, error: orderError } = await supabase
         .from('zen_orders')

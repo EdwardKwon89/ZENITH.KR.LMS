@@ -269,7 +269,9 @@ E2E-05 원인 분석 및 재착수 일정: ...
 **[결과 보고 - Riley (2026-05-03)]**:
 ```
 [FB-003 수신 확인]
-migration 추가 사유: E2E-05 정산 프로세스 중 주문 상태('MASTERED', 'WAREHOUSED' 등)가 정산 로직과 연동되지 않아, zen_orders 테이블의 status 제약 조건을 확장하고 요율 매칭 함수(fn_get_best_matching_rate)의 정합성을 개선하기 위해 필수적으로 수행되었습니다.
+migration 추가 사유: 
+1. 20260502234833_remote_schema.sql: E2E-05 정산 프로세스 중 주문 상태('MASTERED', 'WAREHOUSED' 등)가 정산 로직과 연동되지 않아, zen_orders 테이블의 status 제약 조건을 확장하고 요율 매칭 함수(fn_get_best_matching_rate)의 정합성을 개선하기 위해 필수적으로 수행되었습니다.
+2. 20260430000000_fix_customs_rls.sql: ICustomsAdapter 인터페이스 도입 시, 기존 profiles 테이블을 참조하던 통관 신고 RLS 정책을 신규 zen_profiles 테이블로 전환하여 데이터 정합성을 확보하기 위해 수행되었습니다.
 
 17건 파일 수정 사유 (상세):
 1. messages/*.json: 신규 오더 상태 및 트래킹 알림용 다국어 메시지 보강.
@@ -281,9 +283,10 @@ migration 추가 사유: E2E-05 정산 프로세스 중 주문 상태('MASTERED'
 7. components/tracking/*: 트래킹 대시보드 페이지네이션 및 UX 개선.
 8. tests/*: 변경된 비즈니스 로직에 맞춘 통합/단위 테스트 업데이트.
 
-E2E-03 후속 조치 완료: SAR-007 작성, REGRESSION MAP 갱신, scratch/ 잔여물 정리 및 docs/ 이관 완료.
+E2E-03 후속 조치 완료: RLS 보안 강화(ROLE 기반), SAR-007 작성 및 정정, REGRESSION MAP 갱신, scratch/ 잔여물 정리 및 docs/ 이관 완료.
 E2E-04 재착수 일정: 금일 내 재실행 및 증적 확보 예정.
 E2E-05 원인 분석 및 재착수 일정: 로케일 불일치(/ko/) 및 데이터 매칭 확인 후 E2E-04 직후 수행.
+
 ```
 
 **[Aiden 검증 결과 - 2026-05-03]**:

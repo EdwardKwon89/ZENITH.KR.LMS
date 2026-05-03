@@ -71,7 +71,7 @@ export default function TrackingDashboard() {
 
   const filteredTracks = tracks.filter(track =>
     track.order?.order_no?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    track.tracking_number?.toLowerCase().includes(searchQuery.toLowerCase())
+    track.tracking_no?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const stats = [
@@ -203,7 +203,7 @@ export default function TrackingDashboard() {
                       </div>
                     </td>
                     <td className="px-6 py-4 text-sm font-medium text-slate-700">
-                      {track.tracking_number || "—"}
+                      {track.tracking_no || "—"}
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex flex-col">

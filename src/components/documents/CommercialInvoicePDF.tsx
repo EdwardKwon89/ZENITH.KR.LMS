@@ -6,13 +6,13 @@ import { Document, Page, Text, View, StyleSheet, Font } from '@react-pdf/rendere
 // Font registration for CJK support
 Font.register({
   family: 'Noto Sans KR',
-  src: 'https://fonts.gstatic.com/s/notosanskr/v27/PpkLp3gh9_iS_mH2_vN0_lD7p66_pYw.woff2', // Regular
+  src: 'https://cdn.jsdelivr.net/gh/sun-typeface/SUIT@2/fonts/static/woff2/SUIT-Regular.woff2',
   fontWeight: 'normal',
 });
 
 Font.register({
   family: 'Noto Sans KR',
-  src: 'https://fonts.gstatic.com/s/notosanskr/v27/PpkLp3gh9_iS_mH2_vN0_lD7p66_pYw.woff2', // Using same for bold for now if bold URL not available, or find bold
+  src: 'https://cdn.jsdelivr.net/gh/sun-typeface/SUIT@2/fonts/static/woff2/SUIT-Bold.woff2',
   fontWeight: 'bold',
 });
 

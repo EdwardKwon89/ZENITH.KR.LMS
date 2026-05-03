@@ -247,7 +247,18 @@
     "customs_status_approved": "통관 승인",
     "customs_status_held": "보류",
     "customs_status_rejected": "통관 반려",
-    "declaration_no": "신고번호"
+    "declaration_no": "신고번호",
+    "my_customs": "통관 현황",
+    "history_title": "통관 신고 내역",
+    "no_data": "통관 신고 내역이 없습니다.",
+    "order_no": "주문번호",
+    "cargo": "화물명",
+    "status": "상태",
+    "date": "등록일"
+  },
+  "Pending": {
+    "title": "대기 항목",
+    "description": "대기 중인 작업 및 기록을 관리합니다."
   },
   "Claims": {
     "title": "클레임 관리",

@@ -85,13 +85,13 @@ export async function middleware(request: NextRequest) {
     try {
       // [DB Verification]
       const { data: profile, error } = await supabase
-        .from('profiles')
+        .from('zen_profiles')
         .select(`
           status,
           org_id,
           role,
-          organizations (
-            org_type
+          zen_organizations (
+            type
           )
         `)
         .eq('id', user.id)
@@ -99,7 +99,7 @@ export async function middleware(request: NextRequest) {
 
       if (profile) {
         userStatus = profile.status || userStatus;
-        const dbOrgType = (profile.organizations as any)?.org_type;
+        const dbOrgType = (profile.zen_organizations as any)?.type;
 
         if ((profile as any).role === 'ZENITH_SUPER_ADMIN') {
           // 플랫폼 슈퍼 관리자는 조직 소속 없이도 PLATFORM 전체 권한 부여

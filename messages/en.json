@@ -65,7 +65,8 @@
     "org_approval": "Organization Approval",
     "my_profile": "My Profile",
     "my_grade": "My Grade",
-    "my_customs": "Customs Status"
+    "my_customs": "Customs Status",
+    "customs_management": "Customs Management"
   },
   "VOC": {
     "title": "VOC Management",
@@ -229,7 +230,18 @@
     "customs_status_approved": "Approved",
     "customs_status_held": "Held",
     "customs_status_rejected": "Rejected",
-    "declaration_no": "Declaration No."
+    "declaration_no": "Declaration No.",
+    "my_customs": "Customs Status",
+    "history_title": "Customs Declarations",
+    "no_data": "No customs declarations found.",
+    "order_no": "Order #",
+    "cargo": "Cargo",
+    "status": "Status",
+    "date": "Date"
+  },
+  "Pending": {
+    "title": "Pending Items",
+    "description": "Manage your pending tasks and records."
   },
   "Claims": {
     "title": "Claim Management",

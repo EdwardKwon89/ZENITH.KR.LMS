@@ -5,6 +5,8 @@ import {
   MockCarrierProvider 
 } from './tracking-adapters';
 import { getNumericParam } from '../params/service';
+import { OrderStatus } from '@/types/orders';
+import { triggerStatusChangeNotification } from '@/app/actions/notifications';
 
 export type TrackingEventCode = 'BOOKED' | 'PICKED_UP' | 'TERMINAL_IN' | 'DEPARTED' | 'IN_TRANSIT' | 'ARRIVED' | 'OUT_FOR_DELIVERY' | 'DELIVERED' | 'DELAYED' | 'EXCEPTION';
 
@@ -54,17 +56,17 @@ export class TrackingManager {
   /**
    * 트래킹 이벤트 코드와 오더 상태 매핑 테이블
    */
-  private statusMapping: Record<TrackingEventCode, string> = {
-    'BOOKED': 'SCHEDULED',
-    'PICKED_UP': 'RELEASED',
-    'TERMINAL_IN': 'WAREHOUSED',
-    'DEPARTED': 'IN_TRANSIT',
-    'IN_TRANSIT': 'IN_TRANSIT',
-    'ARRIVED': 'IN_TRANSIT',
-    'OUT_FOR_DELIVERY': 'IN_TRANSIT',
-    'DELIVERED': 'DELIVERED',
-    'DELAYED': 'HELD',
-    'EXCEPTION': 'HELD'
+  private statusMapping: Record<TrackingEventCode, OrderStatus> = {
+    'BOOKED': OrderStatus.SCHEDULED,
+    'PICKED_UP': OrderStatus.RELEASED,
+    'TERMINAL_IN': OrderStatus.WAREHOUSED,
+    'DEPARTED': OrderStatus.IN_TRANSIT,
+    'IN_TRANSIT': OrderStatus.IN_TRANSIT,
+    'ARRIVED': OrderStatus.IN_TRANSIT,
+    'OUT_FOR_DELIVERY': OrderStatus.IN_TRANSIT,
+    'DELIVERED': OrderStatus.DELIVERED,
+    'DELAYED': OrderStatus.HELD,
+    'EXCEPTION': OrderStatus.HELD
   };
 
   constructor() {
@@ -178,6 +180,10 @@ export class TrackingManager {
       console.error(`[TRACKING_SYNC] Failed to sync status for ${orderId}:`, error.message);
     } else {
       console.log(`[TRACKING_SYNC] Order ${orderId} status updated to ${nextStatus}`);
+      // 상태 변경 알림 트리거 (Async)
+      triggerStatusChangeNotification(orderId, nextStatus as OrderStatus).catch(e => {
+        console.error(`[TRACKING_SYNC] Notification trigger failed for ${orderId}:`, e);
+      });
     }
   }
 }
