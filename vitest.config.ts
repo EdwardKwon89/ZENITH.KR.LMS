@@ -16,6 +16,7 @@ export default defineConfig({
       '**/.{idea,git,cache,output,temp}/**',
       '**/{karma,rollup,webpack,vite,vitest,ava,babel,nyc,cypress,tsup,build}.config.*',
       'tests/e2e/**',
+      'scratch/**',
     ],
     alias: {
       '@': path.resolve(__dirname, './src'),
