@@ -7,109 +7,149 @@ test.describe('E2E-05: Settlement & Finance Workflow', () => {
   const PASSWORD = 'password1234';
 
   test.beforeEach(async ({ page }) => {
-    // Capture browser logs
-    page.on('console', msg => {
-      console.log(`[BROWSER] ${msg.type()}: ${msg.text()}`);
-    });
-
-    console.log(`Logging in as ${ADMIN_EMAIL}...`);
-    await page.goto('/login');
-    await page.fill('input[type="email"]', ADMIN_EMAIL);
-    await page.fill('input[type="password"]', PASSWORD);
-    await page.click('button[type="submit"]');
+    page.on('console', msg => console.log('PAGE LOG:', msg.text()));
+    page.on('pageerror', err => console.error('PAGE ERROR:', err.message));
     
-    await expect(page).toHaveURL(/.*(dashboard|orders)/);
+    console.log(`Logging in as ${ADMIN_EMAIL}...`);
+    await page.goto('/ko/login');
+    await page.fill('input#email', ADMIN_EMAIL);
+    await page.fill('input#password', PASSWORD);
+    
+    await Promise.all([
+      page.waitForURL(/.*(dashboard|orders)/, { timeout: 30000 }),
+      page.click('button[data-action="login"]')
+    ]);
+    
     console.log('Login successful.');
   });
 
-  test('should calculate settlement and generate invoice for a completed order', async ({ page }) => {
-    const currentUrl = page.url();
-    const locale = currentUrl.includes('/ko') ? 'ko' : 'en';
-    const orderUrl = `/${locale}/orders/${TEST_ORDER_ID}`;
-    
-    console.log(`Navigating to order detail: ${orderUrl}`);
-    await page.goto(orderUrl);
+  test('Settlement Workflow: Calculate -> Invoice -> Tax Invoice -> Export', async ({ page }) => {
+    test.setTimeout(120000);
 
-    // Verify order number
-    await expect(page.locator('h1')).toContainText(TEST_ORDER_NO);
-    console.log(`Arrived at order ${TEST_ORDER_NO} detail page.`);
+    // 1. Calculate & Generate Invoice
+    const orderUrl = `/ko/orders/${TEST_ORDER_ID}`;
+    console.log(`Step 1: Navigating to order detail: ${orderUrl}`);
+    await page.goto(orderUrl, { timeout: 60000 });
 
-    // Finance Section
-    const financeSection = page.locator('h3:has-text("Settlement Preview")').locator('..').locator('..');
-    await expect(financeSection).toBeVisible();
+    const settlementHeader = page.locator('h3:has-text("Settlement Preview"), h3:has-text("정산 미리보기")');
+    await settlementHeader.scrollIntoViewIfNeeded();
 
-    // Check for costs
-    const costItemsSelector = '.text-slate-400.text-sm';
-    let costCount = await financeSection.locator(costItemsSelector).count();
-    console.log(`Initial cost count: ${costCount}`);
-    
-    if (costCount === 0) {
-      console.log('No costs found. Triggering recalculation...');
-      const calcButton = financeSection.locator('button[title="Recalculate Costs"]');
-      await expect(calcButton).toBeVisible();
-      
-      // Listen for network responses to server actions
-      const responsePromise = page.waitForResponse(response => 
-        response.url().includes('finance') || response.request().method() === 'POST'
-      );
-      
-      await calcButton.click();
-      console.log('Clicked recalculate. Waiting for response...');
-      
-      try {
-        await responsePromise;
-        console.log('Server action response received.');
-      } catch (e) {
-        console.warn('Timeout or error waiting for server action response.');
-      }
-      
-      // Wait for at least one cost item to appear
-      console.log('Waiting for costs to appear in UI...');
-      try {
-        await expect(financeSection.locator(costItemsSelector).first()).toBeVisible({ timeout: 15000 });
-        costCount = await financeSection.locator(costItemsSelector).count();
-        console.log(`Costs updated. New count: ${costCount}`);
-      } catch (e) {
-        console.error('FAILED: Costs did not appear after recalculation.');
-        // Take a screenshot for debugging if possible (though I can't see it directly, it helps in local runs)
-        await page.screenshot({ path: 'settlement-failure.png' });
-        throw e;
-      }
-    }
-
-    // Verify Generate Final Invoice button is enabled
-    const generateButton = page.locator('button:has-text("Generate Final Invoice")');
-    
-    // If already invoiced, we skip generation but verify existence
-    const invoicedBadge = page.locator('text=Invoiced');
+    // Check if already invoiced FIRST
+    const invoicedBadge = page.locator('span:has-text("Invoiced"), span:has-text("청구됨")');
     const isAlreadyInvoiced = await invoicedBadge.isVisible();
 
-    if (!isAlreadyInvoiced) {
-      console.log('Order is not yet invoiced. Checking if generate button is enabled...');
-      await expect(generateButton).toBeEnabled({ timeout: 5000 });
-      console.log('Generating final invoice...');
-      await generateButton.click();
-
-      // Verify success status
-      await expect(page.locator('text=Invoiced')).toBeVisible({ timeout: 15000 });
-      console.log('Invoice generated successfully.');
+    const recalculateBtn = page.locator('button[title="Recalculate Costs"], button[title="비용 재계산"]');
+    const noCostsText = page.getByText(/No costs calculated yet/i);
+    
+    // Only attempt to recalculate if NOT invoiced AND (no costs OR button is visible and enabled)
+    if (!isAlreadyInvoiced && (await noCostsText.isVisible() || (await recalculateBtn.isVisible() && await recalculateBtn.isEnabled()))) {
+      console.log('Recalculate button found or No Costs message visible. Clicking recalculate...');
+      await recalculateBtn.scrollIntoViewIfNeeded();
+      await recalculateBtn.click();
+      
+      // Wait for success toast
+      console.log('Waiting for recalculation success toast...');
+      await expect(page.getByText(/recalculated successfully/i).or(page.getByText(/정산 비용이 계산되었습니다/i))).toBeVisible({ timeout: 30000 });
+      await page.waitForTimeout(3000); // Give it a bit more time for state update
     } else {
-      console.log('Order already invoiced.');
+      console.log('Skipping recalculation: already invoiced, costs present, or button disabled.');
     }
-    
-    // Verify Invoice Number
-    const invoiceNo = page.locator('span.text-blue-400:has-text("#")');
-    await expect(invoiceNo).toBeVisible();
-    const invoiceText = await invoiceNo.innerText();
-    console.log(`Verified Invoice: ${invoiceText}`);
 
-    // Verify in Finance Dashboard
-    console.log('Navigating to Finance Dashboard for final verification...');
-    await page.goto(`/${locale}/finance`);
-    await expect(page.locator('h1')).toContainText(locale === 'ko' ? '재무 현황' : 'Financial Status');
+    // 2. Check if already invoiced or generate new one
+    const generateBtn = page.locator('button:has-text("Generate Final Invoice"), button:has-text("최종 청구서 생성")');
     
-    const cleanInvoiceNo = invoiceText.replace('#', '');
-    await expect(page.locator(`text=${cleanInvoiceNo}`).first()).toBeVisible();
-    console.log(`Invoice ${cleanInvoiceNo} found in Finance Dashboard. Test Passed.`);
+    if (await invoicedBadge.isVisible()) {
+      console.log('Order already invoiced. Skipping generation step.');
+    } else {
+      console.log('Generating invoice...');
+      await expect(generateBtn).toBeEnabled({ timeout: 45000 });
+      await generateBtn.click();
+      
+      // Wait for success toast (using a broader match)
+      console.log('Waiting for invoice generation success toast...');
+      await expect(page.getByText(/generated/i).or(page.getByText(/생성되었습니다/i))).toBeVisible({ timeout: 20000 });
+      
+      // Verify badge appeared
+      await expect(invoicedBadge).toBeVisible({ timeout: 10000 });
+    }
+
+    // Capture Invoice Number
+    const invoiceLocator = page.locator('span:has-text("#INV-"), span:has-text("INV-")').first();
+    await expect(invoiceLocator).toBeVisible({ timeout: 15000 });
+    let invoiceNo = (await invoiceLocator.textContent())?.trim() || '';
+    // Strip leading '#' if present for searching in the finance table
+    if (invoiceNo.startsWith('#')) {
+      invoiceNo = invoiceNo.substring(1);
+    }
+    console.log(`Step 1 Complete. Active Invoice: ${invoiceNo}`);
+
+    // 2. Issue Tax Invoice
+    console.log(`Step 2: Navigating to finance dashboard to issue tax invoice for ${invoiceNo}`);
+    await page.goto('/ko/finance');
+    await page.waitForLoadState('networkidle');
+    
+    // Find row by invoice number (exact match)
+    const invoiceRow = page.locator('tr').filter({ hasText: new RegExp(`^${invoiceNo}$|^${invoiceNo}\\s|\\s${invoiceNo}$|\\s${invoiceNo}\\s`) }).first();
+    // If exact match filter is too strict, fall back to simple hasText
+    const rowToClick = (await invoiceRow.count() > 0) ? invoiceRow : page.locator('tr').filter({ hasText: invoiceNo }).first();
+    
+    const taxInvoiceBtn = rowToClick.locator('button[title="Tax Invoice"]');
+    await expect(taxInvoiceBtn).toBeVisible({ timeout: 15000 });
+    await taxInvoiceBtn.click();
+
+    // Wait for Sheet to be visible
+    const sheet = page.locator('h3:has-text("Tax Invoice Management")');
+    await expect(sheet).toBeVisible({ timeout: 10000 });
+
+    // Click Issue button in the sheet (Scope it to the sheet)
+    const issueBtn = page.locator('div[role="dialog"], .fixed').filter({ has: sheet }).locator('button:has-text("Issue"), button:has-text("발행")').first();
+    await expect(issueBtn).toBeEnabled({ timeout: 10000 });
+    await issueBtn.click();
+
+    // Verify issuance message
+    console.log('Waiting for tax invoice issuance success message...');
+    // Use a more specific locator for the toast to avoid strict mode violation with badges in the table
+    await expect(page.locator('[data-sonner-toast]').filter({ hasText: /발행되었습니다|issued/i }).first()).toBeVisible({ timeout: 20000 });
+    
+    // Close the sheet before proceeding to Step 3
+    console.log('Closing Tax Invoice Management sheet...');
+    const closeBtn = page.locator('div[role="dialog"], .fixed').filter({ has: sheet }).locator('button').first();
+    await closeBtn.click();
+    await expect(sheet).not.toBeVisible({ timeout: 10000 });
+    
+    console.log('Step 2 Complete. Tax Invoice issued and sheet closed.');
+
+    // 3. Excel Export
+    console.log('Step 3: Exporting Excel from finance dashboard');
+    
+    // Check if table has data
+    const rows = page.locator('table tbody tr');
+    const rowCount = await rows.count();
+    console.log(`Finance table has ${rowCount} rows.`);
+
+    const exportBtn = page.locator('button[data-action="export-finance"]');
+    console.log('Waiting for export button to be visible...');
+    await expect(exportBtn).toBeVisible({ timeout: 15000 });
+    
+    const downloadPromise = page.waitForEvent('download', { timeout: 60000 }).catch(e => {
+      console.error('Download wait failed:', e.message);
+      return null;
+    });
+
+    console.log('Clicking export button (force: true)...');
+    await exportBtn.click({ force: true });
+    
+    const download = await downloadPromise;
+
+    if (!download) {
+      console.error('No download started. Checking for error messages on page...');
+      await page.screenshot({ path: 'docs/99_Manual/E2E_05_Result/e2e_05_export_failed.png' });
+      throw new Error('Export failed: No download event triggered');
+    }
+
+    expect(download.suggestedFilename()).toMatch(/settlement_export_.*\.xlsx/);
+    console.log(`Step 3 Complete. Downloaded: ${download.suggestedFilename()}`);
+
+    await page.screenshot({ path: 'docs/99_Manual/E2E_05_Result/e2e_05_combined_success.png' });
   });
 });

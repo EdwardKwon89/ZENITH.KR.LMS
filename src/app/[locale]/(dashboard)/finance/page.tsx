@@ -88,7 +88,11 @@ export default async function FinanceDashboardPage() {
             <span className="text-xl font-black text-slate-900">$1,284,500.00</span>
           </div>
           <div className="h-10 w-[1px] bg-slate-200 mx-2"></div>
-          <ExportButton />
+          <ExportButton 
+            data={invoices || []} 
+            filename={`settlement_export_${format(new Date(), 'yyyyMMdd')}`} 
+            type="SETTLEMENT" 
+          />
         </div>
       </div>
 
