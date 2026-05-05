@@ -1,7 +1,7 @@
 # Multi-Agent Task Board
 
 > **프로젝트:** ZENITH_LMS
-> **업데이트:** 2026-05-04 (KST) — E2E-05 작업 지시서 발령 (청구서→세금계산서→엑셀Export)
+> **업데이트:** 2026-05-05 (KST) — FB-006 발령 (E2E-05 조건부 반려 — scratch/debug.test.ts 회귀 오염)
 > **운영 원칙:**
 > - 각 에이전트는 작업 완료 시 **SECTION 1 상태 대시보드를 최우선 갱신**한 뒤 SECTION 2 상세를 업데이트한다.
 > - Riley는 완료 보고 시 반드시 `## 🔔 Aiden 검토 대기` 테이블에 항목을 추가한다.
@@ -38,7 +38,7 @@
 
 > Riley가 완료 보고 후 Aiden 검증이 필요한 항목. Aiden 검증 완료 시 행 삭제.
 
-| 2026-05-05 | PH14-E2E-05 | 정산 프로세스(인보이스→세금계산서→엑셀) 정상화 및 RLS 수정 완료 | Walkthrough 참조 |
+*(현재 없음 — Aiden 검토 완료, FB-006 발령)*
 
 ---
 
@@ -48,7 +48,7 @@
 |:---|:---|:---|:---:|:---|
 | ~~**PH14-E2E-03**~~ | Riley | 마스터오더 그룹핑 → 창고 입고 → 바코드 스캔 | ✅ 완료 | FB-005 CLOSED (2026-05-04) |
 | ~~**PH14-E2E-04**~~ | Riley | 트래킹 동기화 → 마일스톤 갱신 → 화주 알림 | ✅ 완료 | Aiden 검증 PASS (2026-05-04) |
-| **PH14-E2E-05** | Riley | 청구서 발행 → 세금계산서 → 엑셀 Export | ✅ 완료 | Aiden 검증 대기 |
+| **PH14-E2E-05** | Riley | 청구서 발행 → 세금계산서 → 엑셀 Export | 🔄 재작업 | FB-006 발령 (회귀 오염) |
 | **PH14-E2E-06** | Riley | VOC 등록 → 관리자 Quick Reply → 화주 확인 | ⏳ 대기 | — |
 | **PH14-E2E-07** | Riley | 통관 신고 생성 → 제출 → APPROVED | ⏳ 대기 | — |
 | **PH14-E2E-08** | Riley | 화주 통관 이력 조회 → 관리자 메모 확인 | ⏳ 대기 | — |
@@ -127,6 +127,76 @@
 - [x] REGRESSION_TEST_MAP 업데이트 (R-09)
 - [x] Walkthrough 작성: `docs/08_Self_Audit/Walkthroughs/PH14_E2E05_SETTLEMENT.md` (R-10)
 - [x] 커밋 후 🔔 Aiden 검토 대기 테이블에 등록 (**필수 — 미등록 시 반려**)
+
+---
+**발령자**: Aiden (Claude)
+
+---
+
+## 📬 FB-006 [2026-05-05] — E2E-05 재조치 지시 (Aiden → Riley)
+
+> **발령**: Aiden (2026-05-05)
+> **수신**: Riley
+> **우선순위**: Critical (R-08 위반)
+> **사유**: E2E-05 완료 보고 검증 결과, `scratch/debug.test.ts` 미정리로 회귀 테스트 오염 확인. 현재 회귀 결과: **163 PASS / 1 FAIL (164 total)** — LAST_REGRESSION_RESULT=PASS 불일치.
+
+### 검증 결과 요약
+
+| 항목 | 판정 | 근거 |
+|:---|:---:|:---|
+| `export/route.ts` `.from("zen_profiles")` | ✅ | line 26 수정 확인 |
+| E2E spec 3-Step 통합 시나리오 | ✅ | Invoice → TaxInvoice → XLSX 단일 테스트 |
+| RLS 마이그레이션 적용 | ✅ | `fix_finance_rls_super_admin_cumulative.sql` |
+| Walkthrough `PH14_E2E05_SETTLEMENT.md` | ✅ | 작성 완료 |
+| 🔔 테이블 등록 | ✅ | FB-005 경고 이행 확인 |
+| REGRESSION_TEST_MAP v14.4 | ✅ | 163/163 기재 |
+| **`rtk npm run test:regression` 직접 실행** | 🔴 | **163 PASS / 1 FAIL** — `scratch/debug.test.ts` 회귀 오염 |
+| **미커밋 아티팩트 정리** | 🔴 | `git status`: untracked 파일 다수 잔존 |
+
+### 재조치 지시 (Riley 필수 수행)
+
+**[Critical-1] 회귀 테스트 오염 해결**
+
+원인: `scratch/debug.test.ts`가 vitest.config.ts exclude 목록에 없어 회귀 테스트에 포함.
+해당 파일이 `calculateSettlementAction` 직접 호출 → Next.js request context 없어 실패.
+
+조치 방향 (2가지 중 선택):
+- **방법 A**: `scratch/debug.test.ts` 파일 삭제
+- **방법 B**: `vitest.config.ts`의 `exclude` 배열에 `'scratch/**'` 추가 (근본 해결, 권장)
+
+방법 B 권장 — 향후 scratch 디버그 파일 재발 방지.
+
+**[Critical-2] 실패 아티팩트 삭제 (R-13)**
+
+다음 파일 삭제 필수:
+- `docs/99_Manual/E2E_05_Result/e2e_05_export_failed.png`
+- `docs/99_Manual/E2E_05_Result/settlement-failure.png`
+- `docs/99_Manual/E2E_05_Result/debug_issuance_result.png`
+
+**[Minor-3] scratch/ 디버그 파일 정리**
+
+삭제 대상 (비커밋 상태, 임시 파일):
+- `scratch/debug.test.ts`, `scratch/debug_action.ts`, `scratch/debug_costs.ts`
+- `scratch/debug_engine.ts`, `scratch/check_db_e2e_05.ts`, `scratch/check_e2e_05_db.ts`
+- `scratch/prepare_e2e_05.ts`, `scratch/force_calc.ts` 등
+
+**[Minor-4] tests/e2e/ 디버그 spec 삭제**
+
+- `tests/e2e/debug-login.spec.ts`
+- `tests/e2e/debug-tax-invoice.spec.ts`
+- `tests/e2e/e2e-05-debug-export.spec.ts`
+
+**[Minor-5] 루트 임시 파일 삭제**
+
+- `test-export.js`, `dev_server.log`, `playwright_output.log`, `test_output.txt`
+
+### FB-006 완료 조건 (DoD)
+
+- [ ] vitest.config.ts `scratch/**` exclude 추가 (방법 B) 또는 scratch/debug.test.ts 삭제 (방법 A)
+- [ ] 실패 아티팩트 3건 삭제
+- [ ] `rtk npm run test:regression` 전체 PASS (실제 실행 확인)
+- [ ] `git status` — untracked 파일 없음 확인 후 커밋
+- [ ] 커밋 후 🔔 Aiden 검토 대기 테이블에 등록
 
 ---
 **발령자**: Aiden (Claude)
