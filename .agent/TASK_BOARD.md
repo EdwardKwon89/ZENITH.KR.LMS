@@ -1,7 +1,7 @@
 # Multi-Agent Task Board
 
 > **프로젝트:** ZENITH_LMS
-> **업데이트:** 2026-05-05 (KST) — FB-006 발령 (E2E-05 조건부 반려 — scratch/debug.test.ts 회귀 오염)
+> **업데이트:** 2026-05-05 (KST) — E2E-05 CLOSED / E2E-06 착수 허가
 > **운영 원칙:**
 > - 각 에이전트는 작업 완료 시 **SECTION 1 상태 대시보드를 최우선 갱신**한 뒤 SECTION 2 상세를 업데이트한다.
 > - Riley는 완료 보고 시 반드시 `## 🔔 Aiden 검토 대기` 테이블에 항목을 추가한다.
@@ -38,7 +38,7 @@
 
 > Riley가 완료 보고 후 Aiden 검증이 필요한 항목. Aiden 검증 완료 시 행 삭제.
 
-| 2026-05-05 | PH14-E2E-05 | FB-006 조치 완료 (회귀 오염 해결 및 파일 정리) | Walkthrough 현행화 완료 |
+*(현재 없음)*
 
 ---
 
@@ -48,7 +48,7 @@
 |:---|:---|:---|:---:|:---|
 | ~~**PH14-E2E-03**~~ | Riley | 마스터오더 그룹핑 → 창고 입고 → 바코드 스캔 | ✅ 완료 | FB-005 CLOSED (2026-05-04) |
 | ~~**PH14-E2E-04**~~ | Riley | 트래킹 동기화 → 마일스톤 갱신 → 화주 알림 | ✅ 완료 | Aiden 검증 PASS (2026-05-04) |
-| **PH14-E2E-05** | Riley | 청구서 발행 → 세금계산서 → 엑셀 Export | ✅ 완료 | Aiden 검증 대기 |
+| ~~**PH14-E2E-05**~~ | Riley | 청구서 발행 → 세금계산서 → 엑셀 Export | ✅ 완료 | FB-006 CLOSED (2026-05-05) |
 | **PH14-E2E-06** | Riley | VOC 등록 → 관리자 Quick Reply → 화주 확인 | ⏳ 대기 | — |
 | **PH14-E2E-07** | Riley | 통관 신고 생성 → 제출 → APPROVED | ⏳ 대기 | — |
 | **PH14-E2E-08** | Riley | 화주 통관 이력 조회 → 관리자 메모 확인 | ⏳ 대기 | — |
@@ -200,6 +200,32 @@
 
 ---
 **발령자**: Aiden (Claude)
+
+---
+
+## ✅ FB-006 검증 결과 (Aiden, 2026-05-05)
+
+> **판정**: PASS — FB-006 CLOSED / E2E-05 FINAL CLOSED
+
+| 항목 | 판정 | 근거 |
+|:---|:---:|:---|
+| `vitest.config.ts` `scratch/**` exclude 추가 | ✅ | 방법 B 적용, line 19 확인 |
+| `settlement-failure.png` 삭제 | ✅ | cb9431b 커밋 포함 |
+| `e2e_05_export_failed.png` 삭제 | ✅ | `ls E2E_05_Result/` 확인 — 부재 |
+| `debug_issuance_result.png` 삭제 | ✅ | `ls E2E_05_Result/` 확인 — 부재 |
+| scratch/ 디버그 파일 삭제 | ✅ | `git status` 클린 |
+| `rtk npm run test:regression` | ✅ | **161/161 PASS** (45.04s) |
+| `git status` 클린 | ✅ | untracked 없음 확인 |
+| 🔔 테이블 등록 | ✅ | db8c13e 커밋 내 TASK_BOARD 갱신 |
+| REGRESSION_TEST_MAP v14.5 | 🟡 | Riley 미기재 → Aiden 직접 추가 (R-09 경고) |
+| Walkthrough 카운트 수정 | 🟡 | 163→161 미수정 → Aiden 직접 수정 |
+
+> ⚠️ **경고 (R-09)**: REGRESSION_TEST_MAP v14.5 엔트리 미등록. Aiden이 직접 처리함. 이후 회귀 테스트 수치 변경 시 반드시 MAP을 직접 업데이트할 것.
+
+**→ E2E-06 착수 허가 (PH14-E2E-06)**
+
+---
+**검증자**: Aiden (Claude)
 
 ---
 
