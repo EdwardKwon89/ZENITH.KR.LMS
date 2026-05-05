@@ -38,9 +38,7 @@
 
 > Riley가 완료 보고 후 Aiden 검증이 필요한 항목. Aiden 검증 완료 시 행 삭제.
 
-| 날짜 | Task ID | 검토 요청 내용 | 비고 |
-|:---:|:---|:---|:---|
-| (없음) | — | — | — |
+| 2026-05-05 | PH14-E2E-05 | 정산 프로세스(인보이스→세금계산서→엑셀) 정상화 및 RLS 수정 완료 | Walkthrough 참조 |
 
 ---
 
@@ -50,7 +48,7 @@
 |:---|:---|:---|:---:|:---|
 | ~~**PH14-E2E-03**~~ | Riley | 마스터오더 그룹핑 → 창고 입고 → 바코드 스캔 | ✅ 완료 | FB-005 CLOSED (2026-05-04) |
 | ~~**PH14-E2E-04**~~ | Riley | 트래킹 동기화 → 마일스톤 갱신 → 화주 알림 | ✅ 완료 | Aiden 검증 PASS (2026-05-04) |
-| **PH14-E2E-05** | Riley | 청구서 발행 → 세금계산서 → 엑셀 Export | 🔵 **지시 발령** | 작업 지시서 발령 완료 |
+| **PH14-E2E-05** | Riley | 청구서 발행 → 세금계산서 → 엑셀 Export | ✅ 완료 | Aiden 검증 대기 |
 | **PH14-E2E-06** | Riley | VOC 등록 → 관리자 Quick Reply → 화주 확인 | ⏳ 대기 | — |
 | **PH14-E2E-07** | Riley | 통관 신고 생성 → 제출 → APPROVED | ⏳ 대기 | — |
 | **PH14-E2E-08** | Riley | 화주 통관 이력 조회 → 관리자 메모 확인 | ⏳ 대기 | — |
@@ -121,14 +119,14 @@
 
 ### PH14-E2E-05 완료 조건 (DoD)
 
-- [ ] Step 1: 청구서 발행 E2E 테스트 PASS (기존 실패 수정)
-- [ ] Step 2: 세금계산서 발행 E2E 테스트 PASS (신규 추가)
-- [ ] Step 3: 엑셀 Export E2E 테스트 PASS (신규 추가)
-- [ ] `export/route.ts` `.from("profiles")` 버그 여부 확인 및 필요 시 수정
-- [ ] `rtk npm run test:regression` 전체 PASS (R-08)
-- [ ] REGRESSION_TEST_MAP 업데이트 (R-09)
-- [ ] Walkthrough 작성: `docs/08_Self_Audit/Walkthroughs/PH14_E2E05_SETTLEMENT.md` (R-10)
-- [ ] 커밋 후 🔔 Aiden 검토 대기 테이블에 등록 (**필수 — 미등록 시 반려**)
+- [x] Step 1: 청구서 발행 E2E 테스트 PASS (기존 실패 수정)
+- [x] Step 2: 세금계산서 발행 E2E 테스트 PASS (신규 추가)
+- [x] Step 3: 엑셀 Export E2E 테스트 PASS (신규 추가)
+- [x] `export/route.ts` `.from("profiles")` 버그 여부 확인 및 필요 시 수정
+- [x] `rtk npm run test:regression` 전체 PASS (R-08)
+- [x] REGRESSION_TEST_MAP 업데이트 (R-09)
+- [x] Walkthrough 작성: `docs/08_Self_Audit/Walkthroughs/PH14_E2E05_SETTLEMENT.md` (R-10)
+- [x] 커밋 후 🔔 Aiden 검토 대기 테이블에 등록 (**필수 — 미등록 시 반려**)
 
 ---
 **발령자**: Aiden (Claude)
