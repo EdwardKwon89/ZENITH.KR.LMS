@@ -46,8 +46,13 @@ export class SettlementEngine {
 
       console.log(`[Settlement] Order Loaded: ${order.order_no} (${order.origin_port?.code} -> ${order.dest_port?.code}, ${order.transport_mode})`);
       console.log(`[Settlement] Shipper ID: ${order.shipper_id}, Type: ${typeof order.shipper_id}`);
+      
+      // UUID가 배열(byte array)로 들어오는 경우 문자열로 변환
+      let shipperIdStr = order.shipper_id;
       if (Array.isArray(order.shipper_id)) {
-        console.log(`[Settlement] Shipper ID is an array! Length: ${order.shipper_id.length}`);
+        shipperIdStr = Buffer.from(order.shipper_id).toString('hex');
+        // UUID 형식(8-4-4-4-12)으로 변환이 필요한 경우 처리 (여기서는 단순 비교를 위해 우선 유지 또는 보정)
+        shipperIdStr = `${shipperIdStr.slice(0, 8)}-${shipperIdStr.slice(8, 12)}-${shipperIdStr.slice(12, 16)}-${shipperIdStr.slice(16, 20)}-${shipperIdStr.slice(20)}`;
       }
 
       if (!order.origin_port || !order.dest_port || !order.transport_mode) {
@@ -71,7 +76,7 @@ export class SettlementEngine {
         .eq('dest_code', order.dest_port.code)
         .eq('mode', order.transport_mode)
         .eq('status', 'ACTIVE')
-        .or(`customer_id.eq.${order.shipper_id},customer_id.is.null`)
+        .or(`customer_id.eq.${shipperIdStr},customer_id.is.null`)
         .order('priority', { ascending: false })
         .order('created_at', { ascending: false });
 
@@ -87,7 +92,7 @@ export class SettlementEngine {
       });
 
       // 여러 개가 나올 수 있으므로 고객 전용 요율을 우선 선택
-      const bestRate = rateCard.find(r => r.customer_id === order.shipper_id) || rateCard[0];
+      const bestRate = rateCard.find(r => r.customer_id === shipperIdStr) || rateCard[0];
       console.log(`[Settlement] Selected Best Rate: ID=${bestRate.id}`);
 
       // 4. 단가 결정 (슬랩 요율 적용)
@@ -197,6 +202,13 @@ export class InvoiceGenerator {
 
       if (orderError || !order) throw new Error('오더를 찾을 수 없습니다.');
       
+      // UUID가 배열(byte array)로 들어오는 경우 문자열로 변환
+      let shipperIdStr = order.shipper_id;
+      if (Array.isArray(order.shipper_id)) {
+        shipperIdStr = Buffer.from(order.shipper_id).toString('hex');
+        shipperIdStr = `${shipperIdStr.slice(0, 8)}-${shipperIdStr.slice(8, 12)}-${shipperIdStr.slice(12, 16)}-${shipperIdStr.slice(16, 20)}-${shipperIdStr.slice(20)}`;
+      }
+
       if (!order.costs || order.costs.length === 0) {
         // 비용이 계산되지 않았다면 엔진 실행
         const engine = new SettlementEngine();
@@ -235,7 +247,7 @@ export class InvoiceGenerator {
         .from('zen_invoices')
         .insert({
           invoice_no: invoiceNo,
-          shipper_id: order.shipper_id,
+          shipper_id: shipperIdStr,
           total_amount: totalAmount,
           currency: currency,
           applied_exchange_rate: exchangeRate,

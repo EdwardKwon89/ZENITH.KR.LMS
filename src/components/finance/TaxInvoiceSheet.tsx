@@ -48,16 +48,25 @@ export const TaxInvoiceSheet: React.FC<TaxInvoiceSheetProps> = ({
   };
 
   const handleIssue = async () => {
+    console.log('[TaxInvoiceSheet] handleIssue started');
     setActionLoading(true);
     try {
+      console.log('[TaxInvoiceSheet] Calling issueTaxInvoice action...');
       const result = await issueTaxInvoice(invoiceId);
+      console.log('[TaxInvoiceSheet] issueTaxInvoice result:', result);
       if (result.success) {
+        console.log('[TaxInvoiceSheet] Success! Showing toast...');
         toast.success('세금계산서가 발행되었습니다.');
+        console.log('[TaxInvoiceSheet] Reloading history...');
         loadHistory();
+      } else {
+        console.warn('[TaxInvoiceSheet] issueTaxInvoice returned success: false', result);
       }
     } catch (err: any) {
+      console.error('[TaxInvoiceSheet] handleIssue error:', err);
       toast.error(`발행 실패: ${err.message}`);
     } finally {
+      console.log('[TaxInvoiceSheet] handleIssue finished, setting actionLoading to false');
       setActionLoading(false);
     }
   };
@@ -112,6 +121,7 @@ export const TaxInvoiceSheet: React.FC<TaxInvoiceSheetProps> = ({
               <button 
                 onClick={onClose}
                 className="p-2 hover:bg-slate-200/50 rounded-2xl transition-colors text-slate-400 hover:text-slate-600"
+                title="Close Sheet"
               >
                 <X className="w-6 h-6" />
               </button>

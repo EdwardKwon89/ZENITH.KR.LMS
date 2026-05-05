@@ -215,7 +215,7 @@ const CommercialInvoicePDF = ({ data }: CIProps) => (
 
       <View style={{ marginTop: 40, borderTop: '0.5pt solid #eee', paddingTop: 10 }}>
         <Text style={styles.label}>Declaration</Text>
-        <Text style={[styles.text, { fontStyle: 'italic' }]}>
+        <Text style={styles.text}>
           We hereby certify that the information in this invoice is true and correct, and that the contents and value of this shipment are as stated above.
         </Text>
       </View>

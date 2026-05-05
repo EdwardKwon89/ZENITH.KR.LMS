@@ -80,17 +80,25 @@ export async function updatePaymentStatus(
  */
 export async function calculateSettlementAction(orderId: string) {
   console.log(`[Action] calculateSettlementAction started for order: ${orderId}`);
-  const { supabase } = await validateAdminAction();
+  const { supabase, profile } = await validateAdminAction();
+  console.log(`[Action] User Profile: ${profile.email}, Role: ${profile.role}`);
+  
   const engine = new SettlementEngine();
   const result = await engine.calculateOrderCosts(orderId);
   
-  console.log(`[Action] Settlement result for ${orderId}:`, result);
+  console.log(`[Action] Settlement calculation result for ${orderId}:`, result);
   
   if (result.success) {
-    const { data: costs } = await supabase
+    const { data: costs, error: costsError } = await supabase
       .from('zen_order_costs')
       .select('*')
       .eq('order_id', orderId);
+    
+    if (costsError) {
+      console.error(`[Action] Error fetching costs for ${orderId}:`, costsError);
+    }
+    
+    console.log(`[Action] Fetched ${costs?.length || 0} costs for ${orderId}`);
     
     revalidatePath(`/orders/${orderId}`);
     return { ...result, costs: costs || [] };
@@ -279,9 +287,12 @@ export async function getInvoicePdfHistory(invoiceId: string) {
  * [FIN-03] 특정 인보이스를 기반으로 세금계산서 데이터를 생성합니다.
  */
 export async function issueTaxInvoice(invoiceId: string) {
+  console.log(`[Action] issueTaxInvoice started for invoiceId: ${invoiceId}`);
   const { supabase, profile } = await validateAdminAction();
+  console.log(`[Action] Admin authorized: ${profile.email}`);
 
   // 1. 인보이스 및 조직 정보 조회
+  console.log(`[Action] Fetching invoice and costs...`);
   const { data: invoice, error: invError } = await supabase
     .from('zen_invoices')
     .select(`
@@ -293,13 +304,18 @@ export async function issueTaxInvoice(invoiceId: string) {
     .single();
 
   if (invError || !invoice) {
+    console.error(`[Action] Invoice not found:`, invError);
     throw new Error(`인보이스 정보를 찾을 수 없습니다: ${invError?.message}`);
   }
+  console.log(`[Action] Invoice fetched: ${invoice.invoice_no}, Costs count: ${invoice.costs?.length || 0}`);
 
   // 2. 세금계산서 데이터 구성
   const taxInvoiceNo = `TX-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${Math.floor(1000 + Math.random() * 9000)}`;
+  console.log(`[Action] Generating tax invoice no: ${taxInvoiceNo}`);
+  
   const vatRate = await getNumericParam('VAT_RATE', 0.1);
   const exchangeRate = invoice.applied_exchange_rate || await getNumericParam('EXCHANGE_RATE_USD_KRW', 1350);
+  console.log(`[Action] Parameters: vatRate=${vatRate}, exchangeRate=${exchangeRate}`);
   
   const supplierInfo = {
     business_number: "123-45-67890", // 시스템 설정에서 가져와야 함 (Mock)
@@ -331,8 +347,10 @@ export async function issueTaxInvoice(invoiceId: string) {
 
   const supplyTotal = items.reduce((sum: number, item: any) => sum + item.supply_amount, 0);
   const vatTotal = items.reduce((sum: number, item: any) => sum + item.tax_amount, 0);
+  console.log(`[Action] Calculated totals: supplyTotal=${supplyTotal}, vatTotal=${vatTotal}`);
 
   // 3. DB 저장
+  console.log(`[Action] Inserting into zen_tax_invoices...`);
   const { data: taxInvoice, error: txError } = await supabase
     .from('zen_tax_invoices')
     .insert({
@@ -359,10 +377,13 @@ export async function issueTaxInvoice(invoiceId: string) {
     .single();
 
   if (txError) {
+    console.error(`[Action] Tax invoice insertion failed:`, txError);
     throw new Error(`세금계산서 생성 실패: ${txError.message}`);
   }
+  console.log(`[Action] Tax invoice inserted successfully: ${taxInvoice.id}`);
 
   revalidatePath('/finance/invoices');
+  console.log(`[Action] issueTaxInvoice completed successfully`);
   return { success: true, taxInvoiceId: taxInvoice.id };
 }
 

@@ -22,30 +22,36 @@ export interface SystemParam {
 }
 
 /**
+ * 특정 키의 파라미터를 조회합니다. (Raw Fetch - 캐시 없음)
+ */
+export async function fetchParamRaw(key: string): Promise<SystemParam | null> {
+  const supabase = isTest ? (global as any).mockSupabase : await createAdminClient();
+  if (!supabase) return null;
+
+  const { data, error } = await supabase
+    .from('zen_system_params')
+    .select('*')
+    .eq('key', key)
+    .single();
+
+  if (error) {
+    if (error.code !== 'PGRST116') { // Not found는 에러로 로깅하지 않음
+      console.error(`[PARAM_SERVICE] Error fetching param ${key}:`, error.message);
+    }
+    return null;
+  }
+  return data;
+}
+
+/**
  * 특정 키의 파라미터를 조회합니다. (캐싱 적용)
  */
 export const getParam = unstable_cache(
-  async (key: string): Promise<SystemParam | null> => {
-    // 테스트 환경에서는 전역 mockSupabase를 사용하거나(있다면), 에러 방지를 위해 조건부 처리
-    const supabase = isTest ? (global as any).mockSupabase : await createAdminClient();
-    if (!supabase) return null;
-
-    const { data, error } = await supabase
-      .from('zen_system_params')
-      .select('*')
-      .eq('key', key)
-      .single();
-
-    if (error) {
-      console.error(`[PARAM_SERVICE] Error fetching param ${key}:`, error.message);
-      return null;
-    }
-    return data;
-  },
-  ['system-params'], // Query key
+  async (key: string) => fetchParamRaw(key),
+  ['system-params'],
   {
-    tags: ['system-params'], // Revalidation tag
-    revalidate: 3600, // 1 hour fallback
+    tags: ['system-params'],
+    revalidate: 3600,
   }
 );
 
@@ -151,8 +157,16 @@ export async function updateSystemParam(
  * 숫자형 파라미터 값을 편리하게 가져오는 헬퍼
  */
 export async function getNumericParam(key: string, defaultValue: number): Promise<number> {
-  const param = await getParam(key);
-  return param?.value_numeric !== null && param?.value_numeric !== undefined 
-    ? Number(param.value_numeric) 
-    : defaultValue;
+  try {
+    const param = await getParam(key);
+    return param?.value_numeric !== null && param?.value_numeric !== undefined 
+      ? Number(param.value_numeric) 
+      : defaultValue;
+  } catch (e) {
+    // unstable_cache가 실패하는 환경(예: standalone script, 일부 테스트 환경)을 위한 Fallback
+    const param = await fetchParamRaw(key);
+    return param?.value_numeric !== null && param?.value_numeric !== undefined 
+      ? Number(param.value_numeric) 
+      : defaultValue;
+  }
 }
