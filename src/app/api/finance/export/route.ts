@@ -23,17 +23,17 @@ export async function GET(request: Request) {
     }
 
     const { data: profile, error: profileError } = await supabase
-      .from("profiles")
+      .from("zen_profiles")
       .select("*")
       .eq("id", user.id)
       .single();
 
     if (profileError || !profile) {
-      return new NextResponse("Forbidden", { status: 403 });
+      console.error("[FIN-02] Profile Error:", profileError);
+      return new NextResponse(`Forbidden: ${profileError?.message || 'Profile not found'}`, { status: 403 });
     }
 
     // 2. 쿼리 구성
-    // RLS가 적용되어 있으므로 소속 조직 데이터만 조회됨 (ADMIN 제외)
     let query = supabase
       .from("zen_invoices")
       .select(`
@@ -43,17 +43,10 @@ export async function GET(request: Request) {
       .order("created_at", { ascending: false });
 
     // 필터 적용
-    if (status) {
-      query = query.eq("status", status);
-    }
-    if (dateFrom) {
-      query = query.gte("created_at", `${dateFrom}T00:00:00Z`);
-    }
-    if (dateTo) {
-      query = query.lte("created_at", `${dateTo}T23:59:59Z`);
-    }
+    if (status) query = query.eq("status", status);
+    if (dateFrom) query = query.gte("created_at", `${dateFrom}T00:00:00Z`);
+    if (dateTo) query = query.lte("created_at", `${dateTo}T23:59:59Z`);
     
-    // Admin/SuperAdmin은 특정 화주 필터링 가능
     const isAdmin = ['ADMIN', 'ZENITH_SUPER_ADMIN'].includes(profile.role);
     if (isAdmin && shipperId) {
       query = query.eq("shipper_id", shipperId);
@@ -66,55 +59,90 @@ export async function GET(request: Request) {
       return new NextResponse(`Data fetch error: ${queryError.message}`, { status: 500 });
     }
 
-    // 3. 데이터 가공 (엑셀 행 데이터)
-    const worksheetData = (invoices || []).map((inv: any) => ({
-      "인보이스 번호": inv.invoice_no,
-      "상태": inv.status,
-      "화주명": inv.shipper?.name || inv.shipper_id,
-      "총 금액": inv.total_amount,
-      "결제 금액": inv.paid_amount,
-      "통화": inv.currency,
-      "지불 기한": inv.due_date,
-      "생성 일시": new Date(inv.created_at).toLocaleString('ko-KR'),
-    }));
+    return generateExcelResponse(invoices || [], "export");
+
+  } catch (error: any) {
+    console.error("[FIN-02] Export Handler Panic:", error);
+    return new NextResponse(`Server Error: ${error.message}\n${error.stack}`, { status: 500 });
+  }
+}
+
+export async function POST(request: Request) {
+  try {
+    const body = await request.json();
+    const { data, filename } = body;
+
+    if (!data || !Array.isArray(data)) {
+      console.error("[FIN-02] Invalid POST data:", body);
+      return new NextResponse("Invalid data format", { status: 400 });
+    }
+
+    console.log(`[FIN-02] POST Payload - Data rows: ${data.length}, Filename: ${filename}`);
+    if (data.length > 0) {
+      console.log(`[FIN-02] First row sample:`, JSON.stringify(data[0]).substring(0, 200));
+    }
+
+    return generateExcelResponse(data, filename || "export");
+
+  } catch (error: any) {
+    console.error("[FIN-02] Export POST Handler Panic:", error);
+    return new NextResponse(`Server Error: ${error.message}\n${error.stack}`, { status: 500 });
+  }
+}
+
+function generateExcelResponse(data: any[], filename: string) {
+  try {
+    console.log(`[FIN-02] Generating Excel for ${data.length} rows, filename: ${filename}`);
+    
+    // 3. 데이터 가공
+    const worksheetData = data.map((inv: any, idx: number) => {
+      try {
+        return {
+          "인보이스 번호": inv.invoice_no || "N/A",
+          "상태": inv.status || "N/A",
+          "화주명": inv.shipper?.name || inv.shipper_id || "N/A",
+          "총 금액": inv.total_amount || 0,
+          "결제 금액": inv.paid_amount || 0,
+          "통화": inv.currency || "USD",
+          "지불 기한": inv.due_date || "N/A",
+          "생성 일시": inv.created_at ? new Date(inv.created_at).toLocaleString('ko-KR') : "N/A",
+        };
+      } catch (e) {
+        console.error(`[FIN-02] Error processing row ${idx}:`, e);
+        return { "Error": "Row processing failed" };
+      }
+    });
+
+    console.log("[FIN-02] Worksheet data prepared");
 
     // 4. XLSX 워크북 생성
     const worksheet = XLSX.utils.json_to_sheet(worksheetData);
     
-    // 컬럼 너비 설정
     const wscols = [
-      { wch: 20 }, // 인보이스 번호
-      { wch: 10 }, // 상태
-      { wch: 20 }, // 화주명
-      { wch: 15 }, // 총 금액
-      { wch: 15 }, // 결제 금액
-      { wch: 8 },  // 통화
-      { wch: 15 }, // 지불 기한
-      { wch: 25 }, // 생성 일시
+      { wch: 20 }, { wch: 10 }, { wch: 20 }, { wch: 15 },
+      { wch: 15 }, { wch: 8 }, { wch: 15 }, { wch: 25 },
     ];
     worksheet['!cols'] = wscols;
 
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "정산데이터");
 
-    // 5. 바이너리 스트림 생성
-    const buffer = XLSX.write(workbook, { type: "buffer", bookType: "xlsx" });
+    console.log("[FIN-02] Workbook created");
 
-    const dateStr = new Date().toISOString().split('T')[0].replace(/-/g, '');
-    const fileName = `settlement_export_${dateStr}.xlsx`;
-
-    // 6. 응답 반환
-    return new NextResponse(buffer, {
+    // 5. 바이너리 데이터 생성
+    const buf = XLSX.write(workbook, { type: "buffer", bookType: "xlsx" });
+    console.log("[FIN-02] Buffer generated, size:", buf?.length);
+  
+    return new NextResponse(buf, {
       status: 200,
       headers: {
         "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        "Content-Disposition": `attachment; filename=${fileName}`,
+        "Content-Disposition": `attachment; filename=${filename}.xlsx`,
         "Cache-Control": "no-store",
       },
     });
-
   } catch (error: any) {
-    console.error("[FIN-02] Export Handler Panic:", error);
-    return new NextResponse(`Server Error: ${error.message}`, { status: 500 });
+    console.error("[FIN-02] generateExcelResponse Error:", error);
+    throw error;
   }
 }

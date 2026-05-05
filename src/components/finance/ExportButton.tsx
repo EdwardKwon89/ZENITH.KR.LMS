@@ -21,12 +21,15 @@ export default function ExportButton({
   const [isExporting, setIsExporting] = useState(false);
 
   const handleExport = async () => {
+    console.log("[FIN-EXP] handleExport triggered", { dataLength: data?.length, type });
     if (!data || data.length === 0) {
+      console.warn("[FIN-EXP] No data to export");
       toast.error('내보낼 데이터가 없습니다.');
       return;
     }
 
     setIsExporting(true);
+    console.log("[FIN-EXP] Starting fetch to /api/finance/export");
     try {
       // Note: In a real implementation, we would call an API route that uses ExcelJS
       // For this task, we'll simulate the download or provide a CSV fallback
@@ -36,11 +39,13 @@ export default function ExportButton({
       const response = await fetch(`/api/finance/export`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ data, type, filename })
+        body: JSON.stringify({ data, filename, type }),
       });
       
       if (!response.ok) {
-        throw new Error(`Export failed: ${response.statusText}`);
+        const errorText = await response.text();
+        console.error("Server Error Details:", errorText);
+        throw new Error(`Export failed: ${response.status} - ${errorText}`);
       }
 
       const blob = await response.blob();
@@ -68,6 +73,7 @@ export default function ExportButton({
       disabled={isExporting}
       variant="glass"
       className={className}
+      data-action="export-finance"
     >
       {isExporting ? (
         <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
