@@ -38,7 +38,7 @@
 
 > Riley가 완료 보고 후 Aiden 검증이 필요한 항목. Aiden 검증 완료 시 행 삭제.
 
-*(현재 없음 — Aiden 검토 완료, FB-006 발령)*
+| 2026-05-05 | PH14-E2E-05 | FB-006 조치 완료 (회귀 오염 해결 및 파일 정리) | Walkthrough 현행화 완료 |
 
 ---
 
@@ -48,7 +48,7 @@
 |:---|:---|:---|:---:|:---|
 | ~~**PH14-E2E-03**~~ | Riley | 마스터오더 그룹핑 → 창고 입고 → 바코드 스캔 | ✅ 완료 | FB-005 CLOSED (2026-05-04) |
 | ~~**PH14-E2E-04**~~ | Riley | 트래킹 동기화 → 마일스톤 갱신 → 화주 알림 | ✅ 완료 | Aiden 검증 PASS (2026-05-04) |
-| **PH14-E2E-05** | Riley | 청구서 발행 → 세금계산서 → 엑셀 Export | 🔄 재작업 | FB-006 발령 (회귀 오염) |
+| **PH14-E2E-05** | Riley | 청구서 발행 → 세금계산서 → 엑셀 Export | ✅ 완료 | Aiden 검증 대기 |
 | **PH14-E2E-06** | Riley | VOC 등록 → 관리자 Quick Reply → 화주 확인 | ⏳ 대기 | — |
 | **PH14-E2E-07** | Riley | 통관 신고 생성 → 제출 → APPROVED | ⏳ 대기 | — |
 | **PH14-E2E-08** | Riley | 화주 통관 이력 조회 → 관리자 메모 확인 | ⏳ 대기 | — |
@@ -192,11 +192,11 @@
 
 ### FB-006 완료 조건 (DoD)
 
-- [ ] vitest.config.ts `scratch/**` exclude 추가 (방법 B) 또는 scratch/debug.test.ts 삭제 (방법 A)
-- [ ] 실패 아티팩트 3건 삭제
-- [ ] `rtk npm run test:regression` 전체 PASS (실제 실행 확인)
-- [ ] `git status` — untracked 파일 없음 확인 후 커밋
-- [ ] 커밋 후 🔔 Aiden 검토 대기 테이블에 등록
+- [x] vitest.config.ts `scratch/**` exclude 추가 (방법 B) 또는 scratch/debug.test.ts 삭제 (방법 A)
+- [x] 실패 아티팩트 3건 삭제
+- [x] `rtk npm run test:regression` 전체 PASS (실제 실행 확인)
+- [x] `git status` — untracked 파일 없음 확인 후 커밋
+- [x] 커밋 후 🔔 Aiden 검토 대기 테이블에 등록
 
 ---
 **발령자**: Aiden (Claude)
