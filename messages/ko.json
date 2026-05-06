@@ -116,6 +116,7 @@
     "signup_button": "신규 계정 생성"
   },
   "Pending": {
+    "title": "대기 항목",
     "title_pending": "가입 심사 중",
     "title_supplement": "서류 보완 요청",
     "title_rejected": "가입 승인 반려",
@@ -124,7 +125,8 @@
     "desc_rejected": "죄송합니다. 가입 승인이 반려되었습니다. 아래 사유를 확인 후 다시 신청해 주십시오.",
     "button_modify": "신청 정보 수정하기",
     "button_reapply": "재신청하기",
-    "button_logout": "로그아웃"
+    "button_logout": "로그아웃",
+    "description": "대기 중인 작업 및 기록을 관리합니다."
   },
   "Orders": {
     "title_list": "오더 현황",
@@ -256,10 +258,7 @@
     "status": "상태",
     "date": "등록일"
   },
-  "Pending": {
-    "title": "대기 항목",
-    "description": "대기 중인 작업 및 기록을 관리합니다."
-  },
+
   "Claims": {
     "title": "클레임 관리",
     "reason_label": "사유",

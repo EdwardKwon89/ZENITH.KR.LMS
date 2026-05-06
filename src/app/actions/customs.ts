@@ -50,9 +50,12 @@ export async function getDeclarations(params?: {
   limit?: number;
   offset?: number;
 }) {
-  const { supabase, profile } = params?.orderId 
-    ? await validateUserAction() 
-    : await validateAdminAction();
+  // Always use validateUserAction to allow both Admins and Shippers.
+  // RLS on the database side will ensure that Shippers only see their own data.
+  const { supabase, profile } = await validateUserAction();
+  
+  const isAdmin = ['ZENITH_SUPER_ADMIN', 'ADMIN', 'MANAGER'].includes(profile?.role || '');
+  console.log(`[getDeclarations] User: ${profile?.email}, Role: ${profile?.role}, IsAdmin: ${isAdmin}`);
 
   let query = supabase
     .from('customs_declarations')
