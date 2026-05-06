@@ -41,6 +41,7 @@ test.describe('E2E-07: Customs Declaration Lifecycle', () => {
 
     // Verify creation success
     await expect(page.getByText(/신고가 성공적으로 생성되었습니다/i)).toBeVisible({ timeout: 15000 });
+    await page.screenshot({ path: 'docs/99_Manual/E2E_07_Result/e2e_07_01_declaration_created.png', fullPage: true });
     console.log('Declaration created successfully');
 
     // --- Step 3: Submit to Customs Authorities ---
@@ -52,11 +53,16 @@ test.describe('E2E-07: Customs Declaration Lifecycle', () => {
     // Confirm dialog (browser dialog) - must be set BEFORE the action that triggers it
     page.once('dialog', dialog => dialog.accept());
     
-    // Click the submit (Send) button in the row
-    const submitBtn = row.locator('button').nth(1); // Second button is Send icon
+    // Click the submit (Send) button in the row using data-action
+    const submitBtn = row.locator('button[data-action="submit-declaration"]');
     await submitBtn.click();
     
     await expect(page.getByText(/신고가 성공적으로 제출되었습니다/i)).toBeVisible({ timeout: 15000 });
+    
+    // Verify SUBMITTED badge and capture
+    const submittedRowVerify = page.locator('tr').filter({ hasText: TEST_ORDER_NO }).filter({ hasText: '신고 완료' }).first();
+    await expect(submittedRowVerify).toBeVisible();
+    await page.screenshot({ path: 'docs/99_Manual/E2E_07_Result/e2e_07_02_submitted.png', fullPage: true });
     console.log('Declaration submitted to authorities');
 
     // --- Step 4: Approve Declaration ---
@@ -82,7 +88,7 @@ test.describe('E2E-07: Customs Declaration Lifecycle', () => {
     const approvedRow = page.locator('tr').filter({ hasText: TEST_ORDER_NO }).filter({ hasText: '통관 승인' }).first();
     await expect(approvedRow).toBeVisible({ timeout: 10000 });
     
-    await page.screenshot({ path: 'docs/99_Manual/E2E_07_Result/e2e_07_final_success.png', fullPage: true });
+    await page.screenshot({ path: 'docs/99_Manual/E2E_07_Result/e2e_07_03_approved.png', fullPage: true });
     console.log('E2E-07 Customs Declaration Lifecycle Test Passed!');
   });
 });

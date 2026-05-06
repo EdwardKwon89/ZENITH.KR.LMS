@@ -17,6 +17,7 @@ import CommercialInvoicePDF from '@/components/documents/CommercialInvoicePDF';
 import PackingListPDF from '@/components/documents/PackingListPDF';
 import { getDeclarations } from '@/app/actions/customs';
 import OrderCustomsSection from '@/components/customs/OrderCustomsSection';
+import OrderCustomsAdminControl from '@/components/customs/OrderCustomsAdminControl';
 
 import { Package, MapPin, Truck, ShieldCheck, FileText } from 'lucide-react';
 
@@ -287,6 +288,14 @@ export default async function OrderDetailPage({
 
           {/* 3. Customs Section (Sprint 12) */}
           <OrderCustomsSection declaration={declaration} />
+
+          {/* 3.1 Admin Customs Control */}
+          {isAdmin && (
+            <OrderCustomsAdminControl 
+              orderId={orderId} 
+              declaration={declaration} 
+            />
+          )}
 
           {/* 4. VOC Trigger */}
           <OrderVocTrigger orderId={orderId} orderNo={order.order_no} />

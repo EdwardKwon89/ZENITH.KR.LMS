@@ -200,6 +200,7 @@ export default function CustomsClient({ initialData, initialTotal }: CustomsClie
                 variant="tactile" 
                 className="p-2 h-auto bg-blue-600 text-white hover:bg-blue-700"
                 onClick={() => handleSubmit(item.id)}
+                data-action="submit-declaration"
               >
                 <Send size={16} />
               </ZenButton>
@@ -471,7 +472,7 @@ function CustomsDetailModal({
           </div>
 
           <div className="p-6 bg-slate-50/50 border-t border-slate-100 flex gap-3">
-            <ZenButton variant="ghost" onClick={onClose} className="flex-1">취ce</ZenButton>
+            <ZenButton variant="ghost" onClick={onClose} className="flex-1">취소</ZenButton>
             <ZenButton 
               id="save-status-btn"
               variant="tactile" 
