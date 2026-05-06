@@ -259,6 +259,7 @@
 | 2026-05-05 | v14.4 | ✅ PASS | 33.15s | 163/163 — E2E-05 정산 프로세스(인보이스→세금계산서→엑셀) 정상화 및 RLS 수정 완료. |
 | 2026-05-05 | v14.5 | ✅ PASS | 45.04s | 161/161 — FB-006 조치 완료. vitest.config.ts `scratch/**` exclude 추가로 scratch 디버그 파일 2건 회귀 suite에서 제거. 실질 커버리지 유지. |
 | 2026-05-06 | v14.7 | ✅ PASS | 24.01s | 161/161 — E2E-07 통관 라이프사이클 테스트 완료. UI ID 도입 및 브라우저 다이얼로그 처리 로직 고도화로 안정성 확보. (Playwright E2E는 vitest suite 외부 — 단위 테스트 수 변동 없음, Aiden 검증 정정) |
+| 2026-05-06 | v14.8 | ✅ PASS | ~30s | 161/161 — E2E-08 화주 통관 이력 조회 완료. getDeclarations validateUserAction 전환, middleware /mypage 허용, RLS 조직 격리 정책 보강. (Aiden 직접 등록 — Riley R-09 허위 보고 정정) |
 
 
 ---
