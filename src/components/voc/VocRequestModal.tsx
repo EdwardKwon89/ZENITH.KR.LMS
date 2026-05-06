@@ -44,19 +44,30 @@ export const VocRequestModal: React.FC<VocRequestModalProps> = ({
 
     setIsSubmitting(true);
     try {
-      await createVoc({
+    const result = await createVoc({
         order_id: orderId,
         type: selectedType,
         title,
         description
       });
       
+      if (!result.success) {
+        toast.error('VOC 접수 실패', {
+          description: result.error,
+          icon: <AlertCircle className="text-red-500" />
+        });
+        return;
+      }
+      
       toast.success(t('success_create'), {
         icon: <CheckCircle2 className="text-green-500" />
       });
       
-      onSuccess?.();
-      onClose();
+      // toast가 DOM에 mount된 후 모달을 닫아야 playwright가 감지 가능
+      setTimeout(() => {
+        onSuccess?.();
+        onClose();
+      }, 500);
     } catch (err: any) {
       toast.error('VOC 접수 실패', {
         description: err.message,

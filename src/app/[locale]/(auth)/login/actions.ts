@@ -7,24 +7,46 @@ import { revalidatePath } from 'next/cache';
 
 
 export async function login(formData: FormData) {
+  console.log('[ACTION] login START');
   const supabase = await createClient();
 
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
   const locale = formData.get('locale') as string || 'ko';
 
-  const { error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
+  console.log('[ACTION] login INPUT:', { email, locale });
 
-  if (error) {
-    throw new Error(error.message);
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      console.error('[ACTION] login AUTH ERROR:', error.message);
+      return { error: error.message };
+    }
+
+    console.log('[ACTION] login AUTH SUCCESS:', data.user?.id);
+
+    // Redirect to orders as the primary dashboard view with locale prefix
+    revalidatePath('/', 'layout');
+    console.log('[ACTION] login REDIRECTING to:', `/${locale}/orders`);
+    
+    // Using redirect inside try-catch is tricky in Next.js.
+    // It's better to return success and let the client handle redirect, 
+    // or call redirect outside the try-catch.
+  } catch (e: any) {
+    if (e.message?.includes('NEXT_REDIRECT')) {
+      throw e; 
+    }
+    console.error('[ACTION] login UNEXPECTED ERROR:', e);
+    return { error: 'An unexpected error occurred during login.' };
   }
-
-  // Redirect to orders as the primary dashboard view with locale prefix
-  revalidatePath('/', 'layout');
-  redirect(`/${locale}/orders`);
+  
+  // Call redirect outside try-catch
+  const formDataLocale = formData.get('locale') as string || 'ko';
+  redirect(`/${formDataLocale}/orders`);
 }
 
 export async function signup(formData: FormData, locale: string = 'ko') {

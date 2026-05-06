@@ -15,6 +15,7 @@ import {
 import { cn } from "@/lib/utils";
 import { ZenButton, ZenBadge, ZenCard } from "@/components/ui/ZenUI";
 import { getOrderQnaList, answerQna } from "@/app/actions/support";
+import { getVocList } from "@/app/actions/voc";
 import { format } from "date-fns";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -33,8 +34,9 @@ export function OrderQnaSection({
   locale = "ko" 
 }: OrderQnaSectionProps) {
   const t = useTranslations("Support");
+  const tVoc = useTranslations("VOC");
   const router = useRouter();
-  const [qnas, setQnas] = useState<any[]>([]);
+  const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   
   // Quick Reply States
@@ -44,16 +46,36 @@ export function OrderQnaSection({
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    loadQnas();
+    loadItems();
   }, [orderId]);
 
-  const loadQnas = async () => {
+  const loadItems = async () => {
     setLoading(true);
     try {
-      const data = await getOrderQnaList(orderId);
-      setQnas(data);
+      const [qnaData, vocData] = await Promise.all([
+        getOrderQnaList(orderId),
+        getVocList({ order_id: orderId })
+      ]);
+      
+      const normalizedQnas = qnaData.map(q => ({ 
+        ...q, 
+        _type: 'QNA' 
+      }));
+      
+      const normalizedVocs = (vocData.success ? vocData.vocs : []).map(v => ({ 
+        ...v, 
+        _type: 'VOC',
+        title: `[VOC] ${v.title}`,
+        content: v.description
+      }));
+      
+      const merged = [...normalizedQnas, ...normalizedVocs].sort((a, b) => 
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+      
+      setItems(merged);
     } catch (error) {
-      console.error("Failed to load order QNAs", error);
+      console.error("Failed to load order items", error);
     } finally {
       setLoading(false);
     }
@@ -75,7 +97,7 @@ export function OrderQnaSection({
       toast.success("답변이 성공적으로 등록되었습니다.");
       setReplyingTo(null);
       setReplyContent("");
-      await loadQnas();
+      await loadItems();
     } catch (error: any) {
       toast.error(error.message || "답변 등록에 실패했습니다.");
     } finally {
@@ -83,28 +105,49 @@ export function OrderQnaSection({
     }
   };
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "PENDING":
-        return (
-          <ZenBadge variant="default" className="bg-slate-50 text-slate-500 border-slate-200">
-            <Clock size={12} className="mr-1" /> {t("status_pending")}
-          </ZenBadge>
-        );
-      case "IN_PROGRESS":
-        return (
-          <ZenBadge variant="info" className="bg-blue-50 text-blue-500 border-blue-200">
-            <AlertCircle size={12} className="mr-1" /> {t("status_in_progress")}
-          </ZenBadge>
-        );
-      case "ANSWERED":
-        return (
-          <ZenBadge variant="success" className="bg-green-50 text-green-500 border-green-200">
-            <CheckCircle2 size={12} className="mr-1" /> {t("status_answered")}
-          </ZenBadge>
-        );
-      default:
-        return null;
+  const getStatusBadge = (status: string, itemType: string) => {
+    if (status === "IN_PROGRESS") {
+      return (
+        <ZenBadge variant="info" className="bg-blue-50 text-blue-500 border-blue-200">
+          <AlertCircle size={12} className="mr-1" /> {t("status_in_progress")}
+        </ZenBadge>
+      );
+    }
+
+    if (itemType === 'VOC') {
+      switch (status) {
+        case "OPEN":
+          return (
+            <ZenBadge variant="default" className="bg-slate-50 text-slate-500 border-slate-200">
+              <Clock size={12} className="mr-1" /> {tVoc("status_open")}
+            </ZenBadge>
+          );
+        case "CLOSED":
+          return (
+            <ZenBadge variant="success" className="bg-green-50 text-green-500 border-green-200">
+              <CheckCircle2 size={12} className="mr-1" /> {tVoc("status_closed")}
+            </ZenBadge>
+          );
+        default:
+          return null;
+      }
+    } else {
+      switch (status) {
+        case "PENDING":
+          return (
+            <ZenBadge variant="default" className="bg-slate-50 text-slate-500 border-slate-200">
+              <Clock size={12} className="mr-1" /> {t("status_pending")}
+            </ZenBadge>
+          );
+        case "ANSWERED":
+          return (
+            <ZenBadge variant="success" className="bg-green-50 text-green-500 border-green-200">
+              <CheckCircle2 size={12} className="mr-1" /> {t("status_answered")}
+            </ZenBadge>
+          );
+        default:
+          return null;
+      }
     }
   };
 
@@ -116,7 +159,7 @@ export function OrderQnaSection({
             <MessageCircle className="w-5 h-5 text-blue-500" />
             {t("qna_title")}
           </h3>
-          <p className="text-xs text-slate-500 mt-1">이 오더와 관련된 1:1 상담 내역입니다.</p>
+          <p className="text-xs text-slate-500 mt-1">이 오더와 관련된 1:1 상담 및 VOC 내역입니다.</p>
         </div>
         {!isAdmin && (
           <ZenButton 
@@ -133,11 +176,11 @@ export function OrderQnaSection({
           Array(2).fill(0).map((_, i) => (
             <div key={i} className="h-20 w-full bg-slate-100 dark:bg-neutral-800 animate-pulse rounded-2xl" />
           ))
-        ) : qnas.length > 0 ? (
+        ) : items.length > 0 ? (
           <div className="grid grid-cols-1 gap-4">
-            {qnas.map((qna, idx) => (
+            {items.map((item, idx) => (
               <motion.div
-                key={qna.id}
+                key={item.id}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: idx * 0.05 }}
@@ -146,57 +189,65 @@ export function OrderQnaSection({
                 <ZenCard 
                   className={cn(
                     "p-0 border-slate-200 dark:border-neutral-800 transition-all overflow-hidden rounded-2xl zen-shadow-sm",
-                    replyingTo === qna.id && "ring-2 ring-brand-500 border-transparent shadow-brand-100"
+                    replyingTo === item.id && "ring-2 ring-brand-500 border-transparent shadow-brand-100"
                   )}
                 >
-                  {/* QnA Summary Row */}
+                  {/* Item Summary Row */}
                   <div 
                     className="p-4 flex items-center justify-between gap-4 cursor-pointer hover:bg-slate-50 dark:hover:bg-neutral-800/50 transition-colors"
                     onClick={() => {
-                        if (replyingTo === qna.id) setReplyingTo(null);
-                        else router.push(`/${locale}/support/qna/${qna.id}`);
+                        if (replyingTo === item.id) setReplyingTo(null);
+                        else {
+                          const path = item._type === 'VOC' ? 'voc' : 'support/qna';
+                          router.push(`/${locale}/${path}/${item.id}`);
+                        }
                     }}
                   >
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1.5">
-                        {getStatusBadge(qna.status)}
+                        {getStatusBadge(item.status, item._type)}
                         <span className="text-[10px] text-slate-400">
-                          {format(new Date(qna.created_at), "yyyy-MM-dd HH:mm")}
+                          {format(new Date(item.created_at), "yyyy-MM-dd HH:mm")}
                         </span>
+                        {item._type === 'VOC' && (
+                          <ZenBadge variant="outline" className="text-[9px] h-4 px-1.5 border-brand-200 text-brand-600">
+                            VOC
+                          </ZenBadge>
+                        )}
                       </div>
                       <h4 className="font-bold text-slate-900 dark:text-white text-sm truncate">
-                        {qna.title}
+                        {item.title}
                       </h4>
                     </div>
                     
                     <div className="flex items-center gap-3">
-                      {isAdmin && qna.status !== "ANSWERED" && (
+                      {isAdmin && item.status !== "ANSWERED" && item.status !== "CLOSED" && item._type === 'QNA' && (
                         <ZenButton
                           variant="ghost"
                           onClick={(e) => {
                             e.stopPropagation();
-                            if (replyingTo === qna.id) setReplyingTo(null);
+                            if (replyingTo === item.id) setReplyingTo(null);
                             else {
-                                setReplyingTo(qna.id);
+                                setReplyingTo(item.id);
                                 setReplyContent("");
                             }
                           }}
                           className={cn(
                             "h-8 px-3 text-xs rounded-lg flex items-center gap-1.5 border transition-all",
-                            replyingTo === qna.id 
+                            replyingTo === item.id 
                                 ? "bg-brand-600 text-white border-brand-600" 
                                 : "bg-brand-50 text-brand-600 hover:bg-brand-100 border-brand-100"
                           )}
                         >
                           <MessageSquareReply size={14} />
-                          {replyingTo === qna.id ? "닫기" : "바로 답변"}
+                          {replyingTo === item.id ? "닫기" : "바로 답변"}
                         </ZenButton>
                       )}
                       <div className="flex items-center gap-3 shrink-0">
-                        {qna.answer_count > 0 && (
+                        {item.answer_count > 0 && (
                           <div className="flex items-center gap-1 text-brand-600 bg-brand-50 dark:bg-brand-900/20 px-2 py-0.5 rounded-lg">
                             <MessageCircle size={12} />
-                            <span className="text-[10px] font-bold">{qna.answer_count}</span>
+                            <span className="text-[10px] font-bold">{item.answer_count}</span>
                           </div>
                         )}
                         <ChevronRight size={18} className="text-slate-300 group-hover:text-brand-400 transition-colors" />
@@ -204,9 +255,9 @@ export function OrderQnaSection({
                     </div>
                   </div>
 
-                  {/* Quick Reply Form (Admin Only) */}
+                  {/* Quick Reply Form (Admin Only, QNA Only for now) */}
                   <AnimatePresence>
-                    {replyingTo === qna.id && (
+                    {replyingTo === item.id && item._type === 'QNA' && (
                       <motion.div
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: "auto", opacity: 1 }}
@@ -216,7 +267,7 @@ export function OrderQnaSection({
                         <div className="p-4 space-y-4">
                             <div className="bg-white dark:bg-neutral-800 p-3 rounded-xl border border-slate-200 dark:border-neutral-700 text-xs text-slate-600 dark:text-slate-400">
                                 <p className="font-bold mb-1 text-slate-800 dark:text-slate-200">문의 내용 미리보기:</p>
-                                <p className="line-clamp-3 italic">"{qna.content}"</p>
+                                <p className="line-clamp-3 italic">"{item.content}"</p>
                             </div>
 
                             <textarea
@@ -249,7 +300,7 @@ export function OrderQnaSection({
                                     </ZenButton>
                                     <ZenButton
                                         loading={submitting}
-                                        onClick={() => handleQuickReply(qna.id)}
+                                        onClick={() => handleQuickReply(item.id)}
                                         className="h-9 px-6 text-xs bg-brand-600 text-white hover:bg-brand-700 rounded-xl"
                                     >
                                         답변 등록

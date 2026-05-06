@@ -85,19 +85,25 @@ export async function validateAdminAction() {
  * 일반 사용자 세션을 검증하는 서버 액션용 가드입니다.
  */
 export async function validateUserAction() {
+  console.log("[DEBUG] validateUserAction START");
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  console.log("[DEBUG] validateUserAction: Supabase client created");
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  console.log("[DEBUG] validateUserAction: getUser result", { hasUser: !!user, email: user?.email, error: authError });
 
   if (!user) {
     console.error("[AUTH_REQUIRED] Session not found");
     throw new Error("Login required");
   }
 
-  const { data: profile } = await supabase
+  const { data: profile, error: profileError } = await supabase
     .from("zen_profiles")
     .select("*")
     .eq("id", user.id)
     .single();
+    
+  console.log("[DEBUG] validateUserAction: profile result", { hasProfile: !!profile, error: profileError });
 
   return { user, profile, supabase };
 }
+

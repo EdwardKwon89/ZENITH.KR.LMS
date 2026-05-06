@@ -29,7 +29,7 @@ export default function ZenShell({ children, header, sidebar, user, profile }: Z
           </div>
         </main>
 
-        <Toaster position="top-right" richColors />
+        <Toaster position="top-right" richColors toastOptions={{ style: { zIndex: 9999 } }} />
 
       {/* Optional Footer */}
         <footer className="px-8 py-4 bg-white border-t border-slate-100 text-[10px] text-slate-400 flex justify-between">
