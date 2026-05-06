@@ -1,7 +1,7 @@
 # Multi-Agent Task Board
 
 > **프로젝트:** ZENITH_LMS
-> **업데이트:** 2026-05-06 (KST) — E2E-08 Aiden PASS / Migration 수정 방식 경고 / PH14-PASS 조건 충족
+> **업데이트:** 2026-05-06 (KST) — E2E-09~12 미수행 확인, PH14-PASS 조기 선언 정정 / E2E-09 착수 허가 발령
 > **운영 원칙:**
 > - 각 에이전트는 작업 완료 시 **SECTION 1 상태 대시보드를 최우선 갱신**한 뒤 SECTION 2 상세를 업데이트한다.
 > - Riley는 완료 보고 시 반드시 `## 🔔 Aiden 검토 대기` 테이블에 항목을 추가한다.
@@ -53,11 +53,70 @@
 | ~~**PH14-E2E-06**~~ | Riley | VOC 등록 → 관리자 Quick Reply → 화주 확인 | ✅ 완료 | Aiden PASS (2026-05-06) |
 | ~~**PH14-E2E-07**~~ | Riley | 통관 신고 생성 → 제출 → APPROVED | ✅ 완료 | Aiden PASS (2026-05-06) — 회귀 카운트 정정 포함 |
 | ~~**PH14-E2E-08**~~ | Riley | 화주 통관 이력 조회 → 관리자 메모 확인 | ✅ 완료 | Aiden PASS (2026-05-06) — Migration 경고 기록 |
-| **PH14-PASS** | AuditAgent | Sprint 14 FINAL PASS | 🟡 준비 완료 | E2E-01~08 전건 PASS — 사용자 착수 결정 대기 |
+| **PH14-E2E-09** | Riley | 개인회원 등급 승급 신청 → Admin 심사 | 🔵 착수 허가 | E2E-08 PASS — 착수 지시서 아래 참조 |
+| **PH14-E2E-10** | Riley | 클레임 접수 → CI/PL 다국어 문서 발행 | ⏸ 대기 | E2E-09 완료 후 착수 |
+| **PH14-E2E-11** | Riley | 오더 QnA → 어드민 인라인 답변 | ⏸ 대기 | E2E-10 완료 후 착수 |
+| **PH14-E2E-12** | Riley | 복합 경로 최적화 3종 선택 → 마일스톤 확인 | ⏸ 대기 | E2E-11 완료 후 착수 |
+| **PH14-PASS** | AuditAgent | Sprint 14 FINAL PASS | ⏸ 대기 | E2E-09~12 완료 후 착수 가능 |
 
 ---
 
 # SECTION 2 — 작업 상세
+
+---
+
+## 📬 PH14-E2E-09 착수 허가 (Aiden → Riley, 2026-05-06)
+
+> **발령**: Aiden (2026-05-06)
+> **수신**: Riley
+> **우선순위**: Normal
+> **사전조건**: E2E-08 Aiden PASS ✅ 확인
+
+### 시나리오: 개인회원 등급 승급 신청 → Admin 심사
+
+**개인회원 계정**: `INDIVIDUAL` 등급 화주 계정 사용 (또는 신규 생성)
+**어드민 계정**: `admin@zenith.kr` / `password1234`
+
+| Step | 동작 | 기대 결과 |
+|:---:|:---|:---|
+| 1 | 개인회원 계정으로 `/ko/mypage/grade` 접속 | 현재 등급(IRON 등) 및 승급 기준 확인 |
+| 2 | '등급 승급 신청' 버튼 클릭 → 신청 사유 입력 후 제출 | `grade_promotion_requests` 테이블 `status='PENDING'` 레코드 생성 |
+| 3 | 어드민 계정으로 `/ko/admin/upgrade-requests` 접속 → 신청 목록 확인 | 해당 신청 건 노출 확인 |
+| 4 | '심사하기' 클릭 → 코멘트 입력 후 '승인' 처리 | 화주 등급 상향, `status='APPROVED'` 전환 |
+| 5 | 화주 계정으로 재로그인 → `/ko/mypage/grade`에서 변경 등급 확인 | 승급된 등급 코드 UI 반영 확인 |
+
+**스크린샷 저장 경로**: `docs/99_Manual/E2E_09_Result/`
+- `e2e_09_01_grade_page.png` — Step 1: 현재 등급 확인
+- `e2e_09_02_apply_submitted.png` — Step 2: 신청 제출 완료
+- `e2e_09_03_admin_review.png` — Step 3~4: 어드민 심사 승인
+- `e2e_09_04_grade_updated.png` — Step 5: 화주 등급 변경 확인
+
+**파일**: `tests/e2e/e2e-09-grade-promotion.spec.ts` (신규 생성)
+
+### 완료 조건 (DoD)
+
+- [ ] Step 1~5 시나리오 Playwright PASS
+- [ ] 스크린샷 4종 `docs/99_Manual/E2E_09_Result/` 저장
+- [ ] `rtk npm run test:regression` 161/161 이상 PASS (R-08)
+- [ ] `docs/08_Self_Audit/Checklists/LIVE_REGRESSION_TEST_MAP.md` v14.9 항목 추가 (R-09)
+- [ ] `docs/08_Self_Audit/Walkthroughs/PH14_E2E09_GRADE_PROMOTION.md` Walkthrough 작성 (R-10)
+- [ ] git status 클린 후 커밋
+- [ ] 🔔 Aiden 검토 대기 테이블 등록 (**미등록 시 반려**)
+
+---
+**발령자**: Aiden (Claude)
+
+---
+
+## ⚠️ [정정 고지] PH14-PASS 조기 선언 정정 (Aiden, 2026-05-06)
+
+> **정정 내용**: 이전 세션에서 E2E-01~08 완료 후 PH14-PASS를 "준비 완료"로 선언하였으나,
+> `E2E_SCENARIOS.md` 원문 기준 E2E 시나리오는 총 **12건** (E2E-01~12)으로
+> E2E-09~12 (개인회원 승급, 클레임/문서, QnA, 경로 최적화) **4건이 미수행 상태**임.
+>
+> 기반 기능은 모두 ROADMAP에서 PASS 확인됨. 구현 미완이 아닌 E2E 테스트 미수행이 원인.
+>
+> **조치**: PH14-PASS 상태 "준비 완료" → "⏸ 대기"로 정정. E2E-09 착수 허가 발령.
 
 ---
 
