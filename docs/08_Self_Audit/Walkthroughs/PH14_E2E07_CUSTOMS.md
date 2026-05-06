@@ -35,7 +35,7 @@
 - **E2E 테스트**: `tests/e2e/e2e-07-customs.spec.ts` PASS
 - **회귀 테스트**: `rtk npm run test:regression` 실행 결과 **162/162 PASS** 확인.
 - **규정 준수**:
-  - [x] R-08: 회귀 테스트 수행 및 성공 증빙 (162/162 PASS)
+  - [x] R-08: 회귀 테스트 수행 및 성공 증빙 (161/161 PASS — Playwright E2E는 vitest 외부, 단위 테스트 카운트 변동 없음)
   - [x] R-09: 회귀 테스트 마스터 맵 업데이트 완료 (v14.7)
   - [x] R-10: 물리적 UI 구동 증적(스크린샷 3종) 포함 완료
   - [x] R-13: 테스트 결과물 지정 폴더(`docs/99_Manual/E2E_07_Result`) 저장 완료

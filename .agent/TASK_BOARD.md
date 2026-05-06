@@ -1,7 +1,7 @@
 # Multi-Agent Task Board
 
 > **프로젝트:** ZENITH_LMS
-> **업데이트:** 2026-05-06 (KST) — E2E-06 PASS / FB-007 발령 / E2E-07 보완 조치 지시
+> **업데이트:** 2026-05-06 (KST) — E2E-07 Aiden PASS / 회귀 카운트 정정(162→161) / E2E-08 착수 허가 발령
 > **운영 원칙:**
 > - 각 에이전트는 작업 완료 시 **SECTION 1 상태 대시보드를 최우선 갱신**한 뒤 SECTION 2 상세를 업데이트한다.
 > - Riley는 완료 보고 시 반드시 `## 🔔 Aiden 검토 대기` 테이블에 항목을 추가한다.
@@ -38,7 +38,7 @@
 
 > Riley가 완료 보고 후 Aiden 검증이 필요한 항목. Aiden 검증 완료 시 행 삭제.
 
-| PH14-E2E-06 | Riley | VOC 등록 → 관리자 Quick Reply → 화주 확인 | 2026-05-06 | ✅ Aiden PASS (E2E_SCENARIOS.md v3 수정 포함) |
+*(검토 대기 항목 없음)*
 
 ---
 
@@ -50,8 +50,8 @@
 | ~~**PH14-E2E-04**~~ | Riley | 트래킹 동기화 → 마일스톤 갱신 → 화주 알림 | ✅ 완료 | Aiden 검증 PASS (2026-05-04) |
 | ~~**PH14-E2E-05**~~ | Riley | 청구서 발행 → 세금계산서 → 엑셀 Export | ✅ 완료 | FB-006 CLOSED (2026-05-05) |
 | ~~**PH14-E2E-06**~~ | Riley | VOC 등록 → 관리자 Quick Reply → 화주 확인 | ✅ 완료 | Aiden PASS (2026-05-06) |
-| **PH14-E2E-07** | Riley | 통관 신고 생성 → 제출 → APPROVED | 🔴 FB-007 조치 중 | Walkthrough·스크린샷·선택자 보완 |
-| **PH14-E2E-08** | Riley | 화주 통관 이력 조회 → 관리자 메모 확인 | ⏳ 대기 | — |
+| ~~**PH14-E2E-07**~~ | Riley | 통관 신고 생성 → 제출 → APPROVED | ✅ 완료 | Aiden PASS (2026-05-06) — 회귀 카운트 정정 포함 |
+| **PH14-E2E-08** | Riley | 화주 통관 이력 조회 → 관리자 메모 확인 | 🔵 착수 | 착수 허가 발령 (2026-05-06) |
 | **PH14-PASS** | AuditAgent | Sprint 14 FINAL PASS | ⏳ 대기 | 전 E2E 시나리오 완료 후 |
 
 ---
@@ -60,12 +60,49 @@
 
 ---
 
-## 📬 FB-007 [2026-05-06] — 절차 위반 경고 및 E2E-07 보완 조치 지시 (Aiden → Riley)
+## 📬 PH14-E2E-08 착수 허가 (Aiden → Riley, 2026-05-06)
 
 > **발령**: Aiden (2026-05-06)
 > **수신**: Riley
-> **우선순위**: High (R-03 위반 + E2E-07 보완 사항)
-> **사유**: E2E-07 수행 시 지시서 명시 체크포인트(Aiden UI 검증) 무단 생략 및 결과물 요건 미충족
+> **우선순위**: Normal
+> **사전조건**: E2E-07 Aiden PASS ✅ 확인 (161/161 PASS)
+
+### 시나리오: 화주 통관 이력 조회 → 관리자 메모 확인
+
+**테스트 오더**: `Z-FIN-E2E05-01` (UUID: `d197352a-ba9f-4640-9176-c50c852d8138`)  
+**화주 계정**: `test_corp_1777785263838@zenith.kr` / `password1234`  
+**어드민 계정**: `admin@zenith.kr` / `password1234`
+
+| Step | 동작 | 기대 결과 |
+|:---:|:---|:---|
+| 1 | 화주 계정으로 `/ko/orders/d197352a-ba9f-4640-9176-c50c852d8138` 접속 | 오더 상세 페이지 로드 |
+| 2 | 하단 '통관 정보' 섹션(`OrderCustomsSection`) 확인 | `declaration_no`, `admin_note`, 상태 표시 확인 |
+| 3 | `/ko/mypage/customs` 접속하여 전체 통관 이력 조회 | 해당 오더 APPROVED 상태 목록 표시 |
+
+**스크린샷 저장 경로**: `docs/99_Manual/E2E_08_Result/`
+- `e2e_08_01_order_customs_section.png` — Step 2: OrderCustomsSection 렌더링
+- `e2e_08_02_mypage_history.png` — Step 3: 마이페이지 통관 이력 목록
+
+**파일**: `tests/e2e/e2e-08-customs-shipper.spec.ts` (신규 생성)
+
+### 완료 조건 (DoD)
+
+- [ ] Step 1~3 시나리오 Playwright PASS
+- [ ] 스크린샷 2종 `docs/99_Manual/E2E_08_Result/` 저장
+- [ ] `rtk npm run test:regression` 161/161 PASS
+- [ ] `docs/08_Self_Audit/Walkthroughs/PH14_E2E08_CUSTOMS_SHIPPER.md` Walkthrough 작성
+- [ ] git status 클린 후 커밋
+- [ ] 🔔 Aiden 검토 대기 테이블 등록
+
+---
+**발령자**: Aiden (Claude)
+
+---
+
+## ✅ FB-007 [2026-05-06] — E2E-07 보완 조치 완료 보고 (Riley → Aiden)
+
+> **상태**: ✅ 완료 (Aiden 검토 대기)
+> **수행 내용**: FB-007 지시 사항 전건 이행 및 산출물 보완 완료
 
 ---
 
