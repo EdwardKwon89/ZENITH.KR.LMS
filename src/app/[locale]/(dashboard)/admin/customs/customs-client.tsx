@@ -14,12 +14,13 @@ import {
   AlertCircle,
   Clock,
   XCircle,
-  Eye
+  Eye,
+  Plus
 } from 'lucide-react';
 import { ZenCard, ZenButton, ZenBadge, ZenInput } from '@/components/ui/ZenUI';
 import ZenDataGrid from '@/components/ui/ZenDataGrid';
 import { CustomsDeclaration, CustomsStatus } from '@/lib/customs/types';
-import { getDeclarations, submitDeclaration, updateDeclarationStatus } from '@/app/actions/customs';
+import { getDeclarations, submitDeclaration, updateDeclarationStatus, createDeclaration } from '@/app/actions/customs';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
@@ -40,7 +41,9 @@ export default function CustomsClient({ initialData, initialTotal }: CustomsClie
   // Modal State
   const [selectedItem, setSelectedItem] = useState<CustomsDeclaration | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
 
   const fetchData = async (status?: CustomsStatus | 'ALL') => {
     setLoading(true);
@@ -99,6 +102,29 @@ export default function CustomsClient({ initialData, initialTotal }: CustomsClie
       toast.error('오류가 발생했습니다.');
     } finally {
       setIsUpdating(false);
+    }
+  };
+
+  const handleCreateDeclaration = async (payload: {
+    orderId: string;
+    cargoDescription: string;
+    declaredValue: number;
+    currencyCode: string;
+  }) => {
+    setIsCreating(true);
+    try {
+      const result = await createDeclaration(payload);
+      if (result.success) {
+        toast.success('신고가 성공적으로 생성되었습니다.');
+        setIsCreateModalOpen(false);
+        fetchData(activeTab);
+      } else {
+        toast.error(result.error || '신고 생성에 실패했습니다.');
+      }
+    } catch (error) {
+      toast.error('오류가 발생했습니다.');
+    } finally {
+      setIsCreating(false);
     }
   };
 
@@ -188,6 +214,21 @@ export default function CustomsClient({ initialData, initialTotal }: CustomsClie
 
   return (
     <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <div className="space-y-1">
+          <h2 className="text-2xl font-bold tracking-tight">통관 관리</h2>
+          <p className="text-muted-foreground">통관 신고 및 상태를 관리합니다.</p>
+        </div>
+        <ZenButton 
+          variant="tactile" 
+          className="bg-brand-600 text-white hover:bg-brand-700 shadow-lg shadow-brand-500/20"
+          onClick={() => setIsCreateModalOpen(true)}
+        >
+          <Plus size={18} className="mr-2" />
+          신고 생성
+        </ZenButton>
+      </div>
+
       {/* Status Tabs */}
       <div className="flex p-1 bg-slate-100/50 rounded-2xl w-fit">
         {TABS.map(tab => (
@@ -223,6 +264,116 @@ export default function CustomsClient({ initialData, initialTotal }: CustomsClie
           />
         )}
       </AnimatePresence>
+
+      <AnimatePresence>
+        {isCreateModalOpen && (
+          <CreateDeclarationModal 
+            onClose={() => setIsCreateModalOpen(false)} 
+            onCreate={handleCreateDeclaration}
+            isCreating={isCreating}
+          />
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+function CreateDeclarationModal({ 
+  onClose, 
+  onCreate, 
+  isCreating 
+}: { 
+  onClose: () => void; 
+  onCreate: (payload: any) => void;
+  isCreating: boolean;
+}) {
+  const [orderId, setOrderId] = useState('');
+  const [cargoDescription, setCargoDescription] = useState('');
+  const [declaredValue, setDeclaredValue] = useState(0);
+  const [currencyCode, setCurrencyCode] = useState('KRW');
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 20 }}
+        className="w-full max-w-lg"
+      >
+        <ZenCard className="bg-white p-0 overflow-hidden">
+          <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+            <div>
+              <h3 className="text-xl font-bold text-slate-900">신규 통관 신고 생성</h3>
+              <p className="text-sm text-slate-500">신고할 오더 정보를 입력하세요.</p>
+            </div>
+            <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-600 transition-colors">
+              <X size={20} />
+            </button>
+          </div>
+
+          <div className="p-6 space-y-4">
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-slate-700">Order ID</label>
+              <ZenInput 
+                id="order-id-input"
+                value={orderId}
+                onChange={(e) => setOrderId(e.target.value)}
+                placeholder="오더의 UUID를 입력하세요"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-slate-700">화물 설명</label>
+              <ZenInput 
+                id="cargo-description-input"
+                value={cargoDescription}
+                onChange={(e) => setCargoDescription(e.target.value)}
+                placeholder="예: 전자제품, 의류 등"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-700">신고 금액</label>
+                <ZenInput 
+                  id="declared-value-input"
+                  type="number"
+                  value={declaredValue}
+                  onChange={(e) => setDeclaredValue(Number(e.target.value))}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-700">통화</label>
+                <select 
+                  id="currency-code-select"
+                  value={currencyCode}
+                  onChange={(e) => setCurrencyCode(e.target.value)}
+                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-500/10 focus:outline-none"
+                >
+                  <option value="KRW">KRW</option>
+                  <option value="USD">USD</option>
+                  <option value="JPY">JPY</option>
+                  <option value="CNY">CNY</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div className="p-6 bg-slate-50/50 border-t border-slate-100 flex gap-3">
+            <ZenButton variant="ghost" onClick={onClose} className="flex-1">취소</ZenButton>
+            <ZenButton 
+              id="submit-declaration-btn"
+              variant="tactile" 
+              className="flex-1 bg-brand-600 text-white hover:bg-brand-700"
+              onClick={() => onCreate({ orderId, cargoDescription, declaredValue, currencyCode })}
+              loading={isCreating}
+              disabled={!orderId || !cargoDescription}
+            >
+              생성하기
+            </ZenButton>
+          </div>
+        </ZenCard>
+      </motion.div>
     </div>
   );
 }
@@ -284,6 +435,7 @@ function CustomsDetailModal({
               <div className="space-y-2">
                 <label className="text-sm font-bold text-slate-700">처리 상태</label>
                 <select 
+                  id="status-select"
                   value={status}
                   onChange={(e) => setStatus(e.target.value as CustomsStatus)}
                   className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-500/10 focus:outline-none"
@@ -308,6 +460,7 @@ function CustomsDetailModal({
               <div className="space-y-2">
                 <label className="text-sm font-bold text-slate-700">관리자 메모</label>
                 <textarea 
+                  id="admin-note-input"
                   value={adminNote}
                   onChange={(e) => setAdminNote(e.target.value)}
                   className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-500/10 focus:outline-none min-h-[100px]"
@@ -320,6 +473,7 @@ function CustomsDetailModal({
           <div className="p-6 bg-slate-50/50 border-t border-slate-100 flex gap-3">
             <ZenButton variant="ghost" onClick={onClose} className="flex-1">취ce</ZenButton>
             <ZenButton 
+              id="save-status-btn"
               variant="tactile" 
               className="flex-1 bg-blue-600 text-white hover:bg-blue-700"
               onClick={() => onUpdate(item.id, { status, declarationNo, adminNote })}
