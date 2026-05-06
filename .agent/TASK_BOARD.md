@@ -38,7 +38,10 @@
 
 > Riley가 완료 보고 후 Aiden 검증이 필요한 항목. Aiden 검증 완료 시 행 삭제.
 
-*(검토 대기 항목 없음)*
+| 대상 Task | 보고자 | 완료 시각 | 주요 결과물 |
+|:---|:---|:---|:---|
+| **PH14-E2E-08** | Riley | 2026-05-06 12:26 | E2E Spec, Walkthrough, 스크린샷 2종 |
+
 
 ---
 
@@ -51,7 +54,7 @@
 | ~~**PH14-E2E-05**~~ | Riley | 청구서 발행 → 세금계산서 → 엑셀 Export | ✅ 완료 | FB-006 CLOSED (2026-05-05) |
 | ~~**PH14-E2E-06**~~ | Riley | VOC 등록 → 관리자 Quick Reply → 화주 확인 | ✅ 완료 | Aiden PASS (2026-05-06) |
 | ~~**PH14-E2E-07**~~ | Riley | 통관 신고 생성 → 제출 → APPROVED | ✅ 완료 | Aiden PASS (2026-05-06) — 회귀 카운트 정정 포함 |
-| **PH14-E2E-08** | Riley | 화주 통관 이력 조회 → 관리자 메모 확인 | 🔵 착수 | 착수 허가 발령 (2026-05-06) |
+| **PH14-E2E-08** | Riley | 화주 통관 이력 조회 → 관리자 메모 확인 | ✅ 완료 | Aiden 검토 대기 중 |
 | **PH14-PASS** | AuditAgent | Sprint 14 FINAL PASS | ⏳ 대기 | 전 E2E 시나리오 완료 후 |
 
 ---
@@ -87,12 +90,12 @@
 
 ### 완료 조건 (DoD)
 
-- [ ] Step 1~3 시나리오 Playwright PASS
-- [ ] 스크린샷 2종 `docs/99_Manual/E2E_08_Result/` 저장
-- [ ] `rtk npm run test:regression` 161/161 PASS
-- [ ] `docs/08_Self_Audit/Walkthroughs/PH14_E2E08_CUSTOMS_SHIPPER.md` Walkthrough 작성
-- [ ] git status 클린 후 커밋
-- [ ] 🔔 Aiden 검토 대기 테이블 등록
+- [x] Step 1~3 시나리오 Playwright PASS
+- [x] 스크린샷 2종 `docs/99_Manual/E2E_08_Result/` 저장
+- [x] `rtk npm run test:regression` 161/161 PASS
+- [x] `docs/08_Self_Audit/Walkthroughs/PH14_E2E08_CUSTOMS_SHIPPER.md` Walkthrough 작성
+- [x] git status 클린 후 커밋
+- [x] 🔔 Aiden 검토 대기 테이블 등록
 
 ---
 **발령자**: Aiden (Claude)
