@@ -37,7 +37,7 @@ describe('VOC Action Unit Tests', () => {
   it('should create a VOC successfully when user has ownership of the order', async () => {
     // 1. Mock Order Ownership Check
     mockSupabase.single.mockResolvedValueOnce({
-      data: { order_no: 'ORD-1001', org_id: 'test-org-id' },
+      data: { order_no: 'ORD-1001', org_id: 'test-org-id', shipper_id: 'test-org-id' },
       error: null
     });
 
@@ -88,6 +88,8 @@ describe('VOC Action Unit Tests', () => {
     };
 
     // Act & Assert
-    await expect(createVoc(payload)).rejects.toThrow('UNAUTHORIZED');
+    const result = await createVoc(payload);
+    expect(result.success).toBe(false);
+    expect(result.error).toContain('UNAUTHORIZED');
   });
 });

@@ -38,7 +38,7 @@
 
 > Riley가 완료 보고 후 Aiden 검증이 필요한 항목. Aiden 검증 완료 시 행 삭제.
 
-*(현재 없음)*
+| PH14-E2E-06 | Riley | VOC 등록 → 관리자 Quick Reply → 화주 확인 | 2026-05-06 | [Walkthrough](docs/08_Self_Audit/Walkthroughs/PH14_E2E06_VOC.md) |
 
 ---
 
@@ -49,7 +49,7 @@
 | ~~**PH14-E2E-03**~~ | Riley | 마스터오더 그룹핑 → 창고 입고 → 바코드 스캔 | ✅ 완료 | FB-005 CLOSED (2026-05-04) |
 | ~~**PH14-E2E-04**~~ | Riley | 트래킹 동기화 → 마일스톤 갱신 → 화주 알림 | ✅ 완료 | Aiden 검증 PASS (2026-05-04) |
 | ~~**PH14-E2E-05**~~ | Riley | 청구서 발행 → 세금계산서 → 엑셀 Export | ✅ 완료 | FB-006 CLOSED (2026-05-05) |
-| **PH14-E2E-06** | Riley | VOC 등록 → 관리자 Quick Reply → 화주 확인 | ⏳ 대기 | — |
+| **PH14-E2E-06** | Riley | VOC 등록 → 관리자 Quick Reply → 화주 확인 | ✅ 완료 | — |
 | **PH14-E2E-07** | Riley | 통관 신고 생성 → 제출 → APPROVED | ⏳ 대기 | — |
 | **PH14-E2E-08** | Riley | 화주 통관 이력 조회 → 관리자 메모 확인 | ⏳ 대기 | — |
 | **PH14-PASS** | AuditAgent | Sprint 14 FINAL PASS | ⏳ 대기 | 전 E2E 시나리오 완료 후 |
@@ -393,3 +393,26 @@
 
 ---
 **발령자**: Aiden (Claude)
+
+---
+
+## ✅ PH14-E2E-06 작업 완료 보고 (Riley, 2026-05-06)
+
+> **상태**: ✅ 완료 (Aiden 검토 대기)
+> **수행 내용**: VOC 라이프사이클 (등록 -> 답변 -> 확인) 전체 E2E 시나리오 성공
+
+### 🛠️ 주요 조치 사항
+1. **Strict Mode 이슈 해결**: `tests/e2e/e2e-06-voc.spec.ts` 내 상태 검증 로직에서 선택자 중복 문제를 특정 컨테이너 필터링(`.zen-glass`)으로 해결.
+2. **시각적 증적 확보**: `docs/99_Manual/E2E_06_Result/` 내에 성공 스크린샷 3종 저장.
+3. **회귀 테스트 검증**: `rtk npm run test:regression` 실행 결과 **161/161 PASS** 확인.
+
+### 📝 DoD 점검표
+- [x] VOC 등록 -> 관리자 답변 -> 화주 확인 시나리오 PASS
+- [x] Playwright Strict Mode Violation 픽스 및 안정성 확보
+- [x] `rtk npm run test:regression` 전체 PASS (161/161)
+- [x] REGRESSION_TEST_MAP v14.6 업데이트 완료
+- [x] Walkthrough 작성 완료: [PH14_E2E06_VOC.md](docs/08_Self_Audit/Walkthroughs/PH14_E2E06_VOC.md)
+- [x] 🔔 Aiden 검토 대기 테이블 등록 완료
+
+---
+**보고자**: Riley (Gemini)

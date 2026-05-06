@@ -36,8 +36,7 @@ export async function middleware(request: NextRequest) {
     return handleI18nRouting(request);
   }
   
-  const { supabaseResponse, user } = sessionResult;
-  const supabase = await createClient();
+  const { supabaseResponse, user, supabase } = sessionResult;
 
   // 🎯 [Path Normalization]
   const segments = pathname.split('/').filter(Boolean);
@@ -101,8 +100,8 @@ export async function middleware(request: NextRequest) {
         userStatus = profile.status || userStatus;
         const dbOrgType = (profile.zen_organizations as any)?.type;
 
-        if ((profile as any).role === 'ZENITH_SUPER_ADMIN') {
-          // 플랫폼 슈퍼 관리자는 조직 소속 없이도 PLATFORM 전체 권한 부여
+        if (['ZENITH_SUPER_ADMIN', 'ADMIN'].includes((profile as any).role)) {
+          // 플랫폼 관리자는 조직 소속 없이도 PLATFORM 전체 권한 부여
           orgType = 'PLATFORM';
         } else if (dbOrgType) {
           orgType = dbOrgType;

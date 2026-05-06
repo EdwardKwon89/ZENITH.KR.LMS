@@ -24,10 +24,15 @@ function LoginForm() {
     const action = (event.nativeEvent as any).submitter?.getAttribute('data-action');
 
     try {
+      let result;
       if (action === 'signup') {
-        await signup(formData);
+        result = await signup(formData);
       } else {
-        await login(formData);
+        result = await login(formData);
+      }
+      
+      if (result && 'error' in result) {
+        setError(result.error as string);
       }
     } catch (err: any) {
       if (err.message?.includes('NEXT_REDIRECT')) {

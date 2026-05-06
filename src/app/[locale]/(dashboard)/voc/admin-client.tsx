@@ -24,14 +24,13 @@ export default function AdminVocClient({ initialVocs, t }: AdminVocClientProps) 
 
   const fetchVocDetail = async (id: string) => {
     setIsLoadingDetail(true);
-    try {
-      const detail = await getVocDetail(id);
-      setSelectedVocDetail(detail);
-    } catch (err) {
-      toast.error('상세 정보 로드 실패');
-    } finally {
-      setIsLoadingDetail(false);
+    const result = await getVocDetail(id);
+    if (result.success) {
+      setSelectedVocDetail(result.data);
+    } else {
+      toast.error('상세 정보 로드 실패', { description: result.error });
     }
+    setIsLoadingDetail(false);
   };
 
   const handleSelectVoc = (id: string) => {
@@ -44,17 +43,25 @@ export default function AdminVocClient({ initialVocs, t }: AdminVocClientProps) 
 
     setIsSubmitting(true);
     try {
-      await answerVoc({
+      const result = await answerVoc({
         vocId: selectedVocId,
         content: answerContent
       });
+      
+      if (!result.success) {
+        toast.error('답변 등록 실패', { description: result.error });
+        return;
+      }
+
       toast.success(t.success_answer);
       setAnswerContent('');
       // 상세 정보 다시 로드
       await fetchVocDetail(selectedVocId);
       // 목록 갱신 (상태가 IN_PROGRESS로 변했을 수 있음)
-      const { vocs: updatedList } = await getVocList();
-      setVocs(updatedList);
+      const listResult = await getVocList();
+      if (listResult.success) {
+        setVocs(listResult.vocs);
+      }
     } catch (err: any) {
       toast.error('답변 등록 실패', { description: err.message });
     } finally {
@@ -66,11 +73,18 @@ export default function AdminVocClient({ initialVocs, t }: AdminVocClientProps) 
     if (!selectedVocId) return;
 
     try {
-      await updateVocStatus(selectedVocId, 'CLOSED');
+      const result = await updateVocStatus(selectedVocId, 'CLOSED');
+      if (!result.success) {
+        toast.error('상태 변경 실패', { description: result.error });
+        return;
+      }
+      
       toast.success('VOC가 종료 처리되었습니다.');
       await fetchVocDetail(selectedVocId);
-      const { vocs: updatedList } = await getVocList();
-      setVocs(updatedList);
+      const listResult = await getVocList();
+      if (listResult.success) {
+        setVocs(listResult.vocs);
+      }
     } catch (err: any) {
       toast.error('상태 변경 실패', { description: err.message });
     }
@@ -255,12 +269,16 @@ export default function AdminVocClient({ initialVocs, t }: AdminVocClientProps) 
                       <button
                         onClick={handleSendAnswer}
                         disabled={!answerContent.trim() || isSubmitting}
+                        aria-label={t.submit_answer}
                         className="absolute bottom-4 right-4 w-10 h-10 bg-slate-900 text-white rounded-xl flex items-center justify-center hover:bg-blue-600 transition-colors disabled:bg-slate-200 disabled:text-slate-400 shadow-xl shadow-slate-200"
                       >
                         {isSubmitting ? (
                           <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                         ) : (
-                          <Send size={18} />
+                          <>
+                            <Send size={18} />
+                            <span className="sr-only">{t.submit_answer}</span>
+                          </>
                         )}
                       </button>
                     </div>
