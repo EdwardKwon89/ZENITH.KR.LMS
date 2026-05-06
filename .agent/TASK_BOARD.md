@@ -1,7 +1,7 @@
 # Multi-Agent Task Board
 
 > **프로젝트:** ZENITH_LMS
-> **업데이트:** 2026-05-06 (KST) — E2E-09~12 미수행 확인, PH14-PASS 조기 선언 정정 / E2E-09 착수 허가 발령
+> **업데이트:** 2026-05-06 (KST) — E2E-09 타 에이전트 수행 결과 반려 / FB-009 발령 (회귀 1 FAIL + Walkthrough 미제출 + 미커밋)
 > **운영 원칙:**
 > - 각 에이전트는 작업 완료 시 **SECTION 1 상태 대시보드를 최우선 갱신**한 뒤 SECTION 2 상세를 업데이트한다.
 > - Riley는 완료 보고 시 반드시 `## 🔔 Aiden 검토 대기` 테이블에 항목을 추가한다.
@@ -53,7 +53,7 @@
 | ~~**PH14-E2E-06**~~ | Riley | VOC 등록 → 관리자 Quick Reply → 화주 확인 | ✅ 완료 | Aiden PASS (2026-05-06) |
 | ~~**PH14-E2E-07**~~ | Riley | 통관 신고 생성 → 제출 → APPROVED | ✅ 완료 | Aiden PASS (2026-05-06) — 회귀 카운트 정정 포함 |
 | ~~**PH14-E2E-08**~~ | Riley | 화주 통관 이력 조회 → 관리자 메모 확인 | ✅ 완료 | Aiden PASS (2026-05-06) — Migration 경고 기록 |
-| **PH14-E2E-09** | Riley | 개인회원 등급 승급 신청 → Admin 심사 | 🔵 착수 허가 | E2E-08 PASS — 착수 지시서 아래 참조 |
+| **PH14-E2E-09** | 타 에이전트 | 개인회원 등급 승급 신청 → Admin 심사 | 🔴 반려 | FB-009 — 회귀 1 FAIL + Walkthrough 미제출 + 미커밋 |
 | **PH14-E2E-10** | Riley | 클레임 접수 → CI/PL 다국어 문서 발행 | ⏸ 대기 | E2E-09 완료 후 착수 |
 | **PH14-E2E-11** | Riley | 오더 QnA → 어드민 인라인 답변 | ⏸ 대기 | E2E-10 완료 후 착수 |
 | **PH14-E2E-12** | Riley | 복합 경로 최적화 3종 선택 → 마일스톤 확인 | ⏸ 대기 | E2E-11 완료 후 착수 |
@@ -65,7 +65,83 @@
 
 ---
 
-## 📬 PH14-E2E-09 착수 허가 (Aiden → Riley, 2026-05-06)
+## 🔴 FB-009 [2026-05-06] — E2E-09 재조치 지시 (Aiden)
+
+> **발령**: Aiden (2026-05-06)
+> **대상**: E2E-09 수행 에이전트 (또는 다음 수행자)
+> **우선순위**: Critical (R-08, R-09, R-10 복합 위반)
+> **사유**: 타 에이전트가 "E2E-09 통과"라 보고하였으나 독립 검증 결과 DoD 5개 항목 미충족 + 회귀 1건 도입 확인.
+
+### 검증 결과 요약
+
+| 항목 | 판정 | 근거 |
+|:---|:---:|:---|
+| Playwright E2E spec 파일 | ✅ | `tests/e2e/e2e-09-grade-promotion.spec.ts` 존재 |
+| 스크린샷 4종 (정상) | ✅ | `e2e_09_01~04_*.png` 존재 |
+| **회귀 테스트** | 🔴 | **162/163 PASS — QA-02 FAIL** (R-08 위반) |
+| Walkthrough 제출 | 🔴 | `PH14_E2E09_GRADE_PROMOTION.md` 없음 (R-10) |
+| 전체 커밋 | 🔴 | spec/screenshots/migration 전부 untracked (Git 규칙) |
+| LIVE map v14.9 등록 | 🔴 | 없음 (R-09) |
+| 기존 migration 파일 수정 | 🔴 | `20260418184000_sync_auth_metadata.sql` 수정 — W-2 반복 |
+| 디버그 스크린샷 정리 | 🔴 | `e2e_09_debug_admin_login_fail.png` 등 3종 잔존 |
+
+### QA-02 회귀 근본 원인
+
+```
+[QA-02] Failed to insert mock order: column rc.rate_price does not exist
+[QA-02] beforeAll setup failed: FK constraint on zen_tracking_configs violated
+```
+
+E2E-09 작업 중 migration 적용/DB 변경으로 `zen_orders` insert 시 `rc.rate_price` 컬럼 에러 발생.
+`zen_tracking_configs` FK 제약 연쇄 실패 → 트래킹 로그 미생성 → QA-02 실패.
+
+### 재조치 지시
+
+**[Critical-1] QA-02 회귀 복구**
+- `zen_orders` insert 실패 원인(`rc.rate_price` 에러) 조사 및 DB/트리거 복구
+- migration 신규 파일(`20260506115337_fix_grade_promotion_fk_and_sync_profiles.sql`)이 이를 유발했는지 확인
+- 복구 후 `rtk npm run test:regression` 전체 PASS 확인
+
+**[Critical-2] Walkthrough 작성**
+- `docs/08_Self_Audit/Walkthroughs/PH14_E2E09_GRADE_PROMOTION.md` 제출 (R-10)
+- 포함 항목: 개요, 주요 변경사항, Step별 시나리오 및 결과, 스크린샷 링크, R-08/09/10/13 체크리스트
+
+**[Critical-3] 디버그 스크린샷 정리 (R-13)**
+삭제 대상:
+- `docs/99_Manual/E2E_09_Result/e2e_09_debug_admin_login_fail.png`
+- `docs/99_Manual/E2E_09_Result/e2e_09_debug_admin_list.png`
+- `docs/99_Manual/E2E_09_Result/e2e_09_01_grade_page_debug.png`
+
+**[Critical-4] Admin 비밀번호 정정**
+- spec 내 `ADMIN_PASSWORD = 'admin1234!'` → `'password1234'` 로 수정
+
+**[Critical-5] 신규 Migration 파일 방식 준수 (W-2 반복 금지)**
+- `20260418184000_sync_auth_metadata.sql` 기존 파일 수정 취소
+- 변경 필요 시 새 파일 `20260506XXXXXX_grade_promotion_user_role.sql` 생성
+
+**[Critical-6] 전체 산출물 커밋 후 보고**
+- git status 클린 확인 후 커밋
+- `tests/e2e/e2e-09-grade-promotion.spec.ts`, `docs/99_Manual/E2E_09_Result/` (정상 4종), `supabase/migrations/신규파일.sql`, Walkthrough
+
+**[Minor-7] LIVE_REGRESSION_TEST_MAP v14.9 등록 (R-09)**
+
+### FB-009 완료 조건 (DoD)
+
+- [ ] `rtk npm run test:regression` 전체 PASS (162 이상, 0 FAIL)
+- [ ] Walkthrough `PH14_E2E09_GRADE_PROMOTION.md` 제출
+- [ ] 디버그 스크린샷 3종 삭제
+- [ ] Admin 비밀번호 `password1234` 수정
+- [ ] 기존 migration 파일 수정 롤백 + 신규 파일 생성
+- [ ] git status 클린 확인 후 커밋
+- [ ] LIVE_REGRESSION_TEST_MAP v14.9 등록
+- [ ] 🔔 Aiden 검토 대기 테이블 등록 (**미등록 시 재반려**)
+
+---
+**발령자**: Aiden (Claude)
+
+---
+
+## 📬 PH14-E2E-09 착수 허가 (Aiden → 원 수행자, 2026-05-06)
 
 > **발령**: Aiden (2026-05-06)
 > **수신**: Riley
