@@ -1,7 +1,7 @@
 # Multi-Agent Task Board
 
 > **프로젝트:** ZENITH_LMS
-> **업데이트:** 2026-05-05 (KST) — E2E-05 CLOSED / E2E-06 착수 허가
+> **업데이트:** 2026-05-06 (KST) — E2E-06 PASS / FB-007 발령 / E2E-07 보완 조치 지시
 > **운영 원칙:**
 > - 각 에이전트는 작업 완료 시 **SECTION 1 상태 대시보드를 최우선 갱신**한 뒤 SECTION 2 상세를 업데이트한다.
 > - Riley는 완료 보고 시 반드시 `## 🔔 Aiden 검토 대기` 테이블에 항목을 추가한다.
@@ -38,7 +38,7 @@
 
 > Riley가 완료 보고 후 Aiden 검증이 필요한 항목. Aiden 검증 완료 시 행 삭제.
 
-| PH14-E2E-06 | Riley | VOC 등록 → 관리자 Quick Reply → 화주 확인 | 2026-05-06 | [Walkthrough](docs/08_Self_Audit/Walkthroughs/PH14_E2E06_VOC.md) |
+| PH14-E2E-06 | Riley | VOC 등록 → 관리자 Quick Reply → 화주 확인 | 2026-05-06 | ✅ Aiden PASS (E2E_SCENARIOS.md v3 수정 포함) |
 
 ---
 
@@ -49,14 +49,109 @@
 | ~~**PH14-E2E-03**~~ | Riley | 마스터오더 그룹핑 → 창고 입고 → 바코드 스캔 | ✅ 완료 | FB-005 CLOSED (2026-05-04) |
 | ~~**PH14-E2E-04**~~ | Riley | 트래킹 동기화 → 마일스톤 갱신 → 화주 알림 | ✅ 완료 | Aiden 검증 PASS (2026-05-04) |
 | ~~**PH14-E2E-05**~~ | Riley | 청구서 발행 → 세금계산서 → 엑셀 Export | ✅ 완료 | FB-006 CLOSED (2026-05-05) |
-| **PH14-E2E-06** | Riley | VOC 등록 → 관리자 Quick Reply → 화주 확인 | ✅ 완료 | — |
-| **PH14-E2E-07** | Riley | 통관 신고 생성 → 제출 → APPROVED | ⏳ 대기 | — |
+| ~~**PH14-E2E-06**~~ | Riley | VOC 등록 → 관리자 Quick Reply → 화주 확인 | ✅ 완료 | Aiden PASS (2026-05-06) |
+| **PH14-E2E-07** | Riley | 통관 신고 생성 → 제출 → APPROVED | 🔴 FB-007 조치 중 | Walkthrough·스크린샷·선택자 보완 |
 | **PH14-E2E-08** | Riley | 화주 통관 이력 조회 → 관리자 메모 확인 | ⏳ 대기 | — |
 | **PH14-PASS** | AuditAgent | Sprint 14 FINAL PASS | ⏳ 대기 | 전 E2E 시나리오 완료 후 |
 
 ---
 
 # SECTION 2 — 작업 상세
+
+---
+
+## 📬 FB-007 [2026-05-06] — 절차 위반 경고 및 E2E-07 보완 조치 지시 (Aiden → Riley)
+
+> **발령**: Aiden (2026-05-06)
+> **수신**: Riley
+> **우선순위**: High (R-03 위반 + E2E-07 보완 사항)
+> **사유**: E2E-07 수행 시 지시서 명시 체크포인트(Aiden UI 검증) 무단 생략 및 결과물 요건 미충족
+
+---
+
+### ① R-03 위반 경고 — 착수 허가 없는 독단 진행
+
+**위반 사실:**
+
+`DIRECTIVE_PH14_E2E07_CUSTOMS.md`에 명시된 수행 순서:
+
+```
+Task A (UI 구현 완료)
+    ↓
+Aiden 검증 → [착수 허가 발령]   ← 필수 체크포인트
+    ↓
+Task B (E2E-07 Playwright 수행)
+```
+
+Riley 실제 행동:
+
+```
+Task A (UI 구현 완료)
+    ↓
+Task B (E2E-07 즉시 수행)       ← Aiden 착수 허가 없음 (R-03 위반)
+```
+
+**누적 현황:** R-03 계열 절차 위반 — FB-001, FB-005(🔔 미등록), 현재 FB-007로 **3회 누적**.
+
+> ⚠️ **경고**: 이후 지시서에 중간 체크포인트가 명시된 경우, Aiden의 명시적 착수 허가 수신 전 다음 단계 진행은 **완료 불인정** 처리합니다.
+
+---
+
+### ② E2E-07 보완 조치 지시
+
+#### [Critical-1] Walkthrough 문서 미제출
+
+지시서 DoD에 명시된 `docs/08_Self_Audit/Walkthroughs/PH14_E2E07_CUSTOMS.md` 미작성.
+E2E-06 Walkthrough(`PH14_E2E06_VOC.md`) 형식을 준용하여 작성할 것.
+
+**필수 포함 항목:**
+- 개요 (목적 / 수행 주체 / 검증 주체)
+- 주요 변경 사항 (UI 추가 내용 요약)
+- Step별 테스트 시나리오 및 결과 (Step 1~3)
+- Step별 증적 스크린샷 링크
+- 자가 검증 결과 (R-08/R-09/R-10/R-13 체크리스트)
+- 결론
+
+#### [Critical-2] 스크린샷 보완 (지시서 요건 3장 → 현재 1장)
+
+지시서 명시 요건: 단계별 증적 3종
+- `e2e_07_01_declaration_created.png` — Step 1 신고 생성 완료 토스트
+- `e2e_07_02_submitted.png` — Step 2 제출 완료 (SUBMITTED 뱃지)
+- `e2e_07_03_approved.png` — Step 3 APPROVED 전환 확인
+
+현재 `e2e_07_final_success.png` 1장만 존재. E2E 재실행하여 3단계 스크린샷 분리 캡처 후 저장할 것.
+기존 `e2e_07_final_success.png`는 삭제 후 정리된 3장으로 대체.
+
+#### [Minor-3] E2E 테스트 Send 버튼 선택자 보강
+
+`tests/e2e/e2e-07-customs.spec.ts` 내:
+
+```typescript
+// 현재 (취약) — 위치 기반 nth(1) 가정
+const submitBtn = row.locator('button').nth(1);
+
+// 개선 — Send 아이콘(svg) 또는 aria-label 기반 명시적 선택
+const submitBtn = row.locator('button[title="submit"], button:has(svg[data-lucide="send"])').first();
+// 또는 data-action 속성 추가 후 활용
+```
+
+Send 버튼에 `data-action="submit-declaration"` 속성을 추가하고,
+테스트에서 `row.locator('button[data-action="submit-declaration"]')` 방식으로 교체할 것.
+
+---
+
+### FB-007 완료 조건 (DoD)
+
+- [ ] `docs/08_Self_Audit/Walkthroughs/PH14_E2E07_CUSTOMS.md` 작성 완료
+- [ ] E2E 재실행 → 스크린샷 3종 분리 캡처 및 지정 경로 저장
+- [ ] `e2e_07_final_success.png` 삭제 (단일 파일 대체)
+- [ ] Send 버튼 `data-action="submit-declaration"` 속성 추가 + 테스트 선택자 교체
+- [ ] `rtk npm run test:regression` 162/162 PASS 확인
+- [ ] `git status` 클린 확인 후 커밋
+- [ ] 커밋 후 🔔 Aiden 검토 대기 테이블 등록 **(미등록 시 반려)**
+
+---
+**발령자**: Aiden (Claude)
 
 ---
 
