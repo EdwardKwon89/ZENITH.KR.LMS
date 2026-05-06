@@ -121,7 +121,9 @@
 | 2026-04-26 | Phase 4 Sprint 4: OPS 파라미터 시스템 최종 검증 (PH4-OPS-01~06) | Claude (Antigravity) | ✅ PASS | 시스템 파라미터 UI + 비즈니스 로직 연동 + Feature Flag 전체 PASS (회귀 테스트 111/111 PASS) |
 | 2026-04-29 | Phase 4 Sprint 8: Claims & Document Engine 최종 검증 | Claude (Antigravity) | ✅ PASS | 클레임 UI 고도화 + CJK PDF 엔진 + 사고비 벨리데이션 전체 PASS (회귀 테스트 122/122 PASS) |
 | 2026-05-01 | Phase 5 PH14-E2E-02: B2C 오더 등록 및 정산 자동화 검증 | Riley (Gemini) | ✅ PASS | useWatch 기반 폼 반응성 최적화 + Playwright 헤드리스 동기화 이슈 해결. [증적](docs/99_Manual/E2E_02_Result/) |
-| 2026-05-06 | Phase 5 E2E-07: 통관 신고 라이프사이클 (생성→제출→승인) | Riley (Gemini) | ✅ PASS | UI ID 부여를 통한 안정성 확보 및 전체 사이클 검증 성공. [증적](docs/99_Manual/E2E_07_Result/) |
+| 2026-05-06 | Phase 5 PH14-E2E-06: VOC 라이프사이클 검증 | Riley (Gemini) | ✅ PASS | [PH14_E2E06_VOC.md](../Walkthroughs/PH14_E2E06_VOC.md) |
+| 2026-05-06 | Phase 5 E2E-07: 통관 신고 라이프사이클 (생성→제출→승인) | Riley (Gemini) | ✅ PASS | [PH14_E2E07_CUSTOMS.md](../Walkthroughs/PH14_E2E07_CUSTOMS.md) |
+| 2026-05-06 | Phase 5 E2E-08: 화주 권한별 통관 이력 격리 검증 | Riley (Gemini) | ✅ PASS | [PH14_E2E08_CUSTOMS_SHIPPER.md](../Walkthroughs/PH14_E2E08_CUSTOMS_SHIPPER.md) |
 ---
 **작성 가이드:**
 1. 커밋/PR 요청 전 이 `LIVE` 문서를 전수 체크하십시오.

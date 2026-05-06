@@ -137,6 +137,7 @@ export async function middleware(request: NextRequest) {
         isAuthPage || 
         purePath.startsWith('/orders') || 
         purePath.startsWith('/tracking') ||
+        purePath.startsWith('/mypage') ||
         purePath.startsWith('/inventory'); // 재고관리도 허용 목록에 추가
 
       if (!isAllowedPath) {
