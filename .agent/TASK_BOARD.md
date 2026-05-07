@@ -42,7 +42,10 @@
 
 > Riley가 완료 보고 후 Aiden 검증이 필요한 항목. Aiden 검증 완료 시 행 삭제.
 
-*(검토 대기 항목 없음)*
+| Task ID | 담당 | Task 명 | 상태 | 비고 |
+|:---|:---|:---|:---:|:---|
+| **PH14-PASS** | Riley | Sprint 14 FINAL PASS (R1/R2/R3 통합 완료) | 🟠 검토 대기 | 빌드 에러 수정 및 WBS/ROADMAP 동기화 완료 |
+
 
 ---
 
@@ -60,10 +63,10 @@
 | ~~**PH14-E2E-10**~~ | Riley | 클레임 접수 → CI/PL 다국어 문서 발행 | ✅ 완료 | Aiden PASS (2026-05-07) — FB-012 CLOSED |
 | ~~**PH14-E2E-11**~~ | Riley | 오더 QnA → 어드민 인라인 답변 | ✅ 완료 | Aiden PASS (2026-05-08) — 163/163, FB-013 CLOSED |
 | ~~**PH14-E2E-12**~~ | Riley | 복합 경로 최적화 3종 선택 → 마일스톤 확인 | ✅ 완료 | Aiden PASS (2026-05-08) — 163/163 |
-| **PH14-PASS** | AuditAgent | Sprint 14 FINAL PASS | 🔄 진행 중 | 빌드 에러 수정 · 문서 동기화 Riley 처리 중 |
-| **PH14-PASS-R1** | Riley | TypeScript 빌드 에러 수정 | 🟢 착수 가능 | Aiden 지시 (2026-05-08) |
-| **PH14-PASS-R2** | Riley | WBS / ROADMAP 동기화 | 🟢 착수 가능 | Aiden 지시 (2026-05-08) |
-| **PH14-PASS-R3** | Riley | LIVE_PHASE_5_FINALIZE.md 갱신 | 🟢 착수 가능 | Aiden 지시 (2026-05-08) |
+| **PH14-PASS** | AuditAgent | Sprint 14 FINAL PASS | ✅ 완료 | 163/163 PASS, 빌드 성공, 문서 동기화 완료 |
+| ~~**PH14-PASS-R1**~~ | Riley | TypeScript 빌드 에러 수정 | ✅ 완료 | Aiden PASS (2026-05-08) |
+| ~~**PH14-PASS-R2**~~ | Riley | WBS / ROADMAP 동기화 | ✅ 완료 | Aiden PASS (2026-05-08) |
+| ~~**PH14-PASS-R3**~~ | Riley | LIVE_PHASE_5_FINALIZE.md 갱신 | ✅ 완료 | Aiden PASS (2026-05-08) |
 
 ---
 
