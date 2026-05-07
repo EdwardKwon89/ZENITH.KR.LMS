@@ -82,7 +82,7 @@ export async function signup(formData: FormData, locale: string = 'ko') {
         // Individual users are ACTIVE immediately; Corporate/New Org users are PENDING.
         status: (orgId === null && !isNewOrg) ? 'ACTIVE' : 'PENDING',
         // New Org creators are ADMIN; Joinees are MEMBER; Individuals are USER.
-        role: isNewOrg ? 'ADMIN' : (orgId === null ? 'USER' : 'MEMBER'),
+        role: isNewOrg ? 'ADMIN' : (orgId === null ? 'INDIVIDUAL' : 'MEMBER'),
       }
     }
   });

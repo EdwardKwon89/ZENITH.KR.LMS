@@ -17,12 +17,29 @@ export const USER_ROLES = {
 export type UserRole = keyof typeof USER_ROLES;
 
 /**
+ * 경로에서 다국어 접두사(예: /ko, /en)를 제거하여 정규화합니다.
+ */
+function normalizePath(path: string): string {
+  const segments = path.split('/').filter(Boolean);
+  const locales = ['ko', 'en', 'zh', 'ja'];
+  
+  if (segments.length > 0 && locales.includes(segments[0])) {
+    return '/' + segments.slice(1).join('/');
+  }
+  
+  return path.startsWith('/') ? path : '/' + path;
+}
+
+/**
  * 특정 경로(Path)에 대한 역할별 접근 권한을 검증합니다.
  * @param role 사용자의 역할
  * @param path 접근하려는 경로
  */
 export function checkPermission(role: string | null | undefined, path: string): boolean {
   if (!role) return false;
+
+  // 🎯 경로 정규화 (다국어 접두어 제거)
+  const normalizedPath = normalizePath(path);
 
   // 1. ZENITH_SUPER_ADMIN (Bypass) - 모든 권한 허용
   if (role === USER_ROLES.ZENITH_SUPER_ADMIN) {
@@ -32,7 +49,7 @@ export function checkPermission(role: string | null | undefined, path: string): 
   // 2. 공통 접근 가능 경로 (Common Access)
   // '/' 경로는 완전 일치해야 하며, 나머지는 접두어 기반으로 검사합니다.
   const commonPaths = ['/dashboard', '/profile', '/notifications', '/support', '/mypage'];
-  if (path === '/' || commonPaths.some(cp => path.startsWith(cp))) {
+  if (normalizedPath === '/' || commonPaths.some(cp => normalizedPath.startsWith(cp))) {
     return true;
   }
 
@@ -51,5 +68,5 @@ export function checkPermission(role: string | null | undefined, path: string): 
   const allowedPaths = permissions[role] || [];
   
   // 요청한 경로가 허용된 경로 목록에 포함되어 있는지 확인
-  return allowedPaths.some(ap => path.startsWith(ap));
+  return allowedPaths.some(ap => normalizedPath.startsWith(ap));
 }

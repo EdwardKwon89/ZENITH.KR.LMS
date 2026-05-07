@@ -12,6 +12,11 @@ describe('ZENITH Security Shield: RBAC Permission Logic', () => {
     expect(result).toBe(false);
   });
 
+  it('TC-S.1: ADMIN은 locale 접두사가 붙은 승급 심사 경로에 접근 가능해야 함', async () => {
+    const result = await checkPermission(USER_ROLES.ADMIN, '/ko/admin/upgrade-requests');
+    expect(result).toBe(true);
+  });
+
   it('TC-S.1: CORPORATE 화주는 오더 등록 및 이력 확인이 가능해야 함 (허용 확인)', async () => {
     const registerResult = await checkPermission(USER_ROLES.CORPORATE, '/orders/register');
     const historyResult = await checkPermission(USER_ROLES.CORPORATE, '/orders/history');
