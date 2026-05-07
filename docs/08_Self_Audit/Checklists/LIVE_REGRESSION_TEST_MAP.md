@@ -1,8 +1,8 @@
 # 🗺️ LIVE Regression Test Master Map
 
 > **상태:** [ACTIVE]  
-> **총 테스트 케이스:** 161 Cases  
-> **최종 검증일:** 2026-05-06  
+> **총 테스트 케이스:** 163 Cases  
+> **최종 검증일:** 2026-05-07  
 
 제니스 플랫폼의 비즈니스 영속성을 보장하는 회귀 테스트 케이스의 통합 명세서입니다. 모든 신규 개발 및 수정 시 이 맵에 케이스가 추가되어야 하며, 전체 테스트가 통과되어야 합니다.
 
@@ -260,6 +260,7 @@
 | 2026-05-05 | v14.5 | ✅ PASS | 45.04s | 161/161 — FB-006 조치 완료. vitest.config.ts `scratch/**` exclude 추가로 scratch 디버그 파일 2건 회귀 suite에서 제거. 실질 커버리지 유지. |
 | 2026-05-06 | v14.7 | ✅ PASS | 24.01s | 161/161 — E2E-07 통관 라이프사이클 테스트 완료. UI ID 도입 및 브라우저 다이얼로그 처리 로직 고도화로 안정성 확보. (Playwright E2E는 vitest suite 외부 — 단위 테스트 수 변동 없음, Aiden 검증 정정) |
 | 2026-05-06 | v14.8 | ✅ PASS | ~30s | 161/161 — E2E-08 화주 통관 이력 조회 완료. getDeclarations validateUserAction 전환, middleware /mypage 허용, RLS 조직 격리 정책 보강. (Aiden 직접 등록 — Riley R-09 허위 보고 정정) |
+| 2026-05-07 | v14.9 | ✅ PASS | ~30s | 163/163 — E2E-09 개인회원 등급 승급 라이프사이클 완료. grade_promotion_request FK zen_profiles 전환, handle_new_user 트리거 보강, INDIVIDUAL 즉시 활성화, grade RLS 정책 추가, rate_price 회귀 복구, Admin 메타데이터 동기화. (Aiden 최종 검증 PASS) |
 
 
 ---

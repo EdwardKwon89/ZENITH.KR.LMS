@@ -70,7 +70,7 @@ export class MockCarrierProvider implements ITrackingProvider {
     });
 
     if (logError) {
-      console.error(`[MOCK_CARRIER] Failed to save raw log:`, logError.message);
+      console.error(`[MOCK_CARRIER] Failed to save raw log for ${config.order_id}:`, logError);
     } else {
       console.log(`[MOCK_CARRIER] Raw log saved successfully for ${config.order_id}`);
     }

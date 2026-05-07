@@ -77,9 +77,15 @@ describe('Grade Promotion Unit Tests', () => {
     });
 
     it('should request grade promotion successfully', async () => {
-      // Mock profile check
+      // Mock zen_profiles role/status check
       mockSupabase.single.mockResolvedValueOnce({
-        data: mockProfile,
+        data: { role: 'INDIVIDUAL', status: 'ACTIVE' },
+        error: null
+      });
+
+      // Mock profiles.grade_code lookup
+      mockSupabase.maybeSingle.mockResolvedValueOnce({
+        data: { grade_code: 'G01' },
         error: null
       });
 
@@ -117,7 +123,12 @@ describe('Grade Promotion Unit Tests', () => {
 
     it('should prevent promotion request if one is pending', async () => {
       mockSupabase.single.mockResolvedValueOnce({
-        data: mockProfile,
+        data: { role: 'INDIVIDUAL', status: 'ACTIVE' },
+        error: null
+      });
+
+      mockSupabase.maybeSingle.mockResolvedValueOnce({
+        data: { grade_code: 'G01' },
         error: null
       });
 
@@ -134,6 +145,40 @@ describe('Grade Promotion Unit Tests', () => {
   });
 
   describe('Admin Actions', () => {
+    it('should fetch promotion requests joined with zen_profiles', async () => {
+      mockSupabase.range.mockResolvedValueOnce({
+        data: [
+          {
+            id: 'req-1',
+            user_id: 'user-1',
+            current_grade: 'IRON',
+            target_grade: 'BRONZE',
+            request_reason: 'Need benefits',
+            status: 'PENDING',
+            admin_comment: null,
+            processed_at: null,
+            created_at: '2026-05-06T00:00:00.000Z',
+            zen_profiles: {
+              full_name: 'Requester One',
+              email: 'requester@zenith.kr',
+            },
+          },
+        ],
+        count: 1,
+        error: null,
+      });
+
+      const result = await getGradePromotionRequests();
+
+      expect(result.total).toBe(1);
+      expect(result.requests[0]).toMatchObject({
+        user_name: 'Requester One',
+        user_email: 'requester@zenith.kr',
+        status: 'PENDING',
+      });
+      expect(validateAdminAction).toHaveBeenCalled();
+    });
+
     it('should approve grade promotion', async () => {
       // Mock request fetch
       mockSupabase.single.mockResolvedValueOnce({

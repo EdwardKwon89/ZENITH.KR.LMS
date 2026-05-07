@@ -3,7 +3,6 @@ import { routing } from './i18n/routing';
 import { updateSession } from '@/utils/supabase/middleware';
 import { type NextRequest, NextResponse } from 'next/server';
 import { ORG_ROUTE_MAP, DEFAULT_REDIRECTS } from '@/config/routes';
-import { createClient } from '@/utils/supabase/server';
 import { isFeatureEnabled } from '@/lib/params/feature-flags';
 
 const handleI18nRouting = createMiddleware(routing);
@@ -78,7 +77,11 @@ export async function middleware(request: NextRequest) {
   // 3. 권한 및 상태 거버넌스 (Schema-Resilient & Individual-Safe)
   if (user && !isApi) {
     // [Metadata Baseline]
-    let orgType = (user.app_metadata?.org_type as any) || 'GUEST';
+    const metadataRole = user.app_metadata?.role as string | undefined;
+    const isMetadataPlatformAdmin = metadataRole === 'ADMIN' || metadataRole === 'ZENITH_SUPER_ADMIN';
+    let orgType = isMetadataPlatformAdmin
+      ? 'PLATFORM'
+      : ((user.app_metadata?.org_type as any) || 'GUEST');
     let userStatus = (user.app_metadata?.status as string) || 'PENDING';
 
     try {
@@ -101,7 +104,7 @@ export async function middleware(request: NextRequest) {
         const dbOrgType = (profile.zen_organizations as any)?.type;
 
         if (['ZENITH_SUPER_ADMIN', 'ADMIN'].includes((profile as any).role)) {
-          // 플랫폼 관리자는 조직 소속 없이도 PLATFORM 전체 권한 부여
+          // 플랫폼 관리자는 메타데이터/조직 타입과 무관하게 PLATFORM으로 고정
           orgType = 'PLATFORM';
         } else if (dbOrgType) {
           orgType = dbOrgType;
@@ -112,6 +115,9 @@ export async function middleware(request: NextRequest) {
       }
     } catch (e) {
       console.warn(`[MIDDLEWARE] Robust Fallback active due to query error:`, e);
+      if (isMetadataPlatformAdmin) {
+        orgType = 'PLATFORM';
+      }
     }
 
     const allowedRoot = ORG_ROUTE_MAP[orgType as keyof typeof ORG_ROUTE_MAP] || '/';

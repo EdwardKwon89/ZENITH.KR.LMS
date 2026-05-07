@@ -89,14 +89,26 @@ export async function requestGradePromotion(payload: {
 }): Promise<{ success: boolean; requestId: string }> {
   const { user, supabase } = await validateUserAction();
 
-  // 1. 프로필 정보 조회 (역할 및 현재 등급 확인)
-  const { data: profile, error: profileError } = await supabase
-    .from("profiles")
-    .select("grade_code, role")
+  // 1. 프로필 정보 조회 (역할 및 현재 등급 확인) - zen_profiles 기준
+  const { data: zenProfile, error: zenProfileError } = await supabase
+    .from("zen_profiles")
+    .select("role, status")
     .eq("id", user.id)
     .single();
 
-  if (profileError || !profile) {
+  // profiles 테이블에서 grade_code 조회 (zen_profiles에는 grade_code 없음)
+  const { data: profileGrade } = await supabase
+    .from("profiles")
+    .select("grade_code")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  const profile = zenProfile ? {
+    role: zenProfile.role,
+    grade_code: profileGrade?.grade_code || 'IRON' // 기본값 IRON
+  } : null;
+
+  if (zenProfileError || !profile) {
     throw new Error("프로필 정보를 확인할 수 없습니다.");
   }
 
@@ -137,7 +149,7 @@ export async function requestGradePromotion(payload: {
   // 4. Admin 대상 알림 발송
   // (참조: 모든 관리자에게 알림 발송)
   const { data: admins } = await supabase
-    .from("profiles")
+    .from("zen_profiles")
     .select("id")
     .in("role", ["ADMIN", "ZENITH_SUPER_ADMIN"]);
 
@@ -164,13 +176,13 @@ export async function getGradePromotionRequests(params?: {
   limit?: number;
   offset?: number;
 }): Promise<{ requests: GradePromotionRequest[]; total: number }> {
-  const { supabase } = await validateAdminAction();
+  const { supabase, profile } = await validateAdminAction();
 
   let query = supabase
     .from("grade_promotion_request")
     .select(`
       *,
-      profiles:user_id (
+      zen_profiles:user_id (
         full_name,
         email
       )
@@ -188,17 +200,25 @@ export async function getGradePromotionRequests(params?: {
     .range(offset, offset + limit - 1);
 
   if (error) {
-    console.error("Error fetching promotion requests:", error);
+    console.error("Error fetching promotion requests:", {
+      error,
+      adminRole: profile?.role,
+      params,
+    });
     throw new Error("신청 목록을 불러오는 데 실패했습니다.");
   }
 
   const requests: GradePromotionRequest[] = (data || []).map((item: any) => {
-    const profileItem = item.profiles as unknown as { full_name: string | null; email: string | null };
+    const zenProfileValue = item.zen_profiles;
+    const zenProfileItem = Array.isArray(zenProfileValue)
+      ? zenProfileValue[0]
+      : zenProfileValue;
+
     return {
       id: item.id,
       user_id: item.user_id,
-      user_name: profileItem?.full_name || "Unknown",
-      user_email: profileItem?.email || "Unknown",
+      user_name: zenProfileItem?.full_name || "Unknown",
+      user_email: zenProfileItem?.email || "Unknown",
       current_grade: item.current_grade,
       target_grade: item.target_grade,
       request_reason: item.request_reason,

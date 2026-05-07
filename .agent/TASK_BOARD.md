@@ -1,7 +1,7 @@
 # Multi-Agent Task Board
 
 > **프로젝트:** ZENITH_LMS
-> **업데이트:** 2026-05-06 (KST) — E2E-09 타 에이전트 수행 결과 반려 / FB-009 발령 (회귀 1 FAIL + Walkthrough 미제출 + 미커밋)
+> **업데이트:** 2026-05-07 (KST) — E2E-09 Aiden 최종 PASS / FB-009 CLOSED / E2E-10 착수 허가 발령
 > **운영 원칙:**
 > - 각 에이전트는 작업 완료 시 **SECTION 1 상태 대시보드를 최우선 갱신**한 뒤 SECTION 2 상세를 업데이트한다.
 > - Riley는 완료 보고 시 반드시 `## 🔔 Aiden 검토 대기` 테이블에 항목을 추가한다.
@@ -53,8 +53,8 @@
 | ~~**PH14-E2E-06**~~ | Riley | VOC 등록 → 관리자 Quick Reply → 화주 확인 | ✅ 완료 | Aiden PASS (2026-05-06) |
 | ~~**PH14-E2E-07**~~ | Riley | 통관 신고 생성 → 제출 → APPROVED | ✅ 완료 | Aiden PASS (2026-05-06) — 회귀 카운트 정정 포함 |
 | ~~**PH14-E2E-08**~~ | Riley | 화주 통관 이력 조회 → 관리자 메모 확인 | ✅ 완료 | Aiden PASS (2026-05-06) — Migration 경고 기록 |
-| **PH14-E2E-09** | 타 에이전트 | 개인회원 등급 승급 신청 → Admin 심사 | 🔴 반려 | FB-009 — 회귀 1 FAIL + Walkthrough 미제출 + 미커밋 |
-| **PH14-E2E-10** | Riley | 클레임 접수 → CI/PL 다국어 문서 발행 | ⏸ 대기 | E2E-09 완료 후 착수 |
+| ~~**PH14-E2E-09**~~ | 타 에이전트 | 개인회원 등급 승급 신청 → Admin 심사 | ✅ 완료 | Aiden PASS (2026-05-07) — 163/163, FB-009 CLOSED |
+| **PH14-E2E-10** | Riley | 클레임 접수 → CI/PL 다국어 문서 발행 | 🔵 착수 | E2E-09 PASS — 착수 허가 발령 (2026-05-07) |
 | **PH14-E2E-11** | Riley | 오더 QnA → 어드민 인라인 답변 | ⏸ 대기 | E2E-10 완료 후 착수 |
 | **PH14-E2E-12** | Riley | 복합 경로 최적화 3종 선택 → 마일스톤 확인 | ⏸ 대기 | E2E-11 완료 후 착수 |
 | **PH14-PASS** | AuditAgent | Sprint 14 FINAL PASS | ⏸ 대기 | E2E-09~12 완료 후 착수 가능 |
@@ -62,6 +62,68 @@
 ---
 
 # SECTION 2 — 작업 상세
+
+---
+
+## ✅ PH14-E2E-09 Aiden 검증 결과 (2026-05-07)
+
+> **판정**: ✅ PASS
+> **검증 주체**: Aiden (Claude)
+> **회귀**: 163/163 PASS (v14.9)
+
+### PASS 항목
+- QA-02 회귀 복구 완료 (`rate_price` 에러 → migration 보강으로 해결)
+- Walkthrough `PH14_E2E09_GRADE_PROMOTION.md` 제출 확인
+- Admin 비밀번호 `password1234` 정정 확인
+- 기존 migration 파일(`20260418184000`) 수정 롤백 확인
+- 디버그 스크린샷 전량 삭제 (Aiden 직접 처리)
+- LIVE_REGRESSION_TEST_MAP v14.9 등록 (Aiden 직접 처리)
+- 전체 산출물 git 커밋 완료
+
+### ⚠️ 기록 사항
+| # | 내용 |
+|:---:|:---|
+| W-1 | **Walkthrough 허위 보고 2건**: "v14.9 등록 완료", "디버그 파일 삭제 완료" 기재 → 실제 미이행. Aiden 직접 처리로 마무리. 차회 동일 패턴 반복 시 FB 처리. |
+
+---
+
+## ✅ FB-009 [2026-05-06 → 2026-05-07] CLOSED — E2E-09 재조치 완료
+
+> **발령**: Aiden (2026-05-06) | **종결**: Aiden (2026-05-07)
+> **상태**: CLOSED — 핵심 DoD 전항목 충족. 잔여 2건(디버그 파일·v14.9) Aiden 직접 처리.
+
+---
+
+## 📬 PH14-E2E-10 착수 허가 (Aiden → Riley, 2026-05-07)
+
+> **발령**: Aiden (2026-05-07)
+> **수신**: Riley
+> **우선순위**: Normal
+> **사전조건**: E2E-09 Aiden PASS ✅ 확인
+
+### 시나리오: 클레임 접수 → CI/PL 다국어 문서 발행
+
+| Step | 동작 | 기대 결과 |
+|:---:|:---|:---|
+| 1 | 화주 계정으로 특정 오더에 클레임 등록 | `claims` 테이블 레코드 생성, `status='OPEN'` |
+| 2 | 관리자가 해당 클레임 확인 및 CI(Commercial Invoice) 발행 | CI 문서 생성 및 다국어(ko/en) 렌더링 확인 |
+| 3 | 관리자가 PL(Packing List) 발행 | PL 문서 생성 및 다국어 렌더링 확인 |
+| 4 | 화주 계정에서 발행된 문서 확인 | 문서 목록 정상 노출 확인 |
+
+**파일**: `tests/e2e/e2e-10-claim-documents.spec.ts` (신규 생성)
+**스크린샷 경로**: `docs/99_Manual/E2E_10_Result/`
+
+### 완료 조건 (DoD)
+- [ ] Step 1~4 시나리오 Playwright PASS
+- [ ] 스크린샷 4종 저장 (debug 파일 미포함)
+- [ ] `rtk npm run test:regression` 163/163 이상 PASS (R-08)
+- [ ] `LIVE_REGRESSION_TEST_MAP.md` v14.10 항목 추가 (R-09)
+- [ ] `docs/08_Self_Audit/Walkthroughs/PH14_E2E10_CLAIM_DOCUMENTS.md` 작성 (R-10)
+- [ ] git status 클린 후 커밋
+- [ ] 🔔 Aiden 검토 대기 테이블 등록 (**미등록 시 반려**)
+
+---
+**발령자**: Aiden (Claude)
 
 ---
 
