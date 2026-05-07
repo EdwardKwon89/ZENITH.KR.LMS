@@ -123,6 +123,43 @@ export default function TradeDocumentClient({ locale }: { locale: string }) {
     };
   };
 
+  const getCILabels = () => ({
+    invoice_no: "Commercial Invoice",
+    issue_date: "Issue Date",
+    shipper: "Shipper",
+    consignee: "Consignee",
+    order_ref: "Order Ref.",
+    item_desc: "Description",
+    quantity: "Qty",
+    unit_price: "Unit Price",
+    sub_total: "Sub Total",
+    total: "Total Amount",
+    currency: "Currency",
+    trade_terms: "Trade Terms",
+    declaration: "Declaration",
+    declaration_text: "The goods described herein are in full compliance with export regulations.",
+    generated_on: "Generated on",
+  });
+
+  const getPLLabels = () => ({
+    pl_no: "Packing List",
+    issue_date: "Issue Date",
+    shipper: "Shipper",
+    consignee: "Consignee",
+    order_ref: "Order Ref.",
+    item_desc: "Description",
+    qty: "Qty",
+    pkgs: "Pkgs",
+    net_weight: "Net W. (kg)",
+    gross_weight: "Gross W. (kg)",
+    total_pkgs: "Total Pkgs",
+    transport_mode: "Transport Mode",
+    express_air: "Express Air",
+    remarks: "Remarks",
+    remarks_text: "All weights are approximate.",
+    generated_on: "Generated on",
+  });
+
   return (
     <div className="max-w-5xl mx-auto space-y-8">
       {/* Header Section */}
@@ -217,7 +254,7 @@ export default function TradeDocumentClient({ locale }: { locale: string }) {
                 </div>
                 <div className="flex gap-2">
                   <PDFDownloadLink 
-                    document={<CommercialInvoicePDF data={getCIData()} />} 
+                    document={<CommercialInvoicePDF data={getCIData()} labels={getCILabels()} />}
                     fileName={`CI_${orderData.order_no}.pdf`}
                   >
                     {({ loading: pdfLoading }) => (
@@ -252,7 +289,7 @@ export default function TradeDocumentClient({ locale }: { locale: string }) {
                 </div>
                 <div className="flex gap-2">
                   <PDFDownloadLink 
-                    document={<PackingListPDF data={getPLData()} />} 
+                    document={<PackingListPDF data={getPLData()} labels={getPLLabels()} />} 
                     fileName={`PL_${orderData.order_no}.pdf`}
                   >
                     {({ loading: pdfLoading }) => (

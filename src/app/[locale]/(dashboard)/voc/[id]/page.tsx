@@ -12,7 +12,15 @@ export default async function UserVocDetailPage({
 }) {
   const { locale, id } = await params;
   const { profile } = await requireAuth();
-  const voc = await getVocDetail(id);
+  const result = await getVocDetail(id);
+  if (!result.success || !result.data) {
+    return (
+      <div className="max-w-4xl mx-auto py-20 text-center">
+        <p className="text-slate-500">VOC를 찾을 수 없습니다.</p>
+      </div>
+    );
+  }
+  const voc = result.data;
   const messages = await getMessages() as any;
   const t = messages.VOC;
 
@@ -70,7 +78,7 @@ export default async function UserVocDetailPage({
           </div>
 
           {voc.answers.length > 0 ? (
-            voc.answers.map((ans) => (
+            voc.answers.map((ans: any) => (
               <div key={ans.id} className="flex gap-4 justify-end">
                 <div className="flex-1 bg-white border border-slate-100 rounded-2xl p-6 shadow-xl shadow-slate-100 relative overflow-hidden group">
                   <div className="absolute top-0 left-0 w-1 h-full bg-blue-500"></div>

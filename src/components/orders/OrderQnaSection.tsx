@@ -210,7 +210,7 @@ export function OrderQnaSection({
                           {format(new Date(item.created_at), "yyyy-MM-dd HH:mm")}
                         </span>
                         {item._type === 'VOC' && (
-                          <ZenBadge variant="outline" className="text-[9px] h-4 px-1.5 border-brand-200 text-brand-600">
+                          <ZenBadge variant="default" className="text-[9px] h-4 px-1.5 border-brand-200 text-brand-600">
                             VOC
                           </ZenBadge>
                         )}

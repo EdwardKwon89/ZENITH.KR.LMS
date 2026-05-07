@@ -38,7 +38,9 @@ export default async function VocPage({
     offset: (page - 1) * PAGE_SIZE
   });
 
-  const totalPages = Math.ceil(total / PAGE_SIZE);
+  const displayTotal = total ?? 0;
+  const displayVocs = vocs ?? [];
+  const totalPages = Math.ceil(displayTotal / PAGE_SIZE);
 
   // URL helper — preserves existing filters
   const buildUrl = (params: Record<string, string | undefined>) => {
@@ -151,9 +153,9 @@ export default async function VocPage({
       </div>
 
       {/* ── Stats Summary ───────────────────────────────────────── */}
-      {total > 0 && (
+      {displayTotal > 0 && (
         <div className="flex items-center gap-2 text-xs text-slate-500 font-medium px-1">
-          <span className="font-bold text-slate-700">{total.toLocaleString()}</span>건의 VOC
+          <span className="font-bold text-slate-700">{displayTotal.toLocaleString()}</span>건의 VOC
           {status && <span>· 필터: <span className="text-brand-600 font-bold">{status}</span></span>}
           <span className="ml-auto">
             페이지 <span className="font-bold text-slate-700">{page}</span> / {totalPages}
@@ -163,8 +165,8 @@ export default async function VocPage({
 
       {/* ── VOC List ─────────────────────────────────────────────── */}
       <div className="grid grid-cols-1 gap-4">
-        {vocs.length > 0 ? (
-          vocs.map((voc) => (
+        {displayVocs.length > 0 ? (
+          displayVocs.map((voc) => (
             <ZenCard key={voc.id} className="group hover:border-brand-200/50">
               <div className="flex items-start justify-between gap-4">
                 <div className="space-y-2 flex-1 min-w-0">

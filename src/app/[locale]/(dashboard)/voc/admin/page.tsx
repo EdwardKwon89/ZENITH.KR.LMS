@@ -29,7 +29,7 @@ export default async function AdminVocPage() {
         </div>
       </div>
 
-      <AdminVocClient initialVocs={vocs} t={t} />
+      <AdminVocClient initialVocs={vocs ?? []} t={t} />
     </div>
   );
 }

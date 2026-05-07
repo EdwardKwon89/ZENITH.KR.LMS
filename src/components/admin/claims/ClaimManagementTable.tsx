@@ -124,6 +124,43 @@ export const ClaimManagementTable: React.FC<ClaimManagementTableProps> = ({ init
     };
   };
 
+  const getCILabels = () => ({
+    invoice_no: "Commercial Invoice",
+    issue_date: "Issue Date",
+    shipper: "Shipper",
+    consignee: "Consignee",
+    order_ref: "Order Ref.",
+    item_desc: "Description",
+    quantity: "Qty",
+    unit_price: "Unit Price",
+    sub_total: "Sub Total",
+    total: "Total Amount",
+    currency: "Currency",
+    trade_terms: "Trade Terms",
+    declaration: "Declaration",
+    declaration_text: "The goods described herein are in full compliance with export regulations.",
+    generated_on: "Generated on",
+  });
+
+  const getPLLabels = () => ({
+    pl_no: "Packing List",
+    issue_date: "Issue Date",
+    shipper: "Shipper",
+    consignee: "Consignee",
+    order_ref: "Order Ref.",
+    item_desc: "Description",
+    qty: "Qty",
+    pkgs: "Pkgs",
+    net_weight: "Net W. (kg)",
+    gross_weight: "Gross W. (kg)",
+    total_pkgs: "Total Pkgs",
+    transport_mode: "Transport Mode",
+    express_air: "Express Air",
+    remarks: "Remarks",
+    remarks_text: "All weights are approximate.",
+    generated_on: "Generated on",
+  });
+
   const columns: ColumnDef<any>[] = [
     {
       header: 'Order Info',
@@ -197,13 +234,13 @@ export const ClaimManagementTable: React.FC<ClaimManagementTableProps> = ({ init
       cell: ({ row }) => (
         <div className="flex items-center gap-1.5">
           <DocumentDownloadButton 
-            document={<CommercialInvoicePDF data={getCIData(row.original)} />}
+            document={<CommercialInvoicePDF data={getCIData(row.original)} labels={getCILabels()} />}
             fileName={`CI_${row.original.order?.order_no}.pdf`}
             label="CI"
             className="px-2.5 py-1 h-8 text-[11px] font-black min-w-0 rounded-lg shadow-sm"
           />
           <DocumentDownloadButton 
-            document={<PackingListPDF data={getPLData(row.original)} />}
+            document={<PackingListPDF data={getPLData(row.original)} labels={getPLLabels()} />}
             fileName={`PL_${row.original.order?.order_no}.pdf`}
             label="PL"
             className="px-2.5 py-1 h-8 text-[11px] font-black min-w-0 rounded-lg shadow-sm"

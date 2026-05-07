@@ -60,7 +60,7 @@ export default function AdminVocClient({ initialVocs, t }: AdminVocClientProps) 
       // 목록 갱신 (상태가 IN_PROGRESS로 변했을 수 있음)
       const listResult = await getVocList();
       if (listResult.success) {
-        setVocs(listResult.vocs);
+        setVocs(listResult.vocs ?? []);
       }
     } catch (err: any) {
       toast.error('답변 등록 실패', { description: err.message });
@@ -83,7 +83,7 @@ export default function AdminVocClient({ initialVocs, t }: AdminVocClientProps) 
       await fetchVocDetail(selectedVocId);
       const listResult = await getVocList();
       if (listResult.success) {
-        setVocs(listResult.vocs);
+        setVocs(listResult.vocs ?? []);
       }
     } catch (err: any) {
       toast.error('상태 변경 실패', { description: err.message });

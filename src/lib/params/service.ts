@@ -15,10 +15,11 @@ export interface SystemParam {
   id: string;
   key: string;
   category: ParamCategory;
-  value_text?: string;
-  value_numeric?: number;
-  value_jsonb?: any;
+  value_text: string | null;
+  value_numeric: number | null;
+  value_jsonb: any | null;
   description: string;
+  updated_at?: string;
 }
 
 /**
