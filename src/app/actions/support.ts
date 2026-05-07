@@ -71,12 +71,12 @@ export async function createQna(payload: {
   if (payload.order_id) {
     const { data: order, error: orderError } = await supabase
       .from("zen_orders")
-      .select("org_id")
+      .select("shipper_id")
       .eq("id", payload.order_id)
       .single();
 
     if (orderError || !order) throw new Error("Order not found");
-    if (order.org_id !== profile.org_id) throw new Error("UNAUTHORIZED: Access denied to this order");
+    if (order.shipper_id !== profile.org_id) throw new Error("UNAUTHORIZED: Access denied to this order");
   }
 
   // 2. zen_qna INSERT

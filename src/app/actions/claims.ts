@@ -60,12 +60,12 @@ export async function createClaim(payload: {
   // 1. 오더 정보 및 권한 확인
   const { data: order, error: orderError } = await supabase
     .from("zen_orders")
-    .select("org_id")
+    .select("shipper_id")
     .eq("id", payload.order_id)
     .single();
 
   if (orderError || !order) throw new Error("Order not found");
-  if (profile.role !== 'ADMIN' && order.org_id !== profile.org_id) {
+  if (profile.role !== 'ADMIN' && order.shipper_id !== profile.org_id) {
     throw new Error("You do not have permission to file a claim for this order.");
   }
 
@@ -74,7 +74,7 @@ export async function createClaim(payload: {
     .from("zen_claims")
     .insert({
       order_id: payload.order_id,
-      org_id: order.org_id,
+      org_id: order.shipper_id,
       created_by: user.id,
       reason_code: payload.reason_code,
       description: payload.description,

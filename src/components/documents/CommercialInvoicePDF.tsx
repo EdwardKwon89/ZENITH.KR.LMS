@@ -146,30 +146,47 @@ interface CIProps {
     total_amount: number;
     currency: string;
   };
+  labels: {
+    issue_date: string;
+    shipper: string;
+    consignee: string;
+    order_ref: string;
+    item_desc: string;
+    quantity: string;
+    unit_price: string;
+    sub_total: string;
+    total: string;
+    currency: string;
+    declaration: string;
+    declaration_text: string;
+    generated_on: string;
+    trade_terms: string;
+    invoice_no: string;
+  };
 }
 
-const CommercialInvoicePDF = ({ data }: CIProps) => (
+const CommercialInvoicePDF = ({ data, labels }: CIProps) => (
   <Document title={`CI_${data.invoice_no}`} author="ZENITH LMS">
     <Page size="A4" style={styles.page}>
       <View style={styles.header}>
         <View>
-          <Text style={styles.title}>Commercial Invoice</Text>
-          <Text style={styles.text}>Invoice No: {data.invoice_no}</Text>
+          <Text style={styles.title}>{labels.invoice_no}</Text>
+          <Text style={styles.text}>{labels.invoice_no}: {data.invoice_no}</Text>
         </View>
         <View style={{ textAlign: 'right' }}>
-          <Text style={styles.label}>Issue Date</Text>
+          <Text style={styles.label}>{labels.issue_date}</Text>
           <Text style={styles.value}>{data.date}</Text>
         </View>
       </View>
 
       <View style={styles.section}>
         <View style={styles.box}>
-          <Text style={styles.label}>Shipper / Exporter</Text>
+          <Text style={styles.label}>{labels.shipper}</Text>
           <Text style={styles.value}>{data.shipper.name}</Text>
           <Text style={styles.text}>{data.shipper.address}</Text>
         </View>
         <View style={styles.box}>
-          <Text style={styles.label}>Consignee / Recipient</Text>
+          <Text style={styles.label}>{labels.consignee}</Text>
           <Text style={styles.value}>{data.consignee.name}</Text>
           <Text style={styles.text}>{data.consignee.address}</Text>
         </View>
@@ -177,21 +194,21 @@ const CommercialInvoicePDF = ({ data }: CIProps) => (
 
       <View style={styles.section}>
         <View style={styles.box}>
-          <Text style={styles.label}>Order Reference</Text>
+          <Text style={styles.label}>{labels.order_ref}</Text>
           <Text style={styles.value}>{data.order_no}</Text>
         </View>
         <View style={styles.box}>
-          <Text style={styles.label}>Trade Terms</Text>
+          <Text style={styles.label}>{labels.trade_terms}</Text>
           <Text style={styles.value}>DDU (Delivery Duty Unpaid)</Text>
         </View>
       </View>
 
       <View style={styles.table}>
         <View style={[styles.tableRow, styles.tableHeader]}>
-          <Text style={styles.col1}>Description of Goods</Text>
-          <Text style={styles.col2}>Quantity</Text>
-          <Text style={styles.col3}>Unit Price</Text>
-          <Text style={styles.col4}>Sub-Total</Text>
+          <Text style={styles.col1}>{labels.item_desc}</Text>
+          <Text style={styles.col2}>{labels.quantity}</Text>
+          <Text style={styles.col3}>{labels.unit_price}</Text>
+          <Text style={styles.col4}>{labels.sub_total}</Text>
         </View>
 
         {data.items.map((item, index) => (
@@ -208,20 +225,18 @@ const CommercialInvoicePDF = ({ data }: CIProps) => (
 
       <View style={styles.totalSection}>
         <View style={styles.totalBox}>
-          <Text style={styles.totalLabel}>TOTAL ({data.currency})</Text>
+          <Text style={styles.totalLabel}>{labels.total} ({data.currency})</Text>
           <Text style={styles.totalValue}>{data.total_amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</Text>
         </View>
       </View>
 
       <View style={{ marginTop: 40, borderTop: '0.5pt solid #eee', paddingTop: 10 }}>
-        <Text style={styles.label}>Declaration</Text>
-        <Text style={styles.text}>
-          We hereby certify that the information in this invoice is true and correct, and that the contents and value of this shipment are as stated above.
-        </Text>
+        <Text style={styles.label}>{labels.declaration}</Text>
+        <Text style={styles.text}>{labels.declaration_text}</Text>
       </View>
 
       <Text style={styles.footer}>
-        ZENITH LMS Digital Document Services • Generated on {new Date().toLocaleString()}
+        ZENITH LMS Digital Document Services • {labels.generated_on} {new Date().toLocaleString()}
       </Text>
     </Page>
   </Document>

@@ -261,6 +261,7 @@
 | 2026-05-06 | v14.7 | ✅ PASS | 24.01s | 161/161 — E2E-07 통관 라이프사이클 테스트 완료. UI ID 도입 및 브라우저 다이얼로그 처리 로직 고도화로 안정성 확보. (Playwright E2E는 vitest suite 외부 — 단위 테스트 수 변동 없음, Aiden 검증 정정) |
 | 2026-05-06 | v14.8 | ✅ PASS | ~30s | 161/161 — E2E-08 화주 통관 이력 조회 완료. getDeclarations validateUserAction 전환, middleware /mypage 허용, RLS 조직 격리 정책 보강. (Aiden 직접 등록 — Riley R-09 허위 보고 정정) |
 | 2026-05-07 | v14.9 | ✅ PASS | ~30s | 163/163 — E2E-09 개인회원 등급 승급 라이프사이클 완료. grade_promotion_request FK zen_profiles 전환, handle_new_user 트리거 보강, INDIVIDUAL 즉시 활성화, grade RLS 정책 추가, rate_price 회귀 복구, Admin 메타데이터 동기화. (Aiden 최종 검증 PASS) |
+| 2026-05-07 | v14.10 | ✅ PASS | ~32s | 163/163 — E2E-10 클레임 및 다국어 문서 발행 엔진 완료. claims.ts 액션 구현, PDF 컴포넌트(CI/PL) 다국어 렌더링 고도화, ClaimRequestModal UI 연계 확인. (FB-010 재조치 완료) |
 
 
 ---
