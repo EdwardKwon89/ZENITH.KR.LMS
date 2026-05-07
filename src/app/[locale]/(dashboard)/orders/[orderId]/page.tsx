@@ -18,6 +18,8 @@ import PackingListPDF from '@/components/documents/PackingListPDF';
 import { getDeclarations } from '@/app/actions/customs';
 import OrderCustomsSection from '@/components/customs/OrderCustomsSection';
 import OrderCustomsAdminControl from '@/components/customs/OrderCustomsAdminControl';
+import { getTranslations } from 'next-intl/server';
+import { OrderClaimTrigger } from '@/components/claims/OrderClaimTrigger';
 
 import { Package, MapPin, Truck, ShieldCheck, FileText } from 'lucide-react';
 
@@ -136,6 +138,38 @@ export default async function OrderDetailPage({
     total_pkgs: order.packages.reduce((sum: number, pkg: any) => sum + pkg.packing_count, 0),
     total_net_weight: order.packages.reduce((sum: number, pkg: any) => sum + (pkg.gross_weight * 0.9), 0),
     total_gross_weight: order.packages.reduce((sum: number, pkg: any) => sum + pkg.gross_weight, 0)
+  };
+
+  // 6. 다국어 라벨 준비 (E2E-10)
+  const tDoc = await getTranslations('DocumentLabels');
+  const tDocs = await getTranslations('Documents');
+  
+  const docLabels = {
+    issue_date: tDoc('issue_date'),
+    shipper: tDoc('shipper'),
+    consignee: tDoc('consignee'),
+    order_ref: tDoc('order_ref'),
+    item_desc: tDoc('item_desc'),
+    quantity: tDoc('quantity'),
+    unit_price: tDoc('unit_price'),
+    sub_total: tDoc('sub_total'),
+    total: tDoc('total'),
+    currency: tDoc('currency'),
+    declaration: tDoc('declaration'),
+    declaration_text: tDoc('declaration_text'),
+    generated_on: tDoc('generated_on'),
+    transport_mode: tDoc('transport_mode'),
+    express_air: tDoc('express_air'),
+    qty: tDoc('qty'),
+    pkgs: tDoc('pkgs'),
+    net_weight: tDoc('net_weight'),
+    gross_weight: tDoc('gross_weight'),
+    total_pkgs: tDoc('total_pkgs'),
+    trade_terms: tDoc('trade_terms'),
+    invoice_no: tDoc('invoice_no'),
+    pl_no: tDoc('pl_no'),
+    remarks: tDoc('remarks'),
+    remarks_text: tDoc('remarks_text'),
   };
 
   return (
@@ -297,8 +331,11 @@ export default async function OrderDetailPage({
             />
           )}
 
-          {/* 4. VOC Trigger */}
-          <OrderVocTrigger orderId={orderId} orderNo={order.order_no} />
+          {/* 4. VOC & Claim Trigger */}
+          <div className="grid grid-cols-2 gap-3">
+            <OrderVocTrigger orderId={orderId} orderNo={order.order_no} />
+            <OrderClaimTrigger orderId={orderId} orderNo={order.order_no} />
+          </div>
 
           {/* 4. Finance Summary */}
           <OrderFinanceSummary 
@@ -314,7 +351,7 @@ export default async function OrderDetailPage({
              <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
                    <FileText className="w-5 h-5 text-blue-500" />
-                   Trade Documents
+                   {tDocs('title')}
                 </h2>
                 <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest bg-slate-50 dark:bg-neutral-800 px-3 py-1 rounded-full">
                    Auto-Generated
@@ -323,18 +360,18 @@ export default async function OrderDetailPage({
              
              <div className="grid grid-cols-1 gap-3">
                 <p className="text-xs text-slate-500 italic mb-4">
-                  무역 상업 송장(CI) 및 패킹 리스트(PL)가 오더 정보를 기반으로 자동 생성되었습니다.
+                  {tDocs('description')}
                 </p>
                 <div className="flex flex-col gap-3">
                    <DocumentDownloadButton 
-                     document={<CommercialInvoicePDF data={ciData} />}
+                     document={<CommercialInvoicePDF data={ciData} labels={docLabels} />}
                      fileName={`CI_${order.order_no}.pdf`}
-                     label="Commercial Invoice (CI)"
+                     label={`${tDocs('ci')} (CI)`}
                    />
                    <DocumentDownloadButton 
-                     document={<PackingListPDF data={plData} />}
+                     document={<PackingListPDF data={plData} labels={docLabels} />}
                      fileName={`PL_${order.order_no}.pdf`}
-                     label="Packing List (PL)"
+                     label={`${tDocs('pl')} (PL)`}
                    />
                 </div>
              </div>

@@ -150,30 +150,48 @@ interface PLProps {
     total_net_weight: number;
     total_gross_weight: number;
   };
+  labels: {
+    issue_date: string;
+    shipper: string;
+    consignee: string;
+    order_ref: string;
+    item_desc: string;
+    qty: string;
+    pkgs: string;
+    net_weight: string;
+    gross_weight: string;
+    total_pkgs: string;
+    remarks: string;
+    remarks_text: string;
+    generated_on: string;
+    transport_mode: string;
+    express_air: string;
+    pl_no: string;
+  };
 }
 
-const PackingListPDF = ({ data }: PLProps) => (
+const PackingListPDF = ({ data, labels }: PLProps) => (
   <Document title={`PL_${data.pl_no}`} author="ZENITH LMS">
     <Page size="A4" style={styles.page}>
       <View style={styles.header}>
         <View>
-          <Text style={styles.title}>Packing List</Text>
-          <Text style={styles.text}>PL No: {data.pl_no}</Text>
+          <Text style={styles.title}>{labels.pl_no}</Text>
+          <Text style={styles.text}>{labels.pl_no}: {data.pl_no}</Text>
         </View>
         <View style={{ textAlign: 'right' }}>
-          <Text style={styles.label}>Issue Date</Text>
+          <Text style={styles.label}>{labels.issue_date}</Text>
           <Text style={styles.value}>{data.date}</Text>
         </View>
       </View>
 
       <View style={styles.section}>
         <View style={styles.box}>
-          <Text style={styles.label}>Shipper / Exporter</Text>
+          <Text style={styles.label}>{labels.shipper}</Text>
           <Text style={styles.value}>{data.shipper.name}</Text>
           <Text style={styles.text}>{data.shipper.address}</Text>
         </View>
         <View style={styles.box}>
-          <Text style={styles.label}>Consignee / Recipient</Text>
+          <Text style={styles.label}>{labels.consignee}</Text>
           <Text style={styles.value}>{data.consignee.name}</Text>
           <Text style={styles.text}>{data.consignee.address}</Text>
         </View>
@@ -181,22 +199,22 @@ const PackingListPDF = ({ data }: PLProps) => (
 
       <View style={styles.section}>
         <View style={styles.box}>
-          <Text style={styles.label}>Order Reference</Text>
+          <Text style={styles.label}>{labels.order_ref}</Text>
           <Text style={styles.value}>{data.order_no}</Text>
         </View>
         <View style={styles.box}>
-          <Text style={styles.label}>Transport Mode</Text>
-          <Text style={styles.value}>Express Courier / Air</Text>
+          <Text style={styles.label}>{labels.transport_mode}</Text>
+          <Text style={styles.value}>{labels.express_air}</Text>
         </View>
       </View>
 
       <View style={styles.table}>
         <View style={[styles.tableRow, styles.tableHeader]}>
-          <Text style={styles.col1}>Description of Goods</Text>
-          <Text style={styles.col2}>Qty</Text>
-          <Text style={styles.col3}>Pkgs</Text>
-          <Text style={styles.col4}>Net (kg)</Text>
-          <Text style={styles.col5}>Gross (kg)</Text>
+          <Text style={styles.col1}>{labels.item_desc}</Text>
+          <Text style={styles.col2}>{labels.qty}</Text>
+          <Text style={styles.col3}>{labels.pkgs}</Text>
+          <Text style={styles.col4}>{labels.net_weight}</Text>
+          <Text style={styles.col5}>{labels.gross_weight}</Text>
         </View>
 
         {data.items.map((item, index) => (
@@ -212,28 +230,26 @@ const PackingListPDF = ({ data }: PLProps) => (
 
       <View style={styles.summarySection}>
         <View style={styles.summaryItem}>
-          <Text style={styles.summaryLabel}>Total Packages</Text>
+          <Text style={styles.summaryLabel}>{labels.total_pkgs}</Text>
           <Text style={styles.summaryValue}>{data.total_pkgs}</Text>
         </View>
         <View style={styles.summaryItem}>
-          <Text style={styles.summaryLabel}>Net Weight</Text>
+          <Text style={styles.summaryLabel}>{labels.net_weight}</Text>
           <Text style={styles.summaryValue}>{data.total_net_weight.toFixed(2)} kg</Text>
         </View>
         <View style={styles.summaryItem}>
-          <Text style={styles.summaryLabel}>Gross Weight</Text>
+          <Text style={styles.summaryLabel}>{labels.gross_weight}</Text>
           <Text style={styles.summaryValue}>{data.total_gross_weight.toFixed(2)} kg</Text>
         </View>
       </View>
 
       <View style={{ marginTop: 40, borderTop: '0.5pt solid #eee', paddingTop: 10 }}>
-        <Text style={styles.label}>Remarks</Text>
-        <Text style={styles.text}>
-          No dangerous goods included. All items are packed for safe international transport.
-        </Text>
+        <Text style={styles.label}>{labels.remarks}</Text>
+        <Text style={styles.text}>{labels.remarks_text}</Text>
       </View>
 
       <Text style={styles.footer}>
-        ZENITH LMS Digital Document Services • Generated on {new Date().toLocaleString()}
+        ZENITH LMS Digital Document Services • {labels.generated_on} {new Date().toLocaleString()}
       </Text>
     </Page>
   </Document>

@@ -77,7 +77,7 @@ describe('ZENITH Claims Actions: Lifecycle & Settlement', () => {
     
     // 1. Order check
     supabaseMock.then.mockImplementationOnce((onFulfilled: any) => 
-      Promise.resolve({ data: { id: 'o1', org_id: 'org-1' }, error: null }).then(onFulfilled)
+      Promise.resolve({ data: { id: 'o1', shipper_id: 'org-1' }, error: null }).then(onFulfilled)
     );
     // 2. Insert result
     supabaseMock.then.mockImplementationOnce((onFulfilled: any) => 
@@ -106,17 +106,9 @@ describe('ZENITH Claims Actions: Lifecycle & Settlement', () => {
     // Given
     const payload = { claim_id: 'c1', invoice_id: 'inv1', fee_amount: 100, currency: 'USD' };
     
-    // 1. Fee insert
-    supabaseMock.then.mockImplementationOnce((onFulfilled: any) => 
-      Promise.resolve({ data: { id: 'fee1' }, error: null }).then(onFulfilled)
-    );
-    // 2. Invoice check
-    supabaseMock.then.mockImplementationOnce((onFulfilled: any) => 
-      Promise.resolve({ data: { id: 'inv1', total_amount: 1000 }, error: null }).then(onFulfilled)
-    );
-    // 3. Invoice update
-    supabaseMock.then.mockImplementationOnce((onFulfilled: any) => 
-      Promise.resolve({ data: null, error: null }).then(onFulfilled)
+    // reset mock to default and provide specific responses
+    supabaseMock.then.mockImplementation((onFulfilled: any) => 
+      Promise.resolve({ data: { id: 'fee1', total_amount: 1000 }, error: null }).then(onFulfilled)
     );
 
     // When
@@ -126,19 +118,29 @@ describe('ZENITH Claims Actions: Lifecycle & Settlement', () => {
     expect(supabaseMock.from).toHaveBeenCalledWith('zen_incident_fees');
     expect(supabaseMock.from).toHaveBeenCalledWith('zen_invoices');
     expect(supabaseMock.update).toHaveBeenCalledWith(expect.objectContaining({
-      total_amount: 900 // 1000 - 100
+      total_amount: 900
     }));
   });
 
   it('TC-CLM.4: [Failure] 타 조직 오더에 대한 클레임 생성 시 예외를 던져야 함', async () => {
     // Given
+    (validateUserAction as any).mockResolvedValueOnce({ 
+      supabase: supabaseMock, 
+      user: { id: 'user-1' },
+      profile: { id: 'prof-1', role: 'SHIPPER', org_id: 'org-1' }
+    });
+
+    // 전역 then mock이 타 조직 오더를 반환하도록 설정
     supabaseMock.then.mockImplementationOnce((onFulfilled: any) => 
-      Promise.resolve({ data: { id: 'o1', org_id: 'other-org' }, error: null }).then(onFulfilled)
+      Promise.resolve({ data: { id: 'prof-1' }, error: null }).then(onFulfilled)
+    );
+    supabaseMock.then.mockImplementationOnce((onFulfilled: any) => 
+      Promise.resolve({ data: { shipper_id: 'other-org' }, error: null }).then(onFulfilled)
     );
 
     // When & Then
     await expect(createClaim({ order_id: 'o1', reason_code: 'DELAY', description: 'Late' }))
-      .rejects.toThrow(/You do not have permission/);
+      .rejects.toThrow(/do not have permission/);
   });
 
   it('TC-CLM.5: [Success] updateClaimStatus는 클레임 상태를 변경하고 revalidatePath를 호출해야 함', async () => {
