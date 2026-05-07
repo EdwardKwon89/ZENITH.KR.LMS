@@ -46,11 +46,13 @@ export async function triggerStatusChangeNotification(
   const supabase = providedSupabase || await createServerClient();
 
   // 1. 오더 기본 정보 조회 (shipper_id = zen_organizations.id)
-  const { data: order, error } = await supabase
+  const { data, error } = await supabase
     .from("zen_orders")
     .select("order_no, shipper_id, recipient_email")
     .eq("id", orderId)
-    .single<OrderBasicData>();
+    .single();
+
+  const order = data as OrderBasicData;
 
   if (error || !order) {
     console.error("[NOTIF] Failed to fetch order for notification:", error);

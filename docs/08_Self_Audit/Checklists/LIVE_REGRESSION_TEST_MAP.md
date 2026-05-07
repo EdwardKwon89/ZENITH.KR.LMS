@@ -261,7 +261,9 @@
 | 2026-05-06 | v14.7 | ✅ PASS | 24.01s | 161/161 — E2E-07 통관 라이프사이클 테스트 완료. UI ID 도입 및 브라우저 다이얼로그 처리 로직 고도화로 안정성 확보. (Playwright E2E는 vitest suite 외부 — 단위 테스트 수 변동 없음, Aiden 검증 정정) |
 | 2026-05-06 | v14.8 | ✅ PASS | ~30s | 161/161 — E2E-08 화주 통관 이력 조회 완료. getDeclarations validateUserAction 전환, middleware /mypage 허용, RLS 조직 격리 정책 보강. (Aiden 직접 등록 — Riley R-09 허위 보고 정정) |
 | 2026-05-07 | v14.9 | ✅ PASS | ~30s | 163/163 — E2E-09 개인회원 등급 승급 라이프사이클 완료. grade_promotion_request FK zen_profiles 전환, handle_new_user 트리거 보강, INDIVIDUAL 즉시 활성화, grade RLS 정책 추가, rate_price 회귀 복구, Admin 메타데이터 동기화. (Aiden 최종 검증 PASS) |
-| 2026-05-07 | v14.10 | ✅ PASS | ~32s | 163/163 — E2E-10 클레임 및 다국어 문서 발행 엔진 완료. claims.ts 액션 구현, PDF 컴포넌트(CI/PL) 다국어 렌더링 고도화, ClaimRequestModal UI 연계 확인. (FB-010 재조치 완료) |
+| 2026-05-07 | v14.11 | ✅ PASS | ~35s | 163/163 — E2E-10 클레임 및 다국어 문서 발행 엔진 완료. FB-011 조치(Step 4 구현 및 실물 스크린샷 교체) 완료. claims.ts 액션 구현, PDF 컴포넌트(CI/PL) 다국어 렌더링 고도화, ClaimRequestModal UI 연계 확인. |
+| 2026-05-07 | v14.12 | ✅ PASS | ~34s | 163/163 — E2E-11 오더 QnA 라이프사이클 완료. 로그아웃 버튼 컴포넌트(`LogoutButton`) 구현 및 글로벌 헤더 연동, E2E 테스트 경로(`/ko/support/qna`) 및 셀렉터 현행화, 로그인 리다이렉트(`/ko/orders`) 정합성 확보. |
+| 2026-05-08 | v14.13 | ✅ PASS | 29.81s | 163/163 — E2E-12 복합 경로 최적화 및 마일스톤 시각화 완료. BALANCED 경로 선택 로직, RouteConsistencyBadge 서버 사이드 업데이트(page.reload) 및 마일스톤 타임라인 시각화 검증 완료. |
 
 
 ---

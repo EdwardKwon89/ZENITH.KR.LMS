@@ -171,7 +171,7 @@ export async function getVocList({
   order_id?: string;
   limit?: number;
   offset?: number;
-} = {}) {
+} = {}): Promise<{ success: boolean; error?: string; vocs: VocItem[]; total: number }> {
   const { supabase } = await validateUserAction();
 
   let query = supabase
@@ -190,9 +190,9 @@ export async function getVocList({
     .order("created_at", { ascending: false })
     .range(offset, offset + limit - 1);
 
-  if (error) return { success: false, error: error.message };
+  if (error) return { success: false, error: error.message, vocs: [] as VocItem[], total: 0 };
 
-  const vocs = data.map((item: any) => ({
+  const vocs: VocItem[] = data.map((item: any) => ({
     ...item,
     order_no: item.order?.order_no,
     answer_count: item.answer_count?.[0]?.count || 0
@@ -205,7 +205,7 @@ export async function getVocList({
  * 14.3 getVocDetail (Action)
  * VOC 상세 정보와 답변 이력을 조회합니다.
  */
-export async function getVocDetail(vocId: string) {
+export async function getVocDetail(vocId: string): Promise<{ success: boolean; error?: string; data: VocDetail | null }> {
   const { supabase } = await validateUserAction();
 
   const { data: voc, error: vocError } = await supabase
@@ -217,7 +217,7 @@ export async function getVocDetail(vocId: string) {
     .eq("id", vocId)
     .single();
 
-  if (vocError || !voc) return { success: false, error: "VOC not found" };
+  if (vocError || !voc) return { success: false, error: "VOC not found", data: null };
 
   const { data: answers, error: ansError } = await supabase
     .from("zen_voc_answers")
@@ -228,7 +228,7 @@ export async function getVocDetail(vocId: string) {
     .eq("voc_id", vocId)
     .order("created_at", { ascending: true });
 
-  if (ansError) return { success: false, error: ansError.message };
+  if (ansError) return { success: false, error: ansError.message, data: null };
 
   const data = {
     ...voc,

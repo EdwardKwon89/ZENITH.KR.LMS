@@ -4,6 +4,7 @@ import { Search, ChevronRight, User, LogOut, Settings, HelpCircle, Building } fr
 import { cn } from "@/lib/utils";
 import { getNotifications } from "@/app/actions/notifications";
 import NotificationBell from "@/components/notifications/NotificationBell";
+import LogoutButton from "./LogoutButton";
 
 export default async function GlobalHeader({ user, profile }: { user?: any; profile?: any }) {
   const t = await getTranslations("Header");
@@ -70,9 +71,7 @@ export default async function GlobalHeader({ user, profile }: { user?: any; prof
               </button>
             </div>
             <div className="h-[1px] bg-slate-100 my-2 mx-1" />
-            <button className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-red-600 hover:bg-red-50 transition-all">
-              <LogOut size={16} /> {t("logout")}
-            </button>
+            <LogoutButton label={t("logout")} />
           </div>
         </div>
       </div>

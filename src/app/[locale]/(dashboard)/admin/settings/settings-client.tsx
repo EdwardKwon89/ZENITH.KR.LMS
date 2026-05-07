@@ -20,21 +20,11 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { updateSystemParam, getSystemParams } from '@/app/actions/master';
+import type { SystemParam } from '@/lib/params/service';
 import { useParams } from 'next/navigation';
 
-interface SystemParam {
-  id: string;
-  key: string;
-  category: string;
-  value_text: string | null;
-  value_numeric: number | null;
-  value_jsonb: any | null;
-  description: string;
-  updated_at: string;
-}
-
 interface AdminSettingsClientProps {
-  initialData: any[];
+  initialData: SystemParam[];
 }
 
 export default function AdminSettingsClient({ initialData }: AdminSettingsClientProps) {
@@ -232,7 +222,7 @@ export default function AdminSettingsClient({ initialData }: AdminSettingsClient
                       <div className="flex items-center justify-between text-[10px] font-mono text-slate-400 px-1">
                         <span className="flex items-center gap-1">
                           <Info className="w-2.5 h-2.5" />
-                          Last Update: {new Date(param.updated_at).toLocaleString()}
+                          Last Update: {param.updated_at ? new Date(param.updated_at).toLocaleString() : '-'}
                         </span>
                         <span className="group-hover:text-blue-500/60 transition-colors uppercase">Real-time Hook Active</span>
                       </div>
