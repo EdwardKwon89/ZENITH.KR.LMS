@@ -60,7 +60,113 @@
 - **관련 파일**: `src/app/actions/member.ts`, `src/app/[locale]/(dashboard)/mypage/`, `src/components/layout/NaviSidebar.tsx`, `messages/*.json`
 - **예상 공수**: 1~2 MD
 - **우선순위**: High (사용자 기본 요구사항 미충족)
-- **상태**: 🟡 FEAT-001 TASK_BOARD 지시 발령 (2026-05-08)
+- **상태**: 🟡 AUDIT-S1 통합 처리 (2026-05-08)
+
+---
+
+## [IMP-005] 인증 - ID 찾기 화면(SCR-002) 미구현
+
+- **발견 경위**: 2026-05-08 요구사항 준수 감사(AUD-2026-0508-001) — An_04 화면목록 SCR-002 대비 누락 확인
+- **현재 상태**: `/[locale]/(auth)/find-id` 경로 페이지 없음. `findUserId()` 서버 액션 없음
+- **임시 조치**: 없음 (로그인 페이지에 ID찾기 링크 미존재)
+- **목표 구현**:
+  1. `/[locale]/(auth)/find-id/page.tsx` — 이름 + 이메일 입력 폼
+  2. `src/app/actions/auth.ts`에 `findUserId(fullName, email)` 추가
+  3. `zen_profiles` 테이블 조회 후 마스킹된 이메일 반환
+  4. 로그인 페이지에 "ID 찾기" 링크 추가
+- **관련 파일**: `src/app/[locale]/(auth)/login/page.tsx`, `src/app/actions/auth.ts`, `zen_profiles` 테이블
+- **예상 공수**: 0.5 MD
+- **우선순위**: High (기본 인증 요구사항 미충족)
+- **상태**: 🟡 AUDIT-S1 포함 (2026-05-08)
+
+---
+
+## [IMP-006] 인증 - 비밀번호 재설정 화면(SCR-003) 미구현
+
+- **발견 경위**: 2026-05-08 요구사항 준수 감사(AUD-2026-0508-001) — An_04 화면목록 SCR-003 대비 누락 확인
+- **현재 상태**: `/[locale]/(auth)/reset-password` 경로 페이지 없음. Supabase 이메일 기반 재설정 플로우 미구현
+- **임시 조치**: 없음 (로그인 페이지에 비밀번호 찾기 링크 미존재)
+- **목표 구현**:
+  1. `/[locale]/(auth)/reset-password/page.tsx` — 이메일 입력 폼 + `supabase.auth.resetPasswordForEmail()` 호출
+  2. `/[locale]/(auth)/confirm/page.tsx` — Supabase 콜백 처리 (`type=recovery`) + 새 비밀번호 입력
+  3. `src/app/actions/auth.ts`에 `sendPasswordReset()` 추가
+  4. 로그인 페이지에 "비밀번호 찾기" 링크 추가
+- **관련 파일**: `src/app/[locale]/(auth)/login/page.tsx`, `src/app/actions/auth.ts`
+- **예상 공수**: 1 MD
+- **우선순위**: High (기본 인증 요구사항 미충족)
+- **상태**: 🟡 AUDIT-S1 포함 (2026-05-08)
+
+---
+
+## [IMP-007] 개인회원 정보수정·탈퇴 서버 액션 누락
+
+- **발견 경위**: 2026-05-08 요구사항 준수 감사 — Fun_Detail_02 2.1.2(정보수정), 2.1.7(탈퇴) 미구현 확인
+- **현재 상태**: `src/app/actions/member.ts`에 `updateProfile()`, `deleteMember()` 없음. `/mypage/profile` 페이지 없음
+- **임시 조치**: 없음
+- **목표 구현**:
+  1. `updateProfile(payload: { full_name: string })` — `zen_profiles` UPDATE 액션
+  2. `/mypage/profile` 페이지 — 정보 조회·수정 UI
+  3. `deleteMember()` — Soft Delete (`deleted_at` 타임스탬프 업데이트)
+  4. 탈퇴 확인 UI (마이페이지 하위)
+- **관련 파일**: `src/app/actions/member.ts`, `src/app/[locale]/(dashboard)/mypage/`
+- **예상 공수**: 1~1.5 MD
+- **우선순위**: High (사용자 기본 요구사항 미충족)
+- **상태**: 🟡 AUDIT-S1(updateProfile) / AUDIT-S3(deleteMember) 분리 처리 예정 (2026-05-08)
+
+---
+
+## [IMP-008] 법인회원 정보수정·부서관리·탈퇴 전면 미구현
+
+- **발견 경위**: 2026-05-08 요구사항 준수 감사 — Fun_Detail_02 2.2.2~2.2.6 전체 미구현 확인 (법인회원 완성도 17%)
+- **현재 상태**: 법인회원 가입(2.2.1)만 구현. 정보수정·부서관리·탈퇴 기능 없음
+- **임시 조치**: 없음
+- **목표 구현**:
+  1. 법인정보 수정 페이지 (대표자, 주소, 연락처, 이메일)
+  2. 부서 관리 페이지 (추가·수정·삭제 CRUD)
+  3. 법인 탈퇴 — `zen_organizations` + 하위 프로필 전체 Soft Delete
+  4. 관련 서버 액션 (`src/app/actions/organization.ts` 확장)
+- **관련 파일**: `src/app/actions/organization.ts`, `src/app/[locale]/(dashboard)/mypage/`, `zen_organizations` 테이블
+- **예상 공수**: 2~4 MD
+- **우선순위**: High (B2B 핵심 요구사항 미충족)
+- **상태**: 🟡 AUDIT-S3 예정 (2026-05-08)
+
+---
+
+## [IMP-009] NaviSidebar 메뉴 구조 오류 (중복·경로 불일치)
+
+- **발견 경위**: 2026-05-08 요구사항 준수 감사 — 메뉴·페이지 정합 감사 에이전트 결과
+- **현재 상태**:
+  - `/admin/rates` 메뉴 항목이 3중 중복 정의 (Master 자식 + 독립형 2개)
+  - `/order/house`, `/order/import` 둘 다 동일 경로(`/orders`) 연결 (기능 미분화)
+  - `/support/page.tsx` 미존재 (부모 클릭 시 404, 자식 페이지만 있음)
+- **임시 조치**: 없음
+- **목표 구현**:
+  1. `/admin/rates` 중복 항목 제거 (Master 자식 1개만 유지)
+  2. `/order/house`, `/order/import` 경로 처리 (쿼리파라미터 분기 또는 단일 통합)
+  3. `/support` 클릭 시 `/support/qna`로 리다이렉트 또는 href 수정
+- **관련 파일**: `src/components/layout/NaviSidebar.tsx`
+- **예상 공수**: 0.5 MD
+- **우선순위**: Medium (사용자 UX 혼란)
+- **상태**: 🟡 AUDIT-S1 포함 (2026-05-08)
+
+---
+
+## [IMP-010] 다중 RBAC 가드 혼재 및 하드코딩 역할 비교
+
+- **발견 경위**: 2026-05-08 요구사항 준수 감사 — RBAC·Auth Guard 감사 에이전트 결과
+- **현재 상태**:
+  - 권한 체크 3원화: `rbac.ts` 정적 배열 / `middleware.ts` 화이트리스트 / `page.tsx` 하드코딩 문자열
+  - `role === 'ADMIN'` 등 문자열 직접 비교가 6개 파일에 산재 (오타 취약, 유지보수 난이도 높음)
+  - `middleware.ts`와 `rbac.ts`의 경로 목록 비동기화 (`/inventory` 등)
+- **임시 조치**: 없음
+- **목표 구현**:
+  1. 6개 파일의 하드코딩 역할 비교 → `checkPermission()` 또는 `USER_ROLES` 상수 사용으로 통일
+  2. `middleware.ts` 허용 경로를 `rbac.ts`와 동기화
+  3. (IMP-001 연계) 장기적으로 DB 기반 동적 RBAC으로 전환
+- **관련 파일**: `src/lib/auth/rbac.ts`, `src/middleware.ts`, `(dashboard)/settlement/page.tsx`, `(dashboard)/mypage/grade/page.tsx`, `(dashboard)/support/*.tsx`, `(dashboard)/inventory/page.tsx`
+- **예상 공수**: 1~2 MD (코드 정비만, DB 전환 제외)
+- **우선순위**: High (보안 취약성 및 유지보수 난이도)
+- **상태**: 🟡 AUDIT-S2 예정 (2026-05-08)
 
 ---
 

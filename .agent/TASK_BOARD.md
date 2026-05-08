@@ -1,7 +1,7 @@
 # Multi-Agent Task Board
 
 > **프로젝트:** ZENITH_LMS
-> **업데이트:** 2026-05-08 (KST) — FEAT-001 신규 지시 (사용자 정보 조회·변경 기능)
+> **업데이트:** 2026-05-08 (KST) — 감사 스프린트 AUDIT-S1·S2·S3 등재 (FEAT-001 통합 처리)
 > **운영 원칙:**
 > - 각 에이전트는 작업 완료 시 **SECTION 1 상태 대시보드를 최우선 갱신**한 뒤 SECTION 2 상세를 업데이트한다.
 > - Riley는 완료 보고 시 반드시 `## 🔔 Aiden 검토 대기` 테이블에 항목을 추가한다.
@@ -50,7 +50,7 @@
 
 | Task ID | 지시자 | Task 명 | 지시일 |
 |:---|:---|:---|:---|
-| **FEAT-001** | Aiden | 사용자 정보 조회·변경 기능 구현 (`/mypage/profile`, `/mypage/security`) | 2026-05-08 |
+| **AUDIT-S1** | Aiden | 인증·마이페이지·메뉴 결함 시정 (IMP-004~006/009, FEAT-001 통합) | 2026-05-08 |
 
 
 ---
@@ -59,7 +59,10 @@
 
 | Task ID | 담당 | Task 명 | 상태 | 블로커 |
 |:---|:---|:---|:---:|:---|
-| **FEAT-001** | Riley | 사용자 정보 조회·변경 기능 구현 | 🟡 착수 대기 | — |
+| ~~**FEAT-001**~~ | Riley | 사용자 정보 조회·변경 기능 구현 | 🔀 AUDIT-S1 통합 | — |
+| **AUDIT-S1** | Riley | 인증·마이페이지·메뉴 결함 시정 | 🟡 착수 대기 | — |
+| **AUDIT-S2** | Riley | RBAC 구조 정비 (동적화·가드 통일) | ⏳ S1 완료 후 | AUDIT-S1 |
+| **AUDIT-S3** | Riley | 법인회원 관리 확장·탈퇴 기능 | ⏳ S2 완료 후 | AUDIT-S2 |
 | ~~**PH14-E2E-03**~~ | Riley | 마스터오더 그룹핑 → 창고 입고 → 바코드 스캔 | ✅ 완료 | FB-005 CLOSED (2026-05-04) |
 | ~~**PH14-E2E-04**~~ | Riley | 트래킹 동기화 → 마일스톤 갱신 → 화주 알림 | ✅ 완료 | Aiden 검증 PASS (2026-05-04) |
 | ~~**PH14-E2E-05**~~ | Riley | 청구서 발행 → 세금계산서 → 엑셀 Export | ✅ 완료 | FB-006 CLOSED (2026-05-05) |
@@ -81,57 +84,89 @@
 
 ---
 
-## 📨 Aiden → Riley 지시 | FEAT-001 (2026-05-08)
+## 📨 Aiden → Riley 지시 | AUDIT-S1 (2026-05-08)
 
 > **발신**: Aiden (Claude) / **수신**: Riley (Gemini)
 > **수행 주체 (R-01)**: Riley (Gemini) — 구현
 > **검증 주체 (R-01)**: Aiden (Claude) — 완료 판정
-> **우선순위**: High (사용자 기본 요구사항 미충족)
+> **우선순위**: High — 감사 결과 시정 Sprint 1 (FEAT-001 통합)
+> **배경 문서**: `docs/91_FinalTest/Audit_Report_20260508.md` (AUD-2026-0508-001)
 
 ### 배경
 
-로컬 환경 테스트 중 carrier 역할로 접근 시 사용자 정보(이메일·이름·비밀번호) 조회 및 변경 화면이 존재하지 않음이 확인됨. 현재 `/mypage`는 지갑 대시보드만 제공하며, 프로필 수정·비밀번호 변경 기능이 전혀 구현되지 않은 상태임.
+2026-05-08 요구사항 준수 감사(병렬 3종 에이전트) 결과, 사용자 직접 영향 결함이 다수 확인되었다. FEAT-001(사용자 정보 페이지)을 포함하여 인증 기능 누락 및 사이드바 오류를 1차 Sprint에서 통합 해소한다.
 
 ---
 
 ### 구현 범위
 
-#### [FEAT-001-A] `/mypage/profile` — 기본 정보 조회·수정 페이지
+#### [AUDIT-S1-A] NaviSidebar 메뉴 구조 오류 수정 (IMP-009)
+
+**수정 파일**: `src/components/layout/NaviSidebar.tsx`
+
+1. **`/admin/rates` 3중 중복 제거**: 독립형 메뉴 항목 2개 삭제, Master 자식 항목 1개만 유지
+2. **`/order/house`, `/order/import` 경로 처리**: 별도 페이지가 없으므로 자식 메뉴를 `/orders`로 통합하고 주석으로 TODO 표기
+3. **`/support` 부모 href 수정**: `href: "/support"` → `href: "/support/qna"` (첫 번째 자식으로 변경)
+
+---
+
+#### [AUDIT-S1-B] ID찾기 페이지 (IMP-005)
+
+**신규 생성 파일**: `src/app/[locale]/(auth)/find-id/page.tsx`
+
+- 이름(`full_name`)과 이메일(`email`) 입력 폼
+- 제출 → `findUserId()` 서버 액션 호출
+  - `zen_profiles` 테이블에서 `full_name` + 이메일로 사용자 조회
+  - 결과: 마스킹된 이메일 표시 또는 "가입된 계정이 없습니다" 메시지
+- 로그인 페이지 링크 포함
+
+**신규 서버 액션**: `src/app/actions/auth.ts`에 `findUserId(fullName, email)` 추가 (파일 없으면 신규 생성)
+
+**로그인 페이지 수정**: `src/app/[locale]/(auth)/login/page.tsx`에 "ID 찾기" 링크 추가
+
+---
+
+#### [AUDIT-S1-C] 비밀번호 재설정 페이지 (IMP-006)
+
+**신규 생성 파일**: `src/app/[locale]/(auth)/reset-password/page.tsx`
+
+- 이메일 입력 폼 → `sendPasswordReset()` 서버 액션 호출
+  - `supabase.auth.resetPasswordForEmail(email)` 호출
+  - 성공 메시지: "이메일을 확인하세요"
+- Supabase 콜백 처리: `src/app/[locale]/(auth)/confirm/page.tsx` (기존 존재 여부 확인 후 신규 생성)
+  - URL 파라미터 `type=recovery` → 새 비밀번호 입력 폼
+  - `supabase.auth.updateUser({ password: newPassword })` 호출
+
+**신규 서버 액션**: `src/app/actions/auth.ts`에 `sendPasswordReset(email)` 추가
+
+**로그인 페이지 수정**: `src/app/[locale]/(auth)/login/page.tsx`에 "비밀번호 찾기" 링크 추가
+
+---
+
+#### [AUDIT-S1-D] 사용자 프로필 페이지 (IMP-004 / FEAT-001-A 통합)
 
 **신규 생성 파일**: `src/app/[locale]/(dashboard)/mypage/profile/page.tsx`
 
-**구현 항목**:
-- 이름(`full_name`) — 조회 및 수정 (텍스트 입력)
-- 이메일(`email`) — 조회 표시 (읽기 전용, 보안상 직접 수정 비허용)
-- 역할(`role`) / 조직명(`org_id`) — 읽기 전용 표시
-- 저장 버튼 → `updateProfile()` 서버 액션 호출
-  - `zen_profiles` 테이블 UPDATE (`full_name`)
-  - 성공/실패 Toast 피드백
+- `full_name` 수정 + 이메일·역할 읽기 전용 표시
+- 저장 버튼 → `updateProfile()` 서버 액션
 
-**신규 서버 액션**: `src/app/actions/member.ts`에 `updateProfile()` 추가
+**신규 서버 액션**: `src/app/actions/member.ts`에 추가
 ```typescript
-// 추가 위치: src/app/actions/member.ts
 export async function updateProfile(payload: { full_name: string }) {
-  // validateUserAction() → supabase.from("zen_profiles").update() → revalidatePath
+  // validateUserAction() → supabase.from("zen_profiles").update() → revalidatePath("/mypage/profile")
 }
 ```
 
 ---
 
-#### [FEAT-001-B] `/mypage/security` — 비밀번호 변경 페이지
+#### [AUDIT-S1-E] 비밀번호 변경 페이지 (IMP-004 / FEAT-001-B 통합)
 
 **신규 생성 파일**: `src/app/[locale]/(dashboard)/mypage/security/page.tsx`
 
-**구현 항목**:
-- 새 비밀번호 입력 (password)
-- 새 비밀번호 확인 입력 (password confirm)
-- 일치 여부 클라이언트 검증
-- 변경 버튼 → `changePassword()` 서버 액션 호출
-  - `supabase.auth.updateUser({ password: newPassword })` 호출
-  - 성공 시 Toast + 입력 필드 초기화
-  - 실패 시 에러 메시지 표시
+- 새 비밀번호 + 확인 입력 폼, 일치 여부 클라이언트 검증
+- 변경 버튼 → `changePassword()` 서버 액션
 
-**신규 서버 액션**: `src/app/actions/auth.ts` (또는 `member.ts`)에 `changePassword()` 추가
+**신규 서버 액션**: `src/app/actions/auth.ts`에 추가
 ```typescript
 export async function changePassword(newPassword: string) {
   // validateUserAction() → supabase.auth.updateUser({ password }) → return result
@@ -140,27 +175,29 @@ export async function changePassword(newPassword: string) {
 
 ---
 
-#### [FEAT-001-C] 사이드바 메뉴 연결
+#### [AUDIT-S1-F] 사이드바 mypage 메뉴 연결 (FEAT-001-C 통합)
 
 **수정 파일**: `src/components/layout/NaviSidebar.tsx`
 
-- 기존 `mypage` 그룹의 `children` 배열에 두 항목 추가:
-  - `{ title: t("my_profile"), href: "/mypage/profile" }` — 프로필 수정
-  - `{ title: t("my_security"), href: "/mypage/security" }` — 비밀번호 변경
-- i18n 키 `my_profile`, `my_security` 를 `messages/ko.json`, `en.json`, `zh.json` 에 추가
+- `mypage` children에 추가:
+  - `{ title: t("my_profile"), href: "/mypage/profile" }`
+  - `{ title: t("my_security"), href: "/mypage/security" }`
+- i18n 키 `my_profile`, `my_security` 를 `messages/ko.json`, `en.json`, `zh.json`에 추가
 
 ---
 
 ### 완료 기준 (DoD)
 
-- [ ] `/mypage/profile` 페이지 렌더링 및 이름 수정 저장 동작 확인
-- [ ] `/mypage/security` 페이지 렌더링 및 비밀번호 변경 동작 확인
-- [ ] 사이드바에서 두 페이지 진입 가능
-- [ ] 모든 역할(CARRIER, SHIPPER, INDIVIDUAL 등)에서 접근 가능 (공통 경로 `/mypage`에 포함)
+- [ ] NaviSidebar `/admin/rates` 중복 항목 제거 확인
+- [ ] `/find-id` 페이지 렌더링 + 이름/이메일 입력 후 마스킹 결과 확인
+- [ ] `/reset-password` 페이지 렌더링 + 이메일 전송 성공 메시지 확인
+- [ ] 로그인 페이지에 ID찾기·비밀번호찾기 링크 확인
+- [ ] `/mypage/profile` 이름 수정 저장 동작 확인
+- [ ] `/mypage/security` 비밀번호 변경 동작 확인
 - [ ] `rtk npm run build` 0 errors
-- [ ] `rtk npm run test:regression` 163/163 PASS (기존 회귀 파괴 없음)
+- [ ] `rtk npm run test:regression` 163/163 PASS
 - [ ] `git status` 클린 확인 후 완료 보고
-- [ ] 커밋: `[Gemini] feat: FEAT-001 사용자 정보 조회·변경 기능 구현 (profile/security 페이지)`
+- [ ] 커밋: `[Gemini] feat: AUDIT-S1 인증·마이페이지·메뉴 결함 시정`
 
 ---
 
@@ -168,19 +205,19 @@ export async function changePassword(newPassword: string) {
 
 | 파일 | 용도 |
 |:---|:---|
-| `src/app/actions/member.ts` | 기존 서버 액션 — `getMyProfile()` 패턴 참조 |
-| `src/lib/auth/guards.ts` | `validateUserAction()` — 인증 검증 패턴 |
-| `src/app/[locale]/(dashboard)/mypage/grade/page.tsx` | 기존 마이페이지 하위 페이지 패턴 참조 |
-| `src/components/layout/NaviSidebar.tsx` | 메뉴 추가 위치 (`mypage` children) |
-| `messages/ko.json`, `en.json`, `zh.json` | i18n 키 추가 |
-| `scratch/post_launch_improvements.md` | IMP-001~003 참조 (연계 개선 사항) |
+| `docs/91_FinalTest/Audit_Report_20260508.md` | 감사 보고서 전체 |
+| `src/app/[locale]/(auth)/login/page.tsx` | 로그인 페이지 패턴 참조 |
+| `src/app/actions/member.ts` | 기존 서버 액션 패턴 참조 |
+| `src/lib/auth/guards.ts` | `validateUserAction()` 패턴 |
+| `src/app/[locale]/(dashboard)/mypage/grade/page.tsx` | mypage 하위 페이지 패턴 |
+| `scratch/post_launch_improvements.md` | IMP-004~009 참조 |
 
 ---
 
 ### Riley 완료 보고 요건
 
 - 완료 후 🔔 Aiden 검토 대기 테이블에 등록
-- 스크린샷 2종 이상: `/mypage/profile` 수정 전/후, `/mypage/security` 변경 성공 화면
+- 스크린샷: find-id, reset-password, mypage/profile, mypage/security 각 1장 이상
 - 회귀 테스트 163/163 결과 첨부
 - `git status` 클린 확인 결과 첨부
 
