@@ -60,6 +60,44 @@ export async function getMyProfile() {
 }
 
 /**
+ * 1.1.1. 내 프로필 정보 수정
+ */
+export async function updateMyProfile(payload: {
+  fullName: string;
+}) {
+  const { user, supabase } = await validateUserAction();
+
+  try {
+    // 1. zen_profiles 업데이트
+    const { error: zenError } = await supabase
+      .from("zen_profiles")
+      .update({ full_name: payload.fullName })
+      .eq("id", user.id);
+
+    if (zenError) throw zenError;
+
+    // 2. profiles 업데이트 (동기화)
+    const { error: profileError } = await supabase
+      .from("profiles")
+      .update({ 
+        full_name: payload.fullName,
+        updated_at: new Date().toISOString()
+      })
+      .eq("id", user.id);
+
+    if (profileError) {
+      console.warn("[MEMBER_ACTION] profiles sync failed:", profileError.message);
+    }
+
+    revalidatePath("/mypage/profile");
+    return { success: true };
+  } catch (err: any) {
+    console.error("[MEMBER_ACTION] updateMyProfile Error:", err.message);
+    return { error: "프로필 수정 중 오류가 발생했습니다." };
+  }
+}
+
+/**
  * 1.2. 내 대기 중인 승급 신청 조회
  */
 export async function getMyPendingPromotionRequest() {

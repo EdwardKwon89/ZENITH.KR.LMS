@@ -23,7 +23,7 @@
 > 상세 시나리오: [UAT_3.0_Phase3_Integrated.md](../UAT/UAT_3.0_Phase3_Integrated.md)
 
 ### Phase 3.1 — Tracking
-- [ ] **TC-UAT-TRK.1**: 외부 트래킹 동기화 (`syncExternalTracking`) — DB 적재 및 Raw 로그 저장 확인
+- [x] **TC-UAT-TRK.1**: 외부 트래킹 동기화 (`syncExternalTracking`) — DB 적재 및 Raw 로그 저장 확인 (QA-02 PASS)
 - [ ] **TC-UAT-TRK.2**: 통합 트래킹 대시보드 — 오더 상세 연동 및 RBAC 확인
 - [ ] **TC-UAT-TRK.3**: 상태 변경 알림 — 이메일(Resend) + IN_APP 동시 발송 확인
 - [ ] **TC-UAT-TRK.4**: RawLogViewer Admin 전용 접근 및 RBAC 차단 확인
@@ -124,6 +124,7 @@
 | 2026-05-06 | Phase 5 PH14-E2E-06: VOC 라이프사이클 검증 | Riley (Gemini) | ✅ PASS | [PH14_E2E06_VOC.md](../Walkthroughs/PH14_E2E06_VOC.md) |
 | 2026-05-06 | Phase 5 E2E-07: 통관 신고 라이프사이클 (생성→제출→승인) | Riley (Gemini) | ✅ PASS | [PH14_E2E07_CUSTOMS.md](../Walkthroughs/PH14_E2E07_CUSTOMS.md) |
 | 2026-05-06 | Phase 5 E2E-08: 화주 권한별 통관 이력 격리 검증 | Riley (Gemini) | ✅ PASS | [PH14_E2E08_CUSTOMS_SHIPPER.md](../Walkthroughs/PH14_E2E08_CUSTOMS_SHIPPER.md) |
+| 2026-05-08 | QA-02: 트래킹 비즈니스 로직 및 SQL 모호성 해결 | Claude (Antigravity) | ✅ PASS | [SAR_2026-05-08_001](SAR_reports/SAR_2026-05-08_001_QA-02_Tracking_SQL_Ambiguity.md) |
 ---
 **작성 가이드:**
 1. 커밋/PR 요청 전 이 `LIVE` 문서를 전수 체크하십시오.

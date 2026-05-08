@@ -1,0 +1,82 @@
+'use server';
+
+import { createClient } from '@/utils/supabase/server';
+import { validateUserAction } from '@/lib/auth/guards';
+import { revalidatePath } from 'next/cache';
+
+/**
+ * [AUDIT-S1-B] 사용자 ID(이메일) 찾기
+ * 이름과 이메일이 일치하는 사용자가 있는지 확인하고 마스킹된 정보를 반환합니다.
+ */
+export async function findUserId(fullName: string, email: string) {
+  const supabase = await createClient();
+
+  try {
+    const { data, error } = await supabase
+      .from('zen_profiles')
+      .select('email')
+      .eq('full_name', fullName)
+      .eq('email', email)
+      .maybeSingle();
+
+    if (error) {
+      console.error('[AUTH_ACTION] findUserId Error:', error);
+      return { error: '데이터 조회 중 오류가 발생했습니다.' };
+    }
+
+    if (!data) {
+      return { error: '일치하는 사용자 정보를 찾을 수 없습니다.' };
+    }
+
+    // 이메일 마스킹 처리 (예: ab***@example.com)
+    const [user, domain] = data.email.split('@');
+    const maskedUser = user.substring(0, 2) + '*'.repeat(Math.max(0, user.length - 2));
+    const maskedEmail = `${maskedUser}@${domain}`;
+
+    return { success: true, maskedEmail };
+  } catch (err) {
+    return { error: '서버 내부 오류가 발생했습니다.' };
+  }
+}
+
+/**
+ * [AUDIT-S1-C] 비밀번호 재설정 이메일 발송
+ */
+export async function sendPasswordReset(email: string, locale: string = 'ko') {
+  const supabase = await createClient();
+  const origin = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+
+  try {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${origin}/${locale}/confirm?type=recovery`,
+    });
+
+    if (error) {
+      console.error('[AUTH_ACTION] sendPasswordReset Error:', error.message);
+      return { error: error.message };
+    }
+
+    return { success: true };
+  } catch (err) {
+    return { error: '비밀번호 재설정 요청 중 오류가 발생했습니다.' };
+  }
+}
+
+/**
+ * [AUDIT-S1-E] 로그인 상태에서 비밀번호 변경
+ */
+export async function changePassword(password: string) {
+  try {
+    const { supabase } = await validateUserAction();
+    const { error } = await supabase.auth.updateUser({ password });
+
+    if (error) {
+      console.error('[AUTH_ACTION] changePassword Error:', error.message);
+      return { error: error.message };
+    }
+
+    return { success: true };
+  } catch (err) {
+    return { error: '비밀번호 변경 중 오류가 발생했습니다.' };
+  }
+}

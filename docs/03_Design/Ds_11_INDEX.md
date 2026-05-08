@@ -120,6 +120,9 @@
 | 19.1 | Documents | `generateCI` | Action | User | Commercial Invoice 데이터 생성 | [DOCUMENTS](Ds_11_DETAIL_DOCUMENTS.md#191-generateci-action) |
 | 19.2 | Documents | `generatePL` | Action | User | Packing List 데이터 생성 | [DOCUMENTS](Ds_11_DETAIL_DOCUMENTS.md#192-generatepl-action) |
 | 19.3 | Documents | `getDocumentsByOrder` | Action | User | 오더별 문서 목록 조회 | [DOCUMENTS](Ds_11_DETAIL_DOCUMENTS.md#193-getdocumentsbyorder-action) |
+| 2.6 | Auth | `updateProfile` | Action | User | 사용자 프로필 정보(성명 등) 수정 | [AUTH](Ds_11_DETAIL_AUTH.md#26-updateprofile) |
+| 2.7 | Auth | `changePassword` | Action | User | 사용자 비밀번호 변경 | [AUTH](Ds_11_DETAIL_AUTH.md#27-changepassword) |
+| 2.8 | Auth | `updateRolePermissions` | Action | Admin | 역할별 접근 권한(RBAC) 설정 변경 | [AUTH](Ds_11_DETAIL_AUTH.md#28-updaterolepermissions) |
 
 ---
 

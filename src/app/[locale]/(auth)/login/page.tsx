@@ -7,6 +7,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { ShieldCheck, Truck, ArrowRight } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
+import Link from 'next/link';
 
 function LoginForm() {
   const t = useTranslations('Auth');
@@ -98,6 +99,21 @@ function LoginForm() {
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </ZenButton>
             
+            <div className="flex items-center justify-between px-1">
+              <Link 
+                href={`/${locale}/find-id`}
+                className="text-xs text-stone-500 hover:text-brand-600 transition-colors"
+              >
+                {t('find_id_link') || '아이디 찾기'}
+              </Link>
+              <Link 
+                href={`/${locale}/reset-password`}
+                className="text-xs text-stone-500 hover:text-brand-600 transition-colors"
+              >
+                {t('reset_password_link') || '비밀번호 재설정'}
+              </Link>
+            </div>
+
             <ZenButton 
               type="submit" 
               data-action="signup"

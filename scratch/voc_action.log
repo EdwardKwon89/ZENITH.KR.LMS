@@ -1,8 +1,0 @@
-[2026-05-08T00:13:24.320Z] createVoc: order_id=order-123, type=DELAY
-[SUCCESS] VOC created: voc-123
-[2026-05-08T00:13:24.323Z] createVoc: order_id=order-456, type=DAMAGE
-[ERROR] UNAUTHORIZED: undefined !== test-org-id
-[2026-05-08T00:14:09.439Z] createVoc: order_id=order-123, type=DELAY
-[SUCCESS] VOC created: voc-123
-[2026-05-08T00:14:09.441Z] createVoc: order_id=order-456, type=DAMAGE
-[ERROR] UNAUTHORIZED: undefined !== test-org-id

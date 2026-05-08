@@ -21,12 +21,15 @@ describe('QA-02 Tracking Business Integration', () => {
   const testOrderId = '3ff5b116-29cd-4d90-8dd0-0e99c36a2155'; // Previously identified order
 
   beforeAll(async () => {
+    console.log('[QA-02] Starting beforeAll setup...');
     supabase = createClient(supabaseUrl, supabaseKey);
 
     // [Cleanup] ALWAYS delete and re-insert to guarantee single, clean configuration.
     // This prevents .single() failures from duplicate rows in any run scenario.
-    await supabase.from('zen_tracking_configs').delete().eq('order_id', testOrderId);
-    await supabase.from('zen_orders').delete().eq('id', testOrderId);
+    const { error: delConfigError } = await supabase.from('zen_tracking_configs').delete().eq('order_id', testOrderId);
+    const { error: delOrderError } = await supabase.from('zen_orders').delete().eq('id', testOrderId);
+    
+    console.log('[QA-02] Cleanup done:', { delConfigError, delOrderError });
 
     const { error: orderError } = await supabase
       .from('zen_orders')
@@ -34,11 +37,14 @@ describe('QA-02 Tracking Business Integration', () => {
         id: testOrderId,
         order_no: 'TRK-QA-TEST-001',
         cargo_details: {},
-        status: 'REGISTERED'
+        status: 'REGISTERED',
+        transport_mode: 'AIR' // [Required] Added for rate matching engine
       });
       
     if (orderError) {
       console.error('[QA-02] Failed to insert mock order:', orderError.message);
+    } else {
+      console.log('[QA-02] Mock order inserted successfully');
     }
 
     const { error: insertError } = await supabase
@@ -51,7 +57,9 @@ describe('QA-02 Tracking Business Integration', () => {
       });
 
     if (insertError) {
-      console.error('[QA-02] beforeAll setup failed:', insertError.message);
+      console.error('[QA-02] beforeAll config insert failed:', insertError.message);
+    } else {
+      console.log('[QA-02] Mock config inserted successfully');
     }
   });
 
@@ -59,6 +67,13 @@ describe('QA-02 Tracking Business Integration', () => {
   it('should preserve raw JSON logs in zen_tracking_raw_logs', async () => {
     // 1. Clear existing logs for this order to ensure clean test
     await supabase.from('zen_tracking_raw_logs').delete().eq('order_id', testOrderId);
+
+    // 1.5 Verify config exists before sync
+    const { data: configCheck, error: checkError } = await supabase
+      .from('zen_tracking_configs')
+      .select('*')
+      .eq('order_id', testOrderId);
+    console.log('[QA-02] Direct Config Check:', { count: configCheck?.length, checkError });
 
     // 2. Execute sync via TrackingManager
     // This will trigger MockCarrierProvider.track() which inserts the raw log
