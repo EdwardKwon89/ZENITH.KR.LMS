@@ -47,4 +47,21 @@
 
 ---
 
+## [IMP-004] 사용자 정보 조회·변경 기능 구현 ← FEAT-001로 작업 착수
+
+- **발견 경위**: 로컬 환경 테스트 중 `/mypage` 화면에서 이름·이메일·비밀번호 변경 기능 부재 확인
+- **현재 상태**: `/mypage` = 지갑 대시보드만 제공. 프로필 수정·비밀번호 변경 페이지 없음
+- **임시 조치**: 없음 (미구현 상태)
+- **목표 구현**:
+  - `/mypage/profile` — 이름 조회·수정, 이메일·역할 읽기 전용 표시
+  - `/mypage/security` — 비밀번호 변경 (`supabase.auth.updateUser`)
+  - `updateProfile()`, `changePassword()` 서버 액션 신규 추가
+  - 사이드바 마이페이지 하위 메뉴에 두 항목 연결
+- **관련 파일**: `src/app/actions/member.ts`, `src/app/[locale]/(dashboard)/mypage/`, `src/components/layout/NaviSidebar.tsx`, `messages/*.json`
+- **예상 공수**: 1~2 MD
+- **우선순위**: High (사용자 기본 요구사항 미충족)
+- **상태**: 🟡 FEAT-001 TASK_BOARD 지시 발령 (2026-05-08)
+
+---
+
 *추가 발견 항목은 이 파일에 IMP-NNN 형식으로 계속 추가*
