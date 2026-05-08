@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import ZenShell from "@/components/layout/ZenShell";
 import GlobalHeader from "@/components/layout/GlobalHeader";
 import NaviSidebar from "@/components/layout/NaviSidebar";
+import { getPermissionsByRole } from "@/lib/auth/rbac";
 
 export default async function DashboardGroupLayout({
   children,
@@ -26,12 +27,15 @@ export default async function DashboardGroupLayout({
     .eq("id", user.id)
     .single();
 
+  // [RBAC] Fetch dynamic permissions from DB (Centralized & Cached)
+  const allowedPaths = await getPermissionsByRole(supabase, profile?.role || "GUEST");
+
   return (
     <ZenShell 
       user={user} 
       profile={profile}
       header={<GlobalHeader user={user} profile={profile} />}
-      sidebar={<NaviSidebar user={user} profile={profile} />}
+      sidebar={<NaviSidebar user={user} profile={profile} allowedPaths={allowedPaths} />}
     >
       {children}
     </ZenShell>

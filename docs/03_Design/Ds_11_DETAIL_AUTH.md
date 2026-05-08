@@ -92,3 +92,29 @@
   - `orgId`: (uuid) 대상 조직 ID
   - `reason`: (string) 보완 요청 상세 사유
 - **응답**: `{ success: boolean }`
+
+### 2.6 updateProfile (Action)
+
+- **설명**: 현재 로그인한 사용자의 프로필 정보(성명 등) 수정
+- **권한**: User (본인 프로필만)
+- **파라미터 (FormData)**:
+  - `full_name`: (string) 변경할 성명
+- **응답**: `{ success: boolean, data?: object, error?: string }`
+
+### 2.7 changePassword (Action)
+
+- **설명**: 현재 로그인한 사용자의 비밀번호 변경 (Supabase Auth 연동)
+- **권한**: User
+- **파라미터 (FormData)**:
+  - `current_password`: (string) 현재 비밀번호 (검증용)
+  - `new_password`: (string) 새 비밀번호
+- **응답**: `{ success: boolean, error?: string }`
+
+### 2.8 updateRolePermissions (Action)
+
+- **설명**: 특정 역할(Role)에 대한 메뉴/경로별 접근 권한 설정 변경
+- **권한**: Admin
+- **파라미터**:
+  - `role_code`: (string) 대상 역할 코드
+  - `permissions`: (array) `{ path: string, is_allowed: boolean }` 목록
+- **응답**: `{ success: boolean, error?: string }`

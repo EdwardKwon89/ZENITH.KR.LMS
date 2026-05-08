@@ -39,7 +39,15 @@ interface NavItem {
   children?: { title: string; href: string }[];
 }
 
-export default function NaviSidebar({ user, profile }: { user?: any; profile?: any }) {
+export default function NaviSidebar({ 
+  user, 
+  profile,
+  allowedPaths
+}: { 
+  user?: any; 
+  profile?: any;
+  allowedPaths?: string[];
+}) {
   const t = useTranslations("Navigation");
   const pathname = usePathname();
   const params = useParams();
@@ -57,18 +65,16 @@ export default function NaviSidebar({ user, profile }: { user?: any; profile?: a
       isAdminOnly: true,
       children: [
         { title: t("master_codes"), href: "/admin/codes" },
-        { title: t("master_geo"), href: "/admin/geo" },
-        { title: t("master_mapping"), href: "/admin/mapping" },
-        { title: t("master_rates"), href: "/admin/rates" },
+        { title: t("master_geo"), href: "/master/geo" },
       ]
     },
     { 
       title: t("order_mgmt"), 
-      href: "/order", 
+      href: "/orders", 
       icon: ShoppingCart,
       children: [
-        { title: t("order_house"), href: "/order/house" },
-        { title: t("order_import"), href: "/order/import" },
+        { title: t("orders"), href: "/orders" },
+        { title: t("order_new"), href: "/orders/new" },
       ]
     },
     {
@@ -80,7 +86,6 @@ export default function NaviSidebar({ user, profile }: { user?: any; profile?: a
         { title: t("inventory"), href: "/inventory" },
       ]
     },
-    { title: t("master_rates"), href: "/admin/rates", icon: Calculator },
     { 
       title: t("finance_group"), 
       href: "/finance", 
@@ -114,14 +119,14 @@ export default function NaviSidebar({ user, profile }: { user?: any; profile?: a
     { title: t("grade_promotion_requests"), href: "/admin/upgrade-requests", icon: TrendingUp, isAdminOnly: true },
     { title: t("org_approval"), href: "/admin/organizations", icon: Building, isAdminOnly: true },
     { title: t("customs_management"), href: "/admin/customs", icon: FileText, isAdminOnly: true },
-    { title: t("governance"), href: "/governance", icon: ShieldCheck, isAdminOnly: true },
     { title: t("admin_error_logs"), href: "/admin/error-logs", icon: ShieldAlert, isAdminOnly: true },
     { 
       title: t("mypage"), 
       href: "/mypage", 
       icon: UserCircle,
       children: [
-        { title: t("my_profile"), href: "/mypage" },
+        { title: t("my_profile"), href: "/mypage/profile" },
+        { title: t("my_security"), href: "/mypage/security" },
         { title: t("my_grade"), href: "/mypage/grade" },
         { title: t("my_customs"), href: "/mypage/customs" },
       ]
@@ -180,7 +185,13 @@ export default function NaviSidebar({ user, profile }: { user?: any; profile?: a
       </div>
 
       <nav className="flex-1 px-4 space-y-1.5 overflow-y-auto overflow-x-hidden scrollbar-hide py-2">
-        {NAV_ITEMS.filter(item => checkPermission(profile?.role || "GUEST", item.href)).map((item) => {
+        {NAV_ITEMS.filter(item => {
+          const isParentAllowed = checkPermission(profile?.role || "GUEST", item.href, allowedPaths);
+          const hasAllowedChild = item.children?.some(child => 
+            checkPermission(profile?.role || "GUEST", child.href, allowedPaths)
+          );
+          return isParentAllowed || hasAllowedChild;
+        }).map((item) => {
           const isActive = pathname.startsWith(`/${locale}${item.href}`);
           const isOpen = openMenus.includes(item.title);
           const hasChildren = item.children && item.children.length > 0;

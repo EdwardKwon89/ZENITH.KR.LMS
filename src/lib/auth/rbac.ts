@@ -3,6 +3,8 @@
  * 8대 표준 역할 및 메뉴 접근 권한을 관리하는 중앙 브레인입니다.
  */
 
+import { cache } from 'react';
+
 export const USER_ROLES = {
   ZENITH_SUPER_ADMIN: 'ZENITH_SUPER_ADMIN',
   ADMIN: 'ADMIN',
@@ -20,6 +22,7 @@ export type UserRole = keyof typeof USER_ROLES;
  * 경로에서 다국어 접두사(예: /ko, /en)를 제거하여 정규화합니다.
  */
 function normalizePath(path: string): string {
+  if (!path) return '/';
   const segments = path.split('/').filter(Boolean);
   const locales = ['ko', 'en', 'zh', 'ja'];
   
@@ -31,14 +34,29 @@ function normalizePath(path: string): string {
 }
 
 /**
- * 특정 경로(Path)에 대한 역할별 접근 권한을 검증합니다.
- * @param role 사용자의 역할
- * @param path 접근하려는 경로
+ * Fallback: Static Permissions (DB 연동 전 또는 장애 시 대비)
  */
-export function checkPermission(role: string | null | undefined, path: string): boolean {
+export const STATIC_PERMISSIONS: Record<string, string[]> = {
+  [USER_ROLES.ADMIN]: ['/master', '/admin', '/orders', '/logistics', '/billing', '/tracking', '/inventory', '/finance', '/settlement', '/voc', '/support', '/mypage'],
+  [USER_ROLES.MANAGER]: ['/orders', '/logistics', '/billing', '/reports', '/tracking', '/inventory', '/finance', '/settlement', '/voc', '/support', '/mypage'],
+  [USER_ROLES.OPERATOR]: ['/orders', '/logistics', '/tracking', '/voc', '/support', '/mypage'],
+  [USER_ROLES.CARRIER]: ['/logistics/delivery', '/orders/assigned', '/admin/transport-costs', '/admin/rates', '/voc', '/support', '/mypage'],
+  [USER_ROLES.CORPORATE]: ['/orders', '/billing/invoice', '/tracking', '/finance', '/settlement', '/voc', '/support', '/mypage'],
+  [USER_ROLES.INDIVIDUAL]: ['/orders', '/tracking', '/voc', '/support', '/mypage'],
+  [USER_ROLES.USER]: ['/dashboard', '/mypage', '/support'],
+};
+
+/**
+ * 특정 경로(Path)에 대한 역할별 접근 권한을 검증합니다. (Sync version)
+ * 주로 Client Component에서 UI 노출 여부를 결정할 때 사용합니다.
+ */
+export function checkPermission(
+  role: string | null | undefined, 
+  path: string, 
+  allowedPaths?: string[]
+): boolean {
   if (!role) return false;
 
-  // 🎯 경로 정규화 (다국어 접두어 제거)
   const normalizedPath = normalizePath(path);
 
   // 1. ZENITH_SUPER_ADMIN (Bypass) - 모든 권한 허용
@@ -47,26 +65,72 @@ export function checkPermission(role: string | null | undefined, path: string): 
   }
 
   // 2. 공통 접근 가능 경로 (Common Access)
-  // '/' 경로는 완전 일치해야 하며, 나머지는 접두어 기반으로 검사합니다.
-  const commonPaths = ['/dashboard', '/profile', '/notifications', '/support', '/mypage'];
-  if (normalizedPath === '/' || commonPaths.some(cp => normalizedPath.startsWith(cp))) {
+  const commonPaths = ['/dashboard', '/notifications', '/support', '/mypage'];
+  if (normalizedPath === '/' || normalizedPath === '/dashboard' || commonPaths.some(cp => normalizedPath.startsWith(cp))) {
     return true;
   }
 
-  // 3. 역할별 동적 권한 검증 (추후 Table 기반으로 확장 가능)
-  // 현재는 시스템의 안정적 기동을 위해 기본 매핑 정책을 적용합니다.
-  const permissions: Record<string, string[]> = {
-    [USER_ROLES.ADMIN]: ['/master', '/admin', '/orders', '/logistics', '/billing', '/tracking', '/inventory', '/finance', '/settlement'],
-    [USER_ROLES.MANAGER]: ['/orders', '/logistics', '/billing', '/reports', '/tracking', '/inventory', '/finance', '/settlement'],
-    [USER_ROLES.OPERATOR]: ['/orders', '/logistics', '/tracking'],
-    [USER_ROLES.CARRIER]: ['/logistics/delivery', '/orders/assigned', '/admin/rates'],
-    [USER_ROLES.CORPORATE]: ['/orders/register', '/orders/history', '/billing/invoice', '/tracking', '/finance', '/settlement'],
-    [USER_ROLES.INDIVIDUAL]: ['/orders/register', '/orders/history', '/tracking'],
-    [USER_ROLES.USER]: [],
-  };
+  // 3. 미리 제공된 허용 경로 목록이 있는 경우 (Server -> Client 전달된 경우)
+  if (allowedPaths && allowedPaths.length > 0) {
+    return allowedPaths.some(ap => normalizedPath === ap || normalizedPath.startsWith(ap + '/'));
+  }
 
-  const allowedPaths = permissions[role] || [];
-  
-  // 요청한 경로가 허용된 경로 목록에 포함되어 있는지 확인
-  return allowedPaths.some(ap => normalizedPath.startsWith(ap));
+  // 4. Fallback: Static Permissions
+  const allowed = STATIC_PERMISSIONS[role as UserRole] || [];
+  return allowed.some(ap => normalizedPath === ap || normalizedPath.startsWith(ap + '/'));
 }
+
+/**
+ * [Server-side] DB에서 역할별 권한 목록을 조회합니다. (Cached)
+ */
+export const getPermissionsByRole = cache(async (supabase: any, role: string): Promise<string[]> => {
+  if (role === USER_ROLES.ZENITH_SUPER_ADMIN) return ['*'];
+  
+  const { data, error } = await supabase
+    .from('zen_role_permissions')
+    .select('path')
+    .eq('role_code', role)
+    .eq('is_allowed', true);
+
+  if (error || !data || data.length === 0) {
+    return STATIC_PERMISSIONS[role as UserRole] || [];
+  }
+
+  return data.map((p: any) => p.path);
+});
+
+/**
+ * [Async] DB에서 역할별 권한을 조회하여 검증합니다. (Server Component용)
+ */
+export async function checkPermissionDB(supabase: any, role: string, path: string): Promise<boolean> {
+  if (role === USER_ROLES.ZENITH_SUPER_ADMIN) return true;
+  
+  const allowedPaths = await getPermissionsByRole(supabase, role);
+  return checkPermission(role, path, allowedPaths);
+}
+
+/**
+ * 시스템의 모든 리소스 경로 목록입니다. (권한 설정 UI용)
+ */
+export const ALL_RESOURCE_PATHS = [
+  { path: '/master', label: '기본 정보 (마스터)' },
+  { path: '/admin', label: '관리자 전용 기능' },
+  { path: '/orders', label: '오더 관리' },
+  { path: '/logistics', label: '물류/배송 관리' },
+  { path: '/tracking', label: '통합 트래킹' },
+  { path: '/inventory', label: '재고 관리' },
+  { path: '/finance', label: '재무/정산 현황' },
+  { path: '/settlement', label: '정산 처리' },
+  { path: '/voc', label: 'VOC 관리' },
+  { path: '/support', label: '고객지원' },
+  { path: '/reports', label: '통계/보고서' },
+  { path: '/admin/rates', label: '슬랩 구간율 (관리)' },
+  { path: '/admin/transport-costs', label: '운송원가 (관리)' },
+  { path: '/admin/organizations', label: '회원사 승인' },
+  { path: '/admin/upgrade-requests', label: '등급 승급 심사' },
+  { path: '/admin/customs', label: '통관 관리 (관리자)' },
+  { path: '/admin/error-logs', label: '에러 로그 모니터링' },
+  { path: '/admin/settings', label: '시스템 설정' },
+  { path: '/admin/permissions', label: '권한 관리' },
+];
+
