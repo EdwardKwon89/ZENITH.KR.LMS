@@ -1,9 +1,15 @@
-# ZENITH_LMS 상세 WBS (Work Breakdown Structure)
+# ~~ZENITH_LMS 상세 WBS (Work Breakdown Structure)~~
+
+> ⚠️ **[DEPRECATED]** 이 문서는 v1.1 (2026-04-29) 기준 구버전 WBS입니다.  
+> **현행 문서**: [`docs/01_WBS/WBS_01_상세_공정표.md`](../docs/01_WBS/WBS_01_상세_공정표.md) (v5.5, 2026-05-08) 를 참조하십시오.  
+> 이 파일은 초기 설계 아카이브 목적으로만 보존됩니다.
+
+---
 
 > **프로젝트:** ZENITH_LMS (SNTL 통합 물류 플랫폼)
 > **인프라 전략:** Separable Serverless (Vercel + Supabase)
 > **문서번호:** WBS-01
-> **최종 버전:** v1.0 (2026-04-16)
+> **최종 버전:** v1.1 (2026-04-29) — ARCHIVED
 
 본 문서는 프로젝트의 핵심 업무 흐름을 기반으로 한 5단계 상세 공정표입니다. 모든 작업은 **1인 Full-stack 개발자**의 집중 개발 공수를 기준으로 산정되었습니다.
 
