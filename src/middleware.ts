@@ -145,7 +145,8 @@ export async function middleware(request: NextRequest) {
         purePath.startsWith('/tracking') ||
         purePath.startsWith('/mypage') ||
         purePath.startsWith('/support') ||
-        purePath.startsWith('/inventory'); // 재고관리도 허용 목록에 추가
+        purePath.startsWith('/inventory') || // 재고관리도 허용 목록에 추가
+        purePath.startsWith('/admin/rates'); // 운임 요율 조회 (역할별 접근은 rbac.ts에서 제어)
 
       if (!isAllowedPath) {
         console.log(`[MIDDLEWARE] Path Violation (${purePath}). Redirecting to ${allowedRoot}`);

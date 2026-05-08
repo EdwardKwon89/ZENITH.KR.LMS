@@ -71,15 +71,16 @@ export default function NaviSidebar({ user, profile }: { user?: any; profile?: a
         { title: t("order_import"), href: "/order/import" },
       ]
     },
-    { 
-      title: t("logistics_group"), 
-      href: "/tracking", 
+    {
+      title: t("logistics_group"),
+      href: "/tracking",
       icon: Truck,
       children: [
         { title: t("logistics_tracking"), href: "/tracking" },
         { title: t("inventory"), href: "/inventory" },
       ]
     },
+    { title: t("master_rates"), href: "/admin/rates", icon: Calculator },
     { 
       title: t("finance_group"), 
       href: "/finance", 
