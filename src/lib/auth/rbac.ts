@@ -59,7 +59,7 @@ export function checkPermission(role: string | null | undefined, path: string): 
     [USER_ROLES.ADMIN]: ['/master', '/admin', '/orders', '/logistics', '/billing', '/tracking', '/inventory', '/finance', '/settlement'],
     [USER_ROLES.MANAGER]: ['/orders', '/logistics', '/billing', '/reports', '/tracking', '/inventory', '/finance', '/settlement'],
     [USER_ROLES.OPERATOR]: ['/orders', '/logistics', '/tracking'],
-    [USER_ROLES.CARRIER]: ['/logistics/delivery', '/orders/assigned'],
+    [USER_ROLES.CARRIER]: ['/logistics/delivery', '/orders/assigned', '/admin/rates'],
     [USER_ROLES.CORPORATE]: ['/orders/register', '/orders/history', '/billing/invoice', '/tracking', '/finance', '/settlement'],
     [USER_ROLES.INDIVIDUAL]: ['/orders/register', '/orders/history', '/tracking'],
     [USER_ROLES.USER]: [],
