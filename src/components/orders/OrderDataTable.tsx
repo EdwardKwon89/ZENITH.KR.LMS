@@ -6,8 +6,9 @@ import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import { StatusChangeModal } from './StatusChangeModal';
 import { canChangeStatus } from '@/lib/logistics/status-machine';
-import { UserRole } from '@/lib/auth/rbac';
+import { UserRole, USER_ROLES } from '@/lib/auth/rbac';
 import { AnimatePresence } from 'framer-motion';
+
 
 interface OrderDataTableProps {
   orders: any[];
@@ -82,7 +83,7 @@ export default function OrderDataTable({
                       const statusInfo = getStatusInfo(order.status);
                       // 현재 역할에서 가능한 다음 상태가 하나라도 있는지 확인
                       const nextStatuses = Object.values(OrderStatus).filter(s => 
-                        canChangeStatus(order.status as OrderStatus, s, (userRole as UserRole) || 'USER').allowed
+                        canChangeStatus(order.status as OrderStatus, s, (userRole as UserRole) || USER_ROLES.USER).allowed
                       );
                       const hasPermission = nextStatuses.length > 0;
 
@@ -166,8 +167,9 @@ export default function OrderDataTable({
             orderId={selectedOrder.id}
             currentStatus={selectedOrder.status as OrderStatus}
             allowedNextStatuses={Object.values(OrderStatus).filter(s => 
-              canChangeStatus(selectedOrder.status as OrderStatus, s, (userRole as UserRole) || 'USER').allowed
+              canChangeStatus(selectedOrder.status as OrderStatus, s, (userRole as UserRole) || USER_ROLES.USER).allowed
             )}
+
             onClose={() => {
               setIsModalOpen(false);
               setSelectedOrder(null);

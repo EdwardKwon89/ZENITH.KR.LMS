@@ -4,6 +4,7 @@ import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
 import { validateUserAction, validateAdminAction } from "@/lib/auth/guards";
 import { sendInAppNotification } from "./notifications";
+import { USER_ROLES } from '@/lib/auth/rbac';
 
 export interface GradeMasterItem {
   grade_code: string;
@@ -150,7 +151,7 @@ export async function requestGradePromotion(payload: {
     throw new Error("프로필 정보를 확인할 수 없습니다.");
   }
 
-  if (profile.role !== 'INDIVIDUAL') {
+  if (profile.role !== USER_ROLES.INDIVIDUAL) {
     throw new Error("개인 회원만 등급 승급을 신청할 수 있습니다.");
   }
 
@@ -189,7 +190,7 @@ export async function requestGradePromotion(payload: {
   const { data: admins } = await supabase
     .from("zen_profiles")
     .select("id")
-    .in("role", ["ADMIN", "ZENITH_SUPER_ADMIN"]);
+    .in("role", [USER_ROLES.ADMIN, USER_ROLES.ZENITH_SUPER_ADMIN]);
 
   if (admins && admins.length > 0) {
     for (const admin of admins) {

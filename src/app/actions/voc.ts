@@ -2,6 +2,7 @@
 
 import { validateUserAction, validateAdminAction } from "@/lib/auth/guards";
 import { revalidatePath } from "next/cache";
+import { USER_ROLES } from "@/lib/auth/rbac";
 
 export type VocType = 'DELAY' | 'DAMAGE' | 'MISDELIVERY' | 'OTHER';
 export type VocStatus = 'OPEN' | 'IN_PROGRESS' | 'CLOSED';
@@ -131,7 +132,7 @@ export async function createVoc(payload: any) {
     const { data: admins } = await supabase
       .from("zen_profiles")
       .select("id")
-      .in("role", ["ZENITH_ADMIN", "ZENITH_SUPER_ADMIN", "MANAGER"]);
+      .in("role", [USER_ROLES.ADMIN, USER_ROLES.ZENITH_SUPER_ADMIN, USER_ROLES.MANAGER]);
 
     if (admins && admins.length > 0) {
       const notifications = admins.map(admin => ({

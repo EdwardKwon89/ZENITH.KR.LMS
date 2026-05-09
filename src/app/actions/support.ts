@@ -2,6 +2,7 @@
 
 import { validateUserAction, validateAdminAction } from "@/lib/auth/guards";
 import { revalidatePath } from "next/cache";
+import { USER_ROLES } from "@/lib/auth/rbac";
 
 export type QnaStatus = 'PENDING' | 'IN_PROGRESS' | 'ANSWERED';
 export type FaqCategory = 'ORDER' | 'INVOICE' | 'TRACKING' | 'ROUTING' | 'GENERAL';
@@ -100,7 +101,7 @@ export async function createQna(payload: {
     const { data: admins } = await supabase
       .from("profiles")
       .select("id")
-      .in("role", ["ADMIN", "ZENITH_SUPER_ADMIN", "MANAGER"]);
+      .in("role", [USER_ROLES.ADMIN, USER_ROLES.ZENITH_SUPER_ADMIN, USER_ROLES.MANAGER]);
 
     if (admins && admins.length > 0) {
       const notifications = admins.map(admin => ({
@@ -145,7 +146,7 @@ export async function getQnaList({
     `, { count: "exact" });
 
   // RLS가 작동하지만 명시적 필터링 추가 (Admin인 경우 제외)
-  if (profile?.role !== 'ADMIN') {
+  if (profile?.role !== USER_ROLES.ADMIN && profile?.role !== USER_ROLES.ZENITH_SUPER_ADMIN) {
     query = query.eq("org_id", profile?.org_id);
   }
 
@@ -319,7 +320,7 @@ export async function getFaqList({
   
   let query = supabase.from("zen_faq").select("*");
 
-  if (profile?.role !== 'ADMIN') {
+  if (profile?.role !== USER_ROLES.ADMIN && profile?.role !== USER_ROLES.ZENITH_SUPER_ADMIN) {
     query = query.eq("is_active", true);
   }
 
@@ -433,7 +434,7 @@ export async function getNoticeList({
   
   let query = supabase.from("zen_notices").select("*", { count: "exact" });
 
-  if (profile?.role !== 'ADMIN') {
+  if (profile?.role !== USER_ROLES.ADMIN && profile?.role !== USER_ROLES.ZENITH_SUPER_ADMIN) {
     query = query.eq("is_published", true);
   }
 
@@ -464,7 +465,7 @@ export async function getOrderQnaList(orderId: string): Promise<QnaItem[]> {
 
   // 1. 오더 소유권/권한 검증
   // Admin이 아닌 경우 자신의 조직 데이터만 조회 (RLS가 처리하지만 가드 차원에서 명시적 eq 추가)
-  if (profile?.role !== 'ADMIN') {
+  if (profile?.role !== USER_ROLES.ADMIN && profile?.role !== USER_ROLES.ZENITH_SUPER_ADMIN) {
     query = query.eq("org_id", profile?.org_id);
   }
 

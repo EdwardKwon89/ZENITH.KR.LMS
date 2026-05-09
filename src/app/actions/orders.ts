@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { generateOrderNo, generateMasterOrderNo } from "./master";
 import { OrderStatus } from "@/types/orders";
 import { canChangeStatus } from "@/lib/logistics/status-machine";
-import { UserRole } from "@/lib/auth/rbac";
+import { UserRole, USER_ROLES } from "@/lib/auth/rbac";
 import { generateInvoicesForOrder } from "./finance";
 
 import { OrderRegistrationInput, orderRegistrationSchema } from "@/lib/validation/order";
@@ -274,9 +274,9 @@ export async function getOrders({
   if (!profile) throw new Error("User profile not found");
 
   const userProfile = profile as any; // 타입 캐스팅을 통한 속성 접근 허용 (v2)
-  if (userProfile.role === "CORPORATE") {
+  if (userProfile.role === USER_ROLES.CORPORATE) {
     query = query.eq("shipper_id", userProfile.org_id);
-  } else if (userProfile.role === "INDIVIDUAL") {
+  } else if (userProfile.role === USER_ROLES.INDIVIDUAL) {
     query = query.eq("created_by", user.id);
   }
 

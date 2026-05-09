@@ -4,6 +4,8 @@ import { createClient } from '@/utils/supabase/server';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
+import { USER_ROLES } from '@/lib/auth/rbac';
+
 
 
 export async function login(formData: FormData) {
@@ -82,7 +84,7 @@ export async function signup(formData: FormData, locale: string = 'ko') {
         // Individual users are ACTIVE immediately; Corporate/New Org users are PENDING.
         status: (orgId === null && !isNewOrg) ? 'ACTIVE' : 'PENDING',
         // New Org creators are ADMIN; Joinees are MEMBER; Individuals are USER.
-        role: isNewOrg ? 'ADMIN' : (orgId === null ? 'INDIVIDUAL' : 'MEMBER'),
+        role: isNewOrg ? USER_ROLES.ADMIN : (orgId === null ? USER_ROLES.INDIVIDUAL : USER_ROLES.USER),
       }
     }
   });

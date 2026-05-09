@@ -2,6 +2,7 @@
 
 import { validateUserAction, validateAdminAction } from "@/lib/auth/guards";
 import { revalidatePath } from "next/cache";
+import { USER_ROLES } from "@/lib/auth/rbac";
 
 /**
  * [PH8-BE-01] 클레임 목록을 조회합니다.
@@ -32,7 +33,7 @@ export async function getClaims({
     .order("created_at", { ascending: false });
 
   // 권한 필터링: 화주는 본인 조직만, 어드민은 전체
-  if (profile.role !== 'ADMIN' && profile.role !== 'ZENITH_SUPER_ADMIN') {
+  if (profile.role !== USER_ROLES.ADMIN && profile.role !== USER_ROLES.ZENITH_SUPER_ADMIN) {
     query = query.eq("org_id", profile.org_id);
   } else if (org_id) {
     query = query.eq("org_id", org_id);
@@ -67,10 +68,10 @@ export async function createClaim(payload: {
   if (orderError || !order) throw new Error("Order not found");
   
   // 권한 필터링: 관리자 패스, 법인 화주(org_id 일치), 개인 화주(created_by 일치)
-  const isOwner = profile.role === 'ADMIN' || 
-                  profile.role === 'ZENITH_SUPER_ADMIN' ||
+  const isOwner = profile.role === USER_ROLES.ADMIN || 
+                  profile.role === USER_ROLES.ZENITH_SUPER_ADMIN ||
                   (profile.org_id && order.shipper_id === profile.org_id) ||
-                  (profile.role === 'INDIVIDUAL' && order.created_by === user.id);
+                  (profile.role === USER_ROLES.INDIVIDUAL && order.created_by === user.id);
 
   if (!isOwner) {
     throw new Error("You do not have permission to file a claim for this order.");
@@ -215,7 +216,7 @@ export async function getClaimDetails(claimId: string) {
   if (error) throw new Error(error.message);
   
   // 권한 필터링
-  if (profile.role !== 'ADMIN' && profile.role !== 'ZENITH_SUPER_ADMIN' && data.org_id !== profile.org_id) {
+  if (profile.role !== USER_ROLES.ADMIN && profile.role !== USER_ROLES.ZENITH_SUPER_ADMIN && data.org_id !== profile.org_id) {
     throw new Error("You do not have permission to view this claim.");
   }
 
@@ -237,10 +238,10 @@ export async function deleteClaim(claimId: string) {
     .single();
 
   if (fetchError || !claim) throw new Error("Claim not found");
-  if (profile.role !== 'ADMIN' && claim.org_id !== profile.org_id) {
+  if (profile.role !== USER_ROLES.ADMIN && claim.org_id !== profile.org_id) {
     throw new Error("Unauthorized");
   }
-  if (claim.status !== 'OPEN' && profile.role !== 'ADMIN') {
+  if (claim.status !== 'OPEN' && profile.role !== USER_ROLES.ADMIN) {
     throw new Error("Cannot delete a claim that is already being investigated or resolved.");
   }
 

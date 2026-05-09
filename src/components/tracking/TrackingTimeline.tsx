@@ -4,7 +4,9 @@ import React from "react";
 import { format } from "date-fns";
 import { MapPin, Clock, Info, CheckCircle2, Package, Truck, Ship, Plane, AlertCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { USER_ROLES } from "@/lib/auth/rbac";
 import "./TrackingTimeline.css";
+
 
 interface TrackingEvent {
   id: string;
@@ -132,7 +134,7 @@ export default function TrackingTimeline({ events, isLoading }: TrackingTimeline
                       {event.description}
                     </p>
 
-                    {event.source_type === 'ADMIN' && (
+                    {event.source_type === USER_ROLES.ADMIN && (
                       <div className="mt-3 pt-3 border-t border-gray-100 dark:border-white/5 text-[10px] text-amber-500/80 font-medium flex items-center gap-1.5 uppercase tracking-wider">
                         <Info className="w-3 h-3" />
                         Verified by Zenith Operations

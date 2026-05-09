@@ -7,6 +7,7 @@ import { User, Mail, Building, ShieldCheck, Save, Loader2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import { toast } from 'sonner';
+import { USER_ROLES } from '@/lib/auth/rbac';
 
 export default function ProfilePage() {
   const t = useTranslations('Auth');
@@ -140,7 +141,7 @@ export default function ProfilePage() {
             <div className="space-y-4">
               <div>
                 <p className="text-[10px] text-slate-400 uppercase tracking-widest mb-1">권한 등급</p>
-                <p className="text-sm font-semibold text-slate-700">{profile?.role || 'USER'}</p>
+                <p className="text-sm font-semibold text-slate-700">{profile?.role || USER_ROLES.USER}</p>
               </div>
               <div>
                 <p className="text-[10px] text-slate-400 uppercase tracking-widest mb-1">소속 조직</p>

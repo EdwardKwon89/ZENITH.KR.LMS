@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { CustomsStatus, CustomsDeclaration } from '@/lib/customs/types';
 import { ManualAdapter } from '@/lib/customs/manual-adapter';
 import { validateAdminAction, validateUserAction } from '@/lib/auth/guards';
+import { USER_ROLES } from '@/lib/auth/rbac';
 
 /**
  * 1. 통관 신고 생성 (Admin 전용)
@@ -54,7 +55,7 @@ export async function getDeclarations(params?: {
   // RLS on the database side will ensure that Shippers only see their own data.
   const { supabase, profile } = await validateUserAction();
   
-  const isAdmin = ['ZENITH_SUPER_ADMIN', 'ADMIN', 'MANAGER'].includes(profile?.role || '');
+  const isAdmin = [USER_ROLES.ZENITH_SUPER_ADMIN, USER_ROLES.ADMIN, USER_ROLES.MANAGER].includes(profile?.role as any || '');
   console.log(`[getDeclarations] User: ${profile?.email}, Role: ${profile?.role}, IsAdmin: ${isAdmin}`);
 
   let query = supabase

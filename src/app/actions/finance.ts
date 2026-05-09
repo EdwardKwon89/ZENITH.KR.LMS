@@ -6,6 +6,7 @@ import { validateUserAction, validateAdminAction } from '@/lib/auth/guards';
 import { getNumericParam } from "@/lib/params/service";
 import { generateInvoicePdfBuffer } from '@/lib/finance/pdf';
 import { Resend } from 'resend';
+import { USER_ROLES } from '@/lib/auth/rbac';
 
 const getResend = () => {
   if (process.env.RESEND_API_KEY) {
@@ -131,7 +132,7 @@ export async function getSettlementOverview() {
   const { supabase, profile } = await validateUserAction();
   if (!profile) throw new Error("User profile not found");
 
-  const isAdmin = profile.role === 'ZENITH_SUPER_ADMIN' || profile.role === 'ADMIN';
+  const isAdmin = profile.role === USER_ROLES.ZENITH_SUPER_ADMIN || profile.role === USER_ROLES.ADMIN;
 
   // 1. 전체 미결제 금액 합산 (UNPAID, PARTIAL)
   const unpaidQuery = supabase
@@ -484,7 +485,7 @@ export async function getWeeklyRevenueChart() {
   const { supabase, profile } = await validateUserAction();
   if (!profile) throw new Error("User profile not found");
 
-  const isAdmin = profile.role === 'ZENITH_SUPER_ADMIN' || profile.role === 'ADMIN';
+  const isAdmin = profile.role === USER_ROLES.ZENITH_SUPER_ADMIN || profile.role === USER_ROLES.ADMIN;
 
   // 1. 최근 7일 날짜 범위 계산
   const now = new Date();
