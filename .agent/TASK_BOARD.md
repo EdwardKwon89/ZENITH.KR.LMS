@@ -63,7 +63,7 @@
 |:---|:---|:---|:---:|:---|
 | ~~**FEAT-001**~~ | Riley | 사용자 정보 조회·변경 기능 구현 | 🔀 AUDIT-S1 통합 | — |
 | ~~**AUDIT-S1**~~ | Riley | 인증·마이페이지·메뉴 결함 시정 | ✅ PASS (2026-05-09) | FB-014 CLOSED |
-| **AUDIT-S2** | Riley | RBAC 구조 정비 (동적화·가드 통일) | 🔴 반려(FB-015) | IMP-010 미이행 |
+| **AUDIT-S2** | Riley | RBAC 구조 정비 (동적화·가드 통일) | 🟠 검토 대기 | IMP-010 완료 |
 | **AUDIT-S3** | Riley | 법인회원 관리 확장·탈퇴 기능 | ⏳ S2 완료 후 | AUDIT-S2 |
 | ~~**PH14-E2E-03**~~ | Riley | 마스터오더 그룹핑 → 창고 입고 → 바코드 스캔 | ✅ 완료 | FB-005 CLOSED (2026-05-04) |
 | ~~**PH14-E2E-04**~~ | Riley | 트래킹 동기화 → 마일스톤 갱신 → 화주 알림 | ✅ 완료 | Aiden 검증 PASS (2026-05-04) |
@@ -135,11 +135,11 @@ const isAdmin = profile?.role === USER_ROLES.ADMIN;
 
 ### DoD (재제출 기준)
 
-- [ ] 7개 파일에서 string literal 역할 비교 → `USER_ROLES.XXX` 상수 교체 확인
-- [ ] `rtk npm run build` 0 errors
-- [ ] `rtk npm run test:regression` ≥ 165/165 PASS
-- [ ] `git status` 클린 확인
-- [ ] 🔔 Aiden 검토 대기 등록
+- [x] 7개 파일에서 string literal 역할 비교 → `USER_ROLES.XXX` 상수 교체 확인
+- [x] `rtk npm run build` 0 errors
+- [x] `rtk npm run test:regression` ≥ 165/165 PASS
+- [x] `git status` 클린 확인
+- [x] 🔔 Aiden 검토 대기 등록
 
 ---
 
