@@ -70,7 +70,8 @@
     "my_security": "보안 설정",
     "my_grade": "내 등급 관리",
     "my_customs": "통관 현황",
-    "customs_management": "통관 관리"
+    "customs_management": "통관 관리",
+    "rates": "운임 요율"
   },
   "VOC": {
     "title": "VOC 관리",

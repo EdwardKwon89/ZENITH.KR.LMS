@@ -64,15 +64,15 @@ export function checkPermission(
     return true;
   }
 
-  // 2. 공통 접근 가능 경로 (Common Access)
+  // 2. 미리 제공된 허용 경로 목록이 있는 경우 (Server -> Client 전달된 경우)
+  if (allowedPaths && allowedPaths.length > 0) {
+    return allowedPaths.some(ap => normalizedPath === ap || normalizedPath.startsWith(ap + '/'));
+  }
+
+  // 3. 공통 접근 가능 경로 (Common Access)
   const commonPaths = ['/dashboard', '/notifications', '/support', '/mypage'];
   if (normalizedPath === '/' || normalizedPath === '/dashboard' || commonPaths.some(cp => normalizedPath.startsWith(cp))) {
     return true;
-  }
-
-  // 3. 미리 제공된 허용 경로 목록이 있는 경우 (Server -> Client 전달된 경우)
-  if (allowedPaths && allowedPaths.length > 0) {
-    return allowedPaths.some(ap => normalizedPath === ap || normalizedPath.startsWith(ap + '/'));
   }
 
   // 4. Fallback: Static Permissions
