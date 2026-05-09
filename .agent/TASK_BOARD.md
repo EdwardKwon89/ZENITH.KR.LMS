@@ -1,7 +1,7 @@
 # Multi-Agent Task Board
 
 > **프로젝트:** ZENITH_LMS
-> **업데이트:** 2026-05-08 (KST) — 감사 스프린트 AUDIT-S1·S2·S3 등재 (FEAT-001 통합 처리)
+> **업데이트:** 2026-05-09 (KST) — FB-014 발령: AUDIT-S1 반려 (4개 결함 조치 요구)
 > **운영 원칙:**
 > - 각 에이전트는 작업 완료 시 **SECTION 1 상태 대시보드를 최우선 갱신**한 뒤 SECTION 2 상세를 업데이트한다.
 > - Riley는 완료 보고 시 반드시 `## 🔔 Aiden 검토 대기` 테이블에 항목을 추가한다.
@@ -42,7 +42,7 @@
 
 > Riley가 완료 보고 후 Aiden 검증이 필요한 항목. Aiden 검증 완료 시 행 삭제.
 
-*(검토 대기 항목 없음)*
+*(현재 대기 없음)*
 
 ---
 
@@ -50,8 +50,7 @@
 
 | Task ID | 지시자 | Task 명 | 지시일 |
 |:---|:---|:---|:---|
-| **AUDIT-S1** | Aiden | 인증·마이페이지·메뉴 결함 시정 (IMP-004~006/009, FEAT-001 통합) | 2026-05-08 |
-
+| **FB-014** | Aiden | AUDIT-S1 반려 — 4개 결함 조치 | 2026-05-09 |
 
 ---
 
@@ -60,8 +59,8 @@
 | Task ID | 담당 | Task 명 | 상태 | 블로커 |
 |:---|:---|:---|:---:|:---|
 | ~~**FEAT-001**~~ | Riley | 사용자 정보 조회·변경 기능 구현 | 🔀 AUDIT-S1 통합 | — |
-| **AUDIT-S1** | Riley | 인증·마이페이지·메뉴 결함 시정 | 🟡 착수 대기 | — |
-| **AUDIT-S2** | Riley | RBAC 구조 정비 (동적화·가드 통일) | ⏳ S1 완료 후 | AUDIT-S1 |
+| **AUDIT-S1** | Riley | 인증·마이페이지·메뉴 결함 시정 | 🔴 반려 (FB-014) | FB-014 조치 후 재제출 |
+| **AUDIT-S2** | Riley | RBAC 구조 정비 (동적화·가드 통일) | ⏸ FB-014 조치 후 | AUDIT-S1 FB-014 CLOSED |
 | **AUDIT-S3** | Riley | 법인회원 관리 확장·탈퇴 기능 | ⏳ S2 완료 후 | AUDIT-S2 |
 | ~~**PH14-E2E-03**~~ | Riley | 마스터오더 그룹핑 → 창고 입고 → 바코드 스캔 | ✅ 완료 | FB-005 CLOSED (2026-05-04) |
 | ~~**PH14-E2E-04**~~ | Riley | 트래킹 동기화 → 마일스톤 갱신 → 화주 알림 | ✅ 완료 | Aiden 검증 PASS (2026-05-04) |
@@ -81,6 +80,87 @@
 ---
 
 # SECTION 2 — 작업 상세
+
+---
+
+## 🔴 FB-014 [2026-05-09] — AUDIT-S1 반려 (Aiden)
+
+> **발령**: Aiden (Claude) 2026-05-09 | **우선순위**: High
+> **대상 Task**: AUDIT-S1 인증·마이페이지·메뉴 결함 시정
+
+### 검증 요약
+
+| 항목 | 판정 | 근거 |
+|:---|:---:|:---|
+| find-id 페이지 + findUserId 액션 | ✅ | 구현 확인, 폼/액션 정상 |
+| reset-password 페이지 + sendPasswordReset 액션 | ✅ | Supabase redirectTo 패턴 정상 |
+| confirm 페이지 (recovery → /mypage/security) | ✅ | 리다이렉트 로직 정상 (경로: `/[locale]/confirm/`) |
+| mypage/profile 페이지 + updateMyProfile 액션 | ✅ | 조회·수정 동작 정상 |
+| mypage/security 페이지 + changePassword 액션 | ✅ | validateUserAction → updateUser 정상 |
+| 로그인 페이지 ID찾기·비밀번호찾기 링크 | ✅ | find-id, reset-password 경로 정상 |
+| NaviSidebar my_profile/my_security 메뉴 | ✅ | children 정상 추가 |
+| ko.json i18n 키 추가 | ✅ | my_profile, my_security, find_id_link 등 존재 |
+| **빌드 0 errors** | ✅ | `/[locale]/find-id`, `/[locale]/reset-password` 등 라우트 생성 확인 |
+| **회귀 테스트** | ✅ | 165/165 PASS (신규 2케이스 포함, 이전 163/163 대비 증가) |
+| **NaviSidebar `/admin/rates` 처리** | 🔴 | DoD "Master 자식 1개 유지" → **완전 삭제됨** (회귀) |
+| **NaviSidebar `support` parent href** | 🔴 | `/support` 미수정 → `/support/qna` 변경 누락 |
+| **en.json / zh.json i18n 키** | 🟡 | en: `my_security` 미추가 / zh: 전체 auth 키 미추가 |
+| **스크린샷 산출물** | 🔴 | DoD 요구 4종 (find-id/reset-password/profile/security) 없음 |
+| **커밋 규약** | 🟡 | `[Gemini] feat: AUDIT-S1 ...` 미발행 — QA-02 커밋에 혼합 (9f34cef) |
+| **git status 클린** | 🟡 | 완료 보고 시 AUDIT-S2 미커밋 변경 25개 잔류 |
+
+### 필수 조치 항목 (재제출 前 완료 의무)
+
+#### [FB-014-A] `Critical` NaviSidebar `/admin/rates` 복원
+
+**파일**: `src/components/layout/NaviSidebar.tsx`
+
+`master` children 배열에 운임 요율 메뉴 1개 추가:
+```typescript
+{ title: t("rates"), href: "/admin/rates" },
+```
+- i18n 키 `rates`가 messages/*.json에 없으면 추가
+
+#### [FB-014-B] `High` NaviSidebar `support` parent href 수정
+
+**파일**: `src/components/layout/NaviSidebar.tsx`
+
+```typescript
+// 변경 전
+href: "/support",
+// 변경 후
+href: "/support/qna",
+```
+
+#### [FB-014-C] `Medium` en.json / zh.json 누락 키 추가
+
+- `en.json`: `my_security`, `find_id_link`, `reset_password_link`, `back_to_login` 등 Auth 섹션 키 추가
+- `zh.json`: 동일 키 중국어 번역 추가
+
+#### [FB-014-D] `High` 스크린샷 4종 제출
+
+다음 4개 화면 각 1장 (Playwright 또는 수동 캡처):
+1. `/find-id` — 이름/이메일 입력 폼
+2. `/reset-password` — 이메일 입력 폼 또는 발송 완료 메시지
+3. `/mypage/profile` — 프로필 조회/수정 화면
+4. `/mypage/security` — 비밀번호 변경 화면
+
+저장 경로: `docs/99_Manual/AUDIT_S1_Result/`
+
+### DoD (재제출 기준)
+
+- [ ] NaviSidebar `/admin/rates` Master 자식 1개 복원 확인
+- [ ] NaviSidebar `support` href = `/support/qna` 확인
+- [ ] en.json / zh.json Auth 누락 키 추가 확인
+- [ ] 4종 스크린샷 `docs/99_Manual/AUDIT_S1_Result/` 저장 확인
+- [ ] `rtk npm run build` 0 errors
+- [ ] `rtk npm run test:regression` ≥ 165/165 PASS
+- [ ] `git status` 클린 확인
+- [ ] 🔔 Aiden 검토 대기 등록
+
+> ⚠️ **프로세스 경고**: AUDIT-S2를 S1 Aiden 검증 전 착수한 것은 블로커 규칙 위반입니다.
+> S2 작업은 현재 미커밋 상태이므로 FB-014 조치 완료 후 S1·S2 작업을 함께 커밋하십시오.
+> 향후 블로커 무시 재발 시 FB 발령 대상입니다.
 
 ---
 
