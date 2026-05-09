@@ -1,10 +1,11 @@
 import { FaqSection } from "@/components/support/FaqSection";
 import { SupportHeader } from "@/components/support/SupportHeader";
 import { requireAuth } from "@/lib/auth/guards";
+import { USER_ROLES } from "@/lib/auth/rbac";
 
 export default async function FaqPage() {
   const { profile } = await requireAuth();
-  const isAdmin = profile?.role === 'ADMIN';
+  const isAdmin = profile?.role === USER_ROLES.ADMIN || profile?.role === USER_ROLES.ZENITH_SUPER_ADMIN;
 
   return (
     <div className="container py-8">

@@ -5,6 +5,7 @@ import InventoryDataTable from "@/components/inventory/InventoryDataTable";
 import InventoryScanner from "@/components/inventory/InventoryScanner";
 import { Package, Truck, AlertCircle, Box } from "lucide-react";
 import { ZenCard } from "@/components/ui/ZenUI";
+import { USER_ROLES } from "@/lib/auth/rbac";
 
 export default async function InventoryPage({
   params,
@@ -70,7 +71,7 @@ export default async function InventoryPage({
       </div>
 
       {/* [NEW] Intelligent Barcode Scanner */}
-      {(profile?.role === 'ADMIN' || profile?.role === 'ZENITH_SUPER_ADMIN' || profile?.role === 'MANAGER') && (
+      {(profile?.role === USER_ROLES.ADMIN || profile?.role === USER_ROLES.ZENITH_SUPER_ADMIN || profile?.role === USER_ROLES.MANAGER) && (
         <InventoryScanner />
       )}
 

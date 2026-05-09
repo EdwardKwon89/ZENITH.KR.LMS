@@ -15,6 +15,7 @@ import {
   getMyPendingPromotionRequest,
   GradeMasterItem 
 } from "@/app/actions/member";
+import { USER_ROLES } from "@/lib/auth/rbac";
 import { toast } from "sonner";
 import { Star, ArrowUpCircle, Info, CheckCircle2, Clock } from "lucide-react";
 
@@ -83,7 +84,7 @@ export default function MyGradePage({ params: { locale } }: { params: { locale: 
 
   if (loading) return <div className="p-8 text-center">Loading...</div>;
 
-  if (profile?.role !== 'INDIVIDUAL') {
+  if (profile?.role !== USER_ROLES.INDIVIDUAL) {
     return (
       <div className="p-8 flex flex-col items-center justify-center min-h-[60vh]">
         <Info className="w-12 h-12 text-stone-400 mb-4" />
