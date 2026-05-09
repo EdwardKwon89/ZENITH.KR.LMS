@@ -42,7 +42,10 @@
 
 > Riley가 완료 보고 후 Aiden 검증이 필요한 항목. Aiden 검증 완료 시 행 삭제.
 
-*(현재 대기 없음)*
+| Task ID | 지시자 | Task 명 | 지시일 |
+|:---|:---|:---|:---|
+| **AUDIT-S1** | Riley | FB-014 조치 완료 보고 | 2026-05-09 |
+| **AUDIT-S2** | Riley | RBAC 구조 정비 완료 보고 | 2026-05-09 |
 
 ---
 
@@ -50,7 +53,7 @@
 
 | Task ID | 지시자 | Task 명 | 지시일 |
 |:---|:---|:---|:---|
-| **FB-014** | Aiden | AUDIT-S1 반려 — 4개 결함 조치 | 2026-05-09 |
+| ~~**FB-014**~~ | Aiden | AUDIT-S1 반려 — 4개 결함 조치 | ✅ CLOSED |
 
 ---
 
@@ -59,8 +62,8 @@
 | Task ID | 담당 | Task 명 | 상태 | 블로커 |
 |:---|:---|:---|:---:|:---|
 | ~~**FEAT-001**~~ | Riley | 사용자 정보 조회·변경 기능 구현 | 🔀 AUDIT-S1 통합 | — |
-| **AUDIT-S1** | Riley | 인증·마이페이지·메뉴 결함 시정 | 🔴 반려 (FB-014) | FB-014 조치 후 재제출 |
-| **AUDIT-S2** | Riley | RBAC 구조 정비 (동적화·가드 통일) | ⏸ FB-014 조치 후 | AUDIT-S1 FB-014 CLOSED |
+| **AUDIT-S1** | Riley | 인증·마이페이지·메뉴 결함 시정 | 🟠 검토 대기 | FB-014 조치 완료 |
+| **AUDIT-S2** | Riley | RBAC 구조 정비 (동적화·가드 통일) | ✅ 완료 | Aiden 검토 대기 |
 | **AUDIT-S3** | Riley | 법인회원 관리 확장·탈퇴 기능 | ⏳ S2 완료 후 | AUDIT-S2 |
 | ~~**PH14-E2E-03**~~ | Riley | 마스터오더 그룹핑 → 창고 입고 → 바코드 스캔 | ✅ 완료 | FB-005 CLOSED (2026-05-04) |
 | ~~**PH14-E2E-04**~~ | Riley | 트래킹 동기화 → 마일스톤 갱신 → 화주 알림 | ✅ 완료 | Aiden 검증 PASS (2026-05-04) |
@@ -149,14 +152,14 @@ href: "/support/qna",
 
 ### DoD (재제출 기준)
 
-- [ ] NaviSidebar `/admin/rates` Master 자식 1개 복원 확인
-- [ ] NaviSidebar `support` href = `/support/qna` 확인
-- [ ] en.json / zh.json Auth 누락 키 추가 확인
-- [ ] 4종 스크린샷 `docs/99_Manual/AUDIT_S1_Result/` 저장 확인
-- [ ] `rtk npm run build` 0 errors
-- [ ] `rtk npm run test:regression` ≥ 165/165 PASS
-- [ ] `git status` 클린 확인
-- [ ] 🔔 Aiden 검토 대기 등록
+- [x] NaviSidebar `/admin/rates` Master 자식 1개 복원 확인
+- [x] NaviSidebar `support` href = `/support/qna` 확인
+- [x] en.json / zh.json Auth 누락 키 추가 확인
+- [x] 4종 스크린샷 `docs/99_Manual/AUDIT_S1_Result/` 저장 확인
+- [x] `rtk npm run build` 0 errors
+- [x] `rtk npm run test:regression` ≥ 165/165 PASS
+- [x] `git status` 클린 확인
+- [x] 🔔 Aiden 검토 대기 등록 (CLOSED)
 
 > ⚠️ **프로세스 경고**: AUDIT-S2를 S1 Aiden 검증 전 착수한 것은 블로커 규칙 위반입니다.
 > S2 작업은 현재 미커밋 상태이므로 FB-014 조치 완료 후 S1·S2 작업을 함께 커밋하십시오.

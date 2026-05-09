@@ -64,8 +64,7 @@ export default function NaviSidebar({
       icon: Database,
       isAdminOnly: true,
       children: [
-        { title: t("master_codes"), href: "/admin/codes" },
-        { title: t("master_geo"), href: "/master/geo" },
+        { title: t("rates"), href: "/admin/rates" },
       ]
     },
     { 
@@ -107,7 +106,7 @@ export default function NaviSidebar({
     },
     { 
       title: t("support_group"), 
-      href: "/support", 
+      href: "/support/qna", 
       icon: HelpCircle,
       children: [
         { title: t("support_qna"), href: "/support/qna" },
