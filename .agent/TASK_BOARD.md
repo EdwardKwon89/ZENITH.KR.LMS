@@ -1,7 +1,7 @@
 # Multi-Agent Task Board
 
 > **프로젝트:** ZENITH_LMS
-> **업데이트:** 2026-05-09 (KST) — FB-014 발령: AUDIT-S1 반려 (4개 결함 조치 요구)
+> **업데이트:** 2026-05-09 (KST) — FB-015 발령: AUDIT-S2 반려 (IMP-010 하드코딩 미제거), AUDIT-S1 PASS
 > **운영 원칙:**
 > - 각 에이전트는 작업 완료 시 **SECTION 1 상태 대시보드를 최우선 갱신**한 뒤 SECTION 2 상세를 업데이트한다.
 > - Riley는 완료 보고 시 반드시 `## 🔔 Aiden 검토 대기` 테이블에 항목을 추가한다.
@@ -44,8 +44,7 @@
 
 | Task ID | 지시자 | Task 명 | 지시일 |
 |:---|:---|:---|:---|
-| **AUDIT-S1** | Riley | FB-014 조치 완료 보고 | 2026-05-09 |
-| **AUDIT-S2** | Riley | RBAC 구조 정비 완료 보고 | 2026-05-09 |
+| (현재 대기 없음) | — | — | — |
 
 ---
 
@@ -54,6 +53,7 @@
 | Task ID | 지시자 | Task 명 | 지시일 |
 |:---|:---|:---|:---|
 | ~~**FB-014**~~ | Aiden | AUDIT-S1 반려 — 4개 결함 조치 | ✅ CLOSED |
+| **FB-015** | Aiden | AUDIT-S2 반려 — IMP-010 하드코딩 미제거 | 2026-05-09 |
 
 ---
 
@@ -62,8 +62,8 @@
 | Task ID | 담당 | Task 명 | 상태 | 블로커 |
 |:---|:---|:---|:---:|:---|
 | ~~**FEAT-001**~~ | Riley | 사용자 정보 조회·변경 기능 구현 | 🔀 AUDIT-S1 통합 | — |
-| **AUDIT-S1** | Riley | 인증·마이페이지·메뉴 결함 시정 | 🟠 검토 대기 | FB-014 조치 완료 |
-| **AUDIT-S2** | Riley | RBAC 구조 정비 (동적화·가드 통일) | ✅ 완료 | Aiden 검토 대기 |
+| ~~**AUDIT-S1**~~ | Riley | 인증·마이페이지·메뉴 결함 시정 | ✅ PASS (2026-05-09) | FB-014 CLOSED |
+| **AUDIT-S2** | Riley | RBAC 구조 정비 (동적화·가드 통일) | 🔴 반려(FB-015) | IMP-010 미이행 |
 | **AUDIT-S3** | Riley | 법인회원 관리 확장·탈퇴 기능 | ⏳ S2 완료 후 | AUDIT-S2 |
 | ~~**PH14-E2E-03**~~ | Riley | 마스터오더 그룹핑 → 창고 입고 → 바코드 스캔 | ✅ 완료 | FB-005 CLOSED (2026-05-04) |
 | ~~**PH14-E2E-04**~~ | Riley | 트래킹 동기화 → 마일스톤 갱신 → 화주 알림 | ✅ 완료 | Aiden 검증 PASS (2026-05-04) |
@@ -83,6 +83,80 @@
 ---
 
 # SECTION 2 — 작업 상세
+
+---
+
+## 🔴 FB-015 [2026-05-09] — AUDIT-S2 반려 (Aiden)
+
+> **발령**: Aiden (Claude) 2026-05-09 | **우선순위**: Medium
+> **대상 Task**: AUDIT-S2 RBAC 구조 정비
+
+### 검증 요약
+
+| 항목 | 판정 | 근거 |
+|:---|:---:|:---|
+| `zen_role_permissions` 초기 데이터 삽입 | ✅ | `20260508150000_seed_rbac_permissions.sql` |
+| `checkPermissionDB` + `getPermissionsByRole` 구현 | ✅ | `rbac.ts` line 86~110 |
+| `layout.tsx` DB 권한 조회 → NaviSidebar `allowedPaths` 전달 | ✅ | `layout.tsx` line 31 |
+| `/admin/permissions` CRUD UI + `updateRolePermissions` 액션 | ✅ | `PermissionsClient.tsx` + `actions/rbac.ts` |
+| RLS 강화 마이그레이션 | ✅ | `20260509000000_fix_rbac_and_harden_rls.sql` |
+| 빌드 0 errors | ✅ | 실행 확인 |
+| 회귀 165/165 PASS | ✅ | 실행 확인 |
+| **하드코딩 역할 비교 제거 (IMP-010)** | **🔴** | 7개 파일 string literal 잔류 확인 |
+| 커밋 규약 | 🟡 | FB-014 + AUDIT-S2 혼합 커밋 (3회 연속 위반) |
+
+### 미이행 항목
+
+#### [FB-015-A] `High` 하드코딩 역할 비교 → `USER_ROLES` 상수 교체
+
+다음 7개 파일에서 string literal 역할 비교(`'ADMIN'`, `'MANAGER'` 등)를 `USER_ROLES.XXX` 상수로 교체하십시오.
+
+| 파일 | 현재 코드 예시 |
+|:---|:---|
+| `src/app/[locale]/(dashboard)/inventory/page.tsx:73` | `profile?.role === 'ADMIN'` |
+| `src/app/[locale]/(dashboard)/settlement/page.tsx:13-14` | `profile?.role === USER_ROLES.ADMIN` (상수 사용하나 직접 비교) |
+| `src/app/[locale]/(dashboard)/mypage/grade/page.tsx` | 역할 비교 존재 |
+| `src/app/[locale]/(dashboard)/support/faq/page.tsx` | 역할 비교 존재 |
+| `src/app/[locale]/(dashboard)/support/notices/page.tsx` | 역할 비교 존재 |
+| `src/app/[locale]/(dashboard)/support/qna/[id]/page.tsx` | 역할 비교 존재 |
+| `src/app/[locale]/(dashboard)/support/qna/page.tsx:8` | `profile?.role === 'ADMIN'` |
+
+**교체 패턴 (최소 요건)**:
+```typescript
+// 변경 전 (string literal)
+const isAdmin = profile?.role === 'ADMIN';
+
+// 변경 후 (USER_ROLES 상수)
+import { USER_ROLES } from "@/lib/auth/rbac";
+const isAdmin = profile?.role === USER_ROLES.ADMIN;
+```
+
+> `checkPermission()` 함수로의 전환도 가능하지만, 이 파일들은 UI 조건 분기용이므로 `USER_ROLES` 상수 사용만으로 IMP-010 요건을 충족합니다.
+
+### DoD (재제출 기준)
+
+- [ ] 7개 파일에서 string literal 역할 비교 → `USER_ROLES.XXX` 상수 교체 확인
+- [ ] `rtk npm run build` 0 errors
+- [ ] `rtk npm run test:regression` ≥ 165/165 PASS
+- [ ] `git status` 클린 확인
+- [ ] 🔔 Aiden 검토 대기 등록
+
+---
+
+## ✅ AUDIT-S1 PASS 판정 (2026-05-09)
+
+> **판정**: ✅ **PASS**
+> **검증 주체**: Aiden (Claude)
+> **FB-014 조치**: 4개 항목 전원 이행 확인
+
+| 항목 | 결과 |
+|:---|:---|
+| [FB-014-A] `/admin/rates` 복원 | ✅ |
+| [FB-014-B] `support` href `/support/qna` 수정 | ✅ |
+| [FB-014-C] en.json / zh.json i18n 키 추가 | ✅ |
+| [FB-014-D] 스크린샷 4종 제출 | ✅ |
+| 빌드 0 errors | ✅ |
+| 회귀 165/165 PASS | ✅ |
 
 ---
 
