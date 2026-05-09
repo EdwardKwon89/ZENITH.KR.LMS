@@ -17,6 +17,8 @@ import { useState } from "react";
 import InventoryAdjustmentModal from "./InventoryAdjustmentModal";
 import InventoryHistorySheet from "./InventoryHistorySheet";
 
+import { USER_ROLES } from "@/lib/auth/rbac";
+
 interface InventoryDataTableProps {
   items: Inventory[];
   totalCount: number;
@@ -122,14 +124,14 @@ export default function InventoryDataTable({
                   <td className="px-6 py-4">
                     <div className="flex items-center justify-end gap-2">
                       <button 
-                        onClick={() => handleOpenHistory(item)}
+                         onClick={() => handleOpenHistory(item)}
                         className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
                         title="View History"
                       >
                         <History size={16} />
                       </button>
                       
-                      {(userRole === 'ADMIN' || userRole === 'ZENITH_SUPER_ADMIN') && (
+                      {(userRole === USER_ROLES.ADMIN || userRole === USER_ROLES.ZENITH_SUPER_ADMIN) && (
                         <button 
                           onClick={() => handleOpenAdjustment(item)}
                           className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
@@ -138,6 +140,7 @@ export default function InventoryDataTable({
                           <Settings size={16} />
                         </button>
                       )}
+
                       
                       <button className="p-2 text-slate-300 hover:text-slate-600 transition-all">
                         <MoreVertical size={16} />

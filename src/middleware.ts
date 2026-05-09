@@ -4,6 +4,7 @@ import { updateSession } from '@/utils/supabase/middleware';
 import { type NextRequest, NextResponse } from 'next/server';
 import { ORG_ROUTE_MAP, DEFAULT_REDIRECTS } from '@/config/routes';
 import { isFeatureEnabled } from '@/lib/params/feature-flags';
+import { USER_ROLES } from '@/lib/auth/rbac';
 
 const handleI18nRouting = createMiddleware(routing);
 
@@ -62,7 +63,7 @@ export async function middleware(request: NextRequest) {
 
   // 2.1 플랫폼 점검 모드 (Maintenance Mode) Feature Flag 확인 (PH4-OPS-06)
   const isMaintenanceMode = await isFeatureEnabled('MAINTENANCE_MODE');
-  const isPlatformUser = user?.app_metadata?.role === 'ZENITH_SUPER_ADMIN' || user?.app_metadata?.role === 'ADMIN';
+  const isPlatformUser = user?.app_metadata?.role === USER_ROLES.ZENITH_SUPER_ADMIN || user?.app_metadata?.role === USER_ROLES.ADMIN;
 
   if (isMaintenanceMode && !isPlatformUser && !isAuthPage && !isApi && purePath !== '/') {
     console.log(`[MIDDLEWARE] Maintenance Mode Active. Blocking non-admin access.`);
@@ -78,7 +79,7 @@ export async function middleware(request: NextRequest) {
   if (user && !isApi) {
     // [Metadata Baseline]
     const metadataRole = user.app_metadata?.role as string | undefined;
-    const isMetadataPlatformAdmin = metadataRole === 'ADMIN' || metadataRole === 'ZENITH_SUPER_ADMIN';
+    const isMetadataPlatformAdmin = metadataRole === USER_ROLES.ADMIN || metadataRole === USER_ROLES.ZENITH_SUPER_ADMIN;
     let orgType = isMetadataPlatformAdmin
       ? 'PLATFORM'
       : ((user.app_metadata?.org_type as any) || 'GUEST');
@@ -103,7 +104,7 @@ export async function middleware(request: NextRequest) {
         userStatus = profile.status || userStatus;
         const dbOrgType = (profile.zen_organizations as any)?.type;
 
-        if (['ZENITH_SUPER_ADMIN', 'ADMIN'].includes((profile as any).role)) {
+        if ([USER_ROLES.ZENITH_SUPER_ADMIN, USER_ROLES.ADMIN].includes((profile as any).role)) {
           // 플랫폼 관리자는 메타데이터/조직 타입과 무관하게 PLATFORM으로 고정
           orgType = 'PLATFORM';
         } else if (dbOrgType) {

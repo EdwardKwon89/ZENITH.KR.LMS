@@ -29,7 +29,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { checkPermission } from "@/lib/auth/rbac";
+import { checkPermission, USER_ROLES } from "@/lib/auth/rbac";
 
 interface NavItem {
   title: string;
@@ -101,7 +101,7 @@ export default function NaviSidebar({
     { title: t("schedules"), href: "/schedules", icon: CalendarDays },
     { 
       title: t("voc"), 
-      href: profile?.role?.includes('ADMIN') ? "/voc/admin" : "/voc", 
+      href: profile?.role?.includes(USER_ROLES.ADMIN) ? "/voc/admin" : "/voc", 
       icon: MessageSquare 
     },
     { 

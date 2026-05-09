@@ -9,6 +9,7 @@ import {
   inventoryFilterSchema
 } from "@/lib/validation/inventory";
 import { OrderStatus } from "@/types/orders";
+import { USER_ROLES } from "@/lib/auth/rbac";
 
 /**
  * 조직별 SKU 기반 재고 현황 목록을 조회합니다.
@@ -20,7 +21,7 @@ export async function getInventoryList(payload: InventoryFilterInput) {
   const validated = inventoryFilterSchema.parse(payload);
   const { page, pageSize, search, lowStockOnly } = validated;
 
-  const isAdmin = profile.role === 'ZENITH_SUPER_ADMIN' || profile.role === 'ADMIN';
+  const isAdmin = profile.role === USER_ROLES.ZENITH_SUPER_ADMIN || profile.role === USER_ROLES.ADMIN;
 
   let query = supabase
     .from("zen_inventory")

@@ -4,6 +4,7 @@ import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
 import { validateAdminAction } from "@/lib/auth/guards";
 import { sendInAppNotification } from "./notifications";
+import { USER_ROLES } from "@/lib/auth/rbac";
 
 /**
  * 클라이언트 또는 서버에서 발생한 에러를 DB에 기록하고, 중대 에러 시 관리자에게 알림을 발송합니다.
@@ -55,7 +56,7 @@ export async function logClientError(data: {
     const { data: admins } = await supabase
       .from('profiles')
       .select('id')
-      .in('role', ['ADMIN', 'ZENITH_SUPER_ADMIN']);
+      .in('role', [USER_ROLES.ADMIN, USER_ROLES.ZENITH_SUPER_ADMIN]);
 
     if (admins && admins.length > 0) {
       for (const admin of admins) {

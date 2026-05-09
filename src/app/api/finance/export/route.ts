@@ -1,6 +1,7 @@
 import { createClient } from "@/utils/supabase/server";
 import { NextResponse } from "next/server";
 import * as XLSX from "xlsx";
+import { USER_ROLES } from "@/lib/auth/rbac";
 
 /**
  * [FIN-02] 정산 데이터 엑셀 내보내기 Route Handler
@@ -47,7 +48,7 @@ export async function GET(request: Request) {
     if (dateFrom) query = query.gte("created_at", `${dateFrom}T00:00:00Z`);
     if (dateTo) query = query.lte("created_at", `${dateTo}T23:59:59Z`);
     
-    const isAdmin = ['ADMIN', 'ZENITH_SUPER_ADMIN'].includes(profile.role);
+    const isAdmin = [USER_ROLES.ADMIN, USER_ROLES.ZENITH_SUPER_ADMIN].includes(profile.role);
     if (isAdmin && shipperId) {
       query = query.eq("shipper_id", shipperId);
     }
