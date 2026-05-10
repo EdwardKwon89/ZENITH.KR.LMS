@@ -3,21 +3,25 @@
 import { useState, useEffect } from 'react';
 import { getMyProfile, updateMyProfile } from '@/app/actions/member';
 import { ZenCard, ZenButton, ZenInput } from '@/components/ui/ZenUI';
-import { User, Mail, Building, ShieldCheck, Save, Loader2 } from 'lucide-react';
+import { User, Mail, Building, ShieldCheck, Save, Loader2, UserMinus } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { USER_ROLES } from '@/lib/auth/rbac';
+import WithdrawalModal from '@/components/mypage/WithdrawalModal';
+import { withdrawUser } from '@/app/actions/member';
 
 export default function ProfilePage() {
   const t = useTranslations('Auth');
   const navT = useTranslations('Navigation');
   const params = useParams();
+  const router = useRouter();
   const locale = params?.locale as string || 'ko';
   
   const [isPending, setIsPending] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [profile, setProfile] = useState<any>(null);
+  const [showWithdrawalModal, setShowWithdrawalModal] = useState(false);
 
   useEffect(() => {
     async function loadProfile() {
@@ -52,6 +56,20 @@ export default function ProfilePage() {
       toast.error('프로필 수정 중 오류가 발생했습니다.');
     } finally {
       setIsPending(false);
+    }
+  }
+
+  async function handleWithdraw() {
+    try {
+      const res = await withdrawUser();
+      if (res.error) {
+        toast.error(res.error);
+      } else {
+        toast.success('탈퇴 처리가 완료되었습니다. 이용해 주셔서 감사합니다.');
+        router.push(`/${locale}/login`);
+      }
+    } catch (err) {
+      toast.error('탈퇴 처리 중 오류가 발생했습니다.');
     }
   }
 
@@ -171,6 +189,34 @@ export default function ProfilePage() {
           </ZenCard>
         </div>
       </div>
+
+      {/* Withdrawal Section */}
+      <ZenCard className="p-8 bg-rose-50 border-rose-100 border-dashed">
+        <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+          <div className="space-y-2">
+            <h3 className="text-lg font-bold text-rose-900 flex items-center gap-2">
+              <UserMinus className="w-5 h-5" />
+              회원 탈퇴
+            </h3>
+            <p className="text-sm text-rose-700 max-w-xl">
+              계정을 삭제하면 더 이상 서비스를 이용하실 수 없으며, 모든 개인정보가 안전하게 보호된 상태로 비활성화됩니다.
+            </p>
+          </div>
+          <ZenButton 
+            variant="tactile" 
+            className="border-rose-200 text-rose-600 hover:bg-rose-100 hover:text-rose-700 shrink-0"
+            onClick={() => setShowWithdrawalModal(true)}
+          >
+            탈퇴하기
+          </ZenButton>
+        </div>
+      </ZenCard>
+
+      <WithdrawalModal 
+        isOpen={showWithdrawalModal} 
+        onClose={() => setShowWithdrawalModal(false)}
+        locale={locale}
+      />
     </div>
   );
 }

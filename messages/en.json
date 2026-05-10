@@ -68,7 +68,8 @@
     "my_grade": "My Grade",
     "my_customs": "Customs Status",
     "customs_management": "Customs Management",
-    "rates": "Rates"
+    "rates": "Rates",
+    "corporate_mgmt": "Corporate Mgmt"
   },
   "VOC": {
     "title": "VOC Management",
@@ -405,5 +406,52 @@
       "sentry_link": "View in Sentry",
       "success_resolve": "Error log has been marked as resolved."
     }
+  },
+  "Dashboard": {
+    "corporate_mgmt": "Corporate Management",
+    "corporate_mgmt_desc": "Manage corporate information and departments integratedly.",
+    "tab_corporate_info": "Corporate Info",
+    "tab_dept_mgmt": "Department Mgmt",
+    "org_info_title": "Corporate Basic Info",
+    "org_info_desc": "Please keep your business registration and contact information up to date.",
+    "label_org_name": "Corporate Name",
+    "label_representative": "Representative",
+    "label_biz_no": "Business No.",
+    "label_contact": "Contact",
+    "label_email": "Email",
+    "label_address": "Address",
+    "org_name_help": "Corporate name changes are available through the customer center.",
+    "save_org_info": "Save Info",
+    "dept_mgmt_title": "Department Management",
+    "dept_mgmt_desc": "Manage active departments within the organization.",
+    "add_dept": "Add Department",
+    "table_dept_name": "Dept Name",
+    "table_created_at": "Created At",
+    "table_actions": "Actions",
+    "empty_depts": "No departments registered.",
+    "success_save_org": "Corporate information has been saved.",
+    "success_add_dept": "Department has been added.",
+    "success_edit_dept": "Department has been updated.",
+    "success_delete_dept": "Department has been deleted.",
+    "loading": "Loading information...",
+    "error_load": "Failed to load data.",
+    "confirm_delete": "Are you sure you want to delete this?",
+    "prompt_add_dept": "Enter new department name",
+    "prompt_edit_dept": "Edit department name"
+  },
+  "Withdrawal": {
+    "title": "Are you sure you want to withdraw?",
+    "desc": "Upon withdrawal, all account information and service usage history will be deleted and cannot be recovered.",
+    "notice_title": "Notice",
+    "notice_1": "Withdrawal may not be possible if there are incomplete orders or unpaid settlements.",
+    "notice_2": "Some transaction information may be kept for a certain period according to laws.",
+    "confirm_input_label": "Please enter \"WITHDRAW\" below to confirm.",
+    "confirm_text": "WITHDRAW",
+    "placeholder": "WITHDRAW",
+    "button_cancel": "Cancel",
+    "button_submit": "Withdraw Membership",
+    "success": "Withdrawal process completed. Thank you for using our service.",
+    "error_confirm": "Please enter \"WITHDRAW\" exactly.",
+    "error_process": "An error occurred during the withdrawal process."
   }
 }
