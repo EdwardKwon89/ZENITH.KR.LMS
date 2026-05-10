@@ -128,6 +128,9 @@ export default function NaviSidebar({
         { title: t("my_security"), href: "/mypage/security" },
         { title: t("my_grade"), href: "/mypage/grade" },
         { title: t("my_customs"), href: "/mypage/customs" },
+        ...(profile?.role === USER_ROLES.CORPORATE || profile?.role === USER_ROLES.ADMIN
+          ? [{ title: t("corporate_mgmt"), href: "/mypage/corporate" }]
+          : []),
       ]
     },
     { title: t("settings"), href: "/admin/settings", icon: Settings, isAdminOnly: true },

@@ -338,3 +338,27 @@ export async function reviewGradePromotion(payload: {
   revalidatePath("/mypage/grade");
   return { success: true };
 }
+
+/**
+ * 5. 회원 탈퇴 (Soft Delete)
+ */
+export async function withdrawUser() {
+  const { user, supabase } = await validateUserAction();
+
+  try {
+    const { error } = await supabase
+      .from("zen_profiles")
+      .update({ is_active: false })
+      .eq("id", user.id);
+
+    if (error) throw error;
+
+    // 로그아웃 처리
+    await supabase.auth.signOut();
+    
+    return { success: true };
+  } catch (err: any) {
+    console.error("[MEMBER_ACTION] withdrawUser Error:", err.message);
+    return { error: "탈퇴 처리 중 오류가 발생했습니다." };
+  }
+}
