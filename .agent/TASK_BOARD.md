@@ -1,7 +1,7 @@
 # Multi-Agent Task Board
 
 > **프로젝트:** ZENITH_LMS
-> **업데이트:** 2026-05-09 (KST) — FB-015 발령: AUDIT-S2 반려 (IMP-010 하드코딩 미제거), AUDIT-S1 PASS
+> **업데이트:** 2026-05-10 (KST) — AUDIT-S2 ✅ PASS (FB-015 CLOSED), AUDIT-S3 착수 가능
 > **운영 원칙:**
 > - 각 에이전트는 작업 완료 시 **SECTION 1 상태 대시보드를 최우선 갱신**한 뒤 SECTION 2 상세를 업데이트한다.
 > - Riley는 완료 보고 시 반드시 `## 🔔 Aiden 검토 대기` 테이블에 항목을 추가한다.
@@ -44,7 +44,7 @@
 
 | Task ID | 지시자 | Task 명 | 지시일 |
 |:---|:---|:---|:---|
-| **FB-015** | Aiden | AUDIT-S2 반려 — IMP-010 하드코딩 미제거 | 2026-05-09 |
+| (현재 대기 없음) | — | — | — |
 
 ---
 
@@ -52,8 +52,9 @@
 
 | Task ID | 지시자 | Task 명 | 지시일 |
 |:---|:---|:---|:---|
+| **AUDIT-S3** | Aiden | 법인회원 관리·탈퇴 기능 구현 착수 허가 | 2026-05-10 |
 | ~~**FB-014**~~ | Aiden | AUDIT-S1 반려 — 4개 결함 조치 | ✅ CLOSED |
-| ~~**FB-015**~~ | Aiden | AUDIT-S2 반려 — IMP-010 하드코딩 미제거 | 🟠 검토 대기 |
+| ~~**FB-015**~~ | Aiden | AUDIT-S2 반려 — IMP-010 하드코딩 미제거 | ✅ CLOSED |
 
 ---
 
@@ -63,8 +64,8 @@
 |:---|:---|:---|:---:|:---|
 | ~~**FEAT-001**~~ | Riley | 사용자 정보 조회·변경 기능 구현 | 🔀 AUDIT-S1 통합 | — |
 | ~~**AUDIT-S1**~~ | Riley | 인증·마이페이지·메뉴 결함 시정 | ✅ PASS (2026-05-09) | FB-014 CLOSED |
-| **AUDIT-S2** | Riley | RBAC 구조 정비 (동적화·가드 통일) | 🟠 검토 대기 | IMP-010 완료 |
-| **AUDIT-S3** | Riley | 법인회원 관리 확장·탈퇴 기능 | ⏳ S2 완료 후 | AUDIT-S2 |
+| ~~**AUDIT-S2**~~ | Riley | RBAC 구조 정비 (동적화·가드 통일) | ✅ PASS (2026-05-10) | FB-015 CLOSED |
+| **AUDIT-S3** | Riley | 법인회원 관리 확장·탈퇴 기능 | 🟢 착수 가능 | — |
 | ~~**PH14-E2E-03**~~ | Riley | 마스터오더 그룹핑 → 창고 입고 → 바코드 스캔 | ✅ 완료 | FB-005 CLOSED (2026-05-04) |
 | ~~**PH14-E2E-04**~~ | Riley | 트래킹 동기화 → 마일스톤 갱신 → 화주 알림 | ✅ 완료 | Aiden 검증 PASS (2026-05-04) |
 | ~~**PH14-E2E-05**~~ | Riley | 청구서 발행 → 세금계산서 → 엑셀 Export | ✅ 완료 | FB-006 CLOSED (2026-05-05) |
@@ -83,6 +84,79 @@
 ---
 
 # SECTION 2 — 작업 상세
+
+---
+
+## ✅ AUDIT-S2 PASS 판정 (2026-05-10)
+
+> **판정**: ✅ **PASS**
+> **검증 주체**: Aiden (Claude)
+> **FB-015 조치**: IMP-010 하드코딩 제거 전 항목 이행 + 추가 전역 정리 포함
+
+| 항목 | 결과 |
+|:---|:---|
+| [FB-015-A] 6개 파일 string literal → `USER_ROLES` 상수 교체 | ✅ (34cbe73) |
+| `settlement/page.tsx` — 이미 `USER_ROLES` 사용 중 | ✅ (수정 불필요) |
+| 추가 전역 정리: middleware.ts + 12개 액션/컴포넌트 | ✅ (84f3d5d) |
+| 빌드 0 errors | ✅ |
+| 회귀 165/165 PASS | ✅ |
+
+---
+
+## 📨 Aiden → Riley 지시 | AUDIT-S3 (2026-05-10)
+
+> **발신**: Aiden (Claude) / **수신**: Riley (Gemini)
+> **수행 주체 (R-01)**: Riley (Gemini) — 구현
+> **검증 주체 (R-01)**: Aiden (Claude) — 완료 판정
+> **우선순위**: Medium — 감사 보고서 Sprint S3
+> **배경 문서**: `docs/91_FinalTest/Audit_Report_20260508.md` (Sprint S3 섹션)
+> **블로커**: ~~AUDIT-S2~~ CLOSED — 즉시 착수 가능
+
+### 구현 범위
+
+감사 보고서 Sprint S3 항목 기준:
+
+| 항목 | IMP | 내용 |
+|:---|:---:|:---|
+| 법인회원 정보 수정 | IMP-008 | 대표자·주소·연락처·이메일 수정 페이지 |
+| 부서 관리 CRUD | IMP-008 | 부서 추가·수정·삭제 페이지 |
+| 개인·법인 탈퇴 기능 | IMP-007/008 | Soft Delete 액션 + 확인 UI |
+
+#### [AUDIT-S3-A] 법인회원 정보 수정 페이지 (IMP-008)
+
+**대상 파일**: `src/app/[locale]/(dashboard)/mypage/` 하위 또는 적합한 경로에 신규 생성
+
+- 법인 기본 정보(대표자명, 사업자번호, 주소, 연락처, 이메일) 조회·수정
+- `zen_profiles` + 관련 org 테이블 쿼리
+- 저장 → 서버 액션 호출 + 토스트 알림
+
+#### [AUDIT-S3-B] 부서 관리 CRUD 페이지 (IMP-008)
+
+**대상 파일**: 법인 계정 전용 부서 관리 페이지 신규 생성
+
+- 소속 부서 목록 조회
+- 부서 추가·수정·삭제 (CRUD)
+- 적절한 권한 가드 (`CORPORATE` 또는 `ADMIN` 역할)
+
+#### [AUDIT-S3-C] 개인·법인 회원 탈퇴 기능 (IMP-007/008)
+
+**대상 파일**: `src/app/[locale]/(dashboard)/mypage/` 하위에 탈퇴 UI 추가
+
+- 탈퇴 확인 모달 (재확인 문구 입력)
+- 탈퇴 서버 액션: `zen_profiles.is_active = false` (Soft Delete)
+- 탈퇴 후 로그아웃 → 로그인 페이지 리다이렉트
+
+### 완료 기준 (DoD)
+
+- [ ] 법인 정보 수정 페이지 렌더링 + 저장 동작 확인
+- [ ] 부서 CRUD 동작 확인 (추가/수정/삭제)
+- [ ] 탈퇴 확인 모달 + Soft Delete 동작 확인
+- [ ] NaviSidebar에 S3 신규 페이지 메뉴 연결 (필요 시)
+- [ ] `rtk npm run build` 0 errors
+- [ ] `rtk npm run test:regression` ≥ 165/165 PASS
+- [ ] `git status` 클린 확인
+- [ ] 커밋: `[Gemini] feat: AUDIT-S3 법인회원 관리·탈퇴 기능 구현`
+- [ ] 🔔 Aiden 검토 대기 등록 + 스크린샷 3종 (`docs/99_Manual/AUDIT_S3_Result/`)
 
 ---
 
