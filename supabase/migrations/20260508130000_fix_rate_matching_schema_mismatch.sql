@@ -3,6 +3,7 @@
 -- 1. fn_get_best_matching_rate 수정 (ID -> Code 매칭 로직으로 전환)
 -- zen_rate_cards 테이블이 origin_id/destination_id 대신 origin_code/dest_code를 사용함에 따라
 -- 입력받은 UUID(ID)를 zen_ports 테이블에서 조회하여 코드로 변환 후 매칭하도록 수정합니다.
+DROP FUNCTION IF EXISTS public.fn_get_best_matching_rate(uuid, uuid, uuid, varchar, uuid, timestamptz);
 CREATE OR REPLACE FUNCTION public.fn_get_best_matching_rate(
     p_carrier_id uuid, 
     p_origin_port_id uuid, 
