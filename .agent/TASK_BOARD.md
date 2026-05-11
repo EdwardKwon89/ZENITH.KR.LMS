@@ -1,7 +1,7 @@
 # Multi-Agent Task Board
 
 > **프로젝트:** ZENITH_LMS
-> **업데이트:** 2026-05-11 (KST) — AUDIT-S3 ✅ PASS (Aiden 검증 완료)
+> **업데이트:** 2026-05-11 (KST) — FEAT-RATES 구현 계획 수립 (사용자 승인 대기)
 > **운영 원칙:**
 > - 각 에이전트는 작업 완료 시 **SECTION 1 상태 대시보드를 최우선 갱신**한 뒤 SECTION 2 상세를 업데이트한다.
 > - Riley는 완료 보고 시 반드시 `## 🔔 Aiden 검토 대기` 테이블에 항목을 추가한다.
@@ -52,6 +52,7 @@
 
 | Task ID | 지시자 | Task 명 | 지시일 |
 |:---|:---|:---|:---|
+| **FEAT-RATES** | Aiden | 요율 관리 고도화 (IMP-002 + IMP-011) | ⏳ 사용자 승인 대기 |
 | ~~**AUDIT-S3**~~ | Aiden | 법인회원 관리·탈퇴 기능 구현 착수 허가 | ✅ 완료 |
 | ~~**FB-014**~~ | Aiden | AUDIT-S1 반려 — 4개 결함 조치 | ✅ CLOSED |
 | ~~**FB-015**~~ | Aiden | AUDIT-S2 반려 — IMP-010 하드코딩 미제거 | ✅ CLOSED |
@@ -84,6 +85,155 @@
 ---
 
 # SECTION 2 — 작업 상세
+
+---
+
+## 📋 Aiden → Riley 구현 계획 | FEAT-RATES (⏳ 사용자 승인 대기)
+
+> **발신**: Aiden (Claude) / **수신**: Riley (Gemini)
+> **수행 주체 (R-01)**: Riley (Gemini) — 구현
+> **검증 주체 (R-01)**: Aiden (Claude) — 완료 판정
+> **우선순위**: Medium
+> **근거 IMP**: IMP-002 (역할별 UI 분기) + IMP-011 (할증/할인 체계 신규)
+> **상태**: ⏳ **사용자 최종 승인 후 착수**
+
+---
+
+### 배경
+
+현재 `/admin/rates` 페이지는 두 가지 문제를 가진다:
+1. **역할 무분별 노출 (IMP-002)**: CARRIER가 요율 등록·삭제 폼을 그대로 볼 수 있음. 요율은 플랫폼 운영자(ADMIN/MANAGER)만 등록·삭제하는 마스터 데이터이며, CARRIER는 자사 요율 조회만 허용 (Model A 확정).
+2. **할증 체계 미구현 (IMP-011)**: 기본요금 + 중량 슬랩만 등록 가능. FSC(유류)·SSC(보안)·THC(터미널) 등 할증 항목 없어 견적 엔진 Landed Cost 과소 산출 위험.
+
+---
+
+### 구현 범위
+
+#### [FEAT-RATES-A] DB 마이그레이션 — `zen_rate_surcharges` 테이블 신규
+
+**신규 파일**: `supabase/migrations/20260511000000_rate_surcharges.sql`
+
+```sql
+CREATE TABLE IF NOT EXISTS zen_rate_surcharges (
+    id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    rate_card_id UUID NOT NULL REFERENCES zen_rate_cards(id) ON DELETE CASCADE,
+    surcharge_type TEXT NOT NULL CHECK (surcharge_type IN (
+        'FSC',    -- 유류할증료 (Fuel Surcharge)
+        'SSC',    -- 보안할증료 (Security Surcharge)
+        'THC',    -- 터미널처리비 (Terminal Handling Charge)
+        'DG',     -- 위험물할증 (Dangerous Goods)
+        'PEAK',   -- 성수기할증 (Peak Season)
+        'CUSTOM'  -- 기타 (직접 입력)
+    )),
+    calc_type   TEXT NOT NULL CHECK (calc_type IN ('PERCENT', 'FIXED')),
+    value       NUMERIC NOT NULL,  -- PERCENT: 비율(%), FIXED: 정액($)
+    currency    TEXT DEFAULT 'USD',
+    description TEXT,              -- CUSTOM 타입 시 명칭 직접 입력
+    created_at  TIMESTAMPTZ DEFAULT now()
+);
+ALTER TABLE zen_rate_surcharges ENABLE ROW LEVEL SECURITY;
+-- RLS: ADMIN/MANAGER 전체, CARRIER 자사 rate_card만 조회
+```
+
+**기존 컬럼 활용 (추가 마이그레이션 불필요)**:
+- `zen_rate_cards.valid_from / valid_to` — 이미 존재, UI만 추가
+- `zen_rate_tiers.min_total_price` — 이미 존재, UI만 추가
+
+---
+
+#### [FEAT-RATES-B] 서버 액션 — `src/app/actions/rates.ts` 신규
+
+필요 액션:
+
+| 함수명 | 역할 | 권한 |
+|:---|:---|:---|
+| `createRateCard(payload)` | 요율 카드 + 슬랩 + 할증 통합 저장 | ADMIN, MANAGER |
+| `deleteRateCard(id)` | 요율 카드 삭제 (SUPERSEDED 상태 포함) | ADMIN |
+| `getRateCards(filters)` | 목록 조회 (역할 필터 포함) | ALL (CARRIER: 자사만) |
+| `getSurchargesByCard(rateCardId)` | 특정 카드의 할증 목록 | ALL |
+
+> 기존 `page.tsx` 클라이언트 직접 supabase 호출 → 서버 액션으로 이전. `validateUserAction()` + 역할 체크 패턴 적용.
+
+---
+
+#### [FEAT-RATES-C] 요율 등록 폼 UI 개선 — `admin/rates/page.tsx`
+
+**역할별 분기**:
+```typescript
+// 서버에서 profile 조회 후 props로 전달
+const canEdit = profile.role === USER_ROLES.ADMIN || profile.role === USER_ROLES.MANAGER;
+const canDelete = profile.role === USER_ROLES.ADMIN;
+```
+- `canEdit = false` (CARRIER/OPERATOR): 등록 폼 숨김, "조회 전용" 배너 표시
+- `canDelete = false` (MANAGER): 삭제 버튼 숨김
+
+**폼 추가 항목**:
+1. **유효기간 (Valid Period)**: `valid_from` + `valid_to` 날짜 입력 (DatePicker)
+2. **최소 운임 (Min Charge)**: 각 슬랩 tier에 `min_total_price` 입력란 추가 → `RateTierEditor` 컴포넌트 수정
+3. **할증 섹션 신규**: `SurchargeEditor` 컴포넌트 (아래 참조)
+
+---
+
+#### [FEAT-RATES-D] `SurchargeEditor` 컴포넌트 신규
+
+**신규 파일**: `src/components/admin/SurchargeEditor.tsx`
+
+```typescript
+interface Surcharge {
+  surcharge_type: 'FSC' | 'SSC' | 'THC' | 'DG' | 'PEAK' | 'CUSTOM';
+  calc_type: 'PERCENT' | 'FIXED';
+  value: number;
+  currency: string;
+  description?: string;
+}
+```
+
+UI 구성:
+- 할증 유형 드롭다운 (FSC / SSC / THC / DG / PEAK / CUSTOM)
+- 계산 방식 토글 (% 비율 | $ 정액)
+- 금액/비율 입력
+- CUSTOM 선택 시 명칭 직접 입력란 노출
+- 행 추가/삭제 (RateTierEditor 패턴 동일)
+
+---
+
+#### [FEAT-RATES-E] `RateCardList` 할증 요약 표시
+
+**수정 파일**: `src/components/admin/RateCardList.tsx`
+
+- 요율 카드 행 확장 시(또는 툴팁) 연결된 할증 항목 요약 표시
+  - 예: `FSC 15% | THC $35 | SSC $5`
+- 유효기간 표시 컬럼 추가
+
+---
+
+### 완료 기준 (DoD)
+
+- [ ] `zen_rate_surcharges` 마이그레이션 적용 확인
+- [ ] ADMIN/MANAGER: 요율 등록 시 할증 항목 추가·저장 동작 확인
+- [ ] ADMIN/MANAGER: 유효기간 및 최소 운임 입력·저장 동작 확인
+- [ ] CARRIER 로그인 시 등록 폼 숨김 + "조회 전용" 배너 표시 확인
+- [ ] CARRIER 로그인 시 자사 요율만 목록에 표시 확인
+- [ ] ADMIN 전용 삭제 버튼 — MANAGER 로그인 시 미노출 확인
+- [ ] `rtk npm run build` 0 errors
+- [ ] `rtk npm run test:regression` ≥ 173/173 PASS + 신규 TC 추가
+- [ ] `git status` 클린 확인
+- [ ] 커밋: `[Gemini] feat: FEAT-RATES IMP-002+IMP-011 요율 관리 고도화`
+- [ ] 스크린샷 3종: 관리자 등록폼(할증 포함) / Carrier 조회 전용 화면 / 요율 목록(할증 요약)
+- [ ] 🔔 Aiden 검토 대기 등록
+
+---
+
+### 참고 파일
+
+| 파일 | 용도 |
+|:---|:---|
+| `src/app/[locale]/(dashboard)/admin/rates/page.tsx` | 기존 요율 페이지 |
+| `src/components/admin/RateTierEditor.tsx` | 슬랩 편집기 패턴 참조 |
+| `src/lib/auth/guards.ts` | `validateUserAction()` 패턴 |
+| `src/lib/auth/rbac.ts` | `USER_ROLES` 상수 |
+| `scratch/post_launch_improvements.md` | IMP-002, IMP-011 참조 |
+| `supabase/migrations/20260417143821_upgrade_rate_cards_marketplace.sql` | `zen_rate_tiers` 구조 참조 |
 
 ---
 
