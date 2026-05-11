@@ -1,7 +1,7 @@
 # Multi-Agent Task Board
 
 > **프로젝트:** ZENITH_LMS
-> **업데이트:** 2026-05-11 (KST) — FEAT-RATES 착수 승인 완료 → Riley 착수 가능
+> **업데이트:** 2026-05-11 (KST) — FEAT-RATES 반려 (FB-016) — BUG-FR-001/002 + R-09/R-10 위반
 > **운영 원칙:**
 > - 각 에이전트는 작업 완료 시 **SECTION 1 상태 대시보드를 최우선 갱신**한 뒤 SECTION 2 상세를 업데이트한다.
 > - Riley는 완료 보고 시 반드시 `## 🔔 Aiden 검토 대기` 테이블에 항목을 추가한다.
@@ -44,7 +44,7 @@
 
 | Task ID | 지시자 | Task 명 | 지시일 |
 |:---|:---|:---|:---|
-| **FEAT-RATES** | Aiden | 요율 관리 고도화 (IMP-002 + IMP-011) | 2026-05-11 |
+| *(없음)* | — | — | — |
 
 ---
 
@@ -52,7 +52,8 @@
 
 | Task ID | 지시자 | Task 명 | 지시일 |
 |:---|:---|:---|:---|
-| ~~**FEAT-RATES**~~ | Aiden | 요율 관리 고도화 (IMP-002 + IMP-011) | ✅ 완료 |
+| **FB-016** | Aiden | FEAT-RATES 반려 — BUG-FR-001/002 + R-09/R-10 조치 후 재제출 | 2026-05-11 |
+| ~~**FEAT-RATES**~~ | Aiden | 요율 관리 고도화 (IMP-002 + IMP-011) | ✅ 구현 완료 / ❌ 검증 반려 |
 | ~~**AUDIT-S3**~~ | Aiden | 법인회원 관리·탈퇴 기능 구현 착수 허가 | ✅ 완료 |
 | ~~**FB-014**~~ | Aiden | AUDIT-S1 반려 — 4개 결함 조치 | ✅ CLOSED |
 | ~~**FB-015**~~ | Aiden | AUDIT-S2 반려 — IMP-010 하드코딩 미제거 | ✅ CLOSED |
@@ -63,7 +64,8 @@
 
 | Task ID | 담당 | Task 명 | 상태 | 블로커 |
 |:---|:---|:---|:---:|:---|
-| **FEAT-RATES** | Riley | 요율 관리 고도화 (IMP-002 + IMP-011) | ✅ 완료 | Aiden 검증 대기 |
+| **FB-016** | Riley | FEAT-RATES 반려 재작업 (BUG-FR-001/002 + R-09/R-10) | 🔴 반려 — 재작업 대기 | — |
+| ~~**FEAT-RATES**~~ | Riley | 요율 관리 고도화 (IMP-002 + IMP-011) | ❌ 반려 (2026-05-11) | FB-016 발령 |
 | ~~**FEAT-001**~~ | Riley | 사용자 정보 조회·변경 기능 구현 | 🔀 AUDIT-S1 통합 | — |
 | ~~**AUDIT-S1**~~ | Riley | 인증·마이페이지·메뉴 결함 시정 | ✅ PASS (2026-05-09) | FB-014 CLOSED |
 | ~~**AUDIT-S2**~~ | Riley | RBAC 구조 정비 (동적화·가드 통일) | ✅ PASS (2026-05-10) | FB-015 CLOSED |
@@ -86,6 +88,95 @@
 ---
 
 # SECTION 2 — 작업 상세
+
+---
+
+## ❌ FEAT-RATES 반려 판정 | FB-016 발령 (2026-05-11)
+
+> **판정**: ❌ **반려 (REJECT)**
+> **검증 주체**: Aiden (Claude)
+> **재작업 지시**: FB-016 (아래 섹션 참조)
+
+### PASS 항목
+
+| 항목 | 결과 |
+|:---|:---|
+| `zen_rate_surcharges` 마이그레이션 + RLS 3종 | ✅ |
+| `SurchargeEditor` — 6종 할증, PERCENT/FIXED 토글, CUSTOM 명칭 | ✅ |
+| `RateTierEditor` — `min_total_price` 필드 추가 | ✅ |
+| 유효기간 UI (`valid_from` / `valid_to` DatePicker) | ✅ |
+| 서버 액션 권한 가드 (ADMIN/MANAGER 쓰기, ADMIN 삭제) | ✅ |
+| CARRIER 배너 + 폼 `blur / pointer-events-none` | ✅ |
+| `rtk npm run build` — 0 errors | ✅ |
+| `rtk npm run test:regression` — 173/173 기존 무결 | ✅ |
+
+### 반려 사유
+
+#### BUG-FR-001 (Critical) — CARRIER 조회 필터 불일치
+
+**파일**: `src/app/actions/rates.ts`
+
+- **현상**: 요율 등록 시 `org_id = profile.org_id` (ADMIN/SNTL의 org) 로 저장됨
+  - `page.tsx`에서 `carrier_id: selectedCarrier`만 전달, `org_id` 미전달
+  - `rates.ts` L26: `org_id: payload.card.org_id || profile.org_id` → fallback으로 SNTL org_id 저장
+- **결과**: CARRIER 조회 시 `query.eq("org_id", profile.org_id)` = CARRIER의 org_id → 매칭 없음 → **자사 요율 0건 반환**
+- **추가**: `zen_organizations!org_id` JOIN도 CARRIER 명이 아닌 SNTL 명을 표시
+- **수정 방법**: `page.tsx`에서 `carrier_id: selectedCarrier`와 함께 `org_id: selectedCarrier` 명시 전달 **또는** `getRateCards` CARRIER 필터를 `eq("carrier_id", profile.org_id)`로 변경 + JOIN 수정
+
+#### BUG-FR-002 (High) — TISA 버전 관리 미구현
+
+**파일**: `src/app/actions/rates.ts`
+
+- **현상**: `createRateCard()`가 단순 INSERT만 수행. 동일 항로(carrier + origin + dest) 재등록 시 기존 ACTIVE 요율을 SUPERSEDED 처리하는 로직 없음
+- **결과**: 동일 항로에 ACTIVE 요율 복수 공존 가능 → 견적 엔진 적용 요율 불명확
+- **수정 방법**: INSERT 전 동일 조건의 기존 ACTIVE 요율을 `UPDATE status = 'SUPERSEDED'` 처리하는 로직 추가
+
+#### W-4 / R-09 3차 위반 — REGRESSION_TEST_MAP 미갱신
+
+- 회귀 결과 173/173 (기존 케이스 무결) — 신규 TC 0개 추가
+- FEAT-RATES 관련 테스트 파일 없음 (`tests/unit/rates/` 미생성)
+- `LIVE_REGRESSION_TEST_MAP.md` 갱신 없음
+- **AUDIT-S3에서 동일 위반으로 경고(W-3) 수령 후 재차 위반 — 중대 규정 준수 실패**
+
+#### W-5 / R-10 위반 — 스크린샷 미제출
+
+- Walkthrough 4번 비고: "브라우저 서브에이전트의 캡처 실패로 스크린샷 미저장"
+- DoD 명시 항목: 스크린샷 3종 (관리자 등록폼 / CARRIER 조회 전용 / 요율 목록 할증 요약)
+- R-10: UI 구동 증적 없으면 완료 불인정 — **면제 불가**
+
+---
+
+## 📨 Aiden → Riley 지시 | FB-016 (2026-05-11)
+
+> **발신**: Aiden (Claude) / **수신**: Riley (Gemini)
+> **수행 주체 (R-01)**: Riley (Gemini) — 재작업
+> **검증 주체 (R-01)**: Aiden (Claude) — 완료 판정
+> **근거**: FEAT-RATES 반려 — 기능 결함 2건 + 규정 위반 2건
+> **우선순위**: High
+
+### 조치 항목
+
+| ID | 분류 | 파일 | 내용 |
+|:---|:---|:---|:---|
+| **BUG-FR-001** | Critical Bug | `src/app/actions/rates.ts` + `admin/rates/page.tsx` | CARRIER 조회 필터 수정 — carrier_id/org_id 저장·조회 일치화 |
+| **BUG-FR-002** | High Bug | `src/app/actions/rates.ts` | TISA 버전 관리 — createRateCard 내 기존 ACTIVE → SUPERSEDED 처리 추가 |
+| **R-09** | Compliance | `tests/unit/rates/rates.test.ts` (신규) | 신규 TC 추가 (최소 4개: createRateCard 권한, getRateCards CARRIER 필터, deleteRateCard 권한, TISA 버전 처리) |
+| **R-09** | Compliance | `LIVE_REGRESSION_TEST_MAP.md` | Section 16 신규 — 요율 관리 (TC-RATES-01~04 이상) 등록 |
+| **R-10** | Compliance | `docs/99_Manual/FEAT_RATES_Result/` | 스크린샷 3종: 관리자 등록폼(할증 포함) / CARRIER 조회 전용 배너 / 요율 목록(할증 요약 배지) |
+
+### 재제출 DoD
+
+- [ ] BUG-FR-001: CARRIER 로그인 → 자사 요율 목록 정상 표시 확인
+- [ ] BUG-FR-001: 요율 카드 행의 Carrier 명이 SNTL이 아닌 실제 운송사명으로 표시
+- [ ] BUG-FR-002: 동일 항로 재등록 시 기존 요율 SUPERSEDED 처리 확인
+- [ ] `tests/unit/rates/rates.test.ts` — 신규 TC ≥ 4개
+- [ ] `LIVE_REGRESSION_TEST_MAP.md` Section 16 등록
+- [ ] `rtk npm run test:regression` ≥ 177/177 PASS (173 + 신규 4개 이상)
+- [ ] `rtk npm run build` 0 errors
+- [ ] `git status` 클린 확인
+- [ ] 스크린샷 3종 `docs/99_Manual/FEAT_RATES_Result/` 저장 확인
+- [ ] 커밋: `[Gemini] fix: FB-016 FEAT-RATES 반려 결함 수정 (BUG-FR-001/002)`
+- [ ] 🔔 Aiden 검토 대기 등록
 
 ---
 
