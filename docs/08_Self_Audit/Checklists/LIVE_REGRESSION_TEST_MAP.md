@@ -1,8 +1,8 @@
 # 🗺️ LIVE Regression Test Master Map
 
 > **상태:** [ACTIVE]  
-> **총 테스트 케이스:** 173 Cases  
-> **최종 검증일:** 2026-05-11  
+> **총 테스트 케이스:** 177 Cases  
+> **최종 검증일:** 2026-05-11 (RE-FEAT-RATES)  
 
 제니스 플랫폼의 비즈니스 영속성을 보장하는 회귀 테스트 케이스의 통합 명세서입니다. 모든 신규 개발 및 수정 시 이 맵에 케이스가 추가되어야 하며, 전체 테스트가 통과되어야 합니다.
 
@@ -141,12 +141,21 @@
 | **TC-N.4** | 단건 알림 읽음 처리 | markNotificationRead 호출 시 is_read=true 업데이트 확인 | `tests/integration/notifications.test.ts` |
 | **TC-N.5** | 전체 알림 읽음 처리 | markAllNotificationsRead 호출 시 미읽음 건수 반환 및 일괄 처리 확인 | `tests/integration/notifications.test.ts` |
 
+### 24. 요율 관리 (Rates)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-RATES-01** | createRateCard 권한 검증 | ADMIN/MANAGER만 등록 가능 여부 확인 | `tests/unit/rates/rates.test.ts` |
+| **TC-RATES-02** | getRateCards CARRIER 격리 | CARRIER 로그인 시 자사 요율만 조회 보장 | `tests/unit/rates/rates.test.ts` |
+| **TC-RATES-03** | deleteRateCard 권한 검증 | ADMIN만 삭제 가능 여부 확인 | `tests/unit/rates/rates.test.ts` |
+| **TC-RATES-04** | TISA 버전 관리 (SUPERSEDED) | 신규 등록 시 기존 ACTIVE 요율의 상태 전환 검증 | `tests/unit/rates/rates.test.ts` |
+
 ---
 
 ## 📊 최신 검증 이력 (Execution History)
 
 | 검증일 | 버전 | 성공/실패 | 총 소요시간 | 결과 리포트 |
 | :--- | :--- | :---: | :--- | :--- |
+| 2026-05-11 | v16.1 | ✅ PASS | ~1.5s | 177/177 — FEAT-RATES 반려 결함(BUG-FR-001/002) 수정 및 TC-RATES-01~04 신규 등록 완료. |
 | 2026-04-21 | v1.1 | ✅ PASS | 1.88s | 28/28 Passed |
 | 2026-04-22 | v2.1 | ✅ PASS | 2.81s | 58/58 Fully Registered & Verified |
 | 2026-04-23 | v2.2 | ✅ PASS | 7.9s | 60/60 QA-02 통합 2건 추가, 데이터 레이스 픽스 |
@@ -286,6 +295,20 @@
 | 2026-05-09 | v15.1 | ✅ PASS | ~30s | 165/165 — AUDIT-S1 인증·마이페이지·메뉴 결함 시정 + AUDIT-S2 RBAC 구조 정비. TC-RBAC-01~03 신규 등록 (DB 기반 동적 권한 + Fallback 검증). |
 | 2026-05-11 | v15.2 | ✅ PASS | ~30s | 173/173 — AUDIT-S3 법인회원 관리·탈퇴 기능 구현 완료. TC-PROFILE-01~04, TC-MEM-01~04 신규 등록. Aiden 검증 PASS. |
 
+
+| 2026-05-11 | v16.0 | ✅ PASS | ~35s | 177/177 — FB-016 FEAT-RATES 반려 결함 수정 완료. BUG-FR-001(Carrier 필터), BUG-FR-002(TISA 버전 관리) 조치 및 TC-RATES-01~04 신규 등록. |
+
+
+---
+
+## 16. 요율 관리 (Rates Management)
+
+| ID | 테스트 항목 | 파일 | 결과 | 비고 |
+|:---|:---|:---|:---:|:---|
+| TC-RATES-01 | 요율 등록 권한 가드 (ADMIN/MANAGER 허용) | `rates.test.ts` | ✅ | CARRIER 등 타 역할 차단 검증 |
+| TC-RATES-02 | CARRIER 역할 자사 요율 필터링 | `rates.test.ts` | ✅ | org_id 기반 격리 조회 검증 |
+| TC-RATES-03 | 요율 삭제 권한 가드 (ADMIN 전용) | `rates.test.ts` | ✅ | MANAGER 권한 삭제 시도 차단 |
+| TC-RATES-04 | TISA 버전 관리 (ACTIVE -> SUPERSEDED) | `rates.test.ts` | ✅ | 동일 항로 재등록 시 상태 전이 및 버전 증가 |
 
 ---
 
