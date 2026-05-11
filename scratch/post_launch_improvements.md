@@ -170,4 +170,30 @@
 
 ---
 
+## [IMP-011] 요율 관리 고도화 — 할증/할인 체계 + 역할별 UI 분기
+
+- **발견 경위**: 2026-05-11 요율 페이지 구조 분석 — 현재 기본요금 + 중량구간 슬랩만 등록 가능. 할증 요금 체계 전무 확인
+- **현재 상태**:
+  - 할증 항목(FSC, SSC, THC, DG, PEAK 등) DB 스키마 및 UI 없음
+  - `zen_rate_cards.valid_from/valid_to` DB에 존재하나 UI에서 입력 불가
+  - `zen_rate_tiers.min_total_price` DB에 존재하나 UI 미구현
+  - CARRIER 역할이 등록·삭제 폼까지 노출됨 (IMP-002 미처리 상태 포함)
+- **목표 구현**:
+  1. `zen_rate_surcharges` 테이블 신규 생성 (type, calc_type, value, currency)
+  2. 요율 등록 폼에 할증/할인 항목 추가 (FSC·SSC·THC·DG·PEAK·CUSTOM)
+  3. 유효기간(valid_from/valid_to) UI 입력 구현
+  4. 최소 운임(min_total_price) UI 입력 구현 (rate_tiers 연동)
+  5. 역할별 UI 분기: ADMIN/MANAGER → 전체 CRUD / CARRIER·OPERATOR → 조회 전용 (IMP-002 통합)
+  6. 요율 목록에 할증 요약 정보 표시
+- **관련 파일**:
+  - `supabase/migrations/` — `zen_rate_surcharges` 마이그레이션 신규
+  - `src/app/[locale]/(dashboard)/admin/rates/page.tsx`
+  - `src/components/admin/RateTierEditor.tsx`
+  - `src/app/actions/rates.ts` (신규 서버 액션)
+- **예상 공수**: 3~4 MD
+- **우선순위**: Medium (견적 엔진 정확도 직결 — 현재 Landed Cost 과소 산출 위험)
+- **상태**: 🔴 미착수 (IMP-002 통합 처리 예정)
+
+---
+
 *추가 발견 항목은 이 파일에 IMP-NNN 형식으로 계속 추가*
