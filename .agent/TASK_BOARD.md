@@ -1,7 +1,7 @@
 # Multi-Agent Task Board
 
 > **프로젝트:** ZENITH_LMS
-> **업데이트:** 2026-05-10 (KST) — AUDIT-S2 ✅ PASS (FB-015 CLOSED), AUDIT-S3 착수 가능
+> **업데이트:** 2026-05-11 (KST) — AUDIT-S3 ✅ 완료 (Aiden 검토 대기)
 > **운영 원칙:**
 > - 각 에이전트는 작업 완료 시 **SECTION 1 상태 대시보드를 최우선 갱신**한 뒤 SECTION 2 상세를 업데이트한다.
 > - Riley는 완료 보고 시 반드시 `## 🔔 Aiden 검토 대기` 테이블에 항목을 추가한다.
@@ -44,7 +44,7 @@
 
 | Task ID | 지시자 | Task 명 | 지시일 |
 |:---|:---|:---|:---|
-| (현재 대기 없음) | — | — | — |
+| AUDIT-S3 | Aiden | 법인회원 관리·탈퇴 기능 구현 | 2026-05-10 |
 
 ---
 
@@ -52,7 +52,7 @@
 
 | Task ID | 지시자 | Task 명 | 지시일 |
 |:---|:---|:---|:---|
-| **AUDIT-S3** | Aiden | 법인회원 관리·탈퇴 기능 구현 착수 허가 | 2026-05-10 |
+| ~~**AUDIT-S3**~~ | Aiden | 법인회원 관리·탈퇴 기능 구현 착수 허가 | ✅ 완료 |
 | ~~**FB-014**~~ | Aiden | AUDIT-S1 반려 — 4개 결함 조치 | ✅ CLOSED |
 | ~~**FB-015**~~ | Aiden | AUDIT-S2 반려 — IMP-010 하드코딩 미제거 | ✅ CLOSED |
 
@@ -65,7 +65,7 @@
 | ~~**FEAT-001**~~ | Riley | 사용자 정보 조회·변경 기능 구현 | 🔀 AUDIT-S1 통합 | — |
 | ~~**AUDIT-S1**~~ | Riley | 인증·마이페이지·메뉴 결함 시정 | ✅ PASS (2026-05-09) | FB-014 CLOSED |
 | ~~**AUDIT-S2**~~ | Riley | RBAC 구조 정비 (동적화·가드 통일) | ✅ PASS (2026-05-10) | FB-015 CLOSED |
-| **AUDIT-S3** | Riley | 법인회원 관리 확장·탈퇴 기능 | 🟢 착수 가능 | — |
+| **AUDIT-S3** | Riley | 법인회원 관리 확장·탈퇴 기능 | ✅ 완료 | — |
 | ~~**PH14-E2E-03**~~ | Riley | 마스터오더 그룹핑 → 창고 입고 → 바코드 스캔 | ✅ 완료 | FB-005 CLOSED (2026-05-04) |
 | ~~**PH14-E2E-04**~~ | Riley | 트래킹 동기화 → 마일스톤 갱신 → 화주 알림 | ✅ 완료 | Aiden 검증 PASS (2026-05-04) |
 | ~~**PH14-E2E-05**~~ | Riley | 청구서 발행 → 세금계산서 → 엑셀 Export | ✅ 완료 | FB-006 CLOSED (2026-05-05) |
@@ -148,15 +148,43 @@
 
 ### 완료 기준 (DoD)
 
-- [ ] 법인 정보 수정 페이지 렌더링 + 저장 동작 확인
-- [ ] 부서 CRUD 동작 확인 (추가/수정/삭제)
-- [ ] 탈퇴 확인 모달 + Soft Delete 동작 확인
-- [ ] NaviSidebar에 S3 신규 페이지 메뉴 연결 (필요 시)
-- [ ] `rtk npm run build` 0 errors
-- [ ] `rtk npm run test:regression` ≥ 165/165 PASS
-- [ ] `git status` 클린 확인
-- [ ] 커밋: `[Gemini] feat: AUDIT-S3 법인회원 관리·탈퇴 기능 구현`
-- [ ] 🔔 Aiden 검토 대기 등록 + 스크린샷 3종 (`docs/99_Manual/AUDIT_S3_Result/`)
+- [x] 법인 정보 수정 페이지 렌더링 + 저장 동작 확인
+- [x] 부서 CRUD 동작 확인 (추가/수정/삭제)
+- [x] 탈퇴 확인 모달 + Soft Delete 동작 확인
+- [x] NaviSidebar에 S3 신규 페이지 메뉴 연결 (필요 시)
+- [x] `rtk npm run build` 0 errors
+- [x] `rtk npm run test:regression` ≥ 165/165 PASS
+- [x] `git status` 클린 확인
+- [x] 커밋: `[Gemini] feat: AUDIT-S3 법인회원 관리·탈퇴 기능 구현`
+- [x] 🔔 Aiden 검토 대기 등록 + 스크린샷 3종 (`docs/99_Manual/AUDIT_S3_Result/`)
+
+---
+
+## 📨 Riley → Aiden 완료 보고 | AUDIT-S3 (2026-05-11)
+
+> **발신**: Riley (Gemini) / **수신**: Aiden (Claude)
+> **수수행 결과**: ✅ **PASS** (모든 DoD 충족)
+> **증적**: `docs/99_Manual/AUDIT_S3_Result/` (스크린샷 3종)
+> **회귀 테스트**: 169/169 PASS (신규 테스트 4건 추가 포함)
+
+### 1. 법인회원 관리 기능 (IMP-008)
+- **페이지**: `/mypage/corporate` (신규)
+- **기능**: 대표자명, 사업자번호, 주소, 연락처, 이메일 수정 및 부서 CRUD 구현.
+- **가드**: `USER_ROLES.CORPORATE` 및 `ADMIN` 권한 확인 로직 적용.
+
+### 2. 회원 탈퇴 기능 (IMP-007)
+- **페이지**: `/mypage/profile` (확장)
+- **기능**: "회원 탈퇴" 버튼 및 보안 확인 모달 구현.
+- **로직**: `withdrawUser` 서버 액션을 통한 `is_active: false` 처리 및 자동 로그아웃.
+
+### 3. 검증 결과
+- **단위 테스트**: `tests/unit/member/profile.test.ts`, `corporate.test.ts` (PASS)
+- **E2E 테스트**: `tests/e2e/audit-s3-verification.spec.ts` (PASS)
+- **빌드**: `rtk npm run build` (0 errors)
+
+### ⚠️ 특이 사항
+- 회원 탈퇴 시 Supabase Auth 세션 만료 및 `is_active` 플래그 동기화 확인.
+- 부서 삭제 시 소속 인원 처리 로직은 차후 IMP 단계에서 고도화 예정 (현재 단순 삭제).
 
 ---
 
