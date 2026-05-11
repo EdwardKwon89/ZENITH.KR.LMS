@@ -1,7 +1,7 @@
 # Multi-Agent Task Board
 
 > **프로젝트:** ZENITH_LMS
-> **업데이트:** 2026-05-11 (KST) — AUDIT-S3 ✅ 완료 (Aiden 검토 대기)
+> **업데이트:** 2026-05-11 (KST) — AUDIT-S3 ✅ PASS (Aiden 검증 완료)
 > **운영 원칙:**
 > - 각 에이전트는 작업 완료 시 **SECTION 1 상태 대시보드를 최우선 갱신**한 뒤 SECTION 2 상세를 업데이트한다.
 > - Riley는 완료 보고 시 반드시 `## 🔔 Aiden 검토 대기` 테이블에 항목을 추가한다.
@@ -44,7 +44,7 @@
 
 | Task ID | 지시자 | Task 명 | 지시일 |
 |:---|:---|:---|:---|
-| AUDIT-S3 | Aiden | 법인회원 관리·탈퇴 기능 구현 | 2026-05-10 |
+| *(없음)* | — | — | — |
 
 ---
 
@@ -65,7 +65,7 @@
 | ~~**FEAT-001**~~ | Riley | 사용자 정보 조회·변경 기능 구현 | 🔀 AUDIT-S1 통합 | — |
 | ~~**AUDIT-S1**~~ | Riley | 인증·마이페이지·메뉴 결함 시정 | ✅ PASS (2026-05-09) | FB-014 CLOSED |
 | ~~**AUDIT-S2**~~ | Riley | RBAC 구조 정비 (동적화·가드 통일) | ✅ PASS (2026-05-10) | FB-015 CLOSED |
-| **AUDIT-S3** | Riley | 법인회원 관리 확장·탈퇴 기능 | ✅ 완료 | — |
+| ~~**AUDIT-S3**~~ | Riley | 법인회원 관리 확장·탈퇴 기능 | ✅ PASS (2026-05-11) | Aiden 검증 PASS |
 | ~~**PH14-E2E-03**~~ | Riley | 마스터오더 그룹핑 → 창고 입고 → 바코드 스캔 | ✅ 완료 | FB-005 CLOSED (2026-05-04) |
 | ~~**PH14-E2E-04**~~ | Riley | 트래킹 동기화 → 마일스톤 갱신 → 화주 알림 | ✅ 완료 | Aiden 검증 PASS (2026-05-04) |
 | ~~**PH14-E2E-05**~~ | Riley | 청구서 발행 → 세금계산서 → 엑셀 Export | ✅ 완료 | FB-006 CLOSED (2026-05-05) |
@@ -84,6 +84,28 @@
 ---
 
 # SECTION 2 — 작업 상세
+
+---
+
+## ✅ AUDIT-S3 PASS 판정 (2026-05-11)
+
+> **판정**: ✅ **PASS**
+> **검증 주체**: Aiden (Claude)
+> **회귀**: 173/173 PASS (Riley 보고 169 → 실측 +4)
+
+| 항목 | 결과 |
+|:---|:---|
+| [S3-A] 법인 정보 수정 페이지 (`/mypage/corporate`) | ✅ |
+| [S3-B] 부서 CRUD + `zen_departments` 마이그레이션 | ✅ |
+| [S3-C] 탈퇴 모달 + Soft Delete (`is_active=false`) | ✅ |
+| NaviSidebar `corporate_mgmt` 메뉴 연결 | ✅ |
+| 빌드 0 errors | ✅ |
+| 회귀 173/173 PASS | ✅ |
+| 스크린샷 3종 MD5 상이 | ✅ |
+
+**W-1** 회귀 수 계수 오류 (보고 169 vs 실측 173) — DoD 초과이므로 PASS 처리
+**W-2** `profile/page.tsx:62-74` 미사용 `handleWithdraw()` 데드 코드
+**W-3** `fee132f` Riley가 Aiden 작성 `AGENTS.md`를 `[Gemini]` 태그로 커밋 — 파일 소유권 혼재
 
 ---
 
