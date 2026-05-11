@@ -1,8 +1,8 @@
 # 🗺️ LIVE Regression Test Master Map
 
 > **상태:** [ACTIVE]  
-> **총 테스트 케이스:** 163 Cases  
-> **최종 검증일:** 2026-05-07  
+> **총 테스트 케이스:** 173 Cases  
+> **최종 검증일:** 2026-05-11  
 
 제니스 플랫폼의 비즈니스 영속성을 보장하는 회귀 테스트 케이스의 통합 명세서입니다. 모든 신규 개발 및 수정 시 이 맵에 케이스가 추가되어야 하며, 전체 테스트가 통과되어야 합니다.
 
@@ -14,9 +14,12 @@
 | ID | 테스트 항목 | 목적 | 파일 경로 |
 | :--- | :--- | :--- | :--- |
 | **TC-S.1** | SUPER_ADMIN 바이패스 | 관리자 권한의 전역 접근성 보장 | `tests/unit/auth/rbac.test.ts` |
-| **TC-S.2** | 일반 화주 관리자 메뉴 차단 | 역할 기반 접근 제어(RBAC)의 엄격한 분리 | `tests/unit/auth/rbac.test.ts` |
-| **TC-S.3** | 화주 오더 등록/이력 권한 | 실무 역할(Corporate)의 필수 기능 접근성 | `tests/unit/auth/rbac.test.ts` |
-| **TC-S.4** | Default Deny (익명 차단) | 인증되지 않은 사용자의 무단 접근 원천 차단 | `tests/unit/auth/rbac.test.ts` |
+| **TC-S.2** | INDIVIDUAL 등급 승급 페이지 접근 | 역할 기반 접근 제어(RBAC)의 정상 허용 경로 검증 | `tests/unit/auth/rbac.test.ts` |
+| **TC-S.3** | Default Deny (역할 없음) | 역할 정보 미존재 시 접근 거부 원천 차단 | `tests/unit/auth/rbac.test.ts` |
+| **TC-S.4** | allowedPaths 우선 적용 | DB 전달 allowedPaths가 정적 fallback보다 우선되어야 함 | `tests/unit/auth/rbac.test.ts` |
+| **TC-RBAC-01** | DB 권한 존재 시 접근 허용 | `zen_role_permissions` DB 설정 기반 동적 허용 | `tests/unit/auth/rbac.test.ts` |
+| **TC-RBAC-02** | DB 미등록 경로 — STATIC Fallback 허용 | DB 없을 때 STATIC_PERMISSIONS로 Fallback 동작 | `tests/unit/auth/rbac.test.ts` |
+| **TC-RBAC-03** | DB 조회 실패 시 STATIC Fallback 유지 | DB 장애 시에도 서비스 중단 없이 Fallback 보장 | `tests/unit/auth/rbac.test.ts` |
 
 ### 2. 소속 기반 지능형 제어 (Identity/Affiliation)
 | ID | 테스트 항목 | 목적 | 파일 경로 |
@@ -237,6 +240,22 @@
 | **TC-CCL-04** | getDeclarations — 화주별 권한 격리 | 본인 오더와 연계된 신고만 조회 가능 여부 확인 | `tests/unit/customs/customs-declaration.test.ts` |
 | **TC-ORDER-RLS-01** | zen_orders RLS UPDATE | 관리자/운영자의 마스터오더 그룹핑(UPDATE) 권한 보장 | `tests/unit/master/master_policy.test.ts` |
 
+### 14. 회원 프로필 (Member/Profile)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-PROFILE-01** | getMyProfile — 프로필 조회 | 인증된 사용자의 프로필 정상 반환 | `tests/unit/member/profile.test.ts` |
+| **TC-PROFILE-02** | updateMyProfile — 이름 수정 | `zen_profiles` UPDATE 호출 및 성공 확인 | `tests/unit/member/profile.test.ts` |
+| **TC-PROFILE-03** | withdrawUser — Soft Delete 성공 | `is_active=false` 업데이트 + `signOut` 호출 확인 | `tests/unit/member/profile.test.ts` |
+| **TC-PROFILE-04** | withdrawUser — DB 오류 처리 | DB 실패 시 에러 메시지 반환 (서비스 미중단) | `tests/unit/member/profile.test.ts` |
+
+### 15. 법인회원 관리 (Corporate Management)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-MEM-01** | updateOrganizationInfo — 법인 정보 수정 | metadata 병합 업데이트 및 성공 반환 확인 | `tests/unit/member/corporate.test.ts` |
+| **TC-MEM-02** | createDepartment — 부서 추가 | `zen_departments` INSERT + org_id 연결 확인 | `tests/unit/member/corporate.test.ts` |
+| **TC-MEM-03** | deleteDepartment — 부서 삭제 | DELETE 호출 및 id 조건 정합 확인 | `tests/unit/member/corporate.test.ts` |
+| **TC-MEM-04** | updateOrganizationInfo — 권한 없는 역할 거부 | USER 역할의 법인 정보 수정 시도 차단 | `tests/unit/member/corporate.test.ts` |
+
 
 
 ---
@@ -264,6 +283,8 @@
 | 2026-05-07 | v14.11 | ✅ PASS | ~35s | 163/163 — E2E-10 클레임 및 다국어 문서 발행 엔진 완료. FB-011 조치(Step 4 구현 및 실물 스크린샷 교체) 완료. claims.ts 액션 구현, PDF 컴포넌트(CI/PL) 다국어 렌더링 고도화, ClaimRequestModal UI 연계 확인. |
 | 2026-05-07 | v14.12 | ✅ PASS | ~34s | 163/163 — E2E-11 오더 QnA 라이프사이클 완료. 로그아웃 버튼 컴포넌트(`LogoutButton`) 구현 및 글로벌 헤더 연동, E2E 테스트 경로(`/ko/support/qna`) 및 셀렉터 현행화, 로그인 리다이렉트(`/ko/orders`) 정합성 확보. |
 | 2026-05-08 | v14.13 | ✅ PASS | 29.81s | 163/163 — E2E-12 복합 경로 최적화 및 마일스톤 시각화 완료. BALANCED 경로 선택 로직, RouteConsistencyBadge 서버 사이드 업데이트(page.reload) 및 마일스톤 타임라인 시각화 검증 완료. |
+| 2026-05-09 | v15.1 | ✅ PASS | ~30s | 165/165 — AUDIT-S1 인증·마이페이지·메뉴 결함 시정 + AUDIT-S2 RBAC 구조 정비. TC-RBAC-01~03 신규 등록 (DB 기반 동적 권한 + Fallback 검증). |
+| 2026-05-11 | v15.2 | ✅ PASS | ~30s | 173/173 — AUDIT-S3 법인회원 관리·탈퇴 기능 구현 완료. TC-PROFILE-01~04, TC-MEM-01~04 신규 등록. Aiden 검증 PASS. |
 
 
 ---
