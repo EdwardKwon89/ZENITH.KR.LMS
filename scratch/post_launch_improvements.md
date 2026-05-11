@@ -32,6 +32,7 @@
 - **관련 파일**: `src/app/[locale]/(admin)/rates/page.tsx`
 - **예상 공수**: 0.5 MD
 - **우선순위**: Medium (RLS로 실제 DB 보호는 되어 있음)
+- **상태**: 🟡 FEAT-RATES 통합 처리 예정 (2026-05-11)
 
 ---
 

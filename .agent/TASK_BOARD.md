@@ -1,7 +1,7 @@
 # Multi-Agent Task Board
 
 > **프로젝트:** ZENITH_LMS
-> **업데이트:** 2026-05-11 (KST) — FEAT-RATES 구현 계획 수립 (사용자 승인 대기)
+> **업데이트:** 2026-05-11 (KST) — FEAT-RATES 착수 승인 완료 → Riley 착수 가능
 > **운영 원칙:**
 > - 각 에이전트는 작업 완료 시 **SECTION 1 상태 대시보드를 최우선 갱신**한 뒤 SECTION 2 상세를 업데이트한다.
 > - Riley는 완료 보고 시 반드시 `## 🔔 Aiden 검토 대기` 테이블에 항목을 추가한다.
@@ -52,7 +52,7 @@
 
 | Task ID | 지시자 | Task 명 | 지시일 |
 |:---|:---|:---|:---|
-| **FEAT-RATES** | Aiden | 요율 관리 고도화 (IMP-002 + IMP-011) | ⏳ 사용자 승인 대기 |
+| **FEAT-RATES** | Aiden | 요율 관리 고도화 (IMP-002 + IMP-011) | ✅ 착수 허가 |
 | ~~**AUDIT-S3**~~ | Aiden | 법인회원 관리·탈퇴 기능 구현 착수 허가 | ✅ 완료 |
 | ~~**FB-014**~~ | Aiden | AUDIT-S1 반려 — 4개 결함 조치 | ✅ CLOSED |
 | ~~**FB-015**~~ | Aiden | AUDIT-S2 반려 — IMP-010 하드코딩 미제거 | ✅ CLOSED |
@@ -63,6 +63,7 @@
 
 | Task ID | 담당 | Task 명 | 상태 | 블로커 |
 |:---|:---|:---|:---:|:---|
+| **FEAT-RATES** | Riley | 요율 관리 고도화 (IMP-002 + IMP-011) | 🟡 착수 대기 | — |
 | ~~**FEAT-001**~~ | Riley | 사용자 정보 조회·변경 기능 구현 | 🔀 AUDIT-S1 통합 | — |
 | ~~**AUDIT-S1**~~ | Riley | 인증·마이페이지·메뉴 결함 시정 | ✅ PASS (2026-05-09) | FB-014 CLOSED |
 | ~~**AUDIT-S2**~~ | Riley | RBAC 구조 정비 (동적화·가드 통일) | ✅ PASS (2026-05-10) | FB-015 CLOSED |
@@ -88,14 +89,14 @@
 
 ---
 
-## 📋 Aiden → Riley 구현 계획 | FEAT-RATES (⏳ 사용자 승인 대기)
+## 📨 Aiden → Riley 지시 | FEAT-RATES (2026-05-11)
 
 > **발신**: Aiden (Claude) / **수신**: Riley (Gemini)
 > **수행 주체 (R-01)**: Riley (Gemini) — 구현
 > **검증 주체 (R-01)**: Aiden (Claude) — 완료 판정
 > **우선순위**: Medium
 > **근거 IMP**: IMP-002 (역할별 UI 분기) + IMP-011 (할증/할인 체계 신규)
-> **상태**: ⏳ **사용자 최종 승인 후 착수**
+> **상태**: ✅ **착수 허가 (2026-05-11)**
 
 ---
 
