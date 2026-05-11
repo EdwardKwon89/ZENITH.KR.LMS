@@ -44,7 +44,7 @@
 
 | Task ID | 지시자 | Task 명 | 지시일 |
 |:---|:---|:---|:---|
-| *(없음)* | — | — | — |
+| **FEAT-RATES** | Aiden | 요율 관리 고도화 (IMP-002 + IMP-011) | 2026-05-11 |
 
 ---
 
@@ -52,7 +52,7 @@
 
 | Task ID | 지시자 | Task 명 | 지시일 |
 |:---|:---|:---|:---|
-| **FEAT-RATES** | Aiden | 요율 관리 고도화 (IMP-002 + IMP-011) | ✅ 착수 허가 |
+| ~~**FEAT-RATES**~~ | Aiden | 요율 관리 고도화 (IMP-002 + IMP-011) | ✅ 완료 |
 | ~~**AUDIT-S3**~~ | Aiden | 법인회원 관리·탈퇴 기능 구현 착수 허가 | ✅ 완료 |
 | ~~**FB-014**~~ | Aiden | AUDIT-S1 반려 — 4개 결함 조치 | ✅ CLOSED |
 | ~~**FB-015**~~ | Aiden | AUDIT-S2 반려 — IMP-010 하드코딩 미제거 | ✅ CLOSED |
@@ -63,7 +63,7 @@
 
 | Task ID | 담당 | Task 명 | 상태 | 블로커 |
 |:---|:---|:---|:---:|:---|
-| **FEAT-RATES** | Riley | 요율 관리 고도화 (IMP-002 + IMP-011) | 🟡 착수 대기 | — |
+| **FEAT-RATES** | Riley | 요율 관리 고도화 (IMP-002 + IMP-011) | ✅ 완료 | Aiden 검증 대기 |
 | ~~**FEAT-001**~~ | Riley | 사용자 정보 조회·변경 기능 구현 | 🔀 AUDIT-S1 통합 | — |
 | ~~**AUDIT-S1**~~ | Riley | 인증·마이페이지·메뉴 결함 시정 | ✅ PASS (2026-05-09) | FB-014 CLOSED |
 | ~~**AUDIT-S2**~~ | Riley | RBAC 구조 정비 (동적화·가드 통일) | ✅ PASS (2026-05-10) | FB-015 CLOSED |
