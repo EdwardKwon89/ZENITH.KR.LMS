@@ -146,6 +146,7 @@ export default function RatesManagementPage() {
           base_date_rule: baseDateRule,
           valid_from: new Date(validFrom).toISOString(),
           valid_to: new Date(validTo).toISOString(),
+          org_id: selectedCarrier,
           status: 'ACTIVE'
         },
         tiers: tiers.map(t => ({
@@ -195,8 +196,9 @@ export default function RatesManagementPage() {
   const filteredRates = rateCards.filter(r => 
     r.origin_port.toLowerCase().includes(searchTerm.toLowerCase()) ||
     r.destination_port.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    r.organizations?.name.toLowerCase().includes(searchTerm.toLowerCase())
+    r.carrier?.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
 
   return (
     <div className="min-h-screen bg-slate-50 p-8 space-y-10">
