@@ -80,3 +80,20 @@ export async function changePassword(password: string) {
     return { error: '비밀번호 변경 중 오류가 발생했습니다.' };
   }
 }
+
+/**
+ * [BASE] 사용자 세션 및 프로필 조회
+ */
+export async function getUserSession() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  const { data: profile } = await supabase
+    .from("zen_profiles")
+    .select("*")
+    .eq("id", user.id)
+    .single();
+
+  return { user, profile };
+}

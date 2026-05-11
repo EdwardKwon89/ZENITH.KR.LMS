@@ -7,13 +7,13 @@
 
 ## 현재 상태
 
-- **Status**: IDLE
-- **에이전트**: —
-- **역할**: —
-- **작업**: —
-- **시작**: —
-- **예상 완료**: —
-- **잠금 파일/경로**: —
+- **Status**: BUSY
+- **에이전트**: Antigravity (Gemini)
+- **역할**: EXECUTION
+- **작업**: FEAT-RATES (요율 관리 고도화)
+- **시작**: 2026-05-11 11:45
+- **예상 완료**: 2026-05-11 13:00
+- **잠금 파일/경로**: src/app/actions/rates.ts, src/app/[locale]/(dashboard)/admin/rates/page.tsx
 
 ---
 

@@ -33,9 +33,19 @@ interface RateCard {
   organizations?: {
     name: string;
   };
+  carrier?: {
+    name: string;
+    iata_code: string;
+  };
   base_date_rule?: string;
   customer_id?: string;
   priority?: number;
+  surcharges?: Array<{
+    surcharge_type: string;
+    calc_type: string;
+    amount: number;
+    currency: string;
+  }>;
 }
 
 interface RateCardListProps {
@@ -43,9 +53,18 @@ interface RateCardListProps {
   loading: boolean;
   onEdit?: (rate: RateCard) => void;
   onDelete?: (id: string) => void;
+  canEdit?: boolean;
+  canDelete?: boolean;
 }
 
-export const RateCardList: React.FC<RateCardListProps> = ({ rates, loading, onEdit, onDelete }) => {
+export const RateCardList: React.FC<RateCardListProps> = ({ 
+  rates, 
+  loading, 
+  onEdit, 
+  onDelete, 
+  canEdit = false,
+  canDelete = false 
+}) => {
   if (loading) {
     return (
       <div className="space-y-4">
@@ -94,7 +113,7 @@ export const RateCardList: React.FC<RateCardListProps> = ({ rates, loading, onEd
                     </span>
                   </div>
                   <p className="text-sm font-bold text-slate-900 truncate max-w-[150px]">
-                    {rate.organizations?.name || 'Unknown Partner'}
+                    {rate.carrier?.name || rate.organizations?.name || 'Unknown Partner'}
                   </p>
                 </div>
               </div>
@@ -130,15 +149,25 @@ export const RateCardList: React.FC<RateCardListProps> = ({ rates, loading, onEd
                   </div>
                 </div>
                 
-                {/* Validity Period Display */}
-                <div className="flex items-center gap-3 mt-2">
+                {/* Validity & Surcharge Summary */}
+                <div className="flex flex-wrap items-center justify-center gap-3 mt-2">
                   <div className="flex items-center gap-2 px-3 py-1 bg-slate-50 rounded-full border border-slate-200">
                     <span className="text-[9px] font-mono text-slate-400">
                       {new Date(rate.valid_from).toLocaleDateString()} - {rate.valid_to.startsWith('9999') ? 'UNTIL EXPIRED' : new Date(rate.valid_to).toLocaleDateString()}
                     </span>
                   </div>
                   
-                  {/* TISA Rule Badge */}
+                  {/* Surcharges Summary */}
+                  {rate.surcharges && rate.surcharges.length > 0 && (
+                    <div className="flex items-center gap-1.5">
+                      {rate.surcharges.map((s, idx) => (
+                        <div key={idx} className="px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-100 rounded text-[8px] font-black uppercase tracking-wider">
+                          {s.surcharge_type} {s.calc_type === 'PERCENT' ? `${s.amount}%` : `$${s.amount}`}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
                   <div className="flex items-center gap-1.5 px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-200 rounded text-[8px] font-black uppercase tracking-wider">
                     <Calendar className="w-2.5 h-2.5" />
                     {rate.base_date_rule || 'RECEIPT_DATE'}
@@ -177,20 +206,26 @@ export const RateCardList: React.FC<RateCardListProps> = ({ rates, loading, onEd
               </div>
 
               {/* Actions */}
-              <div className="flex items-center gap-2 pl-4 border-l border-slate-200">
-                <button 
-                  onClick={() => onEdit?.(rate)}
-                  className="p-2 text-slate-400 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-all"
-                >
-                  <Edit3 className="w-4 h-4" />
-                </button>
-                <button 
-                  onClick={() => onDelete?.(rate.id)}
-                  className="p-2 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
+              {(canEdit || canDelete) && (
+                <div className="flex items-center gap-2 pl-4 border-l border-slate-200">
+                  {canEdit && (
+                    <button 
+                      onClick={() => onEdit?.(rate)}
+                      className="p-2 text-slate-400 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-all"
+                    >
+                      <Edit3 className="w-4 h-4" />
+                    </button>
+                  )}
+                  {canDelete && (
+                    <button 
+                      onClick={() => onDelete?.(rate.id)}
+                      className="p-2 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </ZenCard>
