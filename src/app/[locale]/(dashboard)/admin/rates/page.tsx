@@ -2,16 +2,22 @@
 
 import { useState, useEffect } from 'react';
 import { createClient } from '@/utils/supabase/client';
-import { ZenCard, ZenButton, ZenInput } from '@/components/ui/ZenUI';
+import { ZenCard, ZenButton, ZenInput, ZenSelect } from '@/components/ui/ZenUI';
 import { RateTierEditor, RateTier } from '@/components/admin/RateTierEditor';
 import { RateCardList } from '@/components/admin/RateCardList';
+import { SurchargeEditor, Surcharge } from '@/components/admin/SurchargeEditor';
+import { 
+  getRateCards, 
+  createRateCard, 
+  deleteRateCard 
+} from '@/app/actions/rates';
+import { USER_ROLES } from '@/lib/auth/rbac';
 import { 
   Globe, 
   MapPin, 
   Truck, 
   Save, 
   Search, 
-  Filter, 
   DollarSign, 
   ChevronRight, 
   Settings2,
@@ -20,7 +26,8 @@ import {
   Box,
   LayoutGrid,
   ListFilter,
-  Calendar
+  Calendar,
+  AlertCircle
 } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
@@ -36,22 +43,55 @@ export default function RatesManagementPage() {
   const [priority, setPriority] = useState(0);
   const [selectedCustomer, setSelectedCustomer] = useState('');
   const [baseDateRule, setBaseDateRule] = useState('RECEIPT_DATE');
+  const [validFrom, setValidFrom] = useState(new Date().toISOString().split('T')[0]);
+  const [validTo, setValidTo] = useState('9999-12-31');
   const [shippers, setShippers] = useState<any[]>([]);
   const [tiers, setTiers] = useState<RateTier[]>([]);
+  const [surcharges, setSurcharges] = useState<Surcharge[]>([]);
   const [loading, setLoading] = useState(false);
   
   const [rateCards, setRateCards] = useState<any[]>([]);
   const [listLoading, setListLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('ACTIVE');
+  const [profile, setProfile] = useState<any>(null);
   
   const supabase = createClient();
 
+
+  // RBAC permissions
+  const canEdit = profile?.role === USER_ROLES.ADMIN || profile?.role === USER_ROLES.MANAGER;
+  const canDelete = profile?.role === USER_ROLES.ADMIN;
+
+  const fetchRateCards = async () => {
+    setListLoading(true);
+    try {
+      const data = await getRateCards();
+      setRateCards(data);
+    } catch (err: any) {
+      console.error('Error fetching rate cards:', err);
+    } finally {
+      setListLoading(false);
+    }
+  };
+
   useEffect(() => {
+
     const fetchData = async () => {
-      // Fetch Carriers
+      // Get Profile for RBAC
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profileData } = await supabase
+          .from('zen_profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single();
+        setProfile(profileData);
+      }
+
+      // Fetch Carriers (zen_organizations)
       const { data: carrierData } = await supabase
-        .from('organizations')
+        .from('zen_organizations')
         .select('*')
         .eq('type', 'CARRIER')
         .eq('status', 'ACTIVE');
@@ -60,16 +100,16 @@ export default function RatesManagementPage() {
 
       // Fetch Shippers (Customers)
       const { data: shipperData } = await supabase
-        .from('organizations')
+        .from('zen_organizations')
         .select('*')
-        .in('org_type', ['SHIPPER', 'FORWARDER'])
-        .eq('is_active', true);
+        .in('type', ['SHIPPER', 'FORWARDER'])
+        .eq('status', 'ACTIVE');
       
       if (shipperData) setShippers(shipperData);
 
       // Fetch Ports
       const { data: portData } = await supabase
-        .from('ports')
+        .from('zen_ports')
         .select('*')
         .order('port_code');
       
@@ -80,29 +120,11 @@ export default function RatesManagementPage() {
     fetchRateCards();
   }, []);
 
-  const fetchRateCards = async () => {
-    setListLoading(true);
-    let query = supabase
-      .from('rate_cards')
-      .select(`
-        *,
-        organizations(name)
-      `)
-      .order('version_no', { ascending: false })
-      .order('created_at', { ascending: false });
-    
-    if (statusFilter !== 'ALL') {
-      query = query.eq('status', statusFilter);
-    }
-    
-    const { data } = await query;
-    if (data) setRateCards(data);
-    setListLoading(false);
-  };
 
   useEffect(() => {
     fetchRateCards();
   }, [statusFilter]);
+
 
   const handleSaveRate = async () => {
     if (!selectedCarrier || !originPort || !destPort) {
@@ -112,42 +134,8 @@ export default function RatesManagementPage() {
 
     setLoading(true);
     try {
-      // 1. Check for existing active rate card for TISA versioning
-      const { data: existingCard } = await supabase
-        .from('rate_cards')
-        .select('*')
-        .eq('carrier_id', selectedCarrier)
-        .eq('origin_port', originPort)
-        .eq('destination_port', destPort)
-        .eq('service_type', serviceType)
-        .eq('status', 'ACTIVE')
-        .maybeSingle();
-
-      let newVersionNo = 1;
-      let parentId = null;
-
-      if (existingCard) {
-        // TISA Logic: Supersede existing card
-        newVersionNo = existingCard.version_no + 1;
-        parentId = existingCard.id;
-
-        const { error: supersedeError } = await supabase
-          .from('rate_cards')
-          .update({ 
-            status: 'SUPERSEDED',
-            valid_to: new Date().toISOString()
-          })
-          .eq('id', existingCard.id);
-
-        if (supersedeError) throw supersedeError;
-      }
-
-      // 2. Create New Version
-      const { data: card, error: cardError } = await supabase
-        .from('rate_cards')
-        .insert({
-          version_no: newVersionNo,
-          parent_version_id: parentId,
+      await createRateCard({
+        card: {
           carrier_id: selectedCarrier,
           origin_port: originPort,
           destination_port: destPort,
@@ -156,28 +144,25 @@ export default function RatesManagementPage() {
           priority: priority,
           customer_id: selectedCustomer || null,
           base_date_rule: baseDateRule,
-          status: 'ACTIVE',
-          valid_from: new Date().toISOString()
-        })
-        .select()
-        .single();
+          valid_from: new Date(validFrom).toISOString(),
+          valid_to: new Date(validTo).toISOString(),
+          status: 'ACTIVE'
+        },
+        tiers: tiers.map(t => ({
+          weight_min: t.weight_min,
+          unit_price: t.unit_price,
+          min_total_price: t.min_total_price
+        })),
+        surcharges: surcharges.map(s => ({
+          surcharge_type: s.surcharge_type,
+          calc_type: s.calc_type,
+          amount: s.amount,
+          currency: s.currency,
+          description: s.description
+        }))
+      });
 
-      if (cardError) throw cardError;
-
-      // 3. Save Tiers
-      if (tiers.length > 0) {
-        const { error: tierError } = await supabase
-          .from('rate_slabs')
-          .insert(tiers.map(t => ({
-            rate_card_id: card.id,
-            weight_min: t.weight_min,
-            unit_price: t.unit_price
-          })));
-        
-        if (tierError) throw tierError;
-      }
-
-      alert(`요율 카드가 성공적으로 등록되었습니다. (Version v${newVersionNo})`);
+      alert(`요율 카드가 성공적으로 등록되었습니다.`);
       // Reset form
       setOriginPort('');
       setDestPort('');
@@ -186,20 +171,25 @@ export default function RatesManagementPage() {
       setSelectedCustomer('');
       setBaseDateRule('RECEIPT_DATE');
       setTiers([]);
+      setSurcharges([]);
+      setValidFrom(new Date().toISOString().split('T')[0]);
+      setValidTo('9999-12-31');
+      fetchRateCards();
     } catch (err: any) {
       alert(`저장 중 오류 발생: ${err.message}`);
     } finally {
       setLoading(false);
-      fetchRateCards();
     }
   };
 
   const handleDeleteRate = async (id: string) => {
     if (!confirm('정말 이 요율 정보를 삭제하시겠습니까?')) return;
-    
-    const { error } = await supabase.from('rate_cards').delete().eq('id', id);
-    if (error) alert(error.message);
-    else fetchRateCards();
+    try {
+      await deleteRateCard(id);
+      fetchRateCards();
+    } catch (err: any) {
+      alert(err.message);
+    }
   };
 
   const filteredRates = rateCards.filter(r => 
@@ -220,18 +210,35 @@ export default function RatesManagementPage() {
           <h1 className="text-4xl font-black text-slate-900 tracking-tight flex items-center gap-4">
             물류 요율 마스터 등록
             <span className="text-xs bg-slate-100 text-slate-500 px-3 py-1 rounded-full border border-slate-200 font-mono">
-              V-Engine 1.0
+              V-Engine 2.0
             </span>
           </h1>
           <p className="text-slate-500 max-w-xl">
-            운송사별, 항로별 기본 요율 및 중량구간(Slab) 할인 체계를 관리합니다. 이 데이터는 견적 엔진의 핵심 소스로 사용됩니다.
+            운송사별, 항로별 기본 요율 및 중량구간(Slab), 할증료(Surcharge) 체계를 관리합니다.
           </p>
         </div>
       </header>
 
+      {profile?.role === USER_ROLES.CARRIER && (
+        <div className="max-w-7xl mx-auto">
+          <ZenCard className="bg-blue-600 border-none flex items-center gap-4 text-white">
+            <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center">
+              <AlertCircle className="w-6 h-6" />
+            </div>
+            <div>
+              <p className="font-black tracking-tight text-lg">Partner View Mode Active</p>
+              <p className="text-blue-100 text-sm">운송 파트너 계정으로 접속 중입니다. 요율 정보는 조회만 가능하며 수정 권한이 제한됩니다.</p>
+            </div>
+          </ZenCard>
+        </div>
+      )}
+
       <main className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10">
         {/* Left: Configuration Form */}
-        <div className="lg:col-span-8 space-y-8">
+        <div className={cn(
+          "lg:col-span-8 space-y-8 transition-all",
+          profile?.role === USER_ROLES.CARRIER && "opacity-50 pointer-events-none scale-[0.98] blur-[2px]"
+        )}>
           <ZenCard className="bg-white border-slate-200 space-y-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Carrier Selection */}
@@ -327,6 +334,31 @@ export default function RatesManagementPage() {
                   * Determines which date on the order determines the applicable rate version.
                 </p>
               </div>
+              {/* Validity Period */}
+              <div className="col-span-1 md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-slate-100">
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
+                    <Calendar className="w-3 h-3 text-emerald-500" /> Valid From
+                  </label>
+                  <ZenInput 
+                    type="date" 
+                    value={validFrom}
+                    onChange={(e) => setValidFrom(e.target.value)}
+                    className="bg-slate-50 border-slate-300"
+                  />
+                </div>
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
+                    <Calendar className="w-3 h-3 text-red-400" /> Valid To
+                  </label>
+                  <ZenInput 
+                    type="date" 
+                    value={validTo}
+                    onChange={(e) => setValidTo(e.target.value)}
+                    className="bg-slate-50 border-slate-300"
+                  />
+                </div>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -367,6 +399,10 @@ export default function RatesManagementPage() {
 
             <div className="pt-6 border-t border-slate-200">
               <RateTierEditor tiers={tiers} onChange={setTiers} />
+            </div>
+
+            <div className="pt-6 border-t border-slate-200">
+              <SurchargeEditor surcharges={surcharges} onChange={setSurcharges} />
             </div>
           </ZenCard>
         </div>
@@ -476,6 +512,8 @@ export default function RatesManagementPage() {
           rates={filteredRates} 
           loading={listLoading} 
           onDelete={handleDeleteRate}
+          canEdit={canEdit}
+          canDelete={canDelete}
         />
       </section>
     </div>

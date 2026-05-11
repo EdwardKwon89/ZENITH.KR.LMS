@@ -8,6 +8,7 @@ export interface RateTier {
   id?: string;
   weight_min: number;
   unit_price: number;
+  min_total_price: number;
 }
 
 interface RateTierEditorProps {
@@ -17,7 +18,7 @@ interface RateTierEditorProps {
 
 export const RateTierEditor: React.FC<RateTierEditorProps> = ({ tiers, onChange }) => {
   const addTier = () => {
-    onChange([...tiers, { weight_min: 0, unit_price: 0 }]);
+    onChange([...tiers, { weight_min: 0, unit_price: 0, min_total_price: 0 }]);
   };
 
   const removeTier = (index: number) => {
@@ -75,6 +76,19 @@ export const RateTierEditor: React.FC<RateTierEditorProps> = ({ tiers, onChange 
                     value={tier.unit_price}
                     onChange={(e) => updateTier(index, 'unit_price', Number(e.target.value))}
                     className="pl-12 bg-slate-50 border-slate-300 text-emerald-600 font-bold"
+                  />
+                </div>
+              </div>
+
+              <div className="flex-1 space-y-2">
+                <label className="text-[10px] text-slate-400 font-bold uppercase ml-1">Min. Charge ($)</label>
+                <div className="relative">
+                  <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-500/50" />
+                  <ZenInput 
+                    type="number" 
+                    value={tier.min_total_price}
+                    onChange={(e) => updateTier(index, 'min_total_price', Number(e.target.value))}
+                    className="pl-12 bg-slate-50 border-slate-300 text-amber-600 font-bold"
                   />
                 </div>
               </div>
