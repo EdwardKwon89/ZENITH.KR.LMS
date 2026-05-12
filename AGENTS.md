@@ -138,3 +138,5 @@ git commit -m "[Codex] test: <작업 설명>"
 | :--- | :--- | :--- | :--- |
 | v1.0 | 2026-05-10 | Aiden (Claude, ZEN_CEO) | Noah (Codex) 에이전트 업무 규정 초안 수립 |
 | v2.0 | 2026-05-12 | Aiden (Claude, ZEN_CEO) | GOV_COMMON.md 분리 — 공통 규칙 이관, Noah 전용 내용만 유지 (SAR-2026-05-12-001 반영) |
+
+<!-- gitnexus rules: GOV_COMMON.md 참조 (예외 조항 포함 단일 출처) -->

@@ -34,3 +34,5 @@ tags: ["governance"]
 | v1.2 | 2026-04-22 | Claude | GEMINI.md R-01~R-12 전체 동기화, SAR 절차, 문서 이원화 체계 보완 |
 | v1.3 | 2026-05-08 | Claude (Aiden) | 개선 사항 도출 및 기록 의무 R-15 추가 |
 | v2.0 | 2026-05-12 | Aiden (Claude, ZEN_CEO) | GOV_COMMON.md 분리 — 공통 규칙 이관, Claude 전용 내용만 유지 (SAR-2026-05-12-001 반영) |
+
+<!-- gitnexus rules: GOV_COMMON.md 참조 (예외 조항 포함 단일 출처) -->
