@@ -35,4 +35,4 @@ tags: ["governance"]
 | v1.3 | 2026-05-08 | Claude (Aiden) | 개선 사항 도출 및 기록 의무 R-15 추가 |
 | v2.0 | 2026-05-12 | Aiden (Claude, ZEN_CEO) | GOV_COMMON.md 분리 — 공통 규칙 이관, Claude 전용 내용만 유지 (SAR-2026-05-12-001 반영) |
 
-<!-- gitnexus rules: GOV_COMMON.md 참조 (예외 조항 포함 단일 출처) -->
+<!-- gitnexus: GOV_COMMON.md 단일 출처. 재인덱싱 시 `gitnexus analyze --skip-agents-md` 사용 -->
