@@ -1,7 +1,7 @@
 # Multi-Agent Task Board
 
 > **프로젝트:** ZENITH_LMS
-> **업데이트:** 2026-05-13 (KST) — FB-017 PASS / GOV-001~002 Phase 1 PASS / GOV-003~005 Phase 2 PASS / GOV-006~009 Phase 3 착수 가능
+> **업데이트:** 2026-05-13 (KST) — FB-017 PASS / GOV-001~005 Phase 1~2 PASS / GOV-006~009 Phase 3 PASS
 > **운영 원칙:**
 > - 각 에이전트는 작업 완료 시 **SECTION 1 상태 대시보드를 최우선 갱신**한 뒤 담당 SECTION 상세를 업데이트한다.
 > - Riley는 완료 보고 시 반드시 `## 🔔 Aiden 검토 대기` 테이블에 항목을 추가한다.
@@ -46,7 +46,6 @@
 
 | Task ID | 지시자 | Task 명 | 지시일 |
 |:---|:---|:---|:---|
-| **GOV-006~009** | D_Kai | [Phase 3] GOV_COMMON.md 규칙 + B_Kai 문서화 + SAR-2026-05-12-001 점검 | 2026-05-13 |
 | _(없음 — 모두 검토 완료)_ | — | — | — |
 
 ---
@@ -88,7 +87,7 @@
 | ~~**FB-017**~~ | Riley | R-10 스크린샷 재제출 (요율 관리 UI 3종) | ✅ **PASS (2026-05-13)** | 코드 구현 기준 완료 |
 | ~~**GOV-001~002**~~ | D_Kai | [Phase 1] SAR-2026-05-13-001 거버넌스 조치 (즉시) | ✅ **Aiden PASS (2026-05-13)** | — |
 | ~~**GOV-003~005**~~ | D_Kai | [Phase 2] SAR-2026-05-13-001 거버넌스 조치 (단기) | ✅ **Aiden PASS (2026-05-13)** | — |
-| ~~**GOV-006~009**~~ | D_Kai | [Phase 3] SAR-2026-05-13-001 거버넌스 조치 (장기) | ✅ **Aiden 검토 대기** | — |
+| ~~**GOV-006~009**~~ | D_Kai | [Phase 3] SAR-2026-05-13-001 거버넌스 조치 (장기) | ✅ **Aiden PASS (2026-05-13)** | — |
 | ~~**FB-016**~~ | Riley | FEAT-RATES 2차 반려 재작업 | ❌ 2차 반려 | FB-017 대체 |
 | ~~**FEAT-RATES**~~ | Riley | 요율 관리 고도화 (IMP-002 + IMP-011) | ❌ 반려 (2026-05-11) | FB-016 발령 |
 | ~~**FEAT-001**~~ | Riley | 사용자 정보 조회·변경 기능 구현 | 🔀 AUDIT-S1 통합 | — |
@@ -668,7 +667,27 @@ status_age_limit_hours: 24                     # 이 시간 초과 BUSY → STAL
 
 ---
 
-## 📨 Aiden → D_Kai | Phase 3 — 장기 조치 🆕 즉시 착수 가능 (2026-05-13 Aiden 승인)
+## ✅ GOV Phase 3 PASS 판정 (2026-05-13)
+
+> **판정**: ✅ **PASS**
+> **검증 주체**: Aiden (Claude)
+> **커밋**: `1f19c32` (feat) + `d729e8b` (chore: 검토 대기 등록)
+
+| 항목 | 결과 |
+|:---|:---|
+| GOV-006 GOV_COMMON.md 질문 유형별 분석 범위 추가 | ✅ |
+| GOV-007 R-16 신설 (세션 시작 상태 파일 일관성 검증) | ✅ |
+| GOV-008 104_MULTIAGENT_RNR_GUIDE.md B_Kai 섹션 추가 (v1.4) | ✅ |
+| GOV-009 SAR-2026-05-12-001 §5 ALL CLOSED 처리 | ✅ |
+| ACTIVE_AGENT.md IDLE 초기화 | ✅ |
+| git status 클린 | ✅ |
+
+**W-1** `last_verified_at: 2026-05-13T14:52:00+09:00` — Phase 3 커밋(15:45) 시각 미반영. Phase 2 W-1과 동일 패턴 반복 (IDLE 상태 실질 영향 없음)
+**W-2** ACTIVE_AGENT.md 업데이트 기록 테이블에 Phase 2·3 이력 누락 — GOV-001~002만 기록됨
+
+---
+
+## 📨 Aiden → D_Kai | Phase 3 — 장기 조치 ✅ PASS (2026-05-13 Aiden 검증)
 
 > **수행 주체**: D_Kai (OpenCode) | **검증 주체**: Aiden (Claude) | **우선순위**: Medium
 > **⚠️ GOV-006·007은 GOV_COMMON.md 전 에이전트 영향. 초안 작성 → Aiden 승인 득한 뒤 커밋.**
