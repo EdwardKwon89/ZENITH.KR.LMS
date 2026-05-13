@@ -4,8 +4,10 @@
 > 최초 작성: 2026-05-08
 > 상태 일괄 갱신: 2026-05-13 (Aiden — 코드베이스 교차 검증 기반)
 >
-> **현황 요약**: IMP-001~011 중 **IMP-003만 미착수** (Low priority). 나머지 10개 완료.
-> **IMP-012~014**: EXP-IMP-DK (D_Kai) 2026-05-13 도출 — Aiden CONDITIONAL PASS 후 등록.
+> **현황 요약**: IMP-001~011 중 **IMP-003만 미착수** (Low priority). 나머지 10개 완료.  
+> **IMP-012~014**: EXP-IMP-DK (D_Kai) 2026-05-13 도출 — Aiden CONDITIONAL PASS 후 등록.  
+> **IMP-015~017**: EXP-IMP-DK-ARCH (D_Kai) 2026-05-13 — 아키텍처·워크플로우 추가 도출.  
+> **IMP-019~026**: EXP-IMP-RG (Ring) / EXP-IMP-MM (MiniMax) 2026-05-13 도출.
 > **IMP-019~022**: EXP-IMP-RG (Ring 2.6 1T) 2026-05-13 도출 — Aiden CONDITIONAL PASS 대기 중.
 > **IMP-023~026**: EXP-IMP-RL (Riley, Gemini) 2026-05-13 도출 — Aiden PASS 확정.
 
@@ -237,6 +239,42 @@
 - **관련 파일**: `src/app/[locale]/(dashboard)/admin/rates/page.tsx`, `src/components/admin/SurchargeEditor.tsx`, `src/components/admin/RateCardList.tsx`
 - **예상 공수**: 1~1.5 MD
 - **우선순위**: Low
+
+---
+
+## [IMP-015] middleware.ts console.log로 세션·경로 정보 프로덕션 노출
+
+- **발견 경위**: EXP-IMP-DK-ARCH — `src/middleware.ts` L28 분석
+- **현재 상태**: `console.log('[MIDDLEWARE] Entry: ' + pathname)` — 모든 요청 경로 stdout 출력
+- **임시 조치**: 없음
+- **목표 구현**: `logger.debug` 교체 또는 NODE_ENV 조건부 분기 (IMP-013 logger 연계)
+- **관련 파일**: `src/middleware.ts`
+- **예상 공수**: 0.1 MD (IMP-013과 통합 시 추가 공수 없음)
+- **우선순위**: Medium
+
+---
+
+## [IMP-016] 서버 액션 Supabase 클라이언트 중복 생성 — 서비스 레이어 부재
+
+- **발견 경위**: EXP-IMP-DK-ARCH — `createClient()` 57회 호출 + 7개 액션 파일 직접 DB 쿼리
+- **현재 상태**: 각 서버 액션(`auth.ts`, `orders.ts`, `finance.ts`, `member.ts`, `inventory.ts`, `rates.ts`, `tracking.ts`)이 개별적으로 Supabase 클라이언트 생성 및 직접 DB 쿼리 수행
+- **임시 조치**: 없음
+- **목표 구현**: `src/lib/repositories/` 신설 — Repository 패턴 도입. 서버 액션은 권한 검증 + Repository 호출만 담당.
+- **관련 파일**: `src/app/actions/*.ts` (7개), `src/lib/repositories/` (신규)
+- **예상 공수**: 3~5 MD
+- **우선순위**: Medium
+
+---
+
+## [IMP-017] Error Boundary 부족 — 전역 오류 처리 일원화 필요
+
+- **발견 경위**: EXP-IMP-DK-ARCH — error boundary 파일 1개만 존재 확인
+- **현재 상태**: `src/app/[locale]/(dashboard)/error.tsx` 단 1개. `(auth)`, `admin`, `master`, `orders/[orderId]` 등 주요 경로에 error boundary 없음
+- **임시 조치**: 각 페이지/액션에서 개별 try-catch
+- **목표 구현**: 주요 경로 세그먼트별 error.tsx 4개 추가 + 공통 ErrorFallback 컴포넌트 제작
+- **관련 파일**: `src/app/[locale]/(dashboard)/error.tsx`, `src/components/ui/ErrorFallback.tsx` (신규) + 4개 error.tsx (신규)
+- **예상 공수**: 1 MD
+- **우선순위**: Medium
 
 ---
 
