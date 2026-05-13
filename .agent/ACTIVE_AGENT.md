@@ -7,13 +7,13 @@
 
 ## 현재 상태
 
-- **Status**: BUSY
-- **에이전트**: D_Kai (OpenCode)
-- **역할**: 거버넌스 조치 — GOV-006~009 (Phase 3)
-- **작업**: GOV_COMMON.md 규칙 반영 + B_Kai 문서화 + SAR-2026-05-12-001 점검
-- **시작**: 2026-05-13
-- **예상 완료**: 2026-05-13
-- **잠금 파일/경로**: GOV_COMMON.md, docs/00_GUIDE/104_MULTIAGENT_RNR_GUIDE.md
+- **Status**: IDLE
+- **에이전트**: None
+- **역할**: None
+- **작업**: None
+- **시작**: —
+- **예상 완료**: —
+- **잠금 파일/경로**: None
 - **last_verified_at**: 2026-05-13T14:52:00+09:00
 - **status_age_limit_hours**: 24
 
