@@ -1,7 +1,7 @@
 # Multi-Agent Task Board
 
 > **프로젝트:** ZENITH_LMS
-> **업데이트:** 2026-05-13 (KST) — FIX-MCM-002 PASS (MCM v1.8) / B_Kai 비활성화 / EXP-IMP 4개 모델 성능 실험 지시
+> **업데이트:** 2026-05-13 (KST) — REG-IMP-RL PASS / EXP-IMP-DK PASS 확정 / IMP-023~026 등록 완료
 > **운영 원칙:**
 > - 각 에이전트는 작업 완료 시 **SECTION 1 상태 대시보드를 최우선 갱신**한 뒤 담당 SECTION 상세를 업데이트한다.
 > - Riley는 완료 보고 시 반드시 `## 🔔 Aiden 검토 대기` 테이블에 항목을 추가한다.
@@ -46,9 +46,7 @@
 
 | Task ID | 지시자 | Task 명 | 지시일 |
 |:---|:---|:---|:---|
-| **EXP-IMP-DK** | D_Kai | 전체 코드베이스 IMP 도출 (IMP-012~014) | 2026-05-13 |
-| **FIX-MCM-002** | D_Kai | `105_MODEL_CAPABILITY_MATRIX.md` v1.4 신규 오류 수정 (블로커 4 + 경미 2) | 2026-05-13 |
-| _(없음 — 모두 검토 완료)_ | — | — | — |
+| *(검토 대기 항목 없음)* | — | — | — |
 
 ---
 
@@ -56,7 +54,8 @@
 
 | Task ID | 지시자 | Task 명 | 지시일 |
 |:---|:---|:---|:---|
-| **EXP-IMP-RL** | Aiden | 전체 코드베이스 IMP 도출 (성능 실험) | 2026-05-13 |
+| ~~**EXP-IMP-RL**~~ | Aiden | 전체 코드베이스 IMP 도출 (성능 실험) | 2026-05-13 |
+| ~~**REG-IMP-RL**~~ | Aiden | IMP-023~026 `post_launch_improvements.md` 등록 | ✅ 완료 |
 
 ## 🆕 신규 지시 대기 (D_Kai 착수 가능)
 
@@ -85,13 +84,13 @@
 
 ---
 
-## 🧪 신규 지시 대기 (MiniMax · Ring — 신규 온보딩 + 성능 실험)
+## 🧪 신규 에이전트 실험 현황 (EXP-IMP)
 
-> 신규 에이전트. SECTION 5·6 온보딩 안내 참조 후 착수.
+> Ring: SECTION 6 온보딩 안내 참조 후 착수. MiniMax: EXP-IMP 테스트 탈락 (2026-05-13)
 
 | Task ID | 에이전트 | 모델 | Task 명 | 지시일 | 상태 |
 |:---|:---|:---|:---|:---|:---:|
-| **EXP-IMP-MM** | MiniMax | MiniMax M2.5 | 전체 코드베이스 IMP 도출 | 2026-05-13 | ⏳ 온보딩 후 착수 |
+| ~~**EXP-IMP-MM**~~ | MiniMax | MiniMax M2.5 | 전체 코드베이스 IMP 도출 | 2026-05-13 | ❌ **테스트 탈락** — 보고서 미제출 |
 | **EXP-IMP-RG** | Ring | Ring 2.6 1T | 전체 코드베이스 IMP 도출 | 2026-05-13 | ⏳ 온보딩 후 착수 |
 
 ---
@@ -100,16 +99,17 @@
 
 | Task ID | 담당 | Task 명 | 상태 | 블로커 |
 |:---|:---|:---|:---:|:---|
-| **EXP-IMP-DK** | D_Kai | 전체 코드베이스 IMP 도출 | ⏳ 대기 | — |
-| **EXP-IMP-RL** | Riley | 전체 코드베이스 IMP 도출 | ✅ 완료 | `scratch/imp_scan_riley_20260513.md` |
-| **EXP-IMP-MM** | MiniMax | 전체 코드베이스 IMP 도출 | ⏳ 온보딩 필요 | 신규 에이전트 |
+| ~~**EXP-IMP-DK**~~ | D_Kai | 전체 코드베이스 IMP 도출 | ✅ **PASS** | `scratch/imp_scan_dkai_20260513.md` |
+| ~~**EXP-IMP-RL**~~ | Riley | 전체 코드베이스 IMP 도출 | ✅ PASS | `scratch/imp_scan_riley_20260513.md` |
+| ~~**REG-IMP-RL**~~ | Riley | IMP-023~026 post_launch_improvements.md 등록 | ✅ 완료 | — |
+| ~~**EXP-IMP-MM**~~ | MiniMax | 전체 코드베이스 IMP 도출 | ❌ **테스트 탈락** | 보고서 미제출 — 자율 과업 수행 불가 |
 | **EXP-IMP-RG** | Ring | 전체 코드베이스 IMP 도출 | ⏳ 온보딩 필요 | 신규 에이전트 |
 | ~~**FB-017**~~ | Riley | R-10 스크린샷 재제출 (요율 관리 UI 3종) | ✅ **PASS (2026-05-13)** | 코드 구현 기준 완료 |
 | ~~**GOV-001~002**~~ | D_Kai | [Phase 1] SAR-2026-05-13-001 거버넌스 조치 (즉시) | ✅ **Aiden PASS (2026-05-13)** | — |
 | ~~**GOV-003~005**~~ | D_Kai | [Phase 2] SAR-2026-05-13-001 거버넌스 조치 (단기) | ✅ **Aiden PASS (2026-05-13)** | — |
 | ~~**GOV-006~009**~~ | D_Kai | [Phase 3] SAR-2026-05-13-001 거버넌스 조치 (장기) | ✅ **Aiden PASS (2026-05-13)** | — |
 | ~~**FIX-MCM-001**~~ | D_Kai | `105_MODEL_CAPABILITY_MATRIX.md` 오류 수정 (v1.3 DoD) | ✅ **Aiden PASS** | v1.4 신규 오류 → FIX-MCM-002 |
-| ~~**FIX-MCM-002**~~ | D_Kai | `105_MODEL_CAPABILITY_MATRIX.md` v1.4 신규 오류 수정 | ✅ **Aiden 검토 대기** | — |
+| ~~**FIX-MCM-002**~~ | D_Kai | `105_MODEL_CAPABILITY_MATRIX.md` v1.4 신규 오류 수정 | ✅ **Aiden PASS** | MCM v1.8 |
 | ~~**FB-016**~~ | Riley | FEAT-RATES 2차 반려 재작업 | ❌ 2차 반려 | FB-017 대체 |
 | ~~**FEAT-RATES**~~ | Riley | 요율 관리 고도화 (IMP-002 + IMP-011) | ❌ 반려 (2026-05-11) | FB-016 발령 |
 | ~~**FEAT-001**~~ | Riley | 사용자 정보 조회·변경 기능 구현 | 🔀 AUDIT-S1 통합 | — |
@@ -142,6 +142,38 @@
 ---
 
 # SECTION 2 — 작업 상세
+
+---
+
+## 📨 Aiden → Riley 지시 | REG-IMP-RL — IMP-015~018 등록 (2026-05-13)
+
+> **수행 주체**: Riley (Gemini) | **검증 주체**: Aiden (Claude)
+> **우선순위**: Low | **예상 공수**: 0.25 MD
+
+### 배경
+
+EXP-IMP-RL (✅ PASS) 결과물 `scratch/imp_scan_riley_20260513.md`의 IMP-015~018이 `scratch/post_launch_improvements.md`에 아직 등록되지 않았습니다.
+
+### 작업 지시
+
+`scratch/post_launch_improvements.md`에 IMP-015~018을 R-15 형식으로 등록하십시오.
+
+**등록 대상 (4건)**:
+
+| IMP | 내용 | 우선순위 | 예상 공수 |
+|:----|:----|:--------:|:--------:|
+| IMP-015 | I18n 번역 키 타입 안정성 자동화 | Medium | 1.0 MD |
+| IMP-016 | 도메인 특화 공통 UI 컴포넌트 라이브러리화 | Medium | 2.0 MD |
+| IMP-017 | Server Actions 에러 핸들링 래퍼 표준화 | High | 1.5 MD |
+| IMP-018 | Supabase RLS 비즈니스 규칙 통합 | High | 3.0 MD |
+
+**참조 파일**: `scratch/imp_scan_riley_20260513.md` — 각 항목의 발견 경위·현재 상태·근본 문제·목표 구현·관련 파일 내용을 그대로 옮겨 등록
+
+### DoD
+
+- [x] `scratch/post_launch_improvements.md` IMP-023~026 등록 완료 (번호 조정됨)
+- [x] 커밋: `[Claude] docs: REG-IMP-RL Aiden 검토 — IMP-023~026 번호 확정 및 파일 정리` (Riley 미커밋 → Aiden 대리 처리)
+- [x] Aiden 검토 완료 → ✅ **PASS** (IMP 번호 정정 반영)
 
 ---
 
@@ -623,11 +655,11 @@ GitNexus(`gitnexus_query`) 활용 권장.
 
 ---
 
-# SECTION 5 — MiniMax (M2.5) 작업 상세
+# SECTION 5 — MiniMax (M2.5) ❌ 테스트 탈락
 
 > **에이전트**: MiniMax M2.5 | **역할**: Noah 역할 시험 운용 (E2E·IMP 실행)
 > **커밋 태그**: `[MiniMax]`
-> **상태**: 신규 온보딩 (2026-05-13)
+> **상태**: ❌ **EXP-IMP 테스트 탈락** (2026-05-13) — 보고서 자율 생성 불가, Noah 역할 부적합 판정
 
 ---
 

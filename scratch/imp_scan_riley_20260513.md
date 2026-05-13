@@ -7,9 +7,11 @@
 
 기존 `scratch/post_launch_improvements.md`에 등록된 IMP-001~014 항목과 중복되지 않는 새로운 개선 사항 4건을 다음과 같이 도출하여 보고합니다.
 
+> **번호 정정 안내 (2026-05-13, Aiden)**: 보고서 작성 후 Ring IMP-019~022가 먼저 등록되어 실제 등록 번호는 IMP-023~026으로 확정됨. 본 보고서 번호도 이에 맞게 정정.
+
 ---
 
-## [IMP-015] I18n 타입 안정성 및 번역 키 누락 방지 자동화
+## [IMP-023] I18n 타입 안정성 및 번역 키 누락 방지 자동화
 
 - **발견 경위**: `src/app/[locale]/(auth)/login/page.tsx` 등에서 `useTranslations('Auth')` 사용 시 수동 문자열 참조 확인.
 - **현재 상태**: `next-intl`을 사용 중이나, 번역 파일(`messages/*.json`)의 키가 소스 코드에 타입으로 정의되어 있지 않음.
@@ -23,7 +25,7 @@
 
 ---
 
-## [IMP-016] 공통 도메인 UI 컴포넌트(Domain-Specific Common UI) 라이브러리화
+## [IMP-024] 공통 도메인 UI 컴포넌트(Domain-Specific Common UI) 라이브러리화
 
 - **발견 경위**: `src/components/` 하위의 `admin`, `customs`, `orders` 폴더 구조 탐색 중 유사한 배지/데이터 그리드 패턴 발견.
 - **현재 상태**: 운송 상태(Status), 통화 표시, 파트너사 정보 등 도메인 개체들이 각 폴더에 산재하여 구현됨.
@@ -38,7 +40,7 @@
 
 ---
 
-## [IMP-017] Server Actions 에러 핸들링 및 리스폰스 래퍼 표준화
+## [IMP-025] Server Actions 에러 핸들링 및 리스폰스 래퍼 표준화
 
 - **발견 경위**: `src/app/actions/auth.ts` 분석 중 각 함수마다 개별적으로 `try-catch` 및 `console.error`가 구현된 패턴 확인.
 - **현재 상태**: 성공 시 `{ success: true }`, 실패 시 `{ error: '...' }` 형태의 리턴값이 수동으로 작성됨.
@@ -53,7 +55,7 @@
 
 ---
 
-## [IMP-018] Supabase RLS(Row Level Security) 정책의 비즈니스 규칙 통합
+## [IMP-026] Supabase RLS(Row Level Security) 정책의 비즈니스 규칙 통합
 
 - **발견 경위**: `supabase/migrations/` 분석 결과, 정책들이 단순한 `auth.uid()` 비교 수준에 머물러 있는 것으로 확인.
 - **현재 상태**: 파트너사 간 데이터 격리 등 복잡한 보안 규칙이 애플리케이션 코드(`rbac.ts`)에만 의존하고 있음.
@@ -65,3 +67,54 @@
 - **관련 파일**: `supabase/migrations/*.sql`, `supabase/functions/`
 - **예상 공수**: 3.0 MD
 - **우선순위**: High (데이터 보안 아키텍처 강화)
+
+---
+
+## IMP 항목 요약
+
+| IMP | 내용 | 우선순위 | 예상 공수 | 관련 파일 |
+|:----|:----|:--------:|:--------:|:---------|
+| **IMP-023** | I18n 번역 키 타입 안정성 자동화 | Medium | 1.0 MD | messages/*.json, global.d.ts |
+| **IMP-024** | 도메인 특화 공통 UI 컴포넌트 라이브러리화 | Medium | 2.0 MD | src/components/domain/ |
+| **IMP-025** | Server Actions 에러 핸들링 래퍼 표준화 | High | 1.5 MD | src/app/actions/*.ts |
+| **IMP-026** | Supabase RLS 비즈니스 규칙 통합 | High | 3.0 MD | supabase/migrations/*.sql |
+
+---
+
+## Aiden 검토 의견
+
+> **판정**: ✅ **PASS** (번호 정정 후 확정)
+> **검증 주체**: Aiden (Claude) | **판정일**: 2026-05-13
+
+### ✅ 거버넌스 준수 확인
+
+| 항목 | 결과 | 비고 |
+|:----|:----:|:-----|
+| R-13 파일 경로 | ✅ | `scratch/imp_scan_riley_20260513.md` 정확 |
+| R-15 형식 | ✅ | IMP-NNN / 발견 경위 / 현재 상태 / 근본 문제 / 목표 구현 / 관련 파일 / 예상 공수 / 우선순위 완비 |
+| 에이전트 커밋 태그 | ✅ | `[Gemini] feat: EXP-IMP-RL submit report` (0f69bd7) |
+| 중복 방지 | ✅ | 보고서 작성 당시 IMP-001~014 확인 명시 |
+| IMP 번호 | ✅ | 등록 시점 기준 IMP-022 이후 IMP-023~026 확정 |
+
+### ✅ 사실 확인
+
+| IMP | 검증 결과 | 비고 |
+|:----|:--------:|:-----|
+| IMP-023 | ✅ 타당 | `messages/` 폴더 확인 (ko/en/zh/ja.json 존재), type-safe 미설정 합리적 추정 |
+| IMP-024 | ✅ 타당 | `src/components/domain/` 미존재 확인, 분산 구조 개선 방향 유효 |
+| IMP-025 | ✅ 사실 확인 | `src/app/actions/auth.ts` 내 파편화된 `try-catch` + `{ success: true }` / `{ error: '...' }` 패턴 직접 확인 |
+| IMP-026 | ⚠️ 부분 부정확 (W-1 참조) | 현재 상태 기술 수정 권고 (개선 방향 자체는 유효) |
+
+### ⚠️ 주의 사항 (Warning)
+
+**W-1 | IMP-026 현재 상태 기술 부정확**
+- **보고**: "단순한 `auth.uid()` 비교 수준에 머물러 있는 것으로 확인"
+- **실제**: `supabase/migrations/20260501053000_fix_zen_profiles_rls.sql` 내 `get_my_role()` SECURITY DEFINER 헬퍼 함수 기반 role 정책이 이미 존재 — 단순 auth.uid() 수준이 아님
+- **영향**: 개선 방향(비즈니스 규칙 RLS 통합) 자체는 유효하나, 현재 상태 기술을 "파트너 간 조직 격리 규칙 등 복잡한 비즈니스 규칙이 DB 레벨이 아닌 애플리케이션 코드에만 의존"으로 수정 권고
+- **처리**: 사소한 기술적 부정확으로 PASS 판정에 영향 없음
+
+### 📋 IMP 번호 정정 이력
+
+> **보고서 원본 번호**: IMP-015~018 (보고서 작성 당시 IMP-014가 마지막 등록)  
+> **실제 등록 번호**: IMP-023~026 (Ring IMP-019~022 선등록 후 연속 번호 채택)  
+> **정정 일시**: 2026-05-13 (Aiden 검토 시 소급 수정)
