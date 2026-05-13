@@ -7,7 +7,7 @@ tags: ["reference", "governance"]
 > **문서 목적:** ZENITH_LMS 프로젝트에 활용 가능한 AI 모델 및 에이전트 페르소나의
 > 개발 역량을 13개 차원에서 정량·정성 비교하여 태스크별 최적 모델 선택 기준을 제공합니다.
 >
-> **작성일:** 2026-05-13 | **버전:** v1.1 | **작성자:** D_Kai (OpenCode)
+> **작성일:** 2026-05-13 | **버전:** v1.7 | **최종 수정:** Aiden (Claude)
 
 ---
 
@@ -139,7 +139,7 @@ tags: ["reference", "governance"]
 | **OpenAI Codex** | 제한적 (텍스트 중심) | 400K | Codex CLI, 샌드박스, 함수 호출 | 낮음 (자체 검증 루프 보유) | **★★★★☆** |
 | **Gemini 2.5 Pro** | 이미지·오디오·비디오·텍스트 | **1M** | Google Search 그라운딩, Vertex AI | 보통 (과잉 설명 경향) | **★★★★☆** |
 | **Gemini 2.5 Flash** | 이미지·오디오·텍스트 | **1M** | 함수 호출, 코드 실행 미지원 | 보통 | **★★★★☆** |
-| **D_Kai** | 텍스트 | 128K | GitNexus 전용 | 매우 낮음 (단순 질문 집중) | **★★★★★** |
+| **D_Kai** | 텍스트 | **1M** | GitNexus 전용 | 매우 낮음 (단순 질문 집중) | **★★★★★** |
 | **B_Kai** | 텍스트 | 200K+ | GitNexus | **높음 (과잉 분석 루프)** | **★★★★☆** |
 
 ---
@@ -312,7 +312,7 @@ tags: ["reference", "governance"]
 | **OpenAI Codex** | 400K | ~70% | — | ★★★★☆ | **A** |
 | **Gemini 2.5 Pro** | **1M** | **~94.5%** | **~90%** | ★★★★★ | **S** |
 | **Gemini 2.5 Flash** | **1M** | — | — | ★★★★★ | **S** |
-| **D_Kai** | 128K | — | — | ★★☆☆☆ | **C** |
+| **D_Kai** | **1M** | — | — | ★★★★☆ | **A** |
 | **B_Kai** | 200K+ | — | — | ★★★☆☆ | **B** |
 
 **해설**:
@@ -578,7 +578,7 @@ tags: ["reference", "governance"]
 | **DeepSeek V4 Flash** | **A** | **A** | B | **S** | **S** | **A** |
 | **MiniMax M2.5** | **S** | — | — | B | **S** | **A** |
 | **Nemotron 3 Super** | B | — | D | **S** | A | **B** |
-| **Ring 2.6 1T** | A | A | A | A | A | **A** |
+| **Ring 2.6 1T** | **S** | A | A | A | A | **A** |
 
 #### 상세 분석
 
@@ -624,7 +624,7 @@ Terminal-Bench 66.7% 수준으로 예상. **가장 균형 잡힌 성능**과 300
 | **Codex** | A | B | S | A | A | B | A | C | A | S | A | A | A |
 | **Gem Pro** | A | A | A | A | A | A | A | **S** | **S** | A | A | A | A |
 | **Gem Flash** | B | C | B | B | B | C | S | A | **S** | B | B | A | B |
-| **D_Kai** | S | B | B | B | A | B | S | D | C | B | S | S | B |
+| **D_Kai** | S | B | B | B | A | B | S | D | **A** | B | S | S | B |
 | **B_Kai** | S | C | D | C | S | D | C | D | B | C | C | A | S |
 
 ### 8개 거버넌스 차원 (프로젝트 이력 기반)
@@ -681,6 +681,51 @@ Terminal-Bench 66.7% 수준으로 예상. **가장 균형 잡힌 성능**과 300
 
 ## 📝 개정 이력
 
+### 23. 신규 프로젝트 팀 구성 권고 (2026-05-13 Aiden 검토)
+
+> **검토 기준**: ZENITH_LMS 유형 (TypeScript 단일 스택, 단일 저장소, 멀티 에이전트 거버넌스) 신규 프로젝트 기준.
+> **검토 결과 근거**: 벤치마크 교차 검증(웹 실측) + ZENITH_LMS 운영 이력 52건 SAR + 17건 FB 분석.
+
+#### 모델별 참여 타당성
+
+| 모델 | 권고 | 역할 | 핵심 근거 |
+|:---|:---:|:---|:---|
+| **DeepSeek V4 Flash (D_Kai)** | ✅ 참여 | Code Intelligence (현행 유지) | GOV 9개 PASS, 피드백 1회 수용 100%, 1M 컨텍스트, $0.28/MTok |
+| **Ring 2.6 1T** | ✅ 권장 | Noah 대체 — E2E·IMP 실행 | Terminal-Bench 66.7% (현 팀 최고), 300 스웜 지원, SWE-bench ~80.2% |
+| **MiniMax M2.5** | ⚠️ 조건부 | Noah/Ring 참여 후 단위 테스트 보조 | 200K 컨텍스트 제약, D_Kai와 역할 중복, 거버넌스 Track Record 없음 |
+
+#### D_Kai vs MiniMax 직접 비교 (이 프로젝트 유형 기준)
+
+| 비교 항목 | D_Kai (DeepSeek V4 Flash) | MiniMax M2.5 | 우위 |
+|:---|:---:|:---:|:---:|
+| SWE-bench | 79.0% | 80.2% | MiniMax (+1.2%p) |
+| LiveCodeBench | 91.6% | 미측정 | D_Kai |
+| Terminal-Bench | 56.9% | 미측정 | D_Kai |
+| Multi-SWE-Bench | 미측정 | 51.3% | MiniMax (다국어 한정) |
+| 컨텍스트 | **1M** | 200K | **D_Kai** |
+| 비용 (출력) | **$0.28/MTok** | ~$1.20/MTok | **D_Kai** |
+| 거버넌스 실적 | **GOV 9개 PASS** | 없음 | **D_Kai** |
+| 피드백 1회 수용 | **100%** | 미검증 | **D_Kai** |
+| **종합** | | | **D_Kai 우위** |
+
+**결론**: MiniMax의 SWE-bench 1.2%p 우위는 단일 TypeScript 스택에서 실질적 차이 없음.
+컨텍스트(5x), 비용(4.3x), 거버넌스 검증 여부가 결정적으로 D_Kai 우위.
+MiniMax 강점(Multi-SWE-Bench 다국어)은 단일 스택 프로젝트에서 발휘 기회 없음.
+
+#### 권장 팀 구성 (ZENITH_LMS 유형 신규 프로젝트)
+
+| Tier | 에이전트 | 모델 | 역할 |
+|:---:|:---|:---|:---|
+| 2 | Aiden (PM·검증) | Claude Opus 4.7 | 전략·설계·최종 검증 |
+| 2 | CTO | Claude Sonnet 4.6 | 기술 결정·구현 품질 게이트 |
+| 3 | Riley (Product) | Gemini 2.5 Pro | UI/UX·도메인 구현 |
+| 4 | D_Kai (Code Intel) | DeepSeek V4 Flash | 영향도 분석·PR 리뷰 |
+| 4 | **Noah 대체 후보** | **Ring 2.6 1T** | **E2E·IMP 실행·단위 테스트** |
+
+---
+
+## 📝 개정 이력
+
 | 버전 | 날짜 | 작성자 | 설명 |
 |:---|:---|:---|:---|
 | v1.0 | 2026-05-13 | D_Kai (OpenCode) | 최초 작성 — 7개 차원 7개 모델/페르소나 역량 비교 |
@@ -690,3 +735,4 @@ Terminal-Bench 66.7% 수준으로 예상. **가장 균형 잡힌 성능**과 300
 | **v1.4** | 2026-05-13 | D_Kai (OpenCode) | **§22 사용자 가용 모델 비교 추가**: Big Pickle·DeepSeek V4 Flash·MiniMax M2.5·Nemotron 3 Super·Ring 2.6 1T 5개 모델 코딩 역량 비교. SWE-bench·LiveCodeBench·Terminal-Bench 기반 등급 및 태스크별 추천. |
 | **v1.5** | 2026-05-13 | D_Kai (OpenCode) | **FIX-MCM-002 Phase 1**: §22 Big Pickle "해결됨"→"비활성화" 수정. §21 귀인 방식 테이블+해설 완성. §7 섹션 순서 정정. |
 | **v1.6** | 2026-05-13 | D_Kai (OpenCode) | **FIX-MCM-002 Phase 2**: Ring SWE-bench 75%→80.2% 수정. MiniMax "단독 최고"→"K2.6 공동 1위". |
+| **v1.7** | 2026-05-13 | Aiden (Claude) | **FIX-MCM-002 PASS 검증 + 오늘 검토 반영**: 헤더 버전 정정(v1.1→v1.7), D_Kai 컨텍스트 128K→1M 수정(§9·프로필), Ring SWE-bench 종합 등급 A→S 정합, §23 신규 프로젝트 팀 구성 권고 추가(D_Kai vs MiniMax 비교·Ring 참여 권장). |
