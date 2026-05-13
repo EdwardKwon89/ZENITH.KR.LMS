@@ -101,7 +101,7 @@
 | Task ID | 담당 | Task 명 | 상태 | 블로커 |
 |:---|:---|:---|:---:|:---|
 | **EXP-IMP-DK** | D_Kai | 전체 코드베이스 IMP 도출 | ⏳ 대기 | — |
-| **EXP-IMP-RL** | Riley | 전체 코드베이스 IMP 도출 | ⏳ 대기 | — |
+| **EXP-IMP-RL** | Riley | 전체 코드베이스 IMP 도출 | ✅ 완료 | `scratch/imp_scan_riley_20260513.md` |
 | **EXP-IMP-MM** | MiniMax | 전체 코드베이스 IMP 도출 | ⏳ 온보딩 필요 | 신규 에이전트 |
 | **EXP-IMP-RG** | Ring | 전체 코드베이스 IMP 도출 | ⏳ 온보딩 필요 | 신규 에이전트 |
 | ~~**FB-017**~~ | Riley | R-10 스크린샷 재제출 (요율 관리 UI 3종) | ✅ **PASS (2026-05-13)** | 코드 구현 기준 완료 |
