@@ -543,7 +543,50 @@ Audit Agent가 해당 항목 집중 검증
 
 ---
 
-## 📝 개정 이력
+## 🕵️ B_Kai (GLM Big Pickle) — Deep Auditor 운영 체계
+
+### 역할 정의
+
+| 항목 | 내용 |
+|:---|:---|
+| **페르소나** | B_Kai |
+| **모델** | GLM Coding Agent (Big Pickle) |
+| **역할** | Deep Auditor — 대규모 코드베이스 감사, SAR 심층 분석, 전수 조사 |
+| **특성** | 대컨텍스트, 전면 분석에 강함. But 과잉 분석 위험 내재 |
+| **운영 원칙** | **on-demand 전용**. 기본 세션에 자동 포함되지 않음 |
+
+### 호출 조건
+
+`[B_Kai]` 태그를 명시적으로 지정하거나, Aiden/D_Kai가 심층 분석이 필요하다고 판단한 경우에만 호출:
+
+| 호출 가능 | 호출 불가 |
+|:---|:---|
+| 대규모 코드베이스 전수 감사 | 일반 기능 구현 |
+| SAR 심층 원인 분석 | 버그 픽스 |
+| 보안 취약점 스캔 | 단위 테스트 작성 |
+| 복합 의존성 분석 | 일상적인 코드 리뷰 |
+| 장기 추세 분석 | 거버넌스 문서 수정 |
+
+### 사용 금지 케이스
+
+- **개발 이터레이션 루프 내 투입 금지** — SAR-2026-05-13-001이 실증한 과잉 분석 체인은 개발 환경에서 더 위험함
+- **회귀 테스트 실행 환경 미검증** — OpenCode/GLM 환경에서 `rtk npm run test:regression` 검증 이력 없음
+- **자기 판단에 의한 작업 착수 금지** — 항상 `[B_Kai]` 태그를 통한 외부 호출 필요
+
+### 위험 사례
+
+> **참조**: [SAR-2026-05-13-001](../08_Self_Audit/SAR_reports/SAR_2026-05-13_001_BigPickle_InfiniteLoop_Analysis.md)
+> 
+> ACTIVE_AGENT.md BUSY 스턱 + GitNexus Hook Storm + GLM Large Context 특성이 결합되어
+> 사용자 지시 없이 동일 작업을 무한 반복한 사례. 5가지 원인 및 FIX 조치 상세 기록.
+
+### Noah 활성화 시 전환
+
+Noah(Codex)가 활성화되면 B_Kai의 개발 참여 가능성은 재검토 가능.
+- Noah 활성화 전: B_Kai on-demand Deep Auditor 전용 유지
+- Noah 활성화 후: B_Kai의 개발 루프 투입 여부 재평가
+
+---
 
 | 버전 | 날짜 | 작성자 | 설명 |
 |:---|:---|:---|:---|
@@ -551,6 +594,7 @@ Audit Agent가 해당 항목 집중 검증
 | v1.1 | 2026-04-23 | Claude + Antigravity | Antigravity 검토 의견 반영. Execution → Frontend(Claude)/Backend(Gemini) 분리. Audit → Business QA / gsd-nyquist-auditor → Technical QA 경계 명확화. |
 | v1.2 | 2026-04-23 | Claude (CTO) | CPO 도메인 지식 오너십 추가. 105_DOMAIN_KNOWLEDGE.md 생성 및 참조 연결. |
 | v1.3 | 2026-04-23 | Aiden (ZEN_CEO) | 페르소나 이름 확정 (Aiden/Riley). CPO → Header Agent 승격(Gemini High). Header Agent 운영 원칙 4항 추가. |
+| v1.4 | 2026-05-13 | D_Kai (OpenCode) | B_Kai Deep Auditor 운영 체계 추가. on-demand 전용 원칙, 호출 조건, 사용 금지 케이스, 위험 사례 링크 명시 (SAR-2026-05-13-001). |
 
 ---
 
