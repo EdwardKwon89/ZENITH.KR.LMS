@@ -7,6 +7,7 @@
 > **현황 요약**: IMP-001~011 중 **IMP-003만 미착수** (Low priority). 나머지 10개 완료.
 > **IMP-012~014**: EXP-IMP-DK (D_Kai) 2026-05-13 도출 — Aiden CONDITIONAL PASS 후 등록.
 > **IMP-019~022**: EXP-IMP-RG (Ring 2.6 1T) 2026-05-13 도출 — Aiden CONDITIONAL PASS 대기 중.
+> **IMP-023~026**: EXP-IMP-RL (Riley, Gemini) 2026-05-13 도출 — Aiden PASS 확정.
 
 ---
 
@@ -284,3 +285,52 @@
 - **관련 파일**: `src/components/layout/NaviSidebar.tsx`
 - **예상 공수**: 1 MD
 - **우선순위**: Low
+
+---
+
+## [IMP-023] I18n 번역 키 타입 안정성 및 번역 키 누락 방지 자동화
+
+- **발견 경위**: Riley (Gemini) 코드 분석 — `useTranslations` 사용 시 문자열 하드코딩 확인
+- **현재 상태**: `next-intl`을 사용 중이나, 번역 키가 TypeScript 타입으로 보호받지 못함
+- **근본 문제**: 존재하지 않는 번역 키 호출 시 런타임 에러 또는 키 텍스트 노출 위험
+- **목표 구현**: `next-intl` Type-safe navigation 설정 + 미번역 키 자동 추출 스크립트 도입
+- **관련 파일**: `src/i18n.ts`, `messages/*.json`, `global.d.ts` (신규)
+- **예상 공수**: 1.0 MD
+- **우선순위**: Medium
+
+---
+
+## [IMP-024] 공통 도메인 UI 컴포넌트(Domain-Specific Common UI) 라이브러리화
+
+- **발견 경위**: Riley (Gemini) 코드 분석 — 도메인별 유사 UI 패턴(Status Badge 등) 산재 확인
+- **현재 상태**: 운송 상태 배지, 통화 표시기 등이 각 도메인 폴더에 개별 구현됨
+- **근본 문제**: UI 일관성 유지 어려움 및 중복 코드 발생
+- **목표 구현**: `src/components/domain/` 폴더 신설 및 공통 비즈니스 UI(ZenStatusBadge 등) 추출
+- **관련 파일**: `src/components/domain/`, `src/components/ui/ZenUI.tsx`
+- **예상 공수**: 2.0 MD
+- **우선순위**: Medium
+
+---
+
+## [IMP-025] Server Actions 에러 핸들링 및 리스폰스 래퍼 표준화
+
+- **발견 경위**: Riley (Gemini) 코드 분석 — `src/app/actions/` 하위 에러 처리 패턴 파편화 확인
+- **현재 상태**: 각 서버 액션이 수동으로 `try-catch` 및 `console.error` 수행
+- **근본 문제**: 일관된 클라이언트 피드백(Toast 등) 제공 및 통합 로깅 어려움
+- **목표 구현**: `Result<T, E>` 패턴 래퍼 도입 및 공통 에러 핸들러/로깅 통합
+- **관련 파일**: `src/app/actions/*.ts`, `src/lib/actions/action-wrapper.ts` (신규)
+- **예상 공수**: 1.5 MD
+- **우선순위**: High
+
+---
+
+## [IMP-026] Supabase RLS(Row Level Security) 정책의 비즈니스 규칙 통합
+
+- **발견 경위**: Riley (Gemini) DB 스키마 분석 — 정책이 단순 UID 비교에 편중됨 확인
+- **현재 상태**: 파트너사 데이터 격리 등 복잡한 보안 로직이 앱 코드에 의존함
+- **근본 문제**: 클라이언트 직접 호출 시 비즈니스 보안 규칙 우회 가능성 존재
+- **목표 구현**: 보안 로직을 SQL 함수화하여 RLS 정책에 통합, DB 레벨 보안 보장 강화
+- **관련 파일**: `supabase/migrations/*.sql`
+- **예상 공수**: 3.0 MD
+- **우선순위**: High
+
