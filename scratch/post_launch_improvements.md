@@ -4,7 +4,8 @@
 > 최초 작성: 2026-05-08
 > 상태 일괄 갱신: 2026-05-13 (Aiden — 코드베이스 교차 검증 기반)
 >
-> **현황 요약**: IMP-001~011 중 **IMP-003만 미착수** (Low priority). 나머지 10개 완료.
+> **현황 요약**: IMP-001~011 중 **IMP-003만 미착수** (Low priority). 나머지 10개 완료.  
+> **IMP-012~014**: EXP-IMP-DK (D_Kai) 2026-05-13 도출 — Aiden CONDITIONAL PASS 후 등록.
 
 ---
 
@@ -201,4 +202,36 @@
 
 ---
 
-*추가 발견 항목은 이 파일에 IMP-NNN 형식으로 계속 추가*
+## [IMP-012] Master/Admin 코드 관리 페이지 완전 중복
+
+- **발견 경위**: EXP-IMP-DK GitNexus 분석 중 `master/codes/`와 `admin/codes/` 경로에서 동일 파일 발견
+- **현재 상태**: 두 파일 MD5 해시 완전 일치 — 동일 UI를 두 경로에 복사
+- **임시 조치**: 없음 (중복 상태 운영)
+- **목표 구현**: 공통 컴포넌트 추출 + 얇은 wrapper로 축소
+- **관련 파일**: `src/app/[locale]/(dashboard)/master/codes/codes-client.tsx`, `src/app/[locale]/(dashboard)/admin/codes/codes-client.tsx`
+- **예상 공수**: 0.5 MD
+- **우선순위**: Medium
+
+---
+
+## [IMP-013] console.log/console.error 직접 사용 — 로깅 유틸리티 미적용
+
+- **발견 경위**: EXP-IMP-DK GitNexus 분석 — `grep -r "console\." src/` 결과 **53개 파일** 확인
+- **현재 상태**: 53개 파일에서 console.log/error 직접 호출. 오류 추적·로그 수집 불가
+- **임시 조치**: 없음
+- **목표 구현**: `src/lib/logger.ts` 신규 생성 + 53개 파일 교체
+- **관련 파일**: 53개 파일 + `src/lib/logger.ts` (신규)
+- **예상 공수**: 2~3 MD
+- **우선순위**: High
+
+---
+
+## [IMP-014] admin/rates/page.tsx 단일 파일 531줄 — 복잡도 집중
+
+- **발견 경위**: EXP-IMP-DK GitNexus 분석 — `admin/rates/page.tsx` 구조 분석
+- **현재 상태**: 531줄 단일 파일에 등록 폼·목록·할증·역할 분기·상태 관리 5개 관심사 혼재
+- **임시 조치**: 없음
+- **목표 구현**: RateForm·RateList·RateSurchargeEditor 3개 컴포넌트로 분리
+- **관련 파일**: `src/app/[locale]/(dashboard)/admin/rates/page.tsx`, `src/components/admin/SurchargeEditor.tsx`, `src/components/admin/RateCardList.tsx`
+- **예상 공수**: 1~1.5 MD
+- **우선순위**: Low
