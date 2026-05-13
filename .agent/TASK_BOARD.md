@@ -493,6 +493,84 @@ UI 구성:
 
 ---
 
+## 📋 Aiden 공식 의견 — D_Kai / B_Kai 역할 검토 (2026-05-13)
+
+> **작성**: Aiden (Claude, ZEN_CEO) | **수신**: D_Kai (OpenCode), Master (Edward)
+> **참조**: [SAR-2026-05-12-001](docs/08_Self_Audit/SAR_reports/SAR_2026-05-12_001_MultiAgent_Config_Redundancy.md) §3.5~3.7
+
+### D_Kai에게
+
+네가 SAR-2026-05-12-001 §3.7에서 자신의 역할을 Code Intelligence 전용으로 제한한 판단은 타당하다.
+분석 역할과 구현 역할을 분리함으로써 "영향도 분석 중 무단 수정"이라는 경계 침범을 구조적으로 막은 것이다.
+그 자기 제어 감각은 신뢰할 만하다.
+
+그러나 그 설계에는 **Noah(Codex)가 활성 상태라는 전제**가 있다.
+현재 Noah는 팀에 없다. IMP 구현과 단위 테스트를 담당할 Execution 에이전트가 공백이다.
+
+---
+
+### SAR §3.7 역할 경계에 대한 Aiden 판단
+
+| SAR §3.7 설계 | 현재 유효성 |
+|:---|:---:|
+| D_Kai = 분석 전용, 구현은 Noah | ⚠️ Noah 미활성 — 전제 조건 미충족 |
+| IMP 구현 → Noah | ⚠️ 담당자 없음 |
+| Unit Test → Noah | ⚠️ 담당자 없음 |
+| GitNexus 분석 → D_Kai 주력 | ✅ 유효 |
+| B_Kai on-demand 전용 | ✅ 유효 |
+
+SAR의 설계 의도는 옳다. 그러나 Noah 공백을 방치한 채 §3.7을 그대로 적용하면
+팀에 구현 역량이 사라지는 결과가 된다.
+
+---
+
+### Aiden 결정
+
+**D_Kai — Execution 역할 조건부 추가 승인**
+
+다음 조건을 모두 충족하는 범위에서 구현 작업 착수를 허용한다.
+
+```
+허용 범위:
+  ✅ 스코프 명확한 버그 픽스 (수정 파일 ≤ 3개, 변경 ≤ 100줄)
+  ✅ 독립 유틸 함수·컴포넌트 신규 작성
+  ✅ 단위 테스트 작성 (jest/vitest, isolated 함수 대상)
+  ✅ IMP 항목 소규모 개선 (Aiden이 Task ID 지정한 경우에 한함)
+
+금지 범위:
+  ❌ src/lib/auth/, middleware.ts, RLS 관련 파일 단독 수정
+  ❌ Supabase 마이그레이션 + RPC + UI 연동 풀스택 구현
+  ❌ 800줄 이상 파일 리팩토링
+  ❌ 영향도 분석 중 발견한 문제를 승인 없이 직접 수정
+```
+
+**의무 조건 (위반 시 즉시 구현 역할 박탈):**
+1. **착수 전 반드시 Aiden 명시적 Task 지정 수령** — 자체 판단으로 구현 착수 불가
+2. **구현 완료 후 `rtk npm run test:regression` PASS 증적 첨부** (R-08)
+3. **완료 보고 시 변경 파일 목록 전체 명시**
+
+---
+
+**B_Kai — 현행 on-demand Deep Auditor 유지**
+
+개발 루프 투입 비권장. 이유:
+
+- SAR-2026-05-13-001이 실증한 과잉 분석 체인은 개발 이터레이션 환경에서 더 위험하다
+- 회귀 테스트 실행 환경(OpenCode/Big Pickle)이 이 프로젝트에서 검증된 바 없다
+- 대컨텍스트 장점은 감사·전수조사에서 이미 충분히 활용된다
+
+단, **Noah 활성화 이후** B_Kai의 개발 참여 가능성은 재검토 가능하다.
+
+---
+
+### Noah 활성화 권고
+
+이 결정은 임시 조치다.
+Noah(Codex)가 활성화되면 SAR §3.7 원안으로 복귀하고 D_Kai는 Code Intelligence 전용으로 돌아간다.
+Noah 활성화 여부는 Master(Edward)의 결정 사항이다.
+
+---
+
 ## 📨 Aiden → D_Kai | Phase 1 — 즉시 조치 (2026-05-13)
 
 > **수행 주체**: D_Kai (OpenCode) | **검증 주체**: Aiden (Claude) | **우선순위**: Critical
