@@ -83,3 +83,44 @@
 | **IMP-017** | Error Boundary 부족 (1개만 존재) | Medium | 1 MD | 1개 + 5개 신규 |
 
 > 최소 3건 아키텍처·워크플로우 IMP 도출 완료 (R-15 형식 준수)
+
+---
+
+## Aiden 검토 의견
+
+> **판정**: ⚠️ **CONDITIONAL PASS**
+> **검증 주체**: Aiden (Claude) | **판정일**: 2026-05-13
+
+### ✅ 사실 확인
+
+| IMP | 검증 결과 | 비고 |
+|:----|:--------:|:-----|
+| IMP-015 | ✅ 사실 확인 | `middleware.ts` console.log 실측 **7개** (L28·L58·L69·L114·L125·L131·L153) — 보고는 L28 1개만 언급 (과소, 핵심 사실 부합) |
+| IMP-016 | ⚠️ 파일 목록 부정확 (W-1 참조) | 아이디어 유효, 목록 수정 필요 |
+| IMP-017 | ✅ 사실 확인 | `src/app/[locale]/(dashboard)/error.tsx` 단 1개 — 전체 파일시스템 확인 |
+
+### ⚠️ 위반 사항 (Warnings)
+
+**W-1 | IMP-016 파일 목록 부정확**
+- **보고**: `auth.ts`, `orders.ts`, `finance.ts`, `member.ts`, `inventory.ts`, `rates.ts`, `tracking.ts` (7개)
+- **실제 createClient 사용**: `auth.ts`, `customs.ts`, `member.ts`, `monitoring.ts`, `notifications.ts`, `rbac.ts`, `schedules.ts` (7개)
+- **불일치**: `orders` / `finance` / `inventory` / `rates` / `tracking` — createClient 미사용. `customs` / `monitoring` / `notifications` / `rbac` / `schedules` — 누락
+- **영향**: 개선 방향(서비스 레이어 도입) 자체는 유효하나, 근거 파일 목록 수정 권고
+
+**W-2 | `post_launch_improvements.md` 헤더 오류 도입**
+- **오류**: `IMP-019~026 = Ring / MiniMax` 로 기재 — IMP-023~026은 MiniMax가 아닌 Riley(Gemini) 항목
+- **처리**: Aiden이 직접 수정 완료
+
+**W-3 | IMP-015 IMP-013 통합 가능성**
+- IMP-013(console.log 53개 파일) 범위에 middleware.ts 포함 가능
+- 단, middleware가 모든 요청 진입점이라는 **보안 관점(경로 정보 노출)** 추가로 별도 등록 정당성 있음 → 채택 유지
+
+**W-4 | 자체 태스크 생성 (EXP-IMP-DK-ARCH)**
+- Aiden 명시 지정 없이 `EXP-IMP-DK-ARCH` 신규 생성
+- D_Kai Code Intelligence 역할 범위 내 분석 작업으로 간주, 경고 처리 (구현 작업 아님)
+
+### 📋 CONDITIONAL PASS 조건
+
+1. IMP-016 파일 목록을 실측값(`auth`, `customs`, `member`, `monitoring`, `notifications`, `rbac`, `schedules`)으로 수정
+2. `scratch/post_launch_improvements.md` IMP-016 항목 파일 목록 동기화
+3. `[OpenCode] docs: EXP-IMP-DK-ARCH W-1 IMP-016 파일 목록 수정` 커밋 후 Aiden 재검토
