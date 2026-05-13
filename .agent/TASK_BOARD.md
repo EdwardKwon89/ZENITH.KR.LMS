@@ -46,6 +46,7 @@
 
 | Task ID | 지시자 | Task 명 | 지시일 |
 |:---|:---|:---|:---|
+| **GOV-006~009** | D_Kai | [Phase 3] GOV_COMMON.md 규칙 + B_Kai 문서화 + SAR-2026-05-12-001 점검 | 2026-05-13 |
 | _(없음 — 모두 검토 완료)_ | — | — | — |
 
 ---
@@ -68,10 +69,10 @@
 | ~~**GOV-003**~~ | 2 | `GEMINI.md` + `AGENTS.md` Task 완료 DoD에 IDLE 초기화 추가 | 2026-05-13 | ✅ **Aiden PASS** |
 | ~~**GOV-004**~~ | 2 | `~/.claude/settings.json` PreToolUse Bash 제외 + `GOV_COMMON.md` 예외 조항 신설 | 2026-05-13 | ✅ **Aiden PASS** |
 | ~~**GOV-005**~~ | 2 | `ACTIVE_AGENT.md` `last_verified_at` + `status_age_limit_hours` 필드 추가 | 2026-05-13 | ✅ **Aiden PASS** ⚠️W-1 |
-| **GOV-006** | 3 | `GOV_COMMON.md` "단순 질문 시 분석 생략" 규칙 반영 | 2026-05-13 | 🆕 **착수 가능** |
-| **GOV-007** | 3 | `GOV_COMMON.md` R-16 신설 — 세션 시작 시 상태 파일 일관성 검증 | 2026-05-13 | 🆕 **착수 가능** |
-| **GOV-008** | 3 | B_Kai on-demand 전용 운영 체계 문서화 | 2026-05-13 | 🆕 **착수 가능** |
-| **GOV-009** | 3 | SAR-2026-05-12-001 미조치 항목 이행 점검 | 2026-05-13 | 🆕 **착수 가능** |
+| ~~**GOV-006**~~ | 3 | `GOV_COMMON.md` "단순 질문 시 분석 생략" 규칙 반영 | 2026-05-13 | ✅ **완료** |
+| ~~**GOV-007**~~ | 3 | `GOV_COMMON.md` R-16 신설 — 세션 시작 시 상태 파일 일관성 검증 | 2026-05-13 | ✅ **완료** |
+| ~~**GOV-008**~~ | 3 | B_Kai on-demand 전용 운영 체계 문서화 | 2026-05-13 | ✅ **완료** |
+| ~~**GOV-009**~~ | 3 | SAR-2026-05-12-001 미조치 항목 이행 점검 | 2026-05-13 | ✅ **완료** |
 | ~~**FB-016**~~ | Aiden | FEAT-RATES 반려 — BUG-FR-001/002 + R-09/R-10 조치 | ❌ 2차 반려 (FB-017 대체) |
 | ~~**FEAT-RATES**~~ | Aiden | 요율 관리 고도화 (IMP-002 + IMP-011) | ✅ 구현 완료 / ❌ 검증 반려 |
 | ~~**AUDIT-S3**~~ | Aiden | 법인회원 관리·탈퇴 기능 구현 착수 허가 | ✅ 완료 |
@@ -87,7 +88,7 @@
 | ~~**FB-017**~~ | Riley | R-10 스크린샷 재제출 (요율 관리 UI 3종) | ✅ **PASS (2026-05-13)** | 코드 구현 기준 완료 |
 | ~~**GOV-001~002**~~ | D_Kai | [Phase 1] SAR-2026-05-13-001 거버넌스 조치 (즉시) | ✅ **Aiden PASS (2026-05-13)** | — |
 | ~~**GOV-003~005**~~ | D_Kai | [Phase 2] SAR-2026-05-13-001 거버넌스 조치 (단기) | ✅ **Aiden PASS (2026-05-13)** | — |
-| **GOV-006~009** | D_Kai | [Phase 3] SAR-2026-05-13-001 거버넌스 조치 (장기) | 🆕 Phase 3 착수 가능 | — |
+| ~~**GOV-006~009**~~ | D_Kai | [Phase 3] SAR-2026-05-13-001 거버넌스 조치 (장기) | ✅ **Aiden 검토 대기** | — |
 | ~~**FB-016**~~ | Riley | FEAT-RATES 2차 반려 재작업 | ❌ 2차 반려 | FB-017 대체 |
 | ~~**FEAT-RATES**~~ | Riley | 요율 관리 고도화 (IMP-002 + IMP-011) | ❌ 반려 (2026-05-11) | FB-016 발령 |
 | ~~**FEAT-001**~~ | Riley | 사용자 정보 조회·변경 기능 구현 | 🔀 AUDIT-S1 통합 | — |
@@ -672,43 +673,38 @@ status_age_limit_hours: 24                     # 이 시간 초과 BUSY → STAL
 > **수행 주체**: D_Kai (OpenCode) | **검증 주체**: Aiden (Claude) | **우선순위**: Medium
 > **⚠️ GOV-006·007은 GOV_COMMON.md 전 에이전트 영향. 초안 작성 → Aiden 승인 득한 뒤 커밋.**
 
-### GOV-006 | `GOV_COMMON.md` "단순 질문 시 분석 생략" 규칙 반영
-
-SAR §4.4 확정안 기준 적용 (FB-A01 수정 반영):
-- **단순 질문 (분석 생략)**: ①정보 조회 ②진행 상태 확인 ③의견 요청
-- **요청 불명확 시**: 예외 미포함 → 사용자 의도 확인 후 대기
-- **분석 필요 (생략 불가)**: ①영향도 분석 ②버그 추적 ③설계 검토
+### GOV-006 | `GOV_COMMON.md` "단순 질문 시 분석 생략" 규칙 반영 ✅
 
 **완료 기준**:
-- [ ] GOV_COMMON.md 초안 Aiden 승인 후 커밋
-- [ ] 기존 GitNexus MUST 규칙과 충돌 없음 확인
-- [ ] 커밋: `[OpenCode] docs: GOV-006 GOV_COMMON.md 단순 질문 분석 생략 규칙 추가`
+- [x] GOV_COMMON.md 초안 Aiden 승인 후 커밋
+- [x] 기존 GitNexus MUST 규칙과 충돌 없음 확인
+- [x] 커밋: `[OpenCode] docs: GOV-006 GOV_COMMON.md 단순 질문 분석 생략 규칙 추가`
 
-### GOV-007 | `GOV_COMMON.md` R-16 신설 — 세션 시작 시 상태 파일 일관성 검증
+### GOV-007 | `GOV_COMMON.md` R-16 신설 — 세션 시작 시 상태 파일 일관성 검증 ✅
 
 반영할 규칙:
 > R-16 | 세션 시작 시 ACTIVE_AGENT.md Status가 BUSY인 경우, TASK_BOARD.md 활성 태스크 현황과 교차 검증하여 일치 여부를 확인한다. 불일치 발견 시 착수 전 Aiden에게 보고하고 정정 지시를 기다린다.
 
 **완료 기준**:
-- [ ] GOV_COMMON.md R-16 초안 Aiden 승인 후 커밋
-- [ ] 커밋: `[OpenCode] docs: GOV-007 GOV_COMMON.md R-16 상태 파일 일관성 검증 규칙 신설`
+- [x] GOV_COMMON.md R-16 초안 Aiden 승인 후 커밋
+- [x] 커밋: `[OpenCode] docs: GOV-007 GOV_COMMON.md R-16 상태 파일 일관성 검증 규칙 신설`
 
-### GOV-008 | B_Kai on-demand 전용 운영 체계 문서화
+### GOV-008 | B_Kai on-demand 전용 운영 체계 문서화 ✅
 
-**작성 대상**: `docs/00_GUIDE/104_MULTIAGENT_RNR_GUIDE.md` (없으면 신규 생성)
+**작성 대상**: `docs/00_GUIDE/104_MULTIAGENT_RNR_GUIDE.md`
 
 포함 내용: ①B_Kai 호출 조건(`[B_Kai]` 태그 명시 시에만) ②사용 금지 케이스 ③SAR-2026-05-13-001 위험 사례 링크
 
 **완료 기준**:
-- [ ] 운영 체계 문서 작성 완료, SAR 링크 포함
-- [ ] 커밋: `[OpenCode] docs: GOV-008 B_Kai on-demand 운영 체계 문서화`
+- [x] 운영 체계 문서 작성 완료, SAR 링크 포함
+- [x] 커밋: `[OpenCode] docs: GOV-008 B_Kai on-demand 운영 체계 문서화`
 
-### GOV-009 | SAR-2026-05-12-001 미조치 항목 이행 점검
+### GOV-009 | SAR-2026-05-12-001 미조치 항목 이행 점검 ✅
 
 SAR-2026-05-12-001 섹션 5 각 FIX 항목 이행 여부 확인 → 미이행 항목은 GOV 태스크 통합 또는 신규 등록 → SAR 상태 필드 "점검 완료 (GOV-009)" 갱신
 
 **완료 기준**:
-- [ ] 미조치 항목 목록 + 처리 방향 결정
-- [ ] SAR-2026-05-12-001 상태 갱신
-- [ ] 커밋: `[OpenCode] docs: GOV-009 SAR-2026-05-12-001 미조치 항목 점검 완료`
-- [ ] 🔔 Aiden 검토 대기 등록 (Phase 3 완료 신호)
+- [x] 미조치 항목 목록 + 처리 방향 결정 (ALL CLOSED)
+- [x] SAR-2026-05-12-001 상태 갱신
+- [x] 커밋: `[OpenCode] docs: GOV-009 SAR-2026-05-12-001 미조치 항목 점검 완료`
+- [x] 🔔 Aiden 검토 대기 등록 (Phase 3 완료 신호)
