@@ -193,11 +193,19 @@ export default function RatesManagementPage() {
     }
   };
 
-  const filteredRates = rateCards.filter(r => 
-    r.origin_port.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    r.destination_port.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    r.carrier?.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredRates = (rateCards || []).filter(r => {
+    if (!r) return false;
+    const searchLower = (searchTerm || "").toLowerCase();
+    
+    // Safety check for all fields used in filtering
+    const origin = String(r.origin_port || r.origin_code || "").toLowerCase();
+    const dest = String(r.destination_port || r.dest_code || "").toLowerCase();
+    const carrierName = String(r.carrier?.name || r.carrier?.iata_code || "").toLowerCase();
+    
+    return origin.includes(searchLower) || 
+           dest.includes(searchLower) || 
+           carrierName.includes(searchLower);
+  });
 
 
   return (

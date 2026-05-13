@@ -153,7 +153,7 @@ export const RateCardList: React.FC<RateCardListProps> = ({
                 <div className="flex flex-wrap items-center justify-center gap-3 mt-2">
                   <div className="flex items-center gap-2 px-3 py-1 bg-slate-50 rounded-full border border-slate-200">
                     <span className="text-[9px] font-mono text-slate-400">
-                      {new Date(rate.valid_from).toLocaleDateString()} - {rate.valid_to.startsWith('9999') ? 'UNTIL EXPIRED' : new Date(rate.valid_to).toLocaleDateString()}
+                      {rate.valid_from ? new Date(rate.valid_from).toLocaleDateString() : 'N/A'} - {String(rate.valid_to || '').startsWith('9999') ? 'UNTIL EXPIRED' : (rate.valid_to ? new Date(rate.valid_to).toLocaleDateString() : 'N/A')}
                     </span>
                   </div>
                   
@@ -188,7 +188,7 @@ export const RateCardList: React.FC<RateCardListProps> = ({
                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Base Rate</p>
                   <p className="text-2xl font-mono font-black text-slate-900 group-hover:text-emerald-600 transition-colors">
                     <span className="text-xs text-slate-500 mr-1">$</span>
-                    {rate.base_rate.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                    {(rate.base_rate || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                   </p>
                 </div>
                 

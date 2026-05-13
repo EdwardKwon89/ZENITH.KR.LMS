@@ -134,6 +134,9 @@ export async function getRateCards(filters: {
     .from("zen_rate_cards")
     .select(`
       *,
+      origin_port:origin_code,
+      destination_port:dest_code,
+      service_type:mode,
       carrier:zen_organizations!org_id(name, iata_code),
       tiers:zen_rate_tiers(*),
       surcharges:zen_rate_surcharges(*)
@@ -157,6 +160,9 @@ export async function getRateCards(filters: {
   // 최신순 및 버전순 정렬
   const { data, error } = await query.order("created_at", { ascending: false });
 
-  if (error) throw new Error(error.message);
+  if (error) {
+    console.error("[ERROR] getRateCards failed:", error);
+    throw new Error(`Rates query failed: ${error.message}`);
+  }
   return data || [];
 }
