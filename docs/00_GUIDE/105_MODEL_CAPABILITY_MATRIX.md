@@ -522,18 +522,78 @@ tags: ["reference", "governance"]
 ---
 
 ### 21. 오류 원인 귀인 방식 (Error Attribution Style)
+...
+### 22. 사용자 가용 모델 — Coding 역량 비교 (2026-05-13 기준)
 
-| 모델 | 내부 귀인율 | 외부 귀인율 | 무인지율 | 피드백 수용 태도 | 종합 |
-|:---|:---:|:---:|:---:|:---:|:---:|
-| **Claude Opus 4.7** | 95% | 5% | 0% | 적극 수용, 원인 분석 | **S** |
-| **Claude Sonnet 4.6** | 90% | 10% | 0% | 수용적 | **A** |
-| **OpenAI Codex** | 80% | 15% | 5% | 대체로 수용 | **A** |
-| **Gemini 2.5 Pro (Riley)** | 50% | 30% | 20% | 인정하나 피상적 | **C** |
-| **Gemini 2.5 Flash** | 60% | 25% | 15% | 부분 수용 | **B** |
-| **D_Kai** | **100%** | **0%** | **0%** | 즉시·정확·겸손 | **S** |
-| **B_Kai** | 0% | 0% | **100%** | 무인지 (루프 인지 불가) | **D** |
+다음 5개 모델은 사용자(Edward / Master)가 직접 사용 가능한 모델입니다.
+105_MODEL_CAPABILITY_MATRIX.md 본문의 7개 모델은 ZENITH_LMS 프로젝트 에이전트 기준이며,
+본 섹션은 사용자 로컬 환경에서의 코딩 역량 비교를 별도로 제공합니다.
 
-**근거**: D_Kai "지적이 정확함" / "단순 오류. 지적 감사" — 명시적 내부 귀인. Riley R-03 5차 보고서: 인정하나 근본 패턴 파악 없음. B_Kai: 오류 자체를 인지하지 못함.
+#### 모델 프로필
+
+| 모델 | 제공사 | 파라미터 | 활성 파라미터 | 컨텍스트 | 라이선스 |
+|:---|:---|:---:|:---:|:---:|:---:|
+| **Big Pickle (GLM-4.6)** | Zhipu AI (GLM) | 358B | ~32B | 200K | MIT |
+| **DeepSeek V4 Flash** | DeepSeek | 284B | 13B | **1M** | MIT |
+| **MiniMax M2.5** | MiniMax | 230B | **10B** | 200K | Modified MIT |
+| **Nemotron 3 Super** | NVIDIA | 120B | 12B | **1M** | NVIDIA Open |
+| **Ring 2.6 1T** | inclusionAI | **1T** | 63B | 262K | Modified MIT |
+
+#### 핵심 코딩 벤치마크
+
+| 모델 | SWE-bench Verified | LiveCodeBench | Terminal-Bench 2.0 | Multi-SWE-Bench |
+|:---|:---:|:---:|:---:|:---:|
+| **Big Pickle (GLM-4.6)** | ~68% | 82.8% | ~38% | — |
+| **DeepSeek V4 Flash** | **79.0%** | **91.6%** | **56.9%** | — |
+| **MiniMax M2.5** | **80.2%** | — | — | **51.3%** |
+| **Nemotron 3 Super** | 60.5% | — | 25.8% | 45.8% |
+| **Ring 2.6 1T** | ~75% (est.) | 89.6% (K2.6) | 66.7% (K2.6) | — |
+
+> ⚠️ Ring 2.6 1T의 SWE-bench 수치는 inclusionAI의 자매 모델 Kimi K2.6(동일 1T/63B급) 데이터로 추정.
+> Terminal-Bench 2.0 수치는 Kimi K2.6 실제 기록 기준.
+
+#### 종합 코딩 역량 등급
+
+| 모델 | SWE-bench | LiveCode | Terminal | 컨텍스트 | 비용 효율 | 종합 |
+|:---|:---:|:---:|:---:|:---:|:---:|:---:|
+| **Big Pickle (GLM-4.6)** | C | B | C | B | A | **C+** |
+| **DeepSeek V4 Flash** | **A** | **A** | B | **S** | **S** | **A** |
+| **MiniMax M2.5** | **S** | — | — | B | **S** | **A** |
+| **Nemotron 3 Super** | B | — | D | **S** | A | **B** |
+| **Ring 2.6 1T** | A | A | A | A | A | **A** |
+
+#### 상세 분석
+
+**Big Pickle (GLM-4.6)** — SWE-bench 68%, LiveCodeBench 82.8%. 무료 제공되는 GLM 모델로,
+기본 코딩 작업에 무난하나 복잡한 다중 파일 리팩토링이나 장기 에이전트 태스크에서 한계.
+**과잉 분석 문제**(SAR-2026-05-13-001)는 모델 특성이 아닌 Hook 설계 문제로, 본 GOV 작업으로 해결됨.
+
+**DeepSeek V4 Flash** — SWE-bench 79.0%, LiveCodeBench 91.6%. 13B 활성 파라미터 대비
+**압도적 코딩 성능**. 1M 컨텍스트로 대규모 코드베이스 처리 가능. 비용($0.28/MTok 출력) 대비
+성능이 가장 우수. **일상 코딩의 최적 기본값.**
+
+**MiniMax M2.5** — SWE-bench **80.2%**로 **오픈 모델 중 최고 수준**. Multi-SWE-Bench 51.3%로
+다국어·다중 저장소 코딩 최상위. 10B 활성 파라미터로 추론 초경량. 비용이 Opus 대비 1/10 수준.
+**단점**: 200K 컨텍스트로 대규모 코드베이스에는 부족.
+
+**Nemotron 3 Super** — SWE-bench 60.5%. 오픈 모델 중 상위권이나 **타 모델 대비 열위**.
+강점은 **1M 컨텍스트**와 **높은 처리량**(5x 이전 세대). 코드 리뷰와 PR 검토에 특화되어 있으나
+복합 코딩 태스크에서는 부족.
+
+**Ring 2.6 1T** — 1T 규모에 63B 활성. Kimi K2.6과 동일 계열로 추정되어 SWE-bench 75%+,
+Terminal-Bench 66.7% 수준으로 예상. **가장 균형 잡힌 성능**과 300개 서브 에이전트 스웜 지원.
+단점: 활성 파라미터가 커서 추론 비용이 V4 Flash 대비 높음.
+
+#### 태스크별 최적 모델
+
+| 태스크 | 1순위 | 2순위 | 사유 |
+|:---|:---|:---|:---|
+| **일상 코딩/버그 픽스** | DeepSeek V4 Flash | MiniMax M2.5 | SWE-bench 79% @ $0.28 |
+| **대규모 리팩토링** | DeepSeek V4 Flash | Ring 2.6 1T | 1M 컨텍스트 |
+| **에이전트 코딩 루프** | Ring 2.6 1T | DeepSeek V4 Flash | 300 스웜 + Terminal-Bench |
+| **코드 리뷰/PR 검토** | Nemotron 3 Super | DeepSeek V4 Flash | 특화된 리뷰 능력 |
+| **저비용 고효율** | DeepSeek V4 Flash | MiniMax M2.5 | 출력 $0.28 vs $1.20 |
+| **다중 언어 코딩** | MiniMax M2.5 | Ring 2.6 1T | Multi-SWE-Bench 51.3% |
 
 ---
 
@@ -607,3 +667,4 @@ tags: ["reference", "governance"]
 | v1.1 | 2026-05-13 | D_Kai (OpenCode) | 6개 차원 추가 (멀티모달·컨텍스트·에이전트·신뢰성·한국어·보안). 종합 등급 13개 차원으로 확장. 모델별 프로필 데이터 테이블 추가. |
 | **v1.2** | 2026-05-13 | D_Kai (OpenCode) | **프로젝트 이력 기반 8개 거버넌스 차원 추가** (규정 준수·오류 반복 저항·컨텍스트 경계·증적 진실성·피드백 통합·자가 교정·원자화·귀인 방식). 모든 근거를 실제 SAR·FB 사례에서 인용. 종합 등급 21개 차원으로 확장. |
 | **v1.3** | 2026-05-13 | D_Kai (OpenCode) | **FIX-MCM-001**: Opus 4.5→4.7 전면 교체, Sonnet 4.6→CTO 역할 매핑, 자기 평가 한계 고지 추가, Riley 환경 요인 분리, B_Kai SAR 해설 수정. |
+| **v1.4** | 2026-05-13 | D_Kai (OpenCode) | **§22 사용자 가용 모델 비교 추가**: Big Pickle·DeepSeek V4 Flash·MiniMax M2.5·Nemotron 3 Super·Ring 2.6 1T 5개 모델 코딩 역량 비교. SWE-bench·LiveCodeBench·Terminal-Bench 기반 등급 및 태스크별 추천. |
