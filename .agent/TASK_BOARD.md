@@ -3,12 +3,13 @@
 > **프로젝트:** ZENITH_LMS
 > **업데이트:** 2026-05-12 (KST) — FB-016 2차 반려 (FB-017 발령) — 스크린샷 로그인 오류 화면 제출 (R-10 재위반)
 > **운영 원칙:**
-> - 각 에이전트는 작업 완료 시 **SECTION 1 상태 대시보드를 최우선 갱신**한 뒤 SECTION 2 상세를 업데이트한다.
+> - 각 에이전트는 작업 완료 시 **SECTION 1 상태 대시보드를 최우선 갱신**한 뒤 담당 SECTION 상세를 업데이트한다.
 > - Riley는 완료 보고 시 반드시 `## 🔔 Aiden 검토 대기` 테이블에 항목을 추가한다.
+> - D_Kai는 완료 보고 시 반드시 `## 🔔 Aiden 검토 대기` 테이블에 항목을 추가한다.
 > - Aiden은 새 세션 시작 시 SECTION 1만 읽어 즉시 현황을 파악한다.
 >
 > **Git 운영 규칙:**
-> - **커밋 접두사**: Riley → `[Gemini]` / Aiden → `[Claude]` — 에이전트 식별 필수
+> - **커밋 접두사**: Riley → `[Gemini]` / Aiden → `[Claude]` / D_Kai → `[OpenCode]` — 에이전트 식별 필수
 > - **커밋 단위**: Task ID 단위 원자적 커밋. 메시지에 Task ID 포함 필수
 >   - 형식: `[Gemini] fix: BUG-UI-01 Admin 다크테마 제거` / `[Claude] docs: E2E-01 FINAL PASS 검증 결과`
 > - **완료 보고 전 git status 확인 의무**: `git status` 실행 → untracked·unstaged 파일 없음 확인 후 보고
@@ -18,7 +19,8 @@
 >
 > **관리 규칙:**
 > - **라인 수**: 800줄 이하 유지 (초과 시 즉시 이관 조치)
-> - **완료 태스크**: SECTION 2 섹션 내 **3개** 초과 시 → `.agent/archive/TASKS_[PHASE명].md` 이관
+> - **파일 분리 예외**: TASK_BOARD는 다중 에이전트 협업 조율 파일로, 800줄 초과 시 Overview/Detail 파일 분리 대신 **아카이브 이관**으로 줄 수를 관리한다.
+> - **완료 태스크**: SECTION 2·4 섹션 내 **3개** 초과 시 → `.agent/archive/TASKS_[PHASE명].md` 이관
 > - **Handoff 메시지 — 2-Tier 관리**:
 >   - **Active 지시** (수신자 완료 보고 미수신): 이관 불가
 >   - **Closed 교환** (지시 + 완료 보고 쌍 완성): **3개** 초과 시 → `.agent/archive/MSG_YYYY-MM-DD.md` 이관
@@ -53,6 +55,23 @@
 | Task ID | 지시자 | Task 명 | 지시일 |
 |:---|:---|:---|:---|
 | **FB-017** | Aiden | R-10 스크린샷 재제출 — 요율 관리 UI 3종 (코드/테스트 수정 불필요) | 2026-05-12 |
+
+## 🆕 신규 지시 대기 (D_Kai 착수 가능)
+
+> ⚠️ **D_Kai 전용 지시입니다. 다른 에이전트는 참조만 가능하며 착수 불가.**
+> 반드시 **Phase 1 → Phase 2 → Phase 3 순서**로 진행하고, 각 Phase 완료 후 Aiden 검토 대기 등록 후 다음 Phase 착수 가능.
+
+| Task ID | Phase | Task 명 | 지시일 | 상태 |
+|:---|:---:|:---|:---|:---:|
+| **GOV-001** | 1 | ACTIVE_AGENT.md IDLE 강제 초기화 | 2026-05-13 | 🆕 |
+| **GOV-002** | 1 | `~/.claude/settings.json` PostToolUse GitNexus Hook 제거 | 2026-05-13 | 🆕 |
+| **GOV-003** | 2 | `GEMINI.md` + `AGENTS.md` Task 완료 DoD에 IDLE 초기화 추가 | 2026-05-13 | 🔒 Phase 1 완료 후 |
+| **GOV-004** | 2 | `~/.claude/settings.json` PreToolUse Bash 제외 + `GOV_COMMON.md` 예외 조항 신설 | 2026-05-13 | 🔒 Phase 1 완료 후 |
+| **GOV-005** | 2 | `ACTIVE_AGENT.md` `last_verified_at` + `status_age_limit_hours` 필드 추가 | 2026-05-13 | 🔒 Phase 1 완료 후 |
+| **GOV-006** | 3 | `GOV_COMMON.md` "단순 질문 시 분석 생략" 규칙 반영 | 2026-05-13 | 🔒 Phase 2 + Aiden 승인 후 |
+| **GOV-007** | 3 | `GOV_COMMON.md` R-16 신설 — 세션 시작 시 상태 파일 일관성 검증 | 2026-05-13 | 🔒 Phase 2 + Aiden 승인 후 |
+| **GOV-008** | 3 | B_Kai on-demand 전용 운영 체계 문서화 | 2026-05-13 | 🔒 Phase 2 완료 후 |
+| **GOV-009** | 3 | SAR-2026-05-12-001 미조치 항목 이행 점검 | 2026-05-13 | 🔒 Phase 2 완료 후 |
 | ~~**FB-016**~~ | Aiden | FEAT-RATES 반려 — BUG-FR-001/002 + R-09/R-10 조치 | ❌ 2차 반려 (FB-017 대체) |
 | ~~**FEAT-RATES**~~ | Aiden | 요율 관리 고도화 (IMP-002 + IMP-011) | ✅ 구현 완료 / ❌ 검증 반려 |
 | ~~**AUDIT-S3**~~ | Aiden | 법인회원 관리·탈퇴 기능 구현 착수 허가 | ✅ 완료 |
@@ -66,6 +85,9 @@
 | Task ID | 담당 | Task 명 | 상태 | 블로커 |
 |:---|:---|:---|:---:|:---|
 | **FB-017** | Riley | R-10 스크린샷 재제출 (요율 관리 UI 3종) | 🆕 신규 지시 | — |
+| **GOV-001~002** | D_Kai | [Phase 1] SAR-2026-05-13-001 거버넌스 조치 (즉시) | 🆕 신규 지시 | — |
+| **GOV-003~005** | D_Kai | [Phase 2] SAR-2026-05-13-001 거버넌스 조치 (단기) | 🔒 Phase 1 완료 후 | — |
+| **GOV-006~009** | D_Kai | [Phase 3] SAR-2026-05-13-001 거버넌스 조치 (장기) | 🔒 Phase 2 + Aiden 승인 후 | — |
 | ~~**FB-016**~~ | Riley | FEAT-RATES 2차 반려 재작업 | ❌ 2차 반려 | FB-017 대체 |
 | ~~**FEAT-RATES**~~ | Riley | 요율 관리 고도화 (IMP-002 + IMP-011) | ❌ 반려 (2026-05-11) | FB-016 발령 |
 | ~~**FEAT-001**~~ | Riley | 사용자 정보 조회·변경 기능 구현 | 🔀 AUDIT-S1 통합 | — |
