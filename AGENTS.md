@@ -93,13 +93,14 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 ```
 완료 보고 절차:
-1. npm run test:regression → 전체 PASS
-2. echo "PASS" > .agent/LAST_REGRESSION_RESULT
-3. git add <변경파일>
-4. git commit -m "[Codex] <type>: <Task ID> <설명>"
-5. git status → 미커밋 파일 없음 확인
-6. TASK_BOARD SECTION 1 🔔 테이블에 항목 추가
-7. HANDOFF_BOX.md에 상세 인계 메시지 작성
+1. sed -i '' 's/Status: BUSY/Status: IDLE/' .agent/ACTIVE_AGENT.md  # ACTIVE_AGENT.md IDLE 초기화 (SAR-2026-05-13-001)
+2. npm run test:regression → 전체 PASS
+3. echo "PASS" > .agent/LAST_REGRESSION_RESULT
+4. git add <변경파일>
+5. git commit -m "[Codex] <type>: <Task ID> <설명>"
+6. git status → 미커밋 파일 없음 확인
+7. TASK_BOARD SECTION 1 🔔 테이블에 항목 추가
+8. HANDOFF_BOX.md에 상세 인계 메시지 작성
 ```
 
 ---
@@ -111,6 +112,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - **메시지 형식**: `[Codex] <type>: <description>`
 
 ```bash
+sed -i '' 's/Status: BUSY/Status: IDLE/' .agent/ACTIVE_AGENT.md     # ACTIVE_AGENT.md IDLE 초기화 (SAR-2026-05-13-001)
 npm run test:regression
 echo "PASS" > .agent/LAST_REGRESSION_RESULT
 git add <변경파일>
