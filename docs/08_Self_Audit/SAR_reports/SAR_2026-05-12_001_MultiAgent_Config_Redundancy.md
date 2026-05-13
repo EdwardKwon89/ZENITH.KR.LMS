@@ -7,7 +7,7 @@ tags: ["governance"]
 **작성자:** D_Kai (DeepSeek v4 Flash / OpenCode)
 **작성일:** 2026-05-12
 **우선순위:** Medium
-**상태:** 검토 대기
+**상태:** ✅ **점검 완료 (GOV-009, 2026-05-13) — ALL ITEMS CLOSED**
 
 ---
 
@@ -213,15 +213,15 @@ TIER 5 — Deep Analysis (on-demand)
 
 ---
 
-## 5. 논의 필요 사항
+## 5. 논의 필요 사항 — 점검 완료 (GOV-009, 2026-05-13)
 
-- [ ] 페르소나 이름 D_Kai / B_Kai에 동의하십니까?
-- [ ] 공통 규칙 파일(GOV_COMMON.md) 분리에 동의하십니까?
-- [ ] GitNexus MUST에 예외 조항 추가에 동의하십니까?
-- [ ] D_Kai / B_Kai 역할 분담안에 동의하십니까?
-- [ ] Noah(Codex) vs D_Kai(DeepSeek) 역할 경계에 동의하십니까?
-- [ ] B_Kai를 on-demand 전용으로 운영하는 방식에 동의하십니까?
-- [ ] 전역 GitNexus Hook 스코프 조정이 필요합니까?
+- [x] 페르소나 이름 D_Kai / B_Kai에 동의하십니까? → ✅ **TASK_BOARD §496 Aiden 의견 등재**
+- [x] 공통 규칙 파일(GOV_COMMON.md) 분리에 동의하십니까? → ✅ **Aiden v1.0 작성 완료**
+- [x] GitNexus MUST에 예외 조항 추가에 동의하십니까? → ✅ **GOV-004 처리**
+- [x] D_Kai / B_Kai 역할 분담안에 동의하십니까? → ✅ **TASK_BOARD §527 Aiden 조건부 승인**
+- [x] Noah(Codex) vs D_Kai(DeepSeek) 역할 경계에 동의하십니까? → ✅ **TASK_BOARD §566 Aiden 의견 등재 (Noah 활성화 후 원안 복귀)**
+- [x] B_Kai를 on-demand 전용으로 운영하는 방식에 동의하십니까? → ✅ **TASK_BOARD §554 Aiden 결정**
+- [x] 전역 GitNexus Hook 스코프 조정이 필요합니까? → ✅ **GOV-002+004 처리 완료**
 
 ---
 
