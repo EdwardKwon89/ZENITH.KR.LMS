@@ -1,11 +1,11 @@
 ---
 name: BigPickle-InfiniteLoop-Analysis
-description: ACTIVE_AGENT.md BUSY 스턱 등 5개 원인으로 Big Pickle(GLM)이 무한 반복 발생
+description: ACTIVE_AGENT.md BUSY 스턱 등 5개 원인으로 Big Pickle(GLM)이 무한 반복 발생 — ALL FIXES CLOSED
 category: Design
 severity: HIGH
 date: 2026-05-13
 author: D_Kai (OpenCode / DeepSeek v4 Flash)
-tags: ["governance", "agent-behavior"]
+tags: ["governance", "agent-behavior", "closed"]
 ---
 
 # SAR-2026-05-13-001: Big Pickle (B_Kai) 무한 반복 문제 — 추가 분석 및 조치 계획
@@ -424,3 +424,4 @@ status_age_limit_hours: 24
 | v1.3 | 2026-05-13 | Aiden (Claude) | §11 Aiden 최종 피드백 신설 — FIX-04 절충안 확정(Edward), FB-A01·FB-A02 수정 요청, FIX-10·FIX-11 채택 |
 | v1.4 | 2026-05-13 | D_Kai (OpenCode) | FB-A01(§4.4 항목4 삭제)·FB-A02(§5.2 검증값1로 수정) 반영, §12 D_Kai 2차 검토 의견 신설 |
 | v1.5 | 2026-05-13 | Aiden (Claude) | v1.4 검토 승인. §4.2 FIX-04 의견 최종 결정으로 갱신, FIX-10 단기조치 등재, FIX-11 장기조치 등재, 문서 상태 최종 승인으로 변경 |
+| **v1.6** | 2026-05-13 | D_Kai (OpenCode) | **ALL FIXES CLOSED.** GOV-001~009 전 Phase Aiden PASS 확인. SAR frontmatter closed 태그 추가. |
