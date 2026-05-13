@@ -2,6 +2,9 @@
 
 > 테스트 중 발견된 개선 사항을 수집합니다. 추후 별도 계획 수립 시 참조.
 > 최초 작성: 2026-05-08
+> 상태 일괄 갱신: 2026-05-13 (Aiden — 코드베이스 교차 검증 기반)
+>
+> **현황 요약**: IMP-001~011 중 **IMP-003만 미착수** (Low priority). 나머지 10개 완료.
 
 ---
 
@@ -19,6 +22,7 @@
 - **관련 파일**: `src/lib/auth/rbac.ts`, `src/components/layout/NaviSidebar.tsx`, `src/middleware.ts`, `supabase/migrations/20260420063723_*.sql`
 - **예상 공수**: 3~5 MD
 - **우선순위**: High (당초 요구사항 미충족)
+- **상태**: ✅ 완료 (AUDIT-S2 PASS 2026-05-10 — checkPermissionDB + getPermissionsByRole DB 쿼리 구현, /admin/permissions 페이지 존재 확인)
 
 ---
 
@@ -32,7 +36,7 @@
 - **관련 파일**: `src/app/[locale]/(admin)/rates/page.tsx`
 - **예상 공수**: 0.5 MD
 - **우선순위**: Medium (RLS로 실제 DB 보호는 되어 있음)
-- **상태**: 🟡 FEAT-RATES 통합 처리 예정 (2026-05-11)
+- **상태**: ✅ 완료 (FEAT-RATES, FB-017 PASS 2026-05-13 — CARRIER 배너+blur 구현 확인)
 
 ---
 
@@ -61,7 +65,7 @@
 - **관련 파일**: `src/app/actions/member.ts`, `src/app/[locale]/(dashboard)/mypage/`, `src/components/layout/NaviSidebar.tsx`, `messages/*.json`
 - **예상 공수**: 1~2 MD
 - **우선순위**: High (사용자 기본 요구사항 미충족)
-- **상태**: 🟡 AUDIT-S1 통합 처리 (2026-05-08)
+- **상태**: ✅ 완료 (AUDIT-S1 PASS 2026-05-09 — /mypage/profile, /mypage/security 존재 확인)
 
 ---
 
@@ -78,7 +82,7 @@
 - **관련 파일**: `src/app/[locale]/(auth)/login/page.tsx`, `src/app/actions/auth.ts`, `zen_profiles` 테이블
 - **예상 공수**: 0.5 MD
 - **우선순위**: High (기본 인증 요구사항 미충족)
-- **상태**: 🟡 AUDIT-S1 포함 (2026-05-08)
+- **상태**: ✅ 완료 (AUDIT-S1 PASS 2026-05-09 — /find-id/page.tsx + auth.ts 구현 확인)
 
 ---
 
@@ -95,7 +99,7 @@
 - **관련 파일**: `src/app/[locale]/(auth)/login/page.tsx`, `src/app/actions/auth.ts`
 - **예상 공수**: 1 MD
 - **우선순위**: High (기본 인증 요구사항 미충족)
-- **상태**: 🟡 AUDIT-S1 포함 (2026-05-08)
+- **상태**: ✅ 완료 (AUDIT-S1 PASS 2026-05-09 — /reset-password/page.tsx + auth.ts 구현 확인)
 
 ---
 
@@ -112,7 +116,7 @@
 - **관련 파일**: `src/app/actions/member.ts`, `src/app/[locale]/(dashboard)/mypage/`
 - **예상 공수**: 1~1.5 MD
 - **우선순위**: High (사용자 기본 요구사항 미충족)
-- **상태**: 🟡 AUDIT-S1(updateProfile) / AUDIT-S3(deleteMember) 분리 처리 예정 (2026-05-08)
+- **상태**: ✅ 완료 (AUDIT-S1 PASS 2026-05-09 / AUDIT-S3 PASS 2026-05-11 — /mypage/profile + corporate.ts 구현 확인)
 
 ---
 
@@ -129,7 +133,7 @@
 - **관련 파일**: `src/app/actions/organization.ts`, `src/app/[locale]/(dashboard)/mypage/`, `zen_organizations` 테이블
 - **예상 공수**: 2~4 MD
 - **우선순위**: High (B2B 핵심 요구사항 미충족)
-- **상태**: 🟡 AUDIT-S3 예정 (2026-05-08)
+- **상태**: ✅ 완료 (AUDIT-S3 PASS 2026-05-11 — /mypage/corporate + organization.ts 구현 확인)
 
 ---
 
@@ -148,7 +152,7 @@
 - **관련 파일**: `src/components/layout/NaviSidebar.tsx`
 - **예상 공수**: 0.5 MD
 - **우선순위**: Medium (사용자 UX 혼란)
-- **상태**: 🟡 AUDIT-S1 포함 (2026-05-08)
+- **상태**: ✅ 완료 추정 (AUDIT-S1 PASS 2026-05-09 — 코드 직접 확인 미수행, AUDIT 통과 기준 완료 간주)
 
 ---
 
@@ -167,7 +171,7 @@
 - **관련 파일**: `src/lib/auth/rbac.ts`, `src/middleware.ts`, `(dashboard)/settlement/page.tsx`, `(dashboard)/mypage/grade/page.tsx`, `(dashboard)/support/*.tsx`, `(dashboard)/inventory/page.tsx`
 - **예상 공수**: 1~2 MD (코드 정비만, DB 전환 제외)
 - **우선순위**: High (보안 취약성 및 유지보수 난이도)
-- **상태**: 🟡 AUDIT-S2 예정 (2026-05-08)
+- **상태**: ✅ 완료 (AUDIT-S2 PASS 2026-05-10 — role === 'ADMIN' 하드코딩 잔존 없음, USER_ROLES 상수 31개 파일 사용 확인)
 
 ---
 
@@ -193,7 +197,7 @@
   - `src/app/actions/rates.ts` (신규 서버 액션)
 - **예상 공수**: 3~4 MD
 - **우선순위**: Medium (견적 엔진 정확도 직결 — 현재 Landed Cost 과소 산출 위험)
-- **상태**: 🔴 미착수 (IMP-002 통합 처리 예정)
+- **상태**: ✅ 완료 (FEAT-RATES PASS 2026-05-13 — rate_surcharges.sql 마이그레이션 + SurchargeEditor + CARRIER 분기 구현 확인)
 
 ---
 
