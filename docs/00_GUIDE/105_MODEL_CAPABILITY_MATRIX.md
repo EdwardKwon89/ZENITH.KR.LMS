@@ -565,9 +565,9 @@ tags: ["reference", "governance"]
 | **DeepSeek V4 Flash** | **79.0%** | **91.6%** | **56.9%** | — |
 | **MiniMax M2.5** | **80.2%** | — | — | **51.3%** |
 | **Nemotron 3 Super** | 60.5% | — | 25.8% | 45.8% |
-| **Ring 2.6 1T** | ~75% (est.) | 89.6% (K2.6) | 66.7% (K2.6) | — |
+| **Ring 2.6 1T** | ~80.2% (est. Kimi K2.6) | 89.6% (K2.6) | 66.7% (K2.6) | — |
 
-> ⚠️ Ring 2.6 1T의 SWE-bench 수치는 inclusionAI의 자매 모델 Kimi K2.6(동일 1T/63B급) 데이터로 추정.
+> ⚠️ Ring 2.6 1T의 SWE-bench 수치는 inclusionAI의 자매 모델 Kimi K2.6(동일 1T/63B급, 실측 80.2%) 데이터로 추정.
 > Terminal-Bench 2.0 수치는 Kimi K2.6 실제 기록 기준.
 
 #### 종합 코딩 역량 등급
@@ -592,7 +592,7 @@ tags: ["reference", "governance"]
 **압도적 코딩 성능**. 1M 컨텍스트로 대규모 코드베이스 처리 가능. 비용($0.28/MTok 출력) 대비
 성능이 가장 우수. **일상 코딩의 최적 기본값.**
 
-**MiniMax M2.5** — SWE-bench **80.2%**로 **오픈 모델 중 최고 수준**. Multi-SWE-Bench 51.3%로
+**MiniMax M2.5** — SWE-bench **80.2%**로 **Kimi K2.6과 공동 1위 수준 (Ring 2.6 1T의 기준 모델과 동점)**. Multi-SWE-Bench 51.3%로
 다국어·다중 저장소 코딩 최상위. 10B 활성 파라미터로 추론 초경량. 비용이 Opus 대비 1/10 수준.
 **단점**: 200K 컨텍스트로 대규모 코드베이스에는 부족.
 
@@ -600,7 +600,7 @@ tags: ["reference", "governance"]
 강점은 **1M 컨텍스트**와 **높은 처리량**(5x 이전 세대). 코드 리뷰와 PR 검토에 특화되어 있으나
 복합 코딩 태스크에서는 부족.
 
-**Ring 2.6 1T** — 1T 규모에 63B 활성. Kimi K2.6과 동일 계열로 추정되어 SWE-bench 75%+,
+**Ring 2.6 1T** — 1T 규모에 63B 활성. Kimi K2.6과 동일 계열로 추정되어 SWE-bench 80.2%+,
 Terminal-Bench 66.7% 수준으로 예상. **가장 균형 잡힌 성능**과 300개 서브 에이전트 스웜 지원.
 단점: 활성 파라미터가 커서 추론 비용이 V4 Flash 대비 높음.
 
@@ -688,4 +688,5 @@ Terminal-Bench 66.7% 수준으로 예상. **가장 균형 잡힌 성능**과 300
 | **v1.2** | 2026-05-13 | D_Kai (OpenCode) | **프로젝트 이력 기반 8개 거버넌스 차원 추가** (규정 준수·오류 반복 저항·컨텍스트 경계·증적 진실성·피드백 통합·자가 교정·원자화·귀인 방식). 모든 근거를 실제 SAR·FB 사례에서 인용. 종합 등급 21개 차원으로 확장. |
 | **v1.3** | 2026-05-13 | D_Kai (OpenCode) | **FIX-MCM-001**: Opus 4.5→4.7 전면 교체, Sonnet 4.6→CTO 역할 매핑, 자기 평가 한계 고지 추가, Riley 환경 요인 분리, B_Kai SAR 해설 수정. |
 | **v1.4** | 2026-05-13 | D_Kai (OpenCode) | **§22 사용자 가용 모델 비교 추가**: Big Pickle·DeepSeek V4 Flash·MiniMax M2.5·Nemotron 3 Super·Ring 2.6 1T 5개 모델 코딩 역량 비교. SWE-bench·LiveCodeBench·Terminal-Bench 기반 등급 및 태스크별 추천. |
-| **v1.5** | 2026-05-13 | D_Kai (OpenCode) | **FIX-MCM-002**: §22 Big Pickle "해결됨"→"비활성화" 수정. §21 귀인 방식 테이블+해설 완성. §7 섹션 순서 정정. |
+| **v1.5** | 2026-05-13 | D_Kai (OpenCode) | **FIX-MCM-002 Phase 1**: §22 Big Pickle "해결됨"→"비활성화" 수정. §21 귀인 방식 테이블+해설 완성. §7 섹션 순서 정정. |
+| **v1.6** | 2026-05-13 | D_Kai (OpenCode) | **FIX-MCM-002 Phase 2**: Ring SWE-bench 75%→80.2% 수정. MiniMax "단독 최고"→"K2.6 공동 1위". |
