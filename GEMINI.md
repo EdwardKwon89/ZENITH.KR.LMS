@@ -46,7 +46,8 @@ tags: ["governance"]
 
 ```bash
 # 표준 커밋 절차
-rtk npm run test:regression                              # R-08
+sed -i '' 's/Status: BUSY/Status: IDLE/' .agent/ACTIVE_AGENT.md     # ACTIVE_AGENT.md IDLE 초기화 (SAR-2026-05-13-001)
+rtk npm run test:regression                                          # R-08
 echo "PASS" > .agent/LAST_REGRESSION_RESULT
 git add <변경파일>
 git commit -m "[Gemini] feat: <작업 설명>"

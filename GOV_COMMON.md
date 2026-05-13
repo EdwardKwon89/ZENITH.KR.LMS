@@ -160,6 +160,12 @@ This project is indexed by GitNexus as **ZENITH.KR.LMS** (6827 symbols, 10124 re
 | `gitnexus://repo/ZENITH.KR.LMS/processes` | All execution flows |
 | `gitnexus://repo/ZENITH.KR.LMS/process/{name}` | Step-by-step execution trace |
 
+### 수동 호출 보완 (Bash 자동 주입 제외 대비)
+PreToolUse GitNexus Hook에서 `Bash`가 제외되었습니다. 아래 경우는 반드시 직접 호출해야 합니다:
+- 심볼 수정 전 영향도 분석: `gitnexus_impact({target: "symbolName", direction: "upstream"})`
+- 버그 원인 추적: `gitnexus_query({query: "concept"})`
+- 설계 검토: `gitnexus_context({name: "symbolName"})`
+
 ## CLI
 
 | Task | Read this skill file |
