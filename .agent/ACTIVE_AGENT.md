@@ -7,13 +7,13 @@
 
 ## 현재 상태
 
-- **Status**: BUSY
-- **에이전트**: D_Kai (OpenCode)
-- **역할**: 거버넌스 조치 — GOV-003~005 (Phase 2)
-- **작업**: GEMINI·AGENTS DoD 수정 + PreToolUse Bash 제외 + ACTIVE_AGENT 포맷 개선
-- **시작**: 2026-05-13
-- **예상 완료**: 2026-05-13
-- **잠금 파일/경로**: GEMINI.md, AGENTS.md, GOV_COMMON.md, ~/.claude/settings.json
+- **Status**: IDLE
+- **에이전트**: None
+- **역할**: None
+- **작업**: None
+- **시작**: —
+- **예상 완료**: —
+- **잠금 파일/경로**: None
 - **last_verified_at**: 2026-05-13T12:00:00+09:00
 - **status_age_limit_hours**: 24
 

@@ -46,6 +46,7 @@
 
 | Task ID | 지시자 | Task 명 | 지시일 |
 |:---|:---|:---|:---|
+| **GOV-003~005** | D_Kai | [Phase 2] GEMINI·AGENTS DoD 수정 + PreToolUse Bash 제외 + ACTIVE_AGENT 포맷 개선 | 2026-05-13 |
 | _(없음 — 모두 검토 완료)_ | — | — | — |
 
 ---
@@ -65,11 +66,11 @@
 |:---|:---:|:---|:---|:---:|
 | ~~**GOV-001**~~ | 1 | ACTIVE_AGENT.md IDLE 강제 초기화 | 2026-05-13 | ✅ **Aiden PASS** |
 | ~~**GOV-002**~~ | 1 | `~/.claude/settings.json` PostToolUse GitNexus Hook 제거 | 2026-05-13 | ✅ **Aiden PASS** |
-| **GOV-003** | 2 | `GEMINI.md` + `AGENTS.md` Task 완료 DoD에 IDLE 초기화 추가 | 2026-05-13 | 🆕 **착수 가능** |
-| **GOV-004** | 2 | `~/.claude/settings.json` PreToolUse Bash 제외 + `GOV_COMMON.md` 예외 조항 신설 | 2026-05-13 | 🆕 **착수 가능** |
-| **GOV-005** | 2 | `ACTIVE_AGENT.md` `last_verified_at` + `status_age_limit_hours` 필드 추가 | 2026-05-13 | 🆕 **착수 가능** |
-| **GOV-006** | 3 | `GOV_COMMON.md` "단순 질문 시 분석 생략" 규칙 반영 | 2026-05-13 | 🔒 Phase 2 + Aiden 승인 후 |
-| **GOV-007** | 3 | `GOV_COMMON.md` R-16 신설 — 세션 시작 시 상태 파일 일관성 검증 | 2026-05-13 | 🔒 Phase 2 + Aiden 승인 후 |
+| ~~**GOV-003**~~ | 2 | `GEMINI.md` + `AGENTS.md` Task 완료 DoD에 IDLE 초기화 추가 | 2026-05-13 | ✅ **완료** |
+| ~~**GOV-004**~~ | 2 | `~/.claude/settings.json` PreToolUse Bash 제외 + `GOV_COMMON.md` 예외 조항 신설 | 2026-05-13 | ✅ **완료** |
+| ~~**GOV-005**~~ | 2 | `ACTIVE_AGENT.md` `last_verified_at` + `status_age_limit_hours` 필드 추가 | 2026-05-13 | ✅ **완료** |
+| **GOV-006** | 3 | `GOV_COMMON.md` "단순 질문 시 분석 생략" 규칙 반영 | 2026-05-13 | 🔒 Phase 2 Aiden 검토 후 |
+| **GOV-007** | 3 | `GOV_COMMON.md` R-16 신설 — 세션 시작 시 상태 파일 일관성 검증 | 2026-05-13 | 🔒 Phase 2 Aiden 검토 후 |
 | **GOV-008** | 3 | B_Kai on-demand 전용 운영 체계 문서화 | 2026-05-13 | 🔒 Phase 2 완료 후 |
 | **GOV-009** | 3 | SAR-2026-05-12-001 미조치 항목 이행 점검 | 2026-05-13 | 🔒 Phase 2 완료 후 |
 | ~~**FB-016**~~ | Aiden | FEAT-RATES 반려 — BUG-FR-001/002 + R-09/R-10 조치 | ❌ 2차 반려 (FB-017 대체) |
@@ -86,8 +87,8 @@
 |:---|:---|:---|:---:|:---|
 | ~~**FB-017**~~ | Riley | R-10 스크린샷 재제출 (요율 관리 UI 3종) | ✅ **PASS (2026-05-13)** | 코드 구현 기준 완료 |
 | ~~**GOV-001~002**~~ | D_Kai | [Phase 1] SAR-2026-05-13-001 거버넌스 조치 (즉시) | ✅ **Aiden PASS (2026-05-13)** | — |
-| **GOV-003~005** | D_Kai | [Phase 2] SAR-2026-05-13-001 거버넌스 조치 (단기) | 🆕 **Phase 2 착수 가능** | — |
-| **GOV-006~009** | D_Kai | [Phase 3] SAR-2026-05-13-001 거버넌스 조치 (장기) | 🔒 Phase 2 + Aiden 승인 후 | — |
+| ~~**GOV-003~005**~~ | D_Kai | [Phase 2] SAR-2026-05-13-001 거버넌스 조치 (단기) | ✅ **Aiden 검토 대기** | — |
+| **GOV-006~009** | D_Kai | [Phase 3] SAR-2026-05-13-001 거버넌스 조치 (장기) | 🔒 Phase 2 Aiden 검토 후 | — |
 | ~~**FB-016**~~ | Riley | FEAT-RATES 2차 반려 재작업 | ❌ 2차 반려 | FB-017 대체 |
 | ~~**FEAT-RATES**~~ | Riley | 요율 관리 고도화 (IMP-002 + IMP-011) | ❌ 반려 (2026-05-11) | FB-016 발령 |
 | ~~**FEAT-001**~~ | Riley | 사용자 정보 조회·변경 기능 구현 | 🔀 AUDIT-S1 통합 | — |
@@ -525,22 +526,14 @@ UI 구성:
 
 > **수행 주체**: D_Kai (OpenCode) | **검증 주체**: Aiden (Claude) | **우선순위**: High
 
-### GOV-003 | `GEMINI.md` + `AGENTS.md` Task 완료 DoD에 IDLE 초기화 추가
-
-**대상**: `GEMINI.md`, `AGENTS.md` — **반드시 두 파일 동시 수정. 어느 한쪽만 수정 시 불완료.**
-
-커밋 절차 섹션에 아래 단계를 **첫 번째 항목**으로 추가:
-```bash
-# Task 완료 시 ACTIVE_AGENT.md IDLE 초기화 (SAR-2026-05-13-001)
-sed -i 's/Status: BUSY/Status: IDLE/' .agent/ACTIVE_AGENT.md
-```
+### GOV-003 | `GEMINI.md` + `AGENTS.md` Task 완료 DoD에 IDLE 초기화 추가 ✅
 
 **완료 기준**:
-- [ ] `GEMINI.md` 커밋 절차에 IDLE 초기화 단계 포함
-- [ ] `AGENTS.md` 커밋 절차에 동일 단계 포함
-- [ ] 커밋: `[OpenCode] docs: GOV-003 GEMINI·AGENTS Task DoD IDLE 초기화 추가`
+- [x] `GEMINI.md` 커밋 절차에 IDLE 초기화 단계 포함
+- [x] `AGENTS.md` 커밋 절차에 동일 단계 포함
+- [x] 커밋: `[OpenCode] docs: GOV-003 GEMINI·AGENTS Task DoD IDLE 초기화 추가`
 
-### GOV-004 | `~/.claude/settings.json` PreToolUse Bash 제외 + `GOV_COMMON.md` 예외 조항 신설
+### GOV-004 | `~/.claude/settings.json` PreToolUse Bash 제외 + `GOV_COMMON.md` 예외 조항 신설 ✅
 
 **⚠️ 두 파일 동시 수정 필수. 어느 한쪽만 수정 시 불완료.**
 
@@ -550,18 +543,18 @@ sed -i 's/Status: BUSY/Status: IDLE/' .agent/ACTIVE_AGENT.md
 
 **조치 ②** `GOV_COMMON.md` GitNexus 섹션에 예외 조항 추가:
 ```
-### gitnexus_impact 수동 호출 필수 케이스 (Bash Hook 자동 주입 제외 보완)
+### 수동 호출 보완 (Bash 자동 주입 제외 대비)
 - 심볼 수정 전: gitnexus_impact({target: "symbolName", direction: "upstream"})
 - 버그 추적 시: gitnexus_query({query: "concept"})
 - 설계 검토 시: gitnexus_context({name: "symbolName"})
 ```
 
 **완료 기준**:
-- [ ] 검증: `grep -A2 '"Grep' ~/.claude/settings.json` → Bash 없음 확인
-- [ ] 검증: `grep "gitnexus_impact" GOV_COMMON.md` → 1줄 이상 출력
-- [ ] 커밋: `[OpenCode] fix: GOV-004 GitNexus Bash Hook 제외 + GOV_COMMON.md 예외 조항`
+- [x] 검증: `grep -A2 '"Grep' ~/.claude/settings.json` → Bash 없음 확인
+- [x] 검증: `grep "gitnexus_impact" GOV_COMMON.md` → 1줄 이상 출력
+- [x] 커밋: `[OpenCode] fix: GOV-004 GitNexus Bash Hook 제외 + GOV_COMMON.md 예외 조항`
 
-### GOV-005 | `ACTIVE_AGENT.md` `last_verified_at` 포맷 추가
+### GOV-005 | `ACTIVE_AGENT.md` `last_verified_at` 포맷 추가 ✅
 
 **대상**: `.agent/ACTIVE_AGENT.md`  
 현재 상태 섹션에 아래 필드 추가 (SAR §12.4 D_Kai 제안 포맷):
@@ -571,10 +564,10 @@ status_age_limit_hours: 24                     # 이 시간 초과 BUSY → STAL
 ```
 
 **완료 기준**:
-- [ ] `last_verified_at` 필드 현재 시각으로 초기화
-- [ ] `status_age_limit_hours: 24` 필드 추가
-- [ ] 커밋: `[OpenCode] feat: GOV-005 ACTIVE_AGENT.md last_verified_at 포맷 추가`
-- [ ] 🔔 Aiden 검토 대기 등록 (Phase 2 완료 신호)
+- [x] `last_verified_at` 필드 현재 시각으로 초기화
+- [x] `status_age_limit_hours: 24` 필드 추가
+- [x] 커밋: `[OpenCode] feat: GOV-005 ACTIVE_AGENT.md last_verified_at 포맷 추가`
+- [x] 🔔 Aiden 검토 대기 등록 (Phase 2 완료 신호)
 
 ---
 
