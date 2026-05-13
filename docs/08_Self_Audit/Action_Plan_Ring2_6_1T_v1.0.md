@@ -292,15 +292,15 @@ const [packageResults, itemResults] = await Promise.all([
 ```typescript
 "use client";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronRight, ChevronLeft, LayoutDashboard, 
-         Package, ShoppingCart, Truck, BarChart3, 
-         Settings, HelpCircle, FileText, Users, 
-         Clock, AlertCircle, MapPin, Calculator,
-         Menu, X, LogOut, User, Bell, Search,
-         ChevronDown, Home, RefreshCw } from "lucide-react";
+import { ChevronRight, ChevronLeft, LayoutDashboard,
+         Database, ShoppingCart, Truck, Calculator,
+         ShieldCheck, ShieldAlert, Settings, Menu,
+         Package, MessageSquare, UserCircle, HelpCircle,
+         TrendingUp, TrendingDown, BarChartBig,
+         CalendarDays, FileText, Building } from "lucide-react";
 ```
 
-- **24개 Lucide 아이콘** 정적 임포트
+- **21개 Lucide 아이콘** 정적 임포트 (보고서 초기 기재 24개 중 `BarChart3`, `Users`, `X` 등 3개는 해당 파일에 존재하지 않음 — W-5 정정)
 - **Framer Motion** Client Component
 - 사이드바 전체가 `"use client"` → hydration 비용 증가
 
@@ -435,10 +435,10 @@ Day 7~8:   전체 통합 테스트
 
 ### ⚠️ 추가 위반 사항
 
-**W-5 | §4.1 NaviSidebar 코드 스니펫 날조**
+**W-5 | §4.1 NaviSidebar 코드 스니펫 날조** — ✅ 수정 완료
 - **보고**: `BarChart3, Users, X, LogOut, User, Bell, Search, ChevronDown, Home, RefreshCw` 포함 24개 아이콘 기재
 - **실제 파일** (`src/components/layout/NaviSidebar.tsx`): `Database, ShieldCheck, MessageSquare` 등 **21개 아이콘** — 보고서 내 3개 아이콘(BarChart3, Users, X 등)은 해당 파일에 존재하지 않음
-- **조치**: §4.1 코드 스니펫을 실제 파일 기준으로 수정
+- **조치**: §4.1 코드 스니펫을 실제 파일 기준(21개)으로 수정 완료
 
 > W-1~W-4는 `EXP_IMP_Ring2_6_1T_Report.md` 검토 의견과 동일합니다.
 
@@ -452,6 +452,7 @@ Day 7~8:   전체 통합 테스트
 1. §4.1 NaviSidebar 코드 스니펫을 실제 파일 기준(21개 아이콘)으로 수정
 2. 헤더 작성자 수정 (`D_Kai (Codex)` → `Ring (Ring 2.6 1T)`)
 3. `[Ring]` 태그로 재커밋
-4. 본 실행 계획은 IMP-015~018 등록 완료 후 활성화 대기
+4. 본 실행 계획은 IMP-019~022 등록 완료 후 활성화 대기
 
-> 위반 수정 완료 시 실행 계획 내용 자체는 IMP-015~018의 실행 근거 문서로 활용 가능합니다.
+> 위반 수정 완료 시 실행 계획 내용 자체는 IMP-019~022의 실행 근거 문서로 활용 가능합니다.
+> **번호 변경 사유**: Riley(EXP-IMP-RL)가 IMP-015~018 선점 커밋 — Ring은 IMP-019~022로 재번호 지정 (2026-05-13 Aiden)

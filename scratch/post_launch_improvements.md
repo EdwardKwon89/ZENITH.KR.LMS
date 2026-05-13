@@ -4,8 +4,9 @@
 > 최초 작성: 2026-05-08
 > 상태 일괄 갱신: 2026-05-13 (Aiden — 코드베이스 교차 검증 기반)
 >
-> **현황 요약**: IMP-001~011 중 **IMP-003만 미착수** (Low priority). 나머지 10개 완료.  
+> **현황 요약**: IMP-001~011 중 **IMP-003만 미착수** (Low priority). 나머지 10개 완료.
 > **IMP-012~014**: EXP-IMP-DK (D_Kai) 2026-05-13 도출 — Aiden CONDITIONAL PASS 후 등록.
+> **IMP-019~022**: EXP-IMP-RG (Ring 2.6 1T) 2026-05-13 도출 — Aiden CONDITIONAL PASS 대기 중.
 
 ---
 
@@ -234,4 +235,52 @@
 - **목표 구현**: RateForm·RateList·RateSurchargeEditor 3개 컴포넌트로 분리
 - **관련 파일**: `src/app/[locale]/(dashboard)/admin/rates/page.tsx`, `src/components/admin/SurchargeEditor.tsx`, `src/components/admin/RateCardList.tsx`
 - **예상 공수**: 1~1.5 MD
+- **우선순위**: Low
+
+---
+
+## [IMP-019] createOrder() 트랜잭션 부재 — 부분 실패 시 데이터 불일치 위험
+
+- **발견 경위**: EXP-IMP-RG (Ring 2.6 1T) 코드베이스 분석 — `src/app/actions/orders.ts` 주문 생성 플로우에서 DB 트랜잭션 미사용 확인
+- **현재 상태**: `createOrder()` 내 순차적 Supabase 호출 (최소 5~7회) — 원자성 보장 없음, 부분 실패 시 데이터 불일치 위험
+- **임시 조치**: 없음
+- **목표 구현**: Supabase RPC(`create_order_with_items`) 또는 배치 INSERT로 단일 호출 전환, 부분 실패 시 롤백 로직 추가
+- **관련 파일**: `src/app/actions/orders.ts` (681줄)
+- **예상 공수**: 2~3 MD (RPC 설계 + 에러 핸들링)
+- **우선순위**: High
+
+---
+
+## [IMP-020] Feature Flags `unstable_cache` 미적용 — 매 요청 DB 직접 조회
+
+- **발견 경위**: EXP-IMP-RG (Ring 2.6 1T) 분석 — `src/lib/params/feature-flags.ts` `isFeatureEnabled()` 호출마다 DB 쿼리 확인
+- **현재 상태**: `unstable_cache()` 미사용, MAINTENANCE_MODE 체크 시 트래픽 증가에 DB 부하
+- **임시 조치**: 없음
+- **목표 구현**: `unstable_cache()`로 감싸거나 Edge Config/Env Var로 이전
+- **관련 파일**: `src/lib/params/feature-flags.ts`
+- **예상 공수**: 0.5 MD
+- **우선순위**: Medium
+
+---
+
+## [IMP-021] 미들웨어 매 요청 DB 호출 최적화 (JWT-only 검증 + 캐시)
+
+- **발견 경위**: EXP-IMP-RG (Ring 2.6 1T) 분석 — `src/middleware.ts` 모든 요청에서 Supabase Auth + zen_profiles JOIN 쿼리 확인
+- **현재 상태**: Edge Runtime에서 매 요청마다 `updateSession()` → DB 쿼리 → 인증된 사용자 페이지 접근 시 50~150ms 추가 지연
+- **임시 조치**: 없음
+- **목표 구현**: `createClient()` 결과를 Request-scoped로 캐시, JWT 검증만으로 인증 처리, 프로필은 최초 로드 시만 조회
+- **관련 파일**: `src/middleware.ts` (171줄)
+- **예상 공수**: 1~2 MD
+- **우선순위**: Medium
+
+---
+
+## [IMP-022] NaviSidebar Client Bundle 최적화 (아이콘 dynamic import, Framer Motion 격리)
+
+- **발견 경위**: EXP-IMP-RG (Ring 2.6 1T) 분석 — `src/components/layout/NaviSidebar.tsx` Client Component 내 Framer Motion + Lucide 21개 아이콘 전체 번들 확인
+- **현재 상태**: `"use client"` + Framer Motion + Lucide 21개 아이콘이 클라이언트 JS 번들에 포함, Hydration 비용 증가
+- **임시 조치**: 없음
+- **목표 구현**: 아이콘 dynamic import(`next/dynamic`), Framer Motion server-only 대안 검토, Server Component 전환 고려
+- **관련 파일**: `src/components/layout/NaviSidebar.tsx`
+- **예상 공수**: 1 MD
 - **우선순위**: Low

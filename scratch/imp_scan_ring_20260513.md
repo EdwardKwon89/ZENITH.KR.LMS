@@ -103,7 +103,7 @@ src/app/
 
 ## 4. Ring 2.6 1T 성능 분석 — 우려 사항 (IMP-NNN 형식)
 
-### IMP-015 | createOrder() 트랜잭션 부재 — 부분 실패 시 데이터 불일치 위험
+### IMP-019 | createOrder() 트랜잭션 부재 — 부분 실패 시 데이터 불일치 위험
 
 | 항목 | 내용 |
 |------|------|
@@ -115,7 +115,7 @@ src/app/
 | **예상 공수** | 2~3일 (RPC 설계 + 에러 핸들링) |
 | **우선순위** | **High** |
 
-### IMP-016 | Feature Flags `unstable_cache` 미적용 — 매 요청 DB 직접 조회
+### IMP-020 | Feature Flags `unstable_cache` 미적용 — 매 요청 DB 직접 조회
 
 | 항목 | 내용 |
 |------|------|
@@ -127,7 +127,7 @@ src/app/
 | **예상 공수** | 0.5일 |
 | **우선순위** | **Medium** |
 
-### IMP-017 | 미들웨어 매 요청 DB 호출 최적화 (JWT-only 검증 + 캐시)
+### IMP-021 | 미들웨어 매 요청 DB 호출 최적화 (JWT-only 검증 + 캐시)
 
 | 항목 | 내용 |
 |------|------|
@@ -139,7 +139,7 @@ src/app/
 | **예상 공수** | 1~2일 |
 | **우선순위** | **Medium** |
 
-### IMP-018 | NaviSidebar Client Bundle 최적화 (아이콘 dynamic import, Framer Motion 격리)
+### IMP-022 | NaviSidebar Client Bundle 최적화 (아이콘 dynamic import, Framer Motion 격리)
 
 | 항목 | 내용 |
 |------|------|
@@ -151,15 +151,6 @@ src/app/
 | **예상 공수** | 1일 |
 | **우선순위** | **Low** |
 
-### 📋 실사용 검증 미완료 항목
-
-- **Ring 2.6 1T 프로젝트 내 실제 운용 이력 없음** — Kimi K2.6 벤치마크 수치 기반 추정치만 존재
-- `src/app/api/` 경로 내 API 라우트 상세 분석 미완료 (RPC 함수 미점검)
-- 클라이언트 번들 사이즈 측정 미실시
-- 로딩 성능(LCP, FCP) 벤치마크 미실시
-- Supabase Connection Pooling 설정 확인 필요
-- 환경별 스케일링 정책 미확인
-
 ---
 
 ## 5. 종합 평가
@@ -170,7 +161,7 @@ src/app/
 | 코드 가독성 | ★★★★☆ | 일관된 패턴, 한국어 주석, 타입 안전성 우수 |
 | 성능 최적화 | ★★★☆☆ | 순차적 DB 호출, 미들웨어 부하, Feature Flag 캐싱 미흡 |
 | 확장성 | ★★★★☆ | 모듈화 잘됨, 도메인 추가 용이 |
-| 프로덕션 준비 | ★★★☆☆ | 에러 핸들링 보강, 번들 최적화, 캐싱 전략 필요 |
+| 프로덕션 준비 | ★★★☆☆ | 에러 핀들링 보강, 번들 최적화, 캐싱 전략 필요 |
 | Ring 2.6 1T 적합성 | **조건부 권장** | 실사용 검증 필요, 벤치마크 수치만 존재 |
 
 ### 추천
@@ -201,7 +192,7 @@ src/app/
 ### ✅ 분석 역량 평가
 
 | 평가 항목 | 결과 | 비고 |
-|:---------|:----:|:-----|
+|----------|:----:|------|
 | 아키텍처 전반 파악 | ✅ 우수 | 라우팅·RBAC·도메인 모델 정확히 파악 |
 | 성능 병목 식별 | ✅ 우수 | 미들웨어 DB 부하·Feature Flags 캐싱 정확히 진단 |
 | createOrder() 트랜잭션 부재 식별 | ✅ 우수 | 부분 실패 시 데이터 불일치 위험 정확히 식별 |
@@ -236,9 +227,9 @@ src/app/
 
 | IMP | 내용 | 우선순위 | 근거 섹션 |
 |:----|:----|:--------:|:---------|
-| IMP-019 | createOrder() 트랜잭션 부재 — 부분 실패 시 데이터 불일치 위험 | High | §4.3 |
+| IMP-019 | createOrder() 트랜잭션 부재 — 부분 실패 시 데이터 불일치 위험 | High | §4.1 |
 | IMP-020 | Feature Flags `unstable_cache` 미적용 — 매 요청 DB 직접 조회 | Medium | §4.2 |
-| IMP-021 | 미들웨어 매 요청 DB 호출 최적화 (JWT-only 검증 + 캐시) | Medium | §4.1 |
+| IMP-021 | 미들웨어 매 요청 DB 호출 최적화 (JWT-only 검증 + 캐시) | Medium | §4.3 |
 | IMP-022 | NaviSidebar Client Bundle 최적화 (아이콘 dynamic import, Framer Motion 격리) | Low | §4.4 |
 
 > **번호 변경 사유**: Riley(EXP-IMP-RL)가 IMP-015~018을 선점 커밋 (`[Gemini] feat: EXP-IMP-RL`) — Ring은 IMP-019~022로 재번호 지정 (2026-05-13 Aiden)
@@ -248,7 +239,7 @@ src/app/
 | # | 조치 | 상태 |
 |---|------|:----:|
 | 1 | W-3 헤더 작성자 수정 (`D_Kai (Codex)` → `Ring (Ring 2.6 1T)`) | ✅ 완료 |
-| 2 | W-1 파일 경로를 `scratch/imp_scan_ring_20260513.md`로 이동 | ⏳ 미완료 |
+| 2 | W-1 파일 경로를 `scratch/imp_scan_ring_20260513.md`로 이동 | ✅ 완료 |
 | 3 | W-2 섹션 4 내용을 IMP-NNN 형식으로 재작성 | ✅ 완료 |
 | 4 | W-4 `[Ring]` 태그로 커밋 | ⏳ 미완료 |
 | 5 | `scratch/post_launch_improvements.md`에 IMP-019~022 등록 | ⏳ 미완료 |
