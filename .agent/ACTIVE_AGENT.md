@@ -7,13 +7,13 @@
 
 ## 현재 상태
 
-- **Status**: BUSY
-- **에이전트**: Antigravity (Gemini)
-- **역할**: EXECUTION
-- **작업**: FEAT-RATES (요율 관리 고도화)
-- **시작**: 2026-05-11 11:45
-- **예상 완료**: 2026-05-11 13:00
-- **잠금 파일/경로**: src/app/actions/rates.ts, src/app/[locale]/(dashboard)/admin/rates/page.tsx
+- **Status**: IDLE
+- **에이전트**: None
+- **역할**: None
+- **작업**: None
+- **시작**: —
+- **예상 완료**: —
+- **잠금 파일/경로**: None
 
 ---
 
@@ -21,11 +21,6 @@
 
 | 시각 | 에이전트 | 작업 | 결과 |
 |:---|:---|:---|:---|
+| 2026-05-13 12:32 | Antigravity (Gemini) | FB-017 R-10 스크린샷 재제출 및 상태 초기화 | ✅ 완료 |
+| 2026-05-11 11:45 | Antigravity (Gemini) | FEAT-RATES (요율 관리 고도화) | ✅ 완료 |
 | 2026-04-23 | Aiden (ZEN_CEO) | ENV 설정 (103/104 업데이트, .agent/ 구성, pre-commit hook) | ✅ 완료 |
-| 2026-04-23 12:00 | Riley (CPO) | Phase 3.1 Tracking Module (BE-03, BE-04, FE-01) | ✅ 완료 |
-| 2026-04-23 14:10 | Claude (Antigravity) | QA-02 Business QA, pre-commit 훅 버그 수정 | ✅ 완료 |
-| 2026-04-23 14:21 | Claude (Antigravity) | ENV-07~10 잔여 작업 처리 → IDLE 초기화 | ✅ 완료 |
-| 2026-04-24 12:20 | Riley (Antigravity) | Phase 3.2 Finance API 명세 (PDF/Excel) 및 DB 기반 검증 완료 | ✅ 완료 |
-| 2026-04-24 13:50 | Riley (Antigravity) | FIN-01 (PDF 청구서 발행) 및 NOTIF-01 (알림 엔진) 구현 완료 | ✅ 완료 |
-| 2026-04-24 14:45 | Riley (Antigravity) | BUG-04 (RLS 보완) 검증 및 FIN-02 (Excel Export) 구현 완료 | ✅ 완료 |
-
