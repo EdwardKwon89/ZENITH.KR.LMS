@@ -1,7 +1,7 @@
 # Multi-Agent Task Board
 
 > **프로젝트:** ZENITH_LMS
-> **업데이트:** 2026-05-12 (KST) — FB-016 2차 반려 (FB-017 발령) — 스크린샷 로그인 오류 화면 제출 (R-10 재위반)
+> **업데이트:** 2026-05-13 (KST) — FB-017 PASS (코드 구현 기준 완료 처리) / GOV-001~002 D_Kai Phase 1 PASS / GOV-003~005 Phase 2 착수 가능
 > **운영 원칙:**
 > - 각 에이전트는 작업 완료 시 **SECTION 1 상태 대시보드를 최우선 갱신**한 뒤 담당 SECTION 상세를 업데이트한다.
 > - Riley는 완료 보고 시 반드시 `## 🔔 Aiden 검토 대기` 테이블에 항목을 추가한다.
@@ -46,8 +46,7 @@
 
 | Task ID | 지시자 | Task 명 | 지시일 |
 |:---|:---|:---|:---|
-| **FB-017** | Aiden | FB-016 2차 반려 — R-10 스크린샷 재제출 (로그인 오류 화면 무효 처리) | 2026-05-12 |
-| **GOV-001~002** | D_Kai | [Phase 1] ACTIVE_AGENT.md IDLE 초기화 + PostToolUse GitNexus Hook 제거 | 2026-05-13 |
+| _(없음 — 모두 검토 완료)_ | — | — | — |
 
 ---
 
@@ -55,7 +54,7 @@
 
 | Task ID | 지시자 | Task 명 | 지시일 |
 |:---|:---|:---|:---|
-| **FB-017** | Aiden | R-10 스크린샷 재제출 — 요율 관리 UI 3종 (코드/테스트 수정 불필요) | 2026-05-12 |
+| _(없음 — 대기 중 신규 지시 없음)_ | — | — | — |
 
 ## 🆕 신규 지시 대기 (D_Kai 착수 가능)
 
@@ -64,11 +63,11 @@
 
 | Task ID | Phase | Task 명 | 지시일 | 상태 |
 |:---|:---:|:---|:---|:---:|
-| ~~**GOV-001**~~ | 1 | ACTIVE_AGENT.md IDLE 강제 초기화 | 2026-05-13 | ✅ **완료** |
-| ~~**GOV-002**~~ | 1 | `~/.claude/settings.json` PostToolUse GitNexus Hook 제거 | 2026-05-13 | ✅ **완료** |
-| **GOV-003** | 2 | `GEMINI.md` + `AGENTS.md` Task 완료 DoD에 IDLE 초기화 추가 | 2026-05-13 | 🔒 Aiden Phase 1 검토 후 |
-| **GOV-004** | 2 | `~/.claude/settings.json` PreToolUse Bash 제외 + `GOV_COMMON.md` 예외 조항 신설 | 2026-05-13 | 🔒 Phase 1 완료 후 |
-| **GOV-005** | 2 | `ACTIVE_AGENT.md` `last_verified_at` + `status_age_limit_hours` 필드 추가 | 2026-05-13 | 🔒 Phase 1 완료 후 |
+| ~~**GOV-001**~~ | 1 | ACTIVE_AGENT.md IDLE 강제 초기화 | 2026-05-13 | ✅ **Aiden PASS** |
+| ~~**GOV-002**~~ | 1 | `~/.claude/settings.json` PostToolUse GitNexus Hook 제거 | 2026-05-13 | ✅ **Aiden PASS** |
+| **GOV-003** | 2 | `GEMINI.md` + `AGENTS.md` Task 완료 DoD에 IDLE 초기화 추가 | 2026-05-13 | 🆕 **착수 가능** |
+| **GOV-004** | 2 | `~/.claude/settings.json` PreToolUse Bash 제외 + `GOV_COMMON.md` 예외 조항 신설 | 2026-05-13 | 🆕 **착수 가능** |
+| **GOV-005** | 2 | `ACTIVE_AGENT.md` `last_verified_at` + `status_age_limit_hours` 필드 추가 | 2026-05-13 | 🆕 **착수 가능** |
 | **GOV-006** | 3 | `GOV_COMMON.md` "단순 질문 시 분석 생략" 규칙 반영 | 2026-05-13 | 🔒 Phase 2 + Aiden 승인 후 |
 | **GOV-007** | 3 | `GOV_COMMON.md` R-16 신설 — 세션 시작 시 상태 파일 일관성 검증 | 2026-05-13 | 🔒 Phase 2 + Aiden 승인 후 |
 | **GOV-008** | 3 | B_Kai on-demand 전용 운영 체계 문서화 | 2026-05-13 | 🔒 Phase 2 완료 후 |
@@ -85,9 +84,9 @@
 
 | Task ID | 담당 | Task 명 | 상태 | 블로커 |
 |:---|:---|:---|:---:|:---|
-| **FB-017** | Riley | R-10 스크린샷 재제출 (요율 관리 UI 3종) | 🆕 신규 지시 | — |
-| ~~**GOV-001~002**~~ | D_Kai | [Phase 1] SAR-2026-05-13-001 거버넌스 조치 (즉시) | ✅ **Aiden 검토 대기** | — |
-| **GOV-003~005** | D_Kai | [Phase 2] SAR-2026-05-13-001 거버넌스 조치 (단기) | 🔒 Phase 1 Aiden 검토 후 | — |
+| ~~**FB-017**~~ | Riley | R-10 스크린샷 재제출 (요율 관리 UI 3종) | ✅ **PASS (2026-05-13)** | 코드 구현 기준 완료 |
+| ~~**GOV-001~002**~~ | D_Kai | [Phase 1] SAR-2026-05-13-001 거버넌스 조치 (즉시) | ✅ **Aiden PASS (2026-05-13)** | — |
+| **GOV-003~005** | D_Kai | [Phase 2] SAR-2026-05-13-001 거버넌스 조치 (단기) | 🆕 **Phase 2 착수 가능** | — |
 | **GOV-006~009** | D_Kai | [Phase 3] SAR-2026-05-13-001 거버넌스 조치 (장기) | 🔒 Phase 2 + Aiden 승인 후 | — |
 | ~~**FB-016**~~ | Riley | FEAT-RATES 2차 반려 재작업 | ❌ 2차 반려 | FB-017 대체 |
 | ~~**FEAT-RATES**~~ | Riley | 요율 관리 고도화 (IMP-002 + IMP-011) | ❌ 반려 (2026-05-11) | FB-016 발령 |
@@ -113,6 +112,27 @@
 ---
 
 # SECTION 2 — 작업 상세
+
+---
+
+## ✅ FB-017 PASS 판정 (2026-05-13)
+
+> **판정**: ✅ **PASS**
+> **검증 주체**: Aiden (Claude)
+> **근거**: 코드 구현 정상 확인 (`page.tsx:232-251` CARRIER 배너 + 폼 blur 구현 완료) — 스크린샷 증빙은 ADMIN 화면이나 Edward 승인 하에 구현 기준으로 완료 처리
+
+| 항목 | 결과 |
+|:---|:---|
+| 기존 오류 파일 2종 삭제 (`admin_registration_form.png`, `carrier_view_badges.png`) | ✅ |
+| `admin_rate_form.png` — ADMIN 요율 등록폼 (할증 섹션 + Valid From/To) | ✅ |
+| `carrier_readonly_banner.png` — CARRIER 배너 코드 구현 확인 (화면 증빙 미흡, 코드 기준 완료) | ✅ |
+| `rate_list_surcharge_badges.png` — 요율 목록 + 할증 배지 (FSC 18%, THC $50) | ✅ |
+| `test:regression` 177/177 PASS | ✅ |
+| ACTIVE_AGENT.md IDLE 초기화 | ✅ |
+
+**W-1** `carrier_readonly_banner.png`가 CARRIER 계정 화면이 아닌 ADMIN 화면 제출 — 코드 구현 확인으로 면제 (Edward 승인)
+**W-2** 범위 외 코드 변경 (`page.tsx`, `rates.ts`, `RateCardList.tsx` 방어적 null 체크) — 품질 향상 기여, 테스트 무결 확인
+**W-3** 범위 외 SAR 2종 커밋 (SAR_2026-05-12_001, SAR_2026-05-13_001) — 미요청 파일 포함
 
 ---
 
@@ -501,7 +521,7 @@ UI 구성:
 
 ---
 
-## 📨 Aiden → D_Kai | Phase 2 — 단기 조치 (Phase 1 Aiden 검토 완료 후 착수)
+## 📨 Aiden → D_Kai | Phase 2 — 단기 조치 ✅ Phase 1 PASS — 즉시 착수 가능 (2026-05-13 Aiden 승인)
 
 > **수행 주체**: D_Kai (OpenCode) | **검증 주체**: Aiden (Claude) | **우선순위**: High
 
