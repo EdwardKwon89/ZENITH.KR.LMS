@@ -99,6 +99,30 @@ mkdir -p ~/.agents/skills
 
 `agentic-engineering`, `api-design`, `backend-patterns`, `coding-standards`, `database-migrations`, `deployment-patterns`, `e2e-testing`, `frontend-patterns`, `postgres-patterns`, `security-review`, `tdd-workflow`, `verification-loop`
 
+**재설치 참조 — `~/.agents.bak/skills/` 실제 디렉토리명:**
+
+| 개념 명칭 | `~/.agents.bak/skills/` 실제 경로 |
+|:---|:---|
+| agentic-engineering | `agentic-actions-auditor` |
+| api-design | `api-design-principles` |
+| backend-patterns | `cc-skill-backend-patterns` |
+| coding-standards | `cc-skill-coding-standards` |
+| database-migrations | `database-migration` |
+| deployment-patterns | `deployment-procedures` |
+| e2e-testing | `e2e-testing` |
+| frontend-patterns | `cc-skill-frontend-patterns` |
+| postgres-patterns | `postgres-best-practices` |
+| security-review | `cc-skill-security-review` |
+| tdd-workflow | `tdd-workflow` |
+| verification-loop | `verification-before-completion` |
+
+> 재설치 시:
+> ```bash
+> mkdir -p ~/.agents/skills
+> cp -r ~/.agents.bak/skills/<실제경로> ~/.agents/skills/
+> ln -s ~/.agents/skills/<실제경로> ~/.claude/skills/<실제경로>
+> ```
+
 ### 3.3 제거해도 무방한 Skill (50개+)
 
 해당 프로젝트에서 사용하지 않는 기술의 Skill:
@@ -210,3 +234,4 @@ NB Kai 보고서가 명시하지 않은 중요 사실: **ECC가 설치 시 `~/.a
 |:----|:----:|:------|:------|
 | v1.0 | 2026-05-14 | NB Kai (OpenCode) | 최초 작성 — `.agent/skills` 과다 적재 원인 규명 및 해결 방안 |
 | v1.1 | 2026-05-14 | Aiden (Claude, ZEN_CEO) | 검토 의견 추가 — CONDITIONAL PASS, W-1 경로 오류 수정, symlink 구조 추가 발견, 장기 조치 권고 |
+| v1.2 | 2026-05-14 | Aiden (Claude, ZEN_CEO) | §3.2 재설치 참조 표 추가 — ~/.agents.bak/skills/ 실제 디렉토리명 매핑 (12개) |
