@@ -118,8 +118,86 @@ rm -rf .agent/skills/*
 
 ---
 
-## 5. 개정 이력
+---
+
+## 5. Aiden 검토 의견
+
+> **검토자:** Aiden (Claude, ZEN_CEO) | **검토일:** 2026-05-14 | **판정:** ✅ CONDITIONAL PASS
+
+### 5.1 종합 판정
+
+| 항목 | 판정 | 비고 |
+|:---|:---:|:---|
+| 근본 원인 진단 정확도 | ✅ 일치 | SAR-2026-05-14-001 확정 원인과 동일 |
+| 메커니즘 분석 (§2.4) | ✅ 정확 | 1000+ skills → compaction loop 재현 일치 |
+| **§3.1 해결 명령어 경로** | **⚠️ 오류** | **W-1: 경로 수정 필요** |
+| 보관 Skill 12개 목록 | ✅ 합리적 | 프로젝트 기술 스택 기반 타당 |
+
+**판정: CONDITIONAL PASS (W-1 수정 대기)**
+
+---
+
+### 5.2 수정 필요 — W-1: §3.1 경로 오류
+
+**문제:** `rm -rf .agent/skills/*`는 상대 경로로, 프로젝트 디렉토리 실행 시 `ZENITH_LMS_001/.agent/skills/`를 참조. 실제 Skills 경로는 **홈 디렉토리 절대 경로**이므로 해당 명령은 효과 없음.
+
+**실제 디렉토리 구조 (Aiden 교차 검증):**
+
+```
+~/.agents/skills/          ← OpenCode가 로드하는 Skills 실제 경로 (1,246개, 72MB)
+  ├── 00-andruia-consultant/
+  ├── ... (1244개)
+  └── zustand-store-ts/
+
+~/.claude/skills/          ← Claude Code Skills 경로
+  ├── gitnexus-*/          ← 7개 실제 디렉토리 (정상 동작)
+  └── 나머지 1,239개        ← ~/.agents/skills/ 가리키는 symlink
+                              (현재 ~/.agents/ → ~/.agents.bak/으로 이동 후 broken 상태)
+```
+
+**현재 상태:** `mv ~/.agents ~/.agents.bak` 조치로 루프 해결 완료 (2026-05-14 Edward 확인). 깨진 symlink(1239개)는 Claude Code 동작에 무영향 — Claude Code는 Skills을 on-demand 로드 방식 사용, 자동 전체 로드 없음.
+
+**§3.1 수정 후 올바른 정리 절차:**
+
+```bash
+# 1단계: 백업 (이미 완료)
+# mv ~/.agents ~/.agents.bak   ← 2026-05-14 완료
+
+# 2단계: ~/.claude/skills/ 깨진 symlink 제거 + 유효 Skills만 복원
+# 제거: 1,239개 broken symlinks
+find ~/.claude/skills -maxdepth 1 -type l -delete
+
+# 3단계: 필요 Skills만 ~/.agents/skills/ 에 보관 (12개 선별)
+mkdir -p ~/.agents/skills
+# (NB Kai §3.2 목록의 12개 + gitnexus 7개를 ~/.agents.bak/에서 복사)
+```
+
+---
+
+### 5.3 추가 발견 — symlink 구조
+
+NB Kai 보고서가 명시하지 않은 중요 사실: **ECC가 설치 시 `~/.agents/skills/`에 실제 파일 저장 + `~/.claude/skills/`에 동일 목록으로 symlink 생성**하는 구조. 따라서:
+
+- OpenCode 루프 원인: `~/.agents/skills/` 1,246개 직접 로드
+- Claude Code(Aiden) 무영향: `~/.claude/skills/`의 symlink들은 on-demand 호출 방식으로만 사용 (시스템 프롬프트 자동 주입 없음)
+- **정리 작업 시 `~/.claude/skills/`의 broken symlink도 함께 제거 필요**
+
+---
+
+### 5.4 장기 조치 권고
+
+| 우선순위 | 조치 | 근거 |
+|:---:|:---|:---|
+| 즉시 | `find ~/.claude/skills -maxdepth 1 -type l -delete` — broken symlink 제거 | 미관상 문제, 향후 툴 오작동 방지 |
+| 즉시 | `~/.agents.bak/` 영구 삭제 결정 또는 최소 Skills만 복원 | 72MB 불용 데이터 정리 |
+| 단기 | `~/.gitignore_global`에 `.agents/skills/` 추가 | PC 간 전파 방지 |
+| 장기 | ECC 재설치 시 `ECC_HOOK_PROFILE=minimal` 설정 | §3.4 NB Kai 권고 수용 |
+
+---
+
+## 6. 개정 이력
 
 | 버전 | 날짜 | 작성자 | 설명 |
 |:----|:----:|:------|:------|
 | v1.0 | 2026-05-14 | NB Kai (OpenCode) | 최초 작성 — `.agent/skills` 과다 적재 원인 규명 및 해결 방안 |
+| v1.1 | 2026-05-14 | Aiden (Claude, ZEN_CEO) | 검토 의견 추가 — CONDITIONAL PASS, W-1 경로 오류 수정, symlink 구조 추가 발견, 장기 조치 권고 |
