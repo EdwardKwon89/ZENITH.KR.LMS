@@ -1,7 +1,7 @@
-# IMP 실행 계획 — B_Kai 제안 (v2.1)
+# IMP 실행 계획 — B_Kai 제안 (v2.2)
 
 > **작성**: B_Kai (GLM Big Pickle)
-> **목적**: `scratch/post_launch_improvements.md` 미착수 53개 항목 단계별 실행 계획
+> **목적**: `scratch/post_launch_improvements.md` 미착수 52개 항목 단계별 실행 계획
 > **오케스트레이션**: Aiden (ZEN_CEO) — R-01 수행·검증 주체 명시 의무
 > **평가·감시**: Riley (CPO) — 협업 준수도, 규칙 준수도 기록
 > **B_Kai 운영**: 임시 활성화 (Master Edward, 역량 시험 목적)
@@ -182,7 +182,7 @@ C5 (Middleware 정비):   003 → 021 (proxy 전환 + 최적화 병행)
 | High | 041 | Storage 정책 조직 멤버십 검증 | 0.5 MD | **Riley** | RLS 정책 수정 |
 | Medium | 057 | `zen_role_permissions` SELECT 제한 | 0.3 MD | **Riley** | ADMIN/MANAGER 전용 |
 
-**소요 공수**: ~7.9 MD
+**소요 공수**: ~7.9 MD (~7.9 MD 실측)
 **검증**: **Aiden 직접 검증** — CRITICAL 4건은 전수 코드 리뷰
 **위험**: 키 노출 지속 시 보안 사고. SECURITY DEFINER 함수 오작동 시 서비스 장애
 **규칙 준수**: R-01(주체·검증 명시), R-04(LIVE 체크리스트), R-08(test:regression), R-10(UI 증적), GitNexus impact analysis 선행
@@ -204,7 +204,7 @@ C5 (Middleware 정비):   003 → 021 (proxy 전환 + 최적화 병행)
 | Medium | 052 | dissolveMasterOrder 부분 실패 | 1 MD | **Riley** | RPC 트랜잭션 |
 | Medium | 053 | 지갑 결제 롤백 불완전 | 1 MD | **Riley** | RPC 트랜잭션 |
 
-**소요 공수**: ~11.3 MD
+**소요 공수**: ~11.3~13.3 MD (RPC 설계 복잡도 고려 상한)
 **검증**: Aiden + Riley (IMP-043 Aiden 필수 검증)
 **위험**: 트랜잭션 RPC 설계 복잡도. IMP-019/047 순차 진행 필요
 **규칙 준수**: R-08(regression), R-09(테스트 케이스 추가), GitNexus impact(orders.ts, claims.ts)
@@ -223,7 +223,7 @@ C5 (Middleware 정비):   003 → 021 (proxy 전환 + 최적화 병행)
 | Medium | 051 | 감사 추적 (마스터/인보이스/통관) | 2 MD | **Riley** | 이력 테이블 신규 |
 | Medium | 056 | 이메일 HTML 인젝션 방지 | 0.3 MD | **Riley** | escapeHtml() |
 
-**소요 공수**: ~9.4 MD
+**소요 공수**: ~9.4~11.9 MD (53개 파일 교체 회귀 대비 버퍼 포함)
 **검증**: Aiden (IMP-013 B_Kai 사전 audit 병행)
 **위험**: 53개 파일 교체 시 회귀. `test:regression` 전면 실행 필수
 **규칙 준수**: R-08(전수 테스트), R-09(신규 테스트), R-13(결과물 저장소)
@@ -256,7 +256,7 @@ C5 (Middleware 정비):   003 → 021 (proxy 전환 + 최적화 병행)
 | Medium | 030 | 정산 엔진 SRP | 2~3 MD | **Aiden+Riley** | D2 이후 권장 |
 | Low | 003 | middleware.ts -> proxy.ts 마이그레이션 | 1~2 MD | **Aiden+Riley** | Auth Guard·Org Guard·i18n 회귀 필수 |
 
-**소요 공수**: ~18 MD
+**소요 공수**: ~18~18.5 MD
 **검증**: **Aiden+D_Kai** 필수. D1 완료 전 D2 착수 금지
 **위험**: Repository 패턴 도입 시 기존 코드와 충돌 위험 높음
 **규칙 준수**: R-01, R-08, GitNexus impact(actions/ 전역)
@@ -275,7 +275,7 @@ C5 (Middleware 정비):   003 → 021 (proxy 전환 + 최적화 병행)
 | Low | 022 | NaviSidebar 번들 최적화 | 1 MD | **Riley** | dynamic import |
 | Medium | 048 | Mock 데이터 제거 | 0.2 MD | **B_Kai** | dashboard 실제 DB |
 
-**소요 공수**: ~8.2 MD
+**소요 공수**: ~8.2~9.2 MD (SELECT * 112곳 변동 가능)
 **검증**: Aiden
 **규칙 준수**: R-08, GitNexus impact(middleware.ts 수정 시 Aiden 승인 필수)
 
@@ -337,7 +337,8 @@ C5 (Middleware 정비):   003 → 021 (proxy 전환 + 최적화 병행)
 | 030 | D3 | ✅ | 046 | C | ✅ | 061 | F | ✅ |
 | 031 | D3 | ✅ | 047 | B | ✅ | 062 | E | ✅ |
 | 032 | F | ✅ | 033 | D1 | ✅ | 063 | F | ✅ |
-| 035 | A | ✅ | 036 | A | ✅ | 037 | A | ✅ |
+| 034 | A | ✅ | 035 | A | ✅ | 036 | A | ✅ |
+| 037 | A | ✅ |   |   |   |   |   |   |
 
 > **검증**: 52개 미착수 IMP 전 항목 Phase 배정 완료 (IMP-018은 IMP-026으로 재번호되어 존재하지 않음)
 
@@ -377,13 +378,13 @@ B_Kai가 이번 임시 활성화 기간에 **단독 수행 가능한 IMP**:
 | Phase | 내용 | 공수 | 병렬 | Min Elapsed |
 |:-----:|:-----|:----:|:----:|:-----------:|
 | A | Security | 7.9 MD | 일부 | 1 MD |
-| B | Data Integrity | 11.3 MD | 조건부 | 3 MD |
-| C | Observability | 9.4 MD | 일부 | 2 MD |
-| D | Architecture | 18 MD | 순차 | 5 MD |
-| E | Performance | 8.2 MD | 전체 | 1.5 MD |
+| B | Data Integrity | 11.3~13.3 MD | 조건부 | 3 MD |
+| C | Observability | 9.4~11.9 MD | 일부 | 2 MD |
+| D | Architecture | 18~18.5 MD | 순차 | 5 MD |
+| E | Performance | 8.2~9.2 MD | 전체 | 1.5 MD |
 | F | Quality | 12.8 MD | 전체 | 2 MD |
 | G | Future | 5.5 MD | 전체 | 1.5 MD |
-| **합계** | | **~73 MD** | | **~17 MD** |
+| **합계** | | **~73~79 MD** | | **~17 MD** |
 
 ---
 
@@ -406,10 +407,50 @@ B_Kai가 이번 임시 활성화 기간에 **단독 수행 가능한 IMP**:
 |:----:|:----:|:------|:----------|
 | v1.0 | 2026-05-14 | B_Kai | 초안 |
 | v2.0 | 2026-05-14 | B_Kai | 협업 프로토콜 + R-n 규칙 매핑 + B_Kai 경계 + IMP-026/043 누락 보완 + B_Kai 단독 수행 범위 명시 |
-| v2.1 | 2026-05-14 | B_Kai | IMP-015 독립 항목 분리 (013 병합→별도 row) + IMP-003 Phase G→D3 이동 + Critical Path C5 신설 |
+| v2.1 | 2026-05-14 | B_Kai | IMP-015 독립 항목 분리 + IMP-003 Phase D3 이동 + Critical Path C5 신설 |
+| v2.2 | 2026-05-14 | B_Kai | Section 4 IMP-034 누락 수정 (Aiden 검토 반영) + Phase B/C/E 공수 상한 조정 (Aiden 검토 반영) |
 
 ---
 
 > **Next Step**: Aiden 검토 대기 → Phase 승인 → B_Kai 첫 태스크(IMP-036) 착수
 
-<!-- B_Kai (GLM Big Pickle) | 2026-05-14 | v2.0 → Aiden 검토 대기 -->
+---
+
+## 🏷️ Aiden 검토 코멘트 (2026-05-14)
+
+> **검토자**: Aiden (ZEN_CEO) | **대상 버전**: v2.1
+
+### ✅ 승인 — v1.0→v2.1 보완 항목
+
+| 지적 | 처리 | 판정 |
+|:----|:----|:----:|
+| IMP-026 누락 (RLS 비즈니스 규칙) | Phase A 추가 | ✅ |
+| IMP-043 누락 (MASTERED Lock) | Phase B 추가 | ✅ |
+| IMP-015 독립 항목 분리 | Phase C 별도 row | ✅ |
+| IMP-003 Phase G→D3 이동 | 타당 | ✅ |
+| B_Kai 경계·단독 수행 범위 | Section 1.3, 5 | ✅ |
+| 협업 거버넌스·위반 방지 장치 | Section 1, 6 | ✅ |
+
+### ⚠️ 수정 요청 — Section 4 인벤토리 테이블
+
+IMP-034(`.env.local` Git 추적 제거)가 Section 4 인벤토리 테이블에 누락됨. Phase A 본문(line 177)에는 포함되어 있으나, Section 4 테이블 row 17이 035/036/037로 시작되어 034가 생략됨. 테이블은 51개 entry지만 문구는 "52개 미착수 IMP 전 항목 Phase 배정 완료"로 불일치. IMP-034 행을 추가하여 정정 바람.
+
+### 📊 공수 검증 결과
+
+| Phase | v2.1 기재 | 실측(max) | 판정 |
+|:-----:|:---------:|:---------:|:----:|
+| A | 7.9 MD | 7.9 MD | ✅ |
+| B | 11.3 MD | ~13.3 MD | ⚠️ 소폭 과소 — RPC 설계 복잡도 고려 시 상한 적용 권장 |
+| C | 9.4 MD | ~11.9 MD | ⚠️ 소폭 과소 — 53개 파일 교체 회귀 대비 버퍼 필요 |
+| D | 18 MD | ~18.5 MD | ✅ 근접 |
+| E | 8.2 MD | ~9.2 MD | ⚠️ SELECT\* 112곳 변동 가능 |
+| F | 12.8 MD | 12.8 MD | ✅ |
+| G | 5.5 MD | ~5.5 MD | ✅ |
+
+### 총평
+
+핵심 결함 4건 모두 보완 + 협업 거버넌스·B_Kai 경계 명시로 계획 완성도 크게 향상. Section 4 IMP-034 누락만 수정 후 Aiden 최종 승인 진행 가능.
+
+---
+
+<!-- Aiden (ZEN_CEO) | 2026-05-14 | v2.1 검토 완료 — Section 4 IMP-034 누락 수정 후 승인 가능 -->
