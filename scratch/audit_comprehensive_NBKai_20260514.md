@@ -579,11 +579,100 @@ Phase 3 (1~2주):
 
 ---
 
-## 5. 개정 이력
+## 5. Aiden 검토 의견
+
+> **검토자:** Aiden (Claude, ZEN_CEO) | **검토일:** 2026-05-14 | **판정:** ✅ PASS (수정 사항 포함)
+
+### 5.1 종합 판정
+
+| 항목 | 판정 | 비고 |
+|:---|:---:|:---|
+| 분석 정확도 (spot-check 9/9) | ✅ 우수 | 전 항목 실측 확인 |
+| R-15 형식 준수 | ✅ 완전 준수 | 필수 기재 항목 전부 포함 |
+| 신규성 (기존 IMP 대비) | ✅ 유효 | 중복 2건 제외 29건 신규 확정 |
+| 보안 영역 분석 | ✅ 탁월 | CRITICAL 4건 — 타 에이전트 전부 미발견 |
+| **종합 등급** | **A+** | 5개 에이전트 중 최고 |
+
+**CRITICAL 4건 실측 검증 결과:**
+
+| NB Kai 번호 | 내용 | 검증 방법 | 결과 |
+|:---:|:---|:---|:---:|
+| IMP-027 | `.env.local` Git 추적 중 | `git ls-files .env.local` | ✅ 확인 |
+| IMP-028 | `approve_organization()` 권한 검증 전무 | 마이그레이션 SQL 직접 확인 | ✅ 확인 |
+| IMP-029 | `ROLE_PERMISSIONS`에 MANAGER 키 없음 | `status-machine.ts` L33~40 직접 확인 | ✅ 확인 |
+| IMP-030 | Auth 설정 취약 (pw 6자, confirm=false) | `supabase/config.toml` 직접 확인 | ✅ 확인 |
+
+### 5.2 수정 사항 — 번호 충돌 (W-1)
+
+**원인:** NB Kai의 기준선이 IMP-001~026이었으나, B_Kai(EXP-IMP-BK)가 IMP-027~033을 선행 등록함.  
+NB Kai의 IMP-027~058(32건)과 기등록 IMP-027~033(7건)이 충돌.
+
+**확정 번호 재부여:**
+
+| NB Kai 원번호 | 확정 번호 | 비고 |
+|:---:|:---:|:---|
+| IMP-027 | **IMP-034** | .env.local Git 노출 |
+| IMP-028 | **IMP-035** | SECURITY DEFINER 권한 누락 |
+| IMP-029 | **IMP-036** | MANAGER 역할 누락 |
+| IMP-030 | **IMP-037** | Supabase Auth 설정 취약 |
+| IMP-031 | **IMP-038** | CLAIMED 미등록 |
+| IMP-032 | **IMP-039** | 정산 이중 실행 |
+| IMP-033 | **IMP-040** | 재고 불일치 |
+| IMP-034 | **IMP-041** | Storage 정책 누락 |
+| IMP-035 | **IMP-042** | updateOrder isOrderEditable 미호출 |
+| IMP-036 | **IMP-043** | MASTERED Lock 우회 |
+| IMP-037 | **IMP-044** | 인보이스 발행 후 비용 변경 차단 없음 |
+| IMP-038 | **IMP-045** | 무제한 리스트 18곳 |
+| IMP-039 | **IMP-046** | Rate Limiting 전무 |
+| IMP-040 | **IMP-047** | 트랜잭션 부재 확장 |
+| IMP-041 | ~~중복~~ | TypeScript any → B_Kai IMP-029와 동일, **병합** |
+| IMP-042 | **IMP-048** | Mock 데이터 잔재 |
+| IMP-043 | **IMP-049** | 이중 프로필 테이블 |
+| IMP-044 | **IMP-050** | HELD 복구 로직 부재 |
+| IMP-045 | **IMP-051** | 감사 추적 누락 |
+| IMP-046 | **IMP-052** | dissolveMasterOrder 부분 실패 |
+| IMP-047 | **IMP-053** | 지갑 결제 롤백 불완전 |
+| IMP-048 | **IMP-054** | N+1 쿼리 7곳 |
+| IMP-049 | **IMP-055** | 인덱스 누락 4종 |
+| IMP-050 | **IMP-056** | 이메일 HTML 인젝션 |
+| IMP-051 | **IMP-057** | zen_role_permissions SELECT 노출 |
+| IMP-052 | **IMP-058** | finance.ts 733줄 분할 (B_Kai IMP-033과 부분 중복 — 범위 확장으로 유지) |
+| IMP-053 | **IMP-059** | Supabase 클라이언트 중복 생성 |
+| IMP-054 | **IMP-060** | RETURNED 상태 모호성 |
+| IMP-055 | ~~중복~~ | 통관 어댑터 미완성 → B_Kai IMP-028과 동일, **병합** |
+| IMP-056 | **IMP-061** | PDF 경로 충돌 |
+| IMP-057 | **IMP-062** | SELECT * 남용 112곳 |
+| IMP-058 | **IMP-063** | ZenUI.tsx 7개 컴포넌트 단일 파일 |
+
+**최종 등록 건수: 32건 → 중복 2건 병합 후 30건 (IMP-034~063)**
+
+### 5.3 우선순위 조정 의견
+
+| 확정 번호 | NB Kai 우선순위 | Aiden 조정 | 사유 |
+|:---:|:---:|:---:|:---|
+| IMP-034 (.env.local) | CRITICAL | **즉시 처리** | 키 재발급 + `git rm --cached` 선행 필요 |
+| IMP-036 (MANAGER 누락) | CRITICAL | **즉시 처리** | 한 줄 수정으로 해결 가능 — 가장 빠른 CRITICAL 해소 |
+| IMP-035 (SECURITY DEFINER) | CRITICAL | CRITICAL 유지 | 38개 함수 전수 검토 필요 |
+| IMP-037 (Auth 설정) | CRITICAL | CRITICAL 유지 | 운영 환경 즉시 적용 가능 |
+
+### 5.4 에이전트별 비교 (EXP-IMP 시리즈 종합)
+
+| 에이전트 | 도출 건수 | 등급 | 특화 영역 |
+|:---|:---:|:---:|:---|
+| **NB Kai** | **30건** (중복 제외) | **A+** | 보안·전 영역 종합 |
+| B_Kai | 7건 | A | 아키텍처 |
+| D_Kai | 6건 | A | 아키텍처 |
+| Ring | 4건 | B+ | 성능 |
+| Riley | 4건 | B+ | 코드 품질 |
+
+---
+
+## 6. 개정 이력
 
 | 버전 | 날짜 | 작성자 | 설명 |
 |:----|:----:|:------|:------|
 | v1.0 | 2026-05-14 | NB Kai (OpenCode) | 최초 작성. 5개 영역 전면 분석 + 기존 IMP-001~026 중복 교차 검증 + 신규 IMP-027~058 도출 |
+| v1.1 | 2026-05-14 | Aiden (Claude, ZEN_CEO) | 검토 의견 추가 — PASS 판정, 번호 충돌 수정 (IMP-027~058 → IMP-034~063), 중복 2건 병합 |
 
 ---
 
