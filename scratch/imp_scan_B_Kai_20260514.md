@@ -192,3 +192,45 @@
 
 > **비고**: 본 보고서의 IMP 번호(027~033)는 제안 번호입니다.  
 > `scratch/post_launch_improvements.md` 등재 시점의 마지막 등록 번호 이후 연속 번호로 Aiden 검토 후 확정합니다.
+
+---
+
+## Aiden 검토 의견
+
+> **판정**: ✅ **PASS**
+> **검증 주체**: Aiden (Claude) | **판정일**: 2026-05-14
+
+### ✅ 거버넌스 준수 확인
+
+| 항목 | 결과 | 비고 |
+|:----|:----:|:-----|
+| R-13 파일 경로 | ✅ | `scratch/imp_scan_B_Kai_20260514.md` 정확 |
+| R-15 형식 | ✅ | 발견 경위 / 현재 상태 / 임시 조치 / 근본 문제 / 목표 구현 / 관련 파일 / 예상 공수 / 우선순위 완비 |
+| 에이전트 커밋 태그 | ✅ | `[B_Kai]` 태그 (bf4c47d) |
+| 중복 방지 | ✅ | IMP-001~026 전수 검토 명시, 완전 중복 2건 제외 + 부분 중복 3건 보완 처리 |
+| IMP 번호 | ✅ | IMP-026 이후 IMP-027~033 확정 |
+
+### ✅ 사실 확인
+
+| IMP | 검증 결과 | 비고 |
+|:----|:--------:|:-----|
+| IMP-027 | ✅ 사실 확인 | `src/middleware.ts` L63~75 — MAINTENANCE_MODE 분기 존재, 코드 주석 "아직 없으므로" 직접 확인. `(maintenance)/` 디렉토리 없음 실측 |
+| IMP-028 | ✅ 사실 확인 | `src/lib/customs/` 내 `manual-adapter.ts`, `types.ts` 2개만 존재. UnipassAdapter 구현체 없음 확인 |
+| IMP-029 | ✅ 사실 확인 | `src/types/claims.ts` — `order: any; // Detailed order info` 직접 확인 |
+| IMP-030 | ⚠️ 수치 경미 부정확 (W-1 참조) | 핵심 사실 부합, 수치만 수정 권고 |
+| IMP-031 | ✅ 사실 확인 | `validateAdminAction()` → `checkPermission(profile?.role, "/admin")` 직접 확인. `STATIC_PERMISSIONS` fallback 1순위 사용 실측 |
+| IMP-032 | ✅ 사실 확인 | `ORDER_STATUS_META`의 label 필드 `'접수'`, `'스케줄배정'` 등 한글 하드코딩 직접 확인 |
+| IMP-033 | ✅ 사실 확인 | `finance.ts` 733줄(보고 732줄, 1줄 오차 무시), `orders.ts` 681줄 실측 일치 |
+
+### ⚠️ 주의 사항 (Warning)
+
+**W-1 | IMP-030 `SettlementEngine` 줄 수 기술 경미 부정확**
+- **보고**: "SettlementEngine 클래스 185줄"
+- **실측**: `src/lib/finance/settlement.ts` 전체 파일 288줄 (SettlementEngine 클래스 L22~L186, InvoiceGenerator L188~L288로 구성)
+- **영향**: 핵심 개선 방향(단일 책임 분할) 자체는 유효하며 PASS 판정에 영향 없음
+- **수정 권고**: "전체 파일 288줄, SettlementEngine(L22~186) + InvoiceGenerator(L188~288) 혼재"로 기술 정확도 향상 권고
+
+### 📋 IMP 번호 확정
+
+> IMP-026 마지막 등록 확인 → **IMP-027~033 확정**
+> `scratch/post_launch_improvements.md` 등재 완료 (Aiden 대리 처리)
