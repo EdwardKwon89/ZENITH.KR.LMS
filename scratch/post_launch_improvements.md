@@ -10,6 +10,7 @@
 > **IMP-019~022**: EXP-IMP-RG (Ring 2.6 1T) 2026-05-13 도출 — Aiden CONDITIONAL PASS 대기 중.
 > **IMP-023~026**: EXP-IMP-RL (Riley, Gemini) 2026-05-13 도출 — Aiden PASS 확정.
 > **IMP-027~033**: EXP-IMP-BK (B_Kai) 2026-05-14 도출 — Aiden PASS 확정.
+> **IMP-034~063**: AUD-2026-0514-001 (NB Kai) 2026-05-14 도출 — Aiden PASS 확정 (번호 충돌 정정: NB Kai 원번호 IMP-027~058 → IMP-034~063, 중복 2건 병합 후 30건).
 
 ---
 
@@ -463,3 +464,366 @@
 - **관련 파일**: `src/app/actions/finance.ts` → 5개 신규, `src/app/actions/orders.ts` → 4개 신규
 - **예상 공수**: 2~3 MD
 - **우선순위**: Medium
+
+---
+
+## [IMP-034] `.env.local` 프로덕션 자격증명 Git 노출
+
+- **발견 경위**: AUD-2026-0514-001 (NB Kai) — `.env.local` 파일이 `git ls-files`에 추적되어 있음
+- **현재 상태**: 6개 프로덕션 자격증명 평문 노출: `SUPABASE_SERVICE_ROLE_KEY`(DB 전체접근·RLS 우회), `DATABASE_URL`(비밀번호 포함), `VERCEL_TOKEN`(배포 권한), `SUPABASE_ACCESS_TOKEN`(Supabase 관리 API), `RESEND_API_KEY`(이메일 발송), `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- **임시 조치**: 즉시 모든 키 재발급 (Supabase Dashboard → Settings → API → Service Key, Vercel → Settings → Tokens, Resend → API Keys)
+- **근본 문제**: `.gitignore`에 `.env*` 패턴이 있으나 Git이 이미 `.env.local`을 추적 중 (`git rm --cached` 필요)
+- **목표 구현**: ① `git rm --cached .env.local`로 Git 추적 제거 ② `.gitignore`에 `.env.local` 명시 추가 ③ 모든 키 재발급 후 새 `.env.local`에 설정 ④ `.env.example`은 키 없이 포맷만 유지
+- **관련 파일**: `.env.local`, `.gitignore`, `.env.example`
+- **예상 공수**: 0.5 MD
+- **우선순위**: **CRITICAL**
+
+---
+
+## [IMP-035] SECURITY DEFINER 함수 38개 권한 검증 누락
+
+- **발견 경위**: AUD-2026-0514-001 (NB Kai) — `supabase/migrations/` 전수 분석, 38개 SQL 함수 `SECURITY DEFINER` 생성 확인
+- **현재 상태**: `approve_organization()` 함수 본문에 권한 검증 코드 전무. `reject_organization()`, `request_organization_supplement()`도 `auth.users` 직접 수정 + 권한 확인 없음. `SECURITY DEFINER`로 실행되어 호출자 역할과 무관하게 postgres 권한으로 실행
+- **임시 조치**: 해당 SECURITY DEFINER 함수들에 `auth.jwt()` 기반 권한 확인 로직 즉시 추가
+- **근본 문제**: SECURITY DEFINER는 기본적으로 RLS를 우회하므로 함수 내부에서 명시적 권한 검증이 필수이나 누락됨
+- **목표 구현**: ① 모든 SECURITY DEFINER 함수 인벤토리 정리 ② 각 함수에 권한 검증 로직 추가 ③ 불필요한 함수는 `SECURITY INVOKER`로 전환 ④ `get_my_role()` 헬퍼 재사용
+- **관련 파일**: `supabase/migrations/*.sql` (38개 함수 전반)
+- **예상 공수**: 2~3 MD
+- **우선순위**: **CRITICAL**
+
+---
+
+## [IMP-036] Status Machine MANAGER 역할 누락 — 관리자 상태 변경 불가
+
+- **발견 경위**: AUD-2026-0514-001 (NB Kai) — `src/lib/logistics/status-machine.ts` `ROLE_PERMISSIONS` 객체에서 `MANAGER` 키 확인
+- **현재 상태**: `canChangeStatus()` 내 `ROLE_PERMISSIONS` 객체에 `MANAGER` 키 없음 → `ROLE_PERMISSIONS[MANAGER] = undefined` → `allowedByRole = []` → 모든 상태 전이 거부. ADMIN/ZENITH_SUPER_ADMIN은 별도 bypass 로직 동작하지만 MANAGER는 미포함
+- **임시 조치**: `ROLE_PERMISSIONS.MANAGER = TRANSITION_RULES.ADMIN` 추가 (ADMIN과 동일 권한)
+- **근본 문제**: Status Machine 설계 시 MANAGER 역할이 누락됨. 기존 4개 에이전트가 모두 미발견
+- **목표 구현**: `ROLE_PERMISSIONS`에 `MANAGER` 키와 전이 규칙 배열 추가. MANAGER와 ADMIN 권한 차이가 있다면 별도 배열 정의
+- **관련 파일**: `src/lib/logistics/status-machine.ts`
+- **예상 공수**: 0.1 MD
+- **우선순위**: **CRITICAL**
+
+---
+
+## [IMP-037] Supabase Auth 보안 설정 취약
+
+- **발견 경위**: AUD-2026-0514-001 (NB Kai) — `supabase/config.toml` `[auth]` 섹션 분석
+- **현재 상태**: `minimum_password_length = 6` (OWASP 위반), `password_requirements = ""` (복잡도 없음), `enable_confirmations = false`, `secure_password_change = false`, MFA 비활성화, Captcha 없음, `enable_signup = true` (공개 회원가입)
+- **임시 조치**: 운영 환경 Supabase 프로젝트에서 즉시 설정 변경
+- **목표 구현**: `minimum_password_length = 8`, `password_requirements = "lower_upper_letters_digits"`, `enable_confirmations = true`, `secure_password_change = true`, MFA TOTP 활성화, Captcha 설정
+- **관련 파일**: `supabase/config.toml`
+- **예상 공수**: 0.5 MD
+- **우선순위**: **CRITICAL**
+
+---
+
+## [IMP-038] CLAIMED 정식 OrderStatus 미등록 — 상태 전이 검증 우회
+
+- **발견 경위**: AUD-2026-0514-001 (NB Kai) — `src/app/actions/claims.ts`의 `createClaim()`에서 `OrderStatus` enum에 없는 'CLAIMED' 문자열 직접 할당 확인
+- **현재 상태**: `OrderStatus` 타입에 `CLAIMED` 미등록. `claims.createClaim()`이 `'CLAIMED'` 문자열을 수동 설정하여 `updateOrderStatus()` 경유 없이 상태 변경. 감사 추적에도 CLAIMED 전이가 정식 기록되지 않을 수 있음
+- **임시 조치**: 없음
+- **목표 구현**: ① `OrderStatus` enum에 `CLAIMED` 등록 ② CLAIMED→RESOLVED→CLOSED 전이 규칙 Status Machine에 정의 ③ `createClaim()`에서 `checkPermission()` 및 `canChangeStatus()` 경유하도록 수정
+- **관련 파일**: `src/lib/logistics/status-machine.ts`, `src/app/actions/claims.ts`, `supabase/migrations/`
+- **예상 공수**: 0.5 MD
+- **우선순위**: High
+
+---
+
+## [IMP-039] 정산 이중 실행 위험
+
+- **발견 경위**: AUD-2026-0514-001 (NB Kai) — `src/app/actions/finance.ts`에서 `calculateSettlementAction()`과 오더 상태 RELEASED 자동 트리거 간 중복 호출 가능성 확인
+- **현재 상태**: 오더 RELEASED 시 정산 자동 트리거(`generateInvoicesForOrder`). 동시에 관리자가 수동으로 `calculateSettlementAction()` 호출 가능. 중복 실행 방어 로직이 정산 내역을 덮어쓰는 결과 초래
+- **임시 조치**: 없음
+- **목표 구현**: ① RELEASED 자동 트리거 이후 수동 호출 차단 플래그 추가 ② `billing_status` 컬럼 활용하여 이미 정산된 오더 재정산 불가 처리 ③ 관리자 화면에 "정산 완료" 표시
+- **관련 파일**: `src/app/actions/finance.ts`, `src/app/actions/orders.ts`
+- **예상 공수**: 0.5 MD
+- **우선순위**: High
+
+---
+
+## [IMP-040] 재고 불일치 (WAREHOUSED→CANCELED)
+
+- **발견 경위**: AUD-2026-0514-001 (NB Kai) — `src/lib/logistics/inventory.ts`의 `syncInventoryFromOrder()` 상태별 분기 로직 분석
+- **현재 상태**: WAREHOUSED 진입 시 `on_hand_qty` 증가 + `reserved_qty` 차감. WAREHOUSED에서 CANCELED 시 `reserved_qty`만 차감되고 `on_hand_qty`는 유지
+- **임시 조치**: 없음
+- **목표 구현**: WAREHOUSED 이후 CANCELED 시 `on_hand_qty`도 함께 차감하는 로직 추가. 또는 CANCELED 시점 현재 상태 기준 역연산 수행
+- **관련 파일**: `src/app/actions/inventory.ts`, `src/lib/logistics/inventory.ts`
+- **예상 공수**: 0.5 MD
+- **우선순위**: High
+
+---
+
+## [IMP-041] Storage 정책 조직 멤버십 검증 부재
+
+- **발견 경위**: AUD-2026-0514-001 (NB Kai) — `supabase/migrations/20260418200000_storage_and_approval.sql` 분석
+- **현재 상태**: `business_docs` Storage 버킷 INSERT 정책이 `bucket_id = 'business_docs'` 조건만 있고 조직 멤버십 검증 없음. SELECT 정책에만 소유자 확인이 있고 INSERT/UPDATE/DELETE에는 소유자 검증 부재
+- **임시 조치**: 없음
+- **목표 구현**: Storage INSERT/UPDATE 정책에 `auth.uid()`와 `zen_profiles.org_id` 기반 조직 멤버십 검증 추가. 공용 버킷과 조직별 버킷 정책 분리
+- **관련 파일**: `supabase/migrations/20260418200000_storage_and_approval.sql`, `supabase/migrations/20260425110000_fix_storage_rls_super_admin.sql`
+- **예상 공수**: 0.5 MD
+- **우선순위**: High
+
+---
+
+## [IMP-042] `updateOrder()` WAREHOUSED+ 상태 수정 미차단
+
+- **발견 경위**: AUD-2026-0514-001 (NB Kai) — `src/app/actions/orders.ts` 분석, `isOrderEditable()` 함수가 `updateOrder()`에서 미호출
+- **현재 상태**: `isOrderEditable()`이 WAREHOUSED/PACKED/RELEASED/IN_TRANSIT/DELIVERED/CANCELED 상태에서 `false` 반환하도록 정의되어 있으나, `updateOrder()` 액션에서 이 함수를 호출하지 않고 바로 UPDATE 실행
+- **임시 조치**: 없음
+- **목표 구현**: `updateOrder()` 시작 시 `isOrderEditable()` 호출하여 수정 가능 상태 검증. 수정 불가 상태면 오류 반환
+- **관련 파일**: `src/app/actions/orders.ts`
+- **예상 공수**: 0.3 MD
+- **우선순위**: High
+
+---
+
+## [IMP-043] MASTERED Lock 액션별 우회 가능
+
+- **발견 경위**: AUD-2026-0514-001 (NB Kai) — `updateOrderStatus()` 내 MASTERED 체크 코드 확인 후 타 액션 교차 검증
+- **현재 상태**: `updateOrderStatus()`에서만 `master_order_id` 조회하여 MASTERED 상태 Lock 적용. `updateOrder()`, `claims.createClaim()`, `dissolveMasterOrder()` 등 다른 액션에서는 마스터 여부 확인 없음
+- **임시 조치**: 없음
+- **목표 구현**: ① DB 레벨 Check Constraint 추가 ② 또는 Supabase RPC로 모든 쓰기 작업을 단일 진입점으로 통일 ③ 최소한 모든 쓰기 액션에 `isMastered(orderId)` 검증 추가
+- **관련 파일**: `src/app/actions/orders.ts`, `src/app/actions/claims.ts`, `supabase/migrations/`
+- **예상 공수**: 1 MD
+- **우선순위**: High
+
+---
+
+## [IMP-044] 인보이스 발행 후 비용 변경 차단 없음
+
+- **발견 경위**: AUD-2026-0514-001 (NB Kai) — `finance.ts`의 `updateOrderCosts()`와 `issueInvoicePdf()` 간 관계 분석
+- **현재 상태**: 인보이스 발행 후에도 `zen_order_costs` 데이터 수정 가능. `invoice_id IS NULL` 조건만으로 미청구 비용 식별하나, 이미 청구된 비용 변경을 물리적으로 차단하지 않음
+- **임시 조치**: 없음
+- **목표 구현**: `zen_order_costs`에 `invoice_id`가 설정된 레코드는 UPDATE/DELETE 차단하는 DB 트리거 또는 RLS 정책 추가. 재발행 시 기존 cost 유지 + 추가 cost 신규 생성 패턴 도입
+- **관련 파일**: `src/app/actions/finance.ts`, `supabase/migrations/`
+- **예상 공수**: 0.5 MD
+- **우선순위**: High
+
+---
+
+## [IMP-045] 무제한 리스트 조회 18곳
+
+- **발견 경위**: AUD-2026-0514-001 (NB Kai) — 22개 서버 액션 파일 전수 분석, `.range()` / `.limit()` 사용 여부 확인
+- **현재 상태**: `getClaims()`(중첩조인 4테이블), `getMasterOrders()`, `getPendingHouseOrders()`, `getTransportCosts()`, `getCostProfitStats()`, `getRevenueReport()`, `getCostReport()`, `getVesselSchedules()`, `getOrderQnaList()` 외 다수에 페이지네이션 없음. Supabase `max_rows = 1000`이 유일한 방어
+- **임시 조치**: 없음
+- **목표 구현**: 18곳 모두 `page`, `pageSize` 파라미터 추가, `.range((page - 1) * pageSize, page * pageSize - 1)` 적용, 전체 카운트는 별도 `.count('exact')`
+- **관련 파일**: `src/app/actions/claims.ts`, `orders.ts`, `finance.ts`, `master.ts`, `statistics.ts`, `schedules.ts`, `support.ts`, `master-data.ts`
+- **예상 공수**: 2~3 MD
+- **우선순위**: High
+
+---
+
+## [IMP-046] Rate Limiting 전무
+
+- **발견 경위**: AUD-2026-0514-001 (NB Kai) — 서버 액션 분석 중 호출 제한 메커니즘 전무 확인
+- **현재 상태**: 모든 서버 액션(`createOrder()`, `createVoc()`, `topUpWallet()`, `logClientError()`)에 Rate Limiting 전혀 없음. Supabase Auth 레벨(`sign_in_sign_ups = 30/5분`)만 존재
+- **임시 조치**: 없음
+- **목표 구현**: ① `@upstash/ratelimit` 또는 Next.js 미들웨어 레벨 IP 기반 Rate Limiting 도입 ② 서버 액션별 제한: Mutation 10회/분/사용자, 읽기 100회/분/사용자 ③ `topUpWallet()` 등 금융 액션 3회/분
+- **관련 파일**: `src/app/actions/*.ts` (전체), `src/middleware.ts`
+- **예상 공수**: 2 MD
+- **우선순위**: High
+
+---
+
+## [IMP-047] 트랜잭션 부재 확장 (createOrder 외 전체 쓰기 작업)
+
+- **발견 경위**: AUD-2026-0514-001 (NB Kai) — IMP-019(`createOrder()`) 확인 후 `updateOrderStatus()`, 지갑 결제 등 타 쓰기 작업 확대 분석
+- **현재 상태**: `updateOrderStatus()`에서 8회 순차 쿼리(상태변경+히스토리+인벤토리+정산+알림+트래킹)가 try-catch로만 부분 보호. `payInvoiceFromWallet()`은 인보이스 실패 시 지갑 잔액 이미 차감됨
+- **임시 조치**: 없음
+- **목표 구현**: ① Supabase RPC로 여러 쓰기 작업을 단일 트랜잭션으로 래핑 ② PostgreSQL `BEGIN ... COMMIT/ROLLBACK` 활용 ③ 단기: 명시적 롤백 로직을 각 단계 실패 시 추가
+- **관련 파일**: `src/app/actions/orders.ts`, `src/app/actions/wallet.ts`, `supabase/migrations/`
+- **예상 공수**: 3~5 MD
+- **우선순위**: High
+
+---
+
+## [IMP-048] Mock 데이터 잔재 (프로덕션 코드)
+
+- **발견 경위**: AUD-2026-0514-001 (NB Kai) — `src/app/[locale]/(dashboard)/dashboard/page.tsx` 분석
+- **현재 상태**: 대시보드 페이지가 `MOCK_ORDERS` 배열을 사용하여 가짜 오더 데이터 표시. 실제 DB에서 조회하지 않음
+- **임시 조치**: 없음
+- **목표 구현**: 서버 액션 `getDashboardStats()`를 통해 실제 DB 데이터 기반으로 대시보드 렌더링. `MOCK_ORDERS` 제거
+- **관련 파일**: `src/app/[locale]/(dashboard)/dashboard/page.tsx`
+- **예상 공수**: 0.2 MD
+- **우선순위**: Medium
+
+---
+
+## [IMP-049] 이중 프로필 테이블 (profiles + zen_profiles)
+
+- **발견 경위**: AUD-2026-0514-001 (NB Kai) — `src/types/supabase.ts`와 마이그레이션 파일에서 두 테이블 공존 확인
+- **현재 상태**: `profiles`(초기 스키마)와 `zen_profiles`(리팩토링) 두 테이블 공존. `updateMyProfile()`에서 두 테이블 모두 업데이트. `getCurrentUserAffiliation()`은 두 테이블 조회 후 병합
+- **임시 조치**: 없음
+- **목표 구현**: ① `profiles` 테이블 의존성을 모두 `zen_profiles`로 이전 ② `profiles`를 View로 전환하거나 Drop ③ 모든 RLS 정책과 서버 액션 참조를 단일 테이블로 통일
+- **관련 파일**: `src/types/supabase.ts`, `src/app/actions/member.ts`, `supabase/migrations/*.sql`
+- **예상 공수**: 2 MD
+- **우선순위**: Medium
+
+---
+
+## [IMP-050] HELD→이전상태 복구 로직 부재
+
+- **발견 경위**: AUD-2026-0514-001 (NB Kai) — `status-machine.ts`의 `canChangeStatus()`에서 HELD 전이 규칙 분석
+- **현재 상태**: HELD 상태에서 REGISTERED/SCHEDULED/WAREHOUSED/PACKED/RELEASED/IN_TRANSIT 모든 전이가 허용되나, HELD 직전의 정확한 상태로 복구하는 로직 없음. 운영자가 직접 목적 상태를 선택해야 함
+- **임시 조치**: 없음
+- **목표 구현**: ① `order_status_history`에서 HELD 직전 상태 조회 ② HELD→이전상태 전이를 기본 복구 경로로 제안 ③ 운영자 선택 UI에 "원상복구" 자동 복구 버튼 제공
+- **관련 파일**: `src/lib/logistics/status-machine.ts`, `src/app/actions/orders.ts`
+- **예상 공수**: 1 MD
+- **우선순위**: Medium
+
+---
+
+## [IMP-051] 감사 추적 누락 (마스터/인보이스/통관)
+
+- **발견 경위**: AUD-2026-0514-001 (NB Kai) — `updateMasterOrderStatus()`, 인보이스 상태 변경, 통관 상태 변경 코드 분석
+- **현재 상태**: 오더 상태 변경은 `order_status_history`에 기록되나, 마스터 오더 상태 변경은 `remarks` 필드에만 기록. 인보이스 상태 변경(UNPAID→PAID/OVERDUE)은 `updated_at`만 갱신. 통관 상태 변경 이력 테이블 없음
+- **임시 조치**: 없음
+- **목표 구현**: ① `zen_master_order_history` 테이블 신규 생성 ② `zen_invoice_history` 테이블 신규 생성 ③ 각 변경 시점에 트리거 또는 서버 코드에서 이력 INSERT
+- **관련 파일**: `src/app/actions/orders.ts`, `src/app/actions/finance.ts`, `src/app/actions/customs.ts`, `supabase/migrations/`
+- **예상 공수**: 2 MD
+- **우선순위**: Medium
+
+---
+
+## [IMP-052] dissolveMasterOrder 부분 실패 위험
+
+- **발견 경위**: AUD-2026-0514-001 (NB Kai) — `orders.ts`의 `dissolveMasterOrder()` 로직 분석
+- **현재 상태**: 다수 House Order를 단일 쿼리(`update().eq("master_order_id", masterId)`)로 일괄 해체. 부분 실패(일부 row만 업데이트) 발생 시 불일치 상태
+- **임시 조치**: 없음
+- **목표 구현**: Supabase RPC로 트랜잭션 내에서 처리하거나, 각 House Order 개별 업데이트 후 결과 검증
+- **관련 파일**: `src/app/actions/orders.ts`
+- **예상 공수**: 1 MD
+- **우선순위**: Medium
+
+---
+
+## [IMP-053] 지갑 결제 롤백 불완전
+
+- **발견 경위**: AUD-2026-0514-001 (NB Kai) — `src/app/actions/wallet.ts`의 `payInvoiceFromWallet()` 분석
+- **현재 상태**: 지갑 잔액 차감 → `zen_wallet_transactions` INSERT → `zen_invoices` 상태 업데이트 순차 실행. 인보이스 업데이트 실패 시 지갑 잔액은 이미 차감되었으나 인보이스는 UNPAID 상태 유지
+- **임시 조치**: 없음
+- **목표 구현**: Supabase RPC로 전체 결제 프로세스를 단일 트랜잭션으로 래핑. 단기: 각 단계 실패 시 이전 단계 롤백 코드 추가
+- **관련 파일**: `src/app/actions/wallet.ts`
+- **예상 공수**: 1 MD
+- **우선순위**: Medium
+
+---
+
+## [IMP-054] N+1 쿼리 7곳
+
+- **발견 경위**: AUD-2026-0514-001 (NB Kai) — 22개 서버 액션의 Supabase 쿼리 패턴 분석
+- **현재 상태**: `getOrderDetails()`: 오더(1)+패키지(1)+아이템(1)=3회. `triggerStatusChangeNotification()`: 오더조회(1)+사용자목록(1)+알림INSERT(N)+이메일INSERT(N)=2+2N회. `createVoc()`: 오더확인(1)+INSERT(1)+Admin조회(1)+알림(1)=4회
+- **임시 조치**: 없음
+- **목표 구현**: Supabase 그래프QL 조인(`select(*, packages:zen_order_packages(*, items:zen_order_items(*)))`)으로 1회 통합. Batch INSERT로 N회 개별 INSERT 제거
+- **관련 파일**: `src/app/actions/orders.ts`, `src/app/actions/finance.ts`, `src/app/actions/notifications.ts`, `src/app/actions/voc.ts`, `src/app/actions/support.ts`
+- **예상 공수**: 2 MD
+- **우선순위**: Medium
+
+---
+
+## [IMP-055] 인덱스 누락 4종
+
+- **발견 경위**: AUD-2026-0514-001 (NB Kai) — `supabase/migrations/` 내 CREATE INDEX 문 분석 + 주요 쿼리 패턴 크로스 체크
+- **현재 상태**: `zen_profiles(org_id)` 인덱스 없음(조직별 사용자 조회 Full Scan). `zen_voc(order_id, org_id, status)` 인덱스 없음. `zen_qna(org_id, status)` 인덱스 없음. `zen_invoices(shipper_id, status, created_at)` 복합 조건 인덱스 없음
+- **임시 조치**: 없음
+- **목표 구현**: 위 4종 인덱스 추가 마이그레이션 작성
+- **관련 파일**: `supabase/migrations/` (신규 마이그레이션 파일)
+- **예상 공수**: 0.5 MD
+- **우선순위**: Medium
+
+---
+
+## [IMP-056] 이메일 HTML 인젝션 위험
+
+- **발견 경위**: AUD-2026-0514-001 (NB Kai) — `src/lib/notifications/email.ts` 및 `finance.ts`의 `sendTaxInvoiceEmail()` 분석
+- **현재 상태**: `${orderNo}`, `${tx.tax_invoice_no}`, `${tx.total_amount}` 등이 HTML 템플릿에 직접 삽입. 오더번호에 HTML 태그 포함 시 XSS 가능. Resend API를 통해 이메일 렌더링 환경에서 스크립트 실행 가능
+- **임시 조치**: 없음
+- **목표 구현**: 모든 동적 값에 `escapeHtml()` 적용 또는 DOMPurify 등 HTML sanitizer 사용
+- **관련 파일**: `src/lib/notifications/email.ts`, `src/app/actions/finance.ts`
+- **예상 공수**: 0.3 MD
+- **우선순위**: Medium
+
+---
+
+## [IMP-057] `zen_role_permissions` 모든 인증 사용자 SELECT 가능
+
+- **발견 경위**: AUD-2026-0514-001 (NB Kai) — `20260509000000_fix_rbac_and_harden_rls.sql`의 `"Allow authenticated users to read role permissions"` 정책 확인
+- **현재 상태**: `zen_role_permissions` 테이블에 모든 인증 사용자(`authenticated` 역할)가 SELECT 가능한 RLS 정책 존재. 하위 권한 사용자(CARRIER/INDIVIDUAL)가 시스템 전체 권한 구조를 조회 가능
+- **임시 조치**: 없음
+- **목표 구현**: SELECT 정책을 역할 기반으로 제한 (ADMIN/MANAGER/ZENITH_SUPER_ADMIN만 SELECT, 또는 현재 사용자 자신의 역할에 해당하는 row만 SELECT)
+- **관련 파일**: `supabase/migrations/20260509000000_fix_rbac_and_harden_rls.sql`
+- **예상 공수**: 0.3 MD
+- **우선순위**: Medium
+
+---
+
+## [IMP-058] `finance.ts` 733줄 분할 (IMP-033 범위 확장)
+
+- **발견 경위**: AUD-2026-0514-001 (NB Kai) — 서버 액션 파일 크기 분석 (IMP-033 B_Kai와 부분 중복, finance.ts에 특화)
+- **현재 상태**: `src/app/actions/finance.ts`가 733줄로 인보이스 발행·정산 생성·세금계산서·PDF 발행·리포트·엑셀 다운로드 등 6개 이상의 책임을 단일 파일에 혼재
+- **임시 조치**: 없음
+- **목표 구현**: `finance/invoice.ts`, `finance/settlement.ts`, `finance/tax-invoice.ts`, `finance/report.ts` 등 도메인별 4~5개 파일로 분할
+- **관련 파일**: `src/app/actions/finance.ts`
+- **예상 공수**: 2 MD
+- **우선순위**: Medium
+
+---
+
+## [IMP-059] Supabase 클라이언트 중복 생성
+
+- **발견 경위**: AUD-2026-0514-001 (NB Kai) — `createClient()` 호출 패턴 분석
+- **현재 상태**: `src/utils/supabase/server.ts`의 `createClient()`가 57회 호출됨. 동일 요청 내에서 `validateUserAction()` → 내부 `createClient()` + 서버 액션 자체 `createClient()`로 2중 생성 발생
+- **임시 조치**: 없음
+- **목표 구현**: `React.cache()`로 `createClient()` 래핑하여 요청 스코프 내 싱글톤 보장. 또는 Request 지역 변수로 Supabase 인스턴스 전달
+- **관련 파일**: `src/utils/supabase/server.ts`, `src/app/actions/*.ts`
+- **예상 공수**: 1 MD
+- **우선순위**: Medium
+
+---
+
+## [IMP-060] RETURNED 상태 모호성
+
+- **발견 경위**: AUD-2026-0514-001 (NB Kai) — Status Machine에서 RETURNED→WAREHOUSED 단일 전이만 존재 확인
+- **현재 상태**: RETURNED 상태에서 WAREHOUSED 전이만 허용. 반송 화물의 폐기 또는 최종 취소 시나리오 미구현
+- **임시 조치**: 없음
+- **목표 구현**: RETURNED→DISPOSED(폐기), RETURNED→CANCELED(최종취소) 전이 규칙 추가
+- **관련 파일**: `src/lib/logistics/status-machine.ts`
+- **예상 공수**: 0.5 MD
+- **우선순위**: Low
+
+---
+
+## [IMP-061] PDF 경로 충돌 위험
+
+- **발견 경위**: AUD-2026-0514-001 (NB Kai) — `finance.ts`의 `issueInvoicePdf()` Storage 업로드 로직 분석
+- **현재 상태**: 인보이스 PDF가 `invoices/{invoice_no}.pdf` 경로에 저장. 동일 인보이스 번호 동시 발행 시 Storage 파일명 충돌 가능
+- **임시 조치**: 없음
+- **목표 구현**: UUID 기반 파일명(`invoices/{uuid}.pdf`) + 메타데이터에 invoice_no 저장. `zen_invoice_pdf_history.version`과 조합하여 버전별 파일명 분리
+- **관련 파일**: `src/app/actions/finance.ts`, `supabase/migrations/`
+- **예상 공수**: 0.3 MD
+- **우선순위**: Low
+
+---
+
+## [IMP-062] `SELECT *` 남용 112곳
+
+- **발견 경위**: AUD-2026-0514-001 (NB Kai) — 서버 액션 및 Server Component의 `.select("*")` 패턴 전수 분석
+- **현재 상태**: 112곳에서 `.select("*")`로 불필요한 컬럼까지 조회. 필요한 컬럼보다 2~5배 많은 데이터 전송
+- **임시 조치**: 없음
+- **목표 구현**: 각 쿼리에서 실제 사용하는 컬럼만 `.select("col1, col2, ...")`로 명시
+- **관련 파일**: `src/app/actions/*.ts` (전체), `src/components/` (Server Component 포함)
+- **예상 공수**: 3 MD
+- **우선순위**: Low
+
+---
+
+## [IMP-063] `ZenUI.tsx` 7개 컴포넌트 단일 파일
+
+- **발견 경위**: AUD-2026-0514-001 (NB Kai) — `src/components/ui/ZenUI.tsx` 분석
+- **현재 상태**: ZenCard·ZenButton·ZenAurora·ZenInput·ZenTextarea·ZenBadge·ZenSelect 7개 독립 UI 컴포넌트가 단일 파일(204줄)에 정의됨
+- **임시 조치**: 없음
+- **목표 구현**: `src/components/ui/` 하위에 각 컴포넌트별 개별 파일로 분할. barrel export(`index.ts`)로 import 경로 유지
+- **관련 파일**: `src/components/ui/ZenUI.tsx`
+- **예상 공수**: 1 MD
+- **우선순위**: Low
