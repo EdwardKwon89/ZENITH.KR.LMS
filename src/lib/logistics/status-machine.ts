@@ -45,7 +45,7 @@ export function canChangeStatus(
   role: UserRole
 ): { allowed: boolean; message?: string } {
   // 1. Super Admin은 모든 전이 허용
-  if (role === USER_ROLES.ZENITH_SUPER_ADMIN || role === USER_ROLES.ADMIN) {
+  if (role === USER_ROLES.ZENITH_SUPER_ADMIN || role === USER_ROLES.ADMIN || role === USER_ROLES.MANAGER) {
     return { allowed: true };
   }
 
