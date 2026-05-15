@@ -58,8 +58,9 @@
 | ~~**ANA-IMP-DK**~~      | D_Kai  | Phase A CRITICAL 사전 GitNexus 분석 (IMP-035·026·041)       | 2026-05-15 | ✅ FULL PASS |
 | ~~**IMP-048-BK**~~      | B_Kai  | [Phase E] Mock 데이터 제거 (대시보드)                        | 2026-05-15 | ❌ CONDITIONAL PASS |
 | ~~**IMP-048-BK-FIX**~~  | B_Kai  | [FIX] 통계 쿼리 역할 필터 + .gitignore 보완                 | 2026-05-15 | ✅ FULL PASS |
-| **ANA-IMP-DK-B**       | D_Kai  | Phase B CRITICAL 사전 GitNexus 분석 (IMP-019·039·040·042·043·044) | 2026-05-15 | 🔔 Aiden 검토 대기 |
-| **IMP-027-BK**          | B_Kai  | [Phase F] 점검 모드 페이지 신규 구현                            | 2026-05-15 | 192/192 PASS |
+| ~~**ANA-IMP-DK-B**~~   | D_Kai  | Phase B CRITICAL 사전 GitNexus 분석 (IMP-019·039·040·042·043·044) | 2026-05-15 | ✅ FULL PASS |
+| ~~**IMP-027-BK**~~      | B_Kai  | [Phase F] 점검 모드 페이지 신규 구현                            | 2026-05-15 | ✅ FULL PASS |
+| **IMP-034a-RL + IMP-037-RL** | Riley | [Phase A] `.env.local` Git 추적 제거 + Auth 보안 설정        | 2026-05-15 | ❌ CONDITIONAL PASS — IMP-034a git rm --cached 미실행 |
 
 ---
 
@@ -86,7 +87,8 @@
 | :--------------------------- | :----- | :-------------------------------------------------- | :--------- | :---------: |
 | ~~**EXP-IMP-RL**~~           | Aiden  | 전체 코드베이스 IMP 도출 (성능 실험)                | 2026-05-13 | ✅ 완료     |
 | ~~**REG-IMP-RL**~~           | Aiden  | IMP-023~026 `post_launch_improvements.md` 등록      | 2026-05-13 | ✅ 완료     |
-| **IMP-034a-RL + IMP-037-RL** | Aiden  | [Phase A] `.env.local` Git 추적 제거 + Auth 보안 설정 | 2026-05-15 | ⏳ 착수 가능 |
+| ~~**IMP-034a-RL + IMP-037-RL**~~ | Aiden  | [Phase A] `.env.local` Git 추적 제거 + Auth 보안 설정 | 2026-05-15 | ❌ CONDITIONAL PASS |
+| **IMP-034a-RL-FIX** | Aiden  | [Phase A] IMP-034a 반려 — `git rm --cached` + IMP_PROGRESS + TASK_BOARD 보완 | 2026-05-15 | ⏳ 착수 가능 (Edward IMP-034b 완료 후) |
 
 ## 🆕 신규 지시 대기 (D_Kai 착수 가능)
 
@@ -269,15 +271,80 @@ gitnexus_detect_changes()
 
 ### 완료 기준 (DoD)
 
-- [ ] `git ls-files .env.local` → 빈 출력 (추적 해제 확인)
-- [ ] `.gitignore` — `.env.local` 명시 등재
+- [x] `git ls-files .env.local` → 빈 출력 (추적 해제 확인) — **❌ 미충족: 여전히 tracked**
+- [x] `.gitignore` — `.env.local` 명시 등재 ✅
 - [ ] `.env.example` — 키값 없음 확인
-- [ ] `supabase/config.toml` 4개 항목 수정 완료
+- [x] `supabase/config.toml` 4개 항목 수정 완료 ✅
+- [ ] `rtk npm run test:regression` 전체 PASS 증적 — **❌ 미제출**
+- [x] `[Gemini] fix: IMP-034a + IMP-037` 커밋 완료 ✅
+- [ ] `scratch/IMP_PROGRESS.md` IMP-034a·037 행 상태 `🔔` 갱신 — **❌ 미완료**
+- [ ] ACTIVE_AGENT.md IDLE 초기화
+- [ ] TASK_BOARD SECTION 1 🔔 검토 대기 등록 — **❌ 미완료**
+
+## ❌ CONDITIONAL PASS 판정 (2026-05-15 Aiden)
+
+> **판정**: ❌ CONDITIONAL PASS | **검증**: Aiden (Claude)
+>
+> IMP-037 자체는 PASS. IMP-034a 핵심 결함 3건으로 전체 반려.
+
+| 결함 | 내용 | 위험도 |
+|:---|:---|:---:|
+| `git rm --cached` 미실행 | `.env.local` 여전히 git 추적 중 — 6개 프로덕션 자격증명 노출 상태 | CRITICAL |
+| IMP_PROGRESS.md 미갱신 | IMP-034a·037 행 여전히 ⬜ | Medium |
+| TASK_BOARD SECTION 1 미등록 | 🔔 검토 대기 행 미추가 | Medium |
+
+**추가 지적**: 회귀 테스트 결과 미제출, HANDOFF_BOX 메시지 없음.
+
+---
+
+## 📨 Aiden → Riley | IMP-034a-RL-FIX — CONDITIONAL PASS 반려 재작업
+
+> **수행 주체**: Riley (Gemini) | **검증 주체**: Aiden (Claude)
+> **유형**: 보안 수정 CRITICAL | **지시일**: 2026-05-15
+> ⚠️ **Edward IMP-034b (API 키 재발급) 완료 후 착수할 것. 기존 자격증명이 노출된 상태에서 git 추적만 제거해도 이미 노출된 커밋 히스토리는 남음. 재발급 병행 필수.**
+
+### 결함 수정 지시
+
+**Step 1.** ACTIVE_AGENT.md → Status: BUSY 갱신
+
+**Step 2.** `git rm --cached .env.local` 실행
+
+```bash
+git rm --cached .env.local
+```
+
+결과 확인: `git ls-files .env.local` → 빈 출력이어야 함
+
+**Step 3.** `scratch/IMP_PROGRESS.md` 갱신
+- IMP-034a 행: `⬜` → `🔔` / 완료일: `—` → `2026-05-15`
+- IMP-037 행: `⬜` → `🔔` / 완료일: `—` → `2026-05-15`
+- Phase A 완료: `1 / 8` → `3 / 8 (37.5%)`
+- 전체 합계 업데이트
+
+**Step 4.** 회귀 테스트 실행 및 결과 기록
+
+```bash
+rtk npm run test:regression
+```
+
+**Step 5.** 커밋
+
+```
+[Gemini] fix: IMP-034a-FIX git rm --cached .env.local + IMP_PROGRESS 갱신
+```
+
+**Step 6.** ACTIVE_AGENT.md → Status: IDLE 초기화
+
+**Step 7.** TASK_BOARD SECTION 1 🔔 검토 대기 등록 + HANDOFF_BOX 인계 메시지 작성
+
+### 완료 기준 (DoD)
+
+- [ ] `git ls-files .env.local` → 빈 출력 확인
 - [ ] `rtk npm run test:regression` 전체 PASS 증적
-- [ ] `[Gemini] fix: IMP-034a + IMP-037` 커밋 완료
-- [ ] `scratch/IMP_PROGRESS.md` IMP-034a·037 행 상태 `🔔` 갱신
+- [ ] `scratch/IMP_PROGRESS.md` IMP-034a·037 행 `🔔` 갱신
 - [ ] ACTIVE_AGENT.md IDLE 초기화
 - [ ] TASK_BOARD SECTION 1 🔔 검토 대기 등록
+- [ ] HANDOFF_BOX.md 인계 메시지 작성
 
 ---
 

@@ -135,7 +135,7 @@
 | 017 | Error Boundary 4개 추가 | Riley | ⬜ | — |
 | 023 | i18n 번역 키 타입 안정성 | Riley | ⬜ | — |
 | 024 | 공통 UI 컴포넌트 라이브러리화 | Riley | ⬜ | — |
-| 027 | 점검 모드 페이지 | B_Kai | 🔔 | 2026-05-15 |
+| 027 | 점검 모드 페이지 | B_Kai | ✅ | 2026-05-15 |
 | 029 | TS 타입 안전성 (any 퇴출) | Riley | ⬜ | — |
 | 032 | 다국어 번역 커버리지 감사 + CI 게이트 | B_Kai+Riley | ⬜ | — |
 | 049 | 이중 프로필 테이블 정리 | Riley | ⬜ | — |
@@ -144,7 +144,7 @@
 | 061 | PDF 경로 충돌 방지 | Riley | ⬜ | — |
 | 063 | ZenUI.tsx 7개 분할 | Riley | ⬜ | — |
 
-**Phase F 완료**: 0 / 12
+**Phase F 완료**: 1 / 12 (8.3%)
 
 ---
 
@@ -175,11 +175,11 @@
 | C | 0 | 7 | 0% |
 | D | 0 | 8 | 0% |
 | E | 1 | 7 | 14.3% |
-| F | 0 | 12 | 0% |
+| F | 1 | 12 | 8.3% |
 | G | 0 | 1 | 0% |
-| **합계** | **3** | **53** | **5.7%** |
+| **합계** | **4** | **53** | **7.5%** |
 
-> ⚠️ 합계 53개 = 완료 3개(IMP-036·038·048) + 미착수 50개 (IMP-018 제외)
+> ⚠️ 합계 53개 = 완료 4개(IMP-027·036·038·048) + 미착수 49개 (IMP-018 제외)
 
 ---
 
@@ -190,3 +190,4 @@
 | 2026-05-15 | Aiden (Claude) | 최초 작성 — 52개 IMP 전수 등재, IMP-036 완료 반영, IMP-038 진행 중 표시 |
 | 2026-05-15 | B_Kai (GLM Big Pickle) | IMP-038 완료 — CLAIMED Enum 등록 + Status Machine 전이 규칙 + claims.ts canChangeStatus 연동 |
 | 2026-05-15 | Aiden (Claude) | IMP-048 ✅ PASS 확정 — 대시보드 MOCK_ORDERS 제거 + getDashboardStats() 실DB 연동 + 통계 쿼리 역할 필터 보완 |
+| 2026-05-15 | Aiden (Claude) | IMP-027 ✅ PASS 확정 — /maintenance 페이지 신규 + middleware 루프 방지 + i18n ko/en 완비 / IMP-034a ❌ 반려 — git rm --cached 미실행 |
