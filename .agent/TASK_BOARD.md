@@ -68,7 +68,8 @@
 | ~~**IMP-035-RL-FIX-2**~~ | Riley  | [FIX-2] CRITICAL 3종 SECURITY DEFINER 복원 + MANAGER | 2026-05-15 | ✅ FULL PASS |
 | ~~**IMP-042-043-BK-FIX**~~| B_Kai  | [FIX] IMP_PROGRESS Phase B 카운트 보정 (3/10→1/10) | 2026-05-15 | ✅ FULL PASS            |
 | **IMP-026-RL**            | Riley  | [Phase A] RLS 비즈니스 규칙 통합 (SQL 함수화)       | 2026-05-16 | ⏳ 착수 가능 |
-| **IMP-044-BK**            | B_Kai  | [Phase B] 인보이스 발행 후 비용 변경 차단           | 2026-05-16 | ⏳ 착수 가능 |
+| ~~**IMP-044-BK**~~            | B_Kai  | [Phase B] 인보이스 발행 후 비용 변경 차단           | 2026-05-16 | ➡️ 🔔 Aiden 검토 대기 (하단 등록) |
+| **IMP-044-BK**            | B_Kai  | [Phase B] 인보이스 발행 후 비용 변경 차단 — DB 트리거 + 서버 액션 가드 | 2026-05-16 | 🔔 Aiden 검토 대기 |
 | **ANA-IMP-DK-D**          | D_Kai  | Phase D 사전 GitNexus 분석 (IMP-014·033·058·059)   | 2026-05-16 | 🔔 Aiden 검토 대기 |
 
 
