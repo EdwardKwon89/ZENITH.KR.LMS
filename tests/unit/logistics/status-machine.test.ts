@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { canChangeStatus } from '@/lib/logistics/status-machine';
+import { canChangeStatus, isOrderEditable, isMasteredStatus } from '@/lib/logistics/status-machine';
 import { OrderStatus } from '@/types/orders';
 import { USER_ROLES } from '@/lib/auth/rbac';
 
@@ -96,6 +96,30 @@ describe('ZENITH Status Machine: CLAIMED 전이 규칙 (R-09)', () => {
     it('TC-SM-M3: MANAGER는 배송 완료 후에도 보류 상태로 변경 가능 (DELIVERED → HELD)', () => {
       const result = canChangeStatus(OrderStatus.DELIVERED, OrderStatus.HELD, USER_ROLES.MANAGER);
       expect(result.allowed).toBe(true);
+    });
+  });
+
+  describe('MASTERED Lock 강화 (IMP-043)', () => {
+    it('TC-ML-T1: isMasteredStatus(MASTERED)는 true를 반환', () => {
+      expect(isMasteredStatus(OrderStatus.MASTERED)).toBe(true);
+    });
+
+    it('TC-ML-T2: isMasteredStatus(IN_TRANSIT)는 false를 반환', () => {
+      expect(isMasteredStatus(OrderStatus.IN_TRANSIT)).toBe(false);
+    });
+  });
+
+  describe('isOrderEditable 수정 차단 (IMP-042)', () => {
+    it('TC-ED-T1: WAREHOUSED 상태는 수정 불가', () => {
+      expect(isOrderEditable(OrderStatus.WAREHOUSED)).toBe(false);
+    });
+
+    it('TC-ED-T2: REGISTERED 상태는 수정 가능', () => {
+      expect(isOrderEditable(OrderStatus.REGISTERED)).toBe(true);
+    });
+
+    it('TC-ED-T3: MASTERED 상태는 수정 불가', () => {
+      expect(isOrderEditable(OrderStatus.MASTERED)).toBe(false);
     });
   });
 });
