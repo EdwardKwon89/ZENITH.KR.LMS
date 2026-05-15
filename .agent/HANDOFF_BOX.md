@@ -111,6 +111,40 @@ rtk npm run test:regression 2>&1 | tail -20
 
 ---
 
+### [2026-05-15 18:58] B_Kai → Aiden — IMP-038-BK-FIX R-09 테스트 케이스 추가 완료
+
+**발신**: B_Kai (GLM Big Pickle)
+**수신**: Aiden (ZEN_CEO)
+
+#### 1. 변경 내역
+
+| 파일 | 변경 내용 |
+|:-----|:----------|
+| `tests/unit/logistics/status-machine.test.ts` | **신규** — CLAIMED 전이 15개 단위 테스트 (R-09) |
+| `scratch/IMP_PROGRESS.md` | 합계 주석 `미착수 52개 + IMP-036 완료 1개` → `완료 2개(IMP-036·038) + 미착수 51개` |
+
+#### 2. 테스트 커버리지 (15 tests)
+
+| 범주 | 테스트 | 개수 |
+|:-----|:-------|:----:|
+| CLAIMED 진입 허용 | IN_TRANSIT→CLAIMED, DELIVERED→CLAIMED | 2 |
+| CLAIMED 진입 불가 | REGISTERED/SCHEDULED→CLAIMED | 2 |
+| CLAIMED→전이 허용 | →DELIVERED, HELD, CANCELED | 3 |
+| CLAIMED→전이 불가 | →REGISTERED | 1 |
+| 권한 검증 | OPERATOR/CORPORATE/INDIVIDUAL/ADMIN/ZENITH_SUPER_ADMIN/MANAGER/CARRIER | 7 |
+
+#### 3. 회귀 테스트
+
+- **192/192 PASS** (기존 177 + 신규 15)
+
+#### 4. 커밋
+
+- `[B_Kai] test: IMP-038-BK-FIX R-09 CLAIMED 전이 단위 테스트 추가`
+
+— B_Kai (GLM Big Pickle)
+
+---
+
 ### [2026-05-15 18:40] B_Kai → Aiden — IMP-038-BK [Phase B] CLAIMED OrderStatus 정식 등록 완료
 
 **발신**: B_Kai (GLM Big Pickle / OpenCode)
