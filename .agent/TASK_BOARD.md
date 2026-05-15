@@ -1,7 +1,7 @@
 # Multi-Agent Task Board
 
 > **프로젝트:** ZENITH_LMS
-> **업데이트:** 2026-05-16 (KST) — Riley IMP-026-RL 지시 / B_Kai IMP-044-BK 지시 / D_Kai ANA-IMP-DK-D 지시
+> **업데이트:** 2026-05-16 (KST) — IMP-044-BK-FIX ✅ FULL PASS / ANA-IMP-DK-D-FIX ✅ FULL PASS
 > **운영 원칙:**
 >
 > - 각 에이전트는 작업 완료 시 **SECTION 1 상태 대시보드를 최우선 갱신**한 뒤 담당 SECTION 상세를 업데이트한다.
@@ -68,10 +68,10 @@
 | ~~**IMP-035-RL-FIX-2**~~ | Riley  | [FIX-2] CRITICAL 3종 SECURITY DEFINER 복원 + MANAGER | 2026-05-15 | ✅ FULL PASS |
 | ~~**IMP-042-043-BK-FIX**~~| B_Kai  | [FIX] IMP_PROGRESS Phase B 카운트 보정 (3/10→1/10) | 2026-05-15 | ✅ FULL PASS            |
 | **IMP-026-RL**            | Riley  | [Phase A] RLS 비즈니스 규칙 통합 (SQL 함수화)       | 2026-05-16 | 🔔 검토 대기 |
-| ~~**IMP-044-BK**~~            | B_Kai  | [Phase B] 인보이스 발행 후 비용 변경 차단           | 2026-05-16 | ✅ PASS |
-| **IMP-044-BK-FIX**        | B_Kai  | [FIX] 트리거 RETURN NEW→OLD 수정 (DELETE 경로 버그) | 2026-05-16 | 🔔 검토 대기 |
-| ~~**ANA-IMP-DK-D**~~      | D_Kai  | Phase D 사전 GitNexus 분석 (IMP-014·033·058·059)   | 2026-05-16 | ❌ CONDITIONAL PASS — IMP-014 분류 오류·IMP-059 누락 |
-| **ANA-IMP-DK-D-FIX**      | D_Kai  | [FIX] IMP-014 Client 컴포넌트 재분석 + IMP-059 보완  | 2026-05-16 | 🔔 Aiden 검토 대기 |
+| ~~**IMP-044-BK**~~            | B_Kai  | [Phase B] 인보이스 발행 후 비용 변경 차단           | 2026-05-16 | ✅ FULL PASS |
+| ~~**IMP-044-BK-FIX**~~    | B_Kai  | [FIX] 트리거 TG_OP 분기 수정 (DELETE→RETURN OLD)   | 2026-05-16 | ✅ FULL PASS |
+| ~~**ANA-IMP-DK-D**~~      | D_Kai  | Phase D 사전 GitNexus 분析 (IMP-014·033·058·059)   | 2026-05-16 | ❌ CONDITIONAL PASS — IMP-014 분류 오류·IMP-059 누락 |
+| ~~**ANA-IMP-DK-D-FIX**~~ | D_Kai  | [FIX] IMP-014 Client 재분류 + IMP-059 보완          | 2026-05-16 | ✅ FULL PASS |
 
 
 ---
@@ -92,8 +92,8 @@
 | ~~**IMP-027-BK**~~         | [Phase F] 점검 모드 페이지 신규 구현                         | 2026-05-15 | ✅ FULL PASS        |
 | ~~**IMP-042-043-BK**~~         | [Phase B] updateOrder 수정 차단 + MASTERED Lock 강화 (동시 구현) | 2026-05-15 | ❌ CONDITIONAL PASS |
 | ~~**IMP-042-043-BK-FIX**~~    | IMP_PROGRESS Phase B 카운트 보정 (3/10 → 1/10)               | 2026-05-15 | ✅ FULL PASS       |
-| ~~**IMP-044-BK**~~            | [Phase B] 인보이스 발행 후 비용 변경 차단                       | 2026-05-16 | ✅ PASS |
-| **IMP-044-BK-FIX**            | [FIX] 트리거 RETURN NEW→OLD 수정 (DELETE 경로 버그)             | 2026-05-16 | 🔔 검토 대기       |
+| ~~**IMP-044-BK**~~            | [Phase B] 인보이스 발행 후 비용 변경 차단                       | 2026-05-16 | ✅ FULL PASS |
+| ~~**IMP-044-BK-FIX**~~        | [FIX] 트리거 TG_OP 분기 수정 (DELETE→RETURN OLD)               | 2026-05-16 | ✅ FULL PASS |
 
 ---
 
@@ -124,7 +124,7 @@
 | ~~**ANA-IMP-DK-B**~~       | —  | Phase B CRITICAL 사전 GitNexus 분석 (IMP-019·039·040·042·043·044)               | 2026-05-15                  | ✅ **FULL PASS**       |
 | ~~**ANA-IMP-DK-C**~~           | —  | Phase C 사전 GitNexus 분석 (IMP-013·025·045·051·056)                             | 2026-05-15                  | ✅ **FULL PASS**       |
 | ~~**ANA-IMP-DK-D**~~               | D  | Phase D 사전 GitNexus 분석 (IMP-014·033·058·059)                                  | 2026-05-16                  | ❌ **CONDITIONAL PASS** — IMP-014 분류 오류·IMP-059 누락 |
-| ~~**ANA-IMP-DK-D-FIX**~~               | D  | [FIX] IMP-014 Client 컴포넌트 재분석 + IMP-059 보완                               | 2026-05-16                  | 🔔 **Aiden 검토 대기**       |
+| ~~**ANA-IMP-DK-D-FIX**~~               | D  | [FIX] IMP-014 Client 컴포넌트 재분류 + IMP-059 보완                               | 2026-05-16                  | ✅ **FULL PASS**       |
 | ~~**GOV-001**~~     | 1     | ACTIVE_AGENT.md IDLE 강제 초기화                                                | 2026-05-13                  | ✅ **Aiden PASS**        |
 | ~~**GOV-002**~~     | 1     | `~/.claude/settings.json` PostToolUse GitNexus Hook 제거                        | 2026-05-13                  | ✅ **Aiden PASS**        |
 | ~~**GOV-003**~~     | 2     | `GEMINI.md` + `AGENTS.md` Task 완료 DoD에 IDLE 초기화 추가                      | 2026-05-13                  | ✅ **Aiden PASS**        |
