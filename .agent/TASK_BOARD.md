@@ -49,7 +49,7 @@
 | ~~**IMP-PLAN-BK**~~ | B_Kai | IMP 실행 계획 v2.2 — Aiden+Riley 공동 CONDITIONAL PASS 확정 | ✅ 검토 완료 |
 | ~~**IMP-PLAN-BK-V23**~~ | B_Kai | IMP 실행 계획 v2.3 — W-1~W-3+N-1 수정 | ✅ FULL PASS (2026-05-15) |
 | ~~**IMP-036-BK**~~ | B_Kai | Status Machine MANAGER 역할 추가 | ✅ CONDITIONAL PASS — DoD 보완 요청 발령 |
-| **IMP-036-BK-FIX** | B_Kai | IMP-036-BK DoD 보완 (HANDOFF_BOX + GitNexus 소급) | 2026-05-15 | ⏳ 착수 대기 |
+| ~~**IMP-036-BK-FIX**~~ | B_Kai | IMP-036-BK DoD 보완 (HANDOFF_BOX + GitNexus 소급) | 2026-05-15 | ✅ 보완 완료 |
 
 ---
 
@@ -62,7 +62,7 @@
 |:---|:---|:---|:---:|
 | ~~**IMP-PLAN-BK-V23**~~ | IMP 실행 계획 v2.3 제출 — W-1~W-3+N-1 수정 | 2026-05-15 | ✅ FULL PASS |
 | ~~**IMP-036-BK**~~ | [Phase A] Status Machine MANAGER 역할 추가 | 2026-05-15 | ✅ CONDITIONAL PASS |
-| **IMP-036-BK-FIX** | DoD 보완 — HANDOFF_BOX + GitNexus 소급 증적 | 2026-05-15 | ⏳ 착수 대기 |
+| ~~**IMP-036-BK-FIX**~~ | DoD 보완 — HANDOFF_BOX + GitNexus 소급 증적 | 2026-05-15 | ✅ 보완 완료 |
 
 ---
 
