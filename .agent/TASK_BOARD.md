@@ -54,6 +54,7 @@
 | ~~**IMP-036-BK**~~      | B_Kai  | Status Machine MANAGER 역할 추가                            | ✅ CONDITIONAL PASS — DoD 보완 요청 발령 |
 | ~~**IMP-036-BK-FIX**~~  | B_Kai  | IMP-036-BK DoD 보완 (HANDOFF_BOX + GitNexus 소급)           | 2026-05-15                               |
 | ~~**IMP-038-BK**~~      | B_Kai  | [Phase B] CLAIMED OrderStatus 정식 등록                     | 2026-05-15 | 🔶 CONDITIONAL PASS — IMP-038-BK-FIX 발령 |
+| **IMP-038-BK-FIX**      | B_Kai  | R-09 테스트 케이스 추가 + IMP_PROGRESS 주석 보완           | 2026-05-15 | ⏳ Aiden 검토 대기 |
 | ~~**ANA-IMP-DK**~~      | D_Kai  | Phase A CRITICAL 사전 GitNexus 분석 (IMP-035·026·041)       | 2026-05-15 | ✅ FULL PASS |
 
 ---
@@ -68,7 +69,7 @@
 | ~~**IMP-036-BK**~~      | [Phase A] Status Machine MANAGER 역할 추가  | 2026-05-15 | ✅ CONDITIONAL PASS |
 | ~~**IMP-036-BK-FIX**~~  | DoD 보완 — HANDOFF_BOX + GitNexus 소급 증적 | 2026-05-15 | ✅ 보완 완료        |
 | ~~**IMP-038-BK**~~      | [Phase B] CLAIMED OrderStatus 정식 등록     | 2026-05-15 | 🔶 CONDITIONAL PASS |
-| **IMP-038-BK-FIX**      | IMP-038 보완 — R-09 테스트 케이스 추가      | 2026-05-15 | ⏳ 착수 가능        |
+| ~~**IMP-038-BK-FIX**~~      | IMP-038 보완 — R-09 테스트 케이스 추가      | 2026-05-15 | ✅ 보완 완료        |
 
 ---
 
