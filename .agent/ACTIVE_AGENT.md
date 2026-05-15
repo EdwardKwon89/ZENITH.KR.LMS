@@ -7,14 +7,14 @@
 
 ## 현재 상태
 
-- **Status**: BUSY
-- **에이전트**: B_Kai (GLM Big Pickle)
-- **역할**: Temp Execution (IMP-044-BK)
-- **작업**: [Phase B] 인보이스 발행 후 비용 변경 차단 — DB 트리거 + 서버 액션 가드
-- **시작**: 2026-05-16
-- **예상 완료**: 2026-05-16
-- **잠금 파일/경로**: supabase/migrations/, src/app/actions/finance.ts, src/app/actions/claims.ts
-- **last_verified_at**: 2026-05-16T09:00:00+09:00
+- **Status**: IDLE
+- **에이전트**: —
+- **역할**: —
+- **작업**: —
+- **시작**: —
+- **예상 완료**: —
+- **잠금 파일/경로**: —
+- **last_verified_at**: 2026-05-16T09:10:00+09:00
 - **status_age_limit_hours**: 24
 
 ---
