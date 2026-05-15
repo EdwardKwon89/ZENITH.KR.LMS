@@ -55,6 +55,23 @@ git commit -m "[Gemini] feat: <작업 설명>"
 
 ---
 
+## ⛔ Task 완료 정의 (DoD) — 강제 조항
+
+> **위반 이력**: IMP-035-RL·IMP-034a-RL-FIX-2·IMP-026-RL 3회 반복 (2026-05-16 Aiden 거버넌스 강화)
+> **이 조항은 GEMINI.md의 다른 모든 절차보다 우선합니다.**
+
+모든 Task 완료 보고 전, 아래 3가지 조건이 **동시에 충족**된 상태에서만 완료 보고가 허용됩니다.
+
+| 순서 | 필수 조건 | 위반 시 결과 |
+|:----:|:---------|:------------|
+| 1 | **ACTIVE_AGENT.md IDLE 초기화**: `sed -i '' 's/Status: BUSY/Status: IDLE/' .agent/ACTIVE_AGENT.md` 커밋 포함 | 자동 반려 |
+| 2 | **회귀 테스트 PASS**: `rtk npm run test:regression` 전체 통과 | 자동 반려 |
+| 3 | **git status 클린**: untracked·unstaged 파일 없음 | 자동 반려 |
+
+미충족 상태의 완료 보고는 **Aiden 검토 없이 자동 반려**됩니다.
+
+---
+
 ## 🛠️ 도구 활용 규칙
 
 - **rtk proxy**: 모든 CLI 명령어는 `rtk` 도구를 경유하여 토큰 효율을 극대화합니다.
@@ -70,3 +87,4 @@ git commit -m "[Gemini] feat: <작업 설명>"
 | v1.13 | 2026-05-07 | Antigravity | E2E 테스트 로컬 Supabase 환경 우선 원칙 R-14 추가 |
 | v1.14 | 2026-05-08 | Claude (Aiden) | R-15 추가 |
 | v2.0 | 2026-05-12 | Aiden (Claude, ZEN_CEO) | GOV_COMMON.md 분리 — 공통 규칙 이관, Gemini 전용 내용만 유지 (SAR-2026-05-12-001 반영) |
+| v2.1 | 2026-05-16 | Aiden (Claude, ZEN_CEO) | DoD 강제 조항 신설 — ACTIVE_AGENT.md IDLE 초기화 3회 반복 위반 재발 방지 |
