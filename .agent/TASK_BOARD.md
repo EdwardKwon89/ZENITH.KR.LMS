@@ -1,7 +1,7 @@
 # Multi-Agent Task Board
 
 > **프로젝트:** ZENITH_LMS
-> **업데이트:** 2026-05-15 (KST) — IMP-035-RL 착수 대기 중 / B_Kai IMP-042+043-BK 신규 지시 / D_Kai ANA-IMP-DK-C 신규 지시
+> **업데이트:** 2026-05-16 (KST) — Riley IMP-026-RL 지시 / B_Kai IMP-044-BK 지시 / D_Kai ANA-IMP-DK-D 지시
 > **운영 원칙:**
 >
 > - 각 에이전트는 작업 완료 시 **SECTION 1 상태 대시보드를 최우선 갱신**한 뒤 담당 SECTION 상세를 업데이트한다.
@@ -67,6 +67,9 @@
 | ~~**IMP-035-RL**~~        | Riley  | [Phase A] SECURITY DEFINER 함수 권한 검증 및 시정    | 2026-05-15 | ✅ FULL PASS (FIX-2 완료) |
 | ~~**IMP-035-RL-FIX-2**~~ | Riley  | [FIX-2] CRITICAL 3종 SECURITY DEFINER 복원 + MANAGER | 2026-05-15 | ✅ FULL PASS |
 | ~~**IMP-042-043-BK-FIX**~~| B_Kai  | [FIX] IMP_PROGRESS Phase B 카운트 보정 (3/10→1/10) | 2026-05-15 | ✅ FULL PASS            |
+| **IMP-026-RL**            | Riley  | [Phase A] RLS 비즈니스 규칙 통합 (SQL 함수화)       | 2026-05-16 | ⏳ 착수 가능 |
+| **IMP-044-BK**            | B_Kai  | [Phase B] 인보이스 발행 후 비용 변경 차단           | 2026-05-16 | ⏳ 착수 가능 |
+| **ANA-IMP-DK-D**          | D_Kai  | Phase D 사전 GitNexus 분석 (IMP-014·033·058·059)   | 2026-05-16 | ⏳ 착수 가능 |
 
 
 ---
@@ -87,6 +90,7 @@
 | ~~**IMP-027-BK**~~         | [Phase F] 점검 모드 페이지 신규 구현                         | 2026-05-15 | ✅ FULL PASS        |
 | ~~**IMP-042-043-BK**~~         | [Phase B] updateOrder 수정 차단 + MASTERED Lock 강화 (동시 구현) | 2026-05-15 | ❌ CONDITIONAL PASS |
 | ~~**IMP-042-043-BK-FIX**~~    | IMP_PROGRESS Phase B 카운트 보정 (3/10 → 1/10)               | 2026-05-15 | ✅ FULL PASS       |
+| **IMP-044-BK**                | [Phase B] 인보이스 발행 후 비용 변경 차단                       | 2026-05-16 | ⏳ 착수 가능       |
 
 ---
 
@@ -102,6 +106,7 @@
 | ~~**IMP-035-RL**~~        | Aiden  | [Phase A] SECURITY DEFINER 권한 검증 — CRITICAL 3종 + HIGH 1종 | 2026-05-15 | ✅ FULL PASS (FIX-2 완료) |
 | ~~**IMP-035-RL-FIX**~~    | Aiden  | [FIX] CRITICAL 3종 SECURITY DEFINER 복원 + MANAGER 역할 추가 | 2026-05-15 | ❌ FAIL (FIX-2로 대체됨) |
 | ~~**IMP-035-RL-FIX-2**~~ | Aiden  | [FIX-2] CRITICAL 3종 SECURITY DEFINER 복원 + MANAGER 역할 추가 (재지시) | 2026-05-15 | ✅ FULL PASS |
+| **IMP-026-RL**            | Aiden  | [Phase A] RLS 비즈니스 규칙 통합 (SQL 함수화)                           | 2026-05-16 | ⏳ 착수 가능 |
 
 
 ## 🆕 신규 지시 대기 (D_Kai 착수 가능)
@@ -114,7 +119,8 @@
 | ~~**ANA-IMP-DK**~~  | —     | Phase A CRITICAL 사전 GitNexus 분석 (IMP-035·026·041)                          | 2026-05-15                  | 🔔 **Aiden 검토 대기**   |
 | ~~**ANA-IMP-DK-FIX**~~ | —  | TASK_BOARD ANA-IMP-DK 상태 🔔 갱신                                              | 2026-05-15                  | ✅ FULL PASS             |
 | ~~**ANA-IMP-DK-B**~~       | —  | Phase B CRITICAL 사전 GitNexus 분석 (IMP-019·039·040·042·043·044)               | 2026-05-15                  | ✅ **FULL PASS**       |
-| ~~**ANA-IMP-DK-C**~~           | —  | Phase C 사전 GitNexus 분석 (IMP-013·025·045·051·056)                             | 2026-05-15                  | 🔔 **Aiden 검토 대기**       |
+| ~~**ANA-IMP-DK-C**~~           | —  | Phase C 사전 GitNexus 분석 (IMP-013·025·045·051·056)                             | 2026-05-15                  | ✅ **FULL PASS**       |
+| **ANA-IMP-DK-D**               | D  | Phase D 사전 GitNexus 분석 (IMP-014·033·058·059)                                  | 2026-05-16                  | ⏳ 착수 가능               |
 | ~~**GOV-001**~~     | 1     | ACTIVE_AGENT.md IDLE 강제 초기화                                                | 2026-05-13                  | ✅ **Aiden PASS**        |
 | ~~**GOV-002**~~     | 1     | `~/.claude/settings.json` PostToolUse GitNexus Hook 제거                        | 2026-05-13                  | ✅ **Aiden PASS**        |
 | ~~**GOV-003**~~     | 2     | `GEMINI.md` + `AGENTS.md` Task 완료 DoD에 IDLE 초기화 추가                      | 2026-05-13                  | ✅ **Aiden PASS**        |
@@ -456,6 +462,79 @@ git rm regression_result.txt regression_result_imp035.txt
 - [ ] `regression_result*.txt` 루트 파일 `git rm` 후 커밋
 - [ ] 회귀 테스트 전체 PASS 증적 (`docs/08_Self_Audit/Regression_Results/` 저장)
 - [ ] `scratch/IMP_PROGRESS.md` IMP-035 행 `🔔` 갱신
+- [ ] HANDOFF_BOX.md 인계 메시지 작성
+- [ ] ACTIVE_AGENT.md IDLE 초기화
+- [ ] TASK_BOARD SECTION 1 🔔 검토 대기 등록
+
+---
+
+## 📨 Aiden → Riley | IMP-026-RL — RLS 비즈니스 규칙 통합 (SQL 함수화)
+
+> **수행 주체**: Riley (Gemini) | **검증 주체**: Aiden (Claude)
+> **Phase**: A — Security & Infrastructure (CRITICAL)
+> **우선순위**: CRITICAL | **지시일**: 2026-05-16
+> **사전 분석**: `scratch/ANA_PhaseA_DKai_20260515.md` §IMP-026 참조
+
+### 배경
+
+현재 `zen_orders`에 `"Allow authenticated full access to master zen_orders"` 정책이 존재 — 인증된 모든 사용자가 전체 접근 가능. 비즈니스 규칙(조직 멤버십, 역할 검증)이 앱 코드(서버 액션)에만 존재하고 DB RLS 레벨에는 미반영. 선행 IMP-035 SECURITY DEFINER 정상화로 이 작업 착수 가능.
+
+### 구현 지시
+
+**Step 1.** ACTIVE_AGENT.md → Status: BUSY
+
+**Step 2. SQL 헬퍼 함수 추가** (migration 파일 신규 생성)
+
+```sql
+-- is_org_member: RLS 정책 재사용을 위한 헬퍼
+CREATE OR REPLACE FUNCTION public.is_org_member(p_user_id uuid, p_org_id uuid)
+RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM public.zen_profiles
+    WHERE id = p_user_id AND org_id = p_org_id AND status = 'ACTIVE'
+  );
+$$;
+```
+
+**Step 3. zen_orders RLS 정책 교체** (migration 동일 파일)
+
+- `"Allow authenticated full access to master zen_orders"` → **DROP** 후 역할별 정책 3개로 교체:
+  1. **ADMIN/MANAGER/ZENITH_SUPER_ADMIN**: 전체 접근 허용 (역할 기반)
+  2. **PARTNER/SHIPPER**: `is_org_member(auth.uid(), org_id)` = true인 오더만 조회
+  3. 기존 `"Shippers can view their own zen_orders"` 정책과의 중복 제거 검토
+
+> ⚠️ **HIGH Blast Radius**: 오더 관련 20+개 서버 액션 영향. 변경 전 기존 정책 목록 전수 확인 필수.
+
+**Step 4.** 역할 하드코딩 교체 — 기존 `role = 'ADMIN'` 문자열 → `get_my_role()` 함수 활용 패턴으로 통일 (마이그레이션 내부)
+
+**Step 5.** 회귀 테스트
+
+```bash
+rtk npm run test:regression
+```
+
+결과: `docs/08_Self_Audit/Regression_Results/` 저장 (R-13 준수)
+
+**Step 6.** `scratch/IMP_PROGRESS.md` IMP-026 행: `⬜` → `🔔`, 완료일: `2026-05-16`
+
+**Step 7.** HANDOFF_BOX.md 인계 메시지 작성
+
+**Step 8.** 커밋
+
+```
+[Gemini] feat: IMP-026-RL RLS 비즈니스 규칙 통합 — is_org_member 헬퍼 + zen_orders 정책 교체
+```
+
+**Step 9.** ACTIVE_AGENT.md → IDLE / TASK_BOARD SECTION 1 🔔 등록
+
+### 완료 기준 (DoD)
+
+- [ ] `is_org_member(uuid, uuid)` SQL 함수 migration 추가
+- [ ] `"Allow authenticated full access to master zen_orders"` 정책 DROP 확인
+- [ ] 역할별 RLS 정책 3종 적용 (ADMIN계열, PARTNER/SHIPPER)
+- [ ] 기존 정책과의 중복/충돌 없음 확인
+- [ ] 회귀 테스트 전체 PASS 증적 (`docs/` 저장)
+- [ ] `scratch/IMP_PROGRESS.md` IMP-026 행 `🔔` 갱신
 - [ ] HANDOFF_BOX.md 인계 메시지 작성
 - [ ] ACTIVE_AGENT.md IDLE 초기화
 - [ ] TASK_BOARD SECTION 1 🔔 검토 대기 등록
@@ -965,6 +1044,53 @@ gitnexus_query({query: "email template html sendEmail"})
 | IMP-051 (HIGH) — 마스터·인보이스·통관 이력 부재 3종 확인 | ✅ |
 | IMP-056 (LOW) — 위험 판정 + 예방 조치 권장 | ✅ |
 | 구현 순서 권고 (IMP-013→025 / 045·051·056 병렬) | ✅ |
+
+---
+
+## 📨 Aiden → D_Kai | ANA-IMP-DK-D — Phase D 사전 GitNexus 분석
+
+> **수행 주체**: D_Kai (OpenCode) | **검증 주체**: Aiden (Claude)
+> **유형**: 순수 분석 (코드 수정 없음) | **지시일**: 2026-05-16
+> **분석 대상**: IMP-014 / IMP-033 / IMP-058 / IMP-059
+> **결과물**: `scratch/ANA_PhaseD_DKai_20260516.md`
+
+### 분석 지시
+
+Phase D는 대규모 파일 분할과 패턴 도입이 중심입니다. Riley가 Phase D에 착수하기 전, 각 IMP의 분할 전략과 blast radius를 사전 확인해야 합니다.
+
+#### IMP-014 — admin/rates/page.tsx 531줄 분할
+
+- `gitnexus_context({name: "admin rates page"})` — 현재 컴포넌트 구조 파악
+- 분할 후보 단위: 컴포넌트별 파일 분리 전략 제안  
+- **보고 필수**: 현재 컴포넌트 목록, 각 컴포넌트 줄 수, 권장 분리 파일 구조
+
+#### IMP-033 — Server Actions 도메인 분할
+
+- `gitnexus_query({query: "server actions domain"})` — 현재 액션 파일 구조
+- `src/app/actions/` 디렉토리 파일 전수 목록 + 줄 수
+- **보고 필수**: 도메인별 분류안, 순환 참조 위험 경로, 권장 분리 순서
+
+#### IMP-058 — finance.ts 733줄 분할
+
+- `gitnexus_context({name: "finance"})` — finance.ts 함수 목록
+- **보고 필수**: 함수 그룹별 분리 후보 (예: settlement, invoice, cost, report), 공유 유틸 의존성
+
+#### IMP-059 — Supabase 클라이언트 중복 제거
+
+- `gitnexus_query({query: "createClient supabase"})` — 전체 호출 지점
+- **보고 필수**: `createClient()` 중복 패턴 유형, 통합 가능 범위, 위험도
+
+### 완료 기준 (DoD)
+
+- [ ] IMP-014 분석: 현재 컴포넌트 구조 + 권장 분리 파일 구조 포함
+- [ ] IMP-033 분석: 도메인 분류안 + 순환 참조 위험 경로 포함
+- [ ] IMP-058 분석: 함수 그룹별 분리안 + 공유 의존성 포함
+- [ ] IMP-059 분석: `createClient()` 중복 전수 목록 + 통합 범위 포함
+- [ ] 각 IMP Blast Radius 요약 포함
+- [ ] 코드 수정 없음 확인 (순수 분석)
+- [ ] `scratch/ANA_PhaseD_DKai_20260516.md` 커밋
+- [ ] TASK_BOARD SECTION 1 🔔 검토 대기 등록
+- [ ] ACTIVE_AGENT.md IDLE 초기화
 
 ---
 
@@ -1708,3 +1834,83 @@ rtk npm run test:regression
 
 > **판정**: ✅ **FULL PASS** | **검증**: Aiden (Claude)
 > IMP-042·043 ✅ 확정 — IMP_PROGRESS 갱신 완료 (Phase B 1/10→3/10, 전체 6/52→8/52)
+
+---
+
+## 📨 Aiden → B_Kai | IMP-044-BK — [Phase B] 인보이스 발행 후 비용 변경 차단
+
+> **수행 주체**: B_Kai (GLM Big Pickle) | **검증 주체**: Aiden (Claude)
+> **Phase**: B — Data Integrity & Transaction Safety
+> **우선순위**: MEDIUM | **지시일**: 2026-05-16
+> **사전 분석**: `scratch/ANA_PhaseB_DKai_20260515.md` §IMP-044 참조
+
+### 배경
+
+인보이스 발행 후(`issueInvoicePdf()` 완료, `invoice_id` 설정)에도 `zen_order_costs` 레코드가 UPDATE 가능. `addIncidentFee()`가 인보이스 발행 후에도 `total_amount`를 직접 수정하는 경로 존재. D_Kai 분석: **DB 트리거가 가장 효과적**.
+
+### 구현 지시
+
+**Step 1.** ACTIVE_AGENT.md → Status: BUSY
+
+**Step 2. DB 트리거 추가** (migration 파일 신규 생성)
+
+```sql
+-- zen_order_costs: invoice_id가 설정된 레코드 UPDATE/DELETE 차단
+CREATE OR REPLACE FUNCTION public.fn_prevent_cost_change_after_invoice()
+RETURNS TRIGGER LANGUAGE plpgsql AS $$
+BEGIN
+  IF OLD.invoice_id IS NOT NULL THEN
+    RAISE EXCEPTION 'Cannot modify order costs after invoice has been issued (invoice_id: %)', OLD.invoice_id;
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER trg_prevent_cost_change_after_invoice
+BEFORE UPDATE OR DELETE ON public.zen_order_costs
+FOR EACH ROW EXECUTE FUNCTION public.fn_prevent_cost_change_after_invoice();
+```
+
+**Step 3. addIncidentFee() 예외 처리** (`src/app/actions/claims.ts`)
+
+`addIncidentFee()`는 인보이스 발행 후 사고 비용 반영이 필요한 **특수 케이스**. 두 가지 방안 중 선택:
+- **(권장)** `invoice_id IS NOT NULL` 체크 후 예외 던지기 — 현재는 MASTERED Lock 범위에서 처리
+- 또는 `zen_order_cost_adjustments` 별도 테이블로 조정분 기록 (복잡도 높음)
+
+> 간단한 방안 선택 권장. 복잡도 높은 방안은 Aiden 승인 후 진행.
+
+**Step 4. 서버 액션 가드 추가** (`src/app/actions/finance.ts`)
+
+`updateOrderCosts()` 또는 비용 수정 경로에 `invoice_id IS NULL` 사전 조건 체크 추가.
+
+**Step 5.** 회귀 테스트
+
+```bash
+rtk npm run test:regression
+```
+
+결과: `docs/08_Self_Audit/Regression_Results/` 저장 (R-13 준수)
+
+**Step 6.** `scratch/IMP_PROGRESS.md` IMP-044 행: `⬜` → `🔔`, 완료일: `2026-05-16`
+
+**Step 7.** HANDOFF_BOX.md 인계 메시지 작성
+
+**Step 8.** 커밋
+
+```
+[B_Kai] feat: IMP-044-BK 인보이스 발행 후 비용 변경 차단 — DB 트리거 + 서버 액션 가드
+```
+
+**Step 9.** ACTIVE_AGENT.md → IDLE / TASK_BOARD SECTION 1 🔔 등록
+
+### 완료 기준 (DoD)
+
+- [ ] `fn_prevent_cost_change_after_invoice()` 트리거 migration 추가
+- [ ] `zen_order_costs` invoice_id 설정 후 UPDATE/DELETE 차단 확인
+- [ ] `addIncidentFee()` 예외 처리 명시 (선택한 방안 명기)
+- [ ] `updateOrderCosts()` 가드 추가 (또는 트리거로 커버됨 명시)
+- [ ] 회귀 테스트 전체 PASS 증적 (`docs/` 저장)
+- [ ] `scratch/IMP_PROGRESS.md` IMP-044 행 `🔔` 갱신
+- [ ] HANDOFF_BOX.md 인계 메시지 작성
+- [ ] ACTIVE_AGENT.md IDLE 초기화
+- [ ] TASK_BOARD SECTION 1 🔔 검토 대기 등록
