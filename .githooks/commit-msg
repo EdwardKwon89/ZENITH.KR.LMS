@@ -8,11 +8,11 @@ COMMIT_MSG_FILE="$1"
 COMMIT_MSG=$(cat "$COMMIT_MSG_FILE")
 
 # ── R-01: 에이전트 태그 확인 ─────────────────────────────────────
-if ! echo "$COMMIT_MSG" | grep -qE '^\[(Claude|Gemini|OpenCode)\]'; then
+if ! echo "$COMMIT_MSG" | grep -qE '^\[(Claude|Gemini|OpenCode|B_Kai|D_Kai|Ring)\]'; then
   echo ""
   echo "❌ BLOCKED: 에이전트 태그 누락 (R-01 위반)"
-  echo "   커밋 메시지 형식: [Claude], [Gemini], [OpenCode] 중 하나 필수"
-  echo "   예시: [OpenCode] fix: GOV-001 ACTIVE_AGENT.md IDLE 초기화"
+  echo "   커밋 메시지 형식: [Claude], [Gemini], [OpenCode], [B_Kai], [D_Kai], [Ring] 중 하나 필수"
+  echo "   예시: [B_Kai] fix: IMP-038 CLAIMED OrderStatus 정식 등록"
   echo ""
   exit 1
 fi
