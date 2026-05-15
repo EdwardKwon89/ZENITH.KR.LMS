@@ -70,7 +70,8 @@
 | **IMP-026-RL**            | Riley  | [Phase A] RLS 비즈니스 규칙 통합 (SQL 함수화)       | 2026-05-16 | 🔔 검토 대기 |
 | ~~**IMP-044-BK**~~            | B_Kai  | [Phase B] 인보이스 발행 후 비용 변경 차단           | 2026-05-16 | ✅ PASS |
 | **IMP-044-BK-FIX**        | B_Kai  | [FIX] 트리거 RETURN NEW→OLD 수정 (DELETE 경로 버그) | 2026-05-16 | 🔔 검토 대기 |
-| ~~**ANA-IMP-DK-D**~~      | D_Kai  | Phase D 사전 GitNexus 분석 (IMP-014·033·058·059)   | 2026-05-16 | ✅ FULL PASS |
+| ~~**ANA-IMP-DK-D**~~      | D_Kai  | Phase D 사전 GitNexus 분석 (IMP-014·033·058·059)   | 2026-05-16 | ❌ CONDITIONAL PASS — IMP-014 분류 오류·IMP-059 누락 |
+| **ANA-IMP-DK-D-FIX**      | D_Kai  | [FIX] IMP-014 Client 컴포넌트 재분석 + IMP-059 보완  | 2026-05-16 | ⏳ D_Kai 착수 가능 |
 
 
 ---
@@ -122,7 +123,8 @@
 | ~~**ANA-IMP-DK-FIX**~~ | —  | TASK_BOARD ANA-IMP-DK 상태 🔔 갱신                                              | 2026-05-15                  | ✅ FULL PASS             |
 | ~~**ANA-IMP-DK-B**~~       | —  | Phase B CRITICAL 사전 GitNexus 분석 (IMP-019·039·040·042·043·044)               | 2026-05-15                  | ✅ **FULL PASS**       |
 | ~~**ANA-IMP-DK-C**~~           | —  | Phase C 사전 GitNexus 분석 (IMP-013·025·045·051·056)                             | 2026-05-15                  | ✅ **FULL PASS**       |
-| ~~**ANA-IMP-DK-D**~~               | D  | Phase D 사전 GitNexus 분석 (IMP-014·033·058·059)                                  | 2026-05-16                  | ✅ **FULL PASS**       |
+| ~~**ANA-IMP-DK-D**~~               | D  | Phase D 사전 GitNexus 분석 (IMP-014·033·058·059)                                  | 2026-05-16                  | ❌ **CONDITIONAL PASS** — IMP-014 분류 오류·IMP-059 누락 |
+| **ANA-IMP-DK-D-FIX**               | D  | [FIX] IMP-014 Client 컴포넌트 재분석 + IMP-059 보완                               | 2026-05-16                  | ⏳ **착수 가능**       |
 | ~~**GOV-001**~~     | 1     | ACTIVE_AGENT.md IDLE 강제 초기화                                                | 2026-05-13                  | ✅ **Aiden PASS**        |
 | ~~**GOV-002**~~     | 1     | `~/.claude/settings.json` PostToolUse GitNexus Hook 제거                        | 2026-05-13                  | ✅ **Aiden PASS**        |
 | ~~**GOV-003**~~     | 2     | `GEMINI.md` + `AGENTS.md` Task 완료 DoD에 IDLE 초기화 추가                      | 2026-05-13                  | ✅ **Aiden PASS**        |
@@ -1093,6 +1095,84 @@ Phase D는 대규모 파일 분할과 패턴 도입이 중심입니다. Riley가
 - [ ] `scratch/ANA_PhaseD_DKai_20260516.md` 커밋
 - [ ] TASK_BOARD SECTION 1 🔔 검토 대기 등록
 - [ ] ACTIVE_AGENT.md IDLE 초기화
+
+---
+
+## 📨 Aiden → D_Kai | ANA-IMP-DK-D-FIX — Phase D 분석 보완
+
+> **수행 주체**: D_Kai (OpenCode) | **검증 주체**: Aiden (Claude)
+> **반려 사유**: IMP-014 Server/Client 오분류, IMP-059 호출 수 오류, IMP-033 파일 수 오류
+> **유형**: 순수 분석 수정 (코드 수정 없음) | **지시일**: 2026-05-16
+> **수정 대상**: `scratch/ANA_PhaseD_DKai_20260516.md`
+
+### 결함 1 — IMP-014: Server Component 오분류 (중요)
+
+**현재 분석 오류**:
+
+```
+| Page 컴포넌트 (Server) | 데이터 fetch + 레이아웃 | ~80줄 |
+```
+
+> 주의사항에도 "fetchData() (L79-116)는 Page 컴포넌트에 유지 — Server Component에서만 Supabase 직접 호출"이라고 잘못 기술됨.
+
+**실제 파일** (`src/app/[locale]/(dashboard)/admin/rates/page.tsx`):
+
+- 첫 줄: `'use client'`
+- `useState`, `useEffect` 사용 — 전체가 **클라이언트 컴포넌트**
+- `createClient()`는 `@/utils/supabase/client` (브라우저 클라이언트) import
+- `fetchData()`는 `useEffect` 내 클라이언트 사이드 비동기 함수
+
+**수정 지시**:
+
+1. 컴포넌트 구조 표의 "Page 컴포넌트 (Server)" → "Page 컴포넌트 (Client, 'use client')"로 수정
+2. 주의사항 2번 "fetchData()는 Server Component에서만 Supabase 직접 호출" → **삭제** (클라이언트 컴포넌트이므로 무관)
+3. 권장 분리 전략에 아래 내용 추가:
+   - 현재 전체가 클라이언트 컴포넌트 — 분리 후에도 데이터 fetch는 Server Actions(`getRateCards` 등) 경유 유지 (이미 올바르게 구현됨)
+   - `fetchData()`는 이미 Server Actions를 호출하므로 분리 시 동일 패턴 유지
+
+### 결함 2 — IMP-059: createClient() 호출 수 오류 (경미)
+
+**현재 분석**: "직접 호출자 (23개 서버 코드)"
+
+**실제**: 정의 2개(`server.ts`, `client.ts`) 제외 **26개** 호출 지점
+
+누락된 호출 (클라이언트 사이드):
+- `src/app/[locale]/(dashboard)/admin/organizations/organizations-client.tsx`
+- `src/components/layout/LogoutButton.tsx`
+- `src/components/inventory/InventoryScanner.tsx`
+- `src/hooks/useAuth.ts`
+
+**수정 지시**:
+
+IMP-059 섹션에 아래 내용 추가:
+
+```
+| 클라이언트 사이드 | organizations-client.tsx, LogoutButton.tsx, InventoryScanner.tsx, useAuth.ts | 4 |
+```
+
+그리고 주의사항에 명시:
+- `React.cache()` 전략은 **서버 사이드 전용** (클라이언트 사이드 4개 호출 지점은 `@/utils/supabase/client`를 사용하므로 범위 외)
+- 실제 서버 사이드 중복 제거 대상: 22개 (총 26개 - 클라이언트 4개)
+
+### 결함 3 — IMP-033: 파일 수 오류 (경미)
+
+**현재 분석**: "24개 파일, 총 5,570줄"
+**실제**: **23개 파일, 5,587줄**
+
+수정: 첫 줄 숫자 정정
+
+### 완료 기준 (DoD)
+
+- [ ] IMP-014 컴포넌트 구조 표 Server → Client 수정
+- [ ] IMP-014 주의사항 2번 잘못된 Server Component 언급 삭제
+- [ ] IMP-014 권장 분리 전략에 클라이언트 컴포넌트 기반 분리 전략 보완
+- [ ] IMP-059 클라이언트 사이드 4개 호출 지점 추가 및 React.cache() 적용 범위 명시
+- [ ] IMP-033 파일 수 23개, 5,587줄로 정정
+- [ ] `scratch/ANA_PhaseD_DKai_20260516.md` 수정 후 커밋
+- [ ] TASK_BOARD SECTION 1 🔔 검토 대기 등록
+- [ ] ACTIVE_AGENT.md IDLE 초기화
+
+커밋: `[OpenCode] docs: ANA-IMP-DK-D-FIX IMP-014 Client 컴포넌트 재분류 + IMP-059 호출 수 보완`
 
 ---
 
