@@ -49,8 +49,8 @@
 | 038 | CLAIMED OrderStatus 정식 등록 | B_Kai | ✅ | 2026-05-15 |
 | 039 | 정산 이중 실행 방지 | Riley | ⬜ | — |
 | 040 | WAREHOUSED→CANCELED 재고 불일치 | Riley | ⬜ | — |
-| 042 | `updateOrder()` 수정 차단 누락 | Riley | ⬜ | — |
-| 043 | MASTERED Lock 액션별 우회 방지 | Riley | ⬜ | — |
+| 042 | `updateOrder()` 수정 차단 누락 | B_Kai | 🔔 | 2026-05-15 |
+| 043 | MASTERED Lock 액션별 우회 방지 | B_Kai | 🔔 | 2026-05-15 |
 | 044 | 인보이스 발행 후 비용 변경 차단 | Riley | ⬜ | — |
 | 047 | 트랜잭션 부재 확장 (status/지갑) | Riley | 🚫 | — |
 | 052 | dissolveMasterOrder 부분 실패 | Riley | 🚫 | — |
@@ -58,7 +58,7 @@
 
 > 🚫 IMP-047: IMP-019 완료 후 착수 가능 / IMP-052·053: IMP-047 완료 후 착수 가능
 
-**Phase B 완료**: 1 / 10
+**Phase B 완료**: 3 / 10
 
 ---
 
