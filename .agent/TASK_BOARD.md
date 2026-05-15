@@ -59,6 +59,7 @@
 | ~~**IMP-048-BK**~~      | B_Kai  | [Phase E] Mock 데이터 제거 (대시보드)                        | 2026-05-15 | ❌ CONDITIONAL PASS |
 | ~~**IMP-048-BK-FIX**~~  | B_Kai  | [FIX] 통계 쿼리 역할 필터 + .gitignore 보완                 | 2026-05-15 | ✅ FULL PASS |
 | **ANA-IMP-DK-B**       | D_Kai  | Phase B CRITICAL 사전 GitNexus 분석 (IMP-019·039·040·042·043·044) | 2026-05-15 | 🔔 Aiden 검토 대기 |
+| **IMP-027-BK**          | B_Kai  | [Phase F] 점검 모드 페이지 신규 구현                            | 2026-05-15 | 192/192 PASS |
 
 ---
 
@@ -75,7 +76,7 @@
 | ~~**IMP-038-BK-FIX**~~      | IMP-038 보완 — R-09 테스트 케이스 추가      | 2026-05-15 | ✅ 보완 완료        |
 | ~~**IMP-048-BK**~~     | [Phase E] Mock 데이터 제거 (대시보드)                        | 2026-05-15 | ❌ CONDITIONAL PASS |
 | ~~**IMP-048-BK-FIX**~~ | [Phase E] 통계 쿼리 역할 필터 수정 + .gitignore 보완         | 2026-05-15 | ✅ FULL PASS        |
-| **IMP-027-BK**         | [Phase F] 점검 모드 페이지 신규 구현                         | 2026-05-15 | ⏳ 착수 가능        |
+| ~~**IMP-027-BK**~~         | [Phase F] 점검 모드 페이지 신규 구현                         | 2026-05-15 | 🔔 검토 대기        |
 
 ---
 

@@ -265,3 +265,42 @@ Aiden 재검증 대기.
 
 ---
 
+### [2026-05-15 20:15] B_Kai → Aiden — IMP-027-BK [Phase F] 점검 모드 페이지 신규 구현 완료
+
+**발신**: B_Kai (GLM Big Pickle)
+**수신**: Aiden (ZEN_CEO)
+**우선순위**: 일반
+
+**IMP-027-BK — 점검 모드 /maintenance 페이지 신규 구현 완료 보고.**
+
+### 변경 내용
+
+1. **신규 파일**: `src/app/[locale]/(maintenance)/page.tsx`
+   - 점검 중 안내 UI (제목·메시지·예상 복구 시간 미정 안내·홈 버튼)
+   - `next-intl` `useTranslations('Maintenance')` 적용
+
+2. **다국어 키 추가**: `messages/ko.json` + `messages/en.json`
+   - `"Maintenance"` 네임스페이스: title, message, eta_unknown, back
+
+3. **수정 파일**: `src/middleware.ts` L64~76
+   - 이전: `/maintenance` 경로 설정 후 즉시 홈(`/${locale}?error=maintenance`)으로 덮어쓰기
+   - 변경: `/maintenance` 경로로 정상 리다이렉트
+   - 루프 방지: 조건에 `purePath !== '/maintenance'` 추가
+
+### 테스트 결과
+
+- **회귀 테스트**: 192/192 PASS (42 test files)
+- **GitNexus detect_changes**: MEDIUM risk (1 affected process — middleware)
+
+### 커밋
+
+- `0bd37d0 [B_Kai] feat: IMP-027 점검 모드 /maintenance 페이지 신규 구현`
+
+### 제어권
+
+Aiden 검증 대기.
+
+— B_Kai (GLM Big Pickle)
+
+---
+
