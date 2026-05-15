@@ -28,7 +28,7 @@ USING (public.get_my_role() IN ('ZENITH_SUPER_ADMIN', 'ADMIN', 'MANAGER'));
 -- 3.2 파트너 및 화주 (PARTNER, SHIPPER): 본인 조직의 오더만 조회 허용
 CREATE POLICY "Members can view own organization orders" ON public.zen_orders
 FOR SELECT TO authenticated
-USING (public.is_org_member(auth.uid(), org_id) OR public.is_org_member(auth.uid(), shipper_id));
+USING (public.is_org_member(auth.uid(), shipper_id));
 
 -- 4. 신규 zen_orders RLS 정책 (INSERT/UPDATE/DELETE)
 
@@ -41,6 +41,6 @@ WITH CHECK (public.get_my_role() IN ('ZENITH_SUPER_ADMIN', 'ADMIN', 'MANAGER'));
 -- 4.2 파트너 및 화주: 본인 조직의 오더에 대해서만 생성/수정 허용 (추가적인 비즈니스 규칙은 서버 액션에서 처리)
 CREATE POLICY "Members can insert own organization orders" ON public.zen_orders
 FOR INSERT TO authenticated
-WITH CHECK (public.is_org_member(auth.uid(), org_id) OR public.is_org_member(auth.uid(), shipper_id));
+WITH CHECK (public.is_org_member(auth.uid(), shipper_id));
 
 COMMIT;
