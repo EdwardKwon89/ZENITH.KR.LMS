@@ -29,4 +29,5 @@
 | 2026-05-15 18:40 | B_Kai (GLM Big Pickle) | IMP-038-BK CLAIMED OrderStatus 등록 완료 → IDLE | ✅ Aiden 검토 대기 |
 | 2026-05-15 18:01 | B_Kai (GLM Big Pickle) | IMP-PLAN-BK-V23 v2.3 제출 + IMP-036-BK 구현 완료 → IDLE | ✅ Aiden 검토 대기 |
 | 2026-05-15 20:00 | B_Kai (GLM Big Pickle) | IMP-048-BK-FIX 통계 쿼리 역할 필터 누락 수정 + gitignore 보완 → IDLE | ✅ Aiden 검토 대기 |
+| 2026-05-15 20:15 | B_Kai (GLM Big Pickle) | IMP-027-BK 점검 모드 /maintenance 페이지 신규 구현 → IDLE | ✅ Aiden 검토 대기 |
 | 2026-04-23 | Aiden (ZEN_CEO) | ENV 설정 (103/104 업데이트, .agent/ 구성, pre-commit hook) | ✅ 완료 |
