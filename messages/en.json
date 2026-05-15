@@ -453,5 +453,11 @@
     "success": "Withdrawal process completed. Thank you for using our service.",
     "error_confirm": "Please enter \"WITHDRAW\" exactly.",
     "error_process": "An error occurred during the withdrawal process."
+  },
+  "Maintenance": {
+    "title": "Under Maintenance",
+    "message": "The service is currently under maintenance. Please try again shortly.",
+    "eta_unknown": "Estimated recovery time is not yet available.",
+    "back": "Back to Home"
   }
 }

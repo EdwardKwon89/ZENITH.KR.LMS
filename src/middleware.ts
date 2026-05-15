@@ -65,13 +65,10 @@ export async function middleware(request: NextRequest) {
   const isMaintenanceMode = await isFeatureEnabled('MAINTENANCE_MODE');
   const isPlatformUser = user?.app_metadata?.role === USER_ROLES.ZENITH_SUPER_ADMIN || user?.app_metadata?.role === USER_ROLES.ADMIN;
 
-  if (isMaintenanceMode && !isPlatformUser && !isAuthPage && !isApi && purePath !== '/') {
-    console.log(`[MIDDLEWARE] Maintenance Mode Active. Blocking non-admin access.`);
+  if (isMaintenanceMode && !isPlatformUser && !isAuthPage && !isApi && purePath !== '/' && purePath !== '/maintenance') {
+    console.log(`[MIDDLEWARE] Maintenance Mode Active. Redirecting to /maintenance.`);
     const url = request.nextUrl.clone();
-    url.pathname = `/${locale}/maintenance`; // 점검 페이지 (아직 없으므로 루트로 보내거나 403 처리 가능)
-    // 임시로 홈으로 보내거나 에러 메시지 쿼리 파라미터 추가
-    url.pathname = `/${locale}`;
-    url.searchParams.set('error', 'maintenance');
+    url.pathname = `/${locale}/maintenance`;
     return mergeHeaders(NextResponse.redirect(url), supabaseResponse);
   }
 
