@@ -47,6 +47,8 @@
 | Task ID | 지시자 | Task 명 | 지시일 |
 |:---|:---|:---|:---|
 | ~~**IMP-PLAN-BK**~~ | B_Kai | IMP 실행 계획 v2.2 — Aiden+Riley 공동 CONDITIONAL PASS 확정 | ✅ 검토 완료 |
+| **IMP-PLAN-BK-V23** | B_Kai | IMP 실행 계획 v2.3 — W-1~W-3+N-1 수정 | 2026-05-15 | ⏳ Aiden 검토 대기 |
+| **IMP-036-BK** | B_Kai | Status Machine MANAGER 역할 추가 (1라인+bypass) | 2026-05-15 | ⏳ Aiden 검토 대기 |
 
 ---
 
@@ -57,8 +59,8 @@
 
 | Task ID | Task 명 | 지시일 | 상태 |
 |:---|:---|:---|:---:|
-| **IMP-PLAN-BK-V23** | IMP 실행 계획 v2.3 제출 — W-1~W-3+N-1 수정 | 2026-05-15 | ⏳ 착수 가능 |
-| **IMP-036-BK** | [Phase A] Status Machine MANAGER 역할 추가 | 2026-05-15 | ⏳ 즉시 착수 가능 |
+| ~~**IMP-PLAN-BK-V23**~~ | IMP 실행 계획 v2.3 제출 — W-1~W-3+N-1 수정 | 2026-05-15 | ✅ 제출 완료 |
+| ~~**IMP-036-BK**~~ | [Phase A] Status Machine MANAGER 역할 추가 | 2026-05-15 | ✅ 구현 완료 |
 
 ---
 

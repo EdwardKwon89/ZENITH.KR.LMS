@@ -155,7 +155,7 @@ Layer 7 (장기)
 ### Critical Path 5개
 
 ```
-C1 (Security, 즉시):   034 → 035 → 037 → 026 → 041 → 057
+C1 (Security, 즉시):   [034 + 036 + 037] (병렬) → 035 → 026 → 041 → 057
 C2 (Data Integrity):   019 → 047 → 043 → 052 → 053
                                → 039 → 040 → 042
 C3 (Architecture):     033 → 016 → 030      003 (병렬)
@@ -174,7 +174,8 @@ C5 (Middleware 정비):   003 → 021 (proxy 전환 + 최적화 병행)
 
 | P | IMP | 내용 | 공수 | Agent | 비고 |
 |:-:|:---:|:-----|:----:|:-----|:-----|
-| CRITICAL | 034 | `.env.local` Git 추적 제거 + 키 재발급 | 0.5 MD | **Riley** | 즉시 git rm --cached |
+| CRITICAL | 034a | `.env.local` Git 추적 제거 (`git rm --cached` + `.gitignore` + 커밋) | 0.3 MD | **Riley** | Git 작업 |
+| CRITICAL | 034b | API 키 재발급 (Supabase·Vercel·Resend) | 0.2 MD | **Edward (Human)** | Dashboard 직접 수행 |
 | CRITICAL | 035 | SECURITY DEFINER 38개 권한 검증 | 2~3 MD | **Aiden+Riley** | get_my_role() 활용. D_Kai 구조 검토 |
 | CRITICAL | 036 | Status Machine MANAGER 누락 | 0.1 MD | **B_Kai** | 1라인 추가. 첫 역량 입증용 |
 | CRITICAL | 037 | Supabase Auth 보안 설정 | 0.5 MD | **Riley** | config.toml |
@@ -182,7 +183,7 @@ C5 (Middleware 정비):   003 → 021 (proxy 전환 + 최적화 병행)
 | High | 041 | Storage 정책 조직 멤버십 검증 | 0.5 MD | **Riley** | RLS 정책 수정 |
 | Medium | 057 | `zen_role_permissions` SELECT 제한 | 0.3 MD | **Riley** | ADMIN/MANAGER 전용 |
 
-**소요 공수**: ~7.9 MD (~7.9 MD 실측)
+**소요 공수**: ~7.9 MD (034a 0.3MD + 034b 0.2MD 포함)
 **검증**: **Aiden 직접 검증** — CRITICAL 4건은 전수 코드 리뷰
 **위험**: 키 노출 지속 시 보안 사고. SECURITY DEFINER 함수 오작동 시 서비스 장애
 **규칙 준수**: R-01(주체·검증 명시), R-04(LIVE 체크리스트), R-08(test:regression), R-10(UI 증적), GitNexus impact analysis 선행
@@ -218,7 +219,7 @@ C5 (Middleware 정비):   003 → 021 (proxy 전환 + 최적화 병행)
 | High | 013 | console->logger 교체 (53개 파일) | 2~3 MD | **Riley** | logger.ts 신규 |
 | Medium | 015 | middleware.ts console.log 프로덕션 노출 | 0.1 MD | **Riley** | IMP-013 logger 활용 (MUST after 013) |
 | High | 025 | Server Actions 에러 래퍼 | 1.5 MD | **Riley** | Result<T,E> 패턴 |
-| High | 046 | Rate Limiting 도입 | 2 MD | **Riley** | @upstash/ratelimit |
+| High | 046 | Rate Limiting 도입 | 2 MD | **Riley** | 결정 주체: **Aiden** (Phase C 착수 전 결정 필수, 미결정 시 착수 차단) |
 | High | 045 | 무제한 리스트 페이지네이션 (18곳) | 2~3 MD | **Riley** | .range() 적용 |
 | Medium | 051 | 감사 추적 (마스터/인보이스/통관) | 2 MD | **Riley** | 이력 테이블 신규 |
 | Medium | 056 | 이메일 HTML 인젝션 방지 | 0.3 MD | **Riley** | escapeHtml() |
@@ -340,7 +341,7 @@ C5 (Middleware 정비):   003 → 021 (proxy 전환 + 최적화 병행)
 | 034 | A | ✅ | 035 | A | ✅ | 036 | A | ✅ |
 | 037 | A | ✅ |   |   |   |   |   |   |
 
-> **검증**: 52개 미착수 IMP 전 항목 Phase 배정 완료 (IMP-018은 IMP-026으로 재번호되어 존재하지 않음)
+> **검증**: 52개 미착수 IMP 전 항목 Phase 배정 완료 (IMP-018: 삭제/병합 처리됨. Riley 원번 IMP-018은 IMP-026과 무관)
 
 ---
 
@@ -392,7 +393,8 @@ B_Kai가 이번 임시 활성화 기간에 **단독 수행 가능한 IMP**:
 
 | IMP | 조치 | 긴급성 | 담당 |
 |:---:|:-----|:------:|:----:|
-| 034 | `git rm --cached .env.local` + 키 재발급 | **당일** | Riley |
+| 034a | `.env.local` Git 추적 제거 (`git rm --cached` + `.gitignore`) | **당일** | **Riley** |
+| 034b | API 키 재발급 (Supabase·Vercel·Resend) | **당일** | **Edward (Human)** |
 | 036 | `ROLE_PERMISSIONS.MANAGER` 1줄 추가 | **당일** | B_Kai |
 | 037 | Supabase Auth 설정 변경 | **당일** | Riley |
 | 035 | SECURITY DEFINER 권한 검증 | **1주일** | Aiden+Riley |
@@ -409,6 +411,7 @@ B_Kai가 이번 임시 활성화 기간에 **단독 수행 가능한 IMP**:
 | v2.0 | 2026-05-14 | B_Kai | 협업 프로토콜 + R-n 규칙 매핑 + B_Kai 경계 + IMP-026/043 누락 보완 + B_Kai 단독 수행 범위 명시 |
 | v2.1 | 2026-05-14 | B_Kai | IMP-015 독립 항목 분리 + IMP-003 Phase D3 이동 + Critical Path C5 신설 |
 | v2.2 | 2026-05-14 | B_Kai | Section 4 IMP-034 누락 자체 수정 + Phase B/C/E 공수 상한 자체 조정 |
+| v2.3 | 2026-05-15 | B_Kai | W-1 IMP-034 수행 주체 분리 (Riley/Edward). W-2 C1 병렬 표현 수정. W-3 IMP-046 결정 주체·시점 명시. N-1 IMP-018 설명 정정 |
 | v2.2-R | 2026-05-15 | Aiden (Claude, ZEN_CEO) | §10 Aiden 검토 의견 추가 — CONDITIONAL PASS (W-1~W-3) |
 | v2.2-R2 | 2026-05-15 | Riley (Gemini Pro High) | §11 Riley 부 평가자 검토 의견 추가 — Aiden 판정 동의, W-2 지지, IMP-036 감시 예고 |
 
