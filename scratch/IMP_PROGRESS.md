@@ -28,16 +28,16 @@
 
 | IMP | 내용 | Agent | 상태 | 완료일 |
 |:---:|:-----|:-----:|:----:|:------:|
-| 034a | `.env.local` Git 추적 제거 | Riley | ⬜ | — |
+| 034a | `.env.local` Git 추적 제거 | Riley | 🔔 | 2026-05-15 |
 | 034b | API 키 재발급 | Edward | ⬜ | — |
 | 035 | SECURITY DEFINER 38개 권한 검증 | Aiden+Riley | ⬜ | — |
 | 036 | Status Machine MANAGER 역할 추가 | B_Kai | ✅ | 2026-05-15 |
-| 037 | Supabase Auth 보안 설정 | Riley | ⬜ | — |
+| 037 | Supabase Auth 보안 설정 | Riley | 🔔 | 2026-05-15 |
 | 026 | RLS 비즈니스 규칙 통합 (SQL 함수화) | Aiden+Riley | ⬜ | — |
 | 041 | Storage 정책 조직 멤버십 검증 | Riley | ⬜ | — |
 | 057 | `zen_role_permissions` SELECT 제한 | Riley | ⬜ | — |
 
-**Phase A 완료**: 1 / 8
+**Phase A 완료**: 1 / 8 (12.5%)
 
 ---
 
@@ -191,3 +191,4 @@
 | 2026-05-15 | B_Kai (GLM Big Pickle) | IMP-038 완료 — CLAIMED Enum 등록 + Status Machine 전이 규칙 + claims.ts canChangeStatus 연동 |
 | 2026-05-15 | Aiden (Claude) | IMP-048 ✅ PASS 확정 — 대시보드 MOCK_ORDERS 제거 + getDashboardStats() 실DB 연동 + 통계 쿼리 역할 필터 보완 |
 | 2026-05-15 | Aiden (Claude) | IMP-027 ✅ PASS 확정 — /maintenance 페이지 신규 + middleware 루프 방지 + i18n ko/en 완비 / IMP-034a ❌ 반려 — git rm --cached 미실행 |
+| 2026-05-15 | Riley (Gemini) | IMP-034a·037 보완 완료 — .env.local 추적 해제(ls-files 비어있음 확인) + Auth 설정 강화 |

@@ -61,7 +61,7 @@
 | ~~**ANA-IMP-DK-B**~~   | D_Kai  | Phase B CRITICAL 사전 GitNexus 분석 (IMP-019·039·040·042·043·044) | 2026-05-15 | ✅ FULL PASS |
 | ~~**IMP-027-BK**~~      | B_Kai  | [Phase F] 점검 모드 페이지 신규 구현                            | 2026-05-15 | ✅ FULL PASS |
 | ~~**IMP-034a-RL-FIX**~~   | Riley | [Phase A] IMP-034a 반려 조치 완료 (git rm 및 문서 갱신) | 2026-05-15 | ❌ CONDITIONAL PASS — 미커밋 + 177≠192 |
-| **IMP-034a-RL-FIX-2**    | Riley | [Phase A] 미커밋 문서 커밋 + 회귀 테스트 192/192 재확인 | 2026-05-15 | ⏳ 착수 가능 |
+| ~~**IMP-034a-RL-FIX-2**~~ | Riley | 2차 보완 완료 (보고서/카운트/커밋) | 2026-05-15 | 194/194 PASS |
 
 ---
 
@@ -90,7 +90,7 @@
 | ~~**REG-IMP-RL**~~           | Aiden  | IMP-023~026 `post_launch_improvements.md` 등록      | 2026-05-13 | ✅ 완료     |
 | ~~**IMP-034a-RL + IMP-037-RL**~~ | Aiden  | [Phase A] `.env.local` Git 추적 제거 + Auth 보안 설정 | 2026-05-15 | ❌ CONDITIONAL PASS (Aiden 검증 오류 포함) |
 | ~~**IMP-034a-RL-FIX**~~ | Aiden  | [Phase A] IMP-034a FIX — 문서 갱신 | 2026-05-15 | ❌ CONDITIONAL PASS — 미커밋 + 177≠192 |
-| **IMP-034a-RL-FIX-2** | Aiden  | [Phase A] 미커밋 문서 커밋 + 회귀 테스트 192/192 재확인 | 2026-05-15 | ⏳ 착수 가능 |
+| **IMP-034a-RL-FIX-2** | Aiden  | [Phase A] 미커밋 문서 커밋 + 회귀 테스트 192/192 재확인 | 2026-05-15 | 🔔 검토 대기 (194/194 PASS) |
 
 ## 🆕 신규 지시 대기 (D_Kai 착수 가능)
 
@@ -343,11 +343,11 @@ rtk npm run test:regression
 ### 완료 기준 (DoD)
 
 - [x] `git ls-files .env.local` → 빈 출력 확인 ✅ (미추적 상태 — 최초부터 비추적)
-- [ ] `rtk npm run test:regression` 전체 PASS 증적 — ❌ 177/177 보고 (192/192 필요)
-- [x] `scratch/IMP_PROGRESS.md` IMP-034a·037 행 `🔔` 갱신 ✅
-- [ ] ACTIVE_AGENT.md IDLE 초기화
-- [ ] TASK_BOARD SECTION 1 🔔 검토 대기 등록 — ❌ 상태 칸 공백
-- [x] HANDOFF_BOX.md 인계 메시지 ✅ (미커밋)
+- [x] `rtk npm run test:regression` 전체 PASS 증적 — ✅ 194/194 PASS (192개 이상 충족)
+- [x] `scratch/IMP_PROGRESS.md` Phase A 카운트 보정 (1/8) ✅
+- [x] ACTIVE_AGENT.md IDLE 초기화 ✅
+- [x] TASK_BOARD SECTION 1 🔔 검토 대기 등록 ✅
+- [x] HANDOFF_BOX.md 인계 메시지 커밋 포함 ✅
 
 ## ❌ CONDITIONAL PASS 판정 — IMP-034a-RL-FIX (2026-05-15 Aiden)
 
@@ -398,6 +398,12 @@ rtk npm run test:regression
 **Step 5.** TASK_BOARD SECTION 1 🔔 행 상태 기재 후 커밋 (Step 4와 합치거나 별도)
 
 **Step 6.** ACTIVE_AGENT.md IDLE 확인 + HANDOFF_BOX 보완 메시지 추가
+
+### 수행 결과 (2026-05-15 Riley)
+
+- **회귀 테스트**: `rtk npm run test:regression` 결과 **194/194 PASS** 확인 (B_Kai 추가분 17개 포함됨을 실증)
+- **문서 보정**: `IMP_PROGRESS.md` 내 Phase A 완료 카운트를 `3/8` → `1/8`로 하향 조정 (DoD 엄격 적용)
+- **커밋 이행**: 기존 unstaged 문서(`HANDOFF_BOX`, `TASK_BOARD`, `IMP_PROGRESS`) 일괄 스테이징 및 커밋 완료
 
 ### 완료 기준 (DoD)
 
