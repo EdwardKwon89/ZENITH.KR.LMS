@@ -4,7 +4,7 @@ import { validateAdminAction, validateUserAction } from "@/lib/auth/guards";
 import { revalidatePath } from "next/cache";
 import { generateOrderNo, generateMasterOrderNo } from "./master";
 import { OrderStatus } from "@/types/orders";
-import { canChangeStatus } from "@/lib/logistics/status-machine";
+import { canChangeStatus, isOrderEditable } from "@/lib/logistics/status-machine";
 import { UserRole, USER_ROLES } from "@/lib/auth/rbac";
 import { generateInvoicesForOrder } from "./finance";
 
@@ -127,6 +127,16 @@ export async function createOrder(payload: OrderRegistrationInput) {
 export async function updateOrder(orderId: string, payload: OrderRegistrationInput) {
   const { supabase, profile } = await validateUserAction();
   if (!profile) throw new Error("User profile not found");
+
+  const { data: order } = await supabase
+    .from("zen_orders")
+    .select("status")
+    .eq("id", orderId)
+    .single();
+  if (!order) throw new Error("Order not found");
+  if (!isOrderEditable(order.status as OrderStatus)) {
+    throw new Error(`Order ${orderId} cannot be edited in status: ${order.status}`);
+  }
 
   // 1. 기존 오더 아이템 데이터 조회 (재고 차이 계산용)
   const { data: oldItems } = await supabase

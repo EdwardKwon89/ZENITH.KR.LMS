@@ -88,3 +88,11 @@ export function isOrderEditable(status: OrderStatus): boolean {
   ];
   return !nonEditableStates.includes(status);
 }
+
+/**
+ * MASTERED 상태 여부를 확인합니다.
+ * MASTERED 상태의 오더는 인보이스 발행 후 Lock 상태로, 사고비 추가/클레인 등록 등이 차단되어야 합니다.
+ */
+export function isMasteredStatus(status: OrderStatus): boolean {
+  return status === OrderStatus.MASTERED;
+}

@@ -4,7 +4,7 @@ import { validateUserAction, validateAdminAction } from "@/lib/auth/guards";
 import { revalidatePath } from "next/cache";
 import { USER_ROLES } from "@/lib/auth/rbac";
 import { OrderStatus } from "@/types/orders";
-import { canChangeStatus } from "@/lib/logistics/status-machine";
+import { canChangeStatus, isMasteredStatus } from "@/lib/logistics/status-machine";
 
 /**
  * [PH8-BE-01] 클레임 목록을 조회합니다.
@@ -68,6 +68,10 @@ export async function createClaim(payload: {
     .single();
 
   if (orderError || !order) throw new Error("Order not found");
+  
+  if (isMasteredStatus(order.status as OrderStatus)) {
+    throw new Error("Cannot file a claim for a MASTERED order.");
+  }
   
   // 권한 필터링: 관리자 패스, 법인 화주(org_id 일치), 개인 화주(created_by 일치)
   const isOwner = profile.role === USER_ROLES.ADMIN || 
@@ -150,6 +154,21 @@ export async function addIncidentFee(payload: {
   description?: string;
 }) {
   const { supabase, user } = await validateAdminAction();
+
+  const { data: claimData } = await supabase
+    .from("zen_claims")
+    .select("order_id")
+    .eq("id", payload.claim_id)
+    .single();
+  if (!claimData) throw new Error("Claim not found");
+  const { data: orderData } = await supabase
+    .from("zen_orders")
+    .select("status")
+    .eq("id", claimData.order_id)
+    .single();
+  if (orderData && isMasteredStatus(orderData.status as OrderStatus)) {
+    throw new Error("Cannot add incident fee to a MASTERED order.");
+  }
 
   // 1. 사고 비용 기록
   const { data: fee, error: feeError } = await supabase
