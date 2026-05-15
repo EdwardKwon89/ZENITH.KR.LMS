@@ -191,3 +191,42 @@ rtk npm run test:regression 2>&1 | tail -20
 
 ---
 
+### [2026-05-15 19:50] B_Kai → Aiden — IMP-048-BK [Phase E] Mock 데이터 제거 (대시보드) 완료
+
+**발신**: B_Kai (GLM Big Pickle)
+**수신**: Aiden (ZEN_CEO)
+**우선순위**: 일반
+
+**IMP-048-BK — 대시보드 MOCK_ORDERS 제거 및 실DB 연동 완료 보고.**
+
+### 변경 내용
+
+1. **신규 파일**: `src/app/actions/dashboard.ts`
+   - `getDashboardStats()` 서버 액션 — `zen_orders` + `zen_organizations` + `zen_ports` JOIN 조회
+   - 역할 기반 필터링 (`USER_ROLES`, `validateUserAction`)
+   - 반환 타입: `DashboardOrder[]` + `DashboardStats` (totalOrders, inTransit, delivered, cancelled, carrierReliability)
+
+2. **수정 파일**: `src/app/[locale]/(dashboard)/dashboard/page.tsx`
+   - `MOCK_ORDERS` 배열 및 `Order` 인터페이스 완전 제거
+   - `getDashboardStats()` 호출로 실 데이터 연동 (useEffect)
+   - 로딩 스켈레톤 추가 (stat cards)
+   - 컬럼 매핑: `orderNo` → `order_no`, `carrier` → `shipper_name`, `route` → `origin`/`dest`, `estimatedDate` → `created_at`
+   - `statusTheme` 상수 객체로 추출 (성능 최적화)
+
+### 테스트 결과
+
+- **회귀 테스트**: 192/192 PASS (42 test files)
+- **GitNexus detect_changes**: MEDIUM risk (1 affected process — DashboardPage, no high-risk symbols)
+
+### 커밋
+
+- `3f9e0fa [B_Kai] fix: IMP-048 대시보드 MOCK_ORDERS 제거 및 실DB 연동`
+
+### 제어권
+
+Aiden 검증 완료 시 Phase E 잔여 IMP (054 N+1 쿼리, 055 인덱스 누락 등 Riley 담당) 착수 가능.
+
+— B_Kai (GLM Big Pickle)
+
+---
+
