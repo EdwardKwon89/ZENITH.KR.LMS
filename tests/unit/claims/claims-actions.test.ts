@@ -46,7 +46,7 @@ describe('ZENITH Claims Actions: Lifecycle & Settlement', () => {
     (validateUserAction as any).mockResolvedValue({ 
       supabase: supabaseMock, 
       user: { id: 'user-1' },
-      profile: { id: 'prof-1', role: 'SHIPPER', org_id: 'org-1' }
+      profile: { id: 'prof-1', role: 'CORPORATE', org_id: 'org-1' }
     });
     
     (validateAdminAction as any).mockResolvedValue({ 
@@ -75,9 +75,9 @@ describe('ZENITH Claims Actions: Lifecycle & Settlement', () => {
     // Given
     const payload = { order_id: 'o1', reason_code: 'DAMAGE' as const, description: 'Broken' };
     
-    // 1. Order check
+    // 1. Order check (with status for canChangeStatus validation)
     supabaseMock.then.mockImplementationOnce((onFulfilled: any) => 
-      Promise.resolve({ data: { id: 'o1', shipper_id: 'org-1' }, error: null }).then(onFulfilled)
+      Promise.resolve({ data: { id: 'o1', shipper_id: 'org-1', status: 'IN_TRANSIT' }, error: null }).then(onFulfilled)
     );
     // 2. Insert result
     supabaseMock.then.mockImplementationOnce((onFulfilled: any) => 
@@ -124,10 +124,10 @@ describe('ZENITH Claims Actions: Lifecycle & Settlement', () => {
 
   it('TC-CLM.4: [Failure] 타 조직 오더에 대한 클레임 생성 시 예외를 던져야 함', async () => {
     // Given
-    (validateUserAction as any).mockResolvedValueOnce({ 
-      supabase: supabaseMock, 
+    (validateUserAction as any).mockResolvedValueOnce({
+      supabase: supabaseMock,
       user: { id: 'user-1' },
-      profile: { id: 'prof-1', role: 'SHIPPER', org_id: 'org-1' }
+      profile: { id: 'prof-1', role: 'CORPORATE', org_id: 'org-1' }
     });
 
     // 전역 then mock이 타 조직 오더를 반환하도록 설정

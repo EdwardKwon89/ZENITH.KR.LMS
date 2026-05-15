@@ -3,6 +3,8 @@
 import { validateUserAction, validateAdminAction } from "@/lib/auth/guards";
 import { revalidatePath } from "next/cache";
 import { USER_ROLES } from "@/lib/auth/rbac";
+import { OrderStatus } from "@/types/orders";
+import { canChangeStatus } from "@/lib/logistics/status-machine";
 
 /**
  * [PH8-BE-01] 클레임 목록을 조회합니다.
@@ -61,7 +63,7 @@ export async function createClaim(payload: {
   // 1. 오더 정보 및 권한 확인
   const { data: order, error: orderError } = await supabase
     .from("zen_orders")
-    .select("shipper_id, created_by")
+    .select("shipper_id, created_by, status")
     .eq("id", payload.order_id)
     .single();
 
@@ -93,10 +95,16 @@ export async function createClaim(payload: {
 
   if (claimError) throw new Error(`Claim registration failed: ${claimError.message}`);
 
-  // 3. 오더 상태 업데이트 ('CLAIMED')
+  // 3. 오더 상태 업데이트 (CLAIMED) — Status Machine 검증 우회 방지
+  const currentStatus = order.status as OrderStatus;
+  const statusCheck = canChangeStatus(currentStatus, OrderStatus.CLAIMED, profile.role as any);
+  if (!statusCheck.allowed) {
+    throw new Error(`Cannot file a claim: ${statusCheck.message}`);
+  }
+
   await supabase
     .from("zen_orders")
-    .update({ status: 'CLAIMED' })
+    .update({ status: OrderStatus.CLAIMED })
     .eq("id", payload.order_id);
 
   revalidatePath("/(dashboard)/orders");

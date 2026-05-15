@@ -7,14 +7,14 @@
 
 ## 현재 상태
 
-- **Status**: IDLE
-- **에이전트**: —
-- **역할**: —
-- **작업**: —
-- **시작**: —
-- **예상 완료**: —
-- **잠금 파일/경로**: —
-- **last_verified_at**: 2026-05-15T18:01:00+09:00
+- **Status**: BUSY
+- **에이전트**: B_Kai (GLM Big Pickle)
+- **역할**: Temp Execution (IMP-038-BK)
+- **작업**: [Phase B] CLAIMED OrderStatus 정식 등록 (3 files)
+- **시작**: 2026-05-15
+- **예상 완료**: 2026-05-15
+- **잠금 파일/경로**: src/types/orders.ts, src/lib/logistics/status-machine.ts, src/app/actions/claims.ts
+- **last_verified_at**: 2026-05-15T18:30:00+09:00
 - **status_age_limit_hours**: 24
 
 ---
