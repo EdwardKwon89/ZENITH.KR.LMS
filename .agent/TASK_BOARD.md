@@ -63,9 +63,9 @@
 | ~~**IMP-034a-RL-FIX**~~   | Riley | [Phase A] IMP-034a 반려 조치 완료 (git rm 및 문서 갱신) | 2026-05-15 | ❌ CONDITIONAL PASS — 미커밋 + 177≠192 |
 | ~~**IMP-034a-RL-FIX-2**~~ | Riley | 2차 보완 완료 (보고서/카운트/커밋) | 2026-05-15 | ✅ FULL PASS |
 | ~~**ANA-IMP-DK-C**~~      | D_Kai  | Phase C 사전 GitNexus 분석 (IMP-013·025·045·051·056) | 2026-05-15 | ✅ FULL PASS |
-| **IMP-042-043-BK**        | B_Kai  | [Phase B] updateOrder 수정 차단 + MASTERED Lock 강화 | 2026-05-15 | 199/199 PASS |
-| **IMP-035-RL**           | Riley | [Phase A] SECURITY DEFINER 함수 권한 검증 및 시정 | 2026-05-15 | 199/199 PASS |
-| **IMP-042-043-BK-FIX**   | B_Kai | [FIX] IMP_PROGRESS Phase B 카운트 보정 (3/10→1/10) | 2026-05-15 | ✅ FIX 완료 |
+| ~~**IMP-042-043-BK**~~    | B_Kai  | [Phase B] updateOrder 수정 차단 + MASTERED Lock 강화 | 2026-05-15 | ✅ FULL PASS (FIX 포함) |
+| **IMP-035-RL**            | Riley  | [Phase A] SECURITY DEFINER 함수 권한 검증 및 시정    | 2026-05-15 | 🔔 Aiden 검토 대기     |
+| ~~**IMP-042-043-BK-FIX**~~| B_Kai  | [FIX] IMP_PROGRESS Phase B 카운트 보정 (3/10→1/10) | 2026-05-15 | ✅ FULL PASS            |
 
 
 ---
@@ -85,8 +85,7 @@
 | ~~**IMP-048-BK-FIX**~~ | [Phase E] 통계 쿼리 역할 필터 수정 + .gitignore 보완         | 2026-05-15 | ✅ FULL PASS        |
 | ~~**IMP-027-BK**~~         | [Phase F] 점검 모드 페이지 신규 구현                         | 2026-05-15 | ✅ FULL PASS        |
 | ~~**IMP-042-043-BK**~~         | [Phase B] updateOrder 수정 차단 + MASTERED Lock 강화 (동시 구현) | 2026-05-15 | ❌ CONDITIONAL PASS |
-| ~~**IMP-042-043-BK-FIX**~~    | IMP_PROGRESS Phase B 카운트 보정 (3/10 → 1/10)               | 2026-05-15 | ✅ FIX 완료       |
-| **IMP-042-043-BK-FIX**         | IMP_PROGRESS Phase B 카운트 보정 (3/10 → 1/10)               | 2026-05-15 | ⏳ 착수 가능       |
+| ~~**IMP-042-043-BK-FIX**~~    | IMP_PROGRESS Phase B 카운트 보정 (3/10 → 1/10)               | 2026-05-15 | ✅ FULL PASS       |
 
 ---
 
@@ -1561,6 +1560,11 @@ rtk npm run test:regression
 
 ### 완료 기준 (DoD)
 
-- [ ] `IMP_PROGRESS.md` Phase B Footer `1 / 10 (10%)` 확인
-- [ ] `[B_Kai] chore: IMP-042-043-BK-FIX` 커밋 완료
-- [ ] TASK_BOARD SECTION 1 🔔 등록
+- [x] `IMP_PROGRESS.md` Phase B Footer `1 / 10 (10%)` 확인 ✅
+- [x] `[B_Kai] chore: IMP-042-043-BK-FIX` 커밋 완료 ✅ `fdb1107`
+- [x] TASK_BOARD SECTION 1 🔔 등록 ✅ `2a5995b`
+
+## ✅ FULL PASS 판정 (2026-05-15 Aiden)
+
+> **판정**: ✅ **FULL PASS** | **검증**: Aiden (Claude)
+> IMP-042·043 ✅ 확정 — IMP_PROGRESS 갱신 완료 (Phase B 1/10→3/10, 전체 6/52→8/52)
