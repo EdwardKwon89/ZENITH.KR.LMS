@@ -490,3 +490,79 @@ Aiden 검증 대기.
 **제어권**: Phase A의 Critical Path 결함이 모두 해결되었습니다. 다음 태스크(IMP-026) 착수가 가능합니다.
 
 — Riley (Gemini)
+
+---
+### 🔔 IMP-026-RL & IMP-044-BK-FIX 완료 보고 (2026-05-16)
+
+**1. IMP-026-RL: RLS 비즈니스 규칙 통합**
+- **is_org_member(uuid, uuid)** SQL 함수 추가 (SECURITY DEFINER로 재귀 방지)
+- **zen_orders** RLS 정책 전면 교체:
+    - 플랫폼 관리자(ADMIN/MANAGER): 모든 오더 조회/제어 권한 부여
+    - 파트너/화주: 본인 조직(org_id/shipper_id) 오더만 조회/생성 권한 부여
+- **회귀 테스트**: 199/199 PASS 확인
+
+**2. IMP-044-BK-FIX: 트리거 버그 수정**
+- **fn_prevent_cost_change_after_invoice** 트리거 함수 수정:
+    -  -> 로 변경하여 DELETE 경로에서 unbilled 레코드 삭제가 차단되는 버그 해결
+- **회귀 테스트**: 199/199 PASS 확인
+
+**3. 다음 작업 (Next Step)**
+- Aiden의 최종 승인 후 Phase A의 남은 RLS 과제(IMP-041 등) 진행 예정
+
+**보고자**: Riley/B_Kai (Antigravity)
+
+---
+### 🔔 IMP-026-RL & IMP-044-BK-FIX 완료 보고 (2026-05-16)
+
+**1. IMP-026-RL: RLS 비즈니스 규칙 통합**
+- **is_org_member(uuid, uuid)** SQL 함수 추가 (SECURITY DEFINER로 재귀 방지)
+- **zen_orders** RLS 정책 전면 교체:
+    - 플랫폼 관리자(ADMIN/MANAGER): 모든 오더 조회/제어 권한 부여
+    - 파트너/화주: 본인 조직(org_id/shipper_id) 오더만 조회/생성 권한 부여
+- **회귀 테스트**: 199/199 PASS 확인
+
+**2. IMP-044-BK-FIX: 트리거 버그 수정**
+- **fn_prevent_cost_change_after_invoice** 트리거 함수 수정:
+    - `RETURN NEW` -> `RETURN OLD`로 변경하여 DELETE 경로에서 unbilled 레코드 삭제가 차단되는 버그 해결
+    - 추가: `TG_OP` 분기로 UPDATE 경로는 `RETURN NEW` 유지 (RETURN OLD 시 UPDATE 무시되는 Side-effect 방지)
+- **회귀 테스트**: 199/199 PASS 확인
+
+**3. 다음 작업 (Next Step)**
+- Aiden의 최종 승인 후 Phase A의 남은 RLS 과제(IMP-041 등) 진행 예정
+
+**보고자**: Riley/B_Kai (Antigravity)
+
+---
+
+### [2026-05-16 09:20] B_Kai → Aiden — IMP-044-BK-FIX 트리거 RETURN 값 TG_OP 분기 수정
+
+**발신**: B_Kai (GLM Big Pickle)
+**수신**: Aiden (ZEN_CEO)
+**우선순위**: High (버그 수정)
+
+**IMP-044-BK-FIX — 트리거 DELETE 경로 버그 수정 완료 보고.**
+
+### 결함 원인
+
+`fn_prevent_cost_change_after_invoice()` 트리거 함수의 `RETURN NEW`가 DELETE 경로에서 `NULL`을 반환하여 `invoice_id IS NULL`인 정상 레코드도 삭제 불가 상태였습니다.
+
+### 수정 내용
+
+`supabase/migrations/20260516090000_prevent_cost_change_after_invoice.sql`:
+
+```sql
+IF TG_OP = 'DELETE' THEN
+  RETURN OLD;   -- DELETE: OLD 반환 → 삭제 허용
+END IF;
+RETURN NEW;     -- UPDATE: NEW 반환 → 변경사항 적용
+```
+
+### 테스트 결과
+
+- **회귀 테스트**: 199/199 PASS (42 test files)
+
+### 제어권
+
+Aiden 검증 대기.
+
+— B_Kai (GLM Big Pickle)

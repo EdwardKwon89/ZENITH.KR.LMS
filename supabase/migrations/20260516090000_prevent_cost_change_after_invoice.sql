@@ -1,6 +1,7 @@
 -- Migration: Prevent cost changes after invoice issuance
--- Task ID: IMP-044-BK
+-- Task ID: IMP-044-BK, IMP-044-BK-FIX
 -- Created At: 2026-05-16 09:00:00
+-- FIX: TG_OP 분기 — DELETE는 OLD, UPDATE는 NEW 반환 (2026-05-16)
 -- Reason: zen_order_costs: invoice_id가 설정된 레코드의 UPDATE/DELETE를 차단하여
 --         인보이스 발행 후 비용 변경을 방지합니다.
 --         addIncidentFee()는 MASTERED Lock(IMP-042-043-BK)으로 별도 처리합니다.
@@ -12,7 +13,10 @@ BEGIN
   IF OLD.invoice_id IS NOT NULL THEN
     RAISE EXCEPTION 'Cannot modify order costs after invoice has been issued (invoice_id: %)', OLD.invoice_id;
   END IF;
-  RETURN OLD;
+  IF TG_OP = 'DELETE' THEN
+    RETURN OLD;
+  END IF;
+  RETURN NEW;
 END;
 $$;
 
