@@ -318,3 +318,127 @@
 [SUCCESS] VOC created: voc-123
 [2026-05-14T14:58:26.227Z] createVoc: order_id=order-456, type=DAMAGE
 [ERROR] UNAUTHORIZED: undefined !== test-org-id
+[2026-05-14T15:19:33.885Z] createVoc: order_id=order-123, type=DELAY
+[SUCCESS] VOC created: voc-123
+[2026-05-14T15:19:33.888Z] createVoc: order_id=order-456, type=DAMAGE
+[ERROR] UNAUTHORIZED: undefined !== test-org-id
+[2026-05-14T15:32:28.752Z] createVoc: order_id=order-123, type=DELAY
+[SUCCESS] VOC created: voc-123
+[2026-05-14T15:32:28.755Z] createVoc: order_id=order-456, type=DAMAGE
+[ERROR] UNAUTHORIZED: undefined !== test-org-id
+[2026-05-14T15:34:05.411Z] createVoc: order_id=order-123, type=DELAY
+[SUCCESS] VOC created: voc-123
+[2026-05-14T15:34:05.414Z] createVoc: order_id=order-456, type=DAMAGE
+[ERROR] UNAUTHORIZED: undefined !== test-org-id
+[2026-05-14T15:39:10.923Z] createVoc: order_id=order-123, type=DELAY
+[SUCCESS] VOC created: voc-123
+[2026-05-14T15:39:10.926Z] createVoc: order_id=order-456, type=DAMAGE
+[ERROR] UNAUTHORIZED: undefined !== test-org-id
+[2026-05-15T07:46:17.544Z] createVoc: order_id=order-123, type=DELAY
+[SUCCESS] VOC created: voc-123
+[2026-05-15T07:46:17.547Z] createVoc: order_id=order-456, type=DAMAGE
+[ERROR] UNAUTHORIZED: undefined !== test-org-id
+[2026-05-15T07:57:45.882Z] createVoc: order_id=order-123, type=DELAY
+[SUCCESS] VOC created: voc-123
+[2026-05-15T07:57:45.885Z] createVoc: order_id=order-456, type=DAMAGE
+[ERROR] UNAUTHORIZED: undefined !== test-org-id
+[2026-05-15T07:58:30.732Z] createVoc: order_id=order-123, type=DELAY
+[SUCCESS] VOC created: voc-123
+[2026-05-15T07:58:30.736Z] createVoc: order_id=order-456, type=DAMAGE
+[ERROR] UNAUTHORIZED: undefined !== test-org-id
+[2026-05-15T09:01:10.052Z] createVoc: order_id=order-123, type=DELAY
+[SUCCESS] VOC created: voc-123
+[2026-05-15T09:01:10.055Z] createVoc: order_id=order-456, type=DAMAGE
+[ERROR] UNAUTHORIZED: undefined !== test-org-id
+[2026-05-15T09:04:36.966Z] createVoc: order_id=order-123, type=DELAY
+[SUCCESS] VOC created: voc-123
+[2026-05-15T09:04:36.969Z] createVoc: order_id=order-456, type=DAMAGE
+[ERROR] UNAUTHORIZED: undefined !== test-org-id
+[2026-05-15T09:05:54.331Z] createVoc: order_id=order-123, type=DELAY
+[SUCCESS] VOC created: voc-123
+[2026-05-15T09:05:54.334Z] createVoc: order_id=order-456, type=DAMAGE
+[ERROR] UNAUTHORIZED: undefined !== test-org-id
+[2026-05-15T09:09:37.285Z] createVoc: order_id=order-123, type=DELAY
+[SUCCESS] VOC created: voc-123
+[2026-05-15T09:09:37.288Z] createVoc: order_id=order-456, type=DAMAGE
+[ERROR] UNAUTHORIZED: undefined !== test-org-id
+[2026-05-15T09:13:32.147Z] createVoc: order_id=order-123, type=DELAY
+[SUCCESS] VOC created: voc-123
+[2026-05-15T09:13:32.150Z] createVoc: order_id=order-456, type=DAMAGE
+[ERROR] UNAUTHORIZED: undefined !== test-org-id
+[2026-05-15T09:14:39.173Z] createVoc: order_id=order-123, type=DELAY
+[SUCCESS] VOC created: voc-123
+[2026-05-15T09:14:39.176Z] createVoc: order_id=order-456, type=DAMAGE
+[ERROR] UNAUTHORIZED: undefined !== test-org-id
+[2026-05-15T09:28:05.343Z] createVoc: order_id=order-123, type=DELAY
+[SUCCESS] VOC created: voc-123
+[2026-05-15T09:28:05.346Z] createVoc: order_id=order-456, type=DAMAGE
+[ERROR] UNAUTHORIZED: undefined !== test-org-id
+[2026-05-15T09:29:58.289Z] createVoc: order_id=order-123, type=DELAY
+[SUCCESS] VOC created: voc-123
+[2026-05-15T09:29:58.292Z] createVoc: order_id=order-456, type=DAMAGE
+[ERROR] UNAUTHORIZED: undefined !== test-org-id
+[2026-05-15T09:32:42.934Z] createVoc: order_id=order-123, type=DELAY
+[SUCCESS] VOC created: voc-123
+[2026-05-15T09:32:42.937Z] createVoc: order_id=order-456, type=DAMAGE
+[ERROR] UNAUTHORIZED: undefined !== test-org-id
+[2026-05-15T09:35:56.580Z] createVoc: order_id=order-123, type=DELAY
+[SUCCESS] VOC created: voc-123
+[2026-05-15T09:35:56.583Z] createVoc: order_id=order-456, type=DAMAGE
+[ERROR] UNAUTHORIZED: undefined !== test-org-id
+[2026-05-15T09:36:54.154Z] createVoc: order_id=order-123, type=DELAY
+[SUCCESS] VOC created: voc-123
+[2026-05-15T09:36:54.157Z] createVoc: order_id=order-456, type=DAMAGE
+[ERROR] UNAUTHORIZED: undefined !== test-org-id
+[2026-05-15T09:37:58.614Z] createVoc: order_id=order-123, type=DELAY
+[SUCCESS] VOC created: voc-123
+[2026-05-15T09:37:58.618Z] createVoc: order_id=order-456, type=DAMAGE
+[ERROR] UNAUTHORIZED: undefined !== test-org-id
+[2026-05-15T09:38:22.958Z] createVoc: order_id=order-123, type=DELAY
+[SUCCESS] VOC created: voc-123
+[2026-05-15T09:38:22.961Z] createVoc: order_id=order-456, type=DAMAGE
+[ERROR] UNAUTHORIZED: undefined !== test-org-id
+[2026-05-15T09:39:35.833Z] createVoc: order_id=order-123, type=DELAY
+[SUCCESS] VOC created: voc-123
+[2026-05-15T09:39:35.836Z] createVoc: order_id=order-456, type=DAMAGE
+[ERROR] UNAUTHORIZED: undefined !== test-org-id
+[2026-05-15T09:45:35.963Z] createVoc: order_id=order-123, type=DELAY
+[SUCCESS] VOC created: voc-123
+[2026-05-15T09:45:35.966Z] createVoc: order_id=order-456, type=DAMAGE
+[ERROR] UNAUTHORIZED: undefined !== test-org-id
+[2026-05-15T09:49:38.298Z] createVoc: order_id=order-123, type=DELAY
+[SUCCESS] VOC created: voc-123
+[2026-05-15T09:49:38.301Z] createVoc: order_id=order-456, type=DAMAGE
+[ERROR] UNAUTHORIZED: undefined !== test-org-id
+[2026-05-15T09:50:42.667Z] createVoc: order_id=order-123, type=DELAY
+[SUCCESS] VOC created: voc-123
+[2026-05-15T09:50:42.670Z] createVoc: order_id=order-456, type=DAMAGE
+[ERROR] UNAUTHORIZED: undefined !== test-org-id
+[2026-05-15T09:52:19.306Z] createVoc: order_id=order-123, type=DELAY
+[SUCCESS] VOC created: voc-123
+[2026-05-15T09:52:19.309Z] createVoc: order_id=order-456, type=DAMAGE
+[ERROR] UNAUTHORIZED: undefined !== test-org-id
+[2026-05-15T09:54:24.421Z] createVoc: order_id=order-123, type=DELAY
+[SUCCESS] VOC created: voc-123
+[2026-05-15T09:54:24.424Z] createVoc: order_id=order-456, type=DAMAGE
+[ERROR] UNAUTHORIZED: undefined !== test-org-id
+[2026-05-15T09:58:14.726Z] createVoc: order_id=order-123, type=DELAY
+[SUCCESS] VOC created: voc-123
+[2026-05-15T09:58:14.729Z] createVoc: order_id=order-456, type=DAMAGE
+[ERROR] UNAUTHORIZED: undefined !== test-org-id
+[2026-05-15T10:34:36.757Z] createVoc: order_id=order-123, type=DELAY
+[SUCCESS] VOC created: voc-123
+[2026-05-15T10:34:36.760Z] createVoc: order_id=order-456, type=DAMAGE
+[ERROR] UNAUTHORIZED: undefined !== test-org-id
+[2026-05-15T10:38:25.493Z] createVoc: order_id=order-123, type=DELAY
+[SUCCESS] VOC created: voc-123
+[2026-05-15T10:38:25.496Z] createVoc: order_id=order-456, type=DAMAGE
+[ERROR] UNAUTHORIZED: undefined !== test-org-id
+[2026-05-15T10:47:15.055Z] createVoc: order_id=order-123, type=DELAY
+[SUCCESS] VOC created: voc-123
+[2026-05-15T10:47:15.058Z] createVoc: order_id=order-456, type=DAMAGE
+[ERROR] UNAUTHORIZED: undefined !== test-org-id
+[2026-05-15T10:51:44.018Z] createVoc: order_id=order-123, type=DELAY
+[SUCCESS] VOC created: voc-123
+[2026-05-15T10:51:44.021Z] createVoc: order_id=order-456, type=DAMAGE
+[ERROR] UNAUTHORIZED: undefined !== test-org-id

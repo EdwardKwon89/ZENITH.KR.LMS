@@ -56,6 +56,7 @@
 | ~~**IMP-038-BK**~~      | B_Kai  | [Phase B] CLAIMED OrderStatus 정식 등록                     | 2026-05-15 | ✅ FULL PASS |
 | ~~**IMP-038-BK-FIX**~~  | B_Kai  | R-09 테스트 케이스 추가 + IMP_PROGRESS 주석 보완           | 2026-05-15 | ✅ FULL PASS |
 | ~~**ANA-IMP-DK**~~      | D_Kai  | Phase A CRITICAL 사전 GitNexus 분석 (IMP-035·026·041)       | 2026-05-15 | ✅ FULL PASS |
+| **IMP-048-BK**          | B_Kai  | [Phase E] Mock 데이터 제거 (대시보드)                        | 2026-05-15 | 192/192 PASS |
 
 ---
 
@@ -70,6 +71,7 @@
 | ~~**IMP-036-BK-FIX**~~  | DoD 보완 — HANDOFF_BOX + GitNexus 소급 증적 | 2026-05-15 | ✅ 보완 완료        |
 | ~~**IMP-038-BK**~~      | [Phase B] CLAIMED OrderStatus 정식 등록     | 2026-05-15 | 🔶 CONDITIONAL PASS |
 | ~~**IMP-038-BK-FIX**~~      | IMP-038 보완 — R-09 테스트 케이스 추가      | 2026-05-15 | ✅ 보완 완료        |
+| ~~**IMP-048-BK**~~              | [Phase E] Mock 데이터 제거 (대시보드)        | 2026-05-15 | 🔔 검토 대기        |
 
 ---
 
@@ -89,6 +91,7 @@
 | ~~**EXP-IMP-DK**~~  | —     | 전체 코드베이스 IMP 도출 (성능 실험)                                            | 2026-05-13                  | ✅ **PASS**              |
 | ~~**ANA-IMP-DK**~~  | —     | Phase A CRITICAL 사전 GitNexus 분석 (IMP-035·026·041)                          | 2026-05-15                  | 🔔 **Aiden 검토 대기**   |
 | ~~**ANA-IMP-DK-FIX**~~ | —  | TASK_BOARD ANA-IMP-DK 상태 🔔 갱신                                              | 2026-05-15                  | ✅ FULL PASS             |
+| **ANA-IMP-DK-B**       | —  | Phase B CRITICAL 사전 GitNexus 분석 (IMP-019·039·040·042·043·044)               | 2026-05-15                  | 🚫 보류 — Riley Phase A 착수 후 해제 |
 | ~~**GOV-001**~~     | 1     | ACTIVE_AGENT.md IDLE 강제 초기화                                                | 2026-05-13                  | ✅ **Aiden PASS**        |
 | ~~**GOV-002**~~     | 1     | `~/.claude/settings.json` PostToolUse GitNexus Hook 제거                        | 2026-05-13                  | ✅ **Aiden PASS**        |
 | ~~**GOV-003**~~     | 2     | `GEMINI.md` + `AGENTS.md` Task 완료 DoD에 IDLE 초기화 추가                      | 2026-05-13                  | ✅ **Aiden PASS**        |
@@ -708,6 +711,92 @@ ANA-IMP-DK 완료 후 TASK_BOARD D_Kai 전용 테이블의 상태가 `⏳ 착수
 
 ---
 
+## 📨 Aiden → D_Kai | ANA-IMP-DK-B — Phase B CRITICAL 사전 GitNexus 분석
+
+> **수행 주체**: D_Kai (OpenCode) | **검증 주체**: Aiden (Claude)
+> **유형**: 순수 분석 (코드 수정 없음) | **지시일**: 2026-05-15 | **우선순위**: High
+> **⚠️ 보류 중**: Riley Phase A 착수 확인 후 Aiden이 해제. 현재는 착수 불가.
+
+### 배경
+
+Riley가 Phase A 완료 후 곧 Phase B로 진입합니다. Phase B의 핵심은 `createOrder()` 트랜잭션 도입(IMP-019)으로, 이것이 IMP-047·052·053의 블로커입니다. 사전 blast radius 파악이 Riley 착수 속도와 안전성을 높입니다. Phase A 분석(ANA-IMP-DK)과 동일한 방식으로 수행합니다.
+
+### 분석 대상
+
+#### 1. IMP-019 — `createOrder()` 트랜잭션 도입
+
+```
+gitnexus_impact({target: "createOrder", direction: "upstream"})
+gitnexus_context({name: "createOrder"})
+```
+
+보고 항목:
+- `createOrder()` 호출 체인 (직접 호출자 + 실행 흐름 수)
+- 트랜잭션 래퍼 도입 시 영향 받는 심볼 목록
+- 현재 partial failure 발생 가능한 DB 작업 시퀀스 식별
+- Riley 구현 시 주의할 고위험 변경점
+
+#### 2. IMP-039 — 정산 이중 실행 방지
+
+```
+gitnexus_query({query: "settlement duplicate"})
+gitnexus_impact({target: "processSettlement", direction: "upstream"})
+```
+
+보고 항목:
+- 정산 처리 함수 호출 경로
+- 이중 실행 가능한 진입점 식별
+- DB 레벨 중복 방지 부재 여부 (unique constraint, idempotency key 등)
+
+#### 3. IMP-040 / IMP-042 — WAREHOUSED→CANCELED 재고 불일치 / `updateOrder()` 수정 차단 누락
+
+```
+gitnexus_impact({target: "updateOrder", direction: "upstream"})
+gitnexus_query({query: "WAREHOUSED CANCELED inventory"})
+```
+
+보고 항목:
+- `updateOrder()` 호출 경로 및 수정 차단 미적용 케이스
+- WAREHOUSED → CANCELED 전이 시 재고 롤백 로직 부재 위치
+
+#### 4. IMP-043 / IMP-044 — MASTERED Lock 우회 / 인보이스 발행 후 비용 변경 차단
+
+```
+gitnexus_query({query: "MASTERED lock invoice cost"})
+gitnexus_impact({target: "updateOrderStatus", direction: "upstream"})
+```
+
+보고 항목:
+- MASTERED 상태 Lock 우회 가능한 액션 목록
+- 인보이스 발행 후 비용 변경 가능한 경로 식별
+
+### 결과물 형식
+
+`scratch/ANA_PhaseB_DKai_20260515.md` 파일로 제출. ANA-IMP-DK와 동일한 섹션 구조:
+
+```markdown
+## IMP-019 분석 결과
+- 심볼 목록: ...
+- Blast Radius: ...
+- Riley 주의사항: ...
+
+## IMP-039 분석 결과
+...
+```
+
+### 완료 기준 (DoD)
+
+- [ ] IMP-019·039·040·042·043·044 각 GitNexus 분석 결과 포함
+- [ ] 각 IMP별 blast radius 등급 명시
+- [ ] Riley 구현 시 주의사항 항목 명시
+- [ ] `scratch/ANA_PhaseB_DKai_20260515.md` 파일 제출 후 커밋
+- [ ] 커밋: `[OpenCode] docs: ANA-IMP-DK-B Phase B CRITICAL 사전 GitNexus 분석`
+- [ ] 🔔 TASK_BOARD SECTION 1 검토 대기 등록
+
+> **주의**: 분석 중 코드 결함 발견 시 직접 수정하지 말고 분석 결과에 기록만 합니다.
+
+---
+
 # SECTION 6 — Ring 2.6 1T 작업 상세
 
 > **에이전트**: Ring 2.6 1T (inclusionAI / Ant Group) | **역할**: 성능 벤치마크 실증 실험
@@ -1060,6 +1149,74 @@ gitnexus_detect_changes()
 - [ ] ACTIVE_AGENT.md IDLE 초기화
 - [ ] TASK_BOARD 🔔 검토 대기 등록
 - [ ] HANDOFF_BOX.md 인계 메시지 작성 (canChangeStatus 우회 해결 여부 명시)
+
+---
+
+## 📨 Aiden → B_Kai | IMP-048-BK — [Phase E] Mock 데이터 제거
+
+> **수행 주체**: B_Kai (GLM Big Pickle) | **검증 주체**: Aiden (Claude)
+> **유형**: 버그 수정 (Medium) | **지시일**: 2026-05-15 | **예상 공수**: 0.2 MD
+
+### 배경
+
+`src/app/[locale]/(dashboard)/dashboard/page.tsx`의 대시보드가 `MOCK_ORDERS` 배열로 가짜 데이터를 표시하고 있습니다. 실제 DB를 조회하지 않아 운영 환경에서 잘못된 정보가 노출됩니다 (IMP-048, Medium).
+
+### 작업 지시
+
+**Step 1. ACTIVE_AGENT.md → Status: BUSY 갱신**
+
+**Step 2. GitNexus impact analysis 실행** (GOV 필수)
+
+```
+gitnexus_impact({target: "MOCK_ORDERS", direction: "upstream"})
+gitnexus_context({name: "getDashboardStats"})
+```
+
+HIGH/CRITICAL 결과 시 Aiden에게 보고 후 지시 대기.
+
+**Step 3. 수정 내용**
+
+- 파일: `src/app/[locale]/(dashboard)/dashboard/page.tsx`
+- `MOCK_ORDERS` 배열 정의 및 참조 제거
+- `getDashboardStats()` 서버 액션 호출로 교체 (기존 액션이 없으면 신규 작성)
+- 파일 분량 유지: 변경 후 **800줄 이하** 확인
+
+> ⚠️ `getDashboardStats()` 가 이미 존재한다면 import 후 바로 호출. 없다면 `src/app/actions/` 적절한 파일에 신규 함수 추가 (단, 추가 파일이 800줄 초과 시 Aiden에게 보고 후 지시 대기).
+
+**Step 4. 회귀 테스트**
+
+```bash
+rtk npm run test:regression
+```
+
+전체 PASS 확인 후 결과 증적 보관.
+
+**Step 5. GitNexus detect_changes() 실행**
+
+```
+gitnexus_detect_changes()
+```
+
+**Step 6. 커밋**
+
+```bash
+[B_Kai] fix: IMP-048 대시보드 MOCK_ORDERS 제거 및 실DB 연동
+```
+
+**Step 7. ACTIVE_AGENT.md → Status: IDLE 초기화**
+
+**Step 8. 🔔 TASK_BOARD SECTION 1 검토 대기 등록 + IMP_PROGRESS.md IMP-048 행 상태 🔔 갱신**
+
+### 완료 기준 (DoD)
+
+- [ ] `MOCK_ORDERS` 배열 및 참조 전부 제거
+- [ ] `getDashboardStats()` 호출로 실 데이터 연동 확인
+- [ ] `rtk npm run test:regression` 전체 PASS 증적
+- [ ] GitNexus impact + detect_changes() 결과 보고
+- [ ] `[B_Kai] fix: IMP-048` 커밋 완료
+- [ ] `scratch/IMP_PROGRESS.md` IMP-048 행 상태 `🔔` 갱신
+- [ ] ACTIVE_AGENT.md IDLE 초기화
+- [ ] TASK_BOARD SECTION 1 🔔 검토 대기 등록
 
 ---
 

@@ -118,7 +118,7 @@
 | 020 | Feature Flags 캐싱 | Riley | ⬜ | — |
 | 021 | 미들웨어 DB 호출 최적화 | Riley | ⬜ | — |
 | 022 | NaviSidebar 번들 최적화 | Riley | ⬜ | — |
-| 048 | Mock 데이터 제거 | B_Kai | ⬜ | — |
+| 048 | Mock 데이터 제거 | B_Kai | 🔔 | 2026-05-15 |
 | 054 | N+1 쿼리 7곳 | Riley | ⬜ | — |
 | 055 | 인덱스 누락 4종 | Riley | ⬜ | — |
 | 062 | SELECT * → 명시적 컬럼 (112곳) | Riley | ⬜ | — |
