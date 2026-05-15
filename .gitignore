@@ -60,3 +60,6 @@ _tmp_*.py
 .obsidian/workspace-mobile.json
 
 test-results/
+
+# ─── Temporary Log Files ────────────────────────────────
+scratch/*.log
