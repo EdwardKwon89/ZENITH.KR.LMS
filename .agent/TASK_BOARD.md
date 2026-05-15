@@ -9,7 +9,7 @@
 > - Aiden은 새 세션 시작 시 SECTION 1만 읽어 즉시 현황을 파악한다.
 >
 > **Git 운영 규칙:**
-> - **커밋 접두사**: Riley → `[Gemini]` / Aiden → `[Claude]` / D_Kai → `[OpenCode]` — 에이전트 식별 필수
+> - **커밋 접두사**: Riley → `[Gemini]` / Aiden → `[Claude]` / D_Kai → `[OpenCode]` / B_Kai → `[B_Kai]` — 에이전트 식별 필수
 > - **커밋 단위**: Task ID 단위 원자적 커밋. 메시지에 Task ID 포함 필수
 >   - 형식: `[Gemini] fix: BUG-UI-01 Admin 다크테마 제거` / `[Claude] docs: E2E-01 FINAL PASS 검증 결과`
 > - **완료 보고 전 git status 확인 의무**: `git status` 실행 → untracked·unstaged 파일 없음 확인 후 보고
@@ -47,8 +47,9 @@
 | Task ID | 지시자 | Task 명 | 지시일 |
 |:---|:---|:---|:---|
 | ~~**IMP-PLAN-BK**~~ | B_Kai | IMP 실행 계획 v2.2 — Aiden+Riley 공동 CONDITIONAL PASS 확정 | ✅ 검토 완료 |
-| **IMP-PLAN-BK-V23** | B_Kai | IMP 실행 계획 v2.3 — W-1~W-3+N-1 수정 | 2026-05-15 | ⏳ Aiden 검토 대기 |
-| **IMP-036-BK** | B_Kai | Status Machine MANAGER 역할 추가 (1라인+bypass) | 2026-05-15 | ⏳ Aiden 검토 대기 |
+| ~~**IMP-PLAN-BK-V23**~~ | B_Kai | IMP 실행 계획 v2.3 — W-1~W-3+N-1 수정 | ✅ FULL PASS (2026-05-15) |
+| ~~**IMP-036-BK**~~ | B_Kai | Status Machine MANAGER 역할 추가 | ✅ CONDITIONAL PASS — DoD 보완 요청 발령 |
+| **IMP-036-BK-FIX** | B_Kai | IMP-036-BK DoD 보완 (HANDOFF_BOX + GitNexus 소급) | 2026-05-15 | ⏳ 착수 대기 |
 
 ---
 
@@ -59,8 +60,9 @@
 
 | Task ID | Task 명 | 지시일 | 상태 |
 |:---|:---|:---|:---:|
-| ~~**IMP-PLAN-BK-V23**~~ | IMP 실행 계획 v2.3 제출 — W-1~W-3+N-1 수정 | 2026-05-15 | ✅ 제출 완료 |
-| ~~**IMP-036-BK**~~ | [Phase A] Status Machine MANAGER 역할 추가 | 2026-05-15 | ✅ 구현 완료 |
+| ~~**IMP-PLAN-BK-V23**~~ | IMP 실행 계획 v2.3 제출 — W-1~W-3+N-1 수정 | 2026-05-15 | ✅ FULL PASS |
+| ~~**IMP-036-BK**~~ | [Phase A] Status Machine MANAGER 역할 추가 | 2026-05-15 | ✅ CONDITIONAL PASS |
+| **IMP-036-BK-FIX** | DoD 보완 — HANDOFF_BOX + GitNexus 소급 증적 | 2026-05-15 | ⏳ 착수 대기 |
 
 ---
 
@@ -742,3 +744,55 @@ gitnexus_detect_changes()
 - [ ] ACTIVE_AGENT.md IDLE 초기화
 - [ ] TASK_BOARD 🔔 검토 대기 등록
 - [ ] HANDOFF_BOX.md 상세 인계 메시지 작성
+
+---
+
+## 📨 Aiden → B_Kai | IMP-036-BK-FIX — DoD 미준수 보완
+
+> **수행 주체**: B_Kai (GLM Big Pickle) | **검증 주체**: Aiden (Claude)
+> **유형**: 규정 준수 보완 | **지시일**: 2026-05-15 | **우선순위**: 즉시
+
+### 배경
+
+IMP-036-BK 결과물 검토 결과, DoD 3항목이 미준수 상태입니다. 아래 순서대로 보완하십시오.
+
+> **[규약 안내]** 커밋 태그 `[OpenCode]` 사용은 기존 규약 헤더 해석 범위 내로 인정합니다.
+> 단, 본 태스크 완료부터는 **`[B_Kai]`** 태그를 사용하십시오 (TASK_BOARD 헤더 2026-05-15 개정 반영).
+
+### 보완 지시
+
+**항목 1 | HANDOFF_BOX.md 인계 메시지 작성 (필수)**
+
+`.agent/HANDOFF_BOX.md`에 IMP-036-BK 완료 인계 메시지를 작성하십시오.
+
+포함 내용:
+- 수정 파일 및 변경 내용 요약
+- canChangeStatus() bypass 방식 선택 이유 (ROLE_PERMISSIONS 직접 추가 대신)
+- 회귀 테스트 결과 (177/177 PASS — Aiden 직접 확인으로 대체 가능)
+- GitNexus 절차 이행 여부
+
+**항목 2 | GitNexus 절차 소급 실행 및 결과 보고 (필수)**
+
+이미 커밋된 코드이나 안전성 확인을 위해 소급 실행하십시오.
+
+```
+gitnexus_impact({target: "canChangeStatus", direction: "upstream"})
+gitnexus_detect_changes()
+```
+
+결과를 HANDOFF_BOX 인계 메시지에 포함하십시오. CRITICAL/HIGH 결과 시 Aiden에게 즉시 보고 후 지시 대기.
+
+**항목 3 | 향후 커밋 규약 확인 (학습 사항)**
+
+- 커밋 타입: 기존 기능 수정은 `fix:`, 신규 기능 추가는 `feat:`
+- 태스크 단위 원자적 커밋: 지시 ID가 다른 작업은 별도 커밋
+- 이번 건은 소급 수정 불요 (기록 사항만)
+
+### 완료 기준 (DoD)
+
+- [ ] HANDOFF_BOX.md IMP-036-BK 인계 메시지 작성 완료
+- [ ] gitnexus_impact({target: "canChangeStatus"}) 결과 포함
+- [ ] gitnexus_detect_changes() 결과 포함
+- [ ] `[B_Kai] docs: IMP-036-BK DoD 보완 — HANDOFF_BOX + GitNexus 소급 증적` 커밋
+- [ ] ACTIVE_AGENT.md IDLE 확인
+- [ ] 🔔 TASK_BOARD SECTION 1 검토 대기 등록
