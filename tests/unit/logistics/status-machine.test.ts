@@ -80,9 +80,21 @@ describe('ZENITH Status Machine: CLAIMED 전이 규칙 (R-09)', () => {
       expect(result.allowed).toBe(false);
       expect(result.message).toContain('권한이 없습니다');
     });
+  });
 
-    it('TC-CLM-T15: MANAGER는 모든 전이 허용 (bypass)', () => {
+  describe('MANAGER 역할 전 권한 검증 (IMP-036)', () => {
+    it('TC-SM-M1: MANAGER는 일반적인 전이 규칙을 우회하여 변경 가능 (REGISTERED → CLAIMED)', () => {
       const result = canChangeStatus(OrderStatus.REGISTERED, OrderStatus.CLAIMED, USER_ROLES.MANAGER);
+      expect(result.allowed).toBe(true);
+    });
+
+    it('TC-SM-M2: MANAGER는 극단적인 전이 규칙도 우회 가능 (CANCELED → REGISTERED)', () => {
+      const result = canChangeStatus(OrderStatus.CANCELED, OrderStatus.REGISTERED, USER_ROLES.MANAGER);
+      expect(result.allowed).toBe(true);
+    });
+
+    it('TC-SM-M3: MANAGER는 배송 완료 후에도 보류 상태로 변경 가능 (DELIVERED → HELD)', () => {
+      const result = canChangeStatus(OrderStatus.DELIVERED, OrderStatus.HELD, USER_ROLES.MANAGER);
       expect(result.allowed).toBe(true);
     });
   });
