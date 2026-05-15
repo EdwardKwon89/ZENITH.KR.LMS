@@ -79,11 +79,11 @@
 ## 🆕 신규 지시 대기 (D_Kai 착수 가능)
 
 > ⚠️ **D_Kai 전용 지시입니다. 다른 에이전트는 참조만 가능하며 착수 불가.**
-> 반드시 **Phase 1 → Phase 2 → Phase 3 순서**로 진행하고, 각 Phase 완료 후 Aiden 검토 대기 등록 후 다음 Phase 착수 가능.
 
 | Task ID             | Phase | Task 명                                                                         | 지시일                      | 상태                     |
 | :------------------ | :---: | :------------------------------------------------------------------------------ | :-------------------------- | :----------------------: |
-| **EXP-IMP-DK**      | —     | 전체 코드베이스 IMP 도출 (성능 실험)                                            | 2026-05-13                  | ⏳ 착수 가능             |
+| ~~**EXP-IMP-DK**~~  | —     | 전체 코드베이스 IMP 도출 (성능 실험)                                            | 2026-05-13                  | ✅ **PASS**              |
+| **ANA-IMP-DK**      | —     | Phase A CRITICAL 사전 GitNexus 분석 (IMP-035·026·041)                          | 2026-05-15                  | ⏳ 착수 가능             |
 | ~~**GOV-001**~~     | 1     | ACTIVE_AGENT.md IDLE 강제 초기화                                                | 2026-05-13                  | ✅ **Aiden PASS**        |
 | ~~**GOV-002**~~     | 1     | `~/.claude/settings.json` PostToolUse GitNexus Hook 제거                        | 2026-05-13                  | ✅ **Aiden PASS**        |
 | ~~**GOV-003**~~     | 2     | `GEMINI.md` + `AGENTS.md` Task 완료 DoD에 IDLE 초기화 추가                      | 2026-05-13                  | ✅ **Aiden PASS**        |
@@ -596,6 +596,90 @@ GitNexus(`gitnexus_query`) 활용 권장.
 - [x] 🔔 Aiden 검토 대기 등록
 
 - 커밋: `[OpenCode] docs: EXP-IMP-DK 전체 코드베이스 IMP 도출`
+
+---
+
+## 📨 Aiden → D_Kai | ANA-IMP-DK — Phase A CRITICAL 사전 GitNexus 분석
+
+> **수행 주체**: D_Kai (OpenCode) | **검증 주체**: Aiden (Claude)
+> **유형**: 순수 분석 (실행·코드 수정 없음) | **지시일**: 2026-05-15 | **우선순위**: High
+> **병행 작업**: B_Kai IMP-038-BK와 동시 진행 가능
+
+### 배경
+
+Riley가 Phase A CRITICAL 3종(IMP-035·026·041)에 착수하기 전, blast radius를 사전에 파악해 두면 구현 속도와 안전성이 모두 높아집니다. D_Kai는 순수 분석만 수행하며, 코드 수정은 없습니다.
+
+### 분석 대상
+
+#### 1. IMP-035 — SECURITY DEFINER 함수 권한 검증
+
+`SECURITY DEFINER` 속성으로 정의된 Supabase RPC/함수의 호출 관계를 파악합니다.
+
+```
+gitnexus_query({query: "SECURITY DEFINER"})
+gitnexus_query({query: "get_my_role"})
+```
+
+보고 항목:
+- SECURITY DEFINER 함수 목록 및 각 함수의 upstream 호출자
+- 잘못된 권한 설정 시 영향 받는 실행 흐름 (execution flow)
+- Riley 구현 시 주의할 고위험 함수 목록 (HIGH/CRITICAL 해당 심볼)
+
+#### 2. IMP-026 — RLS 비즈니스 규칙 통합
+
+orders 테이블 및 RLS 관련 심볼의 영향도를 파악합니다.
+
+```
+gitnexus_impact({target: "orders", direction: "upstream"})
+gitnexus_query({query: "RLS policy orders"})
+```
+
+보고 항목:
+- orders 테이블 직접 참조 심볼 및 실행 흐름 수
+- RLS 정책 수정 시 영향 범위 (risk level)
+- SQL 함수화 전환 시 변경이 필요한 호출 지점 목록
+
+#### 3. IMP-041 — Storage 정책 조직 멤버십 검증
+
+Storage RLS 정책 관련 심볼 영향도를 파악합니다.
+
+```
+gitnexus_query({query: "storage policy"})
+gitnexus_query({query: "organization membership"})
+```
+
+보고 항목:
+- Storage 접근 관련 심볼 및 호출 관계
+- 조직 멤버십 검증 추가 시 영향 받는 컴포넌트/액션 목록
+- 현재 미검증 접근 경로 식별
+
+### 결과물 형식
+
+`scratch/ANA_PhaseA_DKai_20260515.md` 파일로 제출. 각 IMP별 섹션 구성:
+
+```markdown
+## IMP-035 분석 결과
+- 심볼 목록: ...
+- Blast Radius: LOW / MEDIUM / HIGH / CRITICAL
+- Riley 주의사항: ...
+
+## IMP-026 분석 결과
+...
+
+## IMP-041 분석 결과
+...
+```
+
+### 완료 기준 (DoD)
+
+- [ ] IMP-035·026·041 각 GitNexus 분석 결과 포함
+- [ ] 각 IMP별 blast radius 등급 명시
+- [ ] Riley 구현 시 주의사항 항목 명시
+- [ ] `scratch/ANA_PhaseA_DKai_20260515.md` 파일 제출 후 커밋
+- [ ] 커밋: `[D_Kai] docs: ANA-IMP-DK Phase A CRITICAL 사전 GitNexus 분석 (IMP-035·026·041)`
+- [ ] 🔔 TASK_BOARD SECTION 1 검토 대기 등록
+
+> **주의**: 분석 중 코드 결함 발견 시 직접 수정하지 말고 분석 결과에 기록만 합니다. 수정은 Riley/Aiden 지시 후 수행합니다.
 
 ---
 
