@@ -53,8 +53,8 @@
 | ~~**IMP-PLAN-BK-V23**~~ | B_Kai  | IMP 실행 계획 v2.3 — W-1~W-3+N-1 수정                       | ✅ FULL PASS (2026-05-15)                |
 | ~~**IMP-036-BK**~~      | B_Kai  | Status Machine MANAGER 역할 추가                            | ✅ CONDITIONAL PASS — DoD 보완 요청 발령 |
 | ~~**IMP-036-BK-FIX**~~  | B_Kai  | IMP-036-BK DoD 보완 (HANDOFF_BOX + GitNexus 소급)           | 2026-05-15                               |
-| **IMP-038-BK**          | B_Kai  | [Phase B] CLAIMED OrderStatus 정식 등록                     | 2026-05-15 | ⏳ Aiden 검토 대기    |
-| **ANA-IMP-DK**          | D_Kai  | Phase A CRITICAL 사전 GitNexus 분석 (IMP-035·026·041)        | 2026-05-15                               |
+| ~~**IMP-038-BK**~~      | B_Kai  | [Phase B] CLAIMED OrderStatus 정식 등록                     | 2026-05-15 | 🔶 CONDITIONAL PASS — IMP-038-BK-FIX 발령 |
+| ~~**ANA-IMP-DK**~~      | D_Kai  | Phase A CRITICAL 사전 GitNexus 분석 (IMP-035·026·041)       | 2026-05-15 | 🔶 CONDITIONAL PASS — ANA-IMP-DK-FIX 발령 |
 
 ---
 
@@ -67,7 +67,8 @@
 | ~~**IMP-PLAN-BK-V23**~~ | IMP 실행 계획 v2.3 제출 — W-1~W-3+N-1 수정  | 2026-05-15 | ✅ FULL PASS        |
 | ~~**IMP-036-BK**~~      | [Phase A] Status Machine MANAGER 역할 추가  | 2026-05-15 | ✅ CONDITIONAL PASS |
 | ~~**IMP-036-BK-FIX**~~  | DoD 보완 — HANDOFF_BOX + GitNexus 소급 증적 | 2026-05-15 | ✅ 보완 완료        |
-| ~~**IMP-038-BK**~~          | [Phase B] CLAIMED OrderStatus 정식 등록     | 2026-05-15 | ✅ 완료 (🔔 Aiden 검토 대기) |
+| ~~**IMP-038-BK**~~      | [Phase B] CLAIMED OrderStatus 정식 등록     | 2026-05-15 | 🔶 CONDITIONAL PASS |
+| **IMP-038-BK-FIX**      | IMP-038 보완 — R-09 테스트 케이스 추가      | 2026-05-15 | ⏳ 착수 가능        |
 
 ---
 
@@ -85,7 +86,8 @@
 | Task ID             | Phase | Task 명                                                                         | 지시일                      | 상태                     |
 | :------------------ | :---: | :------------------------------------------------------------------------------ | :-------------------------- | :----------------------: |
 | ~~**EXP-IMP-DK**~~  | —     | 전체 코드베이스 IMP 도출 (성능 실험)                                            | 2026-05-13                  | ✅ **PASS**              |
-| **ANA-IMP-DK**      | —     | Phase A CRITICAL 사전 GitNexus 분석 (IMP-035·026·041)                          | 2026-05-15                  | ⏳ 착수 가능             |
+| ~~**ANA-IMP-DK**~~  | —     | Phase A CRITICAL 사전 GitNexus 분석 (IMP-035·026·041)                          | 2026-05-15                  | 🔶 CONDITIONAL PASS      |
+| **ANA-IMP-DK-FIX**  | —     | TASK_BOARD ANA-IMP-DK 상태 🔔 갱신                                              | 2026-05-15                  | ⏳ 착수 가능             |
 | ~~**GOV-001**~~     | 1     | ACTIVE_AGENT.md IDLE 강제 초기화                                                | 2026-05-13                  | ✅ **Aiden PASS**        |
 | ~~**GOV-002**~~     | 1     | `~/.claude/settings.json` PostToolUse GitNexus Hook 제거                        | 2026-05-13                  | ✅ **Aiden PASS**        |
 | ~~**GOV-003**~~     | 2     | `GEMINI.md` + `AGENTS.md` Task 완료 DoD에 IDLE 초기화 추가                      | 2026-05-13                  | ✅ **Aiden PASS**        |
@@ -685,6 +687,26 @@ gitnexus_query({query: "organization membership"})
 
 ---
 
+## 📨 Aiden → D_Kai | ANA-IMP-DK-FIX — TASK_BOARD 상태 갱신
+
+> **수행 주체**: D_Kai (OpenCode) | **검증 주체**: Aiden (Claude)
+> **유형**: 행정 보완 | **지시일**: 2026-05-15 | **우선순위**: Low
+
+### 배경
+
+ANA-IMP-DK 완료 후 TASK_BOARD D_Kai 전용 테이블의 상태가 `⏳ 착수 가능` 그대로 남아 있음. DoD 항목 "🔔 TASK_BOARD SECTION 1 검토 대기 등록" 미이행.
+
+### 작업 내용
+
+`.agent/TASK_BOARD.md` D_Kai 전용 테이블에서 `ANA-IMP-DK` 행 상태를 `🔔 Aiden 검토 대기`로 갱신.
+
+### 완료 기준 (DoD)
+
+- [ ] TASK_BOARD D_Kai 전용 테이블 `ANA-IMP-DK` 상태 → `🔔 Aiden 검토 대기`
+- [ ] 커밋: `[OpenCode] chore: ANA-IMP-DK-FIX TASK_BOARD 상태 갱신`
+
+---
+
 # SECTION 6 — Ring 2.6 1T 작업 상세
 
 > **에이전트**: Ring 2.6 1T (inclusionAI / Ant Group) | **역할**: 성능 벤치마크 실증 실험
@@ -1037,3 +1059,47 @@ gitnexus_detect_changes()
 - [ ] ACTIVE_AGENT.md IDLE 초기화
 - [ ] TASK_BOARD 🔔 검토 대기 등록
 - [ ] HANDOFF_BOX.md 인계 메시지 작성 (canChangeStatus 우회 해결 여부 명시)
+
+---
+
+## 📨 Aiden → B_Kai | IMP-038-BK-FIX — R-09 테스트 케이스 추가 및 주석 보완
+
+> **수행 주체**: B_Kai (GLM Big Pickle) | **검증 주체**: Aiden (Claude)
+> **유형**: 테스트 보완 | **지시일**: 2026-05-15 | **우선순위**: Medium
+
+### 검토 결과 요약
+
+IMP-038-BK CONDITIONAL PASS. 핵심 DoD는 충족됐으나 2가지 보완 필요:
+- **지적-2 `CLAIMED → DELIVERED` 역방향 전이**: Edward 승인 — **설계 타당, 수정 불필요**
+- **지적-1 R-09 미이행**: CLAIMED 전이 단위 테스트 케이스 신규 추가 필요
+- **지적-3 IMP_PROGRESS.md 주석 미갱신**: 합계 주석 1줄 수정 필요
+
+### 작업 내용
+
+#### Task 1 — R-09: CLAIMED 전이 단위 테스트 케이스 추가
+
+`tests/unit/` 적절한 위치에 `status-machine.ts` 전이 규칙을 검증하는 테스트 추가:
+- `CLAIMED` 상태로의 진입 허용 케이스: `IN_TRANSIT → CLAIMED`, `DELIVERED → CLAIMED`
+- `CLAIMED` 상태에서의 전이 허용 케이스: `CLAIMED → DELIVERED`, `CLAIMED → HELD`, `CLAIMED → CANCELED`
+- 권한 검증: OPERATOR·CORPORATE·INDIVIDUAL은 CLAIMED 전이 가능 / ADMIN은 전체 권한 확인
+
+#### Task 2 — IMP_PROGRESS.md 주석 1줄 수정
+
+`scratch/IMP_PROGRESS.md` 하단 주석:
+```
+# Before
+> ⚠️ 합계 53개 = 미착수 52개 + IMP-036 완료 1개 (IMP-018 제외)
+
+# After
+> ⚠️ 합계 53개 = 완료 2개(IMP-036·038) + 미착수 51개 (IMP-018 제외)
+```
+
+### 완료 기준 (DoD)
+
+- [ ] `status-machine.ts` CLAIMED 전이 단위 테스트 케이스 신규 추가 (R-09)
+- [ ] 테스트 케이스 커버 범위: IN_TRANSIT/DELIVERED→CLAIMED 허용, CLAIMED→DELIVERED/HELD/CANCELED 허용
+- [ ] `rtk npm run test:regression` 전체 PASS
+- [ ] `scratch/IMP_PROGRESS.md` 합계 주석 갱신
+- [ ] 커밋: `[B_Kai] test: IMP-038-BK-FIX R-09 CLAIMED 전이 단위 테스트 추가`
+- [ ] TASK_BOARD SECTION 1 IMP-038-BK-FIX `🔔 Aiden 검토 대기`로 갱신
+- [ ] HANDOFF_BOX.md 인계 메시지 작성
