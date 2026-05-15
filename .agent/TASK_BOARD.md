@@ -666,6 +666,7 @@ GitNexus(`gitnexus_query`) 활용 권장.
 1. [GOV_COMMON.md](GOV_COMMON.md) — 전 에이전트 공통 규칙 (R-01~R-16, GitNexus MUST, ZEN_A4)
 2. [scratch/IMP_EXECUTION_PLAN_BKai_20260514.md](scratch/IMP_EXECUTION_PLAN_BKai_20260514.md) — 본인 작성 실행 계획
 3. [scratch/post_launch_improvements.md](scratch/post_launch_improvements.md) — IMP 백로그 전체
+4. [scratch/IMP_PROGRESS.md](scratch/IMP_PROGRESS.md) — **IMP 진척 대시보드 (완료 시 반드시 갱신)**
 
 **커밋 태그**: `[B_Kai] <type>: <description>`
 **CLI**: 모든 명령어는 `rtk <command>` 경유 실행
@@ -946,6 +947,7 @@ gitnexus_detect_changes()
 - [ ] `rtk npm run test:regression` 전체 PASS 증적
 - [ ] GitNexus impact + detect_changes() 결과 보고
 - [ ] `[B_Kai] fix: IMP-038` 커밋 완료
+- [ ] **`scratch/IMP_PROGRESS.md` IMP-038 행 상태 `🔔` 로 갱신** (완료일 포함)
 - [ ] ACTIVE_AGENT.md IDLE 초기화
 - [ ] TASK_BOARD 🔔 검토 대기 등록
 - [ ] HANDOFF_BOX.md 인계 메시지 작성 (canChangeStatus 우회 해결 여부 명시)
