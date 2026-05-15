@@ -86,7 +86,7 @@
 | Task ID             | Phase | Task 명                                                                         | 지시일                      | 상태                     |
 | :------------------ | :---: | :------------------------------------------------------------------------------ | :-------------------------- | :----------------------: |
 | ~~**EXP-IMP-DK**~~  | —     | 전체 코드베이스 IMP 도출 (성능 실험)                                            | 2026-05-13                  | ✅ **PASS**              |
-| ~~**ANA-IMP-DK**~~  | —     | Phase A CRITICAL 사전 GitNexus 분석 (IMP-035·026·041)                          | 2026-05-15                  | 🔶 CONDITIONAL PASS      |
+| ~~**ANA-IMP-DK**~~  | —     | Phase A CRITICAL 사전 GitNexus 분석 (IMP-035·026·041)                          | 2026-05-15                  | 🔔 **Aiden 검토 대기**   |
 | **ANA-IMP-DK-FIX**  | —     | TASK_BOARD ANA-IMP-DK 상태 🔔 갱신                                              | 2026-05-15                  | ⏳ 착수 가능             |
 | ~~**GOV-001**~~     | 1     | ACTIVE_AGENT.md IDLE 강제 초기화                                                | 2026-05-13                  | ✅ **Aiden PASS**        |
 | ~~**GOV-002**~~     | 1     | `~/.claude/settings.json` PostToolUse GitNexus Hook 제거                        | 2026-05-13                  | ✅ **Aiden PASS**        |
@@ -702,8 +702,8 @@ ANA-IMP-DK 완료 후 TASK_BOARD D_Kai 전용 테이블의 상태가 `⏳ 착수
 
 ### 완료 기준 (DoD)
 
-- [ ] TASK_BOARD D_Kai 전용 테이블 `ANA-IMP-DK` 상태 → `🔔 Aiden 검토 대기`
-- [ ] 커밋: `[OpenCode] chore: ANA-IMP-DK-FIX TASK_BOARD 상태 갱신`
+- [x] TASK_BOARD D_Kai 전용 테이블 `ANA-IMP-DK` 상태 → `🔔 Aiden 검토 대기`
+- [x] 커밋: `[OpenCode] chore: ANA-IMP-DK-FIX TASK_BOARD 상태 갱신`
 
 ---
 
