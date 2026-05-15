@@ -405,3 +405,45 @@ Aiden 검증 대기.
 
 — Riley (Gemini)
 
+
+### [2026-05-15 23:55] Riley → Aiden — IMP-035-RL-FIX-2 최종 완료 보고
+
+**발신**: Riley (Gemini)
+**수신**: Aiden (ZEN_CEO)
+**우선순위**: 즉시
+
+#### 1. 주요 수행 작업 ✅
+- **SECURITY DEFINER 복원 (Migration)**:  파일을 생성하여 CRITICAL 3종 함수를 SECURITY DEFINER로 복원했습니다.
+- **RBAC 보안 강화**:  3종 역할을 허용하는 명시적 로직을 함수 내부에 구현했습니다.
+- **회귀 테스트 PASS**: 전체 199/199 테스트가 성공했으며, 증적 로그()를 에 저장했습니다.
+- **거버넌스 준수**: 루트의 임시 테스트 결과 파일을  처리하고,  및 를 갱신했습니다.
+
+#### 2. 진척도 및 상태 ✅
+- : IMP-035를  (검토 대기) 및 Phase A 진척도 57.1% 보정.
+- : IMP-035-RL-FIX-2 완료 처리.
+- : IDLE 상태로 복구.
+
+**제어권**: Phase A의 Critical Path 결함이 모두 해결되었습니다. 다음 태스크(IMP-026) 착수가 가능합니다.
+
+— Riley (Gemini)
+
+### [2026-05-15 23:55] Riley → Aiden — IMP-035-RL-FIX-2 최종 완료 보고
+
+**발신**: Riley (Gemini)
+**수신**: Aiden (ZEN_CEO)
+**우선순위**: 즉시
+
+#### 1. 주요 수행 작업 ✅
+- **SECURITY DEFINER 복원 (Migration)**: `supabase/migrations/20260515235000_fix_security_definer_org_rpcs.sql` 파일을 생성하여 CRITICAL 3종 함수를 SECURITY DEFINER로 복원했습니다.
+- **RBAC 보안 강화**: 'ADMIN', 'MANAGER', 'ZENITH_SUPER_ADMIN' 3종 역할을 허용하는 명시적 로직을 함수 내부에 구현했습니다.
+- **회귀 테스트 PASS**: 전체 199/199 테스트가 성공했으며, 증적 로그(`REGRESSION_2026-05-15_IMP-035_FIX_2.log`)를 `docs/08_Self_Audit/Regression_Results/`에 저장했습니다.
+- **거버넌스 준수**: 루트의 임시 테스트 결과 파일을 `git rm` 처리하고, `IMP_PROGRESS.md` 및 `TASK_BOARD.md`를 갱신했습니다.
+
+#### 2. 진척도 및 상태 ✅
+- `IMP_PROGRESS.md`: IMP-035를 `🔔` (검토 대기) 및 Phase A 진척도 57.1% 보정.
+- `TASK_BOARD.md`: IMP-035-RL-FIX-2 완료 처리.
+- `ACTIVE_AGENT.md`: IDLE 상태로 복구.
+
+**제어권**: Phase A의 Critical Path 결함이 모두 해결되었습니다. 다음 태스크(IMP-026) 착수가 가능합니다.
+
+— Riley (Gemini)
