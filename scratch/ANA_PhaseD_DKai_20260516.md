@@ -18,7 +18,7 @@
 
 | 구성 요소 | 역할 | 예상 줄 수 |
 |:---------|:-----|:---------:|
-| Page 컴포넌트 (Server) | 데이터 fetch + 레이아웃 | ~80줄 |
+| Page 컴포넌트 (Client, 'use client') | 데이터 fetch + 레이아웃 | ~80줄 |
 | RateForm (Client) | 요율 등록/수정 폼 | ~150줄 |
 | RateList / RateCardList | 등록된 요율 목록 표시 | ~120줄 |
 | SurchargeSection | 할증 요금 섹션 | ~80줄 |
@@ -42,8 +42,9 @@ src/components/admin/
 ### Riley 구현 시 주의사항
 
 1. **RateCardList.tsx는 이미 IMP-011 FEAT-RATES에서 생성되었을 가능성 높음** — 기존 파일 재활용
-2. **`fetchData()` (L79-116)는 Page 컴포넌트에 유지** — Server Component에서만 Supabase 직접 호출
+2. **`fetchData()`는 이미 Server Actions(`getRateCards` 등)를 경유하므로** 분리 시 동일 패턴 유지
 3. re-export `index.ts` 또는 barrel 파일로 기존 import 경로 호환성 유지
+4. 현재 전체가 클라이언트 컴포넌트이므로 분리 후에도 데이터 fetch는 Server Actions 경유 유지 (이미 올바르게 구현됨)
 
 ---
 
@@ -51,7 +52,7 @@ src/components/admin/
 
 ### 현황
 
-`src/app/actions/` — **24개 파일, 총 5,570줄**
+`src/app/actions/` — **23개 파일, 총 5,587줄**
 
 ### 파일 크기 순
 
@@ -145,11 +146,14 @@ src/components/admin/
 
 ## IMP-059 — Supabase 클라이언트 중복 제거
 
-### `createClient()` 호출 현황
+### `createClient()` 호출 현황 (서버 + 클라이언트)
 
-**정의**: `src/utils/supabase/server.ts:3-29`
+**서버 사이드 정의**: `src/utils/supabase/server.ts:3-29`
+**클라이언트 사이드 정의**: `src/utils/supabase/client.ts`
 
-**직접 호출자 (23개 서버 코드)**:
+**총 26개 호출 지점** (서버 22 + 클라이언트 4)
+
+#### 서버 사이드 (22개)
 
 | 카테고리 | 호출 지점 | 호출 수 |
 |:---------|:---------|:-------:|
@@ -159,7 +163,15 @@ src/components/admin/
 | **Notifications** | `triggerStatusChangeNotification`, `getNotifications`, `markNotificationRead`, `markAllNotificationsRead`, `sendInAppNotification` | 5 |
 | **Pages** | `DashboardGroupLayout` (layout.tsx), `PermissionsPage` (admin/permissions), `login`/`signup` (login/actions.ts) | 4 |
 | **API routes** | `GET` (api/finance/export) | 1 |
-| **Customs** | `getStatus` (manual-adapter.ts) | 1 |
+
+#### 클라이언트 사이드 (4개, `@/utils/supabase/client` 사용)
+
+| 카테고리 | 호출 지점 |
+|:---------|:---------|
+| **Admin UI** | `organizations-client.tsx` |
+| **Auth UI** | `LogoutButton.tsx` |
+| **Inventory** | `InventoryScanner.tsx` |
+| **Hook** | `useAuth.ts` |
 
 **중복 패턴**:
 - `validateUserAction()` 내부 `createClient()` + 서버 액션 자체 `createClient()` = **2중 생성**
@@ -168,21 +180,22 @@ src/components/admin/
 
 ### 통합 가능 범위
 
-| 방안 | 설명 | 공수 | 위험도 |
-|:-----|:-----|:----:|:------:|
-| `React.cache()` 래핑 | `createClient()`를 `React.cache()`로 감싸기 | 0.1 MD | 🟢 LOW |
-| Request-scoped 싱글톤 | `asyncLocalStorage` 또는 request 전달 | 1 MD | 🟡 MEDIUM |
-| `createClient()` 게으른 초기화 | flags.ts 패턴처럼 최초 호출 시 생성 | 0.1 MD | 🟢 LOW |
+| 방안 | 설명 | 공수 | 위험도 | 적용 대상 |
+|:-----|:-----|:----:|:------:|:---------|
+| `React.cache()` 래핑 | `createClient()`를 `React.cache()`로 감싸기 | 0.1 MD | 🟢 LOW | 서버 사이드 22개 |
+| Request-scoped 싱글톤 | `asyncLocalStorage` 또는 request 전달 | 1 MD | 🟡 MEDIUM | 서버 사이드 |
+| `createClient()` 게으른 초기화 | flags.ts 패턴처럼 최초 호출 시 생성 | 0.1 MD | 🟢 LOW | 서버 사이드 |
 
-### Blast Radius: HIGH (영향 파일 23+)
+### Blast Radius: HIGH (서버 22개 + 클라이언트 4개)
 
-`React.cache()` 방식이 가장 안전 — 단일 파일 변경으로 23개 호출 지점 모두受益.
+`React.cache()` 방식이 가장 안전 — `server.ts` 1개 파일만 수정으로 서버 22개 호출受益.
 
 ### Riley 구현 시 주의사항
 
 1. **`React.cache()`로 `createClient()` 래핑**이 최적 — `server.ts` 1개 파일만 수정, 0.1 MD
-2. 단, middleware.ts는 `React.cache()` 사용 불가 (Edge Runtime) — middleware용 `createClient()`는 별도 유지
-3. guards.ts(`requireAuth`, `validateUserAction` 등)가 가장 많은 중복 생성 유발 — 서버 액션 내 guards 호출 + 액션 자체 createClient = 2중 생성 해소
+2. 단, `React.cache()`는 **서버 사이드 전용** — 클라이언트 사이드 4개 호출은 `@/utils/supabase/client`를 사용하므로 범위 외
+3. middleware.ts도 `React.cache()` 사용 불가 (Edge Runtime) — middleware용 `createClient()`는 별도 유지
+4. guards.ts(`requireAuth`, `validateUserAction` 등)가 가장 많은 중복 생성 유발 — 서버 액션 내 guards 호출 + 액션 자체 createClient = 2중 생성 해소
 
 ---
 
@@ -193,7 +206,7 @@ src/components/admin/
 | IMP-014 | **LOW** | `page.tsx` 1개 | 단순 컴포넌트 추출 (RateForm/RateCardList) |
 | IMP-033 | **MEDIUM** | 3개 파일 → 6~9개 | 1차 finance(IMP-058), 2차 orders, 3차 support |
 | IMP-058 | **MEDIUM** | 1개 → 5개 | settlement/invoice/tax-invoice/report 분할 |
-| IMP-059 | **HIGH** | `server.ts` 1개 | `React.cache()` 1줄로 23개 호출 최적화 |
+| IMP-059 | **HIGH** | `server.ts` 1개 | `React.cache()` 1줄로 서버 22개 호출 최적화 |
 
 ### 구현 순서 권장
 
