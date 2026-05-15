@@ -56,7 +56,8 @@
 | ~~**IMP-038-BK**~~      | B_Kai  | [Phase B] CLAIMED OrderStatus 정식 등록                     | 2026-05-15 | ✅ FULL PASS |
 | ~~**IMP-038-BK-FIX**~~  | B_Kai  | R-09 테스트 케이스 추가 + IMP_PROGRESS 주석 보완           | 2026-05-15 | ✅ FULL PASS |
 | ~~**ANA-IMP-DK**~~      | D_Kai  | Phase A CRITICAL 사전 GitNexus 분석 (IMP-035·026·041)       | 2026-05-15 | ✅ FULL PASS |
-| **IMP-048-BK**          | B_Kai  | [Phase E] Mock 데이터 제거 (대시보드)                        | 2026-05-15 | 192/192 PASS |
+| ~~**IMP-048-BK**~~      | B_Kai  | [Phase E] Mock 데이터 제거 (대시보드)                        | 2026-05-15 | ❌ CONDITIONAL PASS |
+| **IMP-048-BK-FIX**      | B_Kai  | [FIX] 통계 쿼리 역할 필터 + .gitignore 보완                 | 2026-05-15 | 192/192 PASS |
 
 ---
 
@@ -71,7 +72,8 @@
 | ~~**IMP-036-BK-FIX**~~  | DoD 보완 — HANDOFF_BOX + GitNexus 소급 증적 | 2026-05-15 | ✅ 보완 완료        |
 | ~~**IMP-038-BK**~~      | [Phase B] CLAIMED OrderStatus 정식 등록     | 2026-05-15 | 🔶 CONDITIONAL PASS |
 | ~~**IMP-038-BK-FIX**~~      | IMP-038 보완 — R-09 테스트 케이스 추가      | 2026-05-15 | ✅ 보완 완료        |
-| ~~**IMP-048-BK**~~              | [Phase E] Mock 데이터 제거 (대시보드)        | 2026-05-15 | 🔔 검토 대기        |
+| ~~**IMP-048-BK**~~     | [Phase E] Mock 데이터 제거 (대시보드)                        | 2026-05-15 | ❌ CONDITIONAL PASS |
+| **IMP-048-BK-FIX**     | [Phase E] 통계 쿼리 역할 필터 수정 + .gitignore 보완         | 2026-05-15 | 🔔 검토 대기        |
 
 ---
 
@@ -1217,6 +1219,79 @@ gitnexus_detect_changes()
 - [ ] `scratch/IMP_PROGRESS.md` IMP-048 행 상태 `🔔` 갱신
 - [ ] ACTIVE_AGENT.md IDLE 초기화
 - [ ] TASK_BOARD SECTION 1 🔔 검토 대기 등록
+
+---
+
+## 📨 Aiden → B_Kai | IMP-048-BK-FIX — 통계 쿼리 역할 필터 수정 + .gitignore 보완
+
+> **수행 주체**: B_Kai (GLM Big Pickle) | **검증 주체**: Aiden (Claude)
+> **유형**: 결함 수정 (CONDITIONAL PASS 반려) | **지시일**: 2026-05-15 | **우선순위**: High
+
+### 반려 사유
+
+IMP-048-BK 검증 시 다음 2개 결함 발견:
+
+1. **결함 1 (데이터 격리 누락)**: `src/app/actions/dashboard.ts` L59~L72의 `inTransit` / `delivered` / `cancelled` 집계 쿼리에 역할 기반 필터 누락. 주문 목록 쿼리(L42~44)에는 `shipper_id`/`created_by` 필터가 적용되어 있으나, 통계 집계 3건은 전체 DB를 대상으로 조회 → CORPORATE/INDIVIDUAL 사용자가 타 조직 통계를 열람 가능.
+2. **결함 2 (로그 파일 커밋)**: `scratch/voc_action.log`가 IMP-048 커밋에 포함됨. `.gitignore` 처리 필요.
+
+> 💡 `profile as any` (L29) 타입 안전성 이슈는 IMP-029 예정 항목이므로 이번 수정 범위 제외.
+
+### 작업 지시
+
+**Step 1. ACTIVE_AGENT.md → Status: BUSY 갱신**
+
+**Step 2. 결함 1 수정** — `src/app/actions/dashboard.ts` L59~L72
+
+아래 3개 집계 쿼리에 역할 기반 필터를 추가한다. 주문 목록 쿼리(L42~44)와 동일한 패턴 적용:
+
+```typescript
+// CORPORATE: .eq("shipper_id", userProfile.org_id)
+// INDIVIDUAL: .eq("created_by", user.id)
+// ADMIN/기타: 필터 없음 (전체)
+```
+
+**Step 3. 결함 2 수정** — `.gitignore`
+
+프로젝트 루트 `.gitignore`에 아래 패턴 추가:
+
+```
+scratch/*.log
+```
+
+**Step 4. 회귀 테스트**
+
+```bash
+rtk npm run test:regression
+```
+
+전체 PASS 확인 후 결과 증적 보관.
+
+**Step 5. GitNexus detect_changes() 실행**
+
+```
+gitnexus_detect_changes()
+```
+
+**Step 6. 커밋**
+
+```bash
+[B_Kai] fix: IMP-048-BK-FIX 통계 쿼리 역할 필터 누락 수정 및 gitignore 보완
+```
+
+**Step 7. ACTIVE_AGENT.md → Status: IDLE 초기화**
+
+**Step 8. TASK_BOARD SECTION 1 🔔 갱신 + HANDOFF_BOX.md 수정 내역 추가**
+
+### 완료 기준 (DoD)
+
+- [ ] `dashboard.ts` inTransit/delivered/cancelled 집계 쿼리에 역할 필터 추가
+- [ ] `.gitignore` — `scratch/*.log` 패턴 추가
+- [ ] `rtk npm run test:regression` 전체 PASS 증적
+- [ ] GitNexus detect_changes() 결과 보고
+- [ ] `[B_Kai] fix: IMP-048-BK-FIX` 커밋 완료
+- [ ] ACTIVE_AGENT.md IDLE 초기화
+- [ ] TASK_BOARD SECTION 1 🔔 검토 대기 등록
+- [ ] HANDOFF_BOX.md 수정 내역 추가
 
 ---
 
