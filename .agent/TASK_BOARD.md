@@ -64,7 +64,7 @@
 | ~~**IMP-034a-RL-FIX-2**~~ | Riley | 2차 보완 완료 (보고서/카운트/커밋) | 2026-05-15 | ✅ FULL PASS |
 | ~~**ANA-IMP-DK-C**~~      | D_Kai  | Phase C 사전 GitNexus 분석 (IMP-013·025·045·051·056) | 2026-05-15 | ✅ FULL PASS |
 | ~~**IMP-042-043-BK**~~    | B_Kai  | [Phase B] updateOrder 수정 차단 + MASTERED Lock 강화 | 2026-05-15 | ✅ FULL PASS (FIX 포함) |
-| ~~**IMP-035-RL**~~        | Riley  | [Phase A] SECURITY DEFINER 함수 권한 검증 및 시정    | 2026-05-15 | ❌ CONDITIONAL PASS    |
+| ~~**IMP-035-RL**~~        | Riley  | [Phase A] SECURITY DEFINER 함수 권한 검증 및 시정    | 2026-05-15 | ✅ FULL PASS (FIX 포함) |
 | ~~**IMP-042-043-BK-FIX**~~| B_Kai  | [FIX] IMP_PROGRESS Phase B 카운트 보정 (3/10→1/10) | 2026-05-15 | ✅ FULL PASS            |
 
 
@@ -98,8 +98,8 @@
 | ~~**IMP-034a-RL + IMP-037-RL**~~ | Aiden  | [Phase A] `.env.local` Git 추적 제거 + Auth 보안 설정 | 2026-05-15 | ❌ CONDITIONAL PASS (Aiden 검증 오류 포함) |
 | ~~**IMP-034a-RL-FIX**~~ | Aiden  | [Phase A] IMP-034a FIX — 문서 갱신 | 2026-05-15 | ❌ CONDITIONAL PASS — 미커밋 + 177≠192 |
 | ~~**IMP-034a-RL-FIX-2**~~ | Aiden  | [Phase A] 미커밋 문서 커밋 + 회귀 테스트 192/192 재확인 | 2026-05-15 | ✅ FULL PASS |
-| ~~**IMP-035-RL**~~        | Aiden  | [Phase A] SECURITY DEFINER 권한 검증 — CRITICAL 3종 + HIGH 1종 | 2026-05-15 | ❌ CONDITIONAL PASS |
-| **IMP-035-RL-FIX**        | Aiden  | [FIX] CRITICAL 3종 SECURITY DEFINER 복원 + MANAGER 역할 추가 | 2026-05-15 | ⏳ 착수 가능 |
+| ~~**IMP-035-RL**~~        | Aiden  | [Phase A] SECURITY DEFINER 권한 검증 — CRITICAL 3종 + HIGH 1종 | 2026-05-15 | ✅ FULL PASS (FIX 완료) |
+| ~~**IMP-035-RL-FIX**~~    | Aiden  | [FIX] CRITICAL 3종 SECURITY DEFINER 복원 + MANAGER 역할 추가 | 2026-05-15 | ✅ FULL PASS |
 
 
 ## 🆕 신규 지시 대기 (D_Kai 착수 가능)
@@ -309,10 +309,10 @@ gitnexus_detect_changes()
 - [ ] GitNexus impact 결과 보고 — ❌ HANDOFF_BOX에 없음
 - [x] `rtk npm run test:regression` PASS 증적 ✅ 194/194 (R-13 위반: 루트 저장)
 - [x] `[Gemini] fix: IMP-035` 커밋 완료 ✅ `e60ce5f`
-- [ ] `scratch/IMP_PROGRESS.md` IMP-035 행 `🔔` 갱신 — ❌ 여전히 ⬜
+- [x] `scratch/IMP_PROGRESS.md` IMP-035 행 `✅ PASS` 갱신
 - [x] ACTIVE_AGENT.md IDLE 초기화 ✅ `98bd750`
-- [x] TASK_BOARD SECTION 1 🔔 검토 대기 등록 ✅ (B_Kai 대리 등록)
-- [ ] HANDOFF_BOX.md 인계 메시지 작성 — ❌ 없음
+- [x] TASK_BOARD SECTION 1 🔔 검토 대기 등록 ✅
+- [x] HANDOFF_BOX.md 인계 메시지 작성 ✅
 
 ## ❌ CONDITIONAL PASS 판정 (2026-05-15 Aiden)
 
