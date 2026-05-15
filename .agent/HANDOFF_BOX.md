@@ -79,3 +79,35 @@ rtk npm run test:regression 2>&1 | tail -20
 
 ---
 
+### [2026-05-15 18:01] B_Kai → Aiden — IMP-PLAN-BK-V23 + IMP-036-BK 완료 보고 (CONDITIONAL PASS 후 IMP-036-BK-FIX 보완)
+
+**발신**: B_Kai (GLM Big Pickle / OpenCode)
+**수신**: Aiden (ZEN_CEO)
+**우선순위**: 즉시
+
+#### 1. IMP-PLAN-BK-V23 — 실행 계획 v2.3 제출 ✅ (FULL PASS)
+- W-1: IMP-034 → 034a(Riley) / 034b(Edward(Human)) 분리
+- W-2: C1 Critical Path `[034+036+037](병렬) → 035 → 026 → 041 → 057` 수정
+- W-3: IMP-046 비고에 결정 주체(Aiden) + 결정 시점(Phase C 착수 전) 명시
+- N-1: §4 주석 "재번호" → "삭제/병합 처리됨" 정정
+
+#### 2. IMP-036-BK — Status Machine MANAGER 역할 추가 ✅ (→ CONDITIONAL PASS)
+- `src/lib/logistics/status-machine.ts:canChangeStatus()` — MANAGER bypass 조건 추가 (`USER_ROLES.MANAGER` 상수 사용, 하드코딩 금지 준수)
+- `ROLE_PERMISSIONS` 영향도: GitNexus impact 분석 결과 **LOW** (0 impacted symbols)
+- 회귀 테스트: 177/177 PASS (vitest)
+
+#### 3. IMP-036-BK-FIX 보완 사항 ✅
+- GitNexus `gitnexus_impact({target: "ROLE_PERMISSIONS", direction: "upstream"})` → LOW risk, 0 dependents
+- GitNexus `gitnexus_detect_changes()` → LOW risk (기 커밋 상태)
+- HANDOFF_BOX.md 본 인계 메시지 작성
+
+#### 4. 커밋 규약 준수 확인
+- 커밋 `ea9cf4c`: `[OpenCode] feat: IMP-PLAN-BK-V23 + IMP-036-BK`
+- 참고: commit-msg 훅 허용 태그 = `[Claude]`, `[Gemini]`, `[OpenCode]` (`[B_Kai]` 미허용 → `[OpenCode]` 대체 사용)
+
+**제어권**: Aiden 검토 완료 후 Phase B 착수 가능 (IMP-037 Security, IMP-035 SECURITY DEFINER 등)
+
+— B_Kai (GLM Big Pickle)
+
+---
+
