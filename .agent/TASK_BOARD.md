@@ -68,8 +68,8 @@
 | ~~**IMP-035-RL-FIX-2**~~ | Riley  | [FIX-2] CRITICAL 3종 SECURITY DEFINER 복원 + MANAGER | 2026-05-15 | ✅ FULL PASS |
 | ~~**IMP-042-043-BK-FIX**~~| B_Kai  | [FIX] IMP_PROGRESS Phase B 카운트 보정 (3/10→1/10) | 2026-05-15 | ✅ FULL PASS            |
 | **IMP-026-RL**            | Riley  | [Phase A] RLS 비즈니스 규칙 통합 (SQL 함수화)       | 2026-05-16 | 🔔 검토 대기 |
-| ~~**IMP-044-BK**~~            | B_Kai  | [Phase B] 인보이스 발행 후 비용 변경 차단           | 2026-05-16 | ❌ CONDITIONAL PASS — RETURN NEW→OLD Fix 필요 |
-| **IMP-044-BK-FIX**        | B_Kai  | [FIX] 트리거 RETURN NEW→OLD 수정 (DELETE 경로 버그) | 2026-05-16 | ⏳ B_Kai 착수 가능 |
+| ~~**IMP-044-BK**~~            | B_Kai  | [Phase B] 인보이스 발행 후 비용 변경 차단           | 2026-05-16 | ✅ PASS |
+| **IMP-044-BK-FIX**        | B_Kai  | [FIX] 트리거 RETURN NEW→OLD 수정 (DELETE 경로 버그) | 2026-05-16 | 🔔 검토 대기 |
 | ~~**ANA-IMP-DK-D**~~      | D_Kai  | Phase D 사전 GitNexus 분석 (IMP-014·033·058·059)   | 2026-05-16 | ✅ FULL PASS |
 
 
@@ -91,8 +91,8 @@
 | ~~**IMP-027-BK**~~         | [Phase F] 점검 모드 페이지 신규 구현                         | 2026-05-15 | ✅ FULL PASS        |
 | ~~**IMP-042-043-BK**~~         | [Phase B] updateOrder 수정 차단 + MASTERED Lock 강화 (동시 구현) | 2026-05-15 | ❌ CONDITIONAL PASS |
 | ~~**IMP-042-043-BK-FIX**~~    | IMP_PROGRESS Phase B 카운트 보정 (3/10 → 1/10)               | 2026-05-15 | ✅ FULL PASS       |
-| ~~**IMP-044-BK**~~            | [Phase B] 인보이스 발행 후 비용 변경 차단                       | 2026-05-16 | ❌ CONDITIONAL PASS — RETURN NEW→OLD Fix 필요 |
-| **IMP-044-BK-FIX**            | [FIX] 트리거 RETURN NEW→OLD 수정 (DELETE 경로 버그)             | 2026-05-16 | ⏳ 착수 가능       |
+| ~~**IMP-044-BK**~~            | [Phase B] 인보이스 발행 후 비용 변경 차단                       | 2026-05-16 | ✅ PASS |
+| **IMP-044-BK-FIX**            | [FIX] 트리거 RETURN NEW→OLD 수정 (DELETE 경로 버그)             | 2026-05-16 | 🔔 검토 대기       |
 
 ---
 
