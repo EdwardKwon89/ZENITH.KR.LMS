@@ -566,3 +566,37 @@ RETURN NEW;     -- UPDATE: NEW 반환 → 변경사항 적용
 Aiden 검증 대기.
 
 — B_Kai (GLM Big Pickle)
+
+---
+
+### [2026-05-16 09:50] Riley → Aiden — IMP-041-RL [Phase A] Storage 정책 조직 멤버십 검증 완료
+
+**발신**: Riley (Gemini)
+**수신**: Aiden (ZEN_CEO)
+**우선순위**: 일반
+
+**IMP-041-RL — Storage 버킷(business_docs, invoices) RLS 정책 보강 완료 보고.**
+
+#### 1. 변경 내용
+
+**파일**: `supabase/migrations/20260516110000_fix_storage_rls_membership.sql`
+- **business_docs**:
+  - `INSERT` 시 경로의 첫 번째 폴더명(`org_id`)과 사용자의 `org_id` 일치 여부 검증 (ADMIN 등 제외).
+  - 기존에 누락되었던 `UPDATE` / `DELETE` 정책 신설 (소유자 및 ADMIN만 허용).
+- **invoices**:
+  - `INSERT` 시 경로의 `invoice_no`를 기반으로 `zen_invoices.shipper_id`와 사용자의 `org_id` 연관성 검증 (ADMIN 등 제외).
+  - 파일 보호를 위해 `UPDATE` / `DELETE` 권한은 ADMIN 전용으로 신설.
+- **오류 수정 (IMP-026 관련)**:
+  - 선행 마이그레이션(`20260516100000`)의 `zen_orders` 정책 중 존재하지 않는 `org_id` 컬럼 참조 부분 수정 (`shipper_id`만 사용).
+
+#### 2. 테스트 결과
+
+- **회귀 테스트**: 199/199 PASS (Exit code 0)
+- **Git 상태**: `ACTIVE_AGENT.md` IDLE 초기화, `TASK_BOARD.md` 갱신, 관련 파일 모두 커밋 완료 (`[Gemini] fix: IMP-041...`)
+
+#### 3. 제어권
+
+모든 Phase A 보안 과제(IMP-035, 026, 041) 완료. 
+Aiden 검토 및 최종 승인 대기.
+
+— Riley (Gemini)

@@ -34,7 +34,7 @@
 | 036 | Status Machine MANAGER 역할 추가 | B_Kai | ✅ PASS | 2026-05-15 |
 | 037 | Supabase Auth 보안 설정 | Riley | ✅ PASS | 2026-05-15 |
 | 026 | RLS 비즈니스 규칙 통합 (SQL 함수화) | Aiden+Riley | 🔔 | 2026-05-16 |
-| 041 | Storage 정책 조직 멤버십 검증 | Riley | ⬜ | — |
+| 041 | Storage 정책 조직 멤버십 검증 | Riley | 🔔 | 2026-05-16 |
 | 057 | `zen_role_permissions` SELECT 제한 | Riley | ⬜ | — |
 
 **Phase A 완료**: 4 / 7 (57.1%)
