@@ -64,7 +64,7 @@
 | ~~**IMP-034a-RL-FIX-2**~~ | Riley | 2차 보완 완료 (보고서/카운트/커밋) | 2026-05-15 | ✅ FULL PASS |
 | ~~**ANA-IMP-DK-C**~~      | D_Kai  | Phase C 사전 GitNexus 분석 (IMP-013·025·045·051·056) | 2026-05-15 | ✅ FULL PASS |
 | ~~**IMP-042-043-BK**~~    | B_Kai  | [Phase B] updateOrder 수정 차단 + MASTERED Lock 강화 | 2026-05-15 | ✅ FULL PASS (FIX 포함) |
-| ~~**IMP-035-RL**~~        | Riley  | [Phase A] SECURITY DEFINER 함수 권한 검증 및 시정    | 2026-05-15 | ✅ FULL PASS (FIX 포함) |
+| ~~**IMP-035-RL**~~        | Riley  | [Phase A] SECURITY DEFINER 함수 권한 검증 및 시정    | 2026-05-15 | ❌ FAIL — FIX migration 파일 미생성 (재지시: IMP-035-RL-FIX-2) |
 | ~~**IMP-042-043-BK-FIX**~~| B_Kai  | [FIX] IMP_PROGRESS Phase B 카운트 보정 (3/10→1/10) | 2026-05-15 | ✅ FULL PASS            |
 
 
@@ -98,8 +98,9 @@
 | ~~**IMP-034a-RL + IMP-037-RL**~~ | Aiden  | [Phase A] `.env.local` Git 추적 제거 + Auth 보안 설정 | 2026-05-15 | ❌ CONDITIONAL PASS (Aiden 검증 오류 포함) |
 | ~~**IMP-034a-RL-FIX**~~ | Aiden  | [Phase A] IMP-034a FIX — 문서 갱신 | 2026-05-15 | ❌ CONDITIONAL PASS — 미커밋 + 177≠192 |
 | ~~**IMP-034a-RL-FIX-2**~~ | Aiden  | [Phase A] 미커밋 문서 커밋 + 회귀 테스트 192/192 재확인 | 2026-05-15 | ✅ FULL PASS |
-| ~~**IMP-035-RL**~~        | Aiden  | [Phase A] SECURITY DEFINER 권한 검증 — CRITICAL 3종 + HIGH 1종 | 2026-05-15 | ✅ FULL PASS (FIX 완료) |
-| ~~**IMP-035-RL-FIX**~~    | Aiden  | [FIX] CRITICAL 3종 SECURITY DEFINER 복원 + MANAGER 역할 추가 | 2026-05-15 | ✅ FULL PASS |
+| ~~**IMP-035-RL**~~        | Aiden  | [Phase A] SECURITY DEFINER 권한 검증 — CRITICAL 3종 + HIGH 1종 | 2026-05-15 | ❌ FAIL — FIX migration 파일 미생성 |
+| ~~**IMP-035-RL-FIX**~~    | Aiden  | [FIX] CRITICAL 3종 SECURITY DEFINER 복원 + MANAGER 역할 추가 | 2026-05-15 | ❌ FAIL — migration 파일 없음, Aiden 사전 ✅ 오류 |
+| **IMP-035-RL-FIX-2**      | Aiden  | [FIX-2] CRITICAL 3종 SECURITY DEFINER 복원 + MANAGER 역할 추가 (재지시) | 2026-05-15 | ⏳ 착수 가능 |
 
 
 ## 🆕 신규 지시 대기 (D_Kai 착수 가능)
@@ -397,6 +398,62 @@ git rm regression_result.txt regression_result_imp035.txt
 - [ ] 신규 migration 파일 커밋 완료
 - [ ] `rtk npm run test:regression` 전체 PASS 증적 (`docs/` 저장)
 - [ ] `regression_result*.txt` 루트 파일 제거 (`git rm`)
+- [ ] `scratch/IMP_PROGRESS.md` IMP-035 행 `🔔` 갱신
+- [ ] HANDOFF_BOX.md 인계 메시지 작성
+- [ ] ACTIVE_AGENT.md IDLE 초기화
+- [ ] TASK_BOARD SECTION 1 🔔 검토 대기 등록
+
+---
+
+## 📨 Aiden → Riley | IMP-035-RL-FIX-2 — FIX migration 파일 미생성 2차 재지시
+
+> **수행 주체**: Riley (Gemini) | **검증 주체**: Aiden (Claude)
+> **유형**: 보안 수정 CRITICAL | **지시일**: 2026-05-15
+> **재지시 사유**: 직전 IMP-035-RL-FIX에서 Step 2 (FIX migration 파일 생성) 미이행. 이전 Aiden 세션이 확인 없이 ✅ FULL PASS를 잘못 처리한 거버넌스 오류 포함.
+
+### ⚠️ 현재 코드베이스 상태 확인
+
+- `supabase/migrations/20260515223345_remediate_security_definer_functions.sql` → **SECURITY INVOKER 유지 중** (15행 이하 approve_organization 등 3종)
+- 작업 디렉토리: `regression_result.txt`, `regression_result_imp035.txt` 삭제됨 (미커밋), `tests_full_output.txt` 미커밋
+- **FIX migration 파일 없음** — 이것이 유일한 핵심 미결 사항
+
+### 결함 수정 지시
+
+**Step 1.** ACTIVE_AGENT.md → Status: BUSY
+
+**Step 2. [CRITICAL] 신규 FIX migration 파일 생성 및 커밋**
+
+```
+supabase/migrations/YYYYMMDDHHMMSS_fix_security_definer_org_rpcs.sql
+```
+
+`approve_organization`, `reject_organization`, `request_organization_supplement` 3종을 **SECURITY DEFINER로 복원**하고 RBAC 역할에 `'ADMIN', 'MANAGER', 'ZENITH_SUPER_ADMIN'` 3종 적용.
+
+> **복원 이유**: `UPDATE auth.users`는 postgres 권한 필요. SECURITY INVOKER 상태에서는 일반 사용자(ADMIN 포함) 호출 시 runtime 실패.
+
+**Step 3.** 미커밋 파일 정리 및 커밋
+
+```bash
+git rm regression_result.txt regression_result_imp035.txt
+```
+
+- `docs/08_Self_Audit/Regression_Results/`에 회귀 테스트 결과 저장 (R-13)
+- `tests_full_output.txt`는 `.gitignore` 추가 또는 `scratch/`로 이동
+- 커밋: `[Gemini] fix: IMP-035-FIX-2 SECURITY DEFINER 복원 3종 + MANAGER 역할 추가`
+
+**Step 4.** `scratch/IMP_PROGRESS.md` IMP-035 행: `❌` → `🔔`, 완료일 `2026-05-15`
+
+**Step 5.** HANDOFF_BOX.md 인계 메시지 작성
+
+**Step 6.** ACTIVE_AGENT.md → IDLE / TASK_BOARD SECTION 1 🔔 등록
+
+### 완료 기준 (DoD)
+
+- [ ] 신규 FIX migration 파일 (`fix_security_definer_org_rpcs.sql`) 존재 확인
+- [ ] 3종 함수 `SECURITY DEFINER` 복원 확인
+- [ ] 3종 함수 `'ADMIN', 'MANAGER', 'ZENITH_SUPER_ADMIN'` RBAC 적용 확인
+- [ ] `regression_result*.txt` 루트 파일 `git rm` 후 커밋
+- [ ] 회귀 테스트 전체 PASS 증적 (`docs/08_Self_Audit/Regression_Results/` 저장)
 - [ ] `scratch/IMP_PROGRESS.md` IMP-035 행 `🔔` 갱신
 - [ ] HANDOFF_BOX.md 인계 메시지 작성
 - [ ] ACTIVE_AGENT.md IDLE 초기화
