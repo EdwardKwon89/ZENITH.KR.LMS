@@ -68,8 +68,8 @@
 | ~~**IMP-035-RL-FIX-2**~~ | Riley  | [FIX-2] CRITICAL 3종 SECURITY DEFINER 복원 + MANAGER | 2026-05-15 | ✅ FULL PASS |
 | ~~**IMP-042-043-BK-FIX**~~| B_Kai  | [FIX] IMP_PROGRESS Phase B 카운트 보정 (3/10→1/10) | 2026-05-15 | ✅ FULL PASS            |
 | **IMP-026-RL**            | Riley  | [Phase A] RLS 비즈니스 규칙 통합 (SQL 함수화)       | 2026-05-16 | ⏳ 착수 가능 |
-| ~~**IMP-044-BK**~~            | B_Kai  | [Phase B] 인보이스 발행 후 비용 변경 차단           | 2026-05-16 | ➡️ 🔔 Aiden 검토 대기 (하단 등록) |
-| **IMP-044-BK**            | B_Kai  | [Phase B] 인보이스 발행 후 비용 변경 차단 — DB 트리거 + 서버 액션 가드 | 2026-05-16 | 🔔 Aiden 검토 대기 |
+| ~~**IMP-044-BK**~~            | B_Kai  | [Phase B] 인보이스 발행 후 비용 변경 차단           | 2026-05-16 | ❌ CONDITIONAL PASS — RETURN NEW→OLD Fix 필요 |
+| **IMP-044-BK-FIX**        | B_Kai  | [FIX] 트리거 RETURN NEW→OLD 수정 (DELETE 경로 버그) | 2026-05-16 | ⏳ B_Kai 착수 가능 |
 | ~~**ANA-IMP-DK-D**~~      | D_Kai  | Phase D 사전 GitNexus 분석 (IMP-014·033·058·059)   | 2026-05-16 | ✅ FULL PASS |
 
 
@@ -91,7 +91,8 @@
 | ~~**IMP-027-BK**~~         | [Phase F] 점검 모드 페이지 신규 구현                         | 2026-05-15 | ✅ FULL PASS        |
 | ~~**IMP-042-043-BK**~~         | [Phase B] updateOrder 수정 차단 + MASTERED Lock 강화 (동시 구현) | 2026-05-15 | ❌ CONDITIONAL PASS |
 | ~~**IMP-042-043-BK-FIX**~~    | IMP_PROGRESS Phase B 카운트 보정 (3/10 → 1/10)               | 2026-05-15 | ✅ FULL PASS       |
-| **IMP-044-BK**                | [Phase B] 인보이스 발행 후 비용 변경 차단                       | 2026-05-16 | ⏳ 착수 가능       |
+| ~~**IMP-044-BK**~~            | [Phase B] 인보이스 발행 후 비용 변경 차단                       | 2026-05-16 | ❌ CONDITIONAL PASS — RETURN NEW→OLD Fix 필요 |
+| **IMP-044-BK-FIX**            | [FIX] 트리거 RETURN NEW→OLD 수정 (DELETE 경로 버그)             | 2026-05-16 | ⏳ 착수 가능       |
 
 ---
 
@@ -1913,5 +1914,54 @@ rtk npm run test:regression
 - [ ] 회귀 테스트 전체 PASS 증적 (`docs/` 저장)
 - [ ] `scratch/IMP_PROGRESS.md` IMP-044 행 `🔔` 갱신
 - [ ] HANDOFF_BOX.md 인계 메시지 작성
+- [ ] ACTIVE_AGENT.md IDLE 초기화
+- [ ] TASK_BOARD SECTION 1 🔔 검토 대기 등록
+
+---
+
+## 📨 Aiden → B_Kai | IMP-044-BK-FIX — 트리거 RETURN 값 수정
+
+> **수행 주체**: B_Kai (GLM Big Pickle) | **검증 주체**: Aiden (Claude)
+> **반려 사유**: DELETE 트리거 RETURN 값 버그 | **지시일**: 2026-05-16
+
+### 결함 설명
+
+`fn_prevent_cost_change_after_invoice()` 트리거 함수의 `RETURN NEW`가 DELETE 경로에서 `NULL`을 반환하여 `invoice_id IS NULL`인 정상 레코드도 삭제 불가.
+
+**현재 (버그)**:
+```sql
+  IF OLD.invoice_id IS NOT NULL THEN
+    RAISE EXCEPTION '...';
+  END IF;
+  RETURN NEW;  -- DELETE 시 NULL 반환 → 삭제 취소됨
+```
+
+**수정 필요**:
+```sql
+  IF OLD.invoice_id IS NOT NULL THEN
+    RAISE EXCEPTION '...';
+  END IF;
+  RETURN OLD;  -- DELETE 허용 시 OLD 반환 (UPDATE는 NEW 유지)
+```
+
+### 구현 지시
+
+**Step 1.** ACTIVE_AGENT.md → Status: BUSY
+
+**Step 2.** `supabase/migrations/20260516090000_prevent_cost_change_after_invoice.sql` 수정 — `RETURN NEW` → `RETURN OLD`
+
+**Step 3.** 회귀 테스트 실행 및 결과 저장
+
+**Step 4.** HANDOFF_BOX.md 인계 메시지
+
+**Step 5.** 커밋: `[B_Kai] fix: IMP-044-BK-FIX 트리거 RETURN NEW→OLD 수정 (DELETE 경로 버그)`
+
+**Step 6.** ACTIVE_AGENT.md → IDLE / TASK_BOARD SECTION 1 🔔 등록
+
+### 완료 기준 (DoD)
+
+- [ ] `RETURN NEW` → `RETURN OLD` 수정 확인
+- [ ] 회귀 테스트 전체 PASS 증적
+- [ ] HANDOFF_BOX.md 인계 메시지
 - [ ] ACTIVE_AGENT.md IDLE 초기화
 - [ ] TASK_BOARD SECTION 1 🔔 검토 대기 등록
