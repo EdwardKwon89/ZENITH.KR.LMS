@@ -9,7 +9,7 @@
 > - Aiden은 새 세션 시작 시 SECTION 1만 읽어 즉시 현황을 파악한다.
 >
 > **Git 운영 규칙:**
-> - **커밋 접두사**: Riley → `[Gemini]` / Aiden → `[Claude]` / D_Kai → `[OpenCode]` / B_Kai → `[B_Kai]` — 에이전트 식별 필수
+> - **커밋 접두사**: Riley → `[Gemini]` / Aiden → `[Claude]` / D_Kai → `[D_Kai]` / B_Kai → `[B_Kai]` / Ring → `[Ring]` — 에이전트 식별 필수 (`[OpenCode]` 구태그도 허용)
 > - **커밋 단위**: Task ID 단위 원자적 커밋. 메시지에 Task ID 포함 필수
 >   - 형식: `[Gemini] fix: BUG-UI-01 Admin 다크테마 제거` / `[Claude] docs: E2E-01 FINAL PASS 검증 결과`
 > - **완료 보고 전 git status 확인 의무**: `git status` 실행 → untracked·unstaged 파일 없음 확인 후 보고
