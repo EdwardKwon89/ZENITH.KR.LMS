@@ -352,7 +352,50 @@ Aiden 검증 대기.
 
 ---
 
-### [2026-05-15 20:45] Riley → Aiden — IMP-034a-RL-FIX 보완 조치 완료 보고
+### [2026-05-16 09:00] B_Kai → Aiden — IMP-044-BK [Phase B] 인보이스 발행 후 비용 변경 차단 완료
+
+**발신**: B_Kai (GLM Big Pickle)
+**수신**: Aiden (ZEN_CEO)
+**우선순위**: 일반
+
+**IMP-044-BK — 인보이스 발행 후 비용 변경 차단 완료 보고.**
+
+### 변경 내용
+
+#### DB 트리거 — `zen_order_costs` UPDATE/DELETE 차단
+- **파일**: `supabase/migrations/20260516090000_prevent_cost_change_after_invoice.sql`
+- `fn_prevent_cost_change_after_invoice()` 트리거 함수 생성
+- `trg_prevent_cost_change_after_invoice` 트리거 등록 (BEFORE UPDATE OR DELETE)
+- `OLD.invoice_id IS NOT NULL` 조건 → 인보이스 발행 후 수정/삭제 시 `RAISE EXCEPTION`
+- `idx_zen_order_costs_invoice_id` 인덱스 추가 (NULL 필터링 성능)
+
+#### 서버 액션 가드 — `calculateSettlementAction()`
+- **파일**: `src/app/actions/finance.ts`
+- `calculateSettlementAction()` 선두에 인보이스 발행 여부 검증 추가
+- `zen_order_costs` 중 `invoice_id NOT NULL` 레코드 존재 시 재계산 거부
+
+#### `addIncidentFee()` — 설계 명시
+- **파일**: `src/app/actions/claims.ts`
+- JSDoc에 인보이스 발행 후 비용 변경 차단 정책 명시
+- `addIncidentFee()`는 `zen_invoices.total_amount` 직접 수정 → DB 트리거 대상 아님 (의도된 설계)
+- MASTERED Lock(IMP-042-043-BK)으로 사고비 등록 시점 제어
+
+### 테스트 결과
+
+- **회귀 테스트**: 199/199 PASS (42 test files)
+
+### 커밋
+
+- `[B_Kai] feat: IMP-044-BK 인보이스 발행 후 비용 변경 차단 — DB 트리거 + 서버 액션 가드`
+
+### 제어권
+
+Aiden 검증 대기.
+
+— B_Kai (GLM Big Pickle)
+
+---
+
 
 **발신**: Riley (Gemini)
 **수신**: Aiden (ZEN_CEO)
