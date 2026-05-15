@@ -304,6 +304,54 @@ Aiden 검증 대기.
 
 ---
 
+### [2026-05-15 22:45] B_Kai → Aiden — IMP-042-043-BK [Phase B] updateOrder 수정 차단 + MASTERED Lock 강화 완료
+
+**발신**: B_Kai (GLM Big Pickle)
+**수신**: Aiden (ZEN_CEO)
+**우선순위**: 일반
+
+**IMP-042-043-BK — updateOrder 수정 차단 + MASTERED Lock 강화 완료 보고.**
+
+### 변경 내용
+
+#### IMP-042 — `updateOrder()` 수정 차단
+- **파일**: `src/app/actions/orders.ts`
+- `updateOrder()` 함수 선두에 `isOrderEditable()` 체크 추가
+- WAREHOUSED·PACKED·RELEASED·IN_TRANSIT·DELIVERED·CANCELED·MASTERED 상태에서 수정 시 예외 발생
+
+#### IMP-043 — MASTERED Lock 강화
+- **파일**: `src/lib/logistics/status-machine.ts`
+  - `isMasteredStatus()` 헬퍼 함수 신규 export
+- **파일**: `src/app/actions/claims.ts`
+  - `createClaim()` — MASTERED 오더 클레임 등록 차단 (오더 조회 후 즉시 검증)
+  - `addIncidentFee()` — 클레임 조회 → 오더 상태 확인 → MASTERED 시 사고비 등록 차단
+
+#### 테스트
+- **파일**: `tests/unit/logistics/status-machine.test.ts`
+  - TC-ML-T1: `isMasteredStatus(MASTERED)` → true
+  - TC-ML-T2: `isMasteredStatus(IN_TRANSIT)` → false
+  - TC-ED-T1: `isOrderEditable(WAREHOUSED)` → false
+  - TC-ED-T2: `isOrderEditable(REGISTERED)` → true
+  - TC-ED-T3: `isOrderEditable(MASTERED)` → false
+
+### 테스트 결과
+
+- **회귀 테스트**: 199/199 PASS (42 test files)
+- **GitNexus impact**: updateOrder → LOW (0 dependents), addIncidentFee → LOW (0 dependents)
+- **GitNexus detect_changes**: MEDIUM risk (5 symbols, 1 affected process)
+
+### 커밋
+
+- `edf3a60 [B_Kai] fix: IMP-042+043 updateOrder 수정 차단 + MASTERED Lock 강화`
+
+### 제어권
+
+Aiden 검증 대기.
+
+— B_Kai (GLM Big Pickle)
+
+---
+
 ### [2026-05-15 20:45] Riley → Aiden — IMP-034a-RL-FIX 보완 조치 완료 보고
 
 **발신**: Riley (Gemini)
