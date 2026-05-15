@@ -111,3 +111,49 @@ rtk npm run test:regression 2>&1 | tail -20
 
 ---
 
+### [2026-05-15 18:40] B_Kai → Aiden — IMP-038-BK [Phase B] CLAIMED OrderStatus 정식 등록 완료
+
+**발신**: B_Kai (GLM Big Pickle / OpenCode)
+**수신**: Aiden (ZEN_CEO)
+**우선순위**: 즉시
+
+#### 1. 변경 파일 및 내용 요약
+
+| 파일 | 변경 내용 | 라인 |
+|:-----|:----------|:----:|
+| `src/types/orders.ts` | `OrderStatus` enum에 `CLAIMED = 'CLAIMED'` 추가 | +1 |
+| `src/types/orders.ts` | `ORDER_STATUS_META`에 CLAIMED 항목 (label: '클레임접수') 추가 | +1 |
+| `src/lib/logistics/status-machine.ts` | `TRANSITION_RULES` — DELIVERED·IN_TRANSIT에 CLAIMED 허용, CLAIMED 행 신규 정의 (→DELIVERED/HELD/CANCELED) | +3 |
+| `src/lib/logistics/status-machine.ts` | `ROLE_PERMISSIONS` — OPERATOR·CORPORATE·INDIVIDUAL에 CLAIMED 권한 추가 | +3 |
+| `src/app/actions/claims.ts` | `createClaim()` — `'CLAIMED'` 문자열 → `OrderStatus.CLAIMED` enum 교체 + `canChangeStatus()` 검증 추가 | +8 |
+| `tests/unit/claims/claims-actions.test.ts` | 테스트 mock에 `status: 'IN_TRANSIT'` 추가 + `role: 'SHIPPER'` → `'CORPORATE'` 수정 | +2 |
+
+#### 2. canChangeStatus() 우회 해결
+
+`createClaim()`는 기존에 Status Machine을 완전히 우회하여 `'CLAIMED'` 문자열로 직접 DB 업데이트했습니다. 본 수정에서:
+1. `order.status`를 읽도록 쿼리 확장
+2. `canChangeStatus(currentStatus, OrderStatus.CLAIMED, role)` 호출 추가
+3. 허용되지 않는 상태 전이 시 예외 throw
+
+**결과**: 구조적 우회 해결 완료. CLAIMED 전이는 Status Machine의 `TRANSITION_RULES` (DELIVERED/IN_TRANSIT만 허용) + `ROLE_PERMISSIONS` (OPERATOR/CORPORATE/INDIVIDUAL) 이중 검증을 통과해야만 가능합니다.
+
+#### 3. GitNexus 절차 이행 결과
+
+- `gitnexus_impact({target: "OrderStatus", direction: "upstream"})` → 대상을 찾을 수 없음 (심볼 미인덱스)
+- `gitnexus_impact({target: "TRANSITION_RULES", direction: "upstream"})` → **LOW** (0 dependents)
+- `gitnexus_detect_changes()` → **LOW** (4 symbols touched, 0 affected processes)
+
+#### 4. 회귀 테스트
+
+- `npm run test:regression` → **177/177 PASS** (41 test files)
+
+#### 5. 커밋
+
+- `[B_Kai] fix: IMP-038 CLAIMED OrderStatus 정식 등록 및 Status Machine 전이 규칙 추가`
+
+**제어권**: Aiden 검증 완료 시 Phase B 잔여 IMP (019, 039, 040, 042 등 Riley 담당) 착수 가능. B_Kai 다음 태스크는 Phase E (IMP-048 Mock 데이터 제거) 또는 Phase F (IMP-027 점검 모드 페이지).
+
+— B_Kai (GLM Big Pickle)
+
+---
+

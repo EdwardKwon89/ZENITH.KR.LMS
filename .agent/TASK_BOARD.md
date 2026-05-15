@@ -53,6 +53,8 @@
 | ~~**IMP-PLAN-BK-V23**~~ | B_Kai  | IMP 실행 계획 v2.3 — W-1~W-3+N-1 수정                       | ✅ FULL PASS (2026-05-15)                |
 | ~~**IMP-036-BK**~~      | B_Kai  | Status Machine MANAGER 역할 추가                            | ✅ CONDITIONAL PASS — DoD 보완 요청 발령 |
 | ~~**IMP-036-BK-FIX**~~  | B_Kai  | IMP-036-BK DoD 보완 (HANDOFF_BOX + GitNexus 소급)           | 2026-05-15                               |
+| **IMP-038-BK**          | B_Kai  | [Phase B] CLAIMED OrderStatus 정식 등록                     | 2026-05-15 | ⏳ Aiden 검토 대기    |
+| **ANA-IMP-DK**          | D_Kai  | Phase A CRITICAL 사전 GitNexus 분석 (IMP-035·026·041)        | 2026-05-15                               |
 
 ---
 
@@ -65,7 +67,7 @@
 | ~~**IMP-PLAN-BK-V23**~~ | IMP 실행 계획 v2.3 제출 — W-1~W-3+N-1 수정  | 2026-05-15 | ✅ FULL PASS        |
 | ~~**IMP-036-BK**~~      | [Phase A] Status Machine MANAGER 역할 추가  | 2026-05-15 | ✅ CONDITIONAL PASS |
 | ~~**IMP-036-BK-FIX**~~  | DoD 보완 — HANDOFF_BOX + GitNexus 소급 증적 | 2026-05-15 | ✅ 보완 완료        |
-| **IMP-038-BK**          | [Phase B] CLAIMED OrderStatus 정식 등록     | 2026-05-15 | ⏳ 착수 가능        |
+| ~~**IMP-038-BK**~~          | [Phase B] CLAIMED OrderStatus 정식 등록     | 2026-05-15 | ✅ 완료 (🔔 Aiden 검토 대기) |
 
 ---
 
@@ -672,12 +674,12 @@ gitnexus_query({query: "organization membership"})
 
 ### 완료 기준 (DoD)
 
-- [ ] IMP-035·026·041 각 GitNexus 분석 결과 포함
-- [ ] 각 IMP별 blast radius 등급 명시
-- [ ] Riley 구현 시 주의사항 항목 명시
-- [ ] `scratch/ANA_PhaseA_DKai_20260515.md` 파일 제출 후 커밋
-- [ ] 커밋: `[D_Kai] docs: ANA-IMP-DK Phase A CRITICAL 사전 GitNexus 분석 (IMP-035·026·041)`
-- [ ] 🔔 TASK_BOARD SECTION 1 검토 대기 등록
+- [x] IMP-035·026·041 각 GitNexus 분석 결과 포함
+- [x] 각 IMP별 blast radius 등급 명시
+- [x] Riley 구현 시 주의사항 항목 명시
+- [x] `scratch/ANA_PhaseA_DKai_20260515.md` 파일 제출 후 커밋
+- [x] 커밋: `[OpenCode] docs: ANA-IMP-DK Phase A CRITICAL 사전 GitNexus 분석 (IMP-035·026·041)`
+- [x] 🔔 TASK_BOARD SECTION 1 검토 대기 등록
 
 > **주의**: 분석 중 코드 결함 발견 시 직접 수정하지 말고 분석 결과에 기록만 합니다. 수정은 Riley/Aiden 지시 후 수행합니다.
 
