@@ -60,7 +60,8 @@
 | ~~**IMP-048-BK-FIX**~~  | B_Kai  | [FIX] 통계 쿼리 역할 필터 + .gitignore 보완                 | 2026-05-15 | ✅ FULL PASS |
 | ~~**ANA-IMP-DK-B**~~   | D_Kai  | Phase B CRITICAL 사전 GitNexus 분석 (IMP-019·039·040·042·043·044) | 2026-05-15 | ✅ FULL PASS |
 | ~~**IMP-027-BK**~~      | B_Kai  | [Phase F] 점검 모드 페이지 신규 구현                            | 2026-05-15 | ✅ FULL PASS |
-| **IMP-034a-RL + IMP-037-RL** | Riley | [Phase A] `.env.local` Git 추적 제거 + Auth 보안 설정        | 2026-05-15 | ❌ CONDITIONAL PASS — IMP-034a git rm --cached 미실행 |
+| ~~**IMP-034a-RL-FIX**~~   | Riley | [Phase A] IMP-034a 반려 조치 완료 (git rm 및 문서 갱신) | 2026-05-15 | ❌ CONDITIONAL PASS — 미커밋 + 177≠192 |
+| **IMP-034a-RL-FIX-2**    | Riley | [Phase A] 미커밋 문서 커밋 + 회귀 테스트 192/192 재확인 | 2026-05-15 | ⏳ 착수 가능 |
 
 ---
 
@@ -87,8 +88,9 @@
 | :--------------------------- | :----- | :-------------------------------------------------- | :--------- | :---------: |
 | ~~**EXP-IMP-RL**~~           | Aiden  | 전체 코드베이스 IMP 도출 (성능 실험)                | 2026-05-13 | ✅ 완료     |
 | ~~**REG-IMP-RL**~~           | Aiden  | IMP-023~026 `post_launch_improvements.md` 등록      | 2026-05-13 | ✅ 완료     |
-| ~~**IMP-034a-RL + IMP-037-RL**~~ | Aiden  | [Phase A] `.env.local` Git 추적 제거 + Auth 보안 설정 | 2026-05-15 | ❌ CONDITIONAL PASS |
-| **IMP-034a-RL-FIX** | Aiden  | [Phase A] IMP-034a 반려 — `git rm --cached` + IMP_PROGRESS + TASK_BOARD 보완 | 2026-05-15 | ⏳ 착수 가능 (Edward IMP-034b 완료 후) |
+| ~~**IMP-034a-RL + IMP-037-RL**~~ | Aiden  | [Phase A] `.env.local` Git 추적 제거 + Auth 보안 설정 | 2026-05-15 | ❌ CONDITIONAL PASS (Aiden 검증 오류 포함) |
+| ~~**IMP-034a-RL-FIX**~~ | Aiden  | [Phase A] IMP-034a FIX — 문서 갱신 | 2026-05-15 | ❌ CONDITIONAL PASS — 미커밋 + 177≠192 |
+| **IMP-034a-RL-FIX-2** | Aiden  | [Phase A] 미커밋 문서 커밋 + 회귀 테스트 192/192 재확인 | 2026-05-15 | ⏳ 착수 가능 |
 
 ## 🆕 신규 지시 대기 (D_Kai 착수 가능)
 
@@ -304,6 +306,7 @@ gitnexus_detect_changes()
 > ⚠️ **Edward IMP-034b (API 키 재발급) 완료 후 착수할 것. 기존 자격증명이 노출된 상태에서 git 추적만 제거해도 이미 노출된 커밋 히스토리는 남음. 재발급 병행 필수.**
 
 ### 결함 수정 지시
+---
 
 **Step 1.** ACTIVE_AGENT.md → Status: BUSY 갱신
 
@@ -339,12 +342,70 @@ rtk npm run test:regression
 
 ### 완료 기준 (DoD)
 
-- [ ] `git ls-files .env.local` → 빈 출력 확인
-- [ ] `rtk npm run test:regression` 전체 PASS 증적
-- [ ] `scratch/IMP_PROGRESS.md` IMP-034a·037 행 `🔔` 갱신
+- [x] `git ls-files .env.local` → 빈 출력 확인 ✅ (미추적 상태 — 최초부터 비추적)
+- [ ] `rtk npm run test:regression` 전체 PASS 증적 — ❌ 177/177 보고 (192/192 필요)
+- [x] `scratch/IMP_PROGRESS.md` IMP-034a·037 행 `🔔` 갱신 ✅
 - [ ] ACTIVE_AGENT.md IDLE 초기화
-- [ ] TASK_BOARD SECTION 1 🔔 검토 대기 등록
-- [ ] HANDOFF_BOX.md 인계 메시지 작성
+- [ ] TASK_BOARD SECTION 1 🔔 검토 대기 등록 — ❌ 상태 칸 공백
+- [x] HANDOFF_BOX.md 인계 메시지 ✅ (미커밋)
+
+## ❌ CONDITIONAL PASS 판정 — IMP-034a-RL-FIX (2026-05-15 Aiden)
+
+> **배경**: Aiden의 최초 `git ls-files .env.local && echo "tracked"` 체크가 오류였음 — `git ls-files`는 항상 exit 0 반환. 실제로 `.env.local`은 최초부터 git에 추적된 적 없음. IMP-034a 반려 판정 자체가 Aiden 오류임을 인정.
+>
+> **잔여 미충족 항목**:
+> 1. 모든 변경사항 미커밋 (HANDOFF_BOX·TASK_BOARD·IMP_PROGRESS unstaged)
+> 2. 회귀 테스트 177/177 보고 — B_Kai IMP-038-BK-FIX 15개 누락, 192/192이어야 함
+
+---
+
+## 📨 Aiden → Riley | IMP-034a-RL-FIX-2 — 미커밋 + 회귀 테스트 재확인
+
+> **수행 주체**: Riley (Gemini) | **검증 주체**: Aiden (Claude)
+> **유형**: 행정 보완 | **지시일**: 2026-05-15 | **예상 공수**: 5분
+
+### 작업 지시
+
+**Step 1.** 현재 unstaged 변경사항 확인
+
+```bash
+git status
+```
+
+unstaged: `.agent/HANDOFF_BOX.md`, `.agent/TASK_BOARD.md`, `scratch/IMP_PROGRESS.md`
+
+**Step 2.** 회귀 테스트 재실행 — **192/192** 확인 필수
+
+```bash
+rtk npm run test:regression
+```
+
+> ⚠️ B_Kai IMP-038-BK-FIX에서 CLAIMED 전이 테스트 15개 추가됨 (177→192). 192 미만 시 환경 문제 보고.
+
+**Step 3.** `scratch/IMP_PROGRESS.md` Phase A 완료 카운트 보정
+
+현재 `3 / 8`으로 되어있으나 확정(✅) 기준은 `1 / 8` (IMP-036만 ✅). 🔔 항목은 Aiden 확정 후 카운트 편입. 수정:
+- `**Phase A 완료**: 3 / 8` → `**Phase A 완료**: 1 / 8 (12.5%)`
+- 전체 합계: `6/53 (11.3%)` → `4/53 (7.5%)`
+- 합계 주석: `완료 6개(IMP-027·034a·036·037·038·048)` → `완료 4개(IMP-027·036·038·048)`
+
+**Step 4.** 파일 3개 커밋
+
+```
+[Gemini] chore: IMP-034a-RL-FIX-2 미커밋 문서 커밋 + IMP_PROGRESS 카운트 보정
+```
+
+**Step 5.** TASK_BOARD SECTION 1 🔔 행 상태 기재 후 커밋 (Step 4와 합치거나 별도)
+
+**Step 6.** ACTIVE_AGENT.md IDLE 확인 + HANDOFF_BOX 보완 메시지 추가
+
+### 완료 기준 (DoD)
+
+- [ ] `rtk npm run test:regression` **192/192** PASS 증적
+- [ ] `scratch/IMP_PROGRESS.md` Phase A `1 / 8`, 전체 `4/53 (7.5%)` 보정
+- [ ] `[Gemini] chore: IMP-034a-RL-FIX-2` 커밋 완료
+- [ ] TASK_BOARD SECTION 1 `IMP-034a-RL-FIX-2` 행 🔔 등록
+- [ ] HANDOFF_BOX.md 인계 메시지 추가
 
 ---
 
