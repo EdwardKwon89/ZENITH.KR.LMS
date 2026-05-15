@@ -61,7 +61,7 @@
 | ~~**ANA-IMP-DK-B**~~   | D_Kai  | Phase B CRITICAL 사전 GitNexus 분석 (IMP-019·039·040·042·043·044) | 2026-05-15 | ✅ FULL PASS |
 | ~~**IMP-027-BK**~~      | B_Kai  | [Phase F] 점검 모드 페이지 신규 구현                            | 2026-05-15 | ✅ FULL PASS |
 | ~~**IMP-034a-RL-FIX**~~   | Riley | [Phase A] IMP-034a 반려 조치 완료 (git rm 및 문서 갱신) | 2026-05-15 | ❌ CONDITIONAL PASS — 미커밋 + 177≠192 |
-| ~~**IMP-034a-RL-FIX-2**~~ | Riley | 2차 보완 완료 (보고서/카운트/커밋) | 2026-05-15 | 194/194 PASS |
+| ~~**IMP-034a-RL-FIX-2**~~ | Riley | 2차 보완 완료 (보고서/카운트/커밋) | 2026-05-15 | ✅ FULL PASS |
 
 ---
 
@@ -90,7 +90,7 @@
 | ~~**REG-IMP-RL**~~           | Aiden  | IMP-023~026 `post_launch_improvements.md` 등록      | 2026-05-13 | ✅ 완료     |
 | ~~**IMP-034a-RL + IMP-037-RL**~~ | Aiden  | [Phase A] `.env.local` Git 추적 제거 + Auth 보안 설정 | 2026-05-15 | ❌ CONDITIONAL PASS (Aiden 검증 오류 포함) |
 | ~~**IMP-034a-RL-FIX**~~ | Aiden  | [Phase A] IMP-034a FIX — 문서 갱신 | 2026-05-15 | ❌ CONDITIONAL PASS — 미커밋 + 177≠192 |
-| **IMP-034a-RL-FIX-2** | Aiden  | [Phase A] 미커밋 문서 커밋 + 회귀 테스트 192/192 재확인 | 2026-05-15 | 🔔 검토 대기 (194/194 PASS) |
+| ~~**IMP-034a-RL-FIX-2**~~ | Aiden  | [Phase A] 미커밋 문서 커밋 + 회귀 테스트 192/192 재확인 | 2026-05-15 | ✅ FULL PASS |
 
 ## 🆕 신규 지시 대기 (D_Kai 착수 가능)
 
