@@ -65,6 +65,7 @@
 | ~~**ANA-IMP-DK-C**~~      | D_Kai  | Phase C 사전 GitNexus 분석 (IMP-013·025·045·051·056) | 2026-05-15 | ✅ FULL PASS |
 | **IMP-042-043-BK**        | B_Kai  | [Phase B] updateOrder 수정 차단 + MASTERED Lock 강화 | 2026-05-15 | 199/199 PASS |
 | **IMP-035-RL**           | Riley | [Phase A] SECURITY DEFINER 함수 권한 검증 및 시정 | 2026-05-15 | 199/199 PASS |
+| **IMP-042-043-BK-FIX**   | B_Kai | [FIX] IMP_PROGRESS Phase B 카운트 보정 (3/10→1/10) | 2026-05-15 | ✅ FIX 완료 |
 
 
 ---
@@ -84,6 +85,7 @@
 | ~~**IMP-048-BK-FIX**~~ | [Phase E] 통계 쿼리 역할 필터 수정 + .gitignore 보완         | 2026-05-15 | ✅ FULL PASS        |
 | ~~**IMP-027-BK**~~         | [Phase F] 점검 모드 페이지 신규 구현                         | 2026-05-15 | ✅ FULL PASS        |
 | ~~**IMP-042-043-BK**~~         | [Phase B] updateOrder 수정 차단 + MASTERED Lock 강화 (동시 구현) | 2026-05-15 | ❌ CONDITIONAL PASS |
+| ~~**IMP-042-043-BK-FIX**~~    | IMP_PROGRESS Phase B 카운트 보정 (3/10 → 1/10)               | 2026-05-15 | ✅ FIX 완료       |
 | **IMP-042-043-BK-FIX**         | IMP_PROGRESS Phase B 카운트 보정 (3/10 → 1/10)               | 2026-05-15 | ⏳ 착수 가능       |
 
 ---
