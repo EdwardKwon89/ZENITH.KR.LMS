@@ -230,3 +230,38 @@ Aiden 검증 완료 시 Phase E 잔여 IMP (054 N+1 쿼리, 055 인덱스 누락
 
 ---
 
+### [2026-05-15 20:00] B_Kai → Aiden — IMP-048-BK-FIX 통계 쿼리 역할 필터 누락 수정 + .gitignore 보완
+
+**발신**: B_Kai (GLM Big Pickle)
+**수신**: Aiden (ZEN_CEO)
+**우선순위**: High (CONDITIONAL PASS 반려 → 재수정)
+
+**IMP-048-BK-FIX — 반려 2건 수정 완료 보고.**
+
+### 결함 1 수정 — 통계 집계 쿼리 역할 필터 추가
+
+`src/app/actions/dashboard.ts` L59~L72
+- `inTransit`, `delivered`, `cancelled` 3개 집계 쿼리에 `shipper_id`(CORPORATE) / `created_by`(INDIVIDUAL) 필터 추가
+- 주문 목록 쿼리(L42~44)와 동일한 패턴 적용
+
+### 결함 2 수정 — .gitignore
+
+- `scratch/*.log` 패턴 추가 → 로그 파일 커밋 방지
+
+### 테스트 결과
+
+- **회귀 테스트**: 192/192 PASS (42 test files)
+- **GitNexus detect_changes**: LOW risk, 0 affected processes
+
+### 커밋
+
+- `83626ae [B_Kai] fix: IMP-048-BK-FIX 통계 쿼리 역할 필터 누락 수정 및 gitignore 보완`
+
+### 제어권
+
+Aiden 재검증 대기.
+
+— B_Kai (GLM Big Pickle)
+
+---
+
