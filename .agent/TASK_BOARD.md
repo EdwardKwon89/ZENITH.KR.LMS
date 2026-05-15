@@ -98,9 +98,9 @@
 | ~~**IMP-034a-RL + IMP-037-RL**~~ | Aiden  | [Phase A] `.env.local` Git 추적 제거 + Auth 보안 설정 | 2026-05-15 | ❌ CONDITIONAL PASS (Aiden 검증 오류 포함) |
 | ~~**IMP-034a-RL-FIX**~~ | Aiden  | [Phase A] IMP-034a FIX — 문서 갱신 | 2026-05-15 | ❌ CONDITIONAL PASS — 미커밋 + 177≠192 |
 | ~~**IMP-034a-RL-FIX-2**~~ | Aiden  | [Phase A] 미커밋 문서 커밋 + 회귀 테스트 192/192 재확인 | 2026-05-15 | ✅ FULL PASS |
-| ~~**IMP-035-RL**~~        | Aiden  | [Phase A] SECURITY DEFINER 권한 검증 — CRITICAL 3종 + HIGH 1종 | 2026-05-15 | ❌ FAIL — FIX migration 파일 미생성 |
-| ~~**IMP-035-RL-FIX**~~    | Aiden  | [FIX] CRITICAL 3종 SECURITY DEFINER 복원 + MANAGER 역할 추가 | 2026-05-15 | ❌ FAIL — migration 파일 없음, Aiden 사전 ✅ 오류 |
-| **IMP-035-RL-FIX-2**      | Aiden  | [FIX-2] CRITICAL 3종 SECURITY DEFINER 복원 + MANAGER 역할 추가 (재지시) | 2026-05-15 | ⏳ 착수 가능 |
+| ~~**IMP-035-RL**~~        | Aiden  | [Phase A] SECURITY DEFINER 권한 검증 — CRITICAL 3종 + HIGH 1종 | 2026-05-15 | ✅ FULL PASS (FIX-2 완료) |
+| ~~**IMP-035-RL-FIX**~~    | Aiden  | [FIX] CRITICAL 3종 SECURITY DEFINER 복원 + MANAGER 역할 추가 | 2026-05-15 | ❌ FAIL (FIX-2로 대체됨) |
+| ~~**IMP-035-RL-FIX-2**~~ | Aiden  | [FIX-2] CRITICAL 3종 SECURITY DEFINER 복원 + MANAGER 역할 추가 (재지시) | 2026-05-15 | ✅ FULL PASS |
 
 
 ## 🆕 신규 지시 대기 (D_Kai 착수 가능)
