@@ -64,7 +64,8 @@
 | ~~**IMP-034a-RL-FIX-2**~~ | Riley | 2차 보완 완료 (보고서/카운트/커밋) | 2026-05-15 | ✅ FULL PASS |
 | ~~**ANA-IMP-DK-C**~~      | D_Kai  | Phase C 사전 GitNexus 분석 (IMP-013·025·045·051·056) | 2026-05-15 | ✅ FULL PASS |
 | ~~**IMP-042-043-BK**~~    | B_Kai  | [Phase B] updateOrder 수정 차단 + MASTERED Lock 강화 | 2026-05-15 | ✅ FULL PASS (FIX 포함) |
-| ~~**IMP-035-RL**~~        | Riley  | [Phase A] SECURITY DEFINER 함수 권한 검증 및 시정    | 2026-05-15 | ❌ FAIL — FIX migration 파일 미생성 (재지시: IMP-035-RL-FIX-2) |
+| ~~**IMP-035-RL**~~        | Riley  | [Phase A] SECURITY DEFINER 함수 권한 검증 및 시정    | 2026-05-15 | ✅ FULL PASS (FIX-2 완료) |
+| ~~**IMP-035-RL-FIX-2**~~ | Riley  | [FIX-2] CRITICAL 3종 SECURITY DEFINER 복원 + MANAGER | 2026-05-15 | ✅ FULL PASS |
 | ~~**IMP-042-043-BK-FIX**~~| B_Kai  | [FIX] IMP_PROGRESS Phase B 카운트 보정 (3/10→1/10) | 2026-05-15 | ✅ FULL PASS            |
 
 
