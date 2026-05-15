@@ -91,6 +91,7 @@
 | ~~**IMP-034a-RL + IMP-037-RL**~~ | Aiden  | [Phase A] `.env.local` Git 추적 제거 + Auth 보안 설정 | 2026-05-15 | ❌ CONDITIONAL PASS (Aiden 검증 오류 포함) |
 | ~~**IMP-034a-RL-FIX**~~ | Aiden  | [Phase A] IMP-034a FIX — 문서 갱신 | 2026-05-15 | ❌ CONDITIONAL PASS — 미커밋 + 177≠192 |
 | ~~**IMP-034a-RL-FIX-2**~~ | Aiden  | [Phase A] 미커밋 문서 커밋 + 회귀 테스트 192/192 재확인 | 2026-05-15 | ✅ FULL PASS |
+| **IMP-035-RL** | Aiden | [Phase A] SECURITY DEFINER 함수 권한 검증 — CRITICAL 3종 + HIGH 1종 조치 | 2026-05-15 | ⏳ 착수 가능 |
 
 ## 🆕 신규 지시 대기 (D_Kai 착수 가능)
 
@@ -407,11 +408,113 @@ rtk npm run test:regression
 
 ### 완료 기준 (DoD)
 
-- [ ] `rtk npm run test:regression` **192/192** PASS 증적
-- [ ] `scratch/IMP_PROGRESS.md` Phase A `1 / 8`, 전체 `4/53 (7.5%)` 보정
-- [ ] `[Gemini] chore: IMP-034a-RL-FIX-2` 커밋 완료
-- [ ] TASK_BOARD SECTION 1 `IMP-034a-RL-FIX-2` 행 🔔 등록
-- [ ] HANDOFF_BOX.md 인계 메시지 추가
+- [x] `rtk npm run test:regression` **194/194** PASS 증적 ✅
+- [x] `scratch/IMP_PROGRESS.md` Phase A `1 / 8`, 전체 `4/53 (7.5%)` 보정 ✅
+- [x] `[Gemini] chore: IMP-034a-RL-FIX-2` 커밋 완료 ✅
+- [x] TASK_BOARD SECTION 1 `IMP-034a-RL-FIX-2` 행 🔔 등록 ✅
+- [x] HANDOFF_BOX.md 인계 메시지 추가 ✅
+
+## ✅ FULL PASS 판정 (2026-05-15 Aiden)
+
+---
+
+## 📨 Aiden → Riley | IMP-035-RL — [Phase A] SECURITY DEFINER 함수 권한 검증
+
+> **수행 주체**: Riley (Gemini) | **검증 주체**: Aiden (Claude)
+> **유형**: 보안 수정 CRITICAL | **지시일**: 2026-05-15 | **예상 공수**: 2~3 MD
+> **사전 분석**: `scratch/ANA_PhaseA_DKai_20260515.md` — D_Kai IMP-035 분석 필독
+> **C1 Critical Path**: IMP-035 → IMP-026 → IMP-041 → IMP-057
+
+### 배경
+
+`supabase/migrations/`에 SECURITY DEFINER로 생성된 함수 약 12개가 확인됨. SECURITY DEFINER 함수는 RLS를 우회하여 postgres 권한으로 실행되므로 내부 권한 검증이 필수이나, CRITICAL 3종 및 HIGH 1종이 권한 검증 로직 전무 또는 주석만 존재.
+
+### 작업 지시
+
+**Step 1.** ACTIVE_AGENT.md → Status: BUSY 갱신
+
+**Step 2.** D_Kai 분석 확인
+
+```
+scratch/ANA_PhaseA_DKai_20260515.md §IMP-035
+```
+
+**Step 3. CRITICAL 3종 처리** — 신규 migration 파일 작성
+
+| 함수명 | 현재 | 조치 |
+|:-------|:----:|:----:|
+| `approve_organization(UUID)` | ❌ 주석만 | `get_my_role()` 호출 + ADMIN/MANAGER 검증 추가 |
+| `reject_organization(UUID, text)` | ❌ 없음 | 동일 |
+| `request_organization_supplement(UUID, text)` | ❌ 없음 | 동일 |
+
+권한 검증 패턴 (`get_my_role()` 헬퍼 재사용):
+
+```sql
+DECLARE
+  v_role TEXT := get_my_role();
+BEGIN
+  IF v_role NOT IN ('ADMIN', 'MANAGER', 'ZENITH_SUPER_ADMIN') THEN
+    RAISE EXCEPTION 'Permission denied: ADMIN or MANAGER role required';
+  END IF;
+  -- 기존 로직
+END;
+```
+
+**Step 4. HIGH 1종 처리** — `calculate_order_costs(UUID)`
+
+- SECURITY DEFINER 불필요 (트리거 호출, 별도 권한 불필요)
+- `SECURITY INVOKER`로 전환 (ALTER FUNCTION 또는 CREATE OR REPLACE)
+
+**Step 5. LOW/SAFE 목록 확인만** (수정 금지)
+
+`handle_new_user()`, `get_my_role()`, `handle_updated_at()`, `rls_auto_enable()` — 트리거 전용 또는 의도적 SECURITY DEFINER. 변경 없음.
+
+**Step 6. 신규 migration 파일 작성**
+
+```
+supabase/migrations/YYYYMMDDHHMMSS_fix_security_definer_permissions.sql
+```
+
+형식: `CREATE OR REPLACE FUNCTION ... SECURITY DEFINER` (권한 검증 추가 버전) 또는 `ALTER FUNCTION ... SECURITY INVOKER`
+
+**Step 7.** GitNexus impact analysis
+
+```
+gitnexus_impact({target: "approve_organization", direction: "upstream"})
+gitnexus_impact({target: "calculate_order_costs", direction: "upstream"})
+```
+
+HIGH/CRITICAL 결과 시 Aiden 보고 후 지시 대기.
+
+**Step 8.** 로컬 Supabase migration 적용 및 회귀 테스트
+
+```bash
+rtk supabase db reset   # 또는 supabase migration up
+rtk npm run test:regression
+```
+
+**Step 9.** GitNexus detect_changes() 실행
+
+**Step 10.** 커밋
+
+```
+[Gemini] fix: IMP-035 SECURITY DEFINER 함수 권한 검증 추가 (CRITICAL 3종 + HIGH 1종)
+```
+
+**Step 11.** ACTIVE_AGENT.md → IDLE / TASK_BOARD SECTION 1 🔔 등록 / IMP_PROGRESS.md IMP-035 `🔔` 갱신 / HANDOFF_BOX 인계 메시지 작성
+
+### 완료 기준 (DoD)
+
+- [ ] `approve_organization()` / `reject_organization()` / `request_organization_supplement()` — 권한 검증 로직 추가 확인
+- [ ] `calculate_order_costs()` — SECURITY INVOKER 전환 확인
+- [ ] migration 파일 작성 완료 (`YYYYMMDDHHMMSS_fix_security_definer_permissions.sql`)
+- [ ] GitNexus impact 결과 보고 (CRITICAL/HIGH 시 Aiden 승인)
+- [ ] `rtk npm run test:regression` 전체 PASS 증적
+- [ ] `[Gemini] fix: IMP-035` 커밋 완료
+- [ ] `scratch/IMP_PROGRESS.md` IMP-035 행 `🔔` 갱신
+- [ ] ACTIVE_AGENT.md IDLE 초기화
+- [ ] TASK_BOARD SECTION 1 🔔 검토 대기 등록
+- [ ] HANDOFF_BOX.md 인계 메시지 작성
 
 ---
 
