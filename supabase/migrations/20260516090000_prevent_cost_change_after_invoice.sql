@@ -12,7 +12,7 @@ BEGIN
   IF OLD.invoice_id IS NOT NULL THEN
     RAISE EXCEPTION 'Cannot modify order costs after invoice has been issued (invoice_id: %)', OLD.invoice_id;
   END IF;
-  RETURN NEW;
+  RETURN OLD;
 END;
 $$;
 
