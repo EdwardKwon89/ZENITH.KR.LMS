@@ -28,16 +28,16 @@
 
 | IMP | 내용 | Agent | 상태 | 완료일 |
 |:---:|:-----|:-----:|:----:|:------:|
-| 034a | `.env.local` Git 추적 제거 | Riley | 🔔 | 2026-05-15 |
+| 034a | `.env.local` Git 추적 제거 | Riley | ✅ | 2026-05-15 |
 | 034b | API 키 재발급 | Edward | ⬜ | — |
 | 035 | SECURITY DEFINER 38개 권한 검증 | Aiden+Riley | ⬜ | — |
 | 036 | Status Machine MANAGER 역할 추가 | B_Kai | ✅ | 2026-05-15 |
-| 037 | Supabase Auth 보안 설정 | Riley | 🔔 | 2026-05-15 |
+| 037 | Supabase Auth 보안 설정 | Riley | ✅ | 2026-05-15 |
 | 026 | RLS 비즈니스 규칙 통합 (SQL 함수화) | Aiden+Riley | ⬜ | — |
 | 041 | Storage 정책 조직 멤버십 검증 | Riley | ⬜ | — |
 | 057 | `zen_role_permissions` SELECT 제한 | Riley | ⬜ | — |
 
-**Phase A 완료**: 1 / 8 (12.5%)
+**Phase A 완료**: 3 / 8 (37.5%)
 
 ---
 
@@ -170,16 +170,16 @@
 
 | Phase | 완료 | 전체 | 진행률 |
 |:-----:|:----:|:----:|:------:|
-| A | 1 | 8 | 12.5% |
+| A | 3 | 8 | 37.5% |
 | B | 1 | 10 | 10% |
 | C | 0 | 7 | 0% |
 | D | 0 | 8 | 0% |
 | E | 1 | 7 | 14.3% |
 | F | 1 | 12 | 8.3% |
 | G | 0 | 1 | 0% |
-| **합계** | **4** | **53** | **7.5%** |
+| **합계** | **6** | **53** | **11.3%** |
 
-> ⚠️ 합계 53개 = 완료 4개(IMP-027·036·038·048) + 미착수 49개 (IMP-018 제외)
+> ⚠️ 합계 53개 = 완료 6개(IMP-027·034a·036·037·038·048) + 미착수 47개 (IMP-018 제외)
 
 ---
 
@@ -191,4 +191,5 @@
 | 2026-05-15 | B_Kai (GLM Big Pickle) | IMP-038 완료 — CLAIMED Enum 등록 + Status Machine 전이 규칙 + claims.ts canChangeStatus 연동 |
 | 2026-05-15 | Aiden (Claude) | IMP-048 ✅ PASS 확정 — 대시보드 MOCK_ORDERS 제거 + getDashboardStats() 실DB 연동 + 통계 쿼리 역할 필터 보완 |
 | 2026-05-15 | Aiden (Claude) | IMP-027 ✅ PASS 확정 — /maintenance 페이지 신규 + middleware 루프 방지 + i18n ko/en 완비 / IMP-034a ❌ 반려 — git rm --cached 미실행 |
+| 2026-05-15 | Aiden (Claude) | IMP-034a·037 ✅ FULL PASS 확정 — .gitignore 명시 + Auth 설정 강화. (※ .env.local 최초부터 미추적 — Aiden 초기 반려 오류 인정) 194/194 PASS |
 | 2026-05-15 | Riley (Gemini) | IMP-034a·037 보완 완료 — .env.local 추적 해제(ls-files 비어있음 확인) + Auth 설정 강화 |
