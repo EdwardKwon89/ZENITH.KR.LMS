@@ -1,7 +1,7 @@
 # Multi-Agent Task Board
 
 > **프로젝트:** ZENITH_LMS
-> **업데이트:** 2026-05-15 (KST) — B_Kai 임시 재활성화 (역량 평가 목적) / IMP-PLAN-BK-V23 + IMP-036-BK 지시 등록
+> **업데이트:** 2026-05-15 (KST) — IMP-035-RL 착수 대기 중 / B_Kai IMP-042+043-BK 신규 지시 / D_Kai ANA-IMP-DK-C 신규 지시
 > **운영 원칙:**
 >
 > - 각 에이전트는 작업 완료 시 **SECTION 1 상태 대시보드를 최우선 갱신**한 뒤 담당 SECTION 상세를 업데이트한다.
@@ -78,7 +78,8 @@
 | ~~**IMP-038-BK-FIX**~~      | IMP-038 보완 — R-09 테스트 케이스 추가      | 2026-05-15 | ✅ 보완 완료        |
 | ~~**IMP-048-BK**~~     | [Phase E] Mock 데이터 제거 (대시보드)                        | 2026-05-15 | ❌ CONDITIONAL PASS |
 | ~~**IMP-048-BK-FIX**~~ | [Phase E] 통계 쿼리 역할 필터 수정 + .gitignore 보완         | 2026-05-15 | ✅ FULL PASS        |
-| ~~**IMP-027-BK**~~         | [Phase F] 점검 모드 페이지 신규 구현                         | 2026-05-15 | 🔔 검토 대기        |
+| ~~**IMP-027-BK**~~         | [Phase F] 점검 모드 페이지 신규 구현                         | 2026-05-15 | ✅ FULL PASS        |
+| **IMP-042-043-BK**         | [Phase B] updateOrder 수정 차단 + MASTERED Lock 강화 (동시 구현) | 2026-05-15 | ⏳ 착수 가능     |
 
 ---
 
@@ -102,7 +103,8 @@
 | ~~**EXP-IMP-DK**~~  | —     | 전체 코드베이스 IMP 도출 (성능 실험)                                            | 2026-05-13                  | ✅ **PASS**              |
 | ~~**ANA-IMP-DK**~~  | —     | Phase A CRITICAL 사전 GitNexus 분석 (IMP-035·026·041)                          | 2026-05-15                  | 🔔 **Aiden 검토 대기**   |
 | ~~**ANA-IMP-DK-FIX**~~ | —  | TASK_BOARD ANA-IMP-DK 상태 🔔 갱신                                              | 2026-05-15                  | ✅ FULL PASS             |
-| ~~**ANA-IMP-DK-B**~~       | —  | Phase B CRITICAL 사전 GitNexus 분석 (IMP-019·039·040·042·043·044)               | 2026-05-15                  | 🔔 **Aiden 검토 대기** |
+| ~~**ANA-IMP-DK-B**~~       | —  | Phase B CRITICAL 사전 GitNexus 분석 (IMP-019·039·040·042·043·044)               | 2026-05-15                  | ✅ **FULL PASS**       |
+| **ANA-IMP-DK-C**           | —  | Phase C 사전 GitNexus 분석 (IMP-013·025·045·051·056)                             | 2026-05-15                  | ⏳ **착수 가능**       |
 | ~~**GOV-001**~~     | 1     | ACTIVE_AGENT.md IDLE 강제 초기화                                                | 2026-05-13                  | ✅ **Aiden PASS**        |
 | ~~**GOV-002**~~     | 1     | `~/.claude/settings.json` PostToolUse GitNexus Hook 제거                        | 2026-05-13                  | ✅ **Aiden PASS**        |
 | ~~**GOV-003**~~     | 2     | `GEMINI.md` + `AGENTS.md` Task 완료 DoD에 IDLE 초기화 추가                      | 2026-05-13                  | ✅ **Aiden PASS**        |
@@ -1133,6 +1135,99 @@ gitnexus_impact({target: "updateOrderStatus", direction: "upstream"})
 
 ---
 
+## 📨 Aiden → D_Kai | ANA-IMP-DK-C — Phase C 사전 GitNexus 분석
+
+> **수행 주체**: D_Kai (OpenCode) | **검증 주체**: Aiden (Claude)
+> **유형**: 순수 분석 (코드 수정 없음) | **지시일**: 2026-05-15 | **우선순위**: High
+> **병행 가능**: Riley IMP-035 및 B_Kai IMP-042-043과 동시 진행 가능
+
+### 배경
+
+Riley가 Phase A(C1 Critical Path: IMP-035 → 026 → 041 → 057) 완료 후 Phase C로 진입합니다.
+Phase C의 대표 항목인 IMP-013(console→logger 53개 파일)은 blast radius가 가장 넓습니다.
+사전 파악으로 Riley 착수 속도와 안전성을 높입니다.
+
+### 분석 대상
+
+#### 1. IMP-013 — console→logger 교체 (53개 파일)
+
+```
+gitnexus_query({query: "console.log console.error console.warn"})
+```
+
+보고 항목:
+- console 사용 파일 목록 및 주요 호출 패턴 (서버/클라이언트 분리)
+- 교체 시 테스트 코드·미들웨어·라이브러리 영향 범위
+- 권장 logger 라이브러리 또는 기존 유틸 확인
+
+#### 2. IMP-025 — Server Actions 에러 래퍼
+
+```
+gitnexus_query({query: "Server Actions try catch error"})
+gitnexus_query({query: "actions error handling"})
+```
+
+보고 항목:
+- 에러 래퍼가 없는 Server Actions 목록 및 영향 UI 컴포넌트
+- 표준 에러 래퍼 패턴 도입 시 변경 파일 수 추정
+
+#### 3. IMP-045 — 무제한 리스트 페이지네이션 (18곳)
+
+```
+gitnexus_query({query: "pagination limit offset list"})
+```
+
+보고 항목:
+- 페이지네이션 없이 전체 조회하는 쿼리 호출 지점 목록
+- 영향 테이블 규모 (rows 많은 순)
+- 페이지네이션 추가 시 UI 컴포넌트 변경 범위
+
+#### 4. IMP-051 — 감사 추적 (마스터/인보이스/통관)
+
+```
+gitnexus_query({query: "audit log master invoice customs"})
+gitnexus_impact({target: "issueInvoicePdf", direction: "upstream"})
+```
+
+보고 항목:
+- 감사 추적이 없는 핵심 액션 목록
+- audit_logs 테이블 존재 여부 및 현재 사용 현황
+- 감사 추적 추가 시 영향 파일 수
+
+#### 5. IMP-056 — 이메일 HTML 인젝션 방지
+
+```
+gitnexus_query({query: "email template html sendEmail"})
+```
+
+보고 항목:
+- HTML 이메일 생성 경로 목록
+- 사용자 입력이 이메일 body에 직접 삽입되는 지점 식별
+- 이스케이프 처리 현황
+
+### 결과물 형식
+
+`scratch/ANA_PhaseC_DKai_20260515.md` 파일로 제출. ANA-IMP-DK 동일 구조:
+
+```
+## IMP-013 분석 결과
+- Blast Radius: ...
+- D_Kai 주의사항: ...
+```
+
+### 완료 기준 (DoD)
+
+- [ ] IMP-013·025·045·051·056 각 GitNexus 분석 결과 포함
+- [ ] 각 IMP별 blast radius 등급 명시
+- [ ] Riley 구현 시 주의사항 항목 명시
+- [ ] `scratch/ANA_PhaseC_DKai_20260515.md` 파일 제출 후 커밋
+- [ ] 커밋: `[OpenCode] docs: ANA-IMP-DK-C Phase C 사전 GitNexus 분석 (IMP-013·025·045·051·056)`
+- [ ] 🔔 TASK_BOARD SECTION 1 검토 대기 등록
+
+> **주의**: 분석 중 코드 결함 발견 시 직접 수정하지 말고 분석 결과에 기록만 합니다.
+
+---
+
 # SECTION 6 — Ring 2.6 1T 작업 상세
 
 > **에이전트**: Ring 2.6 1T (inclusionAI / Ant Group) | **역할**: 성능 벤치마크 실증 실험
@@ -1738,6 +1833,97 @@ gitnexus_detect_changes()
 - [ ] GitNexus detect_changes() 결과 보고
 - [ ] `[B_Kai] feat: IMP-027` 커밋 완료
 - [ ] `scratch/IMP_PROGRESS.md` IMP-027 행 상태 `🔔` 갱신
+- [ ] ACTIVE_AGENT.md IDLE 초기화
+- [ ] TASK_BOARD SECTION 1 🔔 검토 대기 등록
+- [ ] HANDOFF_BOX.md 인계 메시지 작성
+
+---
+
+## 📨 Aiden → B_Kai | IMP-042-043-BK — [Phase B] updateOrder 수정 차단 + MASTERED Lock 강화
+
+> **수행 주체**: B_Kai (GLM Big Pickle) | **검증 주체**: Aiden (Claude)
+> **유형**: 보안·데이터 무결성 수정 MEDIUM | **지시일**: 2026-05-15 | **예상 공수**: 1~1.5 MD
+> **사전 분석**: `scratch/ANA_PhaseB_DKai_20260515.md` §IMP-042·043 필독
+> **동시 수정 권장**: D_Kai 분석 결과 — "isOrderEditable()이 이미 MASTERED를 포함하므로 IMP-042 1줄 추가만으로 IMP-043 updateOrder 경로 자연 차단 — 두 IMP 동시 수정 권장"
+
+### 배경
+
+- **IMP-042**: `updateOrder()`에 `isOrderEditable()` 호출이 전무 — WAREHOUSED·PACKED·RELEASED 등 비편집 상태에서도 수정 가능
+- **IMP-043**: MASTERED 상태의 오더에 대해 `addIncidentFee()`, `createClaim()` 등 4개 이상 우회 경로 존재
+
+### 작업 지시
+
+**Step 1.** ACTIVE_AGENT.md → Status: BUSY 갱신
+
+**Step 2.** GitNexus impact analysis 실행
+
+```
+gitnexus_impact({target: "updateOrder", direction: "upstream"})
+gitnexus_impact({target: "addIncidentFee", direction: "upstream"})
+```
+
+HIGH/CRITICAL 결과 시 Aiden 보고 후 지시 대기.
+
+**Step 3. IMP-042 수정** — `src/app/actions/orders.ts`의 `updateOrder()` 함수 선두에 추가:
+
+```typescript
+if (!isOrderEditable(order.status)) {
+  throw new Error(`Order ${orderId} cannot be edited in status: ${order.status}`);
+}
+```
+
+> `isOrderEditable()`은 `src/lib/logistics/status-machine.ts:76-87`에 이미 존재. import 추가 필요.
+
+**Step 4. IMP-043 수정** — MASTERED Lock 헬퍼 생성 및 적용
+
+`src/lib/logistics/status-machine.ts`에 헬퍼 추가:
+
+```typescript
+export function isMasteredStatus(status: OrderStatus): boolean {
+  return status === OrderStatus.MASTERED;
+}
+```
+
+다음 함수 선두에 MASTERED 체크 추가:
+- `addIncidentFee()` (`claims.ts`) — 인보이스 발행 후 사고비 추가 차단
+- `createClaim()` (`claims.ts`) — MASTERED 오더 클레임 등록 차단
+
+> `updateOrder()` MASTERED 차단은 Step 3의 `isOrderEditable()`이 이미 포함하므로 중복 불필요.
+> `dissolveMasterOrder()`는 MASTERED 해체 전용 — 별도 IMP로 분리 처리 (이번 범위 외).
+
+**Step 5.** 회귀 테스트
+
+```bash
+rtk npm run test:regression
+```
+
+**Step 6.** 신규 테스트 케이스 추가 (R-09 의무)
+
+- `updateOrder()` WAREHOUSED 상태 → 수정 거부 케이스
+- `addIncidentFee()` MASTERED 상태 → 예외 발생 케이스
+- `createClaim()` MASTERED 상태 → 예외 발생 케이스
+
+**Step 7.** GitNexus detect_changes() 실행
+
+**Step 8.** 커밋
+
+```
+[B_Kai] fix: IMP-042+043 updateOrder 수정 차단 + MASTERED Lock 강화
+```
+
+**Step 9.** ACTIVE_AGENT.md → IDLE / TASK_BOARD SECTION 1 🔔 등록 / IMP_PROGRESS.md IMP-042·043 행 `🔔` 갱신 / HANDOFF_BOX 인계 메시지 작성
+
+### 완료 기준 (DoD)
+
+- [ ] `updateOrder()` 선두에 `isOrderEditable()` 체크 추가 확인
+- [ ] `isMasteredStatus()` 헬퍼 (또는 동등 로직) `status-machine.ts`에 추가
+- [ ] `addIncidentFee()` MASTERED 체크 추가 확인
+- [ ] `createClaim()` MASTERED 체크 추가 확인
+- [ ] R-09 신규 테스트 케이스 3건 이상 추가
+- [ ] `rtk npm run test:regression` 전체 PASS 증적
+- [ ] GitNexus impact + detect_changes() 결과 보고
+- [ ] `[B_Kai] fix: IMP-042+043` 커밋 완료
+- [ ] `scratch/IMP_PROGRESS.md` IMP-042·043 행 `🔔` 갱신
 - [ ] ACTIVE_AGENT.md IDLE 초기화
 - [ ] TASK_BOARD SECTION 1 🔔 검토 대기 등록
 - [ ] HANDOFF_BOX.md 인계 메시지 작성
