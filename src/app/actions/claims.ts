@@ -143,32 +143,38 @@ export async function updateClaimStatus(
   return { success: true };
 }
 
-/**
- * [PH8-BE-01] 사고 비용을 등록하고 인보이스 금액을 차감합니다.
- */
-export async function addIncidentFee(payload: {
-  claim_id: string;
-  invoice_id: string;
-  fee_amount: number;
-  currency: string;
-  description?: string;
-}) {
-  const { supabase, user } = await validateAdminAction();
+  /**
+   * [PH8-BE-01] 사고 비용을 등록하고 인보이스 금액을 차감합니다.
+   *
+   * 인보이스 발행 후 비용 변경 차단 정책 (IMP-044-BK):
+   * - zen_order_costs는 DB 트리거(fn_prevent_cost_change_after_invoice)로 보호
+   * - addIncidentFee()는 zen_invoices.total_amount를 직접 수정하므로 트리거 대상 아님
+   * - 대신 MASTERED Lock(IMP-042-043-BK)으로 사고비 등록 시점 제어
+   * - MASTERED 이전이면 인보이스 발행 후에도 사고비 등록 허용 (의도된 설계)
+   */
+  export async function addIncidentFee(payload: {
+    claim_id: string;
+    invoice_id: string;
+    fee_amount: number;
+    currency: string;
+    description?: string;
+  }) {
+    const { supabase, user } = await validateAdminAction();
 
-  const { data: claimData } = await supabase
-    .from("zen_claims")
-    .select("order_id")
-    .eq("id", payload.claim_id)
-    .single();
-  if (!claimData) throw new Error("Claim not found");
-  const { data: orderData } = await supabase
-    .from("zen_orders")
-    .select("status")
-    .eq("id", claimData.order_id)
-    .single();
-  if (orderData && isMasteredStatus(orderData.status as OrderStatus)) {
-    throw new Error("Cannot add incident fee to a MASTERED order.");
-  }
+    const { data: claimData } = await supabase
+      .from("zen_claims")
+      .select("order_id")
+      .eq("id", payload.claim_id)
+      .single();
+    if (!claimData) throw new Error("Claim not found");
+    const { data: orderData } = await supabase
+      .from("zen_orders")
+      .select("status")
+      .eq("id", claimData.order_id)
+      .single();
+    if (orderData && isMasteredStatus(orderData.status as OrderStatus)) {
+      throw new Error("Cannot add incident fee to a MASTERED order.");
+    }
 
   // 1. 사고 비용 기록
   const { data: fee, error: feeError } = await supabase

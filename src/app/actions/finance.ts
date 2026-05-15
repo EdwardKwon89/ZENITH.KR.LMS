@@ -78,11 +78,22 @@ export async function updatePaymentStatus(
 
 /**
  * 특정 오더의 비용을 계산합니다. (UI 수동 호출용)
+ * IMP-044-BK: 인보이스 발행 후 재계산 차단 — invoice_id가 설정된 cost가 있으면 거부
  */
 export async function calculateSettlementAction(orderId: string) {
   console.log(`[Action] calculateSettlementAction started for order: ${orderId}`);
   const { supabase, profile } = await validateAdminAction();
   console.log(`[Action] User Profile: ${profile.email}, Role: ${profile.role}`);
+
+  // 인보이스 발행 여부 확인 (JS-side 필터: mock 호환성)
+  const { data: existingCosts, error: costsCheckError } = await supabase
+    .from('zen_order_costs')
+    .select('id, invoice_id')
+    .eq('order_id', orderId);
+  if (costsCheckError) throw new Error(`비용 확인 실패: ${costsCheckError.message}`);
+  if (existingCosts?.some(c => c.invoice_id !== null)) {
+    throw new Error('Cannot recalculate costs after invoice has been issued.');
+  }
   
   const engine = new SettlementEngine();
   const result = await engine.calculateOrderCosts(orderId);
