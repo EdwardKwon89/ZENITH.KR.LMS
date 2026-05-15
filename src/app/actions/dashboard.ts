@@ -56,20 +56,38 @@ export async function getDashboardStats() {
   }
   const { count: totalOrders } = await statsQuery;
 
-  const { count: inTransit } = await supabase
+  let inTransitQuery = supabase
     .from("zen_orders")
     .select("status", { count: "exact", head: true })
     .eq("status", "IN_TRANSIT");
+  if (userProfile.role === USER_ROLES.CORPORATE) {
+    inTransitQuery = inTransitQuery.eq("shipper_id", userProfile.org_id);
+  } else if (userProfile.role === USER_ROLES.INDIVIDUAL) {
+    inTransitQuery = inTransitQuery.eq("created_by", user.id);
+  }
+  const { count: inTransit } = await inTransitQuery;
 
-  const { count: delivered } = await supabase
+  let deliveredQuery = supabase
     .from("zen_orders")
     .select("status", { count: "exact", head: true })
     .eq("status", "DELIVERED");
+  if (userProfile.role === USER_ROLES.CORPORATE) {
+    deliveredQuery = deliveredQuery.eq("shipper_id", userProfile.org_id);
+  } else if (userProfile.role === USER_ROLES.INDIVIDUAL) {
+    deliveredQuery = deliveredQuery.eq("created_by", user.id);
+  }
+  const { count: delivered } = await deliveredQuery;
 
-  const { count: cancelled } = await supabase
+  let cancelledQuery = supabase
     .from("zen_orders")
     .select("status", { count: "exact", head: true })
     .eq("status", "CANCELED");
+  if (userProfile.role === USER_ROLES.CORPORATE) {
+    cancelledQuery = cancelledQuery.eq("shipper_id", userProfile.org_id);
+  } else if (userProfile.role === USER_ROLES.INDIVIDUAL) {
+    cancelledQuery = cancelledQuery.eq("created_by", user.id);
+  }
+  const { count: cancelled } = await cancelledQuery;
 
   const mapped = (orders || []).map((o: any) => ({
     id: o.id,
