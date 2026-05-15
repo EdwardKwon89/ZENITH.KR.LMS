@@ -57,7 +57,8 @@
 | ~~**IMP-038-BK-FIX**~~  | B_Kai  | R-09 테스트 케이스 추가 + IMP_PROGRESS 주석 보완           | 2026-05-15 | ✅ FULL PASS |
 | ~~**ANA-IMP-DK**~~      | D_Kai  | Phase A CRITICAL 사전 GitNexus 분석 (IMP-035·026·041)       | 2026-05-15 | ✅ FULL PASS |
 | ~~**IMP-048-BK**~~      | B_Kai  | [Phase E] Mock 데이터 제거 (대시보드)                        | 2026-05-15 | ❌ CONDITIONAL PASS |
-| **IMP-048-BK-FIX**      | B_Kai  | [FIX] 통계 쿼리 역할 필터 + .gitignore 보완                 | 2026-05-15 | 192/192 PASS |
+| ~~**IMP-048-BK-FIX**~~  | B_Kai  | [FIX] 통계 쿼리 역할 필터 + .gitignore 보완                 | 2026-05-15 | ✅ FULL PASS |
+| **ANA-IMP-DK-B**       | D_Kai  | Phase B CRITICAL 사전 GitNexus 분석 (IMP-019·039·040·042·043·044) | 2026-05-15 | 🔔 Aiden 검토 대기 |
 
 ---
 
@@ -73,16 +74,18 @@
 | ~~**IMP-038-BK**~~      | [Phase B] CLAIMED OrderStatus 정식 등록     | 2026-05-15 | 🔶 CONDITIONAL PASS |
 | ~~**IMP-038-BK-FIX**~~      | IMP-038 보완 — R-09 테스트 케이스 추가      | 2026-05-15 | ✅ 보완 완료        |
 | ~~**IMP-048-BK**~~     | [Phase E] Mock 데이터 제거 (대시보드)                        | 2026-05-15 | ❌ CONDITIONAL PASS |
-| **IMP-048-BK-FIX**     | [Phase E] 통계 쿼리 역할 필터 수정 + .gitignore 보완         | 2026-05-15 | 🔔 검토 대기        |
+| ~~**IMP-048-BK-FIX**~~ | [Phase E] 통계 쿼리 역할 필터 수정 + .gitignore 보완         | 2026-05-15 | ✅ FULL PASS        |
+| **IMP-027-BK**         | [Phase F] 점검 모드 페이지 신규 구현                         | 2026-05-15 | ⏳ 착수 가능        |
 
 ---
 
 ## 🆕 신규 지시 대기 (Riley 착수 가능)
 
-| Task ID            | 지시자 | Task 명                                        | 지시일     |
-| :----------------- | :----- | :--------------------------------------------- | :--------- |
-| ~~**EXP-IMP-RL**~~ | Aiden  | 전체 코드베이스 IMP 도출 (성능 실험)           | 2026-05-13 |
-| ~~**REG-IMP-RL**~~ | Aiden  | IMP-023~026 `post_launch_improvements.md` 등록 | ✅ 완료    |
+| Task ID                      | 지시자 | Task 명                                             | 지시일     | 상태        |
+| :--------------------------- | :----- | :-------------------------------------------------- | :--------- | :---------: |
+| ~~**EXP-IMP-RL**~~           | Aiden  | 전체 코드베이스 IMP 도출 (성능 실험)                | 2026-05-13 | ✅ 완료     |
+| ~~**REG-IMP-RL**~~           | Aiden  | IMP-023~026 `post_launch_improvements.md` 등록      | 2026-05-13 | ✅ 완료     |
+| **IMP-034a-RL + IMP-037-RL** | Aiden  | [Phase A] `.env.local` Git 추적 제거 + Auth 보안 설정 | 2026-05-15 | ⏳ 착수 가능 |
 
 ## 🆕 신규 지시 대기 (D_Kai 착수 가능)
 
@@ -93,7 +96,7 @@
 | ~~**EXP-IMP-DK**~~  | —     | 전체 코드베이스 IMP 도출 (성능 실험)                                            | 2026-05-13                  | ✅ **PASS**              |
 | ~~**ANA-IMP-DK**~~  | —     | Phase A CRITICAL 사전 GitNexus 분석 (IMP-035·026·041)                          | 2026-05-15                  | 🔔 **Aiden 검토 대기**   |
 | ~~**ANA-IMP-DK-FIX**~~ | —  | TASK_BOARD ANA-IMP-DK 상태 🔔 갱신                                              | 2026-05-15                  | ✅ FULL PASS             |
-| **ANA-IMP-DK-B**       | —  | Phase B CRITICAL 사전 GitNexus 분석 (IMP-019·039·040·042·043·044)               | 2026-05-15                  | 🚫 보류 — Riley Phase A 착수 후 해제 |
+| ~~**ANA-IMP-DK-B**~~       | —  | Phase B CRITICAL 사전 GitNexus 분석 (IMP-019·039·040·042·043·044)               | 2026-05-15                  | 🔔 **Aiden 검토 대기** |
 | ~~**GOV-001**~~     | 1     | ACTIVE_AGENT.md IDLE 강제 초기화                                                | 2026-05-13                  | ✅ **Aiden PASS**        |
 | ~~**GOV-002**~~     | 1     | `~/.claude/settings.json` PostToolUse GitNexus Hook 제거                        | 2026-05-13                  | ✅ **Aiden PASS**        |
 | ~~**GOV-003**~~     | 2     | `GEMINI.md` + `AGENTS.md` Task 완료 DoD에 IDLE 초기화 추가                      | 2026-05-13                  | ✅ **Aiden PASS**        |
@@ -181,6 +184,99 @@
 | REG-IMP-RL (IMP-023~026)      | ✅ PASS                 | 2026-05-15 |
 | FB-017 (R-10 스크린샷 재제출) | ✅ PASS                 | 2026-05-15 |
 | FB-016 (FEAT-RATES 2차 반려)  | ❌ REJECT → FB-017 대체 | 2026-05-15 |
+
+---
+
+# SECTION 3 — Riley (Gemini) 작업 상세
+
+> **에이전트**: Riley (Gemini 2.x) | **커밋 접두사**: `[Gemini]`
+> **진행 원칙**: C1 Critical Path 순서 엄수 — [034a + 037] 병렬 완료 → 035 → 026 → 041 → 057
+> **참조 분석**: `scratch/ANA_PhaseA_DKai_20260515.md` — IMP-035·026·041 blast radius 完
+
+---
+
+## 📨 Aiden → Riley | IMP-034a-RL + IMP-037-RL — [Phase A] C1 Critical Path 첫 스텝
+
+> **수행 주체**: Riley (Gemini) | **검증 주체**: Aiden (Claude)
+> **유형**: 보안 수정 CRITICAL | **지시일**: 2026-05-15 | **예상 공수**: 0.5 MD + 0.5 MD
+
+### 배경
+
+Phase A Security CRITICAL 항목 중 병렬 착수 가능한 2건 동시 지시.
+C1 Critical Path: **[IMP-034a + IMP-037] 병렬** → IMP-035 → IMP-026 → IMP-041 → IMP-057
+
+> ⚠️ IMP-034b (API 키 재발급)는 Edward(Human) 직접 수행 항목. Riley 착수 전 Edward에게 재발급 착수 요청을 병행 전달할 것.
+
+---
+
+### IMP-034a — `.env.local` Git 추적 제거
+
+**현황**: `.env.local`에 6개 프로덕션 자격증명 평문 노출 (`SUPABASE_SERVICE_ROLE_KEY`, `DATABASE_URL`, `VERCEL_TOKEN`, `SUPABASE_ACCESS_TOKEN`, `RESEND_API_KEY`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`). `.gitignore`에 `.env*` 패턴이 있으나 이미 추적 중.
+
+**Step 1.** `git rm --cached .env.local` — Git 추적 해제 (파일은 로컬에 유지)
+
+**Step 2.** `.gitignore`에 `.env.local` 명시 추가 (기존 `.env*` 패턴 외 명시적 등록)
+
+**Step 3.** `.env.example` 확인 — 키값 없이 포맷만 유지되는지 검증. 키값이 있으면 제거.
+
+**Step 4.** `git status`로 `.env.local`이 `Changes to be committed`에서 제거되었는지 확인
+
+---
+
+### IMP-037 — Supabase Auth 보안 설정
+
+**현황**: `supabase/config.toml` `[auth]` 섹션 취약 설정 다수.
+
+| 항목 | 현재 | 목표 |
+|:---|:---:|:---:|
+| `minimum_password_length` | 6 | 8 |
+| `password_requirements` | `""` | `"lower_upper_letters_digits"` |
+| `enable_confirmations` | `false` | `true` |
+| `secure_password_change` | `false` | `true` |
+
+**Step 1.** `supabase/config.toml` 위 4개 항목 수정
+
+> ⚠️ MFA(TOTP)·Captcha·`enable_signup` 변경은 **운영 영향도 큼** → 이번 작업 범위 제외. Aiden 별도 검토 후 후속 IMP로 처리.
+
+---
+
+### 공통 절차 (IMP-034a + IMP-037 모두 완료 후)
+
+**Step 5. ACTIVE_AGENT.md → Status: BUSY 갱신** (착수 시점에 갱신)
+
+**Step 6. 회귀 테스트**
+
+```bash
+rtk npm run test:regression
+```
+
+**Step 7. GitNexus detect_changes() 실행**
+
+```
+gitnexus_detect_changes()
+```
+
+**Step 8. 커밋** (2건을 하나의 커밋으로)
+
+```
+[Gemini] fix: IMP-034a + IMP-037 .env.local Git 추적 제거 및 Auth 보안 설정 강화
+```
+
+**Step 9. ACTIVE_AGENT.md → Status: IDLE 초기화**
+
+**Step 10. 🔔 TASK_BOARD SECTION 1 검토 대기 등록 + IMP_PROGRESS.md IMP-034a·037 행 상태 🔔 갱신**
+
+### 완료 기준 (DoD)
+
+- [ ] `git ls-files .env.local` → 빈 출력 (추적 해제 확인)
+- [ ] `.gitignore` — `.env.local` 명시 등재
+- [ ] `.env.example` — 키값 없음 확인
+- [ ] `supabase/config.toml` 4개 항목 수정 완료
+- [ ] `rtk npm run test:regression` 전체 PASS 증적
+- [ ] `[Gemini] fix: IMP-034a + IMP-037` 커밋 완료
+- [ ] `scratch/IMP_PROGRESS.md` IMP-034a·037 행 상태 `🔔` 갱신
+- [ ] ACTIVE_AGENT.md IDLE 초기화
+- [ ] TASK_BOARD SECTION 1 🔔 검토 대기 등록
 
 ---
 
@@ -717,7 +813,7 @@ ANA-IMP-DK 완료 후 TASK_BOARD D_Kai 전용 테이블의 상태가 `⏳ 착수
 
 > **수행 주체**: D_Kai (OpenCode) | **검증 주체**: Aiden (Claude)
 > **유형**: 순수 분석 (코드 수정 없음) | **지시일**: 2026-05-15 | **우선순위**: High
-> **⚠️ 보류 중**: Riley Phase A 착수 확인 후 Aiden이 해제. 현재는 착수 불가.
+> ✅ **보류 해제**: Riley Phase A(IMP-034a·037) 착수 지시 완료 — 2026-05-15 Aiden 해제. **즉시 착수 가능.**
 
 ### 배경
 
@@ -1335,4 +1431,75 @@ IMP-038-BK CONDITIONAL PASS. 핵심 DoD는 충족됐으나 2가지 보완 필요
 - [ ] `scratch/IMP_PROGRESS.md` 합계 주석 갱신
 - [ ] 커밋: `[B_Kai] test: IMP-038-BK-FIX R-09 CLAIMED 전이 단위 테스트 추가`
 - [ ] TASK_BOARD SECTION 1 IMP-038-BK-FIX `🔔 Aiden 검토 대기`로 갱신
+- [ ] HANDOFF_BOX.md 인계 메시지 작성
+
+---
+
+## 📨 Aiden → B_Kai | IMP-027-BK — [Phase F] 점검 모드 페이지 신규 구현
+
+> **수행 주체**: B_Kai (GLM Big Pickle) | **검증 주체**: Aiden (Claude)
+> **유형**: 신규 기능 (Medium) | **지시일**: 2026-05-15 | **예상 공수**: 0.5 MD
+
+### 배경
+
+`src/middleware.ts` L63~75에 `MAINTENANCE_MODE` 분기가 있으나 `/maintenance` 라우트가 존재하지 않습니다. 점검 시 `error=maintenance` 쿼리 파라미터만 추가하여 홈으로 리다이렉트 — 사용자가 점검 중임을 알 수 없는 상태. (IMP-027, Medium)
+
+### 작업 지시
+
+**Step 1. ACTIVE_AGENT.md → Status: BUSY 갱신**
+
+**Step 2. GitNexus impact analysis 실행** (GOV 필수)
+
+```
+gitnexus_impact({target: "MAINTENANCE_MODE", direction: "upstream"})
+gitnexus_context({name: "middleware"})
+```
+
+HIGH/CRITICAL 결과 시 Aiden에게 보고 후 지시 대기.
+
+**Step 3. `/maintenance` 라우트 신규 생성**
+
+- 파일: `src/app/[locale]/(maintenance)/page.tsx` 신규 생성
+- 내용: 점검 중 안내 UI (제목·메시지·예상 복구 시간 미정 안내·홈 버튼)
+- 다국어: `messages/ko.json`, `messages/en.json`에 `maintenance` 네임스페이스 키 추가
+  - 예: `"maintenance": { "title": "점검 중", "message": "서비스 점검 중입니다.", "back": "홈으로" }`
+
+**Step 4. middleware 루프 방지 처리**
+
+- `src/middleware.ts` 확인 — MAINTENANCE_MODE 분기가 `/maintenance` 경로 자체도 리다이렉트하고 있으면 무한 루프 발생
+- `/maintenance` 경로는 리다이렉트 제외 처리 추가 (matcher 또는 경로 조건)
+
+**Step 5. 회귀 테스트**
+
+```bash
+rtk npm run test:regression
+```
+
+**Step 6. GitNexus detect_changes() 실행**
+
+```
+gitnexus_detect_changes()
+```
+
+**Step 7. 커밋**
+
+```
+[B_Kai] feat: IMP-027 점검 모드 /maintenance 페이지 신규 구현
+```
+
+**Step 8. ACTIVE_AGENT.md → Status: IDLE 초기화**
+
+**Step 9. 🔔 TASK_BOARD SECTION 1 검토 대기 등록 + IMP_PROGRESS.md IMP-027 행 상태 🔔 갱신 + HANDOFF_BOX.md 인계 메시지 작성**
+
+### 완료 기준 (DoD)
+
+- [ ] `src/app/[locale]/(maintenance)/page.tsx` 신규 생성 및 점검 안내 UI 구현
+- [ ] `messages/ko.json` + `messages/en.json` 다국어 키 추가
+- [ ] `src/middleware.ts` — `/maintenance` 경로 리다이렉트 루프 방지 처리
+- [ ] `rtk npm run test:regression` 전체 PASS 증적
+- [ ] GitNexus detect_changes() 결과 보고
+- [ ] `[B_Kai] feat: IMP-027` 커밋 완료
+- [ ] `scratch/IMP_PROGRESS.md` IMP-027 행 상태 `🔔` 갱신
+- [ ] ACTIVE_AGENT.md IDLE 초기화
+- [ ] TASK_BOARD SECTION 1 🔔 검토 대기 등록
 - [ ] HANDOFF_BOX.md 인계 메시지 작성
