@@ -1,7 +1,7 @@
 # Multi-Agent Task Board
 
 > **프로젝트:** ZENITH_LMS
-> **업데이트:** 2026-05-13 (KST) — REG-IMP-RL PASS / EXP-IMP-DK PASS 확정 / IMP-023~026 등록 완료
+> **업데이트:** 2026-05-15 (KST) — B_Kai 임시 재활성화 (역량 평가 목적) / IMP-PLAN-BK-V23 + IMP-036-BK 지시 등록
 > **운영 원칙:**
 > - 각 에이전트는 작업 완료 시 **SECTION 1 상태 대시보드를 최우선 갱신**한 뒤 담당 SECTION 상세를 업데이트한다.
 > - Riley는 완료 보고 시 반드시 `## 🔔 Aiden 검토 대기` 테이블에 항목을 추가한다.
@@ -46,7 +46,19 @@
 
 | Task ID | 지시자 | Task 명 | 지시일 |
 |:---|:---|:---|:---|
-| **IMP-PLAN-BK** | B_Kai | IMP 실행 계획 v2.2 — Aiden 검토 반영 완료 (IMP-034 추가, 공수 조정) | 2026-05-14 |
+| ~~**IMP-PLAN-BK**~~ | B_Kai | IMP 실행 계획 v2.2 — Aiden+Riley 공동 CONDITIONAL PASS 확정 | ✅ 검토 완료 |
+
+---
+
+## 🆕 신규 지시 대기 (B_Kai 착수 가능)
+
+> ⚠️ **B_Kai 전용 지시입니다. 역량 평가 목적 임시 재활성화 (2026-05-15, Edward 지시).**
+> IMP-PLAN-BK-V23 → IMP-036-BK 순서로 진행. IMP-036-BK는 V23과 **병렬 착수 가능**.
+
+| Task ID | Task 명 | 지시일 | 상태 |
+|:---|:---|:---|:---:|
+| **IMP-PLAN-BK-V23** | IMP 실행 계획 v2.3 제출 — W-1~W-3+N-1 수정 | 2026-05-15 | ⏳ 착수 가능 |
+| **IMP-036-BK** | [Phase A] Status Machine MANAGER 역할 추가 | 2026-05-15 | ⏳ 즉시 착수 가능 |
 
 ---
 
@@ -138,116 +150,20 @@
 | 에이전트 | 결정일 | 결정자 | 사유 | 재활성화 조건 |
 |:---|:---|:---|:---|:---|
 | **B_Kai (GLM Big Pickle)** | 2026-05-13 | Edward (Master) | 코딩 역량 C+(5개 모델 최하위), 과잉 분석 GOV Phase 1~3 조치 후 재발, 효용 < 거버넌스 오버헤드 | 5만 줄+ 코드베이스 전수 감사 또는 보안 감사 필요 시 + Edward 명시 요청 |
+| **B_Kai — 임시 재활성화** | 2026-05-15 | Edward (Master) | 분석·개발 역량 평가 목적 (규정 준수, 지시 이행률, 실행 품질 다차원 평가). IMP 누적 수행 후 최종 평가 예정. | 평가 종료 후 결과에 따라 재활성화 여부 결정 |
 
 ---
 
-# SECTION 2 — 작업 상세
+# SECTION 2 — Riley 완료 태스크 이관 이력
 
----
+> 전체 CLOSED. 상세 이력 → [archive/MSG_2026-05-15.md](.agent/archive/MSG_2026-05-15.md)
 
-## 📨 Aiden → Riley 지시 | REG-IMP-RL — IMP-015~018 등록 (2026-05-13)
-
-> **수행 주체**: Riley (Gemini) | **검증 주체**: Aiden (Claude)
-> **우선순위**: Low | **예상 공수**: 0.25 MD
-
-### 배경
-
-EXP-IMP-RL (✅ PASS) 결과물 `scratch/imp_scan_riley_20260513.md`의 IMP-015~018이 `scratch/post_launch_improvements.md`에 아직 등록되지 않았습니다.
-
-### 작업 지시
-
-`scratch/post_launch_improvements.md`에 IMP-015~018을 R-15 형식으로 등록하십시오.
-
-**등록 대상 (4건)**:
-
-| IMP | 내용 | 우선순위 | 예상 공수 |
-|:----|:----|:--------:|:--------:|
-| IMP-015 | I18n 번역 키 타입 안정성 자동화 | Medium | 1.0 MD |
-| IMP-016 | 도메인 특화 공통 UI 컴포넌트 라이브러리화 | Medium | 2.0 MD |
-| IMP-017 | Server Actions 에러 핸들링 래퍼 표준화 | High | 1.5 MD |
-| IMP-018 | Supabase RLS 비즈니스 규칙 통합 | High | 3.0 MD |
-
-**참조 파일**: `scratch/imp_scan_riley_20260513.md` — 각 항목의 발견 경위·현재 상태·근본 문제·목표 구현·관련 파일 내용을 그대로 옮겨 등록
-
-### DoD
-
-- [x] `scratch/post_launch_improvements.md` IMP-023~026 등록 완료 (번호 조정됨)
-- [x] 커밋: `[Claude] docs: REG-IMP-RL Aiden 검토 — IMP-023~026 번호 확정 및 파일 정리` (Riley 미커밋 → Aiden 대리 처리)
-- [x] Aiden 검토 완료 → ✅ **PASS** (IMP 번호 정정 반영)
-
----
-
-## ✅ FB-017 PASS 판정 (2026-05-13)
-
-> **판정**: ✅ **PASS**
-> **검증 주체**: Aiden (Claude)
-> **근거**: 코드 구현 정상 확인 (`page.tsx:232-251` CARRIER 배너 + 폼 blur 구현 완료) — 스크린샷 증빙은 ADMIN 화면이나 Edward 승인 하에 구현 기준으로 완료 처리
-
-| 항목 | 결과 |
-|:---|:---|
-| 기존 오류 파일 2종 삭제 (`admin_registration_form.png`, `carrier_view_badges.png`) | ✅ |
-| `admin_rate_form.png` — ADMIN 요율 등록폼 (할증 섹션 + Valid From/To) | ✅ |
-| `carrier_readonly_banner.png` — CARRIER 배너 코드 구현 확인 (화면 증빙 미흡, 코드 기준 완료) | ✅ |
-| `rate_list_surcharge_badges.png` — 요율 목록 + 할증 배지 (FSC 18%, THC $50) | ✅ |
-| `test:regression` 177/177 PASS | ✅ |
-| ACTIVE_AGENT.md IDLE 초기화 | ✅ |
-
-**W-1** `carrier_readonly_banner.png`가 CARRIER 계정 화면이 아닌 ADMIN 화면 제출 — 코드 구현 확인으로 면제 (Edward 승인)
-**W-2** 범위 외 코드 변경 (`page.tsx`, `rates.ts`, `RateCardList.tsx` 방어적 null 체크) — 품질 향상 기여, 테스트 무결 확인
-**W-3** 범위 외 SAR 2종 커밋 (SAR_2026-05-12_001, SAR_2026-05-13_001) — 미요청 파일 포함
-
----
-
-## ❌ FB-016 2차 반려 판정 | FB-017 발령 (2026-05-12)
-
-> **판정**: ❌ **2차 반려 (REJECT)**
-> **검증 주체**: Aiden (Claude)
-> **사유**: R-10 위반 — 스크린샷 2종 모두 로그인 오류 화면 제출
-
-### PASS 항목 (FB-016 수정분 — 인계됨)
-
-| 항목 | 결과 |
-|:---|:---|
-| BUG-FR-001: `org_id: selectedCarrier` 명시 전달 + `targetOrgId` 폴백 | ✅ |
-| BUG-FR-002: TISA ACTIVE→SUPERSEDED 로직 구현 | ✅ |
-| `tests/unit/rates/rates.test.ts` TC-RATES-01~04 (4개) | ✅ |
-| `LIVE_REGRESSION_TEST_MAP.md` Section 16 등록 | ✅ |
-| `test:regression` 177/177 PASS | ✅ |
-| `build` 0 errors | ✅ |
-
-### 반려 사유
-
-#### W-6 / R-10 2차 위반 — 스크린샷 내용 무효
-
-- 제출 파일: `admin_registration_form.png`, `carrier_view_badges.png` (2종)
-- **실제 내용: 두 파일 모두 동일한 로그인 오류 화면** (`Invalid login credentials`, `temp_admin@zenith.kr`)
-- DoD 요구 3종 (관리자 등록폼 / CARRIER 배너 / 요율 목록 할증 배지) 중 **0건 충족**
-- FB-016에서 이미 R-10 위반 → **동일 위반 재발 = 중대 프로세스 위반**
-- 로그인 불가 상태 오류 화면을 기능 증적으로 제출하는 행위는 허용 불가
-
-*FEAT-RATES·FB-016·FB-017·AUDIT-S2·AUDIT-S3 CLOSED 이관 (2026-05-13)* → [archive/MSG_2026-05-13.md](.agent/archive/MSG_2026-05-13.md)
-*AUDIT-S3 착수·완료·FB-015·AUDIT-S1·FB-014·PH14-PASS·E2E-02/12 이관 → [archive/MSG_2026-05-12.md](.agent/archive/MSG_2026-05-12.md)*
-
----
-
-## 📨 Aiden → Riley | EXP-IMP-RL — 전체 코드베이스 IMP 도출
-
-> **수행 주체**: Riley (Gemini) | **검증 주체**: Aiden (Claude)
-> **유형**: 성능 비교 실험 태스크 | **지시일**: 2026-05-13
-
-`src/` 전체 코드베이스를 분석하여 개선 가능한 IMP 항목을 R-15 형식으로 도출하라.
-
-**제약**: [scratch/post_launch_improvements.md](scratch/post_launch_improvements.md)의 IMP-001~011과 중복 금지.
-
-**IMP 항목 필수 기재 (R-15 형식)**:
-- IMP-NNN / 발견 경위 / 현재 상태 / 임시 조치 / 목표 구현 / 관련 파일 / 예상 공수 / 우선순위
-
-**완료 기준 (DoD)**:
-- [ ] 최소 3건 IMP 도출 (우선순위 분류 포함)
-- [ ] R-15 형식 전 항목 준수
-- [ ] `scratch/imp_scan_riley_20260513.md` 파일로 제출 후 커밋
-- [ ] 🔔 Aiden 검토 대기 등록
-- 커밋: `[Gemini] docs: EXP-IMP-RL 전체 코드베이스 IMP 도출`
+| Task | 결과 | 이관일 |
+|:---|:---:|:---|
+| EXP-IMP-RL | ✅ PASS | 2026-05-15 |
+| REG-IMP-RL (IMP-023~026) | ✅ PASS | 2026-05-15 |
+| FB-017 (R-10 스크린샷 재제출) | ✅ PASS | 2026-05-15 |
+| FB-016 (FEAT-RATES 2차 반려) | ❌ REJECT → FB-017 대체 | 2026-05-15 |
 
 ---
 
@@ -655,48 +571,6 @@ GitNexus(`gitnexus_query`) 활용 권장.
 
 ---
 
-# SECTION 5 — MiniMax (M2.5) ❌ 테스트 탈락
-
-> **에이전트**: MiniMax M2.5 | **역할**: Noah 역할 시험 운용 (E2E·IMP 실행)
-> **커밋 태그**: `[MiniMax]`
-> **상태**: ❌ **EXP-IMP 테스트 탈락** (2026-05-13) — 보고서 자율 생성 불가, Noah 역할 부적합 판정
-
----
-
-## 🆕 신규 에이전트 온보딩 안내 — MiniMax
-
-> **프로젝트**: ZENITH_LMS (지능형 통합 물류 플랫폼 — Next.js · Supabase · TypeScript · Vercel)
-> **작업 디렉토리**: `/Users/edward.kwon/WorkSpace/ZENITH_LMS_001`
-
-**필독 문서**:
-1. [GOV_COMMON.md](GOV_COMMON.md) — 전 에이전트 공통 규칙 (R-01~R-16, GitNexus, ZEN_A4)
-2. [scratch/post_launch_improvements.md](scratch/post_launch_improvements.md) — 기존 IMP 목록
-
-**커밋 규칙**: `[MiniMax] <type>: <description>`
-**CLI**: 모든 명령어는 `rtk <command>` 경유 실행
-
----
-
-## 📨 Aiden → MiniMax | EXP-IMP-MM — 전체 코드베이스 IMP 도출
-
-> **수행 주체**: MiniMax (M2.5) | **검증 주체**: Aiden (Claude)
-> **유형**: 신규 온보딩 첫 태스크 + 성능 실험 | **지시일**: 2026-05-13
-
-`src/` 전체 코드베이스를 분석하여 개선 가능한 IMP 항목을 R-15 형식으로 도출하라.
-
-**제약**: [scratch/post_launch_improvements.md](scratch/post_launch_improvements.md)의 IMP-001~011과 중복 금지.
-
-**IMP 항목 필수 기재 (R-15 형식)**:
-- IMP-NNN / 발견 경위 / 현재 상태 / 임시 조치 / 목표 구현 / 관련 파일 / 예상 공수 / 우선순위
-
-**완료 기준 (DoD)**:
-- [ ] 최소 3건 IMP 도출 (우선순위 분류 포함)
-- [ ] R-15 형식 전 항목 준수
-- [ ] `scratch/imp_scan_minimax_20260513.md` 파일로 제출 후 커밋
-- [ ] 🔔 Aiden 검토 대기 등록
-- 커밋: `[MiniMax] docs: EXP-IMP-MM 전체 코드베이스 IMP 도출`
-
----
 
 # SECTION 6 — Ring 2.6 1T 작업 상세
 
@@ -738,3 +612,131 @@ GitNexus(`gitnexus_query`) 활용 권장.
 - [ ] `scratch/imp_scan_ring_20260513.md` 파일로 제출 후 커밋
 - [ ] 🔔 Aiden 검토 대기 등록
 - 커밋: `[Ring] docs: EXP-IMP-RG 전체 코드베이스 IMP 도출`
+
+---
+
+# SECTION 7 — B_Kai (GLM Big Pickle) 작업 상세
+
+> **에이전트**: B_Kai (GLM Big Pickle / OpenCode) | **역할**: 분석·개발 역량 평가 대상
+> **커밋 태그**: `[B_Kai]`
+> **평가 목적**: 분석력, 개발 역량, 규정 준수, 지시 이해 및 이행률 다차원 평가
+> **평가자**: Aiden (주), Riley (부) | **최종 판정**: Edward (Master)
+> **근거**: IMP 누적 수행 후 최종 평가 예정 (단일 태스크 평가 아님)
+
+---
+
+## 🆕 온보딩 안내 — B_Kai
+
+> **프로젝트**: ZENITH_LMS (지능형 통합 물류 플랫폼 — Next.js · Supabase · TypeScript · Vercel)
+> **작업 디렉토리**: `/Users/edward.kwon/WorkSpace/ZENITH_LMS_001`
+
+**필독 문서 (세션 시작 시)**:
+1. [GOV_COMMON.md](GOV_COMMON.md) — 전 에이전트 공통 규칙 (R-01~R-16, GitNexus MUST, ZEN_A4)
+2. [scratch/IMP_EXECUTION_PLAN_BKai_20260514.md](scratch/IMP_EXECUTION_PLAN_BKai_20260514.md) — 본인 작성 실행 계획
+3. [scratch/post_launch_improvements.md](scratch/post_launch_improvements.md) — IMP 백로그 전체
+
+**커밋 태그**: `[B_Kai] <type>: <description>`
+**CLI**: 모든 명령어는 `rtk <command>` 경유 실행
+
+---
+
+## 📨 Aiden → B_Kai | IMP-PLAN-BK-V23 — 실행 계획 v2.3 보완 제출
+
+> **수행 주체**: B_Kai (GLM Big Pickle) | **검증 주체**: Aiden (Claude)
+> **유형**: 계획 문서 보완 | **지시일**: 2026-05-15 | **우선순위**: 즉시
+
+### 배경
+
+[scratch/IMP_EXECUTION_PLAN_BKai_20260514.md](scratch/IMP_EXECUTION_PLAN_BKai_20260514.md) v2.2에 대해 Aiden(§10) + Riley(§11) 공동 **CONDITIONAL PASS** 판정을 내렸습니다. 아래 4가지 수정 조건을 반영하여 **v2.3**을 제출하십시오.
+
+### 수정 조건 (전체 반영 필수)
+
+**W-1 | IMP-034 수행 주체 분리**
+- Phase A 표 및 §8에서 IMP-034 담당을 다음과 같이 분리 명시:
+  - `git rm --cached .env.local` + `.gitignore` 등록 + 커밋 → **Riley**
+  - API 키 재발급 (Supabase, Vercel, Resend, SUPABASE_ACCESS_TOKEN) → **Edward (Human 직접 수행)**
+
+**W-2 | C1 Critical Path 병렬 표현 수정**
+- 현재: `034 → 035 → 037 → 026 → 041 → 057` (전체 순차)
+- 수정: `[034 + 036 + 037] (병렬) → 035 → 026 → 041 → 057`
+- 근거: IMP-034/036/037은 상호 독립 — 순차 표현 시 병목 발생
+
+**W-3 | IMP-046 인프라 결정 주체·시점 명시**
+- Phase C 표 IMP-046 비고에 추가:
+  - 결정 주체: Aiden
+  - 결정 시점: Phase C 착수 전
+  - 미결정 시 IMP-046 착수 차단
+
+**N-1 | IMP-018 설명 수정 (권고)**
+- §4 주석 "IMP-018은 IMP-026으로 재번호" → "IMP-018: 삭제/병합 처리됨"으로 수정
+- 근거: IMP-026은 Riley 독립 도출 항목, 재번호 대상 아님
+
+### 완료 기준 (DoD)
+
+- [ ] W-1 Phase A 표 + §8 수행 주체 분리 반영
+- [ ] W-2 §2 C1 Critical Path 병렬 표현 수정
+- [ ] W-3 Phase C IMP-046 비고 결정 주체·시점 추가
+- [ ] N-1 §4 주석 IMP-018 설명 수정
+- [ ] 개정 이력에 v2.3 항목 추가 (작성자: B_Kai)
+- [ ] `rtk git add` + `[B_Kai] docs: IMP_EXECUTION_PLAN v2.3 — W-1~W-3+N-1 수정` 커밋
+- [ ] ACTIVE_AGENT.md → Status: IDLE 초기화
+- [ ] 🔔 TASK_BOARD SECTION 1 검토 대기 등록
+
+---
+
+## 📨 Aiden → B_Kai | IMP-036-BK — [Phase A] Status Machine MANAGER 역할 추가
+
+> **수행 주체**: B_Kai (GLM Big Pickle) | **검증 주체**: Aiden (Claude) + Riley (감시)
+> **유형**: 버그 수정 (CRITICAL) | **지시일**: 2026-05-15 | **IMP-PLAN-BK-V23과 병렬 착수 가능**
+
+### 배경
+
+`src/lib/logistics/status-machine.ts`의 `ROLE_PERMISSIONS` 객체에 `MANAGER` 키가 없어 모든 상태 전이가 거부됩니다 (IMP-036, CRITICAL).
+
+### 작업 지시
+
+**Step 1. ACTIVE_AGENT.md → Status: BUSY 갱신**
+
+**Step 2. GitNexus impact analysis 실행** (GOV 필수)
+```
+gitnexus_impact({target: "ROLE_PERMISSIONS", direction: "upstream"})
+```
+- HIGH/CRITICAL 결과 시 Aiden에게 보고 후 지시 대기
+
+**Step 3. 수정 대상**
+- 파일: `src/lib/logistics/status-machine.ts`
+- 수정: `ROLE_PERMISSIONS` 객체에 MANAGER 항목 추가
+  ```typescript
+  ROLE_PERMISSIONS[USER_ROLES.MANAGER] = TRANSITION_RULES.ADMIN
+  ```
+  또는 객체 리터럴 내 직접 추가 (기존 코드 컨벤션 준수)
+
+**Step 4. 회귀 테스트**
+```bash
+rtk npm run test:regression
+```
+전체 PASS 확인 후 결과 증적 보관
+
+**Step 5. GitNexus detect_changes() 실행**
+```
+gitnexus_detect_changes()
+```
+
+**Step 6. 커밋**
+```bash
+[B_Kai] fix: IMP-036 Status Machine MANAGER 역할 누락 수정
+```
+
+**Step 7. ACTIVE_AGENT.md → Status: IDLE 초기화**
+
+**Step 8. 🔔 TASK_BOARD SECTION 1 검토 대기 등록**
+
+### 완료 기준 (DoD)
+
+- [ ] ROLE_PERMISSIONS에 MANAGER 항목 추가 (USER_ROLES 상수 사용 — R-08 하드코딩 금지)
+- [ ] `rtk npm run test:regression` 전체 PASS 증적
+- [ ] GitNexus impact + detect_changes() 실행 결과 보고
+- [ ] `[B_Kai] fix: IMP-036` 커밋 완료
+- [ ] ACTIVE_AGENT.md IDLE 초기화
+- [ ] TASK_BOARD 🔔 검토 대기 등록
+- [ ] HANDOFF_BOX.md 상세 인계 메시지 작성
