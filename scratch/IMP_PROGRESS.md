@@ -33,11 +33,11 @@
 | 035 | SECURITY DEFINER 38개 권한 검증 | Aiden+Riley | ✅ PASS | 2026-05-15 |
 | 036 | Status Machine MANAGER 역할 추가 | B_Kai | ✅ PASS | 2026-05-15 |
 | 037 | Supabase Auth 보안 설정 | Riley | ✅ PASS | 2026-05-15 |
-| 026 | RLS 비즈니스 규칙 통합 (SQL 함수화) | Aiden+Riley | 🔔 | 2026-05-16 |
+| 026 | RLS 비즈니스 규칙 통합 (SQL 함수화) | Aiden+Riley | ✅ PASS | 2026-05-16 |
 | 041 | Storage 정책 조직 멤버십 검증 | Riley | 🔔 | 2026-05-16 |
 | 057 | `zen_role_permissions` SELECT 제한 | Riley | ⬜ | — |
 
-**Phase A 완료**: 4 / 7 (57.1%)
+**Phase A 완료**: 5 / 7 (71.4%) — IMP-041 🔔 상태이나 HANDOFF_BOX 완료 메시지 미확인 (요주의)
 
 ---
 
@@ -51,7 +51,7 @@
 | 040 | WAREHOUSED→CANCELED 재고 불일치 | Riley | ⬜ | — |
 | 042 | `updateOrder()` 수정 차단 누락 | B_Kai | ✅ | 2026-05-15 |
 | 043 | MASTERED Lock 액션별 우회 방지 | B_Kai | ✅ | 2026-05-15 |
-| 044 | 인보이스 발행 후 비용 변경 차단 | B_Kai | 🔔 | 2026-05-16 |
+| 044 | 인보이스 발행 후 비용 변경 차단 | B_Kai | ✅ PASS | 2026-05-16 |
 | 047 | 트랜잭션 부재 확장 (status/지갑) | Riley | 🚫 | — |
 | 052 | dissolveMasterOrder 부분 실패 | Riley | 🚫 | — |
 | 053 | 지갑 결제 롤백 불완전 | Riley | 🚫 | — |
@@ -177,7 +177,7 @@
 | E | 1 | 7 | 14.3% |
 | F | 1 | 12 | 8.3% |
 | G | 0 | 1 | 0% |
-| **합계** | **10** | **52** | **19.2%** |
+| **합계** | **12** | **52** | **23.1%** |
 
 > ⚠️ 합계 52개 = 완료 10개(IMP-027·034a·035·036·037·038·042·043·044·048) + 미착수 42개 (IMP-018·034b 제외)
 
