@@ -1,7 +1,7 @@
 # Multi-Agent Task Board
 
 > **프로젝트:** ZENITH_LMS
-> **업데이트:** 2026-05-16 (KST) — 전 에이전트 신규 지시 발령 (Riley 4건·B_Kai 2건·D_Kai 1건·Ring 1건)
+> **업데이트:** 2026-05-16 (KST) — B_Kai IMP-055-BK-SUP 추가 지시 (D_Kai 권장 인덱스 보완)
 > **운영 원칙:**
 >
 > - 각 에이전트는 작업 완료 시 **SECTION 1 상태 대시보드를 최우선 갱신**한 뒤 담당 SECTION 상세를 업데이트한다.
@@ -97,6 +97,7 @@
 | ~~**IMP-044-BK**~~            | [Phase B] 인보이스 발행 후 비용 변경 차단                       | 2026-05-16 | ✅ FULL PASS |
 | ~~**IMP-044-BK-FIX**~~        | [FIX] 트리거 TG_OP 분기 수정 (DELETE→RETURN OLD)               | 2026-05-16 | ✅ FULL PASS |
 | ~~**IMP-055-BK**~~            | [Phase E] 인덱스 누락 4종 추가                                  | 2026-05-16 | ✅ FULL PASS |
+| **IMP-055-BK-SUP**            | [Phase E] D_Kai 권장 인덱스 보완 (zen_profiles·voc·qna·invoices 복합) | 2026-05-16 | ⏳ 즉시 착수 |
 | **IMP-054-BK**                | [Phase E] N+1 쿼리 7곳 수정                                     | 2026-05-16 | ⏳ 착수 가능 (ANA-E PASS) |
 
 ---
@@ -2210,6 +2211,54 @@ rtk npm run test:regression
 - [ ] `ACTIVE_AGENT.md` IDLE 초기화
 - [ ] TASK_BOARD SECTION 1 🔔 검토 대기 등록
 - [ ] `scratch/IMP_PROGRESS.md` IMP-055 행 `🔔` 갱신
+
+---
+
+## 📨 Aiden → B_Kai | IMP-055-BK-SUP — [Phase E] D_Kai 권장 인덱스 보완
+
+> **수행 주체**: B_Kai (GLM Big Pickle) | **검증 주체**: Aiden (Claude) | **지시일**: 2026-05-16
+> **우선순위**: High | **예상 공수**: 0.3 MD
+> **배경**: IMP-055-BK에서 D_Kai 권장 인덱스 4종이 반영되지 않음 — 동시 지시로 인한 교차 검증 누락
+
+### 배경
+
+IMP-055-BK(자체 판단 4종)와 ANA-IMP-DK-E 권장안(분석 기반 4종)이 상이한 테이블을 대상으로 함.  
+두 세트는 상호 배타적이지 않으므로 D_Kai 권장안을 별도 Migration으로 추가해야 함.
+
+**IMP-055-BK가 추가한 인덱스** (유지):
+- `idx_zen_orders_shipper_id`, `idx_zen_orders_status`
+- `idx_zen_invoices_shipper_id`, `idx_zen_order_costs_order_id`
+
+**이번 보완 대상 (D_Kai 분析 기반)**:
+- `zen_profiles(org_id)` — 알림 발송·조직 사용자 조회 Full Scan 방지
+- `zen_voc(order_id, org_id, status)` — VOC 목록 복합 조건 최적화
+- `zen_qna(org_id, status)` — QnA 목록 복합 조건 최적화
+- `zen_invoices(shipper_id, status, created_at DESC)` — 정산 복합 쿼리 최적화 (기존 단순 인덱스와 별개)
+
+### 작업 지시
+
+1. `ACTIVE_AGENT.md` → `Status: BUSY`
+2. 신규 migration 파일 작성: `supabase/migrations/20260516XXXXXX_add_dkai_recommended_indexes.sql`
+   ```sql
+   -- Migration: IMP-055-BK-SUP — D_Kai 권장 인덱스 보완
+   CREATE INDEX IF NOT EXISTS idx_zen_profiles_org_id ON public.zen_profiles(org_id);
+   CREATE INDEX IF NOT EXISTS idx_zen_voc_lookup ON public.zen_voc(order_id, org_id, status);
+   CREATE INDEX IF NOT EXISTS idx_zen_qna_lookup ON public.zen_qna(org_id, status);
+   CREATE INDEX IF NOT EXISTS idx_zen_invoices_lookup ON public.zen_invoices(shipper_id, status, created_at DESC);
+   ```
+3. `supabase db reset` → `rtk npm run test:regression` → 전체 PASS
+4. `gitnexus_detect_changes()`
+5. 커밋: `[B_Kai] fix: IMP-055-BK-SUP D_Kai 권장 인덱스 보완 4종`
+6. `ACTIVE_AGENT.md` IDLE / HANDOFF_BOX 인계 / TASK_BOARD SECTION 1 🔔 / IMP_PROGRESS 갱신
+
+### 완료 기준 (DoD)
+
+- [ ] 보완 migration 파일 커밋 완료 (4종 인덱스 모두 포함)
+- [ ] 기존 `idx_zen_invoices_shipper_id`와 `idx_zen_invoices_lookup` 중복 없음 확인
+- [ ] 회귀 테스트 전체 PASS 증적
+- [ ] HANDOFF_BOX.md 인계 메시지 작성
+- [ ] `ACTIVE_AGENT.md` IDLE 초기화
+- [ ] TASK_BOARD SECTION 1 🔔 검토 대기 등록
 
 ---
 
