@@ -827,3 +827,63 @@
 - **관련 파일**: `src/components/ui/ZenUI.tsx`
 - **예상 공수**: 1 MD
 - **우선순위**: Low
+
+---
+
+## [IMP-064] API Route Handler 스택 트레이스 프로덕션 노출
+
+- **발견 경위**: Ring (Qwen3.6) — `src/app/api/finance/export/route.ts` 전수 분석 중 L67, L90에서 `error.stack` 클라이언트 응답 포함 확인
+- **현재 상태**: GET/POST handler panic 시 `error.stack` 전체가 HTTP 500 response body에 포함됨. 프로덕션 환경에서 내부 코드 구조, 파일 경로, 라이브러리 버전 등 민감 정보 노출
+- **임시 조치**: 없음
+- **목표 구현**: ① 프로덕션(`NODE_ENV=production`)에서는 `error.stack` 제거, 범용 메시지만 반환 ② 개발 환경에서만 스택 트레이스 포함 ③ `src/lib/errors.ts` 공통 에러 응답 헬퍼 도입
+- **관련 파일**: `src/app/api/finance/export/route.ts`
+- **예상 공수**: 0.2 MD
+- **우선순위**: **High** (보안 정보 노출)
+
+---
+
+## [IMP-065] Excel Export POST 엔드포인트 인증 미적용
+
+- **발견 경위**: Ring (Qwen3.6) — `src/app/api/finance/export/route.ts` POST handler 분석 (L71~L92)
+- **현재 상태**: `POST /api/finance/export`가 인증 체크 없이 임의의 JSON 데이터를 받아 Excel 파일 생성. 인증 검증이 GET에만 존재, POST에는 전무
+- **임시 조치**: 없음
+- **목표 구현**: ① POST handler에도 GET과 동일한 인증·프로필 검증 로직 추가 ② 페이로드 크기 제한 ③ Rate Limiting 적용 (IMP-046 연계)
+- **관련 파일**: `src/app/api/finance/export/route.ts`
+- **예상 공수**: 0.3 MD
+- **우선순위**: **High** (인증 우회·데이터 위조 가능)
+
+---
+
+## [IMP-066] HTTP Security Headers 미설정
+
+- **발견 경위**: Ring (Qwen3.6) — `next.config.ts` 전수 분석, 보안 헤더 설정 전무 확인
+- **현재 상태**: CSP, X-Frame-Options, X-Content-Type-Options, Strict-Transport-Security, Referrer-Policy 등 OWASP 권장 보안 헤더 미적용
+- **임시 조치**: 없음
+- **목표 구현**: ① `next.config.ts`에 `headers()` 함수 추가 ② 필수 보안 헤더 적용 (CSP, X-Frame, HSTS 등) ③ Supabase, Sentry 등 외부 도메인 CSP 예외 추가
+- **관련 파일**: `next.config.ts`, `src/middleware.ts`
+- **예상 공수**: 0.5 MD
+- **우선순위**: **High** (OWASP 보안 헤더 미적용)
+
+---
+
+## [IMP-067] Server Action 입력 유효성 검증 부재 (Zod 등)
+
+- **발견 경위**: Ring (Qwen3.6) — `src/app/actions/` 전수 분석, 6개 mutation 액션이 `payload: any` 파라미터 수신, 런타임 검증 전무
+- **현재 상태**: `createVoc()`, `upsertTransportCost()`, `upsertPort()`, `upsertCommonCode()`, `updateSystemParam()`, `upsertVesselSchedule()` — 타입 안전성 없이 임의 객체 직접 DB 쿼리 사용
+- **임시 조치**: 없음
+- **목표 구현**: ① `zod` 도입 — 각 mutation 액션에 스키마 정의 ② `payload` 파싱 → 검증 실패 시 400 에러 반환 ③ `src/lib/validation/` 하위에 공통 스키마 정의
+- **관련 파일**: `src/app/actions/voc.ts`, `finance.ts`, `master.ts`, `schedules.ts`
+- **예상 공수**: 1.5 MD
+- **우선순위**: **High** (데이터 무결성 위험)
+
+---
+
+## [IMP-068] Signup 프로필 생성 Race Condition
+
+- **발견 경위**: Ring (Qwen3.6) — `src/app/[locale]/(auth)/login/actions.ts` signup 함수 분석 (L105)
+- **현재 상태**: 회원가입 시 문서 업로드 플로우에서 `setTimeout(500)`으로 Supabase auth 트리거가 `zen_profiles` 생성을 기다림. 500ms는 환경에 따라 부족할 수 있으며, race condition으로 프로필 미생성 시 문서 업로드 silently 실패
+- **임시 조치**: 없음
+- **목표 구현**: ① `setTimeout` 제거 → `zen_profiles` 생성 확인 시까지 polling (최대 5초, 200ms 간격) ② 또는 Supabase Edge Function으로 auth 트리거 → 문서 업로드 직렬화 ③ 실패 시 명시적 에러 반환
+- **관련 파일**: `src/app/[locale]/(auth)/login/actions.ts`
+- **예상 공수**: 0.5 MD
+- **우선순위**: **Medium** (간헐적 문서 업로드 실패)
