@@ -7,14 +7,14 @@
 
 ## 현재 상태
 
-- **Status**: IDLE
-- **에이전트**: —
-- **역할**: —
-- **작업**: —
-- **시작**: —
-- **예상 완료**: —
-- **잠금 파일/경로**: —
-- **last_verified_at**: 2026-05-16T09:25:00+09:00
+- **Status**: BUSY
+- **에이전트**: B_Kai (GLM Big Pickle)
+- **역할**: Temp Execution (IMP-055-BK)
+- **작업**: [Phase E] 인덱스 누락 4종 추가
+- **시작**: 2026-05-16
+- **예상 완료**: 2026-05-16
+- **잠금 파일/경로**: supabase/migrations/
+- **last_verified_at**: 2026-05-16T09:30:00+09:00
 - **status_age_limit_hours**: 24
 
 ---
