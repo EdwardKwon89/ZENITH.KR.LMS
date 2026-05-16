@@ -35,9 +35,9 @@
 | 037 | Supabase Auth 보안 설정 | Riley | ✅ PASS | 2026-05-15 |
 | 026 | RLS 비즈니스 규칙 통합 (SQL 함수화) | Aiden+Riley | ✅ PASS | 2026-05-16 |
 | 041 | Storage 정책 조직 멤버십 검증 | Riley | ✅ PASS | 2026-05-16 |
-| 057 | `zen_role_permissions` SELECT 제한 | Riley | 🔔 | 2026-05-16 |
+| 057 | `zen_role_permissions` SELECT 제한 | Riley | ✅ PASS | 2026-05-16 |
 
-**Phase A 완료**: 6 / 7 (85.7%) ※ IMP-057 FIX 완료 후 7/7
+**Phase A 완료**: 7 / 7 (100%) ✅
 
 ---
 

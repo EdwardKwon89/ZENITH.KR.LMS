@@ -1,7 +1,7 @@
 # Multi-Agent Task Board
 
 > **프로젝트:** ZENITH_LMS
-> **업데이트:** 2026-05-16 (KST) — IMP-057-RL ❌ CONDITIONAL PASS (DoD 3중 위반) — Riley FIX 지시 발령
+> **업데이트:** 2026-05-16 (KST) — EXP-IMP-RG(Ring/Qwen3.6) ❌ CONDITIONAL PASS + IMP-057-RL FIX 지시 발령
 > **운영 원칙:**
 >
 > - 각 에이전트는 작업 완료 시 **SECTION 1 상태 대시보드를 최우선 갱신**한 뒤 담당 SECTION 상세를 업데이트한다.
@@ -73,7 +73,8 @@
 | ~~**ANA-IMP-DK-D**~~      | D_Kai  | Phase D 사전 GitNexus 분析 (IMP-014·033·058·059)   | 2026-05-16 | ❌ CONDITIONAL PASS — IMP-014 분류 오류·IMP-059 누락 |
 | ~~**ANA-IMP-DK-D-FIX**~~ | D_Kai  | [FIX] IMP-014 Client 재분류 + IMP-059 보완          | 2026-05-16 | ✅ FULL PASS |
 | ~~**ANA-IMP-DK-E**~~      | D_Kai  | Phase E 사전 GitNexus 분석 (IMP-020·021·022·054·055·062) | 2026-05-16 | ✅ FULL PASS |
-| ~~**IMP-057-RL-FIX**~~        | Riley  | [Phase A] IMP-057 DoD 보완 (HANDOFF_BOX + IMP_PROGRESS + TASK_BOARD) | 2026-05-16 | ✅ 완료 |
+| ~~**IMP-057-RL-FIX**~~        | Riley  | [Phase A] IMP-057 DoD 보완 (HANDOFF_BOX + IMP_PROGRESS + TASK_BOARD) | 2026-05-16 | ✅ FULL PASS |
+| **EXP-IMP-RG-FIX**       | Ring   | IMP-064~068 post_launch_improvements 등록 + [Ring] 태그 + HANDOFF  | 2026-05-16 | 🔔 Aiden 검토 대기 |
 | **IMP-055-BK**            | B_Kai  | [Phase E] 인덱스 누락 4종 추가                                  | 2026-05-16 | 🔔 Aiden 검토 대기 |
 | **IMP-055-BK-SUP**        | B_Kai  | [Phase E] D_Kai 권장 인덱스 보완 (zen_profiles·voc·qna·invoices 복합) | 2026-05-16 | 🔔 Aiden 검토 대기 |
 
@@ -118,9 +119,9 @@
 | ~~**IMP-035-RL-FIX-2**~~ | Aiden  | [FIX-2] CRITICAL 3종 SECURITY DEFINER 복원 + MANAGER 역할 추가 (재지시) | 2026-05-15 | ✅ FULL PASS |
 | ~~**IMP-026-RL**~~        | Aiden  | [Phase A] RLS 비즈니스 규칙 통합 (SQL 함수화)                           | 2026-05-16 | ✅ FULL PASS |
 | ~~**IMP-041-RL**~~        | Aiden  | [Phase A] Storage 버킷 조직 멤버십 검증 (business_docs, invoices)     | 2026-05-16 | ✅ FULL PASS |
-| ~~**IMP-057-RL**~~            | Aiden  | [Phase A] zen_role_permissions SELECT 제한                            | 2026-05-16 | ❌ CONDITIONAL PASS |
-| **IMP-057-RL-FIX**        | Aiden  | [FIX] DoD 보완 — HANDOFF_BOX + IMP_PROGRESS + TASK_BOARD 정정         | 2026-05-16 | 🔔 Aiden 검토 대기 |
-| **IMP-019-RL**            | Aiden  | [Phase B] createOrder() 트랜잭션 도입 (IMP-047·052·053 블로커)        | 2026-05-16 | 🚫 IMP-057-FIX 완료 후 착수 |
+| ~~**IMP-057-RL**~~            | Aiden  | [Phase A] zen_role_permissions SELECT 제한                            | 2026-05-16 | ✅ FULL PASS (FIX 완료) |
+| ~~**IMP-057-RL-FIX**~~    | Aiden  | [FIX] DoD 보완 — HANDOFF_BOX + IMP_PROGRESS + TASK_BOARD 정정         | 2026-05-16 | ✅ 완료 |
+| **IMP-019-RL**            | Aiden  | [Phase B] createOrder() 트랜잭션 도입 (IMP-047·052·053 블로커)        | 2026-05-16 | ⏳ 착수 가능 (IMP-057 PASS) |
 | **IMP-039-RL**            | Aiden  | [Phase B] 정산 이중 실행 방지                                          | 2026-05-16 | 🚫 IMP-019 후 착수 |
 | **IMP-040-RL**            | Aiden  | [Phase B] WAREHOUSED→CANCELED 재고 복구 누락                          | 2026-05-16 | 🚫 IMP-019 후 착수 |
 
@@ -164,10 +165,41 @@
 | Task ID            | 에이전트 | 모델         | Task 명                  | 지시일     | 상태                               |
 | :----------------- | :------- | :----------- | :----------------------- | :--------- | :--------------------------------: |
 | ~~**EXP-IMP-MM**~~ | MiniMax  | MiniMax M2.5 | 전체 코드베이스 IMP 도출 | 2026-05-13 | ❌ **테스트 탈락** — 보고서 미제출 |
-| **EXP-IMP-RG**     | Ring     | Ring 2.6 1T  | 전체 코드베이스 IMP 도출 | 2026-05-16 | 🔄 **착수 지시 (2026-05-16)**      |
+| **EXP-IMP-RG**     | Ring     | Qwen3.6      | 전체 코드베이스 IMP 도출 | 2026-05-16 | ❌ **CONDITIONAL PASS** — IMP-064~068 미등록·[Ring] 태그·HANDOFF 없음 |
 
 ---
 
+
+---
+
+## 📨 Aiden → Ring | EXP-IMP-RG-FIX — 보완 지시 (CONDITIONAL PASS)
+
+> **수행 주체**: Ring (Qwen3.6) | **검증 주체**: Aiden (Claude) | **지시일**: 2026-05-16
+> **판정**: ❌ CONDITIONAL PASS — 분析 품질 우수, 절차 3건 보완 필요
+
+### 보완 이유
+
+IMP-064~068 (신규 5종) 소스 코드 검증 전량 통과. 절차 누락만 보완하면 FULL PASS.
+
+### 작업 지시
+
+1. `scratch/post_launch_improvements.md`에 IMP-064~068 각항 R-15 형식으로 등록
+   - IMP-064: API Route stack trace 노출 (High)
+   - IMP-065: Excel Export POST 인증 미적용 (High)
+   - IMP-066: HTTP Security Headers 미설정 (High)
+   - IMP-067: Server Action 입력 Zod 검증 부재 (High)
+   - IMP-068: Signup `setTimeout(500)` race condition (Medium)
+2. `HANDOFF_BOX.md`에 완료 보고 메시지 작성
+3. 커밋: `[Ring] chore: EXP-IMP-RG-FIX IMP-064~068 post_launch 등록`
+   - **반드시 `[Ring]` 태그 사용** (이전 커밋의 `[OpenCode]` 태그는 에이전트 식별 불가)
+
+### 완료 기준 (DoD)
+
+- [ ] IMP-064~068 `post_launch_improvements.md` 등록 완료
+- [ ] HANDOFF_BOX 완료 메시지 작성
+- [ ] `[Ring]` 태그 커밋
+
+---
 ## 📊 전체 활성 태스크 현황
 
 | Task ID              | 담당        | Task 명                                               | 상태                           | 블로커                                                     |
