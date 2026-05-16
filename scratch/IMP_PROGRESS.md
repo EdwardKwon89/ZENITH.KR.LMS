@@ -158,6 +158,22 @@
 
 ---
 
+## Phase H — Security Hardening 2차 (Ring 도출)
+
+> Ring (Qwen3.6) EXP-IMP-RG-FIX (2026-05-16) 도출 — 보안·인증·입력 검증 보완
+
+| IMP | 내용 | Agent | 상태 | 완료일 |
+|:---:|:-----|:-----:|:----:|:------:|
+| 064 | API Route Handler 스택 트레이스 프로덕션 노출 | Riley | ⬜ | — |
+| 065 | Excel Export POST 엔드포인트 인증 미적용 | Riley | ⬜ | — |
+| 066 | HTTP Security Headers 미설정 (CSP·HSTS·X-Frame) | Riley | ⬜ | — |
+| 067 | Server Action 입력 Zod 검증 부재 (6개 액션) | Riley | ⬜ | — |
+| 068 | Signup 프로필 생성 Race Condition (setTimeout 500) | Riley | ⬜ | — |
+
+**Phase H 완료**: 0 / 5
+
+---
+
 ## 삭제/병합 처리
 
 | IMP | 처리 내용 |
@@ -177,9 +193,11 @@
 | E | 2 | 7 | 28.6% |
 | F | 1 | 12 | 8.3% |
 | G | 0 | 1 | 0% |
-| **합계** | **14** | **52** | **26.9%** |
+| H | 0 | 5 | 0% |
+| **합계** | **14** | **57** | **24.6%** |
 
-> ⚠️ 합계 52개 = 완료 14개(IMP-026·027·034a·035·036·037·038·041·042·043·044·048·055·057) + 미착수 38개 (IMP-018·034b 제외)
+> ⚠️ 합계 57개 = 완료 14개(IMP-026·027·034a·035·036·037·038·041·042·043·044·048·055·057) + 미착수 43개 (IMP-018·034b 제외)
+> Phase H 신설 (2026-05-16): IMP-064~068 Ring(Qwen3.6) EXP-IMP-RG-FIX 도출 5건 추가
 
 ---
 
@@ -198,3 +216,4 @@
 | 2026-05-16 | B_Kai (GLM Big Pickle) | IMP-055 완료 — 누락 인덱스 4종 추가 (zen_orders shipper_id/status, zen_invoices shipper_id, zen_order_costs order_id) |
 | 2026-05-16 | B_Kai (GLM Big Pickle) | IMP-055-BK-SUP — D_Kai 권장 인덱스 보완 4종 추가 (zen_profiles org_id, zen_voc 복합, zen_qna 복합, zen_invoices 복합) |
 | 2026-05-16 | Aiden (Claude) | IMP-055 ✅ PASS 확정 — BK 자체 4종 + D_Kai 권장 4종 총 8종 중복 없음 확인. Phase A 집계 보정(4/7→7/7). 전체 14/52(26.9%) |
+| 2026-05-16 | Aiden (Claude) | Phase H 신설 — IMP-064~068 (Ring EXP-IMP-RG-FIX 도출 5건) 등재. 전체 52→57개, 진행률 26.9%→24.6% |
