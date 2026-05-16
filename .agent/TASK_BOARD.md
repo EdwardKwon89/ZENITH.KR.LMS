@@ -1,7 +1,7 @@
 # Multi-Agent Task Board
 
 > **프로젝트:** ZENITH_LMS
-> **업데이트:** 2026-05-16 (KST) — IMP-044-BK-FIX ✅ FULL PASS / ANA-IMP-DK-D-FIX ✅ FULL PASS
+> **업데이트:** 2026-05-16 (KST) — 전 에이전트 신규 지시 발령 (Riley 4건·B_Kai 2건·D_Kai 1건·Ring 1건)
 > **운영 원칙:**
 >
 > - 각 에이전트는 작업 완료 시 **SECTION 1 상태 대시보드를 최우선 갱신**한 뒤 담당 SECTION 상세를 업데이트한다.
@@ -94,6 +94,8 @@
 | ~~**IMP-042-043-BK-FIX**~~    | IMP_PROGRESS Phase B 카운트 보정 (3/10 → 1/10)               | 2026-05-15 | ✅ FULL PASS       |
 | ~~**IMP-044-BK**~~            | [Phase B] 인보이스 발행 후 비용 변경 차단                       | 2026-05-16 | ✅ FULL PASS |
 | ~~**IMP-044-BK-FIX**~~        | [FIX] 트리거 TG_OP 분기 수정 (DELETE→RETURN OLD)               | 2026-05-16 | ✅ FULL PASS |
+| **IMP-055-BK**                | [Phase E] 인덱스 누락 4종 추가                                  | 2026-05-16 | ⏳ 착수 지시 |
+| **IMP-054-BK**                | [Phase E] N+1 쿼리 7곳 수정                                     | 2026-05-16 | 🚫 ANA-IMP-DK-E PASS 후 착수 |
 
 ---
 
@@ -111,6 +113,10 @@
 | ~~**IMP-035-RL-FIX-2**~~ | Aiden  | [FIX-2] CRITICAL 3종 SECURITY DEFINER 복원 + MANAGER 역할 추가 (재지시) | 2026-05-15 | ✅ FULL PASS |
 | ~~**IMP-026-RL**~~        | Aiden  | [Phase A] RLS 비즈니스 규칙 통합 (SQL 함수화)                           | 2026-05-16 | ✅ FULL PASS |
 | ~~**IMP-041-RL**~~        | Aiden  | [Phase A] Storage 버킷 조직 멤버십 검증 (business_docs, invoices)     | 2026-05-16 | ✅ FULL PASS |
+| **IMP-057-RL**            | Aiden  | [Phase A] zen_role_permissions SELECT 제한                            | 2026-05-16 | ⏳ 착수 대기 |
+| **IMP-019-RL**            | Aiden  | [Phase B] createOrder() 트랜잭션 도입 (IMP-047·052·053 블로커)        | 2026-05-16 | 🚫 IMP-057 후 착수 |
+| **IMP-039-RL**            | Aiden  | [Phase B] 정산 이중 실행 방지                                          | 2026-05-16 | 🚫 IMP-019 후 착수 |
+| **IMP-040-RL**            | Aiden  | [Phase B] WAREHOUSED→CANCELED 재고 복구 누락                          | 2026-05-16 | 🚫 IMP-019 후 착수 |
 
 ## 🆕 신규 지시 대기 (D_Kai 착수 가능)
 
@@ -125,6 +131,7 @@
 | ~~**ANA-IMP-DK-C**~~           | —  | Phase C 사전 GitNexus 분석 (IMP-013·025·045·051·056)                             | 2026-05-15                  | ✅ **FULL PASS**       |
 | ~~**ANA-IMP-DK-D**~~               | D  | Phase D 사전 GitNexus 분석 (IMP-014·033·058·059)                                  | 2026-05-16                  | ❌ **CONDITIONAL PASS** — IMP-014 분류 오류·IMP-059 누락 |
 | ~~**ANA-IMP-DK-D-FIX**~~               | D  | [FIX] IMP-014 Client 컴포넌트 재분류 + IMP-059 보완                               | 2026-05-16                  | ✅ **FULL PASS**       |
+| **ANA-IMP-DK-E**                        | E  | Phase E 사전 GitNexus 분析 (IMP-020·021·022·054·055·062)                           | 2026-05-16                  | ⏳ **착수 지시**       |
 | ~~**GOV-001**~~     | 1     | ACTIVE_AGENT.md IDLE 강제 초기화                                                | 2026-05-13                  | ✅ **Aiden PASS**        |
 | ~~**GOV-002**~~     | 1     | `~/.claude/settings.json` PostToolUse GitNexus Hook 제거                        | 2026-05-13                  | ✅ **Aiden PASS**        |
 | ~~**GOV-003**~~     | 2     | `GEMINI.md` + `AGENTS.md` Task 완료 DoD에 IDLE 초기화 추가                      | 2026-05-13                  | ✅ **Aiden PASS**        |
@@ -151,7 +158,7 @@
 | Task ID            | 에이전트 | 모델         | Task 명                  | 지시일     | 상태                               |
 | :----------------- | :------- | :----------- | :----------------------- | :--------- | :--------------------------------: |
 | ~~**EXP-IMP-MM**~~ | MiniMax  | MiniMax M2.5 | 전체 코드베이스 IMP 도출 | 2026-05-13 | ❌ **테스트 탈락** — 보고서 미제출 |
-| **EXP-IMP-RG**     | Ring     | Ring 2.6 1T  | 전체 코드베이스 IMP 도출 | 2026-05-13 | ⏳ 온보딩 후 착수                  |
+| **EXP-IMP-RG**     | Ring     | Ring 2.6 1T  | 전체 코드베이스 IMP 도출 | 2026-05-16 | 🔄 **착수 지시 (2026-05-16)**      |
 
 ---
 
@@ -542,6 +549,85 @@ rtk npm run test:regression
 - [ ] HANDOFF_BOX.md 인계 메시지 작성
 - [ ] ACTIVE_AGENT.md IDLE 초기화
 - [ ] TASK_BOARD SECTION 1 🔔 검토 대기 등록
+
+---
+
+## 📨 Aiden → Riley | IMP-057 → IMP-019 → IMP-039+040 [Phase A/B] 순차 착수 지시
+
+> **수행 주체**: Riley (Gemini) | **검증 주체**: Aiden (Claude) | **지시일**: 2026-05-16
+> **착수 순서**: IMP-057(즉시) → IMP-019(Phase B 블로커) → IMP-039+040(IMP-019 완료 후)
+
+---
+
+### IMP-057 — zen_role_permissions SELECT 제한 (Phase A 최종)
+
+**목적**: 현재 인증 사용자 전원이 전체 권한 테이블 조회 가능 → 역할별 본인 권한만 조회하도록 RLS 보강
+
+**작업 지시**
+
+1. `ACTIVE_AGENT.md` → `Status: BUSY`
+2. `zen_role_permissions` 현재 RLS 정책 확인 (`supabase/migrations/` 내 최신 정책)
+3. 신규 migration 작성
+   - ADMIN·MANAGER·ZENITH_SUPER_ADMIN: 전체 조회
+   - 그 외 인증 사용자: `WHERE role = public.get_my_role()` 본인 역할 권한만 조회
+4. `gitnexus_impact({target: "zen_role_permissions", direction: "upstream"})` — HIGH/CRITICAL 시 Aiden 보고 후 대기
+5. `supabase db reset` → `rtk npm run test:regression` → 전체 PASS
+6. `gitnexus_detect_changes()`
+7. 커밋: `[Gemini] fix: IMP-057 zen_role_permissions SELECT 제한`
+8. `ACTIVE_AGENT.md` IDLE / HANDOFF_BOX 인계 / TASK_BOARD SECTION 1 🔔 / `IMP_PROGRESS.md` 갱신
+
+**DoD**: migration 커밋 + 회귀 PASS 증적 + IDLE 초기화 + 🔔 등록
+
+---
+
+### IMP-019 — createOrder() 트랜잭션 도입 ⚠️ IMP-047·052·053 블로커
+
+**목적**: `createOrder()` 내 오더 생성 + 재고 차감 + 알림 발송이 단일 트랜잭션 없이 실행 → 중간 실패 시 데이터 불일치
+
+**작업 지시**
+
+1. `src/app/actions/orders.ts` → `createOrder()` 전체 흐름 파악
+2. `src/app/actions/inventory.ts` → 재고 차감 함수 확인
+3. 구현 방식 결정 (둘 중 선택):
+   - **방식 A (권장)**: DB RPC 함수로 원자적 처리 — `supabase.rpc('create_order_atomic', {...})`
+   - **방식 B**: 실패 시 보상 트랜잭션 (rollback 전략 명시 필수)
+4. `gitnexus_impact({target: "createOrder", direction: "upstream"})` — 영향 범위 Aiden 보고
+5. 구현 후 회귀 테스트 전체 PASS
+6. 커밋: `[Gemini] fix: IMP-019 createOrder 트랜잭션 도입`
+7. DoD: ACTIVE_AGENT.md IDLE + HANDOFF_BOX + 🔔 + IMP_PROGRESS 갱신
+
+**⚠️ IMP-047·052·053은 본 태스크 Aiden PASS 후 자동 블로커 해제**
+
+---
+
+### IMP-039 — 정산 이중 실행 방지 (IMP-019 완료 후 착수)
+
+**목적**: `calculateSettlementAction()` 중복 호출 시 정산 레코드 이중 생성 가능
+
+**작업 지시**
+
+1. `src/app/actions/finance.ts` → `calculateSettlementAction()` 검토
+2. 이미 `invoice_id` 가드(IMP-044) 적용됨 → 정산 계산 단계 자체의 멱등성 추가 필요 여부 판단
+3. `zen_order_costs` 레코드 존재 시 UPSERT 또는 실행 전 존재 체크 추가
+4. 회귀 테스트 전체 PASS
+5. 커밋: `[Gemini] fix: IMP-039 정산 이중 실행 방지`
+6. DoD: ACTIVE_AGENT.md IDLE + HANDOFF_BOX + 🔔 + IMP_PROGRESS 갱신
+
+---
+
+### IMP-040 — WAREHOUSED→CANCELED 재고 복구 누락 (IMP-019 완료 후 착수)
+
+**목적**: 오더가 WAREHOUSED 상태에서 CANCELED 전이 시 차감된 재고가 복구되지 않음
+
+**작업 지시**
+
+1. `src/app/actions/orders.ts` → CANCELED 전이 처리 로직 확인
+2. `src/app/actions/inventory.ts` → 재고 복구 함수 유무 확인 (없으면 신규 작성)
+3. `updateOrderStatus()` 내 CANCELED 전이 분기 → 이전 상태가 WAREHOUSED·PACKED·RELEASED인 경우에만 재고 복구 적용
+4. `gitnexus_impact({target: "updateOrderStatus", direction: "upstream"})` — HIGH/CRITICAL 시 Aiden 보고
+5. 회귀 테스트 전체 PASS
+6. 커밋: `[Gemini] fix: IMP-040 WAREHOUSED→CANCELED 재고 복구 누락`
+7. DoD: ACTIVE_AGENT.md IDLE + HANDOFF_BOX + 🔔 + IMP_PROGRESS 갱신
 
 ---
 
@@ -1176,11 +1262,49 @@ IMP-059 섹션에 아래 내용 추가:
 
 ---
 
+## 📨 Aiden → D_Kai | ANA-IMP-DK-E — Phase E 사전 GitNexus 분析
+
+> **수행 주체**: D_Kai (OpenCode) | **검증 주체**: Aiden (Claude) | **지시일**: 2026-05-16
+> **유형**: 순수 분석 (코드 수정 없음) | **예상 공수**: 0.5 MD
+> **목적**: Phase E 구현 에이전트(B_Kai·Riley)의 구현 전 Blast Radius·위치 특정 제공
+
+### 분析 대상 (Phase E — Performance Optimization)
+
+| IMP | 내용 | 핵심 분析 포인트 |
+|:---:|:-----|:---------------|
+| 020 | Feature Flags 캐싱 | `isFeatureEnabled()` 중복 호출 횟수·패턴, 캐싱 삽입 위치 |
+| 021 | 미들웨어 DB 호출 최적화 | `src/middleware.ts` DB 쿼리 수·호출 구조 |
+| 022 | NaviSidebar 번들 최적화 | 번들 크기·동적 import 적용 가능 범위 |
+| **054** | **N+1 쿼리 7곳** | **정확한 파일·라인·쿼리 패턴 전부 특정 (B_Kai 구현 지도 필수)** |
+| **055** | **인덱스 누락 4종** | **테이블·컬럼·이유 전부 특정 (B_Kai 구현 지도 필수)** |
+| 062 | SELECT * → 명시적 컬럼 | 영향 파일 수·위험 쿼리 우선순위 |
+
+### 작업 지시
+
+1. `ACTIVE_AGENT.md` → `Status: BUSY`
+2. `gitnexus_query`, `gitnexus_impact`, `gitnexus_context` 활용하여 각 IMP Blast Radius 산출
+3. **IMP-054**: `orders.ts`·`inventory.ts`·`tracking.ts`·`dashboard.ts` 등 N+1 쿼리 7곳 파일·라인 특정
+4. **IMP-055**: 주요 WHERE 절·JOIN 컬럼 분析 → 누락 인덱스 4종 컬럼·테이블 특정
+5. 결과 저장: `scratch/ANA_PhaseE_DKai_20260516.md`
+6. 커밋: `[OpenCode] docs: ANA-IMP-DK-E Phase E 사전 GitNexus 분析`
+7. `ACTIVE_AGENT.md` IDLE / TASK_BOARD SECTION 1 🔔 등록
+
+### 완료 기준 (DoD)
+
+- [ ] IMP-054: N+1 쿼리 7개 파일·라인 전부 특정
+- [ ] IMP-055: 누락 인덱스 4종 컬럼·테이블 전부 특정
+- [ ] IMP-020·021·022·062: Blast Radius + 권장 구현 방향 기술
+- [ ] `scratch/ANA_PhaseE_DKai_20260516.md` 커밋
+- [ ] `ACTIVE_AGENT.md` IDLE 초기화
+- [ ] TASK_BOARD SECTION 1 🔔 등록
+
+---
+
 # SECTION 6 — Ring 2.6 1T 작업 상세
 
 > **에이전트**: Ring 2.6 1T (inclusionAI / Ant Group) | **역할**: 성능 벤치마크 실증 실험
 > **커밋 태그**: `[Ring]`
-> **상태**: 신규 온보딩 (2026-05-13)
+> **상태**: ✅ 온보딩 안내 완료 → **🔄 EXP-IMP-RG 착수 지시 (2026-05-16)**
 
 ---
 
@@ -2045,3 +2169,65 @@ rtk npm run test:regression
 - [ ] HANDOFF_BOX.md 인계 메시지
 - [ ] ACTIVE_AGENT.md IDLE 초기화
 - [ ] TASK_BOARD SECTION 1 🔔 검토 대기 등록
+
+---
+
+## 📨 Aiden → B_Kai | IMP-055-BK — [Phase E] 인덱스 누락 4종 추가
+
+> **수행 주체**: B_Kai (GLM Big Pickle) | **검증 주체**: Aiden (Claude) | **지시일**: 2026-05-16
+> **우선순위**: High | **예상 공수**: 0.5 MD
+> **참조**: D_Kai ANA-IMP-DK-E PASS 후 `scratch/ANA_PhaseE_DKai_20260516.md §IMP-055` 교차 검증 권장
+> **⚠️ D_Kai 분析 완료 전 선착수 가능** — 자체 식별 후 ANA-E로 교차 검증
+
+### 배경
+
+주요 조회 쿼리 WHERE·JOIN 컬럼에 인덱스가 누락되어 있어 대용량 데이터 처리 시 성능 저하 발생.  
+단, `zen_order_costs.invoice_id`는 IMP-044-BK에서 이미 추가됨 — **중복 추가 금지**.
+
+### 작업 지시
+
+1. `ACTIVE_AGENT.md` → `Status: BUSY`
+2. 누락 인덱스 자체 식별 (아래 테이블 우선 검토):
+   - `zen_orders`: `shipper_id`, `org_id`, `status`, `created_at` 컬럼 빈도 확인
+   - `zen_invoices`: `shipper_id`, `status`, `created_at` 컬럼 빈도 확인
+   - `zen_profiles`: `org_id`, `role` 컬럼 빈도 확인
+   - `zen_order_costs`: `order_id` (invoice_id는 기존 인덱스 존재 — 중복 확인 필수)
+3. 기존 인덱스 현황 확인 (migrations 파일 + `0001_initial_schema.sql`)
+4. 신규 migration 파일 작성: `supabase/migrations/20260516XXXXXX_add_missing_indexes.sql`
+5. `supabase db reset` → `rtk npm run test:regression` → 전체 PASS
+6. `gitnexus_detect_changes()`
+7. 커밋: `[B_Kai] fix: IMP-055 누락 인덱스 4종 추가`
+8. `ACTIVE_AGENT.md` IDLE / HANDOFF_BOX 인계 / TASK_BOARD SECTION 1 🔔 / IMP_PROGRESS 갱신
+
+### 완료 기준 (DoD)
+
+- [ ] 4종 인덱스 migration 파일 커밋 완료
+- [ ] `zen_order_costs.invoice_id` 중복 추가 없음 확인
+- [ ] 회귀 테스트 전체 PASS 증적 (`docs/08_Self_Audit/Regression_Results/` 저장)
+- [ ] HANDOFF_BOX.md 인계 메시지 작성
+- [ ] `ACTIVE_AGENT.md` IDLE 초기화
+- [ ] TASK_BOARD SECTION 1 🔔 검토 대기 등록
+- [ ] `scratch/IMP_PROGRESS.md` IMP-055 행 `🔔` 갱신
+
+---
+
+## 📨 Aiden → B_Kai | IMP-054-BK — [Phase E] N+1 쿼리 7곳 수정 🚫 ANA-IMP-DK-E 후 착수
+
+> **수행 주체**: B_Kai (GLM Big Pickle) | **검증 주체**: Aiden (Claude) | **지시일**: 2026-05-16
+> **블로커**: D_Kai ANA-IMP-DK-E PASS (`scratch/ANA_PhaseE_DKai_20260516.md §IMP-054`) 필수 선행
+> **예상 공수**: 1 MD
+
+### 배경
+
+리스트 조회 함수에서 단건 조회를 반복 호출하는 N+1 패턴이 7곳에서 발생.  
+ANA-IMP-DK-E에서 정확한 파일·라인을 특정한 후 JOIN 또는 In-clause 일괄 조회로 교체.
+
+### 작업 지시 (ANA-IMP-DK-E PASS 후 실행)
+
+1. `scratch/ANA_PhaseE_DKai_20260516.md §IMP-054` 내 7개 위치 확인
+2. `ACTIVE_AGENT.md` → `Status: BUSY`
+3. 각 위치별 수정: 단건 반복 → JOIN 또는 `IN (ids)` 일괄 조회로 교체
+4. `gitnexus_impact` 영향도 확인 — HIGH/CRITICAL 시 Aiden 보고
+5. 회귀 테스트 전체 PASS
+6. 커밋: `[B_Kai] fix: IMP-054 N+1 쿼리 7곳 수정`
+7. DoD: ACTIVE_AGENT.md IDLE + HANDOFF_BOX + 🔔 + IMP_PROGRESS 갱신
