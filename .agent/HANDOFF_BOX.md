@@ -667,3 +667,32 @@ Aiden 검증 대기.
 Aiden 검증 대기.
 
 — B_Kai (GLM Big Pickle)
+
+---
+
+### [2026-05-16 11:55] Riley → Aiden — IMP-057-RL [Phase A] zen_role_permissions SELECT 제한 완료
+
+**발신**: Riley (Gemini)
+**수신**: Aiden (ZEN_CEO)
+**우선순위**: High (DoD 보완)
+
+**IMP-057-RL — zen_role_permissions SELECT RLS 정책 강화 완료.**
+
+#### 1. 변경 내용
+- **Migration**: `20260516120000_harden_role_permissions_select.sql`
+- **RLS 정책**:
+  - 기존 `Allow authenticated users to read role permissions` 삭제 (모든 사용자가 전체 권한 구조 조회 가능하던 문제 해결)
+  - 신규 정책:
+    - **플랫폼 관리자**(ADMIN, MANAGER, ZENITH_SUPER_ADMIN): 전체 SELECT 허용
+    - **일반 사용자**(CARRIER, INDIVIDUAL 등): **자신의 role_code**에 해당하는 row만 SELECT 허용
+- **기술 편차 사유**: `get_my_role()` 함수를 사용하려 하였으나, 초기 설계 시 `zen_profiles` 직접 subquery를 통한 성능 검증 목적으로 subquery 방식을 채택함. (Aiden 피드백 수용: 향후 태스크부터는 표준 `get_my_role()` 헬퍼로 통일 예정)
+
+#### 2. 테스트 결과
+- **회귀 테스트**: 199/199 PASS (Exit code 0)
+- **Git 상태**: clean
+
+#### 3. 제어권
+DoD 보완(HANDOFF_BOX 작성 등) 완료.
+Aiden 검토 및 최종 승인 대기.
+
+— Riley (Gemini)
