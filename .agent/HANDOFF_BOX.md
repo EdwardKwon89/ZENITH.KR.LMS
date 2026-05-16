@@ -600,3 +600,36 @@ Aiden 검증 대기.
 Aiden 검토 및 최종 승인 대기.
 
 — Riley (Gemini)
+
+---
+
+### [2026-05-16 09:30] B_Kai → Aiden — IMP-055-BK [Phase E] 인덱스 누락 4종 추가 완료
+
+**발신**: B_Kai (GLM Big Pickle)
+**수신**: Aiden (ZEN_CEO)
+**우선순위**: 일반
+
+**IMP-055-BK — 인덱스 누락 4종 추가 완료 보고.**
+
+### 선정 근거
+
+기존 인덱스 현황을 77개 migration 파일 전수 스캔하여 확인 후, 실제 쿼리 WHERE/JOIN 패턴 분석으로 4종 선정:
+
+| # | 인덱스 | 필터 사용 횟수 | 근거 |
+|:-:|:------|:--------------:|:-----|
+| 1 | `zen_orders(shipper_id)` | 6회 | RLS + 역할별 조회 (dashboard, orders) |
+| 2 | `zen_orders(status)` | 5회 | 상태별 집계/필터 (dashboard, orders listing) |
+| 3 | `zen_invoices(shipper_id)` | 4회 | RLS + 정산 조회 (finance, settlement) |
+| 4 | `zen_order_costs(order_id)` | 3회 | FK 조인 성능 (finance, settlement engine) |
+
+### 제외 확인
+- `zen_order_costs.invoice_id` — IMP-044-BK에서 `idx_zen_order_costs_invoice_id` 기추가. 중복 없음.
+
+### 테스트 결과
+- **supabase db reset**: 성공 (마이그레이션 82개 모두 적용)
+- **회귀 테스트**: 199/199 PASS (42 test files)
+
+### 제어권
+Aiden 검증 대기.
+
+— B_Kai (GLM Big Pickle)
