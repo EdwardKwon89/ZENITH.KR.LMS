@@ -74,6 +74,7 @@
 | ~~**ANA-IMP-DK-D-FIX**~~ | D_Kai  | [FIX] IMP-014 Client 재분류 + IMP-059 보완          | 2026-05-16 | ✅ FULL PASS |
 | ~~**ANA-IMP-DK-E**~~      | D_Kai  | Phase E 사전 GitNexus 분석 (IMP-020·021·022·054·055·062) | 2026-05-16 | ✅ FULL PASS |
 | **IMP-055-BK**            | B_Kai  | [Phase E] 인덱스 누락 4종 추가                                  | 2026-05-16 | 🔔 Aiden 검토 대기 |
+| **IMP-055-BK-SUP**        | B_Kai  | [Phase E] D_Kai 권장 인덱스 보완 (zen_profiles·voc·qna·invoices 복합) | 2026-05-16 | 🔔 Aiden 검토 대기 |
 
 
 ---
@@ -97,7 +98,7 @@
 | ~~**IMP-044-BK**~~            | [Phase B] 인보이스 발행 후 비용 변경 차단                       | 2026-05-16 | ✅ FULL PASS |
 | ~~**IMP-044-BK-FIX**~~        | [FIX] 트리거 TG_OP 분기 수정 (DELETE→RETURN OLD)               | 2026-05-16 | ✅ FULL PASS |
 | ~~**IMP-055-BK**~~            | [Phase E] 인덱스 누락 4종 추가                                  | 2026-05-16 | ✅ FULL PASS |
-| **IMP-055-BK-SUP**            | [Phase E] D_Kai 권장 인덱스 보완 (zen_profiles·voc·qna·invoices 복합) | 2026-05-16 | ⏳ 즉시 착수 |
+| ~~**IMP-055-BK-SUP**~~        | [Phase E] D_Kai 권장 인덱스 보완 (zen_profiles·voc·qna·invoices 복합) | 2026-05-16 | ✅ FULL PASS |
 | **IMP-054-BK**                | [Phase E] N+1 쿼리 7곳 수정                                     | 2026-05-16 | ⏳ 착수 가능 (ANA-E PASS) |
 
 ---
