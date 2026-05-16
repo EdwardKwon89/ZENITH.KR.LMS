@@ -45,7 +45,7 @@
 
 | IMP | 내용 | Agent | 상태 | 완료일 |
 |:---:|:-----|:-----:|:----:|:------:|
-| 019 | `createOrder()` 트랜잭션 도입 | Aiden+Riley | ⬜ | — |
+| 019 | `createOrder()` 트랜잭션 도입 | Riley | ⬜ | — |
 | 038 | CLAIMED OrderStatus 정식 등록 | B_Kai | ✅ | 2026-05-15 |
 | 039 | 정산 이중 실행 방지 | Riley | ⬜ | — |
 | 040 | WAREHOUSED→CANCELED 재고 불일치 | Riley | ⬜ | — |
@@ -69,10 +69,10 @@
 | 013 | console→logger 교체 (53개 파일) | Riley | ⬜ | — |
 | 015 | middleware.ts console.log 제거 | Riley | 🚫 | — |
 | 025 | Server Actions 에러 래퍼 | Riley | ⬜ | — |
-| 045 | 무제한 리스트 페이지네이션 (18곳) | Riley | ⬜ | — |
-| 046 | Rate Limiting 도입 | Riley | 🚫 | — |
-| 051 | 감사 추적 (마스터/인보이스/통관) | Riley | ⬜ | — |
-| 056 | 이메일 HTML 인젝션 방지 | Riley | ⬜ | — |
+| 045 | 무제한 리스트 페이지네이션 (18곳) | Ring | ⬜ | — |
+| 046 | Rate Limiting 도입 | B_Kai | 🚫 | — |
+| 051 | 감사 추적 (마스터/인보이스/통관) | Ring | ⬜ | — |
+| 056 | 이메일 HTML 인젝션 방지 | Ring | ⬜ | — |
 
 > 🚫 IMP-015: IMP-013 완료 후 착수 가능 / IMP-046: Aiden 인프라 결정 후 착수 가능 (Phase C 착수 전)
 
@@ -86,24 +86,24 @@
 
 | IMP | 내용 | Agent | 상태 | 완료일 |
 |:---:|:-----|:-----:|:----:|:------:|
-| 014 | admin/rates 531줄 분할 | Riley | ⬜ | — |
-| 033 | Server Actions 도메인 분할 | Riley | ⬜ | — |
-| 058 | finance.ts 733줄 분할 | Riley | ⬜ | — |
+| 014 | admin/rates 531줄 분할 | B_Kai | ⬜ | — |
+| 033 | Server Actions 도메인 분할 | B_Kai | ⬜ | — |
+| 058 | finance.ts 733줄 분할 | B_Kai | ⬜ | — |
 
 ### D2 — 패턴 도입
 
 | IMP | 내용 | Agent | 상태 | 완료일 |
 |:---:|:-----|:-----:|:----:|:------:|
-| 016 | Repository 패턴 | Aiden+D_Kai+Riley | 🚫 | — |
-| 059 | Supabase 클라이언트 중복 제거 | Riley | ⬜ | — |
+| 016 | Repository 패턴 | B_Kai+D_Kai | 🚫 | — |
+| 059 | Supabase 클라이언트 중복 제거 | D_Kai | ⬜ | — |
 
 ### D3 — 구조 개선
 
 | IMP | 내용 | Agent | 상태 | 완료일 |
 |:---:|:-----|:-----:|:----:|:------:|
-| 003 | middleware.ts → proxy.ts 마이그레이션 | Aiden+Riley | ⬜ | — |
-| 030 | 정산 엔진 SRP | Aiden+Riley | ⬜ | — |
-| 031 | RBAC 이중 상태 정리 | Riley | ⬜ | — |
+| 003 | middleware.ts → proxy.ts 마이그레이션 | D_Kai | ⬜ | — |
+| 030 | 정산 엔진 SRP | Riley | ⬜ | — |
+| 031 | RBAC 이중 상태 정리 | D_Kai | ⬜ | — |
 
 > 🚫 IMP-016: D1(IMP-033·058) 완료 후 착수 가능
 
@@ -115,13 +115,13 @@
 
 | IMP | 내용 | Agent | 상태 | 완료일 |
 |:---:|:-----|:-----:|:----:|:------:|
-| 020 | Feature Flags 캐싱 | Riley | ⬜ | — |
-| 021 | 미들웨어 DB 호출 최적화 | Riley | ⬜ | — |
-| 022 | NaviSidebar 번들 최적화 | Riley | ⬜ | — |
+| 020 | Feature Flags 캐싱 | D_Kai | ⬜ | — |
+| 021 | 미들웨어 DB 호출 최적화 | D_Kai | ⬜ | — |
+| 022 | NaviSidebar 번들 최적화 | D_Kai | ⬜ | — |
 | 048 | Mock 데이터 제거 | B_Kai | ✅ | 2026-05-15 |
-| 054 | N+1 쿼리 7곳 | Riley | ⬜ | — |
+| 054 | N+1 쿼리 7곳 | B_Kai | ⬜ | — |
 | 055 | 인덱스 누락 4종 | B_Kai | ✅ PASS | 2026-05-16 |
-| 062 | SELECT * → 명시적 컬럼 (112곳) | Riley | ⬜ | — |
+| 062 | SELECT * → 명시적 컬럼 (112곳) | B_Kai | ⬜ | — |
 
 **Phase E 완료**: 2 / 7
 
@@ -131,18 +131,18 @@
 
 | IMP | 내용 | Agent | 상태 | 완료일 |
 |:---:|:-----|:-----:|:----:|:------:|
-| 012 | Master/Admin 코드 중복 | Riley | ⬜ | — |
-| 017 | Error Boundary 4개 추가 | Riley | ⬜ | — |
-| 023 | i18n 번역 키 타입 안정성 | Riley | ⬜ | — |
-| 024 | 공통 UI 컴포넌트 라이브러리화 | Riley | ⬜ | — |
+| 012 | Master/Admin 코드 중복 | D_Kai | ⬜ | — |
+| 017 | Error Boundary 4개 추가 | B_Kai | ⬜ | — |
+| 023 | i18n 번역 키 타입 안정성 | D_Kai | ⬜ | — |
+| 024 | 공통 UI 컴포넌트 라이브러리화 | Ring | ⬜ | — |
 | 027 | 점검 모드 페이지 | B_Kai | ✅ | 2026-05-15 |
-| 029 | TS 타입 안전성 (any 퇴출) | Riley | ⬜ | — |
-| 032 | 다국어 번역 커버리지 감사 + CI 게이트 | B_Kai+Riley | ⬜ | — |
-| 049 | 이중 프로필 테이블 정리 | Riley | ⬜ | — |
+| 029 | TS 타입 안전성 (any 퇴출) | D_Kai | ⬜ | — |
+| 032 | 다국어 번역 커버리지 감사 + CI 게이트 | B_Kai | ⬜ | — |
+| 049 | 이중 프로필 테이블 정리 | D_Kai | ⬜ | — |
 | 050 | HELD→이전상태 복구 로직 | Riley | ⬜ | — |
-| 060 | RETURNED 상태 전이 확장 | Riley | ⬜ | — |
-| 061 | PDF 경로 충돌 방지 | Riley | ⬜ | — |
-| 063 | ZenUI.tsx 7개 분할 | Riley | ⬜ | — |
+| 060 | RETURNED 상태 전이 확장 | Ring | ⬜ | — |
+| 061 | PDF 경로 충돌 방지 | B_Kai | ⬜ | — |
+| 063 | ZenUI.tsx 7개 분할 | B_Kai | ⬜ | — |
 
 **Phase F 완료**: 1 / 12 (8.3%)
 
@@ -164,11 +164,11 @@
 
 | IMP | 내용 | Agent | 상태 | 완료일 |
 |:---:|:-----|:-----:|:----:|:------:|
-| 064 | API Route Handler 스택 트레이스 프로덕션 노출 | Riley | ⬜ | — |
-| 065 | Excel Export POST 엔드포인트 인증 미적용 | Riley | ⬜ | — |
-| 066 | HTTP Security Headers 미설정 (CSP·HSTS·X-Frame) | Riley | ⬜ | — |
-| 067 | Server Action 입력 Zod 검증 부재 (6개 액션) | Riley | ⬜ | — |
-| 068 | Signup 프로필 생성 Race Condition (setTimeout 500) | Riley | ⬜ | — |
+| 064 | API Route Handler 스택 트레이스 프로덕션 노출 | Ring | ⬜ | — |
+| 065 | Excel Export POST 엔드포인트 인증 미적용 | Ring | ⬜ | — |
+| 066 | HTTP Security Headers 미설정 (CSP·HSTS·X-Frame) | Ring | ⬜ | — |
+| 067 | Server Action 입력 Zod 검증 부재 (6개 액션) | Ring | ⬜ | — |
+| 068 | Signup 프로필 생성 Race Condition (setTimeout 500) | Ring | ⬜ | — |
 
 **Phase H 완료**: 0 / 5
 
@@ -217,3 +217,4 @@
 | 2026-05-16 | B_Kai (GLM Big Pickle) | IMP-055-BK-SUP — D_Kai 권장 인덱스 보완 4종 추가 (zen_profiles org_id, zen_voc 복합, zen_qna 복합, zen_invoices 복합) |
 | 2026-05-16 | Aiden (Claude) | IMP-055 ✅ PASS 확정 — BK 자체 4종 + D_Kai 권장 4종 총 8종 중복 없음 확인. Phase A 집계 보정(4/7→7/7). 전체 14/52(26.9%) |
 | 2026-05-16 | Aiden (Claude) | Phase H 신설 — IMP-064~068 (Ring EXP-IMP-RG-FIX 도출 5건) 등재. 전체 52→57개, 진행률 26.9%→24.6% |
+| 2026-05-16 | Aiden (Claude) | 역량 평가 목적 Agent 공평 재배분 — Riley 전담→4 Agent 균등 분배. Phase C·D·E·F·H 담당 전면 조정 |

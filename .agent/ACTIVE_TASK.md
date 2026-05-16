@@ -50,20 +50,36 @@
 | Task-ID | 생성일 | 업무개요 | 우선순위 | 전제조건 | 할당Agent | 상태 | 상세파일 | 비고 |
 |:-------:|:------:|:--------|:--------:|:--------:|:---------:|:----:|:--------|:-----|
 | TASK-001 | 260516 | createOrder() 트랜잭션 도입 | P2 | 없음 | Riley | 🔄 | [TASK-001](tasks/TASK-001_260516_createOrder트랜잭션도입_Riley.md) | IMP-019 · IMP-047/052/053 블로커 해제 |
-| TASK-002 | 260516 | N+1 쿼리 7곳 수정 | P2 | 없음 | B_Kai | ⬜ | [TASK-002](tasks/TASK-002_260516_N+1쿼리7곳수정_BKai.md) | IMP-054 · ANA-DK-E 분석 완비 |
+| TASK-002 | 260516 | N+1 쿼리 7곳 수정 | P2 | 없음 | B_Kai | 🔄 | [TASK-002](tasks/TASK-002_260516_N+1쿼리7곳수정_BKai.md) | IMP-054 |
 | TASK-003 | 260516 | 정산 이중 실행 방지 | P2 | TASK-001 | Riley | 🚫 | [TASK-003](tasks/TASK-003_260516_정산이중실행방지_Riley.md) | IMP-039 |
 | TASK-004 | 260516 | WAREHOUSED→CANCELED 재고 복구 | P2 | TASK-001 | Riley | 🚫 | [TASK-004](tasks/TASK-004_260516_WAREHOUSED재고복구_Riley.md) | IMP-040 |
+| TASK-005 | 260516 | Phase F 사전 GitNexus 분석 | P3 | 없음 | D_Kai | ⬜ | — | ANA-IMP-DK-F · IMP-012/017/023/024/029/049/060/061/063 |
+| TASK-006 | 260516 | Supabase 클라이언트 중복 제거 | P3 | 없음 | D_Kai | ⬜ | — | IMP-059 |
+| TASK-007 | 260516 | RBAC 이중 상태 정리 | P3 | 없음 | D_Kai | ⬜ | — | IMP-031 |
+| TASK-008 | 260516 | middleware→proxy.ts 마이그레이션 | P3 | 없음 | D_Kai | ⬜ | — | IMP-003 |
+| TASK-009 | 260516 | API Route stack trace 노출 수정 | P2 | 없음 | Ring | ⬜ | — | IMP-064 |
+| TASK-010 | 260516 | Excel Export POST 인증 적용 | P2 | 없음 | Ring | ⬜ | — | IMP-065 |
+| TASK-011 | 260516 | HTTP Security Headers 설정 | P2 | 없음 | Ring | ⬜ | — | IMP-066 |
+| TASK-012 | 260516 | Server Action Zod 검증 추가 | P2 | 없음 | Ring | ⬜ | — | IMP-067 |
+| TASK-013 | 260516 | Signup race condition 수정 | P3 | 없음 | Ring | ⬜ | — | IMP-068 |
+| TASK-014 | 260516 | 무제한 리스트 페이지네이션 수정 | P3 | 없음 | Ring | ⬜ | — | IMP-045 · 18곳 |
+| TASK-015 | 260516 | console→logger 교체 | P3 | 없음 | Riley | ⬜ | — | IMP-013 · 53개 파일 |
+| TASK-016 | 260516 | Server Actions 에러 래퍼 | P3 | 없음 | Riley | ⬜ | — | IMP-025 |
+| TASK-017 | 260516 | admin/rates 531줄 분할 | P3 | 없음 | B_Kai | ⬜ | — | IMP-014 |
+| TASK-018 | 260516 | finance.ts 733줄 분할 | P3 | 없음 | B_Kai | ⬜ | — | IMP-058 |
+| TASK-019 | 260516 | Server Actions 도메인 분할 | P3 | TASK-017+018 | B_Kai | 🚫 | — | IMP-033 · D1 완료 후 |
+| TASK-020 | 260516 | SELECT * 명시적 컬럼 교체 | P3 | 없음 | B_Kai | ⬜ | — | IMP-062 · 112곳 |
 
 ---
 
 ## Agent별 즉시 착수 가능 Task
 
-| Agent | 착수 가능 | 비고 |
-|:------|:--------:|:-----|
-| Riley | **TASK-001** | TASK-003/004는 TASK-001 완료 후 블로커 해제 |
-| B_Kai | **TASK-002** | D_Kai ANA-IMP-DK-E 분석 완비 (`scratch/ANA_PhaseE_DKai_20260516.md`) |
-| D_Kai | — | 현재 할당 Task 없음 |
-| Ring | — | 현재 할당 Task 없음 |
+| Agent | 즉시 착수 가능 | 블로커 대기 |
+|:------|:-------------|:----------|
+| Riley | TASK-001🔄 · TASK-015 · TASK-016 | TASK-003/004 (TASK-001 완료 후) |
+| B_Kai | TASK-002🔄 · TASK-017 · TASK-018 · TASK-020 | TASK-019 (TASK-017+018 완료 후) |
+| D_Kai | TASK-005 · TASK-006 · TASK-007 · TASK-008 | — |
+| Ring | TASK-009 · TASK-010 · TASK-011 · TASK-012 · TASK-013 · TASK-014 | — |
 
 ---
 
@@ -72,3 +88,4 @@
 | 날짜 | 주체 | 내용 |
 |:-----|:----:|:-----|
 | 2026-05-16 | Aiden (Claude) | 신규 오케스트레이션 체계 도입 — ACTIVE_TASK.md v1.0 초기 작성. TASK_BOARD+ACTIVE_AGENT+HANDOFF_BOX 통합 대체 |
+| 2026-05-16 | Aiden (Claude) | 역량 평가 목적 공평 재배분 — TASK-005~020 신규 등록. D_Kai·Ring Task 할당 (기존 Riley 전담 → 4 Agent 균등) |
