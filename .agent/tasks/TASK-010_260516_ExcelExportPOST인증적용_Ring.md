@@ -1,0 +1,86 @@
+# TASK-010 — Excel Export POST 엔드포인트 인증 적용
+
+| 항목 | 내용 |
+|:---|:---|
+| Task-ID | TASK-010 |
+| IMP-ID | IMP-065 |
+| 생성일 | 2026-05-16 |
+| 담당 Agent | Ring (Qwen) |
+| 우선순위 | P2 |
+| 전제조건 | 없음 (즉시 착수 가능) |
+| 상태 | ⬜ 미착수 |
+
+---
+
+## 배경
+
+Excel Export용 POST 엔드포인트(`/api/export/excel` 또는 유사 경로)에 인증이 미적용되어 있습니다.
+인증 없이 대량 데이터를 외부에서 요청할 수 있어 데이터 유출 및 DoS 위험이 존재합니다.
+Supabase Auth 기반 세션 검증을 추가하여 인가된 사용자만 접근 가능하도록 수정이 필요합니다.
+
+---
+
+## 작업 지시
+
+1. **본 파일 상태 → 🔄, ACTIVE_TASK.md TASK-010 → 🔄 동시 반영**
+2. `gitnexus_query({query: "excel export api route"})` — Export 엔드포인트 위치 파악
+3. `gitnexus_impact({target: "excelExportHandler", direction: "upstream"})` — 영향 범위 확인
+4. 인증 미들웨어 / 세션 검증 로직 추가:
+   ```typescript
+   const { data: { session } } = await supabase.auth.getSession()
+   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+   ```
+5. 역할 기반 접근 제어 추가 (MANAGER 이상만 Export 허용)
+6. `gitnexus_detect_changes()` — 커밋 전 변경 범위 확인
+7. 회귀 테스트 전체 PASS: `rtk npm run test:regression`
+8. 결과 저장: `docs/08_Self_Audit/Regression_Results/`
+9. 커밋: `[Ring] fix: IMP-065 Excel Export POST 인증 적용`
+10. **본 파일 [작업 결과] 섹션 작성 + 상태 → 🔔**
+11. **ACTIVE_TASK.md TASK-010 → 🔔 반영**
+12. **`scratch/IMP_PROGRESS.md` IMP-065 행 🔔 갱신**
+
+---
+
+## 완료 기준 (DoD)
+
+- [ ] Excel Export 엔드포인트 인증 미적용 0건
+- [ ] 미인증 요청 401 응답 확인
+- [ ] 역할 기반 접근 제어 적용
+- [ ] `gitnexus_impact` 결과 기록
+- [ ] 회귀 테스트 전체 PASS 증적
+- [ ] `[Ring] fix: IMP-065` 커밋 완료
+- [ ] 본 파일 상태 🔔 + ACTIVE_TASK.md 동기화
+
+---
+
+## 작업 결과
+
+> **이 섹션은 착수 후 Ring이 작성합니다.**
+
+| 항목 | 내용 |
+|:---|:---|
+| 착수일 | — |
+| 완료일 | — |
+| 수정 엔드포인트 | — |
+| 회귀 결과 | — |
+| 커밋 해시 | — |
+
+---
+
+## Aiden 검토
+
+> **이 섹션은 🔔 보고 후 Aiden이 작성합니다.**
+
+| 항목 | 내용 |
+|:---|:---|
+| 검토일 | — |
+| 판정 | — |
+| 검토 의견 | — |
+
+---
+
+## 개정 이력
+
+| 날짜 | 주체 | 내용 |
+|:-----|:----:|:-----|
+| 2026-05-16 | Aiden (Claude) | Task 생성 — 작업 지시 발령 |
