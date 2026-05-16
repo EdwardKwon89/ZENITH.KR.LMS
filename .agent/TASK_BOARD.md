@@ -72,7 +72,7 @@
 | ~~**IMP-044-BK-FIX**~~    | B_Kai  | [FIX] 트리거 TG_OP 분기 수정 (DELETE→RETURN OLD)   | 2026-05-16 | ✅ FULL PASS |
 | ~~**ANA-IMP-DK-D**~~      | D_Kai  | Phase D 사전 GitNexus 분析 (IMP-014·033·058·059)   | 2026-05-16 | ❌ CONDITIONAL PASS — IMP-014 분류 오류·IMP-059 누락 |
 | ~~**ANA-IMP-DK-D-FIX**~~ | D_Kai  | [FIX] IMP-014 Client 재분류 + IMP-059 보완          | 2026-05-16 | ✅ FULL PASS |
-| **ANA-IMP-DK-E**          | D_Kai  | Phase E 사전 GitNexus 분석 (IMP-020·021·022·054·055·062) | 2026-05-16 | 🔔 Aiden 검토 대기 |
+| ~~**ANA-IMP-DK-E**~~      | D_Kai  | Phase E 사전 GitNexus 분석 (IMP-020·021·022·054·055·062) | 2026-05-16 | ✅ FULL PASS |
 | **IMP-055-BK**            | B_Kai  | [Phase E] 인덱스 누락 4종 추가                                  | 2026-05-16 | 🔔 Aiden 검토 대기 |
 
 
@@ -97,7 +97,7 @@
 | ~~**IMP-044-BK**~~            | [Phase B] 인보이스 발행 후 비용 변경 차단                       | 2026-05-16 | ✅ FULL PASS |
 | ~~**IMP-044-BK-FIX**~~        | [FIX] 트리거 TG_OP 분기 수정 (DELETE→RETURN OLD)               | 2026-05-16 | ✅ FULL PASS |
 | ~~**IMP-055-BK**~~            | [Phase E] 인덱스 누락 4종 추가                                  | 2026-05-16 | ✅ FULL PASS |
-| **IMP-054-BK**                | [Phase E] N+1 쿼리 7곳 수정                                     | 2026-05-16 | 🚫 ANA-IMP-DK-E PASS 후 착수 |
+| **IMP-054-BK**                | [Phase E] N+1 쿼리 7곳 수정                                     | 2026-05-16 | ⏳ 착수 가능 (ANA-E PASS) |
 
 ---
 
@@ -133,7 +133,7 @@
 | ~~**ANA-IMP-DK-C**~~           | —  | Phase C 사전 GitNexus 분석 (IMP-013·025·045·051·056)                             | 2026-05-15                  | ✅ **FULL PASS**       |
 | ~~**ANA-IMP-DK-D**~~               | D  | Phase D 사전 GitNexus 분석 (IMP-014·033·058·059)                                  | 2026-05-16                  | ❌ **CONDITIONAL PASS** — IMP-014 분류 오류·IMP-059 누락 |
 | ~~**ANA-IMP-DK-D-FIX**~~               | D  | [FIX] IMP-014 Client 컴포넌트 재분류 + IMP-059 보완                               | 2026-05-16                  | ✅ **FULL PASS**       |
-| ~~**ANA-IMP-DK-E**~~                        | E  | Phase E 사전 GitNexus 분석 (IMP-020·021·022·054·055·062)                           | 2026-05-16                  | 🔔 **Aiden 검토 대기**       |
+| ~~**ANA-IMP-DK-E**~~                        | E  | Phase E 사전 GitNexus 분석 (IMP-020·021·022·054·055·062)                           | 2026-05-16                  | ✅ **FULL PASS**       |
 | ~~**GOV-001**~~     | 1     | ACTIVE_AGENT.md IDLE 강제 초기화                                                | 2026-05-13                  | ✅ **Aiden PASS**        |
 | ~~**GOV-002**~~     | 1     | `~/.claude/settings.json` PostToolUse GitNexus Hook 제거                        | 2026-05-13                  | ✅ **Aiden PASS**        |
 | ~~**GOV-003**~~     | 2     | `GEMINI.md` + `AGENTS.md` Task 완료 DoD에 IDLE 초기화 추가                      | 2026-05-13                  | ✅ **Aiden PASS**        |
