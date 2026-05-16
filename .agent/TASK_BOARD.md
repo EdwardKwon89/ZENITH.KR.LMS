@@ -115,7 +115,7 @@
 | ~~**IMP-035-RL-FIX-2**~~ | Aiden  | [FIX-2] CRITICAL 3종 SECURITY DEFINER 복원 + MANAGER 역할 추가 (재지시) | 2026-05-15 | ✅ FULL PASS |
 | ~~**IMP-026-RL**~~        | Aiden  | [Phase A] RLS 비즈니스 규칙 통합 (SQL 함수화)                           | 2026-05-16 | ✅ FULL PASS |
 | ~~**IMP-041-RL**~~        | Aiden  | [Phase A] Storage 버킷 조직 멤버십 검증 (business_docs, invoices)     | 2026-05-16 | ✅ FULL PASS |
-| **IMP-057-RL**            | Aiden  | [Phase A] zen_role_permissions SELECT 제한                            | 2026-05-16 | ⏳ 착수 대기 |
+| ~~**IMP-057-RL**~~            | Aiden  | [Phase A] zen_role_permissions SELECT 제한                            | 2026-05-16 | ✅ FULL PASS |
 | **IMP-019-RL**            | Aiden  | [Phase B] createOrder() 트랜잭션 도입 (IMP-047·052·053 블로커)        | 2026-05-16 | 🚫 IMP-057 후 착수 |
 | **IMP-039-RL**            | Aiden  | [Phase B] 정산 이중 실행 방지                                          | 2026-05-16 | 🚫 IMP-019 후 착수 |
 | **IMP-040-RL**            | Aiden  | [Phase B] WAREHOUSED→CANCELED 재고 복구 누락                          | 2026-05-16 | 🚫 IMP-019 후 착수 |
