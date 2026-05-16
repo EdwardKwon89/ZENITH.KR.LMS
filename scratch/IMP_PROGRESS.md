@@ -195,3 +195,5 @@
 | 2026-05-15 | Riley (Gemini) | IMP-034a·037 보완 완료 — .env.local 추적 해제(ls-files 비어있음 확인) + Auth 설정 강화 |
 | 2026-05-15 | Riley (Gemini) | IMP-035-RL-FIX-2 완료 — SECURITY DEFINER 복원 migration + MANAGER RBAC 추가. 199/199 PASS. |
 | 2026-05-15 | Aiden (Claude) | IMP-035 ✅ PASS 확정 — `20260515235000_fix_security_definer_org_rpcs.sql` 검증 완료. Phase A 4/7. 전체 9/52. |
+| 2026-05-16 | B_Kai (GLM Big Pickle) | IMP-055 완료 — 누락 인덱스 4종 추가 (zen_orders shipper_id/status, zen_invoices shipper_id, zen_order_costs order_id) |
+| 2026-05-16 | B_Kai (GLM Big Pickle) | IMP-055-BK-SUP — D_Kai 권장 인덱스 보완 4종 추가 (zen_profiles org_id, zen_voc 복합, zen_qna 복합, zen_invoices 복합) |
