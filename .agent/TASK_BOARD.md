@@ -73,7 +73,7 @@
 | ~~**ANA-IMP-DK-D**~~      | D_Kai  | Phase D 사전 GitNexus 분析 (IMP-014·033·058·059)   | 2026-05-16 | ❌ CONDITIONAL PASS — IMP-014 분류 오류·IMP-059 누락 |
 | ~~**ANA-IMP-DK-D-FIX**~~ | D_Kai  | [FIX] IMP-014 Client 재분류 + IMP-059 보완          | 2026-05-16 | ✅ FULL PASS |
 | ~~**ANA-IMP-DK-E**~~      | D_Kai  | Phase E 사전 GitNexus 분석 (IMP-020·021·022·054·055·062) | 2026-05-16 | ✅ FULL PASS |
-| **IMP-057-RL-FIX**        | Riley  | [Phase A] IMP-057 DoD 보완 (HANDOFF_BOX + IMP_PROGRESS + TASK_BOARD) | 2026-05-16 | 🔔 Aiden 검토 대기 |
+| ~~**IMP-057-RL-FIX**~~        | Riley  | [Phase A] IMP-057 DoD 보완 (HANDOFF_BOX + IMP_PROGRESS + TASK_BOARD) | 2026-05-16 | ✅ 완료 |
 | **IMP-055-BK**            | B_Kai  | [Phase E] 인덱스 누락 4종 추가                                  | 2026-05-16 | 🔔 Aiden 검토 대기 |
 | **IMP-055-BK-SUP**        | B_Kai  | [Phase E] D_Kai 권장 인덱스 보완 (zen_profiles·voc·qna·invoices 복합) | 2026-05-16 | 🔔 Aiden 검토 대기 |
 
@@ -119,7 +119,7 @@
 | ~~**IMP-026-RL**~~        | Aiden  | [Phase A] RLS 비즈니스 규칙 통합 (SQL 함수화)                           | 2026-05-16 | ✅ FULL PASS |
 | ~~**IMP-041-RL**~~        | Aiden  | [Phase A] Storage 버킷 조직 멤버십 검증 (business_docs, invoices)     | 2026-05-16 | ✅ FULL PASS |
 | ~~**IMP-057-RL**~~            | Aiden  | [Phase A] zen_role_permissions SELECT 제한                            | 2026-05-16 | ❌ CONDITIONAL PASS |
-| **IMP-057-RL-FIX**        | Aiden  | [FIX] DoD 보완 — HANDOFF_BOX + IMP_PROGRESS + TASK_BOARD 정정         | 2026-05-16 | ⏳ 즉시 착수 |
+| **IMP-057-RL-FIX**        | Aiden  | [FIX] DoD 보완 — HANDOFF_BOX + IMP_PROGRESS + TASK_BOARD 정정         | 2026-05-16 | 🔔 Aiden 검토 대기 |
 | **IMP-019-RL**            | Aiden  | [Phase B] createOrder() 트랜잭션 도입 (IMP-047·052·053 블로커)        | 2026-05-16 | 🚫 IMP-057-FIX 완료 후 착수 |
 | **IMP-039-RL**            | Aiden  | [Phase B] 정산 이중 실행 방지                                          | 2026-05-16 | 🚫 IMP-019 후 착수 |
 | **IMP-040-RL**            | Aiden  | [Phase B] WAREHOUSED→CANCELED 재고 복구 누락                          | 2026-05-16 | 🚫 IMP-019 후 착수 |
