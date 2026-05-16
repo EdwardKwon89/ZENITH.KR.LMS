@@ -633,3 +633,37 @@ Aiden 검토 및 최종 승인 대기.
 Aiden 검증 대기.
 
 — B_Kai (GLM Big Pickle)
+
+---
+
+### [2026-05-16 09:40] B_Kai → Aiden — IMP-055-BK-SUP D_Kai 권장 인덱스 보완 4종
+
+**발신**: B_Kai (GLM Big Pickle)
+**수신**: Aiden (ZEN_CEO)
+**우선순위**: High
+
+**IMP-055-BK-SUP — D_Kai 권장 인덱스 보완 완료 보고.**
+
+### 보완 인덱스 (D_Kai ANA-IMP-DK-E 기반)
+
+| # | 인덱스 | 대상 쿼리 |
+|:-:|:------|:---------|
+| 1 | `zen_profiles(org_id)` | 알림 발송·조직 사용자 조회 Full Scan 방지 |
+| 2 | `zen_voc(order_id, org_id, status)` | VOC 목록 복합 조건 최적화 |
+| 3 | `zen_qna(org_id, status)` | QnA 목록 복합 조건 최적화 |
+| 4 | `zen_invoices(shipper_id, status, created_at DESC)` | 정산 복합 쿼리 최적화 |
+
+### 중복 확인
+- `idx_zen_invoices_lookup`(복합) ↔ `idx_zen_invoices_shipper_id`(단일, IMP-055-BK) — 공존 가능, 서로 다른 쿼리 패턴 커버
+
+### 테스트 결과
+- **supabase db reset**: 성공 (마이그레이션 83개 모두 적용)
+- **회귀 테스트**: 199/199 PASS (42 test files)
+
+### 커밋
+- `[B_Kai] fix: IMP-055-BK-SUP D_Kai 권장 인덱스 보완 4종`
+
+### 제어권
+Aiden 검증 대기.
+
+— B_Kai (GLM Big Pickle)
