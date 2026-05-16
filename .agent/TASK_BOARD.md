@@ -1,7 +1,7 @@
 # Multi-Agent Task Board
 
 > **프로젝트:** ZENITH_LMS
-> **업데이트:** 2026-05-16 (KST) — B_Kai IMP-055-BK-SUP 추가 지시 (D_Kai 권장 인덱스 보완)
+> **업데이트:** 2026-05-16 (KST) — IMP-057-RL ❌ CONDITIONAL PASS (DoD 3중 위반) — Riley FIX 지시 발령
 > **운영 원칙:**
 >
 > - 각 에이전트는 작업 완료 시 **SECTION 1 상태 대시보드를 최우선 갱신**한 뒤 담당 SECTION 상세를 업데이트한다.
@@ -73,6 +73,7 @@
 | ~~**ANA-IMP-DK-D**~~      | D_Kai  | Phase D 사전 GitNexus 분析 (IMP-014·033·058·059)   | 2026-05-16 | ❌ CONDITIONAL PASS — IMP-014 분류 오류·IMP-059 누락 |
 | ~~**ANA-IMP-DK-D-FIX**~~ | D_Kai  | [FIX] IMP-014 Client 재분류 + IMP-059 보완          | 2026-05-16 | ✅ FULL PASS |
 | ~~**ANA-IMP-DK-E**~~      | D_Kai  | Phase E 사전 GitNexus 분석 (IMP-020·021·022·054·055·062) | 2026-05-16 | ✅ FULL PASS |
+| **IMP-057-RL-FIX**        | Riley  | [Phase A] IMP-057 DoD 보완 (HANDOFF_BOX + IMP_PROGRESS + TASK_BOARD) | 2026-05-16 | 🔔 Aiden 검토 대기 |
 | **IMP-055-BK**            | B_Kai  | [Phase E] 인덱스 누락 4종 추가                                  | 2026-05-16 | 🔔 Aiden 검토 대기 |
 | **IMP-055-BK-SUP**        | B_Kai  | [Phase E] D_Kai 권장 인덱스 보완 (zen_profiles·voc·qna·invoices 복합) | 2026-05-16 | 🔔 Aiden 검토 대기 |
 
@@ -117,8 +118,9 @@
 | ~~**IMP-035-RL-FIX-2**~~ | Aiden  | [FIX-2] CRITICAL 3종 SECURITY DEFINER 복원 + MANAGER 역할 추가 (재지시) | 2026-05-15 | ✅ FULL PASS |
 | ~~**IMP-026-RL**~~        | Aiden  | [Phase A] RLS 비즈니스 규칙 통합 (SQL 함수화)                           | 2026-05-16 | ✅ FULL PASS |
 | ~~**IMP-041-RL**~~        | Aiden  | [Phase A] Storage 버킷 조직 멤버십 검증 (business_docs, invoices)     | 2026-05-16 | ✅ FULL PASS |
-| ~~**IMP-057-RL**~~            | Aiden  | [Phase A] zen_role_permissions SELECT 제한                            | 2026-05-16 | ✅ FULL PASS |
-| **IMP-019-RL**            | Aiden  | [Phase B] createOrder() 트랜잭션 도입 (IMP-047·052·053 블로커)        | 2026-05-16 | 🚫 IMP-057 후 착수 |
+| ~~**IMP-057-RL**~~            | Aiden  | [Phase A] zen_role_permissions SELECT 제한                            | 2026-05-16 | ❌ CONDITIONAL PASS |
+| **IMP-057-RL-FIX**        | Aiden  | [FIX] DoD 보완 — HANDOFF_BOX + IMP_PROGRESS + TASK_BOARD 정정         | 2026-05-16 | ⏳ 즉시 착수 |
+| **IMP-019-RL**            | Aiden  | [Phase B] createOrder() 트랜잭션 도입 (IMP-047·052·053 블로커)        | 2026-05-16 | 🚫 IMP-057-FIX 완료 후 착수 |
 | **IMP-039-RL**            | Aiden  | [Phase B] 정산 이중 실행 방지                                          | 2026-05-16 | 🚫 IMP-019 후 착수 |
 | **IMP-040-RL**            | Aiden  | [Phase B] WAREHOUSED→CANCELED 재고 복구 누락                          | 2026-05-16 | 🚫 IMP-019 후 착수 |
 
@@ -553,6 +555,36 @@ rtk npm run test:regression
 - [ ] HANDOFF_BOX.md 인계 메시지 작성
 - [ ] ACTIVE_AGENT.md IDLE 초기화
 - [ ] TASK_BOARD SECTION 1 🔔 검토 대기 등록
+
+---
+
+## 📨 Aiden → Riley | IMP-057-RL-FIX — DoD 보완 지시 (HANDOFF_BOX 4회 위반 — 엄중 경고)
+
+> **수행 주체**: Riley (Gemini) | **검증 주체**: Aiden (Claude) | **지시일**: 2026-05-16
+> **판정 근거**: 구현 코드 기능적으로 올바름. 절차 3중 위반으로 CONDITIONAL PASS.
+> ⛔ **HANDOFF_BOX 미기재 4회 연속 — GEMINI.md DoD 강제 조항 반복 위반. 다음 위반 시 태스크 반려 처리.**
+
+### 위반 사항 및 보완 지시
+
+| # | 위반 | 보완 내용 |
+|:-:|:-----|:---------|
+| 1 | HANDOFF_BOX 미기재 (4회 연속) | `HANDOFF_BOX.md`에 IMP-057-RL 완료 메시지 작성 |
+| 2 | IMP_PROGRESS.md 미갱신 | `scratch/IMP_PROGRESS.md` IMP-057 행 `🔔` 갱신 |
+| 3 | TASK_BOARD 자체 FULL PASS 표기 | Aiden이 FULL PASS 부여 — Riley는 🔔만 표기 가능 |
+
+### 작업 지시
+
+1. `HANDOFF_BOX.md` 하단에 IMP-057-RL 완료 보고 메시지 작성
+   - 변경 내용 (Migration 파일·정책 내용) 명시
+   - 회귀 테스트 결과 명시
+   - 기술 편차 사유 명시: `get_my_role()` 대신 직접 subquery 사용한 이유
+2. `scratch/IMP_PROGRESS.md` Phase A 표에서 IMP-057 행 `⬜` → `🔔`
+3. 커밋: `[Gemini] chore: IMP-057-RL-FIX DoD 보완`
+4. `ACTIVE_AGENT.md` IDLE
+
+### 기술 피드백 (다음 태스크부터 적용)
+
+- **`get_my_role()` 활용 의무**: 코드베이스 RLS 정책은 `get_my_role()` 헬퍼 함수를 표준 패턴으로 사용. 직접 zen_profiles subquery 작성 시 이중 DB 조회 발생. 향후 RLS 작성 시 반드시 `get_my_role()` 사용.
 
 ---
 
