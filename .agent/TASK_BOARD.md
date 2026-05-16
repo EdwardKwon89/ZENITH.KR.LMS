@@ -74,7 +74,7 @@
 | ~~**ANA-IMP-DK-D-FIX**~~ | D_Kai  | [FIX] IMP-014 Client 재분류 + IMP-059 보완          | 2026-05-16 | ✅ FULL PASS |
 | ~~**ANA-IMP-DK-E**~~      | D_Kai  | Phase E 사전 GitNexus 분석 (IMP-020·021·022·054·055·062) | 2026-05-16 | ✅ FULL PASS |
 | ~~**IMP-057-RL-FIX**~~        | Riley  | [Phase A] IMP-057 DoD 보완 (HANDOFF_BOX + IMP_PROGRESS + TASK_BOARD) | 2026-05-16 | ✅ FULL PASS |
-| **EXP-IMP-RG-FIX**       | Ring   | IMP-064~068 post_launch_improvements 등록 + [Ring] 태그 + HANDOFF  | 2026-05-16 | 🔔 Aiden 검토 대기 |
+| ~~**EXP-IMP-RG-FIX**~~   | Ring   | IMP-064~068 post_launch_improvements 등록 + [Ring] 태그 + HANDOFF  | 2026-05-16 | ✅ FULL PASS |
 | ~~**IMP-055-BK**~~        | B_Kai  | [Phase E] 인덱스 누락 4종 추가                                  | 2026-05-16 | ✅ FULL PASS |
 | ~~**IMP-055-BK-SUP**~~    | B_Kai  | [Phase E] D_Kai 권장 인덱스 보완 (zen_profiles·voc·qna·invoices 복합) | 2026-05-16 | ✅ FULL PASS |
 
@@ -1372,7 +1372,7 @@ IMP-059 섹션에 아래 내용 추가:
 
 > **에이전트**: Ring 2.6 1T (inclusionAI / Ant Group) | **역할**: 성능 벤치마크 실증 실험
 > **커밋 태그**: `[Ring]`
-> **상태**: ✅ 온보딩 안내 완료 → **🔄 EXP-IMP-RG 착수 지시 (2026-05-16)**
+> **상태**: ✅ 온보딩 완료 → **EXP-IMP-RG ✅ FULL PASS (FIX 포함, 2026-05-16)**
 
 ---
 
