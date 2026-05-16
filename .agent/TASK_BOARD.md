@@ -110,7 +110,7 @@
 | ~~**IMP-035-RL-FIX**~~    | Aiden  | [FIX] CRITICAL 3종 SECURITY DEFINER 복원 + MANAGER 역할 추가 | 2026-05-15 | ❌ FAIL (FIX-2로 대체됨) |
 | ~~**IMP-035-RL-FIX-2**~~ | Aiden  | [FIX-2] CRITICAL 3종 SECURITY DEFINER 복원 + MANAGER 역할 추가 (재지시) | 2026-05-15 | ✅ FULL PASS |
 | ~~**IMP-026-RL**~~        | Aiden  | [Phase A] RLS 비즈니스 규칙 통합 (SQL 함수화)                           | 2026-05-16 | ✅ FULL PASS |
-| **IMP-041-RL**            | Aiden  | [Phase A] Storage 버킷 조직 멤버십 검증 (business_docs, invoices)     | 2026-05-16 | ✅ FULL PASS |
+| ~~**IMP-041-RL**~~        | Aiden  | [Phase A] Storage 버킷 조직 멤버십 검증 (business_docs, invoices)     | 2026-05-16 | ✅ FULL PASS |
 
 ## 🆕 신규 지시 대기 (D_Kai 착수 가능)
 
