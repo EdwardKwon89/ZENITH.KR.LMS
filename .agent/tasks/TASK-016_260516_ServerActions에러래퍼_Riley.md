@@ -52,10 +52,11 @@ export function withAction<T>(
 5. `gitnexus_detect_changes()` — 커밋 전 변경 범위 확인
 6. 회귀 테스트 전체 PASS: `rtk npm run test:regression`
 7. 결과 저장: `docs/08_Self_Audit/Regression_Results/`
-8. 커밋: `[Gemini] refactor: IMP-025 Server Actions 에러 래퍼 도입`
-9. **본 파일 [작업 결과] 섹션 작성 + 상태 → 🔔**
+8. **[코드 커밋]** `[Gemini] refactor: IMP-025 Server Actions 에러 래퍼 도입` (코드·회귀파일)
+9. **본 파일 [작업 결과] 섹션 작성** (8번 커밋 해시 포함) **+ 상태 → 🔔**
 10. **ACTIVE_TASK.md TASK-016 → 🔔 반영**
 11. **`scratch/IMP_PROGRESS.md` IMP-025 행 🔔 갱신**
+12. **[문서 커밋]** `[Gemini] docs: TASK-016 완료 보고 — task file 🔔`
 
 ---
 

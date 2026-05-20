@@ -8,7 +8,7 @@
 | 담당 Agent | B_Kai (GLM Big Pickle) |
 | 우선순위 | P3 |
 | 전제조건 | 없음 (즉시 착수 가능) |
-| 상태 | ⬜ 미착수 |
+| 상태 | 🔄 진행 중 (B_Kai 착수) |
 
 ---
 
@@ -38,10 +38,11 @@ Supabase 쿼리 112곳에서 `select('*')`로 전체 컬럼을 조회합니다.
 5. `gitnexus_detect_changes()` — 커밋 전 변경 범위 확인
 6. 회귀 테스트 전체 PASS: `rtk npm run test:regression`
 7. 결과 저장: `docs/08_Self_Audit/Regression_Results/`
-8. 커밋: `[B_Kai] perf: IMP-062 SELECT * → 명시적 컬럼 교체 (112곳)`
-9. **본 파일 [작업 결과] 섹션 작성 + 상태 → 🔔**
+8. **[코드 커밋]** `[B_Kai] perf: IMP-062 SELECT * → 명시적 컬럼 교체 (112곳)` (코드·회귀파일)
+9. **본 파일 [작업 결과] 섹션 작성** (8번 커밋 해시 포함) **+ 상태 → 🔔**
 10. **ACTIVE_TASK.md TASK-020 → 🔔 반영**
 11. **`scratch/IMP_PROGRESS.md` IMP-062 행 🔔 갱신**
+12. **[문서 커밋]** `[B_Kai] docs: TASK-020 완료 보고 — task file 🔔`
 
 ---
 
