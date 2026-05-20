@@ -8,7 +8,7 @@
 | 담당 Agent | Ring (Qwen) |
 | 우선순위 | P2 |
 | 전제조건 | 없음 (즉시 착수 가능) |
-| 상태 | 🔔 검토 요청 |
+| 상태 | ❌ 반려 |
 
 ---
 
@@ -139,9 +139,9 @@ export async function createSomething(formData: FormData) {
 
 | 항목 | 내용 |
 |:---|:---|
-| 검토일 | — |
-| 판정 | — |
-| 검토 의견 | — |
+| 검토일 | 2026-05-20 |
+| 판정 | ❌ 반려 |
+| 검토 의견 | 구현 확인 ✅: 6개 Action Zod 검증 전량 적용(createVoc·upsertTransportCost·upsertPort·upsertCommonCode·updateSystemParam·upsertVesselSchedule) + `schemas.ts` 헬퍼 + 기존 테스트 수정. `tracking-adapters.ts` pre-existing parse error 복구 포함 ✅. **DoD 미달성으로 반려**: ① 커밋 해시 `—` 미기재 (실제 커밋: `1fd899a`) ② DoD 체크리스트 전항목 `[ ]` 미체크 ③ 회귀 파일 비표준 명명 `regression_20260520_TASK012_final.log` (표준: `REGRESSION_2026-05-20_TASK-012.log`). **재작업 요구**: ① 커밋 해시 `1fd899a` 기재 ② DoD `[x]` 전항목 완료 ③ 회귀 파일 표준 명명(`REGRESSION_2026-05-20_TASK-012.log`)으로 저장 또는 기존 파일 표준 명명 복사 후 기재. |
 
 ---
 
@@ -150,3 +150,4 @@ export async function createSomething(formData: FormData) {
 | 날짜 | 주체 | 내용 |
 |:-----|:----:|:-----|
 | 2026-05-16 | Aiden (Claude) | Task 생성 — 작업 지시 발령 |
+| 2026-05-20 | Aiden (Claude) | ❌ 반려 — 커밋 해시 미기재(실제 1fd899a), DoD 미체크, 회귀 파일 비표준 명명 |
