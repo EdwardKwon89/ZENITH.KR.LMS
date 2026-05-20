@@ -82,14 +82,14 @@
 | TASK-023 | 260520 | Phase F 데브리프 응답 | P4 | 없음 | D_Kai | ✅ | [TASK-023](tasks/TASK-023_260520_PhaseF데브리프응답_DKai.md) | 커밋 d7090a3 · Phase G IMP-016 즉시 착수 가능 |
 | TASK-024 | 260520 | Phase F 데브리프 응답 | P4 | 없음 | Ring | ✅ | [TASK-024](tasks/TASK-024_260520_PhaseF데브리프응답_Ring.md) | 커밋 db32af1 · 조건부 승인 · Phase G 착수 허가 (첫 Task 절차 중점 확인) |
 | TASK-027 | 260520 | 트랜잭션 부재 확장 (status/지갑) | P2 | IMP-019 ✅ | Riley | ✅ | [TASK-027](tasks/TASK-027_260520_트랜잭션부재확장_Riley.md) | IMP-047 완료 · 코드 867d023·문서 e4ccc31 · 209/209 · IMP-052·053 블로커 해제 |
-| TASK-028 | 260520 | middleware.ts console.log 제거 | P3 | IMP-013 ✅ | Riley | 🔔 | [TASK-028](tasks/TASK-028_260520_middleware로그제거_Riley.md) | IMP-015 · 독립 코드 커밋 없음(df63706 혼입) · 문서 커밋 재수행 완료 |
-| TASK-029 | 260520 | Repository 패턴 도입 | P3 | D1 ✅ | B_Kai+D_Kai | 🔔 | [TASK-029](tasks/TASK-029_260520_Repository패턴도입_BKaiDKai.md) | IMP-016 · 3차 재작업 완료: 36개 함수 전량 전환 · detect_changes 6 files 정정 · 209/209 PASS · 코드 ed7629d+9ba0853 · 문서 5b4ad83+bb161ae |
+| TASK-028 | 260520 | middleware.ts console.log 제거 | P3 | IMP-013 ✅ | Riley | ❌ | [TASK-028](tasks/TASK-028_260520_middleware로그제거_Riley.md) | IMP-015 · ❌ 2차 반려 — doc commit 7f07c95에 IMP_PROGRESS.md 미포함·개정 이력 누락 |
+| TASK-029 | 260520 | Repository 패턴 도입 | P3 | D1 ✅ | B_Kai+D_Kai | ❌ | [TASK-029](tasks/TASK-029_260520_Repository패턴도입_BKaiDKai.md) | IMP-016 · ❌ 3차 반려 — doc commit 64a0b5e에 IMP_PROGRESS.md 미포함 · B_Kai 4차 위반·신규 할당 중단 |
 | TASK-030 | 260520 | Feature Flags unstable_cache 적용 | P3 | 없음 | D_Kai | ✅ | [TASK-030](tasks/TASK-030_260520_FeatureFlags캐싱_DKai.md) | IMP-020 완료 · 코드 c5e03bd·문서 a5669ab · 207/209 |
-| TASK-031 | 260520 | 미들웨어 DB 호출 최적화 (JWT-only) | P3 | IMP-003 ✅ | D_Kai | 🔔 | [TASK-031](tasks/TASK-031_260520_미들웨어DB최적화_DKai.md) | IMP-021 · 구현 완료 — 209/209 PASS · 코드 5bc0653 |
+| TASK-031 | 260520 | 미들웨어 DB 호출 최적화 (JWT-only) | P3 | IMP-003 ✅ | D_Kai | ✅ | [TASK-031](tasks/TASK-031_260520_미들웨어DB최적화_DKai.md) | IMP-021 완료 · hasCompleteMetadata 방식 A-1 · 코드 5bc0653·문서 00b717f · TASK-037 블로커 해제 |
 | TASK-032 | 260520 | 이메일 HTML 인젝션 방지 | P2 | 없음 | Ring | ⬜ | [TASK-032](tasks/TASK-032_260520_이메일HTML인젝션방지_Ring.md) | IMP-056 · Ring 절차 준수 중점 감시 |
 | TASK-033 | 260520 | 감사 추적 도입 (마스터/인보이스/통관) | P3 | TASK-032 | Ring | ⬜ | [TASK-033](tasks/TASK-033_260520_감사추적도입_Ring.md) | IMP-051 · 설계 의견 필수 · 신규 DB 테이블 |
 | TASK-034 | 260520 | Error Boundary 4개 추가 | P3 | 없음 | B_Kai | ✅ | [TASK-034](tasks/TASK-034_260520_ErrorBoundary추가_BKai.md) | IMP-017 완료 · 커밋 1a6e245+cdf4963 · 209/209 |
-| TASK-035 | 260520 | 정산 엔진 SRP 분할 | P3 | TASK-027 권장 | Riley | 🔍 | [TASK-035](tasks/TASK-035_260520_정산엔진SRP_Riley.md) | IMP-030 · 설계 의견 제출 |
+| TASK-035 | 260520 | 정산 엔진 SRP 분할 | P3 | TASK-027 권장 | Riley | 🔄 | [TASK-035](tasks/TASK-035_260520_정산엔진SRP_Riley.md) | IMP-030 · 설계 확정 완료 — 3클래스+Facade 승인 |
 | TASK-036 | 260520 | ZenUI.tsx 7개 컴포넌트 분할 | P3 | 없음 | B_Kai | ✅ | [TASK-036](tasks/TASK-036_260520_ZenUI분할_BKai.md) | IMP-063 완료 · 코드 d099a04 · 재보고 b544aaf · 209/209 |
 | TASK-037 | 260520 | NaviSidebar Client Bundle 최적화 | P3 | TASK-031 권장 | D_Kai | ⬜ | [TASK-037](tasks/TASK-037_260520_NaviSidebar최적화_DKai.md) | IMP-022 · **설계 의견 권장** · TASK-031 완료 후 순차 |
 
@@ -99,9 +99,9 @@
 
 | Agent | 즉시 착수 가능 | 재작업 필요 | 블로커 대기 |
 |:------|:-------------|:-----------|:----------|
-| Riley | — | — | TASK-035 🔍 (설계 의견 제출 · Aiden 검토 대기) |
-| B_Kai | — | TASK-029 🔔 (3차 재작업 · Noah auth.ts 전환 · 코드 d88892c) | — |
-| D_Kai | TASK-031 🔔 (구현 완료 · Aiden 검토 대기) | — | TASK-037 (TASK-031 완료 후) |
+| Riley | **TASK-035** 🔄 (설계 확정 완료 · 즉시 착수 가능) | TASK-028 ❌ (2차 재작업 · IMP_PROGRESS·개정이력 추가 후 새 doc commit) | — |
+| B_Kai | — | TASK-029 ❌ (3차 재작업 · 신규 doc commit에 IMP_PROGRESS IMP-016 🔔 포함) · **신규 Task 할당 중단** | — |
+| D_Kai | **TASK-037** ⬜ (TASK-031 ✅ 블로커 해제 · 즉시 착수 가능) | — | — |
 | Ring | **TASK-032** (P2, 최우선) | — | TASK-033 (TASK-032 완료 후 + 설계 의견 선행) |
 
 ---
@@ -152,3 +152,4 @@
 | 2026-05-20 | Aiden (Claude) | TASK-027 ✅ PASS — Riley RPC 트랜잭션 래핑 완료. 코드 867d023·문서 e4ccc31. IMP-047 완료·IMP-052·053 블로커 해제 |
 | 2026-05-20 | Aiden (Claude) | TASK-029 ❌ 반려 (2차) — 코드 정상(9ba0853 전량 전환·209/209) · task file 커밋 해시 미기재·IMP_PROGRESS 미포함·detect_changes 범위 불일치. B_Kai 3차 위반 기록 |
 | 2026-05-20 | Aiden (Claude) | TASK-031 설계 확정 — 방식 A-1 승인(metadata 조건부 DB 스킵·fallback React.cache). 📝→🔄 착수 승인 |
+| 2026-05-21 | Aiden (Claude) | Phase G 3차 검토 완료 — TASK-031 ✅ PASS(hasCompleteMetadata 방식 A-1·TASK-037 블로커 해제). TASK-028 ❌ 2차 반려(IMP_PROGRESS.md 미포함·개정이력 누락). TASK-029 ❌ 3차 반려(IMP_PROGRESS 미포함·B_Kai 4차 위반·신규 할당 중단). TASK-035 설계 확정(3클래스+Facade·🔍→🔄) |

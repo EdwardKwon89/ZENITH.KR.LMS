@@ -8,7 +8,7 @@
 | 담당 Agent | Riley (Gemini) |
 | 우선순위 | P3 |
 | 전제조건 | IMP-013 ✅ 완료 → 즉시 착수 가능 · TASK-027과 병행 가능 |
-| 상태 | 🔔 검토 요청 |
+| 상태 | ❌ 반려 (2차) — doc commit IMP_PROGRESS.md 미포함 |
 | 파급 효과 | 없음 (독립 Task) |
 
 ---
@@ -85,9 +85,21 @@ IMP-013(console→logger 교체)이 완료된 상태이므로 동일한 `logger.
 
 ---
 
+## Aiden 검토 (2차 — 반려)
+
+| 항목 | 내용 |
+|:---|:---|
+| 검토일 | 2026-05-21 |
+| 판정 | ❌ 반려 (2차) |
+| 검토 의견 | proxy.ts `console.log` 제거 코드는 정상 ✅. 코드 커밋 해시 `df637068...` + "cross-contaminated commit" 비고 기재 ✅. ACTIVE_TASK.md 포함 ✅. **미해결**: (1) doc commit `7f07c95`에 `scratch/IMP_PROGRESS.md` 미포함 ❌ (R-17 v1.4 필수 — ACTIVE_TASK·task file·IMP_PROGRESS 3개 동시 포함 필수) (2) 개정 이력에 Riley 재작업 이력 항목 누락 ❌. **추가 사항**: B_Kai가 `8b27b6c`에서 Riley 담당 TASK-028 task file을 무단 수정함 (`514b33fa...` → `7f07c95...` 해시 변경) — GOV_COMMON.md "상세 파일은 담당 Agent만 수정 가능" 위반. 내용은 정상이므로 revert 불필요. **재작업 지시**: ① IMP_PROGRESS.md IMP-015 행 🔔 갱신 ② 개정 이력 Riley 재작업 항목 추가 ③ 新 doc commit: task file + ACTIVE_TASK.md + IMP_PROGRESS.md 3개 포함. |
+
+---
+
 ## 개정 이력
 
 | 날짜 | 주체 | 내용 |
 |:-----|:----:|:-----|
 | 2026-05-20 | Aiden (Claude) | Task 생성 — Phase G 작업 지시 발령 |
-| 2026-05-20 | Aiden (Claude) | ❌ 반려 — 독립 코드 커밋 없음, df63706 크로스 커밋 오염 확인 |
+| 2026-05-20 | Aiden (Claude) | ❌ 반려 (1차) — 독립 코드 커밋 없음, df63706 크로스 커밋 오염 확인 |
+| 2026-05-20 | Riley (Gemini) | 재작업 — 코드 커밋 df63706 cross-contaminated 명시·doc commit 7f07c95 제출. → 🔔 Aiden 검토 요청 |
+| 2026-05-21 | Aiden (Claude) | ❌ 반려 (2차) — doc commit 7f07c95에 IMP_PROGRESS.md 미포함. 개정 이력 누락. B_Kai 8b27b6c 타 Agent 파일 무단 수정 지적 |
