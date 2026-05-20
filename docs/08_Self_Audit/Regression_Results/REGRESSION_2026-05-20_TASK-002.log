@@ -1,0 +1,11 @@
+TASK-002 IMP-054 Regression Test Result
+Date: 2026-05-20
+Result: 199/199 PASS (42 test files)
+Commit: (pending - will be created after review)
+
+Changes:
+1. tracking.ts:188-206 — configsWithEvents N+1 → IN(order_ids) batch
+2. notifications.ts:91-117 — triggerStatusChangeNotification loop → batch INSERT
+3. inventory.ts:140-262 — syncInventoryFromOrder per-item loop → IN(sku_codes) batch
+4. orders.ts:354-389 — updateOrderStatus sequential → Promise.all parallel
+5. voc.ts:138-146 — already batch INSERT (confirmed, no change needed)

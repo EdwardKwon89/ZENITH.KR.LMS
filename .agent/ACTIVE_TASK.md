@@ -56,7 +56,7 @@
 | Task-ID | 생성일 | 업무개요 | 우선순위 | 전제조건 | 할당Agent | 상태 | 상세파일 | 비고 |
 |:-------:|:------:|:--------|:--------:|:--------:|:---------:|:----:|:--------|:-----|
 | TASK-001 | 260516 | createOrder() 트랜잭션 도입 | P2 | 없음 | Riley | ✅ | [TASK-001](tasks/TASK-001_260516_createOrder트랜잭션도입_Riley.md) | IMP-019 · IMP-047/052/053 블로커 해제 |
-| TASK-002 | 260516 | N+1 쿼리 7곳 수정 | P2 | 없음 | B_Kai | ❌ | [TASK-002](tasks/TASK-002_260516_N+1쿼리7곳수정_BKai.md) | #4·#6 미수정 — 재작업 요구 |
+| TASK-002 | 260516 | N+1 쿼리 7곳 수정 | P2 | 없음 | B_Kai | 🔔 | [TASK-002](tasks/TASK-002_260516_N+1쿼리7곳수정_BKai.md) | 재작업 완료 — #4 Promise.all, #6 확인; 199/199 PASS |
 | TASK-003 | 260516 | 정산 이중 실행 방지 | P2 | TASK-001 | Riley | ⬜ | [TASK-003](tasks/TASK-003_260516_정산이중실행방지_Riley.md) | IMP-039 · TASK-001 ✅ → 블로커 해제 |
 | TASK-004 | 260516 | WAREHOUSED→CANCELED 재고 복구 | P2 | TASK-001 | Riley | ⬜ | [TASK-004](tasks/TASK-004_260516_WAREHOUSED재고복구_Riley.md) | IMP-040 · TASK-001 ✅ → 블로커 해제 |
 | TASK-005 | 260516 | Phase F 사전 GitNexus 분析 | P3 | 없음 | D_Kai | ⬜ | [TASK-005](tasks/TASK-005_260516_PhaseF사전GitNexus분析_DKai.md) | ANA-IMP-DK-F · IMP-012/017/023/024/029/049/060/061/063 |
@@ -66,7 +66,7 @@
 | TASK-009 | 260516 | API Route stack trace 노출 수정 | P2 | 없음 | Ring | 🔔 | [TASK-009](tasks/TASK-009_260516_APIRoute스택트레이스수정_Ring.md) | IMP-064 |
 | TASK-010 | 260516 | Excel Export POST 인증 적용 | P2 | 없음 | Ring | 🔔 | [TASK-010](tasks/TASK-010_260516_ExcelExportPOST인증적용_Ring.md) | IMP-065 |
 | TASK-011 | 260516 | HTTP Security Headers 설정 | P2 | 없음 | Ring | 🔔 | [TASK-011](tasks/TASK-011_260516_HTTPSecurityHeaders설정_Ring.md) | IMP-066 |
-| TASK-012 | 260516 | Server Action Zod 검증 추가 | P2 | 없음 | Ring | ⬜ | [TASK-012](tasks/TASK-012_260516_ServerActionZod검증추가_Ring.md) | IMP-067 |
+| TASK-012 | 260516 | Server Action Zod 검증 추가 | P2 | 없음 | Ring | 🔄 | [TASK-012](tasks/TASK-012_260516_ServerActionZod검증추가_Ring.md) | IMP-067 |
 | TASK-013 | 260516 | Signup race condition 수정 | P3 | 없음 | Ring | ⬜ | [TASK-013](tasks/TASK-013_260516_SignupRaceCondition수정_Ring.md) | IMP-068 |
 | TASK-014 | 260516 | 무제한 리스트 페이지네이션 수정 | P3 | 없음 | Ring | ⬜ | [TASK-014](tasks/TASK-014_260516_무제한리스트페이지네이션수정_Ring.md) | IMP-045 · 18곳 |
 | TASK-015 | 260516 | console→logger 교체 | P3 | 없음 | Riley | ⬜ | [TASK-015](tasks/TASK-015_260516_console→logger교체_Riley.md) | IMP-013 · 53개 파일 |
