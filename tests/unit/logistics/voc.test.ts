@@ -79,7 +79,8 @@ describe('VOC Action Unit Tests', () => {
     const result = await createVoc(payload);
 
     // Assert
-    expect(result.success).toBe(true);
+    expect(result.data).toBe('voc-123');
+    expect(result.error).toBeNull();
     expect(mockSupabase.from).toHaveBeenCalledWith('zen_voc');
     expect(mockSupabase.insert).toHaveBeenCalledWith(expect.objectContaining({
       order_id: '550e8400-e29b-41d4-a716-446655440001',
@@ -91,7 +92,7 @@ describe('VOC Action Unit Tests', () => {
   it('should throw error when user tries to create VOC for an order they do not own', async () => {
     // Mock Order with DIFFERENT org_id
     mockSupabase.single.mockResolvedValueOnce({
-      data: { order_no: 'ORD-1002', org_id: 'other-org-id' },
+      data: { order_no: 'ORD-1002', org_id: 'other-org-id', shipper_id: 'other-org-id' },
       error: null
     });
 
@@ -104,7 +105,7 @@ describe('VOC Action Unit Tests', () => {
 
     // Act & Assert
     const result = await createVoc(payload);
-    expect(result.success).toBe(false);
+    expect(result.data).toBeNull();
     expect(result.error).toContain('UNAUTHORIZED');
   });
 });

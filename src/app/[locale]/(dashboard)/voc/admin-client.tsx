@@ -43,13 +43,13 @@ export default function AdminVocClient({ initialVocs, t }: AdminVocClientProps) 
 
     setIsSubmitting(true);
     try {
-      const result = await answerVoc({
+      const { data: answerId, error } = await answerVoc({
         vocId: selectedVocId,
         content: answerContent
       });
       
-      if (!result.success) {
-        toast.error('답변 등록 실패', { description: result.error });
+      if (error) {
+        toast.error('답변 등록 실패', { description: error });
         return;
       }
 
@@ -73,9 +73,9 @@ export default function AdminVocClient({ initialVocs, t }: AdminVocClientProps) 
     if (!selectedVocId) return;
 
     try {
-      const result = await updateVocStatus(selectedVocId, 'CLOSED');
-      if (!result.success) {
-        toast.error('상태 변경 실패', { description: result.error });
+      const { data: success, error } = await updateVocStatus(selectedVocId, 'CLOSED');
+      if (error) {
+        toast.error('상태 변경 실패', { description: error });
         return;
       }
       

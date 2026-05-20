@@ -158,7 +158,7 @@ export function useRates(): RatesFormState {
 
     setLoading(true);
     try {
-      await createRateCard({
+      const { data: card, error } = await createRateCard({
         card: {
           carrier_id: selectedCarrier,
           origin_port: originPort,
@@ -187,9 +187,13 @@ export function useRates(): RatesFormState {
         }))
       });
 
-      alert(`요율 카드가 성공적으로 등록되었습니다.`);
-      resetForm();
-      fetchRateCards();
+      if (error) {
+        alert(`저장 중 오류 발생: ${error}`);
+      } else {
+        alert(`요율 카드가 성공적으로 등록되었습니다.`);
+        resetForm();
+        fetchRateCards();
+      }
     } catch (err: any) {
       alert(`저장 중 오류 발생: ${err.message}`);
     } finally {
@@ -200,8 +204,12 @@ export function useRates(): RatesFormState {
   const handleDeleteRate = async (id: string) => {
     if (!confirm('정말 이 요율 정보를 삭제하시겠습니까?')) return;
     try {
-      await deleteRateCard(id);
-      fetchRateCards();
+      const { data: success, error } = await deleteRateCard(id);
+      if (error) {
+        alert(`삭제 중 오류 발생: ${error}`);
+      } else {
+        fetchRateCards();
+      }
     } catch (err: any) {
       alert(err.message);
     }

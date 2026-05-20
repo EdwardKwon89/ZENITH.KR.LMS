@@ -1,4 +1,5 @@
 import { logger } from '@/lib/logger';
+import { withAction } from '@/lib/actions/wrapper';
 "use server";
 
 import fs from "fs";
@@ -41,11 +42,11 @@ export interface VocDetail extends VocItem {
  * 14.1 createVoc (Action)
  * VOC를 등록하고 Admin에게 알림을 발송합니다.
  */
-export async function createVoc(payload: unknown) {
+export const createVoc = withAction(async function (payload: unknown) {
   // Zod 입력 검증
   const validated = validatePayload(createVocSchema, payload);
   if (!validated.success) {
-    return { success: false, error: `Validation error: ${validated.error}` };
+    throw new Error(`Validation error: ${validated.error}`);
   }
   const data = validated.data;
 
@@ -53,7 +54,7 @@ export async function createVoc(payload: unknown) {
 
   if (!profile) {
     fs.appendFileSync('scratch/voc_action.log', `[ERROR] No profile found for user ${user?.id}\n`);
-    return { success: false, error: "User profile not found" };
+    throw new Error("User profile not found");
   }
 
   // 1. 오더 소유권 확인
@@ -67,13 +68,13 @@ export async function createVoc(payload: unknown) {
   if (orderError) {
     logger.error("[DEBUG] Order verification FAILED:", orderError);
     fs.appendFileSync('scratch/voc_action.log', `[ERROR] Order verification FAILED: ${JSON.stringify(orderError)}\n`);
-    return { success: false, error: `Order verification failed: ${orderError.message}` };
+    throw new Error(`Order verification failed: ${orderError.message}`);
   }
   
   if (!order) {
     logger.error("[DEBUG] Order NOT FOUND");
     fs.appendFileSync('scratch/voc_action.log', `[ERROR] Order NOT FOUND: ${data.order_id}\n`);
-    return { success: false, error: "Order not found" };
+    throw new Error("Order not found");
   }
 
   logger.info(`[DEBUG] Order found: no=${order.order_no}, shipper_id=${order.shipper_id}`);
@@ -81,7 +82,7 @@ export async function createVoc(payload: unknown) {
   if (order.shipper_id !== profile.org_id) {
     logger.error(`[DEBUG] UNAUTHORIZED: order.shipper_id(${order.shipper_id}) !== profile.org_id(${profile.org_id})`);
     fs.appendFileSync('scratch/voc_action.log', `[ERROR] UNAUTHORIZED: ${order.shipper_id} !== ${profile.org_id}\n`);
-    return { success: false, error: "UNAUTHORIZED: Access denied to this order" };
+    throw new Error("UNAUTHORIZED: Access denied to this order");
   }
 
   // 2. zen_voc INSERT
@@ -106,7 +107,7 @@ export async function createVoc(payload: unknown) {
   if (vocError) {
     logger.error("[DEBUG] VOC creation FAILED:", vocError);
     fs.appendFileSync('scratch/voc_action.log', `[ERROR] VOC creation FAILED: ${JSON.stringify(vocError)}\n`);
-    return { success: false, error: `VOC creation failed: ${vocError.message}` };
+    throw new Error(`VOC creation failed: ${vocError.message}`);
   }
 
   logger.info("[DEBUG] VOC creation SUCCESS:", voc);
@@ -138,8 +139,8 @@ export async function createVoc(payload: unknown) {
   revalidatePath('/voc/admin', 'page');
   revalidatePath(`/orders/${data.order_id}`, 'page');
 
-  return { success: true, vocId: voc.id };
-}
+  return voc.id;
+});
 
 /**
  * 14.2 getVocList (Action)
@@ -232,7 +233,7 @@ export async function getVocDetail(vocId: string): Promise<{ success: boolean; e
  * 14.4 answerVoc (Action)
  * VOC에 답변을 등록합니다. 최초 답변 시 상태를 IN_PROGRESS로 전환합니다.
  */
-export async function answerVoc(payload: {
+export const answerVoc = withAction(async function (payload: {
   vocId: string;
   content: string;
 }) {
@@ -249,7 +250,9 @@ export async function answerVoc(payload: {
     .select("id, voc_id, answered_by, content, created_at")
     .single();
 
-  if (ansError) return { success: false, error: `Answer failed: ${ansError.message}` };
+  if (ansError) {
+    throw new Error(`Answer failed: ${ansError.message}`);
+  }
 
   // 2. VOC 상태 확인 및 업데이트 (OPEN -> IN_PROGRESS)
   const { data: voc } = await supabase
@@ -284,14 +287,14 @@ export async function answerVoc(payload: {
   revalidatePath("/(dashboard)/voc", "page");
   revalidatePath("/(dashboard)/admin/voc", "page");
 
-  return { success: true, answerId: answer.id };
-}
+  return answer.id;
+});
 
 /**
  * 14.5 updateVocStatus (Action)
  * VOC 상태를 직접 업데이트합니다 (주로 CLOSED 전환용).
  */
-export async function updateVocStatus(vocId: string, status: VocStatus) {
+export const updateVocStatus = withAction(async function (vocId: string, status: VocStatus) {
   const { supabase } = await validateAdminAction();
 
   // 1. 상태 전이 검증 (CLOSED -> OPEN 불가)
@@ -302,7 +305,7 @@ export async function updateVocStatus(vocId: string, status: VocStatus) {
     .single();
 
   if (current?.status === 'CLOSED' && status !== 'CLOSED') {
-    return { success: false, error: "INVALID_TRANSITION: CLOSED status cannot be reverted" };
+    throw new Error("INVALID_TRANSITION: CLOSED status cannot be reverted");
   }
 
   const { error } = await supabase
@@ -310,10 +313,12 @@ export async function updateVocStatus(vocId: string, status: VocStatus) {
     .update({ status })
     .eq("id", vocId);
 
-  if (error) return { success: false, error: `Status update failed: ${error.message}` };
+  if (error) {
+    throw new Error(`Status update failed: ${error.message}`);
+  }
 
   revalidatePath("/(dashboard)/voc", "page");
   revalidatePath("/(dashboard)/admin/voc", "page");
 
-  return { success: true };
-}
+  return true;
+});

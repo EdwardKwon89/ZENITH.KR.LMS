@@ -119,13 +119,15 @@ export default function UpgradeRequestClient({
     
     setIsLoading(true);
     try {
-      const res = await reviewGradePromotion({
+      const { data: success, error } = await reviewGradePromotion({
         requestId: selectedRequest.id,
         decision,
         adminComment
       });
 
-      if (res.success) {
+      if (error) {
+        toast.error(error);
+      } else {
         toast.success(`승급 신청이 ${decision === 'APPROVED' ? '승인' : '반려'}되었습니다.`);
         setAllData(prev => prev.map(r => 
           r.id === selectedRequest.id 

@@ -74,7 +74,8 @@ describe('Monitoring Actions: Error Logging System', () => {
       message: 'Test Error',
       severity: 'ERROR'
     }));
-    expect(result.success).toBe(true);
+    expect(result.data).toBe('log-1');
+    expect(result.error).toBeNull();
   });
 
   it('TC-ERR-02: [Success] severity가 CRITICAL일 경우 관리자 알림을 발송해야 함', async () => {
@@ -135,6 +136,7 @@ describe('Monitoring Actions: Error Logging System', () => {
     // Then
     expect(supabaseMock.update).toHaveBeenCalledWith({ resolved: true });
     expect(supabaseMock.eq).toHaveBeenCalledWith('id', 'log-1');
-    expect(result.success).toBe(true);
+    expect(result.data).toBe(true);
+    expect(result.error).toBeNull();
   });
 });

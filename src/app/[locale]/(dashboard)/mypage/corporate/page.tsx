@@ -68,8 +68,12 @@ export default function CorporatePage() {
     };
 
     try {
-      await updateOrganizationInfo(payload);
-      toast.success(t('success_save_org'));
+      const { data: success, error } = await updateOrganizationInfo(payload);
+      if (error) {
+        toast.error(error);
+      } else {
+        toast.success(t('success_save_org'));
+      }
     } catch (err: any) {
       toast.error(err.message);
     } finally {
@@ -81,9 +85,13 @@ export default function CorporatePage() {
     const name = prompt(t('prompt_add_dept'));
     if (!name) return;
     try {
-      await createDepartment(name);
-      setDepts(await getDepartments());
-      toast.success(t('success_add_dept'));
+      const { data: success, error } = await createDepartment(name);
+      if (error) {
+        toast.error(error);
+      } else {
+        setDepts(await getDepartments());
+        toast.success(t('success_add_dept'));
+      }
     } catch (err: any) {
       toast.error(err.message);
     }
@@ -93,9 +101,13 @@ export default function CorporatePage() {
     const name = prompt(t('prompt_edit_dept'), currentName);
     if (!name || name === currentName) return;
     try {
-      await updateDepartment(id, name);
-      setDepts(await getDepartments());
-      toast.success(t('success_edit_dept'));
+      const { data: success, error } = await updateDepartment(id, name);
+      if (error) {
+        toast.error(error);
+      } else {
+        setDepts(await getDepartments());
+        toast.success(t('success_edit_dept'));
+      }
     } catch (err: any) {
       toast.error(err.message);
     }
@@ -104,9 +116,13 @@ export default function CorporatePage() {
   async function handleDeleteDept(id: string) {
     if (!confirm(t('confirm_delete'))) return;
     try {
-      await deleteDepartment(id);
-      setDepts(await getDepartments());
-      toast.success(t('success_delete_dept'));
+      const { data: success, error } = await deleteDepartment(id);
+      if (error) {
+        toast.error(error);
+      } else {
+        setDepts(await getDepartments());
+        toast.success(t('success_delete_dept'));
+      }
     } catch (err: any) {
       toast.error(err.message);
     }

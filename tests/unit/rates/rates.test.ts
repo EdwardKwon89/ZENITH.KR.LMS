@@ -39,8 +39,9 @@ describe('Rates Actions Unit Tests', () => {
       supabase: mockSupabase 
     });
 
-    await expect(createRateCard({ card: {}, tiers: [], surcharges: [] }))
-      .rejects.toThrow("요율 등록 권한이 없습니다.");
+    const result = await createRateCard({ card: {}, tiers: [], surcharges: [] });
+    expect(result.data).toBeNull();
+    expect(result.error).toBe("요율 등록 권한이 없습니다.");
   });
 
   it('TC-RATES-02: should filter getRateCards by org_id for CARRIER role', async () => {
@@ -62,8 +63,9 @@ describe('Rates Actions Unit Tests', () => {
       supabase: mockSupabase 
     });
 
-    await expect(deleteRateCard('card-123'))
-      .rejects.toThrow("요율 삭제 권한은 관리자(ADMIN)만 가능합니다.");
+    const result = await deleteRateCard('card-123');
+    expect(result.data).toBeNull();
+    expect(result.error).toBe("요율 삭제 권한은 관리자(ADMIN)만 가능합니다.");
   });
 
   it('TC-RATES-04: should handle TISA versioning (ACTIVE to SUPERSEDED) in createRateCard', async () => {
@@ -102,6 +104,6 @@ describe('Rates Actions Unit Tests', () => {
       status: "ACTIVE",
       org_id: 'carrier-org-123'
     }));
-    expect(result.id).toBe('new-1');
+    expect(result.data.id).toBe('new-1');
   });
 });

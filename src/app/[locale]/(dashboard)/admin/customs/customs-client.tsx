@@ -70,12 +70,12 @@ export default function CustomsClient({ initialData, initialTotal }: CustomsClie
     
     setLoading(true);
     try {
-      const result = await submitDeclaration(id);
-      if (result.success) {
+      const { data: success, error } = await submitDeclaration(id);
+      if (error) {
+        toast.error(error || '제출에 실패했습니다.');
+      } else {
         toast.success('신고가 성공적으로 제출되었습니다.');
         fetchData(activeTab);
-      } else {
-        toast.error(result.error || '제출에 실패했습니다.');
       }
     } catch (error) {
       toast.error('오류가 발생했습니다.');
@@ -87,16 +87,16 @@ export default function CustomsClient({ initialData, initialTotal }: CustomsClie
   const handleUpdateStatus = async (id: string, payload: { status: CustomsStatus; declarationNo?: string; adminNote?: string }) => {
     setIsUpdating(true);
     try {
-      const result = await updateDeclarationStatus({
+      const { data: success, error } = await updateDeclarationStatus({
         id,
         ...payload
       });
-      if (result.success) {
+      if (error) {
+        toast.error(error || '업데이트에 실패했습니다.');
+      } else {
         toast.success('상태가 업데이트되었습니다.');
         setIsModalOpen(false);
         fetchData(activeTab);
-      } else {
-        toast.error(result.error || '업데이트에 실패했습니다.');
       }
     } catch (error) {
       toast.error('오류가 발생했습니다.');
@@ -113,13 +113,13 @@ export default function CustomsClient({ initialData, initialTotal }: CustomsClie
   }) => {
     setIsCreating(true);
     try {
-      const result = await createDeclaration(payload);
-      if (result.success) {
+      const { data: id, error } = await createDeclaration(payload);
+      if (error) {
+        toast.error(error || '신고 생성에 실패했습니다.');
+      } else {
         toast.success('신고가 성공적으로 생성되었습니다.');
         setIsCreateModalOpen(false);
         fetchData(activeTab);
-      } else {
-        toast.error(result.error || '신고 생성에 실패했습니다.');
       }
     } catch (error) {
       toast.error('오류가 발생했습니다.');

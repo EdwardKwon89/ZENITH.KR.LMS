@@ -1,4 +1,5 @@
 import { logger } from '@/lib/logger';
+import { withAction } from '@/lib/actions/wrapper';
 "use server";
 
 import { createClient } from "@/utils/supabase/server";
@@ -10,7 +11,7 @@ import { USER_ROLES } from "@/lib/auth/rbac";
 /**
  * 클라이언트 또는 서버에서 발생한 에러를 DB에 기록하고, 중대 에러 시 관리자에게 알림을 발송합니다.
  */
-export async function logClientError(data: {
+export const logClientError = withAction(async function (data: {
   message: string;
   stack?: string;
   url?: string;
@@ -49,7 +50,7 @@ export async function logClientError(data: {
 
   if (error) {
     logger.error("Failed to log error to DB:", error);
-    return { success: false, error: error.message };
+    throw new Error(error.message);
   }
 
   // CRITICAL 레벨인 경우 관리자들에게 인앱 알림 발송
@@ -72,8 +73,8 @@ export async function logClientError(data: {
     }
   }
 
-  return { success: true, logId: log.id };
-}
+  return log.id;
+});
 
 /**
  * 관리자용 에러 로그 목록 조회 (페이징 지원)
@@ -122,7 +123,7 @@ export async function getErrorLogs(params: {
 /**
  * 특정 에러 로그를 '해결됨' 상태로 변경
  */
-export async function resolveErrorLog(id: string) {
+export const resolveErrorLog = withAction(async function (id: string) {
   const { supabase } = await validateAdminAction();
 
   const { error } = await supabase
@@ -133,5 +134,5 @@ export async function resolveErrorLog(id: string) {
   if (error) throw error;
   
   revalidatePath('/admin/error-logs');
-  return { success: true };
-}
+  return true;
+});
