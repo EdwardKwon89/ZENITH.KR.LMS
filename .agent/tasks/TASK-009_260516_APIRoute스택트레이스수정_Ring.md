@@ -8,7 +8,7 @@
 | 담당 Agent | Ring (Qwen) |
 | 우선순위 | P2 |
 | 전제조건 | 없음 (즉시 착수 가능) |
-| 상태 | 🔄 구현 중 |
+| 상태 | 🔔 검토 요청 |
 
 ---
 
@@ -104,11 +104,28 @@ catch (error) {
 
 | 항목 | 내용 |
 |:---|:---|
-| 착수일 | — |
-| 완료일 | — |
-| 수정 Route 수 | — |
-| 회귀 결과 | — |
-| 커밋 해시 | — |
+| 착수일 | 2026-05-20 |
+| 완료일 | 2026-05-20 |
+| 수정 Route 수 | 1개 파일 (GET/POST 2개 핸들러) |
+| 회귀 결과 | 199/199 PASS (42 test files) |
+| 커밋 해시 | `d196e6b` |
+
+### 구현 상세
+
+**신규 파일**: `src/lib/errors.ts`
+- `formatErrorResponse(error, fallbackMessage)` — `NODE_ENV` 기반 스택 트레이스 노출 제어
+- 프로덕션: 일반 메시지(`'서버 오류가 발생했습니다.'`)만 반환
+- 개발: `error.message` + `error.stack` 전체 반환
+
+**수정 파일**: `src/app/api/finance/export/route.ts`
+- L67: `error: any` → `error: unknown` + `formatErrorResponse()` 적용
+- L90: 동일 패턴 적용
+- `import { formatErrorResponse } from "@/lib/errors"` 추가
+
+### 설계 의견 (TASK-009)
+- Aiden 지시: 각 Route에 `NODE_ENV` 분기 추가
+- Ring 제안: 공통 헬퍼 `formatErrorResponse()` 생성 → 채택
+- 근거: DRY 원칙, 향후 에러 로깅 통합 시 확장 용이, 전역 일관성 보장
 
 ---
 

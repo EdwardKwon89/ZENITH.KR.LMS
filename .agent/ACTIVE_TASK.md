@@ -63,7 +63,7 @@
 | TASK-006 | 260516 | Supabase 클라이언트 중복 제거 | P3 | 없음 | D_Kai | ⬜ | [TASK-006](tasks/TASK-006_260516_Supabase클라이언트중복제거_DKai.md) | IMP-059 |
 | TASK-007 | 260516 | RBAC 이중 상태 정리 | P3 | 없음 | D_Kai | 📝 | [TASK-007](tasks/TASK-007_260516_RBAC이중상태정리_DKai.md) | IMP-031 |
 | TASK-008 | 260516 | middleware→proxy.ts 마이그레이션 | P3 | 없음 | D_Kai | 📝 | [TASK-008](tasks/TASK-008_260516_middleware→proxy마이그레이션_DKai.md) | IMP-003 |
-| TASK-009 | 260516 | API Route stack trace 노출 수정 | P2 | 없음 | Ring | 🔄 | [TASK-009](tasks/TASK-009_260516_APIRoute스택트레이스수정_Ring.md) | IMP-064 |
+| TASK-009 | 260516 | API Route stack trace 노출 수정 | P2 | 없음 | Ring | 🔔 | [TASK-009](tasks/TASK-009_260516_APIRoute스택트레이스수정_Ring.md) | IMP-064 |
 | TASK-010 | 260516 | Excel Export POST 인증 적용 | P2 | 없음 | Ring | ⬜ | [TASK-010](tasks/TASK-010_260516_ExcelExportPOST인증적용_Ring.md) | IMP-065 |
 | TASK-011 | 260516 | HTTP Security Headers 설정 | P2 | 없음 | Ring | ⬜ | [TASK-011](tasks/TASK-011_260516_HTTPSecurityHeaders설정_Ring.md) | IMP-066 |
 | TASK-012 | 260516 | Server Action Zod 검증 추가 | P2 | 없음 | Ring | ⬜ | [TASK-012](tasks/TASK-012_260516_ServerActionZod검증추가_Ring.md) | IMP-067 |
