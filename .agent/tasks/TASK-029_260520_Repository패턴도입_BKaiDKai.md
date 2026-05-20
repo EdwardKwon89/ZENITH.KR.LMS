@@ -116,7 +116,7 @@ IMP-059(클라이언트 싱글톤)는 완료되었으나, 비즈니스 로직과
 | gitnexus_detect_changes | 2 files touched, 2 symbols(findUserId·getUserSession), 1 affected process(HandleSubmit), risk: MEDIUM — auth 도메인 전환만 잔여 |
 | 회귀 결과 | 44 files, 209 tests PASS |
 | 코드 커밋 해시 | `d88892c` (auth.ts 2곳 + AdminRepository.findProfileByNameAndEmail 추가) |
-| 문서 커밋 해시 | `⏳ after doc commit` |
+| 문서 커밋 해시 | `64a0b5e` |
 | 상태 | → 🔔 (Aiden 검토 요청) |
 
 ---
