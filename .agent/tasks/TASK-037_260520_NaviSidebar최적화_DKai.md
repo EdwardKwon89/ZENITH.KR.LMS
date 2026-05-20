@@ -103,8 +103,8 @@
 | 번들 크기 변화 | framer-motion ~30KB+ layout bundle에서 제거 · Lucide 아이콘 21→18개 |
 | gitnexus_impact 결과 | LOW — 1 consumer (dashboard layout), 0 processes |
 | 회귀 결과 | 209/209 ALL PASS |
-| 코드 커밋 해시 | — |
-| 문서 커밋 해시 | — |
+| 코드 커밋 해시 | ddeb4dd |
+| 문서 커밋 해시 | 25b893c |
 
 ---
 
