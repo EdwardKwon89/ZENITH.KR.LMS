@@ -351,42 +351,27 @@ export async function updateOrderStatus(
     console.error("[ERROR] History recording failed:", historyError);
   }
 
-  // [WBS 2.4] 인벤토리 동기화 처리
-  await syncInventoryFromOrder(orderId, nextStatus);
-
-  // 4. [Finance Integration] 출고 시 자동 정산 생성
-  if (nextStatus === OrderStatus.RELEASED) {
-    try {
-      await generateInvoicesForOrder(orderId);
-    } catch (financeError) {
-      console.error("[CRITICAL] Finance automation failed during release:", financeError);
-      // 오더 상태 변경은 성공했으므로 중단하지 않으나 로그 기록
-    }
-  }
-
-  // 5. [Notification Integration] 상태 변경 알림 트리거 (WBS 3.1.2.2)
-  try {
-    const { triggerStatusChangeNotification } = await import("@/app/actions/notifications");
-    await triggerStatusChangeNotification(orderId, nextStatus);
-  } catch (notifError) {
-    console.error("[ERROR] Notification trigger failed:", notifError);
-  }
-
-  // 6. [Tracking Integration] 지능형 트래킹 시뮬레이션 트리거
-  // 상태 변경 시점에 맞춘 과거 기록 생성 (사용자 지침 준수)
-  try {
-    // [Optimization] 이미 266라인에서 상세 정보를 조회하도록 코드를 개선하여 재사용
-    if (currentOrder && (currentOrder as any).transport_mode) {
-      await generateTrackingHistory(
-        supabase, 
-        orderId, 
-        nextStatus, 
-        (currentOrder as any).transport_mode
-      );
-    }
-  } catch (trackError) {
-    console.error("[ERROR] Tracking simulation failed:", trackError);
-  }
+  // [WBS 2.4~6] 독립 후속 작업 병렬 실행 (IMP-054 N+1 최적화: 순차→Promise.all)
+  await Promise.all([
+    syncInventoryFromOrder(orderId, nextStatus).catch(invError => {
+      console.error("[ERROR] Inventory sync failed:", invError);
+    }),
+    nextStatus === OrderStatus.RELEASED
+      ? generateInvoicesForOrder(orderId).catch(financeError => {
+          console.error("[CRITICAL] Finance automation failed during release:", financeError);
+        })
+      : Promise.resolve(),
+    import("@/app/actions/notifications").then(async ({ triggerStatusChangeNotification }) => {
+      await triggerStatusChangeNotification(orderId, nextStatus);
+    }).catch(notifError => {
+      console.error("[ERROR] Notification trigger failed:", notifError);
+    }),
+    currentOrder?.transport_mode
+      ? generateTrackingHistory(supabase, orderId, nextStatus, currentOrder.transport_mode).catch(trackError => {
+          console.error("[ERROR] Tracking simulation failed:", trackError);
+        })
+      : Promise.resolve(),
+  ]);
 
   revalidatePath("/(dashboard)/orders", "page");
   revalidatePath(`/(dashboard)/orders/${orderId}`, "page");
