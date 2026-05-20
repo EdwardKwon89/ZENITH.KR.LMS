@@ -1,0 +1,4 @@
+REGRESSION_2026-05-20_TASK-007.log
+IMP-031 RBAC 감사 스크립트
+- scripts/audit-rbac.ts 신규 생성 (코드 수정 없음)
+Result: 197/199 PASS (2 pre-existing voc.ts fs bug)

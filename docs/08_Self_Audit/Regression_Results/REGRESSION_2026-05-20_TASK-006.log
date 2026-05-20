@@ -1,0 +1,5 @@
+REGRESSION_2026-05-20_TASK-006.log
+IMP-059 Supabase 클라이언트 중복 제거
+- src/lib/supabase.ts 삭제 (dead code)
+- login/actions.ts createSupabaseClient → createAdminClient 교체
+Result: 197/199 PASS (2 pre-existing voc.ts fs bug)
