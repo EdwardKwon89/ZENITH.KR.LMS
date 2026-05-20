@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 "use server";
 
 import { validateAdminAction } from "@/lib/auth/guards";
@@ -16,7 +17,7 @@ export async function approveOrganization(orgId: string) {
 
   if (error) throw new Error(`Org approval RPC failed: ${error.message}`);
 
-  console.log(`Organization ${orgId} approved by admin ${user.id}. Assigned ID: ${newId}`);
+  logger.info(`Organization ${orgId} approved by admin ${user.id}. Assigned ID: ${newId}`);
 
   revalidatePath("/admin/organizations");
   return { success: true, corporateId: newId };

@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 "use server";
 
 import { createClient as createServerClient } from "@/utils/supabase/server";
@@ -55,7 +56,7 @@ export async function triggerStatusChangeNotification(
   const order = data as OrderBasicData;
 
   if (error || !order) {
-    console.error("[NOTIF] Failed to fetch order for notification:", error);
+    logger.error("[NOTIF] Failed to fetch order for notification:", error);
     return;
   }
 
@@ -83,7 +84,7 @@ export async function triggerStatusChangeNotification(
     try {
       await sendStatusChangeEmail({ email: order.recipient_email }, order.order_no, newStatus);
     } catch (e) {
-      console.error("[NOTIF] Recipient email failed:", e);
+      logger.error("[NOTIF] Recipient email failed:", e);
     }
   }
 
@@ -99,7 +100,7 @@ export async function triggerStatusChangeNotification(
 
   if (inAppNotifications.length > 0) {
     const { error: batchError } = await supabase.from("zen_notifications").insert(inAppNotifications);
-    if (batchError) console.error("[NOTIF] IN_APP batch insert failed:", batchError);
+    if (batchError) logger.error("[NOTIF] IN_APP batch insert failed:", batchError);
   }
 
   // EMAIL 발송 + 이력 저장
@@ -107,7 +108,7 @@ export async function triggerStatusChangeNotification(
     try {
       await sendStatusChangeEmail({ email: target.email }, order.order_no, newStatus);
     } catch (e) {
-      console.error("[NOTIF] Email send failed:", e);
+      logger.error("[NOTIF] Email send failed:", e);
     }
   }));
 
@@ -122,7 +123,7 @@ export async function triggerStatusChangeNotification(
 
   if (emailLogs.length > 0) {
     const { error: emailBatchError } = await supabase.from("zen_notifications").insert(emailLogs);
-    if (emailBatchError) console.error("[NOTIF] EMAIL batch insert failed:", emailBatchError);
+    if (emailBatchError) logger.error("[NOTIF] EMAIL batch insert failed:", emailBatchError);
   }
 }
 
@@ -213,7 +214,7 @@ export async function sendInAppNotification(params: {
     .single();
 
   if (error) {
-    console.error("[NOTIF] sendInAppNotification failed:", error);
+    logger.error("[NOTIF] sendInAppNotification failed:", error);
     return { success: false, error: error.message };
   }
 

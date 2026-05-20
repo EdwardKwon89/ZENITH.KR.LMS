@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 /**
  * ZENITH_LMS: System Parameters Service
  * 캐싱 레이어를 포함한 시스템 파라미터 조회 및 업데이트 로직
@@ -37,7 +38,7 @@ export async function fetchParamRaw(key: string): Promise<SystemParam | null> {
 
   if (error) {
     if (error.code !== 'PGRST116') { // Not found는 에러로 로깅하지 않음
-      console.error(`[PARAM_SERVICE] Error fetching param ${key}:`, error.message);
+      logger.error(`[PARAM_SERVICE] Error fetching param ${key}:`, error.message);
     }
     return null;
   }
@@ -71,7 +72,7 @@ export const getParamsByCategory = unstable_cache(
       .order('key', { ascending: true });
 
     if (error) {
-      console.error(`[PARAM_SERVICE] Error fetching params for ${category}:`, error.message);
+      logger.error(`[PARAM_SERVICE] Error fetching params for ${category}:`, error.message);
       return [];
     }
     return data || [];
@@ -98,7 +99,7 @@ export const getAllParams = unstable_cache(
       .order('key', { ascending: true });
 
     if (error) {
-      console.error(`[PARAM_SERVICE] Error fetching all params:`, error.message);
+      logger.error(`[PARAM_SERVICE] Error fetching all params:`, error.message);
       return [];
     }
     return data || [];

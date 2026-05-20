@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 'use server';
 
 import { createClient } from '@/utils/supabase/server';
@@ -34,7 +35,7 @@ export async function createDeclaration(payload: {
     .single();
 
   if (error) {
-    console.error('Error creating declaration:', error);
+    logger.error('Error creating declaration:', error);
     return { success: false, error: error.message };
   }
 
@@ -56,7 +57,7 @@ export async function getDeclarations(params?: {
   const { supabase, profile } = await validateUserAction();
   
   const isAdmin = [USER_ROLES.ZENITH_SUPER_ADMIN, USER_ROLES.ADMIN, USER_ROLES.MANAGER].includes(profile?.role as any || '');
-  console.log(`[getDeclarations] User: ${profile?.email}, Role: ${profile?.role}, IsAdmin: ${isAdmin}`);
+  logger.info(`[getDeclarations] User: ${profile?.email}, Role: ${profile?.role}, IsAdmin: ${isAdmin}`);
 
   let query = supabase
     .from('customs_declarations')
@@ -86,7 +87,7 @@ export async function getDeclarations(params?: {
     .range(offset, offset + limit - 1);
 
   if (error) {
-    console.error('Error fetching declarations:', error);
+    logger.error('Error fetching declarations:', error);
     return { declarations: [], total: 0 };
   }
 
@@ -130,7 +131,7 @@ export async function updateDeclarationStatus(payload: {
     .eq('id', payload.id);
 
   if (error) {
-    console.error('Error updating declaration status:', error);
+    logger.error('Error updating declaration status:', error);
     return { success: false, error: error.message };
   }
 
@@ -176,7 +177,7 @@ export async function submitDeclaration(id: string) {
     .eq('id', id);
 
   if (updateError) {
-    console.error('Error updating status after submission:', updateError);
+    logger.error('Error updating status after submission:', updateError);
     return { success: false, error: updateError.message };
   }
 

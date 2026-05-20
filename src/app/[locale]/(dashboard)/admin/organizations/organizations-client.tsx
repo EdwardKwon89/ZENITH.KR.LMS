@@ -1,4 +1,5 @@
 'use client';
+import { logger } from '@/lib/logger';
 
 import { useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
@@ -31,7 +32,7 @@ export default function OrganizationApprovalClient({ initialData }: Organization
       const data = await getOrganizations(['PENDING', 'SUPPLEMENT_REQUIRED']);
       setPendingOrgs(data);
     } catch (err) {
-      console.error("Failed to refresh organizations:", err);
+      logger.error("Failed to refresh organizations:", err);
     } finally {
       setLoading(false);
     }

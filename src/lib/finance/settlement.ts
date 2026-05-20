@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 /**
  * ZENITH_LMS: Settlement & Finance Engine
  * 
@@ -40,12 +41,12 @@ export class SettlementEngine {
         .single();
 
       if (orderError || !order) {
-        console.error('[Settlement] Order not found:', orderId, orderError);
+        logger.error('[Settlement] Order not found:', orderId, orderError);
         return { success: false, message: '오더 정보를 찾을 수 없습니다.' };
       }
 
-      console.log(`[Settlement] Order Loaded: ${order.order_no} (${order.origin_port?.code} -> ${order.dest_port?.code}, ${order.transport_mode})`);
-      console.log(`[Settlement] Shipper ID: ${order.shipper_id}, Type: ${typeof order.shipper_id}`);
+      logger.info(`[Settlement] Order Loaded: ${order.order_no} (${order.origin_port?.code} -> ${order.dest_port?.code}, ${order.transport_mode})`);
+      logger.info(`[Settlement] Shipper ID: ${order.shipper_id}, Type: ${typeof order.shipper_id}`);
       
       // UUID가 배열(byte array)로 들어오는 경우 문자열로 변환
       let shipperIdStr = order.shipper_id;
@@ -61,7 +62,7 @@ export class SettlementEngine {
 
       // 2. Chargeable Weight 계산
       const { chargeableWeight } = await this.calculateChargeableWeight(order);
-      console.log(`[Settlement] Chargeable Weight: ${chargeableWeight}kg`);
+      logger.info(`[Settlement] Chargeable Weight: ${chargeableWeight}kg`);
 
       // 3. 요율 매칭 (가장 적합한 Rate Card 검색)
       // 우선순위: 1. 고객 전용 요율(customer_id 매칭), 2. 일반 요율(customer_id IS NULL)
@@ -81,32 +82,32 @@ export class SettlementEngine {
         .order('created_at', { ascending: false });
 
       if (rateError || !rateCard || rateCard.length === 0) {
-        console.warn(`[Settlement] No matching rate card found for ${order.origin_port.code}->${order.dest_port.code} (${order.transport_mode}). Error: ${rateError?.message}`);
+        logger.warn(`[Settlement] No matching rate card found for ${order.origin_port.code}->${order.dest_port.code} (${order.transport_mode}). Error: ${rateError?.message}`);
         return { success: false, message: '매칭되는 유효한 요율 카드가 없습니다.' };
       }
 
-      console.log(`[Settlement] Found ${rateCard.length} potential rate cards`);
-      console.log(`[Settlement] Order Shipper ID: ${order.shipper_id}`);
+      logger.info(`[Settlement] Found ${rateCard.length} potential rate cards`);
+      logger.info(`[Settlement] Order Shipper ID: ${order.shipper_id}`);
       rateCard.forEach((r, idx) => {
-        console.log(`[Settlement] Rate Card ${idx}: ID=${r.id}, Customer=${r.customer_id}, Priority=${r.priority}`);
+        logger.info(`[Settlement] Rate Card ${idx}: ID=${r.id}, Customer=${r.customer_id}, Priority=${r.priority}`);
       });
 
       // 여러 개가 나올 수 있으므로 고객 전용 요율을 우선 선택
       const bestRate = rateCard.find(r => r.customer_id === shipperIdStr) || rateCard[0];
-      console.log(`[Settlement] Selected Best Rate: ID=${bestRate.id}`);
+      logger.info(`[Settlement] Selected Best Rate: ID=${bestRate.id}`);
 
       // 4. 단가 결정 (슬랩 요율 적용)
-      console.log(`[Settlement] Raw Unit Price from DB:`, bestRate.unit_price, `Type:`, typeof bestRate.unit_price);
+      logger.info(`[Settlement] Raw Unit Price from DB:`, bestRate.unit_price, `Type:`, typeof bestRate.unit_price);
       const unitPrice = bestRate.tiers && bestRate.tiers.length > 0
         ? calculateSlabRate(chargeableWeight, bestRate.tiers)
         : (typeof bestRate.unit_price === 'object' && bestRate.unit_price !== null && 'Int' in bestRate.unit_price 
             ? Number(bestRate.unit_price.Int) * Math.pow(10, bestRate.unit_price.Exp)
             : Number(bestRate.unit_price));
       
-      console.log(`[Settlement] Calculated Unit Price: ${unitPrice}`);
+      logger.info(`[Settlement] Calculated Unit Price: ${unitPrice}`);
 
       const totalFreight = unitPrice * chargeableWeight;
-      console.log(`[Settlement] Calculation Success: ${unitPrice} * ${chargeableWeight} = ${totalFreight} ${bestRate.currency}`);
+      logger.info(`[Settlement] Calculation Success: ${unitPrice} * ${chargeableWeight} = ${totalFreight} ${bestRate.currency}`);
 
       // 5. 비용 데이터 저장 (멱등성 처리)
       const { data: existingCosts, error: costSelectError } = await supabase
@@ -175,7 +176,7 @@ export class SettlementEngine {
         costId: costData.id
       };
     } catch (err: any) {
-      console.error('SettlementEngine Error:', err);
+      logger.error('SettlementEngine Error:', err);
       return { success: false, message: err.message };
     }
   }
@@ -314,7 +315,7 @@ export class InvoiceGenerator {
 
       return { success: true, invoice };
     } catch (err: any) {
-      console.error('InvoiceGenerator Error:', err);
+      logger.error('InvoiceGenerator Error:', err);
       return { success: false, message: err.message };
     }
   }

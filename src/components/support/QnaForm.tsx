@@ -1,4 +1,5 @@
 "use client";
+import { logger } from '@/lib/logger';
 
 import React, { useState } from "react";
 import { useTranslations } from "next-intl";
@@ -49,7 +50,7 @@ export function QnaForm({
       router.push(`/${locale}/support/qna`);
       router.refresh();
     } catch (error) {
-      console.error("Failed to submit inquiry", error);
+      logger.error("Failed to submit inquiry", error);
       toast.error(t("error_submit"));
     } finally {
       setLoading(false);

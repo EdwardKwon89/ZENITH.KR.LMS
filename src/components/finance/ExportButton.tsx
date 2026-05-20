@@ -1,4 +1,5 @@
 "use client";
+import { logger } from '@/lib/logger';
 
 import React, { useState } from 'react';
 import { FileText, Loader2, Download } from 'lucide-react';
@@ -21,15 +22,15 @@ export default function ExportButton({
   const [isExporting, setIsExporting] = useState(false);
 
   const handleExport = async () => {
-    console.log("[FIN-EXP] handleExport triggered", { dataLength: data?.length, type });
+    logger.info("[FIN-EXP] handleExport triggered", { dataLength: data?.length, type });
     if (!data || data.length === 0) {
-      console.warn("[FIN-EXP] No data to export");
+      logger.warn("[FIN-EXP] No data to export");
       toast.error('내보낼 데이터가 없습니다.');
       return;
     }
 
     setIsExporting(true);
-    console.log("[FIN-EXP] Starting fetch to /api/finance/export");
+    logger.info("[FIN-EXP] Starting fetch to /api/finance/export");
     try {
       // Note: In a real implementation, we would call an API route that uses ExcelJS
       // For this task, we'll simulate the download or provide a CSV fallback
@@ -44,7 +45,7 @@ export default function ExportButton({
       
       if (!response.ok) {
         const errorText = await response.text();
-        console.error("Server Error Details:", errorText);
+        logger.error("Server Error Details:", errorText);
         throw new Error(`Export failed: ${response.status} - ${errorText}`);
       }
 
@@ -60,7 +61,7 @@ export default function ExportButton({
 
       toast.success('Excel file generated successfully.');
     } catch (error: any) {
-      console.error("[FIN-EXP] Export Error:", error);
+      logger.error("[FIN-EXP] Export Error:", error);
       toast.error(`Export failed: ${error.message}`);
     } finally {
       setIsExporting(false);

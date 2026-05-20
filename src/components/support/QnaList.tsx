@@ -1,4 +1,5 @@
 "use client";
+import { logger } from '@/lib/logger';
 
 import React, { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
@@ -35,7 +36,7 @@ export function QnaList({ isAdmin = false, locale = "ko" }: { isAdmin?: boolean,
       const { qnas } = await getQnaList();
       if (qnas) setQnas(qnas);
     } catch (error) {
-      console.error("Failed to load QNAs", error);
+      logger.error("Failed to load QNAs", error);
     } finally {
       setLoading(false);
     }

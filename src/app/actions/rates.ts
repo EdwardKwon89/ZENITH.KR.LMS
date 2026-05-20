@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 "use server";
 
 import { validateUserAction } from "@/lib/auth/guards";
@@ -161,7 +162,7 @@ export async function getRateCards(filters: {
   const { data, error } = await query.order("created_at", { ascending: false });
 
   if (error) {
-    console.error("[ERROR] getRateCards failed:", error);
+    logger.error("[ERROR] getRateCards failed:", error);
     throw new Error(`Rates query failed: ${error.message}`);
   }
   return data || [];

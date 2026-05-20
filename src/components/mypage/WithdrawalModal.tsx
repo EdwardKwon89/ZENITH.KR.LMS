@@ -1,4 +1,5 @@
 'use client';
+import { logger } from '@/lib/logger';
 
 import { useState } from 'react';
 import { ZenButton, ZenInput } from '@/components/ui/ZenUI';
@@ -37,7 +38,7 @@ export default function WithdrawalModal({ isOpen, onClose, locale }: WithdrawalM
         router.push(`/${locale}/login`);
       }
     } catch (err: any) {
-      console.error(err);
+      logger.error(err);
       toast.error('탈퇴 처리 중 오류가 발생했습니다.');
     } finally {
       setIsPending(false);

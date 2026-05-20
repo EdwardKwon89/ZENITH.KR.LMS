@@ -1,4 +1,5 @@
 'use client';
+import { logger } from '@/lib/logger';
 
 import { useState, useEffect } from 'react';
 import { 
@@ -45,7 +46,7 @@ export default function CorporatePage() {
         setOrg(orgData);
         setDepts(deptsData);
       } catch (err) {
-        console.error(err);
+        logger.error(err);
         toast.error('데이터를 불러오는 데 실패했습니다.');
       } finally {
         setIsLoading(false);

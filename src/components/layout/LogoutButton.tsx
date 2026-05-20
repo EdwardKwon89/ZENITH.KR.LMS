@@ -1,4 +1,5 @@
 'use client';
+import { logger } from '@/lib/logger';
 
 import React from 'react';
 import { LogOut } from 'lucide-react';
@@ -20,7 +21,7 @@ export default function LogoutButton({ label }: LogoutButtonProps) {
       // Force a hard redirect to login to ensure all state is cleared
       window.location.href = '/login';
     } catch (error) {
-      console.error('Logout failed:', error);
+      logger.error('Logout failed:', error);
       // Fallback redirect
       router.push('/login');
     }

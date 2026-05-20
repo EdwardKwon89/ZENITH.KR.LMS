@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { 
   ITrackingProvider, 
   VirtualTrackingProvider, 
@@ -83,15 +84,15 @@ export class TrackingManager {
       .single();
 
     if (configError) {
-      console.error(`[TRACKING_MANAGER] Error fetching config for ${orderId}:`, configError.message);
+      logger.error(`[TRACKING_MANAGER] Error fetching config for ${orderId}:`, configError.message);
     }
 
     if (!config) {
-      console.warn(`[TRACKING_MANAGER] No config found for order ${orderId}`);
+      logger.warn(`[TRACKING_MANAGER] No config found for order ${orderId}`);
       return [];
     }
 
-    console.log(`[TRACKING_MANAGER] Found config for ${orderId}: provider_type=${config.provider_type}`);
+    logger.info(`[TRACKING_MANAGER] Found config for ${orderId}: provider_type=${config.provider_type}`);
 
     const provider = this.providers.get(config.provider_type);
     if (!provider) return [];
@@ -144,7 +145,7 @@ export class TrackingManager {
         const hoursSinceLastEvent = (Date.now() - latest.event_time.getTime()) / (1000 * 60 * 60);
         
         if (hoursSinceLastEvent > threshold) {
-          console.log(`[TRACKING_MANAGER] Order ${orderId} is delayed. Last event was ${hoursSinceLastEvent.toFixed(1)}h ago (Threshold: ${threshold}h)`);
+          logger.info(`[TRACKING_MANAGER] Order ${orderId} is delayed. Last event was ${hoursSinceLastEvent.toFixed(1)}h ago (Threshold: ${threshold}h)`);
           
           // 상태가 아직 HELD가 아니라면 업데이트
           await this.syncOrderStatus(supabase, orderId, 'DELAYED');
@@ -177,12 +178,12 @@ export class TrackingManager {
       .eq('id', orderId);
 
     if (error) {
-      console.error(`[TRACKING_SYNC] Failed to sync status for ${orderId}:`, error.message);
+      logger.error(`[TRACKING_SYNC] Failed to sync status for ${orderId}:`, error.message);
     } else {
-      console.log(`[TRACKING_SYNC] Order ${orderId} status updated to ${nextStatus}`);
+      logger.info(`[TRACKING_SYNC] Order ${orderId} status updated to ${nextStatus}`);
       // 상태 변경 알림 트리거 (Async)
       triggerStatusChangeNotification(orderId, nextStatus as OrderStatus, supabase).catch(e => {
-        console.error(`[TRACKING_SYNC] Notification trigger failed for ${orderId}:`, e);
+        logger.error(`[TRACKING_SYNC] Notification trigger failed for ${orderId}:`, e);
       });
     }
   }

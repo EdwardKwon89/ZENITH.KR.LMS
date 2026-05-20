@@ -1,0 +1,446 @@
+
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.4 [39m[90m/Users/edward.kwon/WorkSpace/ZENITH_LMS_001[39m
+
+(node:45612) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+[90mstdout[2m | tests/integration/tracking-business-qa.test.ts[2m > [22m[2mQA-02 Tracking Business Integration
+[22m[39m[QA-02] Starting beforeAll setup...
+
+[90mstdout[2m | tests/integration/tracking-business-qa.test.ts[2m > [22m[2mQA-02 Tracking Business Integration
+[22m[39m[QA-02] Cleanup done: { delConfigError: [1mnull[22m, delOrderError: [1mnull[22m }
+
+[90mstdout[2m | tests/integration/tracking-business-qa.test.ts[2m > [22m[2mQA-02 Tracking Business Integration
+[22m[39m[QA-02] Mock order inserted successfully
+
+[90mstdout[2m | tests/integration/tracking-business-qa.test.ts[2m > [22m[2mQA-02 Tracking Business Integration
+[22m[39m[QA-02] Mock config inserted successfully
+
+[90mstdout[2m | tests/integration/tracking-business-qa.test.ts[2m > [22m[2mQA-02 Tracking Business Integration[2m > [22m[2mshould preserve raw JSON logs in zen_tracking_raw_logs
+[22m[39m[QA-02] Direct Config Check: { count: [33m1[39m, checkError: [1mnull[22m }
+
+[90mstdout[2m | tests/integration/tracking-business-qa.test.ts[2m > [22m[2mQA-02 Tracking Business Integration[2m > [22m[2mshould preserve raw JSON logs in zen_tracking_raw_logs
+[22m[39m[INFO] [TRACKING_MANAGER] Found config for 3ff5b116-29cd-4d90-8dd0-0e99c36a2155: provider_type=API
+
+[90mstdout[2m | tests/integration/tracking-business-qa.test.ts[2m > [22m[2mQA-02 Tracking Business Integration[2m > [22m[2mshould preserve raw JSON logs in zen_tracking_raw_logs
+[22m[39m[INFO] [MOCK_CARRIER] Raw log saved successfully for 3ff5b116-29cd-4d90-8dd0-0e99c36a2155
+
+[90mstdout[2m | tests/integration/tracking-business-qa.test.ts[2m > [22m[2mQA-02 Tracking Business Integration[2m > [22m[2mshould preserve raw JSON logs in zen_tracking_raw_logs
+[22m[39m[QA-02] Verified Raw Log: b7b20164-1462-4089-8164-44252f029ad3
+
+ [32m✓[39m tests/integration/tracking-business-qa.test.ts[2m > [22mQA-02 Tracking Business Integration[2m > [22mshould preserve raw JSON logs in zen_tracking_raw_logs[32m 74[2mms[22m[39m
+[90mstdout[2m | tests/integration/tracking-business-qa.test.ts[2m > [22m[2mQA-02 Tracking Business Integration[2m > [22m[2mshould maintain sync integrity without duplicating events
+[22m[39m[INFO] [TRACKING_MANAGER] Found config for 3ff5b116-29cd-4d90-8dd0-0e99c36a2155: provider_type=API
+
+[90mstdout[2m | tests/integration/tracking-business-qa.test.ts[2m > [22m[2mQA-02 Tracking Business Integration[2m > [22m[2mshould maintain sync integrity without duplicating events
+[22m[39m[INFO] [MOCK_CARRIER] Raw log saved successfully for 3ff5b116-29cd-4d90-8dd0-0e99c36a2155
+
+[90mstdout[2m | tests/integration/tracking-business-qa.test.ts[2m > [22m[2mQA-02 Tracking Business Integration[2m > [22m[2mshould maintain sync integrity without duplicating events
+[22m[39m[INFO] [TRACKING_MANAGER] Found config for 3ff5b116-29cd-4d90-8dd0-0e99c36a2155: provider_type=API
+
+[90mstdout[2m | tests/integration/tracking-business-qa.test.ts[2m > [22m[2mQA-02 Tracking Business Integration[2m > [22m[2mshould maintain sync integrity without duplicating events
+[22m[39m[INFO] [MOCK_CARRIER] Raw log saved successfully for 3ff5b116-29cd-4d90-8dd0-0e99c36a2155
+
+[90mstdout[2m | tests/integration/tracking-business-qa.test.ts[2m > [22m[2mQA-02 Tracking Business Integration[2m > [22m[2mshould maintain sync integrity without duplicating events
+[22m[39m[QA-02] Verified Sync Integrity: No duplicates for 3ff5b116-29cd-4d90-8dd0-0e99c36a2155
+
+ [32m✓[39m tests/integration/tracking-business-qa.test.ts[2m > [22mQA-02 Tracking Business Integration[2m > [22mshould maintain sync integrity without duplicating events[32m 61[2mms[22m[39m
+ [32m✓[39m tests/unit/finance/pdf.test.ts[2m > [22mInvoice PDF Generation[2m > [22mshould generate a PDF buffer from valid data[32m 25[2mms[22m[39m
+(node:45639) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+[90mstdout[2m | tests/integration/uat-phase3-e2e.test.ts[2m > [22m[2mZENITH Phase 3 UAT: E2E + Routing Integrated Validation[2m > [22m[2mTC-UAT-E2E.1: 완전 물류 사이클 (오더 → 경로 → 트래킹 → 정산 → 세금계산서)
+[22m[39m[INFO] [Action] calculateSettlementAction started for order: order-e2e-1
+
+[90mstdout[2m | tests/integration/uat-phase3-e2e.test.ts[2m > [22m[2mZENITH Phase 3 UAT: E2E + Routing Integrated Validation[2m > [22m[2mTC-UAT-E2E.1: 완전 물류 사이클 (오더 → 경로 → 트래킹 → 정산 → 세금계산서)
+[22m[39m[INFO] [Action] User Profile: undefined, Role: ADMIN
+
+[90mstdout[2m | tests/integration/uat-phase3-e2e.test.ts[2m > [22m[2mZENITH Phase 3 UAT: E2E + Routing Integrated Validation[2m > [22m[2mTC-UAT-E2E.1: 완전 물류 사이클 (오더 → 경로 → 트래킹 → 정산 → 세금계산서)
+[22m[39m[INFO] [Action] Settlement calculation result for order-e2e-1: {
+  success: [33mtrue[39m,
+  chargeableWeight: [33m100[39m,
+  totalFreight: [33m1000[39m,
+  currency: [32m'USD'[39m,
+  costId: [32m'cost-uuid-1'[39m
+}
+
+[90mstdout[2m | tests/integration/uat-phase3-e2e.test.ts[2m > [22m[2mZENITH Phase 3 UAT: E2E + Routing Integrated Validation[2m > [22m[2mTC-UAT-E2E.1: 완전 물류 사이클 (오더 → 경로 → 트래킹 → 정산 → 세금계산서)
+[22m[39m[INFO] [Action] Fetched 0 costs for order-e2e-1
+
+ [32m✓[39m tests/integration/uat-phase3-e2e.test.ts[2m > [22mZENITH Phase 3 UAT: E2E + Routing Integrated Validation[2m > [22mTC-UAT-E2E.1: 완전 물류 사이클 (오더 → 경로 → 트래킹 → 정산 → 세금계산서)[32m 18[2mms[22m[39m
+ [32m✓[39m tests/integration/uat-phase3-e2e.test.ts[2m > [22mZENITH Phase 3 UAT: E2E + Routing Integrated Validation[2m > [22mTC-UAT-ROU.3/4: 경로 타임라인 & 배지 UAT 검증[32m 0[2mms[22m[39m
+(node:45654) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+ [32m✓[39m tests/integration/fin-03.test.ts[2m > [22mFIN-03 Tax Invoice Regression Tests[2m > [22mTC-F.7: issueTaxInvoice[2m > [22mshould successfully issue a tax invoice[32m 2[2mms[22m[39m
+ [32m✓[39m tests/integration/fin-03.test.ts[2m > [22mFIN-03 Tax Invoice Regression Tests[2m > [22mTC-F.8: sendTaxInvoiceEmail[2m > [22mshould successfully send an email and update status[32m 14[2mms[22m[39m
+ [32m✓[39m tests/integration/fin-03.test.ts[2m > [22mFIN-03 Tax Invoice Regression Tests[2m > [22mTC-F.9: getTaxInvoiceHistory[2m > [22mshould retrieve history for an invoice[32m 0[2mms[22m[39m
+(node:45660) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+[90mstderr[2m | tests/integration/finance.test.ts[2m > [22m[2mZENITH Finance Integration: WBS 3.2 Integrity Test[2m > [22m[2mScenario 1: Auto-Invoicing on Order Release[2m > [22m[2mTC-F.1: [Success] 오더가 RELEASED 상태가 될 때 정산서가 자동 생성되어야 함
+[22m[39m[ERROR] [ERROR] Notification trigger failed: Error: `cookies` was called outside a request scope. Read more: https://nextjs.org/docs/messages/next-dynamic-api-wrong-context
+    at throwForMissingRequestStore [90m(/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/[39mnode_modules/[4mnext[24m/dist/server/app-render/work-unit-async-storage.external.js:75:33[90m)[39m
+    at cookies [90m(/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/[39mnode_modules/[4mnext[24m/dist/server/request/cookies.js:126:67[90m)[39m
+    at createClient [90m(/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/[39msrc/utils/supabase/server.ts:7:29[90m)[39m
+    at triggerStatusChangeNotification [90m(/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/[39msrc/app/actions/notifications.ts:47:46[90m)[39m
+    at [90m/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/[39msrc/app/actions/orders.ts:366:13
+[90m    at processTicksAndRejections (node:internal/process/task_queues:104:5)[39m
+    at async Promise.all (index 2)
+    at Module.updateOrderStatus [90m(/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/[39msrc/app/actions/orders.ts:356:3[90m)[39m
+    at [90m/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/[39mtests/integration/finance.test.ts:71:22
+    at [90mfile:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:1903:20
+
+[90mstderr[2m | tests/integration/finance.test.ts[2m > [22m[2mZENITH Finance Integration: WBS 3.2 Integrity Test[2m > [22m[2mScenario 4: Multi-Currency & Security Expansion (TC-F.4~6)[2m > [22m[2mTC-F.6: [Policy] 인보이스가 생성된 오더는 상태 변경이 제한되어야 함 (Data Integrity)
+[22m[39m[ERROR] [ERROR] Notification trigger failed: Error: `cookies` was called outside a request scope. Read more: https://nextjs.org/docs/messages/next-dynamic-api-wrong-context
+    at throwForMissingRequestStore [90m(/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/[39mnode_modules/[4mnext[24m/dist/server/app-render/work-unit-async-storage.external.js:75:33[90m)[39m
+    at cookies [90m(/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/[39mnode_modules/[4mnext[24m/dist/server/request/cookies.js:126:67[90m)[39m
+    at createClient [90m(/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/[39msrc/utils/supabase/server.ts:7:29[90m)[39m
+    at triggerStatusChangeNotification [90m(/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/[39msrc/app/actions/notifications.ts:47:46[90m)[39m
+    at [90m/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/[39msrc/app/actions/orders.ts:366:13
+[90m    at processTicksAndRejections (node:internal/process/task_queues:104:5)[39m
+    at async Promise.all (index 2)
+    at Module.updateOrderStatus [90m(/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/[39msrc/app/actions/orders.ts:356:3[90m)[39m
+    at [90m/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/[39mtests/integration/finance.test.ts:133:22
+    at [90mfile:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:1903:20
+
+ [32m✓[39m tests/integration/finance.test.ts[2m > [22mZENITH Finance Integration: WBS 3.2 Integrity Test[2m > [22mScenario 1: Auto-Invoicing on Order Release[2m > [22mTC-F.1: [Success] 오더가 RELEASED 상태가 될 때 정산서가 자동 생성되어야 함[32m 5[2mms[22m[39m
+ [32m✓[39m tests/integration/finance.test.ts[2m > [22mZENITH Finance Integration: WBS 3.2 Integrity Test[2m > [22mScenario 2: Financial Precision & Integrity[2m > [22mTC-F.2: [Success] 인보이스 생성 로직 검증[32m 1[2mms[22m[39m
+ [32m✓[39m tests/integration/finance.test.ts[2m > [22mZENITH Finance Integration: WBS 3.2 Integrity Test[2m > [22mScenario 3: Payment Workflow Synchronization[2m > [22mTC-F.3: [Success] 인보이스 결제 완료 시 오더의 Billing Status가 PAID로 자동 변경되어야 함[32m 0[2mms[22m[39m
+ [32m✓[39m tests/integration/finance.test.ts[2m > [22mZENITH Finance Integration: WBS 3.2 Integrity Test[2m > [22mScenario 4: Multi-Currency & Security Expansion (TC-F.4~6)[2m > [22mTC-F.4: [Success] 다중 통화 환산(KRW)이 올바르게 전달되는지 검증[32m 0[2mms[22m[39m
+ [32m✓[39m tests/integration/finance.test.ts[2m > [22mZENITH Finance Integration: WBS 3.2 Integrity Test[2m > [22mScenario 4: Multi-Currency & Security Expansion (TC-F.4~6)[2m > [22mTC-F.5: [Failure] 일반 화주(CORPORATE)는 결제 상태를 변경할 수 없어야 함 (보안 가드)[32m 1[2mms[22m[39m
+ [32m✓[39m tests/integration/finance.test.ts[2m > [22mZENITH Finance Integration: WBS 3.2 Integrity Test[2m > [22mScenario 4: Multi-Currency & Security Expansion (TC-F.4~6)[2m > [22mTC-F.6: [Policy] 인보이스가 생성된 오더는 상태 변경이 제한되어야 함 (Data Integrity)[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/support/support-actions.test.ts[2m > [22mSupport Action Unit Tests[2m > [22mQnA Actions[2m > [22mshould fetch QnA list with pagination[32m 2[2mms[22m[39m
+ [32m✓[39m tests/unit/support/support-actions.test.ts[2m > [22mSupport Action Unit Tests[2m > [22mQnA Actions[2m > [22mshould create a QnA successfully[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/support/support-actions.test.ts[2m > [22mSupport Action Unit Tests[2m > [22mQnA Actions[2m > [22mshould fetch QnA detail with answers[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/support/support-actions.test.ts[2m > [22mSupport Action Unit Tests[2m > [22mQnA Actions[2m > [22mshould allow admin to answer QnA and set status to ANSWERED when isFinal is true[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/support/support-actions.test.ts[2m > [22mSupport Action Unit Tests[2m > [22mQnA Actions[2m > [22mshould set status to IN_PROGRESS when first answer is given (isFinal is false)[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/support/support-actions.test.ts[2m > [22mSupport Action Unit Tests[2m > [22mFAQ Actions[2m > [22mshould fetch FAQ list and support keyword filtering[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/support/support-actions.test.ts[2m > [22mSupport Action Unit Tests[2m > [22mFAQ Actions[2m > [22mshould allow admin to upsert FAQ[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/support/support-actions.test.ts[2m > [22mSupport Action Unit Tests[2m > [22mNotice Actions[2m > [22mshould fetch Notice list with pagination[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/support/support-actions.test.ts[2m > [22mSupport Action Unit Tests[2m > [22mNotice Actions[2m > [22mshould allow admin to upsert Notice and set published_at if is_published is true[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/support/support-actions.test.ts[2m > [22mSupport Action Unit Tests[2m > [22mNotice Actions[2m > [22mshould allow admin to delete Notice[32m 0[2mms[22m[39m
+[90mstdout[2m | tests/unit/customs/customs-declaration.test.ts[2m > [22m[2mCustoms Server Actions[2m > [22m[2mTC-CCL-01: createDeclaration — 초기 상태 PENDING
+[22m[39m[INFO] [AUTH_TRACE] User: undefined, Role: ADMIN, Path: /admin, Allowed: true
+
+[90mstdout[2m | tests/unit/customs/customs-declaration.test.ts[2m > [22m[2mCustoms Server Actions[2m > [22m[2mTC-CCL-04: getDeclarations — 화주별 권한 격리
+[22m[39m[INFO] [DEBUG] validateUserAction START
+
+[90mstdout[2m | tests/unit/customs/customs-declaration.test.ts[2m > [22m[2mCustoms Server Actions[2m > [22m[2mTC-CCL-04: getDeclarations — 화주별 권한 격리
+[22m[39m[INFO] [DEBUG] validateUserAction: Supabase client created
+
+[90mstdout[2m | tests/unit/customs/customs-declaration.test.ts[2m > [22m[2mCustoms Server Actions[2m > [22m[2mTC-CCL-04: getDeclarations — 화주별 권한 격리
+[22m[39m[INFO] [DEBUG] validateUserAction: getUser result { hasUser: [33mtrue[39m, email: [90mundefined[39m, error: [90mundefined[39m }
+
+[90mstdout[2m | tests/unit/customs/customs-declaration.test.ts[2m > [22m[2mCustoms Server Actions[2m > [22m[2mTC-CCL-04: getDeclarations — 화주별 권한 격리
+[22m[39m[INFO] [DEBUG] validateUserAction: profile result { hasProfile: [33mtrue[39m, error: [1mnull[22m }
+
+[90mstdout[2m | tests/unit/customs/customs-declaration.test.ts[2m > [22m[2mCustoms Server Actions[2m > [22m[2mTC-CCL-04: getDeclarations — 화주별 권한 격리
+[22m[39m[INFO] [getDeclarations] User: undefined, Role: ADMIN, IsAdmin: true
+
+[90mstdout[2m | tests/unit/customs/customs-declaration.test.ts[2m > [22m[2mCustoms Server Actions[2m > [22m[2mTC-CCL-02: updateDeclarationStatus — 상태/메모 업데이트
+[22m[39m[INFO] [AUTH_TRACE] User: undefined, Role: ADMIN, Path: /admin, Allowed: true
+
+[90mstdout[2m | tests/unit/customs/customs-declaration.test.ts[2m > [22m[2mCustoms Server Actions[2m > [22m[2mTC-CCL-03: submitDeclaration — 어댑터 연동 및 SUBMITTED 전환
+[22m[39m[INFO] [AUTH_TRACE] User: undefined, Role: ADMIN, Path: /admin, Allowed: true
+
+ [32m✓[39m tests/unit/customs/customs-declaration.test.ts[2m > [22mCustoms Server Actions[2m > [22mTC-CCL-01: createDeclaration — 초기 상태 PENDING[32m 3[2mms[22m[39m
+ [32m✓[39m tests/unit/customs/customs-declaration.test.ts[2m > [22mCustoms Server Actions[2m > [22mTC-CCL-04: getDeclarations — 화주별 권한 격리[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/customs/customs-declaration.test.ts[2m > [22mCustoms Server Actions[2m > [22mTC-CCL-02: updateDeclarationStatus — 상태/메모 업데이트[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/customs/customs-declaration.test.ts[2m > [22mCustoms Server Actions[2m > [22mTC-CCL-03: submitDeclaration — 어댑터 연동 및 SUBMITTED 전환[32m 0[2mms[22m[39m
+ [32m✓[39m tests/integration/inventory.test.ts[2m > [22mZENITH Inventory Integration[2m > [22madjustInventory[2m > [22mshould successfully adjust inventory and log history[32m 4[2mms[22m[39m
+ [32m✓[39m tests/integration/inventory.test.ts[2m > [22mZENITH Inventory Integration[2m > [22madjustInventory[2m > [22mshould prevent negative inventory adjustment[32m 0[2mms[22m[39m
+ [32m✓[39m tests/integration/inventory.test.ts[2m > [22mZENITH Inventory Integration[2m > [22msyncInventoryFromOrder[2m > [22mshould reserve inventory on order REGISTERED[32m 1[2mms[22m[39m
+ [32m✓[39m tests/integration/inventory.test.ts[2m > [22mZENITH Inventory Integration[2m > [22msyncInventoryFromOrder[2m > [22mshould reduce inventory on order RELEASED[32m 0[2mms[22m[39m
+ [32m✓[39m tests/integration/inventory.test.ts[2m > [22mZENITH Inventory Integration[2m > [22msyncInventoryFromOrder[2m > [22mshould restore on_hand and reserved on order CANCELED from WAREHOUSED[32m 0[2mms[22m[39m
+ [32m✓[39m tests/integration/inventory.test.ts[2m > [22mZENITH Inventory Integration[2m > [22msyncInventoryFromOrder[2m > [22mshould restore on_hand on order CANCELED from RELEASED[32m 0[2mms[22m[39m
+ [32m✓[39m tests/integration/inventory.test.ts[2m > [22mZENITH Inventory Integration[2m > [22msyncInventoryFromOrder[2m > [22mshould query order_status_history as fallback if prevStatus is not provided on CANCELED[32m 0[2mms[22m[39m
+(node:45726) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+ [32m✓[39m tests/integration/rou-01.test.ts[2m > [22mTC-R.4: getRouteOptions — 3종 옵션 생성 및 UPSERT 정책[2m > [22m[TC-R.4a] COST/TIME/BALANCED 3종 옵션을 반환한다 (BUG-08-A: 객체 형식)[32m 2[2mms[22m[39m
+ [32m✓[39m tests/integration/rou-01.test.ts[2m > [22mTC-R.4: getRouteOptions — 3종 옵션 생성 및 UPSERT 정책[2m > [22m[TC-R.4b] COST 옵션의 비용은 TIME 옵션보다 저렴하거나 같아야 한다[32m 0[2mms[22m[39m
+ [32m✓[39m tests/integration/rou-01.test.ts[2m > [22mTC-R.4: getRouteOptions — 3종 옵션 생성 및 UPSERT 정책[2m > [22m[TC-R.4c] TIME 옵션의 소요일은 COST 옵션보다 짧거나 같아야 한다[32m 0[2mms[22m[39m
+ [32m✓[39m tests/integration/rou-01.test.ts[2m > [22mTC-R.4: getRouteOptions — 3종 옵션 생성 및 UPSERT 정책[2m > [22m[TC-R.4d] UPSERT 정책 — zen_route_options.upsert 를 호출한다[32m 1[2mms[22m[39m
+ [32m✓[39m tests/integration/rou-01.test.ts[2m > [22mTC-R.5: selectRoute — zen_order_routes 확정 저장[2m > [22m[TC-R.5a] 선택한 optionId 로 zen_order_routes 에 레코드를 생성한다[32m 1[2mms[22m[39m
+ [32m✓[39m tests/integration/rou-01.test.ts[2m > [22mTC-R.5: selectRoute — zen_order_routes 확정 저장[2m > [22m[TC-R.5b] appliedRouteId 는 zen_order_routes 실제 레코드 UUID 를 반환한다 (BUG-10-A)[32m 0[2mms[22m[39m
+ [32m✓[39m tests/integration/rou-01.test.ts[2m > [22mTC-R.6: getRouteVisualization — 마일스톤 및 시각화 데이터[2m > [22m[TC-R.6a] 적용된 경로가 없을 경우 success: false 를 반환한다[32m 0[2mms[22m[39m
+ [32m✓[39m tests/integration/rou-01.test.ts[2m > [22mTC-R.6: getRouteVisualization — 마일스톤 및 시각화 데이터[2m > [22m[TC-R.6b] 세그먼트 데이터를 마일스톤 배열로 올바르게 변환한다[32m 0[2mms[22m[39m
+ [32m✓[39m tests/integration/rou-01.test.ts[2m > [22mTC-R.6: getRouteVisualization — 마일스톤 및 시각화 데이터[2m > [22m[TC-R.6c] 트래킹 이벤트가 존재하는 지점의 status 는 COMPLETED 이다[32m 0[2mms[22m[39m
+ [32m✓[39m tests/integration/rou-01.test.ts[2m > [22mTC-R.7: getRouteConsistencyStatus — 경로 정합성 상태[2m > [22m[TC-R.7a] (Mock) 항상 success: true 와 isConsistent: true 를 반환한다[32m 0[2mms[22m[39m
+[90mstdout[2m | tests/unit/logistics/voc.test.ts[2m > [22m[2mVOC Action Unit Tests[2m > [22m[2mshould create a VOC successfully when user has ownership of the order
+[22m[39m[INFO] [DEBUG] Verifying order ownership: order_id=550e8400-e29b-41d4-a716-446655440001, org_id=test-org-id
+
+[90mstdout[2m | tests/unit/logistics/voc.test.ts[2m > [22m[2mVOC Action Unit Tests[2m > [22m[2mshould create a VOC successfully when user has ownership of the order
+[22m[39m[INFO] [DEBUG] Order found: no=ORD-1001, shipper_id=test-org-id
+[INFO] [DEBUG] Inserting into zen_voc...
+[INFO] [DEBUG] VOC Insert data: {
+  order_id: [32m'550e8400-e29b-41d4-a716-446655440001'[39m,
+  org_id: [32m'test-org-id'[39m,
+  created_by: [32m'test-user-id'[39m,
+  type: [32m'DELAY'[39m,
+  title: [32m'Test VOC Title'[39m,
+  description: [32m'Test VOC Description'[39m,
+  status: [32m'OPEN'[39m
+}
+
+[90mstdout[2m | tests/unit/logistics/voc.test.ts[2m > [22m[2mVOC Action Unit Tests[2m > [22m[2mshould create a VOC successfully when user has ownership of the order
+[22m[39m[INFO] [DEBUG] VOC creation SUCCESS: { id: [32m'voc-123'[39m }
+
+[90mstdout[2m | tests/unit/logistics/voc.test.ts[2m > [22m[2mVOC Action Unit Tests[2m > [22m[2mshould throw error when user tries to create VOC for an order they do not own
+[22m[39m[INFO] [DEBUG] Verifying order ownership: order_id=550e8400-e29b-41d4-a716-446655440002, org_id=test-org-id
+
+[90mstdout[2m | tests/unit/logistics/voc.test.ts[2m > [22m[2mVOC Action Unit Tests[2m > [22m[2mshould throw error when user tries to create VOC for an order they do not own
+[22m[39m[INFO] [DEBUG] Order found: no=ORD-1002, shipper_id=undefined
+
+[90mstderr[2m | tests/unit/logistics/voc.test.ts[2m > [22m[2mVOC Action Unit Tests[2m > [22m[2mshould throw error when user tries to create VOC for an order they do not own
+[22m[39m[ERROR] [DEBUG] UNAUTHORIZED: order.shipper_id(undefined) !== profile.org_id(test-org-id)
+
+ [32m✓[39m tests/unit/logistics/voc.test.ts[2m > [22mVOC Action Unit Tests[2m > [22mshould create a VOC successfully when user has ownership of the order[32m 5[2mms[22m[39m
+ [32m✓[39m tests/unit/logistics/voc.test.ts[2m > [22mVOC Action Unit Tests[2m > [22mshould throw error when user tries to create VOC for an order they do not own[32m 1[2mms[22m[39m
+(node:45759) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+ [32m✓[39m tests/unit/logistics/order-actions.test.ts[2m > [22mZENITH Logistics: Order Creation Logic[2m > [22mTC-A.1: [Success] 오더 생성 시 recipient_phone 및 소유주 정보가 정확히 매핑되어야 함[32m 4[2mms[22m[39m
+ [32m✓[39m tests/unit/logistics/order-actions.test.ts[2m > [22mZENITH Logistics: Order Creation Logic[2m > [22mTC-A.2: [Failure] 가드에서 프로필 획득 실패 시 에러를 전파해야 함[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/logistics/order-actions.test.ts[2m > [22mZENITH Logistics: Order Creation Logic[2m > [22mTC-A.3: [Success] 송하인 담당자명, 연락처, 비고 필드가 DB 삽입 시 포함되어야 함 (v2)[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/logistics/order-actions.test.ts[2m > [22mZENITH Logistics: Order Creation Logic[2m > [22mOrder Status Update: Exception Resilience[2m > [22mTC-A.4: [Failure] 마스터에 결합된 오더의 상태 변경 시도 시 예외를 발생시켜야 함[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/logistics/inventory.test.ts[2m > [22mZENITH Logistics: Inventory Management Logic[2m > [22mTC-I.1: [Success] 일반 사용자의 재고 조회는 조직 ID로 필터링되어야 함[32m 3[2mms[22m[39m
+ [32m✓[39m tests/unit/logistics/inventory.test.ts[2m > [22mZENITH Logistics: Inventory Management Logic[2m > [22mTC-I.4: [Success] Admin/ZENITH_SUPER_ADMIN은 org_id 필터 없이 전체 재고를 조회해야 함[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/logistics/inventory.test.ts[2m > [22mZENITH Logistics: Inventory Management Logic[2m > [22mTC-I.2: [Success] 관리자가 재고 조정 시 이력이 기록되어야 함[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/logistics/inventory.test.ts[2m > [22mZENITH Logistics: Inventory Management Logic[2m > [22mTC-I.3: [Failure] 재고 수량이 0 미만이 되는 조정은 실패해야 함[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/claims/claims-actions.test.ts[2m > [22mZENITH Claims Actions: Lifecycle & Settlement[2m > [22mTC-CLM.1: [Success] getClaims는 해당 조직의 클레임만 조회해야 함 (화주 기준)[32m 2[2mms[22m[39m
+ [32m✓[39m tests/unit/claims/claims-actions.test.ts[2m > [22mZENITH Claims Actions: Lifecycle & Settlement[2m > [22mTC-CLM.2: [Success] createClaim은 클레임을 생성하고 오더 상태를 CLAIMED로 변경해야 함[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/claims/claims-actions.test.ts[2m > [22mZENITH Claims Actions: Lifecycle & Settlement[2m > [22mTC-CLM.3: [Success] addIncidentFee는 사고비를 등록하고 인보이스 총액을 차감해야 함[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/claims/claims-actions.test.ts[2m > [22mZENITH Claims Actions: Lifecycle & Settlement[2m > [22mTC-CLM.4: [Failure] 타 조직 오더에 대한 클레임 생성 시 예외를 던져야 함[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/claims/claims-actions.test.ts[2m > [22mZENITH Claims Actions: Lifecycle & Settlement[2m > [22mTC-CLM.5: [Success] updateClaimStatus는 클레임 상태를 변경하고 revalidatePath를 호출해야 함[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/member/grade-promotion.test.ts[2m > [22mGrade Promotion Unit Tests[2m > [22mMember Actions[2m > [22mshould fetch grade master list[32m 2[2mms[22m[39m
+ [32m✓[39m tests/unit/member/grade-promotion.test.ts[2m > [22mGrade Promotion Unit Tests[2m > [22mMember Actions[2m > [22mshould request grade promotion successfully[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/member/grade-promotion.test.ts[2m > [22mGrade Promotion Unit Tests[2m > [22mMember Actions[2m > [22mshould prevent promotion request if one is pending[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/member/grade-promotion.test.ts[2m > [22mGrade Promotion Unit Tests[2m > [22mAdmin Actions[2m > [22mshould fetch promotion requests joined with zen_profiles[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/member/grade-promotion.test.ts[2m > [22mGrade Promotion Unit Tests[2m > [22mAdmin Actions[2m > [22mshould approve grade promotion[32m 1[2mms[22m[39m
+[90mstdout[2m | tests/unit/auth/guards.test.ts[2m > [22m[2mZENITH Security Guard: Server Action Authorization[2m > [22m[2mTC-G.1: [Success] 관리자 권한을 가진 사용자는 프로필 전체 정보를 반환해야 함
+[22m[39m[INFO] [AUTH_TRACE] User: admin@zenith.kr, Role: ADMIN, Path: /admin, Allowed: [object Promise]
+
+[90mstdout[2m | tests/unit/auth/guards.test.ts[2m > [22m[2mZENITH Security Guard: Server Action Authorization[2m > [22m[2mTC-G.2: [Failure] 권한이 없는 사용자가 관리자 액션 호출 시 예외를 발생시켜야 함
+[22m[39m[INFO] [AUTH_TRACE] User: admin@zenith.kr, Role: CUSTOMER, Path: /admin, Allowed: false
+
+[90mstderr[2m | tests/unit/auth/guards.test.ts[2m > [22m[2mZENITH Security Guard: Server Action Authorization[2m > [22m[2mTC-G.2: [Failure] 권한이 없는 사용자가 관리자 액션 호출 시 예외를 발생시켜야 함
+[22m[39m[ERROR] [AUTH_DENIED] Access blocked for admin@zenith.kr (Role: CUSTOMER)
+
+[90mstdout[2m | tests/unit/auth/guards.test.ts[2m > [22m[2mZENITH Security Guard: Server Action Authorization[2m > [22m[2mTC-G.4: [Success] 일반 사용자 액션 가드는 권한 체크 없이 프로필을 반환해야 함
+[22m[39m[INFO] [DEBUG] validateUserAction START
+
+[90mstdout[2m | tests/unit/auth/guards.test.ts[2m > [22m[2mZENITH Security Guard: Server Action Authorization[2m > [22m[2mTC-G.4: [Success] 일반 사용자 액션 가드는 권한 체크 없이 프로필을 반환해야 함
+[22m[39m[INFO] [DEBUG] validateUserAction: Supabase client created
+
+[90mstdout[2m | tests/unit/auth/guards.test.ts[2m > [22m[2mZENITH Security Guard: Server Action Authorization[2m > [22m[2mTC-G.4: [Success] 일반 사용자 액션 가드는 권한 체크 없이 프로필을 반환해야 함
+[22m[39m[INFO] [DEBUG] validateUserAction: getUser result { hasUser: [33mtrue[39m, email: [32m'admin@zenith.kr'[39m, error: [90mundefined[39m }
+
+[90mstdout[2m | tests/unit/auth/guards.test.ts[2m > [22m[2mZENITH Security Guard: Server Action Authorization[2m > [22m[2mTC-G.4: [Success] 일반 사용자 액션 가드는 권한 체크 없이 프로필을 반환해야 함
+[22m[39m[INFO] [DEBUG] validateUserAction: profile result { hasProfile: [33mtrue[39m, error: [90mundefined[39m }
+
+ [32m✓[39m tests/unit/auth/guards.test.ts[2m > [22mZENITH Security Guard: Server Action Authorization[2m > [22mTC-G.1: [Success] 관리자 권한을 가진 사용자는 프로필 전체 정보를 반환해야 함[32m 2[2mms[22m[39m
+ [32m✓[39m tests/unit/auth/guards.test.ts[2m > [22mZENITH Security Guard: Server Action Authorization[2m > [22mTC-G.2: [Failure] 권한이 없는 사용자가 관리자 액션 호출 시 예외를 발생시켜야 함[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/auth/guards.test.ts[2m > [22mZENITH Security Guard: Server Action Authorization[2m > [22mTC-G.3: [Failure] 세션이 없는 경우 로그인 페이지로 리다이렉트해야 함[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/auth/guards.test.ts[2m > [22mZENITH Security Guard: Server Action Authorization[2m > [22mTC-G.4: [Success] 일반 사용자 액션 가드는 권한 체크 없이 프로필을 반환해야 함[32m 1[2mms[22m[39m
+(node:45802) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+[90mstderr[2m | tests/integration/tracking.test.ts[2m > [22m[2mZENITH Tracking Visibility: Phase 3.3 Multi-Agent Cases[2m > [22m[2mScenario 3: Governance & Security (CIO Case)[2m > [22m[2mTC-TR.5: [Security] 타 화주 소속의 트래킹 정보 조회가 차단되어야 함
+[22m[39m[WARN] [TRACKING] No config found for order: other-corp-order
+
+ [32m✓[39m tests/integration/tracking.test.ts[2m > [22mZENITH Tracking Visibility: Phase 3.3 Multi-Agent Cases[2m > [22mScenario 1: Provider & Simulation Logic (CTO Case)[2m > [22mTC-TR.1: [Success] 트래킹 공급자 설정 변경이 정상적으로 반영되어야 함[32m 3[2mms[22m[39m
+ [32m✓[39m tests/integration/tracking.test.ts[2m > [22mZENITH Tracking Visibility: Phase 3.3 Multi-Agent Cases[2m > [22mScenario 1: Provider & Simulation Logic (CTO Case)[2m > [22mTC-TR.2: [Success] 오더 상태 변경 시 시뮬레이션 이벤트가 과거 시점으로 생성되어야 함[32m 1[2mms[22m[39m
+ [32m✓[39m tests/integration/tracking.test.ts[2m > [22mZENITH Tracking Visibility: Phase 3.3 Multi-Agent Cases[2m > [22mScenario 2: UI & Manual Override (CPO Case)[2m > [22mTC-TR.3: [Success] 어드민 수동 이벤트가 시나리오 자동 생성 데이터보다 우선 노출되어야 함[32m 0[2mms[22m[39m
+ [32m✓[39m tests/integration/tracking.test.ts[2m > [22mZENITH Tracking Visibility: Phase 3.3 Multi-Agent Cases[2m > [22mScenario 2: UI & Manual Override (CPO Case)[2m > [22mTC-TR.4: [Logic] 운송 모드(SEA)에 따른 선박 특화 노드가 매핑되어야 함[32m 0[2mms[22m[39m
+ [32m✓[39m tests/integration/tracking.test.ts[2m > [22mZENITH Tracking Visibility: Phase 3.3 Multi-Agent Cases[2m > [22mScenario 3: Governance & Security (CIO Case)[2m > [22mTC-TR.5: [Security] 타 화주 소속의 트래킹 정보 조회가 차단되어야 함[32m 1[2mms[22m[39m
+ [32m✓[39m tests/integration/tracking.test.ts[2m > [22mZENITH Tracking Visibility: Phase 3.3 Multi-Agent Cases[2m > [22mScenario 3: Governance & Security (CIO Case)[2m > [22mTC-TR.6: [Integrity] 수동 입력 이벤트 발행 시 감사 정보(Source)가 보존되어야 함[32m 0[2mms[22m[39m
+(node:45820) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+ [32m✓[39m tests/unit/master/master-actions.test.ts[2m > [22mZENITH Master Data: CRUD Operations[2m > [22mTC-M.1: [Success] getNations는 국가 목록을 이름 순으로 반환해야 함[32m 2[2mms[22m[39m
+ [32m✓[39m tests/unit/master/master-actions.test.ts[2m > [22mZENITH Master Data: CRUD Operations[2m > [22mTC-M.2: [Success] getPorts는 항구 목록을 코드 순으로 반환해야 함[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/master/master-actions.test.ts[2m > [22mZENITH Master Data: CRUD Operations[2m > [22mTC-M.3: [Success] upsertCommonCode는 데이터를 저장하고 경로를 갱신해야 함[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/master/master-actions.test.ts[2m > [22mZENITH Master Data: CRUD Operations[2m > [22mTC-M.4: [Success] deleteCommonCode는 해당 ID를 삭제해야 함[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/master/master-actions.test.ts[2m > [22mZENITH Master Data: CRUD Operations[2m > [22mMaster Order Actions: Exception Resilience[2m > [22mTC-A.5: [Failure] 마스터 오더 생성 시 DB 에러 발생 시 예외를 던져야 함[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/master/master-actions.test.ts[2m > [22mZENITH Master Data: CRUD Operations[2m > [22mMaster Order Actions: Exception Resilience[2m > [22mTC-A.6: [Failure] 마스터 해체(Dissolve) 시 바인딩 해제 실패 시 예외를 던져야 함[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/finance/report.test.ts[2m > [22mFinance & Schedules Report Actions[2m > [22mTC-FIN7-01: getRevenueReport — startDate 필터 시 해당 기간 데이터만 반환[32m 3[2mms[22m[39m
+ [32m✓[39m tests/unit/finance/report.test.ts[2m > [22mFinance & Schedules Report Actions[2m > [22mTC-FIN7-02: getCostReport — serviceType 필터 시 해당 모드 데이터만 반환[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/finance/report.test.ts[2m > [22mFinance & Schedules Report Actions[2m > [22mTC-FIN7-03: upsertTransportCost — 신규 등록 시 { success: true, data } 반환[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/finance/report.test.ts[2m > [22mFinance & Schedules Report Actions[2m > [22mTC-FIN7-04: getVesselSchedules — originPortId 필터 동작 검증[32m 0[2mms[22m[39m
+(node:45836) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+[90mstdout[2m | tests/unit/logistics/tracking.test.ts[2m > [22m[2mTrackingManager[2m > [22m[2mshould prevent duplicate tracking events
+[22m[39m[INFO] [TRACKING_MANAGER] Found config for test-order-id: provider_type=API
+
+[90mstdout[2m | tests/unit/logistics/tracking.test.ts[2m > [22m[2mTrackingManager[2m > [22m[2mshould prevent duplicate tracking events
+[22m[39m[INFO] [TRACKING_SYNC] Order test-order-id status updated to IN_TRANSIT
+
+[90mstdout[2m | tests/unit/logistics/tracking.test.ts[2m > [22m[2mTrackingManager[2m > [22m[2mshould prevent duplicate tracking events
+[22m[39m[INFO] [TRACKING_MANAGER] Order test-order-id is delayed. Last event was 656.5h ago (Threshold: 48h)
+
+[90mstdout[2m | tests/unit/logistics/tracking.test.ts[2m > [22m[2mTrackingManager[2m > [22m[2mshould prevent duplicate tracking events
+[22m[39m[INFO] [TRACKING_SYNC] Order test-order-id status updated to HELD
+
+[90mstdout[2m | tests/unit/logistics/tracking.test.ts[2m > [22m[2mTrackingManager[2m > [22m[2mshould sync order status when new events are added
+[22m[39m[INFO] [TRACKING_SYNC] Order test-order-id status updated to DELIVERED
+
+[90mstderr[2m | tests/unit/logistics/tracking.test.ts[2m > [22m[2mTrackingManager[2m > [22m[2mshould sync order status when new events are added
+[22m[39m[ERROR] [NOTIF] Failed to fetch order for notification: [90mundefined[39m
+
+[90mstdout[2m | tests/unit/logistics/tracking.test.ts[2m > [22m[2mTrackingManager[2m > [22m[2mTC-OPS-04: [Success] should detect delay when last event is older than threshold
+[22m[39m[INFO] [TRACKING_MANAGER] Found config for delay-order-id: provider_type=API
+
+[90mstdout[2m | tests/unit/logistics/tracking.test.ts[2m > [22m[2mTrackingManager[2m > [22m[2mTC-OPS-04: [Success] should detect delay when last event is older than threshold
+[22m[39m[INFO] [TRACKING_MANAGER] Order delay-order-id is delayed. Last event was 50.0h ago (Threshold: 48h)
+
+[90mstdout[2m | tests/unit/logistics/tracking.test.ts[2m > [22m[2mTrackingManager[2m > [22m[2mTC-OPS-04: [Success] should detect delay when last event is older than threshold
+[22m[39m[INFO] [TRACKING_SYNC] Order delay-order-id status updated to HELD
+
+[90mstderr[2m | tests/unit/logistics/tracking.test.ts[2m > [22m[2mTrackingManager[2m > [22m[2mTC-OPS-04: [Success] should detect delay when last event is older than threshold
+[22m[39m[ERROR] [NOTIF] Failed to fetch order for notification: [1mnull[22m
+
+ [32m✓[39m tests/unit/logistics/tracking.test.ts[2m > [22mTrackingManager[2m > [22mshould prevent duplicate tracking events[32m 3[2mms[22m[39m
+ [32m✓[39m tests/unit/logistics/tracking.test.ts[2m > [22mTrackingManager[2m > [22mshould sync order status when new events are added[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/logistics/tracking.test.ts[2m > [22mTrackingManager[2m > [22mTC-OPS-04: [Success] should detect delay when last event is older than threshold[32m 1[2mms[22m[39m
+ [32m✓[39m tests/integration/notifications.test.ts[2m > [22mZENITH Notification Engine: WBS 3.1.2.2[2m > [22m[TC-N.1] should NOT trigger notifications for non-trigger statuses (REGISTERED)[32m 2[2mms[22m[39m
+ [32m✓[39m tests/integration/notifications.test.ts[2m > [22mZENITH Notification Engine: WBS 3.1.2.2[2m > [22m[TC-N.2] should create IN_APP notification and send email to shipper org users on WAREHOUSED[32m 3[2mms[22m[39m
+ [32m✓[39m tests/integration/notifications.test.ts[2m > [22mZENITH Notification Engine: WBS 3.1.2.2[2m > [22m[TC-N.3] should send email ONLY to recipient on IN_TRANSIT (no IN_APP insert)[32m 1[2mms[22m[39m
+ [32m✓[39m tests/integration/notifications.test.ts[2m > [22mZENITH Notification Engine: WBS 3.1.2.2[2m > [22m[TC-N.4] should mark a single notification as read[32m 0[2mms[22m[39m
+ [32m✓[39m tests/integration/notifications.test.ts[2m > [22mZENITH Notification Engine: WBS 3.1.2.2[2m > [22m[TC-N.5] should mark all unread IN_APP notifications as read for the current user[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/logistics/order-validation.test.ts[2m > [22mZENITH Order Integrity: Registration Schema Validation[2m > [22mTC-O.1: 유효한 데이터 입력 시 검증을 통과해야 함[32m 2[2mms[22m[39m
+ [32m✓[39m tests/unit/logistics/order-validation.test.ts[2m > [22mZENITH Order Integrity: Registration Schema Validation[2m > [22mTC-O.1: 필수 항목(shipper_id) 누락 시 검증에 실패해야 함 (Negative)[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/logistics/order-validation.test.ts[2m > [22mZENITH Order Integrity: Registration Schema Validation[2m > [22mTC-O.1: 부적절한 이메일 형식 입력 시 검증에 실패해야 함 (Negative)[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/logistics/order-validation.test.ts[2m > [22mZENITH Order Integrity: Registration Schema Validation[2m > [22mTC-O.1: 패키지가 최소 1개 이상 존재해야 함[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/logistics/order-validation.test.ts[2m > [22mZENITH Order Integrity: Registration Schema Validation[2m > [22mTC-O.2: 송하인 담당자 정보 및 비고 필드가 포함된 경우 통과해야 함 (v2)[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/logistics/order-validation.test.ts[2m > [22mZENITH Order Integrity: Registration Schema Validation[2m > [22mTC-O.3: 송하인 정보가 누락되어도 optional이므로 통과해야 함 (v2)[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/logistics/order-validation.test.ts[2m > [22mZENITH Order Integrity: Registration Schema Validation[2m > [22mTC-O.4: [Negative] 패키지 중량 또는 아이템 수량이 0 이하일 때 실패해야 함[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/logistics/order-validation.test.ts[2m > [22mZENITH Order Integrity: Registration Schema Validation[2m > [22mTC-O.5: [Negative] 필수 수취인 정보(name, address) 누락 시 실패해야 함[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/rates/rates.test.ts[2m > [22mRates Actions Unit Tests[2m > [22mTC-RATES-01: should restrict createRateCard to ADMIN or MANAGER[32m 2[2mms[22m[39m
+ [32m✓[39m tests/unit/rates/rates.test.ts[2m > [22mRates Actions Unit Tests[2m > [22mTC-RATES-02: should filter getRateCards by org_id for CARRIER role[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/rates/rates.test.ts[2m > [22mRates Actions Unit Tests[2m > [22mTC-RATES-03: should restrict deleteRateCard to ADMIN only[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/rates/rates.test.ts[2m > [22mRates Actions Unit Tests[2m > [22mTC-RATES-04: should handle TISA versioning (ACTIVE to SUPERSEDED) in createRateCard[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/finance/wallet.test.ts[2m > [22mWallet Server Actions[2m > [22mWAL-01: should return wallet balance and create wallet if not exists (Lazy Init)[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/finance/wallet.test.ts[2m > [22mWallet Server Actions[2m > [22mWAL-04: should successfully pay invoice from wallet and update balance/invoice status[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/finance/wallet.test.ts[2m > [22mWallet Server Actions[2m > [22mWAL-04: should fail payment if balance is insufficient[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/finance/wallet.test.ts[2m > [22mWallet Server Actions[2m > [22mWAL-04: should fail payment if invoice is already paid[32m 1[2mms[22m[39m
+(node:45918) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+ [32m✓[39m tests/unit/master/master_policy.test.ts[2m > [22mZENITH Master Order: Policy & Integrity Audit[2m > [22mTC-MP.1: [Auto-Dissolve] 마스터 취소 시 하위 오더가 REGISTERED로 자동 해체되어야 함[32m 2[2mms[22m[39m
+ [32m✓[39m tests/unit/master/master_policy.test.ts[2m > [22mZENITH Master Order: Policy & Integrity Audit[2m > [22mTC-MP.2: [Manual-Dissolve] 수동 해체 시 하위 오더가 REGISTERED 상태로 복구되어야 함[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/master/master_policy.test.ts[2m > [22mZENITH Master Order: Policy & Integrity Audit[2m > [22mTC-MP.3: [Immutable-Guard] 마스터 결합 오더는 개별 상태 변경이 차단되어야 함[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/master/master_policy.test.ts[2m > [22mZENITH Master Order: Policy & Integrity Audit[2m > [22mTC-ORDER-RLS-01: [Role-Guard] 관리자/운영자 이외의 역할은 오더 정보를 업데이트할 수 없어야 함[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/monitoring/error-log.test.ts[2m > [22mMonitoring Actions: Error Logging System[2m > [22mTC-ERR-01: [Success] logClientError는 에러를 DB에 기록해야 함[32m 3[2mms[22m[39m
+ [32m✓[39m tests/unit/monitoring/error-log.test.ts[2m > [22mMonitoring Actions: Error Logging System[2m > [22mTC-ERR-02: [Success] severity가 CRITICAL일 경우 관리자 알림을 발송해야 함[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/monitoring/error-log.test.ts[2m > [22mMonitoring Actions: Error Logging System[2m > [22mTC-ERR-03: [Success] getErrorLogs는 권한 체크 후 로그 목록을 반환해야 함[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/monitoring/error-log.test.ts[2m > [22mMonitoring Actions: Error Logging System[2m > [22mTC-ERR-04: [Success] resolveErrorLog는 로그 상태를 업데이트해야 함[32m 0[2mms[22m[39m
+(node:45931) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+ [32m✓[39m tests/unit/logistics/order-status.test.ts[2m > [22mZENITH Logistics: Order Status Machine Action[2m > [22mTC-S.1: [Success] OPERATOR는 REGISTERED에서 SCHEDULED로 상태를 변경할 수 있어야 함[32m 3[2mms[22m[39m
+ [32m✓[39m tests/unit/logistics/order-status.test.ts[2m > [22mZENITH Logistics: Order Status Machine Action[2m > [22mTC-S.2: [Failure] SHIPPER(CORPORATE)는 WAREHOUSED 이후 상태를 변경할 수 없어야 함 (Immutable Guard)[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/logistics/order-status.test.ts[2m > [22mZENITH Logistics: Order Status Machine Action[2m > [22mTC-S.3: [Failure] 유효하지 않은 상태 전이 시도 시 에러를 발생시켜야 함 (예: REGISTERED -> DELIVERED)[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/monitoring/logger.test.ts[2m > [22mLogger Utility[2m > [22mlogger.info should call console.log with [INFO] prefix[32m 2[2mms[22m[39m
+ [32m✓[39m tests/unit/monitoring/logger.test.ts[2m > [22mLogger Utility[2m > [22mlogger.warn should call console.warn with [WARN] prefix[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/monitoring/logger.test.ts[2m > [22mLogger Utility[2m > [22mlogger.error should call console.error with [ERROR] prefix[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/monitoring/logger.test.ts[2m > [22mLogger Utility[2m > [22mlogger.debug should output [DEBUG] log in non-production environments[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/member/corporate.test.ts[2m > [22mCorporate Actions Unit Tests[2m > [22mTC-MEM-01: should update organization info successfully[32m 2[2mms[22m[39m
+ [32m✓[39m tests/unit/member/corporate.test.ts[2m > [22mCorporate Actions Unit Tests[2m > [22mTC-MEM-02: should create department successfully[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/member/corporate.test.ts[2m > [22mCorporate Actions Unit Tests[2m > [22mTC-MEM-03: should delete department successfully[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/member/corporate.test.ts[2m > [22mCorporate Actions Unit Tests[2m > [22mTC-MEM-04: should throw error if unauthorized role tries to update org info[32m 1[2mms[22m[39m
+(node:46004) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+ [32m✓[39m tests/unit/documents/document-actions.test.ts[2m > [22mZENITH Document Actions: Data Aggregation[2m > [22mTC-DOC.1: [Success] getOrderDocumentData는 오더, 패킹, 아이템 정보를 통합하여 반환해야 함[32m 3[2mms[22m[39m
+ [32m✓[39m tests/unit/documents/document-actions.test.ts[2m > [22mZENITH Document Actions: Data Aggregation[2m > [22mTC-DOC.2: [Failure] 존재하지 않는 오더 번호 조회 시 예외를 던져야 함[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/documents/document-actions.test.ts[2m > [22mZENITH Document Actions: Data Aggregation[2m > [22mTC-DOC.3: [Failure] DB 조회 오류 발생 시 예외를 던져야 함[32m 0[2mms[22m[39m
+(node:46019) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+[90mstderr[2m | tests/unit/member/profile.test.ts[2m > [22m[2mProfile Actions Unit Tests[2m > [22m[2mTC-PROFILE-04: should handle error during withdrawal
+[22m[39m[ERROR] [MEMBER_ACTION] withdrawUser Error: DB Error
+
+ [32m✓[39m tests/unit/member/profile.test.ts[2m > [22mProfile Actions Unit Tests[2m > [22mTC-PROFILE-01: should get my profile successfully[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/member/profile.test.ts[2m > [22mProfile Actions Unit Tests[2m > [22mTC-PROFILE-02: should update my profile successfully[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/member/profile.test.ts[2m > [22mProfile Actions Unit Tests[2m > [22mTC-PROFILE-03: should withdraw user successfully (soft delete)[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/member/profile.test.ts[2m > [22mProfile Actions Unit Tests[2m > [22mTC-PROFILE-04: should handle error during withdrawal[32m 0[2mms[22m[39m
+(node:46029) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+[90mstderr[2m | tests/unit/params/service.test.ts[2m > [22m[2mSystemParamService[2m > [22m[2mTC-OPS-02: [Success] getNumericParam should return default value if DB record is missing
+[22m[39m[ERROR] [PARAM_SERVICE] Error fetching param MISSING_KEY: Not found
+
+ [32m✓[39m tests/unit/params/service.test.ts[2m > [22mSystemParamService[2m > [22mTC-OPS-01: [Success] getNumericParam should return value from DB if exists[32m 2[2mms[22m[39m
+ [32m✓[39m tests/unit/params/service.test.ts[2m > [22mSystemParamService[2m > [22mTC-OPS-02: [Success] getNumericParam should return default value if DB record is missing[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/params/service.test.ts[2m > [22mSystemParamService[2m > [22mTC-OPS-03: [Success] getNumericParam should return default value if value_numeric is null[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/params/service.test.ts[2m > [22mSystemParamService[2m > [22mTC-OPS-04: [Success] getNumericParam should work for EXCHANGE_RATE_USD_KRW[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/params/service.test.ts[2m > [22mSystemParamService[2m > [22mTC-OPS-05: [Success] getNumericParam should work for TRACKING_DELAY_THRESHOLD_HOURS[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/support/order-qna.test.ts[2m > [22mOrder-linked QnA Unit Tests[2m > [22mTC-ORD-QNA-01: should filter QnA by specific orderId[32m 2[2mms[22m[39m
+ [32m✓[39m tests/unit/support/order-qna.test.ts[2m > [22mOrder-linked QnA Unit Tests[2m > [22mTC-ORD-QNA-02: should filter by org_id for non-admin users[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/support/order-qna.test.ts[2m > [22mOrder-linked QnA Unit Tests[2m > [22mTC-ORD-QNA-03: should NOT filter by org_id for admin users[32m 0[2mms[22m[39m
+(node:46048) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+ [32m✓[39m tests/integration/rou-02.test.ts[2m > [22mTC-R.6: getRouteVisualization — 시각화 데이터 변환[2m > [22m[TC-R.6a] 세그먼트 데이터를 마일스톤 배열로 올바르게 변환한다[32m 2[2mms[22m[39m
+ [32m✓[39m tests/integration/rou-02.test.ts[2m > [22mTC-R.6: getRouteVisualization — 시각화 데이터 변환[2m > [22m[TC-R.6b] 데이터가 없을 경우 빈 마일스톤을 반환한다[32m 0[2mms[22m[39m
+ [32m✓[39m tests/integration/rou-02.test.ts[2m > [22mTC-R.7: getRouteConsistencyStatus — 정합성 체크[2m > [22m[TC-R.7a] Mock 단계에서는 항상 isConsistent: true 를 반환한다[32m 0[2mms[22m[39m
+(node:46079) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+ [32m✓[39m tests/unit/master/master-detail.test.ts[2m > [22mZENITH Master Detail: Data Integrity Audit[2m > [22mTC-MD.1: [Success] 마스터 상세 정보와 하우스 목록을 결합하여 반환해야 함[32m 2[2mms[22m[39m
+ [32m✓[39m tests/unit/master/master-detail.test.ts[2m > [22mZENITH Master Detail: Data Integrity Audit[2m > [22mTC-MD.2: [Failure] 존재하지 않는 마스터 ID 조회 시 예외를 발생시켜야 함[32m 1[2mms[22m[39m
+(node:46107) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+ [32m✓[39m tests/unit/logistics/affiliation.test.ts[2m > [22mZENITH Logistics: User Affiliation & Order Settings Logic[2m > [22mTC-A.1: 법인 사용자는 소속 조직 ID와 기업명을 정확히 반환해야 함[32m 2[2mms[22m[39m
+ [32m✓[39m tests/unit/logistics/affiliation.test.ts[2m > [22mZENITH Logistics: User Affiliation & Order Settings Logic[2m > [22mTC-A.2: 개인 사용자는 시스템 지정 더미 ID를 반환하고 isIndividual이 true여야 함[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/logistics/affiliation.test.ts[2m > [22mZENITH Logistics: User Affiliation & Order Settings Logic[2m > [22mTC-A.3: 시스템 개인 화주 ID(Dummy)는 프로젝트 표준 규격과 일치해야 함[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/logistics/status-machine.test.ts[2m > [22mZENITH Status Machine: CLAIMED 전이 규칙 (R-09)[2m > [22mCLAIMED 상태로의 진입[2m > [22mTC-CLM-T1: IN_TRANSIT → CLAIMED 허용 (OPERATOR)[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/logistics/status-machine.test.ts[2m > [22mZENITH Status Machine: CLAIMED 전이 규칙 (R-09)[2m > [22mCLAIMED 상태로의 진입[2m > [22mTC-CLM-T2: DELIVERED → CLAIMED 허용 (OPERATOR)[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/logistics/status-machine.test.ts[2m > [22mZENITH Status Machine: CLAIMED 전이 규칙 (R-09)[2m > [22mCLAIMED 상태로의 진입[2m > [22mTC-CLM-T3: REGISTERED → CLAIMED 불가 (허용되지 않은 전이)[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/logistics/status-machine.test.ts[2m > [22mZENITH Status Machine: CLAIMED 전이 규칙 (R-09)[2m > [22mCLAIMED 상태로의 진입[2m > [22mTC-CLM-T4: SCHEDULED → CLAIMED 불가 (허용되지 않은 전이)[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/logistics/status-machine.test.ts[2m > [22mZENITH Status Machine: CLAIMED 전이 규칙 (R-09)[2m > [22mCLAIMED 상태로부터의 전이[2m > [22mTC-CLM-T5: CLAIMED → DELIVERED 허용 (ADMIN bypass)[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/logistics/status-machine.test.ts[2m > [22mZENITH Status Machine: CLAIMED 전이 규칙 (R-09)[2m > [22mCLAIMED 상태로부터의 전이[2m > [22mTC-CLM-T6: CLAIMED → HELD 허용[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/logistics/status-machine.test.ts[2m > [22mZENITH Status Machine: CLAIMED 전이 규칙 (R-09)[2m > [22mCLAIMED 상태로부터의 전이[2m > [22mTC-CLM-T7: CLAIMED → CANCELED 허용[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/logistics/status-machine.test.ts[2m > [22mZENITH Status Machine: CLAIMED 전이 규칙 (R-09)[2m > [22mCLAIMED 상태로부터의 전이[2m > [22mTC-CLM-T8: CLAIMED → REGISTERED 불가 (허용되지 않은 전이)[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/logistics/status-machine.test.ts[2m > [22mZENITH Status Machine: CLAIMED 전이 규칙 (R-09)[2m > [22mCLAIMED 전이 권한 검증[2m > [22mTC-CLM-T9: OPERATOR는 CLAIMED 전이 가능[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/logistics/status-machine.test.ts[2m > [22mZENITH Status Machine: CLAIMED 전이 규칙 (R-09)[2m > [22mCLAIMED 전이 권한 검증[2m > [22mTC-CLM-T10: CORPORATE는 CLAIMED 전이 가능[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/logistics/status-machine.test.ts[2m > [22mZENITH Status Machine: CLAIMED 전이 규칙 (R-09)[2m > [22mCLAIMED 전이 권한 검증[2m > [22mTC-CLM-T11: INDIVIDUAL은 CLAIMED 전이 가능[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/logistics/status-machine.test.ts[2m > [22mZENITH Status Machine: CLAIMED 전이 규칙 (R-09)[2m > [22mCLAIMED 전이 권한 검증[2m > [22mTC-CLM-T12: ADMIN은 역할 제한 없이 CLAIMED 전이 가능[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/logistics/status-machine.test.ts[2m > [22mZENITH Status Machine: CLAIMED 전이 규칙 (R-09)[2m > [22mCLAIMED 전이 권한 검증[2m > [22mTC-CLM-T13: ZENITH_SUPER_ADMIN은 역할 제한 없이 CLAIMED 전이 가능[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/logistics/status-machine.test.ts[2m > [22mZENITH Status Machine: CLAIMED 전이 규칙 (R-09)[2m > [22mCLAIMED 전이 권한 검증[2m > [22mTC-CLM-T14: CARRIER는 CLAIMED 전이 불가 (권한 없음)[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/logistics/status-machine.test.ts[2m > [22mZENITH Status Machine: CLAIMED 전이 규칙 (R-09)[2m > [22mMANAGER 역할 전 권한 검증 (IMP-036)[2m > [22mTC-SM-M1: MANAGER는 일반적인 전이 규칙을 우회하여 변경 가능 (REGISTERED → CLAIMED)[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/logistics/status-machine.test.ts[2m > [22mZENITH Status Machine: CLAIMED 전이 규칙 (R-09)[2m > [22mMANAGER 역할 전 권한 검증 (IMP-036)[2m > [22mTC-SM-M2: MANAGER는 극단적인 전이 규칙도 우회 가능 (CANCELED → REGISTERED)[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/logistics/status-machine.test.ts[2m > [22mZENITH Status Machine: CLAIMED 전이 규칙 (R-09)[2m > [22mMANAGER 역할 전 권한 검증 (IMP-036)[2m > [22mTC-SM-M3: MANAGER는 배송 완료 후에도 보류 상태로 변경 가능 (DELIVERED → HELD)[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/logistics/status-machine.test.ts[2m > [22mZENITH Status Machine: CLAIMED 전이 규칙 (R-09)[2m > [22mMASTERED Lock 강화 (IMP-043)[2m > [22mTC-ML-T1: isMasteredStatus(MASTERED)는 true를 반환[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/logistics/status-machine.test.ts[2m > [22mZENITH Status Machine: CLAIMED 전이 규칙 (R-09)[2m > [22mMASTERED Lock 강화 (IMP-043)[2m > [22mTC-ML-T2: isMasteredStatus(IN_TRANSIT)는 false를 반환[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/logistics/status-machine.test.ts[2m > [22mZENITH Status Machine: CLAIMED 전이 규칙 (R-09)[2m > [22misOrderEditable 수정 차단 (IMP-042)[2m > [22mTC-ED-T1: WAREHOUSED 상태는 수정 불가[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/logistics/status-machine.test.ts[2m > [22mZENITH Status Machine: CLAIMED 전이 규칙 (R-09)[2m > [22misOrderEditable 수정 차단 (IMP-042)[2m > [22mTC-ED-T2: REGISTERED 상태는 수정 가능[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/logistics/status-machine.test.ts[2m > [22mZENITH Status Machine: CLAIMED 전이 규칙 (R-09)[2m > [22misOrderEditable 수정 차단 (IMP-042)[2m > [22mTC-ED-T3: MASTERED 상태는 수정 불가[32m 0[2mms[22m[39m
+(node:46113) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+ [32m✓[39m tests/unit/params/feature-flags.test.ts[2m > [22mFeatureFlagService[2m > [22mTC-FF-01: [Success] should return true if global feature flag is ON[32m 2[2mms[22m[39m
+ [32m✓[39m tests/unit/params/feature-flags.test.ts[2m > [22mFeatureFlagService[2m > [22mTC-FF-02: [Success] should check org flag if global flag is OFF[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/params/feature-flags.test.ts[2m > [22mFeatureFlagService[2m > [22mTC-FF-03: [Success] should return false if both global and org flags are OFF[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/routing/scoring.test.ts[2m > [22mTC-R.1: Cost-Optimal 선택 (최저비용 ASC)[2m > [22m후보 중 total_cost 가 가장 낮은 캐리어를 선택한다[32m 2[2mms[22m[39m
+ [32m✓[39m tests/unit/routing/scoring.test.ts[2m > [22mTC-R.1: Cost-Optimal 선택 (최저비용 ASC)[2m > [22m원본 배열을 변경하지 않는다 (불변성)[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/routing/scoring.test.ts[2m > [22mTC-R.2: Time-Optimal 선택 (최단시간 ASC)[2m > [22m후보 중 total_transit_days 가 가장 낮은 캐리어를 선택한다[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/routing/scoring.test.ts[2m > [22mTC-R.2: Time-Optimal 선택 (최단시간 ASC)[2m > [22m원본 배열을 변경하지 않는다 (불변성)[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/routing/scoring.test.ts[2m > [22mTC-R.3: Balanced 스코어 산출 (α=0.6, β=0.4)[2m > [22mα=0.6, β=0.4 가중치 합이 1.0 이다[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/routing/scoring.test.ts[2m > [22mTC-R.3: Balanced 스코어 산출 (α=0.6, β=0.4)[2m > [22mKE 스코어 ≈ 0.400 (norm_cost=0, norm_time=1)[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/routing/scoring.test.ts[2m > [22mTC-R.3: Balanced 스코어 산출 (α=0.6, β=0.4)[2m > [22mSQ 스코어 ≈ 0.600 (norm_cost=1, norm_time=0)[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/routing/scoring.test.ts[2m > [22mTC-R.3: Balanced 스코어 산출 (α=0.6, β=0.4)[2m > [22mOZ 스코어 ≈ 0.283 (norm_cost=0.25, norm_time=0.333)[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/routing/scoring.test.ts[2m > [22mTC-R.3: Balanced 스코어 산출 (α=0.6, β=0.4)[2m > [22mBalanced 최소 스코어 캐리어는 OZ 이다[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/routing/scoring.test.ts[2m > [22mTC-R.3: Balanced 스코어 산출 (α=0.6, β=0.4)[2m > [22m단일 후보일 때 스코어는 0 이다 (max===min 경계)[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/statistics/stats-actions.test.ts[2m > [22mStatistics Server Actions[2m > [22mTC-STAT-01: getCostProfitStats('MONTH') — statsByMode 배열 AIR/SEA/CIR 3종 반환[32m 2[2mms[22m[39m
+ [32m✓[39m tests/unit/statistics/stats-actions.test.ts[2m > [22mStatistics Server Actions[2m > [22mTC-STAT-02: getCostProfitStats 마진율 — revenue > 0 시 margin = (rev-cost)/rev*100[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/auth/rbac.test.ts[2m > [22m🛡️ ZENITH Security Shield: RBAC Engine Tests[2m > [22m1. Synchronous checkPermission (Client-side / Fallback)[2m > [22mTC-S.1: SUPER_ADMIN은 모든 경로에 접근 가능해야 함 (Bypass)[32m 2[2mms[22m[39m
+ [32m✓[39m tests/unit/auth/rbac.test.ts[2m > [22m🛡️ ZENITH Security Shield: RBAC Engine Tests[2m > [22m1. Synchronous checkPermission (Client-side / Fallback)[2m > [22mTC-S.2: INDIVIDUAL 회원은 승급 신청 페이지 접근이 가능해야 함[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/auth/rbac.test.ts[2m > [22m🛡️ ZENITH Security Shield: RBAC Engine Tests[2m > [22m1. Synchronous checkPermission (Client-side / Fallback)[2m > [22mTC-S.3: 역할 정보가 없는 경우 접근이 거부되어야 함 (Default Deny)[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/auth/rbac.test.ts[2m > [22m🛡️ ZENITH Security Shield: RBAC Engine Tests[2m > [22m1. Synchronous checkPermission (Client-side / Fallback)[2m > [22mTC-S.4: allowedPaths가 제공된 경우 이를 우선적으로 확인해야 함[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/auth/rbac.test.ts[2m > [22m🛡️ ZENITH Security Shield: RBAC Engine Tests[2m > [22m2. Asynchronous checkPermissionDB (Server-side / DB-driven)[2m > [22mTC-A.1: DB에 설정된 권한이 있는 경우 접근을 허용해야 함[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/auth/rbac.test.ts[2m > [22m🛡️ ZENITH Security Shield: RBAC Engine Tests[2m > [22m2. Asynchronous checkPermissionDB (Server-side / DB-driven)[2m > [22mTC-A.2: DB에 없는 경로이나 STATIC_PERMISSIONS에 있는 경우 Fallback 허용 (DB 결과 없을 때)[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/auth/rbac.test.ts[2m > [22m🛡️ ZENITH Security Shield: RBAC Engine Tests[2m > [22m2. Asynchronous checkPermissionDB (Server-side / DB-driven)[2m > [22mTC-A.3: DB 조회 실패 시에도 STATIC_PERMISSIONS로 Fallback 해야 함[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/logistics/freight-calculator.test.ts[2m > [22mFreight Calculator Utility[2m > [22mcalculateChargeableWeight[2m > [22mshould use Actual Weight when it is greater than Volume Weight (AIR)[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/logistics/freight-calculator.test.ts[2m > [22mFreight Calculator Utility[2m > [22mcalculateChargeableWeight[2m > [22mshould use Volume Weight when it is greater than Actual Weight (AIR)[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/logistics/freight-calculator.test.ts[2m > [22mFreight Calculator Utility[2m > [22mcalculateChargeableWeight[2m > [22mshould calculate Revenue Ton (R.T) correctly for Sea Freight[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/logistics/freight-calculator.test.ts[2m > [22mFreight Calculator Utility[2m > [22mestimateFreightCost[2m > [22mshould calculate correct Air Freight cost[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/logistics/freight-calculator.test.ts[2m > [22mFreight Calculator Utility[2m > [22mestimateFreightCost[2m > [22mshould calculate correct Sea Freight cost[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/master/aviation-master.test.ts[2m > [22mAviation Master Regression[2m > [22mTC-AV.1: [Airlines] 항공사 목록 조회 시 IATA 코드가 포함되어야 함[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/master/aviation-master.test.ts[2m > [22mAviation Master Regression[2m > [22mTC-AV.2: [Airlines] 항공사 Prefix 코드는 3자리 숫자여야 함[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/logistics/rate-engine.test.ts[2m > [22mZENITH Rate Engine: Slab Calculation[2m > [22mTC-R.1: 중량 등급별 슬랩 요율 매칭 무결성 확인 (0~45kg)[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/logistics/rate-engine.test.ts[2m > [22mZENITH Rate Engine: Slab Calculation[2m > [22mTC-R.1: 중량 등급별 슬랩 요율 매칭 무결성 확인 (45~100kg)[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/logistics/rate-engine.test.ts[2m > [22mZENITH Rate Engine: Slab Calculation[2m > [22mTC-R.1: 중량 등급별 슬랩 요율 매칭 무결성 확인 (100kg+)[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/logistics/rate-engine.test.ts[2m > [22mZENITH Rate Engine: Version Governance[2m > [22mTC-R.2: 요율 유효기간 중첩 감지 로직 확인[32m 0[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m43 passed[39m[22m[90m (43)[39m
+[2m      Tests [22m [1m[32m206 passed[39m[22m[90m (206)[39m
+[2m   Start at [22m 17:27:49
+[2m   Duration [22m 37.05s[2m (transform 507ms, setup 2.66s, import 3.03s, tests 536ms, environment 24.12s)[22m
+

@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 'use server';
 
 import { InvoiceGenerator } from '@/lib/finance/settlement';
@@ -147,7 +148,7 @@ export async function issueTaxInvoice(invoiceId: string) {
     .single();
 
   if (invError || !invoice) {
-    console.error(`[Action] Invoice not found:`, invError);
+    logger.error(`[Action] Invoice not found:`, invError);
     throw new Error(`인보이스 정보를 찾을 수 없습니다: ${invError?.message}`);
   }
 
@@ -213,7 +214,7 @@ export async function issueTaxInvoice(invoiceId: string) {
     .single();
 
   if (txError) {
-    console.error(`[Action] Tax invoice insertion failed:`, txError);
+    logger.error(`[Action] Tax invoice insertion failed:`, txError);
     throw new Error(`세금계산서 생성 실패: ${txError.message}`);
   }
 

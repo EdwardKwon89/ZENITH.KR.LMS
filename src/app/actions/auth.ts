@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 'use server';
 
 import { createClient } from '@/utils/supabase/server';
@@ -20,7 +21,7 @@ export async function findUserId(fullName: string, email: string) {
       .maybeSingle();
 
     if (error) {
-      console.error('[AUTH_ACTION] findUserId Error:', error);
+      logger.error('[AUTH_ACTION] findUserId Error:', error);
       return { error: '데이터 조회 중 오류가 발생했습니다.' };
     }
 
@@ -52,7 +53,7 @@ export async function sendPasswordReset(email: string, locale: string = 'ko') {
     });
 
     if (error) {
-      console.error('[AUTH_ACTION] sendPasswordReset Error:', error.message);
+      logger.error('[AUTH_ACTION] sendPasswordReset Error:', error.message);
       return { error: error.message };
     }
 
@@ -71,7 +72,7 @@ export async function changePassword(password: string) {
     const { error } = await supabase.auth.updateUser({ password });
 
     if (error) {
-      console.error('[AUTH_ACTION] changePassword Error:', error.message);
+      logger.error('[AUTH_ACTION] changePassword Error:', error.message);
       return { error: error.message };
     }
 

@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { type NextRequest, NextResponse } from 'next/server';
 import type { SupabaseClient, User } from '@supabase/supabase-js';
 import { isFeatureEnabled } from '@/lib/params/feature-flags';
@@ -83,7 +84,7 @@ export async function authGuard(
         }
       }
     } catch (e) {
-      console.warn(`[AUTH PROXY] DB fallback:`, e);
+      logger.warn(`[AUTH PROXY] DB fallback:`, e);
       if (isMetadataPlatformAdmin) orgType = 'PLATFORM';
     }
 

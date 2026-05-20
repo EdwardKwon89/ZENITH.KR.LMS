@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 'use server';
 
 import { validateUserAction, validateAdminAction } from '@/lib/auth/guards';
@@ -206,7 +207,7 @@ export async function payInvoiceFromWallet(invoiceId: string) {
 
   if (invUpdateError) {
     // 롤백은 복잡해지므로 로그 기록 후 관리자 개입 필요 (또는 RPC 전환)
-    console.error(`[CRITICAL] Invoice update failed after balance deduction: ${invoiceId}`);
+    logger.error(`[CRITICAL] Invoice update failed after balance deduction: ${invoiceId}`);
     throw new Error(`인보이스 상태 업데이트 실패: ${invUpdateError.message}`);
   }
 

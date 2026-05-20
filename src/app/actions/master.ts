@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 "use server";
 
 import { validateAdminAction, validateUserAction } from "@/lib/auth/guards";
@@ -20,7 +21,7 @@ export async function generateOrderNo(supabase: any) {
   });
 
   if (error) {
-    console.error("Sequence error:", error);
+    logger.error("Sequence error:", error);
     // 폴백: 타임스탬프와 랜덤 숫자로 임시 생성
     return `${prefix}-${year}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
   }
@@ -36,7 +37,7 @@ export async function generateMasterOrderNo(supabase: any) {
   const { data, error } = await supabase.rpc("generate_master_order_no");
 
   if (error) {
-    console.error("Master Sequence error:", error);
+    logger.error("Master Sequence error:", error);
     const datePart = new Date().toISOString().slice(2, 10).replace(/-/g, '');
     return `M${datePart}-${Math.floor(1000 + Math.random() * 9000)}`;
   }

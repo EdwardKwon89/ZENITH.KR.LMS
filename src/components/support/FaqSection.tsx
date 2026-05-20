@@ -1,4 +1,5 @@
 "use client";
+import { logger } from '@/lib/logger';
 
 import React, { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
@@ -45,7 +46,7 @@ export function FaqSection({ isAdmin = false }: { isAdmin?: boolean }) {
       const { faqs } = await getFaqList();
       if (faqs) setFaqs(faqs);
     } catch (error) {
-      console.error("Failed to load FAQs", error);
+      logger.error("Failed to load FAQs", error);
     } finally {
       setLoading(false);
     }
@@ -67,7 +68,7 @@ export function FaqSection({ isAdmin = false }: { isAdmin?: boolean }) {
       setCurrentFaq(null);
       loadFaqs();
     } catch (error) {
-      console.error("Failed to save FAQ", error);
+      logger.error("Failed to save FAQ", error);
       toast.error(commonT("error_save"));
     }
   };
@@ -79,7 +80,7 @@ export function FaqSection({ isAdmin = false }: { isAdmin?: boolean }) {
       toast.success(commonT("success_delete"));
       loadFaqs();
     } catch (error) {
-      console.error("Failed to delete FAQ", error);
+      logger.error("Failed to delete FAQ", error);
     }
   };
 

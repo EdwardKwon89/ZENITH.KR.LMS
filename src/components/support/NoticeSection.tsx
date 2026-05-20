@@ -1,4 +1,5 @@
 "use client";
+import { logger } from '@/lib/logger';
 
 import React, { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
@@ -45,7 +46,7 @@ export function NoticeSection({ isAdmin = false }: { isAdmin?: boolean }) {
       const { notices } = await getNoticeList();
       if (notices) setNotices(notices);
     } catch (error) {
-      console.error("Failed to load notices", error);
+      logger.error("Failed to load notices", error);
     } finally {
       setLoading(false);
     }
@@ -65,7 +66,7 @@ export function NoticeSection({ isAdmin = false }: { isAdmin?: boolean }) {
       setIsEditing(false);
       loadNotices();
     } catch (error) {
-      console.error("Failed to save notice", error);
+      logger.error("Failed to save notice", error);
       toast.error(commonT("error_save"));
     }
   };
@@ -77,7 +78,7 @@ export function NoticeSection({ isAdmin = false }: { isAdmin?: boolean }) {
       toast.success(commonT("success_delete"));
       loadNotices();
     } catch (error) {
-      console.error("Failed to delete notice", error);
+      logger.error("Failed to delete notice", error);
     }
   };
 
@@ -90,7 +91,7 @@ export function NoticeSection({ isAdmin = false }: { isAdmin?: boolean }) {
       toast.success(notice.is_published ? t("notice_unpublish") : t("notice_publish"));
       loadNotices();
     } catch (error) {
-      console.error("Failed to toggle publish", error);
+      logger.error("Failed to toggle publish", error);
     }
   };
 

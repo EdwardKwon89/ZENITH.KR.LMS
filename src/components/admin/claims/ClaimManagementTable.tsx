@@ -1,4 +1,5 @@
 "use client";
+import { logger } from '@/lib/logger';
 
 import React, { useState } from 'react';
 import ZenDataGrid from '@/components/ui/ZenDataGrid';
@@ -46,7 +47,7 @@ export const ClaimManagementTable: React.FC<ClaimManagementTableProps> = ({ init
       setSelectedClaimId(claimId);
       setShowFeeModal(true);
     } catch (error) {
-      console.error("Failed to fetch claim details", error);
+      logger.error("Failed to fetch claim details", error);
     } finally {
       setIsLoading(false);
     }

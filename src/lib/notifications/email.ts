@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { Resend } from "resend";
 import { OrderStatus } from "@/types/orders";
 
@@ -27,7 +28,7 @@ export async function sendStatusChangeEmail(
   if (!label || !target.email) return;
 
   if (!resend) {
-    console.warn(`[NOTIF] Resend API Key is missing. Skipping email for order ${orderNo} (Status: ${label})`);
+    logger.warn(`[NOTIF] Resend API Key is missing. Skipping email for order ${orderNo} (Status: ${label})`);
     return;
   }
 

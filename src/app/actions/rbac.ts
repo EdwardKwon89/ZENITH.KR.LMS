@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 "use server";
 
 import { createClient } from "@/utils/supabase/server";
@@ -19,7 +20,7 @@ export async function updateRolePermissions(
     .eq("role_code", roleCode);
 
   if (deleteError) {
-    console.error("Error deleting old permissions:", deleteError);
+    logger.error("Error deleting old permissions:", deleteError);
     return { success: false, error: deleteError.message };
   }
 
@@ -37,7 +38,7 @@ export async function updateRolePermissions(
       .insert(records);
 
     if (insertError) {
-      console.error("Error inserting new permissions:", insertError);
+      logger.error("Error inserting new permissions:", insertError);
       return { success: false, error: insertError.message };
     }
   }

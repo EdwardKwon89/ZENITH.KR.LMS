@@ -1,4 +1,5 @@
 'use client';
+import { logger } from '@/lib/logger';
 
 import { useState, useEffect } from 'react';
 import { createClient } from '@/utils/supabase/client';
@@ -86,7 +87,7 @@ export function useRates(): RatesFormState {
       const data = await getRateCards();
       setRateCards(data);
     } catch (err: any) {
-      console.error('Error fetching rate cards:', err);
+      logger.error('Error fetching rate cards:', err);
     } finally {
       setListLoading(false);
     }
