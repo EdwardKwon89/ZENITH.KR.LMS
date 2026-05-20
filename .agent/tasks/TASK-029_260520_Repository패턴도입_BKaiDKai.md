@@ -112,12 +112,12 @@ IMP-059(클라이언트 싱글톤)는 완료되었으나, 비즈니스 로직과
 |:---|:---|
 | 착수일 | 2026-05-20 |
 | 완료일 | 2026-05-20 |
-| 생성 파일 목록 | `src/lib/repositories/base.repository.ts`, `order.repository.ts`, `finance.repository.ts`, `admin.repository.ts`, `index.ts` (5개) |
-| 전환 액션 범위 | Orders(`updateOrder`), Finance(`updatePaymentStatus`), Admin(`getPorts`) — 3개 도메인 3개 액션 마이그레이션 완료. 복잡 RPC·join 쿼리는 D_Kai 시그니처 설계 대기. |
-| gitnexus_impact 결과 | 신규 심볼(Repository class) — 기존 코드 import 없음, 회귀 가능성 0% |
+| 생성 파일 목록 | `base.repository.ts`, `order.repository.ts`, `finance.repository.ts`, `admin.repository.ts`, `index.ts` (5개) |
+| 전환 액션 범위 | `operations/orders.ts` 전량 Repository 호출 전환 (10개 함수) + `admin/master.ts` getPorts 수정 |
+| gitnexus_impact 결과 | 17개 심볼 변경, 17개 프로세스 영향 — 회귀 테스트 209/209 PASS로 안전성 확인 |
 | 회귀 결과 | 44 files, 209 tests PASS |
-| 코드 커밋 해시 | 2936b8b (Repository 신설) + b69c952 (액션 마이그레이션) |
-| 문서 커밋 해시 | — |
+| 코드 커밋 해시 | ed7629d |
+| 문서 커밋 해시 | adcfd60 |
 
 ---
 
