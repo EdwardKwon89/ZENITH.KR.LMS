@@ -72,9 +72,9 @@
 | TASK-015 | 260516 | console→logger 교체 | P3 | 없음 | Riley | ⬜ | [TASK-015](tasks/TASK-015_260516_console→logger교체_Riley.md) | IMP-013 · 53개 파일 |
 | TASK-016 | 260516 | Server Actions 에러 래퍼 | P3 | 없음 | Riley | ⬜ | [TASK-016](tasks/TASK-016_260516_ServerActions에러래퍼_Riley.md) | IMP-025 |
 | TASK-017 | 260516 | admin/rates 531줄 분할 | P3 | 없음 | B_Kai | ✅ | [TASK-017](tasks/TASK-017_260516_adminRates531줄분할_BKai.md) | IMP-014 완료 · page.tsx 94줄·커밋 e4fee51 |
-| TASK-018 | 260516 | finance.ts 733줄 분할 | P3 | 없음 | B_Kai | 🔔 | [TASK-018](tasks/TASK-018_260516_financeTs733줄분할_BKai.md) | IMP-058 · 커밋 af2f873 · finance 84·settlement 253·invoice 300·fees 53 · 199/199 PASS · doc commit 완료 |
-| TASK-019 | 260516 | Server Actions 도메인 분할 | P3 | TASK-017+018 | B_Kai | 🚫 | [TASK-019](tasks/TASK-019_260516_ServerActions도메인분할_BKai.md) | IMP-033 · D1 완료 후 |
-| TASK-020 | 260516 | SELECT * 명시적 컬럼 교체 | P3 | 없음 | B_Kai | 🔔 | [TASK-020](tasks/TASK-020_260516_SELECT명시적컬럼교체_BKai.md) | IMP-062 · 코드 c777b10(혼합 커밋 — Aiden 별도 지시 대기) · 112/112 교체 · 202/202 PASS · doc commit 완료 |
+| TASK-018 | 260516 | finance.ts 733줄 분할 | P3 | 없음 | B_Kai | ✅ | [TASK-018](tasks/TASK-018_260516_financeTs733줄분할_BKai.md) | IMP-058 완료 · 커밋 af2f873+06210a0 · 199/199 PASS |
+| TASK-019 | 260516 | Server Actions 도메인 분할 | P3 | TASK-017+018 | B_Kai | ⬜ | [TASK-019](tasks/TASK-019_260516_ServerActions도메인분할_BKai.md) | IMP-033 · TASK-017✅+TASK-018✅ 블로커 해제 — 즉시 착수 가능 |
+| TASK-020 | 260516 | SELECT * 명시적 컬럼 교체 | P3 | 없음 | B_Kai | ✅ | [TASK-020](tasks/TASK-020_260516_SELECT명시적컬럼교체_BKai.md) | IMP-062 완료 · 커밋 c777b10+06210a0 · 202/202 PASS |
 
 ---
 
@@ -83,7 +83,7 @@
 | Agent | 즉시 착수 가능 | 블로커 대기 |
 |:------|:-------------|:----------|
 | Riley | TASK-015 · TASK-016 | — |
-| B_Kai | TASK-018🔔 · TASK-020🔔 | TASK-019 (TASK-018 ✅ 후) |
+| B_Kai | TASK-019 (블로커 해제 — 즉시 착수) | — |
 | D_Kai | — | 전량 완료 |
 | Ring | TASK-013 · TASK-014 | — |
 
@@ -113,3 +113,4 @@
 | 2026-05-20 | Aiden (Claude) | Ring TASK-010 ✅ PASS (4차) · TASK-012 ✅ PASS (3차). Riley TASK-004 ❌ 반려 (커밋 해시 오기재·독립 커밋 없음·test 미커밋). B_Kai TASK-018 ❌ 반려 (3차, doc commit 미완료). B_Kai TASK-020 ❌ 반려 (1차, mixed commit·doc commit 미완료) |
 | 2026-05-20 | B_Kai | TASK-018/020 doc commit 재수행 — task file 🔔 + ACTIVE_TASK.md 🔔 동기화 |
 | 2026-05-20 | Aiden (Claude) | Riley TASK-004 ✅ PASS (2차) — 공지 타이밍 완화 적용. 0ccebb9(test)+400a4bd(doc) R-17 v1.4 패턴 준수. AGENTS.md·CLAUDE.md 중복 GitNexus 섹션 Aiden 정정 처리 |
+| 2026-05-20 | Aiden (Claude) | Aiden 오판 정정 — B_Kai TASK-018 ✅ PASS (4차 승인, 3차 ❌ 오판) · TASK-020 ✅ PASS (1차 승인, 오판 정정). TASK-019 블로커 전량 해제(TASK-017✅+TASK-018✅) — B_Kai 즉시 착수 가능 |
