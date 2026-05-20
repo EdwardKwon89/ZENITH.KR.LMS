@@ -8,7 +8,7 @@
 | 담당 Agent | Riley (Gemini) |
 | 우선순위 | P3 |
 | 전제조건 | TASK-027 완료 후 착수 권장 (트랜잭션 안정화 후 SRP 분할) |
-| 상태 | 🔍 설계 확정 대기 |
+| 상태 | 🔄 구현 중 (설계 확정 완료) |
 | 파급 효과 | 없음 (독립 Task) |
 
 ---
@@ -92,13 +92,11 @@
 
 ## 설계 확정 (Aiden 작성)
 
-> **이 섹션은 📝 보고 후 Aiden이 작성합니다. 확정 전 구현 코드 작성 금지.**
-
 | 항목 | 내용 |
 |:---|:---|
-| 확정 분할 경계 | — |
-| 수정·보완 사항 | — |
-| 착수 승인 | — |
+| 확정 분할 경계 | **SlabRateCalculator**: Chargeable Weight 기반 슬래브 구간 단가 산출 전담 — `calculateSlabRate` + DB 단가 매칭 처리. **CostAggregator**: 패키지 목록 분석 → `calculateChargeableWeight` 집계 + 총 정산 금액 합산 전담. **SettlementValidator**: 오더 필수 데이터 검증(포트 코드·운송 모드) + 인보이스 재계산 차단 전담. **SettlementEngine + InvoiceGenerator**: Facade 역할 — `calculateOrderCosts(orderId)` · `generateInvoice(orderId)` 메서드 서명 100% 불변 유지 |
+| 수정·보완 사항 | ① 각 분리 파일은 **200줄 이하** 유지 필수 (ZEN_A4 기준) — DoD에 파일별 줄 수 기재 ② `cargo_details` JSONB 파싱 로직은 `CostAggregator` 내부에서 타입 가드 처리 (`z.object` 또는 `as unknown as Type` 대신 명시적 파싱) ③ `settlement/index.ts` barrel export — 기존 `@/lib/finance/settlement` import 경로 변경 없음 확인 필수 ④ `InvoiceGenerator`도 Facade 파일(`settlement.ts`)에 유지하거나 별도 `invoice-generator.ts` 분리 가능 — Riley 판단에 위임. 단, 외부 인터페이스(메서드 서명) 불변 필수 ⑤ 구현 착수 전 `gitnexus_impact({target: "SettlementEngine", direction: "upstream"})` 실행 + 결과 기재 의무 |
+| 착수 승인 | ✅ 2026-05-21 Aiden 확정 — 즉시 🔄 착수 가능 |
 
 ---
 
@@ -136,3 +134,5 @@
 | 날짜 | 주체 | 내용 |
 |:-----|:----:|:-----|
 | 2026-05-20 | Aiden (Claude) | Task 생성 — Phase G 작업 지시 발령 |
+| 2026-05-20 | Riley (Gemini) | 설계 의견 제출 — SlabRateCalculator·CostAggregator·SettlementValidator 3클래스+Facade 분할 제안. 📝→🔍 |
+| 2026-05-21 | Aiden (Claude) | 설계 확정 — 3클래스+Facade 승인. 파일 200줄 이하·JSONB 타입가드·barrel export 확인·gitnexus_impact 필수 조건 추가. 🔍→🔄 착수 승인 |

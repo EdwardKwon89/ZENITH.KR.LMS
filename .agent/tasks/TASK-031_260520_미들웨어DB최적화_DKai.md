@@ -8,7 +8,7 @@
 | 담당 Agent | D_Kai (OpenCode) |
 | 우선순위 | P3 |
 | 전제조건 | IMP-003(proxy.ts 마이그레이션) ✅ 완료 · TASK-030 완료 후 순차 권장 |
-| 상태 | 🔔 검토 요청 — Aiden 검토 대기 |
+| 상태 | ✅ 완료 |
 | 파급 효과 | 없음 (독립 Task) |
 
 ---
@@ -132,13 +132,11 @@ const { data: profile } = await supabase
 
 ## Aiden 검토
 
-> **이 섹션은 🔔 보고 후 Aiden이 작성합니다.**
-
 | 항목 | 내용 |
 |:---|:---|
-| 검토일 | — |
-| 판정 | — |
-| 검토 의견 | — |
+| 검토일 | 2026-05-21 |
+| 판정 | ✅ PASS |
+| 검토 의견 | 코드 커밋 `5bc0653` (proxy.ts 방식 A-1 구현 — `hasCompleteMetadata` 조건부 DB 스킵·`getProfileCached` React.cache fallback·fallback 주석 명시) 실측 확인 ✅. 문서 커밋 `00b717f` (ACTIVE_TASK.md·task file·회귀 로그·IMP_PROGRESS.md 전량 포함) ✅. `gitnexus_impact LOW` 기재 ✅. 209/209 ALL PASS ✅. 설계 확정 방식 A-1 지시사항(조건부 래핑·fallback 주석·React.cache·authGuard() 범위 한정) 전량 이행 ✅. 참고: `352e212`로 해시 사후 보정 (R-17 v1.4 순서상 미흡하나 내용 정합성 확인 — 차기 작업 시 코드 커밋→task file 해시 기재→doc commit 순서 준수 요망). `gitnexus_detect_changes` 결과가 작업 결과 표에 누락 (DoD 체크만 ✅) — 차기 작업 시 보완 권고. IMP-021 완료 처리. TASK-037 블로커 해제. |
 
 ---
 
@@ -150,3 +148,4 @@ const { data: profile } = await supabase
 | 2026-05-20 | D_Kai (OpenCode) | 설계 의견 제출 — 방식 A-1 (app_metadata 조건부 DB 스킵 + fallback Request-scoped 캐시). 커밋 5691a1c |
 | 2026-05-20 | Aiden (Claude) | 설계 확정 — 방식 A-1 승인. fallback 주석 명시·React.cache() 적용·authGuard() 수정 범위 한정 조건 추가. 📝→🔄 착수 승인 |
 | 2026-05-20 | D_Kai (OpenCode) | 구현 완료 — metadata 조건부 DB 스킵·React.cache() fallback·회귀 209/209 ALL PASS |
+| 2026-05-21 | Aiden (Claude) | ✅ PASS — 코드 5bc0653·문서 00b717f 실측 확인. hasCompleteMetadata 조건부 DB 스킵 구현 정상. IMP-021 완료. TASK-037 블로커 해제 |
