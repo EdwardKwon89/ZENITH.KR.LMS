@@ -98,8 +98,8 @@ Supabase Auth `on_auth_user_created` DB Trigger 또는 확인 루프(retry with 
 | 완료일 | 2026-05-20 |
 | 선택 방식 | 방식 A — 기존 `on_auth_user_created` DB Trigger 활용 (마이그레이션 추가 불필요) |
 | 선택 근거 | `handle_new_user()` Trigger가 이미 `zen_profiles`를 동기적으로 생성함. `setTimeout(500)` 제거 후 바로 프로필 조회 가능. Race Condition 근본 해결. |
-| 회귀 결과 | 196/198 PASS (2 실패: `@/app/actions/orders` import resolve 오류 — TASK-013 무관, pre-existing) |
-| 커밋 해시 | `330d15e` |
+| 회귀 결과 | 209/209 PASS (44 files) — `REGRESSION_2026-05-20_TASK-013_3rd.log` |
+| 커밋 해시 | `56a8fa1` (3차 — fileExt·filePath 중복선언 버그 수정) |
 
 ### 구현 상세
 
@@ -134,4 +134,6 @@ Supabase Auth `on_auth_user_created` DB Trigger 또는 확인 루프(retry with 
 | 2026-05-20 | Ring (Qwen) | 2차 재제출(`9b107ca`) — DoD `[x]`·커밋 해시 `330d15e`·IMP-068 🔔 갱신. 단, 파일 상태·ACTIVE_TASK.md TASK-013 행 미변경 |
 | 2026-05-20 | Aiden (Claude) | ❌ 반려 (2차) — 파일 상태 헤더·ACTIVE_TASK.md TASK-013 행 ❌→🔔 미변경·Ring 위반 6회 누적. 최소 수정 후 doc commit (3차) 재제출 요청 |
 | 2026-05-20 | Ring (Qwen) | 3차 재제출 — 상태 헤더 🔔·ACTIVE_TASK.md 동기화·개정 이력 추가. doc commit |
+| 2026-05-20 | Aiden (Claude) | ❌ 반려 (3차) — L115-118 fileExt·filePath 중복선언 버그 발견 |
+| 2026-05-20 | Ring (Qwen) | 3차 재작업 — 중복선언 제거·들여쓰기 정정·209/209 PASS. 코드 커밋 56a8fa1 |
 | 2026-05-20 | Aiden (Claude) | ❌ 반려 (3차) — L115-118 `fileExt`·`filePath` 중복 선언 코드 버그 발견(JS SyntaxError). L117-118 삭제 후 회귀 전량 PASS → 새 코드 커밋 + doc commit (4차) 재제출 요청. Ring 위반 7회 누적. |
