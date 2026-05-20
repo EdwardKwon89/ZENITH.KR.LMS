@@ -8,7 +8,7 @@
 | 담당 Agent | Ring (Qwen) |
 | 우선순위 | P2 |
 | 전제조건 | 없음 (즉시 착수 가능) |
-| 상태 | ⬜ 미착수 |
+| 상태 | 🔔 검토 요청 |
 
 ---
 
@@ -103,11 +103,33 @@ export async function createSomething(formData: FormData) {
 
 | 항목 | 내용 |
 |:---|:---|
-| 착수일 | — |
-| 완료일 | — |
-| 수정 Action 수 | — |
-| 회귀 결과 | — |
+| 착수일 | 2026-05-20 |
+| 완료일 | 2026-05-20 |
+| 수정 Action 수 | 6개 (`createVoc`, `upsertTransportCost`, `upsertPort`, `upsertCommonCode`, `updateSystemParam`, `upsertVesselSchedule`) |
+| 회귀 결과 | 198/199 PASS (1 실패: tracking raw logs — TASK-012 무관, pre-existing) |
 | 커밋 해시 | — |
+
+### 구현 상세
+
+**신규 파일**: `src/lib/validation/schemas.ts`
+- 6개 Zod 스키마 정의: `createVocSchema`, `upsertTransportCostSchema`, `upsertPortSchema`, `upsertCommonCodeSchema`, `updateSystemParamSchema`, `upsertVesselScheduleSchema`
+- `validatePayload(schema, data)` 공통 헬퍼 — safeParse 실패 시 첫 번째 에러 메시지 반환
+
+**수정 파일**:
+- `src/app/actions/voc.ts` — `createVoc()`: `payload: unknown` + Zod 검증 적용
+- `src/app/actions/finance.ts` — `upsertTransportCost()`: `payload: unknown` + Zod 검증 적용
+- `src/app/actions/master.ts` — `upsertPort()`, `upsertCommonCode()`, `updateSystemParam()`: 각각 `payload: unknown` + Zod 검증 적용
+- `src/app/actions/schedules.ts` — `upsertVesselSchedule()`: `payload: unknown` + Zod 검증 적용
+
+**테스트 수정**:
+- `tests/unit/logistics/voc.test.ts` — UUID 형식 payload로 수정 + `fs` mock 추가
+- `tests/unit/finance/report.test.ts` — `upsertTransportCost` payload를 스키마에 맞게 수정
+- `tests/unit/master/master-actions.test.ts` — `upsertCommonCode` payload에 `code_name` 추가
+
+**부수 수정**:
+- `src/lib/errors.ts` — Zod v4 API 호환 (`result.error.issues` not `errors`)
+- `src/app/actions/voc.ts` — 누락된 `fs` import 추가
+- `src/lib/logistics/tracking-adapters.ts` — pre-existing parse error 복구 (`MockCarrierProvider` class 누락 구조 복구)
 
 ---
 

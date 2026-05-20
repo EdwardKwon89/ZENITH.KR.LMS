@@ -3,6 +3,7 @@
 import { createClient } from '@/utils/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { validateUserAction, validateAdminAction } from '@/lib/auth/guards';
+import { upsertVesselScheduleSchema, validatePayload } from '@/lib/validation/schemas';
 
 /**
  * [WBS 4.5.3.1] 운항 스케줄을 조회합니다.
@@ -35,12 +36,16 @@ export async function getVesselSchedules(filters: {
 /**
  * [WBS 4.5.3.2] 운항 스케줄을 저장/수정합니다. (Admin 전용)
  */
-export async function upsertVesselSchedule(payload: any) {
+export async function upsertVesselSchedule(payload: unknown) {
+  const validated = validatePayload(upsertVesselScheduleSchema, payload);
+  if (!validated.success) {
+    throw new Error(`입력 검증 실패: ${validated.error}`);
+  }
   const { supabase } = await validateAdminAction();
   const { data, error } = await supabase
     .from('zen_vessel_schedules')
     .upsert({
-      ...payload,
+      ...validated.data,
       updated_at: new Date().toISOString()
     })
     .select()
