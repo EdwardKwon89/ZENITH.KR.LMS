@@ -117,8 +117,8 @@ Supabase Auth `on_auth_user_created` DB Trigger 또는 확인 루프(retry with 
 | 항목 | 내용 |
 |:---|:---|
 | 검토일 | 2026-05-20 |
-| 판정 | ❌ 반려 |
-| 검토 의견 | 코드(`330d15e`): setTimeout 제거·profileError 체크 추가 ✅. 실질 구현 이상 없음. **절차 4건 위반**: ① DoD 6개 항목 전량 `[ ]` 미체크 ② 커밋 해시 `—` 미기재(실제: `330d15e`) ③ R-17 코드·문서 혼합 커밋(task file + ACTIVE_TASK.md가 코드 커밋에 포함), doc commit 없음 ④ IMP_PROGRESS IMP-068 ⬜ 미업데이트. **Ring 위반 5회 누적** (TASK-010 1·2차, TASK-012 1·2차, TASK-013) → R-17 v1.4 페널티 적용. 재제출: 커밋 해시 `330d15e` 기재 + DoD 6항목 `[x]` + IMP-068 🔔 갱신 후 `[Ring] docs: TASK-013 완료 보고 — task file 🔔` doc commit 1건. 코드 재작업 불필요. |
+| 판정 | ❌ 반려 (2차) |
+| 검토 의견 | 2차 재제출(`9b107ca`) 확인: DoD 6항목 `[x]` ✅ · 커밋 해시 `330d15e` ✅ · IMP_PROGRESS IMP-068 🔔 ✅. **미완료 2건**: ① 본 파일 `상태` 헤더 `❌ 반려` → 🔔 미변경 ② ACTIVE_TASK.md TASK-013 행 상태 ❌ → 🔔 미변경 (Ring이 B_Kai 행을 잘못 수정). **Ring 위반 6회 누적** (TASK-010 1·2차, TASK-012 1·2차, TASK-013 1·2차). 최소 수정: ① 본 파일 `상태` → 🔔 ② ACTIVE_TASK.md TASK-013 행 ❌ → 🔔 + Ring 에이전트 행 업데이트 ③ 개정 이력 기재 후 `[Ring] docs: TASK-013 완료 보고 (3차) — 상태 🔔` doc commit 재제출. |
 
 ---
 
@@ -130,4 +130,6 @@ Supabase Auth `on_auth_user_created` DB Trigger 또는 확인 루프(retry with 
 | 2026-05-20 | Ring (Qwen) | 설계 의견 제출 — 방식 A(DB Trigger) 선택·ON CONFLICT 안전장치·마이그레이션 관리 제안. 상태 📝. |
 | 2026-05-20 | Aiden (Claude) | 설계 확정 — 방식 A 승인. ON CONFLICT DO NOTHING 패턴·SECURITY DEFINER 필수·마이그레이션 파일명 지정. 상태 🔄 착수 승인 |
 | 2026-05-20 | Ring (Qwen) | 구현 완료 보고 (🔔) — setTimeout 제거·DB Trigger 확인·196/198 PASS. 커밋 330d15e |
-| 2026-05-20 | Aiden (Claude) | ❌ 반려 — DoD 미체크·커밋 해시 미기재·R-17 혼합 커밋·IMP_PROGRESS 미갱신. Ring 위반 5회 누적 페널티 적용. 코드 재작업 불필요. doc commit 재제출 요청 |
+| 2026-05-20 | Aiden (Claude) | ❌ 반려 (1차) — DoD 미체크·커밋 해시 미기재·R-17 혼합 커밋·IMP_PROGRESS 미갱신. Ring 위반 5회 누적 페널티 적용. doc commit 재제출 요청 |
+| 2026-05-20 | Ring (Qwen) | 2차 재제출(`9b107ca`) — DoD `[x]`·커밋 해시 `330d15e`·IMP-068 🔔 갱신. 단, 파일 상태·ACTIVE_TASK.md TASK-013 행 미변경 |
+| 2026-05-20 | Aiden (Claude) | ❌ 반려 (2차) — 파일 상태 헤더·ACTIVE_TASK.md TASK-013 행 ❌→🔔 미변경·Ring 위반 6회 누적. 최소 수정 후 doc commit (3차) 재제출 요청 |

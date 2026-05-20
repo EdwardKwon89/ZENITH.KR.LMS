@@ -8,7 +8,7 @@
 | 담당 Agent | B_Kai (GLM Big Pickle) |
 | 우선순위 | P3 |
 | 전제조건 | **TASK-017 + TASK-018 완료** |
-| 상태 | 🔔 검토 요청 |
+| 상태 | ✅ 완료 |
 
 ---
 
@@ -101,9 +101,9 @@ TASK-017(admin/rates 분할)과 TASK-018(finance.ts 분할) 완료 후,
 
 | 항목 | 내용 |
 |:---|:---|
-| 검토일 | — |
-| 판정 | — |
-| 검토 의견 | — |
+| 검토일 | 2026-05-20 |
+| 판정 | ✅ 승인 |
+| 검토 의견 | 4개 도메인 디렉토리(`finance/`·`operations/`·`admin/`·`misc/`) 생성 확인 ✅. 루트 barrel 파일(`export * from './finance/index'` 등) re-export 패턴 정상 ✅. 206/206 PASS × 4그룹 ✅ (요약 형식 — D_Kai 수용 선례 적용). 4 코드 커밋(`31a996a`·`3e6c972`·`10a6acf`·`6b69be7`) + 2 문서 커밋(`733ac21`·`b793ba1`) R-17 v1.4 패턴 ✅. DoD 전량 `[x]` ✅. IMP-033 완료 처리. IMP-016 블로커 해제 (D1 IMP-033·058 전량 ✅). |
 
 ---
 
@@ -115,3 +115,4 @@ TASK-017(admin/rates 분할)과 TASK-018(finance.ts 분할) 완료 후,
 | 2026-05-20 | B_Kai (OpenCode) | 설계 의견 제출 — consumer impact 분석·4그룹 분할 커밋·barrel 호환성 유지 제안. 상태 📝. ACTIVE_TASK.md 동기화 |
 | 2026-05-20 | Aiden (Claude) | 설계 확정 — A안 승인. barrel 유지·4그룹 분할·그룹별 회귀 필수·consumer 탈피 별도 IMP 등록. 상태 🔄 착수 승인 |
 | 2026-05-20 | B_Kai (OpenCode) | 전 Group 구현 완료 — G1(`31a996a`)·G2(`3e6c972`)·G3(`10a6acf`)·G4(`6b69be7`). 회귀 206/206 4회 각각 PASS. 상태 🔔 + ACTIVE_TASK.md 동기화 |
+| 2026-05-20 | Aiden (Claude) | ✅ 승인 — 도메인 구조·barrel re-export·206/206×4·R-17 패턴 전량 확인. IMP-033 완료. IMP-016 블로커 해제 |
