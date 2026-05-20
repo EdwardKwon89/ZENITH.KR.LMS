@@ -59,10 +59,10 @@
 | TASK-002 | 260516 | N+1 쿼리 7곳 수정 | P2 | 없음 | B_Kai | ✅ | [TASK-002](tasks/TASK-002_260516_N+1쿼리7곳수정_BKai.md) | IMP-054 완료 |
 | TASK-003 | 260516 | 정산 이중 실행 방지 | P2 | TASK-001 | Riley | 🔄 | [TASK-003](tasks/TASK-003_260516_정산이중실행방지_Riley.md) | IMP-039 · TASK-001 ✅ → 블로커 해제 |
 | TASK-004 | 260516 | WAREHOUSED→CANCELED 재고 복구 | P2 | TASK-001 | Riley | ⬜ | [TASK-004](tasks/TASK-004_260516_WAREHOUSED재고복구_Riley.md) | IMP-040 · TASK-001 ✅ → 블로커 해제 |
-| TASK-005 | 260516 | Phase F 사전 GitNexus 분析 | P3 | 없음 | D_Kai | 🔄 | [TASK-005](tasks/TASK-005_260516_PhaseF사전GitNexus분析_DKai.md) | ANA-IMP-DK-F · IMP-012/017/023/024/029/049/060/061/063 |
-| TASK-006 | 260516 | Supabase 클라이언트 중복 제거 | P3 | 없음 | D_Kai | 🔄 | [TASK-006](tasks/TASK-006_260516_Supabase클라이언트중복제거_DKai.md) | IMP-059 |
-| TASK-007 | 260516 | RBAC 이중 상태 정리 | P3 | 없음 | D_Kai | 🔄 | [TASK-007](tasks/TASK-007_260516_RBAC이중상태정리_DKai.md) | IMP-031 · 대안 B(감사 스크립트) 확정 |
-| TASK-008 | 260516 | middleware→proxy.ts 마이그레이션 | P3 | 없음 | D_Kai | 🔄 | [TASK-008](tasks/TASK-008_260516_middleware→proxy마이그레이션_DKai.md) | IMP-003 · middleware 경량화+proxy.ts 확정 |
+| TASK-005 | 260516 | Phase F 사전 GitNexus 분析 | P3 | 없음 | D_Kai | 🔔 | [TASK-005](tasks/TASK-005_260516_PhaseF사전GitNexus분析_DKai.md) | ANA-IMP-DK-F · 9/9 IMP 분析 완료 |
+| TASK-006 | 260516 | Supabase 클라이언트 중복 제거 | P3 | 없음 | D_Kai | 🔔 | [TASK-006](tasks/TASK-006_260516_Supabase클라이언트중복제거_DKai.md) | IMP-059 · dead code 제거 + login/actions 교체 |
+| TASK-007 | 260516 | RBAC 이중 상태 정리 | P3 | 없음 | D_Kai | 🔔 | [TASK-007](tasks/TASK-007_260516_RBAC이중상태정리_DKai.md) | IMP-031 · scripts/audit-rbac.ts 작성 |
+| TASK-008 | 260516 | middleware→proxy.ts 마이그레이션 | P3 | 없음 | D_Kai | 🔔 | [TASK-008](tasks/TASK-008_260516_middleware→proxy마이그레이션_DKai.md) | IMP-003 · middleware 168→52줄, proxy.ts 122줄 신규 |
 | TASK-009 | 260516 | API Route stack trace 노출 수정 | P2 | 없음 | Ring | ❌ | [TASK-009](tasks/TASK-009_260516_APIRoute스택트레이스수정_Ring.md) | IMP-064 · 회귀파일 미저장·gitnexus_impact 누락 재작업 요구 |
 | TASK-010 | 260516 | Excel Export POST 인증 적용 | P2 | 없음 | Ring | ❌ | [TASK-010](tasks/TASK-010_260516_ExcelExportPOST인증적용_Ring.md) | IMP-065 · 회귀파일 미저장·DoD 미체크 재작업 요구 |
 | TASK-011 | 260516 | HTTP Security Headers 설정 | P2 | 없음 | Ring | ❌ | [TASK-011](tasks/TASK-011_260516_HTTPSecurityHeaders설정_Ring.md) | IMP-066 · 회귀파일 미저장·DoD 미체크 재작업 요구 |
@@ -83,8 +83,8 @@
 | Agent | 즉시 착수 가능 | 블로커 대기 |
 |:------|:-------------|:----------|
 | Riley | TASK-004 · TASK-015 · TASK-016 | TASK-003🔄 구현 중 |
-| B_Kai | TASK-017 · TASK-018 · TASK-020 | TASK-019 (TASK-017+018 완료 후) |
-| D_Kai | — | TASK-005🔄 · TASK-006🔄 · TASK-007🔄 · TASK-008🔄 구현 중 |
+| B_Kai | TASK-017🔄 · TASK-018 · TASK-020 | TASK-019 (TASK-017+018 완료 후) |
+| D_Kai | — | TASK-005🔔 · TASK-006🔔 · TASK-007🔔 · TASK-008🔔 검토 대기 |
 | Ring | TASK-013 · TASK-014 | TASK-009❌·TASK-010❌·TASK-011❌ 재작업 대기 · TASK-012🔄 구현 중 |
 
 ---
