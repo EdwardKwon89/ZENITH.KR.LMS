@@ -63,10 +63,10 @@
 | TASK-006 | 260516 | Supabase 클라이언트 중복 제거 | P3 | 없음 | D_Kai | ✅ | [TASK-006](tasks/TASK-006_260516_Supabase클라이언트중복제거_DKai.md) | IMP-059 완료 · 커밋 385122c |
 | TASK-007 | 260516 | RBAC 이중 상태 정리 | P3 | 없음 | D_Kai | ✅ | [TASK-007](tasks/TASK-007_260516_RBAC이중상태정리_DKai.md) | IMP-031 완료 · 커밋 385122c |
 | TASK-008 | 260516 | middleware→proxy.ts 마이그레이션 | P3 | 없음 | D_Kai | ✅ | [TASK-008](tasks/TASK-008_260516_middleware→proxy마이그레이션_DKai.md) | IMP-003 완료 · 커밋 385122c |
-| TASK-009 | 260516 | API Route stack trace 노출 수정 | P2 | 없음 | Ring | ❌ | [TASK-009](tasks/TASK-009_260516_APIRoute스택트레이스수정_Ring.md) | IMP-064 · 회귀파일 미저장·gitnexus_impact 누락 재작업 요구 |
-| TASK-010 | 260516 | Excel Export POST 인증 적용 | P2 | 없음 | Ring | ❌ | [TASK-010](tasks/TASK-010_260516_ExcelExportPOST인증적용_Ring.md) | IMP-065 · 회귀파일 미저장·DoD 미체크 재작업 요구 |
-| TASK-011 | 260516 | HTTP Security Headers 설정 | P2 | 없음 | Ring | ❌ | [TASK-011](tasks/TASK-011_260516_HTTPSecurityHeaders설정_Ring.md) | IMP-066 · 회귀파일 미저장·DoD 미체크 재작업 요구 |
-| TASK-012 | 260516 | Server Action Zod 검증 추가 | P2 | 없음 | Ring | 🔄 | [TASK-012](tasks/TASK-012_260516_ServerActionZod검증추가_Ring.md) | IMP-067 |
+| TASK-009 | 260516 | API Route stack trace 노출 수정 | P2 | 없음 | Ring | 🔔 | [TASK-009](tasks/TASK-009_260516_APIRoute스택트레이스수정_Ring.md) | IMP-064 · 재작업 완료 — DoD·impact·회귀파일 전량 보완 |
+| TASK-010 | 260516 | Excel Export POST 인증 적용 | P2 | 없음 | Ring | 🔔 | [TASK-010](tasks/TASK-010_260516_ExcelExportPOST인증적용_Ring.md) | IMP-065 |
+| TASK-011 | 260516 | HTTP Security Headers 설정 | P2 | 없음 | Ring | 🔔 | [TASK-011](tasks/TASK-011_260516_HTTPSecurityHeaders설정_Ring.md) | IMP-066 |
+| TASK-012 | 260516 | Server Action Zod 검증 추가 | P2 | 없음 | Ring | 🔔 | [TASK-012](tasks/TASK-012_260516_ServerActionZod검증추가_Ring.md) | IMP-067 · 6개 Action 전량 적용 |
 | TASK-013 | 260516 | Signup race condition 수정 | P3 | 없음 | Ring | ⬜ | [TASK-013](tasks/TASK-013_260516_SignupRaceCondition수정_Ring.md) | IMP-068 |
 | TASK-014 | 260516 | 무제한 리스트 페이지네이션 수정 | P3 | 없음 | Ring | ⬜ | [TASK-014](tasks/TASK-014_260516_무제한리스트페이지네이션수정_Ring.md) | IMP-045 · 18곳 |
 | TASK-015 | 260516 | console→logger 교체 | P3 | 없음 | Riley | ⬜ | [TASK-015](tasks/TASK-015_260516_console→logger교체_Riley.md) | IMP-013 · 53개 파일 |
@@ -85,7 +85,7 @@
 | Riley | TASK-004 · TASK-015 · TASK-016 | TASK-003🔄 구현 중 |
 | B_Kai | TASK-018 | TASK-017🔔 재검토 대기 · TASK-019 (017+018 완료 후) · TASK-020🔄 구현 중 |
 | D_Kai | — | TASK-005✅·TASK-006✅·TASK-007✅·TASK-008✅ 전량 완료 |
-| Ring | TASK-013 · TASK-014 | TASK-009❌·TASK-010❌·TASK-011❌ 재작업 대기 · TASK-012🔄 구현 중 |
+| Ring | TASK-013 · TASK-014 | TASK-009🔔·TASK-010🔔·TASK-011🔔·TASK-012🔔 재검토 대기 |
 
 ---
 

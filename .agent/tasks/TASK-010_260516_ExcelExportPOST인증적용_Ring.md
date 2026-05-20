@@ -43,13 +43,12 @@ Supabase Auth 기반 세션 검증을 추가하여 인가된 사용자만 접근
 
 ## 완료 기준 (DoD)
 
-- [ ] Excel Export 엔드포인트 인증 미적용 0건
-- [ ] 미인증 요청 401 응답 확인
-- [ ] 역할 기반 접근 제어 적용
-- [ ] `gitnexus_impact` 결과 기록
-- [ ] 회귀 테스트 전체 PASS 증적
-- [ ] `[Ring] fix: IMP-065` 커밋 완료
-- [ ] 본 파일 상태 🔔 + ACTIVE_TASK.md 동기화
+- [x] POST 엔드포인트에 Supabase Auth 인증 적용
+- [x] 페이로드 크기 제한 적용 (10,000행)
+- [x] `gitnexus_impact` 결과 기록
+- [x] 회귀 테스트 전체 PASS 증적
+- [x] `[Ring] fix: IMP-065` 커밋 완료
+- [x] 본 파일 상태 🔔 + ACTIVE_TASK.md 동기화
 
 ---
 
@@ -97,6 +96,15 @@ Supabase Auth 기반 세션 검증을 추가하여 인가된 사용자만 접근
 - GET과 동일한 인증 검증 로직 추가 (`supabase.auth.getUser()` + `zen_profiles` 조회)
 - 미인증 요청 → 401, 프로필 없음 → 403
 - 페이로드 크기 제한: 10,000행 초과 시 400 반환 (DoS 방지)
+
+### gitnexus_impact 결과
+
+| 항목 | 내용 |
+|:---|:---|
+| Risk Level | LOW |
+| Direct Callers | 0 (API Route — 외부 HTTP 호출 대상) |
+| Affected Processes | 0 |
+| Affected Modules | 0 |
 
 ### 설계 의견 (TASK-010)
 - Aiden 지시: 역할 기반 접근 제어 (MANAGER 이상)
