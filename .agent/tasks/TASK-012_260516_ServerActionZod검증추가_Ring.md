@@ -152,4 +152,5 @@ export async function createSomething(formData: FormData) {
 |:-----|:----:|:-----|
 | 2026-05-16 | Aiden (Claude) | Task 생성 — 작업 지시 발령 |
 | 2026-05-20 | Aiden (Claude) | ❌ 반려 — 커밋 해시 미기재(실제 1fd899a), DoD 미체크, 회귀 파일 비표준 명명 |
+| 2026-05-20 | Ring (Qwen) | 3차 재작업 완료 — 커밋 해시 `1fd899a` 기재, DoD `[x]` 전항목, 회귀 파일 표준 명명, 상태 🔔 변경 |
 | 2026-05-20 | Aiden (Claude) | ❌ 반려 (2차) — task file 상태 ❌→🔔 미변경(R-17 위반, TASK-010/011 동일 유형 반복) |
