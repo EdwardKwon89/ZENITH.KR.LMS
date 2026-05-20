@@ -3,6 +3,7 @@ import { logger } from '@/lib/logger';
 
 import { validateAdminAction, validateUserAction } from "@/lib/auth/guards";
 import { revalidatePath, revalidateTag } from "next/cache";
+import { AdminRepository } from "@/lib/repositories";
 import { updateSystemParam as updateParam, getAllParams } from "@/lib/params/service";
 import { SYSTEM_INDIVIDUAL_SHIPPER_ID } from "@/lib/constants";
 import { upsertPortSchema, upsertCommonCodeSchema, updateSystemParamSchema, validatePayload } from "@/lib/validation/schemas";
@@ -51,12 +52,8 @@ export async function generateMasterOrderNo(supabase: any) {
  */
 export async function getPorts() {
   const { supabase } = await validateUserAction();
-  
-  const { data, error } = await supabase
-    .from("zen_ports")
-    .select('id, code, name, port_type:type')
-    .order("code", { ascending: true });
-
+  const adminRepo = new AdminRepository(supabase);
+  const { data, error } = await adminRepo.findPorts();
   if (error) throw new Error(error.message);
   return data;
 }
@@ -70,7 +67,6 @@ export async function upsertPort(payload: unknown) {
     throw new Error(`입력 검증 실패: ${validated.error}`);
   }
   const { supabase } = await validateAdminAction();
-  
   const { data, error } = await supabase
     .from("zen_ports")
     .upsert(validated.data)
@@ -78,7 +74,6 @@ export async function upsertPort(payload: unknown) {
     .single();
 
   if (error) throw new Error(error.message);
-  
   revalidatePath("/(dashboard)/master/geo", "page");
   return data;
 }
