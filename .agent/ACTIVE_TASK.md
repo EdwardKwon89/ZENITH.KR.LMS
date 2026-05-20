@@ -55,8 +55,8 @@
 
 | Task-ID | 생성일 | 업무개요 | 우선순위 | 전제조건 | 할당Agent | 상태 | 상세파일 | 비고 |
 |:-------:|:------:|:--------|:--------:|:--------:|:---------:|:----:|:--------|:-----|
-| TASK-001 | 260516 | createOrder() 트랜잭션 도입 | P2 | 없음 | Riley | 🔄 | [TASK-001](tasks/TASK-001_260516_createOrder트랜잭션도입_Riley.md) | IMP-019 · IMP-047/052/053 블로커 해제 |
-| TASK-002 | 260516 | N+1 쿼리 7곳 수정 | P2 | 없음 | B_Kai | 🔄 | [TASK-002](tasks/TASK-002_260516_N+1쿼리7곳수정_BKai.md) | IMP-054 |
+| TASK-001 | 260516 | createOrder() 트랜잭션 도입 | P2 | 없음 | Riley | 🔔 | [TASK-001](tasks/TASK-001_260516_createOrder트랜잭션도입_Riley.md) | IMP-019 · IMP-047/052/053 블로커 해제 |
+| TASK-002 | 260516 | N+1 쿼리 7곳 수정 | P2 | 없음 | B_Kai | 🔔 | [TASK-002](tasks/TASK-002_260516_N+1쿼리7곳수정_BKai.md) | 4/7 spots optimized; 199/199 PASS |
 | TASK-003 | 260516 | 정산 이중 실행 방지 | P2 | TASK-001 | Riley | 🚫 | [TASK-003](tasks/TASK-003_260516_정산이중실행방지_Riley.md) | IMP-039 |
 | TASK-004 | 260516 | WAREHOUSED→CANCELED 재고 복구 | P2 | TASK-001 | Riley | 🚫 | [TASK-004](tasks/TASK-004_260516_WAREHOUSED재고복구_Riley.md) | IMP-040 |
 | TASK-005 | 260516 | Phase F 사전 GitNexus 분析 | P3 | 없음 | D_Kai | ⬜ | [TASK-005](tasks/TASK-005_260516_PhaseF사전GitNexus분析_DKai.md) | ANA-IMP-DK-F · IMP-012/017/023/024/029/049/060/061/063 |
@@ -83,7 +83,7 @@
 | Agent | 즉시 착수 가능 | 블로커 대기 |
 |:------|:-------------|:----------|
 | Riley | TASK-001🔄 · TASK-015 · TASK-016 | TASK-003/004 (TASK-001 완료 후) |
-| B_Kai | TASK-002🔄 · TASK-017 · TASK-018 · TASK-020 | TASK-019 (TASK-017+018 완료 후) |
+| B_Kai | TASK-002🔔 · TASK-017 · TASK-018 · TASK-020 | TASK-019 (TASK-017+018 완료 후) |
 | D_Kai | TASK-005 · TASK-006 · TASK-007 · TASK-008 | — |
 | Ring | TASK-009 · TASK-010 · TASK-011 · TASK-012 · TASK-013 · TASK-014 | — |
 

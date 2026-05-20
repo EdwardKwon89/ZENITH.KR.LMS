@@ -1,0 +1,7 @@
+Test Files  42 passed (42)
+      Tests  199 passed (199)
+   Start at  09:01:37
+   Duration  37.46s (transform 528ms, setup 2.75s, import 3.11s, tests 446ms, environment 24.74s)
+
+All 199 regression tests successfully passed.
+No regressions detected after refactoring the createOrder workflow into the single atomic Supabase RPC create_order_atomic transaction.
