@@ -73,7 +73,7 @@
 | TASK-016 | 260516 | Server Actions 에러 래퍼 | P3 | 없음 | Riley | ✅ | [TASK-016](tasks/TASK-016_260516_ServerActions에러래퍼_Riley.md) | IMP-025 완료 · 16개 Action 적용 · 커밋 021a17b · 209/209 PASS |
 | TASK-017 | 260516 | admin/rates 531줄 분할 | P3 | 없음 | B_Kai | ✅ | [TASK-017](tasks/TASK-017_260516_adminRates531줄분할_BKai.md) | IMP-014 완료 · page.tsx 94줄·커밋 e4fee51 |
 | TASK-018 | 260516 | finance.ts 733줄 분할 | P3 | 없음 | B_Kai | ✅ | [TASK-018](tasks/TASK-018_260516_financeTs733줄분할_BKai.md) | IMP-058 완료 · 커밋 af2f873+06210a0 · 199/199 PASS |
-| TASK-019 | 260516 | Server Actions 도메인 분할 | P3 | TASK-017+018 | B_Kai | 🔄 | [TASK-019](tasks/TASK-019_260516_ServerActions도메인분할_BKai.md) | IMP-033 설계 확정 · A안 승인 · 착수 승인 |
+| TASK-019 | 260516 | Server Actions 도메인 분할 | P3 | TASK-017+018 | B_Kai | 🔔 | [TASK-019](tasks/TASK-019_260516_ServerActions도메인분할_BKai.md) | IMP-033 · G1(`31a996a`)·G2(`3e6c972`)·G3(`10a6acf`)·G4(`6b69be7`)·206/206 4회 PASS |
 | TASK-020 | 260516 | SELECT * 명시적 컬럼 교체 | P3 | 없음 | B_Kai | ✅ | [TASK-020](tasks/TASK-020_260516_SELECT명시적컬럼교체_BKai.md) | IMP-062 완료 · 커밋 c777b10+06210a0 · 202/202 PASS |
 
 ---
