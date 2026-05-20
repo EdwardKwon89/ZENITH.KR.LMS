@@ -87,9 +87,15 @@ Supabase Auth 기반 세션 검증을 추가하여 인가된 사용자만 접근
 | 착수일 | 2026-05-20 |
 | 완료일 | 2026-05-20 |
 | 수정 엔드포인트 | POST `/api/finance/export` |
-| 회귀 결과 | 198/199 PASS (1 실패: tracking raw logs — TASK-010 무관, pre-existing) |
-| 커밋 해시 | `47d8f2d` |
-| 회귀 파일 | `REGRESSION_2026-05-20_TASK-010.log` |
+| 회귀 결과 | 202/202 PASS (42 test files) |
+| 커밋 해시 | `47d8f2d` + 4차 재작업 커밋 |
+| 회귀 파일 | `REGRESSION_2026-05-20_TASK-010_4th.log` |
+
+### 4차 재작업 상세
+
+**수정 파일**: `src/app/api/finance/export/route.ts` POST 핸들러
+- L100-104: 역할 기반 접근 제어 추가 — `ADMIN`, `ZENITH_SUPER_ADMIN`, `MANAGER`만 허용
+- 비관리자 요청 → 403 Forbidden 반환
 
 ### 구현 상세
 
@@ -120,9 +126,9 @@ Supabase Auth 기반 세션 검증을 추가하여 인가된 사용자만 접근
 
 | 항목 | 내용 |
 |:---|:---|
-| 검토일 | 2026-05-20 (1차 반려) / 2026-05-20 (재작업 2차 검토) |
+| 검토일 | 2026-05-20 (1차 반려) / 2026-05-20 (2차 반려) / 2026-05-20 (3차 반려) |
 | 판정 | ❌ 반려 |
-| 검토 의견 | 1차 반려: DoD 미체크·회귀파일 미저장·gitnexus_impact 누락. 재작업(b24c5d2) 부분 확인: DoD `[x]` 갱신 ✅, gitnexus_impact 기록(Risk LOW, 0 callers) ✅, 커밋 `47d8f2d` ✅. **2차 반려 — 미달성 항목**: ① 회귀 결과 파일 미저장 — `REGRESSION_2026-05-20_TASK-010.log` 없음 (b24c5d2에 회귀 파일 미포함) R-13 위반 ② 상세 파일 상태 여전히 `❌ 반려` — 🔔 변경 누락 (ACTIVE_TASK.md 🔔 불일치) R-17 위반. **재작업 요구**: ① 회귀 테스트 재실행 + `REGRESSION_2026-05-20_TASK-010.log` 저장 ② 상세 파일 상태 🔔로 변경 후 커밋. |
+| 검토 의견 | [1차] DoD 미체크·회귀파일 미저장·gitnexus_impact 누락. [2차] 회귀 파일 미저장·task 상태 미변경. [3차] 회귀 파일·DoD·커밋 `47d8f2d` 확인 ✅, 회귀 **199/199** 실측 ✅. **미달성**: 작업 지시 Step 5 "MANAGER 이상만 Export 허용" 미이행 — POST 핸들러 역할 기반 접근 제어 없음. GET 핸들러(line 59 isAdmin 체크)와 달리 POST는 로그인 사용자 전체 허용. Ring 설계 의견 "GET과 동일한 패턴"은 실제 GET 정책(역할 제한 있음)과 불일치 — 설계 확정 Aiden 미승인 상태. P2 보안 Task 역할 제어 미구현은 허용 불가. **재작업 요구**: POST 핸들러에 `isAdmin`(`ADMIN` 또는 `MANAGER`) 체크 추가 후 재커밋. |
 
 ---
 
@@ -133,3 +139,4 @@ Supabase Auth 기반 세션 검증을 추가하여 인가된 사용자만 접근
 | 2026-05-16 | Aiden (Claude) | Task 생성 — 작업 지시 발령 |
 | 2026-05-20 | Aiden (Claude) | ❌ 반려 — 회귀파일 미저장(R-13), gitnexus_impact 누락, DoD 미체크 |
 | 2026-05-20 | Aiden (Claude) | ❌ 반려 (2차) — 회귀 파일 미저장(REGRESSION_2026-05-20_TASK-010.log 없음), task file 상태 ❌ 미변경(ACTIVE_TASK.md 불일치) |
+| 2026-05-20 | Aiden (Claude) | ❌ 반려 (3차) — POST 핸들러 역할 기반 접근 제어 미구현(MANAGER 이상 제한 누락). 재작업: isAdmin 체크 추가 |
