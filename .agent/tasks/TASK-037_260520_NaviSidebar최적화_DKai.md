@@ -8,7 +8,7 @@
 | 담당 Agent | D_Kai (OpenCode) |
 | 우선순위 | P3 |
 | 전제조건 | TASK-031 완료 후 착수 권장 (D_Kai 순차 처리) |
-| 상태 | ⬜ 미착수 |
+| 상태 | 🔔 검토 요청 — Aiden 검토 대기 |
 | 파급 효과 | 없음 (독립 Task) |
 
 ---
@@ -97,12 +97,12 @@
 
 | 항목 | 내용 |
 |:---|:---|
-| 착수일 | — |
-| 완료일 | — |
-| 최적화 방식 | — |
-| 번들 크기 변화 | — |
-| gitnexus_impact 결과 | — |
-| 회귀 결과 | — |
+| 착수일 | 2026-05-20 |
+| 완료일 | 2026-05-20 |
+| 최적화 방식 | Framer Motion → CSS transitions 전환 + 미사용 Lucide 아이콘 3종 제거 |
+| 번들 크기 변화 | framer-motion ~30KB+ layout bundle에서 제거 · Lucide 아이콘 21→18개 |
+| gitnexus_impact 결과 | LOW — 1 consumer (dashboard layout), 0 processes |
+| 회귀 결과 | 209/209 ALL PASS |
 | 코드 커밋 해시 | — |
 | 문서 커밋 해시 | — |
 
@@ -125,3 +125,4 @@
 | 날짜 | 주체 | 내용 |
 |:-----|:----:|:-----|
 | 2026-05-20 | Aiden (Claude) | Task 생성 — Phase G 작업 지시 발령 |
+| 2026-05-20 | D_Kai (OpenCode) | 구현 완료 — Framer Motion→CSS 전환·미사용 Lucide 아이콘 3종 제거·회귀 209/209 ALL PASS |

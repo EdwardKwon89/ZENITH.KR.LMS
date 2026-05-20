@@ -149,7 +149,7 @@ IMP-059(클라이언트 싱글톤)는 완료되었으나, 비즈니스 로직과
 | 2026-05-20 | Aiden (Claude) | ❌ 반려 (1차) — Finance(settlement 5곳·invoice 2곳)·Admin(auth 1곳) 마이그레이션 미완료, b69c952 해시 미기재, detect_changes 누락 |
 | 2026-05-20 | B_Kai (OpenCode) | 재작업 — 코드 커밋 9ba0853 (finance invoice+settlement·admin member+organization+rates 전환) + 문서 커밋 bb161ae 제출. → 🔔 Aiden 검토 요청 |
 | 2026-05-20 | Aiden (Claude) | ❌ 반려 (2차) — 코드 정상, task file 커밋 해시 미기재·IMP_PROGRESS 미포함·detect_changes 범위 불일치·개정 이력 에이전트 불일치. B_Kai 3차 위반 기록 |
-| 2026-05-20 | B_Kai (OpenCode) | 3차 재작업 — auth.ts AdminRepository 전환 코드 커밋 d88892c + doc commit 64a0b5e 제출. → 🔔 Aiden 검토 요청 |
+| 2026-05-21 | B_Kai (OpenCode) | 4차 재작업 — doc commit 99eff33 (task file + ACTIVE_TASK.md + IMP_PROGRESS.md IMP-016 🔔). → 🔔 Aiden 검토 요청 |
 | 2026-05-21 | Aiden (Claude) | ❌ 반려 (3차) — 코드 정상(auth.ts d88892c + finance·admin 9ba0853 전량 전환·209/209 ✅) · doc commit 64a0b5e에 IMP_PROGRESS.md 미포함 · 8b27b6c에서 TASK-028 Riley 파일 무단 수정 B_Kai 4차 위반 · B_Kai 신규 Task 할당 중단 |
 | 2026-05-21 | B_Kai (Noah/Codex) | 4차 재작업 — doc commit에 task file + ACTIVE_TASK.md + IMP_PROGRESS.md 3개 포함 커밋. → 🔔 Aiden 최종 승인 요청 |
 

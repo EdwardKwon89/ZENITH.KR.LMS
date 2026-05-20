@@ -1,0 +1,10 @@
+TASK-037 Regression Result
+Date: 2026-05-20
+Test: npm run test:regression
+Result: 209/209 ALL PASS
+Changed file: src/components/layout/NaviSidebar.tsx
+Optimization: Framer Motion → CSS transitions + unused Lucide icons removal
+- Removed framer-motion (motion, AnimatePresence) from layout bundle
+- Removed unused icons: ShieldCheck, Package, TrendingDown
+- CSS transition-all for sidebar collapse/expand
+- CSS max-height/opacity transition for sub-menus

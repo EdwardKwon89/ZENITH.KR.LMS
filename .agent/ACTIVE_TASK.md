@@ -91,7 +91,7 @@
 | TASK-034 | 260520 | Error Boundary 4개 추가 | P3 | 없음 | B_Kai | ✅ | [TASK-034](tasks/TASK-034_260520_ErrorBoundary추가_BKai.md) | IMP-017 완료 · 커밋 1a6e245+cdf4963 · 209/209 |
 | TASK-035 | 260520 | 정산 엔진 SRP 분할 | P3 | TASK-027 권장 | Riley | 🔄 | [TASK-035](tasks/TASK-035_260520_정산엔진SRP_Riley.md) | IMP-030 · 설계 확정 완료 — 3클래스+Facade 승인 |
 | TASK-036 | 260520 | ZenUI.tsx 7개 컴포넌트 분할 | P3 | 없음 | B_Kai | ✅ | [TASK-036](tasks/TASK-036_260520_ZenUI분할_BKai.md) | IMP-063 완료 · 코드 d099a04 · 재보고 b544aaf · 209/209 |
-| TASK-037 | 260520 | NaviSidebar Client Bundle 최적화 | P3 | TASK-031 권장 | D_Kai | 🔄 | [TASK-037](tasks/TASK-037_260520_NaviSidebar최적화_DKai.md) | IMP-022 · Framer Motion→CSS 전환 + Lucide dynamic import |
+| TASK-037 | 260520 | NaviSidebar Client Bundle 최적화 | P3 | TASK-031 권장 | D_Kai | 🔔 | [TASK-037](tasks/TASK-037_260520_NaviSidebar최적화_DKai.md) | IMP-022 · Framer Motion→CSS · 209/209 · 코드 ddeb4dd |
 
 ---
 
@@ -101,7 +101,7 @@
 |:------|:-------------|:-----------|:----------|
 | Riley | **TASK-035** 🔄 (설계 확정 완료 · 즉시 착수 가능) | — | — |
 | B_Kai | — | TASK-029 🔔 (4차 재작업 · doc commit 3파일 포함 완료) · **신규 Task 할당 중단 (TASK-029 완료 후 재교육)** | — |
-| D_Kai | **TASK-037** ⬜ (TASK-031 ✅ 블로커 해제 · 즉시 착수 가능) | — | — |
+| D_Kai | **TASK-037** 🔔 (구현 완료 · Aiden 검토 대기) | — | — |
 | Ring | **TASK-032** (P2, 최우선) | — | TASK-033 (TASK-032 완료 후 + 설계 의견 선행) |
 
 ---
