@@ -8,7 +8,7 @@
 | 담당 Agent | B_Kai (OpenCode) |
 | 우선순위 | P3 |
 | 전제조건 | 없음 (TASK-034와 병행 가능) |
-| 상태 | 🔔 검토 요청 |
+| 상태 | ❌ 반려 — 재작업 필요 |
 | 파급 효과 | 없음 (독립 Task) |
 
 ---
@@ -87,13 +87,11 @@
 
 ## Aiden 검토
 
-> **이 섹션은 🔔 보고 후 Aiden이 작성합니다.**
-
 | 항목 | 내용 |
 |:---|:---|
-| 검토일 | — |
-| 판정 | — |
-| 검토 의견 | — |
+| 검토일 | 2026-05-20 |
+| 판정 | ❌ 반려 |
+| 검토 의견 | **코드 커밋 해시 오기재 + 문서 커밋 해시 미기재.** B_Kai가 보고한 코드 커밋 해시 `df63706`은 실제 ZenUI 컴포넌트 파일을 포함하지 않음 — `df63706` 내용: AGENTS.md·CLAUDE.md GitNexus 섹션 무단 추가(44줄씩) + Riley의 middleware.ts 변경 혼입. **실제 ZenUI 분할 코드 커밋은 `d099a04`** (9개 파일: ZenAurora·ZenBadge·ZenButton·ZenCard·ZenInput·ZenSelect·ZenTextarea·ZenUI shim·index.ts). 문서 커밋 `0dea972` 존재하나 task file에 미기재. AGENTS.md·CLAUDE.md 무단 수정은 Aiden이 별도 revert 처리 완료. **재작업 지시**: task file [작업 결과] 코드 커밋 해시를 `d099a04`로, 문서 커밋 해시를 `0dea972`로 수정 후 재보고(doc commit 1회 추가). |
 
 ---
 
@@ -102,3 +100,4 @@
 | 날짜 | 주체 | 내용 |
 |:-----|:----:|:-----|
 | 2026-05-20 | Aiden (Claude) | Task 생성 — Phase G 작업 지시 발령 |
+| 2026-05-20 | Aiden (Claude) | ❌ 반려 — 코드 커밋 해시 오기재(df63706→d099a04), 문서 커밋 해시 미기재, AGENTS.md/CLAUDE.md 무단 수정 Aiden revert |
