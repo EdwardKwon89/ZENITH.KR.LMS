@@ -75,6 +75,10 @@
 | TASK-018 | 260516 | finance.ts 733줄 분할 | P3 | 없음 | B_Kai | ✅ | [TASK-018](tasks/TASK-018_260516_financeTs733줄분할_BKai.md) | IMP-058 완료 · 커밋 af2f873+06210a0 · 199/199 PASS |
 | TASK-019 | 260516 | Server Actions 도메인 분할 | P3 | TASK-017+018 | B_Kai | ✅ | [TASK-019](tasks/TASK-019_260516_ServerActions도메인분할_BKai.md) | IMP-033 완료 · 4그룹 barrel 구조 ✅ · 206/206×4 PASS |
 | TASK-020 | 260516 | SELECT * 명시적 컬럼 교체 | P3 | 없음 | B_Kai | ✅ | [TASK-020](tasks/TASK-020_260516_SELECT명시적컬럼교체_BKai.md) | IMP-062 완료 · 커밋 c777b10+06210a0 · 202/202 PASS |
+| TASK-021 | 260520 | Phase F 데브리프 응답 | P4 | 없음 | Riley | ⬜ | [TASK-021](tasks/TASK-021_260520_PhaseF데브리프응답_Riley.md) | 거버넌스 Task · 문서 커밋 1회 · Phase G 준비 |
+| TASK-022 | 260520 | Phase F 데브리프 응답 | P4 | 없음 | B_Kai | ⬜ | [TASK-022](tasks/TASK-022_260520_PhaseF데브리프응답_BKai.md) | 거버넌스 Task · 문서 커밋 1회 · Phase G 준비 |
+| TASK-023 | 260520 | Phase F 데브리프 응답 | P4 | 없음 | D_Kai | ⬜ | [TASK-023](tasks/TASK-023_260520_PhaseF데브리프응답_DKai.md) | 거버넌스 Task · 문서 커밋 1회 · Phase G 준비 |
+| TASK-024 | 260520 | Phase F 데브리프 응답 | P4 | 없음 | Ring | ⬜ | [TASK-024](tasks/TASK-024_260520_PhaseF데브리프응답_Ring.md) | 거버넌스 Task · R-17 7회 경고 포함 · Phase G 착수 전 완료 필수 |
 
 ---
 
@@ -82,10 +86,10 @@
 
 | Agent | 즉시 착수 가능 | 블로커 대기 |
 |:------|:-------------|:----------|
-| Riley | — | 전량 완료 |
-| B_Kai | — | 전량 완료 |
-| D_Kai | — | 전량 완료 |
-| Ring | — | 전량 완료 |
+| Riley | TASK-021 ⬜ Phase F 데브리프 응답 | — |
+| B_Kai | TASK-022 ⬜ Phase F 데브리프 응답 | — |
+| D_Kai | TASK-023 ⬜ Phase F 데브리프 응답 | — |
+| Ring | TASK-024 ⬜ Phase F 데브리프 응답 (R-17 7회 경고 · Phase G 착수 전 완료 필수) | — |
 
 ---
 
@@ -121,4 +125,5 @@
 | 2026-05-20 | Aiden (Claude) | B_Kai TASK-019 ✅ PASS — barrel 파일·디렉토리 구조·206/206×4·R-17 패턴 전량 확인. IMP-033 완료·IMP-016 블로커 해제. Ring TASK-013 ❌ 반려 (2차) — 파일 상태 헤더·ACTIVE_TASK.md 미변경·위반 6회 누적. Ring TASK-014 ✅ PASS — 18곳 페이지네이션·209/209·R-17 패턴. IMP-045 완료 |
 | 2026-05-20 | Aiden (Claude) | Ring TASK-013 ❌ 반려 (3차) — L115-118 fileExt·filePath 중복선언 코드 버그 발견 (JS SyntaxError). L117-118 삭제 후 회귀 전량 PASS → 코드 커밋 + doc commit (4차) 재제출 요청. Ring 위반 7회 누적 |
 | 2026-05-20 | Aiden (Claude) | Ring TASK-013 ✅ PASS — 중복 선언 제거·209/209·R-17 v1.4 패턴. IMP-068 완료. Ring 전량 완료 |
+| 2026-05-20 | Aiden (Claude) | Phase F 완료 공식 선언 — TASK-001~020 전량 ✅. 평가보고서 v3.0 발행. TASK-021~024 데브리프 응답 Task 발령 (전 Agent 대상, Ring은 Phase G 착수 전 완료 필수) |
 | 2026-05-20 | Ring (Qwen) | TASK-013 4차 재제출 — 중복선언 제거·들여쓰기 정정·코드 커밋 56a8fa1·209/209 PASS·task file·ACTIVE_TASK.md 🔔 동기화 |
