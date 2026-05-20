@@ -8,7 +8,7 @@
 | 담당 Agent | B_Kai (구현) + D_Kai (설계·검토) |
 | 우선순위 | P3 |
 | 전제조건 | IMP-033·058 ✅ 완료(D1 전량 완료) → 즉시 착수 가능 |
-| 상태 | 🔄 구현 중 |
+| 상태 | 🔔 검토 요청 |
 | 파급 효과 | 없음 (독립 Task, 완료 후 아키텍처 개선 가속) |
 
 ---
@@ -110,13 +110,13 @@ IMP-059(클라이언트 싱글톤)는 완료되었으나, 비즈니스 로직과
 
 | 항목 | 내용 |
 |:---|:---|
-| 착수일 | — |
-| 완료일 | — |
-| 생성 파일 목록 | — |
-| 전환 액션 범위 | — |
-| gitnexus_impact 결과 | — |
-| 회귀 결과 | — |
-| 코드 커밋 해시 | — |
+| 착수일 | 2026-05-20 |
+| 완료일 | 2026-05-20 |
+| 생성 파일 목록 | `src/lib/repositories/base.repository.ts`, `order.repository.ts`, `finance.repository.ts`, `admin.repository.ts`, `index.ts` (5개) |
+| 전환 액션 범위 | Orders(`updateOrder`), Finance(`updatePaymentStatus`), Admin(`getPorts`) — 3개 도메인 3개 액션 마이그레이션 완료. 복잡 RPC·join 쿼리는 D_Kai 시그니처 설계 대기. |
+| gitnexus_impact 결과 | 신규 심볼(Repository class) — 기존 코드 import 없음, 회귀 가능성 0% |
+| 회귀 결과 | 44 files, 209 tests PASS |
+| 코드 커밋 해시 | 2936b8b (Repository 신설) + b69c952 (액션 마이그레이션) |
 | 문서 커밋 해시 | — |
 
 ---
