@@ -1,0 +1,104 @@
+# TASK-036 — ZenUI.tsx 7개 컴포넌트 분할
+
+| 항목 | 내용 |
+|:---|:---|
+| Task-ID | TASK-036 |
+| IMP-ID | IMP-063 |
+| 생성일 | 2026-05-20 |
+| 담당 Agent | B_Kai (OpenCode) |
+| 우선순위 | P3 |
+| 전제조건 | 없음 (TASK-034와 병행 가능) |
+| 상태 | ⬜ 미착수 |
+| 파급 효과 | 없음 (독립 Task) |
+
+---
+
+## 배경
+
+`src/components/ui/ZenUI.tsx` 204줄에 ZenCard·ZenButton·ZenAurora·ZenInput·ZenTextarea·ZenBadge·ZenSelect
+7개 독립 UI 컴포넌트가 단일 파일에 정의됨. 컴포넌트 단위 수정 시 전체 파일 변경 필요.
+
+- **목표**: `src/components/ui/` 하위 7개 개별 파일로 분할
+- barrel export(`index.ts`) 유지 → 기존 import 경로 변경 불필요
+
+참조: `scratch/post_launch_improvements.md §IMP-063` · `src/components/ui/ZenUI.tsx`
+
+---
+
+## 작업 지시
+
+> **단순 Task — ⬜→🔄 직행 가능**
+
+1. **본 파일 상태 → 🔄, ACTIVE_TASK.md TASK-036 → 🔄 동시 반영**
+2. `src/components/ui/ZenUI.tsx` 전체 구조 파악
+3. `gitnexus_impact({target: "ZenUI", direction: "upstream"})` — import 위치 전수 확인
+4. 7개 개별 파일 신규 생성:
+   - `src/components/ui/ZenCard.tsx`
+   - `src/components/ui/ZenButton.tsx`
+   - `src/components/ui/ZenAurora.tsx`
+   - `src/components/ui/ZenInput.tsx`
+   - `src/components/ui/ZenTextarea.tsx`
+   - `src/components/ui/ZenBadge.tsx`
+   - `src/components/ui/ZenSelect.tsx`
+5. `src/components/ui/index.ts` barrel export 작성 (또는 기존 파일 확인)
+6. `ZenUI.tsx` → 7개 파일 re-export shim으로 전환 (기존 import 호환성 유지)
+7. `gitnexus_detect_changes()` — 커밋 전 변경 범위 확인
+8. 회귀 테스트 전체 PASS: `rtk npm run test:regression`
+9. 결과 저장: `docs/08_Self_Audit/Regression_Results/REGRESSION_2026-05-20_TASK-036.log`
+10. **코드 커밋**: `[B_Kai] refactor: IMP-063 ZenUI.tsx 7개 컴포넌트 분할 — barrel export`
+11. **본 파일 [작업 결과] 섹션 작성 + 상태 → 🔔** (커밋 해시 반드시 기재)
+12. **ACTIVE_TASK.md TASK-036 → 🔔 반영**
+13. **`scratch/IMP_PROGRESS.md` IMP-063 행 🔔 갱신**
+14. **문서 커밋**: `[B_Kai] docs: TASK-036 완료 보고 — task file 🔔`
+
+---
+
+## 완료 기준 (DoD)
+
+- [ ] 7개 개별 컴포넌트 파일 생성 완료
+- [ ] `ZenUI.tsx` re-export shim 전환 (기존 import 경로 100% 호환)
+- [ ] barrel export `index.ts` 작성 완료
+- [ ] `gitnexus_impact` 결과 기록 (import 위치 전수 확인)
+- [ ] `gitnexus_detect_changes()` 결과 확인
+- [ ] 회귀 테스트 전체 PASS 증적 (`docs/08_Self_Audit/Regression_Results/`)
+- [ ] `[B_Kai] refactor: IMP-063` 코드 커밋 완료 (해시 기재)
+- [ ] `[B_Kai] docs: TASK-036` 문서 커밋 완료
+- [ ] 본 파일 상태 🔔 + ACTIVE_TASK.md 동기화
+- [ ] `scratch/IMP_PROGRESS.md` IMP-063 행 갱신
+
+---
+
+## 작업 결과
+
+> **이 섹션은 착수 후 B_Kai가 작성합니다.**
+
+| 항목 | 내용 |
+|:---|:---|
+| 착수일 | — |
+| 완료일 | — |
+| 생성 파일 목록 | — |
+| 분할 결과 (각 파일 줄 수) | — |
+| gitnexus_impact 결과 | — |
+| 회귀 결과 | — |
+| 코드 커밋 해시 | — |
+| 문서 커밋 해시 | — |
+
+---
+
+## Aiden 검토
+
+> **이 섹션은 🔔 보고 후 Aiden이 작성합니다.**
+
+| 항목 | 내용 |
+|:---|:---|
+| 검토일 | — |
+| 판정 | — |
+| 검토 의견 | — |
+
+---
+
+## 개정 이력
+
+| 날짜 | 주체 | 내용 |
+|:-----|:----:|:-----|
+| 2026-05-20 | Aiden (Claude) | Task 생성 — Phase G 작업 지시 발령 |
