@@ -52,11 +52,11 @@
 | 042 | `updateOrder()` 수정 차단 누락 | B_Kai | ✅ | 2026-05-15 |
 | 043 | MASTERED Lock 액션별 우회 방지 | B_Kai | ✅ | 2026-05-15 |
 | 044 | 인보이스 발행 후 비용 변경 차단 | B_Kai | ✅ PASS | 2026-05-16 |
-| 047 | 트랜잭션 부재 확장 (status/지갑) | Riley | 🔔 | 2026-05-20 |
-| 052 | dissolveMasterOrder 부분 실패 | Riley | 🚫 | — |
-| 053 | 지갑 결제 롤백 불완전 | Riley | 🚫 | — |
+| 047 | 트랜잭션 부재 확장 (status/지갑) | Riley | ✅ | 2026-05-20 |
+| 052 | dissolveMasterOrder 부분 실패 | Riley | ⬜ | — |
+| 053 | 지갑 결제 롤백 불완전 | Riley | ⬜ | — |
 
-> 🚫 IMP-047: IMP-019 완료 후 착수 가능 / IMP-052·053: IMP-047 완료 후 착수 가능
+> IMP-047 ✅ 완료 → IMP-052·053 블로커 해제 (Riley 즉시 착수 가능)
 
 **Phase B 완료**: 7 / 10 (70%)
 
