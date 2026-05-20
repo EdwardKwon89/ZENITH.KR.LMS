@@ -4,6 +4,7 @@ import { logger } from '@/lib/logger';
 import { SettlementEngine, InvoiceGenerator } from '@/lib/finance/settlement';
 import { revalidatePath } from 'next/cache';
 import { validateUserAction, validateAdminAction } from '@/lib/auth/guards';
+import { FinanceRepository } from '@/lib/repositories';
 import { USER_ROLES } from '@/lib/auth/rbac';
 
 export async function generateInvoicesForOrder(orderId: string) {
@@ -29,18 +30,13 @@ export async function updatePaymentStatus(
   paymentMethod: string = 'BANK_TRANSFER'
 ) {
   const { supabase } = await validateAdminAction();
+  const financeRepo = new FinanceRepository(supabase);
 
-  const { data: invoice, error: invError } = await supabase
-    .from('zen_invoices')
-    .update({
-      status,
-      paid_amount: amount,
-      payment_method: paymentMethod,
-      updated_at: new Date().toISOString()
-    })
-    .eq('id', invoiceId)
-    .select('metadata')
-    .single();
+  const { data: invoice, error: invError } = await financeRepo.updatePaymentStatus(invoiceId, {
+    status,
+    paid_amount: amount,
+    payment_method: paymentMethod,
+  });
 
   if (invError) throw new Error(`결제 상태 업데이트 실패: ${invError.message}`);
 
