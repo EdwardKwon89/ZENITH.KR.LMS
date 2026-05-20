@@ -8,7 +8,7 @@
 | 담당 Agent | D_Kai (OpenCode) |
 | 우선순위 | P3 |
 | 전제조건 | 없음 (TASK-029와 병행 가능) |
-| 상태 | ⬜ 미착수 |
+| 상태 | 🔔 검토 요청 — Aiden 검토 대기 |
 | 파급 효과 | 없음 (독립 Task) |
 
 ---
@@ -65,12 +65,12 @@ Next.js `unstable_cache()` 또는 Edge Config 전환으로 캐시 적용 필요.
 
 | 항목 | 내용 |
 |:---|:---|
-| 착수일 | — |
-| 완료일 | — |
-| 캐시 방식 | — |
-| revalidate 전략 | — |
-| gitnexus_impact 결과 | — |
-| 회귀 결과 | — |
+| 착수일 | 2026-05-20 |
+| 완료일 | 2026-05-20 |
+| 캐시 방식 | 방식 A — `unstable_cache` 전체 조회 로직 래핑 |
+| revalidate 전략 | `{ revalidate: 60 }` — 60초 TTL |
+| gitnexus_impact 결과 | LOW — 2 direct callers (authGuard, OrdersPage), 1 module (Auth) |
+| 회귀 결과 | 207/209 PASS (2건 pre-existing — integration Supabase local DB 미연동) |
 | 코드 커밋 해시 | — |
 | 문서 커밋 해시 | — |
 
