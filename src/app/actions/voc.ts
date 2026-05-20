@@ -1,8 +1,10 @@
 "use server";
 
+import fs from "fs";
 import { validateUserAction, validateAdminAction } from "@/lib/auth/guards";
 import { revalidatePath } from "next/cache";
 import { USER_ROLES } from "@/lib/auth/rbac";
+import { createVocSchema, validatePayload } from "@/lib/validation/schemas";
 
 export type VocType = 'DELAY' | 'DAMAGE' | 'MISDELIVERY' | 'OTHER';
 export type VocStatus = 'OPEN' | 'IN_PROGRESS' | 'CLOSED';
@@ -38,31 +40,13 @@ export interface VocDetail extends VocItem {
  * 14.1 createVoc (Action)
  * VOC를 등록하고 Admin에게 알림을 발송합니다.
  */
-export async function createVoc(payload: any) {
-  console.log("[DEBUG] createVoc called");
-  console.log("[DEBUG] payload type:", typeof payload);
-  console.log("[DEBUG] payload is null:", payload === null);
-  console.log("[DEBUG] payload keys:", payload ? Object.keys(payload) : "none");
-  console.log("[DEBUG] payload stringified:", JSON.stringify(payload));
-  
-  // If payload is FormData, extract fields
-  let data = payload;
-  if (payload instanceof FormData) {
-    console.log("[DEBUG] payload is FormData");
-    data = {
-      order_id: payload.get("order_id") as string,
-      type: payload.get("type") as VocType,
-      title: payload.get("title") as string,
-      description: payload.get("description") as string,
-    };
+export async function createVoc(payload: unknown) {
+  // Zod 입력 검증
+  const validated = validatePayload(createVocSchema, payload);
+  if (!validated.success) {
+    return { success: false, error: `Validation error: ${validated.error}` };
   }
-
-  console.log("[DEBUG] createVoc processed data:", data);
-  
-  // File based logging for E2E debugging
-  const fs = require('fs');
-  const logMsg = `[${new Date().toISOString()}] createVoc: order_id=${data.order_id}, type=${data.type}\n`;
-  fs.appendFileSync('scratch/voc_action.log', logMsg);
+  const data = validated.data;
 
   const { supabase, user, profile } = await validateUserAction();
 

@@ -164,7 +164,7 @@
 
 | IMP | 내용 | Agent | 상태 | 완료일 |
 |:---:|:-----|:-----:|:----:|:------:|
-| 064 | API Route Handler 스택 트레이스 프로덕션 노출 | Ring | ⬜ | — |
+| 064 | API Route Handler 스택 트레이스 프로덕션 노출 | Ring | 🔔 | 2026-05-20 |
 | 065 | Excel Export POST 엔드포인트 인증 미적용 | Ring | ⬜ | — |
 | 066 | HTTP Security Headers 미설정 (CSP·HSTS·X-Frame) | Ring | ⬜ | — |
 | 067 | Server Action 입력 Zod 검증 부재 (6개 액션) | Ring | ⬜ | — |

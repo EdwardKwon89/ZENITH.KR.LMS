@@ -19,55 +19,51 @@ export class VirtualTrackingProvider implements ITrackingProvider {
   async track(supabase: any, config: { id: string; tracking_no: string; order_id: string }): Promise<TrackingStep[]> {
     const { data: events, error } = await supabase
       .from('zen_tracking_events')
-      .select('*')
+      .select('event_code, event_time, location, description')
       .eq('order_id', config.order_id)
       .order('event_time', { ascending: false });
 
-    if (error || !events) return [];
+    if (error) {
+      console.error('[VIRTUAL] Failed to fetch events:', error);
+      return [];
+    }
 
-    return events.map((e: any) => ({
-      event_code: e.event_code as TrackingEventCode,
-      event_time: new Date(e.event_time),
-      location: e.location,
-      description: e.description,
-      source: this.name
-    }));
+    const latestEvents = new Map<string, TrackingStep>();
+    for (const e of events) {
+      if (!latestEvents.has(e.event_code)) {
+        latestEvents.set(e.event_code, {
+          event_code: e.event_code,
+          event_time: new Date(e.event_time),
+          location: e.location,
+          description: e.description,
+          source: 'VIRTUAL'
+        });
+      }
+    }
+
+    return Array.from(latestEvents.values()).sort((a, b) => b.event_time.getTime() - a.event_time.getTime());
   }
 }
 
 /**
  * [Execution] Mock Carrier API Provider
- * Simulates external carrier API calls with raw log persistence
+ * Simulates external carrier API response
  */
 export class MockCarrierProvider implements ITrackingProvider {
   name = 'MockCarrier';
 
   async track(supabase: any, config: { id: string; tracking_no: string; order_id: string }): Promise<TrackingStep[]> {
-    // Deterministic checkpoints based on tracking number suffix
-    const lastChar = config.tracking_no.slice(-1);
-    const isOdd = parseInt(lastChar, 16) % 2 !== 0;
-
-    // 1. Simulate external API call
     const mockApiResponse = {
-      carrier: "MOCK_EXPRESS",
-      tracking_no: config.tracking_no,
-      status: isOdd ? "ARRIVED" : "IN_TRANSIT",
-      timestamp: new Date().toISOString(),
       checkpoints: [
-        { code: "DEPARTED", loc: "Incheon, KR", msg: "Export customs cleared and departed", hours_ago: 24 },
-        { code: "ARRIVED", loc: "Singapore, SG", msg: "Arrived at destination airport", hours_ago: 12 },
-        ...(isOdd ? [{ code: "IN_TRANSIT", loc: "Singapore Hub", msg: "Out for distribution", hours_ago: 2 }] : [])
+        { code: 'DEPARTURE', hours_ago: 48, loc: 'Shanghai, CN', msg: 'Departed from origin' },
+        { code: 'TRANSIT', hours_ago: 24, loc: 'Incheon, KR', msg: 'Arrived at transit hub' },
+        { code: 'CUSTOMS', hours_ago: 12, loc: 'Incheon, KR', msg: 'Customs clearance in progress' },
       ]
     };
 
-    console.log(`[MOCK_CARRIER] Attempting to insert raw log for order ${config.order_id}`);
-    // 2. Persist Raw Log (Auditing)
-    const { error: logError } = await supabase.from('zen_tracking_raw_logs').insert({
-      order_id: config.order_id,
-      tracking_no: config.tracking_no,
-      provider_name: this.name,
-      raw_data: mockApiResponse
-    });
+    const { error: logError } = await supabase
+      .from('zen_tracking_raw_logs')
+      .insert({ order_id: config.order_id, raw_data: mockApiResponse });
 
     if (logError) {
       console.error(`[MOCK_CARRIER] Failed to save raw log for ${config.order_id}:`, logError);
@@ -107,7 +103,7 @@ export class ManualTrackingProvider implements ITrackingProvider {
   async track(supabase: any, config: { id: string; tracking_no: string; order_id: string }): Promise<TrackingStep[]> {
     const { data: events, error } = await supabase
       .from('zen_tracking_events')
-      .select('*')
+      .select('event_code, event_time, location, description')
       .eq('order_id', config.order_id)
       .eq('source_type', 'MANUAL')
       .order('event_time', { ascending: false });
