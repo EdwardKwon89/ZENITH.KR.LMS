@@ -14,7 +14,7 @@
 
 | 구 개념 | 신규 대응 |
 |:---|:---|
-| Status: BUSY | Task 상세 파일 생성 + ACTIVE_TASK 🔄 반영 |
+| Status: IDLE | Task 상세 파일 생성 + ACTIVE_TASK 🔄 반영 |
 | Status: IDLE | Task 상세 파일 완료 기록 + ACTIVE_TASK 🔔 반영 |
 | 충돌 방지 | 상세 파일 존재 여부 확인 (파일 선점 = 착수권) |
 

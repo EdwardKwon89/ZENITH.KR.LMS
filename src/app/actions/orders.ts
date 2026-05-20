@@ -17,104 +17,22 @@ import { syncInventoryFromOrder } from "./inventory";
  */
 export async function createOrder(payload: OrderRegistrationInput) {
   const { supabase, user, profile } = await validateUserAction();
+  if (!profile) throw new Error("User profile not found");
   
   // 1. 데이터 검증 (Server-side validation)
   const validated = orderRegistrationSchema.parse(payload);
-  const order_no = await generateOrderNo(supabase);
 
-  // 2. 주문 헤더 삽입 (수취인 상세 정보 포함)
-  const { data: order, error: orderError } = await supabase
-    .from("zen_orders")
-    .insert({
-      order_no,
-      order_type: validated.order_type,
-      shipper_id: validated.shipper_id,
-      origin_port_id: validated.origin_port_id,
-      dest_port_id: validated.dest_port_id,
-      description: validated.description,
-      
-      // 송하인(화주) 담당자/연락처 (v2)
-      shipper_contact_name: validated.shipper_contact_name,
-      shipper_contact_phone: validated.shipper_contact_phone,
-      
-      // 수취인 상세 (v2)
-      recipient_name: validated.recipient_name,
-      recipient_address: validated.recipient_address,
-      recipient_phone: validated.recipient_phone,
-      recipient_zipcode: validated.recipient_zipcode,
-      
-      recipient_pccc: validated.recipient_pccc,
-      recipient_email: validated.recipient_email,
-      delivery_notes: validated.delivery_notes,
-      transport_mode: validated.transport_mode,
-      estimated_cost: validated.estimated_cost,
-      
-      status: OrderStatus.REGISTERED,
-      created_by: user.id,
-      org_id: profile?.org_id
-    })
-    .select()
-    .single();
+  // 2. 단일 Supabase RPC 호출로 원자적 트랜잭션 실행
+  const { data: order, error: rpcError } = await supabase
+    .rpc("create_order_atomic", {
+      p_payload: validated,
+      p_user_id: user.id,
+      p_org_id: profile.org_id
+    });
 
-  if (orderError) throw new Error(`Order header failed: ${orderError.message}`);
-
-  // [Phase 3.1] 트래킹 초기 설정 (기본적으로 VIRTUAL 시뮬레이터 할당)
-  await supabase.from("zen_tracking_configs").insert({
-    order_id: order.id,
-    tracking_no: `ZN-${order.order_no}`,
-    provider_type: 'VIRTUAL',
-    provider_name: 'ZSim (Virtual)'
-  });
-
-  // 3. 계층형 패킹 및 아이템 삽입
-  if (validated.packages && validated.packages.length > 0) {
-    for (const pkg of validated.packages) {
-      // 3.1 패킹 단위 삽입
-      const { data: packageData, error: pkgError } = await supabase
-        .from("zen_order_packages")
-        .insert({
-          order_id: order.id,
-          packing_unit: pkg.packing_unit,
-          packing_count: pkg.packing_count,
-          length: pkg.length,
-          width: pkg.width,
-          height: pkg.height,
-          gross_weight: pkg.gross_weight,
-          volume: pkg.volume
-        })
-        .select()
-        .single();
-
-      if (pkgError) {
-        console.error("Package insertion failed:", pkgError);
-        continue;
-      }
-
-      // 3.2 해당 패킹에 속한 아이템들 삽입
-      if (pkg.items && pkg.items.length > 0) {
-        const itemsToInsert = pkg.items.map(item => ({
-          order_id: order.id,
-          package_id: packageData.id,
-          sku_code: item.sku_code,
-          item_name: item.item_name,
-          quantity: item.quantity,
-          unit_price: item.unit_price,
-          currency: item.currency || 'USD',
-          hs_code: item.hs_code,
-          item_packing_unit: item.item_packing_unit
-        }));
-
-        const { error: itemsError } = await supabase
-          .from("zen_order_items")
-          .insert(itemsToInsert);
-
-        if (itemsError) console.error("Items insertion failed for package:", packageData.id, itemsError);
-      }
-    }
+  if (rpcError) {
+    throw new Error(`Order creation failed: ${rpcError.message}`);
   }
-
-  // [WBS 2.4] 인벤토리 예약 처리 (REGISTERED 상태)
-  await syncInventoryFromOrder(order.id, OrderStatus.REGISTERED);
 
   revalidatePath("/(dashboard)/orders", "page");
   revalidatePath("/(dashboard)/inventory", "page");

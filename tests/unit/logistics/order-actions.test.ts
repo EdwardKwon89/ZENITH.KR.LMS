@@ -76,7 +76,7 @@ describe('ZENITH Logistics: Order Creation Logic', () => {
       ]
     };
 
-    mockSupabase.single.mockResolvedValue({ data: { id: 'new-order-id', order_no: mockOrderNo } });
+    mockSupabase.rpc.mockResolvedValue({ data: { id: 'new-order-id', order_no: mockOrderNo }, error: null });
 
     // When
     const result = await createOrder(payload as any);
@@ -84,11 +84,12 @@ describe('ZENITH Logistics: Order Creation Logic', () => {
     // Then
     expect(result.order_no).toBe(mockOrderNo);
     
-    // Supabase 호출 데이터 검증
-    const insertCall = mockSupabase.insert.mock.calls[0][0];
-    expect(insertCall.recipient_phone).toBe('010-1234-5678'); 
-    expect(insertCall.created_by).toBe(mockProfile.id); 
-    expect(insertCall.org_id).toBe(mockProfile.org_id); 
+    // Supabase RPC 호출 데이터 검증
+    const rpcCall = mockSupabase.rpc.mock.calls[0];
+    expect(rpcCall[0]).toBe('create_order_atomic');
+    expect(rpcCall[1].p_payload.recipient_phone).toBe('010-1234-5678'); 
+    expect(rpcCall[1].p_user_id).toBe(mockProfile.id); 
+    expect(rpcCall[1].p_org_id).toBe(mockProfile.org_id); 
     
     expect(revalidatePath).toHaveBeenCalledWith('/(dashboard)/orders', 'page');
   });
@@ -133,16 +134,17 @@ describe('ZENITH Logistics: Order Creation Logic', () => {
       ]
     };
 
-    mockSupabase.single.mockResolvedValue({ data: { id: 'order-v2-id', order_no: mockOrderNo } });
+    mockSupabase.rpc.mockResolvedValue({ data: { id: 'order-v2-id', order_no: mockOrderNo }, error: null });
 
     // When
     await createOrder(payload as any);
 
     // Then
-    const insertCall = mockSupabase.insert.mock.calls[0][0];
-    expect(insertCall.shipper_contact_name).toBe('Manager Kim');
-    expect(insertCall.shipper_contact_phone).toBe('010-1111-2222');
-    expect(insertCall.description).toBe('Special delivery instruction: Ring the bell');
+    const rpcCall = mockSupabase.rpc.mock.calls[0];
+    expect(rpcCall[0]).toBe('create_order_atomic');
+    expect(rpcCall[1].p_payload.shipper_contact_name).toBe('Manager Kim');
+    expect(rpcCall[1].p_payload.shipper_contact_phone).toBe('010-1111-2222');
+    expect(rpcCall[1].p_payload.description).toBe('Special delivery instruction: Ring the bell');
   });
 
   describe('Order Status Update: Exception Resilience', () => {
