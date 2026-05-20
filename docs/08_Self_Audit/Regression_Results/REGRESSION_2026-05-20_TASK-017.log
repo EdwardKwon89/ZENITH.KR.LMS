@@ -1,0 +1,33 @@
+
+> zenith-lms@1.0.0 test:regression
+> vitest run
+
+
+ RUN  v4.1.4 /Users/edward.kwon/WorkSpace/ZENITH_LMS_001
+
+stdout | tests/integration/tracking-business-qa.test.ts > QA-02 Tracking Business Integration > should preserve raw JSON logs in zen_tracking_raw_logs
+[QA-02] Direct Config Check: { count: 1, checkError: null }
+
+stdout | tests/integration/tracking-business-qa.test.ts > QA-02 Tracking Business Integration > should preserve raw JSON logs in zen_tracking_raw_logs
+[TRACKING_MANAGER] Found config for 3ff5b116-29cd-4d90-8dd0-0e99c36a2155: provider_type=API
+
+stdout | tests/integration/tracking-business-qa.test.ts > QA-02 Tracking Business Integration
+[QA-02] Starting beforeAll setup...
+
+stdout | tests/integration/tracking-business-qa.test.ts > QA-02 Tracking Business Integration
+[QA-02] Cleanup done: { delConfigError: null, delOrderError: null }
+
+stdout | tests/integration/tracking-business-qa.test.ts > QA-02 Tracking Business Integration
+[QA-02] Mock order inserted successfully
+
+stdout | tests/integration/tracking-business-qa.test.ts > QA-02 Tracking Business Integration
+[QA-02] Mock config inserted successfully
+
+ ❯ tests/integration/tracking-business-qa.test.ts (2 tests | 1 failed) 93ms
+     × should preserve raw JSON logs in zen_tracking_raw_logs 29ms
+
+ Test Files  1 failed | 41 passed (42)
+      Tests  1 failed | 198 passed (199)
+   Start at  10:07:57
+   Duration  35.21s (transform 515ms, setup 2.40s, import 3.20s, tests 357ms, environment 22.65s)
+

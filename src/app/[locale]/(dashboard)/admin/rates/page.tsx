@@ -1,11 +1,10 @@
 'use client';
 
-import { DollarSign, AlertCircle, LayoutGrid, Search, ListFilter } from 'lucide-react';
-import { ZenCard, ZenButton, ZenInput } from '@/components/ui/ZenUI';
+import { DollarSign, AlertCircle } from 'lucide-react';
+import { ZenCard } from '@/components/ui/ZenUI';
 import { RateCardList } from '@/components/admin/RateCardList';
 import { RateCardForm } from '@/components/admin/RateCardForm';
 import { USER_ROLES } from '@/lib/auth/rbac';
-import { cn } from '@/lib/utils';
 import { useRates } from './useRates';
 
 export default function RatesManagementPage() {
@@ -78,57 +77,17 @@ export default function RatesManagementPage() {
         profile={profile} isCarrierRole={isCarrier}
       />
 
-      <section className="max-w-7xl mx-auto space-y-6">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div className="space-y-1">
-            <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-3">
-              <LayoutGrid className="w-6 h-6 text-blue-500" />
-              Registered Pricing Masters
-            </h2>
-            <p className="text-sm text-slate-400">시스템에 배포되어 현재 유효한 운송사별 요율 정보 목록입니다.</p>
-          </div>
-
-          <div className="flex items-center gap-4 w-full md:w-auto">
-            <div className="flex gap-1 p-1 bg-slate-50 rounded-2xl border border-slate-300 overflow-hidden">
-              {['ACTIVE', 'ALL'].map((s) => (
-                <button
-                  key={s}
-                  onClick={() => setStatusFilter(s)}
-                  className={cn(
-                    "px-4 py-2 rounded-xl text-[10px] font-black tracking-widest transition-all",
-                    statusFilter === s
-                      ? "bg-blue-600 text-white shadow-lg"
-                      : "text-slate-400 hover:text-slate-500"
-                  )}
-                >
-                  {s}
-                </button>
-              ))}
-            </div>
-
-            <div className="relative flex-1 md:w-64">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-              <ZenInput
-                placeholder="Search route or carrier..."
-                className="pl-12 bg-slate-50 border-slate-300"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-            <ZenButton variant="glass" className="aspect-square p-0 w-12 h-12 rounded-2xl">
-              <ListFilter className="w-5 h-5 text-slate-500" />
-            </ZenButton>
-          </div>
-        </div>
-
-        <RateCardList
-          rates={filteredRates}
-          loading={listLoading}
-          onDelete={handleDeleteRate}
-          canEdit={canEdit}
-          canDelete={canDelete}
-        />
-      </section>
+      <RateCardList
+        rates={filteredRates}
+        loading={listLoading}
+        onDelete={handleDeleteRate}
+        canEdit={canEdit}
+        canDelete={canDelete}
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        statusFilter={statusFilter}
+        onStatusFilterChange={setStatusFilter}
+      />
     </div>
   );
 }
