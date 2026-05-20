@@ -4,6 +4,7 @@ import { logger } from '@/lib/logger';
 import { InvoiceGenerator } from '@/lib/finance/settlement';
 import { revalidatePath } from 'next/cache';
 import { validateUserAction, validateAdminAction } from '@/lib/auth/guards';
+import { FinanceRepository } from '@/lib/repositories';
 import { getNumericParam } from "@/lib/params/service";
 import { generateInvoicePdfBuffer } from '@/lib/finance/pdf';
 import { Resend } from 'resend';
@@ -28,16 +29,9 @@ export async function generateInvoiceAction(orderId: string) {
 
 export async function issueInvoicePdf(invoiceId: string) {
   const { supabase, profile } = await validateAdminAction();
+  const financeRepo = new FinanceRepository(supabase);
 
-  const { data: invoice, error: invError } = await supabase
-    .from('zen_invoices')
-    .select(`
-      *,
-      shipper:shipper_id(name, metadata),
-      costs:zen_order_costs(*)
-    `)
-    .eq('id', invoiceId)
-    .single();
+  const { data: invoice, error: invError } = await financeRepo.findByIdBasic(invoiceId);
 
   if (invError || !invoice) {
     throw new Error(`인보이스 정보를 찾을 수 없습니다: ${invError?.message}`);
@@ -65,10 +59,7 @@ export async function issueInvoicePdf(invoiceId: string) {
 
   const buffer = await generateInvoicePdfBuffer(pdfData);
 
-  const { count } = await supabase
-    .from('zen_invoice_pdf_history')
-    .select('*', { count: 'exact', head: true })
-    .eq('invoice_id', invoiceId);
+  const { count } = await financeRepo.countPdfHistory(invoiceId);
 
   const nextVersion = (count || 0) + 1;
   const timestamp = Date.now();
@@ -85,19 +76,17 @@ export async function issueInvoicePdf(invoiceId: string) {
     throw new Error(`PDF 업로드 실패: ${uploadError.message}`);
   }
 
-  const { error: histError } = await supabase
-    .from('zen_invoice_pdf_history')
-    .insert({
-      invoice_id: invoiceId,
-      file_path: filePath,
-      version: nextVersion,
-      created_by: profile.id,
-      metadata: {
-        total_amount: invoice.total_amount,
-        currency: invoice.currency,
-        issued_at: new Date().toISOString()
-      }
-    });
+  const { error: histError } = await financeRepo.insertPdfHistory({
+    invoice_id: invoiceId,
+    file_path: filePath,
+    version: nextVersion,
+    created_by: profile.id,
+    metadata: {
+      total_amount: invoice.total_amount,
+      currency: invoice.currency,
+      issued_at: new Date().toISOString()
+    }
+  });
 
   if (histError) {
     throw new Error(`발행 이력 저장 실패: ${histError.message}`);
@@ -109,12 +98,9 @@ export async function issueInvoicePdf(invoiceId: string) {
 
 export async function getInvoicePdfHistory(invoiceId: string) {
   const { supabase } = await validateUserAction();
+  const financeRepo = new FinanceRepository(supabase);
 
-  const { data, error } = await supabase
-    .from('zen_invoice_pdf_history')
-    .select('id, invoice_id, file_path, version, created_by, metadata, created_at')
-    .eq('invoice_id', invoiceId)
-    .order('version', { ascending: false });
+  const { data, error } = await financeRepo.findPdfHistory(invoiceId);
 
   if (error) {
     throw new Error(`이력 조회 실패: ${error.message}`);
@@ -136,16 +122,9 @@ export async function getInvoicePdfHistory(invoiceId: string) {
 
 export async function issueTaxInvoice(invoiceId: string) {
   const { supabase, profile } = await validateAdminAction();
+  const financeRepo = new FinanceRepository(supabase);
 
-  const { data: invoice, error: invError } = await supabase
-    .from('zen_invoices')
-    .select(`
-      *,
-      shipper:shipper_id(*),
-      costs:zen_order_costs(*)
-    `)
-    .eq('id', invoiceId)
-    .single();
+  const { data: invoice, error: invError } = await financeRepo.findById(invoiceId);
 
   if (invError || !invoice) {
     logger.error(`[Action] Invoice not found:`, invError);
@@ -188,30 +167,26 @@ export async function issueTaxInvoice(invoiceId: string) {
   const supplyTotal = items.reduce((sum: number, item: any) => sum + item.supply_amount, 0);
   const vatTotal = items.reduce((sum: number, item: any) => sum + item.tax_amount, 0);
 
-  const { data: taxInvoice, error: txError } = await supabase
-    .from('zen_tax_invoices')
-    .insert({
-      invoice_id: invoiceId,
-      tax_invoice_no: taxInvoiceNo,
-      status: 'ISSUED',
-      supplier_info: supplierInfo,
-      buyer_info: buyerInfo,
-      items: items,
-      total_amount: supplyTotal + vatTotal,
-      vat_amount: vatTotal,
-      applied_exchange_rate: exchangeRate,
-      recipient_email: invoice.shipper?.email || 'test@example.com',
-      issued_by: profile.id,
-      metadata: {
-        ...invoice.metadata,
-        snapshot: {
-          applied_exchange_rate: exchangeRate,
-          vat_rate: vatRate
-        }
+  const { data: taxInvoice, error: txError } = await financeRepo.insertTaxInvoice({
+    invoice_id: invoiceId,
+    tax_invoice_no: taxInvoiceNo,
+    status: 'ISSUED',
+    supplier_info: supplierInfo,
+    buyer_info: buyerInfo,
+    items: items,
+    total_amount: supplyTotal + vatTotal,
+    vat_amount: vatTotal,
+    applied_exchange_rate: exchangeRate,
+    recipient_email: invoice.shipper?.email || 'test@example.com',
+    issued_by: profile.id,
+    metadata: {
+      ...invoice.metadata,
+      snapshot: {
+        applied_exchange_rate: exchangeRate,
+        vat_rate: vatRate
       }
-    })
-    .select()
-    .single();
+    }
+  });
 
   if (txError) {
     logger.error(`[Action] Tax invoice insertion failed:`, txError);
@@ -224,12 +199,9 @@ export async function issueTaxInvoice(invoiceId: string) {
 
 export async function sendTaxInvoiceEmail(taxInvoiceId: string, recipientEmail: string) {
   const { supabase } = await validateAdminAction();
+  const financeRepo = new FinanceRepository(supabase);
 
-  const { data: tx, error: txError } = await supabase
-    .from('zen_tax_invoices')
-    .select('id, tax_invoice_no, total_amount, currency, status, metadata, created_at')
-    .eq('id', taxInvoiceId)
-    .single();
+  const { data: tx, error: txError } = await financeRepo.findTaxInvoiceById(taxInvoiceId);
 
   if (txError || !tx) {
     throw new Error(`세금계산서 정보를 찾을 수 없습니다: ${txError?.message}`);
@@ -260,25 +232,19 @@ export async function sendTaxInvoiceEmail(taxInvoiceId: string, recipientEmail: 
 
     if (emailError) throw emailError;
 
-    await supabase
-      .from('zen_tax_invoices')
-      .update({
-        status: 'SENT',
-        sent_at: new Date().toISOString(),
-        metadata: { ...tx.metadata, resend_id: emailData?.id }
-      })
-      .eq('id', taxInvoiceId);
+    await financeRepo.updateTaxInvoiceStatus(taxInvoiceId, {
+      status: 'SENT',
+      sent_at: new Date().toISOString(),
+      metadata: { ...tx.metadata, resend_id: emailData?.id }
+    });
 
     revalidatePath('/finance/invoices');
     return { success: true, messageId: emailData?.id };
   } catch (error: any) {
-    await supabase
-      .from('zen_tax_invoices')
-      .update({
-        status: 'FAILED',
-        metadata: { ...tx.metadata, error: error.message }
-      })
-      .eq('id', taxInvoiceId);
+    await financeRepo.updateTaxInvoiceStatus(taxInvoiceId, {
+      status: 'FAILED',
+      metadata: { ...tx.metadata, error: error.message }
+    });
 
     throw new Error(`이메일 발송 실패: ${error.message}`);
   }
@@ -286,12 +252,9 @@ export async function sendTaxInvoiceEmail(taxInvoiceId: string, recipientEmail: 
 
 export async function getTaxInvoiceHistory(invoiceId: string) {
   const { supabase } = await validateUserAction();
+  const financeRepo = new FinanceRepository(supabase);
 
-  const { data, error } = await supabase
-    .from('zen_tax_invoices')
-    .select('id, tax_invoice_no, total_amount, status, invoice_id, created_at')
-    .eq('invoice_id', invoiceId)
-    .order('created_at', { ascending: false });
+  const { data, error } = await financeRepo.findTaxInvoicesByInvoiceId(invoiceId);
 
   if (error) {
     throw new Error(`이력 조회 실패: ${error.message}`);

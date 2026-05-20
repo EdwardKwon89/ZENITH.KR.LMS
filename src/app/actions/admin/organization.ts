@@ -3,18 +3,16 @@ import { logger } from '@/lib/logger';
 
 import { validateAdminAction } from "@/lib/auth/guards";
 import { revalidatePath } from "next/cache";
+import { AdminRepository } from '@/lib/repositories';
 
 /**
  * 신규 가입한 조직(화주/포워더 등)을 승인합니다.
  */
 export async function approveOrganization(orgId: string) {
   const { supabase, user } = await validateAdminAction();
+  const adminRepo = new AdminRepository(supabase);
 
-  // RPC를 통해 승인 처리 (Corporate ID 생성 및 Auth 메타데이터 동기화 포함)
-  const { data: newId, error } = await supabase.rpc("approve_organization", {
-    target_org_id: orgId
-  });
-
+  const { data: newId, error } = await adminRepo.approveOrganization(orgId);
   if (error) throw new Error(`Org approval RPC failed: ${error.message}`);
 
   logger.info(`Organization ${orgId} approved by admin ${user.id}. Assigned ID: ${newId}`);
@@ -28,12 +26,9 @@ export async function approveOrganization(orgId: string) {
  */
 export async function rejectOrganization(orgId: string, reason: string) {
   const { supabase } = await validateAdminAction();
+  const adminRepo = new AdminRepository(supabase);
 
-  const { error } = await supabase.rpc("reject_organization", {
-    target_org_id: orgId,
-    comment: reason
-  });
-
+  const { error } = await adminRepo.rejectOrganization(orgId, reason);
   if (error) throw new Error(`Org rejection RPC failed: ${error.message}`);
 
   revalidatePath("/admin/organizations");
@@ -45,12 +40,9 @@ export async function rejectOrganization(orgId: string, reason: string) {
  */
 export async function requestOrganizationSupplement(orgId: string, reason: string) {
   const { supabase } = await validateAdminAction();
+  const adminRepo = new AdminRepository(supabase);
 
-  const { error } = await supabase.rpc("request_organization_supplement", {
-    target_org_id: orgId,
-    comment: reason
-  });
-
+  const { error } = await adminRepo.requestOrganizationSupplement(orgId, reason);
   if (error) throw new Error(`Supplement request RPC failed: ${error.message}`);
 
   revalidatePath("/admin/organizations");
@@ -62,29 +54,10 @@ export async function requestOrganizationSupplement(orgId: string, reason: strin
  */
 export async function getOrganizations(status?: string | string[], page = 1, pageSize = 50) {
   const { supabase } = await validateAdminAction();
-  const from = (page - 1) * pageSize;
-  const to = from + pageSize - 1;
+  const adminRepo = new AdminRepository(supabase);
 
-  let query = supabase
-    .from("zen_organizations")
-    .select(`
-      *,
-      zen_organization_documents(*)
-    `, { count: "exact" });
-  
-  if (status) {
-    if (Array.isArray(status)) {
-      query = query.in("status", status);
-    } else {
-      query = query.eq("status", status);
-    }
-  }
-
-  const { data, error, count } = await query
-    .order("created_at", { ascending: false })
-    .range(from, to);
+  const { data, error, count } = await adminRepo.findOrganizations(status, page, pageSize);
   if (error) throw new Error(`Failed to fetch organizations: ${error.message}`);
 
   return { organizations: data || [], total: count || 0 };
 }
-
