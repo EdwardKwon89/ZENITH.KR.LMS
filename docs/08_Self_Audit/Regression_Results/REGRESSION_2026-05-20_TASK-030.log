@@ -1,0 +1,6 @@
+TASK-030 Regression Result
+Date: 2026-05-20
+Commit: (pending)
+Test: npm run test:regression
+Result: 207/209 PASS (2 integration failures pre-existing - Supabase local DB not running)
+Changed files: src/lib/params/feature-flags.ts
