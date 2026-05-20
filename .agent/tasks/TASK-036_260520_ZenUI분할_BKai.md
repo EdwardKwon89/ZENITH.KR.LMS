@@ -80,8 +80,8 @@
 | 분할 결과 (각 파일 줄 수) | ZenCard 26·ZenButton 37·ZenAurora 19·ZenInput 20·ZenTextarea 20·ZenBadge 32·ZenSelect 37·index 8·ZenUI shim 7 |
 | gitnexus_impact 결과 | ZenUI.tsx re-export shim 전환 — 모든 기존 import 경로 100% 호환 유지 |
 | 회귀 결과 | 44 files, 209 tests PASS |
-| 코드 커밋 해시 | df63706 |
-| 문서 커밋 해시 | — |
+| 코드 커밋 해시 | d099a04 |
+| 문서 커밋 해시 | 0dea972 |
 
 ---
 
