@@ -1,0 +1,13 @@
+
+> zenith-lms@1.0.0 test:regression
+> vitest run
+
+
+ RUN  v4.1.4 /Users/edward.kwon/WorkSpace/ZENITH_LMS_001
+
+
+ Test Files  42 passed (42)
+      Tests  199 passed (199)
+   Start at  12:00:46
+   Duration  113.16s (transform 1.63s, setup 7.38s, import 9.71s, tests 1.16s, environment 75.35s)
+
