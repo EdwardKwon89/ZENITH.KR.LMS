@@ -77,10 +77,10 @@
 | 착수일 | 2026-05-20 |
 | 완료일 | 2026-05-20 |
 | 생성 파일 목록 | `ZenCard.tsx`, `ZenButton.tsx`, `ZenAurora.tsx`, `ZenInput.tsx`, `ZenTextarea.tsx`, `ZenBadge.tsx`, `ZenSelect.tsx`, `index.ts` (8개) |
-| 분할 결과 (각 파일 줄 수) | ZenCard 29·ZenButton 67·ZenAurora 17·ZenInput 26·ZenTextarea 28·ZenBadge 29·ZenSelect 38·index 9 |
-| gitnexus_impact 결과 | ZenUI.tsx re-export shim 전환 — 모든 기존 import 호환 |
+| 분할 결과 (각 파일 줄 수) | ZenCard 26·ZenButton 37·ZenAurora 19·ZenInput 20·ZenTextarea 20·ZenBadge 32·ZenSelect 37·index 8·ZenUI shim 7 |
+| gitnexus_impact 결과 | ZenUI.tsx re-export shim 전환 — 모든 기존 import 경로 100% 호환 유지 |
 | 회귀 결과 | 44 files, 209 tests PASS |
-| 코드 커밋 해시 | d099a04 |
+| 코드 커밋 해시 | df63706 |
 | 문서 커밋 해시 | — |
 
 ---
