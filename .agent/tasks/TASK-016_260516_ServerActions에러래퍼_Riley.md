@@ -8,7 +8,7 @@
 | 담당 Agent | Riley (Gemini) |
 | 우선순위 | P3 |
 | 전제조건 | 없음 (즉시 착수 가능) |
-| 상태 | 🔄 구현 중 |
+| 상태 | 🔔 검토 요청 |
 
 ---
 
@@ -62,12 +62,12 @@ export function withAction<T>(
 
 ## 완료 기준 (DoD)
 
-- [ ] `withAction()` 래퍼 함수 구현
-- [ ] 주요 Server Action 래퍼 적용 (최소 10개 이상)
-- [ ] 에러 타입 표준화 (`{ data, error }` 반환 일관성)
-- [ ] 회귀 테스트 전체 PASS 증적
-- [ ] `[Gemini] refactor: IMP-025` 커밋 완료
-- [ ] 본 파일 상태 🔔 + ACTIVE_TASK.md 동기화
+- [x] `withAction()` 래퍼 함수 구현
+- [x] 주요 Server Action 래퍼 적용 (최소 10개 이상)
+- [x] 에러 타입 표준화 (`{ data, error }` 반환 일관성)
+- [x] 회귀 테스트 전체 PASS 증적
+- [x] `[Gemini] refactor: IMP-025` 커밋 완료
+- [x] 본 파일 상태 🔔 + ACTIVE_TASK.md 동기화
 
 ---
 
@@ -103,12 +103,12 @@ export function withAction<T>(
 
 | 항목 | 내용 |
 |:---|:---|
-| 착수일 | — |
-| 완료일 | — |
-| 래퍼 경로 | — |
-| 적용 Action 수 | — |
-| 회귀 결과 | — |
-| 커밋 해시 | — |
+| 착수일 | 2026-05-20 |
+| 완료일 | 2026-05-20 |
+| 래퍼 경로 | `src/lib/actions/wrapper.ts` |
+| 적용 Action 수 | 16개 (monitoring, voc, customs, member, rates, corporate) |
+| 회귀 결과 | **209/209 PASS** (REGRESSION_2026-05-20_TASK-016.log) |
+| 커밋 해시 | `021a17b` |
 
 ---
 
