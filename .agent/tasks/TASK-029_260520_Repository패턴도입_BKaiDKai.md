@@ -170,5 +170,5 @@ IMP-059(클라이언트 싱글톤)는 완료되었으나, 비즈니스 로직과
 | 수정 사항 | doc commit에 `IMP_PROGRESS.md` 포함 (R-17 v1.4 단일 미해결 항목) |
 | 포함 파일 | task file + ACTIVE_TASK.md + IMP_PROGRESS.md (3개 단일 커밋) |
 | 코드 커밋 해시 | `d88892c` (auth.ts 2곳 + AdminRepository.findProfileByNameAndEmail) |
-| 문서 커밋 해시 | `⏳` (이 필드는 커밋 후 갱신) |
+| 문서 커밋 해시 | `99eff33` (ACTIVE_TASK.md + IMP_PROGRESS.md 포함) |
 | 상태 | → 🔔 (Aiden 최종 승인 요청) |
