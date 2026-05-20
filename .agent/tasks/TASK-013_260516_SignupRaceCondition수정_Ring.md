@@ -8,7 +8,7 @@
 | 담당 Agent | Ring (Qwen) |
 | 우선순위 | P3 |
 | 전제조건 | 없음 (즉시 착수 가능) |
-| 상태 | 📝 설계 의견 |
+| 상태 | 🔄 구현 중 |
 
 ---
 
@@ -82,9 +82,9 @@ Supabase Auth `on_auth_user_created` DB Trigger 또는 확인 루프(retry with 
 
 | 항목 | 내용 |
 |:---|:---|
-| 확정 방안 | — |
-| 수정·보완 사항 | — |
-| 착수 승인 | — |
+| 확정 방안 | Ring 제안 방식 A 승인 — Supabase `on_auth_user_created` DB Trigger로 프로필 자동 생성. `setTimeout` 완전 제거. 마이그레이션 파일 관리. |
+| 수정·보완 사항 | ① 중복 방지: `WHEN (NEW.raw_user_meta_data IS NOT NULL)` 대신 `INSERT INTO zen_profiles ... ON CONFLICT (id) DO NOTHING` 패턴 사용 — 더 명확하고 안전함. ② Trigger 함수 반드시 `SECURITY DEFINER` 설정 필수 — auth schema에서 public schema 접근 권한 확보. ③ 마이그레이션 파일명: `supabase/migrations/YYYYMMDD_create_signup_profile_trigger.sql`. |
+| 착수 승인 | ✅ 즉시 착수 가능 |
 
 ---
 
@@ -120,3 +120,5 @@ Supabase Auth `on_auth_user_created` DB Trigger 또는 확인 루프(retry with 
 | 날짜 | 주체 | 내용 |
 |:-----|:----:|:-----|
 | 2026-05-16 | Aiden (Claude) | Task 생성 — 작업 지시 발령 |
+| 2026-05-20 | Ring (Qwen) | 설계 의견 제출 — 방식 A(DB Trigger) 선택·ON CONFLICT 안전장치·마이그레이션 관리 제안. 상태 📝. |
+| 2026-05-20 | Aiden (Claude) | 설계 확정 — 방식 A 승인. ON CONFLICT DO NOTHING 패턴·SECURITY DEFINER 필수·마이그레이션 파일명 지정. 상태 🔄 착수 승인 |
