@@ -1,10 +1,25 @@
 import { vi, describe, it, expect, beforeEach } from 'vitest';
+
+// Mock fs module BEFORE importing createVoc
+vi.mock('fs', () => ({
+  default: { appendFileSync: vi.fn() },
+  appendFileSync: vi.fn(),
+}));
+
 import { createVoc } from '../../../src/app/actions/voc';
 import { validateUserAction } from '../../../src/lib/auth/guards';
 
 // Mock the auth guards
 vi.mock('../../../src/lib/auth/guards', () => ({
   validateUserAction: vi.fn(),
+}));
+
+// Mock fs module
+vi.mock('fs', () => ({
+  default: {
+    appendFileSync: vi.fn(),
+  },
+  appendFileSync: vi.fn(),
 }));
 
 describe('VOC Action Unit Tests', () => {
@@ -54,7 +69,7 @@ describe('VOC Action Unit Tests', () => {
     });
 
     const payload = {
-      order_id: 'order-123',
+      order_id: '550e8400-e29b-41d4-a716-446655440001',
       type: 'DELAY' as const,
       title: 'Test VOC Title',
       description: 'Test VOC Description'
@@ -67,7 +82,7 @@ describe('VOC Action Unit Tests', () => {
     expect(result.success).toBe(true);
     expect(mockSupabase.from).toHaveBeenCalledWith('zen_voc');
     expect(mockSupabase.insert).toHaveBeenCalledWith(expect.objectContaining({
-      order_id: 'order-123',
+      order_id: '550e8400-e29b-41d4-a716-446655440001',
       title: 'Test VOC Title',
       status: 'OPEN'
     }));
@@ -81,7 +96,7 @@ describe('VOC Action Unit Tests', () => {
     });
 
     const payload = {
-      order_id: 'order-456',
+      order_id: '550e8400-e29b-41d4-a716-446655440002',
       type: 'DAMAGE' as const,
       title: 'Hack Attempt',
       description: 'Trying to post VOC to other org order'

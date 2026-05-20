@@ -1,0 +1,74 @@
+> vitest run
+ RUN  v4.1.4 /Users/edward.kwon/WorkSpace/ZENITH_LMS_001
+stdout | tests/integration/tracking-business-qa.test.ts > QA-02 Tracking Business Integration > should preserve raw JSON logs in zen_tracking_raw_logs
+[QA-02] Direct Config Check: { count: 1, checkError: null }
+stdout | tests/integration/tracking-business-qa.test.ts > QA-02 Tracking Business Integration > should preserve raw JSON logs in zen_tracking_raw_logs
+[TRACKING_MANAGER] Found config for 3ff5b116-29cd-4d90-8dd0-0e99c36a2155: provider_type=API
+stdout | tests/integration/tracking-business-qa.test.ts > QA-02 Tracking Business Integration
+[QA-02] Starting beforeAll setup...
+stdout | tests/integration/tracking-business-qa.test.ts > QA-02 Tracking Business Integration
+[QA-02] Cleanup done: { delConfigError: null, delOrderError: null }
+stdout | tests/integration/tracking-business-qa.test.ts > QA-02 Tracking Business Integration
+[QA-02] Mock order inserted successfully
+stdout | tests/integration/tracking-business-qa.test.ts > QA-02 Tracking Business Integration
+[QA-02] Mock config inserted successfully
+ ❯ tests/integration/tracking-business-qa.test.ts (2 tests | 1 failed) 142ms
+     × should preserve raw JSON logs in zen_tracking_raw_logs 34ms
+ Test Files  1 failed | 41 passed (42)
+      Tests  1 failed | 198 passed (199)
+   Start at  09:55:13
+   Duration  47.38s (transform 660ms, setup 3.51s, import 4.03s, tests 431ms, environment 31.15s)
+(node:89929) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+stderr | tests/integration/tracking-business-qa.test.ts > QA-02 Tracking Business Integration > should preserve raw JSON logs in zen_tracking_raw_logs
+[MOCK_CARRIER] Failed to save raw log for 3ff5b116-29cd-4d90-8dd0-0e99c36a2155: {
+  code: '23502',
+  details: 'Failing row contains (0b384db4-b322-43b6-a63f-91823760dd4c, 3ff5b116-29cd-4d90-8dd0-0e99c36a2155, null, null, {"checkpoints": [{"loc": "Shanghai, CN", "msg": "Departed from o..., 2026-05-20 00:55:15.25215+00).',
+  hint: null,
+  message: 'null value in column "provider_name" of relation "zen_tracking_raw_logs" violates not-null constraint'
+}
+(node:89951) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:89961) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:89999) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:90040) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:90073) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:90157) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:90169) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:90182) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:90255) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:90267) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:90306) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:90343) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:90396) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:90404) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:90431) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:90530) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:90541) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  tests/integration/tracking-business-qa.test.ts > QA-02 Tracking Business Integration > should preserve raw JSON logs in zen_tracking_raw_logs
+AssertionError: expected 0 to be greater than 0
+ ❯ tests/integration/tracking-business-qa.test.ts:91:26
+     89|     expect(logError).toBeNull();
+     90|     expect(logs).toBeDefined();
+     91|     expect(logs!.length).toBeGreaterThan(0);
+       |                          ^
+     92|
+     93|     const latestLog = logs![0];
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
