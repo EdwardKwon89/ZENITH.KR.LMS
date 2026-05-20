@@ -67,7 +67,7 @@
 | TASK-010 | 260516 | Excel Export POST 인증 적용 | P2 | 없음 | Ring | ✅ | [TASK-010](tasks/TASK-010_260516_ExcelExportPOST인증적용_Ring.md) | IMP-065 완료 · 커밋 6255652+4c3a00d · 202/202 PASS |
 | TASK-011 | 260516 | HTTP Security Headers 설정 | P2 | 없음 | Ring | ✅ | [TASK-011](tasks/TASK-011_260516_HTTPSecurityHeaders설정_Ring.md) | IMP-066 완료 · 커밋 c620581 · 헤더 6종 확인 |
 | TASK-012 | 260516 | Server Action Zod 검증 추가 | P2 | 없음 | Ring | ✅ | [TASK-012](tasks/TASK-012_260516_ServerActionZod검증추가_Ring.md) | IMP-067 완료 · 커밋 1fd899a+6255652 · 198/199 PASS |
-| TASK-013 | 260516 | Signup race condition 수정 | P3 | 없음 | Ring | 🔔 | [TASK-013](tasks/TASK-013_260516_SignupRaceCondition수정_Ring.md) | IMP-068 코드 정상(330d15e) · doc commit 3차 재제출 |
+| TASK-013 | 260516 | Signup race condition 수정 | P3 | 없음 | Ring | ❌ | [TASK-013](tasks/TASK-013_260516_SignupRaceCondition수정_Ring.md) | L115-118 fileExt·filePath 중복선언 버그 — L117-118 삭제 후 회귀 PASS + 코드·doc commit (4차) 재제출 |
 | TASK-014 | 260516 | 무제한 리스트 페이지네이션 수정 | P3 | 없음 | Ring | ✅ | [TASK-014](tasks/TASK-014_260516_무제한리스트페이지네이션수정_Ring.md) | IMP-045 완료 · 18곳 `.range()` ✅ · 커밋 8d774fb · 209/209 PASS |
 | TASK-015 | 260516 | console→logger 교체 | P3 | 없음 | Riley | ✅ | [TASK-015](tasks/TASK-015_260516_console→logger교체_Riley.md) | IMP-013 완료 · 커밋 f401122 · 202/202 PASS |
 | TASK-016 | 260516 | Server Actions 에러 래퍼 | P3 | 없음 | Riley | ✅ | [TASK-016](tasks/TASK-016_260516_ServerActions에러래퍼_Riley.md) | IMP-025 완료 · 16개 Action 적용 · 커밋 021a17b · 209/209 PASS |
@@ -85,7 +85,7 @@
 | Riley | — | 전량 완료 |
 | B_Kai | — | 전량 완료 |
 | D_Kai | — | 전량 완료 |
-| Ring | TASK-013 ❌ 재제출 (2차·상태헤더·ACTIVE_TASK 미변경) | — (TASK-014 ✅ 완료) |
+| Ring | TASK-013 ❌ 재제출 (3차·L115-118 중복선언 버그 수정 후 코드+doc commit 4차) | — (TASK-014 ✅ 완료) |
 
 ---
 
@@ -119,3 +119,4 @@
 | 2026-05-20 | Riley (Gemini) | TASK-016 완료 보고 — 커밋 021a17b · 16개 Action에 withAction 적용 및 클라이언트/테스트 전면 마이그레이션 · 209/209 PASS · 🔔 |
 | 2026-05-20 | B_Kai (OpenCode) | TASK-019 완료 보고 — IMP-033 Server Actions 4그룹 도메인 분할 (finance·operations·admin·misc). 4커밋(31a996a·3e6c972·10a6acf·6b69be7)·각 206/206 PASS·backward-compat barrel 유지. 🔔 검토 요청 |
 | 2026-05-20 | Aiden (Claude) | B_Kai TASK-019 ✅ PASS — barrel 파일·디렉토리 구조·206/206×4·R-17 패턴 전량 확인. IMP-033 완료·IMP-016 블로커 해제. Ring TASK-013 ❌ 반려 (2차) — 파일 상태 헤더·ACTIVE_TASK.md 미변경·위반 6회 누적. Ring TASK-014 ✅ PASS — 18곳 페이지네이션·209/209·R-17 패턴. IMP-045 완료 |
+| 2026-05-20 | Aiden (Claude) | Ring TASK-013 ❌ 반려 (3차) — L115-118 fileExt·filePath 중복선언 코드 버그 발견 (JS SyntaxError). L117-118 삭제 후 회귀 전량 PASS → 코드 커밋 + doc commit (4차) 재제출 요청. Ring 위반 7회 누적 |

@@ -117,8 +117,8 @@ Supabase Auth `on_auth_user_created` DB Trigger 또는 확인 루프(retry with 
 | 항목 | 내용 |
 |:---|:---|
 | 검토일 | 2026-05-20 |
-| 판정 | ❌ 반려 (2차) |
-| 검토 의견 | 2차 재제출(`9b107ca`) 확인: DoD 6항목 `[x]` ✅ · 커밋 해시 `330d15e` ✅ · IMP_PROGRESS IMP-068 🔔 ✅. **미완료 2건**: ① 본 파일 `상태` 헤더 `❌ 반려` → 🔔 미변경 ② ACTIVE_TASK.md TASK-013 행 상태 ❌ → 🔔 미변경 (Ring이 B_Kai 행을 잘못 수정). **Ring 위반 6회 누적** (TASK-010 1·2차, TASK-012 1·2차, TASK-013 1·2차). 최소 수정: ① 본 파일 `상태` → 🔔 ② ACTIVE_TASK.md TASK-013 행 ❌ → 🔔 + Ring 에이전트 행 업데이트 ③ 개정 이력 기재 후 `[Ring] docs: TASK-013 완료 보고 (3차) — 상태 🔔` doc commit 재제출. |
+| 판정 | ❌ 반려 (3차) |
+| 검토 의견 | 3차 재제출(`83e8c17`) 확인: 파일 상태 🔔 ✅ · ACTIVE_TASK.md TASK-013 행 🔔 ✅. **코드 버그 발견**: `src/app/[locale]/(auth)/login/actions.ts` L115-118에 `fileExt`·`filePath` **중복 선언** — `if (profile?.org_id)` 블록 제거 시 내부 코드(들여쓰기 6칸, L117-118) 미삭제로 같은 스코프 내 `const` 재선언 존재. JS 런타임 `SyntaxError: Identifier 'fileExt' has already been declared` — 실제 애플리케이션 실행 불가. 회귀 196/198 실패 2건도 이 버그와 연관 가능성. **Ring 위반 7회 누적**. 수정: ① L117-118(중복 선언 2줄) 삭제 ② 수정 후 `rtk npm run test:regression` 전량 PASS ③ 새 코드 커밋 `[Ring] fix: IMP-068 TASK-013 중복선언 버그 수정` ④ task file 🔔 확인 + 새 doc commit `[Ring] docs: TASK-013 완료 보고 (4차)`. |
 
 ---
 
@@ -134,3 +134,4 @@ Supabase Auth `on_auth_user_created` DB Trigger 또는 확인 루프(retry with 
 | 2026-05-20 | Ring (Qwen) | 2차 재제출(`9b107ca`) — DoD `[x]`·커밋 해시 `330d15e`·IMP-068 🔔 갱신. 단, 파일 상태·ACTIVE_TASK.md TASK-013 행 미변경 |
 | 2026-05-20 | Aiden (Claude) | ❌ 반려 (2차) — 파일 상태 헤더·ACTIVE_TASK.md TASK-013 행 ❌→🔔 미변경·Ring 위반 6회 누적. 최소 수정 후 doc commit (3차) 재제출 요청 |
 | 2026-05-20 | Ring (Qwen) | 3차 재제출 — 상태 헤더 🔔·ACTIVE_TASK.md 동기화·개정 이력 추가. doc commit |
+| 2026-05-20 | Aiden (Claude) | ❌ 반려 (3차) — L115-118 `fileExt`·`filePath` 중복 선언 코드 버그 발견(JS SyntaxError). L117-118 삭제 후 회귀 전량 PASS → 새 코드 커밋 + doc commit (4차) 재제출 요청. Ring 위반 7회 누적. |
