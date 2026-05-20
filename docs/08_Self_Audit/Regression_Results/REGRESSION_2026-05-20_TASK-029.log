@@ -1,0 +1,7 @@
+REGRESSION RESULT: TASK-029 (IMP-016) Repository 패턴 도입
+Date: 2026-05-20
+Test: rtk npm run test:regression
+Result: 43 passed + 2 pre-existing failures (tracking integration tests - schema cache missing tables)
+         → 44 files, 207/209 PASS (2 pre-existing failures unrelated to this change)
+Notes: src/lib/repositories/ 신설 (base.repository.ts, order.repository.ts, finance.repository.ts, admin.repository.ts, index.ts)
+         신규 파일만 생성, 기존 코드 import 없음 — 회귀 가능성 0%
