@@ -78,7 +78,7 @@
 | TASK-021 | 260520 | Phase F 데브리프 응답 | P4 | 없음 | Riley | 🔔 | [TASK-021](tasks/TASK-021_260520_PhaseF데브리프응답_Riley.md) | 거버넌스 Task · 문서 커밋 1회 · Phase G 준비 |
 | TASK-022 | 260520 | Phase F 데브리프 응답 | P4 | 없음 | B_Kai | 🔔 | [TASK-022](tasks/TASK-022_260520_PhaseF데브리프응답_BKai.md) | 거버넌스 Task · 응답 완료 · 🔔 검토 요청 |
 | TASK-023 | 260520 | Phase F 데브리프 응답 | P4 | 없음 | D_Kai | 🔔 | [TASK-023](tasks/TASK-023_260520_PhaseF데브리프응답_DKai.md) | 거버넌스 Task · 문서 커밋 1회 · Phase G 준비 |
-| TASK-024 | 260520 | Phase F 데브리프 응답 | P4 | 없음 | Ring | 🔄 | [TASK-024](tasks/TASK-024_260520_PhaseF데브리프응답_Ring.md) | 거버넌스 Task · R-17 7회 경고 포함 · Phase G 착수 전 완료 필수 |
+| TASK-024 | 260520 | Phase F 데브리프 응답 | P4 | 없음 | Ring | 🔔 | [TASK-024](tasks/TASK-024_260520_PhaseF데브리프응답_Ring.md) | 거버넌스 Task · 3항목 응답 완료 · Phase G 착수 대기 |
 
 ---
 
