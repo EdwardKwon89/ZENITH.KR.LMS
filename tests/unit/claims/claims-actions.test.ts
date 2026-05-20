@@ -23,6 +23,7 @@ describe('ZENITH Claims Actions: Lifecycle & Settlement', () => {
     eq: vi.fn(),
     single: vi.fn(),
     order: vi.fn(),
+    range: vi.fn(),
     then: vi.fn(),
   };
 
@@ -37,11 +38,13 @@ describe('ZENITH Claims Actions: Lifecycle & Settlement', () => {
     supabaseMock.eq.mockReturnValue(supabaseMock);
     supabaseMock.single.mockReturnValue(supabaseMock);
     supabaseMock.order.mockReturnValue(supabaseMock);
+    supabaseMock.range.mockReturnValue(supabaseMock);
     
-    // Default then implementation
+    // Default then/range implementation
     supabaseMock.then.mockImplementation((onFulfilled: any) => 
       Promise.resolve({ data: [], error: null }).then(onFulfilled)
     );
+    supabaseMock.range.mockResolvedValue({ data: [], error: null, count: 0 });
 
     (validateUserAction as any).mockResolvedValue({ 
       supabase: supabaseMock, 
@@ -58,9 +61,11 @@ describe('ZENITH Claims Actions: Lifecycle & Settlement', () => {
 
   it('TC-CLM.1: [Success] getClaims는 해당 조직의 클레임만 조회해야 함 (화주 기준)', async () => {
     // Given
-    supabaseMock.then.mockImplementationOnce((onFulfilled: any) => 
-      Promise.resolve({ data: [{ id: 'c1', org_id: 'org-1' }], error: null }).then(onFulfilled)
-    );
+    supabaseMock.range.mockResolvedValueOnce({ 
+      data: [{ id: 'c1', org_id: 'org-1' }], 
+      error: null, 
+      count: 1 
+    });
 
     // When
     const result = await getClaims();
@@ -68,7 +73,8 @@ describe('ZENITH Claims Actions: Lifecycle & Settlement', () => {
     // Then
     expect(supabaseMock.from).toHaveBeenCalledWith('zen_claims');
     expect(supabaseMock.eq).toHaveBeenCalledWith('org_id', 'org-1');
-    expect(result).toHaveLength(1);
+    expect(result.claims).toHaveLength(1);
+    expect(result.total).toBe(1);
   });
 
   it('TC-CLM.2: [Success] createClaim은 클레임을 생성하고 오더 상태를 CLAIMED로 변경해야 함', async () => {

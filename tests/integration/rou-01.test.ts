@@ -29,6 +29,7 @@ const createMockSupabase = () => {
     eq: vi.fn().mockReturnThis(),
     single: vi.fn(),
     maybeSingle: vi.fn(),
+    range: vi.fn().mockReturnThis(),
   };
   mock.from.mockReturnValue(mock);
   mock.select.mockReturnValue(mock);
@@ -36,6 +37,7 @@ const createMockSupabase = () => {
   mock.insert.mockReturnValue(mock);
   mock.eq.mockReturnValue(mock);
   mock.maybeSingle.mockReturnValue(mock);
+  mock.range.mockReturnValue(mock);
   return mock;
 };
 
@@ -206,7 +208,7 @@ describe('TC-R.6: getRouteVisualization — 마일스톤 및 시각화 데이터
     activeMockSupabase.eq.mockReturnThis();
     activeMockSupabase.from.mockImplementation((table: string) => {
       if (table === 'zen_order_routes') return activeMockSupabase;
-      if (table === 'zen_tracking_events') return { select: vi.fn().mockReturnThis(), eq: vi.fn().mockResolvedValue({ data: [], error: null }) };
+      if (table === 'zen_tracking_events') return { select: vi.fn().mockReturnThis(), eq: vi.fn().mockReturnThis(), limit: vi.fn().mockResolvedValue({ data: [], error: null }) };
       return activeMockSupabase;
     });
 
@@ -232,7 +234,7 @@ describe('TC-R.6: getRouteVisualization — 마일스톤 및 시각화 데이터
     activeMockSupabase.maybeSingle.mockResolvedValue({ data: mockRoute, error: null });
     activeMockSupabase.from.mockImplementation((table: string) => {
       if (table === 'zen_order_routes') return activeMockSupabase;
-      if (table === 'zen_tracking_events') return { select: vi.fn().mockReturnThis(), eq: vi.fn().mockResolvedValue({ data: mockEvents, error: null }) };
+      if (table === 'zen_tracking_events') return { select: vi.fn().mockReturnThis(), eq: vi.fn().mockReturnThis(), limit: vi.fn().mockResolvedValue({ data: mockEvents, error: null }) };
       return activeMockSupabase;
     });
 

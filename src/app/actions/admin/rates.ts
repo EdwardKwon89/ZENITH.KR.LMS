@@ -129,9 +129,16 @@ export async function getRateCards(filters: {
   mode?: string;
   service_type?: string;
   status?: string;
+  page?: number;
+  pageSize?: number;
 } = {}) {
   const { supabase, profile } = await validateUserAction();
   
+  const page = filters.page ?? 1;
+  const pageSize = filters.pageSize ?? 50;
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
+
   let query = supabase
     .from("zen_rate_cards")
     .select(`
@@ -142,7 +149,7 @@ export async function getRateCards(filters: {
       carrier:zen_organizations!org_id(name, iata_code),
       tiers:zen_rate_tiers(*),
       surcharges:zen_rate_surcharges(*)
-    `);
+    `, { count: "exact" });
 
   // 권한별 필터링: CARRIER는 자사 요율만 조회
   if (profile?.role === USER_ROLES.CARRIER) {
@@ -160,11 +167,13 @@ export async function getRateCards(filters: {
   if (filters.status && filters.status !== 'ALL') query = query.eq("status", filters.status);
 
   // 최신순 및 버전순 정렬
-  const { data, error } = await query.order("created_at", { ascending: false });
+  const { data, error, count } = await query
+    .order("created_at", { ascending: false })
+    .range(from, to);
 
   if (error) {
     logger.error("[ERROR] getRateCards failed:", error);
     throw new Error(`Rates query failed: ${error.message}`);
   }
-  return data || [];
+  return { rateCards: data || [], total: count || 0 };
 }

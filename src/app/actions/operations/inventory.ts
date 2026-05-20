@@ -60,20 +60,24 @@ export async function getInventoryList(payload: InventoryFilterInput) {
 /**
  * 특정 재고 품목의 상세 변동 이력(원장)을 조회합니다.
  */
-export async function getInventoryHistory(inventoryId: string) {
+export async function getInventoryHistory(inventoryId: string, page = 1, pageSize = 50) {
   const { supabase } = await validateUserAction();
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
 
-  const { data, error } = await supabase
+  const { data, error, count } = await supabase
     .from("zen_inventory_history")
-    .select('id, inventory_id, org_id, transaction_type, change_qty, result_qty, reference_id, remarks, created_by, created_at')
+    .select('id, inventory_id, org_id, transaction_type, change_qty, result_qty, reference_id, remarks, created_by, created_at', { count: "exact" })
     .eq("inventory_id", inventoryId)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .range(from, to);
 
   if (error) throw new Error(`Failed to fetch inventory history: ${error.message}`);
 
   return {
     success: true,
-    data: data || []
+    data: data || [],
+    total: count || 0
   };
 }
 

@@ -312,14 +312,20 @@ export async function upsertFaq(payload: {
  */
 export async function getFaqList({
   category,
-  keyword
+  keyword,
+  page = 1,
+  pageSize = 50,
 }: {
   category?: FaqCategory;
   keyword?: string;
+  page?: number;
+  pageSize?: number;
 } = {}) {
   const { supabase, profile } = await validateUserAction();
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
   
-  let query = supabase.from("zen_faq").select("id, answer, category, created_at, created_by, is_active, order_no, question, updated_at");
+  let query = supabase.from("zen_faq").select("id, answer, category, created_at, created_by, is_active, order_no, question, updated_at", { count: "exact" });
 
   if (profile?.role !== USER_ROLES.ADMIN && profile?.role !== USER_ROLES.ZENITH_SUPER_ADMIN) {
     query = query.eq("is_active", true);
@@ -330,10 +336,10 @@ export async function getFaqList({
     query = query.or(`question.ilike.%${keyword}%,answer.ilike.%${keyword}%`);
   }
 
-  const { data, error } = await query.order("order_no", { ascending: true });
+  const { data, error, count } = await query.order("order_no", { ascending: true }).range(from, to);
   if (error) throw new Error(error.message);
 
-  return { faqs: data as FaqItem[] };
+  return { faqs: data as FaqItem[], total: count || 0 };
 }
 
 /**
@@ -453,8 +459,10 @@ export async function getNoticeList({
  * 15.11 getOrderQnaList
  * 특정 오더에 연결된 QnA 목록 조회 (오더 상세 탭에서 사용)
  */
-export async function getOrderQnaList(orderId: string): Promise<QnaItem[]> {
+export async function getOrderQnaList(orderId: string, page = 1, pageSize = 50): Promise<{ qnas: QnaItem[]; total: number }> {
   const { supabase, profile } = await validateUserAction();
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
 
   let query = supabase
     .from("zen_qna")
@@ -462,7 +470,7 @@ export async function getOrderQnaList(orderId: string): Promise<QnaItem[]> {
       id, title, content, order_id, org_id, status, created_at, updated_at, created_by,
       order:zen_orders(order_no),
       answer_count:zen_qna_answers(count)
-    `);
+    `, { count: "exact" });
 
   // 1. 오더 소유권/권한 검증
   // Admin이 아닌 경우 자신의 조직 데이터만 조회 (RLS가 처리하지만 가드 차원에서 명시적 eq 추가)
@@ -471,15 +479,18 @@ export async function getOrderQnaList(orderId: string): Promise<QnaItem[]> {
   }
 
   // 2. 오더 ID 필터링
-  const { data, error } = await query
+  const { data, error, count } = await query
     .eq("order_id", orderId)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .range(from, to);
 
   if (error) throw new Error(`Failed to fetch order QnA: ${error.message}`);
 
-  return data.map((item: any) => ({
+  const qnas = data.map((item: any) => ({
     ...item,
     order_no: item.order?.order_no,
     answer_count: item.answer_count?.[0]?.count || 0
   })) as QnaItem[];
+
+  return { qnas, total: count || 0 };
 }

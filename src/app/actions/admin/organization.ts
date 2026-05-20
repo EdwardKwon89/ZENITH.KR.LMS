@@ -60,15 +60,17 @@ export async function requestOrganizationSupplement(orgId: string, reason: strin
 /**
  * 조직 목록을 조회합니다 (가입 대기 중인 조직 우선).
  */
-export async function getOrganizations(status?: string | string[]) {
+export async function getOrganizations(status?: string | string[], page = 1, pageSize = 50) {
   const { supabase } = await validateAdminAction();
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
 
   let query = supabase
     .from("zen_organizations")
     .select(`
       *,
       zen_organization_documents(*)
-    `);
+    `, { count: "exact" });
   
   if (status) {
     if (Array.isArray(status)) {
@@ -78,9 +80,11 @@ export async function getOrganizations(status?: string | string[]) {
     }
   }
 
-  const { data, error } = await query.order("created_at", { ascending: false });
+  const { data, error, count } = await query
+    .order("created_at", { ascending: false })
+    .range(from, to);
   if (error) throw new Error(`Failed to fetch organizations: ${error.message}`);
 
-  return data || [];
+  return { organizations: data || [], total: count || 0 };
 }
 

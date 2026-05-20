@@ -12,12 +12,19 @@ import { canChangeStatus, isMasteredStatus } from "@/lib/logistics/status-machin
 export async function getClaims({
   status,
   org_id,
+  page = 1,
+  pageSize = 50,
 }: {
   status?: string;
   org_id?: string;
+  page?: number;
+  pageSize?: number;
 } = {}) {
   const { supabase, profile } = await validateUserAction();
   if (!profile) throw new Error("User profile not found");
+
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
 
   let query = supabase
     .from("zen_claims")
@@ -31,7 +38,7 @@ export async function getClaims({
         packages:zen_order_packages(*, items:zen_order_items(*))
       ),
       shipper:zen_organizations(name, metadata)
-    `)
+    `, { count: "exact" })
     .order("created_at", { ascending: false });
 
   // 권한 필터링: 화주는 본인 조직만, 어드민은 전체
@@ -43,10 +50,10 @@ export async function getClaims({
 
   if (status) query = query.eq("status", status);
 
-  const { data, error } = await query;
+  const { data, error, count } = await query.range(from, to);
   if (error) throw new Error(error.message);
 
-  return data || [];
+  return { claims: data || [], total: count || 0 };
 }
 
 /**

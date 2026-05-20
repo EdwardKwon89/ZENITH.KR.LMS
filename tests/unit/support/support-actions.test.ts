@@ -144,13 +144,15 @@ describe('Support Action Unit Tests', () => {
 
   describe('FAQ Actions', () => {
     it('should fetch FAQ list and support keyword filtering', async () => {
-      mockSupabase.order.mockResolvedValueOnce({
+      mockSupabase.range.mockResolvedValueOnce({
         data: [{ id: 'faq-1', question: 'How to use?', answer: 'Like this' }],
-        error: null
+        error: null,
+        count: 1
       });
 
       const result = await getFaqList({ keyword: 'test' });
       expect(result.faqs).toHaveLength(1);
+      expect(result.total).toBe(1);
       // Verify keyword filter (or query)
       expect(mockSupabase.or).toHaveBeenCalledWith("question.ilike.%test%,answer.ilike.%test%");
     });

@@ -49,14 +49,14 @@ export async function getRouteOptions(orderId: string) {
 
   revalidatePath(`/(dashboard)/orders/${orderId}`, "page");
 
-  const { data: savedOptions } = await supabase
+  const { data: savedOptions, count } = await supabase
     .from("zen_route_options")
-    .select("id, order_id, option_type, segments, total_cost, total_transit_days, score, created_at")
+    .select("id, order_id, option_type, segments, total_cost, total_transit_days, score, created_at", { count: "exact" })
     .eq("order_id", orderId);
 
   const optionsMap: Record<string, any> = {};
   (savedOptions || []).forEach((opt: any) => { optionsMap[opt.option_type] = opt; });
-  return { success: true, options: optionsMap };
+  return { success: true, options: optionsMap, total: count || 0 };
 }
 
 /**
@@ -119,11 +119,12 @@ export async function getRouteVisualization(orderId: string) {
     'Incheon Hub': { lat: 37.4602, lng: 126.4407 },
   };
 
-  // 2. 트래킹 이벤트 조회 (실적 확인용)
+  // 2. 트래킹 이벤트 조회 (실적 확인용 — 페이지네이션 적용 IMP-045)
   const { data: events } = await supabase
     .from("zen_tracking_events")
     .select("location_name, event_type")
-    .eq("order_id", orderId);
+    .eq("order_id", orderId)
+    .limit(500);
 
   const eventLocations = new Set((events || []).map(e => e.location_name));
 

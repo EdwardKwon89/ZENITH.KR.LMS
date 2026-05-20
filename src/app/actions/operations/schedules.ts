@@ -13,8 +13,15 @@ export async function getVesselSchedules(filters: {
   destinationPortId?: string;
   startDate?: string;
   endDate?: string;
+  page?: number;
+  pageSize?: number;
 }) {
   const supabase = await createClient();
+  const page = filters.page ?? 1;
+  const pageSize = filters.pageSize ?? 50;
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
+
   let query = supabase
     .from('zen_vessel_schedules')
     .select(`
@@ -28,16 +35,18 @@ export async function getVesselSchedules(filters: {
       status,
       origin_port:origin_port_id(name, code),
       destination_port:destination_port_id(name, code)
-    `);
+    `, { count: "exact" });
 
   if (filters.originPortId) query = query.eq('origin_port_id', filters.originPortId);
   if (filters.destinationPortId) query = query.eq('destination_port_id', filters.destinationPortId);
   if (filters.startDate) query = query.gte('etd', filters.startDate);
   if (filters.endDate) query = query.lte('eta', filters.endDate);
 
-  const { data, error } = await query.order('etd', { ascending: true });
+  const { data, error, count } = await query
+    .order('etd', { ascending: true })
+    .range(from, to);
   if (error) throw new Error(`스케줄 조회 실패: ${error.message}`);
-  return data;
+  return { schedules: data, total: count || 0 };
 }
 
 /**
