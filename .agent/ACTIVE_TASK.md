@@ -90,7 +90,7 @@
 | TASK-033 | 260520 | 감사 추적 도입 (마스터/인보이스/통관) | P3 | TASK-032 | Ring | ⬜ | [TASK-033](tasks/TASK-033_260520_감사추적도입_Ring.md) | IMP-051 · 설계 의견 필수 · 신규 DB 테이블 |
 | TASK-034 | 260520 | Error Boundary 4개 추가 | P3 | 없음 | B_Kai | ✅ | [TASK-034](tasks/TASK-034_260520_ErrorBoundary추가_BKai.md) | IMP-017 완료 · 커밋 1a6e245+cdf4963 · 209/209 |
 | TASK-035 | 260520 | 정산 엔진 SRP 분할 | P3 | TASK-027 권장 | Riley | ⬜ | [TASK-035](tasks/TASK-035_260520_정산엔진SRP_Riley.md) | IMP-030 · 설계 의견 권장 |
-| TASK-036 | 260520 | ZenUI.tsx 7개 컴포넌트 분할 | P3 | 없음 | B_Kai | ❌ | [TASK-036](tasks/TASK-036_260520_ZenUI분할_BKai.md) | IMP-063 · 코드 커밋 해시 오기재(d099a04) · 문서 커밋 해시 미기재 · 재보고 필요 |
+| TASK-036 | 260520 | ZenUI.tsx 7개 컴포넌트 분할 | P3 | 없음 | B_Kai | 🔔 | [TASK-036](tasks/TASK-036_260520_ZenUI분할_BKai.md) | IMP-063 · 코드 d099a04 · 문서 0dea972 · 209/209 · 3차 재보고 |
 | TASK-037 | 260520 | NaviSidebar Client Bundle 최적화 | P3 | TASK-031 권장 | D_Kai | ⬜ | [TASK-037](tasks/TASK-037_260520_NaviSidebar최적화_DKai.md) | IMP-022 · **설계 의견 권장** · TASK-031 완료 후 순차 |
 
 ---
@@ -100,7 +100,7 @@
 | Agent | 즉시 착수 가능 | 재작업 필요 | 블로커 대기 |
 |:------|:-------------|:-----------|:----------|
 | Riley | **TASK-027 🔄** (P2, 설계 확정 · 즉시 착수) | TASK-028 ❌ (문서 커밋 재수행) | TASK-035 (TASK-027 완료 후 권장) |
-| B_Kai | — | TASK-029 ❌ (Finance·Admin 마이그레이션 미완료) · TASK-036 ❌ (3차 재작업) | — |
+| B_Kai | — | TASK-029 ❌ (Finance·Admin 마이그레이션 미완료) · TASK-036 🔔 (3차 재보고) | — |
 | D_Kai | **TASK-029 협업** (복잡 쿼리 시그니처 설계) · TASK-030 🔔 (재검토 대기) | TASK-031 (TASK-030 🔔 승인 후) · TASK-037 (TASK-031 완료 후) |
 | Ring | TASK-032 (P2, 최우선) | — | TASK-033 (TASK-032 완료 후 + 설계 의견 선행) |
 
