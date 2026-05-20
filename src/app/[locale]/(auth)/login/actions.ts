@@ -114,28 +114,25 @@ export async function signup(formData: FormData, locale: string = 'ko') {
 
     const fileExt = docFile.name.split('.').pop();
     const filePath = `${profile.org_id}/${Date.now()}_${docFile.name}`;
-      const fileExt = docFile.name.split('.').pop();
-      const filePath = `${profile.org_id}/${Date.now()}_${docFile.name}`;
-      
-      const { error: uploadError } = await adminClient.storage
-        .from('business_docs')
-        .upload(filePath, docFile, {
-          contentType: docFile.type,
-          upsert: false
+
+    const { error: uploadError } = await adminClient.storage
+      .from('business_docs')
+      .upload(filePath, docFile, {
+        contentType: docFile.type,
+        upsert: false
+      });
+
+    if (!uploadError) {
+      await adminClient
+        .from('zen_organization_documents')
+        .insert({
+          org_id: profile.org_id,
+          doc_type: 'BIZ_REG',
+          file_path: filePath,
+          status: 'PENDING'
         });
-      
-      if (!uploadError) {
-        await adminClient
-          .from('zen_organization_documents')
-          .insert({
-            org_id: profile.org_id,
-            doc_type: 'BIZ_REG',
-            file_path: filePath,
-            status: 'PENDING'
-          });
-      } else {
-        logger.error('Upload Error:', uploadError);
-      }
+    } else {
+      logger.error('Upload Error:', uploadError);
     }
   }
 
