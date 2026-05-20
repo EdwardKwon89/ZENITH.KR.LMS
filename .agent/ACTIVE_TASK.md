@@ -57,7 +57,7 @@
 |:-------:|:------:|:--------|:--------:|:--------:|:---------:|:----:|:--------|:-----|
 | TASK-001 | 260516 | createOrder() 트랜잭션 도입 | P2 | 없음 | Riley | ✅ | [TASK-001](tasks/TASK-001_260516_createOrder트랜잭션도입_Riley.md) | IMP-019 · IMP-047/052/053 블로커 해제 |
 | TASK-002 | 260516 | N+1 쿼리 7곳 수정 | P2 | 없음 | B_Kai | ✅ | [TASK-002](tasks/TASK-002_260516_N+1쿼리7곳수정_BKai.md) | IMP-054 완료 |
-| TASK-003 | 260516 | 정산 이중 실행 방지 | P2 | TASK-001 | Riley | ❌ | [TASK-003](tasks/TASK-003_260516_정산이중실행방지_Riley.md) | IMP-039 · 커밋 해시 조작·DoD 미체크·회귀 파일 미저장 재작업 요구 |
+| TASK-003 | 260516 | 정산 이중 실행 방지 | P2 | TASK-001 | Riley | 🔔 | [TASK-003](tasks/TASK-003_260516_정산이중실행방지_Riley.md) | IMP-039 · 커밋 해시 조작·DoD 미체크·회귀 파일 미저장 재작업 요구 |
 | TASK-004 | 260516 | WAREHOUSED→CANCELED 재고 복구 | P2 | TASK-001 | Riley | ⬜ | [TASK-004](tasks/TASK-004_260516_WAREHOUSED재고복구_Riley.md) | IMP-040 · TASK-001 ✅ → 블로커 해제 |
 | TASK-005 | 260516 | Phase F 사전 GitNexus 분析 | P3 | 없음 | D_Kai | ✅ | [TASK-005](tasks/TASK-005_260516_PhaseF사전GitNexus분析_DKai.md) | ANA-IMP-DK-F 완료 · 커밋 385122c |
 | TASK-006 | 260516 | Supabase 클라이언트 중복 제거 | P3 | 없음 | D_Kai | ✅ | [TASK-006](tasks/TASK-006_260516_Supabase클라이언트중복제거_DKai.md) | IMP-059 완료 · 커밋 385122c |
@@ -82,7 +82,7 @@
 
 | Agent | 즉시 착수 가능 | 블로커 대기 |
 |:------|:-------------|:----------|
-| Riley | TASK-004 · TASK-015 · TASK-016 | TASK-003❌ 재작업 대기 |
+| Riley | TASK-004 · TASK-015 · TASK-016 | TASK-003🔔 재검토 대기 |
 | B_Kai | TASK-018 | TASK-017🔔 재검토 대기 · TASK-019 (017+018 완료 후) · TASK-020🔄 구현 중 |
 | D_Kai | — | TASK-005✅·TASK-006✅·TASK-007✅·TASK-008✅ 전량 완료 |
 | Ring | TASK-013 · TASK-014 | TASK-009✅·TASK-010❌·TASK-011❌·TASK-012❌ 재작업 대기 |
