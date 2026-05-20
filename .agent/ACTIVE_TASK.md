@@ -90,7 +90,7 @@
 | TASK-033 | 260520 | 감사 추적 도입 (마스터/인보이스/통관) | P3 | TASK-032 | Ring | ⬜ | [TASK-033](tasks/TASK-033_260520_감사추적도입_Ring.md) | IMP-051 · 설계 의견 필수 · 신규 DB 테이블 |
 | TASK-034 | 260520 | Error Boundary 4개 추가 | P3 | 없음 | B_Kai | ✅ | [TASK-034](tasks/TASK-034_260520_ErrorBoundary추가_BKai.md) | IMP-017 완료 · 커밋 1a6e245+cdf4963 · 209/209 |
 | TASK-035 | 260520 | 정산 엔진 SRP 분할 | P3 | TASK-027 권장 | Riley | ⬜ | [TASK-035](tasks/TASK-035_260520_정산엔진SRP_Riley.md) | IMP-030 · 설계 의견 권장 |
-| TASK-036 | 260520 | ZenUI.tsx 7개 컴포넌트 분할 | P3 | 없음 | B_Kai | 🔔 | [TASK-036](tasks/TASK-036_260520_ZenUI분할_BKai.md) | IMP-063 · 코드 d099a04 · 문서 0dea972 · 209/209 · 3차 재보고 |
+| TASK-036 | 260520 | ZenUI.tsx 7개 컴포넌트 분할 | P3 | 없음 | B_Kai | ✅ | [TASK-036](tasks/TASK-036_260520_ZenUI분할_BKai.md) | IMP-063 완료 · 코드 d099a04 · 재보고 b544aaf · 209/209 |
 | TASK-037 | 260520 | NaviSidebar Client Bundle 최적화 | P3 | TASK-031 권장 | D_Kai | ⬜ | [TASK-037](tasks/TASK-037_260520_NaviSidebar최적화_DKai.md) | IMP-022 · **설계 의견 권장** · TASK-031 완료 후 순차 |
 
 ---
@@ -148,3 +148,4 @@
 | 2026-05-20 | Aiden (Claude) | Phase G 1차 검토 완료 — TASK-027/029 설계 확정(🔄 착수 승인). TASK-034 ✅ PASS. TASK-028/030/036 ❌ 반려(재작업). AGENTS.md·CLAUDE.md B_Kai 무단 추가 GitNexus 섹션 revert |
 | 2026-05-20 | Aiden (Claude) | TASK-030 ✅ PASS — D_Kai 재작업 확인(코드 c5e03bd·문서 a5669ab 분리). IMP-020 완료. TASK-036 ❌ 2차 반려 — 해시 수정됐으나 상태·ACTIVE_TASK·IMP_PROGRESS 미반영 |
 | 2026-05-20 | Aiden (Claude) | TASK-029 ❌ 반려 — Finance(settlement 5곳·invoice 2곳)·Admin(auth 1곳) 마이그레이션 미완료. b69c952 해시 미기재. detect_changes 누락 |
+| 2026-05-20 | Aiden (Claude) | TASK-036 ✅ PASS — B_Kai 3차 재작업 전량 확인. 코드 d099a04·재보고 b544aaf. IMP-063 완료 |

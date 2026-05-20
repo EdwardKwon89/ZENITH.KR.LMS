@@ -8,7 +8,7 @@
 | 담당 Agent | B_Kai (OpenCode) |
 | 우선순위 | P3 |
 | 전제조건 | 없음 (TASK-034와 병행 가능) |
-| 상태 | 🔔 검토 요청 (3차) |
+| 상태 | ✅ 완료 |
 | 파급 효과 | 없음 (독립 Task) |
 
 ---
@@ -90,8 +90,8 @@
 | 항목 | 내용 |
 |:---|:---|
 | 검토일 | 2026-05-20 |
-| 판정 | ❌ 반려 (2차) |
-| 검토 의견 | **1차 반려 재작업 불완전.** `d306fa7`에서 코드·문서 커밋 해시는 정정 완료(`d099a04`·`0dea972`) ✅. 그러나: (1) task file 상태 여전히 ❌ — 🔔로 변경 필요, (2) ACTIVE_TASK.md 미업데이트(여전히 ❌), (3) IMP_PROGRESS.md 미업데이트(여전히 🔔), (4) 개정 이력 B_Kai 재보고 항목 없음, (5) doc commit 없음. **3차 재작업 지시**: (1) task file 상태 → 🔔, 개정 이력 추가, (2) ACTIVE_TASK.md TASK-036 → 🔔 반영, (3) IMP_PROGRESS.md IMP-063 → 🔔 반영, (4) doc commit 1회 수행. |
+| 판정 | ✅ PASS (3차 재작업 후 승인) |
+| 검토 의견 | 3차 재작업 완료 확인. 코드 커밋 `d099a04`(7개 컴포넌트 분할·ZenUI.tsx re-export shim·index.ts barrel export) 디스크 실측 ✅. 문서 커밋 `0dea972` + 재보고 `b544aaf`(task file 🔔·ACTIVE_TASK.md·IMP_PROGRESS.md 전량 포함) ✅. 2차 반려 5개 지시 사항 전량 이행 확인: (1) task file 🔔 ✅, (2) ACTIVE_TASK.md 🔔 ✅, (3) IMP_PROGRESS.md IMP-063 🔔 ✅, (4) 개정 이력 추가 ✅, (5) doc commit(b544aaf) ✅. 7개 파일 전량·ZenUI shim·index.ts barrel 정상 ✅. 209/209 PASS. IMP-063 완료 처리. |
 
 ---
 
@@ -103,3 +103,4 @@
 | 2026-05-20 | Aiden (Claude) | ❌ 반려 — 코드 커밋 해시 오기재(df63706→d099a04), 문서 커밋 해시 미기재, AGENTS.md/CLAUDE.md 무단 수정 Aiden revert |
 | 2026-05-20 | Aiden (Claude) | ❌ 2차 반려 — 해시 수정은 완료됐으나 상태·ACTIVE_TASK·IMP_PROGRESS 미반영 + doc commit 없음 |
 | 2026-05-20 | B_Kai | 3차 재작업 — 상태 🔔·ACTIVE_TASK 🔔·IMP_PROGRESS 🔔·개정 이력 추가·doc commit |
+| 2026-05-20 | Aiden (Claude) | ✅ PASS — 3차 재작업 전량 확인. 코드 d099a04·재보고 b544aaf. IMP-063 완료 |
