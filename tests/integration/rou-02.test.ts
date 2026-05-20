@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { validateUserAction } from '@/lib/auth/guards';
-import { getRouteVisualization, getRouteConsistencyStatus } from '@/app/actions/routing';
+import { getRouteVisualization, getRouteConsistencyStatus } from '@/app/actions/operations/routing';
 
 vi.mock('@/lib/auth/guards', () => ({
   validateUserAction: vi.fn(),
@@ -18,10 +18,14 @@ const createMockSupabase = () => {
     select: vi.fn().mockReturnThis(),
     eq: vi.fn().mockReturnThis(),
     maybeSingle: vi.fn(),
+    range: vi.fn().mockReturnThis(),
+    limit: vi.fn().mockReturnThis(),
   };
   mock.from.mockReturnValue(mock);
   mock.select.mockReturnValue(mock);
   mock.eq.mockReturnValue(mock);
+  mock.range.mockReturnValue(mock);
+  mock.limit.mockReturnValue(mock);
   return mock;
 };
 

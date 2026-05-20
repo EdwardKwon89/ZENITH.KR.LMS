@@ -25,6 +25,7 @@ describe('Rates Actions Unit Tests', () => {
     in: vi.fn().mockReturnThis(),
     order: vi.fn().mockReturnThis(),
     single: vi.fn().mockReturnThis(),
+    range: vi.fn().mockReturnThis(),
     then: vi.fn(),
   };
 
@@ -50,7 +51,7 @@ describe('Rates Actions Unit Tests', () => {
       supabase: mockSupabase 
     });
 
-    mockSupabase.then.mockImplementation((cb) => cb({ data: [], error: null }));
+    mockSupabase.range.mockResolvedValueOnce({ data: [], error: null, count: 0 });
 
     await getRateCards();
 

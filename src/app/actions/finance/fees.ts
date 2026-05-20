@@ -4,20 +4,24 @@ import { revalidatePath } from 'next/cache';
 import { validateAdminAction } from '@/lib/auth/guards';
 import { upsertTransportCostSchema, validatePayload } from '@/lib/validation/schemas';
 
-export async function getTransportCosts() {
+export async function getTransportCosts(page = 1, pageSize = 50) {
   const { supabase } = await validateAdminAction();
-  const { data, error } = await supabase
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
+
+  const { data, error, count } = await supabase
     .from('zen_transport_costs')
     .select(`
       *,
       carrier:carrier_id(name),
       origin_port:origin_port_id(name, code),
       destination_port:destination_port_id(name, code)
-    `)
-    .order('created_at', { ascending: false });
+    `, { count: "exact" })
+    .order('created_at', { ascending: false })
+    .range(from, to);
 
   if (error) throw new Error(`운송원가 조회 실패: ${error.message}`);
-  return data;
+  return { costs: data, total: count || 0 };
 }
 
 export async function upsertTransportCost(payload: unknown) {

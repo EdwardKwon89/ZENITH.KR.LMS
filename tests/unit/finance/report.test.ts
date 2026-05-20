@@ -38,6 +38,7 @@ describe('Finance & Schedules Report Actions', () => {
       order: vi.fn().mockReturnThis(),
       upsert: vi.fn().mockReturnThis(),
       limit: vi.fn().mockReturnThis(),
+      range: vi.fn().mockReturnThis(),
       single: vi.fn().mockReturnThis(),
       mockResolvedValue: vi.fn().mockReturnThis(),
     };
@@ -113,12 +114,13 @@ describe('Finance & Schedules Report Actions', () => {
     const filters = { originPortId: 'port-789' };
     const mockSchedules = [{ id: 's1', origin_port_id: 'port-789', etd: '2026-05-01T10:00:00Z' }];
 
-    mockSupabase.order.mockResolvedValueOnce({ data: mockSchedules, error: null });
+    mockSupabase.range.mockResolvedValueOnce({ data: mockSchedules, error: null, count: 1 });
 
     const result = await getVesselSchedules(filters);
 
     expect(mockSupabase.from).toHaveBeenCalledWith('zen_vessel_schedules');
     expect(mockSupabase.eq).toHaveBeenCalledWith('origin_port_id', 'port-789');
-    expect(result.length).toBe(1);
+    expect(result.schedules.length).toBe(1);
+    expect(result.total).toBe(1);
   });
 });

@@ -79,25 +79,28 @@ export const updateOrganizationInfo = withAction(async function (payload: {
 /**
  * 3. 부서 목록 조회
  */
-export async function getDepartments() {
+export async function getDepartments(page = 1, pageSize = 50) {
   const { profile, supabase } = await validateUserAction();
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
 
   if (!profile?.org_id) {
-    return [];
+    return { departments: [], total: 0 };
   }
 
-  const { data, error } = await supabase
+  const { data, error, count } = await supabase
     .from("zen_departments")
-    .select('id, name, created_at')
+    .select('id, name, created_at', { count: "exact" })
     .eq("org_id", profile.org_id)
-    .order("created_at", { ascending: true });
+    .order("created_at", { ascending: true })
+    .range(from, to);
 
   if (error) {
     logger.error("Error fetching departments:", error);
     throw new Error("부서 목록을 불러오는 데 실패했습니다.");
   }
 
-  return data || [];
+  return { departments: data || [], total: count || 0 };
 }
 
 /**

@@ -21,6 +21,7 @@ describe('Order-linked QnA Unit Tests', () => {
       select: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
       order: vi.fn().mockReturnThis(),
+      range: vi.fn().mockReturnThis(),
     };
 
     mockUser = { id: 'test-user-id' };
@@ -34,7 +35,7 @@ describe('Order-linked QnA Unit Tests', () => {
   });
 
   it('TC-ORD-QNA-01: should filter QnA by specific orderId', async () => {
-    mockSupabase.order.mockResolvedValueOnce({
+    mockSupabase.range.mockResolvedValueOnce({
       data: [
         { 
           id: 'qna-1', 
@@ -43,22 +44,24 @@ describe('Order-linked QnA Unit Tests', () => {
           answer_count: [{ count: 1 }] 
         }
       ],
-      error: null
+      error: null,
+      count: 1
     });
 
     const result = await getOrderQnaList('order-123');
     
     expect(mockSupabase.from).toHaveBeenCalledWith('zen_qna');
     expect(mockSupabase.eq).toHaveBeenCalledWith('order_id', 'order-123');
-    expect(result).toHaveLength(1);
-    expect(result[0].order_no).toBe('ORD-123');
-    expect(result[0].answer_count).toBe(1);
+    expect(result.qnas).toHaveLength(1);
+    expect(result.qnas[0].order_no).toBe('ORD-123');
+    expect(result.qnas[0].answer_count).toBe(1);
   });
 
   it('TC-ORD-QNA-02: should filter by org_id for non-admin users', async () => {
-    mockSupabase.order.mockResolvedValueOnce({
+    mockSupabase.range.mockResolvedValueOnce({
       data: [],
-      error: null
+      error: null,
+      count: 0
     });
 
     await getOrderQnaList('order-123');
@@ -75,9 +78,10 @@ describe('Order-linked QnA Unit Tests', () => {
       profile: adminProfile,
     });
 
-    mockSupabase.order.mockResolvedValueOnce({
+    mockSupabase.range.mockResolvedValueOnce({
       data: [],
-      error: null
+      error: null,
+      count: 0
     });
 
     await getOrderQnaList('order-123');

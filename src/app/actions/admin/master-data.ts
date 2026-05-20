@@ -34,62 +34,76 @@ export async function upsertPort(payload: PortInput) {
 /**
  * 항구 목록을 조회합니다.
  */
-export async function getPorts(activeOnly = true) {
+export async function getPorts(activeOnly = true, page = 1, pageSize = 50) {
   const { supabase } = await validateAdminAction();
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
   
-  let query = supabase.from("zen_ports").select("id, code, name, type, country_code, city, is_active, created_at, updated_at");
+  let query = supabase.from("zen_ports").select("id, code, name, type, country_code, city, is_active, created_at, updated_at", { count: "exact" });
   if (activeOnly) query = query.eq("is_active", true);
 
-  const { data, error } = await query.order("code", { ascending: true });
+  const { data, error, count } = await query.order("code", { ascending: true }).range(from, to);
   if (error) throw new Error(`Failed to fetch ports: ${error.message}`);
 
-  return data || [];
+  return { ports: data || [], total: count || 0 };
 }
 
 /**
  * [Ds-11 7.2] 국가 목록을 조회합니다.
  */
-export async function getNations() {
+export async function getNations(page = 1, pageSize = 50) {
   const { supabase } = await validateUserAction();
-  const { data, error } = await supabase
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
+
+  const { data, error, count } = await supabase
     .from("zen_nations")
-    .select("iso_alpha2, iso_alpha3, nation_name_ko, nation_name_en, nation_name_zh, nation_name_ja, phone_code, is_active, created_at, updated_at")
-    .order("name", { ascending: true });
+    .select("iso_alpha2, iso_alpha3, nation_name_ko, nation_name_en, nation_name_zh, nation_name_ja, phone_code, is_active, created_at, updated_at", { count: "exact" })
+    .order("name", { ascending: true })
+    .range(from, to);
 
   if (error) throw new Error(`Failed to fetch nations: ${error.message}`);
-  return data || [];
+  return { nations: data || [], total: count || 0 };
 }
 
 /**
  * [Ds-11 7.3] 등록된 모든 조직(화주/파트너 등) 목록을 조회합니다.
  */
-export async function getOrganizations() {
+export async function getOrganizations(page = 1, pageSize = 50) {
   const { supabase } = await validateUserAction();
-  const { data, error } = await supabase
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
+
+  const { data, error, count } = await supabase
     .from("zen_organizations")
-    .select("id, name, type, status, biz_no, corporate_id, iata_code, prefix_code, rep_name, parent_id, metadata, approval_comment, approval_date, created_at")
+    .select("id, name, type, status, biz_no, corporate_id, iata_code, prefix_code, rep_name, parent_id, metadata, approval_comment, approval_date, created_at", { count: "exact" })
     .eq("status", "ACTIVE")
-    .order("name", { ascending: true });
+    .order("name", { ascending: true })
+    .range(from, to);
 
   if (error) throw new Error(`Failed to fetch organizations: ${error.message}`);
-  return data || [];
+  return { organizations: data || [], total: count || 0 };
 }
 
 /**
  * [Ds-11 7.3] 항공사(IATA 코드가 있는 CARRIER) 목록을 조회합니다.
  */
-export async function getAirlines() {
+export async function getAirlines(page = 1, pageSize = 50) {
   const { supabase } = await validateUserAction();
-  const { data, error } = await supabase
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
+
+  const { data, error, count } = await supabase
     .from("zen_organizations")
-    .select("id, name, type, status, biz_no, corporate_id, iata_code, prefix_code, rep_name, parent_id, metadata, approval_comment, approval_date, created_at")
+    .select("id, name, type, status, biz_no, corporate_id, iata_code, prefix_code, rep_name, parent_id, metadata, approval_comment, approval_date, created_at", { count: "exact" })
     .eq("org_type", "CARRIER")
     .not("iata_code", "is", null)
     .eq("status", "ACTIVE")
-    .order("name", { ascending: true });
+    .order("name", { ascending: true })
+    .range(from, to);
 
   if (error) throw new Error(`Failed to fetch airlines: ${error.message}`);
-  return data || [];
+  return { airlines: data || [], total: count || 0 };
 }
 
 /**
@@ -117,20 +131,22 @@ export async function upsertCommonCode(payload: CommonCodeInput) {
 /**
  * 특정 카테고리의 공통코드를 조회합니다.
  */
-export async function getCommonCodes(category: string, activeOnly = true) {
+export async function getCommonCodes(category: string, activeOnly = true, page = 1, pageSize = 50) {
   const { supabase } = await validateAdminAction();
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
 
   let query = supabase
     .from("zen_common_codes")
-    .select("id, category, code, name_ko, name_en, sort_order, is_active, metadata, created_at, updated_at")
+    .select("id, category, code, name_ko, name_en, sort_order, is_active, metadata, created_at, updated_at", { count: "exact" })
     .eq("category", category);
     
   if (activeOnly) query = query.eq("is_active", true);
 
-  const { data, error } = await query.order("sort_order", { ascending: true });
+  const { data, error, count } = await query.order("sort_order", { ascending: true }).range(from, to);
   if (error) throw new Error(`Failed to fetch codes: ${error.message}`);
 
-  return data || [];
+  return { codes: data || [], total: count || 0 };
 }
 
 /**

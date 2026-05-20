@@ -471,44 +471,50 @@ export async function dissolveMasterOrder(masterId: string) {
 /**
  * [WBS 2.2] 마스터 오더 목록을 조회합니다.
  */
-export async function getMasterOrders() {
+export async function getMasterOrders(page = 1, pageSize = 50) {
   const { supabase } = await validateUserAction();
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
 
-  const { data, error } = await supabase
+  const { data, error, count } = await supabase
     .from("zen_master_orders")
     .select(`
       *,
       origin_port:zen_ports!origin_port_id(code, name),
       dest_port:zen_ports!dest_port_id(code, name),
       carrier:zen_organizations!carrier_id(name, iata_code)
-    `)
-    .order("created_at", { ascending: false });
+    `, { count: "exact" })
+    .order("created_at", { ascending: false })
+    .range(from, to);
 
   if (error) throw new Error(error.message);
-  return data || [];
+  return { masterOrders: data || [], total: count || 0 };
 }
 
 /**
  * [WBS 2.2] 마스터에 바인딩 가능한 하우스 오더 목록을 조회합니다.
  * (PACKED 상태이며 master_order_id가 없는 오더 대상)
  */
-export async function getPendingHouseOrders() {
+export async function getPendingHouseOrders(page = 1, pageSize = 50) {
   const { supabase } = await validateUserAction();
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
 
-  const { data, error } = await supabase
+  const { data, error, count } = await supabase
     .from("zen_orders")
     .select(`
       *,
       shipper:zen_organizations!shipper_id(name),
       origin_port:zen_ports!origin_port_id(code, name),
       dest_port:zen_ports!dest_port_id(code, name)
-    `)
+    `, { count: "exact" })
     .eq("status", OrderStatus.PACKED)
     .is("master_order_id", null)
-    .order("created_at", { ascending: true });
+    .order("created_at", { ascending: true })
+    .range(from, to);
 
   if (error) throw new Error(error.message);
-  return data || [];
+  return { orders: data || [], total: count || 0 };
 }
 
 /**
@@ -556,8 +562,10 @@ export async function updateMasterOrderStatus(
  * [WBS 2.2] 특정 마스터 오더 상세 정보와 소속된 하우스 오더 목록을 조회합니다.
  * 감사 및 출력(Label/Manifest)을 위해 사용됩니다.
  */
-export async function getMasterOrderWithHouses(masterId: string) {
+export async function getMasterOrderWithHouses(masterId: string, page = 1, pageSize = 50) {
   const { supabase } = await validateUserAction();
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
 
   // 1. 마스터 본체 조회
   const { data: master, error: masterError } = await supabase
@@ -575,21 +583,23 @@ export async function getMasterOrderWithHouses(masterId: string) {
     throw new Error(`Master order not found: ${masterError?.message}`);
   }
 
-  // 2. 소속된 하우스 오더 목록 조회
-  const { data: houses, error: housesError } = await supabase
+  // 2. 소속된 하우스 오더 목록 조회 (페이지네이션 적용 — IMP-045)
+  const { data: houses, error: housesError, count } = await supabase
     .from("zen_orders")
     .select(`
       *,
       shipper:zen_organizations!shipper_id(name),
       origin_port:zen_ports!origin_port_id(code, name),
       dest_port:zen_ports!dest_port_id(code, name)
-    `)
-    .eq("master_order_id", masterId);
+    `, { count: "exact" })
+    .eq("master_order_id", masterId)
+    .range(from, to);
 
   if (housesError) throw new Error(`Failed to fetch linked houses: ${housesError.message}`);
 
   return {
     ...master,
-    houses: houses || []
+    houses: houses || [],
+    totalHouses: count || 0
   };
 }
