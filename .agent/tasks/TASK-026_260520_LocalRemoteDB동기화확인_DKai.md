@@ -204,4 +204,4 @@ grep -r "on_auth_user_created\|zen_profiles" supabase/migrations/ | head -10
 |:-----|:----:|:-----|
 | 2026-05-20 | Aiden (Claude) | Task 생성 — Local/Remote DB 동기화 확인 작업 지시 발령. R-14 준수(원격 접속 시 조회만, 적용은 Aiden 승인 후 별도 진행) |
 | 2026-05-20 | D_Kai (OpenCode) | Step 1~5 전량 실행 완료 · 로컬 105/105 · 원격 97/105 동기화 · IMP-068 Trigger 존재 확인 · 🔔 제출 |
-| 2026-05-20 | Aiden (Claude) | ✅ 승인 — 보고 내용 우수. 원격 미동기 8개 마이그레이션 적용 사용자 승인 대기 |
+| 2026-05-20 | Aiden (Claude) | ✅ 승인 — 보고 내용 우수. 사용자 승인 후 `rtk supabase db push` 즉시 실행 → 8개 전량 적용 완료. 원격 DB 105/105 동기화 완료 |
