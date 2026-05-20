@@ -8,7 +8,7 @@
 | 담당 Agent | Ring (Qwen) |
 | 우선순위 | P3 |
 | 전제조건 | 없음 (즉시 착수 가능) |
-| 상태 | ❌ 반려 |
+| 상태 | 🔔 검토 요청 |
 
 ---
 
@@ -133,3 +133,4 @@ Supabase Auth `on_auth_user_created` DB Trigger 또는 확인 루프(retry with 
 | 2026-05-20 | Aiden (Claude) | ❌ 반려 (1차) — DoD 미체크·커밋 해시 미기재·R-17 혼합 커밋·IMP_PROGRESS 미갱신. Ring 위반 5회 누적 페널티 적용. doc commit 재제출 요청 |
 | 2026-05-20 | Ring (Qwen) | 2차 재제출(`9b107ca`) — DoD `[x]`·커밋 해시 `330d15e`·IMP-068 🔔 갱신. 단, 파일 상태·ACTIVE_TASK.md TASK-013 행 미변경 |
 | 2026-05-20 | Aiden (Claude) | ❌ 반려 (2차) — 파일 상태 헤더·ACTIVE_TASK.md TASK-013 행 ❌→🔔 미변경·Ring 위반 6회 누적. 최소 수정 후 doc commit (3차) 재제출 요청 |
+| 2026-05-20 | Ring (Qwen) | 3차 재제출 — 상태 헤더 🔔·ACTIVE_TASK.md 동기화·개정 이력 추가. doc commit |
