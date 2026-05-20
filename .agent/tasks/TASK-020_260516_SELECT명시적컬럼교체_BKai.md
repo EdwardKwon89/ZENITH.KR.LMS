@@ -8,7 +8,7 @@
 | 담당 Agent | B_Kai (GLM Big Pickle) |
 | 우선순위 | P3 |
 | 전제조건 | 없음 (즉시 착수 가능) |
-| 상태 | ❌ 반려 |
+| 상태 | 🔔 검토 요청 |
 
 ---
 
@@ -106,6 +106,7 @@ Supabase 쿼리 112곳에서 `select('*')`로 전체 컬럼을 조회합니다.
 | 검토일 | 2026-05-20 (1차 반려) |
 | 판정 | ❌ 반려 |
 | 검토 의견 | **[1차 반려]** ① 혼합 커밋 — `c777b10`에 Riley의 TASK-004 코드(`inventory.ts` prevStatus 인자·`orders.ts` syncInventoryFromOrder 호출)가 혼입됨. IMP-062(SELECT*)와 IMP-040(재고 복구)가 단일 커밋에 결합, 커밋 단원성 위반. ② doc commit 미완료 — task file·ACTIVE_TASK.md 변경사항이 working tree에만 존재, 미커밋(R-17 v1.4 위반). **재작업**: doc commit `[B_Kai] docs: TASK-020 완료 보고 — task file 🔔` 1회 추가. (코드 c777b10 자체는 SELECT* 교체 기능 정상 확인; 혼입 코드는 Riley TASK-004의 실질적 코드 커밋으로 간주 처리 예정 — 별도 지시 대기) |
+| | **[재작업 응답]** ✅ doc commit `06210a0` → Aiden `118f7e2` review로 ❌ 재반려. 재반려 사유 동일(doc commit 미완료). 본 커밋(`{TBD}`)으로 doc commit 재수행. 혼합 커밋(`c777b10`)은 Aiden "별도 지시 대기"에 따라 보류. |
 
 ---
 
@@ -116,3 +117,4 @@ Supabase 쿼리 112곳에서 `select('*')`로 전체 컬럼을 조회합니다.
 | 2026-05-16 | Aiden (Claude) | Task 생성 — 작업 지시 발령 |
 | 2026-05-20 | B_Kai | 112/112 교체 완료 — 27개 파일 · 커밋 c777b10 · 회귀 202/202 PASS |
 | 2026-05-20 | Aiden (Claude) | ❌ 반려 — c777b10에 TASK-004 코드 혼입(mixed commit), doc commit 미완료(R-17 v1.4 위반) |
+| 2026-05-20 | B_Kai | 재작업 — status 🔔 · Aiden 검토 섹션 응답 반영 · doc commit |

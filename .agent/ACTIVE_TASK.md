@@ -58,7 +58,7 @@
 | TASK-001 | 260516 | createOrder() 트랜잭션 도입 | P2 | 없음 | Riley | ✅ | [TASK-001](tasks/TASK-001_260516_createOrder트랜잭션도입_Riley.md) | IMP-019 · IMP-047/052/053 블로커 해제 |
 | TASK-002 | 260516 | N+1 쿼리 7곳 수정 | P2 | 없음 | B_Kai | ✅ | [TASK-002](tasks/TASK-002_260516_N+1쿼리7곳수정_BKai.md) | IMP-054 완료 |
 | TASK-003 | 260516 | 정산 이중 실행 방지 | P2 | TASK-001 | Riley | ✅ | [TASK-003](tasks/TASK-003_260516_정산이중실행방지_Riley.md) | IMP-039 완료 · 커밋 b9ea28e+3ba3a97 · 199/199 PASS |
-| TASK-004 | 260516 | WAREHOUSED→CANCELED 재고 복구 | P2 | TASK-001 | Riley | 🔔 | [TASK-004](tasks/TASK-004_260516_WAREHOUSED재고복구_Riley.md) | IMP-040 완료 · 커밋 0ccebb9 · 202/202 PASS |
+| TASK-004 | 260516 | WAREHOUSED→CANCELED 재고 복구 | P2 | TASK-001 | Riley | ✅ | [TASK-004](tasks/TASK-004_260516_WAREHOUSED재고복구_Riley.md) | IMP-040 완료 · 커밋 c777b10+0ccebb9+400a4bd · 202/202 PASS |
 | TASK-005 | 260516 | Phase F 사전 GitNexus 분析 | P3 | 없음 | D_Kai | ✅ | [TASK-005](tasks/TASK-005_260516_PhaseF사전GitNexus분析_DKai.md) | ANA-IMP-DK-F 완료 · 커밋 385122c |
 | TASK-006 | 260516 | Supabase 클라이언트 중복 제거 | P3 | 없음 | D_Kai | ✅ | [TASK-006](tasks/TASK-006_260516_Supabase클라이언트중복제거_DKai.md) | IMP-059 완료 · 커밋 385122c |
 | TASK-007 | 260516 | RBAC 이중 상태 정리 | P3 | 없음 | D_Kai | ✅ | [TASK-007](tasks/TASK-007_260516_RBAC이중상태정리_DKai.md) | IMP-031 완료 · 커밋 385122c |
@@ -72,9 +72,9 @@
 | TASK-015 | 260516 | console→logger 교체 | P3 | 없음 | Riley | ⬜ | [TASK-015](tasks/TASK-015_260516_console→logger교체_Riley.md) | IMP-013 · 53개 파일 |
 | TASK-016 | 260516 | Server Actions 에러 래퍼 | P3 | 없음 | Riley | ⬜ | [TASK-016](tasks/TASK-016_260516_ServerActions에러래퍼_Riley.md) | IMP-025 |
 | TASK-017 | 260516 | admin/rates 531줄 분할 | P3 | 없음 | B_Kai | ✅ | [TASK-017](tasks/TASK-017_260516_adminRates531줄분할_BKai.md) | IMP-014 완료 · page.tsx 94줄·커밋 e4fee51 |
-| TASK-018 | 260516 | finance.ts 733줄 분할 | P3 | 없음 | B_Kai | ❌ | [TASK-018](tasks/TASK-018_260516_financeTs733줄분할_BKai.md) | IMP-058 · 코드 af2f873 ✅ · doc commit 미완료(3차 반려) |
+| TASK-018 | 260516 | finance.ts 733줄 분할 | P3 | 없음 | B_Kai | 🔔 | [TASK-018](tasks/TASK-018_260516_financeTs733줄분할_BKai.md) | IMP-058 · 커밋 af2f873 · finance 84·settlement 253·invoice 300·fees 53 · 199/199 PASS · doc commit 완료 |
 | TASK-019 | 260516 | Server Actions 도메인 분할 | P3 | TASK-017+018 | B_Kai | 🚫 | [TASK-019](tasks/TASK-019_260516_ServerActions도메인분할_BKai.md) | IMP-033 · D1 완료 후 |
-| TASK-020 | 260516 | SELECT * 명시적 컬럼 교체 | P3 | 없음 | B_Kai | ❌ | [TASK-020](tasks/TASK-020_260516_SELECT명시적컬럼교체_BKai.md) | IMP-062 · 코드 c777b10(TASK-004 혼입) · doc commit 미완료(1차 반려) |
+| TASK-020 | 260516 | SELECT * 명시적 컬럼 교체 | P3 | 없음 | B_Kai | 🔔 | [TASK-020](tasks/TASK-020_260516_SELECT명시적컬럼교체_BKai.md) | IMP-062 · 코드 c777b10(혼합 커밋 — Aiden 별도 지시 대기) · 112/112 교체 · 202/202 PASS · doc commit 완료 |
 
 ---
 
@@ -82,8 +82,8 @@
 
 | Agent | 즉시 착수 가능 | 블로커 대기 |
 |:------|:-------------|:----------|
-| Riley | TASK-004❌ 재작업 · TASK-015 · TASK-016 | — |
-| B_Kai | TASK-018❌ 재작업(doc commit) · TASK-020❌ 재작업(doc commit) | TASK-019 (TASK-018 ✅ 후) |
+| Riley | TASK-015 · TASK-016 | — |
+| B_Kai | TASK-018🔔 · TASK-020🔔 | TASK-019 (TASK-018 ✅ 후) |
 | D_Kai | — | 전량 완료 |
 | Ring | TASK-013 · TASK-014 | — |
 
@@ -111,3 +111,5 @@
 | 2026-05-20 | Aiden (Claude) | B_Kai TASK-018 ❌ 재작업 반려 — 코드(af2f873·invoice 300줄·199/199) ✅, task file 상태·커밋해시·수치 미업데이트(R-17 반복). TASK-020 🔄 진행 중(110/112 완료·2곳 잔여·미커밋) |
 | 2026-05-20 | B_Kai | TASK-018 2차 재작업 완료 — task file 🔔·커밋해시·수치 정정. TASK-020 112/112 교체 완료 — 커밋 c777b10·202/202 PASS·🔔 |
 | 2026-05-20 | Aiden (Claude) | Ring TASK-010 ✅ PASS (4차) · TASK-012 ✅ PASS (3차). Riley TASK-004 ❌ 반려 (커밋 해시 오기재·독립 커밋 없음·test 미커밋). B_Kai TASK-018 ❌ 반려 (3차, doc commit 미완료). B_Kai TASK-020 ❌ 반려 (1차, mixed commit·doc commit 미완료) |
+| 2026-05-20 | B_Kai | TASK-018/020 doc commit 재수행 — task file 🔔 + ACTIVE_TASK.md 🔔 동기화 |
+| 2026-05-20 | Aiden (Claude) | Riley TASK-004 ✅ PASS (2차) — 공지 타이밍 완화 적용. 0ccebb9(test)+400a4bd(doc) R-17 v1.4 패턴 준수. AGENTS.md·CLAUDE.md 중복 GitNexus 섹션 Aiden 정정 처리 |
