@@ -54,6 +54,7 @@ export class MockCarrierProvider implements ITrackingProvider {
 
   async track(supabase: any, config: { id: string; tracking_no: string; order_id: string }): Promise<TrackingStep[]> {
     const mockApiResponse = {
+      carrier: 'MOCK_EXPRESS',
       checkpoints: [
         { code: 'DEPARTURE', hours_ago: 48, loc: 'Shanghai, CN', msg: 'Departed from origin' },
         { code: 'TRANSIT', hours_ago: 24, loc: 'Incheon, KR', msg: 'Arrived at transit hub' },

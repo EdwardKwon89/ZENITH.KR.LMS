@@ -108,29 +108,62 @@ export class SettlementEngine {
       const totalFreight = unitPrice * chargeableWeight;
       console.log(`[Settlement] Calculation Success: ${unitPrice} * ${chargeableWeight} = ${totalFreight} ${bestRate.currency}`);
 
-      // 5. 비용 데이터 저장 (기존 FREIGHT 항목이 있으면 삭제 후 재입력)
-      await supabase
+      // 5. 비용 데이터 저장 (멱등성 처리)
+      const { data: existingCosts, error: costSelectError } = await supabase
         .from('zen_order_costs')
-        .delete()
+        .select('id, invoice_id')
         .eq('order_id', orderId)
-        .eq('cost_type', 'FREIGHT')
-        .is('invoice_id', null); // 인보이스가 이미 발행된 경우 수정 불가
+        .eq('cost_type', 'FREIGHT');
 
-      const { data: costData, error: costInsertError } = await supabase
-        .from('zen_order_costs')
-        .insert({
-          order_id: orderId,
-          cost_type: 'FREIGHT',
-          unit_price: unitPrice,
-          quantity: chargeableWeight,
-          currency: bestRate.currency || 'USD',
-          is_revenue: true
-        })
-        .select()
-        .single();
+      if (costSelectError) {
+        throw costSelectError;
+      }
 
-      if (costInsertError) {
-        throw costInsertError;
+      const unbilledCost = existingCosts?.find(c => c.invoice_id === null);
+      const billedCost = existingCosts?.find(c => c.invoice_id !== null);
+
+      if (billedCost) {
+        throw new Error('Cannot recalculate costs after invoice has been issued.');
+      }
+
+      let costData;
+      if (unbilledCost) {
+        // 이미 청구되지 않은 비용 레코드가 존재하면 업데이트 (멱등성 보장)
+        const { data: updatedCost, error: costUpdateError } = await supabase
+          .from('zen_order_costs')
+          .update({
+            unit_price: unitPrice,
+            quantity: chargeableWeight,
+            currency: bestRate.currency || 'USD',
+            is_revenue: true
+          })
+          .eq('id', unbilledCost.id)
+          .select()
+          .single();
+
+        if (costUpdateError) {
+          throw costUpdateError;
+        }
+        costData = updatedCost;
+      } else {
+        // 존재하지 않으면 새로 생성
+        const { data: insertedCost, error: costInsertError } = await supabase
+          .from('zen_order_costs')
+          .insert({
+            order_id: orderId,
+            cost_type: 'FREIGHT',
+            unit_price: unitPrice,
+            quantity: chargeableWeight,
+            currency: bestRate.currency || 'USD',
+            is_revenue: true
+          })
+          .select()
+          .single();
+
+        if (costInsertError) {
+          throw costInsertError;
+        }
+        costData = insertedCost;
       }
 
       return {
