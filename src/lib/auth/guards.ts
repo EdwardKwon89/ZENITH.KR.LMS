@@ -17,7 +17,7 @@ export async function requireAuth() {
 
   const { data: profile } = await supabase
     .from("zen_profiles")
-    .select("*")
+    .select('id, email, role, org_id, status, full_name')
     .eq("id", user.id)
     .single();
 
@@ -38,7 +38,7 @@ export async function requireAdmin() {
 
   const { data: profile } = await supabase
     .from("zen_profiles")
-    .select("*")
+    .select('id, email, role, org_id, status, full_name')
     .eq("id", user.id)
     .single();
 
@@ -66,7 +66,7 @@ export async function validateAdminAction() {
 
   const { data: profile } = await supabase
     .from("zen_profiles")
-    .select("*")
+    .select('id, email, role, org_id, status, full_name')
     .eq("id", user.id)
     .single();
 
@@ -98,7 +98,7 @@ export async function validateUserAction() {
 
   const { data: profile, error: profileError } = await supabase
     .from("zen_profiles")
-    .select("*")
+    .select('id, email, role, org_id, status')
     .eq("id", user.id)
     .single();
     

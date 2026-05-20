@@ -36,7 +36,7 @@ export async function getGradeMaster(): Promise<GradeMasterItem[]> {
 
   const { data, error } = await supabase
     .from("grade_master")
-    .select("*")
+    .select('grade_code, grade_name_ko, grade_name_en, discount_rate, benefit_desc')
     .order("created_at", { ascending: true });
 
   if (error) {
@@ -106,7 +106,7 @@ export async function getMyPendingPromotionRequest() {
 
   const { data, error } = await supabase
     .from("grade_promotion_request")
-    .select("*")
+    .select('target_grade, request_reason')
     .eq("user_id", user.id)
     .eq("status", "PENDING")
     .maybeSingle();
@@ -177,7 +177,7 @@ export async function requestGradePromotion(payload: {
       request_reason: payload.requestReason,
       status: "PENDING"
     })
-    .select()
+    .select('id')
     .single();
 
   if (requestError || !request) {
@@ -220,7 +220,7 @@ export async function getGradePromotionRequests(params?: {
   let query = supabase
     .from("grade_promotion_request")
     .select(`
-      *,
+      id, user_id, current_grade, target_grade, request_reason, status, admin_comment, processed_at, created_at,
       zen_profiles:user_id (
         full_name,
         email
@@ -284,7 +284,7 @@ export async function reviewGradePromotion(payload: {
   // 1. 신청 내역 조회
   const { data: request, error: fetchError } = await supabase
     .from("grade_promotion_request")
-    .select("*")
+    .select('id, status, target_grade, user_id')
     .eq("id", payload.requestId)
     .single();
 

@@ -16,14 +16,10 @@ interface Nation {
 }
 
 interface Port {
-  port_code: string;
-  port_name_ko: string;
-  port_name_en: string;
-  nation_code: string;
+  code: string;
+  name: string;
   port_type: string;
-  is_active: boolean;
   nations?: { name_ko: string; name_en: string };
-  iata_code?: string; // 항공 전용 IATA 3자리
 }
 
 export default function GeoClient({ 
@@ -65,12 +61,12 @@ export default function GeoClient({
   // 항구 컬럼 정의 (편집 가능)
   const portColumns: ColumnDef<Port>[] = [
     {
-      accessorKey: "port_code",
+      accessorKey: "code",
       header: "거점 코드 (IATA)",
       cell: ({ row }) => (
         <div className="flex flex-col">
           <span className="font-mono font-bold text-brand-700 tracking-wider">
-            {row.original.port_code}
+            {row.original.code}
           </span>
           {row.original.port_type === "AIR" && (
             <span className="text-[9px] text-brand-400 font-medium">IATA 3-LETTER</span>
@@ -92,24 +88,7 @@ export default function GeoClient({
         </div>
       ),
     },
-    { accessorKey: "port_name_ko", header: "거점명 (한글)" },
-    {
-      accessorKey: "nation_code",
-      header: "국가",
-      cell: ({ row }) => (
-        <div className="flex flex-col">
-          <span className="text-xs font-bold text-slate-900">{row.original.nations?.name_ko}</span>
-          <span className="text-[10px] text-slate-400 font-mono tracking-tighter uppercase">{row.original.nation_code}</span>
-        </div>
-      ),
-    },
-    {
-      accessorKey: "is_active",
-      header: "상태",
-      cell: ({ row }) => (
-        <CheckCircle2 size={18} className={row.original.is_active ? "text-emerald-500" : "text-slate-200"} />
-      ),
-    },
+    { accessorKey: "name", header: "거점명" },
     {
       id: "actions",
       header: "Actions",
@@ -136,7 +115,7 @@ export default function GeoClient({
 
     try {
       const result = await upsertPort(portData);
-      setPorts(prev => prev.map(p => p.port_code === result.port_code ? { ...result, nations: editingPort?.nations } : p));
+      setPorts(prev => prev.map(p => p.code === result.code ? { ...result, nations: editingPort?.nations } : p));
       setIsModalOpen(false);
       setEditingPort(null);
     } catch (error) {
@@ -232,8 +211,8 @@ export default function GeoClient({
                       거점 코드 {editingPort?.port_type === "AIR" ? "(IATA 3글자)" : "(5글자)"}
                     </label>
                     <input
-                      name="port_code"
-                      defaultValue={editingPort?.port_code}
+                      name="code"
+                      defaultValue={editingPort?.code}
                       placeholder={editingPort?.port_type === "AIR" ? "e.g. ICN" : "e.g. KRPUS"}
                       required
                       readOnly={!!editingPort}
@@ -243,8 +222,7 @@ export default function GeoClient({
                   <div className="space-y-1">
                     <label className="text-xs font-bold text-slate-500 uppercase tracking-tight">국가 코드</label>
                     <input
-                      name="nation_code"
-                      defaultValue={editingPort?.nation_code}
+                      name="country_code"
                       placeholder="e.g. KR"
                       required
                       className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-500/10 focus:border-brand-500 transition-all"
@@ -253,22 +231,11 @@ export default function GeoClient({
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-slate-500 uppercase tracking-tight">거점명 (한글)</label>
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-tight">거점명</label>
                   <input
-                    name="port_name_ko"
-                    defaultValue={editingPort?.port_name_ko}
+                    name="name"
+                    defaultValue={editingPort?.name}
                     placeholder="부산항"
-                    required
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-500/10 focus:border-brand-500 transition-all"
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-xs font-bold text-slate-500 uppercase tracking-tight">거점명 (영문)</label>
-                  <input
-                    name="port_name_en"
-                    defaultValue={editingPort?.port_name_en}
-                    placeholder="BUSAN PORT"
                     required
                     className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-500/10 focus:border-brand-500 transition-all"
                   />

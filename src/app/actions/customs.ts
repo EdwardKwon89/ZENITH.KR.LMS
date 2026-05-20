@@ -148,7 +148,7 @@ export async function submitDeclaration(id: string) {
   // 1. 현재 데이터 조회
   const { data: declaration, error: fetchError } = await supabase
     .from('customs_declarations')
-    .select('*')
+    .select('id, order_id, cargo_description, declared_value, currency_code, status, adapter_type, declaration_no, admin_note, submitted_at, resolved_at, created_at, updated_at')
     .eq('id', id)
     .single();
 

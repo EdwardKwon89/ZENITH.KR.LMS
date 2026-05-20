@@ -23,7 +23,7 @@ export default async function DashboardGroupLayout({
   // Fetch detailed profile info if needed (for business name, etc.)
   const { data: profile } = await supabase
     .from("zen_profiles")
-    .select("*")
+    .select("id, role, full_name")
     .eq("id", user.id)
     .single();
 

@@ -91,7 +91,7 @@ export async function getUserSession() {
 
   const { data: profile } = await supabase
     .from("zen_profiles")
-    .select("*")
+    .select('id, email, role, org_id, status')
     .eq("id", user.id)
     .single();
 

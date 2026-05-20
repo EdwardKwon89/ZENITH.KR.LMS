@@ -134,7 +134,7 @@ export async function getNotifications(limit = 20, offset = 0) {
   const [{ data: notifications }, { count }] = await Promise.all([
     supabase
       .from("zen_notifications")
-      .select("*")
+      .select('id, user_id, order_id, type, title, message, channel, is_read, created_at, sent_at')
       .eq("user_id", user.id)
       .eq("channel", "IN_APP")
       .order("is_read", { ascending: true })
@@ -209,7 +209,7 @@ export async function sendInAppNotification(params: {
       // link는 현재 스키마에 없으므로 message에 포함하거나 추후 스키마 확장 필요
       // 일단은 데이터 일관성을 위해 스키마에 정의된 필드만 입력
     })
-    .select()
+    .select('id')
     .single();
 
   if (error) {

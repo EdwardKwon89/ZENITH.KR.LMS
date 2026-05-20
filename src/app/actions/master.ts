@@ -53,7 +53,7 @@ export async function getPorts() {
   
   const { data, error } = await supabase
     .from("zen_ports")
-    .select("*")
+    .select('id, code, name, port_type:type')
     .order("code", { ascending: true });
 
   if (error) throw new Error(error.message);
@@ -73,7 +73,7 @@ export async function upsertPort(payload: unknown) {
   const { data, error } = await supabase
     .from("zen_ports")
     .upsert(validated.data)
-    .select()
+    .select('id, code, name, port_type:type')
     .single();
 
   if (error) throw new Error(error.message);
@@ -90,7 +90,7 @@ export async function getNations() {
   
   const { data, error } = await supabase
     .from("zen_nations")
-    .select("*")
+    .select('nation_code, name, name_ko, name_en, is_active')
     .order("name", { ascending: true });
 
   if (error) throw new Error(error.message);
@@ -120,7 +120,7 @@ export async function getAirlines() {
   
   const { data, error } = await supabase
     .from("zen_organizations")
-    .select("*")
+    .select('id, name, type, iata_code, prefix_code, status')
     .eq("type", "CARRIER")
     .not("iata_code", "is", null)
     .order("name", { ascending: true });
@@ -135,7 +135,7 @@ export async function getCodeGroups() {
   const { supabase } = await validateAdminAction();
   const { data, error } = await supabase
     .from("common_code_groups")
-    .select("*")
+    .select('group_code, group_name, description, is_system')
     .order("group_code", { ascending: true });
   if (error) throw new Error(error.message);
   return data;
@@ -167,7 +167,7 @@ export async function getCommonCodesByGroup(groupCode: string) {
   
   const { data, error } = await supabase
     .from("common_codes")
-    .select("*")
+    .select('group_code, code_value, code_name_ko, code_name_en, is_active, sort_order')
     .eq("group_code", groupCode)
     .eq("is_active", true)
     .order("sort_order", { ascending: true });
@@ -190,7 +190,7 @@ export async function upsertCommonCode(payload: unknown) {
   const { data, error } = await supabase
     .from("common_codes")
     .upsert(validated.data)
-    .select()
+    .select('id, group_code, code_value, code_name_ko, code_name_en, sort_order, is_active, description')
     .single();
 
   if (error) throw new Error(error.message);

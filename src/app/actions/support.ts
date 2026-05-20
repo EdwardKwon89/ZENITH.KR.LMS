@@ -91,7 +91,7 @@ export async function createQna(payload: {
       created_by: user.id,
       status: 'PENDING'
     })
-    .select()
+    .select("id, title, content, order_id, org_id, status, created_at, updated_at, created_by")
     .single();
 
   if (qnaError) throw new Error(`QnA creation failed: ${qnaError.message}`);
@@ -177,7 +177,7 @@ export async function getQnaDetail(qnaId: string): Promise<QnaDetail> {
   const { data: qna, error: qnaError } = await supabase
     .from("zen_qna")
     .select(`
-      *,
+      id, title, content, order_id, org_id, status, created_at, updated_at, created_by,
       order:zen_orders(order_no)
     `)
     .eq("id", qnaId)
@@ -188,7 +188,7 @@ export async function getQnaDetail(qnaId: string): Promise<QnaDetail> {
   const { data: answers, error: ansError } = await supabase
     .from("zen_qna_answers")
     .select(`
-      *,
+      id, qna_id, answered_by, content, created_at,
       profile:profiles(full_name)
     `)
     .eq("qna_id", qnaId)
@@ -224,7 +224,7 @@ export async function answerQna(payload: {
       answered_by: user.id,
       content: payload.content.substring(0, 5000)
     })
-    .select()
+    .select("id, qna_id, answered_by, content, created_at")
     .single();
 
   if (ansError) throw new Error(`Answer failed: ${ansError.message}`);
@@ -299,7 +299,7 @@ export async function upsertFaq(payload: {
     query = supabase.from("zen_faq").insert(faqData);
   }
 
-  const { data, error } = await query.select().single();
+  const { data, error } = await query.select("id, answer, category, created_at, created_by, is_active, order_no, question, updated_at").single();
   if (error) throw new Error(`FAQ upsert failed: ${error.message}`);
 
   revalidatePath("/support/faq");
@@ -318,7 +318,7 @@ export async function getFaqList({
 } = {}) {
   const { supabase, profile } = await validateUserAction();
   
-  let query = supabase.from("zen_faq").select("*");
+  let query = supabase.from("zen_faq").select("id, answer, category, created_at, created_by, is_active, order_no, question, updated_at");
 
   if (profile?.role !== USER_ROLES.ADMIN && profile?.role !== USER_ROLES.ZENITH_SUPER_ADMIN) {
     query = query.eq("is_active", true);
@@ -396,7 +396,7 @@ export async function upsertNotice(payload: {
     query = supabase.from("zen_notices").insert(noticeData);
   }
 
-  const { data, error } = await query.select().single();
+  const { data, error } = await query.select("id, content, created_at, created_by, is_important, is_published, published_at, title, updated_at").single();
   if (error) throw new Error(`Notice upsert failed: ${error.message}`);
 
   revalidatePath("/support/notices");
@@ -458,7 +458,7 @@ export async function getOrderQnaList(orderId: string): Promise<QnaItem[]> {
   let query = supabase
     .from("zen_qna")
     .select(`
-      *,
+      id, title, content, order_id, org_id, status, created_at, updated_at, created_by,
       order:zen_orders(order_no),
       answer_count:zen_qna_answers(count)
     `);

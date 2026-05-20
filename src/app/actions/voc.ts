@@ -99,7 +99,7 @@ export async function createVoc(payload: unknown) {
   const { data: voc, error: vocError } = await supabase
     .from("zen_voc")
     .insert(vocData)
-    .select()
+    .select("id, order_id, org_id, created_by, type, title, description, status, created_at, updated_at")
     .single();
 
   if (vocError) {
@@ -245,7 +245,7 @@ export async function answerVoc(payload: {
       answered_by: user.id,
       content: payload.content.substring(0, 2000)
     })
-    .select()
+    .select("id, voc_id, answered_by, content, created_at")
     .single();
 
   if (ansError) return { success: false, error: `Answer failed: ${ansError.message}` };

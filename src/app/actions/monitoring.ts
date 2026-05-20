@@ -43,7 +43,7 @@ export async function logClientError(data: {
       user_id: user?.id,
       org_id
     })
-    .select()
+    .select("id")
     .single();
 
   if (error) {

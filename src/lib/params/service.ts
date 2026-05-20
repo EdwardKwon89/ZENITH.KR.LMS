@@ -31,7 +31,7 @@ export async function fetchParamRaw(key: string): Promise<SystemParam | null> {
 
   const { data, error } = await supabase
     .from('zen_system_params')
-    .select('*')
+    .select('id, key, category, value_text, value_numeric, value_jsonb, description, updated_at')
     .eq('key', key)
     .single();
 
@@ -66,7 +66,7 @@ export const getParamsByCategory = unstable_cache(
 
     const { data, error } = await supabase
       .from('zen_system_params')
-      .select('*')
+      .select('id, key, category, value_text, value_numeric, value_jsonb, description, updated_at')
       .eq('category', category)
       .order('key', { ascending: true });
 
@@ -93,7 +93,7 @@ export const getAllParams = unstable_cache(
 
     const { data, error } = await supabase
       .from('zen_system_params')
-      .select('*')
+      .select('id, key, category, value_text, value_numeric, value_jsonb, description, updated_at')
       .order('category', { ascending: true })
       .order('key', { ascending: true });
 

@@ -108,7 +108,7 @@ export async function updateOrder(orderId: string, payload: OrderRegistrationInp
           gross_weight: pkg.gross_weight,
           volume: pkg.volume
         })
-        .select()
+        .select('id, order_id, packing_unit, packing_count, length, width, height, gross_weight, volume')
         .single();
 
       if (pkgError) continue;
@@ -257,7 +257,7 @@ export async function getOrderDetails(orderId: string) {
   // 계층형 데이터 로드: Packages -> Items
   const { data: packages, error: pkgError } = await supabase
     .from("zen_order_packages")
-    .select("*")
+    .select('id, order_id, packing_unit, packing_count, length, width, height, gross_weight, volume, remarks, created_at')
     .eq("order_id", orderId)
     .order("created_at", { ascending: true });
 
@@ -265,7 +265,7 @@ export async function getOrderDetails(orderId: string) {
 
   const { data: items, error: itemsError } = await supabase
     .from("zen_order_items")
-    .select("*")
+    .select('id, order_id, package_id, sku_code, item_name, quantity, unit_price, currency, hs_code, item_packing_unit, volume, weight')
     .eq("order_id", orderId)
     .order("created_at", { ascending: true });
 
@@ -353,7 +353,7 @@ export async function updateOrderStatus(
 
   // [WBS 2.4~6] 독립 후속 작업 병렬 실행 (IMP-054 N+1 최적화: 순차→Promise.all)
   await Promise.all([
-    syncInventoryFromOrder(orderId, nextStatus).catch(invError => {
+    syncInventoryFromOrder(orderId, nextStatus, undefined, currentOrder.status).catch(invError => {
       console.error("[ERROR] Inventory sync failed:", invError);
     }),
     nextStatus === OrderStatus.RELEASED
@@ -417,7 +417,7 @@ export async function createMasterOrder(payload: {
       remarks: payload.remarks,
       created_by: user.id
     })
-    .select()
+    .select('id, master_no, status, total_house_count, total_gross_weight, total_volume, carrier_id, vessel_flight_no, origin_port_id, dest_port_id, remarks, created_by')
     .single();
 
   if (masterError) throw new Error(`Master creation failed: ${masterError.message}`);

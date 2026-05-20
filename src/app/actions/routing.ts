@@ -50,7 +50,7 @@ export async function getRouteOptions(orderId: string) {
 
   const { data: savedOptions } = await supabase
     .from("zen_route_options")
-    .select("*")
+    .select("id, order_id, option_type, segments, total_cost, total_transit_days, score, created_at")
     .eq("order_id", orderId);
 
   const optionsMap: Record<string, any> = {};
@@ -98,7 +98,7 @@ export async function getRouteVisualization(orderId: string) {
   // 1. 적용된 경로 및 옵션 조회
   const { data: route, error: routeError } = await supabase
     .from("zen_order_routes")
-    .select("*, selected_option:zen_route_options(*)")
+    .select("id, order_id, selected_option_id, applied_by, applied_at, selected_option:zen_route_options(id, option_type, order_id, score, segments, total_cost, total_transit_days, created_at)")
     .eq("order_id", orderId)
     .maybeSingle();
 

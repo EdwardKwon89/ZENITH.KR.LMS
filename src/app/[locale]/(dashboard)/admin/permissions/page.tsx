@@ -27,7 +27,7 @@ export default async function PermissionsPage() {
   // Fetch all current permissions
   const { data: currentPermissions } = await supabase
     .from("zen_role_permissions")
-    .select("*");
+    .select("role_code, path");
 
   return (
     <div className="space-y-6">

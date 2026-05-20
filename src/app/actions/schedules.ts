@@ -18,7 +18,14 @@ export async function getVesselSchedules(filters: {
   let query = supabase
     .from('zen_vessel_schedules')
     .select(`
-      *,
+      id,
+      mode,
+      carrier,
+      vessel_no,
+      flight_no,
+      etd,
+      eta,
+      status,
       origin_port:origin_port_id(name, code),
       destination_port:destination_port_id(name, code)
     `);
@@ -48,7 +55,7 @@ export async function upsertVesselSchedule(payload: unknown) {
       ...validated.data,
       updated_at: new Date().toISOString()
     })
-    .select()
+    .select("id, vessel_name, voyage_no, origin_port_id, destination_port_id, etd, eta, status")
     .single();
 
   if (error) throw new Error(`스케줄 저장 실패: ${error.message}`);
