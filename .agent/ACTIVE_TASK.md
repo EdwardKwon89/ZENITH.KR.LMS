@@ -82,10 +82,10 @@
 
 | Agent | 즉시 착수 가능 | 블로커 대기 |
 |:------|:-------------|:----------|
-| Riley | TASK-003 · TASK-004 · TASK-015 · TASK-016 | — |
+| Riley | TASK-004 · TASK-015 · TASK-016 | TASK-003🔄 구현 중 |
 | B_Kai | TASK-017 · TASK-018 · TASK-020 | TASK-019 (TASK-017+018 완료 후) |
-| D_Kai | TASK-005 · TASK-006 | TASK-007🔄 · TASK-008🔄 구현 중 |
-| Ring | TASK-010 · TASK-011 · TASK-013 · TASK-014 | TASK-009❌ 재작업 대기 · TASK-012🔄 구현 중 |
+| D_Kai | — | TASK-005🔄 · TASK-006🔄 · TASK-007🔄 · TASK-008🔄 구현 중 |
+| Ring | TASK-013 · TASK-014 | TASK-009❌·TASK-010❌·TASK-011❌ 재작업 대기 · TASK-012🔄 구현 중 |
 
 ---
 
@@ -99,3 +99,4 @@
 | 2026-05-16 | Aiden (Claude) | 설계 의견/검토 단계 신설 (R-17 v1.3) — 📝·🔍 상태 추가. TASK-005~020 [설계 의견]·[설계 확정] 섹션 일괄 삽입 |
 | 2026-05-20 | Aiden (Claude) | TASK-001 ✅ 판정 (IMP-019 완료) — TASK-003/004 블로커 해제. TASK-002 ❌ 반려 (DoD 미달성, #4·#6 미수정) |
 | 2026-05-20 | Aiden (Claude) | TASK-007/008 설계 확정 → 🔄 착수 승인. TASK-009 ❌ 반려 (회귀파일 미저장·gitnexus_impact 누락·DoD 미체크) |
+| 2026-05-20 | Aiden (Claude) | TASK-002 ✅ PASS (재작업 검토 완료). TASK-010/011 ❌ 반려 (Ring 회귀파일 미저장·DoD 미체크 반복 위반) |
