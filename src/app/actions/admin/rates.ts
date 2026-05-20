@@ -1,4 +1,5 @@
 import { logger } from '@/lib/logger';
+import { withAction } from '@/lib/actions/wrapper';
 "use server";
 
 import { validateUserAction } from "@/lib/auth/guards";
@@ -9,7 +10,7 @@ import { USER_ROLES } from "@/lib/auth/rbac";
  * 요율 카드 등록 (마스터 + 슬랩 + 할증 통합 저장)
  * TISA 규정에 따라 동일 항로의 기존 ACTIVE 요율을 SUPERSEDED 처리함
  */
-export async function createRateCard(payload: {
+export const createRateCard = withAction(async function (payload: {
   card: any;
   tiers: any[];
   surcharges: any[];
@@ -94,12 +95,12 @@ export async function createRateCard(payload: {
 
   revalidatePath("/admin/rates");
   return card;
-}
+});
 
 /**
  * 요율 카드 삭제 (Soft delete 대신 물리 삭제 적용, CASCADE 설정됨)
  */
-export async function deleteRateCard(cardId: string) {
+export const deleteRateCard = withAction(async function (cardId: string) {
   const { supabase, profile } = await validateUserAction();
   
   if (!profile || profile.role !== USER_ROLES.ADMIN) {
@@ -114,8 +115,8 @@ export async function deleteRateCard(cardId: string) {
   if (error) throw new Error(`Rate card deletion failed: ${error.message}`);
 
   revalidatePath("/admin/rates");
-  return { success: true };
-}
+  return true;
+});
 
 /**
  * 역할 및 필터 기반 요율 목록 조회

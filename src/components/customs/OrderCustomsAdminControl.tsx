@@ -49,18 +49,18 @@ export default function OrderCustomsAdminControl({ orderId, declaration }: Order
   const onCreate = async (data: CustomsDeclarationInput) => {
     setIsPending(true);
     try {
-      const result = await createDeclaration({
+      const { data: decId, error } = await createDeclaration({
         orderId,
         cargoDescription: data.cargoDescription,
         declaredValue: data.declaredValue,
         currencyCode: data.currencyCode,
       });
-      if (result.success) {
+      if (error) {
+        toast.error(error || '생성 실패');
+      } else {
         toast.success('통관 신고가 생성되었습니다.');
         setShowCreateForm(false);
         resetCreate();
-      } else {
-        toast.error(result.error || '생성 실패');
       }
     } catch (error: any) {
       toast.error(error.message);
@@ -74,11 +74,11 @@ export default function OrderCustomsAdminControl({ orderId, declaration }: Order
     if (!declaration) return;
     setIsPending(true);
     try {
-      const result = await submitDeclaration(declaration.id);
-      if (result.success) {
-        toast.success('관세청에 신고가 제출되었습니다.');
+      const { data: success, error } = await submitDeclaration(declaration.id);
+      if (error) {
+        toast.error(error || '제출 실패');
       } else {
-        toast.error(result.error || '제출 실패');
+        toast.success('관세청에 신고가 제출되었습니다.');
       }
     } catch (error: any) {
       toast.error(error.message);
@@ -92,15 +92,15 @@ export default function OrderCustomsAdminControl({ orderId, declaration }: Order
     if (!declaration) return;
     setIsPending(true);
     try {
-      const result = await updateDeclarationStatus({
+      const { data: success, error } = await updateDeclarationStatus({
         id: declaration.id,
         status: status as any,
         adminNote,
       });
-      if (result.success) {
-        toast.success(`통관 상태가 ${status}로 변경되었습니다.`);
+      if (error) {
+        toast.error(error || '업데이트 실패');
       } else {
-        toast.error(result.error || '업데이트 실패');
+        toast.success(`통관 상태가 ${status}로 변경되었습니다.`);
       }
     } catch (error: any) {
       toast.error(error.message);

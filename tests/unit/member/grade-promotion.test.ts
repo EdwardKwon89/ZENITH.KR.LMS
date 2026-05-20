@@ -112,8 +112,8 @@ describe('Grade Promotion Unit Tests', () => {
         requestReason: 'Test reason'
       });
 
-      expect(result.success).toBe(true);
-      expect(result.requestId).toBe('req-123');
+      expect(result.data).toBe('req-123');
+      expect(result.error).toBeNull();
       expect(mockSupabase.insert).toHaveBeenCalledWith(expect.objectContaining({
         target_grade: 'G02',
         request_reason: 'Test reason'
@@ -137,10 +137,13 @@ describe('Grade Promotion Unit Tests', () => {
         error: null
       });
 
-      await expect(requestGradePromotion({
+      const result = await requestGradePromotion({
         targetGrade: 'G02',
         requestReason: 'Reason'
-      })).rejects.toThrow('이미 대기 중인 승급 신청이 있습니다.');
+      });
+
+      expect(result.data).toBeNull();
+      expect(result.error).toBe('이미 대기 중인 승급 신청이 있습니다.');
     });
   });
 
@@ -197,7 +200,8 @@ describe('Grade Promotion Unit Tests', () => {
         adminComment: 'Approved'
       });
 
-      expect(result.success).toBe(true);
+      expect(result.data).toBe(true);
+      expect(result.error).toBeNull();
       expect(mockSupabase.update).toHaveBeenCalledTimes(2); // Request status + Profile grade
       expect(sendInAppNotification).toHaveBeenCalled();
     });

@@ -8,7 +8,7 @@ import { TrackingStep, trackingManager } from "@/lib/logistics/tracking";
 /**
  * 특정 오더의 트래킹 데이터 및 마일스톤 정보를 조회합니다.
  */
-export async function getTrackingEvents(orderId: string) {
+export async function getTrackingEvents(orderId: string, page = 1, pageSize = 50) {
   const { supabase } = await validateUserAction();
 
   // 1. 트래킹 설정 확인
@@ -20,7 +20,7 @@ export async function getTrackingEvents(orderId: string) {
 
   if (configError || !config) {
     logger.warn(`[TRACKING] No config found for order: ${orderId}`);
-    return [];
+    return { events: [], total: 0 };
   }
 
   // 2. 만약 API 프로바이더인 경우, 최신 데이터를 가져오고 상태를 동기화합니다.
@@ -28,19 +28,22 @@ export async function getTrackingEvents(orderId: string) {
     await trackingManager.getTrackingData(supabase, orderId);
   }
 
-  // 3. 트래킹 이벤트 조회 (DB에서 최종 결과 반환)
-  const { data: events, error } = await supabase
+  // 3. 트래킹 이벤트 조회 (페이지네이션 적용 — IMP-045)
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
+  const { data: events, error, count } = await supabase
     .from("zen_tracking_events")
-    .select("id, order_id, event_code, event_time, status, location, description, source_type")
+    .select("id, order_id, event_code, event_time, status, location, description, source_type", { count: "exact" })
     .eq("order_id", orderId)
-    .order("event_time", { ascending: false });
+    .order("event_time", { ascending: false })
+    .range(from, to);
 
   if (error) {
     logger.error("Failed to fetch tracking events:", error);
-    return [];
+    return { events: [], total: 0 };
   }
 
-  return events;
+  return { events, total: count || 0 };
 }
 
 /**
@@ -150,28 +153,33 @@ export async function syncExternalTracking() {
 /**
  * [Phase 3.1] 문제 발생 시 디버깅을 위한 원본(Raw JSON) 응답 내역 조회
  */
-export async function getTrackingRawLogs(orderId: string) {
+export async function getTrackingRawLogs(orderId: string, page = 1, pageSize = 50) {
   const { supabase } = await validateAdminAction();
 
-  const { data: logs, error } = await supabase
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
+  const { data: logs, error, count } = await supabase
     .from("zen_tracking_raw_logs")
-    .select("id, order_id, raw_body, created_at, provider")
+    .select("id, order_id, raw_body, created_at, provider", { count: "exact" })
     .eq("order_id", orderId)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .range(from, to);
 
   if (error) throw new Error(`Failed to fetch raw logs: ${error.message}`);
 
-  return logs;
+  return { logs, total: count || 0 };
 }
 
 /**
  * [Phase 3.1] 모든 활성 트래킹 현황을 요약 조회합니다. (대시보드용)
  * shipper_id 또는 recipient_name이 없는 오더는 'Unassigned'로 분류하여 통계 누락을 방지합니다.
  */
-export async function getGlobalTrackingOverview() {
+export async function getGlobalTrackingOverview(page = 1, pageSize = 50) {
   const { supabase } = await validateUserAction();
 
-  const { data, error } = await supabase
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
+  const { data, error, count } = await supabase
     .from("zen_tracking_configs")
     .select(`
       id,
@@ -186,8 +194,9 @@ export async function getGlobalTrackingOverview() {
         shipper_id,
         recipient_name
       )
-    `)
-    .order("updated_at", { ascending: false });
+    `, { count: "exact" })
+    .order("updated_at", { ascending: false })
+    .range(from, to);
 
   if (error) throw new Error(`Failed to fetch tracking overview: ${error.message}`);
 
@@ -211,5 +220,5 @@ export async function getGlobalTrackingOverview() {
     return { ...config, latest_event: latestEvent, is_unassigned };
   });
 
-  return configsWithEvents;
+  return { configs: configsWithEvents, total: count || 0 };
 }

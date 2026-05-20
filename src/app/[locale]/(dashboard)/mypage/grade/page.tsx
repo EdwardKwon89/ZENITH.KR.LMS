@@ -69,8 +69,10 @@ export default function MyGradePage({ params: { locale } }: { params: { locale: 
 
     setSubmitting(true);
     try {
-      const res = await requestGradePromotion({ targetGrade, requestReason });
-      if (res.success) {
+      const { data: resData, error } = await requestGradePromotion({ targetGrade, requestReason });
+      if (error) {
+        toast.error(error);
+      } else {
         toast.success("승급 신청이 접수되었습니다.");
         // 신청 후 상태 업데이트
         const newPending = await getMyPendingPromotionRequest();

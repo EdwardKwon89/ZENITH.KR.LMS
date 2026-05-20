@@ -66,8 +66,8 @@ describe('Customs Server Actions', () => {
 
     const result = await createDeclaration(payload);
 
-    expect(result.success).toBe(true);
-    expect(result.id).toBe('decl-123');
+    expect(result.data).toBe('decl-123');
+    expect(result.error).toBeNull();
     expect(mockSupabase.from).toHaveBeenCalledWith('customs_declarations');
     expect(revalidatePath).toHaveBeenCalledWith('/admin/customs');
   });
@@ -105,7 +105,8 @@ describe('Customs Server Actions', () => {
 
     const result = await updateDeclarationStatus(payload);
 
-    expect(result.success).toBe(true);
+    expect(result.data).toBe(true);
+    expect(result.error).toBeNull();
     expect(mockSupabase.update).toHaveBeenCalledWith(expect.objectContaining({
       status: 'APPROVED',
       admin_note: 'Verified'
@@ -127,7 +128,8 @@ describe('Customs Server Actions', () => {
 
     const result = await submitDeclaration('decl-123');
 
-    expect(result.success).toBe(true);
+    expect(result.data).toBe(true);
+    expect(result.error).toBeNull();
     expect(mockSupabase.update).toHaveBeenCalledWith(expect.objectContaining({
       status: 'SUBMITTED'
     }));

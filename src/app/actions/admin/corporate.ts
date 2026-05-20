@@ -1,4 +1,5 @@
 import { logger } from '@/lib/logger';
+import { withAction } from '@/lib/actions/wrapper';
 "use server";
 
 import { revalidatePath } from "next/cache";
@@ -32,7 +33,7 @@ export async function getOrganizationInfo() {
 /**
  * 2. 법인 조직 정보(metadata) 수정
  */
-export async function updateOrganizationInfo(payload: {
+export const updateOrganizationInfo = withAction(async function (payload: {
   representative?: string;
   bizNo?: string;
   address?: string;
@@ -72,8 +73,8 @@ export async function updateOrganizationInfo(payload: {
   }
 
   revalidatePath("/mypage/corporate");
-  return { success: true };
-}
+  return true;
+});
 
 /**
  * 3. 부서 목록 조회
@@ -102,7 +103,7 @@ export async function getDepartments() {
 /**
  * 4. 부서 추가
  */
-export async function createDepartment(name: string) {
+export const createDepartment = withAction(async function (name: string) {
   const { profile, supabase } = await validateUserAction();
 
   if (profile.role !== USER_ROLES.CORPORATE && profile.role !== USER_ROLES.ADMIN) {
@@ -126,13 +127,13 @@ export async function createDepartment(name: string) {
   }
 
   revalidatePath("/mypage/corporate");
-  return { success: true };
-}
+  return true;
+});
 
 /**
  * 5. 부서 수정
  */
-export async function updateDepartment(id: string, name: string) {
+export const updateDepartment = withAction(async function (id: string, name: string) {
   const { profile, supabase } = await validateUserAction();
 
   if (profile.role !== USER_ROLES.CORPORATE && profile.role !== USER_ROLES.ADMIN) {
@@ -155,13 +156,13 @@ export async function updateDepartment(id: string, name: string) {
   }
 
   revalidatePath("/mypage/corporate");
-  return { success: true };
-}
+  return true;
+});
 
 /**
  * 6. 부서 삭제
  */
-export async function deleteDepartment(id: string) {
+export const deleteDepartment = withAction(async function (id: string) {
   const { profile, supabase } = await validateUserAction();
 
   if (profile.role !== USER_ROLES.CORPORATE && profile.role !== USER_ROLES.ADMIN) {
@@ -184,5 +185,5 @@ export async function deleteDepartment(id: string) {
   }
 
   revalidatePath("/mypage/corporate");
-  return { success: true };
-}
+  return true;
+});

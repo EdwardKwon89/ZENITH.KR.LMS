@@ -38,7 +38,8 @@ describe('Corporate Actions Unit Tests', () => {
     
     const result = await updateOrganizationInfo({ representative: 'New CEO' });
     
-    expect(result.success).toBe(true);
+    expect(result.data).toBe(true);
+    expect(result.error).toBeNull();
     expect(mockSupabase.update).toHaveBeenCalledWith({
       metadata: { old: 'data', representative: 'New CEO' }
     });
@@ -47,7 +48,8 @@ describe('Corporate Actions Unit Tests', () => {
   it('TC-MEM-02: should create department successfully', async () => {
     const result = await createDepartment('Sales');
     
-    expect(result.success).toBe(true);
+    expect(result.data).toBe(true);
+    expect(result.error).toBeNull();
     expect(mockSupabase.insert).toHaveBeenCalledWith({
       org_id: 'org-456',
       name: 'Sales'
@@ -57,19 +59,21 @@ describe('Corporate Actions Unit Tests', () => {
   it('TC-MEM-03: should delete department successfully', async () => {
     const result = await deleteDepartment('dept-789');
     
-    expect(result.success).toBe(true);
+    expect(result.data).toBe(true);
+    expect(result.error).toBeNull();
     expect(mockSupabase.delete).toHaveBeenCalled();
     expect(mockSupabase.eq).toHaveBeenCalledWith('id', 'dept-789');
   });
 
-  it('TC-MEM-04: should throw error if unauthorized role tries to update org info', async () => {
+  it('TC-MEM-04: should return error if unauthorized role tries to update org info', async () => {
     (validateUserAction as any).mockResolvedValueOnce({ 
       user: mockUser, 
       profile: { ...mockProfile, role: USER_ROLES.USER }, // Regular user
       supabase: mockSupabase 
     });
 
-    await expect(updateOrganizationInfo({ representative: 'Bad Guy' }))
-      .rejects.toThrow('조직 정보를 수정할 권한이 없습니다.');
+    const result = await updateOrganizationInfo({ representative: 'Bad Guy' });
+    expect(result.data).toBeNull();
+    expect(result.error).toBe('조직 정보를 수정할 권한이 없습니다.');
   });
 });

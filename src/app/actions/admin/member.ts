@@ -1,4 +1,5 @@
 import { logger } from '@/lib/logger';
+import { withAction } from '@/lib/actions/wrapper';
 "use server";
 
 import { createClient } from "@/utils/supabase/server";
@@ -123,10 +124,10 @@ export async function getMyPendingPromotionRequest() {
 /**
  * 2. 승급 신청 (INDIVIDUAL 사용자 전용)
  */
-export async function requestGradePromotion(payload: {
+export const requestGradePromotion = withAction(async function (payload: {
   targetGrade: string;
   requestReason: string;
-}): Promise<{ success: boolean; requestId: string }> {
+}) {
   const { user, supabase } = await validateUserAction();
 
   // 1. 프로필 정보 조회 (역할 및 현재 등급 확인) - zen_profiles 기준
@@ -205,8 +206,8 @@ export async function requestGradePromotion(payload: {
   }
 
   revalidatePath("/mypage/grade");
-  return { success: true, requestId: request.id };
-}
+  return request.id;
+});
 
 /**
  * 3. 승급 신청 목록 조회 (Admin 전용)
@@ -275,11 +276,11 @@ export async function getGradePromotionRequests(params?: {
 /**
  * 4. 승급 심사 처리 (Admin 전용)
  */
-export async function reviewGradePromotion(payload: {
+export const reviewGradePromotion = withAction(async function (payload: {
   requestId: string;
   decision: 'APPROVED' | 'REJECTED';
   adminComment?: string;
-}): Promise<{ success: boolean }> {
+}) {
   const { supabase } = await validateAdminAction();
 
   // 1. 신청 내역 조회
@@ -337,8 +338,8 @@ export async function reviewGradePromotion(payload: {
 
   revalidatePath("/admin/upgrade-requests");
   revalidatePath("/mypage/grade");
-  return { success: true };
-}
+  return true;
+});
 
 /**
  * 5. 회원 탈퇴 (Soft Delete)

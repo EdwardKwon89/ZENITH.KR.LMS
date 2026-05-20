@@ -44,16 +44,16 @@ export const VocRequestModal: React.FC<VocRequestModalProps> = ({
 
     setIsSubmitting(true);
     try {
-    const result = await createVoc({
+      const { data: vocId, error } = await createVoc({
         order_id: orderId,
         type: selectedType,
         title,
         description
       });
       
-      if (!result.success) {
+      if (error) {
         toast.error('VOC 접수 실패', {
-          description: result.error,
+          description: error,
           icon: <AlertCircle className="text-red-500" />
         });
         return;

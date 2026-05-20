@@ -34,6 +34,7 @@ describe('ZENITH Tracking Visibility: Phase 3.3 Multi-Agent Cases', () => {
       single: vi.fn(),
       maybeSingle: vi.fn(),
       order: vi.fn().mockReturnThis(),
+      range: vi.fn().mockReturnThis(),
     };
 
     (validateUserAction as any).mockResolvedValue({ 
@@ -89,9 +90,9 @@ describe('ZENITH Tracking Visibility: Phase 3.3 Multi-Agent Cases', () => {
         { id: 2, event_code: 'DELAYED', source_type: 'MANUAL', event_time: '2026-04-22T10:00:00Z' },
         { id: 1, event_code: 'ARRIVED', source_type: 'SYSTEM', event_time: '2026-04-20T10:00:00Z' },
       ];
-      mockSupabase.order.mockResolvedValueOnce({ data: mockEvents, error: null });
+      mockSupabase.range.mockResolvedValueOnce({ data: mockEvents, error: null, count: mockEvents.length });
 
-      const events = await getTrackingEvents('order-1');
+      const { events } = await getTrackingEvents('order-1');
       
       expect(events[0].source_type).toBe('MANUAL'); 
       expect(events.length).toBe(2);
@@ -125,7 +126,7 @@ describe('ZENITH Tracking Visibility: Phase 3.3 Multi-Agent Cases', () => {
         supabase: mockSupabase 
       });
       
-      const events = await getTrackingEvents('other-corp-order');
+      const { events } = await getTrackingEvents('other-corp-order');
       expect(events).toEqual([]); // 가시성 차단 시 빈 배열 반환 확인
     });
 

@@ -1,4 +1,5 @@
 import { logger } from '@/lib/logger';
+import { withAction } from '@/lib/actions/wrapper';
 'use server';
 
 import { createClient } from '@/utils/supabase/server';
@@ -11,7 +12,7 @@ import { USER_ROLES } from '@/lib/auth/rbac';
 /**
  * 1. 통관 신고 생성 (Admin 전용)
  */
-export async function createDeclaration(payload: {
+export const createDeclaration = withAction(async function (payload: {
   orderId: string;
   cargoDescription: string;
   declaredValue: number;
@@ -36,12 +37,12 @@ export async function createDeclaration(payload: {
 
   if (error) {
     logger.error('Error creating declaration:', error);
-    return { success: false, error: error.message };
+    throw new Error(error.message);
   }
 
   revalidatePath('/admin/customs');
-  return { success: true, id: data.id };
-}
+  return data.id;
+});
 
 /**
  * 2. 통관 신고 목록 조회 (Admin: 전체 / User: 본인 오더)
@@ -104,7 +105,7 @@ export async function getDeclarations(params?: {
 /**
  * 3. 상태 갱신 (Admin 전용)
  */
-export async function updateDeclarationStatus(payload: {
+export const updateDeclarationStatus = withAction(async function (payload: {
   id: string;
   status: CustomsStatus;
   declarationNo?: string;
@@ -132,18 +133,18 @@ export async function updateDeclarationStatus(payload: {
 
   if (error) {
     logger.error('Error updating declaration status:', error);
-    return { success: false, error: error.message };
+    throw new Error(error.message);
   }
 
   revalidatePath('/admin/customs');
   revalidatePath('/mypage/customs');
-  return { success: true };
-}
+  return true;
+});
 
 /**
  * 4. 신고 제출 (Admin 전용) - Adapter 호출
  */
-export async function submitDeclaration(id: string) {
+export const submitDeclaration = withAction(async function (id: string) {
   const { supabase } = await validateAdminAction();
 
   // 1. 현재 데이터 조회
@@ -154,7 +155,7 @@ export async function submitDeclaration(id: string) {
     .single();
 
   if (fetchError || !declaration) {
-    return { success: false, error: 'Declaration not found' };
+    throw new Error('Declaration not found');
   }
 
   // 2. 어댑터 호출 (현재는 ManualAdapter 고정)
@@ -162,7 +163,7 @@ export async function submitDeclaration(id: string) {
   const result = await adapter.submitDeclaration(declaration);
 
   if (!result.success) {
-    return { success: false, error: 'Adapter submission failed' };
+    throw new Error('Adapter submission failed');
   }
 
   // 3. 상태 업데이트 (SUBMITTED)
@@ -178,9 +179,9 @@ export async function submitDeclaration(id: string) {
 
   if (updateError) {
     logger.error('Error updating status after submission:', updateError);
-    return { success: false, error: updateError.message };
+    throw new Error(updateError.message);
   }
 
   revalidatePath('/admin/customs');
-  return { success: true };
-}
+  return true;
+});

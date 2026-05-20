@@ -24,7 +24,11 @@ export const ErrorLogsTable: React.FC<ErrorLogsTableProps> = ({ initialLogs, tot
   const handleResolve = async (id: string) => {
     setIsLoading(true);
     try {
-      await resolveErrorLog(id);
+      const { data: success, error } = await resolveErrorLog(id);
+      if (error) {
+        toast.error(error || '상태 변경에 실패했습니다.');
+        return;
+      }
       setLogs(prev => prev.map(log => 
         log.id === id ? { ...log, resolved: true } : log
       ));
