@@ -37,7 +37,15 @@ export class AdminRepository extends BaseRepository {
   async findProfileById(userId: string) {
     return this.db
       .from('zen_profiles')
-      .select('role, status')
+      .select('id, email, role, org_id, status')
+      .eq('id', userId)
+      .single();
+  }
+
+  async findProfileSession(userId: string) {
+    return this.db
+      .from('zen_profiles')
+      .select('id, email, role, org_id, status')
       .eq('id', userId)
       .single();
   }

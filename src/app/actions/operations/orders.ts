@@ -258,9 +258,6 @@ export async function updateOrderStatus(
   if (rpcError) throw new Error(`Update failed: ${rpcError.message}`);
 
   await Promise.all([
-    syncInventoryFromOrder(orderId, nextStatus, undefined, currentOrder.status).catch(invError => {
-      logger.error("[ERROR] Inventory sync failed:", invError);
-    }),
     nextStatus === OrderStatus.RELEASED
       ? generateInvoicesForOrder(orderId).catch(financeError => {
           logger.error("[CRITICAL] Finance automation failed during release:", financeError);
