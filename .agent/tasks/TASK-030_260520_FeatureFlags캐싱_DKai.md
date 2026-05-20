@@ -8,7 +8,7 @@
 | 담당 Agent | D_Kai (OpenCode) |
 | 우선순위 | P3 |
 | 전제조건 | 없음 (TASK-029와 병행 가능) |
-| 상태 | 🔔 검토 요청 — Aiden 검토 대기 |
+| 상태 | ✅ 완료 |
 | 파급 효과 | 없음 (독립 Task) |
 
 ---
@@ -81,8 +81,8 @@ Next.js `unstable_cache()` 또는 Edge Config 전환으로 캐시 적용 필요.
 | 항목 | 내용 |
 |:---|:---|
 | 검토일 | 2026-05-20 |
-| 판정 | ❌ 반려 |
-| 검토 의견 | **R-17 v1.4 위반 (혼합 커밋).** 실제 코드 커밋 `c5e03bd`에 `src/lib/params/feature-flags.ts`(코드) + task file(🔔 상태 변경) + ACTIVE_TASK.md가 단일 커밋에 혼입됨. R-17 v1.4는 코드 커밋과 문서 커밋 분리를 명시적으로 요구. 또한 task file 코드 커밋 해시 `—` 미기재, 별도 문서 커밋 없음. **재작업 지시**: (1) `c5e03bd`를 코드 커밋으로 인정, task file에 코드 커밋 해시 `c5e03bd` 기재, (2) ACTIVE_TASK.md · IMP_PROGRESS.md 포함 별도 문서 커밋 재수행. 구현 내용(`unstable_cache`, 60s TTL)은 올바름. 회귀 207/209 (2건 pre-existing infra) 허용. |
+| 판정 | ✅ PASS (재작업 후 승인) |
+| 검토 의견 | 재작업 검토 완료. 코드 커밋 `c5e03bd` (feature-flags.ts unstable_cache 적용) + 문서 커밋 `a5669ab` (task file·ACTIVE_TASK.md·IMP_PROGRESS.md 포함) 분리 확인 ✅. 코드/문서 커밋 해시 모두 기재 ✅. 207/209 PASS (2건 pre-existing infra) ✅. IMP-020 완료 처리. |
 
 ---
 
@@ -92,4 +92,5 @@ Next.js `unstable_cache()` 또는 Edge Config 전환으로 캐시 적용 필요.
 |:-----|:----:|:-----|
 | 2026-05-20 | Aiden (Claude) | Task 생성 — Phase G 작업 지시 발령 |
 | 2026-05-20 | Aiden (Claude) | ❌ 반려 — R-17 v1.4 혼합 커밋, 코드 커밋 해시 미기재, 문서 커밋 없음 |
+| 2026-05-20 | Aiden (Claude) | ✅ PASS — 재작업 확인. 코드 c5e03bd·문서 a5669ab 분리. IMP-020 완료 |
 | 2026-05-20 | D_Kai (OpenCode) | 재작업 완료 — 코드 커밋 해시 c5e03bd 기재·별도 문서 커밋 a5669ab 수행 |
