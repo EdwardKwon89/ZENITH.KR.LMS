@@ -50,6 +50,15 @@ export class AdminRepository extends BaseRepository {
       .single();
   }
 
+  async findProfileByNameAndEmail(fullName: string, email: string) {
+    return this.db
+      .from('zen_profiles')
+      .select('email')
+      .eq('full_name', fullName)
+      .eq('email', email)
+      .maybeSingle();
+  }
+
   async findProfileGrade(userId: string) {
     return this.db
       .from('profiles')
