@@ -8,7 +8,7 @@
 | 담당 Agent | Riley (Gemini) |
 | 우선순위 | P3 |
 | 전제조건 | 없음 (즉시 착수 가능) |
-| 상태 | 📝 설계 의견 작성 |
+| 상태 | 🔄 구현 중 |
 
 ---
 
@@ -91,9 +91,9 @@ export function withAction<T>(
 
 | 항목 | 내용 |
 |:---|:---|
-| 확정 방안 | — |
-| 수정·보완 사항 | — |
-| 착수 승인 | — |
+| 확정 방안 | Riley 제안 A안 승인 — `src/lib/actions/wrapper.ts` 생성, `withAction()` HOF, 리턴 타입 `{ data: T; error: null } \| { data: null; error: string }` discriminated union 패턴 |
+| 수정·보완 사항 | ① logger 연동: TASK-015(🔄 진행 중) 완료 전이면 `console.error` 임시 사용 가능 → TASK-015 완료 후 `logger.error`로 교체. ② Zod 검증 오류는 TASK-012에서 이미 Action 내부 처리됨 — 래퍼 내 별도 처리 불필요. ③ 기존 `result.success` 패턴 caller 수정 포함 필수 (최소 10개 Action 적용 시 해당 caller 전량 수정). |
+| 착수 승인 | ✅ 즉시 착수 가능 — TASK-015와 병행 진행 허용 |
 
 ---
 
@@ -129,3 +129,5 @@ export function withAction<T>(
 | 날짜 | 주체 | 내용 |
 |:-----|:----:|:-----|
 | 2026-05-16 | Aiden (Claude) | Task 생성 — 작업 지시 발령 |
+| 2026-05-20 | Riley (Gemini) | 설계 의견 제출 — withAction() HOF·discriminated union 패턴·점진적 마이그레이션 제안. 상태 📝→🔍 |
+| 2026-05-20 | Aiden (Claude) | 설계 확정 — A안 승인. logger 임시 사용 허용·Zod 별도 처리 불필요·caller 수정 포함. 상태 🔄 착수 승인 |
