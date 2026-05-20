@@ -94,7 +94,7 @@
 
 | IMP | 내용 | Agent | 상태 | 완료일 |
 |:---:|:-----|:-----:|:----:|:------:|
-| 016 | Repository 패턴 | B_Kai+D_Kai | 🔍 | — |
+| 016 | Repository 패턴 | B_Kai+D_Kai | 🔄 | — |
 | 059 | Supabase 클라이언트 중복 제거 | D_Kai | ✅ PASS | 2026-05-20 |
 
 ### D3 — 구조 개선
