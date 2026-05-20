@@ -75,6 +75,8 @@
 | TASK-018 | 260516 | finance.ts 733줄 분할 | P3 | 없음 | B_Kai | ✅ | [TASK-018](tasks/TASK-018_260516_financeTs733줄분할_BKai.md) | IMP-058 완료 · 커밋 af2f873+06210a0 · 199/199 PASS |
 | TASK-019 | 260516 | Server Actions 도메인 분할 | P3 | TASK-017+018 | B_Kai | ✅ | [TASK-019](tasks/TASK-019_260516_ServerActions도메인분할_BKai.md) | IMP-033 완료 · 4그룹 barrel 구조 ✅ · 206/206×4 PASS |
 | TASK-020 | 260516 | SELECT * 명시적 컬럼 교체 | P3 | 없음 | B_Kai | ✅ | [TASK-020](tasks/TASK-020_260516_SELECT명시적컬럼교체_BKai.md) | IMP-062 완료 · 커밋 c777b10+06210a0 · 202/202 PASS |
+| TASK-025 | 260520 | 원격 저장소 Push | P2 | 없음 | B_Kai | ⬜ | [TASK-025](tasks/TASK-025_260520_원격저장소Push_BKai.md) | 운영 Task · Phase F 전량 미push 해소 · 약 20개 커밋 |
+| TASK-026 | 260520 | Local/Remote DB 동기화 확인 | P2 | 없음 | D_Kai | ⬜ | [TASK-026](tasks/TASK-026_260520_LocalRemoteDB동기화확인_DKai.md) | 운영 Task · R-14 조회만(적용 금지) · IMP-068 Trigger 확인 포함 |
 | TASK-021 | 260520 | Phase F 데브리프 응답 | P4 | 없음 | Riley | ✅ | [TASK-021](tasks/TASK-021_260520_PhaseF데브리프응답_Riley.md) | 커밋 8a6e276 · Phase G IMP-015 착수 가능 |
 | TASK-022 | 260520 | Phase F 데브리프 응답 | P4 | 없음 | B_Kai | ✅ | [TASK-022](tasks/TASK-022_260520_PhaseF데브리프응답_BKai.md) | 커밋 ead4466 · Phase G 다음 Task 배분 대기 |
 | TASK-023 | 260520 | Phase F 데브리프 응답 | P4 | 없음 | D_Kai | ✅ | [TASK-023](tasks/TASK-023_260520_PhaseF데브리프응답_DKai.md) | 커밋 d7090a3 · Phase G IMP-016 즉시 착수 가능 |
@@ -87,8 +89,8 @@
 | Agent | 즉시 착수 가능 | 블로커 대기 |
 |:------|:-------------|:----------|
 | Riley | — | — (TASK-021 ✅ · Phase G IMP-015 착수 대기) |
-| B_Kai | — | — (TASK-022 ✅ · Phase G Task 배분 대기) |
-| D_Kai | — | — (TASK-023 ✅ · Phase G IMP-016 즉시 착수 가능) |
+| B_Kai | TASK-025 ⬜ 원격 저장소 Push | — |
+| D_Kai | TASK-025 병행 가능 · TASK-026 ⬜ Local/Remote DB 동기화 확인 | — |
 | Ring | — | — (TASK-024 ✅ 조건부 승인 · Phase G Task 배분 대기, 절차 중점 감시) |
 
 ---
@@ -129,3 +131,4 @@
 | 2026-05-20 | Ring (Qwen) | TASK-013 4차 재제출 — 중복선언 제거·들여쓰기 정정·코드 커밋 56a8fa1·209/209 PASS·task file·ACTIVE_TASK.md 🔔 동기화 |
 | 2026-05-20 | Riley (Gemini) | TASK-021 Phase F 데브리프 응답 완료 · 🔔 |
 | 2026-05-20 | Aiden (Claude) | TASK-021~024 전량 ✅ 승인 — Phase F 데브리프 완료. Ring TASK-024 조건부 승인(DoD 메타위반 기록). Phase G 전 Agent 착수 가능 |
+| 2026-05-20 | Aiden (Claude) | TASK-025 발령(B_Kai — 원격 저장소 Push) · TASK-026 발령(D_Kai — Local/Remote DB 동기화 확인). Phase G 착수 전 운영 체크 |
