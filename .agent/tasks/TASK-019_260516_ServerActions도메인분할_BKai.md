@@ -42,10 +42,11 @@ TASK-018 상태: ⬜ 미착수
 6. `gitnexus_detect_changes()` — 커밋 전 변경 범위 확인
 7. 회귀 테스트 전체 PASS: `rtk npm run test:regression`
 8. 결과 저장: `docs/08_Self_Audit/Regression_Results/`
-9. 커밋: `[B_Kai] refactor: IMP-033 Server Actions 도메인 분할`
-10. **본 파일 [작업 결과] 섹션 작성 + 상태 → 🔔**
+9. **[코드 커밋]** `[B_Kai] refactor: IMP-033 Server Actions 도메인 분할` (코드·회귀파일)
+10. **본 파일 [작업 결과] 섹션 작성** (9번 커밋 해시 포함) **+ 상태 → 🔔**
 11. **ACTIVE_TASK.md TASK-019 → 🔔 반영**
 12. **`scratch/IMP_PROGRESS.md` IMP-033 행 🔔 갱신**
+13. **[문서 커밋]** `[B_Kai] docs: TASK-019 완료 보고 — task file 🔔`
 
 ---
 
