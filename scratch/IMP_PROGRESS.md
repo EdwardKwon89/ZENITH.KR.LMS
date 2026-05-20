@@ -67,7 +67,7 @@
 | IMP | 내용 | Agent | 상태 | 완료일 |
 |:---:|:-----|:-----:|:----:|:------:|
 | 013 | console→logger 교체 (53개 파일) | Riley | ✅ | 2026-05-20 |
-| 015 | middleware.ts console.log 제거 | Riley | ⬜ | — |
+| 015 | middleware.ts console.log 제거 | Riley | 🔔 | — |
 | 025 | Server Actions 에러 래퍼 | Riley | ✅ | 2026-05-20 |
 | 045 | 무제한 리스트 페이지네이션 (18곳) | Ring | ✅ PASS | 2026-05-20 |
 | 046 | Rate Limiting 도입 | B_Kai | 🚫 | — |
@@ -94,7 +94,7 @@
 
 | IMP | 내용 | Agent | 상태 | 완료일 |
 |:---:|:-----|:-----:|:----:|:------:|
-| 016 | Repository 패턴 | B_Kai+D_Kai | 📝 | — |
+| 016 | Repository 패턴 | B_Kai+D_Kai | 🔍 | — |
 | 059 | Supabase 클라이언트 중복 제거 | D_Kai | ✅ PASS | 2026-05-20 |
 
 ### D3 — 구조 개선
@@ -115,7 +115,7 @@
 
 | IMP | 내용 | Agent | 상태 | 완료일 |
 |:---:|:-----|:-----:|:----:|:------:|
-| 020 | Feature Flags 캐싱 | D_Kai | ⬜ | — |
+| 020 | Feature Flags 캐싱 | D_Kai | 🔔 | 2026-05-20 |
 | 021 | 미들웨어 DB 호출 최적화 | D_Kai | ⬜ | — |
 | 022 | NaviSidebar 번들 최적화 | D_Kai | ⬜ | — |
 | 048 | Mock 데이터 제거 | B_Kai | ✅ | 2026-05-15 |

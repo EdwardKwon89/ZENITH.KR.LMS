@@ -8,7 +8,7 @@
 | 담당 Agent | B_Kai (구현) + D_Kai (설계·검토) |
 | 우선순위 | P3 |
 | 전제조건 | IMP-033·058 ✅ 완료(D1 전량 완료) → 즉시 착수 가능 |
-| 상태 | ⬜ 미착수 |
+| 상태 | 🔍 설계 검토 대기 |
 | 파급 효과 | 없음 (독립 Task, 완료 후 아키텍처 개선 가속) |
 
 ---
@@ -85,11 +85,11 @@ IMP-059(클라이언트 싱글톤)는 완료되었으나, 비즈니스 로직과
 
 | 항목 | 내용 |
 |:---|:---|
-| 제안 방안 | — |
-| 도입 범위 | — |
-| 선택 근거 | — |
-| 예상 리스크 | — |
-| 대안 방안 | — |
+| 제안 방안 | **A안 (권장)**: BaseRepository 추상 클래스 + 도메인별 Repository (OrderRepository·FinanceRepository·AdminRepository). BaseRepository가 `createClient()`·`getUser()`·`getProfile()` 공통 제공, 하위 Repo가 도메인 테이블 전용 메서드 정의. |
+| 도입 범위 | **1차**: Orders(zen_orders·zen_order_packages·zen_order_items), Finance(zen_invoices·zen_settlements·zen_order_costs), Admin(zen_profiles·zen_organizations·zen_ports·zen_common_codes) — **3개 도메인 9개 테이블**. 2차 확장 시 master·inventory·tracking 추가. |
+| 선택 근거 | ① 기존 `validateUserAction()` 패턴과 호환 ② barrel re-export로 기존 import 경로 변경 불필요 ③ 단계적 전환 가능 (1개 Repository 완료 후 즉시 action에 적용) ④ `logger`·`revalidatePath` 등 공통 로직 중앙화 |
+| 예상 리스크 | ① LOW — 기존 action에 `new OrderRepository()` 주입 시 import 경로만 변경, 로직 자체는 유지 ② LOW — Repository 내 Supabase 클라이언트 재사용(`React.cache()` 활용, IMP-059 패턴 계승) ③ MEDIUM — 복잡 쿼리(RPC·join)는 Repository 메서드 시그니처 설계 필요 |
+| 대안 방안 | B안: Interface 기반 (유연성↑ 복잡도↑). C안: 전량 1회 마이그레이션 (리스크↑). → **A안 채택 권장**: D1에서 검증된 barrel+incremental 패턴과 일관성 유지 |
 
 ---
 
