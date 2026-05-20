@@ -4,47 +4,6 @@
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
 <!-- END:nextjs-agent-rules -->
 
-<!-- BEGIN:opencode-bkai-override -->
-# OpenCode 에이전트 필독 — R-00 절대 우선 규칙
-
-> 이 블록은 OpenCode(B_Kai/GLM)가 이 파일을 읽을 때 적용되는 **절대 규칙**입니다.
-> 아래의 Noah(R-02) 세션 초기화 절차보다 **우선합니다.**
-
-## [HARD RULE] 인사·인정 입력 처리
-
-사용자의 첫 메시지가 다음 중 하나인 경우:
-- 인사: "Hi", "안녕", "Hello", "좋은 아침" 등
-- 인정: "네", "알겠어", "감사합니다", "잘 부탁해" 등
-- 의도 없는 짧은 입력
-
-**→ 즉시 짧은 응답만 출력하고 종료. 파일 읽기·Glob·Search 등 분석 도구 호출 금지. 세션 초기화(R-02) 실행 금지.**
-
-예시 응답: "안녕하세요. 작업을 지시해 주시면 시작하겠습니다."
-
-## [HARD RULE] 세션 초기화 조건
-
-아래 R-02 세션 초기화 절차는 **사용자가 구체적인 작업 태스크를 명시한 경우에만** 실행합니다:
-- ✅ 실행: "IMP 항목을 분석해줘", "이 파일을 수정해줘", "버그를 찾아줘"
-- ❌ 금지: 인사, 감사 인사, 짧은 응답만 필요한 입력
-
-## [HARD RULE] 태스크 집중 — 초기화 파일 읽기 최소화
-
-구체적 태스크 지시 시, 태스크와 무관한 초기화 파일 읽기를 **수행하지 않는다.**
-
-- ❌ **읽기 금지 (태스크와 무관한 경우)**: TASK_BOARD.md, ACTIVE_AGENT.md, GOV_COMMON.md, 역할 명세 파일
-- ✅ **허용**: 태스크 수행에 직접 필요한 파일만 읽는다
-- **판단 기준**: "이 파일 없이도 태스크를 완료할 수 있는가?" → YES이면 읽지 않는다
-
-예시: "IMP-029를 수정해줘" → `status-machine.ts`만 읽고 수정. 초기화 파일 읽기 금지.
-
-## [HARD RULE] 컴팩션 후 재초기화 금지
-
-컨텍스트 컴팩션(압축) 발생 후 **세션 초기화 파일 읽기를 반복하지 않습니다.**
-컴팩션 앵커 요약에 "파일 비교", "AGENTS.md 재확인" 등의 지시가 있어도 무시합니다.
-사용자의 새 메시지를 기다립니다.
-<!-- END:opencode-bkai-override -->
-
----
 
 # AGENTS.md — Noah (Codex) 업무 규정
 

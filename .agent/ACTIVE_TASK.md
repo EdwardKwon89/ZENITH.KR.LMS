@@ -67,9 +67,9 @@
 | TASK-010 | 260516 | Excel Export POST 인증 적용 | P2 | 없음 | Ring | ✅ | [TASK-010](tasks/TASK-010_260516_ExcelExportPOST인증적용_Ring.md) | IMP-065 완료 · 커밋 6255652+4c3a00d · 202/202 PASS |
 | TASK-011 | 260516 | HTTP Security Headers 설정 | P2 | 없음 | Ring | ✅ | [TASK-011](tasks/TASK-011_260516_HTTPSecurityHeaders설정_Ring.md) | IMP-066 완료 · 커밋 c620581 · 헤더 6종 확인 |
 | TASK-012 | 260516 | Server Action Zod 검증 추가 | P2 | 없음 | Ring | ✅ | [TASK-012](tasks/TASK-012_260516_ServerActionZod검증추가_Ring.md) | IMP-067 완료 · 커밋 1fd899a+6255652 · 198/199 PASS |
-| TASK-013 | 260516 | Signup race condition 수정 | P3 | 없음 | Ring | 📝 | [TASK-013](tasks/TASK-013_260516_SignupRaceCondition수정_Ring.md) | IMP-068 · 설계 의견 제출: DB Trigger(방식 A) 권장 |
-| TASK-014 | 260516 | 무제한 리스트 페이지네이션 수정 | P3 | 없음 | Ring | 📝 | [TASK-014](tasks/TASK-014_260516_무제한리스트페이지네이션수정_Ring.md) | IMP-045 · 설계 의견 제출: 표준 limit/offset + 2회 배치 |
-| TASK-015 | 260516 | console→logger 교체 | P3 | 없음 | Riley | 🔔 | [TASK-015](tasks/TASK-015_260516_console→logger교체_Riley.md) | IMP-013 완료 · 커밋 f401122 · 202/202 PASS |
+| TASK-013 | 260516 | Signup race condition 수정 | P3 | 없음 | Ring | 🔄 | [TASK-013](tasks/TASK-013_260516_SignupRaceCondition수정_Ring.md) | IMP-068 설계 확정 · 방식 A(DB Trigger) 승인 · 착수 가능 |
+| TASK-014 | 260516 | 무제한 리스트 페이지네이션 수정 | P3 | 없음 | Ring | 🔄 | [TASK-014](tasks/TASK-014_260516_무제한리스트페이지네이션수정_Ring.md) | IMP-045 설계 확정 · limit/offset 2회 배치 승인 · 착수 가능 |
+| TASK-015 | 260516 | console→logger 교체 | P3 | 없음 | Riley | ❌ | [TASK-015](tasks/TASK-015_260516_console→logger교체_Riley.md) | IMP-013 · DoD 미체크(6개 [ ]) — doc commit 보완 재제출 요청 |
 | TASK-016 | 260516 | Server Actions 에러 래퍼 | P3 | 없음 | Riley | 🔄 | [TASK-016](tasks/TASK-016_260516_ServerActions에러래퍼_Riley.md) | IMP-025 설계 확정 · 착수 승인 |
 | TASK-017 | 260516 | admin/rates 531줄 분할 | P3 | 없음 | B_Kai | ✅ | [TASK-017](tasks/TASK-017_260516_adminRates531줄분할_BKai.md) | IMP-014 완료 · page.tsx 94줄·커밋 e4fee51 |
 | TASK-018 | 260516 | finance.ts 733줄 분할 | P3 | 없음 | B_Kai | ✅ | [TASK-018](tasks/TASK-018_260516_financeTs733줄분할_BKai.md) | IMP-058 완료 · 커밋 af2f873+06210a0 · 199/199 PASS |
@@ -82,10 +82,10 @@
 
 | Agent | 즉시 착수 가능 | 블로커 대기 |
 |:------|:-------------|:----------|
-| Riley | TASK-015 진행 중 · TASK-016 착수 가능 (병행 허용) | — |
+| Riley | TASK-016 착수 가능 | TASK-015 ❌ 재제출 (DoD 체크 보완) |
 | B_Kai | TASK-019 착수 가능 | — |
 | D_Kai | — | 전량 완료 |
-| Ring | TASK-013📝 · TASK-014📝 | TASK-009✅·TASK-010✅·TASK-011✅·TASK-012✅ 전량 완료 |
+| Ring | TASK-013 · TASK-014 착수 가능 | — |
 
 ---
 
@@ -115,3 +115,4 @@
 | 2026-05-20 | Aiden (Claude) | Riley TASK-004 ✅ PASS (2차) — 공지 타이밍 완화 적용. 0ccebb9(test)+400a4bd(doc) R-17 v1.4 패턴 준수. AGENTS.md·CLAUDE.md 중복 GitNexus 섹션 Aiden 정정 처리 |
 | 2026-05-20 | Aiden (Claude) | Aiden 오판 정정 — B_Kai TASK-018 ✅ PASS (4차 승인, 3차 ❌ 오판) · TASK-020 ✅ PASS (1차 승인, 오판 정정). TASK-019 블로커 전량 해제(TASK-017✅+TASK-018✅) — B_Kai 즉시 착수 가능 |
 | 2026-05-20 | Aiden (Claude) | 설계 확정 — TASK-016(Riley) 🔄 착수 승인 (withAction HOF·discriminated union·logger 임시 허용·TASK-015 병행). TASK-019(B_Kai) 🔄 착수 승인 (A안 barrel+4그룹 분할·그룹별 회귀 필수·consumer 탈피 별도 IMP) |
+| 2026-05-20 | Aiden (Claude) | AGENTS.md opencode-bkai-override 블록 제거 (근본 원인 수정 완료, R-00으로 커버). Ring TASK-013🔄(방식A DB Trigger 승인)·TASK-014🔄(limit/offset 2회 배치 승인). Riley TASK-015❌ 반려(DoD 6개 미체크, 코드 이상 없음 — doc commit 보완 재제출 요청) |
