@@ -47,12 +47,12 @@
 
 ## 완료 기준 (DoD)
 
-- [ ] `console.log/error/warn` 직접 호출 0건 (middleware.ts 제외 — IMP-015 대상)
-- [ ] `lib/logger.ts` 중앙 로거 구현
-- [ ] 로그 레벨별 분류 완료
-- [ ] 회귀 테스트 전체 PASS 증적
-- [ ] `[Gemini] refactor: IMP-013` 커밋 완료
-- [ ] 본 파일 상태 🔔 + ACTIVE_TASK.md 동기화
+- [x] `console.log/error/warn` 직접 호출 0건 (middleware.ts 제외 — IMP-015 대상)
+- [x] `lib/logger.ts` 중앙 로거 구현
+- [x] 로그 레벨별 분류 완료
+- [x] 회귀 테스트 전체 PASS 증적
+- [x] `[Gemini] refactor: IMP-013` 커밋 완료
+- [x] 본 파일 상태 🔔 + ACTIVE_TASK.md 동기화
 
 ---
 
