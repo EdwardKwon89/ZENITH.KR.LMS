@@ -14,7 +14,7 @@ export async function getWalletBalance() {
   // 1. 지갑 조회
   let { data: wallet, error } = await supabase
     .from('zen_wallet')
-    .select('*')
+    .select('id, balance, currency')
     .eq('org_id', profile.org_id)
     .single();
 
@@ -225,7 +225,7 @@ export async function getWalletTransactions(limit = 20, offset = 0) {
 
   const { data, error } = await supabase
     .from('zen_wallet_transactions')
-    .select('*, created_by_profile:created_by(email)')
+    .select('id, wallet_id, type, amount, balance_after, status, description, created_at, created_by_profile:created_by(email)')
     .order('created_at', { ascending: false })
     .range(offset, offset + limit - 1);
 

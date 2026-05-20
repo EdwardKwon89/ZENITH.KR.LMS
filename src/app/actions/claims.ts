@@ -94,7 +94,7 @@ export async function createClaim(payload: {
       description: payload.description,
       status: 'OPEN'
     })
-    .select()
+    .select("id, order_id, org_id, created_by, reason_code, description, status, resolved_at, created_at, updated_at")
     .single();
 
   if (claimError) throw new Error(`Claim registration failed: ${claimError.message}`);
@@ -187,7 +187,7 @@ export async function updateClaimStatus(
       description: payload.description,
       created_by: user.id
     })
-    .select()
+    .select("id, claim_id, invoice_id, fee_amount, currency, description, created_by, created_at")
     .single();
 
   if (feeError) throw new Error(`Incident fee registration failed: ${feeError.message}`);

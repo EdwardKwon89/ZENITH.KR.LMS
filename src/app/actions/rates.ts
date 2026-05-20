@@ -60,7 +60,7 @@ export async function createRateCard(payload: {
       version_no: nextVersion,
       created_at: new Date().toISOString()
     })
-    .select()
+    .select("id")
     .single();
 
   if (cardError) throw new Error(`Rate card creation failed: ${cardError.message}`);

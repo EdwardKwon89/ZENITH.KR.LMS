@@ -64,7 +64,7 @@ export async function getInventoryHistory(inventoryId: string) {
 
   const { data, error } = await supabase
     .from("zen_inventory_history")
-    .select("*")
+    .select('id, inventory_id, org_id, transaction_type, change_qty, result_qty, reference_id, remarks, created_by, created_at')
     .eq("inventory_id", inventoryId)
     .order("created_at", { ascending: false });
 
@@ -141,10 +141,26 @@ export async function adjustInventory(payload: InventoryAdjustmentInput) {
 export async function syncInventoryFromOrder(
   orderId: string, 
   nextStatus: string, 
-  itemDiff?: { sku: string; diff: number }[]
+  itemDiff?: { sku: string; diff: number }[],
+  prevStatus?: string
 ) {
   const { supabase, profile } = await validateUserAction();
   if (!profile) return;
+
+  // CANCELED 상태 전환 시, 이전 상태 파악이 필요하나 prevStatus가 생략된 경우 fallback 조회
+  let resolvedPrevStatus = prevStatus;
+  if (!resolvedPrevStatus && nextStatus === OrderStatus.CANCELED) {
+    const { data: history } = await supabase
+      .from("order_status_history")
+      .select("prev_status")
+      .eq("order_id", orderId)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (history) {
+      resolvedPrevStatus = history.prev_status;
+    }
+  }
 
   // 1. 오더 아이템 조회
   const { data: items, error: itemsError } = await supabase
@@ -157,7 +173,7 @@ export async function syncInventoryFromOrder(
   const skuCodes = items.filter(i => i.sku_code).map(i => i.sku_code);
   const { data: inventoryList } = skuCodes.length > 0 ? await supabase
     .from("zen_inventory")
-    .select("*")
+    .select('id, sku_code, on_hand_qty, reserved_qty')
     .eq("org_id", profile.org_id)
     .in("sku_code", skuCodes) : { data: [] };
   const inventoryBySku = new Map(inventoryList?.map(i => [i.sku_code, i]) ?? []);
@@ -216,17 +232,51 @@ export async function syncInventoryFromOrder(
         break;
 
       case OrderStatus.CANCELED:
-        // 예약 취소 (reserved_qty 차감)
-        updatePayload = { 
-          reserved_qty: Math.max(0, inventory.reserved_qty - item.quantity) 
-        };
-        historyPayload = {
-          ...historyPayload,
-          transaction_type: 'RESERVATION_CANCEL',
-          change_qty: -item.quantity,
-          result_qty: inventory.on_hand_qty,
-          remarks: `Order Cancelled: ${orderId}`
-        };
+        // WAREHOUSED or PACKED 상태에서 취소 시: 입고/예약 동시 복구 (on_hand 차감, reserved 차감)
+        if (resolvedPrevStatus === OrderStatus.WAREHOUSED || resolvedPrevStatus === OrderStatus.PACKED) {
+          updatePayload = { 
+            on_hand_qty: Math.max(0, inventory.on_hand_qty - item.quantity),
+            reserved_qty: Math.max(0, inventory.reserved_qty - item.quantity) 
+          };
+          historyPayload = {
+            ...historyPayload,
+            transaction_type: 'ADJUSTMENT',
+            change_qty: -item.quantity,
+            result_qty: Math.max(0, inventory.on_hand_qty - item.quantity),
+            remarks: `Order Cancelled (Warehoused/Packed Revert) from ${resolvedPrevStatus}: ${orderId}`
+          };
+        }
+        // RELEASED, IN_TRANSIT, DELIVERED, CLAIMED 상태에서 취소 시: 출고 복구 (on_hand 가산, reserved 변동 없음)
+        else if (
+          resolvedPrevStatus === OrderStatus.RELEASED ||
+          resolvedPrevStatus === OrderStatus.IN_TRANSIT ||
+          resolvedPrevStatus === OrderStatus.DELIVERED ||
+          resolvedPrevStatus === OrderStatus.CLAIMED
+        ) {
+          updatePayload = {
+            on_hand_qty: inventory.on_hand_qty + item.quantity
+          };
+          historyPayload = {
+            ...historyPayload,
+            transaction_type: 'INBOUND',
+            change_qty: item.quantity,
+            result_qty: inventory.on_hand_qty + item.quantity,
+            remarks: `Order Cancelled (Released/InTransit Revert) from ${resolvedPrevStatus}: ${orderId}`
+          };
+        }
+        // 그 외 상태 (REGISTERED, SCHEDULED 등)에서 취소 시: 예약 취소 (reserved 감산)
+        else {
+          updatePayload = { 
+            reserved_qty: Math.max(0, inventory.reserved_qty - item.quantity) 
+          };
+          historyPayload = {
+            ...historyPayload,
+            transaction_type: 'RESERVATION_CANCEL',
+            change_qty: -item.quantity,
+            result_qty: inventory.on_hand_qty,
+            remarks: `Order Cancelled: ${orderId}`
+          };
+        }
         break;
       
       case 'UPDATED':

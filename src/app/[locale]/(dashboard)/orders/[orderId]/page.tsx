@@ -41,25 +41,25 @@ export default async function OrderDetailPage({
   // note: requireAuth에서 가져온 profile.role을 기반으로 rbac 체크
   const { data: config } = await supabase
     .from("zen_tracking_configs")
-    .select("*")
+    .select("tracking_no, provider_type")
     .eq("order_id", orderId)
     .single();
 
   // 3. 재무 데이터 가져오기
   const { data: costs } = await supabase
     .from('zen_order_costs')
-    .select('*')
+    .select('id, cost_type, total_amount, currency, invoice_id')
     .eq('order_id', orderId);
 
   // Look up invoice via cost's invoice_id (ground truth) to avoid RLS/shipper-id mismatch
   const linkedInvoiceId = costs?.find((c: any) => c.invoice_id)?.invoice_id ?? null;
   const { data: invoice } = linkedInvoiceId
-    ? await supabase.from('zen_invoices').select('*').eq('id', linkedInvoiceId).single()
+    ? await supabase.from('zen_invoices').select('id, invoice_no, total_amount, status').eq('id', linkedInvoiceId).single()
     : { data: null };
 
   // Fetch incident fees associated with the invoice (if any)
   const { data: incidentFees } = linkedInvoiceId
-    ? await supabase.from('zen_incident_fees').select('*').eq('invoice_id', linkedInvoiceId)
+    ? await supabase.from('zen_incident_fees').select('id, description, currency, fee_amount').eq('invoice_id', linkedInvoiceId)
     : { data: [] };
 
   const isAdmin = checkPermission(profile?.role, "/admin");

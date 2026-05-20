@@ -98,7 +98,7 @@ export function useRates(): RatesFormState {
       if (user) {
         const { data: profileData } = await supabase
           .from('zen_profiles')
-          .select('*')
+          .select('id, role, email, full_name, org_id')
           .eq('id', user.id)
           .single();
         setProfile(profileData);
@@ -106,7 +106,7 @@ export function useRates(): RatesFormState {
 
       const { data: carrierData } = await supabase
         .from('zen_organizations')
-        .select('*')
+        .select('id, name, type, status')
         .eq('type', 'CARRIER')
         .eq('status', 'ACTIVE');
 
@@ -114,7 +114,7 @@ export function useRates(): RatesFormState {
 
       const { data: shipperData } = await supabase
         .from('zen_organizations')
-        .select('*')
+        .select('id, name, type, status')
         .in('type', ['SHIPPER', 'FORWARDER'])
         .eq('status', 'ACTIVE');
 
@@ -122,8 +122,8 @@ export function useRates(): RatesFormState {
 
       const { data: portData } = await supabase
         .from('zen_ports')
-        .select('*')
-        .order('port_code');
+        .select('id, name, code, country_code, type')
+        .order('code');
 
       if (portData) setPorts(portData);
     };

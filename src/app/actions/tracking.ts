@@ -13,7 +13,7 @@ export async function getTrackingEvents(orderId: string) {
   // 1. 트래킹 설정 확인
   const { data: config, error: configError } = await supabase
     .from("zen_tracking_configs")
-    .select("*")
+    .select("provider_type")
     .eq("order_id", orderId)
     .single();
 
@@ -30,7 +30,7 @@ export async function getTrackingEvents(orderId: string) {
   // 3. 트래킹 이벤트 조회 (DB에서 최종 결과 반환)
   const { data: events, error } = await supabase
     .from("zen_tracking_events")
-    .select("*")
+    .select("id, order_id, event_code, event_time, status, location, description, source_type")
     .eq("order_id", orderId)
     .order("event_time", { ascending: false });
 
@@ -124,7 +124,7 @@ export async function syncExternalTracking() {
   // 1. API 공급자가 설정된 활성 트래킹 설정 조회
   const { data: configs, error } = await supabase
     .from("zen_tracking_configs")
-    .select("*")
+    .select("order_id, provider_type")
     .eq("provider_type", "API");
 
   if (error) throw new Error(`Failed to fetch tracking configs: ${error.message}`);
@@ -154,7 +154,7 @@ export async function getTrackingRawLogs(orderId: string) {
 
   const { data: logs, error } = await supabase
     .from("zen_tracking_raw_logs")
-    .select("*")
+    .select("id, order_id, raw_body, created_at, provider")
     .eq("order_id", orderId)
     .order("created_at", { ascending: false });
 
@@ -173,7 +173,12 @@ export async function getGlobalTrackingOverview() {
   const { data, error } = await supabase
     .from("zen_tracking_configs")
     .select(`
-      *,
+      id,
+      order_id,
+      provider_type,
+      provider_name,
+      tracking_no,
+      updated_at,
       order:zen_orders(
         id,
         order_no,

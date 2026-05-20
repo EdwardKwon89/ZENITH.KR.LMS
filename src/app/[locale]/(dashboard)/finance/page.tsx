@@ -24,12 +24,12 @@ export default async function FinanceDashboardPage() {
   // 1. 재무 요약 데이터 가져오기 (실제 DB 연동)
   const { data: invoices } = await supabase
     .from('zen_invoices')
-    .select('*')
+    .select('id, invoice_no, total_amount, currency, status, created_at')
     .order('created_at', { ascending: false });
 
   const { data: costs } = await supabase
     .from('zen_order_costs')
-    .select('*')
+    .select('total_amount, is_revenue')
     .eq('is_revenue', true);
 
   const totalRevenue = costs?.reduce((sum, c) => sum + Number(c.total_amount), 0) || 0;

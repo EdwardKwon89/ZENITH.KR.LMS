@@ -22,7 +22,7 @@ export async function upsertPort(payload: PortInput) {
       ...validated,
       updated_at: new Date().toISOString()
     })
-    .select()
+    .select("id, code, name, type, country_code, city, is_active, created_at, updated_at")
     .single();
 
   if (error) throw new Error(`Port upsert failed: ${error.message}`);
@@ -37,7 +37,7 @@ export async function upsertPort(payload: PortInput) {
 export async function getPorts(activeOnly = true) {
   const { supabase } = await validateAdminAction();
   
-  let query = supabase.from("zen_ports").select("*");
+  let query = supabase.from("zen_ports").select("id, code, name, type, country_code, city, is_active, created_at, updated_at");
   if (activeOnly) query = query.eq("is_active", true);
 
   const { data, error } = await query.order("code", { ascending: true });
@@ -53,7 +53,7 @@ export async function getNations() {
   const { supabase } = await validateUserAction();
   const { data, error } = await supabase
     .from("zen_nations")
-    .select("*")
+    .select("iso_alpha2, iso_alpha3, nation_name_ko, nation_name_en, nation_name_zh, nation_name_ja, phone_code, is_active, created_at, updated_at")
     .order("name", { ascending: true });
 
   if (error) throw new Error(`Failed to fetch nations: ${error.message}`);
@@ -67,7 +67,7 @@ export async function getOrganizations() {
   const { supabase } = await validateUserAction();
   const { data, error } = await supabase
     .from("zen_organizations")
-    .select("*")
+    .select("id, name, type, status, biz_no, corporate_id, iata_code, prefix_code, rep_name, parent_id, metadata, approval_comment, approval_date, created_at")
     .eq("status", "ACTIVE")
     .order("name", { ascending: true });
 
@@ -82,7 +82,7 @@ export async function getAirlines() {
   const { supabase } = await validateUserAction();
   const { data, error } = await supabase
     .from("zen_organizations")
-    .select("*")
+    .select("id, name, type, status, biz_no, corporate_id, iata_code, prefix_code, rep_name, parent_id, metadata, approval_comment, approval_date, created_at")
     .eq("org_type", "CARRIER")
     .not("iata_code", "is", null)
     .eq("status", "ACTIVE")
@@ -105,7 +105,7 @@ export async function upsertCommonCode(payload: CommonCodeInput) {
       ...validated,
       updated_at: new Date().toISOString()
     })
-    .select()
+    .select("id, category, code, name_ko, name_en, sort_order, is_active, metadata, created_at, updated_at")
     .single();
 
   if (error) throw new Error(`Common code upsert failed: ${error.message}`);
@@ -122,7 +122,7 @@ export async function getCommonCodes(category: string, activeOnly = true) {
 
   let query = supabase
     .from("zen_common_codes")
-    .select("*")
+    .select("id, category, code, name_ko, name_en, sort_order, is_active, metadata, created_at, updated_at")
     .eq("category", category);
     
   if (activeOnly) query = query.eq("is_active", true);

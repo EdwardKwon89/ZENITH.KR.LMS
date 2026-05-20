@@ -25,7 +25,7 @@ export interface TrackingStep {
 export async function generateTrackingHistory(supabase: any, orderId: string, status: string, mode: string): Promise<void> {
   const { data: scenarios } = await supabase
     .from('zen_tracking_scenarios')
-    .select('*')
+    .select('relative_minutes, event_code, location_template, description_template')
     .eq('transport_mode', mode)
     .eq('order_status', status)
     .order('sequence_no', { ascending: true });
@@ -78,7 +78,7 @@ export class TrackingManager {
   async getTrackingData(supabase: any, orderId: string): Promise<TrackingStep[]> {
     const { data: config, error: configError } = await supabase
       .from('zen_tracking_configs')
-      .select('*')
+      .select('id, provider_type, tracking_no, order_id')
       .eq('order_id', orderId)
       .single();
 
@@ -90,7 +90,7 @@ export class TrackingManager {
       console.warn(`[TRACKING_MANAGER] No config found for order ${orderId}`);
       return [];
     }
-    
+
     console.log(`[TRACKING_MANAGER] Found config for ${orderId}: provider_type=${config.provider_type}`);
 
     const provider = this.providers.get(config.provider_type);

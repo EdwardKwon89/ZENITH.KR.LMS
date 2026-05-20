@@ -16,7 +16,7 @@ export async function getOrganizationInfo() {
 
   const { data, error } = await supabase
     .from("zen_organizations")
-    .select("*")
+    .select('id, name, metadata')
     .eq("id", profile.org_id)
     .single();
 
@@ -86,7 +86,7 @@ export async function getDepartments() {
 
   const { data, error } = await supabase
     .from("zen_departments")
-    .select("*")
+    .select('id, name, created_at')
     .eq("org_id", profile.org_id)
     .order("created_at", { ascending: true });
 
