@@ -71,7 +71,7 @@ IMP-013(console→logger 교체)이 완료된 상태이므로 동일한 `logger.
 | gitnexus_impact 결과 | `risk: LOW, affected: 0 (Next.js Entrypoint)` |
 | 회귀 결과 | `PASS (44 files, 209 tests)` |
 | 코드 커밋 해시 | `df637068602623096ccfa2c6dce79a637ab7b2c6` |
-| 문서 커밋 해시 | `대기 중` |
+| 문서 커밋 해시 | `428bf3e8d2e850bdf73a90710652bf3ec6877997` |
 
 ---
 
