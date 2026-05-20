@@ -81,7 +81,7 @@
 | TASK-022 | 260520 | Phase F 데브리프 응답 | P4 | 없음 | B_Kai | ✅ | [TASK-022](tasks/TASK-022_260520_PhaseF데브리프응답_BKai.md) | 커밋 ead4466 · Phase G 다음 Task 배분 대기 |
 | TASK-023 | 260520 | Phase F 데브리프 응답 | P4 | 없음 | D_Kai | ✅ | [TASK-023](tasks/TASK-023_260520_PhaseF데브리프응답_DKai.md) | 커밋 d7090a3 · Phase G IMP-016 즉시 착수 가능 |
 | TASK-024 | 260520 | Phase F 데브리프 응답 | P4 | 없음 | Ring | ✅ | [TASK-024](tasks/TASK-024_260520_PhaseF데브리프응답_Ring.md) | 커밋 db32af1 · 조건부 승인 · Phase G 착수 허가 (첫 Task 절차 중점 확인) |
-| TASK-027 | 260520 | 트랜잭션 부재 확장 (status/지갑) | P2 | IMP-019 ✅ | Riley | 🔄 | [TASK-027](tasks/TASK-027_260520_트랜잭션부재확장_Riley.md) | IMP-047 · 설계 확정 ✅ · 완료 시 IMP-052·053 블로커 해제 |
+| TASK-027 | 260520 | 트랜잭션 부재 확장 (status/지갑) | P2 | IMP-019 ✅ | Riley | 🔔 | [TASK-027](tasks/TASK-027_260520_트랜잭션부재확장_Riley.md) | IMP-047 · 설계 확정 ✅ · 완료 시 IMP-052·053 블로커 해제 |
 | TASK-028 | 260520 | middleware.ts console.log 제거 | P3 | IMP-013 ✅ | Riley | ❌ | [TASK-028](tasks/TASK-028_260520_middleware로그제거_Riley.md) | IMP-015 · 독립 코드 커밋 없음(df63706 혼입) · 문서 커밋 재수행 필요 |
 | TASK-029 | 260520 | Repository 패턴 도입 | P3 | D1 ✅ | B_Kai+D_Kai | ❌ | [TASK-029](tasks/TASK-029_260520_Repository패턴도입_BKaiDKai.md) | IMP-016 · Finance(settlement 5곳·invoice 2곳)·Admin(auth 1곳) 마이그레이션 미완료 |
 | TASK-030 | 260520 | Feature Flags unstable_cache 적용 | P3 | 없음 | D_Kai | ✅ | [TASK-030](tasks/TASK-030_260520_FeatureFlags캐싱_DKai.md) | IMP-020 완료 · 코드 c5e03bd·문서 a5669ab · 207/209 |
@@ -99,7 +99,7 @@
 
 | Agent | 즉시 착수 가능 | 재작업 필요 | 블로커 대기 |
 |:------|:-------------|:-----------|:----------|
-| Riley | **TASK-027 🔄** (P2, 설계 확정 · 즉시 착수) | TASK-028 ❌ (문서 커밋 재수행) | TASK-035 (TASK-027 완료 후 권장) |
+| Riley | — | TASK-028 ❌ (문서 커밋 재수행) | TASK-035 (TASK-027 완료 후 권장) |
 | B_Kai | — | TASK-029 ❌ (Finance·Admin 마이그레이션 미완료) · TASK-036 🔔 (3차 재보고) | — |
 | D_Kai | **TASK-029 협업** (복잡 쿼리 시그니처 설계) · TASK-030 🔔 (재검토 대기) | TASK-031 (TASK-030 🔔 승인 후) · TASK-037 (TASK-031 완료 후) |
 | Ring | TASK-032 (P2, 최우선) | — | TASK-033 (TASK-032 완료 후 + 설계 의견 선행) |

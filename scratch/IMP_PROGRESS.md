@@ -52,7 +52,7 @@
 | 042 | `updateOrder()` 수정 차단 누락 | B_Kai | ✅ | 2026-05-15 |
 | 043 | MASTERED Lock 액션별 우회 방지 | B_Kai | ✅ | 2026-05-15 |
 | 044 | 인보이스 발행 후 비용 변경 차단 | B_Kai | ✅ PASS | 2026-05-16 |
-| 047 | 트랜잭션 부재 확장 (status/지갑) | Riley | ⬜ | — |
+| 047 | 트랜잭션 부재 확장 (status/지갑) | Riley | 🔔 | 2026-05-20 |
 | 052 | dissolveMasterOrder 부분 실패 | Riley | 🚫 | — |
 | 053 | 지갑 결제 롤백 불완전 | Riley | 🚫 | — |
 
