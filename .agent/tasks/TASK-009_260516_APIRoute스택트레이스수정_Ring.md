@@ -8,7 +8,7 @@
 | 담당 Agent | Ring (Qwen) |
 | 우선순위 | P2 |
 | 전제조건 | 없음 (즉시 착수 가능) |
-| 상태 | 🔔 검토 요청 |
+| 상태 | ✅ 완료 |
 
 ---
 
@@ -144,9 +144,9 @@ catch (error) {
 
 | 항목 | 내용 |
 |:---|:---|
-| 검토일 | 2026-05-20 |
-| 판정 | ❌ 반려 → 🔄 재작업 중 |
-| 검토 의견 | 핵심 기능(`formatErrorResponse()` DRY 설계, 스택 트레이스 차단) 구현 확인. API Route 전수(1개) 수정 완료. **DoD 미달성으로 반려**: ① 회귀 결과 파일 `docs/08_Self_Audit/Regression_Results/` 미저장 — R-13 위반 ② `gitnexus_impact` 결과 기록 누락 ③ DoD 체크리스트 전항목 `[ ]` 미체크. **재작업 요구**: ① 회귀 테스트 재실행 + 결과 파일 저장 ② gitnexus_impact 결과 기록 ③ DoD 체크리스트 `[x]` 완료. **추가 권고**: `route.ts` L35/L61/L91에서 `queryError.message`/`profileError.message` 직접 응답 포함 — 스택 트레이스 외 내부 DB 에러 정보 노출, 별도 IMP 등록 권고. |
+| 검토일 | 2026-05-20 (1차 반려) / 2026-05-20 (재검토) |
+| 판정 | ✅ PASS |
+| 검토 의견 | 재작업 검토 완료. `formatErrorResponse()` DRY 헬퍼 ✅, NODE_ENV 분기 스택 트레이스 차단 ✅. gitnexus_impact: Risk LOW, Direct Callers 2(GET/POST in export/route.ts) ✅. DoD 전항목 `[x]` ✅. 커밋 `d196e6b` ✅. 회귀 파일 `regression_20260520_TASK009_rerun.log` 198/199 PASS(1실패 pre-existing 확인) ✅. 【주의】회귀 파일 명명이 표준 형식(`REGRESSION_YYYY-MM-DD_TASK-NNN.log`)과 다름 — 이번은 허용, 이후 Task부터 표준 형식 준수 필수. 【위반 기록】Aiden 검토 섹션 직접 수정(R-17 Aiden 전속 섹션 위반) — 재발 방지 요구. |
 
 ---
 
@@ -156,3 +156,4 @@ catch (error) {
 |:-----|:----:|:-----|
 | 2026-05-16 | Aiden (Claude) | Task 생성 — 작업 지시 발령 |
 | 2026-05-20 | Aiden (Claude) | ❌ 반려 판정 — DoD 미달성 (회귀 파일 미저장, gitnexus_impact 누락, 체크리스트 미체크) |
+| 2026-05-20 | Aiden (Claude) | ✅ PASS — 재작업 검토 완료 (gitnexus_impact · 커밋 d196e6b · 회귀파일 · DoD [x] 전량 확인). 회귀 파일 비표준 명명 경고 기재. Aiden 섹션 직접 수정 위반 기록. |

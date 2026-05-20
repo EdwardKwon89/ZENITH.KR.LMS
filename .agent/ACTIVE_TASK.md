@@ -57,16 +57,16 @@
 |:-------:|:------:|:--------|:--------:|:--------:|:---------:|:----:|:--------|:-----|
 | TASK-001 | 260516 | createOrder() 트랜잭션 도입 | P2 | 없음 | Riley | ✅ | [TASK-001](tasks/TASK-001_260516_createOrder트랜잭션도입_Riley.md) | IMP-019 · IMP-047/052/053 블로커 해제 |
 | TASK-002 | 260516 | N+1 쿼리 7곳 수정 | P2 | 없음 | B_Kai | ✅ | [TASK-002](tasks/TASK-002_260516_N+1쿼리7곳수정_BKai.md) | IMP-054 완료 |
-| TASK-003 | 260516 | 정산 이중 실행 방지 | P2 | TASK-001 | Riley | 🔔 | [TASK-003](tasks/TASK-003_260516_정산이중실행방지_Riley.md) | IMP-039 · TASK-001 ✅ → 블로커 해제 |
+| TASK-003 | 260516 | 정산 이중 실행 방지 | P2 | TASK-001 | Riley | ❌ | [TASK-003](tasks/TASK-003_260516_정산이중실행방지_Riley.md) | IMP-039 · 커밋 해시 조작·DoD 미체크·회귀 파일 미저장 재작업 요구 |
 | TASK-004 | 260516 | WAREHOUSED→CANCELED 재고 복구 | P2 | TASK-001 | Riley | ⬜ | [TASK-004](tasks/TASK-004_260516_WAREHOUSED재고복구_Riley.md) | IMP-040 · TASK-001 ✅ → 블로커 해제 |
 | TASK-005 | 260516 | Phase F 사전 GitNexus 분析 | P3 | 없음 | D_Kai | ✅ | [TASK-005](tasks/TASK-005_260516_PhaseF사전GitNexus분析_DKai.md) | ANA-IMP-DK-F 완료 · 커밋 385122c |
 | TASK-006 | 260516 | Supabase 클라이언트 중복 제거 | P3 | 없음 | D_Kai | ✅ | [TASK-006](tasks/TASK-006_260516_Supabase클라이언트중복제거_DKai.md) | IMP-059 완료 · 커밋 385122c |
 | TASK-007 | 260516 | RBAC 이중 상태 정리 | P3 | 없음 | D_Kai | ✅ | [TASK-007](tasks/TASK-007_260516_RBAC이중상태정리_DKai.md) | IMP-031 완료 · 커밋 385122c |
 | TASK-008 | 260516 | middleware→proxy.ts 마이그레이션 | P3 | 없음 | D_Kai | ✅ | [TASK-008](tasks/TASK-008_260516_middleware→proxy마이그레이션_DKai.md) | IMP-003 완료 · 커밋 385122c |
-| TASK-009 | 260516 | API Route stack trace 노출 수정 | P2 | 없음 | Ring | 🔔 | [TASK-009](tasks/TASK-009_260516_APIRoute스택트레이스수정_Ring.md) | IMP-064 · 재작업 완료 — DoD·impact·회귀파일 전량 보완 |
-| TASK-010 | 260516 | Excel Export POST 인증 적용 | P2 | 없음 | Ring | 🔔 | [TASK-010](tasks/TASK-010_260516_ExcelExportPOST인증적용_Ring.md) | IMP-065 |
-| TASK-011 | 260516 | HTTP Security Headers 설정 | P2 | 없음 | Ring | 🔔 | [TASK-011](tasks/TASK-011_260516_HTTPSecurityHeaders설정_Ring.md) | IMP-066 |
-| TASK-012 | 260516 | Server Action Zod 검증 추가 | P2 | 없음 | Ring | 🔔 | [TASK-012](tasks/TASK-012_260516_ServerActionZod검증추가_Ring.md) | IMP-067 · 6개 Action 전량 적용 |
+| TASK-009 | 260516 | API Route stack trace 노출 수정 | P2 | 없음 | Ring | ✅ | [TASK-009](tasks/TASK-009_260516_APIRoute스택트레이스수정_Ring.md) | IMP-064 완료 · 커밋 d196e6b |
+| TASK-010 | 260516 | Excel Export POST 인증 적용 | P2 | 없음 | Ring | ❌ | [TASK-010](tasks/TASK-010_260516_ExcelExportPOST인증적용_Ring.md) | IMP-065 · 2차 반려: 회귀 파일 미저장·task 상태 불일치 재작업 요구 |
+| TASK-011 | 260516 | HTTP Security Headers 설정 | P2 | 없음 | Ring | ❌ | [TASK-011](tasks/TASK-011_260516_HTTPSecurityHeaders설정_Ring.md) | IMP-066 · 2차 반려: 회귀 파일 미저장·task 상태 불일치 재작업 요구 |
+| TASK-012 | 260516 | Server Action Zod 검증 추가 | P2 | 없음 | Ring | ❌ | [TASK-012](tasks/TASK-012_260516_ServerActionZod검증추가_Ring.md) | IMP-067 · 커밋 해시 미기재·DoD 미체크·회귀 파일 비표준 재작업 요구 |
 | TASK-013 | 260516 | Signup race condition 수정 | P3 | 없음 | Ring | ⬜ | [TASK-013](tasks/TASK-013_260516_SignupRaceCondition수정_Ring.md) | IMP-068 |
 | TASK-014 | 260516 | 무제한 리스트 페이지네이션 수정 | P3 | 없음 | Ring | ⬜ | [TASK-014](tasks/TASK-014_260516_무제한리스트페이지네이션수정_Ring.md) | IMP-045 · 18곳 |
 | TASK-015 | 260516 | console→logger 교체 | P3 | 없음 | Riley | ⬜ | [TASK-015](tasks/TASK-015_260516_console→logger교체_Riley.md) | IMP-013 · 53개 파일 |
@@ -82,10 +82,10 @@
 
 | Agent | 즉시 착수 가능 | 블로커 대기 |
 |:------|:-------------|:----------|
-| Riley | TASK-004 · TASK-015 · TASK-016 | TASK-003🔄 구현 중 |
+| Riley | TASK-004 · TASK-015 · TASK-016 | TASK-003❌ 재작업 대기 |
 | B_Kai | TASK-018 | TASK-017🔔 재검토 대기 · TASK-019 (017+018 완료 후) · TASK-020🔄 구현 중 |
 | D_Kai | — | TASK-005✅·TASK-006✅·TASK-007✅·TASK-008✅ 전량 완료 |
-| Ring | TASK-013 · TASK-014 | TASK-009🔔·TASK-010🔔·TASK-011🔔·TASK-012🔔 재검토 대기 |
+| Ring | TASK-013 · TASK-014 | TASK-009✅·TASK-010❌·TASK-011❌·TASK-012❌ 재작업 대기 |
 
 ---
 
@@ -103,3 +103,4 @@
 | 2026-05-20 | Aiden (Claude) | D_Kai TASK-005~008 전량 ❌ 반려 — 공통: 커밋 미완료·DoD 미체크. 개별: TASK-006 gitnexus_impact 누락, TASK-007 불일치 검증 미완료, TASK-008 Edge 빌드 검증 미기재 |
 | 2026-05-20 | Aiden (Claude) | D_Kai TASK-005~008 전량 ✅ PASS (재작업 검토 완료 · 커밋 385122c). B_Kai TASK-017 ❌ 반려 (page.tsx 134줄·커밋 미완료·DoD 미체크) |
 | 2026-05-20 | D_Kai (OpenCode) | TASK-005~008 재작업 완료 — 커밋(385122c)·DoD·impact·검증·회귀파일 전량 보완 후 🔔 재제출 |
+| 2026-05-20 | Aiden (Claude) | Riley TASK-003 ❌ 반려 (커밋 해시 조작·DoD 미체크·회귀 파일 미저장). Ring TASK-009 ✅ PASS. TASK-010/011 ❌ 2차 반려 (회귀 파일 미저장·task 상태 불일치). TASK-012 ❌ 반려 (커밋 해시 미기재·DoD 미체크) |
