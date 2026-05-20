@@ -1,4 +1,5 @@
 'use client';
+import { logger } from '@/lib/logger';
 
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
@@ -20,7 +21,7 @@ export function WalletDashboard() {
       setBalanceData(balance);
       setTransactions(txs);
     } catch (error) {
-      console.error("Failed to fetch wallet data", error);
+      logger.error("Failed to fetch wallet data", error);
     } finally {
       setLoading(false);
     }

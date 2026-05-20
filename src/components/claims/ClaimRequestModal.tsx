@@ -1,4 +1,5 @@
 "use client";
+import { logger } from '@/lib/logger';
 
 import React, { useState } from 'react';
 import { useTranslations } from 'next-intl';
@@ -36,7 +37,7 @@ export const ClaimRequestModal: React.FC<ClaimRequestModalProps> = ({ orderId, o
       toast.success(t('success_register'));
       onClose();
     } catch (error: any) {
-      console.error('Claim error:', error);
+      logger.error('Claim error:', error);
       toast.error(t('error_register') + ': ' + error.message);
     } finally {
       setIsSubmitting(false);

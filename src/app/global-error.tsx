@@ -1,4 +1,5 @@
 "use client";
+import { logger } from '@/lib/logger';
 
 import * as Sentry from "@sentry/nextjs";
 import { useEffect } from "react";
@@ -30,7 +31,7 @@ export default function GlobalError({
       url: typeof window !== "undefined" ? window.location.href : undefined,
     });
     
-    console.error("Global Runtime Error:", error);
+    logger.error("Global Runtime Error:", error);
   }, [error]);
 
   return (

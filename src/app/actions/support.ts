@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 "use server";
 
 import { validateUserAction, validateAdminAction } from "@/lib/auth/guards";
@@ -114,7 +115,7 @@ export async function createQna(payload: {
       await supabase.from("zen_notifications").insert(notifications);
     }
   } catch (e) {
-    console.error("[ERROR] QnA notification failed:", e);
+    logger.error("[ERROR] QnA notification failed:", e);
   }
 
   revalidatePath("/support/qna");
@@ -256,7 +257,7 @@ export async function answerQna(payload: {
         channel: "IN_APP"
       });
     } catch (e) {
-      console.error("[ERROR] QnA answer notification failed:", e);
+      logger.error("[ERROR] QnA answer notification failed:", e);
     }
   }
 

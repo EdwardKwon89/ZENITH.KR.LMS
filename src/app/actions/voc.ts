@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 "use server";
 
 import fs from "fs";
@@ -56,7 +57,7 @@ export async function createVoc(payload: unknown) {
   }
 
   // 1. 오더 소유권 확인
-  console.log(`[DEBUG] Verifying order ownership: order_id=${data.order_id}, org_id=${profile.org_id}`);
+  logger.info(`[DEBUG] Verifying order ownership: order_id=${data.order_id}, org_id=${profile.org_id}`);
   const { data: order, error: orderError } = await supabase
     .from("zen_orders")
     .select("order_no, shipper_id")
@@ -64,27 +65,27 @@ export async function createVoc(payload: unknown) {
     .single();
 
   if (orderError) {
-    console.error("[DEBUG] Order verification FAILED:", orderError);
+    logger.error("[DEBUG] Order verification FAILED:", orderError);
     fs.appendFileSync('scratch/voc_action.log', `[ERROR] Order verification FAILED: ${JSON.stringify(orderError)}\n`);
     return { success: false, error: `Order verification failed: ${orderError.message}` };
   }
   
   if (!order) {
-    console.error("[DEBUG] Order NOT FOUND");
+    logger.error("[DEBUG] Order NOT FOUND");
     fs.appendFileSync('scratch/voc_action.log', `[ERROR] Order NOT FOUND: ${data.order_id}\n`);
     return { success: false, error: "Order not found" };
   }
 
-  console.log(`[DEBUG] Order found: no=${order.order_no}, shipper_id=${order.shipper_id}`);
+  logger.info(`[DEBUG] Order found: no=${order.order_no}, shipper_id=${order.shipper_id}`);
   
   if (order.shipper_id !== profile.org_id) {
-    console.error(`[DEBUG] UNAUTHORIZED: order.shipper_id(${order.shipper_id}) !== profile.org_id(${profile.org_id})`);
+    logger.error(`[DEBUG] UNAUTHORIZED: order.shipper_id(${order.shipper_id}) !== profile.org_id(${profile.org_id})`);
     fs.appendFileSync('scratch/voc_action.log', `[ERROR] UNAUTHORIZED: ${order.shipper_id} !== ${profile.org_id}\n`);
     return { success: false, error: "UNAUTHORIZED: Access denied to this order" };
   }
 
   // 2. zen_voc INSERT
-  console.log("[DEBUG] Inserting into zen_voc...");
+  logger.info("[DEBUG] Inserting into zen_voc...");
   const vocData = {
     order_id: data.order_id,
     org_id: profile.org_id,
@@ -94,7 +95,7 @@ export async function createVoc(payload: unknown) {
     description: data.description.substring(0, 2000),
     status: 'OPEN'
   };
-  console.log("[DEBUG] VOC Insert data:", vocData);
+  logger.info("[DEBUG] VOC Insert data:", vocData);
 
   const { data: voc, error: vocError } = await supabase
     .from("zen_voc")
@@ -103,12 +104,12 @@ export async function createVoc(payload: unknown) {
     .single();
 
   if (vocError) {
-    console.error("[DEBUG] VOC creation FAILED:", vocError);
+    logger.error("[DEBUG] VOC creation FAILED:", vocError);
     fs.appendFileSync('scratch/voc_action.log', `[ERROR] VOC creation FAILED: ${JSON.stringify(vocError)}\n`);
     return { success: false, error: `VOC creation failed: ${vocError.message}` };
   }
 
-  console.log("[DEBUG] VOC creation SUCCESS:", voc);
+  logger.info("[DEBUG] VOC creation SUCCESS:", voc);
   fs.appendFileSync('scratch/voc_action.log', `[SUCCESS] VOC created: ${voc.id}\n`);
 
   // 3. Admin 대상 알림 발송
@@ -130,7 +131,7 @@ export async function createVoc(payload: unknown) {
       await supabase.from("zen_notifications").insert(notifications);
     }
   } catch (notifError) {
-    console.error("[ERROR] VOC Admin notification failed:", notifError);
+    logger.error("[ERROR] VOC Admin notification failed:", notifError);
   }
 
   revalidatePath('/voc', 'page');
@@ -276,7 +277,7 @@ export async function answerVoc(payload: {
         channel: "IN_APP"
       });
     } catch (notifError) {
-      console.error("[ERROR] VOC answer notification failed:", notifError);
+      logger.error("[ERROR] VOC answer notification failed:", notifError);
     }
   }
 

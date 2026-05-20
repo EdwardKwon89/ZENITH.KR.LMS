@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 "use server";
 
 import { createClient } from "@/utils/supabase/server";
@@ -40,7 +41,7 @@ export async function getGradeMaster(): Promise<GradeMasterItem[]> {
     .order("created_at", { ascending: true });
 
   if (error) {
-    console.error("Error fetching grade master:", error);
+    logger.error("Error fetching grade master:", error);
     throw new Error("등급 정보를 불러오는 데 실패했습니다.");
   }
 
@@ -87,13 +88,13 @@ export async function updateMyProfile(payload: {
       .eq("id", user.id);
 
     if (profileError) {
-      console.warn("[MEMBER_ACTION] profiles sync failed:", profileError.message);
+      logger.warn("[MEMBER_ACTION] profiles sync failed:", profileError.message);
     }
 
     revalidatePath("/mypage/profile");
     return { success: true };
   } catch (err: any) {
-    console.error("[MEMBER_ACTION] updateMyProfile Error:", err.message);
+    logger.error("[MEMBER_ACTION] updateMyProfile Error:", err.message);
     return { error: "프로필 수정 중 오류가 발생했습니다." };
   }
 }
@@ -112,7 +113,7 @@ export async function getMyPendingPromotionRequest() {
     .maybeSingle();
 
   if (error) {
-    console.error("Error fetching pending request:", error);
+    logger.error("Error fetching pending request:", error);
     return null;
   }
 
@@ -181,7 +182,7 @@ export async function requestGradePromotion(payload: {
     .single();
 
   if (requestError || !request) {
-    console.error("Error requesting grade promotion:", requestError);
+    logger.error("Error requesting grade promotion:", requestError);
     throw new Error("승급 신청 중 오류가 발생했습니다.");
   }
 
@@ -239,7 +240,7 @@ export async function getGradePromotionRequests(params?: {
     .range(offset, offset + limit - 1);
 
   if (error) {
-    console.error("Error fetching promotion requests:", {
+    logger.error("Error fetching promotion requests:", {
       error,
       adminRole: profile?.role,
       params,
@@ -318,7 +319,7 @@ export async function reviewGradePromotion(payload: {
       .eq("id", request.user_id);
 
     if (profileUpdateError) {
-      console.error("Failed to update profile grade:", profileUpdateError);
+      logger.error("Failed to update profile grade:", profileUpdateError);
       // 신청 상태는 이미 업데이트되었으므로 로깅만 수행
     }
   }
@@ -358,7 +359,7 @@ export async function withdrawUser() {
     
     return { success: true };
   } catch (err: any) {
-    console.error("[MEMBER_ACTION] withdrawUser Error:", err.message);
+    logger.error("[MEMBER_ACTION] withdrawUser Error:", err.message);
     return { error: "탈퇴 처리 중 오류가 발생했습니다." };
   }
 }

@@ -1,4 +1,5 @@
 "use client";
+import { logger } from '@/lib/logger';
 
 import React, { useState } from 'react';
 import ZenDataGrid from '@/components/ui/ZenDataGrid';
@@ -29,7 +30,7 @@ export const ErrorLogsTable: React.FC<ErrorLogsTableProps> = ({ initialLogs, tot
       ));
       toast.success('에러 로그가 해결됨으로 표시되었습니다.');
     } catch (error) {
-      console.error("Failed to resolve error log", error);
+      logger.error("Failed to resolve error log", error);
       toast.error('상태 변경에 실패했습니다.');
     } finally {
       setIsLoading(false);

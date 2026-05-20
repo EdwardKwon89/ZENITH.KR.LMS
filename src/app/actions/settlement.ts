@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 'use server';
 
 import { SettlementEngine, InvoiceGenerator } from '@/lib/finance/settlement';
@@ -58,9 +59,9 @@ export async function updatePaymentStatus(
 }
 
 export async function calculateSettlementAction(orderId: string) {
-  console.log(`[Action] calculateSettlementAction started for order: ${orderId}`);
+  logger.info(`[Action] calculateSettlementAction started for order: ${orderId}`);
   const { supabase, profile } = await validateAdminAction();
-  console.log(`[Action] User Profile: ${profile.email}, Role: ${profile.role}`);
+  logger.info(`[Action] User Profile: ${profile.email}, Role: ${profile.role}`);
 
   const { data: existingCosts, error: costsCheckError } = await supabase
     .from('zen_order_costs')
@@ -74,7 +75,7 @@ export async function calculateSettlementAction(orderId: string) {
   const engine = new SettlementEngine();
   const result = await engine.calculateOrderCosts(orderId);
 
-  console.log(`[Action] Settlement calculation result for ${orderId}:`, result);
+  logger.info(`[Action] Settlement calculation result for ${orderId}:`, result);
 
   if (result.success) {
     const { data: costs, error: costsError } = await supabase
@@ -83,10 +84,10 @@ export async function calculateSettlementAction(orderId: string) {
       .eq('order_id', orderId);
 
     if (costsError) {
-      console.error(`[Action] Error fetching costs for ${orderId}:`, costsError);
+      logger.error(`[Action] Error fetching costs for ${orderId}:`, costsError);
     }
 
-    console.log(`[Action] Fetched ${costs?.length || 0} costs for ${orderId}`);
+    logger.info(`[Action] Fetched ${costs?.length || 0} costs for ${orderId}`);
 
     revalidatePath(`/orders/${orderId}`);
     return { ...result, costs: costs || [] };

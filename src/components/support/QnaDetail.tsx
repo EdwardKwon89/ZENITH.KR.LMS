@@ -1,4 +1,5 @@
 "use client";
+import { logger } from '@/lib/logger';
 
 import React, { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
@@ -38,7 +39,7 @@ export function QnaDetail({ qnaId, isAdmin = false, locale = "ko" }: { qnaId: st
       const data = await getQnaDetail(qnaId);
       if (data) setQna(data);
     } catch (error) {
-      console.error("Failed to load QNA detail", error);
+      logger.error("Failed to load QNA detail", error);
       toast.error("Failed to load QNA detail");
     } finally {
       setLoading(false);
@@ -54,7 +55,7 @@ export function QnaDetail({ qnaId, isAdmin = false, locale = "ko" }: { qnaId: st
       setAnswerContent("");
       loadQna();
     } catch (error) {
-      console.error("Failed to post answer", error);
+      logger.error("Failed to post answer", error);
       toast.error("Failed to post answer");
     } finally {
       setSubmitting(false);

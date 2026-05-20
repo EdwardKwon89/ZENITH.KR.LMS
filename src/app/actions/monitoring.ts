@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 "use server";
 
 import { createClient } from "@/utils/supabase/server";
@@ -47,7 +48,7 @@ export async function logClientError(data: {
     .single();
 
   if (error) {
-    console.error("Failed to log error to DB:", error);
+    logger.error("Failed to log error to DB:", error);
     return { success: false, error: error.message };
   }
 
@@ -106,7 +107,7 @@ export async function getErrorLogs(params: {
     .range(from, to);
 
   if (error) {
-    console.error("getErrorLogs error:", error);
+    logger.error("getErrorLogs error:", error);
     throw error;
   }
 

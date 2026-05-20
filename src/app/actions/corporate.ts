@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 "use server";
 
 import { revalidatePath } from "next/cache";
@@ -21,7 +22,7 @@ export async function getOrganizationInfo() {
     .single();
 
   if (error) {
-    console.error("Error fetching organization info:", error);
+    logger.error("Error fetching organization info:", error);
     throw new Error("조직 정보를 불러오는 데 실패했습니다.");
   }
 
@@ -66,7 +67,7 @@ export async function updateOrganizationInfo(payload: {
     .eq("id", profile.org_id);
 
   if (error) {
-    console.error("Error updating organization info:", error);
+    logger.error("Error updating organization info:", error);
     throw new Error("조직 정보 저장 중 오류가 발생했습니다.");
   }
 
@@ -91,7 +92,7 @@ export async function getDepartments() {
     .order("created_at", { ascending: true });
 
   if (error) {
-    console.error("Error fetching departments:", error);
+    logger.error("Error fetching departments:", error);
     throw new Error("부서 목록을 불러오는 데 실패했습니다.");
   }
 
@@ -120,7 +121,7 @@ export async function createDepartment(name: string) {
     });
 
   if (error) {
-    console.error("Error creating department:", error);
+    logger.error("Error creating department:", error);
     throw new Error("부서 추가 중 오류가 발생했습니다.");
   }
 
@@ -149,7 +150,7 @@ export async function updateDepartment(id: string, name: string) {
     .eq("org_id", profile.org_id);
 
   if (error) {
-    console.error("Error updating department:", error);
+    logger.error("Error updating department:", error);
     throw new Error("부서 수정 중 오류가 발생했습니다.");
   }
 
@@ -178,7 +179,7 @@ export async function deleteDepartment(id: string) {
     .eq("org_id", profile.org_id);
 
   if (error) {
-    console.error("Error deleting department:", error);
+    logger.error("Error deleting department:", error);
     throw new Error("부서 삭제 중 오류가 발생했습니다.");
   }
 

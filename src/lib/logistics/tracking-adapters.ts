@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { TrackingEventCode, TrackingStep } from './tracking';
 
 /**
@@ -24,7 +25,7 @@ export class VirtualTrackingProvider implements ITrackingProvider {
       .order('event_time', { ascending: false });
 
     if (error) {
-      console.error('[VIRTUAL] Failed to fetch events:', error);
+      logger.error('[VIRTUAL] Failed to fetch events:', error);
       return [];
     }
 
@@ -67,9 +68,9 @@ export class MockCarrierProvider implements ITrackingProvider {
       .insert({ order_id: config.order_id, provider_name: this.name, raw_data: mockApiResponse });
 
     if (logError) {
-      console.error(`[MOCK_CARRIER] Failed to save raw log for ${config.order_id}:`, logError);
+      logger.error(`[MOCK_CARRIER] Failed to save raw log for ${config.order_id}:`, logError);
     } else {
-      console.log(`[MOCK_CARRIER] Raw log saved successfully for ${config.order_id}`);
+      logger.info(`[MOCK_CARRIER] Raw log saved successfully for ${config.order_id}`);
     }
 
     // 3. Map to Internal Standard Format

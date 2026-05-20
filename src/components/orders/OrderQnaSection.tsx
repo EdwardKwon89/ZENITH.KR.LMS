@@ -1,4 +1,5 @@
 "use client";
+import { logger } from '@/lib/logger';
 
 import React, { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
@@ -75,7 +76,7 @@ export function OrderQnaSection({
       
       setItems(merged);
     } catch (error) {
-      console.error("Failed to load order items", error);
+      logger.error("Failed to load order items", error);
     } finally {
       setLoading(false);
     }

@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 "use server";
 
 import { validateAdminAction, validateUserAction } from "@/lib/auth/guards";
@@ -124,7 +125,7 @@ export async function adjustInventory(payload: InventoryAdjustmentInput) {
       });
 
     if (historyError) {
-      console.error("Failed to record inventory history:", historyError.message);
+      logger.error("Failed to record inventory history:", historyError.message);
     }
 
     revalidatePath("/(dashboard)/inventory", "page");

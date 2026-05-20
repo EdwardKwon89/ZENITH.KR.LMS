@@ -1,4 +1,5 @@
 "use client";
+import { logger } from '@/lib/logger';
 
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence, Variants } from "framer-motion";
@@ -47,7 +48,7 @@ export default function TrackingDashboard() {
       const data = await getGlobalTrackingOverview();
       setTracks(data);
     } catch (error) {
-      console.error("Failed to fetch tracking overview:", error);
+      logger.error("Failed to fetch tracking overview:", error);
     } finally {
       setLoading(false);
     }
@@ -63,7 +64,7 @@ export default function TrackingDashboard() {
       await syncExternalTracking();
       await fetchOverview();
     } catch (error) {
-      console.error("Sync failed:", error);
+      logger.error("Sync failed:", error);
     } finally {
       setSyncing(false);
     }

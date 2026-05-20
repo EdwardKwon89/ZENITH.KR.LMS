@@ -1,4 +1,5 @@
 "use client";
+import { logger } from '@/lib/logger';
 
 import React, { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
@@ -49,7 +50,7 @@ export default function MyGradePage({ params: { locale } }: { params: { locale: 
           setRequestReason(pending.request_reason);
         }
       } catch (err) {
-        console.error(err);
+        logger.error(err);
       } finally {
         setLoading(false);
       }

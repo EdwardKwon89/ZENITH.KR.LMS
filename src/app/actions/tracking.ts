@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 "use server";
 
 import { validateUserAction, validateAdminAction } from "@/lib/auth/guards";
@@ -18,7 +19,7 @@ export async function getTrackingEvents(orderId: string) {
     .single();
 
   if (configError || !config) {
-    console.warn(`[TRACKING] No config found for order: ${orderId}`);
+    logger.warn(`[TRACKING] No config found for order: ${orderId}`);
     return [];
   }
 
@@ -35,7 +36,7 @@ export async function getTrackingEvents(orderId: string) {
     .order("event_time", { ascending: false });
 
   if (error) {
-    console.error("Failed to fetch tracking events:", error);
+    logger.error("Failed to fetch tracking events:", error);
     return [];
   }
 
@@ -54,7 +55,7 @@ export async function refreshTrackingData(orderId: string) {
     revalidatePath(`/(dashboard)/orders/${orderId}`, "page");
     return { success: true, count: steps.length };
   } catch (error: any) {
-    console.error(`[REFRESH_TRACKING] Error:`, error.message);
+    logger.error(`[REFRESH_TRACKING] Error:`, error.message);
     return { success: false, error: error.message };
   }
 }
@@ -138,7 +139,7 @@ export async function syncExternalTracking() {
       await trackingManager.getTrackingData(supabase, config.order_id);
       processed++;
     } catch (e) {
-      console.error(`[SYNC_TRACKING] Error processing order ${config.order_id}:`, e);
+      logger.error(`[SYNC_TRACKING] Error processing order ${config.order_id}:`, e);
       errors++;
     }
   }

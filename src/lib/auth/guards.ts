@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 import { checkPermission, USER_ROLES } from "./rbac";
@@ -43,7 +44,7 @@ export async function requireAdmin() {
     .single();
 
   const isAllowed = checkPermission(profile?.role, "/admin");
-  console.log(`[AUTH_DEBUG] requireAdmin: email=${user.email}, role=${profile?.role}, isAllowed=${isAllowed}`);
+  logger.info(`[AUTH_DEBUG] requireAdmin: email=${user.email}, role=${profile?.role}, isAllowed=${isAllowed}`);
 
   if (!isAllowed) {
     redirect("/");
@@ -71,10 +72,10 @@ export async function validateAdminAction() {
     .single();
 
   const isAllowed = checkPermission(profile?.role, "/admin");
-  console.log(`[AUTH_TRACE] User: ${user.email}, Role: ${profile?.role}, Path: /admin, Allowed: ${isAllowed}`);
+  logger.info(`[AUTH_TRACE] User: ${user.email}, Role: ${profile?.role}, Path: /admin, Allowed: ${isAllowed}`);
 
   if (!isAllowed) {
-    console.error(`[AUTH_DENIED] Access blocked for ${user.email} (Role: ${profile?.role})`);
+    logger.error(`[AUTH_DENIED] Access blocked for ${user.email} (Role: ${profile?.role})`);
     throw new Error("Unauthorized access");
   }
 
@@ -85,14 +86,14 @@ export async function validateAdminAction() {
  * 일반 사용자 세션을 검증하는 서버 액션용 가드입니다.
  */
 export async function validateUserAction() {
-  console.log("[DEBUG] validateUserAction START");
+  logger.info("[DEBUG] validateUserAction START");
   const supabase = await createClient();
-  console.log("[DEBUG] validateUserAction: Supabase client created");
+  logger.info("[DEBUG] validateUserAction: Supabase client created");
   const { data: { user }, error: authError } = await supabase.auth.getUser();
-  console.log("[DEBUG] validateUserAction: getUser result", { hasUser: !!user, email: user?.email, error: authError });
+  logger.info("[DEBUG] validateUserAction: getUser result", { hasUser: !!user, email: user?.email, error: authError });
 
   if (!user) {
-    console.error("[AUTH_REQUIRED] Session not found");
+    logger.error("[AUTH_REQUIRED] Session not found");
     throw new Error("Login required");
   }
 
@@ -102,7 +103,7 @@ export async function validateUserAction() {
     .eq("id", user.id)
     .single();
     
-  console.log("[DEBUG] validateUserAction: profile result", { hasProfile: !!profile, error: profileError });
+  logger.info("[DEBUG] validateUserAction: profile result", { hasProfile: !!profile, error: profileError });
 
   return { user, profile, supabase };
 }

@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 "use server";
 
 import { validateUserAction } from "@/lib/auth/guards";
@@ -42,7 +43,7 @@ export async function getRouteOptions(orderId: string) {
       });
 
     if (upsertError) {
-      console.error(`[ROU-01] Upsert failed for ${opt.option_type}:`, upsertError.message);
+      logger.error(`[ROU-01] Upsert failed for ${opt.option_type}:`, upsertError.message);
     }
   }
 

@@ -1,4 +1,5 @@
 "use client";
+import { logger } from '@/lib/logger';
 
 import React, { useState } from "react";
 import { useTranslations } from "next-intl";
@@ -38,7 +39,7 @@ export default function TradeDocumentClient({ locale }: { locale: string }) {
       const data = await getOrderDocumentData(orderNo.trim());
       setOrderData(data);
     } catch (error: any) {
-      console.error(error);
+      logger.error(error);
       toast.error(error.message || t("error_fetch"));
       setOrderData(null);
     } finally {

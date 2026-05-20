@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 'use server';
 
 import { createClient } from '@/utils/supabase/server';
@@ -9,14 +10,14 @@ import { USER_ROLES } from '@/lib/auth/rbac';
 
 
 export async function login(formData: FormData) {
-  console.log('[ACTION] login START');
+  logger.info('[ACTION] login START');
   const supabase = await createClient();
 
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
   const locale = formData.get('locale') as string || 'ko';
 
-  console.log('[ACTION] login INPUT:', { email, locale });
+  logger.info('[ACTION] login INPUT:', { email, locale });
 
   try {
     const { data, error } = await supabase.auth.signInWithPassword({
@@ -25,15 +26,15 @@ export async function login(formData: FormData) {
     });
 
     if (error) {
-      console.error('[ACTION] login AUTH ERROR:', error.message);
+      logger.error('[ACTION] login AUTH ERROR:', error.message);
       return { error: error.message };
     }
 
-    console.log('[ACTION] login AUTH SUCCESS:', data.user?.id);
+    logger.info('[ACTION] login AUTH SUCCESS:', data.user?.id);
 
     // Redirect to orders as the primary dashboard view with locale prefix
     revalidatePath('/', 'layout');
-    console.log('[ACTION] login REDIRECTING to:', `/${locale}/orders`);
+    logger.info('[ACTION] login REDIRECTING to:', `/${locale}/orders`);
     
     // Using redirect inside try-catch is tricky in Next.js.
     // It's better to return success and let the client handle redirect, 
@@ -42,7 +43,7 @@ export async function login(formData: FormData) {
     if (e.message?.includes('NEXT_REDIRECT')) {
       throw e; 
     }
-    console.error('[ACTION] login UNEXPECTED ERROR:', e);
+    logger.error('[ACTION] login UNEXPECTED ERROR:', e);
     return { error: 'An unexpected error occurred during login.' };
   }
   
@@ -62,7 +63,7 @@ export async function signup(formData: FormData, locale: string = 'ko') {
   const orgName = formData.get('org_name') as string | null;
   const businessNumber = formData.get('business_number') as string | null;
 
-  console.log('[SIGNUP_ACTION] Received signup request:', { email, fullName, isNewOrg, orgName });
+  logger.info('[SIGNUP_ACTION] Received signup request:', { email, fullName, isNewOrg, orgName });
   
   // Master Edward's Policy: Personal accounts are assigned 'SHIPPER' by default.
   let orgType = formData.get('org_type') as string | null;
@@ -128,7 +129,7 @@ export async function signup(formData: FormData, locale: string = 'ko') {
             status: 'PENDING'
           });
       } else {
-        console.error('Upload Error:', uploadError);
+        logger.error('Upload Error:', uploadError);
       }
     }
   }

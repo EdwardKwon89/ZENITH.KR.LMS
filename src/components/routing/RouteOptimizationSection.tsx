@@ -1,4 +1,5 @@
 "use client";
+import { logger } from '@/lib/logger';
 
 import { useState, useEffect, useTransition } from "react";
 import { getRouteOptions, selectRoute, getRouteVisualization } from "@/app/actions/routing";
@@ -69,7 +70,7 @@ export default function RouteOptimizationSection({
         setMilestones(result.milestones);
       }
     } catch (error) {
-      console.error("Failed to fetch visualization:", error);
+      logger.error("Failed to fetch visualization:", error);
     } finally {
       setIsLoadingVisual(false);
     }

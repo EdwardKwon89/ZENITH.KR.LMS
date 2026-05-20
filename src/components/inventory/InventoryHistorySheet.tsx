@@ -1,4 +1,5 @@
 "use client";
+import { logger } from '@/lib/logger';
 
 import { Inventory, InventoryHistory } from "@/types/inventory";
 import { ZenCard, ZenBadge, ZenButton } from "@/components/ui/ZenUI";
@@ -35,7 +36,7 @@ export default function InventoryHistorySheet({
         setHistory(result.data);
       }
     } catch (error) {
-      console.error("Failed to load history:", error);
+      logger.error("Failed to load history:", error);
     } finally {
       setIsLoading(false);
     }

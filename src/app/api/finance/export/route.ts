@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { createClient } from "@/utils/supabase/server";
 import { NextResponse } from "next/server";
 import * as XLSX from "xlsx";
@@ -31,7 +32,7 @@ export async function GET(request: Request) {
       .single();
 
     if (profileError || !profile) {
-      console.error("[FIN-02] Profile Error:", profileError);
+      logger.error("[FIN-02] Profile Error:", profileError);
       return new NextResponse(`Forbidden: ${profileError?.message || 'Profile not found'}`, { status: 403 });
     }
 
@@ -64,14 +65,14 @@ export async function GET(request: Request) {
     const { data: invoices, error: queryError } = await query;
 
     if (queryError) {
-      console.error("[FIN-02] Query Error:", queryError);
+      logger.error("[FIN-02] Query Error:", queryError);
       return new NextResponse(`Data fetch error: ${queryError.message}`, { status: 500 });
     }
 
     return generateExcelResponse(invoices || [], "export");
 
   } catch (error: unknown) {
-    console.error("[FIN-02] Export Handler Panic:", error);
+    logger.error("[FIN-02] Export Handler Panic:", error);
     const err = formatErrorResponse(error);
     return new NextResponse(err.message, { status: 500 });
   }
@@ -94,7 +95,7 @@ export async function POST(request: Request) {
       .single();
 
     if (profileError || !profile) {
-      console.error("[FIN-02] Profile Error:", profileError);
+      logger.error("[FIN-02] Profile Error:", profileError);
       return new NextResponse(`Forbidden: ${profileError?.message || 'Profile not found'}`, { status: 403 });
     }
 
@@ -108,7 +109,7 @@ export async function POST(request: Request) {
     const { data, filename } = body;
 
     if (!data || !Array.isArray(data)) {
-      console.error("[FIN-02] Invalid POST data:", body);
+      logger.error("[FIN-02] Invalid POST data:", body);
       return new NextResponse("Invalid data format", { status: 400 });
     }
 
@@ -117,15 +118,15 @@ export async function POST(request: Request) {
       return new NextResponse("Data exceeds maximum limit of 10,000 rows", { status: 400 });
     }
 
-    console.log(`[FIN-02] POST Payload - Data rows: ${data.length}, Filename: ${filename}`);
+    logger.info(`[FIN-02] POST Payload - Data rows: ${data.length}, Filename: ${filename}`);
     if (data.length > 0) {
-      console.log(`[FIN-02] First row sample:`, JSON.stringify(data[0]).substring(0, 200));
+      logger.info(`[FIN-02] First row sample:`, JSON.stringify(data[0]).substring(0, 200));
     }
 
     return generateExcelResponse(data, filename || "export");
 
   } catch (error: unknown) {
-    console.error("[FIN-02] Export POST Handler Panic:", error);
+    logger.error("[FIN-02] Export POST Handler Panic:", error);
     const err = formatErrorResponse(error);
     return new NextResponse(err.message, { status: 500 });
   }
@@ -133,7 +134,7 @@ export async function POST(request: Request) {
 
 function generateExcelResponse(data: any[], filename: string) {
   try {
-    console.log(`[FIN-02] Generating Excel for ${data.length} rows, filename: ${filename}`);
+    logger.info(`[FIN-02] Generating Excel for ${data.length} rows, filename: ${filename}`);
     
     // 3. 데이터 가공
     const worksheetData = data.map((inv: any, idx: number) => {
@@ -149,12 +150,12 @@ function generateExcelResponse(data: any[], filename: string) {
           "생성 일시": inv.created_at ? new Date(inv.created_at).toLocaleString('ko-KR') : "N/A",
         };
       } catch (e) {
-        console.error(`[FIN-02] Error processing row ${idx}:`, e);
+        logger.error(`[FIN-02] Error processing row ${idx}:`, e);
         return { "Error": "Row processing failed" };
       }
     });
 
-    console.log("[FIN-02] Worksheet data prepared");
+    logger.info("[FIN-02] Worksheet data prepared");
 
     // 4. XLSX 워크북 생성
     const worksheet = XLSX.utils.json_to_sheet(worksheetData);
@@ -168,11 +169,11 @@ function generateExcelResponse(data: any[], filename: string) {
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "정산데이터");
 
-    console.log("[FIN-02] Workbook created");
+    logger.info("[FIN-02] Workbook created");
 
     // 5. 바이너리 데이터 생성
     const buf = XLSX.write(workbook, { type: "buffer", bookType: "xlsx" });
-    console.log("[FIN-02] Buffer generated, size:", buf?.length);
+    logger.info("[FIN-02] Buffer generated, size:", buf?.length);
   
     return new NextResponse(buf, {
       status: 200,
@@ -183,7 +184,7 @@ function generateExcelResponse(data: any[], filename: string) {
       },
     });
   } catch (error: any) {
-    console.error("[FIN-02] generateExcelResponse Error:", error);
+    logger.error("[FIN-02] generateExcelResponse Error:", error);
     throw error;
   }
 }

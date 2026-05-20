@@ -1,4 +1,5 @@
 "use client";
+import { logger } from '@/lib/logger';
 
 import React, { useEffect } from 'react';
 import * as Sentry from "@sentry/nextjs";
@@ -26,7 +27,7 @@ export default function GlobalDashboardError({
       sentry_id: eventId
     });
 
-    console.error("Dashboard Runtime Error:", error);
+    logger.error("Dashboard Runtime Error:", error);
   }, [error]);
 
   return (

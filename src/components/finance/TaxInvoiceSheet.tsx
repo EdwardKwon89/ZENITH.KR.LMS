@@ -1,4 +1,5 @@
 "use client";
+import { logger } from '@/lib/logger';
 
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -48,25 +49,25 @@ export const TaxInvoiceSheet: React.FC<TaxInvoiceSheetProps> = ({
   };
 
   const handleIssue = async () => {
-    console.log('[TaxInvoiceSheet] handleIssue started');
+    logger.info('[TaxInvoiceSheet] handleIssue started');
     setActionLoading(true);
     try {
-      console.log('[TaxInvoiceSheet] Calling issueTaxInvoice action...');
+      logger.info('[TaxInvoiceSheet] Calling issueTaxInvoice action...');
       const result = await issueTaxInvoice(invoiceId);
-      console.log('[TaxInvoiceSheet] issueTaxInvoice result:', result);
+      logger.info('[TaxInvoiceSheet] issueTaxInvoice result:', result);
       if (result.success) {
-        console.log('[TaxInvoiceSheet] Success! Showing toast...');
+        logger.info('[TaxInvoiceSheet] Success! Showing toast...');
         toast.success('세금계산서가 발행되었습니다.');
-        console.log('[TaxInvoiceSheet] Reloading history...');
+        logger.info('[TaxInvoiceSheet] Reloading history...');
         loadHistory();
       } else {
-        console.warn('[TaxInvoiceSheet] issueTaxInvoice returned success: false', result);
+        logger.warn('[TaxInvoiceSheet] issueTaxInvoice returned success: false', result);
       }
     } catch (err: any) {
-      console.error('[TaxInvoiceSheet] handleIssue error:', err);
+      logger.error('[TaxInvoiceSheet] handleIssue error:', err);
       toast.error(`발행 실패: ${err.message}`);
     } finally {
-      console.log('[TaxInvoiceSheet] handleIssue finished, setting actionLoading to false');
+      logger.info('[TaxInvoiceSheet] handleIssue finished, setting actionLoading to false');
       setActionLoading(false);
     }
   };

@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 "use server";
 
 import { validateAdminAction, validateUserAction } from "@/lib/auth/guards";
@@ -300,7 +301,7 @@ export async function updateOrderStatus(
     .maybeSingle(); // single() 대신 maybeSingle()을 사용하여 데이터 부재 시 null 반환 처리
 
   if (masterCheckError) {
-    console.error("[ERROR] Failed to check master connection:", masterCheckError);
+    logger.error("[ERROR] Failed to check master connection:", masterCheckError);
   }
 
   if (orderData?.master_order_id) {
@@ -348,27 +349,27 @@ export async function updateOrderStatus(
     });
 
   if (historyError) {
-    console.error("[ERROR] History recording failed:", historyError);
+    logger.error("[ERROR] History recording failed:", historyError);
   }
 
   // [WBS 2.4~6] 독립 후속 작업 병렬 실행 (IMP-054 N+1 최적화: 순차→Promise.all)
   await Promise.all([
     syncInventoryFromOrder(orderId, nextStatus, undefined, currentOrder.status).catch(invError => {
-      console.error("[ERROR] Inventory sync failed:", invError);
+      logger.error("[ERROR] Inventory sync failed:", invError);
     }),
     nextStatus === OrderStatus.RELEASED
       ? generateInvoicesForOrder(orderId).catch(financeError => {
-          console.error("[CRITICAL] Finance automation failed during release:", financeError);
+          logger.error("[CRITICAL] Finance automation failed during release:", financeError);
         })
       : Promise.resolve(),
     import("@/app/actions/notifications").then(async ({ triggerStatusChangeNotification }) => {
       await triggerStatusChangeNotification(orderId, nextStatus);
     }).catch(notifError => {
-      console.error("[ERROR] Notification trigger failed:", notifError);
+      logger.error("[ERROR] Notification trigger failed:", notifError);
     }),
     currentOrder?.transport_mode
       ? generateTrackingHistory(supabase, orderId, nextStatus, currentOrder.transport_mode).catch(trackError => {
-          console.error("[ERROR] Tracking simulation failed:", trackError);
+          logger.error("[ERROR] Tracking simulation failed:", trackError);
         })
       : Promise.resolve(),
   ]);
@@ -543,7 +544,7 @@ export async function updateMasterOrderStatus(
       .eq("master_order_id", masterId);
 
     if (dissolveError) {
-      console.error("[ERROR] Auto-dissolve failed for master:", masterId, dissolveError);
+      logger.error("[ERROR] Auto-dissolve failed for master:", masterId, dissolveError);
     }
   }
 

@@ -1,4 +1,5 @@
 "use client";
+import { logger } from '@/lib/logger';
 
 import React, { useMemo, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
@@ -165,7 +166,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
           setValue('shipper_contact_name', data.userName);
           setValue('shipper_contact_email', data.userEmail);
         }
-      } catch (err) { console.error(err); } finally { setIsLoadingAffiliation(false); }
+      } catch (err) { logger.error(err); } finally { setIsLoadingAffiliation(false); }
     }
     loadAffiliation();
   }, [setValue]);
@@ -237,7 +238,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
       if (onSuccess) onSuccess();
       setTimeout(() => router.push(`/orders/${result.id}`), 1000);
     } catch (err: any) {
-      console.error('Registration failed:', err);
+      logger.error('Registration failed:', err);
       toast.error('Submission Failed', { 
         description: err.message,
         icon: <AlertCircle className="text-red-500" />
@@ -246,14 +247,14 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
   };
 
   const onError = (errors: any) => {
-    console.error('Validation Errors:', errors);
+    logger.error('Validation Errors:', errors);
     const firstError = Object.values(errors)[0] as any;
     const errorMessage = firstError?.message || 'Check required fields';
     toast.error('Validation Error', { 
       description: errorMessage,
       action: {
         label: 'Retry',
-        onClick: () => console.log('Retry clicked')
+        onClick: () => logger.info('Retry clicked')
       }
     });
   };
