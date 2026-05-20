@@ -69,7 +69,7 @@
 | 013 | console→logger 교체 (53개 파일) | Riley | ✅ | 2026-05-20 |
 | 015 | middleware.ts console.log 제거 | Riley | 🚫 | — |
 | 025 | Server Actions 에러 래퍼 | Riley | ✅ | 2026-05-20 |
-| 045 | 무제한 리스트 페이지네이션 (18곳) | Ring | ⬜ | — |
+| 045 | 무제한 리스트 페이지네이션 (18곳) | Ring | 🔔 | 2026-05-20 |
 | 046 | Rate Limiting 도입 | B_Kai | 🚫 | — |
 | 051 | 감사 추적 (마스터/인보이스/통관) | Ring | ⬜ | — |
 | 056 | 이메일 HTML 인젝션 방지 | Ring | ⬜ | — |

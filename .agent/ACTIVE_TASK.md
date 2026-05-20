@@ -68,7 +68,7 @@
 | TASK-011 | 260516 | HTTP Security Headers 설정 | P2 | 없음 | Ring | ✅ | [TASK-011](tasks/TASK-011_260516_HTTPSecurityHeaders설정_Ring.md) | IMP-066 완료 · 커밋 c620581 · 헤더 6종 확인 |
 | TASK-012 | 260516 | Server Action Zod 검증 추가 | P2 | 없음 | Ring | ✅ | [TASK-012](tasks/TASK-012_260516_ServerActionZod검증추가_Ring.md) | IMP-067 완료 · 커밋 1fd899a+6255652 · 198/199 PASS |
 | TASK-013 | 260516 | Signup race condition 수정 | P3 | 없음 | Ring | ❌ | [TASK-013](tasks/TASK-013_260516_SignupRaceCondition수정_Ring.md) | 코드 정상(330d15e) · DoD 미체크·커밋해시 미기재·혼합커밋·IMP_PROGRESS 미갱신 — doc commit 재제출 |
-| TASK-014 | 260516 | 무제한 리스트 페이지네이션 수정 | P3 | 없음 | Ring | 🔄 | [TASK-014](tasks/TASK-014_260516_무제한리스트페이지네이션수정_Ring.md) | IMP-045 설계 확정 · limit/offset 2회 배치 승인 · 구현 중 |
+| TASK-014 | 260516 | 무제한 리스트 페이지네이션 수정 | P3 | 없음 | Ring | 🔔 | [TASK-014](tasks/TASK-014_260516_무제한리스트페이지네이션수정_Ring.md) | IMP-045 완료 · 커밋 8d774fb · 209/209 PASS · 18곳 적용 |
 | TASK-015 | 260516 | console→logger 교체 | P3 | 없음 | Riley | ✅ | [TASK-015](tasks/TASK-015_260516_console→logger교체_Riley.md) | IMP-013 완료 · 커밋 f401122 · 202/202 PASS |
 | TASK-016 | 260516 | Server Actions 에러 래퍼 | P3 | 없음 | Riley | ✅ | [TASK-016](tasks/TASK-016_260516_ServerActions에러래퍼_Riley.md) | IMP-025 완료 · 16개 Action 적용 · 커밋 021a17b · 209/209 PASS |
 | TASK-017 | 260516 | admin/rates 531줄 분할 | P3 | 없음 | B_Kai | ✅ | [TASK-017](tasks/TASK-017_260516_adminRates531줄분할_BKai.md) | IMP-014 완료 · page.tsx 94줄·커밋 e4fee51 |
