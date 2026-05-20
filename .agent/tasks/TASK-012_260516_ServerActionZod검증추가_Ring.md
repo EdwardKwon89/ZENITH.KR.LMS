@@ -8,7 +8,7 @@
 | 담당 Agent | Ring (Qwen) |
 | 우선순위 | P2 |
 | 전제조건 | 없음 (즉시 착수 가능) |
-| 상태 | ❌ 반려 |
+| 상태 | 🔔 검토 요청 |
 
 ---
 
@@ -140,9 +140,9 @@ export async function createSomething(formData: FormData) {
 
 | 항목 | 내용 |
 |:---|:---|
-| 검토일 | 2026-05-20 |
+| 검토일 | 2026-05-20 (1차 반려) / 2026-05-20 (2차 반려) |
 | 판정 | ❌ 반려 |
-| 검토 의견 | 구현 확인 ✅: 6개 Action Zod 검증 전량 적용(createVoc·upsertTransportCost·upsertPort·upsertCommonCode·updateSystemParam·upsertVesselSchedule) + `schemas.ts` 헬퍼 + 기존 테스트 수정. `tracking-adapters.ts` pre-existing parse error 복구 포함 ✅. **DoD 미달성으로 반려**: ① 커밋 해시 `—` 미기재 (실제 커밋: `1fd899a`) ② DoD 체크리스트 전항목 `[ ]` 미체크 ③ 회귀 파일 비표준 명명 `regression_20260520_TASK012_final.log` (표준: `REGRESSION_2026-05-20_TASK-012.log`). **재작업 요구**: ① 커밋 해시 `1fd899a` 기재 ② DoD `[x]` 전항목 완료 ③ 회귀 파일 표준 명명(`REGRESSION_2026-05-20_TASK-012.log`)으로 저장 또는 기존 파일 표준 명명 복사 후 기재. |
+| 검토 의견 | [1차] 커밋 해시 미기재·DoD 미체크·회귀 파일 비표준 명명. [2차] 커밋 `1fd899a` 기재 ✅, DoD `[x]` 전량 ✅, 회귀 파일 `REGRESSION_2026-05-20_TASK-012.log`(5.2K) 표준 명명 ✅, 6개 Action Zod 검증 실코드 확인(schemas.ts + 6파일) ✅, 회귀 198/199(Riley mock 수정 이전 실행, 타임라인 사유 허용) ✅. **미달성**: task file `| 상태 |` 여전히 `❌ 반려` — 🔔 미변경. ACTIVE_TASK.md 🔔 불일치(R-17 위반). TASK-010/011 2차 반려에서 동일 유형 지적 후 재발. **재작업 요구**: task file 상태 `❌ 반려` → `🔔 검토 요청` 변경 + 커밋. |
 
 ---
 
@@ -152,3 +152,4 @@ export async function createSomething(formData: FormData) {
 |:-----|:----:|:-----|
 | 2026-05-16 | Aiden (Claude) | Task 생성 — 작업 지시 발령 |
 | 2026-05-20 | Aiden (Claude) | ❌ 반려 — 커밋 해시 미기재(실제 1fd899a), DoD 미체크, 회귀 파일 비표준 명명 |
+| 2026-05-20 | Aiden (Claude) | ❌ 반려 (2차) — task file 상태 ❌→🔔 미변경(R-17 위반, TASK-010/011 동일 유형 반복) |

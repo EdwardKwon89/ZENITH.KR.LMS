@@ -26,7 +26,7 @@ export async function GET(request: Request) {
 
     const { data: profile, error: profileError } = await supabase
       .from("zen_profiles")
-      .select("*")
+      .select("role")
       .eq("id", user.id)
       .single();
 
@@ -39,7 +39,14 @@ export async function GET(request: Request) {
     let query = supabase
       .from("zen_invoices")
       .select(`
-        *,
+        invoice_no,
+        status,
+        shipper_id,
+        total_amount,
+        paid_amount,
+        currency,
+        due_date,
+        created_at,
         shipper:shipper_id(name)
       `)
       .order("created_at", { ascending: false });
@@ -82,13 +89,19 @@ export async function POST(request: Request) {
 
     const { data: profile, error: profileError } = await supabase
       .from("zen_profiles")
-      .select("*")
+      .select("role")
       .eq("id", user.id)
       .single();
 
     if (profileError || !profile) {
       console.error("[FIN-02] Profile Error:", profileError);
       return new NextResponse(`Forbidden: ${profileError?.message || 'Profile not found'}`, { status: 403 });
+    }
+
+    // 2. 역할 기반 접근 제어 (MANAGER 이상만 허용)
+    const isAdmin = [USER_ROLES.ADMIN, USER_ROLES.ZENITH_SUPER_ADMIN, USER_ROLES.MANAGER].includes(profile.role);
+    if (!isAdmin) {
+      return new NextResponse("Forbidden: Manager role or higher required", { status: 403 });
     }
 
     const body = await request.json();
