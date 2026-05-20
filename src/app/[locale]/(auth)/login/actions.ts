@@ -1,7 +1,7 @@
 'use server';
 
 import { createClient } from '@/utils/supabase/server';
-import { createClient as createSupabaseClient } from '@supabase/supabase-js';
+import { createAdminClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { USER_ROLES } from '@/lib/auth/rbac';
@@ -96,10 +96,7 @@ export async function signup(formData: FormData, locale: string = 'ko') {
   // Handle Document Upload if present
   const docFile = formData.get('doc_file') as File | null;
   if (docFile && data?.user) {
-    const adminClient = createSupabaseClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
+    const adminClient = await createAdminClient();
 
     // Wait a brief moment to ensure trigger created the profile
     await new Promise(resolve => setTimeout(resolve, 500));

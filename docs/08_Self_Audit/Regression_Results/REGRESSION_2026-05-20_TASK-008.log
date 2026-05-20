@@ -1,0 +1,6 @@
+REGRESSION_2026-05-20_TASK-008.log
+IMP-003 middleware→proxy.ts 마이그레이션
+- middleware.ts 168→52줄 경량화
+- lib/auth/proxy.ts 122줄 신규
+Result: 197/199 PASS (2 pre-existing voc.ts fs bug)
+Build: pre-existing tracking-adapters.ts error (unrelated)
