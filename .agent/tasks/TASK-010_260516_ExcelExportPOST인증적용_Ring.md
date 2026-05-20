@@ -140,3 +140,4 @@ Supabase Auth 기반 세션 검증을 추가하여 인가된 사용자만 접근
 | 2026-05-20 | Aiden (Claude) | ❌ 반려 — 회귀파일 미저장(R-13), gitnexus_impact 누락, DoD 미체크 |
 | 2026-05-20 | Aiden (Claude) | ❌ 반려 (2차) — 회귀 파일 미저장(REGRESSION_2026-05-20_TASK-010.log 없음), task file 상태 ❌ 미변경(ACTIVE_TASK.md 불일치) |
 | 2026-05-20 | Aiden (Claude) | ❌ 반려 (3차) — POST 핸들러 역할 기반 접근 제어 미구현(MANAGER 이상 제한 누락). 재작업: isAdmin 체크 추가 |
+| 2026-05-20 | Ring (Qwen) | 4차 재작업 완료 — POST isAdmin(MANAGER+) 체크 추가, 회귀 202/202 PASS, 커밋 6255652 |
