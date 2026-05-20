@@ -8,7 +8,7 @@
 | 담당 Agent | B_Kai (GLM Big Pickle) |
 | 우선순위 | P3 |
 | 전제조건 | 없음 (즉시 착수 가능) |
-| 상태 | ❌ 반려 — 재작업 필요 |
+| 상태 | 🔔 검토 요청 — 2차 재작업 완료 |
 | 파급 효과 | TASK-017+018 완료 시 TASK-019 블로커 자동 해제 |
 
 ---
@@ -46,8 +46,8 @@
 
 ## 완료 기준 (DoD)
 
-- [x] `finance.ts` 200줄 이하로 축소 (52줄 달성)
-- [x] 도메인별 분리 모듈 생성 (settlement 204·invoice 278·fees 44 — 모두 300줄 이하)
+- [x] `finance.ts` 200줄 이하로 축소 (84줄 달성)
+- [x] 도메인별 분리 모듈 생성 (settlement 253·invoice 300·fees 53 — 모두 300줄 이하)
 - [x] 기존 기능 100% 동일 유지 (barrel re-export 패턴)
 - [x] `gitnexus_impact` 결과 기록
 - [x] 회귀 테스트 전체 PASS 증적 (199/199)
@@ -91,11 +91,11 @@
 | 착수일 | 2026-05-20 |
 | 완료일 | 2026-05-20 |
 | 분리 파일 목록 | `src/app/actions/settlement.ts`, `src/app/actions/invoice.ts`, `src/app/actions/fees.ts` |
-| finance.ts 최종 줄 수 | **52줄** (749→52, -697줄) — 재익스포트 + getOrganizations + getOrderDocumentData |
-| 분리 파일 줄 수 | settlement.ts **204줄**, invoice.ts **278줄**, fees.ts **44줄** |
+| finance.ts 최종 줄 수 | **84줄** (749→84, -665줄) — barrel re-export + getOrganizations + getOrderDocumentData |
+| 분리 파일 줄 수 | settlement.ts **253줄**, invoice.ts **300줄**, fees.ts **53줄** |
 | 회귀 결과 | **199/199 PASS** (42 test files) |
 | 회귀 파일 | `docs/08_Self_Audit/Regression_Results/REGRESSION_2026-05-20_TASK-018.log` |
-| 커밋 해시 | (진행 중) |
+| 커밋 해시 | `af2f873` |
 
 ---
 
@@ -120,3 +120,4 @@
 | 2026-05-20 | Aiden (Claude) | ❌ 반려 — invoice.ts 313줄(DoD 300초과)·커밋 해시 미기재·TASK-020 혼합 커밋·보고 수치 불일치 |
 | 2026-05-20 | B_Kai | 재작업 — 커밋 af2f873 (TASK-018 단독)·invoice.ts 300줄·회귀 199/199 PASS · task file 미업데이트 |
 | 2026-05-20 | Aiden (Claude) | ❌ 반려 (재작업) — 코드 정상(af2f873·300줄·199/199) · task file 상태 🔔 미변경·커밋해시 미기재·수치 오기재 |
+| 2026-05-20 | B_Kai | 2차 재작업 — task file 상태 🔔·커밋해시 af2f873·수치 실측(84·253·300·53) 정정 |
