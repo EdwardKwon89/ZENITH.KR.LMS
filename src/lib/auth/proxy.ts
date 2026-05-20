@@ -1,3 +1,4 @@
+import { cache } from 'react';
 import { logger } from '@/lib/logger';
 import { type NextRequest, NextResponse } from 'next/server';
 import type { SupabaseClient, User } from '@supabase/supabase-js';
@@ -5,6 +6,14 @@ import { isFeatureEnabled } from '@/lib/params/feature-flags';
 import { USER_ROLES } from '@/lib/auth/rbac';
 import { ORG_ROUTE_MAP, DEFAULT_REDIRECTS } from '@/config/routes';
 import { routing } from '@/i18n/routing';
+
+const getProfileCached = cache(async (supabase: SupabaseClient, userId: string) => {
+  return supabase
+    .from('zen_profiles')
+    .select(`status, org_id, role, zen_organizations ( type )`)
+    .eq('id', userId)
+    .single();
+});
 
 export interface ProxyDecision {
   response: NextResponse;
@@ -64,28 +73,29 @@ export async function authGuard(
     let orgType = isMetadataPlatformAdmin ? 'PLATFORM' : ((user.app_metadata?.org_type as any) || 'GUEST');
     let userStatus = (user.app_metadata?.status as string) || 'PENDING';
 
-    try {
-      const { data: profile } = await supabase
-        .from('zen_profiles')
-        .select(`status, org_id, role, zen_organizations ( type )`)
-        .eq('id', user.id)
-        .single();
+    // metadata 누락 세션 fallback: app_metadata 갱신 hook 미적용 레거시 세션
+    const hasCompleteMetadata = !!(user.app_metadata?.role && user.app_metadata?.org_type && user.app_metadata?.status);
 
-      if (profile) {
-        userStatus = profile.status || userStatus;
-        const dbOrgType = (profile.zen_organizations as any)?.type;
+    if (!hasCompleteMetadata) {
+      try {
+        const { data: profile } = await getProfileCached(supabase, user.id);
 
-        if ([USER_ROLES.ZENITH_SUPER_ADMIN, USER_ROLES.ADMIN].includes((profile as any).role)) {
-          orgType = 'PLATFORM';
-        } else if (dbOrgType) {
-          orgType = dbOrgType;
-        } else if (!profile.org_id && userStatus === 'ACTIVE') {
-          orgType = 'SHIPPER';
+        if (profile) {
+          userStatus = profile.status || userStatus;
+          const dbOrgType = (profile.zen_organizations as any)?.type;
+
+          if ([USER_ROLES.ZENITH_SUPER_ADMIN, USER_ROLES.ADMIN].includes((profile as any).role)) {
+            orgType = 'PLATFORM';
+          } else if (dbOrgType) {
+            orgType = dbOrgType;
+          } else if (!profile.org_id && userStatus === 'ACTIVE') {
+            orgType = 'SHIPPER';
+          }
         }
+      } catch (e) {
+        logger.warn(`[AUTH PROXY] DB fallback:`, e);
+        if (isMetadataPlatformAdmin) orgType = 'PLATFORM';
       }
-    } catch (e) {
-      logger.warn(`[AUTH PROXY] DB fallback:`, e);
-      if (isMetadataPlatformAdmin) orgType = 'PLATFORM';
     }
 
     const allowedRoot = ORG_ROUTE_MAP[orgType as keyof typeof ORG_ROUTE_MAP] || '/';
