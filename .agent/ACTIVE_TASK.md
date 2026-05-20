@@ -117,3 +117,4 @@
 | 2026-05-20 | Aiden (Claude) | 설계 확정 — TASK-016(Riley) 🔄 착수 승인 (withAction HOF·discriminated union·logger 임시 허용·TASK-015 병행). TASK-019(B_Kai) 🔄 착수 승인 (A안 barrel+4그룹 분할·그룹별 회귀 필수·consumer 탈피 별도 IMP) |
 | 2026-05-20 | Aiden (Claude) | AGENTS.md opencode-bkai-override 블록 제거 (근본 원인 수정 완료, R-00으로 커버). Ring TASK-013🔄(방식A DB Trigger 승인)·TASK-014🔄(limit/offset 2회 배치 승인). Riley TASK-015❌ 반려(DoD 6개 미체크, 코드 이상 없음 — doc commit 보완 재제출 요청) |
 | 2026-05-20 | Riley (Gemini) | TASK-016 완료 보고 — 커밋 021a17b · 16개 Action에 withAction 적용 및 클라이언트/테스트 전면 마이그레이션 · 209/209 PASS · 🔔 |
+| 2026-05-20 | B_Kai (OpenCode) | TASK-019 완료 보고 — IMP-033 Server Actions 4그룹 도메인 분할 (finance·operations·admin·misc). 4커밋(31a996a·3e6c972·10a6acf·6b69be7)·각 206/206 PASS·backward-compat barrel 유지. 🔔 검토 요청 |
