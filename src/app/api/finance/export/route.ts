@@ -72,12 +72,36 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
+    const supabase = await createClient();
+
+    // 1. 인증 검증 (GET과 동일한 패턴)
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return new NextResponse("Unauthorized", { status: 401 });
+    }
+
+    const { data: profile, error: profileError } = await supabase
+      .from("zen_profiles")
+      .select("*")
+      .eq("id", user.id)
+      .single();
+
+    if (profileError || !profile) {
+      console.error("[FIN-02] Profile Error:", profileError);
+      return new NextResponse(`Forbidden: ${profileError?.message || 'Profile not found'}`, { status: 403 });
+    }
+
     const body = await request.json();
     const { data, filename } = body;
 
     if (!data || !Array.isArray(data)) {
       console.error("[FIN-02] Invalid POST data:", body);
       return new NextResponse("Invalid data format", { status: 400 });
+    }
+
+    // 2. 페이로드 크기 제한 (10,000행)
+    if (data.length > 10000) {
+      return new NextResponse("Data exceeds maximum limit of 10,000 rows", { status: 400 });
     }
 
     console.log(`[FIN-02] POST Payload - Data rows: ${data.length}, Filename: ${filename}`);
