@@ -90,8 +90,8 @@
 | 항목 | 내용 |
 |:---|:---|
 | 검토일 | 2026-05-20 |
-| 판정 | ❌ 반려 |
-| 검토 의견 | **코드 커밋 해시 오기재 + 문서 커밋 해시 미기재.** B_Kai가 보고한 코드 커밋 해시 `df63706`은 실제 ZenUI 컴포넌트 파일을 포함하지 않음 — `df63706` 내용: AGENTS.md·CLAUDE.md GitNexus 섹션 무단 추가(44줄씩) + Riley의 middleware.ts 변경 혼입. **실제 ZenUI 분할 코드 커밋은 `d099a04`** (9개 파일: ZenAurora·ZenBadge·ZenButton·ZenCard·ZenInput·ZenSelect·ZenTextarea·ZenUI shim·index.ts). 문서 커밋 `0dea972` 존재하나 task file에 미기재. AGENTS.md·CLAUDE.md 무단 수정은 Aiden이 별도 revert 처리 완료. **재작업 지시**: task file [작업 결과] 코드 커밋 해시를 `d099a04`로, 문서 커밋 해시를 `0dea972`로 수정 후 재보고(doc commit 1회 추가). |
+| 판정 | ❌ 반려 (2차) |
+| 검토 의견 | **1차 반려 재작업 불완전.** `d306fa7`에서 코드·문서 커밋 해시는 정정 완료(`d099a04`·`0dea972`) ✅. 그러나: (1) task file 상태 여전히 ❌ — 🔔로 변경 필요, (2) ACTIVE_TASK.md 미업데이트(여전히 ❌), (3) IMP_PROGRESS.md 미업데이트(여전히 🔔), (4) 개정 이력 B_Kai 재보고 항목 없음, (5) doc commit 없음. **3차 재작업 지시**: (1) task file 상태 → 🔔, 개정 이력 추가, (2) ACTIVE_TASK.md TASK-036 → 🔔 반영, (3) IMP_PROGRESS.md IMP-063 → 🔔 반영, (4) doc commit 1회 수행. |
 
 ---
 
@@ -101,3 +101,4 @@
 |:-----|:----:|:-----|
 | 2026-05-20 | Aiden (Claude) | Task 생성 — Phase G 작업 지시 발령 |
 | 2026-05-20 | Aiden (Claude) | ❌ 반려 — 코드 커밋 해시 오기재(df63706→d099a04), 문서 커밋 해시 미기재, AGENTS.md/CLAUDE.md 무단 수정 Aiden revert |
+| 2026-05-20 | Aiden (Claude) | ❌ 2차 반려 — 해시 수정은 완료됐으나 상태·ACTIVE_TASK·IMP_PROGRESS 미반영 + doc commit 없음 |
