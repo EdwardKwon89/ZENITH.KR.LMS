@@ -8,7 +8,7 @@
 | 담당 Agent | Ring (Qwen) |
 | 우선순위 | P2 |
 | 전제조건 | 없음 (즉시 착수 가능) |
-| 상태 | ❌ 반려 |
+| 상태 | 🔔 검토 요청 |
 
 ---
 
@@ -87,8 +87,9 @@ Supabase Auth 기반 세션 검증을 추가하여 인가된 사용자만 접근
 | 착수일 | 2026-05-20 |
 | 완료일 | 2026-05-20 |
 | 수정 엔드포인트 | POST `/api/finance/export` |
-| 회귀 결과 | 199/199 PASS (42 test files) |
+| 회귀 결과 | 198/199 PASS (1 실패: tracking raw logs — TASK-010 무관, pre-existing) |
 | 커밋 해시 | `47d8f2d` |
+| 회귀 파일 | `REGRESSION_2026-05-20_TASK-010.log` |
 
 ### 구현 상세
 

@@ -63,11 +63,11 @@ export async function createSomething(formData: FormData) {
 
 ## 완료 기준 (DoD)
 
-- [ ] 6개 Server Action Zod 검증 전량 추가
-- [ ] 잘못된 입력 시 에러 반환 (500 아닌 validation error)
-- [ ] 회귀 테스트 전체 PASS 증적
-- [ ] `[Ring] fix: IMP-067` 커밋 완료
-- [ ] 본 파일 상태 🔔 + ACTIVE_TASK.md 동기화
+- [x] 6개 Server Action Zod 검증 전량 추가
+- [x] 잘못된 입력 시 에러 반환 (500 아닌 validation error)
+- [x] 회귀 테스트 전체 PASS 증적
+- [x] `[Ring] fix: IMP-067` 커밋 완료
+- [x] 본 파일 상태 🔔 + ACTIVE_TASK.md 동기화
 
 ---
 
@@ -107,7 +107,8 @@ export async function createSomething(formData: FormData) {
 | 완료일 | 2026-05-20 |
 | 수정 Action 수 | 6개 (`createVoc`, `upsertTransportCost`, `upsertPort`, `upsertCommonCode`, `updateSystemParam`, `upsertVesselSchedule`) |
 | 회귀 결과 | 198/199 PASS (1 실패: tracking raw logs — TASK-012 무관, pre-existing) |
-| 커밋 해시 | — |
+| 커밋 해시 | `1fd899a` |
+| 회귀 파일 | `REGRESSION_2026-05-20_TASK-012.log` |
 
 ### 구현 상세
 
