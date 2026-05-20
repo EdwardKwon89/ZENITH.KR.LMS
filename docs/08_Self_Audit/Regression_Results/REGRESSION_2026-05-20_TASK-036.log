@@ -1,0 +1,5 @@
+REGRESSION RESULT: TASK-036 (IMP-063) ZenUI.tsx 7개 컴포넌트 분할
+Date: 2026-05-20
+Test: rtk npm run test:regression
+Result: 44 files, 209 tests PASS
+Notes: 7 individual files + index.ts barrel + ZenUI.tsx re-export shim

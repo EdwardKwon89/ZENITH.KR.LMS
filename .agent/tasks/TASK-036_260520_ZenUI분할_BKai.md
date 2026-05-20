@@ -8,7 +8,7 @@
 | 담당 Agent | B_Kai (OpenCode) |
 | 우선순위 | P3 |
 | 전제조건 | 없음 (TASK-034와 병행 가능) |
-| 상태 | ⬜ 미착수 |
+| 상태 | 🔔 검토 요청 |
 | 파급 효과 | 없음 (독립 Task) |
 
 ---
@@ -74,13 +74,13 @@
 
 | 항목 | 내용 |
 |:---|:---|
-| 착수일 | — |
-| 완료일 | — |
-| 생성 파일 목록 | — |
-| 분할 결과 (각 파일 줄 수) | — |
-| gitnexus_impact 결과 | — |
-| 회귀 결과 | — |
-| 코드 커밋 해시 | — |
+| 착수일 | 2026-05-20 |
+| 완료일 | 2026-05-20 |
+| 생성 파일 목록 | `ZenCard.tsx`, `ZenButton.tsx`, `ZenAurora.tsx`, `ZenInput.tsx`, `ZenTextarea.tsx`, `ZenBadge.tsx`, `ZenSelect.tsx`, `index.ts` (8개) |
+| 분할 결과 (각 파일 줄 수) | ZenCard 29·ZenButton 67·ZenAurora 17·ZenInput 26·ZenTextarea 28·ZenBadge 29·ZenSelect 38·index 9 |
+| gitnexus_impact 결과 | ZenUI.tsx re-export shim 전환 — 모든 기존 import 호환 |
+| 회귀 결과 | 44 files, 209 tests PASS |
+| 코드 커밋 해시 | d099a04 |
 | 문서 커밋 해시 | — |
 
 ---
