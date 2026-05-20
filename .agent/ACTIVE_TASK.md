@@ -55,16 +55,16 @@
 
 | Task-ID | 생성일 | 업무개요 | 우선순위 | 전제조건 | 할당Agent | 상태 | 상세파일 | 비고 |
 |:-------:|:------:|:--------|:--------:|:--------:|:---------:|:----:|:--------|:-----|
-| TASK-001 | 260516 | createOrder() 트랜잭션 도입 | P2 | 없음 | Riley | 🔔 | [TASK-001](tasks/TASK-001_260516_createOrder트랜잭션도입_Riley.md) | IMP-019 · IMP-047/052/053 블로커 해제 |
-| TASK-002 | 260516 | N+1 쿼리 7곳 수정 | P2 | 없음 | B_Kai | 🔔 | [TASK-002](tasks/TASK-002_260516_N+1쿼리7곳수정_BKai.md) | 4/7 spots optimized; 199/199 PASS |
-| TASK-003 | 260516 | 정산 이중 실행 방지 | P2 | TASK-001 | Riley | 🚫 | [TASK-003](tasks/TASK-003_260516_정산이중실행방지_Riley.md) | IMP-039 |
-| TASK-004 | 260516 | WAREHOUSED→CANCELED 재고 복구 | P2 | TASK-001 | Riley | 🚫 | [TASK-004](tasks/TASK-004_260516_WAREHOUSED재고복구_Riley.md) | IMP-040 |
+| TASK-001 | 260516 | createOrder() 트랜잭션 도입 | P2 | 없음 | Riley | ✅ | [TASK-001](tasks/TASK-001_260516_createOrder트랜잭션도입_Riley.md) | IMP-019 · IMP-047/052/053 블로커 해제 |
+| TASK-002 | 260516 | N+1 쿼리 7곳 수정 | P2 | 없음 | B_Kai | ❌ | [TASK-002](tasks/TASK-002_260516_N+1쿼리7곳수정_BKai.md) | #4·#6 미수정 — 재작업 요구 |
+| TASK-003 | 260516 | 정산 이중 실행 방지 | P2 | TASK-001 | Riley | ⬜ | [TASK-003](tasks/TASK-003_260516_정산이중실행방지_Riley.md) | IMP-039 · TASK-001 ✅ → 블로커 해제 |
+| TASK-004 | 260516 | WAREHOUSED→CANCELED 재고 복구 | P2 | TASK-001 | Riley | ⬜ | [TASK-004](tasks/TASK-004_260516_WAREHOUSED재고복구_Riley.md) | IMP-040 · TASK-001 ✅ → 블로커 해제 |
 | TASK-005 | 260516 | Phase F 사전 GitNexus 분析 | P3 | 없음 | D_Kai | ⬜ | [TASK-005](tasks/TASK-005_260516_PhaseF사전GitNexus분析_DKai.md) | ANA-IMP-DK-F · IMP-012/017/023/024/029/049/060/061/063 |
 | TASK-006 | 260516 | Supabase 클라이언트 중복 제거 | P3 | 없음 | D_Kai | ⬜ | [TASK-006](tasks/TASK-006_260516_Supabase클라이언트중복제거_DKai.md) | IMP-059 |
 | TASK-007 | 260516 | RBAC 이중 상태 정리 | P3 | 없음 | D_Kai | 📝 | [TASK-007](tasks/TASK-007_260516_RBAC이중상태정리_DKai.md) | IMP-031 |
 | TASK-008 | 260516 | middleware→proxy.ts 마이그레이션 | P3 | 없음 | D_Kai | 📝 | [TASK-008](tasks/TASK-008_260516_middleware→proxy마이그레이션_DKai.md) | IMP-003 |
 | TASK-009 | 260516 | API Route stack trace 노출 수정 | P2 | 없음 | Ring | 🔔 | [TASK-009](tasks/TASK-009_260516_APIRoute스택트레이스수정_Ring.md) | IMP-064 |
-| TASK-010 | 260516 | Excel Export POST 인증 적용 | P2 | 없음 | Ring | ⬜ | [TASK-010](tasks/TASK-010_260516_ExcelExportPOST인증적용_Ring.md) | IMP-065 |
+| TASK-010 | 260516 | Excel Export POST 인증 적용 | P2 | 없음 | Ring | 🔄 | [TASK-010](tasks/TASK-010_260516_ExcelExportPOST인증적용_Ring.md) | IMP-065 |
 | TASK-011 | 260516 | HTTP Security Headers 설정 | P2 | 없음 | Ring | ⬜ | [TASK-011](tasks/TASK-011_260516_HTTPSecurityHeaders설정_Ring.md) | IMP-066 |
 | TASK-012 | 260516 | Server Action Zod 검증 추가 | P2 | 없음 | Ring | ⬜ | [TASK-012](tasks/TASK-012_260516_ServerActionZod검증추가_Ring.md) | IMP-067 |
 | TASK-013 | 260516 | Signup race condition 수정 | P3 | 없음 | Ring | ⬜ | [TASK-013](tasks/TASK-013_260516_SignupRaceCondition수정_Ring.md) | IMP-068 |
@@ -82,7 +82,7 @@
 
 | Agent | 즉시 착수 가능 | 블로커 대기 |
 |:------|:-------------|:----------|
-| Riley | TASK-001🔄 · TASK-015 · TASK-016 | TASK-003/004 (TASK-001 완료 후) |
+| Riley | TASK-003 · TASK-004 · TASK-015 · TASK-016 | — |
 | B_Kai | TASK-002🔔 · TASK-017 · TASK-018 · TASK-020 | TASK-019 (TASK-017+018 완료 후) |
 | D_Kai | TASK-005 · TASK-006 · TASK-007 · TASK-008 | — |
 | Ring | TASK-009 · TASK-010 · TASK-011 · TASK-012 · TASK-013 · TASK-014 | — |
@@ -97,3 +97,4 @@
 | 2026-05-16 | Aiden (Claude) | 역량 평가 목적 공평 재배분 — TASK-005~020 신규 등록. D_Kai·Ring Task 할당 (기존 Riley 전담 → 4 Agent 균등) |
 | 2026-05-16 | Aiden (Claude) | 작업 지시 발령 — TASK-005~020 상세 파일 전량 생성. 각 Agent 즉시 착수 가능 상태 |
 | 2026-05-16 | Aiden (Claude) | 설계 의견/검토 단계 신설 (R-17 v1.3) — 📝·🔍 상태 추가. TASK-005~020 [설계 의견]·[설계 확정] 섹션 일괄 삽입 |
+| 2026-05-20 | Aiden (Claude) | TASK-001 ✅ 판정 (IMP-019 완료) — TASK-003/004 블로커 해제. TASK-002 ❌ 반려 (DoD 미달성, #4·#6 미수정) |
