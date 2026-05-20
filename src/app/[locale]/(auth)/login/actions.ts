@@ -99,16 +99,21 @@ export async function signup(formData: FormData, locale: string = 'ko') {
   if (docFile && data?.user) {
     const adminClient = await createAdminClient();
 
-    // Wait a brief moment to ensure trigger created the profile
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    const { data: profile } = await adminClient
+    // on_auth_user_created DB Trigger가 signUp 내에서 동기적으로 zen_profiles를 생성하므로
+    // setTimeout 대기 없이 바로 조회 가능 (Race Condition 근본 해결 — IMP-068)
+    const { data: profile, error: profileError } = await adminClient
       .from('zen_profiles')
       .select('org_id')
       .eq('id', data.user.id)
       .single();
 
-    if (profile?.org_id) {
+    if (profileError || !profile?.org_id) {
+      console.error('[SIGNUP_ACTION] Profile not found after signup:', profileError);
+      return { error: 'Profile creation failed. Please try again.' };
+    }
+
+    const fileExt = docFile.name.split('.').pop();
+    const filePath = `${profile.org_id}/${Date.now()}_${docFile.name}`;
       const fileExt = docFile.name.split('.').pop();
       const filePath = `${profile.org_id}/${Date.now()}_${docFile.name}`;
       

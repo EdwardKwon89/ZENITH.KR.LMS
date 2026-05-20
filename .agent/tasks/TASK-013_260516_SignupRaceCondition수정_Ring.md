@@ -8,7 +8,7 @@
 | 담당 Agent | Ring (Qwen) |
 | 우선순위 | P3 |
 | 전제조건 | 없음 (즉시 착수 가능) |
-| 상태 | 🔄 구현 중 |
+| 상태 | 🔔 검토 요청 |
 
 ---
 
@@ -94,12 +94,19 @@ Supabase Auth `on_auth_user_created` DB Trigger 또는 확인 루프(retry with 
 
 | 항목 | 내용 |
 |:---|:---|
-| 착수일 | — |
-| 완료일 | — |
-| 선택 방식 | — |
-| 선택 근거 | — |
-| 회귀 결과 | — |
+| 착수일 | 2026-05-20 |
+| 완료일 | 2026-05-20 |
+| 선택 방식 | 방식 A — 기존 `on_auth_user_created` DB Trigger 활용 (마이그레이션 추가 불필요) |
+| 선택 근거 | `handle_new_user()` Trigger가 이미 `zen_profiles`를 동기적으로 생성함. `setTimeout(500)` 제거 후 바로 프로필 조회 가능. Race Condition 근본 해결. |
+| 회귀 결과 | 196/198 PASS (2 실패: `@/app/actions/orders` import resolve 오류 — TASK-013 무관, pre-existing) |
 | 커밋 해시 | — |
+
+### 구현 상세
+
+**수정 파일**: `src/app/[locale]/(auth)/login/actions.ts`
+- L101-102: `await new Promise(resolve => setTimeout(resolve, 500))` 제거
+- L103-110: 프로필 조회 시 `profileError` 체크 추가, `profile?.org_id` 없을 시 에러 반환
+- 주석: IMP-068 Race Condition 근본 해결 명시
 
 ---
 
