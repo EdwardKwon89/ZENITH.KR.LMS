@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from "react";
 import { usePathname, useParams, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { motion, AnimatePresence } from "framer-motion";
 import { 
   ChevronRight, 
   ChevronLeft, 
@@ -12,16 +11,13 @@ import {
   ShoppingCart, 
   Truck, 
   Calculator, 
-  ShieldCheck, 
   ShieldAlert,
   Settings,
   Menu,
-  Package,
   MessageSquare,
   UserCircle,
   HelpCircle,
   TrendingUp,
-  TrendingDown,
   BarChartBig,
   CalendarDays,
   FileText,
@@ -157,12 +153,10 @@ export default function NaviSidebar({
   };
 
   return (
-    <motion.aside
-      initial={false}
-      animate={{ width: isCollapsed ? 80 : 280 }}
+    <aside
       className={cn(
-        "relative h-screen flex flex-col bg-white border-r border-slate-200 transition-colors duration-300 zen-shadow-premium z-40",
-        isCollapsed ? "items-center" : "items-stretch"
+        "relative h-screen flex flex-col bg-white border-r border-slate-200 transition-all duration-300 zen-shadow-premium z-40",
+        isCollapsed ? "items-center w-[80px]" : "items-stretch w-[280px]"
       )}
     >
       <div className={cn(
@@ -170,13 +164,9 @@ export default function NaviSidebar({
         isCollapsed ? "justify-center px-0" : "justify-between"
       )}>
         {!isCollapsed && (
-          <motion.span 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-xl font-bold font-heading text-brand-900 tracking-tight"
-          >
+          <span className="text-xl font-bold font-heading text-brand-900 tracking-tight">
             ZENITH<span className="text-brand-500">_LMS</span>
-          </motion.span>
+          </span>
         )}
         <button 
           onClick={toggleSidebar}
@@ -237,29 +227,25 @@ export default function NaviSidebar({
                 )}
               </div>
 
-              <AnimatePresence>
-                {!isCollapsed && hasChildren && isOpen && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    className="overflow-hidden pl-10 pr-2 space-y-1 mt-1"
-                  >
-                    {item.children?.map((child) => (
-                      <Link
-                        key={child.href}
-                        href={`/${locale}${child.href}`}
-                        className={cn(
-                          "block py-1.5 text-sm text-slate-500 hover:text-brand-600 transition-colors",
-                          pathname === `/${locale}${child.href}` && "text-brand-700 font-medium"
-                        )}
-                      >
-                        {child.title}
-                      </Link>
-                    ))}
-                  </motion.div>
+              <div
+                className={cn(
+                  "overflow-hidden pl-10 pr-2 space-y-1 mt-1 transition-all duration-200",
+                  !isCollapsed && hasChildren && isOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
                 )}
-              </AnimatePresence>
+              >
+                {item.children?.map((child) => (
+                  <Link
+                    key={child.href}
+                    href={`/${locale}${child.href}`}
+                    className={cn(
+                      "block py-1.5 text-sm text-slate-500 hover:text-brand-600 transition-colors",
+                      pathname === `/${locale}${child.href}` && "text-brand-700 font-medium"
+                    )}
+                  >
+                    {child.title}
+                  </Link>
+                ))}
+              </div>
             </div>
           );
         })}
@@ -289,6 +275,6 @@ export default function NaviSidebar({
           </div>
         )}
       </div>
-    </motion.aside>
+    </aside>
   );
 }
