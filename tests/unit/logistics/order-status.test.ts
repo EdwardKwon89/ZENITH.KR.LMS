@@ -26,6 +26,7 @@ describe('ZENITH Logistics: Order Status Machine Action', () => {
       maybeSingle: vi.fn(),
       update: vi.fn(),
       insert: vi.fn(),
+      rpc: vi.fn(),
     };
 
     mock.from.mockReturnValue(mock);
@@ -35,6 +36,7 @@ describe('ZENITH Logistics: Order Status Machine Action', () => {
     mock.maybeSingle.mockReturnValue(mock);
     mock.update.mockReturnValue(mock);
     mock.insert.mockReturnValue(mock);
+    mock.rpc.mockReturnValue(mock);
     
     return mock;
   };
@@ -56,13 +58,13 @@ describe('ZENITH Logistics: Order Status Machine Action', () => {
     supabase.maybeSingle.mockResolvedValueOnce({ data: null, error: null });
     // 2. 현재 상태 조회용 (ZEN_ORDERS single)
     supabase.single.mockResolvedValueOnce({ data: { status: OrderStatus.REGISTERED } });
-    // 3. 히스토리 삽입용 (HISTORY insert)
-    supabase.insert.mockResolvedValueOnce({ error: null });
+    // 3. RPC 호출용 (rpc)
+    supabase.rpc.mockResolvedValueOnce({ error: null });
 
     const result = await updateOrderStatus('order-1', OrderStatus.SCHEDULED, '차량 배차 완료');
 
     expect(result.success).toBe(true);
-    expect(supabase.from).toHaveBeenCalledWith('order_status_history');
+    expect(supabase.rpc).toHaveBeenCalledWith('update_order_status_atomic', expect.anything());
   });
 
   it('TC-S.2: [Failure] SHIPPER(CORPORATE)는 WAREHOUSED 이후 상태를 변경할 수 없어야 함 (Immutable Guard)', async () => {

@@ -31,6 +31,7 @@ describe('ZENITH Tracking Visibility: Phase 3.3 Multi-Agent Cases', () => {
       update: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
       select: vi.fn().mockReturnThis(),
+      rpc: vi.fn().mockResolvedValue({ data: null, error: null }),
       single: vi.fn(),
       maybeSingle: vi.fn(),
       order: vi.fn().mockReturnThis(),

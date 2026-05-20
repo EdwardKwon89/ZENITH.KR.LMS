@@ -45,6 +45,7 @@ describe('Wallet Server Actions', () => {
         return insertChain;
       }),
       update: vi.fn().mockReturnValue(updateChain),
+      rpc: vi.fn(),
       single: vi.fn(),
     };
 
@@ -85,14 +86,17 @@ describe('Wallet Server Actions', () => {
       error: null 
     });
 
-    // 2. Wallet found
-    mockSupabase.single.mockResolvedValueOnce({ data: { id: 'wallet-123', balance: 10000 }, error: null });
+    // 2. RPC call success
+    mockSupabase.rpc.mockResolvedValueOnce({ data: 5000, error: null });
     
-    // The updateChain and simple insert mocks are already set up to return success
     const result = await payInvoiceFromWallet('inv-123');
     
     expect(result.success).toBe(true);
-    expect(mockSupabase.update).toHaveBeenCalledWith({ balance: 5000 });
+    expect(result.remainingBalance).toBe(5000);
+    expect(mockSupabase.rpc).toHaveBeenCalledWith('pay_invoice_from_wallet_atomic', {
+      p_invoice_id: 'inv-123',
+      p_profile_id: 'user-123'
+    });
   });
 
   it('WAL-04: should fail payment if balance is insufficient', async () => {
@@ -102,8 +106,8 @@ describe('Wallet Server Actions', () => {
       error: null 
     });
 
-    // 2. Insufficient balance
-    mockSupabase.single.mockResolvedValueOnce({ data: { id: 'wallet-123', balance: 1000 }, error: null });
+    // 2. Insufficient balance RPC error
+    mockSupabase.rpc.mockResolvedValueOnce({ data: null, error: { message: 'INSUFFICIENT_BALANCE' } });
 
     const result = await payInvoiceFromWallet('inv-123');
     

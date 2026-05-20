@@ -150,71 +150,23 @@ export async function payInvoiceFromWallet(invoiceId: string) {
   if (invError || !invoice) throw new Error("인보이스를 찾을 수 없습니다.");
   if (invoice.status === 'PAID') throw new Error("이미 결제된 인보이스입니다.");
 
-  // 2. 지갑 정보 조회
-  const { data: wallet, error: walletError } = await supabase
-    .from('zen_wallet')
-    .select('id, balance')
-    .eq('org_id', invoice.shipper_id)
-    .single();
+  // 2. RPC 호출로 원자적 트랜잭션 수행
+  const { data: newBalance, error: rpcError } = await supabase.rpc('pay_invoice_from_wallet_atomic', {
+    p_invoice_id: invoiceId,
+    p_profile_id: profile.id
+  });
 
-  if (walletError || !wallet) throw new Error("지갑을 찾을 수 없습니다.");
-  
-  const totalAmount = Number(invoice.total_amount);
-  const currentBalance = Number(wallet.balance);
-
-  if (currentBalance < totalAmount) {
-    return { success: false, error: 'INSUFFICIENT_BALANCE', message: '지갑 잔액이 부족합니다.' };
-  }
-
-  // 3. 원자적 트랜잭션 (잔액 차감 -> 이력 생성 -> 인보이스 업데이트)
-  // 실제 프로덕션에서는 RPC 사용 권장
-  const newBalance = currentBalance - totalAmount;
-
-  const { error: updateBalanceError } = await supabase
-    .from('zen_wallet')
-    .update({ balance: newBalance })
-    .eq('id', wallet.id);
-
-  if (updateBalanceError) throw new Error(`잔액 차감 실패: ${updateBalanceError.message}`);
-
-  const { error: txError } = await supabase
-    .from('zen_wallet_transactions')
-    .insert({
-      wallet_id: wallet.id,
-      type: 'DEDUCT',
-      amount: totalAmount,
-      status: 'COMPLETED',
-      reference_id: invoiceId,
-      description: `Invoice Payment: ${invoice.invoice_no}`,
-      created_by: profile.id
-    });
-
-  if (txError) {
-    // 롤백 (단순)
-    await supabase.from('zen_wallet').update({ balance: currentBalance }).eq('id', wallet.id);
-    throw new Error(`거래 이력 생성 실패: ${txError.message}`);
-  }
-
-  const { error: invUpdateError } = await supabase
-    .from('zen_invoices')
-    .update({
-      status: 'PAID',
-      payment_method: 'WALLET',
-      paid_amount: totalAmount,
-      paid_at: new Date().toISOString()
-    })
-    .eq('id', invoiceId);
-
-  if (invUpdateError) {
-    // 롤백은 복잡해지므로 로그 기록 후 관리자 개입 필요 (또는 RPC 전환)
-    logger.error(`[CRITICAL] Invoice update failed after balance deduction: ${invoiceId}`);
-    throw new Error(`인보이스 상태 업데이트 실패: ${invUpdateError.message}`);
+  if (rpcError) {
+    if (rpcError.message.includes('INSUFFICIENT_BALANCE')) {
+      return { success: false, error: 'INSUFFICIENT_BALANCE', message: '지갑 잔액이 부족합니다.' };
+    }
+    throw new Error(rpcError.message);
   }
 
   revalidatePath('/finance/invoices');
   revalidatePath('/mypage');
 
-  return { success: true, invoice_no: invoice.invoice_no, remainingBalance: newBalance };
+  return { success: true, invoice_no: invoice.invoice_no, remainingBalance: Number(newBalance) };
 }
 
 /**
