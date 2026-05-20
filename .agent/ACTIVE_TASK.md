@@ -70,7 +70,7 @@
 | TASK-013 | 260516 | Signup race condition 수정 | P3 | 없음 | Ring | 🔔 | [TASK-013](tasks/TASK-013_260516_SignupRaceCondition수정_Ring.md) | IMP-068 완료 · setTimeout 제거 · 196/198 PASS |
 | TASK-014 | 260516 | 무제한 리스트 페이지네이션 수정 | P3 | 없음 | Ring | 🔄 | [TASK-014](tasks/TASK-014_260516_무제한리스트페이지네이션수정_Ring.md) | IMP-045 설계 확정 · limit/offset 2회 배치 승인 · 구현 중 |
 | TASK-015 | 260516 | console→logger 교체 | P3 | 없음 | Riley | ✅ | [TASK-015](tasks/TASK-015_260516_console→logger교체_Riley.md) | IMP-013 완료 · 커밋 f401122 · 202/202 PASS |
-| TASK-016 | 260516 | Server Actions 에러 래퍼 | P3 | 없음 | Riley | 🔄 | [TASK-016](tasks/TASK-016_260516_ServerActions에러래퍼_Riley.md) | IMP-025 설계 확정 · 착수 승인 |
+| TASK-016 | 260516 | Server Actions 에러 래퍼 | P3 | 없음 | Riley | 🔔 | [TASK-016](tasks/TASK-016_260516_ServerActions에러래퍼_Riley.md) | IMP-025 완료 · 16개 Action 적용 · 커밋 021a17b · 209/209 PASS |
 | TASK-017 | 260516 | admin/rates 531줄 분할 | P3 | 없음 | B_Kai | ✅ | [TASK-017](tasks/TASK-017_260516_adminRates531줄분할_BKai.md) | IMP-014 완료 · page.tsx 94줄·커밋 e4fee51 |
 | TASK-018 | 260516 | finance.ts 733줄 분할 | P3 | 없음 | B_Kai | ✅ | [TASK-018](tasks/TASK-018_260516_financeTs733줄분할_BKai.md) | IMP-058 완료 · 커밋 af2f873+06210a0 · 199/199 PASS |
 | TASK-019 | 260516 | Server Actions 도메인 분할 | P3 | TASK-017+018 | B_Kai | 🔄 | [TASK-019](tasks/TASK-019_260516_ServerActions도메인분할_BKai.md) | IMP-033 설계 확정 · A안 승인 · 착수 승인 |
@@ -116,3 +116,4 @@
 | 2026-05-20 | Aiden (Claude) | Aiden 오판 정정 — B_Kai TASK-018 ✅ PASS (4차 승인, 3차 ❌ 오판) · TASK-020 ✅ PASS (1차 승인, 오판 정정). TASK-019 블로커 전량 해제(TASK-017✅+TASK-018✅) — B_Kai 즉시 착수 가능 |
 | 2026-05-20 | Aiden (Claude) | 설계 확정 — TASK-016(Riley) 🔄 착수 승인 (withAction HOF·discriminated union·logger 임시 허용·TASK-015 병행). TASK-019(B_Kai) 🔄 착수 승인 (A안 barrel+4그룹 분할·그룹별 회귀 필수·consumer 탈피 별도 IMP) |
 | 2026-05-20 | Aiden (Claude) | AGENTS.md opencode-bkai-override 블록 제거 (근본 원인 수정 완료, R-00으로 커버). Ring TASK-013🔄(방식A DB Trigger 승인)·TASK-014🔄(limit/offset 2회 배치 승인). Riley TASK-015❌ 반려(DoD 6개 미체크, 코드 이상 없음 — doc commit 보완 재제출 요청) |
+| 2026-05-20 | Riley (Gemini) | TASK-016 완료 보고 — 커밋 021a17b · 16개 Action에 withAction 적용 및 클라이언트/테스트 전면 마이그레이션 · 209/209 PASS · 🔔 |
