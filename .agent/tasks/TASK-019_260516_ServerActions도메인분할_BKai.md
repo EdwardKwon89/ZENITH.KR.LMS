@@ -8,7 +8,7 @@
 | 담당 Agent | B_Kai (GLM Big Pickle) |
 | 우선순위 | P3 |
 | 전제조건 | **TASK-017 + TASK-018 완료** |
-| 상태 | 🔄 구현 중 |
+| 상태 | 🔔 검토 요청 |
 
 ---
 
@@ -47,11 +47,11 @@ TASK-017(admin/rates 분할)과 TASK-018(finance.ts 분할) 완료 후,
 
 ## 완료 기준 (DoD)
 
-- [ ] Server Actions 도메인별 디렉토리 구조 완성
-- [ ] 기존 기능 100% 동일 유지
-- [ ] 회귀 테스트 전체 PASS 증적
-- [ ] `[B_Kai] refactor: IMP-033` 커밋 완료
-- [ ] 본 파일 상태 🔔 + ACTIVE_TASK.md 동기화
+- [x] Server Actions 도메인별 디렉토리 구조 완성
+- [x] 기존 기능 100% 동일 유지
+- [x] 회귀 테스트 전체 PASS 증적
+- [x] `[B_Kai] refactor: IMP-033` 커밋 완료 (4회)
+- [x] 본 파일 상태 🔔 + ACTIVE_TASK.md 동기화
 
 ---
 
@@ -87,11 +87,11 @@ TASK-017(admin/rates 분할)과 TASK-018(finance.ts 분할) 완료 후,
 
 | 항목 | 내용 |
 |:---|:---|
-| 착수일 | — |
-| 완료일 | — |
-| 최종 도메인 구조 | — |
-| 회귀 결과 | — |
-| 커밋 해시 | — |
+| 착수일 | 2026-05-20 |
+| 완료일 | 2026-05-20 |
+| 최종 도메인 구조 | `finance/` (4 files: index·settlement·invoice·fees), `operations/` (5 files: index·orders·tracking·schedules·routing·inventory), `admin/` (8 files: index·auth·corporate·master·master-data·member·organization·rates·rbac), `misc/` (9 files: index·claims·customs·dashboard·monitoring·notifications·statistics·support·voc·wallet) |
+| 회귀 결과 | **206/206 PASS** (4회 그룹별 검증 — 각 206/206) |
+| 커밋 해시 | `31a996a`(G1) `3e6c972`(G2) `10a6acf`(G3) `6b69be7`(G4) |
 
 ---
 
@@ -114,3 +114,4 @@ TASK-017(admin/rates 분할)과 TASK-018(finance.ts 분할) 완료 후,
 | 2026-05-16 | Aiden (Claude) | Task 생성 — 작업 지시 발령 (블로커 상태) |
 | 2026-05-20 | B_Kai (OpenCode) | 설계 의견 제출 — consumer impact 분석·4그룹 분할 커밋·barrel 호환성 유지 제안. 상태 📝. ACTIVE_TASK.md 동기화 |
 | 2026-05-20 | Aiden (Claude) | 설계 확정 — A안 승인. barrel 유지·4그룹 분할·그룹별 회귀 필수·consumer 탈피 별도 IMP 등록. 상태 🔄 착수 승인 |
+| 2026-05-20 | B_Kai (OpenCode) | 전 Group 구현 완료 — G1(`31a996a`)·G2(`3e6c972`)·G3(`10a6acf`)·G4(`6b69be7`). 회귀 206/206 4회 각각 PASS. 상태 🔔 + ACTIVE_TASK.md 동기화 |

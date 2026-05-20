@@ -119,9 +119,9 @@
 | 021 | 미들웨어 DB 호출 최적화 | D_Kai | ⬜ | — |
 | 022 | NaviSidebar 번들 최적화 | D_Kai | ⬜ | — |
 | 048 | Mock 데이터 제거 | B_Kai | ✅ | 2026-05-15 |
-| 054 | N+1 쿼리 7곳 | B_Kai | ⬜ | — |
+| 054 | N+1 쿼리 7곳 | B_Kai | ✅ PASS | 2026-05-20 |
 | 055 | 인덱스 누락 4종 | B_Kai | ✅ PASS | 2026-05-16 |
-| 062 | SELECT * → 명시적 컬럼 (112곳) | B_Kai | ⬜ | — |
+| 062 | SELECT * → 명시적 컬럼 (112곳) | B_Kai | ✅ PASS | 2026-05-20 |
 
 **Phase E 완료**: 2 / 7
 
@@ -218,3 +218,4 @@
 | 2026-05-16 | Aiden (Claude) | IMP-055 ✅ PASS 확정 — BK 자체 4종 + D_Kai 권장 4종 총 8종 중복 없음 확인. Phase A 집계 보정(4/7→7/7). 전체 14/52(26.9%) |
 | 2026-05-16 | Aiden (Claude) | Phase H 신설 — IMP-064~068 (Ring EXP-IMP-RG-FIX 도출 5건) 등재. 전체 52→57개, 진행률 26.9%→24.6% |
 | 2026-05-16 | Aiden (Claude) | 역량 평가 목적 Agent 공평 재배분 — Riley 전담→4 Agent 균등 분배. Phase C·D·E·F·H 담당 전면 조정 |
+| 2026-05-20 | B_Kai (OpenCode) | IMP-014·058 ✅ PASS / IMP-033 🔔 검토 요청 — Server Actions 4그룹 도메인 분할 완료 (4커밋·206/206 4회) |
