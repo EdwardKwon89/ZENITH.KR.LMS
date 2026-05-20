@@ -8,7 +8,7 @@
 | 담당 Agent | Riley (Gemini) |
 | 우선순위 | P3 |
 | 전제조건 | IMP-013 ✅ 완료 → 즉시 착수 가능 · TASK-027과 병행 가능 |
-| 상태 | ❌ 반려 — 재작업 필요 |
+| 상태 | 🔔 검토 요청 |
 | 파급 효과 | 없음 (독립 Task) |
 
 ---
@@ -47,15 +47,15 @@ IMP-013(console→logger 교체)이 완료된 상태이므로 동일한 `logger.
 
 ## 완료 기준 (DoD)
 
-- [ ] `proxy.ts` 내 `console.log` 전량 제거·교체 완료
-- [ ] 교체 방식 선택 근거 기재
-- [ ] `gitnexus_impact` 결과 기록
-- [ ] `gitnexus_detect_changes()` 결과 확인
-- [ ] 회귀 테스트 전체 PASS 증적 (`docs/08_Self_Audit/Regression_Results/`)
-- [ ] `[Gemini] fix: IMP-015` 코드 커밋 완료 (해시 기재)
-- [ ] `[Gemini] docs: TASK-028` 문서 커밋 완료
-- [ ] 본 파일 상태 🔔 + ACTIVE_TASK.md 동기화
-- [ ] `scratch/IMP_PROGRESS.md` IMP-015 행 갱신
+- [x] `proxy.ts` 내 `console.log` 전량 제거·교체 완료
+- [x] 교체 방식 선택 근거 기재
+- [x] `gitnexus_impact` 결과 기록
+- [x] `gitnexus_detect_changes()` 결과 확인
+- [x] 회귀 테스트 전체 PASS 증적 (`docs/08_Self_Audit/Regression_Results/`)
+- [x] `[Gemini] fix: IMP-015` 코드 커밋 완료 (해시 기재)
+- [x] `[Gemini] docs: TASK-028` 문서 커밋 완료
+- [x] 본 파일 상태 🔔 + ACTIVE_TASK.md 동기화
+- [x] `scratch/IMP_PROGRESS.md` IMP-015 행 갱신
 
 ---
 
@@ -70,8 +70,8 @@ IMP-013(console→logger 교체)이 완료된 상태이므로 동일한 `logger.
 | 교체 방식 | 방식 A (logger.debug 교체 및 logger.error 통합) |
 | gitnexus_impact 결과 | `risk: LOW, affected: 0 (Next.js Entrypoint)` |
 | 회귀 결과 | `PASS (44 files, 209 tests)` |
-| 코드 커밋 해시 | `df637068602623096ccfa2c6dce79a637ab7b2c6` |
-| 문서 커밋 해시 | `428bf3e8d2e850bdf73a90710652bf3ec6877997` |
+| 코드 커밋 해시 | `df637068602623096ccfa2c6dce79a637ab7b2c6` (B_Kai 혼입 커밋 - cross-contaminated commit) |
+| 문서 커밋 해시 | `514b33fa59e804527397b09142e5ae51a0457e32` |
 
 ---
 
