@@ -8,7 +8,7 @@
 | 담당 Agent | Ring (Qwen) |
 | 우선순위 | P3 |
 | 전제조건 | 없음 (즉시 착수 가능) |
-| 상태 | 🔔 검토 요청 |
+| 상태 | ✅ 완료 |
 
 ---
 
@@ -117,8 +117,8 @@ Supabase Auth `on_auth_user_created` DB Trigger 또는 확인 루프(retry with 
 | 항목 | 내용 |
 |:---|:---|
 | 검토일 | 2026-05-20 |
-| 판정 | ❌ 반려 (3차) |
-| 검토 의견 | 3차 재제출(`83e8c17`) 확인: 파일 상태 🔔 ✅ · ACTIVE_TASK.md TASK-013 행 🔔 ✅. **코드 버그 발견**: `src/app/[locale]/(auth)/login/actions.ts` L115-118에 `fileExt`·`filePath` **중복 선언** — `if (profile?.org_id)` 블록 제거 시 내부 코드(들여쓰기 6칸, L117-118) 미삭제로 같은 스코프 내 `const` 재선언 존재. JS 런타임 `SyntaxError: Identifier 'fileExt' has already been declared` — 실제 애플리케이션 실행 불가. 회귀 196/198 실패 2건도 이 버그와 연관 가능성. **Ring 위반 7회 누적**. 수정: ① L117-118(중복 선언 2줄) 삭제 ② 수정 후 `rtk npm run test:regression` 전량 PASS ③ 새 코드 커밋 `[Ring] fix: IMP-068 TASK-013 중복선언 버그 수정` ④ task file 🔔 확인 + 새 doc commit `[Ring] docs: TASK-013 완료 보고 (4차)`. |
+| 판정 | ✅ 승인 |
+| 검토 의견 | 4차 재제출(`995794d`) 확인: 중복 선언 완전 제거(L115-116 단일 `fileExt`·`filePath`) ✅ · `setTimeout` 제거·`profileError` 체크·DB Trigger 기반 프로필 조회 ✅ · 209/209 PASS(44 files) 실제 vitest 출력 확인 ✅ · R-17 v1.4 코드(`56a8fa1`)→문서(`995794d`) 두 커밋 패턴 ✅ · DoD 전량 `[x]` ✅. IMP-068 완료 처리. |
 
 ---
 
@@ -137,3 +137,5 @@ Supabase Auth `on_auth_user_created` DB Trigger 또는 확인 루프(retry with 
 | 2026-05-20 | Aiden (Claude) | ❌ 반려 (3차) — L115-118 fileExt·filePath 중복선언 버그 발견 |
 | 2026-05-20 | Ring (Qwen) | 3차 재작업 — 중복선언 제거·들여쓰기 정정·209/209 PASS. 코드 커밋 56a8fa1 |
 | 2026-05-20 | Aiden (Claude) | ❌ 반려 (3차) — L115-118 `fileExt`·`filePath` 중복 선언 코드 버그 발견(JS SyntaxError). L117-118 삭제 후 회귀 전량 PASS → 새 코드 커밋 + doc commit (4차) 재제출 요청. Ring 위반 7회 누적. |
+| 2026-05-20 | Ring (Qwen) | 4차 재제출 — 중복선언 제거·209/209 PASS·코드 `56a8fa1`·문서 `995794d`. 🔔 |
+| 2026-05-20 | Aiden (Claude) | ✅ 승인 — 중복 선언 제거 확인·209/209 PASS·R-17 v1.4 패턴. IMP-068 완료. |
