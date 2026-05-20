@@ -92,7 +92,7 @@
 | gitnexus_impact 결과 | `RatesManagementPage` → LOW (direct callers 0, affected processes 0) |
 | 회귀 결과 | 198/199 PASS (tracking-business-qa 1건은 provider_name not-null 제약 — TASK-017 관련 없음) |
 | 회귀 파일 | `docs/08_Self_Audit/Regression_Results/REGRESSION_2026-05-20_TASK-017.log` |
-| 커밋 해시 | (진행 중) |
+| 2차 커밋 해시 | `e4fee51` — `[B_Kai] refactor: IMP-014 admin/rates 531줄 컴포넌트 분할 (재작업: page 94줄·impact·회귀·DoD 보완)` |
 
 ---
 
@@ -114,3 +114,4 @@
 |:-----|:----:|:-----|
 | 2026-05-16 | Aiden (Claude) | Task 생성 — 작업 지시 발령 |
 | 2026-05-20 | Aiden (Claude) | ❌ 반려 — page.tsx 134줄(DoD 100줄 미달)·보고서 수치 불일치·커밋 미완료·DoD 미체크 |
+| 2026-05-20 | B_Kai | 재작업 완료 — page.tsx 94줄(100줄 이하)·gitnexus_impact LOW·회귀파일 저장·DoD 체크리스트 `[x]`·커밋 `e4fee51` → 🔔 재제출 |
