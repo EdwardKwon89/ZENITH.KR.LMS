@@ -57,7 +57,7 @@ describe('ZENITH Security Guard: Server Action Authorization', () => {
     // Then
     expect(result.user).toEqual(mockUser);
     expect(result.profile).toEqual(mockProfile); // select("*")가 반영된 전체 정보
-    expect(mockSupabase.select).toHaveBeenCalledWith('*');
+    expect(mockSupabase.select).toHaveBeenCalledWith('id, email, role, org_id, status, full_name');
     expect(redirect).not.toHaveBeenCalled();
   });
 

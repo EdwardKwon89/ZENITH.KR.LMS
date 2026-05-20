@@ -28,6 +28,9 @@ describe('ZENITH Inventory Integration', () => {
       select: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
       in: vi.fn().mockReturnThis(),
+      order: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockReturnThis(),
+      maybeSingle: vi.fn(),
       single: vi.fn(),
     };
 
@@ -143,6 +146,96 @@ describe('ZENITH Inventory Integration', () => {
         transaction_type: 'OUTBOUND',
         change_qty: -5,
         result_qty: 45
+      }));
+    });
+
+    it('should restore on_hand and reserved on order CANCELED from WAREHOUSED', async () => {
+      mockSupabase.eq.mockResolvedValueOnce({
+        data: [{ sku_code: 'SKU-003', quantity: 8 }],
+        error: null
+      }); // order items
+      
+      mockSupabase.in.mockResolvedValue({
+        data: [{ id: 'inv-3', sku_code: 'SKU-003', reserved_qty: 10, on_hand_qty: 100 }],
+        error: null
+      }); // inventory batch
+
+      await syncInventoryFromOrder('order-3', OrderStatus.CANCELED, undefined, OrderStatus.WAREHOUSED);
+
+      expect(mockSupabase.update).toHaveBeenCalledWith(expect.objectContaining({
+        on_hand_qty: 92,
+        reserved_qty: 2
+      }));
+
+      expect(mockSupabase.insert).toHaveBeenCalledWith(expect.objectContaining({
+        transaction_type: 'ADJUSTMENT',
+        change_qty: -8,
+        result_qty: 92
+      }));
+    });
+
+    it('should restore on_hand on order CANCELED from RELEASED', async () => {
+      mockSupabase.eq.mockResolvedValueOnce({
+        data: [{ sku_code: 'SKU-004', quantity: 5 }],
+        error: null
+      }); // order items
+      
+      mockSupabase.in.mockResolvedValue({
+        data: [{ id: 'inv-4', sku_code: 'SKU-004', reserved_qty: 0, on_hand_qty: 50 }],
+        error: null
+      }); // inventory batch
+
+      await syncInventoryFromOrder('order-4', OrderStatus.CANCELED, undefined, OrderStatus.RELEASED);
+
+      expect(mockSupabase.update).toHaveBeenCalledWith(expect.objectContaining({
+        on_hand_qty: 55
+      }));
+
+      expect(mockSupabase.insert).toHaveBeenCalledWith(expect.objectContaining({
+        transaction_type: 'INBOUND',
+        change_qty: 5,
+        result_qty: 55
+      }));
+    });
+
+    it('should query order_status_history as fallback if prevStatus is not provided on CANCELED', async () => {
+      let lastTable = '';
+      mockSupabase.from.mockImplementation((table: string) => {
+        lastTable = table;
+        return mockSupabase;
+      });
+
+      mockSupabase.eq.mockImplementation((col: string, val: any) => {
+        if (lastTable === 'zen_order_items') {
+          return Promise.resolve({
+            data: [{ sku_code: 'SKU-005', quantity: 4 }],
+            error: null
+          });
+        }
+        return mockSupabase;
+      });
+      
+      mockSupabase.in.mockResolvedValue({
+        data: [{ id: 'inv-5', sku_code: 'SKU-005', reserved_qty: 15, on_hand_qty: 200 }],
+        error: null
+      }); // inventory batch
+
+      mockSupabase.maybeSingle.mockResolvedValueOnce({
+        data: { prev_status: OrderStatus.WAREHOUSED },
+        error: null
+      });
+
+      await syncInventoryFromOrder('order-5', OrderStatus.CANCELED);
+
+      expect(mockSupabase.update).toHaveBeenCalledWith(expect.objectContaining({
+        on_hand_qty: 196,
+        reserved_qty: 11
+      }));
+
+      expect(mockSupabase.insert).toHaveBeenCalledWith(expect.objectContaining({
+        transaction_type: 'ADJUSTMENT',
+        change_qty: -4,
+        result_qty: 196
       }));
     });
   });
