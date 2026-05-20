@@ -77,7 +77,7 @@
 | gitnexus_impact 결과 | Target 'ErrorBoundary' not found (신규 심볼) |
 | 회귀 결과 | 44 files, 209 tests PASS |
 | 코드 커밋 해시 | 1a6e245 |
-| 문서 커밋 해시 | — |
+| 문서 커밋 해시 | cdf4963 |
 
 ---
 
