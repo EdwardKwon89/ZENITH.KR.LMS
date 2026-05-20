@@ -65,7 +65,7 @@
 | TASK-008 | 260516 | middleware→proxy.ts 마이그레이션 | P3 | 없음 | D_Kai | 📝 | [TASK-008](tasks/TASK-008_260516_middleware→proxy마이그레이션_DKai.md) | IMP-003 |
 | TASK-009 | 260516 | API Route stack trace 노출 수정 | P2 | 없음 | Ring | 🔔 | [TASK-009](tasks/TASK-009_260516_APIRoute스택트레이스수정_Ring.md) | IMP-064 |
 | TASK-010 | 260516 | Excel Export POST 인증 적용 | P2 | 없음 | Ring | 🔔 | [TASK-010](tasks/TASK-010_260516_ExcelExportPOST인증적용_Ring.md) | IMP-065 |
-| TASK-011 | 260516 | HTTP Security Headers 설정 | P2 | 없음 | Ring | ⬜ | [TASK-011](tasks/TASK-011_260516_HTTPSecurityHeaders설정_Ring.md) | IMP-066 |
+| TASK-011 | 260516 | HTTP Security Headers 설정 | P2 | 없음 | Ring | 🔔 | [TASK-011](tasks/TASK-011_260516_HTTPSecurityHeaders설정_Ring.md) | IMP-066 |
 | TASK-012 | 260516 | Server Action Zod 검증 추가 | P2 | 없음 | Ring | ⬜ | [TASK-012](tasks/TASK-012_260516_ServerActionZod검증추가_Ring.md) | IMP-067 |
 | TASK-013 | 260516 | Signup race condition 수정 | P3 | 없음 | Ring | ⬜ | [TASK-013](tasks/TASK-013_260516_SignupRaceCondition수정_Ring.md) | IMP-068 |
 | TASK-014 | 260516 | 무제한 리스트 페이지네이션 수정 | P3 | 없음 | Ring | ⬜ | [TASK-014](tasks/TASK-014_260516_무제한리스트페이지네이션수정_Ring.md) | IMP-045 · 18곳 |
