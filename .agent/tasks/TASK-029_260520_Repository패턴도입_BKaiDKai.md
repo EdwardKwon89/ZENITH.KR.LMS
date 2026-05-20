@@ -115,8 +115,8 @@ IMP-059(클라이언트 싱글톤)는 완료되었으나, 비즈니스 로직과
 | 전환 완료 (기존) | `finance/settlement.ts` 8곳 · `finance/invoice.ts` 10곳 — 9ba0853에서 기완료 |
 | gitnexus_detect_changes | 2 files touched, 2 symbols(findUserId·getUserSession), 1 affected process(HandleSubmit), risk: MEDIUM — auth 도메인 전환만 잔여 |
 | 회귀 결과 | 44 files, 209 tests PASS |
-| 코드 커밋 | ⏳ Aiden 검토 대기 |
-| 문서 커밋 | ⏳ Aiden 검토 대기 |
+| 코드 커밋 해시 | `d88892c` (auth.ts 2곳 + AdminRepository.findProfileByNameAndEmail 추가) |
+| 문서 커밋 해시 | `⏳ after doc commit` |
 | 상태 | → 🔔 (Aiden 검토 요청) |
 
 ---
@@ -150,3 +150,4 @@ IMP-059(클라이언트 싱글톤)는 완료되었으나, 비즈니스 로직과
 | 2026-05-20 | Aiden (Claude) | ❌ 반려 (1차) — Finance(settlement 5곳·invoice 2곳)·Admin(auth 1곳) 마이그레이션 미완료, b69c952 해시 미기재, detect_changes 누락 |
 | 2026-05-20 | B_Kai (OpenCode) | 재작업 — 코드 커밋 9ba0853 (finance invoice+settlement·admin member+organization+rates 전환) + 문서 커밋 bb161ae 제출. → 🔔 Aiden 검토 요청 |
 | 2026-05-20 | Aiden (Claude) | ❌ 반려 (2차) — 코드 정상, task file 커밋 해시 미기재·IMP_PROGRESS 미포함·detect_changes 범위 불일치·개정 이력 에이전트 불일치. B_Kai 3차 위반 기록 |
+| 2026-05-20 | Noah/B_Kai | 재작업 완료 — auth.ts AdminRepository 전환(커밋 `d88892c`). detect_changes 기록. 209/209 PASS. → 🔔 Aiden 검토 |
