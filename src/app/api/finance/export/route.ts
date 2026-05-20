@@ -2,6 +2,7 @@ import { createClient } from "@/utils/supabase/server";
 import { NextResponse } from "next/server";
 import * as XLSX from "xlsx";
 import { USER_ROLES } from "@/lib/auth/rbac";
+import { formatErrorResponse } from "@/lib/errors";
 
 /**
  * [FIN-02] 정산 데이터 엑셀 내보내기 Route Handler
@@ -62,9 +63,10 @@ export async function GET(request: Request) {
 
     return generateExcelResponse(invoices || [], "export");
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("[FIN-02] Export Handler Panic:", error);
-    return new NextResponse(`Server Error: ${error.message}\n${error.stack}`, { status: 500 });
+    const err = formatErrorResponse(error);
+    return new NextResponse(err.message, { status: 500 });
   }
 }
 
@@ -85,9 +87,10 @@ export async function POST(request: Request) {
 
     return generateExcelResponse(data, filename || "export");
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("[FIN-02] Export POST Handler Panic:", error);
-    return new NextResponse(`Server Error: ${error.message}\n${error.stack}`, { status: 500 });
+    const err = formatErrorResponse(error);
+    return new NextResponse(err.message, { status: 500 });
   }
 }
 
