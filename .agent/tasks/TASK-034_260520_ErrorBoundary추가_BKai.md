@@ -8,7 +8,7 @@
 | 담당 Agent | B_Kai (OpenCode) |
 | 우선순위 | P3 |
 | 전제조건 | 없음 (TASK-029와 병행 가능) |
-| 상태 | ⬜ 미착수 |
+| 상태 | 🔔 검토 요청 |
 | 파급 효과 | 없음 (독립 Task) |
 
 ---
@@ -71,12 +71,12 @@
 
 | 항목 | 내용 |
 |:---|:---|
-| 착수일 | — |
-| 완료일 | — |
-| 생성 파일 목록 | — |
-| gitnexus_impact 결과 | — |
-| 회귀 결과 | — |
-| 코드 커밋 해시 | — |
+| 착수일 | 2026-05-20 |
+| 완료일 | 2026-05-20 |
+| 생성 파일 목록 | `src/components/ui/ErrorFallback.tsx`, `src/app/[locale]/(auth)/error.tsx`, `src/app/[locale]/(dashboard)/admin/error.tsx`, `src/app/[locale]/(dashboard)/master/error.tsx`, `src/app/[locale]/(dashboard)/orders/[orderId]/error.tsx` |
+| gitnexus_impact 결과 | Target 'ErrorBoundary' not found (신규 심볼) |
+| 회귀 결과 | 44 files, 209 tests PASS |
+| 코드 커밋 해시 | 1a6e245 |
 | 문서 커밋 해시 | — |
 
 ---

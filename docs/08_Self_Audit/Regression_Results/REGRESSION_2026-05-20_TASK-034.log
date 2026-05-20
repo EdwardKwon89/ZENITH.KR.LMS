@@ -1,0 +1,5 @@
+REGRESSION RESULT: TASK-034 (IMP-017) Error Boundary 4개 추가
+Date: 2026-05-20
+Test: rtk npm run test:regression
+Result: 44 files, 209 tests PASS
+Notes: ErrorFallback.tsx + 4 error.tsx files (auth·admin·master·orderId)
