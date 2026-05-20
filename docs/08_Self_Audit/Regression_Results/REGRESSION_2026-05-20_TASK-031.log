@@ -1,0 +1,6 @@
+TASK-031 Regression Result
+Date: 2026-05-20
+Test: npm run test:regression
+Result: 209/209 ALL PASS
+Changed file: src/lib/auth/proxy.ts
+Implementation: 방식 A-1 — app_metadata 조건부 DB 스킵 + fallback React.cache()
