@@ -8,7 +8,7 @@
 | 담당 Agent | D_Kai (OpenCode) |
 | 우선순위 | P3 |
 | 전제조건 | IMP-003(proxy.ts 마이그레이션) ✅ 완료 · TASK-030 완료 후 순차 권장 |
-| 상태 | ⬜ 미착수 |
+| 상태 | 📝 설계 의견 — Aiden 확정 대기 |
 | 파급 효과 | 없음 (독립 Task) |
 
 ---
@@ -67,14 +67,40 @@ Edge Runtime에서 매 요청마다 `updateSession()` → DB 쿼리 → 50~150ms
 ## 설계 의견 (D_Kai 작성)
 
 > **사용 기준**: proxy.ts 수정 영향도가 높으므로 설계 의견 제출 권장.
-> 방향이 자명하다고 판단 시 생략 가능.
+
+### 분석
+
+`src/lib/auth/proxy.ts` `authGuard()` — DB 호출부 (L67-72):
+```typescript
+const { data: profile } = await supabase
+  .from('zen_profiles')
+  .select(`status, org_id, role, zen_organizations ( type )`)
+  .eq('id', user.id)
+  .single();
+```
+
+**현재 JWT `app_metadata` 이미 포함 정보**:
+| 필드 | app_metadata | DB 조회 필요? |
+|:-----|:------------|:---------------|
+| `role` | `user.app_metadata.role` (L62) | ❌ metadata로 충분 (ADMIN/ZENITH_SUPER_ADMIN 체크 L63) |
+| `status` | `user.app_metadata.status` (L65) | ⚠️ metadata 우선, DB는 fallback (L75) |
+| `org_type` | `user.app_metadata.org_type` (L64) | ⚠️ metadata 우선, DB는 fallback (L78-84) |
+
+**핵심 발견**: `app_metadata`만으로도 L74-89의 모든 분기 처리 가능. DB 쿼리는 **metadata에 누락된 경우** fallback으로만 동작함. 즉, `app_metadata`에 `role`·`org_type`·`status`가 정상 세팅되어 있다면 DB 조회 자체를 스킵할 수 있음.
+
+### 제안: 방식 A-1 — JWT 우선 + DB fallback 조건부 스킵 (권장)
 
 | 항목 | 내용 |
-|:---|:---|
-| 제안 방안 | — |
-| 선택 근거 | — |
-| 예상 리스크 | — |
-| 대안 방안 | — |
+|:-----|:------|
+| **제안 방안** | **방식 A-1**: `app_metadata`에 role·org_type·status가 전부 존재하면 DB 쿼리 스킵. metadata 불완전 시에만 DB fallback (Request-scoped cache 적용) |
+| **선택 근거** | • 최소 변경으로 80%+ DB 호출 제거 (정상 세션은 metadata 완비)<br>• fallback 유지로 회귀 제로 — metadata 누락 세션도 정상 동작<br>• `isFeatureEnabled('MAINTENANCE_MODE')`는 TASK-030 캐싱 완료로 추가 최적화 불필요<br>• **gitnexus_impact LOW** (1 caller: middleware, Auth module only) — Aiden 사전 승인 불필요 |
+| **구현 상세** | 1. L67-72를 조건부 래핑: `if (!user.app_metadata.role \|\| !user.app_metadata.org_type \|\| !user.app_metadata.status)`<br>2. fallback 시에도 `React.cache()`로 Request-scoped 캐싱 (동일 요청 내 중복 조회 방지)<br>3. DB 조회 결과로 `orgType`·`userStatus` 재정의 로직(L74-89)은 동일 유지 |
+| **예상 리스크** | • metadata 불완전 세션(로그인 후 첫 요청, 레거시 세션) — fallback이 정상 처리하므로 영향 없음<br>• 추후 Supabase Auth hook에서 `app_metadata` 갱신 로직 추가 권장 (현재 Task 범위 밖) |
+| **대안 방안** | • **방식 B** (React.cache Request-scoped): DB 호출은 유지되나 중복 제거 — 개선 효과 미미<br>• **방식 C** (경로별 DB 스킵): 공개 경로 DB 미조회 — `org_type` 결정이 필요한 경로가 전체이므로 효과 제한적 |
+
+### 권장 최종안
+
+**방식 A-1** `app_metadata` 조건부 DB 스킵 + fallback Request-scoped 캐시 → 최소 변경·최대 효과·회귀 제로.
 
 ---
 

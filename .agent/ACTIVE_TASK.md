@@ -85,7 +85,7 @@
 | TASK-028 | 260520 | middleware.ts console.log 제거 | P3 | IMP-013 ✅ | Riley | ❌ | [TASK-028](tasks/TASK-028_260520_middleware로그제거_Riley.md) | IMP-015 · 독립 코드 커밋 없음(df63706 혼입) · 문서 커밋 재수행 필요 |
 | TASK-029 | 260520 | Repository 패턴 도입 | P3 | D1 ✅ | B_Kai+D_Kai | ❌ | [TASK-029](tasks/TASK-029_260520_Repository패턴도입_BKaiDKai.md) | IMP-016 · Finance(settlement 5곳·invoice 2곳)·Admin(auth 1곳) 마이그레이션 미완료 |
 | TASK-030 | 260520 | Feature Flags unstable_cache 적용 | P3 | 없음 | D_Kai | ✅ | [TASK-030](tasks/TASK-030_260520_FeatureFlags캐싱_DKai.md) | IMP-020 완료 · 코드 c5e03bd·문서 a5669ab · 207/209 |
-| TASK-031 | 260520 | 미들웨어 DB 호출 최적화 (JWT-only) | P3 | IMP-003 ✅ | D_Kai | ⬜ | [TASK-031](tasks/TASK-031_260520_미들웨어DB최적화_DKai.md) | IMP-021 · **설계 의견 권장** · TASK-030 완료 후 순차 |
+| TASK-031 | 260520 | 미들웨어 DB 호출 최적화 (JWT-only) | P3 | IMP-003 ✅ | D_Kai | 📝 | [TASK-031](tasks/TASK-031_260520_미들웨어DB최적화_DKai.md) | IMP-021 · **방식 A-1 제안**: metadata 조건부 DB 스킵 + fallback 캐시 |
 | TASK-032 | 260520 | 이메일 HTML 인젝션 방지 | P2 | 없음 | Ring | ⬜ | [TASK-032](tasks/TASK-032_260520_이메일HTML인젝션방지_Ring.md) | IMP-056 · Ring 절차 준수 중점 감시 |
 | TASK-033 | 260520 | 감사 추적 도입 (마스터/인보이스/통관) | P3 | TASK-032 | Ring | ⬜ | [TASK-033](tasks/TASK-033_260520_감사추적도입_Ring.md) | IMP-051 · 설계 의견 필수 · 신규 DB 테이블 |
 | TASK-034 | 260520 | Error Boundary 4개 추가 | P3 | 없음 | B_Kai | ✅ | [TASK-034](tasks/TASK-034_260520_ErrorBoundary추가_BKai.md) | IMP-017 완료 · 커밋 1a6e245+cdf4963 · 209/209 |
