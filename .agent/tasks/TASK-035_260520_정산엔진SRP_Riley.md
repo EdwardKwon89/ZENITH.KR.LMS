@@ -8,7 +8,7 @@
 | 담당 Agent | Riley (Gemini) |
 | 우선순위 | P3 |
 | 전제조건 | TASK-027 완료 후 착수 권장 (트랜잭션 안정화 후 SRP 분할) |
-| 상태 | ⬜ 미착수 |
+| 상태 | 🔍 설계 확정 대기 |
 | 파급 효과 | 없음 (독립 Task) |
 
 ---
@@ -83,10 +83,10 @@
 
 | 항목 | 내용 |
 |:---|:---|
-| 클래스 분할 경계 | — |
-| Facade 인터페이스 | — |
-| 호출자 영향 범위 | — |
-| 예상 리스크 | — |
+| 클래스 분할 경계 | **1. SlabRateCalculator**: Chargeable Weight 기반 슬래브 구간 단가 산출 전담 (`calculateSlabRate` 유틸 및 DB 단가 매칭 처리).<br>**2. CostAggregator**: 오더 패키지 목록 분석을 통한 `Chargeable Weight` 집계 로직(`calculateChargeableWeight`) 및 총 정산 금액 합산 처리.<br>**3. SettlementValidator**: 오더 필수 데이터 검증(포트 코드, 운송 모드 존재 여부) 및 이미 인보이스가 발행된 비용에 대한 재계산 차단 제어. |
+| Facade 인터페이스 | `SettlementEngine` 및 `InvoiceGenerator` 클래스를 Facade 컴포넌트로 두어 기존 외부 호출 인터페이스를 100% 동일하게 유지합니다 (`calculateOrderCosts(orderId)` 및 `generateInvoice(orderId)` 메서드 서명 불변). |
+| 호출자 영향 범위 | `@/lib/finance/settlement` 경로를 barrel export(`index.ts`)를 통해 디렉토리 기반 모듈로 전환하므로, 기존 호출자(`src/app/actions/finance/settlement.ts`, `invoice.ts` 등)의 import 경로는 수정 없이 그대로 호환됩니다. (영향 범위 최소화) |
+| 예상 리스크 | - 패키지 정보가 누락되어 `cargo_details` JSONB 필드를 파싱하는 예외 흐름에서의 타입 안전성 검증.<br>- 리팩토링 후 기존 단위/통합 테스트의 통과 보장 (회귀 테스트를 통한 세밀한 검증 필요). |
 
 ---
 
