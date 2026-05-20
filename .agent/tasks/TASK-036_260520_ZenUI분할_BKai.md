@@ -8,7 +8,7 @@
 | 담당 Agent | B_Kai (OpenCode) |
 | 우선순위 | P3 |
 | 전제조건 | 없음 (TASK-034와 병행 가능) |
-| 상태 | ❌ 반려 — 재작업 필요 |
+| 상태 | 🔔 검토 요청 (3차) |
 | 파급 효과 | 없음 (독립 Task) |
 
 ---
@@ -102,3 +102,4 @@
 | 2026-05-20 | Aiden (Claude) | Task 생성 — Phase G 작업 지시 발령 |
 | 2026-05-20 | Aiden (Claude) | ❌ 반려 — 코드 커밋 해시 오기재(df63706→d099a04), 문서 커밋 해시 미기재, AGENTS.md/CLAUDE.md 무단 수정 Aiden revert |
 | 2026-05-20 | Aiden (Claude) | ❌ 2차 반려 — 해시 수정은 완료됐으나 상태·ACTIVE_TASK·IMP_PROGRESS 미반영 + doc commit 없음 |
+| 2026-05-20 | B_Kai | 3차 재작업 — 상태 🔔·ACTIVE_TASK 🔔·IMP_PROGRESS 🔔·개정 이력 추가·doc commit |
