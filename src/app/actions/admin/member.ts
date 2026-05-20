@@ -2,11 +2,11 @@ import { logger } from '@/lib/logger';
 import { withAction } from '@/lib/actions/wrapper';
 "use server";
 
-import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
 import { validateUserAction, validateAdminAction } from "@/lib/auth/guards";
 import { sendInAppNotification } from "../notifications";
 import { USER_ROLES } from '@/lib/auth/rbac';
+import { AdminRepository } from '@/lib/repositories';
 
 export interface GradeMasterItem {
   grade_code: string;
@@ -19,8 +19,8 @@ export interface GradeMasterItem {
 export interface GradePromotionRequest {
   id: string;
   user_id: string;
-  user_name: string;      // profiles.full_name
-  user_email: string;     // profiles.email
+  user_name: string;
+  user_email: string;
   current_grade: string;
   target_grade: string;
   request_reason: string;
@@ -35,18 +35,8 @@ export interface GradePromotionRequest {
  */
 export async function getGradeMaster(): Promise<GradeMasterItem[]> {
   const { supabase } = await validateUserAction();
-
-  const { data, error } = await supabase
-    .from("grade_master")
-    .select('grade_code, grade_name_ko, grade_name_en, discount_rate, benefit_desc')
-    .order("created_at", { ascending: true });
-
-  if (error) {
-    logger.error("Error fetching grade master:", error);
-    throw new Error("등급 정보를 불러오는 데 실패했습니다.");
-  }
-
-  return data || [];
+  const adminRepo = new AdminRepository(supabase);
+  return adminRepo.findGradeMaster();
 }
 
 /**
@@ -54,7 +44,7 @@ export async function getGradeMaster(): Promise<GradeMasterItem[]> {
  */
 export async function getMyProfile() {
   const { profile } = await validateUserAction();
-  
+
   if (!profile) {
     throw new Error("프로필 정보를 불러오는 데 실패했습니다.");
   }
@@ -69,25 +59,13 @@ export async function updateMyProfile(payload: {
   fullName: string;
 }) {
   const { user, supabase } = await validateUserAction();
+  const adminRepo = new AdminRepository(supabase);
 
   try {
-    // 1. zen_profiles 업데이트
-    const { error: zenError } = await supabase
-      .from("zen_profiles")
-      .update({ full_name: payload.fullName })
-      .eq("id", user.id);
-
+    const { error: zenError } = await adminRepo.updateProfileFullName(user.id, payload.fullName);
     if (zenError) throw zenError;
 
-    // 2. profiles 업데이트 (동기화)
-    const { error: profileError } = await supabase
-      .from("profiles")
-      .update({ 
-        full_name: payload.fullName,
-        updated_at: new Date().toISOString()
-      })
-      .eq("id", user.id);
-
+    const { error: profileError } = await adminRepo.updateProfilesFullName(user.id, payload.fullName);
     if (profileError) {
       logger.warn("[MEMBER_ACTION] profiles sync failed:", profileError.message);
     }
@@ -105,14 +83,9 @@ export async function updateMyProfile(payload: {
  */
 export async function getMyPendingPromotionRequest() {
   const { user, supabase } = await validateUserAction();
+  const adminRepo = new AdminRepository(supabase);
 
-  const { data, error } = await supabase
-    .from("grade_promotion_request")
-    .select('target_grade, request_reason')
-    .eq("user_id", user.id)
-    .eq("status", "PENDING")
-    .maybeSingle();
-
+  const { data, error } = await adminRepo.findPendingPromotionByUserId(user.id);
   if (error) {
     logger.error("Error fetching pending request:", error);
     return null;
@@ -129,24 +102,14 @@ export const requestGradePromotion = withAction(async function (payload: {
   requestReason: string;
 }) {
   const { user, supabase } = await validateUserAction();
+  const adminRepo = new AdminRepository(supabase);
 
-  // 1. 프로필 정보 조회 (역할 및 현재 등급 확인) - zen_profiles 기준
-  const { data: zenProfile, error: zenProfileError } = await supabase
-    .from("zen_profiles")
-    .select("role, status")
-    .eq("id", user.id)
-    .single();
-
-  // profiles 테이블에서 grade_code 조회 (zen_profiles에는 grade_code 없음)
-  const { data: profileGrade } = await supabase
-    .from("profiles")
-    .select("grade_code")
-    .eq("id", user.id)
-    .maybeSingle();
+  const { data: zenProfile, error: zenProfileError } = await adminRepo.findProfileById(user.id);
+  const { data: profileGrade } = await adminRepo.findProfileGrade(user.id);
 
   const profile = zenProfile ? {
     role: zenProfile.role,
-    grade_code: profileGrade?.grade_code || 'IRON' // 기본값 IRON
+    grade_code: profileGrade?.grade_code || 'IRON'
   } : null;
 
   if (zenProfileError || !profile) {
@@ -157,43 +120,25 @@ export const requestGradePromotion = withAction(async function (payload: {
     throw new Error("개인 회원만 등급 승급을 신청할 수 있습니다.");
   }
 
-  // 2. 대기 중인 신청 확인
-  const { data: existing } = await supabase
-    .from("grade_promotion_request")
-    .select("id")
-    .eq("user_id", user.id)
-    .eq("status", "PENDING")
-    .maybeSingle();
-
+  const { data: existing } = await adminRepo.findExistingPendingRequest(user.id);
   if (existing) {
     throw new Error("이미 대기 중인 승급 신청이 있습니다.");
   }
 
-  // 3. 신청 등록
-  const { data: request, error: requestError } = await supabase
-    .from("grade_promotion_request")
-    .insert({
-      user_id: user.id,
-      current_grade: profile.grade_code,
-      target_grade: payload.targetGrade,
-      request_reason: payload.requestReason,
-      status: "PENDING"
-    })
-    .select('id')
-    .single();
+  const { data: request, error: requestError } = await adminRepo.insertPromotionRequest({
+    user_id: user.id,
+    current_grade: profile.grade_code,
+    target_grade: payload.targetGrade,
+    request_reason: payload.requestReason,
+    status: "PENDING"
+  });
 
   if (requestError || !request) {
     logger.error("Error requesting grade promotion:", requestError);
     throw new Error("승급 신청 중 오류가 발생했습니다.");
   }
 
-  // 4. Admin 대상 알림 발송
-  // (참조: 모든 관리자에게 알림 발송)
-  const { data: admins } = await supabase
-    .from("zen_profiles")
-    .select("id")
-    .in("role", [USER_ROLES.ADMIN, USER_ROLES.ZENITH_SUPER_ADMIN]);
-
+  const { data: admins } = await adminRepo.findAdminProfiles();
   if (admins && admins.length > 0) {
     for (const admin of admins) {
       await sendInAppNotification({
@@ -218,27 +163,9 @@ export async function getGradePromotionRequests(params?: {
   offset?: number;
 }): Promise<{ requests: GradePromotionRequest[]; total: number }> {
   const { supabase, profile } = await validateAdminAction();
+  const adminRepo = new AdminRepository(supabase);
 
-  let query = supabase
-    .from("grade_promotion_request")
-    .select(`
-      id, user_id, current_grade, target_grade, request_reason, status, admin_comment, processed_at, created_at,
-      zen_profiles:user_id (
-        full_name,
-        email
-      )
-    `, { count: "exact" });
-
-  if (params?.status) {
-    query = query.eq("status", params.status);
-  }
-
-  const limit = params?.limit || 20;
-  const offset = params?.offset || 0;
-
-  const { data, count, error } = await query
-    .order("created_at", { ascending: false })
-    .range(offset, offset + limit - 1);
+  const { data, count, error } = await adminRepo.findPromotionRequests(params);
 
   if (error) {
     logger.error("Error fetching promotion requests:", {
@@ -282,14 +209,9 @@ export const reviewGradePromotion = withAction(async function (payload: {
   adminComment?: string;
 }) {
   const { supabase } = await validateAdminAction();
+  const adminRepo = new AdminRepository(supabase);
 
-  // 1. 신청 내역 조회
-  const { data: request, error: fetchError } = await supabase
-    .from("grade_promotion_request")
-    .select('id, status, target_grade, user_id')
-    .eq("id", payload.requestId)
-    .single();
-
+  const { data: request, error: fetchError } = await adminRepo.findPromotionRequestById(payload.requestId);
   if (fetchError || !request) {
     throw new Error("신청 내역을 찾을 수 없습니다.");
   }
@@ -298,40 +220,29 @@ export const reviewGradePromotion = withAction(async function (payload: {
     throw new Error("이미 처리가 완료된 신청입니다.");
   }
 
-  // 2. 상태 업데이트
-  const { error: updateError } = await supabase
-    .from("grade_promotion_request")
-    .update({
-      status: payload.decision,
-      admin_comment: payload.adminComment,
-      processed_at: new Date().toISOString()
-    })
-    .eq("id", payload.requestId);
+  const { error: updateError } = await adminRepo.updatePromotionRequest(payload.requestId, {
+    status: payload.decision,
+    admin_comment: payload.adminComment,
+    processed_at: new Date().toISOString()
+  });
 
   if (updateError) {
     throw new Error("심사 결과 저장 중 오류가 발생했습니다.");
   }
 
-  // 3. 승인 시 프로필 등급 갱신
   if (payload.decision === "APPROVED") {
-    const { error: profileUpdateError } = await supabase
-      .from("profiles")
-      .update({ grade_code: request.target_grade })
-      .eq("id", request.user_id);
-
+    const { error: profileUpdateError } = await adminRepo.updateProfileGrade(request.user_id, request.target_grade);
     if (profileUpdateError) {
       logger.error("Failed to update profile grade:", profileUpdateError);
-      // 신청 상태는 이미 업데이트되었으므로 로깅만 수행
     }
   }
 
-  // 4. 신청자에게 알림 발송
   const resultText = payload.decision === "APPROVED" ? "승인" : "반려";
   await sendInAppNotification({
     userId: request.user_id,
     type: "GRADE_PROMOTION_RESULT",
     title: `등급 승급 심사 결과 (${resultText})`,
-    message: payload.decision === "APPROVED" 
+    message: payload.decision === "APPROVED"
       ? `축하합니다! 등급 승급이 승인되었습니다. (${request.target_grade})`
       : `안타깝게도 등급 승급이 반려되었습니다. 사유: ${payload.adminComment || "사유 없음"}`,
   });
@@ -346,18 +257,14 @@ export const reviewGradePromotion = withAction(async function (payload: {
  */
 export async function withdrawUser() {
   const { user, supabase } = await validateUserAction();
+  const adminRepo = new AdminRepository(supabase);
 
   try {
-    const { error } = await supabase
-      .from("zen_profiles")
-      .update({ is_active: false })
-      .eq("id", user.id);
-
+    const { error } = await adminRepo.deactivateProfile(user.id);
     if (error) throw error;
 
-    // 로그아웃 처리
     await supabase.auth.signOut();
-    
+
     return { success: true };
   } catch (err: any) {
     logger.error("[MEMBER_ACTION] withdrawUser Error:", err.message);

@@ -42,10 +42,7 @@ export async function updatePaymentStatus(
 
   const orderId = (invoice?.metadata as any)?.source_order_id;
   if (status === 'PAID' && orderId) {
-    await supabase
-      .from('zen_orders')
-      .update({ billing_status: 'PAID' })
-      .eq('id', orderId);
+    await financeRepo.updateBillingStatusByOrderId(orderId, 'PAID');
 
     revalidatePath(`/orders/${orderId}`);
   }
@@ -57,12 +54,10 @@ export async function updatePaymentStatus(
 export async function calculateSettlementAction(orderId: string) {
   logger.info(`[Action] calculateSettlementAction started for order: ${orderId}`);
   const { supabase, profile } = await validateAdminAction();
+  const financeRepo = new FinanceRepository(supabase);
   logger.info(`[Action] User Profile: ${profile.email}, Role: ${profile.role}`);
 
-  const { data: existingCosts, error: costsCheckError } = await supabase
-    .from('zen_order_costs')
-    .select('id, invoice_id')
-    .eq('order_id', orderId);
+  const { data: existingCosts, error: costsCheckError } = await financeRepo.findByOrderId(orderId);
   if (costsCheckError) throw new Error(`비용 확인 실패: ${costsCheckError.message}`);
   if (existingCosts?.some(c => c.invoice_id !== null)) {
     throw new Error('Cannot recalculate costs after invoice has been issued.');
@@ -74,10 +69,7 @@ export async function calculateSettlementAction(orderId: string) {
   logger.info(`[Action] Settlement calculation result for ${orderId}:`, result);
 
   if (result.success) {
-    const { data: costs, error: costsError } = await supabase
-      .from('zen_order_costs')
-      .select('id, order_id, cost_type, quantity, unit_price, total_amount, currency, invoice_id, is_revenue, created_at')
-      .eq('order_id', orderId);
+    const { data: costs, error: costsError } = await financeRepo.findFullByOrderId(orderId);
 
     if (costsError) {
       logger.error(`[Action] Error fetching costs for ${orderId}:`, costsError);
@@ -95,23 +87,13 @@ export async function calculateSettlementAction(orderId: string) {
 export async function getSettlementOverview() {
   const { supabase, profile } = await validateUserAction();
   if (!profile) throw new Error("User profile not found");
+  const financeRepo = new FinanceRepository(supabase);
 
   const isAdmin = profile.role === USER_ROLES.ZENITH_SUPER_ADMIN || profile.role === USER_ROLES.ADMIN;
+  const shipperId = !isAdmin && profile.org_id ? profile.org_id : undefined;
 
-  const unpaidQuery = supabase
-    .from("zen_invoices")
-    .select("total_amount")
-    .in("status", ["UNPAID", "PARTIAL"]);
-  if (!isAdmin && profile.org_id) unpaidQuery.eq("shipper_id", profile.org_id);
-  const { data: unpaidSum, error: unpaidError } = await unpaidQuery;
-
-  const recentQuery = supabase
-    .from("zen_invoices")
-    .select("id, invoice_no, total_amount, currency, status, created_at, shipper_id")
-    .order("created_at", { ascending: false })
-    .limit(5);
-  if (!isAdmin && profile.org_id) recentQuery.eq("shipper_id", profile.org_id);
-  const { data: recentInvoices, error: recentError } = await recentQuery;
+  const { data: unpaidSum, error: unpaidError } = await financeRepo.findUnpaidSum(shipperId);
+  const { data: recentInvoices, error: recentError } = await financeRepo.findRecentInvoices(5, shipperId);
 
   if (unpaidError || recentError) {
     throw new Error("Failed to fetch settlement overview");
@@ -129,26 +111,21 @@ export async function getSettlementOverview() {
 export async function getWeeklyRevenueChart() {
   const { supabase, profile } = await validateUserAction();
   if (!profile) throw new Error("User profile not found");
+  const financeRepo = new FinanceRepository(supabase);
 
   const isAdmin = profile.role === USER_ROLES.ZENITH_SUPER_ADMIN || profile.role === USER_ROLES.ADMIN;
+  const shipperId = !isAdmin && profile.org_id ? profile.org_id : undefined;
 
   const now = new Date();
   const sevenDaysAgo = new Date(now);
   sevenDaysAgo.setDate(now.getDate() - 6);
   sevenDaysAgo.setHours(0, 0, 0, 0);
 
-  const query = supabase
-    .from('zen_invoices')
-    .select('total_amount, created_at')
-    .eq('status', 'PAID')
-    .gte('created_at', sevenDaysAgo.toISOString())
-    .lte('created_at', now.toISOString());
-
-  if (!isAdmin && profile.org_id) {
-    query.eq('shipper_id', profile.org_id);
-  }
-
-  const { data: invoices, error } = await query;
+  const { data: invoices, error } = await financeRepo.findPaidInvoicesByDateRange(
+    sevenDaysAgo.toISOString(),
+    now.toISOString(),
+    shipperId,
+  );
   if (error) throw new Error(`매출 통계 조회 실패: ${error.message}`);
 
   const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -182,30 +159,9 @@ export async function getRevenueReport(filters: {
   shipperId?: string;
 }) {
   const { supabase, profile } = await validateAdminAction();
+  const financeRepo = new FinanceRepository(supabase);
 
-  let query = supabase
-    .from('zen_invoices')
-    .select(`
-      id,
-      invoice_no,
-      total_amount,
-      currency,
-      status,
-      created_at,
-      shipper:shipper_id(name),
-      order:zen_orders!inner(id, trans_mode)
-    `)
-    .gte('created_at', filters.startDate)
-    .lte('created_at', filters.endDate);
-
-  if (filters.transMode && filters.transMode !== 'ALL') {
-    query = query.eq('order.trans_mode', filters.transMode);
-  }
-  if (filters.shipperId) {
-    query = query.eq('shipper_id', filters.shipperId);
-  }
-
-  const { data, error } = await query.order('created_at', { ascending: false });
+  const { data, error } = await financeRepo.findRevenueReport(filters);
   if (error) throw new Error(`수입 리포트 조회 실패: ${error.message}`);
 
   const totalRevenue = data?.reduce((sum, inv) => sum + Number(inv.total_amount), 0) || 0;
@@ -224,21 +180,9 @@ export async function getCostReport(filters: {
   serviceType?: string;
 }) {
   const { supabase } = await validateAdminAction();
+  const financeRepo = new FinanceRepository(supabase);
 
-  let query = supabase
-    .from('zen_order_costs')
-    .select(`
-      *,
-      order:order_id(order_no, trans_mode, shipper:shipper_id(name))
-    `)
-    .gte('created_at', filters.startDate)
-    .lte('created_at', filters.endDate);
-
-  if (filters.serviceType && filters.serviceType !== 'ALL') {
-    query = query.eq('cost_type', filters.serviceType);
-  }
-
-  const { data, error } = await query.order('created_at', { ascending: false });
+  const { data, error } = await financeRepo.findCostReport(filters);
   if (error) throw new Error(`비용 리포트 조회 실패: ${error.message}`);
 
   const totalCost = data?.reduce((sum, cost) => sum + Number(cost.total_amount), 0) || 0;
