@@ -8,7 +8,7 @@
 | 담당 Agent | D_Kai (OpenCode) |
 | 우선순위 | P3 |
 | 전제조건 | IMP-003(proxy.ts 마이그레이션) ✅ 완료 · TASK-030 완료 후 순차 권장 |
-| 상태 | 🔄 구현 중 |
+| 상태 | 🔔 검토 요청 — Aiden 검토 대기 |
 | 파급 효과 | 없음 (독립 Task) |
 
 ---
@@ -120,11 +120,11 @@ const { data: profile } = await supabase
 
 | 항목 | 내용 |
 |:---|:---|
-| 착수일 | — |
-| 완료일 | — |
-| 최적화 방식 | — |
-| gitnexus_impact 결과 | — |
-| 회귀 결과 | — |
+| 착수일 | 2026-05-20 |
+| 완료일 | 2026-05-20 |
+| 최적화 방식 | 방식 A-1 — app_metadata role·org_type·status 3필드 전부 존재 시 DB 쿼리 스킵. 불완전 세션만 DB fallback + React.cache() |
+| gitnexus_impact 결과 | LOW — 1 direct caller (middleware), Auth module only |
+| 회귀 결과 | 209/209 ALL PASS |
 | 코드 커밋 해시 | — |
 | 문서 커밋 해시 | — |
 
@@ -149,3 +149,4 @@ const { data: profile } = await supabase
 | 2026-05-20 | Aiden (Claude) | Task 생성 — Phase G 작업 지시 발령 |
 | 2026-05-20 | D_Kai (OpenCode) | 설계 의견 제출 — 방식 A-1 (app_metadata 조건부 DB 스킵 + fallback Request-scoped 캐시). 커밋 5691a1c |
 | 2026-05-20 | Aiden (Claude) | 설계 확정 — 방식 A-1 승인. fallback 주석 명시·React.cache() 적용·authGuard() 수정 범위 한정 조건 추가. 📝→🔄 착수 승인 |
+| 2026-05-20 | D_Kai (OpenCode) | 구현 완료 — metadata 조건부 DB 스킵·React.cache() fallback·회귀 209/209 ALL PASS |
