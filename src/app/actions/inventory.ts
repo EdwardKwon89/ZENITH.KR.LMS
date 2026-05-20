@@ -154,21 +154,18 @@ export async function syncInventoryFromOrder(
 
   if (itemsError || !items || items.length === 0) return;
 
+  const skuCodes = items.filter(i => i.sku_code).map(i => i.sku_code);
+  const { data: inventoryList } = skuCodes.length > 0 ? await supabase
+    .from("zen_inventory")
+    .select("*")
+    .eq("org_id", profile.org_id)
+    .in("sku_code", skuCodes) : { data: [] };
+  const inventoryBySku = new Map(inventoryList?.map(i => [i.sku_code, i]) ?? []);
+
   for (const item of items) {
     if (!item.sku_code) continue;
 
-    // 2. SKU에 해당하는 인벤토리 조회
-    const { data: inventory, error: invError } = await supabase
-      .from("zen_inventory")
-      .select("*")
-      .eq("org_id", profile.org_id)
-      .eq("sku_code", item.sku_code)
-      .single();
-
-    if (invError || !inventory) {
-      console.warn(`Inventory not found for SKU: ${item.sku_code}`);
-      continue;
-    }
+    const inventory = inventoryBySku.get(item.sku_code);
 
     let updatePayload: any = {};
     let historyPayload: any = {
