@@ -3,6 +3,7 @@ import { logger } from '@/lib/logger';
 
 import { createClient } from '@/utils/supabase/server';
 import { validateUserAction } from '@/lib/auth/guards';
+import { AdminRepository } from '@/lib/repositories';
 import { revalidatePath } from 'next/cache';
 
 /**
@@ -13,12 +14,8 @@ export async function findUserId(fullName: string, email: string) {
   const supabase = await createClient();
 
   try {
-    const { data, error } = await supabase
-      .from('zen_profiles')
-      .select('email')
-      .eq('full_name', fullName)
-      .eq('email', email)
-      .maybeSingle();
+    const adminRepo = new AdminRepository(supabase);
+    const { data, error } = await adminRepo.findProfileByNameAndEmail(fullName, email);
 
     if (error) {
       logger.error('[AUTH_ACTION] findUserId Error:', error);
@@ -90,11 +87,8 @@ export async function getUserSession() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
 
-  const { data: profile } = await supabase
-    .from("zen_profiles")
-    .select('id, email, role, org_id, status')
-    .eq("id", user.id)
-    .single();
+  const adminRepo = new AdminRepository(supabase);
+  const { data: profile } = await adminRepo.findProfileById(user.id);
 
   return { user, profile };
 }
