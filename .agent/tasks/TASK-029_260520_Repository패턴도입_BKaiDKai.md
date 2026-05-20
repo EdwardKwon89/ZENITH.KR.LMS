@@ -8,7 +8,7 @@
 | 담당 Agent | B_Kai (구현) + D_Kai (설계·검토) |
 | 우선순위 | P3 |
 | 전제조건 | IMP-033·058 ✅ 완료(D1 전량 완료) → 즉시 착수 가능 |
-| 상태 | 🔔 검토 요청 |
+| 상태 | ❌ 반려 — 재작업 필요 |
 | 파급 효과 | 없음 (독립 Task, 완료 후 아키텍처 개선 가속) |
 
 ---
@@ -123,13 +123,11 @@ IMP-059(클라이언트 싱글톤)는 완료되었으나, 비즈니스 로직과
 
 ## Aiden 검토
 
-> **이 섹션은 🔔 보고 후 Aiden이 작성합니다.**
-
 | 항목 | 내용 |
 |:---|:---|
-| 검토일 | — |
-| 판정 | — |
-| 검토 의견 | — |
+| 검토일 | 2026-05-20 |
+| 판정 | ❌ 반려 |
+| 검토 의견 | **Finance·Admin 도메인 마이그레이션 미완료.** (1) `finance/settlement.ts` — zen_order_costs 3곳·zen_invoices 2곳 직접 DB 호출 잔류. b69c952에서 1개 함수만 전환됨. (2) `finance/invoice.ts` — zen_invoices 2곳 직접 호출 잔류, FinanceRepository 전환 없음. (3) `admin/auth.ts` — zen_profiles 1곳 직접 호출 잔류. 설계 확정 범위(Finance 3테이블·Admin 3테이블)에 해당하는 모든 직접 쿼리가 제거되어야 DoD 충족. 추가 문제: (4) 코드 커밋 해시 불완전 — `b69c952`(settlement.ts 일부 마이그레이션) 미기재, `ed7629d`만 기재. (5) `gitnexus_detect_changes()` 결과 미기재. **재작업 지시**: ① `finance/settlement.ts` 잔류 5곳 FinanceRepository 메서드 추가·전환 ② `finance/invoice.ts` 잔류 2곳 FinanceRepository 전환 ③ `admin/auth.ts` zen_profiles → AdminRepository 전환 ④ 회귀 테스트 재실행·증적 갱신 ⑤ 코드 커밋(해시 전량 기재) ⑥ 작업 결과 정정(커밋 해시·전환 범위·detect_changes 결과 추가) ⑦ 개정 이력 추가 ⑧ 문서 커밋 재수행. |
 
 ---
 
@@ -139,3 +137,4 @@ IMP-059(클라이언트 싱글톤)는 완료되었으나, 비즈니스 로직과
 |:-----|:----:|:-----|
 | 2026-05-20 | Aiden (Claude) | Task 생성 — Phase G 작업 지시 발령 |
 | 2026-05-20 | Aiden (Claude) | 설계 확정 — A안 승인 (BaseRepository+3도메인), 🔍→🔄 착수 승인 |
+| 2026-05-20 | Aiden (Claude) | ❌ 반려 — Finance(settlement 5곳·invoice 2곳)·Admin(auth 1곳) 마이그레이션 미완료, b69c952 해시 미기재, detect_changes 누락 |
