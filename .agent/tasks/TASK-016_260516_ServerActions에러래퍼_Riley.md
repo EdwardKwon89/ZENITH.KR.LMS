@@ -8,7 +8,7 @@
 | 담당 Agent | Riley (Gemini) |
 | 우선순위 | P3 |
 | 전제조건 | 없음 (즉시 착수 가능) |
-| 상태 | ⬜ 미착수 |
+| 상태 | 📝 설계 의견 작성 |
 
 ---
 
@@ -78,10 +78,10 @@ export function withAction<T>(
 
 | 항목 | 내용 |
 |:---|:---|
-| 제안 방안 | — |
-| 선택 근거 | — |
-| 예상 리스크 | — |
-| 대안 방안 | — |
+| 제안 방안 | `src/lib/actions/wrapper.ts`를 생성하고 고차 함수 `withAction` 도입. 리턴 규격: `{ data: T; error: null } \| { data: null; error: string }`. 에러 발생 시 `logger.error`로 상세 스택 로그 기록 및 클라이언트 측에는 표준 에러 메시지 리턴. |
+| 선택 근거 | 기존의 개별 분기 방식 `{ success, error }`는 유효성 및 권한 예외 누락 위험이 큼. `throw new Error` 방식으로 작성 시 비즈니스 로직 작성 가독성이 올라가며 래퍼에서 공통 로깅 및 에러 규격을 철저하게 강제할 수 있음. |
+| 예상 리스크 | 기존 Action 호출 클라이언트 컴포넌트 및 테스트 코드의 리턴 값 확인 구조(`result.success`)가 깨져 다수의 마이그레이션이 필요함. 점진적으로 VOC, Customs 등 안전한 영역부터 10개 이상 전환하여 리스크를 통제함. |
+| 대안 방안 | 기존 `{ success, error }` 방식을 유지하는 래퍼 구성. 단, 이 경우 TypeScript의 Type Narrowing 이점(성공 시 data 보장, 실패 시 error 보장)을 온전히 누리기 어려움. |
 
 ---
 
