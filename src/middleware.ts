@@ -3,6 +3,7 @@ import { routing } from './i18n/routing';
 import { updateSession } from '@/utils/supabase/middleware';
 import { type NextRequest, NextResponse } from 'next/server';
 import { authGuard } from '@/lib/auth/proxy';
+import { logger } from '@/lib/logger';
 
 const handleI18nRouting = createMiddleware(routing);
 
@@ -15,13 +16,13 @@ function mergeHeaders(targetResponse: NextResponse, sourceResponse: NextResponse
 
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
-  console.log(`[MIDDLEWARE] Entry: ${pathname}`);
+  logger.debug(`[PROXY] Entry: ${pathname}`);
 
   let sessionResult;
   try {
     sessionResult = await updateSession(request);
   } catch (e) {
-    console.error(`[MIDDLEWARE] Session Sync Failed:`, e);
+    logger.error(`[MIDDLEWARE] Session Sync Failed:`, e);
     return handleI18nRouting(request);
   }
 
