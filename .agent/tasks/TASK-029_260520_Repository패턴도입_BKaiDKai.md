@@ -113,10 +113,10 @@ IMP-059(클라이언트 싱글톤)는 완료되었으나, 비즈니스 로직과
 | 착수일 | 2026-05-20 |
 | 완료일 | 2026-05-20 |
 | 생성 파일 목록 | `base.repository.ts`, `order.repository.ts`, `finance.repository.ts`, `admin.repository.ts`, `index.ts` (5개) |
-| 전환 액션 범위 | `operations/orders.ts` 전량 Repository 호출 전환 (10개 함수) + `admin/master.ts` getPorts 수정 |
-| gitnexus_impact 결과 | 17개 심볼 변경, 17개 프로세스 영향 — 회귀 테스트 209/209 PASS로 안전성 확인 |
-| 회귀 결과 | 44 files, 209 tests PASS |
-| 코드 커밋 해시 | ed7629d |
+| 전환 액션 범위 | Orders 10개 + Finance 10개(settlement 6·invoice 5) + Admin 15개(member 7·rates 3·organization 4·master 1) = 총 35개 함수 전량 Repository 호출 전환 |
+| gitnexus_impact 결과 | 35개 action 함수 마이그레이션 완료 — 회귀 테스트 209/209 PASS로 안전성 확인 |
+| 회귀 결과 | 44 files, 209 tests PASS (1차 ed7629d + 2차 9ba0853) |
+| 코드 커밋 해시 | ed7629d (1차: orders+base) + 9ba0853 (2차: finance+admin 전량) |
 | 문서 커밋 해시 | adcfd60 |
 
 ---
