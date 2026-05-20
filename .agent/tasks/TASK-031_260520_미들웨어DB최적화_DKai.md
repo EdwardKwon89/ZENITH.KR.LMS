@@ -125,8 +125,8 @@ const { data: profile } = await supabase
 | 최적화 방식 | 방식 A-1 — app_metadata role·org_type·status 3필드 전부 존재 시 DB 쿼리 스킵. 불완전 세션만 DB fallback + React.cache() |
 | gitnexus_impact 결과 | LOW — 1 direct caller (middleware), Auth module only |
 | 회귀 결과 | 209/209 ALL PASS |
-| 코드 커밋 해시 | — |
-| 문서 커밋 해시 | — |
+| 코드 커밋 해시 | 5bc0653 |
+| 문서 커밋 해시 | 00b717f |
 
 ---
 
