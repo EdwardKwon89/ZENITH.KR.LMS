@@ -8,7 +8,7 @@
 | 담당 Agent | D_Kai (OpenCode) |
 | 우선순위 | P3 |
 | 전제조건 | 없음 (즉시 착수 가능) |
-| 상태 | ❌ 반려 |
+| 상태 | ✅ 완료 |
 
 ---
 
@@ -92,7 +92,7 @@
 | 중복 제거 수 | 2건 (파일 1개 삭제, import 1건 교체) |
 | 회귀 결과 | 197/199 PASS (2건 pre-existing voc.ts) |
 | gitnexus_impact | `createClient`(server.ts) CRITICAL — 24 direct callers, 127 processes. 변경 범위: `src/lib/supabase.ts`(dead code, import 0건) 삭제 + `login/actions.ts` import 경로만 교체. 기존 `createClient` 호출자 24곳 영향 없음. |
-| 커밋 해시 | (커밋 예정) |
+| 커밋 해시 | 385122c |
 
 ---
 
@@ -102,9 +102,9 @@
 
 | 항목 | 내용 |
 |:---|:---|
-| 검토일 | 2026-05-20 |
-| 판정 | ❌ 반려 |
-| 검토 의견 | 구현 확인 ✅: `src/lib/supabase.ts` 삭제 ✅, `login/actions.ts` 클라이언트 교체 ✅, `D_Kai_20260520.log` 197/199 PASS (pre-existing 2건) 확인. **DoD 미달성으로 반려**: ① 커밋 미완료 — 커밋 해시 미기재, 커밋 전 상태로 🔔 보고 ② `gitnexus_impact` 결과 작업 결과 섹션 미기재 ③ TASK별 회귀 결과 파일 미저장 (R-13: `REGRESSION_2026-05-20_TASK-006.log` 저장 필요) ④ DoD 체크리스트 전항목 `[ ]` 미체크. **재작업 요구**: ① 커밋 완료 (`[D_Kai] refactor: IMP-059 Supabase 클라이언트 중복 제거`) ② gitnexus_impact 결과 기록 ③ TASK별 회귀 결과 파일 저장 ④ DoD 체크리스트 `[x]` 완료. |
+| 검토일 | 2026-05-20 (1차 반려) / 2026-05-20 (재검토) |
+| 판정 | ✅ PASS |
+| 검토 의견 | 재작업 검토 완료. 코드 확인 ✅: `src/lib/supabase.ts` 삭제(dead code, import 0건) ✅, `login/actions.ts` `createAdminClient` 교체 ✅. `gitnexus_impact`: `createClient` CRITICAL(24 callers, 127 processes)이나 변경 범위 = dead code 삭제 + import 경로 교체만 — 기존 24 callers 영향 없음 ✅. 커밋 `385122c` ✅. `REGRESSION_2026-05-20_TASK-006.log` 197/199 PASS ✅. DoD 체크리스트 `[x]` ✅. (`IMP_PROGRESS.md` 미존재 skip 허용). |
 
 ---
 
@@ -114,3 +114,4 @@
 |:-----|:----:|:-----|
 | 2026-05-16 | Aiden (Claude) | Task 생성 — 작업 지시 발령 |
 | 2026-05-20 | Aiden (Claude) | ❌ 반려 — 커밋 미완료, gitnexus_impact 누락, 회귀 파일 미저장(R-13), DoD 미체크 |
+| 2026-05-20 | Aiden (Claude) | ✅ PASS — 재작업 검토 완료 (커밋 385122c · gitnexus_impact · 회귀파일 · DoD [x] 전량 확인) |
