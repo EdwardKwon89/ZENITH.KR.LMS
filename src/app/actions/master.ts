@@ -4,6 +4,7 @@ import { validateAdminAction, validateUserAction } from "@/lib/auth/guards";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { updateSystemParam as updateParam, getAllParams } from "@/lib/params/service";
 import { SYSTEM_INDIVIDUAL_SHIPPER_ID } from "@/lib/constants";
+import { upsertPortSchema, upsertCommonCodeSchema, updateSystemParamSchema, validatePayload } from "@/lib/validation/schemas";
 
 /**
  * 하우스 오더 번호를 생성합니다.
@@ -62,12 +63,16 @@ export async function getPorts() {
 /**
  * 특정 항구 정보를 추가하거나 업데이트합니다.
  */
-export async function upsertPort(payload: any) {
+export async function upsertPort(payload: unknown) {
+  const validated = validatePayload(upsertPortSchema, payload);
+  if (!validated.success) {
+    throw new Error(`입력 검증 실패: ${validated.error}`);
+  }
   const { supabase } = await validateAdminAction();
   
   const { data, error } = await supabase
     .from("zen_ports")
-    .upsert(payload)
+    .upsert(validated.data)
     .select()
     .single();
 
@@ -175,12 +180,16 @@ export async function getCommonCodesByGroup(groupCode: string) {
 /**
  * 공통 코드를 생성하거나 업데이트합니다.
  */
-export async function upsertCommonCode(payload: any) {
+export async function upsertCommonCode(payload: unknown) {
+  const validated = validatePayload(upsertCommonCodeSchema, payload);
+  if (!validated.success) {
+    throw new Error(`입력 검증 실패: ${validated.error}`);
+  }
   const { supabase } = await validateAdminAction();
   
   const { data, error } = await supabase
     .from("common_codes")
-    .upsert(payload)
+    .upsert(validated.data)
     .select()
     .single();
 
@@ -193,10 +202,14 @@ export async function upsertCommonCode(payload: any) {
 /**
  * 시스템 파라미터를 업데이트합니다. (PH4-OPS-03)
  */
-export async function updateSystemParam(key: string, payload: any) {
+export async function updateSystemParam(key: string, payload: unknown) {
+  const validated = validatePayload(updateSystemParamSchema, payload);
+  if (!validated.success) {
+    throw new Error(`입력 검증 실패: ${validated.error}`);
+  }
   const { profile } = await validateAdminAction();
   
-  const data = await updateParam(key, payload, profile.id);
+  const data = await updateParam(key, validated.data, profile.id);
   
   revalidatePath("/admin/settings", "page");
   return data;

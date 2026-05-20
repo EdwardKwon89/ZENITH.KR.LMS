@@ -7,6 +7,7 @@ import { getNumericParam } from "@/lib/params/service";
 import { generateInvoicePdfBuffer } from '@/lib/finance/pdf';
 import { Resend } from 'resend';
 import { USER_ROLES } from '@/lib/auth/rbac';
+import { upsertTransportCostSchema, validatePayload } from '@/lib/validation/schemas';
 
 const getResend = () => {
   if (process.env.RESEND_API_KEY) {
@@ -103,7 +104,7 @@ export async function calculateSettlementAction(orderId: string) {
   if (result.success) {
     const { data: costs, error: costsError } = await supabase
       .from('zen_order_costs')
-      .select('*')
+      .select('id, order_id, cost_type, quantity, unit_price, total_amount, currency, invoice_id, is_revenue, created_at')
       .eq('order_id', orderId);
     
     if (costsError) {
@@ -156,7 +157,7 @@ export async function getSettlementOverview() {
   // 2. 최근 인보이스 5건
   const recentQuery = supabase
     .from("zen_invoices")
-    .select("*")
+    .select("id, invoice_no, total_amount, currency, status, created_at, shipper_id")
     .order("created_at", { ascending: false })
     .limit(5);
   if (!isAdmin && profile.org_id) recentQuery.eq("shipper_id", profile.org_id);
@@ -272,7 +273,7 @@ export async function getInvoicePdfHistory(invoiceId: string) {
 
   const { data, error } = await supabase
     .from('zen_invoice_pdf_history')
-    .select('*')
+    .select('id, invoice_id, file_path, version, created_by, metadata, created_at')
     .eq('invoice_id', invoiceId)
     .order('version', { ascending: false });
 
@@ -408,7 +409,7 @@ export async function sendTaxInvoiceEmail(taxInvoiceId: string, recipientEmail: 
   // 1. 세금계산서 데이터 조회
   const { data: tx, error: txError } = await supabase
     .from('zen_tax_invoices')
-    .select('*')
+    .select('id, tax_invoice_no, total_amount, currency, status, metadata, created_at')
     .eq('id', taxInvoiceId)
     .single();
 
@@ -476,7 +477,7 @@ export async function getTaxInvoiceHistory(invoiceId: string) {
 
   const { data, error } = await supabase
     .from('zen_tax_invoices')
-    .select('*')
+    .select('id, tax_invoice_no, total_amount, status, invoice_id, created_at')
     .eq('invoice_id', invoiceId)
     .order('created_at', { ascending: false });
 
@@ -662,12 +663,16 @@ export async function getTransportCosts() {
 /**
  * [WBS 4.5.2] 운송원가 정보를 저장하거나 수정합니다.
  */
-export async function upsertTransportCost(payload: any) {
+export async function upsertTransportCost(payload: unknown) {
+  const validated = validatePayload(upsertTransportCostSchema, payload);
+  if (!validated.success) {
+    throw new Error(`입력 검증 실패: ${validated.error}`);
+  }
   const { supabase } = await validateAdminAction();
   const { data, error } = await supabase
     .from('zen_transport_costs')
     .upsert({
-      ...payload,
+      ...validated.data,
       updated_at: new Date().toISOString()
     })
     .select()
@@ -717,7 +722,7 @@ export async function getOrderDocumentData(orderNo: string) {
   // 2. 패킹 및 아이템 정보 조회
   const { data: packages, error: pkgError } = await supabase
     .from('zen_order_packages')
-    .select('*')
+    .select('id, order_id, packing_unit, packing_count, gross_weight, volume, length, width, height, remarks, created_at, updated_at')
     .eq('order_id', order.id)
     .order('created_at', { ascending: true });
 
@@ -725,7 +730,7 @@ export async function getOrderDocumentData(orderNo: string) {
 
   const { data: items, error: itemsError } = await supabase
     .from('zen_order_items')
-    .select('*')
+    .select('id, order_id, package_id, item_name, quantity, unit_price, currency, hs_code, sku_code, weight, volume, item_packing_unit, created_at, updated_at')
     .eq('order_id', order.id)
     .order('created_at', { ascending: true });
 

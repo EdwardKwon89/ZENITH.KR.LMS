@@ -96,7 +96,7 @@ describe('Finance & Schedules Report Actions', () => {
   });
 
   it('TC-FIN7-03: upsertTransportCost — 신규 등록 시 { success: true, data } 반환', async () => {
-    const payload = { mode: 'AIR', origin_port_id: 'p1', destination_port_id: 'p2', base_cost: 200 };
+    const payload = { order_id: '550e8400-e29b-41d4-a716-446655440001', cost_type: 'OCEAN_FREIGHT', amount: 200 };
     const mockSaved = { id: 'tc-123', ...payload };
 
     mockSupabase.single.mockResolvedValueOnce({ data: mockSaved, error: null });

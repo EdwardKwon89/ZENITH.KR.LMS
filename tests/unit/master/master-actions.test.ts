@@ -80,7 +80,7 @@ describe('ZENITH Master Data: CRUD Operations', () => {
 
   it('TC-M.3: [Success] upsertCommonCode는 데이터를 저장하고 경로를 갱신해야 함', async () => {
     // Given
-    const payload = { group_code: 'TEST', code_value: '01' };
+    const payload = { group_code: 'TEST', code_value: '01', code_name: 'Test Code' };
     supabaseMock.single.mockResolvedValue({ data: { ...payload, id: 'uuid' } });
 
     // When

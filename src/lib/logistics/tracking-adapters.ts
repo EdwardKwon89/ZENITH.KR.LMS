@@ -63,7 +63,7 @@ export class MockCarrierProvider implements ITrackingProvider {
 
     const { error: logError } = await supabase
       .from('zen_tracking_raw_logs')
-      .insert({ order_id: config.order_id, raw_data: mockApiResponse });
+      .insert({ order_id: config.order_id, provider_name: this.name, raw_data: mockApiResponse });
 
     if (logError) {
       console.error(`[MOCK_CARRIER] Failed to save raw log for ${config.order_id}:`, logError);
