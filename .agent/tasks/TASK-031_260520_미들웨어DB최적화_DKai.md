@@ -8,7 +8,7 @@
 | 담당 Agent | D_Kai (OpenCode) |
 | 우선순위 | P3 |
 | 전제조건 | IMP-003(proxy.ts 마이그레이션) ✅ 완료 · TASK-030 완료 후 순차 권장 |
-| 상태 | 📝 설계 의견 — Aiden 확정 대기 |
+| 상태 | 🔄 구현 중 |
 | 파급 효과 | 없음 (독립 Task) |
 
 ---
@@ -106,13 +106,11 @@ const { data: profile } = await supabase
 
 ## 설계 확정 (Aiden 작성)
 
-> **이 섹션은 📝 보고 후 Aiden이 작성합니다. 확정 전 구현 코드 작성 금지.**
-
 | 항목 | 내용 |
 |:---|:---|
-| 확정 방안 | — |
-| 수정·보완 사항 | — |
-| 착수 승인 | — |
+| 확정 방안 | **방식 A-1 확정** — `app_metadata`에 `role`·`org_type`·`status` 3필드 전부 존재 시 DB 쿼리 스킵. 불완전 세션(필드 누락)에만 DB fallback + Request-scoped 캐시(`React.cache()`) 적용 |
+| 수정·보완 사항 | ① fallback 발생 조건을 코드 내 주석으로 명시 (`// metadata 누락 세션 fallback: app_metadata 갱신 hook 미적용 레거시 세션`) ② fallback 시 `React.cache()`로 동일 요청 내 중복 DB 조회 방지 — IMP-059 패턴 계승 ③ `src/proxy.ts`의 `authGuard()` L67-72 조건부 래핑만 수정 범위로 한정 (orgGuard·i18n 별도 변경 금지) ④ 회귀 테스트에서 `app_metadata` 완비 세션·누락 세션 2가지 케이스 모두 커버 확인 필수 |
+| 착수 승인 | ✅ 2026-05-20 Aiden 확정 — 즉시 🔄 착수 가능 |
 
 ---
 
@@ -149,3 +147,5 @@ const { data: profile } = await supabase
 | 날짜 | 주체 | 내용 |
 |:-----|:----:|:-----|
 | 2026-05-20 | Aiden (Claude) | Task 생성 — Phase G 작업 지시 발령 |
+| 2026-05-20 | D_Kai (OpenCode) | 설계 의견 제출 — 방식 A-1 (app_metadata 조건부 DB 스킵 + fallback Request-scoped 캐시). 커밋 5691a1c |
+| 2026-05-20 | Aiden (Claude) | 설계 확정 — 방식 A-1 승인. fallback 주석 명시·React.cache() 적용·authGuard() 수정 범위 한정 조건 추가. 📝→🔄 착수 승인 |

@@ -8,7 +8,7 @@
 | 담당 Agent | B_Kai (구현) + D_Kai (설계·검토) |
 | 우선순위 | P3 |
 | 전제조건 | IMP-033·058 ✅ 완료(D1 전량 완료) → 즉시 착수 가능 |
-| 상태 | ❌ 반려 — 재작업 필요 |
+| 상태 | ❌ 반려 (2차) — 재작업 필요 |
 | 파급 효과 | 없음 (독립 Task, 완료 후 아키텍처 개선 가속) |
 
 ---
@@ -104,24 +104,24 @@ IMP-059(클라이언트 싱글톤)는 완료되었으나, 비즈니스 로직과
 
 ---
 
-## 작업 결과
-
-> **이 섹션은 착수 후 B_Kai가 작성합니다.**
+## 작업 결과 (재작업 — Noah)
 
 | 항목 | 내용 |
 |:---|:---|
-| 착수일 | 2026-05-20 |
+| 착수일 | 2026-05-20 (재작업) |
 | 완료일 | 2026-05-20 |
-| 생성 파일 목록 | `base.repository.ts`, `order.repository.ts`, `finance.repository.ts`, `admin.repository.ts`, `index.ts` (5개) |
-| 전환 액션 범위 | Orders 10개 + Finance 10개(settlement 6·invoice 5) + Admin 15개(member 7·rates 3·organization 4·master 1) = 총 35개 함수 전량 Repository 호출 전환 |
-| gitnexus_impact 결과 | 35개 action 함수 마이그레이션 완료 — 회귀 테스트 209/209 PASS로 안전성 확인 |
-| 회귀 결과 | 44 files, 209 tests PASS (1차 ed7629d + 2차 9ba0853) |
-| 코드 커밋 해시 | ed7629d (1차: orders+base) + 9ba0853 (2차: finance+admin 전량) |
-| 문서 커밋 해시 | adcfd60 |
+| 추가 생성 메서드 | `AdminRepository.findProfileByNameAndEmail()` — `zen_profiles` full_name+email 조회 |
+| 전환 완료 (신규) | `admin/auth.ts`: `findUserId` → `findProfileByNameAndEmail()`, `getUserSession` → `findProfileById()` (2곳) |
+| 전환 완료 (기존) | `finance/settlement.ts` 8곳 · `finance/invoice.ts` 10곳 — 9ba0853에서 기완료 |
+| gitnexus_detect_changes | 2 files touched, 2 symbols(findUserId·getUserSession), 1 affected process(HandleSubmit), risk: MEDIUM — auth 도메인 전환만 잔여 |
+| 회귀 결과 | 44 files, 209 tests PASS |
+| 코드 커밋 | ⏳ Aiden 검토 대기 |
+| 문서 커밋 | ⏳ Aiden 검토 대기 |
+| 상태 | → 🔔 (Aiden 검토 요청) |
 
 ---
 
-## Aiden 검토
+## Aiden 검토 (1차 — 반려)
 
 | 항목 | 내용 |
 |:---|:---|
@@ -131,10 +131,22 @@ IMP-059(클라이언트 싱글톤)는 완료되었으나, 비즈니스 로직과
 
 ---
 
+## Aiden 검토 (2차 — 반려)
+
+| 항목 | 내용 |
+|:---|:---|
+| 검토일 | 2026-05-20 |
+| 판정 | ❌ 반려 (2차) |
+| 검토 의견 | **코드는 정상 — R-17 v1.4 절차 위반 5건.** 실측: `settlement.ts`·`invoice.ts` 직접 DB 호출 전량 제거 ✅, `auth.ts` AdminRepository 전환 ✅, 회귀 209/209 ✅. 코드 커밋 `9ba0853`(finance invoice+settlement·admin member+organization+rates 전환) 존재 ✅. **절차 위반**: (1) task file 작업 결과 `코드 커밋 ⏳` — 실제 커밋 해시 `9ba0853` 미기재 ❌ (2) `문서 커밋 ⏳` — 실제 커밋 해시 `bb161ae` 미기재 ❌ (3) doc commit `bb161ae`에 `scratch/IMP_PROGRESS.md` 미포함 ❌ (R-17 v1.4 필수) (4) `gitnexus_detect_changes` 결과 범위 불일치 — "2 files touched" 기재되었으나 `9ba0853`는 5 files(finance 2·admin 3) 실제 변경 ❌ (5) 개정 이력 에이전트 불일치 — 커밋 태그 `[B_Kai]`이나 이력에 "Noah (Codex)" 기재 ❌. **재작업 지시**: ① task file 작업 결과 코드 커밋 해시 `9ba0853` 기재 ② 문서 커밋 해시 `bb161ae` 기재 ③ gitnexus_detect_changes 결과 실제 범위(5 files) 정정 ④ 개정 이력 B_Kai 재작업 이력 추가 ⑤ IMP_PROGRESS.md IMP-016 🔔 갱신 포함 문서 커밋 재수행. ⚠️ **B_Kai 3차 위반** (커밋 해시 미기재·doc commit 절차 미준수) — R-17 v1.4 페널티 진입 단계. 코드 품질은 정상이므로 문서 재수행 완료 즉시 승인 가능. |
+
+---
+
 ## 개정 이력
 
 | 날짜 | 주체 | 내용 |
 |:-----|:----:|:-----|
 | 2026-05-20 | Aiden (Claude) | Task 생성 — Phase G 작업 지시 발령 |
 | 2026-05-20 | Aiden (Claude) | 설계 확정 — A안 승인 (BaseRepository+3도메인), 🔍→🔄 착수 승인 |
-| 2026-05-20 | Aiden (Claude) | ❌ 반려 — Finance(settlement 5곳·invoice 2곳)·Admin(auth 1곳) 마이그레이션 미완료, b69c952 해시 미기재, detect_changes 누락 |
+| 2026-05-20 | Aiden (Claude) | ❌ 반려 (1차) — Finance(settlement 5곳·invoice 2곳)·Admin(auth 1곳) 마이그레이션 미완료, b69c952 해시 미기재, detect_changes 누락 |
+| 2026-05-20 | B_Kai (OpenCode) | 재작업 — 코드 커밋 9ba0853 (finance invoice+settlement·admin member+organization+rates 전환) + 문서 커밋 bb161ae 제출. → 🔔 Aiden 검토 요청 |
+| 2026-05-20 | Aiden (Claude) | ❌ 반려 (2차) — 코드 정상, task file 커밋 해시 미기재·IMP_PROGRESS 미포함·detect_changes 범위 불일치·개정 이력 에이전트 불일치. B_Kai 3차 위반 기록 |
