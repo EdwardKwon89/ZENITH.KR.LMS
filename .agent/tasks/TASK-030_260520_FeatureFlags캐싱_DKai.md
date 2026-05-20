@@ -71,7 +71,7 @@ Next.js `unstable_cache()` 또는 Edge Config 전환으로 캐시 적용 필요.
 | revalidate 전략 | `{ revalidate: 60 }` — 60초 TTL |
 | gitnexus_impact 결과 | LOW — 2 direct callers (authGuard, OrdersPage), 1 module (Auth) |
 | 회귀 결과 | 207/209 PASS (2건 pre-existing — integration Supabase local DB 미연동) |
-| 코드 커밋 해시 | — |
+| 코드 커밋 해시 | c5e03bd |
 | 문서 커밋 해시 | — |
 
 ---
