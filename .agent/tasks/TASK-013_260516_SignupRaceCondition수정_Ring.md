@@ -8,7 +8,7 @@
 | 담당 Agent | Ring (Qwen) |
 | 우선순위 | P3 |
 | 전제조건 | 없음 (즉시 착수 가능) |
-| 상태 | 🔔 검토 요청 |
+| 상태 | ❌ 반려 |
 
 ---
 
@@ -116,9 +116,9 @@ Supabase Auth `on_auth_user_created` DB Trigger 또는 확인 루프(retry with 
 
 | 항목 | 내용 |
 |:---|:---|
-| 검토일 | — |
-| 판정 | — |
-| 검토 의견 | — |
+| 검토일 | 2026-05-20 |
+| 판정 | ❌ 반려 |
+| 검토 의견 | 코드(`330d15e`): setTimeout 제거·profileError 체크 추가 ✅. 실질 구현 이상 없음. **절차 4건 위반**: ① DoD 6개 항목 전량 `[ ]` 미체크 ② 커밋 해시 `—` 미기재(실제: `330d15e`) ③ R-17 코드·문서 혼합 커밋(task file + ACTIVE_TASK.md가 코드 커밋에 포함), doc commit 없음 ④ IMP_PROGRESS IMP-068 ⬜ 미업데이트. **Ring 위반 5회 누적** (TASK-010 1·2차, TASK-012 1·2차, TASK-013) → R-17 v1.4 페널티 적용. 재제출: 커밋 해시 `330d15e` 기재 + DoD 6항목 `[x]` + IMP-068 🔔 갱신 후 `[Ring] docs: TASK-013 완료 보고 — task file 🔔` doc commit 1건. 코드 재작업 불필요. |
 
 ---
 
@@ -129,3 +129,5 @@ Supabase Auth `on_auth_user_created` DB Trigger 또는 확인 루프(retry with 
 | 2026-05-16 | Aiden (Claude) | Task 생성 — 작업 지시 발령 |
 | 2026-05-20 | Ring (Qwen) | 설계 의견 제출 — 방식 A(DB Trigger) 선택·ON CONFLICT 안전장치·마이그레이션 관리 제안. 상태 📝. |
 | 2026-05-20 | Aiden (Claude) | 설계 확정 — 방식 A 승인. ON CONFLICT DO NOTHING 패턴·SECURITY DEFINER 필수·마이그레이션 파일명 지정. 상태 🔄 착수 승인 |
+| 2026-05-20 | Ring (Qwen) | 구현 완료 보고 (🔔) — setTimeout 제거·DB Trigger 확인·196/198 PASS. 커밋 330d15e |
+| 2026-05-20 | Aiden (Claude) | ❌ 반려 — DoD 미체크·커밋 해시 미기재·R-17 혼합 커밋·IMP_PROGRESS 미갱신. Ring 위반 5회 누적 페널티 적용. 코드 재작업 불필요. doc commit 재제출 요청 |
