@@ -8,7 +8,7 @@
 | 담당 Agent | Ring (Qwen) |
 | 우선순위 | P3 |
 | 전제조건 | 없음 (즉시 착수 가능) |
-| 상태 | ⬜ 미착수 |
+| 상태 | 📝 설계 의견 |
 
 ---
 
@@ -69,10 +69,10 @@ Supabase Auth `on_auth_user_created` DB Trigger 또는 확인 루프(retry with 
 
 | 항목 | 내용 |
 |:---|:---|
-| 제안 방안 | — |
-| 선택 근거 | — |
-| 예상 리스크 | — |
-| 대안 방안 | — |
+| 제안 방안 | Supabase `on_auth_user_created` DB Trigger 활용 (방식 A) |
+| 선택 근거 | `setTimeout(500)`은 네트워크 지연 시 여전히 실패 가능. DB Trigger는 Auth Signup과 프로필 생성을 원자적으로 연결하여 Race Condition 근본 해결. 마이그레이션 파일로 관리 가능. |
+| 예상 리스크 | 기존 Trigger와 충돌 시 중복 프로필 생성 가능 — `WHEN (NEW.raw_user_meta_data IS NOT NULL)` 조건으로 안전장치. |
+| 대안 방안 | Exponential Backoff polling (방식 B) — 코드 변경만 가능하지만 근본 해결 아님. |
 
 ---
 
