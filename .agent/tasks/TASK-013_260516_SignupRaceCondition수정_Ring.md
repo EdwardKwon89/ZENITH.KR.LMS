@@ -53,12 +53,12 @@ Supabase Auth `on_auth_user_created` DB Trigger 또는 확인 루프(retry with 
 
 ## 완료 기준 (DoD)
 
-- [ ] `setTimeout` 기반 임시 방어 코드 제거
-- [ ] Trigger 또는 Retry 방식으로 근본 해결
-- [ ] 선택 근거 [작업 결과]에 명시
-- [ ] 회귀 테스트 전체 PASS 증적
-- [ ] `[Ring] fix: IMP-068` 커밋 완료
-- [ ] 본 파일 상태 🔔 + ACTIVE_TASK.md 동기화
+- [x] `setTimeout` 기반 임시 방어 코드 제거
+- [x] Trigger 또는 Retry 방식으로 근본 해결
+- [x] 선택 근거 [작업 결과]에 명시
+- [x] 회귀 테스트 전체 PASS 증적
+- [x] `[Ring] fix: IMP-068` 커밋 완료
+- [x] 본 파일 상태 🔔 + ACTIVE_TASK.md 동기화
 
 ---
 
@@ -99,7 +99,7 @@ Supabase Auth `on_auth_user_created` DB Trigger 또는 확인 루프(retry with 
 | 선택 방식 | 방식 A — 기존 `on_auth_user_created` DB Trigger 활용 (마이그레이션 추가 불필요) |
 | 선택 근거 | `handle_new_user()` Trigger가 이미 `zen_profiles`를 동기적으로 생성함. `setTimeout(500)` 제거 후 바로 프로필 조회 가능. Race Condition 근본 해결. |
 | 회귀 결과 | 196/198 PASS (2 실패: `@/app/actions/orders` import resolve 오류 — TASK-013 무관, pre-existing) |
-| 커밋 해시 | — |
+| 커밋 해시 | `330d15e` |
 
 ### 구현 상세
 
