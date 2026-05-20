@@ -8,7 +8,7 @@
 | 담당 Agent | B_Kai (GLM Big Pickle) |
 | 우선순위 | P3 |
 | 전제조건 | **TASK-017 + TASK-018 완료** |
-| 상태 | 🚫 블로커 |
+| 상태 | 🔄 구현 중 |
 
 ---
 
@@ -20,15 +20,10 @@ TASK-017(admin/rates 분할)과 TASK-018(finance.ts 분할) 완료 후,
 
 ---
 
-## ⛔ 착수 불가
+## ✅ 블로커 해제됨
 
-**TASK-017과 TASK-018이 모두 ✅ PASS 완료되어야 착수 가능합니다.**
-현재 이 두 Task가 진행 중이거나 미완료 상태이면 본 Task를 시작하지 마십시오.
-
-TASK-017 상태: ⬜ 미착수
-TASK-018 상태: ⬜ 미착수
-
-블로커 해제 조건: Aiden이 TASK-017 + TASK-018 ✅ 판정 후 본 파일 상태를 🚫→⬜로 변경
+**TASK-017 ✅ + TASK-018 ✅ — 전제조건이 모두 충족되었습니다.**
+본 파일은 📝 설계 의견 제출 상태로 Aiden 검토를 대기 중입니다.
 
 ---
 
@@ -67,10 +62,10 @@ TASK-018 상태: ⬜ 미착수
 
 | 항목 | 내용 |
 |:---|:---|
-| 제안 방안 | — |
-| 선택 근거 | — |
-| 예상 리스크 | — |
-| 대안 방안 | — |
+| 제안 방안 | ① Consumer 사전 임팩트 분석: 각 Action 파일별 `gitnexus_impact` 선행 → consumer 목록 파악 후 import 일괄 수정 계획 수립<br/>② 도메인 4개 그룹 분할 커밋: (1차) finance·settlement·invoice·fees, (2차) orders·tracking·schedules·routing, (3차) admin·rates·master·master-data·rbac·organization·member·corporate·auth, (4차) 나머지(claims·customs·dashboard·monitoring·notifications·statistics·support·voc·wallet)<br/>③ 각 커밋은 barrel `index.ts`를 디렉토리 루트에 배치하여 이전 import 경로 호환 유지 |
+| 선택 근거 | ① TASK-017·018 경험상 consumer import 수정 누락이 재작업의 주원인이었음 — 사전 impact 분석으로 원천 차단<br/>② 26개 파일 단일 커밋은 diff 규모과다·rollback困難 — 4그룹 분할로 각 단계별 회귀 검증 가능<br/>③ barrel로 구 경로 호환 시 consumer 수정 없이 디렉토리 구조만 전환 가능 → 임팩트 최소화 |
+| 예상 리스크 | ① import cycle: 도메인간 상호 참조(circular dependency) 발생 가능 — 각 그룹별 `gitnexus_detect_changes`로 사전 검증 필요<br/>② barrel 유지 시 "디렉토리 구조만 바꾸고 import 경로는 그대로"라는 반쪽 리팩터가 될 수 있음 — 추후 consumer barrel 탈피가 추가 작업으로 남음 |
+| 대안 방안 | A안 (제안): barrel 유지 + consumer import 유지 — 안전하나 반쪽 리팩터 리스크<br/>B안: barrel 없이 모든 consumer import 경로 일괄 변경 — 완전한 리팩터지만 consumer가 50+개인 경우 작업량 과다 및 누락 리스크<br/>→ **A안 + 별도 Task로 consumer barrel 탈피 추진** 권장 |
 
 ---
 
@@ -80,9 +75,9 @@ TASK-018 상태: ⬜ 미착수
 
 | 항목 | 내용 |
 |:---|:---|
-| 확정 방안 | — |
-| 수정·보완 사항 | — |
-| 착수 승인 | — |
+| 확정 방안 | B_Kai 제안 A안 승인 — barrel `index.ts` 유지 + 4그룹 분할 커밋 방식. 구 import 경로 호환 유지하여 consumer 수정 최소화. |
+| 수정·보완 사항 | ① 착수 전 `gitnexus_query({query: "server actions"})` 로 현재 actions/ 전체 파일 목록 재확인 필수 (TASK-017·018 완료 후 finance.ts→settlement/invoice/fees 분리 등 구조 변동됨). ② 각 그룹 커밋 직후 `rtk npm run test:regression` PASS 확인 후 다음 그룹 진행 (그룹별 개별 검증). ③ consumer barrel 탈피는 본 Task 범위 외 — 완료 후 `scratch/post_launch_improvements.md`에 신규 IMP 등록하여 별도 추진. |
+| 착수 승인 | ✅ 즉시 착수 가능 |
 
 ---
 
@@ -117,3 +112,5 @@ TASK-018 상태: ⬜ 미착수
 | 날짜 | 주체 | 내용 |
 |:-----|:----:|:-----|
 | 2026-05-16 | Aiden (Claude) | Task 생성 — 작업 지시 발령 (블로커 상태) |
+| 2026-05-20 | B_Kai (OpenCode) | 설계 의견 제출 — consumer impact 분석·4그룹 분할 커밋·barrel 호환성 유지 제안. 상태 📝. ACTIVE_TASK.md 동기화 |
+| 2026-05-20 | Aiden (Claude) | 설계 확정 — A안 승인. barrel 유지·4그룹 분할·그룹별 회귀 필수·consumer 탈피 별도 IMP 등록. 상태 🔄 착수 승인 |
