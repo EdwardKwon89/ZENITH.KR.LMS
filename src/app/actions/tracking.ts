@@ -185,25 +185,25 @@ export async function getGlobalTrackingOverview() {
 
   if (error) throw new Error(`Failed to fetch tracking overview: ${error.message}`);
 
-  const configsWithEvents = await Promise.all(
-    (data ?? []).map(async (config) => {
-      const { data: latestEvent } = await supabase
-        .from("zen_tracking_events")
-        .select("*")
-        .eq("order_id", config.order_id)
-        .order("event_time", { ascending: false })
-        .limit(1)
-        .single();
+  const orderIds = (data ?? []).map(c => c.order_id).filter(Boolean);
+  const { data: allEvents } = orderIds.length > 0 ? await supabase
+    .from("zen_tracking_events")
+    .select("order_id, event_time, status, location, description")
+    .in("order_id", orderIds)
+    .order("event_time", { ascending: false }) : { data: [] };
 
-      const isUnassigned = !config.order?.shipper_id && !config.order?.recipient_name;
+  const latestEventMap = new Map<string, any>();
+  for (const evt of allEvents ?? []) {
+    if (!latestEventMap.has(evt.order_id)) {
+      latestEventMap.set(evt.order_id, evt);
+    }
+  }
 
-      return {
-        ...config,
-        latest_event: latestEvent ?? null,
-        is_unassigned: isUnassigned,
-      };
-    })
-  );
+  const configsWithEvents = (data ?? []).map((config) => {
+    const latestEvent = latestEventMap.get(config.order_id) ?? null;
+    const isUnassigned = !config.order?.shipper_id && !config.order?.recipient_name;
+    return { ...config, latest_event: latestEvent, is_unassigned };
+  });
 
   return configsWithEvents;
 }

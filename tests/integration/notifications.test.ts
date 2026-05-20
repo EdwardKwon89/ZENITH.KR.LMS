@@ -80,12 +80,14 @@ describe('ZENITH Notification Engine: WBS 3.1.2.2', () => {
 
     // 실제 user_id (zen_profiles.id)로 알림 저장, org_id가 아님
     expect(mockInsert).toHaveBeenCalledWith(
-      expect.objectContaining({
-        user_id: mockShipperUsers[0].id,
-        channel: 'IN_APP',
-        type:    'STATUS_CHANGE',
-        title:   '입고 완료',
-      })
+      expect.arrayContaining([
+        expect.objectContaining({
+          user_id: mockShipperUsers[0].id,
+          channel: 'IN_APP',
+          type:    'STATUS_CHANGE',
+          title:   '입고 완료',
+        })
+      ])
     );
 
     expect(mockSendStatusChangeEmail).toHaveBeenCalledWith(
@@ -106,13 +108,17 @@ describe('ZENITH Notification Engine: WBS 3.1.2.2', () => {
       OrderStatus.IN_TRANSIT
     );
 
-    // 송하인도 IN_TRANSIT 대상임 → IN_APP + EMAIL insert 발생 확인
+    // 송하인도 IN_TRANSIT 대상임 → IN_APP + EMAIL batch insert 발생 확인
     expect(mockInsert).toHaveBeenCalledTimes(2);
     expect(mockInsert).toHaveBeenCalledWith(
-      expect.objectContaining({ channel: 'IN_APP', user_id: mockShipperUsers[0].id })
+      expect.arrayContaining([
+        expect.objectContaining({ channel: 'IN_APP', user_id: mockShipperUsers[0].id })
+      ])
     );
     expect(mockInsert).toHaveBeenCalledWith(
-      expect.objectContaining({ channel: 'EMAIL', user_id: mockShipperUsers[0].id })
+      expect.arrayContaining([
+        expect.objectContaining({ channel: 'EMAIL', user_id: mockShipperUsers[0].id })
+      ])
     );
   });
 

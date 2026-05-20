@@ -27,6 +27,7 @@ describe('ZENITH Inventory Integration', () => {
       update: vi.fn().mockReturnThis(),
       select: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
+      in: vi.fn().mockReturnThis(),
       single: vi.fn(),
     };
 
@@ -98,10 +99,10 @@ describe('ZENITH Inventory Integration', () => {
         error: null
       }); // order items
       
-      mockSupabase.single.mockResolvedValueOnce({
-        data: { id: 'inv-1', reserved_qty: 5, on_hand_qty: 100 },
+      mockSupabase.in.mockResolvedValue({
+        data: [{ id: 'inv-1', sku_code: 'SKU-001', reserved_qty: 5, on_hand_qty: 100 }],
         error: null
-      }); // inventory single
+      }); // inventory batch
 
       await syncInventoryFromOrder('order-1', OrderStatus.REGISTERED);
 
@@ -124,10 +125,10 @@ describe('ZENITH Inventory Integration', () => {
         error: null
       }); // order items
       
-      mockSupabase.single.mockResolvedValueOnce({
-        data: { id: 'inv-2', reserved_qty: 20, on_hand_qty: 50 },
+      mockSupabase.in.mockResolvedValue({
+        data: [{ id: 'inv-2', sku_code: 'SKU-002', reserved_qty: 20, on_hand_qty: 50 }],
         error: null
-      }); // inventory single
+      }); // inventory batch
 
       await syncInventoryFromOrder('order-2', OrderStatus.RELEASED);
 

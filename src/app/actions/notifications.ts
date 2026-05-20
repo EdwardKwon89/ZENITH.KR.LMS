@@ -88,38 +88,41 @@ export async function triggerStatusChangeNotification(
   }
 
   // 송하인 IN_APP + EMAIL 처리
-  for (const target of targets) {
-    // IN_APP 알림 저장
-    const { error: insertError } = await supabase.from("zen_notifications").insert({
-      user_id:  target.userId,
-      order_id: orderId,
-      type:     newStatus === OrderStatus.HELD ? "HELD" : newStatus === OrderStatus.DELIVERED ? "DELIVERED" : "STATUS_CHANGE",
-      title,
-      message,
-      channel:  "IN_APP",
-    });
+  const inAppNotifications = targets.map(target => ({
+    user_id:  target.userId,
+    order_id: orderId,
+    type:     newStatus === OrderStatus.HELD ? "HELD" : newStatus === OrderStatus.DELIVERED ? "DELIVERED" : "STATUS_CHANGE",
+    title,
+    message,
+    channel:  "IN_APP",
+  }));
 
-    if (insertError) {
-      console.error("[NOTIF] IN_APP insert failed:", insertError);
-    }
+  if (inAppNotifications.length > 0) {
+    const { error: batchError } = await supabase.from("zen_notifications").insert(inAppNotifications);
+    if (batchError) console.error("[NOTIF] IN_APP batch insert failed:", batchError);
+  }
 
-    // EMAIL 발송
-    if (target.email) {
-      try {
-        await sendStatusChangeEmail({ email: target.email }, order.order_no, newStatus);
-        // EMAIL 이력도 별도 저장
-        await supabase.from("zen_notifications").insert({
-          user_id:  target.userId,
-          order_id: orderId,
-          type:     "STATUS_CHANGE",
-          title,
-          message,
-          channel:  "EMAIL",
-        });
-      } catch (e) {
-        console.error("[NOTIF] Email send failed:", e);
-      }
+  // EMAIL 발송 + 이력 저장
+  await Promise.all(targets.filter(t => t.email).map(async (target) => {
+    try {
+      await sendStatusChangeEmail({ email: target.email }, order.order_no, newStatus);
+    } catch (e) {
+      console.error("[NOTIF] Email send failed:", e);
     }
+  }));
+
+  const emailLogs = targets.filter(t => t.email).map(target => ({
+    user_id:  target.userId,
+    order_id: orderId,
+    type:     "STATUS_CHANGE",
+    title,
+    message,
+    channel:  "EMAIL",
+  }));
+
+  if (emailLogs.length > 0) {
+    const { error: emailBatchError } = await supabase.from("zen_notifications").insert(emailLogs);
+    if (emailBatchError) console.error("[NOTIF] EMAIL batch insert failed:", emailBatchError);
   }
 }
 
