@@ -1,13 +1,12 @@
 'use client';
 
 import React from 'react';
-import { ZenCard } from '@/components/ui/ZenUI';
+import { ZenCard, ZenInput, ZenButton } from '@/components/ui/ZenUI';
 import { 
   Ship, 
   Plane, 
   Box, 
   ChevronRight, 
-  MoreVertical, 
   Trash2, 
   Edit3,
   Globe,
@@ -15,7 +14,9 @@ import {
   Truck,
   Calendar,
   User,
-  Settings2
+  Search,
+  ListFilter,
+  LayoutGrid
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -55,6 +56,10 @@ interface RateCardListProps {
   onDelete?: (id: string) => void;
   canEdit?: boolean;
   canDelete?: boolean;
+  searchTerm?: string;
+  onSearchChange?: (v: string) => void;
+  statusFilter?: string;
+  onStatusFilterChange?: (v: string) => void;
 }
 
 export const RateCardList: React.FC<RateCardListProps> = ({ 
@@ -63,29 +68,69 @@ export const RateCardList: React.FC<RateCardListProps> = ({
   onEdit, 
   onDelete, 
   canEdit = false,
-  canDelete = false 
+  canDelete = false,
+  searchTerm = '',
+  onSearchChange,
+  statusFilter = 'ACTIVE',
+  onStatusFilterChange,
 }) => {
-  if (loading) {
-    return (
-      <div className="space-y-4">
-        {[1, 2, 3].map((i) => (
-          <div key={i} className="h-24 bg-slate-50 rounded-2xl animate-pulse" />
-        ))}
-      </div>
-    );
-  }
-
-  if (rates.length === 0) {
-    return (
-      <ZenCard className="bg-slate-50 border-slate-200 flex flex-col items-center justify-center py-20 text-slate-400">
-        <Globe className="w-12 h-12 mb-4 opacity-5" />
-        <p className="text-sm font-medium">검색된 요율 정보가 없습니다.</p>
-      </ZenCard>
-    );
-  }
-
   return (
-    <div className="space-y-4">
+    <section className="space-y-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div className="space-y-1">
+          <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-3">
+            <LayoutGrid className="w-6 h-6 text-blue-500" />
+            Registered Pricing Masters
+          </h2>
+          <p className="text-sm text-slate-400">시스템에 배포되어 현재 유효한 운송사별 요율 정보 목록입니다.</p>
+        </div>
+
+        <div className="flex items-center gap-4 w-full md:w-auto">
+          <div className="flex gap-1 p-1 bg-slate-50 rounded-2xl border border-slate-300 overflow-hidden">
+            {['ACTIVE', 'ALL'].map((s) => (
+              <button
+                key={s}
+                onClick={() => onStatusFilterChange?.(s)}
+                className={cn(
+                  "px-4 py-2 rounded-xl text-[10px] font-black tracking-widest transition-all",
+                  statusFilter === s
+                    ? "bg-blue-600 text-white shadow-lg"
+                    : "text-slate-400 hover:text-slate-500"
+                )}
+              >
+                {s}
+              </button>
+            ))}
+          </div>
+
+          <div className="relative flex-1 md:w-64">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <ZenInput
+              placeholder="Search route or carrier..."
+              className="pl-12 bg-slate-50 border-slate-300"
+              value={searchTerm}
+              onChange={(e) => onSearchChange?.(e.target.value)}
+            />
+          </div>
+          <ZenButton variant="glass" className="aspect-square p-0 w-12 h-12 rounded-2xl">
+            <ListFilter className="w-5 h-5 text-slate-500" />
+          </ZenButton>
+        </div>
+      </div>
+
+      {loading ? (
+        <div className="space-y-4">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-24 bg-slate-50 rounded-2xl animate-pulse" />
+          ))}
+        </div>
+      ) : rates.length === 0 ? (
+        <ZenCard className="bg-slate-50 border-slate-200 flex flex-col items-center justify-center py-20 text-slate-400">
+          <Globe className="w-12 h-12 mb-4 opacity-5" />
+          <p className="text-sm font-medium">검색된 요율 정보가 없습니다.</p>
+        </ZenCard>
+      ) : (
+        <div className="space-y-4">
       {rates.map((rate) => (
         <ZenCard 
           key={rate.id} 
@@ -231,5 +276,7 @@ export const RateCardList: React.FC<RateCardListProps> = ({
         </ZenCard>
       ))}
     </div>
+      )}
+    </section>
   );
 };
