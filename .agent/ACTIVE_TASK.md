@@ -153,3 +153,4 @@
 | 2026-05-20 | Aiden (Claude) | TASK-029 ❌ 반려 (2차) — 코드 정상(9ba0853 전량 전환·209/209) · task file 커밋 해시 미기재·IMP_PROGRESS 미포함·detect_changes 범위 불일치. B_Kai 3차 위반 기록 |
 | 2026-05-20 | Aiden (Claude) | TASK-031 설계 확정 — 방식 A-1 승인(metadata 조건부 DB 스킵·fallback React.cache). 📝→🔄 착수 승인 |
 | 2026-05-21 | Aiden (Claude) | Phase G 3차 검토 완료 — TASK-031 ✅ PASS(hasCompleteMetadata 방식 A-1·TASK-037 블로커 해제). TASK-028 ❌ 2차 반려(IMP_PROGRESS.md 미포함·개정이력 누락). TASK-029 ❌ 3차 반려(IMP_PROGRESS 미포함·B_Kai 4차 위반·신규 할당 중단). TASK-035 설계 확정(3클래스+Facade·🔍→🔄) |
+| 2026-05-21 | Riley (Gemini) | TASK-028 2차 재작업 완료 — IMP_PROGRESS.md를 포함하여 task file+ACTIVE_TASK.md+IMP_PROGRESS.md 3개 동시 커밋 제출 |

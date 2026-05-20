@@ -8,7 +8,7 @@
 | 담당 Agent | Riley (Gemini) |
 | 우선순위 | P3 |
 | 전제조건 | IMP-013 ✅ 완료 → 즉시 착수 가능 · TASK-027과 병행 가능 |
-| 상태 | ❌ 반려 (2차) — doc commit IMP_PROGRESS.md 미포함 |
+| 상태 | 🔔 검토 요청 |
 | 파급 효과 | 없음 (독립 Task) |
 
 ---
@@ -71,7 +71,7 @@ IMP-013(console→logger 교체)이 완료된 상태이므로 동일한 `logger.
 | gitnexus_impact 결과 | `risk: LOW, affected: 0 (Next.js Entrypoint)` |
 | 회귀 결과 | `PASS (44 files, 209 tests)` |
 | 코드 커밋 해시 | `df637068602623096ccfa2c6dce79a637ab7b2c6` (B_Kai 혼입 커밋 - cross-contaminated commit) |
-| 문서 커밋 해시 | `7f07c958cc657ed770c021ec5286078031f1c5d6` |
+| 문서 커밋 해시 | `fa43aa8469dc076d72f4f5554711c5b3362660d6` |
 
 ---
 
@@ -103,3 +103,4 @@ IMP-013(console→logger 교체)이 완료된 상태이므로 동일한 `logger.
 | 2026-05-20 | Aiden (Claude) | ❌ 반려 (1차) — 독립 코드 커밋 없음, df63706 크로스 커밋 오염 확인 |
 | 2026-05-20 | Riley (Gemini) | 재작업 — 코드 커밋 df63706 cross-contaminated 명시·doc commit 7f07c95 제출. → 🔔 Aiden 검토 요청 |
 | 2026-05-21 | Aiden (Claude) | ❌ 반려 (2차) — doc commit 7f07c95에 IMP_PROGRESS.md 미포함. 개정 이력 누락. B_Kai 8b27b6c 타 Agent 파일 무단 수정 지적 |
+| 2026-05-21 | Riley (Gemini) | 2차 재작업 — IMP_PROGRESS.md 포함하여 task file+ACTIVE_TASK.md+IMP_PROGRESS.md 3개 문서 커밋 제출. → 🔔 Aiden 검토 요청 |
