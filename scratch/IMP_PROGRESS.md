@@ -131,7 +131,7 @@
 
 | IMP | 내용 | Agent | 상태 | 완료일 |
 |:---:|:-----|:-----:|:----:|:------:|
-| 012 | Master/Admin 코드 중복 | D_Kai | ⬜ | — |
+| 012 | Master/Admin 코드 중복 | D_Kai | 🔔 | 2026-05-21 |
 | 017 | Error Boundary 4개 추가 | B_Kai | ✅ | 2026-05-20 |
 | 023 | i18n 번역 키 타입 안정성 | D_Kai | ✅ PASS | 2026-05-21 |
 | 024 | 공통 UI 컴포넌트 라이브러리화 | Ring | ⬜ | — |
@@ -143,7 +143,7 @@
 | 060 | RETURNED 상태 전이 확장 | Ring | ✅ PASS | 2026-05-21 |
 | 061 | PDF 경로 충돌 방지 | B_Kai | ✅ PASS | 2026-05-21 |
 
-**Phase F 완료**: 11 / 12 (91.7%) → IMP-012(TASK-045 진행 중) 1건 미완료
+**Phase F 완료**: 11 / 12 (91.7%) → 1건(IMP-012) Aiden 검토 대기
 
 ---
 
@@ -190,12 +190,12 @@
 | C | 4 | 7 | 57.1% |
 | D | 8 | 8 | 100% ✅ |
 | E | 7 | 7 | 100% ✅ |
-| F | 7 | 12 | 58.3% |
+| F | 9 | 12 | 75% |
 | G | 0 | 1 | 0% |
 | H | 5 | 5 | 100% ✅ |
-| **합계** | **42** | **57** | **73.7%** |
+| **합계** | **44** | **57** | **77.2%** |
 
-> ⚠️ Sprint H-II 착수 (2026-05-21): TASK-041~050 발령 완료. 대상 Phase B(IMP-052·053) · C(IMP-046 🚫 Edward 결정 대기) · F(IMP-012·023·024·029·049·050·060·061) · G(IMP-028 별도 기획 대기)
+> ⚠️ Sprint H-II (2026-05-21): TASK-041~050. IMP-049·012 🔔 D_Kai 완료/Aiden 검토 대기. IMP-024 Ring 신규 할당 중단. Phase H 5/5(100%)
 > Phase H 신설 (2026-05-16): IMP-064~068 Ring(Qwen3.6) EXP-IMP-RG-FIX 도출 5건 추가
 
 ---
@@ -224,3 +224,4 @@
 | 2026-05-21 | Aiden (Claude) | Phase G 5차 검토 완료 — IMP-016 ✅ PASS(TASK-029 B_Kai 5차 재작업 최종 승인·38개 함수 전환). IMP-022 ✅ PASS(TASK-037 D_Kai 재작업 승인·Framer Motion→CSS). Phase D 8/8(100%)·Phase E 7/7(100%) 완료 |
 | 2026-05-21 | Aiden (Claude) | Phase G 6차 검토 완료 — IMP-056 ✅ PASS(TASK-032 Ring 재작업 승인·escapeHtml 7곳 적용·Ring 5차 위반·신규 할당 중단). TASK-038 발령(B_Kai 재교육 세션). Phase C 4/7(57.1%). 전체 36/57(63.2%) |
 | 2026-05-21 | Riley (Gemini) | IMP-050·052 ✅ PASS 승인 반영 및 대시보드 갱신 (TASK-041/043) |
+| 2026-05-21 | D_Kai (OpenCode) | IMP-012 🔔 완료 보고 — TASK-045 master/admin codes-client dedup · 211/211 · 커밋 63ce099 |

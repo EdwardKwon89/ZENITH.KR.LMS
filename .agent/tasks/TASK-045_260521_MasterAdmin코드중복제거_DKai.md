@@ -8,7 +8,7 @@
 | 담당 Agent | D_Kai (DeepSeek/OpenCode) |
 | 우선순위 | P3 |
 | 전제조건 | 없음 — 즉시 착수 가능 |
-| 상태 | ⬜ 미착수 |
+| 상태 | 🔔 |
 | 파급 효과 | 없음 |
 
 ---
@@ -45,12 +45,12 @@
 
 ## 완료 기준 (DoD)
 
-- [ ] `src/components/codes/CodesClient.tsx` 공통 컴포넌트 신규 생성
-- [ ] `master/codes/codes-client.tsx` wrapper로 축소 (50줄 이하 권장)
-- [ ] `admin/codes/codes-client.tsx` wrapper로 축소 (50줄 이하 권장)
-- [ ] `gitnexus_impact` 결과 기록
-- [ ] 회귀 테스트 전체 PASS 증적
-- [ ] `[OpenCode] refactor: IMP-012` 코드 커밋 완료 (해시 기재)
+- [x] `src/components/codes/CodesClient.tsx` 공통 컴포넌트 신규 생성
+- [x] `master/codes/codes-client.tsx` wrapper로 축소 (4줄)
+- [x] `admin/codes/codes-client.tsx` wrapper로 축소 (4줄)
+- [x] `gitnexus_impact` 결과 기록
+- [x] 회귀 테스트 전체 PASS 증적 (211/211)
+- [x] `[OpenCode] refactor: IMP-012` 코드 커밋 완료 (`63ce099`)
 - [ ] `[OpenCode] docs: TASK-045` 문서 커밋 완료
 - [ ] 본 파일 상태 🔔 + ACTIVE_TASK.md 동기화
 - [ ] `scratch/IMP_PROGRESS.md` IMP-012 행 갱신
@@ -76,12 +76,12 @@
 
 | 항목 | 내용 |
 |:---|:---|
-| 착수일 | — |
-| 완료일 | — |
-| 구현 방식 | — |
-| gitnexus_impact 결과 | — |
-| 회귀 결과 | — |
-| 코드 커밋 해시 | — |
+| 착수일 | 2026-05-21 |
+| 완료일 | 2026-05-21 |
+| 구현 방식 | 공통 컴포넌트 추출 — `src/components/codes/CodesClient.tsx` 신규 생성, 기존 두 파일 4줄 wrapper로 축소 |
+| gitnexus_impact 결과 | 두 codes-client.tsx 파일의 유일한 consumer는 각각 master/codes/page.tsx와 admin/codes/page.tsx. 두 page.tsx도 동일 — 역할별 차이 없음 |
+| 회귀 결과 | 44 files passed, 211 tests passed |
+| 코드 커밋 해시 | `63ce099` |
 | 문서 커밋 해시 | — |
 
 ---
@@ -97,3 +97,4 @@
 | 날짜 | 주체 | 내용 |
 |:-----|:----:|:-----|
 | 2026-05-21 | Aiden (Claude) | Task 생성 — Sprint H-II 작업 지시 발령 |
+| 2026-05-21 | D_Kai (OpenCode) | 구현 완료 — 공통 컴포넌트 추출·wrapper 전환·회귀 211/211·코드 커밋 `63ce099`. 🔔 제출 |
