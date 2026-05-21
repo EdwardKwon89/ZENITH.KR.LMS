@@ -104,7 +104,7 @@
 | TASK-047 | 260521 | i18n 번역 키 타입 안정성 | P4 | 없음 | D_Kai | ⬜ | [TASK-047](tasks/TASK-047_260521_i18n번역키타입안정성_DKai.md) | IMP-023 · next-intl type-safe 설정 |
 | TASK-048 | 260521 | RETURNED 상태 전이 확장 | P3 | 없음 | Ring | ⬜ | [TASK-048](tasks/TASK-048_260521_RETURNED상태전이확장_Ring.md) | IMP-060 · DISPOSED·CANCELED 전이 추가 |
 | TASK-049 | 260521 | 공통 UI 컴포넌트 라이브러리화 | P3 | 없음 | Ring | ⬜ | [TASK-049](tasks/TASK-049_260521_공통UI컴포넌트라이브러리화_Ring.md) | IMP-024 · src/components/domain/ 신설 |
-| TASK-050 | 260521 | PDF 경로 충돌 방지 | P3 | 없음 | B_Kai | ⬜ | [TASK-050](tasks/TASK-050_260521_PDF경로충돌방지_BKai.md) | IMP-061 · UUID 기반 파일명 |
+| TASK-050 | 260521 | PDF 경로 충돌 방지 | P3 | 없음 | B_Kai | 🔔 | [TASK-050](tasks/TASK-050_260521_PDF경로충돌방지_BKai.md) | IMP-061 · UUID 기반 파일명 · 코드 7ef504a · 209/209 ✅ |
 
 ---
 
@@ -113,7 +113,7 @@
 | Agent | 즉시 착수 가능 | 재작업 필요 | 블로커 대기 |
 |:------|:-------------|:-----------|:----------|
 | Riley | TASK-041 · TASK-042 · TASK-043 | — | — |
-| B_Kai | TASK-050 | — | TASK-051 (IMP-046 🚫 방식 결정 대기) |
+| B_Kai | — | **TASK-050** 🔔 (IMP-061 · 209/209 ✅ — Aiden 검토 대기) | TASK-051 (IMP-046 🚫 방식 결정 대기) |
 | D_Kai | TASK-045 · TASK-046 · TASK-047 | — | TASK-044 (📝 설계 의견 후 Aiden 확정 대기) |
 | Ring | TASK-048 · TASK-049 | — | — |
 
