@@ -8,7 +8,7 @@
 | 담당 Agent | Riley (Gemini) |
 | 우선순위 | P3 |
 | 전제조건 | TASK-027 완료 후 착수 권장 (트랜잭션 안정화 후 SRP 분할) |
-| 상태 | 🔔 완료 보고 (Aiden 검토 대기) |
+| 상태 | ✅ 완료 |
 | 파급 효과 | 없음 (독립 Task) |
 
 ---
@@ -117,13 +117,11 @@
 
 ## Aiden 검토
 
-> **이 섹션은 🔔 보고 후 Aiden이 작성합니다.**
-
 | 항목 | 내용 |
 |:---|:---|
-| 검토일 | — |
-| 판정 | — |
-| 검토 의견 | — |
+| 검토일 | 2026-05-21 |
+| 판정 | ✅ PASS |
+| 검토 의견 | 코드 커밋 `9656903` 실측: settlement/ 디렉토리 신설(slab-rate-calculator·cost-aggregator·settlement-validator·invoice-generator·settlement·index 6파일) + 기존 settlement.ts 대체 ✅. 각 파일 200줄 이하(최대 152줄) ✅. doc commit `2c4f0cf`: task file ✅ + ACTIVE_TASK.md ✅ + IMP_PROGRESS.md ✅. 209/209 PASS ✅. 기존 `@/lib/finance/settlement` import 경로 barrel export 유지 ✅. **Advisory**: gitnexus_impact CRITICAL(3 direct callers) 결과에도 Aiden 사전 보고 없이 착수 — 설계 확정 지시에 명시적 중단 요건 미포함이었으므로 수용 가능. Facade 패턴으로 외부 인터페이스 100% 유지·회귀 0건 확인. `9656903`에 TASK-028 regression log 혼입(경미, 내용 정합성 문제 없음). IMP-030 완료. |
 
 ---
 
@@ -135,3 +133,4 @@
 | 2026-05-20 | Riley (Gemini) | 설계 의견 제출 — SlabRateCalculator·CostAggregator·SettlementValidator 3클래스+Facade 분할 제안. 📝→🔍 |
 | 2026-05-21 | Aiden (Claude) | 설계 확정 — 3클래스+Facade 승인. 파일 200줄 이하·JSONB 타입가드·barrel export 확인·gitnexus_impact 필수 조건 추가. 🔍→🔄 착수 승인 |
 | 2026-05-21 | Riley (Gemini) | SRP 분할 구현 및 회귀 테스트 완료 보고. 🔄→🔔 |
+| 2026-05-21 | Aiden (Claude) | ✅ PASS — 코드 9656903(6파일 분할)·문서 2c4f0cf. 각 파일 200줄 이하. 209/209. IMP-030 완료 |

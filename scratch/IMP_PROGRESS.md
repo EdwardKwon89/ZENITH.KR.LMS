@@ -67,7 +67,7 @@
 | IMP | 내용 | Agent | 상태 | 완료일 |
 |:---:|:-----|:-----:|:----:|:------:|
 | 013 | console→logger 교체 (53개 파일) | Riley | ✅ | 2026-05-20 |
-| 015 | middleware.ts console.log 제거 | Riley | 🔔 | — |
+| 015 | middleware.ts console.log 제거 | Riley | ✅ | 2026-05-21 |
 | 025 | Server Actions 에러 래퍼 | Riley | ✅ | 2026-05-20 |
 | 045 | 무제한 리스트 페이지네이션 (18곳) | Ring | ✅ PASS | 2026-05-20 |
 | 046 | Rate Limiting 도입 | B_Kai | 🚫 | — |
@@ -102,7 +102,7 @@
 | IMP | 내용 | Agent | 상태 | 완료일 |
 |:---:|:-----|:-----:|:----:|:------:|
 | 003 | middleware.ts → proxy.ts 마이그레이션 | D_Kai | ✅ PASS | 2026-05-20 |
-| 030 | 정산 엔진 SRP | Riley | 🔔 | 2026-05-21 |
+| 030 | 정산 엔진 SRP | Riley | ✅ | 2026-05-21 |
 | 031 | RBAC 이중 상태 정리 | D_Kai | ✅ PASS | 2026-05-20 |
 
 > 🚫 IMP-016: D1(IMP-033·058) 완료 후 착수 가능

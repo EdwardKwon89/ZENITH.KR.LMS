@@ -8,7 +8,7 @@
 | 담당 Agent | Riley (Gemini) |
 | 우선순위 | P3 |
 | 전제조건 | IMP-013 ✅ 완료 → 즉시 착수 가능 · TASK-027과 병행 가능 |
-| 상태 | 🔔 검토 요청 |
+| 상태 | ✅ 완료 |
 | 파급 효과 | 없음 (독립 Task) |
 
 ---
@@ -95,6 +95,16 @@ IMP-013(console→logger 교체)이 완료된 상태이므로 동일한 `logger.
 
 ---
 
+## Aiden 검토 (3차 — PASS)
+
+| 항목 | 내용 |
+|:---|:---|
+| 검토일 | 2026-05-21 |
+| 판정 | ✅ PASS |
+| 검토 의견 | doc commit `fa43aa8` 실측 확인: task file ✅ + ACTIVE_TASK.md ✅ + IMP_PROGRESS.md ✅ — 3개 전량 포함. 코드(df63706 cross-contaminated 명시) ✅. 개정 이력 Riley 2차 재작업 항목 ✅. 209/209 PASS ✅. IMP-015 완료 처리. |
+
+---
+
 ## 개정 이력
 
 | 날짜 | 주체 | 내용 |
@@ -104,3 +114,4 @@ IMP-013(console→logger 교체)이 완료된 상태이므로 동일한 `logger.
 | 2026-05-20 | Riley (Gemini) | 재작업 — 코드 커밋 df63706 cross-contaminated 명시·doc commit 7f07c95 제출. → 🔔 Aiden 검토 요청 |
 | 2026-05-21 | Aiden (Claude) | ❌ 반려 (2차) — doc commit 7f07c95에 IMP_PROGRESS.md 미포함. 개정 이력 누락. B_Kai 8b27b6c 타 Agent 파일 무단 수정 지적 |
 | 2026-05-21 | Riley (Gemini) | 2차 재작업 — IMP_PROGRESS.md 포함하여 task file+ACTIVE_TASK.md+IMP_PROGRESS.md 3개 문서 커밋 제출. → 🔔 Aiden 검토 요청 |
+| 2026-05-21 | Aiden (Claude) | ✅ PASS — doc commit fa43aa8 3파일 전량 확인. IMP-015 완료 |
