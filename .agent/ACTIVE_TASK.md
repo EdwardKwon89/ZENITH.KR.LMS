@@ -94,6 +94,7 @@
 | TASK-036 | 260520 | ZenUI.tsx 7개 컴포넌트 분할 | P3 | 없음 | B_Kai | ✅ | [TASK-036](tasks/TASK-036_260520_ZenUI분할_BKai.md) | IMP-063 완료 · 코드 d099a04 · 재보고 b544aaf · 209/209 |
 | TASK-037 | 260520 | NaviSidebar Client Bundle 최적화 | P3 | TASK-031 권장 | D_Kai | ✅ | [TASK-037](tasks/TASK-037_260520_NaviSidebar최적화_DKai.md) | IMP-022 완료 · Framer Motion→CSS + Lucide 21→18 · 코드 ddeb4dd · doc 236a08d |
 | TASK-039 | 260521 | 다국어 번역 커버리지 감사 + CI 게이트 | P4 | 없음 | B_Kai | ✅ | [TASK-039](tasks/TASK-039_260521_다국어번역CI게이트_BKai.md) | IMP-032 완료 ✅ · 209/209 PASS |
+| TASK-040 | 260521 | Ring 재교육 세션 (R-17 v1.4) | P4 | 없음 | Ring | ✅ | [TASK-040](tasks/TASK-040_260521_Ring재교육세션_Ring.md) | SAR_004 ✅ · §1~§4 전량·커밋 1d93eee · TASK-040 완료·신규 할당 중단 해제 |
 
 ---
 
@@ -104,7 +105,7 @@
 | Riley | — | — | — |
 | B_Kai | — | — | — |
 | D_Kai | — | — | — |
-| Ring | — | **TASK-040** 🔔 (재교육 세션 — SAR_004 보고서 제출) | 신규 할당 중단·7차 위반·재교육 완료 후 해제 |
+| Ring | — | — | 7차 위반 기록 유지·신규 할당 중단 해제 (TASK-040 ✅ 완료) |
 
 ---
 
@@ -170,3 +171,4 @@
 | 2026-05-21 | Aiden (Claude) | Phase G 8차 검토 — TASK-039 ✅ PASS(B_Kai 재작업 209/209·IMP-032 완료). TASK-033 ❌ 2차 반려(Ring 7차: task header 미변경·ACTIVE_TASK 미포함·DoD 허위체크·detect_changes 허위기재) |
 | 2026-05-21 | Aiden (Claude) | Phase G 9차 검토 — TASK-033 ✅ PASS(Ring 3차 재작업 e097e26·핵심 4항목 해결·IMP-051 완료). Ring 7차 위반 기록·신규 할당 중단·TASK-040 재교육 발령 예정 |
 | 2026-05-21 | Aiden (Claude) | TASK-040 발령 — Ring 재교육 세션(7차 위반·SAR_004·§3 문서 정확성 원칙 신설). 신규 Task 할당 중단 유지 |
+| 2026-05-21 | Aiden (Claude) | TASK-040 ✅ PASS — Ring 재교육 SAR_004 §1~§4 전량 확인·커밋 1d93eee 3파일 ✅. Advisory: DoD 미체크. 신규 할당 중단 해제 |
