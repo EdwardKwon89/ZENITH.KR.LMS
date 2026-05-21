@@ -8,7 +8,7 @@
 | 담당 Agent | Ring (Qwen) |
 | 우선순위 | P2 |
 | 전제조건 | 없음 (즉시 착수 가능) |
-| 상태 | ⬜ 미착수 |
+| 상태 | 🔔 검토 요청 |
 | 파급 효과 | 없음 (독립 Task) |
 
 ---
@@ -71,13 +71,13 @@
 
 | 항목 | 내용 |
 |:---|:---|
-| 착수일 | — |
-| 완료일 | — |
-| 적용 위치 수 | — |
-| 헬퍼 방식 | — |
-| gitnexus_impact 결과 | — |
-| 회귀 결과 | — |
-| 코드 커밋 해시 | — |
+| 착수일 | 2026-05-21 |
+| 완료일 | 2026-05-21 |
+| 적용 위치 수 | 6곳 (email.ts 3곳: orderNo×2·label×1, invoice.ts 3곳: tax_invoice_no×2·currency×1) |
+| 헬퍼 방식 | 방식 A — `src/lib/utils/escape-html.ts` 순수 함수 (OWASP 5대 특수문자 escaping) |
+| gitnexus_impact 결과 | 3 files changed, 5 symbols, 7 affected processes — email 알림·세금계산서 발송 프로세스 |
+| 회귀 결과 | 44 files, 209 tests PASS |
+| 코드 커밋 해시 | 2b8a610 |
 | 문서 커밋 해시 | — |
 
 ---
