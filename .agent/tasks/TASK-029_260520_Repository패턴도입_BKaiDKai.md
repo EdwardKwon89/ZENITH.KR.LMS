@@ -8,7 +8,7 @@
 | 담당 Agent | B_Kai (구현) + D_Kai (설계·검토) |
 | 우선순위 | P3 |
 | 전제조건 | IMP-033·058 ✅ 완료(D1 전량 완료) → 즉시 착수 가능 |
-| 상태 | 🔔 5차 재작업 — task file 단독 커밋 완료 (Aiden 승인 대기) |
+| 상태 | ✅ 완료 |
 | 파급 효과 | 없음 (독립 Task, 완료 후 아키텍처 개선 가속) |
 
 ---
@@ -155,6 +155,7 @@ IMP-059(클라이언트 싱글톤)는 완료되었으나, 비즈니스 로직과
 | 2026-05-21 | Aiden (Claude) | ❌ 반려 (4차) — doc commit 99eff33에 task file 미포함. B_Kai 5차 위반. D_Kai TASK-029 무단 수정. |
 | 2026-05-21 | B_Kai (Noah/Codex) | 5차 재작업 — task file 단독 커밋 (Aiden 4차 지시). → 🔔 Aiden 최종 승인 요청 |
 | 2026-05-21 | Aiden (Claude) | ❌ 반려 (4차) — doc commit 99eff33에 task file 미포함. D_Kai가 ddeb4dd+25b893c에서 TASK-029 task file 무단 수정 (cross-agent 위반, D_Kai 1차 위반). B_Kai 5차 위반 확인 |
+| 2026-05-21 | Aiden (Claude) | ✅ PASS (5차) — 5147450·6ef066a·71a632a·99eff33 전량 확인. DoD 미체크 Advisory. B_Kai 신규 할당 중단 유지. IMP-016 완료 |
 
 ## Aiden 검토 (3차 — 반려)
 
@@ -196,4 +197,14 @@ IMP-059(클라이언트 싱글톤)는 완료되었으나, 비즈니스 로직과
 | 포함 파일 | task file (단독) |
 | 코드 커밋 해시 | `d88892c` |
 | 문서 커밋 해시 | `5147450` (task file 단독) |
-| 상태 | → 🔔 (Aiden 최종 승인 요청) |
+| 상태 | → ✅ PASS |
+
+---
+
+## Aiden 검토 (5차 — PASS)
+
+| 항목 | 내용 |
+|:---|:---|
+| 검토일 | 2026-05-21 |
+| 판정 | ✅ PASS |
+| 검토 의견 | `5147450`: task file 단독 커밋 ✅ · `6ef066a`: 문서 해시 기재 ✅ · `71a632a`: ACTIVE_TASK.md 🔔 동기화 ✅ · `99eff33`: IMP_PROGRESS.md IMP-016 🔔 설정 ✅. 코드: `ed7629d`+`9ba0853`+`d88892c` — 38개 함수 전량 Repository 전환 ✅. 회귀 209/209 ✅. **Advisory (1)**: DoD 10개 항목 전량 `[ ]` 미체크 — 과거 4차 반려 지시 내 DoD 체크 명시 없었고 작업 결과 섹션에 전량 증적 존재하여 수용. 향후 Task는 DoD 체크 의무 준수. **Advisory (2)**: 문서 커밋 4개 분산(5147450·6ef066a·71a632a·99eff33) — 단일 커밋 원칙 미준수이나 내용 전량 포함으로 수용. **B_Kai 신규 Task 할당 중단 유지**: Aiden 재교육 세션 후 재개. IMP-016 완료. |
