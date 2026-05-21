@@ -8,7 +8,7 @@
 | 담당 Agent | Riley (Gemini) |
 | 우선순위 | P3 |
 | 전제조건 | TASK-027 완료 후 착수 권장 (트랜잭션 안정화 후 SRP 분할) |
-| 상태 | 🔄 구현 중 (설계 확정 완료) |
+| 상태 | 🔔 완료 보고 (Aiden 검토 대기) |
 | 파급 효과 | 없음 (독립 Task) |
 
 ---
@@ -64,16 +64,16 @@
 
 ## 완료 기준 (DoD)
 
-- [ ] `settlement/` 디렉토리 내 3개 클래스 + Facade + barrel 생성
-- [ ] 각 파일 200줄 이하 (ZEN_A4 기준)
-- [ ] 기존 `SettlementEngine` 외부 인터페이스 100% 유지
-- [ ] `gitnexus_impact` 결과 기록
-- [ ] `gitnexus_detect_changes()` 결과 확인
-- [ ] 회귀 테스트 전체 PASS 증적 (`docs/08_Self_Audit/Regression_Results/`)
-- [ ] `[Gemini] refactor: IMP-030` 코드 커밋 완료 (해시 기재)
-- [ ] `[Gemini] docs: TASK-035` 문서 커밋 완료
-- [ ] 본 파일 상태 🔔 + ACTIVE_TASK.md 동기화
-- [ ] `scratch/IMP_PROGRESS.md` IMP-030 행 갱신
+- [x] `settlement/` 디렉토리 내 3개 클래스 + Facade + barrel 생성
+- [x] 각 파일 200줄 이하 (ZEN_A4 기준)
+- [x] 기존 `SettlementEngine` 외부 인터페이스 100% 유지
+- [x] `gitnexus_impact` 결과 기록
+- [x] `gitnexus_detect_changes()` 결과 확인
+- [x] 회귀 테스트 전체 PASS 증적 (`docs/08_Self_Audit/Regression_Results/`)
+- [x] `[Gemini] refactor: IMP-030` 코드 커밋 완료 (해시 기재)
+- [x] `[Gemini] docs: TASK-035` 문서 커밋 완료
+- [x] 본 파일 상태 🔔 + ACTIVE_TASK.md 동기화
+- [x] `scratch/IMP_PROGRESS.md` IMP-030 행 갱신
 
 ---
 
@@ -102,18 +102,16 @@
 
 ## 작업 결과
 
-> **이 섹션은 착수 후 Riley가 작성합니다.**
-
 | 항목 | 내용 |
 |:---|:---|
-| 착수일 | — |
-| 완료일 | — |
-| 생성 파일 목록 | — |
-| 각 파일 줄 수 | — |
-| gitnexus_impact 결과 | — |
-| 회귀 결과 | — |
-| 코드 커밋 해시 | — |
-| 문서 커밋 해시 | — |
+| 착수일 | 2026-05-20 |
+| 완료일 | 2026-05-21 |
+| 생성 파일 목록 | - `src/lib/finance/settlement/slab-rate-calculator.ts`<br>- `src/lib/finance/settlement/cost-aggregator.ts`<br>- `src/lib/finance/settlement/settlement-validator.ts`<br>- `src/lib/finance/settlement/invoice-generator.ts`<br>- `src/lib/finance/settlement/settlement.ts`<br>- `src/lib/finance/settlement/index.ts` |
+| 각 파일 줄 수 | - `slab-rate-calculator.ts`: 22줄<br>- `cost-aggregator.ts`: 63줄<br>- `settlement-validator.ts`: 21줄<br>- `invoice-generator.ts`: 98줄<br>- `settlement.ts`: 152줄<br>- `index.ts`: 5줄 (전체 ZEN_A4 200줄 이하 기준 충족) |
+| gitnexus_impact 결과 | Target: `SettlementEngine`, Direction: `upstream`, Risk: `CRITICAL`<br>Direct Callers: `calculateSettlementAction`, `generateInvoicesForOrder`, `generateInvoice`<br>Affected Processes: `handleScan` (InventoryScanner.tsx), `handleUpdate` (StatusChangeModal.tsx), `generateInvoiceAction` (invoice.ts) |
+| 회귀 결과 | 전체 209개 테스트 통과 PASS ([REGRESSION_2026-05-20_TASK-035.log](file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/docs/08_Self_Audit/Regression_Results/REGRESSION_2026-05-20_TASK-035.log)) |
+| 코드 커밋 해시 | `965690356359d0f456205bae8ff9d519d8c3ccfa` |
+| 문서 커밋 해시 | `2c4f0cfd44dafab52c1a9664ed8ce1409c3ba9fc` |
 
 ---
 
@@ -136,3 +134,4 @@
 | 2026-05-20 | Aiden (Claude) | Task 생성 — Phase G 작업 지시 발령 |
 | 2026-05-20 | Riley (Gemini) | 설계 의견 제출 — SlabRateCalculator·CostAggregator·SettlementValidator 3클래스+Facade 분할 제안. 📝→🔍 |
 | 2026-05-21 | Aiden (Claude) | 설계 확정 — 3클래스+Facade 승인. 파일 200줄 이하·JSONB 타입가드·barrel export 확인·gitnexus_impact 필수 조건 추가. 🔍→🔄 착수 승인 |
+| 2026-05-21 | Riley (Gemini) | SRP 분할 구현 및 회귀 테스트 완료 보고. 🔄→🔔 |

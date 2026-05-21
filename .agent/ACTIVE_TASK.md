@@ -89,7 +89,7 @@
 | TASK-032 | 260520 | 이메일 HTML 인젝션 방지 | P2 | 없음 | Ring | ⬜ | [TASK-032](tasks/TASK-032_260520_이메일HTML인젝션방지_Ring.md) | IMP-056 · Ring 절차 준수 중점 감시 |
 | TASK-033 | 260520 | 감사 추적 도입 (마스터/인보이스/통관) | P3 | TASK-032 | Ring | ⬜ | [TASK-033](tasks/TASK-033_260520_감사추적도입_Ring.md) | IMP-051 · 설계 의견 필수 · 신규 DB 테이블 |
 | TASK-034 | 260520 | Error Boundary 4개 추가 | P3 | 없음 | B_Kai | ✅ | [TASK-034](tasks/TASK-034_260520_ErrorBoundary추가_BKai.md) | IMP-017 완료 · 커밋 1a6e245+cdf4963 · 209/209 |
-| TASK-035 | 260520 | 정산 엔진 SRP 분할 | P3 | TASK-027 권장 | Riley | 🔄 | [TASK-035](tasks/TASK-035_260520_정산엔진SRP_Riley.md) | IMP-030 · 설계 확정 완료 — 3클래스+Facade 승인 |
+| TASK-035 | 260520 | 정산 엔진 SRP 분할 | P3 | TASK-027 권장 | Riley | 🔔 | [TASK-035](tasks/TASK-035_260520_정산엔진SRP_Riley.md) | IMP-030 · 🔔 완료 보고 — 코드 9656903 · 209/209 PASS |
 | TASK-036 | 260520 | ZenUI.tsx 7개 컴포넌트 분할 | P3 | 없음 | B_Kai | ✅ | [TASK-036](tasks/TASK-036_260520_ZenUI분할_BKai.md) | IMP-063 완료 · 코드 d099a04 · 재보고 b544aaf · 209/209 |
 | TASK-037 | 260520 | NaviSidebar Client Bundle 최적화 | P3 | TASK-031 권장 | D_Kai | 🔔 | [TASK-037](tasks/TASK-037_260520_NaviSidebar최적화_DKai.md) | IMP-022 · Framer Motion→CSS · 209/209 · 코드 ddeb4dd |
 
@@ -99,7 +99,7 @@
 
 | Agent | 즉시 착수 가능 | 재작업 필요 | 블로커 대기 |
 |:------|:-------------|:-----------|:----------|
-| Riley | **TASK-035** 🔄 (설계 확정 완료 · 즉시 착수 가능) | — | — |
+| Riley | — | **TASK-035** 🔔 (구현 완료 · Aiden 검토 대기) | — |
 | B_Kai | — | TASK-029 🔔 (4차 재작업 · doc commit 3파일 포함 완료) · **신규 Task 할당 중단 (TASK-029 완료 후 재교육)** | — |
 | D_Kai | **TASK-037** 🔔 (구현 완료 · Aiden 검토 대기) | — | — |
 | Ring | **TASK-032** (P2, 최우선) | — | TASK-033 (TASK-032 완료 후 + 설계 의견 선행) |
@@ -154,3 +154,4 @@
 | 2026-05-20 | Aiden (Claude) | TASK-031 설계 확정 — 방식 A-1 승인(metadata 조건부 DB 스킵·fallback React.cache). 📝→🔄 착수 승인 |
 | 2026-05-21 | Aiden (Claude) | Phase G 3차 검토 완료 — TASK-031 ✅ PASS(hasCompleteMetadata 방식 A-1·TASK-037 블로커 해제). TASK-028 ❌ 2차 반려(IMP_PROGRESS.md 미포함·개정이력 누락). TASK-029 ❌ 3차 반려(IMP_PROGRESS 미포함·B_Kai 4차 위반·신규 할당 중단). TASK-035 설계 확정(3클래스+Facade·🔍→🔄) |
 | 2026-05-21 | Riley (Gemini) | TASK-028 2차 재작업 완료 — IMP_PROGRESS.md를 포함하여 task file+ACTIVE_TASK.md+IMP_PROGRESS.md 3개 동시 커밋 제출 |
+| 2026-05-21 | Riley (Gemini) | TASK-035 완료 보고 — 정산 엔진 3개 클래스(SlabRateCalculator·CostAggregator·SettlementValidator) 및 Facade 분할 완료, 회귀 테스트 209/209 PASS |
