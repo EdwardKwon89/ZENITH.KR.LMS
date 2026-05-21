@@ -59,7 +59,7 @@ UI 일관성 유지가 어렵고 동일 기능의 중복 코드가 산재한다.
 - [x] `gitnexus_impact` 결과 기록
 - [x] 회귀 테스트 전체 PASS 증적 (211/211)
 - [x] `[B_Kai] refactor: IMP-024` 코드 커밋 완료 (`c96bff4`)
-- [ ] `[B_Kai] docs: TASK-049` 문서 커밋 완료
+- [x] `[B_Kai] docs: TASK-049` 문서 커밋 완료 (`3ce44ab` + `3a23d6a`)
 - [x] 본 파일 상태 🔔 + ACTIVE_TASK.md 동기화
 - [x] `scratch/IMP_PROGRESS.md` IMP-024 행 갱신
 
