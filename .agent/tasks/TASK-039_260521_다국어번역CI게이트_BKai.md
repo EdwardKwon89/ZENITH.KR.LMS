@@ -92,7 +92,7 @@
 |:---|:---|
 | 검토일 | 2026-05-21 |
 | 판정 | ❌ 반려 |
-| 검토 의견 | **코드 ✅**: `audit-i18n.ts` 깔끔 (flattenKeys 재귀·exit 1·올바른 출력 형식). `ORDER_STATUS_META` labelKey/descriptionKey 전환 + `useTranslations('orderStatus')` 패턴 ✅. `en.json`/`ko.json` 12개 상태 × 2 키 = 24키 ✅. `package.json` check:i18n ✅. **R-17 커밋 순서 위반 ❌**: 코드 커밋 없이 task file을 🔔로 변경 — 9개 Modified + 1개 Untracked 파일이 미커밋 상태. R-17 v1.4 명시적 금지사항 위반. **절차 ❌**: ① 코드 커밋 해시 `—` (코드 커밋 자체 미수행) ② 문서 커밋 미수행 ③ IMP_PROGRESS.md IMP-032 `[ ]` 미갱신 ④ 개정 이력 누락 ⑤ 커밋 태그 `[Codex]`→`[B_Kai]` 불일치. **207/209 분석**: 2 실패는 Ring TASK-033(8419a9a)이 도입한 버그(master_policy.test.ts) — B_Kai 책임 없음 ✅. **최소 재작업**: ① 코드 커밋 `[B_Kai] feat: IMP-032 다국어 번역 CI 게이트 — audit-i18n 스크립트 + ORDER_STATUS_META i18n 전환` (9파일+scripts/audit-i18n.ts 포함) ② task file 작업결과 해시 기재 + 상태 🔔 유지 ③ IMP_PROGRESS IMP-032 🔔 갱신 ④ doc 커밋(task+ACTIVE_TASK+IMP_PROGRESS). TASK-038 이후 첫 위반 기록. |
+| 검토 의견 | **Aiden 정정**: 1차 리뷰에서 "R-17 커밋 순서 위반"으로 반려하였으나 오류 — 실제로 B_Kai는 `1e5c07d`(코드, 11:18:25) → `8a6cf8e`(문서, 11:18:37) 순서 정상 준수. Aiden의 git status 확인 시점이 B_Kai 커밋 이전이어서 발생한 오진. **코드 ✅**: `audit-i18n.ts` 깔끔·flattenKeys 재귀·exit 1·올바른 형식. `ORDER_STATUS_META` labelKey/descriptionKey + `useTranslations('orderStatus')` ✅. `en.json`/`ko.json` 24키 ✅. IMP_PROGRESS.md ✅. R-17 3파일 doc commit ✅. **잔여 절차 이슈 ❌**: ① 코드 커밋 해시 `—`→`1e5c07d` 기재 필요 (2-커밋 패턴 구조적 한계, Advisory) ② 문서 커밋 해시 `—`→`8a6cf8e` 기재 필요 ③ DoD 3개 미체크: `feat` 해시·`docs` 해시·IMP_PROGRESS `[ ]` → `[x]` ④ DoD 텍스트 `[Codex]` → `[B_Kai]` 수정 ⑤ 개정 이력 이름 `Noah (Codex)` → `B_Kai (OpenCode)`. **207/209**: 2 실패 Ring TASK-033 버그 — B_Kai 책임 없음 ✅. **최소 재작업**: task file 단독 커밋 — 해시 2개 기재 + DoD 3개 [x] + 텍스트 `[Codex]`→`[B_Kai]` + 이력 이름 수정. 신규 위반 아님 (2-커밋 패턴 Advisory). |
 
 ---
 
@@ -101,6 +101,5 @@
 | 날짜 | 주체 | 내용 |
 |:-----|:----:|:-----|
 | 2026-05-21 | Aiden (Claude) | Task 생성 — IMP-032 다국어 번역 CI 게이트 발령. B_Kai 신규 할당 중단 해제 후 첫 Task |
-| 2026-05-21 | B_Kai (Noah/Codex) | 구현 완료(미커밋) — audit-i18n.ts·ORDER_STATUS_META 전환·en/ko 키 추가·check:i18n. 207/209(Ring TASK-033 버그 상속). 코드 커밋 전 task file 🔔 변경 (R-17 v1.4 순서 위반) |
-| 2026-05-21 | Aiden (Claude) | ❌ 반려 — R-17 커밋 순서 위반(코드 미커밋·task file 🔔 선변경). 코드 ✅. 즉시 코드 커밋 후 절차 재수행 지시 |
-| 2026-05-21 | Noah (Codex) | 구현 완료 — audit-i18n.ts·ORDER_STATUS_META i18n 전환·consumer 2곳 useTranslations 적용·207/209 PASS |
+| 2026-05-21 | B_Kai (OpenCode) | 구현 완료 — `1e5c07d`(feat) + `8a6cf8e`(docs). audit-i18n.ts·ORDER_STATUS_META i18n 전환·consumer 2곳 useTranslations. 207/209 PASS (2 pre-existing Ring TASK-033 버그). R-17 커밋 순서 ✅ |
+| 2026-05-21 | Aiden (Claude) | ❌ 반려 (1차: 오진 정정) — 실제 이슈: 해시 `—` 미기재·DoD 3개 미체크·`[Codex]`→`[B_Kai]` 수정. 신규 위반 아님(2-커밋 패턴 Advisory). task file 단독 후속 커밋 지시 |

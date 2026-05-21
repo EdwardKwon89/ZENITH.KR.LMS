@@ -93,7 +93,7 @@
 | TASK-035 | 260520 | 정산 엔진 SRP 분할 | P3 | TASK-027 권장 | Riley | ✅ | [TASK-035](tasks/TASK-035_260520_정산엔진SRP_Riley.md) | IMP-030 완료 · 3클래스+Facade · 코드 9656903·문서 2c4f0cf · 209/209 |
 | TASK-036 | 260520 | ZenUI.tsx 7개 컴포넌트 분할 | P3 | 없음 | B_Kai | ✅ | [TASK-036](tasks/TASK-036_260520_ZenUI분할_BKai.md) | IMP-063 완료 · 코드 d099a04 · 재보고 b544aaf · 209/209 |
 | TASK-037 | 260520 | NaviSidebar Client Bundle 최적화 | P3 | TASK-031 권장 | D_Kai | ✅ | [TASK-037](tasks/TASK-037_260520_NaviSidebar최적화_DKai.md) | IMP-022 완료 · Framer Motion→CSS + Lucide 21→18 · 코드 ddeb4dd · doc 236a08d |
-| TASK-039 | 260521 | 다국어 번역 커버리지 감사 + CI 게이트 | P4 | 없음 | B_Kai | ❌ | [TASK-039](tasks/TASK-039_260521_다국어번역CI게이트_BKai.md) | IMP-032 · 코드 미커밋·R-17 순서 위반(🔔 선변경) — 즉시 코드 커밋 후 재제출 |
+| TASK-039 | 260521 | 다국어 번역 커버리지 감사 + CI 게이트 | P4 | 없음 | B_Kai | ❌ | [TASK-039](tasks/TASK-039_260521_다국어번역CI게이트_BKai.md) | IMP-032 · 코드 1e5c07d·문서 8a6cf8e ✅ · 해시 미기재·DoD 3개 미체크 — task file 후속 커밋 1개 |
 
 ---
 
@@ -102,7 +102,7 @@
 | Agent | 즉시 착수 가능 | 재작업 필요 | 블로커 대기 |
 |:------|:-------------|:-----------|:----------|
 | Riley | — | — | — |
-| B_Kai | — | **TASK-039** ❌ (R-17 커밋 순서 위반 — 코드 먼저 커밋 후 재제출) | — |
+| B_Kai | — | **TASK-039** ❌ (해시 미기재·DoD 3개 미체크 — task file 후속 커밋 1개로 해결) | — |
 | D_Kai | — | — | — |
 | Ring | — | **TASK-033** ❌ (DoD 미체크·테스트 버그·detect_changes 미기재 — 재작업) | 신규 할당 중단·6차 위반 |
 
@@ -166,4 +166,4 @@
 | 2026-05-21 | Aiden (Claude) | TASK-039 발령(B_Kai — IMP-032 다국어 번역 CI 게이트·audit-i18n.ts 신규·ORDER_STATUS_META i18n 전환) |
 | 2026-05-21 | Ring (Qwen) | TASK-033 구현 완료 보고 — 코드 8419a9a·문서 1bf74e4. 🔔 제출 |
 | 2026-05-21 | B_Kai (Noah/Codex) | TASK-039 구현 보고(미커밋) — audit-i18n.ts·ORDER_STATUS_META 전환·en/ko 키 추가. 코드 커밋 없이 🔔 선변경 |
-| 2026-05-21 | Aiden (Claude) | Phase G 7차 검토 — TASK-033 ❌(Ring 6차·DoD+테스트버그+detect_changes 미제출). TASK-039 ❌(B_Kai R-17 커밋순서위반·코드미커밋). 두 건 모두 최소 재작업 지시 |
+| 2026-05-21 | Aiden (Claude) | Phase G 7차 검토 — TASK-033 ❌(Ring 6차·DoD+master_policy.test 버그·detect_changes 미기재). TASK-039 ❌(오진 정정: R-17 순서 ✅·코드 1e5c07d·문서 8a6cf8e — 실제 이슈 해시 미기재·DoD 3개 미체크·Advisory) |
