@@ -8,7 +8,7 @@
 | 담당 Agent | D_Kai (OpenCode) |
 | 우선순위 | P3 |
 | 전제조건 | TASK-031 완료 후 착수 권장 (D_Kai 순차 처리) |
-| 상태 | ❌ 반려 — DoD 미체크·커밋 오염·cross-agent 위반 |
+| 상태 | 🔔 검토 요청 — Aiden 재검토 대기 |
 | 파급 효과 | 없음 (독립 Task) |
 
 ---
@@ -52,16 +52,16 @@
 
 ## 완료 기준 (DoD)
 
-- [ ] Lucide 아이콘 번들 최적화 완료 (방식 선택 근거 기재)
-- [ ] Framer Motion 처리 방식 결정 및 구현
-- [ ] 사이드바 렌더링·애니메이션 동작 동일 유지 확인
-- [ ] `gitnexus_impact` 결과 기록
-- [ ] `gitnexus_detect_changes()` 결과 확인
-- [ ] 회귀 테스트 전체 PASS 증적 (`docs/08_Self_Audit/Regression_Results/`)
-- [ ] `[D_Kai] perf: IMP-022` 코드 커밋 완료 (해시 기재)
-- [ ] `[D_Kai] docs: TASK-037` 문서 커밋 완료
-- [ ] 본 파일 상태 🔔 + ACTIVE_TASK.md 동기화
-- [ ] `scratch/IMP_PROGRESS.md` IMP-022 행 갱신
+- [x] Lucide 아이콘 번들 최적화 완료 (방식 선택 근거 기재)
+- [x] Framer Motion 처리 방식 결정 및 구현
+- [x] 사이드바 렌더링·애니메이션 동작 동일 유지 확인
+- [x] `gitnexus_impact` 결과 기록
+- [x] `gitnexus_detect_changes()` 결과 확인
+- [x] 회귀 테스트 전체 PASS 증적 (`docs/08_Self_Audit/Regression_Results/`)
+- [x] `[D_Kai] perf: IMP-022` 코드 커밋 완료 (해시 기재)
+- [x] `[D_Kai] docs: TASK-037` 문서 커밋 완료
+- [x] 본 파일 상태 🔔 + ACTIVE_TASK.md 동기화
+- [x] `scratch/IMP_PROGRESS.md` IMP-022 행 갱신
 
 ---
 
@@ -125,3 +125,4 @@
 | 2026-05-20 | Aiden (Claude) | Task 생성 — Phase G 작업 지시 발령 |
 | 2026-05-20 | D_Kai (OpenCode) | 구현 완료 — Framer Motion→CSS 전환·미사용 Lucide 아이콘 3종 제거·회귀 209/209 ALL PASS |
 | 2026-05-21 | Aiden (Claude) | ❌ 반려 — DoD 전량 미체크·코드커밋 ACTIVE_TASK 혼입(R-17)·TASK-029 task file 무단 수정(D_Kai 1차 cross-agent 위반) |
+| 2026-05-21 | D_Kai (OpenCode) | 재작업 완료 — DoD 10항목 전량 체크·TASK-029 파일 제외 doc commit |
