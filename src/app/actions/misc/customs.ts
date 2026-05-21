@@ -111,7 +111,14 @@ export const updateDeclarationStatus = withAction(async function (payload: {
   declarationNo?: string;
   adminNote?: string;
 }) {
-  const { supabase } = await validateAdminAction();
+  const { supabase, user } = await validateAdminAction();
+
+  // Get current status before update
+  const { data: current } = await supabase
+    .from('customs_declarations')
+    .select('status')
+    .eq('id', payload.id)
+    .single();
 
   const updatePayload: any = {
     status: payload.status,
@@ -121,7 +128,6 @@ export const updateDeclarationStatus = withAction(async function (payload: {
   if (payload.declarationNo) updatePayload.declaration_no = payload.declarationNo;
   if (payload.adminNote) updatePayload.admin_note = payload.adminNote;
 
-  // 승인 또는 반려 시 완료일 설정
   if (payload.status === 'APPROVED' || payload.status === 'REJECTED') {
     updatePayload.resolved_at = new Date().toISOString();
   }
@@ -136,6 +142,18 @@ export const updateDeclarationStatus = withAction(async function (payload: {
     throw new Error(error.message);
   }
 
+  // IMP-051: Audit history (best-effort)
+  void (async () => {
+    const { error } = await supabase.from('zen_customs_history').insert({
+      declaration_id: payload.id,
+      prev_status: current?.status ?? null,
+      next_status: payload.status,
+      admin_note: payload.adminNote,
+      changed_by: user.id,
+    });
+    if (error) logger.error('[AUDIT] Customs history insert failed:', error);
+  })();
+
   revalidatePath('/admin/customs');
   revalidatePath('/mypage/customs');
   return true;
@@ -145,7 +163,7 @@ export const updateDeclarationStatus = withAction(async function (payload: {
  * 4. 신고 제출 (Admin 전용) - Adapter 호출
  */
 export const submitDeclaration = withAction(async function (id: string) {
-  const { supabase } = await validateAdminAction();
+  const { supabase, user } = await validateAdminAction();
 
   // 1. 현재 데이터 조회
   const { data: declaration, error: fetchError } = await supabase
@@ -181,6 +199,17 @@ export const submitDeclaration = withAction(async function (id: string) {
     logger.error('Error updating status after submission:', updateError);
     throw new Error(updateError.message);
   }
+
+  // IMP-051: Audit history (best-effort)
+  void (async () => {
+    const { error } = await supabase.from('zen_customs_history').insert({
+      declaration_id: id,
+      prev_status: declaration.status,
+      next_status: 'SUBMITTED',
+      changed_by: user.id,
+    });
+    if (error) logger.error('[AUDIT] Customs history insert failed:', error);
+  })();
 
   revalidatePath('/admin/customs');
   return true;

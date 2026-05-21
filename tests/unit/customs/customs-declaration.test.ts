@@ -37,7 +37,7 @@ describe('Customs Server Actions', () => {
       range: vi.fn().mockReturnThis(),
       insert: vi.fn().mockReturnThis(),
       update: vi.fn().mockReturnThis(),
-      single: vi.fn().mockReturnThis(),
+      single: vi.fn().mockResolvedValue({ data: null, error: null }),
     };
 
     mockSupabase = {
@@ -101,7 +101,12 @@ describe('Customs Server Actions', () => {
       adminNote: 'Verified'
     };
 
-    mockSupabase.eq.mockResolvedValueOnce({ error: null });
+    // Mock for getting current status (new IMP-051 audit)
+    mockSupabase.single.mockResolvedValueOnce({ data: { status: 'PENDING' }, error: null });
+    // Mock for update chain: first eq() returns chain (for select), second eq() returns result (for update)
+    mockSupabase.eq
+      .mockReturnValueOnce(mockSupabase)
+      .mockResolvedValueOnce({ error: null });
 
     const result = await updateDeclarationStatus(payload);
 

@@ -29,8 +29,11 @@ export async function updatePaymentStatus(
   amount: number,
   paymentMethod: string = 'BANK_TRANSFER'
 ) {
-  const { supabase } = await validateAdminAction();
+  const { supabase, user } = await validateAdminAction();
   const financeRepo = new FinanceRepository(supabase);
+
+  const { data: existingInvoice } = await financeRepo.findByIdBasic(invoiceId);
+  const prevStatus = existingInvoice?.status ?? null;
 
   const { data: invoice, error: invError } = await financeRepo.updatePaymentStatus(invoiceId, {
     status,
@@ -40,10 +43,21 @@ export async function updatePaymentStatus(
 
   if (invError) throw new Error(`결제 상태 업데이트 실패: ${invError.message}`);
 
+  // IMP-051: Audit history (best-effort)
+  void (async () => {
+    const { error } = await supabase.from('zen_invoice_history').insert({
+      invoice_id: invoiceId,
+      prev_status: prevStatus,
+      next_status: status,
+      paid_amount: amount,
+      changed_by: user.id,
+    });
+    if (error) logger.error('[AUDIT] Invoice history insert failed:', error);
+  })();
+
   const orderId = (invoice?.metadata as any)?.source_order_id;
   if (status === 'PAID' && orderId) {
     await financeRepo.updateBillingStatusByOrderId(orderId, 'PAID');
-
     revalidatePath(`/orders/${orderId}`);
   }
 
