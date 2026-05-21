@@ -100,9 +100,15 @@
 | TASK-043 | 260521 | HELD→이전상태 복구 로직 | P3 | 없음 | Riley | ✅ | [TASK-043](tasks/TASK-043_260521_HELD이전상태복구_Riley.md) | IMP-050 완료 · getHeldPreviousStatus + 원상복구 버튼 |
 | TASK-044 | 260521 | 이중 프로필 테이블 정리 | P2 | 없음 | D_Kai | 🔄 | [TASK-044](tasks/TASK-044_260521_이중프로필테이블정리_DKai.md) | IMP-049 · 방안 B(profiles 삭제·grade_code 이관) 설계 확정 |
 | TASK-045 | 260521 | Master/Admin 코드 중복 제거 | P3 | 없음 | D_Kai | 🔄 | [TASK-045](tasks/TASK-045_260521_MasterAdmin코드중복제거_DKai.md) | IMP-012 · 공통 컴포넌트 추출 구현 중 |
+<<<<<<< Updated upstream
 | TASK-046 | 260521 | TS any 타입 퇴출 | P3 | 없음 | D_Kai | 🔔 | [TASK-046](tasks/TASK-046_260521_TSany퇴출_DKai.md) | IMP-029 · 커밋 282c3c6 · 재작업 — DoD 체크·개정이력 보완 |
 | TASK-047 | 260521 | i18n 번역 키 타입 안정성 | P4 | 없음 | D_Kai | 🔔 | [TASK-047](tasks/TASK-047_260521_i18n번역키타입안정성_DKai.md) | IMP-023 · 커밋 14ce2cb · 재작업 — DoD 체크·개정이력 보완 |
 | TASK-048 | 260521 | RETURNED 상태 전이 확장 | P3 | 없음 | Ring | ❌ | [TASK-048](tasks/TASK-048_260521_RETURNED상태전이확장_Ring.md) | IMP-060 · R-17 위반(8차) 코드 커밋 없이 🔔 선변경 — 신규 할당 중단 |
+=======
+| TASK-046 | 260521 | TS any 타입 퇴출 | P3 | 없음 | D_Kai | ❌ | [TASK-046](tasks/TASK-046_260521_TSany퇴출_DKai.md) | IMP-029 · DoD 전량 미체크·개정이력 누락 — 재작업 |
+| TASK-047 | 260521 | i18n 번역 키 타입 안정성 | P4 | 없음 | D_Kai | ❌ | [TASK-047](tasks/TASK-047_260521_i18n번역키타입안정성_DKai.md) | IMP-023 · DoD 전량 미체크·개정이력 누락 — 재작업 |
+| TASK-048 | 260521 | RETURNED 상태 전이 확장 | P3 | 없음 | Ring | 🔔 | [TASK-048](tasks/TASK-048_260521_RETURNED상태전이확장_Ring.md) | IMP-060 · DISPOSED enum·status-machine·migration·i18n · 211/211 PASS · 코드 3cfe3f4·문서 e2ea410 |
+>>>>>>> Stashed changes
 | TASK-049 | 260521 | 공통 UI 컴포넌트 라이브러리화 | P3 | 없음 | Ring | ⬜ | [TASK-049](tasks/TASK-049_260521_공통UI컴포넌트라이브러리화_Ring.md) | IMP-024 · src/components/domain/ 신설 |
 | TASK-050 | 260521 | PDF 경로 충돌 방지 | P3 | 없음 | B_Kai | ✅ | [TASK-050](tasks/TASK-050_260521_PDF경로충돌방지_BKai.md) | IMP-061 완료 · UUID 기반 파일명 · 7ef504a+1e8b86c · 209/209 ✅ |
 
