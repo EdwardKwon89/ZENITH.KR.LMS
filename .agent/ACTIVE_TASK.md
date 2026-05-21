@@ -91,7 +91,7 @@
 | TASK-034 | 260520 | Error Boundary 4개 추가 | P3 | 없음 | B_Kai | ✅ | [TASK-034](tasks/TASK-034_260520_ErrorBoundary추가_BKai.md) | IMP-017 완료 · 커밋 1a6e245+cdf4963 · 209/209 |
 | TASK-035 | 260520 | 정산 엔진 SRP 분할 | P3 | TASK-027 권장 | Riley | ✅ | [TASK-035](tasks/TASK-035_260520_정산엔진SRP_Riley.md) | IMP-030 완료 · 3클래스+Facade · 코드 9656903·문서 2c4f0cf · 209/209 |
 | TASK-036 | 260520 | ZenUI.tsx 7개 컴포넌트 분할 | P3 | 없음 | B_Kai | ✅ | [TASK-036](tasks/TASK-036_260520_ZenUI분할_BKai.md) | IMP-063 완료 · 코드 d099a04 · 재보고 b544aaf · 209/209 |
-| TASK-037 | 260520 | NaviSidebar Client Bundle 최적화 | P3 | TASK-031 권장 | D_Kai | ❌ | [TASK-037](tasks/TASK-037_260520_NaviSidebar최적화_DKai.md) | IMP-022 · ❌ 반려 — DoD 미체크·코드커밋 오염·TASK-029 cross-agent 위반(D_Kai 1차) |
+| TASK-037 | 260520 | NaviSidebar Client Bundle 최적화 | P3 | TASK-031 권장 | D_Kai | 🔔 | [TASK-037](tasks/TASK-037_260520_NaviSidebar최적화_DKai.md) | IMP-022 · 재작업 완료 — DoD 전량 체크·TASK-029 파일 제외 doc commit |
 
 ---
 
@@ -101,7 +101,7 @@
 |:------|:-------------|:-----------|:----------|
 | Riley | — | — | — |
 | B_Kai | — | TASK-029 ❌ (4차 재작업 · task file만 포함 doc commit 1건) · **신규 Task 할당 중단** | — |
-| D_Kai | — | TASK-037 ❌ (DoD 전량 체크 + 新 doc commit · TASK-029 파일 제외) | — |
+| D_Kai | — | TASK-037 🔔 (재작업 완료 · DoD 체크 · TASK-029 제외) | — |
 | Ring | **TASK-032** (P2, 최우선) | — | TASK-033 (TASK-032 완료 후 + 설계 의견 선행) |
 
 ---
