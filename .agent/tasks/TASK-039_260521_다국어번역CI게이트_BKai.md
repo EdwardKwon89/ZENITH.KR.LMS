@@ -8,7 +8,7 @@
 | 담당 Agent | B_Kai (OpenCode) |
 | 우선순위 | P4 |
 | 전제조건 | 없음 |
-| 상태 | 🔔 검토 요청 |
+| 상태 | ❌ 반려 — 재작업 필요 |
 | 파급 효과 | 낮음 (신규 스크립트 추가 + ORDER_STATUS_META 키 전환) |
 
 ---
@@ -88,13 +88,11 @@
 
 ## Aiden 검토
 
-> **이 섹션은 🔔 보고 후 Aiden이 작성합니다.**
-
 | 항목 | 내용 |
 |:---|:---|
-| 검토일 | — |
-| 판정 | — |
-| 검토 의견 | — |
+| 검토일 | 2026-05-21 |
+| 판정 | ❌ 반려 |
+| 검토 의견 | **코드 ✅**: `audit-i18n.ts` 깔끔 (flattenKeys 재귀·exit 1·올바른 출력 형식). `ORDER_STATUS_META` labelKey/descriptionKey 전환 + `useTranslations('orderStatus')` 패턴 ✅. `en.json`/`ko.json` 12개 상태 × 2 키 = 24키 ✅. `package.json` check:i18n ✅. **R-17 커밋 순서 위반 ❌**: 코드 커밋 없이 task file을 🔔로 변경 — 9개 Modified + 1개 Untracked 파일이 미커밋 상태. R-17 v1.4 명시적 금지사항 위반. **절차 ❌**: ① 코드 커밋 해시 `—` (코드 커밋 자체 미수행) ② 문서 커밋 미수행 ③ IMP_PROGRESS.md IMP-032 `[ ]` 미갱신 ④ 개정 이력 누락 ⑤ 커밋 태그 `[Codex]`→`[B_Kai]` 불일치. **207/209 분석**: 2 실패는 Ring TASK-033(8419a9a)이 도입한 버그(master_policy.test.ts) — B_Kai 책임 없음 ✅. **최소 재작업**: ① 코드 커밋 `[B_Kai] feat: IMP-032 다국어 번역 CI 게이트 — audit-i18n 스크립트 + ORDER_STATUS_META i18n 전환` (9파일+scripts/audit-i18n.ts 포함) ② task file 작업결과 해시 기재 + 상태 🔔 유지 ③ IMP_PROGRESS IMP-032 🔔 갱신 ④ doc 커밋(task+ACTIVE_TASK+IMP_PROGRESS). TASK-038 이후 첫 위반 기록. |
 
 ---
 
@@ -103,4 +101,6 @@
 | 날짜 | 주체 | 내용 |
 |:-----|:----:|:-----|
 | 2026-05-21 | Aiden (Claude) | Task 생성 — IMP-032 다국어 번역 CI 게이트 발령. B_Kai 신규 할당 중단 해제 후 첫 Task |
+| 2026-05-21 | B_Kai (Noah/Codex) | 구현 완료(미커밋) — audit-i18n.ts·ORDER_STATUS_META 전환·en/ko 키 추가·check:i18n. 207/209(Ring TASK-033 버그 상속). 코드 커밋 전 task file 🔔 변경 (R-17 v1.4 순서 위반) |
+| 2026-05-21 | Aiden (Claude) | ❌ 반려 — R-17 커밋 순서 위반(코드 미커밋·task file 🔔 선변경). 코드 ✅. 즉시 코드 커밋 후 절차 재수행 지시 |
 | 2026-05-21 | Noah (Codex) | 구현 완료 — audit-i18n.ts·ORDER_STATUS_META i18n 전환·consumer 2곳 useTranslations 적용·207/209 PASS |
