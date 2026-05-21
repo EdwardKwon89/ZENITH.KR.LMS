@@ -125,11 +125,11 @@ describe('ZENITH Master Data: CRUD Operations', () => {
 
     it('TC-A.6: [Failure] 마스터 해체(Dissolve) 시 바인딩 해제 실패 시 예외를 던져야 함', async () => {
       // Given
-      supabaseMock.eq.mockResolvedValue({ error: { message: 'Network Timeout' } });
+      supabaseMock.rpc.mockResolvedValueOnce({ error: { message: 'Network Timeout' } });
 
       // When & Then
       await expect(dissolveMasterOrder('m-789'))
-        .rejects.toThrow(/Unbinding failed: Network Timeout/);
+        .rejects.toThrow(/Master dissolution failed: Network Timeout/);
     });
   });
 });

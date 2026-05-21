@@ -22,6 +22,7 @@ describe('ZENITH Master Order: Policy & Integrity Audit', () => {
       single: vi.fn(),
       delete: vi.fn().mockReturnThis(),
       insert: vi.fn().mockReturnThis(),
+      rpc: vi.fn().mockReturnThis(),
     };
     return mock;
   };
@@ -64,25 +65,16 @@ describe('ZENITH Master Order: Policy & Integrity Audit', () => {
     const supabase = createMockSupabase();
     (validateUserAction as any).mockResolvedValue({ supabase, user: { id: 'test-user-456' } });
 
-    // 1. Unbinding house orders
-    supabase.update.mockReturnValueOnce(supabase);
-    supabase.eq.mockReturnValueOnce({ error: null });
-
-    // 2. Deleting master order
-    supabase.delete.mockReturnValueOnce(supabase);
-    supabase.eq.mockReturnValueOnce({ error: null });
-
-    // 3. Audit history insert (best-effort)
-    supabase.insert.mockReturnValueOnce({ error: null });
+    // Mock RPC call
+    supabase.rpc.mockResolvedValueOnce({ data: null, error: null });
 
     const result = await dissolveMasterOrder('m-456');
 
     expect(result.success).toBe(true);
-    expect(supabase.update).toHaveBeenCalledWith({
-      master_order_id: null,
-      status: OrderStatus.REGISTERED
+    expect(supabase.rpc).toHaveBeenCalledWith('dissolve_master_order_atomic', {
+      p_master_order_id: 'm-456',
+      p_user_id: 'test-user-456'
     });
-    expect(supabase.delete).toHaveBeenCalled();
   });
 
   it('TC-MP.3: [Immutable-Guard] 마스터 결합 오더는 개별 상태 변경이 차단되어야 함', async () => {

@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, CheckCircle2, AlertCircle, Info } from 'lucide-react';
 import { ZenCard, ZenButton, ZenInput } from '@/components/ui/ZenUI';
 import { OrderStatus, ORDER_STATUS_META } from '@/types/orders';
-import { updateOrderStatus } from '@/app/actions/orders';
+import { updateOrderStatus, getHeldPreviousStatus } from '@/app/actions/orders';
 import { toast } from 'sonner';
 import { useTranslations } from 'next-intl';
 
@@ -25,9 +25,39 @@ export const StatusChangeModal: React.FC<StatusChangeModalProps> = ({
   onSuccess
 }) => {
   const [selectedStatus, setSelectedStatus] = useState<OrderStatus | null>(null);
+  const [previousStatus, setPreviousStatus] = useState<OrderStatus | null>(null);
   const [reason, setReason] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const t = useTranslations('orderStatus');
+
+  useEffect(() => {
+    if (currentStatus === 'HELD') {
+      getHeldPreviousStatus(orderId).then((status) => {
+        if (status) {
+          setPreviousStatus(status as OrderStatus);
+        }
+      });
+    }
+  }, [orderId, currentStatus]);
+
+  const handleRestore = async (prevStatus: OrderStatus) => {
+    setIsSubmitting(true);
+    try {
+      await updateOrderStatus(orderId, prevStatus, 'HELD 상태에서 이전 상태로 원상복구');
+      toast.success('이전 상태로 성공적으로 복구되었습니다.', {
+        icon: <CheckCircle2 className="text-green-500" />
+      });
+      onSuccess();
+      onClose();
+    } catch (err: any) {
+      toast.error('원상복구 실패', {
+        description: err.message,
+        icon: <AlertCircle className="text-red-500" />
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const handleUpdate = async () => {
     if (!selectedStatus) return;
@@ -82,6 +112,28 @@ export const StatusChangeModal: React.FC<StatusChangeModalProps> = ({
                 <p className="text-sm font-bold text-slate-700">{ORDER_STATUS_META[currentStatus] ? t(ORDER_STATUS_META[currentStatus].labelKey) : currentStatus}</p>
               </div>
             </div>
+
+            {/* HELD 이전 상태로 원상복구 버튼 */}
+            {currentStatus === 'HELD' && previousStatus && (
+              <div className="p-3 bg-indigo-50/50 backdrop-blur-sm rounded-2xl border border-indigo-100/50 flex items-center justify-between shadow-sm animate-pulse">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-indigo-500" />
+                  <div className="flex flex-col">
+                    <span className="text-[10px] font-bold text-indigo-500 uppercase tracking-wider">이전 상태 복구 가능</span>
+                    <span className="text-xs font-semibold text-slate-700">이전 상태: {ORDER_STATUS_META[previousStatus] ? t(ORDER_STATUS_META[previousStatus].labelKey) : previousStatus}</span>
+                  </div>
+                </div>
+                <ZenButton
+                  variant="tactile"
+                  size="sm"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs py-1.5 px-3 rounded-xl shadow-lg shadow-indigo-500/20 transition-all transform hover:scale-105"
+                  onClick={() => handleRestore(previousStatus)}
+                  disabled={isSubmitting}
+                >
+                  원상복구
+                </ZenButton>
+              </div>
+            )}
 
             {/* 선택 가능한 다음 상태 목록 */}
             <div className="grid grid-cols-2 gap-2">
