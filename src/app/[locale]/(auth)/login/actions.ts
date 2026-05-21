@@ -1,5 +1,6 @@
-import { logger } from '@/lib/logger';
 'use server';
+
+import { logger } from '@/lib/logger';
 
 import { createClient } from '@/utils/supabase/server';
 import { createAdminClient } from '@/utils/supabase/server';

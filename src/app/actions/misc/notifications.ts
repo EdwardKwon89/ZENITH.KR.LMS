@@ -1,5 +1,6 @@
-import { logger } from '@/lib/logger';
 "use server";
+
+import { logger } from '@/lib/logger';
 
 import { createClient as createServerClient } from "@/utils/supabase/server";
 import { OrderStatus } from "@/types/orders";
