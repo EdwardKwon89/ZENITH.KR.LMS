@@ -37,6 +37,8 @@ describe('ZENITH Logistics: Order Creation Logic', () => {
       eq: vi.fn().mockReturnThis(),
       select: vi.fn().mockReturnThis(),
       rpc: vi.fn().mockReturnThis(),
+      order: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockReturnThis(),
       single: vi.fn(),
       maybeSingle: vi.fn(),
     };
@@ -160,6 +162,48 @@ describe('ZENITH Logistics: Order Creation Logic', () => {
       // When & Then
       await expect(updateOrderStatus(orderId, OrderStatus.IN_TRANSIT))
         .rejects.toThrow(/마스터 오더에 결합된 상태입니다/);
+    });
+  });
+
+  describe('dissolveMasterOrder and getHeldPreviousStatus Actions', () => {
+    it('[Success] dissolveMasterOrder: should call RPC dissolve_master_order_atomic with correct parameters', async () => {
+      // Given
+      const masterId = 'master-uuid-123';
+      mockSupabase.rpc.mockResolvedValue({ data: null, error: null });
+
+      // When
+      const { dissolveMasterOrder } = await import('@/app/actions/orders');
+      const result = await dissolveMasterOrder(masterId);
+
+      // Then
+      expect(result).toEqual({ success: true });
+      expect(mockSupabase.rpc).toHaveBeenCalledWith('dissolve_master_order_atomic', {
+        p_master_order_id: masterId,
+        p_user_id: mockUser.id,
+      });
+      expect(revalidatePath).toHaveBeenCalledWith('/(dashboard)/logistics/master', 'page');
+    });
+
+    it('[Success] getHeldPreviousStatus: should query order_status_history and return correct status', async () => {
+      // Given
+      const orderId = 'order-uuid-999';
+      mockSupabase.from.mockReturnThis();
+      mockSupabase.select.mockReturnThis();
+      mockSupabase.eq.mockReturnThis();
+      mockSupabase.order.mockReturnThis();
+      mockSupabase.limit.mockReturnThis();
+      mockSupabase.maybeSingle.mockResolvedValue({
+        data: { prev_status: 'REGISTERED' },
+        error: null
+      });
+
+      // When
+      const { getHeldPreviousStatus } = await import('@/app/actions/orders');
+      const result = await getHeldPreviousStatus(orderId);
+
+      // Then
+      expect(result).toBe('REGISTERED');
+      expect(mockSupabase.from).toHaveBeenCalledWith('order_status_history');
     });
   });
 });

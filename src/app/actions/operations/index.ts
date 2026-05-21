@@ -10,6 +10,7 @@ export {
   getPendingHouseOrders,
   updateMasterOrderStatus,
   getMasterOrderWithHouses,
+  getHeldPreviousStatus,
 } from './orders';
 
 export {

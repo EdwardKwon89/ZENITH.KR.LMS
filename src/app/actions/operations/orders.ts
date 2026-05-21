@@ -332,23 +332,8 @@ export async function dissolveMasterOrder(masterId: string) {
 
   const orderRepo = new OrderRepository(supabase);
 
-  const { error: unbindingError } = await orderRepo.unbindHouseOrders(masterId, OrderStatus.REGISTERED);
-  if (unbindingError) throw new Error(`Unbinding failed: ${unbindingError.message}`);
-
-  const { error: deleteError } = await orderRepo.deleteMasterOrder(masterId);
-  if (deleteError) throw new Error(`Master deletion failed: ${deleteError.message}`);
-
-  // IMP-051: Audit history (best-effort)
-  void (async () => {
-    const { error } = await supabase.from('zen_master_order_history').insert({
-      master_order_id: masterId,
-      prev_status: 'MASTERED',
-      next_status: 'DISSOLVED',
-      reason: 'Master order dissolved',
-      changed_by: user.id,
-    });
-    if (error) logger.error('[AUDIT] Master order history insert failed:', error);
-  })();
+  const { error } = await orderRepo.dissolveMasterOrderAtomic(masterId, user.id);
+  if (error) throw new Error(`Master dissolution failed: ${error.message}`);
 
   revalidatePath("/(dashboard)/logistics/master", "page");
   return { success: true };
@@ -442,4 +427,18 @@ export async function getMasterOrderWithHouses(masterId: string, page = 1, pageS
     houses: houses || [],
     totalHouses: count || 0,
   };
+}
+
+/**
+ * [WBS 2.1 / IMP-050] HELD 상태의 오더가 HELD로 전이되기 직전의 상태를 조회합니다.
+ */
+export async function getHeldPreviousStatus(orderId: string) {
+  const { supabase } = await validateUserAction();
+  const orderRepo = new OrderRepository(supabase);
+  const { data, error } = await orderRepo.getHeldPreviousStatus(orderId);
+  if (error) {
+    logger.error('Failed to get HELD previous status:', error);
+    return null;
+  }
+  return data?.prev_status || null;
 }
