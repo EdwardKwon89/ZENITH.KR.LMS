@@ -88,7 +88,7 @@
 | TASK-031 | 260520 | 미들웨어 DB 호출 최적화 (JWT-only) | P3 | IMP-003 ✅ | D_Kai | ✅ | [TASK-031](tasks/TASK-031_260520_미들웨어DB최적화_DKai.md) | IMP-021 완료 · hasCompleteMetadata 방식 A-1 · 코드 5bc0653·문서 00b717f · TASK-037 블로커 해제 |
 | TASK-032 | 260520 | 이메일 HTML 인젝션 방지 | P2 | 없음 | Ring | ✅ | [TASK-032](tasks/TASK-032_260520_이메일HTML인젝션방지_Ring.md) | IMP-056 완료 · escapeHtml 7곳 · 코드 2b8a610 · doc 31ffff4+a8a68cb+105cdcc · 209/209 |
 | TASK-033 | 260520 | 감사 추적 도입 (마스터/인보이스/통관) | P3 | TASK-032 ✅ | Ring | 🔄 | [TASK-033](tasks/TASK-033_260520_감사추적도입_Ring.md) | IMP-051 · A안 확정(3테이블·서버INSERT·best-effort 트랜잭션) · 즉시 착수 가능 |
-| TASK-038 | 260521 | B_Kai 재교육 세션 (R-17 v1.4) | P4 | 없음 | B_Kai | ❌ | [TASK-038](tasks/TASK-038_260521_BKai재교육세션_BKai.md) | SAR 내용 ✅ · DoD 미체크·이력 누락 → doc 재제출 지시 |
+| TASK-038 | 260521 | B_Kai 재교육 세션 (R-17 v1.4) | P4 | 없음 | B_Kai | ✅ | [TASK-038](tasks/TASK-038_260521_BKai재교육세션_BKai.md) | SAR 내용 ✅ · 재작업 7c985db DoD 전량·이력 추가 · TASK-038 완료·신규 할당 중단 해제 |
 | TASK-034 | 260520 | Error Boundary 4개 추가 | P3 | 없음 | B_Kai | ✅ | [TASK-034](tasks/TASK-034_260520_ErrorBoundary추가_BKai.md) | IMP-017 완료 · 커밋 1a6e245+cdf4963 · 209/209 |
 | TASK-035 | 260520 | 정산 엔진 SRP 분할 | P3 | TASK-027 권장 | Riley | ✅ | [TASK-035](tasks/TASK-035_260520_정산엔진SRP_Riley.md) | IMP-030 완료 · 3클래스+Facade · 코드 9656903·문서 2c4f0cf · 209/209 |
 | TASK-036 | 260520 | ZenUI.tsx 7개 컴포넌트 분할 | P3 | 없음 | B_Kai | ✅ | [TASK-036](tasks/TASK-036_260520_ZenUI분할_BKai.md) | IMP-063 완료 · 코드 d099a04 · 재보고 b544aaf · 209/209 |
@@ -101,7 +101,7 @@
 | Agent | 즉시 착수 가능 | 재작업 필요 | 블로커 대기 |
 |:------|:-------------|:-----------|:----------|
 | Riley | — | — | — |
-| B_Kai | — | **TASK-038** ❌ (DoD 미체크·이력 누락 — doc 재제출 필요) | — |
+| B_Kai | — | — | — |
 | D_Kai | — | — | — |
 | Ring | **TASK-033** 🔄 (설계 확정 완료 — 즉시 착수 가능 · 신규 할당 중단·5차 위반) | — | — |
 
@@ -161,3 +161,4 @@
 | 2026-05-21 | Aiden (Claude) | Phase G 6차 검토 완료 — TASK-032 ❌ 반려(DoD 미체크·해시 공란·이력 누락·Ring 5차 위반·신규 할당 중단). 코드 2b8a610 정상·doc commit 재제출 지시 |
 | 2026-05-21 | Aiden (Claude) | TASK-032 ✅ PASS(Ring 재작업 a8a68cb+105cdcc·DoD 전량·IMP-056 완료). TASK-038 발령(B_Kai 재교육·옵션A 자가진단). Ring 신규 할당 중단·TASK-033 기할당 착수 가능. B_Kai TASK-038 완료 후 신규 Task 재개 |
 | 2026-05-21 | Aiden (Claude) | TASK-038 ❌ 반려(B_Kai·SAR 내용 우수·DoD 미체크·이력 누락·최소 재작업 지시). TASK-033 설계 확정(Ring·A안 3테이블·서버INSERT·best-effort·🔄 착수 승인) |
+| 2026-05-21 | Aiden (Claude) | TASK-038 ✅ PASS(B_Kai 재작업 7c985db DoD 전량·이력 추가·task file 단독 커밋). B_Kai 신규 Task 할당 중단 해제 |
