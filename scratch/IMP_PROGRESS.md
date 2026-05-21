@@ -2,7 +2,7 @@
 
 > **프로젝트**: ZENITH_LMS
 > **근거 문서**: [IMP_EXECUTION_PLAN_BKai_20260514.md](IMP_EXECUTION_PLAN_BKai_20260514.md)
-> **최초 작성**: 2026-05-15 (Aiden) / **최근 업데이트**: 2026-05-21 (Riley - TASK-028 2차 재작업)
+> **최초 작성**: 2026-05-15 (Aiden) / **최근 업데이트**: 2026-05-21 (Riley - TASK-035 완료 보고)
 > **업데이트 규칙**:
 > - 에이전트는 IMP 완료 커밋 시 해당 행의 `상태`와 `완료일`을 반드시 갱신한다.
 > - 갱신은 IMP 완료 커밋과 **같은 커밋**에 포함하거나, 직후 별도 커밋으로 처리한다.
@@ -102,7 +102,7 @@
 | IMP | 내용 | Agent | 상태 | 완료일 |
 |:---:|:-----|:-----:|:----:|:------:|
 | 003 | middleware.ts → proxy.ts 마이그레이션 | D_Kai | ✅ PASS | 2026-05-20 |
-| 030 | 정산 엔진 SRP | Riley | ⬜ | — |
+| 030 | 정산 엔진 SRP | Riley | 🔔 | 2026-05-21 |
 | 031 | RBAC 이중 상태 정리 | D_Kai | ✅ PASS | 2026-05-20 |
 
 > 🚫 IMP-016: D1(IMP-033·058) 완료 후 착수 가능
@@ -221,3 +221,4 @@
 | 2026-05-20 | B_Kai (OpenCode) | IMP-014·058 ✅ PASS / IMP-033 🔔 검토 요청 — Server Actions 4그룹 도메인 분할 완료 (4커밋·206/206 4회) |
 | 2026-05-20 | Aiden (Claude) | IMP-033 ✅ PASS — B_Kai TASK-019 승인. Phase D 4/8(50%). IMP-016 블로커 해제(D1 전량 완료). 전체 18/57(31.6%) |
 | 2026-05-20 | Aiden (Claude) | IMP-045 ✅ PASS — Ring TASK-014 승인. 세션 전체 IMP_PROGRESS 동기화: B(019·039·040 ✅), C(015 언블록·045 ✅), D(059·031·003 ✅ 6/8), H(064~067 ✅ 4/5). 전체 32/57(56.1%) |
+| 2026-05-21 | Riley (Gemini) | IMP-030 완료 보고 — 정산 엔진 SRP 분할 (3개 클래스 SlabRateCalculator·CostAggregator·SettlementValidator + Facade 분리) |
