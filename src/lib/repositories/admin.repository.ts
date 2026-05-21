@@ -61,7 +61,7 @@ export class AdminRepository extends BaseRepository {
 
   async findProfileGrade(userId: string) {
     return this.db
-      .from('profiles')
+      .from('zen_profiles')
       .select('grade_code')
       .eq('id', userId)
       .maybeSingle();
@@ -74,13 +74,6 @@ export class AdminRepository extends BaseRepository {
       .eq('id', userId);
   }
 
-  async updateProfilesFullName(userId: string, fullName: string) {
-    return this.db
-      .from('profiles')
-      .update({ full_name: fullName, updated_at: new Date().toISOString() })
-      .eq('id', userId);
-  }
-
   async deactivateProfile(userId: string) {
     return this.db
       .from('zen_profiles')
@@ -90,7 +83,7 @@ export class AdminRepository extends BaseRepository {
 
   async updateProfileGrade(userId: string, gradeCode: string) {
     return this.db
-      .from('profiles')
+      .from('zen_profiles')
       .update({ grade_code: gradeCode })
       .eq('id', userId);
   }

@@ -100,7 +100,7 @@ export async function createQna(payload: {
   // 3. Admin 대상 알림 발송 (VOC 패턴 참조)
   try {
     const { data: admins } = await supabase
-      .from("profiles")
+      .from("zen_profiles")
       .select("id")
       .in("role", [USER_ROLES.ADMIN, USER_ROLES.ZENITH_SUPER_ADMIN, USER_ROLES.MANAGER]);
 

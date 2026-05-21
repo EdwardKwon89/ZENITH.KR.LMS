@@ -26,7 +26,7 @@ export const logClientError = withAction(async function (data: {
   let org_id = null;
   if (user) {
     const { data: profile } = await supabase
-      .from('profiles')
+      .from('zen_profiles')
       .select('org_id')
       .eq('id', user.id)
       .single();
@@ -56,7 +56,7 @@ export const logClientError = withAction(async function (data: {
   // CRITICAL 레벨인 경우 관리자들에게 인앱 알림 발송
   if (data.severity === 'CRITICAL') {
     const { data: admins } = await supabase
-      .from('profiles')
+      .from('zen_profiles')
       .select('id')
       .in('role', [USER_ROLES.ADMIN, USER_ROLES.ZENITH_SUPER_ADMIN]);
 

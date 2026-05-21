@@ -65,11 +65,6 @@ export async function updateMyProfile(payload: {
     const { error: zenError } = await adminRepo.updateProfileFullName(user.id, payload.fullName);
     if (zenError) throw zenError;
 
-    const { error: profileError } = await adminRepo.updateProfilesFullName(user.id, payload.fullName);
-    if (profileError) {
-      logger.warn("[MEMBER_ACTION] profiles sync failed:", profileError.message);
-    }
-
     revalidatePath("/mypage/profile");
     return { success: true };
   } catch (err: any) {
