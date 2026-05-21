@@ -5,6 +5,7 @@ import { InvoiceGenerator } from '@/lib/finance/settlement';
 import { revalidatePath } from 'next/cache';
 import { validateUserAction, validateAdminAction } from '@/lib/auth/guards';
 import { FinanceRepository } from '@/lib/repositories';
+import { escapeHtml } from '@/lib/utils/escape-html';
 import { getNumericParam } from "@/lib/params/service";
 import { generateInvoicePdfBuffer } from '@/lib/finance/pdf';
 import { Resend } from 'resend';
@@ -215,15 +216,15 @@ export async function sendTaxInvoiceEmail(taxInvoiceId: string, recipientEmail: 
     const { data: emailData, error: emailError } = await resendInstance.emails.send({
       from: 'ZENITH LMS <notifications@zenith.kr>',
       to: [recipientEmail],
-      subject: `[ZENITH] 세금계산서가 발행되었습니다 (No. ${tx.tax_invoice_no})`,
+      subject: `[ZENITH] 세금계산서가 발행되었습니다 (No. ${escapeHtml(tx.tax_invoice_no)})`,
       html: `
         <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee;">
           <h2>세금계산서 발행 안내</h2>
           <p>안녕하세요, ZENITH LOGISTICS입니다.</p>
           <p>귀사의 인보이스에 대한 세금계산서가 다음과 같이 발행되었습니다.</p>
           <ul>
-            <li>번호: ${tx.tax_invoice_no}</li>
-            <li>금액: ${Number(tx.total_amount).toLocaleString()} ${tx.currency || 'KRW'}</li>
+            <li>번호: ${escapeHtml(tx.tax_invoice_no)}</li>
+            <li>금액: ${escapeHtml(Number(tx.total_amount).toLocaleString())} ${escapeHtml(tx.currency || 'KRW')}</li>
           </ul>
           <p>자세한 내용은 시스템에 접속하여 확인해 주시기 바랍니다.</p>
         </div>
