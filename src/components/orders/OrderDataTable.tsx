@@ -9,6 +9,7 @@ import { canChangeStatus } from '@/lib/logistics/status-machine';
 import { UserRole, USER_ROLES } from '@/lib/auth/rbac';
 import { AnimatePresence } from 'framer-motion';
 import { useTranslations } from 'next-intl';
+import { ZenStatusBadge } from '@/components/domain';
 
 
 interface OrderDataTableProps {
@@ -34,10 +35,6 @@ export default function OrderDataTable({
   const safeLocale = (params?.locale as string) || locale || 'ko';
   const totalPages = Math.ceil(totalCount / pageSize);
   const t = useTranslations('orderStatus');
-
-  const getStatusInfo = (status: string) => {
-    return ORDER_STATUS_META[status as OrderStatus] || { labelKey: status, color: 'bg-slate-100 text-slate-600 border-slate-200', descriptionKey: status };
-  };
 
   return (
     <div className="bg-white zen-tactile border border-slate-200 rounded-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-500">
@@ -82,26 +79,24 @@ export default function OrderDataTable({
                   </td>
                   <td className="px-6 py-2.5">
                     {(() => {
-                      const statusInfo = getStatusInfo(order.status);
-                      // 현재 역할에서 가능한 다음 상태가 하나라도 있는지 확인
                       const nextStatuses = Object.values(OrderStatus).filter(s => 
                         canChangeStatus(order.status as OrderStatus, s, (userRole as UserRole) || USER_ROLES.USER).allowed
                       );
                       const hasPermission = nextStatuses.length > 0;
+                      const descKey = ORDER_STATUS_META[order.status as OrderStatus]?.descriptionKey ?? order.status;
 
                       return (
-                        <span 
+                        <ZenStatusBadge
+                          status={order.status as OrderStatus}
+                          clickable={hasPermission}
                           onClick={() => {
                             if (hasPermission) {
                               setSelectedOrder(order);
                               setIsModalOpen(true);
                             }
                           }}
-                          className={`px-2 py-0.5 rounded text-[10px] font-bold border ${statusInfo.color} ${hasPermission ? 'cursor-pointer hover:ring-2 hover:ring-offset-1 ring-blue-400 transition-all' : 'cursor-default'}`}
-                          title={hasPermission ? `${t(statusInfo.descriptionKey)} (클릭하여 상태 변경)` : t(statusInfo.descriptionKey)}
-                        >
-                          {t(statusInfo.labelKey)}
-                        </span>
+                          title={hasPermission ? `${t(descKey)} (클릭하여 상태 변경)` : t(descKey)}
+                        />
                       );
                     })()}
                   </td>

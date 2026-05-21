@@ -8,6 +8,7 @@ import { OrderStatus, ORDER_STATUS_META } from '@/types/orders';
 import { updateOrderStatus, getHeldPreviousStatus } from '@/app/actions/orders';
 import { toast } from 'sonner';
 import { useTranslations } from 'next-intl';
+import { ZenStatusBadge } from '@/components/domain';
 
 interface StatusChangeModalProps {
   orderId: string;
@@ -148,9 +149,7 @@ export const StatusChangeModal: React.FC<StatusChangeModalProps> = ({
                       : 'bg-white border-slate-100 hover:border-slate-200'
                   }`}
                 >
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full mb-2 ${ORDER_STATUS_META[status]?.color}`}>
-                    {ORDER_STATUS_META[status] ? t(ORDER_STATUS_META[status].labelKey) : status}
-                  </span>
+                  <ZenStatusBadge status={status} className="rounded-full mb-2" />
                   <span className="text-[11px] text-slate-500 font-medium leading-tight">
                     {ORDER_STATUS_META[status] ? t(ORDER_STATUS_META[status].descriptionKey) : status}
                   </span>
