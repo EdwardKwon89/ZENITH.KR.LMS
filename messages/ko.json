@@ -425,6 +425,20 @@
     "error_confirm": "'탈퇴'를 정확히 입력해 주세요.",
     "error_process": "탈퇴 처리 중 오류가 발생했습니다."
   },
+  "orderStatus": {
+    "REGISTERED": { "label": "접수", "description": "오더가 신규 등록됨" },
+    "SCHEDULED": { "label": "스케줄배정", "description": "운송 수단 배정 완료" },
+    "WAREHOUSED": { "label": "입고완료", "description": "창고 실물 입고 확인" },
+    "PACKED": { "label": "패킹완료", "description": "출고용 패킹/래핑 완료" },
+    "RELEASED": { "label": "출고완료", "description": "창고 출고 및 운송장 부착" },
+    "IN_TRANSIT": { "label": "운송중", "description": "최종 목적지로 이동 중" },
+    "DELIVERED": { "label": "배송완료", "description": "수하인에게 인도 완료" },
+    "CLAIMED": { "label": "클레임접수", "description": "화주 클레임이 정식 접수됨" },
+    "HELD": { "label": "보류", "description": "문제 발생으로 인한 일시 중단" },
+    "CANCELED": { "label": "취소", "description": "오더 취소됨" },
+    "RETURNED": { "label": "반송", "description": "화주에게 화물 반송됨" },
+    "MASTERED": { "label": "마스터결합", "description": "마스터 오더에 바인딩되어 수정이 제한됨" }
+  },
   "Maintenance": {
     "title": "점검 중",
     "message": "서비스 점검 중입니다. 잠시 후 다시 접속해 주세요.",
