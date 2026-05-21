@@ -5,7 +5,7 @@
 | Task-ID | TASK-049 |
 | IMP-ID | IMP-024 |
 | 생성일 | 2026-05-21 |
-| 담당 Agent | Ring (Qwen) |
+| 담당 Agent | B_Kai (Noah/Codex) |
 | 우선순위 | P3 |
 | 전제조건 | 없음 — 즉시 착수 가능 |
 | 상태 | ⬜ 미착수 |
@@ -42,11 +42,11 @@ UI 일관성 유지가 어렵고 동일 기능의 중복 코드가 산재한다.
    - 기존 각 도메인 컴포넌트 → 공통 컴포넌트 참조로 교체
 5. 회귀 테스트 전체 PASS: `rtk npm run test:regression`
 6. 결과 저장: `docs/08_Self_Audit/Regression_Results/REGRESSION_2026-05-21_TASK-049.log`
-7. **코드 커밋**: `[Qwen] refactor: IMP-024 공통 도메인 UI 컴포넌트 라이브러리화`
+7. **코드 커밋**: `[B_Kai] refactor: IMP-024 공통 도메인 UI 컴포넌트 라이브러리화`
 8. **본 파일 [작업 결과] 섹션 작성 + 상태 → 🔔** (커밋 해시 반드시 기재)
 9. **ACTIVE_TASK.md TASK-049 → 🔔 반영**
 10. **`scratch/IMP_PROGRESS.md` IMP-024 행 🔔 갱신**
-11. **문서 커밋**: `[Qwen] docs: TASK-049 완료 보고 — task file 🔔`
+11. **문서 커밋**: `[B_Kai] docs: TASK-049 완료 보고 — task file 🔔`
 
 ---
 
@@ -80,7 +80,7 @@ UI 일관성 유지가 어렵고 동일 기능의 중복 코드가 산재한다.
 
 ## 작업 결과
 
-> **이 섹션은 착수 후 Ring이 작성합니다.**
+> **이 섹션은 착수 후 B_Kai가 작성합니다.**
 
 | 항목 | 내용 |
 |:---|:---|
@@ -104,4 +104,5 @@ UI 일관성 유지가 어렵고 동일 기능의 중복 코드가 산재한다.
 
 | 날짜 | 주체 | 내용 |
 |:-----|:----:|:-----|
-| 2026-05-21 | Aiden (Claude) | Task 생성 — Sprint H-II 작업 지시 발령 |
+| 2026-05-21 | Aiden (Claude) | Task 생성 — Sprint H-II 작업 지시 발령 (Ring 최초 할당) |
+| 2026-05-21 | Aiden (Claude) | 담당 Agent 재할당 — Ring(신규 할당 중단) → B_Kai. ZenUI 분할 경험(TASK-036) 기반 선정 |
