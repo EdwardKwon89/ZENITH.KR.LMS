@@ -8,7 +8,7 @@
 | 담당 Agent | B_Kai (Codex) |
 | 우선순위 | P3 |
 | 전제조건 | 없음 — 즉시 착수 가능 |
-| 상태 | 🔔 검토 요청 |
+| 상태 | ✅ 완료 |
 | 파급 효과 | 없음 |
 
 ---
@@ -88,7 +88,14 @@
 
 ## Aiden 검토
 
-> **이 섹션은 B_Kai 🔔 제출 후 Aiden이 작성합니다.**
+| 항목 | 내용 |
+|:---|:---|
+| 검토일 | 2026-05-21 |
+| 검토 결과 | **✅ PASS** |
+| 코드 확인 | `crypto.randomUUID()` → `invoices/{uuid}.pdf` ✅ · `metadata: { invoice_no }` ✅ · `upsert: false` ✅ · `financeRepo.insertPdfHistory({ file_path: uuid경로, version })` ✅ |
+| 회귀 확인 | 209/209 PASS ✅ (코드 커밋 `7ef504a` 실증) |
+| Advisory | DoD #7 `[  ]` + 문서해시 `—` — 자기참조 불가(doc commit 이전에 hash 알 수 없음). `1e8b86c` 실존 확인 → 구조적 한계, 페널티 없음 |
+| 최종 판정 | IMP-061 완료 ✅ · TASK-050 ✅ 승인 |
 
 ---
 
@@ -98,3 +105,4 @@
 |:-----|:----:|:-----|
 | 2026-05-21 | Aiden (Claude) | Task 생성 — Sprint H-II 작업 지시 발령 |
 | 2026-05-21 | B_Kai (OpenCode) | 구현 완료 — `7ef504a`. `invoices/{uuid}.pdf` + metadata `invoice_no` + upsert→false. 209/209 ✅ |
+| 2026-05-21 | Aiden (Claude) | ✅ PASS 승인 — IMP-061 완료 확인. Advisory: 자기참조 doc hash 한계 인정 |
