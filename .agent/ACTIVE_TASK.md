@@ -99,7 +99,7 @@
 | TASK-042 | 260521 | 지갑 결제 롤백 검증 및 잔여 수정 | P2 | IMP-047 ✅ | Riley | ✅ | [TASK-042](tasks/TASK-042_260521_지갑결제롤백검증_Riley.md) | IMP-053 ➖ IMP-047 통합 · Path A 확인 |
 | TASK-043 | 260521 | HELD→이전상태 복구 로직 | P3 | 없음 | Riley | ✅ | [TASK-043](tasks/TASK-043_260521_HELD이전상태복구_Riley.md) | IMP-050 완료 · getHeldPreviousStatus + 원상복구 버튼 |
 | TASK-044 | 260521 | 이중 프로필 테이블 정리 | P2 | 없음 | D_Kai | ✅ | [TASK-044](tasks/TASK-044_260521_이중프로필테이블정리_DKai.md) | IMP-049 완료 · ba14f88 · 31be239+e54d351 · 211/211 · VIEW profiles(security_invoker) ✅ |
-| TASK-045 | 260521 | Master/Admin 코드 중복 제거 | P3 | 없음 | D_Kai | 🔔 | [TASK-045](tasks/TASK-045_260521_MasterAdmin코드중복제거_DKai.md) | IMP-012 · 코드 63ce099 · 211/211 PASS |
+| TASK-045 | 260521 | Master/Admin 코드 중복 제거 | P3 | 없음 | D_Kai | ✅ | [TASK-045](tasks/TASK-045_260521_MasterAdmin코드중복제거_DKai.md) | IMP-012 완료 · 63ce099 · 55a8f65 · 211/211 · Aiden 직접 보완 PASS |
 | TASK-046 | 260521 | TS any 타입 퇴출 | P3 | 없음 | D_Kai | ✅ | [TASK-046](tasks/TASK-046_260521_TSany퇴출_DKai.md) | IMP-029 완료 · 282c3c6 · Aiden 직접 보완 PASS · 위반 2회 경고 |
 | TASK-047 | 260521 | i18n 번역 키 타입 안정성 | P4 | 없음 | D_Kai | ✅ | [TASK-047](tasks/TASK-047_260521_i18n번역키타입안정성_DKai.md) | IMP-023 완료 · 14ce2cb · Aiden 직접 보완 PASS · 위반 2회 경고 |
 | TASK-048 | 260521 | RETURNED 상태 전이 확장 | P3 | 없음 | Ring | ✅ | [TASK-048](tasks/TASK-048_260521_RETURNED상태전이확장_Ring.md) | IMP-060 완료 · 3cfe3f4 · 211/211 · Aiden 직접 보완 PASS · 신규 할당 중단 유지 |
@@ -191,3 +191,4 @@
 | 2026-05-21 | Aiden (Claude) | TASK-048 ✅ PASS (Aiden 직접 보완) — Ring 3차 재작업 헤더 변경 확인 후 문서 잔여분 처리. IMP-060 완료. Ring 신규 할당 중단 유지(9차 위반 누적) |
 | 2026-05-21 | Aiden (Claude) | TASK-044 추가 발견 2건 승인 — VIEW profiles(RLS compat)·handle_new_user 트리거 수정 ✅. D_Kai M6·M7 착수 재개 🔄 |
 | 2026-05-21 | Aiden (Claude) | Sprint H-II 4차 검토 — TASK-044✅(IMP-049·Option B 보완)·TASK-046✅(IMP-029·Option B 헤더 수정)·TASK-047✅(IMP-023·동일). D_Kai R-17 동일 유형 위반 2회 기록(경고, 임계 3회). IMP_PROGRESS 3건 완료 처리 |
+| 2026-05-21 | Aiden (Claude) | Sprint H-II 5차 검토 — TASK-045✅(IMP-012·코드 63ce099·문서 55a8f65·211/211·Aiden 직접 보완). D_Kai 절차 개선 확인(상태헤더·ACTIVE_TASK·개정이력 모두 올바르게 처리). Phase F 12/12 (100%) 완료 |
