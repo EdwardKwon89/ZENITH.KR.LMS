@@ -8,7 +8,7 @@
 | 담당 Agent | Ring (Qwen) |
 | 우선순위 | P3 |
 | 전제조건 | 없음 — 즉시 착수 가능 |
-| 상태 | ⬜ 미착수 |
+| 상태 | 📝 설계 의견 — Aiden 검토 대기 |
 | 파급 효과 | Status Machine 전이 규칙 변경 — gitnexus_impact 필수 |
 
 ---
@@ -60,6 +60,26 @@ RETURNED 상태에서 WAREHOUSED 전이만 허용되어 반송 화물의 폐기/
 
 > **사용 기준**: 구현 방향이 복수이거나 설계 결정이 필요한 경우에만 작성합니다.
 > 단순 Task는 이 섹션을 생략하고 바로 🔄 착수 가능합니다.
+
+### 🚨 HIGH Impact 보고 — Aiden 검토 요청
+
+`gitnexus_impact({target: "canChangeStatus", direction: "upstream"})` 결과 **HIGH** 리스크 감지.
+
+**영향 분석**:
+| 항목 | 내용 |
+|:---|:---|
+| 직접 영향 | 4개 함수 (`updateOrderStatus`, `createClaim`, `OrderDataTable`, `nextStatuses`) |
+| 영향 프로세스 | 4개 (`handleScan`, `handleUpdate`, `createClaim`, `OrderDataTable`) |
+| 영향 모듈 | Logistics, Orders, Misc (3개) |
+
+**위험 평가**:
+- 코드 변경은 단순 추가 (기존 규칙 삭제 없음) — 하위 호환성 유지
+- UI 컴포넌트(`StatusChangeModal`, `InventoryScanner`, `OrderDataTable`)에서 새 상태(DISPOSED, CANCELED) 처리 로직 추가 필요 여부 확인 필요
+- `OrderStatus` enum에 DISPOSED/CANCELED 존재 여부 확인 후, 없으면 DB 마이그레이션 필요
+
+**요청 사항**:
+1. 착수 승인 여부 (HIGH 리스크이나 단순 추가이므로 진행 가능할 것으로 판단)
+2. UI 컴포넌트 상태 표시 로직 동시 검토 여부 지시
 
 ---
 

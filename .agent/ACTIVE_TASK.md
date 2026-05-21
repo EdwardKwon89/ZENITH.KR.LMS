@@ -102,7 +102,7 @@
 | TASK-045 | 260521 | Master/Admin 코드 중복 제거 | P3 | 없음 | D_Kai | ⬜ | [TASK-045](tasks/TASK-045_260521_MasterAdmin코드중복제거_DKai.md) | IMP-012 · 공통 컴포넌트 추출 |
 | TASK-046 | 260521 | TS any 타입 퇴출 | P3 | 없음 | D_Kai | ⬜ | [TASK-046](tasks/TASK-046_260521_TSany퇴출_DKai.md) | IMP-029 · WithRelations 유틸리티 도입 |
 | TASK-047 | 260521 | i18n 번역 키 타입 안정성 | P4 | 없음 | D_Kai | ⬜ | [TASK-047](tasks/TASK-047_260521_i18n번역키타입안정성_DKai.md) | IMP-023 · next-intl type-safe 설정 |
-| TASK-048 | 260521 | RETURNED 상태 전이 확장 | P3 | 없음 | Ring | ⬜ | [TASK-048](tasks/TASK-048_260521_RETURNED상태전이확장_Ring.md) | IMP-060 · DISPOSED·CANCELED 전이 추가 |
+| TASK-048 | 260521 | RETURNED 상태 전이 확장 | P3 | 없음 | Ring | 📝 | [TASK-048](tasks/TASK-048_260521_RETURNED상태전이확장_Ring.md) | IMP-060 · HIGH impact 보고 — Aiden 검토 대기 |
 | TASK-049 | 260521 | 공통 UI 컴포넌트 라이브러리화 | P3 | 없음 | Ring | ⬜ | [TASK-049](tasks/TASK-049_260521_공통UI컴포넌트라이브러리화_Ring.md) | IMP-024 · src/components/domain/ 신설 |
 | TASK-050 | 260521 | PDF 경로 충돌 방지 | P3 | 없음 | B_Kai | 🔔 | [TASK-050](tasks/TASK-050_260521_PDF경로충돌방지_BKai.md) | IMP-061 · UUID 기반 파일명 · 코드 7ef504a · 209/209 ✅ |
 
