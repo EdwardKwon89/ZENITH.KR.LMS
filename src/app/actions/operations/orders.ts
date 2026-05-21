@@ -328,7 +328,7 @@ export async function createMasterOrder(payload: {
  * [WBS 2.2] 마스터 오더를 해체(Dissolve)합니다.
  */
 export async function dissolveMasterOrder(masterId: string) {
-  const { supabase } = await validateUserAction();
+  const { supabase, user } = await validateUserAction();
 
   const orderRepo = new OrderRepository(supabase);
 
@@ -337,6 +337,18 @@ export async function dissolveMasterOrder(masterId: string) {
 
   const { error: deleteError } = await orderRepo.deleteMasterOrder(masterId);
   if (deleteError) throw new Error(`Master deletion failed: ${deleteError.message}`);
+
+  // IMP-051: Audit history (best-effort)
+  void (async () => {
+    const { error } = await supabase.from('zen_master_order_history').insert({
+      master_order_id: masterId,
+      prev_status: 'MASTERED',
+      next_status: 'DISSOLVED',
+      reason: 'Master order dissolved',
+      changed_by: user.id,
+    });
+    if (error) logger.error('[AUDIT] Master order history insert failed:', error);
+  })();
 
   revalidatePath("/(dashboard)/logistics/master", "page");
   return { success: true };
@@ -376,12 +388,27 @@ export async function updateMasterOrderStatus(
   nextStatus: string,
   reason?: string
 ) {
-  const { supabase } = await validateUserAction();
+  const { supabase, user } = await validateUserAction();
 
   const orderRepo = new OrderRepository(supabase);
 
+  const { data: master } = await orderRepo.findMasterById(masterId);
+  const prevStatus = master?.status ?? null;
+
   const { error: updateError } = await orderRepo.updateMasterStatus(masterId, nextStatus, reason);
   if (updateError) throw new Error(`Master status update failed: ${updateError.message}`);
+
+  // IMP-051: Audit history (best-effort)
+  void (async () => {
+    const { error } = await supabase.from('zen_master_order_history').insert({
+      master_order_id: masterId,
+      prev_status: prevStatus,
+      next_status: nextStatus,
+      reason,
+      changed_by: user.id,
+    });
+    if (error) logger.error('[AUDIT] Master order history insert failed:', error);
+  })();
 
   if (nextStatus === 'CANCELED') {
     const { error: dissolveError } = await orderRepo.unbindHouseOrders(masterId, OrderStatus.REGISTERED);

@@ -194,6 +194,17 @@ export async function issueTaxInvoice(invoiceId: string) {
     throw new Error(`세금계산서 생성 실패: ${txError.message}`);
   }
 
+  // IMP-051: Audit history (best-effort)
+  void (async () => {
+    const { error } = await supabase.from('zen_invoice_history').insert({
+      invoice_id: invoiceId,
+      prev_status: invoice.status,
+      next_status: 'TAX_INVOICE_ISSUED',
+      changed_by: profile.id,
+    });
+    if (error) logger.error('[AUDIT] Invoice history insert failed:', error);
+  })();
+
   revalidatePath('/finance/invoices');
   return { success: true, taxInvoiceId: taxInvoice.id };
 }
