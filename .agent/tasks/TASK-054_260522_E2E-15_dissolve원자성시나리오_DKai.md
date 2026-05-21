@@ -8,7 +8,7 @@
 | 담당 Agent | D_Kai (OpenCode) |
 | 우선순위 | P3 |
 | 전제조건 | 없음 — 즉시 착수 가능 |
-| 상태 | ⬜ 미착수 |
+| 상태 | 🚫 |
 | 파급 효과 | 신규 spec 파일 추가 — 기존 코드 변경 없음 |
 
 ---
@@ -92,18 +92,38 @@ IMP-052에서 `dissolveMasterOrder()`가 `dissolve_master_order_atomic` Supabase
 
 ## 작업 결과
 
-> 이 섹션은 착수 후 D_Kai가 작성합니다.
+> Noah (Codex)가 D_Kai Task 대신 테스트 수행 후 기록
 
 | 항목 | 내용 |
 |:---|:---|
-| 착수일 | — |
-| 완료일 | — |
-| E2E-15 결과 | — |
-| 검증 방식 | — (UI 직접 / API 레벨 대체) |
-| 스크린샷 수 | — |
+| 착수일 | 2026-05-22 (Noah, Codex) |
+| 완료일 | — (시드 데이터 부재로 미완료) |
+| E2E-15 결과 | ⚠️ PASS but SKIPPED — 검증 데이터 없음 |
+| 검증 방식 | UI 탐색 → fallback (데이터 없음) |
+| 스크린샷 수 | 2장 (master-orders 페이지, no-dissolve 화면) |
 | 회귀 결과 | — |
 | 코드 커밋 해시 | — |
-| 문서 커밋 해시 | — |
+
+### 발견된 크리티컬 버그 (수정 완료)
+
+3개 파일에서 `"use server"` 지시문이 import문 뒤에 위치하여 Next.js 컴파일 에러 발생.
+이로 인해 로그인 페이지(`/ko/login`)가 렌더링되지 않아 **모든 E2E 테스트가 실행 불가능**했음.
+
+| 파일 | 라인 | 문제 | 수정 |
+|:-----|:----:|:-----|:----:|
+| `src/app/[locale]/(auth)/login/actions.ts` | 1-2 | `import { logger }` → `'use server'` 순서 | `'use server'` → `import` 순서로 교정 |
+| `src/app/actions/misc/monitoring.ts` | 1-3 | `import { logger, withAction }` → `"use server"` 순서 | 동일 |
+| `src/app/actions/misc/notifications.ts` | 1-2 | `import { logger }` → `"use server"` 순서 | 동일 |
+
+### 블로커: E2E 테스트 시드 데이터 부재
+
+`scripts/seed-local.ts`는 유저/조직만 생성하고 오더 데이터는 생성하지 않음.
+E2E-15 dissolve 검증에 필요한 PENDING 상태 하우스 오더 2건 + 마스터 오더가 DB에 없음.
+
+**필요한 조치**:
+- (Option A) API 레벨 검증으로 전환 — `dissolve_master_order_atomic` RPC 직접 호출 (Server Action 경유) 
+- (Option B) 시드 데이터 스크립트에 E2E 테스트용 오더 생성 로직 추가
+- **Aiden 결정 필요**
 
 ---
 
@@ -118,3 +138,4 @@ IMP-052에서 `dissolveMasterOrder()`가 `dissolve_master_order_atomic` Supabase
 | 날짜 | 주체 | 내용 |
 |:-----|:----:|:-----|
 | 2026-05-22 | Aiden (Claude) | Task 생성 — E2E 확장 Sprint, IMP-052 E2E 검증 (D_Kai 할당) |
+| 2026-05-22 | Noah (Codex) | 테스트 수행 — "use server" 3건 버그 발견/수정, 시드 데이터 부재 블로커 확인, 상태 🚫 전환 |
