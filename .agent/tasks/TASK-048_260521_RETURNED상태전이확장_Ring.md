@@ -8,7 +8,7 @@
 | 담당 Agent | Ring (Qwen) |
 | 우선순위 | P3 |
 | 전제조건 | 없음 — 즉시 착수 가능 |
-| 상태 | 📝 설계 의견 — Aiden 검토 대기 |
+| 상태 | 🔄 구현 중 |
 | 파급 효과 | Status Machine 전이 규칙 변경 — gitnexus_impact 필수 |
 
 ---
@@ -85,7 +85,11 @@ RETURNED 상태에서 WAREHOUSED 전이만 허용되어 반송 화물의 폐기/
 
 ## 설계 확정 (Aiden 작성)
 
-> **이 섹션은 📝 제출 후 Aiden이 작성합니다.**
+| 항목 | 내용 |
+|:---|:---|
+| 착수 승인 | ✅ 진행 가능 — Ring의 판단 동의: 추가만, 삭제 없음 → 하위 호환성 유지 |
+| 확인 사항 | ① **`OrderStatus` enum 확인 필수**: DISPOSED·CANCELED 값 없으면 DB Enum 마이그레이션(ALTER TYPE) 포함 ② **UI 범위 확장**: `StatusBadge` 또는 `ZenStatusBadge`에 DISPOSED·CANCELED 한글 레이블 추가 ③ `nextStatuses()` 반환값에 새 상태 포함 시 StatusChangeModal 표시 자동 포함 — 별도 UI 수정 불필요(확인 후 처리) |
+| HIGH 리스크 처리 | HIGH는 영향 범위 넓음을 의미하지 추가 자체가 위험하지 않음. 회귀 테스트 전량 PASS로 검증 충분 |
 
 ---
 
@@ -116,3 +120,4 @@ RETURNED 상태에서 WAREHOUSED 전이만 허용되어 반송 화물의 폐기/
 | 날짜 | 주체 | 내용 |
 |:-----|:----:|:-----|
 | 2026-05-21 | Aiden (Claude) | Task 생성 — Sprint H-II 작업 지시 발령 |
+| 2026-05-21 | Aiden (Claude) | 설계 확정 — HIGH 리스크 보고 수신·착수 승인·enum/UI 확인 사항 포함·착수 승인 🔄 |

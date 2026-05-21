@@ -95,27 +95,27 @@
 | TASK-037 | 260520 | NaviSidebar Client Bundle 최적화 | P3 | TASK-031 권장 | D_Kai | ✅ | [TASK-037](tasks/TASK-037_260520_NaviSidebar최적화_DKai.md) | IMP-022 완료 · Framer Motion→CSS + Lucide 21→18 · 코드 ddeb4dd · doc 236a08d |
 | TASK-039 | 260521 | 다국어 번역 커버리지 감사 + CI 게이트 | P4 | 없음 | B_Kai | ✅ | [TASK-039](tasks/TASK-039_260521_다국어번역CI게이트_BKai.md) | IMP-032 완료 ✅ · 209/209 PASS |
 | TASK-040 | 260521 | Ring 재교육 세션 (R-17 v1.4) | P4 | 없음 | Ring | ✅ | [TASK-040](tasks/TASK-040_260521_Ring재교육세션_Ring.md) | SAR_004 ✅ · §1~§4 전량·커밋 1d93eee · TASK-040 완료·신규 할당 중단 해제 |
-| TASK-041 | 260521 | dissolveMasterOrder 부분 실패 수정 | P2 | IMP-047 ✅ | Riley | 📝 | [TASK-041](tasks/TASK-041_260521_dissolveMasterOrder부분실패_Riley.md) | IMP-052 · 원자적 RPC 래핑 |
-| TASK-042 | 260521 | 지갑 결제 롤백 검증 및 잔여 수정 | P2 | IMP-047 ✅ | Riley | 🔄 | [TASK-042](tasks/TASK-042_260521_지갑결제롤백검증_Riley.md) | IMP-053 · IMP-047 커버리지 확인 후 A/B 경로 |
-| TASK-043 | 260521 | HELD→이전상태 복구 로직 | P3 | 없음 | Riley | 🔄 | [TASK-043](tasks/TASK-043_260521_HELD이전상태복구_Riley.md) | IMP-050 · 원상복구 버튼 UI |
-| TASK-044 | 260521 | 이중 프로필 테이블 정리 | P2 | 없음 | D_Kai | ⬜ | [TASK-044](tasks/TASK-044_260521_이중프로필테이블정리_DKai.md) | IMP-049 · 📝 설계 의견 필수 후 착수 |
-| TASK-045 | 260521 | Master/Admin 코드 중복 제거 | P3 | 없음 | D_Kai | ⬜ | [TASK-045](tasks/TASK-045_260521_MasterAdmin코드중복제거_DKai.md) | IMP-012 · 공통 컴포넌트 추출 |
-| TASK-046 | 260521 | TS any 타입 퇴출 | P3 | 없음 | D_Kai | ⬜ | [TASK-046](tasks/TASK-046_260521_TSany퇴출_DKai.md) | IMP-029 · WithRelations 유틸리티 도입 |
-| TASK-047 | 260521 | i18n 번역 키 타입 안정성 | P4 | 없음 | D_Kai | ⬜ | [TASK-047](tasks/TASK-047_260521_i18n번역키타입안정성_DKai.md) | IMP-023 · next-intl type-safe 설정 |
-| TASK-048 | 260521 | RETURNED 상태 전이 확장 | P3 | 없음 | Ring | 📝 | [TASK-048](tasks/TASK-048_260521_RETURNED상태전이확장_Ring.md) | IMP-060 · HIGH impact 보고 — Aiden 검토 대기 |
+| TASK-041 | 260521 | dissolveMasterOrder 부분 실패 수정 | P2 | IMP-047 ✅ | Riley | 🔄 | [TASK-041](tasks/TASK-041_260521_dissolveMasterOrder부분실패_Riley.md) | IMP-052 · 방안 A(ON DELETE SET NULL 포함 RPC) 설계 확정 |
+| TASK-042 | 260521 | 지갑 결제 롤백 검증 및 잔여 수정 | P2 | IMP-047 ✅ | Riley | 🔄 | [TASK-042](tasks/TASK-042_260521_지갑결제롤백검증_Riley.md) | IMP-053 · A/B 경로 구현 중 |
+| TASK-043 | 260521 | HELD→이전상태 복구 로직 | P3 | 없음 | Riley | 🔄 | [TASK-043](tasks/TASK-043_260521_HELD이전상태복구_Riley.md) | IMP-050 · 원상복구 버튼 UI 구현 중 |
+| TASK-044 | 260521 | 이중 프로필 테이블 정리 | P2 | 없음 | D_Kai | 🔄 | [TASK-044](tasks/TASK-044_260521_이중프로필테이블정리_DKai.md) | IMP-049 · 방안 B(profiles 삭제·grade_code 이관) 설계 확정 |
+| TASK-045 | 260521 | Master/Admin 코드 중복 제거 | P3 | 없음 | D_Kai | 🔄 | [TASK-045](tasks/TASK-045_260521_MasterAdmin코드중복제거_DKai.md) | IMP-012 · 공통 컴포넌트 추출 구현 중 |
+| TASK-046 | 260521 | TS any 타입 퇴출 | P3 | 없음 | D_Kai | 🔄 | [TASK-046](tasks/TASK-046_260521_TSany퇴출_DKai.md) | IMP-029 · WithRelations 유틸리티 구현 중 |
+| TASK-047 | 260521 | i18n 번역 키 타입 안정성 | P4 | 없음 | D_Kai | 🔄 | [TASK-047](tasks/TASK-047_260521_i18n번역키타입안정성_DKai.md) | IMP-023 · next-intl type-safe 설정 구현 중 |
+| TASK-048 | 260521 | RETURNED 상태 전이 확장 | P3 | 없음 | Ring | 🔄 | [TASK-048](tasks/TASK-048_260521_RETURNED상태전이확장_Ring.md) | IMP-060 · HIGH 보고 수신·착수 승인·enum/UI 확인 포함 |
 | TASK-049 | 260521 | 공통 UI 컴포넌트 라이브러리화 | P3 | 없음 | Ring | ⬜ | [TASK-049](tasks/TASK-049_260521_공통UI컴포넌트라이브러리화_Ring.md) | IMP-024 · src/components/domain/ 신설 |
-| TASK-050 | 260521 | PDF 경로 충돌 방지 | P3 | 없음 | B_Kai | 🔔 | [TASK-050](tasks/TASK-050_260521_PDF경로충돌방지_BKai.md) | IMP-061 · UUID 기반 파일명 · 코드 7ef504a · 209/209 ✅ |
+| TASK-050 | 260521 | PDF 경로 충돌 방지 | P3 | 없음 | B_Kai | ✅ | [TASK-050](tasks/TASK-050_260521_PDF경로충돌방지_BKai.md) | IMP-061 완료 · UUID 기반 파일명 · 7ef504a+1e8b86c · 209/209 ✅ |
 
 ---
 
 ## Agent별 즉시 착수 가능 Task
 
-| Agent | 즉시 착수 가능 | 재작업 필요 | 블로커 대기 |
-|:------|:-------------|:-----------|:----------|
-| Riley | TASK-041 · TASK-042 · TASK-043 | — | — |
-| B_Kai | — | **TASK-050** 🔔 (IMP-061 · 209/209 ✅ — Aiden 검토 대기) | TASK-051 (IMP-046 🚫 방식 결정 대기) |
-| D_Kai | TASK-045 · TASK-046 · TASK-047 | — | TASK-044 (📝 설계 의견 후 Aiden 확정 대기) |
-| Ring | TASK-048 · TASK-049 | — | — |
+| Agent | 진행 중 | 재작업 필요 | 블로커 대기 |
+|:------|:--------|:-----------|:----------|
+| Riley | TASK-041(설계확정·🔄) · TASK-042 · TASK-043 | — | — |
+| B_Kai | — | — | TASK-051 (IMP-046 🚫 방식 결정 대기) |
+| D_Kai | TASK-044(설계확정·🔄) · TASK-045 · TASK-046 · TASK-047 | — | — |
+| Ring | TASK-048(설계확정·🔄) · **TASK-049** ⬜ 착수 가능 | — | — |
 
 ---
 
@@ -183,3 +183,4 @@
 | 2026-05-21 | Aiden (Claude) | TASK-040 발령 — Ring 재교육 세션(7차 위반·SAR_004·§3 문서 정확성 원칙 신설). 신규 Task 할당 중단 유지 |
 | 2026-05-21 | Aiden (Claude) | TASK-040 ✅ PASS — Ring 재교육 SAR_004 §1~§4 전량 확인·커밋 1d93eee 3파일 ✅. Advisory: DoD 미체크. 신규 할당 중단 해제 |
 | 2026-05-21 | Aiden (Claude) | Sprint H-II 작업 지시 발령 — TASK-041~050 전량 등록 (Riley 3건·D_Kai 4건·Ring 2건·B_Kai 1건). IMP_PROGRESS.md 갱신(Phase H 100%·전체 38/57·Sprint H-II 착수 주석). TASK-044 📝 설계 의견 필수. TASK-051 IMP-046 🚫 블로커(방식 미결정) |
+| 2026-05-21 | Aiden (Claude) | Sprint H-II 1차 검토 — TASK-050 ✅ PASS(IMP-061 완료). TASK-041 설계 확정(방안 A·ON DELETE SET NULL 필수). TASK-044 설계 확정(방안 B·rollback 필수). TASK-048 설계 확정(HIGH 보고 수신·착수 승인). TASK-042~047 착수 동기화 🔄 |
