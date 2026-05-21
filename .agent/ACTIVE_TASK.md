@@ -106,6 +106,10 @@
 | TASK-049 | 260521 | 공통 UI 컴포넌트 라이브러리화 | P3 | 없음 | B_Kai | ✅ | [TASK-049](tasks/TASK-049_260521_공통UI컴포넌트라이브러리화_Ring.md) | IMP-024 완료 · c96bff4 · 211/211 · Phase F 11/11 100% ✅ |
 | TASK-050 | 260521 | PDF 경로 충돌 방지 | P3 | 없음 | B_Kai | ✅ | [TASK-050](tasks/TASK-050_260521_PDF경로충돌방지_BKai.md) | IMP-061 완료 · UUID 기반 파일명 · 7ef504a+1e8b86c · 209/209 ✅ |
 | TASK-051 | 260521 | Rate Limiting 도입 | P2 | — | B_Kai | ➖ | — | IMP-046 · **상용 오픈 전 Sprint으로 유예** (2026-05-21 Aiden 결정) |
+| TASK-052 | 260522 | E2E-13 HELD 복구 시나리오 spec + 실행 | P3 | 없음 | Riley | ⬜ | [TASK-052](tasks/TASK-052_260522_E2E-13_HELD복구시나리오_Riley.md) | IMP-050 E2E 검증 |
+| TASK-053 | 260522 | E2E-14 RETURNED 전이 시나리오 spec + 실행 | P3 | 없음 | B_Kai | ⬜ | [TASK-053](tasks/TASK-053_260522_E2E-14_RETURNED전이시나리오_BKai.md) | IMP-060 E2E 검증 |
+| TASK-054 | 260522 | E2E-15 dissolve 원자성 시나리오 spec + 실행 | P3 | 없음 | D_Kai | ⬜ | [TASK-054](tasks/TASK-054_260522_E2E-15_dissolve원자성시나리오_DKai.md) | IMP-052 E2E 검증 |
+| TASK-055 | 260522 | E2E-01/03/05 기존 시나리오 재검증 | P3 | 없음 | Riley | ⬜ | [TASK-055](tasks/TASK-055_260522_E2E재검증01_03_05_Riley.md) | IMP-068·052·030 회귀 확인 |
 
 ---
 
@@ -127,6 +131,7 @@
 | 2026-05-16 | Aiden (Claude) | 신규 오케스트레이션 체계 도입 — ACTIVE_TASK.md v1.0 초기 작성. TASK_BOARD+ACTIVE_AGENT+HANDOFF_BOX 통합 대체 |
 | 2026-05-16 | Aiden (Claude) | 역량 평가 목적 공평 재배분 — TASK-005~020 신규 등록. D_Kai·Ring Task 할당 (기존 Riley 전담 → 4 Agent 균등) |
 | 2026-05-16 | Aiden (Claude) | 작업 지시 발령 — TASK-005~020 상세 파일 전량 생성. 각 Agent 즉시 착수 가능 상태 |
+| 2026-05-22 | Aiden (Claude) | E2E 확장 Sprint 작업 지시 발령 — TASK-052~055 등록 (Riley 2건·B_Kai 1건·D_Kai 1건). E2E-13/14/15 신규 spec + E2E-01/03/05 재검증 |
 | 2026-05-16 | Aiden (Claude) | 설계 의견/검토 단계 신설 (R-17 v1.3) — 📝·🔍 상태 추가. TASK-005~020 [설계 의견]·[설계 확정] 섹션 일괄 삽입 |
 | 2026-05-20 | Aiden (Claude) | TASK-001 ✅ 판정 (IMP-019 완료) — TASK-003/004 블로커 해제. TASK-002 ❌ 반려 (DoD 미달성, #4·#6 미수정) |
 | 2026-05-20 | Aiden (Claude) | TASK-007/008 설계 확정 → 🔄 착수 승인. TASK-009 ❌ 반려 (회귀파일 미저장·gitnexus_impact 누락·DoD 미체크) |
