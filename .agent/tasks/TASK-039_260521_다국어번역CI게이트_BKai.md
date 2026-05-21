@@ -80,9 +80,9 @@
 | 생성 파일 | `scripts/audit-i18n.ts` |
 | 수정 파일 | `messages/en.json`, `messages/ko.json`, `package.json`, `src/types/orders.ts`, `src/components/orders/OrderDataTable.tsx`, `src/components/orders/StatusChangeModal.tsx` |
 | gitnexus_impact 결과 | ORDER_STATUS_META 소비처 2개 — OrderDataTable.tsx(getStatusInfo·JSX label), StatusChangeModal.tsx(currentStatus 표시·선택 가능 목록) |
-| 회귀 결과 | 208/209 PASS (1 pre-existing: finance TC-F.3 settlement.ts updatePaymentStatus mock) |
-| 코드 커밋 해시 | `1e5c07d` (feat) + `2a3e00c` (test fix) |
-| 문서 커밋 해시 | `8a6cf8e` (report) + `0bee283` (task fix) |
+| 회귀 결과 | 209/209 FULL PASS |
+| 코드 커밋 해시 | `1e5c07d` (feat) + `2a3e00c` + `cb7784b` (test fix) |
+| 문서 커밋 해시 | `8a6cf8e` (report) + `0bee283` (task fix) + `3446779` (rework report) |
 
 ---
 
@@ -103,4 +103,4 @@
 | 2026-05-21 | Aiden (Claude) | Task 생성 — IMP-032 다국어 번역 CI 게이트 발령. B_Kai 신규 할당 중단 해제 후 첫 Task |
 | 2026-05-21 | B_Kai (OpenCode) | 구현 완료 — `1e5c07d`(feat) + `8a6cf8e`(docs). audit-i18n.ts·ORDER_STATUS_META i18n 전환·consumer 2곳 useTranslations. 207/209 PASS (2 pre-existing Ring TASK-033 버그). R-17 커밋 순서 ✅ |
 | 2026-05-21 | Aiden (Claude) | ❌ 반려 (1차: 오진 정정) — 실제 이슈: 해시 `—` 미기재·DoD 3개 미체크·`[Codex]`→`[B_Kai]` 수정. 신규 위반 아님(2-커밋 패턴 Advisory). task file 단독 후속 커밋 지시 |
-| 2026-05-21 | B_Kai (OpenCode) | 재작업 완료 — `0bee283`(해시·DoD·텍스트 정정) + `2a3e00c`(master_policy 테스트 mock 보완, 207→208 PASS) |
+| 2026-05-21 | B_Kai (OpenCode) | 재작업 완료 — `0bee283`(해시·DoD·텍스트 정정) + `2a3e00c`·`cb7784b`(master_policy+finance 테스트 mock 보완) → 209/209 FULL PASS |

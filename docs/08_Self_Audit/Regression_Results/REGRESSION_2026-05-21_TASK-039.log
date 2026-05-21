@@ -3,11 +3,11 @@ Date: 2026-05-21
 Branch: main
 Agent: Noah (Codex)
 Changes: scripts/audit-i18n.ts (신규) + ORDER_STATUS_META i18n 전환 + OrderDataTable/StatusChangeModal useTranslations 적용
-Result: 207/209 PASS (2 pre-existing failures, unrelated to changes)
+Result: 209/209 FULL PASS (44/44 test files)
 
-Pre-existing failures:
-1. tests/integration/finance.test.ts — TC-F.3: settlement.ts:38 (financeRepo.updatePaymentStatus)
-2. tests/unit/master/master_policy.test.ts — TC-MP.1: order.repository.ts:230 (findMasterById mock)
+Pre-existing failures resolved:
+- tests/integration/finance.test.ts — TC-F.3: mock chain 보완 (cb7784b)
+- tests/unit/master/master_policy.test.ts — TC-MP.1/2: user.id + findMasterById mock 보완 (2a3e00c)
 
 === npm run check:i18n ===
 en.json baseline: 441 keys
