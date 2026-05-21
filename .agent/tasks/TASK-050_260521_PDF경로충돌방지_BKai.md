@@ -8,7 +8,7 @@
 | 담당 Agent | B_Kai (Codex) |
 | 우선순위 | P3 |
 | 전제조건 | 없음 — 즉시 착수 가능 |
-| 상태 | ⬜ 미착수 |
+| 상태 | 🔔 검토 요청 |
 | 파급 효과 | 없음 |
 
 ---
@@ -47,15 +47,15 @@
 
 ## 완료 기준 (DoD)
 
-- [ ] `issueInvoicePdf()` UUID 기반 파일명으로 수정 완료
-- [ ] Storage metadata에 `invoice_no` 포함
-- [ ] DB `pdf_path` 저장 로직 확인 (있다면 수정 완료)
-- [ ] `gitnexus_impact` 결과 기록
-- [ ] 회귀 테스트 전체 PASS 증적
-- [ ] `[Codex] fix: IMP-061` 코드 커밋 완료 (해시 기재)
-- [ ] `[Codex] docs: TASK-050` 문서 커밋 완료
-- [ ] 본 파일 상태 🔔 + ACTIVE_TASK.md 동기화
-- [ ] `scratch/IMP_PROGRESS.md` IMP-061 행 갱신
+- [x] `issueInvoicePdf()` UUID 기반 파일명으로 수정 완료
+- [x] Storage metadata에 `invoice_no` 포함
+- [x] DB `pdf_path` 저장 로직 확인 — `zen_invoice_pdf_history.file_path` 기존 사용, 수정 불필요
+- [x] `gitnexus_impact` 결과 기록 — LOW risk
+- [x] 회귀 테스트 전체 PASS 증적 — 209/209
+- [x] `[B_Kai] fix: IMP-061` 코드 커밋 완료 (해시 `7ef504a`)
+- [ ] `[B_Kai] docs: TASK-050` 문서 커밋 완료
+- [x] 본 파일 상태 🔔 + ACTIVE_TASK.md 동기화
+- [x] `scratch/IMP_PROGRESS.md` IMP-061 행 🔔 갱신
 
 ---
 
@@ -74,16 +74,14 @@
 
 ## 작업 결과
 
-> **이 섹션은 착수 후 B_Kai가 작성합니다.**
-
 | 항목 | 내용 |
 |:---|:---|
-| 착수일 | — |
-| 완료일 | — |
-| 구현 방식 | — |
-| gitnexus_impact 결과 | — |
-| 회귀 결과 | — |
-| 코드 커밋 해시 | — |
+| 착수일 | 2026-05-21 |
+| 완료일 | 2026-05-21 |
+| 구현 방식 | `invoices/{invoice_no}/v{version}_{timestamp}.pdf` → `invoices/{uuid}.pdf` (`crypto.randomUUID()`) |
+| gitnexus_impact 결과 | LOW — `issueInvoicePdf` 직접 호출자 2개(Finance InvoiceTable·Admin InvoiceTable) — `handleIssuePdf` 경로만 영향 |
+| 회귀 결과 | 209/209 FULL PASS |
+| 코드 커밋 해시 | `7ef504a` |
 | 문서 커밋 해시 | — |
 
 ---
@@ -99,3 +97,4 @@
 | 날짜 | 주체 | 내용 |
 |:-----|:----:|:-----|
 | 2026-05-21 | Aiden (Claude) | Task 생성 — Sprint H-II 작업 지시 발령 |
+| 2026-05-21 | B_Kai (OpenCode) | 구현 완료 — `7ef504a`. `invoices/{uuid}.pdf` + metadata `invoice_no` + upsert→false. 209/209 ✅ |
