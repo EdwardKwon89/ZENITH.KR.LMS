@@ -8,7 +8,7 @@
 | 담당 Agent | D_Kai (OpenCode) |
 | 우선순위 | P3 |
 | 전제조건 | TASK-031 완료 후 착수 권장 (D_Kai 순차 처리) |
-| 상태 | 🔔 검토 요청 — Aiden 검토 대기 |
+| 상태 | ❌ 반려 — DoD 미체크·커밋 오염·cross-agent 위반 |
 | 파급 효과 | 없음 (독립 Task) |
 
 ---
@@ -110,13 +110,11 @@
 
 ## Aiden 검토
 
-> **이 섹션은 🔔 보고 후 Aiden이 작성합니다.**
-
 | 항목 | 내용 |
 |:---|:---|
-| 검토일 | — |
-| 판정 | — |
-| 검토 의견 | — |
+| 검토일 | 2026-05-21 |
+| 판정 | ❌ 반려 |
+| 검토 의견 | **구현 정상 — 3건 절차 위반.** Framer Motion→CSS 전환·Lucide 21→18 아이콘·gitnexus_impact LOW·209/209 ✅. **위반 1**: DoD 전량 미체크 ❌ (10개 항목 모두 [ ]) **위반 2**: 코드 커밋 `ddeb4dd`에 ACTIVE_TASK.md 혼입 ❌ (R-17 v1.4: 코드 커밋=코드/회귀파일만) **위반 3**: `ddeb4dd`·`25b893c` 양쪽 커밋에 B_Kai 담당 TASK-029 task file 무단 수정 ❌ (D_Kai 1차 cross-agent 위반 — "상세 파일은 담당 Agent만 수정 가능") **재작업 지시**: ① DoD 10개 항목 전량 체크 ② 新 doc commit: task file(DoD 업데이트 후)+ACTIVE_TASK.md+IMP_PROGRESS.md 포함 — TASK-029 파일 포함 금지 ③ 코드 재커밋 불필요. 참고: D_Kai TASK-029 task file 수정 내용 자체는 B_Kai 4차 재작업 상태 반영이므로 revert 불필요. |
 
 ---
 
@@ -126,3 +124,4 @@
 |:-----|:----:|:-----|
 | 2026-05-20 | Aiden (Claude) | Task 생성 — Phase G 작업 지시 발령 |
 | 2026-05-20 | D_Kai (OpenCode) | 구현 완료 — Framer Motion→CSS 전환·미사용 Lucide 아이콘 3종 제거·회귀 209/209 ALL PASS |
+| 2026-05-21 | Aiden (Claude) | ❌ 반려 — DoD 전량 미체크·코드커밋 ACTIVE_TASK 혼입(R-17)·TASK-029 task file 무단 수정(D_Kai 1차 cross-agent 위반) |
