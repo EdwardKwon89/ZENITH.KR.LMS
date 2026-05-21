@@ -8,7 +8,7 @@
 | 담당 Agent | D_Kai (DeepSeek/OpenCode) |
 | 우선순위 | P3 |
 | 전제조건 | 없음 — 즉시 착수 가능 |
-| 상태 | ⬜ 미착수 |
+| 상태 | 🔔 검토 요청 |
 | 파급 효과 | 타입 오류 파급 가능 — gitnexus_impact 필수 |
 
 ---
@@ -83,12 +83,12 @@ DB 스키마 변경 시 영향 범위 특정이 불가능하고 런타임 에러
 
 | 항목 | 내용 |
 |:---|:---|
-| 착수일 | — |
-| 완료일 | — |
-| 발견 any 건수 | — |
-| gitnexus_impact 결과 | — |
-| 회귀 결과 | — |
-| 코드 커밋 해시 | — |
+| 착수일 | 2026-05-21 |
+| 완료일 | 2026-05-21 |
+| 발견 any 건수 | 2건 (`src/types/orders.ts:62` · `src/types/claims.ts:36`) |
+| gitnexus_impact 결과 | 타입 전용 변경 — 런타임 영향 없음, 파급 효과 LOW |
+| 회귀 결과 | 207/209 PASS (2 infra-only pre-existing failures) |
+| 코드 커밋 해시 | `282c3c6` |
 | 문서 커밋 해시 | — |
 
 ---
