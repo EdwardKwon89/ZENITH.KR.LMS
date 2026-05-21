@@ -147,13 +147,16 @@
 
 ---
 
-## Phase G — Future
+## Phase G — Future (통관 연계)
 
 | IMP | 내용 | Agent | 상태 | 완료일 |
 |:---:|:-----|:-----:|:----:|:------:|
 | 028 | UNI-PASS EDI 연동 | Aiden+Riley | ⬜ | — |
+| 069 | IBC 어댑터 구현 (미국 통관) | — | 🚫 | — |
 
-**Phase G 완료**: 0 / 1
+> IMP-069 착수 조건: IBC Sandbox 계정 확보 + shxk 정체 확인 (R_01 §1-1·§1-4). An_08/An_09 분석 완료로 명세 준비됨.
+
+**Phase G 완료**: 0 / 2
 
 ---
 
@@ -191,11 +194,11 @@
 | D | 8 | 8 | 100% ✅ | |
 | E | 7 | 7 | 100% ✅ | |
 | F | 11 | 11 | 100% ✅ | |
-| G | 0 | 1 | 0% | IMP-028 미착수 (Future) |
+| G | 0 | 2 | 0% | IMP-028·069 미착수 (Future — 통관 연계) |
 | H | 5 | 5 | 100% ✅ | |
-| **합계** | **53** | **56** | **94.6%** | ➖ 1건 제외 기준 |
+| **합계** | **53** | **57** | **93.0%** | ➖ 1건 제외 기준 |
 
-> 미완료 IMP 2건: IMP-046(🚫 유예) · IMP-028(⬜ Future)
+> 미완료 IMP 3건: IMP-046(🚫 유예) · IMP-028(⬜ Future) · IMP-069(🚫 착수 조건 대기)
 > 2026-05-21 기준 업데이트 (Aiden)
 
 ---
@@ -226,3 +229,4 @@
 | 2026-05-21 | Riley (Gemini) | IMP-050·052 ✅ PASS 승인 반영 및 대시보드 갱신 (TASK-041/043) |
 | 2026-05-21 | D_Kai (OpenCode) | IMP-012 🔔 완료 보고 — TASK-045 master/admin codes-client dedup · 211/211 · 커밋 63ce099 |
 | 2026-05-21 | B_Kai (OpenCode) | IMP-024 ✅ PASS — TASK-049 공통 도메인 UI 컴포넌트 라이브러리화 완료 · ZenStatusBadge + ZenCurrencyDisplay · Ring 재할당 → B_Kai · 211/211 FULL PASS |
+| 2026-05-21 | Aiden (Claude) | IMP-069 신규 등록 — IBC 어댑터 구현 (Phase G 추가). An_08/An_09 분석 완료 기반. 착수 조건: IBC Sandbox 계정 + shxk 정체 확인. Phase G 0/1→0/2, 전체 56→57개 |
