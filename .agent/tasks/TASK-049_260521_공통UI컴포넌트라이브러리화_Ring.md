@@ -8,7 +8,7 @@
 | 담당 Agent | B_Kai (Noah/Codex) |
 | 우선순위 | P3 |
 | 전제조건 | 없음 — 즉시 착수 가능 |
-| 상태 | ⬜ 미착수 |
+| 상태 | 🔔 검토 요청 |
 | 파급 효과 | 여러 도메인 컴포넌트에 영향 — gitnexus_impact 필수 |
 
 ---
@@ -52,16 +52,16 @@ UI 일관성 유지가 어렵고 동일 기능의 중복 코드가 산재한다.
 
 ## 완료 기준 (DoD)
 
-- [ ] `src/components/domain/` 폴더 신설 완료
-- [ ] 최소 2개 이상 공통 UI 컴포넌트 추출 (ZenStatusBadge 포함)
-- [ ] barrel export (`index.ts`) 완성
-- [ ] 기존 도메인 컴포넌트 → 공통 컴포넌트 참조 교체 (해당되는 곳)
-- [ ] `gitnexus_impact` 결과 기록
-- [ ] 회귀 테스트 전체 PASS 증적
-- [ ] `[Qwen] refactor: IMP-024` 코드 커밋 완료 (해시 기재)
-- [ ] `[Qwen] docs: TASK-049` 문서 커밋 완료
-- [ ] 본 파일 상태 🔔 + ACTIVE_TASK.md 동기화
-- [ ] `scratch/IMP_PROGRESS.md` IMP-024 행 갱신
+- [x] `src/components/domain/` 폴더 신설 완료
+- [x] 최소 2개 이상 공통 UI 컴포넌트 추출 (ZenStatusBadge + ZenCurrencyDisplay)
+- [x] barrel export (`index.ts`) 완성
+- [x] 기존 도메인 컴포넌트 → 공통 컴포넌트 참조 교체 (OrderDataTable + StatusChangeModal)
+- [x] `gitnexus_impact` 결과 기록
+- [x] 회귀 테스트 전체 PASS 증적 (211/211)
+- [x] `[B_Kai] refactor: IMP-024` 코드 커밋 완료 (`c96bff4`)
+- [ ] `[B_Kai] docs: TASK-049` 문서 커밋 완료
+- [x] 본 파일 상태 🔔 + ACTIVE_TASK.md 동기화
+- [x] `scratch/IMP_PROGRESS.md` IMP-024 행 갱신
 
 ---
 
@@ -80,16 +80,14 @@ UI 일관성 유지가 어렵고 동일 기능의 중복 코드가 산재한다.
 
 ## 작업 결과
 
-> **이 섹션은 착수 후 B_Kai가 작성합니다.**
-
 | 항목 | 내용 |
 |:---|:---|
-| 착수일 | — |
-| 완료일 | — |
-| 추출 컴포넌트 목록 | — |
-| gitnexus_impact 결과 | — |
-| 회귀 결과 | — |
-| 코드 커밋 해시 | — |
+| 착수일 | 2026-05-21 |
+| 완료일 | 2026-05-21 |
+| 추출 컴포넌트 목록 | ZenStatusBadge (Order 배지), ZenCurrencyDisplay (통화 표시기) |
+| gitnexus_impact 결과 | LOW — OrderDataTable + StatusChangeModal 2곳만 영향. barrel 경로 신규라 영향 없음 |
+| 회귀 결과 | 211/211 FULL PASS |
+| 코드 커밋 해시 | `c96bff4` |
 | 문서 커밋 해시 | — |
 
 ---
