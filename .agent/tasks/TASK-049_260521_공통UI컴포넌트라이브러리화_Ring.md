@@ -88,7 +88,7 @@ UI 일관성 유지가 어렵고 동일 기능의 중복 코드가 산재한다.
 | gitnexus_impact 결과 | LOW — OrderDataTable + StatusChangeModal 2곳만 영향. barrel 경로 신규라 영향 없음 |
 | 회귀 결과 | 211/211 FULL PASS |
 | 코드 커밋 해시 | `c96bff4` |
-| 문서 커밋 해시 | — |
+| 문서 커밋 해시 | `3ce44ab` |
 
 ---
 
