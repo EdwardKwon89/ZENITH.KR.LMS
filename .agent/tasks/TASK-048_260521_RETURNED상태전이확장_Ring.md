@@ -8,7 +8,7 @@
 | 담당 Agent | Ring (Qwen) |
 | 우선순위 | P3 |
 | 전제조건 | 없음 — 즉시 착수 가능 |
-| 상태 | ❌ 반려 |
+| 상태 | 🔔 검토 요청 |
 | 파급 효과 | Status Machine 전이 규칙 변경 — gitnexus_impact 필수 |
 
 ---
