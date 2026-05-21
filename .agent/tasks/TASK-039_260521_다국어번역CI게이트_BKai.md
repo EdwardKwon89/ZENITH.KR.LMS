@@ -64,10 +64,10 @@
 - [x] `gitnexus_impact` 결과 기록 — ORDER_STATUS_META 소비처 2개(OrderDataTable·StatusChangeModal)
 - [x] `gitnexus_detect_changes()` 결과 확인 — 변경 범위 6개 파일
 - [x] 회귀 테스트 PASS 증적 — 207/209 (2 pre-existing failure, 내 변경 무관)
-- [ ] `[Codex] feat: IMP-032` 코드 커밋 완료 (해시 기재)
-- [ ] `[Codex] docs: TASK-039` 문서 커밋 완료
+- [x] `[B_Kai] feat: IMP-032` 코드 커밋 완료 (해시 `1e5c07d`)
+- [x] `[B_Kai] docs: TASK-039` 문서 커밋 완료 (해시 `8a6cf8e`)
 - [x] 본 파일 상태 🔔 + ACTIVE_TASK.md 동기화
-- [ ] `scratch/IMP_PROGRESS.md` IMP-032 행 갱신
+- [x] `scratch/IMP_PROGRESS.md` IMP-032 행 🔔 갱신
 
 ---
 
@@ -81,8 +81,8 @@
 | 수정 파일 | `messages/en.json`, `messages/ko.json`, `package.json`, `src/types/orders.ts`, `src/components/orders/OrderDataTable.tsx`, `src/components/orders/StatusChangeModal.tsx` |
 | gitnexus_impact 결과 | ORDER_STATUS_META 소비처 2개 — OrderDataTable.tsx(getStatusInfo·JSX label), StatusChangeModal.tsx(currentStatus 표시·선택 가능 목록) |
 | 회귀 결과 | 207/209 PASS (2 pre-existing: master_policy.test.ts dissolveMasterOrder mock user 미설정) |
-| 코드 커밋 해시 | — |
-| 문서 커밋 해시 | — |
+| 코드 커밋 해시 | `1e5c07d` |
+| 문서 커밋 해시 | `8a6cf8e` |
 
 ---
 
