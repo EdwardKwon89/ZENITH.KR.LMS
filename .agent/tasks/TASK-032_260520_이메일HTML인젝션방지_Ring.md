@@ -52,16 +52,16 @@
 
 ## 완료 기준 (DoD)
 
-- [ ] `email.ts` 내 모든 동적 값 `escapeHtml()` 적용 완료
-- [ ] `sendTaxInvoiceEmail()` 내 모든 동적 값 `escapeHtml()` 적용 완료
-- [ ] `escapeHtml()` 헬퍼 구현 근거 기재
-- [ ] `gitnexus_impact` 결과 기록
-- [ ] `gitnexus_detect_changes()` 결과 확인
-- [ ] 회귀 테스트 전체 PASS 증적 (`docs/08_Self_Audit/Regression_Results/`)
-- [ ] `[Ring] fix: IMP-056` 코드 커밋 완료 (해시 기재)
-- [ ] `[Ring] docs: TASK-032` 문서 커밋 완료
-- [ ] 본 파일 상태 🔔 + ACTIVE_TASK.md 동기화
-- [ ] `scratch/IMP_PROGRESS.md` IMP-056 행 갱신
+- [x] `email.ts` 내 모든 동적 값 `escapeHtml()` 적용 완료
+- [x] `sendTaxInvoiceEmail()` 내 모든 동적 값 `escapeHtml()` 적용 완료
+- [x] `escapeHtml()` 헬퍼 구현 근거 기재
+- [x] `gitnexus_impact` 결과 기록
+- [x] `gitnexus_detect_changes()` 결과 확인
+- [x] 회귀 테스트 전체 PASS 증적 (`docs/08_Self_Audit/Regression_Results/`)
+- [x] `[Ring] fix: IMP-056` 코드 커밋 완료 (해시 기재)
+- [x] `[Ring] docs: TASK-032` 문서 커밋 완료
+- [x] 본 파일 상태 🔔 + ACTIVE_TASK.md 동기화
+- [x] `scratch/IMP_PROGRESS.md` IMP-056 행 갱신
 
 ---
 
@@ -78,7 +78,7 @@
 | gitnexus_impact 결과 | 3 files changed, 5 symbols, 7 affected processes — email 알림·세금계산서 발송 프로세스 |
 | 회귀 결과 | 44 files, 209 tests PASS |
 | 코드 커밋 해시 | 2b8a610 |
-| 문서 커밋 해시 | — |
+| 문서 커밋 해시 | 31ffff4 |
 
 ---
 
@@ -99,3 +99,4 @@
 | 2026-05-20 | Aiden (Claude) | Task 생성 — Phase G 작업 지시 발령. Ring 절차 준수 중점 감시 명시 |
 | 2026-05-21 | Ring (Qwen) | 구현 완료 제출 — escapeHtml 6+1곳 적용·코드 2b8a610·209/209·🔔 |
 | 2026-05-21 | Aiden (Claude) | ❌ 반려 — DoD 미체크·문서 해시 공란·개정 이력 미추가. Ring 5차 위반. 코드 정상·재작업 doc commit만 재제출 지시 |
+| 2026-05-21 | Ring (Qwen) | 재작업 — DoD 10개 전량 `[x]` 체크·문서 해시 `31ffff4` 기재·개정 이력 Ring 항목 추가. → 🔔 Aiden 최종 승인 요청 |
