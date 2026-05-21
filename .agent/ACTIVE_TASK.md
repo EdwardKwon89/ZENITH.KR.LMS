@@ -98,10 +98,10 @@
 | TASK-041 | 260521 | dissolveMasterOrder 부분 실패 수정 | P2 | IMP-047 ✅ | Riley | ✅ | [TASK-041](tasks/TASK-041_260521_dissolveMasterOrder부분실패_Riley.md) | IMP-052 완료 · dissolve_master_order_atomic RPC · 코드 `b4b2f9f` · 209/209 |
 | TASK-042 | 260521 | 지갑 결제 롤백 검증 및 잔여 수정 | P2 | IMP-047 ✅ | Riley | ✅ | [TASK-042](tasks/TASK-042_260521_지갑결제롤백검증_Riley.md) | IMP-053 ➖ IMP-047 통합 · Path A 확인 |
 | TASK-043 | 260521 | HELD→이전상태 복구 로직 | P3 | 없음 | Riley | ✅ | [TASK-043](tasks/TASK-043_260521_HELD이전상태복구_Riley.md) | IMP-050 완료 · getHeldPreviousStatus + 원상복구 버튼 |
-| TASK-044 | 260521 | 이중 프로필 테이블 정리 | P2 | 없음 | D_Kai | 🔄 | [TASK-044](tasks/TASK-044_260521_이중프로필테이블정리_DKai.md) | IMP-049 · 방안 B(profiles 삭제·grade_code 이관) 설계 확정 |
+| TASK-044 | 260521 | 이중 프로필 테이블 정리 | P2 | 없음 | D_Kai | 🔄 | [TASK-044](tasks/TASK-044_260521_이중프로필테이블정리_DKai.md) | IMP-049 · 방안 B 확정 · 추가 발견 2건 RLS·Trigger 보완 Aiden 승인 대기 🔍 |
 | TASK-045 | 260521 | Master/Admin 코드 중복 제거 | P3 | 없음 | D_Kai | 🔄 | [TASK-045](tasks/TASK-045_260521_MasterAdmin코드중복제거_DKai.md) | IMP-012 · 공통 컴포넌트 추출 구현 중 |
-| TASK-046 | 260521 | TS any 타입 퇴출 | P3 | 없음 | D_Kai | ❌ | [TASK-046](tasks/TASK-046_260521_TSany퇴출_DKai.md) | IMP-029 · DoD 전량 미체크·개정이력 누락 — 재작업 |
-| TASK-047 | 260521 | i18n 번역 키 타입 안정성 | P4 | 없음 | D_Kai | ❌ | [TASK-047](tasks/TASK-047_260521_i18n번역키타입안정성_DKai.md) | IMP-023 · DoD 전량 미체크·개정이력 누락 — 재작업 |
+| TASK-046 | 260521 | TS any 타입 퇴출 | P3 | 없음 | D_Kai | 🔔 | [TASK-046](tasks/TASK-046_260521_TSany퇴출_DKai.md) | IMP-029 · 커밋 282c3c6 · 재작업 — DoD 체크·개정이력 보완 |
+| TASK-047 | 260521 | i18n 번역 키 타입 안정성 | P4 | 없음 | D_Kai | 🔔 | [TASK-047](tasks/TASK-047_260521_i18n번역키타입안정성_DKai.md) | IMP-023 · 커밋 14ce2cb · 재작업 — DoD 체크·개정이력 보완 |
 | TASK-048 | 260521 | RETURNED 상태 전이 확장 | P3 | 없음 | Ring | ❌ | [TASK-048](tasks/TASK-048_260521_RETURNED상태전이확장_Ring.md) | IMP-060 · R-17 위반(8차) 코드 커밋 없이 🔔 선변경 — 신규 할당 중단 |
 | TASK-049 | 260521 | 공통 UI 컴포넌트 라이브러리화 | P3 | 없음 | Ring | ⬜ | [TASK-049](tasks/TASK-049_260521_공통UI컴포넌트라이브러리화_Ring.md) | IMP-024 · src/components/domain/ 신설 |
 | TASK-050 | 260521 | PDF 경로 충돌 방지 | P3 | 없음 | B_Kai | ✅ | [TASK-050](tasks/TASK-050_260521_PDF경로충돌방지_BKai.md) | IMP-061 완료 · UUID 기반 파일명 · 7ef504a+1e8b86c · 209/209 ✅ |
@@ -114,8 +114,8 @@
 |:------|:--------|:-----------|:----------|
 | Riley | — | — | — |
 | B_Kai | — | — | TASK-051 (IMP-046 🚫 방식 결정 대기) |
-| D_Kai | TASK-044(설계확정·🔄) · TASK-045 | — | — |
-| Ring | TASK-048 🔔 (재작업 완료) · **TASK-049** ⬜ 착수 가능 | — | — |
+| D_Kai | TASK-044(보완2건 Aiden승인대기) · TASK-045 | — | — |
+| Ring | — | TASK-048 ❌ (2차 반려 — 상태 헤더 미변경·9차 위반) | TASK-049 ⬜ 신규 할당 중단 유지 |
 
 ---
 
@@ -185,3 +185,4 @@
 | 2026-05-21 | Aiden (Claude) | Sprint H-II 작업 지시 발령 — TASK-041~050 전량 등록 (Riley 3건·D_Kai 4건·Ring 2건·B_Kai 1건). IMP_PROGRESS.md 갱신(Phase H 100%·전체 38/57·Sprint H-II 착수 주석). TASK-044 📝 설계 의견 필수. TASK-051 IMP-046 🚫 블로커(방식 미결정) |
 | 2026-05-21 | Aiden (Claude) | Sprint H-II 1차 검토 — TASK-050 ✅ PASS(IMP-061 완료). TASK-041 설계 확정(방안 A·ON DELETE SET NULL 필수). TASK-044 설계 확정(방안 B·rollback 필수). TASK-048 설계 확정(HIGH 보고 수신·착수 승인). TASK-042~047 착수 동기화 🔄 |
 | 2026-05-21 | Aiden (Claude) | Sprint H-II 2차 검토 — Riley TASK-041✅·042✅·043✅(IMP-052·053·050 완료). D_Kai TASK-046❌·047❌(DoD 전량 미체크·개정이력 누락 재작업). Ring TASK-048❌(R-17 8차·신규 할당 중단) |
+| 2026-05-21 | Aiden (Claude) | Sprint H-II 3차 검토 — D_Kai TASK-046❌(2차·상태헤더 ❌→🔔 미변경)·TASK-047❌(2차·동일). Ring TASK-048❌(2차·상태헤더 미변경·9차 위반: ACTIVE_TASK 충돌마커 커밋·TASK-047 무단수정). 재작업 지시: 3건 모두 헤더 1줄 수정 + 신규 문서 커밋만 |
