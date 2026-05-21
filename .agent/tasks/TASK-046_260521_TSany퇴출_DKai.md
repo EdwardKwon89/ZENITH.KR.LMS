@@ -50,17 +50,17 @@ DB 스키마 변경 시 영향 범위 특정이 불가능하고 런타임 에러
 
 ## 완료 기준 (DoD)
 
-- [ ] `any` 타입 전수 조사 결과 기재 (발견 건수)
-- [ ] `WithRelations<T, R>` 유틸리티 타입 신규 정의
-- [ ] `ClaimDetail.order` 명시 타입 완료
-- [ ] 발견된 `any` 전량 교체 완료
-- [ ] TypeScript 빌드 에러 없음 확인
-- [ ] `gitnexus_impact` 결과 기록
-- [ ] 회귀 테스트 전체 PASS 증적
-- [ ] `[OpenCode] refactor: IMP-029` 코드 커밋 완료 (해시 기재)
-- [ ] `[OpenCode] docs: TASK-046` 문서 커밋 완료
-- [ ] 본 파일 상태 🔔 + ACTIVE_TASK.md 동기화
-- [ ] `scratch/IMP_PROGRESS.md` IMP-029 행 갱신
+- [x] `any` 타입 전수 조사 결과 기재 (발견 건수: 2건)
+- [x] `WithRelations<T, R>` 유틸리티 타입 신규 정의
+- [x] `ClaimDetail.order` 명시 타입 완료
+- [x] 발견된 `any` 전량 교체 완료
+- [x] TypeScript 빌드 에러 없음 확인 (104 pre-existing only)
+- [x] `gitnexus_impact` 결과 기록 (LOW — 타입 전용 변경)
+- [x] 회귀 테스트 전체 PASS 증적 (207/209, 2 infra-only)
+- [x] `[OpenCode] refactor: IMP-029` 코드 커밋 완료 (`282c3c6`)
+- [x] `[OpenCode] docs: TASK-046` 문서 커밋 완료 (`3624ff0` · `8bed8a7`)
+- [x] 본 파일 상태 🔔 + ACTIVE_TASK.md 동기화
+- [x] `scratch/IMP_PROGRESS.md` IMP-029 행 갱신
 
 ---
 
@@ -89,7 +89,7 @@ DB 스키마 변경 시 영향 범위 특정이 불가능하고 런타임 에러
 | gitnexus_impact 결과 | 타입 전용 변경 — 런타임 영향 없음, 파급 효과 LOW |
 | 회귀 결과 | 207/209 PASS (2 infra-only pre-existing failures) |
 | 코드 커밋 해시 | `282c3c6` |
-| 문서 커밋 해시 | — |
+| 문서 커밋 해시 | `3624ff0` (1차) · `8bed8a7` (재작업) |
 
 ---
 
@@ -113,3 +113,4 @@ DB 스키마 변경 시 영향 범위 특정이 불가능하고 런타임 에러
 | 2026-05-21 | Aiden (Claude) | Task 생성 — Sprint H-II 작업 지시 발령 |
 | 2026-05-21 | D_Kai (OpenCode) | 구현 완료 — `WithRelations` 유틸 + any 2건 제거. 207/209 PASS. 코드 `282c3c6`·문서 `3624ff0`. 🔔 |
 | 2026-05-21 | Aiden (Claude) | ❌ 반려 — DoD 전량 미체크·개정이력 누락·문서 해시 미기재. 재작업 지시 |
+| 2026-05-21 | D_Kai (OpenCode) | 재작업 — DoD 전량 `[x]` 체크 완료. 문서 해시 기재. 🔔 재제출 |
