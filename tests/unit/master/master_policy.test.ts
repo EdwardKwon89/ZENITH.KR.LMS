@@ -21,6 +21,7 @@ describe('ZENITH Master Order: Policy & Integrity Audit', () => {
       maybeSingle: vi.fn(),
       single: vi.fn(),
       delete: vi.fn().mockReturnThis(),
+      insert: vi.fn().mockReturnThis(),
     };
     return mock;
   };
@@ -31,7 +32,11 @@ describe('ZENITH Master Order: Policy & Integrity Audit', () => {
 
   it('TC-MP.1: [Auto-Dissolve] 마스터 취소 시 하위 오더가 REGISTERED로 자동 해체되어야 함', async () => {
     const supabase = createMockSupabase();
-    (validateUserAction as any).mockResolvedValue({ supabase });
+    (validateUserAction as any).mockResolvedValue({ supabase, user: { id: 'test-user-123' } });
+
+    // 0. findMasterById chain (new IMP-051 audit): eq() returns chain, single() returns data
+    supabase.eq.mockReturnValueOnce(supabase);
+    supabase.single.mockResolvedValueOnce({ data: { status: 'CREATED' }, error: null });
 
     // 1. Master status update: CREATED -> CANCELED
     supabase.update.mockReturnValueOnce(supabase); 
@@ -40,6 +45,9 @@ describe('ZENITH Master Order: Policy & Integrity Audit', () => {
     // 2. Child orders auto-dissolve update
     supabase.update.mockReturnValueOnce(supabase);
     supabase.eq.mockReturnValueOnce({ error: null });
+
+    // 3. Audit history insert (best-effort)
+    supabase.insert.mockReturnValueOnce({ error: null });
 
     const result = await updateMasterOrderStatus('m-123', 'CANCELED', 'CEO Direct Order');
 
@@ -54,7 +62,7 @@ describe('ZENITH Master Order: Policy & Integrity Audit', () => {
 
   it('TC-MP.2: [Manual-Dissolve] 수동 해체 시 하위 오더가 REGISTERED 상태로 복구되어야 함', async () => {
     const supabase = createMockSupabase();
-    (validateUserAction as any).mockResolvedValue({ supabase });
+    (validateUserAction as any).mockResolvedValue({ supabase, user: { id: 'test-user-456' } });
 
     // 1. Unbinding house orders
     supabase.update.mockReturnValueOnce(supabase);
@@ -63,6 +71,9 @@ describe('ZENITH Master Order: Policy & Integrity Audit', () => {
     // 2. Deleting master order
     supabase.delete.mockReturnValueOnce(supabase);
     supabase.eq.mockReturnValueOnce({ error: null });
+
+    // 3. Audit history insert (best-effort)
+    supabase.insert.mockReturnValueOnce({ error: null });
 
     const result = await dissolveMasterOrder('m-456');
 
