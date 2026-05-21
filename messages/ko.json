@@ -437,6 +437,7 @@
     "HELD": { "label": "보류", "description": "문제 발생으로 인한 일시 중단" },
     "CANCELED": { "label": "취소", "description": "오더 취소됨" },
     "RETURNED": { "label": "반송", "description": "화주에게 화물 반송됨" },
+    "DISPOSED": { "label": "폐기", "description": "화물 폐기 처리됨" },
     "MASTERED": { "label": "마스터결합", "description": "마스터 오더에 바인딩되어 수정이 제한됨" }
   },
   "Maintenance": {
