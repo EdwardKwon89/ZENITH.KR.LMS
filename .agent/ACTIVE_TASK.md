@@ -95,14 +95,14 @@
 | TASK-037 | 260520 | NaviSidebar Client Bundle 최적화 | P3 | TASK-031 권장 | D_Kai | ✅ | [TASK-037](tasks/TASK-037_260520_NaviSidebar최적화_DKai.md) | IMP-022 완료 · Framer Motion→CSS + Lucide 21→18 · 코드 ddeb4dd · doc 236a08d |
 | TASK-039 | 260521 | 다국어 번역 커버리지 감사 + CI 게이트 | P4 | 없음 | B_Kai | ✅ | [TASK-039](tasks/TASK-039_260521_다국어번역CI게이트_BKai.md) | IMP-032 완료 ✅ · 209/209 PASS |
 | TASK-040 | 260521 | Ring 재교육 세션 (R-17 v1.4) | P4 | 없음 | Ring | ✅ | [TASK-040](tasks/TASK-040_260521_Ring재교육세션_Ring.md) | SAR_004 ✅ · §1~§4 전량·커밋 1d93eee · TASK-040 완료·신규 할당 중단 해제 |
-| TASK-041 | 260521 | dissolveMasterOrder 부분 실패 수정 | P2 | IMP-047 ✅ | Riley | 🔄 | [TASK-041](tasks/TASK-041_260521_dissolveMasterOrder부분실패_Riley.md) | IMP-052 · 방안 A(ON DELETE SET NULL 포함 RPC) 설계 확정 |
-| TASK-042 | 260521 | 지갑 결제 롤백 검증 및 잔여 수정 | P2 | IMP-047 ✅ | Riley | 🔄 | [TASK-042](tasks/TASK-042_260521_지갑결제롤백검증_Riley.md) | IMP-053 · A/B 경로 구현 중 |
-| TASK-043 | 260521 | HELD→이전상태 복구 로직 | P3 | 없음 | Riley | 🔄 | [TASK-043](tasks/TASK-043_260521_HELD이전상태복구_Riley.md) | IMP-050 · 원상복구 버튼 UI 구현 중 |
+| TASK-041 | 260521 | dissolveMasterOrder 부분 실패 수정 | P2 | IMP-047 ✅ | Riley | 🔔 | [TASK-041](tasks/TASK-041_260521_dissolveMasterOrder부분실패_Riley.md) | IMP-052 · 방안 A(ON DELETE SET NULL 포함 RPC) 설계 확정 |
+| TASK-042 | 260521 | 지갑 결제 롤백 검증 및 잔여 수정 | P2 | IMP-047 ✅ | Riley | 🔔 | [TASK-042](tasks/TASK-042_260521_지갑결제롤백검증_Riley.md) | IMP-053 · A/B 경로 검토 및 IMP-047에 완전 커버 통합 확인 |
+| TASK-043 | 260521 | HELD→이전상태 복구 로직 | P3 | 없음 | Riley | 🔔 | [TASK-043](tasks/TASK-043_260521_HELD이전상태복구_Riley.md) | IMP-050 · 원상복구 버튼 UI 및 서버 액션 구현 완료 |
 | TASK-044 | 260521 | 이중 프로필 테이블 정리 | P2 | 없음 | D_Kai | 🔄 | [TASK-044](tasks/TASK-044_260521_이중프로필테이블정리_DKai.md) | IMP-049 · 방안 B(profiles 삭제·grade_code 이관) 설계 확정 |
 | TASK-045 | 260521 | Master/Admin 코드 중복 제거 | P3 | 없음 | D_Kai | 🔄 | [TASK-045](tasks/TASK-045_260521_MasterAdmin코드중복제거_DKai.md) | IMP-012 · 공통 컴포넌트 추출 구현 중 |
 | TASK-046 | 260521 | TS any 타입 퇴출 | P3 | 없음 | D_Kai | 🔔 | [TASK-046](tasks/TASK-046_260521_TSany퇴출_DKai.md) | IMP-029 · 커밋 282c3c6 · 207/209 PASS |
 | TASK-047 | 260521 | i18n 번역 키 타입 안정성 | P4 | 없음 | D_Kai | 🔔 | [TASK-047](tasks/TASK-047_260521_i18n번역키타입안정성_DKai.md) | IMP-023 · 커밋 14ce2cb · 207/209 PASS |
-| TASK-048 | 260521 | RETURNED 상태 전이 확장 | P3 | 없음 | Ring | 🔄 | [TASK-048](tasks/TASK-048_260521_RETURNED상태전이확장_Ring.md) | IMP-060 · HIGH 보고 수신·착수 승인·enum/UI 확인 포함 |
+| TASK-048 | 260521 | RETURNED 상태 전이 확장 | P3 | 없음 | Ring | 🔔 | [TASK-048](tasks/TASK-048_260521_RETURNED상태전이확장_Ring.md) | IMP-060 · DISPOSED enum·status-machine·migration·i18n · 211/211 PASS |
 | TASK-049 | 260521 | 공통 UI 컴포넌트 라이브러리화 | P3 | 없음 | Ring | ⬜ | [TASK-049](tasks/TASK-049_260521_공통UI컴포넌트라이브러리화_Ring.md) | IMP-024 · src/components/domain/ 신설 |
 | TASK-050 | 260521 | PDF 경로 충돌 방지 | P3 | 없음 | B_Kai | ✅ | [TASK-050](tasks/TASK-050_260521_PDF경로충돌방지_BKai.md) | IMP-061 완료 · UUID 기반 파일명 · 7ef504a+1e8b86c · 209/209 ✅ |
 
