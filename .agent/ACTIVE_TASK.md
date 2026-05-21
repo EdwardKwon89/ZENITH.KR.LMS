@@ -93,7 +93,7 @@
 | TASK-035 | 260520 | 정산 엔진 SRP 분할 | P3 | TASK-027 권장 | Riley | ✅ | [TASK-035](tasks/TASK-035_260520_정산엔진SRP_Riley.md) | IMP-030 완료 · 3클래스+Facade · 코드 9656903·문서 2c4f0cf · 209/209 |
 | TASK-036 | 260520 | ZenUI.tsx 7개 컴포넌트 분할 | P3 | 없음 | B_Kai | ✅ | [TASK-036](tasks/TASK-036_260520_ZenUI분할_BKai.md) | IMP-063 완료 · 코드 d099a04 · 재보고 b544aaf · 209/209 |
 | TASK-037 | 260520 | NaviSidebar Client Bundle 최적화 | P3 | TASK-031 권장 | D_Kai | ✅ | [TASK-037](tasks/TASK-037_260520_NaviSidebar최적화_DKai.md) | IMP-022 완료 · Framer Motion→CSS + Lucide 21→18 · 코드 ddeb4dd · doc 236a08d |
-| TASK-039 | 260521 | 다국어 번역 커버리지 감사 + CI 게이트 | P4 | 없음 | B_Kai | 🔔 | [TASK-039](tasks/TASK-039_260521_다국어번역CI게이트_BKai.md) | IMP-032 · 재작업 완료 · 해시기재·DoD 3개[x] · 208/209 |
+| TASK-039 | 260521 | 다국어 번역 커버리지 감사 + CI 게이트 | P4 | 없음 | B_Kai | 🔔 | [TASK-039](tasks/TASK-039_260521_다국어번역CI게이트_BKai.md) | IMP-032 · 재작업 완료 · 해시기재·DoD 전량[x] · **209/209 ✅** |
 
 ---
 
@@ -102,7 +102,7 @@
 | Agent | 즉시 착수 가능 | 재작업 필요 | 블로커 대기 |
 |:------|:-------------|:-----------|:----------|
 | Riley | — | — | — |
-| B_Kai | — | **TASK-039** 🔔 (재작업 완료 — 해시기재·DoD [x]·208/209) | — |
+| B_Kai | — | **TASK-039** 🔔 (재작업 완료 — 해시기재·DoD 전량[x]·**209/209 ✅**) | — |
 | D_Kai | — | — | — |
 | Ring | — | **TASK-033** ❌ (DoD 미체크·테스트 버그·detect_changes 미기재 — 재작업) | 신규 할당 중단·6차 위반 |
 
