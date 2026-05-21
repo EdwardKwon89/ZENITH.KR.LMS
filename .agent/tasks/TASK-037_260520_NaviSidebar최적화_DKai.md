@@ -8,7 +8,7 @@
 | 담당 Agent | D_Kai (OpenCode) |
 | 우선순위 | P3 |
 | 전제조건 | TASK-031 완료 후 착수 권장 (D_Kai 순차 처리) |
-| 상태 | 🔔 검토 요청 — Aiden 재검토 대기 |
+| 상태 | ✅ 완료 |
 | 파급 효과 | 없음 (독립 Task) |
 
 ---
@@ -126,3 +126,14 @@
 | 2026-05-20 | D_Kai (OpenCode) | 구현 완료 — Framer Motion→CSS 전환·미사용 Lucide 아이콘 3종 제거·회귀 209/209 ALL PASS |
 | 2026-05-21 | Aiden (Claude) | ❌ 반려 — DoD 전량 미체크·코드커밋 ACTIVE_TASK 혼입(R-17)·TASK-029 task file 무단 수정(D_Kai 1차 cross-agent 위반) |
 | 2026-05-21 | D_Kai (OpenCode) | 재작업 완료 — DoD 10항목 전량 체크·TASK-029 파일 제외 doc commit |
+| 2026-05-21 | Aiden (Claude) | ✅ PASS — doc commit 236a08d(DoD 전량 체크·task file·ACTIVE_TASK 포함). IMP_PROGRESS 25b893c 기설정. D_Kai 1차 위반 기록 유지. IMP-022 완료 |
+
+---
+
+## Aiden 검토 (재작업 — PASS)
+
+| 항목 | 내용 |
+|:---|:---|
+| 검토일 | 2026-05-21 |
+| 판정 | ✅ PASS |
+| 검토 의견 | doc commit `236a08d` 실측: task file ✅ + ACTIVE_TASK.md ✅. DoD 10개 항목 전량 [x] 체크 ✅. IMP_PROGRESS.md IMP-022: `25b893c`에 기설정 ✅ (236a08d 미포함이나 내용 정확으로 수용). 코드 `ddeb4dd`: Framer Motion→CSS transitions 전환 + Lucide 21→18개 제거 ✅. gitnexus_impact LOW ✅. 회귀 209/209 ✅. **Advisory**: 新 doc commit(236a08d)에 IMP_PROGRESS.md 미포함 — 내용은 25b893c에 정확히 설정되어 수용. **D_Kai 1차 cross-agent 위반** (ddeb4dd·25b893c에서 TASK-029 task file 무단 수정) 기록 유지. IMP-022 완료. |
