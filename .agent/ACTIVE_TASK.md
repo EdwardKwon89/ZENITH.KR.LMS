@@ -93,6 +93,7 @@
 | TASK-035 | 260520 | 정산 엔진 SRP 분할 | P3 | TASK-027 권장 | Riley | ✅ | [TASK-035](tasks/TASK-035_260520_정산엔진SRP_Riley.md) | IMP-030 완료 · 3클래스+Facade · 코드 9656903·문서 2c4f0cf · 209/209 |
 | TASK-036 | 260520 | ZenUI.tsx 7개 컴포넌트 분할 | P3 | 없음 | B_Kai | ✅ | [TASK-036](tasks/TASK-036_260520_ZenUI분할_BKai.md) | IMP-063 완료 · 코드 d099a04 · 재보고 b544aaf · 209/209 |
 | TASK-037 | 260520 | NaviSidebar Client Bundle 최적화 | P3 | TASK-031 권장 | D_Kai | ✅ | [TASK-037](tasks/TASK-037_260520_NaviSidebar최적화_DKai.md) | IMP-022 완료 · Framer Motion→CSS + Lucide 21→18 · 코드 ddeb4dd · doc 236a08d |
+| TASK-039 | 260521 | 다국어 번역 커버리지 감사 + CI 게이트 | P4 | 없음 | B_Kai | ⬜ | [TASK-039](tasks/TASK-039_260521_다국어번역CI게이트_BKai.md) | IMP-032 · audit-i18n.ts 신규 + ORDER_STATUS_META i18n 전환 |
 
 ---
 
@@ -101,9 +102,9 @@
 | Agent | 즉시 착수 가능 | 재작업 필요 | 블로커 대기 |
 |:------|:-------------|:-----------|:----------|
 | Riley | — | — | — |
-| B_Kai | — | — | — |
+| B_Kai | **TASK-039** ⬜ (IMP-032 다국어 번역 CI 게이트 — 즉시 착수 가능) | — | — |
 | D_Kai | — | — | — |
-| Ring | **TASK-033** 🔄 (설계 확정 완료 — 즉시 착수 가능 · 신규 할당 중단·5차 위반) | — | — |
+| Ring | — | — | **TASK-033** 🔔 (doc commit 제출 대기 · 신규 할당 중단·5차 위반) |
 
 ---
 
@@ -162,3 +163,4 @@
 | 2026-05-21 | Aiden (Claude) | TASK-032 ✅ PASS(Ring 재작업 a8a68cb+105cdcc·DoD 전량·IMP-056 완료). TASK-038 발령(B_Kai 재교육·옵션A 자가진단). Ring 신규 할당 중단·TASK-033 기할당 착수 가능. B_Kai TASK-038 완료 후 신규 Task 재개 |
 | 2026-05-21 | Aiden (Claude) | TASK-038 ❌ 반려(B_Kai·SAR 내용 우수·DoD 미체크·이력 누락·최소 재작업 지시). TASK-033 설계 확정(Ring·A안 3테이블·서버INSERT·best-effort·🔄 착수 승인) |
 | 2026-05-21 | Aiden (Claude) | TASK-038 ✅ PASS(B_Kai 재작업 7c985db DoD 전량·이력 추가·task file 단독 커밋). B_Kai 신규 Task 할당 중단 해제 |
+| 2026-05-21 | Aiden (Claude) | TASK-039 발령(B_Kai — IMP-032 다국어 번역 CI 게이트·audit-i18n.ts 신규·ORDER_STATUS_META i18n 전환) |
