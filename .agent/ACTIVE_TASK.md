@@ -88,7 +88,7 @@
 | TASK-031 | 260520 | 미들웨어 DB 호출 최적화 (JWT-only) | P3 | IMP-003 ✅ | D_Kai | ✅ | [TASK-031](tasks/TASK-031_260520_미들웨어DB최적화_DKai.md) | IMP-021 완료 · hasCompleteMetadata 방식 A-1 · 코드 5bc0653·문서 00b717f · TASK-037 블로커 해제 |
 | TASK-032 | 260520 | 이메일 HTML 인젝션 방지 | P2 | 없음 | Ring | ✅ | [TASK-032](tasks/TASK-032_260520_이메일HTML인젝션방지_Ring.md) | IMP-056 완료 · escapeHtml 7곳 · 코드 2b8a610 · doc 31ffff4+a8a68cb+105cdcc · 209/209 |
 | TASK-033 | 260520 | 감사 추적 도입 (마스터/인보이스/통관) | P3 | TASK-032 ✅ | Ring | ⬜ | [TASK-033](tasks/TASK-033_260520_감사추적도입_Ring.md) | IMP-051 · 설계 의견 필수 · 신규 DB 테이블 · TASK-032 블로커 해제 |
-| TASK-038 | 260521 | B_Kai 재교육 세션 (R-17 v1.4) | P4 | 없음 | B_Kai | 🔄 | [TASK-038](tasks/TASK-038_260521_BKai재교육세션_BKai.md) | 거버넌스 Task · SAR_003 자가 진단 보고서 작성 · 신규 코드 Task 재개 전 완료 필수 |
+| TASK-038 | 260521 | B_Kai 재교육 세션 (R-17 v1.4) | P4 | 없음 | B_Kai | 🔔 | [TASK-038](tasks/TASK-038_260521_BKai재교육세션_BKai.md) | 거버넌스 Task · SAR_003 자가 진단 보고서 제출 완료 · Aiden 검토 대기 |
 | TASK-034 | 260520 | Error Boundary 4개 추가 | P3 | 없음 | B_Kai | ✅ | [TASK-034](tasks/TASK-034_260520_ErrorBoundary추가_BKai.md) | IMP-017 완료 · 커밋 1a6e245+cdf4963 · 209/209 |
 | TASK-035 | 260520 | 정산 엔진 SRP 분할 | P3 | TASK-027 권장 | Riley | ✅ | [TASK-035](tasks/TASK-035_260520_정산엔진SRP_Riley.md) | IMP-030 완료 · 3클래스+Facade · 코드 9656903·문서 2c4f0cf · 209/209 |
 | TASK-036 | 260520 | ZenUI.tsx 7개 컴포넌트 분할 | P3 | 없음 | B_Kai | ✅ | [TASK-036](tasks/TASK-036_260520_ZenUI분할_BKai.md) | IMP-063 완료 · 코드 d099a04 · 재보고 b544aaf · 209/209 |
@@ -101,7 +101,7 @@
 | Agent | 즉시 착수 가능 | 재작업 필요 | 블로커 대기 |
 |:------|:-------------|:-----------|:----------|
 | Riley | — | — | — |
-| B_Kai | **TASK-038 🔄** (P4, 재교육 세션 — SAR_003 자가 진단 보고서 작성 중) | — | — |
+| B_Kai | **TASK-038 🔔** (P4, 재교육 세션 — SAR_003 제출 완료, Aiden 검토 대기) | — | — |
 | D_Kai | — | — | — |
 | Ring | **TASK-033** (P3, TASK-032 ✅ 블로커 해제 — 설계 의견 📝 필수) | — | — (신규 할당 중단·5차 위반·TASK-033 기할당분만 진행) |
 
