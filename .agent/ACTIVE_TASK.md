@@ -98,7 +98,7 @@
 | TASK-041 | 260521 | dissolveMasterOrder 부분 실패 수정 | P2 | IMP-047 ✅ | Riley | ✅ | [TASK-041](tasks/TASK-041_260521_dissolveMasterOrder부분실패_Riley.md) | IMP-052 완료 · dissolve_master_order_atomic RPC · 코드 `b4b2f9f` · 209/209 |
 | TASK-042 | 260521 | 지갑 결제 롤백 검증 및 잔여 수정 | P2 | IMP-047 ✅ | Riley | ✅ | [TASK-042](tasks/TASK-042_260521_지갑결제롤백검증_Riley.md) | IMP-053 ➖ IMP-047 통합 · Path A 확인 |
 | TASK-043 | 260521 | HELD→이전상태 복구 로직 | P3 | 없음 | Riley | ✅ | [TASK-043](tasks/TASK-043_260521_HELD이전상태복구_Riley.md) | IMP-050 완료 · getHeldPreviousStatus + 원상복구 버튼 |
-| TASK-044 | 260521 | 이중 프로필 테이블 정리 | P2 | 없음 | D_Kai | 🔄 | [TASK-044](tasks/TASK-044_260521_이중프로필테이블정리_DKai.md) | IMP-049 · 방안 B 확정 · 추가 발견 2건(RLS·Trigger) Aiden 승인 ✅ · M6·M7 착수 재개 |
+| TASK-044 | 260521 | 이중 프로필 테이블 정리 | P2 | 없음 | D_Kai | 🔔 | [TASK-044](tasks/TASK-044_260521_이중프로필테이블정리_DKai.md) | IMP-049 · 코드 ba14f88 · 문서 31be239 · 211/211 PASS |
 | TASK-045 | 260521 | Master/Admin 코드 중복 제거 | P3 | 없음 | D_Kai | 🔄 | [TASK-045](tasks/TASK-045_260521_MasterAdmin코드중복제거_DKai.md) | IMP-012 · 공통 컴포넌트 추출 구현 중 |
 | TASK-046 | 260521 | TS any 타입 퇴출 | P3 | 없음 | D_Kai | 🔔 | [TASK-046](tasks/TASK-046_260521_TSany퇴출_DKai.md) | IMP-029 · 커밋 282c3c6 · 재작업 — DoD 체크·개정이력 보완 |
 | TASK-047 | 260521 | i18n 번역 키 타입 안정성 | P4 | 없음 | D_Kai | 🔔 | [TASK-047](tasks/TASK-047_260521_i18n번역키타입안정성_DKai.md) | IMP-023 · 커밋 14ce2cb · 재작업 — DoD 체크·개정이력 보완 |
@@ -115,7 +115,7 @@
 |:------|:--------|:-----------|:----------|
 | Riley | — | — | — |
 | B_Kai | — | — | — |
-| D_Kai | TASK-044(보완2건 Aiden승인대기) · TASK-045 | — | — |
+| D_Kai | TASK-045 | — | TASK-044(🔔) |
 | Ring | — | — | TASK-049 ⬜ 신규 할당 중단 유지 (9차 위반 누적) |
 
 ---
