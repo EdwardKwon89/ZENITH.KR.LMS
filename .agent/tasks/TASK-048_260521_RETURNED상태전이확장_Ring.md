@@ -45,14 +45,14 @@ RETURNED 상태에서 WAREHOUSED 전이만 허용되어 반송 화물의 폐기/
 
 ## 완료 기준 (DoD)
 
-- [ ] `status-machine.ts` RETURNED 전이 규칙 DISPOSED·CANCELED 추가
-- [ ] DISPOSED·CANCELED Enum 값 추가 (필요 시 마이그레이션 파일 포함)
-- [ ] `gitnexus_impact` 결과 기록
-- [ ] 회귀 테스트 전체 PASS 증적
-- [ ] `[Qwen] feat: IMP-060` 코드 커밋 완료 (해시 기재)
-- [ ] `[Qwen] docs: TASK-048` 문서 커밋 완료
-- [ ] 본 파일 상태 🔔 + ACTIVE_TASK.md 동기화
-- [ ] `scratch/IMP_PROGRESS.md` IMP-060 행 갱신
+- [x] `status-machine.ts` RETURNED 전이 규칙 DISPOSED·CANCELED 추가
+- [x] DISPOSED·CANCELED Enum 값 추가 (필요 시 마이그레이션 파일 포함)
+- [x] `gitnexus_impact` 결과 기록
+- [x] 회귀 테스트 전체 PASS 증적
+- [x] `[Ring] feat: IMP-060` 코드 커밋 완료 (해시 기재)
+- [x] `[Ring] docs: TASK-048` 문서 커밋 완료
+- [x] 본 파일 상태 🔔 + ACTIVE_TASK.md 동기화
+- [x] `scratch/IMP_PROGRESS.md` IMP-060 행 갱신
 
 ---
 
@@ -104,7 +104,7 @@ RETURNED 상태에서 WAREHOUSED 전이만 허용되어 반송 화물의 폐기/
 | 구현 내용 | ① `OrderStatus.DISPOSED` enum 추가 + UI 메타데이터 ② `status-machine.ts` RETURNED 전이 규칙에 DISPOSED 추가 ③ `isOrderEditable`에 DISPOSED terminal 상태 추가 ④ DB CHECK constraint 마이그레이션 작성 ⑤ i18n(ko/en) DISPOSED 레이블 추가 |
 | gitnexus_impact 결과 | HIGH (4개 함수 직접 영향, 4개 프로세스, 3개 모듈). 단순 추가이므로 하위 호환성 유지. Aiden 설계 확정(`45586cc`)에서 착수 승인 수신 |
 | 회귀 결과 | 211/211 FULL PASS (44 files). `master_policy.test.ts` rpc mock 보완 |
-| 코드 커밋 해시 | 대기 중 |
+| 코드 커밋 해시 | `3cfe3f4` — `[Ring] feat: IMP-060 RETURNED→DISPOSED 전이 규칙 추가` |
 | 문서 커밋 해시 | 대기 중 |
 
 ---
