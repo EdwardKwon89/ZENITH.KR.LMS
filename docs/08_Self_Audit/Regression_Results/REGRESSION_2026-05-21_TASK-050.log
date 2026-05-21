@@ -1,0 +1,6 @@
+=== REGRESSION TEST: TASK-050 (IMP-061) ===
+Date: 2026-05-21
+Branch: main
+Agent: B_Kai (Codex)
+Changes: issueInvoicePdf() — UUID 기반 파일명 + metadata invoice_no
+Result: 209/209 FULL PASS (44/44 test files)
