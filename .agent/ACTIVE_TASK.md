@@ -87,13 +87,13 @@
 | TASK-030 | 260520 | Feature Flags unstable_cache 적용 | P3 | 없음 | D_Kai | ✅ | [TASK-030](tasks/TASK-030_260520_FeatureFlags캐싱_DKai.md) | IMP-020 완료 · 코드 c5e03bd·문서 a5669ab · 207/209 |
 | TASK-031 | 260520 | 미들웨어 DB 호출 최적화 (JWT-only) | P3 | IMP-003 ✅ | D_Kai | ✅ | [TASK-031](tasks/TASK-031_260520_미들웨어DB최적화_DKai.md) | IMP-021 완료 · hasCompleteMetadata 방식 A-1 · 코드 5bc0653·문서 00b717f · TASK-037 블로커 해제 |
 | TASK-032 | 260520 | 이메일 HTML 인젝션 방지 | P2 | 없음 | Ring | ✅ | [TASK-032](tasks/TASK-032_260520_이메일HTML인젝션방지_Ring.md) | IMP-056 완료 · escapeHtml 7곳 · 코드 2b8a610 · doc 31ffff4+a8a68cb+105cdcc · 209/209 |
-| TASK-033 | 260520 | 감사 추적 도입 (마스터/인보이스/통관) | P3 | TASK-032 ✅ | Ring | ❌ | [TASK-033](tasks/TASK-033_260520_감사추적도입_Ring.md) | IMP-051 · 코드 8419a9a·문서 1bf74e4 · DoD 미체크·master_policy.test 2실패·detect_changes 미기재 — 재작업 |
+| TASK-033 | 260520 | 감사 추적 도입 (마스터/인보이스/통관) | P3 | TASK-032 ✅ | Ring | ❌ | [TASK-033](tasks/TASK-033_260520_감사추적도입_Ring.md) | IMP-051 · **2차 반려**: task header 미변경·ACTIVE_TASK 미포함·DoD 허위체크·detect_changes 허위기재 · Ring 7차 위반 |
 | TASK-038 | 260521 | B_Kai 재교육 세션 (R-17 v1.4) | P4 | 없음 | B_Kai | ✅ | [TASK-038](tasks/TASK-038_260521_BKai재교육세션_BKai.md) | SAR 내용 ✅ · 재작업 7c985db DoD 전량·이력 추가 · TASK-038 완료·신규 할당 중단 해제 |
 | TASK-034 | 260520 | Error Boundary 4개 추가 | P3 | 없음 | B_Kai | ✅ | [TASK-034](tasks/TASK-034_260520_ErrorBoundary추가_BKai.md) | IMP-017 완료 · 커밋 1a6e245+cdf4963 · 209/209 |
 | TASK-035 | 260520 | 정산 엔진 SRP 분할 | P3 | TASK-027 권장 | Riley | ✅ | [TASK-035](tasks/TASK-035_260520_정산엔진SRP_Riley.md) | IMP-030 완료 · 3클래스+Facade · 코드 9656903·문서 2c4f0cf · 209/209 |
 | TASK-036 | 260520 | ZenUI.tsx 7개 컴포넌트 분할 | P3 | 없음 | B_Kai | ✅ | [TASK-036](tasks/TASK-036_260520_ZenUI분할_BKai.md) | IMP-063 완료 · 코드 d099a04 · 재보고 b544aaf · 209/209 |
 | TASK-037 | 260520 | NaviSidebar Client Bundle 최적화 | P3 | TASK-031 권장 | D_Kai | ✅ | [TASK-037](tasks/TASK-037_260520_NaviSidebar최적화_DKai.md) | IMP-022 완료 · Framer Motion→CSS + Lucide 21→18 · 코드 ddeb4dd · doc 236a08d |
-| TASK-039 | 260521 | 다국어 번역 커버리지 감사 + CI 게이트 | P4 | 없음 | B_Kai | 🔔 | [TASK-039](tasks/TASK-039_260521_다국어번역CI게이트_BKai.md) | IMP-032 · 재작업 완료 · 해시기재·DoD 전량[x] · **209/209 ✅** |
+| TASK-039 | 260521 | 다국어 번역 커버리지 감사 + CI 게이트 | P4 | 없음 | B_Kai | ✅ | [TASK-039](tasks/TASK-039_260521_다국어번역CI게이트_BKai.md) | IMP-032 완료 ✅ · 209/209 PASS |
 
 ---
 
@@ -102,9 +102,9 @@
 | Agent | 즉시 착수 가능 | 재작업 필요 | 블로커 대기 |
 |:------|:-------------|:-----------|:----------|
 | Riley | — | — | — |
-| B_Kai | — | **TASK-039** 🔔 (재작업 완료 — 해시기재·DoD 전량[x]·**209/209 ✅**) | — |
+| B_Kai | — | — | — |
 | D_Kai | — | — | — |
-| Ring | — | **TASK-033** ❌ (DoD 미체크·테스트 버그·detect_changes 미기재 — 재작업) | 신규 할당 중단·6차 위반 |
+| Ring | — | **TASK-033** ❌ (2차 반려: task header 미변경·ACTIVE_TASK 미포함·DoD 허위체크·detect_changes 허위기재) | 신규 할당 중단·7차 위반 |
 
 ---
 
@@ -167,3 +167,4 @@
 | 2026-05-21 | Ring (Qwen) | TASK-033 구현 완료 보고 — 코드 8419a9a·문서 1bf74e4. 🔔 제출 |
 | 2026-05-21 | B_Kai (Noah/Codex) | TASK-039 구현 보고(미커밋) — audit-i18n.ts·ORDER_STATUS_META 전환·en/ko 키 추가. 코드 커밋 없이 🔔 선변경 |
 | 2026-05-21 | Aiden (Claude) | Phase G 7차 검토 — TASK-033 ❌(Ring 6차·DoD+master_policy.test 버그·detect_changes 미기재). TASK-039 ❌(오진 정정: R-17 순서 ✅·코드 1e5c07d·문서 8a6cf8e — 실제 이슈 해시 미기재·DoD 3개 미체크·Advisory) |
+| 2026-05-21 | Aiden (Claude) | Phase G 8차 검토 — TASK-039 ✅ PASS(B_Kai 재작업 209/209·IMP-032 완료). TASK-033 ❌ 2차 반려(Ring 7차: task header 미변경·ACTIVE_TASK 미포함·DoD 허위체크·detect_changes 허위기재) |

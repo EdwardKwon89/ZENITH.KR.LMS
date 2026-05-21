@@ -8,7 +8,7 @@
 | 담당 Agent | B_Kai (OpenCode) |
 | 우선순위 | P4 |
 | 전제조건 | 없음 |
-| 상태 | 🔔 검토 요청 (재작업 완료) |
+| 상태 | ✅ 완료 |
 | 파급 효과 | 낮음 (신규 스크립트 추가 + ORDER_STATUS_META 키 전환) |
 
 ---
@@ -91,8 +91,8 @@
 | 항목 | 내용 |
 |:---|:---|
 | 검토일 | 2026-05-21 |
-| 판정 | ❌ 반려 |
-| 검토 의견 | **Aiden 정정**: 1차 리뷰에서 "R-17 커밋 순서 위반"으로 반려하였으나 오류 — 실제로 B_Kai는 `1e5c07d`(코드, 11:18:25) → `8a6cf8e`(문서, 11:18:37) 순서 정상 준수. Aiden의 git status 확인 시점이 B_Kai 커밋 이전이어서 발생한 오진. **코드 ✅**: `audit-i18n.ts` 깔끔·flattenKeys 재귀·exit 1·올바른 형식. `ORDER_STATUS_META` labelKey/descriptionKey + `useTranslations('orderStatus')` ✅. `en.json`/`ko.json` 24키 ✅. IMP_PROGRESS.md ✅. R-17 3파일 doc commit ✅. **잔여 절차 이슈 ❌**: ① 코드 커밋 해시 `—`→`1e5c07d` 기재 필요 (2-커밋 패턴 구조적 한계, Advisory) ② 문서 커밋 해시 `—`→`8a6cf8e` 기재 필요 ③ DoD 3개 미체크: `feat` 해시·`docs` 해시·IMP_PROGRESS `[ ]` → `[x]` ④ DoD 텍스트 `[Codex]` → `[B_Kai]` 수정 ⑤ 개정 이력 이름 `Noah (Codex)` → `B_Kai (OpenCode)`. **207/209**: 2 실패 Ring TASK-033 버그 — B_Kai 책임 없음 ✅. **최소 재작업**: task file 단독 커밋 — 해시 2개 기재 + DoD 3개 [x] + 텍스트 `[Codex]`→`[B_Kai]` + 이력 이름 수정. 신규 위반 아님 (2-커밋 패턴 Advisory). |
+| 판정 | ✅ 승인 |
+| 검토 의견 | **재작업 전량 ✅**: 코드 `audit-i18n.ts`(flattenKeys 재귀·exit 1·형식 ✅)·`ORDER_STATUS_META` labelKey/descriptionKey 전환·`useTranslations('orderStatus')` 적용·`en.json`/`ko.json` 24키 전량 ✅. **테스트** 209/209 FULL PASS ✅ — B_Kai가 Ring TASK-033 코드 충격으로 발생한 `master_policy.test.ts`·`finance.test.ts` 2건 선제 수정 포함(`2a3e00c`·`cb7784b`). **절차** ✅: R-17 커밋 순서 `1e5c07d`(코드)→`8a6cf8e`(문서) 정상. DoD 전량 [x] ✅. ACTIVE_TASK.md 동기화 `338888d` ✅. IMP-032 완료 확정. B_Kai 재작업 절차 재발 없음. |
 
 ---
 
@@ -104,3 +104,4 @@
 | 2026-05-21 | B_Kai (OpenCode) | 구현 완료 — `1e5c07d`(feat) + `8a6cf8e`(docs). audit-i18n.ts·ORDER_STATUS_META i18n 전환·consumer 2곳 useTranslations. 207/209 PASS (2 pre-existing Ring TASK-033 버그). R-17 커밋 순서 ✅ |
 | 2026-05-21 | Aiden (Claude) | ❌ 반려 (1차: 오진 정정) — 실제 이슈: 해시 `—` 미기재·DoD 3개 미체크·`[Codex]`→`[B_Kai]` 수정. 신규 위반 아님(2-커밋 패턴 Advisory). task file 단독 후속 커밋 지시 |
 | 2026-05-21 | B_Kai (OpenCode) | 재작업 완료 — `0bee283`(해시·DoD·텍스트 정정) + `2a3e00c`·`cb7784b`(master_policy+finance 테스트 mock 보완) → 209/209 FULL PASS |
+| 2026-05-21 | Aiden (Claude) | ✅ 승인 — 재작업 전량 확인. audit-i18n.ts·ORDER_STATUS_META i18n 전환·en/ko 24키·209/209 FULL PASS. IMP-032 완료 확정 |
