@@ -51,9 +51,9 @@
 - [x] `gitnexus_impact` 결과 기록
 - [x] 회귀 테스트 전체 PASS 증적 (211/211)
 - [x] `[OpenCode] refactor: IMP-012` 코드 커밋 완료 (`63ce099`)
-- [ ] `[OpenCode] docs: TASK-045` 문서 커밋 완료
-- [ ] 본 파일 상태 🔔 + ACTIVE_TASK.md 동기화
-- [ ] `scratch/IMP_PROGRESS.md` IMP-012 행 갱신
+- [x] `[OpenCode] docs: TASK-045` 문서 커밋 완료 (`55a8f65`)
+- [x] 본 파일 상태 🔔 + ACTIVE_TASK.md 동기화
+- [x] `scratch/IMP_PROGRESS.md` IMP-012 행 갱신
 
 ---
 
@@ -82,13 +82,20 @@
 | gitnexus_impact 결과 | 두 codes-client.tsx 파일의 유일한 consumer는 각각 master/codes/page.tsx와 admin/codes/page.tsx. 두 page.tsx도 동일 — 역할별 차이 없음 |
 | 회귀 결과 | 44 files passed, 211 tests passed |
 | 코드 커밋 해시 | `63ce099` |
-| 문서 커밋 해시 | — |
+| 문서 커밋 해시 | `55a8f65` |
 
 ---
 
 ## Aiden 검토
 
-> **이 섹션은 D_Kai 🔔 제출 후 Aiden이 작성합니다.**
+| 항목 | 내용 |
+|:---|:---|
+| 검토일 | 2026-05-21 |
+| 검토 결과 | **✅ PASS (Aiden 직접 보완)** |
+| 코드 확인 | `63ce099` — `CodesClient.tsx` 266줄 신규 생성, master/admin wrapper 각 4줄로 축소, 3 files changed, 211/211 PASS ✅ |
+| 문서 커밋 확인 | `55a8f65` — task file·ACTIVE_TASK·regression log·IMP_PROGRESS 4파일 포함 ✅ |
+| 보완 처리 | `문서 커밋 해시 —` → `55a8f65` 기재, DoD 3개 `[ ]` → `[x]` 체크 — Aiden 직접 완료 |
+| 평가 기록 | D_Kai 절차 개선 확인 — 상태 헤더 🔔 올바르게 변경, ACTIVE_TASK 동기화, 개정이력 추가. TASK-046·047 대비 크게 향상. 문서 커밋 해시는 커밋 내에서 기재 불가한 구조적 한계(Option B 처리). IMP-012 완료 |
 
 ---
 
@@ -97,4 +104,5 @@
 | 날짜 | 주체 | 내용 |
 |:-----|:----:|:-----|
 | 2026-05-21 | Aiden (Claude) | Task 생성 — Sprint H-II 작업 지시 발령 |
-| 2026-05-21 | D_Kai (OpenCode) | 구현 완료 — 공통 컴포넌트 추출·wrapper 전환·회귀 211/211·코드 커밋 `63ce099`. 🔔 제출 |
+| 2026-05-21 | D_Kai (OpenCode) | 구현 완료 — 공통 컴포넌트 추출·wrapper 전환·회귀 211/211·코드 커밋 `63ce099`·문서 커밋 `55a8f65`. 🔔 제출 |
+| 2026-05-21 | Aiden (Claude) | ✅ PASS (Aiden 직접 보완) — 문서 커밋 해시·DoD 3개 체크 보완. D_Kai 절차 개선 확인. IMP-012 완료 |
