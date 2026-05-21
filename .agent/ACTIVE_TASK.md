@@ -87,7 +87,7 @@
 | TASK-030 | 260520 | Feature Flags unstable_cache 적용 | P3 | 없음 | D_Kai | ✅ | [TASK-030](tasks/TASK-030_260520_FeatureFlags캐싱_DKai.md) | IMP-020 완료 · 코드 c5e03bd·문서 a5669ab · 207/209 |
 | TASK-031 | 260520 | 미들웨어 DB 호출 최적화 (JWT-only) | P3 | IMP-003 ✅ | D_Kai | ✅ | [TASK-031](tasks/TASK-031_260520_미들웨어DB최적화_DKai.md) | IMP-021 완료 · hasCompleteMetadata 방식 A-1 · 코드 5bc0653·문서 00b717f · TASK-037 블로커 해제 |
 | TASK-032 | 260520 | 이메일 HTML 인젝션 방지 | P2 | 없음 | Ring | ✅ | [TASK-032](tasks/TASK-032_260520_이메일HTML인젝션방지_Ring.md) | IMP-056 완료 · escapeHtml 7곳 · 코드 2b8a610 · doc 31ffff4+a8a68cb+105cdcc · 209/209 |
-| TASK-033 | 260520 | 감사 추적 도입 (마스터/인보이스/통관) | P3 | TASK-032 ✅ | Ring | ❌ | [TASK-033](tasks/TASK-033_260520_감사추적도입_Ring.md) | IMP-051 · **2차 반려**: task header 미변경·ACTIVE_TASK 미포함·DoD 허위체크·detect_changes 허위기재 · Ring 7차 위반 |
+| TASK-033 | 260520 | 감사 추적 도입 (마스터/인보이스/통관) | P3 | TASK-032 ✅ | Ring | 🔔 | [TASK-033](tasks/TASK-033_260520_감사추적도입_Ring.md) | IMP-051 · 2차 재작업: header 🔔·detect_changes 수정·DoD 12[x]·회귀로그·해시기재·이력 추가 · 코드 8419a9a·doc 1bf74e4+9e231c8 · 209/209 |
 | TASK-038 | 260521 | B_Kai 재교육 세션 (R-17 v1.4) | P4 | 없음 | B_Kai | ✅ | [TASK-038](tasks/TASK-038_260521_BKai재교육세션_BKai.md) | SAR 내용 ✅ · 재작업 7c985db DoD 전량·이력 추가 · TASK-038 완료·신규 할당 중단 해제 |
 | TASK-034 | 260520 | Error Boundary 4개 추가 | P3 | 없음 | B_Kai | ✅ | [TASK-034](tasks/TASK-034_260520_ErrorBoundary추가_BKai.md) | IMP-017 완료 · 커밋 1a6e245+cdf4963 · 209/209 |
 | TASK-035 | 260520 | 정산 엔진 SRP 분할 | P3 | TASK-027 권장 | Riley | ✅ | [TASK-035](tasks/TASK-035_260520_정산엔진SRP_Riley.md) | IMP-030 완료 · 3클래스+Facade · 코드 9656903·문서 2c4f0cf · 209/209 |
