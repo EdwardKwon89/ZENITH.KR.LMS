@@ -466,6 +466,7 @@
     "HELD": { "label": "Held", "description": "Temporarily suspended due to issues" },
     "CANCELED": { "label": "Canceled", "description": "Order has been canceled" },
     "RETURNED": { "label": "Returned", "description": "Cargo returned to shipper" },
+    "DISPOSED": { "label": "Disposed", "description": "Cargo has been disposed/scrapped" },
     "MASTERED": { "label": "Master Bound", "description": "Bound to master order, modifications restricted" }
   },
   "Maintenance": {

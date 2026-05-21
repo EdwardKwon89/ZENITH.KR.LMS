@@ -26,7 +26,7 @@ const TRANSITION_RULES: Record<OrderStatus, OrderStatus[]> = {
     OrderStatus.CANCELED
   ], // 보류 해제 시 이전 단계 또는 취소로 복구
   [OrderStatus.CANCELED]: [], // 취소 시 종료
-  [OrderStatus.RETURNED]: [OrderStatus.WAREHOUSED, OrderStatus.CANCELED],
+  [OrderStatus.RETURNED]: [OrderStatus.WAREHOUSED, OrderStatus.CANCELED, OrderStatus.DISPOSED],
   [OrderStatus.MASTERED]: [], // 마스터 결합 시 개별 상태 변경 불가 (먼저 Dissolve 필요)
 };
 
@@ -84,6 +84,7 @@ export function isOrderEditable(status: OrderStatus): boolean {
     OrderStatus.IN_TRANSIT,
     OrderStatus.DELIVERED,
     OrderStatus.CANCELED,
+    OrderStatus.DISPOSED, // 폐기 상태는 수정 불가
     OrderStatus.MASTERED // 마스터 결합 시 수정 불가
   ];
   return !nonEditableStates.includes(status);
