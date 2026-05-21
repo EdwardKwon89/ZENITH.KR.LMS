@@ -103,7 +103,7 @@
 | TASK-046 | 260521 | TS any 타입 퇴출 | P3 | 없음 | D_Kai | ✅ | [TASK-046](tasks/TASK-046_260521_TSany퇴출_DKai.md) | IMP-029 완료 · 282c3c6 · Aiden 직접 보완 PASS · 위반 2회 경고 |
 | TASK-047 | 260521 | i18n 번역 키 타입 안정성 | P4 | 없음 | D_Kai | ✅ | [TASK-047](tasks/TASK-047_260521_i18n번역키타입안정성_DKai.md) | IMP-023 완료 · 14ce2cb · Aiden 직접 보완 PASS · 위반 2회 경고 |
 | TASK-048 | 260521 | RETURNED 상태 전이 확장 | P3 | 없음 | Ring | ✅ | [TASK-048](tasks/TASK-048_260521_RETURNED상태전이확장_Ring.md) | IMP-060 완료 · 3cfe3f4 · 211/211 · Aiden 직접 보완 PASS · 신규 할당 중단 유지 |
-| TASK-049 | 260521 | 공통 UI 컴포넌트 라이브러리화 | P3 | 없음 | B_Kai | 🔔 | [TASK-049](tasks/TASK-049_260521_공통UI컴포넌트라이브러리화_Ring.md) | IMP-024 · src/components/domain/ 신설 · Ring→B_Kai 재할당 · `c96bff4` · 🔔 검토 요청 |
+| TASK-049 | 260521 | 공통 UI 컴포넌트 라이브러리화 | P3 | 없음 | B_Kai | ✅ | [TASK-049](tasks/TASK-049_260521_공통UI컴포넌트라이브러리화_Ring.md) | IMP-024 완료 · c96bff4 · 211/211 · Phase F 11/11 100% ✅ |
 | TASK-050 | 260521 | PDF 경로 충돌 방지 | P3 | 없음 | B_Kai | ✅ | [TASK-050](tasks/TASK-050_260521_PDF경로충돌방지_BKai.md) | IMP-061 완료 · UUID 기반 파일명 · 7ef504a+1e8b86c · 209/209 ✅ |
 | TASK-051 | 260521 | Rate Limiting 도입 | P2 | — | B_Kai | ➖ | — | IMP-046 · **상용 오픈 전 Sprint으로 유예** (2026-05-21 Aiden 결정) |
 
@@ -114,7 +114,7 @@
 | Agent | 진행 중 | 재작업 필요 | 블로커 대기 |
 |:------|:--------|:-----------|:----------|
 | Riley | — | — | — |
-| B_Kai | TASK-049 🔔 (검토 요청) | — | — |
+| B_Kai | — | — | — |
 | D_Kai | — | — | — |
 | Ring | — | — | 신규 할당 중단 유지 (9차 위반 누적) |
 
@@ -193,3 +193,4 @@
 | 2026-05-21 | Aiden (Claude) | Sprint H-II 4차 검토 — TASK-044✅(IMP-049·Option B 보완)·TASK-046✅(IMP-029·Option B 헤더 수정)·TASK-047✅(IMP-023·동일). D_Kai R-17 동일 유형 위반 2회 기록(경고, 임계 3회). IMP_PROGRESS 3건 완료 처리 |
 | 2026-05-21 | Aiden (Claude) | Sprint H-II 5차 검토 — TASK-045✅(IMP-012·코드 63ce099·문서 55a8f65·211/211·Aiden 직접 보완). D_Kai 절차 개선 확인(상태헤더·ACTIVE_TASK·개정이력 모두 올바르게 처리). Phase F 10/11 (90.9%) |
 | 2026-05-21 | Aiden (Claude) | TASK-049 담당 Agent 재할당 — Ring(신규 할당 중단) → B_Kai(ZenUI 분할 경험 선정). IMP-024 즉시 착수 가능 |
+| 2026-05-21 | Aiden (Claude) | Sprint H-II 6차 검토 — TASK-049 ✅ PASS(B_Kai·IMP-024 완료·c96bff4·211/211·자체 보완 Advisory). Phase F 11/11 (100%) ✅ 완료 확정. 전체 IMP 53/56 (94.6%) |
