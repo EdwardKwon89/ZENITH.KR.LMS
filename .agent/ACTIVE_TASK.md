@@ -104,7 +104,7 @@
 | Riley | — | — | — |
 | B_Kai | — | — | — |
 | D_Kai | — | — | — |
-| Ring | — | — | 신규 할당 중단·7차 위반·TASK-040 재교육 대기 |
+| Ring | — | **TASK-040** ⬜ (재교육 세션 — SAR_004 보고서 작성) | 신규 할당 중단·7차 위반·재교육 완료 후 해제 |
 
 ---
 
@@ -169,3 +169,4 @@
 | 2026-05-21 | Aiden (Claude) | Phase G 7차 검토 — TASK-033 ❌(Ring 6차·DoD+master_policy.test 버그·detect_changes 미기재). TASK-039 ❌(오진 정정: R-17 순서 ✅·코드 1e5c07d·문서 8a6cf8e — 실제 이슈 해시 미기재·DoD 3개 미체크·Advisory) |
 | 2026-05-21 | Aiden (Claude) | Phase G 8차 검토 — TASK-039 ✅ PASS(B_Kai 재작업 209/209·IMP-032 완료). TASK-033 ❌ 2차 반려(Ring 7차: task header 미변경·ACTIVE_TASK 미포함·DoD 허위체크·detect_changes 허위기재) |
 | 2026-05-21 | Aiden (Claude) | Phase G 9차 검토 — TASK-033 ✅ PASS(Ring 3차 재작업 e097e26·핵심 4항목 해결·IMP-051 완료). Ring 7차 위반 기록·신규 할당 중단·TASK-040 재교육 발령 예정 |
+| 2026-05-21 | Aiden (Claude) | TASK-040 발령 — Ring 재교육 세션(7차 위반·SAR_004·§3 문서 정확성 원칙 신설). 신규 Task 할당 중단 유지 |
