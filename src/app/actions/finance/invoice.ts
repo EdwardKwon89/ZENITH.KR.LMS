@@ -63,14 +63,15 @@ export async function issueInvoicePdf(invoiceId: string) {
   const { count } = await financeRepo.countPdfHistory(invoiceId);
 
   const nextVersion = (count || 0) + 1;
-  const timestamp = Date.now();
-  const filePath = `${invoice.invoice_no}/v${nextVersion}_${timestamp}.pdf`;
+  const uuid = crypto.randomUUID();
+  const filePath = `${uuid}.pdf`;
 
   const { error: uploadError } = await supabase.storage
     .from('invoices')
     .upload(filePath, buffer, {
       contentType: 'application/pdf',
-      upsert: true
+      upsert: false,
+      metadata: { invoice_no: invoice.invoice_no }
     });
 
   if (uploadError) {
