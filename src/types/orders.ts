@@ -1,4 +1,4 @@
-import { Database } from "./supabase";
+import { Database, Json } from "./supabase";
 
 export type OrderType = 'B2B' | 'B2C_ECOM' | 'B2C_EXPRESS';
 
@@ -17,6 +17,7 @@ export enum OrderStatus {
   HELD = 'HELD',
   CANCELED = 'CANCELED',
   RETURNED = 'RETURNED',
+  DISPOSED = 'DISPOSED',
   MASTERED = 'MASTERED',
 }
 
@@ -35,6 +36,7 @@ export const ORDER_STATUS_META: Record<OrderStatus, { labelKey: string; color: s
   [OrderStatus.HELD]: { labelKey: 'HELD.label', color: 'bg-red-100 text-red-800', descriptionKey: 'HELD.description' },
   [OrderStatus.CANCELED]: { labelKey: 'CANCELED.label', color: 'bg-gray-100 text-gray-800', descriptionKey: 'CANCELED.description' },
   [OrderStatus.RETURNED]: { labelKey: 'RETURNED.label', color: 'bg-rose-100 text-rose-800', descriptionKey: 'RETURNED.description' },
+  [OrderStatus.DISPOSED]: { labelKey: 'DISPOSED.label', color: 'bg-stone-100 text-stone-800', descriptionKey: 'DISPOSED.description' },
   [OrderStatus.MASTERED]: { labelKey: 'MASTERED.label', color: 'bg-slate-700 text-white', descriptionKey: 'MASTERED.description' },
 };
 
@@ -59,7 +61,7 @@ export interface CreateOrderRequest {
   recipient_email?: string;
   delivery_notes?: string;
   items: OrderItem[];
-  cargo_details?: any;
+  cargo_details?: Json;
 }
 
 export type OrderListItem = Database['public']['Tables']['zen_orders']['Row'] & {

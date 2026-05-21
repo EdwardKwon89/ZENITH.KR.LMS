@@ -1,29 +1,32 @@
 import { BaseRepository } from './base.repository';
 import { OrderRegistrationInput } from '@/lib/validation/order';
 import { OrderStatus } from '@/types/orders';
+import { WithRelations } from '@/types/utils';
 
-export interface OrderWithRelations {
-  id: string;
-  [key: string]: unknown;
-  shipper?: { name?: string } | null;
-  origin_port?: { name?: string; code?: string } | null;
-  dest_port?: { name?: string; code?: string } | null;
-  packages?: Array<{
-    id: string;
-    [key: string]: unknown;
-    items?: Array<{ [key: string]: unknown }>;
-  }>;
-}
+export type OrderWithRelations = WithRelations<
+  { id: string },
+  {
+    shipper?: { name?: string } | null;
+    origin_port?: { name?: string; code?: string } | null;
+    dest_port?: { name?: string; code?: string } | null;
+    packages?: Array<{
+      id: string;
+      [key: string]: unknown;
+      items?: Array<{ [key: string]: unknown }>;
+    }>;
+  }
+>;
 
-export interface MasterOrderWithHouses {
-  id: string;
-  [key: string]: unknown;
-  origin_port?: { code?: string; name?: string } | null;
-  dest_port?: { code?: string; name?: string } | null;
-  carrier?: { name?: string; iata_code?: string } | null;
-  houses?: Array<{ [key: string]: unknown }>;
-  totalHouses?: number;
-}
+export type MasterOrderWithHouses = WithRelations<
+  { id: string },
+  {
+    origin_port?: { code?: string; name?: string } | null;
+    dest_port?: { code?: string; name?: string } | null;
+    carrier?: { name?: string; iata_code?: string } | null;
+    houses?: Array<{ [key: string]: unknown }>;
+    totalHouses?: number;
+  }
+>;
 
 /**
  * OrderRepository: Orders 도메인 DB 접근 전담
@@ -294,5 +297,23 @@ export class OrderRepository extends BaseRepository {
 
   async getOrdersAggregation(orderIds: string[]) {
     return this.db.rpc('get_orders_aggregation', { order_ids: orderIds });
+  }
+
+  async dissolveMasterOrderAtomic(masterId: string, userId: string) {
+    return this.db.rpc('dissolve_master_order_atomic', {
+      p_master_order_id: masterId,
+      p_user_id: userId,
+    });
+  }
+
+  async getHeldPreviousStatus(orderId: string) {
+    return this.db
+      .from('order_status_history')
+      .select('prev_status')
+      .eq('order_id', orderId)
+      .eq('next_status', 'HELD')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
   }
 }
