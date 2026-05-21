@@ -94,10 +94,21 @@ describe('ZENITH Finance Integration: WBS 3.2 Integrity Test', () => {
 
   describe('Scenario 3: Payment Workflow Synchronization', () => {
     it('TC-F.3: [Success] 인보이스 결제 완료 시 오더의 Billing Status가 PAID로 자동 변경되어야 함', async () => {
+      // 1. findByIdBasic chain (new IMP-051 audit)
+      mockSupabase.single.mockResolvedValueOnce({ 
+        data: { metadata: { source_order_id: 'order-101' }, status: 'PENDING' }, 
+        error: null 
+      });
+      
+      // 2. updatePaymentStatus repo chain: update().eq().select().single()
+      mockSupabase.select.mockReturnValueOnce(mockSupabase);
       mockSupabase.single.mockResolvedValueOnce({ 
         data: { metadata: { source_order_id: 'order-101' } }, 
         error: null 
       });
+
+      // 3. Audit history insert (best-effort)
+      mockSupabase.insert.mockReturnValueOnce({ error: null });
       
       await updatePaymentStatus('inv-101', 'PAID', 1250.55);
 
