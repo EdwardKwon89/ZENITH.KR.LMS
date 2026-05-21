@@ -888,3 +888,24 @@
 - **관련 파일**: `src/app/[locale]/(auth)/login/actions.ts`
 - **예상 공수**: 0.5 MD
 - **우선순위**: **Medium** (간헐적 문서 업로드 실패)
+
+---
+
+## [IMP-069] 통관 연계 — IBC 어댑터 구현
+
+- **발견 경위**: Aiden — An_08(통관연계 분석 보고서 v1.1) · An_09(통관연계 분석 검토보고서) 완료 후 IBC API 연동 어댑터 미구현 확인 (2026-05-21)
+- **현재 상태**: `src/lib/customs/` 내 `ICustomsAdapter` 인터페이스 + `ManualAdapter`(Mock 수준)만 존재. IBC(국제 통관 대행사) 실제 연동 어댑터 없음 — 현재 관리자 수동 신고번호 입력으로 운영
+- **임시 조치**: ManualAdapter로 수동 `declaration_no` 입력 후 APPROVED 처리
+- **근본 문제**: An_08/An_09 분석으로 IBC API 3개 시스템(중국 포워더 shxk·IBC Air AMS·IBC eTrack) 전체 명세 확보됐으나 실제 어댑터 미구현. 어댑터 패턴(`ICustomsAdapter`)이 설계되어 있어 구조적 착수 준비는 완료됨
+- **목표 구현**:
+  - `src/lib/customs/ibc-adapter.ts` 신규 구현 (`ICustomsAdapter` 인터페이스 구현)
+  - 중국 포워더(shxk) API 연동: `CreateOrder` + `SubmitForecast` 2단계 주문 프로세스
+  - IBC Air AMS Manifest 제출: Fullman CSV 42개 필드 생성 + 비동기 이메일 결과 처리
+  - IBC eTrack Polling: 3계층 이벤트 배열(`events[]` / `aams_events[]` / `vendor_events[]`) + Disposition Codes 84개 매핑
+  - IBC Authority Token 인증 모듈: HEAD + Base64 + 토큰 캐싱 + 만료 시 재발급
+  - `src/lib/customs/adapter-factory.ts` 동적 어댑터 로딩
+  - Admin UI 어댑터 선택 드롭다운 (IBC / Manual)
+- **관련 파일**: `src/lib/customs/ibc-adapter.ts` (신규), `src/lib/customs/adapter-factory.ts` (신규), `src/lib/customs/types.ts`, `src/lib/customs/manual-adapter.ts`, `docs/02_Analysis/An_08_통관연계_분석_보고서.md`, `docs/02_Analysis/An_09_통관연계_분석_검토보고서.md`, `docs/02_Analysis/R_01_통관연계_Aiden_검토요청.md`
+- **착수 조건**: ① IBC Sandbox API 계정 확보 (R_01 §1-4) ② `shxk.rtb56.com` 시스템 정체 IBC 확인 (R_01 §1-1)
+- **예상 공수**: 5~8 MD
+- **우선순위**: **High**
