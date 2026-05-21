@@ -454,6 +454,20 @@
     "error_confirm": "Please enter \"WITHDRAW\" exactly.",
     "error_process": "An error occurred during the withdrawal process."
   },
+  "orderStatus": {
+    "REGISTERED": { "label": "Received", "description": "Order has been newly registered" },
+    "SCHEDULED": { "label": "Scheduled", "description": "Transport assignment completed" },
+    "WAREHOUSED": { "label": "Warehoused", "description": "Physical warehouse arrival confirmed" },
+    "PACKED": { "label": "Packed", "description": "Outbound packing/wrapping completed" },
+    "RELEASED": { "label": "Released", "description": "Warehouse release and waybill attached" },
+    "IN_TRANSIT": { "label": "In Transit", "description": "Moving to final destination" },
+    "DELIVERED": { "label": "Delivered", "description": "Delivered to consignee" },
+    "CLAIMED": { "label": "Claimed", "description": "Shipper claim has been formally received" },
+    "HELD": { "label": "Held", "description": "Temporarily suspended due to issues" },
+    "CANCELED": { "label": "Canceled", "description": "Order has been canceled" },
+    "RETURNED": { "label": "Returned", "description": "Cargo returned to shipper" },
+    "MASTERED": { "label": "Master Bound", "description": "Bound to master order, modifications restricted" }
+  },
   "Maintenance": {
     "title": "Under Maintenance",
     "message": "The service is currently under maintenance. Please try again shortly.",

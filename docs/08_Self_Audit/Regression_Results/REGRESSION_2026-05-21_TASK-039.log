@@ -1,0 +1,16 @@
+=== REGRESSION TEST: TASK-039 (IMP-032) ===
+Date: 2026-05-21
+Branch: main
+Agent: Noah (Codex)
+Changes: scripts/audit-i18n.ts (신규) + ORDER_STATUS_META i18n 전환 + OrderDataTable/StatusChangeModal useTranslations 적용
+Result: 207/209 PASS (2 pre-existing failures, unrelated to changes)
+
+Pre-existing failures:
+1. tests/integration/finance.test.ts — TC-F.3: settlement.ts:38 (financeRepo.updatePaymentStatus)
+2. tests/unit/master/master_policy.test.ts — TC-MP.1: order.repository.ts:230 (findMasterById mock)
+
+=== npm run check:i18n ===
+en.json baseline: 441 keys
+ko.json: 43 missing (pre-existing — Finance/Statistics/Schedules sections)
+ja.json: 427 missing (pre-existing — severely incomplete)
+zh.json: 372 missing (pre-existing — severely incomplete)

@@ -7,6 +7,7 @@ import { ZenCard, ZenButton, ZenInput } from '@/components/ui/ZenUI';
 import { OrderStatus, ORDER_STATUS_META } from '@/types/orders';
 import { updateOrderStatus } from '@/app/actions/orders';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 
 interface StatusChangeModalProps {
   orderId: string;
@@ -26,6 +27,7 @@ export const StatusChangeModal: React.FC<StatusChangeModalProps> = ({
   const [selectedStatus, setSelectedStatus] = useState<OrderStatus | null>(null);
   const [reason, setReason] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const t = useTranslations('orderStatus');
 
   const handleUpdate = async () => {
     if (!selectedStatus) return;
@@ -77,7 +79,7 @@ export const StatusChangeModal: React.FC<StatusChangeModalProps> = ({
               </div>
               <div>
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Current Status</p>
-                <p className="text-sm font-bold text-slate-700">{ORDER_STATUS_META[currentStatus]?.label || currentStatus}</p>
+                <p className="text-sm font-bold text-slate-700">{ORDER_STATUS_META[currentStatus] ? t(ORDER_STATUS_META[currentStatus].labelKey) : currentStatus}</p>
               </div>
             </div>
 
@@ -95,10 +97,10 @@ export const StatusChangeModal: React.FC<StatusChangeModalProps> = ({
                   }`}
                 >
                   <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full mb-2 ${ORDER_STATUS_META[status]?.color}`}>
-                    {ORDER_STATUS_META[status]?.label}
+                    {ORDER_STATUS_META[status] ? t(ORDER_STATUS_META[status].labelKey) : status}
                   </span>
                   <span className="text-[11px] text-slate-500 font-medium leading-tight">
-                    {ORDER_STATUS_META[status]?.description}
+                    {ORDER_STATUS_META[status] ? t(ORDER_STATUS_META[status].descriptionKey) : status}
                   </span>
                 </button>
               ))}
