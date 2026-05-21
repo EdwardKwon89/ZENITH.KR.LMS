@@ -622,7 +622,8 @@
 - **목표 구현**: ① `@upstash/ratelimit` 또는 Next.js 미들웨어 레벨 IP 기반 Rate Limiting 도입 ② 서버 액션별 제한: Mutation 10회/분/사용자, 읽기 100회/분/사용자 ③ `topUpWallet()` 등 금융 액션 3회/분
 - **관련 파일**: `src/app/actions/*.ts` (전체), `src/middleware.ts`
 - **예상 공수**: 2 MD
-- **우선순위**: High
+- **우선순위**: High → **⏸ 상용 오픈 전 Sprint으로 유예 (2026-05-21 Aiden 결정)**
+- **유예 사유**: 현재 내부 개발/테스트 단계 — 외부 공격자 노출 없음. 상용 오픈 직전 필수 보완 항목으로 재배치
 
 ---
 
