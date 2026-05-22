@@ -1,8 +1,7 @@
 "use client";
-import { logger } from '@/lib/logger';
 
 import React, { useState } from 'react';
-import { FileText, Loader2, Download } from 'lucide-react';
+import { Loader2, Download } from 'lucide-react';
 import { toast } from 'sonner';
 import { ZenButton } from '@/components/ui/ZenUI';
 
@@ -22,30 +21,21 @@ export default function ExportButton({
   const [isExporting, setIsExporting] = useState(false);
 
   const handleExport = async () => {
-    logger.info("[FIN-EXP] handleExport triggered", { dataLength: data?.length, type });
     if (!data || data.length === 0) {
-      logger.warn("[FIN-EXP] No data to export");
       toast.error('내보낼 데이터가 없습니다.');
       return;
     }
 
     setIsExporting(true);
-    logger.info("[FIN-EXP] Starting fetch to /api/finance/export");
     try {
-      // Note: In a real implementation, we would call an API route that uses ExcelJS
-      // For this task, we'll simulate the download or provide a CSV fallback
-      // Since I am an AI agent, I'll assume the /api/finance/export endpoint is ready
-      // or will be handled by the next task.
-      
-      const response = await fetch(`/api/finance/export`, {
+      const response = await fetch('/api/finance/export', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ data, filename, type }),
       });
-      
+
       if (!response.ok) {
         const errorText = await response.text();
-        logger.error("Server Error Details:", errorText);
         throw new Error(`Export failed: ${response.status} - ${errorText}`);
       }
 
@@ -56,17 +46,19 @@ export default function ExportButton({
       a.download = `${filename}.xlsx`;
       document.body.appendChild(a);
       a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
+      setTimeout(() => {
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      }, 1000);
 
       toast.success('Excel file generated successfully.');
     } catch (error: any) {
-      logger.error("[FIN-EXP] Export Error:", error);
       toast.error(`Export failed: ${error.message}`);
     } finally {
       setIsExporting(false);
     }
   };
+
 
   return (
     <ZenButton 

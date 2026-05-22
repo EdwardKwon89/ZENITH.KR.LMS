@@ -10,7 +10,7 @@ import { routing } from '@/i18n/routing';
 const getProfileCached = cache(async (supabase: SupabaseClient, userId: string) => {
   return supabase
     .from('zen_profiles')
-    .select(`status, org_id, role, zen_organizations ( type )`)
+    .select(`status, org_id, role`)
     .eq('id', userId)
     .single();
 });
@@ -58,7 +58,9 @@ export async function authGuard(
 
   if (user) {
     const isMaintenanceMode = await isFeatureEnabled('MAINTENANCE_MODE');
-    const isPlatformUser = user?.app_metadata?.role === USER_ROLES.ZENITH_SUPER_ADMIN || user?.app_metadata?.role === USER_ROLES.ADMIN;
+    const isPlatformUser = 
+      user?.app_metadata?.role === USER_ROLES.ZENITH_SUPER_ADMIN || 
+      (user?.app_metadata?.role === USER_ROLES.ADMIN && user?.app_metadata?.org_type === 'PLATFORM');
 
     if (isMaintenanceMode && !isPlatformUser && !isAuthPage && purePath !== '/' && purePath !== '/maintenance') {
       const url = request.nextUrl.clone();
@@ -69,8 +71,16 @@ export async function authGuard(
 
   if (user && !isApi) {
     const metadataRole = user.app_metadata?.role as string | undefined;
-    const isMetadataPlatformAdmin = metadataRole === USER_ROLES.ADMIN || metadataRole === USER_ROLES.ZENITH_SUPER_ADMIN;
-    let orgType = isMetadataPlatformAdmin ? 'PLATFORM' : ((user.app_metadata?.org_type as any) || 'GUEST');
+    const metadataOrgType = user.app_metadata?.org_type as string | undefined;
+    
+    let orgType: string;
+    if (metadataOrgType) {
+      orgType = metadataOrgType;
+    } else {
+      const isMetadataPlatformAdmin = metadataRole === USER_ROLES.ADMIN || metadataRole === USER_ROLES.ZENITH_SUPER_ADMIN;
+      orgType = isMetadataPlatformAdmin ? 'PLATFORM' : 'GUEST';
+    }
+    
     let userStatus = (user.app_metadata?.status as string) || 'PENDING';
 
     // metadata 누락 세션 fallback: app_metadata 갱신 hook 미적용 레거시 세션
@@ -82,7 +92,16 @@ export async function authGuard(
 
         if (profile) {
           userStatus = profile.status || userStatus;
-          const dbOrgType = (profile.zen_organizations as any)?.type;
+          
+          let dbOrgType: string | undefined;
+          if (profile.org_id) {
+            const { data: org } = await supabase
+              .from('zen_organizations')
+              .select('type')
+              .eq('id', profile.org_id)
+              .single();
+            dbOrgType = org?.type;
+          }
 
           if ([USER_ROLES.ZENITH_SUPER_ADMIN, USER_ROLES.ADMIN].includes((profile as any).role)) {
             orgType = 'PLATFORM';

@@ -1,4 +1,3 @@
-import { logger } from '@/lib/logger';
 'use server';
 
 import { validateUserAction, validateAdminAction } from '@/lib/auth/guards';

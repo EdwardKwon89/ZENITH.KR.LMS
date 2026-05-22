@@ -28,7 +28,7 @@ export async function middleware(request: NextRequest) {
 
   const { supabaseResponse, user, supabase } = sessionResult;
 
-  const isApi = pathname.split('/').filter(Boolean)[1] === 'api' ||
+  const isApi = pathname.split('/').filter(Boolean)[0] === 'api' ||
     (routing.locales.includes(pathname.split('/').filter(Boolean)[0] as any) &&
      pathname.split('/').filter(Boolean)[1] === 'api');
 
