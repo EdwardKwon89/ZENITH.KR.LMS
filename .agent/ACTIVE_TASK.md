@@ -107,8 +107,8 @@
 | TASK-050 | 260521 | PDF 경로 충돌 방지 | P3 | 없음 | B_Kai | ✅ | [TASK-050](tasks/TASK-050_260521_PDF경로충돌방지_BKai.md) | IMP-061 완료 · UUID 기반 파일명 · 7ef504a+1e8b86c · 209/209 ✅ |
 | TASK-051 | 260521 | Rate Limiting 도입 | P2 | — | B_Kai | ➖ | — | IMP-046 · **상용 오픈 전 Sprint으로 유예** (2026-05-21 Aiden 결정) |
 | TASK-052 | 260522 | E2E-13 HELD 복구 시나리오 spec + 실행 | P3 | 없음 | Riley | 🔄 | [TASK-052](tasks/TASK-052_260522_E2E-13_HELD복구시나리오_Riley.md) | IMP-050 E2E 검증 |
-| TASK-053 | 260522 | E2E-14 RETURNED 전이 시나리오 spec + 실행 | P3 | 없음 | B_Kai | ✅ | [TASK-053](tasks/TASK-053_260522_E2E-14_RETURNED전이시나리오_BKai.md) | IMP-060 · spec·회귀·커밋 ✅ · E2E 케이스 A/B ⏸️(TASK-056 블로커) — 완료 후 재실행 지시 예정 |
-| TASK-054 | 260522 | E2E-15 dissolve 원자성 시나리오 spec + 실행 | P3 | 없음 | D_Kai | ❌ | [TASK-054](tasks/TASK-054_260522_E2E-15_dissolve원자성시나리오_DKai.md) | ❌ 반려: 커밋 해시 미기재·"use server" 허위 기재·StatusChangeModal/OrderDataTable 미커밋·E2E_SCENARIOS 미갱신 |
+| TASK-053 | 260522 | E2E-14 RETURNED 전이 시나리오 spec + 실행 | P3 | 없음 | B_Kai | 🔔 | [TASK-053](tasks/TASK-053_260522_E2E-14_RETURNED전이시나리오_BKai.md) | IMP-060 · E2E-14 재실행 중 버그 3종 발견·수정 (updated_at 컬럼 누락·i18n 레이블·viewport) · Aiden 2차 검토 요청 |
+| TASK-054 | 260522 | E2E-15 dissolve 원자성 시나리오 spec + 실행 | P3 | 없음 | D_Kai | 🔔 | [TASK-054](tasks/TASK-054_260522_E2E-15_dissolve원자성시나리오_DKai.md) | 재작업 완료: `931a396` 보완 커밋·허위 기재 정정·해시 기재·E2E_SCENARIOS 갱신 |
 | TASK-056 | 260522 | E2E 테스트용 오더 시드 데이터 생성 | P3 | 없음 | D_Kai | ✅ | [TASK-056](tasks/TASK-056_260522_E2E시드데이터생성_DKai.md) | seedOrders() 5건 ✅ · 회귀 211/211 ✅ · 재작업(371b59f) ✅ · Aiden ✅ 승인 |
 | TASK-055 | 260522 | E2E-01/03/05 기존 시나리오 재검증 | P3 | 없음 | Riley | 🔄 | [TASK-055](tasks/TASK-055_260522_E2E재검증01_03_05_Riley.md) | IMP-068·052·030 회귀 확인 |
 | TASK-057 | 260522 | E2E-14 케이스 A/B 재실행 + 타이밍 최적화 | P3 | TASK-056 ✅ | B_Kai | 🔄 | [TASK-057](tasks/TASK-057_260522_E2E-14재실행_타이밍최적화_BKai.md) | IMP-060 재검증 · waitForTimeout×4 → expect() 최적화 + 케이스 A/B 재실행 |
@@ -121,7 +121,7 @@
 |:------|:--------|:----------------|:----------|
 | Riley | TASK-052·055 🔄 | ⚠️ "use server" 추가 fix cdd365d 반영됨 — 재시도 가능 | — |
 | B_Kai | TASK-057 🔄 (E2E-14 재실행 + 타이밍 최적화) | — | — |
-| D_Kai | — | TASK-054 ❌ 재작업: 보완 커밋(Modal/Table+E2E_SCENARIOS)·허위 기재 정정·커밋 해시 기재 | — |
+| D_Kai | — | TASK-054 🔔 (Aiden 재검토 대기) | — |
 | Ring | — | — | 신규 할당 중단 유지 (9차 위반 누적) |
 
 ---
