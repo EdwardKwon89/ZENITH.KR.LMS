@@ -9,11 +9,14 @@ import { cn } from '@/lib/utils';
 import { approveOrganization, rejectOrganization, requestOrganizationSupplement, getOrganizations } from "@/app/actions/organization";
 
 interface OrganizationApprovalClientProps {
-  initialData: any[];
+  initialData: {
+    organizations: any[];
+    total: number;
+  };
 }
 
 export default function OrganizationApprovalClient({ initialData }: OrganizationApprovalClientProps) {
-  const [pendingOrgs, setPendingOrgs] = useState<any[]>(initialData);
+  const [pendingOrgs, setPendingOrgs] = useState<any[]>(initialData?.organizations || []);
   const [loading, setLoading] = useState(false);
   const [platformVersion, setPlatformVersion] = useState<string>('v2.1 Premium');
   const supabase = createClient();
@@ -23,14 +26,14 @@ export default function OrganizationApprovalClient({ initialData }: Organization
     try {
       // 버전 정보 실시간 동기화
       const { data: verData } = await supabase
-        .from('system_settings')
-        .select('value')
-        .eq('key', 'PLATFORM_VERSION')
-        .single();
+          .from('system_settings')
+          .select('value')
+          .eq('key', 'PLATFORM_VERSION')
+          .single();
       if (verData?.value) setPlatformVersion(verData.value);
 
       const data = await getOrganizations(['PENDING', 'SUPPLEMENT_REQUIRED']);
-      setPendingOrgs(data);
+      setPendingOrgs(data?.organizations || []);
     } catch (err) {
       logger.error("Failed to refresh organizations:", err);
     } finally {
