@@ -24,6 +24,11 @@
 | **E2E-10** | 클레임 접수 및 CI/PL 다국어 문서 발행 | Admin | Phase 4 |
 | **E2E-11** | 오더 QnA 어드민 인라인 답변 | User/Admin | Phase 4 |
 | **E2E-12** | 복합 경로 최적화 3종 선택 및 마일스톤 확인 | Admin | Phase 3 |
+| **E2E-13** | HELD→이전상태 복구 로직 (IMP-050 검증) | Admin | Phase 4 |
+| **E2E-14** | RETURNED 상태 전이 플로우 (IMP-060 검증) | Admin | Phase 5 |
+| **E2E-13** | HELD→이전상태 복구 로직 검증 | Admin/Oper | Phase 3 |
+| **E2E-14** | RETURNED 상태 전이 시나리오 검증 | Admin/Oper | Phase 3 |
+| **E2E-15** | 마스터 오더 해체(dissolve) 원자성 검증 | Admin | Phase 2 |
 
 ---
 
@@ -184,3 +189,35 @@
     7. 마일스톤 타임라인(출발 → 경유 → 도착 예정일) 시각화 표시 확인
 - **기대 결과**: 3종 스코어링 비교 후 선택 경로가 확정 적용되며 마일스톤 타임라인이 시각적으로 표시됨.
 - **검증 포인트**: `zen_order_routes.selected_option_id`, `zen_route_options.score` 3종 비교값, `RouteConsistencyBadge` 배지 상태.
+
+---
+
+### E2E-15: 마스터 오더 해체(dissolve) 원자성 검증
+- **사전 조건**: 어드민 계정 로그인 상태. 마스터 오더에 편성된 하우스 오더 2건 이상 존재 (또는 `PENDING` 상태 하우스 오더 2건 이상 존재하여 신규 마스터 오더 생성 가능).
+- **수행 단계**:
+    1. 어드민 `/ko/master-orders` 접속 → 마스터 오더 목록 확인
+    2. (필요시) `PENDING` 하우스 오더 2건 선택 → 'Create Master' 버튼으로 신규 마스터 오더 생성
+    3. 마스터 오더 행의 `Dissolve Master` 버튼(Trash2 아이콘) 클릭 → 브라우저 confirm() 다이얼로그 수락
+    4. 토스트 메시지 "해체 완료" 확인
+    5. `/ko/orders` 이동 → 해체된 하우스 오더들의 상태 확인 (REGISTERED, master_order_id = NULL)
+- **기대 결과**: 마스터 오더가 삭제되고 모든 하우스 오더가 개별 오더로 복귀(`master_order_id = NULL`, `status = 'REGISTERED'`). 해체 이력이 `zen_master_order_history`에 기록됨.
+- **검증 포인트**: `zen_master_orders` DELETE 확인, `zen_orders.master_order_id` NULL 처리 확인, UI 토스트 "해체 완료" 표시.
+- **구현 파일**: `tests/e2e/e2e-15-dissolve-atomicity.spec.ts`
+
+---
+
+### E2E-14: RETURNED 상태 전이 플로우
+- **사전 조건**: RETURNED(반송) 상태로 전이 가능한 오더가 존재 (WAREHOUSED·IN_TRANSIT·DELIVERED 상태). 어드민 계정으로 로그인.
+- **수행 단계 (케이스 A — RETURNED→WAREHOUSED 재입고)**:
+    1. `/ko/orders` 접속하여 특정 오더의 상태 배지 클릭 → StatusChangeModal 오픈
+    2. RETURNED 선택 → 상태 변경 실행
+    3. 오더 배지가 RETURNED로 변경 확인
+    4. StatusChangeModal 재오픈 → 전이 옵션 3종(WAREHOUSED·CANCELED·DISPOSED) 표시 확인
+    5. WAREHOUSED 선택 → 상태 변경 실행
+    6. 오더 배지가 WAREHOUSED로 변경 확인
+- **수행 단계 (케이스 B — RETURNED→DISPOSED 폐기)**:
+    1. 별도 오더를 RETURNED 상태로 전환
+    2. StatusChangeModal → DISPOSED 선택 → 상태 변경 실행
+    3. 오더 배지가 DISPOSED로 변경 확인
+- **기대 결과**: RETURNED 상태에서 WAREHOUSED(재입고) 및 DISPOSED(폐기)로 정상 전이되며, 배지 UI가 즉시 갱신됨.
+- **검증 포인트**: `zen_orders.status` 컬럼 값 변경, StatusChangeModal 전이 옵션 3종 표시, 배지 색상/라벨 정합성.
