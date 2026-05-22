@@ -112,8 +112,8 @@
 | TASK-056 | 260522 | E2E 테스트용 오더 시드 데이터 생성 | P3 | 없음 | D_Kai | ✅ | [TASK-056](tasks/TASK-056_260522_E2E시드데이터생성_DKai.md) | seedOrders() 5건 ✅ · 회귀 211/211 ✅ · 재작업(371b59f) ✅ · Aiden ✅ 승인 |
 | TASK-055 | 260522 | E2E-01/03/05 기존 시나리오 재검증 | P3 | 없음 | Riley | 🔄 | [TASK-055](tasks/TASK-055_260522_E2E재검증01_03_05_Riley.md) | IMP-068·052·030 회귀 확인 |
 | TASK-057 | 260522 | E2E-14 케이스 A/B 재실행 + 타이밍 최적화 | P3 | TASK-053 ✅ 통합 완료 | B_Kai | ➖ | [TASK-057](tasks/TASK-057_260522_E2E-14재실행_타이밍최적화_BKai.md) | TASK-053 재작업에 통합 완료 · E2E A/B ✅ · 회귀 211/211 ✅ |
-| TASK-058 | 260522 | UAT 절차서: 오더관리·마스터오더 | P4 | 없음 | B_Kai | ⬜ | [TASK-058](tasks/TASK-058_260522_UAT_오더마스터오더_BKai.md) | UAT_02·03 작성 (10개 시나리오) |
-| TASK-059 | 260522 | UAT 절차서: 인증·창고·어드민 | P4 | 없음 | D_Kai | ⬜ | [TASK-059](tasks/TASK-059_260522_UAT_인증창고어드민_DKai.md) | UAT_01·04·09 작성 (17개 시나리오) |
+| TASK-058 | 260522 | UAT 절차서: 오더관리·마스터오더 | P4 | 없음 | B_Kai | 🔄 | [TASK-058](tasks/TASK-058_260522_UAT_오더마스터오더_BKai.md) | UAT_02·03 작성 (10개 시나리오) |
+| TASK-059 | 260522 | UAT 절차서: 인증·창고·어드민 | P4 | 없음 | D_Kai | 🔔 | [TASK-059](tasks/TASK-059_260522_UAT_인증창고어드민_DKai.md) | UAT_01·04·09 작성 (17개 시나리오) |
 | TASK-060 | 260522 | UAT 절차서: 정산·추적·VOC·마이페이지 | P4 | TASK-052·055 ✅ | Riley | 🚫 | — | E2E 완료 후 착수 — UAT_05·06·07·08 (19개 시나리오) |
 
 ---
@@ -123,8 +123,8 @@
 | Agent | 진행 중 | 재작업/조치 필요 | 블로커 대기 |
 |:------|:--------|:----------------|:----------|
 | Riley | TASK-052·055 🔄 | ⚠️ "use server" 추가 fix cdd365d 반영됨 — 재시도 가능 | TASK-060 🚫 (E2E 완료 대기) |
-| B_Kai | TASK-058 ⬜ 즉시 착수 가능 | — | — |
-| D_Kai | TASK-059 ⬜ 즉시 착수 가능 | — | — |
+| B_Kai | TASK-058 🔄 구현 중 | — | — |
+| D_Kai | TASK-059 🔔 검토 요청 | — | — |
 | Ring | — | — | 신규 할당 중단 유지 (9차 위반 누적) |
 
 ---
@@ -218,3 +218,4 @@
 | 2026-05-22 | Aiden (Claude) | TASK-054 ✅ PASS — D_Kai 재작업(`931a396`·`9686245`) 전량 확인. DoD 결함 Aiden 직접 보완. IMP-052 완료 |
 | 2026-05-22 | Aiden (Claude) | TASK-053 ✅ PASS — B_Kai 3차 재작업(`e70b6a2`·`51cd330`) 전량 확인. migration 3종·E2E A/B·회귀 211/211. IMP-060 완료. Aiden 직접 보완: 2차 DoD·개정이력 정정 |
 | 2026-05-22 | Aiden (Claude) | UAT 절차서 Sprint 착수 — TASK-058(B_Kai: UAT_02·03)·TASK-059(D_Kai: UAT_01·04·09)·TASK-060(Riley: UAT_05·06·07·08 🚫 E2E 완료 후) 발령. UAT_MASTER.md 생성 (46개 시나리오 인덱스). `docs/91_FinalTest/UAT/` |
+| 2026-05-22 | D_Kai (OpenCode) | TASK-059 구현 완료 🔔 — UAT_01·04·09 17개 시나리오 전량 작성, 코드 커밋 b747c5b, UAT_MASTER 인덱스 ✅ 갱신 |
