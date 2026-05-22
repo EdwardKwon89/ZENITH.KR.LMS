@@ -20,7 +20,7 @@ async function createUser(supabase: any, email: string, fullName: string, role: 
       user_metadata: { full_name: fullName, role: role }
     });
     if (createError) {
-      console.error(`  - Failed to create ${email}:`, createError.message);
+      console.error(`  - Failed to create ${email}:`, JSON.stringify(createError, null, 2));
       return;
     }
     user = newUser.user;
@@ -86,16 +86,56 @@ async function getOrCreateOrg(supabase: any, name: string, type: string) {
 async function seedOrders(supabase: any, shipperOrgId: string) {
   console.log('\nSeeding E2E test orders...');
 
-  const cargoDetails = { description: 'E2E test cargo', weight_kg: 1.0 };
+  // Fetch port IDs for ICN and LAX dynamically to ensure robustness
+  const { data: ports } = await supabase
+    .from('zen_ports')
+    .select('id, code');
+  
+  const icnPort = ports?.find((p: any) => p.code === 'ICN');
+  const laxPort = ports?.find((p: any) => p.code === 'LAX');
+  const icnId = icnPort?.id || null;
+  const laxId = laxPort?.id || null;
+
+  const cargoDetails = { description: 'E2E test cargo', weight_kg: 1.0, total_weight: 10.0, total_volume: 0.05 };
   const testOrders = [
     { order_no: 'E2E-SEED-001', status: 'REGISTERED', recipient_name: 'E2E Test Recipient 1', recipient_phone: '010-9999-0001' },
     { order_no: 'E2E-SEED-002', status: 'REGISTERED', recipient_name: 'E2E Test Recipient 2', recipient_phone: '010-9999-0002' },
     { order_no: 'E2E-SEED-003', status: 'REGISTERED', recipient_name: 'E2E Test Recipient 3', recipient_phone: '010-9999-0003' },
     { order_no: 'E2E-SEED-004', status: 'WAREHOUSED', recipient_name: 'E2E Test Recipient 4', recipient_phone: '010-9999-0004' },
     { order_no: 'E2E-SEED-005', status: 'WAREHOUSED', recipient_name: 'E2E Test Recipient 5', recipient_phone: '010-9999-0005' },
+    {
+      id: 'd197352a-ba9f-4640-9176-c50c852d8138',
+      order_no: 'Z-FIN-E2E05-01',
+      status: 'REGISTERED',
+      recipient_name: 'E2E Target Recipient',
+      recipient_phone: '010-9999-0013',
+      origin_port_id: icnId,
+      dest_port_id: laxId,
+      transport_mode: 'AIR',
+      order_type: 'B2B'
+    },
+    {
+      id: '3ff5b116-29cd-4d90-8dd0-0e99c36a2155',
+      order_no: 'Z-HOU-E2E03-01',
+      status: 'PACKED',
+      order_type: 'B2B',
+      transport_mode: 'AIR',
+      recipient_name: 'E2E B2B Recipient',
+      recipient_phone: '010-9999-0003',
+      origin_port_id: icnId,
+      dest_port_id: laxId
+    },
   ];
 
   for (const order of testOrders) {
+    if (order.id === '3ff5b116-29cd-4d90-8dd0-0e99c36a2155') {
+      console.log(`  - Cleaning up conflicting order ID ${order.id} (from integration test)...`);
+      await supabase.from('zen_tracking_events').delete().eq('order_id', order.id);
+      await supabase.from('zen_tracking_raw_logs').delete().eq('order_id', order.id);
+      await supabase.from('zen_tracking_configs').delete().eq('order_id', order.id);
+      await supabase.from('zen_orders').delete().eq('id', order.id);
+    }
+
     const { data: existing } = await supabase
       .from('zen_orders')
       .select('id')
@@ -104,20 +144,124 @@ async function seedOrders(supabase: any, shipperOrgId: string) {
 
     if (existing) {
       console.log(`  - Order exists: ${order.order_no}`);
+      
+      // Update existing orders to ensure they have correct ports/transport_mode set
+      const { error: updateError } = await supabase
+        .from('zen_orders')
+        .update({
+          origin_port_id: order.origin_port_id,
+          dest_port_id: order.dest_port_id,
+          transport_mode: order.transport_mode,
+          order_type: order.order_type || 'B2B',
+          cargo_details: cargoDetails
+        })
+        .eq('id', existing.id);
+
+      if (updateError) {
+        console.error(`  - Failed to update order ports/mode: ${updateError.message}`);
+      } else {
+        console.log(`  - Updated ports/mode for existing order: ${order.order_no}`);
+      }
+
+      if (order.order_no === 'Z-HOU-E2E03-01') {
+        const { data: configExists } = await supabase
+          .from('zen_tracking_configs')
+          .select('id')
+          .eq('order_id', existing.id)
+          .maybeSingle();
+        if (!configExists) {
+          console.log(`  - Seeding tracking config for existing order Z-HOU-E2E03-01...`);
+          await supabase.from('zen_tracking_configs').insert({
+            order_id: existing.id,
+            provider_type: 'API',
+            tracking_no: 'TRK-E2E04-API-01',
+            is_active: true
+          });
+        }
+      }
       continue;
     }
 
-    const { error } = await supabase.from('zen_orders').insert({
-      ...order,
-      shipper_id: shipperOrgId,
-      cargo_details: cargoDetails,
-    });
+    const { data: insertedOrder, error } = await supabase
+      .from('zen_orders')
+      .insert({
+        ...order,
+        shipper_id: shipperOrgId,
+        cargo_details: cargoDetails,
+      })
+      .select('id')
+      .single();
 
     if (error) {
       console.error(`  - Failed: ${order.order_no}`, error.message);
     } else {
       console.log(`  - Created: ${order.order_no} [${order.status}]`);
+      if (order.order_no === 'Z-HOU-E2E03-01') {
+        console.log(`  - Seeding tracking config for new order Z-HOU-E2E03-01...`);
+        await supabase.from('zen_tracking_configs').insert({
+          order_id: insertedOrder.id,
+          provider_type: 'API',
+          tracking_no: 'TRK-E2E04-API-01',
+          is_active: true
+        });
+      }
     }
+  }
+}
+
+async function seedRateCards(supabase: any, carrierOrgId: string) {
+  console.log('\nSeeding Rate Cards...');
+  
+  // check if any rate card already exists
+  const { data: existingCards } = await supabase
+    .from('zen_rate_cards')
+    .select('id')
+    .limit(1);
+
+  if (existingCards && existingCards.length > 0) {
+    console.log('  - Rate cards already exist. Skipping.');
+    return;
+  }
+
+  // Insert a rate card for ICN -> LAX, AIR mode
+  const { data: rateCard, error: cardError } = await supabase
+    .from('zen_rate_cards')
+    .insert({
+      org_id: carrierOrgId,
+      origin_code: 'ICN',
+      dest_code: 'LAX',
+      mode: 'AIR',
+      unit_type: 'KG',
+      unit_price: 10.5,
+      currency: 'USD',
+      transit_days: 2,
+      is_direct: true,
+      status: 'ACTIVE',
+      priority: 10
+    })
+    .select('id')
+    .single();
+
+  if (cardError) {
+    console.error('  - Failed to create rate card:', cardError.message);
+    return;
+  }
+
+  console.log(`  - Created rate card: ${rateCard.id}`);
+
+  // Insert tiers
+  const { error: tierError } = await supabase
+    .from('zen_rate_tiers')
+    .insert([
+      { rate_card_id: rateCard.id, weight_min: 0, unit_price: 12.0, min_total_price: 50 },
+      { rate_card_id: rateCard.id, weight_min: 100, unit_price: 10.5, min_total_price: 50 },
+      { rate_card_id: rateCard.id, weight_min: 500, unit_price: 9.0, min_total_price: 50 }
+    ]);
+
+  if (tierError) {
+    console.error('  - Failed to create rate tiers:', tierError.message);
+  } else {
+    console.log('  - Created rate tiers for ICN -> LAX');
   }
 }
 
@@ -147,6 +291,9 @@ async function seed() {
 
     // 4. E2E 테스트용 오더 시드 데이터 생성
     await seedOrders(supabase, shipperOrg.id);
+
+    // 5. 정산 요율 카드 시드 데이터 생성
+    await seedRateCards(supabase, carrierOrg.id);
 
     console.log('\nSeed complete! All test accounts and E2E orders are ready.');
   } catch (err: any) {

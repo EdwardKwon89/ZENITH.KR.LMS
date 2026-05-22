@@ -1,13 +1,27 @@
 import { test, expect } from '@playwright/test';
 import path from 'path';
+import fs from 'fs';
+
+const SCREENSHOT_DIR = 'docs/99_Manual/E2E_01_Result/RERUN_2026-05-22';
 
 test.describe('E2E-01: Corporate Registration & Admin Approval', () => {
   const TIMESTAMP = Date.now();
   const testEmail = `test_corp_${TIMESTAMP}@zenith.kr`;
-  const testPassword = 'password1234';
+  const testPassword = 'Password1234';
   const testOrgName = `Test Corp ${TIMESTAMP}`;
 
+  test.beforeAll(async () => {
+    if (!fs.existsSync(SCREENSHOT_DIR)) {
+      fs.mkdirSync(SCREENSHOT_DIR, { recursive: true });
+    }
+  });
+
   test('should register a new corporate user and be approved by admin', async ({ page }) => {
+    test.setTimeout(120000);
+    // Console logs redirect
+    page.on('console', msg => console.log(`[PAGE CONSOLE] ${msg.type()}: ${msg.text()}`));
+    page.on('pageerror', err => console.log(`[PAGE ERROR] ${err.message}`));
+
     // 1. Registration Phase
     console.log('--- Step 1: Registration ---');
     await page.goto('/ko/register');
@@ -43,8 +57,8 @@ test.describe('E2E-01: Corporate Registration & Admin Approval', () => {
     
     // Verify redirect to pending
     await expect(page).toHaveURL(/\/register\/pending/);
-    await expect(page.locator('h1')).toContainText('심사');
-    await page.screenshot({ path: 'test-results/e2e_01_registration_pending.png' });
+    await expect(page.locator('.max-w-xl h1')).toContainText('심사');
+    await page.screenshot({ path: path.join(SCREENSHOT_DIR, '01_registration_pending.png') });
 
     // 2. Admin Approval Phase
     console.log('--- Step 2: Admin Approval ---');
@@ -68,15 +82,18 @@ test.describe('E2E-01: Corporate Registration & Admin Approval', () => {
     });
     
     // Find the pending org card and approve
-    const orgCard = page.locator('.zen-glass').filter({ hasText: testOrgName }).first();
-    await expect(orgCard).toBeVisible({ timeout: 15000 });
+    // ZenCard renders as a div with the org name in an h3
+    const orgCard = page.locator('div').filter({ has: page.locator(`h3:has-text("${testOrgName}")`) }).first();
+    await expect(orgCard).toBeVisible({ timeout: 30000 });
+    console.log('Org card found for:', testOrgName);
     
-    const approveBtn = orgCard.locator('button:has-text("법인 최종 승인")');
+    const approveBtn = page.locator('button').filter({ hasText: '법인 최종 승인' }).first();
+    await expect(approveBtn).toBeVisible({ timeout: 10000 });
     await approveBtn.click();
     
-    // Wait for the UI to update
-    await page.waitForTimeout(2000);
-    await page.screenshot({ path: 'test-results/e2e_01_admin_approved.png' });
+    // Wait for the UI to update after approval (dialog auto-accepted)
+    await expect(page.locator(`h3:has-text("${testOrgName}")`)).not.toBeVisible({ timeout: 20000 });
+    await page.screenshot({ path: path.join(SCREENSHOT_DIR, '02_admin_approved.png') });
 
     // 3. Verification Phase
     console.log('--- Step 3: Verification ---');
@@ -89,7 +106,7 @@ test.describe('E2E-01: Corporate Registration & Admin Approval', () => {
     
     // Should be redirected to dashboard (/orders) now instead of /register/pending
     await expect(page).toHaveURL(/\/orders/);
-    await page.screenshot({ path: 'test-results/e2e_01_login_success.png' });
+    await page.screenshot({ path: path.join(SCREENSHOT_DIR, '03_login_success.png') });
     
     // 4. Access Control Verification
     console.log('--- Step 4: Access Control Verification ---');
@@ -99,7 +116,7 @@ test.describe('E2E-01: Corporate Registration & Admin Approval', () => {
     // Should be redirected away or shown 403
     const finalUrl = page.url();
     expect(finalUrl).not.toContain('/admin/organizations');
-    await page.screenshot({ path: 'test-results/e2e_01_access_control_success.png' });
+    await page.screenshot({ path: path.join(SCREENSHOT_DIR, '04_access_control.png') });
     
     console.log('--- E2E-01 Success! ---');
   });

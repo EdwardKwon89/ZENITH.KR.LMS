@@ -1,6 +1,7 @@
+"use server";
+
 import { logger } from '@/lib/logger';
 import { withAction } from '@/lib/actions/wrapper';
-"use server";
 
 import fs from "fs";
 import { validateUserAction, validateAdminAction } from "@/lib/auth/guards";
