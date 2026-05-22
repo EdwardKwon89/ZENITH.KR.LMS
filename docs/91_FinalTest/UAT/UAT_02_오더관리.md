@@ -1,0 +1,272 @@
+# UAT_02 — 오더 관리
+
+> **문서번호**: UAT-02
+> **작성일**: 2026-05-22
+> **작성자**: B_Kai (Noah/Codex)
+> **버전**: v1.0
+
+---
+
+## [UAT-02-01] 오더 신규 생성
+
+| 항목 | 내용 |
+|:----|:----|
+| 역할 | SHIPPER |
+| 화면 URL | /ko/login → /ko/orders/new |
+| 예상 소요 시간 | 10분 |
+| 사전 조건 | SHIPPER 계정(`test_corp_1777785263838@zenith.kr`) 로그인 상태 |
+
+### 테스트 절차
+
+| 순서 | 화면·URL | 수행 액션 | 입력 데이터 | 기대 결과 | 확인 |
+|:---:|:---------|:---------|:-----------|:---------|:----:|
+| 1 | /ko/orders | '신규 오더' 버튼 클릭 | — | /ko/orders/new 로 이동, 오더 생성 폼 표시 | ☐ |
+| 2 | /ko/orders/new | Order Type 선택 | 'B2B General Cargo' 선택 | Order Type이 B2B로 설정됨 | ☐ |
+| 3 | /ko/orders/new | Transport Mode 선택 | 'AIR (항공)' 선택 | 출발지/도착지 드롭다운이 공항 목록으로 필터링 | ☐ |
+| 4 | /ko/orders/new | 출발지(Origin Port) 선택 | 드롭다운에서 'ICN (인천국제공항)' 선택 | 출발지가 ICN으로 표시 | ☐ |
+| 5 | /ko/orders/new | 도착지(Destination Port) 선택 | 드롭다운에서 'LAX (로스앤젤레스 국제공항)' 선택 | 도착지가 LAX로 표시 | ☐ |
+| 6 | /ko/orders/new | 수하인 정보 입력 - 이름 | '김철수' 입력 | 입력값 표시 | ☐ |
+| 7 | /ko/orders/new | 수하인 정보 입력 - 연락처 | '010-5678-1234' 입력 | 입력값 표시 | ☐ |
+| 8 | /ko/orders/new | 수하인 정보 입력 - 주소 | '1234 Sunset Blvd, Los Angeles, CA 90001, USA' 입력 | 입력값 표시 | ☐ |
+| 9 | /ko/orders/new | Package 1 - 포장단위 선택 | 'BOX' 선택 | 포장단위가 BOX로 표시 | ☐ |
+| 10 | /ko/orders/new | Package 1 - 개수 입력 | '2' 입력 | 개수 2로 표시 | ☐ |
+| 11 | /ko/orders/new | Package 1 - 중량 입력 | '15.5' 입력 | 중량 15.5 kg 표시 | ☐ |
+| 12 | /ko/orders/new | Package 1 - 품목명 입력 | '전자부품 (Electronic Components)' 입력 | 품목명 표시 | ☐ |
+| 13 | /ko/orders/new | Package 1 - 품목 수량 입력 | '100' 입력 | 수량 100 표시 | ☐ |
+| 14 | /ko/orders/new | Package 1 - HS Code 입력 | '8542.31' 입력 | HS Code 표시 | ☐ |
+| 15 | /ko/orders/new | '등록' 버튼 클릭 | — | 오더 생성 완료 토스트 메시지 표시, 오더 상세 페이지로 이동 | ☐ |
+
+### 합격 기준
+- [ ] 전 단계 ☑ 완료
+- [ ] 오류 메시지 없음
+- [ ] 생성된 오더의 status가 'PENDING'으로 표시
+- [ ] 오더 상세 페이지에 입력한 모든 정보가 정확히 표시
+
+### 결함 기재란
+
+| 결함-ID | 단계 | 현상 | 심각도 |
+|:-------:|:---:|:-----|:------:|
+| | | | |
+
+---
+
+## [UAT-02-02] 오더 목록 조회·검색·필터
+
+| 항목 | 내용 |
+|:----|:----|
+| 역할 | ADMIN |
+| 화면 URL | /ko/login → /ko/orders |
+| 예상 소요 시간 | 8분 |
+| 사전 조건 | ADMIN 계정(`admin@zenith.kr`) 로그인 상태, 다수의 오더 데이터 존재 |
+
+### 테스트 절차
+
+| 순서 | 화면·URL | 수행 액션 | 입력 데이터 | 기대 결과 | 확인 |
+|:---:|:---------|:---------|:-----------|:---------|:----:|
+| 1 | /ko/orders | 오더 목록 페이지 접속 | — | 오더 목록 테이블 정상 표시 (주문번호·상태·송하인·수하인·일자 컬럼) | ☐ |
+| 2 | /ko/orders | 검색창에 송하인명 입력 후 검색 | '테스트' | 입력한 송하인명이 포함된 오더만 필터링되어 표시 | ☐ |
+| 3 | /ko/orders | 검색창 초기화 | 검색어 삭제 | 전체 오더 목록 복원 | ☐ |
+| 4 | /ko/orders | 상태(Status) 필터 선택 | 'PENDING' 선택 | PENDING 상태 오더만 표시 | ☐ |
+| 5 | /ko/orders | 상태 필터 변경 | 'WAREHOUSED' 선택 | WAREHOUSED 상태 오더만 표시 | ☐ |
+| 6 | /ko/orders | 상태 필터 초기화 | '전체' 선택 | 전체 오더 목록 복원 | ☐ |
+| 7 | /ko/orders | 페이지네이션 동작 확인 | '2' 페이지 클릭 | 2페이지 오더 목록 로드 | ☐ |
+| 8 | /ko/orders | 페이지 당 행 수 변경 | 드롭다운에서 '50' 선택 | 50개씩 표시, 2페이지 이후로 이동 | ☐ |
+
+### 합격 기준
+- [ ] 전 단계 ☑ 완료
+- [ ] 오류 메시지 없음
+- [ ] 검색·필터 결과가 URL 쿼리 파라미터에 반영 (`/ko/orders?status=PENDING`)
+- [ ] 페이지네이션 정상 동작
+
+### 결함 기재란
+
+| 결함-ID | 단계 | 현상 | 심각도 |
+|:-------:|:---:|:-----|:------:|
+| | | | |
+
+---
+
+## [UAT-02-03] 오더 상세 조회
+
+| 항목 | 내용 |
+|:----|:----|
+| 역할 | ADMIN / SHIPPER |
+| 화면 URL | /ko/login → /ko/orders → /ko/orders/{orderId} |
+| 예상 소요 시간 | 5분 |
+| 사전 조건 | ADMIN(`admin@zenith.kr`) 또는 SHIPPER(`test_corp_1777785263838@zenith.kr`) 로그인 상태, 오더 1건 존재 |
+
+### 테스트 절차
+
+| 순서 | 화면·URL | 수행 액션 | 입력 데이터 | 기대 결과 | 확인 |
+|:---:|:---------|:---------|:-----------|:---------|:----:|
+| 1 | /ko/orders | 오더 목록에서 첫 번째 행 클릭 | — | 오더 상세 페이지로 이동 | ☐ |
+| 2 | /ko/orders/{orderId} | 오더 기본 정보 확인 | — | 오더 번호·상태·타입·Transport Mode 표시 | ☐ |
+| 3 | /ko/orders/{orderId} | 송하인 정보 섹션 확인 | — | 송하인명·연락처·주소·사업자번호 표시 | ☐ |
+| 4 | /ko/orders/{orderId} | 수하인 정보 섹션 확인 | — | 수하인명·연락처·주소 표시 | ☐ |
+| 5 | /ko/orders/{orderId} | 포트 정보 확인 | — | 출발지·도착지 표시 | ☐ |
+| 6 | /ko/orders/{orderId} | 패키지·품목 정보 확인 | — | 포장단위·개수·중량·품목명·HS Code 표시 | ☐ |
+| 7 | /ko/orders/{orderId} | 히스토리 탭 확인 (ADMIN 전용) | — | 오더 상태 변경 이력(변경 전/후·일시·처리자) 표시 | ☐ |
+
+### 합격 기준
+- [ ] 전 단계 ☑ 완료
+- [ ] 오류 메시지 없음
+- [ ] 모든 정보 필드가 정확히 표시 (오더 생성 시 입력한 값과 일치)
+- [ ] SHIPPER 역할에서도 자신의 오더 상세 조회 가능
+
+### 결함 기재란
+
+| 결함-ID | 단계 | 현상 | 심각도 |
+|:-------:|:---:|:-----|:------:|
+| | | | |
+
+---
+
+## [UAT-02-04] 오더 상태 전이 전체 플로우 (PENDING→WAREHOUSED)
+
+| 항목 | 내용 |
+|:----|:----|
+| 역할 | ADMIN |
+| 화면 URL | /ko/login → /ko/orders |
+| 예상 소요 시간 | 10분 |
+| 사전 조건 | ADMIN 계정(`admin@zenith.kr`) 로그인 상태, PENDING 상태 오더 1건 존재 |
+
+### 테스트 절차
+
+| 순서 | 화면·URL | 수행 액션 | 입력 데이터 | 기대 결과 | 확인 |
+|:---:|:---------|:---------|:-----------|:---------|:----:|
+| 1 | /ko/orders | 오더 목록에서 PENDING 상태 오더 검색 | 상태 필터 → 'PENDING' | PENDING 오더만 표시 | ☐ |
+| 2 | /ko/orders | PENDING 오더의 상태 배지 클릭 | — | StatusChangeModal 오픈, 전이 가능 상태 목록 표시 | ☐ |
+| 3 | /ko/orders | PENDING→WAREHOUSED 전이 | 'WAREHOUSED' 선택 → '변경' 버튼 클릭 | 토스트 "상태가 변경되었습니다" 표시 | ☐ |
+| 4 | /ko/orders | 상태 배지 확인 | — | 오더 배지가 'WAREHOUSED'(파란색)로 변경 | ☐ |
+
+### 합격 기준
+- [ ] 전 단계 ☑ 완료
+- [ ] 오류 메시지 없음
+- [ ] PENDING→WAREHOUSED 상태 전이 성공
+- [ ] 상태 변경 후 오더 히스토리에 이력 기록 (변경 전:PENDING, 변경 후:WAREHOUSED)
+
+### 결함 기재란
+
+| 결함-ID | 단계 | 현상 | 심각도 |
+|:-------:|:---:|:-----|:------:|
+| | | | |
+
+---
+
+## [UAT-02-05] HELD 상태 전환 + 원상복구
+
+| 항목 | 내용 |
+|:----|:----|
+| 역할 | ADMIN |
+| 화면 URL | /ko/login → /ko/orders |
+| 예상 소요 시간 | 8분 |
+| 사전 조건 | ADMIN 계정(`admin@zenith.kr`) 로그인 상태, WAREHOUSED 상태 오더 1건 존재 |
+
+### 테스트 절차
+
+| 순서 | 화면·URL | 수행 액션 | 입력 데이터 | 기대 결과 | 확인 |
+|:---:|:---------|:---------|:-----------|:---------|:----:|
+| 1 | /ko/orders | 상태 필터 'WAREHOUSED' 선택 | 상태 필터 → 'WAREHOUSED' | WAREHOUSED 오더만 표시 | ☐ |
+| 2 | /ko/orders | WAREHOUSED 오더의 상태 배지 클릭 | — | StatusChangeModal 오픈, 전이 가능 목록에 HELD 포함 확인 | ☐ |
+| 3 | /ko/orders | WAREHOUSED→HELD 전이 | 'HELD' 선택 → '변경' 버튼 클릭 | 토스트 표시, 상태 배지 HELD(빨간색)로 변경 | ☐ |
+| 4 | /ko/orders | HELD 오더 상태 배지 재클릭 | — | StatusChangeModal에 '원상복구' 버튼 및 이전 상태(WAREHOUSED) 레이블 표시 | ☐ |
+| 5 | /ko/orders | '원상복구' 버튼 클릭 | — | 토스트 "이전 상태로 성공적으로 복구되었습니다." 표시 | ☐ |
+| 6 | /ko/orders | 상태 복구 확인 | — | 오더 상태 배지가 WAREHOUSED로 복귀 | ☐ |
+| 7 | /ko/orders | HELD→다른 상태 전이 테스트 | 상태 배지 클릭 → HELD 선택 | StatusChangeModal에 '원상복구' 버튼 및 현재 바로 전 상태 표시 | ☐ |
+| 8 | /ko/orders/orderId | HELD 이력 확인 (오더 상세) | 오더 상세 → 히스토리 탭 | 상태 변경 이력에 PENDING→WAREHOUSED→HELD→WAREHOUSED 기록 표시 | ☐ |
+
+### 합격 기준
+- [ ] 전 단계 ☑ 완료
+- [ ] 오류 메시지 없음
+- [ ] HELD 원상복구 후 상태가 HELD 직전 상태로 정확히 복구
+- [ ] 오더 히스토리에 HELD 전환 및 복구 이력 모두 기록
+
+### 결함 기재란
+
+| 결함-ID | 단계 | 현상 | 심각도 |
+|:-------:|:---:|:-----|:------:|
+| | | | |
+
+---
+
+## [UAT-02-06] RETURNED → WAREHOUSED / DISPOSED 전이
+
+| 항목 | 내용 |
+|:----|:----|
+| 역할 | ADMIN |
+| 화면 URL | /ko/login → /ko/orders |
+| 예상 소요 시간 | 8분 |
+| 사전 조건 | ADMIN 계정(`admin@zenith.kr`) 로그인 상태, WAREHOUSED 상태 오더 2건 존재 |
+
+### 테스트 절차 - 케이스 A: RETURNED → WAREHOUSED 재입고
+
+| 순서 | 화면·URL | 수행 액션 | 입력 데이터 | 기대 결과 | 확인 |
+|:---:|:---------|:---------|:-----------|:---------|:----:|
+| 1 | /ko/orders | WAREHOUSED 오더 1건을 RETURNED로 전환 | 상태 배지 클릭 → 'RETURNED' 선택 → 변경 | 상태 배지 RETURNED(주황색)로 변경 | ☐ |
+| 2 | /ko/orders | RETURNED 오더 상태 배지 재클릭 | — | StatusChangeModal에 전이 옵션 3종(WAREHOUSED·CANCELED·DISPOSED) 표시 확인 | ☐ |
+| 3 | /ko/orders | RETURNED→WAREHOUSED 전이 | 'WAREHOUSED' 선택 → '변경' 클릭 | 상태 배지 WAREHOUSED(파란색)로 변경 | ☐ |
+| 4 | /ko/orders | 상태 변경 확인 | — | 오더 리스트에 WAREHOUSED 상태로 표시 | ☐ |
+
+### 테스트 절차 - 케이스 B: RETURNED → DISPOSED 폐기
+
+| 순서 | 화면·URL | 수행 액션 | 입력 데이터 | 기대 결과 | 확인 |
+|:---:|:---------|:---------|:-----------|:---------|:----:|
+| 5 | /ko/orders | 다른 WAREHOUSED 오더를 RETURNED로 전환 | 상태 배지 클릭 → 'RETURNED' 선택 → 변경 | 상태 배지 RETURNED로 변경 | ☐ |
+| 6 | /ko/orders | RETURNED→DISPOSED 전이 | 상태 배지 클릭 → 'DISPOSED' 선택 → 변경 | 상태 배지 DISPOSED(회색)로 변경 | ☐ |
+| 7 | /ko/orders | DISPOSED 오더 재변경 불가 확인 | 상태 배지 클릭 | StatusChangeModal에 전이 가능 상태 없음 또는 비활성화 | ☐ |
+
+### 합격 기준
+- [ ] 전 단계 ☑ 완료
+- [ ] 오류 메시지 없음
+- [ ] RETURNED→WAREHOUSED 재입고 성공
+- [ ] RETURNED→DISPOSED 폐기 성공
+- [ ] DISPOSED 상태에서는 추가 상태 전이 불가
+- [ ] 오더 히스토리에 모든 전이 이력 기록
+
+### 결함 기재란
+
+| 결함-ID | 단계 | 현상 | 심각도 |
+|:-------:|:---:|:-----|:------:|
+| | | | |
+
+---
+
+## [UAT-02-07] 오더 취소 (CANCELED)
+
+| 항목 | 내용 |
+|:----|:----|
+| 역할 | ADMIN |
+| 화면 URL | /ko/login → /ko/orders |
+| 예상 소요 시간 | 5분 |
+| 사전 조건 | ADMIN 계정(`admin@zenith.kr`) 로그인 상태, PENDING 상태 오더 1건, WAREHOUSED 상태 오더 1건 존재 |
+
+### 테스트 절차
+
+| 순서 | 화면·URL | 수행 액션 | 입력 데이터 | 기대 결과 | 확인 |
+|:---:|:---------|:---------|:-----------|:---------|:----:|
+| 1 | /ko/orders | PENDING 오더 상태 배지 클릭 | — | StatusChangeModal에 CANCELED 옵션 표시 | ☐ |
+| 2 | /ko/orders | PENDING→CANCELED 전이 | 'CANCELED' 선택 → '변경' 클릭 | 상태 배지 CANCELED(빨간색)로 변경 | ☐ |
+| 3 | /ko/orders | CANCELED 오더 재변경 불가 확인 | 상태 배지 클릭 | StatusChangeModal에 전이 가능 상태 없음 | ☐ |
+| 4 | /ko/orders | WAREHOUSED→CANCELED 전이 | WAREHOUSED 오더 상태 배지 클릭 → 'CANCELED' 선택 → 변경 | 상태 배지 CANCELED로 변경, 재고 복구 확인 | ☐ |
+| 5 | /ko/orders | 재고 확인 (재고 페이지 이동) | /ko/inventory로 이동 | 취소된 오더의 재고가 복구되어 표시 | ☐ |
+
+### 합격 기준
+- [ ] 전 단계 ☑ 완료
+- [ ] 오류 메시지 없음
+- [ ] PENDING→CANCELED 성공
+- [ ] WAREHOUSED→CANCELED 성공 (재고 복구 포함)
+- [ ] CANCELED 상태에서는 추가 전이 불가
+
+### 결함 기재란
+
+| 결함-ID | 단계 | 현상 | 심각도 |
+|:-------:|:---:|:-----|:------:|
+| | | | |
+
+---
+
+## 개정 이력
+
+| 날짜 | 주체 | 내용 |
+|:-----|:----:|:-----|
+| 2026-05-22 | B_Kai (Noah/Codex) | v1.0 초안 작성 — 7개 시나리오 전량 |
