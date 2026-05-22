@@ -43,8 +43,23 @@ export async function requireAdmin() {
     .eq("id", user.id)
     .single();
 
-  const isAllowed = checkPermission(profile?.role, "/admin");
-  logger.info(`[AUTH_DEBUG] requireAdmin: email=${user.email}, role=${profile?.role}, isAllowed=${isAllowed}`);
+  let orgType = 'GUEST';
+  if (profile?.org_id) {
+    const { data: org } = await supabase
+      .from("zen_organizations")
+      .select('type')
+      .eq('id', profile.org_id)
+      .single();
+    if (org) {
+      orgType = org.type;
+    }
+  }
+  const isPlatformAdmin = 
+    profile?.role === USER_ROLES.ZENITH_SUPER_ADMIN || 
+    (profile?.role === USER_ROLES.ADMIN && orgType === 'PLATFORM');
+
+  const isAllowed = isPlatformAdmin || checkPermission(profile?.role, "/admin");
+  logger.info(`[AUTH_DEBUG] requireAdmin: email=${user.email}, role=${profile?.role}, orgType=${orgType}, isAllowed=${isAllowed}`);
 
   if (!isAllowed) {
     redirect("/");
@@ -71,11 +86,26 @@ export async function validateAdminAction() {
     .eq("id", user.id)
     .single();
 
-  const isAllowed = checkPermission(profile?.role, "/admin");
-  logger.info(`[AUTH_TRACE] User: ${user.email}, Role: ${profile?.role}, Path: /admin, Allowed: ${isAllowed}`);
+  let orgType = 'GUEST';
+  if (profile?.org_id) {
+    const { data: org } = await supabase
+      .from("zen_organizations")
+      .select('type')
+      .eq('id', profile.org_id)
+      .single();
+    if (org) {
+      orgType = org.type;
+    }
+  }
+  const isPlatformAdmin = 
+    profile?.role === USER_ROLES.ZENITH_SUPER_ADMIN || 
+    (profile?.role === USER_ROLES.ADMIN && orgType === 'PLATFORM');
+
+  const isAllowed = isPlatformAdmin || checkPermission(profile?.role, "/admin");
+  logger.info(`[AUTH_TRACE] User: ${user.email}, Role: ${profile?.role}, orgType=${orgType}, Path: /admin, Allowed: ${isAllowed}`);
 
   if (!isAllowed) {
-    logger.error(`[AUTH_DENIED] Access blocked for ${user.email} (Role: ${profile?.role})`);
+    logger.error(`[AUTH_DENIED] Access blocked for ${user.email} (Role: ${profile?.role}, OrgType: ${orgType})`);
     throw new Error("Unauthorized access");
   }
 
