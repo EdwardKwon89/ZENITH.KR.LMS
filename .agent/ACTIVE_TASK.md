@@ -110,7 +110,7 @@
 | TASK-053 | 260522 | E2E-14 RETURNED 전이 시나리오 spec + 실행 | P3 | 없음 | B_Kai | ✅ | [TASK-053](tasks/TASK-053_260522_E2E-14_RETURNED전이시나리오_BKai.md) | IMP-060 완료 · `e70b6a2` 코드 · `51cd330` 문서 · E2E A/B ✅ · 회귀 211/211 ✅ |
 | TASK-054 | 260522 | E2E-15 dissolve 원자성 시나리오 spec + 실행 | P3 | 없음 | D_Kai | ✅ | [TASK-054](tasks/TASK-054_260522_E2E-15_dissolve원자성시나리오_DKai.md) | IMP-052 완료 · `3f76f84`+`931a396` 코드 · `9686245` 문서 · 재작업 전량 이행 |
 | TASK-056 | 260522 | E2E 테스트용 오더 시드 데이터 생성 | P3 | 없음 | D_Kai | ✅ | [TASK-056](tasks/TASK-056_260522_E2E시드데이터생성_DKai.md) | seedOrders() 5건 ✅ · 회귀 211/211 ✅ · 재작업(371b59f) ✅ · Aiden ✅ 승인 |
-| TASK-055 | 260522 | E2E-01/03/05 기존 시나리오 재검증 | P3 | 없음 | Riley | 🔔 | [TASK-055](tasks/TASK-055_260522_E2E재검증01_03_05_Riley.md) | 3종 PASS · c65684c · middleware fix · 211/211 |
+| TASK-055 | 260522 | E2E-01/03/05 기존 시나리오 재검증 | P3 | 없음 | Riley | ✅ | [TASK-055](tasks/TASK-055_260522_E2E재검증01_03_05_Riley.md) | 3종 PASS · c65684c · middleware fix · 211/211 |
 | TASK-057 | 260522 | E2E-14 케이스 A/B 재실행 + 타이밍 최적화 | P3 | TASK-053 ✅ 통합 완료 | B_Kai | ➖ | [TASK-057](tasks/TASK-057_260522_E2E-14재실행_타이밍최적화_BKai.md) | TASK-053 재작업에 통합 완료 · E2E A/B ✅ · 회귀 211/211 ✅ |
 | TASK-058 | 260522 | UAT 절차서: 오더관리·마스터오더 | P4 | 없음 | B_Kai | ✅ | [TASK-058](tasks/TASK-058_260522_UAT_오더마스터오더_BKai.md) | UAT_02·03 작성 (10개 시나리오) · dd13438 |
 | TASK-059 | 260522 | UAT 절차서: 인증·창고·어드민 | P4 | 없음 | D_Kai | ✅ | [TASK-059](tasks/TASK-059_260522_UAT_인증창고어드민_DKai.md) | UAT_01·04·09 작성 (17개 시나리오) · b747c5b |
@@ -124,7 +124,7 @@
 
 | Agent | 진행 중 | 재작업/조치 필요 | 블로커 대기 |
 |:------|:--------|:----------------|:----------|
-| Riley | TASK-055 🔔 검토 요청 | — | — |
+| Riley | — | — | — |
 | B_Kai | — | — | — |
 | D_Kai | — | — | — |
 | Ring | — | — | 신규 할당 중단 유지 (9차 위반 누적) |
@@ -225,3 +225,4 @@
 | 2026-05-22 | Aiden (Claude) | TASK-058 ✅ PASS(B_Kai) + TASK-059 ✅ PASS(D_Kai) — UAT 절차서 27개 시나리오(UAT-01·02·03·04·09) 전량 승인. Advisory 각 1건(비차단) |
 | 2026-05-22 | Aiden (Claude) | TASK-052 ✅ 승인 — DoD 전량 완료 확인 (E2E_SCENARIOS.md D_Kai 931a396 포함). TASK-055 🔔 — Riley 인수, E2E-05 export 버그 2건 수정(middleware isApi·sticky header click), c65684c·211/211. TASK-060 ➖ 취소·TASK-061(B_Kai UAT_05·06)·TASK-062(D_Kai UAT_07·08) 신규 발령 |
 | 2026-05-22 | Aiden (Claude) | TASK-061 ✅ 승인(B_Kai) — UAT_05 5개·UAT_06 3개 시나리오 DoD 전항목 확인. 커밋 2b91af8. Advisory: UAT-05-01·02 /ko/settlement URL 비차단. TASK-062 ✅ 승인(D_Kai) — UAT_07 5개·UAT_08 5개 시나리오 DoD 전항목 확인. 커밋 4bf56b9. Advisory: UAT-08-02·04 미명시 경로 비차단 |
+| 2026-05-22 | Aiden (Claude) | TASK-055 ✅ 승인(Riley/Aiden 인수) — E2E-01·03·05 3종 PASS·스크린샷 6건·middleware isApi fix·evaluate click fix·회귀 211/211. Advisory: 회귀 로그 형식 비표준(비차단) |
