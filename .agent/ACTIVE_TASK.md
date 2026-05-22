@@ -109,7 +109,7 @@
 | TASK-052 | 260522 | E2E-13 HELD 복구 시나리오 spec + 실행 | P3 | 없음 | Riley | 🔄 | [TASK-052](tasks/TASK-052_260522_E2E-13_HELD복구시나리오_Riley.md) | IMP-050 E2E 검증 |
 | TASK-053 | 260522 | E2E-14 RETURNED 전이 시나리오 spec + 실행 | P3 | 없음 | B_Kai | ✅ | [TASK-053](tasks/TASK-053_260522_E2E-14_RETURNED전이시나리오_BKai.md) | IMP-060 · spec·회귀·커밋 ✅ · E2E 케이스 A/B ⏸️(TASK-056 블로커) — 완료 후 재실행 지시 예정 |
 | TASK-054 | 260522 | E2E-15 dissolve 원자성 시나리오 spec + 실행 | P3 | 없음 | D_Kai | ⬜ | [TASK-054](tasks/TASK-054_260522_E2E-15_dissolve원자성시나리오_DKai.md) | IMP-052 E2E 검증 · TASK-056 시드 완료로 블로커 해제 → 즉시 착수 가능 |
-| TASK-056 | 260522 | E2E 테스트용 오더 시드 데이터 생성 | P3 | 없음 | D_Kai | ❌ | [TASK-056](tasks/TASK-056_260522_E2E시드데이터생성_DKai.md) | 코드·회귀 ✅(6f78acb·07bfc7b) · ❌ 반려: 커밋 해시 미기재·신원 오인·TASK-054 월권 전환 |
+| TASK-056 | 260522 | E2E 테스트용 오더 시드 데이터 생성 | P3 | 없음 | D_Kai | ✅ | [TASK-056](tasks/TASK-056_260522_E2E시드데이터생성_DKai.md) | seedOrders() 5건 ✅ · 회귀 211/211 ✅ · 재작업(371b59f) ✅ · Aiden ✅ 승인 |
 | TASK-055 | 260522 | E2E-01/03/05 기존 시나리오 재검증 | P3 | 없음 | Riley | 🔄 | [TASK-055](tasks/TASK-055_260522_E2E재검증01_03_05_Riley.md) | IMP-068·052·030 회귀 확인 |
 
 ---
@@ -119,8 +119,8 @@
 | Agent | 진행 중 | 재작업/조치 필요 | 블로커 대기 |
 |:------|:--------|:----------------|:----------|
 | Riley | TASK-052·055 🔄 | ⚠️ "use server" 추가 fix cdd365d 반영됨 — 재시도 가능 | — |
-| B_Kai | — | TASK-056 ✅ 후 E2E-14 케이스 A/B 재실행 지시 예정 | D_Kai TASK-056 ❌ 재작업 |
-| D_Kai | TASK-054 ⬜ (착수 가능) | TASK-056 ❌ 재작업: 커밋 해시 기재·신원 수정·문서 커밋 | — |
+| B_Kai | — | E2E-14 케이스 A/B 재실행 지시 예정 (TASK-056 ✅ — 블로커 해제) | — |
+| D_Kai | TASK-054 ⬜ (착수 가능) | — | — |
 | Ring | — | — | 신규 할당 중단 유지 (9차 위반 누적) |
 
 ---
@@ -205,3 +205,4 @@
 | 2026-05-21 | Aiden (Claude) | Sprint H-II 6차 검토 — TASK-049 ✅ PASS(B_Kai·IMP-024 완료·c96bff4·211/211·자체 보완 Advisory). Phase F 11/11 (100%) ✅ 완료 확정. 전체 IMP 53/56 (94.6%) |
 | 2026-05-22 | Aiden (Claude) | E2E 확장 Sprint 2차 검토 — TASK-053 ✅(B_Kai E2E-14 PASS·b54445e). TASK-056 ❌ 반려(D_Kai: 커밋 해시 미기재·신원 오인·TASK-054 월권 전환). TASK-054 🔄→⬜ 복구. ACTIVE_TASK 전면 정정(Noah→D_Kai). D_Kai TASK-056 재작업 지시 |
 | 2026-05-22 | D_Kai | TASK-056 재작업 — 상세 파일 커밋 해시 기재·신원 전면 정정·TASK-054 ⬜ 복구. 문서 커밋 371b59f |
+| 2026-05-22 | Aiden (Claude) | TASK-056 ✅ 승인 — D_Kai 재작업(371b59f) 확인. 잔여 doc 결함(DoD 레이블·완료일·[Aiden 검토]) Aiden 직접 보완 후 최종 승인. B_Kai E2E-14 케이스 A/B 재실행 지시 예정 |
