@@ -115,8 +115,8 @@
 | TASK-058 | 260522 | UAT 절차서: 오더관리·마스터오더 | P4 | 없음 | B_Kai | ✅ | [TASK-058](tasks/TASK-058_260522_UAT_오더마스터오더_BKai.md) | UAT_02·03 작성 (10개 시나리오) · dd13438 |
 | TASK-059 | 260522 | UAT 절차서: 인증·창고·어드민 | P4 | 없음 | D_Kai | ✅ | [TASK-059](tasks/TASK-059_260522_UAT_인증창고어드민_DKai.md) | UAT_01·04·09 작성 (17개 시나리오) · b747c5b |
 | TASK-060 | 260522 | UAT 절차서: 정산·추적·VOC·마이페이지 | P4 | TASK-052·055 ✅ | Riley | ➖ | — | TASK-061·062로 분담 처리 (B_Kai·D_Kai) |
-| TASK-061 | 260522 | UAT 절차서: 정산·추적 (UAT_05·06) | P4 | TASK-052·055 ✅ | B_Kai | 🔔 | [TASK-061](tasks/TASK-061_260522_UAT_정산추적_BKai.md) | UAT_05·06 작성 (8개 시나리오) · 2b91af8 |
-| TASK-062 | 260522 | UAT 절차서: VOC·마이페이지 (UAT_07·08) | P4 | TASK-052·055 ✅ | D_Kai | 🔔 | [TASK-062](tasks/TASK-062_260522_UAT_VOC마이페이지_DKai.md) | UAT-07-01~05 + UAT-08-01~05 (10개 시나리오) |
+| TASK-061 | 260522 | UAT 절차서: 정산·추적 (UAT_05·06) | P4 | TASK-052·055 ✅ | B_Kai | ✅ | [TASK-061](tasks/TASK-061_260522_UAT_정산추적_BKai.md) | UAT_05·06 작성 (8개 시나리오) · 2b91af8 · Advisory: /ko/settlement URL (비차단) |
+| TASK-062 | 260522 | UAT 절차서: VOC·마이페이지 (UAT_07·08) | P4 | TASK-052·055 ✅ | D_Kai | ✅ | [TASK-062](tasks/TASK-062_260522_UAT_VOC마이페이지_DKai.md) | UAT_07·08 작성 (10개 시나리오) · 4bf56b9 · Advisory: /ko/mypage/security·corporate URL (비차단) |
 
 ---
 
@@ -124,9 +124,9 @@
 
 | Agent | 진행 중 | 재작업/조치 필요 | 블로커 대기 |
 |:------|:--------|:----------------|:----------|
-| Riley | — | — | — |
-| B_Kai | TASK-061 🔔 검토 요청 | — | TASK-052·055 ✅ 해소로 즉시 착수 가능 |
-| D_Kai | TASK-062 🔔 검토 요청 | — | — |
+| Riley | TASK-055 🔔 검토 요청 | — | — |
+| B_Kai | — | — | — |
+| D_Kai | — | — | — |
 | Ring | — | — | 신규 할당 중단 유지 (9차 위반 누적) |
 
 ---
@@ -224,3 +224,4 @@
 | 2026-05-22 | D_Kai (OpenCode) | TASK-062 구현 완료 🔔 — UAT_07·08 10개 시나리오 전량 작성, 코드 커밋 4bf56b9, UAT_MASTER 인덱스 ✅ 갱신 (작성완료 27/46) |
 | 2026-05-22 | Aiden (Claude) | TASK-058 ✅ PASS(B_Kai) + TASK-059 ✅ PASS(D_Kai) — UAT 절차서 27개 시나리오(UAT-01·02·03·04·09) 전량 승인. Advisory 각 1건(비차단) |
 | 2026-05-22 | Aiden (Claude) | TASK-052 ✅ 승인 — DoD 전량 완료 확인 (E2E_SCENARIOS.md D_Kai 931a396 포함). TASK-055 🔔 — Riley 인수, E2E-05 export 버그 2건 수정(middleware isApi·sticky header click), c65684c·211/211. TASK-060 ➖ 취소·TASK-061(B_Kai UAT_05·06)·TASK-062(D_Kai UAT_07·08) 신규 발령 |
+| 2026-05-22 | Aiden (Claude) | TASK-061 ✅ 승인(B_Kai) — UAT_05 5개·UAT_06 3개 시나리오 DoD 전항목 확인. 커밋 2b91af8. Advisory: UAT-05-01·02 /ko/settlement URL 비차단. TASK-062 ✅ 승인(D_Kai) — UAT_07 5개·UAT_08 5개 시나리오 DoD 전항목 확인. 커밋 4bf56b9. Advisory: UAT-08-02·04 미명시 경로 비차단 |
