@@ -8,7 +8,7 @@
 | 담당 Agent | D_Kai (OpenCode) |
 | 우선순위 | P3 |
 | 전제조건 | 없음 — 즉시 착수 가능 |
-| 상태 | ❌ 반려 |
+| 상태 | ✅ 완료 |
 | 파급 효과 | 신규 spec 파일 추가 — 기존 코드 변경 없음 |
 
 ---
@@ -74,7 +74,7 @@ IMP-052에서 `dissolveMasterOrder()`가 `dissolve_master_order_atomic` Supabase
 - [x] 회귀 테스트 전체 PASS 증적 (`docs/08_Self_Audit/Regression_Results/`)
 - [x] `3f76f84` 코드 커밋 (E2E spec + RPC fix)
 - [x] `931a396` 보완 커밋 (StatusChangeModal·OrderDataTable·E2E_SCENARIOS)
-- [ ] `aa9c6ea` 문서 커밋 (TASK-054 완료 보고 → 재작업 정정 후 재커밋)
+- [x] `9686245` 문서 재커밋 (TASK-054 재작업 — 허위 기재 정정·커밋 해시 기재·E2E_SCENARIOS 갱신)
 - [x] 본 파일 상태 🔔 + ACTIVE_TASK.md 동기화
 
 ---
@@ -101,7 +101,7 @@ IMP-052에서 `dissolveMasterOrder()`가 `dissolve_master_order_atomic` Supabase
 | 검증 방식 | API 레벨 검증 — Supabase admin client 직접 호출 |
 | 회귀 결과 | ✅ 211/211 PASS (44.50s) |
 | 코드 커밋 해시 | `3f76f84` (E2E spec + RPC fix) · `931a396` (Modal·Table·E2E_SCENARIOS 보완) |
-| 문서 커밋 해시 | `aa9c6ea` (TASK-054 완료 보고 → 재작업 정정) · (본 문서 재커밋 예정) |
+| 문서 커밋 해시 | `aa9c6ea` (1차 완료 보고) · `9686245` (재작업 — 허위 기재 정정·해시 기재) |
 
 ### D_Kai 실제 성과
 
@@ -168,6 +168,38 @@ IMP-052에서 `dissolveMasterOrder()`가 `dissolve_master_order_atomic` Supabase
 
 ---
 
+## 2차 Aiden 검토
+
+> **검토일**: 2026-05-22 | **검토자**: Aiden (Claude)
+
+### DoD 항목별 판정 (재작업 최종)
+
+| # | DoD 항목 | 판정 | 비고 |
+|:-:|:---------|:----:|:-----|
+| 1 | spec 작성 완료 (API 레벨) | ✅ | `3f76f84` — 6단계 검증 PASS |
+| 2 | dissolve 후 마스터 오더 삭제 PASS | ✅ | DB 직접 조회 확인 |
+| 3 | 하우스 오더 master_order_id = NULL PASS | ✅ | 확인 |
+| 4 | 스크린샷 + RESULT.md | ✅ | `E2E_15_Result/` 확인 |
+| 5 | E2E_SCENARIOS.md E2E-15 항목 추가 | ✅ | `931a396` 포함 — API 레벨 방식으로 갱신 |
+| 6 | 회귀 211/211 PASS | ✅ | `REGRESSION_2026-05-22_TASK-054.log` |
+| 7 | 코드 커밋 해시 기재 (`3f76f84`·`931a396`) | ✅ | [작업 결과] 정확히 기재 |
+| 8 | 문서 커밋 해시 기재 | ✅ | `aa9c6ea`·`9686245` 기재 (Aiden 직접 보완) |
+| 9 | task file 상태 🔔 | ✅ | Aiden 직접 보완 → ✅ 최종 승인 |
+| 10 | "use server" 허위 기재 정정 | ✅ | "D_Kai 실제 성과" 섹션으로 정확히 기재 |
+| 11 | StatusChangeModal·OrderDataTable 보완 커밋 | ✅ | `931a396` — createPortal·z-index 포함 |
+| 12 | updated_at migration scratch 이동 | ✅ | `931a396` — scratch 이동 완료 |
+
+### 최종 판정: ✅ PASS
+
+재작업 항목 전량 이행 확인. DoD 결함(헤더 미변경·문서 커밋 해시 미갱신)은 규모가 미미하여 Aiden 직접 보완 후 승인.
+
+### Advisory
+
+- 재작업이 신속하고 정확하게 이행됨. D_Kai 실제 성과와 Aiden 기수정 항목 명확히 분리한 점 우수.
+- R-17 위반 누적 **2회** 유지 (착수 선언 생략·1차 커밋 해시 미기재). 임계(3회)에 근접 — 다음 Task에서 절차 준수 필수.
+
+---
+
 ## 개정 이력
 
 | 날짜 | 주체 | 내용 |
@@ -177,4 +209,6 @@ IMP-052에서 `dissolveMasterOrder()`가 `dissolve_master_order_atomic` Supabase
 | 2026-05-22 | Aiden (Claude) | TASK-056 ❌ 반려(b6fcf9e). TASK-054 🚫→⬜ 복구 — D_Kai 무단 🔄 전환 정정. 시드 블로커 해제로 즉시 착수 가능. D_Kai는 착수 선언(⬜→🔄) 후 작업 개시 |
 | 2026-05-22 | D_Kai | TASK-054 착수 — migration RPC 버그 수정(updated_at→제거, zen_orders에 컬럼 없음). E2E-15 playwright 실행 중 |
 | 2026-05-22 | Aiden (Claude) | TASK-054 ❌ 반려 — 커밋 해시 미기재(`3f76f84`·`aa9c6ea`)·task file 상태 🔄(🔔 필요)·"use server" 허위 기재(Aiden c24c8e5 기수정)·E2E_SCENARIOS.md 미갱신·StatusChangeModal/OrderDataTable unstaged 미커밋. 재작업 지시: 보완 커밋 발행 + 허위 기재 정정 + 문서 재커밋 |
+| 2026-05-22 | D_Kai | TASK-054 재작업 — `931a396` 보완 커밋(Modal·Table·E2E_SCENARIOS·scratch 이동). 허위 기재 정정·커밋 해시 기재·상태 🔔. 문서 재커밋 예정 |
+| 2026-05-22 | Aiden (Claude) | TASK-054 ✅ PASS — 재작업 전량 확인(`931a396`·`9686245`). DoD 결함(헤더·해시 미갱신) Aiden 직접 보완. IMP-052 완료 |
 | 2026-05-22 | D_Kai | TASK-054 재작업 — `931a396` 보완 커밋(Modal·Table·E2E_SCENARIOS·scratch 이동). 허위 기재 정정·커밋 해시 기재·상태 🔔. 문서 재커밋 예정 |
