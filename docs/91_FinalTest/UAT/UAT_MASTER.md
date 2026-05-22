@@ -85,14 +85,14 @@ Supabase: Cloud 프로젝트 연결
 | UAT-04-02 | 입고 처리 | MANAGER | [UAT_04](UAT_04_창고_재고.md) | D_Kai | ✅ |
 | UAT-04-03 | 출고 처리 | MANAGER | [UAT_04](UAT_04_창고_재고.md) | D_Kai | ✅ |
 | UAT-04-04 | 재고 현황 대시보드 확인 | ADMIN | [UAT_04](UAT_04_창고_재고.md) | D_Kai | ✅ |
-| UAT-05-01 | 정산 목록 조회 | ADMIN | [UAT_05](UAT_05_정산_인보이스.md) | Riley | ⬜ |
-| UAT-05-02 | 인보이스 생성 | ADMIN | [UAT_05](UAT_05_정산_인보이스.md) | Riley | ⬜ |
-| UAT-05-03 | 인보이스 Excel/PDF 다운로드 | ADMIN/SHIPPER | [UAT_05](UAT_05_정산_인보이스.md) | Riley | ⬜ |
-| UAT-05-04 | 비용 조회 (finance/costs) | ADMIN | [UAT_05](UAT_05_정산_인보이스.md) | Riley | ⬜ |
-| UAT-05-05 | 수익 조회 (finance/revenue) | ADMIN | [UAT_05](UAT_05_정산_인보이스.md) | Riley | ⬜ |
-| UAT-06-01 | 배송 추적 조회 | SHIPPER | [UAT_06](UAT_06_추적_스케줄.md) | Riley | ⬜ |
-| UAT-06-02 | 스케줄 목록 조회 | ADMIN | [UAT_06](UAT_06_추적_스케줄.md) | Riley | ⬜ |
-| UAT-06-03 | 스케줄 등록 | ADMIN | [UAT_06](UAT_06_추적_스케줄.md) | Riley | ⬜ |
+| UAT-05-01 | 정산 목록 조회 | ADMIN | [UAT_05](UAT_05_정산_인보이스.md) | B_Kai | ✅ |
+| UAT-05-02 | 인보이스 생성 | ADMIN | [UAT_05](UAT_05_정산_인보이스.md) | B_Kai | ✅ |
+| UAT-05-03 | 인보이스 Excel/PDF 다운로드 | ADMIN/SHIPPER | [UAT_05](UAT_05_정산_인보이스.md) | B_Kai | ✅ |
+| UAT-05-04 | 비용 조회 (finance/costs) | ADMIN | [UAT_05](UAT_05_정산_인보이스.md) | B_Kai | ✅ |
+| UAT-05-05 | 수익 조회 (finance/revenue) | ADMIN | [UAT_05](UAT_05_정산_인보이스.md) | B_Kai | ✅ |
+| UAT-06-01 | 배송 추적 조회 | SHIPPER | [UAT_06](UAT_06_추적_스케줄.md) | B_Kai | ✅ |
+| UAT-06-02 | 스케줄 목록 조회 | ADMIN | [UAT_06](UAT_06_추적_스케줄.md) | B_Kai | ✅ |
+| UAT-06-03 | 스케줄 등록 | ADMIN | [UAT_06](UAT_06_추적_스케줄.md) | B_Kai | ✅ |
 | UAT-07-01 | VOC 접수 | SHIPPER | [UAT_07](UAT_07_VOC_고객지원.md) | D_Kai | ✅ |
 | UAT-07-02 | VOC 처리 (ADMIN 답변) | ADMIN | [UAT_07](UAT_07_VOC_고객지원.md) | D_Kai | ✅ |
 | UAT-07-03 | FAQ 조회 | ALL | [UAT_07](UAT_07_VOC_고객지원.md) | D_Kai | ✅ |
@@ -112,7 +112,7 @@ Supabase: Cloud 프로젝트 연결
 | UAT-09-07 | 코드 관리 | ADMIN | [UAT_09](UAT_09_어드민_운영.md) | D_Kai | ✅ |
 | UAT-09-08 | 업그레이드 요청 처리 | ADMIN | [UAT_09](UAT_09_어드민_운영.md) | D_Kai | ✅ |
 
-**총 46개 시나리오** | 작성 완료: 27 / 46
+**총 46개 시나리오** | 작성 완료: 45 / 46
 
 ---
 
