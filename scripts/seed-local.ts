@@ -83,6 +83,44 @@ async function getOrCreateOrg(supabase: any, name: string, type: string) {
   return newOrg;
 }
 
+async function seedOrders(supabase: any, shipperOrgId: string) {
+  console.log('\nSeeding E2E test orders...');
+
+  const cargoDetails = { description: 'E2E test cargo', weight_kg: 1.0 };
+  const testOrders = [
+    { order_no: 'E2E-SEED-001', status: 'REGISTERED', recipient_name: 'E2E Test Recipient 1', recipient_phone: '010-9999-0001' },
+    { order_no: 'E2E-SEED-002', status: 'REGISTERED', recipient_name: 'E2E Test Recipient 2', recipient_phone: '010-9999-0002' },
+    { order_no: 'E2E-SEED-003', status: 'REGISTERED', recipient_name: 'E2E Test Recipient 3', recipient_phone: '010-9999-0003' },
+    { order_no: 'E2E-SEED-004', status: 'WAREHOUSED', recipient_name: 'E2E Test Recipient 4', recipient_phone: '010-9999-0004' },
+    { order_no: 'E2E-SEED-005', status: 'WAREHOUSED', recipient_name: 'E2E Test Recipient 5', recipient_phone: '010-9999-0005' },
+  ];
+
+  for (const order of testOrders) {
+    const { data: existing } = await supabase
+      .from('zen_orders')
+      .select('id')
+      .eq('order_no', order.order_no)
+      .maybeSingle();
+
+    if (existing) {
+      console.log(`  - Order exists: ${order.order_no}`);
+      continue;
+    }
+
+    const { error } = await supabase.from('zen_orders').insert({
+      ...order,
+      shipper_id: shipperOrgId,
+      cargo_details: cargoDetails,
+    });
+
+    if (error) {
+      console.error(`  - Failed: ${order.order_no}`, error.message);
+    } else {
+      console.log(`  - Created: ${order.order_no} [${order.status}]`);
+    }
+  }
+}
+
 async function seed() {
   if (!supabaseKey) {
     console.error('SUPABASE_SERVICE_ROLE_KEY is missing. Please run with the key.');
@@ -107,7 +145,10 @@ async function seed() {
     await createUser(supabase, 'carrier@zenith.kr', 'Main Carrier', 'CARRIER', carrierOrg.id, 'PARTNER');
     await createUser(supabase, 'individual@zenith.kr', 'Individual User', 'INDIVIDUAL', null, 'CUSTOMER');
 
-    console.log('\nSeed complete! All test accounts are ready.');
+    // 4. E2E 테스트용 오더 시드 데이터 생성
+    await seedOrders(supabase, shipperOrg.id);
+
+    console.log('\nSeed complete! All test accounts and E2E orders are ready.');
   } catch (err: any) {
     console.error('\nSeed process failed:', err.message);
     process.exit(1);
