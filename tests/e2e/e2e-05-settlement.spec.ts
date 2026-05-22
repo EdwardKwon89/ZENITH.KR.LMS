@@ -129,7 +129,7 @@ test.describe('E2E-05: Settlement & Finance Workflow', () => {
 
     // 3. Excel Export
     console.log('Step 3: Exporting Excel from finance dashboard');
-    
+
     // Check if table has data
     const rows = page.locator('table tbody tr');
     const rowCount = await rows.count();
@@ -139,39 +139,40 @@ test.describe('E2E-05: Settlement & Finance Workflow', () => {
     console.log('Waiting for export button to be visible...');
     await expect(exportBtn).toBeVisible({ timeout: 15000 });
 
-    // Click the export button and wait for success toast
-    // Note: ExportButton uses fetch+blob+a.click() which does not trigger Playwright's
-    // native 'download' event. We verify the API independently and confirm toast.
-    console.log('Clicking export button...');
-    await exportBtn.click({ force: true });
-
-    // Wait for the success toast from ExportButton
-    await expect(
-      page.locator('[data-sonner-toast]').filter({ hasText: /successfully|성공/i }).first()
-    ).toBeVisible({ timeout: 30000 });
-
-    console.log('Export toast confirmed. Verifying Export API directly...');
-
-    // Separately verify the Export API returns a valid xlsx response
-    // (This tests the actual Export API endpoint end-to-end)
-    const apiResponse = await page.request.post('/api/finance/export', {
-      headers: { 'Content-Type': 'application/json' },
-      data: { data: [], filename: `settlement_export_verify`, type: 'SETTLEMENT' },
+    // Log all network requests to diagnose export API call
+    const exportRequests: string[] = [];
+    page.on('request', req => {
+      if (req.url().includes('finance') || req.url().includes('api')) {
+        exportRequests.push(`${req.method()} ${req.url()}`);
+      }
+    });
+    page.on('response', resp => {
+      if (resp.url().includes('finance') || resp.url().includes('api')) {
+        exportRequests.push(`RESP ${resp.status()} ${resp.url()}`);
+      }
     });
 
-    // Admin role is required; check we get a valid response
-    // Empty data returns 200 with xlsx headers (or a proper error if data is required)
-    console.log(`Export API direct call status: ${apiResponse.status()}`);
-    const contentType = apiResponse.headers()['content-type'] || '';
-    const contentDisposition = apiResponse.headers()['content-disposition'] || '';
-    console.log(`Content-Type: ${contentType}, Content-Disposition: ${contentDisposition}`);
+    // Intercept the POST /api/finance/export network request triggered by button click
+    console.log('Clicking export button and waiting for API response...');
+    const responsePromise = page.waitForResponse(
+      resp => resp.url().includes('/api/finance/export'),
+      { timeout: 30000 }
+    );
+    // Use evaluate().click() to bypass sticky header z-30 DOM hit-testing interception
+    await exportBtn.evaluate((el: HTMLButtonElement) => el.click());
+    const exportResponse = await responsePromise;
 
-    // The API must return 200 with xlsx content type
-    expect(apiResponse.status()).toBe(200);
-    expect(contentType).toContain('spreadsheetml.sheet');
-    expect(contentDisposition).toContain('.xlsx');
+    console.log('Network requests captured:', exportRequests.join(' | '));
+    const exportStatus = exportResponse.status();
+    const exportContentType = exportResponse.headers()['content-type'] || '';
+    const exportContentDisposition = exportResponse.headers()['content-disposition'] || '';
+    console.log(`Export API response: status=${exportStatus}, content-type=${exportContentType}`);
 
-    console.log(`Step 3 Complete. Export API verified: ${contentDisposition}`);
+    expect(exportStatus).toBe(200);
+    expect(exportContentType).toContain('spreadsheetml.sheet');
+    expect(exportContentDisposition).toContain('.xlsx');
+
+    console.log(`Step 3 Complete. Export API verified: ${exportContentDisposition}`);
 
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, 'e2e_05_combined_success.png') });
   });

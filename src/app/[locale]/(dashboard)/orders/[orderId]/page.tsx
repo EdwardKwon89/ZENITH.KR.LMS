@@ -33,7 +33,7 @@ export default async function OrderDetailPage({
   // 1. 서버 사이드 데이터 페칭
   const { profile, supabase } = await requireAuth();
   const order = await getOrderDetails(orderId);
-  const events = await getTrackingEvents(orderId);
+  const { events } = await getTrackingEvents(orderId);
   const { declarations } = await getDeclarations({ orderId });
   const declaration = declarations[0] || null;
 
@@ -62,8 +62,22 @@ export default async function OrderDetailPage({
     ? await supabase.from('zen_incident_fees').select('id, description, currency, fee_amount').eq('invoice_id', linkedInvoiceId)
     : { data: [] };
 
-  const isAdmin = checkPermission(profile?.role, "/admin");
-  const rawLogs = isAdmin ? await getTrackingRawLogs(orderId) : [];
+  let orgType = 'GUEST';
+  if (profile?.org_id) {
+    const { data: org } = await supabase
+      .from("zen_organizations")
+      .select('type')
+      .eq('id', profile.org_id)
+      .single();
+    if (org) orgType = org.type;
+  }
+  const isAdmin = 
+    profile?.role === 'ZENITH_SUPER_ADMIN' || 
+    (profile?.role === 'ADMIN' && orgType === 'PLATFORM') || 
+    checkPermission(profile?.role, "/admin");
+
+  const rawLogsData = isAdmin ? await getTrackingRawLogs(orderId) : { logs: [] };
+  const rawLogs = rawLogsData?.logs || [];
 
   // 4. 적용된 경로 정보 가져오기 (Sprint B)
   const { data: routeData } = await supabase
