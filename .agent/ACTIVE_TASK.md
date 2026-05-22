@@ -107,7 +107,7 @@
 | TASK-050 | 260521 | PDF 경로 충돌 방지 | P3 | 없음 | B_Kai | ✅ | [TASK-050](tasks/TASK-050_260521_PDF경로충돌방지_BKai.md) | IMP-061 완료 · UUID 기반 파일명 · 7ef504a+1e8b86c · 209/209 ✅ |
 | TASK-051 | 260521 | Rate Limiting 도입 | P2 | — | B_Kai | ➖ | — | IMP-046 · **상용 오픈 전 Sprint으로 유예** (2026-05-21 Aiden 결정) |
 | TASK-052 | 260522 | E2E-13 HELD 복구 시나리오 spec + 실행 | P3 | 없음 | Riley | 🔄 | [TASK-052](tasks/TASK-052_260522_E2E-13_HELD복구시나리오_Riley.md) | IMP-050 E2E 검증 |
-| TASK-053 | 260522 | E2E-14 RETURNED 전이 시나리오 spec + 실행 | P3 | 없음 | B_Kai | 🔄 | [TASK-053](tasks/TASK-053_260522_E2E-14_RETURNED전이시나리오_BKai.md) | IMP-060 E2E 검증 · 🔄 착수 |
+| TASK-053 | 260522 | E2E-14 RETURNED 전이 시나리오 spec + 실행 | P3 | 없음 | B_Kai | 🔔 | [TASK-053](tasks/TASK-053_260522_E2E-14_RETURNED전이시나리오_BKai.md) | IMP-060 E2E 검증 · `4f72533` · 🔔 검토 요청 |
 | TASK-054 | 260522 | E2E-15 dissolve 원자성 시나리오 spec + 실행 | P3 | ⛔ TASK-056 완료 후 착수 가능 | D_Kai | 🚫 | [TASK-054](tasks/TASK-054_260522_E2E-15_dissolve원자성시나리오_DKai.md) | IMP-052 E2E 검증 · spec 작성 완료(Noah) · "use server" 3건 버그 수정(c24c8e5) |
 | TASK-056 | 260522 | E2E 테스트용 오더 시드 데이터 생성 | P3 | 없음 | D_Kai | ⬜ | [TASK-056](tasks/TASK-056_260522_E2E시드데이터생성_DKai.md) | TASK-054 🚫 블로커 해소 목적 · seed-local.ts 오더 5건 추가 |
 | TASK-055 | 260522 | E2E-01/03/05 기존 시나리오 재검증 | P3 | 없음 | Riley | 🔄 | [TASK-055](tasks/TASK-055_260522_E2E재검증01_03_05_Riley.md) | IMP-068·052·030 회귀 확인 |
