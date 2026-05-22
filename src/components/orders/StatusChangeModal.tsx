@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, CheckCircle2, AlertCircle, Info } from 'lucide-react';
 import { ZenCard, ZenButton, ZenInput } from '@/components/ui/ZenUI';
@@ -30,6 +31,12 @@ export const StatusChangeModal: React.FC<StatusChangeModalProps> = ({
   const [reason, setReason] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const t = useTranslations('orderStatus');
+
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (currentStatus === 'HELD') {
@@ -81,7 +88,9 @@ export const StatusChangeModal: React.FC<StatusChangeModalProps> = ({
     }
   };
 
-  return (
+  if (!mounted) return null;
+
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -102,7 +111,7 @@ export const StatusChangeModal: React.FC<StatusChangeModalProps> = ({
             <p className="text-sm text-slate-500 mt-1">오더의 다음 생명주기 단계를 선택해주세요.</p>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-4 overflow-y-auto max-h-[55vh] pr-1.5 scrollbar-thin">
             {/* 현재 상태 표시 */}
             <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-100">
               <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm">
@@ -189,6 +198,7 @@ export const StatusChangeModal: React.FC<StatusChangeModalProps> = ({
           </div>
         </ZenCard>
       </motion.div>
-    </div>
+    </div>,
+    document.body
   );
 };

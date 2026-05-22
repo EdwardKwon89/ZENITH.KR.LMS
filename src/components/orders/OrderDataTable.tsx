@@ -37,7 +37,7 @@ export default function OrderDataTable({
   const t = useTranslations('orderStatus');
 
   return (
-    <div className="bg-white zen-tactile border border-slate-200 rounded-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-500">
+    <div className={`bg-white zen-tactile border border-slate-200 rounded-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-500 ${isModalOpen ? 'relative z-50' : ''}`}>
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead>

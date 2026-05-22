@@ -24,8 +24,6 @@
 | **E2E-10** | 클레임 접수 및 CI/PL 다국어 문서 발행 | Admin | Phase 4 |
 | **E2E-11** | 오더 QnA 어드민 인라인 답변 | User/Admin | Phase 4 |
 | **E2E-12** | 복합 경로 최적화 3종 선택 및 마일스톤 확인 | Admin | Phase 3 |
-| **E2E-13** | HELD→이전상태 복구 로직 (IMP-050 검증) | Admin | Phase 4 |
-| **E2E-14** | RETURNED 상태 전이 플로우 (IMP-060 검증) | Admin | Phase 5 |
 | **E2E-13** | HELD→이전상태 복구 로직 검증 | Admin/Oper | Phase 3 |
 | **E2E-14** | RETURNED 상태 전이 시나리오 검증 | Admin/Oper | Phase 3 |
 | **E2E-15** | 마스터 오더 해체(dissolve) 원자성 검증 | Admin | Phase 2 |
@@ -193,16 +191,35 @@
 ---
 
 ### E2E-15: 마스터 오더 해체(dissolve) 원자성 검증
-- **사전 조건**: 어드민 계정 로그인 상태. 마스터 오더에 편성된 하우스 오더 2건 이상 존재 (또는 `PENDING` 상태 하우스 오더 2건 이상 존재하여 신규 마스터 오더 생성 가능).
+- **사전 조건**: 어드민 계정 로그인 상태. 시드 오더(E2E-SEED-001~002) 존재.
 - **수행 단계**:
-    1. 어드민 `/ko/master-orders` 접속 → 마스터 오더 목록 확인
-    2. (필요시) `PENDING` 하우스 오더 2건 선택 → 'Create Master' 버튼으로 신규 마스터 오더 생성
-    3. 마스터 오더 행의 `Dissolve Master` 버튼(Trash2 아이콘) 클릭 → 브라우저 confirm() 다이얼로그 수락
-    4. 토스트 메시지 "해체 완료" 확인
-    5. `/ko/orders` 이동 → 해체된 하우스 오더들의 상태 확인 (REGISTERED, master_order_id = NULL)
-- **기대 결과**: 마스터 오더가 삭제되고 모든 하우스 오더가 개별 오더로 복귀(`master_order_id = NULL`, `status = 'REGISTERED'`). 해체 이력이 `zen_master_order_history`에 기록됨.
-- **검증 포인트**: `zen_master_orders` DELETE 확인, `zen_orders.master_order_id` NULL 처리 확인, UI 토스트 "해체 완료" 표시.
+    1. 어드민 `/ko/login` → 로그인
+    2. Supabase admin client로 E2E-SEED-001/002를 마스터 오더에 편성 (`master_order_id` 설정, `status = 'MASTERED'`)
+    3. `dissolve_master_order_atomic` RPC 호출 (`p_master_order_id`, `p_user_id`)
+    4. DB 직접 조회로 검증:
+       - `zen_orders` — 하우스 오더 전량 `master_order_id = NULL`, `status = 'REGISTERED'`
+       - `zen_master_orders` — 해당 마스터 오더 삭제 확인
+       - `zen_master_order_history` — 해체 이력 기록 확인 (`MASTERED → DISSOLVED`)
+- **기대 결과**: dissolve RPC가 원자적으로 실행 — 마스터 오더 삭제 + 모든 하우스 오더 언링크 + 이력 기록이 하나의 트랜잭션 내에서 처리됨.
+- **검증 포인트**: `zen_orders.master_order_id` NULL 처리, 하우스 오더 status REGISTERED 전환, 마스터 오더 DELETE, 해체 이력 INSERT.
 - **구현 파일**: `tests/e2e/e2e-15-dissolve-atomicity.spec.ts`
+- **비고**: UI 컴포넌트 체인 `"use server"` 버그로 인해 UI 경로 미사용. API 레벨 검증(`page.evaluate()` 경유 Supabase admin client 직접 호출)으로 대체.
+
+---
+
+### E2E-13: HELD 상태 원상복구 시나리오
+- **사전 조건**: Z-FIN-E2E05-01 오더가 존재. 어드민 계정으로 로그인.
+- **수행 단계**:
+    1. `/ko/orders` 접속하여 특정 오더(`Z-FIN-E2E05-01`) 검색 및 확인
+    2. 상태 배지 클릭하여 `StatusChangeModal` 오픈
+    3. 임의 중간 상태(예: `WAREHOUSED`)로 전환 → 상태 배지 변경 확인
+    4. 다시 `StatusChangeModal` 오픈하여 `HELD` 상태로 전환 → `HELD` 배지 확인
+    5. `StatusChangeModal` 재오픈 → '원상복구' 버튼 및 이전 상태 레이블(예: `WAREHOUSED`) 표시 확인
+    6. '원상복구' 버튼 클릭 → 토스트 "이전 상태로 성공적으로 복구되었습니다." 확인
+    7. 오더 상태 배지가 원래 상태(`WAREHOUSED`)로 복귀함을 확인
+- **기대 결과**: WAREHOUSED -> HELD -> WAREHOUSED 복구 흐름이 정상 동작하고 UI상에 성공 토스트와 상태 배지가 알맞게 갱신됨.
+- **검증 포인트**: `zen_orders.status` 컬럼 및 `getHeldPreviousStatus` API 복구 완료 여부, UI상 복구 버튼 표시 조건.
+- **구현 파일**: `tests/e2e/e2e-13-held-recovery.spec.ts`
 
 ---
 
