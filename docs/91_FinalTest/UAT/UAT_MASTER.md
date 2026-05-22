@@ -66,11 +66,11 @@ Supabase: Cloud 프로젝트 연결
 
 | UAT-ID | 시나리오명 | 주요 역할 | 담당 문서 | 작성 Agent | 상태 |
 |:------:|:---------|:--------:|:---------|:----------:|:----:|
-| UAT-01-01 | 신규 회원가입 | SHIPPER | [UAT_01](UAT_01_인증_회원가입.md) | D_Kai | ⬜ |
-| UAT-01-02 | 로그인 (전 역할) | ALL | [UAT_01](UAT_01_인증_회원가입.md) | D_Kai | ⬜ |
-| UAT-01-03 | 로그아웃 | ALL | [UAT_01](UAT_01_인증_회원가입.md) | D_Kai | ⬜ |
-| UAT-01-04 | 아이디 찾기 | ALL | [UAT_01](UAT_01_인증_회원가입.md) | D_Kai | ⬜ |
-| UAT-01-05 | 비밀번호 재설정 | ALL | [UAT_01](UAT_01_인증_회원가입.md) | D_Kai | ⬜ |
+| UAT-01-01 | 신규 회원가입 | SHIPPER | [UAT_01](UAT_01_인증_회원가입.md) | D_Kai | ✅ |
+| UAT-01-02 | 로그인 (전 역할) | ALL | [UAT_01](UAT_01_인증_회원가입.md) | D_Kai | ✅ |
+| UAT-01-03 | 로그아웃 | ALL | [UAT_01](UAT_01_인증_회원가입.md) | D_Kai | ✅ |
+| UAT-01-04 | 아이디 찾기 | ALL | [UAT_01](UAT_01_인증_회원가입.md) | D_Kai | ✅ |
+| UAT-01-05 | 비밀번호 재설정 | ALL | [UAT_01](UAT_01_인증_회원가입.md) | D_Kai | ✅ |
 | UAT-02-01 | 오더 신규 생성 | SHIPPER | [UAT_02](UAT_02_오더관리.md) | B_Kai | ⬜ |
 | UAT-02-02 | 오더 목록 조회·검색·필터 | ADMIN | [UAT_02](UAT_02_오더관리.md) | B_Kai | ⬜ |
 | UAT-02-03 | 오더 상세 조회 | ADMIN/SHIPPER | [UAT_02](UAT_02_오더관리.md) | B_Kai | ⬜ |
@@ -81,10 +81,10 @@ Supabase: Cloud 프로젝트 연결
 | UAT-03-01 | 마스터 오더 생성 | MASTER | [UAT_03](UAT_03_마스터오더_분리.md) | B_Kai | ⬜ |
 | UAT-03-02 | 마스터 오더 목록 조회 | MASTER/ADMIN | [UAT_03](UAT_03_마스터오더_분리.md) | B_Kai | ⬜ |
 | UAT-03-03 | dissolve (분리) 실행 + 원자성 확인 | ADMIN | [UAT_03](UAT_03_마스터오더_분리.md) | B_Kai | ⬜ |
-| UAT-04-01 | 재고 목록 조회 | MANAGER/ADMIN | [UAT_04](UAT_04_창고_재고.md) | D_Kai | ⬜ |
-| UAT-04-02 | 입고 처리 | MANAGER | [UAT_04](UAT_04_창고_재고.md) | D_Kai | ⬜ |
-| UAT-04-03 | 출고 처리 | MANAGER | [UAT_04](UAT_04_창고_재고.md) | D_Kai | ⬜ |
-| UAT-04-04 | 재고 현황 대시보드 확인 | ADMIN | [UAT_04](UAT_04_창고_재고.md) | D_Kai | ⬜ |
+| UAT-04-01 | 재고 목록 조회 | MANAGER/ADMIN | [UAT_04](UAT_04_창고_재고.md) | D_Kai | ✅ |
+| UAT-04-02 | 입고 처리 | MANAGER | [UAT_04](UAT_04_창고_재고.md) | D_Kai | ✅ |
+| UAT-04-03 | 출고 처리 | MANAGER | [UAT_04](UAT_04_창고_재고.md) | D_Kai | ✅ |
+| UAT-04-04 | 재고 현황 대시보드 확인 | ADMIN | [UAT_04](UAT_04_창고_재고.md) | D_Kai | ✅ |
 | UAT-05-01 | 정산 목록 조회 | ADMIN | [UAT_05](UAT_05_정산_인보이스.md) | Riley | ⬜ |
 | UAT-05-02 | 인보이스 생성 | ADMIN | [UAT_05](UAT_05_정산_인보이스.md) | Riley | ⬜ |
 | UAT-05-03 | 인보이스 Excel/PDF 다운로드 | ADMIN/SHIPPER | [UAT_05](UAT_05_정산_인보이스.md) | Riley | ⬜ |
@@ -103,16 +103,16 @@ Supabase: Cloud 프로젝트 연결
 | UAT-08-03 | 통관 정보 설정 | SHIPPER | [UAT_08](UAT_08_마이페이지.md) | Riley | ⬜ |
 | UAT-08-04 | 법인 정보 등록 | SHIPPER | [UAT_08](UAT_08_마이페이지.md) | Riley | ⬜ |
 | UAT-08-05 | 등급 조회 | SHIPPER | [UAT_08](UAT_08_마이페이지.md) | Riley | ⬜ |
-| UAT-09-01 | 조직 승인·거부 | ADMIN | [UAT_09](UAT_09_어드민_운영.md) | D_Kai | ⬜ |
-| UAT-09-02 | 권한(역할) 변경 | ADMIN | [UAT_09](UAT_09_어드민_운영.md) | D_Kai | ⬜ |
-| UAT-09-03 | 요율 설정 | ADMIN | [UAT_09](UAT_09_어드민_운영.md) | D_Kai | ⬜ |
-| UAT-09-04 | 운송 비용 설정 | ADMIN | [UAT_09](UAT_09_어드민_운영.md) | D_Kai | ⬜ |
-| UAT-09-05 | 통계 조회 | ADMIN | [UAT_09](UAT_09_어드민_운영.md) | D_Kai | ⬜ |
-| UAT-09-06 | 오류 로그 조회 | ADMIN | [UAT_09](UAT_09_어드민_운영.md) | D_Kai | ⬜ |
-| UAT-09-07 | 코드 관리 | ADMIN | [UAT_09](UAT_09_어드민_운영.md) | D_Kai | ⬜ |
-| UAT-09-08 | 업그레이드 요청 처리 | ADMIN | [UAT_09](UAT_09_어드민_운영.md) | D_Kai | ⬜ |
+| UAT-09-01 | 조직 승인·거부 | ADMIN | [UAT_09](UAT_09_어드민_운영.md) | D_Kai | ✅ |
+| UAT-09-02 | 권한(역할) 변경 | ADMIN | [UAT_09](UAT_09_어드민_운영.md) | D_Kai | ✅ |
+| UAT-09-03 | 요율 설정 | ADMIN | [UAT_09](UAT_09_어드민_운영.md) | D_Kai | ✅ |
+| UAT-09-04 | 운송 비용 설정 | ADMIN | [UAT_09](UAT_09_어드민_운영.md) | D_Kai | ✅ |
+| UAT-09-05 | 통계 조회 | ADMIN | [UAT_09](UAT_09_어드민_운영.md) | D_Kai | ✅ |
+| UAT-09-06 | 오류 로그 조회 | ADMIN | [UAT_09](UAT_09_어드민_운영.md) | D_Kai | ✅ |
+| UAT-09-07 | 코드 관리 | ADMIN | [UAT_09](UAT_09_어드민_운영.md) | D_Kai | ✅ |
+| UAT-09-08 | 업그레이드 요청 처리 | ADMIN | [UAT_09](UAT_09_어드민_운영.md) | D_Kai | ✅ |
 
-**총 46개 시나리오** | 작성 완료: 0 / 46
+**총 46개 시나리오** | 작성 완료: 17 / 46
 
 ---
 
