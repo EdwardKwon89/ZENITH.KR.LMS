@@ -107,7 +107,7 @@
 | TASK-050 | 260521 | PDF 경로 충돌 방지 | P3 | 없음 | B_Kai | ✅ | [TASK-050](tasks/TASK-050_260521_PDF경로충돌방지_BKai.md) | IMP-061 완료 · UUID 기반 파일명 · 7ef504a+1e8b86c · 209/209 ✅ |
 | TASK-051 | 260521 | Rate Limiting 도입 | P2 | — | B_Kai | ➖ | — | IMP-046 · **상용 오픈 전 Sprint으로 유예** (2026-05-21 Aiden 결정) |
 | TASK-052 | 260522 | E2E-13 HELD 복구 시나리오 spec + 실행 | P3 | 없음 | Riley | 🔄 | [TASK-052](tasks/TASK-052_260522_E2E-13_HELD복구시나리오_Riley.md) | IMP-050 E2E 검증 |
-| TASK-053 | 260522 | E2E-14 RETURNED 전이 시나리오 spec + 실행 | P3 | 없음 | B_Kai | 🔔 | [TASK-053](tasks/TASK-053_260522_E2E-14_RETURNED전이시나리오_BKai.md) | IMP-060 · 3차 재작업 완료 · 코드 e70b6a2 · E2E A/B ✅ · 회귀 211/211 ✅ · Aiden 검토 요청 |
+| TASK-053 | 260522 | E2E-14 RETURNED 전이 시나리오 spec + 실행 | P3 | 없음 | B_Kai | ✅ | [TASK-053](tasks/TASK-053_260522_E2E-14_RETURNED전이시나리오_BKai.md) | IMP-060 완료 · `e70b6a2` 코드 · `51cd330` 문서 · E2E A/B ✅ · 회귀 211/211 ✅ |
 | TASK-054 | 260522 | E2E-15 dissolve 원자성 시나리오 spec + 실행 | P3 | 없음 | D_Kai | ✅ | [TASK-054](tasks/TASK-054_260522_E2E-15_dissolve원자성시나리오_DKai.md) | IMP-052 완료 · `3f76f84`+`931a396` 코드 · `9686245` 문서 · 재작업 전량 이행 |
 | TASK-056 | 260522 | E2E 테스트용 오더 시드 데이터 생성 | P3 | 없음 | D_Kai | ✅ | [TASK-056](tasks/TASK-056_260522_E2E시드데이터생성_DKai.md) | seedOrders() 5건 ✅ · 회귀 211/211 ✅ · 재작업(371b59f) ✅ · Aiden ✅ 승인 |
 | TASK-055 | 260522 | E2E-01/03/05 기존 시나리오 재검증 | P3 | 없음 | Riley | 🔄 | [TASK-055](tasks/TASK-055_260522_E2E재검증01_03_05_Riley.md) | IMP-068·052·030 회귀 확인 |
@@ -120,7 +120,7 @@
 | Agent | 진행 중 | 재작업/조치 필요 | 블로커 대기 |
 |:------|:--------|:----------------|:----------|
 | Riley | TASK-052·055 🔄 | ⚠️ "use server" 추가 fix cdd365d 반영됨 — 재시도 가능 | — |
-| B_Kai | TASK-053 🔔 (3차 재작업 완료) | — | — |
+| B_Kai | — | — | — |
 | D_Kai | — | — | — |
 | Ring | — | — | 신규 할당 중단 유지 (9차 위반 누적) |
 
@@ -213,3 +213,4 @@
 | 2026-05-22 | Aiden (Claude) | TASK-054 ❌ 반려 — 커밋 해시 미기재(`3f76f84`·`aa9c6ea`)·"use server" 허위 기재(Aiden c24c8e5 기수정)·StatusChangeModal/OrderDataTable unstaged 미커밋·E2E_SCENARIOS 미갱신. R-17 누적 2회. 재작업 지시 |
 | 2026-05-22 | Aiden (Claude) | TASK-053 ❌ 반려 (2차) — committed migration 직접 수정(`imp049`)·E2E/회귀/커밋 미수행. Option A(updated_at 컬럼 추가) 확정. TASK-057 ➖ 취소·TASK-053 재작업에 통합 |
 | 2026-05-22 | Aiden (Claude) | TASK-054 ✅ PASS — D_Kai 재작업(`931a396`·`9686245`) 전량 확인. DoD 결함 Aiden 직접 보완. IMP-052 완료 |
+| 2026-05-22 | Aiden (Claude) | TASK-053 ✅ PASS — B_Kai 3차 재작업(`e70b6a2`·`51cd330`) 전량 확인. migration 3종·E2E A/B·회귀 211/211. IMP-060 완료. Aiden 직접 보완: 2차 DoD·개정이력 정정 |
