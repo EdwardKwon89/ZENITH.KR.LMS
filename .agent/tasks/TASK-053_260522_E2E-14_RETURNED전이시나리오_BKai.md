@@ -8,7 +8,7 @@
 | 담당 Agent | B_Kai (Noah/Codex) |
 | 우선순위 | P3 |
 | 전제조건 | 없음 — 즉시 착수 가능 |
-| 상태 | ❌ 반려 (2차) |
+| 상태 | 🔔 검토 요청 (3차) |
 | 파급 효과 | 신규 spec 파일 추가 — 기존 코드 변경 없음 |
 
 ---
@@ -316,10 +316,40 @@ rtk npm run test:regression
 
 ---
 
+## 3차 작업 결과 (재작업 — 2026-05-22, B_Kai)
+
+| 항목 | 내용 |
+|:---|:---|
+| 착수 | Aiden 12단계 재작업 지시 (❌ 반려 후) |
+| Step 1 | `git checkout supabase/migrations/20260521200000_imp049_merge_dual_profiles.sql` — revert ✅ |
+| Step 2 | `20260522000300_fix_preferred_language_view.sql` 생성 ✅ |
+| Step 3 | `scratch/` → `supabase/migrations/` 복원 (updated_at) ✅ |
+| Step 4 | `supabase db push --local` — `000100` + `000300` 전량 PASS ✅ |
+| Step 5 | Spec 타이밍 최적화: `waitForTimeout(3000)×4` → `expect().not.toBeVisible()` ✅ |
+| Step 6 | E2E-14: Case A ✅ (11.5s) / Case B ✅ (7.8s) — 2/2 PASS |
+| Step 7 | RESULT.md 갱신 — 버그 수정 내역 포함 ✅ |
+| Step 8 | 회귀 211/211 FULL PASS (37.12s) ✅ |
+| Step 9 | 코드 커밋 `e70b6a2`: `[B_Kai] test: E2E-14 재작업 — migration 3종·spec 타이밍 최적화·케이스 A/B PASS` ✅ |
+
+### 수정 파일 목록 (코드 커밋 e70b6a2)
+
+| 파일 | 변경 |
+|:-----|:-----|
+| `tests/e2e/e2e-14-returned-flow.spec.ts` | i18n 레이블 수정·scrollIntoViewIfNeeded·타이밍 최적화·findWarehousedRow |
+| `supabase/migrations/20260522000100_fix_zen_orders_updated_at.sql` | 신규 — `zen_orders`에 `updated_at` 컬럼 + 트리거 |
+| `supabase/migrations/20260522000200_restore_zen_organizations_columns.sql` | Aiden 기생성 — `zen_organizations` 컬럼 복원 |
+| `supabase/migrations/20260522000300_fix_preferred_language_view.sql` | 신규 — profiles VIEW `preferred_language` 수정 |
+| `docs/99_Manual/E2E_14_Result/RESULT.md` | 갱신 — 케이스 A/B PASS + 버그 수정 내역 |
+| `docs/99_Manual/E2E_14_Result/*.png` | 스크린샷 5장 (케이스 A 3장 + 케이스 B 2장) |
+| `docs/08_Self_Audit/Regression_Results/REGRESSION_2026-05-22_TASK-053-v2.log` | 회귀 로그 (211/211 FULL PASS) |
+
+---
+
 ## 개정 이력
 
 | 날짜 | 주체 | 내용 |
 |:-----|:----:|:-----|
 | 2026-05-22 | Aiden (Claude) | Task 생성 — E2E 확장 Sprint, IMP-060 E2E 검증 (B_Kai 할당) |
-| 2026-05-22 | B_Kai (Noah/Codex) | 2차 작업: E2E-14 재실행 중 버그 4종 발견·수정(updated_at·i18n·viewport·findWarehousedRow). 미완성 에스컬레이션 — Aiden 검토 요청 |
+| 2026-05-22 | Aiden (Claude) | — | 2026-05-22 | B_Kai (Noah/Codex) | 2차 작업: E2E-14 재실행 중 버그 4종 발견·수정(updated_at·i18n·viewport·findWarehousedRow). 미완성 에스컬레이션 — Aiden 검토 요청 |
 | 2026-05-22 | Aiden (Claude) | TASK-053 ❌ 반려 (2차) — committed migration 직접 수정·E2E/회귀/커밋 미수행. Option A(updated_at 컬럼 추가) 확정. 12단계 재작업 지시. TASK-057 본 재작업에 통합 |
+| 2026-05-22 | B_Kai | 3차 재작업 완료 — 12단계 전량 이행. 코드 e70b6a2 · E2E A/B ✅ · 회귀 211/211 · 🔔 |
