@@ -1,0 +1,51 @@
+> vitest run
+ RUN  v4.1.4 /Users/edward.kwon/WorkSpace/ZENITH_LMS_001
+ ✓ tests/integration/tracking-business-qa.test.ts (2 tests) 75ms
+ ✓ tests/unit/finance/pdf.test.ts (1 test) 24ms
+ ✓ tests/integration/uat-phase3-e2e.test.ts (2 tests) 17ms
+ ✓ tests/integration/fin-03.test.ts (3 tests) 14ms
+ ✓ tests/integration/finance.test.ts (6 tests) 9ms
+ ✓ tests/unit/member/grade-promotion.test.ts (5 tests) 8ms
+ ✓ tests/unit/logistics/voc.test.ts (2 tests) 7ms
+ ✓ tests/unit/rates/rates.test.ts (4 tests) 7ms
+ ✓ tests/unit/customs/customs-declaration.test.ts (4 tests) 6ms
+ ✓ tests/unit/logistics/order-actions.test.ts (6 tests) 6ms
+ ✓ tests/unit/support/support-actions.test.ts (10 tests) 6ms
+ ✓ tests/integration/rou-01.test.ts (10 tests) 6ms
+ ✓ tests/integration/inventory.test.ts (7 tests) 6ms
+ ✓ tests/unit/auth/guards.test.ts (4 tests) 6ms
+ ✓ tests/unit/member/corporate.test.ts (4 tests) 6ms
+ ✓ tests/integration/tracking.test.ts (6 tests) 5ms
+ ✓ tests/unit/claims/claims-actions.test.ts (5 tests) 5ms
+ ✓ tests/unit/master/master-actions.test.ts (6 tests) 6ms
+ ✓ tests/unit/logistics/inventory.test.ts (4 tests) 5ms
+ ✓ tests/unit/logistics/tracking.test.ts (3 tests) 5ms
+ ✓ tests/unit/master/master_policy.test.ts (4 tests) 5ms
+ ✓ tests/unit/logistics/order-validation.test.ts (8 tests) 4ms
+ ✓ tests/integration/notifications.test.ts (5 tests) 4ms
+ ✓ tests/unit/finance/report.test.ts (4 tests) 4ms
+ ✓ tests/unit/finance/wallet.test.ts (4 tests) 4ms
+ ✓ tests/unit/monitoring/error-log.test.ts (4 tests) 4ms
+ ✓ tests/unit/logistics/order-status.test.ts (3 tests) 4ms
+ ✓ tests/unit/master/master-detail.test.ts (2 tests) 3ms
+ ✓ tests/unit/monitoring/logger.test.ts (4 tests) 4ms
+ ✓ tests/unit/monitoring/wrapper.test.ts (3 tests) 3ms
+ ✓ tests/unit/params/service.test.ts (5 tests) 3ms
+ ✓ tests/unit/support/order-qna.test.ts (3 tests) 3ms
+ ✓ tests/unit/documents/document-actions.test.ts (3 tests) 3ms
+ ✓ tests/unit/member/profile.test.ts (4 tests) 4ms
+ ✓ tests/unit/logistics/affiliation.test.ts (3 tests) 3ms
+ ✓ tests/unit/logistics/status-machine.test.ts (22 tests) 3ms
+ ✓ tests/integration/rou-02.test.ts (3 tests) 3ms
+ ✓ tests/unit/params/feature-flags.test.ts (3 tests) 3ms
+ ✓ tests/unit/statistics/stats-actions.test.ts (2 tests) 2ms
+ ✓ tests/unit/auth/rbac.test.ts (7 tests) 3ms
+ ✓ tests/unit/routing/scoring.test.ts (10 tests) 2ms
+ ✓ tests/unit/logistics/freight-calculator.test.ts (5 tests) 2ms
+ ✓ tests/unit/logistics/rate-engine.test.ts (4 tests) 2ms
+ ✓ tests/unit/master/aviation-master.test.ts (2 tests) 2ms
+
+Test Files  44 passed (44)
+     Tests  211 passed (211)
+  Start at  16:48:52
+  Duration  36.01s (transform 489ms, setup 2.79s, import 2.83s, tests 303ms, environment 23.93s)
