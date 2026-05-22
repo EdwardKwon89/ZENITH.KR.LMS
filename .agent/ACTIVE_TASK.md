@@ -111,6 +111,7 @@
 | TASK-054 | 260522 | E2E-15 dissolve 원자성 시나리오 spec + 실행 | P3 | 없음 | D_Kai | 🔔 | [TASK-054](tasks/TASK-054_260522_E2E-15_dissolve원자성시나리오_DKai.md) | IMP-052 E2E 검증 · E2E-15 PASS · migration RPC 버그 수정 · 회귀 211/211 |
 | TASK-056 | 260522 | E2E 테스트용 오더 시드 데이터 생성 | P3 | 없음 | D_Kai | ✅ | [TASK-056](tasks/TASK-056_260522_E2E시드데이터생성_DKai.md) | seedOrders() 5건 ✅ · 회귀 211/211 ✅ · 재작업(371b59f) ✅ · Aiden ✅ 승인 |
 | TASK-055 | 260522 | E2E-01/03/05 기존 시나리오 재검증 | P3 | 없음 | Riley | 🔄 | [TASK-055](tasks/TASK-055_260522_E2E재검증01_03_05_Riley.md) | IMP-068·052·030 회귀 확인 |
+| TASK-057 | 260522 | E2E-14 케이스 A/B 재실행 + 타이밍 최적화 | P3 | TASK-056 ✅ | B_Kai | 🔄 | [TASK-057](tasks/TASK-057_260522_E2E-14재실행_타이밍최적화_BKai.md) | IMP-060 재검증 · waitForTimeout×4 → expect() 최적화 + 케이스 A/B 재실행 |
 
 ---
 
@@ -119,7 +120,7 @@
 | Agent | 진행 중 | 재작업/조치 필요 | 블로커 대기 |
 |:------|:--------|:----------------|:----------|
 | Riley | TASK-052·055 🔄 | ⚠️ "use server" 추가 fix cdd365d 반영됨 — 재시도 가능 | — |
-| B_Kai | E2E-14 케이스 A/B 재실행 🔄 (사용자 직접 지시) | — | — |
+| B_Kai | TASK-057 🔄 (E2E-14 재실행 + 타이밍 최적화) | — | — |
 | D_Kai | TASK-054 🔔 (Aiden 검토 대기) | — | — |
 | Ring | — | — | 신규 할당 중단 유지 (9차 위반 누적) |
 
@@ -208,3 +209,4 @@
 | 2026-05-22 | Aiden (Claude) | TASK-056 ✅ 승인 — D_Kai 재작업 확인·ACTIVE_TASK ✅ 반영. 사용자 직접 지시로 B_Kai E2E-14 케이스 A/B 재실행 🔄 |
 | 2026-05-22 | D_Kai | TASK-054 착수+완료 🔔 — RPC 버그(updated_at) 수정·E2E-15 PASS(3.2s)·회귀 211/211 |
 | 2026-05-22 | Aiden (Claude) | TASK-056 ✅ 승인 — D_Kai 재작업(371b59f) 확인. 잔여 doc 결함(DoD 레이블·완료일·[Aiden 검토]) Aiden 직접 보완 후 최종 승인. B_Kai E2E-14 케이스 A/B 재실행 지시 예정 |
+| 2026-05-22 | Aiden (Claude) | E2E 타이밍 최적화 지시 발령 — TASK-052(Riley) waitForTimeout/networkidle 개선 지시 추가. TASK-057 신규 발령(B_Kai) — E2E-14 케이스 A/B 재실행 + waitForTimeout×4 최적화 포함 |
