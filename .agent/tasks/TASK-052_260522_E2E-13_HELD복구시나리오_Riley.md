@@ -8,7 +8,7 @@
 | 담당 Agent | Riley (Gemini) |
 | 우선순위 | P3 |
 | 전제조건 | 없음 — 즉시 착수 가능 |
-| 상태 | 🔄 구현 중 |
+| 상태 | 🔔 검토 요청 |
 | 파급 효과 | 신규 spec 파일 추가 — 기존 코드 변경 없음 |
 
 ---
@@ -76,13 +76,13 @@ IMP-050(`getHeldPreviousStatus` + '원상복구' 버튼)이 구현되었으나 E
 
 ## 완료 기준 (DoD)
 
-- [ ] `tests/e2e/e2e-13-held-recovery.spec.ts` 타이밍 최적화 완료 (networkidle 제거·waitForTimeout→expect 대체)
-- [ ] E2E-13 실행 PASS — 스크린샷 증적 `docs/99_Manual/E2E_13_Result/` 저장
+- [x] `tests/e2e/e2e-13-held-recovery.spec.ts` 타이밍 최적화 완료 (networkidle 제거·waitForTimeout→expect 대체)
+- [x] E2E-13 실행 PASS — 스크린샷 증적 `docs/99_Manual/E2E_13_Result/` 저장 (6개)
 - [ ] `docs/99_Manual/E2E_SCENARIOS.md` E2E-13 항목 추가 (요약표 + 상세 정의)
-- [ ] 회귀 테스트 전체 PASS 증적 (`docs/08_Self_Audit/Regression_Results/`)
-- [ ] `[Gemini] test: E2E-13` 코드 커밋 완료 (해시 기재)
-- [ ] `[Gemini] docs: TASK-052` 문서 커밋 완료 (해시 기재)
-- [ ] 본 파일 상태 🔔 + ACTIVE_TASK.md 동기화
+- [x] 회귀 테스트 전체 PASS 증적 (`docs/08_Self_Audit/Regression_Results/REGRESSION_2026-05-22_TASK-052.log` · 211/211)
+- [x] `[Claude] test: E2E-13` 코드 커밋 완료 (269b33a)
+- [ ] `[Claude] docs: TASK-052` 문서 커밋 완료 (해시 기재) ← 진행 중
+- [x] 본 파일 상태 🔔 + ACTIVE_TASK.md 동기화
 
 ---
 
@@ -100,16 +100,16 @@ IMP-050(`getHeldPreviousStatus` + '원상복구' 버튼)이 구현되었으나 E
 
 ## 작업 결과
 
-> 이 섹션은 착수 후 Riley가 작성합니다.
+> Riley 작업 내용 Aiden 인수 처리 (2026-05-22)
 
 | 항목 | 내용 |
 |:---|:---|
 | 착수일 | 2026-05-22 |
-| 완료일 | — |
-| E2E-13 결과 | — |
-| 스크린샷 수 | — |
-| 회귀 결과 | — |
-| 코드 커밋 해시 | — |
+| 완료일 | 2026-05-22 |
+| E2E-13 결과 | PASS |
+| 스크린샷 수 | 6 (`docs/99_Manual/E2E_13_Result/`) |
+| 회귀 결과 | 211/211 PASS |
+| 코드 커밋 해시 | 269b33a |
 | 문서 커밋 해시 | — |
 
 ---
@@ -126,3 +126,5 @@ IMP-050(`getHeldPreviousStatus` + '원상복구' 버튼)이 구현되었으나 E
 |:-----|:----:|:-----|
 | 2026-05-22 | Aiden (Claude) | Task 생성 — E2E 확장 Sprint, IMP-050 E2E 검증 (Riley 할당) |
 | 2026-05-22 | Aiden (Claude) | 지시 추가 — E2E-13 spec 타이밍 최적화 필수 반영. `networkidle`×2 → `domcontentloaded`, `waitForTimeout`×5 → `expect().toBeVisible()` 대체. (Aiden 분석: Next.js dev HMR WebSocket 간섭 확인) |
+| 2026-05-22 | Riley (Gemini) | E2E-13 spec 작성 + 타이밍 최적화 + E2E PASS + 회귀 211/211 — 커밋 미이행 |
+| 2026-05-22 | Aiden (Claude) | Riley 작업 인수 처리 — task file 🔔 갱신, 코드·문서 커밋 대행 |
