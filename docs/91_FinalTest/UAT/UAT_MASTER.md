@@ -93,16 +93,16 @@ Supabase: Cloud 프로젝트 연결
 | UAT-06-01 | 배송 추적 조회 | SHIPPER | [UAT_06](UAT_06_추적_스케줄.md) | Riley | ⬜ |
 | UAT-06-02 | 스케줄 목록 조회 | ADMIN | [UAT_06](UAT_06_추적_스케줄.md) | Riley | ⬜ |
 | UAT-06-03 | 스케줄 등록 | ADMIN | [UAT_06](UAT_06_추적_스케줄.md) | Riley | ⬜ |
-| UAT-07-01 | VOC 접수 | SHIPPER | [UAT_07](UAT_07_VOC_고객지원.md) | Riley | ⬜ |
-| UAT-07-02 | VOC 처리 (ADMIN 답변) | ADMIN | [UAT_07](UAT_07_VOC_고객지원.md) | Riley | ⬜ |
-| UAT-07-03 | FAQ 조회 | ALL | [UAT_07](UAT_07_VOC_고객지원.md) | Riley | ⬜ |
-| UAT-07-04 | 공지사항 조회 | ALL | [UAT_07](UAT_07_VOC_고객지원.md) | Riley | ⬜ |
-| UAT-07-05 | QnA 문의 등록 + 답변 | SHIPPER/ADMIN | [UAT_07](UAT_07_VOC_고객지원.md) | Riley | ⬜ |
-| UAT-08-01 | 프로필 조회·수정 | ALL | [UAT_08](UAT_08_마이페이지.md) | Riley | ⬜ |
-| UAT-08-02 | 비밀번호 변경 | ALL | [UAT_08](UAT_08_마이페이지.md) | Riley | ⬜ |
-| UAT-08-03 | 통관 정보 설정 | SHIPPER | [UAT_08](UAT_08_마이페이지.md) | Riley | ⬜ |
-| UAT-08-04 | 법인 정보 등록 | SHIPPER | [UAT_08](UAT_08_마이페이지.md) | Riley | ⬜ |
-| UAT-08-05 | 등급 조회 | SHIPPER | [UAT_08](UAT_08_마이페이지.md) | Riley | ⬜ |
+| UAT-07-01 | VOC 접수 | SHIPPER | [UAT_07](UAT_07_VOC_고객지원.md) | D_Kai | ✅ |
+| UAT-07-02 | VOC 처리 (ADMIN 답변) | ADMIN | [UAT_07](UAT_07_VOC_고객지원.md) | D_Kai | ✅ |
+| UAT-07-03 | FAQ 조회 | ALL | [UAT_07](UAT_07_VOC_고객지원.md) | D_Kai | ✅ |
+| UAT-07-04 | 공지사항 조회 | ALL | [UAT_07](UAT_07_VOC_고객지원.md) | D_Kai | ✅ |
+| UAT-07-05 | QnA 문의 등록 + 답변 | SHIPPER/ADMIN | [UAT_07](UAT_07_VOC_고객지원.md) | D_Kai | ✅ |
+| UAT-08-01 | 프로필 조회·수정 | ALL | [UAT_08](UAT_08_마이페이지.md) | D_Kai | ✅ |
+| UAT-08-02 | 비밀번호 변경 | ALL | [UAT_08](UAT_08_마이페이지.md) | D_Kai | ✅ |
+| UAT-08-03 | 통관 정보 설정 | SHIPPER | [UAT_08](UAT_08_마이페이지.md) | D_Kai | ✅ |
+| UAT-08-04 | 법인 정보 등록 | SHIPPER | [UAT_08](UAT_08_마이페이지.md) | D_Kai | ✅ |
+| UAT-08-05 | 등급 조회 | SHIPPER | [UAT_08](UAT_08_마이페이지.md) | D_Kai | ✅ |
 | UAT-09-01 | 조직 승인·거부 | ADMIN | [UAT_09](UAT_09_어드민_운영.md) | D_Kai | ✅ |
 | UAT-09-02 | 권한(역할) 변경 | ADMIN | [UAT_09](UAT_09_어드민_운영.md) | D_Kai | ✅ |
 | UAT-09-03 | 요율 설정 | ADMIN | [UAT_09](UAT_09_어드민_운영.md) | D_Kai | ✅ |
@@ -112,7 +112,7 @@ Supabase: Cloud 프로젝트 연결
 | UAT-09-07 | 코드 관리 | ADMIN | [UAT_09](UAT_09_어드민_운영.md) | D_Kai | ✅ |
 | UAT-09-08 | 업그레이드 요청 처리 | ADMIN | [UAT_09](UAT_09_어드민_운영.md) | D_Kai | ✅ |
 
-**총 46개 시나리오** | 작성 완료: 17 / 46
+**총 46개 시나리오** | 작성 완료: 27 / 46
 
 ---
 
