@@ -71,16 +71,16 @@ Supabase: Cloud 프로젝트 연결
 | UAT-01-03 | 로그아웃 | ALL | [UAT_01](UAT_01_인증_회원가입.md) | D_Kai | ✅ |
 | UAT-01-04 | 아이디 찾기 | ALL | [UAT_01](UAT_01_인증_회원가입.md) | D_Kai | ✅ |
 | UAT-01-05 | 비밀번호 재설정 | ALL | [UAT_01](UAT_01_인증_회원가입.md) | D_Kai | ✅ |
-| UAT-02-01 | 오더 신규 생성 | SHIPPER | [UAT_02](UAT_02_오더관리.md) | B_Kai | ⬜ |
-| UAT-02-02 | 오더 목록 조회·검색·필터 | ADMIN | [UAT_02](UAT_02_오더관리.md) | B_Kai | ⬜ |
-| UAT-02-03 | 오더 상세 조회 | ADMIN/SHIPPER | [UAT_02](UAT_02_오더관리.md) | B_Kai | ⬜ |
-| UAT-02-04 | 오더 상태 전이 — 전체 플로우 | ADMIN | [UAT_02](UAT_02_오더관리.md) | B_Kai | ⬜ |
-| UAT-02-05 | HELD 상태 전환 + 원상복구 | ADMIN | [UAT_02](UAT_02_오더관리.md) | B_Kai | ⬜ |
-| UAT-02-06 | RETURNED → WAREHOUSED / DISPOSED | ADMIN | [UAT_02](UAT_02_오더관리.md) | B_Kai | ⬜ |
-| UAT-02-07 | 오더 취소 (CANCELED) | ADMIN | [UAT_02](UAT_02_오더관리.md) | B_Kai | ⬜ |
-| UAT-03-01 | 마스터 오더 생성 | MASTER | [UAT_03](UAT_03_마스터오더_분리.md) | B_Kai | ⬜ |
-| UAT-03-02 | 마스터 오더 목록 조회 | MASTER/ADMIN | [UAT_03](UAT_03_마스터오더_분리.md) | B_Kai | ⬜ |
-| UAT-03-03 | dissolve (분리) 실행 + 원자성 확인 | ADMIN | [UAT_03](UAT_03_마스터오더_분리.md) | B_Kai | ⬜ |
+| UAT-02-01 | 오더 신규 생성 | SHIPPER | [UAT_02](UAT_02_오더관리.md) | B_Kai | ✅ |
+| UAT-02-02 | 오더 목록 조회·검색·필터 | ADMIN | [UAT_02](UAT_02_오더관리.md) | B_Kai | ✅ |
+| UAT-02-03 | 오더 상세 조회 | ADMIN/SHIPPER | [UAT_02](UAT_02_오더관리.md) | B_Kai | ✅ |
+| UAT-02-04 | 오더 상태 전이 — 전체 플로우 | ADMIN | [UAT_02](UAT_02_오더관리.md) | B_Kai | ✅ |
+| UAT-02-05 | HELD 상태 전환 + 원상복구 | ADMIN | [UAT_02](UAT_02_오더관리.md) | B_Kai | ✅ |
+| UAT-02-06 | RETURNED → WAREHOUSED / DISPOSED | ADMIN | [UAT_02](UAT_02_오더관리.md) | B_Kai | ✅ |
+| UAT-02-07 | 오더 취소 (CANCELED) | ADMIN | [UAT_02](UAT_02_오더관리.md) | B_Kai | ✅ |
+| UAT-03-01 | 마스터 오더 생성 | MASTER | [UAT_03](UAT_03_마스터오더_분리.md) | B_Kai | ✅ |
+| UAT-03-02 | 마스터 오더 목록 조회 | MASTER/ADMIN | [UAT_03](UAT_03_마스터오더_분리.md) | B_Kai | ✅ |
+| UAT-03-03 | dissolve (분리) 실행 + 원자성 확인 | ADMIN | [UAT_03](UAT_03_마스터오더_분리.md) | B_Kai | ✅ |
 | UAT-04-01 | 재고 목록 조회 | MANAGER/ADMIN | [UAT_04](UAT_04_창고_재고.md) | D_Kai | ✅ |
 | UAT-04-02 | 입고 처리 | MANAGER | [UAT_04](UAT_04_창고_재고.md) | D_Kai | ✅ |
 | UAT-04-03 | 출고 처리 | MANAGER | [UAT_04](UAT_04_창고_재고.md) | D_Kai | ✅ |
