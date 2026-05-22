@@ -1,5 +1,6 @@
-import { logger } from '@/lib/logger';
 'use server';
+
+import { logger } from '@/lib/logger';
 
 import { SettlementEngine, InvoiceGenerator } from '@/lib/finance/settlement';
 import { revalidatePath } from 'next/cache';
@@ -205,4 +206,15 @@ export async function getCostReport(filters: {
     items: data || [],
     summary: { totalCost }
   };
+}
+
+export async function getOrganizations() {
+  const { supabase } = await validateUserAction();
+  const { data, error } = await supabase
+    .from('zen_organizations')
+    .select('id, name')
+    .order('name');
+
+  if (error) throw new Error(`조직 조회 실패: ${error.message}`);
+  return data || [];
 }

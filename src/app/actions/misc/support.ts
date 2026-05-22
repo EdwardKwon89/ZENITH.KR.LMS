@@ -1,5 +1,6 @@
-import { logger } from '@/lib/logger';
 "use server";
+
+import { logger } from '@/lib/logger';
 
 import { validateUserAction, validateAdminAction } from "@/lib/auth/guards";
 import { revalidatePath } from "next/cache";

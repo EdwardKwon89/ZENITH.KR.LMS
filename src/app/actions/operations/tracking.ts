@@ -1,5 +1,6 @@
-import { logger } from '@/lib/logger';
 "use server";
+
+import { logger } from '@/lib/logger';
 
 import { validateUserAction, validateAdminAction } from "@/lib/auth/guards";
 import { revalidatePath } from "next/cache";
@@ -160,7 +161,7 @@ export async function getTrackingRawLogs(orderId: string, page = 1, pageSize = 5
   const to = from + pageSize - 1;
   const { data: logs, error, count } = await supabase
     .from("zen_tracking_raw_logs")
-    .select("id, order_id, raw_body, created_at, provider", { count: "exact" })
+    .select("id, order_id, raw_data, created_at, provider_name", { count: "exact" })
     .eq("order_id", orderId)
     .order("created_at", { ascending: false })
     .range(from, to);

@@ -18,7 +18,7 @@ const nextConfig = {
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: blob:",
               "font-src 'self'",
-              "connect-src 'self' https://*.supabase.co https://*.sentry.io",
+              "connect-src 'self' https://*.supabase.co https://*.sentry.io http://127.0.0.1:54321 http://localhost:54321 ws://localhost:3000 ws://127.0.0.1:3000",
               "frame-ancestors 'none'",
               "base-uri 'self'",
               "form-action 'self'",

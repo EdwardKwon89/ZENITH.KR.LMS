@@ -1,6 +1,7 @@
+'use server';
+
 import { logger } from '@/lib/logger';
 import { withAction } from '@/lib/actions/wrapper';
-'use server';
 
 import { createClient } from '@/utils/supabase/server';
 import { revalidatePath } from 'next/cache';
