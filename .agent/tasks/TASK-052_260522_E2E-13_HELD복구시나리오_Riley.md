@@ -8,7 +8,7 @@
 | 담당 Agent | Riley (Gemini) |
 | 우선순위 | P3 |
 | 전제조건 | 없음 — 즉시 착수 가능 |
-| 상태 | ⬜ 미착수 |
+| 상태 | 🔄 구현 중 |
 | 파급 효과 | 신규 spec 파일 추가 — 기존 코드 변경 없음 |
 
 ---
@@ -27,7 +27,27 @@ IMP-050(`getHeldPreviousStatus` + '원상복구' 버튼)이 구현되었으나 E
 ## 작업 지시
 
 1. **본 파일 상태 → 🔄, ACTIVE_TASK.md TASK-052 → 🔄 동시 반영**
-2. **E2E spec 작성**: `tests/e2e/e2e-13-held-recovery.spec.ts`
+
+2. **[필수] E2E-13 spec 타이밍 최적화** — 기작성 파일 수정 후 실행할 것
+
+   Aiden 분석 결과, `tests/e2e/e2e-13-held-recovery.spec.ts`에 불필요한 고정 대기가 누적되어
+   테스트 실행 시간이 과도하게 증가하는 문제 확인. 아래 지시대로 **반드시 수정 후 실행**.
+
+   | 위치 | 현재 코드 | 수정 방향 |
+   |:-----|:---------|:---------|
+   | L23 | `waitForLoadState('networkidle')` | `waitForLoadState('domcontentloaded')` |
+   | L26 | `waitForTimeout(2000) // Hydration 대기` | **삭제** — `waitForURL` 완료 시 이미 보장 |
+   | L37 | `waitForLoadState('networkidle')` | `waitForLoadState('domcontentloaded')` |
+   | L42 | `waitForTimeout(3000)` | **삭제** — 아래 `expect(targetRow).toBeVisible()` 으로 충분 |
+   | L79 | `waitForTimeout(2000) // 렌더링 대기` | `await expect(targetRow.locator('span:has-text("입고완료")')).toBeVisible({timeout:10000})` |
+   | L100 | `waitForTimeout(2000) // 렌더링 대기` | `await expect(targetRow.locator('span:has-text("보류")')).toBeVisible({timeout:10000})` |
+   | L128 | `waitForTimeout(2000) // 렌더링 대기` | `await expect(targetRow.locator('span:has-text("입고완료")')).toBeVisible({timeout:10000})` |
+
+   > **근거**: `networkidle`은 Next.js dev HMR WebSocket 때문에 최대 30s까지 블로킹됨.
+   > `waitForTimeout`은 실제 준비 여부와 무관하게 고정 대기 — Playwright `expect().toBeVisible()`
+   > smart polling으로 대체하면 준비 즉시 통과하여 전체 실행 시간 대폭 단축 가능.
+
+3. **E2E spec 시나리오 확인**: `tests/e2e/e2e-13-held-recovery.spec.ts`
    - 테스트 계정: 어드민 계정(`admin@zenith.kr`)으로 실행
    - **시나리오 흐름**:
      1. PENDING 상태 오더 준비 (기존 오더 활용 또는 신규 생성)
@@ -41,22 +61,22 @@ IMP-050(`getHeldPreviousStatus` + '원상복구' 버튼)이 구현되었으나 E
      9. 오더 상태 배지가 원래 상태(`WAREHOUSED`)로 복귀함을 확인
    - 스크린샷: 각 단계별 저장 → `docs/99_Manual/E2E_13_Result/`
    - 결과 파일: `docs/99_Manual/E2E_13_Result/RESULT.md` (PASS/FAIL 및 스크린샷 목록)
-3. **E2E 실행**: `rtk npx playwright test tests/e2e/e2e-13-held-recovery.spec.ts --reporter=list`
-4. **E2E_SCENARIOS.md 갱신**: `docs/99_Manual/E2E_SCENARIOS.md` 요약표 + 상세 정의에 E2E-13 추가
-5. 회귀 테스트 전체 PASS 확인: `rtk npm run test:regression`
-6. 결과 저장: `docs/08_Self_Audit/Regression_Results/REGRESSION_2026-05-22_TASK-052.log`
-7. **코드 커밋**: `[Gemini] test: E2E-13 HELD 상태 원상복구 시나리오 spec 작성 + 실행`
+4. **E2E 실행**: `rtk npx playwright test tests/e2e/e2e-13-held-recovery.spec.ts --reporter=list`
+5. **E2E_SCENARIOS.md 갱신**: `docs/99_Manual/E2E_SCENARIOS.md` 요약표 + 상세 정의에 E2E-13 추가
+6. 회귀 테스트 전체 PASS 확인: `rtk npm run test:regression`
+7. 결과 저장: `docs/08_Self_Audit/Regression_Results/REGRESSION_2026-05-22_TASK-052.log`
+8. **코드 커밋**: `[Gemini] test: E2E-13 HELD 상태 원상복구 시나리오 spec 타이밍 최적화 + 실행`
    - 포함 파일: `tests/e2e/e2e-13-held-recovery.spec.ts` + `docs/99_Manual/E2E_13_Result/` + `docs/08_Self_Audit/Regression_Results/REGRESSION_2026-05-22_TASK-052.log`
-8. **본 파일 [작업 결과] 섹션 작성 + 상태 → 🔔** (커밋 해시 반드시 기재)
-9. **ACTIVE_TASK.md TASK-052 → 🔔 반영**
-10. **문서 커밋**: `[Gemini] docs: TASK-052 완료 보고 — task file 🔔`
+9. **본 파일 [작업 결과] 섹션 작성 + 상태 → 🔔** (커밋 해시 반드시 기재)
+10. **ACTIVE_TASK.md TASK-052 → 🔔 반영**
+11. **문서 커밋**: `[Gemini] docs: TASK-052 완료 보고 — task file 🔔`
     - 포함 파일: 본 파일 + ACTIVE_TASK.md + `docs/99_Manual/E2E_SCENARIOS.md`
 
 ---
 
 ## 완료 기준 (DoD)
 
-- [ ] `tests/e2e/e2e-13-held-recovery.spec.ts` 작성 완료
+- [ ] `tests/e2e/e2e-13-held-recovery.spec.ts` 타이밍 최적화 완료 (networkidle 제거·waitForTimeout→expect 대체)
 - [ ] E2E-13 실행 PASS — 스크린샷 증적 `docs/99_Manual/E2E_13_Result/` 저장
 - [ ] `docs/99_Manual/E2E_SCENARIOS.md` E2E-13 항목 추가 (요약표 + 상세 정의)
 - [ ] 회귀 테스트 전체 PASS 증적 (`docs/08_Self_Audit/Regression_Results/`)
@@ -84,7 +104,7 @@ IMP-050(`getHeldPreviousStatus` + '원상복구' 버튼)이 구현되었으나 E
 
 | 항목 | 내용 |
 |:---|:---|
-| 착수일 | — |
+| 착수일 | 2026-05-22 |
 | 완료일 | — |
 | E2E-13 결과 | — |
 | 스크린샷 수 | — |
@@ -105,3 +125,4 @@ IMP-050(`getHeldPreviousStatus` + '원상복구' 버튼)이 구현되었으나 E
 | 날짜 | 주체 | 내용 |
 |:-----|:----:|:-----|
 | 2026-05-22 | Aiden (Claude) | Task 생성 — E2E 확장 Sprint, IMP-050 E2E 검증 (Riley 할당) |
+| 2026-05-22 | Aiden (Claude) | 지시 추가 — E2E-13 spec 타이밍 최적화 필수 반영. `networkidle`×2 → `domcontentloaded`, `waitForTimeout`×5 → `expect().toBeVisible()` 대체. (Aiden 분석: Next.js dev HMR WebSocket 간섭 확인) |
