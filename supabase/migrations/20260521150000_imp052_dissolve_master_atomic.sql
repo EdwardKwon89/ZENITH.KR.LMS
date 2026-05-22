@@ -39,8 +39,7 @@ BEGIN
   UPDATE public.zen_orders
   SET 
     master_order_id = NULL,
-    status = 'REGISTERED',
-    updated_at = NOW()
+    status = 'REGISTERED'
   WHERE master_order_id = p_master_order_id;
 
   -- 3. zen_master_order_history에 해체 이력 삽입
