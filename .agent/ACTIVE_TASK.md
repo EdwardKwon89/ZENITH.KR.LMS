@@ -106,15 +106,17 @@
 | TASK-049 | 260521 | 공통 UI 컴포넌트 라이브러리화 | P3 | 없음 | B_Kai | ✅ | [TASK-049](tasks/TASK-049_260521_공통UI컴포넌트라이브러리화_Ring.md) | IMP-024 완료 · c96bff4 · 211/211 · Phase F 11/11 100% ✅ |
 | TASK-050 | 260521 | PDF 경로 충돌 방지 | P3 | 없음 | B_Kai | ✅ | [TASK-050](tasks/TASK-050_260521_PDF경로충돌방지_BKai.md) | IMP-061 완료 · UUID 기반 파일명 · 7ef504a+1e8b86c · 209/209 ✅ |
 | TASK-051 | 260521 | Rate Limiting 도입 | P2 | — | B_Kai | ➖ | — | IMP-046 · **상용 오픈 전 Sprint으로 유예** (2026-05-21 Aiden 결정) |
-| TASK-052 | 260522 | E2E-13 HELD 복구 시나리오 spec + 실행 | P3 | 없음 | Riley | 🔔 | [TASK-052](tasks/TASK-052_260522_E2E-13_HELD복구시나리오_Riley.md) | IMP-050 E2E 검증 · 269b33a |
+| TASK-052 | 260522 | E2E-13 HELD 복구 시나리오 spec + 실행 | P3 | 없음 | Riley | ✅ | [TASK-052](tasks/TASK-052_260522_E2E-13_HELD복구시나리오_Riley.md) | IMP-050 E2E 검증 · 269b33a · DoD 전량 완료 |
 | TASK-053 | 260522 | E2E-14 RETURNED 전이 시나리오 spec + 실행 | P3 | 없음 | B_Kai | ✅ | [TASK-053](tasks/TASK-053_260522_E2E-14_RETURNED전이시나리오_BKai.md) | IMP-060 완료 · `e70b6a2` 코드 · `51cd330` 문서 · E2E A/B ✅ · 회귀 211/211 ✅ |
 | TASK-054 | 260522 | E2E-15 dissolve 원자성 시나리오 spec + 실행 | P3 | 없음 | D_Kai | ✅ | [TASK-054](tasks/TASK-054_260522_E2E-15_dissolve원자성시나리오_DKai.md) | IMP-052 완료 · `3f76f84`+`931a396` 코드 · `9686245` 문서 · 재작업 전량 이행 |
 | TASK-056 | 260522 | E2E 테스트용 오더 시드 데이터 생성 | P3 | 없음 | D_Kai | ✅ | [TASK-056](tasks/TASK-056_260522_E2E시드데이터생성_DKai.md) | seedOrders() 5건 ✅ · 회귀 211/211 ✅ · 재작업(371b59f) ✅ · Aiden ✅ 승인 |
-| TASK-055 | 260522 | E2E-01/03/05 기존 시나리오 재검증 | P3 | 없음 | Riley | 🔄 | [TASK-055](tasks/TASK-055_260522_E2E재검증01_03_05_Riley.md) | IMP-068·052·030 회귀 확인 |
+| TASK-055 | 260522 | E2E-01/03/05 기존 시나리오 재검증 | P3 | 없음 | Riley | 🔔 | [TASK-055](tasks/TASK-055_260522_E2E재검증01_03_05_Riley.md) | 3종 PASS · c65684c · middleware fix · 211/211 |
 | TASK-057 | 260522 | E2E-14 케이스 A/B 재실행 + 타이밍 최적화 | P3 | TASK-053 ✅ 통합 완료 | B_Kai | ➖ | [TASK-057](tasks/TASK-057_260522_E2E-14재실행_타이밍최적화_BKai.md) | TASK-053 재작업에 통합 완료 · E2E A/B ✅ · 회귀 211/211 ✅ |
 | TASK-058 | 260522 | UAT 절차서: 오더관리·마스터오더 | P4 | 없음 | B_Kai | ✅ | [TASK-058](tasks/TASK-058_260522_UAT_오더마스터오더_BKai.md) | UAT_02·03 작성 (10개 시나리오) · dd13438 |
 | TASK-059 | 260522 | UAT 절차서: 인증·창고·어드민 | P4 | 없음 | D_Kai | ✅ | [TASK-059](tasks/TASK-059_260522_UAT_인증창고어드민_DKai.md) | UAT_01·04·09 작성 (17개 시나리오) · b747c5b |
-| TASK-060 | 260522 | UAT 절차서: 정산·추적·VOC·마이페이지 | P4 | TASK-052·055 ✅ | Riley | 🚫 | — | E2E 완료 후 착수 — UAT_05·06·07·08 (19개 시나리오) |
+| TASK-060 | 260522 | UAT 절차서: 정산·추적·VOC·마이페이지 | P4 | TASK-052·055 ✅ | Riley | ➖ | — | TASK-061·062로 분담 처리 (B_Kai·D_Kai) |
+| TASK-061 | 260522 | UAT 절차서: 정산·추적 (UAT_05·06) | P4 | TASK-052·055 ✅ | B_Kai | ⬜ | [TASK-061](tasks/TASK-061_260522_UAT_정산추적_BKai.md) | UAT-05-01~05 + UAT-06-01~03 (8개 시나리오) |
+| TASK-062 | 260522 | UAT 절차서: VOC·마이페이지 (UAT_07·08) | P4 | TASK-052·055 ✅ | D_Kai | ⬜ | [TASK-062](tasks/TASK-062_260522_UAT_VOC마이페이지_DKai.md) | UAT-07-01~05 + UAT-08-01~05 (10개 시나리오) |
 
 ---
 
@@ -122,9 +124,9 @@
 
 | Agent | 진행 중 | 재작업/조치 필요 | 블로커 대기 |
 |:------|:--------|:----------------|:----------|
-| Riley | TASK-052·055 🔄 | ⚠️ "use server" 추가 fix cdd365d 반영됨 — 재시도 가능 | TASK-060 🚫 (E2E 완료 대기) |
-| B_Kai | — | — | — |
-| D_Kai | — | — | — |
+| Riley | — | — | — |
+| B_Kai | TASK-061 ⬜ | — | TASK-052·055 ✅ 해소로 즉시 착수 가능 |
+| D_Kai | TASK-062 ⬜ | — | TASK-052·055 ✅ 해소로 즉시 착수 가능 |
 | Ring | — | — | 신규 할당 중단 유지 (9차 위반 누적) |
 
 ---
@@ -220,3 +222,4 @@
 | 2026-05-22 | Aiden (Claude) | UAT 절차서 Sprint 착수 — TASK-058(B_Kai: UAT_02·03)·TASK-059(D_Kai: UAT_01·04·09)·TASK-060(Riley: UAT_05·06·07·08 🚫 E2E 완료 후) 발령. UAT_MASTER.md 생성 (46개 시나리오 인덱스). `docs/91_FinalTest/UAT/` |
 | 2026-05-22 | D_Kai (OpenCode) | TASK-059 구현 완료 🔔 — UAT_01·04·09 17개 시나리오 전량 작성, 코드 커밋 b747c5b, UAT_MASTER 인덱스 ✅ 갱신 |
 | 2026-05-22 | Aiden (Claude) | TASK-058 ✅ PASS(B_Kai) + TASK-059 ✅ PASS(D_Kai) — UAT 절차서 27개 시나리오(UAT-01·02·03·04·09) 전량 승인. Advisory 각 1건(비차단) |
+| 2026-05-22 | Aiden (Claude) | TASK-052 ✅ 승인 — DoD 전량 완료 확인 (E2E_SCENARIOS.md D_Kai 931a396 포함). TASK-055 🔔 — Riley 인수, E2E-05 export 버그 2건 수정(middleware isApi·sticky header click), c65684c·211/211. TASK-060 ➖ 취소·TASK-061(B_Kai UAT_05·06)·TASK-062(D_Kai UAT_07·08) 신규 발령 |
