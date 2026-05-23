@@ -60,7 +60,7 @@ An-10 갭 분析 재분류 결과 보안 필수 항목 2건이 실 누락으로 
 - [x] 코드 커밋 완료 (`bd88eac`)
 - [x] 본 파일 상태 🔔 + ACTIVE_TASK.md 동기화
 - [x] IMP_PROGRESS.md IMP-071·072 🔔 갱신
-- [ ] 문서 커밋 완료 (해시 기재)
+- [x] 문서 커밋 완료 (`3138eab`)
 
 ---
 
@@ -99,7 +99,17 @@ An-10 갭 분析 재분류 결과 보안 필수 항목 2건이 실 누락으로 
 
 ## Aiden 검토
 
-> 이 섹션은 Aiden이 작성합니다.
+**판정: ✅ 승인** (2026-05-23, Aiden)
+
+**DoD 전량 충족** (8/8):
+- IMP-071 Idle Timeout: `zen_last_activity` httpOnly 쿠키, `SESSION_IDLE_TIMEOUT_MIN` 환경변수, signOut+redirect 정확 ✅
+- IMP-072 SUSPENDED: `userStatus === 'SUSPENDED'` 감지, `/suspended` whitelist 정확 ✅
+- `suspended/page.tsx`: ShieldAlert + 안내문구 + 로그아웃 버튼 ✅
+- 214/214 PASS ✅
+- R-17 커밋 순서(`bd88eac` → `3138eab`) ✅
+- ACTIVE_TASK.md 동기화 확인 ✅
+
+**Advisory (비차단)**: [작업 결과] 커밋 테이블에 문서 커밋 `3138eab` 행 미기재 — DoD에는 체크되어 있으나 커밋 표에서 누락. 차후 task 완료 시 코드·문서 커밋 해시 양쪽 모두 커밋 테이블에 기재 필수.
 
 ---
 
