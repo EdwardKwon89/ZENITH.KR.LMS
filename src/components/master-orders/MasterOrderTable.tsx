@@ -111,11 +111,15 @@ export default function MasterOrderTable({ masters, locale }: MasterOrderTablePr
                       {master.status}
                     </span>
                   </td>
-                  <td className="px-6 py-5 text-right">
+                    <td className="px-6 py-5 text-right">
                     <div className="flex items-center justify-end gap-1">
-                      <ZenButton title="Manifest Print" className="w-8 h-8 p-0 rounded-lg hover:bg-blue-50 text-blue-600 border border-slate-200 transition-all hover:scale-110">
+                      <a
+                        href={`/${locale}/master-orders/${master.id}/packing`}
+                        title="Packing List"
+                        className="w-8 h-8 p-0 rounded-lg hover:bg-indigo-50 text-indigo-600 border border-slate-200 transition-all hover:scale-110 inline-flex items-center justify-center"
+                      >
                         <FileText size={14} />
-                      </ZenButton>
+                      </a>
                       <ZenButton title="Barcode Print" className="w-8 h-8 p-0 rounded-lg hover:bg-slate-900 hover:text-white text-slate-600 border border-slate-200 transition-all hover:scale-110">
                         <Barcode size={14} />
                       </ZenButton>
