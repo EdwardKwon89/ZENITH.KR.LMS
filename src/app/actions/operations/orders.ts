@@ -443,3 +443,109 @@ export async function getHeldPreviousStatus(orderId: string) {
   }
   return data?.prev_status || null;
 }
+
+/**
+ * 바코드(오더 번호) 또는 ID로 오더를 검색하고 상세 품목 정보를 함께 조회합니다.
+ */
+export async function getOrderByBarcodeOrNo(barcodeOrNo: string) {
+  const { supabase } = await validateUserAction();
+  const orderRepo = new OrderRepository(supabase);
+
+  // 1. UUID 형식인지 검사하여 ID 또는 order_no로 조회
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(barcodeOrNo);
+
+  let query = supabase
+    .from('zen_orders')
+    .select(`
+      *,
+      shipper:zen_organizations!shipper_id(name),
+      origin_port:zen_ports!origin_port_id(name, code),
+      dest_port:zen_ports!dest_port_id(name, code)
+    `);
+
+  if (isUuid) {
+    query = query.eq('id', barcodeOrNo);
+  } else {
+    query = query.eq('order_no', barcodeOrNo);
+  }
+
+  const { data: order, error } = await query.maybeSingle();
+
+  if (error) {
+    logger.error('Failed to fetch order by barcode:', error);
+    throw new Error(`오더 조회 실패: ${error.message}`);
+  }
+
+  if (!order) {
+    return null;
+  }
+
+  // 2. 관련 패키지 및 품목(items) 정보 조회
+  const { data: items, error: itemsError } = await orderRepo.getItemsFullByOrderId(order.id);
+  if (itemsError) {
+    logger.error('Failed to fetch order items:', itemsError);
+    throw new Error(`오더 품목 조회 실패: ${itemsError.message}`);
+  }
+
+  return {
+    ...order,
+    items: items || [],
+  };
+}
+
+/**
+ * 오더를 입고 확정 처리(WAREHOUSED 상태로 변경)하고 검수 결과를 기록합니다.
+ */
+export async function confirmInbound(
+  orderId: string,
+  inspectStatus: 'NORMAL' | 'DAMAGED',
+  note?: string
+) {
+  const statusLabel = inspectStatus === 'NORMAL' ? '정상' : '손상';
+  const formattedReason = `[검수: ${statusLabel}]${note ? ` ${note}` : ''}`;
+  
+  return updateOrderStatus(orderId, OrderStatus.WAREHOUSED, formattedReason);
+}
+
+/**
+ * 오늘 하루 동안의 입고(WAREHOUSED) 처리 이력을 조회합니다. (KST 기준)
+ */
+export async function getTodayInboundHistory() {
+  const { supabase } = await validateUserAction();
+
+  // KST(GMT+9) 기준 오늘 00:00:00 ~ 23:59:59 계산 후 UTC 변환
+  const now = new Date();
+  const todayKst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+  todayKst.setUTCHours(0, 0, 0, 0);
+  const startUtc = new Date(todayKst.getTime() - 9 * 60 * 60 * 1000).toISOString();
+  todayKst.setUTCHours(23, 59, 59, 999);
+  const endUtc = new Date(todayKst.getTime() - 9 * 60 * 60 * 1000).toISOString();
+
+  const { data, error } = await supabase
+    .from('order_status_history')
+    .select(`
+      id,
+      order_id,
+      prev_status,
+      next_status,
+      reason,
+      created_at,
+      changed_by,
+      order:zen_orders!order_id(
+        order_no,
+        shipper:zen_organizations!shipper_id(name)
+      ),
+      operator:zen_profiles!changed_by(full_name)
+    `)
+    .eq('next_status', 'WAREHOUSED')
+    .gte('created_at', startUtc)
+    .lte('created_at', endUtc)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    logger.error('Failed to fetch today inbound history:', error);
+    throw new Error(`오늘의 입고 이력 조회 실패: ${error.message}`);
+  }
+
+  return data || [];
+}

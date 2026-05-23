@@ -11,6 +11,9 @@ export {
   updateMasterOrderStatus,
   getMasterOrderWithHouses,
   getHeldPreviousStatus,
+  getOrderByBarcodeOrNo,
+  confirmInbound,
+  getTodayInboundHistory,
 } from './orders';
 
 export {
