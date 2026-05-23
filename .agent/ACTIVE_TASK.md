@@ -141,7 +141,7 @@
 
 | Agent | 진행 중 | 재작업/조치 필요 | 블로커 대기 |
 |:------|:--------|:----------------|:----------|
-| Riley | TASK-079 ⬜ 재교육 세션 착수 대기 | 신규 코드 Task 할당 중단 — TASK-079 완료 후 재개 | TASK-076 🚫 (Composite Pricing — TASK-074 선행) |
+| Riley | TASK-079 ⬜ 재교육 세션 착수 대기 | 신규 할당 중단 (위반 3회 누적) | TASK-076 🚫 (Composite Pricing — TASK-074 선행) |
 | B_Kai | — | TASK-070 ❌ 재작업 (zh/ja i18n + Server Action RBAC 2건) | TASK-071 ⬜ (TASK-070 재작업 완료 후 착수 권장) · TASK-075 🚫 · TASK-077 🚫 |
 | D_Kai | — | TASK-073 Advisory fix 권고 (i18n 4개 언어·자기정지방지) | TASK-074 🚫 (라우팅 DB 스키마 — TASK-070~073 전량 완료 후) |
 | Ring | — | — | 신규 할당 중단 유지 (9차 위반 누적) |
@@ -259,6 +259,4 @@
 | 2026-05-23 | Aiden (Claude) | TASK-068 ✅ 승인(D_Kai IMP-071·072 보안 구현, 214/214). TASK-069 ✅ 승인(Riley IMP-073, 218/218) — Riley 위반 2건 기록(절차·cross-agent). TASK-070 설계 확정 → 🔄 착수 승인(PDF @react-pdf ✅, 출고처리 WAREHOUSED오더기반 수정 지시). TASK-072(Riley)·TASK-073(D_Kai) 즉시 착수 가능 |
 | 2026-05-23 | Aiden (Claude) | 지능형 라우팅 계획 수립 — TASK-074~078 🚫 등록 (TASK-070~073 전량 완료 후 순차 착수). UAT_MASTER 72개 갱신 (누락 기능 7건 + 라우팅 6건 추가). |
 | 2026-05-23 | Aiden (Claude) | TASK-073 ✅ 승인 — IMP-077 SCR-091 회원관리 전항목 통과. Advisory 2건(i18n 키 누락·자기정지방지) 비차단 기록. TASK-074 전제조건 1/4 충족 |
-| 2026-05-23 | Aiden (Claude) | TASK-072 ✅ 승인 — IMP-076 특수화물 기재 전항목 통과. Riley 위반 3회 누적 → 신규 할당 중단. TASK-074 전제조건 2/4 충족 |
-| 2026-05-23 | Aiden (Claude) | TASK-070 ❌ 반려 — zh/ja i18n 키 누락(기능결함) + Server Action RBAC 미적용(보안결함) 2건. B_Kai 재작업 지시 |
-| 2026-05-23 | Aiden (Claude) | TASK-079 발령 — Riley 재교육 세션 (위반 3건 누적: 착수절차·cross-agent·해시미기재). 신규 코드 Task 할당 중단. TASK-079 완료 후 재개 |
+| 2026-05-23 | Aiden (Claude) | TASK-072 ✅ 승인(Riley IMP-076, 219/219) — Riley 위반 3회 누적 → 신규 Task 할당 중단. TASK-070 ❌ 반려(B_Kai) — zh/ja i18n 누락 + Server Action RBAC 미적용 2건 재작업 지시. TASK-074 전제조건 2/4 충족(072✅·073✅) |
