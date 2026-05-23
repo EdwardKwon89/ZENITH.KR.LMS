@@ -131,7 +131,7 @@
 | TASK-074 | 260523 | 지능형 라우팅 DB 스키마 확장 | P2 | TASK-070~073 ✅ 전량 | D_Kai | ✅ | [TASK-074](tasks/TASK-074_260523_라우팅DB스키마확장_DKai.md) | IMP-080 완료 · f066eab(재작업) · 219/219 · SHIPPER RLS + LAND fix · Aiden ✅ 승인 |
 | TASK-075 | 260523 | DatabaseRouteAdapter 구현 | P2 | TASK-074 ✅ | B_Kai | ✅ | [TASK-075](tasks/TASK-075_260523_DatabaseRouteAdapter구현_BKai.md) | IMP-081 완료 · d86c6af · 219/219 · zen_route_network+rate_cards 기반 직항 라우팅 · MockMapAdapter 보존 |
 | TASK-076 | 260523 | Composite Pricing Engine 구현 | P2 | TASK-074 ✅ | Riley | ✅ | [TASK-076](tasks/TASK-076_260523_CompositePricingEngine구현_Riley.md) | IMP-082 완료 · 3d9e915+83a5b4c · 220/220 · slab rate+surcharges 합산·순환참조 해결 |
-| TASK-077 | 260523 | Admin 요율 카드 관리 UI | P3 | TASK-076 ✅ | B_Kai | ⬜ | [TASK-077](tasks/TASK-077_260523_Admin요율카드관리UI_BKai.md) | IMP-083 · zen_rate_cards CRUD |
+| TASK-077 | 260523 | Admin 요율 카드 관리 UI | P3 | TASK-076 ✅ | B_Kai | 📝 | [TASK-077](tasks/TASK-077_260523_Admin요율카드관리UI_BKai.md) | IMP-083 · 설계 의견 제출 — 방안 A 신규페이지+내부탭 · Aiden 확정 대기 |
 | TASK-078 | 260523 | UAT_10 지능형 라우팅 절차서 작성 | P4 | TASK-075 ✅ · TASK-077 ✅ | 미정 | 🚫 | [TASK-078](tasks/TASK-078_260523_UAT10지능형라우팅절차서_구현Agent.md) | UAT-10-01~06 절차서 6건 |
 | TASK-079 | 260523 | Riley 재교육 세션 (R-17 v1.4 절차 준수) | P4 | 없음 | Riley | ✅ | [TASK-079](tasks/TASK-079_260523_Riley재교육세션_Riley.md) | ✅ PASS — 차단 2건 해결(개정이력·단독커밋) · Riley 신규 할당 중단 해제 |
 | TASK-080 | 260524 | D_Kai 재교육 세션 (R-17 v1.4 절차 준수) | P4 | 없음 | D_Kai | ✅ | [TASK-080](tasks/TASK-080_260524_DKai재교육세션_DKai.md) | ✅ PASS — §1~§4 전항목 우수 · D_Kai 신규 할당 중단 해제 |
@@ -143,7 +143,7 @@
 | Agent | 진행 중 | 재작업/조치 필요 | 블로커 대기 |
 |:------|:--------|:----------------|:----------|
 | Riley | — | — | — |
-| B_Kai | — | — | TASK-077 ⬜ 즉시 착수 가능 |
+| B_Kai | TASK-077 📝 설계 의견 제출 | Aiden 확정 대기 | — |
 | D_Kai | — | — (TASK-080 ✅ 재교육 완료 · 신규 할당 중단 해제) | — |
 | Ring | — | — | 신규 할당 중단 유지 (9차 위반 누적) |
 
@@ -279,3 +279,4 @@
 | 2026-05-24 | Aiden (Claude) | TASK-076 ❌ 반려(Riley) — 코드 ✅ 우수. 차단 2건: estimateFreightCost 반환타입(TS2769 하위호환 위반)·문서커밋해시 미기재(TASK-072 동일유형 재발·R-17 경고). 재작업: 타입 복원 + 해시 기재 |
 | 2026-05-24 | Riley (Gemini) | TASK-076 🔔 재작업 — estimateFreightCost number 복원·순환참조 제거·문서커밋해시 기재 · 3d9e915+83a5b4c |
 | 2026-05-24 | Aiden (Claude) | TASK-076 ✅ 승인(Riley) — 차단 2건 전량 해결(TS2769 해소·문서3파일). IMP-082 완료. Aiden 직접 보완: 문서커밋해시 f298e3f→83a5b4c 정정. TASK-077 🚫→⬜ B_Kai 즉시 착수 가능 |
+| 2026-05-24 | B_Kai (OpenCode) | TASK-077 📝 설계 의견 제출 — 방안 A: 신규 `/ko/admin/rate-cards` + 내부 탭(cards/surcharges) + 유효기간 중첩 하이브리드 검증. Aiden 확정 대기 |
