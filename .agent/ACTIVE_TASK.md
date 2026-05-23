@@ -122,9 +122,9 @@
 | TASK-065 | 260523 | 다중 경로 정산 연계 구현 | P2 | 없음 | Riley | ✅ | [TASK-065](tasks/TASK-065_260523_다중경로정산연계구현_Riley.md) | IMP-070 완료 · bb198d5+8be0383·b46f830+2022c16 |
 | TASK-066 | 260523 | UAT 다중 경로 정산 시나리오 추가 | P4 | TASK-065 ✅ | B_Kai | ✅ | [TASK-066](tasks/TASK-066_260523_UAT다중경로정산시나리오추가_BKai.md) | IMP-070 UAT — 3개 시나리오(UAT-02-09·05-08·05-09) 추가 완료 · 29dcd10 · Aiden ✅ 승인 |
 | TASK-067 | 260523 | An-10 갭 분析 문서 정정 | P4 | 없음 | D_Kai | ✅ | [TASK-067](tasks/TASK-067_260523_An10갭분석문서정정_DKai.md) | An-10 v2.2 — 작성자·SCR-101·구현률 3건 정정 완료 · 21e76b3+cbdf058 · Aiden ✅ 승인 |
-| TASK-068 | 260523 | 세션 Idle Timeout + SUSPENDED 보안 처리 | P0 | 없음 | D_Kai | ⬜ | [TASK-068](tasks/TASK-068_260523_세션Idle+SUSPENDED보안처리_DKai.md) | IMP-071·072 보안 (P0) |
+| TASK-068 | 260523 | 세션 Idle Timeout + SUSPENDED 보안 처리 | P0 | 없음 | D_Kai | 🔄 | [TASK-068](tasks/TASK-068_260523_세션Idle+SUSPENDED보안처리_DKai.md) | IMP-071·072 보안 (P0) |
 | TASK-069 | 260523 | SCR-040 입고 처리 전용 화면 | P1 | 없음 | Riley | ⬜ | [TASK-069](tasks/TASK-069_260523_SCR040입고처리전용화면_Riley.md) | IMP-073 창고 입고 워크플로우 |
-| TASK-070 | 260523 | SCR-041 출고·운송장 출력 화면 | P1 | TASK-069 ✅ 권장 | B_Kai | ⬜ | [TASK-070](tasks/TASK-070_260523_SCR041출고운송장출력화면_BKai.md) | IMP-074 창고 출고·운송장 PDF |
+| TASK-070 | 260523 | SCR-041 출고·운송장 출력 화면 | P1 | TASK-069 ✅ 권장 | B_Kai | 📝 | [TASK-070](tasks/TASK-070_260523_SCR041출고운송장출력화면_BKai.md) | IMP-074 창고 출고·운송장 PDF — 설계 의견 제출, Aiden 검토 대기 |
 | TASK-071 | 260523 | SCR-031 오더 패킹 화면 | P2 | TASK-070 ✅ 권장 | B_Kai | ⬜ | [TASK-071](tasks/TASK-071_260523_SCR031오더패킹화면_BKai.md) | IMP-075 마스터 오더 Packing List |
 | TASK-072 | 260523 | 특수화물 기재 (zen_orders + UI) | P2 | TASK-069 ✅ 권장 | Riley | ⬜ | [TASK-072](tasks/TASK-072_260523_특수화물기재_Riley.md) | IMP-076 DB 스키마 + 주문등록 폼 |
 | TASK-073 | 260523 | SCR-091 회원 관리 전용 화면 | P2 | TASK-068 ✅ 권장 | D_Kai | ⬜ | [TASK-073](tasks/TASK-073_260523_SCR091회원관리전용화면_DKai.md) | IMP-077 어드민 회원 목록·등급·정지 |
@@ -136,8 +136,8 @@
 | Agent | 진행 중 | 재작업/조치 필요 | 블로커 대기 |
 |:------|:--------|:----------------|:----------|
 | Riley | — | — | TASK-069 ⬜ (SCR-040 입고처리) · TASK-072 ⬜ (특수화물) |
-| B_Kai | — | — | TASK-070 ⬜ (SCR-041 출고) · TASK-071 ⬜ (SCR-031 패킹) |
-| D_Kai | — | — | **TASK-068 ⬜ P0 즉시 착수** · TASK-073 ⬜ (SCR-091 회원) |
+| B_Kai | TASK-070 📝 (설계 의견 — Aiden 검토 대기) | — | TASK-071 ⬜ (SCR-031 패킹) |
+| D_Kai | TASK-068 🔄 구현 중 | — | TASK-073 ⬜ (SCR-091 회원) |
 | Ring | — | — | 신규 할당 중단 유지 (9차 위반 누적) |
 
 ---
