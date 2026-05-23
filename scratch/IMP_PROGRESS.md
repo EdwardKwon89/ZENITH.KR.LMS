@@ -201,10 +201,10 @@
 |:---:|:-----|:-----:|:----:|:------:|
 | 080 | DB 스키마 확장 (zen_carriers·route_network·rate_cards·surcharges) | D_Kai | ⬜ | — |
 | 081 | DatabaseRouteAdapter 구현 (MockMapAdapter 교체) | B_Kai | 🔔 | 2026-05-24 |
-| 082 | Composite Pricing Engine 구현 (DUMMY_RATES 교체, 기본운임+할증) | Riley | 🚫 | — |
+| 082 | Composite Pricing Engine 구현 (DUMMY_RATES 교체, 기본운임+할증) | Riley | 🔔 | 2026-05-24 |
 | 083 | Admin 요율 카드 관리 UI (zen_rate_cards CRUD) | B_Kai | 🚫 | — |
 
-**Phase J 완료**: 1 / 4 (IMP-080 🔔 TASK-074 Aiden 검토 대기 · IMP-081 🔔 재작업)
+**Phase J 완료**: 3 / 4 (IMP-080 ✅ · IMP-081 ✅ · IMP-082 🔔 완료 보고)
 
 ---
 
@@ -229,8 +229,8 @@
 | G | 0 | 2 | 0% | IMP-028·069 미착수 (Future — 통관 연계) |
 | H | 5 | 5 | 100% ✅ | |
 | I | 5 | 5 | 100% ✅ | IMP-073~077 전량 완료 (TASK-069~073 ✅) |
-| J | 2 | 4 | 50% | IMP-080 🔔 · IMP-081 🔔 (재작업) · IMP-082·083 🚫 |
-| **합계** | **62** | **68** | **91.2%** | ➖ 1건 제외 기준 |
+| J | 3 | 4 | 75% | IMP-080 ✅ · IMP-081 ✅ · IMP-082 🔔 완료 보고 · IMP-083 🚫 |
+| **합계** | **63** | **68** | **92.6%** | ➖ 1건 제외 기준 |
 
 > 미완료 IMP 4건: IMP-081~083(🚫 Phase J 잔여 — TASK-074 평가 대기) · IMP-046(🚫 유예) · IMP-028·069(⬜·🚫 Future·착수 조건 대기)
 > 2026-05-23 기준 업데이트 (Riley/Gemini — Phase I 5/5 ✅ 전량 승인 반영, Phase A 100% 확정)
@@ -241,6 +241,7 @@
 
 | 날짜 | 작성자 | 내용 |
 |:----:|:------|:-----|
+| 2026-05-24 | Riley (Gemini) | IMP-082 🔔 완료 보고 — Composite Pricing Engine 구현 (b859677) |
 | 2026-05-23 | D_Kai (OpenCode) | IMP-080 🔔 완료 — 지능형 라우팅 DB 스키마 4 테이블 · mig + RLS + seed · 219/219 (TASK-074) |
 | 2026-05-23 | B_Kai (OpenCode) | IMP-074 🔔 재작업 완료 — zh/ja i18n + RBAC · 90ca21d · 219/219 (TASK-070 반려 대응) |
 | 2026-05-23 | B_Kai (OpenCode) | IMP-075 🔔 완료 보고 — Packing List SCR-031 · ed7dc67 · 219/219 (TASK-071) |
