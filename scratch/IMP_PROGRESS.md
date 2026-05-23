@@ -241,7 +241,7 @@
 
 | 날짜 | 작성자 | 내용 |
 |:----:|:------|:-----|
-| 2026-05-23 | D_Kai (Codex) | IMP-080 🔔 완료 — 지능형 라우팅 DB 스키마 4 테이블 · mig + RLS + seed · 219/219 (TASK-074) |
+| 2026-05-23 | D_Kai (OpenCode) | IMP-080 🔔 완료 — 지능형 라우팅 DB 스키마 4 테이블 · mig + RLS + seed · 219/219 (TASK-074) |
 | 2026-05-23 | B_Kai (OpenCode) | IMP-074 🔔 재작업 완료 — zh/ja i18n + RBAC · 90ca21d · 219/219 (TASK-070 반려 대응) |
 | 2026-05-23 | B_Kai (OpenCode) | IMP-075 🔔 완료 보고 — Packing List SCR-031 · ed7dc67 · 219/219 (TASK-071) |
 | 2026-05-23 | B_Kai (OpenCode) | IMP-074 🔔 완료 보고 — 출고·운송장 SCR-041 · WAREHOUSED→RELEASED · a746aee · 219/219 PASS (TASK-070) |
