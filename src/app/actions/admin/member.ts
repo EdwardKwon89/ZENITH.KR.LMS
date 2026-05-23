@@ -266,3 +266,66 @@ export async function withdrawUser() {
     return { error: "탈퇴 처리 중 오류가 발생했습니다." };
   }
 }
+
+/**
+ * 6. 회원 목록 조회 (Admin 전용)
+ */
+export async function listMembers(params?: {
+  status?: string;
+  role?: string;
+  keyword?: string;
+  limit?: number;
+  offset?: number;
+}) {
+  const { supabase } = await validateAdminAction();
+  const repo = new AdminRepository(supabase);
+
+  const { data, error, count } = await repo.findMembers({
+    status: params?.status,
+    role: params?.role,
+    keyword: params?.keyword,
+    limit: params?.limit || 20,
+    offset: params?.offset || 0,
+  });
+
+  if (error) {
+    logger.error("[MEMBER_ACTION] listMembers Error:", error);
+    throw new Error("회원 목록을 불러오는 데 실패했습니다.");
+  }
+
+  return { members: data || [], total: count || 0 };
+}
+
+/**
+ * 7. 회원 상태 변경 (Admin 전용)
+ */
+export async function changeMemberStatus(userId: string, status: string) {
+  const { supabase } = await validateAdminAction();
+  const repo = new AdminRepository(supabase);
+
+  const { error } = await repo.updateProfileStatus(userId, status);
+  if (error) {
+    logger.error("[MEMBER_ACTION] changeMemberStatus Error:", error);
+    throw new Error("회원 상태 변경 중 오류가 발생했습니다.");
+  }
+
+  revalidatePath("/admin/members");
+  return { success: true };
+}
+
+/**
+ * 8. 회원 등급 변경 (Admin 전용)
+ */
+export async function changeMemberGrade(userId: string, gradeCode: string) {
+  const { supabase } = await validateAdminAction();
+  const repo = new AdminRepository(supabase);
+
+  const { error } = await repo.updateProfileGrade(userId, gradeCode);
+  if (error) {
+    logger.error("[MEMBER_ACTION] changeMemberGrade Error:", error);
+    throw new Error("회원 등급 변경 중 오류가 발생했습니다.");
+  }
+
+  revalidatePath("/admin/members");
+  return { success: true };
+}

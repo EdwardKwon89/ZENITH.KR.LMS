@@ -127,6 +127,7 @@ export const ALL_RESOURCE_PATHS = [
   { path: '/admin/rates', label: '슬랩 구간율 (관리)' },
   { path: '/admin/transport-costs', label: '운송원가 (관리)' },
   { path: '/admin/organizations', label: '회원사 승인' },
+  { path: '/admin/members', label: '회원 관리' },
   { path: '/admin/upgrade-requests', label: '등급 승급 심사' },
   { path: '/admin/customs', label: '통관 관리 (관리자)' },
   { path: '/admin/error-logs', label: '에러 로그 모니터링' },
