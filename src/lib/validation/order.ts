@@ -59,6 +59,9 @@ export const orderRegistrationSchema = z.object({
   // 물류 요약 정보 (v2.2)
   estimated_cost: z.number().optional(),
   
+  // 특수화물 기재 (IMP-076)
+  special_cargo_type: z.enum(['NONE', 'DANGEROUS', 'FROZEN', 'VALUABLE', 'USED']).default('NONE'),
+  
   // 계층형 패킹 데이터
   packages: z.array(orderPackageSchema).min(1, 'At least one package is required'),
 });

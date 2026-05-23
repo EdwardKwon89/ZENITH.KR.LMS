@@ -34,6 +34,21 @@ export type Database = {
   }
   public: {
     Tables: {
+      _profiles_grade_backup_20260521: {
+        Row: {
+          grade_code: string | null
+          id: string | null
+        }
+        Insert: {
+          grade_code?: string | null
+          id?: string | null
+        }
+        Update: {
+          grade_code?: string | null
+          id?: string | null
+        }
+        Relationships: []
+      }
       common_code_groups: {
         Row: {
           created_at: string | null
@@ -285,13 +300,6 @@ export type Database = {
             referencedRelation: "grade_master"
             referencedColumns: ["grade_code"]
           },
-          {
-            foreignKeyName: "grade_promotion_request_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
         ]
       }
       nations: {
@@ -403,6 +411,50 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      organization_documents: {
+        Row: {
+          doc_type: string
+          file_path: string
+          id: string
+          org_id: string
+          rejection_reason: string | null
+          requested_at: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string | null
+        }
+        Insert: {
+          doc_type: string
+          file_path: string
+          id?: string
+          org_id: string
+          rejection_reason?: string | null
+          requested_at?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string | null
+        }
+        Update: {
+          doc_type?: string
+          file_path?: string
+          id?: string
+          org_id?: string
+          rejection_reason?: string | null
+          requested_at?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_documents_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       organizations: {
         Row: {
@@ -528,63 +580,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "nations"
             referencedColumns: ["iso_alpha2"]
-          },
-        ]
-      }
-      profiles: {
-        Row: {
-          created_at: string | null
-          email: string | null
-          full_name: string | null
-          grade_code: string | null
-          id: string
-          is_approved: boolean | null
-          org_id: string | null
-          preferred_language: string | null
-          role: string | null
-          status: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          email?: string | null
-          full_name?: string | null
-          grade_code?: string | null
-          id: string
-          is_approved?: boolean | null
-          org_id?: string | null
-          preferred_language?: string | null
-          role?: string | null
-          status?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          email?: string | null
-          full_name?: string | null
-          grade_code?: string | null
-          id?: string
-          is_approved?: boolean | null
-          org_id?: string | null
-          preferred_language?: string | null
-          role?: string | null
-          status?: string | null
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "profiles_grade_code_fkey"
-            columns: ["grade_code"]
-            isOneToOne: false
-            referencedRelation: "grade_master"
-            referencedColumns: ["grade_code"]
-          },
-          {
-            foreignKeyName: "profiles_org_id_fkey"
-            columns: ["org_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
           },
         ]
       }
@@ -851,7 +846,7 @@ export type Database = {
           description: string
           id: string
           order_id: string
-          org_id: string
+          org_id: string | null
           reason_code: string
           resolved_at: string | null
           status: string
@@ -863,7 +858,7 @@ export type Database = {
           description: string
           id?: string
           order_id: string
-          org_id: string
+          org_id?: string | null
           reason_code: string
           resolved_at?: string | null
           status?: string
@@ -875,13 +870,20 @@ export type Database = {
           description?: string
           id?: string
           order_id?: string
-          org_id?: string
+          org_id?: string | null
           reason_code?: string
           resolved_at?: string | null
           status?: string
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "zen_claims_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "zen_claims_created_by_fkey"
             columns: ["created_by"]
@@ -938,6 +940,73 @@ export type Database = {
         }
         Relationships: []
       }
+      zen_customs_history: {
+        Row: {
+          admin_note: string | null
+          changed_by: string
+          created_at: string
+          declaration_id: string
+          id: string
+          next_status: string
+          prev_status: string | null
+        }
+        Insert: {
+          admin_note?: string | null
+          changed_by: string
+          created_at?: string
+          declaration_id: string
+          id?: string
+          next_status: string
+          prev_status?: string | null
+        }
+        Update: {
+          admin_note?: string | null
+          changed_by?: string
+          created_at?: string
+          declaration_id?: string
+          id?: string
+          next_status?: string
+          prev_status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "zen_customs_history_declaration_id_fkey"
+            columns: ["declaration_id"]
+            isOneToOne: false
+            referencedRelation: "customs_declarations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      zen_departments: {
+        Row: {
+          created_at: string | null
+          id: string
+          name: string
+          org_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          name: string
+          org_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          name?: string
+          org_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "zen_departments_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "zen_organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       zen_error_logs: {
         Row: {
           created_at: string
@@ -993,6 +1062,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "zen_error_logs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "zen_profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       zen_faq: {
@@ -1035,6 +1111,13 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "zen_faq_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "zen_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -1082,6 +1165,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "zen_feature_flags_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "zen_profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       zen_incident_fees: {
@@ -1121,6 +1211,13 @@ export type Database = {
             columns: ["claim_id"]
             isOneToOne: false
             referencedRelation: "zen_claims"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "zen_incident_fees_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
@@ -1243,6 +1340,44 @@ export type Database = {
           },
         ]
       }
+      zen_invoice_history: {
+        Row: {
+          changed_by: string
+          created_at: string
+          id: string
+          invoice_id: string
+          next_status: string
+          paid_amount: number | null
+          prev_status: string | null
+        }
+        Insert: {
+          changed_by: string
+          created_at?: string
+          id?: string
+          invoice_id: string
+          next_status: string
+          paid_amount?: number | null
+          prev_status?: string | null
+        }
+        Update: {
+          changed_by?: string
+          created_at?: string
+          id?: string
+          invoice_id?: string
+          next_status?: string
+          paid_amount?: number | null
+          prev_status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "zen_invoice_history_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "zen_invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       zen_invoice_pdf_history: {
         Row: {
           created_at: string | null
@@ -1339,6 +1474,47 @@ export type Database = {
             columns: ["shipper_id"]
             isOneToOne: false
             referencedRelation: "zen_organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      zen_master_order_history: {
+        Row: {
+          changed_by: string
+          created_at: string
+          id: string
+          master_no: string | null
+          master_order_id: string | null
+          next_status: string
+          prev_status: string | null
+          reason: string | null
+        }
+        Insert: {
+          changed_by: string
+          created_at?: string
+          id?: string
+          master_no?: string | null
+          master_order_id?: string | null
+          next_status: string
+          prev_status?: string | null
+          reason?: string | null
+        }
+        Update: {
+          changed_by?: string
+          created_at?: string
+          id?: string
+          master_no?: string | null
+          master_order_id?: string | null
+          next_status?: string
+          prev_status?: string | null
+          reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "zen_master_order_history_master_order_id_fkey"
+            columns: ["master_order_id"]
+            isOneToOne: false
+            referencedRelation: "zen_master_orders"
             referencedColumns: ["id"]
           },
         ]
@@ -1464,6 +1640,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "zen_notices_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "zen_profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       zen_notifications: {
@@ -1516,6 +1699,13 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "zen_notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "zen_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -1815,6 +2005,7 @@ export type Database = {
           carrier_id: string | null
           confirmed_at: string | null
           created_at: string | null
+          created_by: string | null
           delivery_notes: string | null
           description: string | null
           dest_port_id: string | null
@@ -1835,8 +2026,10 @@ export type Database = {
           shipper_contact_name: string | null
           shipper_contact_phone: string | null
           shipper_id: string | null
+          special_cargo_type: string | null
           status: string | null
           transport_mode: string | null
+          updated_at: string | null
         }
         Insert: {
           billing_status?: string | null
@@ -1844,6 +2037,7 @@ export type Database = {
           carrier_id?: string | null
           confirmed_at?: string | null
           created_at?: string | null
+          created_by?: string | null
           delivery_notes?: string | null
           description?: string | null
           dest_port_id?: string | null
@@ -1864,8 +2058,10 @@ export type Database = {
           shipper_contact_name?: string | null
           shipper_contact_phone?: string | null
           shipper_id?: string | null
+          special_cargo_type?: string | null
           status?: string | null
           transport_mode?: string | null
+          updated_at?: string | null
         }
         Update: {
           billing_status?: string | null
@@ -1873,6 +2069,7 @@ export type Database = {
           carrier_id?: string | null
           confirmed_at?: string | null
           created_at?: string | null
+          created_by?: string | null
           delivery_notes?: string | null
           description?: string | null
           dest_port_id?: string | null
@@ -1893,8 +2090,10 @@ export type Database = {
           shipper_contact_name?: string | null
           shipper_contact_phone?: string | null
           shipper_id?: string | null
+          special_cargo_type?: string | null
           status?: string | null
           transport_mode?: string | null
+          updated_at?: string | null
         }
         Relationships: [
           {
@@ -1902,6 +2101,20 @@ export type Database = {
             columns: ["carrier_id"]
             isOneToOne: false
             referencedRelation: "zen_organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "zen_orders_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "zen_orders_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "zen_profiles"
             referencedColumns: ["id"]
           },
           {
@@ -2070,6 +2283,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "zen_param_audit_log_changed_by_fkey"
+            columns: ["changed_by"]
+            isOneToOne: false
+            referencedRelation: "zen_profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       zen_ports: {
@@ -2104,8 +2324,11 @@ export type Database = {
           created_at: string | null
           email: string
           full_name: string | null
+          grade_code: string | null
           id: string
+          is_active: boolean | null
           org_id: string | null
+          preferred_language: string | null
           role: string
           status: string | null
         }
@@ -2113,8 +2336,11 @@ export type Database = {
           created_at?: string | null
           email: string
           full_name?: string | null
+          grade_code?: string | null
           id: string
+          is_active?: boolean | null
           org_id?: string | null
+          preferred_language?: string | null
           role: string
           status?: string | null
         }
@@ -2122,12 +2348,23 @@ export type Database = {
           created_at?: string | null
           email?: string
           full_name?: string | null
+          grade_code?: string | null
           id?: string
+          is_active?: boolean | null
           org_id?: string | null
+          preferred_language?: string | null
           role?: string
           status?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "zen_profiles_grade_code_fkey"
+            columns: ["grade_code"]
+            isOneToOne: false
+            referencedRelation: "grade_master"
+            referencedColumns: ["grade_code"]
+          },
+        ]
       }
       zen_qna: {
         Row: {
@@ -2169,6 +2406,13 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "zen_qna_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "zen_profiles"
             referencedColumns: ["id"]
           },
           {
@@ -2215,6 +2459,13 @@ export type Database = {
             columns: ["answered_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "zen_qna_answers_answered_by_fkey"
+            columns: ["answered_by"]
+            isOneToOne: false
+            referencedRelation: "zen_profiles"
             referencedColumns: ["id"]
           },
           {
@@ -2315,6 +2566,47 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "zen_ports"
             referencedColumns: ["code"]
+          },
+        ]
+      }
+      zen_rate_surcharges: {
+        Row: {
+          amount: number
+          calc_type: string
+          created_at: string | null
+          currency: string | null
+          description: string | null
+          id: string
+          rate_card_id: string | null
+          surcharge_type: string
+        }
+        Insert: {
+          amount?: number
+          calc_type: string
+          created_at?: string | null
+          currency?: string | null
+          description?: string | null
+          id?: string
+          rate_card_id?: string | null
+          surcharge_type: string
+        }
+        Update: {
+          amount?: number
+          calc_type?: string
+          created_at?: string | null
+          currency?: string | null
+          description?: string | null
+          id?: string
+          rate_card_id?: string | null
+          surcharge_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "zen_rate_surcharges_rate_card_id_fkey"
+            columns: ["rate_card_id"]
+            isOneToOne: false
+            referencedRelation: "zen_rate_cards"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -2485,6 +2777,13 @@ export type Database = {
             columns: ["updated_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "zen_system_params_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "zen_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -2962,13 +3261,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "zen_voc_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "zen_profiles"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "zen_voc_order_id_fkey"
             columns: ["order_id"]
             isOneToOne: false
@@ -3007,13 +3299,6 @@ export type Database = {
           voc_id?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "zen_voc_answers_answered_by_fkey"
-            columns: ["answered_by"]
-            isOneToOne: false
-            referencedRelation: "zen_profiles"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "zen_voc_answers_voc_id_fkey"
             columns: ["voc_id"]
@@ -3098,6 +3383,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "zen_wallet_transactions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "zen_profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "zen_wallet_transactions_wallet_id_fkey"
             columns: ["wallet_id"]
             isOneToOne: false
@@ -3108,11 +3400,56 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          created_at: string | null
+          email: string | null
+          full_name: string | null
+          grade_code: string | null
+          id: string | null
+          is_approved: boolean | null
+          org_id: string | null
+          preferred_language: string | null
+          role: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email?: never
+          full_name?: never
+          grade_code?: never
+          id?: string | null
+          is_approved?: never
+          org_id?: string | null
+          preferred_language?: never
+          role?: never
+          status?: string | null
+          updated_at?: never
+        }
+        Update: {
+          created_at?: string | null
+          email?: never
+          full_name?: never
+          grade_code?: never
+          id?: string | null
+          is_approved?: never
+          org_id?: string | null
+          preferred_language?: never
+          role?: never
+          status?: string | null
+          updated_at?: never
+        }
+        Relationships: []
+      }
     }
     Functions: {
       approve_organization: { Args: { target_org_id: string }; Returns: string }
       calculate_order_costs: { Args: { p_order_id: string }; Returns: Json }
+      dissolve_master_order_atomic: {
+        Args: { p_master_order_id: string; p_user_id: string }
+        Returns: undefined
+      }
       fn_get_best_matching_rate: {
         Args: {
           p_carrier_id: string
@@ -3125,7 +3462,7 @@ export type Database = {
         Returns: {
           base_date_rule: string
           currency: string
-          id: string
+          rate_id: string
           unit_price: number
         }[]
       }
@@ -3142,6 +3479,14 @@ export type Database = {
           total_weight: number
         }[]
       }
+      is_org_member: {
+        Args: { p_org_id: string; p_user_id: string }
+        Returns: boolean
+      }
+      pay_invoice_from_wallet_atomic: {
+        Args: { p_invoice_id: string; p_profile_id: string }
+        Returns: number
+      }
       reject_organization: {
         Args: { comment: string; target_org_id: string }
         Returns: boolean
@@ -3149,6 +3494,16 @@ export type Database = {
       request_organization_supplement: {
         Args: { comment: string; target_org_id: string }
         Returns: boolean
+      }
+      update_order_status_atomic: {
+        Args: {
+          p_next_status: string
+          p_order_id: string
+          p_prev_status: string
+          p_reason: string
+          p_user_id: string
+        }
+        Returns: undefined
       }
     }
     Enums: {

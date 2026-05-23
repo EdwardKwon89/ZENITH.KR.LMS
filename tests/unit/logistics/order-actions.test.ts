@@ -149,6 +149,44 @@ describe('ZENITH Logistics: Order Creation Logic', () => {
     expect(rpcCall[1].p_payload.description).toBe('Special delivery instruction: Ring the bell');
   });
 
+  it('TC-A.5: [Success] 오더 생성 시 특수화물 유형(special_cargo_type)이 정상 전달되어야 함', async () => {
+    // Given
+    const payload = {
+      order_type: 'B2B',
+      shipper_id: '4bd7d15a-9042-4b72-8822-68c13000b001',
+      origin_port_id: '550e8400-e29b-41d4-a716-446655440001',
+      dest_port_id: '550e8400-e29b-41d4-a716-446655440002',
+      recipient_name: 'Hong Gil-dong',
+      recipient_address: '123 Zenith St, Seoul',
+      recipient_phone: '010-1234-5678',
+      special_cargo_type: 'DANGEROUS',
+      packages: [
+        {
+          packing_unit: 'BOX',
+          packing_count: 1,
+          gross_weight: 10.5,
+          items: [{ 
+            item_name: 'Chemical Reagents', 
+            quantity: 1, 
+            unit_price: 1000,
+            currency: 'USD',
+            item_packing_unit: 'UNIT'
+          }]
+        }
+      ]
+    };
+
+    mockSupabase.rpc.mockResolvedValue({ data: { id: 'new-order-id', order_no: mockOrderNo }, error: null });
+
+    // When
+    await createOrder(payload as any);
+
+    // Then
+    const rpcCall = mockSupabase.rpc.mock.calls[0];
+    expect(rpcCall[0]).toBe('create_order_atomic');
+    expect(rpcCall[1].p_payload.special_cargo_type).toBe('DANGEROUS');
+  });
+
   describe('Order Status Update: Exception Resilience', () => {
 
     it('TC-A.4: [Failure] 마스터에 결합된 오더의 상태 변경 시도 시 예외를 발생시켜야 함', async () => {
