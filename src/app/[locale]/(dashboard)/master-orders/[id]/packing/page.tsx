@@ -1,6 +1,7 @@
 import { getTranslations } from 'next-intl/server';
 import { requireAuth } from '@/lib/auth/guards';
 import { getMasterOrderWithHouses } from '@/app/actions/operations';
+import PackingToolbar from '@/components/master-orders/PackingToolbar';
 
 export default async function MasterPackingPage({
   params,
@@ -68,38 +69,7 @@ export default async function MasterPackingPage({
         .no-print { margin-bottom: 16px; display: flex; gap: 8px; }
       `}</style>
 
-      <div className="no-print">
-        <button
-          onClick={() => window.print()}
-          style={{
-            padding: '10px 24px',
-            background: '#0f172a',
-            color: '#fff',
-            border: 'none',
-            borderRadius: 8,
-            fontWeight: 700,
-            fontSize: 13,
-            cursor: 'pointer',
-          }}
-        >
-          {t('print_btn') || '인쇄'}
-        </button>
-        <button
-          onClick={() => window.history.back()}
-          style={{
-            padding: '10px 24px',
-            background: '#e2e8f0',
-            color: '#0f172a',
-            border: 'none',
-            borderRadius: 8,
-            fontWeight: 600,
-            fontSize: 13,
-            cursor: 'pointer',
-          }}
-        >
-          {t('back_btn') || '뒤로'}
-        </button>
-      </div>
+      <PackingToolbar />
 
       <div className="header">
         <div>
