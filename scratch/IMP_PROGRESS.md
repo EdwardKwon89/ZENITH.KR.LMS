@@ -199,8 +199,8 @@
 
 | IMP | 내용 | Agent | 상태 | 완료일 |
 |:---:|:-----|:-----:|:----:|:------:|
-| 080 | DB 스키마 확장 (zen_carriers·route_network·rate_cards·surcharges) | D_Kai | ⬜ | — |
-| 081 | DatabaseRouteAdapter 구현 (MockMapAdapter 교체) | B_Kai | 🔔 | 2026-05-24 |
+| 080 | DB 스키마 확장 (zen_carriers·route_network·rate_cards·surcharges) | D_Kai | ✅ | 2026-05-24 |
+| 081 | DatabaseRouteAdapter 구현 (MockMapAdapter 교체) | B_Kai | ✅ | 2026-05-24 |
 | 082 | Composite Pricing Engine 구현 (DUMMY_RATES 교체, 기본운임+할증) | Riley | 🔔 | 2026-05-24 |
 | 083 | Admin 요율 카드 관리 UI (zen_rate_cards CRUD) | B_Kai | 🚫 | — |
 
@@ -241,6 +241,7 @@
 
 | 날짜 | 작성자 | 내용 |
 |:----:|:------|:-----|
+| 2026-05-24 | Riley (Gemini) | IMP-082 🔔 재작업 완료 — estimateFreightCost 복원, 순환참조 해결 (3d9e915) |
 | 2026-05-24 | Riley (Gemini) | IMP-082 🔔 완료 보고 — Composite Pricing Engine 구현 (b859677) |
 | 2026-05-23 | D_Kai (OpenCode) | IMP-080 🔔 완료 — 지능형 라우팅 DB 스키마 4 테이블 · mig + RLS + seed · 219/219 (TASK-074) |
 | 2026-05-23 | B_Kai (OpenCode) | IMP-074 🔔 재작업 완료 — zh/ja i18n + RBAC · 90ca21d · 219/219 (TASK-070 반려 대응) |

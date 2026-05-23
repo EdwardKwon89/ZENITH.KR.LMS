@@ -130,7 +130,7 @@
 | TASK-073 | 260523 | SCR-091 회원 관리 전용 화면 | P2 | TASK-068 ✅ 권장 | D_Kai | ✅ | [TASK-073](tasks/TASK-073_260523_SCR091회원관리전용화면_DKai.md) | IMP-077 완료 · c72e92f · 218/218 · admin/members + 등급·정지 · Advisory: i18n 키 누락·자기정지방지(비차단) |
 | TASK-074 | 260523 | 지능형 라우팅 DB 스키마 확장 | P2 | TASK-070~073 ✅ 전량 | D_Kai | ✅ | [TASK-074](tasks/TASK-074_260523_라우팅DB스키마확장_DKai.md) | IMP-080 완료 · f066eab(재작업) · 219/219 · SHIPPER RLS + LAND fix · Aiden ✅ 승인 |
 | TASK-075 | 260523 | DatabaseRouteAdapter 구현 | P2 | TASK-074 ✅ | B_Kai | ✅ | [TASK-075](tasks/TASK-075_260523_DatabaseRouteAdapter구현_BKai.md) | IMP-081 완료 · d86c6af · 219/219 · zen_route_network+rate_cards 기반 직항 라우팅 · MockMapAdapter 보존 |
-| TASK-076 | 260523 | Composite Pricing Engine 구현 | P2 | TASK-074 ✅ | Riley | ❌ | [TASK-076](tasks/TASK-076_260523_CompositePricingEngine구현_Riley.md) | IMP-082 · b859677 · 220/220 · 코드 우수 · 차단 2건: estimateFreightCost TS오류·문서해시 미기재 |
+| TASK-076 | 260523 | Composite Pricing Engine 구현 | P2 | TASK-074 ✅ | Riley | 🔔 | [TASK-076](tasks/TASK-076_260523_CompositePricingEngine구현_Riley.md) | IMP-082 재작업 · 3d9e915 · 220/220 PASS · estimateFreightCost 복원 |
 | TASK-077 | 260523 | Admin 요율 카드 관리 UI | P3 | TASK-076 ✅ | B_Kai | 🚫 | [TASK-077](tasks/TASK-077_260523_Admin요율카드관리UI_BKai.md) | IMP-083 · zen_rate_cards CRUD |
 | TASK-078 | 260523 | UAT_10 지능형 라우팅 절차서 작성 | P4 | TASK-075 ✅ · TASK-077 ✅ | 미정 | 🚫 | [TASK-078](tasks/TASK-078_260523_UAT10지능형라우팅절차서_구현Agent.md) | UAT-10-01~06 절차서 6건 |
 | TASK-079 | 260523 | Riley 재교육 세션 (R-17 v1.4 절차 준수) | P4 | 없음 | Riley | ✅ | [TASK-079](tasks/TASK-079_260523_Riley재교육세션_Riley.md) | ✅ PASS — 차단 2건 해결(개정이력·단독커밋) · Riley 신규 할당 중단 해제 |
