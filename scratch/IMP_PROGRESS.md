@@ -200,11 +200,11 @@
 | IMP | 내용 | Agent | 상태 | 완료일 |
 |:---:|:-----|:-----:|:----:|:------:|
 | 080 | DB 스키마 확장 (zen_carriers·route_network·rate_cards·surcharges) | D_Kai | ⬜ | — |
-| 081 | DatabaseRouteAdapter 구현 (MockMapAdapter 교체) | B_Kai | 🚫 | — |
+| 081 | DatabaseRouteAdapter 구현 (MockMapAdapter 교체) | B_Kai | 🔔 | 2026-05-24 |
 | 082 | Composite Pricing Engine 구현 (DUMMY_RATES 교체, 기본운임+할증) | Riley | 🚫 | — |
 | 083 | Admin 요율 카드 관리 UI (zen_rate_cards CRUD) | B_Kai | 🚫 | — |
 
-**Phase J 완료**: 0 / 4 (코어 TASK-074 진행 중)
+**Phase J 완료**: 1 / 4 (IMP-080 🔔 TASK-074 Aiden 검토 대기 · IMP-081 🔔 재작업)
 
 ---
 
@@ -229,8 +229,8 @@
 | G | 0 | 2 | 0% | IMP-028·069 미착수 (Future — 통관 연계) |
 | H | 5 | 5 | 100% ✅ | |
 | I | 5 | 5 | 100% ✅ | IMP-073~077 전량 완료 (TASK-069~073 ✅) |
-| J | 1 | 4 | 25% | IMP-080 🔔 (TASK-074 완료) · IMP-081~083 🚫 |
-| **합계** | **61** | **68** | **89.7%** | ➖ 1건 제외 기준 |
+| J | 2 | 4 | 50% | IMP-080 🔔 · IMP-081 🔔 (재작업) · IMP-082·083 🚫 |
+| **합계** | **62** | **68** | **91.2%** | ➖ 1건 제외 기준 |
 
 > 미완료 IMP 4건: IMP-081~083(🚫 Phase J 잔여 — TASK-074 평가 대기) · IMP-046(🚫 유예) · IMP-028·069(⬜·🚫 Future·착수 조건 대기)
 > 2026-05-23 기준 업데이트 (Riley/Gemini — Phase I 5/5 ✅ 전량 승인 반영, Phase A 100% 확정)
@@ -270,3 +270,4 @@
 | 2026-05-21 | B_Kai (OpenCode) | IMP-024 ✅ PASS — TASK-049 공통 도메인 UI 컴포넌트 라이브러리화 완료 · ZenStatusBadge + ZenCurrencyDisplay · Ring 재할당 → B_Kai · 211/211 FULL PASS |
 | 2026-05-21 | Aiden (Claude) | IMP-069 신규 등록 — IBC 어댑터 구현 (Phase G 추가). An_08/An_09 분석 완료 기반. 착수 조건: IBC Sandbox 계정 + shxk 정체 확인. Phase G 0/1→0/2, 전체 56→57개 |
 | 2026-05-23 | Riley (Gemini) | Phase I 5/5 ✅ 전량 승인 반영 + Phase A 100% 확정 — IMP-073~077 ✅, IMP-071·072·077 ✅, 전체 61/68 89.7%, Phase J IMP-080 ⬜(TASK-074 진행중) |
+| 2026-05-24 | B_Kai (OpenCode) | IMP-081 🔔 재작업 완료 — DatabaseRouteAdapter 구현 (d86c6af) + docs 재커밋. Phase J 2/4 50% |

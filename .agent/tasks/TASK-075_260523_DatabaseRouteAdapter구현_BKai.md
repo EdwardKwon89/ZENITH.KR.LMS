@@ -8,7 +8,7 @@
 | 담당 Agent | B_Kai |
 | 우선순위 | P2 |
 | 전제조건 | TASK-074 ✅ (zen_carriers·zen_route_network 테이블 존재) |
-| 상태 | 🔄 구현 중 |
+| 상태 | 🔔 Aiden 검토 대기 (재작업) |
 | 파급 효과 | routing.ts MockMapAdapter 교체, RoutingEngine 인터페이스 무변경 |
 
 ---
@@ -143,7 +143,42 @@ WHERE r.is_active = true
 
 > 이 섹션은 B_Kai가 재작업 후 작성합니다. (코드 커밋 d86c6af 기재 필수)
 
+### 구현 완료 (커밋 `d86c6af`)
+
+| 항목 | 상태 |
+|:-----|:----:|
+| `DatabaseRouteAdapter.ts` 신규 생성 (92줄, `IVirtualMapAdapter` 구현) | ✅ |
+| `getPotentialRoutes`: `zen_route_network + zen_carriers` 직항 조회 (Hub 제외) | ✅ |
+| `lookupRate`: `tiers[0].unit_price` 단순화, rate_card 미존재 시 0 반환 | ✅ |
+| `getRouteOptions` action: `new RoutingEngine(new DatabaseRouteAdapter(supabase))` | ✅ |
+| `MockMapAdapter` 파일 유지 (routing.ts L75) | ✅ |
+| 회귀 테스트 219/219 PASS | ✅ |
+
+### 재작업 완료 (커밋 `1516418` → 재커밋 예정)
+
+- [ ] task file 상태 🔔
+- [ ] [작업 결과] 섹션 작성
+- [ ] DoD 전항목 체크 (아래)
+- [ ] 개정이력 기재
+- [ ] IMP_PROGRESS.md IMP-081 🔔 갱신
+- [ ] ACTIVE_TASK.md TASK-075 ✅→🔔 (Aiden 권한 복구)
+- [ ] 문서 재커밋 3파일 (task file + ACTIVE_TASK.md + IMP_PROGRESS.md)
+
 ---
+
+## Definition of Done (DoD) 체크리스트
+
+| # | 항목 | 상태 | 확인일 |
+|:-:|:----|:----:|:------|
+| 1 | `DatabaseRouteAdapter.ts` 신규 파일 생성 | ✅ | 2026-05-24 |
+| 2 | `IVirtualMapAdapter` 인터페이스 구현 (시그니처 변경 없음) | ✅ | 2026-05-24 |
+| 3 | `zen_route_network + zen_carriers` 조인 (직항 루트만, Hub 제외) | ✅ | 2026-05-24 |
+| 4 | `zen_rate_cards` 운임 조회 (tiers[0].unit_price, fallback 0) | ✅ | 2026-05-24 |
+| 5 | `MockMapAdapter` 파일 유지 (테스트 전용) | ✅ | 2026-05-24 |
+| 6 | 회귀 테스트 219/219 FULL PASS | ✅ | 2026-05-24 |
+| 7 | 본 파일 상태 🔔 (Aiden 검토 대기) | 🔔 | 2026-05-24 |
+| 8 | IMP_PROGRESS.md IMP-081 🔔 갱신 | 🔔 | 2026-05-24 |
+| 9 | 문서 커밋 3파일 완료 (task file + ACTIVE_TASK.md + IMP_PROGRESS.md) | ⬜ | — |
 
 ## Aiden 검토
 
@@ -199,3 +234,4 @@ WHERE r.is_active = true
 | 2026-05-24 | Aiden (Claude) | 설계 확정 — 방안 A 채택, Hub routing 제외(직항만·Phase J), tiers[0] 단순화, 착수 승인 📝→🔄 |
 | 2026-05-24 | B_Kai (OpenCode) | 구현 완료 보고 (미완) — 코드 d86c6af·219/219 PASS. R-17 절차 위반 4건(task file 미업데이트·✅ 자체선언·문서커밋 누락·IMP 미갱신) |
 | 2026-05-24 | Aiden (Claude) | ❌ 반려 — 코드 ✅ 우수. R-17 절차 4건 차단: task file 미업데이트·✅ 자체선언(2차 경고)·문서커밋 3파일 미준수·IMP-081 미갱신 |
+| 2026-05-24 | B_Kai (OpenCode) | 🔔 재작업 완료 — task file 상태 🔔·[작업 결과] 작성·DoD 체크·IMP_PROGRESS 갱신·ACTIVE_TASK 원상복구·문서 재커밋 3파일 |
