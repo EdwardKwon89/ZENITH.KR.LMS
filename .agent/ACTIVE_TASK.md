@@ -119,7 +119,7 @@
 | TASK-062 | 260522 | UAT 절차서: VOC·마이페이지 (UAT_07·08) | P4 | TASK-052·055 ✅ | D_Kai | ✅ | [TASK-062](tasks/TASK-062_260522_UAT_VOC마이페이지_DKai.md) | UAT_07·08 작성 (10개 시나리오) · 4bf56b9 · Advisory: /ko/mypage/security·corporate URL (비차단) |
 | TASK-063 | 260523 | UAT 분기 보완: 오더·마스터오더·정산·추적 | P4 | TASK-058·061 ✅ | B_Kai | ✅ | [TASK-063](tasks/TASK-063_260523_UAT분기보완_오더정산추적_BKai.md) | 5개 시나리오 추가 · 8cf9bfc · Advisory: 개정이력 모델명 병기(비차단) |
 | TASK-064 | 260523 | UAT 분기 보완: 인증·VOC·마이페이지·어드민 | P4 | TASK-063 ✅ | D_Kai | ✅ | [TASK-064](tasks/TASK-064_260523_UAT분기보완_인증VOC마이페이지어드민_DKai.md) | 8건 추가·수정 · 95d2d97 · UAT_MASTER 56/56 ✅ |
-| TASK-065 | 260523 | 다중 경로 정산 연계 구현 | P2 | 없음 | Riley | 🔔 | [TASK-065](tasks/TASK-065_260523_다중경로정산연계구현_Riley.md) | IMP-070 — 방안 A 확정·즉시 착수 가능 |
+| TASK-065 | 260523 | 다중 경로 정산 연계 구현 | P2 | 없음 | Riley | ❌ | [TASK-065](tasks/TASK-065_260523_다중경로정산연계구현_Riley.md) | IMP-070 — migration 파일 미커밋·DoD 9번 미체크 재작업 |
 | TASK-066 | 260523 | UAT 다중 경로 정산 시나리오 추가 | P4 | TASK-065 ✅ | B_Kai | 🚫 | [TASK-066](tasks/TASK-066_260523_UAT다중경로정산시나리오추가_BKai.md) | IMP-070 UAT — TASK-065 완료 후 착수 |
 
 ---
@@ -128,7 +128,7 @@
 
 | Agent | 진행 중 | 재작업/조치 필요 | 블로커 대기 |
 |:------|:--------|:----------------|:----------|
-| Riley | — | — | — |
+| Riley | — | TASK-065 ❌ (migration 미커밋·DoD 9번 기재) | — |
 | B_Kai | — | — | TASK-066 🚫 (TASK-065 완료 대기) |
 | D_Kai | — | — | — |
 | Ring | — | — | 신규 할당 중단 유지 (9차 위반 누적) |
@@ -237,3 +237,4 @@
 | 2026-05-23 | Aiden (Claude) | TASK-065 발령(Riley) — IMP-070 다중 경로 정산 연계 구현. 단일/다중 carrier 정산 분기 처리 포함. 📝 설계 의견 필수 |
 | 2026-05-23 | Aiden (Claude) | TASK-066 발령(B_Kai) — IMP-070 UAT 시나리오 추가. TASK-065 완료 후 🚫→⬜ 전환 |
 | 2026-05-23 | Aiden (Claude) | TASK-065 설계 확정 — 방안 A(zen_order_costs 컬럼 확장) 채택. route_option_id·carrier·segment_index 3컬럼, ON DELETE SET NULL, 단일/다중 carrier 자동 판별 로직 확정. 🔍→🔄 착수 승인 |
+| 2026-05-23 | Aiden (Claude) | TASK-065 ❌ 반려 — 코드 로직 100% 설계 일치 ✅. Critical: migration 파일(`20260523100000_imp070_multi_route_settlement.sql`) git untracked. Minor: DoD 9번 미체크. Riley 재작업 지시 |
