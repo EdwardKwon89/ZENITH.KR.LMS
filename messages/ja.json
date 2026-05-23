@@ -51,7 +51,8 @@
     "my_customs": "通関状況",
     "customs_management": "通関管理",
     "rates": "運賃料率",
-    "corporate_mgmt": "法人管理"
+    "corporate_mgmt": "法人管理",
+    "member_management": "会員管理"
   },
   "Auth": {
     "login_title": "Zenithにサインイン",

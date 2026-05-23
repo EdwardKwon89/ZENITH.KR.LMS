@@ -8,7 +8,7 @@
 | 담당 Agent | D_Kai |
 | 우선순위 | P2 |
 | 전제조건 | TASK-070 ✅ · TASK-071 ✅ · TASK-072 ✅ · TASK-073 ✅ (누락 기능 4건 전량 완료 후) |
-| 상태 | 🚫 블로커 — 전제조건 미충족 |
+| 상태 | 🔔 완료 — 회귀 219/219 ✅ |
 | 파급 효과 | 신규 테이블 4개 마이그레이션, 기존 zen_route_options 무변경 |
 
 ---
@@ -135,7 +135,16 @@
 
 ## 작업 결과
 
-> 이 섹션은 완료 후 D_Kai가 작성합니다.
+| 파일 | 설명 |
+|:-----|:------|
+| `supabase/migrations/20260523130000_imp080_zen_carriers.sql` | 운송사 마스터 (ZENITH_AIR·SEA) + RLS + 시드 2건 |
+| `supabase/migrations/20260523130100_imp080_zen_route_network.sql` | 가용 루트 3건 (ICN→SIN SEA·AIR·LAND) + RLS |
+| `supabase/migrations/20260523130200_imp080_zen_rate_cards.sql` | 요율 카드 AIR·SEA 2건 + RLS |
+| `supabase/migrations/20260523130300_imp080_zen_surcharges.sql` | 할증 FSC·SSC 2건 + RLS |
+| **회귀 테스트** | 219/219 ✅ |
+
+- 전 테이블 RLS: ADMIN/ZENITH_SUPER_ADMIN ALL, MANAGER SELECT
+- 기존 zen_route_options 테이블 무변경
 
 ---
 
