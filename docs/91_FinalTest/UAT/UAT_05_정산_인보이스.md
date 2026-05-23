@@ -269,9 +269,82 @@
 
 ---
 
+## [UAT-05-08] 단일 carrier 다중 구간 정산 검증
+
+| 항목 | 내용 |
+|:----|:----|
+| 역할 | ADMIN |
+| 화면 URL | /ko/login → /ko/orders/{orderId} → 인보이스 발행 → /ko/settlement |
+| 예상 소요 시간 | 10분 |
+| 사전 조건 | ADMIN 계정(`admin@zenith.kr`) 로그인 상태, 동일 carrier의 2-leg 경로(ICN→NRT→LAX, carrier 동일)가 선택된 오더 1건 존재 |
+
+### 테스트 절차
+
+| 순서 | 화면·URL | 수행 액션 | 입력 데이터 | 기대 결과 | 확인 |
+|:---:|:---------|:---------|:-----------|:---------|:----:|
+| 1 | /ko/orders/{orderId} | 오더 상세 접속 — 경로 섹션 확인 | — | 경로 옵션에 ICN→NRT, NRT→LAX 2개 구간이 동일 carrier로 표시 | ☐ |
+| 2 | /ko/orders/{orderId} | 정산 실행 | '정산 실행' 또는 상태 변경으로 정산 트리거 | 정산 완료 토스트 표시, 오류 없음 | ☐ |
+| 3 | /ko/settlement | 정산 페이지 접속 | — | 해당 오더의 UNPAID 인보이스 정상 표시 | ☐ |
+| 4 | /ko/settlement | 인보이스 Actions → 'Confirm Payment' 버튼 클릭 | — | ConfirmPaymentModal 오픈, 금액 확인 | ☐ |
+| 5 | /ko/settlement | 인보이스 금액 검증 | — | 총 운임이 ICN→NRT 구간비 + NRT→LAX 구간비 합계와 일치 (단일 cost row로 합산) | ☐ |
+| 6 | /ko/settlement | '확인' 버튼 클릭 → 상태 PAID 변경 | — | 결제 처리 완료 토스트, 인보이스 상태 PAID(에메랄드)로 변경 | ☐ |
+
+### 합격 기준
+- [ ] 전 단계 ☑ 완료
+- [ ] 오류 메시지 없음
+- [ ] 단일 carrier 다중 구간 정산이 1건의 FREIGHT cost row로 처리됨
+- [ ] 인보이스 금액 = 구간별 비용 합계와 일치
+- [ ] route_option_id 및 carrier 정보가 zen_order_costs에 반영
+
+### 결함 기재란
+
+| 결함-ID | 단계 | 현상 | 심각도 |
+|:-------:|:---:|:-----|:------:|
+| | | | |
+
+---
+
+## [UAT-05-09] 다중 carrier 구간별 정산 분리 검증
+
+| 항목 | 내용 |
+|:----|:----|
+| 역할 | ADMIN |
+| 화면 URL | /ko/login → /ko/orders/{orderId} → 인보이스 발행 → /ko/finance/costs |
+| 예상 소요 시간 | 10분 |
+| 사전 조건 | ADMIN 계정(`admin@zenith.kr`) 로그인 상태, 구간별 다른 carrier 경로(ICN→NRT: Carrier A, NRT→LAX: Carrier B)가 선택된 오더 1건 존재 |
+
+### 테스트 절차
+
+| 순서 | 화면·URL | 수행 액션 | 입력 데이터 | 기대 결과 | 확인 |
+|:---:|:---------|:---------|:-----------|:---------|:----:|
+| 1 | /ko/orders/{orderId} | 오더 상세 접속 — 경로 섹션 확인 | — | 경로 옵션에 구간별 서로 다른 carrier 표시 (ICN→NRT: Carrier A, NRT→LAX: Carrier B) | ☐ |
+| 2 | /ko/orders/{orderId} | 정산 실행 | '정산 실행' 또는 상태 변경으로 정산 트리거 | 정산 완료 토스트, 오류 없음 | ☐ |
+| 3 | /ko/finance/costs | 비용 조회 페이지 접속 | — | 비용 테이블에 해당 오더의 cost row 표시 | ☐ |
+| 4 | /ko/finance/costs | Service Category 필터 'FREIGHT' 선택 후 필터링 | — | FREIGHT 유형 비용만 표시 | ☐ |
+| 5 | /ko/finance/costs | carrier 컬럼/정보 확인 | — | Carrier A 비용 + Carrier B 비용이 각각 별도 row로 표시 (segment_index 0, 1) | ☐ |
+| 6 | /ko/settlement | 정산 페이지 접속 — 인보이스 확인 | — | 인보이스 총액 = Carrier A 구간비 + Carrier B 구간비 | ☐ |
+| 7 | /ko/settlement | 'Confirm Payment' 클릭 → PAID 완료 | — | 결제 정상 처리 | ☐ |
+
+### 합격 기준
+- [ ] 전 단계 ☑ 완료
+- [ ] 오류 메시지 없음
+- [ ] 다중 carrier 정산이 구간별 분리 row로 처리됨 (segment_index 0, 1)
+- [ ] 각 cost row에 정확한 carrier명 기재
+- [ ] 인보이스 총액 = 모든 구간 비용 합계와 일치
+- [ ] route_option_id가 모든 cost row에 동일하게 반영
+
+### 결함 기재란
+
+| 결함-ID | 단계 | 현상 | 심각도 |
+|:-------:|:---:|:-----|:------:|
+| | | | |
+
+---
+
 ## 개정 이력
 
 | 날짜 | 주체 | 내용 |
 |:-----|:----:|:-----|
 | 2026-05-22 | B_Kai (Noah/Codex) | v1.0 초안 작성 — 5개 시나리오 전량 |
 | 2026-05-23 | B_Kai (Noah/Codex) | UAT-05-06·07 추가 — 인보이스 링크 + SHIPPER Settlement 접근 권한 |
+| 2026-05-23 | B_Kai (Noah/Codex) | UAT-05-08·09 추가 — 단일/다중 carrier 경로 정산 검증 |
