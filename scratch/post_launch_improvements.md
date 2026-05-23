@@ -909,3 +909,18 @@
 - **착수 조건**: ① IBC Sandbox API 계정 확보 (R_01 §1-4) ② `shxk.rtb56.com` 시스템 정체 IBC 확인 (R_01 §1-1)
 - **예상 공수**: 5~8 MD
 - **우선순위**: **High**
+
+---
+
+## [IMP-070] 다중 경로 정산 연계
+
+- **발견 경위**: Aiden — Phase 3.3 경로 선택 구현 완료 후 정산 연계 누락 확인 (2026-05-23)
+- **현재 상태**: `zen_route_options`(segments JSONB) 테이블은 구현됐으나 `zen_order_costs`가 `route_option_id`를 참조하지 않고 단일 운임만 계산. 단일 carrier / 경로별 다른 carrier 케이스 모두 미지원
+- **임시 조치**: 기존 단일 운임 계산 방식으로 운영
+- **근본 문제**: 초기 요구사항(REQUIREMENTS.md 3.4 지능형 라우팅)에 다중 경로 배정 및 정산이 명시되었으나, Phase 3.3 경로 선택 구현 후 정산 연계가 누락된 채 완료 처리됨
+- **목표 구현**: `zen_order_costs`에 `route_option_id` FK 연계 및 구간별(segment) 비용 분해 계산 구현. 단일 carrier(합산 1건) / 경로별 다른 carrier(구간별 분리) 모두 자동 판별·지원
+- **관련 파일**: `supabase/migrations/` (신규 마이그레이션), `src/lib/finance/settlement/settlement.ts`, `src/lib/finance/settlement/cost-aggregator.ts`, `supabase/migrations/20260422020000_zen_finance_core.sql`, `supabase/migrations/20260424200000_zen_routing_sprint_a.sql`
+- **예상 공수**: 2~3 MD
+- **우선순위**: **High**
+- **상태**: ⬜
+- **연계 Task**: TASK-065
