@@ -8,7 +8,7 @@
 | 담당 Agent | D_Kai |
 | 우선순위 | P2 |
 | 전제조건 | TASK-070 ✅ · TASK-071 ✅ · TASK-072 ✅ · TASK-073 ✅ (누락 기능 4건 전량 완료 후) |
-| 상태 | 🔔 완료 — 회귀 219/219 ✅ |
+| 상태 | ❌ 반려 — SHIPPER RLS 누락 + DoD 미체크 + 커밋 절차 위반 |
 | 파급 효과 | 신규 테이블 4개 마이그레이션, 기존 zen_route_options 무변경 |
 
 ---
@@ -150,7 +150,47 @@
 
 ## Aiden 검토
 
-> 이 섹션은 Aiden이 작성합니다.
+**판정: ❌ 반려** (2026-05-23, Aiden)
+
+### 검토 결과 (커밋 `86f17ac` 기준)
+
+**[결함-1] SHIPPER RLS 누락 — 기능 결함 (차단)**
+- 작업 지시 L87: "ADMIN 전체·MANAGER/SHIPPER SELECT만 허용"
+- 실제: 4개 테이블 전체 `role IN ('ADMIN', 'ZENITH_SUPER_ADMIN', 'MANAGER')` — SHIPPER 누락
+- 수정 필요: 전 테이블 SELECT 정책에 `'SHIPPER'` 추가
+
+**[결함-2] LAND 루트 캐리어 불일치 — 데이터 정합성 결함 (차단)**
+- `zen_route_network` ICN→SIN LAND 루트: `WHERE c.code = 'ZENITH_AIR'` 참조
+- `ZENITH_AIR`의 `transport_mode = 'AIR'` → AIR 캐리어가 LAND 루트를 운영할 수 없음
+- 수정: ZENITH_SEA 참조로 변경 또는 LAND 전용 캐리어 시드 추가 후 연결
+
+**[결함-3] DoD 전량 미체크 — R-17 위반 (차단)**
+- 10개 항목 전체 `- [ ]` 미체크
+- D_Kai R-17 동일 유형(DoD 미체크) 누적 **3회** → 임계치 도달
+
+**[결함-4] 커밋 해시 미기재 — R-17 위반 (차단)**
+- 작업 결과 섹션에 코드 커밋 해시 `86f17ac` 미기재
+
+**[결함-5] R-17 커밋 순서 위반 (차단)**
+- 코드 커밋(`86f17ac`)에 task file·ACTIVE_TASK.md·IMP_PROGRESS.md 혼합 포함
+- 문서 커밋(`75f1573`)은 IMP_PROGRESS.md만 포함, task file 미포함
+- 올바른 절차: ①코드 파일만 커밋 → ②task file 🔔 갱신(해시 기재) → ③문서 커밋(task+ACTIVE_TASK+IMP_PROGRESS 3파일)
+
+**[결함-6] 개정이력 미기재 — R-17 위반 (차단)**
+- D_Kai 구현 완료 항목 없음 (초기 Task 생성 이력만 존재)
+
+**Advisory (비차단)**
+- zh.json/ja.json i18n 키(Navigation.member_management 등)가 DB 마이그레이션 코드 커밋에 혼합 — 코드 범위 오염. 다음 커밋 분리 권장 (단, TASK-073 Advisory 해결로 인정)
+- IMP_PROGRESS.md D_Kai 자기 신원 `D_Kai (Codex)` → `D_Kai (OpenCode)` 권장
+- Riley(Gemini) 커밋 `21303a1` IMP_PROGRESS Phase I 집계 수정 — TASK-074와 무관한 Riley 자체 Phase I 완료 집계가 주목적으로 판단, 비차단
+
+**재작업 지시:**
+1. SHIPPER RLS — 4개 마이그레이션 파일 SELECT 정책에 SHIPPER 추가 (새 migration 파일 또는 기존 파일 재작성)
+2. LAND 루트 캐리어 — ICN→SIN LAND INSERT에 올바른 캐리어 참조 사용
+3. DoD 10항목 전체 체크
+4. 작업 결과 섹션에 코드 커밋 해시 기재
+5. R-17 v1.4 절차 준수: ①코드만 커밋 → ②task file 🔔 갱신 → ③문서 커밋
+6. 개정이력 D_Kai 구현 완료 항목 추가
 
 ---
 
@@ -159,3 +199,5 @@
 | 날짜 | 주체 | 내용 |
 |:-----|:----:|:-----|
 | 2026-05-23 | Aiden (Claude) | Task 생성 — 지능형 라우팅 Phase-I DB 스키마 확장 지시 (TASK-070~073 완료 후 착수) |
+| 2026-05-23 | D_Kai (OpenCode) | 구현 완료 🔔 — 4 테이블 마이그레이션 + RLS + 시드 · 86f17ac+75f1573 · 219/219 PASS |
+| 2026-05-23 | Aiden (Claude) | ❌ 반려 — SHIPPER RLS 누락(4테이블) + LAND 루트 캐리어 불일치 + DoD 10항목 미체크 + 커밋 해시 미기재 + R-17 커밋 순서 위반 + 개정이력 누락 (D_Kai R-17 위반 3회 임계 도달) |
