@@ -128,12 +128,13 @@
 | TASK-071 | 260523 | SCR-031 오더 패킹 화면 | P2 | TASK-070 ✅ 권장 | B_Kai | ✅ | [TASK-071](tasks/TASK-071_260523_SCR031오더패킹화면_BKai.md) | IMP-075 완료 · e21b3b7(재작업) · 219/219 · PackingToolbar Client Component · Aiden ✅ 승인 |
 | TASK-072 | 260523 | 특수화물 기재 (zen_orders + UI) | P2 | TASK-069 ✅ 권장 | Riley | ✅ | [TASK-072](tasks/TASK-072_260523_특수화물기재_Riley.md) | IMP-076 완료 · 259cdb6 · 219/219 · special_cargo_type DB+폼+RPC · Riley 위반 3회 누적→신규 할당 중단 |
 | TASK-073 | 260523 | SCR-091 회원 관리 전용 화면 | P2 | TASK-068 ✅ 권장 | D_Kai | ✅ | [TASK-073](tasks/TASK-073_260523_SCR091회원관리전용화면_DKai.md) | IMP-077 완료 · c72e92f · 218/218 · admin/members + 등급·정지 · Advisory: i18n 키 누락·자기정지방지(비차단) |
-| TASK-074 | 260523 | 지능형 라우팅 DB 스키마 확장 | P2 | TASK-070~073 ✅ 전량 | D_Kai | 🔔 | [TASK-074](tasks/TASK-074_260523_라우팅DB스키마확장_DKai.md) | IMP-080 재작완 · SHIPPER RLS + LAND fix + DoD 체크 · f066eab · 219/219 |
-| TASK-075 | 260523 | DatabaseRouteAdapter 구현 | P2 | TASK-074 ✅ | B_Kai | 🚫 | [TASK-075](tasks/TASK-075_260523_DatabaseRouteAdapter구현_BKai.md) | IMP-081 · MockMapAdapter 교체 |
-| TASK-076 | 260523 | Composite Pricing Engine 구현 | P2 | TASK-074 ✅ | Riley | 🚫 | [TASK-076](tasks/TASK-076_260523_CompositePricingEngine구현_Riley.md) | IMP-082 · DUMMY_RATES 교체 · 기본운임+할증 합산 |
+| TASK-074 | 260523 | 지능형 라우팅 DB 스키마 확장 | P2 | TASK-070~073 ✅ 전량 | D_Kai | ✅ | [TASK-074](tasks/TASK-074_260523_라우팅DB스키마확장_DKai.md) | IMP-080 완료 · f066eab(재작업) · 219/219 · SHIPPER RLS + LAND fix · Aiden ✅ 승인 |
+| TASK-075 | 260523 | DatabaseRouteAdapter 구현 | P2 | TASK-074 ✅ | B_Kai | ⬜ | [TASK-075](tasks/TASK-075_260523_DatabaseRouteAdapter구현_BKai.md) | IMP-081 · MockMapAdapter 교체 · B_Kai 즉시 착수 가능 |
+| TASK-076 | 260523 | Composite Pricing Engine 구현 | P2 | TASK-074 ✅ | Riley | ⬜ | [TASK-076](tasks/TASK-076_260523_CompositePricingEngine구현_Riley.md) | IMP-082 · DUMMY_RATES 교체 · Riley TASK-079 재교육 완료 후 착수 |
 | TASK-077 | 260523 | Admin 요율 카드 관리 UI | P3 | TASK-076 ✅ | B_Kai | 🚫 | [TASK-077](tasks/TASK-077_260523_Admin요율카드관리UI_BKai.md) | IMP-083 · zen_rate_cards CRUD |
 | TASK-078 | 260523 | UAT_10 지능형 라우팅 절차서 작성 | P4 | TASK-075 ✅ · TASK-077 ✅ | 미정 | 🚫 | [TASK-078](tasks/TASK-078_260523_UAT10지능형라우팅절차서_구현Agent.md) | UAT-10-01~06 절차서 6건 |
 | TASK-079 | 260523 | Riley 재교육 세션 (R-17 v1.4 절차 준수) | P4 | 없음 | Riley | ⬜ | [TASK-079](tasks/TASK-079_260523_Riley재교육세션_Riley.md) | 위반 3건(착수절차·cross-agent·해시미기재) — 신규 할당 중단 중 |
+| TASK-080 | 260524 | D_Kai 재교육 세션 (R-17 v1.4 절차 준수) | P4 | 없음 | D_Kai | ⬜ | [TASK-080](tasks/TASK-080_260524_DKai재교육세션_DKai.md) | 위반 3건(DoD 미체크·커밋 해시 미기재·커밋 순서 위반) — 신규 할당 중단 중 |
 
 ---
 
@@ -141,9 +142,9 @@
 
 | Agent | 진행 중 | 재작업/조치 필요 | 블로커 대기 |
 |:------|:--------|:----------------|:----------|
-| Riley | TASK-079 ⬜ 재교육 세션 착수 대기 | 신규 할당 중단 (위반 3회 누적) | TASK-076 🚫 (Composite Pricing — TASK-074 선행) |
-| B_Kai | — | — | TASK-075 🚫 (TASK-074 선행 필요) · TASK-077 🚫 |
-| D_Kai | — | TASK-074 🔔 재작업 완료 (SHIPPER RLS + LAND fix + DoD) | TASK-075 🚫 (DatabaseRouteAdapter — TASK-074 ✅ 선행) |
+| Riley | TASK-079 ⬜ 재교육 세션 착수 대기 | 신규 할당 중단 (위반 3회 누적) | TASK-076 ⬜ (TASK-074 ✅ 해제 — Riley 재교육 후 착수) |
+| B_Kai | TASK-075 ⬜ 즉시 착수 가능 | — | TASK-077 🚫 (TASK-076 선행) |
+| D_Kai | TASK-080 ⬜ 재교육 세션 착수 대기 | 신규 할당 중단 (R-17 위반 3회 임계 도달) | — |
 | Ring | — | — | 신규 할당 중단 유지 (9차 위반 누적) |
 
 ---
@@ -263,3 +264,4 @@
 | 2026-05-23 | Aiden (Claude) | TASK-070 ✅ 승인(B_Kai 재작업 90ca21d) — zh/ja i18n 전량(WarehouseOutbound·ShippingLabel·MasterPacking·Navigation) + RBAC 3개 함수 전항목 확인. TASK-074 전제조건 3/4 충족. TASK-071 ❌ 반려 — Server Component onClick 기능 결함 + task file 문서 커밋 누락 |
 | 2026-05-23 | Aiden (Claude) | TASK-071 ✅ 승인(B_Kai 재작업 e21b3b7) — PackingToolbar "use client" 분리·onClick 제거 확인. IMP-075 완료. TASK-070~073 전량 ✅ → TASK-074 🚫→⬜ 블로커 해제 — D_Kai 즉시 착수 가능 |
 | 2026-05-23 | Aiden (Claude) | TASK-074 ❌ 반려(D_Kai) — SHIPPER RLS 누락(4테이블) + LAND 루트 캐리어 불일치 + DoD 10항목 미체크 + 커밋 해시 미기재 + R-17 커밋 순서 위반 + 개정이력 누락. D_Kai R-17 위반 3회 임계 도달. |
+| 2026-05-24 | Aiden (Claude) | TASK-074 ✅ 승인(D_Kai 재작업 f066eab) — SHIPPER RLS 4테이블·LAND 캐리어 정정·DoD·커밋 절차 전량 해결. IMP-080 완료. TASK-075 🚫→⬜(B_Kai 즉시 착수)·TASK-076 🚫→⬜(Riley TASK-079 후 착수). D_Kai R-17 임계 → 신규 할당 중단·TASK-080 재교육 발령 |
