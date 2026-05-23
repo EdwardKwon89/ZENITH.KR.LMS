@@ -39,7 +39,11 @@
     "my_grade": "我的等级",
     "my_customs": "通关状态",
     "customs_management": "通关管理",
-    "rates": "费率"
+    "rates": "费率",
+    "member_management": "会员管理",
+    "grade_promotion_requests": "等级升级审核",
+    "org_approval": "会员公司审批",
+    "claims": "索赔管理"
   },
   "Auth": {
     "login_title": "登录 Zenith",
