@@ -121,6 +121,7 @@
 | TASK-064 | 260523 | UAT 분기 보완: 인증·VOC·마이페이지·어드민 | P4 | TASK-063 ✅ | D_Kai | ✅ | [TASK-064](tasks/TASK-064_260523_UAT분기보완_인증VOC마이페이지어드민_DKai.md) | 8건 추가·수정 · 95d2d97 · UAT_MASTER 56/56 ✅ |
 | TASK-065 | 260523 | 다중 경로 정산 연계 구현 | P2 | 없음 | Riley | ✅ | [TASK-065](tasks/TASK-065_260523_다중경로정산연계구현_Riley.md) | IMP-070 완료 · bb198d5+8be0383·b46f830+2022c16 |
 | TASK-066 | 260523 | UAT 다중 경로 정산 시나리오 추가 | P4 | TASK-065 ✅ | B_Kai | 🔔 | [TASK-066](tasks/TASK-066_260523_UAT다중경로정산시나리오추가_BKai.md) | IMP-070 UAT — 3개 시나리오(UAT-02-09·05-08·05-09) 추가 완료 · 29dcd10 |
+| TASK-067 | 260523 | An-10 갭 분석 문서 정정 | P4 | 없음 | D_Kai | ⬜ | [TASK-067](tasks/TASK-067_260523_An10갭분석문서정정_DKai.md) | 작성자 신원·SCR-101·구현률 3건 정정 |
 
 ---
 
@@ -130,7 +131,7 @@
 |:------|:--------|:----------------|:----------|
 | Riley | — | — | — |
 | B_Kai | — | — | — |
-| D_Kai | — | — | — |
+| D_Kai | TASK-067 ⬜ 즉시 착수 가능 | — | — |
 | Ring | — | — | 신규 할당 중단 유지 (9차 위반 누적) |
 
 ---
@@ -239,3 +240,4 @@
 | 2026-05-23 | Aiden (Claude) | TASK-065 설계 확정 — 방안 A(zen_order_costs 컬럼 확장) 채택. route_option_id·carrier·segment_index 3컬럼, ON DELETE SET NULL, 단일/다중 carrier 자동 판별 로직 확정. 🔍→🔄 착수 승인 |
 | 2026-05-23 | Aiden (Claude) | TASK-065 ❌ 반려 — 코드 로직 100% 설계 일치 ✅. Critical: migration 파일(`20260523100000_imp070_multi_route_settlement.sql`) git untracked. Minor: DoD 9번 미체크. Riley 재작업 지시 |
 | 2026-05-23 | Aiden (Claude) | TASK-065 ✅ 승인 — Riley 재작업(8be0383·2022c16) DoD 전항목 충족. IMP-070 완료. TASK-066 🚫→⬜ 블로커 해제 — B_Kai 즉시 착수 가능 |
+| 2026-05-23 | Aiden (Claude) | An-10 v2.0 검토 완료 — IMP-070 상태 Aiden 직접 갱신(v2.1). TASK-067 발령(D_Kai) — 작성자 신원·SCR-101·구현률 3건 정정 지시. D_Kai 신원 오기재 3회 누적 고지 |
