@@ -1,11 +1,11 @@
 "use server";
 
 import { logger } from '@/lib/logger';
-
 import { validateUserAction } from "@/lib/auth/guards";
 import { revalidatePath } from "next/cache";
 import { RoutingEngine, RouteOption } from "@/lib/logistics/routing";
 import { DatabaseRouteAdapter } from "@/lib/logistics/adapters/DatabaseRouteAdapter";
+import { calculateCompositePricing, PricingBreakdown, SurchargeBreakdownItem } from "@/lib/logistics/composite-pricing";
 
 /**
  * [ROU-01] 오더에 대한 경로 옵션을 생성하거나 갱신합니다. (UPSERT)
@@ -13,10 +13,10 @@ import { DatabaseRouteAdapter } from "@/lib/logistics/adapters/DatabaseRouteAdap
 export async function getRouteOptions(orderId: string) {
   const { supabase, user } = await validateUserAction();
 
-  // 1. 오더 정보 조회 (출발/도착지 파악)
+  // 1. 오더 정보 조회 (출발/도착지 및 화물 스펙 파악)
   const { data: order, error: orderError } = await supabase
     .from("zen_orders")
-    .select("origin_port_id, dest_port_id, origin_port:zen_ports!origin_port_id(code, name), dest_port:zen_ports!dest_port_id(code, name)")
+    .select("origin_port_id, dest_port_id, transport_mode, cargo_details, origin_port:zen_ports!origin_port_id(code, name), dest_port:zen_ports!dest_port_id(code, name)")
     .eq("id", orderId)
     .single();
 
@@ -25,12 +25,43 @@ export async function getRouteOptions(orderId: string) {
   const originCode = (order.origin_port as any)?.code || (order.origin_port as any)?.name || "";
   const destCode = (order.dest_port as any)?.code || (order.dest_port as any)?.name || "";
 
+  // 화물 중량 및 부피 스펙 파악 (비동기 composite pricing 인풋용)
+  const cargoDetails = order.cargo_details as any;
+  const weight = Number(cargoDetails?.total_weight || 0);
+  const volume = Number(cargoDetails?.total_volume || 0);
+
   // 2. 엔진을 통한 경로 계산 (DB 기반 라우팅)
   const engine = new RoutingEngine(new DatabaseRouteAdapter(supabase));
   const options = await engine.calculateOptions(originCode, destCode);
 
-  // 3. DB 저장 (BUG-07-A: UPSERT 정책 적용)
-  // ON CONFLICT (order_id, option_type) DO UPDATE
+  // 3. Composite Pricing 계산 및 각 option별 segments.cost/total_cost 갱신
+  for (const opt of options) {
+    let optionTotalCost = 0;
+    
+    for (const seg of opt.segments) {
+      if (seg.carrier_id) {
+        const pricing = await calculateCompositePricing({
+          weight,
+          volume,
+          transport_mode: seg.transport_mode,
+          carrier_id: seg.carrier_id,
+          supabase
+        });
+        seg.cost = pricing.total;
+        seg.currency = pricing.currency;
+        optionTotalCost += pricing.total;
+      } else {
+        optionTotalCost += seg.cost;
+      }
+    }
+    
+    opt.total_cost = optionTotalCost;
+    if (opt.option_type === 'COST') {
+      opt.score = optionTotalCost;
+    }
+  }
+
+  // 4. DB 저장 (BUG-07-A: UPSERT 정책 적용)
   for (const opt of options) {
     const { error: upsertError } = await supabase
       .from("zen_route_options")
@@ -52,13 +83,63 @@ export async function getRouteOptions(orderId: string) {
 
   revalidatePath(`/(dashboard)/orders/${orderId}`, "page");
 
+  // 5. 반환용 데이터 조회 및 pricing_breakdown 동적 바인딩
   const { data: savedOptions, count } = await supabase
     .from("zen_route_options")
     .select("id, order_id, option_type, segments, total_cost, total_transit_days, score, created_at", { count: "exact" })
     .eq("order_id", orderId);
 
   const optionsMap: Record<string, any> = {};
-  (savedOptions || []).forEach((opt: any) => { optionsMap[opt.option_type] = opt; });
+  if (savedOptions) {
+    for (const opt of savedOptions) {
+      const segments = opt.segments as any[];
+      const pricingBreakdowns: PricingBreakdown[] = [];
+      
+      for (const seg of segments) {
+        if (seg.carrier_id) {
+          const pricing = await calculateCompositePricing({
+            weight,
+            volume,
+            transport_mode: seg.transport_mode,
+            carrier_id: seg.carrier_id,
+            supabase
+          });
+          pricingBreakdowns.push(pricing);
+        }
+      }
+      
+      if (pricingBreakdowns.length > 0) {
+        if (pricingBreakdowns.length === 1) {
+          (opt as any).pricing_breakdown = pricingBreakdowns[0];
+        } else {
+          const baseFreight = pricingBreakdowns.reduce((sum, p) => sum + p.baseFreight, 0);
+          const total = pricingBreakdowns.reduce((sum, p) => sum + p.total, 0);
+          const surcharges: SurchargeBreakdownItem[] = [];
+          
+          pricingBreakdowns.forEach(p => {
+            p.surcharges.forEach(s => {
+              const existing = surcharges.find(ex => ex.surcharge_type === s.surcharge_type);
+              if (existing) {
+                existing.calculated_amount += s.calculated_amount;
+              } else {
+                surcharges.push({ ...s });
+              }
+            });
+          });
+          
+          (opt as any).pricing_breakdown = {
+            baseFreight,
+            surcharges,
+            total,
+            currency: pricingBreakdowns[0].currency
+          };
+        }
+      }
+      
+      optionsMap[opt.option_type] = opt;
+    }
+  }
+
   return { success: true, options: optionsMap, total: count || 0 };
 }
 

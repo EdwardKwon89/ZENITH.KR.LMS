@@ -56,6 +56,7 @@ export class DatabaseRouteAdapter implements IVirtualMapAdapter {
           from_port_id: r.from_port_id,
           to_port_id: r.to_port_id,
           carrier: carrierName,
+          carrier_id: r.carrier_id,
           transit_days: r.transit_days,
           cost,
           currency: 'USD',

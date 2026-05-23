@@ -1,8 +1,8 @@
 # 🗺️ LIVE Regression Test Master Map
 
 > **상태:** [ACTIVE]  
-> **총 테스트 케이스:** 218 Cases  
-> **최종 검증일:** 2026-05-23 (IMP-073)  
+> **총 테스트 케이스:** 220 Cases  
+> **최종 검증일:** 2026-05-24 (IMP-082)  
 
 제니스 플랫폼의 비즈니스 영속성을 보장하는 회귀 테스트 케이스의 통합 명세서입니다. 모든 신규 개발 및 수정 시 이 맵에 케이스가 추가되어야 하며, 전체 테스트가 통과되어야 합니다.
 
@@ -71,6 +71,7 @@
 | **TC-C.3** | 항공 요율 슬랩 매칭 | 중량 구간별(Slab) 정확한 요율 적용 확인 | `tests/unit/logistics/rate-engine.test.ts` |
 | **TC-C.4** | 요율 유효기간 중첩 감지 | 동일 노선 기간 중복 등록 방지 로직 | `tests/unit/logistics/rate-engine.test.ts` |
 | **TC-C.5** | 공용 포트 필터링 Logic | 모드(AIR/SEA)에 따른 UI 노드 필터링 정확도 | `tests/unit/logistics/rate-engine.test.ts` |
+| **TC-C.6** | Composite Pricing 복합 운임 산출 | 기본 슬랩 운임 + 다중 할증료(percent/flat 등) 유효기간 필터링 합산 계산 검증 | `tests/unit/logistics/freight-calculator.test.ts` |
 
 ### 7. 마스터 데이터 및 가드 (Common & Guards)
 | ID | 테스트 항목 | 목적 | 파일 경로 |

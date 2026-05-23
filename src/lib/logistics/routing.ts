@@ -4,6 +4,7 @@ import {
   selectBalanced,
   Candidate
 } from "./scoring";
+import { PricingBreakdown } from "./composite-pricing";
 
 export type RouteOptionType = 'COST' | 'TIME' | 'BALANCED';
 
@@ -15,6 +16,7 @@ export interface RouteSegment {
   transit_days: number;
   cost: number;
   currency: string;
+  carrier_id?: string;
 }
 
 export interface RouteOption extends Candidate {
@@ -23,6 +25,7 @@ export interface RouteOption extends Candidate {
   total_cost: number;
   total_transit_days: number;
   score: number;
+  pricing_breakdown?: PricingBreakdown;
 }
 
 /**
