@@ -119,6 +119,8 @@
 | TASK-062 | 260522 | UAT 절차서: VOC·마이페이지 (UAT_07·08) | P4 | TASK-052·055 ✅ | D_Kai | ✅ | [TASK-062](tasks/TASK-062_260522_UAT_VOC마이페이지_DKai.md) | UAT_07·08 작성 (10개 시나리오) · 4bf56b9 · Advisory: /ko/mypage/security·corporate URL (비차단) |
 | TASK-063 | 260523 | UAT 분기 보완: 오더·마스터오더·정산·추적 | P4 | TASK-058·061 ✅ | B_Kai | ✅ | [TASK-063](tasks/TASK-063_260523_UAT분기보완_오더정산추적_BKai.md) | 5개 시나리오 추가 · 8cf9bfc · Advisory: 개정이력 모델명 병기(비차단) |
 | TASK-064 | 260523 | UAT 분기 보완: 인증·VOC·마이페이지·어드민 | P4 | TASK-063 ✅ | D_Kai | ✅ | [TASK-064](tasks/TASK-064_260523_UAT분기보완_인증VOC마이페이지어드민_DKai.md) | 8건 추가·수정 · 95d2d97 · UAT_MASTER 56/56 ✅ |
+| TASK-065 | 260523 | 다중 경로 정산 연계 구현 | P2 | 없음 | Riley | 📝 | [TASK-065](tasks/TASK-065_260523_다중경로정산연계구현_Riley.md) | IMP-070 — route_option_id 연계·단일/다중 carrier 정산 |
+| TASK-066 | 260523 | UAT 다중 경로 정산 시나리오 추가 | P4 | TASK-065 ✅ | B_Kai | 🚫 | [TASK-066](tasks/TASK-066_260523_UAT다중경로정산시나리오추가_BKai.md) | IMP-070 UAT — TASK-065 완료 후 착수 |
 
 ---
 
@@ -126,8 +128,8 @@
 
 | Agent | 진행 중 | 재작업/조치 필요 | 블로커 대기 |
 |:------|:--------|:----------------|:----------|
-| Riley | — | — | — |
-| B_Kai | — | — | — |
+| Riley | TASK-065 📝 설계 의견 대기 | — | — |
+| B_Kai | — | — | TASK-066 🚫 (TASK-065 완료 대기) |
 | D_Kai | — | — | — |
 | Ring | — | — | 신규 할당 중단 유지 (9차 위반 누적) |
 
@@ -232,3 +234,5 @@
 | 2026-05-23 | Aiden (Claude) | TASK-063 발령(B_Kai) — UAT 코드-시나리오 정합성 재점검, 오더·마스터오더·정산·추적 High 분기 5건 누락. TASK-064 발령(D_Kai) — 인증·VOC·마이페이지·어드민 High 분기 7건 누락. TASK-064는 UAT_MASTER 충돌 방지 위해 TASK-063 ✅ 전제조건 설정 |
 | 2026-05-23 | Aiden (Claude) | TASK-063 ✅ 승인(B_Kai) — 5개 시나리오 DoD 전항목 확인(UAT-02-08·03-04·05-06·05-07·06-04)·커밋 8cf9bfc·UAT_MASTER 50/50. TASK-064 🚫→⬜ 블로커 해제, D_Kai 즉시 착수 가능. Advisory: 개정이력 모델명 병기(비차단) |
 | 2026-05-23 | Aiden (Claude) | TASK-064 ✅ 승인(D_Kai) — UAT-01-01 재작성·7개 신규 시나리오·UAT_MASTER 56/56 DoD 전항목 확인. 커밋 95d2d97·56d8a47. UAT Sprint 전량 완료. Advisory: UAT_09 헤더 오탈자(비차단·Aiden 직접 수정) |
+| 2026-05-23 | Aiden (Claude) | TASK-065 발령(Riley) — IMP-070 다중 경로 정산 연계 구현. 단일/다중 carrier 정산 분기 처리 포함. 📝 설계 의견 필수 |
+| 2026-05-23 | Aiden (Claude) | TASK-066 발령(B_Kai) — IMP-070 UAT 시나리오 추가. TASK-065 완료 후 🚫→⬜ 전환 |
