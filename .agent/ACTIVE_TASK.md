@@ -124,8 +124,8 @@
 | TASK-067 | 260523 | An-10 갭 분析 문서 정정 | P4 | 없음 | D_Kai | ✅ | [TASK-067](tasks/TASK-067_260523_An10갭분석문서정정_DKai.md) | An-10 v2.2 — 작성자·SCR-101·구현률 3건 정정 완료 · 21e76b3+cbdf058 · Aiden ✅ 승인 |
 | TASK-068 | 260523 | 세션 Idle Timeout + SUSPENDED 보안 처리 | P0 | 없음 | D_Kai | ✅ | [TASK-068](tasks/TASK-068_260523_세션Idle+SUSPENDED보안처리_DKai.md) | IMP-071·072 완료 · bd88eac+3138eab · 214/214 · Aiden ✅ 승인 |
 | TASK-069 | 260523 | SCR-040 입고 처리 전용 화면 | P1 | 없음 | Riley | ✅ | [TASK-069](tasks/TASK-069_260523_SCR040입고처리전용화면_Riley.md) | IMP-073 완료 · 438c835+65b943d · 218/218 · Riley 위반 2건 기록 · Aiden ✅ 승인 |
-| TASK-070 | 260523 | SCR-041 출고·운송장 출력 화면 | P1 | TASK-069 ✅ 권장 | B_Kai | 🔔 | [TASK-070](tasks/TASK-070_260523_SCR041출고운송장출력화면_BKai.md) | IMP-074 — 재작업 완료: zh/ja i18n + RBAC · 90ca21d · 219/219 |
-| TASK-071 | 260523 | SCR-031 오더 패킹 화면 | P2 | TASK-070 ✅ 권장 | B_Kai | 🔔 | [TASK-071](tasks/TASK-071_260523_SCR031오더패킹화면_BKai.md) | IMP-075 — 구현 완료 · ed7dc67 · 219/219 · Packing List + print CSS |
+| TASK-070 | 260523 | SCR-041 출고·운송장 출력 화면 | P1 | TASK-069 ✅ 권장 | B_Kai | ✅ | [TASK-070](tasks/TASK-070_260523_SCR041출고운송장출력화면_BKai.md) | IMP-074 완료 · 90ca21d(재작업) · 219/219 · zh/ja i18n + RBAC 3개 함수 · Aiden ✅ 승인 |
+| TASK-071 | 260523 | SCR-031 오더 패킹 화면 | P2 | TASK-070 ✅ 권장 | B_Kai | ❌ | [TASK-071](tasks/TASK-071_260523_SCR031오더패킹화면_BKai.md) | IMP-075 — ❌ 반려: Server Component onClick 기능 결함 + task file 문서 커밋 누락 |
 | TASK-072 | 260523 | 특수화물 기재 (zen_orders + UI) | P2 | TASK-069 ✅ 권장 | Riley | ✅ | [TASK-072](tasks/TASK-072_260523_특수화물기재_Riley.md) | IMP-076 완료 · 259cdb6 · 219/219 · special_cargo_type DB+폼+RPC · Riley 위반 3회 누적→신규 할당 중단 |
 | TASK-073 | 260523 | SCR-091 회원 관리 전용 화면 | P2 | TASK-068 ✅ 권장 | D_Kai | ✅ | [TASK-073](tasks/TASK-073_260523_SCR091회원관리전용화면_DKai.md) | IMP-077 완료 · c72e92f · 218/218 · admin/members + 등급·정지 · Advisory: i18n 키 누락·자기정지방지(비차단) |
 | TASK-074 | 260523 | 지능형 라우팅 DB 스키마 확장 | P2 | TASK-070~073 ✅ 전량 | D_Kai | 🚫 | [TASK-074](tasks/TASK-074_260523_라우팅DB스키마확장_DKai.md) | IMP-080 · zen_carriers·route_network·rate_cards·surcharges |
@@ -142,7 +142,7 @@
 | Agent | 진행 중 | 재작업/조치 필요 | 블로커 대기 |
 |:------|:--------|:----------------|:----------|
 | Riley | TASK-079 ⬜ 재교육 세션 착수 대기 | 신규 할당 중단 (위반 3회 누적) | TASK-076 🚫 (Composite Pricing — TASK-074 선행) |
-| B_Kai | — | TASK-070 🔔 (IMP-074 Aiden 재검토 대기) · TASK-071 🔔 (IMP-075 Aiden 검토 대기) | TASK-075 🚫 · TASK-077 🚫 |
+| B_Kai | — | TASK-071 ❌ 재작업 (Server Component onClick + task file 문서 커밋 누락) | TASK-075 🚫 · TASK-077 🚫 |
 | D_Kai | — | TASK-073 Advisory fix 권고 (i18n 4개 언어·자기정지방지) | TASK-074 🚫 (라우팅 DB 스키마 — TASK-070~073 전량 완료 후) |
 | Ring | — | — | 신규 할당 중단 유지 (9차 위반 누적) |
 
@@ -260,3 +260,4 @@
 | 2026-05-23 | Aiden (Claude) | 지능형 라우팅 계획 수립 — TASK-074~078 🚫 등록 (TASK-070~073 전량 완료 후 순차 착수). UAT_MASTER 72개 갱신 (누락 기능 7건 + 라우팅 6건 추가). |
 | 2026-05-23 | Aiden (Claude) | TASK-073 ✅ 승인 — IMP-077 SCR-091 회원관리 전항목 통과. Advisory 2건(i18n 키 누락·자기정지방지) 비차단 기록. TASK-074 전제조건 1/4 충족 |
 | 2026-05-23 | Aiden (Claude) | TASK-072 ✅ 승인(Riley IMP-076, 219/219) — Riley 위반 3회 누적 → 신규 Task 할당 중단. TASK-070 ❌ 반려(B_Kai) — zh/ja i18n 누락 + Server Action RBAC 미적용 2건 재작업 지시. TASK-074 전제조건 2/4 충족(072✅·073✅) |
+| 2026-05-23 | Aiden (Claude) | TASK-070 ✅ 승인(B_Kai 재작업 90ca21d) — zh/ja i18n 전량(WarehouseOutbound·ShippingLabel·MasterPacking·Navigation) + RBAC 3개 함수 전항목 확인. TASK-074 전제조건 3/4 충족. TASK-071 ❌ 반려 — Server Component onClick 기능 결함 + task file 문서 커밋 누락 |
