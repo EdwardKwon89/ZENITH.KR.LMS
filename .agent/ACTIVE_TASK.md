@@ -117,6 +117,8 @@
 | TASK-060 | 260522 | UAT 절차서: 정산·추적·VOC·마이페이지 | P4 | TASK-052·055 ✅ | Riley | ➖ | — | TASK-061·062로 분담 처리 (B_Kai·D_Kai) |
 | TASK-061 | 260522 | UAT 절차서: 정산·추적 (UAT_05·06) | P4 | TASK-052·055 ✅ | B_Kai | ✅ | [TASK-061](tasks/TASK-061_260522_UAT_정산추적_BKai.md) | UAT_05·06 작성 (8개 시나리오) · 2b91af8 · Advisory: /ko/settlement URL (비차단) |
 | TASK-062 | 260522 | UAT 절차서: VOC·마이페이지 (UAT_07·08) | P4 | TASK-052·055 ✅ | D_Kai | ✅ | [TASK-062](tasks/TASK-062_260522_UAT_VOC마이페이지_DKai.md) | UAT_07·08 작성 (10개 시나리오) · 4bf56b9 · Advisory: /ko/mypage/security·corporate URL (비차단) |
+| TASK-063 | 260523 | UAT 분기 보완: 오더·마스터오더·정산·추적 | P4 | TASK-058·061 ✅ | B_Kai | ⬜ | [TASK-063](tasks/TASK-063_260523_UAT분기보완_오더정산추적_BKai.md) | High 분기 5건 누락 — UAT-02-08·03-04·05-06·05-07·06-04 추가 |
+| TASK-064 | 260523 | UAT 분기 보완: 인증·VOC·마이페이지·어드민 | P4 | TASK-063 ✅ | D_Kai | 🚫 | [TASK-064](tasks/TASK-064_260523_UAT분기보완_인증VOC마이페이지어드민_DKai.md) | High 분기 7건 누락 — UAT-01-01 재작성·01-06·01-07·07-06·08-06·09-09·09-10 추가 |
 
 ---
 
@@ -125,8 +127,8 @@
 | Agent | 진행 중 | 재작업/조치 필요 | 블로커 대기 |
 |:------|:--------|:----------------|:----------|
 | Riley | — | — | — |
-| B_Kai | — | — | — |
-| D_Kai | — | — | — |
+| B_Kai | TASK-063 ⬜ (즉시 착수 가능) | — | — |
+| D_Kai | — | — | TASK-064 🚫 (TASK-063 ✅ 대기) |
 | Ring | — | — | 신규 할당 중단 유지 (9차 위반 누적) |
 
 ---
@@ -226,3 +228,4 @@
 | 2026-05-22 | Aiden (Claude) | TASK-052 ✅ 승인 — DoD 전량 완료 확인 (E2E_SCENARIOS.md D_Kai 931a396 포함). TASK-055 🔔 — Riley 인수, E2E-05 export 버그 2건 수정(middleware isApi·sticky header click), c65684c·211/211. TASK-060 ➖ 취소·TASK-061(B_Kai UAT_05·06)·TASK-062(D_Kai UAT_07·08) 신규 발령 |
 | 2026-05-22 | Aiden (Claude) | TASK-061 ✅ 승인(B_Kai) — UAT_05 5개·UAT_06 3개 시나리오 DoD 전항목 확인. 커밋 2b91af8. Advisory: UAT-05-01·02 /ko/settlement URL 비차단. TASK-062 ✅ 승인(D_Kai) — UAT_07 5개·UAT_08 5개 시나리오 DoD 전항목 확인. 커밋 4bf56b9. Advisory: UAT-08-02·04 미명시 경로 비차단 |
 | 2026-05-22 | Aiden (Claude) | TASK-055 ✅ 승인(Riley/Aiden 인수) — E2E-01·03·05 3종 PASS·스크린샷 6건·middleware isApi fix·evaluate click fix·회귀 211/211. Advisory: 회귀 로그 형식 비표준(비차단) |
+| 2026-05-23 | Aiden (Claude) | TASK-063 발령(B_Kai) — UAT 코드-시나리오 정합성 재점검, 오더·마스터오더·정산·추적 High 분기 5건 누락. TASK-064 발령(D_Kai) — 인증·VOC·마이페이지·어드민 High 분기 7건 누락. TASK-064는 UAT_MASTER 충돌 방지 위해 TASK-063 ✅ 전제조건 설정 |
