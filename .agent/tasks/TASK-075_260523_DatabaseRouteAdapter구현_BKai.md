@@ -8,7 +8,7 @@
 | 담당 Agent | B_Kai |
 | 우선순위 | P2 |
 | 전제조건 | TASK-074 ✅ (zen_carriers·zen_route_network 테이블 존재) |
-| 상태 | 📝 설계 의견 — Agent 구현 방안 제출 |
+| 상태 | 🔄 구현 중 |
 | 파급 효과 | routing.ts MockMapAdapter 교체, RoutingEngine 인터페이스 무변경 |
 
 ---
@@ -119,7 +119,23 @@ WHERE r.is_active = true
 
 ## 설계 확정 (Aiden 작성)
 
-> Aiden 검토 후 작성.
+**판정: 방안 A 채택** (2026-05-24, Aiden)
+
+### 채택 내용
+
+1. **구현 방식**: DB 직접 조회 (캐싱 불필요) — 방안 A 그대로 채택
+2. **쿼리 범위 — Hub routing 제외**: Phase J에서는 **직항 루트만** 구현
+   - `from_port_id = origin AND to_port_id = dest` 단일 조건만 사용
+   - 멀티 레그(환적) 경로 조회는 Phase K로 유예
+3. **운임 산정**: `zen_rate_cards.tiers[0].base_rate` 단순화 허용 (Phase J)
+   - `rate_card` 미존재 시 `total_cost = 0` 반환 — scoring에서 처리
+4. **MockMapAdapter 보존**: 파일 유지, 테스트에서만 명시적 사용
+5. **0건 처리**: 빈 배열 `[]` 반환 — RoutingEngine L82 체크에 위임
+6. **SupabaseClient 주입**: Repository 패턴 — action에서 `validateUserAction()` 획득 후 주입
+
+### 착수 승인
+
+📝→🔄: B_Kai 즉시 구현 착수 가능
 
 ---
 
@@ -141,3 +157,4 @@ WHERE r.is_active = true
 |:-----|:----:|:-----|
 | 2026-05-23 | Aiden (Claude) | Task 생성 — 지능형 라우팅 Phase-II DatabaseRouteAdapter 구현 지시 |
 | 2026-05-24 | B_Kai (OpenCode) | 📝 설계 의견 제출 — 방안 A: DB 직접 조회 + segments 합산 + rate_card 운임 |
+| 2026-05-24 | Aiden (Claude) | 설계 확정 — 방안 A 채택, Hub routing 제외(직항만·Phase J), tiers[0] 단순화, 착수 승인 📝→🔄 |
