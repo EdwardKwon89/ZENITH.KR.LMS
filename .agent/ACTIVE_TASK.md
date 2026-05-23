@@ -126,8 +126,8 @@
 | TASK-069 | 260523 | SCR-040 입고 처리 전용 화면 | P1 | 없음 | Riley | ✅ | [TASK-069](tasks/TASK-069_260523_SCR040입고처리전용화면_Riley.md) | IMP-073 완료 · 438c835+65b943d · 218/218 · Riley 위반 2건 기록 · Aiden ✅ 승인 |
 | TASK-070 | 260523 | SCR-041 출고·운송장 출력 화면 | P1 | TASK-069 ✅ 권장 | B_Kai | 🔄 | [TASK-070](tasks/TASK-070_260523_SCR041출고운송장출력화면_BKai.md) | IMP-074 — 설계 확정: PDF(@react-pdf) ✅, 출고처리 WAREHOUSED오더기반으로 수정 → 착수 승인 |
 | TASK-071 | 260523 | SCR-031 오더 패킹 화면 | P2 | TASK-070 ✅ 권장 | B_Kai | ⬜ | [TASK-071](tasks/TASK-071_260523_SCR031오더패킹화면_BKai.md) | IMP-075 마스터 오더 Packing List |
-| TASK-072 | 260523 | 특수화물 기재 (zen_orders + UI) | P2 | TASK-069 ✅ 권장 | Riley | ⬜ | [TASK-072](tasks/TASK-072_260523_특수화물기재_Riley.md) | IMP-076 DB 스키마 + 주문등록 폼 |
-| TASK-073 | 260523 | SCR-091 회원 관리 전용 화면 | P2 | TASK-068 ✅ 권장 | D_Kai | ⬜ | [TASK-073](tasks/TASK-073_260523_SCR091회원관리전용화면_DKai.md) | IMP-077 어드민 회원 목록·등급·정지 |
+| TASK-072 | 260523 | 특수화물 기재 (zen_orders + UI) | P2 | TASK-069 ✅ 권장 | Riley | 🔄 | [TASK-072](tasks/TASK-072_260523_특수화물기재_Riley.md) | IMP-076 DB 스키마 + 주문등록 폼 |
+| TASK-073 | 260523 | SCR-091 회원 관리 전용 화면 | P2 | TASK-068 ✅ 권장 | D_Kai | 🔔 | [TASK-073](tasks/TASK-073_260523_SCR091회원관리전용화면_DKai.md) | IMP-077 완료 · c72e92f · 218/218 · admin/members + 등급·정지 |
 
 ---
 
@@ -135,9 +135,9 @@
 
 | Agent | 진행 중 | 재작업/조치 필요 | 블로커 대기 |
 |:------|:--------|:----------------|:----------|
-| Riley | — | — | TASK-072 ⬜ (특수화물, 즉시 착수 가능) |
+| Riley | TASK-072 🔄 구현 중 | — | — |
 | B_Kai | TASK-070 🔄 (출고·운송장 — 설계 확정, 착수 가능) | — | TASK-071 ⬜ (SCR-031 패킹) |
-| D_Kai | — | — | TASK-073 ⬜ (SCR-091 회원, 즉시 착수 가능) |
+| D_Kai | TASK-073 🔔 검토 요청 | — | — |
 | Ring | — | — | 신규 할당 중단 유지 (9차 위반 누적) |
 
 ---
