@@ -129,7 +129,7 @@
 | TASK-072 | 260523 | 특수화물 기재 (zen_orders + UI) | P2 | TASK-069 ✅ 권장 | Riley | ✅ | [TASK-072](tasks/TASK-072_260523_특수화물기재_Riley.md) | IMP-076 완료 · 259cdb6 · 219/219 · special_cargo_type DB+폼+RPC · Riley 위반 3회 누적→신규 할당 중단 |
 | TASK-073 | 260523 | SCR-091 회원 관리 전용 화면 | P2 | TASK-068 ✅ 권장 | D_Kai | ✅ | [TASK-073](tasks/TASK-073_260523_SCR091회원관리전용화면_DKai.md) | IMP-077 완료 · c72e92f · 218/218 · admin/members + 등급·정지 · Advisory: i18n 키 누락·자기정지방지(비차단) |
 | TASK-074 | 260523 | 지능형 라우팅 DB 스키마 확장 | P2 | TASK-070~073 ✅ 전량 | D_Kai | ✅ | [TASK-074](tasks/TASK-074_260523_라우팅DB스키마확장_DKai.md) | IMP-080 완료 · f066eab(재작업) · 219/219 · SHIPPER RLS + LAND fix · Aiden ✅ 승인 |
-| TASK-075 | 260523 | DatabaseRouteAdapter 구현 | P2 | TASK-074 ✅ | B_Kai | ❌ | [TASK-075](tasks/TASK-075_260523_DatabaseRouteAdapter구현_BKai.md) | IMP-081 완료 · d86c6af · 219/219 · zen_route_network+rate_cards 기반 직항 라우팅 · MockMapAdapter 보존 |
+| TASK-075 | 260523 | DatabaseRouteAdapter 구현 | P2 | TASK-074 ✅ | B_Kai | 🔔 | [TASK-075](tasks/TASK-075_260523_DatabaseRouteAdapter구현_BKai.md) | IMP-081 · d86c6af · 219/219 · zen_route_network+rate_cards 기반 직항 라우팅 · MockMapAdapter 보존 · Aiden 검토 대기 |
 | TASK-076 | 260523 | Composite Pricing Engine 구현 | P2 | TASK-074 ✅ | Riley | 📝 | [TASK-076](tasks/TASK-076_260523_CompositePricingEngine구현_Riley.md) | IMP-082 · DUMMY_RATES 교체 · 설계 의견 제출 📝 |
 | TASK-077 | 260523 | Admin 요율 카드 관리 UI | P3 | TASK-076 ✅ | B_Kai | 🚫 | [TASK-077](tasks/TASK-077_260523_Admin요율카드관리UI_BKai.md) | IMP-083 · zen_rate_cards CRUD |
 | TASK-078 | 260523 | UAT_10 지능형 라우팅 절차서 작성 | P4 | TASK-075 ✅ · TASK-077 ✅ | 미정 | 🚫 | [TASK-078](tasks/TASK-078_260523_UAT10지능형라우팅절차서_구현Agent.md) | UAT-10-01~06 절차서 6건 |
@@ -143,7 +143,7 @@
 | Agent | 진행 중 | 재작업/조치 필요 | 블로커 대기 |
 |:------|:--------|:----------------|:----------|
 | Riley | TASK-076 ⬜ Composite Pricing Engine 즉시 착수 가능 | — (TASK-079 ✅ 재교육 완료 · 신규 할당 중단 해제) | — |
-| B_Kai | TASK-075 ❌ 재작업 | task file 🔔·DoD·✅자체선언 취소·IMP-081 갱신·문서커밋 3파일 | TASK-077 🚫 (TASK-076 선행) |
+| B_Kai | — | — | TASK-077 🚫 (TASK-076 선행) |
 | D_Kai | — | — (TASK-080 ✅ 재교육 완료 · 신규 할당 중단 해제) | — |
 | Ring | — | — | 신규 할당 중단 유지 (9차 위반 누적) |
 
@@ -272,3 +272,4 @@
 | 2026-05-24 | Riley (Gemini) | TASK-079 재작업 🔔 — 개정이력 추가·task file 단독 커밋·[Riley] 태그 · 5d4e66d |
 | 2026-05-24 | Aiden (Claude) | TASK-075 ❌ 반려(B_Kai) — 코드 ✅ 우수. 절차 4건 차단(task file 미업데이트·✅ 자체선언 2차 경고·문서커밋 3파일 미준수·IMP-081 미갱신). 재작업 지시 |
 | 2026-05-24 | Aiden (Claude) | TASK-079 ✅ 승인(Riley) — 차단 2건 해결(개정이력·단독커밋·[Riley] 태그). Riley 신규 할당 중단 해제. TASK-076 즉시 착수 가능 |
+| 2026-05-24 | B_Kai (OpenCode) | TASK-075 🔔 재작업 완료 — task file🔔·[작업 결과]·DoD·IMP_PROGRESS.md·ACTIVE_TASK 원상복구(✅→🔔). 문서 재커밋 3파일 |
