@@ -1,8 +1,8 @@
 # 🗺️ LIVE Regression Test Master Map
 
 > **상태:** [ACTIVE]  
-> **총 테스트 케이스:** 177 Cases  
-> **최종 검증일:** 2026-05-11 (RE-FEAT-RATES)  
+> **총 테스트 케이스:** 218 Cases  
+> **최종 검증일:** 2026-05-23 (IMP-073)  
 
 제니스 플랫폼의 비즈니스 영속성을 보장하는 회귀 테스트 케이스의 통합 명세서입니다. 모든 신규 개발 및 수정 시 이 맵에 케이스가 추가되어야 하며, 전체 테스트가 통과되어야 합니다.
 
@@ -48,6 +48,10 @@
 | **TC-OR.3** | 상태 변경 권한 (Operator) | 실무자의 유효한 상태 전이 허용 확인 | `tests/unit/logistics/order-status.test.ts` |
 | **TC-OR.4** | 상태 변경 제한 (Shipper) | 화주(User)의 상태 변경 권한 통제 확인 | `tests/unit/logistics/order-status.test.ts` |
 | **TC-OR.5** | 상태 머신 유효성 | 비정상적인 상태 점프(REGISTERED -> DELIVERED) 차단 | `tests/unit/logistics/order-status.test.ts` |
+| **TC-INB.1** | 바코드 기반 오더 조회 | 존재하는 바코드/오더번호 입력 시 상세 내역 조회 보장 | `tests/unit/logistics/inbound.test.ts` |
+| **TC-INB.2** | 존재하지 않는 바코드 조회 | 미등록 바코드 조회 시 예외 처리 및 null 반환 검증 | `tests/unit/logistics/inbound.test.ts` |
+| **TC-INB.3** | 입고 확정 처리 | 검수 결과(정상/손상)를 포함하여 WAREHOUSED 상태 전이 성공 확인 | `tests/unit/logistics/inbound.test.ts` |
+| **TC-INB.4** | 오늘의 입고 이력 조회 | 오늘 KST 기준 입고 완료된 이력 목록을 정상 집계 확인 | `tests/unit/logistics/inbound.test.ts` |
 
 ### 5. 마스터 오더 거버넌스 (Master Order)
 | ID | 테스트 항목 | 목적 | 파일 경로 |
@@ -155,7 +159,8 @@
 
 | 검증일 | 버전 | 성공/실패 | 총 소요시간 | 결과 리포트 |
 | :--- | :--- | :---: | :--- | :--- |
-| 2026-05-11 | v16.1 | ✅ PASS | ~1.5s | 177/177 — FEAT-RATES 반려 결함(BUG-FR-001/002) 수정 및 TC-RATES-01~04 신규 등록 완료. |
+| 2026-05-23 | v17.0 | ✅ PASS | 49.49s | 218/218 — IMP-073 입고 처리 전용 화면 신규 개발 및 TC-INB.1~4 신규 등록 완료. |
+| 2026-05-11 | v16.1 | ✅ PASS | ~30s | 177/177 — FEAT-RATES 반려 결함(BUG-FR-001/002) 수정 및 TC-RATES-01~04 신규 등록 완료. |
 | 2026-04-21 | v1.1 | ✅ PASS | 1.88s | 28/28 Passed |
 | 2026-04-22 | v2.1 | ✅ PASS | 2.81s | 58/58 Fully Registered & Verified |
 | 2026-04-23 | v2.2 | ✅ PASS | 7.9s | 60/60 QA-02 통합 2건 추가, 데이터 레이스 픽스 |
