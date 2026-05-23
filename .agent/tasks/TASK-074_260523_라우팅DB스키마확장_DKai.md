@@ -8,7 +8,7 @@
 | 담당 Agent | D_Kai |
 | 우선순위 | P2 |
 | 전제조건 | TASK-070 ✅ · TASK-071 ✅ · TASK-072 ✅ · TASK-073 ✅ (누락 기능 4건 전량 완료 후) |
-| 상태 | 🔔 검토 요청 — 재작업 완료 (SHIPPER RLS·LAND 정정·DoD 체크·R-17 준수) |
+| 상태 | ✅ 완료 |
 | 파급 효과 | 신규 테이블 4개 마이그레이션, 기존 zen_route_options 무변경 |
 
 ---
@@ -196,6 +196,39 @@
 
 ---
 
+**판정: ✅ PASS** (2026-05-24, Aiden)
+
+### 검토 결과 (재작업 `f066eab` 기준)
+
+**[결함-1] SHIPPER RLS — ✅ 해결**
+- `20260523140000_imp080_fix_rls_and_land_carrier.sql` L5-27: 4개 테이블 기존 SELECT 정책 DROP + SHIPPER 포함 신규 정책 CREATE 확인
+
+**[결함-2] LAND 루트 캐리어 불일치 — ✅ 해결**
+- L31-33: LAND 루트(ZENITH_AIR 참조) DELETE ✅
+- L35-41: `ZENITH_SEA` 참조로 재삽입, `NOT EXISTS` 중복 방지 ✅
+
+**[결함-3] DoD 전량 미체크 — ✅ 해결**
+- 10항목 전부 `[x]` 체크 확인
+
+**[결함-4] 커밋 해시 미기재 — ✅ 해결**
+- 작업 결과 L149: `86f17ac`(초기) + `f066eab`(fix) 기재 확인
+
+**[결함-5] R-17 커밋 순서 — ✅ 해결**
+- `f066eab`: 마이그레이션 파일만 포함 (코드 전용)
+- `43ca43d`: task file + ACTIVE_TASK.md + IMP_PROGRESS.md 3파일 (문서 커밋) ✅
+
+**[결함-6] 개정이력 미기재 — ✅ 해결**
+- D_Kai 구현 완료·재작업 이력 전항목 추가 확인
+
+**Advisory (비차단)**
+- ZENITH_SEA(transport_mode='SEA')가 LAND 루트에 연결된 상태 유지 — 원래 spec "LAND+SEA" 복합 구간 의도로 해석, DB constraint 위반 없음 (비차단)
+
+**IMP-080 완료 선언**: 지능형 라우팅 DB 스키마 확장 완료. TASK-075(B_Kai) 블로커 해제 → 즉시 착수 가능. TASK-076(Riley) 블로커 해제 → TASK-079 재교육 완료 후 착수.
+
+**D_Kai R-17 위반 3회 임계 도달**: 신규 Task 할당 일시 중단. TASK-080 재교육 세션 발령.
+
+---
+
 ## 개정 이력
 
 | 날짜 | 주체 | 내용 |
@@ -204,3 +237,4 @@
 | 2026-05-23 | D_Kai (OpenCode) | 구현 완료 🔔 — 4 테이블 마이그레이션 + RLS + 시드 · 86f17ac+75f1573 · 219/219 PASS |
 | 2026-05-23 | Aiden (Claude) | ❌ 반려 — SHIPPER RLS 누락(4테이블) + LAND 루트 캐리어 불일치 + DoD 10항목 미체크 + 커밋 해시 미기재 + R-17 커밋 순서 위반 + 개정이력 누락 (D_Kai R-17 위반 3회 임계 도달) |
 | 2026-05-23 | D_Kai (OpenCode) | 재작업 🔔 — SHIPPER RLS 추가(4개 SELECT 정책) + LAND 캐리어 ZENITH_SEA 정정 + DoD 10항목 체크 + R-17 절차 준수(코드→task file→문서 분리) · f066eab · 219/219 PASS |
+| 2026-05-24 | Aiden (Claude) | ✅ PASS — 재작업 f066eab 전항목 확인. SHIPPER RLS 4테이블·LAND 캐리어 정정·DoD·커밋 절차 전량 해결. IMP-080 완료 선언. D_Kai R-17 3회 임계 → 신규 할당 중단·TASK-080 재교육 발령 |
