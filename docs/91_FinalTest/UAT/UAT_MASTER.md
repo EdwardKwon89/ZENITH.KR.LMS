@@ -81,6 +81,7 @@ Supabase: Cloud 프로젝트 연결
 | UAT-02-06 | RETURNED → WAREHOUSED / DISPOSED | ADMIN | [UAT_02](UAT_02_오더관리.md) | B_Kai | ✅ |
 | UAT-02-07 | 오더 취소 (CANCELED) | ADMIN | [UAT_02](UAT_02_오더관리.md) | B_Kai | ✅ |
 | UAT-02-08 | 역할별 상태 변경 권한 분화 | MANAGER/ADMIN | [UAT_02](UAT_02_오더관리.md) | B_Kai | ✅ |
+| UAT-02-09 | 경로 옵션 조회 및 선택 | SHIPPER/ADMIN | [UAT_02](UAT_02_오더관리.md) | B_Kai | ✅ |
 | UAT-03-01 | 마스터 오더 생성 | MASTER | [UAT_03](UAT_03_마스터오더_분리.md) | B_Kai | ✅ |
 | UAT-03-02 | 마스터 오더 목록 조회 | MASTER/ADMIN | [UAT_03](UAT_03_마스터오더_분리.md) | B_Kai | ✅ |
 | UAT-03-03 | dissolve (분리) 실행 + 원자성 확인 | ADMIN | [UAT_03](UAT_03_마스터오더_분리.md) | B_Kai | ✅ |
@@ -96,6 +97,8 @@ Supabase: Cloud 프로젝트 연결
 | UAT-05-05 | 수익 조회 (finance/revenue) | ADMIN | [UAT_05](UAT_05_정산_인보이스.md) | B_Kai | ✅ |
 | UAT-05-06 | 인보이스 상세 링크 이동 | ADMIN | [UAT_05](UAT_05_정산_인보이스.md) | B_Kai | ✅ |
 | UAT-05-07 | SHIPPER Settlement 접근 권한 | SHIPPER | [UAT_05](UAT_05_정산_인보이스.md) | B_Kai | ✅ |
+| UAT-05-08 | 단일 carrier 다중 구간 정산 검증 | ADMIN | [UAT_05](UAT_05_정산_인보이스.md) | B_Kai | ✅ |
+| UAT-05-09 | 다중 carrier 구간별 정산 분리 검증 | ADMIN | [UAT_05](UAT_05_정산_인보이스.md) | B_Kai | ✅ |
 | UAT-06-01 | 배송 추적 조회 | SHIPPER | [UAT_06](UAT_06_추적_스케줄.md) | B_Kai | ✅ |
 | UAT-06-02 | 스케줄 목록 조회 | ADMIN | [UAT_06](UAT_06_추적_스케줄.md) | B_Kai | ✅ |
 | UAT-06-03 | 스케줄 등록 | ADMIN | [UAT_06](UAT_06_추적_스케줄.md) | B_Kai | ✅ |
@@ -123,7 +126,7 @@ Supabase: Cloud 프로젝트 연결
 | UAT-09-09 | REJECTED 사용자 로그인 차단 | ADMIN/SHIPPER | [UAT_09](UAT_09_어드민_운영.md) | D_Kai | ✅ |
 | UAT-09-10 | 자기 자신 역할 변경 제한 | ADMIN | [UAT_09](UAT_09_어드민_운영.md) | D_Kai | ✅ |
 
-**총 56개 시나리오** | 작성 완료: 56 / 56 ✅
+**총 59개 시나리오** | 작성 완료: 59 / 59 ✅
 
 ---
 
@@ -207,3 +210,4 @@ Supabase: Cloud 프로젝트 연결
 | 2026-05-22 | B_Kai (OpenCode) | 인덱스 45개 갱신 (TASK-058·059·061·062 작성 완료 반영) |
 | 2026-05-23 | B_Kai (OpenCode) | TASK-063 — UAT-02-08·03-04·05-06·05-07·06-04 5개 행 추가, 총계 50개 갱신 |
 | 2026-05-23 | D_Kai (OpenCode) | TASK-064 — UAT-01-01 비고 갱신·UAT-01-06·01-07·07-06·08-06·09-09·09-10 6개 행 추가, 총계 56개 갱신 |
+| 2026-05-23 | B_Kai (Noah/Codex) | TASK-066 — UAT-02-09·05-08·05-09 3개 행 추가, 총계 59개 갱신 |
