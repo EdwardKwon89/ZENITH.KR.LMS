@@ -117,7 +117,7 @@
 | TASK-060 | 260522 | UAT 절차서: 정산·추적·VOC·마이페이지 | P4 | TASK-052·055 ✅ | Riley | ➖ | — | TASK-061·062로 분담 처리 (B_Kai·D_Kai) |
 | TASK-061 | 260522 | UAT 절차서: 정산·추적 (UAT_05·06) | P4 | TASK-052·055 ✅ | B_Kai | ✅ | [TASK-061](tasks/TASK-061_260522_UAT_정산추적_BKai.md) | UAT_05·06 작성 (8개 시나리오) · 2b91af8 · Advisory: /ko/settlement URL (비차단) |
 | TASK-062 | 260522 | UAT 절차서: VOC·마이페이지 (UAT_07·08) | P4 | TASK-052·055 ✅ | D_Kai | ✅ | [TASK-062](tasks/TASK-062_260522_UAT_VOC마이페이지_DKai.md) | UAT_07·08 작성 (10개 시나리오) · 4bf56b9 · Advisory: /ko/mypage/security·corporate URL (비차단) |
-| TASK-063 | 260523 | UAT 분기 보완: 오더·마스터오더·정산·추적 | P4 | TASK-058·061 ✅ | B_Kai | ⬜ | [TASK-063](tasks/TASK-063_260523_UAT분기보완_오더정산추적_BKai.md) | High 분기 5건 누락 — UAT-02-08·03-04·05-06·05-07·06-04 추가 |
+| TASK-063 | 260523 | UAT 분기 보완: 오더·마스터오더·정산·추적 | P4 | TASK-058·061 ✅ | B_Kai | 🔔 | [TASK-063](tasks/TASK-063_260523_UAT분기보완_오더정산추적_BKai.md) | UAT 분기 5건 추가 · 8cf9bfc · D_Kai TASK-064 블로커 해제 |
 | TASK-064 | 260523 | UAT 분기 보완: 인증·VOC·마이페이지·어드민 | P4 | TASK-063 ✅ | D_Kai | 🚫 | [TASK-064](tasks/TASK-064_260523_UAT분기보완_인증VOC마이페이지어드민_DKai.md) | High 분기 7건 누락 — UAT-01-01 재작성·01-06·01-07·07-06·08-06·09-09·09-10 추가 |
 
 ---
@@ -127,7 +127,7 @@
 | Agent | 진행 중 | 재작업/조치 필요 | 블로커 대기 |
 |:------|:--------|:----------------|:----------|
 | Riley | — | — | — |
-| B_Kai | TASK-063 ⬜ (즉시 착수 가능) | — | — |
+| B_Kai | TASK-063 🔔 검토 요청 | — | — |
 | D_Kai | — | — | TASK-064 🚫 (TASK-063 ✅ 대기) |
 | Ring | — | — | 신규 할당 중단 유지 (9차 위반 누적) |
 
