@@ -922,5 +922,5 @@
 - **관련 파일**: `supabase/migrations/` (신규 마이그레이션), `src/lib/finance/settlement/settlement.ts`, `src/lib/finance/settlement/cost-aggregator.ts`, `supabase/migrations/20260422020000_zen_finance_core.sql`, `supabase/migrations/20260424200000_zen_routing_sprint_a.sql`
 - **예상 공수**: 2~3 MD
 - **우선순위**: **High**
-- **상태**: 🔔
-- **연계 Task**: TASK-065
+- **상태**: ✅ 완료 (2026-05-23)
+- **연계 Task**: TASK-065 ✅
