@@ -70,6 +70,34 @@ export async function authGuard(
   }
 
   if (user && !isApi) {
+    // --- IMP-071: 세션 Idle Timeout ---
+    if (!isAuthPage && purePath !== '/') {
+      const SESSION_IDLE_TIMEOUT_MIN = parseInt(process.env.SESSION_IDLE_TIMEOUT_MIN || '30', 10);
+      const now = Date.now();
+      const lastActivity = request.cookies.get('zen_last_activity')?.value;
+
+      if (lastActivity) {
+        const elapsed = now - parseInt(lastActivity, 10);
+        if (elapsed > SESSION_IDLE_TIMEOUT_MIN * 60 * 1000) {
+          await supabase.auth.signOut();
+          const url = request.nextUrl.clone();
+          url.pathname = `/${locale}/login`;
+          url.searchParams.set('reason', 'timeout');
+          const response = NextResponse.redirect(url);
+          response.cookies.delete('zen_last_activity');
+          return { response: mergeHeaders(response, supabaseResponse), redirectUrl: url.pathname };
+        }
+      }
+
+      supabaseResponse.cookies.set('zen_last_activity', String(now), {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'lax',
+        maxAge: SESSION_IDLE_TIMEOUT_MIN * 60,
+        path: '/',
+      });
+    }
+
     const metadataRole = user.app_metadata?.role as string | undefined;
     const metadataOrgType = user.app_metadata?.org_type as string | undefined;
     
@@ -124,6 +152,19 @@ export async function authGuard(
       if (purePath !== pendingPath && !isAuthPage && !purePath.startsWith('/orders') && !purePath.startsWith('/dashboard')) {
         const url = request.nextUrl.clone();
         url.pathname = `/${locale}${pendingPath}`;
+        return { response: mergeHeaders(NextResponse.redirect(url), supabaseResponse), redirectUrl: url.pathname };
+      }
+    }
+
+    // --- IMP-072: SUSPENDED 계정 처리 ---
+    if (userStatus === 'SUSPENDED') {
+      const isSuspendedWhitelisted =
+        purePath.startsWith('/suspended') ||
+        isAuthPage ||
+        purePath === '/';
+      if (!isSuspendedWhitelisted) {
+        const url = request.nextUrl.clone();
+        url.pathname = `/${locale}/suspended`;
         return { response: mergeHeaders(NextResponse.redirect(url), supabaseResponse), redirectUrl: url.pathname };
       }
     }
