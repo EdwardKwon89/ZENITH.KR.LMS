@@ -118,7 +118,7 @@
 | TASK-061 | 260522 | UAT 절차서: 정산·추적 (UAT_05·06) | P4 | TASK-052·055 ✅ | B_Kai | ✅ | [TASK-061](tasks/TASK-061_260522_UAT_정산추적_BKai.md) | UAT_05·06 작성 (8개 시나리오) · 2b91af8 · Advisory: /ko/settlement URL (비차단) |
 | TASK-062 | 260522 | UAT 절차서: VOC·마이페이지 (UAT_07·08) | P4 | TASK-052·055 ✅ | D_Kai | ✅ | [TASK-062](tasks/TASK-062_260522_UAT_VOC마이페이지_DKai.md) | UAT_07·08 작성 (10개 시나리오) · 4bf56b9 · Advisory: /ko/mypage/security·corporate URL (비차단) |
 | TASK-063 | 260523 | UAT 분기 보완: 오더·마스터오더·정산·추적 | P4 | TASK-058·061 ✅ | B_Kai | ✅ | [TASK-063](tasks/TASK-063_260523_UAT분기보완_오더정산추적_BKai.md) | 5개 시나리오 추가 · 8cf9bfc · Advisory: 개정이력 모델명 병기(비차단) |
-| TASK-064 | 260523 | UAT 분기 보완: 인증·VOC·마이페이지·어드민 | P4 | TASK-063 ✅ | D_Kai | ⬜ | [TASK-064](tasks/TASK-064_260523_UAT분기보완_인증VOC마이페이지어드민_DKai.md) | High 분기 7건 누락 — UAT-01-01 재작성·01-06·01-07·07-06·08-06·09-09·09-10 추가 |
+| TASK-064 | 260523 | UAT 분기 보완: 인증·VOC·마이페이지·어드민 | P4 | TASK-063 ✅ | D_Kai | 🔔 | [TASK-064](tasks/TASK-064_260523_UAT분기보완_인증VOC마이페이지어드민_DKai.md) | High 분기 7건 누락 — UAT-01-01 재작성·01-06·01-07·07-06·08-06·09-09·09-10 추가 |
 
 ---
 
@@ -128,7 +128,7 @@
 |:------|:--------|:----------------|:----------|
 | Riley | — | — | — |
 | B_Kai | — | — | — |
-| D_Kai | TASK-064 ⬜ (즉시 착수 가능) | — | — |
+| D_Kai | TASK-064 🔔 검토 요청 | — | — |
 | Ring | — | — | 신규 할당 중단 유지 (9차 위반 누적) |
 
 ---
@@ -224,6 +224,7 @@
 | 2026-05-22 | Aiden (Claude) | UAT 절차서 Sprint 착수 — TASK-058(B_Kai: UAT_02·03)·TASK-059(D_Kai: UAT_01·04·09)·TASK-060(Riley: UAT_05·06·07·08 🚫 E2E 완료 후) 발령. UAT_MASTER.md 생성 (46개 시나리오 인덱스). `docs/91_FinalTest/UAT/` |
 | 2026-05-22 | D_Kai (OpenCode) | TASK-059 구현 완료 🔔 — UAT_01·04·09 17개 시나리오 전량 작성, 코드 커밋 b747c5b, UAT_MASTER 인덱스 ✅ 갱신 |
 | 2026-05-22 | D_Kai (OpenCode) | TASK-062 구현 완료 🔔 — UAT_07·08 10개 시나리오 전량 작성, 코드 커밋 4bf56b9, UAT_MASTER 인덱스 ✅ 갱신 (작성완료 27/46) |
+| 2026-05-23 | D_Kai (OpenCode) | TASK-064 구현 완료 🔔 — UAT-01-01 재작성 + 6개 시나리오 추가, UAT_MASTER 56개 갱신, 코드 커밋 95d2d97 |
 | 2026-05-22 | Aiden (Claude) | TASK-058 ✅ PASS(B_Kai) + TASK-059 ✅ PASS(D_Kai) — UAT 절차서 27개 시나리오(UAT-01·02·03·04·09) 전량 승인. Advisory 각 1건(비차단) |
 | 2026-05-22 | Aiden (Claude) | TASK-052 ✅ 승인 — DoD 전량 완료 확인 (E2E_SCENARIOS.md D_Kai 931a396 포함). TASK-055 🔔 — Riley 인수, E2E-05 export 버그 2건 수정(middleware isApi·sticky header click), c65684c·211/211. TASK-060 ➖ 취소·TASK-061(B_Kai UAT_05·06)·TASK-062(D_Kai UAT_07·08) 신규 발령 |
 | 2026-05-22 | Aiden (Claude) | TASK-061 ✅ 승인(B_Kai) — UAT_05 5개·UAT_06 3개 시나리오 DoD 전항목 확인. 커밋 2b91af8. Advisory: UAT-05-01·02 /ko/settlement URL 비차단. TASK-062 ✅ 승인(D_Kai) — UAT_07 5개·UAT_08 5개 시나리오 DoD 전항목 확인. 커밋 4bf56b9. Advisory: UAT-08-02·04 미명시 경로 비차단 |
