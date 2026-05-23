@@ -300,8 +300,12 @@ export async function listMembers(params?: {
  * 7. 회원 상태 변경 (Admin 전용)
  */
 export async function changeMemberStatus(userId: string, status: string) {
-  const { supabase } = await validateAdminAction();
+  const { supabase, profile } = await validateAdminAction();
   const repo = new AdminRepository(supabase);
+
+  if (status === 'SUSPENDED' && profile?.id === userId) {
+    throw new Error("자기 자신을 정지할 수 없습니다.");
+  }
 
   const { error } = await repo.updateProfileStatus(userId, status);
   if (error) {
