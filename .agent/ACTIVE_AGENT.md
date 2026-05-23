@@ -19,3 +19,5 @@
 | 충돌 방지 | 상세 파일 존재 여부 확인 (파일 선점 = 착수권) |
 
 신규 체계 전체 규칙: [GOV_COMMON.md R-16·R-17](../GOV_COMMON.md)
+
+Status: IDLE

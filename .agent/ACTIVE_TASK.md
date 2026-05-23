@@ -133,7 +133,7 @@
 | TASK-076 | 260523 | Composite Pricing Engine 구현 | P2 | TASK-074 ✅ | Riley | ⬜ | [TASK-076](tasks/TASK-076_260523_CompositePricingEngine구현_Riley.md) | IMP-082 · DUMMY_RATES 교체 · Riley TASK-079 재교육 완료 후 착수 |
 | TASK-077 | 260523 | Admin 요율 카드 관리 UI | P3 | TASK-076 ✅ | B_Kai | 🚫 | [TASK-077](tasks/TASK-077_260523_Admin요율카드관리UI_BKai.md) | IMP-083 · zen_rate_cards CRUD |
 | TASK-078 | 260523 | UAT_10 지능형 라우팅 절차서 작성 | P4 | TASK-075 ✅ · TASK-077 ✅ | 미정 | 🚫 | [TASK-078](tasks/TASK-078_260523_UAT10지능형라우팅절차서_구현Agent.md) | UAT-10-01~06 절차서 6건 |
-| TASK-079 | 260523 | Riley 재교육 세션 (R-17 v1.4 절차 준수) | P4 | 없음 | Riley | 🔄 | [TASK-079](tasks/TASK-079_260523_Riley재교육세션_Riley.md) | 위반 3건(착수절차·cross-agent·해시미기재) — 신규 할당 중단 중 |
+| TASK-079 | 260523 | Riley 재교육 세션 (R-17 v1.4 절차 준수) | P4 | 없음 | Riley | 🔔 | [TASK-079](tasks/TASK-079_260523_Riley재교육세션_Riley.md) | 위반 3건(착수절차·cross-agent·해시미기재) — 신규 할당 중단 중 |
 | TASK-080 | 260524 | D_Kai 재교육 세션 (R-17 v1.4 절차 준수) | P4 | 없음 | D_Kai | 🔔 | [TASK-080](tasks/TASK-080_260524_DKai재교육세션_DKai.md) | 재교육 완료 · 자가 분석 + 절차 재서술 + 신원 확인 + 서약 |
 
 ---
