@@ -117,8 +117,43 @@
 
 ---
 
+## [UAT-03-04] MASTERED 상태 오더 수정 불가 검증
+
+| 항목 | 내용 |
+|:----|:----|
+| 역할 | ADMIN |
+| 화면 URL | /ko/login → /ko/orders |
+| 예상 소요 시간 | 8분 |
+| 사전 조건 | ADMIN 계정(`admin@zenith.kr`) 로그인 상태, MASTERED 상태 하우스 오더 1건 존재 (마스터 오더에 바인딩된 오더) |
+
+### 테스트 절차
+
+| 순서 | 화면·URL | 수행 액션 | 입력 데이터 | 기대 결과 | 확인 |
+|:---:|:---------|:---------|:-----------|:---------|:----:|
+| 1 | /ko/orders | 오더 목록에서 MASTERED 상태 오더 검색 | 상태 필터 → 'MASTERED' | MASTERED 오더만 표시 | ☐ |
+| 2 | /ko/orders | MASTERED 오더의 상태 배지 클릭 | — | StatusChangeModal에서 상태 변경 버튼이 비활성화 또는 숨김 처리 확인 | ☐ |
+| 3 | /ko/orders | MASTERED 오더 상세 접속 | 오더 번호 클릭 → /ko/orders/{orderId} | 오더 상세 정보 표시 (읽기 전용), '수정' 또는 '변경' 버튼 미노출 또는 비활성 확인 | ☐ |
+| 4 | /ko/orders/{orderId} | 오더 정보 필드 편집 시도 | 입력 필드 클릭 또는 수정 시도 | 입력 필드가 읽기 전용(disabled) 또는 수정 불가 상태 | ☐ |
+| 5 | /ko/master-orders | 마스터 오더 dissolve 후 재확인 | UAT-03-03 절차에 따라 dissolve → /ko/orders로 이동 | dissolve 완료 후 해당 오더 상태가 REGISTERED로 변경되며 상태 변경 가능해짐 | ☐ |
+
+### 합격 기준
+- [ ] 전 단계 ☑ 완료
+- [ ] 오류 메시지 없음
+- [ ] MASTERED 상태에서 StatusChangeModal 상태 변경 비활성화
+- [ ] MASTERED 오더 상세 페이지 수정 불가 (읽기 전용)
+- [ ] dissolve 후 REGISTERED 상태에서는 정상 변경 가능
+
+### 결함 기재란
+
+| 결함-ID | 단계 | 현상 | 심각도 |
+|:-------:|:---:|:-----|:------:|
+| | | | |
+
+---
+
 ## 개정 이력
 
 | 날짜 | 주체 | 내용 |
 |:-----|:----:|:-----|
 | 2026-05-22 | B_Kai (Noah/Codex) | v1.0 초안 작성 — 3개 시나리오 전량 |
+| 2026-05-23 | B_Kai (Noah/Codex) | UAT-03-04 추가 — MASTERED 상태 오더 수정 불가 검증 |

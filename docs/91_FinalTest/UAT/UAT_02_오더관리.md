@@ -265,8 +265,50 @@
 
 ---
 
+## [UAT-02-08] 역할별 상태 변경 권한 분화
+
+| 항목 | 내용 |
+|:----|:----|
+| 역할 | MANAGER / ADMIN |
+| 화면 URL | /ko/login → /ko/orders |
+| 예상 소요 시간 | 10분 |
+| 사전 조건 | MANAGER 계정(`manager@zenith.kr`) + ADMIN 계정(`admin@zenith.kr`) 로그인 상태, 각 역할별 오더 데이터 존재 |
+
+### 테스트 절차 — MANAGER 권한 범위
+
+| 순서 | 화면·URL | 수행 액션 | 입력 데이터 | 기대 결과 | 확인 |
+|:---:|:---------|:---------|:-----------|:---------|:----:|
+| 1 | /ko/login | MANAGER 계정 로그인 | manager@zenith.kr / password1234 | 대시보드 이동 | ☐ |
+| 2 | /ko/orders | 오더 목록 접속 | — | 오더 테이블 정상 표시 | ☐ |
+| 3 | /ko/orders | PENDING 오더 상태 배지 클릭 | — | StatusChangeModal에 MANAGER 허용 상태(WAREHOUSED·PACKED 등)만 표시 | ☐ |
+| 4 | /ko/orders | MANAGER가 WAREHOUSED 상태로 전환 | 'WAREHOUSED' 선택 → '변경' 클릭 | 상태 변경 성공, 토스트 표시 | ☐ |
+| 5 | /ko/orders | MANAGER 허용 범위 외 상태 확인 | 다른 오더 상태 배지 클릭 → StatusChangeModal에서 CANCELED·RETURNED·HELD 등 버튼 비활성 또는 미노출 확인 | ADMIN 전용 상태는 MANAGER가 접근 불가 | ☐ |
+
+### 테스트 절차 — ADMIN 전용 상태 검증
+
+| 순서 | 화면·URL | 수행 액션 | 입력 데이터 | 기대 결과 | 확인 |
+|:---:|:---------|:---------|:-----------|:---------|:----:|
+| 6 | /ko/login | ADMIN 계정 로그인 | admin@zenith.kr / password1234 | 대시보드 이동 | ☐ |
+| 7 | /ko/orders | ADMIN이 CANCELED·RETURNED·HELD 전이 | 상태 배지 클릭 → 각 전이 실행 | ADMIN은 모든 상태 전이 가능 | ☐ |
+
+### 합격 기준
+- [ ] 전 단계 ☑ 완료
+- [ ] 오류 메시지 없음
+- [ ] MANAGER는 WAREHOUSED·PACKED 등 허용 상태만 전환 가능 (CANCELED·RETURNED·HELD 등 차단)
+- [ ] ADMIN은 제한 없이 모든 상태 전이 가능
+- [ ] MANAGER가 StatusChangeModal에서 ADMIN 전용 상태 버튼이 비활성화 또는 미노출
+
+### 결함 기재란
+
+| 결함-ID | 단계 | 현상 | 심각도 |
+|:-------:|:---:|:-----|:------:|
+| | | | |
+
+---
+
 ## 개정 이력
 
 | 날짜 | 주체 | 내용 |
 |:-----|:----:|:-----|
 | 2026-05-22 | B_Kai (Noah/Codex) | v1.0 초안 작성 — 7개 시나리오 전량 |
+| 2026-05-23 | B_Kai (Noah/Codex) | UAT-02-08 추가 — 역할별 상태 변경 권한 분화 |
