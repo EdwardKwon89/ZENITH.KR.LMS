@@ -522,5 +522,32 @@
     "total_pkgs": "총 패키지",
     "carrier_barcode": "운송장 바코드",
     "generated_on": "생성일시"
+  },
+  "MasterPacking": {
+    "title": "PACKING LIST",
+    "print_btn": "인쇄",
+    "back_btn": "뒤로",
+    "master_ref": "마스터 번호",
+    "issue_date": "발행일",
+    "origin": "출발지",
+    "destination": "도착지",
+    "carrier": "운송사",
+    "vessel": "항차",
+    "etd": "ETD",
+    "eta": "ETA",
+    "house_list": "HOUSE ORDERS",
+    "no_houses": "연결된 하우스 오더가 없습니다.",
+    "item_desc": "품명",
+    "qty": "수량",
+    "weight": "중량(kg)",
+    "volume": "용적(CBM)",
+    "house_total": "소계",
+    "total_houses": "총 House",
+    "total_qty": "총 수량",
+    "total_weight": "총 중량",
+    "total_volume": "총 용적",
+    "remarks": "비고",
+    "generated": "생성일시",
+    "print_title": "Packing List 출력"
   }
 }

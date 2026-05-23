@@ -551,5 +551,32 @@
     "total_pkgs": "Total Packages",
     "carrier_barcode": "Carrier Barcode",
     "generated_on": "Generated On"
+  },
+  "MasterPacking": {
+    "title": "PACKING LIST",
+    "print_btn": "Print",
+    "back_btn": "Back",
+    "master_ref": "Master Ref",
+    "issue_date": "Issue Date",
+    "origin": "Origin",
+    "destination": "Destination",
+    "carrier": "Carrier",
+    "vessel": "Vessel / Flight",
+    "etd": "ETD",
+    "eta": "ETA",
+    "house_list": "HOUSE ORDERS",
+    "no_houses": "No house orders linked.",
+    "item_desc": "Description",
+    "qty": "Qty",
+    "weight": "Weight (kg)",
+    "volume": "Volume (CBM)",
+    "house_total": "Subtotal",
+    "total_houses": "Total Houses",
+    "total_qty": "Total Qty",
+    "total_weight": "Total Weight",
+    "total_volume": "Total Volume",
+    "remarks": "Remarks",
+    "generated": "Generated",
+    "print_title": "Print Packing List"
   }
 }
