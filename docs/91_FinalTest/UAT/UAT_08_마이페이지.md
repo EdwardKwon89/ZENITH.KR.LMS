@@ -171,3 +171,35 @@
 | 결함-ID | 단계 | 현상 | 심각도 |
 |:-------:|:---:|:-----|:------:|
 | | | | |
+
+---
+
+## [UAT-08-06] ADMIN 마이페이지 SHIPPER 전용 페이지 접근 차단
+
+| 항목 | 내용 |
+|:----|:----|
+| 역할 | ADMIN |
+| 화면 URL | /ko/mypage/customs, /ko/mypage/corporate |
+| 예상 소요 시간 | 5분 |
+| 사전 조건 | ADMIN 계정 로그인 (`admin@zenith.kr`) |
+| 비고 | 시나리오 A (customs) + 시나리오 B (corporate) — SHIPPER 전용 페이지 2종 검증 |
+
+### 테스트 절차
+
+| 순서 | 화면·URL | 수행 액션 | 입력 데이터 | 기대 결과 | 확인 |
+|:---:|:---------|:---------|:-----------|:---------|:----:|
+| 1 | /ko/mypage/customs | [시나리오 A] ADMIN 계정으로 통관 정보 페이지 직접 URL 접근 | `admin@zenith.kr` → URL 직접 입력 | 403 페이지, 리다이렉트(/ko/dashboard), 또는 "접근 권한이 없습니다" 메시지 표시 | ☐ |
+| 2 | /ko/mypage/corporate | [시나리오 B] ADMIN 계정으로 법인 정보 페이지 직접 URL 접근 | `admin@zenith.kr` → URL 직접 입력 | 시나리오 A와 동일하게 접근 차단 처리 | ☐ |
+| 3 | /ko/mypage/profile | ADMIN 계정으로 프로필 페이지 접근 | — | 프로필 페이지(ALL 접근 가능) 정상 표시 — SHIPPER 전용만 차단됨 확인 | ☐ |
+
+### 합격 기준
+- [ ] 전 단계 ☑ 완료
+- [ ] `/ko/mypage/customs` ADMIN 접근 차단 확인
+- [ ] `/ko/mypage/corporate` ADMIN 접근 차단 확인
+- [ ] ALL 접근 페이지(`/ko/mypage/profile`)는 정상 접근 — 차단이 SHIPPER 전용에만 적용됨 확인
+
+### 결함 기재란
+
+| 결함-ID | 단계 | 현상 | 심각도 |
+|:-------:|:---:|:-----|:------:|
+| | | | |
