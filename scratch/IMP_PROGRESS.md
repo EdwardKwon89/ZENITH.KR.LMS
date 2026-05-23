@@ -230,7 +230,7 @@
 | H | 5 | 5 | 100% ✅ | |
 | I | 5 | 5 | 100% ✅ | IMP-073~077 전량 완료 (TASK-069~073 ✅) |
 | J | 1 | 4 | 25% | IMP-080 🔔 (TASK-074 완료) · IMP-081~083 🚫 |
-| **합계** | **58** | **68** | **85.3%** | ➖ 1건 제외 기준 |
+| **합계** | **61** | **68** | **89.7%** | ➖ 1건 제외 기준 |
 
 > 미완료 IMP 4건: IMP-081~083(🚫 Phase J 잔여 — TASK-074 평가 대기) · IMP-046(🚫 유예) · IMP-028·069(⬜·🚫 Future·착수 조건 대기)
 > 2026-05-23 기준 업데이트 (Riley/Gemini — Phase I 5/5 ✅ 전량 승인 반영, Phase A 100% 확정)
@@ -269,3 +269,4 @@
 | 2026-05-21 | D_Kai (OpenCode) | IMP-012 🔔 완료 보고 — TASK-045 master/admin codes-client dedup · 211/211 · 커밋 63ce099 |
 | 2026-05-21 | B_Kai (OpenCode) | IMP-024 ✅ PASS — TASK-049 공통 도메인 UI 컴포넌트 라이브러리화 완료 · ZenStatusBadge + ZenCurrencyDisplay · Ring 재할당 → B_Kai · 211/211 FULL PASS |
 | 2026-05-21 | Aiden (Claude) | IMP-069 신규 등록 — IBC 어댑터 구현 (Phase G 추가). An_08/An_09 분석 완료 기반. 착수 조건: IBC Sandbox 계정 + shxk 정체 확인. Phase G 0/1→0/2, 전체 56→57개 |
+| 2026-05-23 | Riley (Gemini) | Phase I 5/5 ✅ 전량 승인 반영 + Phase A 100% 확정 — IMP-073~077 ✅, IMP-071·072·077 ✅, 전체 61/68 89.7%, Phase J IMP-080 ⬜(TASK-074 진행중) |
