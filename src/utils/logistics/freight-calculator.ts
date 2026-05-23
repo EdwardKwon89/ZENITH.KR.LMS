@@ -3,6 +3,9 @@
  * 물류 표준 Chargeable Weight 산출 및 예상 운임 계산 엔진
  */
 
+import { SupabaseClient } from '@supabase/supabase-js';
+import { calculateCompositePricing } from '@/lib/logistics/composite-pricing';
+
 export type TransportMode = 'AIR' | 'SEA' | 'EXP' | 'LAND';
 
 export interface FreightCalcInput {
@@ -11,8 +14,8 @@ export interface FreightCalcInput {
   mode: TransportMode;
 }
 
-// 📐 가변 요율 정의 (향후 DB 연동 대상으로, 현재는 비즈니스 정책 기반 더미값 사용)
-const DUMMY_RATES = {
+// 📐 가변 요율 정의 (DB 미연동 시의 동기 Fallback 정책용 더미값)
+const DEFAULT_FALLBACK_RATES = {
   AIR: 5.5,   // $ per kg
   EXP: 9.0,   // $ per kg
   SEA: 120.0, // $ per CBM (LCL 기본)
@@ -46,17 +49,34 @@ export function calculateChargeableWeight(input: FreightCalcInput): number {
 
 /**
  * 예상 운임(Estimated Freight) 계산
+ * - supabase와 carrier_id가 주어지면 DB 기반 Composite Pricing 비동기 계산을 수행하고,
+ * - 주어지지 않으면 기존 DUMMY 요율 기반 동기 계산(하위 호환)을 수행합니다.
  */
-export function estimateFreightCost(input: FreightCalcInput): number {
+export function estimateFreightCost(
+  input: FreightCalcInput & { carrier_id?: string; supabase?: SupabaseClient }
+): number | Promise<number> {
+  if (input.supabase && input.carrier_id) {
+    // 🎛️ DB 기반 Composite Pricing 비동기 계산 경로
+    return calculateCompositePricing({
+      weight: input.weight,
+      volume: input.volume,
+      transport_mode: input.mode,
+      carrier_id: input.carrier_id,
+      supabase: input.supabase
+    }).then(res => res.total);
+  }
+
+  // 📐 동기 Fallback 경로 (클라이언트 UI / 단위 테스트용)
   const chargeable = calculateChargeableWeight(input);
   const mode = input.mode;
 
   if (mode === 'SEA') {
     // 해상은 R.T(Chargeable Volume) 기준 단가 적용
-    return chargeable * DUMMY_RATES.SEA;
+    return chargeable * DEFAULT_FALLBACK_RATES.SEA;
   }
 
   // 항공, 특송 등은 중량 기준 단가 적용
-  const rate = DUMMY_RATES[mode] || 0;
+  const rate = DEFAULT_FALLBACK_RATES[mode] || 0;
   return chargeable * rate;
 }
+
