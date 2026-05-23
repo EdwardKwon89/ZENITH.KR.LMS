@@ -8,7 +8,7 @@
 | 담당 Agent | Riley |
 | 우선순위 | P2 |
 | 전제조건 | TASK-074 ✅ (zen_rate_cards·zen_surcharges 테이블 존재) |
-| 상태 | 📝 설계 의견 |
+| 상태 | 🔄 구현 중 |
 | 파급 효과 | freight-calculator.ts DUMMY_RATES 교체, zen_order_costs 연계 |
 
 ---
@@ -123,7 +123,31 @@ graph TD
 
 ## 설계 확정 (Aiden 작성)
 
-> 착수 시 작성 예정.
+**판정: 방안 A 채택** (2026-05-24, Aiden)
+
+### 채택 내용
+
+1. **계산 흐름 채택**: `chargeableWeight` → `zen_rate_cards` slab rate → `zen_surcharges` 합산 → `PricingBreakdown`
+   - `calculateSlabRate(weight, tiers)` 재사용 (`rate-engine.ts` L19) ✅
+   - `PERCENT` surcharge는 baseFreight 기준 비율 계산 ✅
+
+2. **`zen_order_costs` 방식**: 기존 컬럼 활용 (컬럼 확장 없음) — Riley 제안 채택
+   - `cost_type = 'FREIGHT'` (기본 운임) + 할증 구분 코드(FSC·SSC 등) row 추가 방식
+   - 새 할증 유형 추가 시 스키마 변경 불필요
+
+3. **통합 지점**: `getRouteOptions` (routing.ts) 수준 — DatabaseRouteAdapter 최소 변경
+   - `DatabaseRouteAdapter.lookupRate`는 그대로 유지 (TASK-075 완료분 변경 최소화)
+   - `getRouteOptions`에서 route options 계산 후 각 option에 `pricing_breakdown` 추가 호출
+   - `routing.ts` RouteOption 타입에 `pricing_breakdown?: PricingBreakdown` 선택적 필드 추가
+
+4. **`estimateFreightCost` 시그니처 유지**: 하위 호환 필수
+   - `DUMMY_RATES` 제거 후 내부적으로 `calculateCompositePricing` 위임
+
+5. **유효기간 필터**: `valid_from <= CURRENT_DATE <= valid_until(or NULL)` 엄수
+
+### 착수 승인
+
+📝→🔄: Riley 즉시 구현 착수 가능
 
 ---
 
@@ -144,3 +168,5 @@ graph TD
 | 날짜 | 주체 | 내용 |
 |:-----|:----:|:-----|
 | 2026-05-23 | Aiden (Claude) | Task 생성 — 지능형 라우팅 Phase-II Composite Pricing Engine 구현 지시 |
+| 2026-05-24 | Riley (Gemini) | 📝 설계 의견 제출 — 방안 A: slab rate + surcharge 합산 흐름·zen_order_costs 기존 컬럼 활용·composite-pricing.ts 신규 |
+| 2026-05-24 | Aiden (Claude) | 설계 확정 — 방안 A 채택, 통합지점 getRouteOptions 수준(DatabaseRouteAdapter 최소변경), estimateFreightCost 시그니처 유지, 착수 승인 📝→🔄 |
