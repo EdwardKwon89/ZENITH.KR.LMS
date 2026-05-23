@@ -62,6 +62,7 @@ export default function NaviSidebar({
       isAdminOnly: true,
       children: [
         { title: t("rates"), href: "/admin/rates" },
+        { title: t("rate_cards_management"), href: "/admin/rate-cards" },
       ]
     },
     { 
