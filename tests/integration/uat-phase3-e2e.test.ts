@@ -63,6 +63,7 @@ describe('ZENITH Phase 3 UAT: E2E + Routing Integrated Validation', () => {
       upsert: vi.fn().mockReturnThis(),
       delete: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
+      lte: vi.fn().mockReturnThis(),
       in: vi.fn().mockReturnThis(),
       is: vi.fn().mockReturnThis(),
       or: vi.fn().mockReturnThis(),
@@ -105,7 +106,9 @@ describe('ZENITH Phase 3 UAT: E2E + Routing Integrated Validation', () => {
 
     // Step 3: Shipper calculates route -> selects BALANCED. (ROU.1, ROU.2)
     mockResultQueue.push(
-      { data: { origin_port_id: 'port-1', dest_port_id: 'port-2' }, error: null }, // order single
+      { data: { origin_port_id: 'port-uuid-1', dest_port_id: 'port-uuid-2', origin_port: { code: 'ICN', name: 'Incheon' }, dest_port: { code: 'SIN', name: 'Singapore' } }, error: null }, // order single
+      { data: [{ id: 'route-1', carrier_id: 'carrier-air', from_port_id: 'ICN', to_port_id: 'SIN', transport_mode: 'AIR', transit_days: 2, is_active: true, carrier: { code: 'ZENITH_AIR', name: 'ZENITH Air Cargo', transport_mode: 'AIR' } }], error: null }, // route_network
+      { data: { tiers: [{ weight_min: 0, unit_price: 5.50 }] }, error: null }, // rate card lookup
       { data: { key: 'ROUTING_WEIGHT_ALPHA', value_numeric: 0.6 }, error: null }, // getParam ALPHA
       { data: { key: 'ROUTING_WEIGHT_BETA', value_numeric: 0.4 }, error: null },  // getParam BETA
       { error: null }, // upsert COST

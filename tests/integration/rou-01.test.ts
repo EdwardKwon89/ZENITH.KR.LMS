@@ -73,7 +73,56 @@ describe('TC-R.4: getRouteOptions — 3종 옵션 생성 및 UPSERT 정책', () 
           select: vi.fn().mockReturnThis(),
           eq: vi.fn().mockReturnThis(),
           single: vi.fn().mockResolvedValue({
-            data: { origin_port: { name: 'ICN' }, dest_port: { name: 'SIN' } },
+            data: {
+              origin_port_id: 'port-uuid-1',
+              dest_port_id: 'port-uuid-2',
+              origin_port: { code: 'ICN', name: 'Incheon' },
+              dest_port: { code: 'SIN', name: 'Singapore' }
+            },
+            error: null
+          })
+        };
+      }
+      if (table === 'zen_route_network') {
+        const mockRoutes = [
+          {
+            id: 'route-1',
+            carrier_id: 'carrier-air',
+            from_port_id: 'ICN',
+            to_port_id: 'SIN',
+            transport_mode: 'AIR',
+            transit_days: 2,
+            is_active: true,
+            carrier: { code: 'ZENITH_AIR', name: 'ZENITH Air Cargo', transport_mode: 'AIR' }
+          },
+          {
+            id: 'route-2',
+            carrier_id: 'carrier-sea',
+            from_port_id: 'ICN',
+            to_port_id: 'SIN',
+            transport_mode: 'SEA',
+            transit_days: 7,
+            is_active: true,
+            carrier: { code: 'ZENITH_SEA', name: 'ZENITH Maritime', transport_mode: 'SEA' }
+          },
+        ];
+        const handler: any = {
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(),
+        };
+        handler.then = (resolve: any) => resolve({ data: mockRoutes, error: null });
+        return handler;
+      }
+      if (table === 'zen_rate_cards') {
+        return {
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(),
+          lte: vi.fn().mockReturnThis(),
+          or: vi.fn().mockReturnThis(),
+          order: vi.fn().mockReturnThis(),
+          limit: vi.fn().mockReturnThis(),
+          maybeSingle: vi.fn().mockResolvedValue({
+            data: { tiers: [{ weight_min: 0, unit_price: 5.50 }] },
             error: null
           })
         };
