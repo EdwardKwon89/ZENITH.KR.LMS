@@ -118,7 +118,7 @@ export class FinanceRepository extends BaseRepository {
   async findFullByOrderId(orderId: string) {
     return this.db
       .from('zen_order_costs')
-      .select('id, order_id, cost_type, quantity, unit_price, total_amount, currency, invoice_id, is_revenue, created_at')
+      .select('id, order_id, cost_type, quantity, unit_price, total_amount, currency, invoice_id, is_revenue, created_at, route_option_id, carrier, segment_index')
       .eq('order_id', orderId);
   }
 

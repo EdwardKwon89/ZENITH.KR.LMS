@@ -1522,6 +1522,7 @@ export type Database = {
       }
       zen_order_costs: {
         Row: {
+          carrier: string | null
           cost_type: string
           created_at: string | null
           currency: string
@@ -1530,10 +1531,13 @@ export type Database = {
           is_revenue: boolean | null
           order_id: string
           quantity: number
+          route_option_id: string | null
+          segment_index: number | null
           total_amount: number | null
           unit_price: number
         }
         Insert: {
+          carrier?: string | null
           cost_type: string
           created_at?: string | null
           currency?: string
@@ -1542,10 +1546,13 @@ export type Database = {
           is_revenue?: boolean | null
           order_id: string
           quantity?: number
+          route_option_id?: string | null
+          segment_index?: number | null
           total_amount?: number | null
           unit_price?: number
         }
         Update: {
+          carrier?: string | null
           cost_type?: string
           created_at?: string | null
           currency?: string
@@ -1554,6 +1561,8 @@ export type Database = {
           is_revenue?: boolean | null
           order_id?: string
           quantity?: number
+          route_option_id?: string | null
+          segment_index?: number | null
           total_amount?: number | null
           unit_price?: number
         }
@@ -1570,6 +1579,13 @@ export type Database = {
             columns: ["order_id"]
             isOneToOne: false
             referencedRelation: "zen_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "zen_order_costs_route_option_id_fkey"
+            columns: ["route_option_id"]
+            isOneToOne: false
+            referencedRelation: "zen_route_options"
             referencedColumns: ["id"]
           },
         ]

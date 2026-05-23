@@ -64,38 +64,7 @@ export class SettlementEngine {
       const { chargeableWeight } = await this.costAggregator.calculateChargeableWeight(order);
       logger.info(`[Settlement] Chargeable Weight: ${chargeableWeight}kg`);
 
-      // 3. 요율 매칭 (가장 적합한 Rate Card 검색)
-      const { data: rateCard, error: rateError } = await supabase
-        .from('zen_rate_cards')
-        .select(`
-          *,
-          tiers:zen_rate_tiers(*)
-        `)
-        .eq('origin_code', order.origin_port.code)
-        .eq('dest_code', order.dest_port.code)
-        .eq('mode', order.transport_mode)
-        .eq('status', 'ACTIVE')
-        .or(`customer_id.eq.${shipperIdStr},customer_id.is.null`)
-        .order('priority', { ascending: false })
-        .order('created_at', { ascending: false });
-
-      if (rateError || !rateCard || rateCard.length === 0) {
-        logger.warn(`[Settlement] No matching rate card found for ${order.origin_port.code}->${order.dest_port.code} (${order.transport_mode}). Error: ${rateError?.message}`);
-        return { success: false, message: '매칭되는 유효한 요율 카드가 없습니다.' };
-      }
-
-      logger.info(`[Settlement] Found ${rateCard.length} potential rate cards`);
-      const bestRate = rateCard.find(r => r.customer_id === shipperIdStr) || rateCard[0];
-      logger.info(`[Settlement] Selected Best Rate: ID=${bestRate.id}`);
-
-      // 4. 단가 결정 (슬랩 요율 적용)
-      const unitPrice = this.slabRateCalculator.calculateUnitPrice(bestRate, chargeableWeight);
-      logger.info(`[Settlement] Calculated Unit Price: ${unitPrice}`);
-
-      const totalFreight = unitPrice * chargeableWeight;
-      logger.info(`[Settlement] Calculation Success: ${unitPrice} * ${chargeableWeight} = ${totalFreight} ${bestRate.currency}`);
-
-      // 5. 비용 데이터 저장 (멱등성 처리)
+      // 3. 비용 데이터 저장 (멱등성 처리) - 기존 미청구 비용 목록 및 인보이스 상태 확인을 위해 먼저 로드
       const { data: existingCosts, error: costSelectError } = await supabase
         .from('zen_order_costs')
         .select('id, invoice_id')
@@ -109,55 +78,183 @@ export class SettlementEngine {
       // 재계산 검증
       this.settlementValidator.validateRecalculation(existingCosts);
 
-      const unbilledCost = existingCosts?.find(c => c.invoice_id === null);
-      let costData;
+      // 4. 적용된 경로 옵션 확인 (IMP-070)
+      const { data: route, error: routeError } = await supabase
+        .from('zen_order_routes')
+        .select(`
+          selected_option_id,
+          selected_option:zen_route_options(id, segments, total_cost, total_transit_days, option_type)
+        `)
+        .eq('order_id', orderId)
+        .maybeSingle();
 
-      if (unbilledCost) {
-        // 이미 청구되지 않은 비용 레코드가 존재하면 업데이트 (멱등성 보장)
-        const { data: updatedCost, error: costUpdateError } = await supabase
+      if (routeError) {
+        logger.error('[Settlement] Route query error:', routeError);
+      }
+
+      const selectedOption = route?.selected_option as any;
+      const segments = selectedOption?.segments;
+
+      let costId: string | undefined;
+      let totalFreight: number;
+      let calculatedUnitPrice: number | undefined;
+      let finalCurrency: string;
+
+      if (selectedOption && Array.isArray(segments) && segments.length > 0) {
+        logger.info(`[Settlement] Routing option found: ${route.selected_option_id}`);
+        
+        // 멱등성 보장: 기존 미청구 FREIGHT 항목 삭제
+        const { error: deleteError } = await supabase
           .from('zen_order_costs')
-          .update({
-            unit_price: unitPrice,
-            quantity: chargeableWeight,
-            currency: bestRate.currency || 'USD',
-            is_revenue: true
-          })
-          .eq('id', unbilledCost.id)
-          .select()
-          .single();
+          .delete()
+          .eq('order_id', orderId)
+          .eq('cost_type', 'FREIGHT');
 
-        if (costUpdateError) {
-          throw costUpdateError;
+        if (deleteError) {
+          throw deleteError;
         }
-        costData = updatedCost;
-      } else {
-        // 존재하지 않으면 새로 생성
-        const { data: insertedCost, error: costInsertError } = await supabase
-          .from('zen_order_costs')
-          .insert({
+
+        const carriers = segments.map((s: any) => s.carrier).filter(Boolean);
+        const uniqueCarriers = new Set(carriers);
+        const isSingleCarrier = uniqueCarriers.size === 1;
+
+        totalFreight = segments.reduce((sum: number, s: any) => sum + Number(s.cost || 0), 0);
+        finalCurrency = segments[0]?.currency || 'USD';
+
+        if (isSingleCarrier) {
+          logger.info(`[Settlement] Single carrier detected: ${carriers[0]}`);
+          const unitPrice = totalFreight / (chargeableWeight || 1);
+          calculatedUnitPrice = unitPrice;
+
+          const { data: insertedCost, error: costInsertError } = await supabase
+            .from('zen_order_costs')
+            .insert({
+              order_id: orderId,
+              cost_type: 'FREIGHT',
+              unit_price: unitPrice,
+              quantity: chargeableWeight,
+              currency: finalCurrency,
+              is_revenue: true,
+              route_option_id: route.selected_option_id,
+              carrier: carriers[0],
+              segment_index: null
+            })
+            .select()
+            .single();
+
+          if (costInsertError) {
+            throw costInsertError;
+          }
+          costId = insertedCost.id;
+        } else {
+          logger.info(`[Settlement] Multi-carrier detected. Segment count: ${segments.length}`);
+          const insertPayloads = segments.map((seg: any, idx: number) => ({
             order_id: orderId,
             cost_type: 'FREIGHT',
-            unit_price: unitPrice,
-            quantity: chargeableWeight,
-            currency: bestRate.currency || 'USD',
-            is_revenue: true
-          })
-          .select()
-          .single();
+            unit_price: Number(seg.cost || 0),
+            quantity: 1,
+            currency: seg.currency || 'USD',
+            is_revenue: true,
+            route_option_id: route.selected_option_id,
+            carrier: seg.carrier,
+            segment_index: idx
+          }));
 
-        if (costInsertError) {
-          throw costInsertError;
+          const { data: insertedCosts, error: costInsertError } = await supabase
+            .from('zen_order_costs')
+            .insert(insertPayloads)
+            .select();
+
+          if (costInsertError || !insertedCosts || insertedCosts.length === 0) {
+            throw costInsertError || new Error('다중 캐리어 비용 삽입 실패');
+          }
+          costId = insertedCosts[0].id;
         }
-        costData = insertedCost;
+      } else {
+        logger.info('[Settlement] No selected route option. Falling back to Rate Cards.');
+        
+        // 요율 매칭 (가장 적합한 Rate Card 검색) - Fallback 시에만 실행
+        const { data: rateCard, error: rateError } = await supabase
+          .from('zen_rate_cards')
+          .select(`
+            *,
+            tiers:zen_rate_tiers(*)
+          `)
+          .eq('origin_code', order.origin_port.code)
+          .eq('dest_code', order.dest_port.code)
+          .eq('mode', order.transport_mode)
+          .eq('status', 'ACTIVE')
+          .or(`customer_id.eq.${shipperIdStr},customer_id.is.null`)
+          .order('priority', { ascending: false })
+          .order('created_at', { ascending: false });
+
+        if (rateError || !rateCard || rateCard.length === 0) {
+          logger.warn(`[Settlement] No matching rate card found for ${order.origin_port.code}->${order.dest_port.code} (${order.transport_mode}). Error: ${rateError?.message}`);
+          return { success: false, message: '매칭되는 유효한 요율 카드가 없습니다.' };
+        }
+
+        logger.info(`[Settlement] Found ${rateCard.length} potential rate cards`);
+        const bestRate = rateCard.find(r => r.customer_id === shipperIdStr) || rateCard[0];
+        logger.info(`[Settlement] Selected Best Rate: ID=${bestRate.id}`);
+
+        const unitPrice = this.slabRateCalculator.calculateUnitPrice(bestRate, chargeableWeight);
+        calculatedUnitPrice = unitPrice;
+        totalFreight = unitPrice * chargeableWeight;
+        finalCurrency = bestRate.currency || 'USD';
+
+        const unbilledCost = existingCosts?.find(c => c.invoice_id === null);
+
+        if (unbilledCost) {
+          const { data: updatedCost, error: costUpdateError } = await supabase
+            .from('zen_order_costs')
+            .update({
+              unit_price: unitPrice,
+              quantity: chargeableWeight,
+              currency: finalCurrency,
+              is_revenue: true,
+              route_option_id: null,
+              carrier: null,
+              segment_index: null
+            })
+            .eq('id', unbilledCost.id)
+            .select()
+            .single();
+
+          if (costUpdateError) {
+            throw costUpdateError;
+          }
+          costId = updatedCost.id;
+        } else {
+          const { data: insertedCost, error: costInsertError } = await supabase
+            .from('zen_order_costs')
+            .insert({
+              order_id: orderId,
+              cost_type: 'FREIGHT',
+              unit_price: unitPrice,
+              quantity: chargeableWeight,
+              currency: finalCurrency,
+              is_revenue: true,
+              route_option_id: null,
+              carrier: null,
+              segment_index: null
+            })
+            .select()
+            .single();
+
+          if (costInsertError) {
+            throw costInsertError;
+          }
+          costId = insertedCost.id;
+        }
       }
 
       return {
         success: true,
         chargeableWeight,
-        unitPrice,
+        unitPrice: calculatedUnitPrice,
         totalFreight,
-        currency: bestRate.currency ?? undefined,
-        costId: costData.id
+        currency: finalCurrency,
+        costId
       };
     } catch (err: any) {
       logger.error('SettlementEngine Error:', err);
