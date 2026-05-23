@@ -88,6 +88,43 @@ export class AdminRepository extends BaseRepository {
       .eq('id', userId);
   }
 
+  async updateProfileStatus(userId: string, status: string) {
+    return this.db
+      .from('zen_profiles')
+      .update({ status })
+      .eq('id', userId);
+  }
+
+  async findMembers(params: {
+    status?: string;
+    role?: string;
+    keyword?: string;
+    limit?: number;
+    offset?: number;
+  }) {
+    let query = this.db
+      .from('zen_profiles')
+      .select('id, email, full_name, role, status, grade_code, org_id, created_at, is_active', { count: 'exact' });
+
+    if (params.status) {
+      query = query.eq('status', params.status);
+    }
+
+    if (params.role) {
+      query = query.eq('role', params.role);
+    }
+
+    if (params.keyword) {
+      query = query.or(`full_name.ilike.%${params.keyword}%,email.ilike.%${params.keyword}%`);
+    }
+
+    query = query.order('created_at', { ascending: false });
+
+    if (params.limit) query = query.range(params.offset || 0, (params.offset || 0) + params.limit - 1);
+
+    return query;
+  }
+
   async findAdminProfiles() {
     return this.db
       .from('zen_profiles')

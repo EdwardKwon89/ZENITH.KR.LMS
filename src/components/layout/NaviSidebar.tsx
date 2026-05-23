@@ -21,7 +21,8 @@ import {
   BarChartBig,
   CalendarDays,
   FileText,
-  Building
+  Building,
+  Users
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -80,6 +81,7 @@ export default function NaviSidebar({
         { title: t("logistics_tracking"), href: "/tracking" },
         { title: t("inventory"), href: "/inventory" },
         { title: t("logistics_inbound"), href: "/warehouse/inbound" },
+        { title: t("logistics_outbound"), href: "/warehouse/outbound" },
       ]
     },
     { 
@@ -112,6 +114,7 @@ export default function NaviSidebar({
       ]
     },
     { title: t("claims"), href: "/admin/claims", icon: ShieldAlert, isAdminOnly: true },
+    { title: t("member_management"), href: "/admin/members", icon: Users, isAdminOnly: true },
     { title: t("grade_promotion_requests"), href: "/admin/upgrade-requests", icon: TrendingUp, isAdminOnly: true },
     { title: t("org_approval"), href: "/admin/organizations", icon: Building, isAdminOnly: true },
     { title: t("customs_management"), href: "/admin/customs", icon: FileText, isAdminOnly: true },
