@@ -3,6 +3,7 @@
 import { logger } from '@/lib/logger';
 
 import { validateUserAction } from "@/lib/auth/guards";
+import { USER_ROLES } from "@/lib/auth/rbac";
 import { revalidatePath } from "next/cache";
 import { OrderRepository } from "@/lib/repositories";
 import { OrderStatus } from "@/types/orders";
@@ -11,6 +12,12 @@ import { updateOrderStatus } from "./orders";
 export async function getWarehousedOrders() {
   const { supabase, profile } = await validateUserAction();
   if (!profile) throw new Error("User profile not found");
+  const isAllowed = profile.role === USER_ROLES.ADMIN ||
+    profile.role === USER_ROLES.MANAGER ||
+    profile.role === USER_ROLES.ZENITH_SUPER_ADMIN;
+  if (!isAllowed) {
+    throw new Error("권한이 없습니다. ADMIN, MANAGER, ZENITH_SUPER_ADMIN만 접근 가능합니다.");
+  }
 
   const { data, error } = await supabase
     .from("zen_orders")
@@ -36,6 +43,12 @@ export async function getWarehousedOrders() {
 export async function getTodayReleasedOrders() {
   const { supabase, profile } = await validateUserAction();
   if (!profile) throw new Error("User profile not found");
+  const isAllowed = profile.role === USER_ROLES.ADMIN ||
+    profile.role === USER_ROLES.MANAGER ||
+    profile.role === USER_ROLES.ZENITH_SUPER_ADMIN;
+  if (!isAllowed) {
+    throw new Error("권한이 없습니다. ADMIN, MANAGER, ZENITH_SUPER_ADMIN만 접근 가능합니다.");
+  }
 
   const todayStart = new Date();
   todayStart.setHours(0, 0, 0, 0);
@@ -63,6 +76,12 @@ export async function getTodayReleasedOrders() {
 export async function confirmOutbound(orderId: string) {
   const { supabase, user, profile } = await validateUserAction();
   if (!profile) throw new Error("User profile not found");
+  const isAllowed = profile.role === USER_ROLES.ADMIN ||
+    profile.role === USER_ROLES.MANAGER ||
+    profile.role === USER_ROLES.ZENITH_SUPER_ADMIN;
+  if (!isAllowed) {
+    throw new Error("권한이 없습니다. ADMIN, MANAGER, ZENITH_SUPER_ADMIN만 접근 가능합니다.");
+  }
 
   const orderRepo = new OrderRepository(supabase);
 
