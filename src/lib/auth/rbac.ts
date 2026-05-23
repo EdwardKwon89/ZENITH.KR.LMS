@@ -37,8 +37,8 @@ function normalizePath(path: string): string {
  * Fallback: Static Permissions (DB 연동 전 또는 장애 시 대비)
  */
 export const STATIC_PERMISSIONS: Record<string, string[]> = {
-  [USER_ROLES.ADMIN]: ['/master', '/admin', '/orders', '/logistics', '/billing', '/tracking', '/inventory', '/finance', '/settlement', '/voc', '/support', '/mypage'],
-  [USER_ROLES.MANAGER]: ['/orders', '/logistics', '/billing', '/reports', '/tracking', '/inventory', '/finance', '/settlement', '/voc', '/support', '/mypage'],
+  [USER_ROLES.ADMIN]: ['/master', '/admin', '/orders', '/logistics', '/billing', '/tracking', '/inventory', '/finance', '/settlement', '/voc', '/support', '/mypage', '/warehouse'],
+  [USER_ROLES.MANAGER]: ['/orders', '/logistics', '/billing', '/reports', '/tracking', '/inventory', '/finance', '/settlement', '/voc', '/support', '/mypage', '/warehouse'],
   [USER_ROLES.OPERATOR]: ['/orders', '/logistics', '/tracking', '/voc', '/support', '/mypage'],
   [USER_ROLES.CARRIER]: ['/logistics/delivery', '/orders/assigned', '/admin/transport-costs', '/admin/rates', '/voc', '/support', '/mypage'],
   [USER_ROLES.CORPORATE]: ['/orders', '/billing/invoice', '/tracking', '/finance', '/settlement', '/voc', '/support', '/mypage'],

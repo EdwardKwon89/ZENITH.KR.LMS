@@ -79,6 +79,7 @@ export default function NaviSidebar({
       children: [
         { title: t("logistics_tracking"), href: "/tracking" },
         { title: t("inventory"), href: "/inventory" },
+        { title: t("logistics_inbound"), href: "/warehouse/inbound" },
       ]
     },
     { 
