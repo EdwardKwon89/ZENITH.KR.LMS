@@ -72,6 +72,7 @@ export async function updateOrder(orderId: string, payload: OrderRegistrationInp
     delivery_notes: validated.delivery_notes,
     transport_mode: validated.transport_mode,
     estimated_cost: validated.estimated_cost,
+    special_cargo_type: validated.special_cargo_type,
   });
 
   await orderRepo.deleteItemsByOrderId(orderId);

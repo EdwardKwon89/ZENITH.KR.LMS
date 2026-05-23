@@ -141,6 +141,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
     defaultValues: {
       order_type: 'B2B',
       transport_mode: 'AIR',
+      special_cargo_type: 'NONE',
       packages: [{ 
         packing_unit: 'BOX', 
         packing_count: 1, 
@@ -403,6 +404,35 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                         <option value="">{transportMode === 'AIR' || transportMode === 'EXP' ? 'Dest Airport' : 'Dest Port'}</option>
                         {filteredPorts.map(p => <option key={p.id} value={p.id}>[{p.code}] {p.name}</option>)}
                       </select>
+                    </div>
+                  </div>
+
+                  {/* 📦 Special Cargo Selection UI (IMP-076) */}
+                  <div className="mt-4 pt-4 border-t border-slate-100">
+                    <label className="text-[10px] font-bold text-slate-500 mb-1.5 block uppercase tracking-wider">
+                      {t('special_cargo_label')}
+                    </label>
+                    <div className="grid grid-cols-5 gap-1">
+                      {[
+                        { code: 'NONE', label: t('special_cargo_none') },
+                        { code: 'DANGEROUS', label: t('special_cargo_dangerous') },
+                        { code: 'FROZEN', label: t('special_cargo_frozen') },
+                        { code: 'VALUABLE', label: t('special_cargo_valuable') },
+                        { code: 'USED', label: t('special_cargo_used') }
+                      ].map((cargo) => (
+                        <button
+                          key={cargo.code}
+                          type="button"
+                          onClick={() => setValue('special_cargo_type', cargo.code as any)}
+                          className={`py-2 rounded-xl border text-[10px] font-bold transition-all ${
+                            watch('special_cargo_type') === cargo.code
+                              ? 'bg-slate-800 border-slate-800 text-white shadow-md'
+                              : 'bg-white border-slate-200 text-slate-400 hover:bg-slate-50'
+                          }`}
+                        >
+                          {cargo.label}
+                        </button>
+                      ))}
                     </div>
                   </div>
                 </div>
