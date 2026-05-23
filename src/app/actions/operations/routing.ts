@@ -4,7 +4,8 @@ import { logger } from '@/lib/logger';
 
 import { validateUserAction } from "@/lib/auth/guards";
 import { revalidatePath } from "next/cache";
-import { routingEngine, RouteOption } from "@/lib/logistics/routing";
+import { RoutingEngine, RouteOption } from "@/lib/logistics/routing";
+import { DatabaseRouteAdapter } from "@/lib/logistics/adapters/DatabaseRouteAdapter";
 
 /**
  * [ROU-01] 오더에 대한 경로 옵션을 생성하거나 갱신합니다. (UPSERT)
@@ -15,17 +16,18 @@ export async function getRouteOptions(orderId: string) {
   // 1. 오더 정보 조회 (출발/도착지 파악)
   const { data: order, error: orderError } = await supabase
     .from("zen_orders")
-    .select("origin_port_id, dest_port_id, origin_port:zen_ports!origin_port_id(name), dest_port:zen_ports!dest_port_id(name)")
+    .select("origin_port_id, dest_port_id, origin_port:zen_ports!origin_port_id(code, name), dest_port:zen_ports!dest_port_id(code, name)")
     .eq("id", orderId)
     .single();
 
   if (orderError || !order) throw new Error("Order not found for routing");
 
-  const originName = (order.origin_port as any)?.name || "Unknown Origin";
-  const destName = (order.dest_port as any)?.name || "Unknown Destination";
+  const originCode = (order.origin_port as any)?.code || (order.origin_port as any)?.name || "";
+  const destCode = (order.dest_port as any)?.code || (order.dest_port as any)?.name || "";
 
-  // 2. 엔진을 통한 경로 계산
-  const options = await routingEngine.calculateOptions(originName, destName);
+  // 2. 엔진을 통한 경로 계산 (DB 기반 라우팅)
+  const engine = new RoutingEngine(new DatabaseRouteAdapter(supabase));
+  const options = await engine.calculateOptions(originCode, destCode);
 
   // 3. DB 저장 (BUG-07-A: UPSERT 정책 적용)
   // ON CONFLICT (order_id, option_type) DO UPDATE
