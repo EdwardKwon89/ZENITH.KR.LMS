@@ -8,7 +8,7 @@
 | 담당 Agent | B_Kai |
 | 우선순위 | P2 |
 | 전제조건 | TASK-074 ✅ (zen_carriers·zen_route_network 테이블 존재) |
-| 상태 | 🚫 블로커 — 전제조건 미충족 |
+| 상태 | 📝 설계 의견 — Agent 구현 방안 제출 |
 | 파급 효과 | routing.ts MockMapAdapter 교체, RoutingEngine 인터페이스 무변경 |
 
 ---
@@ -73,13 +73,53 @@ TASK-074로 `zen_carriers`·`zen_route_network` 테이블이 준비되면, `IVir
 
 ## 설계 의견 (Agent 작성)
 
-> 착수 전 작성 예정 (📝 단계 활용 권장).
+### 방안 A (제안) — DatabaseRouteAdapter
+
+**1. 인터페이스 준수**
+- `IVirtualMapAdapter.getPotentialRoutes(origin, dest)` — origin·dest는 port code (TEXT)
+- 반환 구조: `Omit<RouteOption, 'option_type' | 'score'>[]` — segments·total_cost·total_transit_days
+
+**2. DB 조회 전략 — 직접 조회 (캐싱 불필요)**
+
+`zen_route_network` 1회 쿼리로 전체 후보 조회:
+
+```sql
+SELECT r.*, c.name as carrier_name, c.code as carrier_code
+FROM zen_route_network r
+JOIN zen_carriers c ON r.carrier_id = c.id
+WHERE r.is_active = true
+  AND (r.from_port_id = origin AND r.to_port_id = dest)  -- 직항
+```
+
+멀티 레그(환적) 경로는 `from_port_id IN (hub ports of origin)` 조건으로 2차 쿼리.
+
+**3. 운임 산정**
+
+`zen_rate_cards`에서 carrier·transport_mode·유효기간 매칭:
+
+- Simple 단일 구간: rate_card.tiers 첫 번째 티어 base_rate 사용
+- 복수 구간: 각 구간 rate 합산
+- Fallback: rate_card 미존재 시 carrier 기본 운임 0원, `total_cost = 0`으로 반환 (scoring에서 처리)
+
+**4. 단일 파일 구성**
+
+`src/lib/logistics/adapters/DatabaseRouteAdapter.ts`:
+- `constructor(private supabase: SupabaseClient)`
+- SupabaseClient는 action에서 validateUserAction()으로 획득 후 주입 (기존 Repository 패턴과 동일)
+
+**5. MockMapAdapter 보존**
+- `MockMapAdapter`는 파일 유지 (파일 삭제 금지)
+- `routingEngine` 생성자 기본값을 `DatabaseRouteAdapter`로 교체
+- 테스트에서만 명시적 `new RoutingEngine(new MockMapAdapter())` 사용
+
+**6. 0건 처리**
+- DB 조회 결과 0건 → 빈 배열 `[]` 반환 → `routingEngine.calculateOptions`에서 `[]` 체크 이미 존재 (L82)
 
 ---
 
 ## 설계 확정 (Aiden 작성)
 
-> 착수 시 작성 예정.
+> Aiden 검토 후 작성.
 
 ---
 
@@ -100,3 +140,4 @@ TASK-074로 `zen_carriers`·`zen_route_network` 테이블이 준비되면, `IVir
 | 날짜 | 주체 | 내용 |
 |:-----|:----:|:-----|
 | 2026-05-23 | Aiden (Claude) | Task 생성 — 지능형 라우팅 Phase-II DatabaseRouteAdapter 구현 지시 |
+| 2026-05-24 | B_Kai (OpenCode) | 📝 설계 의견 제출 — 방안 A: DB 직접 조회 + segments 합산 + rate_card 운임 |
