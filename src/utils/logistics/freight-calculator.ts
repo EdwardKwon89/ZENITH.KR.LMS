@@ -3,8 +3,6 @@
  * 물류 표준 Chargeable Weight 산출 및 예상 운임 계산 엔진
  */
 
-import { SupabaseClient } from '@supabase/supabase-js';
-import { calculateCompositePricing } from '@/lib/logistics/composite-pricing';
 
 export type TransportMode = 'AIR' | 'SEA' | 'EXP' | 'LAND';
 
@@ -47,25 +45,7 @@ export function calculateChargeableWeight(input: FreightCalcInput): number {
   }
 }
 
-/**
- * 예상 운임(Estimated Freight) 계산
- * - supabase와 carrier_id가 주어지면 DB 기반 Composite Pricing 비동기 계산을 수행하고,
- * - 주어지지 않으면 기존 DUMMY 요율 기반 동기 계산(하위 호환)을 수행합니다.
- */
-export function estimateFreightCost(
-  input: FreightCalcInput & { carrier_id?: string; supabase?: SupabaseClient }
-): number | Promise<number> {
-  if (input.supabase && input.carrier_id) {
-    // 🎛️ DB 기반 Composite Pricing 비동기 계산 경로
-    return calculateCompositePricing({
-      weight: input.weight,
-      volume: input.volume,
-      transport_mode: input.mode,
-      carrier_id: input.carrier_id,
-      supabase: input.supabase
-    }).then(res => res.total);
-  }
-
+export function estimateFreightCost(input: FreightCalcInput): number {
   // 📐 동기 Fallback 경로 (클라이언트 UI / 단위 테스트용)
   const chargeable = calculateChargeableWeight(input);
   const mode = input.mode;
