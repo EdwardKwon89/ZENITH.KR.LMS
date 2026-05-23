@@ -924,3 +924,108 @@
 - **우선순위**: **High**
 - **상태**: ✅ 완료 (2026-05-23)
 - **연계 Task**: TASK-065 ✅
+
+---
+
+## [IMP-071] 세션 Idle Timeout 미구현
+
+- **발견 경위**: An-10 갭 분析 재분류 — Aiden 실 누락 확인 (2026-05-23)
+- **현재 상태**: proxy.ts에 idle timeout 로직 없음. Supabase JWT 기본 만료(1시간)만 존재
+- **근본 문제**: 일정 시간 미활동 시 자동 로그아웃 미작동 — 보안 요구사항 미달
+- **목표 구현**: proxy.ts에 마지막 활동 시각 추적(쿠키 `zen_last_activity`) + 30분 미활동 시 자동 로그아웃 redirect (`/login?reason=timeout`)
+- **관련 파일**: `src/middleware.ts`, `src/lib/proxy.ts`
+- **예상 공수**: 0.5일
+- **우선순위**: High (P0 보안)
+
+---
+
+## [IMP-072] SUSPENDED 계정 처리 미구현
+
+- **발견 경위**: An-10 갭 분析 재분류 — Aiden 실 누락 확인 (2026-05-23)
+- **현재 상태**: proxy.ts에서 PENDING만 처리. SUSPENDED 상태 차단 로직 없음
+- **근본 문제**: 정지된 계정이 서비스에 정상 접근 가능 — 보안 허점
+- **목표 구현**: proxy.ts에서 SUSPENDED 감지 → `/ko/suspended` redirect. `src/app/[locale]/(auth)/suspended/page.tsx` 신규 생성
+- **관련 파일**: `src/lib/proxy.ts`, `src/app/[locale]/(auth)/suspended/page.tsx` (신규)
+- **예상 공수**: 0.5일
+- **우선순위**: High (P0 보안)
+
+---
+
+## [IMP-078-DEFERRED] 개인정보 활용동의 — 의도적 유예 (2026-05-23 Aiden 재분류)
+
+- **발견 경위**: An-10 갭 분析 v2.2 → Aiden 재분류 (2026-05-23) — 실 누락 항목 → **2026-05-23 Aiden 갭 재분류 시 의도적 유예로 이동 (상용 오픈 후 별도 Sprint)**
+- **현재 상태**: `register/page.tsx`에 약관동의 UI 없음
+- **근본 문제**: 개인정보보호법 제15조 — 수집 동의 없이 개인정보 처리 불가 (CRITICAL 법적 리스크)
+- **목표 구현**: 회원가입 플로우(TYPE/ORG/INFO/DOCS/COMPLETE) 중 DOCS 단계에 약관동의 step 추가. `zen_users.terms_agreed_at TIMESTAMPTZ` 컬럼 마이그레이션. 동의 미체크 시 가입 차단.
+- **관련 파일**: `src/app/[locale]/(auth)/register/page.tsx`, `supabase/migrations/` (신규)
+- **예상 공수**: 1일
+- **우선순위**: Critical (법률)
+
+---
+
+## [IMP-079-DEFERRED] SMS 인증 — 의도적 유예 (2026-05-23 Aiden 재분류)
+
+- **발견 경위**: An-10 갭 분析 v2.2 → Aiden 재분류 (2026-05-23) — 실 누락 항목 → **2026-05-23 Aiden 갭 재분류 시 의도적 유예로 이동 (상용 오픈 후 별도 Sprint)**
+- **현재 상태**: `register/page.tsx` INFO 단계에 전화번호 입력 필드·인증번호 확인 없음
+- **근본 문제**: 본인확인 없이 회원가입 가능 — 허위 회원 등록 리스크
+- **목표 구현**: CoolSMS(coolsms.io) API 연동 — 전화번호 입력 → OTP 6자리 발송 → 확인 플로우. Server Action `sendSmsOtp()` + `verifySmsOtp()` 구현. `zen_sms_verifications` 테이블(phone, otp_hash, expires_at, verified) 신규.
+- **관련 파일**: `src/app/actions/auth.ts`, `src/app/[locale]/(auth)/register/page.tsx`, `supabase/migrations/` (신규)
+- **예상 공수**: 2일
+- **우선순위**: High
+
+---
+
+## [IMP-073] 입고 처리 전용 화면 SCR-040 미구현
+
+- **발견 경위**: An-10 갭 分析 재분류 — Aiden 실 누락 확인 (2026-05-23)
+- **현재 상태**: `/inventory` 경로로 재고 조회만 가능. 입고 수령→검수→확정 전용 워크플로우 페이지 없음
+- **근본 문제**: 창고 입고 업무 처리 불가
+- **목표 구현**: `src/app/[locale]/(dashboard)/warehouse/inbound/page.tsx` 신규 개발. 바코드 스캔 → 화물 조회 → 검수 메모 → 입고 확정
+- **관련 파일**: `src/app/[locale]/(dashboard)/warehouse/inbound/page.tsx` (신규), `src/app/actions/warehouse.ts`
+- **예상 공수**: 2일
+- **우선순위**: High (P1)
+
+---
+
+## [IMP-074] 출고·운송장 출력 화면 SCR-041 미구현
+
+- **발견 경위**: An-10 갭 分析 재분류 — Aiden 실 누락 확인 (2026-05-23)
+- **현재 상태**: 출고 지시·운송장 PDF 출력 전용 페이지 없음
+- **근본 문제**: 창고 출고 업무 처리 불가. 운송장 없이 화물 발송 불가.
+- **목표 구현**: `src/app/[locale]/(dashboard)/warehouse/outbound/page.tsx` 신규 개발. 출고 지시 → 바코드 스캔 → 운송장 PDF → 출고 확정
+- **관련 파일**: `src/app/[locale]/(dashboard)/warehouse/outbound/page.tsx` (신규), `src/app/actions/warehouse.ts`
+- **예상 공수**: 2.5일
+- **우선순위**: High (P1)
+
+---
+
+## [IMP-075] 오더 패킹 화면 SCR-031 미구현
+
+- **발견 경위**: An-10 갭 分析 재분류 — Aiden 실 누락 확인 (2026-05-23)
+- **현재 상태**: 마스터 오더 Packing List 출력 전용 페이지 없음
+- **목표 구현**: `src/app/[locale]/(dashboard)/master-orders/[id]/packing/page.tsx` 신규 개발. House 오더 품목·수량·CBM + Packing List 인쇄 레이아웃
+- **관련 파일**: `src/app/[locale]/(dashboard)/master-orders/[id]/packing/page.tsx` (신규)
+- **예상 공수**: 1일
+- **우선순위**: Medium (P2)
+
+---
+
+## [IMP-076] 특수화물 기재 미구현
+
+- **발견 경위**: An-10 갭 分析 재분류 — Aiden 실 누락 확인 (2026-05-23)
+- **현재 상태**: OrderRegistrationForm Zod 스키마에 특수화물 타입 필드 없음. zen_orders.cargo_details가 generic JSON
+- **목표 구현**: zen_orders에 `special_cargo_type TEXT CHECK IN ('NONE','DANGEROUS','FROZEN','VALUABLE','USED')` 컬럼 추가. OrderRegistrationForm에 특수화물 라디오 그룹 UI 추가.
+- **관련 파일**: `src/app/[locale]/(dashboard)/orders/new/OrderRegistrationForm.tsx`, `supabase/migrations/` (신규)
+- **예상 공수**: 1일
+- **우선순위**: Medium (P2)
+
+---
+
+## [IMP-077] 회원 관리 전용 화면 SCR-091 미구현
+
+- **발견 경위**: An-10 갭 分析 재분류 — Aiden 실 누락 확인 (2026-05-23)
+- **현재 상태**: /admin/organizations는 조직 승인 전용. 회원 등급·이용 제한 관리 UI 없음
+- **목표 구현**: `src/app/[locale]/(dashboard)/admin/members/page.tsx` 신규 개발. 전체 회원 목록 + 등급 변경 + SUSPEND/UNSUSPEND 조작 UI
+- **관련 파일**: `src/app/[locale]/(dashboard)/admin/members/page.tsx` (신규), `src/app/actions/member.ts`
+- **예상 공수**: 1.5일
+- **우선순위**: Medium (P2)
