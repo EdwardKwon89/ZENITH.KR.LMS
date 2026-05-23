@@ -124,9 +124,9 @@
 | TASK-067 | 260523 | An-10 갭 분析 문서 정정 | P4 | 없음 | D_Kai | ✅ | [TASK-067](tasks/TASK-067_260523_An10갭분석문서정정_DKai.md) | An-10 v2.2 — 작성자·SCR-101·구현률 3건 정정 완료 · 21e76b3+cbdf058 · Aiden ✅ 승인 |
 | TASK-068 | 260523 | 세션 Idle Timeout + SUSPENDED 보안 처리 | P0 | 없음 | D_Kai | ✅ | [TASK-068](tasks/TASK-068_260523_세션Idle+SUSPENDED보안처리_DKai.md) | IMP-071·072 완료 · bd88eac+3138eab · 214/214 · Aiden ✅ 승인 |
 | TASK-069 | 260523 | SCR-040 입고 처리 전용 화면 | P1 | 없음 | Riley | ✅ | [TASK-069](tasks/TASK-069_260523_SCR040입고처리전용화면_Riley.md) | IMP-073 완료 · 438c835+65b943d · 218/218 · Riley 위반 2건 기록 · Aiden ✅ 승인 |
-| TASK-070 | 260523 | SCR-041 출고·운송장 출력 화면 | P1 | TASK-069 ✅ 권장 | B_Kai | 🔔 | [TASK-070](tasks/TASK-070_260523_SCR041출고운송장출력화면_BKai.md) | IMP-074 — 구현 완료 · a746aee · 219/219 · WAREHOUSED→RELEASED + 운송장PDF |
+| TASK-070 | 260523 | SCR-041 출고·운송장 출력 화면 | P1 | TASK-069 ✅ 권장 | B_Kai | ❌ | [TASK-070](tasks/TASK-070_260523_SCR041출고운송장출력화면_BKai.md) | IMP-074 — ❌ 반려: zh/ja i18n 누락(기능결함) + Server Action RBAC 미적용(보안결함) |
 | TASK-071 | 260523 | SCR-031 오더 패킹 화면 | P2 | TASK-070 ✅ 권장 | B_Kai | ⬜ | [TASK-071](tasks/TASK-071_260523_SCR031오더패킹화면_BKai.md) | IMP-075 마스터 오더 Packing List |
-| TASK-072 | 260523 | 특수화물 기재 (zen_orders + UI) | P2 | TASK-069 ✅ 권장 | Riley | 🔔 | [TASK-072](tasks/TASK-072_260523_특수화물기재_Riley.md) | IMP-076 완료 · 259cdb6 · 219/219 · special_cargo_type DB+폼+RPC |
+| TASK-072 | 260523 | 특수화물 기재 (zen_orders + UI) | P2 | TASK-069 ✅ 권장 | Riley | ✅ | [TASK-072](tasks/TASK-072_260523_특수화물기재_Riley.md) | IMP-076 완료 · 259cdb6 · 219/219 · special_cargo_type DB+폼+RPC · Riley 위반 3회 누적→신규 할당 중단 |
 | TASK-073 | 260523 | SCR-091 회원 관리 전용 화면 | P2 | TASK-068 ✅ 권장 | D_Kai | ✅ | [TASK-073](tasks/TASK-073_260523_SCR091회원관리전용화면_DKai.md) | IMP-077 완료 · c72e92f · 218/218 · admin/members + 등급·정지 · Advisory: i18n 키 누락·자기정지방지(비차단) |
 | TASK-074 | 260523 | 지능형 라우팅 DB 스키마 확장 | P2 | TASK-070~073 ✅ 전량 | D_Kai | 🚫 | [TASK-074](tasks/TASK-074_260523_라우팅DB스키마확장_DKai.md) | IMP-080 · zen_carriers·route_network·rate_cards·surcharges |
 | TASK-075 | 260523 | DatabaseRouteAdapter 구현 | P2 | TASK-074 ✅ | B_Kai | 🚫 | [TASK-075](tasks/TASK-075_260523_DatabaseRouteAdapter구현_BKai.md) | IMP-081 · MockMapAdapter 교체 |
@@ -140,9 +140,9 @@
 
 | Agent | 진행 중 | 재작업/조치 필요 | 블로커 대기 |
 |:------|:--------|:----------------|:----------|
-| Riley | TASK-072 🔔 Aiden 검토 대기 | — | TASK-076 🚫 (Composite Pricing — TASK-074 선행) |
-| B_Kai | — | TASK-070 🔔 (IMP-074 Aiden 검토 대기) | TASK-071 ⬜ (SCR-031 패킹) · TASK-075 🚫 · TASK-077 🚫 |
-| D_Kai | — | Advisory 2건 fix 커밋 권고 (TASK-073 i18n 키·자기정지방지) | TASK-074 🚫 (라우팅 DB 스키마 — TASK-070~073 전량 완료 후) |
+| Riley | — | 신규 할당 중단 (위반 3회 누적) — 재교육 세션 후 재개 | TASK-076 🚫 (Composite Pricing — TASK-074 선행) |
+| B_Kai | — | TASK-070 ❌ 재작업 (zh/ja i18n + Server Action RBAC 2건) | TASK-071 ⬜ (TASK-070 재작업 완료 후 착수 권장) · TASK-075 🚫 · TASK-077 🚫 |
+| D_Kai | — | TASK-073 Advisory fix 권고 (i18n 4개 언어·자기정지방지) | TASK-074 🚫 (라우팅 DB 스키마 — TASK-070~073 전량 완료 후) |
 | Ring | — | — | 신규 할당 중단 유지 (9차 위반 누적) |
 
 ---
@@ -258,3 +258,5 @@
 | 2026-05-23 | Aiden (Claude) | TASK-068 ✅ 승인(D_Kai IMP-071·072 보안 구현, 214/214). TASK-069 ✅ 승인(Riley IMP-073, 218/218) — Riley 위반 2건 기록(절차·cross-agent). TASK-070 설계 확정 → 🔄 착수 승인(PDF @react-pdf ✅, 출고처리 WAREHOUSED오더기반 수정 지시). TASK-072(Riley)·TASK-073(D_Kai) 즉시 착수 가능 |
 | 2026-05-23 | Aiden (Claude) | 지능형 라우팅 계획 수립 — TASK-074~078 🚫 등록 (TASK-070~073 전량 완료 후 순차 착수). UAT_MASTER 72개 갱신 (누락 기능 7건 + 라우팅 6건 추가). |
 | 2026-05-23 | Aiden (Claude) | TASK-073 ✅ 승인 — IMP-077 SCR-091 회원관리 전항목 통과. Advisory 2건(i18n 키 누락·자기정지방지) 비차단 기록. TASK-074 전제조건 1/4 충족 |
+| 2026-05-23 | Aiden (Claude) | TASK-072 ✅ 승인 — IMP-076 특수화물 기재 전항목 통과. Riley 위반 3회 누적 → 신규 할당 중단. TASK-074 전제조건 2/4 충족 |
+| 2026-05-23 | Aiden (Claude) | TASK-070 ❌ 반려 — zh/ja i18n 키 누락(기능결함) + Server Action RBAC 미적용(보안결함) 2건. B_Kai 재작업 지시 |
