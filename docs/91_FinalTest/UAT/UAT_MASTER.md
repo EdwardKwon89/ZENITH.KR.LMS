@@ -66,7 +66,9 @@ Supabase: Cloud 프로젝트 연결
 
 | UAT-ID | 시나리오명 | 주요 역할 | 담당 문서 | 작성 Agent | 상태 |
 |:------:|:---------|:--------:|:---------|:----------:|:----:|
-| UAT-01-01 | 신규 회원가입 | SHIPPER | [UAT_01](UAT_01_인증_회원가입.md) | D_Kai | ✅ |
+| UAT-01-01 | 법인 신규 등록 (CREATE) — 다단계 Wizard | SHIPPER | [UAT_01](UAT_01_인증_회원가입.md) | D_Kai | ✅ |
+| UAT-01-06 | 개인회원 가입 | PERSONAL | [UAT_01](UAT_01_인증_회원가입.md) | D_Kai | ✅ |
+| UAT-01-07 | 법인 기존 합류 (JOIN) | CORPORATE | [UAT_01](UAT_01_인증_회원가입.md) | D_Kai | ✅ |
 | UAT-01-02 | 로그인 (전 역할) | ALL | [UAT_01](UAT_01_인증_회원가입.md) | D_Kai | ✅ |
 | UAT-01-03 | 로그아웃 | ALL | [UAT_01](UAT_01_인증_회원가입.md) | D_Kai | ✅ |
 | UAT-01-04 | 아이디 찾기 | ALL | [UAT_01](UAT_01_인증_회원가입.md) | D_Kai | ✅ |
@@ -103,11 +105,13 @@ Supabase: Cloud 프로젝트 연결
 | UAT-07-03 | FAQ 조회 | ALL | [UAT_07](UAT_07_VOC_고객지원.md) | D_Kai | ✅ |
 | UAT-07-04 | 공지사항 조회 | ALL | [UAT_07](UAT_07_VOC_고객지원.md) | D_Kai | ✅ |
 | UAT-07-05 | QnA 문의 등록 + 답변 | SHIPPER/ADMIN | [UAT_07](UAT_07_VOC_고객지원.md) | D_Kai | ✅ |
+| UAT-07-06 | ADMIN VOC 접수 제한 | ADMIN | [UAT_07](UAT_07_VOC_고객지원.md) | D_Kai | ✅ |
 | UAT-08-01 | 프로필 조회·수정 | ALL | [UAT_08](UAT_08_마이페이지.md) | D_Kai | ✅ |
 | UAT-08-02 | 비밀번호 변경 | ALL | [UAT_08](UAT_08_마이페이지.md) | D_Kai | ✅ |
 | UAT-08-03 | 통관 정보 설정 | SHIPPER | [UAT_08](UAT_08_마이페이지.md) | D_Kai | ✅ |
 | UAT-08-04 | 법인 정보 등록 | SHIPPER | [UAT_08](UAT_08_마이페이지.md) | D_Kai | ✅ |
 | UAT-08-05 | 등급 조회 | SHIPPER | [UAT_08](UAT_08_마이페이지.md) | D_Kai | ✅ |
+| UAT-08-06 | ADMIN 마이페이지 접근 차단 | ADMIN | [UAT_08](UAT_08_마이페이지.md) | D_Kai | ✅ |
 | UAT-09-01 | 조직 승인·거부 | ADMIN | [UAT_09](UAT_09_어드민_운영.md) | D_Kai | ✅ |
 | UAT-09-02 | 권한(역할) 변경 | ADMIN | [UAT_09](UAT_09_어드민_운영.md) | D_Kai | ✅ |
 | UAT-09-03 | 요율 설정 | ADMIN | [UAT_09](UAT_09_어드민_운영.md) | D_Kai | ✅ |
@@ -116,8 +120,10 @@ Supabase: Cloud 프로젝트 연결
 | UAT-09-06 | 오류 로그 조회 | ADMIN | [UAT_09](UAT_09_어드민_운영.md) | D_Kai | ✅ |
 | UAT-09-07 | 코드 관리 | ADMIN | [UAT_09](UAT_09_어드민_운영.md) | D_Kai | ✅ |
 | UAT-09-08 | 업그레이드 요청 처리 | ADMIN | [UAT_09](UAT_09_어드민_운영.md) | D_Kai | ✅ |
+| UAT-09-09 | REJECTED 사용자 로그인 차단 | ADMIN/SHIPPER | [UAT_09](UAT_09_어드민_운영.md) | D_Kai | ✅ |
+| UAT-09-10 | 자기 자신 역할 변경 제한 | ADMIN | [UAT_09](UAT_09_어드민_운영.md) | D_Kai | ✅ |
 
-**총 50개 시나리오** | 작성 완료: 50 / 50 ✅
+**총 56개 시나리오** | 작성 완료: 56 / 56 ✅
 
 ---
 
