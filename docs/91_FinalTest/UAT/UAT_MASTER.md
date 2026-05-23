@@ -125,8 +125,21 @@ Supabase: Cloud 프로젝트 연결
 | UAT-09-08 | 업그레이드 요청 처리 | ADMIN | [UAT_09](UAT_09_어드민_운영.md) | D_Kai | ✅ |
 | UAT-09-09 | REJECTED 사용자 로그인 차단 | ADMIN/SHIPPER | [UAT_09](UAT_09_어드민_운영.md) | D_Kai | ✅ |
 | UAT-09-10 | 자기 자신 역할 변경 제한 | ADMIN | [UAT_09](UAT_09_어드민_운영.md) | D_Kai | ✅ |
+| UAT-09-11 | SCR-091 회원 관리 전용 화면 (등급 변경·정지) | ADMIN | [UAT_09](UAT_09_어드민_운영.md) | D_Kai | ⬜ |
+| UAT-01-08 | 세션 Idle Timeout 자동 로그아웃 | ALL | [UAT_01](UAT_01_인증_회원가입.md) | D_Kai | ⬜ |
+| UAT-01-09 | SUSPENDED 계정 접근 차단 | ADMIN/SUSPENDED | [UAT_01](UAT_01_인증_회원가입.md) | D_Kai | ⬜ |
+| UAT-02-10 | 특수화물 유형 기재 + 조회 | SHIPPER/ADMIN | [UAT_02](UAT_02_오더관리.md) | Riley | ⬜ |
+| UAT-04-05 | SCR-040 입고 처리 전용 화면 (바코드·검수) | MANAGER | [UAT_04](UAT_04_창고_재고.md) | Riley | ⬜ |
+| UAT-04-06 | SCR-041 출고 처리 + 운송장 PDF 출력 | MANAGER | [UAT_04](UAT_04_창고_재고.md) | B_Kai | ⬜ |
+| UAT-04-07 | SCR-031 오더 패킹 리스트 화면 | MASTER/ADMIN | [UAT_04](UAT_04_창고_재고.md) | B_Kai | ⬜ |
+| UAT-10-01 | 경로 옵션 3종 조회 (COST·TIME·BALANCED) | ADMIN/SHIPPER | [UAT_10](UAT_10_지능형라우팅_운임.md) | 구현Agent | ⬜ |
+| UAT-10-02 | 최적 경로 선택 및 오더 적용 | ADMIN | [UAT_10](UAT_10_지능형라우팅_운임.md) | 구현Agent | ⬜ |
+| UAT-10-03 | Composite Pricing 항목별 금액 확인 | ADMIN | [UAT_10](UAT_10_지능형라우팅_운임.md) | 구현Agent | ⬜ |
+| UAT-10-04 | 요율 카드 등록·수정·삭제 (ADMIN) | ADMIN | [UAT_10](UAT_10_지능형라우팅_운임.md) | 구현Agent | ⬜ |
+| UAT-10-05 | 경로 재산출 (오더 변경 후) | ADMIN | [UAT_10](UAT_10_지능형라우팅_운임.md) | 구현Agent | ⬜ |
+| UAT-10-06 | 라우팅 결과 경로 시각화 확인 | ADMIN/SHIPPER | [UAT_10](UAT_10_지능형라우팅_운임.md) | 구현Agent | ⬜ |
 
-**총 59개 시나리오** | 작성 완료: 59 / 59 ✅
+**총 72개 시나리오** | 작성 완료: 59 / 72 ✅ (⬜ 누락 기능 7건 + 지능형 라우팅 6건 절차서 작성 예정)
 
 ---
 
@@ -211,3 +224,4 @@ Supabase: Cloud 프로젝트 연결
 | 2026-05-23 | B_Kai (OpenCode) | TASK-063 — UAT-02-08·03-04·05-06·05-07·06-04 5개 행 추가, 총계 50개 갱신 |
 | 2026-05-23 | D_Kai (OpenCode) | TASK-064 — UAT-01-01 비고 갱신·UAT-01-06·01-07·07-06·08-06·09-09·09-10 6개 행 추가, 총계 56개 갱신 |
 | 2026-05-23 | B_Kai (Noah/Codex) | TASK-066 — UAT-02-09·05-08·05-09 3개 행 추가, 총계 59개 갱신 |
+| 2026-05-23 | Aiden (Claude) | 누락 기능 UAT 7건 추가 (UAT-01-08·09, UAT-02-10, UAT-04-05·06·07, UAT-09-11) + 지능형 라우팅 UAT_10 신규 6건 추가, 총계 72개 갱신 |

@@ -193,6 +193,21 @@
 
 ---
 
+## Phase J — 지능형 라우팅 & Composite Pricing Engine
+
+> **전제조건**: Phase I 전량 완료 (TASK-070~073 ✅) 후 착수
+
+| IMP | 내용 | Agent | 상태 | 완료일 |
+|:---:|:-----|:-----:|:----:|:------:|
+| 080 | DB 스키마 확장 (zen_carriers·route_network·rate_cards·surcharges) | D_Kai | 🚫 | — |
+| 081 | DatabaseRouteAdapter 구현 (MockMapAdapter 교체) | B_Kai | 🚫 | — |
+| 082 | Composite Pricing Engine 구현 (DUMMY_RATES 교체, 기본운임+할증) | Riley | 🚫 | — |
+| 083 | Admin 요율 카드 관리 UI (zen_rate_cards CRUD) | B_Kai | 🚫 | — |
+
+**Phase J 완료**: 0 / 4 (착수 전)
+
+---
+
 ## 삭제/병합 처리
 
 | IMP | 처리 내용 |
@@ -214,9 +229,10 @@
 | G | 0 | 2 | 0% | IMP-028·069 미착수 (Future — 통관 연계) |
 | H | 5 | 5 | 100% ✅ | |
 | I | 0 | 5 | 0% | IMP-073 🔔 (입고 처리 전용 화면, TASK-069 완료) |
-| **합계** | **55** | **64** | **85.9%** | ➖ 1건 제외 기준 |
+| J | 0 | 4 | 0% | IMP-080~083 🚫 (Phase I 완료 후 착수) — 지능형 라우팅 |
+| **합계** | **55** | **68** | **80.9%** | ➖ 1건 제외 기준 |
 
-> 미완료 IMP 9건: IMP-071·072·073·077(🔔 검토 대기) · IMP-074·075(⬜) · IMP-076(🔄) · IMP-046(🚫 유예) · IMP-028(⬜ Future) · IMP-069(🚫 착수 조건 대기)
+> 미완료 IMP 13건: IMP-071·072·073·077(🔔 검토 대기) · IMP-074·075(⬜) · IMP-076(🔄) · IMP-046(🚫 유예) · IMP-028(⬜ Future) · IMP-069(🚫 착수 조건 대기) · IMP-080~083(🚫 Phase J 대기)
 > 2026-05-23 기준 업데이트 (D_Kai - TASK-073 완료 보고)
 
 ---
