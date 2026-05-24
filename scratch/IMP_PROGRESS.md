@@ -36,9 +36,9 @@
 | 026 | RLS 비즈니스 규칙 통합 (SQL 함수화) | Aiden+Riley | ✅ PASS | 2026-05-16 |
 | 041 | Storage 정책 조직 멤버십 검증 | Riley | ✅ PASS | 2026-05-16 |
 | 057 | `zen_role_permissions` SELECT 제한 | Riley | ✅ PASS | 2026-05-16 |
-| 071 | 세션 Idle Timeout (zen_last_activity 쿠키, 30분) | D_Kai | 🔔 | 2026-05-23 |
-| 072 | SUSPENDED 계정 차단·안내 페이지 | D_Kai | 🔔 | 2026-05-23 |
-| 077 | SCR-091 회원 관리 전용 화면 (등급·정지) | D_Kai | 🔔 | 2026-05-23 |
+| 071 | 세션 Idle Timeout (zen_last_activity 쿠키, 30분) | D_Kai | ✅ | 2026-05-23 |
+| 072 | SUSPENDED 계정 차단·안내 페이지 | D_Kai | ✅ | 2026-05-23 |
+| 077 | SCR-091 회원 관리 전용 화면 (등급·정지) | D_Kai | ✅ | 2026-05-23 |
 
 **Phase A 완료**: 7 / 10 (70.0%)
 
@@ -201,10 +201,10 @@
 |:---:|:-----|:-----:|:----:|:------:|
 | 080 | DB 스키마 확장 (zen_carriers·route_network·rate_cards·surcharges) | D_Kai | ✅ | 2026-05-24 |
 | 081 | DatabaseRouteAdapter 구현 (MockMapAdapter 교체) | B_Kai | ✅ | 2026-05-24 |
-| 082 | Composite Pricing Engine 구현 (DUMMY_RATES 교체, 기본운임+할증) | Riley | 🔔 | 2026-05-24 |
-| 083 | Admin 요율 카드 관리 UI (zen_rate_cards CRUD) | B_Kai | 🔔 | 2026-05-24 |
+| 082 | Composite Pricing Engine 구현 (DUMMY_RATES 교체, 기본운임+할증) | Riley | ✅ | 2026-05-24 |
+| 083 | Admin 요율 카드 관리 UI (zen_rate_cards CRUD) | B_Kai | ✅ | 2026-05-24 |
 
-**Phase J 완료**: 3 / 4 (IMP-080 ✅ · IMP-081 ✅ · IMP-082 🔔 완료 보고)
+**Phase J 완료**: 4 / 4 (100%) ✅
 
 ---
 
@@ -276,3 +276,4 @@
 | 2026-05-24 | B_Kai (OpenCode) | IMP-081 🔔 재작업 완료 — DatabaseRouteAdapter 구현 (d86c6af) + docs 재커밋. Phase J 2/4 50% |
 | 2026-05-24 | B_Kai (OpenCode) | IMP-083 🔔 완료 — Admin 요율 카드 관리 UI (27de276 · 220/220 · 10파일). NaviSidebar + i18n + Server Actions + UI 3컴포넌트 |
 | 2026-05-24 | Aiden (Claude) | IMP-083 ✅ 확정 — TASK-077 ✅ 승인. Phase J 4/4 100% 완료. TASK-078(UAT_10) ⬜ D_Kai 착수 가능. 전체 65/68 (95.6%) |
+| 2026-05-24 | Aiden (Claude) | IMP_PROGRESS 상태 동기화 — IMP-071·072·077·082·083 🔔→✅ 정정 (TASK-068·073·076·077 Aiden 승인 누락 반영). Phase A 100% · Phase J 100% 확정 |
