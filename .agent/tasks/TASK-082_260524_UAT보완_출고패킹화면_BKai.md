@@ -97,7 +97,14 @@ UAT Sprint(TASK-058~064) 완료 후 갭 분석 후속으로 구현된 IMP-074(SC
 
 ## Aiden 검토
 
-> Aiden 검토 후 기재.
+| 항목 | 내용 |
+|:---|:---|
+| 검토일 | 2026-05-24 |
+| 결과 | ✅ 승인 |
+| 커밋 확인 | 코드 182ebd7 (UAT_04·MASTER 2파일) · 문서 d4d5706 (task+ACTIVE_TASK) — 분리 커밋 ✅ |
+| 콘텐츠 | UAT-04-06 절차표 (MANAGER·WAREHOUSED→RELEASED·운송장 PDF·다국어 검증) ✅ · UAT-04-07 절차표 (MASTER/ADMIN·PackingToolbar·SHIPPER 차단) ✅ |
+| UAT_MASTER | UAT-04-06·04-07 ✅ B_Kai 갱신 확인 ✅ — 총계 표기 70/72→72/72 Aiden 직접 보완 |
+| Advisory | ①추가 커밋 94cf7ef (문서해시 후속 기재 — 문서 커밋 시 포함했어야 함) ②DoD 메인 섹션 `[ ]` 미체크 (작업 결과 섹션에는 `[x]` 중복 기재) |
 
 ---
 
