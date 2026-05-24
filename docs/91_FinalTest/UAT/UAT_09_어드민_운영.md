@@ -357,20 +357,38 @@
 |:----|:----|
 | 역할 | ADMIN |
 | 화면 URL | /ko/admin/members |
-| 예상 소요 시간 | TBD |
-| 사전 조건 | ADMIN 계정 로그인, 일반 SHIPPER 계정 1건 이상 존재 |
+| 예상 소요 시간 | 15분 |
+| 사전 조건 | ADMIN 계정 로그인 (`admin@zenith.kr`), 일반 SHIPPER 계정 2건 이상, MANAGER 계정 1건 |
 | 관련 IMP | IMP-077 |
 
-> ⬜ **상세 절차서 작성 예정** — IMP-077 담당 Agent (D_Kai) 작성
+### 테스트 절차
+
+| 순서 | 화면·URL | 수행 액션 | 입력 데이터 | 기대 결과 | 확인 |
+|:---:|:---------|:---------|:-----------|:---------|:----:|
+| 1 | /ko/admin/members | ADMIN 계정으로 회원 관리 페이지 진입 | `admin@zenith.kr` | 전체 회원 목록 테이블 표시 (이름·이메일·유형·등급·상태·가입일·관리) | ☐ |
+| 2 | /ko/admin/members | 테이블 컬럼 순서 확인 | — | 이름 → 이메일 → 유형(badge) → 등급(select) → 상태(badge) → 가입일 → 관리(버튼) 7열 | ☐ |
+| 3 | /ko/admin/members | 검색창에 대상 회원 이름 입력 | 대상 SHIPPER 이름 | 테이블 실시간 필터링, 이름 일치 회원만 표시 | ☐ |
+| 4 | /ko/admin/members | 상태 필터 'SUSPENDED' 선택 | SUSPENDED | SUSPENDED 상태 회원만 필터링 | ☐ |
+| 5 | /ko/admin/members | 유형 필터 'CORPORATE' 선택 | CORPORATE | CORPORATE 유형 회원만 필터링 | ☐ |
+| 6 | /ko/admin/members | 대상 SHIPPER의 등급 select 변경: IRON → GOLD | GOLD | "회원 등급을 GOLD로 변경하시겠습니까?" confirm 대화상자 표시 | ☐ |
+| 7 | 확인 대화상자 | '확인' 클릭 | — | 등급 변경 완료, 테이블에서 해당 행 grade_code = GOLD로 갱신 | ☐ |
+| 8 | /ko/admin/members | 대상 SHIPPER의 '정지' 버튼 클릭 | — | "해당 회원을 이용 제한하시겠습니까?" confirm 표시 | ☐ |
+| 9 | 확인 대화상자 | '확인' 클릭 | — | 상태 badge → SUSPENDED(red) 전환, 버튼 '해제'(green)로 변경 | ☐ |
+| 10 | /ko/admin/members | 정지된 SHIPPER의 '해제' 버튼 클릭 | — | "해당 회원을 이용 제한 해제하시겠습니까?" confirm → ACTIVE 복원 | ☐ |
+| 11 | /ko/admin/members | 자기 자신(ADMIN 계정)의 행 확인 | admin@zenith.kr | ADMIN 본인은 정지 버튼이 표시되지 않음 (또는 비활성화) — 자기정지방지 | ☐ |
+| 12 | /ko/login | MANAGER 계정으로 /ko/admin/members 직접 접속 | `manager@zenith.kr` | 접근 차단 (메인 대시보드 redirect 또는 403) — RBAC ADMIN 전용 | ☐ |
+| 13 | Supabase Studio | `SELECT status, grade_code FROM zen_profiles WHERE email = '[대상SHIPPER]'` | — | status: ACTIVE, grade_code: GOLD — 변경 사항 DB 반영 확인 | ☐ |
+| 14 | /ko/admin/members | 총 회원 수 표시 확인 (ZenCard 하단) | — | "총 N명" 텍스트 표시, 20명 초과 시 페이지네이션(이전·다음) 버튼 표시 | ☐ |
 
 ### 합격 기준
-- [ ] `/ko/admin/members` 전용 화면 접근 및 전체 회원 목록 표시
+- [ ] 전 단계 ☑ 완료
+- [ ] `/ko/admin/members` 전용 화면 접근 및 전체 회원 목록 표시 (7열 테이블)
 - [ ] 회원 검색·필터 (이름·이메일·역할·상태) 정상 동작
-- [ ] 회원 등급(역할) 변경 → DB 즉시 반영 확인
-- [ ] SUSPEND(정지) 처리 → 대상 계정 `status = 'SUSPENDED'` 전환 확인
-- [ ] UNSUSPEND(정지 해제) → 정상 상태 복원 확인
-- [ ] 자기 자신 정지 불가 확인
-- [ ] ADMIN 이외 역할 접근 차단 (403 또는 redirect)
+- [ ] 회원 등급(grade_code) 변경 → DB 즉시 반영 확인
+- [ ] SUSPEND(정지) 처리 → 대상 계정 `status = 'SUSPENDED'` 전환 + 버튼 '해제'로 변경
+- [ ] UNSUSPEND(정지 해제) → ACTIVE 복원 확인
+- [ ] 자기 자신(ADMIN) 정지 불가 확인 (버튼 미표시 또는 비활성)
+- [ ] ADMIN 이외 역할 접근 차단 (redirect 또는 권한 없음)
 
 ### 결함 기재란
 
