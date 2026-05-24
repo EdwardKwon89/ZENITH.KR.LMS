@@ -139,8 +139,8 @@
 | TASK-082 | 260524 | UAT 절차서 보완: 출고·운송장·패킹 (UAT-04-06·04-07) | P4 | TASK-070 ✅ · TASK-071 ✅ | B_Kai | ✅ | [TASK-082](tasks/TASK-082_260524_UAT보완_출고패킹화면_BKai.md) | 182ebd7+d4d5706 · UAT-04-06·07 절차표 ✅ · UAT_MASTER 72/72 Aiden보완 |
 | TASK-083 | 260524 | UAT 절차서 보완: 세션보안·회원관리 (UAT-01-08·09·09-11) | P4 | TASK-068 ✅ · TASK-073 ✅ | D_Kai | ✅ | [TASK-083](tasks/TASK-083_260524_UAT보완_보안회원관리_DKai.md) | 78d32b1+4df7c8d · UAT-01-08·09·09-11 ✅ |
 | TASK-084 | 260524 | E2E-16: 창고 통합 플로우 (입고·출고·특수화물) | P3 | TASK-081 ✅ · TASK-082 ✅ | N_Kai | ⬜ | [TASK-084](tasks/TASK-084_260524_E2E16_창고통합플로우_NKai.md) | IMP-073·074·076 E2E 신규 · N_Kai 첫 Task (투입 평가) |
-| TASK-085 | 260524 | E2E-17: SUSPENDED 보안·회원관리 플로우 | P3 | TASK-083 ✅ | D_Kai | ⬜ | [TASK-085](tasks/TASK-085_260524_E2E17_보안회원관리플로우_DKai.md) | IMP-072·077 E2E 신규 |
-| TASK-086 | 260524 | E2E-18: 패킹·Composite Pricing·Rate Cards 플로우 | P3 | TASK-082 ✅ | B_Kai | ⬜ | [TASK-086](tasks/TASK-086_260524_E2E18_패킹라우팅요율플로우_BKai.md) | IMP-075·081·082·083 E2E 신규 + E2E-12 실DB 보강 |
+| TASK-085 | 260524 | E2E-17: SUSPENDED 보안·회원관리 플로우 | P3 | TASK-083 ✅ | D_Kai | 🔔 | [TASK-085](tasks/TASK-085_260524_E2E17_보안회원관리플로우_DKai.md) | 5a279ac · 220/220 · e2e-17 249 lines · 시나리오 A+B ✅ |
+| TASK-086 | 260524 | E2E-18: 패킹·Composite Pricing·Rate Cards 플로우 | P3 | TASK-082 ✅ | B_Kai | 🔄 | [TASK-086](tasks/TASK-086_260524_E2E18_패킹라우팅요율플로우_BKai.md) | IMP-075·081·082·083 E2E 신규 + E2E-12 실DB 보강 |
 
 ---
 
@@ -149,8 +149,8 @@
 | Agent | 진행 중 | 재작업/조치 필요 | 블로커 대기 |
 |:------|:--------|:----------------|:----------|
 | Riley | — | — | — |
-| B_Kai | TASK-086 ⬜ (E2E-18 패킹·Composite Pricing·Rate Cards) | — | — |
-| D_Kai | TASK-085 ⬜ (E2E-17 SUSPENDED·회원관리) | — | — |
+| B_Kai | TASK-086 🔄 (E2E-18 패킹·Pricing·Rate Cards) | — | — |
+| D_Kai | TASK-085 🔔 (E2E-17 SUSPENDED·회원관리, Aiden 검토 대기) | — | — |
 | N_Kai | TASK-084 ⬜ (E2E-16 창고 통합 플로우 — 첫 Task 평가) | — | — |
 | Ring | — | — | 신규 할당 중단 유지 (9차 위반 누적) |
 
