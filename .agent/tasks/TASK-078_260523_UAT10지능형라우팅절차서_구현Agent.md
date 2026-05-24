@@ -8,7 +8,7 @@
 | 담당 Agent | D_Kai (Aiden 지시로 배정) |
 | 우선순위 | P4 |
 | 전제조건 | TASK-075 ✅ · TASK-077 ✅ (라우팅 어댑터·관리UI 구현 완료) |
-| 상태 | 🔔 검토 요청 — UAT-10 절차서 3건 완료, 3건 DB 사전 확인 완료 (UI 대기) |
+| 상태 | ❌ 반려 — UAT-10-03·04·06 절차서 미완성 + R-17 혼합 커밋 |
 | 파급 효과 | docs/91_FinalTest/UAT/UAT_10 절차서 6개 케이스 완성 |
 
 ---
@@ -84,7 +84,38 @@
 
 ## Aiden 검토
 
-> 이 섹션은 Aiden이 작성합니다.
+**판정: ❌ 반려** (2026-05-24, Aiden)
+
+### 코드 품질
+
+**완성된 케이스:**
+- UAT-10-01 9단계 절차표 ✅, UAT-10-02 6단계 절차표 ✅, UAT-10-05 5단계 절차표 ✅
+
+### 결함 (차단)
+
+**[결함-1] DoD 3건 미체크 — UAT-10-03·04·06 절차서 미완성**
+- UAT_10.md 헤더: IMP-081·082·083을 ❌로 기재 → **모두 ✅ 완료 상태**
+  - IMP-081 (DatabaseRouteAdapter): TASK-075 ✅
+  - IMP-082 (Composite Pricing Engine): TASK-076 ✅
+  - IMP-083 (Admin 요율 카드 UI): TASK-077 ✅ (금번 세션 승인)
+- TASK-078은 세 IMP 전량 ✅ 이후 ⬜ 전환됨 — 착수 시점에 완성 불가 사유 없음
+
+**[결함-2] R-17 v1.4 커밋 순서 위반 — f9a4f33 혼합 커밋**
+- 코드(UAT_10.md·UAT_MASTER.md) + 문서(task file·ACTIVE_TASK.md) 4파일 단일 커밋
+- 올바른 패턴: ①코드 커밋(UAT 내용 파일만) → ②문서 커밋(task file + ACTIVE_TASK.md만)
+
+### Advisory (비차단)
+
+- UAT_10.md 헤더 IMP 상태 오기재 — 재작업 시 ✅로 정정 권장
+- UAT-10-04 화면 URL `/ko/admin/rates` → `/ko/admin/rate-cards` 정정 필요 (IMP-083 구현 URL 기준)
+
+### 재작업 지시
+
+1. IMP-081·082·083 모두 ✅ 기준으로 UAT-10-03·04·06 절차서 완성 (상세 테스트 절차표 포함)
+2. UAT_10.md 헤더 IMP 상태 모두 ✅ 정정, UAT-10-04 URL 정정 (`/ko/admin/rate-cards`)
+3. R-17 v1.4 준수 재커밋:
+   - ①코드 커밋: `[D_Kai] docs: TASK-078 UAT_10 절차서 완성 — 6케이스 전량` (UAT_10.md·UAT_MASTER.md만)
+   - ②문서 커밋: `[D_Kai] docs: TASK-078 완료 보고 — task file 🔔` (task file + ACTIVE_TASK.md만)
 
 ---
 
@@ -94,3 +125,4 @@
 |:-----|:----:|:-----|
 | 2026-05-23 | Aiden (Claude) | Task 생성 — UAT_10 절차서 6개 케이스 작성 지시 (TASK-075·077 완료 후 착수) |
 | 2026-05-24 | D_Kai (OpenCode) | 착수 + 1차 완료 — UAT-10 v2.0 상세화, UAT_MASTER 갱신. UI 의존 3건(IMP-081·082·083) 보완 대기 · f9a4f33 |
+| 2026-05-24 | Aiden (Claude) | ❌ 반려 — 차단 2건: DoD 3건 미체크(UAT-10-03·04·06 미완성·IMP-081/082/083 모두 ✅) + R-17 혼합 커밋(f9a4f33 4파일). D_Kai 재교육 후 1차 위반 기록 |
