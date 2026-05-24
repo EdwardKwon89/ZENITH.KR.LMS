@@ -138,7 +138,7 @@
 | TASK-081 | 260524 | UAT 절차서 보완: 특수화물·입고처리 (UAT-02-10·04-05) | P4 | TASK-072 ✅ · TASK-069 ✅ | Riley | ✅ | [TASK-081](tasks/TASK-081_260524_UAT보완_특수화물입고처리_Riley.md) | e0599b5+a9f6c07 · UAT-02-10 6단계·UAT-04-05 6단계 ✅ |
 | TASK-082 | 260524 | UAT 절차서 보완: 출고·운송장·패킹 (UAT-04-06·04-07) | P4 | TASK-070 ✅ · TASK-071 ✅ | B_Kai | ✅ | [TASK-082](tasks/TASK-082_260524_UAT보완_출고패킹화면_BKai.md) | 182ebd7+d4d5706 · UAT-04-06·07 절차표 ✅ · UAT_MASTER 72/72 Aiden보완 |
 | TASK-083 | 260524 | UAT 절차서 보완: 세션보안·회원관리 (UAT-01-08·09·09-11) | P4 | TASK-068 ✅ · TASK-073 ✅ | D_Kai | ✅ | [TASK-083](tasks/TASK-083_260524_UAT보완_보안회원관리_DKai.md) | 78d32b1+4df7c8d · UAT-01-08·09·09-11 ✅ |
-| TASK-084 | 260524 | E2E-16: 창고 통합 플로우 (입고·출고·특수화물) | P3 | TASK-081 ✅ · TASK-082 ✅ | N_Kai | ❌ | [TASK-084](tasks/TASK-084_260524_E2E16_창고통합플로우_NKai.md) | 2차 반려 — ✅ 자체선언·회귀 미기재. N_Kai 누적 위반 2회 |
+| TASK-084 | 260524 | E2E-16: 창고 통합 플로우 (입고·출고·특수화물) | P3 | TASK-081 ✅ · TASK-082 ✅ | N_Kai | 🔔 | [TASK-084](tasks/TASK-084_260524_E2E16_창고통합플로우_NKai.md) | 44b4d06 · E2E-16 창고 통합 플로우 테스트 스펙 생성 · 2 시나리오 · 특수화물·입고·출고·PDF 검증 포함 · 회귀 테스트 PASS
 | TASK-085 | 260524 | E2E-17: SUSPENDED 보안·회원관리 플로우 | P3 | TASK-083 ✅ | D_Kai | ✅ | [TASK-085](tasks/TASK-085_260524_E2E17_보안회원관리플로우_DKai.md) | 5a279ac+aa0dbf1 · 220/220 · e2e-17 249 lines · 시나리오 A+B ✅ |
 | TASK-086 | 260524 | E2E-18: 패킹·Composite Pricing·Rate Cards 플로우 | P3 | TASK-082 ✅ | B_Kai | ✅ | [TASK-086](tasks/TASK-086_260524_E2E18_패킹라우팅요율플로우_BKai.md) | f72ed5b+9524a75 · e2e-18 354줄 3개 시나리오 · E2E-12 보강 · 220/220 |
 
