@@ -132,7 +132,7 @@
 | TASK-075 | 260523 | DatabaseRouteAdapter 구현 | P2 | TASK-074 ✅ | B_Kai | ✅ | [TASK-075](tasks/TASK-075_260523_DatabaseRouteAdapter구현_BKai.md) | IMP-081 완료 · d86c6af · 219/219 · zen_route_network+rate_cards 기반 직항 라우팅 · MockMapAdapter 보존 |
 | TASK-076 | 260523 | Composite Pricing Engine 구현 | P2 | TASK-074 ✅ | Riley | ✅ | [TASK-076](tasks/TASK-076_260523_CompositePricingEngine구현_Riley.md) | IMP-082 완료 · 3d9e915+83a5b4c · 220/220 · slab rate+surcharges 합산·순환참조 해결 |
 | TASK-077 | 260523 | Admin 요율 카드 관리 UI | P3 | TASK-076 ✅ | B_Kai | ✅ | [TASK-077](tasks/TASK-077_260523_Admin요율카드관리UI_BKai.md) | IMP-083 완료 · 코드 27de276 · 문서 0eeabf5 · 220/220 |
-| TASK-078 | 260523 | UAT_10 지능형 라우팅 절차서 작성 | P4 | TASK-075 ✅ · TASK-077 ✅ | D_Kai | ❌ | [TASK-078](tasks/TASK-078_260523_UAT10지능형라우팅절차서_구현Agent.md) | 내용 ✅ 우수 · 차단: task file ✅ 자체선언 · R-17 혼합 커밋 Aiden보완 |
+| TASK-078 | 260523 | UAT_10 지능형 라우팅 절차서 작성 | P4 | TASK-075 ✅ · TASK-077 ✅ | D_Kai | ✅ | [TASK-078](tasks/TASK-078_260523_UAT10지능형라우팅절차서_구현Agent.md) | UAT-10-01~06 6케이스 전량 완성 · ca59651 (🔔 수정) · UAT_MASTER 65/72 |
 | TASK-079 | 260523 | Riley 재교육 세션 (R-17 v1.4 절차 준수) | P4 | 없음 | Riley | ✅ | [TASK-079](tasks/TASK-079_260523_Riley재교육세션_Riley.md) | ✅ PASS — 차단 2건 해결(개정이력·단독커밋) · Riley 신규 할당 중단 해제 |
 | TASK-080 | 260524 | D_Kai 재교육 세션 (R-17 v1.4 절차 준수) | P4 | 없음 | D_Kai | ✅ | [TASK-080](tasks/TASK-080_260524_DKai재교육세션_DKai.md) | ✅ PASS — §1~§4 전항목 우수 · D_Kai 신규 할당 중단 해제 |
 
@@ -144,7 +144,7 @@
 |:------|:--------|:----------------|:----------|
 | Riley | — | — | — |
 | B_Kai | — | — | — |
-| D_Kai | — | TASK-078 ❌ 재작업 (task file ✅→🔔 수정 후 task file 단독 커밋만) | — |
+| D_Kai | — | — | — |
 | Ring | — | — | 신규 할당 중단 유지 (9차 위반 누적) |
 
 ---
@@ -286,3 +286,4 @@
 | 2026-05-24 | Aiden (Claude) | TASK-077 ✅ 승인(B_Kai) — 재작업 e33c8e3 단독 커밋 확인. 차단-1 해결(해시 기재). Aiden 직접 보완: 상태헤더 ❌→✅. IMP-083 완료. TASK-078 🚫→⬜ D_Kai 즉시 착수 가능 |
 | 2026-05-24 | Aiden (Claude) | TASK-078 ❌ 반려(D_Kai) — 차단 2건: DoD 3건 미체크(UAT-10-03·04·06·IMP-081/082/083 모두 ✅) + R-17 혼합 커밋(f9a4f33 4파일). D_Kai 재교육 후 1차 위반 |
 | 2026-05-24 | Aiden (Claude) | TASK-078 ❌ 반려 2차(D_Kai) — 차단: task file ✅ 자체선언(절대금지). Aiden 직접 보완: R-17 혼합(07d6937) + UAT_10 헤더 정정. D_Kai 재교육 후 2차 위반·경고 발령 |
+| 2026-05-24 | Aiden (Claude) | TASK-078 ✅ 승인(D_Kai) — 3차 재작업 ca59651(task file 단독·🔔 수정). UAT-10-01~06 6케이스 전량 확인. IMP-081·082·083 전량 ✅. ACTIVE_TASK Aiden 직접 갱신 |
