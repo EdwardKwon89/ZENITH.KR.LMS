@@ -125,11 +125,11 @@ Supabase: Cloud 프로젝트 연결
 | UAT-09-08 | 업그레이드 요청 처리 | ADMIN | [UAT_09](UAT_09_어드민_운영.md) | D_Kai | ✅ |
 | UAT-09-09 | REJECTED 사용자 로그인 차단 | ADMIN/SHIPPER | [UAT_09](UAT_09_어드민_운영.md) | D_Kai | ✅ |
 | UAT-09-10 | 자기 자신 역할 변경 제한 | ADMIN | [UAT_09](UAT_09_어드민_운영.md) | D_Kai | ✅ |
-| UAT-09-11 | SCR-091 회원 관리 전용 화면 (등급 변경·정지) | ADMIN | [UAT_09](UAT_09_어드민_운영.md) | D_Kai | ⬜ |
-| UAT-01-08 | 세션 Idle Timeout 자동 로그아웃 | ALL | [UAT_01](UAT_01_인증_회원가입.md) | D_Kai | ⬜ |
-| UAT-01-09 | SUSPENDED 계정 접근 차단 | ADMIN/SUSPENDED | [UAT_01](UAT_01_인증_회원가입.md) | D_Kai | ⬜ |
-| UAT-02-10 | 특수화물 유형 기재 + 조회 | SHIPPER/ADMIN | [UAT_02](UAT_02_오더관리.md) | Riley | ⬜ |
-| UAT-04-05 | SCR-040 입고 처리 전용 화면 (바코드·검수) | MANAGER | [UAT_04](UAT_04_창고_재고.md) | Riley | ⬜ |
+| UAT-09-11 | SCR-091 회원 관리 전용 화면 (등급 변경·정지) | ADMIN | [UAT_09](UAT_09_어드민_운영.md) | D_Kai | ✅ |
+| UAT-01-08 | 세션 Idle Timeout 자동 로그아웃 | ALL | [UAT_01](UAT_01_인증_회원가입.md) | D_Kai | ✅ |
+| UAT-01-09 | SUSPENDED 계정 접근 차단 | ADMIN/SUSPENDED | [UAT_01](UAT_01_인증_회원가입.md) | D_Kai | ✅ |
+| UAT-02-10 | 특수화물 유형 기재 + 조회 | SHIPPER/ADMIN | [UAT_02](UAT_02_오더관리.md) | Riley | ✅ |
+| UAT-04-05 | SCR-040 입고 처리 전용 화면 (바코드·검수) | MANAGER | [UAT_04](UAT_04_창고_재고.md) | Riley | ✅ |
 | UAT-04-06 | SCR-041 출고 처리 + 운송장 PDF 출력 | MANAGER | [UAT_04](UAT_04_창고_재고.md) | B_Kai | ⬜ |
 | UAT-04-07 | SCR-031 오더 패킹 리스트 화면 | MASTER/ADMIN | [UAT_04](UAT_04_창고_재고.md) | B_Kai | ⬜ |
 | UAT-10-01 | 경로 옵션 3종 조회 (COST·TIME·BALANCED) | ADMIN/SHIPPER | [UAT_10](UAT_10_지능형라우팅_운임.md) | D_Kai | ✅ |
@@ -139,7 +139,7 @@ Supabase: Cloud 프로젝트 연결
 | UAT-10-05 | 경로 재산출 (오더 변경 후) | ADMIN | [UAT_10](UAT_10_지능형라우팅_운임.md) | D_Kai | ✅ |
 | UAT-10-06 | 라우팅 결과 경로 시각화 확인 | ADMIN/SHIPPER | [UAT_10](UAT_10_지능형라우팅_운임.md) | D_Kai | ✅ |
 
-**총 72개 시나리오** | 작성 완료: 65 / 72 ✅ (⬜ 누락 기능 7건)
+**총 72개 시나리오** | 작성 완료: 68 / 72 ✅ (⬜ 절차서 미작성 4건)
 
 ---
 
@@ -221,6 +221,8 @@ Supabase: Cloud 프로젝트 연결
 |:-----|:----:|:-----|
 | 2026-05-22 | Aiden (Claude) | v1.0 초안 작성 — 테스트 계정·인덱스 46개·합격기준·템플릿 정의 |
 | 2026-05-22 | B_Kai (OpenCode) | 인덱스 45개 갱신 (TASK-058·059·061·062 작성 완료 반영) |
+| 2026-05-24 | Riley (Gemini) | TASK-081 — UAT-02-10 특수화물 및 UAT-04-05 입고처리 UAT 절차서 작성 완료, 총계 67개 갱신 |
+| 2026-05-24 | B_Kai (OpenCode) | TASK-077 🔔 완료 — 27de276 · 220/220 · 10파일 914줄. rate-cards page + Server Actions + NaviSidebar + i18n 전량 구현 |
 | 2026-05-23 | B_Kai (OpenCode) | TASK-063 — UAT-02-08·03-04·05-06·05-07·06-04 5개 행 추가, 총계 50개 갱신 |
 | 2026-05-23 | D_Kai (OpenCode) | TASK-064 — UAT-01-01 비고 갱신·UAT-01-06·01-07·07-06·08-06·09-09·09-10 6개 행 추가, 총계 56개 갱신 |
 | 2026-05-23 | B_Kai (Noah/Codex) | TASK-066 — UAT-02-09·05-08·05-09 3개 행 추가, 총계 59개 갱신 |
