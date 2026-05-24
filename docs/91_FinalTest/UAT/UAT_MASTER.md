@@ -130,8 +130,8 @@ Supabase: Cloud 프로젝트 연결
 | UAT-01-09 | SUSPENDED 계정 접근 차단 | ADMIN/SUSPENDED | [UAT_01](UAT_01_인증_회원가입.md) | D_Kai | ✅ |
 | UAT-02-10 | 특수화물 유형 기재 + 조회 | SHIPPER/ADMIN | [UAT_02](UAT_02_오더관리.md) | Riley | ✅ |
 | UAT-04-05 | SCR-040 입고 처리 전용 화면 (바코드·검수) | MANAGER | [UAT_04](UAT_04_창고_재고.md) | Riley | ✅ |
-| UAT-04-06 | SCR-041 출고 처리 + 운송장 PDF 출력 | MANAGER | [UAT_04](UAT_04_창고_재고.md) | B_Kai | ⬜ |
-| UAT-04-07 | SCR-031 오더 패킹 리스트 화면 | MASTER/ADMIN | [UAT_04](UAT_04_창고_재고.md) | B_Kai | ⬜ |
+| UAT-04-06 | SCR-041 출고 처리 + 운송장 PDF 출력 | MANAGER | [UAT_04](UAT_04_창고_재고.md) | B_Kai | ✅ |
+| UAT-04-07 | SCR-031 오더 패킹 리스트 화면 | MASTER/ADMIN | [UAT_04](UAT_04_창고_재고.md) | B_Kai | ✅ |
 | UAT-10-01 | 경로 옵션 3종 조회 (COST·TIME·BALANCED) | ADMIN/SHIPPER | [UAT_10](UAT_10_지능형라우팅_운임.md) | D_Kai | ✅ |
 | UAT-10-02 | 최적 경로 선택 및 오더 적용 | ADMIN | [UAT_10](UAT_10_지능형라우팅_운임.md) | D_Kai | ✅ |
 | UAT-10-03 | Composite Pricing 항목별 금액 확인 | ADMIN | [UAT_10](UAT_10_지능형라우팅_운임.md) | D_Kai | ✅ |
@@ -139,7 +139,7 @@ Supabase: Cloud 프로젝트 연결
 | UAT-10-05 | 경로 재산출 (오더 변경 후) | ADMIN | [UAT_10](UAT_10_지능형라우팅_운임.md) | D_Kai | ✅ |
 | UAT-10-06 | 라우팅 결과 경로 시각화 확인 | ADMIN/SHIPPER | [UAT_10](UAT_10_지능형라우팅_운임.md) | D_Kai | ✅ |
 
-**총 72개 시나리오** | 작성 완료: 68 / 72 ✅ (⬜ 절차서 미작성 4건)
+**총 72개 시나리오** | 작성 완료: 70 / 72 ✅ (⬜ 절차서 미작성 2건)
 
 ---
 
@@ -227,3 +227,4 @@ Supabase: Cloud 프로젝트 연결
 | 2026-05-23 | B_Kai (Noah/Codex) | TASK-066 — UAT-02-09·05-08·05-09 3개 행 추가, 총계 59개 갱신 |
 | 2026-05-23 | Aiden (Claude) | 누락 기능 UAT 7건 추가 (UAT-01-08·09, UAT-02-10, UAT-04-05·06·07, UAT-09-11) + 지능형 라우팅 UAT_10 신규 6건 추가, 총계 72개 갱신 |
 | 2026-05-24 | D_Kai (OpenCode) | TASK-083 — UAT-01-08·09·09-11 절차서 완성 (IMP-071·072·077 반영), 총계 68개 갱신 |
+| 2026-05-24 | B_Kai (OpenCode) | TASK-082 — UAT-04-06·04-07 절차서 완성 (IMP-074·075 반영), 총계 70개 갱신 |

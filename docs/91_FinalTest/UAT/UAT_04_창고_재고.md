@@ -184,11 +184,27 @@
 |:----|:----|
 | 역할 | MANAGER |
 | 화면 URL | /ko/warehouse/outbound |
-| 예상 소요 시간 | TBD |
+| 예상 소요 시간 | 7분 |
 | 사전 조건 | MANAGER 계정 로그인, WAREHOUSED 상태 오더 1건 이상 존재 |
 | 관련 IMP | IMP-074 |
 
-> ⬜ **상세 절차서 작성 예정** — IMP-074 담당 Agent (B_Kai) 작성
+### 테스트 절차
+
+| 순서 | 화면·URL | 수행 액션 | 입력 데이터 | 기대 결과 | 확인 |
+|:---:|:---------|:---------|:-----------|:---------|:----:|
+| 1 | /ko/login | 창고 매니저(MANAGER) 계정으로 로그인 | `manager@zenith.kr` / `password1234` | 로그인 성공 후 대시보드로 이동 | ☐ |
+| 2 | /ko/warehouse/outbound | 사이드바 창고관리 → '출고 처리' 메뉴 또는 URL 직접 접속 | — | 출고 처리 전용 화면 표시, WAREHOUSED 상태 오더 목록 로딩 | ☐ |
+| 3 | /ko/warehouse/outbound | 오더 목록에서 출고 대상 오더 1건 선택 | (아무 오더 클릭) | 선택한 오더의 상세 정보(수하인·품목·중량·수량) 표시 | ☐ |
+| 4 | /ko/warehouse/outbound | 운송장 PDF 미리보기 영역 확인 | — | 운송장 PDF 미리보기 표시 (수하인명·주소·품목·중량·바코드·A4 레이아웃) | ☐ |
+| 5 | /ko/warehouse/outbound | 운송장 PDF 다운로드 버튼 클릭 | — | PDFDownloadLink 동작 → 브라우저 다운로드 시작 (ShippingLabelPDF.tsx 렌더링) | ☐ |
+| 6 | /ko/warehouse/outbound | '출고 확정' 버튼 클릭 | — | 확인 모달 표시, "출고가 완료되었습니다." 토스트 메시지 노출 | ☐ |
+| 7 | /ko/warehouse/outbound | 출고 완료 후 하단 '오늘의 출고 이력' 확인 | — | 방금 출고 처리한 오더가 이력 목록에 추가됨 | ☐ |
+| 8 | /ko/orders/[orderId] | 해당 오더 상세 화면에서 상태 및 이력 확인 | 히스토리 탭 | 오더 상태 WAREHOUSED→RELEASED 전환 확인 | ☐ |
+| 9 | /ko/warehouse/outbound | 다국어 전환 확인 | URL: `/en/warehouse/outbound` | 영문 레이블·메시지 정상 출력 (제목·버튼·토스트·NaviSidebar) | ☐ |
+| 10 | /ko/warehouse/outbound | 다국어 전환 확인 | URL: `/zh/warehouse/outbound` | 중국어 레이블 정상 출력 | ☐ |
+| 11 | /ko/warehouse/outbound | 다국어 전환 확인 | URL: `/ja/warehouse/outbound` | 일본어 레이블 정상 출력 | ☐ |
+| 12 | /ko/warehouse/outbound | ADMIN 계정 접근 확인 | `admin@zenith.kr` 로그인 후 동일 페이지 접속 | ADMIN도 출고 처리 가능, MANAGER와 동일 UI | ☐ |
+| 13 | /ko/warehouse/outbound | SHIPPER 계정 접근 차단 확인 | `shipper@zenith.kr` 로그인 후 동일 페이지 접속 | `/ko/dashboard`로 리다이렉트 또는 403 페이지 | ☐ |
 
 ### 합격 기준
 - [ ] `/ko/warehouse/outbound` 라우트 접근 및 출고 처리 전용 화면 표시
@@ -199,6 +215,8 @@
 - [ ] DB `zen_inventory_history` INSERT (transaction_type='OUTBOUND') 확인
 - [ ] 오늘의 출고 이력 목록 하단 표시
 - [ ] NaviSidebar 창고관리 그룹 "출고 처리" 메뉴 정상 표시
+- [ ] 다국어(ko/en/zh/ja) 레이블·메시지 정상 출력
+- [ ] SHIPPER 접근 차단 확인
 
 ### 결함 기재란
 
@@ -214,18 +232,32 @@
 |:----|:----|
 | 역할 | MASTER / ADMIN |
 | 화면 URL | /ko/master-orders/[id]/packing |
-| 예상 소요 시간 | TBD |
+| 예상 소요 시간 | 5분 |
 | 사전 조건 | MASTER 계정 로그인, 마스터 오더 1건 이상 존재 |
 | 관련 IMP | IMP-075 |
 
-> ⬜ **상세 절차서 작성 예정** — IMP-075 담당 Agent (B_Kai) 작성
+### 테스트 절차
+
+| 순서 | 화면·URL | 수행 액션 | 입력 데이터 | 기대 결과 | 확인 |
+|:---:|:---------|:---------|:-----------|:---------|:----:|
+| 1 | /ko/login | MASTER 계정으로 로그인 | `master@zenith.kr` / `password1234` | 로그인 성공 | ☐ |
+| 2 | /ko/master-orders | 마스터 오더 목록에서 1건 선택 → 상세 화면 진입 | (아무 마스터 오더 클릭) | 마스터 오더 상세 페이지 표시 | ☐ |
+| 3 | /ko/master-orders/[id]/packing | URL 직접 접속 또는 패킹 탭 클릭 | — | 패킹 리스트 페이지 표시, 마스터 오더 정보(총중량·총부피·오더 수) 집계 상단 표시 | ☐ |
+| 4 | /ko/master-orders/[id]/packing | 하위 House 오더 목록 확인 | — | 각 House 오더별 품목·수량·중량 정보가 테이블에 표시 | ☐ |
+| 5 | — | PackingToolbar 인쇄 버튼 클릭 | — | 브라우저 인쇄 대화상자 열림, print CSS @media print 적용된 레이아웃 표시 | ☐ |
+| 6 | — | PackingToolbar 뒤로가기 버튼 클릭 | — | 이전 페이지(마스터 오더 상세)로 이동 | ☐ |
+| 7 | /ko/master-orders/[id]/packing | ADMIN 계정으로 동일 페이지 접근 | `admin@zenith.kr` 로그인 | ADMIN도 패킹 리스트 정상 조회 가능 | ☐ |
+| 8 | /ko/master-orders/[id]/packing | SHIPPER 계정 접근 차단 확인 | `shipper@zenith.kr` 로그인 후 동일 URL 접속 | SHIPPER 접근 차단 (리다이렉트 또는 403) | ☐ |
 
 ### 합격 기준
 - [ ] `/ko/master-orders/[id]/packing` 라우트 정상 접근
 - [ ] 마스터 오더 하위 House 오더 목록 표시
-- [ ] 패킹 리스트 인쇄 (print CSS 적용) 정상 동작
 - [ ] 마스터 오더 정보 (총중량·총부피·오더 수) 집계 확인
+- [ ] PackingToolbar 인쇄 버튼 → window.print() 정상 호출
+- [ ] PackingToolbar 뒤로가기 버튼 → 이전 페이지 이동
+- [ ] 패킹 리스트 인쇄 (print CSS 적용) 정상 동작
 - [ ] SHIPPER 역할 접근 차단 확인
+- [ ] 500 에러 없음
 
 ### 결함 기재란
 
