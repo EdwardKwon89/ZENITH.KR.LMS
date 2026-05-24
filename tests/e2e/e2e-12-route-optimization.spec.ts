@@ -16,6 +16,9 @@ const ADMIN_PASSWORD = 'password1234!';
 const SCREENSHOT_DIR = 'docs/99_Manual/E2E_12_Result';
 
 test.describe('E2E-12: Route Optimization Workflow', () => {
+  // NOTE: This test uses MockMapAdapter data. Real DB verification (zen_carriers,
+  // zen_route_network, zen_rate_cards, zen_surcharges) is covered by E2E-18
+  // (e2e-18-packing-pricing-ratecards.spec.ts Scenario B).
   
   test.beforeAll(async () => {
     // 1. Create screenshot directory
