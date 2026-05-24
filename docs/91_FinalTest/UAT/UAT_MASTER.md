@@ -132,14 +132,16 @@ Supabase: Cloud 프로젝트 연결
 | UAT-04-05 | SCR-040 입고 처리 전용 화면 (바코드·검수) | MANAGER | [UAT_04](UAT_04_창고_재고.md) | Riley | ⬜ |
 | UAT-04-06 | SCR-041 출고 처리 + 운송장 PDF 출력 | MANAGER | [UAT_04](UAT_04_창고_재고.md) | B_Kai | ⬜ |
 | UAT-04-07 | SCR-031 오더 패킹 리스트 화면 | MASTER/ADMIN | [UAT_04](UAT_04_창고_재고.md) | B_Kai | ⬜ |
-| UAT-10-01 | 경로 옵션 3종 조회 (COST·TIME·BALANCED) | ADMIN/SHIPPER | [UAT_10](UAT_10_지능형라우팅_운임.md) | 구현Agent | ⬜ |
-| UAT-10-02 | 최적 경로 선택 및 오더 적용 | ADMIN | [UAT_10](UAT_10_지능형라우팅_운임.md) | 구현Agent | ⬜ |
-| UAT-10-03 | Composite Pricing 항목별 금액 확인 | ADMIN | [UAT_10](UAT_10_지능형라우팅_운임.md) | 구현Agent | ⬜ |
-| UAT-10-04 | 요율 카드 등록·수정·삭제 (ADMIN) | ADMIN | [UAT_10](UAT_10_지능형라우팅_운임.md) | 구현Agent | ⬜ |
-| UAT-10-05 | 경로 재산출 (오더 변경 후) | ADMIN | [UAT_10](UAT_10_지능형라우팅_운임.md) | 구현Agent | ⬜ |
-| UAT-10-06 | 라우팅 결과 경로 시각화 확인 | ADMIN/SHIPPER | [UAT_10](UAT_10_지능형라우팅_운임.md) | 구현Agent | ⬜ |
+| UAT-10-01 | 경로 옵션 3종 조회 (COST·TIME·BALANCED) | ADMIN/SHIPPER | [UAT_10](UAT_10_지능형라우팅_운임.md) | D_Kai | ✅ |
+| UAT-10-02 | 최적 경로 선택 및 오더 적용 | ADMIN | [UAT_10](UAT_10_지능형라우팅_운임.md) | D_Kai | ✅ |
+| UAT-10-03 | Composite Pricing 항목별 금액 확인 | ADMIN | [UAT_10](UAT_10_지능형라우팅_운임.md) | D_Kai | ⬜* |
+| UAT-10-04 | 요율 카드 등록·수정·삭제 (ADMIN) | ADMIN | [UAT_10](UAT_10_지능형라우팅_운임.md) | D_Kai | ⬜* |
+| UAT-10-05 | 경로 재산출 (오더 변경 후) | ADMIN | [UAT_10](UAT_10_지능형라우팅_운임.md) | D_Kai | ✅ |
+| UAT-10-06 | 라우팅 결과 경로 시각화 확인 | ADMIN/SHIPPER | [UAT_10](UAT_10_지능형라우팅_운임.md) | D_Kai | ⬜* |
 
-**총 72개 시나리오** | 작성 완료: 59 / 72 ✅ (⬜ 누락 기능 7건 + 지능형 라우팅 6건 절차서 작성 예정)
+\* DB 사전 확인 절차 완료, UI 상세 단계는 해당 IMP(IMP-081·082·083) 구현 완료 후 보완 예정
+
+**총 72개 시나리오** | 작성 완료: 62 / 72 ✅ (⬜ 누락 기능 7건 + 지능형 라우팅 3건 UI 대기)
 
 ---
 
