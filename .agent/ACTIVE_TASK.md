@@ -135,6 +135,9 @@
 | TASK-078 | 260523 | UAT_10 지능형 라우팅 절차서 작성 | P4 | TASK-075 ✅ · TASK-077 ✅ | D_Kai | ✅ | [TASK-078](tasks/TASK-078_260523_UAT10지능형라우팅절차서_구현Agent.md) | UAT-10-01~06 6케이스 전량 완성 · ca59651 (🔔 수정) · UAT_MASTER 65/72 |
 | TASK-079 | 260523 | Riley 재교육 세션 (R-17 v1.4 절차 준수) | P4 | 없음 | Riley | ✅ | [TASK-079](tasks/TASK-079_260523_Riley재교육세션_Riley.md) | ✅ PASS — 차단 2건 해결(개정이력·단독커밋) · Riley 신규 할당 중단 해제 |
 | TASK-080 | 260524 | D_Kai 재교육 세션 (R-17 v1.4 절차 준수) | P4 | 없음 | D_Kai | ✅ | [TASK-080](tasks/TASK-080_260524_DKai재교육세션_DKai.md) | ✅ PASS — §1~§4 전항목 우수 · D_Kai 신규 할당 중단 해제 |
+| TASK-081 | 260524 | UAT 절차서 보완: 특수화물·입고처리 (UAT-02-10·04-05) | P4 | TASK-072 ✅ · TASK-069 ✅ | Riley | ⬜ | [TASK-081](tasks/TASK-081_260524_UAT보완_특수화물입고처리_Riley.md) | UAT Sprint 누락 보완 — IMP-076·073 대응 |
+| TASK-082 | 260524 | UAT 절차서 보완: 출고·운송장·패킹 (UAT-04-06·04-07) | P4 | TASK-070 ✅ · TASK-071 ✅ | B_Kai | ⬜ | [TASK-082](tasks/TASK-082_260524_UAT보완_출고패킹화면_BKai.md) | UAT Sprint 누락 보완 — IMP-074·075 대응 |
+| TASK-083 | 260524 | UAT 절차서 보완: 세션보안·회원관리 (UAT-01-08·09·09-11) | P4 | TASK-068 ✅ · TASK-073 ✅ | D_Kai | ⬜ | [TASK-083](tasks/TASK-083_260524_UAT보완_보안회원관리_DKai.md) | UAT Sprint 누락 보완 — IMP-071·072·077 대응 |
 
 ---
 
@@ -142,9 +145,9 @@
 
 | Agent | 진행 중 | 재작업/조치 필요 | 블로커 대기 |
 |:------|:--------|:----------------|:----------|
-| Riley | — | — | — |
-| B_Kai | — | — | — |
-| D_Kai | — | — | — |
+| Riley | TASK-081 ⬜ (UAT-02-10·04-05 절차서) | — | — |
+| B_Kai | TASK-082 ⬜ (UAT-04-06·04-07 절차서) | — | — |
+| D_Kai | TASK-083 ⬜ (UAT-01-08·09·09-11 절차서) | — | — |
 | Ring | — | — | 신규 할당 중단 유지 (9차 위반 누적) |
 
 ---
@@ -287,3 +290,4 @@
 | 2026-05-24 | Aiden (Claude) | TASK-078 ❌ 반려(D_Kai) — 차단 2건: DoD 3건 미체크(UAT-10-03·04·06·IMP-081/082/083 모두 ✅) + R-17 혼합 커밋(f9a4f33 4파일). D_Kai 재교육 후 1차 위반 |
 | 2026-05-24 | Aiden (Claude) | TASK-078 ❌ 반려 2차(D_Kai) — 차단: task file ✅ 자체선언(절대금지). Aiden 직접 보완: R-17 혼합(07d6937) + UAT_10 헤더 정정. D_Kai 재교육 후 2차 위반·경고 발령 |
 | 2026-05-24 | Aiden (Claude) | TASK-078 ✅ 승인(D_Kai) — 3차 재작업 ca59651(task file 단독·🔔 수정). UAT-10-01~06 6케이스 전량 확인. IMP-081·082·083 전량 ✅. ACTIVE_TASK Aiden 직접 갱신 |
+| 2026-05-24 | Aiden (Claude) | TASK-081~083 발령 — UAT Sprint 이후 갭 기능(IMP-071~077) UAT 절차서 7건 누락 보완. Riley(081)·B_Kai(082)·D_Kai(083) 배정. 전체 Task 65/72 → 72/72 목표 |
