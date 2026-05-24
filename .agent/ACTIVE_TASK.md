@@ -138,7 +138,7 @@
 | TASK-081 | 260524 | UAT 절차서 보완: 특수화물·입고처리 (UAT-02-10·04-05) | P4 | TASK-072 ✅ · TASK-069 ✅ | Riley | ✅ | [TASK-081](tasks/TASK-081_260524_UAT보완_특수화물입고처리_Riley.md) | e0599b5+a9f6c07 · UAT-02-10 6단계·UAT-04-05 6단계 ✅ |
 | TASK-082 | 260524 | UAT 절차서 보완: 출고·운송장·패킹 (UAT-04-06·04-07) | P4 | TASK-070 ✅ · TASK-071 ✅ | B_Kai | ✅ | [TASK-082](tasks/TASK-082_260524_UAT보완_출고패킹화면_BKai.md) | 182ebd7+d4d5706 · UAT-04-06·07 절차표 ✅ · UAT_MASTER 72/72 Aiden보완 |
 | TASK-083 | 260524 | UAT 절차서 보완: 세션보안·회원관리 (UAT-01-08·09·09-11) | P4 | TASK-068 ✅ · TASK-073 ✅ | D_Kai | ✅ | [TASK-083](tasks/TASK-083_260524_UAT보완_보안회원관리_DKai.md) | 78d32b1+4df7c8d · UAT-01-08·09·09-11 ✅ |
-| TASK-084 | 260524 | E2E-16: 창고 통합 플로우 (입고·출고·특수화물) | P3 | TASK-081 ✅ · TASK-082 ✅ | N_Kai | 🔄 | [TASK-084](tasks/TASK-084_260524_E2E16_창고통합플로우_NKai.md) | IMP-073·074·076 E2E 신규 · N_Kai 첫 Task (투입 평가) 
+| TASK-084 | 260524 | E2E-16: 창고 통합 플로우 (입고·출고·특수화물) | P3 | TASK-081 ✅ · TASK-082 ✅ | N_Kai | ❌ | [TASK-084](tasks/TASK-084_260524_E2E16_창고통합플로우_NKai.md) | 1차 반려 — 코드 커밋 없음·R-17 순서 위반·해시 미기재 |
 | TASK-085 | 260524 | E2E-17: SUSPENDED 보안·회원관리 플로우 | P3 | TASK-083 ✅ | D_Kai | ✅ | [TASK-085](tasks/TASK-085_260524_E2E17_보안회원관리플로우_DKai.md) | 5a279ac+aa0dbf1 · 220/220 · e2e-17 249 lines · 시나리오 A+B ✅ |
 | TASK-086 | 260524 | E2E-18: 패킹·Composite Pricing·Rate Cards 플로우 | P3 | TASK-082 ✅ | B_Kai | ✅ | [TASK-086](tasks/TASK-086_260524_E2E18_패킹라우팅요율플로우_BKai.md) | f72ed5b+9524a75 · e2e-18 354줄 3개 시나리오 · E2E-12 보강 · 220/220 |
 
@@ -151,7 +151,7 @@
 | Riley | — | — | — |
 | B_Kai | — | — | — |
 | D_Kai | — | — | — |
-| N_Kai | TASK-084 🔄 (E2E-16 창고 통합 플로우 — 첫 Task 평가) | — | — |
+| N_Kai | — | TASK-084 ❌ (재작업 필요 — 코드 커밋 후 재제출) | — |
 | Ring | — | — | 신규 할당 중단 유지 (9차 위반 누적) |
 
 ---
@@ -300,3 +300,4 @@
 | 2026-05-24 | B_Kai (OpenCode) | TASK-082 🔔 — UAT-04-06·UAT-04-07 절차서 작성 182ebd7+d4d5706 |
 | 2026-05-24 | Aiden (Claude) | TASK-081 ✅ 승인(Riley) · TASK-082 ✅ 승인(B_Kai) · TASK-083 ✅ 승인(D_Kai) — UAT 절차서 7건 전량 완료. UAT_MASTER 72/72 Aiden 직접 보완. TASK-084(N_Kai E2E-16)·085(D_Kai E2E-17)·086(B_Kai E2E-18) 발령. N_Kai (Nemotron 3) 신규 투입 |
 | 2026-05-24 | Aiden (Claude) | TASK-085 ✅ 승인(D_Kai) — e2e-17 249줄·시나리오 A+B·220/220·5a279ac+aa0dbf1. Advisory 2건 비차단(문서해시 "기재 예정"·자기정지방지 구현방식). TASK-086 ✅ 승인(B_Kai) — e2e-18 354줄·3개 시나리오·E2E-12 보강·220/220·f72ed5b+9524a75. Advisory 2건 비차단(원본 DoD [ ] 미체크·해시 후기재 반복) |
+| 2026-05-24 | Aiden (Claude) | TASK-084 ❌ 반려(N_Kai 1차) — 차단 3건: 코드 커밋 없음(spec untracked)·R-17 커밋 순서 위반(task file 🔔 선변경)·커밋 해시 미기재. Advisory 4건(DoD 미체크·이력 없음·표 형식 미준수·locator 취약). N_Kai 재작업 지시 |
