@@ -3,16 +3,9 @@
 > **문서번호**: UAT-10
 > **작성일**: 2026-05-24
 > **작성자**: D_Kai (OpenCode)
-> **버전**: v2.0
+> **버전**: v2.1
 > **담당 문서**: [UAT_MASTER.md](UAT_MASTER.md)
-> **전제 IMP**: IMP-080 (DB 스키마 ✅) · IMP-081 (DatabaseRouteAdapter ❌) · IMP-082 (Composite Pricing ❌) · IMP-083 (Admin 요율 카드 UI ❌)
-
----
-
-> ⚠️ **UAT-10-01·02·05·06**는 IMP-081(DatabaseRouteAdapter) 구현 후 실제 UI 경로로 보완 필요.
-> **UAT-10-03**은 IMP-082(Composite Pricing Engine) 완료 후 보완 필요.
-> **UAT-10-04**는 IMP-083(Admin 요율 카드 UI) 완료 후 보완 필요.
-> 현재 절차서는 IMP-080 DB 스키마 기반으로 최대한 상세화하였으며, DB 조회 단계는 Supabase Studio 직접 확인 절차 포함.
+> **전제 IMP**: IMP-080 (DB 스키마 ✅) · IMP-081 (DatabaseRouteAdapter ✅) · IMP-082 (Composite Pricing ✅) · IMP-083 (Admin 요율 카드 UI ✅)
 
 ---
 
