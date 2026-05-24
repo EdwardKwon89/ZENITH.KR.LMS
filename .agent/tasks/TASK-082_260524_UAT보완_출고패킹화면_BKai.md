@@ -8,7 +8,7 @@
 | 담당 Agent | B_Kai |
 | 우선순위 | P4 |
 | 전제조건 | TASK-070 ✅ (IMP-074 SCR-041 출고·운송장) · TASK-071 ✅ (IMP-075 SCR-031 패킹) |
-| 상태 | ⬜ |
+| 상태 | 🔔 |
 | 파급 효과 | UAT_04 기존 문서에 시나리오 추가 — 코드 변경 없음 |
 
 ---
@@ -76,7 +76,22 @@ UAT Sprint(TASK-058~064) 완료 후 갭 분석 후속으로 구현된 IMP-074(SC
 
 ## 작업 결과
 
-> 이 섹션은 착수 후 B_Kai가 작성합니다.
+| 항목 | 파일 | 상태 |
+|:-----|:-----|:----:|
+| UAT-04-06 절차표 완성 (출고처리·RELEASED 전이·운송장 PDF·다국어) | `docs/91_FinalTest/UAT/UAT_04_창고_재고.md` | ✅ |
+| UAT-04-07 절차표 완성 (패킹 리스트·PackingToolbar·SHIPPER 차단) | `docs/91_FinalTest/UAT/UAT_04_창고_재고.md` | ✅ |
+| UAT_MASTER.md 인덱스 UAT-04-06·04-07 ✅ + 담당 B_Kai 반영 | `docs/91_FinalTest/UAT/UAT_MASTER.md` | ✅ |
+| 총계 갱신 (70/72 ✅) | `docs/91_FinalTest/UAT/UAT_MASTER.md` | ✅ |
+| 코드 커밋 완료 (해시: `182ebd7`) | — | ✅ |
+
+### DoD 체크리스트
+
+- [x] UAT_04_창고_재고.md — UAT-04-06 절차표 완성 (출고처리·RELEASED 전이·운송장 PDF·다국어)
+- [x] UAT_04_창고_재고.md — UAT-04-07 절차표 완성 (패킹 리스트·PackingToolbar·SHIPPER 차단)
+- [x] UAT_MASTER.md 인덱스 UAT-04-06·04-07 상태 ✅ + 담당 B_Kai 반영
+- [x] 코드 커밋 완료 (해시: `182ebd7`)
+- [x] 본 파일 상태 🔔 + ACTIVE_TASK.md 동기화
+- [ ] 문서 커밋 완료 (해시: 기재 필수)
 
 ---
 
@@ -91,3 +106,4 @@ UAT Sprint(TASK-058~064) 완료 후 갭 분석 후속으로 구현된 IMP-074(SC
 | 날짜 | 주체 | 내용 |
 |:-----|:----:|:-----|
 | 2026-05-24 | Aiden (Claude) | Task 생성 — UAT Sprint 누락 2건(IMP-074·075) 보완. B_Kai 직접 구현 기능 담당 배정 |
+| 2026-05-24 | B_Kai (OpenCode) | 🔔 완료 — UAT-04-06·04-07 절차서 작성 · 코드 182ebd7 · 70/72 갱신 |
