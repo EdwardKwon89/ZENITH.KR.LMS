@@ -250,17 +250,28 @@
 |:----|:----|
 | 역할 | ALL |
 | 화면 URL | /ko/orders (또는 임의 인증 필요 페이지) |
-| 예상 소요 시간 | TBD |
-| 사전 조건 | 로그인 상태, `SESSION_IDLE_TIMEOUT_MIN` 환경변수 테스트용 단축 값 설정 |
+| 예상 소요 시간 | 10분 |
+| 사전 조건 | ADMIN 계정 로그인, `SESSION_IDLE_TIMEOUT_MIN=2` (테스트용 2분 설정) |
 | 관련 IMP | IMP-071 |
 
-> ⬜ **상세 절차서 작성 예정** — IMP-071 담당 Agent (D_Kai) 작성
+### 테스트 절차
+
+| 순서 | 화면·URL | 수행 액션 | 입력 데이터 | 기대 결과 | 확인 |
+|:---:|:---------|:---------|:-----------|:---------|:----:|
+| 1 | /ko/orders | ADMIN 계정으로 로그인 후 /ko/orders 진입 | `admin@zenith.kr` / `password1234` | 오더 목록 페이지 정상 표시 | ☐ |
+| 2 | 브라우저 DevTools | Application → Cookies → `zen_last_activity` 확인 | — | Unix timestamp 값 저장 확인 (httpOnly·secure·sameSite lax) | ☐ |
+| 3 | /ko/orders | 30초 내 페이지 새로고침 (활동 유지) | — | `zen_last_activity` 갱신 → 새로운 timestamp로 변경 | ☐ |
+| 4 | — | 2분 대기 후 (SESSION_IDLE_TIMEOUT_MIN=2) 페이지 새로고침 | — | 자동 로그아웃 → `/ko/login?reason=timeout` 으로 redirect | ☐ |
+| 5 | /ko/login | URL 쿼리 파라미터 확인 | — | `reason=timeout` 파라미터 포함 확인 | ☐ |
+| 6 | 브라우저 DevTools | `zen_last_activity` 쿠키 존재 여부 확인 | — | 쿠키가 완전히 삭제됨 (`response.cookies.delete('zen_last_activity')`) | ☐ |
+| 7 | /ko/login | 다시 로그인 시도 | `admin@zenith.kr` / `password1234` | 정상 로그인, 새 `zen_last_activity` 쿠키 발급 | ☐ |
 
 ### 합격 기준
-- [ ] 설정 Idle 시간 초과 후 자동 로그아웃
+- [ ] 전 단계 ☑ 완료
+- [ ] 설정 Idle 시간(2분) 초과 후 자동 로그아웃
 - [ ] `/login?reason=timeout` 으로 redirect
 - [ ] `zen_last_activity` 쿠키 삭제 확인
-- [ ] 활동 중 요청 시 쿠키 갱신(타임아웃 리셋) 확인
+- [ ] 활동 중(30초 내) 요청 시 쿠키 갱신(타임아웃 리셋) 확인
 
 ### 결함 기재란
 
@@ -276,18 +287,34 @@
 |:----|:----|
 | 역할 | ADMIN (정지 처리) / SUSPENDED 계정 (피검증) |
 | 화면 URL | /ko/suspended |
-| 예상 소요 시간 | TBD |
-| 사전 조건 | ADMIN 계정 로그인, 정지 처리 대상 계정 1건 존재 |
+| 예상 소요 시간 | 10분 |
+| 사전 조건 | ADMIN 계정 로그인 (`admin@zenith.kr`), 정지 처리 대상 일반 SHIPPER 계정 1건 |
 | 관련 IMP | IMP-072 |
 
-> ⬜ **상세 절차서 작성 예정** — IMP-072 담당 Agent (D_Kai) 작성
+### 테스트 절차
+
+| 순서 | 화면·URL | 수행 액션 | 입력 데이터 | 기대 결과 | 확인 |
+|:---:|:---------|:---------|:-----------|:---------|:----:|
+| 1 | /ko/admin/members | ADMIN 로그인 → 회원 관리 페이지 진입 | `admin@zenith.kr` / `password1234` | 전체 회원 목록 표시 | ☐ |
+| 2 | /ko/admin/members | 대상 SHIPPER 계정의 '정지' 버튼 클릭 | — | "해당 회원을 이용 제한하시겠습니까?" 확인 대화상자 표시 | ☐ |
+| 3 | 확인 대화상자 | '확인' 클릭 | — | "이용 제한" confirm 실행 → 계정 status = SUSPENDED | ☐ |
+| 4 | /ko/login | 정지된 SHIPPER 계정으로 로그인 시도 | (해당 SHIPPER 이메일) / `password1234` | 로그인 직후 `/ko/suspended` 페이지로 redirect | ☐ |
+| 5 | /ko/suspended | SUSPENDED 안내 페이지 UI 확인 | — | ShieldAlert 아이콘 + "계정이 일시 정지되었습니다" 문구 + support@zenith.kr 연락처 + 로그아웃 버튼 표시 (ZenCard 레이아웃) | ☐ |
+| 6 | /ko/suspended | 브라우저 URL에 `/ko/orders` 직접 입력 | — | `/ko/suspended` 유지 — authGuard SUSPENDED whitelist 불일치로 강제 redirect | ☐ |
+| 7 | /ko/suspended | URL에 `/ko/login` 직접 입력 | — | `/ko/login` 페이지로 정상 이동 (whitelist 허용) | ☐ |
+| 8 | /ko/login | URL에 `/` (루트) 직접 입력 | — | 루트 페이지 접근 가능 (whitelist 허용) | ☐ |
+| 9 | /ko/suspended | 로그인 페이지로 이동 후 로그아웃 버튼 클릭 | — | `/ko/login` 으로 이동, 세션 완전 종료 | ☐ |
+| 10 | /ko/login | ADMIN 계정으로 재로그인 → 정지 해제 | `admin@zenith.kr` | 회원 관리 페이지에서 해당 계정 '해제' 버튼 클릭 → ACTIVE 복원 | ☐ |
+| 11 | /ko/login | 복구된 SHIPPER 계정으로 로그인 | (해당 SHIPPER) | 정상 로그인, 대시보드 접근 가능 | ☐ |
 
 ### 합격 기준
+- [ ] 전 단계 ☑ 완료
 - [ ] SUSPENDED 계정 로그인 후 `/suspended` redirect
-- [ ] `/suspended` 페이지: 안내 문구 + 로그아웃 버튼 정상 표시
+- [ ] `/suspended` 페이지: ShieldAlert 아이콘 + 안내 문구 + support@zenith.kr + 로그아웃 버튼 정상 표시 (ZenCard)
 - [ ] 일반 페이지 직접 접근 시도 → `/suspended` 강제 redirect
-- [ ] 로그아웃 버튼 클릭 → `/login` 이동
 - [ ] 화이트리스트 경로 (`/`, `/login`, `/register`) 접근 가능 확인
+- [ ] 로그아웃 버튼 클릭 → `/login` 이동
+- [ ] 정지 해제(UNSUSPEND) 후 정상 로그인 가능
 
 ### 결함 기재란
 
