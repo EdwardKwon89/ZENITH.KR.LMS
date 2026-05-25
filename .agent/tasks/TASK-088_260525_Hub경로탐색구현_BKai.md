@@ -89,7 +89,7 @@ Phase J(TASK-075)에서 구현된 `DatabaseRouteAdapter`는 직항 루트만 조
 - [x] 코드 커밋 완료 — `5616493` (test) + `610cf1b` (seed + MOCK 좌표)
 - [x] 본 파일 상태 🔔 + ACTIVE_TASK.md 동기화 — 본 파일 🔔 전환, ACTIVE_TASK.md 🔄→🔔
 - [x] IMP_PROGRESS.md IMP-084 🔔 갱신
-- [x] 문서 커밋 완료 (해시: `0835a0b`)
+- [x] 문서 커밋 완료 (해시: `0835a0b` · `0679d97`)
 
 ---
 
