@@ -150,7 +150,7 @@
 | TASK-093 | 260525 | 환적 상태 추적 A안 (Transit Tracking per Leg) | P2 | TASK-091 ✅ | B_Kai | ✅ | [TASK-093](tasks/TASK-093_260525_환적상태추적A안_BKai.md) | IMP-087 완료 · 82c9fb7+bd7c2b2+3c6e422 · 227/227 · TASK-094·095 블로커 해제 ✅ |
 | TASK-094 | 260525 | E2E-19: Hub Routing 플로우 자동화 | P3 | TASK-091 ✅ · TASK-092 ✅ · TASK-093 ✅ | D_Kai | ✅ | [TASK-094](tasks/TASK-094_260525_E2EPhaseK자동화_DKai.md) | 3d8e5fc+0dba4b8+ed65e02 · 227/227 · E2E-19 시나리오 A+B ✅ |
 | TASK-095 | 260525 | UAT-11 Phase K 절차서 작성 (Hub Routing + P0 항목) | P3 | TASK-091 ✅ · TASK-092 ✅ · TASK-093 ✅ | B_Kai | ✅ | [TASK-095](tasks/TASK-095_260525_UATPhaseK절차서_BKai.md) | UAT-11 신규 6건 · UAT_MASTER 72→78 · 0322b1b+78345f3+97f2729+e2e3bc3 ✅ |
-| TASK-097 | 260525 | UAT-11 보완 — 쿼리 오류 수정 + IMP-086 시나리오 추가 | P3 | TASK-095 ✅ | B_Kai | ⬜ | [TASK-097](tasks/TASK-097_260525_UAT11보완_BKai.md) | UAT-11-03 쿼리 오류·UAT-11-04 비고·UAT-11-07 신규 · TASK-096 블로커 |
+| TASK-097 | 260525 | UAT-11 보완 — 쿼리 오류 수정 + IMP-086 시나리오 추가 | P3 | TASK-095 ✅ | B_Kai | 🔔 | [TASK-097](tasks/TASK-097_260525_UAT11보완_BKai.md) | UAT-11-03 쿼리 수정·11-04 비고·11-07 신규 · UAT_MASTER 78→79 · 3e491bb |
 | TASK-096 | 260525 | UAT 전체 실행 (Edward 직접 검증 — Go-Live 판정) | P1 | TASK-094 ✅ · TASK-095 ✅ · TASK-097 ✅ | Edward | 🚫 | [TASK-096](tasks/TASK-096_260525_UAT전체실행_Edward.md) | TASK-097 완료 후 Edward 직접 실행 |
 
 ---
@@ -160,7 +160,7 @@
 | Agent | 진행 중 | 재작업/조치 필요 | 블로커 대기 |
 |:------|:--------|:----------------|:----------|
 | Riley | — | R-17 위반 2회 누적 (TASK-088 무단 수정·TASK-092 혼합 커밋+해시 미기재) | — |
-| B_Kai | TASK-097 ⬜ (UAT-11 보완 — 즉시 착수 가능) | — | — |
+| B_Kai | TASK-097 🔔 (UAT-11 보완 — Aiden 검토 대기) | — | — |
 | D_Kai | — | — | — |
 | N_Kai | TASK-087 ⬜ (재교육 세션 — 완료 후 신규 할당 재개) | — | 신규 할당 중단 유지 |
 | Ring | — | — | 신규 할당 중단 유지 (9차 위반 누적) |
