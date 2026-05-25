@@ -35,6 +35,10 @@ export default function RegisterPage() {
   const [orgSearch, setOrgSearch] = useState('');
   const [orgs, setOrgs] = useState<any[]>([]);
 
+  // IMP-088: 개인정보 활용동의
+  const [privacyConsent, setPrivacyConsent] = useState(false);
+  const [termsConsent, setTermsConsent] = useState(false);
+
   const supabase = createClient();
 
   // 조직 검색 로직
@@ -101,6 +105,11 @@ export default function RegisterPage() {
       if (docFile) {
         formData.append('doc_file', docFile);
       }
+
+      // IMP-088: 동의 시각 전달
+      const now = new Date().toISOString();
+      formData.append('privacy_consent_at', now);
+      formData.append('terms_consent_at', now);
 
       const result = await signup(formData, locale);
       
@@ -284,10 +293,35 @@ export default function RegisterPage() {
               <ZenInput type="email" placeholder="이메일 주소" value={email} onChange={(e) => setEmail(e.target.value)} />
               <ZenInput type="password" placeholder="비밀번호" value={password} onChange={(e) => setPassword(e.target.value)} />
             </div>
+            {/* IMP-088: 개인정보 활용동의 */}
+            <div className="border-t border-stone-200 pt-4 mt-2 space-y-3">
+              <label className="flex items-start gap-3 cursor-pointer group">
+                <input
+                  type="checkbox"
+                  checked={privacyConsent}
+                  onChange={(e) => setPrivacyConsent(e.target.checked)}
+                  className="mt-0.5 w-4 h-4 rounded border-stone-300 text-blue-600 focus:ring-blue-500"
+                />
+                <span className="text-xs text-stone-600 group-hover:text-stone-800 leading-relaxed">
+                  [필수] 개인정보 수집·이용에 동의합니다. (수집항목: 이름, 이메일, 전화번호, 사업자등록번호)
+                </span>
+              </label>
+              <label className="flex items-start gap-3 cursor-pointer group">
+                <input
+                  type="checkbox"
+                  checked={termsConsent}
+                  onChange={(e) => setTermsConsent(e.target.checked)}
+                  className="mt-0.5 w-4 h-4 rounded border-stone-300 text-blue-600 focus:ring-blue-500"
+                />
+                <span className="text-xs text-stone-600 group-hover:text-stone-800 leading-relaxed">
+                  [필수] 서비스 이용약관에 동의합니다.
+                </span>
+              </label>
+            </div>
             {error && <div className="text-red-500 text-xs text-center">{error}</div>}
             <div className="flex gap-3">
                 <ZenButton variant="ghost" onClick={handleBack} className="flex-1">이전</ZenButton>
-                <ZenButton disabled={!email || !password || isPending} onClick={handleNext} className="flex-[2]">
+                <ZenButton disabled={!email || !password || !privacyConsent || !termsConsent || isPending} onClick={handleNext} className="flex-[2]">
                     {isPending ? '처리 중...' : '다음 단계로'}
                 </ZenButton>
             </div>

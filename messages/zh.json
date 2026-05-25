@@ -148,5 +148,14 @@
     "remarks": "备注",
     "generated": "生成时间",
     "print_title": "打印Packing List"
+  },
+  "Signup": {
+    "consent": {
+      "privacy_required": "[必填] 同意收集和使用个人信息",
+      "terms_required": "[必填] 同意服务条款",
+      "privacy_label": "我同意收集和使用我的个人信息（姓名、电子邮件、电话号码、营业执照号码）。",
+      "terms_label": "我同意服务条款。",
+      "error_required": "您必须同意隐私政策和服务条款。"
+    }
   }
 }

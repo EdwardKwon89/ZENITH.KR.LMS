@@ -130,5 +130,14 @@
     "remarks": "備考",
     "generated": "生成日時",
     "print_title": "Packing List印刷"
+  },
+  "Signup": {
+    "consent": {
+      "privacy_required": "[必須] 個人情報の収集・利用に同意",
+      "terms_required": "[必須] 利用規約に同意",
+      "privacy_label": "個人情報の収集・利用に同意します。（収集項目：氏名、メールアドレス、電話番号、事業者登録番号）",
+      "terms_label": "利用規約に同意します。",
+      "error_required": "個人情報の収集・利用および利用規約にすべて同意する必要があります。"
+    }
   }
 }

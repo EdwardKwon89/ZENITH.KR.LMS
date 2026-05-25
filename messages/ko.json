@@ -550,5 +550,14 @@
     "remarks": "비고",
     "generated": "생성일시",
     "print_title": "Packing List 출력"
+  },
+  "Signup": {
+    "consent": {
+      "privacy_required": "[필수] 개인정보 수집·이용 동의",
+      "terms_required": "[필수] 서비스 이용약관 동의",
+      "privacy_label": "개인정보 수집·이용에 동의합니다. (수집항목: 이름, 이메일, 전화번호, 사업자등록번호)",
+      "terms_label": "서비스 이용약관에 동의합니다.",
+      "error_required": "개인정보 수집·이용 및 서비스 이용약관에 모두 동의해야 합니다."
+    }
   }
 }
