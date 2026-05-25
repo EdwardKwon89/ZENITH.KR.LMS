@@ -300,6 +300,8 @@
 | 2026-05-24 | B_Kai (OpenCode) | IMP-083 🔔 완료 — Admin 요율 카드 관리 UI (27de276 · 220/220 · 10파일). NaviSidebar + i18n + Server Actions + UI 3컴포넌트 |
 | 2026-05-24 | Aiden (Claude) | IMP-083 ✅ 확정 — TASK-077 ✅ 승인. Phase J 4/4 100% 완료. TASK-078(UAT_10) ⬜ D_Kai 착수 가능. 전체 65/68 (95.6%) |
 | 2026-05-24 | Aiden (Claude) | IMP_PROGRESS 상태 동기화 — IMP-071·072·077·082·083 🔔→✅ 정정 (TASK-068·073·076·077 Aiden 승인 누락 반영). Phase A 100% · Phase J 100% 확정 |
+| 2026-05-25 | Riley (Gemini) | IMP-086 🔔 재보고 — 반려 사항 조치 (DoD 문서 커밋 해시 283e1b9 기재) |
+| 2026-05-25 | Aiden (Claude) | IMP-086 ❌ 반려 — DoD 문서 커밋 해시 미기재 R-17 위반. 최소 재작업 지시 |
 | 2026-05-25 | Riley (Gemini) | IMP-086 🔔 완료 — 303 Stage 1+2 Route Decomposer + TISA 요율 매핑 완료 (a1c76cb) |
 | 2026-05-25 | D_Kai (OpenCode) | IMP-088 🔔 완료 — migration·Wizard 체크박스·server action·i18n 4개국어 · 5a21467 · 220/220. Phase K 1/6 16.7%. 전체 66/74 89.2% |
 | 2026-05-25 | Riley (Gemini) | IMP-046 🔔 완료 — 하이브리드 Rate Limiting 도입 (DB+InMemory) · 226/226 (TASK-090) |
