@@ -148,8 +148,8 @@
 | TASK-091 | 260525 | Order-Route Segment 연결 (zen_orders ↔ 선택 경로 세그먼트) | P2 | TASK-088 ✅ | D_Kai | ✅ | [TASK-091](tasks/TASK-091_260525_오더라우트세그먼트연결_DKai.md) | IMP-085 완료 · 0eb5355+1b37eca · 227/227 · TASK-093 블로커 해제 ✅ |
 | TASK-092 | 260525 | 303 Stage 1+2: Route Decomposer + TISA 캐리어별 요율 매핑 | P2 | TASK-088 ✅ | Riley | ✅ | [TASK-092](tasks/TASK-092_260525_복합운임Stage1Stage2_Riley.md) | IMP-086 완료 · a1c76cb+283e1b9+929c3e8 · 227/227 ✅ |
 | TASK-093 | 260525 | 환적 상태 추적 A안 (Transit Tracking per Leg) | P2 | TASK-091 ✅ | B_Kai | ✅ | [TASK-093](tasks/TASK-093_260525_환적상태추적A안_BKai.md) | IMP-087 완료 · 82c9fb7+bd7c2b2+3c6e422 · 227/227 · TASK-094·095 블로커 해제 ✅ |
-| TASK-094 | 260525 | E2E-19: Hub Routing 플로우 자동화 | P3 | TASK-091 ✅ · TASK-092 ✅ · TASK-093 ✅ | D_Kai | ⬜ | [TASK-094](tasks/TASK-094_260525_E2EPhaseK자동화_DKai.md) | 전제조건 전량 충족 — 즉시 착수 가능 |
-| TASK-095 | 260525 | UAT-11 Phase K 절차서 작성 (Hub Routing + P0 항목) | P3 | TASK-091 ✅ · TASK-092 ✅ · TASK-093 ✅ | B_Kai | ⬜ | [TASK-095](tasks/TASK-095_260525_UATPhaseK절차서_BKai.md) | 전제조건 전량 충족 — 즉시 착수 가능 |
+| TASK-094 | 260525 | E2E-19: Hub Routing 플로우 자동화 | P3 | TASK-091 ✅ · TASK-092 ✅ · TASK-093 ✅ | D_Kai | 🔄 | [TASK-094](tasks/TASK-094_260525_E2EPhaseK자동화_DKai.md) | 구현 중 |
+| TASK-095 | 260525 | UAT-11 Phase K 절차서 작성 (Hub Routing + P0 항목) | P3 | TASK-091 ✅ · TASK-092 ✅ · TASK-093 ✅ | B_Kai | 🔔 | [TASK-095](tasks/TASK-095_260525_UATPhaseK절차서_BKai.md) | UAT-11 신규 6건 · UAT_MASTER 72→78 · 🔔 Aiden 검토 대기 |
 | TASK-096 | 260525 | UAT 전체 실행 (Edward 직접 검증 — Go-Live 판정) | P1 | TASK-094 ✅ · TASK-095 ✅ | Edward | 🚫 | [TASK-096](tasks/TASK-096_260525_UAT전체실행_Edward.md) | TASK-094~095 완료 후 Edward 직접 실행 |
 
 ---
@@ -159,8 +159,8 @@
 | Agent | 진행 중 | 재작업/조치 필요 | 블로커 대기 |
 |:------|:--------|:----------------|:----------|
 | Riley | — | R-17 위반 2회 누적 (TASK-088 무단 수정·TASK-092 혼합 커밋+해시 미기재) | — |
-| B_Kai | TASK-095 ⬜ (UAT-11 Phase K 절차서 — 즉시 착수 가능) | — | — |
-| D_Kai | TASK-094 ⬜ (E2E-19 Hub Routing 자동화 — 즉시 착수 가능) | — | — |
+| B_Kai | TASK-095 🔔 (UAT-11 Phase K 절차서 — Aiden 검토 대기) | — | — |
+| D_Kai | TASK-094 🔄 (E2E-19 Hub Routing 자동화 — 구현 중) | — | — |
 | N_Kai | TASK-087 ⬜ (재교육 세션 — 완료 후 신규 할당 재개) | — | 신규 할당 중단 유지 |
 | Ring | — | — | 신규 할당 중단 유지 (9차 위반 누적) |
 
