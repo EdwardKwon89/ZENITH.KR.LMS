@@ -146,8 +146,8 @@
 | TASK-089 | 260525 | 개인정보 활용동의 체크박스 (회원가입 Wizard) | P1 | 없음 | D_Kai | ✅ | [TASK-089](tasks/TASK-089_260525_개인정보활용동의_DKai.md) | IMP-088 완료 · 5a21467+1711d6b+fed208b · 220/220 · 개인정보보호법 준수 ✅ |
 | TASK-090 | 260525 | Rate Limiting 도입 (IMP-046 재활성화) | P1 | 없음 | Riley | ✅ | [TASK-090](tasks/TASK-090_260525_RateLimiting도입_Riley.md) | IMP-046 완료 · 610cf1b+5616493 · 226/226 PASS ✅ |
 | TASK-091 | 260525 | Order-Route Segment 연결 (zen_orders ↔ 선택 경로 세그먼트) | P2 | TASK-088 ✅ | D_Kai | ✅ | [TASK-091](tasks/TASK-091_260525_오더라우트세그먼트연결_DKai.md) | IMP-085 완료 · 0eb5355+1b37eca · 227/227 · TASK-093 블로커 해제 ✅ |
-| TASK-092 | 260525 | 303 Stage 1+2: Route Decomposer + TISA 캐리어별 요율 매핑 | P2 | TASK-088 ✅ | Riley | 🔔 | [TASK-092](tasks/TASK-092_260525_복합운임Stage1Stage2_Riley.md) | IMP-086 · 완료 보고 (반려 대응) — task file 🔔 |
-| TASK-093 | 260525 | 환적 상태 추적 A안 (Transit Tracking per Leg) | P2 | TASK-091 ✅ | B_Kai | ⬜ | [TASK-093](tasks/TASK-093_260525_환적상태추적A안_BKai.md) | IMP-087 · TASK-091 ✅ 블로커 해제 — 즉시 착수 가능 |
+| TASK-092 | 260525 | 303 Stage 1+2: Route Decomposer + TISA 캐리어별 요율 매핑 | P2 | TASK-088 ✅ | Riley | ✅ | [TASK-092](tasks/TASK-092_260525_복합운임Stage1Stage2_Riley.md) | IMP-086 완료 · a1c76cb+283e1b9+929c3e8 · 227/227 ✅ |
+| TASK-093 | 260525 | 환적 상태 추적 A안 (Transit Tracking per Leg) | P2 | TASK-091 ✅ | B_Kai | 🔄 | [TASK-093](tasks/TASK-093_260525_환적상태추적A안_BKai.md) | IMP-087 · 착수 — migration+types+validation+UI+i18n |
 | TASK-094 | 260525 | E2E-19: Hub Routing 플로우 자동화 | P3 | TASK-091 ✅ · TASK-092 ✅ · TASK-093 ✅ | D_Kai | 🚫 | [TASK-094](tasks/TASK-094_260525_E2EPhaseK자동화_DKai.md) | TASK-091~093 완료 후 착수 |
 | TASK-095 | 260525 | UAT-11 Phase K 절차서 작성 (Hub Routing + P0 항목) | P3 | TASK-091 ✅ · TASK-092 ✅ · TASK-093 ✅ | B_Kai | 🚫 | [TASK-095](tasks/TASK-095_260525_UATPhaseK절차서_BKai.md) | TASK-091~093 완료 후 착수 |
 | TASK-096 | 260525 | UAT 전체 실행 (Edward 직접 검증 — Go-Live 판정) | P1 | TASK-094 ✅ · TASK-095 ✅ | Edward | 🚫 | [TASK-096](tasks/TASK-096_260525_UAT전체실행_Edward.md) | TASK-094~095 완료 후 Edward 직접 실행 |
@@ -158,8 +158,8 @@
 
 | Agent | 진행 중 | 재작업/조치 필요 | 블로커 대기 |
 |:------|:--------|:----------------|:----------|
-| Riley | TASK-092 🔔 (IMP-086 — 검토 대기) | R-17 위반 2회 누적 (TASK-088 무단 수정·TASK-092 혼합 커밋+해시 미기재) | — |
-| B_Kai | TASK-093 ⬜ (IMP-087 환적 상태 추적 — 즉시 착수 가능) | — | TASK-095 🚫 |
+| Riley | — | R-17 위반 2회 누적 (TASK-088 무단 수정·TASK-092 혼합 커밋+해시 미기재) | — |
+| B_Kai | TASK-093 🔄 (IMP-087 환적 상태 추적 — 구현 중) | — | TASK-095 🚫 |
 | D_Kai | — | — | TASK-094 🚫 |
 | N_Kai | TASK-087 ⬜ (재교육 세션 — 완료 후 신규 할당 재개) | — | 신규 할당 중단 유지 |
 | Ring | — | — | 신규 할당 중단 유지 (9차 위반 누적) |
@@ -182,6 +182,7 @@
 | 2026-05-25 | Aiden (Claude) | TASK-092 설계 확정 🔄 착수 승인 — Riley RouteDecomposer·TISARateMatcher 전체 승인. Null carrierId 즉시 fallback 처리 명시 추가. routing.ts 단순화 승인 |
 | 2026-05-25 | Aiden (Claude) | TASK-091 ✅ PASS — D_Kai 0eb5355+1b37eca+31b64b0 전항목 확인. IMP-085 완료. TASK-093(B_Kai) 블로커 해제 → ⬜ 즉시 착수 가능 |
 | 2026-05-25 | Aiden (Claude) | TASK-092 ❌ 반려 — Riley doc commit `283e1b9` DoD 해시 미기재 + AGENTS.md·CLAUDE.md 혼합 커밋 R-17 위반. R-17 위반 누적 2회. 최소 재작업: DoD 해시 283e1b9 기재 후 correction commit |
+| 2026-05-25 | Aiden (Claude) | TASK-092 ✅ PASS — Riley 재작업 929c3e8 확인. DoD 12번 해시 283e1b9 기재 완료. IMP-086 완료 |
 | 2026-05-25 | Riley (Gemini) | TASK-092 🔔 재보고 — 반려 사항 조치 (DoD 문서 커밋 해시 283e1b9 기재) |
 | 2026-05-25 | Riley (Gemini) | TASK-092 완료 보고 — 303 Stage 1+2 구현 완료, rtk 회귀 227 PASS, 코드 커밋 a1c76cb |
 | 2026-05-16 | Aiden (Claude) | 역량 평가 목적 공평 재배분 — TASK-005~020 신규 등록. D_Kai·Ring Task 할당 (기존 Riley 전담 → 4 Agent 균등) |
