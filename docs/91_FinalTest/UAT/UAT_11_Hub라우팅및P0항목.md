@@ -101,14 +101,14 @@
 | 2 | 경로 카드 | Hub 경유 경로 카드의 '선택' 버튼 클릭 | — | 버튼 → '선택됨' 상태 변경 | ☐ |
 | 3 | — | 페이지 새로고침 (`F5`) | — | Hub 경유 경로가 계속 선택된 상태 유지 | ☐ |
 | 4 | Supabase Studio | `SELECT * FROM zen_order_routes WHERE order_id = '[orderId]'` | — | selected_option_id가 선택한 Hub 경유 옵션 ID와 일치 | ☐ |
-| 5 | Supabase Studio | `SELECT * FROM zen_order_route_segments WHERE order_id = '[orderId]'` | — | segment_index=0,1 두 행 존재, hub_port_code 경유지 일치 | ☐ |
+| 5 | Supabase Studio | `SELECT o.route_option_id, ors.id, ors.option_type, ors.segments FROM zen_orders o JOIN zen_route_options ors ON ors.id = o.route_option_id WHERE o.id = '[orderId]'` | — | segment_index=0,1 두 segment 존재, hub_port_code 경유지 일치 | ☐ |
 | 6 | /ko/orders/[id] | 오더 상세에서 경유지 정보 표시 확인 | — | 경유 포트 배지 또는 경로 시각화에 경유지 아이콘 표시 | ☐ |
 | 7 | — | COST 직항 경로 재선택 → 새로고침 | — | 선택 경로가 직항으로 변경·유지, segments 1개로 변경 | ☐ |
 
 ### 합격 기준
 - [ ] 전 단계 ☑ 완료
 - [ ] Hub 경유 경로 선택 가능
-- [ ] DB `zen_order_routes` + `zen_order_route_segments` 저장 확인 (2 segments)
+- [ ] DB `zen_orders.route_option_id` + `zen_route_options.segments` 저장 확인 (2 segments)
 - [ ] 새로고침 후 선택 유지
 - [ ] 오더 상세 화면에 경유지 정보 표시
 - [ ] 직항→Hub→직항 재선택 가능 (UPSERT)
@@ -128,7 +128,7 @@
 | 역할 | ADMIN / SHIPPER |
 | 화면 URL | /ko/tracking (추적 대시보드) → /ko/orders/[id] (오더 타임라인) |
 | 예상 소요 시간 | 15분 |
-| 사전 조건 | SHIPPER 계정 로그인, Hub 경유 오더 1건 존재 및 경로 선택 완료 상태 |
+| 사전 조건 | SHIPPER 계정 로그인, Hub 경유 오더 1건 존재 및 경로 선택 완료 상태. ⚠️ 이벤트 등록(4~8단계)은 Supabase Studio 직접 수동 검증 (운영자 UI 미제공 — 개발자 전용 수동 절차) |
 | 관련 IMP | IMP-087 |
 
 ### 테스트 절차
@@ -234,8 +234,46 @@
 
 ---
 
+## [UAT-11-07] Hub 경유 세그먼트별 캐리어 요율 분리 정산 확인
+
+| 항목 | 내용 |
+|:----|:----|
+| 역할 | ADMIN |
+| 화면 URL | /ko/orders/[id] (경로 탭) → /ko/finance/costs |
+| 예상 소요 시간 | 12분 |
+| 사전 조건 | ADMIN 로그인, Hub 경유 오더 1건 존재 (Leg 1 carrier ≠ Leg 2 carrier 가능 경로), zen_rate_cards에 2개 carrier 요율 데이터 존재 |
+| 관련 IMP | IMP-086 |
+
+### 테스트 절차
+
+| 순서 | 화면·URL | 수행 액션 | 입력 데이터 | 기대 결과 | 확인 |
+|:---:|:---------|:---------|:-----------|:---------|:----:|
+| 1 | /ko/orders/[id] | ADMIN 계정으로 Hub 경유 오더 진입 | `admin@zenith.kr` / `password1234` | COST·TIME·BALANCED 3종 + Hub 경유 경로 표시 | ☐ |
+| 2 | 경로 카드 | Hub 경유 경로 카드의 세그먼트별 비용 확인 | — | segment[0].carrier ≠ segment[1].carrier, 각각 cost 필드 표시 | ☐ |
+| 3 | — | 총비용 = segment[0].cost + segment[1].cost 합산 확인 | — | 경로 카드 총비용 = 세그먼트 비용 합계와 일치 | ☐ |
+| 4 | Supabase Studio | `SELECT * FROM zen_rate_cards WHERE carrier_id IN ('[carrier1]','[carrier2]')` | — | 각 carrier의 구간별 rate/cost 확인 가능 | ☐ |
+| 5 | — | segment[0].cost와 zen_rate_cards 조회값이 일치하는지 수동 계산 검증 | — | segment[0].cost = rate_card 조건(출발지→Hub)과 일치 | ☐ |
+| 6 | — | segment[1].cost와 zen_rate_cards 조회값이 일치하는지 수동 계산 검증 | — | segment[1].cost = rate_card 조건(Hub→도착지)과 일치 | ☐ |
+| 7 | /ko/finance/costs | 해당 오더의 인보이스/비용 정산 화면 진입 | — | 오더 총비용 = segment[0].cost + segment[1].cost 와 동일 | ☐ |
+
+### 합격 기준
+- [ ] 전 단계 ☑ 완료
+- [ ] Hub 경유 경로에서 Leg 1 carrier ≠ Leg 2 carrier 확인
+- [ ] 세그먼트별 비용이 각 carrier별 rate_card와 일치
+- [ ] 총비용 = segment[0].cost + segment[1].cost 합산 일치
+- [ ] 인보이스/정산 화면 총비용과 일치
+
+### 결함 기재란
+
+| 결함-ID | 단계 | 현상 | 심각도 |
+|:-------:|:---:|:-----|:------:|
+| | | | |
+
+---
+
 ## 개정 이력
 
 | 날짜 | 주체 | 내용 |
 |:-----|:----:|:-----|
 | 2026-05-25 | B_Kai (OpenCode) | v1.0 초안 작성 — UAT-11-01~06 절차 6개, Hub 라우팅 & P0 필수 항목 검증 범위 정의 |
+| 2026-05-25 | B_Kai (OpenCode) | v1.1 — UAT-11-03 쿼리 오류 수정, UAT-11-04 비고 추가, UAT-11-07 신규 (IMP-086 세그먼트 요율 분리 검증) |
