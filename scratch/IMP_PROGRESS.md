@@ -215,7 +215,7 @@
 
 | IMP | 내용 | Agent | 상태 | 완료일 |
 |:---:|:-----|:-----:|:----:|:------:|
-| 084 | Hub Route Discovery (DatabaseRouteAdapter BFS + 시드 데이터) | B_Kai | ⬜ | — |
+| 084 | Hub Route Discovery (DatabaseRouteAdapter BFS + 시드 데이터) | B_Kai | 🔔 | 5616493 · 226/226 · TC-R.8a·8b ✅ |
 | 085 | Order-Route Segment 연결 (zen_orders ↔ 선택 경로) | D_Kai | 🚫 | — |
 | 086 | 303 Stage 1+2: Route Decomposer + TISA 캐리어별 요율 매핑 | Riley | 🚫 | — |
 | 087 | 환적 상태 추적 A안 (Transit Tracking per Leg) | B_Kai | 🚫 | — |
@@ -225,7 +225,7 @@
 > 🚫 IMP-085·086·087: IMP-084 완료 후 착수 가능
 > 🚫 IMP-087: IMP-085 완료 후 착수 가능
 
-**Phase K 완료**: 2 / 6 (33.3%) — IMP-088·046 🔔 Aiden 검토 대기
+**Phase K 완료**: 3 / 6 (50.0%) — IMP-084·088·046 🔔 Aiden 검토 대기
 
 ---
 
