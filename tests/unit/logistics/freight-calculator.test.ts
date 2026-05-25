@@ -103,6 +103,118 @@ describe('Freight Calculator Utility', () => {
       expect(result.surcharges.find(s => s.surcharge_type === 'SSC')?.calculated_amount).toBe(50);
       expect(result.total).toBeCloseTo(971.84, 2);
     });
+
+    it('should calculate composite pricing for a multi-leg route option (Hub Route) and handle missing rate card fallback', async () => {
+      const mockSupabase = {
+        from: (table: string) => {
+          const chain = {
+            select: () => chain,
+            eq: (field: string, val: any) => {
+              if (field === 'carrier_id') {
+                (chain as any).currentCarrier = val;
+              }
+              return chain;
+            },
+            lte: () => chain,
+            or: () => chain,
+            order: () => chain,
+            limit: () => chain,
+            currentCarrier: '',
+            maybeSingle: async () => {
+              if (table === 'zen_rate_cards') {
+                if ((chain as any).currentCarrier === 'carrier-1') {
+                  return {
+                    data: {
+                      tiers: [{ weight_min: 0, unit_price: 10.0 }],
+                      currency: 'USD'
+                    },
+                    error: null
+                  };
+                }
+              }
+              return { data: null, error: null };
+            },
+            then: (resolve: any) => {
+              if (table === 'zen_surcharges') {
+                if ((chain as any).currentCarrier === 'carrier-1') {
+                  return Promise.resolve(
+                    resolve({
+                      data: [
+                        { surcharge_type: 'FSC', rate_type: 'FLAT', amount: 30.0, currency: 'USD' }
+                      ],
+                      error: null
+                    })
+                  );
+                }
+              }
+              return Promise.resolve(resolve({ data: [], error: null }));
+            }
+          };
+          return chain;
+        }
+      } as any;
+
+      const routeOption = {
+        option_type: 'COST',
+        segments: [
+          // 1st Leg: carrier_id가 있고 rate_card 매칭됨
+          {
+            transport_mode: 'AIR',
+            from_port_id: 'ICN',
+            to_port_id: 'HKG',
+            carrier: 'Zenith Air',
+            carrier_id: 'carrier-1',
+            transit_days: 1,
+            cost: 0,
+            currency: 'USD'
+          },
+          // 2nd Leg: carrier_id가 있으나 rate_card 매칭 안 되어 fallback 발생
+          {
+            transport_mode: 'SEA',
+            from_port_id: 'HKG',
+            to_port_id: 'SIN',
+            carrier: 'Zenith Sea',
+            carrier_id: 'carrier-2',
+            transit_days: 4,
+            cost: 150,
+            currency: 'USD'
+          },
+          // 3rd Leg: carrier_id가 없어 즉시 fallback
+          {
+            transport_mode: 'LAND',
+            from_port_id: 'SIN',
+            to_port_id: 'Hub',
+            carrier: 'Local Truck',
+            transit_days: 1,
+            cost: 50,
+            currency: 'USD'
+          }
+        ],
+        total_cost: 0,
+        total_transit_days: 6,
+        score: 0
+      } as any;
+
+      const result = await calculateCompositePricing({
+        weight: 10,
+        volume: 0.05,
+        supabase: mockSupabase,
+        routeOption
+      });
+
+      // 1st Leg: ChargeableWeight = 10, baseFreight = 10 * 10 = 100, FSC = 30 -> 130
+      // 2nd Leg: rate_card 없음 -> segment.cost인 150 유지
+      // 3rd Leg: carrier_id 없음 -> segment.cost인 50 유지
+      // totalBaseFreight = 100 (leg1) + 150 (leg2 fallback) + 50 (leg3 fallback) = 300
+      // totalSurcharge = 30
+      // total = 130 + 150 + 50 = 330
+      expect(result.baseFreight).toBe(300);
+      expect(result.total).toBe(330);
+      expect(routeOption.segments[0].cost).toBe(130);
+      expect(routeOption.segments[1].cost).toBe(150);
+      expect(routeOption.segments[2].cost).toBe(50);
+      expect(routeOption.total_cost).toBe(330);
+    });
   });
 });
 
