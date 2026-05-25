@@ -144,7 +144,7 @@
 | TASK-086 | 260524 | E2E-18: 패킹·Composite Pricing·Rate Cards 플로우 | P3 | TASK-082 ✅ | B_Kai | ✅ | [TASK-086](tasks/TASK-086_260524_E2E18_패킹라우팅요율플로우_BKai.md) | f72ed5b+9524a75 · e2e-18 354줄 3개 시나리오 · E2E-12 보강 · 220/220 |
 | TASK-088 | 260525 | Hub 경로 탐색 구현 (DatabaseRouteAdapter BFS 확장 + 시드 데이터) | P2 | 없음 | B_Kai | 🔄 | [TASK-088](tasks/TASK-088_260525_Hub경로탐색구현_BKai.md) | IMP-084 · 설계 확정 ✅ (2-step JOIN·2홉·시드 4개·MOCK 좌표) · 즉시 착수 |
 | TASK-089 | 260525 | 개인정보 활용동의 체크박스 (회원가입 Wizard) | P1 | 없음 | D_Kai | ✅ | [TASK-089](tasks/TASK-089_260525_개인정보활용동의_DKai.md) | IMP-088 완료 · 5a21467+1711d6b+fed208b · 220/220 · 개인정보보호법 준수 ✅ |
-| TASK-090 | 260525 | Rate Limiting 도입 (IMP-046 재활성화) | P1 | 없음 | Riley | 🔔 | [TASK-090](tasks/TASK-090_260525_RateLimiting도입_Riley.md) | IMP-046 완료 · 610cf1b+5616493 · 226/226 PASS |
+| TASK-090 | 260525 | Rate Limiting 도입 (IMP-046 재활성화) | P1 | 없음 | Riley | ❌ | [TASK-090](tasks/TASK-090_260525_RateLimiting도입_Riley.md) | IMP-046 완료 · 610cf1b+5616493 · 226/226 PASS · ❌ DoD 미체크+해시 미기재 재작업 |
 | TASK-091 | 260525 | Order-Route Segment 연결 (zen_orders ↔ 선택 경로 세그먼트) | P2 | TASK-088 ✅ | D_Kai | 🚫 | [TASK-091](tasks/TASK-091_260525_오더라우트세그먼트연결_DKai.md) | IMP-085 · TASK-088 완료 후 착수 |
 | TASK-092 | 260525 | 303 Stage 1+2: Route Decomposer + TISA 캐리어별 요율 매핑 | P2 | TASK-088 ✅ | Riley | 🚫 | [TASK-092](tasks/TASK-092_260525_복합운임Stage1Stage2_Riley.md) | IMP-086 · TASK-088 완료 후 착수 |
 | TASK-093 | 260525 | 환적 상태 추적 A안 (Transit Tracking per Leg) | P2 | TASK-091 ✅ | B_Kai | 🚫 | [TASK-093](tasks/TASK-093_260525_환적상태추적A안_BKai.md) | IMP-087 · TASK-091 완료 후 착수 |
@@ -158,7 +158,7 @@
 
 | Agent | 진행 중 | 재작업/조치 필요 | 블로커 대기 |
 |:------|:--------|:----------------|:----------|
-| Riley | TASK-090 🔄 (Rate Limiting — 즉시 착수) | — | TASK-092 🚫 (TASK-088 완료 후) |
+| Riley | — | TASK-090 ❌ (DoD 미체크·해시 미기재 재작업) | TASK-092 🚫 (TASK-088 완료 후) |
 | B_Kai | TASK-088 🔄 (Hub 경로 탐색 — 즉시 착수) | — | TASK-093 🚫 · TASK-095 🚫 |
 | D_Kai | — | — | TASK-091 🚫 (TASK-088 완료 후) · TASK-094 🚫 |
 | N_Kai | TASK-087 ⬜ (재교육 세션 — 완료 후 신규 할당 재개) | — | 신규 할당 중단 유지 |
@@ -174,6 +174,7 @@
 | 2026-05-25 | Aiden (Claude) | Phase K 2차 개발 작업 지시 발령 — TASK-088~096 전량 등록 (B_Kai 3건·D_Kai 3건·Riley 2건·Edward 1건). IMP-084~088 신규 + IMP-046 재활성화. Hub Routing·개인정보동의·Rate Limiting·UAT 전체 커버 |
 | 2026-05-25 | Aiden (Claude) | TASK-088·090 설계 확정 🔄 착수 승인 — B_Kai: 2-step JOIN·2홉·시드 4개·MOCK 좌표 확장 전항목 승인. Riley: 하이브리드(DB+InMemory)·10/100회 한도 전항목 승인. TASK-089 ❌ 반려(D_Kai 문서 커밋 해시 미기재 R-17 위반) |
 | 2026-05-25 | Aiden (Claude) | TASK-089 ✅ PASS — D_Kai 재작업 fed208b 전항목 확인. IMP-088 완료. 개인정보보호법 준수 구현 완료 |
+| 2026-05-25 | Aiden (Claude) | TASK-090 ❌ 반려 — Riley DoD 11항목 전량 미체크 + 문서 커밋 해시 미기재 (R-17 v1.5 §5 위반). 최소 재작업 지시 |
 | 2026-05-16 | Aiden (Claude) | 역량 평가 목적 공평 재배분 — TASK-005~020 신규 등록. D_Kai·Ring Task 할당 (기존 Riley 전담 → 4 Agent 균등) |
 | 2026-05-16 | Aiden (Claude) | 작업 지시 발령 — TASK-005~020 상세 파일 전량 생성. 각 Agent 즉시 착수 가능 상태 |
 | 2026-05-22 | Aiden (Claude) | E2E 확장 Sprint 작업 지시 발령 — TASK-052~055 등록 (Riley 2건·B_Kai 1건·D_Kai 1건). E2E-13/14/15 신규 spec + E2E-01/03/05 재검증 |
