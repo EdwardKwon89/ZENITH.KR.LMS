@@ -34,7 +34,7 @@ export async function getTrackingEvents(orderId: string, page = 1, pageSize = 50
   const to = from + pageSize - 1;
   const { data: events, error, count } = await supabase
     .from("zen_tracking_events")
-    .select("id, order_id, event_code, event_time, status, location, description, source_type", { count: "exact" })
+    .select("id, order_id, event_code, event_time, status, location, description, source_type, segment_index, hub_port_code", { count: "exact" })
     .eq("order_id", orderId)
     .order("event_time", { ascending: false })
     .range(from, to);
@@ -74,6 +74,8 @@ export async function addTrackingEvent(
     location: string;
     description: string;
     event_time?: string;
+    segment_index?: number;
+    hub_port_code?: string;
   }
 ) {
   const { supabase, user } = await validateAdminAction();
@@ -86,7 +88,9 @@ export async function addTrackingEvent(
       location: payload.location,
       description: payload.description,
       event_time: payload.event_time || new Date().toISOString(),
-      source_type: 'MANUAL'
+      source_type: 'MANUAL',
+      segment_index: payload.segment_index ?? null,
+      hub_port_code: payload.hub_port_code ?? null,
     });
 
   if (error) throw new Error(`Failed to add tracking event: ${error.message}`);

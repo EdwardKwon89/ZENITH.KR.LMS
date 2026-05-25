@@ -560,5 +560,13 @@
       "terms_label": "서비스 이용약관에 동의합니다.",
       "error_required": "개인정보 수집·이용 및 서비스 이용약관에 모두 동의해야 합니다."
     }
+  },
+  "Tracking": {
+    "event": {
+      "transit_departed": "출발",
+      "transit_arrived_hub": "환적지 도착",
+      "transit_departed_hub": "환적지 출발",
+      "transit_arrived_dest": "목적지 도착"
+    }
   }
 }

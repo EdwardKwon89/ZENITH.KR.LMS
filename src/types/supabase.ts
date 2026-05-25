@@ -2933,6 +2933,8 @@ export type Database = {
           id: string
           location: string | null
           order_id: string | null
+          segment_index: number | null
+          hub_port_code: string | null
           source_type: string | null
           tracking_config_id: string | null
         }
@@ -2944,6 +2946,8 @@ export type Database = {
           id?: string
           location?: string | null
           order_id?: string | null
+          segment_index?: number | null
+          hub_port_code?: string | null
           source_type?: string | null
           tracking_config_id?: string | null
         }
@@ -2955,6 +2959,8 @@ export type Database = {
           id?: string
           location?: string | null
           order_id?: string | null
+          segment_index?: number | null
+          hub_port_code?: string | null
           source_type?: string | null
           tracking_config_id?: string | null
         }

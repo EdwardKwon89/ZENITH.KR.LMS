@@ -589,5 +589,13 @@
       "terms_label": "I consent to the terms of service.",
       "error_required": "You must consent to both privacy policy and terms of service."
     }
+  },
+  "Tracking": {
+    "event": {
+      "transit_departed": "Departed",
+      "transit_arrived_hub": "Arrived at Hub",
+      "transit_departed_hub": "Departed from Hub",
+      "transit_arrived_dest": "Arrived at Destination"
+    }
   }
 }

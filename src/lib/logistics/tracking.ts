@@ -9,7 +9,7 @@ import { getNumericParam } from '../params/service';
 import { OrderStatus } from '@/types/orders';
 import { triggerStatusChangeNotification } from '@/app/actions/notifications';
 
-export type TrackingEventCode = 'BOOKED' | 'PICKED_UP' | 'TERMINAL_IN' | 'DEPARTED' | 'IN_TRANSIT' | 'ARRIVED' | 'OUT_FOR_DELIVERY' | 'DELIVERED' | 'DELAYED' | 'EXCEPTION';
+export type TrackingEventCode = 'BOOKED' | 'PICKED_UP' | 'TERMINAL_IN' | 'DEPARTED' | 'IN_TRANSIT' | 'ARRIVED' | 'OUT_FOR_DELIVERY' | 'DELIVERED' | 'DELAYED' | 'EXCEPTION' | 'TRANSIT_DEPARTED' | 'TRANSIT_ARRIVED_HUB' | 'TRANSIT_DEPARTED_HUB' | 'TRANSIT_ARRIVED_DEST';
 
 export interface TrackingStep {
   event_code: TrackingEventCode;
@@ -17,6 +17,8 @@ export interface TrackingStep {
   location: string;
   description: string;
   source: string;
+  segment_index?: number;
+  hub_port_code?: string;
 }
 
 /**
@@ -67,7 +69,11 @@ export class TrackingManager {
     'OUT_FOR_DELIVERY': OrderStatus.IN_TRANSIT,
     'DELIVERED': OrderStatus.DELIVERED,
     'DELAYED': OrderStatus.HELD,
-    'EXCEPTION': OrderStatus.HELD
+    'EXCEPTION': OrderStatus.HELD,
+    'TRANSIT_DEPARTED': OrderStatus.IN_TRANSIT,
+    'TRANSIT_ARRIVED_HUB': OrderStatus.IN_TRANSIT,
+    'TRANSIT_DEPARTED_HUB': OrderStatus.IN_TRANSIT,
+    'TRANSIT_ARRIVED_DEST': OrderStatus.DELIVERED,
   };
 
   constructor() {
