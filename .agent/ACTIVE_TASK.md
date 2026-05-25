@@ -146,7 +146,7 @@
 | TASK-089 | 260525 | 개인정보 활용동의 체크박스 (회원가입 Wizard) | P1 | 없음 | D_Kai | ✅ | [TASK-089](tasks/TASK-089_260525_개인정보활용동의_DKai.md) | IMP-088 완료 · 5a21467+1711d6b+fed208b · 220/220 · 개인정보보호법 준수 ✅ |
 | TASK-090 | 260525 | Rate Limiting 도입 (IMP-046 재활성화) | P1 | 없음 | Riley | ✅ | [TASK-090](tasks/TASK-090_260525_RateLimiting도입_Riley.md) | IMP-046 완료 · 610cf1b+5616493 · 226/226 PASS ✅ |
 | TASK-091 | 260525 | Order-Route Segment 연결 (zen_orders ↔ 선택 경로 세그먼트) | P2 | TASK-088 ✅ | D_Kai | 🔔 | [TASK-091](tasks/TASK-091_260525_오더라우트세그먼트연결_DKai.md) | IMP-085 완료 · 0eb5355 · 227/227 · zen_orders.route_option_id + View + selectRoute() |
-| TASK-092 | 260525 | 303 Stage 1+2: Route Decomposer + TISA 캐리어별 요율 매핑 | P2 | TASK-088 ✅ | Riley | 🔄 | [TASK-092](tasks/TASK-092_260525_복합운임Stage1Stage2_Riley.md) | IMP-086 · 설계 확정 🔄 착수 승인 |
+| TASK-092 | 260525 | 303 Stage 1+2: Route Decomposer + TISA 캐리어별 요율 매핑 | P2 | TASK-088 ✅ | Riley | 🔔 | [TASK-092](tasks/TASK-092_260525_복합운임Stage1Stage2_Riley.md) | IMP-086 · 완료 보고 — task file 🔔 |
 | TASK-093 | 260525 | 환적 상태 추적 A안 (Transit Tracking per Leg) | P2 | TASK-091 ✅ | B_Kai | 🚫 | [TASK-093](tasks/TASK-093_260525_환적상태추적A안_BKai.md) | IMP-087 · TASK-091 완료 후 착수 |
 | TASK-094 | 260525 | E2E-19: Hub Routing 플로우 자동화 | P3 | TASK-091 ✅ · TASK-092 ✅ · TASK-093 ✅ | D_Kai | 🚫 | [TASK-094](tasks/TASK-094_260525_E2EPhaseK자동화_DKai.md) | TASK-091~093 완료 후 착수 |
 | TASK-095 | 260525 | UAT-11 Phase K 절차서 작성 (Hub Routing + P0 항목) | P3 | TASK-091 ✅ · TASK-092 ✅ · TASK-093 ✅ | B_Kai | 🚫 | [TASK-095](tasks/TASK-095_260525_UATPhaseK절차서_BKai.md) | TASK-091~093 완료 후 착수 |
@@ -158,7 +158,7 @@
 
 | Agent | 진행 중 | 재작업/조치 필요 | 블로커 대기 |
 |:------|:--------|:----------------|:----------|
-| Riley | TASK-092 🔄 (IMP-086 Route Decomposer — 즉시 착수) | R-17 위반 1회 기록 (TASK-088 파일 무단 수정) | — |
+| Riley | TASK-092 🔔 (IMP-086 — 검토 대기) | R-17 위반 1회 기록 (TASK-088 파일 무단 수정) | — |
 | B_Kai | — | — | TASK-093 🚫 (TASK-091 완료 후) · TASK-095 🚫 |
 | D_Kai | TASK-091 🔔 (IMP-085 — Aiden 검토 대기) | — | TASK-094 🚫 |
 | N_Kai | TASK-087 ⬜ (재교육 세션 — 완료 후 신규 할당 재개) | — | 신규 할당 중단 유지 |
@@ -180,6 +180,7 @@
 | 2026-05-25 | Aiden (Claude) | TASK-088 ❌ 반려 — B_Kai Hub 탐색 구현 커밋 해시 오기재(TASK-075 d86c6af → 실제 610cf1b 혼입) + Riley 무단 작성 미검증 제출 |
 | 2026-05-25 | Aiden (Claude) | TASK-091 설계 확정 🔄 착수 승인 — D_Kai 방안 A' 승인: `zen_orders.route_option_id` FK + `selectRoute()` 트랜잭션 + View `zen_order_route_summary`. `createOrder()` 수정 불필요 확정 |
 | 2026-05-25 | Aiden (Claude) | TASK-092 설계 확정 🔄 착수 승인 — Riley RouteDecomposer·TISARateMatcher 전체 승인. Null carrierId 즉시 fallback 처리 명시 추가. routing.ts 단순화 승인 |
+| 2026-05-25 | Riley (Gemini) | TASK-092 완료 보고 — 303 Stage 1+2 구현 완료, rtk 회귀 227 PASS, 코드 커밋 a1c76cb |
 | 2026-05-16 | Aiden (Claude) | 역량 평가 목적 공평 재배분 — TASK-005~020 신규 등록. D_Kai·Ring Task 할당 (기존 Riley 전담 → 4 Agent 균등) |
 | 2026-05-16 | Aiden (Claude) | 작업 지시 발령 — TASK-005~020 상세 파일 전량 생성. 각 Agent 즉시 착수 가능 상태 |
 | 2026-05-22 | Aiden (Claude) | E2E 확장 Sprint 작업 지시 발령 — TASK-052~055 등록 (Riley 2건·B_Kai 1건·D_Kai 1건). E2E-13/14/15 신규 spec + E2E-01/03/05 재검증 |
