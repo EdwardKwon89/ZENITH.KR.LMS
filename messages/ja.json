@@ -61,7 +61,8 @@
     "login_email_label": "メールアドレス",
     "login_password_label": "パスワード",
     "login_button": "ログイン",
-    "signup_button": "アカウント作成"
+    "signup_button": "アカウント作成",
+    "rate_limit_exceeded": "リクエストの回数が多すぎます。{seconds}秒後に再試行してください。"
   },
   "WarehouseOutbound": {
     "title": "出庫処理",

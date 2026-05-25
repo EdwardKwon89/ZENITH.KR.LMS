@@ -7,17 +7,64 @@ import { createAdminClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { USER_ROLES } from '@/lib/auth/rbac';
+import { headers } from 'next/headers';
+import { getTranslations } from 'next-intl/server';
+
+async function getClientIp() {
+  const headerStore = await headers();
+  const forwardedFor = headerStore.get('x-forwarded-for');
+  if (forwardedFor) {
+    return forwardedFor.split(',')[0].trim();
+  }
+  return headerStore.get('x-real-ip') || '127.0.0.1';
+}
+
+async function verifyDbRateLimit(action: string, maxRequests: number, windowSeconds: number) {
+  const ip = await getClientIp();
+  const key = `${ip}:${action}`;
+  
+  try {
+    const adminClient = await createAdminClient();
+    const { data, error } = await adminClient.rpc('check_rate_limit', {
+      p_key: key,
+      p_window_size_seconds: windowSeconds,
+      p_max_requests: maxRequests
+    });
+
+    if (error) {
+      logger.error(`[RATE_LIMIT_DB] RPC Error for ${key}:`, error);
+      return { allowed: true, retryAfter: 0 };
+    }
+
+    return {
+      allowed: data.allowed as boolean,
+      retryAfter: data.retry_after as number
+    };
+  } catch (e) {
+    logger.error(`[RATE_LIMIT_DB] Unexpected Error for ${key}:`, e);
+    return { allowed: true, retryAfter: 0 };
+  }
+}
+
 
 
 
 export async function login(formData: FormData) {
   logger.info('[ACTION] login START');
-  const supabase = await createClient();
-
+  
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
   const locale = formData.get('locale') as string || 'ko';
 
+  // 1. Rate Limiting Check (Max 10 requests per minute)
+  const rateLimit = await verifyDbRateLimit('login', 10, 60);
+  if (!rateLimit.allowed) {
+    logger.warn(`[RATE_LIMIT] Login blocked for IP: ${await getClientIp()}`);
+    const t = await getTranslations({ locale, namespace: 'Auth' });
+    return { error: t('rate_limit_exceeded', { seconds: String(rateLimit.retryAfter) }) };
+  }
+
+  const supabase = await createClient();
   logger.info('[ACTION] login INPUT:', { email, locale });
 
   try {
@@ -54,6 +101,14 @@ export async function login(formData: FormData) {
 }
 
 export async function signup(formData: FormData, locale: string = 'ko') {
+  // 1. Rate Limiting Check (Max 10 requests per minute)
+  const rateLimit = await verifyDbRateLimit('signup', 10, 60);
+  if (!rateLimit.allowed) {
+    logger.warn(`[RATE_LIMIT] Signup blocked for IP: ${await getClientIp()}`);
+    const t = await getTranslations({ locale, namespace: 'Auth' });
+    return { error: t('rate_limit_exceeded', { seconds: String(rateLimit.retryAfter) }) };
+  }
+
   const supabase = await createClient();
 
   const email = formData.get('email') as string;

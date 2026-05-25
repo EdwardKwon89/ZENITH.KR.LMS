@@ -194,13 +194,17 @@ export async function getRouteVisualization(orderId: string) {
   const segments = (route.selected_option as any).segments;
   const milestones: any[] = [];
 
-  // Mock 포트 좌표 (Ds-11 296-303)
+  // Mock 포트 좌표 (Ds-11 296-303) — Phase L에서 zen_ports.latitude/longitude로 전환 예정
   const MOCK_PORT_COORDS: Record<string, { lat: number; lng: number }> = {
     'ICN': { lat: 37.4602, lng: 126.4407 },
     'SIN': { lat: 1.3521, lng: 103.8198 },
     'HKG': { lat: 22.3080, lng: 113.9185 },
     'PUS': { lat: 35.1796, lng: 129.0756 },
     'Incheon Hub': { lat: 37.4602, lng: 126.4407 },
+    'PVG': { lat: 31.1443, lng: 121.8083 },
+    'LAX': { lat: 33.9416, lng: -118.4085 },
+    'SHA': { lat: 31.1443, lng: 121.8083 },
+    'SFO': { lat: 37.6213, lng: -122.3790 },
   };
 
   // 2. 트래킹 이벤트 조회 (실적 확인용 — 페이지네이션 적용 IMP-045)

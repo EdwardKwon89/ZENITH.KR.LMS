@@ -145,7 +145,8 @@
     "my_profile_title": "프로필 관리",
     "my_profile_desc": "회원님의 기본 정보를 확인하고 수정할 수 있습니다.",
     "my_security_title": "보안 설정",
-    "my_security_desc": "계정 보안을 위해 비밀번호를 주기적으로 변경해 주세요."
+    "my_security_desc": "계정 보안을 위해 비밀번호를 주기적으로 변경해 주세요.",
+    "rate_limit_exceeded": "요청 횟수가 너무 많습니다. {seconds}초 후에 다시 시도해 주세요."
   },
   "Pending": {
     "title": "대기 항목",

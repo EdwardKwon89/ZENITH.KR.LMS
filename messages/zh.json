@@ -79,7 +79,8 @@
     "my_profile_title": "个人资料管理",
     "my_profile_desc": "查看和修改您的基本信息。",
     "my_security_title": "安全设置",
-    "my_security_desc": "为了账户安全，请定期更改密码。"
+    "my_security_desc": "为了账户安全，请定期更改密码。",
+    "rate_limit_exceeded": "请求过于频繁，请在 {seconds} 秒后重试。"
   },
   "WarehouseOutbound": {
     "title": "出库处理",
