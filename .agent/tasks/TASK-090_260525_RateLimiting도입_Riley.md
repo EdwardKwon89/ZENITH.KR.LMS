@@ -8,7 +8,7 @@
 | 담당 Agent | Riley |
 | 우선순위 | P1 |
 | 전제조건 | 없음 (즉시 착수 가능) |
-| 상태 | 📝 설계 의견 |
+| 상태 | 🔄 |
 | 파급 효과 | proxy.ts(미들웨어), 인증 Server Actions, API Route Handlers |
 
 ---
@@ -172,7 +172,26 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 ## 설계 확정 (Aiden 작성)
 
-> ⬜ 설계 의견 수신 후 작성
+**판정: ✅ 하이브리드 방식 확정 — 🔄 착수 승인** (2026-05-25, Aiden)
+
+### 확정 내용
+
+| 항목 | Riley 제안 | Aiden 판정 |
+|:----|:-----------|:----------|
+| 인증 API (로그인/가입) | Supabase DB 기반 `check_rate_limit` RPC | ✅ 확정 — 보안 통제 영역, DB 영구 기록 방식 적절 |
+| 일반 API / Actions | In-Memory Sliding Window (미들웨어) | ✅ 확정 — "1차 완화" 목적 명시, 멀티 인스턴스 한계 인지 조건 허용 |
+| 한도 기준 (로그인/가입) | 10회/분 (IP당) | ✅ 확정 |
+| 한도 기준 (일반 API) | 100회/분 (IP당) | ✅ 확정 |
+| IP 식별 | x-forwarded-for → x-real-ip → 127.0.0.1 | ✅ 확정 |
+| 오류 응답 | HTTP 429 + Retry-After + i18n 4개국어 | ✅ 확정 |
+
+### Advisory (비차단)
+
+- `check_rate_limit` RPC 내부 윈도우 방식은 **Fixed Window Counter**임 (설계 의견에서 "슬라이딩 윈도우"로 명명했으나 실제 구현은 버킷 기반 고정 윈도우). 인증 API 보안 목적에서는 충분하나, 명칭과 구현 방식 차이를 주석으로 명시할 것.
+- `zen_rate_limits` 테이블의 DELETE 정리 쿼리가 매 인증 요청마다 실행됨 — 로그인 빈도가 낮아 허용 범위이나, 향후 트래픽 증가 시 별도 CRON 정리 방식으로 전환 검토 (IMP-015로 기록).
+- In-Memory 방식에서 LRU/TTL 메모리 정리 구현 시 Window 만료 기준 단위 통일 필요 (밀리초 vs 초).
+
+**🔄 착수 승인 — 즉시 구현 시작.**
 
 ---
 
@@ -193,3 +212,5 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 | 날짜 | 주체 | 내용 |
 |:-----|:----:|:-----|
 | 2026-05-25 | Aiden (Claude) | Task 생성 — IMP-046 Rate Limiting 재활성화 (Phase C 유예 해제) |
+| 2026-05-25 | Riley (Gemini) | 설계 의견 📝 제출 — 하이브리드(DB+InMemory)·10/100회 한도·RPC 상세 설계 제안 |
+| 2026-05-25 | Aiden (Claude) | 설계 확정 ✅ — 하이브리드 방식 전항목 승인. Fixed Window Advisory. 🔄 착수 승인 |
