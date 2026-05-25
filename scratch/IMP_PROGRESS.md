@@ -208,6 +208,27 @@
 
 ---
 
+## Phase K — 멀티레그 Hub Routing 2차 개발
+
+> **착수일**: 2026-05-25 | **목표**: 고객 데모 전 Hub Routing 완성 + P0 Go-Live 조건 해소
+> **전제조건**: Phase J 4/4 ✅ 완료 (2026-05-24)
+
+| IMP | 내용 | Agent | 상태 | 완료일 |
+|:---:|:-----|:-----:|:----:|:------:|
+| 084 | Hub Route Discovery (DatabaseRouteAdapter BFS + 시드 데이터) | B_Kai | ⬜ | — |
+| 085 | Order-Route Segment 연결 (zen_orders ↔ 선택 경로) | D_Kai | 🚫 | — |
+| 086 | 303 Stage 1+2: Route Decomposer + TISA 캐리어별 요율 매핑 | Riley | 🚫 | — |
+| 087 | 환적 상태 추적 A안 (Transit Tracking per Leg) | B_Kai | 🚫 | — |
+| 088 | 개인정보 활용동의 체크박스 (회원가입 Wizard) | D_Kai | ⬜ | — |
+| 046 | Rate Limiting 도입 (Phase C 유예 재활성화) | Riley | 📝 | — |
+
+> 🚫 IMP-085·086·087: IMP-084 완료 후 착수 가능
+> 🚫 IMP-087: IMP-085 완료 후 착수 가능
+
+**Phase K 완료**: 0 / 6 (0%) — 진행 중
+
+---
+
 ## 삭제/병합 처리
 
 | IMP | 처리 내용 |
@@ -222,7 +243,7 @@
 |:-----:|:----:|:----:|:------:|:-----|
 | A | 10 | 10 | 100% ✅ | IMP-071·072·077 ✅ (TASK-068·073 Aiden 승인) |
 | B | 9 | 10 | 90% | IMP-053 ➖ (IMP-047 통합) |
-| C | 6 | 7 | 85.7% | IMP-046 🚫 유예 (상용 오픈 전 Sprint 이관) |
+| C | 6 | 7 | 85.7% | IMP-046 ⬜ (Phase K 재활성화 — TASK-090) |
 | D | 8 | 8 | 100% ✅ | |
 | E | 7 | 7 | 100% ✅ | |
 | F | 11 | 11 | 100% ✅ | |
@@ -230,10 +251,11 @@
 | H | 5 | 5 | 100% ✅ | |
 | I | 5 | 5 | 100% ✅ | IMP-073~077 전량 완료 (TASK-069~073 ✅) |
 | J | 4 | 4 | 100% ✅ | IMP-080 ✅ · IMP-081 ✅ · IMP-082 ✅ · IMP-083 ✅ |
-| **합계** | **65** | **68** | **95.6%** | ➖ 1건 제외 기준 |
+| K | 0 | 6 | 0% | IMP-084~088 + IMP-046 — Phase K 2차 개발 착수 |
+| **합계** | **65** | **74** | **87.8%** | Phase K 6건 추가 기준 |
 
-> 미완료 IMP: IMP-046(🚫 유예) · IMP-028·069(⬜·🚫 Future·착수 조건 대기)
-> 2026-05-24 기준 업데이트 (Aiden — IMP-083 ✅ 확정, Phase J 4/4 100% 완료)
+> 미완료 IMP: Phase K 6건(⬜/🚫) · IMP-028·069(Future — 통관 연계)
+> 2026-05-25 기준 업데이트 (Aiden — Phase K 착수, TASK-088~096 발령)
 
 ---
 
@@ -243,6 +265,7 @@
 |:----:|:------|:-----|
 | 2026-05-24 | Aiden (Claude) | IMP-082 ✅ 확정 — TASK-076 ✅ 승인. Phase J 4/4 100% 완료. TASK-077(IMP-083) ⬜ 블로커 해제 |
 | 2026-05-24 | Riley (Gemini) | IMP-082 🔔 재작업 완료 — estimateFreightCost 복원, 순환참조 해결 (3d9e915) |
+| 2026-05-25 | Aiden (Claude) | Phase K 착수 — IMP-084~088 신규 등록, IMP-046 재활성화. TASK-088~096 발령. IMP-046 Phase C에서 ⬜(Phase K)로 전환 |
 | 2026-05-24 | Riley (Gemini) | IMP-082 🔔 완료 보고 — Composite Pricing Engine 구현 (b859677) |
 | 2026-05-23 | D_Kai (OpenCode) | IMP-080 🔔 완료 — 지능형 라우팅 DB 스키마 4 테이블 · mig + RLS + seed · 219/219 (TASK-074) |
 | 2026-05-23 | B_Kai (OpenCode) | IMP-074 🔔 재작업 완료 — zh/ja i18n + RBAC · 90ca21d · 219/219 (TASK-070 반려 대응) |
