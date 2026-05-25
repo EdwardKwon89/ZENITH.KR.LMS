@@ -216,16 +216,16 @@
 | IMP | 내용 | Agent | 상태 | 완료일 |
 |:---:|:-----|:-----:|:----:|:------:|
 | 084 | Hub Route Discovery (DatabaseRouteAdapter BFS + 시드 데이터) | B_Kai | 🔔 | 5616493 · 226/226 · TC-R.8a·8b ✅ |
-| 085 | Order-Route Segment 연결 (zen_orders ↔ 선택 경로) | D_Kai | 🚫 | — |
+| 085 | Order-Route Segment 연결 (zen_orders ↔ 선택 경로) | D_Kai | 📝 | 설계 의견 제출 — 방안 A' 권장 |
 | 086 | 303 Stage 1+2: Route Decomposer + TISA 캐리어별 요율 매핑 | Riley | 🚫 | — |
 | 087 | 환적 상태 추적 A안 (Transit Tracking per Leg) | B_Kai | 🚫 | — |
 | 088 | 개인정보 활용동의 체크박스 (회원가입 Wizard) | D_Kai | 🔔 | 5a21467 · 220/220 · migration+UI+action+i18n 4개국어 ✅ |
 | 046 | Rate Limiting 도입 (Phase C 유예 재활성화) | Riley | 🔔 | 2026-05-25 |
 
-> 🚫 IMP-085·086·087: IMP-084 완료 후 착수 가능
+> 🚫 IMP-086·087: IMP-084 완료 후 착수 가능
 > 🚫 IMP-087: IMP-085 완료 후 착수 가능
 
-**Phase K 완료**: 3 / 6 (50.0%) — IMP-084·088·046 🔔 Aiden 검토 대기
+**Phase K 완료**: 3 / 6 (50.0%) — IMP-084·088·046 🔔 / IMP-085 📝 설계 의견
 
 ---
 
@@ -251,10 +251,10 @@
 | H | 5 | 5 | 100% ✅ | |
 | I | 5 | 5 | 100% ✅ | IMP-073~077 전량 완료 (TASK-069~073 ✅) |
 | J | 4 | 4 | 100% ✅ | IMP-080 ✅ · IMP-081 ✅ · IMP-082 ✅ · IMP-083 ✅ |
-| K | 1 | 6 | 16.7% | IMP-088 ✅🔔 — Aiden 검토 대기 |
-| **합계** | **67** | **74** | **90.5%** | Phase K 6건 추가 기준 — IMP-088·046 🔔 |
+| K | 1 | 6 | 16.7% | IMP-084·088·046 🔔 · IMP-085 📝 설계 의견 |
+| **합계** | **67** | **74** | **90.5%** | Phase K 6건 기준 — IMP-084·088·046 🔔 · IMP-085 📝 |
 
-> 미완료 IMP: Phase K 5건(⬜/🚫) · IMP-028·069(Future — 통관 연계)
+> 미완료 IMP: IMP-085 📝 Aiden 설계 확정 대기 · IMP-086·087 🚫 블로커 · IMP-028·069(Future — 통관 연계)
 > 2026-05-25 기준 업데이트 (Aiden — Phase K 착수, TASK-088~096 발령)
 
 ---
