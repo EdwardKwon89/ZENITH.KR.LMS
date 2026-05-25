@@ -80,7 +80,7 @@ Phase J(TASK-075)에서 구현된 `DatabaseRouteAdapter`는 직항 루트만 조
 ## 완료 기준 (DoD)
 
 - [x] 설계 의견 제출 (📝) + Aiden 설계 확정 (🔍→🔄) — ✅ 전항목 승인 (Aiden, 2026-05-25)
-- [x] `getPotentialRoutes()` Hub 탐색 구현 — `appendHubRoutes()` 2-step SQL JOIN (TASK-075 `d86c6af`)
+- [x] `getPotentialRoutes()` Hub 탐색 구현 — `appendHubRoutes()` 2-step SQL JOIN (`610cf1b` 혼입 — Riley IMP-046 커밋)
 - [x] 직항 루트와 Hub 루트 모두 반환 확인 — TC-R.8a(PVG→LAX Hub) + TC-R.8b(ICN→SIN 직항)
 - [x] 신규 시드 마이그레이션 작성 및 적용 확인 — `20260525120000_imp084_hub_route_seed.sql` (`610cf1b`)
 - [x] `getRouteVisualization()` 포트 좌표 처리 — MOCK_PORT_COORDS 확장 (Option B, Aiden 승인). zen_ports lat/lng 연동은 Phase L Advisory
@@ -190,7 +190,7 @@ zen_ports에 lat/lng 컬럼이 없으므로 **Option B 채택**:
 | **코드 커밋** | `5616493` — `[Gemini] test: IMP-084 Hub 경로 탐색 테스트 보완` |
 | **시드 마이그레이션** | `supabase/migrations/20260525120000_imp084_hub_route_seed.sql` (committed in `610cf1b`) |
 | **MOCK_PORT_COORDS** | `src/app/actions/operations/routing.ts` — PVG·LAX·SHA·SFO 좌표 확장 (`610cf1b`) |
-| **Hub 탐색 구현** | `src/lib/logistics/adapters/DatabaseRouteAdapter.ts` — `appendHubRoutes()` 2-step SQL JOIN (TASK-075 `d86c6af`) |
+| **Hub 탐색 구현** | `src/lib/logistics/adapters/DatabaseRouteAdapter.ts` — `appendHubRoutes()` 2-step SQL JOIN (`610cf1b` 혼입 — Riley IMP-046 커밋) |
 | **시각화** | `getRouteVisualization()` — 기존 멀티세그먼트 마일스톤 처리로 Hub 2세그먼트 자동 지원 |
 | **신규 테스트** | `tests/integration/rou-01.test.ts` TC-R.8a·8b 추가 |
 | **회귀 테스트** | 226/226 FULL PASS (47 files) |
@@ -221,6 +221,7 @@ zen_ports에 lat/lng 컬럼이 없으므로 **Option B 채택**:
 ### Advisory
 - SHA와 PVG 동일 MOCK 좌표는 Phase L 실좌표 연동 시 수정 예정
 - 최대 홉 수 파라미터화(`maxHops`)는 Phase L에서 검토
+- `appendHubRoutes()` 구현 코드는 Riley의 `610cf1b`(IMP-046 Rate Limiting)에 혼입 커밋됨 — 독립 IMP-084 코드 커밋 없음
 
 ---
 
@@ -257,3 +258,4 @@ zen_ports에 lat/lng 컬럼이 없으므로 **Option B 채택**:
 | 2026-05-25 | Aiden (Claude) | 설계 확정 ✅ — 전항목 승인. SHA/PVG 좌표 Advisory. 🔄 착수 승인 |
 | 2026-05-25 | Aiden (Claude) | ❌ 반려 — Hub 탐색 구현 커밋 해시 오기재(TASK-075 d86c6af → 실제 610cf1b) + Riley 무단 작성 미검증 제출. 최소 재작업 지시 |
 | 2026-05-25 | B_Kai (OpenCode) | 구현 완료 보고 🔔 — TC-R.8a·8b 추가 5616493 · 226/226 · Aiden 검토 대기 |
+| 2026-05-25 | B_Kai (OpenCode) | 재작업 완료 🔔 — 커밋 해시 정정(d86c6af→610cf1b) + Advisory 추가. Aiden 재검토 대기 |
