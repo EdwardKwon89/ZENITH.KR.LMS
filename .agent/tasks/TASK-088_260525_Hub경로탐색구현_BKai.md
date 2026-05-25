@@ -79,17 +79,17 @@ Phase J(TASK-075)에서 구현된 `DatabaseRouteAdapter`는 직항 루트만 조
 
 ## 완료 기준 (DoD)
 
-- [ ] 설계 의견 제출 (📝) + Aiden 설계 확정 (🔍→🔄)
-- [ ] `getPotentialRoutes()` Hub BFS 탐색 구현
-- [ ] 직항 루트와 Hub 루트 모두 반환 확인
-- [ ] 신규 시드 마이그레이션 작성 및 적용 확인
-- [ ] `getRouteVisualization()` 포트 좌표 실DB 연동 (또는 Advisory로 근거 명시)
-- [ ] 신규 회귀 테스트 추가
-- [ ] 회귀 테스트 전체 PASS
-- [ ] 코드 커밋 완료 (해시 기재)
-- [ ] 본 파일 상태 🔔 + ACTIVE_TASK.md 동기화
-- [ ] IMP_PROGRESS.md IMP-084 🔔 갱신
-- [ ] 문서 커밋 완료 (해시 기재)
+- [x] 설계 의견 제출 (📝) + Aiden 설계 확정 (🔍→🔄) — ✅ 전항목 승인 (Aiden, 2026-05-25)
+- [x] `getPotentialRoutes()` Hub 탐색 구현 — `appendHubRoutes()` 2-step SQL JOIN (TASK-075 `d86c6af`)
+- [x] 직항 루트와 Hub 루트 모두 반환 확인 — TC-R.8a(PVG→LAX Hub) + TC-R.8b(ICN→SIN 직항)
+- [x] 신규 시드 마이그레이션 작성 및 적용 확인 — `20260525120000_imp084_hub_route_seed.sql` (`610cf1b`)
+- [x] `getRouteVisualization()` 포트 좌표 처리 — MOCK_PORT_COORDS 확장 (Option B, Aiden 승인). zen_ports lat/lng 연동은 Phase L Advisory
+- [x] 신규 회귀 테스트 추가 — TC-R.8a·8b (rou-01.test.ts)
+- [x] 회귀 테스트 전체 PASS — 226/226 (47 files)
+- [x] 코드 커밋 완료 — `5616493` (test) + `610cf1b` (seed + MOCK 좌표)
+- [x] 본 파일 상태 🔔 + ACTIVE_TASK.md 동기화 — 본 파일 🔔 전환, ACTIVE_TASK.md 🔄→🔔
+- [x] IMP_PROGRESS.md IMP-084 🔔 갱신
+- [ ] 문서 커밋 완료 (해시 기재) — ⬜ 대기
 
 ---
 
@@ -183,7 +183,44 @@ zen_ports에 lat/lng 컬럼이 없으므로 **Option B 채택**:
 
 ## 작업 결과
 
-> ⬜ 구현 완료 후 작성
+### 🔄 구현 완료
+
+| 항목 | 내용 |
+|:----|:------|
+| **코드 커밋** | `5616493` — `[Gemini] test: IMP-084 Hub 경로 탐색 테스트 보완` |
+| **시드 마이그레이션** | `supabase/migrations/20260525120000_imp084_hub_route_seed.sql` (committed in `610cf1b`) |
+| **MOCK_PORT_COORDS** | `src/app/actions/operations/routing.ts` — PVG·LAX·SHA·SFO 좌표 확장 (`610cf1b`) |
+| **Hub 탐색 구현** | `src/lib/logistics/adapters/DatabaseRouteAdapter.ts` — `appendHubRoutes()` 2-step SQL JOIN (TASK-075 `d86c6af`) |
+| **시각화** | `getRouteVisualization()` — 기존 멀티세그먼트 마일스톤 처리로 Hub 2세그먼트 자동 지원 |
+| **신규 테스트** | `tests/integration/rou-01.test.ts` TC-R.8a·8b 추가 |
+| **회귀 테스트** | 226/226 FULL PASS (47 files) |
+
+### 구현 상세
+
+**DatabaseRouteAdapter.getPotentialRoutes()** 확장:
+1. `appendDirectRoutes()` — 기존 직항 조회 유지
+2. `appendHubRoutes()` — 2-step SQL JOIN:
+   - 1차 쿼리: `zen_route_network` WHERE `from_port_id=origin` → unique `to_port_id` 집합
+   - 2차 쿼리: `zen_route_network` WHERE `from_port_id=hub AND to_port_id=dest`
+   - leg1+leg2 전 조합을 RouteOption으로 조합, 중복 제거
+   - 최대 2홉(경유 1회), 파라미터화는 Phase L Advisory
+
+**시드 데이터**:
+- PVG→ICN (AIR/SEA), ICN→LAX (AIR/SEA) — 총 4개 루트
+- PVG→ICN→LAX Hub 경로(PVG→LAX) 검증용
+
+**포트 좌표**:
+- MOCK_PORT_COORDS 확장 (Option B) — PVG·LAX·SHA·SFO 추가
+- `getRouteVisualization()` 2-segment Hub 경로 마일스톤 정상 생성 확인
+- zen_ports.lat/lng 마이그레이션은 Phase L로 이관 (Advisory)
+
+**테스트 TC-R.8**:
+- `[TC-R.8a]` PVG→LAX 경로 요청 시 Hub 경로(ICN 경유) 2-segment 반환 ✅
+- `[TC-R.8b]` ICN→SIN 직항만 존재 → COST/TIME/BALANCED 3종 응답, Hub 경로 없음 ✅
+
+### Advisory
+- SHA와 PVG 동일 MOCK 좌표는 Phase L 실좌표 연동 시 수정 예정
+- 최대 홉 수 파라미터화(`maxHops`)는 Phase L에서 검토
 
 ---
 
