@@ -144,7 +144,7 @@
 | TASK-086 | 260524 | E2E-18: 패킹·Composite Pricing·Rate Cards 플로우 | P3 | TASK-082 ✅ | B_Kai | ✅ | [TASK-086](tasks/TASK-086_260524_E2E18_패킹라우팅요율플로우_BKai.md) | f72ed5b+9524a75 · e2e-18 354줄 3개 시나리오 · E2E-12 보강 · 220/220 |
 | TASK-088 | 260525 | Hub 경로 탐색 구현 (DatabaseRouteAdapter BFS 확장 + 시드 데이터) | P2 | 없음 | B_Kai | 🔄 | [TASK-088](tasks/TASK-088_260525_Hub경로탐색구현_BKai.md) | IMP-084 · 설계 확정 ✅ (2-step JOIN·2홉·시드 4개·MOCK 좌표) · 즉시 착수 |
 | TASK-089 | 260525 | 개인정보 활용동의 체크박스 (회원가입 Wizard) | P1 | 없음 | D_Kai | ✅ | [TASK-089](tasks/TASK-089_260525_개인정보활용동의_DKai.md) | IMP-088 완료 · 5a21467+1711d6b+fed208b · 220/220 · 개인정보보호법 준수 ✅ |
-| TASK-090 | 260525 | Rate Limiting 도입 (IMP-046 재활성화) | P1 | 없음 | Riley | 🔔 | [TASK-090](tasks/TASK-090_260525_RateLimiting도입_Riley.md) | IMP-046 완료 · 610cf1b · 224/224 PASS |
+| TASK-090 | 260525 | Rate Limiting 도입 (IMP-046 재활성화) | P1 | 없음 | Riley | 🔔 | [TASK-090](tasks/TASK-090_260525_RateLimiting도입_Riley.md) | IMP-046 완료 · 610cf1b+5616493 · 226/226 PASS |
 | TASK-091 | 260525 | Order-Route Segment 연결 (zen_orders ↔ 선택 경로 세그먼트) | P2 | TASK-088 ✅ | D_Kai | 🚫 | [TASK-091](tasks/TASK-091_260525_오더라우트세그먼트연결_DKai.md) | IMP-085 · TASK-088 완료 후 착수 |
 | TASK-092 | 260525 | 303 Stage 1+2: Route Decomposer + TISA 캐리어별 요율 매핑 | P2 | TASK-088 ✅ | Riley | 🚫 | [TASK-092](tasks/TASK-092_260525_복합운임Stage1Stage2_Riley.md) | IMP-086 · TASK-088 완료 후 착수 |
 | TASK-093 | 260525 | 환적 상태 추적 A안 (Transit Tracking per Leg) | P2 | TASK-091 ✅ | B_Kai | 🚫 | [TASK-093](tasks/TASK-093_260525_환적상태추적A안_BKai.md) | IMP-087 · TASK-091 완료 후 착수 |
