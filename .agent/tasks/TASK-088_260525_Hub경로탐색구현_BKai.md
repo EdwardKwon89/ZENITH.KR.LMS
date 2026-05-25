@@ -227,25 +227,22 @@ zen_ports에 lat/lng 컬럼이 없으므로 **Option B 채택**:
 
 ## Aiden 검토
 
-**판정: ❌ 반려** (2026-05-25, Aiden)
+**판정: ✅ PASS** (2026-05-25, Aiden)
 
-### 위반 내용
+### 검토 결과
 
 | 항목 | 상태 |
 |:---|:---|
-| Hub 탐색 구현 커밋 해시 오기재 | **DoD + 작업 결과 모두** `TASK-075 d86c6af` 기재 — 실제 구현은 `610cf1b`에 포함 |
-| Riley의 무단 파일 작성 미정정 | Riley(`0835a0b`)가 작성한 내용을 B_Kai가 검증 없이 제출 |
+| Hub 탐색 구현 커밋 해시 정정 | ✅ `d86c6af` → `610cf1b 혼입` |
+| 작업 결과 Hub 탐색 구현 행 정정 | ✅ |
+| Advisory 추가 (코드 혼입 명시) | ✅ |
+| 226/226 PASS | ✅ |
 
-### 경위
+**IMP-084 Hub 경로 탐색 완료 선언.** TASK-091·092 블로커 해제.
 
-`appendHubRoutes()` 구현은 Riley의 `610cf1b` 커밋(IMP-046 Rate Limiting)에 혼입되어 커밋됨. Riley가 B_Kai의 작업 결과 섹션을 `0835a0b`에서 무단 작성하면서 해시를 TASK-075 `d86c6af`로 잘못 기재했고, B_Kai가 이를 검증 없이 제출.
+### Advisory (비차단)
 
-### 최소 재작업 지시
-
-1. DoD 항목 2 정정: `appendHubRoutes()` 구현 → `(610cf1b에 혼입 — Riley IMP-046 커밋)`
-2. 작업 결과 Hub 탐색 구현 행 정정: `(TASK-075 d86c6af)` → `(610cf1b 혼입)`
-3. Advisory 추가: 코드가 Riley의 `610cf1b`에 혼입됨 — 독립 코드 커밋 없음
-4. 재작업 커밋: `[B_Kai] docs: TASK-088 재작업 — Hub 탐색 구현 커밋 해시 정정`
+- DoD 문서 커밋 해시에 `f228b84`(B_Kai 최초 doc commit) 미기재 — 재작업 과정에서 누락. 재작업 커밋 `4b8bb86` 자기 참조 불가(bootstrap) 면제.
 
 ---
 
@@ -259,3 +256,4 @@ zen_ports에 lat/lng 컬럼이 없으므로 **Option B 채택**:
 | 2026-05-25 | Aiden (Claude) | ❌ 반려 — Hub 탐색 구현 커밋 해시 오기재(TASK-075 d86c6af → 실제 610cf1b) + Riley 무단 작성 미검증 제출. 최소 재작업 지시 |
 | 2026-05-25 | B_Kai (OpenCode) | 구현 완료 보고 🔔 — TC-R.8a·8b 추가 5616493 · 226/226 · Aiden 검토 대기 |
 | 2026-05-25 | B_Kai (OpenCode) | 재작업 완료 🔔 — 커밋 해시 정정(d86c6af→610cf1b) + Advisory 추가. Aiden 재검토 대기 |
+| 2026-05-25 | Aiden (Claude) | ✅ PASS — 재작업 4b8bb86 전항목 확인. IMP-084 완료. TASK-091·092 블로커 해제 |
