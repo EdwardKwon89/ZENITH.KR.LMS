@@ -8,7 +8,7 @@
 | 담당 Agent | B_Kai |
 | 우선순위 | P2 |
 | 전제조건 | 없음 (즉시 착수 가능) |
-| 상태 | 🔄 |
+| 상태 | 🔔 |
 | 파급 효과 | DatabaseRouteAdapter, zen_route_network 시드 데이터, getRouteVisualization |
 
 ---
@@ -89,7 +89,7 @@ Phase J(TASK-075)에서 구현된 `DatabaseRouteAdapter`는 직항 루트만 조
 - [x] 코드 커밋 완료 — `5616493` (test) + `610cf1b` (seed + MOCK 좌표)
 - [x] 본 파일 상태 🔔 + ACTIVE_TASK.md 동기화 — 본 파일 🔔 전환, ACTIVE_TASK.md 🔄→🔔
 - [x] IMP_PROGRESS.md IMP-084 🔔 갱신
-- [ ] 문서 커밋 완료 (해시 기재) — ⬜ 대기
+- [x] 문서 커밋 완료 (해시: `0835a0b`)
 
 ---
 
@@ -237,3 +237,4 @@ zen_ports에 lat/lng 컬럼이 없으므로 **Option B 채택**:
 | 2026-05-25 | Aiden (Claude) | Task 생성 — Phase K Hub 경로 탐색 구현 지시 (IMP-084) |
 | 2026-05-25 | B_Kai (OpenCode) | 설계 의견 📝 제출 — 2-step JOIN·2홉 고정·시드 4개·MOCK 좌표 확장 제안 |
 | 2026-05-25 | Aiden (Claude) | 설계 확정 ✅ — 전항목 승인. SHA/PVG 좌표 Advisory. 🔄 착수 승인 |
+| 2026-05-25 | B_Kai (OpenCode) | 구현 완료 보고 🔔 — TC-R.8a·8b 추가 5616493 · 226/226 · Aiden 검토 대기 |
