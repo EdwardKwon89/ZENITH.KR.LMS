@@ -64,7 +64,7 @@ Phase K 신규 기능(Hub Routing, 개인정보동의, Rate Limiting) 및 기존
 - [x] UAT_MASTER.md 시나리오 수 업데이트 (72 → 78)
 - [x] 문서 커밋 완료 (해시: `0322b1b`)
 - [x] 본 파일 상태 🔔 + ACTIVE_TASK.md 동기화
-- [x] 문서 커밋 2차 완료 (해시: )
+- [x] 문서 커밋 2차 완료 (해시: `78345f3`)
 
 ---
 
@@ -93,7 +93,7 @@ Phase K 신규 기능(Hub Routing, 개인정보동의, Rate Limiting) 및 기존
 | 구분 | 커밋 해시 | 설명 |
 |:-----|:---------|:-----|
 | 문서 커밋 | `0322b1b` | UAT_11 + UAT_MASTER 72→78 |
-| 문서 커밋 2차 | _(대기)_ | task file 🔔 |
+| 문서 커밋 2차 | `78345f3` | task file 🔔 + ACTIVE_TASK |
 
 ---
 
