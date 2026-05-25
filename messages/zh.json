@@ -158,5 +158,13 @@
       "terms_label": "我同意服务条款。",
       "error_required": "您必须同意隐私政策和服务条款。"
     }
+  },
+  "Tracking": {
+    "event": {
+      "transit_departed": "出发",
+      "transit_arrived_hub": "到达中转站",
+      "transit_departed_hub": "离开中转站",
+      "transit_arrived_dest": "到达目的地"
+    }
   }
 }

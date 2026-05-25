@@ -15,6 +15,8 @@ interface TrackingEvent {
   location: string;
   description: string;
   source_type: string;
+  segment_index?: number | null;
+  hub_port_code?: string | null;
 }
 
 interface TrackingTimelineProps {
@@ -71,11 +73,29 @@ export default function TrackingTimeline({ events, isLoading }: TrackingTimeline
                 case 'OUT_FOR_DELIVERY': return <Truck className="w-4 h-4" />;
                 case 'IN_TRANSIT': return <Truck className="w-4 h-4" />;
                 case 'BOOKED': return <Package className="w-4 h-4" />;
+                case 'TRANSIT_DEPARTED': return <Truck className="w-4 h-4" />;
+                case 'TRANSIT_ARRIVED_HUB': return <MapPin className="w-4 h-4" />;
+                case 'TRANSIT_DEPARTED_HUB': return <Truck className="w-4 h-4" />;
+                case 'TRANSIT_ARRIVED_DEST': return <CheckCircle2 className="w-4 h-4" />;
                 case 'EXCEPTION':
                 case 'DELAYED': return <AlertCircle className="w-4 h-4" />;
                 default: return <Package className="w-4 h-4" />;
               }
             };
+
+            const getEventLabel = (code: string) => {
+              switch (code) {
+                case 'TRANSIT_DEPARTED': return '출발';
+                case 'TRANSIT_ARRIVED_HUB': return '환적지 도착';
+                case 'TRANSIT_DEPARTED_HUB': return '환적지 출발';
+                case 'TRANSIT_ARRIVED_DEST': return '목적지 도착';
+                default: return code;
+              }
+            };
+
+            const segmentLabel = event.segment_index != null
+              ? `Leg ${event.segment_index + 1}`
+              : null;
 
             return (
               <motion.li 
@@ -97,12 +117,12 @@ export default function TrackingTimeline({ events, isLoading }: TrackingTimeline
                   </div>
                 </div>
                 
-                <div className="zen-timeline-content">
+                  <div className="zen-timeline-content">
                   <div className="zen-timeline-glass-shimmer" />
                   <div className="zen-timeline-header">
                     <div className="flex flex-col gap-0.5">
                       <span className="zen-timeline-status flex items-center gap-1.5">
-                        {event.event_code}
+                        {getEventLabel(event.event_code)}
                         {isFirst && (
                           <motion.span 
                             initial={{ scale: 0.8 }}
@@ -113,6 +133,11 @@ export default function TrackingTimeline({ events, isLoading }: TrackingTimeline
                           </motion.span>
                         )}
                       </span>
+                      {segmentLabel && (
+                        <span className="text-[10px] text-gray-400 dark:text-gray-500 font-mono">
+                          {segmentLabel}
+                        </span>
+                      )}
                     </div>
                     <span className="zen-timeline-time flex items-center gap-1">
                       <Clock className="w-3 h-3 opacity-60" />

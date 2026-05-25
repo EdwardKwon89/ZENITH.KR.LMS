@@ -140,5 +140,13 @@
       "terms_label": "利用規約に同意します。",
       "error_required": "個人情報の収集・利用および利用規約にすべて同意する必要があります。"
     }
+  },
+  "Tracking": {
+    "event": {
+      "transit_departed": "出発",
+      "transit_arrived_hub": "中継地に到着",
+      "transit_departed_hub": "中継地を出発",
+      "transit_arrived_dest": "目的地に到着"
+    }
   }
 }
