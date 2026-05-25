@@ -1,0 +1,98 @@
+# TASK-094 — E2E Phase K 자동화 테스트 (Hub Routing 플로우)
+
+| 항목 | 내용 |
+|:---|:---|
+| Task-ID | TASK-094 |
+| IMP-ID | — (테스트 자동화) |
+| 생성일 | 2026-05-25 |
+| 담당 Agent | D_Kai |
+| 우선순위 | P3 |
+| 전제조건 | TASK-091 ✅ · TASK-092 ✅ · TASK-093 ✅ |
+| 상태 | 🚫 블로커 (TASK-091~093 완료 대기) |
+| 파급 효과 | E2E 테스트 스위트, tests/e2e/ |
+
+---
+
+## 배경
+
+Phase K에서 구현된 Hub Routing 전체 플로우(경로 탐색 → 선택 → 오더 생성 → 환적 추적)에 대한 Playwright E2E 자동화 테스트를 작성한다. 기존 E2E 파일 번호: E2E-01~18 (E2E-02 제외). 신규 파일: **E2E-19**.
+
+---
+
+## 작업 지시
+
+> 단순 Task — ⬜ → 🔄 직행 (전제조건 충족 후)
+
+1. **본 파일 상태 → 🔄, ACTIVE_TASK.md TASK-094 → 🔄 반영** (전제조건 ✅ 후 착수)
+
+2. **E2E-19 스펙 파일 생성**: `tests/e2e/e2e-19-hub-routing-flow.spec.ts`
+
+3. **시나리오 A — Hub 경로 선택 및 오더 생성**:
+   ```
+   SHIPPER 로그인
+   → 경로 조회 (PVG → LAX)
+   → 직항 없음 확인 OR 대안 경로 요청
+   → Hub 경로(PVG→ICN→LAX) 선택
+   → 세그먼트별 비용 표시 확인
+   → 오더 생성 완료
+   → 오더 상세에서 경유지 포함 경로 표시 확인
+   ```
+
+4. **시나리오 B — 환적 상태 추적**:
+   ```
+   MANAGER 로그인
+   → Hub 경로 오더 조회
+   → TRANSIT_DEPARTED 이벤트 등록
+   → TRANSIT_ARRIVED_HUB (ICN) 이벤트 등록
+   → TRANSIT_DEPARTED_HUB (ICN→LAX) 이벤트 등록
+   → 오더 상세 Tracking 탭에서 레그별 상태 표시 확인
+   ```
+
+5. **규칙 준수**:
+   - R-14: 로컬 Supabase 환경 사용
+   - Playwright locator 하드코딩(`td.nth()`) 금지 — 역할 기반 또는 data-testid 사용
+   - 스크린샷 자동 캡처 포함
+
+6. **회귀 테스트 실행**: `rtk npm run test:regression` — 전체 PASS 확인
+
+7. **코드 커밋**: `[D_Kai] test: E2E-19 Hub Routing 플로우 — 경로 탐색·오더생성·환적추적`
+
+8. **본 파일 [작업 결과] 섹션 작성 + 상태 → 🔔**
+
+9. **ACTIVE_TASK.md TASK-094 → 🔔 반영**
+
+10. **문서 커밋**: `[D_Kai] docs: TASK-094 완료 보고 — task file 🔔`
+
+---
+
+## 완료 기준 (DoD)
+
+- [ ] `e2e-19-hub-routing-flow.spec.ts` 파일 생성
+- [ ] 시나리오 A: Hub 경로 선택 + 오더 생성 PASS
+- [ ] 시나리오 B: 환적 상태 추적 이벤트 PASS
+- [ ] Playwright locator 하드코딩 없음 확인
+- [ ] 스크린샷 자동 캡처 설정 확인
+- [ ] 회귀 테스트 전체 PASS
+- [ ] 코드 커밋 완료 (해시 기재)
+- [ ] 본 파일 상태 🔔 + ACTIVE_TASK.md 동기화
+- [ ] 문서 커밋 완료 (해시 기재)
+
+---
+
+## 작업 결과
+
+> ⬜ 구현 완료 후 작성
+
+---
+
+## Aiden 검토
+
+> ⬜ 🔔 보고 후 검토
+
+---
+
+## 개정 이력
+
+| 날짜 | 주체 | 내용 |
+|:-----|:----:|:-----|
+| 2026-05-25 | Aiden (Claude) | Task 생성 — Phase K E2E 자동화 (E2E-19 Hub Routing 플로우) |
