@@ -322,8 +322,8 @@ describe('TC-R.8: Hub 경로 탐색 — DatabaseRouteAdapter.appendHubRoutes', (
 
   function createHubMockSupabase(options: { directOnly: boolean }) {
     const mock = createMockSupabase();
-
     let routeNetworkCallCount = 0;
+    const capturedOptions: any[] = [];
 
     mock.from.mockImplementation((table: string) => {
       if (table === 'zen_orders') {
@@ -391,13 +391,28 @@ describe('TC-R.8: Hub 경로 탐색 — DatabaseRouteAdapter.appendHubRoutes', (
         };
       }
       if (table === 'zen_route_options') {
-        const mockOptions = [
-          { id: 'opt-1', order_id: 'order-uuid-001', option_type: 'COST', segments: [{ from_port_id: 'PVG', to_port_id: 'LAX', transport_mode: 'AIR', carrier: 'ZENITH Air Cargo', transit_days: 12, cost: 11, currency: 'USD' }], total_cost: 11, total_transit_days: 12, score: 11, created_at: new Date().toISOString() },
-        ];
         return {
-          upsert: mock.upsert.mockResolvedValue({ error: null }),
+          upsert: vi.fn().mockImplementation((data: any) => {
+            const idx = capturedOptions.findIndex(o => o.order_id === data.order_id && o.option_type === data.option_type);
+            if (idx >= 0) capturedOptions[idx] = { ...capturedOptions[idx], ...data };
+            else capturedOptions.push({ ...data, id: `captured-${capturedOptions.length + 1}`, created_at: new Date().toISOString() });
+            return Promise.resolve({ error: null });
+          }),
           select: vi.fn().mockReturnThis(),
-          eq: vi.fn().mockResolvedValue({ data: mockOptions, error: null })
+          eq: vi.fn().mockImplementation(() => {
+            const count = capturedOptions.length;
+            return Promise.resolve({ data: capturedOptions, error: null, count });
+          })
+        };
+      }
+      if (table === 'zen_surcharges') {
+        return {
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(),
+          gte: vi.fn().mockReturnThis(),
+          lte: vi.fn().mockReturnThis(),
+          order: vi.fn().mockReturnThis(),
+          limit: vi.fn().mockResolvedValue({ data: [], error: null })
         };
       }
       return mock;
@@ -413,7 +428,9 @@ describe('TC-R.8: Hub 경로 탐색 — DatabaseRouteAdapter.appendHubRoutes', (
     const result = await getRouteOptions('order-uuid-001');
 
     expect(result.success).toBe(true);
-    const firstKey = Object.keys(result.options)[0];
+    const keys = Object.keys(result.options);
+    expect(keys.length).toBeGreaterThanOrEqual(1);
+    const firstKey = keys[0];
     const option = result.options[firstKey];
     expect(option.segments).toBeDefined();
     expect(option.segments.length).toBeGreaterThanOrEqual(2);
