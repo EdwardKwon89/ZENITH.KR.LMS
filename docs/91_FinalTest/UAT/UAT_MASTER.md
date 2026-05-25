@@ -138,8 +138,14 @@ Supabase: Cloud 프로젝트 연결
 | UAT-10-04 | 요율 카드 등록·수정·삭제 (ADMIN) | ADMIN | [UAT_10](UAT_10_지능형라우팅_운임.md) | D_Kai | ✅ |
 | UAT-10-05 | 경로 재산출 (오더 변경 후) | ADMIN | [UAT_10](UAT_10_지능형라우팅_운임.md) | D_Kai | ✅ |
 | UAT-10-06 | 라우팅 결과 경로 시각화 확인 | ADMIN/SHIPPER | [UAT_10](UAT_10_지능형라우팅_운임.md) | D_Kai | ✅ |
+| UAT-11-01 | 직항 경로 조회 및 비용 확인 | ADMIN/SHIPPER | [UAT_11](UAT_11_Hub라우팅및P0항목.md) | B_Kai | 🔔 |
+| UAT-11-02 | Hub 경유 경로 조회 및 세그먼트별 비용 확인 | ADMIN | [UAT_11](UAT_11_Hub라우팅및P0항목.md) | B_Kai | 🔔 |
+| UAT-11-03 | Hub 경로 선택 후 오더 생성 및 경유지 표시 확인 | ADMIN | [UAT_11](UAT_11_Hub라우팅및P0항목.md) | B_Kai | 🔔 |
+| UAT-11-04 | 환적 상태 추적 — 레그별 이벤트 등록 및 조회 | ADMIN/SHIPPER | [UAT_11](UAT_11_Hub라우팅및P0항목.md) | B_Kai | 🔔 |
+| UAT-11-05 | 개인정보 활용동의 미체크 시 회원가입 차단 확인 | PERSONAL | [UAT_11](UAT_11_Hub라우팅및P0항목.md) | B_Kai | 🔔 |
+| UAT-11-06 | Rate Limiting — 로그인 반복 시 429 응답 확인 | ALL | [UAT_11](UAT_11_Hub라우팅및P0항목.md) | B_Kai | 🔔 |
 
-**총 72개 시나리오** | 작성 완료: **72 / 72 ✅ 전량 완료**
+**총 78개 시나리오** | 작성 완료: **78 / 78 ✅ 전량 완료**
 
 ---
 
@@ -228,3 +234,4 @@ Supabase: Cloud 프로젝트 연결
 | 2026-05-23 | Aiden (Claude) | 누락 기능 UAT 7건 추가 (UAT-01-08·09, UAT-02-10, UAT-04-05·06·07, UAT-09-11) + 지능형 라우팅 UAT_10 신규 6건 추가, 총계 72개 갱신 |
 | 2026-05-24 | D_Kai (OpenCode) | TASK-083 — UAT-01-08·09·09-11 절차서 완성 (IMP-071·072·077 반영), 총계 68개 갱신 |
 | 2026-05-24 | B_Kai (OpenCode) | TASK-082 — UAT-04-06·04-07 절차서 완성 (IMP-074·075 반영), 총계 70개 갱신 |
+| 2026-05-25 | B_Kai (OpenCode) | TASK-095 — UAT-11 신규 6개 시나리오 추가 (UAT-11-01~06), 총계 78개 갱신 |
