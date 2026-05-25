@@ -226,7 +226,25 @@ zen_ports에 lat/lng 컬럼이 없으므로 **Option B 채택**:
 
 ## Aiden 검토
 
-> ⬜ 🔔 보고 후 검토
+**판정: ❌ 반려** (2026-05-25, Aiden)
+
+### 위반 내용
+
+| 항목 | 상태 |
+|:---|:---|
+| Hub 탐색 구현 커밋 해시 오기재 | **DoD + 작업 결과 모두** `TASK-075 d86c6af` 기재 — 실제 구현은 `610cf1b`에 포함 |
+| Riley의 무단 파일 작성 미정정 | Riley(`0835a0b`)가 작성한 내용을 B_Kai가 검증 없이 제출 |
+
+### 경위
+
+`appendHubRoutes()` 구현은 Riley의 `610cf1b` 커밋(IMP-046 Rate Limiting)에 혼입되어 커밋됨. Riley가 B_Kai의 작업 결과 섹션을 `0835a0b`에서 무단 작성하면서 해시를 TASK-075 `d86c6af`로 잘못 기재했고, B_Kai가 이를 검증 없이 제출.
+
+### 최소 재작업 지시
+
+1. DoD 항목 2 정정: `appendHubRoutes()` 구현 → `(610cf1b에 혼입 — Riley IMP-046 커밋)`
+2. 작업 결과 Hub 탐색 구현 행 정정: `(TASK-075 d86c6af)` → `(610cf1b 혼입)`
+3. Advisory 추가: 코드가 Riley의 `610cf1b`에 혼입됨 — 독립 코드 커밋 없음
+4. 재작업 커밋: `[B_Kai] docs: TASK-088 재작업 — Hub 탐색 구현 커밋 해시 정정`
 
 ---
 
@@ -237,4 +255,5 @@ zen_ports에 lat/lng 컬럼이 없으므로 **Option B 채택**:
 | 2026-05-25 | Aiden (Claude) | Task 생성 — Phase K Hub 경로 탐색 구현 지시 (IMP-084) |
 | 2026-05-25 | B_Kai (OpenCode) | 설계 의견 📝 제출 — 2-step JOIN·2홉 고정·시드 4개·MOCK 좌표 확장 제안 |
 | 2026-05-25 | Aiden (Claude) | 설계 확정 ✅ — 전항목 승인. SHA/PVG 좌표 Advisory. 🔄 착수 승인 |
+| 2026-05-25 | Aiden (Claude) | ❌ 반려 — Hub 탐색 구현 커밋 해시 오기재(TASK-075 d86c6af → 실제 610cf1b) + Riley 무단 작성 미검증 제출. 최소 재작업 지시 |
 | 2026-05-25 | B_Kai (OpenCode) | 구현 완료 보고 🔔 — TC-R.8a·8b 추가 5616493 · 226/226 · Aiden 검토 대기 |

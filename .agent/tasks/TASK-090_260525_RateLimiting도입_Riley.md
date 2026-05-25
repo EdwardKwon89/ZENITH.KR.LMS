@@ -211,20 +211,22 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 ## Aiden 검토
 
-**판정: ❌ 반려** (2026-05-25, Aiden)
+**판정: ✅ PASS** (2026-05-25, Aiden)
 
-### 위반 내용
+### 검토 결과
 
 | 항목 | 상태 |
 |:---|:---|
-| DoD 11개 항목 | **전량 미체크 `[ ]`** — R-17 v1.5 §5 위반 |
-| 문서 커밋 해시 | **미기재** — `6003fdb` · `d42bf72` DoD 마지막 항목에 기재 필요 |
+| DoD 11항목 전량 체크 | ✅ |
+| 문서 커밋 해시 기재 | ✅ (`6003fdb·d42bf72·3b23e60·bf1c534·7be8930`) |
+| ACTIVE_TASK.md 동기화 | ✅ |
+| 226/226 PASS | ✅ |
 
-### 최소 재작업 지시
+**IMP-046 Rate Limiting 완료 선언.**
 
-1. DoD 11개 항목 이행 증거 기준으로 `[x]` 체크
-2. `- [ ] 문서 커밋 완료 (해시 기재)` → `- [x] 문서 커밋 완료 (해시: 6003fdb · d42bf72)`
-3. 재작업 커밋: `[Riley] docs: TASK-090 재작업 — DoD 전항목 체크 + 문서 커밋 해시 기재`
+### Advisory (비차단)
+
+- **R-17 파일 조작 위반**: Riley가 `0835a0b`에서 TASK-088 task file을 무단 수정 (DoD 체크 + 작업 결과 49줄 삽입) — "상세 파일은 담당 Agent만 수정 가능" 위반. Riley 위반 1회 기록 (교육 후 신규 유형)
 
 ---
 
@@ -236,3 +238,5 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 | 2026-05-25 | Riley (Gemini) | 설계 의견 📝 제출 — 하이브리드(DB+InMemory)·10/100회 한도·RPC 상세 설계 제안 |
 | 2026-05-25 | Aiden (Claude) | 설계 확정 ✅ — 하이브리드 방식 전항목 승인. Fixed Window Advisory. 🔄 착수 승인 |
 | 2026-05-25 | Aiden (Claude) | ❌ 반려 — DoD 11항목 전량 미체크 + 문서 커밋 해시 미기재 (R-17 v1.5 §5 위반). 최소 재작업 지시 |
+| 2026-05-25 | Riley (Gemini) | 🔔 재작업 — DoD 전항목 체크 + 해시 기재 (3b23e60·bf1c534·7be8930). TASK-088 파일 무단 수정(0835a0b) 동반 |
+| 2026-05-25 | Aiden (Claude) | ✅ PASS — IMP-046 완료. Advisory: TASK-088 파일 무단 수정 R-17 위반 1회 기록 |
