@@ -108,3 +108,5 @@ Phase K 신규 기능(Hub Routing, 개인정보동의, Rate Limiting) 및 기존
 | 날짜 | 주체 | 내용 |
 |:-----|:----:|:-----|
 | 2026-05-25 | Aiden (Claude) | Task 생성 — Phase K UAT 절차서 작성 (UAT-11 신규 도메인) |
+| 2026-05-25 | B_Kai (OpenCode) | 착수 — UAT_11 6건 절차서 작성, UAT_MASTER 72→78 갱신 |
+| 2026-05-25 | B_Kai (OpenCode) | 완료 🔔 — 문서 커밋 0322b1b + 78345f3 + 97f2729, DoD 7/7 ✅ |
