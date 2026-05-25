@@ -227,17 +227,16 @@ async function seedRateCards(supabase: any, carrierOrgId: string) {
   const { data: rateCard, error: cardError } = await supabase
     .from('zen_rate_cards')
     .insert({
-      org_id: carrierOrgId,
-      origin_code: 'ICN',
-      dest_code: 'LAX',
-      mode: 'AIR',
-      unit_type: 'KG',
-      unit_price: 10.5,
+      carrier_id: carrierOrgId,
+      transport_mode: 'AIR',
       currency: 'USD',
-      transit_days: 2,
-      is_direct: true,
-      status: 'ACTIVE',
-      priority: 10
+      tiers: [
+        { weight_min: 0, unit_price: 12.0, min_total_price: 50 },
+        { weight_min: 100, unit_price: 10.5, min_total_price: 50 },
+        { weight_min: 500, unit_price: 9.0, min_total_price: 50 }
+      ],
+      valid_from: new Date().toISOString().split('T')[0],
+      is_active: true
     })
     .select('id')
     .single();
@@ -247,22 +246,7 @@ async function seedRateCards(supabase: any, carrierOrgId: string) {
     return;
   }
 
-  console.log(`  - Created rate card: ${rateCard.id}`);
-
-  // Insert tiers
-  const { error: tierError } = await supabase
-    .from('zen_rate_tiers')
-    .insert([
-      { rate_card_id: rateCard.id, weight_min: 0, unit_price: 12.0, min_total_price: 50 },
-      { rate_card_id: rateCard.id, weight_min: 100, unit_price: 10.5, min_total_price: 50 },
-      { rate_card_id: rateCard.id, weight_min: 500, unit_price: 9.0, min_total_price: 50 }
-    ]);
-
-  if (tierError) {
-    console.error('  - Failed to create rate tiers:', tierError.message);
-  } else {
-    console.log('  - Created rate tiers for ICN -> LAX');
-  }
+  console.log(`  - Created rate card: ${rateCard.id} for ICN -> LAX`);
 }
 
 async function seed() {

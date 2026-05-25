@@ -313,3 +313,129 @@ describe('TC-R.7: getRouteConsistencyStatus — 경로 정합성 상태', () => 
     expect(result.isConsistent).toBe(true);
   });
 });
+
+// ─── TC-R.8: Hub 경로 탐색 (IMP-084) ─────────────────────────────────────
+
+describe('TC-R.8: Hub 경로 탐색 — DatabaseRouteAdapter.appendHubRoutes', () => {
+  const mockUser = { id: 'user-1' };
+  const mockProfile = { org_id: 'shipper-1', role: 'USER' };
+
+  function createHubMockSupabase(options: { directOnly: boolean }) {
+    const mock = createMockSupabase();
+
+    let routeNetworkCallCount = 0;
+
+    mock.from.mockImplementation((table: string) => {
+      if (table === 'zen_orders') {
+        return {
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(),
+          single: vi.fn().mockResolvedValue({
+            data: options.directOnly ? {
+              origin_port_id: 'port-uuid-1',
+              dest_port_id: 'port-uuid-2',
+              transport_mode: 'AIR',
+              cargo_details: { total_weight: 100, total_volume: 1 },
+              origin_port: { code: 'ICN', name: 'Incheon' },
+              dest_port: { code: 'SIN', name: 'Singapore' }
+            } : {
+              origin_port_id: 'port-uuid-3',
+              dest_port_id: 'port-uuid-4',
+              transport_mode: 'AIR',
+              cargo_details: { total_weight: 100, total_volume: 1 },
+              origin_port: { code: 'PVG', name: 'Shanghai Pudong' },
+              dest_port: { code: 'LAX', name: 'Los Angeles' }
+            },
+            error: null
+          })
+        };
+      }
+      if (table === 'zen_route_network') {
+        routeNetworkCallCount++;
+        const handler: any = {
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(),
+        };
+        if (options.directOnly) {
+          handler.then = (resolve: any) => resolve({ data: [
+            { id: 'r-1', carrier_id: 'carrier-air', from_port_id: 'ICN', to_port_id: 'SIN', transport_mode: 'AIR', transit_days: 2, is_active: true, carrier: { code: 'ZENITH_AIR', name: 'ZENITH Air Cargo', transport_mode: 'AIR' } },
+            { id: 'r-2', carrier_id: 'carrier-sea', from_port_id: 'ICN', to_port_id: 'SIN', transport_mode: 'SEA', transit_days: 7, is_active: true, carrier: { code: 'ZENITH_SEA', name: 'ZENITH Maritime', transport_mode: 'SEA' } },
+          ], error: null });
+        } else if (routeNetworkCallCount === 1) {
+          handler.then = (resolve: any) => resolve({ data: [], error: null });
+        } else if (routeNetworkCallCount === 2) {
+          handler.then = (resolve: any) => resolve({ data: [
+            { id: 'r-3', carrier_id: 'carrier-air', from_port_id: 'PVG', to_port_id: 'ICN', transport_mode: 'AIR', transit_days: 2, is_active: true, carrier: { code: 'ZENITH_AIR', name: 'ZENITH Air Cargo', transport_mode: 'AIR' } },
+            { id: 'r-4', carrier_id: 'carrier-sea', from_port_id: 'PVG', to_port_id: 'ICN', transport_mode: 'SEA', transit_days: 5, is_active: true, carrier: { code: 'ZENITH_SEA', name: 'ZENITH Maritime', transport_mode: 'SEA' } },
+          ], error: null });
+        } else {
+          handler.then = (resolve: any) => resolve({ data: [
+            { id: 'r-5', carrier_id: 'carrier-air', from_port_id: 'ICN', to_port_id: 'LAX', transport_mode: 'AIR', transit_days: 10, is_active: true, carrier: { code: 'ZENITH_AIR', name: 'ZENITH Air Cargo', transport_mode: 'AIR' } },
+            { id: 'r-6', carrier_id: 'carrier-sea', from_port_id: 'ICN', to_port_id: 'LAX', transport_mode: 'SEA', transit_days: 12, is_active: true, carrier: { code: 'ZENITH_SEA', name: 'ZENITH Maritime', transport_mode: 'SEA' } },
+          ], error: null });
+        }
+        return handler;
+      }
+      if (table === 'zen_rate_cards') {
+        return {
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(),
+          lte: vi.fn().mockReturnThis(),
+          or: vi.fn().mockReturnThis(),
+          order: vi.fn().mockReturnThis(),
+          limit: vi.fn().mockReturnThis(),
+          maybeSingle: vi.fn().mockResolvedValue({
+            data: { tiers: [{ weight_min: 0, unit_price: 5.50 }] },
+            error: null
+          })
+        };
+      }
+      if (table === 'zen_route_options') {
+        const mockOptions = [
+          { id: 'opt-1', order_id: 'order-uuid-001', option_type: 'COST', segments: [{ from_port_id: 'PVG', to_port_id: 'LAX', transport_mode: 'AIR', carrier: 'ZENITH Air Cargo', transit_days: 12, cost: 11, currency: 'USD' }], total_cost: 11, total_transit_days: 12, score: 11, created_at: new Date().toISOString() },
+        ];
+        return {
+          upsert: mock.upsert.mockResolvedValue({ error: null }),
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockResolvedValue({ data: mockOptions, error: null })
+        };
+      }
+      return mock;
+    });
+
+    return mock;
+  }
+
+  it('[TC-R.8a] PVG→LAX 경로 요청 시 Hub 경로(ICN 경유)를 1개 이상 반환한다', async () => {
+    activeMockSupabase = createHubMockSupabase({ directOnly: false });
+    (validateUserAction as any).mockResolvedValue({ supabase: activeMockSupabase, user: mockUser, profile: mockProfile });
+
+    const result = await getRouteOptions('order-uuid-001');
+
+    expect(result.success).toBe(true);
+    const firstKey = Object.keys(result.options)[0];
+    const option = result.options[firstKey];
+    expect(option.segments).toBeDefined();
+    expect(option.segments.length).toBeGreaterThanOrEqual(2);
+    expect(option.segments[0].to_port_id).toBe('ICN');
+    expect(option.segments[1].to_port_id).toBe('LAX');
+  });
+
+  it('[TC-R.8b] ICN→SIN 직항 경로는 Hub 경로 없이 2개(COST/TIME/BALANCED) 이상 반환한다', async () => {
+    activeMockSupabase = createHubMockSupabase({ directOnly: true });
+    (validateUserAction as any).mockResolvedValue({ supabase: activeMockSupabase, user: mockUser, profile: mockProfile });
+
+    const result = await getRouteOptions('order-uuid-001');
+
+    expect(result.success).toBe(true);
+    const keys = Object.keys(result.options);
+    expect(keys.length).toBeGreaterThanOrEqual(2);
+    keys.forEach(key => {
+      const seg = result.options[key].segments || [];
+      seg.forEach((s: any) => {
+        expect(s.from_port_id).toBe('ICN');
+        expect(s.to_port_id).toBe('SIN');
+      });
+    });
+  });
+});

@@ -1,6 +1,12 @@
 -- Migration: IMP-080 Zen Rate Cards (요율 카드)
 -- Description: 지능형 라우팅 Phase-I — 운송 요율 카드 테이블
 
+DROP TABLE IF EXISTS public.zen_rate_cards CASCADE;
+DROP TRIGGER IF EXISTS tr_capture_order_rate_snapshot ON public.zen_orders CASCADE;
+DROP FUNCTION IF EXISTS public.fn_trigger_capture_order_rate() CASCADE;
+DROP FUNCTION IF EXISTS public.fn_get_best_matching_rate(uuid, uuid, uuid, character varying, uuid, timestamp with time zone) CASCADE;
+DROP FUNCTION IF EXISTS public.calculate_order_costs(uuid) CASCADE;
+
 CREATE TABLE IF NOT EXISTS public.zen_rate_cards (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   carrier_id UUID REFERENCES public.zen_carriers(id) ON DELETE CASCADE,
