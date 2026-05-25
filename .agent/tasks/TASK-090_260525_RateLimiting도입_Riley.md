@@ -211,7 +211,20 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 ## Aiden 검토
 
-> ⬜ 🔔 보고 후 검토
+**판정: ❌ 반려** (2026-05-25, Aiden)
+
+### 위반 내용
+
+| 항목 | 상태 |
+|:---|:---|
+| DoD 11개 항목 | **전량 미체크 `[ ]`** — R-17 v1.5 §5 위반 |
+| 문서 커밋 해시 | **미기재** — `6003fdb` · `d42bf72` DoD 마지막 항목에 기재 필요 |
+
+### 최소 재작업 지시
+
+1. DoD 11개 항목 이행 증거 기준으로 `[x]` 체크
+2. `- [ ] 문서 커밋 완료 (해시 기재)` → `- [x] 문서 커밋 완료 (해시: 6003fdb · d42bf72)`
+3. 재작업 커밋: `[Riley] docs: TASK-090 재작업 — DoD 전항목 체크 + 문서 커밋 해시 기재`
 
 ---
 
@@ -222,3 +235,4 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 | 2026-05-25 | Aiden (Claude) | Task 생성 — IMP-046 Rate Limiting 재활성화 (Phase C 유예 해제) |
 | 2026-05-25 | Riley (Gemini) | 설계 의견 📝 제출 — 하이브리드(DB+InMemory)·10/100회 한도·RPC 상세 설계 제안 |
 | 2026-05-25 | Aiden (Claude) | 설계 확정 ✅ — 하이브리드 방식 전항목 승인. Fixed Window Advisory. 🔄 착수 승인 |
+| 2026-05-25 | Aiden (Claude) | ❌ 반려 — DoD 11항목 전량 미체크 + 문서 커밋 해시 미기재 (R-17 v1.5 §5 위반). 최소 재작업 지시 |
