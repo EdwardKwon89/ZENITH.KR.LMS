@@ -220,12 +220,12 @@
 | 086 | 303 Stage 1+2: Route Decomposer + TISA 캐리어별 요율 매핑 | Riley | 🚫 | — |
 | 087 | 환적 상태 추적 A안 (Transit Tracking per Leg) | B_Kai | 🚫 | — |
 | 088 | 개인정보 활용동의 체크박스 (회원가입 Wizard) | D_Kai | 🔔 | 5a21467 · 220/220 · migration+UI+action+i18n 4개국어 ✅ |
-| 046 | Rate Limiting 도입 (Phase C 유예 재활성화) | Riley | 📝 | — |
+| 046 | Rate Limiting 도입 (Phase C 유예 재활성화) | Riley | 🔔 | 2026-05-25 |
 
 > 🚫 IMP-085·086·087: IMP-084 완료 후 착수 가능
 > 🚫 IMP-087: IMP-085 완료 후 착수 가능
 
-**Phase K 완료**: 1 / 6 (16.7%) — IMP-088 🔔 Aiden 검토 대기
+**Phase K 완료**: 2 / 6 (33.3%) — IMP-088·046 🔔 Aiden 검토 대기
 
 ---
 
@@ -252,7 +252,7 @@
 | I | 5 | 5 | 100% ✅ | IMP-073~077 전량 완료 (TASK-069~073 ✅) |
 | J | 4 | 4 | 100% ✅ | IMP-080 ✅ · IMP-081 ✅ · IMP-082 ✅ · IMP-083 ✅ |
 | K | 1 | 6 | 16.7% | IMP-088 ✅🔔 — Aiden 검토 대기 |
-| **합계** | **66** | **74** | **89.2%** | Phase K 6건 추가 기준 — IMP-088 ✅ |
+| **합계** | **67** | **74** | **90.5%** | Phase K 6건 추가 기준 — IMP-088·046 🔔 |
 
 > 미완료 IMP: Phase K 5건(⬜/🚫) · IMP-028·069(Future — 통관 연계)
 > 2026-05-25 기준 업데이트 (Aiden — Phase K 착수, TASK-088~096 발령)
@@ -301,3 +301,4 @@
 | 2026-05-24 | Aiden (Claude) | IMP-083 ✅ 확정 — TASK-077 ✅ 승인. Phase J 4/4 100% 완료. TASK-078(UAT_10) ⬜ D_Kai 착수 가능. 전체 65/68 (95.6%) |
 | 2026-05-24 | Aiden (Claude) | IMP_PROGRESS 상태 동기화 — IMP-071·072·077·082·083 🔔→✅ 정정 (TASK-068·073·076·077 Aiden 승인 누락 반영). Phase A 100% · Phase J 100% 확정 |
 | 2026-05-25 | D_Kai (OpenCode) | IMP-088 🔔 완료 — migration·Wizard 체크박스·server action·i18n 4개국어 · 5a21467 · 220/220. Phase K 1/6 16.7%. 전체 66/74 89.2% |
+| 2026-05-25 | Riley (Gemini) | IMP-046 🔔 완료 — 하이브리드 Rate Limiting 도입 (DB+InMemory) · 220/220 (TASK-090) |
