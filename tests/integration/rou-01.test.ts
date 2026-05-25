@@ -26,6 +26,7 @@ const createMockSupabase = () => {
     select: vi.fn().mockReturnThis(),
     upsert: vi.fn().mockReturnThis(),
     insert: vi.fn().mockReturnThis(),
+    update: vi.fn().mockReturnThis(),
     eq: vi.fn().mockReturnThis(),
     single: vi.fn(),
     maybeSingle: vi.fn(),
@@ -35,6 +36,7 @@ const createMockSupabase = () => {
   mock.select.mockReturnValue(mock);
   mock.upsert.mockReturnValue(mock);
   mock.insert.mockReturnValue(mock);
+  mock.update.mockReturnValue(mock);
   mock.eq.mockReturnValue(mock);
   mock.maybeSingle.mockReturnValue(mock);
   mock.range.mockReturnValue(mock);
@@ -72,6 +74,7 @@ describe('TC-R.4: getRouteOptions — 3종 옵션 생성 및 UPSERT 정책', () 
         return {
           select: vi.fn().mockReturnThis(),
           eq: vi.fn().mockReturnThis(),
+          update: vi.fn().mockReturnThis(),
           single: vi.fn().mockResolvedValue({
             data: {
               origin_port_id: 'port-uuid-1',
@@ -330,6 +333,7 @@ describe('TC-R.8: Hub 경로 탐색 — DatabaseRouteAdapter.appendHubRoutes', (
         return {
           select: vi.fn().mockReturnThis(),
           eq: vi.fn().mockReturnThis(),
+          update: vi.fn().mockReturnThis(),
           single: vi.fn().mockResolvedValue({
             data: options.directOnly ? {
               origin_port_id: 'port-uuid-1',

@@ -34,30 +34,17 @@ export async function getRouteOptions(orderId: string) {
   const engine = new RoutingEngine(new DatabaseRouteAdapter(supabase));
   const options = await engine.calculateOptions(originCode, destCode);
 
-  // 3. Composite Pricing 계산 및 각 option별 segments.cost/total_cost 갱신
+  // 3. Composite Pricing 계산 및 각 option별 segments.cost/total_cost 갱신 (IMP-086 통합 파이프라인 연동)
   for (const opt of options) {
-    let optionTotalCost = 0;
+    await calculateCompositePricing({
+      weight,
+      volume,
+      supabase,
+      routeOption: opt
+    });
     
-    for (const seg of opt.segments) {
-      if (seg.carrier_id) {
-        const pricing = await calculateCompositePricing({
-          weight,
-          volume,
-          transport_mode: seg.transport_mode,
-          carrier_id: seg.carrier_id,
-          supabase
-        });
-        seg.cost = pricing.total;
-        seg.currency = pricing.currency;
-        optionTotalCost += pricing.total;
-      } else {
-        optionTotalCost += seg.cost;
-      }
-    }
-    
-    opt.total_cost = optionTotalCost;
     if (opt.option_type === 'COST') {
-      opt.score = optionTotalCost;
+      opt.score = opt.total_cost;
     }
   }
 
@@ -92,49 +79,25 @@ export async function getRouteOptions(orderId: string) {
   const optionsMap: Record<string, any> = {};
   if (savedOptions) {
     for (const opt of savedOptions) {
-      const segments = opt.segments as any[];
-      const pricingBreakdowns: PricingBreakdown[] = [];
-      
-      for (const seg of segments) {
-        if (seg.carrier_id) {
-          const pricing = await calculateCompositePricing({
-            weight,
-            volume,
-            transport_mode: seg.transport_mode,
-            carrier_id: seg.carrier_id,
-            supabase
-          });
-          pricingBreakdowns.push(pricing);
-        }
-      }
-      
-      if (pricingBreakdowns.length > 0) {
-        if (pricingBreakdowns.length === 1) {
-          (opt as any).pricing_breakdown = pricingBreakdowns[0];
-        } else {
-          const baseFreight = pricingBreakdowns.reduce((sum, p) => sum + p.baseFreight, 0);
-          const total = pricingBreakdowns.reduce((sum, p) => sum + p.total, 0);
-          const surcharges: SurchargeBreakdownItem[] = [];
-          
-          pricingBreakdowns.forEach(p => {
-            p.surcharges.forEach(s => {
-              const existing = surcharges.find(ex => ex.surcharge_type === s.surcharge_type);
-              if (existing) {
-                existing.calculated_amount += s.calculated_amount;
-              } else {
-                surcharges.push({ ...s });
-              }
-            });
-          });
-          
-          (opt as any).pricing_breakdown = {
-            baseFreight,
-            surcharges,
-            total,
-            currency: pricingBreakdowns[0].currency
-          };
-        }
-      }
+      // routeOption을 통째로 넘겨서 pricing_breakdown을 동적으로 바인딩
+      const routeOptionObj = {
+        option_type: opt.option_type as any,
+        segments: opt.segments as any[],
+        total_cost: Number(opt.total_cost || 0),
+        total_transit_days: Number(opt.total_transit_days || 0),
+        score: Number(opt.score || 0)
+      };
+
+      const pricing = await calculateCompositePricing({
+        weight,
+        volume,
+        supabase,
+        routeOption: routeOptionObj
+      });
+
+      opt.segments = routeOptionObj.segments;
+      opt.total_cost = routeOptionObj.total_cost;
+      (opt as any).pricing_breakdown = pricing;
       
       optionsMap[opt.option_type] = opt;
     }
@@ -150,7 +113,6 @@ export async function selectRoute(orderId: string, optionId: string) {
   const { supabase, user } = await validateUserAction();
 
   // 1. 확정 경로 저장 (zen_order_routes)
-  // order_id가 UNIQUE이므로 자동으로 UPSERT 처럼 동작 (이미 존재하면 Update 처리 필요할 수도 있음)
   const { error: upsertError } = await supabase
     .from("zen_order_routes")
     .upsert({
@@ -163,6 +125,14 @@ export async function selectRoute(orderId: string, optionId: string) {
     });
 
   if (upsertError) throw new Error(`Route selection failed: ${upsertError.message}`);
+
+  // 2. zen_orders.route_option_id 동기화 (IMP-085: Order-Route Segment 연결)
+  const { error: updateError } = await supabase
+    .from("zen_orders")
+    .update({ route_option_id: optionId })
+    .eq("id", orderId);
+
+  if (updateError) throw new Error(`Order route_option_id sync failed: ${updateError.message}`);
 
   const { data: routeRecord } = await supabase
     .from("zen_order_routes")
