@@ -8,7 +8,7 @@
 | 담당 Agent | Riley |
 | 우선순위 | P1 |
 | 전제조건 | 없음 (즉시 착수 가능) |
-| 상태 | 🔄 |
+| 상태 | 🔔 |
 | 파급 효과 | proxy.ts(미들웨어), 인증 Server Actions, API Route Handlers |
 
 ---
@@ -197,7 +197,15 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 ## 작업 결과
 
-> ⬜ 구현 완료 후 작성
+- **구현 내용**:
+  - 인증 API (`/api/auth/login`, `/api/auth/signup`)에 대해 Supabase DB 기반 Rate Limiting 도입 (`check_rate_limit` RPC 함수 및 `zen_rate_limits` 테이블).
+  - 일반 API 및 Actions에 대해 Next.js Middleware 레벨의 In-Memory Sliding Window Rate Limiting 도입 (LRU/TTL 캐시 활용).
+  - 제한 초과 시 `429 Too Many Requests` 반환 및 `Retry-After` 헤더 응답 제공.
+  - ko, en, zh, ja 4개국어 번역 리소스에 속도 제한 초과 안내 문구 적용.
+  - `DatabaseRouteAdapter` 내 Supabase 쿼리 배열 결과 방어 코드 추가 및 uat-phase3-e2e integration test mock queue 보강으로 224개 전체 회귀 테스트 통과 달성.
+- **코드 커밋 해시**: `610cf1b`
+- **회귀 테스트 결과**: 224/224 PASS
+- **신규 테스트**: `tests/unit/security/rate-limit.test.ts` 추가 완료
 
 ---
 
