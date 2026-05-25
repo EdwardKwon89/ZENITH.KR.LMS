@@ -95,6 +95,20 @@ export async function signup(formData: FormData, locale: string = 'ko') {
     return { error: error.message };
   }
 
+  // IMP-088: 개인정보 활용동의 시각 저장
+  const privacyConsentAt = formData.get('privacy_consent_at') as string | null;
+  const termsConsentAt = formData.get('terms_consent_at') as string | null;
+  if ((privacyConsentAt || termsConsentAt) && data?.user) {
+    const supabaseAdmin = await createAdminClient();
+    await supabaseAdmin
+      .from('zen_profiles')
+      .update({
+        privacy_consent_at: privacyConsentAt,
+        terms_consent_at: termsConsentAt,
+      })
+      .eq('id', data.user.id);
+  }
+
   // Handle Document Upload if present
   const docFile = formData.get('doc_file') as File | null;
   if (docFile && data?.user) {

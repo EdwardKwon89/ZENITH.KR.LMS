@@ -579,5 +579,14 @@
     "remarks": "Remarks",
     "generated": "Generated",
     "print_title": "Print Packing List"
+  },
+  "Signup": {
+    "consent": {
+      "privacy_required": "[Required] Consent to Collection and Use of Personal Information",
+      "terms_required": "[Required] Consent to Terms of Service",
+      "privacy_label": "I consent to the collection and use of my personal information (name, email, phone number, business registration number).",
+      "terms_label": "I consent to the terms of service.",
+      "error_required": "You must consent to both privacy policy and terms of service."
+    }
   }
 }
