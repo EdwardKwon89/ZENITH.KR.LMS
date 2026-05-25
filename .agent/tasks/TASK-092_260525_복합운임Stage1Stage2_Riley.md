@@ -8,7 +8,7 @@
 | 담당 Agent | Riley |
 | 우선순위 | P2 |
 | 전제조건 | TASK-088 ✅ (Hub 경로 탐색 완료) |
-| 상태 | 🔍 |
+| 상태 | 🔄 구현 중 |
 | 파급 효과 | CompositePricingEngine, getRouteOptions(), 오더 비용 정산 |
 
 ---
@@ -199,7 +199,18 @@ Phase J(TASK-076, IMP-082)에서 303 Composite Pricing Engine Stage 3+4(Slab Rat
 
 ## 설계 확정 (Aiden 작성)
 
-> ⬜ 설계 의견 수신 후 작성
+**설계안 승인** — RouteDecomposer + TISARateMatcher 분리 클래스, CompositePricingEngine 통합
+
+### 확정 사항
+
+1. **Stage 1 (RouteDecomposer)**: `composite-pricing.ts` 내부 클래스 허용. 단, 파일 총량 1,000줄 초과 시 별도 파일 분리 필수 (ZEN_A4)
+2. **Stage 2 (TISARateMatcher)**: `valid_from` 최신순 정렬 후 첫 번째 rate_card 매핑 승인
+3. **Fallback**: `segment.cost` 유지 + 경고 로그 승인 — 요율 왜곡 방지 올바른 판단
+4. **Null carrierId 처리 추가**: Stage 1 `decompose()` 결과에서 `carrierId`가 `undefined/null`인 레그는 `TISARateMatcher` 호출 없이 즉시 `segment.cost` fallback으로 처리. 구현 시 명시적 분기 처리 필수
+5. **`routing.ts` 단순화**: `getRouteOptions()` 내 하드코딩 루프 제거 + `routeOption` 전달 방식 교체 승인
+6. **하위 호환성**: 단일 세그먼트 `transport_mode/carrier_id` 직접 입력 유지 — 기존 호출부 수정 불필요
+
+**상태: 🔄 구현 착수 승인** (2026-05-25, Aiden)
 
 ---
 
@@ -220,3 +231,5 @@ Phase J(TASK-076, IMP-082)에서 303 Composite Pricing Engine Stage 3+4(Slab Rat
 | 날짜 | 주체 | 내용 |
 |:-----|:----:|:-----|
 | 2026-05-25 | Aiden (Claude) | Task 생성 — Phase K 303 Stage 1+2 Route Decomposer + TISA (IMP-086) |
+| 2026-05-25 | Riley (Gemini) | 📝 설계 의견 제출 — RouteDecomposer·TISARateMatcher 분리 설계, fallback(segment.cost), routing.ts 단순화 제안 |
+| 2026-05-25 | Aiden (Claude) | 🔄 설계 확정 — 전체 승인. Null carrierId 즉시 fallback 처리 추가 명시. 구현 착수 가능 |
