@@ -218,14 +218,13 @@
 | 084 | Hub Route Discovery (DatabaseRouteAdapter BFS + 시드 데이터) | B_Kai | 🔔 | 5616493 · 226/226 · TC-R.8a·8b ✅ |
 | 085 | Order-Route Segment 연결 (zen_orders ↔ 선택 경로) | D_Kai | 🔔 | 0eb5355 · 227/227 · 방안 A' · route_option_id FK + View + selectRoute() |
 | 086 | 303 Stage 1+2: Route Decomposer + TISA 캐리어별 요율 매핑 | Riley | 🔔 | 2026-05-25 |
-| 087 | 환적 상태 추적 A안 (Transit Tracking per Leg) | B_Kai | 🚫 | — |
+| 087 | 환적 상태 추적 A안 (Transit Tracking per Leg) | B_Kai | 🔔 | 82c9fb7 · 227/227 · migration+types+validation+UI+i18n ✅ |
 | 088 | 개인정보 활용동의 체크박스 (회원가입 Wizard) | D_Kai | 🔔 | 5a21467 · 220/220 · migration+UI+action+i18n 4개국어 ✅ |
 | 046 | Rate Limiting 도입 (Phase C 유예 재활성화) | Riley | 🔔 | 2026-05-25 |
 
-> 🚫 IMP-086·087: IMP-084 완료 후 착수 가능
-> 🚫 IMP-087: IMP-085 완료 후 착수 가능
+> 🚫 IMP-086: IMP-084 완료 후 착수 가능
 
-**Phase K 완료**: 5 / 6 (83.3%) — IMP-084·085·086·088·046 🔔
+**Phase K 완료**: 6 / 6 (100%) — IMP-084·085·086·087·088·046 🔔
 
 ---
 
