@@ -4,7 +4,7 @@ import { Search, User, Settings, HelpCircle, Building } from "lucide-react";
 import { getNotifications } from "@/app/actions/notifications";
 import NotificationBell from "@/components/notifications/NotificationBell";
 import LogoutButton from "./LogoutButton";
-import UserMenuLinks from "./UserMenuLinks";
+import { Link } from "@/i18n/routing";
 
 export default async function GlobalHeader({ user, profile }: { user?: any; profile?: any }) {
   const t = await getTranslations("Header");
@@ -59,7 +59,17 @@ export default async function GlobalHeader({ user, profile }: { user?: any; prof
                 {user?.email || "unknown@zenith.kr"}
               </p>
             </div>
-            <UserMenuLinks />
+            <div className="space-y-0.5">
+              <Link href="/mypage/profile" className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-slate-600 hover:bg-slate-50 hover:text-brand-600 transition-all">
+                <User size={16} /> {t("my_profile")}
+              </Link>
+              <Link href="/mypage/corporate" className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-slate-600 hover:bg-slate-50 hover:text-brand-600 transition-all">
+                <Settings size={16} /> {t("workspace_settings")}
+              </Link>
+              <Link href="/support/qna" className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-slate-600 hover:bg-slate-50 hover:text-brand-600 transition-all">
+                <HelpCircle size={16} /> {t("support_center")}
+              </Link>
+            </div>
             <div className="h-[1px] bg-slate-100 my-2 mx-1" />
             <LogoutButton label={t("logout")} />
           </div>
