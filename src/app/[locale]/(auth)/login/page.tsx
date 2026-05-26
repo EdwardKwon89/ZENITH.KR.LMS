@@ -1,7 +1,7 @@
 'use client';
 
 import { Suspense, useState } from 'react';
-import { login, signup } from './actions';
+import { login } from './actions';
 import { ZenAurora, ZenCard, ZenButton, ZenInput } from '@/components/ui/ZenUI';
 import { useAuth } from '@/hooks/useAuth';
 import { ShieldCheck, Truck, ArrowRight } from 'lucide-react';
@@ -114,15 +114,15 @@ function LoginForm() {
               </Link>
             </div>
 
-            <ZenButton 
-              type="submit" 
-              data-action="signup"
-              variant="glass" 
-              disabled={isPending}
-              className="w-full text-sm py-3.5 mt-2"
-            >
-              {t('signup_button') || 'Create Corporate Account'}
-            </ZenButton>
+            <Link href={`/${locale}/register`} className="w-full">
+              <ZenButton 
+                type="button"
+                variant="glass" 
+                className="w-full text-sm py-3.5 mt-2"
+              >
+                {t('signup_button') || 'Create Corporate Account'}
+              </ZenButton>
+            </Link>
           </div>
         </form>
 
