@@ -8,7 +8,7 @@ ALTER TABLE zen_orders
 
 CREATE INDEX idx_zen_orders_route_option_id ON zen_orders(route_option_id);
 
-COMMENT ON COLUMN zen_orders.route_option_id IS '선택된 경로 옵션 ID (방안 A'). selectRoute()에서 zen_order_routes upsert와 함께 UPDATE됨';
+COMMENT ON COLUMN zen_orders.route_option_id IS '선택된 경로 옵션 ID (방안 A''). selectRoute()에서 zen_order_routes upsert와 함께 UPDATE됨';
 
 -- 2. RLS: zen_orders 기존 RLS 정책에 신규 컬럼 자동 포함
 -- Row-Level Security는 컬럼 단위가 아닌 ROW 단위이므로 별도 RLS 정책 추가 불필요
