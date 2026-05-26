@@ -1,6 +1,6 @@
-import { logger } from '@/lib/logger';
 'use server';
 
+import { logger } from '@/lib/logger';
 import { createClient } from '@/utils/supabase/server';
 import { validateUserAction } from '@/lib/auth/guards';
 import { AdminRepository } from '@/lib/repositories';
