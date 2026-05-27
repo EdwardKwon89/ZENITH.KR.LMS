@@ -39,8 +39,8 @@
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|
 | 시나리오 오류 | 1 | 0 | 0 | 0 | 5 | **6** |
 | 기능 보완/개선 | 2 | 0 | 1 | 0 | 1 | **4** |
-| 기능 오류 | 1 | 0 | 5 | 0 | 0 | **6** |
-| **합계** | **4** | **0** | **6** | **0** | **6** | **16** |
+| 기능 오류 | 1 | 0 | 3 | 2 | 0 | **6** |
+| **합계** | **4** | **0** | **4** | **2** | **6** | **16** |
 
 ---
 
@@ -62,8 +62,8 @@
 | DEF-012 | UAT-01-05 | 기능 오류 | Y | 수정완료 | Aiden | STEP1 | Login 화면의 "비밀번호 찾기" 클릭해도 동작하지 않음 | 737f20a | **원인**: `proxy.ts:48` isAuthPage에 `/reset-password` 누락 → 미인증 접근 시 login으로 리다이렉트<br>**수정**: isAuthPage 조건에 `purePath.startsWith('/reset-password')` 추가<br>**검증**: DEF-011과 동일 커밋 일괄 수정 | ✅ | - |
 | DEF-013 | UAT-01-04 | 기능 오류 | N | 수정완료 | D_Kai | - | ID 찾기 기능 설계 모순 — E-Mail=ID 구조에서 성명+E-Mail로 ID 찾기 무의미 + 개인/법인 분리 미구현 | 15299bf + 8건 | **원인**: findUserId 설계 모순 (E-Mail=ID 구조에서 E-Mail로 E-Mail 찾기)<br>**1차 수정**(`15299bf`): 개인/법인 탭 분리 재설계 · `zen_profiles.phone_number` 추가 · UAT-01-04 전면 재작성<br>**후속 8건**(`2111a75`·`4b796e4`·`883cd25`·`9f0e3c2`·`c509802`·`e27ec7a`·`199712e`·`d1bc3de`): RLS·컬럼·FK·동명이인·마스킹·overflow — D_Kai 자체 테스트 중 발견·수정<br>**검증**: TASK-098 완료 · 227/227 PASS | ✅ | Edward 재검증 필요 |
 | DEF-014 | UAT-01-08 | 기능 보완 | Y | 수정완료 | D_Kai | 사전조건 | `SESSION_IDLE_TIMEOUT_MIN` 환경변수 미설정 → 기본값 30분으로 UAT 시나리오(2분 대기) 정상 동작 불가 | - | **원인**: `.env.local`에 `SESSION_IDLE_TIMEOUT_MIN` 누락 (코드 기본값 30분)<br>**수정**: `.env.local`에 `SESSION_IDLE_TIMEOUT_MIN=2` 추가 (gitignore — 커밋 불가)<br>**검증**: 서버 재시작 후 2분 timeout 동작 확인 | - | 로컬 UAT 전용 설정 |
-| DEF-015 | UAT-01-08 | 기능 오류 | Y | 수정완료 | D_Kai | STEP4 | 로그인 성공 후 `/ko/orders` 진입 시 이전 세션 `zen_last_activity` 쿠키 잔재로 즉시 timeout | `1477091` | **원인 1** (`login/actions.ts`): 로그인 성공 시 `zen_last_activity` 미삭제 → old cookie(>2분)가 남아있어 middleware가 즉시 timeout 판정<br>**수정 1**: `login()` 성공 직후 `cookies().delete('zen_last_activity')` 추가<br>**원인 2** (`proxy.ts:89`): timeout 시 `mergeHeaders(response, supabaseResponse)`가 OLD `supabaseResponse`(signOut 전 값)를 참조 → session cookie 삭제 무효화<br>**수정 2**: timeout 경로에서 `mergeHeaders` 제거 — signOut 후에는 신규 `supabaseResponse`로 재생성되어 파라미터 참조는 stale<br>**검증**: 227/227 PASS | - | - |
-| DEF-016 | UAT-01-08 | 기능 오류 | Y | 수정완료 | D_Kai | STEP4 | `zen_last_activity` 쿠키 maxAge = `SESSION_IDLE_TIMEOUT_MIN * 60` → 2분 후 브라우저가 쿠키 자동 삭제 → `lastActivity` undefined → timeout 체크 skip → 영원히 timeout 미발생 | `f1f20cc` | **원인** (`proxy.ts:100`): `maxAge: SESSION_IDLE_TIMEOUT_MIN * 60` — 쿠키 만료시점 = timeout 기준시점. 브라우저가 쿠키를 먼저 삭제하여 timeout 체크가 실행되지 않음<br>**수정**: `maxAge: 7 * 24 * 60 * 60` (7일) — timeout 체크는 쿠키 VALUE(timestamp)로 판별, maxAge는 단순히 쿠키 보관 기간<br>**검증**: 회귀 227/227 PASS | - | - |
+| DEF-015 | UAT-01-08 | 기능 오류 | Y | 검증완료 | D_Kai | STEP4 | 로그인 성공 후 `/ko/orders` 진입 시 이전 세션 `zen_last_activity` 쿠키 잔재로 즉시 timeout | `1477091` | **원인 1** (`login/actions.ts`): 로그인 성공 시 `zen_last_activity` 미삭제 → old cookie(>2분)가 남아있어 middleware가 즉시 timeout 판정<br>**수정 1**: `login()` 성공 직후 `cookies().delete('zen_last_activity')` 추가<br>**원인 2** (`proxy.ts:89`): timeout 시 `mergeHeaders(response, supabaseResponse)`가 OLD `supabaseResponse`(signOut 전 값)를 참조 → session cookie 삭제 무효화<br>**수정 2**: timeout 경로에서 `mergeHeaders` 제거 — signOut 후에는 신규 `supabaseResponse`로 재생성되어 파라미터 참조는 stale<br>**검증**: 227/227 PASS · Edward 재검증 ✅ | - | - |
+| DEF-016 | UAT-01-08 | 기능 오류 | Y | 검증완료 | D_Kai | STEP4 | `zen_last_activity` 쿠키 maxAge = `SESSION_IDLE_TIMEOUT_MIN * 60` → 2분 후 브라우저가 쿠키 자동 삭제 → `lastActivity` undefined → timeout 체크 skip → 영원히 timeout 미발생 | `f1f20cc` | **원인** (`proxy.ts:100`): `maxAge: SESSION_IDLE_TIMEOUT_MIN * 60` — 쿠키 만료시점 = timeout 기준시점. 브라우저가 쿠키를 먼저 삭제하여 timeout 체크가 실행되지 않음<br>**수정**: `maxAge: 7 * 24 * 60 * 60` (7일) — timeout 체크는 쿠키 VALUE(timestamp)로 판별, maxAge는 단순히 쿠키 보관 기간<br>**검증**: 회귀 227/227 PASS · Edward 재검증 ✅ (session timeout 정상동작 확인) | - | - |
 ---
 
 ## 처리 지침
@@ -91,3 +91,4 @@
 | 2026-05-27 | Edward | DEF-014 추가 (UAT-01-08 진행 중 발견 — `SESSION_IDLE_TIMEOUT_MIN` env 미설정) |
 | 2026-05-27 | D_Kai (OpenCode) | DEF-015 추가 (UAT-01-08 — 로그인 후 즉시 timeout) · `1477091` · login action + proxy timeout mergeHeaders 수정 |
 | 2026-05-27 | D_Kai (OpenCode) | DEF-016 추가 (UAT-01-08 — `zen_last_activity` maxAge=120초 → 브라우저가 쿠키 자동 삭제 → timeout 영원히 미발생) · `7 * 24 * 60 * 60`(7일)로 수정 |
+| 2026-05-27 | Edward | DEF-015·016 재검증 ✅ — session timeout 정상동작 확인 · 상태 `수정완료`→`검증완료` |

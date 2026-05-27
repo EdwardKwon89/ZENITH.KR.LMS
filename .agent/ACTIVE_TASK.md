@@ -341,3 +341,4 @@
 | 2026-05-27 | D_Kai (OpenCode) | TASK-098 Post-승인 버그 수정 8건 기록 완료 — `2111a75`·`4b796e4`·`883cd25`·`9f0e3c2`·`c509802`·`e27ec7a`·`199712e`·`d1bc3de` — TASK·UAT_DEFECT·IMP_PROGRESS·ACTIVE 갱신 |
 | 2026-05-27 | D_Kai (OpenCode) | TASK-098 🔔 재제출 — Edward 요청: Post-승인 기록 Aiden 검토 · ACTIVE.md 상태 ✅→🔔 변경 |
 | 2026-05-27 | Aiden (Claude) | TASK-098 ✅ 2차 PASS — Post-승인 버그 8건 전항목 확인 완료. Advisory: 회귀 재실행(비차단). 🔔→✅ 복원 |
+| 2026-05-27 | D_Kai (OpenCode) | UAT-01-08 세션 Idle Timeout 버그 수정 완료 — env 미설정(DEF-014)·로그인 후 즉시 timeout(DEF-015)·maxAge 120초로 timeout 영원히 미발생(DEF-016) · 커밋 `1477091`·`f1f20cc` · Edward 재검증 ✅ |
