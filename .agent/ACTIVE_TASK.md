@@ -152,7 +152,7 @@
 | TASK-095 | 260525 | UAT-11 Phase K 절차서 작성 (Hub Routing + P0 항목) | P3 | TASK-091 ✅ · TASK-092 ✅ · TASK-093 ✅ | B_Kai | ✅ | [TASK-095](tasks/TASK-095_260525_UATPhaseK절차서_BKai.md) | UAT-11 신규 6건 · UAT_MASTER 72→78 · 0322b1b+78345f3+97f2729+e2e3bc3 ✅ |
 | TASK-097 | 260525 | UAT-11 보완 — 쿼리 오류 수정 + IMP-086 시나리오 추가 | P3 | TASK-095 ✅ | B_Kai | ✅ | [TASK-097](tasks/TASK-097_260525_UAT11보완_BKai.md) | 3e491bb+84034bc+030d0ab · UAT-11-03 수정·UAT-11-07 신규·UAT_MASTER 79개 ✅ |
 | TASK-096 | 260525 | UAT 전체 실행 (Edward 직접 검증 — Go-Live 판정) | P1 | TASK-094 ✅ · TASK-095 ✅ · TASK-097 ✅ | Edward | ⬜ | [TASK-096](tasks/TASK-096_260525_UAT전체실행_Edward.md) | 전제조건 전량 충족 — Edward 직접 실행 대기 |
-| TASK-098 | 260527 | ID 찾기 기능 재설계 — 개인/법인 분리 | P2 | 없음 | D_Kai | ✅ | [TASK-098](tasks/TASK-098_260527_ID찾기기능재설계_DKai.md) | IMP-089 완료 · 코드 15299bf · 문서 c345ffe+40822de · 227/227 |
+| TASK-098 | 260527 | ID 찾기 기능 재설계 — 개인/법인 분리 | P2 | 없음 | D_Kai | ✅ | [TASK-098](tasks/TASK-098_260527_ID찾기기능재설계_DKai.md) | IMP-089 완료 · `15299bf` + 후속 8건(`2111a75`~`d1bc3de`) · 227/227 · 버그8건수정 |
 
 ---
 
@@ -338,3 +338,4 @@
 | 2026-05-27 | Aiden (Claude) | TASK-098 ❌ 반려 — D_Kai R-17 위반 4건: 코드 커밋 미수행(staged 상태)·task file 헤더 ⬜·IMP_PROGRESS IMP-089 누락·DoD #9·10 미체크. 구현 품질 정상. 최소 재작업 후 재제출 지시 |
 | 2026-05-27 | D_Kai (OpenCode) | TASK-098 재작업 완료 — 코드 커밋 15299bf·문서 커밋 c345ffe·task file 헤더 🔔·IMP_PROGRESS IMP-089 추가·DoD #9·10 ✅ · 🔔 재제출 |
 | 2026-05-27 | Aiden (Claude) | TASK-098 ✅ PASS — DoD 전항목·커밋 구조 확인 완료. IMP-089 완료. Advisory 2건 비차단(문서커밋 2건·findProfilesByName maybeSingle). DEF-013 수정완료 반영 |
+| 2026-05-27 | D_Kai (OpenCode) | TASK-098 Post-승인 버그 수정 8건 기록 완료 — `2111a75`·`4b796e4`·`883cd25`·`9f0e3c2`·`c509802`·`e27ec7a`·`199712e`·`d1bc3de` — TASK·UAT_DEFECT·IMP_PROGRESS·ACTIVE 갱신 |

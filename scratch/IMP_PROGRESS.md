@@ -220,7 +220,7 @@
 | 086 | 303 Stage 1+2: Route Decomposer + TISA 캐리어별 요율 매핑 | Riley | 🔔 | 2026-05-25 |
 | 087 | 환적 상태 추적 A안 (Transit Tracking per Leg) | B_Kai | 🔔 | 82c9fb7 · 227/227 · migration+types+validation+UI+i18n ✅ |
 | 088 | 개인정보 활용동의 체크박스 (회원가입 Wizard) | D_Kai | 🔔 | 5a21467 · 220/220 · migration+UI+action+i18n 4개국어 ✅ |
-| 089 | ID 찾기 개인/법인 분리 재설계 (phone_number + 탭 UI) | D_Kai | ✅ | 15299bf · 227/227 · mig+가입폰+백엔드2함수+UI탭+UAT재작 ✅ |
+| 089 | ID 찾기 개인/법인 분리 재설계 (phone_number + 탭 UI) | D_Kai | ✅ | `15299bf`+`2111a75`+`4b796e4`+`883cd25`+`9f0e3c2`+`c509802`+`e27ec7a`+`199712e`+`d1bc3de` · 227/227 · mig+가입폰+백엔드2함수+UI탭+UAT재작+버그8건수정 |
 | 046 | Rate Limiting 도입 (Phase C 유예 재활성화) | Riley | 🔔 | 2026-05-25 |
 
 > 🚫 IMP-086: IMP-084 완료 후 착수 가능
