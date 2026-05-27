@@ -59,7 +59,7 @@ export default function FindIdPage() {
       if (res.error) {
         setError(res.error);
       } else if (res.maskedEmail) {
-        setResult({ email: res.maskedEmail });
+        setResult([{ email: res.maskedEmail }]);
       }
     } catch {
       setError('오류가 발생했습니다. 다시 시도해 주세요.');
