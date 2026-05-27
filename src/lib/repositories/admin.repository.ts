@@ -64,6 +64,7 @@ export class AdminRepository extends BaseRepository {
       .from('zen_profiles')
       .select('email, phone_number')
       .eq('full_name', fullName)
+      .limit(1)
       .maybeSingle();
   }
 
