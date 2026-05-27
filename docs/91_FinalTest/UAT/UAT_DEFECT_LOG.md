@@ -58,8 +58,8 @@
 | DEF-008 | UAT-01-01 | 시나리오 오류 | N | 시나리오수정 | Aiden | - | 법인 등록 신청 후 승인 시나리오 없음 | - | - | UAT-09-01 기존 시나리오 참조 — UAT-01-01 비고에 추가 |
 | DEF-009 | UAT-09-01 | 기능 오류 | N | 미수정 | - | - | "증빙서류 오딧" 버튼 클릭 시 "파일을 불러올 수 없습니다." 메시지 표출 | - | - | |
 | DEF-010 | UAT-09-01 | 기능 개선 | N | 미수정 | - | - | "법인 최종 승인" 버튼의 글자가 보이지 않음 | - | - | |
-| DEF-011 | UAT-01-04 | 기능 오류 | Y | 수정완료 | Aiden | - | Login 화면의 "ID 찾기" 클릭해도 동작하지 않음 | 737f20a | - | proxy.ts isAuthPage 누락 수정 (DEF-013 설계 모순은 별도) |
-| DEF-012 | UAT-01-05 | 기능 오류 | Y | 수정완료 | Aiden | - | Login 화면의 "비밀번호 찾기" 클릭해도 동작하지 않음 | 737f20a | - | proxy.ts isAuthPage 누락 수정 |
+| DEF-011 | UAT-01-04 | 기능 오류 | Y | 수정완료 | Aiden | STEP1 | Login 화면의 "ID 찾기" 클릭해도 동작하지 않음 | 737f20a | ✅ 직접수정 | **원인**: `src/lib/auth/proxy.ts:48` `isAuthPage` 판정에 `/find-id` 경로 누락 → 미인증 사용자가 `/ko/find-id` 접근 시 미들웨어가 즉시 `/ko/login`으로 리다이렉트. **수정**: isAuthPage 조건에 `purePath.startsWith('/find-id')` 추가. **검증**: 회귀 테스트 227/227 PASS. DEF-013(설계 모순) 별도 처리 |
+| DEF-012 | UAT-01-05 | 기능 오류 | Y | 수정완료 | Aiden | STEP1 | Login 화면의 "비밀번호 찾기" 클릭해도 동작하지 않음 | 737f20a | ✅ 직접수정 | **원인**: `src/lib/auth/proxy.ts:48` `isAuthPage` 판정에 `/reset-password` 경로 누락 → 미인증 사용자가 `/ko/reset-password` 접근 시 미들웨어가 즉시 `/ko/login`으로 리다이렉트. **수정**: isAuthPage 조건에 `purePath.startsWith('/reset-password')` 추가. DEF-011과 동일 커밋(737f20a) 일괄 수정 |
 | DEF-013 | UAT-01-04 | 기능 오류 | N | 미수정 | - | - | ID 찾기 기능 설계 모순 — E-Mail=ID 구조에서 성명+E-Mail로 ID 찾기 무의미 + 개인/법인 분리 미구현 | - | - | TASK-098 발령 예정 |
 ---
 
@@ -81,5 +81,5 @@
 | 2026-05-27 | Edward | DEF-009·DEF-010 추가 (UAT-09-01 진행 중 발견) |
 | 2026-05-27 | Aiden (Claude) | DEF-002~008 처리 반영 — 시나리오수정 6건, 현황 요약 갱신 (총 10건) |
 | 2026-05-27 | Edward | DEF-011·DEF-012 추가 (UAT-01-04·05 진행 중 발견 — ID찾기·비밀번호찾기 미동작) |
-| 2026-05-27 | Aiden (Claude) | DEF-011·012 원인 분석 완료 + proxy.ts 수정 (isAuthPage 누락) · 현황 요약 갱신 (총 12건) |
+| 2026-05-27 | Aiden (Claude) | DEF-011·012 원인 분석 및 직접 수정 — `src/lib/auth/proxy.ts:48` isAuthPage에 `/find-id`·`/reset-password` 추가, 커밋 737f20a, 회귀 227/227 PASS · 현황 요약 갱신 (총 12건) |
 | 2026-05-27 | Aiden (Claude) | DEF-011·012 수정완료 반영 (737f20a) · DEF-013 신규 (ID찾기 설계 모순+법인/개인 미분리) · TASK-098 발령 · 현황 요약 갱신 (총 13건) |
