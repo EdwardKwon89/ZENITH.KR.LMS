@@ -38,9 +38,9 @@
 | 구분 | 미수정 | 수정중 | 수정완료 | 검증완료 | 시나리오수정 | 합계 |
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|
 | 시나리오 오류 | 1 | 0 | 0 | 0 | 5 | **6** |
-| 기능 보완/개선 | 2 | 0 | 0 | 0 | 1 | **3** |
+| 기능 보완/개선 | 2 | 0 | 1 | 0 | 1 | **4** |
 | 기능 오류 | 1 | 0 | 3 | 0 | 0 | **4** |
-| **합계** | **4** | **0** | **3** | **0** | **6** | **13** |
+| **합계** | **4** | **0** | **4** | **0** | **6** | **14** |
 
 ---
 
@@ -61,6 +61,7 @@
 | DEF-011 | UAT-01-04 | 기능 오류 | Y | 수정완료 | Aiden | STEP1 | Login 화면의 "ID 찾기" 클릭해도 동작하지 않음 | 737f20a | **원인**: `proxy.ts:48` isAuthPage에 `/find-id` 누락 → 미인증 접근 시 login으로 리다이렉트<br>**수정**: isAuthPage 조건에 `purePath.startsWith('/find-id')` 추가<br>**검증**: 회귀 227/227 PASS | ✅ | DEF-013(설계 모순) 별도 처리 |
 | DEF-012 | UAT-01-05 | 기능 오류 | Y | 수정완료 | Aiden | STEP1 | Login 화면의 "비밀번호 찾기" 클릭해도 동작하지 않음 | 737f20a | **원인**: `proxy.ts:48` isAuthPage에 `/reset-password` 누락 → 미인증 접근 시 login으로 리다이렉트<br>**수정**: isAuthPage 조건에 `purePath.startsWith('/reset-password')` 추가<br>**검증**: DEF-011과 동일 커밋 일괄 수정 | ✅ | - |
 | DEF-013 | UAT-01-04 | 기능 오류 | N | 수정완료 | D_Kai | - | ID 찾기 기능 설계 모순 — E-Mail=ID 구조에서 성명+E-Mail로 ID 찾기 무의미 + 개인/법인 분리 미구현 | 15299bf + 8건 | **원인**: findUserId 설계 모순 (E-Mail=ID 구조에서 E-Mail로 E-Mail 찾기)<br>**1차 수정**(`15299bf`): 개인/법인 탭 분리 재설계 · `zen_profiles.phone_number` 추가 · UAT-01-04 전면 재작성<br>**후속 8건**(`2111a75`·`4b796e4`·`883cd25`·`9f0e3c2`·`c509802`·`e27ec7a`·`199712e`·`d1bc3de`): RLS·컬럼·FK·동명이인·마스킹·overflow — D_Kai 자체 테스트 중 발견·수정<br>**검증**: TASK-098 완료 · 227/227 PASS | ✅ | Edward 재검증 필요 |
+| DEF-014 | UAT-01-08 | 기능 보완 | Y | 수정완료 | D_Kai | 사전조건 | `SESSION_IDLE_TIMEOUT_MIN` 환경변수 미설정 → 기본값 30분으로 UAT 시나리오(2분 대기) 정상 동작 불가 | - | **원인**: `.env.local`에 `SESSION_IDLE_TIMEOUT_MIN` 누락 (코드 기본값 30분)<br>**수정**: `.env.local`에 `SESSION_IDLE_TIMEOUT_MIN=2` 추가 (gitignore — 커밋 불가)<br>**검증**: 서버 재시작 후 2분 timeout 동작 확인 | - | 로컬 UAT 전용 설정 |
 ---
 
 ## 처리 지침
@@ -85,3 +86,4 @@
 | 2026-05-27 | Aiden (Claude) | DEF-011·012 수정완료 반영 (737f20a) · DEF-013 신규 (ID찾기 설계 모순+법인/개인 미분리) · TASK-098 발령 · 현황 요약 갱신 (총 13건) |
 | 2026-05-27 | Aiden (Claude) | DEF-013 수정완료 — TASK-098 (D_Kai) 15299bf · 개인/법인 탭 분리 재설계 · UAT-01-04 시나리오 전면 재작성 · 현황 요약 갱신 (미수정 6→4, 수정완료 2→3) |
 | 2026-05-27 | D_Kai (OpenCode) | DEF-013 조치 사항 갱신 — 후속 8건(`2111a75`~`d1bc3de`) 추가 기재 · TASK-098·IMP_PROGRESS·ACTIVE 동시 갱신 |
+| 2026-05-27 | Edward | DEF-014 추가 (UAT-01-08 진행 중 발견 — `SESSION_IDLE_TIMEOUT_MIN` env 미설정) |
