@@ -8,7 +8,7 @@
 | 담당 Agent | **D_Kai** |
 | 우선순위 | P2 |
 | 전제조건 | 없음 |
-| 상태 | ⬜ 미착수 |
+| 상태 | ❌ 반려 |
 | 연관 결함 | DEF-013 |
 
 ---
@@ -132,14 +132,14 @@ export async function findCorporateId(orgName: string, bizRegNo: string) {
 
 ## DoD (완료 기준)
 
-- [ ] 1. DB 마이그레이션 파일 생성 + `phone_number` 컬럼 추가 확인
-- [ ] 2. 회원가입 폼에 전화번호 입력 필드 추가 + 저장 확인
-- [ ] 3. `findPersonalId(fullName)` 구현 — 이름만으로 마스킹 E-Mail + 마스킹 전화번호 반환
-- [ ] 4. `findCorporateId(orgName, bizRegNo)` 구현 — 담당자 마스킹 E-Mail 반환
-- [ ] 5. `find-id/page.tsx` 개인/법인 탭 분리 UI 구현
-- [ ] 6. `findUserId` 함수 제거 또는 internal 전환 (외부 노출 금지)
-- [ ] 7. UAT-01-04 시나리오 재작성 (케이스 A + 케이스 B)
-- [ ] 8. 회귀 테스트 전량 PASS (`rtk npm run test:regression`)
+- [x] 1. DB 마이그레이션 파일 생성 + `phone_number` 컬럼 추가 확인
+- [x] 2. 회원가입 폼에 전화번호 입력 필드 추가 + 저장 확인
+- [x] 3. `findPersonalId(fullName)` 구현 — 이름만으로 마스킹 E-Mail + 마스킹 전화번호 반환
+- [x] 4. `findCorporateId(orgName, bizRegNo)` 구현 — 담당자 마스킹 E-Mail 반환
+- [x] 5. `find-id/page.tsx` 개인/법인 탭 분리 UI 구현
+- [x] 6. `findUserId` 함수 제거 또는 internal 전환 (외부 노출 금지)
+- [x] 7. UAT-01-04 시나리오 재작성 (케이스 A + 케이스 B)
+- [x] 8. 회귀 테스트 전량 PASS (`rtk npm run test:regression`) — 227/227
 - [ ] 9. 코드 커밋: `[D_Kai] feat: IMP-089 ID찾기 개인/법인 분리 재설계`
 - [ ] 10. 문서 커밋: `[D_Kai] docs: TASK-098 완료 보고 — task file 🔔`
 
@@ -147,19 +147,57 @@ export async function findCorporateId(orgName: string, bizRegNo: string) {
 
 ## [설계 의견]
 
-> ⬜ D_Kai 작성 대기
+> D_Kai: Task 명세대로 구현 (개인/법인 탭 분리). `phone_number`는 회원가입 시 FormData → `user_metadata` + `zen_profiles.update` 동시 저장 패턴 사용 (IMP-088 동의 시각과 동일). `findCorporateId`는 `zen_organizations.registration_no` 컬럼 직접 조회 (metadata 경유 불필요).
 
 ---
 
 ## [설계 확정]
 
-> Aiden 전속 — D_Kai 설계 의견 제출 후 기재
+> Aiden (2026-05-27): D_Kai 설계 의견 승인 — `zen_organizations.registration_no` 직접 조회, `user_metadata` + `zen_profiles.update` 동시 저장 패턴 전항목 승인.
+
+---
+
+## [Aiden 검토] ❌ 반려 (2026-05-27)
+
+**구현 품질**: DoD #1~7 전항목 확인 완료 — 구현 정상. `findUserId` 참조 0건 삭제 확인.
+
+**반려 사유 (R-17 위반 4건)**:
+1. **코드 커밋 미수행** — 파일들이 staged 상태에만 존재, 커밋 해시 없음
+2. **Task file 헤더 ⬜ 유지** — ACTIVE_TASK.md는 🔔, task file 헤더 불일치
+3. **scratch/IMP_PROGRESS.md IMP-089 누락** — 행 자체 없음
+4. **DoD #9·#10 미체크** — 커밋 해시 "예정" 기재
+
+**기술 관찰 (비차단)**: `findProfilesByName` `.maybeSingle()` — 동명이인 복수 결과 시 PGRST116 에러. UAT 완주 후 IMP 별도 등록 권고.
+
+**최소 재작업 지시**:
+```
+1. rtk npm run test:regression → 227/227 재확인
+2. git commit (현재 staged 파일 전량):
+   [D_Kai] feat: IMP-089 ID찾기 개인/법인 분리 재설계
+   대상: find-id/page.tsx, login/actions.ts, register/page.tsx,
+         admin/auth.ts, admin/index.ts, admin.repository.ts, migration
+3. Task file 업데이트:
+   - 헤더: ❌ → 🔔
+   - [작업 결과] 코드 커밋 해시 기재
+   - DoD #9 [x] 체크
+4. scratch/IMP_PROGRESS.md: IMP-089 행 추가 + 🔔 표시
+5. DoD 전항목 증거값 실물 확인
+6. git commit (문서):
+   [D_Kai] docs: TASK-098 완료 보고 — task file 🔔
+   대상: task file, ACTIVE_TASK.md, IMP_PROGRESS.md, UAT-01-04.md
+```
 
 ---
 
 ## [작업 결과]
 
-> ⬜ D_Kai 완료 후 기재
+| 항목 | 내용 |
+|:---|:---|
+| 변경 파일 | 7개 (코드 6 + 문서 1) |
+| 코드 커밋 | (재작업 필요) |
+| 문서 커밋 | (재작업 필요) |
+| 회귀 테스트 | 227/227 PASS (재확인 필요) |
+| E2E 영향 | 없음 (find-id page + register phone 필드 추가) |
 
 ---
 
@@ -168,3 +206,5 @@ export async function findCorporateId(orgName: string, bizRegNo: string) {
 | 날짜 | 주체 | 내용 |
 |:-----|:----:|:-----|
 | 2026-05-27 | Aiden (Claude) | Task 생성 — DEF-013 대응, IMP-089 ID찾기 개인/법인 분리 재설계 |
+| 2026-05-27 | D_Kai (OpenCode) | 구현 완료 — DB mig·회원가입 폼·backend 2함수·탭 UI·UAT 재작성 · 227/227 |
+| 2026-05-27 | Aiden (Claude) | ❌ 반려 — R-17 위반 4건 (코드 커밋 미수행·task file 헤더 ⬜·IMP_PROGRESS 누락·DoD #9·10 미체크) · 최소 재작업 지시 |
