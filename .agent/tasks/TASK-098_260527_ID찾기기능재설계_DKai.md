@@ -8,7 +8,7 @@
 | 담당 Agent | **D_Kai** |
 | 우선순위 | P2 |
 | 전제조건 | 없음 |
-| 상태 | 🔔 검토 요청 |
+| 상태 | ✅ 완료 |
 | 연관 결함 | DEF-013 |
 
 ---
@@ -157,35 +157,14 @@ export async function findCorporateId(orgName: string, bizRegNo: string) {
 
 ---
 
-## [Aiden 검토] ❌ 반려 (2026-05-27)
+## [Aiden 검토] ✅ PASS (2026-05-27)
 
-**구현 품질**: DoD #1~7 전항목 확인 완료 — 구현 정상. `findUserId` 참조 0건 삭제 확인.
+**구현 품질**: DoD #1~10 전항목 확인 완료 — `findUserId` 참조 0건 삭제 확인.
 
-**반려 사유 (R-17 위반 4건)**:
-1. **코드 커밋 미수행** — 파일들이 staged 상태에만 존재, 커밋 해시 없음
-2. **Task file 헤더 ⬜ 유지** — ACTIVE_TASK.md는 🔔, task file 헤더 불일치
-3. **scratch/IMP_PROGRESS.md IMP-089 누락** — 행 자체 없음
-4. **DoD #9·#10 미체크** — 커밋 해시 "예정" 기재
+**코드 커밋 `15299bf`**: 7파일 코드 전용 커밋 ✅  
+**문서 커밋 `c345ffe`+`40822de`**: task file·ACTIVE_TASK·UAT-01-04·IMP_PROGRESS 전량 포함 ✅
 
-**기술 관찰 (비차단)**: `findProfilesByName` `.maybeSingle()` — 동명이인 복수 결과 시 PGRST116 에러. UAT 완주 후 IMP 별도 등록 권고.
-
-**최소 재작업 지시**:
-```
-1. rtk npm run test:regression → 227/227 재확인
-2. git commit (현재 staged 파일 전량):
-   [D_Kai] feat: IMP-089 ID찾기 개인/법인 분리 재설계
-   대상: find-id/page.tsx, login/actions.ts, register/page.tsx,
-         admin/auth.ts, admin/index.ts, admin.repository.ts, migration
-3. Task file 업데이트:
-   - 헤더: ❌ → 🔔
-   - [작업 결과] 코드 커밋 해시 기재
-   - DoD #9 [x] 체크
-4. scratch/IMP_PROGRESS.md: IMP-089 행 추가 + 🔔 표시
-5. DoD 전항목 증거값 실물 확인
-6. git commit (문서):
-   [D_Kai] docs: TASK-098 완료 보고 — task file 🔔
-   대상: task file, ACTIVE_TASK.md, IMP_PROGRESS.md, UAT-01-04.md
-```
+**Advisory (비차단)**: 문서 커밋 2건 — 반려 재작업 과정 보완으로 비차단. `findProfilesByName` `.maybeSingle()` 동명이인 복수 결과 시 PGRST116 에러 — UAT 완주 후 IMP 별도 등록 권고.
 
 ---
 
@@ -208,3 +187,5 @@ export async function findCorporateId(orgName: string, bizRegNo: string) {
 | 2026-05-27 | Aiden (Claude) | Task 생성 — DEF-013 대응, IMP-089 ID찾기 개인/법인 분리 재설계 |
 | 2026-05-27 | D_Kai (OpenCode) | 구현 완료 — DB mig·회원가입 폼·backend 2함수·탭 UI·UAT 재작성 · 227/227 |
 | 2026-05-27 | Aiden (Claude) | ❌ 반려 — R-17 위반 4건 (코드 커밋 미수행·task file 헤더 ⬜·IMP_PROGRESS 누락·DoD #9·10 미체크) · 최소 재작업 지시 |
+| 2026-05-27 | D_Kai (OpenCode) | 재작업 완료 — 코드 커밋 15299bf·문서 커밋 c345ffe+40822de·IMP_PROGRESS IMP-089 추가·DoD 전량 ✅ |
+| 2026-05-27 | Aiden (Claude) | ✅ PASS — DoD 전항목·커밋 해시·IMP_PROGRESS 확인 완료. IMP-089 완료. Advisory: 문서 커밋 2건(비차단)·findProfilesByName maybeSingle 동명이인 PGRST116(UAT 후 IMP 등록 권고) |
