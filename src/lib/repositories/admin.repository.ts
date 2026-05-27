@@ -70,12 +70,18 @@ export class AdminRepository extends BaseRepository {
   async findCorporateAdminEmail(orgName: string, bizNo: string) {
     return this.db
       .from('zen_organizations')
-      .select(`
-        id,
-        zen_profiles!inner(id, email)
-      `)
+      .select('id')
       .eq('name', orgName)
       .eq('biz_no', bizNo)
+      .maybeSingle();
+  }
+
+  async findAdminByOrgId(orgId: string) {
+    return this.db
+      .from('zen_profiles')
+      .select('email')
+      .eq('org_id', orgId)
+      .in('role', ['ADMIN', 'ZENITH_SUPER_ADMIN'])
       .maybeSingle();
   }
 

@@ -53,26 +53,20 @@ export async function findCorporateId(orgName: string, regNo: string) {
 
   try {
     const adminRepo = new AdminRepository(supabase);
-    const { data, error } = await adminRepo.findCorporateAdminEmail(orgName, regNo);
 
-    if (error) {
-      logger.error('[AUTH_ACTION] findCorporateId Error:', error);
-      return { error: '데이터 조회 중 오류가 발생했습니다.' };
-    }
-
-    if (!data?.zen_profiles) {
+    const { data: org, error: orgError } = await adminRepo.findCorporateAdminEmail(orgName, regNo);
+    if (orgError || !org?.id) {
+      logger.error('[AUTH_ACTION] findCorporateId Org Error:', orgError);
       return { error: '일치하는 법인 정보를 찾을 수 없습니다.' };
     }
 
-    const email = Array.isArray(data.zen_profiles)
-      ? data.zen_profiles[0]?.email
-      : data.zen_profiles.email;
-
-    if (!email) {
+    const { data: profile, error: profileError } = await adminRepo.findAdminByOrgId(org.id);
+    if (profileError || !profile?.email) {
+      logger.error('[AUTH_ACTION] findCorporateId Profile Error:', profileError);
       return { error: '법인 담당자 정보를 찾을 수 없습니다.' };
     }
 
-    const [user, domain] = email.split('@');
+    const [user, domain] = profile.email.split('@');
     const maskedUser = user.substring(0, 2) + '*'.repeat(Math.max(0, user.length - 2));
     const maskedEmail = `${maskedUser}@${domain}`;
 
