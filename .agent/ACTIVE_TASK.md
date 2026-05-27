@@ -152,7 +152,7 @@
 | TASK-095 | 260525 | UAT-11 Phase K 절차서 작성 (Hub Routing + P0 항목) | P3 | TASK-091 ✅ · TASK-092 ✅ · TASK-093 ✅ | B_Kai | ✅ | [TASK-095](tasks/TASK-095_260525_UATPhaseK절차서_BKai.md) | UAT-11 신규 6건 · UAT_MASTER 72→78 · 0322b1b+78345f3+97f2729+e2e3bc3 ✅ |
 | TASK-097 | 260525 | UAT-11 보완 — 쿼리 오류 수정 + IMP-086 시나리오 추가 | P3 | TASK-095 ✅ | B_Kai | ✅ | [TASK-097](tasks/TASK-097_260525_UAT11보완_BKai.md) | 3e491bb+84034bc+030d0ab · UAT-11-03 수정·UAT-11-07 신규·UAT_MASTER 79개 ✅ |
 | TASK-096 | 260525 | UAT 전체 실행 (Edward 직접 검증 — Go-Live 판정) | P1 | TASK-094 ✅ · TASK-095 ✅ · TASK-097 ✅ | Edward | ⬜ | [TASK-096](tasks/TASK-096_260525_UAT전체실행_Edward.md) | 전제조건 전량 충족 — Edward 직접 실행 대기 |
-| TASK-098 | 260527 | ID 찾기 기능 재설계 — 개인/법인 분리 | P2 | 없음 | D_Kai | 🔔 | [TASK-098](tasks/TASK-098_260527_ID찾기기능재설계_DKai.md) | IMP-089 · DEF-013 대응 · DB마이그+회원가입폰+백엔드2함수+UI탭+UAT재작 · 227/227 |
+| TASK-098 | 260527 | ID 찾기 기능 재설계 — 개인/법인 분리 | P2 | 없음 | D_Kai | 🔔 | [TASK-098](tasks/TASK-098_260527_ID찾기기능재설계_DKai.md) | IMP-089 · DEF-013 대응 · 재작업 완료: 커밋 15299bf+c345ffe · IMP_PROGRESS 추가 · DoD 전량 ✅ |
 
 ---
 
@@ -162,7 +162,7 @@
 |:------|:--------|:----------------|:----------|
 | Riley | — | R-17 위반 2회 누적 (TASK-088 무단 수정·TASK-092 혼합 커밋+해시 미기재) | — |
 | B_Kai | — | — | — |
-| D_Kai | TASK-098 🔔 (ID찾기 재설계 — Aiden 검토 대기) | — | — |
+| D_Kai | — | — | — |
 | N_Kai | TASK-087 ⬜ (재교육 세션 — 완료 후 신규 할당 재개) | — | 신규 할당 중단 유지 |
 | Ring | — | — | 신규 할당 중단 유지 (9차 위반 누적) |
 
@@ -335,3 +335,5 @@
 | 2026-05-24 | Aiden (Claude) | TASK-084 ✅ 승인(Aiden 직접 보완) — 기술 산출물(spec 336줄·회귀 220/220·44b4d06) 인정. DoD·이력·상태 Aiden 보완. ✅ 자체선언 3회 누적 → N_Kai 신규 할당 중단 + TASK-087 재교육 세션 발령 |
 | 2026-05-24 | Aiden (Claude) | TASK-087 발령 — N_Kai 재교육 세션(✅ 자체선언·R-17 커밋 순서·커밋 구성·커밋 태그 §1~§4). 신규 할당 중단 유지 |
 | 2026-05-27 | Aiden (Claude) | TASK-098 발령 — D_Kai, IMP-089 ID찾기 개인/법인 분리 재설계. DEF-013 대응. DB마이그레이션+회원가입전화번호+백엔드2함수+UI탭분리+UAT재작성 |
+| 2026-05-27 | Aiden (Claude) | TASK-098 ❌ 반려 — D_Kai R-17 위반 4건: 코드 커밋 미수행(staged 상태)·task file 헤더 ⬜·IMP_PROGRESS IMP-089 누락·DoD #9·10 미체크. 구현 품질 정상. 최소 재작업 후 재제출 지시 |
+| 2026-05-27 | D_Kai (OpenCode) | TASK-098 재작업 완료 — 코드 커밋 15299bf·문서 커밋 c345ffe·task file 헤더 🔔·IMP_PROGRESS IMP-089 추가·DoD #9·10 ✅ · 🔔 재제출 |
