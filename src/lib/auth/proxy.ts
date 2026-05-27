@@ -45,7 +45,8 @@ export async function authGuard(
   const pathname = request.nextUrl.pathname;
   const { locale, purePath } = pathInfo(pathname);
 
-  const isAuthPage = purePath.startsWith('/login') || purePath.startsWith('/register');
+  const isAuthPage = purePath.startsWith('/login') || purePath.startsWith('/register') ||
+                     purePath.startsWith('/find-id') || purePath.startsWith('/reset-password');
   const isApi = purePath.startsWith('/api');
 
   if (isApi) return null;
