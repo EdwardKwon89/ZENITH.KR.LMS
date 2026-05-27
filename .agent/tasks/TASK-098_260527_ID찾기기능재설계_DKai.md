@@ -197,6 +197,28 @@ Aiden ✅ 승인 후 D_Kai 자체 추가 테스트 중 발견·수정된 8건.
 
 ---
 
+## [Aiden 검토 2차] ✅ PASS (2026-05-27)
+
+**검토 범위**: Post-승인 버그 수정 8건 (`2111a75`~`d1bc3de`)
+
+**코드 품질**:
+- `createAdminClient()` 전환 ✅ — 미인증 접근 필수, 올바름
+- `biz_no` 컬럼 정정 ✅ — `findCorporateAdminEmail`에 반영 확인
+- 2단계 쿼리 분리 ✅ — `findCorporateAdminEmail`+`findAdminByOrgId` 패턴 적정
+- `findProfilesByName` 배열 반환 ✅ — `.maybeSingle()` 제거 확인 (Aiden 1차 Advisory 해소)
+- 동명이인 UI 복수 표시 ✅ — `result[]` map 렌더링 + "총 N건" 표시
+- 법인 결과 배열 래핑 ✅ — state 타입 일관성 유지
+- 마스킹 개선 ✅ — `auth.ts:32-33`, `76-78` 양쪽 동일 로직 적용
+- `break-all` overflow 처리 ✅ — `find-id/page.tsx:211` 확인
+
+**문서 준수**:
+- `de059d7`: 4파일 일괄 갱신 적정
+- `d678a7f`: `✅→🔔` 변경 Edward 요청 명기 — 절차 예외 인정
+
+**Advisory (비차단)**: 후속 8건 수정 후 회귀 재실행 증적 없음. 변경 범위 find-id 한정으로 기존 227건 영향 없다고 판단 — UAT 완주 후 1회 권고.
+
+---
+
 ## 개정 이력
 
 | 날짜 | 주체 | 내용 |
@@ -207,3 +229,4 @@ Aiden ✅ 승인 후 D_Kai 자체 추가 테스트 중 발견·수정된 8건.
 | 2026-05-27 | D_Kai (OpenCode) | 재작업 완료 — 코드 커밋 15299bf·문서 커밋 c345ffe+40822de·IMP_PROGRESS IMP-089 추가·DoD 전량 ✅ |
 | 2026-05-27 | Aiden (Claude) | ✅ PASS — DoD 전항목·커밋 해시·IMP_PROGRESS 확인 완료. IMP-089 완료. Advisory: 문서 커밋 2건(비차단)·findProfilesByName maybeSingle 동명이인 PGRST116(UAT 후 IMP 등록 권고) |
 | 2026-05-27 | D_Kai (OpenCode) | Post-승인 버그 수정 8건 완료 — `2111a75`·`4b796e4`·`883cd25`·`9f0e3c2`·`c509802`·`e27ec7a`·`199712e`·`d1bc3de` — TASK·UAT_DEFECT·IMP_PROGRESS·ACTIVE 기록 갱신 |
+| 2026-05-27 | Aiden (Claude) | ✅ 2차 PASS — Post-승인 8건 코드 전항목 확인 완료. Advisory: 회귀 재실행 권고(비차단). ACTIVE 🔔→✅ 복원 |
