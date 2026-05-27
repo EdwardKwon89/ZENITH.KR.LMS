@@ -9,6 +9,7 @@ import { revalidatePath } from 'next/cache';
 import { USER_ROLES } from '@/lib/auth/rbac';
 import { headers } from 'next/headers';
 import { getTranslations } from 'next-intl/server';
+import { cookies } from 'next/headers';
 
 async function getClientIp() {
   const headerStore = await headers();
@@ -79,6 +80,10 @@ export async function login(formData: FormData) {
     }
 
     logger.info('[ACTION] login AUTH SUCCESS:', data.user?.id);
+
+    // Clear stale zen_last_activity cookie — prevents immediate timeout after login
+    // (old cookie from previous session with timestamp exceeding SESSION_IDLE_TIMEOUT_MIN)
+    (await cookies()).delete('zen_last_activity');
 
     // Redirect to orders as the primary dashboard view with locale prefix
     revalidatePath('/', 'layout');

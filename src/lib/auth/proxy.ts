@@ -86,7 +86,10 @@ export async function authGuard(
           url.searchParams.set('reason', 'timeout');
           const response = NextResponse.redirect(url);
           response.cookies.delete('zen_last_activity');
-          return { response: mergeHeaders(response, supabaseResponse), redirectUrl: url.pathname };
+          // signOut() recreates supabaseResponse via setAll closure, but authGuard
+          // still holds the OLD reference with valid session cookies. Merging that
+          // would RE-SET the session, nullifying the signOut. Skip merge here.
+          return { response, redirectUrl: url.pathname };
         }
       }
 
