@@ -8,7 +8,7 @@
 | 담당 Agent | **D_Kai** |
 | 우선순위 | P2 |
 | 전제조건 | 없음 |
-| 상태 | ❌ 반려 |
+| 상태 | 🔔 검토 요청 |
 | 연관 결함 | DEF-013 |
 
 ---
@@ -140,8 +140,8 @@ export async function findCorporateId(orgName: string, bizRegNo: string) {
 - [x] 6. `findUserId` 함수 제거 또는 internal 전환 (외부 노출 금지)
 - [x] 7. UAT-01-04 시나리오 재작성 (케이스 A + 케이스 B)
 - [x] 8. 회귀 테스트 전량 PASS (`rtk npm run test:regression`) — 227/227
-- [ ] 9. 코드 커밋: `[D_Kai] feat: IMP-089 ID찾기 개인/법인 분리 재설계`
-- [ ] 10. 문서 커밋: `[D_Kai] docs: TASK-098 완료 보고 — task file 🔔`
+- [x] 9. 코드 커밋: `15299bf` — `[D_Kai] feat: IMP-089 ID찾기 개인/법인 분리 재설계`
+- [x] 10. 문서 커밋: `c345ffe` — `[D_Kai] docs: TASK-098 완료 보고 — task file 🔔 Aiden 검토`
 
 ---
 
@@ -193,10 +193,10 @@ export async function findCorporateId(orgName: string, bizRegNo: string) {
 
 | 항목 | 내용 |
 |:---|:---|
-| 변경 파일 | 7개 (코드 6 + 문서 1) |
-| 코드 커밋 | (재작업 필요) |
-| 문서 커밋 | (재작업 필요) |
-| 회귀 테스트 | 227/227 PASS (재확인 필요) |
+| 변경 파일 | 10개 (코드 7 + 문서 3) |
+| 코드 커밋 | `15299bf` — `[D_Kai] feat: IMP-089 ID찾기 개인/법인 분리 재설계` |
+| 문서 커밋 | `c345ffe` — `[D_Kai] docs: TASK-098 완료 보고 — task file 🔔` |
+| 회귀 테스트 | 227/227 PASS ✅ |
 | E2E 영향 | 없음 (find-id page + register phone 필드 추가) |
 
 ---
