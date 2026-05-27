@@ -28,7 +28,9 @@ export async function findPersonalId(fullName: string) {
 
     const results = profiles.map((p: { email: string; phone_number?: string | null }) => {
       const [user, domain] = p.email.split('@');
-      const maskedUser = user.substring(0, 2) + '*'.repeat(Math.max(0, user.length - 2));
+      const maskedUser = user.length <= 3
+        ? user.substring(0, 1) + '*'.repeat(user.length - 1)
+        : user.substring(0, 2) + '*'.repeat(Math.max(0, user.length - 4)) + user.substring(user.length - 2);
       const maskedEmail = `${maskedUser}@${domain}`;
 
       let maskedPhone: string | null = null;
@@ -71,7 +73,9 @@ export async function findCorporateId(orgName: string, regNo: string) {
     }
 
     const [user, domain] = profile.email.split('@');
-    const maskedUser = user.substring(0, 2) + '*'.repeat(Math.max(0, user.length - 2));
+    const maskedUser = user.length <= 3
+      ? user.substring(0, 1) + '*'.repeat(user.length - 1)
+      : user.substring(0, 2) + '*'.repeat(Math.max(0, user.length - 4)) + user.substring(user.length - 2);
     const maskedEmail = `${maskedUser}@${domain}`;
 
     return { success: true, maskedEmail };
