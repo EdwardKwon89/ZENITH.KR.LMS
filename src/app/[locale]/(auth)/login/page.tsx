@@ -1,7 +1,7 @@
 'use client';
 
 import { Suspense, useState } from 'react';
-import { login } from './actions';
+import { login, signup } from './actions';
 import { ZenAurora, ZenCard, ZenButton, ZenInput } from '@/components/ui/ZenUI';
 import { useAuth } from '@/hooks/useAuth';
 import { ShieldCheck, Truck, ArrowRight } from 'lucide-react';

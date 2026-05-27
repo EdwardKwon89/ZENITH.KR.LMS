@@ -41,7 +41,7 @@ export async function findPersonalId(fullName: string) {
         }
       }
 
-      return { email: maskedEmail, phone: maskedPhone };
+      return { email: maskedEmail, phone: maskedPhone ?? undefined };
     });
 
     return { success: true, results };
