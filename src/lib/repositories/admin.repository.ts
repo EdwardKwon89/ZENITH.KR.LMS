@@ -63,9 +63,7 @@ export class AdminRepository extends BaseRepository {
     return this.db
       .from('zen_profiles')
       .select('email, phone_number')
-      .eq('full_name', fullName)
-      .limit(1)
-      .maybeSingle();
+      .eq('full_name', fullName);
   }
 
   async findCorporateAdminEmail(orgName: string, bizNo: string) {

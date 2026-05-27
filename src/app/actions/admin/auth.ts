@@ -15,30 +15,34 @@ export async function findPersonalId(fullName: string) {
 
   try {
     const adminRepo = new AdminRepository(supabase);
-    const { data, error } = await adminRepo.findProfilesByName(fullName);
+    const { data: profiles, error } = await adminRepo.findProfilesByName(fullName);
 
     if (error) {
       logger.error('[AUTH_ACTION] findPersonalId Error:', error);
       return { error: '데이터 조회 중 오류가 발생했습니다.' };
     }
 
-    if (!data) {
+    if (!profiles || profiles.length === 0) {
       return { error: '일치하는 회원 정보를 찾을 수 없습니다.' };
     }
 
-    const [user, domain] = data.email.split('@');
-    const maskedUser = user.substring(0, 2) + '*'.repeat(Math.max(0, user.length - 2));
-    const maskedEmail = `${maskedUser}@${domain}`;
+    const results = profiles.map((p: { email: string; phone_number?: string | null }) => {
+      const [user, domain] = p.email.split('@');
+      const maskedUser = user.substring(0, 2) + '*'.repeat(Math.max(0, user.length - 2));
+      const maskedEmail = `${maskedUser}@${domain}`;
 
-    let maskedPhone: string | null = null;
-    if (data.phone_number) {
-      const phone = data.phone_number.replace(/-/g, '');
-      if (phone.length >= 8) {
-        maskedPhone = phone.substring(0, 3) + '-****-' + phone.substring(phone.length - 4);
+      let maskedPhone: string | null = null;
+      if (p.phone_number) {
+        const phone = p.phone_number.replace(/-/g, '');
+        if (phone.length >= 8) {
+          maskedPhone = phone.substring(0, 3) + '-****-' + phone.substring(phone.length - 4);
+        }
       }
-    }
 
-    return { success: true, maskedEmail, maskedPhone };
+      return { email: maskedEmail, phone: maskedPhone };
+    });
+
+    return { success: true, results };
   } catch (err) {
     return { error: '서버 내부 오류가 발생했습니다.' };
   }

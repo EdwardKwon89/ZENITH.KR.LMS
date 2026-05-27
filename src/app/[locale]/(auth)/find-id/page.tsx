@@ -19,7 +19,7 @@ export default function FindIdPage() {
   const [tab, setTab] = useState<TabType>('personal');
   const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [result, setResult] = useState<{ email: string; phone?: string } | null>(null);
+  const [result, setResult] = useState<{ email: string; phone?: string }[] | null>(null);
 
   async function handlePersonalSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -34,8 +34,8 @@ export default function FindIdPage() {
       const res = await findPersonalId(fullName);
       if (res.error) {
         setError(res.error);
-      } else if (res.maskedEmail) {
-        setResult({ email: res.maskedEmail, phone: res.maskedPhone || undefined });
+      } else if (res.results && res.results.length > 0) {
+        setResult(res.results);
       }
     } catch {
       setError('오류가 발생했습니다. 다시 시도해 주세요.');
@@ -204,12 +204,29 @@ export default function FindIdPage() {
               <p className="text-stone-500 text-sm mb-2">
                 {tab === 'personal' ? '가입된 아이디(이메일)를 찾았습니다' : '법인 담당자 아이디를 찾았습니다'}
               </p>
-              <p className="text-2xl font-bold text-brand-700 tracking-tight font-mono">
-                {result.email}
-              </p>
-              {result.phone && (
-                <p className="text-stone-500 text-sm mt-3">
-                  등록된 전화번호: {result.phone}
+              {tab === 'personal' && result ? (
+                <div className="space-y-3">
+                  {result.map((r, i) => (
+                    <div key={i} className="bg-white rounded-xl p-4 border border-brand-100">
+                      <p className="text-lg font-bold text-brand-700 tracking-tight font-mono">
+                        {r.email}
+                      </p>
+                      {r.phone && (
+                        <p className="text-stone-500 text-xs mt-1">
+                          전화번호: {r.phone}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : result && result.length > 0 ? (
+                <p className="text-2xl font-bold text-brand-700 tracking-tight font-mono">
+                  {result[0].email}
+                </p>
+              ) : null}
+              {result && result.length > 1 && (
+                <p className="text-[10px] text-stone-400 mt-3">
+                  총 {result.length}건의 계정이 검색되었습니다.
                 </p>
               )}
             </div>
