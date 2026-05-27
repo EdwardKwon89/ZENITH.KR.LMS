@@ -208,7 +208,7 @@ export default function FindIdPage() {
                 <div className="space-y-3">
                   {result.map((r, i) => (
                     <div key={i} className="bg-white rounded-xl p-4 border border-brand-100">
-                      <p className="text-lg font-bold text-brand-700 tracking-tight font-mono">
+                      <p className="text-lg font-bold text-brand-700 tracking-tight font-mono break-all">
                         {r.email}
                       </p>
                       {r.phone && (
@@ -220,7 +220,7 @@ export default function FindIdPage() {
                   ))}
                 </div>
               ) : result && result.length > 0 ? (
-                <p className="text-2xl font-bold text-brand-700 tracking-tight font-mono">
+                <p className="text-2xl font-bold text-brand-700 tracking-tight font-mono break-all">
                   {result[0].email}
                 </p>
               ) : null}
