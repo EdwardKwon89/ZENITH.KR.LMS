@@ -1,7 +1,7 @@
 'use server';
 
 import { logger } from '@/lib/logger';
-import { createClient } from '@/utils/supabase/server';
+import { createClient, createAdminClient } from '@/utils/supabase/server';
 import { validateUserAction } from '@/lib/auth/guards';
 import { AdminRepository } from '@/lib/repositories';
 import { revalidatePath } from 'next/cache';
@@ -11,7 +11,7 @@ import { revalidatePath } from 'next/cache';
  * 마스킹된 E-Mail + 마스킹된 전화번호를 반환합니다.
  */
 export async function findPersonalId(fullName: string) {
-  const supabase = await createClient();
+  const supabase = await createAdminClient();
 
   try {
     const adminRepo = new AdminRepository(supabase);
@@ -49,7 +49,7 @@ export async function findPersonalId(fullName: string) {
  * 담당자 마스킹 E-Mail을 반환합니다.
  */
 export async function findCorporateId(orgName: string, regNo: string) {
-  const supabase = await createClient();
+  const supabase = await createAdminClient();
 
   try {
     const adminRepo = new AdminRepository(supabase);
