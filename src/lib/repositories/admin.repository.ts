@@ -67,7 +67,7 @@ export class AdminRepository extends BaseRepository {
       .maybeSingle();
   }
 
-  async findCorporateAdminEmail(orgName: string, regNo: string) {
+  async findCorporateAdminEmail(orgName: string, bizNo: string) {
     return this.db
       .from('zen_organizations')
       .select(`
@@ -75,7 +75,7 @@ export class AdminRepository extends BaseRepository {
         zen_profiles!inner(id, email)
       `)
       .eq('name', orgName)
-      .eq('registration_no', regNo)
+      .eq('biz_no', bizNo)
       .maybeSingle();
   }
 
