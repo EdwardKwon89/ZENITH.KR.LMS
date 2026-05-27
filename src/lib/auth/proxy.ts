@@ -97,7 +97,7 @@ export async function authGuard(
         httpOnly: true,
         secure: true,
         sameSite: 'lax',
-        maxAge: SESSION_IDLE_TIMEOUT_MIN * 60,
+        maxAge: 7 * 24 * 60 * 60, // 7 days — MUST exceed SESSION_IDLE_TIMEOUT_MIN, else browser auto-deletes cookie before timeout check fires
         path: '/',
       });
     }
