@@ -24,6 +24,7 @@ export default function RegisterPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [docFile, setDocFile] = useState<File | null>(null);
   
   // Org Create States
@@ -92,6 +93,7 @@ export default function RegisterPage() {
       formData.append('email', email);
       formData.append('password', password);
       formData.append('full_name', fullName);
+      formData.append('phone_number', phoneNumber);
       if (selectedOrgId) formData.append('org_id', selectedOrgId);
       
       // 법인 신규 생성 시의 추가 데이터
@@ -292,6 +294,7 @@ export default function RegisterPage() {
               <ZenInput placeholder="이름 (성함)" value={fullName} onChange={(e) => setFullName(e.target.value)} />
               <ZenInput type="email" placeholder="이메일 주소" value={email} onChange={(e) => setEmail(e.target.value)} />
               <ZenInput type="password" placeholder="비밀번호" value={password} onChange={(e) => setPassword(e.target.value)} />
+              <ZenInput placeholder="전화번호 (예: 010-1234-5678)" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} />
             </div>
             {/* IMP-088: 개인정보 활용동의 */}
             <div className="border-t border-stone-200 pt-4 mt-2 space-y-3">

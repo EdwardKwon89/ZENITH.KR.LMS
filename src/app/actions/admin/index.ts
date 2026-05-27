@@ -1,5 +1,6 @@
 export {
-  findUserId,
+  findPersonalId,
+  findCorporateId,
   sendPasswordReset,
   changePassword,
   getUserSession,
