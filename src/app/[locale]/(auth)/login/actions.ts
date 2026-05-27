@@ -118,6 +118,7 @@ export async function signup(formData: FormData, locale: string = 'ko') {
   const isNewOrg = formData.get('is_new_org') === 'true';
   const orgName = formData.get('org_name') as string | null;
   const businessNumber = formData.get('business_number') as string | null;
+  const phoneNumber = formData.get('phone_number') as string | null;
 
   logger.info('[SIGNUP_ACTION] Received signup request:', { email, fullName, isNewOrg, orgName });
   
@@ -138,6 +139,7 @@ export async function signup(formData: FormData, locale: string = 'ko') {
         org_name: orgName,
         business_number: businessNumber,
         org_type: orgType,
+        phone_number: phoneNumber,
         // Individual users are ACTIVE immediately; Corporate/New Org users are PENDING.
         status: (orgId === null && !isNewOrg) ? 'ACTIVE' : 'PENDING',
         // New Org creators are ADMIN; Joinees are MEMBER; Individuals are USER.
@@ -160,6 +162,7 @@ export async function signup(formData: FormData, locale: string = 'ko') {
       .update({
         privacy_consent_at: privacyConsentAt,
         terms_consent_at: termsConsentAt,
+        phone_number: phoneNumber,
       })
       .eq('id', data.user.id);
   }

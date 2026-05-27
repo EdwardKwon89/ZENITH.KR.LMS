@@ -7,27 +7,72 @@ import { AdminRepository } from '@/lib/repositories';
 import { revalidatePath } from 'next/cache';
 
 /**
- * [AUDIT-S1-B] 사용자 ID(이메일) 찾기
- * 이름과 이메일이 일치하는 사용자가 있는지 확인하고 마스킹된 정보를 반환합니다.
+ * 개인 회원 ID(이메일) 찾기 — 이름으로 조회
+ * 마스킹된 E-Mail + 마스킹된 전화번호를 반환합니다.
  */
-export async function findUserId(fullName: string, email: string) {
+export async function findPersonalId(fullName: string) {
   const supabase = await createClient();
 
   try {
     const adminRepo = new AdminRepository(supabase);
-    const { data, error } = await adminRepo.findProfileByNameAndEmail(fullName, email);
+    const { data, error } = await adminRepo.findProfilesByName(fullName);
 
     if (error) {
-      logger.error('[AUTH_ACTION] findUserId Error:', error);
+      logger.error('[AUTH_ACTION] findPersonalId Error:', error);
       return { error: '데이터 조회 중 오류가 발생했습니다.' };
     }
 
     if (!data) {
-      return { error: '일치하는 사용자 정보를 찾을 수 없습니다.' };
+      return { error: '일치하는 회원 정보를 찾을 수 없습니다.' };
     }
 
-    // 이메일 마스킹 처리 (예: ab***@example.com)
     const [user, domain] = data.email.split('@');
+    const maskedUser = user.substring(0, 2) + '*'.repeat(Math.max(0, user.length - 2));
+    const maskedEmail = `${maskedUser}@${domain}`;
+
+    let maskedPhone: string | null = null;
+    if (data.phone_number) {
+      const phone = data.phone_number.replace(/-/g, '');
+      if (phone.length >= 8) {
+        maskedPhone = phone.substring(0, 3) + '-****-' + phone.substring(phone.length - 4);
+      }
+    }
+
+    return { success: true, maskedEmail, maskedPhone };
+  } catch (err) {
+    return { error: '서버 내부 오류가 발생했습니다.' };
+  }
+}
+
+/**
+ * 법인 담당자 ID(이메일) 찾기 — 법인명 + 사업자번호로 조회
+ * 담당자 마스킹 E-Mail을 반환합니다.
+ */
+export async function findCorporateId(orgName: string, regNo: string) {
+  const supabase = await createClient();
+
+  try {
+    const adminRepo = new AdminRepository(supabase);
+    const { data, error } = await adminRepo.findCorporateAdminEmail(orgName, regNo);
+
+    if (error) {
+      logger.error('[AUTH_ACTION] findCorporateId Error:', error);
+      return { error: '데이터 조회 중 오류가 발생했습니다.' };
+    }
+
+    if (!data?.zen_profiles) {
+      return { error: '일치하는 법인 정보를 찾을 수 없습니다.' };
+    }
+
+    const email = Array.isArray(data.zen_profiles)
+      ? data.zen_profiles[0]?.email
+      : data.zen_profiles.email;
+
+    if (!email) {
+      return { error: '법인 담당자 정보를 찾을 수 없습니다.' };
+    }
+
+    const [user, domain] = email.split('@');
     const maskedUser = user.substring(0, 2) + '*'.repeat(Math.max(0, user.length - 2));
     const maskedEmail = `${maskedUser}@${domain}`;
 

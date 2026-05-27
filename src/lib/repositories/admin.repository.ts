@@ -59,6 +59,26 @@ export class AdminRepository extends BaseRepository {
       .maybeSingle();
   }
 
+  async findProfilesByName(fullName: string) {
+    return this.db
+      .from('zen_profiles')
+      .select('email, phone_number')
+      .eq('full_name', fullName)
+      .maybeSingle();
+  }
+
+  async findCorporateAdminEmail(orgName: string, regNo: string) {
+    return this.db
+      .from('zen_organizations')
+      .select(`
+        id,
+        zen_profiles!inner(id, email)
+      `)
+      .eq('name', orgName)
+      .eq('registration_no', regNo)
+      .maybeSingle();
+  }
+
   async findProfileGrade(userId: string) {
     return this.db
       .from('zen_profiles')
