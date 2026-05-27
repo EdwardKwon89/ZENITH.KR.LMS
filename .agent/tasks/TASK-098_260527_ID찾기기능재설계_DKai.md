@@ -172,11 +172,28 @@ export async function findCorporateId(orgName: string, bizRegNo: string) {
 
 | 항목 | 내용 |
 |:---|:---|
-| 변경 파일 | 10개 (코드 7 + 문서 3) |
-| 코드 커밋 | `15299bf` — `[D_Kai] feat: IMP-089 ID찾기 개인/법인 분리 재설계` |
+| 변경 파일 | 18개 (코드 14 + 문서 4) |
+| 코드 커밋 | `15299bf` — `[D_Kai] feat: IMP-089 ID찾기 개인/법인 분리 재설계` (+ 후속 8건: `2111a75`·`4b796e4`·`883cd25`·`9f0e3c2`·`c509802`·`e27ec7a`·`199712e`·`d1bc3de`) |
 | 문서 커밋 | `c345ffe` — `[D_Kai] docs: TASK-098 완료 보고 — task file 🔔` |
 | 회귀 테스트 | 227/227 PASS ✅ |
 | E2E 영향 | 없음 (find-id page + register phone 필드 추가) |
+
+---
+
+## [Post-승인 버그 수정 로그 (2026-05-27)]
+
+Aiden ✅ 승인 후 D_Kai 자체 추가 테스트 중 발견·수정된 8건.
+
+| # | 유형 | 커밋 | 내용 |
+|:-:|:----|:----:|:-----|
+| 1 | RLS 차단 | `2111a75` | `createClient()`→`createAdminClient()` 전환 — service_role로 익명 조회 가능 |
+| 2 | 컬럼 오류 | `4b796e4` | `registration_no`→`biz_no` 컬럼 정정 (`registration_no` 미사용, `handle_new_user`가 `biz_no`에 저장) |
+| 3 | FK 조인 실패 | `883cd25` | `zen_profiles!inner` 조인 → 2단계 쿼리(org→profile)로 FK 의존 제거 |
+| 4 | 동명이인 PGRST116 | `9f0e3c2` | `maybeSingle()`→`select().limit(1)` → `results[]` 배열 반환 |
+| 5 | 동명이인 UI | `c509802` | 복수 결과 리스트 렌더링 + 총 N건 표시 |
+| 6 | 법인 결과 타입 | `e27ec7a` | `setResult({})`→`setResult([{}])` 배열 저장 |
+| 7 | 마스킹 표시 개선 | `199712e` | 앞2자+뒤2자 노출 (유사ID 식별 가능), 중간만 `*` 마스킹 |
+| 8 | 긴 ID overflow | `d1bc3de` | `break-all` 추가 — 카드 영역 내 자동 줄바꿈 |
 
 ---
 
@@ -189,3 +206,4 @@ export async function findCorporateId(orgName: string, bizRegNo: string) {
 | 2026-05-27 | Aiden (Claude) | ❌ 반려 — R-17 위반 4건 (코드 커밋 미수행·task file 헤더 ⬜·IMP_PROGRESS 누락·DoD #9·10 미체크) · 최소 재작업 지시 |
 | 2026-05-27 | D_Kai (OpenCode) | 재작업 완료 — 코드 커밋 15299bf·문서 커밋 c345ffe+40822de·IMP_PROGRESS IMP-089 추가·DoD 전량 ✅ |
 | 2026-05-27 | Aiden (Claude) | ✅ PASS — DoD 전항목·커밋 해시·IMP_PROGRESS 확인 완료. IMP-089 완료. Advisory: 문서 커밋 2건(비차단)·findProfilesByName maybeSingle 동명이인 PGRST116(UAT 후 IMP 등록 권고) |
+| 2026-05-27 | D_Kai (OpenCode) | Post-승인 버그 수정 8건 완료 — `2111a75`·`4b796e4`·`883cd25`·`9f0e3c2`·`c509802`·`e27ec7a`·`199712e`·`d1bc3de` — TASK·UAT_DEFECT·IMP_PROGRESS·ACTIVE 기록 갱신 |
