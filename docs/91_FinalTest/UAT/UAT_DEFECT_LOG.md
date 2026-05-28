@@ -39,8 +39,8 @@
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|
 | 시나리오 오류 | 1 | 0 | 0 | 0 | 5 | **6** |
 | 기능 보완/개선 | 2 | 0 | 1 | 0 | 1 | **4** |
-| 기능 오류 | 2 | 0 | 5 | 2 | 0 | **9** |
-| **합계** | **5** | **0** | **6** | **2** | **6** | **19** |
+| 기능 오류 | 2 | 0 | 6 | 2 | 0 | **10** |
+| **합계** | **5** | **0** | **7** | **2** | **6** | **20** |
 
 ---
 
@@ -66,7 +66,8 @@
 | DEF-016 | UAT-01-08 | 기능 오류 | Y | 검증완료 | D_Kai | STEP4 | `zen_last_activity` 쿠키 maxAge = `SESSION_IDLE_TIMEOUT_MIN * 60` → 2분 후 브라우저가 쿠키 자동 삭제 → `lastActivity` undefined → timeout 체크 skip → 영원히 timeout 미발생 | `f1f20cc` | **원인** (`proxy.ts:100`): `maxAge: SESSION_IDLE_TIMEOUT_MIN * 60` — 쿠키 만료시점 = timeout 기준시점. 브라우저가 쿠키를 먼저 삭제하여 timeout 체크가 실행되지 않음<br>**수정**: `maxAge: 7 * 24 * 60 * 60` (7일) — timeout 체크는 쿠키 VALUE(timestamp)로 판별, maxAge는 단순히 쿠키 보관 기간<br>**검증**: 회귀 227/227 PASS · Edward 재검증 ✅ (session timeout 정상동작 확인) | - | - |
 | DEF-017 | UAT-01-09 | 기능 오류 | Y | 수정완료 | D_Kai | STEP2·3 | 회원 관리 페이지에서 `test_uat01@zenith.kr` 상태를 "미사용"(SUSPENDED)으로 변경해도 화면에 "사용"(ACTIVE)으로 남음 — middleware가 DB가 아닌 JWT `app_metadata.status`를 읽어서 고정 | `37e8bca` | **원인** (`member.ts:302` `changeMemberStatus`): `zen_profiles.status`만 업데이트하고 Supabase Auth `app_metadata`는 갱신하지 않음 → `proxy.ts:116`가 JWT의 old `app_metadata.status`(=ACTIVE)를 계속 사용<br>**수정**: `changeMemberStatus`에 adminClient로 `app_metadata.status` 동기화 추가 (`supabase.auth.admin.updateUserById`)<br>**검증**: 회귀 227/227 PASS | - | Edward 브라우저 재검증 필요 |
 | DEF-018 | UAT-01-09 | 기능 오류 | Y | 미수정 | D_Kai | - | `test_uat01@zenith.kr`을 법인/운송사(CARRIER)로 등록했으나 등급(role)이 ADMIN으로 설정 — `login/actions.ts` 회원가입 시 `isNewOrg ? ADMIN` 로직이 org_type 무시 | 데이터만 조치 | **원인** (`login/actions.ts:146`): `role: isNewOrg ? USER_ROLES.ADMIN : ...` — 신규 조직 생성자 role이 org_type과 무관하게 항상 ADMIN으로 고정<br>**조치**: `test_uat01@zenith.kr`의 role만 CARRIER로 직접 변경 (app_metadata + zen_profiles)<br>**⚠️ 코드 미수정**: 근본 원인인 회원가입 로직은 그대로. IMP 별도 등록 필요 | - | - |
-| DEF-019 | UAT-01-09 | 기능 오류 | Y | 수정완료 | Aiden | STEP2 | 회원 관리 페이지에서 상태 변경(정지/해제) 클릭 시 DB가 업데이트되지 않아 상태가 그대로 유지됨 | 별도 커밋 | **원인** (`supabase/migrations`): `20260507110000_fix_rls_recursion.sql`이 무한재귀 수정을 위해 `zen_profiles` UPDATE 정책을 삭제했으나 재생성하지 않음 → RLS 활성화 상태에서 UPDATE 정책 부재 → 모든 `changeMemberStatus`·`changeMemberGrade`·`updateMyProfile`·`withdrawUser` UPDATE가 0 rows 무성 실패<br>**수정**: `20260528100000_fix_zen_profiles_missing_update_rls.sql` 마이그레이션 — auth.jwt() 기반 UPDATE 정책 2건 추가 (관리자 전체·사용자 본인)<br>**검증**: 로컬 DB 적용 확인, 회귀 227/227 PASS | - | Edward 브라우저 재검증 필요 |
+| DEF-019 | UAT-01-09 | 기능 오류 | Y | 수정완료 | Aiden | STEP2 | 회원 관리 페이지에서 상태 변경(정지/해제) 클릭 시 DB가 업데이트되지 않아 상태가 그대로 유지됨 | `6699a90` | **원인** (`supabase/migrations`): `20260507110000_fix_rls_recursion.sql`이 무한재귀 수정을 위해 `zen_profiles` UPDATE 정책을 삭제했으나 재생성하지 않음 → RLS 활성화 상태에서 UPDATE 정책 부재 → 모든 `changeMemberStatus`·`changeMemberGrade`·`updateMyProfile`·`withdrawUser` UPDATE가 0 rows 무성 실패<br>**수정**: `20260528100000_fix_zen_profiles_missing_update_rls.sql` 마이그레이션 — auth.jwt() 기반 UPDATE 정책 2건 추가 (관리자 전체·사용자 본인)<br>**검증**: 로컬 DB 적용 확인, 회귀 227/227 PASS | - | Edward 브라우저 재검증 필요 |
+| DEF-020 | UAT-01-09 | 기능 오류 | Y | 수정완료 | Aiden | STEP3 | SUSPENDED 회원이 로그인 시도 시 `/suspended` ↔ `/terminal` 무한 redirect → ERR_TOO_MANY_REDIRECTS | 별도 커밋 | **원인** (`proxy.ts:176`): SUSPENDED 유저가 whitelist 경로(`/suspended`)에 있을 때 아래 route access check에서 `/suspended`가 `isAllowedPath`에 미포함 → CARRIER `allowedRoot`(`/terminal`)로 redirect → 다시 SUSPENDED check → `/suspended` → 루프<br>**수정**: `proxy.ts` SUSPENDED whitelist 통과 후 `return null` 조기 반환 추가 — route access check 완전 skip<br>**검증**: 회귀 227/227 PASS | - | Edward 브라우저 재검증 필요 |
 ---
 
 ## 처리 지침
@@ -99,3 +100,4 @@
 | 2026-05-27 | Aiden (Claude) | 현황 요약 갱신 — DEF-017·018 추가 반영 (총 17→18건) |
 | 2026-05-27 | Aiden (Claude) | DEF-017 상태 `미수정`→`수정완료` — 코드 수정 (`37e8bca`) 정상 확인 (Chrome crash는 E2E 환경 이슈, 코드 결함 아님) · 현황 요약 갱신 |
 | 2026-05-28 | Aiden (Claude) | DEF-019 추가 — `zen_profiles` UPDATE RLS 정책 누락 (20260507 마이그레이션 회귀) · 마이그레이션 `20260528100000` 적용 · 현황 요약 갱신 (총 18→19건) |
+| 2026-05-28 | Aiden (Claude) | DEF-020 추가 — SUSPENDED 유저 `/suspended`↔`/terminal` 무한 redirect 수정 · `proxy.ts` SUSPENDED 조기 반환 추가 · 현황 요약 갱신 (총 19→20건) |
