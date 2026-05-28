@@ -171,6 +171,9 @@ export async function authGuard(
         url.pathname = `/${locale}/suspended`;
         return { response: mergeHeaders(NextResponse.redirect(url), supabaseResponse), redirectUrl: url.pathname };
       }
+      // SUSPENDED 유저가 whitelist 경로에 있을 때 route access check를 건너뜀
+      // (아래 orgType 분기가 /suspended를 포함하지 않아 allowedRoot로 재redirect → 무한루프 방지)
+      return null;
     }
 
     if (orgType !== 'PLATFORM') {
