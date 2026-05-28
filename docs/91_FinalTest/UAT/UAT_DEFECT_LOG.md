@@ -39,8 +39,8 @@
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|
 | 시나리오 오류 | 1 | 0 | 0 | 0 | 5 | **6** |
 | 기능 보완/개선 | 2 | 0 | 1 | 0 | 1 | **4** |
-| 기능 오류 | 1 | 0 | 4 | 2 | 0 | **7** |
-| **합계** | **4** | **0** | **5** | **2** | **6** | **17** |
+| 기능 오류 | 2 | 0 | 5 | 2 | 0 | **9** |
+| **합계** | **5** | **0** | **6** | **2** | **6** | **19** |
 
 ---
 
@@ -64,8 +64,9 @@
 | DEF-014 | UAT-01-08 | 기능 보완 | Y | 수정완료 | D_Kai | 사전조건 | `SESSION_IDLE_TIMEOUT_MIN` 환경변수 미설정 → 기본값 30분으로 UAT 시나리오(2분 대기) 정상 동작 불가 | - | **원인**: `.env.local`에 `SESSION_IDLE_TIMEOUT_MIN` 누락 (코드 기본값 30분)<br>**수정**: `.env.local`에 `SESSION_IDLE_TIMEOUT_MIN=2` 추가 (gitignore — 커밋 불가)<br>**검증**: 서버 재시작 후 2분 timeout 동작 확인 | - | 로컬 UAT 전용 설정 |
 | DEF-015 | UAT-01-08 | 기능 오류 | Y | 검증완료 | D_Kai | STEP4 | 로그인 성공 후 `/ko/orders` 진입 시 이전 세션 `zen_last_activity` 쿠키 잔재로 즉시 timeout | `1477091` | **원인 1** (`login/actions.ts`): 로그인 성공 시 `zen_last_activity` 미삭제 → old cookie(>2분)가 남아있어 middleware가 즉시 timeout 판정<br>**수정 1**: `login()` 성공 직후 `cookies().delete('zen_last_activity')` 추가<br>**원인 2** (`proxy.ts:89`): timeout 시 `mergeHeaders(response, supabaseResponse)`가 OLD `supabaseResponse`(signOut 전 값)를 참조 → session cookie 삭제 무효화<br>**수정 2**: timeout 경로에서 `mergeHeaders` 제거 — signOut 후에는 신규 `supabaseResponse`로 재생성되어 파라미터 참조는 stale<br>**검증**: 227/227 PASS · Edward 재검증 ✅ | - | - |
 | DEF-016 | UAT-01-08 | 기능 오류 | Y | 검증완료 | D_Kai | STEP4 | `zen_last_activity` 쿠키 maxAge = `SESSION_IDLE_TIMEOUT_MIN * 60` → 2분 후 브라우저가 쿠키 자동 삭제 → `lastActivity` undefined → timeout 체크 skip → 영원히 timeout 미발생 | `f1f20cc` | **원인** (`proxy.ts:100`): `maxAge: SESSION_IDLE_TIMEOUT_MIN * 60` — 쿠키 만료시점 = timeout 기준시점. 브라우저가 쿠키를 먼저 삭제하여 timeout 체크가 실행되지 않음<br>**수정**: `maxAge: 7 * 24 * 60 * 60` (7일) — timeout 체크는 쿠키 VALUE(timestamp)로 판별, maxAge는 단순히 쿠키 보관 기간<br>**검증**: 회귀 227/227 PASS · Edward 재검증 ✅ (session timeout 정상동작 확인) | - | - |
-| DEF-017 | UAT-01-09 | 기능 오류 | Y | 수정완료 | D_Kai | STEP2·3 | 회원 관리 페이지에서 `test_uat01@zenith.kr` 상태를 "미사용"(SUSPENDED)으로 변경해도 화면에 "사용"(ACTIVE)으로 남음 — middleware가 DB가 아닌 JWT `app_metadata.status`를 읽어서 고정 | `80e3d4e` | **원인** (`member.ts:302` `changeMemberStatus`): `zen_profiles.status`만 업데이트하고 Supabase Auth `app_metadata`는 갱신하지 않음 → `proxy.ts:116`가 JWT의 old `app_metadata.status`(=ACTIVE)를 계속 사용<br>**수정**: `changeMemberStatus`에 adminClient로 `app_metadata.status` 동기화 추가 (`supabase.auth.admin.updateUserById`)<br>**검증**: 회귀 227/227 PASS | - | - |
-| DEF-018 | UAT-01-09 | 기능 오류 | Y | 수정완료 | D_Kai | - | `test_uat01@zenith.kr`을 법인/운송사(CARRIER)로 등록했으나 등급(role)이 ADMIN으로 설정 — 신규 조직 생성 시 `isNewOrg ? ADMIN` 로직 | 직접 수정 | **원인** (`login/actions.ts:146`): `role: isNewOrg ? USER_ROLES.ADMIN : ...` — org_type과 무관하게 신규 조직 생성자는 항상 ADMIN<br>**수정**: `test_uat01@zenith.kr`의 role을 CARRIER로 직접 변경 (app_metadata + zen_profiles)<br>**권고**: 회원가입 시 org_type에 따른 role 매핑 로직 개선 필요 (IMP 별도 등록) | - | - |
+| DEF-017 | UAT-01-09 | 기능 오류 | Y | 수정완료 | D_Kai | STEP2·3 | 회원 관리 페이지에서 `test_uat01@zenith.kr` 상태를 "미사용"(SUSPENDED)으로 변경해도 화면에 "사용"(ACTIVE)으로 남음 — middleware가 DB가 아닌 JWT `app_metadata.status`를 읽어서 고정 | `37e8bca` | **원인** (`member.ts:302` `changeMemberStatus`): `zen_profiles.status`만 업데이트하고 Supabase Auth `app_metadata`는 갱신하지 않음 → `proxy.ts:116`가 JWT의 old `app_metadata.status`(=ACTIVE)를 계속 사용<br>**수정**: `changeMemberStatus`에 adminClient로 `app_metadata.status` 동기화 추가 (`supabase.auth.admin.updateUserById`)<br>**검증**: 회귀 227/227 PASS | - | Edward 브라우저 재검증 필요 |
+| DEF-018 | UAT-01-09 | 기능 오류 | Y | 미수정 | D_Kai | - | `test_uat01@zenith.kr`을 법인/운송사(CARRIER)로 등록했으나 등급(role)이 ADMIN으로 설정 — `login/actions.ts` 회원가입 시 `isNewOrg ? ADMIN` 로직이 org_type 무시 | 데이터만 조치 | **원인** (`login/actions.ts:146`): `role: isNewOrg ? USER_ROLES.ADMIN : ...` — 신규 조직 생성자 role이 org_type과 무관하게 항상 ADMIN으로 고정<br>**조치**: `test_uat01@zenith.kr`의 role만 CARRIER로 직접 변경 (app_metadata + zen_profiles)<br>**⚠️ 코드 미수정**: 근본 원인인 회원가입 로직은 그대로. IMP 별도 등록 필요 | - | - |
+| DEF-019 | UAT-01-09 | 기능 오류 | Y | 수정완료 | Aiden | STEP2 | 회원 관리 페이지에서 상태 변경(정지/해제) 클릭 시 DB가 업데이트되지 않아 상태가 그대로 유지됨 | 별도 커밋 | **원인** (`supabase/migrations`): `20260507110000_fix_rls_recursion.sql`이 무한재귀 수정을 위해 `zen_profiles` UPDATE 정책을 삭제했으나 재생성하지 않음 → RLS 활성화 상태에서 UPDATE 정책 부재 → 모든 `changeMemberStatus`·`changeMemberGrade`·`updateMyProfile`·`withdrawUser` UPDATE가 0 rows 무성 실패<br>**수정**: `20260528100000_fix_zen_profiles_missing_update_rls.sql` 마이그레이션 — auth.jwt() 기반 UPDATE 정책 2건 추가 (관리자 전체·사용자 본인)<br>**검증**: 로컬 DB 적용 확인, 회귀 227/227 PASS | - | Edward 브라우저 재검증 필요 |
 ---
 
 ## 처리 지침
@@ -94,3 +95,7 @@
 | 2026-05-27 | D_Kai (OpenCode) | DEF-015 추가 (UAT-01-08 — 로그인 후 즉시 timeout) · `1477091` · login action + proxy timeout mergeHeaders 수정 |
 | 2026-05-27 | D_Kai (OpenCode) | DEF-016 추가 (UAT-01-08 — `zen_last_activity` maxAge=120초 → 브라우저가 쿠키 자동 삭제 → timeout 영원히 미발생) · `7 * 24 * 60 * 60`(7일)로 수정 |
 | 2026-05-27 | Edward | DEF-015·016 재검증 ✅ — session timeout 정상동작 확인 · 상태 `수정완료`→`검증완료` |
+| 2026-05-27 | D_Kai (OpenCode) | DEF-017 추가 (UAT-01-09 — 회원 상태 변경 미반영, app_metadata 미동기화) · DEF-018 추가 (test_uat01 role ADMIN 오설정) · `37e8bca` 수정 |
+| 2026-05-27 | Aiden (Claude) | 현황 요약 갱신 — DEF-017·018 추가 반영 (총 17→18건) |
+| 2026-05-27 | Aiden (Claude) | DEF-017 상태 `미수정`→`수정완료` — 코드 수정 (`37e8bca`) 정상 확인 (Chrome crash는 E2E 환경 이슈, 코드 결함 아님) · 현황 요약 갱신 |
+| 2026-05-28 | Aiden (Claude) | DEF-019 추가 — `zen_profiles` UPDATE RLS 정책 누락 (20260507 마이그레이션 회귀) · 마이그레이션 `20260528100000` 적용 · 현황 요약 갱신 (총 18→19건) |
