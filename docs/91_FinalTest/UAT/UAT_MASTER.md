@@ -80,7 +80,7 @@ Supabase: Cloud 프로젝트 연결
 | UAT-02-01 | 오더 신규 생성 | SHIPPER | [UAT_02](UAT_02_오더관리.md) | B_Kai | ✅ | 필수 |
 | UAT-02-02 | 오더 목록 조회·검색·필터 | ADMIN | [UAT_02](UAT_02_오더관리.md) | B_Kai | ✅ | 일반 |
 | UAT-02-03 | 오더 상세 조회 | ADMIN/SHIPPER | [UAT_02](UAT_02_오더관리.md) | B_Kai | ✅ | 일반 |
-| UAT-02-04 | 오더 상태 전이 — 전체 플로우 | ADMIN | [UAT_02](UAT_02_오더관리.md) | B_Kai | ✅ | 필수 |
+| UAT-02-04 | 오더 상태 전이 — 전체 플로우 (REGISTERED→DELIVERED) | ADMIN | [UAT_02](UAT_02_오더관리.md) | B_Kai | ✅ | 필수 |
 | UAT-02-05 | HELD 상태 전환 + 원상복구 | ADMIN | [UAT_02](UAT_02_오더관리.md) | B_Kai | ✅ | 일반 |
 | UAT-02-06 | RETURNED → WAREHOUSED / DISPOSED | ADMIN | [UAT_02](UAT_02_오더관리.md) | B_Kai | ✅ | 일반 |
 | UAT-02-07 | 오더 취소 (CANCELED) | ADMIN | [UAT_02](UAT_02_오더관리.md) | B_Kai | ✅ | 일반 |

@@ -121,29 +121,48 @@
 
 ---
 
-## [UAT-02-04] 오더 상태 전이 전체 플로우 (PENDING→WAREHOUSED)
+## [UAT-02-04] 오더 상태 전이 전체 플로우 (REGISTERED→DELIVERED)
 
 | 항목 | 내용 |
 |:----|:----|
 | 역할 | ADMIN |
 | 화면 URL | /ko/login → /ko/orders |
-| 예상 소요 시간 | 10분 |
-| 사전 조건 | ADMIN 계정(`admin@zenith.kr`) 로그인 상태, PENDING 상태 오더 1건 존재 |
+| 예상 소요 시간 | 20분 |
+| 사전 조건 | ADMIN 계정(`admin@zenith.kr`) 로그인 상태, **REGISTERED** 상태 오더 1건 존재 |
 
 ### 테스트 절차
 
 | 순서 | 화면·URL | 수행 액션 | 입력 데이터 | 기대 결과 | 확인 |
 |:---:|:---------|:---------|:-----------|:---------|:----:|
-| 1 | /ko/orders | 오더 목록에서 PENDING 상태 오더 검색 | 상태 필터 → 'PENDING' | PENDING 오더만 표시 | ☐ |
-| 2 | /ko/orders | PENDING 오더의 상태 배지 클릭 | — | StatusChangeModal 오픈, 전이 가능 상태 목록 표시 | ☐ |
-| 3 | /ko/orders | PENDING→WAREHOUSED 전이 | 'WAREHOUSED' 선택 → '변경' 버튼 클릭 | 토스트 "상태가 변경되었습니다" 표시 | ☐ |
-| 4 | /ko/orders | 상태 배지 확인 | — | 오더 배지가 'WAREHOUSED'(파란색)로 변경 | ☐ |
+| 1 | /ko/orders | 오더 목록에서 REGISTERED 상태 오더 검색 | 상태 필터 → 'REGISTERED' | REGISTERED 오더만 표시 | ☐ |
+| 2 | /ko/orders | REGISTERED 오더의 상태 배지 클릭 | — | StatusChangeModal 오픈, 전이 가능 상태 목록에 SCHEDULED 표시 | ☐ |
+| 3 | /ko/orders | REGISTERED→SCHEDULED 전이 | 'SCHEDULED' 선택 → '변경' 버튼 클릭 | 토스트 "상태가 변경되었습니다" 표시 | ☐ |
+| 4 | /ko/orders | 상태 배지 색상 확인 (SCHEDULED) | — | 오더 배지가 남색(`bg-indigo-100 text-indigo-800`)으로 변경 | ☐ |
+| 5 | /ko/orders | SCHEDULED 오더의 상태 배지 클릭 | — | StatusChangeModal 오픈, 전이 가능 상태 목록에 WAREHOUSED 표시 | ☐ |
+| 6 | /ko/orders | SCHEDULED→WAREHOUSED 전이 | 'WAREHOUSED' 선택 → '변경' 버튼 클릭 | 토스트 "상태가 변경되었습니다" 표시 | ☐ |
+| 7 | /ko/orders | 상태 배지 색상 확인 (WAREHOUSED) | — | 오더 배지가 노랑(`bg-yellow-100 text-yellow-800`)으로 변경 | ☐ |
+| 8 | /ko/orders | WAREHOUSED 오더의 상태 배지 클릭 | — | StatusChangeModal 오픈, 전이 가능 상태 목록에 PACKED 표시 | ☐ |
+| 9 | /ko/orders | WAREHOUSED→PACKED 전이 (UAT-04-07과 교차) | 'PACKED' 선택 → '변경' 버튼 클릭 | 토스트 "상태가 변경되었습니다" 표시 | ☐ |
+| 10 | /ko/orders | 상태 배지 색상 확인 (PACKED) | — | 오더 배지가 주황(`bg-orange-100 text-orange-800`)으로 변경 | ☐ |
+| 11 | /ko/orders | PACKED 오더의 상태 배지 클릭 | — | StatusChangeModal 오픈, 전이 가능 상태 목록에 RELEASED 표시 | ☐ |
+| 12 | /ko/orders | PACKED→RELEASED 전이 | 'RELEASED' 선택 → '변경' 버튼 클릭 | 토스트 "상태가 변경되었습니다" 표시 | ☐ |
+| 13 | /ko/orders | 상태 배지 색상 확인 (RELEASED) | — | 오더 배지가 보라(`bg-purple-100 text-purple-800`)으로 변경 | ☐ |
+| 14 | /ko/orders | RELEASED 오더의 상태 배지 클릭 | — | StatusChangeModal 오픈, 전이 가능 상태 목록에 IN_TRANSIT 표시 | ☐ |
+| 15 | /ko/orders | RELEASED→IN_TRANSIT 전이 | 'IN_TRANSIT' 선택 → '변경' 버튼 클릭 | 토스트 "상태가 변경되었습니다" 표시 | ☐ |
+| 16 | /ko/orders | 상태 배지 색상 확인 (IN_TRANSIT) | — | 오더 배지가 청록(`bg-cyan-100 text-cyan-800`)으로 변경 | ☐ |
+| 17 | /ko/orders | IN_TRANSIT 오더의 상태 배지 클릭 | — | StatusChangeModal 오픈, 전이 가능 상태 목록에 DELIVERED 표시 | ☐ |
+| 18 | /ko/orders | IN_TRANSIT→DELIVERED 전이 | 'DELIVERED' 선택 → '변경' 버튼 클릭 | 토스트 "상태가 변경되었습니다" 표시 | ☐ |
+| 19 | /ko/orders | 상태 배지 색상 확인 (DELIVERED) | — | 오더 배지가 초록(`bg-green-100 text-green-800`)으로 변경 | ☐ |
+| 20 | /ko/orders → /ko/orders/[id] | 오더 상세 → 히스토리 탭 | 오더 클릭 → '히스토리' 탭 선택 | **7개 전이 이력 전체** 기록 확인 (변경 전·변경 후·일시·수행자) | ☐ |
 
 ### 합격 기준
 - [ ] 전 단계 ☑ 완료
 - [ ] 오류 메시지 없음
-- [ ] PENDING→WAREHOUSED 상태 전이 성공
-- [ ] 상태 변경 후 오더 히스토리에 이력 기록 (변경 전:PENDING, 변경 후:WAREHOUSED)
+- [ ] REGISTERED→SCHEDULED→WAREHOUSED→PACKED→RELEASED→IN_TRANSIT→DELIVERED 6개 전이 각각 성공
+- [ ] 각 전이 후 상태 배지 색상이 ORDER_STATUS_META 정의와 일치
+- [ ] 오더 히스토리에 **6개 전이 이력** 전체 기록 (변경 전·후·일시·수행자)
+- [ ] WAREHOUSED→PACKED 전이 확인 (UAT-04-07에서 패킹 화면 전용 검증)
+- [ ] DELIVERED 이후 정산은 UAT-05에서 검증
 
 ### 결함 기재란
 
