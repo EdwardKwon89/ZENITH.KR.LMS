@@ -252,10 +252,11 @@
 | I | 5 | 5 | 100% ✅ | IMP-073~077 전량 완료 (TASK-069~073 ✅) |
 | J | 4 | 4 | 100% ✅ | IMP-080 ✅ · IMP-081 ✅ · IMP-082 ✅ · IMP-083 ✅ |
 | K | 1 | 7 | 14.3% | IMP-084·085·086·088·089·046 🔔 |
-| **합계** | **68** | **75** | **90.7%** | Phase K 7건 기준 — IMP-084·085·086·088·089·046 🔔 |
+| UAT | 0 | 2 | 0% | IMP-090 ⬜ (TASK-100 연계 해소 예정) · IMP-091 ⬜ (Carrier Portal — Phase M) |
+| **합계** | **68** | **77** | **88.3%** | Phase K 7건 + UAT 2건 기준 |
 
-> 미완료 IMP: IMP-086·087 🚫 블로커 · IMP-028·069(Future — 통관 연계)
-> 2026-05-27 기준 업데이트 (D_Kai — TASK-098 재작업, IMP-089 🔔)
+> 미완료 IMP: IMP-086·087 🚫 블로커 · IMP-028·069(Future — 통관 연계) · IMP-090·091 ⬜ (UAT 발견)
+> 2026-05-29 기준 업데이트 (Aiden — IMP-091 신규 등재, DEF-030 TASK-100 발령, IMP-090 TASK-100 연계)
 
 ---
 
@@ -267,6 +268,7 @@
 | 2026-05-24 | Riley (Gemini) | IMP-082 🔔 재작업 완료 — estimateFreightCost 복원, 순환참조 해결 (3d9e915) |
 | 2026-05-25 | Aiden (Claude) | Phase K 착수 — IMP-084~088 신규 등록, IMP-046 재활성화. TASK-088~096 발령. IMP-046 Phase C에서 ⬜(Phase K)로 전환 |
 | 2026-05-24 | Riley (Gemini) | IMP-082 🔔 완료 보고 — Composite Pricing Engine 구현 (b859677) |
+| 2026-05-29 | Aiden (Claude) | IMP-090 신규 등재 — DEF-022 ⑤ cargo_details DEFAULT '{}'::jsonb 임시 조치 (e63832e). create_order_atomic RPC 정상화 후 제거 필요. UAT 발견 |
 | 2026-05-23 | D_Kai (OpenCode) | IMP-080 🔔 완료 — 지능형 라우팅 DB 스키마 4 테이블 · mig + RLS + seed · 219/219 (TASK-074) |
 | 2026-05-23 | B_Kai (OpenCode) | IMP-074 🔔 재작업 완료 — zh/ja i18n + RBAC · 90ca21d · 219/219 (TASK-070 반려 대응) |
 | 2026-05-23 | B_Kai (OpenCode) | IMP-075 🔔 완료 보고 — Packing List SCR-031 · ed7dc67 · 219/219 (TASK-071) |
@@ -305,3 +307,5 @@
 | 2026-05-25 | Riley (Gemini) | IMP-086 🔔 완료 — 303 Stage 1+2 Route Decomposer + TISA 요율 매핑 완료 (a1c76cb) |
 | 2026-05-25 | D_Kai (OpenCode) | IMP-088 🔔 완료 — migration·Wizard 체크박스·server action·i18n 4개국어 · 5a21467 · 220/220. Phase K 1/6 16.7%. 전체 66/74 89.2% |
 | 2026-05-25 | Riley (Gemini) | IMP-046 🔔 완료 — 하이브리드 Rate Limiting 도입 (DB+InMemory) · 226/226 (TASK-090) |
+| 2026-05-29 | Aiden (Claude) | IMP-091 신규 등재 — Carrier Portal (운송사 배차 수락/거부·상태 직접 업데이트). Phase M 대상. Low P. UAT 합계 1→2건 갱신 |
+| 2026-05-29 | Aiden (Claude) | IMP-090 TASK-100 연계 확정 — getRouteOptions zen_order_packages 기반 전환 후 cargo_details DEFAULT 제거 마이그레이션 포함 처리 예정 |

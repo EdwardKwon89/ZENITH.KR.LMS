@@ -1029,3 +1029,40 @@
 - **관련 파일**: `src/app/[locale]/(dashboard)/admin/members/page.tsx` (신규), `src/app/actions/member.ts`
 - **예상 공수**: 1.5일
 - **우선순위**: Medium (P2)
+
+---
+
+## [IMP-090] create_order_atomic RPC cargo_details 미처리 — 임시 DEFAULT 제거 필요
+
+- **발견 경위**: UAT-02-01 DEF-022 수정 과정에서 발견 (2026-05-29, Aiden 검토)
+- **현재 상태**: DEF-022 ⑤ 수정으로 `zen_orders.cargo_details` 컬럼에 `DEFAULT '{}'::jsonb` 설정(마이그레이션 `20260529122000`). `create_order_atomic` RPC가 `cargo_details`를 INSERT에 포함하지 않아 NOT NULL 위반을 회피하는 임시 조치임.
+- **임시 조치**: `cargo_details DEFAULT '{}'::jsonb` (커밋 `e63832e`)
+- **목표 구현**: `create_order_atomic` RPC를 수정하여 폼에서 입력된 화물 명세(품목·수량·CBM 등)를 `cargo_details` 컬럼에 올바르게 INSERT하도록 처리. 임시 DEFAULT 제거.
+  - 대상 함수: `create_order_atomic` (마이그레이션 `20260523120500`)
+  - `cargo_details` 파라미터 추가 + INSERT 반영
+  - `OrderRegistrationForm.tsx` 폼 데이터 → RPC 파라미터 매핑 확인
+- **⚠️ TASK-100 연계**: TASK-100에서 `getRouteOptions`를 `zen_order_packages` 기반으로 전환하면 `cargo_details` DEFAULT 의존성이 해소됨. TASK-100 완료 후 DEFAULT 제거 마이그레이션 포함하여 IMP-090 완료 처리.
+- **관련 파일**: 
+  - `supabase/migrations/20260523120500_*.sql` (create_order_atomic RPC)
+  - `supabase/migrations/20260529122000_fix_cargo_details_not_null.sql` (임시 DEFAULT — 제거 대상)
+  - `src/components/orders/OrderRegistrationForm.tsx`
+- **예상 공수**: 0.5일
+- **우선순위**: Medium (P2)
+
+---
+
+## [IMP-091] 운송사 Carrier Portal — 배차 수락/거부 및 상태 직접 업데이트
+
+- **발견 경위**: DEF-030 분석 및 플랫폼 업무 흐름 설계 검토 (2026-05-29, Aiden)
+- **현재 상태**: 운송사(CARRIER role)가 시스템 내 직접 액션 없음. ADMIN이 운송사를 대행하여 SCHEDULED 전이 수행. IN_TRANSIT·DELIVERED 상태 변경도 ADMIN 전속.
+- **목표 구현**:
+  - 운송사 전용 포털(Carrier Dashboard): 배차 요청 수신 → 수락/거부
+  - 운송사가 직접 IN_TRANSIT·DELIVERED 상태 업데이트 가능
+  - 수락 시 REGISTERED→SCHEDULED 자동 전이 (또는 ADMIN 최종 확인)
+  - 거부 시 ADMIN에게 알림 → 대체 운송사 선정 플로우
+- **관련 파일**:
+  - `src/lib/logistics/status-machine.ts` (CARRIER 역할 전이 권한 확장)
+  - `src/app/actions/operations/orders.ts` (배차 수락/거부 Server Action 신규)
+  - `src/app/[locale]/(dashboard)/carrier/` (Carrier 전용 페이지 신규)
+- **예상 공수**: 3일
+- **우선순위**: Low (Phase M 대상)
