@@ -276,7 +276,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
               <button
                 key={type}
                 type="button"
-                disabled={affiliation ? (affiliation.isIndividual && type === 'B2B') || (!affiliation.isIndividual && type !== 'B2B') : false}
+                disabled={affiliation?.isIndividual && type === 'B2B'}
                 onClick={() => setValue('order_type', type)}
                 className={`px-6 py-2 rounded-xl text-xs font-bold transition-all ${watch('order_type') === type ? 'bg-slate-800 text-white shadow-lg' : 'bg-white text-slate-400 border border-slate-200 hover:bg-slate-50'}`}
               >

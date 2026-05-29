@@ -247,16 +247,15 @@ export async function getCurrentUserAffiliation() {
 
   let orgData = null;
   if (profile?.org_id) {
-    // organizations(Legacy)와 zen_organizations(Modern) 모두 조회하여 데이터 병합
     const [legacyRes, modernRes] = await Promise.all([
       supabase.from("organizations").select("org_name_ko, address, biz_no").eq("id", profile.org_id).single(),
-      supabase.from("zen_organizations").select("name").eq("id", profile.org_id).single()
+      supabase.from("zen_organizations").select("name, biz_no").eq("id", profile.org_id).single()
     ]);
     
     orgData = {
       name: legacyRes.data?.org_name_ko || modernRes.data?.name || "Unknown Org",
       address: legacyRes.data?.address,
-      bizNo: legacyRes.data?.biz_no
+      bizNo: legacyRes.data?.biz_no || modernRes.data?.biz_no
     };
   }
 
