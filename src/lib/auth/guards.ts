@@ -129,7 +129,7 @@ export async function validateUserAction() {
 
   const { data: profile, error: profileError } = await supabase
     .from("zen_profiles")
-    .select('id, email, role, org_id, status')
+    .select('id, email, role, org_id, status, full_name, phone_number')
     .eq("id", user.id)
     .single();
     
