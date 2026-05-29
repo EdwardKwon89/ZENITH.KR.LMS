@@ -153,6 +153,7 @@
 | TASK-097 | 260525 | UAT-11 보완 — 쿼리 오류 수정 + IMP-086 시나리오 추가 | P3 | TASK-095 ✅ | B_Kai | ✅ | [TASK-097](tasks/TASK-097_260525_UAT11보완_BKai.md) | 3e491bb+84034bc+030d0ab · UAT-11-03 수정·UAT-11-07 신규·UAT_MASTER 79개 ✅ |
 | TASK-096 | 260525 | UAT 전체 실행 (Edward 직접 검증 — Go-Live 판정) | P1 | TASK-094 ✅ · TASK-095 ✅ · TASK-097 ✅ | Edward | ⬜ | [TASK-096](tasks/TASK-096_260525_UAT전체실행_Edward.md) | 전제조건 전량 충족 — Edward 직접 실행 대기 |
 | TASK-098 | 260527 | ID 찾기 기능 재설계 — 개인/법인 분리 | P2 | 없음 | D_Kai | ✅ | [TASK-098](tasks/TASK-098_260527_ID찾기기능재설계_DKai.md) | IMP-089 완료 · 15299bf + 후속 8건(`2111a75`~`d1bc3de`) · Post-승인 버그 8건 ✅ 2차 승인 |
+| TASK-099 | 260529 | UAT-02-04 재작성 — A-2 경로 (REGISTERED→DELIVERED) | P4 | 없음 | B_Kai | 🔔 | [TASK-099](tasks/TASK-099_260529_UAT0204재작성_BKai.md) | PENDING→REGISTERED 수정 + REGISTERED→DELIVERED(6개 전이) · 332a036 · Aiden 검토 대기 |
 
 ---
 
@@ -341,4 +342,5 @@
 | 2026-05-27 | D_Kai (OpenCode) | TASK-098 Post-승인 버그 수정 8건 기록 완료 — `2111a75`·`4b796e4`·`883cd25`·`9f0e3c2`·`c509802`·`e27ec7a`·`199712e`·`d1bc3de` — TASK·UAT_DEFECT·IMP_PROGRESS·ACTIVE 갱신 |
 | 2026-05-27 | D_Kai (OpenCode) | TASK-098 🔔 재제출 — Edward 요청: Post-승인 기록 Aiden 검토 · ACTIVE.md 상태 ✅→🔔 변경 |
 | 2026-05-27 | Aiden (Claude) | TASK-098 ✅ 2차 PASS — Post-승인 버그 8건 전항목 확인 완료. Advisory: 회귀 재실행(비차단). 🔔→✅ 복원 |
+| 2026-05-29 | Aiden (Claude) | TASK-099 발령 — B_Kai, UAT-02-04 전면 재작성(A-2 경로). PENDING→REGISTERED 오류 수정 + REGISTERED→DELIVERED 7개 전이 전체 커버. UAT_MASTER 시나리오명 갱신 포함 |
 | 2026-05-27 | D_Kai (OpenCode) | UAT-01-08 세션 Idle Timeout 버그 수정 완료 — env 미설정(DEF-014)·로그인 후 즉시 timeout(DEF-015)·maxAge 120초로 timeout 영원히 미발생(DEF-016) · 커밋 `1477091`·`f1f20cc` · Edward 재검증 ✅ |
