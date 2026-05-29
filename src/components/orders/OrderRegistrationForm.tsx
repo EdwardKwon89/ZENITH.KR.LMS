@@ -161,11 +161,15 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
           setValue('shipper_id', data.dummyIndividualId);
           setValue('shipper_contact_name', data.userName);
           setValue('shipper_contact_email', data.userEmail);
+          setValue('shipper_contact_phone', data.userPhone || '');
         } else {
           setValue('order_type', 'B2B');
           setValue('shipper_id', data.orgId as string);
           setValue('shipper_contact_name', data.userName);
           setValue('shipper_contact_email', data.userEmail);
+          setValue('shipper_contact_phone', data.userPhone || '');
+          setValue('shipper_address', data.orgAddress || '');
+          setValue('shipper_biz_no', data.orgBizNo || '');
         }
       } catch (err) { logger.error(err); } finally { setIsLoadingAffiliation(false); }
     }
@@ -354,12 +358,20 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                       {!affiliation?.isIndividual && (
                         <>
                           <div>
-                            <p className="text-slate-400 font-bold uppercase tracking-tighter">{t('shipper_address')}</p>
-                            <p className="text-slate-700 font-semibold leading-relaxed">{affiliation?.orgAddress || 'N/A'}</p>
+                            <p className="text-slate-400 font-bold uppercase tracking-tighter mb-1">{t('shipper_address')}</p>
+                            <ZenInput
+                              readOnly
+                              {...register('shipper_address')}
+                              className="bg-slate-50 py-1.5 text-[11px] text-slate-700 font-semibold"
+                            />
                           </div>
                           <div>
-                            <p className="text-slate-400 font-bold uppercase tracking-tighter">{t('shipper_biz_no')}</p>
-                            <p className="text-slate-700 font-semibold">{affiliation?.orgBizNo || 'N/A'}</p>
+                            <p className="text-slate-400 font-bold uppercase tracking-tighter mb-1">{t('shipper_biz_no')}</p>
+                            <ZenInput
+                              readOnly
+                              {...register('shipper_biz_no')}
+                              className="bg-slate-50 py-1.5 text-[11px] text-slate-700 font-semibold"
+                            />
                           </div>
                         </>
                       )}

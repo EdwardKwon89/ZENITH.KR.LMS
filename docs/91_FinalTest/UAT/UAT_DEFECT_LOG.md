@@ -40,7 +40,7 @@
 | 시나리오 오류 | 1 | 0 | 0 | 0 | 5 | **6** |
 | 기능 보완/개선 | 2 | 0 | 1 | 0 | 1 | **4** |
 | 기능 오류 | 2 | 0 | 3 | 5 | 0 | **10** |
-| **합계** | **5** | **0** | **4** | **5** | **6** | **20** |
+| **합계** | **5** | **1** | **4** | **5** | **6** | **21** |
 
 ---
 
@@ -68,6 +68,7 @@
 | DEF-018 | UAT-01-09 | 기능 오류 | Y | 미수정 | D_Kai | - | `test_uat01@zenith.kr`을 법인/운송사(CARRIER)로 등록했으나 등급(role)이 ADMIN으로 설정 — `login/actions.ts` 회원가입 시 `isNewOrg ? ADMIN` 로직이 org_type 무시 | 데이터만 조치 | **원인** (`login/actions.ts:146`): `role: isNewOrg ? USER_ROLES.ADMIN : ...` — 신규 조직 생성자 role이 org_type과 무관하게 항상 ADMIN으로 고정<br>**조치**: `test_uat01@zenith.kr`의 role만 CARRIER로 직접 변경 (app_metadata + zen_profiles)<br>**⚠️ 코드 미수정**: 근본 원인인 회원가입 로직은 그대로. IMP 별도 등록 필요 | - | - |
 | DEF-019 | UAT-01-09 | 기능 오류 | Y | 검증완료 | Aiden | STEP2 | 회원 관리 페이지에서 상태 변경(정지/해제) 클릭 시 DB가 업데이트되지 않아 상태가 그대로 유지됨 | `6699a90` | **원인** (`supabase/migrations`): `20260507110000_fix_rls_recursion.sql`이 무한재귀 수정을 위해 `zen_profiles` UPDATE 정책을 삭제했으나 재생성하지 않음 → RLS 활성화 상태에서 UPDATE 정책 부재 → 모든 `changeMemberStatus`·`changeMemberGrade`·`updateMyProfile`·`withdrawUser` UPDATE가 0 rows 무성 실패<br>**수정**: `20260528100000_fix_zen_profiles_missing_update_rls.sql` 마이그레이션 — auth.jwt() 기반 UPDATE 정책 2건 추가 (관리자 전체·사용자 본인)<br>**검증**: 로컬 DB 적용 확인, 회귀 227/227 PASS | ✅ | 상태 변경 SUSPENDED 정상 반영 확인 |
 | DEF-020 | UAT-01-09 | 기능 오류 | Y | 검증완료 | Aiden | STEP3 | SUSPENDED 회원이 로그인 시도 시 `/suspended` ↔ `/terminal` 무한 redirect → ERR_TOO_MANY_REDIRECTS | `bd7437c` | **원인** (`proxy.ts:176`): SUSPENDED 유저가 whitelist 경로(`/suspended`)에 있을 때 아래 route access check에서 `/suspended`가 `isAllowedPath`에 미포함 → CARRIER `allowedRoot`(`/terminal`)로 redirect → 다시 SUSPENDED check → `/suspended` → 루프<br>**수정**: `proxy.ts` SUSPENDED whitelist 통과 후 `return null` 조기 반환 추가 — route access check 완전 skip<br>**검증**: 회귀 227/227 PASS | ✅ | /suspended 페이지 정상 표시 확인 |
+| DEF-021 | UAT-02-01 | 기능 개선 | Y | 수정중 | D_Kai | STEP2 | 오더등록 폼 기본정보에 Login user 정보 및 소속 법인 정보 자동 입력 안 됨 | - | **상세**: `OrderRegistrationForm.tsx`에서 담당자 전화번호(`shipper_contact_phone`)가 profile에서 자동 입력되지 않고 빈칸. 사업자등록번호/주소는 form field가 아니라 읽기전용 텍스트로만 표시되어 제출되지 않음<br>**수정방향**: `getCurrentUserAffiliation()`에 `phone_number` 반환 추가 + form에 `setValue` 추가. 사업자번호/주소를 hidden field 또는 읽기전용 form field로 변경 | - | - |
 ---
 
 ## 처리 지침

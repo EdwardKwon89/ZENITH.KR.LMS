@@ -264,6 +264,7 @@ export async function getCurrentUserAffiliation() {
     userId: profile?.id,
     userName: profile?.full_name || "Unknown User",
     userEmail: profile?.email,
+    userPhone: profile?.phone_number || null,
     role: profile?.role,
     orgId: profile?.org_id,
     orgName: orgData?.name || null,

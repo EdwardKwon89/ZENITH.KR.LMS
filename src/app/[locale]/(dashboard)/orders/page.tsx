@@ -53,7 +53,7 @@ export default async function OrdersPage({
             </div>
           )}
           <Link href="/orders/new">
-            <ZenButton variant="tactile" className="bg-brand-600 text-white hover:bg-brand-700 px-8 py-2 text-xs font-bold rounded-xl shadow-lg shadow-brand-100 transition-all">
+            <ZenButton variant="ghost" className="bg-brand-600 text-white hover:bg-brand-700 px-8 py-2 text-xs font-bold rounded-xl shadow-lg shadow-brand-100 transition-all">
               <Plus size={14} className="mr-2" /> CREATE NEW ORDER
             </ZenButton>
           </Link>
