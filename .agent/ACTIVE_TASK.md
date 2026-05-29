@@ -155,7 +155,7 @@
 | TASK-098 | 260527 | ID 찾기 기능 재설계 — 개인/법인 분리 | P2 | 없음 | D_Kai | ✅ | [TASK-098](tasks/TASK-098_260527_ID찾기기능재설계_DKai.md) | IMP-089 완료 · 15299bf + 후속 8건(`2111a75`~`d1bc3de`) · Post-승인 버그 8건 ✅ 2차 승인 |
 | TASK-099 | 260529 | UAT-02-04 재작성 — A-2 경로 (REGISTERED→DELIVERED) | P4 | 없음 | B_Kai | ✅ | [TASK-099](tasks/TASK-099_260529_UAT0204재작성_BKai.md) | 332a036+4833de1+9040bcc · 6개 전이 ✅ · Advisory 2건(비차단) · TASK-101 재교육 세션 병행 |
 | TASK-100 | 260529 | DEF-030 경로 최적화 전면 수정 (전체 운송사 비교·가드) | P1 | 없음 | D_Kai | ❌ | [TASK-100](tasks/TASK-100_260529_DEF030경로최적화수정_DKai.md) | 반려 — 구현 전량 ✅(229/229) · task file 상태 ⬜ 미변경 DoD 허위 체크 1건 · 최소 재작업 |
-| TASK-101 | 260529 | B_Kai 재교육 세션 2차 (R-17 위반 3회 누적) | P4 | 없음 | B_Kai | 🔔 | [TASK-101](tasks/TASK-101_260529_BKai재교육세션2차_BKai.md) | §1 DoD 허위체크·§2 전체커밋·§3 5단계 완료 — Aiden 검토 대기 |
+| TASK-101 | 260529 | B_Kai 재교육 세션 2차 (R-17 위반 3회 누적) | P4 | 없음 | B_Kai | 🔔 | [TASK-101](tasks/TASK-101_260529_BKai재교육세션2차_BKai.md) | §1 DoD 허위체크·§2 전체커밋·§3 5단계 완료 — c60196f · Aiden 검토 대기 |
 | TASK-102 | 260529 | UAT-02·10 시나리오 수정 — TASK-100 경로 최적화 반영 | P3 | TASK-100 ✅ | D_Kai | 🚫 | [TASK-102](tasks/TASK-102_260529_UAT수정_TASK100반영_DKai.md) | UAT-02-04 SCHEDULED 가드 · UAT-02-09 비교 테이블 전환 · UAT-10-01 3종 카드→비교 테이블 |
 
 ---
