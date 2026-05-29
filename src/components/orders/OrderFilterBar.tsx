@@ -48,7 +48,7 @@ export default function OrderFilterBar({ locale }: FilterBarProps) {
           type="text" 
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Order No, Recipient..."
+          placeholder="Order No, Recipient, Shipper..."
           className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium text-sm"
         />
       </div>

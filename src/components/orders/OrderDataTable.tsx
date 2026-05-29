@@ -3,7 +3,7 @@
 import { ORDER_STATUS_META, OrderStatus } from '@/types/orders';
 import Link from 'next/link';
 import { useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import { StatusChangeModal } from './StatusChangeModal';
 import { canChangeStatus } from '@/lib/logistics/status-machine';
 import { UserRole, USER_ROLES } from '@/lib/auth/rbac';
@@ -32,6 +32,7 @@ export default function OrderDataTable({
   const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const params = useParams();
+  const searchParams = useSearchParams();
   const safeLocale = (params?.locale as string) || locale || 'ko';
   const totalPages = Math.ceil(totalCount / pageSize);
   const t = useTranslations('orderStatus');
@@ -54,7 +55,7 @@ export default function OrderDataTable({
           <tbody className="divide-y divide-slate-100">
             {orders.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-6 py-20 text-center text-slate-400 italic">
+                <td colSpan={7} className="px-6 py-20 text-center text-slate-400 italic">
                   No orders found. Use the filters to refine your search.
                 </td>
               </tr>
@@ -145,7 +146,7 @@ export default function OrderDataTable({
           {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
             <Link
               key={p}
-              href={`/${safeLocale}/orders?page=${p}`}
+              href={`/${safeLocale}/orders?${new URLSearchParams({ ...Object.fromEntries(searchParams.entries()), page: String(p) }).toString()}`}
               className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold transition-all ${
                 currentPage === p 
                 ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20' 
