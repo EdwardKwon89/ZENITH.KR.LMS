@@ -9,6 +9,7 @@ import { validateUserAction } from '@/lib/auth/guards';
  */
 
 import { getRouteOptions, selectRoute, getRouteVisualization, getRouteConsistencyStatus } from '@/app/actions/routing';
+import { selectCostOptimal, selectTimeOptimal } from '@/lib/logistics/scoring';
 
 vi.mock('@/lib/auth/guards', () => ({
   validateUserAction: vi.fn(),
@@ -181,11 +182,30 @@ describe('TC-R.4: getRouteOptions — 3종 옵션 생성 및 UPSERT 정책', () 
   });
 
   it('[TC-R.4d] UPSERT 정책 — zen_route_options.upsert 를 호출한다', async () => {
-    // Rely on default from() mock in beforeEach
     await getRouteOptions(mockOrderId);
     
     expect(activeMockSupabase.from).toHaveBeenCalledWith('zen_route_options');
     expect(activeMockSupabase.upsert).toHaveBeenCalled();
+  });
+
+  it('[TC-R.4e] tiebreaker — 동일 비용이면 transit_days가 더 짧은 옵션이 COST winner여야 한다', async () => {
+    const candidates = [
+      { carrier: 'A', total_cost: 1000, total_transit_days: 10 },
+      { carrier: 'B', total_cost: 1000, total_transit_days: 5 },
+    ];
+    const winner = selectCostOptimal(candidates);
+    expect(winner.carrier).toBe('B');
+    expect(winner.total_transit_days).toBe(5);
+  });
+
+  it('[TC-R.4f] tiebreaker — 동일 transit_days면 비용이 더 낮은 옵션이 TIME winner여야 한다', async () => {
+    const candidates = [
+      { carrier: 'A', total_cost: 2000, total_transit_days: 7 },
+      { carrier: 'B', total_cost: 1500, total_transit_days: 7 },
+    ];
+    const winner = selectTimeOptimal(candidates);
+    expect(winner.carrier).toBe('B');
+    expect(winner.total_cost).toBe(1500);
   });
 });
 
