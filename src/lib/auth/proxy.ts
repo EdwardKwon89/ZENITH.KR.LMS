@@ -72,7 +72,9 @@ export async function authGuard(
 
   if (user && !isApi) {
     // --- IMP-071: 세션 Idle Timeout ---
-    if (!isAuthPage && purePath !== '/') {
+    // (Server Action POST는 제외 — 서버액션 내부 validateUserAction()이 세션 검증)
+    const isServerAction = request.method === 'POST' && request.headers.has('next-action');
+    if (!isAuthPage && purePath !== '/' && !isServerAction) {
       const SESSION_IDLE_TIMEOUT_MIN = parseInt(process.env.SESSION_IDLE_TIMEOUT_MIN || '30', 10);
       const now = Date.now();
       const lastActivity = request.cookies.get('zen_last_activity')?.value;
