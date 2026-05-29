@@ -214,7 +214,10 @@ export async function getOrderDetails(orderId: string) {
     items: items.filter(item => item.package_id === pkg.id),
   }));
 
-  return { ...order, packages: packagesWithItems };
+  const totalGrossWeight = packagesWithItems.reduce((sum, pkg) => sum + (pkg.gross_weight || 0), 0);
+  const totalVolume = packagesWithItems.reduce((sum, pkg) => sum + (pkg.volume || 0), 0);
+
+  return { ...order, packages: packagesWithItems, total_gross_weight: totalGrossWeight, total_volume: totalVolume };
 }
 
 /**

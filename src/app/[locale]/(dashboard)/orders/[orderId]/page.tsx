@@ -302,6 +302,42 @@ export default async function OrderDetailPage({
                         </div>
                     </div>
                 </div>
+
+                {/* Package Details Table */}
+                {order.packages && order.packages.length > 0 && (
+                  <div className="mt-8">
+                    <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
+                      <Package className="w-5 h-5 text-blue-500" />
+                      Package Details
+                    </h3>
+                    <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-neutral-700">
+                      <table className="w-full text-sm">
+                        <thead className="bg-slate-100 dark:bg-neutral-800 text-slate-600 dark:text-slate-300">
+                          <tr>
+                            <th className="px-4 py-3 text-left font-semibold">Unit</th>
+                            <th className="px-4 py-3 text-right font-semibold">Count</th>
+                            <th className="px-4 py-3 text-right font-semibold">L × W × H (cm)</th>
+                            <th className="px-4 py-3 text-right font-semibold">Gross Weight (kg)</th>
+                            <th className="px-4 py-3 text-right font-semibold">Volume (cbm)</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-200 dark:divide-neutral-700">
+                          {order.packages.map((pkg: any, idx: number) => (
+                            <tr key={pkg.id || idx} className="hover:bg-slate-50 dark:hover:bg-neutral-800/50">
+                              <td className="px-4 py-3 font-medium text-slate-700 dark:text-slate-200">{pkg.packing_unit}</td>
+                              <td className="px-4 py-3 text-right text-slate-600 dark:text-slate-300">{pkg.packing_count}</td>
+                              <td className="px-4 py-3 text-right text-slate-600 dark:text-slate-300">
+                                {pkg.length} × {pkg.width} × {pkg.height}
+                              </td>
+                              <td className="px-4 py-3 text-right text-slate-600 dark:text-slate-300">{pkg.gross_weight}</td>
+                              <td className="px-4 py-3 text-right text-slate-600 dark:text-slate-300">{pkg.volume}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
               </div>
             }
             supportSection={
