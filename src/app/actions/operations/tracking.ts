@@ -34,7 +34,7 @@ export async function getTrackingEvents(orderId: string, page = 1, pageSize = 50
   const to = from + pageSize - 1;
   const { data: events, error, count } = await supabase
     .from("zen_tracking_events")
-    .select("id, order_id, event_code, event_time, status, location, description, source_type, segment_index, hub_port_code", { count: "exact" })
+    .select("id, order_id, event_code, event_time, location, description, source_type, segment_index, hub_port_code", { count: "exact" })
     .eq("order_id", orderId)
     .order("event_time", { ascending: false })
     .range(from, to);
