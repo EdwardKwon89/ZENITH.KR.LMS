@@ -208,7 +208,7 @@ export async function getGlobalTrackingOverview(page = 1, pageSize = 50) {
   const orderIds = (data ?? []).map(c => c.order_id).filter(Boolean);
   const { data: allEvents } = orderIds.length > 0 ? await supabase
     .from("zen_tracking_events")
-    .select("order_id, event_time, status, location, description")
+    .select("order_id, event_time, location, description")
     .in("order_id", orderIds)
     .order("event_time", { ascending: false }) : { data: [] };
 

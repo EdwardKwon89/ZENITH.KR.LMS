@@ -180,11 +180,11 @@ export async function getRouteVisualization(orderId: string) {
   // 2. 트래킹 이벤트 조회 (실적 확인용 — 페이지네이션 적용 IMP-045)
   const { data: events } = await supabase
     .from("zen_tracking_events")
-    .select("location_name, event_type")
+    .select("location, event_code")
     .eq("order_id", orderId)
     .limit(500);
 
-  const eventLocations = new Set((events || []).map(e => e.location_name));
+  const eventLocations = new Set((events || []).map(e => e.location));
 
   // 3. 세그먼트를 마일스톤으로 변환
   if (segments && segments.length > 0) {

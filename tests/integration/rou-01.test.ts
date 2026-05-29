@@ -281,7 +281,7 @@ describe('TC-R.6: getRouteVisualization — 마일스톤 및 시각화 데이터
         segments: [{ from_port_id: 'ICN', to_port_id: 'SIN', transport_mode: 'AIR' }]
       }
     };
-    const mockEvents = [{ location_name: 'ICN', event_type: 'DEPARTURE' }];
+    const mockEvents = [{ location: 'ICN', event_code: 'DEPARTURE' }];
 
     activeMockSupabase.maybeSingle.mockResolvedValue({ data: mockRoute, error: null });
     activeMockSupabase.from.mockImplementation((table: string) => {
