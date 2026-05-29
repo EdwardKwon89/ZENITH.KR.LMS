@@ -214,8 +214,17 @@ export async function getOrderDetails(orderId: string) {
     items: items.filter(item => item.package_id === pkg.id),
   }));
 
-  const totalGrossWeight = packagesWithItems.reduce((sum, pkg) => sum + (pkg.gross_weight || 0), 0);
-  const totalVolume = packagesWithItems.reduce((sum, pkg) => sum + (pkg.volume || 0), 0);
+  const totalGrossWeight = packagesWithItems.reduce((sum, pkg) => {
+    const cnt = pkg.packing_count || 1;
+    return sum + (pkg.gross_weight || 0) * cnt;
+  }, 0);
+  const totalVolume = packagesWithItems.reduce((sum, pkg) => {
+    const cnt = pkg.packing_count || 1;
+    const vol = pkg.volume ?? (pkg.length && pkg.width && pkg.height
+      ? (pkg.length * pkg.width * pkg.height) / 1000000
+      : 0);
+    return sum + vol * cnt;
+  }, 0);
 
   return { ...order, packages: packagesWithItems, total_gross_weight: totalGrossWeight, total_volume: totalVolume };
 }

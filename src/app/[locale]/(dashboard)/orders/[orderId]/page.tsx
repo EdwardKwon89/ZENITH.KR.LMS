@@ -303,39 +303,78 @@ export default async function OrderDetailPage({
                     </div>
                 </div>
 
-                {/* Package Details Table */}
+                  {/* Package Details Table */}
                 {order.packages && order.packages.length > 0 && (
-                  <div className="mt-8">
-                    <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
+                  <div className="mt-8 space-y-6">
+                    <h3 className="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
                       <Package className="w-5 h-5 text-blue-500" />
                       Package Details
                     </h3>
-                    <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-neutral-700">
-                      <table className="w-full text-sm">
-                        <thead className="bg-slate-100 dark:bg-neutral-800 text-slate-600 dark:text-slate-300">
-                          <tr>
-                            <th className="px-4 py-3 text-left font-semibold">Unit</th>
-                            <th className="px-4 py-3 text-right font-semibold">Count</th>
-                            <th className="px-4 py-3 text-right font-semibold">L × W × H (cm)</th>
-                            <th className="px-4 py-3 text-right font-semibold">Gross Weight (kg)</th>
-                            <th className="px-4 py-3 text-right font-semibold">Volume (cbm)</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-200 dark:divide-neutral-700">
-                          {order.packages.map((pkg: any, idx: number) => (
-                            <tr key={pkg.id || idx} className="hover:bg-slate-50 dark:hover:bg-neutral-800/50">
-                              <td className="px-4 py-3 font-medium text-slate-700 dark:text-slate-200">{pkg.packing_unit}</td>
-                              <td className="px-4 py-3 text-right text-slate-600 dark:text-slate-300">{pkg.packing_count}</td>
-                              <td className="px-4 py-3 text-right text-slate-600 dark:text-slate-300">
-                                {pkg.length} × {pkg.width} × {pkg.height}
-                              </td>
-                              <td className="px-4 py-3 text-right text-slate-600 dark:text-slate-300">{pkg.gross_weight}</td>
-                              <td className="px-4 py-3 text-right text-slate-600 dark:text-slate-300">{pkg.volume}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
+                    {order.packages.map((pkg: any, idx: number) => {
+                      const cnt = pkg.packing_count || 1;
+                      const unitWt = pkg.gross_weight || 0;
+                      const totalWt = unitWt * cnt;
+                      const vol = pkg.volume ?? (pkg.length && pkg.width && pkg.height
+                        ? (pkg.length * pkg.width * pkg.height) / 1000000
+                        : 0);
+                      const totalVol = vol * cnt;
+                      return (
+                        <div key={pkg.id || idx} className="rounded-xl border border-slate-200 dark:border-neutral-700 overflow-hidden">
+                          <table className="w-full text-sm">
+                            <thead className="bg-slate-100 dark:bg-neutral-800 text-slate-600 dark:text-slate-300">
+                              <tr>
+                                <th className="px-4 py-3 text-left font-semibold">Unit</th>
+                                <th className="px-4 py-3 text-right font-semibold">Count</th>
+                                <th className="px-4 py-3 text-right font-semibold">L × W × H (cm)</th>
+                                <th className="px-4 py-3 text-right font-semibold">Unit Weight (kg)</th>
+                                <th className="px-4 py-3 text-right font-semibold">Total Weight (kg)</th>
+                                <th className="px-4 py-3 text-right font-semibold">Volume (cbm)</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <tr className="hover:bg-slate-50 dark:hover:bg-neutral-800/50">
+                                <td className="px-4 py-3 font-medium text-slate-700 dark:text-slate-200">{pkg.packing_unit}</td>
+                                <td className="px-4 py-3 text-right text-slate-600 dark:text-slate-300">{pkg.packing_count}</td>
+                                <td className="px-4 py-3 text-right text-slate-600 dark:text-slate-300">
+                                  {pkg.length} × {pkg.width} × {pkg.height}
+                                </td>
+                                <td className="px-4 py-3 text-right text-slate-600 dark:text-slate-300">{unitWt}</td>
+                                <td className="px-4 py-3 text-right font-bold text-slate-800 dark:text-slate-100">{totalWt}</td>
+                                <td className="px-4 py-3 text-right text-slate-600 dark:text-slate-300">
+                                  {totalVol ? totalVol.toFixed(3) : '-'}
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
+                          {pkg.items && pkg.items.length > 0 && (
+                            <div className="border-t border-slate-100 dark:border-neutral-700">
+                              <table className="w-full text-sm">
+                                <thead className="bg-slate-50 dark:bg-neutral-800/50 text-slate-500 dark:text-slate-400">
+                                  <tr>
+                                    <th className="px-4 py-2 text-left font-medium text-[11px] uppercase tracking-wider pl-8">Item</th>
+                                    <th className="px-4 py-2 text-right font-medium text-[11px] uppercase tracking-wider">Qty</th>
+                                    <th className="px-4 py-2 text-right font-medium text-[11px] uppercase tracking-wider">HS Code</th>
+                                    <th className="px-4 py-2 text-right font-medium text-[11px] uppercase tracking-wider">Unit Price</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {pkg.items.map((item: any, iidx: number) => (
+                                    <tr key={item.id || iidx} className="bg-slate-50/50 dark:bg-neutral-800/30">
+                                      <td className="px-4 py-2 text-slate-600 dark:text-slate-300 pl-8">{item.item_name}</td>
+                                      <td className="px-4 py-2 text-right text-slate-600 dark:text-slate-300">{item.quantity}</td>
+                                      <td className="px-4 py-2 text-right font-mono text-xs text-slate-500">{item.hs_code || '-'}</td>
+                                      <td className="px-4 py-2 text-right text-slate-600 dark:text-slate-300">
+                                        {item.unit_price ? `${item.currency || 'USD'} ${item.unit_price}` : '-'}
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
               </div>
