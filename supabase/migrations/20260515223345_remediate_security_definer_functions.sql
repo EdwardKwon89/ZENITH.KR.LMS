@@ -239,8 +239,8 @@ AS $$
 DECLARE
     next_val bigint;
 BEGIN
-    -- Only Ops/Admin can generate sequences
-    IF public.get_my_role() NOT IN ('ADMIN', 'ZENITH_SUPER_ADMIN', 'MANAGER', 'OPS') THEN
+    -- ADMIN/MANAGER/OPS + 화주(CORPORATE/INDIVIDUAL) 시퀀스 생성 허용
+    IF public.get_my_role() NOT IN ('ADMIN', 'ZENITH_SUPER_ADMIN', 'MANAGER', 'OPS', 'CORPORATE', 'INDIVIDUAL') THEN
         RAISE EXCEPTION 'Access Denied: Insufficient permissions to generate sequence.';
     END IF;
 

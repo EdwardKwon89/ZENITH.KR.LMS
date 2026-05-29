@@ -9,7 +9,7 @@
 
 ---
 
-## [UAT-10-01] 경로 옵션 3종 조회 (COST·TIME·BALANCED)
+## [UAT-10-01] 경로 옵션 전체 후보 비교 조회 (비교 테이블·추천 배지)
 
 | 항목 | 내용 |
 |:----|:----|
@@ -25,20 +25,20 @@
 |:---:|:---------|:---------|:-----------|:---------|:----:|
 | 1 | /ko/orders | ADMIN 계정 로그인 후 오더 목록 진입 | `admin@zenith.kr` / `password1234` | 오더 목록 정상 표시 | ☐ |
 | 2 | /ko/orders/[id] | ICN→SIN 구간 오더 선택 → 상세 페이지 진입 | — | 오더 상세 정보 표시 | ☐ |
-| 3 | /ko/orders/[id] | '경로 탭' 또는 'Route Options' 섹션 클릭 | — | COST·TIME·BALANCED 3종 카드 표시 | ☐ |
-| 4 | 각 카드 | COST 카드 내용 확인 | — | 총비용·총소요일·구간(segments)·스코어 표시 | ☐ |
-| 5 | 각 카드 | TIME 카드 내용 확인 | — | 총비용·총소요일·구간(segments)·스코어 표시 | ☐ |
-| 6 | 각 카드 | BALANCED 카드 내용 확인 | — | 기본 추천 강조 표시 (하이라이트 또는 뱃지) | ☐ |
-| 7 | Supabase Studio | `SELECT * FROM zen_route_options WHERE order_id = '[orderId]'` | — | option_type = COST/TIME/BALANCED 3행 존재 확인 | ☐ |
-| 8 | /ko/logout → /ko/login | SHIPPER 계정으로 로그인 후 동일 오더 진입 | `shipper@zenith.kr` / `password1234` | SHIPPER도 경로 옵션 3종 조회 가능 (데이터 동일) | ☐ |
+| 3 | /ko/orders/[id] | '경로 탭' 또는 'Route Options' 섹션 클릭 | — | 전체 운송사 후보 **비교 테이블** 표시 — 직항/경유 그룹 분리 | ☐ |
+| 4 | 각 행 | 각 행의 정보 확인 | — | 각 행: 운송사명·경로 세그먼트·운송 방식·비용($)·소요일·추천 배지 | ☐ |
+| 5 | 각 행 | 추천 배지 확인 | — | 추천 배지 확인: 최저비용 행 `최저비용 추천` / 최단시간 행 `최단시간 추천` / 균형 행 `균형 추천` | ☐ |
+| 6 | 각 행 | 비용이 0인 행 확인 | — | 비용=0인 경우 해당 행에 "요율 미등록" 표시 확인 | ☐ |
+| 7 | Supabase Studio | `SELECT recommended_for FROM zen_route_options WHERE order_id = '[orderId]'` | — | DB: `recommended_for` 컬럼에 `["COST"]`·`["TIME"]`·`["BALANCED"]` 값 정상 저장 확인 | ☐ |
+| 8 | /ko/logout → /ko/login | SHIPPER 계정으로 로그인 후 동일 오더 진입 | `shipper@zenith.kr` / `password1234` | SHIPPER도 경로 옵션 전체 후보 비교 조회 가능 (데이터 동일) | ☐ |
 | 9 | — | SHIPPER 계정으로 타 조직 오더 URL 직접 입력 시도 | `/ko/orders/[otherOrgOrderId]` | 접근 차단 (403 또는 메인 리다이렉트) | ☐ |
 
 ### 합격 기준
 - [ ] 전 단계 ☑ 완료
-- [ ] 경로 옵션 3종 (COST·TIME·BALANCED) 카드 정상 표시
-- [ ] 각 카드: 총비용·총소요일·구간(segments) 정보·스코어 표시
-- [ ] BALANCED 카드가 기본 추천으로 강조 표시
-- [ ] DB `zen_route_options`에 3종 모두 저장 확인
+- [ ] 전체 운송사 후보 비교 테이블 표시 (직항/경유 그룹 분리)
+- [ ] 추천 배지 3종(최저비용·최단시간·균형) 해당 행에 정상 표시
+- [ ] zen_route_options.recommended_for 컬럼 값 정상 저장 확인
+- [ ] 각 행에 운송사·경로·비용·소요일 표시
 - [ ] SHIPPER 역할에서도 조회 가능 확인
 
 ### 결함 기재란

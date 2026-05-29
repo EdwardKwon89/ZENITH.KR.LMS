@@ -37,3 +37,5 @@ VALUES
   ('ORDER_TYPE', 'B2C_ECOM',     'B2C 이커머스',      'B2C E-Commerce',        true, 20),
   ('ORDER_TYPE', 'B2C_EXPRESS',  'B2C 특송',          'B2C Express',           true, 30)
 ON CONFLICT (group_code, code_value) DO NOTHING;
+
+
