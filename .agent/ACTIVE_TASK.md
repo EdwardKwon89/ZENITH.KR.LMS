@@ -154,9 +154,9 @@
 | TASK-096 | 260525 | UAT 전체 실행 (Edward 직접 검증 — Go-Live 판정) | P1 | TASK-094 ✅ · TASK-095 ✅ · TASK-097 ✅ | Edward | ⬜ | [TASK-096](tasks/TASK-096_260525_UAT전체실행_Edward.md) | 전제조건 전량 충족 — Edward 직접 실행 대기 |
 | TASK-098 | 260527 | ID 찾기 기능 재설계 — 개인/법인 분리 | P2 | 없음 | D_Kai | ✅ | [TASK-098](tasks/TASK-098_260527_ID찾기기능재설계_DKai.md) | IMP-089 완료 · 15299bf + 후속 8건(`2111a75`~`d1bc3de`) · Post-승인 버그 8건 ✅ 2차 승인 |
 | TASK-099 | 260529 | UAT-02-04 재작성 — A-2 경로 (REGISTERED→DELIVERED) | P4 | 없음 | B_Kai | ✅ | [TASK-099](tasks/TASK-099_260529_UAT0204재작성_BKai.md) | 332a036+4833de1+9040bcc · 6개 전이 ✅ · Advisory 2건(비차단) · TASK-101 재교육 세션 병행 |
-| TASK-100 | 260529 | DEF-030 경로 최적화 전면 수정 (전체 운송사 비교·가드) | P1 | 없음 | D_Kai | ❌ | [TASK-100](tasks/TASK-100_260529_DEF030경로최적화수정_DKai.md) | 반려 — 구현 전량 ✅(229/229) · task file 상태 ⬜ 미변경 DoD 허위 체크 1건 · 최소 재작업 |
+| TASK-100 | 260529 | DEF-030 경로 최적화 전면 수정 (전체 운송사 비교·가드) | P1 | 없음 | D_Kai | ✅ | [TASK-100](tasks/TASK-100_260529_DEF030경로최적화수정_DKai.md) | 5b63421+f1c3f74 · 229/229 PASS · Aiden ✅ 승인 |
 | TASK-101 | 260529 | B_Kai 재교육 세션 2차 (R-17 위반 3회 누적) | P4 | 없음 | B_Kai | 🔔 | [TASK-101](tasks/TASK-101_260529_BKai재교육세션2차_BKai.md) | §1 DoD 허위체크·§2 전체커밋·§3 5단계 완료 — c60196f · Aiden 검토 대기 |
-| TASK-102 | 260529 | UAT-02·10 시나리오 수정 — TASK-100 경로 최적화 반영 | P3 | TASK-100 ✅ | D_Kai | 🚫 | [TASK-102](tasks/TASK-102_260529_UAT수정_TASK100반영_DKai.md) | UAT-02-04 SCHEDULED 가드 · UAT-02-09 비교 테이블 전환 · UAT-10-01 3종 카드→비교 테이블 |
+| TASK-102 | 260529 | UAT-02·10 시나리오 수정 — TASK-100 경로 최적화 반영 | P3 | TASK-100 ✅ | D_Kai | 🔔 | [TASK-102](tasks/TASK-102_260529_UAT수정_TASK100반영_DKai.md) | fe04df4 완료 보고 — Riley 대행 |
 
 ---
 
@@ -164,9 +164,9 @@
 
 | Agent | 진행 중 | 재작업/조치 필요 | 블로커 대기 |
 |:------|:--------|:----------------|:----------|
-| Riley | — | R-17 위반 2회 누적 (TASK-088 무단 수정·TASK-092 혼합 커밋+해시 미기재) | — |
+| Riley | TASK-102 🔔 대행 완료 | R-17 위반 2회 누적 (TASK-088 무단 수정·TASK-092 혼합 커밋+해시 미기재) | — |
 | B_Kai | — | TASK-101 🔔 (재교육 세션 2차 — Aiden 검토 대기) | **신규 Task 할당 중단 — TASK-101 ✅ 후 재개** |
-| D_Kai | TASK-100 ❌ 최소 재작업 중 (status ⬜→🔔 단독 커밋) | R-17 위반 누적 경고 (상태 미변경 2회) | TASK-102 🚫 (TASK-100 ✅ 후 자동 해제) |
+| D_Kai | — | R-17 위반 누적 경고 (상태 미변경 2회) | — |
 | N_Kai | TASK-087 ⬜ (재교육 세션 — 완료 후 신규 할당 재개) | — | 신규 할당 중단 유지 |
 | Ring | — | — | 신규 할당 중단 유지 (9차 위반 누적) |
 
@@ -354,3 +354,4 @@
 | 2026-05-29 | Aiden (Claude) | TASK-101 발령 — B_Kai 재교육 세션 2차. R-17 위반 3회 누적 페널티. §1 DoD 허위 체크 금지·§2 재제출 커밋 전체 기재·§3 완료 보고 5단계 |
 | 2026-05-29 | Aiden (Claude) | TASK-102 발령 — D_Kai, TASK-100 경로 최적화 반영 UAT 수정. UAT-02-04 SCHEDULED 가드 사전 조건·UAT-02-09 비교 테이블 전환·UAT-10-01 3종→비교 테이블. 전제조건: TASK-100 ✅ |
 | 2026-05-27 | D_Kai (OpenCode) | UAT-01-08 세션 Idle Timeout 버그 수정 완료 — env 미설정(DEF-014)·로그인 후 즉시 timeout(DEF-015)·maxAge 120초로 timeout 영원히 미발생(DEF-016) · 커밋 `1477091`·`f1f20cc` · Edward 재검증 ✅ |
+| 2026-05-29 | Riley (Gemini) | TASK-102 대행 완료 — UAT 문서 정정 및 화주 시퀀스 권한 확장 SQL 검증 완료 |
