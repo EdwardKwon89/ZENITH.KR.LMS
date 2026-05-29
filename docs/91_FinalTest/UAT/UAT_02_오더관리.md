@@ -153,7 +153,7 @@
 | 17 | /ko/orders | IN_TRANSIT 오더의 상태 배지 클릭 | — | StatusChangeModal 오픈, 전이 가능 상태 목록에 DELIVERED 표시 | ☐ |
 | 18 | /ko/orders | IN_TRANSIT→DELIVERED 전이 | 'DELIVERED' 선택 → '변경' 버튼 클릭 | 토스트 "상태가 변경되었습니다" 표시 | ☐ |
 | 19 | /ko/orders | 상태 배지 색상 확인 (DELIVERED) | — | 오더 배지가 초록(`bg-green-100 text-green-800`)으로 변경 | ☐ |
-| 20 | /ko/orders → /ko/orders/[id] | 오더 상세 → 히스토리 탭 | 오더 클릭 → '히스토리' 탭 선택 | **7개 전이 이력 전체** 기록 확인 (변경 전·변경 후·일시·수행자) | ☐ |
+| 20 | /ko/orders → /ko/orders/[id] | 오더 상세 → 히스토리 탭 | 오더 클릭 → '히스토리' 탭 선택 | **6개 전이 이력 전체** 기록 확인 (변경 전·변경 후·일시·수행자) | ☐ |
 
 ### 합격 기준
 - [ ] 전 단계 ☑ 완료
