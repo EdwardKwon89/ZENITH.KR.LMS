@@ -354,7 +354,6 @@ export default async function OrderDetailPage({
                                     <th className="px-4 py-2 text-left font-medium text-[11px] uppercase tracking-wider pl-8">Item</th>
                                     <th className="px-4 py-2 text-right font-medium text-[11px] uppercase tracking-wider">Qty</th>
                                     <th className="px-4 py-2 text-right font-medium text-[11px] uppercase tracking-wider">HS Code</th>
-                                    <th className="px-4 py-2 text-right font-medium text-[11px] uppercase tracking-wider">Unit Price</th>
                                   </tr>
                                 </thead>
                                 <tbody>
@@ -363,9 +362,6 @@ export default async function OrderDetailPage({
                                       <td className="px-4 py-2 text-slate-600 dark:text-slate-300 pl-8">{item.item_name}</td>
                                       <td className="px-4 py-2 text-right text-slate-600 dark:text-slate-300">{item.quantity}</td>
                                       <td className="px-4 py-2 text-right font-mono text-xs text-slate-500">{item.hs_code || '-'}</td>
-                                      <td className="px-4 py-2 text-right text-slate-600 dark:text-slate-300">
-                                        {item.unit_price ? `${item.currency || 'USD'} ${item.unit_price}` : '-'}
-                                      </td>
                                     </tr>
                                   ))}
                                 </tbody>
