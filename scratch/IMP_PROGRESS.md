@@ -252,11 +252,11 @@
 | I | 5 | 5 | 100% ✅ | IMP-073~077 전량 완료 (TASK-069~073 ✅) |
 | J | 4 | 4 | 100% ✅ | IMP-080 ✅ · IMP-081 ✅ · IMP-082 ✅ · IMP-083 ✅ |
 | K | 1 | 7 | 14.3% | IMP-084·085·086·088·089·046 🔔 |
-| UAT | 0 | 2 | 0% | IMP-090 ⬜ (TASK-100 연계 해소 예정) · IMP-091 ⬜ (Carrier Portal — Phase M) |
+| UAT | 0 | 2 | 0% | IMP-090 ✅ (TASK-100 해소 — cargo_details DEFAULT 제거 완료) · IMP-091 ⬜ (Carrier Portal — Phase M) |
 | **합계** | **68** | **77** | **88.3%** | Phase K 7건 + UAT 2건 기준 |
 
-> 미완료 IMP: IMP-086·087 🚫 블로커 · IMP-028·069(Future — 통관 연계) · IMP-090·091 ⬜ (UAT 발견)
-> 2026-05-29 기준 업데이트 (Aiden — IMP-091 신규 등재, DEF-030 TASK-100 발령, IMP-090 TASK-100 연계)
+> 미완료 IMP: IMP-086·087 🚫 블로커 · IMP-028·069(Future — 통관 연계) · IMP-091 ⬜ (Carrier Portal — Phase M)
+> 2026-05-29 기준 업데이트 — IMP-090 ✅ 해소 (TASK-100 커밋 5b63421)
 
 ---
 
