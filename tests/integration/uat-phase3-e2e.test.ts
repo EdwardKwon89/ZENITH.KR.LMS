@@ -106,16 +106,15 @@ describe('ZENITH Phase 3 UAT: E2E + Routing Integrated Validation', () => {
 
     // Step 3: Shipper calculates route -> selects BALANCED. (ROU.1, ROU.2)
     mockResultQueue.push(
-      { data: { origin_port_id: 'port-uuid-1', dest_port_id: 'port-uuid-2', origin_port: { code: 'ICN', name: 'Incheon' }, dest_port: { code: 'SIN', name: 'Singapore' } }, error: null }, // order single
+      { data: { origin_port_id: 'port-uuid-1', dest_port_id: 'port-uuid-2', transport_mode: 'AIR', origin_port: { code: 'ICN', name: 'Incheon' }, dest_port: { code: 'SIN', name: 'Singapore' } }, error: null }, // order single
+      { data: [], error: null }, // zen_order_packages
       { data: [{ id: 'route-1', carrier_id: 'carrier-air', from_port_id: 'ICN', to_port_id: 'SIN', transport_mode: 'AIR', transit_days: 2, is_active: true, carrier: { code: 'ZENITH_AIR', name: 'ZENITH Air Cargo', transport_mode: 'AIR' } }], error: null }, // route_network
       { data: { tiers: [{ weight_min: 0, unit_price: 5.50 }] }, error: null }, // rate card lookup
       { data: [], error: null }, // appendHubRoutes - leg1Routes
       { data: { key: 'ROUTING_WEIGHT_ALPHA', value_numeric: 0.6 }, error: null }, // getParam ALPHA
       { data: { key: 'ROUTING_WEIGHT_BETA', value_numeric: 0.4 }, error: null },  // getParam BETA
-      { error: null }, // upsert COST
-      { error: null }, // upsert TIME
-      { error: null }, // upsert BALANCED
-      { data: [{ option_type: 'BALANCED', id: 'route-balanced-uuid' }], error: null } // select saved options
+      { error: null }, // upsert (1 candidate → 1 upsert)
+      { data: [{ option_type: 'BALANCED', id: 'route-balanced-uuid', segments: [{ from_port_id: 'ICN', to_port_id: 'SIN', transport_mode: 'AIR', carrier: 'ZENITH Air Cargo', transit_days: 2, cost: 550, currency: 'USD' }], total_cost: 550, total_transit_days: 2, score: 0.5, recommended_for: ['BALANCED'] }], error: null } // select saved options
     );
     
     const routeOptions = await getRouteOptions(mockOrderId);

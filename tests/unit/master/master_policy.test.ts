@@ -114,6 +114,12 @@ describe('ZENITH Master Order: Policy & Integrity Audit', () => {
       error: null
     });
 
+    // 3. SCHEDULED 가드: route_option_id 확인
+    supabase.maybeSingle.mockResolvedValueOnce({
+      data: { route_option_id: 'route-id' },
+      error: null
+    });
+
     // We expect the guard or the action to block this before it even hits the DB update
     // because of the role-based check in the server action.
     await expect(updateOrderStatus('h-101', OrderStatus.SCHEDULED))

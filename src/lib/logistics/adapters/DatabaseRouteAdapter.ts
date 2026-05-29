@@ -29,23 +29,22 @@ interface RateCardRow {
 export class DatabaseRouteAdapter implements IVirtualMapAdapter {
   constructor(private supabase: SupabaseClient) {}
 
-  async getPotentialRoutes(origin: string, dest: string): Promise<Omit<RouteOption, 'option_type' | 'score'>[]> {
+  async getPotentialRoutes(origin: string, dest: string, transportMode?: string): Promise<Omit<RouteOption, 'option_type' | 'score'>[]> {
     const results: Omit<RouteOption, 'option_type' | 'score'>[] = [];
 
-    // 1단계: 직항 조회 (기존 로직)
-    await this.appendDirectRoutes(origin, dest, results);
+    await this.appendDirectRoutes(origin, dest, results, transportMode);
 
-    // 2단계: Hub 경로 조회 — 2-step JOIN (최대 2홉, 경유 1회)
-    await this.appendHubRoutes(origin, dest, results);
+    await this.appendHubRoutes(origin, dest, results, transportMode);
 
     return results;
   }
 
   private async appendDirectRoutes(
     origin: string, dest: string,
-    results: Omit<RouteOption, 'option_type' | 'score'>[]
+    results: Omit<RouteOption, 'option_type' | 'score'>[],
+    transportMode?: string
   ): Promise<void> {
-    const { data: routes, error } = await this.supabase
+    let query = this.supabase
       .from('zen_route_network')
       .select(`
         *,
@@ -54,6 +53,10 @@ export class DatabaseRouteAdapter implements IVirtualMapAdapter {
       .eq('is_active', true)
       .eq('from_port_id', origin)
       .eq('to_port_id', dest);
+
+    if (transportMode) query = query.eq('transport_mode', transportMode);
+
+    const { data: routes, error } = await query;
 
     if (error || !routes || !Array.isArray(routes)) return;
 
@@ -81,10 +84,10 @@ export class DatabaseRouteAdapter implements IVirtualMapAdapter {
 
   private async appendHubRoutes(
     origin: string, dest: string,
-    results: Omit<RouteOption, 'option_type' | 'score'>[]
+    results: Omit<RouteOption, 'option_type' | 'score'>[],
+    transportMode?: string
   ): Promise<void> {
-    // 2a: origin 출발 전체 루트 조회 (leg1)
-    const { data: leg1Routes, error: leg1Err } = await this.supabase
+    let leg1Query = this.supabase
       .from('zen_route_network')
       .select(`
         *,
@@ -92,6 +95,10 @@ export class DatabaseRouteAdapter implements IVirtualMapAdapter {
       `)
       .eq('is_active', true)
       .eq('from_port_id', origin);
+
+    if (transportMode) leg1Query = leg1Query.eq('transport_mode', transportMode);
+
+    const { data: leg1Routes, error: leg1Err } = await leg1Query;
 
     if (leg1Err || !leg1Routes || !Array.isArray(leg1Routes) || leg1Routes.length === 0) return;
 
@@ -101,8 +108,7 @@ export class DatabaseRouteAdapter implements IVirtualMapAdapter {
     for (const hub of hubs) {
       if (hub === dest) continue;
 
-      // 2b: hub → dest 루트 조회 (leg2)
-      const { data: leg2Routes, error: leg2Err } = await this.supabase
+      let leg2Query = this.supabase
         .from('zen_route_network')
         .select(`
           *,
@@ -111,6 +117,10 @@ export class DatabaseRouteAdapter implements IVirtualMapAdapter {
         .eq('is_active', true)
         .eq('from_port_id', hub)
         .eq('to_port_id', dest);
+
+      if (transportMode) leg2Query = leg2Query.eq('transport_mode', transportMode);
+
+      const { data: leg2Routes, error: leg2Err } = await leg2Query;
 
       if (leg2Err || !leg2Routes || !Array.isArray(leg2Routes) || leg2Routes.length === 0) continue;
 

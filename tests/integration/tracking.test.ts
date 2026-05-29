@@ -63,9 +63,9 @@ describe('ZENITH Tracking Visibility: Phase 3.3 Multi-Agent Cases', () => {
     });
 
     it('TC-TR.2: [Success] 오더 상태 변경 시 시뮬레이션 이벤트가 과거 시점으로 생성되어야 함', async () => {
-      // updateOrderStatus 호출 시 가상 트래커가 작동하여 이벤트를 생성하는지 확인
       mockSupabase.maybeSingle.mockResolvedValueOnce({ data: null }); // Master check
       mockSupabase.single.mockResolvedValueOnce({ data: { status: OrderStatus.REGISTERED, transport_mode: 'AIR' } }); // Current order
+      mockSupabase.maybeSingle.mockResolvedValueOnce({ data: { route_option_id: 'route-id' } }); // SCHEDULED guard
       
       // VirtualTrackingProvider.generateHistory 내부의 scenarios 조회 모킹
       mockSupabase.order.mockResolvedValueOnce({ 
@@ -102,6 +102,7 @@ describe('ZENITH Tracking Visibility: Phase 3.3 Multi-Agent Cases', () => {
     it('TC-TR.4: [Logic] 운송 모드(SEA)에 따른 선박 특화 노드가 매핑되어야 함', async () => {
       mockSupabase.maybeSingle.mockResolvedValueOnce({ data: null }); // Master check
       mockSupabase.single.mockResolvedValueOnce({ data: { status: OrderStatus.REGISTERED, transport_mode: 'SEA' } });
+      mockSupabase.maybeSingle.mockResolvedValueOnce({ data: { route_option_id: 'route-id' } }); // SCHEDULED guard
       
       // Scenario 조회 모킹
       mockSupabase.order.mockResolvedValueOnce({ 

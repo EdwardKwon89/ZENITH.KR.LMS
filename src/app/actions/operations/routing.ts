@@ -13,7 +13,6 @@ import { calculateCompositePricing, PricingBreakdown, SurchargeBreakdownItem } f
 export async function getRouteOptions(orderId: string) {
   const { supabase, user } = await validateUserAction();
 
-  // 1. 오더 정보 조회 (출발/도착지 및 화물 스펙 파악)
   const { data: order, error: orderError } = await supabase
     .from("zen_orders")
     .select("origin_port_id, dest_port_id, transport_mode, cargo_details, origin_port:zen_ports!origin_port_id(code, name), dest_port:zen_ports!dest_port_id(code, name)")
@@ -25,14 +24,18 @@ export async function getRouteOptions(orderId: string) {
   const originCode = (order.origin_port as any)?.code || (order.origin_port as any)?.name || "";
   const destCode = (order.dest_port as any)?.code || (order.dest_port as any)?.name || "";
 
-  // 화물 중량 및 부피 스펙 파악 (비동기 composite pricing 인풋용)
-  const cargoDetails = order.cargo_details as any;
-  const weight = Number(cargoDetails?.total_weight || 0);
-  const volume = Number(cargoDetails?.total_volume || 0);
+  const { data: packages } = await supabase
+    .from('zen_order_packages')
+    .select('gross_weight, volume, packing_count')
+    .eq('order_id', orderId);
 
-  // 2. 엔진을 통한 경로 계산 (DB 기반 라우팅)
+  const weight = (packages || []).reduce((s, p) =>
+    s + (Number(p.gross_weight) || 0) * (Number(p.packing_count) || 1), 0);
+  const volume = (packages || []).reduce((s, p) =>
+    s + (Number(p.volume) || 0) * (Number(p.packing_count) || 1), 0);
+
   const engine = new RoutingEngine(new DatabaseRouteAdapter(supabase));
-  const options = await engine.calculateOptions(originCode, destCode);
+  const options = await engine.calculateOptions(originCode, destCode, order.transport_mode);
 
   // 3. Composite Pricing 계산 및 각 option별 segments.cost/total_cost 갱신 (IMP-086 통합 파이프라인 연동)
   for (const opt of options) {
@@ -48,7 +51,6 @@ export async function getRouteOptions(orderId: string) {
     }
   }
 
-  // 4. DB 저장 (BUG-07-A: UPSERT 정책 적용)
   for (const opt of options) {
     const { error: upsertError } = await supabase
       .from("zen_route_options")
@@ -58,7 +60,8 @@ export async function getRouteOptions(orderId: string) {
         segments: opt.segments,
         total_cost: opt.total_cost,
         total_transit_days: opt.total_transit_days,
-        score: opt.score
+        score: opt.score,
+        recommended_for: opt.recommended_for || []
       }, {
         onConflict: 'order_id, option_type'
       });
@@ -70,16 +73,14 @@ export async function getRouteOptions(orderId: string) {
 
   revalidatePath(`/(dashboard)/orders/${orderId}`, "page");
 
-  // 5. 반환용 데이터 조회 및 pricing_breakdown 동적 바인딩
   const { data: savedOptions, count } = await supabase
     .from("zen_route_options")
-    .select("id, order_id, option_type, segments, total_cost, total_transit_days, score, created_at", { count: "exact" })
+    .select("id, order_id, option_type, segments, total_cost, total_transit_days, score, recommended_for, created_at", { count: "exact" })
     .eq("order_id", orderId);
 
-  const optionsMap: Record<string, any> = {};
+  const optionsArray: any[] = [];
   if (savedOptions) {
     for (const opt of savedOptions) {
-      // routeOption을 통째로 넘겨서 pricing_breakdown을 동적으로 바인딩
       const routeOptionObj = {
         option_type: opt.option_type as any,
         segments: opt.segments as any[],
@@ -99,11 +100,11 @@ export async function getRouteOptions(orderId: string) {
       opt.total_cost = routeOptionObj.total_cost;
       (opt as any).pricing_breakdown = pricing;
       
-      optionsMap[opt.option_type] = opt;
+      optionsArray.push(opt);
     }
   }
 
-  return { success: true, options: optionsMap, total: count || 0 };
+  return { success: true, options: optionsArray, total: count || 0 };
 }
 
 /**

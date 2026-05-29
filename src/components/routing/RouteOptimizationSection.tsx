@@ -3,10 +3,9 @@ import { logger } from '@/lib/logger';
 
 import { useState, useEffect, useTransition } from "react";
 import { getRouteOptions, selectRoute, getRouteVisualization } from "@/app/actions/routing";
-import { RouteOptionCard } from "./RouteOptionCard";
 import { RouteMilestoneTimeline } from "./RouteMilestoneTimeline";
 import { ZenButton } from "@/components/ui/ZenUI";
-import { RefreshCw, Calculator, MapPin, CheckCircle2, ChevronRight, Loader2 } from "lucide-react";
+import { RefreshCw, Calculator, MapPin, CheckCircle2, ChevronRight, Loader2, Banknote, Zap, Star, Ship, Plane, Truck, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -23,14 +22,13 @@ export default function RouteOptimizationSection({
   isAdmin = false,
   headerBadge
 }: RouteOptimizationSectionProps) {
-  const [options, setOptions] = useState<Record<string, any> | null>(null);
+  const [options, setOptions] = useState<any[] | null>(null);
   const [appliedRouteId, setAppliedRouteId] = useState<string | null>(initialAppliedRouteId || null);
   const [selectedOptionId, setSelectedOptionId] = useState<string | null>(initialAppliedRouteId || null);
   const [milestones, setMilestones] = useState<any[]>([]);
   const [isPending, startTransition] = useTransition();
   const [isLoadingVisual, setIsLoadingVisual] = useState(false);
 
-  // Fetch options if already applied but not loaded
   const handleCalculate = async () => {
     startTransition(async () => {
       try {
@@ -53,7 +51,6 @@ export default function RouteOptimizationSection({
           setAppliedRouteId(result.appliedRouteId);
           setSelectedOptionId(optionId);
           toast.success("경로가 확정되었습니다.");
-          // Refresh visualization
           fetchVisualization();
         }
       } catch (error: any) {
@@ -81,6 +78,127 @@ export default function RouteOptimizationSection({
       fetchVisualization();
     }
   }, [appliedRouteId]);
+
+  const getModeIcon = (mode: string) => {
+    switch (mode) {
+      case 'SEA': return <Ship className="w-3.5 h-3.5" />;
+      case 'AIR': return <Plane className="w-3.5 h-3.5" />;
+      case 'LAND': return <Truck className="w-3.5 h-3.5" />;
+      default: return <ChevronRight className="w-3.5 h-3.5" />;
+    }
+  };
+
+  const directOptions = (options || []).filter(o => (o.segments || []).length === 1);
+  const hubOptions = (options || []).filter(o => (o.segments || []).length > 1);
+
+  const formatCost = (cost: number) => {
+    if (!cost || cost === 0) return <span className="text-amber-600 text-xs font-medium flex items-center gap-1"><AlertCircle className="w-3 h-3" />요율 미등록</span>;
+    return `$${Number(cost).toLocaleString()}`;
+  };
+
+  const getRecommendedBadges = (recommendedFor: string[] | undefined) => {
+    if (!recommendedFor || recommendedFor.length === 0) return null;
+    return (
+      <div className="flex flex-wrap gap-1">
+        {recommendedFor.map(r => {
+          if (r === 'COST') return <span key={r} className="inline-flex items-center gap-0.5 text-[10px] px-1.5 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-100"><Banknote className="w-2.5 h-2.5" />최저비용</span>;
+          if (r === 'TIME') return <span key={r} className="inline-flex items-center gap-0.5 text-[10px] px-1.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100"><Zap className="w-2.5 h-2.5" />최단시간</span>;
+          if (r === 'BALANCED') return <span key={r} className="inline-flex items-center gap-0.5 text-[10px] px-1.5 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-100"><Star className="w-2.5 h-2.5" />균형 추천</span>;
+          return null;
+        })}
+      </div>
+    );
+  };
+
+  const renderOptionTable = (groupOptions: any[], groupLabel: string) => {
+    if (groupOptions.length === 0) return null;
+    return (
+      <div className="mb-6">
+        <h4 className="text-sm font-semibold text-muted-foreground mb-3">{groupLabel}</h4>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm border-collapse">
+            <thead>
+              <tr className="border-b text-xs text-muted-foreground uppercase tracking-wider">
+                <th className="text-left py-2 pr-2 font-medium">운송사</th>
+                <th className="text-left py-2 px-2 font-medium">경로</th>
+                <th className="text-center py-2 px-2 font-medium">운송 방식</th>
+                <th className="text-right py-2 px-2 font-medium">비용</th>
+                <th className="text-center py-2 px-2 font-medium">소요일</th>
+                <th className="text-center py-2 px-2 font-medium">추천</th>
+                <th className="text-right py-2 pl-2 font-medium">선택</th>
+              </tr>
+            </thead>
+            <tbody>
+              {groupOptions.map((opt: any, idx: number) => {
+                const isSelected = selectedOptionId === opt.id;
+                const segs = opt.segments || [];
+                const carrierNames = segs.map((s: any) => s.carrier).filter(Boolean).join(', ');
+                const routeLabel = segs.map((s: any) => `${s.from_port_id}→${s.to_port_id}`).join(' → ');
+                const modes = [...new Set(segs.map((s: any) => s.transport_mode))];
+
+                return (
+                  <tr key={opt.id || idx} className={cn(
+                    "border-b border-slate-100 transition-colors",
+                    isSelected ? "bg-blue-50/50" : "hover:bg-slate-50"
+                  )}>
+                    <td className="py-3 pr-2 font-medium text-slate-800">{carrierNames}</td>
+                    <td className="py-3 px-2">
+                      <div className="flex items-center gap-1 text-slate-600">
+                        {segs.map((s: any, si: number) => (
+                          <span key={si} className="flex items-center gap-0.5">
+                            {si > 0 && <ChevronRight className="w-3 h-3 text-slate-300" />}
+                            <span>{s.from_port_id}</span>
+                            <ChevronRight className="w-3 h-3 text-slate-400" />
+                            <span>{s.to_port_id}</span>
+                          </span>
+                        ))}
+                      </div>
+                    </td>
+                    <td className="py-3 px-2 text-center">
+                      <div className="flex justify-center gap-1">
+                        {modes.map((m: string) => (
+                          <span key={m} className={cn(
+                            "inline-flex items-center gap-0.5 text-[10px] px-1.5 py-0.5 rounded",
+                            m === 'AIR' ? 'bg-indigo-50 text-indigo-600' :
+                            m === 'SEA' ? 'bg-blue-50 text-blue-600' :
+                            'bg-emerald-50 text-emerald-600'
+                          )}>
+                            {getModeIcon(m)}{m}
+                          </span>
+                        ))}
+                      </div>
+                    </td>
+                    <td className="py-3 px-2 text-right font-semibold text-slate-800">
+                      {formatCost(opt.total_cost)}
+                    </td>
+                    <td className="py-3 px-2 text-center text-slate-700">
+                      {opt.total_transit_days}일
+                    </td>
+                    <td className="py-3 px-2 text-center">
+                      {getRecommendedBadges(opt.recommended_for)}
+                    </td>
+                    <td className="py-3 pl-2 text-right">
+                      {appliedRouteId ? (
+                        isSelected && <span className="text-xs font-medium text-blue-600 flex items-center justify-end gap-1"><CheckCircle2 className="w-3 h-3" />확정됨</span>
+                      ) : (
+                        <button
+                          onClick={() => handleSelect(opt.id)}
+                          disabled={isPending}
+                          className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-white hover:bg-slate-800 disabled:opacity-50 transition-colors"
+                        >
+                          선택
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <section className="space-y-6">
@@ -133,16 +251,15 @@ export default function RouteOptimizationSection({
       )}
 
       {options && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {Object.entries(options).map(([key, opt]) => (
-            <RouteOptionCard 
-              key={key}
-              option={opt}
-              isSelected={selectedOptionId === opt.id}
-              onSelect={handleSelect}
-              isLoading={isPending}
-            />
-          ))}
+        <div className="bg-white rounded-lg border p-4 space-y-6">
+          {directOptions.length > 0 && renderOptionTable(directOptions, `직항 경로 (${directOptions.length}건)`)}
+          {hubOptions.length > 0 && renderOptionTable(hubOptions, `경유 경로 (${hubOptions.length}건)`)}
+          {options.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+              <MapPin className="w-8 h-8 mb-2 opacity-50" />
+              <p className="text-sm">조회 가능한 경로가 없습니다.</p>
+            </div>
+          )}
         </div>
       )}
 

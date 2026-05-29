@@ -58,7 +58,9 @@ describe('ZENITH Logistics: Order Status Machine Action', () => {
     supabase.maybeSingle.mockResolvedValueOnce({ data: null, error: null });
     // 2. 현재 상태 조회용 (ZEN_ORDERS single)
     supabase.single.mockResolvedValueOnce({ data: { status: OrderStatus.REGISTERED } });
-    // 3. RPC 호출용 (rpc)
+    // 3. SCHEDULED 가드: route_option_id 확인
+    supabase.maybeSingle.mockResolvedValueOnce({ data: { route_option_id: 'route-id' }, error: null });
+    // 4. RPC 호출용 (rpc)
     supabase.rpc.mockResolvedValueOnce({ error: null });
 
     const result = await updateOrderStatus('order-1', OrderStatus.SCHEDULED, '차량 배차 완료');

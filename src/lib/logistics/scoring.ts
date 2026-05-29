@@ -23,7 +23,7 @@ export function normalize(value: number, min: number, max: number): number {
  */
 export function selectCostOptimal<T extends Candidate>(candidates: T[]): T {
   if (candidates.length === 0) throw new Error("No candidates for scoring");
-  return [...candidates].sort((a, b) => a.total_cost - b.total_cost)[0];
+  return [...candidates].sort((a, b) => a.total_cost - b.total_cost || a.total_transit_days - b.total_transit_days)[0];
 }
 
 /**
@@ -31,7 +31,7 @@ export function selectCostOptimal<T extends Candidate>(candidates: T[]): T {
  */
 export function selectTimeOptimal<T extends Candidate>(candidates: T[]): T {
   if (candidates.length === 0) throw new Error("No candidates for scoring");
-  return [...candidates].sort((a, b) => a.total_transit_days - b.total_transit_days)[0];
+  return [...candidates].sort((a, b) => a.total_transit_days - b.total_transit_days || a.total_cost - b.total_cost)[0];
 }
 
 /**

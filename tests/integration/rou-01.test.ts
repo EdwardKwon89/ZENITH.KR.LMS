@@ -62,6 +62,7 @@ describe('TC-R.4: getRouteOptions — 3종 옵션 생성 및 UPSERT 정책', () 
     total_cost: type === 'COST' ? 1000 : type === 'TIME' ? 1400 : 1100,
     total_transit_days: type === 'TIME' ? 5 : type === 'COST' ? 8 : 6,
     score: type === 'COST' ? 0.8 : type === 'TIME' ? 0.6 : 0.7,
+    recommended_for: [type],
   });
 
   beforeEach(() => {
@@ -79,12 +80,16 @@ describe('TC-R.4: getRouteOptions — 3종 옵션 생성 및 UPSERT 정책', () 
             data: {
               origin_port_id: 'port-uuid-1',
               dest_port_id: 'port-uuid-2',
+              transport_mode: 'AIR',
               origin_port: { code: 'ICN', name: 'Incheon' },
               dest_port: { code: 'SIN', name: 'Singapore' }
             },
             error: null
           })
         };
+      }
+      if (table === 'zen_order_packages') {
+        return { select: vi.fn().mockReturnThis(), eq: vi.fn().mockResolvedValue({ data: [], error: null }) };
       }
       if (table === 'zen_route_network') {
         const mockRoutes = [
@@ -148,29 +153,31 @@ describe('TC-R.4: getRouteOptions — 3종 옵션 생성 및 UPSERT 정책', () 
     (validateUserAction as any).mockResolvedValue({ supabase: activeMockSupabase, user: mockUser, profile: mockProfile });
   });
 
-  it('[TC-R.4a] COST/TIME/BALANCED 3종 옵션을 반환한다 (BUG-08-A: 객체 형식)', async () => {
+  it('[TC-R.4a] 전체 후보를 배열로 반환한다 (DEF-030: 객체→배열 전환)', async () => {
     const result = await getRouteOptions(mockOrderId);
 
     expect(result.success).toBe(true);
-    expect(result.options).toHaveProperty('COST');
-    expect(result.options).toHaveProperty('TIME');
-    expect(result.options).toHaveProperty('BALANCED');
+    expect(Array.isArray(result.options)).toBe(true);
+    expect(result.options.length).toBeGreaterThanOrEqual(2);
   });
 
-  it('[TC-R.4b] COST 옵션의 비용은 TIME 옵션보다 저렴하거나 같아야 한다', async () => {
+  it('[TC-R.4b] 각 옵션에 recommended_for 필드가 존재한다', async () => {
     const result = await getRouteOptions(mockOrderId);
-    const costOpt = result.options.COST;
-    const timeOpt = result.options.TIME;
-
-    expect(costOpt.total_cost).toBeLessThanOrEqual(timeOpt.total_cost);
+    for (const opt of result.options) {
+      expect(opt).toHaveProperty('recommended_for');
+      expect(Array.isArray(opt.recommended_for)).toBe(true);
+    }
   });
 
-  it('[TC-R.4c] TIME 옵션의 소요일은 COST 옵션보다 짧거나 같아야 한다', async () => {
+  it('[TC-R.4c] COST 추천 옵션의 비용이 가장 저렴하다', async () => {
     const result = await getRouteOptions(mockOrderId);
-    const costOpt = result.options.COST;
-    const timeOpt = result.options.TIME;
-
-    expect(timeOpt.total_transit_days).toBeLessThanOrEqual(costOpt.total_transit_days);
+    const costOpt = result.options.find((o: any) => o.recommended_for?.includes('COST'));
+    const nonCost = result.options.filter((o: any) => !o.recommended_for?.includes('COST'));
+    if (costOpt && nonCost.length > 0) {
+      for (const other of nonCost) {
+        expect(costOpt.total_cost).toBeLessThanOrEqual(other.total_cost);
+      }
+    }
   });
 
   it('[TC-R.4d] UPSERT 정책 — zen_route_options.upsert 를 호출한다', async () => {
@@ -380,6 +387,9 @@ describe('TC-R.8: Hub 경로 탐색 — DatabaseRouteAdapter.appendHubRoutes', (
         }
         return handler;
       }
+      if (table === 'zen_order_packages') {
+        return { select: vi.fn().mockReturnThis(), eq: vi.fn().mockResolvedValue({ data: [], error: null }) };
+      }
       if (table === 'zen_rate_cards') {
         return {
           select: vi.fn().mockReturnThis(),
@@ -432,27 +442,25 @@ describe('TC-R.8: Hub 경로 탐색 — DatabaseRouteAdapter.appendHubRoutes', (
     const result = await getRouteOptions('order-uuid-001');
 
     expect(result.success).toBe(true);
-    const keys = Object.keys(result.options);
-    expect(keys.length).toBeGreaterThanOrEqual(1);
-    const firstKey = keys[0];
-    const option = result.options[firstKey];
-    expect(option.segments).toBeDefined();
-    expect(option.segments.length).toBeGreaterThanOrEqual(2);
-    expect(option.segments[0].to_port_id).toBe('ICN');
-    expect(option.segments[1].to_port_id).toBe('LAX');
+    expect(Array.isArray(result.options)).toBe(true);
+    expect(result.options.length).toBeGreaterThanOrEqual(1);
+    const hubOpt = result.options.find((o: any) => (o.segments || []).length >= 2);
+    expect(hubOpt).toBeDefined();
+    expect(hubOpt.segments[0].to_port_id).toBe('ICN');
+    expect(hubOpt.segments[1].to_port_id).toBe('LAX');
   });
 
-  it('[TC-R.8b] ICN→SIN 직항 경로는 Hub 경로 없이 2개(COST/TIME/BALANCED) 이상 반환한다', async () => {
+  it('[TC-R.8b] ICN→SIN 직항 경로를 2개 이상 배열로 반환한다', async () => {
     activeMockSupabase = createHubMockSupabase({ directOnly: true });
     (validateUserAction as any).mockResolvedValue({ supabase: activeMockSupabase, user: mockUser, profile: mockProfile });
 
     const result = await getRouteOptions('order-uuid-001');
 
     expect(result.success).toBe(true);
-    const keys = Object.keys(result.options);
-    expect(keys.length).toBeGreaterThanOrEqual(2);
-    keys.forEach(key => {
-      const seg = result.options[key].segments || [];
+    expect(Array.isArray(result.options)).toBe(true);
+    expect(result.options.length).toBeGreaterThanOrEqual(2);
+    result.options.forEach((opt: any) => {
+      const seg = opt.segments || [];
       seg.forEach((s: any) => {
         expect(s.from_port_id).toBe('ICN');
         expect(s.to_port_id).toBe('SIN');

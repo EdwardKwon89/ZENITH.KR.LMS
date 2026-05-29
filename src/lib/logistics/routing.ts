@@ -25,6 +25,7 @@ export interface RouteOption extends Candidate {
   total_cost: number;
   total_transit_days: number;
   score: number;
+  recommended_for?: RouteOptionType[];
   pricing_breakdown?: PricingBreakdown;
 }
 
@@ -32,7 +33,7 @@ export interface RouteOption extends Candidate {
  * [CTO] Map Adapter Interface
  */
 export interface IVirtualMapAdapter {
-  getPotentialRoutes(origin: string, dest: string): Promise<Omit<RouteOption, 'option_type' | 'score'>[]>;
+  getPotentialRoutes(origin: string, dest: string, transportMode?: string): Promise<Omit<RouteOption, 'option_type' | 'score'>[]>;
 }
 
 /**
@@ -40,7 +41,7 @@ export interface IVirtualMapAdapter {
  * Provides deterministic scenarios for testing
  */
 export class MockMapAdapter implements IVirtualMapAdapter {
-  async getPotentialRoutes(origin: string, dest: string): Promise<Omit<RouteOption, 'option_type' | 'score'>[]> {
+  async getPotentialRoutes(origin: string, dest: string, transportMode?: string): Promise<Omit<RouteOption, 'option_type' | 'score'>[]> {
     return [
       {
         segments: [
@@ -79,34 +80,36 @@ export class RoutingEngine {
     this.adapter = adapter;
   }
 
-  async calculateOptions(origin: string, dest: string): Promise<RouteOption[]> {
-    const candidates = await this.adapter.getPotentialRoutes(origin, dest);
+  async calculateOptions(origin: string, dest: string, transportMode?: string): Promise<RouteOption[]> {
+    const candidates = await this.adapter.getPotentialRoutes(origin, dest, transportMode);
     
     if (candidates.length === 0) return [];
 
-    // Ds-11 Scoring Policy 적용
+    if (candidates.length === 1) {
+      return [{ ...candidates[0], option_type: 'BALANCED', score: 0, recommended_for: ['COST', 'TIME', 'BALANCED'] }];
+    }
+
     const costWinner = selectCostOptimal(candidates);
     const timeWinner = selectTimeOptimal(candidates);
     const balancedResult = await selectBalanced(candidates);
     const balancedScore = typeof balancedResult.score === 'number' ? balancedResult.score : 0;
 
-    return [
-      { 
-        ...costWinner, 
-        option_type: 'COST', 
-        score: costWinner.total_cost 
-      },
-      { 
-        ...timeWinner, 
-        option_type: 'TIME', 
-        score: timeWinner.total_transit_days 
-      },
-      { 
-        ...balancedResult.candidate, 
-        option_type: 'BALANCED', 
-        score: balancedScore
-      }
-    ];
+    const costWinnerId = `${costWinner.total_cost}-${costWinner.total_transit_days}`;
+    const timeWinnerId = `${timeWinner.total_cost}-${timeWinner.total_transit_days}`;
+    const balancedId = `${balancedResult.candidate.total_cost}-${balancedResult.candidate.total_transit_days}`;
+
+    return candidates.map(c => {
+      const id = `${c.total_cost}-${c.total_transit_days}`;
+      const recommended_for: RouteOptionType[] = [];
+      if (id === costWinnerId) recommended_for.push('COST');
+      if (id === timeWinnerId) recommended_for.push('TIME');
+      if (id === balancedId) recommended_for.push('BALANCED');
+      let option_type: RouteOptionType = 'BALANCED';
+      let score = 0;
+      if (id === costWinnerId) { option_type = 'COST'; score = c.total_cost; }
+      else if (id === timeWinnerId) { option_type = 'TIME'; score = c.total_transit_days; }
+      return { ...c, option_type, score, recommended_for };
+    });
   }
 }
 

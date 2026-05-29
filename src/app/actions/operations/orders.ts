@@ -250,6 +250,18 @@ export async function updateOrderStatus(
   const { data: currentOrder, error: fetchError } = await orderRepo.getStatus(orderId);
   if (fetchError || !currentOrder) throw new Error("Order not found");
 
+  if (currentOrder.status === OrderStatus.REGISTERED && nextStatus === OrderStatus.SCHEDULED) {
+    const orderCheck = await supabase
+      .from('zen_orders')
+      .select('route_option_id')
+      .eq('id', orderId)
+      .maybeSingle();
+    const routeOptionId = orderCheck?.data?.route_option_id;
+    if (!routeOptionId) {
+      throw new Error('경로를 먼저 선택해야 일정 확정(SCHEDULED)이 가능합니다.');
+    }
+  }
+
   const validation = canChangeStatus(
     currentOrder.status as OrderStatus,
     nextStatus,
