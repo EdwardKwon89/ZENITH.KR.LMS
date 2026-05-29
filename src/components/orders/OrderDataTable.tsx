@@ -46,6 +46,7 @@ export default function OrderDataTable({
               <th className="px-6 py-2.5 text-[11px] font-bold text-slate-500 uppercase tracking-widest">Order No</th>
               <th className="px-6 py-2.5 text-[11px] font-bold text-slate-500 uppercase tracking-widest">Type</th>
               <th className="px-6 py-2.5 text-[11px] font-bold text-slate-500 uppercase tracking-widest">Shipper</th>
+              <th className="px-6 py-2.5 text-[11px] font-bold text-slate-500 uppercase tracking-widest">Recipient</th>
               <th className="px-6 py-2.5 text-[11px] font-bold text-slate-500 uppercase tracking-widest">Route (Origin-Dest)</th>
               <th className="px-6 py-2.5 text-[11px] font-bold text-slate-500 uppercase tracking-widest">Status</th>
               <th className="px-6 py-2.5 text-[11px] font-bold text-slate-500 uppercase tracking-widest">Billing</th>
@@ -55,7 +56,7 @@ export default function OrderDataTable({
           <tbody className="divide-y divide-slate-100">
             {orders.length === 0 ? (
               <tr>
-                <td colSpan={7} className="px-6 py-20 text-center text-slate-400 italic">
+                <td colSpan={8} className="px-6 py-20 text-center text-slate-400 italic">
                   No orders found. Use the filters to refine your search.
                 </td>
               </tr>
@@ -70,6 +71,9 @@ export default function OrderDataTable({
                   </td>
                   <td className="px-6 py-2.5">
                     <span className="text-[13px] text-slate-800 font-bold">{order.shipper?.name || '-'}</span>
+                  </td>
+                  <td className="px-6 py-2.5">
+                    <span className="text-[13px] text-slate-800 font-bold">{order.recipient_name || '-'}</span>
                   </td>
                   <td className="px-6 py-2.5">
                     <div className="flex items-center gap-2 text-[12px] font-medium">

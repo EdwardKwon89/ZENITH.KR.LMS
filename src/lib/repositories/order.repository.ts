@@ -91,7 +91,18 @@ export class OrderRepository extends BaseRepository {
     if (status) query = query.eq('status', status);
     if (order_type) query = query.eq('order_type', order_type);
     if (transport_mode) query = query.eq('transport_mode', transport_mode);
-    if (search) query = query.or(`order_no.ilike.%${search}%,recipient_name.ilike.%${search}%,shipper_contact_name.ilike.%${search}%`);
+    if (search) {
+      let searchFilter = `order_no.ilike.%${search}%,recipient_name.ilike.%${search}%,shipper_contact_name.ilike.%${search}%`;
+      const { data: matchedOrgs } = await this.db
+        .from('zen_organizations')
+        .select('id')
+        .ilike('name', `%${search}%`);
+      if (matchedOrgs?.length) {
+        const ids = matchedOrgs.map(o => o.id).join(',');
+        searchFilter += `,shipper_id.in.(${ids})`;
+      }
+      query = query.or(searchFilter);
+    }
 
     const from = (page - 1) * pageSize;
     const to = from + pageSize - 1;
