@@ -71,12 +71,15 @@ export async function authGuard(
   }
 
   if (user && !isApi) {
+    const now = Date.now();
+
     // --- IMP-071: 세션 Idle Timeout ---
     // (Server Action POST는 제외 — 서버액션 내부 validateUserAction()이 세션 검증)
+    // 단, zen_last_activity 갱신은 서버 액션도 포함해야 함. 갱신이 없으면
+    // 서버 액션 후 router.push() GET 요청에서 stale cookie → 로그아웃됨.
     const isServerAction = request.method === 'POST' && request.headers.has('next-action');
     if (!isAuthPage && purePath !== '/' && !isServerAction) {
       const SESSION_IDLE_TIMEOUT_MIN = parseInt(process.env.SESSION_IDLE_TIMEOUT_MIN || '30', 10);
-      const now = Date.now();
       const lastActivity = request.cookies.get('zen_last_activity')?.value;
 
       if (lastActivity) {
@@ -94,12 +97,15 @@ export async function authGuard(
           return { response, redirectUrl: url.pathname };
         }
       }
+    }
 
+    // 서버 액션 포함 모든 인증 요청에 zen_last_activity 갱신
+    if (!isAuthPage && purePath !== '/') {
       supabaseResponse.cookies.set('zen_last_activity', String(now), {
         httpOnly: true,
         secure: true,
         sameSite: 'lax',
-        maxAge: 7 * 24 * 60 * 60, // 7 days — MUST exceed SESSION_IDLE_TIMEOUT_MIN, else browser auto-deletes cookie before timeout check fires
+        maxAge: 7 * 24 * 60 * 60,
         path: '/',
       });
     }
