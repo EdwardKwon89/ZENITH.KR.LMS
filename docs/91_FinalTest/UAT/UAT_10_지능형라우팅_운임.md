@@ -3,7 +3,7 @@
 > **문서번호**: UAT-10
 > **작성일**: 2026-05-24
 > **작성자**: D_Kai (OpenCode)
-> **버전**: v2.1
+> **버전**: v3.0
 > **담당 문서**: [UAT_MASTER.md](UAT_MASTER.md)
 > **전제 IMP**: IMP-080 (DB 스키마 ✅) · IMP-081 (DatabaseRouteAdapter ✅) · IMP-082 (Composite Pricing ✅) · IMP-083 (Admin 요율 카드 UI ✅)
 
@@ -14,7 +14,7 @@
 | 항목 | 내용 |
 |:----|:----|
 | 역할 | ADMIN / SHIPPER |
-| 화면 URL | /ko/orders/[id] (오더 상세 → 경로 탭) |
+| 화면 URL | /ko/orders/[id] (오더 상세 → Route Optimization 섹션) |
 | 예상 소요 시간 | 10분 |
 | 사전 조건 | 오더 1건 존재 (origin_port·dest_port 설정, 예: ICN→SIN), ADMIN 또는 SHIPPER 로그인, zen_route_network·zen_carriers 시드 데이터 존재 |
 | 관련 IMP | IMP-080·081 |
@@ -25,13 +25,10 @@
 |:---:|:---------|:---------|:-----------|:---------|:----:|
 | 1 | /ko/orders | ADMIN 계정 로그인 후 오더 목록 진입 | `admin@zenith.kr` / `password1234` | 오더 목록 정상 표시 | ☐ |
 | 2 | /ko/orders/[id] | ICN→SIN 구간 오더 선택 → 상세 페이지 진입 | — | 오더 상세 정보 표시 | ☐ |
-| 3 | /ko/orders/[id] | '경로 탭' 또는 'Route Options' 섹션 클릭 | — | 전체 운송사 후보 **비교 테이블** 표시 — 직항/경유 그룹 분리 | ☐ |
-| 4 | 각 행 | 각 행의 정보 확인 | — | 각 행: 운송사명·경로 세그먼트·운송 방식·비용($)·소요일·추천 배지 | ☐ |
-| 5 | 각 행 | 추천 배지 확인 | — | 추천 배지 확인: 최저비용 행 `최저비용 추천` / 최단시간 행 `최단시간 추천` / 균형 행 `균형 추천` | ☐ |
-| 6 | 각 행 | 비용이 0인 행 확인 | — | 비용=0인 경우 해당 행에 "요율 미등록" 표시 확인 | ☐ |
-| 7 | Supabase Studio | `SELECT recommended_for FROM zen_route_options WHERE order_id = '[orderId]'` | — | DB: `recommended_for` 컬럼에 `["COST"]`·`["TIME"]`·`["BALANCED"]` 값 정상 저장 확인 | ☐ |
-| 8 | /ko/logout → /ko/login | SHIPPER 계정으로 로그인 후 동일 오더 진입 | `shipper@zenith.kr` / `password1234` | SHIPPER도 경로 옵션 전체 후보 비교 조회 가능 (데이터 동일) | ☐ |
-| 9 | — | SHIPPER 계정으로 타 조직 오더 URL 직접 입력 시도 | `/ko/orders/[otherOrgOrderId]` | 접근 차단 (403 또는 메인 리다이렉트) | ☐ |
+| 3 | /ko/orders/[id] | Route Optimization 섹션에서 '경로 계산하기' 버튼 클릭 후 완료 대기 | — | 전체 운송사 후보 **비교 테이블** 표시 — 직항/경유 그룹 분리, 각 행에 운송사·경로·비용·소요일·추천 배지 | ☐ |
+| 4 | Supabase Studio | `SELECT recommended_for FROM zen_route_options WHERE order_id = '[orderId]'` | — | DB: `recommended_for` 컬럼에 `["COST"]`·`["TIME"]`·`["BALANCED"]` 값 정상 저장 확인 | ☐ |
+| 5 | /ko/logout → /ko/login | SHIPPER 계정으로 로그인 후 동일 오더 진입 | `test_corp_1777785263838@zenith.kr` / `password1234` | SHIPPER도 경로 옵션 전체 후보 비교 조회 가능 (데이터 동일) | ☐ |
+| 6 | — | SHIPPER 계정으로 타 조직 오더 URL 직접 입력 시도 | `/ko/orders/[otherOrgOrderId]` | 접근 차단 (403 또는 메인 리다이렉트) | ☐ |
 
 ### 합격 기준
 - [ ] 전 단계 ☑ 완료
@@ -56,23 +53,23 @@
 | 역할 | ADMIN |
 | 화면 URL | /ko/orders/[id] |
 | 예상 소요 시간 | 10분 |
-| 사전 조건 | 오더 경로 옵션 3종 조회 완료 상태 |
+| 사전 조건 | 오더 경로 옵션 전체 후보 조회 완료 상태 (UAT-10-01 선행) |
 | 관련 IMP | IMP-081 |
 
 ### 테스트 절차
 
 | 순서 | 화면·URL | 수행 액션 | 입력 데이터 | 기대 결과 | 확인 |
 |:---:|:---------|:---------|:-----------|:---------|:----:|
-| 1 | /ko/orders/[id] | ADMIN 계정으로 경로 옵션이 표시된 오더 진입 | — | COST·TIME·BALANCED 3종 카드 표시 | ☐ |
-| 2 | 경로 카드 | BALANCED 카드의 '선택' 또는 '경로 확정' 버튼 클릭 | — | 버튼 → '선택됨' 또는 활성 상태 변경 | ☐ |
-| 3 | — | 페이지 새로고침 (`F5`) | — | BALANCED가 계속 선택된 상태 유지 | ☐ |
-| 4 | — | COST 카드 재선택 후 새로고침 | — | 선택 경로가 COST로 변경·유지 | ☐ |
+| 1 | /ko/orders/[id] | ADMIN 계정으로 경로 옵션이 표시된 오더 진입 | — | 전체 후보 **비교 테이블** 표시 (직항/경유 그룹, 추천 배지) | ☐ |
+| 2 | 비교 테이블 | BALANCED 추천 행의 '선택' 버튼 클릭 | — | 해당 행 하이라이트, "경로가 확정되었습니다" 토스트 | ☐ |
+| 3 | — | 페이지 새로고침 (`F5`) | — | 선택된 경로 유지, 마일스톤 타임라인 재표시 | ☐ |
+| 4 | — | COST 추천 행 재선택 후 새로고침 | — | 선택 경로가 COST로 변경·유지 | ☐ |
 | 5 | Supabase Studio | `SELECT * FROM zen_order_routes WHERE order_id = '[orderId]'` | — | selected_option_id가 선택한 옵션 ID와 일치 | ☐ |
 | 6 | Supabase Studio | `SELECT o.status FROM zen_orders o WHERE o.id = '[orderId]'` | — | 오더 상태가 이전 상태와 동일 (경로 선택은 상태 전이와 독립) | ☐ |
 
 ### 합격 기준
 - [ ] 전 단계 ☑ 완료
-- [ ] 경로 옵션 중 1종 선택 가능
+- [ ] 비교 테이블에서 경로 옵션 중 1종 선택 가능
 - [ ] DB `zen_order_routes`에 `selected_option_id` 저장 확인
 - [ ] 페이지 새로고침 후 선택 경로 유지
 - [ ] 경로 변경 (다른 옵션 재선택) 가능 확인 (UPSERT)
@@ -91,7 +88,7 @@
 | 항목 | 내용 |
 |:----|:----|
 | 역할 | ADMIN |
-| 화면 URL | /ko/orders/[id] (오더 상세 → 경로 탭 → 각 옵션 카드) |
+| 화면 URL | /ko/orders/[id] (오더 상세 → Route Optimization 섹션 → 비교 테이블) |
 | 예상 소요 시간 | 15분 |
 | 사전 조건 | 오더 1건 존재 (ICN→SIN, 중량 200kg), 요율 카드 + 할증 시드 데이터 등록 완료, ADMIN 로그인 |
 | 관련 IMP | IMP-080·082 |
@@ -103,10 +100,10 @@
 | 1 | /ko/admin/rate-cards | ADMIN 로그인 후 Rate Cards 탭 진입 | `admin@zenith.kr` / `password1234` | 요율 카드 목록 표시 (ZENITH_AIR AIR, ZENITH_SEA SEA 시드 2건) | ☐ |
 | 2 | /ko/admin/rate-cards | Surcharges 탭 클릭 | — | 할증 목록 표시 (ZENITH_AIR FSC 15%, ZENITH_SEA SSC $50) | ☐ |
 | 3 | /ko/orders | ICN→SIN 구간, 중량 200kg 오더 선택 | — | 오더 상세 페이지 진입 | ☐ |
-| 4 | /ko/orders/[id] | 경로 탭 클릭 → COST/TIME/BALANCED 3종 카드 확인 | — | 각 카드에 `총비용(total_cost)` 필드 표시 | ☐ |
-| 5 | COST 카드 | 기본 운임(base freight) 금액 확인 | — | 예: ZENITH_AIR AIR 200kg → tiers[1] $4.80/kg → $960.00 | ☐ |
-| 6 | COST 카드 | 할증(FSC) 금액 확인 | — | FSC 15% → $960 × 15% = $144.00 표시 | ☐ |
-| 7 | COST 카드 | 총 운임(total) = baseFreight + surcharges 합산 확인 | — | $960.00 + $144.00 = $1,104.00 | ☐ |
+| 4 | /ko/orders/[id] | '경로 계산하기' 클릭 후 비교 테이블 각 행의 총비용(total_cost) 확인 | — | 각 행에 `총비용(total_cost)` 필드 표시 | ☐ |
+| 5 | 비교 테이블 | 최저비용(COST) 추천 행의 기본 운임(base freight) 금액 확인 | — | 예: ZENITH_AIR AIR 200kg → tiers[1] $4.80/kg → $960.00 | ☐ |
+| 6 | 비교 테이블 | 최저비용 추천 행의 할증(FSC) 금액 확인 | — | FSC 15% → $960 × 15% = $144.00 표시 | ☐ |
+| 7 | 비교 테이블 | 최저비용 추천 행 총 운임(total) = baseFreight + surcharges 합산 확인 | — | $960.00 + $144.00 = $1,104.00 | ☐ |
 | 8 | Supabase Studio | `SELECT * FROM zen_route_options WHERE order_id = '[orderId]'` → pricing_breakdown 컬럼 확인 | — | 각 옵션의 pricing_breakdown에 baseFreight·surcharges[]·total 포함 | ☐ |
 | 9 | Supabase Studio | `SELECT * FROM zen_rate_cards rc JOIN zen_carriers c ON c.id = rc.carrier_id WHERE c.code = 'ZENITH_AIR'` | — | tiers JSONB: `[{"weight_min":0,"unit_price":5.50},...]` — 3개 티어 확인 | ☐ |
 
@@ -256,3 +253,4 @@
 | 2026-05-23 | Aiden (Claude) | v1.0 초안 작성 — UAT-10-01~06 골격 6개, 지능형 라우팅 & Composite Pricing 검증 범위 정의 |
 | 2026-05-24 | D_Kai (OpenCode) | v2.0 — UAT-10-01·02·05 절차표 완성, UAT-10-03·04·06 DB 사전 확인 추가 |
 | 2026-05-24 | D_Kai (OpenCode) | v2.1 — UAT-10-03·04·06 절차표 전면 완성 (IMP-081·082·083 구현 반영), 3건 ⬜→✅ |
+| 2026-05-30 | D_Kai (OpenCode) | v3.0 — UAT-10-01·02 3종 카드 → 전체 후보 비교 테이블 전환, SHIPPER 계정 변경, 화면 URL·절차 업데이트 (DEF-030 반영) |
