@@ -241,6 +241,34 @@ async function seedOrders(supabase: any, shipperOrgId: string) {
         console.log(`  - Seeded package + 2 items for order: ${order.order_no}`);
       }
     }
+
+    // QnA 시드: Customer Support 탭 문의 내역 표시 검증용
+    const { data: existingQna } = await supabase
+      .from('zen_qna')
+      .select('id')
+      .eq('order_id', orderId)
+      .limit(1);
+    if (!existingQna || existingQna.length === 0) {
+      // seed-local.ts가 service_role key로 실행되므로 auth.uid()가 없음 → shipper 프로필 ID를 created_by로 사용
+      const { data: shipperProfile } = await supabase
+        .from('zen_profiles')
+        .select('id')
+        .eq('email', 'uat02_corp_shipper@zenith.kr')
+        .single();
+      const { error: qnaErr } = await supabase.from('zen_qna').insert({
+        order_id: orderId,
+        org_id: shipperOrgId,
+        created_by: shipperProfile?.id || '00000000-0000-0000-0000-000000000000',
+        title: `${order.order_no} 배송 일정 문의`,
+        content: `${order.order_no} 건의 현재 배송 상태와 예상 도착 일정을 확인 요청드립니다.`,
+        status: 'PENDING',
+      });
+      if (qnaErr) {
+        console.error(`  - QnA seed FAILED for ${order.order_no}: ${qnaErr.message}`);
+      } else {
+        console.log(`  - Seeded QnA for order: ${order.order_no}`);
+      }
+    }
   }
 }
 
@@ -416,6 +444,28 @@ async function verifySeedData(supabase: ReturnType<typeof createClient>) {
       const vol = ((pkg.length || 0) * (pkg.width || 0) * (pkg.height || 0)) / 1000000 * (pkg.packing_count || 1);
       console.log(`  PASS: ${order.order_no} → ${pkgCount}pkg, ${itemCount}items, ${totalWt}kg, ${vol.toFixed(3)}cbm`);
     }
+  }
+
+  // QnA 데이터 검증
+  const { data: orderIds } = await supabase
+    .from('zen_orders')
+    .select('id, order_no')
+    .in('order_no', ['E2E-SEED-001', 'E2E-SEED-002', 'E2E-SEED-003', 'E2E-SEED-004', 'E2E-SEED-005']);
+  const e2eIdList = (orderIds || []).map((o: any) => o.id);
+  const { data: qnas } = await supabase
+    .from('zen_qna')
+    .select('id, order_id, title')
+    .in('order_id', e2eIdList);
+  const qnaOrderIds = new Set((qnas || []).map((q: any) => q.order_id));
+  for (const o of (orderIds || [])) {
+    if (!(qnaOrderIds.has(o.id))) {
+      console.error(`  FAIL: ${o.order_no} has NO QnA record`);
+      hasError = true;
+    }
+  }
+  if (!hasError) {
+    const qnaCount = (qnas || []).length;
+    console.log(`  PASS: QnA seeded for all test orders (${qnaCount} total)`);
   }
 
   if (hasError) {

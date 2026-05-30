@@ -49,26 +49,26 @@ export const OrderTisaDashboard: React.FC<OrderTisaDashboardProps> = ({
       {snapshot ? (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 py-2">
           <div className="flex flex-col">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Rate Card ID</span>
-            <span className="text-sm text-slate-700 font-medium truncate">{snapshot.rateCardId}</span>
+            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider" title="Rate Card 고유 식별자">Rate Card ID</span>
+            <span className="text-sm text-slate-700 font-medium break-all" title={snapshot.rateCardId}>{snapshot.rateCardId}</span>
           </div>
           <div className="flex flex-col">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Version</span>
+            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider" title="Rate Card 개정 버전">Version</span>
             <span className="text-sm text-slate-700 font-medium tracking-tight">v{snapshot.versionNo}</span>
           </div>
           <div className="flex flex-col">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Priority Level</span>
+            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider" title="적용 우선순위 (낮을수록 우선)">Priority Level</span>
             <span className="text-sm text-slate-700 font-medium">{snapshot.priority}</span>
           </div>
           <div className="flex flex-col">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Base Amount</span>
+            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider" title="기준 운임 금액">Base Amount</span>
             <span className="text-sm font-bold text-blue-600">
               {new Intl.NumberFormat('en-US', { style: 'currency', currency: snapshot.currency }).format(snapshot.baseAmount)}
             </span>
           </div>
 
           <div className="col-span-2 lg:col-span-4 mt-2">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Validity Period</span>
+            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider" title="요율 유효 기간">Validity Period</span>
             <p className="text-sm text-slate-600 mt-1">
               {new Date(snapshot.validFrom).toLocaleDateString()} ~ {snapshot.validTo.startsWith('9999') ? 'Open Ends' : new Date(snapshot.validTo).toLocaleDateString()}
             </p>
@@ -76,7 +76,7 @@ export const OrderTisaDashboard: React.FC<OrderTisaDashboardProps> = ({
 
           {snapshot.status === 'MANUAL' && snapshot.appliedReason && (
             <div className="col-span-2 lg:col-span-4 mt-2 bg-amber-50/50 p-3 rounded-xl border border-amber-100">
-              <span className="text-xs font-semibold text-amber-800 uppercase tracking-wider">Override Reason</span>
+              <span className="text-xs font-semibold text-amber-800 uppercase tracking-wider" title="Manual Override 사유">Override Reason</span>
               <p className="text-sm text-amber-900 mt-1">{snapshot.appliedReason}</p>
             </div>
           )}

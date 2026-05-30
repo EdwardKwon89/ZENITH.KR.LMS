@@ -164,8 +164,9 @@ export function OrderQnaSection({
         </div>
         {!isAdmin && (
           <ZenButton 
+            variant="ghost"
             onClick={() => router.push(`/${locale}/support/qna/new?orderId=${orderId}&orderNo=${orderNo}`)}
-            className="bg-brand-600 hover:bg-brand-700 text-white rounded-xl px-4 h-10 flex items-center gap-2 text-sm"
+            className="bg-brand-600 hover:bg-brand-500 text-white rounded-xl px-4 h-10 flex items-center gap-2 text-sm"
           >
             <Plus size={16} /> {t("qna_new")}
           </ZenButton>
