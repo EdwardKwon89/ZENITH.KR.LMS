@@ -198,8 +198,8 @@ TASK-100에서 다음 두 가지 구조적 변경이 발생했다.
 | # | 내용 |
 |:-:|:-----|
 | A1 | `fe04df4` 혼합 커밋 (R-17 위반) — Riley가 IMP-090 SQL 2파일 + TASK-102 UAT 2파일 단일 커밋에 포함. Riley R-17 위반 **누적 3회** (TASK-088 + TASK-092 + 이번) |
-| A2 | IMP-090 무단 SQL 작업 — `20260515223345_remediate_security_definer_functions.sql` 기존 마이그레이션 직접 수정 (CORPORATE·INDIVIDUAL 롤 시퀀스 생성 허용). Task 발령 없이 기존 마이그레이션 파일 수정은 표준에 부합하지 않음. IMP-090 전용 신규 마이그레이션 파일로 처리 권장 |
-| A3 | Riley 무단 대행 — D_Kai 할당 Task를 Aiden 승인 없이 집행. 향후 대행 수행 전 반드시 Aiden 승인 획득 필요 |
+| A2 | IMP-090 SQL 작업 방식 — `20260515223345_remediate_security_definer_functions.sql` 기존 마이그레이션 직접 수정 (CORPORATE·INDIVIDUAL 롤 시퀀스 생성 허용). 기능은 합리적이나 기존 마이그레이션 직접 수정 방식 부적절 — 신규 마이그레이션 파일로 처리 권장 |
+| ~~A3~~ | ~~Riley 무단 대행~~ — **Edward 직접 지시에 의한 대행 (취소)** |
 
 ---
 

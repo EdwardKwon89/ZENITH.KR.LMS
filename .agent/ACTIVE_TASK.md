@@ -156,7 +156,7 @@
 | TASK-099 | 260529 | UAT-02-04 재작성 — A-2 경로 (REGISTERED→DELIVERED) | P4 | 없음 | B_Kai | ✅ | [TASK-099](tasks/TASK-099_260529_UAT0204재작성_BKai.md) | 332a036+4833de1+9040bcc · 6개 전이 ✅ · Advisory 2건(비차단) · TASK-101 재교육 세션 병행 |
 | TASK-100 | 260529 | DEF-030 경로 최적화 전면 수정 (전체 운송사 비교·가드) | P1 | 없음 | D_Kai | ✅ | [TASK-100](tasks/TASK-100_260529_DEF030경로최적화수정_DKai.md) | 5b63421+f1c3f74 · 229/229 PASS · Aiden ✅ 승인 |
 | TASK-101 | 260529 | B_Kai 재교육 세션 2차 (R-17 위반 3회 누적) | P4 | 없음 | B_Kai | ✅ | [TASK-101](tasks/TASK-101_260529_BKai재교육세션2차_BKai.md) | §1~§3 전항목 우수 · c60196f · Aiden ✅ 승인 · B_Kai 신규 할당 중단 해제 |
-| TASK-102 | 260529 | UAT-02·10 시나리오 수정 — TASK-100 경로 최적화 반영 | P3 | TASK-100 ✅ | D_Kai | ✅ | [TASK-102](tasks/TASK-102_260529_UAT수정_TASK100반영_DKai.md) | fe04df4+4390bad · 229/229 PASS · Advisory 3건(Riley 위반 3회·IMP-090 무단·무단 대행) |
+| TASK-102 | 260529 | UAT-02·10 시나리오 수정 — TASK-100 경로 최적화 반영 | P3 | TASK-100 ✅ | D_Kai | ✅ | [TASK-102](tasks/TASK-102_260529_UAT수정_TASK100반영_DKai.md) | fe04df4+4390bad · 229/229 PASS · Advisory 2건(Riley 위반 3회·IMP-090 기존마이그 수정) |
 
 ---
 
@@ -356,4 +356,4 @@
 | 2026-05-27 | D_Kai (OpenCode) | UAT-01-08 세션 Idle Timeout 버그 수정 완료 — env 미설정(DEF-014)·로그인 후 즉시 timeout(DEF-015)·maxAge 120초로 timeout 영원히 미발생(DEF-016) · 커밋 `1477091`·`f1f20cc` · Edward 재검증 ✅ |
 | 2026-05-29 | Riley (Gemini) | TASK-102 대행 완료 — UAT 문서 정정 및 화주 시퀀스 권한 확장 SQL 검증 완료 |
 | 2026-05-30 | Aiden (Claude) | TASK-101 ✅ PASS — B_Kai §1~§3 전항목 우수 (TASK-099 사례 구체 서술). B_Kai 신규 Task 할당 중단 해제 |
-| 2026-05-30 | Aiden (Claude) | TASK-102 ✅ PASS — UAT-02-04·02-09·10-01 전항목 충족. Advisory 3건: Riley fe04df4 혼합커밋 R-17 위반(누적 3회)·IMP-090 무단 SQL(기존 마이그레이션 직접 수정)·무단 대행 |
+| 2026-05-30 | Aiden (Claude) | TASK-102 ✅ PASS — UAT-02-04·02-09·10-01 전항목 충족. Advisory 2건: Riley fe04df4 혼합커밋 R-17 위반(누적 3회)·IMP-090 SQL 기존 마이그레이션 직접 수정(신규 마이그 권장). Riley 대행은 Edward 지시 → A3 취소 |
