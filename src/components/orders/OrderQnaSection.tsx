@@ -58,7 +58,7 @@ export function OrderQnaSection({
         getVocList({ order_id: orderId })
       ]);
       
-      const normalizedQnas = qnaData.map(q => ({ 
+      const normalizedQnas = (qnaData.qnas || []).map((q: any) => ({ 
         ...q, 
         _type: 'QNA' 
       }));

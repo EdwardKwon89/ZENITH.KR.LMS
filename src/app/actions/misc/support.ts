@@ -120,6 +120,9 @@ export async function createQna(payload: {
   }
 
   revalidatePath("/support/qna");
+  if (payload.order_id) {
+    revalidatePath(`/orders/${payload.order_id}`);
+  }
   return { success: true, qnaId: qna.id };
 }
 

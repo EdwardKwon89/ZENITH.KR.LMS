@@ -47,7 +47,11 @@ export function QnaForm({
         order_id: formData.orderId || undefined
       });
       toast.success(t("success_create"));
-      router.push(`/${locale}/support/qna`);
+      if (formData.orderId) {
+        router.push(`/${locale}/orders/${formData.orderId}`);
+      } else {
+        router.push(`/${locale}/support/qna`);
+      }
       router.refresh();
     } catch (error) {
       logger.error("Failed to submit inquiry", error);
