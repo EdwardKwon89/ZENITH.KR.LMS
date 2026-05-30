@@ -97,7 +97,6 @@ async function seedOrders(supabase: any, shipperOrgId: string) {
   const icnId = icnPort?.id || null;
   const laxId = laxPort?.id || null;
 
-  const cargoDetails = { description: 'E2E test cargo', weight_kg: 1.0, total_weight: 10.0, total_volume: 0.05 };
   const testOrders = [
     { order_no: 'E2E-SEED-001', status: 'REGISTERED', recipient_name: 'E2E Test Recipient 1', recipient_phone: '010-9999-0001' },
     { order_no: 'E2E-SEED-002', status: 'REGISTERED', recipient_name: 'E2E Test Recipient 2', recipient_phone: '010-9999-0002' },
@@ -134,6 +133,8 @@ async function seedOrders(supabase: any, shipperOrgId: string) {
       await supabase.from('zen_tracking_events').delete().eq('order_id', order.id);
       await supabase.from('zen_tracking_raw_logs').delete().eq('order_id', order.id);
       await supabase.from('zen_tracking_configs').delete().eq('order_id', order.id);
+      await supabase.from('zen_order_items').delete().eq('order_id', order.id);
+      await supabase.from('zen_order_packages').delete().eq('order_id', order.id);
       await supabase.from('zen_orders').delete().eq('id', order.id);
     }
 
@@ -143,8 +144,11 @@ async function seedOrders(supabase: any, shipperOrgId: string) {
       .eq('order_no', order.order_no)
       .maybeSingle();
 
+    let orderId: string;
+
     if (existing) {
       console.log(`  - Order exists: ${order.order_no}`);
+      orderId = existing.id;
       
       // Update existing orders to ensure they have correct ports/transport_mode set
       const { error: updateError } = await supabase
@@ -154,9 +158,9 @@ async function seedOrders(supabase: any, shipperOrgId: string) {
           dest_port_id: order.dest_port_id,
           transport_mode: order.transport_mode,
           order_type: order.order_type || 'B2B',
-          cargo_details: cargoDetails
+          cargo_details: { description: 'E2E test cargo' }
         })
-        .eq('id', existing.id);
+        .eq('id', orderId);
 
       if (updateError) {
         console.error(`  - Failed to update order ports/mode: ${updateError.message}`);
@@ -168,43 +172,73 @@ async function seedOrders(supabase: any, shipperOrgId: string) {
         const { data: configExists } = await supabase
           .from('zen_tracking_configs')
           .select('id')
-          .eq('order_id', existing.id)
+          .eq('order_id', orderId)
           .maybeSingle();
         if (!configExists) {
           console.log(`  - Seeding tracking config for existing order Z-HOU-E2E03-01...`);
           await supabase.from('zen_tracking_configs').insert({
-            order_id: existing.id,
+            order_id: orderId,
             provider_type: 'API',
             tracking_no: 'TRK-E2E04-API-01',
             is_active: true
           });
         }
       }
-      continue;
-    }
-
-    const { data: insertedOrder, error } = await supabase
-      .from('zen_orders')
-      .insert({
-        ...order,
-        shipper_id: shipperOrgId,
-        cargo_details: cargoDetails,
-      })
-      .select('id')
-      .single();
-
-    if (error) {
-      console.error(`  - Failed: ${order.order_no}`, error.message);
     } else {
+      const { data: insertedOrder, error } = await supabase
+        .from('zen_orders')
+        .insert({
+          ...order,
+          shipper_id: shipperOrgId,
+          cargo_details: { description: 'E2E test cargo' },
+        })
+        .select('id')
+        .single();
+
+      if (error) {
+        console.error(`  - Failed: ${order.order_no}`, error.message);
+        continue;
+      }
+      orderId = insertedOrder.id;
       console.log(`  - Created: ${order.order_no} [${order.status}]`);
+
       if (order.order_no === 'Z-HOU-E2E03-01') {
         console.log(`  - Seeding tracking config for new order Z-HOU-E2E03-01...`);
         await supabase.from('zen_tracking_configs').insert({
-          order_id: insertedOrder.id,
+          order_id: orderId,
           provider_type: 'API',
           tracking_no: 'TRK-E2E04-API-01',
           is_active: true
         });
+      }
+    }
+
+    // 패키지/품목 시드: 상세 화면 Total Weight/Volume/Package Details 표시 검증용
+    const { data: existingPkg } = await supabase
+      .from('zen_order_packages')
+      .select('id')
+      .eq('order_id', orderId)
+      .limit(1);
+    if (!existingPkg || existingPkg.length === 0) {
+      const { data: newPkg } = await supabase
+        .from('zen_order_packages')
+        .insert({
+          order_id: orderId,
+          packing_unit: 'BOX',
+          packing_count: 2,
+          length: 40,
+          width: 30,
+          height: 20,
+          gross_weight: 5.0,
+        })
+        .select('id')
+        .single();
+      if (newPkg) {
+        await supabase.from('zen_order_items').insert([
+          { order_id: orderId, package_id: newPkg.id, item_name: 'Sample Widget A', quantity: 10, unit_price: 15.50, currency: 'USD', hs_code: '8471.30' },
+          { order_id: orderId, package_id: newPkg.id, item_name: 'Sample Widget B', quantity: 5, unit_price: 22.00, currency: 'USD', hs_code: '8471.60' },
+        ]);
+        console.log(`  - Seeded package + 2 items for order: ${order.order_no}`);
       }
     }
   }
@@ -294,7 +328,7 @@ async function seed() {
         type: 'SHIPPER',
       });
     } else {
-      await supabase.from('organizations').update({ address, biz_no }).eq('id', org.id);
+      await supabase.from('organizations').update({ address, biz_no: bizNo }).eq('id', org.id);
     }
   }
 
