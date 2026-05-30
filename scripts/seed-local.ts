@@ -41,6 +41,7 @@ async function createUser(supabase: any, email: string, fullName: string, role: 
       id: user.id,
       email: email,
       full_name: fullName,
+      phone_number: '010-1234-5678',
       role: role,
       status: 'ACTIVE',
       org_id: orgId
@@ -261,9 +262,41 @@ async function seed() {
     // 1. 기본 조직 생성 (플랫폼 운영사)
     const platformOrg = await getOrCreateOrg(supabase, 'Zenith Logistics', 'PLATFORM');
 
-    // 2. 테스트용 화주/운송사 조직 생성
-    const shipperOrg = await getOrCreateOrg(supabase, 'Global Shipper Corp', 'SHIPPER');
-    const carrierOrg = await getOrCreateOrg(supabase, 'Fast Carrier Ltd', 'CARRIER');
+  // 2. 테스트용 화주/운송사 조직 생성
+  const shipperOrg = await getOrCreateOrg(supabase, 'Global Shipper Corp', 'SHIPPER');
+  const carrierOrg = await getOrCreateOrg(supabase, 'Fast Carrier Ltd', 'CARRIER');
+
+  // 2-1. 레거시 organizations 테이블에 주소/사업자번호 동기화 (getCurrentUserAffiliation 호환)
+  for (const [org, orgName, address, bizNo] of [
+    [shipperOrg, 'Global Shipper Corp', '1201, 12F, Digital-ro 123, Geumcheon-gu, Seoul, South Korea', '123-45-67890'],
+    [carrierOrg, 'Fast Carrier Ltd', '456 Freight Ave, Incheon, South Korea', '987-65-43210'],
+    [platformOrg, 'Zenith Logistics', '789 Platform St, Gangnam-gu, Seoul', null],
+  ] as const) {
+    // zen_organizations에 address 추가 (컬럼 없으면 zen_organizations의 biz_no만 업데이트)
+    if (bizNo) {
+      await supabase.from('zen_organizations').update({ biz_no: bizNo }).eq('id', org.id);
+    }
+    // 레거시 organizations 테이블에 주소/사업자번호 저장
+    const { data: legacyOrg } = await supabase
+      .from('organizations')
+      .select('id')
+      .eq('id', org.id)
+      .maybeSingle();
+    if (!legacyOrg) {
+      await supabase.from('organizations').insert({
+        id: org.id,
+        org_name_ko: orgName,
+        org_name_en: orgName,
+        org_type: 'SHIPPER',
+        address: address,
+        biz_no: bizNo,
+        is_active: true,
+        type: 'SHIPPER',
+      });
+    } else {
+      await supabase.from('organizations').update({ address, biz_no }).eq('id', org.id);
+    }
+  }
 
     // 3. 역할별 테스트 계정 생성
     await createUser(supabase, 'manager@zenith.kr', 'Platform Manager', 'MANAGER', platformOrg.id, 'PLATFORM');
