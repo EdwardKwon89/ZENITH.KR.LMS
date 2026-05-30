@@ -53,7 +53,7 @@ Supabase: Cloud 프로젝트 연결
 |:----:|:------|:---------|:-----|
 | ADMIN | `admin@zenith.kr` | `password1234` | 기존 확인 계정 |
 | ADMIN (보조) | `admin_e2e@zenith.kr` | `password1234!` | E2E 전용 계정 |
-| SHIPPER | `test_corp_1777785263838@zenith.kr` | `password1234` | 기존 확인 계정 |
+| SHIPPER | `uat02_corp_shipper@zenith.kr` | `password1234` | 기존 확인 계정 |
 | SHIPPER (보조) | `shipper@zenith.kr` | `password1234` | audit spec 확인 |
 | MASTER | `master@zenith.kr` | `password1234` | ⚠️ UAT 전 계정 생성 필요 |
 | MANAGER | `manager@zenith.kr` | `password1234` | ⚠️ UAT 전 계정 생성 필요 |

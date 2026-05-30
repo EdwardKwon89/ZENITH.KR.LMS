@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import fs from 'fs';
 
 // Test Data
-const SHIPPER_EMAIL = 'test_corp_1777785263838@zenith.kr';
+const SHIPPER_EMAIL = 'uat02_corp_shipper@zenith.kr';
 const SHIPPER_PASSWORD = 'password1234';
 const ADMIN_EMAIL = 'admin_e2e@zenith.kr';
 const ADMIN_PASSWORD = 'password1234!';

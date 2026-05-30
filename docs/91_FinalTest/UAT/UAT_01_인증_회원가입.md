@@ -61,7 +61,7 @@
 
 | 순서 | 화면·URL | 수행 액션 | 입력 데이터 | 기대 결과 | 확인 |
 |:---:|:---------|:---------|:-----------|:---------|:----:|
-| 1 | /ko/login | SHIPPER 계정으로 로그인 | `test_corp_1777785263838@zenith.kr` / `password1234` | 대시보드로 이동, SHIPPER 메뉴 표시 | ☐ |
+| 1 | /ko/login | SHIPPER 계정으로 로그인 | `uat02_corp_shipper@zenith.kr` / `password1234` | 대시보드로 이동, SHIPPER 메뉴 표시 | ☐ |
 | 2 | /ko/login | 로그아웃 후 ADMIN 계정 로그인 | `admin@zenith.kr` / `password1234` | 대시보드로 이동, ADMIN 메뉴 표시 | ☐ |
 | 3 | /ko/login | 로그아웃 후 MASTER 계정 로그인 | `master@zenith.kr` / `password1234` | 대시보드로 이동, MASTER 메뉴 표시 | ☐ |
 | 4 | /ko/login | 로그아웃 후 MANAGER 계정 로그인 | `manager@zenith.kr` / `password1234` | 대시보드로 이동, MANAGER 메뉴 표시 | ☐ |

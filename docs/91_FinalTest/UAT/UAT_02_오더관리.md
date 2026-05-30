@@ -14,7 +14,7 @@
 | 역할 | SHIPPER |
 | 화면 URL | /ko/login → /ko/orders/new |
 | 예상 소요 시간 | 10분 |
-| 사전 조건 | SHIPPER 계정(`test_corp_1777785263838@zenith.kr`) 로그인 상태 |
+| 사전 조건 | SHIPPER 계정(`uat02_corp_shipper@zenith.kr`) 로그인 상태 |
 
 ### 테스트 절차
 
@@ -93,7 +93,7 @@
 | 역할 | ADMIN / SHIPPER |
 | 화면 URL | /ko/login → /ko/orders → /ko/orders/{orderId} |
 | 예상 소요 시간 | 5분 |
-| 사전 조건 | ADMIN(`admin@zenith.kr`) 또는 SHIPPER(`test_corp_1777785263838@zenith.kr`) 로그인 상태, 오더 1건 존재 |
+| 사전 조건 | ADMIN(`admin@zenith.kr`) 또는 SHIPPER(`uat02_corp_shipper@zenith.kr`) 로그인 상태, 오더 1건 존재 |
 
 ### 테스트 절차
 
@@ -332,7 +332,7 @@
 | 역할 | SHIPPER / ADMIN |
 | 화면 URL | /ko/login → /ko/orders/{orderId} |
 | 예상 소요 시간 | 8분 |
-| 사전 조건 | SHIPPER(`test_corp_1777785263838@zenith.kr`) 또는 ADMIN(`admin@zenith.kr`) 로그인 상태, **REGISTERED** 상태 오더 1건 존재 |
+| 사전 조건 | SHIPPER(`uat02_corp_shipper@zenith.kr`) 또는 ADMIN(`admin@zenith.kr`) 로그인 상태, **REGISTERED** 상태 오더 1건 존재 |
 
 ### 테스트 절차
 

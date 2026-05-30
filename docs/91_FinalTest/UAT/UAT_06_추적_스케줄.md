@@ -14,7 +14,7 @@
 | 역할 | SHIPPER |
 | 화면 URL | /ko/login → /ko/tracking |
 | 예상 소요 시간 | 8분 |
-| 사전 조건 | SHIPPER 계정(`test_corp_1777785263838@zenith.kr`) 로그인 상태, 배송 추적 데이터 존재 |
+| 사전 조건 | SHIPPER 계정(`uat02_corp_shipper@zenith.kr`) 로그인 상태, 배송 추적 데이터 존재 |
 
 ### 테스트 절차
 
@@ -125,13 +125,13 @@
 | 역할 | SHIPPER / ADMIN |
 | 화면 URL | /ko/login → /ko/tracking |
 | 예상 소요 시간 | 8분 |
-| 사전 조건 | SHIPPER 계정(`test_corp_1777785263838@zenith.kr`) + ADMIN 계정(`admin@zenith.kr`) 모두 필요 |
+| 사전 조건 | SHIPPER 계정(`uat02_corp_shipper@zenith.kr`) + ADMIN 계정(`admin@zenith.kr`) 모두 필요 |
 
 ### 테스트 절차 — 시나리오 A: SHIPPER의 추적 범위
 
 | 순서 | 화면·URL | 수행 액션 | 입력 데이터 | 기대 결과 | 확인 |
 |:---:|:---------|:---------|:-----------|:---------|:----:|
-| 1 | /ko/login | SHIPPER 계정 로그인 | test_corp_1777785263838@zenith.kr / password1234 | 대시보드 이동 | ☐ |
+| 1 | /ko/login | SHIPPER 계정 로그인 | uat02_corp_shipper@zenith.kr / password1234 | 대시보드 이동 | ☐ |
 | 2 | /ko/tracking | 추적 대시보드 접속 | — | 통계 카드 + 추적 데이터 테이블 표시 | ☐ |
 | 3 | /ko/tracking | 테이블 데이터 확인 | — | SHIPPER 본인 조직의 오더에 대한 추적 데이터만 표시 (타 조직 오더 미노출) | ☐ |
 

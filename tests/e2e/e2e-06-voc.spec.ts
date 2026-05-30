@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 // Test Data
-const SHIPPER_EMAIL = 'test_corp_1777785263838@zenith.kr';
+const SHIPPER_EMAIL = 'uat02_corp_shipper@zenith.kr';
 const ADMIN_EMAIL = 'admin@zenith.kr';
 const PASSWORD = 'password1234';
 const TEST_ORDER_ID = 'd197352a-ba9f-4640-9176-c50c852d8138';

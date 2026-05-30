@@ -27,7 +27,7 @@
 | 2 | /ko/orders/[id] | ICN→SIN 구간 오더 선택 → 상세 페이지 진입 | — | 오더 상세 정보 표시 | ☐ |
 | 3 | /ko/orders/[id] | Route Optimization 섹션에서 '경로 계산하기' 버튼 클릭 후 완료 대기 | — | 전체 운송사 후보 **비교 테이블** 표시 — 직항/경유 그룹 분리, 각 행에 운송사·경로·비용·소요일·추천 배지 | ☐ |
 | 4 | Supabase Studio | `SELECT recommended_for FROM zen_route_options WHERE order_id = '[orderId]'` | — | DB: `recommended_for` 컬럼에 `["COST"]`·`["TIME"]`·`["BALANCED"]` 값 정상 저장 확인 | ☐ |
-| 5 | /ko/logout → /ko/login | SHIPPER 계정으로 로그인 후 동일 오더 진입 | `test_corp_1777785263838@zenith.kr` / `password1234` | SHIPPER도 경로 옵션 전체 후보 비교 조회 가능 (데이터 동일) | ☐ |
+| 5 | /ko/logout → /ko/login | SHIPPER 계정으로 로그인 후 동일 오더 진입 | `uat02_corp_shipper@zenith.kr` / `password1234` | SHIPPER도 경로 옵션 전체 후보 비교 조회 가능 (데이터 동일) | ☐ |
 | 6 | — | SHIPPER 계정으로 타 조직 오더 URL 직접 입력 시도 | `/ko/orders/[otherOrgOrderId]` | 접근 차단 (403 또는 메인 리다이렉트) | ☐ |
 
 ### 합격 기준
