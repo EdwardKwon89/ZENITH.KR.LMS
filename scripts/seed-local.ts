@@ -347,11 +347,84 @@ async function seed() {
     // 5. 정산 요율 카드 시드 데이터 생성
     await seedRateCards(supabase, carrierOrg.id);
 
+    // 6. 시드 데이터 무결성 검증
+    await verifySeedData(supabase);
+
     console.log('\nSeed complete! All test accounts and E2E orders are ready.');
   } catch (err: any) {
     console.error('\nSeed process failed:', err.message);
     process.exit(1);
   }
+}
+
+// ──────────────────────────────────────
+// 시드 데이터 무결성 검증
+// ──────────────────────────────────────
+async function verifySeedData(supabase: ReturnType<typeof createClient>) {
+  console.log('\nVerifying seed data integrity...');
+  let hasError = false;
+
+  const { data: orders } = await supabase
+    .from('zen_orders')
+    .select(`
+      id, order_no, status,
+      zen_order_packages (
+        id, packing_count, gross_weight, length, width, height,
+        zen_order_items (id, item_name, quantity)
+      )
+    `)
+    .in('order_no', [
+      'E2E-SEED-001', 'E2E-SEED-002', 'E2E-SEED-003',
+      'E2E-SEED-004', 'E2E-SEED-005',
+      'Z-FIN-E2E05-01', 'Z-HOU-E2E03-01',
+    ]);
+
+  if (!orders) {
+    console.error('  FAIL: No seed orders found in DB');
+    return false;
+  }
+
+  for (const order of orders as any[]) {
+    const pkgCount = (order.zen_order_packages || []).length;
+
+    if (pkgCount === 0) {
+      console.error(`  FAIL: ${order.order_no} has NO packages`);
+      hasError = true;
+      continue;
+    }
+
+    const pkg = order.zen_order_packages[0];
+    const itemCount = (pkg.zen_order_items || []).length;
+
+    if (itemCount === 0) {
+      console.error(`  FAIL: ${order.order_no} → package has NO items`);
+      hasError = true;
+    }
+
+    if (!pkg.gross_weight || pkg.gross_weight <= 0) {
+      console.error(`  FAIL: ${order.order_no} → package gross_weight is empty/zero (${pkg.gross_weight})`);
+      hasError = true;
+    }
+
+    if (!pkg.length || !pkg.width || !pkg.height) {
+      console.error(`  FAIL: ${order.order_no} → package dimensions missing (L:${pkg.length} W:${pkg.width} H:${pkg.height})`);
+      hasError = true;
+    }
+
+    if (!hasError) {
+      const totalWt = (pkg.gross_weight || 0) * (pkg.packing_count || 1);
+      const vol = ((pkg.length || 0) * (pkg.width || 0) * (pkg.height || 0)) / 1000000 * (pkg.packing_count || 1);
+      console.log(`  PASS: ${order.order_no} → ${pkgCount}pkg, ${itemCount}items, ${totalWt}kg, ${vol.toFixed(3)}cbm`);
+    }
+  }
+
+  if (hasError) {
+    console.error('\n  ⚠ Seed data integrity FAILED — fix seed data before UAT');
+    process.exit(1);
+  }
+
+  console.log('  All seed data integrity checks passed.');
+  return true;
 }
 
 seed();
