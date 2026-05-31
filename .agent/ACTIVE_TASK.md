@@ -151,7 +151,9 @@
 | TASK-094 | 260525 | E2E-19: Hub Routing 플로우 자동화 | P3 | TASK-091 ✅ · TASK-092 ✅ · TASK-093 ✅ | D_Kai | ✅ | [TASK-094](tasks/TASK-094_260525_E2EPhaseK자동화_DKai.md) | 3d8e5fc+0dba4b8+ed65e02 · 227/227 · E2E-19 시나리오 A+B ✅ |
 | TASK-095 | 260525 | UAT-11 Phase K 절차서 작성 (Hub Routing + P0 항목) | P3 | TASK-091 ✅ · TASK-092 ✅ · TASK-093 ✅ | B_Kai | ✅ | [TASK-095](tasks/TASK-095_260525_UATPhaseK절차서_BKai.md) | UAT-11 신규 6건 · UAT_MASTER 72→78 · 0322b1b+78345f3+97f2729+e2e3bc3 ✅ |
 | TASK-097 | 260525 | UAT-11 보완 — 쿼리 오류 수정 + IMP-086 시나리오 추가 | P3 | TASK-095 ✅ | B_Kai | ✅ | [TASK-097](tasks/TASK-097_260525_UAT11보완_BKai.md) | 3e491bb+84034bc+030d0ab · UAT-11-03 수정·UAT-11-07 신규·UAT_MASTER 79개 ✅ |
-| TASK-096 | 260525 | UAT 전체 실행 (Edward 직접 검증 — Go-Live 판정) | P1 | TASK-094 ✅ · TASK-095 ✅ · TASK-097 ✅ | Edward | ⬜ | [TASK-096](tasks/TASK-096_260525_UAT전체실행_Edward.md) | 전제조건 전량 충족 — Edward 직접 실행 대기 |
+| TASK-096 | 260525 | UAT 전체 실행 (Edward 직접 검증 — Go-Live 판정) | P1 | TASK-094 ✅ · TASK-095 ✅ · TASK-097 ✅ · **TASK-103 ✅ · TASK-104 ✅** | Edward | 🚫 | [TASK-096](tasks/TASK-096_260525_UAT전체실행_Edward.md) | ⚠️ 전제조건 추가 — TASK-103·104 완료 후 착수 가능 |
+| TASK-103 | 260531 | TISA 요율 3계층 구조 도입 (carrier_cost+margin+platform_fee) | P1 | 없음 | D_Kai | ⬜ | [TASK-103](tasks/TASK-103_260531_TISA요율3계층구조_DKai.md) | IMP-092 · DEF-035 · UAT 진행 전 필수 |
+| TASK-104 | 260531 | TISA Dashboard 실 Rate Card 연동 (Mock 제거·DB 실조회) | P1 | TASK-103 ✅ | D_Kai | 🚫 | [TASK-104](tasks/TASK-104_260531_TISADashboard실연동_DKai.md) | IMP-093 · DEF-032 · TASK-103 완료 후 착수 · UAT 진행 전 필수 |
 | TASK-098 | 260527 | ID 찾기 기능 재설계 — 개인/법인 분리 | P2 | 없음 | D_Kai | ✅ | [TASK-098](tasks/TASK-098_260527_ID찾기기능재설계_DKai.md) | IMP-089 완료 · 15299bf + 후속 8건(`2111a75`~`d1bc3de`) · Post-승인 버그 8건 ✅ 2차 승인 |
 | TASK-099 | 260529 | UAT-02-04 재작성 — A-2 경로 (REGISTERED→DELIVERED) | P4 | 없음 | B_Kai | ✅ | [TASK-099](tasks/TASK-099_260529_UAT0204재작성_BKai.md) | 332a036+4833de1+9040bcc · 6개 전이 ✅ · Advisory 2건(비차단) · TASK-101 재교육 세션 병행 |
 | TASK-100 | 260529 | DEF-030 경로 최적화 전면 수정 (전체 운송사 비교·가드) | P1 | 없음 | D_Kai | ✅ | [TASK-100](tasks/TASK-100_260529_DEF030경로최적화수정_DKai.md) | 5b63421+f1c3f74 · 229/229 PASS · Aiden ✅ 승인 |
@@ -357,3 +359,5 @@
 | 2026-05-29 | Riley (Gemini) | TASK-102 대행 완료 — UAT 문서 정정 및 화주 시퀀스 권한 확장 SQL 검증 완료 |
 | 2026-05-30 | Aiden (Claude) | TASK-101 ✅ PASS — B_Kai §1~§3 전항목 우수 (TASK-099 사례 구체 서술). B_Kai 신규 Task 할당 중단 해제 |
 | 2026-05-30 | Aiden (Claude) | TASK-102 ✅ PASS — UAT-02-04·02-09·10-01 전항목 충족. Advisory 2건: Riley fe04df4 혼합커밋 R-17 위반(누적 3회)·IMP-090 SQL 기존 마이그레이션 직접 수정(신규 마이그 권장). Riley 대행은 Edward 지시 → A3 취소 |
+| 2026-05-31 | Aiden (Claude) | TASK-103 발령 — D_Kai, IMP-092 TISA 요율 3계층 구조 도입 (carrier_cost+margin_rate+platform_fee_rate). DEF-035 신규. P1, UAT 진행 전 필수. TASK-096 전제조건 추가 → 🚫 재설정 |
+| 2026-05-31 | Aiden (Claude) | TASK-104 발령 — D_Kai, IMP-093 TISA Dashboard 실 Rate Card 연동 (Mock 제거·getOrderRateSnapshot·RLS 확장). DEF-032 연계. 전제조건: TASK-103 ✅. P1, UAT 진행 전 필수 |

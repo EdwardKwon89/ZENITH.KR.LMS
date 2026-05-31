@@ -229,6 +229,22 @@
 
 ---
 
+## Phase L — UAT 진행 전 필수 처리 (TISA 요율 구조)
+
+> **등재일**: 2026-05-31 | **목표**: UAT(TASK-096) 착수 전 TISA 요금 구조 완성
+> **우선순위**: P1 — Edward UAT 차단 조건
+
+| IMP | 내용 | Agent | 상태 | 완료일 |
+|:---:|:-----|:-----:|:----:|:------:|
+| 092 | TISA 요율 3계층 구조 도입 (carrier_cost + margin_rate + platform_fee_rate 분리) | D_Kai | ⬜ | — |
+| 093 | TISA Dashboard 실 Rate Card 연동 (Mock 제거, DB 실조회, 경로 선택 후 스냅샷) | D_Kai | 🚫 | — |
+
+> 🚫 IMP-093: IMP-092(TASK-103) 완료 후 착수 가능
+
+**Phase L 완료**: 0 / 2 (0%)
+
+---
+
 ## 삭제/병합 처리
 
 | IMP | 처리 내용 |
@@ -252,11 +268,12 @@
 | I | 5 | 5 | 100% ✅ | IMP-073~077 전량 완료 (TASK-069~073 ✅) |
 | J | 4 | 4 | 100% ✅ | IMP-080 ✅ · IMP-081 ✅ · IMP-082 ✅ · IMP-083 ✅ |
 | K | 1 | 7 | 14.3% | IMP-084·085·086·088·089·046 🔔 |
-| UAT | 0 | 2 | 0% | IMP-090 ✅ (TASK-100 해소 — cargo_details DEFAULT 제거 완료) · IMP-091 ⬜ (Carrier Portal — Phase M) |
-| **합계** | **68** | **77** | **88.3%** | Phase K 7건 + UAT 2건 기준 |
+| UAT | 1 | 4 | 25% | IMP-090 ✅ · IMP-091 ⬜ (Carrier Portal — Phase M) · **IMP-092 ⬜ (TISA 3계층, UAT 전 필수)** · **IMP-093 ⬜ (TISA 실연동, UAT 전 필수)** |
+| **합계** | **68** | **79** | **86.1%** | Phase K 7건 + UAT 4건 기준 |
 
+> **UAT 진행 전 필수 처리**: IMP-092(TASK-103) → IMP-093(TASK-104) 순차 완료 후 TASK-096(Edward UAT) 착수 가능
 > 미완료 IMP: IMP-086·087 🚫 블로커 · IMP-028·069(Future — 통관 연계) · IMP-091 ⬜ (Carrier Portal — Phase M)
-> 2026-05-29 기준 업데이트 — IMP-090 ✅ 해소 (TASK-100 커밋 5b63421)
+> 2026-05-31 기준 업데이트 — IMP-092·093 신규 등재, UAT 진행 전 필수
 
 ---
 
@@ -268,7 +285,7 @@
 | 2026-05-24 | Riley (Gemini) | IMP-082 🔔 재작업 완료 — estimateFreightCost 복원, 순환참조 해결 (3d9e915) |
 | 2026-05-25 | Aiden (Claude) | Phase K 착수 — IMP-084~088 신규 등록, IMP-046 재활성화. TASK-088~096 발령. IMP-046 Phase C에서 ⬜(Phase K)로 전환 |
 | 2026-05-24 | Riley (Gemini) | IMP-082 🔔 완료 보고 — Composite Pricing Engine 구현 (b859677) |
-| 2026-05-29 | Aiden (Claude) | IMP-090 신규 등재 — DEF-022 ⑤ cargo_details DEFAULT '{}'::jsonb 임시 조치 (e63832e). create_order_atomic RPC 정상화 후 제거 필요. UAT 발견 |
+| 2026-05-29 | Aiden (Claude) | IMP-090 신규 등재 — DEF-022 ⑤ cargo_details DEFAULT `'{}'::jsonb` 임시 조치 (e63832e). create_order_atomic RPC 정상화 후 제거 필요. UAT 발견 |
 | 2026-05-23 | D_Kai (OpenCode) | IMP-080 🔔 완료 — 지능형 라우팅 DB 스키마 4 테이블 · mig + RLS + seed · 219/219 (TASK-074) |
 | 2026-05-23 | B_Kai (OpenCode) | IMP-074 🔔 재작업 완료 — zh/ja i18n + RBAC · 90ca21d · 219/219 (TASK-070 반려 대응) |
 | 2026-05-23 | B_Kai (OpenCode) | IMP-075 🔔 완료 보고 — Packing List SCR-031 · ed7dc67 · 219/219 (TASK-071) |
@@ -309,3 +326,5 @@
 | 2026-05-25 | Riley (Gemini) | IMP-046 🔔 완료 — 하이브리드 Rate Limiting 도입 (DB+InMemory) · 226/226 (TASK-090) |
 | 2026-05-29 | Aiden (Claude) | IMP-091 신규 등재 — Carrier Portal (운송사 배차 수락/거부·상태 직접 업데이트). Phase M 대상. Low P. UAT 합계 1→2건 갱신 |
 | 2026-05-29 | Aiden (Claude) | IMP-090 TASK-100 연계 확정 — getRouteOptions zen_order_packages 기반 전환 후 cargo_details DEFAULT 제거 마이그레이션 포함 처리 예정 |
+| 2026-05-31 | Aiden (Claude) | IMP-092 신규 등재 — TISA 요율 3계층 구조 도입 (carrier_cost + margin_rate + platform_fee_rate 분리). DEF-035 연계. TASK-103(D_Kai) 발령. UAT 진행 전 필수 |
+| 2026-05-31 | Aiden (Claude) | IMP-093 신규 등재 — TISA Dashboard 실 Rate Card 연동 (Mock 제거, DB 실조회, 경로 선택 후 스냅샷). DEF-032 연계. TASK-104(D_Kai) 발령. 전제조건: TASK-103 ✅. UAT 진행 전 필수 |
