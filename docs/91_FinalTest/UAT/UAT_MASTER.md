@@ -140,6 +140,7 @@ Supabase: Cloud 프로젝트 연결
 | UAT-10-04 | 요율 카드 등록·수정·삭제 (ADMIN) | ADMIN | [UAT_10](UAT_10_지능형라우팅_운임.md) | D_Kai | ✅ | 일반 |
 | UAT-10-05 | 경로 재산출 (오더 변경 후) | ADMIN | [UAT_10](UAT_10_지능형라우팅_운임.md) | D_Kai | ✅ | 일반 |
 | UAT-10-06 | 라우팅 결과 경로 시각화 확인 | ADMIN/SHIPPER | [UAT_10](UAT_10_지능형라우팅_운임.md) | D_Kai | ✅ | 일반 |
+| UAT-10-07 | TISA Dashboard 역할별 표시 (Admin/Shipper/Fallback) | ADMIN/SHIPPER | [UAT_10](UAT_10_지능형라우팅_운임.md) | B_Kai | 🔄 | 일반 |
 | UAT-11-01 | 직항 경로 조회 및 비용 확인 | ADMIN/SHIPPER | [UAT_11](UAT_11_Hub라우팅및P0항목.md) | B_Kai | ✅ | 필수 |
 | UAT-11-02 | Hub 경유 경로 조회 및 세그먼트별 비용 확인 | ADMIN | [UAT_11](UAT_11_Hub라우팅및P0항목.md) | B_Kai | ✅ | 필수 |
 | UAT-11-03 | Hub 경로 선택 후 오더 생성 및 경유지 표시 확인 | ADMIN | [UAT_11](UAT_11_Hub라우팅및P0항목.md) | B_Kai | ✅ | 필수 |
@@ -148,7 +149,7 @@ Supabase: Cloud 프로젝트 연결
 | UAT-11-06 | Rate Limiting — 로그인 반복 시 429 응답 확인 | ALL | [UAT_11](UAT_11_Hub라우팅및P0항목.md) | B_Kai | ✅ | 필수 |
 | UAT-11-07 | Hub 경유 세그먼트별 캐리어 요율 분리 정산 확인 | ADMIN | [UAT_11](UAT_11_Hub라우팅및P0항목.md) | B_Kai | ✅ | 필수 |
 
-**총 79개 시나리오** | 작성 완료: **79 / 79 ✅ 전량 완료** | 필수: **38개** | 일반: **41개**
+**총 80개 시나리오** | 작성 완료: **80 / 80 ✅ 전량 완료** | 필수: **38개** | 일반: **42개**
 
 ---
 

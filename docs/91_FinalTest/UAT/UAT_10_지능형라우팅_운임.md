@@ -138,25 +138,27 @@
 | 순서 | 화면·URL | 수행 액션 | 입력 데이터 | 기대 결과 | 확인 |
 |:---:|:---------|:---------|:-----------|:---------|:----:|
 | 1 | /ko/admin/rate-cards | ADMIN 로그인 후 Rate Cards 페이지 진입 | `admin@zenith.kr` / `password1234` | Rate Cards 탭 + Surcharges 탭 표시, 목록에 시드 요율 2건 표시 | ☐ |
-| 2 | Rate Cards 탭 | 목록 컬럼 확인 | — | Carrier·Mode·Currency·Tiers·Valid From·Valid Until·Status·Actions(Edit/Delete) 표시 | ☐ |
-| 3 | Rate Cards 탭 | 'Add Rate Card' 버튼 클릭 | — | 신규 등록 폼 오픈 (Carrier·Mode·Currency·Tiers·Valid From·Valid Until) | ☐ |
+| 2 | Rate Cards 탭 | 목록 컬럼 확인 | — | Carrier·Mode·Currency·Tiers·Carrier Cost·Margin Rate·Platform Fee Rate·Valid From·Valid Until·Status·Actions(Edit/Delete) 표시 | ☐ |
+| 3 | Rate Cards 탭 | 'Add Rate Card' 버튼 클릭 | — | 신규 등록 폼 오픈 (Carrier·Mode·Currency·Tiers·Carrier Cost·Margin Rate·Platform Fee Rate·Valid From·Valid Until) | ☐ |
 | 4 | 신규 폼 | Carrier 선택: ZENITH_AIR, Mode: AIR, Currency: USD | ZENITH_AIR·AIR·USD | 필드 정상 입력 가능 | ☐ |
-| 5 | 신규 폼 | Tiers 입력: weight_min=0, unit_price=6.00 → +Add Row → weight_min=100, unit_price=5.00 | 2개 티어 행 | 동적 행 추가 가능 | ☐ |
-| 6 | 신규 폼 | Valid From: 오늘 날짜, Valid Until: 1년 후 날짜 | 오늘 / 1년 후 | 날짜 선택기 정상 동작 | ☐ |
-| 7 | 신규 폼 | 저장(Submit) 클릭 | — | "Rate card created successfully" 메시지, 목록에 신규 카드 표시 | ☐ |
-| 8 | Rate Cards 탭 | 신규 카드의 Edit 버튼 클릭 | — | 폼에 기존 데이터 채워짐 | ☐ |
-| 9 | 수정 폼 | unit_price를 6.50으로 변경 후 저장 | unit_price: 6.50 | 수정 완료 메시지, 목록에 반영 | ☐ |
-| 10 | Rate Cards 탭 | 신규 카드의 Delete 버튼 클릭 | — | "Deactivate this rate card?" 확인 모달 표시 | ☐ |
-| 11 | 확인 모달 | Deactivate(확인) 클릭 | — | 카드 is_active = false, 목록에서 Status가 'Inactive'로 변경 | ☐ |
-| 12 | Surcharges 탭 | 탭 클릭 → 목록 확인 | — | 시드 할증 2건(FSC 15%·SSC $50) 표시 | ☐ |
-| 13 | — | SHIPPER 계정으로 /ko/admin/rate-cards 직접 접속 | `shipper@zenith.kr` | 접근 차단 (403 또는 메인 리다이렉트) | ☐ |
-| 14 | — | 유효기간 중복 테스트: 동일 Carrier·Mode로 기간 겹치는 카드 등록 시도 | — | "Rate card overlaps with existing" 오류 메시지 (validateRateOverlap) | ☐ |
-| 15 | Supabase Studio | `SELECT * FROM zen_rate_cards ORDER BY created_at DESC LIMIT 5` | — | 신규 등록·수정·비활성화 이력 정상 반영 | ☐ |
+| 5 | 신규 폼 | Carrier Cost: 4.00, Margin Rate: 15, Platform Fee Rate: 5 입력 | 4.00·15·5 | 3개 필드 정상 입력 가능, 숫자만 허용 | ☐ |
+| 6 | 신규 폼 | Tiers 입력: weight_min=0, unit_price=6.00 → +Add Row → weight_min=100, unit_price=5.00 | 2개 티어 행 | 동적 행 추가 가능 | ☐ |
+| 7 | 신규 폼 | Valid From: 오늘 날짜, Valid Until: 1년 후 날짜 | 오늘 / 1년 후 | 날짜 선택기 정상 동작 | ☐ |
+| 8 | 신규 폼 | 저장(Submit) 클릭 | — | "Rate card created successfully" 메시지, 목록에 신규 카드 표시 | ☐ |
+| 9 | Rate Cards 탭 | 신규 카드의 Edit 버튼 클릭 | — | 폼에 기존 데이터 채워짐 (Carrier Cost·Margin Rate·Platform Fee Rate 포함) | ☐ |
+| 10 | 수정 폼 | unit_price를 6.50으로 변경 후 저장 | unit_price: 6.50 | 수정 완료 메시지, 목록에 반영 | ☐ |
+| 11 | Rate Cards 탭 | 신규 카드의 Delete 버튼 클릭 | — | "Deactivate this rate card?" 확인 모달 표시 | ☐ |
+| 12 | 확인 모달 | Deactivate(확인) 클릭 | — | 카드 is_active = false, 목록에서 Status가 'Inactive'로 변경 | ☐ |
+| 13 | Surcharges 탭 | 탭 클릭 → 목록 확인 | — | 시드 할증 2건(FSC 15%·SSC $50) 표시 | ☐ |
+| 14 | — | SHIPPER 계정으로 /ko/admin/rate-cards 직접 접속 | `shipper@zenith.kr` | 접근 차단 (403 또는 메인 리다이렉트) | ☐ |
+| 15 | — | 유효기간 중복 테스트: 동일 Carrier·Mode로 기간 겹치는 카드 등록 시도 | — | "Rate card overlaps with existing" 오류 메시지 (validateRateOverlap) | ☐ |
+| 16 | Supabase Studio | `SELECT * FROM zen_rate_cards ORDER BY created_at DESC LIMIT 5` | — | 신규 등록·수정·비활성화 이력 정상 반영 | ☐ |
 
 ### 합격 기준
 - [ ] 전 단계 ☑ 완료
 - [ ] 요율 카드 목록 조회 (운송사·운송 모드·유효기간별)
-- [ ] 신규 요율 카드 등록 (carrier·mode·weight_slabs·유효기간)
+- [ ] 신규 요율 카드 등록 (carrier·mode·carrier_cost·margin_rate·platform_fee_rate·weight_slabs·유효기간)
+- [ ] Carrier Cost·Margin Rate·Platform Fee Rate 3개 필드 입력 및 저장
 - [ ] 기존 요율 카드 수정 및 저장
 - [ ] 요율 카드 삭제 (soft delete — is_active = false + 확인 모달)
 - [ ] 유효기간 중첩 방지 유효성 검사 (validateRateOverlap)
@@ -246,6 +248,57 @@
 
 ---
 
+## [UAT-10-07] TISA Dashboard 역할별 표시
+
+| 항목 | 내용 |
+|:----|:----|
+| 역할 | ADMIN / SHIPPER |
+| 화면 URL | /ko/orders/[id] (Order Detail TISA 패널) |
+| 예상 소요 시간 | 15분 |
+| 사전 조건 | ① 경로 최적화 완료 오더(rate snapshot 존재) 1건 ② 경로 미선택 오더 1건 |
+| 관련 IMP | IMP-092·093 |
+
+### 시나리오 A — Admin 뷰 (전체 필드 표시)
+
+| 순서 | 화면·URL | 수행 액션 | 입력 데이터 | 기대 결과 | 확인 |
+|:---:|:---------|:---------|:-----------|:---------|:----:|
+| 1 | /ko/orders/[id] | ADMIN 로그인 → 경로 최적화 완료 오더의 Order Detail 진입 | `admin@zenith.kr` | TISA Rate Snapshot 패널 표시 | ☐ |
+| 2 | TISA 패널 | Rate Card ID / Version / Priority / Validity Period 확인 | — | 4개 항목 모두 표시 | ☐ |
+| 3 | TISA 패널 | Cost Breakdown 영역 확인 | — | Carrier Cost · Platform Fee · Total 각각 표시 | ☐ |
+| 4 | TISA 패널 | Auto Match 배지 확인 | — | `Auto Matched (자동 매칭)` 배지 + 설명 문구 표시 | ☐ |
+| 5 | TISA 패널 | Override Rate 버튼 확인 | — | Override Rate 버튼 표시 (ADMIN 전용) | ☐ |
+
+### 시나리오 B — Shipper 뷰 (기본 정보만)
+
+| 순서 | 화면·URL | 수행 액션 | 입력 데이터 | 기대 결과 | 확인 |
+|:---:|:---------|:---------|:-----------|:---------|:----:|
+| 1 | /ko/orders/[id] | CORPORATE 계정 로그인 → 본인 오더 Order Detail 진입 | `shipper@zenith.kr` | TISA Rate Snapshot 패널 표시 | ☐ |
+| 2 | TISA 패널 | Base Amount + Currency 확인 | — | 기준 운임과 통화만 표시 | ☐ |
+| 3 | TISA 패널 | Rate Card ID / Version / Cost Breakdown 확인 | — | **비표시** (Shipper는 기본 운임만 확인 가능) | ☐ |
+| 4 | TISA 패널 | Auto Match 배지 확인 | — | **비표시** | ☐ |
+| 5 | TISA 패널 | Override Rate 버튼 확인 | — | **비표시** (Shipper는 Override 불가) | ☐ |
+
+### 시나리오 C — 경로 미선택 fallback
+
+| 순서 | 화면·URL | 수행 액션 | 입력 데이터 | 기대 결과 | 확인 |
+|:---:|:---------|:---------|:-----------|:---------|:----:|
+| 1 | /ko/orders/[id] | 경로 미선택(route_option_id null) 오더 Order Detail 진입 | — | TISA 패널에 fallback 메시지 표시 | ☐ |
+| 2 | TISA 패널 | fallback 메시지 확인 | — | **"No rate snapshot applied yet."** + **"경로 최적화를 완료하면 요율이 자동으로 매칭됩니다."** 표시 | ☐ |
+
+### 합격 기준
+- [ ] 시나리오 A: Admin 전체 필드(Rate Card ID·Version·Priority·Cost Breakdown·Auto Match·Override) 표시
+- [ ] 시나리오 B: Shipper Base Amount + Currency 만 표시 (Rate Card ID·Version·Cost Breakdown·Auto Match·Override 비표시)
+- [ ] 시나리오 C: 경로 미선택 시 fallback 메시지 ("No rate snapshot applied yet." + 안내 문구) 표시
+- [ ] 역할별 필드 분기 정상 동작 (Admin ≠ Shipper)
+
+### 결함 기재란
+
+| 결함-ID | 단계 | 현상 | 심각도 |
+|:-------:|:---:|:-----|:------:|
+| | | | |
+
+---
+
 ## 개정 이력
 
 | 날짜 | 주체 | 내용 |
@@ -254,3 +307,4 @@
 | 2026-05-24 | D_Kai (OpenCode) | v2.0 — UAT-10-01·02·05 절차표 완성, UAT-10-03·04·06 DB 사전 확인 추가 |
 | 2026-05-24 | D_Kai (OpenCode) | v2.1 — UAT-10-03·04·06 절차표 전면 완성 (IMP-081·082·083 구현 반영), 3건 ⬜→✅ |
 | 2026-05-30 | D_Kai (OpenCode) | v3.0 — UAT-10-01·02 3종 카드 → 전체 후보 비교 테이블 전환, SHIPPER 계정 변경, 화면 URL·절차 업데이트 (DEF-030 반영) |
+| 2026-06-01 | B_Kai (OpenCode) | v4.0 — UAT-10-04 Rate Card 폼에 carrier_cost·margin_rate·platform_fee_rate 3개 필드 추가 · UAT-10-07 TISA Dashboard 역할별 표시(Admin/Shipper/Fallback) 신규 3개 시나리오 · TASK-105 |
