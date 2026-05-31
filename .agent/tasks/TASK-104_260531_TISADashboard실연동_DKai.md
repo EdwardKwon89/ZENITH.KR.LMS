@@ -9,7 +9,7 @@
 | **전제조건** | TASK-103 ✅ |
 | **관련 IMP** | IMP-093 |
 | **관련 DEF** | DEF-032 |
-| **상태** | 🔔 |
+| **상태** | ✅ |
 
 ---
 
@@ -271,6 +271,24 @@ const { data: orderData } = await supabase
 ### ⚠️ 절차 위반 (기록)
 
 **전제조건 미충족 착수**: TASK-104 코드 커밋(7225196, 23:24) 이 TASK-103 fix(8132d98, 23:43) 보다 선행 — TASK-103 ❌ 상태에서 착수 R-17 위반. 위반 누적 1회 (재교육 후 기준).
+
+---
+
+## [Aiden 검토] 2차
+
+**검토일**: 2026-06-01 | **결정**: ✅ **PASS**
+
+### 재작업 검토 결과
+
+| 항목 | 결과 | 비고 |
+|:---|:--:|:---|
+| §1 fix (6a0dbab): transport_mode 필드 추가 | ✅ | line 96 `transport_mode` SELECT 컬럼 추가 확인 |
+| §1 fix (6a0dbab): p_service_type 하드코딩 제거 | ✅ | `"STANDARD"` → `orderData.transport_mode` 확인 |
+| DoD 15개 항목 전량 `[x]` 체크 | ✅ | 커밋 해시(`7225196`+`6a0dbab`) 기재 확인 |
+| 회귀 228/229 | ✅ | pre-existing tracking-business-qa FK 결함 1건 Advisory |
+| IMP_PROGRESS.md IMP-093 🔔 갱신 | ✅ | fix 커밋 `6a0dbab` 포함 확인 |
+
+IMP-092(TASK-103) ✅ + IMP-093(TASK-104) ✅ — **TASK-096(Edward UAT) 전제조건 전량 충족, 블로커 해제**.
 
 ---
 

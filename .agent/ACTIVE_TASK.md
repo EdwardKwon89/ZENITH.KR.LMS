@@ -151,9 +151,9 @@
 | TASK-094 | 260525 | E2E-19: Hub Routing 플로우 자동화 | P3 | TASK-091 ✅ · TASK-092 ✅ · TASK-093 ✅ | D_Kai | ✅ | [TASK-094](tasks/TASK-094_260525_E2EPhaseK자동화_DKai.md) | 3d8e5fc+0dba4b8+ed65e02 · 227/227 · E2E-19 시나리오 A+B ✅ |
 | TASK-095 | 260525 | UAT-11 Phase K 절차서 작성 (Hub Routing + P0 항목) | P3 | TASK-091 ✅ · TASK-092 ✅ · TASK-093 ✅ | B_Kai | ✅ | [TASK-095](tasks/TASK-095_260525_UATPhaseK절차서_BKai.md) | UAT-11 신규 6건 · UAT_MASTER 72→78 · 0322b1b+78345f3+97f2729+e2e3bc3 ✅ |
 | TASK-097 | 260525 | UAT-11 보완 — 쿼리 오류 수정 + IMP-086 시나리오 추가 | P3 | TASK-095 ✅ | B_Kai | ✅ | [TASK-097](tasks/TASK-097_260525_UAT11보완_BKai.md) | 3e491bb+84034bc+030d0ab · UAT-11-03 수정·UAT-11-07 신규·UAT_MASTER 79개 ✅ |
-| TASK-096 | 260525 | UAT 전체 실행 (Edward 직접 검증 — Go-Live 판정) | P1 | TASK-094 ✅ · TASK-095 ✅ · TASK-097 ✅ · **TASK-103 ✅ · TASK-104 ✅** | Edward | 🚫 | [TASK-096](tasks/TASK-096_260525_UAT전체실행_Edward.md) | ⚠️ 전제조건 추가 — TASK-103·104 완료 후 착수 가능 |
+| TASK-096 | 260525 | UAT 전체 실행 (Edward 직접 검증 — Go-Live 판정) | P1 | TASK-094 ✅ · TASK-095 ✅ · TASK-097 ✅ · TASK-103 ✅ · TASK-104 ✅ | Edward | ⬜ | [TASK-096](tasks/TASK-096_260525_UAT전체실행_Edward.md) | 전제조건 전량 충족 — 즉시 착수 가능 |
 | TASK-103 | 260531 | TISA 요율 3계층 구조 도입 (carrier_cost+margin+platform_fee) | P1 | 없음 | D_Kai | ✅ | [TASK-103](tasks/TASK-103_260531_TISA요율3계층구조_DKai.md) | IMP-092 · DEF-035 완료 · e442ea3+8132d98 |
-| TASK-104 | 260531 | TISA Dashboard 실 Rate Card 연동 (Mock 제거·DB 실조회) | P1 | TASK-103 ✅ | D_Kai | 🔔 | [TASK-104](tasks/TASK-104_260531_TISADashboard실연동_DKai.md) | IMP-093 · DEF-032 · 재작업 완료(`6a0dbab`) — transport_mode fix + DoD 전량 체크 |
+| TASK-104 | 260531 | TISA Dashboard 실 Rate Card 연동 (Mock 제거·DB 실조회) | P1 | TASK-103 ✅ | D_Kai | ✅ | [TASK-104](tasks/TASK-104_260531_TISADashboard실연동_DKai.md) | IMP-093 · DEF-032 완료 · 7225196+6a0dbab |
 | TASK-098 | 260527 | ID 찾기 기능 재설계 — 개인/법인 분리 | P2 | 없음 | D_Kai | ✅ | [TASK-098](tasks/TASK-098_260527_ID찾기기능재설계_DKai.md) | IMP-089 완료 · 15299bf + 후속 8건(`2111a75`~`d1bc3de`) · Post-승인 버그 8건 ✅ 2차 승인 |
 | TASK-099 | 260529 | UAT-02-04 재작성 — A-2 경로 (REGISTERED→DELIVERED) | P4 | 없음 | B_Kai | ✅ | [TASK-099](tasks/TASK-099_260529_UAT0204재작성_BKai.md) | 332a036+4833de1+9040bcc · 6개 전이 ✅ · Advisory 2건(비차단) · TASK-101 재교육 세션 병행 |
 | TASK-100 | 260529 | DEF-030 경로 최적화 전면 수정 (전체 운송사 비교·가드) | P1 | 없음 | D_Kai | ✅ | [TASK-100](tasks/TASK-100_260529_DEF030경로최적화수정_DKai.md) | 5b63421+f1c3f74 · 229/229 PASS · Aiden ✅ 승인 |
@@ -168,7 +168,7 @@
 |:------|:--------|:----------------|:----------|
 | Riley | — | R-17 위반 **누적 3회** (TASK-088 무단 수정·TASK-092 혼합커밋·TASK-102 혼합커밋+무단대행) — 경고 | — |
 | B_Kai | — | **신규 Task 할당 중단 해제** — TASK-101 ✅ 완료 | — |
-| D_Kai | TASK-103 ✅ · TASK-104 🔔 재작업 완료 — Aiden 검토 대기 | R-17 위반 2회 누적 (혼합커밋·전제조건 미충족 착수) | — |
+| D_Kai | TASK-103 ✅ · TASK-104 ✅ — 신규 Task 대기 | R-17 위반 2회 누적 (혼합커밋·전제조건 미충족 착수) — 경고 | — |
 | N_Kai | TASK-087 ⬜ (재교육 세션 — 완료 후 신규 할당 재개) | — | 신규 할당 중단 유지 |
 | Ring | — | — | 신규 할당 중단 유지 (9차 위반 누적) |
 
@@ -364,3 +364,4 @@
 | 2026-05-31 | Aiden (Claude) | TASK-103 ❌ 반려 — D_Kai. 차단 2건(transport_mode 필터 누락·트리거 'STANDARD' 하드코딩)·DoD 미체크·커밋 해시 미기재. Advisory: 코드 커밋 ACTIVE_TASK 혼합(R-17 위반 1회). 설계 확정 기재(zen_rate_cards 재작성 조건부 승인). |
 | 2026-05-31 | Aiden (Claude) | TASK-103 ✅ PASS (재작업 검토) — 8132d98 fix: transport_mode 필터·NEW.transport_mode 전환 확인. DoD 전량 [x]. IMP-092 완료. |
 | 2026-05-31 | Aiden (Claude) | TASK-104 ❌ 반려 — tisa.ts line 106 `"STANDARD"` 하드코딩(TASK-103 동일 버그 서버 액션 잔존)·DoD 미체크. Advisory: TASK-103 ❌ 상태 선착수 R-17 위반(누적 2회). 재작업: transport_mode 조회 추가 + DoD 체크. |
+| 2026-06-01 | Aiden (Claude) | TASK-104 ✅ PASS — 6a0dbab fix: tisa.ts line 96 transport_mode SELECT 추가·line 106 orderData.transport_mode 전환 확인. DoD 15개 전량 [x]. 회귀 228/229. IMP-093 완료. TASK-096(Edward UAT) 블로커 전량 해제 → ⬜ |
