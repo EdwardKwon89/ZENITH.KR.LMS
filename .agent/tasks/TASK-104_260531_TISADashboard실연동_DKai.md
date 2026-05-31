@@ -9,7 +9,7 @@
 | **전제조건** | TASK-103 ✅ |
 | **관련 IMP** | IMP-093 |
 | **관련 DEF** | DEF-032 |
-| **상태** | 🚫 |
+| **상태** | 🔔 |
 
 ---
 
@@ -163,7 +163,9 @@ USING (
 
 ## [설계 의견]
 
-*(착수 시 D_Kai 기재)*
+서버 액션이 supabase client(user-level)로 동작하므로 RLS 정책이 CORPORATE/INDIVIDUAL 접근을 허용해야 함. `is_org_member(auth.uid(), o.shipper_id)` 패턴은 zen_orders 기존 정책과 동일.
+
+경로 선택 전에는 snapshot이 없고, 경로 선택 후 `fn_get_best_matching_rate`가 자동 매칭. 서버 액션에서 route_option_id 감지 시 자동 INSERT까지 수행.
 
 ---
 
@@ -189,7 +191,36 @@ USING (
 
 ## [작업 결과]
 
-*(D_Kai 기재)*
+### §1 — getOrderRateSnapshot() 서버 액션
+- `src/app/actions/operations/tisa.ts` 신규 파일
+- `zen_order_rate_snapshots` 실조회 → rate_card_id로 zen_rate_cards valid_from/until resolve
+- 스냅샷 없고 route_option_id 존재 시 `fn_get_best_matching_rate` RPC 호출 → 자동 INSERT
+- 스냅샷 없고 route_option_id 없으면 null 반환
+- Role 분기: Admin → 전체 필드 / Shipper → baseAmount + currency만
+- `src/app/actions/operations/index.ts` export 추가
+
+### §2 — page.tsx Mock 제거
+- Mock 객체(rateCardId:'RC-STD-01', baseAmount:1250.00) → `getOrderRateSnapshot(orderId)` 호출로 전환
+
+### §3 — TisaSnapshot 타입
+- TASK-103에서 이미 carrierCostAmount, platformFeeAmount 추가 완료
+
+### §4 — RLS 정책 마이그레이션
+- `20260531110000_imp093_tisa_dashboard_rls.sql`
+- `is_org_member(auth.uid(), o.shipper_id)` 기반 SELECT 정책 추가
+- CORPORATE/INDIVIDUAL도 본인 오더 스냅샷 조회 가능
+
+### §5 — Fallback 메시지 개선
+- `"경로 최적화를 완료하면 요율이 자동으로 매칭됩니다."`
+
+### §6 — 역할별 표시 정책
+- `OrderTisaDashboard`: `isAdminView` prop 신규
+- AdminView=flase → Base Amount + Currency만 표시
+- AdminView=true → Rate Card ID / Version / Priority / Validity / Cost Breakdown / Auto Match 배지 전부 표시
+- Override Rate 버튼 Admin 전용
+
+### 회귀 테스트
+- 228 passed, 1 failed (기존 tracking-business-qa.test.ts — TASK-104 무관)
 
 ---
 

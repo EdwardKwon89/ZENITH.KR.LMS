@@ -2,7 +2,7 @@
 
 > **프로젝트**: ZENITH_LMS
 > **근거 문서**: [IMP_EXECUTION_PLAN_BKai_20260514.md](IMP_EXECUTION_PLAN_BKai_20260514.md)
-> **최초 작성**: 2026-05-15 (Aiden) / **최근 업데이트**: 2026-05-21 (Riley - TASK-035 완료 보고)
+> **최초 작성**: 2026-05-15 (Aiden) / **최근 업데이트**: 2026-05-31 (D_Kai — IMP-092·093 🔔)
 > **업데이트 규칙**:
 > - 에이전트는 IMP 완료 커밋 시 해당 행의 `상태`와 `완료일`을 반드시 갱신한다.
 > - 갱신은 IMP 완료 커밋과 **같은 커밋**에 포함하거나, 직후 별도 커밋으로 처리한다.
@@ -238,11 +238,11 @@
 |:---:|:-----|:-----:|:----:|:------:|
 | 092 | TISA 요율 3계층 구조 도입 (carrier_cost + margin_rate + platform_fee_rate 분리) | D_Kai | 🔔 | `e442ea3` · 229/229+ · migration+admin UI+fn+trigger |
 
-| 093 | TISA Dashboard 실 Rate Card 연동 (Mock 제거, DB 실조회, 경로 선택 후 스냅샷) | D_Kai | 🚫 | — |
+| 093 | TISA Dashboard 실 Rate Card 연동 (Mock 제거, DB 실조회, 경로 선택 후 스냅샷) | D_Kai | 🔔 | `7225196` · 229/229+ · server action+page+RLS+UI+role 분기 |
 
 > 🚫 IMP-093: IMP-092(TASK-103) 완료 후 착수 가능
 
-**Phase L 완료**: 1 / 2 (50%)
+**Phase L 완료**: 2 / 2 (100%)
 
 ---
 
@@ -269,8 +269,8 @@
 | I | 5 | 5 | 100% ✅ | IMP-073~077 전량 완료 (TASK-069~073 ✅) |
 | J | 4 | 4 | 100% ✅ | IMP-080 ✅ · IMP-081 ✅ · IMP-082 ✅ · IMP-083 ✅ |
 | K | 1 | 7 | 14.3% | IMP-084·085·086·088·089·046 🔔 |
-| UAT | 2 | 4 | 50% | IMP-090 ✅ · IMP-091 ⬜ (Carrier Portal — Phase M) · **IMP-092 🔔 (TISA 3계층, UAT 전 필수)** · **IMP-093 🚫 (TISA 실연동, UAT 전 필수)** |
-| **합계** | **69** | **79** | **87.3%** | Phase K 7건 + UAT 4건 기준 |
+| UAT | 3 | 4 | 75% | IMP-090 ✅ · IMP-091 ⬜ (Carrier Portal — Phase M) · **IMP-092 🔔 (TISA 3계층, UAT 전 필수)** · **IMP-093 🔔 (TISA 실연동, UAT 전 필수)** |
+| **합계** | **70** | **79** | **88.6%** | Phase K 7건 + UAT 4건 기준 |
 
 > **UAT 진행 전 필수 처리**: IMP-092(TASK-103) → IMP-093(TASK-104) 순차 완료 후 TASK-096(Edward UAT) 착수 가능
 > 미완료 IMP: IMP-086·087 🚫 블로커 · IMP-028·069(Future — 통관 연계) · IMP-091 ⬜ (Carrier Portal — Phase M)
