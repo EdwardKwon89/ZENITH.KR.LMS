@@ -93,7 +93,7 @@ export async function getOrderRateSnapshot(orderId: string): Promise<TisaSnapsho
   if (routeData?.selected_option_id) {
     const { data: orderData } = await supabase
       .from("zen_orders")
-      .select("carrier_id, origin_port_id, dest_port_id, shipper_id, created_at")
+      .select("carrier_id, origin_port_id, dest_port_id, shipper_id, created_at, transport_mode")
       .eq("id", orderId)
       .maybeSingle();
 
@@ -103,7 +103,7 @@ export async function getOrderRateSnapshot(orderId: string): Promise<TisaSnapsho
         p_carrier_id: orderData.carrier_id,
         p_origin_port: orderData.origin_port_id,
         p_dest_port: orderData.dest_port_id,
-        p_service_type: "STANDARD",
+        p_service_type: orderData.transport_mode,
         p_customer_id: orderData.shipper_id,
         p_reference_date: orderData.created_at,
       });
