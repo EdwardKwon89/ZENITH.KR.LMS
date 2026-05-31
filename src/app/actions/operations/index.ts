@@ -40,6 +40,10 @@ export {
 } from './routing';
 
 export {
+  getOrderRateSnapshot,
+} from './tisa';
+
+export {
   getInventoryList,
   getInventoryHistory,
   adjustInventory,

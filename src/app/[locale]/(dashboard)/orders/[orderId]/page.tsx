@@ -16,6 +16,7 @@ import DocumentDownloadButton from '@/components/documents/DocumentDownloadButto
 import CommercialInvoicePDF from '@/components/documents/CommercialInvoicePDF';
 import PackingListPDF from '@/components/documents/PackingListPDF';
 import { getDeclarations } from '@/app/actions/customs';
+import { getOrderRateSnapshot } from '@/app/actions/operations';
 import OrderCustomsSection from '@/components/customs/OrderCustomsSection';
 import OrderCustomsAdminControl from '@/components/customs/OrderCustomsAdminControl';
 import { getTranslations } from 'next-intl/server';
@@ -88,21 +89,8 @@ export default async function OrderDetailPage({
   
   const appliedRouteId = routeData?.selected_option_id || null;
 
-  // Mock initial TISA state (액션 통합 전 브릿지용)
-  const snapshot = {
-    id: `snap_${order.order_no}`,
-    orderId: orderId,
-    rateCardId: 'RC-STD-01',
-    versionNo: 1,
-    status: 'AUTO' as const,
-    priority: 10,
-    baseAmount: 1250.00,
-    currency: 'USD',
-    validFrom: order.created_at,
-    validTo: '9999-12-31T23:59:59Z',
-    carrierCostAmount: 1000.00,
-    platformFeeAmount: 62.50
-  };
+  // TISA Rate Snapshot: 실 DB 조회 (TASK-104)
+  const snapshot = await getOrderRateSnapshot(orderId);
 
   // 5. 무역 서류 데이터 준비 (Sprint 8)
   const ciData = {
@@ -405,6 +393,7 @@ export default async function OrderDetailPage({
           <OrderTisaDashboard
             orderId={orderId}
             snapshot={snapshot}
+            isAdminView={isAdmin}
           />
 
           {/* 3. Customs Section (Sprint 12) */}
