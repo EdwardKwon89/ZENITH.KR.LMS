@@ -12,6 +12,9 @@ interface CreateRateCardData {
   tiers: { weight_min: number; unit_price: number }[];
   valid_from: string;
   valid_until?: string | null;
+  carrier_cost?: number | null;
+  margin_rate?: number | null;
+  platform_fee_rate?: number | null;
 }
 
 interface UpdateRateCardData extends Partial<CreateRateCardData> {}
@@ -58,8 +61,11 @@ export async function createRateCard(data: CreateRateCardData) {
       valid_from: data.valid_from,
       valid_until: data.valid_until || null,
       is_active: true,
+      carrier_cost: data.carrier_cost ?? null,
+      margin_rate: data.margin_rate ?? 15.0,
+      platform_fee_rate: data.platform_fee_rate ?? 5.0,
     })
-    .select('id, carrier_id, transport_mode, currency, tiers, valid_from, valid_until, is_active, created_at')
+    .select('id, carrier_id, transport_mode, currency, tiers, valid_from, valid_until, is_active, created_at, carrier_cost, margin_rate, platform_fee_rate')
     .single();
 
   if (error) throw new Error(`Rate card creation failed: ${error.message}`);
@@ -79,7 +85,7 @@ export async function updateRateCard(id: string, data: UpdateRateCardData) {
     .from('zen_rate_cards')
     .update(data)
     .eq('id', id)
-    .select('id, carrier_id, transport_mode, currency, tiers, valid_from, valid_until, is_active, created_at')
+    .select('id, carrier_id, transport_mode, currency, tiers, valid_from, valid_until, is_active, created_at, carrier_cost, margin_rate, platform_fee_rate')
     .single();
 
   if (error) throw new Error(`Rate card update failed: ${error.message}`);
@@ -113,6 +119,7 @@ export async function getRateCards() {
     .from('zen_rate_cards')
     .select(`
       id, carrier_id, transport_mode, currency, tiers, valid_from, valid_until, is_active, created_at,
+      carrier_cost, margin_rate, platform_fee_rate,
       carrier:zen_carriers!carrier_id(code, name, transport_mode)
     `)
     .order('created_at', { ascending: false });

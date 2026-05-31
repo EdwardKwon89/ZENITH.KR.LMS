@@ -21,6 +21,9 @@ interface RateCard {
   valid_from: string;
   valid_until: string | null;
   is_active: boolean;
+  carrier_cost?: number | null;
+  margin_rate?: number | null;
+  platform_fee_rate?: number | null;
   carrier?: { code: string; name: string; transport_mode: string } | null;
 }
 
@@ -80,6 +83,9 @@ export function RateCardsTab() {
     tiers: [{ ...EMPTY_TIER }],
     valid_from: new Date().toISOString().split('T')[0],
     valid_until: '',
+    carrier_cost: '',
+    margin_rate: '15.0',
+    platform_fee_rate: '5.0',
   });
 
   const fetchCards = useCallback(async () => {
@@ -109,6 +115,9 @@ export function RateCardsTab() {
       tiers: [{ ...EMPTY_TIER }],
       valid_from: new Date().toISOString().split('T')[0],
       valid_until: '',
+      carrier_cost: '',
+      margin_rate: '15.0',
+      platform_fee_rate: '5.0',
     });
     setEditingId(null);
     setShowForm(false);
@@ -123,6 +132,9 @@ export function RateCardsTab() {
       tiers: card.tiers.length > 0 ? card.tiers.map(t => ({ ...t })) : [{ ...EMPTY_TIER }],
       valid_from: card.valid_from.split('T')[0],
       valid_until: card.valid_until ? card.valid_until.split('T')[0] : '',
+      carrier_cost: card.carrier_cost?.toString() || '',
+      margin_rate: card.margin_rate?.toString() || '15.0',
+      platform_fee_rate: card.platform_fee_rate?.toString() || '5.0',
     });
     setEditingId(card.id);
     setShowForm(true);
@@ -138,6 +150,9 @@ export function RateCardsTab() {
     const payload = {
       ...formData,
       valid_until: formData.valid_until || null,
+      carrier_cost: formData.carrier_cost ? Number(formData.carrier_cost) : null,
+      margin_rate: formData.margin_rate ? Number(formData.margin_rate) : 15.0,
+      platform_fee_rate: formData.platform_fee_rate ? Number(formData.platform_fee_rate) : 5.0,
     };
 
     try {
@@ -253,6 +268,51 @@ export function RateCardsTab() {
             </div>
           </div>
 
+          <div className="border-t border-slate-100 pt-4 mt-2">
+            <h3 className="text-sm font-semibold text-slate-700 mb-3">Pricing Breakdown (3-Tier)</h3>
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <label className="text-xs text-slate-500 font-semibold">Carrier Cost (원가)</label>
+                <input
+                  type="number"
+                  min={0}
+                  step={0.01}
+                  value={formData.carrier_cost}
+                  onChange={e => setFormData(prev => ({ ...prev, carrier_cost: e.target.value }))}
+                  className="w-full border border-slate-200 rounded px-2 py-2 text-sm mt-1"
+                  placeholder="0.00"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-slate-500 font-semibold">Margin Rate (%)</label>
+                <input
+                  type="number"
+                  min={0}
+                  max={100}
+                  step={0.1}
+                  value={formData.margin_rate}
+                  onChange={e => setFormData(prev => ({ ...prev, margin_rate: e.target.value }))}
+                  className="w-full border border-slate-200 rounded px-2 py-2 text-sm mt-1"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-slate-500 font-semibold">Platform Fee Rate (%)</label>
+                <input
+                  type="number"
+                  min={0}
+                  max={100}
+                  step={0.1}
+                  value={formData.platform_fee_rate}
+                  onChange={e => setFormData(prev => ({ ...prev, platform_fee_rate: e.target.value }))}
+                  className="w-full border border-slate-200 rounded px-2 py-2 text-sm mt-1"
+                />
+              </div>
+            </div>
+            <p className="text-[10px] text-slate-400 mt-1">
+              unit_price ≈ carrier_cost × (1 + margin_rate/100) × (1 + platform_fee_rate/100)
+            </p>
+          </div>
+
           <div>
             <label className="text-xs text-slate-500 font-semibold">Tiers</label>
             <div className="space-y-2 mt-1">
@@ -284,6 +344,9 @@ export function RateCardsTab() {
               <th className="text-left px-4 py-3 text-xs text-slate-500 font-semibold">Mode</th>
               <th className="text-left px-4 py-3 text-xs text-slate-500 font-semibold">Currency</th>
               <th className="text-left px-4 py-3 text-xs text-slate-500 font-semibold">Tiers</th>
+              <th className="text-left px-4 py-3 text-xs text-slate-500 font-semibold">Carrier Cost</th>
+              <th className="text-left px-4 py-3 text-xs text-slate-500 font-semibold">Margin</th>
+              <th className="text-left px-4 py-3 text-xs text-slate-500 font-semibold">Fee</th>
               <th className="text-left px-4 py-3 text-xs text-slate-500 font-semibold">Valid From</th>
               <th className="text-left px-4 py-3 text-xs text-slate-500 font-semibold">Valid Until</th>
               <th className="text-left px-4 py-3 text-xs text-slate-500 font-semibold">Status</th>
@@ -292,7 +355,7 @@ export function RateCardsTab() {
           </thead>
           <tbody>
             {cards.length === 0 && (
-              <tr><td colSpan={8} className="text-center py-8 text-slate-400">No rate cards found.</td></tr>
+              <tr><td colSpan={11} className="text-center py-8 text-slate-400">No rate cards found.</td></tr>
             )}
             {cards.map(card => (
               <tr key={card.id} className="border-b border-slate-100 hover:bg-slate-50">
@@ -302,6 +365,9 @@ export function RateCardsTab() {
                 </td>
                 <td className="px-4 py-3">{card.currency}</td>
                 <td className="px-4 py-3 text-xs text-slate-500">{card.tiers?.length || 0} slabs</td>
+                <td className="px-4 py-3 text-xs font-mono">{card.carrier_cost != null ? `$${card.carrier_cost}` : '-'}</td>
+                <td className="px-4 py-3 text-xs">{card.margin_rate != null ? `${card.margin_rate}%` : '-'}</td>
+                <td className="px-4 py-3 text-xs">{card.platform_fee_rate != null ? `${card.platform_fee_rate}%` : '-'}</td>
                 <td className="px-4 py-3">{card.valid_from?.split('T')[0]}</td>
                 <td className="px-4 py-3">{card.valid_until?.split('T')[0] || '∞'}</td>
                 <td className="px-4 py-3">

@@ -17,6 +17,8 @@ interface TisaSnapshot {
   appliedReason?: string;
   validFrom: string;
   validTo: string;
+  carrierCostAmount?: number;
+  platformFeeAmount?: number;
 }
 
 interface OrderTisaDashboardProps {
@@ -66,6 +68,33 @@ export const OrderTisaDashboard: React.FC<OrderTisaDashboardProps> = ({
               </p>
             </div>
           </div>
+
+          {/* Cost Breakdown (Admin View) */}
+          {snapshot.carrierCostAmount != null && snapshot.platformFeeAmount != null && (
+            <div className="bg-slate-50 dark:bg-neutral-800/50 rounded-xl p-3">
+              <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Cost Breakdown (원가 구조)</span>
+              <div className="flex flex-col gap-1 mt-2 text-xs">
+                <div className="flex justify-between text-slate-600">
+                  <span>Carrier Cost (운송사 원가)</span>
+                  <span className="font-mono font-medium">
+                    {new Intl.NumberFormat('en-US', { style: 'currency', currency: snapshot.currency }).format(snapshot.carrierCostAmount)}
+                  </span>
+                </div>
+                <div className="flex justify-between text-slate-600">
+                  <span>Platform Fee (플랫폼 수수료)</span>
+                  <span className="font-mono font-medium">
+                    {new Intl.NumberFormat('en-US', { style: 'currency', currency: snapshot.currency }).format(snapshot.platformFeeAmount)}
+                  </span>
+                </div>
+                <div className="border-t border-slate-200 pt-1 flex justify-between font-semibold text-slate-800">
+                  <span>Total (합계)</span>
+                  <span className="font-mono">
+                    {new Intl.NumberFormat('en-US', { style: 'currency', currency: snapshot.currency }).format(snapshot.baseAmount + snapshot.platformFeeAmount)}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Validity */}
           <div className="bg-slate-50 dark:bg-neutral-800/50 rounded-xl p-3">

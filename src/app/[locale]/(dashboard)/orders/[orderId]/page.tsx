@@ -99,7 +99,9 @@ export default async function OrderDetailPage({
     baseAmount: 1250.00,
     currency: 'USD',
     validFrom: order.created_at,
-    validTo: '9999-12-31T23:59:59Z'
+    validTo: '9999-12-31T23:59:59Z',
+    carrierCostAmount: 1000.00,
+    platformFeeAmount: 62.50
   };
 
   // 5. 무역 서류 데이터 준비 (Sprint 8)

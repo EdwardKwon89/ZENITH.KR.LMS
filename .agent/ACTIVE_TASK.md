@@ -152,7 +152,7 @@
 | TASK-095 | 260525 | UAT-11 Phase K 절차서 작성 (Hub Routing + P0 항목) | P3 | TASK-091 ✅ · TASK-092 ✅ · TASK-093 ✅ | B_Kai | ✅ | [TASK-095](tasks/TASK-095_260525_UATPhaseK절차서_BKai.md) | UAT-11 신규 6건 · UAT_MASTER 72→78 · 0322b1b+78345f3+97f2729+e2e3bc3 ✅ |
 | TASK-097 | 260525 | UAT-11 보완 — 쿼리 오류 수정 + IMP-086 시나리오 추가 | P3 | TASK-095 ✅ | B_Kai | ✅ | [TASK-097](tasks/TASK-097_260525_UAT11보완_BKai.md) | 3e491bb+84034bc+030d0ab · UAT-11-03 수정·UAT-11-07 신규·UAT_MASTER 79개 ✅ |
 | TASK-096 | 260525 | UAT 전체 실행 (Edward 직접 검증 — Go-Live 판정) | P1 | TASK-094 ✅ · TASK-095 ✅ · TASK-097 ✅ · **TASK-103 ✅ · TASK-104 ✅** | Edward | 🚫 | [TASK-096](tasks/TASK-096_260525_UAT전체실행_Edward.md) | ⚠️ 전제조건 추가 — TASK-103·104 완료 후 착수 가능 |
-| TASK-103 | 260531 | TISA 요율 3계층 구조 도입 (carrier_cost+margin+platform_fee) | P1 | 없음 | D_Kai | ⬜ | [TASK-103](tasks/TASK-103_260531_TISA요율3계층구조_DKai.md) | IMP-092 · DEF-035 · UAT 진행 전 필수 |
+| TASK-103 | 260531 | TISA 요율 3계층 구조 도입 (carrier_cost+margin+platform_fee) | P1 | 없음 | D_Kai | 🔔 | [TASK-103](tasks/TASK-103_260531_TISA요율3계층구조_DKai.md) | IMP-092 · DEF-035 · UAT 진행 전 필수 |
 | TASK-104 | 260531 | TISA Dashboard 실 Rate Card 연동 (Mock 제거·DB 실조회) | P1 | TASK-103 ✅ | D_Kai | 🚫 | [TASK-104](tasks/TASK-104_260531_TISADashboard실연동_DKai.md) | IMP-093 · DEF-032 · TASK-103 완료 후 착수 · UAT 진행 전 필수 |
 | TASK-098 | 260527 | ID 찾기 기능 재설계 — 개인/법인 분리 | P2 | 없음 | D_Kai | ✅ | [TASK-098](tasks/TASK-098_260527_ID찾기기능재설계_DKai.md) | IMP-089 완료 · 15299bf + 후속 8건(`2111a75`~`d1bc3de`) · Post-승인 버그 8건 ✅ 2차 승인 |
 | TASK-099 | 260529 | UAT-02-04 재작성 — A-2 경로 (REGISTERED→DELIVERED) | P4 | 없음 | B_Kai | ✅ | [TASK-099](tasks/TASK-099_260529_UAT0204재작성_BKai.md) | 332a036+4833de1+9040bcc · 6개 전이 ✅ · Advisory 2건(비차단) · TASK-101 재교육 세션 병행 |

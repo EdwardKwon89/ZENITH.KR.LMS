@@ -123,7 +123,12 @@ RETURNS TABLE (
 
 ## [설계 의견]
 
-*(착수 시 D_Kai 기재)*
+IMP-080 migration(`20260523130200`)이 `zen_rate_cards`를 JSONB `tiers` 기반으로 전면 재설계하여, TASK-103 3계층 구조를 카드 레벨 컬럼으로 적용. 각 tier의 `unit_price`는 All-in Rate로 유지.
+
+### fn_get_best_matching_rate 호환성
+- IMP-080이 `fn_get_best_matching_rate` DROP 후 재정의 안 함 → 함수가 `public.rate_cards` (구 테이블) 참조로 사장 상태
+- TASK-103에서 `zen_rate_cards` 기반으로 전면 재작성
+- `origin_port`/`dest_port`/`service_type` 컬럼이 `zen_rate_cards`에 없어 carrier_id + is_active + valid_from/until 매칭으로 단순화
 
 ---
 
@@ -135,7 +140,36 @@ RETURNS TABLE (
 
 ## [작업 결과]
 
-*(D_Kai 기재)*
+### §1+§2 — DB 스키마 변경
+- `zen_rate_cards`: `carrier_cost NUMERIC(18,2)`, `margin_rate NUMERIC(5,2) DEFAULT 15.0`, `platform_fee_rate NUMERIC(5,2) DEFAULT 5.0` 추가
+- `zen_order_rate_snapshots`: `carrier_cost_amount NUMERIC(18,2)`, `platform_fee_amount NUMERIC(18,2)` 추가
+
+### §3 — fn_get_best_matching_rate() 재작성
+- `public.rate_cards` → `public.zen_rate_cards` 조회 전환
+- 반환 컬럼에 `carrier_cost DECIMAL(18,2)`, `platform_fee_amount DECIMAL(18,2)` 추가
+- 매칭 조건: carrier_id + is_active + valid_from/until (origin_port/dest_port zen_rate_cards에 없어 단순화)
+
+### §4 — tr_capture_order_rate_snapshot 트리거 수정
+- 스냅샷 INSERT/UPDATE에 `carrier_cost_amount`, `platform_fee_amount` 저장
+
+### §5 — Seed 데이터 보완
+- 기존 AIR/SEA seed rate_cards에 carrier_cost (AIR:4.00, SEA:1.50, LAND:2.50, EXP:5.00) + margin_rate 15% + platform_fee_rate 5% UPDATE
+
+### §6 — Admin UI 수정
+- `RateCardsTab.tsx`: 폼에 Carrier Cost / Margin Rate / Platform Fee Rate 3개 필드 추가
+- `rate-cards.ts` server action: CUD에 신규 3개 필드 반영
+- 테이블 컬럼 8→11 (Carrier Cost·Margin·Fee 컬럼열 추가)
+
+### TisaDashboard
+- `TisaSnapshot` 타입에 `carrierCostAmount`, `platformFeeAmount` 추가
+- Cost Breakdown 섹션 추가 (Admin 조건부 표시 — TASK-104에서 role 분기 예정)
+
+### 마이그레이션
+- `supabase/migrations/20260531100000_imp092_tisa_3tier_rate_structure.sql` 생성
+- 로컬 DB push 완료
+
+### 회귀 테스트
+- 229 passed, 1 failed (기존 `tracking-business-qa.test.ts` raw logs — TASK-103 무관)
 
 ---
 
