@@ -236,12 +236,13 @@
 
 | IMP | 내용 | Agent | 상태 | 완료일 |
 |:---:|:-----|:-----:|:----:|:------:|
-| 092 | TISA 요율 3계층 구조 도입 (carrier_cost + margin_rate + platform_fee_rate 분리) | D_Kai | ⬜ | — |
+| 092 | TISA 요율 3계층 구조 도입 (carrier_cost + margin_rate + platform_fee_rate 분리) | D_Kai | 🔔 | `e442ea3` · 229/229+ · migration+admin UI+fn+trigger |
+
 | 093 | TISA Dashboard 실 Rate Card 연동 (Mock 제거, DB 실조회, 경로 선택 후 스냅샷) | D_Kai | 🚫 | — |
 
 > 🚫 IMP-093: IMP-092(TASK-103) 완료 후 착수 가능
 
-**Phase L 완료**: 0 / 2 (0%)
+**Phase L 완료**: 1 / 2 (50%)
 
 ---
 
@@ -268,8 +269,8 @@
 | I | 5 | 5 | 100% ✅ | IMP-073~077 전량 완료 (TASK-069~073 ✅) |
 | J | 4 | 4 | 100% ✅ | IMP-080 ✅ · IMP-081 ✅ · IMP-082 ✅ · IMP-083 ✅ |
 | K | 1 | 7 | 14.3% | IMP-084·085·086·088·089·046 🔔 |
-| UAT | 1 | 4 | 25% | IMP-090 ✅ · IMP-091 ⬜ (Carrier Portal — Phase M) · **IMP-092 ⬜ (TISA 3계층, UAT 전 필수)** · **IMP-093 ⬜ (TISA 실연동, UAT 전 필수)** |
-| **합계** | **68** | **79** | **86.1%** | Phase K 7건 + UAT 4건 기준 |
+| UAT | 2 | 4 | 50% | IMP-090 ✅ · IMP-091 ⬜ (Carrier Portal — Phase M) · **IMP-092 🔔 (TISA 3계층, UAT 전 필수)** · **IMP-093 🚫 (TISA 실연동, UAT 전 필수)** |
+| **합계** | **69** | **79** | **87.3%** | Phase K 7건 + UAT 4건 기준 |
 
 > **UAT 진행 전 필수 처리**: IMP-092(TASK-103) → IMP-093(TASK-104) 순차 완료 후 TASK-096(Edward UAT) 착수 가능
 > 미완료 IMP: IMP-086·087 🚫 블로커 · IMP-028·069(Future — 통관 연계) · IMP-091 ⬜ (Carrier Portal — Phase M)
