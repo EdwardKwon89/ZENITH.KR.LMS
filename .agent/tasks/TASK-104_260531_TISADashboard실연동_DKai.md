@@ -9,7 +9,7 @@
 | **전제조건** | TASK-103 ✅ |
 | **관련 IMP** | IMP-093 |
 | **관련 DEF** | DEF-032 |
-| **상태** | 🔔 |
+| **상태** | ❌ |
 
 ---
 
@@ -226,7 +226,46 @@ USING (
 
 ## [Aiden 검토]
 
-*(Aiden 기재)*
+**검토일**: 2026-05-31 | **결정**: ❌ **반려** (재작업 1건)
+
+### 기술 구현 평가
+
+| 항목 | 결과 | 비고 |
+|:---|:--:|:---|
+| §2 page.tsx Mock 제거 | ✅ | `getOrderRateSnapshot()` 전환 확인 |
+| §4 RLS migration | ✅ | `is_org_member(auth.uid(), o.shipper_id)` 정확 |
+| §5 fallback 메시지 | ✅ | 경로 최적화 안내 메시지 확인 |
+| §6 isAdminView prop | ✅ | Admin/Shipper 조건부 렌더링 정확 |
+| §1 tisa.ts `p_service_type` | ❌ | **"STANDARD" 하드코딩 — TASK-103 동일 버그 잔존** |
+| DoD 전량 체크 | ❌ | 11개 항목 모두 `[ ]` 미체크 |
+| 회귀 228/229 | ✅ | 기존 결함 Advisory |
+
+### ❌ 차단 이슈
+
+**[차단-1] `tisa.ts` line 106 — `p_service_type: "STANDARD"` 하드코딩**
+
+```typescript
+// 현재: zen_rate_cards.transport_mode IN ('AIR','SEA','LAND','EXP') — 'STANDARD' 없음
+const { data: rateResult } = await supabase.rpc("fn_get_best_matching_rate", {
+  ...
+  p_service_type: "STANDARD",   // ❌ — 매칭 결과 항상 null
+  ...
+});
+
+// 수정 필요:
+const { data: orderData } = await supabase
+  .from("zen_orders")
+  .select("carrier_id, origin_port_id, dest_port_id, shipper_id, created_at, transport_mode")
+  //                                                                               ↑ 추가
+  ...
+  p_service_type: orderData.transport_mode,  // ✅
+```
+
+**[차단-2] DoD 11개 항목 전량 미체크** — `[x]` 체크 + 커밋 해시 기재 필수
+
+### ⚠️ 절차 위반 (기록)
+
+**전제조건 미충족 착수**: TASK-104 코드 커밋(7225196, 23:24) 이 TASK-103 fix(8132d98, 23:43) 보다 선행 — TASK-103 ❌ 상태에서 착수 R-17 위반. 위반 누적 1회 (재교육 후 기준).
 
 ---
 
