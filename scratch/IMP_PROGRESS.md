@@ -2,7 +2,7 @@
 
 > **프로젝트**: ZENITH_LMS
 > **근거 문서**: [IMP_EXECUTION_PLAN_BKai_20260514.md](IMP_EXECUTION_PLAN_BKai_20260514.md)
-> **최초 작성**: 2026-05-15 (Aiden) / **최근 업데이트**: 2026-05-31 (D_Kai — IMP-092·093 🔔)
+> **최초 작성**: 2026-05-15 (Aiden) / **최근 업데이트**: 2026-05-31 (Noah — IMP-092 🔔 재작업 완료)
 > **업데이트 규칙**:
 > - 에이전트는 IMP 완료 커밋 시 해당 행의 `상태`와 `완료일`을 반드시 갱신한다.
 > - 갱신은 IMP 완료 커밋과 **같은 커밋**에 포함하거나, 직후 별도 커밋으로 처리한다.
@@ -236,7 +236,7 @@
 
 | IMP | 내용 | Agent | 상태 | 완료일 |
 |:---:|:-----|:-----:|:----:|:------:|
-| 092 | TISA 요율 3계층 구조 도입 (carrier_cost + margin_rate + platform_fee_rate 분리) | D_Kai | 🔔 | `e442ea3` · 229/229+ · migration+admin UI+fn+trigger |
+| 092 | TISA 요율 3계층 구조 도입 (carrier_cost + margin_rate + platform_fee_rate 분리) | D_Kai | 🔔 | `e442ea3`+`8132d98` · 228/228+ · migration+admin UI+fn+trigger+transport_mode fix |
 
 | 093 | TISA Dashboard 실 Rate Card 연동 (Mock 제거, DB 실조회, 경로 선택 후 스냅샷) | D_Kai | 🔔 | `7225196` · 229/229+ · server action+page+RLS+UI+role 분기 |
 
