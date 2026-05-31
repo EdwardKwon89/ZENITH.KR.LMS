@@ -107,6 +107,28 @@ USING (
 "경로 최적화를 완료하면 요율이 자동으로 매칭됩니다."
 ```
 
+### §6 — 역할별 표시 정책 (Role-Based Display)
+
+화주(CORPORATE/INDIVIDUAL)에게 TISA 내부 구조를 노출하지 않는다.
+
+| 정보 항목 | 화주 (CORPORATE/INDIVIDUAL) | Admin/Manager |
+|:---------|:---------------------------:|:-------------:|
+| Base Amount (기준 운임) | ✅ 표시 | ✅ 표시 |
+| Currency | ✅ 표시 | ✅ 표시 |
+| Rate Card ID | ❌ 비표시 | ✅ 표시 |
+| Version / Priority | ❌ 비표시 | ✅ 표시 |
+| Validity Period | ❌ 비표시 | ✅ 표시 |
+| carrier_cost / margin / platform_fee breakdown | ❌ 비표시 | ✅ 표시 |
+| Applied Rule / Snapshot 메타 | ❌ 비표시 | ✅ 표시 |
+| Auto/Manual 배지 | ❌ 비표시 | ✅ 표시 |
+
+**구현 방식**:
+- `getOrderRateSnapshot(orderId)` 서버 액션에서 role 확인 후 반환 shape 분기
+  - Admin/Manager → 전체 필드 반환
+  - CORPORATE/INDIVIDUAL → `{ baseAmount, currency }` 만 반환
+- `OrderTisaDashboard` 컴포넌트에서 `isAdminView: boolean` prop 수신, 조건부 렌더링
+- RLS column restriction 불필요 — 서버 액션 레이어에서 처리
+
 ---
 
 ## DoD (완료 기준)
@@ -117,6 +139,9 @@ USING (
 - [ ] `OrderTisaDashboard` UI — breakdown 표시 (운송사 원가 / 플랫폼 수수료 / 합계)
 - [ ] RLS 정책 마이그레이션 — CORPORATE/INDIVIDUAL 접근 추가
 - [ ] 경로 미선택 시 fallback 메시지 개선
+- [ ] 역할별 표시 정책 — 화주: Base Amount + Currency 만 / Admin: 전체 필드
+- [ ] `getOrderRateSnapshot()` role 분기 — Admin shape vs Shipper shape
+- [ ] `OrderTisaDashboard` — `isAdminView` prop 기반 조건부 렌더링
 - [ ] ZEN-2026-000002 Order Detail에서 경로 미선택 → "No snapshot" 표시 확인
 - [ ] 회귀 테스트 전체 PASS
 - [ ] 코드 커밋 완료 (커밋 해시 포함)
@@ -144,7 +169,21 @@ USING (
 
 ## [설계 확정]
 
-*(Aiden 기재)*
+**확정일**: 2026-05-31 | **확정자**: Aiden (Claude)
+
+### 역할별 정보 공개 범위
+
+화주(CORPORATE/INDIVIDUAL)에게 TISA 내부 아키텍처 정보를 노출할 필요 없음. 화주는 **최종 청구 금액(Base Amount + Currency)만** 인지하면 충분하다.
+
+- TISA Rate Card ID, Version, Priority, Validity Period 등은 플랫폼 내부 요율 관리 메타데이터로 화주에게 불필요
+- carrier_cost / margin / platform_fee breakdown은 플랫폼-운송사 간 정산 정보로 화주 미공개 원칙
+- Auto/Manual 배지 및 Applied Rule도 내부 운영 정보로 Admin/Manager 전용
+
+### 구현 원칙
+
+- **서버 액션 레이어**에서 role 기반 shape 분기 (RLS column restriction 사용 안 함)
+- **OrderTisaDashboard**는 `isAdminView` prop으로 조건부 렌더링 — 단일 컴포넌트 유지
+- 히스토리 조회(스냅샷 이력)는 Admin/Manager 전용 뷰에서만 접근 가능
 
 ---
 
@@ -165,3 +204,4 @@ USING (
 | 날짜 | 주체 | 내용 |
 |:----|:----:|:----|
 | 2026-05-31 | Aiden (Claude) | v1.0 — TASK-104 발령. IMP-093 · DEF-032 연계. 전제조건: TASK-103 ✅. UAT 진행 전 필수 처리 항목 |
+| 2026-05-31 | Aiden (Claude) | v1.1 — §6 역할별 표시 정책 추가. 화주: Base Amount + Currency 전용 / Admin: 전체 공개. 설계 확정 기재. |
