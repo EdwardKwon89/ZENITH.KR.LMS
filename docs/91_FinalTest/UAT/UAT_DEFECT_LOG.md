@@ -39,8 +39,8 @@
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|
 | 시나리오 오류 | 1 | 0 | 0 | 0 | 5 | **6** |
 | 기능 보완/개선 | 7 | 0 | 2 | 2 | 1 | **12** |
-| 기능 오류 | 4 | 0 | 11 | 7 | 0 | **22** |
-| **합계** | **12** | **0** | **13** | **9** | **6** | **40** |
+| 기능 오류 | 4 | 0 | 12 | 7 | 0 | **23** |
+| **합계** | **12** | **0** | **14** | **9** | **6** | **41** |
 
 ---
 
@@ -88,6 +88,7 @@
 | DEF-038 | UAT-02-04 | 기능 오류 | N | 수정완료 | Noah | `a8bdd79` | **Admin 요율 관리 UI Broken** — TISA 3-tier migration(20260531100000) 후 AdminRepository가 삭제된 컬럼(org_id, origin_code, dest_code, mode, status) 참조 → zen_rate_cards SELECT/INSERT/UPDATE 전부 실패. 현재 유일한 등록 경로는 SQL migration. | TASK-106 | **수정 내역 (Noah, 2026-06-01, DoD ✅ 229/229 PASS)**<br><br>**① AdminRepository (`admin.repository.ts`)**<br>├ `findExistingActiveRateCards()`: `carrier_id + transport_mode + is_active=true`<br>├ `supersedeRateCards()`: `status='SUPERSEDED'` → `is_active=false`<br>├ `insertRateTiers()`: **제거** (tiers JSONB 내재화)<br>├ `deleteRateCard()`: hard delete → `is_active=false` soft-delete<br>└ `findRateCards()`: JOIN `zen_carriers!carrier_id`, filters `carrier_id/transport_mode/is_active`<br><br>**② Server Action (`rates.ts`)**<br>├ `createRateCard()`: payload `carrier_id + transport_mode + tiers(JSONB) + carrier_cost + margin_rate + platform_fee_rate`<br>├ `deleteRateCard()`: soft-delete로 변경 (`is_active=false`)<br>└ `getRateCards()`: `carrier_id/transport_mode/is_active` 필터 (구 `origin_code/dest_code/mode/status` 제거)<br><br>**③ RateCardForm UI**<br>├ `originPort/destPort/baseRate/priority/customer/baseDateRule` 제거<br>├ `carrierCost + marginRate + platformFeeRate` 3필드 추가<br>└ TISA 3계층 요약 패널 (Carrier Cost / Margin Rate / Platform Fee)<br><br>**④ useRates Hook**<br>├ Carrier 조회: `zen_organizations` → `zen_carriers`<br>├ Payload: 구 schema → 신규 TISA 3-tier schema<br>└ filteredRates: origin/dest 검색 제거 (zen_rate_cards에 해당 컬럼 없음)<br><br>**⑤ Test 정합**<br>├ TC-RATES-04 전면 재작성: `update({is_active:false})` + `insert({carrier_id, transport_mode, is_active:true, carrier_cost, margin_rate, platform_fee_rate})`<br>└ **회귀**: 229/229 PASS ✅ | ✅ 수정완료 — Aiden 검토 대기 🔔 | IMP-094 |
 | DEF-039 | UAT-02-04 | 기능 오류 | N | 미수정 | - | - | **CARRIER role RLS 누락** — zen_route_network, zen_rate_cards, zen_carriers SELECT RLS 정책에 CARRIER role 미포함 → CARRIER route/rate 조회 시 항상 빈 배열.<br><br>**수정방향**: 각 테이블 SELECT POLICY에 OR get_my_role() = 'CARRIER' 추가 | - | Aiden 협의 필요 | - |
 | DEF-040 | UAT-02-04 | 기능 보완 | N | 미수정 | - | - | **Route Network 관리 UI 부재** — zen_route_network CRUD Admin 화면 없음. ZEN-2026-000002(ICN→JFK)처럼 DB에 없는 경로는 ADMIN도 SQL로만 추가 가능.<br><br>**개선방향**: /admin/route-network 페이지 신설 | - | Aiden 협의 필요 | - |
+| DEF-041 | UAT-01-09 | 기능 오류 | N | 수정완료 | Noah | `b0b0053` | **SUSPENDED 계정 redirect 루프** — SUSPENDED 계정 로그인 시 proxy.ts가 `/ko/suspended` redirect (세션 유지) → suspended/page.tsx Client Component → signOut() → 쿠키 소멸 → `/ko/login` → 재로그인 가능 → SUSPENDED 감지 → 되풀이 → Chrome crash | TASK-107 | **수정 내역 (Noah, 2026-06-01, DoD ✅ 229/229 PASS)**<br><br>**① proxy.ts SUSPENDED 블록**<br>├ 기존: `redirect + mergeHeaders(supabaseResponse)` → 세션 유지 → redirect만 반복<br>├ 변경: `signOut() + 쿠키 소거 + redirect to /suspended` (supabaseResponse 미병합)<br>└ `/suspended` → `!user` bypass whitelist 추가 (세션 없이 페이지 접근)<br><br>**② suspended/page.tsx**<br>├ 기존: `'use client'`, `supabase.auth.signOut()` on button click<br>└ 변경: Server Component, Link to /login, 정적 안내만 제공<br><br>**③ 결과**<br>├ SUSPENDED 유저 세션은 proxy에서 즉시 종료<br>├ /suspended 페이지는 세션 없이 정적 렌더링 → redirect 루프 없음<br>└ 회귀: 229/229 PASS ✅ | ✅ 수정완료 — Aiden 검토 대기 🔔 | - |
 ---
 
 ## 처리 지침

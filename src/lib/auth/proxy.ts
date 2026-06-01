@@ -51,7 +51,9 @@ export async function authGuard(
 
   if (isApi) return null;
 
-  if (!user && !isAuthPage && purePath !== '/') {
+  const isSuspendedPage = purePath.startsWith('/suspended');
+
+  if (!user && !isAuthPage && purePath !== '/' && !isSuspendedPage) {
     const url = request.nextUrl.clone();
     url.pathname = `/${locale}${DEFAULT_REDIRECTS.UNAUTHENTICATED}`;
     return { response: mergeHeaders(NextResponse.redirect(url), supabaseResponse), redirectUrl: url.pathname };
@@ -170,17 +172,18 @@ export async function authGuard(
 
     // --- IMP-072: SUSPENDED 계정 처리 ---
     if (userStatus === 'SUSPENDED') {
-      const isSuspendedWhitelisted =
-        purePath.startsWith('/suspended') ||
-        isAuthPage ||
-        purePath === '/';
-      if (!isSuspendedWhitelisted) {
+      if (!isSuspendedPage && !isAuthPage && purePath !== '/') {
+        // 세션 종료 + 쿠키 소거 후 안내 페이지로 (루프 방지)
+        await supabase.auth.signOut();
         const url = request.nextUrl.clone();
         url.pathname = `/${locale}/suspended`;
-        return { response: mergeHeaders(NextResponse.redirect(url), supabaseResponse), redirectUrl: url.pathname };
+        url.searchParams.set('reason', 'suspended');
+        const response = NextResponse.redirect(url);
+        response.cookies.delete('zen_last_activity');
+        return { response, redirectUrl: url.pathname };
       }
-      // SUSPENDED 유저가 whitelist 경로에 있을 때 route access check를 건너뜀
-      // (아래 orgType 분기가 /suspended를 포함하지 않아 allowedRoot로 재redirect → 무한루프 방지)
+      // SUSPENDED 유저가 whitelist 경로(/suspended)에 있을 때
+      // authGuard를 건너뛰어 무한루프 방지
       return null;
     }
 
