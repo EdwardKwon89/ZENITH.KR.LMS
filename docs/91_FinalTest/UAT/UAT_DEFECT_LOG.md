@@ -39,8 +39,8 @@
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|
 | 시나리오 오류 | 1 | 0 | 0 | 0 | 5 | **6** |
 | 기능 보완/개선 | 6 | 0 | 2 | 2 | 1 | **11** |
-| 기능 오류 | 3 | 0 | 9 | 7 | 0 | **19** |
-| **합계** | **10** | **0** | **11** | **9** | **6** | **36** |
+| 기능 오류 | 3 | 0 | 10 | 7 | 0 | **20** |
+| **합계** | **10** | **0** | **12** | **9** | **6** | **37** |
 
 ---
 
@@ -127,3 +127,4 @@
 | 2026-05-31 | Aiden (Claude) | DEF-035 추가 — TISA 요율 3계층 구조 미분리 (carrier_cost + margin + platform_fee 분리 필요). IMP-092·TASK-103 발령. DEF-032 설계 확정 (경로 선택 후 스냅샷 캡처) + IMP-093·TASK-104 발령. UAT 전 필수 블로킹 2건 추가. 현황 요약 갱신 (기능오류 미수정 3→5, 합계 33→35) |
 | 2026-06-01 | B_Kai (OpenCode) | DEF-032·DEF-035 상태 미수정→수정완료 · 수정 커밋 해시 기재 (6a0dbab·8132d98) · 현황 요약 갱신 (기능오류 미수정 5→3, 수정완료 6→8, 합계 35 유지) · TASK-105 |
 | 2026-06-01 | Noah (OpenCode) | DEF-036 추가 — UAT-02 경로 선택 시 "경로 등록 오류" 발생. zen_order_routes RLS 정책 0건(UPSERT 차단) + zen_orders UPDATE CORPORATE/INDIVIDUAL 미허용. 마이그레이션 `20260601000000` 적용 · `c1ab318` · 회귀 228/229 PASS · 기능오류 수정완료 8→9, 합계 35→36 |
+| 2026-06-01 | Noah (OpenCode) | DEF-037 추가 — UAT-02 경로 확정 후 TISA 비용 미표시. selectRoute()가 carrier_id 미동기화 + fn_get_best_matching_rate zen_carriers.org_id 컬럼 부재 (SQL ERROR) + 트리거 route_option_id 미감지. 마이그레이션 `20260601010000`에 zen_carriers.org_id 추가 + fn 재정의 + 트리거 보강. selectRoute() carrier_id 동기화 + getOrderRateSnapshot() fallback 추가. `427e306` · 회귀 229/229 PASS · 기능오류 수정완료 9→10, 합계 36→37 |
