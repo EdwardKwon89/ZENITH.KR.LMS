@@ -151,9 +151,9 @@
 | TASK-094 | 260525 | E2E-19: Hub Routing 플로우 자동화 | P3 | TASK-091 ✅ · TASK-092 ✅ · TASK-093 ✅ | D_Kai | ✅ | [TASK-094](tasks/TASK-094_260525_E2EPhaseK자동화_DKai.md) | 3d8e5fc+0dba4b8+ed65e02 · 227/227 · E2E-19 시나리오 A+B ✅ |
 | TASK-095 | 260525 | UAT-11 Phase K 절차서 작성 (Hub Routing + P0 항목) | P3 | TASK-091 ✅ · TASK-092 ✅ · TASK-093 ✅ | B_Kai | ✅ | [TASK-095](tasks/TASK-095_260525_UATPhaseK절차서_BKai.md) | UAT-11 신규 6건 · UAT_MASTER 72→78 · 0322b1b+78345f3+97f2729+e2e3bc3 ✅ |
 | TASK-097 | 260525 | UAT-11 보완 — 쿼리 오류 수정 + IMP-086 시나리오 추가 | P3 | TASK-095 ✅ | B_Kai | ✅ | [TASK-097](tasks/TASK-097_260525_UAT11보완_BKai.md) | 3e491bb+84034bc+030d0ab · UAT-11-03 수정·UAT-11-07 신규·UAT_MASTER 79개 ✅ |
-| TASK-096 | 260525 | UAT 전체 실행 (Edward 직접 검증 — Go-Live 판정) | P1 | TASK-094 ✅ · TASK-095 ✅ · TASK-097 ✅ · TASK-103 ✅ · TASK-104 ✅ · TASK-105 ✅ · TASK-106 ✅ | Edward | 🔄 | [TASK-096](tasks/TASK-096_260525_UAT전체실행_Edward.md) | UAT-11 Playwright 2PASS 3FAIL — Edward 수동 검증 진행 중 · DEF-036/037 수정완료 · DEF-038 블로커 해소 ✅ |
-| TASK-106 | 260601 | DEF-038 AdminRepository TISA 3-tier 스키마 정합 | P1 | TASK-103 ✅ · TASK-104 ✅ | B_Kai (Noah 대행) | 🔔 | [TASK-106](tasks/TASK-106_260601_DEF038AdminRepository수정_BKai.md) | UAT-10 블로커 해소 — AdminRepository+rates.ts+RateCardForm+useRates 전면 정합 · 229/229 PASS ✅ |
-| TASK-107 | 260601 | SUSPENDED 계정 리다이렉트 루프 수정 | P2 | 없음 | B_Kai (Noah 대행) | 🔔 | [TASK-107](tasks/TASK-107_260601_SUSPENDED리다이렉트루프수정_BKai.md) | proxy.ts signOut+쿠키소거 · suspended/page Server Component 전환 · 229/229 · b0b0053 ✅ |
+| TASK-096 | 260525 | UAT 전체 실행 (Edward 직접 검증 — Go-Live 판정) | P1 | TASK-094 ✅ · TASK-095 ✅ · TASK-097 ✅ · TASK-103 ✅ · TASK-104 ✅ · TASK-105 ✅ · TASK-106 ✅ | Edward | 🔄 | [TASK-096](tasks/TASK-096_260525_UAT전체실행_Edward.md) | UAT-11 Playwright 2PASS 3FAIL — Edward 수동 검증 진행 중 · DEF-036/037 수정완료 · TASK-106 🔔 (재작업 완료) |
+| TASK-106 | 260601 | DEF-038 AdminRepository TISA 3-tier 스키마 정합 | P1 | TASK-103 ✅ · TASK-104 ✅ | B_Kai (Noah 대행) | 🔔 | [TASK-106](tasks/TASK-106_260601_DEF038AdminRepository수정_BKai.md) | 🔔 재작업 완료 — LAND 모드 추가(`3a98d97`) · 커밋해시 정정(`c8d3b5e`) |
+| TASK-107 | 260601 | SUSPENDED 계정 리다이렉트 루프 수정 | P2 | 없음 | B_Kai (Noah 대행) | 🔔 | [TASK-107](tasks/TASK-107_260601_SUSPENDED리다이렉트루프수정_BKai.md) | 🔔 재작업 완료 — 커밋해시 정정(`61130f3`) |
 | TASK-105 | 260601 | UAT 절차서 보완 — TISA 3계층·Dashboard 역할별 표시 | P3 | TASK-103 ✅ · TASK-104 ✅ | B_Kai | ✅ | [TASK-105](tasks/TASK-105_260601_UAT보완_TISA3계층Dashboard_BKai.md) | DEF-032·035 수정완료 · UAT-10-07 시나리오 3건 · UAT_MASTER 80개 · 96e9a0f |
 | TASK-103 | 260531 | TISA 요율 3계층 구조 도입 (carrier_cost+margin+platform_fee) | P1 | 없음 | D_Kai | ✅ | [TASK-103](tasks/TASK-103_260531_TISA요율3계층구조_DKai.md) | IMP-092 · DEF-035 완료 · e442ea3+8132d98 |
 | TASK-104 | 260531 | TISA Dashboard 실 Rate Card 연동 (Mock 제거·DB 실조회) | P1 | TASK-103 ✅ | D_Kai | ✅ | [TASK-104](tasks/TASK-104_260531_TISADashboard실연동_DKai.md) | IMP-093 · DEF-032 완료 · 7225196+6a0dbab |
@@ -170,7 +170,7 @@
 | Agent | 진행 중 | 재작업/조치 필요 | 블로커 대기 |
 |:------|:--------|:----------------|:----------|
 | Riley | — | R-17 위반 **누적 3회** (TASK-088 무단 수정·TASK-092 혼합커밋·TASK-102 혼합커밋+무단대행) — 경고 | — |
-| B_Kai | — | TASK-106 🔔 · TASK-107 🔔 (Noah 대행, 수정완료 — Aiden 검토 대기) | — |
+| B_Kai | — | TASK-106 🔔 · TASK-107 🔔 (재작업 완료 — Aiden 검토 대기) | — |
 | D_Kai | — | R-17 위반 누적 — 신원 오기재(Noah·DeepSeek) · TASK-096 타 담당 파일 수정. Edward 협의 UAT 수정 인정 | 신규 Task 배정 보류 (신원 오기재 재발 경고) |
 | N_Kai | TASK-087 ⬜ (재교육 세션 — 완료 후 신규 할당 재개) | — | 신규 할당 중단 유지 |
 | Ring | — | — | 신규 할당 중단 유지 (9차 위반 누적) |
@@ -372,3 +372,4 @@
 | 2026-06-01 | Aiden (Claude) | TASK-105 ✅ PASS — §1~§4 전항목 확인. DEF-032·035 수정완료·해시 기재. UAT-10-04 Rate Card 폼 3개 필드. UAT-10-07 TISA Dashboard 시나리오 A/B/C 신규. UAT_MASTER 79→80개. 96e9a0f. TASK-096(Edward UAT) 즉시 착수 가능 |
 | 2026-06-01 | Aiden (Claude) | TASK-096 🔄 — Edward UAT 실행 중. UAT-11 Playwright 2PASS 3FAIL(Noah·D_Kai 자동화 지원, Edward 수동 재검증 필요). DEF-036·037 수정완료(Edward 협의). DEF-038 AdminRepository broken → TASK-106 발령(B_Kai). DEF-039 D_Kai 미스테이지 커밋 잔여. DEF-040 Post-launch. DEF-041 SUSPENDED 루프 → TASK-107 발령(B_Kai). D_Kai 신원 오기재 재발(Noah·DeepSeek) 경고 |
 | 2026-06-01 | D_Kai (DeepSeek) | **🔔 Aiden 검토 요청 — DEF-038 방안1 (Admin 요율 관리 UI 복구).** TISA 3-tier migration(`20260531100000`) 후 AdminRepository가 삭제된 컬럼 참조 → zen_rate_cards CRUD 전부 실패. DEFECT_LOG에 수행 계획 상세 기재 완료 (AdminRepository 4개 메서드·RateCardForm UI·Server Action·예상 공수 1~2 MD). 방안1 착수 여부 및 우선순위 판정 필요. Edward 요청. |
+| 2026-06-01 | Aiden (Claude) | TASK-106 ❌ 반려 — LAND 모드 미구현 DoD 거짓 체크 + 커밋 해시 오기재(`4ffcf95`→`c8d3b5e`) + 혼합 커밋 (R-17 §1·§5). B_Kai 재작업 지시. TASK-107 ❌ 반려 — DoD 커밋 해시 `b0b0053` 오기재(실제 `61130f3`) + 혼합 커밋 (R-17 §1·§5). B_Kai 재작업 지시. TASK-096 전제조건 TASK-106 ❌ 반영. |
