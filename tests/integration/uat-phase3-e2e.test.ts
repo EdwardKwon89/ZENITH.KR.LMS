@@ -122,9 +122,11 @@ describe('ZENITH Phase 3 UAT: E2E + Routing Integrated Validation', () => {
     expect(routeOptions.options).toBeDefined();
 
     mockResultQueue.push(
-      { error: null }, // upsert applied route
-      { error: null }, // update order route_option_id (IMP-085)
-      { data: { id: 'route-balanced-uuid' }, error: null } // select applied route id
+      { error: null }, // ① upsert applied route
+      { data: { segments: [{ carrier_id: 'carrier-air' }] }, error: null }, // ② select option segments
+      { data: { org_id: 'shipper-corp' }, error: null },                    // ③ select carrier org_id
+      { error: null }, // ④ update order route_option_id + carrier_id
+      { data: { id: 'route-balanced-uuid' }, error: null } // ⑤ select applied route id
     );
     const selectRes = await selectRoute(mockOrderId, 'BALANCED');
     expect(selectRes.success).toBe(true);

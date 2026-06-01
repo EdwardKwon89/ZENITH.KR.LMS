@@ -127,10 +127,33 @@ export async function selectRoute(orderId: string, optionId: string) {
 
   if (upsertError) throw new Error(`Route selection failed: ${upsertError.message}`);
 
-  // 2. zen_orders.route_option_id 동기화 (IMP-085: Order-Route Segment 연결)
+  // 2. Read selected option's carrier from segments → resolve org_id
+  const { data: selectedOption } = await supabase
+    .from("zen_route_options")
+    .select("segments")
+    .eq("id", optionId)
+    .single();
+
+  let resolvedOrgId: string | undefined;
+  const carrierIdFromSegment = (selectedOption?.segments as any[])?.[0]?.carrier_id as string | undefined;
+  if (carrierIdFromSegment) {
+    const { data: carrier } = await supabase
+      .from("zen_carriers")
+      .select("org_id")
+      .eq("id", carrierIdFromSegment)
+      .single();
+    if (carrier?.org_id) {
+      resolvedOrgId = carrier.org_id;
+    }
+  }
+
+  // 3. zen_orders.route_option_id + carrier_id 동기화
   const { error: updateError } = await supabase
     .from("zen_orders")
-    .update({ route_option_id: optionId })
+    .update({
+      route_option_id: optionId,
+      ...(resolvedOrgId ? { carrier_id: resolvedOrgId } : {}),
+    })
     .eq("id", orderId);
 
   if (updateError) throw new Error(`Order route_option_id sync failed: ${updateError.message}`);

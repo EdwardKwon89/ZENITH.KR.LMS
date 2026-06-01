@@ -91,11 +91,29 @@ export async function getOrderRateSnapshot(orderId: string): Promise<TisaSnapsho
 
   // 5a. Route selected but no snapshot — trigger auto-capture
   if (routeData?.selected_option_id) {
-    const { data: orderData } = await supabase
+    let { data: orderData } = await supabase
       .from("zen_orders")
       .select("carrier_id, origin_port_id, dest_port_id, shipper_id, created_at, transport_mode")
       .eq("id", orderId)
       .maybeSingle();
+
+    // Fallback: if carrier_id is NULL, read from route option segments
+    if (orderData && !orderData.carrier_id) {
+      const { data: option } = await supabase
+        .from("zen_route_options")
+        .select("segments")
+        .eq("id", routeData.selected_option_id)
+        .single();
+      const segCarrierId = (option?.segments as any[])?.[0]?.carrier_id as string | undefined;
+      if (segCarrierId) {
+        const { data: carrier } = await supabase
+          .from("zen_carriers")
+          .select("org_id")
+          .eq("id", segCarrierId)
+          .single();
+        orderData.carrier_id = carrier?.org_id || null;
+      }
+    }
 
     if (orderData) {
       // Call fn_get_best_matching_rate via rpc
