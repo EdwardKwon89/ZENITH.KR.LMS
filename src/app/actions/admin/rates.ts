@@ -8,12 +8,21 @@ import { USER_ROLES } from "@/lib/auth/rbac";
 import { AdminRepository } from '@/lib/repositories';
 
 /**
- * 요율 카드 등록 (마스터 + 슬랩 + 할증 통합 저장)
- * TISA 규정에 따라 동일 항로의 기존 ACTIVE 요율을 SUPERSEDED 처리함
+ * 요율 카드 등록 (TISA 3계층 구조 통합 저장)
+ * tiers는 JSONB로 zen_rate_cards 내재화, 동일 carrier+mode 기존 활성 카드는 비활성화
  */
 export const createRateCard = withAction(async function (payload: {
-  card: any;
-  tiers: any[];
+  card: {
+    carrier_id: string;
+    transport_mode: string;
+    currency?: string;
+    tiers: any[];
+    valid_from: string;
+    valid_to?: string;
+    carrier_cost?: number;
+    margin_rate?: number;
+    platform_fee_rate?: number;
+  };
   surcharges: any[];
 }) {
   const { supabase, profile } = await validateUserAction();
@@ -23,43 +32,34 @@ export const createRateCard = withAction(async function (payload: {
     throw new Error("요율 등록 권한이 없습니다.");
   }
 
-  const targetOrgId = payload.card.org_id || payload.card.carrier_id;
-  if (!targetOrgId) throw new Error("운송사 정보(org_id)가 누락되었습니다.");
+  if (!payload.card.carrier_id) throw new Error("운송사 정보(carrier_id)가 누락되었습니다.");
+  if (!payload.card.transport_mode) throw new Error("운송 모드(transport_mode)가 누락되었습니다.");
 
-  const originCode = payload.card.origin_code || payload.card.origin_port;
-  const destCode = payload.card.dest_code || payload.card.destination_port;
-  const mode = payload.card.mode || payload.card.service_type;
+  const { data: existingRates } = await adminRepo.findExistingActiveRateCards(
+    payload.card.carrier_id,
+    payload.card.transport_mode
+  );
 
-  const { data: existingRates } = await adminRepo.findExistingActiveRateCards(targetOrgId, originCode, destCode, mode);
-
-  let nextVersion = 1;
   if (existingRates && existingRates.length > 0) {
     const idsToUpdate = existingRates.map(r => r.id);
     await adminRepo.supersedeRateCards(idsToUpdate);
-    nextVersion = Math.max(...existingRates.map(r => r.version_no)) + 1;
   }
 
   const { data: card, error: cardError } = await adminRepo.insertRateCard({
-    ...payload.card,
-    org_id: targetOrgId,
-    origin_code: originCode,
-    dest_code: destCode,
-    mode: mode,
-    status: "ACTIVE",
-    version_no: nextVersion,
+    carrier_id: payload.card.carrier_id,
+    transport_mode: payload.card.transport_mode,
+    currency: payload.card.currency ?? 'USD',
+    tiers: payload.card.tiers,
+    carrier_cost: payload.card.carrier_cost ?? null,
+    margin_rate: payload.card.margin_rate ?? 15.0,
+    platform_fee_rate: payload.card.platform_fee_rate ?? 5.0,
+    valid_from: payload.card.valid_from,
+    valid_until: payload.card.valid_to ?? null,
+    is_active: true,
     created_at: new Date().toISOString()
   });
 
   if (cardError) throw new Error(`Rate card creation failed: ${cardError.message}`);
-
-  if (payload.tiers && payload.tiers.length > 0) {
-    const tiersToInsert = payload.tiers.map(tier => ({
-      ...tier,
-      rate_card_id: card.id
-    }));
-    const { error: tiersError } = await adminRepo.insertRateTiers(tiersToInsert);
-    if (tiersError) throw new Error(`Rate tiers creation failed: ${tiersError.message}`);
-  }
 
   if (payload.surcharges && payload.surcharges.length > 0) {
     const surchargesToInsert = payload.surcharges.map(s => ({
@@ -75,7 +75,7 @@ export const createRateCard = withAction(async function (payload: {
 });
 
 /**
- * 요율 카드 삭제 (Soft delete 대신 물리 삭제 적용, CASCADE 설정됨)
+ * 요율 카드 비활성화 (Soft delete — is_active = false)
  */
 export const deleteRateCard = withAction(async function (cardId: string) {
   const { supabase, profile } = await validateUserAction();
@@ -86,7 +86,7 @@ export const deleteRateCard = withAction(async function (cardId: string) {
   }
 
   const { error } = await adminRepo.deleteRateCard(cardId);
-  if (error) throw new Error(`Rate card deletion failed: ${error.message}`);
+  if (error) throw new Error(`Rate card deactivation failed: ${error.message}`);
 
   revalidatePath("/admin/rates");
   return true;
@@ -96,30 +96,19 @@ export const deleteRateCard = withAction(async function (cardId: string) {
  * 역할 및 필터 기반 요율 목록 조회
  */
 export async function getRateCards(filters: {
-  origin_code?: string;
-  dest_code?: string;
-  origin_port?: string;
-  destination_port?: string;
-  mode?: string;
-  service_type?: string;
-  status?: string;
+  transport_mode?: string;
+  carrier_id?: string;
+  is_active?: boolean;
   page?: number;
   pageSize?: number;
 } = {}) {
   const { supabase, profile } = await validateUserAction();
   const adminRepo = new AdminRepository(supabase);
 
-  const origin = filters.origin_code || filters.origin_port;
-  const dest = filters.dest_code || filters.destination_port;
-  const mode = filters.mode || filters.service_type;
-  const orgId = profile?.role === USER_ROLES.CARRIER ? profile.org_id : undefined;
-
   const { data, error, count } = await adminRepo.findRateCards({
-    origin_code: origin,
-    dest_code: dest,
-    mode: mode,
-    status: filters.status,
-    orgId,
+    carrier_id: filters.carrier_id,
+    transport_mode: filters.transport_mode,
+    is_active: filters.is_active,
     page: filters.page ?? 1,
     pageSize: filters.pageSize ?? 50,
   });

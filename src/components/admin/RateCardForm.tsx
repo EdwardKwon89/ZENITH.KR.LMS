@@ -6,34 +6,26 @@ import { SurchargeEditor } from '@/components/admin/SurchargeEditor';
 import { RateTier } from '@/components/admin/RateTierEditor';
 import { Surcharge } from '@/components/admin/SurchargeEditor';
 import {
-  Globe, MapPin, Truck, Save, ChevronRight, Settings2, Box, Plane, Ship, Calendar,
+  Truck, Save, Settings2, Box, Plane, Ship, Calendar, DollarSign, Percent,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface RateCardFormProps {
   carriers: any[];
-  ports: any[];
   selectedCarrier: string;
   onCarrierChange: (v: string) => void;
-  originPort: string;
-  onOriginPortChange: (v: string) => void;
-  destPort: string;
-  onDestPortChange: (v: string) => void;
   serviceType: string;
   onServiceTypeChange: (v: string) => void;
-  baseRate: number;
-  onBaseRateChange: (v: number) => void;
-  priority: number;
-  onPriorityChange: (v: number) => void;
-  selectedCustomer: string;
-  onCustomerChange: (v: string) => void;
-  baseDateRule: string;
-  onBaseDateRuleChange: (v: string) => void;
+  carrierCost: number;
+  onCarrierCostChange: (v: number) => void;
+  marginRate: number;
+  onMarginRateChange: (v: number) => void;
+  platformFeeRate: number;
+  onPlatformFeeRateChange: (v: number) => void;
   validFrom: string;
   onValidFromChange: (v: string) => void;
   validTo: string;
   onValidToChange: (v: string) => void;
-  shippers: any[];
   tiers: RateTier[];
   onTiersChange: (v: RateTier[]) => void;
   surcharges: Surcharge[];
@@ -64,20 +56,20 @@ export function RateCardForm(props: RateCardFormProps) {
               >
                 <option value="" className="bg-white">선택하세요...</option>
                 {props.carriers.map(c => (
-                  <option key={c.id} value={c.id} className="bg-white">{c.name} ({c.org_id})</option>
+                  <option key={c.id} value={c.id} className="bg-white">{c.name} ({c.code})</option>
                 ))}
               </select>
             </div>
 
             <div className="space-y-3">
               <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
-                <Settings2 className="w-3 h-3 text-blue-500" /> Service Mode
+                <Settings2 className="w-3 h-3 text-blue-500" /> Transport Mode
               </label>
               <div className="flex gap-2 p-1 bg-slate-100 rounded-2xl border border-slate-200">
                 {[
                   { id: 'AIR', icon: Plane, label: 'Air' },
                   { id: 'SEA', icon: Ship, label: 'Sea' },
-                  { id: 'CIR', icon: Box, label: 'Express' }
+                  { id: 'EXP', icon: Box, label: 'Express' }
                 ].map((mode) => (
                   <button
                     key={mode.id}
@@ -97,49 +89,44 @@ export function RateCardForm(props: RateCardFormProps) {
 
             <div className="space-y-3">
               <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
-                <Box className="w-3 h-3 text-amber-500" /> Target Customer (Optional)
-              </label>
-              <select
-                value={props.selectedCustomer}
-                onChange={(e) => props.onCustomerChange(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-300 text-slate-900 px-4 py-3 rounded-2xl appearance-none"
-              >
-                <option value="" className="bg-white">All Customers (General Rate)</option>
-                {props.shippers.map(s => (
-                  <option key={s.id} value={s.id} className="bg-white">{s.org_name_ko} ({s.org_code})</option>
-                ))}
-              </select>
-            </div>
-
-            <div className="space-y-3">
-              <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
-                <Settings2 className="w-3 h-3 text-amber-500" /> Rate Priority
+                <DollarSign className="w-3 h-3 text-emerald-500" /> Carrier Cost (kg당)
               </label>
               <input
                 type="number"
-                value={props.priority}
-                onChange={(e) => props.onPriorityChange(Number(e.target.value))}
-                className="w-full bg-slate-50 border border-slate-300 text-slate-900 px-4 py-3 rounded-2xl focus:outline-none focus:ring-2 focus:ring-amber-500/30"
-                placeholder="0 (Highest priority wins overlaps)"
+                step="0.01"
+                value={props.carrierCost}
+                onChange={(e) => props.onCarrierCostChange(Number(e.target.value))}
+                className="w-full bg-slate-50 border border-slate-300 text-slate-900 px-4 py-3 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+                placeholder="0.00"
               />
             </div>
 
             <div className="space-y-3">
               <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
-                <Calendar className="w-3 h-3 text-amber-500" /> Settlement Base Date
+                <Percent className="w-3 h-3 text-amber-500" /> Margin Rate (%)
               </label>
-              <select
-                value={props.baseDateRule}
-                onChange={(e) => props.onBaseDateRuleChange(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-300 text-slate-900 px-4 py-3 rounded-2xl appearance-none focus:ring-2 focus:ring-amber-500/30"
-              >
-                <option value="RECEIPT_DATE" className="bg-white">Cargo Receipt Date (Default)</option>
-                <option value="ORDER_DATE" className="bg-white">Order Date</option>
-                <option value="CONFIRM_DATE" className="bg-white">Confirmation Date</option>
-              </select>
-              <p className="text-[9px] text-slate-500 leading-relaxed px-1">
-                * Determines which date on the order determines the applicable rate version.
-              </p>
+              <input
+                type="number"
+                step="0.1"
+                value={props.marginRate}
+                onChange={(e) => props.onMarginRateChange(Number(e.target.value))}
+                className="w-full bg-slate-50 border border-slate-300 text-slate-900 px-4 py-3 rounded-2xl focus:outline-none focus:ring-2 focus:ring-amber-500/30"
+                placeholder="15.0"
+              />
+            </div>
+
+            <div className="space-y-3">
+              <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
+                <Percent className="w-3 h-3 text-purple-500" /> Platform Fee Rate (%)
+              </label>
+              <input
+                type="number"
+                step="0.1"
+                value={props.platformFeeRate}
+                onChange={(e) => props.onPlatformFeeRateChange(Number(e.target.value))}
+                className="w-full bg-slate-50 border border-slate-300 text-slate-900 px-4 py-3 rounded-2xl focus:outline-none focus:ring-2 focus:ring-purple-500/30"
+                placeholder="5.0"
+              />
             </div>
 
             <div className="col-span-1 md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-slate-100">
@@ -168,40 +155,6 @@ export function RateCardForm(props: RateCardFormProps) {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-3">
-              <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
-                <MapPin className="w-3 h-3 text-emerald-500" /> Loading Port (Origin)
-              </label>
-              <select
-                value={props.originPort}
-                onChange={(e) => props.onOriginPortChange(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-300 text-slate-900 px-4 py-3 rounded-2xl appearance-none"
-              >
-                <option value="" className="bg-white">Origin Select...</option>
-                {props.ports.map(p => (
-                  <option key={p.port_code} value={p.port_code} className="bg-white">{p.port_code} - {p.port_name_ko}</option>
-                ))}
-              </select>
-            </div>
-
-            <div className="space-y-3">
-              <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
-                <Globe className="w-3 h-3 text-emerald-500" /> Discharge Port (Dest)
-              </label>
-              <select
-                value={props.destPort}
-                onChange={(e) => props.onDestPortChange(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-300 text-slate-900 px-4 py-3 rounded-2xl appearance-none"
-              >
-                <option value="" className="bg-white">Dest Select...</option>
-                {props.ports.map(p => (
-                  <option key={p.port_code} value={p.port_code} className="bg-white">{p.port_code} - {p.port_name_ko}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-
           <div className="pt-6 border-t border-slate-200">
             <RateTierEditor tiers={props.tiers} onChange={props.onTiersChange} />
           </div>
@@ -214,38 +167,31 @@ export function RateCardForm(props: RateCardFormProps) {
 
       <div className="lg:col-span-4 space-y-6">
         <ZenCard className="bg-white border-slate-200 sticky top-8">
-          <h3 className="text-xl font-bold text-slate-900 mb-6">요율 정보 요약</h3>
+          <h3 className="text-xl font-bold text-slate-900 mb-6">TISA 3-Tier Rate Summary</h3>
 
           <div className="space-y-6">
             <div className="flex justify-between items-center text-sm p-4 bg-slate-50 rounded-2xl">
-              <span className="text-slate-500">기본 단가</span>
-              <div className="flex items-center gap-2">
-                <span className="text-slate-900 font-mono">$</span>
-                <input
-                  type="number"
-                  value={props.baseRate}
-                  onChange={(e) => props.onBaseRateChange(Number(e.target.value))}
-                  className="bg-transparent text-slate-900 font-mono text-right w-20 focus:outline-none focus:text-emerald-600"
-                />
-              </div>
+              <span className="text-slate-500">Carrier Cost</span>
+              <span className="text-slate-900 font-mono font-bold">${props.carrierCost.toFixed(2)} /kg</span>
             </div>
 
-            <div className="p-4 bg-slate-50 rounded-2xl space-y-2">
-              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Active Route</p>
-              <div className="flex items-center gap-3">
-                <span className="text-lg font-black text-slate-900">{props.originPort || '???'}</span>
-                <ChevronRight className="w-4 h-4 text-slate-300" />
-                <span className="text-lg font-black text-slate-900">{props.destPort || '???'}</span>
-              </div>
+            <div className="flex justify-between items-center text-sm p-4 bg-slate-50 rounded-2xl">
+              <span className="text-slate-500">Margin Rate</span>
+              <span className="text-slate-900 font-mono font-bold">{props.marginRate.toFixed(1)}%</span>
+            </div>
+
+            <div className="flex justify-between items-center text-sm p-4 bg-slate-50 rounded-2xl">
+              <span className="text-slate-500">Platform Fee</span>
+              <span className="text-slate-900 font-mono font-bold">{props.platformFeeRate.toFixed(1)}%</span>
             </div>
 
             <div className="p-4 border border-dashed border-slate-300 rounded-2xl space-y-3">
               <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Pricing Formula</p>
               <div className="text-xs text-slate-500 leading-relaxed font-mono">
                 {props.tiers.length === 0 ? (
-                  `BASE_VAL: $${props.baseRate}/KG (Flat)`
+                  `Carrier Cost: $${props.carrierCost.toFixed(2)}/kg × (1 + ${(props.marginRate + props.platformFeeRate).toFixed(1)}%)`
                 ) : (
-                  `IF WEIGHT >= ${props.tiers.sort((a,b) => b.weight_min - a.weight_min)[0].weight_min}KG -> $${props.tiers.sort((a,b) => b.weight_min - a.weight_min)[0].unit_price}/KG...`
+                  `Tiered: ${props.tiers.length} brackets, starting at $${Math.min(...props.tiers.map(t => t.unit_price)).toFixed(2)}/kg`
                 )}
               </div>
             </div>
@@ -260,7 +206,7 @@ export function RateCardForm(props: RateCardFormProps) {
               ) : (
                 <Save className="w-5 h-5" />
               )}
-              MASTER DATA DEPLOY
+              DEPLOY RATE CARD
             </ZenButton>
           </div>
         </ZenCard>

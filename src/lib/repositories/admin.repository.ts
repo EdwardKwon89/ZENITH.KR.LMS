@@ -292,23 +292,21 @@ export class AdminRepository extends BaseRepository {
       .order('sort_order', { ascending: true });
   }
 
-  // ─── zen_rate_cards (+ tiers, surcharges) ─────────────────────
+  // ─── zen_rate_cards (+ surcharges) ────────────────────────────
 
-  async findExistingActiveRateCards(orgId: string, originCode: string, destCode: string, mode: string) {
+  async findExistingActiveRateCards(carrierId: string, transportMode: string) {
     return this.db
       .from('zen_rate_cards')
-      .select('id, version_no')
-      .eq('org_id', orgId)
-      .eq('origin_code', originCode)
-      .eq('dest_code', destCode)
-      .eq('mode', mode)
-      .eq('status', 'ACTIVE');
+      .select('id, tiers')
+      .eq('carrier_id', carrierId)
+      .eq('transport_mode', transportMode)
+      .eq('is_active', true);
   }
 
   async supersedeRateCards(ids: string[]) {
     return this.db
       .from('zen_rate_cards')
-      .update({ status: 'SUPERSEDED' })
+      .update({ is_active: false })
       .in('id', ids);
   }
 
@@ -320,24 +318,21 @@ export class AdminRepository extends BaseRepository {
       .single();
   }
 
-  async insertRateTiers(tiers: Array<Record<string, unknown>>) {
-    return this.db.from('zen_rate_tiers').insert(tiers);
-  }
-
   async insertRateSurcharges(surcharges: Array<Record<string, unknown>>) {
     return this.db.from('zen_rate_surcharges').insert(surcharges);
   }
 
   async deleteRateCard(cardId: string) {
-    return this.db.from('zen_rate_cards').delete().eq('id', cardId);
+    return this.db
+      .from('zen_rate_cards')
+      .update({ is_active: false })
+      .eq('id', cardId);
   }
 
   async findRateCards(filters: {
-    origin_code?: string;
-    dest_code?: string;
-    mode?: string;
-    status?: string;
-    orgId?: string;
+    carrier_id?: string;
+    transport_mode?: string;
+    is_active?: boolean;
     page?: number;
     pageSize?: number;
   }) {
@@ -350,19 +345,13 @@ export class AdminRepository extends BaseRepository {
       .from('zen_rate_cards')
       .select(`
         *,
-        origin_port:origin_code,
-        destination_port:dest_code,
-        service_type:mode,
-        carrier:zen_organizations!org_id(name, iata_code),
-        tiers:zen_rate_tiers(*),
+        carrier:zen_carriers!carrier_id(id, name, code),
         surcharges:zen_rate_surcharges(*)
       `, { count: 'exact' });
 
-    if (filters.orgId) query = query.eq('org_id', filters.orgId);
-    if (filters.origin_code) query = query.eq('origin_code', filters.origin_code);
-    if (filters.dest_code) query = query.eq('dest_code', filters.dest_code);
-    if (filters.mode) query = query.eq('mode', filters.mode);
-    if (filters.status && filters.status !== 'ALL') query = query.eq('status', filters.status);
+    if (filters.carrier_id) query = query.eq('carrier_id', filters.carrier_id);
+    if (filters.transport_mode) query = query.eq('transport_mode', filters.transport_mode);
+    if (filters.is_active !== undefined) query = query.eq('is_active', filters.is_active);
 
     return query.order('created_at', { ascending: false }).range(from, to);
   }

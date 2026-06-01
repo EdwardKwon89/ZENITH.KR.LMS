@@ -10,28 +10,20 @@ import { USER_ROLES } from '@/lib/auth/rbac';
 
 export interface RatesFormState {
   carriers: any[];
-  ports: any[];
   selectedCarrier: string;
   setSelectedCarrier: (v: string) => void;
-  originPort: string;
-  setOriginPort: (v: string) => void;
-  destPort: string;
-  setDestPort: (v: string) => void;
   serviceType: string;
   setServiceType: (v: string) => void;
-  baseRate: number;
-  setBaseRate: (v: number) => void;
-  priority: number;
-  setPriority: (v: number) => void;
-  selectedCustomer: string;
-  setSelectedCustomer: (v: string) => void;
-  baseDateRule: string;
-  setBaseDateRule: (v: string) => void;
+  carrierCost: number;
+  setCarrierCost: (v: number) => void;
+  marginRate: number;
+  setMarginRate: (v: number) => void;
+  platformFeeRate: number;
+  setPlatformFeeRate: (v: number) => void;
   validFrom: string;
   setValidFrom: (v: string) => void;
   validTo: string;
   setValidTo: (v: string) => void;
-  shippers: any[];
   tiers: RateTier[];
   setTiers: (v: RateTier[]) => void;
   surcharges: Surcharge[];
@@ -41,8 +33,6 @@ export interface RatesFormState {
   listLoading: boolean;
   searchTerm: string;
   setSearchTerm: (v: string) => void;
-  statusFilter: string;
-  setStatusFilter: (v: string) => void;
   profile: any;
   canEdit: boolean;
   canDelete: boolean;
@@ -54,18 +44,13 @@ export interface RatesFormState {
 
 export function useRates(): RatesFormState {
   const [carriers, setCarriers] = useState<any[]>([]);
-  const [ports, setPorts] = useState<any[]>([]);
   const [selectedCarrier, setSelectedCarrier] = useState('');
-  const [originPort, setOriginPort] = useState('');
-  const [destPort, setDestPort] = useState('');
   const [serviceType, setServiceType] = useState('AIR');
-  const [baseRate, setBaseRate] = useState(0);
-  const [priority, setPriority] = useState(0);
-  const [selectedCustomer, setSelectedCustomer] = useState('');
-  const [baseDateRule, setBaseDateRule] = useState('RECEIPT_DATE');
+  const [carrierCost, setCarrierCost] = useState(0);
+  const [marginRate, setMarginRate] = useState(15.0);
+  const [platformFeeRate, setPlatformFeeRate] = useState(5.0);
   const [validFrom, setValidFrom] = useState(new Date().toISOString().split('T')[0]);
   const [validTo, setValidTo] = useState('9999-12-31');
-  const [shippers, setShippers] = useState<any[]>([]);
   const [tiers, setTiers] = useState<RateTier[]>([]);
   const [surcharges, setSurcharges] = useState<Surcharge[]>([]);
   const [loading, setLoading] = useState(false);
@@ -73,7 +58,6 @@ export function useRates(): RatesFormState {
   const [rateCards, setRateCards] = useState<any[]>([]);
   const [listLoading, setListLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('ACTIVE');
   const [profile, setProfile] = useState<any>(null);
 
   const supabase = createClient();
@@ -84,8 +68,8 @@ export function useRates(): RatesFormState {
   const fetchRateCards = async () => {
     setListLoading(true);
     try {
-      const data = await getRateCards();
-      setRateCards(data);
+      const result = await getRateCards();
+      setRateCards(result.rateCards);
     } catch (err: any) {
       logger.error('Error fetching rate cards:', err);
     } finally {
@@ -106,44 +90,21 @@ export function useRates(): RatesFormState {
       }
 
       const { data: carrierData } = await supabase
-        .from('zen_organizations')
-        .select('id, name, type, status')
-        .eq('type', 'CARRIER')
+        .from('zen_carriers')
+        .select('id, name, code, status')
         .eq('status', 'ACTIVE');
 
       if (carrierData) setCarriers(carrierData);
-
-      const { data: shipperData } = await supabase
-        .from('zen_organizations')
-        .select('id, name, type, status')
-        .in('type', ['SHIPPER', 'FORWARDER'])
-        .eq('status', 'ACTIVE');
-
-      if (shipperData) setShippers(shipperData);
-
-      const { data: portData } = await supabase
-        .from('zen_ports')
-        .select('id, name, code, country_code, type')
-        .order('code');
-
-      if (portData) setPorts(portData);
     };
 
     fetchData();
     fetchRateCards();
   }, []);
 
-  useEffect(() => {
-    fetchRateCards();
-  }, [statusFilter]);
-
   const resetForm = () => {
-    setOriginPort('');
-    setDestPort('');
-    setBaseRate(0);
-    setPriority(0);
-    setSelectedCustomer('');
-    setBaseDateRule('RECEIPT_DATE');
+    setCarrierCost(0);
+    setMarginRate(15.0);
+    setPlatformFeeRate(5.0);
     setTiers([]);
     setSurcharges([]);
     setValidFrom(new Date().toISOString().split('T')[0]);
@@ -151,33 +112,28 @@ export function useRates(): RatesFormState {
   };
 
   const handleSaveRate = async () => {
-    if (!selectedCarrier || !originPort || !destPort) {
-      alert('필수 정보를 모두 입력해주세요.');
+    if (!selectedCarrier || !serviceType) {
+      alert('필수 정보(Carrier, Transport Mode)를 모두 입력해주세요.');
       return;
     }
 
     setLoading(true);
     try {
-      const { data: card, error } = await createRateCard({
+      const result = await createRateCard({
         card: {
           carrier_id: selectedCarrier,
-          origin_port: originPort,
-          destination_port: destPort,
-          service_type: serviceType,
-          base_rate: baseRate,
-          priority: priority,
-          customer_id: selectedCustomer || null,
-          base_date_rule: baseDateRule,
+          transport_mode: serviceType,
+          tiers: tiers.map(t => ({
+            weight_min: t.weight_min,
+            unit_price: t.unit_price,
+            min_total_price: t.min_total_price
+          })),
           valid_from: new Date(validFrom).toISOString(),
           valid_to: new Date(validTo).toISOString(),
-          org_id: selectedCarrier,
-          status: 'ACTIVE'
+          carrier_cost: carrierCost || null,
+          margin_rate: marginRate,
+          platform_fee_rate: platformFeeRate,
         },
-        tiers: tiers.map(t => ({
-          weight_min: t.weight_min,
-          unit_price: t.unit_price,
-          min_total_price: t.min_total_price
-        })),
         surcharges: surcharges.map(s => ({
           surcharge_type: s.surcharge_type,
           calc_type: s.calc_type,
@@ -187,13 +143,9 @@ export function useRates(): RatesFormState {
         }))
       });
 
-      if (error) {
-        alert(`저장 중 오류 발생: ${error}`);
-      } else {
-        alert(`요율 카드가 성공적으로 등록되었습니다.`);
-        resetForm();
-        fetchRateCards();
-      }
+      alert(`요율 카드가 성공적으로 등록되었습니다.`);
+      resetForm();
+      fetchRateCards();
     } catch (err: any) {
       alert(`저장 중 오류 발생: ${err.message}`);
     } finally {
@@ -202,14 +154,10 @@ export function useRates(): RatesFormState {
   };
 
   const handleDeleteRate = async (id: string) => {
-    if (!confirm('정말 이 요율 정보를 삭제하시겠습니까?')) return;
+    if (!confirm('정말 이 요율 정보를 비활성화하시겠습니까?')) return;
     try {
-      const { data: success, error } = await deleteRateCard(id);
-      if (error) {
-        alert(`삭제 중 오류 발생: ${error}`);
-      } else {
-        fetchRateCards();
-      }
+      await deleteRateCard(id);
+      fetchRateCards();
     } catch (err: any) {
       alert(err.message);
     }
@@ -218,23 +166,19 @@ export function useRates(): RatesFormState {
   const filteredRates = (rateCards || []).filter(r => {
     if (!r) return false;
     const searchLower = (searchTerm || "").toLowerCase();
-    const origin = String(r.origin_port || r.origin_code || "").toLowerCase();
-    const dest = String(r.destination_port || r.dest_code || "").toLowerCase();
-    const carrierName = String(r.carrier?.name || r.carrier?.iata_code || "").toLowerCase();
-    return origin.includes(searchLower) || dest.includes(searchLower) || carrierName.includes(searchLower);
+    const carrierName = String(r.carrier?.name || r.carrier?.code || "").toLowerCase();
+    return carrierName.includes(searchLower);
   });
 
   return {
-    carriers, ports, selectedCarrier, setSelectedCarrier,
-    originPort, setOriginPort, destPort, setDestPort,
-    serviceType, setServiceType, baseRate, setBaseRate,
-    priority, setPriority, selectedCustomer, setSelectedCustomer,
-    baseDateRule, setBaseDateRule, validFrom, setValidFrom,
-    validTo, setValidTo, shippers, tiers, setTiers,
-    surcharges, setSurcharges, loading,
+    carriers, selectedCarrier, setSelectedCarrier,
+    serviceType, setServiceType,
+    carrierCost, setCarrierCost, marginRate, setMarginRate,
+    platformFeeRate, setPlatformFeeRate,
+    validFrom, setValidFrom, validTo, setValidTo,
+    tiers, setTiers, surcharges, setSurcharges, loading,
     rateCards, listLoading, searchTerm, setSearchTerm,
-    statusFilter, setStatusFilter, profile,
-    canEdit, canDelete, filteredRates,
+    profile, canEdit, canDelete, filteredRates,
     handleSaveRate, handleDeleteRate, resetForm,
   };
 }
