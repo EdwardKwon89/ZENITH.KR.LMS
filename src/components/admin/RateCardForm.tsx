@@ -69,6 +69,7 @@ export function RateCardForm(props: RateCardFormProps) {
                 {[
                   { id: 'AIR', icon: Plane, label: 'Air' },
                   { id: 'SEA', icon: Ship, label: 'Sea' },
+                  { id: 'LAND', icon: Truck, label: 'Land' },
                   { id: 'EXP', icon: Box, label: 'Express' }
                 ].map((mode) => (
                   <button
