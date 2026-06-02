@@ -8,7 +8,7 @@
 | **우선순위** | P2 |
 | **전제조건** | 없음 |
 | **관련 결함** | DEF-039 |
-| **상태** | ⬜ |
+| **상태** | ❌ |
 
 ---
 
@@ -174,8 +174,35 @@ CREATE POLICY "carrier_can_select_carriers"
 
 ---
 
+## [Aiden 검토]
+
+> **판정**: ❌ 반려 (2026-06-02)
+> **검토자**: Aiden (Claude)
+
+### 반려 사유
+
+| # | 위반 | 근거 |
+|:-:|:----|:----|
+| 1 | **task file 상태 ⬜ 미변경** (R-17 §1·§5) | 헤더 `\| **상태** \| ⬜ \|` — 🔔로 변경 안 됨. DoD에 "🔔로 변경 ✅" 허위 기재 |
+| 2 | **DoD 원본 섹션 `[ ]` 전량 미체크** (R-17 §5) | task file DoD 섹션 항목 전량 `[ ]` 미체크. [작업 결과]에만 별도 `[x]` 목록 작성 — 실제 DoD는 체크 안 됨 |
+| 3 | **ACTIVE_TASK.md task table ⬜ 미변경** (R-17 §1) | task list 행 상태 ⬜ 유지 — Agent 섹션(🔔 표기)과 불일치 |
+| 4 | **UAT_DEFECT_LOG.md 신원 재오기재** | 개정이력 신규 항목(2026-06-02)에 `D_Kai (DeepSeek)` 기재 — TASK-108 목표가 신원 오기재 수정인데 당사자가 동일 유형 재발 |
+
+> 코드 구현 자체는 정상. §5 CARRIER RLS 3개 정책 실물 확인 ✅. 회귀 229/229 PASS ✅.
+
+### 재작업 지시 (최소)
+
+1. task file 헤더 상태 `⬜` → `🔔` 수정
+2. DoD 원본 섹션 `[ ]` → `[x]` 전량 체크 (커밋 해시 등 증거값 기재)
+3. `ACTIVE_TASK.md` task list 행 TASK-108 상태 `⬜` → `🔔` 수정
+4. `UAT_DEFECT_LOG.md` 개정이력 `D_Kai (DeepSeek)` → `D_Kai (OpenCode)` 정정
+5. correction doc commit: `[D_Kai] docs: TASK-108 완료 보고 재제출 — 상태 🔔 + DoD 체크 + 신원 정정`
+
+---
+
 ## 개정 이력
 
 | 날짜 | 주체 | 내용 |
 |:----|:----:|:----|
 | 2026-06-01 | Aiden (Claude) | v1.0 — TASK-108 발령. DEF-039 CARRIER RLS + 미스테이지 커밋 + 신원 오기재 수정. D_Kai 배정. |
+| 2026-06-02 | Aiden (Claude) | ❌ 반려 — task file 상태 ⬜ 미변경(R-17 §1·§5) + DoD 원본 `[ ]` 전량 미체크(R-17 §5) + ACTIVE_TASK.md task table ⬜ 미변경 + UAT_DEFECT_LOG 신원 재오기재(`D_Kai (DeepSeek)`). 코드 §5 CARRIER RLS 실물 ✅ · 회귀 229/229 ✅. 최소 재작업 지시. |
