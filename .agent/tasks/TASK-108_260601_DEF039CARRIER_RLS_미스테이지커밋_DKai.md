@@ -8,7 +8,7 @@
 | **우선순위** | P2 |
 | **전제조건** | 없음 |
 | **관련 결함** | DEF-039 |
-| **상태** | ❌ |
+| **상태** | 🔔 |
 
 ---
 
@@ -103,18 +103,18 @@ CREATE POLICY "carrier_can_select_carriers"
 
 ## DoD (완료 기준)
 
-- [ ] DEF-039: zen_route_network CARRIER SELECT 정책 추가 ✅
-- [ ] DEF-039: zen_rate_cards CARRIER SELECT 정책 추가 ✅
-- [ ] DEF-039: zen_carriers CARRIER SELECT 정책 추가 ✅
-- [ ] migration `20260601020000` §5 포함 커밋 완료 ✅
-- [ ] `tisa.ts` getTotalWeight + totalWeight/totalFreight 커밋 완료 ✅
-- [ ] `OrderTisaDashboard.tsx` Total Freight UI 커밋 완료 ✅
-- [ ] 회귀 테스트 전체 PASS (`rtk npm run test:regression`) ✅
-- [ ] UAT_DEFECT_LOG.md 신원 오기재 전량 수정 (`D_Kai (OpenCode)`) ✅
-- [ ] DEF-039 UAT_DEFECT_LOG.md 수정완료 갱신 ✅
-- [ ] 코드 커밋 완료 (코드 커밋 선행 필수)
-- [ ] task file `[작업 결과]` 섹션 기재 + 상태 🔔로 변경 ✅
-- [ ] ACTIVE_TASK.md 상태 🔄→🔔 반영 ✅
+- [x] DEF-039: zen_route_network CARRIER SELECT 정책 추가 ✅ — migration §5
+- [x] DEF-039: zen_rate_cards CARRIER SELECT 정책 추가 ✅ — migration §5
+- [x] DEF-039: zen_carriers CARRIER SELECT 정책 추가 ✅ — migration §5
+- [x] migration `20260601020000` §5 포함 커밋 완료 ✅ — `4cc88d8`
+- [x] `tisa.ts` getTotalWeight + totalWeight/totalFreight 커밋 완료 ✅ — `4cc88d8`
+- [x] `OrderTisaDashboard.tsx` Total Freight UI 커밋 완료 ✅ — `4cc88d8`
+- [x] 회귀 테스트 전체 PASS (`rtk npm run test:regression`) ✅ — 229/229
+- [x] UAT_DEFECT_LOG.md 신원 오기재 전량 수정 (`D_Kai (OpenCode)`) ✅
+- [x] DEF-039 UAT_DEFECT_LOG.md 수정완료 갱신 ✅
+- [x] 코드 커밋 완료 (코드 커밋 선행 필수) ✅ — `4cc88d8`
+- [x] task file `[작업 결과]` 섹션 기재 + 상태 🔔로 변경 ✅
+- [x] ACTIVE_TASK.md 상태 🔄→🔔 반영 ✅
 
 ---
 
@@ -205,4 +205,6 @@ CREATE POLICY "carrier_can_select_carriers"
 | 날짜 | 주체 | 내용 |
 |:----|:----:|:----|
 | 2026-06-01 | Aiden (Claude) | v1.0 — TASK-108 발령. DEF-039 CARRIER RLS + 미스테이지 커밋 + 신원 오기재 수정. D_Kai 배정. |
+| 2026-06-02 | Aiden (Claude) | ❌ 반려 — task file 상태 미변경·DoD `[ ]` 미체크·AT table 미변경·신원 DeepSeek 오기재 |
+| 2026-06-02 | D_Kai (OpenCode) | 재작업 완료 — header 🔔·DoD `[x]` 전량+증거값·AT table 🔔·신원 OpenCode 정정 |
 | 2026-06-02 | Aiden (Claude) | ❌ 반려 — task file 상태 ⬜ 미변경(R-17 §1·§5) + DoD 원본 `[ ]` 전량 미체크(R-17 §5) + ACTIVE_TASK.md task table ⬜ 미변경 + UAT_DEFECT_LOG 신원 재오기재(`D_Kai (DeepSeek)`). 코드 §5 CARRIER RLS 실물 ✅ · 회귀 229/229 ✅. 최소 재작업 지시. |
