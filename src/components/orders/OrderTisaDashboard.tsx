@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import { ZenCard, ZenButton, ZenBadge } from '@/components/ui/ZenUI';
 import { OverrideRateModal } from './OverrideRateModal';
 
-// Types (Mock structures matching TISA Architecture)
 interface TisaSnapshot {
   id: string;
   orderId: string;
@@ -19,6 +18,8 @@ interface TisaSnapshot {
   validTo: string;
   carrierCostAmount?: number;
   platformFeeAmount?: number;
+  totalWeight: number;
+  totalFreight: number;
 }
 
 interface OrderTisaDashboardProps {
@@ -73,6 +74,16 @@ export const OrderTisaDashboard: React.FC<OrderTisaDashboardProps> = ({
               <span className="text-[10px] font-semibold text-blue-400 uppercase tracking-wider">Base Amount (기준 운임)</span>
               <p className="text-sm font-bold text-blue-600 mt-0.5">
                 {new Intl.NumberFormat('en-US', { style: 'currency', currency: snapshot.currency }).format(snapshot.baseAmount)}
+                <span className="text-[10px] font-normal text-blue-400 ml-1">/kg</span>
+              </p>
+            </div>
+            <div className="bg-indigo-50 dark:bg-indigo-900/10 rounded-xl p-3">
+              <span className="text-[10px] font-semibold text-indigo-400 uppercase tracking-wider">Total Freight (총 운임)</span>
+              <p className="text-sm font-bold text-indigo-600 mt-0.5">
+                {new Intl.NumberFormat('en-US', { style: 'currency', currency: snapshot.currency }).format(snapshot.totalFreight)}
+              </p>
+              <p className="text-[10px] text-indigo-400 mt-0.5">
+                {new Intl.NumberFormat('en-US').format(snapshot.totalWeight)}kg × {new Intl.NumberFormat('en-US', { style: 'currency', currency: snapshot.currency }).format(snapshot.baseAmount)}/kg
               </p>
             </div>
           </div>
