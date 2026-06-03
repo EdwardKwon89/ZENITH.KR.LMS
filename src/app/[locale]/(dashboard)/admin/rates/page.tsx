@@ -9,16 +9,14 @@ import { useRates } from './useRates';
 
 export default function RatesManagementPage() {
   const {
-    carriers, ports, selectedCarrier, setSelectedCarrier,
-    originPort, setOriginPort, destPort, setDestPort,
-    serviceType, setServiceType, baseRate, setBaseRate,
-    priority, setPriority, selectedCustomer, setSelectedCustomer,
-    baseDateRule, setBaseDateRule, validFrom, setValidFrom,
-    validTo, setValidTo, shippers, tiers, setTiers,
-    surcharges, setSurcharges, loading,
+    carriers, selectedCarrier, setSelectedCarrier,
+    serviceType, setServiceType,
+    carrierCost, setCarrierCost, marginRate, setMarginRate,
+    platformFeeRate, setPlatformFeeRate,
+    validFrom, setValidFrom, validTo, setValidTo,
+    tiers, setTiers, surcharges, setSurcharges, loading,
     rateCards, listLoading, searchTerm, setSearchTerm,
-    statusFilter, setStatusFilter, profile,
-    canEdit, canDelete, filteredRates,
+    profile, canEdit, canDelete, filteredRates,
     handleSaveRate, handleDeleteRate,
   } = useRates();
 
@@ -59,18 +57,14 @@ export default function RatesManagementPage() {
       )}
 
       <RateCardForm
-        carriers={carriers} ports={ports}
+        carriers={carriers}
         selectedCarrier={selectedCarrier} onCarrierChange={setSelectedCarrier}
-        originPort={originPort} onOriginPortChange={setOriginPort}
-        destPort={destPort} onDestPortChange={setDestPort}
         serviceType={serviceType} onServiceTypeChange={setServiceType}
-        baseRate={baseRate} onBaseRateChange={setBaseRate}
-        priority={priority} onPriorityChange={setPriority}
-        selectedCustomer={selectedCustomer} onCustomerChange={setSelectedCustomer}
-        baseDateRule={baseDateRule} onBaseDateRuleChange={setBaseDateRule}
+        carrierCost={carrierCost} onCarrierCostChange={setCarrierCost}
+        marginRate={marginRate} onMarginRateChange={setMarginRate}
+        platformFeeRate={platformFeeRate} onPlatformFeeRateChange={setPlatformFeeRate}
         validFrom={validFrom} onValidFromChange={setValidFrom}
         validTo={validTo} onValidToChange={setValidTo}
-        shippers={shippers}
         tiers={tiers} onTiersChange={setTiers}
         surcharges={surcharges} onSurchargesChange={setSurcharges}
         loading={loading} onSave={handleSaveRate}
@@ -85,8 +79,6 @@ export default function RatesManagementPage() {
         canDelete={canDelete}
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
-        statusFilter={statusFilter}
-        onStatusFilterChange={setStatusFilter}
       />
     </div>
   );

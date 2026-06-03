@@ -130,7 +130,7 @@ export function useRates(): RatesFormState {
           })),
           valid_from: new Date(validFrom).toISOString(),
           valid_to: new Date(validTo).toISOString(),
-          carrier_cost: carrierCost || null,
+          carrier_cost: carrierCost || undefined,
           margin_rate: marginRate,
           platform_fee_rate: platformFeeRate,
         },
