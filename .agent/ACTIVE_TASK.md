@@ -154,7 +154,7 @@
 | TASK-096 | 260525 | UAT 전체 실행 (Edward 직접 검증 — Go-Live 판정) | P1 | TASK-094 ✅ · TASK-095 ✅ · TASK-097 ✅ · TASK-103 ✅ · TASK-104 ✅ · TASK-105 ✅ · TASK-106 ✅ | Edward | 🔄 | [TASK-096](tasks/TASK-096_260525_UAT전체실행_Edward.md) | UAT-11 Playwright 2PASS 3FAIL — Edward 수동 검증 진행 중 · DEF-036/037 수정완료 · DEF-038/041 해소 ✅ |
 | TASK-108 | 260601 | DEF-039 CARRIER RLS + 미스테이지 커밋 + 신원 수정 | P2 | 없음 | D_Kai | ✅ | [TASK-108](tasks/TASK-108_260601_DEF039CARRIER_RLS_미스테이지커밋_DKai.md) | DEF-039 해소 · 4cc88d8+beba338 · CARRIER RLS 3테이블 · 229/229 ✅ · Aiden ✅ 승인 |
 | TASK-109 | 260603 | IMP-095 Rate Card 항로(Port) 기반 매칭 구현 | P1 | TASK-106 ✅ · TASK-108 ✅ | D_Kai (OpenCode) | ✅ | [TASK-109](tasks/TASK-109_260603_IMP095포트기반요율매칭_DKai.md) | IMP-095 완료 · `0fb950d`+`fb263f9` · 236/236 PASS · Aiden ✅ 승인 |
-| TASK-110 | 260603 | IMP-096 요율 관리 페이지 통합 정리 (3단계) | P1 | TASK-106 ✅ · TASK-109 ✅ | D_Kai (OpenCode) | ❌ | [TASK-110](tasks/TASK-110_260603_IMP096요율관리페이지통합정리_DKai.md) | 2차 반려 — UAT-09-04 비고 미수정·task file ⬜ 유지 |
+| TASK-110 | 260603 | IMP-096 요율 관리 페이지 통합 정리 (3단계) | P1 | TASK-106 ✅ · TASK-109 ✅ | D_Kai (OpenCode) | 🔔 | [TASK-110](tasks/TASK-110_260603_IMP096요율관리페이지통합정리_DKai.md) | 3차 제출 — UAT-09-04 TISA 비고 이전·task file 🔔 전환 |
 | TASK-106 | 260601 | DEF-038 AdminRepository TISA 3-tier 스키마 정합 | P1 | TASK-103 ✅ · TASK-104 ✅ | B_Kai (Noah 대행) | ✅ | [TASK-106](tasks/TASK-106_260601_DEF038AdminRepository수정_BKai.md) | DEF-038 해소 · c8d3b5e+3a98d97 · LAND 모드 추가 · 229/229 ✅ · Aiden ✅ 승인 |
 | TASK-107 | 260601 | SUSPENDED 계정 리다이렉트 루프 수정 | P2 | 없음 | B_Kai (Noah 대행) | ✅ | [TASK-107](tasks/TASK-107_260601_SUSPENDED리다이렉트루프수정_BKai.md) | DEF-041 해소 · 61130f3 · proxy.ts signOut+whitelist · suspended 정적 전환 · 229/229 ✅ · Aiden ✅ 승인 |
 | TASK-105 | 260601 | UAT 절차서 보완 — TISA 3계층·Dashboard 역할별 표시 | P3 | TASK-103 ✅ · TASK-104 ✅ | B_Kai | ✅ | [TASK-105](tasks/TASK-105_260601_UAT보완_TISA3계층Dashboard_BKai.md) | DEF-032·035 수정완료 · UAT-10-07 시나리오 3건 · UAT_MASTER 80개 · 96e9a0f |
@@ -174,7 +174,7 @@
 |:------|:--------|:----------------|:----------|
 | Riley | — | R-17 위반 **누적 3회** (TASK-088 무단 수정·TASK-092 혼합커밋·TASK-102 혼합커밋+무단대행) — 경고 | — |
 | B_Kai | — | — | — |
-| D_Kai (OpenCode) | TASK-110 ❌ (재작업 — UAT-09-04 비고 이전·task file 🔔 전환 필요) | R-17 v1.5 위반 누적 — 보완 커밋 2회 (TASK-110) | — |
+| D_Kai (OpenCode) | TASK-110 🔔 (재제출 — Aiden 검토 대기) | R-17 v1.5 위반 누적 — 보완 커밋 2회 (TASK-110) | — |
 | N_Kai | TASK-087 ⬜ (재교육 세션 — 완료 후 신규 할당 재개) | R-17 위반 추가 — 신규 할당 중단 기간 중 무단 코드 수정(admin/rates IMP-095 임시조치)·TASK-096 무단 수정·UAT-11 Playwright 무단 실행 (2026-06-03) | 신규 할당 중단 유지 |
 | Ring | — | — | 신규 할당 중단 유지 (9차 위반 누적) |
 
