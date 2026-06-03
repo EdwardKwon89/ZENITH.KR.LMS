@@ -347,8 +347,7 @@ export class AdminRepository extends BaseRepository {
         *,
         carrier:zen_carriers!carrier_id(id, name, code),
         origin_port:zen_ports!origin_port_id(id, name, code),
-        dest_port:zen_ports!dest_port_id(id, name, code),
-        surcharges:zen_rate_surcharges!rate_card_id(id, surcharge_type, calc_type, amount, currency, description)
+        dest_port:zen_ports!dest_port_id(id, name, code)
       `, { count: 'exact' });
 
     if (filters.carrier_id) query = query.eq('carrier_id', filters.carrier_id);
