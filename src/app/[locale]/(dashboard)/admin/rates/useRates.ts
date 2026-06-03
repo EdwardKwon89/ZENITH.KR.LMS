@@ -107,8 +107,8 @@ export function useRates(): RatesFormState {
 
       const { data: carrierData } = await supabase
         .from('zen_carriers')
-        .select('id, name, code, status')
-        .eq('status', 'ACTIVE');
+        .select('id, name, code, is_active')
+        .eq('is_active', true);
 
       if (carrierData) setCarriers(carrierData);
 
