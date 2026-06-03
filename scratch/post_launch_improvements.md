@@ -1109,7 +1109,7 @@
 
 ---
 
-## [IMP-095] Rate Card 노선별(출발지/도착지) 매칭 누락
+## [IMP-095] Rate Card 노선별(출발지/도착지) 매칭 누락 ✅ 완료 (2026-06-03, TASK-109)
 
 - **발견 경위**: 2026-06-03, `/admin/rates` "Admin Area Error" 디버깅 과정에서 발견 (Noah).  
   Edward Kwon UAT 중 carrier@zenith.kr 접속 오류 신고 → 원인 분석 중 구조적 결함 확인.

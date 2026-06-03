@@ -267,12 +267,12 @@
 | I | 5 | 5 | 100% ✅ | IMP-073~077 전량 완료 (TASK-069~073 ✅) |
 | J | 4 | 4 | 100% ✅ | IMP-080 ✅ · IMP-081 ✅ · IMP-082 ✅ · IMP-083 ✅ |
 | K | 1 | 7 | 14.3% | IMP-084·085·086·088·089·046 🔔 |
-| UAT | 3 | 4 | 75% | IMP-090 ✅ · IMP-091 ⬜ (Carrier Portal — Phase M) · **IMP-092 ✅ (TISA 3계층, UAT 전 필수)** · **IMP-093 🔔 (TISA 실연동, UAT 전 필수)** |
-| **합계** | **70** | **79** | **88.6%** | Phase K 7건 + UAT 4건 기준 |
+| UAT | 4 | 6 | 66.7% | IMP-090 ✅ · IMP-091 ⬜ (Carrier Portal — Phase M) · **IMP-092 ✅ (TISA 3계층)** · **IMP-093 ✅ (TISA 실연동, TASK-104)** · IMP-094 ⬜ (요율 워크플로우 고도화, Phase M) · **IMP-095 ✅ (Rate Card 항로 매칭, TASK-109)** |
+| **합계** | **71** | **81** | **87.7%** | Phase K 7건 + UAT 6건 기준 |
 
-> **UAT 진행 전 필수 처리**: IMP-092(TASK-103) ✅ 완료 · IMP-093(TASK-104) 🔔 (Aiden 검토 대기) — 승인 시 TASK-096(Edward UAT) 블로커 해제
-> 미완료 IMP: IMP-086·087 🚫 블로커 · IMP-028·069(Future — 통관 연계) · IMP-091 ⬜ (Carrier Portal — Phase M)
-> 2026-05-31 기준 업데이트 — IMP-092·093 신규 등재, UAT 진행 전 필수
+> **UAT 진행 전 필수 처리**: IMP-092 ✅ · IMP-093 ✅ · IMP-095 ✅ — 전량 완료
+> 미완료 IMP: IMP-086·087 🚫 블로커 · IMP-028·069(Future — 통관 연계) · IMP-091 ⬜ (Carrier Portal) · IMP-094 ⬜ (요율 워크플로우 Phase M)
+> 2026-06-03 기준 업데이트 — IMP-093 ✅ 확정 · IMP-094/095 신규 등재 · IMP-095 ✅ 완료 (TASK-109)
 
 ---
 
@@ -327,3 +327,4 @@
 | 2026-05-29 | Aiden (Claude) | IMP-090 TASK-100 연계 확정 — getRouteOptions zen_order_packages 기반 전환 후 cargo_details DEFAULT 제거 마이그레이션 포함 처리 예정 |
 | 2026-05-31 | Aiden (Claude) | IMP-092 신규 등재 — TISA 요율 3계층 구조 도입 (carrier_cost + margin_rate + platform_fee_rate 분리). DEF-035 연계. TASK-103(D_Kai) 발령. UAT 진행 전 필수 |
 | 2026-05-31 | Aiden (Claude) | IMP-093 신규 등재 — TISA Dashboard 실 Rate Card 연동 (Mock 제거, DB 실조회, 경로 선택 후 스냅샷). DEF-032 연계. TASK-104(D_Kai) 발령. 전제조건: TASK-103 ✅. UAT 진행 전 필수 |
+| 2026-06-03 | Aiden (Claude) | IMP-093 ✅ 확정 — TASK-104 ✅ 승인 반영 (미기재 정정). IMP-094 신규 등재 — 요율 관리 워크플로우 고도화 (방안2, Phase M, Medium). IMP-095 신규 등재 + ✅ 확정 — Rate Card 항로 기반 매칭 (TASK-109 D_Kai 승인, 236/236 PASS). 합계 70/79→71/81 (87.7%). |
