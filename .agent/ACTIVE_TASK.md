@@ -153,6 +153,7 @@
 | TASK-097 | 260525 | UAT-11 보완 — 쿼리 오류 수정 + IMP-086 시나리오 추가 | P3 | TASK-095 ✅ | B_Kai | ✅ | [TASK-097](tasks/TASK-097_260525_UAT11보완_BKai.md) | 3e491bb+84034bc+030d0ab · UAT-11-03 수정·UAT-11-07 신규·UAT_MASTER 79개 ✅ |
 | TASK-096 | 260525 | UAT 전체 실행 (Edward 직접 검증 — Go-Live 판정) | P1 | TASK-094 ✅ · TASK-095 ✅ · TASK-097 ✅ · TASK-103 ✅ · TASK-104 ✅ · TASK-105 ✅ · TASK-106 ✅ | Edward | 🔄 | [TASK-096](tasks/TASK-096_260525_UAT전체실행_Edward.md) | UAT-11 Playwright 2PASS 3FAIL — Edward 수동 검증 진행 중 · DEF-036/037 수정완료 · DEF-038/041 해소 ✅ |
 | TASK-108 | 260601 | DEF-039 CARRIER RLS + 미스테이지 커밋 + 신원 수정 | P2 | 없음 | D_Kai | ✅ | [TASK-108](tasks/TASK-108_260601_DEF039CARRIER_RLS_미스테이지커밋_DKai.md) | DEF-039 해소 · 4cc88d8+beba338 · CARRIER RLS 3테이블 · 229/229 ✅ · Aiden ✅ 승인 |
+| TASK-109 | 260603 | IMP-095 Rate Card 항로(Port) 기반 매칭 구현 | P1 | TASK-106 ✅ · TASK-108 ✅ | D_Kai | ⬜ | [TASK-109](tasks/TASK-109_260603_IMP095포트기반요율매칭_DKai.md) | zen_rate_cards port 컬럼 추가 · fn_get_best_matching_rate 포트 조건 · TISARateMatcher 확장 · admin/rates UI 포트 드롭다운 |
 | TASK-106 | 260601 | DEF-038 AdminRepository TISA 3-tier 스키마 정합 | P1 | TASK-103 ✅ · TASK-104 ✅ | B_Kai (Noah 대행) | ✅ | [TASK-106](tasks/TASK-106_260601_DEF038AdminRepository수정_BKai.md) | DEF-038 해소 · c8d3b5e+3a98d97 · LAND 모드 추가 · 229/229 ✅ · Aiden ✅ 승인 |
 | TASK-107 | 260601 | SUSPENDED 계정 리다이렉트 루프 수정 | P2 | 없음 | B_Kai (Noah 대행) | ✅ | [TASK-107](tasks/TASK-107_260601_SUSPENDED리다이렉트루프수정_BKai.md) | DEF-041 해소 · 61130f3 · proxy.ts signOut+whitelist · suspended 정적 전환 · 229/229 ✅ · Aiden ✅ 승인 |
 | TASK-105 | 260601 | UAT 절차서 보완 — TISA 3계층·Dashboard 역할별 표시 | P3 | TASK-103 ✅ · TASK-104 ✅ | B_Kai | ✅ | [TASK-105](tasks/TASK-105_260601_UAT보완_TISA3계층Dashboard_BKai.md) | DEF-032·035 수정완료 · UAT-10-07 시나리오 3건 · UAT_MASTER 80개 · 96e9a0f |
@@ -384,3 +385,4 @@
 | 2026-06-03 | Aiden (Claude) | N_Kai R-17 위반 기록 — 신규 할당 중단 기간 중 무단 코드 수정(admin/rates IMP-095 임시조치)·TASK-096 무단 수정·UAT-11 Playwright 무단 실행. IMP-094/095 post_launch_improvements.md 무단 추가. N_Kai 코드/UAT 결과물은 유효 내용 인수 처리. |
 | 2026-06-03 | Aiden (Claude) | admin/rates IMP-095 임시조치 코드 커밋 인수 — page.tsx TISA 3-tier props 정합·useRates.ts null→undefined (N_Kai 무단 작업). UAT-11 Playwright spec + 결과 스크린샷 커밋 인수. |
 | 2026-06-03 | Aiden (Claude) | TASK-106 doc commit — [Aiden 검토] ✅ PASS 판정 본문 기재. TASK-107 doc commit — [Aiden 검토] ✅ PASS 판정 본문 기재. DEF-038·041 해소 문서 완결. |
+| 2026-06-03 | Aiden (Claude) | TASK-109 발령 — D_Kai 배정. IMP-095 Rate Card 항로 기반 매칭 누락 해결. zen_rate_cards port 컬럼 추가·fn_get_best_matching_rate 포트 조건·TISARateMatcher 확장·admin/rates UI 포트 드롭다운. 설계 확정 포함 → ⬜ 즉시 착수 가능. P1. |

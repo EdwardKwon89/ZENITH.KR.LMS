@@ -9,10 +9,11 @@ import { useRates } from './useRates';
 
 export default function RatesManagementPage() {
   const {
-    carriers, selectedCarrier, setSelectedCarrier,
+    carriers, ports, selectedCarrier, setSelectedCarrier,
     serviceType, setServiceType,
     carrierCost, setCarrierCost, marginRate, setMarginRate,
     platformFeeRate, setPlatformFeeRate,
+    originPortId, setOriginPortId, destPortId, setDestPortId,
     validFrom, setValidFrom, validTo, setValidTo,
     tiers, setTiers, surcharges, setSurcharges, loading,
     rateCards, listLoading, searchTerm, setSearchTerm,
@@ -63,6 +64,9 @@ export default function RatesManagementPage() {
         carrierCost={carrierCost} onCarrierCostChange={setCarrierCost}
         marginRate={marginRate} onMarginRateChange={setMarginRate}
         platformFeeRate={platformFeeRate} onPlatformFeeRateChange={setPlatformFeeRate}
+        ports={ports}
+        originPortId={originPortId} onOriginPortIdChange={setOriginPortId}
+        destPortId={destPortId} onDestPortIdChange={setDestPortId}
         validFrom={validFrom} onValidFromChange={setValidFrom}
         validTo={validTo} onValidToChange={setValidTo}
         tiers={tiers} onTiersChange={setTiers}

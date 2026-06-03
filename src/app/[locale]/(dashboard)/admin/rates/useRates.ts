@@ -8,8 +8,17 @@ import { RateTier } from '@/components/admin/RateTierEditor';
 import { Surcharge } from '@/components/admin/SurchargeEditor';
 import { USER_ROLES } from '@/lib/auth/rbac';
 
+export interface Port {
+  id: string;
+  name: string;
+  code: string;
+  country_code: string;
+  type: string;
+}
+
 export interface RatesFormState {
   carriers: any[];
+  ports: Port[];
   selectedCarrier: string;
   setSelectedCarrier: (v: string) => void;
   serviceType: string;
@@ -20,6 +29,10 @@ export interface RatesFormState {
   setMarginRate: (v: number) => void;
   platformFeeRate: number;
   setPlatformFeeRate: (v: number) => void;
+  originPortId: string;
+  setOriginPortId: (v: string) => void;
+  destPortId: string;
+  setDestPortId: (v: string) => void;
   validFrom: string;
   setValidFrom: (v: string) => void;
   validTo: string;
@@ -44,11 +57,14 @@ export interface RatesFormState {
 
 export function useRates(): RatesFormState {
   const [carriers, setCarriers] = useState<any[]>([]);
+  const [ports, setPorts] = useState<Port[]>([]);
   const [selectedCarrier, setSelectedCarrier] = useState('');
   const [serviceType, setServiceType] = useState('AIR');
   const [carrierCost, setCarrierCost] = useState(0);
   const [marginRate, setMarginRate] = useState(15.0);
   const [platformFeeRate, setPlatformFeeRate] = useState(5.0);
+  const [originPortId, setOriginPortId] = useState('');
+  const [destPortId, setDestPortId] = useState('');
   const [validFrom, setValidFrom] = useState(new Date().toISOString().split('T')[0]);
   const [validTo, setValidTo] = useState('9999-12-31');
   const [tiers, setTiers] = useState<RateTier[]>([]);
@@ -95,6 +111,13 @@ export function useRates(): RatesFormState {
         .eq('status', 'ACTIVE');
 
       if (carrierData) setCarriers(carrierData);
+
+      const { data: portData } = await supabase
+        .from('zen_ports')
+        .select('id, name, code, country_code, type')
+        .order('code');
+
+      if (portData) setPorts(portData);
     };
 
     fetchData();
@@ -105,6 +128,8 @@ export function useRates(): RatesFormState {
     setCarrierCost(0);
     setMarginRate(15.0);
     setPlatformFeeRate(5.0);
+    setOriginPortId('');
+    setDestPortId('');
     setTiers([]);
     setSurcharges([]);
     setValidFrom(new Date().toISOString().split('T')[0]);
@@ -123,6 +148,8 @@ export function useRates(): RatesFormState {
         card: {
           carrier_id: selectedCarrier,
           transport_mode: serviceType,
+          origin_port_id: originPortId || null,
+          dest_port_id: destPortId || null,
           tiers: tiers.map(t => ({
             weight_min: t.weight_min,
             unit_price: t.unit_price,
@@ -171,10 +198,11 @@ export function useRates(): RatesFormState {
   });
 
   return {
-    carriers, selectedCarrier, setSelectedCarrier,
+    carriers, ports, selectedCarrier, setSelectedCarrier,
     serviceType, setServiceType,
     carrierCost, setCarrierCost, marginRate, setMarginRate,
     platformFeeRate, setPlatformFeeRate,
+    originPortId, setOriginPortId, destPortId, setDestPortId,
     validFrom, setValidFrom, validTo, setValidTo,
     tiers, setTiers, surcharges, setSurcharges, loading,
     rateCards, listLoading, searchTerm, setSearchTerm,

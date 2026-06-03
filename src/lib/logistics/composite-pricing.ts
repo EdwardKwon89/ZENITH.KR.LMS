@@ -49,7 +49,7 @@ export class RouteDecomposer {
 export class TISARateMatcher {
   constructor(private supabase: SupabaseClient) {}
   
-  async matchRateCard(carrierId: string, mode: TransportMode) {
+  async matchRateCard(carrierId: string, mode: TransportMode, originPortId?: string, destPortId?: string) {
     const today = new Date().toISOString().split('T')[0];
     let query = this.supabase.from('zen_rate_cards').select('tiers, currency');
     
@@ -58,6 +58,14 @@ export class TISARateMatcher {
     if (typeof query.eq === 'function') query = query.eq('is_active', true);
     if (typeof query.lte === 'function') query = query.lte('valid_from', today);
     if (typeof query.or === 'function') query = query.or(`valid_until.is.null,valid_until.gte.${today}`);
+    // IMP-095: port 조건 — NULL 카드는 모든 항로 매칭 허용
+    if (originPortId && typeof query.or === 'function') {
+      query = query.or(`origin_port_id.is.null,origin_port_id.eq.${originPortId}`);
+    }
+    if (destPortId && typeof query.or === 'function') {
+      query = query.or(`dest_port_id.is.null,dest_port_id.eq.${destPortId}`);
+    }
+    // 정밀 우선 정렬
     if (typeof query.order === 'function') query = query.order('valid_from', { ascending: false });
     if (typeof query.limit === 'function') query = query.limit(1);
 

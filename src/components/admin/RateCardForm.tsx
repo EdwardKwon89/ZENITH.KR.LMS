@@ -6,9 +6,17 @@ import { SurchargeEditor } from '@/components/admin/SurchargeEditor';
 import { RateTier } from '@/components/admin/RateTierEditor';
 import { Surcharge } from '@/components/admin/SurchargeEditor';
 import {
-  Truck, Save, Settings2, Box, Plane, Ship, Calendar, DollarSign, Percent,
+  Truck, Save, Settings2, Box, Plane, Ship, Calendar, DollarSign, Percent, MapPin, Globe
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+interface PortOption {
+  id: string;
+  name: string;
+  code: string;
+  country_code: string;
+  type: string;
+}
 
 interface RateCardFormProps {
   carriers: any[];
@@ -22,6 +30,11 @@ interface RateCardFormProps {
   onMarginRateChange: (v: number) => void;
   platformFeeRate: number;
   onPlatformFeeRateChange: (v: number) => void;
+  ports: PortOption[];
+  originPortId: string;
+  onOriginPortIdChange: (v: string) => void;
+  destPortId: string;
+  onDestPortIdChange: (v: string) => void;
   validFrom: string;
   onValidFromChange: (v: string) => void;
   validTo: string;
@@ -86,6 +99,38 @@ export function RateCardForm(props: RateCardFormProps) {
                   </button>
                 ))}
               </div>
+            </div>
+
+            <div className="space-y-3">
+              <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
+                <MapPin className="w-3 h-3 text-blue-500" /> Origin Port
+              </label>
+              <select
+                value={props.originPortId}
+                onChange={(e) => props.onOriginPortIdChange(e.target.value)}
+                className="w-full bg-slate-50 border border-slate-300 text-slate-900 px-4 py-3 rounded-2xl focus:ring-2 focus:ring-blue-500/30 transition-all appearance-none"
+              >
+                <option value="" className="bg-white">All Origins (Fallback)</option>
+                {props.ports.map(p => (
+                  <option key={p.id} value={p.id} className="bg-white">{p.name} ({p.code})</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="space-y-3">
+              <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
+                <Globe className="w-3 h-3 text-emerald-500" /> Destination Port
+              </label>
+              <select
+                value={props.destPortId}
+                onChange={(e) => props.onDestPortIdChange(e.target.value)}
+                className="w-full bg-slate-50 border border-slate-300 text-slate-900 px-4 py-3 rounded-2xl focus:ring-2 focus:ring-emerald-500/30 transition-all appearance-none"
+              >
+                <option value="" className="bg-white">All Destinations (Fallback)</option>
+                {props.ports.map(p => (
+                  <option key={p.id} value={p.id} className="bg-white">{p.name} ({p.code})</option>
+                ))}
+              </select>
             </div>
 
             <div className="space-y-3">

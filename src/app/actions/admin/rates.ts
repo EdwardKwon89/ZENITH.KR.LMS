@@ -16,6 +16,8 @@ export const createRateCard = withAction(async function (payload: {
     carrier_id: string;
     transport_mode: string;
     currency?: string;
+    origin_port_id?: string | null;
+    dest_port_id?: string | null;
     tiers: any[];
     valid_from: string;
     valid_to?: string;
@@ -49,6 +51,8 @@ export const createRateCard = withAction(async function (payload: {
     carrier_id: payload.card.carrier_id,
     transport_mode: payload.card.transport_mode,
     currency: payload.card.currency ?? 'USD',
+    origin_port_id: payload.card.origin_port_id || null,
+    dest_port_id: payload.card.dest_port_id || null,
     tiers: payload.card.tiers,
     carrier_cost: payload.card.carrier_cost ?? null,
     margin_rate: payload.card.margin_rate ?? 15.0,
