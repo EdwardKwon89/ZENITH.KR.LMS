@@ -121,5 +121,25 @@ export async function getRateCards(filters: {
     logger.error("[ERROR] getRateCards failed:", error);
     throw new Error(`Rates query failed: ${error.message}`);
   }
-  return { rateCards: data || [], total: count || 0 };
+
+  const rateCards = data || [];
+  if (rateCards.length > 0) {
+    const cardIds = rateCards.map(r => r.id);
+    const { data: surcharges } = await supabase
+      .from('zen_rate_surcharges')
+      .select('id, rate_card_id, surcharge_type, calc_type, amount, currency, description')
+      .in('rate_card_id', cardIds);
+    if (surcharges) {
+      const surchargesMap: Record<string, any[]> = {};
+      for (const s of surcharges) {
+        if (!surchargesMap[s.rate_card_id]) surchargesMap[s.rate_card_id] = [];
+        surchargesMap[s.rate_card_id].push(s);
+      }
+      for (const card of rateCards) {
+        (card as any).surcharges = surchargesMap[card.id] || [];
+      }
+    }
+  }
+
+  return { rateCards, total: count || 0 };
 }
