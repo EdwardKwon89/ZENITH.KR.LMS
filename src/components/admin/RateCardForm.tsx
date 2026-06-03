@@ -26,6 +26,8 @@ interface RateCardFormProps {
   onServiceTypeChange: (v: string) => void;
   carrierCost: number;
   onCarrierCostChange: (v: number) => void;
+  currency: string;
+  onCurrencyChange: (v: string) => void;
   marginRate: number;
   onMarginRateChange: (v: number) => void;
   platformFeeRate: number;
@@ -137,14 +139,25 @@ export function RateCardForm(props: RateCardFormProps) {
               <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
                 <DollarSign className="w-3 h-3 text-emerald-500" /> Carrier Cost (kg당)
               </label>
-              <input
-                type="number"
-                step="0.01"
-                value={props.carrierCost}
-                onChange={(e) => props.onCarrierCostChange(Number(e.target.value))}
-                className="w-full bg-slate-50 border border-slate-300 text-slate-900 px-4 py-3 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
-                placeholder="0.00"
-              />
+              <div className="flex gap-2">
+                <select
+                  value={props.currency}
+                  onChange={(e) => props.onCurrencyChange(e.target.value)}
+                  className="w-24 bg-slate-50 border border-slate-300 text-slate-900 px-3 py-3 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-500/30 appearance-none text-sm font-mono"
+                >
+                  {['USD', 'KRW', 'EUR', 'JPY', 'CNY', 'GBP', 'SGD', 'HKD'].map(c => (
+                    <option key={c} value={c} className="bg-white">{c}</option>
+                  ))}
+                </select>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={props.carrierCost}
+                  onChange={(e) => props.onCarrierCostChange(Number(e.target.value))}
+                  className="flex-1 bg-slate-50 border border-slate-300 text-slate-900 px-4 py-3 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+                  placeholder="0.00"
+                />
+              </div>
             </div>
 
             <div className="space-y-3">
@@ -218,7 +231,7 @@ export function RateCardForm(props: RateCardFormProps) {
           <div className="space-y-6">
             <div className="flex justify-between items-center text-sm p-4 bg-slate-50 rounded-2xl">
               <span className="text-slate-500">Carrier Cost</span>
-              <span className="text-slate-900 font-mono font-bold">${props.carrierCost.toFixed(2)} /kg</span>
+              <span className="text-slate-900 font-mono font-bold">{props.currency} {props.carrierCost.toFixed(2)} /kg</span>
             </div>
 
             <div className="flex justify-between items-center text-sm p-4 bg-slate-50 rounded-2xl">
@@ -235,9 +248,9 @@ export function RateCardForm(props: RateCardFormProps) {
               <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Pricing Formula</p>
               <div className="text-xs text-slate-500 leading-relaxed font-mono">
                 {props.tiers.length === 0 ? (
-                  `Carrier Cost: $${props.carrierCost.toFixed(2)}/kg × (1 + ${(props.marginRate + props.platformFeeRate).toFixed(1)}%)`
+                  `Carrier Cost: ${props.currency} ${props.carrierCost.toFixed(2)}/kg × (1 + ${(props.marginRate + props.platformFeeRate).toFixed(1)}%)`
                 ) : (
-                  `Tiered: ${props.tiers.length} brackets, starting at $${Math.min(...props.tiers.map(t => t.unit_price)).toFixed(2)}/kg`
+                  `Tiered: ${props.tiers.length} brackets, starting at ${props.currency} ${Math.min(...props.tiers.map(t => t.unit_price)).toFixed(2)}/kg`
                 )}
               </div>
             </div>

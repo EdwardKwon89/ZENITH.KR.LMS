@@ -25,6 +25,8 @@ export interface RatesFormState {
   setServiceType: (v: string) => void;
   carrierCost: number;
   setCarrierCost: (v: number) => void;
+  currency: string;
+  setCurrency: (v: string) => void;
   marginRate: number;
   setMarginRate: (v: number) => void;
   platformFeeRate: number;
@@ -61,6 +63,7 @@ export function useRates(): RatesFormState {
   const [selectedCarrier, setSelectedCarrier] = useState('');
   const [serviceType, setServiceType] = useState('AIR');
   const [carrierCost, setCarrierCost] = useState(0);
+  const [currency, setCurrency] = useState('USD');
   const [marginRate, setMarginRate] = useState(15.0);
   const [platformFeeRate, setPlatformFeeRate] = useState(5.0);
   const [originPortId, setOriginPortId] = useState('');
@@ -158,6 +161,7 @@ export function useRates(): RatesFormState {
           valid_from: new Date(validFrom).toISOString(),
           valid_to: new Date(validTo).toISOString(),
           carrier_cost: carrierCost || undefined,
+          currency: currency,
           margin_rate: marginRate,
           platform_fee_rate: platformFeeRate,
         },
@@ -200,7 +204,8 @@ export function useRates(): RatesFormState {
   return {
     carriers, ports, selectedCarrier, setSelectedCarrier,
     serviceType, setServiceType,
-    carrierCost, setCarrierCost, marginRate, setMarginRate,
+    carrierCost, setCarrierCost, currency, setCurrency,
+    marginRate, setMarginRate,
     platformFeeRate, setPlatformFeeRate,
     originPortId, setOriginPortId, destPortId, setDestPortId,
     validFrom, setValidFrom, validTo, setValidTo,

@@ -346,6 +346,8 @@ export class AdminRepository extends BaseRepository {
       .select(`
         *,
         carrier:zen_carriers!carrier_id(id, name, code),
+        origin_port:zen_ports!origin_port_id(id, name, code),
+        dest_port:zen_ports!dest_port_id(id, name, code),
         surcharges:zen_rate_surcharges(*)
       `, { count: 'exact' });
 

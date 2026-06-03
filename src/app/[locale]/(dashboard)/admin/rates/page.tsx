@@ -16,7 +16,8 @@ export default function RatesManagementPage() {
   const {
     carriers, ports, selectedCarrier, setSelectedCarrier,
     serviceType, setServiceType,
-    carrierCost, setCarrierCost, marginRate, setMarginRate,
+    carrierCost, setCarrierCost, currency, setCurrency,
+    marginRate, setMarginRate,
     platformFeeRate, setPlatformFeeRate,
     originPortId, setOriginPortId, destPortId, setDestPortId,
     validFrom, setValidFrom, validTo, setValidTo,
@@ -91,6 +92,7 @@ export default function RatesManagementPage() {
               selectedCarrier={selectedCarrier} onCarrierChange={setSelectedCarrier}
               serviceType={serviceType} onServiceTypeChange={setServiceType}
               carrierCost={carrierCost} onCarrierCostChange={setCarrierCost}
+              currency={currency} onCurrencyChange={setCurrency}
               marginRate={marginRate} onMarginRateChange={setMarginRate}
               platformFeeRate={platformFeeRate} onPlatformFeeRateChange={setPlatformFeeRate}
               ports={ports}
