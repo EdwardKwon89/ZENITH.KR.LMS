@@ -1145,3 +1145,43 @@
   └ 통합: **IMP-094** (방안2) — 노선별 요율이 전제되어야 워크플로우 설계 완성
 - **예상 공수**: 2~3 MD (마이그레이션 + 함수 수정 + UI)
 - **우선순위**: **High** — UAT 블로커 (노선별 요율 설정 불가, 동일 운송사 모든 노선 동일 요율)
+
+---
+
+## [IMP-096] 요율 관리 페이지 통합 정리 (3단계 — Surcharges 이전·rate-cards 제거·transport-costs 경고)
+
+- **발견 경위**: 2026-06-03 UAT 진행 중 Admin 요율 관련 페이지 3개 혼재 확인 (Aiden). `/admin/rates` 와 `/admin/rate-cards` 가 동일 테이블(`zen_rate_cards`) 중복 관리, `/admin/transport-costs` 가 TISA 엔진과 완전 단절됨을 발견.
+- **현재 상태**:
+  - `/admin/rate-cards` RateCardsTab: `zen_rate_cards` 중복 관리 (포트 매칭 필드 없음)
+  - `/admin/rate-cards` **SurchargesTab**: `zen_surcharges` 의 유일한 관리 UI — TISA 엔진(`composite-pricing.ts`)이 실제 참조하는 테이블
+  - `/admin/transport-costs`: `zen_transport_costs` 관리 — TISA 엔진 미참조 (레거시 단절)
+- **목표 구현**:
+
+  **1단계 — `/admin/rates` Surcharges 탭 추가**
+  ├ `SurchargesTab` (`zen_surcharges` CRUD)을 `/admin/rates` 페이지로 통합
+  └ TISA 엔진 연결 보존
+
+  **2단계 — `/admin/rate-cards` 제거**
+  ├ `page.tsx` → `/admin/rates` redirect 전환
+  ├ NaviSidebar "요율 카드 관리" 메뉴 항목 제거
+  ├ `tests/e2e/e2e-18` URL 수정 (`/rate-cards` → `/rates`)
+  └ UAT-10-01 시나리오 URL 수정
+
+  **3단계 — `/admin/transport-costs` 경고 배너**
+  ├ `transport-cost-client.tsx` 상단: "이 데이터는 실제 운임 계산(TISA)에 반영되지 않습니다" 경고
+  └ UAT-09-11 시나리오 비고: "TISA 미연결 — 참고용 데이터" 추가
+
+- **관련 파일**:
+  - `src/app/[locale]/(dashboard)/admin/rates/page.tsx` (탭 구조 추가)
+  - `src/app/[locale]/(dashboard)/admin/rate-cards/page.tsx` (redirect 전환)
+  - `src/components/layout/NaviSidebar.tsx` (메뉴 항목 제거)
+  - `src/app/[locale]/(dashboard)/admin/transport-costs/transport-cost-client.tsx` (경고 배너)
+  - `tests/e2e/e2e-18-packing-pricing-ratecards.spec.ts` (URL 수정 2곳)
+  - `docs/91_FinalTest/UAT/UAT_10_지능형라우팅_운임.md` (URL 수정)
+  - `docs/91_FinalTest/UAT/UAT_09_어드민_운영.md` (비고 추가)
+- **선후행 관계**:
+  ├ 선행: TASK-106 ✅ (AdminRepository TISA 3-tier 정합)
+  ├ 선행: TASK-109 ✅ (IMP-095 포트 기반 매칭 — `/admin/rates` 포트 필드 완비)
+  └ 후행: IMP-094 (요율 워크플로우 고도화 — 단일 진실 공급원 확립 후 설계 가능)
+- **예상 공수**: 1~1.5 MD
+- **우선순위**: **High** — UAT 중 운영자 혼선 유발, IMP-094 설계 전제조건
