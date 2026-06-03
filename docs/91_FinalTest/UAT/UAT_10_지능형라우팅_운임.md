@@ -97,8 +97,8 @@
 
 | 순서 | 화면·URL | 수행 액션 | 입력 데이터 | 기대 결과 | 확인 |
 |:---:|:---------|:---------|:-----------|:---------|:----:|
-| 1 | /ko/admin/rate-cards | ADMIN 로그인 후 Rate Cards 탭 진입 | `admin@zenith.kr` / `password1234` | 요율 카드 목록 표시 (ZENITH_AIR AIR, ZENITH_SEA SEA 시드 2건) | ☐ |
-| 2 | /ko/admin/rate-cards | Surcharges 탭 클릭 | — | 할증 목록 표시 (ZENITH_AIR FSC 15%, ZENITH_SEA SSC $50) | ☐ |
+| 1 | /ko/admin/rates | ADMIN 로그인 후 Rates 페이지 진입 (Rate Cards 탭) | `admin@zenith.kr` / `password1234` | 요율 카드 목록 표시 (ZENITH_AIR AIR, ZENITH_SEA SEA 시드 2건) | ☐ |
+| 2 | /ko/admin/rates | Surcharges 탭 클릭 | — | 할증 목록 표시 (ZENITH_AIR FSC 15%, ZENITH_SEA SSC $50) | ☐ |
 | 3 | /ko/orders | ICN→SIN 구간, 중량 200kg 오더 선택 | — | 오더 상세 페이지 진입 | ☐ |
 | 4 | /ko/orders/[id] | '경로 계산하기' 클릭 후 비교 테이블 각 행의 총비용(total_cost) 확인 | — | 각 행에 `총비용(total_cost)` 필드 표시 | ☐ |
 | 5 | 비교 테이블 | 최저비용(COST) 추천 행의 기본 운임(base freight) 금액 확인 | — | 예: ZENITH_AIR AIR 200kg → tiers[1] $4.80/kg → $960.00 | ☐ |
@@ -128,7 +128,7 @@
 | 항목 | 내용 |
 |:----|:----|
 | 역할 | ADMIN |
-| 화면 URL | /ko/admin/rate-cards (Phase-J 전용 Rate Cards Management) |
+| 화면 URL | /ko/admin/rates (Surcharges 탭 통합) |
 | 예상 소요 시간 | 20분 |
 | 사전 조건 | ADMIN 계정 로그인, zen_carriers 시드 데이터 존재 |
 | 관련 IMP | IMP-080·083 |
@@ -137,7 +137,7 @@
 
 | 순서 | 화면·URL | 수행 액션 | 입력 데이터 | 기대 결과 | 확인 |
 |:---:|:---------|:---------|:-----------|:---------|:----:|
-| 1 | /ko/admin/rate-cards | ADMIN 로그인 후 Rate Cards 페이지 진입 | `admin@zenith.kr` / `password1234` | Rate Cards 탭 + Surcharges 탭 표시, 목록에 시드 요율 2건 표시 | ☐ |
+| 1 | /ko/admin/rates | ADMIN 로그인 후 Rates 페이지 진입 (Surcharges 탭 통합) | `admin@zenith.kr` / `password1234` | Rate Cards 탭 + Surcharges 탭 표시, 목록에 시드 요율 2건 표시 | ☐ |
 | 2 | Rate Cards 탭 | 목록 컬럼 확인 | — | Carrier·Mode·Currency·Tiers·Carrier Cost·Margin Rate·Platform Fee Rate·Valid From·Valid Until·Status·Actions(Edit/Delete) 표시 | ☐ |
 | 3 | Rate Cards 탭 | 'Add Rate Card' 버튼 클릭 | — | 신규 등록 폼 오픈 (Carrier·Mode·Currency·Tiers·Carrier Cost·Margin Rate·Platform Fee Rate·Valid From·Valid Until) | ☐ |
 | 4 | 신규 폼 | Carrier 선택: ZENITH_AIR, Mode: AIR, Currency: USD | ZENITH_AIR·AIR·USD | 필드 정상 입력 가능 | ☐ |
@@ -150,7 +150,7 @@
 | 11 | Rate Cards 탭 | 신규 카드의 Delete 버튼 클릭 | — | "Deactivate this rate card?" 확인 모달 표시 | ☐ |
 | 12 | 확인 모달 | Deactivate(확인) 클릭 | — | 카드 is_active = false, 목록에서 Status가 'Inactive'로 변경 | ☐ |
 | 13 | Surcharges 탭 | 탭 클릭 → 목록 확인 | — | 시드 할증 2건(FSC 15%·SSC $50) 표시 | ☐ |
-| 14 | — | SHIPPER 계정으로 /ko/admin/rate-cards 직접 접속 | `shipper@zenith.kr` | 접근 차단 (403 또는 메인 리다이렉트) | ☐ |
+| 14 | — | SHIPPER 계정으로 /ko/admin/rates 직접 접속 | `shipper@zenith.kr` | 접근 차단 (403 또는 메인 리다이렉트) | ☐ |
 | 15 | — | 유효기간 중복 테스트: 동일 Carrier·Mode로 기간 겹치는 카드 등록 시도 | — | "Rate card overlaps with existing" 오류 메시지 (validateRateOverlap) | ☐ |
 | 16 | Supabase Studio | `SELECT * FROM zen_rate_cards ORDER BY created_at DESC LIMIT 5` | — | 신규 등록·수정·비활성화 이력 정상 반영 | ☐ |
 
