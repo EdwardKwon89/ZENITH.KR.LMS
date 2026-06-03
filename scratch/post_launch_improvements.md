@@ -1066,3 +1066,82 @@
   - `src/app/[locale]/(dashboard)/carrier/` (Carrier 전용 페이지 신규)
 - **예상 공수**: 3일
 - **우선순위**: Low (Phase M 대상)
+
+---
+
+## [IMP-094] 요율 관리 워크플로우 고도화 — 방안2 (화주·운송사·플랫폼 공동 참여)
+
+- **발견 경위**: DEF-038 분석 및 요율 관리 UI 방안 검토 (2026-06-01, Noah). TISA 3-tier 구조 전환 완료에 따른 워크플로우 확장 검토.
+- **현재 상태**: 요금 등록은 ADMIN/MANAGER 전용 (방안1). 운송사(CARRIER)는 요율을 직접 등록할 수 없고, 화주(SHIPPER)는 시스템이 자동 매칭한 기준 운임만 확인 가능.
+- **목표 구현**:
+
+  **① 운송사 자체 요율 등록**
+  ├ CARRIER가 `/carrier/rates` 페이지에서 자사 요율 등록 (carrier_cost + margin)
+  ├ ADMIN이 등록된 요율 검토 후 승인/반려
+  ├ 승인된 요율만 Rate Match Engine에서 활성화
+  └ 반려 시 수정 요청 사유와 함께 CARRIER에게 통보
+
+  **② 화주 요율 비교·선택**
+  ├ SHIPPER가 다수 운송사 요율 비교 후 선택 (현재 자동 매칭 → 수동 선택 병행)
+  ├ 선택된 요율은 Order TISA Snapshot에 Override 사유 기록
+  └ 장기 계약 건은 별도 협의 요율 등록 가능
+
+  **③ 플랫폼 거버넌스**
+  ├ ADMIN이 운송사별 요율 상한/하한 설정 가능 (rate floor/cap)
+  ├ 플랫폼 수수료(platform_fee_rate)는 ADMIN 전용 설정 — 운송사 수정 불가
+  └ 요율 변경 이력 전수 감사 추적
+
+- **관련 파일**:
+  - `src/app/[locale]/(dashboard)/carrier/rates/page.tsx` (신규 — Carrier 요율 등록 UI)
+  - `src/app/[locale]/(dashboard)/admin/rates-approval/page.tsx` (신규 — ADMIN 승인 UI)
+  - `src/app/actions/admin/rates.ts` (승인/반려 Server Action 확장)
+  - `src/app/actions/operations/tisa.ts` (화주 요율 선택 로직)
+  - `src/lib/repositories/admin.repository.ts` (방안1 선행 수정 완료 후 확장)
+  - `supabase/migrations/` (zen_rate_cards status 컬럼 — PENDING/APPROVED/REJECTED)
+
+- **선후행 관계**:
+  ├ 선행: **방안1** (DEF-038) — AdminRepository TISA 3-tier 정합성 확보 필수
+  ├ 선행: **DEF-039** — CARRIER RLS SELECT 허용 (운송사가 자사 요율 조회 가능해야 함)
+  └ 통합: **IMP-091** (Carrier Portal) — 운송사 대시보드와 요율 관리 UI 통합 설계
+
+- **예상 공수**: 3~5 MD (방안1 선행 완료 기준)
+- **우선순위**: Medium
+
+---
+
+## [IMP-095] Rate Card 노선별(출발지/도착지) 매칭 누락
+
+- **발견 경위**: 2026-06-03, `/admin/rates` "Admin Area Error" 디버깅 과정에서 발견 (Noah).  
+  Edward Kwon UAT 중 carrier@zenith.kr 접속 오류 신고 → 원인 분석 중 구조적 결함 확인.
+- **현재 상태**:
+  - `fn_get_best_matching_rate()` DB 함수가 `p_origin_port`, `p_dest_port`를 **파라미터로 받지만 WHERE절에서 미사용**
+  - `TISARateMatcher.matchRateCard()` (application 레벨)도 **carrier_id + transport_mode**로만 조회
+  - `AdminRepository.findRateCards()`도 port 필터 없음
+  - `zen_rate_cards` 테이블에 `origin_port_id` / `dest_port_id` 컬럼 부재 (레거시 `origin_code`, `dest_code`는 `20260428235219_remote_schema.sql`에서 제거됨)
+- **영향**:
+  - 동일 운송사 + 동일 운송모드인 모든 노선이 **동일한 Rate Card**로 매칭됨  
+    (예: ZENITH_AIR의 ICN→LAX, ICN→SFO가 같은 요율 적용)
+  - 노선별 차등 요율 설정 불가 — 실제 물류 시장에서 일반적인 요구사항 미충족
+- **임시 조치 (2026-06-03)**:
+  - `/admin/rates` 페이지 `page.tsx` props 불일치 수정 (TISA 3-tier `carrierCost`/`marginRate`/`platformFeeRate` 미전달 → **TypeError: undefined.toFixed**)
+  - TypeScript 컴파일 에러 2건 해결 (`statusFilter` 제거, `null`→`undefined`)
+  - **229/229 회귀 테스트 재확인 필요**
+- **목표 구현**:
+  1. `zen_rate_cards`에 `origin_port_id UUID FK → zen_ports(id)`, `dest_port_id UUID FK → zen_ports(id)` 컬럼 추가
+  2. 기존 데이터 마이그레이션 (port code 기준 매핑)
+  3. `fn_get_best_matching_rate` WHERE절에 `origin_port_id`, `dest_port_id` 조건 추가
+  4. `TISARateMatcher.matchRateCard()` 파라미터 및 쿼리 확장
+  5. `AdminRepository.findRateCards()` 필터 확장
+  6. `/admin/rate-cards` 폼에 출발지/도착지 선택 필드 추가
+- **관련 파일**:
+  - `supabase/migrations/` (신규 — `zen_rate_cards` port 컬럼 추가)
+  - `src/app/actions/admin/rates.ts` (`getRateCards` port 필터)
+  - `src/app/actions/admin/rate-cards.ts` (`createRateCard` port 필드)
+  - `src/lib/repositories/admin.repository.ts` (`findRateCards` port 조건)
+  - `src/lib/logistics/composite-pricing.ts` (`TISARateMatcher.matchRateCard` port 조건)
+  - `src/app/[locale]/(dashboard)/admin/rate-cards/RateCardsTab.tsx` (UI에 port 필드)
+- **선후행 관계**:
+  ├ 선행: DEF-038 (TISA 3-tier 정합성) — ✅ 완료
+  └ 통합: **IMP-094** (방안2) — 노선별 요율이 전제되어야 워크플로우 설계 완성
+- **예상 공수**: 2~3 MD (마이그레이션 + 함수 수정 + UI)
+- **우선순위**: **High** — UAT 블로커 (노선별 요율 설정 불가, 동일 운송사 모든 노선 동일 요율)

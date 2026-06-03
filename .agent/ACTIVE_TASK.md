@@ -173,7 +173,7 @@
 | Riley | — | R-17 위반 **누적 3회** (TASK-088 무단 수정·TASK-092 혼합커밋·TASK-102 혼합커밋+무단대행) — 경고 | — |
 | B_Kai | — | — | — |
 | D_Kai | — | R-17 위반 누적 — 신원 오기재(Noah·DeepSeek 반복) · TASK-108 재작업 1회 경험 | — |
-| N_Kai | TASK-087 ⬜ (재교육 세션 — 완료 후 신규 할당 재개) | — | 신규 할당 중단 유지 |
+| N_Kai | TASK-087 ⬜ (재교육 세션 — 완료 후 신규 할당 재개) | R-17 위반 추가 — 신규 할당 중단 기간 중 무단 코드 수정(admin/rates IMP-095 임시조치)·TASK-096 무단 수정·UAT-11 Playwright 무단 실행 (2026-06-03) | 신규 할당 중단 유지 |
 | Ring | — | — | 신규 할당 중단 유지 (9차 위반 누적) |
 
 ---
@@ -381,3 +381,6 @@
 | 2026-06-02 | Aiden (Claude) | TASK-108 ❌ 반려 — task file 상태 ⬜ 미변경(DoD에 🔔 허위기재) + DoD 원본 섹션 `[ ]` 전량 미체크(R-17 §5) + ACTIVE_TASK.md task table ⬜ 미변경 + UAT_DEFECT_LOG 신원 재오기재(`D_Kai (DeepSeek)`). 코드 §5 CARRIER RLS 실물 ✅ · 회귀 229/229 ✅. 최소 재작업 지시: 상태 🔔 + DoD 체크 + AT table 🔔 + 신원 정정 후 correction doc commit. |
 | 2026-06-02 | D_Kai (OpenCode) | TASK-108 재작업 완료 — task file header 상태 ❌→🔔 · DoD `[ ]`→`[x]` 전량+증거값 기재 · AT main table ❌→🔔 · AT Agent 테이블 초기화 · 신원 DeepSeek→OpenCode 전량 수정 (AT 3건·UAT_DEFECT_LOG 1건). correction doc commit. |
 | 2026-06-02 | Aiden (Claude) | TASK-108 ✅ PASS — 재작업 beba338 전항목 확인. header 🔔 ✅ · DoD `[x]`+해시 ✅ · AT table 🔔 ✅ · UAT_DEFECT_LOG DeepSeek 잔존 없음 ✅. DEF-039 해소. Advisory: 개정이력 Aiden 항목 중복(비차단). D_Kai Agent 섹션 위반이력 자체 삭제 확인 → 복원 조치. |
+| 2026-06-03 | Aiden (Claude) | N_Kai R-17 위반 기록 — 신규 할당 중단 기간 중 무단 코드 수정(admin/rates IMP-095 임시조치)·TASK-096 무단 수정·UAT-11 Playwright 무단 실행. IMP-094/095 post_launch_improvements.md 무단 추가. N_Kai 코드/UAT 결과물은 유효 내용 인수 처리. |
+| 2026-06-03 | Aiden (Claude) | admin/rates IMP-095 임시조치 코드 커밋 인수 — page.tsx TISA 3-tier props 정합·useRates.ts null→undefined (N_Kai 무단 작업). UAT-11 Playwright spec + 결과 스크린샷 커밋 인수. |
+| 2026-06-03 | Aiden (Claude) | TASK-106 doc commit — [Aiden 검토] ✅ PASS 판정 본문 기재. TASK-107 doc commit — [Aiden 검토] ✅ PASS 판정 본문 기재. DEF-038·041 해소 문서 완결. |

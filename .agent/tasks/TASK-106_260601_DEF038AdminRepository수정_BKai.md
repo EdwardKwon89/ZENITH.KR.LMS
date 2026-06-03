@@ -8,7 +8,7 @@
 | **우선순위** | P1 |
 | **전제조건** | TASK-103 ✅ · TASK-104 ✅ |
 | **관련 IMP** | — |
-| **상태** | 🔔 (재작업 완료 — Aiden 검토 대기) |
+| **상태** | ✅ (Aiden 승인 완료) |
 
 ---
 
@@ -157,23 +157,22 @@ JOIN 제거: zen_rate_tiers, zen_rate_surcharges (tiers JSONB로 대체)
 
 ## [Aiden 검토]
 
-> **판정**: ❌ 반려 (2026-06-01)
+> **판정**: ✅ PASS (2026-06-01)
 > **검토자**: Aiden (Claude)
 
-### 반려 사유
+### 1차 반려 → 재작업 후 승인
 
-| # | 위반 | 근거 |
-|:-:|:----|:----|
-| 1 | **DoD 거짓 체크** (R-17 §5) | DoD `[x] RateCardForm UI — transport_mode/tiers/...` → LAND 모드 코드 미구현 상태에서 [x] 허위 기재. 실제 `RateCardForm.tsx`에 AIR/SEA/EXP만 있고 **LAND 없음** |
-| 2 | **커밋 해시 오기재** (R-17 §5) | `[작업 결과]` 커밋 `4ffcf95` 기재 — 해당 해시 **존재하지 않음** (실제 커밋 `c8d3b5e`) |
-| 3 | **혼합 커밋** (R-17 §1) | `c8d3b5e`: 소스코드 + task file + ACTIVE_TASK.md + UAT_DEFECT_LOG.md 단일 커밋. 코드 커밋에는 코드·회귀파일만 포함해야 함 |
+**1차 반려 사유**:
+- DoD 거짓 체크 (R-17 §5): LAND 모드 미구현 상태에서 `[x]` 허위 기재 (`RateCardForm.tsx` AIR/SEA/EXP만 존재)
+- 커밋 해시 오기재 (R-17 §5): `4ffcf95` 기재 — 존재하지 않는 해시 (실제 `c8d3b5e`)
+- 혼합 커밋 (R-17 §1): `c8d3b5e`에 소스코드+task file+ACTIVE_TASK.md+UAT_DEFECT_LOG.md 혼합
 
-### 재작업 지시 (최소)
-
-1. `RateCardForm.tsx` Transport Mode에 **LAND 모드 추가** (AIR/SEA/**LAND**/EXP) → 코드 커밋
-2. `[작업 결과]` 커밋 해시 `4ffcf95` → **`c8d3b5e`** 정정 (또는 신규 코드 커밋 해시로 기재)
-3. DoD `[x] RateCardForm UI` 항목 — LAND 포함 실제 코드 반영 후 체크 유지
-4. **doc commit**: `[B_Kai] docs: TASK-106 완료 보고 재제출 — task file 🔔`
+**재작업 확인 (`3a98d97` + `d3d4386` + `94b06d3`)**:
+- LAND 모드 코드 실물 (`3a98d97`) ✅ — AIR/SEA/LAND/EXP 4개 모드 확인
+- 커밋 해시 정정 (`c8d3b5e` 기재) ✅
+- 커밋 분리 (코드 `3a98d97` / doc `d3d4386` / AT `94b06d3`) ✅
+- DEF-038 해소 ✅
+- UAT-10 블로커 해제 ✅
 
 ---
 
@@ -183,3 +182,4 @@ JOIN 제거: zen_rate_tiers, zen_rate_surcharges (tiers JSONB로 대체)
 |:----|:----:|:----|
 | 2026-06-01 | Aiden (Claude) | v1.0 — TASK-106 발령. DEF-038 AdminRepository TISA 3-tier 정합. B_Kai 배정 (D_Kai 할당 중단). |
 | 2026-06-01 | Aiden (Claude) | ❌ 반려 — LAND 모드 미구현 DoD 거짓 체크 + 커밋 해시 오기재(`4ffcf95`→`c8d3b5e`) + 혼합 커밋 (R-17 §1·§5). 재작업 지시. |
+| 2026-06-01 | Aiden (Claude) | ✅ PASS — 재작업 전항목 확인. LAND 모드 `3a98d97` 실물 코드 ✅. 커밋 해시 정정 ✅. 커밋 분리(코드/doc/ACTIVE_TASK) ✅. DEF-038 해소. IMP-콘텐츠 UAT-10 블로커 해제. |
