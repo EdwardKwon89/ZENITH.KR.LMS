@@ -1,13 +1,18 @@
 'use client';
 
+import { useState } from 'react';
 import { DollarSign, AlertCircle } from 'lucide-react';
 import { ZenCard } from '@/components/ui/ZenUI';
 import { RateCardList } from '@/components/admin/RateCardList';
 import { RateCardForm } from '@/components/admin/RateCardForm';
+import { SurchargesTab } from '../rate-cards/SurchargesTab';
 import { USER_ROLES } from '@/lib/auth/rbac';
 import { useRates } from './useRates';
 
+type Tab = 'cards' | 'surcharges';
+
 export default function RatesManagementPage() {
+  const [activeTab, setActiveTab] = useState<Tab>('cards');
   const {
     carriers, ports, selectedCarrier, setSelectedCarrier,
     serviceType, setServiceType,
@@ -22,6 +27,11 @@ export default function RatesManagementPage() {
   } = useRates();
 
   const isCarrier = profile?.role === USER_ROLES.CARRIER;
+
+  const tabs: { key: Tab; label: string }[] = [
+    { key: 'cards', label: 'Rate Cards' },
+    { key: 'surcharges', label: 'Surcharges' },
+  ];
 
   return (
     <div className="min-h-screen bg-slate-50 p-8 space-y-10">
@@ -57,33 +67,57 @@ export default function RatesManagementPage() {
         </div>
       )}
 
-      <RateCardForm
-        carriers={carriers}
-        selectedCarrier={selectedCarrier} onCarrierChange={setSelectedCarrier}
-        serviceType={serviceType} onServiceTypeChange={setServiceType}
-        carrierCost={carrierCost} onCarrierCostChange={setCarrierCost}
-        marginRate={marginRate} onMarginRateChange={setMarginRate}
-        platformFeeRate={platformFeeRate} onPlatformFeeRateChange={setPlatformFeeRate}
-        ports={ports}
-        originPortId={originPortId} onOriginPortIdChange={setOriginPortId}
-        destPortId={destPortId} onDestPortIdChange={setDestPortId}
-        validFrom={validFrom} onValidFromChange={setValidFrom}
-        validTo={validTo} onValidToChange={setValidTo}
-        tiers={tiers} onTiersChange={setTiers}
-        surcharges={surcharges} onSurchargesChange={setSurcharges}
-        loading={loading} onSave={handleSaveRate}
-        profile={profile} isCarrierRole={isCarrier}
-      />
+      <div className="max-w-7xl mx-auto">
+        <div className="flex gap-4 border-b border-slate-200 mb-6">
+          {tabs.map(tab => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              className={`pb-3 px-1 text-sm font-semibold transition-colors border-b-2 -mb-[1px] ${
+                activeTab === tab.key
+                  ? 'text-emerald-600 border-emerald-500'
+                  : 'text-slate-400 border-transparent hover:text-slate-600'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
 
-      <RateCardList
-        rates={filteredRates}
-        loading={listLoading}
-        onDelete={handleDeleteRate}
-        canEdit={canEdit}
-        canDelete={canDelete}
-        searchTerm={searchTerm}
-        onSearchChange={setSearchTerm}
-      />
+        {activeTab === 'cards' && (
+          <>
+            <RateCardForm
+              carriers={carriers}
+              selectedCarrier={selectedCarrier} onCarrierChange={setSelectedCarrier}
+              serviceType={serviceType} onServiceTypeChange={setServiceType}
+              carrierCost={carrierCost} onCarrierCostChange={setCarrierCost}
+              marginRate={marginRate} onMarginRateChange={setMarginRate}
+              platformFeeRate={platformFeeRate} onPlatformFeeRateChange={setPlatformFeeRate}
+              ports={ports}
+              originPortId={originPortId} onOriginPortIdChange={setOriginPortId}
+              destPortId={destPortId} onDestPortIdChange={setDestPortId}
+              validFrom={validFrom} onValidFromChange={setValidFrom}
+              validTo={validTo} onValidToChange={setValidTo}
+              tiers={tiers} onTiersChange={setTiers}
+              surcharges={surcharges} onSurchargesChange={setSurcharges}
+              loading={loading} onSave={handleSaveRate}
+              profile={profile} isCarrierRole={isCarrier}
+            />
+
+            <RateCardList
+              rates={filteredRates}
+              loading={listLoading}
+              onDelete={handleDeleteRate}
+              canEdit={canEdit}
+              canDelete={canDelete}
+              searchTerm={searchTerm}
+              onSearchChange={setSearchTerm}
+            />
+          </>
+        )}
+
+        {activeTab === 'surcharges' && <SurchargesTab />}
+      </div>
     </div>
   );
 }

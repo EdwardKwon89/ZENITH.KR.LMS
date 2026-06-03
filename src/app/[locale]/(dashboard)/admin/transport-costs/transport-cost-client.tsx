@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import ZenDataGrid from "@/components/ui/ZenDataGrid";
-import { Plus, Edit2, Trash2, XCircle, Ship, Plane, Truck } from "lucide-react";
+import { Plus, Edit2, Trash2, XCircle, Ship, Plane, Truck, AlertTriangle } from "lucide-react";
 import { upsertTransportCost, deleteTransportCost } from "@/app/actions/finance";
 import { motion, AnimatePresence } from "framer-motion";
 import { ZenBadge } from "@/components/ui/ZenUI";
@@ -151,6 +151,16 @@ export default function TransportCostClient({
 
   return (
     <div className="space-y-4">
+      <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-start gap-3 mb-6">
+        <AlertTriangle className="w-5 h-5 text-amber-500 mt-0.5 shrink-0" />
+        <div>
+          <p className="font-semibold text-amber-800 text-sm">TISA 엔진 미연결 — 참고용 데이터</p>
+          <p className="text-amber-700 text-xs mt-1">
+            이 페이지의 데이터는 실제 운임 계산(TISA 엔진)에 반영되지 않습니다.
+            운임 요율 설정은 <a href="/admin/rates" className="underline font-semibold">물류 요율 마스터 등록</a>을 사용하세요.
+          </p>
+        </div>
+      </div>
       <div className="flex justify-end">
         <button
           onClick={() => {

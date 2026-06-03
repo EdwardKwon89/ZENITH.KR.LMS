@@ -1,4 +1,8 @@
 "use server";
+/**
+ * @deprecated This module is deprecated. Rate cards are now managed via /admin/rates.
+ * This file is retained for backward compatibility — do not use in new code.
+ */
 
 import { logger } from '@/lib/logger';
 import { validateUserAction } from "@/lib/auth/guards";

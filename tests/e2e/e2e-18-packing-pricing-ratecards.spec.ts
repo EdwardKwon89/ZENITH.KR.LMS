@@ -243,9 +243,9 @@ test.describe('E2E-18: Packing / Composite Pricing / Rate Cards Flow', () => {
     await page.click('button[data-action="login"]');
     await page.waitForURL(/.*(dashboard|orders)/);
 
-    // Step 2: Navigate to rate-cards admin page
-    console.log('Step 2: Navigate to /ko/admin/rate-cards');
-    await page.goto('/ko/admin/rate-cards');
+    // Step 2: Navigate to rates admin page
+    console.log('Step 2: Navigate to /ko/admin/rates');
+    await page.goto('/ko/admin/rates');
     await page.waitForLoadState('networkidle');
     await page.screenshot({ path: `${SCREENSHOT_DIR}/e2e_18_c_ratecards_page.png`, fullPage: true });
 
@@ -342,10 +342,10 @@ test.describe('E2E-18: Packing / Composite Pricing / Rate Cards Flow', () => {
     await page.click('button[data-action="login"]');
     await page.waitForURL(/.*(dashboard|orders)/);
 
-    await page.goto('/ko/admin/rate-cards');
+    await page.goto('/ko/admin/rates');
     await page.waitForLoadState('networkidle');
     const shipperUrl = page.url();
-    console.log(`  SHIPPER URL after /ko/admin/rate-cards: ${shipperUrl}`);
+    console.log(`  SHIPPER URL after /ko/admin/rates: ${shipperUrl}`);
     expect(shipperUrl).not.toContain('/rate-cards');
 
     await page.screenshot({ path: `${SCREENSHOT_DIR}/e2e_18_c_shipper_denied.png`, fullPage: true });
