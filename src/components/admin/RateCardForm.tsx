@@ -37,6 +37,8 @@ interface RateCardFormProps {
   onOriginPortIdChange: (v: string) => void;
   destPortId: string;
   onDestPortIdChange: (v: string) => void;
+  transitDays: number;
+  onTransitDaysChange: (v: number) => void;
   validFrom: string;
   onValidFromChange: (v: string) => void;
   validTo: string;
@@ -134,6 +136,21 @@ export function RateCardForm(props: RateCardFormProps) {
                 ))}
               </select>
             </div>
+
+            {props.originPortId && props.destPortId ? (
+              <div className="space-y-3">
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
+                  <Calendar className="w-3 h-3 text-blue-500" /> Transit Days
+                </label>
+                <input
+                  type="number"
+                  min={1}
+                  value={props.transitDays}
+                  onChange={(e) => props.onTransitDaysChange(Math.max(1, Number(e.target.value)))}
+                  className="w-full bg-slate-50 border border-slate-300 text-slate-900 px-4 py-3 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+                />
+              </div>
+            ) : <div />}
 
             <div className="space-y-3">
               <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">

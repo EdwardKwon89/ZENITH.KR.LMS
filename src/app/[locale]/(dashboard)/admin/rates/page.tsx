@@ -20,6 +20,7 @@ export default function RatesManagementPage() {
     marginRate, setMarginRate,
     platformFeeRate, setPlatformFeeRate,
     originPortId, setOriginPortId, destPortId, setDestPortId,
+    transitDays, setTransitDays,
     validFrom, setValidFrom, validTo, setValidTo,
     tiers, setTiers, surcharges, setSurcharges, loading,
     rateCards, listLoading, searchTerm, setSearchTerm,
@@ -98,6 +99,7 @@ export default function RatesManagementPage() {
               ports={ports}
               originPortId={originPortId} onOriginPortIdChange={setOriginPortId}
               destPortId={destPortId} onDestPortIdChange={setDestPortId}
+              transitDays={transitDays} onTransitDaysChange={setTransitDays}
               validFrom={validFrom} onValidFromChange={setValidFrom}
               validTo={validTo} onValidToChange={setValidTo}
               tiers={tiers} onTiersChange={setTiers}

@@ -21,6 +21,7 @@ async function autoCreateRouteNetwork(
   transport_mode: string,
   origin_port_id: string,
   dest_port_id: string,
+  transit_days?: number | null,
 ) {
   const { data: ports } = await supabase
     .from('zen_ports')
@@ -41,7 +42,7 @@ async function autoCreateRouteNetwork(
     return;
   }
 
-  const transitDays = TRANSIT_DAYS_DEFAULT[transport_mode] ?? 3;
+  const transitDays = transit_days ?? TRANSIT_DAYS_DEFAULT[transport_mode] ?? 3;
 
   const { error } = await supabase
     .from('zen_route_network')
@@ -74,6 +75,7 @@ export const createRateCard = withAction(async function (payload: {
     currency?: string;
     origin_port_id?: string | null;
     dest_port_id?: string | null;
+    transit_days?: number | null;
     tiers: any[];
     valid_from: string;
     valid_to?: string;
@@ -137,6 +139,7 @@ export const createRateCard = withAction(async function (payload: {
       payload.card.transport_mode,
       payload.card.origin_port_id,
       payload.card.dest_port_id,
+      payload.card.transit_days,
     );
   }
 

@@ -35,6 +35,8 @@ export interface RatesFormState {
   setOriginPortId: (v: string) => void;
   destPortId: string;
   setDestPortId: (v: string) => void;
+  transitDays: number;
+  setTransitDays: (v: number) => void;
   validFrom: string;
   setValidFrom: (v: string) => void;
   validTo: string;
@@ -69,6 +71,7 @@ export function useRates(): RatesFormState {
   const [platformFeeRate, setPlatformFeeRate] = useState(5.0);
   const [originPortId, setOriginPortId] = useState('');
   const [destPortId, setDestPortId] = useState('');
+  const [transitDays, setTransitDays] = useState(7);
   const [validFrom, setValidFrom] = useState(new Date().toISOString().split('T')[0]);
   const [validTo, setValidTo] = useState('9999-12-31');
   const [tiers, setTiers] = useState<RateTier[]>([]);
@@ -134,6 +137,7 @@ export function useRates(): RatesFormState {
     setPlatformFeeRate(5.0);
     setOriginPortId('');
     setDestPortId('');
+    setTransitDays(7);
     setTiers([]);
     setSurcharges([]);
     setValidFrom(new Date().toISOString().split('T')[0]);
@@ -179,6 +183,7 @@ export function useRates(): RatesFormState {
           transport_mode: serviceType,
           origin_port_id: originPortId || null,
           dest_port_id: destPortId || null,
+          transit_days: transitDays,
           tiers: tiers.map(t => ({
             weight_min: t.weight_min,
             unit_price: t.unit_price,
@@ -234,6 +239,7 @@ export function useRates(): RatesFormState {
     marginRate, setMarginRate,
     platformFeeRate, setPlatformFeeRate,
     originPortId, setOriginPortId, destPortId, setDestPortId,
+    transitDays, setTransitDays,
     validFrom, setValidFrom, validTo, setValidTo,
     tiers, setTiers, surcharges, setSurcharges, loading,
     rateCards, listLoading, searchTerm, setSearchTerm,
