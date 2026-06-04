@@ -19,6 +19,7 @@ describe('Rates Actions Unit Tests', () => {
     from: vi.fn().mockReturnThis(),
     select: vi.fn().mockReturnThis(),
     insert: vi.fn().mockReturnThis(),
+    upsert: vi.fn().mockReturnThis(),
     update: vi.fn().mockReturnThis(),
     delete: vi.fn().mockReturnThis(),
     eq: vi.fn().mockReturnThis(),
@@ -116,5 +117,165 @@ describe('Rates Actions Unit Tests', () => {
       platform_fee_rate: 5.0,
     }));
     expect(result.data.id).toBe('new-1');
+  });
+
+  it('TC-RATES-07: should auto-create route network when origin_port_id and dest_port_id are provided', async () => {
+    (validateUserAction as any).mockResolvedValue({ 
+      profile: mockAdminProfile, 
+      supabase: mockSupabase 
+    });
+
+    // 1. Check existing active rate cards — none
+    mockSupabase.then.mockImplementationOnce((cb) => cb({ 
+      data: [], 
+      error: null 
+    }));
+    
+    // 2. Insert new card
+    mockSupabase.then.mockImplementationOnce((cb) => cb({ 
+      data: { id: 'new-card-1' }, 
+      error: null 
+    }));
+
+    // 3. zen_ports lookup (for autoCreateRouteNetwork)
+    mockSupabase.then.mockImplementationOnce((cb) => cb({ 
+      data: [
+        { id: 'port-icn-uuid', code: 'ICN' },
+        { id: 'port-jfk-uuid', code: 'JFK' },
+      ], 
+      error: null 
+    }));
+
+    // 4. zen_route_network upsert
+    mockSupabase.then.mockImplementationOnce((cb) => cb({ 
+      data: null, 
+      error: null 
+    }));
+
+    const payload = {
+      card: {
+        carrier_id: 'carrier-uuid-1',
+        transport_mode: 'AIR',
+        origin_port_id: 'port-icn-uuid',
+        dest_port_id: 'port-jfk-uuid',
+        tiers: [{ weight_min: 0, unit_price: 3.00 }],
+        valid_from: '2026-06-01',
+        carrier_cost: 2.00,
+        margin_rate: 15.0,
+        platform_fee_rate: 5.0,
+      },
+      surcharges: []
+    };
+
+    const result = await createRateCard(payload);
+    expect(result.data.id).toBe('new-card-1');
+    
+    // Verify zen_ports were queried for UUID->CODE mapping
+    expect(mockSupabase.from).toHaveBeenCalledWith('zen_ports');
+    // Verify zen_route_network upsert was called
+    expect(mockSupabase.from).toHaveBeenCalledWith('zen_route_network');
+    expect(mockSupabase.upsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        carrier_id: 'carrier-uuid-1',
+        from_port_id: 'ICN',
+        to_port_id: 'JFK',
+        transport_mode: 'AIR',
+        is_active: true,
+      }),
+      expect.objectContaining({ onConflict: 'carrier_id,from_port_id,to_port_id,transport_mode' })
+    );
+  });
+
+  it('TC-RATES-07b: should skip route network creation when ports are not provided (non-fatal)', async () => {
+    (validateUserAction as any).mockResolvedValue({ 
+      profile: mockAdminProfile, 
+      supabase: mockSupabase 
+    });
+
+    // 1. Check existing active rate cards — none
+    mockSupabase.then.mockImplementationOnce((cb) => cb({ 
+      data: [], 
+      error: null 
+    }));
+    
+    // 2. Insert new card
+    mockSupabase.then.mockImplementationOnce((cb) => cb({ 
+      data: { id: 'new-card-2' }, 
+      error: null 
+    }));
+
+    const payload = {
+      card: {
+        carrier_id: 'carrier-uuid-2',
+        transport_mode: 'SEA',
+        // no origin_port_id, no dest_port_id
+        tiers: [{ weight_min: 0, unit_price: 1.50 }],
+        valid_from: '2026-06-01',
+        carrier_cost: 1.20,
+        margin_rate: 15.0,
+        platform_fee_rate: 5.0,
+      },
+      surcharges: []
+    };
+
+    const result = await createRateCard(payload);
+    expect(result.data.id).toBe('new-card-2');
+    // Should NOT query zen_ports or zen_route_network
+    expect(mockSupabase.from).not.toHaveBeenCalledWith('zen_ports');
+    expect(mockSupabase.from).not.toHaveBeenCalledWith('zen_route_network');
+  });
+
+  it('TC-RATES-07c: should preserve rate card creation even when route network upsert fails (non-fatal)', async () => {
+    (validateUserAction as any).mockResolvedValue({ 
+      profile: mockAdminProfile, 
+      supabase: mockSupabase 
+    });
+
+    // 1. Check existing active rate cards — none
+    mockSupabase.then.mockImplementationOnce((cb) => cb({ 
+      data: [], 
+      error: null 
+    }));
+    
+    // 2. Insert new card
+    mockSupabase.then.mockImplementationOnce((cb) => cb({ 
+      data: { id: 'new-card-3' }, 
+      error: null 
+    }));
+
+    // 3. zen_ports lookup succeeds
+    mockSupabase.then.mockImplementationOnce((cb) => cb({ 
+      data: [
+        { id: 'port-icn-uuid', code: 'ICN' },
+        { id: 'port-lax-uuid', code: 'LAX' },
+      ], 
+      error: null 
+    }));
+
+    // 4. zen_route_network upsert FAILS (non-fatal)
+    mockSupabase.then.mockImplementationOnce((cb) => cb({ 
+      data: null, 
+      error: { message: 'duplicate key violation', code: '23505' } 
+    }));
+
+    const payload = {
+      card: {
+        carrier_id: 'carrier-uuid-3',
+        transport_mode: 'AIR',
+        origin_port_id: 'port-icn-uuid',
+        dest_port_id: 'port-lax-uuid',
+        tiers: [{ weight_min: 0, unit_price: 2.00 }],
+        valid_from: '2026-06-01',
+        carrier_cost: 1.50,
+        margin_rate: 10.0,
+        platform_fee_rate: 5.0,
+      },
+      surcharges: []
+    };
+
+    // Rate card creation should still succeed despite route network failure
+    const result = await createRateCard(payload);
+    expect(result.data.id).toBe('new-card-3');
+    expect(result.error).toBeNull();
   });
 });

@@ -8,7 +8,7 @@
 | 우선순위 | P1 |
 | 관련 IMP | — (DEF-040) |
 | 전제조건 | 없음 |
-| 상태 | ❌ |
+| 상태 | 🔔 |
 
 ---
 
@@ -153,7 +153,7 @@ SELECT c.id, 'ICN', 'JFK', 'SEA', 18, true FROM zen_carriers c WHERE c.code = 'Z
 | `ACTIVE_TASK.md` | TASK-111 설명 확장 · Agent 신원 D_Kai 정정 |
 | `TASK-111.md` | v2.0: auto-creation architecture fix 상세 · DoD · [작업 결과] |
 
-### §5 — 검증 ✅
+### §5 — 초기 검증 ✅ (dc0e233)
 
 - **236/236 PASS** (48 files, 43.01s)
 - TypeScript `npx tsc --noEmit`: rates.ts error 0건
@@ -183,6 +183,24 @@ SELECT c.id, 'ICN', 'JFK', 'SEA', 18, true FROM zen_carriers c WHERE c.code = 'Z
    - 검증 항목: Non-fatal — route network 실패 시에도 Rate Card 등록 유지
 3. 코드+문서 커밋 후 🔔 재제출
 
+### 2차 제출 (2026-06-04) — 🔔 재검토 요청
+
+**조치 완료 (2건)**:
+
+1. **`supabase: any` → `SupabaseClient`** ✅
+   - `rates.ts:18` `async function autoCreateRouteNetwork(supabase: SupabaseClient, ...)`
+   - `import { SupabaseClient } from '@supabase/supabase-js';` 추가
+
+2. **TC-RATES-07 등록** ✅
+   - `LIVE_REGRESSION_TEST_MAP.md` TC-RATES-07 신규 항목 추가
+   - `tests/unit/rates/rates.test.ts` TC-RATES-07 (port 지정 시 auto-upsert) + 07b (port 미지정 시 skip) + 07c (upsert 실패해도 rate card 유지) — 3개 테스트 구현
+
+**검증**:
+- 단위 테스트: **7/7 PASS** (TC-RATES-01~04 + 07/07b/07c)
+- 회귀 테스트: **239/239 PASS** (기존 236 + 신규 3)
+- TypeScript: `npx tsc --noEmit` — rates.ts error 0건 (SupabaseClient 타입 적용)
+- 커밋: 단일 커밋 (code + docs)
+
 ## 관계 문서
 
 | 문서 | 링크 |
@@ -201,3 +219,4 @@ SELECT c.id, 'ICN', 'JFK', 'SEA', 18, true FROM zen_carriers c WHERE c.code = 'Z
 | v2.0 | 2026-06-04 | D_Kai (OpenCode) | 설계 보강 — Route Network 자동 생성 + DEF-040 해소 |
 | v2.1 | 2026-06-04 | D_Kai (OpenCode) | DoD·[작업 결과] 보강 + 신원 정정 · 커밋 분할 (`dc0e233`+`25dd208`+`63d5ad1`) |
 | v2.2 | 2026-06-04 | Aiden (Claude) | 1차 검토 ❌ 반려 — R-09 TC-RATES-07 미등록 · `supabase: any` 미수정 |
+| v2.3 | 2026-06-04 | D_Kai (OpenCode) | 재작업 완료 — `supabase: any`→`SupabaseClient` · TC-RATES-07 등록+구현 · 239/239 PASS · 🔔 재제출 |

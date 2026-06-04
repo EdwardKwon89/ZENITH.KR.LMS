@@ -1,8 +1,8 @@
 # 🗺️ LIVE Regression Test Master Map
 
 > **상태:** [ACTIVE]  
-> **총 테스트 케이스:** 236 Cases  
-> **최종 검증일:** 2026-06-03 (IMP-096)  
+> **총 테스트 케이스:** 239 Cases  
+> **최종 검증일:** 2026-06-04 (TASK-111 v2.3)  
 
 제니스 플랫폼의 비즈니스 영속성을 보장하는 회귀 테스트 케이스의 통합 명세서입니다. 모든 신규 개발 및 수정 시 이 맵에 케이스가 추가되어야 하며, 전체 테스트가 통과되어야 합니다.
 
@@ -154,6 +154,7 @@
 | **TC-RATES-03** | deleteRateCard 권한 검증 | ADMIN만 삭제 가능 여부 확인 | `tests/unit/rates/rates.test.ts` |
 | **TC-RATES-04** | TISA 버전 관리 (SUPERSEDED) | 신규 등록 시 기존 ACTIVE 요율의 상태 전환 검증 | `tests/unit/rates/rates.test.ts` |
 | **TC-RATES-06** | Surcharges 탭 통합 (/admin/rates) | `/admin/rates` 페이지 내 Surcharges 탭에서 `zen_surcharges` CRUD 정상 동작 확인 (E2E 커버) | `tests/e2e/e2e-18-packing-pricing-ratecards.spec.ts` |
+| **TC-RATES-07** | Route Network 자동 생성 (Rate Card 등록 시) | `createRateCard()` 호출 시 `origin_port_id` + `dest_port_id`가 있으면 `zen_route_network` 자동 UPSERT. port 미지정 시 skip. route network 실패해도 Rate Card 등록 유지 (non-fatal). | `tests/unit/rates/rates.test.ts` |
 
 ---
 
@@ -161,6 +162,7 @@
 
 | 검증일 | 버전 | 성공/실패 | 총 소요시간 | 결과 리포트 |
 | :--- | :--- | :---: | :--- | :--- |
+| 2026-06-04 | v18.1 | ✅ PASS | 43.48s | 239/239 — TASK-111 재작업 (v2.3) — `supabase: any`→`SupabaseClient` · TC-RATES-07/07b/07c 신규 3건 · 239/239 PASS. |
 | 2026-06-03 | v18.0 | ✅ PASS | 44.10s | 236/236 — IMP-096 요율 관리 페이지 통합 정리 (Surcharges 탭 `/admin/rates` 통합·rate-cards 리다이렉트·transport-costs 경고 배너) + TC-RATES-06 신규 등록 완료. |
 | 2026-05-23 | v17.0 | ✅ PASS | 49.49s | 218/218 — IMP-073 입고 처리 전용 화면 신규 개발 및 TC-INB.1~4 신규 등록 완료. |
 | 2026-05-11 | v16.1 | ✅ PASS | ~30s | 177/177 — FEAT-RATES 반려 결함(BUG-FR-001/002) 수정 및 TC-RATES-01~04 신규 등록 완료. |

@@ -6,6 +6,7 @@ import { validateUserAction } from "@/lib/auth/guards";
 import { revalidatePath } from "next/cache";
 import { USER_ROLES } from "@/lib/auth/rbac";
 import { AdminRepository } from '@/lib/repositories';
+import { SupabaseClient } from '@supabase/supabase-js';
 
 const TRANSIT_DAYS_DEFAULT: Record<string, number> = {
   AIR: 1,
@@ -15,7 +16,7 @@ const TRANSIT_DAYS_DEFAULT: Record<string, number> = {
 };
 
 async function autoCreateRouteNetwork(
-  supabase: any,
+  supabase: SupabaseClient,
   carrier_id: string,
   transport_mode: string,
   origin_port_id: string,
