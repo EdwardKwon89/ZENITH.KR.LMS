@@ -1,9 +1,14 @@
 # TASK-111 — Route Network 자동 생성 + UAT-02 Seed Fix
 
-> **생성일**: 2026-06-04
-> **담당**: D_Kai (OpenCode)
-> **상태**: 🔔 (Aiden 검토 요청)
-> **커밋**: `ea1c5cb` + `(미커밋, rates.ts)`
+| 항목 | 내용 |
+|:---|:---|
+| Task ID | TASK-111 |
+| 생성일 | 2026-06-04 |
+| 할당 Agent | D_Kai (OpenCode) |
+| 우선순위 | P1 |
+| 관련 IMP | — (DEF-040) |
+| 전제조건 | 없음 |
+| 상태 | ❌ |
 
 ---
 
@@ -24,7 +29,7 @@ UAT-02 CORPORATE shipper (`uat02_corp_shipper@zenith.kr`)가 `#ZEN-2026-000002` 
 
 ## 수정 내역
 
-### 🔵 수정 1: `createRateCard()` — Route Network 자동 생성 (Noah)
+### 🔵 수정 1: `createRateCard()` — Route Network 자동 생성 (D_Kai)
 
 **파일**: `src/app/actions/admin/rates.ts`
 
@@ -72,8 +77,26 @@ SELECT c.id, 'ICN', 'JFK', 'SEA', 18, true FROM zen_carriers c WHERE c.code = 'Z
 
 ## 검증
 
-- **236/236 PASS** ✅ (rates.ts type error 0건 확인)
-- DB `zen_route_network`: 9 routes, 중복 없음
+| 검증 항목 | 결과 |
+|:----------|:----:|
+| 회귀 테스트 | **236/236 PASS** ✅ |
+| rates.ts type error | 0건 ✅ |
+| DB `zen_route_network` | 9 routes, 중복 없음 ✅ |
+
+## DoD (완료 기준)
+
+- [x] `createRateCard()`에 `autoCreateRouteNetwork()` 헬퍼 + 호출부 추가 ✅ — `dc0e233`
+- [x] `zen_ports` UUID→CODE 매핑 후 `zen_route_network` UPSERT ✅ — `dc0e233`
+- [x] Non-fail 처리 (실패 시 `logger.warn`, rate card 등록은 유지) ✅
+- [x] `scripts/seed-local.ts` — ICN↔JFK(AIR/SEA) 시드 추가 + idempotent upsert ✅ — `ea1c5cb`
+- [x] DB 직접 조치: ICN→JFK AIR/SEA 2건 INSERT + 중복 5건 DELETE ✅
+- [x] 회귀 테스트 전량 PASS ✅ — **236/236**
+- [x] GitNexus impact analysis 실행 완료 — LOW risk ✅
+- [x] DEF-040 UAT_DEFECT_LOG.md 수정완료 갱신 (커밋 `01786d3` → `25dd208` 분할) ✅
+- [x] 코드 커밋 (`dc0e233`: code-only) + 문서 커밋 (`25dd208`: docs-only) 분리 ✅
+- [x] 커밋 태그 `[D_Kai]` 통일 ✅
+- [x] 신원 정정 (Noah→D_Kai) — `63d5ad1` ✅
+- [x] Task file header 상태 🔔 + ACTIVE_TASK.md 🔔 ✅
 
 ## UAT 복구 절차
 
@@ -82,12 +105,83 @@ SELECT c.id, 'ICN', 'JFK', 'SEA', 18, true FROM zen_carriers c WHERE c.code = 'Z
 SUPABASE_SERVICE_ROLE_KEY=REDACTED npx tsx scripts/seed-local.ts
 ```
 
-## Aiden 확인 필요 사항
+## [작업 결과]
 
-- [ ] **설계 방향 검토**: Rate Card 등록 시 route network 자동 생성 방식으로 DEF-040 해결. 별도 Route Network Admin UI 불필요.
-- [ ] `autoCreateRouteNetwork()` non-fatal 처리 방식 적절한지
-- [ ] Route optimization 정상 동작 확인 (uat02_corp_shipper → ZEN-2026-000002 → 경로 계산하기)
-- [ ] 추가 UAT scenario 필요 여부
+### §1 — 코드 구현 ✅ (`dc0e233`)
+
+**파일**: `src/app/actions/admin/rates.ts`
+
+```
+createRateCard() 성공 → surcharges 저장 완료
+  └── origin_port_id && dest_port_id 모두 있음?
+        ├── YES → autoCreateRouteNetwork()
+        │          ├── zen_ports 조회 (UUID→CODE)
+        │          └── zen_route_network UPSERT (ON CONFLICT carrier_id+from+to+mode)
+        └── NO  → skip (port 미지정 요금)
+```
+
+- 헬퍼 함수 `autoCreateRouteNetwork()` 신규: 46줄
+- `TRANSIT_DAYS_DEFAULT`: AIR/EXP=1, SEA=7, LAND=3
+- Non-fatal: 실패 시 `logger.warn`, rate card 등록 유지
+- 기존 코드 변경 없음 (추가만)
+
+### §2 — 시드 보강 ✅ (`ea1c5cb`)
+
+**파일**: `scripts/seed-local.ts`
+
+- ICN↔JFK (AIR/SEA) 2개 route 추가 (기존 7개 유지 → 총 9개)
+- `seedRouteNetwork()` skip-if-exists 제거 → `ON CONFLICT DO NOTHING` 기반 idempotent
+- 에러 메시지 하드코딩 제거 → 동적 route pair 표시
+
+### §3 — DB 직접 조치
+
+```sql
+INSERT INTO zen_route_network (carrier_id, from_port_id, to_port_id, transport_mode, transit_days, is_active)
+SELECT c.id, 'ICN', 'JFK', 'AIR', 12, true FROM zen_carriers c WHERE c.code = 'ZENITH_AIR';
+
+INSERT INTO zen_route_network (carrier_id, from_port_id, to_port_id, transport_mode, transit_days, is_active)
+SELECT c.id, 'ICN', 'JFK', 'SEA', 18, true FROM zen_carriers c WHERE c.code = 'ZENITH_SEA';
+```
+
+중복 데이터 정리 (5건 DELETE).
+
+### §4 — 문서 갱신 ✅ (`25dd208` · `63d5ad1`)
+
+| 문서 | 갱신 내용 |
+|:-----|:----------|
+| `UAT_DEFECT_LOG.md` | DEF-040 미수정→수정완료 · 현황 요약 갱신 · 개정이력 추가 |
+| `ACTIVE_TASK.md` | TASK-111 설명 확장 · Agent 신원 D_Kai 정정 |
+| `TASK-111.md` | v2.0: auto-creation architecture fix 상세 · DoD · [작업 결과] |
+
+### §5 — 검증 ✅
+
+- **236/236 PASS** (48 files, 43.01s)
+- TypeScript `npx tsc --noEmit`: rates.ts error 0건
+- DB `zen_route_network`: 9 routes, 중복 없음
+- GitNexus impact analysis: LOW risk (upstream callers 0 · affected processes 0)
+
+## [Aiden 검토]
+
+### 1차 검토 (2026-06-04) — ❌ 반려
+
+**설계 방향 승인**: Rate Card 등록 시 route network 자동 생성 방식 ✅. non-fatal 처리 ✅. DEF-040 해소 접근법 ✅.
+
+**반려 사유 (2건)**:
+
+1. **[R-09 미이행] TC-RATES-07 등록 없음**
+   - `LIVE_REGRESSION_TEST_MAP.md` 실행 이력만 v18.1 갱신, TC 목록에 신규 항목 없음
+   - `autoCreateRouteNetwork()` 로직 변경 시 회귀 탐지 불가
+
+2. **[코드 미수정] `supabase: any` 타입**
+   - `rates.ts:18` `autoCreateRouteNetwork(supabase: any, ...)` — IMP-029 TS any 퇴출 기조 위반
+   - `dc0e233`에서 수정 없이 그대로 커밋됨
+
+**재작업 지시** (2건 단일 커밋):
+1. `rates.ts:18` `supabase: any` → 적절한 Supabase 클라이언트 타입으로 교체
+2. `LIVE_REGRESSION_TEST_MAP.md` TC-RATES-07 신규 등록
+   - 검증 항목: Rate Card 등록 시 `zen_route_network` 자동 생성 (origin/dest port 있을 때)
+   - 검증 항목: Non-fatal — route network 실패 시에도 Rate Card 등록 유지
+3. 코드+문서 커밋 후 🔔 재제출
 
 ## 관계 문서
 
@@ -101,7 +195,9 @@ SUPABASE_SERVICE_ROLE_KEY=REDACTED npx tsx scripts/seed-local.ts
 
 ## 개정 이력
 
-| 날짜 | 작성자 | 설명 |
-|:-----|:-------|:-----|
-| 2026-06-04 | D_Kai (OpenCode) | v1.0 — 최초 작성 (seed fix) |
-| 2026-06-04 | D_Kai (OpenCode) | v2.0 — 설계 보강: Route Network 자동 생성 + DEF-040 해소 |
+| 버전 | 날짜 | 작성자 | 내용 |
+|:----:|:----:|:-------|:-----|
+| v1.0 | 2026-06-04 | D_Kai (OpenCode) | 최초 작성 — seed fix (ICN→JFK 시드 보강) |
+| v2.0 | 2026-06-04 | D_Kai (OpenCode) | 설계 보강 — Route Network 자동 생성 + DEF-040 해소 |
+| v2.1 | 2026-06-04 | D_Kai (OpenCode) | DoD·[작업 결과] 보강 + 신원 정정 · 커밋 분할 (`dc0e233`+`25dd208`+`63d5ad1`) |
+| v2.2 | 2026-06-04 | Aiden (Claude) | 1차 검토 ❌ 반려 — R-09 TC-RATES-07 미등록 · `supabase: any` 미수정 |
