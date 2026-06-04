@@ -83,7 +83,7 @@ export const createRateCard = withAction(async function (payload: {
     margin_rate?: number;
     platform_fee_rate?: number;
   };
-  surcharges: any[];
+  surcharges?: any[];
 }) {
   const { supabase, profile } = await validateUserAction();
   const adminRepo = new AdminRepository(supabase);

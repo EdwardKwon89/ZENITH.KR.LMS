@@ -22,7 +22,7 @@ export default function RatesManagementPage() {
     originPortId, setOriginPortId, destPortId, setDestPortId,
     transitDays, setTransitDays,
     validFrom, setValidFrom, validTo, setValidTo,
-    tiers, setTiers, surcharges, setSurcharges, loading,
+    tiers, setTiers, loading,
     rateCards, listLoading, searchTerm, setSearchTerm,
     profile, canEdit, canDelete, filteredRates,
     handleEditRate, handleSaveRate, handleDeleteRate, resetForm,
@@ -107,9 +107,8 @@ export default function RatesManagementPage() {
             transitDays={transitDays} onTransitDaysChange={setTransitDays}
             validFrom={validFrom} onValidFromChange={setValidFrom}
             validTo={validTo} onValidToChange={setValidTo}
-            tiers={tiers} onTiersChange={setTiers}
-            surcharges={surcharges} onSurchargesChange={setSurcharges}
-            loading={loading} onSave={handleSaveRate}
+              tiers={tiers} onTiersChange={setTiers}
+              loading={loading} onSave={handleSaveRate}
             onResetForm={resetForm}
             profile={profile} isCarrierRole={isCarrier}
           />

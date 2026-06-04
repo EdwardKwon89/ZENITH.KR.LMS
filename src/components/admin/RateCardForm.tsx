@@ -2,9 +2,7 @@
 
 import { ZenCard, ZenButton, ZenInput } from '@/components/ui/ZenUI';
 import { RateTierEditor } from '@/components/admin/RateTierEditor';
-import { SurchargeEditor } from '@/components/admin/SurchargeEditor';
 import { RateTier } from '@/components/admin/RateTierEditor';
-import { Surcharge } from '@/components/admin/SurchargeEditor';
 import {
   Truck, Save, Settings2, Box, Plane, Ship, Calendar, DollarSign, Percent, MapPin, Globe
 } from 'lucide-react';
@@ -45,8 +43,6 @@ interface RateCardFormProps {
   onValidToChange: (v: string) => void;
   tiers: RateTier[];
   onTiersChange: (v: RateTier[]) => void;
-  surcharges: Surcharge[];
-  onSurchargesChange: (v: Surcharge[]) => void;
   loading: boolean;
   onSave: () => void;
   onResetForm: () => void;
@@ -234,10 +230,6 @@ export function RateCardForm(props: RateCardFormProps) {
 
           <div className="pt-6 border-t border-slate-200">
             <RateTierEditor tiers={props.tiers} onChange={props.onTiersChange} />
-          </div>
-
-          <div className="pt-6 border-t border-slate-200">
-            <SurchargeEditor surcharges={props.surcharges} onChange={props.onSurchargesChange} />
           </div>
         </ZenCard>
       </div>

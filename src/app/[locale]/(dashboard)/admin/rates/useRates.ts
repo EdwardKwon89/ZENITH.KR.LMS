@@ -5,7 +5,6 @@ import { useState, useEffect } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { createRateCard, deleteRateCard, getRateCards } from '@/app/actions/rates';
 import { RateTier } from '@/components/admin/RateTierEditor';
-import { Surcharge } from '@/components/admin/SurchargeEditor';
 import { USER_ROLES } from '@/lib/auth/rbac';
 
 export interface Port {
@@ -43,8 +42,6 @@ export interface RatesFormState {
   setValidTo: (v: string) => void;
   tiers: RateTier[];
   setTiers: (v: RateTier[]) => void;
-  surcharges: Surcharge[];
-  setSurcharges: (v: Surcharge[]) => void;
   loading: boolean;
   rateCards: any[];
   listLoading: boolean;
@@ -75,7 +72,6 @@ export function useRates(): RatesFormState {
   const [validFrom, setValidFrom] = useState(new Date().toISOString().split('T')[0]);
   const [validTo, setValidTo] = useState('9999-12-31');
   const [tiers, setTiers] = useState<RateTier[]>([]);
-  const [surcharges, setSurcharges] = useState<Surcharge[]>([]);
   const [loading, setLoading] = useState(false);
 
   const [rateCards, setRateCards] = useState<any[]>([]);
@@ -139,7 +135,6 @@ export function useRates(): RatesFormState {
     setDestPortId('');
     setTransitDays(7);
     setTiers([]);
-    setSurcharges([]);
     setValidFrom(new Date().toISOString().split('T')[0]);
     setValidTo('9999-12-31');
   };
@@ -159,13 +154,6 @@ export function useRates(): RatesFormState {
       weight_min: t.weight_min,
       unit_price: t.unit_price,
       min_total_price: t.min_total_price ?? 0,
-    })));
-    setSurcharges((rate.surcharges || []).map((s: any) => ({
-      surcharge_type: s.surcharge_type,
-      calc_type: s.calc_type,
-      amount: s.amount,
-      currency: s.currency || 'USD',
-      description: s.description || '',
     })));
   };
 
@@ -196,13 +184,6 @@ export function useRates(): RatesFormState {
           margin_rate: marginRate,
           platform_fee_rate: platformFeeRate,
         },
-        surcharges: surcharges.map(s => ({
-          surcharge_type: s.surcharge_type,
-          calc_type: s.calc_type,
-          amount: s.amount,
-          currency: s.currency,
-          description: s.description
-        }))
       });
 
       alert(`요율 카드가 성공적으로 등록되었습니다.`);
@@ -241,7 +222,7 @@ export function useRates(): RatesFormState {
     originPortId, setOriginPortId, destPortId, setDestPortId,
     transitDays, setTransitDays,
     validFrom, setValidFrom, validTo, setValidTo,
-    tiers, setTiers, surcharges, setSurcharges, loading,
+    tiers, setTiers, loading,
     rateCards, listLoading, searchTerm, setSearchTerm,
     profile, canEdit, canDelete, filteredRates,
     handleEditRate, handleSaveRate, handleDeleteRate, resetForm,
