@@ -38,9 +38,9 @@
 | 구분 | 미수정 | 수정중 | 수정완료 | 검증완료 | 시나리오수정 | 합계 |
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|
 | 시나리오 오류 | 1 | 0 | 0 | 0 | 5 | **6** |
-| 기능 보완/개선 | 7 | 0 | 4 | 2 | 1 | **14** |
+| 기능 보완/개선 | 8 | 0 | 4 | 2 | 1 | **15** |
 | 기능 오류 | 2 | 0 | 14 | 7 | 0 | **23** |
-| **합계** | **10** | **0** | **18** | **9** | **6** | **43** |
+| **합계** | **11** | **0** | **18** | **9** | **6** | **44** |
 
 ---
 
@@ -91,6 +91,7 @@
 | DEF-041 | UAT-01-09 | 기능 오류 | N | 수정완료 | D_Kai | `b0b0053` | **SUSPENDED 계정 redirect 루프** — SUSPENDED 계정 로그인 시 proxy.ts가 `/ko/suspended` redirect (세션 유지) → suspended/page.tsx Client Component → signOut() → 쿠키 소멸 → `/ko/login` → 재로그인 가능 → SUSPENDED 감지 → 되풀이 → Chrome crash | TASK-107 | **수정 내역 (D_Kai, 2026-06-01, DoD ✅ 229/229 PASS)**<br><br>**① proxy.ts SUSPENDED 블록**<br>├ 기존: `redirect + mergeHeaders(supabaseResponse)` → 세션 유지 → redirect만 반복<br>├ 변경: `signOut() + 쿠키 소거 + redirect to /suspended` (supabaseResponse 미병합)<br>└ `/suspended` → `!user` bypass whitelist 추가 (세션 없이 페이지 접근)<br><br>**② suspended/page.tsx**<br>├ 기존: `'use client'`, `supabase.auth.signOut()` on button click<br>└ 변경: Server Component, Link to /login, 정적 안내만 제공<br><br>**③ 결과**<br>├ SUSPENDED 유저 세션은 proxy에서 즉시 종료<br>├ /suspended 페이지는 세션 없이 정적 렌더링 → redirect 루프 없음<br>└ 회귀: 229/229 PASS ✅ | ✅ 수정완료 — Aiden 승인 (TASK-107) | - |
 | DEF-042 | UAT-02-04 | 기능 보완 | N | 수정완료 | D_Kai | `7262433` | **Per-Rate-Card SurchargeEditor 제거** — RateCardForm 하단 SurchargeEditor에서 입력한 `zen_rate_surcharges`는 가격 엔진(`calculateCompositePricing`)에서 전혀 참조하지 않고 UI badge 표시 전용으로 사용자 혼란 유발. Surcharge 입력은 **SurchargesTab**(`zen_surcharges`)으로 전담 — Carrier+Mode 기준으로 FLAT/PER_KG/PERCENT 계산되어 실제 요금에 반영. RateCardForm·useRates·createRateCard에서 surcharge 관련 코드 전량 제거 (4 files, +5/−33). 239/239 PASS. | - | - | ✅ 수정완료 — Aiden 승인 (`7262433` · seed `7aa332d` · Reset `9351a96` · 탭분리 `87831b1`) | - |
 | DEF-043 | UAT-02-04 | 기능 보완 | N | 미수정 | D_Kai | - | **개별 오더에 실제 운송 스케줄(편명/항차, ETD, ETA) 미연동** — `zen_vessel_schedules`(ADMIN 등록 마스터 스케줄)는 독립 데이터로 존재하나 `selectRoute()`/SCHEDULED 전이 시 개별 오더에 자동 매칭되지 않음. `zen_route_options.segments` JSONB에 flight_no/vessel_no/ETD/ETA 필드 없음. SCHEDULED 상태가 "일정확정"을 의미하나 실제 편명/출도착시간은 저장되지 않는 Gap. **검토 보고서**: `report/UAT-02-04_SCHEDULE_MAPPING_GAP.md` | - | - | 제안 방안 A (zen_vessel_schedules 자동매칭) — SCHEDULED 전이 시 segments에 schedule_id+편명+ETD/ETA 추가 |
+| DEF-044 | UAT-06-03 | 기능 보완 | N | 미수정 | D_Kai | - | **Admin Schedule CRUD 페이지 사이드바 메뉴 누락** — `/ko/admin/schedules`(ADMIN 전용 vessel schedule 등록/수정/삭제 페이지)가 존재하나 `NaviSidebar.tsx`에 메뉴 항목 없음. ADMIN은 URL 직접 입력으로만 접근 가능. `src/components/layout/NaviSidebar.tsx:100`에는 `/schedules`(사용자 조회용)만 등록됨. | - | - | `NaviSidebar.tsx` Master children 또는 Admin 섹션에 `/admin/schedules` 항목 추가 |
 ---
 
 ## 처리 지침
@@ -144,3 +145,4 @@
 | 2026-06-04 | D_Kai (OpenCode) | **DEF-040 transit_days 입력 필드 추가** — Rate Card 등록 시 origin+dest port를 모두 선택하면 Transit Days 입력란이 UI에 노출. ADMIN이 직접 transit_days를 지정 가능하며, 미입력 시 transport_mode별 기본값(AIR/EXP=1, SEA=7, LAND=3) 사용. `7451523`. TASK-111 연장. |
 | 2026-06-04 | D_Kai (OpenCode) | **DEF-042 추가** — Per-Rate-Card SurchargeEditor 제거. RateCardForm 하단 SurchargeEditor에서 입력한 `zen_rate_surcharges`는 가격 엔진에서 미참조 — SurchargeTab(`zen_surcharges`)으로 전담. 4 files, +5/−33, 239/239 PASS. `7262433`. 현황 요약 갱신 (기능보완 수정완료 3→4, 합계 41→42). |
 | 2026-06-04 | D_Kai (OpenCode) | **DEF-043 추가** — 개별 오더-실제 운송 스케줄(편명/ETD/ETA) 미연동 Gap. 기능보완 미수정 1건. 검토 보고서 `report/UAT-02-04_SCHEDULE_MAPPING_GAP.md` 작성. 현황 요약 갱신 (기능보완 미수정 6→7, 합계 42→43). |
+| 2026-06-04 | D_Kai (OpenCode) | **DEF-044 추가** — Admin Schedule CRUD 페이지(`/admin/schedules`) 사이드바 메뉴 누락. 기능보완 미수정 1건. 현황 요약 갱신 (기능보완 미수정 7→8, 합계 43→44). |
