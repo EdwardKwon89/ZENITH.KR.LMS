@@ -49,6 +49,7 @@ interface RateCardFormProps {
   onSurchargesChange: (v: Surcharge[]) => void;
   loading: boolean;
   onSave: () => void;
+  onResetForm: () => void;
   profile: any;
   isCarrierRole: boolean;
 }
@@ -243,7 +244,17 @@ export function RateCardForm(props: RateCardFormProps) {
 
       <div className="lg:col-span-4 space-y-6">
         <ZenCard className="bg-white border-slate-200 sticky top-8">
-          <h3 className="text-xl font-bold text-slate-900 mb-6">TISA 3-Tier Rate Summary</h3>
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-xl font-bold text-slate-900">TISA 3-Tier Rate Summary</h3>
+            {props.selectedCarrier && props.originPortId ? (
+              <button
+                onClick={props.onResetForm}
+                className="text-[10px] font-bold text-slate-400 hover:text-slate-600 uppercase tracking-wider transition-colors"
+              >
+                ✕ New
+              </button>
+            ) : null}
+          </div>
 
           <div className="space-y-6">
             <div className="flex justify-between items-center text-sm p-4 bg-slate-50 rounded-2xl">

@@ -25,7 +25,7 @@ export default function RatesManagementPage() {
     tiers, setTiers, surcharges, setSurcharges, loading,
     rateCards, listLoading, searchTerm, setSearchTerm,
     profile, canEdit, canDelete, filteredRates,
-    handleEditRate, handleSaveRate, handleDeleteRate,
+    handleEditRate, handleSaveRate, handleDeleteRate, resetForm,
   } = useRates();
 
   const isCarrier = profile?.role === USER_ROLES.CARRIER;
@@ -105,6 +105,7 @@ export default function RatesManagementPage() {
               tiers={tiers} onTiersChange={setTiers}
               surcharges={surcharges} onSurchargesChange={setSurcharges}
               loading={loading} onSave={handleSaveRate}
+              onResetForm={resetForm}
               profile={profile} isCarrierRole={isCarrier}
             />
 
