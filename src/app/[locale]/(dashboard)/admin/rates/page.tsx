@@ -9,10 +9,10 @@ import { SurchargesTab } from '../rate-cards/SurchargesTab';
 import { USER_ROLES } from '@/lib/auth/rbac';
 import { useRates } from './useRates';
 
-type Tab = 'cards' | 'surcharges';
+type Tab = 'register' | 'inquiry' | 'surcharges';
 
 export default function RatesManagementPage() {
-  const [activeTab, setActiveTab] = useState<Tab>('cards');
+  const [activeTab, setActiveTab] = useState<Tab>('register');
   const {
     carriers, ports, selectedCarrier, setSelectedCarrier,
     serviceType, setServiceType,
@@ -30,8 +30,14 @@ export default function RatesManagementPage() {
 
   const isCarrier = profile?.role === USER_ROLES.CARRIER;
 
+  const handleEditAndSwitch = (rate: any) => {
+    handleEditRate(rate);
+    setActiveTab('register');
+  };
+
   const tabs: { key: Tab; label: string }[] = [
-    { key: 'cards', label: 'Rate Cards' },
+    { key: 'register', label: 'Register' },
+    { key: 'inquiry', label: 'Inquiry' },
     { key: 'surcharges', label: 'Surcharges' },
   ];
 
@@ -44,7 +50,7 @@ export default function RatesManagementPage() {
             Pricing Strategy & Master Data
           </div>
           <h1 className="text-4xl font-black text-slate-900 tracking-tight flex items-center gap-4">
-            물류 요율 마스터 등록
+            물류 요율 마스터
             <span className="text-xs bg-slate-100 text-slate-500 px-3 py-1 rounded-full border border-slate-200 font-mono">
               V-Engine 2.0
             </span>
@@ -86,40 +92,40 @@ export default function RatesManagementPage() {
           ))}
         </div>
 
-        {activeTab === 'cards' && (
-          <>
-            <RateCardForm
-              carriers={carriers}
-              selectedCarrier={selectedCarrier} onCarrierChange={setSelectedCarrier}
-              serviceType={serviceType} onServiceTypeChange={setServiceType}
-              carrierCost={carrierCost} onCarrierCostChange={setCarrierCost}
-              currency={currency} onCurrencyChange={setCurrency}
-              marginRate={marginRate} onMarginRateChange={setMarginRate}
-              platformFeeRate={platformFeeRate} onPlatformFeeRateChange={setPlatformFeeRate}
-              ports={ports}
-              originPortId={originPortId} onOriginPortIdChange={setOriginPortId}
-              destPortId={destPortId} onDestPortIdChange={setDestPortId}
-              transitDays={transitDays} onTransitDaysChange={setTransitDays}
-              validFrom={validFrom} onValidFromChange={setValidFrom}
-              validTo={validTo} onValidToChange={setValidTo}
-              tiers={tiers} onTiersChange={setTiers}
-              surcharges={surcharges} onSurchargesChange={setSurcharges}
-              loading={loading} onSave={handleSaveRate}
-              onResetForm={resetForm}
-              profile={profile} isCarrierRole={isCarrier}
-            />
+        {activeTab === 'register' && (
+          <RateCardForm
+            carriers={carriers}
+            selectedCarrier={selectedCarrier} onCarrierChange={setSelectedCarrier}
+            serviceType={serviceType} onServiceTypeChange={setServiceType}
+            carrierCost={carrierCost} onCarrierCostChange={setCarrierCost}
+            currency={currency} onCurrencyChange={setCurrency}
+            marginRate={marginRate} onMarginRateChange={setMarginRate}
+            platformFeeRate={platformFeeRate} onPlatformFeeRateChange={setPlatformFeeRate}
+            ports={ports}
+            originPortId={originPortId} onOriginPortIdChange={setOriginPortId}
+            destPortId={destPortId} onDestPortIdChange={setDestPortId}
+            transitDays={transitDays} onTransitDaysChange={setTransitDays}
+            validFrom={validFrom} onValidFromChange={setValidFrom}
+            validTo={validTo} onValidToChange={setValidTo}
+            tiers={tiers} onTiersChange={setTiers}
+            surcharges={surcharges} onSurchargesChange={setSurcharges}
+            loading={loading} onSave={handleSaveRate}
+            onResetForm={resetForm}
+            profile={profile} isCarrierRole={isCarrier}
+          />
+        )}
 
-            <RateCardList
-              rates={filteredRates}
-              loading={listLoading}
-              onEdit={handleEditRate}
-              onDelete={handleDeleteRate}
-              canEdit={canEdit}
-              canDelete={canDelete}
-              searchTerm={searchTerm}
-              onSearchChange={setSearchTerm}
-            />
-          </>
+        {activeTab === 'inquiry' && (
+          <RateCardList
+            rates={filteredRates}
+            loading={listLoading}
+            onEdit={handleEditAndSwitch}
+            onDelete={handleDeleteRate}
+            canEdit={canEdit}
+            canDelete={canDelete}
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
+          />
         )}
 
         {activeTab === 'surcharges' && <SurchargesTab />}
