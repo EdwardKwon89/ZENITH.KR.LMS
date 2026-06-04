@@ -1,7 +1,7 @@
 # TASK-111 — Route Network 자동 생성 + UAT-02 Seed Fix
 
 > **생성일**: 2026-06-04
-> **담당**: Noah (Codex) / D_Kai
+> **담당**: D_Kai (OpenCode)
 > **상태**: 🔔 (Aiden 검토 요청)
 > **커밋**: `ea1c5cb` + `(미커밋, rates.ts)`
 
@@ -104,4 +104,4 @@ SUPABASE_SERVICE_ROLE_KEY=REDACTED npx tsx scripts/seed-local.ts
 | 날짜 | 작성자 | 설명 |
 |:-----|:-------|:-----|
 | 2026-06-04 | D_Kai (OpenCode) | v1.0 — 최초 작성 (seed fix) |
-| 2026-06-04 | Noah (Codex) | v2.0 — 설계 보강: Route Network 자동 생성 + DEF-040 해소 |
+| 2026-06-04 | D_Kai (OpenCode) | v2.0 — 설계 보강: Route Network 자동 생성 + DEF-040 해소 |
