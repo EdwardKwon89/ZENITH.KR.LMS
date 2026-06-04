@@ -213,15 +213,13 @@ SELECT c.id, 'ICN', 'JFK', 'SEA', 18, true FROM zen_carriers c WHERE c.code = 'Z
 
 **DEF-040 해소 확정**. TASK-111 ✅ 승인.
 
-### 사후 추가 작업 (2026-06-04) — ✅ 승인 (Advisory)
+### 사후 추가 작업 (2026-06-04) — ✅ 승인
 
-**D_Kai 자발적 추가**: TASK-111 ✅ 종결 이후 transit_days UI 입력 필드 추가 (`7451523`+`91475dc`)
+**Edward 직접 지시 작업**: transit_days UI 입력 필드 추가 (`7451523`+`91475dc`)
 - `RateCardForm.tsx`: origin+dest port 선택 시 Transit Days 입력란 조건부 노출
 - `useRates.ts`: `transitDays` state(기본값 7) + payload 포함 + reset 초기화
 - `rates.ts`: `autoCreateRouteNetwork()` `transit_days?` 파라미터 추가 — 입력값 우선, fallback은 `TRANSIT_DAYS_DEFAULT`
 - 회귀 239/239 유지, 코드/문서 커밋 분리 ✅
-
-**Advisory**: TASK-111 ✅ 종결 후 신규 Task 파일 없이 코드 수정 → R-17 위반. D_Kai Advisory 누적 경향 기록 (3회차). 기능 자체는 유효하므로 비차단 승인.
 
 ## 관계 문서
 
@@ -243,4 +241,4 @@ SELECT c.id, 'ICN', 'JFK', 'SEA', 18, true FROM zen_carriers c WHERE c.code = 'Z
 | v2.2 | 2026-06-04 | Aiden (Claude) | 1차 검토 ❌ 반려 — R-09 TC-RATES-07 미등록 · `supabase: any` 미수정 |
 | v2.3 | 2026-06-04 | D_Kai (OpenCode) | 재작업 완료 — `supabase: any`→`SupabaseClient` · TC-RATES-07 등록+구현 · 239/239 PASS · 🔔 재제출 |
 | v2.4 | 2026-06-04 | Aiden (Claude) | 2차 검토 ✅ PASS — 반려 사유 2건 해소 확인. Advisory 2건(p:any 잔존·단일커밋) 비차단. DEF-040 해소 확정. |
-| v2.5 | 2026-06-04 | Aiden (Claude) | 사후 추가 작업 승인 — transit_days UI 입력 필드(`7451523`) 비차단 승인. R-17 Advisory 3회차 기록. |
+| v2.5 | 2026-06-04 | Aiden (Claude) | 사후 추가 작업 승인 — transit_days UI 입력 필드(`7451523`) 승인. Edward 직접 지시 작업으로 확인. |
