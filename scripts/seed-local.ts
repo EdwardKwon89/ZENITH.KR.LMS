@@ -272,6 +272,58 @@ async function seedOrders(supabase: any, shipperOrgId: string) {
   }
 }
 
+async function seedRouteNetwork(supabase: any, carrierOrgId: string) {
+  console.log('\nSeeding Route Network...');
+
+  // Find or create a carrier in zen_carriers
+  let { data: carriers } = await supabase
+    .from('zen_carriers')
+    .select('id, code')
+    .limit(1);
+
+  let carrierId: string;
+  if (carriers && carriers.length > 0) {
+    carrierId = carriers[0].id;
+  } else {
+    const { data: newCarrier, error: carrierErr } = await supabase
+      .from('zen_carriers')
+      .insert({ id: carrierOrgId, code: 'SEED_CARRIER', name: 'Fast Carrier Ltd', transport_mode: 'AIR' })
+      .select('id')
+      .single();
+    if (carrierErr || !newCarrier) {
+      console.error('  - Failed to create carrier:', carrierErr?.message);
+      return;
+    }
+    carrierId = newCarrier.id;
+  }
+
+  const routes = [
+    { from_port_id: 'ICN', to_port_id: 'LAX', transport_mode: 'AIR', transit_days: 10 },
+    { from_port_id: 'ICN', to_port_id: 'LAX', transport_mode: 'SEA', transit_days: 12 },
+    { from_port_id: 'ICN', to_port_id: 'SIN', transport_mode: 'AIR', transit_days: 1 },
+    { from_port_id: 'ICN', to_port_id: 'SIN', transport_mode: 'SEA', transit_days: 7 },
+    { from_port_id: 'ICN', to_port_id: 'SIN', transport_mode: 'LAND', transit_days: 5 },
+    { from_port_id: 'ICN', to_port_id: 'JFK', transport_mode: 'AIR', transit_days: 12 },
+    { from_port_id: 'ICN', to_port_id: 'JFK', transport_mode: 'SEA', transit_days: 18 },
+    { from_port_id: 'PVG', to_port_id: 'ICN', transport_mode: 'AIR', transit_days: 2 },
+    { from_port_id: 'PVG', to_port_id: 'ICN', transport_mode: 'SEA', transit_days: 5 },
+  ];
+
+  let created = 0;
+  for (const r of routes) {
+    const { error: insertError } = await supabase
+      .from('zen_route_network')
+      .insert({ carrier_id: carrierId, ...r, is_active: true })
+      .select('id');
+    if (insertError && !insertError.message?.includes('duplicate key')) {
+      console.error(`  - Failed to insert route ${r.from_port_id}->${r.to_port_id} ${r.transport_mode}:`, insertError.message);
+    } else if (!insertError) {
+      created++;
+    }
+  }
+  console.log(`  - Route network: ${created} new, ${routes.length - created} already existed`);
+}
+
 async function seedRateCards(supabase: any, carrierOrgId: string) {
   console.log('\nSeeding Rate Cards...');
   
@@ -374,6 +426,9 @@ async function seed() {
 
     // 5. 정산 요율 카드 시드 데이터 생성
     await seedRateCards(supabase, carrierOrg.id);
+
+    // 5-1. 경로 네트워크 시드 데이터 생성
+    await seedRouteNetwork(supabase, carrierOrg.id);
 
     // 6. 시드 데이터 무결성 검증
     await verifySeedData(supabase);

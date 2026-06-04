@@ -168,7 +168,7 @@ export const RateCardList: React.FC<RateCardListProps> = ({
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Carrier</p>
                   </div>
                   <p className="text-sm font-bold text-slate-900 truncate max-w-[150px]">
-                    {rate.carrier?.name || rate.organizations?.name || 'Unknown Partner'}
+                    {rate.carrier?.name || rate.carrier?.code || 'Unknown Partner'}
                   </p>
                 </div>
               </div>
@@ -212,9 +212,16 @@ export const RateCardList: React.FC<RateCardListProps> = ({
                     </span>
                   </div>
                   
+                  {/* Weight Slabs Summary */}
+                  {rate.tiers && rate.tiers.length > 0 && (
+                    <div className="flex items-center gap-1.5 px-2 py-0.5 bg-purple-50 text-purple-700 border border-purple-200 rounded text-[8px] font-black uppercase tracking-wider">
+                      {rate.tiers.length} slab{rate.tiers.length > 1 ? 's' : ''}: {rate.currency || '$'}{Math.min(...rate.tiers.map(t => t.unit_price)).toFixed(2)}–{Math.max(...rate.tiers.map(t => t.unit_price)).toFixed(2)}/kg
+                    </div>
+                  )}
+
                   {/* Surcharges Summary */}
                   {rate.surcharges && rate.surcharges.length > 0 && (
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-1.5 flex-wrap">
                       {rate.surcharges.map((s, idx) => (
                         <div key={idx} className="px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-100 rounded text-[8px] font-black uppercase tracking-wider">
                           {s.surcharge_type} {s.calc_type === 'PERCENT' ? `${s.amount}%` : `${s.currency || '$'}${s.amount}`}

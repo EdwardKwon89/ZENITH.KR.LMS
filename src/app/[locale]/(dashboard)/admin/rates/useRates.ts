@@ -52,6 +52,7 @@ export interface RatesFormState {
   canEdit: boolean;
   canDelete: boolean;
   filteredRates: any[];
+  handleEditRate: (rate: any) => void;
   handleSaveRate: () => Promise<void>;
   handleDeleteRate: (id: string) => Promise<void>;
   resetForm: () => void;
@@ -139,6 +140,31 @@ export function useRates(): RatesFormState {
     setValidTo('9999-12-31');
   };
 
+  const handleEditRate = (rate: any) => {
+    setSelectedCarrier(rate.carrier_id || '');
+    setServiceType(rate.transport_mode || 'AIR');
+    setCarrierCost(rate.carrier_cost || 0);
+    setCurrency(rate.currency || 'USD');
+    setMarginRate(rate.margin_rate ?? 15.0);
+    setPlatformFeeRate(rate.platform_fee_rate ?? 5.0);
+    setOriginPortId(rate.origin_port_id || '');
+    setDestPortId(rate.dest_port_id || '');
+    setValidFrom(rate.valid_from ? new Date(rate.valid_from).toISOString().split('T')[0] : '');
+    setValidTo(rate.valid_until ? new Date(rate.valid_until).toISOString().split('T')[0] : '');
+    setTiers((rate.tiers || []).map((t: any) => ({
+      weight_min: t.weight_min,
+      unit_price: t.unit_price,
+      min_total_price: t.min_total_price ?? 0,
+    })));
+    setSurcharges((rate.surcharges || []).map((s: any) => ({
+      surcharge_type: s.surcharge_type,
+      calc_type: s.calc_type,
+      amount: s.amount,
+      currency: s.currency || 'USD',
+      description: s.description || '',
+    })));
+  };
+
   const handleSaveRate = async () => {
     if (!selectedCarrier || !serviceType) {
       alert('필수 정보(Carrier, Transport Mode)를 모두 입력해주세요.');
@@ -212,6 +238,6 @@ export function useRates(): RatesFormState {
     tiers, setTiers, surcharges, setSurcharges, loading,
     rateCards, listLoading, searchTerm, setSearchTerm,
     profile, canEdit, canDelete, filteredRates,
-    handleSaveRate, handleDeleteRate, resetForm,
+    handleEditRate, handleSaveRate, handleDeleteRate, resetForm,
   };
 }
