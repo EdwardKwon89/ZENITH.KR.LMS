@@ -327,41 +327,120 @@ async function seedRouteNetwork(supabase: any, carrierOrgId: string) {
 async function seedRateCards(supabase: any, carrierOrgId: string) {
   console.log('\nSeeding Rate Cards...');
   
-  // check if any rate card already exists
-  const { data: existingCards } = await supabase
-    .from('zen_rate_cards')
-    .select('id')
+  // Find or create carrier in zen_carriers (mirrors seedRouteNetwork logic)
+  let { data: carriers } = await supabase
+    .from('zen_carriers')
+    .select('id, code')
     .limit(1);
 
-  if (existingCards && existingCards.length > 0) {
-    console.log('  - Rate cards already exist. Skipping.');
-    return;
+  let carrierId: string;
+  if (carriers && carriers.length > 0) {
+    carrierId = carriers[0].id;
+  } else {
+    const { data: newCarrier, error: carrierErr } = await supabase
+      .from('zen_carriers')
+      .insert({ id: carrierOrgId, code: 'SEED_CARRIER', name: 'Fast Carrier Ltd', transport_mode: 'AIR' })
+      .select('id')
+      .single();
+    if (carrierErr || !newCarrier) {
+      console.error('  - Failed to create carrier:', carrierErr?.message);
+      return;
+    }
+    carrierId = newCarrier.id;
+  }
+  
+  // Look up port UUIDs by code
+  const { data: ports } = await supabase
+    .from('zen_ports')
+    .select('id, code')
+    .in('code', ['ICN', 'LAX', 'JFK', 'SIN', 'PVG']);
+  const portMap = Object.fromEntries((ports || []).map((p: any) => [p.code, p.id]));
+
+  const rateCardDefs = [
+    { from: 'ICN', to: 'LAX', mode: 'AIR', cost: 8.50, margin: 15.0, tiers: [
+      { weight_min: 0, unit_price: 9.50, min_total_price: 5 },
+      { weight_min: 100, unit_price: 8.00, min_total_price: 4 },
+      { weight_min: 1000, unit_price: 5.50, min_total_price: 3 },
+    ]},
+    { from: 'ICN', to: 'LAX', mode: 'SEA', cost: 3.20, margin: 15.0, tiers: [
+      { weight_min: 0, unit_price: 4.00, min_total_price: 2 },
+      { weight_min: 5000, unit_price: 2.80, min_total_price: 1.5 },
+    ]},
+    { from: 'ICN', to: 'JFK', mode: 'AIR', cost: 10.00, margin: 15.0, tiers: [
+      { weight_min: 0, unit_price: 12.00, min_total_price: 50 },
+      { weight_min: 100, unit_price: 10.50, min_total_price: 50 },
+      { weight_min: 500, unit_price: 9.00, min_total_price: 50 },
+    ]},
+    { from: 'ICN', to: 'JFK', mode: 'SEA', cost: 4.50, margin: 15.0, tiers: [
+      { weight_min: 0, unit_price: 5.50, min_total_price: 30 },
+      { weight_min: 1000, unit_price: 4.20, min_total_price: 20 },
+    ]},
+    { from: 'ICN', to: 'SIN', mode: 'AIR', cost: 6.00, margin: 12.0, tiers: [
+      { weight_min: 0, unit_price: 7.50, min_total_price: 4 },
+      { weight_min: 200, unit_price: 6.00, min_total_price: 3 },
+    ]},
+    { from: 'PVG', to: 'ICN', mode: 'AIR', cost: 4.00, margin: 12.0, tiers: [
+      { weight_min: 0, unit_price: 5.00, min_total_price: 3 },
+      { weight_min: 300, unit_price: 4.00, min_total_price: 2 },
+    ]},
+  ];
+
+  const now = new Date().toISOString();
+  const validUntil = '2999-12-31T23:59:59Z';
+  let created = 0;
+  let skipped = 0;
+
+  for (const def of rateCardDefs) {
+    const originPortId = portMap[def.from];
+    const destPortId = portMap[def.to];
+
+    if (!originPortId || !destPortId) {
+      console.warn(`  - Unknown port: ${def.from}->${def.to}, skipping`);
+      continue;
+    }
+
+    // Check if a rate card already exists for this carrier + route + mode
+    const { data: existing } = await supabase
+      .from('zen_rate_cards')
+      .select('id')
+      .eq('carrier_id', carrierId)
+      .eq('transport_mode', def.mode)
+      .eq('origin_port_id', originPortId)
+      .eq('dest_port_id', destPortId)
+      .limit(1);
+
+    if (existing && existing.length > 0) {
+      skipped++;
+      continue;
+    }
+
+    const { error: insertError } = await supabase
+      .from('zen_rate_cards')
+      .insert({
+        carrier_id: carrierId,
+        transport_mode: def.mode,
+        currency: 'USD',
+        origin_port_id: originPortId,
+        dest_port_id: destPortId,
+        carrier_cost: def.cost,
+        margin_rate: def.margin,
+        platform_fee_rate: 5.0,
+        tiers: def.tiers,
+        is_active: true,
+        valid_from: now,
+        valid_until: validUntil,
+      })
+      .select('id')
+      .single();
+
+    if (insertError) {
+      console.error(`  - Failed to create rate card ${def.from}->${def.to} ${def.mode}:`, insertError.message);
+    } else {
+      created++;
+    }
   }
 
-  // Insert a rate card for ICN -> LAX, AIR mode
-  const { data: rateCard, error: cardError } = await supabase
-    .from('zen_rate_cards')
-    .insert({
-      carrier_id: carrierOrgId,
-      transport_mode: 'AIR',
-      currency: 'USD',
-      tiers: [
-        { weight_min: 0, unit_price: 12.0, min_total_price: 50 },
-        { weight_min: 100, unit_price: 10.5, min_total_price: 50 },
-        { weight_min: 500, unit_price: 9.0, min_total_price: 50 }
-      ],
-      valid_from: new Date().toISOString().split('T')[0],
-      is_active: true
-    })
-    .select('id')
-    .single();
-
-  if (cardError) {
-    console.error('  - Failed to create rate card:', cardError.message);
-    return;
-  }
-
-  console.log(`  - Created rate card: ${rateCard.id} for ICN -> LAX`);
+  console.log(`  - Rate cards: ${created} created, ${skipped} already existed`);
 }
 
 async function seed() {
