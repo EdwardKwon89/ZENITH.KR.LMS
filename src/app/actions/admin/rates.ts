@@ -7,9 +7,64 @@ import { revalidatePath } from "next/cache";
 import { USER_ROLES } from "@/lib/auth/rbac";
 import { AdminRepository } from '@/lib/repositories';
 
+const TRANSIT_DAYS_DEFAULT: Record<string, number> = {
+  AIR: 1,
+  EXP: 1,
+  SEA: 7,
+  LAND: 3,
+};
+
+async function autoCreateRouteNetwork(
+  supabase: any,
+  carrier_id: string,
+  transport_mode: string,
+  origin_port_id: string,
+  dest_port_id: string,
+) {
+  const { data: ports } = await supabase
+    .from('zen_ports')
+    .select('id, code')
+    .in('id', [origin_port_id, dest_port_id]);
+
+  if (!ports || ports.length < 2) {
+    logger.warn("[createRateCard] Route network auto-creation skipped: could not resolve port codes", { origin_port_id, dest_port_id });
+    return;
+  }
+
+  const portByUUID = Object.fromEntries(ports.map((p: any) => [p.id, p.code]));
+  const fromCode = portByUUID[origin_port_id];
+  const toCode = portByUUID[dest_port_id];
+
+  if (!fromCode || !toCode) {
+    logger.warn("[createRateCard] Route network auto-creation skipped: port code lookup failed");
+    return;
+  }
+
+  const transitDays = TRANSIT_DAYS_DEFAULT[transport_mode] ?? 3;
+
+  const { error } = await supabase
+    .from('zen_route_network')
+    .upsert({
+      carrier_id,
+      from_port_id: fromCode,
+      to_port_id: toCode,
+      transport_mode,
+      transit_days: transitDays,
+      is_active: true,
+    }, {
+      onConflict: 'carrier_id,from_port_id,to_port_id,transport_mode',
+      ignoreDuplicates: false,
+    });
+
+  if (error) {
+    logger.warn("[createRateCard] Route network upsert failed (non-fatal)", error);
+  }
+}
+
 /**
  * 요율 카드 등록 (TISA 3계층 구조 통합 저장)
  * tiers는 JSONB로 zen_rate_cards 내재화, 동일 carrier+mode 기존 활성 카드는 비활성화
+ * origin_port_id + dest_port_id가 모두 있으면 zen_route_network 자동 upsert
  */
 export const createRateCard = withAction(async function (payload: {
   card: {
@@ -72,6 +127,16 @@ export const createRateCard = withAction(async function (payload: {
     }));
     const { error: surchargesError } = await adminRepo.insertRateSurcharges(surchargesToInsert);
     if (surchargesError) throw new Error(`Surcharges creation failed: ${surchargesError.message}`);
+  }
+
+  if (payload.card.origin_port_id && payload.card.dest_port_id) {
+    await autoCreateRouteNetwork(
+      supabase,
+      payload.card.carrier_id,
+      payload.card.transport_mode,
+      payload.card.origin_port_id,
+      payload.card.dest_port_id,
+    );
   }
 
   revalidatePath("/admin/rates");
