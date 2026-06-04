@@ -8,7 +8,7 @@
 | 우선순위 | P1 |
 | 관련 IMP | — (DEF-040) |
 | 전제조건 | 없음 |
-| 상태 | 🔔 |
+| 상태 | ✅ |
 
 ---
 
@@ -201,6 +201,18 @@ SELECT c.id, 'ICN', 'JFK', 'SEA', 18, true FROM zen_carriers c WHERE c.code = 'Z
 - TypeScript: `npx tsc --noEmit` — rates.ts error 0건 (SupabaseClient 타입 적용)
 - 커밋: 단일 커밋 (code + docs)
 
+### 2차 검토 (2026-06-04) — ✅ PASS
+
+**반려 사유 2건 전량 해소 확인**:
+1. `rates.ts:18` `supabase: SupabaseClient` 타입 적용 ✅ + `import { SupabaseClient }` 추가 ✅
+2. `LIVE_REGRESSION_TEST_MAP.md` TC-RATES-07 신규 등록 ✅ (07/07b/07c 3케이스 구현 포함)
+
+**Advisory (비차단)**:
+- `rates.ts:35` `(p: any)` 잔존 — 반려 명시 항목 외이므로 비차단. IMP-029 후속 작업 대상
+- `0fd8b1d` 코드+문서 단일 커밋 — R-17 절차 위반. D_Kai Advisory 누적 경향 기록
+
+**DEF-040 해소 확정**. TASK-111 ✅ 승인.
+
 ## 관계 문서
 
 | 문서 | 링크 |
@@ -220,3 +232,4 @@ SELECT c.id, 'ICN', 'JFK', 'SEA', 18, true FROM zen_carriers c WHERE c.code = 'Z
 | v2.1 | 2026-06-04 | D_Kai (OpenCode) | DoD·[작업 결과] 보강 + 신원 정정 · 커밋 분할 (`dc0e233`+`25dd208`+`63d5ad1`) |
 | v2.2 | 2026-06-04 | Aiden (Claude) | 1차 검토 ❌ 반려 — R-09 TC-RATES-07 미등록 · `supabase: any` 미수정 |
 | v2.3 | 2026-06-04 | D_Kai (OpenCode) | 재작업 완료 — `supabase: any`→`SupabaseClient` · TC-RATES-07 등록+구현 · 239/239 PASS · 🔔 재제출 |
+| v2.4 | 2026-06-04 | Aiden (Claude) | 2차 검토 ✅ PASS — 반려 사유 2건 해소 확인. Advisory 2건(p:any 잔존·단일커밋) 비차단. DEF-040 해소 확정. |
