@@ -61,10 +61,7 @@ export async function upsertVesselSchedule(payload: unknown) {
   const { supabase } = await validateAdminAction();
   const { data, error } = await supabase
     .from('zen_vessel_schedules')
-    .upsert({
-      ...validated.data,
-      updated_at: new Date().toISOString()
-    })
+    .upsert(validated.data)
     .select("id, vessel_name, voyage_no, service_type, carrier_id, origin_port_id, destination_port_id, etd, eta, status")
     .single();
 

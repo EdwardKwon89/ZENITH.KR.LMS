@@ -141,7 +141,9 @@ export default function ScheduleClient({
     setIsLoading(true);
 
     const formData = new FormData(e.currentTarget);
-    const scheduleData = Object.fromEntries(formData.entries());
+    const scheduleData = Object.fromEntries(
+      Array.from(formData.entries()).filter(([_, v]) => v !== "")
+    );
     
     if (editingSchedule) (scheduleData as any).id = editingSchedule.id;
 
@@ -149,7 +151,7 @@ export default function ScheduleClient({
       await upsertVesselSchedule(scheduleData);
       window.location.reload(); 
     } catch (error) {
-      alert("저장 중 오류가 발생했습니다.");
+      alert(error instanceof Error ? error.message : "저장 중 오류가 발생했습니다.");
     } finally {
       setIsLoading(false);
     }
