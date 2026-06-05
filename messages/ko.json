@@ -64,6 +64,7 @@
     "support_notices": "공지사항",
     "statistics": "통계 대시보드",
     "schedules": "운항 스케줄",
+    "schedules_admin": "스케줄 관리",
     "claims": "클레임 관리",
     "admin_error_logs": "에러 로그",
     "grade_promotion_requests": "등급 승급 심사",

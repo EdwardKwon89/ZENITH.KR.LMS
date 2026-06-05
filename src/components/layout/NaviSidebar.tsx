@@ -113,6 +113,7 @@ export default function NaviSidebar({
         { title: t("support_notices"), href: "/support/notices" },
       ]
     },
+    { title: t("schedules_admin"), href: "/admin/schedules", icon: CalendarDays, isAdminOnly: true },
     { title: t("claims"), href: "/admin/claims", icon: ShieldAlert, isAdminOnly: true },
     { title: t("member_management"), href: "/admin/members", icon: Users, isAdminOnly: true },
     { title: t("grade_promotion_requests"), href: "/admin/upgrade-requests", icon: TrendingUp, isAdminOnly: true },

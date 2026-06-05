@@ -61,6 +61,7 @@
     "support_notices": "Notices",
     "statistics": "Stats Dashboard",
     "schedules": "Vessel Schedules",
+    "schedules_admin": "Schedule Management",
     "claims": "Claims Management",
     "admin_error_logs": "Error Logs",
     "grade_promotion_requests": "Grade Promotion Requests",
