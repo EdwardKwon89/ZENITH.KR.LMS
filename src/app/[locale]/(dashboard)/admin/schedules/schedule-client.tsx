@@ -15,6 +15,8 @@ interface VesselSchedule {
   voyage_no: string;
   origin_port_id: string;
   destination_port_id: string;
+  service_type: string;
+  carrier_id?: string;
   etd: string;
   eta: string;
   status: string;
@@ -24,10 +26,12 @@ interface VesselSchedule {
 
 export default function ScheduleClient({ 
   initialData, 
-  ports 
+  ports,
+  carriers 
 }: { 
   initialData: any[], 
-  ports: any[] 
+  ports: any[],
+  carriers: any[]
 }) {
   const [data, setData] = useState(initialData);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -199,6 +203,33 @@ export default function ScheduleClient({
               </div>
 
               <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-slate-500 uppercase">운송 모드</label>
+                    <div className="flex gap-2">
+                      <label className="flex items-center gap-2 px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer has-[:checked]:bg-brand-50 has-[:checked]:border-brand-500 has-[:checked]:text-brand-700 transition-all">
+                        <input type="radio" name="service_type" value="AIR" defaultChecked className="accent-brand-600" />
+                        <span className="text-sm font-bold">AIR</span>
+                      </label>
+                      <label className="flex items-center gap-2 px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer has-[:checked]:bg-brand-50 has-[:checked]:border-brand-500 has-[:checked]:text-brand-700 transition-all">
+                        <input type="radio" name="service_type" value="SEA" defaultChecked={editingSchedule?.service_type === 'SEA'} className="accent-brand-600" />
+                        <span className="text-sm font-bold">SEA</span>
+                      </label>
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-slate-500 uppercase">운송사 (Carrier)</label>
+                    <select
+                      name="carrier_id"
+                      defaultValue={editingSchedule?.carrier_id || ""}
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-500/10 focus:border-brand-500 transition-all"
+                    >
+                      <option value="">운송사 선택</option>
+                      {carriers.map(c => <option key={c.id} value={c.id}>[{c.code}] {c.name}</option>)}
+                    </select>
+                  </div>
+                </div>
+
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
                     <label className="text-xs font-bold text-slate-500 uppercase">선박/항공기 명칭</label>

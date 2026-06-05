@@ -51,11 +51,13 @@ export const upsertVesselScheduleSchema = z.object({
   id: z.string().uuid().optional(),
   vessel_name: z.string().min(1, "선박명은 필수입니다").max(100),
   voyage_no: z.string().min(1, "항해번호는 필수입니다").max(50),
-  pol: z.string().min(1, "출발항은 필수입니다").max(10),
-  pod: z.string().min(1, "도착항은 필수입니다").max(10),
-  etd: z.string().optional(),
-  eta: z.string().optional(),
+  origin_port_id: z.string().uuid("출발항이 유효하지 않습니다"),
+  destination_port_id: z.string().uuid("도착항이 유효하지 않습니다"),
+  service_type: z.enum(["AIR", "SEA"], { required_error: "운송모드는 필수입니다" }),
   carrier_id: z.string().uuid().optional(),
+  etd: z.string().min(1, "ETD는 필수입니다"),
+  eta: z.string().min(1, "ETA는 필수입니다"),
+  status: z.string().optional(),
 });
 
 /**

@@ -65,11 +65,12 @@ export async function upsertVesselSchedule(payload: unknown) {
       ...validated.data,
       updated_at: new Date().toISOString()
     })
-    .select("id, vessel_name, voyage_no, origin_port_id, destination_port_id, etd, eta, status")
+    .select("id, vessel_name, voyage_no, service_type, carrier_id, origin_port_id, destination_port_id, etd, eta, status")
     .single();
 
   if (error) throw new Error(`스케줄 저장 실패: ${error.message}`);
   revalidatePath('/schedules');
+  revalidatePath('/admin/schedules');
   return { success: true, data };
 }
 

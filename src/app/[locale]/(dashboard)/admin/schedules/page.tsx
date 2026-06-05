@@ -1,6 +1,7 @@
 import { requireAdmin } from "@/lib/auth/guards";
 import { getVesselSchedules } from "@/app/actions/schedules";
 import { getPorts } from "@/app/actions/master";
+import { createClient } from "@/utils/supabase/server";
 import ScheduleClient from "./schedule-client";
 
 export default async function SchedulesPage() {
@@ -8,9 +9,11 @@ export default async function SchedulesPage() {
   await requireAdmin();
 
   // 2. 초기 데이터 및 참조 데이터 로드
-  const [schedules, ports] = await Promise.all([
+  const supabase = await createClient();
+  const [schedules, ports, carriersResult] = await Promise.all([
     getVesselSchedules({}),
     getPorts(),
+    supabase.from('zen_carriers').select('id, code, name, transport_mode').eq('is_active', true),
   ]);
 
   return (
@@ -27,6 +30,7 @@ export default async function SchedulesPage() {
       <ScheduleClient 
         initialData={schedules?.schedules ?? []} 
         ports={ports ?? []} 
+        carriers={carriersResult?.data ?? []}
       />
     </div>
   );
