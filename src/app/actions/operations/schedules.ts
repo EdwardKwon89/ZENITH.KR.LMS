@@ -26,13 +26,14 @@ export async function getVesselSchedules(filters: {
     .from('zen_vessel_schedules')
     .select(`
       id,
-      mode,
-      carrier,
-      vessel_no,
-      flight_no,
+      service_type,
+      carrier_id,
+      vessel_name,
+      voyage_no,
       etd,
       eta,
       status,
+      carrier:carrier_id(name),
       origin_port:origin_port_id(name, code),
       destination_port:destination_port_id(name, code)
     `, { count: "exact" });

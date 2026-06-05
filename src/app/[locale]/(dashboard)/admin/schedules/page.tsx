@@ -25,8 +25,8 @@ export default async function SchedulesPage() {
       </div>
 
       <ScheduleClient 
-        initialData={schedules} 
-        ports={ports} 
+        initialData={schedules?.schedules ?? []} 
+        ports={ports ?? []} 
       />
     </div>
   );

@@ -23,10 +23,11 @@ export default async function VesselSchedulePage({
     endDate: typeof resolvedSearch.end === 'string' ? resolvedSearch.end : undefined,
   };
 
-  const [schedules, ports] = await Promise.all([
+  const [schedulesResult, ports] = await Promise.all([
     getVesselSchedules(filters),
     getPorts()
   ]);
+  const schedules = schedulesResult?.schedules ?? [];
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-1000">
@@ -52,7 +53,7 @@ export default async function VesselSchedulePage({
             </label>
             <select name="origin" defaultValue={filters.originPortId} className="w-full bg-white/60 border border-slate-200 rounded-xl px-4 py-2 text-sm font-medium focus:ring-2 focus:ring-blue-500/20 outline-none transition-all">
               <option value="">Select Origin</option>
-              {ports.map(port => <option key={port.id} value={port.id}>{port.code} - {port.name}</option>)}
+              {ports?.map(port => <option key={port.id} value={port.id}>{port.code} - {port.name}</option>)}
             </select>
           </div>
           <div className="flex-1 min-w-[200px]">
@@ -61,7 +62,7 @@ export default async function VesselSchedulePage({
             </label>
             <select name="dest" defaultValue={filters.destinationPortId} className="w-full bg-white/60 border border-slate-200 rounded-xl px-4 py-2 text-sm font-medium focus:ring-2 focus:ring-blue-500/20 outline-none transition-all">
               <option value="">Select Destination</option>
-              {ports.map(port => <option key={port.id} value={port.id}>{port.code} - {port.name}</option>)}
+              {ports?.map(port => <option key={port.id} value={port.id}>{port.code} - {port.name}</option>)}
             </select>
           </div>
           <ZenButton type="submit" className="px-8 bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-100">
@@ -84,13 +85,13 @@ export default async function VesselSchedulePage({
               <div className="flex flex-col md:flex-row">
                 {/* Left: Mode & Carrier */}
                 <div className="w-full md:w-48 p-6 flex flex-col items-center justify-center border-r border-slate-100 bg-slate-50/50">
-                  <div className={`p-3 rounded-2xl mb-3 ${schedule.mode === 'AIR' ? 'bg-blue-100 text-blue-600' : 'bg-indigo-100 text-indigo-600'}`}>
-                    {schedule.mode === 'AIR' ? <Plane size={24} /> : <Anchor size={24} />}
+                  <div className={`p-3 rounded-2xl mb-3 ${schedule.service_type === 'AIR' ? 'bg-blue-100 text-blue-600' : 'bg-indigo-100 text-indigo-600'}`}>
+                    {schedule.service_type === 'AIR' ? <Plane size={24} /> : <Anchor size={24} />}
                   </div>
                   <p className="text-sm font-black text-slate-900 text-center uppercase tracking-tighter leading-tight">
-                    {schedule.carrier}
+                    {schedule.carrier?.name}
                   </p>
-                  <p className="text-[10px] font-bold text-slate-400 mt-1">{schedule.vessel_no || schedule.flight_no || 'Vessel/Flight TBD'}</p>
+                  <p className="text-[10px] font-bold text-slate-400 mt-1">{schedule.vessel_name || schedule.voyage_no || 'Vessel/Flight TBD'}</p>
                 </div>
 
                 {/* Middle: Route & Times */}
