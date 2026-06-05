@@ -1,8 +1,8 @@
 # 🗺️ LIVE Regression Test Master Map
 
 > **상태:** [ACTIVE]  
-> **총 테스트 케이스:** 239 Cases  
-> **최종 검증일:** 2026-06-04 (TASK-111 v2.3)  
+> **총 테스트 케이스:** 243 Cases  
+> **최종 검증일:** 2026-06-05 (TASK-112 DEF-043)  
 
 제니스 플랫폼의 비즈니스 영속성을 보장하는 회귀 테스트 케이스의 통합 명세서입니다. 모든 신규 개발 및 수정 시 이 맵에 케이스가 추가되어야 하며, 전체 테스트가 통과되어야 합니다.
 
@@ -134,6 +134,7 @@
 | **TC-R.5b** | appliedRouteId 반환 (BUG-10-A) | `zen_order_routes` 실제 레코드 UUID 반환 확인 (`orderId`와 다른 값) | `tests/integration/rou-01.test.ts` |
 | **TC-R.6** | getRouteVisualization 시각화 | 세그먼트 -> 마일스톤 변환 및 Mock 좌표 매핑 확인 | `tests/integration/rou-02.test.ts` |
 | **TC-R.7** | getRouteConsistencyStatus 정합성 | Mock 기반 상시 정합(isConsistent: true) 반환 확인 | `tests/integration/rou-02.test.ts` |
+| **TC-SCHED-01** | selectRoute 스케줄 자동 매칭 (DEF-043) | 경로 선택 시 `zen_vessel_schedules` 매칭으로 segments에 `schedule_id`/`flight_no`/`etd` 보강 및 non-fatal null 허용 확인 | `tests/integration/rou-03.test.ts` |
 | **TC-UAT-E2E.1** | 완전 물류 사이클 통합 | 오더→경로→트래킹→정산→세금계산서 전 단계 서버 액션 연동 확인 | `tests/integration/uat-phase3-e2e.test.ts` |
 | **TC-UAT-ROU.3/4** | 라우팅 타임라인 & 배지 UAT | getRouteVisualization 마일스톤 배열 + getRouteConsistencyStatus 정합성 확인 | `tests/integration/uat-phase3-e2e.test.ts` |
 
