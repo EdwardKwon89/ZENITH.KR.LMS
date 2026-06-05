@@ -3,7 +3,7 @@
 import { logger } from '@/lib/logger';
 import { validateUserAction } from "@/lib/auth/guards";
 import { revalidatePath } from "next/cache";
-import { RoutingEngine, RouteOption } from "@/lib/logistics/routing";
+import { RoutingEngine, RouteOption, RouteSegment } from "@/lib/logistics/routing";
 import { DatabaseRouteAdapter } from "@/lib/logistics/adapters/DatabaseRouteAdapter";
 import { calculateCompositePricing, PricingBreakdown, SurchargeBreakdownItem } from "@/lib/logistics/composite-pricing";
 
@@ -135,7 +135,8 @@ export async function selectRoute(orderId: string, optionId: string) {
     .single();
 
   let resolvedOrgId: string | undefined;
-  const carrierIdFromSegment = (selectedOption?.segments as any[])?.[0]?.carrier_id as string | undefined;
+  const segments = (selectedOption?.segments as any[]) || [];
+  const carrierIdFromSegment = segments[0]?.carrier_id as string | undefined;
   if (carrierIdFromSegment) {
     const { data: carrier } = await supabase
       .from("zen_carriers")
@@ -146,6 +147,53 @@ export async function selectRoute(orderId: string, optionId: string) {
       resolvedOrgId = carrier.org_id;
     }
   }
+
+  // ── DEF-043: zen_vessel_schedules 자동 매칭 ──
+  if (segments.length > 0) {
+    const portCodes = [...new Set(segments.flatMap((s: any) => [s.from_port_id, s.to_port_id]))] as string[];
+    const { data: ports } = await supabase
+      .from("zen_ports")
+      .select("id, code")
+      .in("code", portCodes);
+
+    const portUuidMap = Object.fromEntries((ports || []).map((p: any) => [p.code, p.id]));
+
+    let matchedAny = false;
+    for (const segment of segments) {
+      if (segment.transport_mode === 'LAND') continue;
+      const originUuid = portUuidMap[segment.from_port_id];
+      const destUuid = portUuidMap[segment.to_port_id];
+      if (!originUuid || !destUuid || !segment.carrier_id) continue;
+
+      const { data: schedule } = await supabase
+        .from("zen_vessel_schedules")
+        .select("id, vessel_name, voyage_no, etd, eta")
+        .eq("carrier_id", segment.carrier_id)
+        .eq("origin_port_id", originUuid)
+        .eq("destination_port_id", destUuid)
+        .eq("service_type", segment.transport_mode)
+        .gte("etd", new Date().toISOString())
+        .order("etd", { ascending: true })
+        .limit(1)
+        .maybeSingle();
+
+      if (schedule) {
+        segment.schedule_id = schedule.id;
+        segment.flight_no = schedule.vessel_name + (schedule.voyage_no ? ` / ${schedule.voyage_no}` : '');
+        segment.etd = schedule.etd;
+        segment.eta = schedule.eta;
+        matchedAny = true;
+      }
+    }
+
+    if (matchedAny) {
+      await supabase
+        .from("zen_route_options")
+        .update({ segments })
+        .eq("id", optionId);
+    }
+  }
+  // ── END DEF-043 ──
 
   // 3. zen_orders.route_option_id + carrier_id 동기화
   const { error: updateError } = await supabase

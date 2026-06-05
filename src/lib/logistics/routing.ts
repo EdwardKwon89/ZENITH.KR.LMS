@@ -17,6 +17,10 @@ export interface RouteSegment {
   cost: number;
   currency: string;
   carrier_id?: string;
+  schedule_id?: string;
+  flight_no?: string;
+  etd?: string;
+  eta?: string;
 }
 
 export interface RouteOption extends Candidate {

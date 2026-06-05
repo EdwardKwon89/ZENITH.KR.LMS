@@ -63,6 +63,7 @@ describe('ZENITH Phase 3 UAT: E2E + Routing Integrated Validation', () => {
       upsert: vi.fn().mockReturnThis(),
       delete: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
+      gte: vi.fn().mockReturnThis(),
       lte: vi.fn().mockReturnThis(),
       in: vi.fn().mockReturnThis(),
       is: vi.fn().mockReturnThis(),
@@ -125,6 +126,7 @@ describe('ZENITH Phase 3 UAT: E2E + Routing Integrated Validation', () => {
       { error: null }, // ① upsert applied route
       { data: { segments: [{ carrier_id: 'carrier-air' }] }, error: null }, // ② select option segments
       { data: { org_id: 'shipper-corp' }, error: null },                    // ③ select carrier org_id
+      { data: [], error: null }, // ③-b DEF-043: zen_ports port code→UUID lookup
       { error: null }, // ④ update order route_option_id + carrier_id
       { data: { id: 'route-balanced-uuid' }, error: null } // ⑤ select applied route id
     );

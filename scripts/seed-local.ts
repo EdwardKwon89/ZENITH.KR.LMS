@@ -324,6 +324,96 @@ async function seedRouteNetwork(supabase: any, carrierOrgId: string) {
   console.log(`  - Route network: ${created} new, ${routes.length - created} already existed`);
 }
 
+async function seedVesselSchedules(supabase: any, carrierOrgId: string) {
+  console.log('\nSeeding Vessel Schedules (DEF-043)...');
+
+  const { data: carriers } = await supabase
+    .from('zen_carriers')
+    .select('id, code, transport_mode');
+
+  if (!carriers || carriers.length === 0) {
+    console.warn('  - No carriers found, skipping vessel schedules');
+    return;
+  }
+
+  const { data: ports } = await supabase
+    .from('zen_ports')
+    .select('id, code')
+    .in('code', ['ICN', 'LAX', 'JFK', 'SIN', 'PVG']);
+
+  const portMap = Object.fromEntries((ports || []).map((p: any) => [p.code, p.id]));
+
+  const scheduleDefs = [
+    { carrier_code: 'SEED_CARRIER', service_type: 'AIR', origin: 'ICN', dest: 'LAX', vessel_name: 'Boeing 777F', voyage_no: 'KE-701', etd_offset: 7, eta_offset: 9 },
+    { carrier_code: 'SEED_CARRIER', service_type: 'SEA', origin: 'ICN', dest: 'LAX', vessel_name: 'Zenith Voyager', voyage_no: 'ZV-801', etd_offset: 14, eta_offset: 28 },
+    { carrier_code: 'SEED_CARRIER', service_type: 'AIR', origin: 'ICN', dest: 'JFK', vessel_name: 'Boeing 747F', voyage_no: 'KE-501', etd_offset: 10, eta_offset: 12 },
+    { carrier_code: 'SEED_CARRIER', service_type: 'SEA', origin: 'ICN', dest: 'JFK', vessel_name: 'Atlantic Star', voyage_no: 'AS-301', etd_offset: 20, eta_offset: 38 },
+    { carrier_code: 'SEED_CARRIER', service_type: 'AIR', origin: 'ICN', dest: 'SIN', vessel_name: 'Airbus A330F', voyage_no: 'SQ-601', etd_offset: 3, eta_offset: 4 },
+    { carrier_code: 'SEED_CARRIER', service_type: 'SEA', origin: 'ICN', dest: 'SIN', vessel_name: 'Pacific Trader', voyage_no: 'PT-901', etd_offset: 5, eta_offset: 12 },
+    { carrier_code: 'SEED_CARRIER', service_type: 'AIR', origin: 'PVG', dest: 'ICN', vessel_name: 'Boeing 767F', voyage_no: 'CZ-401', etd_offset: 2, eta_offset: 3 },
+    { carrier_code: 'SEED_CARRIER', service_type: 'SEA', origin: 'PVG', dest: 'ICN', vessel_name: 'Yellow Sea Ferry', voyage_no: 'YS-201', etd_offset: 4, eta_offset: 6 },
+  ];
+
+  const now = new Date();
+  let created = 0;
+  let skipped = 0;
+
+  for (const def of scheduleDefs) {
+    const carrier = (carriers as any[]).find((c: any) => c.code === def.carrier_code);
+    if (!carrier) {
+      console.warn(`  - Carrier ${def.carrier_code} not found, skipping`);
+      continue;
+    }
+
+    const originId = portMap[def.origin];
+    const destId = portMap[def.dest];
+    if (!originId || !destId) {
+      console.warn(`  - Unknown port: ${def.origin}->${def.dest}, skipping`);
+      continue;
+    }
+
+    const etd = new Date(now.getTime() + def.etd_offset * 24 * 60 * 60 * 1000).toISOString();
+    const eta = new Date(now.getTime() + def.eta_offset * 24 * 60 * 60 * 1000).toISOString();
+
+    const { data: existing } = await supabase
+      .from('zen_vessel_schedules')
+      .select('id')
+      .eq('carrier_id', carrier.id)
+      .eq('origin_port_id', originId)
+      .eq('destination_port_id', destId)
+      .eq('service_type', def.service_type)
+      .gte('etd', now.toISOString())
+      .limit(1);
+
+    if (existing && existing.length > 0) {
+      skipped++;
+      continue;
+    }
+
+    const { error: insertError } = await supabase
+      .from('zen_vessel_schedules')
+      .insert({
+        carrier_id: carrier.id,
+        service_type: def.service_type,
+        origin_port_id: originId,
+        destination_port_id: destId,
+        vessel_name: def.vessel_name,
+        voyage_no: def.voyage_no,
+        etd,
+        eta,
+        status: 'SCHEDULED',
+      });
+
+    if (insertError) {
+      console.error(`  - Failed: ${def.origin}->${def.dest} ${def.service_type}: ${insertError.message}`);
+    } else {
+      created++;
+    }
+  }
+
+  console.log(`  - Vessel schedules: ${created} created, ${skipped} already existed`);
+}
+
 async function seedRateCards(supabase: any, carrierOrgId: string) {
   console.log('\nSeeding Rate Cards...');
   
@@ -508,6 +598,9 @@ async function seed() {
 
     // 5-1. 경로 네트워크 시드 데이터 생성
     await seedRouteNetwork(supabase, carrierOrg.id);
+
+    // 5-2. DEF-043: 운항 스케줄 시드 데이터 생성
+    await seedVesselSchedules(supabase, carrierOrg.id);
 
     // 6. 시드 데이터 무결성 검증
     await verifySeedData(supabase);

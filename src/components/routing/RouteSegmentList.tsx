@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Ship, Plane, Truck, ArrowRight, Clock, DollarSign } from "lucide-react";
+import { Ship, Plane, Truck, ArrowRight, Clock, DollarSign, CalendarDays } from "lucide-react";
 import { RouteSegment } from "@/lib/logistics/routing";
 import { cn } from "@/lib/utils";
 
@@ -63,6 +63,18 @@ export function RouteSegmentList({ segments, className }: RouteSegmentListProps)
                   <DollarSign className="w-3 h-3 mr-0.5 opacity-70" />
                   {segment.cost.toLocaleString()} {segment.currency}
                 </div>
+                {segment.flight_no && (
+                  <div className="flex items-center text-[11px] text-indigo-600 font-medium">
+                    <Plane className="w-3 h-3 mr-1" />
+                    {segment.flight_no}
+                  </div>
+                )}
+                {segment.etd && (
+                  <div className="flex items-center text-[11px] text-slate-500">
+                    <CalendarDays className="w-3 h-3 mr-1 opacity-70" />
+                    {new Date(segment.etd).toLocaleDateString()}
+                  </div>
+                )}
               </div>
             </div>
           </div>
