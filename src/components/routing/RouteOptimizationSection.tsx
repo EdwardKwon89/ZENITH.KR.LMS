@@ -179,7 +179,16 @@ export default function RouteOptimizationSection({
                     </td>
                     <td className="py-3 pl-2 text-right">
                       {appliedRouteId ? (
-                        isSelected && <span className="text-xs font-medium text-blue-600 flex items-center justify-end gap-1"><CheckCircle2 className="w-3 h-3" />확정됨</span>
+                        <div className="flex items-center justify-end gap-2">
+                          {isSelected && <span className="text-xs font-medium text-blue-600 flex items-center gap-1"><CheckCircle2 className="w-3 h-3" />확정됨</span>}
+                          <button
+                            onClick={() => handleSelect(opt.id)}
+                            disabled={isPending}
+                            className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-white hover:bg-slate-800 disabled:opacity-50 transition-colors"
+                          >
+                            재선택
+                          </button>
+                        </div>
                       ) : (
                         <button
                           onClick={() => handleSelect(opt.id)}
