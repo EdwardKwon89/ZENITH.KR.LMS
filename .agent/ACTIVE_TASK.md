@@ -156,6 +156,7 @@
 | TASK-109 | 260603 | IMP-095 Rate Card 항로(Port) 기반 매칭 구현 | P1 | TASK-106 ✅ · TASK-108 ✅ | D_Kai (OpenCode) | ✅ | [TASK-109](tasks/TASK-109_260603_IMP095포트기반요율매칭_DKai.md) | IMP-095 완료 · `0fb950d`+`fb263f9` · 236/236 PASS · Aiden ✅ 승인 |
 | TASK-110 | 260603 | IMP-096 요율 관리 페이지 통합 정리 (3단계) | P1 | TASK-106 ✅ · TASK-109 ✅ | D_Kai (OpenCode) | ✅ | [TASK-110](tasks/TASK-110_260603_IMP096요율관리페이지통합정리_DKai.md) | IMP-096 완료 · `e166fec`+`65c904b` · 236/236 PASS · Aiden ✅ 승인 |
 | TASK-111 | 260604 | Route Network 자동 생성 + DEF-040 해소 | P1 | 없음 | D_Kai (OpenCode) | ✅ | [TASK-111](tasks/TASK-111_260604_UAT02RouteOptimizationSeed_DKai.md) | DEF-040 해소 · `0fd8b1d` · `supabase: any`→SupabaseClient · TC-RATES-07/07b/07c · 239/239 ✅ · Aiden ✅ 승인 |
+| TASK-112 | 260605 | DEF-043 스케줄 자동매칭 구현 (방안 A) | P2 | DEF-044 ✅ · DEF-045 ✅ · DEF-046 ✅ | D_Kai (OpenCode) | ⬜ | [TASK-112](tasks/TASK-112_260605_DEF043스케줄자동매칭_DKai.md) | selectRoute()에 zen_vessel_schedules 자동매칭 · segments JSONB 보강 · UAT 시드 등록 포함 |
 | TASK-106 | 260601 | DEF-038 AdminRepository TISA 3-tier 스키마 정합 | P1 | TASK-103 ✅ · TASK-104 ✅ | B_Kai (Noah 대행) | ✅ | [TASK-106](tasks/TASK-106_260601_DEF038AdminRepository수정_BKai.md) | DEF-038 해소 · c8d3b5e+3a98d97 · LAND 모드 추가 · 229/229 ✅ · Aiden ✅ 승인 |
 | TASK-107 | 260601 | SUSPENDED 계정 리다이렉트 루프 수정 | P2 | 없음 | B_Kai (Noah 대행) | ✅ | [TASK-107](tasks/TASK-107_260601_SUSPENDED리다이렉트루프수정_BKai.md) | DEF-041 해소 · 61130f3 · proxy.ts signOut+whitelist · suspended 정적 전환 · 229/229 ✅ · Aiden ✅ 승인 |
 | TASK-105 | 260601 | UAT 절차서 보완 — TISA 3계층·Dashboard 역할별 표시 | P3 | TASK-103 ✅ · TASK-104 ✅ | B_Kai | ✅ | [TASK-105](tasks/TASK-105_260601_UAT보완_TISA3계층Dashboard_BKai.md) | DEF-032·035 수정완료 · UAT-10-07 시나리오 3건 · UAT_MASTER 80개 · 96e9a0f |
@@ -175,7 +176,7 @@
 |:------|:--------|:----------------|:----------|
 | Riley | — | R-17 위반 **누적 3회** (TASK-088 무단 수정·TASK-092 혼합커밋·TASK-102 혼합커밋+무단대행) — 경고 | — |
 | B_Kai | — | — | — |
-| D_Kai (OpenCode) | — | — | — |
+| D_Kai (OpenCode) | TASK-112 ⬜ (즉시 착수 가능) | — | — |
 | N_Kai | TASK-087 ⬜ (재교육 세션 — 완료 후 신규 할당 재개) | R-17 위반 추가 — 신규 할당 중단 기간 중 무단 코드 수정(admin/rates IMP-095 임시조치)·TASK-096 무단 수정·UAT-11 Playwright 무단 실행 (2026-06-03) | 신규 할당 중단 유지 |
 | Ring | — | — | 신규 할당 중단 유지 (9차 위반 누적) |
 
@@ -395,3 +396,4 @@
 | 2026-06-03 | Aiden (Claude) | TASK-110 1차 ❌ 반려 — UAT-09-11(회원관리)에 TISA 비고 오위치·task file 상태 ⬜ 미전환·보완 커밋 2회(R-17 v1.5). 재작업: UAT-09-04 비고 이전·task file 🔔. |
 | 2026-06-03 | Aiden (Claude) | TASK-110 2차 ❌ 재반려 — D_Kai 재작업(`519a14b`) ACTIVE_TASK Agent 섹션만 수정. UAT-09 비고 미수정·task file ⬜ 유지. 동일 재작업 지시 재이행 요구. |
 | 2026-06-03 | Aiden (Claude) | TASK-110 ✅ PASS — 3차 검토 전항목 실물 확인 완료. UAT-09-04 TISA 비고 이전·task file 🔔 전환 확인. DoD 10개 항목 전량 ✅. IMP-096 완료. Advisory: 보완 커밋 반복 경향(비차단). |
+| 2026-06-05 | Aiden (Claude) | TASK-112 발령 — D_Kai 배정. DEF-043 방안 A 구현: selectRoute() zen_vessel_schedules 자동매칭 + segments JSONB 보강 + UAT 시드 스케줄 등록. 전제조건: DEF-044/045/046 ✅. Edward 직접 발령 지시. ⬜ 즉시 착수 가능. |
