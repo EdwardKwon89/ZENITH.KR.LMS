@@ -4,6 +4,7 @@ import { logger } from '@/lib/logger';
 import { useState, useEffect, useTransition } from "react";
 import { getRouteOptions, selectRoute, getRouteVisualization } from "@/app/actions/routing";
 import { RouteMilestoneTimeline } from "./RouteMilestoneTimeline";
+import { RouteSegmentList } from "./RouteSegmentList";
 import { ZenButton } from "@/components/ui/ZenUI";
 import { RefreshCw, Calculator, MapPin, CheckCircle2, ChevronRight, Loader2, Banknote, Zap, Star, Ship, Plane, Truck, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
@@ -279,7 +280,18 @@ export default function RouteOptimizationSection({
               <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
             </div>
           ) : (
-            <RouteMilestoneTimeline milestones={milestones} />
+            <>
+              <RouteMilestoneTimeline milestones={milestones} />
+              {(() => {
+                const sel = options?.find(o => o.id === selectedOptionId);
+                return sel?.segments ? (
+                  <div className="mt-6">
+                    <h4 className="text-sm font-bold text-slate-700 mb-3">확정 경로 상세</h4>
+                    <RouteSegmentList segments={sel.segments} />
+                  </div>
+                ) : null;
+              })()}
+            </>
           )}
           
           <div className="mt-4 flex items-center gap-2 p-3 bg-green-50 border border-green-100 rounded-lg">
