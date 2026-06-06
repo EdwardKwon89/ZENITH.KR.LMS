@@ -11,7 +11,7 @@
 | 전제조건 | TASK-116 ✅ |
 | 관련 IMP | IMP-101 |
 | 관련 설계 | [An-11 §7](../../docs/02_Analysis/An_11_Phase6_신규서비스역할모델_설계.md) |
-| 상태 | 🔔 검토 요청 |
+| 상태 | ❌ 반려 — 재작업 필요 |
 
 ---
 
@@ -105,4 +105,32 @@ Order 제출 Action에서:
 
 ## [Aiden 검토]
 
-*(Aiden 전속)*
+**검토일**: 2026-06-07
+**검토자**: Aiden (Claude, ZEN_CEO)
+**판정**: ❌ **반려 — 재작업 필요**
+
+### 차단 사항
+
+**[차단-1] ZEN_A4 파일 길이 초과 — `OrderRegistrationForm.tsx` 1140줄**
+
+GOV_COMMON.md §코드 가이드라인 위반:
+> "단일 파일이 1,000줄을 초과할 경우, 반드시 개요(Overview)와 상세(Detail) 파일로 분리합니다."
+
+- 작업 전: 618줄 → 작업 후: **1140줄** (140줄 초과)
+
+### 재작업 지시
+
+**파일 분리 구조** (각 파일 ≤1000줄 목표):
+```
+src/components/orders/
+├── OrderRegistrationForm.tsx        ← Wizard 오케스트레이터 + Step 1 (≤800줄)
+├── OrderRegistrationFormStep2.tsx   ← 서비스 조합 선택 Step (신규)
+└── OrderRegistrationFormStep3.tsx   ← 요율 확인 + 제출 Step (신규)
+```
+- 공유 상태(`step`, `selectedCombination`, `availableRates`, `selectedRates`)는 props로 전달
+- 기존 DoD 항목 및 270/270 회귀 테스트 유지
+- R-17 순서: 코드 커밋 → task file 🔔 → DoD 실물 증거 기재 → 문서 커밋
+
+### 통과 항목 (재작업 후 재확인 불필요)
+- 3단계 Wizard UI ✅ / 8종 서비스 조합 ✅ / GAP-P6-01 RLS migration ✅
+- 서버 측 이중 검증 ✅ / TC-P6-ORDERUI-01~03 ✅ / 270/270 PASS ✅
