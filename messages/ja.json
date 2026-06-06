@@ -51,6 +51,8 @@
     "my_grade": "等級管理",
     "my_customs": "通関状況",
     "customs_management": "通関管理",
+    "customs_rates": "通関サービス料率",
+    "delivery_rates": "配送サービス料率",
     "rates": "運賃料率",
     "rate_cards_management": "料率カード管理",
     "corporate_mgmt": "法人管理",

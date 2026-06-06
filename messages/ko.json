@@ -75,6 +75,8 @@
     "my_grade": "내 등급 관리",
     "my_customs": "통관 현황",
     "customs_management": "통관 관리",
+    "customs_rates": "통관 서비스 요율",
+    "delivery_rates": "배송 서비스 요율",
     "rates": "운임 요율",
     "rate_cards_management": "요율 카드 관리",
     "corporate_mgmt": "법인 관리"

@@ -40,6 +40,13 @@ export {
 } from './rates';
 
 export {
+  createCustomsRate,
+  updateCustomsRate,
+  getCustomsRates,
+  deleteCustomsRate,
+} from './customs-rates';
+
+export {
   updateRolePermissions,
 } from './rbac';
 

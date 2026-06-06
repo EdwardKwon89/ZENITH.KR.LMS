@@ -119,6 +119,8 @@ export default function NaviSidebar({
     { title: t("grade_promotion_requests"), href: "/admin/upgrade-requests", icon: TrendingUp, isAdminOnly: true },
     { title: t("org_approval"), href: "/admin/organizations", icon: Building, isAdminOnly: true },
     { title: t("customs_management"), href: "/admin/customs", icon: FileText, isAdminOnly: true },
+    { title: t("customs_rates"), href: "/admin/customs-rates", icon: FileText },
+    { title: t("delivery_rates"), href: "/admin/delivery-rates", icon: Truck },
     { title: t("admin_error_logs"), href: "/admin/error-logs", icon: ShieldAlert, isAdminOnly: true },
     { 
       title: t("mypage"), 
