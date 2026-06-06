@@ -89,6 +89,17 @@ export default async function OrderDetailPage({
   
   const appliedRouteId = routeData?.selected_option_id || null;
 
+  // 4-1. 확정 경로의 segments 조회 (DEF-047: schedule 매핑 정보 표시용)
+  let initialAppliedSegments: any[] | null = null;
+  if (appliedRouteId) {
+    const { data: routeOption } = await supabase
+      .from("zen_route_options")
+      .select("segments")
+      .eq("id", appliedRouteId)
+      .maybeSingle();
+    if (routeOption?.segments) initialAppliedSegments = routeOption.segments;
+  }
+
   // TISA Rate Snapshot: 실 DB 조회 (TASK-104)
   const snapshot = await getOrderRateSnapshot(orderId);
 
@@ -241,6 +252,7 @@ export default async function OrderDetailPage({
             <RouteOptimizationSection 
               orderId={orderId} 
               initialAppliedRouteId={appliedRouteId}
+              initialAppliedSegments={initialAppliedSegments}
               isAdmin={isAdmin}
               headerBadge={
                 <RouteConsistencyBadge orderId={orderId} isAdmin={isAdmin} />

@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 interface RouteOptimizationSectionProps {
   orderId: string;
   initialAppliedRouteId?: string | null;
+  initialAppliedSegments?: any[] | null;
   isAdmin?: boolean;
   headerBadge?: React.ReactNode;
 }
@@ -20,18 +21,21 @@ interface RouteOptimizationSectionProps {
 export default function RouteOptimizationSection({ 
   orderId, 
   initialAppliedRouteId,
+  initialAppliedSegments,
   isAdmin = false,
   headerBadge
 }: RouteOptimizationSectionProps) {
   const [options, setOptions] = useState<any[] | null>(null);
   const [appliedRouteId, setAppliedRouteId] = useState<string | null>(initialAppliedRouteId || null);
   const [selectedOptionId, setSelectedOptionId] = useState<string | null>(initialAppliedRouteId || null);
+  const [appliedSegments, setAppliedSegments] = useState<any[] | null>(initialAppliedSegments || null);
   const [milestones, setMilestones] = useState<any[]>([]);
   const [isPending, startTransition] = useTransition();
   const [isLoadingVisual, setIsLoadingVisual] = useState(false);
 
   const handleCalculate = async () => {
     startTransition(async () => {
+      setAppliedSegments(null);
       try {
         const result = await getRouteOptions(orderId);
         if (result.success) {
@@ -51,6 +55,8 @@ export default function RouteOptimizationSection({
         if (result.success) {
           setAppliedRouteId(result.appliedRouteId);
           setSelectedOptionId(optionId);
+          const sel = options?.find(o => o.id === optionId);
+          if (sel?.segments) setAppliedSegments(sel.segments);
           toast.success("경로가 확정되었습니다.");
           fetchVisualization();
         }
@@ -282,15 +288,12 @@ export default function RouteOptimizationSection({
           ) : (
             <>
               <RouteMilestoneTimeline milestones={milestones} />
-              {(() => {
-                const sel = options?.find(o => o.id === selectedOptionId);
-                return sel?.segments ? (
-                  <div className="mt-6">
-                    <h4 className="text-sm font-bold text-slate-700 mb-3">확정 경로 상세</h4>
-                    <RouteSegmentList segments={sel.segments} />
-                  </div>
-                ) : null;
-              })()}
+              {appliedSegments && appliedSegments.length > 0 && (
+                <div className="mt-6">
+                  <h4 className="text-sm font-bold text-slate-700 mb-3">확정 경로 상세</h4>
+                  <RouteSegmentList segments={appliedSegments} />
+                </div>
+              )}
             </>
           )}
           
