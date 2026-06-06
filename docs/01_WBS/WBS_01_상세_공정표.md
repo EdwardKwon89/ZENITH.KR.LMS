@@ -7,8 +7,8 @@ tags:
 
 > **프로젝트:** ZENITH_LMS (SNTL 통합 물류 플랫폼)
 > **문서번호:** WBS-01
-> **최종 버전:** v5.5 (전 공정 완결 — Deferred/Skip 태스크 최종 정리)
-> **최종 확정일:** 2026-05-08
+> **최종 버전:** v6.0 (Phase 6 신규 등재 — 고객 리뷰 20260606 기반)
+> **최종 확정일:** 2026-06-06
 
 ---
 
@@ -40,7 +40,8 @@ tags:
 | **Phase 3** | 정산 엔진 기초 기반           |    100%    |    0 MD    |   **완료**  |
 | **Phase 4** | 운영 최적화 및 안정화         |    100%    |    0 MD    |   **완료**  |
 | **Phase 5** | 통관 완결 & 시스템 인계       |    100%    |    0 MD    |   **완료**  |
-|  **Total**  | **전체 프로젝트 공정**        |  **100%**  |  **0 MD**  |   **완료**  |
+| **Phase 6** | 신규 서비스 역할+멀티 배정    |     0%     |   40 MD    |   **설계확정** |
+|  **Total**  | **전체 프로젝트 공정**        |   **85%**  |  **40 MD** |  **진행중** |
 
 
 ---
@@ -395,6 +396,92 @@ tags:
 
 ---
 
+### 6. Phase 6: Multi-Service Role Model & Assignment Structure (신규 서비스 역할 모델 + 멀티 서비스 배정)
+> **Goal**: 고객 리뷰(20260606) 기반 — 통관사/배송사 신규 역할, 서비스별 요율 구조, 멀티 서비스 배정(1:N), 역할별 Order 격리
+> **총 공수**: 40 MD | **착수일**: TBD | **상태**: 🔄 설계 확정
+> **설계 문서**: `docs/02_Analysis/An_11_Phase6_신규서비스역할모델_설계.md`
+
+#### 6.1 [SPR-01] DB 스키마 기반 구축 (8 MD)
+
+- **6.1.1 org_type 확장 및 역할 추가** (2 MD)
+    - [ ] 6.1.1.1 `zen_organizations.type` 값 확장 Migration — `CUSTOMS`, `DELIVERY` 추가 + CHECK constraint 수정 (0.5 MD)
+    - [ ] 6.1.1.2 `rbac.ts` USER_ROLES에 `CUSTOMS_BROKER`, `DELIVERY_AGENT` 추가 + STATIC_PERMISSIONS 설정 (1 MD)
+    - [ ] 6.1.1.3 회원 가입/관리 UI: CUSTOMS/DELIVERY org_type 선택 지원 (0.5 MD)
+
+- **6.1.2 서비스 요율 테이블 생성** (3 MD)
+    - [ ] 6.1.2.1 `zen_customs_rates` 테이블 Migration (국가별 통관 요율) + RLS 설정 (1 MD)
+    - [ ] 6.1.2.2 `zen_delivery_rates` 테이블 Migration (LOCAL/TOTAL 배송 요율) + RLS 설정 (1 MD)
+    - [ ] 6.1.2.3 `zen_rate_cards` CARRIER role 등록/수정 권한 Migration (CARRIER RLS 추가) + `platform_fee_rate` 격리 View 생성 (1 MD)
+
+- **6.1.3 zen_order_services 및 carrier_id 마이그레이션** (3 MD)
+    - [ ] 6.1.3.1 `zen_order_services` 테이블 Migration + RLS 설정 (1 MD)
+    - [ ] 6.1.3.2 기존 `zen_orders.carrier_id` → `zen_order_services` 전체 일괄 마이그레이션 스크립트 (1 MD)
+    - [ ] 6.1.3.3 회귀 테스트 기반 기존 기능 영향도 검증 (1 MD)
+
+#### 6.2 [SPR-02] 통관 서비스 요율 관리 (5 MD)
+
+- **6.2.1 Server Actions** (2 MD)
+    - [ ] 6.2.1.1 `createCustomsRate` / `updateCustomsRate` / `getCustomsRates` / `deleteCustomsRate` (2 MD)
+
+- **6.2.2 UI — 통관 요율 관리 페이지** (3 MD)
+    - [ ] 6.2.2.1 `/admin/customs-rates` 목록/등록/수정 페이지 (ADMIN/MANAGER + CUSTOMS_BROKER 접근) (2 MD)
+    - [ ] 6.2.2.2 버전/유효기간/유효상태 관리 UI (1 MD)
+
+#### 6.3 [SPR-03] 배송 서비스 요율 관리 (5 MD)
+
+- **6.3.1 Server Actions** (2 MD)
+    - [ ] 6.3.1.1 `createDeliveryRate` / `updateDeliveryRate` / `getDeliveryRates` / `deleteDeliveryRate` (2 MD)
+
+- **6.3.2 UI — 배송 요율 관리 페이지** (3 MD)
+    - [ ] 6.3.2.1 `/admin/delivery-rates` 목록/등록/수정 페이지 (ADMIN/MANAGER + DELIVERY_AGENT 접근) (2 MD)
+    - [ ] 6.3.2.2 LOCAL/TOTAL 탭 분리 + 버전/유효기간/유효상태 관리 UI (1 MD)
+
+#### 6.4 [SPR-04] 통합 서비스 요율 조회 API (5 MD)
+
+- **6.4.1 화주용 통합 요율 조회** (3 MD)
+    - [ ] 6.4.1.1 `getAvailableServiceRates(origin, dest, destCountry, mode, weight, cbm)` — 3개 테이블 통합 조회 (2 MD)
+    - [ ] 6.4.1.2 노선/비용 미등록 시 완전 차단 처리 (empty result → 오류 메시지) (1 MD)
+
+- **6.4.2 오더-서비스 배정 Actions** (2 MD)
+    - [ ] 6.4.2.1 `createOrderServices` / `getOrderServices` / `updateOrderServiceStatus` (2 MD)
+
+#### 6.5 [SPR-05] Order 등록 UI 개선 (6 MD)
+
+- **6.5.1 서비스 조합 선택 Step 추가** (4 MD)
+    - [ ] 6.5.1.1 Step 설계: 화물정보 → **서비스선택** → **요율확인** → 제출 (다단계 폼) (1 MD)
+    - [ ] 6.5.1.2 서비스 조합 선택 UI (AIR_ONLY / AIR_CUSTOMS / AIR_CUSTOMS_LOCAL / DELIVERY_TOTAL 등) (2 MD)
+    - [ ] 6.5.1.3 요율 조회 + 서비스별 예상 비용 표시 + 선택 확인 UI (1 MD)
+
+- **6.5.2 미등록 노선 차단 처리** (2 MD)
+    - [ ] 6.5.2.1 서비스 선택 Step: 요율 0건 시 "요청 불가" 메시지 + 다음 단계 차단 (1 MD)
+    - [ ] 6.5.2.2 Order 제출 Action 서버 측 이중 검증 (1 MD)
+
+#### 6.6 [SPR-06] Order 목록 역할별 격리 (4 MD)
+
+- **6.6.1 RLS 및 역할별 데이터 격리** (2 MD)
+    - [ ] 6.6.1.1 `zen_orders` RLS 정책 업데이트: CUSTOMS_BROKER/DELIVERY_AGENT → zen_order_services 기반 필터 (1 MD)
+    - [ ] 6.6.1.2 기존 화주/운송사/ADMIN RLS 검증 (1 MD)
+
+- **6.6.2 CUSTOMS_BROKER/DELIVERY_AGENT UI** (2 MD)
+    - [ ] 6.6.2.1 할당된 Order 목록 조회 페이지 `/orders/assigned` (2 MD)
+
+#### 6.7 [SPR-07] zen_rate_cards CARRIER 직접 등록 (3 MD)
+
+- **6.7.1 운송 요율 CARRIER 등록 지원** (3 MD)
+    - [ ] 6.7.1.1 `/admin/rates` 페이지 CARRIER role 접근 허용 + 본인 carrier_id 요율만 표시 (1.5 MD)
+    - [ ] 6.7.1.2 `createRateCard` / `updateRateCard` CARRIER role 허용 코드 수정 (0.5 MD)
+    - [ ] 6.7.1.3 `zen_rate_cards_public` View 적용 — CARRIER에게 platform_fee_rate NULL 응답 (1 MD)
+
+#### 6.8 [SPR-08] 회귀 테스트 확장 + E2E 검증 (4 MD)
+
+- **6.8.1 회귀 테스트 확장** (2 MD)
+    - [ ] 6.8.1.1 Phase 6 신규 기능 회귀 테스트 케이스 추가 (R-09 준수) (2 MD)
+
+- **6.8.2 E2E 검증** (2 MD)
+    - [ ] 6.8.2.1 운송사/통관사/배송사 요율 등록 → 화주 서비스 선택 → 오더 등록 → 각 역할별 조회 E2E (2 MD)
+
+---
+
 ## 📝 개정 이력 (Revision History)
 
 | 버전 | 날짜       | 작성자      | 설명                                                                |
@@ -439,4 +526,5 @@ tags:
 | v5.2 | 2026-04-29 | Aiden | Phase 4 완료 반영 (Sprint 11 FINAL PASS, 159/159 PASS) + Phase 5 등재 (통관 CCL 15 MD) + 4.2.1.1/4.2.2.1 Phase 5 이관 처리. 대시보드 갱신 (Phase 4: 100% / Phase 5: 0%, 15 MD 잔여 / 전체: 88%, 잔여 15 MD). |
 | v5.3 | 2026-05-07 | Antigravity | [5.3.1.4] E2E-09 등급 승급 시나리오 완결 및 증적 확보 (163/163 PASS) |
 | v5.4 | 2026-05-08 | Antigravity | Phase 5 및 종합 E2E-01~12 완주 반영 (100% 완료) |
+| v5.5 | 2026-06-06 | Aiden (Claude) | Phase 6 신규 등재 — 고객 리뷰(20260606) 기반: 신규 서비스 역할 모델(CUSTOMS/DELIVERY) + 멀티 서비스 배정(zen_order_services) + 서비스 요율 테이블. SPR-01~08 (40 MD). 설계 문서: An-11. |
 | v5.5 | 2026-05-08 | Aiden | 전 공정 최종 정리 — [>] Deferred 8개 처리 (2.1.3/2.1.4 Skip, 2.1.5.1 완료·5.2 Skip, 4.2.1.1/4.2.2.1 Skip), ROADMAP Phase 5 Milestone 완료 마커 추가 |

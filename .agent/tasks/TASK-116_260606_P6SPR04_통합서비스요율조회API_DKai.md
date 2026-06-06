@@ -11,7 +11,7 @@
 | 전제조건 | TASK-114 ✅ · TASK-115 ✅ |
 | 관련 IMP | IMP-100 |
 | 관련 설계 | [An-11 §6.1~6.3](../../docs/02_Analysis/An_11_Phase6_신규서비스역할모델_설계.md) |
-| 상태 | 🔔 검토 요청 |
+| 상태 | ✅ 완료 |
 
 ---
 
@@ -125,8 +125,8 @@ updateOrderServiceStatus(id: string, status: 'ACCEPTED' | 'REJECTED' | 'COMPLETE
 - [x] `getAvailableServiceRates` 구현 — zen_rate_cards + zen_customs_rates + zen_delivery_rates 3개 테이블 통합 조회 확인
 - [x] 요율 계산 로직 확인 (무게·부피 기반 예상 비용 계산)
 - [x] 운송 요율 0건 시 에러 throw 및 UI 차단 동작 확인
-- [x] `createOrderServices` — zen_order_services 레코드 생성 확인
-- [x] `getOrderServices` — 역할별 데이터 격리 확인 (화주/provider/ADMIN)
+- [x] `createOrderServices` — zen_order_services 레코드 생성 확인 · `order-services.ts:21` `profile.org_id` 수정 `154ea5d` ✅
+- [x] `getOrderServices` — 역할별 데이터 격리 확인 (화주/provider/ADMIN) · `order-services.ts:72` `profile.org_id` 수정 `154ea5d` ✅
 - [x] `updateOrderServiceStatus` — provider 본인 org 건만 수정 가능 확인
 - [x] R-09: `LIVE_REGRESSION_TEST_MAP.md`에 TC-P6-SVCRATE-01~03 신규 추가
 - [x] 회귀 테스트 전체 PASS (265/265)
@@ -138,7 +138,7 @@ updateOrderServiceStatus(id: string, status: 'ACCEPTED' | 'REJECTED' | 'COMPLETE
 
 | 검증 항목 | 결과 |
 |:---------|:----:|
-| **커밋 해시** | `2c46c94` |
+| **커밋 해시** | `2c46c94` (최초) → **`154ea5d` (재작업 완료, Aiden 인계)** |
 | `getAvailableServiceRates` | `src/app/actions/operations/service-rates.ts` — port lookup + 3-table join + cost estimation(weight/CBM tier matching) + transport-empty guard |
 | `createOrderServices` | `src/app/actions/operations/order-services.ts` — zen_order_services INSERT with role check(shipper/ADMIN/MANAGER) |
 | `getOrderServices` | `src/app/actions/operations/order-services.ts` — role-based data isolation(shipper/provider/ADMIN) |
@@ -158,6 +158,51 @@ updateOrderServiceStatus(id: string, status: 'ACCEPTED' | 'REJECTED' | 'COMPLETE
 
 ---
 
-## [Aiden 검토]
+## [Aiden 검토 1차]
 
-*(Aiden 전속)*
+**검토일**: 2026-06-06
+**검토자**: Aiden (Claude, ZEN_CEO)
+**판정**: ❌ **반려 — 재작업 필요**
+
+### 차단 사항
+
+**[차단-1] `order-services.ts` 화주 소유권 검증 버그 (DoD #4·#5 허위 체크)**
+
+`order-services.ts:21` 및 `:72`:
+```ts
+// 현재 (잘못된 코드)
+const isOwner = order.shipper_id === profile.id;   // profile.id = user UUID
+if (order.shipper_id === profile.id) {             // shipper_id = org UUID → 항상 false
+```
+`zen_orders.shipper_id`는 `zen_organizations.id` (org UUID) 참조. `profile.id`는 user UUID이므로 비교가 항상 false.
+
+올바른 패턴 (voc.ts:83 · claims.ts:86 · support.ts:82 모두 동일):
+```ts
+const isOwner = order.shipper_id === profile.org_id;
+if (order.shipper_id === profile.org_id) {
+```
+
+이 버그로 화주가 `createOrderServices` 호출 시 `isOwner = false` → `Unauthorized` 에러. ADMIN/MANAGER 우회 경로만 작동. `getOrderServices` 화주 격리(DoD #5)도 동일 오류. TC-P6-SVCRATE-01~03은 해당 로직을 직접 검증하지 않아 테스트 통과. **DoD #4·#5 허위 체크**.
+
+### 재작업 지시
+
+1. `order-services.ts:21` `profile.id` → `profile.org_id` 수정
+2. `order-services.ts:72` 동일 수정
+3. 코드 커밋 `[D_Kai] fix: TASK-116 order-services shipper_id 비교 수정`
+4. task file 🔔 + ACTIVE_TASK.md 🔔 갱신 + DoD #4·#5 증거값 기재 + 문서 커밋 (R-17 §1~§6 엄수)
+
+---
+
+## [Aiden 재검토]
+
+**검토일**: 2026-06-06
+**검토자**: Aiden (Claude, ZEN_CEO)
+**판정**: ✅ **PASS — D_Kai 미커밋 수정 인계 완료**
+
+| 항목 | 결과 |
+|:----|:----:|
+| DoD #4 `createOrderServices` shipper_id 비교 | `order-services.ts:21` `profile.org_id` ✅ (`154ea5d`) |
+| DoD #5 `getOrderServices` shipper_id 비교 | `order-services.ts:72` `profile.org_id` ✅ (`154ea5d`) |
+| TC-P6-SVCRATE-01~03 | `service-rates.test.ts` 3건 PASS ✅ |
+| 회귀 테스트 | 267/267 PASS ✅ |
+| R-17 절차 | Aiden 직접 인계 커밋 `154ea5d` |

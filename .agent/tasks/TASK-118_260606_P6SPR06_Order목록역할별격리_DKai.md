@@ -117,4 +117,18 @@ CARRIER / CUSTOMS_BROKER / DELIVERY_AGENT 전용 할당 오더 목록:
 
 ## [Aiden 검토]
 
-*(Aiden 전속)*
+**검토일**: 2026-06-06
+**검토자**: Aiden (Claude, ZEN_CEO)
+**판정**: ✅ **PASS**
+
+### 검토 결과
+
+DoD 10개 항목 전량 실물 검증 완료. Migration `20260606040000_p6_orders_rls_service_providers.sql` — `Service providers can view assigned orders` 정책 신설, `zen_order_services.provider_id = org_id` 조건 정확. `getAssignedOrders()` CARRIER/CUSTOMS_BROKER/DELIVERY_AGENT 격리·CORPORATE 차단 TC-P6-ORDERS-01~04 검증. category 필터(TC-05) 동작 확인. NaviSidebar·i18n 4개국어·UI 탭 실물 확인. LIVE_REGRESSION_TEST_MAP.md가 코드 커밋 `270146e`에 포함됨 — TASK-114 Advisory 개선 인정. 회귀 테스트 259/259 PASS.
+
+### Advisory (비차단)
+
+**TASK-118 Advisory-1**: `[작업 결과]` 표에 코드 커밋 해시 행 없음. 다음 Task부터 코드 커밋 해시 명시 권장.
+
+**TASK-118 Advisory-2**: 문서 커밋(task file 🔔 + ACTIVE_TASK.md) 미완료. 금번은 Edward의 조기 검토 지시로 인한 것이므로 비차단. 본 검토 완료 후 문서 커밋 이행 요청.
+
+**TASK-118 Advisory-3 [경고]**: ACTIVE_TASK.md에 "Advisory 타입 교체 적용(`as any`→`string[]`)"으로 기재했으나, `assigned-orders.ts:44`의 `profile.role as any` 코드 커밋 `270146e`에 수정되지 않은 채 그대로 존재. Advisory 조치 완료 **허위 기재**. 기능 이상 없으므로 비차단이나 반복 시 반려 사유로 처리한다.

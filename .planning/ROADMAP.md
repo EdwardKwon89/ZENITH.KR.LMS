@@ -50,5 +50,18 @@
 - [x] **[종합 E2E]** Phase 1~5 전 구간 시나리오 검증 (Playwright MCP) — Sprint 14 FINAL PASS ✅
 - **Milestone**: 전 도메인 통합 완결 및 운영 인계 준비 [100% 완료 - **Sprint 14 FINAL PASS**]
 
+## Phase 6: Multi-Service Role Model & Assignment Structure (v1.5.0) [Status: 🔄 설계 확정]
+> **목표**: 고객 리뷰(20260606) 기반 — 통관사/배송사 신규 역할 모델, 서비스별 요율 구조, 멀티 서비스 배정(1:N), 역할별 Order 데이터 격리
+> **설계 문서**: [`docs/02_Analysis/An_11_Phase6_신규서비스역할모델_설계.md`](docs/02_Analysis/An_11_Phase6_신규서비스역할모델_설계.md)
+- [ ] **[SPR-01] DB 스키마 기반**: org_type 확장(CUSTOMS/DELIVERY) + zen_customs_rates + zen_delivery_rates + zen_order_services + RLS + carrier_id 일괄 마이그레이션
+- [ ] **[SPR-02] 통관 서비스 요율 관리**: 통관사(CUSTOMS_BROKER) + ADMIN 요율 등록/조회/수정 UI
+- [ ] **[SPR-03] 배송 서비스 요율 관리**: 배송사(DELIVERY_AGENT) + ADMIN 요율 등록/조회/수정 UI (LOCAL + TOTAL)
+- [ ] **[SPR-04] 통합 서비스 요율 조회 API**: 화주용 서비스 조합별 요율 조회 + 노선 미등록 시 완전 차단
+- [ ] **[SPR-05] Order 등록 UI 개선**: 서비스 조합 선택 Step 추가 (화물정보 → 서비스선택 → 요율확인 → 제출)
+- [ ] **[SPR-06] Order 목록 역할별 격리**: CUSTOMS_BROKER/DELIVERY_AGENT 접근 허용 + RLS 역할별 자동 필터
+- [ ] **[SPR-07] 운송 요율(zen_rate_cards) CARRIER 직접 등록 허용**: CARRIER role 등록/수정 권한 + platform_fee_rate 격리 View
+- [ ] **[SPR-08] 회귀 테스트 확장 + E2E 검증**: Phase 6 전 구간 시나리오 검증
+- **Milestone**: 운송사/통관사/배송사 역할 분리 및 멀티 서비스 배정 구조 완비, 역할별 Order 데이터 격리
+
 ---
 *참조 분석 문서: `docs/02_Analysis/` 하위 전체*

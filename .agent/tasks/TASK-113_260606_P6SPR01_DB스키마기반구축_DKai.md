@@ -139,4 +139,20 @@ DELIVERY_AGENT: ['/admin/delivery-rates', '/orders/assigned', '/tracking', '/voc
 
 ## [Aiden 검토]
 
-*(Aiden 전속)*
+**검토일**: 2026-06-06
+**검토자**: Aiden (Claude, ZEN_CEO)
+**판정**: ✅ **PASS**
+
+### 검토 결과
+
+DoD 11개 항목 전량 실물 검증 완료. Migration 3개 정상 생성·내용 An-11 준수. 회귀 테스트 248/248 PASS 확인. R-17 커밋 순서 준수(코드 커밋 `bb9a3fc` 선행·task file 🔔·ACTIVE_TASK 갱신).
+
+**상향 구현 인정**: 마이그레이션 3의 carrier_id TRANSPORT 분기에 `EXP` 케이스 추가 — An-11 명세(`AIR/SEA/LAND/ELSE`) 대비 개선.
+
+### 조건 등록 (TASK-117 DoD 이관)
+
+**GAP-P6-01** — `zen_order_services` INSERT 정책이 ADMIN/MANAGER 전용 구현됨.  
+An-11 §5-3에서 INSERT 정책이 명시되지 않아 D_Kai가 보수적으로 적용한 정당한 구현이나, TASK-117(Order 등록 UI) 구현 시 화주(CORPORATE/INDIVIDUAL)의 INSERT가 필요하므로 TASK-117 DoD에 보완 migration 항목으로 이관.  
+→ 권장 방안 A: INSERT 정책에 `order_id IN (SELECT id FROM zen_orders WHERE shipper_id = 본인 org_id)` 조건 추가.
+
+TASK-117 착수 전 D_Kai가 방안 확정 후 설계 의견(📝) 제출 의무.
