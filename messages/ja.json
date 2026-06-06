@@ -17,6 +17,7 @@
     "order_mgmt": "オーダ管理",
     "orders": "オーダ一覧",
     "order_new": "新規オーダ登録",
+    "orders_assigned": "割当オーダ",
     "order_house": "ハウスオーダ",
     "order_import": "一括アップロード",
     "logistics_group": "物流管理",

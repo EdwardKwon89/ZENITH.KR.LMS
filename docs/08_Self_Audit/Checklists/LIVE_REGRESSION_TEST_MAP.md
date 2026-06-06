@@ -1,8 +1,8 @@
 # 🗺️ LIVE Regression Test Master Map
 
 > **상태:** [ACTIVE]  
-> **총 테스트 케이스:** 254 Cases  
-> **최종 검증일:** 2026-06-06 (TASK-115 P6-SPR-03)  
+> **총 테스트 케이스:** 259 Cases  
+> **최종 검증일:** 2026-06-06 (TASK-118 P6-SPR-06)  
 
 제니스 플랫폼의 비즈니스 영속성을 보장하는 회귀 테스트 케이스의 통합 명세서입니다. 모든 신규 개발 및 수정 시 이 맵에 케이스가 추가되어야 하며, 전체 테스트가 통과되어야 합니다.
 
@@ -167,6 +167,11 @@
 | **TC-P6-DELIVERY-01** | ADMIN createDeliveryRate(LOCAL) 호출 가능 | ADMIN/MANAGER는 모든 배송사 LOCAL 요율 등록 가능 | `tests/unit/rates/delivery-rates.test.ts` |
 | **TC-P6-DELIVERY-02** | DELIVERY_AGENT 본인 org TOTAL 요율 등록 | DELIVERY_AGENT는 소속 조직 TOTAL 요율 등록 허용 | `tests/unit/rates/delivery-rates.test.ts` |
 | **TC-P6-DELIVERY-03** | DELIVERY_AGENT 타인 org 요율 차단 | DELIVERY_AGENT는 타 조직 요율 등록 차단 | `tests/unit/rates/delivery-rates.test.ts` |
+| **TC-P6-ORDERS-01** | CARRIER getAssignedOrders 호출 가능 | CARRIER는 할당 오더 조회 가능 | `tests/unit/orders/assigned-orders.test.ts` |
+| **TC-P6-ORDERS-02** | CUSTOMS_BROKER getAssignedOrders 호출 가능 | CUSTOMS_BROKER는 할당 오더 조회 가능 | `tests/unit/orders/assigned-orders.test.ts` |
+| **TC-P6-ORDERS-03** | DELIVERY_AGENT getAssignedOrders 호출 가능 | DELIVERY_AGENT는 할당 오더 조회 가능 | `tests/unit/orders/assigned-orders.test.ts` |
+| **TC-P6-ORDERS-04** | CORPORATE getAssignedOrders 접근 차단 | 화주는 할당 오더 조회 권한 없음 | `tests/unit/orders/assigned-orders.test.ts` |
+| **TC-P6-ORDERS-05** | DELIVERY_AGENT category=DELIVERY 필터 조회 | DELIVERY_AGENT는 배송 유형 필터 조회 가능 | `tests/unit/orders/assigned-orders.test.ts` |
 
 ---
 

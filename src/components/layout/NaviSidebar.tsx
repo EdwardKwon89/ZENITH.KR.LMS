@@ -22,7 +22,8 @@ import {
   CalendarDays,
   FileText,
   Building,
-  Users
+  Users,
+  ClipboardList
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -121,6 +122,7 @@ export default function NaviSidebar({
     { title: t("customs_management"), href: "/admin/customs", icon: FileText, isAdminOnly: true },
     { title: t("customs_rates"), href: "/admin/customs-rates", icon: FileText },
     { title: t("delivery_rates"), href: "/admin/delivery-rates", icon: Truck },
+    { title: t("orders_assigned"), href: "/orders/assigned", icon: ClipboardList },
     { title: t("admin_error_logs"), href: "/admin/error-logs", icon: ShieldAlert, isAdminOnly: true },
     { 
       title: t("mypage"), 

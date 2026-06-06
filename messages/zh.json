@@ -46,7 +46,8 @@
     "member_management": "会员管理",
     "grade_promotion_requests": "等级升级审核",
     "org_approval": "会员公司审批",
-    "claims": "索赔管理"
+    "claims": "索赔管理",
+    "orders_assigned": "分配订单"
   },
   "Auth": {
     "login_title": "登录 Zenith",

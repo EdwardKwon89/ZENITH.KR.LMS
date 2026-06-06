@@ -37,6 +37,7 @@
     "master_rates": "Slab Rates",
     "order_mgmt": "Order Management",
     "orders": "Orders",
+    "orders_assigned": "Assigned Orders",
     "order_house": "House Order",
     "order_import": "Bulk Import",
     "logistics_group": "Logistics Management",
