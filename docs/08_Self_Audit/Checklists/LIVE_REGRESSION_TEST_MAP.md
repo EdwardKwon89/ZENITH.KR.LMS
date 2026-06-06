@@ -1,8 +1,8 @@
 # 🗺️ LIVE Regression Test Master Map
 
 > **상태:** [ACTIVE]  
-> **총 테스트 케이스:** 265 Cases  
-> **최종 검증일:** 2026-06-06 (TASK-119 P6-SPR-07)  
+> **총 테스트 케이스:** 267 Cases  
+> **최종 검증일:** 2026-06-06 (TASK-116·TASK-119 재작업 완료)  
 
 제니스 플랫폼의 비즈니스 영속성을 보장하는 회귀 테스트 케이스의 통합 명세서입니다. 모든 신규 개발 및 수정 시 이 맵에 케이스가 추가되어야 하며, 전체 테스트가 통과되어야 합니다.
 
@@ -164,6 +164,8 @@
 | **TC-P6-CARRIER-01** | CARRIER createRateCard 본인 carrier 허용 | CARRIER는 본인 carrier_id 요율 등록 가능 | `tests/unit/rates/rates.test.ts` |
 | **TC-P6-CARRIER-02** | CARRIER createRateCard 타 carrier 차단 | CARRIER는 타 carrier 요율 등록 시 차단 | `tests/unit/rates/rates.test.ts` |
 | **TC-P6-CARRIER-03** | CARRIER getRateCards 자사 요율만 조회 | CARRIER는 자사 carrier_id로 필터링된 요율만 조회 | `tests/unit/rates/rates.test.ts` |
+| **TC-P6-CARRIER-04** | CARRIER updateRateCard 본인 carrier 허용 | CARRIER는 본인 carrier_id 요율 수정 가능 | `tests/unit/rates/rates.test.ts` |
+| **TC-P6-CARRIER-04b** | CARRIER updateRateCard 타 carrier 차단 | CARRIER는 타 carrier 요율 수정 시 차단 | `tests/unit/rates/rates.test.ts` |
 | **TC-P6-CUSTOMS-01** | ADMIN createCustomsRate 호출 가능 | ADMIN/MANAGER는 모든 통관사 요율 등록 가능 | `tests/unit/rates/customs-rates.test.ts` |
 | **TC-P6-CUSTOMS-02** | CUSTOMS_BROKER 본인 org 요율 등록 | CUSTOMS_BROKER는 소속 조직 요율 등록 허용 | `tests/unit/rates/customs-rates.test.ts` |
 | **TC-P6-CUSTOMS-03** | CUSTOMS_BROKER 타인 org 요율 차단 | CUSTOMS_BROKER는 타 조직 요율 등록 차단 | `tests/unit/rates/customs-rates.test.ts` |

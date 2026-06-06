@@ -158,6 +158,57 @@ export const createRateCard = withAction(async function (payload: {
   return card;
 });
 
+export const updateRateCard = withAction(async function (cardId: string, data: {
+  transport_mode?: string;
+  currency?: string;
+  origin_port_id?: string | null;
+  dest_port_id?: string | null;
+  transit_days?: number | null;
+  tiers?: any[];
+  valid_from?: string;
+  valid_to?: string;
+  carrier_cost?: number;
+  margin_rate?: number;
+  platform_fee_rate?: number;
+  is_active?: boolean;
+}) {
+  const { supabase, profile } = await validateUserAction();
+
+  if (!profile) throw new Error("인증이 필요합니다.");
+
+  if (profile.role === USER_ROLES.CARRIER) {
+    const { data: existing } = await supabase
+      .from('zen_rate_cards')
+      .select('carrier_id')
+      .eq('id', cardId)
+      .single();
+
+    if (!existing) throw new Error("Rate card not found.");
+
+    const { data: carrier } = await supabase
+      .from('zen_carriers')
+      .select('id')
+      .eq('org_id', profile.org_id)
+      .single();
+
+    if (!carrier || existing.carrier_id !== carrier.id) {
+      throw new Error("본인 운송사 요율만 수정 가능합니다.");
+    }
+  } else if (profile.role !== USER_ROLES.ADMIN && profile.role !== USER_ROLES.MANAGER) {
+    throw new Error("요율 수정 권한이 없습니다.");
+  }
+
+  const { error } = await supabase
+    .from('zen_rate_cards')
+    .update(data)
+    .eq('id', cardId);
+
+  if (error) throw new Error(`Rate card update failed: ${error.message}`);
+
+  revalidatePath("/admin/rates");
+  return true;
+});
+
 /**
  * 요율 카드 비활성화 (Soft delete — is_active = false)
  */

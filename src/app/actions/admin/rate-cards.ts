@@ -81,11 +81,31 @@ export async function createRateCard(data: CreateRateCardData) {
 export async function updateRateCard(id: string, data: UpdateRateCardData) {
   const { supabase, profile } = await validateUserAction();
 
-  if (!profile || profile.role !== USER_ROLES.ADMIN) {
-    throw new Error("Rate card update requires ADMIN role.");
+  if (!profile) throw new Error("인증이 필요합니다.");
+
+  if (profile.role === USER_ROLES.CARRIER) {
+    const { data: existing, error: findError } = await supabase
+      .from('zen_rate_cards')
+      .select('carrier_id')
+      .eq('id', id)
+      .single();
+
+    if (findError || !existing) throw new Error("Rate card not found.");
+
+    const { data: carrier } = await supabase
+      .from('zen_carriers')
+      .select('id')
+      .eq('org_id', profile.org_id)
+      .single();
+
+    if (!carrier || existing.carrier_id !== carrier.id) {
+      throw new Error("본인 운송사 요율만 수정 가능합니다.");
+    }
+  } else if (profile.role !== USER_ROLES.ADMIN && profile.role !== USER_ROLES.MANAGER) {
+    throw new Error("Rate card update requires ADMIN, MANAGER, or CARRIER role.");
   }
 
-  const { data: card, error } = await supabase
+  const { data: updated, error } = await supabase
     .from('zen_rate_cards')
     .update(data)
     .eq('id', id)
@@ -95,7 +115,7 @@ export async function updateRateCard(id: string, data: UpdateRateCardData) {
   if (error) throw new Error(`Rate card update failed: ${error.message}`);
 
   revalidatePath('/admin/rate-cards');
-  return { success: true, card };
+  return { success: true, card: updated };
 }
 
 export async function deleteRateCard(id: string) {

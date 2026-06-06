@@ -18,7 +18,7 @@ export const createOrderServices = withAction(async function (orderId: string, s
   if (orderError || !order) throw new Error("Order not found");
 
   const isAdmin = profile.role === USER_ROLES.ADMIN || profile.role === USER_ROLES.MANAGER;
-  const isOwner = order.shipper_id === profile.id;
+  const isOwner = order.shipper_id === profile.org_id;
 
   if (!isAdmin && !isOwner) throw new Error("Unauthorized");
 
@@ -69,7 +69,7 @@ export const getOrderServices = withAction(async function (orderId: string) {
 
   if (orderError || !order) throw new Error("Order not found");
 
-  if (order.shipper_id === profile.id) {
+  if (order.shipper_id === profile.org_id) {
     const { data, error } = await supabase
       .from("zen_order_services")
       .select("*")

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { createRateCard, deleteRateCard, getRateCards } from '@/app/actions/rates';
+import { createRateCard, deleteRateCard, getRateCards, updateRateCard } from '@/app/actions/rates';
 import { validateUserAction } from '@/lib/auth/guards';
 import { USER_ROLES } from '@/lib/auth/rbac';
 
@@ -113,6 +113,41 @@ describe('Rates Actions Unit Tests', () => {
 
     // Verify carrier_id filter was applied
     expect(mockSupabase.eq).toHaveBeenCalledWith('carrier_id', 'my-carrier-uuid');
+  });
+
+  it('TC-P6-CARRIER-04: should allow CARRIER to update own rate card', async () => {
+    (validateUserAction as any).mockResolvedValue({
+      profile: mockCarrierProfile,
+      supabase: mockSupabase,
+    });
+
+    // 1. zen_rate_cards lookup (own card)
+    mockSupabase.then.mockImplementationOnce((cb: any) => cb({ data: { carrier_id: 'my-carrier-uuid' }, error: null }));
+    // 2. zen_carriers lookup
+    mockSupabase.then.mockImplementationOnce((cb: any) => cb({ data: { id: 'my-carrier-uuid' }, error: null }));
+    // 3. update succeeds
+    mockSupabase.then.mockImplementationOnce((cb: any) => cb({ data: null, error: null }));
+
+    const result = await updateRateCard('rate-card-1', { margin_rate: 20.0 });
+    expect(result.data).toBe(true);
+    expect(result.error).toBeNull();
+    expect(mockSupabase.update).toHaveBeenCalledWith({ margin_rate: 20.0 });
+  });
+
+  it('TC-P6-CARRIER-04b: should reject CARRIER updating other carrier rate card', async () => {
+    (validateUserAction as any).mockResolvedValue({
+      profile: mockCarrierProfile,
+      supabase: mockSupabase,
+    });
+
+    // 1. zen_rate_cards lookup (other carrier's card)
+    mockSupabase.then.mockImplementationOnce((cb: any) => cb({ data: { carrier_id: 'other-carrier-uuid' }, error: null }));
+    // 2. zen_carriers lookup (own carrier)
+    mockSupabase.then.mockImplementationOnce((cb: any) => cb({ data: { id: 'my-carrier-uuid' }, error: null }));
+
+    const result = await updateRateCard('rate-card-other', { margin_rate: 20.0 });
+    expect(result.data).toBeNull();
+    expect(result.error).toBe("본인 운송사 요율만 수정 가능합니다.");
   });
 
   it('TC-RATES-02: should return all rate cards for ADMIN role', async () => {
