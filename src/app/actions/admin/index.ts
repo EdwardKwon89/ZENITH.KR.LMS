@@ -47,6 +47,13 @@ export {
 } from './customs-rates';
 
 export {
+  createDeliveryRate,
+  updateDeliveryRate,
+  getDeliveryRates,
+  deleteDeliveryRate,
+} from './delivery-rates';
+
+export {
   updateRolePermissions,
 } from './rbac';
 

@@ -164,6 +164,9 @@
 | **TC-P6-CUSTOMS-01** | ADMIN createCustomsRate 호출 가능 | ADMIN/MANAGER는 모든 통관사 요율 등록 가능 | `tests/unit/rates/customs-rates.test.ts` |
 | **TC-P6-CUSTOMS-02** | CUSTOMS_BROKER 본인 org 요율 등록 | CUSTOMS_BROKER는 소속 조직 요율 등록 허용 | `tests/unit/rates/customs-rates.test.ts` |
 | **TC-P6-CUSTOMS-03** | CUSTOMS_BROKER 타인 org 요율 차단 | CUSTOMS_BROKER는 타 조직 요율 등록 차단 | `tests/unit/rates/customs-rates.test.ts` |
+| **TC-P6-DELIVERY-01** | ADMIN createDeliveryRate(LOCAL) 호출 가능 | ADMIN/MANAGER는 모든 배송사 LOCAL 요율 등록 가능 | `tests/unit/rates/delivery-rates.test.ts` |
+| **TC-P6-DELIVERY-02** | DELIVERY_AGENT 본인 org TOTAL 요율 등록 | DELIVERY_AGENT는 소속 조직 TOTAL 요율 등록 허용 | `tests/unit/rates/delivery-rates.test.ts` |
+| **TC-P6-DELIVERY-03** | DELIVERY_AGENT 타인 org 요율 차단 | DELIVERY_AGENT는 타 조직 요율 등록 차단 | `tests/unit/rates/delivery-rates.test.ts` |
 
 ---
 
