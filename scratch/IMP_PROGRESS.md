@@ -254,13 +254,13 @@
 | 097 | DB 스키마 기반 (org_type·rate tables·order_services·RLS·migration) | D_Kai | ✅ | 2026-06-06 |
 | 098 | 통관 서비스 요율 관리 Actions + UI | D_Kai | ✅ | 2026-06-06 |
 | 099 | 배송 서비스 요율 관리 Actions + UI (LOCAL+TOTAL) | D_Kai | ✅ | 2026-06-06 |
-| 100 | 통합 서비스 요율 조회 API + 오더-서비스 배정 Actions | D_Kai | ⬜ | — |
+| 100 | 통합 서비스 요율 조회 API + 오더-서비스 배정 Actions | D_Kai | 🔔 | 2026-06-06 |
 | 101 | Order 등록 UI 개선 (서비스조합선택·요율확인·GAP-P6-01 보완) | D_Kai | 🚫 | — |
 | 102 | Order 목록 RLS 역할별 격리 (CUSTOMS_BROKER·DELIVERY_AGENT) | D_Kai | 🔔 | 2026-06-06 |
-| 103 | 운송 요율 CARRIER 직접 등록 허용 + platform_fee_rate 격리 | D_Kai | ⬜ | — |
+| 103 | 운송 요율 CARRIER 직접 등록 허용 + platform_fee_rate 격리 | D_Kai | 🔔 | 2026-06-06 |
 | 104 | Phase 6 회귀 테스트 + E2E 검증 + UAT 절차서 | D_Kai+Riley | 🚫 | — |
 
-**Phase 6 완료**: 4 / 8 (50%) — IMP-097✅ · IMP-098✅ · IMP-099✅ · IMP-102🔔
+**Phase 6 완료**: 6 / 8 (75%) — IMP-097✅ · 098✅ · 099✅ · 100🔔 · 102🔔 · 103🔔
 
 ---
 
@@ -287,9 +287,9 @@
 | I | 5 | 5 | 100% ✅ | IMP-073~077 전량 완료 (TASK-069~073 ✅) |
 | J | 4 | 4 | 100% ✅ | IMP-080 ✅ · IMP-081 ✅ · IMP-082 ✅ · IMP-083 ✅ |
 | K | 1 | 7 | 14.3% | IMP-084·085·086·088·089·046 🔔 |
-| 6 | 4 | 8 | 50% | IMP-097✅·098✅·099✅·102🔔 (Phase 6 신규) |
+| 6 | 6 | 8 | 75% | IMP-097✅·098✅·099✅·100🔔·102🔔·103🔔 (Phase 6 신규) |
 | UAT | 6 | 7 | 85.7% | IMP-090 ✅ · IMP-091 ⬜ (Carrier Portal — Phase M) · **IMP-092 ✅ (TISA 3계층)** · **IMP-093 ✅ (TISA 실연동, TASK-104)** · IMP-094 ⬜ (요율 워크플로우 고도화, Phase M) · **IMP-095 ✅ (Rate Card 항로 매칭, TASK-109)** · **IMP-096 ✅ (요율 관리 페이지 통합 정리, TASK-110)** |
-| **합계** | **77** | **90** | **85.6%** | Phase K 7건 + UAT 7건 + Phase 6 8건 기준 |
+| **합계** | **79** | **90** | **87.8%** | Phase K 7건 + UAT 7건 + Phase 6 8건 기준 |
 
 > **UAT 진행 전 필수 처리**: IMP-092 ✅ · IMP-093 ✅ · IMP-095 ✅ — 전량 완료
 > 미완료 IMP: IMP-086·087 🚫 블로커 · IMP-028·069(Future — 통관 연계) · IMP-091 ⬜ (Carrier Portal) · IMP-094 ⬜ (요율 워크플로우 Phase M)
@@ -354,3 +354,5 @@
 | 2026-06-06 | D_Kai (OpenCode) | **IMP-098 🔔 완료** — TASK-114(P6-SPR-02) 통관 서비스 요율 관리. customs-rates CRUD Actions + UI 페이지 + NaviSidebar + i18n 4개국어 + TC 3건. 251/251 PASS. `a64f970`. |
 | 2026-06-06 | D_Kai (OpenCode) | **IMP-099 🔔 완료** — TASK-115(P6-SPR-03) 배송 서비스 요율 관리. delivery-rates CRUD + UI(LOCAL/TOTAL 탭) + TC 3건. 254/254 PASS. `c745fa0`. |
 | 2026-06-06 | D_Kai (OpenCode) | Phase 6 테이블 신설 — IMP-097~104 전량 등재 (IMP-097✅·098✅·099✅·102🔔). 전체 합계 77/90 (85.6%). |
+| 2026-06-06 | D_Kai (OpenCode) | **IMP-100 🔔 완료** — TASK-116(P6-SPR-04) 통합 서비스 요율 조회 API + 오더-서비스 배정 Actions. `2c46c94` · 265/265 PASS. |
+| 2026-06-06 | D_Kai (OpenCode) | **IMP-103 🔔 완료** — TASK-119(P6-SPR-07) 운송 요율 CARRIER 직접 등록 + platform_fee_rate 격리. `2c46c94` · 265/265 PASS. 전체 합계 79/90 (87.8%). Phase 6 6/8 (75%). |

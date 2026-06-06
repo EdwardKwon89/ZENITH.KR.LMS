@@ -237,5 +237,12 @@ export async function getRateCards(filters: {
     }
   }
 
+  if (profile.role === USER_ROLES.CARRIER) {
+    return {
+      rateCards: rateCards.map(({ platform_fee_rate, ...rest }) => rest),
+      total: count || 0,
+    };
+  }
+
   return { rateCards, total: count || 0 };
 }
