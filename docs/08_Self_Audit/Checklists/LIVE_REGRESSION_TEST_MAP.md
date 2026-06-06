@@ -1,8 +1,8 @@
 # 🗺️ LIVE Regression Test Master Map
 
 > **상태:** [ACTIVE]  
-> **총 테스트 케이스:** 243 Cases  
-> **최종 검증일:** 2026-06-05 (TASK-112 DEF-043)  
+> **총 테스트 케이스:** 248 Cases  
+> **최종 검증일:** 2026-06-06 (TASK-113 P6-SPR-01)  
 
 제니스 플랫폼의 비즈니스 영속성을 보장하는 회귀 테스트 케이스의 통합 명세서입니다. 모든 신규 개발 및 수정 시 이 맵에 케이스가 추가되어야 하며, 전체 테스트가 통과되어야 합니다.
 
@@ -20,6 +20,11 @@
 | **TC-RBAC-01** | DB 권한 존재 시 접근 허용 | `zen_role_permissions` DB 설정 기반 동적 허용 | `tests/unit/auth/rbac.test.ts` |
 | **TC-RBAC-02** | DB 미등록 경로 — STATIC Fallback 허용 | DB 없을 때 STATIC_PERMISSIONS로 Fallback 동작 | `tests/unit/auth/rbac.test.ts` |
 | **TC-RBAC-03** | DB 조회 실패 시 STATIC Fallback 유지 | DB 장애 시에도 서비스 중단 없이 Fallback 보장 | `tests/unit/auth/rbac.test.ts` |
+| **TC-P6-DB-01** | CUSTOMS_BROKER /admin/customs-rates 접근 | 통관사 담당자의 신규 요율 관리 페이지 접근 허용 | `tests/unit/auth/rbac.test.ts` |
+| **TC-P6-DB-02** | DELIVERY_AGENT /admin/delivery-rates 접근 | 배송사 담당자의 신규 요율 관리 페이지 접근 허용 | `tests/unit/auth/rbac.test.ts` |
+| **TC-P6-DB-03** | CUSTOMS_BROKER /orders/assigned 접근 | 통관사 담당자의 담당 오더 목록 접근 허용 | `tests/unit/auth/rbac.test.ts` |
+| **TC-P6-DB-04** | CUSTOMS_BROKER /admin/rates 차단 | 통관사는 운송 요율(CARRIER 전용) 접근 불가 | `tests/unit/auth/rbac.test.ts` |
+| **TC-P6-DB-05** | DELIVERY_AGENT /tracking 접근 | 배송사 담당자의 트래킹 조회 접근 허용 | `tests/unit/auth/rbac.test.ts` |
 
 ### 2. 소속 기반 지능형 제어 (Identity/Affiliation)
 | ID | 테스트 항목 | 목적 | 파일 경로 |
