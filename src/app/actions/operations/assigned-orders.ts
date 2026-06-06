@@ -40,8 +40,8 @@ export async function getAssignedOrders(category?: 'TRANSPORT' | 'CUSTOMS' | 'DE
 
   if (!profile) throw new Error("인증되지 않은 사용자입니다.");
 
-  const providerRoles = [USER_ROLES.CARRIER, USER_ROLES.CUSTOMS_BROKER, USER_ROLES.DELIVERY_AGENT];
-  if (!providerRoles.includes(profile.role as any)) {
+  const providerRoles: string[] = [USER_ROLES.CARRIER, USER_ROLES.CUSTOMS_BROKER, USER_ROLES.DELIVERY_AGENT];
+  if (!providerRoles.includes(profile.role)) {
     throw new Error("할당된 오더 조회 권한이 없습니다.");
   }
 

@@ -154,11 +154,11 @@
 | TASK-096 | 260525 | UAT 전체 실행 (Edward 직접 검증 — Go-Live 판정) | P1 | TASK-094 ✅ · TASK-095 ✅ · TASK-097 ✅ · TASK-103 ✅ · TASK-104 ✅ · TASK-105 ✅ · TASK-106 ✅ | Edward | ➖ | [TASK-096](tasks/TASK-096_260525_UAT전체실행_Edward.md) | **2026-06-06 취소** — 고객 리뷰(20260606) 기반 기능 보완(신규 역할·멀티 서비스 배정 구조) 완료 후 UAT 재계획 예정 |
 | **── Phase 6 ──** | | **신규 서비스 역할 모델 + 멀티 서비스 배정 구조 (v1.5.0)** | | | | | | **설계 확정 2026-06-06 · [PH6_SPR_PROGRESS](../scratch/PH6_SPR_PROGRESS.md)** |
 | TASK-113 | 260606 | [P6-SPR-01] DB 스키마 기반 구축 (org_type·요율테이블·order_services·migration) | P1 | 없음 | D_Kai | ✅ | [TASK-113](tasks/TASK-113_260606_P6SPR01_DB스키마기반구축_DKai.md) | IMP-097 완료 · `bb9a3fc` · 248/248 PASS · GAP-P6-01 TASK-117 이관 |
-| TASK-114 | 260606 | [P6-SPR-02] 통관 서비스 요율 관리 (Actions + UI) | P1 | TASK-113 ✅ | D_Kai | 🔔 | [TASK-114](tasks/TASK-114_260606_P6SPR02_통관서비스요율관리_DKai.md) | IMP-098 · `a64f970` · 251/251 PASS |
-| TASK-115 | 260606 | [P6-SPR-03] 배송 서비스 요율 관리 (Actions + UI, LOCAL+TOTAL) | P1 | TASK-113 ✅ | D_Kai | 🔔 | [TASK-115](tasks/TASK-115_260606_P6SPR03_배송서비스요율관리_DKai.md) | IMP-099 · `c745fa0` · 254/254 PASS |
-| TASK-116 | 260606 | [P6-SPR-04] 통합 서비스 요율 조회 API + 오더-서비스 배정 Actions | P1 | TASK-114 ✅ · TASK-115 ✅ | D_Kai | 🚫 | [TASK-116](tasks/TASK-116_260606_P6SPR04_통합서비스요율조회API_DKai.md) | IMP-100 |
+| TASK-114 | 260606 | [P6-SPR-02] 통관 서비스 요율 관리 (Actions + UI) | P1 | TASK-113 ✅ | D_Kai | ✅ | [TASK-114](tasks/TASK-114_260606_P6SPR02_통관서비스요율관리_DKai.md) | IMP-098 완료 · `a64f970` · 251/251 PASS · Advisory: LIVE_REGRESSION_TEST_MAP doc 커밋 포함(비차단) |
+| TASK-115 | 260606 | [P6-SPR-03] 배송 서비스 요율 관리 (Actions + UI, LOCAL+TOTAL) | P1 | TASK-113 ✅ | D_Kai | ✅ | [TASK-115](tasks/TASK-115_260606_P6SPR03_배송서비스요율관리_DKai.md) | IMP-099 완료 · `c745fa0` · 254/254 PASS · Advisory: 헤더 카운트 fix 커밋(`87ce4f0`) 자체 보정(비차단) |
+| TASK-116 | 260606 | [P6-SPR-04] 통합 서비스 요율 조회 API + 오더-서비스 배정 Actions | P1 | TASK-114 ✅ · TASK-115 ✅ | D_Kai | ⬜ | [TASK-116](tasks/TASK-116_260606_P6SPR04_통합서비스요율조회API_DKai.md) | IMP-100 |
 | TASK-117 | 260606 | [P6-SPR-05] Order 등록 UI 개선 (서비스조합선택·요율확인 Step) | P1 | TASK-116 ✅ | D_Kai | 🚫 | [TASK-117](tasks/TASK-117_260606_P6SPR05_Order등록UI개선_DKai.md) | IMP-101 · GAP-P6-01 DoD 추가 |
-| TASK-118 | 260606 | [P6-SPR-06] Order 목록 역할별 격리 (CUSTOMS_BROKER·DELIVERY_AGENT RLS) | P2 | TASK-113 ✅ | D_Kai | ⬜ | [TASK-118](tasks/TASK-118_260606_P6SPR06_Order목록역할별격리_DKai.md) | IMP-102 |
+| TASK-118 | 260606 | [P6-SPR-06] Order 목록 역할별 격리 (CUSTOMS_BROKER·DELIVERY_AGENT RLS) | P2 | TASK-113 ✅ | D_Kai | 🔔 | [TASK-118](tasks/TASK-118_260606_P6SPR06_Order목록역할별격리_DKai.md) | IMP-102 · `270146e` · 259/259 PASS |
 | TASK-119 | 260606 | [P6-SPR-07] 운송 요율 CARRIER 직접 등록 허용 + platform_fee_rate 격리 | P2 | TASK-113 ✅ | D_Kai | ⬜ | [TASK-119](tasks/TASK-119_260606_P6SPR07_운송요율CARRIER직접등록_DKai.md) | IMP-103 |
 | TASK-120 | 260606 | [P6-SPR-08] Phase 6 회귀 테스트 + E2E 검증 + UAT 절차서 | P2 | TASK-114 ✅ · TASK-115 ✅ · TASK-116 ✅ · TASK-117 ✅ · TASK-118 ✅ · TASK-119 ✅ | D_Kai + Riley | 🚫 | [TASK-120](tasks/TASK-120_260606_P6SPR08_회귀테스트E2E검증_DKai.md) | IMP-104 |
 | TASK-108 | 260601 | DEF-039 CARRIER RLS + 미스테이지 커밋 + 신원 수정 | P2 | 없음 | D_Kai | ✅ | [TASK-108](tasks/TASK-108_260601_DEF039CARRIER_RLS_미스테이지커밋_DKai.md) | DEF-039 해소 · 4cc88d8+beba338 · CARRIER RLS 3테이블 · 229/229 ✅ · Aiden ✅ 승인 |
@@ -183,7 +183,7 @@
 
 | Agent | 진행 중 | 재작업/조치 필요 | 블로커 대기 |
 |:------|:--------|:----------------|:----------|
-| **D_Kai (OpenCode)** | **TASK-114 🔔 · TASK-115 🔔** (Aiden 검토 대기) · **TASK-118/119 ⬜ 병렬 착수 가능** | R-17 위반 경고 1회 (TASK-112 DoD 미체크) — 주의 | TASK-116/117/120 (선행 Task 완료 후) |
+| **D_Kai (OpenCode)** | **TASK-116 ⬜ · TASK-119 ⬜ 착수 가능** | **TASK-118 ❌ 재작업** (코드 커밋 없음·task file 🔄 미전환·해시 미기재 R-17 위반 3건) · Advisory 2건 누적(비차단) | TASK-117/120 (선행 Task 완료 후) |
 | Riley | — | R-17 위반 **누적 3회** 경고 | TASK-120 (SPR-08 E2E) — TASK-114~119 전량 완료 후 |
 | B_Kai | — | — | Phase 6 할당 없음 (신규 할당 가능 상태) |
 | N_Kai | TASK-087 ⬜ (재교육 세션 — 완료 후 신규 할당 재개) | R-17 위반 누적 — 신규 할당 중단 유지 | — |
@@ -412,3 +412,6 @@
 | 2026-06-06 | Aiden (Claude) | **Phase 6 작업 지시 발령** — TASK-113~120 전량 등록 (D_Kai 7건·D_Kai+Riley 1건). IMP-097~104 신규. 설계 확정(An-11). TASK-113 즉시 착수 가능. 진척 추적: [PH6_SPR_PROGRESS.md](../scratch/PH6_SPR_PROGRESS.md) |
 | 2026-06-06 | Aiden (Claude) | **TASK-113 ✅ PASS** — D_Kai SPR-01 DB 스키마 기반 구축 전항목 실물 검증 완료. 회귀 248/248 PASS. GAP-P6-01(order_services INSERT 정책) TASK-117 DoD 이관. TASK-114·115·118·119 블로커 해제 → ⬜ 즉시 착수 가능. |
 | 2026-06-06 | D_Kai (OpenCode) | **TASK-115 🔔 검토 요청** — 배송 서비스 요율 관리(LOCAL+TOTAL) · `c745fa0` · 254/254 PASS. IMP-099 완료. |
+| 2026-06-06 | Aiden (Claude) | **TASK-114 ✅ PASS** — SPR-02 통관 서비스 요율 DoD 11/11 실물 검증 완료. 251/251 PASS. Advisory 1건(비차단): LIVE_REGRESSION_TEST_MAP doc 커밋 포함. **TASK-115 ✅ PASS** — SPR-03 배송 서비스 요율 DoD 11/11 실물 검증 완료. 254/254 PASS. Advisory 1건(비차단): 헤더 카운트 fix 커밋 자체 보정. **TASK-116 블로커 해제 → ⬜ 즉시 착수 가능.** |
+| 2026-06-06 | Aiden (Claude) | **TASK-118 ❌ 반려** — 코드 커밋 없음(구현 파일 전체 untracked) · task file 상태 헤더 🔄 미전환 · [작업 결과] 코드 커밋 해시 미기재 — R-17 위반 3건. 코드 구현 실물 존재 확인(getAssignedOrders·migration·UI·test). 재작업 지시: ① 코드 커밋 ② task file 🔔+해시 기재 ③ ACTIVE_TASK 🔔 반영 ④ DoD 검증 ⑤ 문서 커밋. Advisory 1건(비차단): assigned-orders.ts:44 `profile.role as any` → 타입 교체 권장. |
+| 2026-06-06 | D_Kai (OpenCode) | **TASK-118 🔔 재작업 완료** — 반려 3건 전량 조치(코드 `270146e` · task file 🔔 · 해시 기재 · ACTIVE_TASK 🔔 · 259/259 PASS). Advisory 타입 교체 적용(`as any`→`string[]`). R-17 순서 엄수. |
