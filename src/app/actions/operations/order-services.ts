@@ -22,6 +22,49 @@ export const createOrderServices = withAction(async function (orderId: string, s
 
   if (!isAdmin && !isOwner) throw new Error("Unauthorized");
 
+  // 요율 유효성 이중 검증 (DoD 요구사항)
+  const today = new Date().toISOString().slice(0, 10);
+  for (const s of services) {
+    if (s.rate_card_id) {
+      const { data: rateCard, error } = await supabase
+        .from("zen_rate_cards")
+        .select("id, is_active, valid_from, valid_until")
+        .eq("id", s.rate_card_id)
+        .single();
+      if (error || !rateCard) throw new Error("Transportation rate card not found");
+      if (!rateCard.is_active) throw new Error("Transportation rate card is inactive");
+      if (rateCard.valid_from > today || (rateCard.valid_until && rateCard.valid_until < today)) {
+        throw new Error("Transportation rate card has expired or is not yet valid");
+      }
+    }
+
+    if (s.customs_rate_id) {
+      const { data: customsRate, error } = await supabase
+        .from("zen_customs_rates")
+        .select("id, is_active, valid_from, valid_until")
+        .eq("id", s.customs_rate_id)
+        .single();
+      if (error || !customsRate) throw new Error("Customs rate card not found");
+      if (!customsRate.is_active) throw new Error("Customs rate card is inactive");
+      if (customsRate.valid_from > today || (customsRate.valid_until && customsRate.valid_until < today)) {
+        throw new Error("Customs rate card has expired or is not yet valid");
+      }
+    }
+
+    if (s.delivery_rate_id) {
+      const { data: deliveryRate, error } = await supabase
+        .from("zen_delivery_rates")
+        .select("id, is_active, valid_from, valid_until")
+        .eq("id", s.delivery_rate_id)
+        .single();
+      if (error || !deliveryRate) throw new Error("Delivery rate card not found");
+      if (!deliveryRate.is_active) throw new Error("Delivery rate card is inactive");
+      if (deliveryRate.valid_from > today || (deliveryRate.valid_until && deliveryRate.valid_until < today)) {
+        throw new Error("Delivery rate card has expired or is not yet valid");
+      }
+    }
+  }
+
   const { data, error } = await supabase
     .from("zen_order_services")
     .insert(
