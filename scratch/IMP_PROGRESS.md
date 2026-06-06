@@ -331,3 +331,4 @@
 | 2026-06-06 | Aiden (Claude) | **IMP-097~104 신규 등재** — Phase 6 신규 서비스 역할 모델 + 멀티 서비스 배정 구조. [PH6_SPR_PROGRESS.md](PH6_SPR_PROGRESS.md) 전용 추적기 신설. |
 | 2026-06-06 | D_Kai (OpenCode) | **IMP-097 🔔 완료** — TASK-113(P6-SPR-01) DB 스키마 기반 구축. Migration 3종·rbac·routes·TC 5건·248/248 PASS. `bb9a3fc`. |
 | 2026-06-06 | D_Kai (OpenCode) | **IMP-098 🔔 완료** — TASK-114(P6-SPR-02) 통관 서비스 요율 관리. customs-rates CRUD Actions + UI 페이지 + NaviSidebar + i18n 4개국어 + TC 3건. 251/251 PASS. `a64f970`. |
+| 2026-06-06 | D_Kai (OpenCode) | **IMP-099 🔔 완료** — TASK-115(P6-SPR-03) 배송 서비스 요율 관리. delivery-rates CRUD + UI(LOCAL/TOTAL 탭) + TC 3건. 254/254 PASS. `c745fa0`. |
