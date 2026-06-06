@@ -21,6 +21,26 @@ describe('🛡️ ZENITH Security Shield: RBAC Engine Tests', () => {
       expect(checkPermission(USER_ROLES.INDIVIDUAL, '/custom/path', allowedPaths)).toBe(true);
       expect(checkPermission(USER_ROLES.INDIVIDUAL, '/mypage/grade', allowedPaths)).toBe(false);
     });
+
+    it('TC-P6-DB-01: CUSTOMS_BROKER는 /admin/customs-rates에 접근 가능', () => {
+      expect(checkPermission(USER_ROLES.CUSTOMS_BROKER, '/admin/customs-rates')).toBe(true);
+    });
+
+    it('TC-P6-DB-02: DELIVERY_AGENT는 /admin/delivery-rates에 접근 가능', () => {
+      expect(checkPermission(USER_ROLES.DELIVERY_AGENT, '/admin/delivery-rates')).toBe(true);
+    });
+
+    it('TC-P6-DB-03: CUSTOMS_BROKER는 /orders/assigned에 접근 가능', () => {
+      expect(checkPermission(USER_ROLES.CUSTOMS_BROKER, '/orders/assigned')).toBe(true);
+    });
+
+    it('TC-P6-DB-04: CUSTOMS_BROKER는 /admin/rates 접근 불가 (운송 요율은 CARRIER 전용)', () => {
+      expect(checkPermission(USER_ROLES.CUSTOMS_BROKER, '/admin/rates')).toBe(false);
+    });
+
+    it('TC-P6-DB-05: DELIVERY_AGENT는 /tracking에 접근 가능', () => {
+      expect(checkPermission(USER_ROLES.DELIVERY_AGENT, '/tracking')).toBe(true);
+    });
   });
 
   describe('2. Asynchronous checkPermissionDB (Server-side / DB-driven)', () => {
