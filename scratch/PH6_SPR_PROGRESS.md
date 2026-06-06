@@ -42,7 +42,7 @@
 | SPR-02 | [TASK-114](../.agent/tasks/TASK-114_260606_P6SPR02_통관서비스요율관리_DKai.md) | 통관 서비스 요율 관리 (Actions + UI) | D_Kai | IMP-098 | 5 MD | TASK-113 ✅ | ✅ | 2026-06-06 | `a64f970` |
 | SPR-03 | [TASK-115](../.agent/tasks/TASK-115_260606_P6SPR03_배송서비스요율관리_DKai.md) | 배송 서비스 요율 관리 (Actions + UI, LOCAL+TOTAL) | D_Kai | IMP-099 | 5 MD | TASK-113 ✅ | ✅ | 2026-06-06 | `c745fa0` |
 | SPR-04 | [TASK-116](../.agent/tasks/TASK-116_260606_P6SPR04_통합서비스요율조회API_DKai.md) | 통합 서비스 요율 조회 API + 오더-서비스 배정 Actions | D_Kai | IMP-100 | 5 MD | TASK-114 ✅ · TASK-115 ✅ | ✅ | 2026-06-06 | `154ea5d` |
-| SPR-05 | [TASK-117](../.agent/tasks/TASK-117_260606_P6SPR05_Order등록UI개선_DKai.md) | Order 등록 UI 개선 (서비스조합선택·요율확인 Step 추가) | D_Kai | IMP-101 | 6 MD | TASK-116 ✅ | ⬜ | — | — |
+| SPR-05 | [TASK-117](../.agent/tasks/TASK-117_260606_P6SPR05_Order등록UI개선_DKai.md) | Order 등록 UI 개선 (서비스조합선택·요율확인 Step 추가) | Riley | IMP-101 | 6 MD | TASK-116 ✅ | 🔔 | 2026-06-06 | `5ff2982` |
 | SPR-06 | [TASK-118](../.agent/tasks/TASK-118_260606_P6SPR06_Order목록역할별격리_DKai.md) | Order 목록 역할별 격리 (CUSTOMS_BROKER·DELIVERY_AGENT RLS) | D_Kai | IMP-102 | 4 MD | TASK-113 ✅ | ✅ | 2026-06-06 | `270146e` |
 | SPR-07 | [TASK-119](../.agent/tasks/TASK-119_260606_P6SPR07_운송요율CARRIER직접등록_DKai.md) | 운송 요율 CARRIER 직접 등록 허용 + platform_fee_rate 격리 | D_Kai | IMP-103 | 3 MD | TASK-113 ✅ | ✅ | 2026-06-06 | `154ea5d` |
 | SPR-08 | [TASK-120](../.agent/tasks/TASK-120_260606_P6SPR08_회귀테스트E2E검증_DKai.md) | 회귀 테스트 확장 + E2E 검증 + UAT 절차서 | D_Kai + Riley | IMP-104 | 4 MD | TASK-114~119 전량 ✅ | 🚫 | — | — |
@@ -75,7 +75,7 @@ TASK-113 (SPR-01) ──┬──► TASK-114 (SPR-02) ──┐
 | IMP-098 | 통관 서비스 요율 관리 Actions + UI | TASK-114 | ✅ | 2026-06-06 |
 | IMP-099 | 배송 서비스 요율 관리 Actions + UI | TASK-115 | ✅ | 2026-06-06 |
 | IMP-100 | 통합 서비스 요율 조회 API + 오더-서비스 배정 Actions | TASK-116 | ✅ | 2026-06-06 |
-| IMP-101 | Order 등록 UI 개선 (서비스조합선택·요율확인·GAP-P6-01 보완) | TASK-117 | ⬜ (블로커 해제 — 즉시 착수 가능) | — |
+| IMP-101 | Order 등록 UI 개선 (서비스조합선택·요율확인·GAP-P6-01 보완) | TASK-117 | 🔔 | 2026-06-06 |
 | IMP-102 | Order 목록 RLS 역할별 격리 (CUSTOMS_BROKER·DELIVERY_AGENT) | TASK-118 | ✅ | 2026-06-06 |
 | IMP-103 | 운송 요율 CARRIER 직접 등록 허용 + platform_fee_rate 격리 | TASK-119 | ✅ | 2026-06-06 |
 | IMP-104 | Phase 6 회귀 테스트 + E2E 검증 + UAT 절차서 | TASK-120 | 🚫 | — |
@@ -94,6 +94,7 @@ TASK-113 (SPR-01) ──┬──► TASK-114 (SPR-02) ──┐
 | 2026-06-06 | Aiden (Claude) | [정정] TASK-118(SPR-06) — Edward 조기 검토 지시(코드 미커밋 상태) → Aiden 잘못된 ❌ 판정 발행. D_Kai R-17 위반 아님. |
 | 2026-06-06 | D_Kai (OpenCode) | TASK-118(SPR-06) 🔔 코드 커밋 완료 — `270146e` · task file 🔔 · 259/259 PASS. |
 | 2026-06-06 | Aiden (Claude) | TASK-118(SPR-06) ✅ PASS — DoD 10/10 실물 검증 완료. Advisory 3건(비차단): 커밋 해시 미기재·문서 커밋 미완료(조기 검토 지시)·`as any` 미수정 허위 기재 경고. IMP-102 완료. 진행률 45%→55%. |
+| 2026-06-06 | Riley (Gemini) | **TASK-117(SPR-05) 🔔** — Order 등록 UI 개선 및 이중 요율 검증 완료. RLS 패치, 통합 테스트 작성. 코드 커밋 `5ff2982`. |
 | 2026-06-06 | D_Kai (OpenCode) | **TASK-116(SPR-04) 🔔 + TASK-119(SPR-07) 🔔 병렬 구현 완료** — `2c46c94` · 265/265 PASS. |
 | 2026-06-06 | Aiden (Claude) | **TASK-116(SPR-04) ❌ 반려** — `order-services.ts:21,72` shipper_id 비교 오류(`profile.id`→`profile.org_id`), 화주 createOrderServices/getOrderServices 차단, DoD #4·#5 허위. **TASK-119(SPR-07) ❌ 반려** — `rate-cards.ts` updateRateCard CARRIER 미구현(DoD #3 허위) + R-17 §6 코드-문서 커밋 혼합. 진행률 75% 취소 → 55% 유지. |
 | 2026-06-06 | Aiden (Claude) | **TASK-116(SPR-04) ✅ + TASK-119(SPR-07) ✅** — D_Kai 미커밋 수정 Aiden 인계 커밋 `154ea5d`. order-services.ts org_id 수정·rate-cards.ts updateRateCard CARRIER 허용·TC-P6-CARRIER-04·04b 추가. 267/267 PASS. **TASK-117(SPR-05) 블로커 해제 → ⬜**. 진행률 55%→75%. |

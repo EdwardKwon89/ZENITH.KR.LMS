@@ -11,7 +11,7 @@
 | 전제조건 | TASK-116 ✅ |
 | 관련 IMP | IMP-101 |
 | 관련 설계 | [An-11 §7](../../docs/02_Analysis/An_11_Phase6_신규서비스역할모델_설계.md) |
-| 상태 | ⬜ 미착수 (즉시 착수 가능) |
+| 상태 | 🔔 검토 요청 |
 
 ---
 
@@ -75,23 +75,31 @@ Order 제출 Action에서:
 
 ## DoD (Definition of Done)
 
-- [ ] Order 등록 flow에 서비스 선택 Step 추가 확인 (화물정보 → 서비스선택 → 요율확인 → 제출)
-- [ ] 8종 서비스 조합 선택 UI 동작 확인
-- [ ] 서비스 선택 후 `getAvailableServiceRates` 호출 및 결과 표시 확인
-- [ ] 요율 0건 시 다음 단계 차단 + 오류 메시지 표시 확인
-- [ ] **[GAP-P6-01]** `zen_order_services` INSERT RLS 보완 — 화주(CORPORATE/INDIVIDUAL)가 본인 order_id에 한해 INSERT 가능하도록 migration 패치 추가 (방안 A: shipper_id 기반 정책, 또는 대안 설계 의견 📝 제출 후 착수)
-- [ ] 요율 선택 후 `createOrderServices` 호출 및 zen_order_services 레코드 생성 확인 (화주 역할로 INSERT 성공 확인)
-- [ ] 서버 측 이중 검증 동작 확인 (만료 요율로 제출 시 차단)
-- [ ] 기존 Order 등록 기능(화물정보, 화주 정보 등) 회귀 없음 확인
-- [ ] R-09: `LIVE_REGRESSION_TEST_MAP.md`에 TC-P6-ORDERUI-01 이상 신규 추가
-- [ ] 회귀 테스트 전체 PASS
-- [ ] 코드 커밋 → task file 🔔 → ACTIVE_TASK.md 갱신 → DoD 검증 → 문서 커밋 (R-17 순서 엄수)
+- [x] Order 등록 flow에 서비스 선택 Step 추가 확인 (화물정보 → 서비스선택 → 요율확인 → 제출)
+- [x] 8종 서비스 조합 선택 UI 동작 확인
+- [x] 서비스 선택 후 `getAvailableServiceRates` 호출 및 결과 표시 확인
+- [x] 요율 0건 시 다음 단계 차단 + 오류 메시지 표시 확인
+- [x] **[GAP-P6-01]** `zen_order_services` INSERT RLS 보완 — 화주(CORPORATE/INDIVIDUAL)가 본인 order_id에 한해 INSERT 가능하도록 migration 패치 추가 (방안 A: shipper_id 기반 정책, 또는 대안 설계 의견 📝 제출 후 착수)
+- [x] 요율 선택 후 `createOrderServices` 호출 및 zen_order_services 레코드 생성 확인 (화주 역할로 INSERT 성공 확인)
+- [x] 서버 측 이중 검증 동작 확인 (만료 요율로 제출 시 차단)
+- [x] 기존 Order 등록 기능(화물정보, 화주 정보 등) 회귀 없음 확인
+- [x] R-09: `LIVE_REGRESSION_TEST_MAP.md`에 TC-P6-ORDERUI-01 이상 신규 추가
+- [x] 회귀 테스트 전체 PASS
+- [x] 코드 커밋 → task file 🔔 → ACTIVE_TASK.md 갱신 → DoD 검증 → 문서 커밋 (R-17 순서 엄수)
 
 ---
 
 ## [작업 결과]
 
-*(D_Kai 작성)*
+- **코드 커밋**: `5ff298208c14e0b4e15120528cb2907a991b11a3`
+- **구현 내용**:
+  1. `OrderRegistrationForm.tsx`를 3단계 Wizard UI로 전환했습니다.
+     - 1단계: 화물 및 송/수하인 정보 입력 (기존 Form 유지 및 `trigger`를 통한 유효성 검증).
+     - 2단계: 운송 모드(AIR/SEA/EXP/LAND)에 기반한 8가지 배송 서비스 조합의 동적 필터링 제공.
+     - 3단계: `getAvailableServiceRates` 액션을 호출하여 각 단계별 요율 카드를 실시간 테이블로 조회 및 선택 유도. 특정 필수 서비스 요율이 0개인 경우 차단 배너 노출 및 제출 버튼 비활성화.
+  2. **[GAP-P6-01]** `zen_order_services` 테이블에 대해 화주가 자신의 order_id에 대한 서비스 등록을 허용하도록 INSERT RLS 정책 패치(`20260606050000_gap_p6_01_order_services_rls_patch.sql`)를 로컬 데이터베이스에 성공적으로 마이그레이션했습니다.
+  3. **통합 테스트**: `tests/integration/p6-orderui.test.ts`를 신규 작성하여 서버 사이드 요율 상태(is_active) 및 유효기간(valid_from/until) 이중 검증 성공 및 오류 상황 시 차단 동작을 보증했습니다.
+  4. **회귀 테스트**: 전체 270건 이상의 회귀 테스트를 정상 통과했습니다.
 
 ---
 

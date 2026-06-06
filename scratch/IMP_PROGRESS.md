@@ -255,12 +255,12 @@
 | 098 | 통관 서비스 요율 관리 Actions + UI | D_Kai | ✅ | 2026-06-06 |
 | 099 | 배송 서비스 요율 관리 Actions + UI (LOCAL+TOTAL) | D_Kai | ✅ | 2026-06-06 |
 | 100 | 통합 서비스 요율 조회 API + 오더-서비스 배정 Actions | D_Kai | 🔔 | 2026-06-06 |
-| 101 | Order 등록 UI 개선 (서비스조합선택·요율확인·GAP-P6-01 보완) | D_Kai | 🚫 | — |
+| 101 | Order 등록 UI 개선 (서비스조합선택·요율확인·GAP-P6-01 보완) | Riley | 🔔 | 2026-06-06 |
 | 102 | Order 목록 RLS 역할별 격리 (CUSTOMS_BROKER·DELIVERY_AGENT) | D_Kai | 🔔 | 2026-06-06 |
 | 103 | 운송 요율 CARRIER 직접 등록 허용 + platform_fee_rate 격리 | D_Kai | 🔔 | 2026-06-06 |
 | 104 | Phase 6 회귀 테스트 + E2E 검증 + UAT 절차서 | D_Kai+Riley | 🚫 | — |
 
-**Phase 6 완료**: 6 / 8 (75%) — IMP-097✅ · 098✅ · 099✅ · 100🔔 · 102🔔 · 103🔔
+**Phase 6 완료**: 7 / 8 (87.5%) — IMP-097✅ · 098✅ · 099✅ · 100🔔 · 101🔔 · 102🔔 · 103🔔
 
 ---
 
@@ -287,9 +287,9 @@
 | I | 5 | 5 | 100% ✅ | IMP-073~077 전량 완료 (TASK-069~073 ✅) |
 | J | 4 | 4 | 100% ✅ | IMP-080 ✅ · IMP-081 ✅ · IMP-082 ✅ · IMP-083 ✅ |
 | K | 1 | 7 | 14.3% | IMP-084·085·086·088·089·046 🔔 |
-| 6 | 6 | 8 | 75% | IMP-097✅·098✅·099✅·100🔔·102🔔·103🔔 (Phase 6 신규) |
+| 6 | 7 | 8 | 87.5% | IMP-097✅·098✅·099✅·100🔔·101🔔·102🔔·103🔔 (Phase 6 신규) |
 | UAT | 6 | 7 | 85.7% | IMP-090 ✅ · IMP-091 ⬜ (Carrier Portal — Phase M) · **IMP-092 ✅ (TISA 3계층)** · **IMP-093 ✅ (TISA 실연동, TASK-104)** · IMP-094 ⬜ (요율 워크플로우 고도화, Phase M) · **IMP-095 ✅ (Rate Card 항로 매칭, TASK-109)** · **IMP-096 ✅ (요율 관리 페이지 통합 정리, TASK-110)** |
-| **합계** | **79** | **90** | **87.8%** | Phase K 7건 + UAT 7건 + Phase 6 8건 기준 |
+| **합계** | **80** | **90** | **88.9%** | Phase K 7건 + UAT 7건 + Phase 6 8건 기준 |
 
 > **UAT 진행 전 필수 처리**: IMP-092 ✅ · IMP-093 ✅ · IMP-095 ✅ — 전량 완료
 > 미완료 IMP: IMP-086·087 🚫 블로커 · IMP-028·069(Future — 통관 연계) · IMP-091 ⬜ (Carrier Portal) · IMP-094 ⬜ (요율 워크플로우 Phase M)
@@ -350,6 +350,7 @@
 | 2026-05-31 | Aiden (Claude) | IMP-093 신규 등재 — TISA Dashboard 실 Rate Card 연동 (Mock 제거, DB 실조회, 경로 선택 후 스냅샷). DEF-032 연계. TASK-104(D_Kai) 발령. 전제조건: TASK-103 ✅. UAT 진행 전 필수 |
 | 2026-06-03 | Aiden (Claude) | IMP-093 ✅ 확정 — TASK-104 ✅ 승인 반영 (미기재 정정). IMP-094 신규 등재 — 요율 관리 워크플로우 고도화 (방안2, Phase M, Medium). IMP-095 신규 등재 + ✅ 확정 — Rate Card 항로 기반 매칭 (TASK-109 D_Kai 승인, 236/236 PASS). 합계 70/79→71/81 (87.7%). |
 | 2026-06-06 | Aiden (Claude) | **IMP-097~104 신규 등재** — Phase 6 신규 서비스 역할 모델 + 멀티 서비스 배정 구조. [PH6_SPR_PROGRESS.md](PH6_SPR_PROGRESS.md) 전용 추적기 신설. |
+| 2026-06-06 | Riley (Gemini) | **IMP-101 🔔 완료** — TASK-117(P6-SPR-05) Order 등록 UI 개선 (3-step wizard flow) 및 이중 요율 검증 완료. RLS 패치, 통합 테스트 작성. 코드 커밋 `5ff2982`. |
 | 2026-06-06 | D_Kai (OpenCode) | **IMP-097 🔔 완료** — TASK-113(P6-SPR-01) DB 스키마 기반 구축. Migration 3종·rbac·routes·TC 5건·248/248 PASS. `bb9a3fc`. |
 | 2026-06-06 | D_Kai (OpenCode) | **IMP-098 🔔 완료** — TASK-114(P6-SPR-02) 통관 서비스 요율 관리. customs-rates CRUD Actions + UI 페이지 + NaviSidebar + i18n 4개국어 + TC 3건. 251/251 PASS. `a64f970`. |
 | 2026-06-06 | D_Kai (OpenCode) | **IMP-099 🔔 완료** — TASK-115(P6-SPR-03) 배송 서비스 요율 관리. delivery-rates CRUD + UI(LOCAL/TOTAL 탭) + TC 3건. 254/254 PASS. `c745fa0`. |

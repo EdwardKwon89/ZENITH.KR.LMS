@@ -157,7 +157,7 @@
 | TASK-114 | 260606 | [P6-SPR-02] 통관 서비스 요율 관리 (Actions + UI) | P1 | TASK-113 ✅ | D_Kai | ✅ | [TASK-114](tasks/TASK-114_260606_P6SPR02_통관서비스요율관리_DKai.md) | IMP-098 완료 · `a64f970` · 251/251 PASS · Advisory: LIVE_REGRESSION_TEST_MAP doc 커밋 포함(비차단) |
 | TASK-115 | 260606 | [P6-SPR-03] 배송 서비스 요율 관리 (Actions + UI, LOCAL+TOTAL) | P1 | TASK-113 ✅ | D_Kai | ✅ | [TASK-115](tasks/TASK-115_260606_P6SPR03_배송서비스요율관리_DKai.md) | IMP-099 완료 · `c745fa0` · 254/254 PASS · Advisory: 헤더 카운트 fix 커밋(`87ce4f0`) 자체 보정(비차단) |
 | TASK-116 | 260606 | [P6-SPR-04] 통합 서비스 요율 조회 API + 오더-서비스 배정 Actions | P1 | TASK-114 ✅ · TASK-115 ✅ | D_Kai | ✅ | [TASK-116](tasks/TASK-116_260606_P6SPR04_통합서비스요율조회API_DKai.md) | IMP-100 완료 · `154ea5d` · 267/267 PASS · Aiden 인계 완료 |
-| TASK-117 | 260606 | [P6-SPR-05] Order 등록 UI 개선 (서비스조합선택·요율확인 Step) | P1 | TASK-116 ✅ | **Riley** | ⬜ | [TASK-117](tasks/TASK-117_260606_P6SPR05_Order등록UI개선_DKai.md) | IMP-101 · GAP-P6-01 DoD 추가 · D_Kai 부재 → Riley 재배정 (2026-06-06 Aiden) |
+| TASK-117 | 260606 | [P6-SPR-05] Order 등록 UI 개선 (서비스조합선택·요율확인 Step) | P1 | TASK-116 ✅ | **Riley** | 🔔 | [TASK-117](tasks/TASK-117_260606_P6SPR05_Order등록UI개선_DKai.md) | IMP-101 · GAP-P6-01 DoD 추가 · D_Kai 부재 → Riley 재배정 (2026-06-06 Aiden) |
 | TASK-118 | 260606 | [P6-SPR-06] Order 목록 역할별 격리 (CUSTOMS_BROKER·DELIVERY_AGENT RLS) | P2 | TASK-113 ✅ | D_Kai | ✅ | [TASK-118](tasks/TASK-118_260606_P6SPR06_Order목록역할별격리_DKai.md) | IMP-102 완료 · `270146e` · 259/259 PASS · Advisory 3건(비차단) |
 | TASK-119 | 260606 | [P6-SPR-07] 운송 요율 CARRIER 직접 등록 허용 + platform_fee_rate 격리 | P2 | TASK-113 ✅ | D_Kai | ✅ | [TASK-119](tasks/TASK-119_260606_P6SPR07_운송요율CARRIER직접등록_DKai.md) | IMP-103 완료 · `154ea5d` · 267/267 PASS · Aiden 인계 완료 |
 | TASK-120 | 260606 | [P6-SPR-08] Phase 6 회귀 테스트 + E2E 검증 + UAT 절차서 | P2 | TASK-114 ✅ · TASK-115 ✅ · TASK-116 ✅ · TASK-117 ✅ · TASK-118 ✅ · TASK-119 ✅ | D_Kai + Riley | 🚫 | [TASK-120](tasks/TASK-120_260606_P6SPR08_회귀테스트E2E검증_DKai.md) | IMP-104 |
@@ -184,7 +184,7 @@
 | Agent | 진행 중 | 재작업/조치 필요 | 블로커 대기 |
 |:------|:--------|:----------------|:----------|
 | **D_Kai (OpenCode)** | **일시 부재** — TASK-117 Riley 재배정 완료 | Advisory 누적(비차단) + R-17 §6 위반 기록(TASK-119) | TASK-120 (TASK-117 ✅ 후) |
-| **Riley** | **TASK-117 ⬜ 즉시 착수 가능** | R-17 절차 엄수 필요 (위반 이력 있음) | TASK-120 (SPR-08 E2E) — TASK-117 ✅ 후 |
+| **Riley** | **TASK-117 🔄 구현 중** | R-17 절차 엄수 필요 (위반 이력 있음) | TASK-120 (SPR-08 E2E) — TASK-117 ✅ 후 |
 | B_Kai | — | — | Phase 6 할당 없음 (신규 할당 가능 상태) |
 | N_Kai | TASK-087 ⬜ (재교육 세션 — 완료 후 신규 할당 재개) | R-17 위반 누적 — 신규 할당 중단 유지 | — |
 | Ring | — | — | 신규 할당 중단 유지 (9차 위반 누적) |

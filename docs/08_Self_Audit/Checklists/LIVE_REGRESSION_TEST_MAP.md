@@ -300,7 +300,12 @@
 | **TC-MEM-03** | deleteDepartment — 부서 삭제 | DELETE 호출 및 id 조건 정합 확인 | `tests/unit/member/corporate.test.ts` |
 | **TC-MEM-04** | updateOrganizationInfo — 권한 없는 역할 거부 | USER 역할의 법인 정보 수정 시도 차단 | `tests/unit/member/corporate.test.ts` |
 
-
+### 25. Phase 6 오더 등록 및 요율 검증 (P6 Order Registration & Service Rates)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-P6-ORDERUI-01** | createOrderServices — 활성 및 유효기간 내 요율 등록 | 정상 요율 카드로 오더 서비스 배정 등록 성공 확인 | `tests/integration/p6-orderui.test.ts` |
+| **TC-P6-ORDERUI-02** | createOrderServices — 비활성 요율 차단 | 비활성 요율 카드가 포함된 오더 제출 거부 검증 | `tests/integration/p6-orderui.test.ts` |
+| **TC-P6-ORDERUI-03** | createOrderServices — 만료 요율 차단 | 유효기간 만료 요율 카드가 포함된 오더 제출 거부 검증 | `tests/integration/p6-orderui.test.ts` |
 
 ---
 
@@ -308,6 +313,7 @@
 
 | 검증일 | 버전 | 성공/실패 | 총 소요시간 | 결과 리포트 |
 | :--- | :--- | :---: | :--- | :--- |
+| 2026-06-06 | v1.5.0 | ✅ PASS | 32.15s | Phase 6 Sprint 5 오더 등록 UI 개선 및 이중 요율 검증 완료. TC-P6-ORDERUI-01~03 신규 등록 및 전체 회귀 테스트 통과. |
 | 2026-04-27 | v5.0 | ✅ PASS | 29.10s | 124/124 Phase 4 Sprint 5 (선불 지갑) 완료. 지갑 연동, 충전/결제 액션, 마이페이지 대시보드 구현 및 회귀 테스트 9건(Wallet 관련 9개 TC) 신규 등록. |
 | 2026-04-27 | v6.0 | ✅ PASS | 32.15s | 133/133 Phase 4 Sprint 6 (고객지원 포털) 완료. QnA/FAQ/공지사항 기능 구현 및 TC-CS-01~04 신규 등록. |
 | 2026-04-28 | v7.0 | ✅ PASS | 34.20s | 140/140 — Phase 4 Sprint 7 재무+통계 완료. TC-FIN7-01~04, TC-STAT-01~02 신규 등록. |
