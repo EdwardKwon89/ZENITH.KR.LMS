@@ -328,3 +328,5 @@
 | 2026-05-31 | Aiden (Claude) | IMP-092 신규 등재 — TISA 요율 3계층 구조 도입 (carrier_cost + margin_rate + platform_fee_rate 분리). DEF-035 연계. TASK-103(D_Kai) 발령. UAT 진행 전 필수 |
 | 2026-05-31 | Aiden (Claude) | IMP-093 신규 등재 — TISA Dashboard 실 Rate Card 연동 (Mock 제거, DB 실조회, 경로 선택 후 스냅샷). DEF-032 연계. TASK-104(D_Kai) 발령. 전제조건: TASK-103 ✅. UAT 진행 전 필수 |
 | 2026-06-03 | Aiden (Claude) | IMP-093 ✅ 확정 — TASK-104 ✅ 승인 반영 (미기재 정정). IMP-094 신규 등재 — 요율 관리 워크플로우 고도화 (방안2, Phase M, Medium). IMP-095 신규 등재 + ✅ 확정 — Rate Card 항로 기반 매칭 (TASK-109 D_Kai 승인, 236/236 PASS). 합계 70/79→71/81 (87.7%). |
+| 2026-06-06 | Aiden (Claude) | **IMP-097~104 신규 등재** — Phase 6 신규 서비스 역할 모델 + 멀티 서비스 배정 구조. [PH6_SPR_PROGRESS.md](PH6_SPR_PROGRESS.md) 전용 추적기 신설. |
+| 2026-06-06 | D_Kai (OpenCode) | **IMP-097 🔔 완료** — TASK-113(P6-SPR-01) DB 스키마 기반 구축. Migration 3종·rbac·routes·TC 5건·248/248 PASS. `bb9a3fc`. |
