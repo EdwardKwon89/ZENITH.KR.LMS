@@ -1,8 +1,8 @@
 # 🗺️ LIVE Regression Test Master Map
 
 > **상태:** [ACTIVE]  
-> **총 테스트 케이스:** 248 Cases  
-> **최종 검증일:** 2026-06-06 (TASK-113 P6-SPR-01)  
+> **총 테스트 케이스:** 251 Cases  
+> **최종 검증일:** 2026-06-06 (TASK-114 P6-SPR-02)  
 
 제니스 플랫폼의 비즈니스 영속성을 보장하는 회귀 테스트 케이스의 통합 명세서입니다. 모든 신규 개발 및 수정 시 이 맵에 케이스가 추가되어야 하며, 전체 테스트가 통과되어야 합니다.
 
@@ -161,6 +161,9 @@
 | **TC-RATES-04** | TISA 버전 관리 (SUPERSEDED) | 신규 등록 시 기존 ACTIVE 요율의 상태 전환 검증 | `tests/unit/rates/rates.test.ts` |
 | **TC-RATES-06** | Surcharges 탭 통합 (/admin/rates) | `/admin/rates` 페이지 내 Surcharges 탭에서 `zen_surcharges` CRUD 정상 동작 확인 (E2E 커버) | `tests/e2e/e2e-18-packing-pricing-ratecards.spec.ts` |
 | **TC-RATES-07** | Route Network 자동 생성 (Rate Card 등록 시) | `createRateCard()` 호출 시 `origin_port_id` + `dest_port_id`가 있으면 `zen_route_network` 자동 UPSERT. port 미지정 시 skip. route network 실패해도 Rate Card 등록 유지 (non-fatal). | `tests/unit/rates/rates.test.ts` |
+| **TC-P6-CUSTOMS-01** | ADMIN createCustomsRate 호출 가능 | ADMIN/MANAGER는 모든 통관사 요율 등록 가능 | `tests/unit/rates/customs-rates.test.ts` |
+| **TC-P6-CUSTOMS-02** | CUSTOMS_BROKER 본인 org 요율 등록 | CUSTOMS_BROKER는 소속 조직 요율 등록 허용 | `tests/unit/rates/customs-rates.test.ts` |
+| **TC-P6-CUSTOMS-03** | CUSTOMS_BROKER 타인 org 요율 차단 | CUSTOMS_BROKER는 타 조직 요율 등록 차단 | `tests/unit/rates/customs-rates.test.ts` |
 
 ---
 

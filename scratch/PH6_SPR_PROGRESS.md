@@ -26,11 +26,11 @@
 | 항목 | 수치 |
 |:----|:----|
 | 전체 SPR | 8개 |
-| 완료 SPR | 0개 |
+| 완료 SPR | 1개 (SPR-01 ✅) |
 | 총 공수 | 40 MD |
-| 완료 공수 | 0 MD |
-| 진행률 | 0% |
-| 최근 업데이트 | 2026-06-06 (D_Kai) — TASK-113(SPR-01) 🔔 검토 요청 |
+| 완료 공수 | 8 MD |
+| 진행률 | 20% |
+| 최근 업데이트 | 2026-06-06 (Aiden) — TASK-113(SPR-01) ✅ PASS · TASK-114/115/118/119 블로커 해제 |
 
 ---
 
@@ -38,13 +38,13 @@
 
 | SPR | TASK-ID | 내용 | 담당 | IMP | 공수 | 전제조건 | 상태 | 완료일 | 코드커밋 |
 |:---:|:-------:|:----|:----:|:---:|:----:|:--------:|:----:|:------:|:-------:|
-| SPR-01 | [TASK-113](../.agent/tasks/TASK-113_260606_P6SPR01_DB스키마기반구축_DKai.md) | DB 스키마 기반 구축 (org_type·요율테이블·order_services·migration) | D_Kai | IMP-097 | 8 MD | 없음 | 🔔 | — | `bb9a3fc` |
-| SPR-02 | [TASK-114](../.agent/tasks/TASK-114_260606_P6SPR02_통관서비스요율관리_DKai.md) | 통관 서비스 요율 관리 (Actions + UI) | D_Kai | IMP-098 | 5 MD | TASK-113 ✅ | 🚫 | — | — |
-| SPR-03 | [TASK-115](../.agent/tasks/TASK-115_260606_P6SPR03_배송서비스요율관리_DKai.md) | 배송 서비스 요율 관리 (Actions + UI, LOCAL+TOTAL) | D_Kai | IMP-099 | 5 MD | TASK-113 ✅ | 🚫 | — | — |
+| SPR-01 | [TASK-113](../.agent/tasks/TASK-113_260606_P6SPR01_DB스키마기반구축_DKai.md) | DB 스키마 기반 구축 (org_type·요율테이블·order_services·migration) | D_Kai | IMP-097 | 8 MD | 없음 | ✅ | 2026-06-06 | `bb9a3fc` |
+| SPR-02 | [TASK-114](../.agent/tasks/TASK-114_260606_P6SPR02_통관서비스요율관리_DKai.md) | 통관 서비스 요율 관리 (Actions + UI) | D_Kai | IMP-098 | 5 MD | TASK-113 ✅ | 🔔 | — | `a64f970` |
+| SPR-03 | [TASK-115](../.agent/tasks/TASK-115_260606_P6SPR03_배송서비스요율관리_DKai.md) | 배송 서비스 요율 관리 (Actions + UI, LOCAL+TOTAL) | D_Kai | IMP-099 | 5 MD | TASK-113 ✅ | ⬜ | — | — |
 | SPR-04 | [TASK-116](../.agent/tasks/TASK-116_260606_P6SPR04_통합서비스요율조회API_DKai.md) | 통합 서비스 요율 조회 API + 오더-서비스 배정 Actions | D_Kai | IMP-100 | 5 MD | TASK-114 ✅ · TASK-115 ✅ | 🚫 | — | — |
 | SPR-05 | [TASK-117](../.agent/tasks/TASK-117_260606_P6SPR05_Order등록UI개선_DKai.md) | Order 등록 UI 개선 (서비스조합선택·요율확인 Step 추가) | D_Kai | IMP-101 | 6 MD | TASK-116 ✅ | 🚫 | — | — |
-| SPR-06 | [TASK-118](../.agent/tasks/TASK-118_260606_P6SPR06_Order목록역할별격리_DKai.md) | Order 목록 역할별 격리 (CUSTOMS_BROKER·DELIVERY_AGENT RLS) | D_Kai | IMP-102 | 4 MD | TASK-113 ✅ | 🚫 | — | — |
-| SPR-07 | [TASK-119](../.agent/tasks/TASK-119_260606_P6SPR07_운송요율CARRIER직접등록_DKai.md) | 운송 요율 CARRIER 직접 등록 허용 + platform_fee_rate 격리 | D_Kai | IMP-103 | 3 MD | TASK-113 ✅ | 🚫 | — | — |
+| SPR-06 | [TASK-118](../.agent/tasks/TASK-118_260606_P6SPR06_Order목록역할별격리_DKai.md) | Order 목록 역할별 격리 (CUSTOMS_BROKER·DELIVERY_AGENT RLS) | D_Kai | IMP-102 | 4 MD | TASK-113 ✅ | ⬜ | — | — |
+| SPR-07 | [TASK-119](../.agent/tasks/TASK-119_260606_P6SPR07_운송요율CARRIER직접등록_DKai.md) | 운송 요율 CARRIER 직접 등록 허용 + platform_fee_rate 격리 | D_Kai | IMP-103 | 3 MD | TASK-113 ✅ | ⬜ | — | — |
 | SPR-08 | [TASK-120](../.agent/tasks/TASK-120_260606_P6SPR08_회귀테스트E2E검증_DKai.md) | 회귀 테스트 확장 + E2E 검증 + UAT 절차서 | D_Kai + Riley | IMP-104 | 4 MD | TASK-114~119 전량 ✅ | 🚫 | — | — |
 
 ---
@@ -61,8 +61,8 @@ TASK-113 (SPR-01) ──┬──► TASK-114 (SPR-02) ──┐
                     └──► TASK-119 (SPR-07) ─────────────────────────────────────────────────►┘
 ```
 
-**즉시 착수 가능**: TASK-114 (SPR-02), TASK-115 (SPR-03), TASK-118 (SPR-06), TASK-119 (SPR-07) — 전제조건 TASK-113 ✅ 해제
-**TASK-113 상태**: 🔔 검토 요청 (Aiden 승인 대기)
+**즉시 착수 가능 (⬜)**: TASK-114 (SPR-02), TASK-115 (SPR-03), TASK-118 (SPR-06), TASK-119 (SPR-07) — 병렬 진행 가능
+**TASK-113 상태**: ✅ Aiden PASS (2026-06-06)
 
 ---
 
@@ -70,7 +70,9 @@ TASK-113 (SPR-01) ──┬──► TASK-114 (SPR-02) ──┐
 
 | IMP | 내용 | TASK | 상태 | 완료일 |
 |:---:|:----|:----:|:----:|:------:|
-| IMP-097 | DB 스키마 기반 (org_type·rate tables·order_services·RLS·migration) | TASK-113 | 🔔 | — |
+| IMP-097 | DB 스키마 기반 (org_type·rate tables·order_services·RLS·migration) | TASK-113 | ✅ | 2026-06-06 |
+| IMP-100 | 통합 서비스 요율 조회 API + 오더-서비스 배정 Actions | TASK-116 | 🚫 (TASK-114·115 ✅ 후) | — |
+| IMP-101 | Order 등록 UI 개선 (서비스조합선택·요율확인·GAP-P6-01 보완) | TASK-117 | 🚫 (TASK-116 ✅ 후) | — |
 | IMP-098 | 통관 서비스 요율 관리 Actions + UI | TASK-114 | ⬜ (TASK-113 ✅ 후 착수 가능) | — |
 | IMP-099 | 배송 서비스 요율 관리 Actions + UI | TASK-115 | ⬜ (TASK-113 ✅ 후 착수 가능) | — |
 | IMP-102 | Order 목록 RLS 역할별 격리 (CUSTOMS_BROKER·DELIVERY_AGENT) | TASK-118 | ⬜ (TASK-113 ✅ 후 착수 가능) | — |
@@ -85,3 +87,4 @@ TASK-113 (SPR-01) ──┬──► TASK-114 (SPR-02) ──┐
 |:-----|:----:|:----|
 | 2026-06-06 | Aiden (Claude) | Phase 6 SPR 진척 추적기 초기 작성 — TASK-113~120 발령 완료 |
 | 2026-06-06 | D_Kai (OpenCode) | TASK-113(SPR-01) 🔔 검토 요청 — migration 3종·rbac·routes·TC 5건·248/248 PASS |
+| 2026-06-06 | Aiden (Claude) | TASK-113(SPR-01) ✅ PASS — DoD 11/11 실물 검증·248/248 PASS. GAP-P6-01(order_services INSERT 정책) TASK-117 DoD 이관. SPR-02/03/06/07 블로커 해제 → ⬜. IMP-097 완료. 진행률 0%→20% |
