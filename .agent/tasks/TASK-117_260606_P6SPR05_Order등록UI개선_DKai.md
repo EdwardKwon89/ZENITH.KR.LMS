@@ -6,12 +6,12 @@
 | Phase | Phase 6 / SPR-05 |
 | 생성일 | 2026-06-06 |
 | 발령자 | Aiden (Claude, ZEN_CEO) |
-| 담당 Agent | D_Kai (OpenCode) |
+| 담당 Agent | Riley (Gemini) — D_Kai 일시 부재로 재배정 (2026-06-06 Aiden) |
 | 우선순위 | P1 |
 | 전제조건 | TASK-116 ✅ |
 | 관련 IMP | IMP-101 |
 | 관련 설계 | [An-11 §7](../../docs/02_Analysis/An_11_Phase6_신규서비스역할모델_설계.md) |
-| 상태 | 🚫 블로커 |
+| 상태 | ⬜ 미착수 (즉시 착수 가능) |
 
 ---
 
