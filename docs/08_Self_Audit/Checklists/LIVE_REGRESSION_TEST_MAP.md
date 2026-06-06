@@ -1,8 +1,8 @@
 # 🗺️ LIVE Regression Test Master Map
 
 > **상태:** [ACTIVE]  
-> **총 테스트 케이스:** 259 Cases  
-> **최종 검증일:** 2026-06-06 (TASK-118 P6-SPR-06)  
+> **총 테스트 케이스:** 265 Cases  
+> **최종 검증일:** 2026-06-06 (TASK-119 P6-SPR-07)  
 
 제니스 플랫폼의 비즈니스 영속성을 보장하는 회귀 테스트 케이스의 통합 명세서입니다. 모든 신규 개발 및 수정 시 이 맵에 케이스가 추가되어야 하며, 전체 테스트가 통과되어야 합니다.
 
@@ -161,6 +161,9 @@
 | **TC-RATES-04** | TISA 버전 관리 (SUPERSEDED) | 신규 등록 시 기존 ACTIVE 요율의 상태 전환 검증 | `tests/unit/rates/rates.test.ts` |
 | **TC-RATES-06** | Surcharges 탭 통합 (/admin/rates) | `/admin/rates` 페이지 내 Surcharges 탭에서 `zen_surcharges` CRUD 정상 동작 확인 (E2E 커버) | `tests/e2e/e2e-18-packing-pricing-ratecards.spec.ts` |
 | **TC-RATES-07** | Route Network 자동 생성 (Rate Card 등록 시) | `createRateCard()` 호출 시 `origin_port_id` + `dest_port_id`가 있으면 `zen_route_network` 자동 UPSERT. port 미지정 시 skip. route network 실패해도 Rate Card 등록 유지 (non-fatal). | `tests/unit/rates/rates.test.ts` |
+| **TC-P6-CARRIER-01** | CARRIER createRateCard 본인 carrier 허용 | CARRIER는 본인 carrier_id 요율 등록 가능 | `tests/unit/rates/rates.test.ts` |
+| **TC-P6-CARRIER-02** | CARRIER createRateCard 타 carrier 차단 | CARRIER는 타 carrier 요율 등록 시 차단 | `tests/unit/rates/rates.test.ts` |
+| **TC-P6-CARRIER-03** | CARRIER getRateCards 자사 요율만 조회 | CARRIER는 자사 carrier_id로 필터링된 요율만 조회 | `tests/unit/rates/rates.test.ts` |
 | **TC-P6-CUSTOMS-01** | ADMIN createCustomsRate 호출 가능 | ADMIN/MANAGER는 모든 통관사 요율 등록 가능 | `tests/unit/rates/customs-rates.test.ts` |
 | **TC-P6-CUSTOMS-02** | CUSTOMS_BROKER 본인 org 요율 등록 | CUSTOMS_BROKER는 소속 조직 요율 등록 허용 | `tests/unit/rates/customs-rates.test.ts` |
 | **TC-P6-CUSTOMS-03** | CUSTOMS_BROKER 타인 org 요율 차단 | CUSTOMS_BROKER는 타 조직 요율 등록 차단 | `tests/unit/rates/customs-rates.test.ts` |
@@ -172,6 +175,9 @@
 | **TC-P6-ORDERS-03** | DELIVERY_AGENT getAssignedOrders 호출 가능 | DELIVERY_AGENT는 할당 오더 조회 가능 | `tests/unit/orders/assigned-orders.test.ts` |
 | **TC-P6-ORDERS-04** | CORPORATE getAssignedOrders 접근 차단 | 화주는 할당 오더 조회 권한 없음 | `tests/unit/orders/assigned-orders.test.ts` |
 | **TC-P6-ORDERS-05** | DELIVERY_AGENT category=DELIVERY 필터 조회 | DELIVERY_AGENT는 배송 유형 필터 조회 가능 | `tests/unit/orders/assigned-orders.test.ts` |
+| **TC-P6-SVCRATE-01** | 모든 요율 타입 통합 조회 | 운송/통관/배송(LOCAL/TOTAL) 4종 요율 모두 정상 반환 확인 | `tests/unit/rates/service-rates.test.ts` |
+| **TC-P6-SVCRATE-02** | 운송 요율 없음 에러 처리 | 선택한 노선에 운송 요율 없을 시 에러 메시지 반환 확인 | `tests/unit/rates/service-rates.test.ts` |
+| **TC-P6-SVCRATE-03** | 부분 결과 (운송만 존재) | 통관/배송 요율 없어도 운송 요율만 정상 반환 확인 | `tests/unit/rates/service-rates.test.ts` |
 
 ---
 

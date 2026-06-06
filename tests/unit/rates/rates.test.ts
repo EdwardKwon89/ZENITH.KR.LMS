@@ -14,7 +14,7 @@ vi.mock('next/cache', () => ({
 describe('Rates Actions Unit Tests', () => {
   const mockAdminProfile = { id: 'admin-1', role: USER_ROLES.ADMIN, org_id: 'sntl-org' };
   const mockCarrierProfile = { id: 'carrier-1', role: USER_ROLES.CARRIER, org_id: 'carrier-org-123' };
-  
+
   const mockSupabase = {
     from: vi.fn().mockReturnThis(),
     select: vi.fn().mockReturnThis(),
@@ -35,15 +35,84 @@ describe('Rates Actions Unit Tests', () => {
     mockSupabase.then.mockReset();
   });
 
-  it('TC-RATES-01: should restrict createRateCard to ADMIN or MANAGER', async () => {
-    (validateUserAction as any).mockResolvedValue({ 
-      profile: { id: 'user-1', role: USER_ROLES.CARRIER }, 
-      supabase: mockSupabase 
+  it('TC-RATES-01: should allow MANAGER to create rate cards', async () => {
+    (validateUserAction as any).mockResolvedValue({
+      profile: { id: 'manager-1', role: USER_ROLES.MANAGER, org_id: 'sntl-org' },
+      supabase: mockSupabase,
     });
 
-    const result = await createRateCard({ card: { carrier_id: 'c-1', transport_mode: 'AIR' } as any, surcharges: [] });
+    // 1. Check existing active rate cards — none
+    mockSupabase.then.mockImplementationOnce((cb: any) => cb({ data: [], error: null }));
+    // 2. Insert new card
+    mockSupabase.then.mockImplementationOnce((cb: any) => cb({ data: { id: 'new-card' }, error: null }));
+
+    const payload = {
+      card: { carrier_id: 'c-1', transport_mode: 'AIR', tiers: [], valid_from: '2026-06-01' },
+      surcharges: [],
+    };
+
+    const result = await createRateCard(payload);
+    expect(result.data.id).toBe('new-card');
+    expect(result.error).toBeNull();
+  });
+
+  it('TC-P6-CARRIER-01: should allow CARRIER to create rate card for own carrier', async () => {
+    (validateUserAction as any).mockResolvedValue({
+      profile: mockCarrierProfile,
+      supabase: mockSupabase,
+    });
+
+    // 1. zen_carriers lookup (own carrier match)
+    mockSupabase.then.mockImplementationOnce((cb: any) => cb({ data: { id: 'my-carrier-uuid' }, error: null }));
+    // 2. Check existing active rate cards — none
+    mockSupabase.then.mockImplementationOnce((cb: any) => cb({ data: [], error: null }));
+    // 3. Insert new card
+    mockSupabase.then.mockImplementationOnce((cb: any) => cb({ data: { id: 'carrier-card' }, error: null }));
+
+    const payload = {
+      card: { carrier_id: 'my-carrier-uuid', transport_mode: 'SEA', tiers: [], valid_from: '2026-06-01' },
+      surcharges: [],
+    };
+
+    const result = await createRateCard(payload);
+    expect(result.data.id).toBe('carrier-card');
+    expect(result.error).toBeNull();
+  });
+
+  it('TC-P6-CARRIER-02: should reject CARRIER creating rate card for other carrier', async () => {
+    (validateUserAction as any).mockResolvedValue({
+      profile: mockCarrierProfile,
+      supabase: mockSupabase,
+    });
+
+    // 1. zen_carriers lookup (own carrier)
+    mockSupabase.then.mockImplementationOnce((cb: any) => cb({ data: { id: 'my-carrier-uuid' }, error: null }));
+
+    const payload = {
+      card: { carrier_id: 'other-carrier-uuid', transport_mode: 'SEA', tiers: [], valid_from: '2026-06-01' },
+      surcharges: [],
+    };
+
+    const result = await createRateCard(payload);
     expect(result.data).toBeNull();
-    expect(result.error).toBe("요율 등록 권한이 없습니다.");
+    expect(result.error).toBe("본인 운송사 요율만 등록 가능합니다.");
+  });
+
+  it('TC-P6-CARRIER-03: should filter getRateCards to own carrier for CARRIER role', async () => {
+    (validateUserAction as any).mockResolvedValue({
+      profile: mockCarrierProfile,
+      supabase: mockSupabase,
+    });
+
+    // 1. zen_carriers lookup
+    mockSupabase.then.mockImplementationOnce((cb: any) => cb({ data: { id: 'my-carrier-uuid' }, error: null }));
+    // 2. FindRateCards result
+    mockSupabase.range.mockResolvedValueOnce({ data: [], error: null, count: 0 });
+
+    await getRateCards({ transport_mode: 'AIR' });
+
+    // Verify carrier_id filter was applied
+    expect(mockSupabase.eq).toHaveBeenCalledWith('carrier_id', 'my-carrier-uuid');
   });
 
   it('TC-RATES-02: should return all rate cards for ADMIN role', async () => {

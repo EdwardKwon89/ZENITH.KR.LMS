@@ -88,11 +88,22 @@ export const createRateCard = withAction(async function (payload: {
   const { supabase, profile } = await validateUserAction();
   const adminRepo = new AdminRepository(supabase);
 
-  if (!profile || (profile.role !== USER_ROLES.ADMIN && profile.role !== USER_ROLES.MANAGER)) {
+  if (!profile || (profile.role !== USER_ROLES.ADMIN && profile.role !== USER_ROLES.MANAGER && profile.role !== USER_ROLES.CARRIER)) {
     throw new Error("요율 등록 권한이 없습니다.");
   }
 
   if (!payload.card.carrier_id) throw new Error("운송사 정보(carrier_id)가 누락되었습니다.");
+
+  if (profile.role === USER_ROLES.CARRIER) {
+    const { data: carrier } = await supabase
+      .from('zen_carriers')
+      .select('id')
+      .eq('org_id', profile.org_id)
+      .single();
+    if (!carrier || carrier.id !== payload.card.carrier_id) {
+      throw new Error("본인 운송사 요율만 등록 가능합니다.");
+    }
+  }
   if (!payload.card.transport_mode) throw new Error("운송 모드(transport_mode)가 누락되었습니다.");
 
   const { data: existingRates } = await adminRepo.findExistingActiveRateCards(
@@ -176,6 +187,22 @@ export async function getRateCards(filters: {
   pageSize?: number;
 } = {}) {
   const { supabase, profile } = await validateUserAction();
+
+  if (!profile || (profile.role !== USER_ROLES.ADMIN && profile.role !== USER_ROLES.MANAGER && profile.role !== USER_ROLES.CARRIER)) {
+    throw new Error("요율 조회 권한이 없습니다.");
+  }
+
+  if (profile.role === USER_ROLES.CARRIER) {
+    const { data: carrier } = await supabase
+      .from('zen_carriers')
+      .select('id')
+      .eq('org_id', profile.org_id)
+      .single();
+    if (carrier) {
+      filters.carrier_id = carrier.id;
+    }
+  }
+
   const adminRepo = new AdminRepository(supabase);
 
   const { data, error, count } = await adminRepo.findRateCards({
