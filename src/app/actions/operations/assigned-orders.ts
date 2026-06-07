@@ -54,7 +54,7 @@ export async function getAssignedOrders(category?: 'TRANSPORT' | 'CUSTOMS' | 'DE
       status,
       assigned_at,
       order_id,
-      zen_orders!inner(order_no, shipper_id, zen_organizations!inner(name))
+      zen_orders!inner(order_no, shipper_id, zen_organizations!shipper_id!inner(name))
     `)
     .eq('provider_id', profile.org_id);
 

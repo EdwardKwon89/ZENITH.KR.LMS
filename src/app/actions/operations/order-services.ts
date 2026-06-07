@@ -65,22 +65,19 @@ export const createOrderServices = withAction(async function (orderId: string, s
     }
   }
 
-  const { data, error } = await supabase
-    .from("zen_order_services")
-    .insert(
-      services.map((s: any) => ({
-        order_id: orderId,
-        service_type: s.service_type,
-        provider_id: s.provider_id,
-        rate_card_id: s.rate_card_id || null,
-        customs_rate_id: s.customs_rate_id || null,
-        delivery_rate_id: s.delivery_rate_id || null,
-        quoted_cost: s.quoted_cost,
-        currency: s.currency || 'USD',
-        status: 'REQUESTED',
-      }))
-    )
-    .select();
+  const { data, error } = await supabase.rpc("create_order_services_atomic", {
+    p_order_id: orderId,
+    p_services: services.map((s: any) => ({
+      service_type: s.service_type,
+      provider_id: s.provider_id,
+      rate_card_id: s.rate_card_id || null,
+      customs_rate_id: s.customs_rate_id || null,
+      delivery_rate_id: s.delivery_rate_id || null,
+      quoted_cost: s.quoted_cost,
+      currency: s.currency || 'USD',
+    })),
+    p_user_id: profile.id,
+  });
 
   if (error) throw new Error(error.message);
 

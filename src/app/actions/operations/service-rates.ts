@@ -16,6 +16,7 @@ export interface ServiceRateQueryParams {
 export interface TransportRateOption {
   id: string;
   carrierId: string;
+  orgId: string;
   carrierName: string;
   transportMode: string;
   estimatedCost: number;
@@ -81,7 +82,7 @@ export const getAvailableServiceRates = withAction(async function (
 
   let rateQuery = supabase
     .from("zen_rate_cards")
-    .select("id, carrier_id, transport_mode, tiers, currency, carrier:zen_carriers!carrier_id(name)")
+    .select("id, carrier_id, transport_mode, tiers, currency, carrier:zen_carriers!carrier_id(name, org_id)")
     .eq("is_active", true)
     .eq("transport_mode", params.transportMode);
 
@@ -102,6 +103,7 @@ export const getAvailableServiceRates = withAction(async function (
   const transport: TransportRateOption[] = transportRates.map((r: any) => ({
     id: r.id,
     carrierId: r.carrier_id,
+    orgId: r.carrier?.org_id || '',
     carrierName: r.carrier?.name || '',
     transportMode: r.transport_mode,
     estimatedCost: calculateTransportCost(r.tiers, params.cargoWeight) || 0,
