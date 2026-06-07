@@ -175,23 +175,20 @@ export default function CustomsRatesClient({ initialRates, organizations, userRo
 
   return (
     <div className="space-y-4">
-      {canEdit && (
-        <div className="flex justify-end">
-          <button
-            onClick={openNew}
-            className="flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-xl hover:bg-brand-700 transition-all font-semibold shadow-sm hover:shadow-brand-500/20"
-          >
-            <Plus size={18} />
-            새 요율 등록
-          </button>
-        </div>
-      )}
-
       <ZenDataGrid
         columns={columns}
         data={visibleRates}
-        title="통관 서비스 요율 목록"
-        description="통관사별 국가 단위 요율 정보를 관리합니다."
+        actions={
+          canEdit ? (
+            <button
+              onClick={openNew}
+              className="flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-xl hover:bg-brand-700 transition-all font-semibold shadow-sm hover:shadow-brand-500/20"
+            >
+              <Plus size={18} />
+              새 요율 등록
+            </button>
+          ) : undefined
+        }
       />
 
       <AnimatePresence>

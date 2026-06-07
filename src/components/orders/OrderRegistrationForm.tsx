@@ -455,6 +455,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
       };
       
       const orderResult = await createOrder(finalData as OrderRegistrationInput);
+      console.log('E2E_ORDER_RESULT:', orderResult);
       
       const selectedServicesMapped = requiredServices.map(service => {
         const selected = selectedRates[service.key];

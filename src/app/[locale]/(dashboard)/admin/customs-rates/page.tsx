@@ -1,6 +1,7 @@
 import { requireAuth } from "@/lib/auth/guards";
 import { getCustomsRates } from "@/app/actions/admin/customs-rates";
 import { createClient } from "@/utils/supabase/server";
+import { FileText } from "lucide-react";
 import CustomsRatesClient from "./customs-rates-client";
 
 export default async function CustomsRatesPage() {
@@ -16,10 +17,15 @@ export default async function CustomsRatesPage() {
   const rates = await getCustomsRates();
 
   return (
-    <div className="flex-1 flex flex-col gap-6 p-4 md:p-8">
-      <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-bold text-slate-900 font-heading tracking-tight">통관 서비스 요율</h1>
-        <p className="text-slate-500">통관사별 국가 단위 요율 정보를 관리합니다.</p>
+    <div className="space-y-6">
+      <div className="flex items-center gap-4">
+        <div className="p-2.5 bg-brand-600 rounded-xl text-white shadow-lg shadow-brand-200">
+          <FileText size={24} />
+        </div>
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">통관 서비스 요율</h1>
+          <p className="text-xs font-medium text-slate-500">통관사별 국가 단위 요율 정보를 관리합니다.</p>
+        </div>
       </div>
       <CustomsRatesClient
         initialRates={rates}

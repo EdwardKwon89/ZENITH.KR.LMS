@@ -42,6 +42,7 @@ interface RateCardListProps {
   onDelete?: (id: string) => void;
   canEdit?: boolean;
   canDelete?: boolean;
+  actions?: React.ReactNode;
 }
 
 export const RateCardList: React.FC<RateCardListProps> = ({
@@ -51,6 +52,7 @@ export const RateCardList: React.FC<RateCardListProps> = ({
   onDelete,
   canEdit = false,
   canDelete = false,
+  actions,
 }) => {
   const columns: ColumnDef<RateCard>[] = [
     {
@@ -183,9 +185,8 @@ export const RateCardList: React.FC<RateCardListProps> = ({
     <ZenDataGrid
       columns={columns}
       data={rates}
-      title="운송 서비스 요율 목록"
-      description="운송사별 항로 및 중량구간(Slab) 요율 정보를 관리합니다."
       loading={loading}
+      actions={actions}
     />
   );
 };
