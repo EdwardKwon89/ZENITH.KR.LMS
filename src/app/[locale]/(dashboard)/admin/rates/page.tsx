@@ -47,22 +47,22 @@ export default function RatesManagementPage() {
     <div className="flex-1 flex flex-col gap-6 p-4 md:p-8">
       <div className="flex flex-col gap-2">
         <h1 className="text-3xl font-bold text-slate-900 font-heading tracking-tight">
-          운송 요율 관리
+          운송 서비스 요율
         </h1>
         <p className="text-slate-500">
-          운송사별, 항로별 기본 요율 및 중량구간(Slab) 체계를 관리합니다.
+          운송사별 항로 및 중량구간(Slab) 체계를 관리합니다.
         </p>
       </div>
 
       {isCarrier && (
-        <ZenCard className="bg-blue-600 border-none flex items-center gap-4 text-white">
-          <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center">
-            <AlertCircle className="w-6 h-6" />
+        <ZenCard className="bg-brand-600 border-none flex items-center gap-4 text-white">
+          <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
+            <AlertCircle className="w-5 h-5" />
           </div>
           <div>
-            <p className="font-black tracking-tight text-lg">Partner View Mode Active</p>
-            <p className="text-blue-100 text-sm">
-              운송 파트너 계정으로 접속 중입니다. 요율 정보는 조회만 가능하며 수정 권한이 제한됩니다.
+            <p className="font-bold text-base">파트너 조회 모드</p>
+            <p className="text-brand-100 text-sm">
+              운송 파트너 계정으로 접속 중입니다. 요율 정보는 조회만 가능합니다.
             </p>
           </div>
         </ZenCard>
@@ -88,8 +88,6 @@ export default function RatesManagementPage() {
           onDelete={handleDeleteRate}
           canEdit={canEdit}
           canDelete={canDelete}
-          searchTerm={searchTerm}
-          onSearchChange={setSearchTerm}
         />
       </div>
 
