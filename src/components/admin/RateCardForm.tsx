@@ -235,7 +235,7 @@ export function RateCardForm(props: RateCardFormProps) {
       </div>
 
       <div className="lg:col-span-4 space-y-6">
-        <ZenCard className="bg-white border-slate-200 sticky top-8">
+        <ZenCard className="bg-white border-slate-200">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-xl font-bold text-slate-900">TISA 3-Tier Rate Summary</h3>
             {props.selectedCarrier && props.originPortId ? (

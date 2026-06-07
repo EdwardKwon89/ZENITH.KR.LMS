@@ -52,7 +52,7 @@ export interface RatesFormState {
   canDelete: boolean;
   filteredRates: any[];
   handleEditRate: (rate: any) => void;
-  handleSaveRate: () => Promise<void>;
+  handleSaveRate: () => Promise<boolean>;
   handleDeleteRate: (id: string) => Promise<void>;
   resetForm: () => void;
 }
@@ -128,6 +128,8 @@ export function useRates(): RatesFormState {
   }, []);
 
   const resetForm = () => {
+    setSelectedCarrier('');
+    setServiceType('AIR');
     setCarrierCost(0);
     setMarginRate(15.0);
     setPlatformFeeRate(5.0);
@@ -157,15 +159,15 @@ export function useRates(): RatesFormState {
     })));
   };
 
-  const handleSaveRate = async () => {
+  const handleSaveRate = async (): Promise<boolean> => {
     if (!selectedCarrier || !serviceType) {
       alert('필수 정보(Carrier, Transport Mode)를 모두 입력해주세요.');
-      return;
+      return false;
     }
 
     setLoading(true);
     try {
-      const result = await createRateCard({
+      await createRateCard({
         card: {
           carrier_id: selectedCarrier,
           transport_mode: serviceType,
@@ -186,11 +188,12 @@ export function useRates(): RatesFormState {
         },
       });
 
-      alert(`요율 카드가 성공적으로 등록되었습니다.`);
       resetForm();
       fetchRateCards();
+      return true;
     } catch (err: any) {
       alert(`저장 중 오류 발생: ${err.message}`);
+      return false;
     } finally {
       setLoading(false);
     }
