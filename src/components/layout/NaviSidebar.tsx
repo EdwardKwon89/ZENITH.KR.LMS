@@ -56,13 +56,15 @@ export default function NaviSidebar({
 
   const NAV_ITEMS: NavItem[] = [
     { title: t("dashboard"), href: "/dashboard", icon: LayoutDashboard },
-    { 
-      title: t("master"), 
-      href: "/admin/codes", 
+    {
+      title: t("master"),
+      href: "/admin/codes",
       icon: Database,
       isAdminOnly: true,
       children: [
         { title: t("rates"), href: "/admin/rates" },
+        { title: t("customs_rates"), href: "/admin/customs-rates" },
+        { title: t("delivery_rates"), href: "/admin/delivery-rates" },
       ]
     },
     { 
@@ -120,8 +122,6 @@ export default function NaviSidebar({
     { title: t("grade_promotion_requests"), href: "/admin/upgrade-requests", icon: TrendingUp, isAdminOnly: true },
     { title: t("org_approval"), href: "/admin/organizations", icon: Building, isAdminOnly: true },
     { title: t("customs_management"), href: "/admin/customs", icon: FileText, isAdminOnly: true },
-    { title: t("customs_rates"), href: "/admin/customs-rates", icon: FileText },
-    { title: t("delivery_rates"), href: "/admin/delivery-rates", icon: Truck },
     { title: t("orders_assigned"), href: "/orders/assigned", icon: ClipboardList },
     { title: t("admin_error_logs"), href: "/admin/error-logs", icon: ShieldAlert, isAdminOnly: true },
     { 
@@ -242,7 +242,9 @@ export default function NaviSidebar({
                   !isCollapsed && hasChildren && isOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
                 )}
               >
-                {item.children?.map((child) => (
+                {item.children?.filter(child =>
+                  checkPermission(profile?.role || "GUEST", child.href, allowedPaths)
+                ).map((child) => (
                   <Link
                     key={child.href}
                     href={`/${locale}${child.href}`}

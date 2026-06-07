@@ -1,8 +1,12 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { useParams } from "next/navigation";
+import { ColumnDef } from "@tanstack/react-table";
+import { motion, AnimatePresence } from "framer-motion";
+import { Plus, XCircle, Edit2, Trash2, FileText } from "lucide-react";
 import { USER_ROLES } from "@/lib/auth/rbac";
+import { ZenBadge } from "@/components/ui/ZenUI";
+import ZenDataGrid from "@/components/ui/ZenDataGrid";
 import {
   createCustomsRate,
   updateCustomsRate,
@@ -10,10 +14,7 @@ import {
 } from "@/app/actions/admin/customs-rates";
 import type { CustomsRate, CreateCustomsRateData } from "@/app/actions/admin/customs-rates";
 
-interface Organization {
-  id: string;
-  name: string;
-}
+interface Organization { id: string; name: string; }
 
 interface Props {
   initialRates: CustomsRate[];
@@ -22,62 +23,48 @@ interface Props {
   userOrgId: string;
 }
 
+const EMPTY_FORM: CreateCustomsRateData = {
+  org_id: '', country_code: '', currency: 'USD',
+  cost_per_kg: null, cost_per_cbm: null, fixed_fee: null,
+  transit_days: null, valid_from: '', valid_until: null,
+};
+
 export default function CustomsRatesClient({ initialRates, organizations, userRole, userOrgId }: Props) {
-  const params = useParams();
-  const locale = (params?.locale as string) || "ko";
   const [rates, setRates] = useState(initialRates);
-  const [showForm, setShowForm] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingRate, setEditingRate] = useState<CustomsRate | null>(null);
-  const [form, setForm] = useState<CreateCustomsRateData>({
-    org_id: userRole === USER_ROLES.CUSTOMS_BROKER ? userOrgId : '',
-    country_code: '',
-    currency: 'USD',
-    cost_per_kg: null,
-    cost_per_cbm: null,
-    fixed_fee: null,
-    transit_days: null,
-    valid_from: '',
-    valid_until: null,
-  });
+  const [form, setForm] = useState<CreateCustomsRateData>({ ...EMPTY_FORM, org_id: userRole === USER_ROLES.CUSTOMS_BROKER ? userOrgId : '' });
   const [loading, setLoading] = useState(false);
 
   const canEdit = userRole === USER_ROLES.ADMIN || userRole === USER_ROLES.MANAGER || userRole === USER_ROLES.CUSTOMS_BROKER;
   const isBroker = userRole === USER_ROLES.CUSTOMS_BROKER;
+  const orgMap = Object.fromEntries(organizations.map(o => [o.id, o.name]));
+
+  const visibleRates = rates.filter(r => {
+    if (userRole === USER_ROLES.ADMIN || userRole === USER_ROLES.MANAGER) return true;
+    if (isBroker) return r.org_id === userOrgId;
+    return r.is_active;
+  });
 
   const resetForm = useCallback(() => {
-    setForm({
-      org_id: isBroker ? userOrgId : '',
-      country_code: '',
-      currency: 'USD',
-      cost_per_kg: null,
-      cost_per_cbm: null,
-      fixed_fee: null,
-      transit_days: null,
-      valid_from: '',
-      valid_until: null,
-    });
+    setForm({ ...EMPTY_FORM, org_id: isBroker ? userOrgId : '' });
     setEditingRate(null);
   }, [isBroker, userOrgId]);
 
+  const openNew = () => { resetForm(); setIsModalOpen(true); };
+
   const openEdit = (rate: CustomsRate) => {
     setForm({
-      org_id: rate.org_id,
-      country_code: rate.country_code,
-      currency: rate.currency,
-      cost_per_kg: rate.cost_per_kg,
-      cost_per_cbm: rate.cost_per_cbm,
-      fixed_fee: rate.fixed_fee,
-      transit_days: rate.transit_days,
-      valid_from: rate.valid_from,
-      valid_until: rate.valid_until,
+      org_id: rate.org_id, country_code: rate.country_code, currency: rate.currency,
+      cost_per_kg: rate.cost_per_kg, cost_per_cbm: rate.cost_per_cbm, fixed_fee: rate.fixed_fee,
+      transit_days: rate.transit_days, valid_from: rate.valid_from, valid_until: rate.valid_until,
     });
     setEditingRate(rate);
-    setShowForm(true);
+    setIsModalOpen(true);
   };
 
   const handleSubmit = async () => {
     if (!form.org_id || !form.country_code || !form.valid_from) return;
-
     setLoading(true);
     try {
       if (editingRate) {
@@ -109,180 +96,198 @@ export default function CustomsRatesClient({ initialRates, organizations, userRo
     }
   };
 
-  const visibleRates = rates.filter(r => {
-    if (userRole === USER_ROLES.ADMIN || userRole === USER_ROLES.MANAGER) return true;
-    if (isBroker) return r.org_id === userOrgId;
-    return r.is_active;
-  });
-
-  const orgMap = Object.fromEntries(organizations.map(o => [o.id, o.name]));
+  const columns: ColumnDef<CustomsRate>[] = [
+    {
+      accessorKey: "org_id",
+      header: "통관사",
+      cell: ({ row }) => (
+        <div className="flex items-center gap-2">
+          <div className="p-1.5 bg-slate-100 rounded-lg text-slate-500">
+            <FileText size={14} />
+          </div>
+          <span className="font-medium text-slate-900">{orgMap[row.original.org_id] || row.original.org_id}</span>
+        </div>
+      ),
+    },
+    {
+      accessorKey: "country_code",
+      header: "국가",
+      cell: ({ row }) => <ZenBadge variant="default" className="font-mono">{row.original.country_code}</ZenBadge>,
+    },
+    {
+      accessorKey: "cost_per_kg",
+      header: "무게/kg",
+      cell: ({ row }) => <span className="font-mono text-sm">{row.original.cost_per_kg?.toLocaleString() ?? '-'}</span>,
+    },
+    {
+      accessorKey: "cost_per_cbm",
+      header: "부피/CBM",
+      cell: ({ row }) => <span className="font-mono text-sm">{row.original.cost_per_cbm?.toLocaleString() ?? '-'}</span>,
+    },
+    {
+      accessorKey: "fixed_fee",
+      header: "고정비",
+      cell: ({ row }) => <span className="font-mono text-sm">{row.original.fixed_fee?.toLocaleString() ?? '0'}</span>,
+    },
+    {
+      accessorKey: "currency",
+      header: "통화",
+      cell: ({ row }) => <ZenBadge variant="info">{row.original.currency}</ZenBadge>,
+    },
+    {
+      accessorKey: "transit_days",
+      header: "소요일",
+      cell: ({ row }) => <span className="text-sm">{row.original.transit_days ?? '-'} 일</span>,
+    },
+    {
+      id: "validity",
+      header: "유효기간",
+      cell: ({ row }) => (
+        <span className="text-xs text-slate-500 font-mono">
+          {row.original.valid_from} ~ {row.original.valid_until ?? '무기한'}
+        </span>
+      ),
+    },
+    {
+      accessorKey: "is_active",
+      header: "상태",
+      cell: ({ row }) => (
+        <ZenBadge variant={row.original.is_active ? "success" : "default"}>
+          {row.original.is_active ? "활성" : "만료"}
+        </ZenBadge>
+      ),
+    },
+    ...(canEdit ? [{
+      id: "actions",
+      header: "관리",
+      cell: ({ row }: any) => (
+        <div className="flex items-center gap-2">
+          <button onClick={() => openEdit(row.original)} className="p-2 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-brand-600 transition-colors">
+            <Edit2 size={16} />
+          </button>
+          <button onClick={() => handleDelete(row.original.id)} className="p-2 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-rose-600 transition-colors">
+            <Trash2 size={16} />
+          </button>
+        </div>
+      ),
+    }] : []),
+  ];
 
   return (
     <div className="space-y-4">
       {canEdit && (
         <div className="flex justify-end">
           <button
-            onClick={() => { resetForm(); setShowForm(true); }}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            onClick={openNew}
+            className="flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-xl hover:bg-brand-700 transition-all font-semibold shadow-sm hover:shadow-brand-500/20"
           >
-            + 신규 등록
+            <Plus size={18} />
+            새 요율 등록
           </button>
         </div>
       )}
 
-      <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="bg-gray-50 border-b">
-                <th className="text-left p-3 font-medium">조직</th>
-                <th className="text-left p-3 font-medium">국가</th>
-                <th className="text-right p-3 font-medium">무게/kg</th>
-                <th className="text-right p-3 font-medium">부피/CBM</th>
-                <th className="text-right p-3 font-medium">고정비</th>
-                <th className="text-center p-3 font-medium">통화</th>
-                <th className="text-center p-3 font-medium">소요일</th>
-                <th className="text-center p-3 font-medium">유효기간</th>
-                <th className="text-center p-3 font-medium">상태</th>
-                {canEdit && <th className="text-center p-3 font-medium">관리</th>}
-              </tr>
-            </thead>
-            <tbody>
-              {visibleRates.length === 0 ? (
-                <tr>
-                  <td colSpan={canEdit ? 10 : 9} className="text-center p-6 text-gray-400">
-                    등록된 통관 요율이 없습니다.
-                  </td>
-                </tr>
-              ) : (
-                visibleRates.map((rate) => (
-                  <tr key={rate.id} className="border-b hover:bg-gray-50">
-                    <td className="p-3">{orgMap[rate.org_id] || rate.org_id}</td>
-                    <td className="p-3 font-medium">{rate.country_code}</td>
-                    <td className="p-3 text-right">{rate.cost_per_kg?.toLocaleString() ?? '-'}</td>
-                    <td className="p-3 text-right">{rate.cost_per_cbm?.toLocaleString() ?? '-'}</td>
-                    <td className="p-3 text-right">{rate.fixed_fee?.toLocaleString() ?? '0'}</td>
-                    <td className="p-3 text-center">{rate.currency}</td>
-                    <td className="p-3 text-center">{rate.transit_days ?? '-'}</td>
-                    <td className="p-3 text-center text-xs">
-                      {rate.valid_from} ~ {rate.valid_until ?? '무기한'}
-                    </td>
-                    <td className="p-3 text-center">
-                      <span className={`px-2 py-0.5 rounded-full text-xs ${rate.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
-                        {rate.is_active ? '활성' : '만료'}
-                      </span>
-                    </td>
-                    {canEdit && (
-                      <td className="p-3 text-center space-x-1">
-                        <button
-                          onClick={() => openEdit(rate)}
-                          className="px-2 py-1 text-xs bg-gray-100 rounded hover:bg-gray-200"
-                        >
-                          수정
-                        </button>
-                        <button
-                          onClick={() => handleDelete(rate.id)}
-                          className="px-2 py-1 text-xs bg-red-50 text-red-600 rounded hover:bg-red-100"
-                        >
-                          삭제
-                        </button>
-                      </td>
-                    )}
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <ZenDataGrid
+        columns={columns}
+        data={visibleRates}
+        title="통관 서비스 요율 목록"
+        description="통관사별 국가 단위 요율 정보를 관리합니다."
+      />
 
-      {showForm && (
-        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50" onClick={() => setShowForm(false)}>
-          <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-lg mx-4" onClick={e => e.stopPropagation()}>
-            <h2 className="text-lg font-bold mb-4">{editingRate ? '통관 요율 수정' : '통관 요율 등록'}</h2>
-            <div className="space-y-3">
-              {!isBroker && (
-                <div>
-                  <label className="block text-sm font-medium mb-1">통관사 조직</label>
-                  <select
-                    value={form.org_id}
-                    onChange={e => setForm({ ...form, org_id: e.target.value })}
-                    className="w-full border rounded-lg px-3 py-2 text-sm"
-                  >
-                    <option value="">선택</option>
-                    {organizations.map(o => (
-                      <option key={o.id} value={o.id}>{o.name}</option>
-                    ))}
-                  </select>
-                </div>
-              )}
-              <div>
-                <label className="block text-sm font-medium mb-1">국가 코드</label>
-                <input
-                  type="text"
-                  value={form.country_code}
-                  onChange={e => setForm({ ...form, country_code: e.target.value.toUpperCase() })}
-                  className="w-full border rounded-lg px-3 py-2 text-sm"
-                  placeholder="KR, US, JP..."
-                  maxLength={3}
-                />
+      <AnimatePresence>
+        {isModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              onClick={() => setIsModalOpen(false)}
+              className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl overflow-hidden"
+            >
+              <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                <h3 className="text-lg font-bold text-slate-900">
+                  {editingRate ? "통관 요율 수정" : "통관 요율 등록"}
+                </h3>
+                <button onClick={() => setIsModalOpen(false)} className="p-1 hover:bg-slate-200 rounded-full transition-colors">
+                  <XCircle size={20} className="text-slate-400" />
+                </button>
               </div>
-              <div className="grid grid-cols-3 gap-3">
-                <div>
-                  <label className="block text-sm font-medium mb-1">무게/kg</label>
-                  <input type="number" value={form.cost_per_kg ?? ''} onChange={e => setForm({ ...form, cost_per_kg: e.target.value ? Number(e.target.value) : null })} className="w-full border rounded-lg px-3 py-2 text-sm" />
+
+              <div className="p-6 space-y-4">
+                {!isBroker && (
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-slate-500 uppercase">통관사 조직</label>
+                    <select value={form.org_id} onChange={e => setForm({ ...form, org_id: e.target.value })}
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-500/10 focus:border-brand-500 transition-all">
+                      <option value="">선택</option>
+                      {organizations.map(o => <option key={o.id} value={o.id}>{o.name}</option>)}
+                    </select>
+                  </div>
+                )}
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-500 uppercase">국가 코드</label>
+                  <input type="text" value={form.country_code}
+                    onChange={e => setForm({ ...form, country_code: e.target.value.toUpperCase() })}
+                    placeholder="KR, US, JP..." maxLength={3}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-500/10 focus:border-brand-500 transition-all font-mono" />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">부피/CBM</label>
-                  <input type="number" value={form.cost_per_cbm ?? ''} onChange={e => setForm({ ...form, cost_per_cbm: e.target.value ? Number(e.target.value) : null })} className="w-full border rounded-lg px-3 py-2 text-sm" />
+                <div className="grid grid-cols-3 gap-3">
+                  {[
+                    { label: "무게/kg", key: "cost_per_kg" },
+                    { label: "부피/CBM", key: "cost_per_cbm" },
+                    { label: "고정비", key: "fixed_fee" },
+                  ].map(({ label, key }) => (
+                    <div key={key} className="space-y-1">
+                      <label className="text-xs font-bold text-slate-500 uppercase">{label}</label>
+                      <input type="number" value={(form as any)[key] ?? ''}
+                        onChange={e => setForm({ ...form, [key]: e.target.value ? Number(e.target.value) : null })}
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-500/10 focus:border-brand-500 transition-all" />
+                    </div>
+                  ))}
                 </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">고정비</label>
-                  <input type="number" value={form.fixed_fee ?? ''} onChange={e => setForm({ ...form, fixed_fee: e.target.value ? Number(e.target.value) : null })} className="w-full border rounded-lg px-3 py-2 text-sm" />
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-slate-500 uppercase">통화</label>
+                    <select value={form.currency} onChange={e => setForm({ ...form, currency: e.target.value })}
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-500/10 focus:border-brand-500 transition-all">
+                      {['USD', 'KRW', 'JPY', 'CNY'].map(c => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-slate-500 uppercase">소요일</label>
+                    <input type="number" value={form.transit_days ?? ''}
+                      onChange={e => setForm({ ...form, transit_days: e.target.value ? Number(e.target.value) : null })}
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-500/10 focus:border-brand-500 transition-all" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-slate-500 uppercase">시작일</label>
+                    <input type="date" value={form.valid_from} onChange={e => setForm({ ...form, valid_from: e.target.value })}
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-500/10 focus:border-brand-500 transition-all" />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-slate-500 uppercase">종료일 (선택)</label>
+                    <input type="date" value={form.valid_until ?? ''} onChange={e => setForm({ ...form, valid_until: e.target.value || null })}
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-500/10 focus:border-brand-500 transition-all" />
+                  </div>
+                </div>
+                <div className="pt-2">
+                  <button onClick={handleSubmit}
+                    disabled={loading || !form.org_id || !form.country_code || !form.valid_from}
+                    className="w-full py-3 bg-brand-600 text-white rounded-xl hover:bg-brand-700 transition-all font-bold shadow-lg shadow-brand-500/20 disabled:opacity-50">
+                    {loading ? '저장 중...' : editingRate ? '수정 완료' : '등록'}
+                  </button>
                 </div>
               </div>
-              <div className="grid grid-cols-3 gap-3">
-                <div>
-                  <label className="block text-sm font-medium mb-1">통화</label>
-                  <select value={form.currency} onChange={e => setForm({ ...form, currency: e.target.value })} className="w-full border rounded-lg px-3 py-2 text-sm">
-                    <option value="USD">USD</option>
-                    <option value="KRW">KRW</option>
-                    <option value="JPY">JPY</option>
-                    <option value="CNY">CNY</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">소요일</label>
-                  <input type="number" value={form.transit_days ?? ''} onChange={e => setForm({ ...form, transit_days: e.target.value ? Number(e.target.value) : null })} className="w-full border rounded-lg px-3 py-2 text-sm" />
-                </div>
-                <div></div>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-sm font-medium mb-1">시작일</label>
-                  <input type="date" value={form.valid_from} onChange={e => setForm({ ...form, valid_from: e.target.value })} className="w-full border rounded-lg px-3 py-2 text-sm" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">종료일 (선택)</label>
-                  <input type="date" value={form.valid_until ?? ''} onChange={e => setForm({ ...form, valid_until: e.target.value || null })} className="w-full border rounded-lg px-3 py-2 text-sm" />
-                </div>
-              </div>
-            </div>
-            <div className="flex justify-end gap-2 mt-6">
-              <button onClick={() => setShowForm(false)} className="px-4 py-2 text-sm text-gray-600 border rounded-lg hover:bg-gray-50">
-                취소
-              </button>
-              <button
-                onClick={handleSubmit}
-                disabled={loading || !form.org_id || !form.country_code || !form.valid_from}
-                className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
-              >
-                {loading ? '저장 중...' : '저장'}
-              </button>
-            </div>
+            </motion.div>
           </div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
     </div>
   );
 }
