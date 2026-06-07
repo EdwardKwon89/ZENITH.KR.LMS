@@ -63,7 +63,7 @@ Phase 6 전 구간 회귀 테스트 케이스 확장 및 E2E 시나리오 검증
 - [x] [B_Kai] `UAT_P6_서비스요율_멀티배정.md` 절차서 (Riley 작성, B_Kai 검토)
 - [x] [B_Kai] `UAT_MASTER.md` Phase 6 시나리오 인덱스 갱신 (Riley 갱신, B_Kai 검토)
 - [x] 코드 커밋 (D_Kai, ef6e1e6) → task file 🔔 → ACTIVE_TASK.md 갱신
-- [ ] B_Kai 산출물은 B_Kai 담당 커밋으로 별도 제출
+- [x] B_Kai 산출물은 B_Kai 담당 커밋으로 별도 제출 (`710fd60`)
 
 ---
 
