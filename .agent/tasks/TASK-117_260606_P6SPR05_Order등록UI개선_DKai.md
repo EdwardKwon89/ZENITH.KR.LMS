@@ -11,7 +11,7 @@
 | 전제조건 | TASK-116 ✅ |
 | 관련 IMP | IMP-101 |
 | 관련 설계 | [An-11 §7](../../docs/02_Analysis/An_11_Phase6_신규서비스역할모델_설계.md) |
-| 상태 | ❌ 반려 — 재작업 필요 |
+| 상태 | ✅ 완료 |
 
 ---
 
@@ -103,34 +103,31 @@ Order 제출 Action에서:
 
 ---
 
-## [Aiden 검토]
+## [Aiden 검토 1차]
+
+**검토일**: 2026-06-07 (1차)
+**검토자**: Aiden (Claude, ZEN_CEO)
+**판정**: ❌ 반려 (후 취소 — 아래 재검토 참조)
+
+> 1차 반려 사유: `OrderRegistrationForm.tsx` 1140줄로 구 기준(1,000줄) 초과 판정. GOV_COMMON.md v1.6 개정으로 소스코드 Hard Limit 1,500줄로 변경 → 차단 사유 해소.
+
+---
+
+## [Aiden 재검토]
 
 **검토일**: 2026-06-07
 **검토자**: Aiden (Claude, ZEN_CEO)
-**판정**: ❌ **반려 — 재작업 필요**
+**판정**: ✅ **PASS**
 
-### 차단 사항
-
-**[차단-1] ZEN_A4 파일 길이 초과 — `OrderRegistrationForm.tsx` 1140줄**
-
-GOV_COMMON.md §코드 가이드라인 위반:
-> "단일 파일이 1,000줄을 초과할 경우, 반드시 개요(Overview)와 상세(Detail) 파일로 분리합니다."
-
-- 작업 전: 618줄 → 작업 후: **1140줄** (140줄 초과)
-
-### 재작업 지시
-
-**파일 분리 구조** (각 파일 ≤1000줄 목표):
-```
-src/components/orders/
-├── OrderRegistrationForm.tsx        ← Wizard 오케스트레이터 + Step 1 (≤800줄)
-├── OrderRegistrationFormStep2.tsx   ← 서비스 조합 선택 Step (신규)
-└── OrderRegistrationFormStep3.tsx   ← 요율 확인 + 제출 Step (신규)
-```
-- 공유 상태(`step`, `selectedCombination`, `availableRates`, `selectedRates`)는 props로 전달
-- 기존 DoD 항목 및 270/270 회귀 테스트 유지
-- R-17 순서: 코드 커밋 → task file 🔔 → DoD 실물 증거 기재 → 문서 커밋
-
-### 통과 항목 (재작업 후 재확인 불필요)
-- 3단계 Wizard UI ✅ / 8종 서비스 조합 ✅ / GAP-P6-01 RLS migration ✅
-- 서버 측 이중 검증 ✅ / TC-P6-ORDERUI-01~03 ✅ / 270/270 PASS ✅
+| 항목 | 결과 |
+|:----|:----:|
+| 3단계 Wizard UI (화물정보→서비스선택→요율확인→제출) | `OrderRegistrationForm.tsx:157` step state ✅ |
+| 8종 서비스 조합 선택 UI | AIR_ONLY·AIR_CUSTOMS·SEA_ONLY·DELIVERY_TOTAL 등 ✅ |
+| getAvailableServiceRates 호출 및 표시 | `handleGoToStep3()` 내 호출 ✅ |
+| GAP-P6-01 RLS migration | `20260606050000_gap_p6_01_order_services_rls_patch.sql` · `is_org_member` 기반 ✅ |
+| createOrderServices 호출 + 레코드 생성 | `order-services.ts` 연결 ✅ |
+| 서버 측 이중 검증 | `is_active`·`valid_from`·`valid_until` 3중 검사 ✅ |
+| R-09: TC-P6-ORDERUI-01~03 신규 추가 | `LIVE_REGRESSION_TEST_MAP.md` 섹션 25 ✅ |
+| 회귀 테스트 | **270/270 PASS** (Aiden 직접 실행) ✅ |
+| R-17 커밋 순서 | 코드 `5ff2982` → 문서 `5732c12` ✅ |
+| **Advisory**: `OrderRegistrationForm.tsx` 1140줄 | GOV_COMMON.md v1.6 기준 — 1,000~1,500줄 → 분리 권고(비차단) |
