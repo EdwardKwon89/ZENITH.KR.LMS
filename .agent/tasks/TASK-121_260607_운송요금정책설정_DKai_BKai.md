@@ -235,7 +235,23 @@ WM 방식 카드 등록 시 `cbm_price` 입력 필드 추가:
 
 ## [작업 결과] — D_Kai / Riley / B_Kai 작성
 
-*(구현 완료 후 작성)*
+### D_Kai (2026-06-07)
+
+| 항목 | 상태 | 비고 |
+|:-----|:----:|:-----|
+| **§1 — zen_transport_pricing_policies** | ✅ | CREATE TABLE + 4행 seed (AIR/EXP=VOLUMETRIC, SEA/LAND=WM) + RLS + updated_at trigger |
+| **§1b — zen_rate_cards.tiers cbm_price** | ✅ | JSONB 호환 확장 (COMMENT), 애플리케이션 레벨 검증 권장 |
+| **§3 — 설계 의견** | ✅ | calculate_order_costs / fn_get_best_matching_rate 영향도 분석 + 2개 방안 제시 (방안 A 권장) |
+| **회귀 테스트 (309/309)** | ✅ | bb81021 기준 PASS |
+| **커밋** | bb81021 | `[D_Kai] feat: IMP-105 DB 스키마 — zen_transport_pricing_policies + tiers cbm_price` |
+
+### Riley (TBD)
+- [ ] calculate_order_costs VOLUMETRIC/WM 분기 로직 구현 (설계 의견 방안 A 참조)
+- [ ] TC-POLICY-01~05 통합 테스트 작성
+
+### B_Kai (TBD)
+- [ ] Admin UI: zen_transport_pricing_policies CRUD 페이지
+- [ ] RateTierEditor: SEA/LAND 시 cbm_price 입력 필드
 
 ---
 
