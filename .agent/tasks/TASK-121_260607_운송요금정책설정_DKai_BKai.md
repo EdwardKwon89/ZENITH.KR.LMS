@@ -188,7 +188,42 @@ WM 방식 카드 등록 시 `cbm_price` 입력 필드 추가:
 
 ## [설계 의견] — D_Kai 작성
 
-*(착수 후 작성)*
+### D_Kai — DB 마이그레이션 설계
+
+**영향도 분석 결과**:
+- `calculate_order_costs`는 DB 트리거(`fn_trigger_capture_order_rate`)에서만 호출, TypeScript 직접 호출 없음
+- `fn_get_best_matching_rate` — `zen_rate_cards.tiers` JSONB 첫 번째 tier의 `unit_price` 반환
+- 현재 chargeable_weight = SUM(packages.gross_weight) 단순 합산 (VOLUMETRIC/WM 미반영)
+
+**§1 — zen_transport_pricing_policies 테이블 생성**
+- CREATE TABLE per 명세 (transport_mode UNIQUE 4행 고정)
+- Seed INSERT 4행 (AIR=VOLUMETRIC/6000, EXP=VOLUMETRIC/5000, SEA=WM/null, LAND=WM/null)
+- RLS: ADMIN만 INSERT/UPDATE/DELETE, 전 역할 SELECT
+- updated_at 트리거 자동 갱신
+
+**§1b — zen_rate_cards.tiers JSONB cbm_price 확장**
+- 기존 tiers 구조: `{ weight_min, unit_price, min_total_price }`
+- 확장: `{ weight_min, unit_price, cbm_price, min_total_price }`
+- CHECK 제약: `cbm_price`는 SEA/LAND 전용, AIR/EXP는 null만 허용
+  - 단, JSONB 내부 필드이므로 DB CHECK로 강제 시 `jsonb_typeof` 함수 필요
+  - **대안**: CHECK 제약 없이 애플리케이션 레벨 검증 (Admin UI에서 SEA/LAND만 cbm_price 입력 활성화)
+  - **권안**: 애플리케이션 레벨 검증 + DB는 nullable 허용 (기존 데이터 호환성 유지)
+
+**§3 — calculate_order_costs 수정 방안 (Riley 참고)**
+```
+1. zen_transport_pricing_policies에서 transport_mode(p_service_type)의 policy 조회
+2. WEIGHT_ONLY → 기존 로직 유지
+3. VOLUMETRIC → chargeable_weight = MAX(actual_weight_kg, cargo_cbm × 1,000,000 / divisor)
+4. WM → weight_cost = actual_weight_kg × tier.unit_price
+        cbm_cost = cargo_cbm × tier.cbm_price
+        → MAX(weight_cost, cbm_cost) 채택, unit_price = MAX / chargeable_weight
+```
+- 단, `fn_get_best_matching_rate`가 단일 `unit_price` 반환하므로 WM 방식은 `calculate_order_costs`에서 직접 tier 조회 필요
+- **방안 A**: `fn_get_best_matching_rate`에 pricing_method 파라미터 추가 + WM 시 cbm_price도 반환
+- **방안 B**: `calculate_order_costs`에서 `fn_get_best_matching_rate` 호출 후, 추가로 `zen_rate_cards.tiers` 직접 조회하여 WM 계산
+- **권안**: 방안 A (함수 시그니처 변경 최소화)
+
+**기존 데이터 호환**: 기존 tiers에 `cbm_price` 없음 → WM 계산 시 `COALESCE(tier.cbm_price, 0)` 처리
 
 ---
 
