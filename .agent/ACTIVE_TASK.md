@@ -161,7 +161,7 @@
 | TASK-118 | 260606 | [P6-SPR-06] Order 목록 역할별 격리 (CUSTOMS_BROKER·DELIVERY_AGENT RLS) | P2 | TASK-113 ✅ | D_Kai | ✅ | [TASK-118](tasks/TASK-118_260606_P6SPR06_Order목록역할별격리_DKai.md) | IMP-102 완료 · `270146e` · 259/259 PASS · Advisory 3건(비차단) |
 | TASK-119 | 260606 | [P6-SPR-07] 운송 요율 CARRIER 직접 등록 허용 + platform_fee_rate 격리 | P2 | TASK-113 ✅ | D_Kai | ✅ | [TASK-119](tasks/TASK-119_260606_P6SPR07_운송요율CARRIER직접등록_DKai.md) | IMP-103 완료 · `154ea5d` · 267/267 PASS · Aiden 인계 완료 |
 | TASK-120 | 260606 | [P6-SPR-08] Phase 6 회귀 테스트 + E2E 검증 + UAT 절차서 | P2 | TASK-114 ✅ · TASK-115 ✅ · TASK-116 ✅ · TASK-117 ✅ · TASK-118 ✅ · TASK-119 ✅ | D_Kai + Riley | ⬜ | [TASK-120](tasks/TASK-120_260606_P6SPR08_회귀테스트E2E검증_DKai.md) | IMP-104 · TASK-117 ✅로 전량 블로커 해제 · 즉시 착수 가능 |
-| TASK-121 | 260607 | 운송수단별 요금 산정 정책 설정 (정책 테이블 + Admin UI + 엔진 수정) | P2 | TASK-120 ✅ 권장 | D_Kai + B_Kai | ⬜ | [TASK-121](tasks/TASK-121_260607_운송요금정책설정_DKai_BKai.md) | IMP-105 · VOLUMETRIC/WM 분기 · CBM tier 필드 추가 · TC-POLICY-01~05 |
+| TASK-121 | 260607 | 운송수단별 요금 산정 정책 설정 (정책 테이블 + Admin UI + 엔진 수정) | P2 | TASK-120 ✅ 권장 | D_Kai + Riley + B_Kai | ⬜ | [TASK-121](tasks/TASK-121_260607_운송요금정책설정_DKai_BKai.md) | IMP-105 · D_Kai:DB · Riley:엔진·TC · B_Kai:UI |
 | TASK-108 | 260601 | DEF-039 CARRIER RLS + 미스테이지 커밋 + 신원 수정 | P2 | 없음 | D_Kai | ✅ | [TASK-108](tasks/TASK-108_260601_DEF039CARRIER_RLS_미스테이지커밋_DKai.md) | DEF-039 해소 · 4cc88d8+beba338 · CARRIER RLS 3테이블 · 229/229 ✅ · Aiden ✅ 승인 |
 | TASK-109 | 260603 | IMP-095 Rate Card 항로(Port) 기반 매칭 구현 | P1 | TASK-106 ✅ · TASK-108 ✅ | D_Kai (OpenCode) | ✅ | [TASK-109](tasks/TASK-109_260603_IMP095포트기반요율매칭_DKai.md) | IMP-095 완료 · `0fb950d`+`fb263f9` · 236/236 PASS · Aiden ✅ 승인 |
 | TASK-110 | 260603 | IMP-096 요율 관리 페이지 통합 정리 (3단계) | P1 | TASK-106 ✅ · TASK-109 ✅ | D_Kai (OpenCode) | ✅ | [TASK-110](tasks/TASK-110_260603_IMP096요율관리페이지통합정리_DKai.md) | IMP-096 완료 · `e166fec`+`65c904b` · 236/236 PASS · Aiden ✅ 승인 |
@@ -185,8 +185,8 @@
 | Agent | 진행 중 | 재작업/조치 필요 | 블로커 대기 |
 |:------|:--------|:----------------|:----------|
 | **D_Kai (OpenCode)** | **일시 부재** | Advisory 누적(비차단) + R-17 §6 위반 기록(TASK-119) | TASK-120 ⬜ + TASK-121 ⬜ (D_Kai 복귀 시 착수) |
-| **Riley** | **TASK-120 ⬜ 즉시 착수 가능** | Advisory: OrderRegistrationForm 1140줄(비차단) | — |
-| **B_Kai** | — | — | **TASK-121 ⬜ (TASK-120 완료 후 Admin UI 파트 착수)** |
+| **Riley** | **TASK-120 ⬜ 즉시 착수 가능** | Advisory: OrderRegistrationForm 1140줄(비차단) | TASK-121 ⬜ (TASK-120 완료 후 엔진·TC 파트 착수) |
+| **B_Kai** | — | — | TASK-121 ⬜ (D_Kai DB 완료 후 Admin UI 파트 착수) |
 | N_Kai | TASK-087 ⬜ (재교육 세션 — 완료 후 신규 할당 재개) | R-17 위반 누적 — 신규 할당 중단 유지 | — |
 | Ring | — | — | 신규 할당 중단 유지 (9차 위반 누적) |
 
@@ -424,4 +424,4 @@
 | 2026-06-07 | Aiden (Claude) | **TASK-117 ❌ 반려 (취소됨)** — 구 기준(1,000줄) 적용 오류. GOV_COMMON.md v1.6 소스코드 Hard Limit 1,500줄로 개정 → 차단 사유 해소. |
 | 2026-06-07 | Aiden (Claude) | **GOV_COMMON.md v1.6 개정** — ZEN_A4 파일 길이 기준 분리: 문서(.md) Hard Limit 1,000줄 유지 / 소스코드(.ts/.tsx) Advisory 1,000~1,500줄·Hard Limit 1,500줄 신설. Edward 검토 의견 반영. |
 | 2026-06-07 | Aiden (Claude) | **TASK-117 ✅ PASS** — GOV_COMMON.md v1.6 기준 재판정. 270/270 PASS. Advisory: OrderRegistrationForm 1140줄(분리 권고·비차단). **TASK-120 블로커 전량 해제 → ⬜ 즉시 착수 가능** (D_Kai 복귀 또는 Riley 선착수 가능). |
-| 2026-06-07 | Aiden (Claude) | **TASK-121 발령** — 운송수단별 요금 산정 정책 설정 기능 신규 발령. D_Kai(DB·엔진) + B_Kai(Admin UI) 공동. IMP-105 연계. 전제조건: TASK-120 ✅ 권장. |
+| 2026-06-07 | Aiden (Claude) | **TASK-121 발령** — 운송수단별 요금 산정 정책 설정 기능 신규 발령. D_Kai(DB) + Riley(엔진·TC) + B_Kai(UI) 3-Agent 분담. IMP-105 연계. Riley 선정 근거: TASK-076 Composite Pricing Engine 구현자. |

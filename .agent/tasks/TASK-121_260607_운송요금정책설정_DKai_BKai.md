@@ -2,7 +2,7 @@
 
 > **생성일**: 2026-06-07
 > **발령자**: Aiden (Claude)
-> **담당 Agent**: D_Kai (DB·엔진) + B_Kai (Admin UI)
+> **담당 Agent**: D_Kai (DB 스키마) + Riley (비용 산정 엔진·회귀 테스트) + B_Kai (Admin UI·RateTierEditor)
 > **우선순위**: P2
 > **전제조건**: TASK-120 ✅ (Phase 6 회귀 안정 확인 후 착수 권장)
 > **IMP 연계**: IMP-105 (신규)
@@ -23,6 +23,26 @@
 | LAND | WM | 동일 방식 |
 
 본 태스크는 운송수단별 산정 정책을 **Admin이 DB에서 직접 설정·변경**할 수 있는 기능을 구현한다.
+
+---
+
+## Agent별 역할 분담
+
+| Agent | 담당 범위 | 착수 조건 |
+|:------|:---------|:---------|
+| **D_Kai** | §1 DB 마이그레이션 (`zen_transport_pricing_policies` + tiers cbm_price 확장 + RLS) | 즉시 (설계 의견 📝 제출 후 🔍 확정 대기) |
+| **Riley** | §3 비용 산정 엔진 수정 (`calculate_order_costs` VOLUMETRIC/WM 분기) + §5 TC-POLICY-01~05 회귀 테스트 | D_Kai DB 마이그레이션 완료 후 |
+| **B_Kai** | §2 Admin UI (`/admin/settings/transport-policies`) + §4 `RateTierEditor` cbm_price 필드 추가 | D_Kai DB 마이그레이션 완료 후 |
+
+> **Riley 선정 근거**: Composite Pricing Engine(TASK-076) 구현자 + TISA 3계층 요율 매핑(TASK-092) 경험. `calculate_order_costs` 엔진 구조를 가장 잘 이해하는 Agent.
+
+**착수 순서**:
+```
+D_Kai: DB 스키마 📝→🔍→🔄 (완료)
+         ↓
+Riley (엔진·테스트) ┐ 병렬 착수
+B_Kai (UI)          ┘
+```
 
 ---
 
@@ -140,9 +160,14 @@ WM 방식 카드 등록 시 `cbm_price` 입력 필드 추가:
 - **권장 경로**: ⬜ → 📝(설계 의견 제출) → 🔍(Aiden 확정) → 🔄
 
 **D_Kai 착수 전 필수 확인**:
-1. `calculate_order_costs` 현재 구현 전체 독해
-2. `fn_get_best_matching_rate` 영향도 분석 (`gitnexus_impact` 실행)
-3. WM 방식 시 `tier.cbm_price` null 처리 (기존 데이터 호환)
+1. `fn_get_best_matching_rate` 영향도 분석 (`gitnexus_impact` 실행)
+2. WM 방식 시 `tier.cbm_price` null 처리 — 기존 AIR/EXP 데이터 호환 전략 명시
+3. RLS 정책: ADMIN INSERT/UPDATE/DELETE, 전 역할 SELECT
+
+**Riley 착수 전 필수 확인**:
+1. `calculate_order_costs` 현재 구현 전체 독해 (TASK-076 이후 변경분 포함)
+2. `cargo_cbm` 필드가 `zen_orders`에 존재하는지 확인 → 없으면 D_Kai에게 마이그레이션 요청
+3. `fn_get_best_matching_rate` → `calculate_order_costs` 호출 체인 파악
 
 **B_Kai 착수 조건**: D_Kai `[설계 확정]` 이후 Admin UI 착수 (DB 스키마 확정 전 UI 착수 금지)
 
@@ -173,7 +198,7 @@ WM 방식 카드 등록 시 `cbm_price` 입력 필드 추가:
 
 ---
 
-## [작업 결과] — D_Kai / B_Kai 작성
+## [작업 결과] — D_Kai / Riley / B_Kai 작성
 
 *(구현 완료 후 작성)*
 
@@ -184,3 +209,4 @@ WM 방식 카드 등록 시 `cbm_price` 입력 필드 추가:
 | 날짜 | 주체 | 내용 |
 |:-----|:----:|:----|
 | 2026-06-07 | Aiden (Claude) | TASK-121 신규 발령 |
+| 2026-06-07 | Aiden (Claude) | 담당 Agent 개정 — Riley 추가 (비용 산정 엔진·회귀 테스트 담당). Riley 선정 근거: TASK-076 Composite Pricing Engine 구현자. |
