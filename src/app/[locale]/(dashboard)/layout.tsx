@@ -4,6 +4,7 @@ import ZenShell from "@/components/layout/ZenShell";
 import GlobalHeader from "@/components/layout/GlobalHeader";
 import NaviSidebar from "@/components/layout/NaviSidebar";
 import { getPermissionsByRole } from "@/lib/auth/rbac";
+import SessionKeepalive from "@/components/auth/SessionKeepalive";
 
 export default async function DashboardGroupLayout({
   children,
@@ -31,12 +32,13 @@ export default async function DashboardGroupLayout({
   const allowedPaths = await getPermissionsByRole(supabase, profile?.role || "GUEST");
 
   return (
-    <ZenShell 
-      user={user} 
+    <ZenShell
+      user={user}
       profile={profile}
       header={<GlobalHeader user={user} profile={profile} />}
       sidebar={<NaviSidebar user={user} profile={profile} allowedPaths={allowedPaths} />}
     >
+      <SessionKeepalive />
       {children}
     </ZenShell>
   );
