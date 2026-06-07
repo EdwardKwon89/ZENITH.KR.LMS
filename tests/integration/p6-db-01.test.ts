@@ -125,7 +125,7 @@ describe('TC-P6-DB-01: Phase 6 DB 스키마 연동 통합 테스트', () => {
 
     supabase._listResult = {
       data: [
-        { id: 'rate-1', carrier_id: 'carrier-1', transport_mode: 'AIR', tiers: [{ min_weight: 0, max_weight: 100, rate: 5 }], currency: 'USD', carrier: { name: 'Test Air' } },
+        { id: 'rate-1', carrier_id: 'carrier-1', transport_mode: 'AIR', tiers: [{ weight_min: 0, unit_price: 5 }], currency: 'USD', carrier: { name: 'Test Air' } },
       ],
       error: null,
     };

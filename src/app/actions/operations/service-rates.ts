@@ -52,19 +52,15 @@ export interface AvailableServiceRates {
 
 function calculateTransportCost(tiers: any[], weight: number): number | null {
   if (!tiers || tiers.length === 0) return null;
-  const sorted = [...tiers].sort((a, b) => (a.min_weight ?? 0) - (b.min_weight ?? 0));
-  const tier = sorted.find(
-    (t) => weight >= (t.min_weight ?? 0) && weight <= (t.max_weight ?? Infinity)
-  );
+  const sorted = [...tiers].sort((a, b) => (b.weight_min ?? 0) - (a.weight_min ?? 0));
+  const tier = sorted.find((t) => weight >= (t.weight_min ?? 0));
   if (!tier) {
-    if (weight > 0) {
-      const lastTier = sorted[sorted.length - 1];
-      return (lastTier.rate ?? 0) * weight;
-    }
-    return null;
+    const lowestTier = sorted[sorted.length - 1];
+    return (lowestTier.unit_price ?? 0) * weight;
   }
-  return (tier.rate ?? 0) * weight;
+  return (tier.unit_price ?? 0) * weight;
 }
+
 
 export const getAvailableServiceRates = withAction(async function (
   params: ServiceRateQueryParams
@@ -133,7 +129,7 @@ export const getAvailableServiceRates = withAction(async function (
 
   const { data: deliveryRates, error: deliveryError } = await supabase
     .from("zen_delivery_rates")
-    .select("id, org_id, service_type, cost_per_kg, cost_per_cbm, fixed_fee, currency, transit_days, org:zen_organizations!org_id(name)")
+    .select("id, org_id, service_type, cost_per_kg, cost_per_cbm, currency, transit_days, org:zen_organizations!org_id(name)")
     .eq("is_active", true);
 
   if (deliveryError) throw new Error(deliveryError.message);
@@ -142,7 +138,7 @@ export const getAvailableServiceRates = withAction(async function (
   const deliveryTotal: DeliveryRateOption[] = [];
 
   for (const r of deliveryRates || []) {
-    const estimatedCost = ((r.cost_per_kg || 0) * params.cargoWeight) + ((r.cost_per_cbm || 0) * params.cargoCbm) + (r.fixed_fee || 0);
+    const estimatedCost = ((r.cost_per_kg || 0) * params.cargoWeight) + ((r.cost_per_cbm || 0) * params.cargoCbm);
     const option: DeliveryRateOption = {
       id: r.id,
       orgId: r.org_id,

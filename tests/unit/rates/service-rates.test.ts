@@ -33,8 +33,8 @@ describe('P6-SVCRATE: 통합 서비스 요율 조회 Server Actions', () => {
       .mockImplementationOnce((cb: any) => cb({ data: { id: 'port-lax-uuid' }, error: null }))
       .mockImplementationOnce((cb: any) => cb({
         data: [
-          { id: 'rate-1', carrier_id: 'carrier-1', transport_mode: 'AIR', tiers: [{ min_weight: 0, max_weight: 100, rate: 5 }], currency: 'USD', carrier: { name: 'Korean Air' } },
-          { id: 'rate-2', carrier_id: 'carrier-2', transport_mode: 'AIR', tiers: [{ min_weight: 0, max_weight: 100, rate: 4.5 }], currency: 'USD', carrier: { name: 'Asiana' } },
+          { id: 'rate-1', carrier_id: 'carrier-1', transport_mode: 'AIR', tiers: [{ weight_min: 0, unit_price: 5 }], currency: 'USD', carrier: { name: 'Korean Air' } },
+          { id: 'rate-2', carrier_id: 'carrier-2', transport_mode: 'AIR', tiers: [{ weight_min: 0, unit_price: 4.5 }], currency: 'USD', carrier: { name: 'Asiana' } },
         ],
         error: null,
       }))
@@ -79,8 +79,8 @@ describe('P6-SVCRATE: 통합 서비스 요율 조회 Server Actions', () => {
     expect(rates.customs[0].estimatedCost).toBe(70);
     expect(rates.customs[0].orgName).toBe('Customs Broker Co');
 
-    expect(rates.deliveryLocal[0].estimatedCost).toBe(35);
-    expect(rates.deliveryTotal[0].estimatedCost).toBe(100);
+    expect(rates.deliveryLocal[0].estimatedCost).toBe(25);
+    expect(rates.deliveryTotal[0].estimatedCost).toBe(70);
   });
 
   it('TC-P6-SVCRATE-02: 운송 요율 없음 → 에러 반환', async () => {
@@ -118,7 +118,7 @@ describe('P6-SVCRATE: 통합 서비스 요율 조회 Server Actions', () => {
       .mockImplementationOnce((cb: any) => cb({ data: { id: 'port-icn-uuid' }, error: null }))
       .mockImplementationOnce((cb: any) => cb({ data: { id: 'port-sin-uuid' }, error: null }))
       .mockImplementationOnce((cb: any) => cb({
-        data: [{ id: 'rate-1', carrier_id: 'carrier-1', transport_mode: 'AIR', tiers: [{ min_weight: 0, max_weight: 1000, rate: 3 }], currency: 'USD', carrier: { name: 'Singapore Air' } }],
+        data: [{ id: 'rate-1', carrier_id: 'carrier-1', transport_mode: 'AIR', tiers: [{ weight_min: 0, unit_price: 3 }], currency: 'USD', carrier: { name: 'Singapore Air' } }],
         error: null,
       }))
       .mockImplementationOnce((cb: any) => cb({ data: [], error: null }))
