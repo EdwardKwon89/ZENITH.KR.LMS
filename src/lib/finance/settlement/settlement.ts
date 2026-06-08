@@ -217,7 +217,7 @@ export class SettlementEngine {
         if (policyMethod === 'WM') {
           const totalVolume = await this.getTotalCbm(orderId, supabase);
           const weightCost = totalGrossWeight * unitPrice;
-          const cbmPrice = this.getCbmPriceFromTiers(bestRate.tiers, effectiveChargeableWeight);
+          const cbmPrice = this.getCbmPriceFromCbmSlabs(bestRate.tiers?.cbm_slabs, totalVolume);
           const cbmCost = totalVolume * (cbmPrice || 0);
           totalFreight = Math.max(weightCost, cbmCost);
           effectiveChargeableWeight = totalGrossWeight;
@@ -295,17 +295,17 @@ export class SettlementEngine {
     return packages.reduce((sum: number, p: any) => sum + Number(p.volume || 0), 0);
   }
 
-  private getCbmPriceFromTiers(tiers: any, weight: number): number | null {
-    if (!Array.isArray(tiers)) return null;
+  private getCbmPriceFromCbmSlabs(cbmSlabs: any, cbm: number): number | null {
+    if (!Array.isArray(cbmSlabs)) return null;
     let matched = null;
-    for (const t of tiers) {
-      if (weight >= Number(t.weight_min || 0)) {
-        matched = t;
+    for (const s of cbmSlabs) {
+      if (cbm >= Number(s.cbm_min || 0)) {
+        matched = s;
       }
     }
     if (matched && matched.cbm_price !== undefined && matched.cbm_price !== null) {
       return Number(matched.cbm_price);
     }
-    return matched ? Number(matched.unit_price) : null;
+    return null;
   }
 }

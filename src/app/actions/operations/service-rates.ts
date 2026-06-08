@@ -51,10 +51,11 @@ export interface AvailableServiceRates {
   deliveryTotal: DeliveryRateOption[];
 }
 
-function calculateTransportCost(tiers: any[], weight: number): number | null {
-  if (!tiers || tiers.length === 0) return null;
-  const sorted = [...tiers].sort((a, b) => (b.weight_min ?? 0) - (a.weight_min ?? 0));
-  const tier = sorted.find((t) => weight >= (t.weight_min ?? 0));
+function calculateTransportCost(tiers: any, weight: number): number | null {
+  const weightSlabs = tiers?.weight_slabs;
+  if (!weightSlabs || weightSlabs.length === 0) return null;
+  const sorted = [...weightSlabs].sort((a: any, b: any) => (b.weight_min ?? 0) - (a.weight_min ?? 0));
+  const tier = sorted.find((t: any) => weight >= (t.weight_min ?? 0));
   if (!tier) {
     const lowestTier = sorted[sorted.length - 1];
     return (lowestTier.unit_price ?? 0) * weight;

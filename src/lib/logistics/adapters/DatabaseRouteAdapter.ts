@@ -193,10 +193,10 @@ export class DatabaseRouteAdapter implements IVirtualMapAdapter {
 
     if (error || !data) return 0;
 
-    const raw = data as { tiers: RateCardTier[] };
-    const tiers = raw.tiers;
-    if (!tiers || tiers.length === 0) return 0;
+    const raw = data as { tiers: { weight_slabs: RateCardTier[] } };
+    const weightSlabs = raw.tiers?.weight_slabs;
+    if (!weightSlabs || weightSlabs.length === 0) return 0;
 
-    return tiers[0].unit_price;
+    return weightSlabs[0].unit_price;
   }
 }

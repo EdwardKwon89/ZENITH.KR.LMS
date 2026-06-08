@@ -19,13 +19,18 @@ export interface RateTier {
 export function calculateSlabRate(weight: number, tiers: RateTier[]): number {
   if (!tiers || tiers.length === 0) return 0;
 
-  // 1. weight_min 기준 내림차순 정렬 (가장 큰 구간부터 매칭)
   const sortedTiers = [...tiers].sort((a, b) => b.weight_min - a.weight_min);
 
-  // 2. 입력 중량보다 작거나 같은 weight_min을 가진 첫 번째 티어 반환
   const matchingTier = sortedTiers.find(tier => weight >= tier.weight_min);
 
   return matchingTier ? matchingTier.unit_price : tiers[0].unit_price;
+}
+
+export function calculateWeightSlabRate(
+  weight: number,
+  weightSlabs: { weight_min: number; unit_price: number }[]
+): number {
+  return calculateSlabRate(weight, weightSlabs);
 }
 
 /**

@@ -6,8 +6,8 @@ export class SlabRateCalculator {
    * tiers가 없을 경우 unit_price의 BigDecimal 형식을 파싱하여 단가를 결정합니다.
    */
   calculateUnitPrice(bestRate: any, chargeableWeight: number): number {
-    if (bestRate.tiers && bestRate.tiers.length > 0) {
-      return calculateSlabRate(chargeableWeight, bestRate.tiers);
+    if (bestRate.tiers?.weight_slabs && bestRate.tiers.weight_slabs.length > 0) {
+      return calculateSlabRate(chargeableWeight, bestRate.tiers.weight_slabs);
     }
     
     // unit_price가 객체형(Int, Exp)인 경우 변환 처리

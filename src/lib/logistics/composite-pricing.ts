@@ -140,12 +140,12 @@ export async function calculateCompositePricing(input: CompositePricingInput): P
       
       if (rateCard) {
         const rawTiers = (rateCard as any).tiers;
-        const tiers: RateTier[] = Array.isArray(rawTiers) ? rawTiers : [];
+        const weightSlabs: RateTier[] = rawTiers?.weight_slabs || [];
         legCurrency = (rateCard as any).currency || 'USD';
         mainCurrency = legCurrency;
         
-        if (tiers.length > 0) {
-          const unitPrice = calculateSlabRate(chargeableWeight, tiers);
+        if (weightSlabs.length > 0) {
+          const unitPrice = calculateSlabRate(chargeableWeight, weightSlabs);
           baseFreight = chargeableWeight * unitPrice;
         }
       } else {
@@ -247,11 +247,11 @@ export async function calculateCompositePricing(input: CompositePricingInput): P
   
   if (!rateError && rateCard) {
     const rawTiers = (rateCard as any).tiers;
-    const tiers: RateTier[] = Array.isArray(rawTiers) ? rawTiers : [];
+    const weightSlabs: RateTier[] = rawTiers?.weight_slabs || [];
     currency = (rateCard as any).currency || 'USD';
     
-    if (tiers.length > 0) {
-      const unitPrice = calculateSlabRate(chargeableWeight, tiers);
+    if (weightSlabs.length > 0) {
+      const unitPrice = calculateSlabRate(chargeableWeight, weightSlabs);
       baseFreight = chargeableWeight * unitPrice;
     }
   }
