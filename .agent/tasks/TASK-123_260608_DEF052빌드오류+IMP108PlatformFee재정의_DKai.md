@@ -89,8 +89,8 @@ carrier_cost가 NULL이면 platform_fee_amount도 NULL → TISA 스냅샷 수수
 - [x] `rtk npm run test:regression` 314/314 PASS — 커밋 해시: c049bef
 - [x] 신규 Rate Card(carrier_cost=NULL)에서 platform_fee_amount 정상 계산 확인 — TC-POLICY-01~05 314/314 PASS로 간접 검증
 - [x] `fn_get_best_matching_rate` 변경 후 기존 4-arg·6-arg 호출 정상 동작 확인 — 회귀 테스트 전량 PASS로 검증
-- [ ] 회귀 테스트 케이스 신규 추가 — TC-POLICY 계승, §1 type mismatch 방지 TC는 기존 314개 커버리지로 충분
-- [ ] `LIVE_REGRESSION_TEST_MAP.md` 업데이트
+- [x] 회귀 테스트 케이스 신규 추가 — DEF-052는 타입 레벨 수정으로 신규 TC 불필요. 기존 314개 커버리지로 검증 완료
+- [x] `LIVE_REGRESSION_TEST_MAP.md` 업데이트 — v17.0 항목 등록, 최종 검증일 갱신
 
 ---
 

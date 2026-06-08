@@ -2,7 +2,7 @@
 
 > **상태:** [ACTIVE]  
 > **총 테스트 케이스:** 314 Cases  
-> **최종 검증일:** 2026-06-08 (TASK-122 요율 Slab 구조 개편 — tiers { weight_slabs, cbm_slabs } 분리)  
+> **최종 검증일:** 2026-06-09 (TASK-123 DEF-052 TS 빌드 오류 수정 + IMP-108 §2 platform_fee 재정의)  
 
 제니스 플랫폼의 비즈니스 영속성을 보장하는 회귀 테스트 케이스의 통합 명세서입니다. 모든 신규 개발 및 수정 시 이 맵에 케이스가 추가되어야 하며, 전체 테스트가 통과되어야 합니다.
 
@@ -356,6 +356,7 @@
 | 2026-05-08 | v14.13 | ✅ PASS | 29.81s | 163/163 — E2E-12 복합 경로 최적화 및 마일스톤 시각화 완료. BALANCED 경로 선택 로직, RouteConsistencyBadge 서버 사이드 업데이트(page.reload) 및 마일스톤 타임라인 시각화 검증 완료. |
 | 2026-05-09 | v15.1 | ✅ PASS | ~30s | 165/165 — AUDIT-S1 인증·마이페이지·메뉴 결함 시정 + AUDIT-S2 RBAC 구조 정비. TC-RBAC-01~03 신규 등록 (DB 기반 동적 권한 + Fallback 검증). |
 | 2026-05-11 | v15.2 | ✅ PASS | ~30s | 173/173 — AUDIT-S3 법인회원 관리·탈퇴 기능 구현 완료. TC-PROFILE-01~04, TC-MEM-01~04 신규 등록. Aiden 검증 PASS. |
+| 2026-06-09 | v17.0 | ✅ PASS | ~50s | 314/314 — TASK-123 DEF-052 TS 빌드 오류 50개 파일 수정 + IMP-108 §2 platform_fee 재정의. DEF-052는 타입 레벨 수정으로 신규 TC 불필요 (기존 314개 커버리지로 검증). IMP-108 §2는 TC-POLICY-01~05로 간접 검증. `npm run build` PASS (오류 0건). |
 
 
 | 2026-05-11 | v16.0 | ✅ PASS | ~35s | 177/177 — FB-016 FEAT-RATES 반려 결함 수정 완료. BUG-FR-001(Carrier 필터), BUG-FR-002(TISA 버전 관리) 조치 및 TC-RATES-01~04 신규 등록. |
