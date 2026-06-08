@@ -22,8 +22,6 @@ export interface RatesFormState {
   setSelectedCarrier: (v: string) => void;
   serviceType: string;
   setServiceType: (v: string) => void;
-  carrierCost: number;
-  setCarrierCost: (v: number) => void;
   currency: string;
   setCurrency: (v: string) => void;
   marginRate: number;
@@ -62,7 +60,6 @@ export function useRates(): RatesFormState {
   const [ports, setPorts] = useState<Port[]>([]);
   const [selectedCarrier, setSelectedCarrier] = useState('');
   const [serviceType, setServiceType] = useState('AIR');
-  const [carrierCost, setCarrierCost] = useState(0);
   const [currency, setCurrency] = useState('USD');
   const [marginRate, setMarginRate] = useState(15.0);
   const [platformFeeRate, setPlatformFeeRate] = useState(5.0);
@@ -130,7 +127,6 @@ export function useRates(): RatesFormState {
   const resetForm = () => {
     setSelectedCarrier('');
     setServiceType('AIR');
-    setCarrierCost(0);
     setMarginRate(15.0);
     setPlatformFeeRate(5.0);
     setOriginPortId('');
@@ -144,7 +140,6 @@ export function useRates(): RatesFormState {
   const handleEditRate = (rate: any) => {
     setSelectedCarrier(rate.carrier_id || '');
     setServiceType(rate.transport_mode || 'AIR');
-    setCarrierCost(rate.carrier_cost || 0);
     setCurrency(rate.currency || 'USD');
     setMarginRate(rate.margin_rate ?? 15.0);
     setPlatformFeeRate(rate.platform_fee_rate ?? 5.0);
@@ -196,7 +191,6 @@ export function useRates(): RatesFormState {
           },
           valid_from: new Date(validFrom).toISOString(),
           valid_to: new Date(validTo).toISOString(),
-          carrier_cost: carrierCost || undefined,
           currency: currency,
           margin_rate: marginRate,
           platform_fee_rate: platformFeeRate,
@@ -234,7 +228,7 @@ export function useRates(): RatesFormState {
   return {
     carriers, ports, selectedCarrier, setSelectedCarrier,
     serviceType, setServiceType,
-    carrierCost, setCarrierCost, currency, setCurrency,
+    currency, setCurrency,
     marginRate, setMarginRate,
     platformFeeRate, setPlatformFeeRate,
     originPortId, setOriginPortId, destPortId, setDestPortId,

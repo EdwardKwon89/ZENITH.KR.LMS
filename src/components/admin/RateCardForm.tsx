@@ -1,11 +1,116 @@
 'use client';
 
+import { useState, useMemo } from 'react';
 import { ZenCard, ZenButton, ZenInput } from '@/components/ui/ZenUI';
-import { RateTierEditor, RateTiers } from '@/components/admin/RateTierEditor';
+import { RateTierEditor, RateTiers, WeightSlab, CbmSlab } from '@/components/admin/RateTierEditor';
 import {
-  Truck, Save, Settings2, Box, Plane, Ship, Calendar, DollarSign, Percent, MapPin, Globe
+  Truck, Save, Settings2, Box, Plane, Ship, Calendar, DollarSign, Percent, MapPin, Globe, Calculator, Weight, Package
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+function findMatchingSlab<T extends { weight_min?: number; cbm_min?: number }>(
+  slabs: T[], value: number, key: 'weight_min' | 'cbm_min'
+): T | null {
+  if (!slabs.length) return null;
+  const sorted = [...slabs].sort((a, b) => (b[key] ?? 0) - (a[key] ?? 0));
+  return sorted.find(s => value >= (s[key] ?? 0)) ?? slabs[0];
+}
+
+interface RatePreviewResult {
+  weightSlab: WeightSlab | null;
+  cbmSlab: CbmSlab | null;
+  unitPrice: number;
+  cbmPrice: number;
+  weightCost: number;
+  cbmCost: number;
+  total: number;
+}
+
+function calcRatePreview(tiers: RateTiers, weight: number, cbm: number): RatePreviewResult | null {
+  if (!tiers.weight_slabs.length || !tiers.cbm_slabs.length) return null;
+  const weightSlab = findMatchingSlab(tiers.weight_slabs, weight, 'weight_min');
+  const cbmSlab = findMatchingSlab(tiers.cbm_slabs, cbm, 'cbm_min');
+  const unitPrice = weightSlab?.unit_price ?? 0;
+  const cbmPrice = cbmSlab?.cbm_price ?? 0;
+  const weightCost = weight * unitPrice;
+  const cbmCost = cbm * cbmPrice;
+  const minCharge = Math.max(weightSlab?.min_charge ?? 0, cbmSlab?.min_charge ?? 0);
+  const total = Math.max(weightCost, cbmCost, minCharge);
+  return { weightSlab, cbmSlab, unitPrice, cbmPrice, weightCost, cbmCost, total };
+}
+
+function RatePreview({ tiers, currency }: { tiers: RateTiers; currency: string }) {
+  const [weight, setWeight] = useState(100);
+  const [cbm, setCbm] = useState(1);
+  const result = useMemo(() => calcRatePreview(tiers, weight, cbm), [tiers, weight, cbm]);
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
+        <Calculator className="w-4 h-4 text-brand-600" />
+        <span className="text-xs font-black text-slate-500 uppercase tracking-[0.1em]">운송비 시뮬레이션</span>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-1.5">
+          <label className="text-[10px] text-slate-400 font-semibold flex items-center gap-1">
+            <Weight className="w-3 h-3" /> Test Weight (kg)
+          </label>
+          <ZenInput
+            type="number" min={0} value={weight}
+            onChange={(e) => setWeight(Math.max(0, Number(e.target.value)))}
+            className="bg-slate-50 border-slate-200 text-sm"
+          />
+        </div>
+        <div className="space-y-1.5">
+          <label className="text-[10px] text-slate-400 font-semibold flex items-center gap-1">
+            <Package className="w-3 h-3" /> Test CBM (㎥)
+          </label>
+          <ZenInput
+            type="number" min={0} step={0.1} value={cbm}
+            onChange={(e) => setCbm(Math.max(0, Number(e.target.value)))}
+            className="bg-slate-50 border-slate-200 text-sm"
+          />
+        </div>
+      </div>
+
+      {result ? (
+        <div className="space-y-2 text-xs">
+          <div className="flex justify-between py-1.5 px-3 bg-blue-50 rounded-xl">
+            <span className="text-slate-500">Weight Bracket</span>
+            <span className="font-mono font-semibold text-slate-700">
+              ≥{result.weightSlab?.weight_min}kg @ {currency} {result.unitPrice.toFixed(4)}/kg
+            </span>
+          </div>
+          <div className="flex justify-between py-1.5 px-3 bg-blue-50 rounded-xl">
+            <span className="text-slate-500">CBM Bracket</span>
+            <span className="font-mono font-semibold text-slate-700">
+              ≥{result.cbmSlab?.cbm_min}㎥ @ {currency} {result.cbmPrice.toFixed(4)}/㎥
+            </span>
+          </div>
+          <div className="border-t border-dashed border-slate-200 pt-2 mt-2 space-y-1.5">
+            <div className="flex justify-between text-slate-500">
+              <span>Weight Cost</span>
+              <span className="font-mono">{currency} {result.weightCost.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between text-slate-500">
+              <span>CBM Cost</span>
+              <span className="font-mono">{currency} {result.cbmCost.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between text-sm font-bold text-slate-900 pt-1.5 border-t border-slate-200">
+              <span>Estimated Total (WM)</span>
+              <span className="font-mono">{currency} {result.total.toFixed(2)}</span>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <p className="text-[10px] text-slate-400 italic text-center py-4">
+          Weight/CBM slabs 입력 후 시뮬레이션 가능
+        </p>
+      )}
+    </div>
+  );
+}
 
 interface PortOption {
   id: string;
@@ -21,8 +126,6 @@ interface RateCardFormProps {
   onCarrierChange: (v: string) => void;
   serviceType: string;
   onServiceTypeChange: (v: string) => void;
-  carrierCost: number;
-  onCarrierCostChange: (v: number) => void;
   currency: string;
   onCurrencyChange: (v: string) => void;
   marginRate: number;
@@ -150,27 +253,17 @@ export function RateCardForm(props: RateCardFormProps) {
 
             <div className="space-y-3">
               <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
-                <DollarSign className="w-3 h-3 text-emerald-500" /> Carrier Cost (kg당)
+                <DollarSign className="w-3 h-3 text-emerald-500" /> Currency
               </label>
-              <div className="flex gap-2">
-                <select
-                  value={props.currency}
-                  onChange={(e) => props.onCurrencyChange(e.target.value)}
-                  className="w-24 bg-slate-50 border border-slate-300 text-slate-900 px-3 py-3 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-500/30 appearance-none text-sm font-mono"
-                >
-                  {['USD', 'KRW', 'EUR', 'JPY', 'CNY', 'GBP', 'SGD', 'HKD'].map(c => (
-                    <option key={c} value={c} className="bg-white">{c}</option>
-                  ))}
-                </select>
-                <input
-                  type="number"
-                  step="0.01"
-                  value={props.carrierCost}
-                  onChange={(e) => props.onCarrierCostChange(Number(e.target.value))}
-                  className="flex-1 bg-slate-50 border border-slate-300 text-slate-900 px-4 py-3 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
-                  placeholder="0.00"
-                />
-              </div>
+              <select
+                value={props.currency}
+                onChange={(e) => props.onCurrencyChange(e.target.value)}
+                className="w-full bg-slate-50 border border-slate-300 text-slate-900 px-4 py-3 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-500/30 appearance-none text-sm font-mono"
+              >
+                {['USD', 'KRW', 'EUR', 'JPY', 'CNY', 'GBP', 'SGD', 'HKD'].map(c => (
+                  <option key={c} value={c} className="bg-white">{c}</option>
+                ))}
+              </select>
             </div>
 
             <div className="space-y-3">
@@ -248,10 +341,7 @@ export function RateCardForm(props: RateCardFormProps) {
           </div>
 
           <div className="space-y-6">
-            <div className="flex justify-between items-center text-sm p-4 bg-slate-50 rounded-2xl">
-              <span className="text-slate-500">Carrier Cost</span>
-              <span className="text-slate-900 font-mono font-bold">{props.currency} {props.carrierCost.toFixed(2)} /kg</span>
-            </div>
+            <RatePreview tiers={props.tiers} currency={props.currency} />
 
             <div className="flex justify-between items-center text-sm p-4 bg-slate-50 rounded-2xl">
               <span className="text-slate-500">Margin Rate</span>
@@ -261,17 +351,6 @@ export function RateCardForm(props: RateCardFormProps) {
             <div className="flex justify-between items-center text-sm p-4 bg-slate-50 rounded-2xl">
               <span className="text-slate-500">Platform Fee</span>
               <span className="text-slate-900 font-mono font-bold">{props.platformFeeRate.toFixed(1)}%</span>
-            </div>
-
-            <div className="p-4 border border-dashed border-slate-300 rounded-2xl space-y-3">
-              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Pricing Formula</p>
-              <div className="text-xs text-slate-500 leading-relaxed font-mono">
-                {props.tiers.weight_slabs.length === 0 ? (
-                  `Carrier Cost: ${props.currency} ${props.carrierCost.toFixed(2)}/kg × (1 + ${(props.marginRate + props.platformFeeRate).toFixed(1)}%)`
-                ) : (
-                  `Weight: ${props.tiers.weight_slabs.length} slabs, CBM: ${props.tiers.cbm_slabs.length} slabs · from ${props.currency} ${Math.min(...props.tiers.weight_slabs.map(t => t.unit_price)).toFixed(2)}/kg`
-                )}
-              </div>
             </div>
 
             <ZenButton

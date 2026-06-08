@@ -14,7 +14,7 @@ export default function RatesManagementPage() {
   const {
     carriers, ports, selectedCarrier, setSelectedCarrier,
     serviceType, setServiceType,
-    carrierCost, setCarrierCost, currency, setCurrency,
+    currency, setCurrency,
     marginRate, setMarginRate,
     platformFeeRate, setPlatformFeeRate,
     originPortId, setOriginPortId, destPortId, setDestPortId,
@@ -121,12 +121,11 @@ export default function RatesManagementPage() {
               </div>
 
               <div className="overflow-y-auto flex-1 p-6">
-                <RateCardForm
-                  carriers={carriers}
-                  selectedCarrier={selectedCarrier} onCarrierChange={setSelectedCarrier}
-                  serviceType={serviceType} onServiceTypeChange={setServiceType}
-                  carrierCost={carrierCost} onCarrierCostChange={setCarrierCost}
-                  currency={currency} onCurrencyChange={setCurrency}
+                  <RateCardForm
+                    carriers={carriers}
+                    selectedCarrier={selectedCarrier} onCarrierChange={setSelectedCarrier}
+                    serviceType={serviceType} onServiceTypeChange={setServiceType}
+                    currency={currency} onCurrencyChange={setCurrency}
                   marginRate={marginRate} onMarginRateChange={setMarginRate}
                   platformFeeRate={platformFeeRate} onPlatformFeeRateChange={setPlatformFeeRate}
                   ports={ports}
