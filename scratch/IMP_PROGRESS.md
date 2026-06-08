@@ -259,10 +259,10 @@
 | 102 | Order 목록 RLS 역할별 격리 (CUSTOMS_BROKER·DELIVERY_AGENT) | D_Kai | 🔔 | 2026-06-06 |
 | 103 | 운송 요율 CARRIER 직접 등록 허용 + platform_fee_rate 격리 | D_Kai | 🔔 | 2026-06-06 |
 | 104 | Phase 6 회귀 테스트 + E2E 검증 + UAT 절차서 | D_Kai+Riley+B_Kai | 🔔 | 2026-06-07 |
-| 105 | 운송수단별 요금 산정 정책 설정 (DB + Admin UI + 엔진) | D_Kai+Riley+B_Kai | 🔔 | 2026-06-08 |
+| 105 | 운송수단별 요금 산정 정책 설정 (DB + Admin UI + 엔진) | D_Kai+B_Kai | 🔔 | 2026-06-08 |
 
 **Phase 6 완료**: 8 / 8 (100%) — IMP-097✅ · 098✅ · 099✅ · 100🔔 · 101🔔 · 102🔔 · 103🔔 · 104🔔
-**IMP-105**: D_Kai DB ✅(bb81021) · B_Kai UI ✅(5171675+0d428a3) · Riley 엔진+TC 잔여
+**IMP-105**: D_Kai DB ✅(bb81021) · B_Kai UI ✅(5171675+0d428a3) · D_Kai 엔진+TC ✅(723db3e+c0bcab0+974e632) · 회귀 314/314 PASS
 
 ---
 
@@ -289,9 +289,9 @@
 | I | 5 | 5 | 100% ✅ | IMP-073~077 전량 완료 (TASK-069~073 ✅) |
 | J | 4 | 4 | 100% ✅ | IMP-080 ✅ · IMP-081 ✅ · IMP-082 ✅ · IMP-083 ✅ |
 | K | 1 | 7 | 14.3% | IMP-084·085·086·088·089·046 🔔 |
-| 6 | 9 | 9 | — | IMP-097✅·098✅·099✅·100🔔·101🔔·102🔔·103🔔·104🔔·105🔔 (Phase 6+IMP-105) |
+| 6 | 9 | 9 | — | IMP-097✅·098✅·099✅·100🔔·101🔔·102🔔·103🔔·104🔔·105✅(D_Kai 엔진+TC 완료) (Phase 6+IMP-105) |
 | UAT | 6 | 7 | 85.7% | IMP-090 ✅ · IMP-091 ⬜ (Carrier Portal — Phase M) · **IMP-092 ✅ (TISA 3계층)** · **IMP-093 ✅ (TISA 실연동, TASK-104)** · IMP-094 ⬜ (요율 워크플로우 고도화, Phase M) · **IMP-095 ✅ (Rate Card 항로 매칭, TASK-109)** · **IMP-096 ✅ (요율 관리 페이지 통합 정리, TASK-110)** |
-| **합계** | **82** | **91** | **90.1%** | Phase K 7건 + UAT 7건 + Phase 6 8건 + IMP-105 기준 |
+| **합계** | **83** | **91** | **91.2%** | Phase K 7건 + UAT 7건 + Phase 6 8건 + IMP-105 기준 |
 
 > **UAT 진행 전 필수 처리**: IMP-092 ✅ · IMP-093 ✅ · IMP-095 ✅ — 전량 완료
 > 미완료 IMP: IMP-086·087 🚫 블로커 · IMP-028·069(Future — 통관 연계) · IMP-091 ⬜ (Carrier Portal) · IMP-094 ⬜ (요율 워크플로우 Phase M)
@@ -361,3 +361,4 @@
 | 2026-06-06 | D_Kai (OpenCode) | **IMP-103 🔔 완료** — TASK-119(P6-SPR-07) 운송 요율 CARRIER 직접 등록 + platform_fee_rate 격리. `2c46c94` · 265/265 PASS. 전체 합계 79/90 (87.8%). Phase 6 6/8 (75%). |
 | 2026-06-07 | B_Kai (OpenCode) | **IMP-104 🔔 완료** — TASK-120 Phase 6 E2E 5종 Playwright spec 수정 + 회귀 PASS (3건 pre-existing mock failure 제외). 블로커 4건 해소 (UI form flakiness 회피·FK 모호성·RLS app_metadata·UNIQUE constraint upsert). E2E 5/5 PASS · 회귀 309/309 PASS. `66a5dfb`+`710fd60`. Phase 6 8/8 100% 완료. 전체 합계 81/90 (90.0%). |
 | 2026-06-08 | B_Kai (OpenCode) | **IMP-105 🔔 등재** — TASK-121 §2 Admin 운송 정책 설정 화면 + §4 RateTierEditor cbm_price 필드. B_Kai UI ✅ (5171675+0d428a3). D_Kai DB ✅ (bb81021). Riley 엔진+TC 잔여. 전체 합계 82/91 (90.1%). |
+| 2026-06-08 | D_Kai (OpenCode) | **IMP-105 ✅ 완료** — TASK-121 §3 엔진 파트(Riley→D_Kai 재배정) · §5 TC-POLICY-01~05 완료. migration `723db3e`(fn_get_best_matching_rate 4-arg + calculate_order_costs VOLUMETRIC/WM) · SettlementEngine `c0bcab0`(정책 기반 chargeable weight + WM fallback) · TC `974e632`(TC-POLICY-01~05 TS+SQL 동시 검증) · 회귀 314/314 PASS. scope-creep 18개 파일 정리. 전체 합계 83/91 (91.2%). |

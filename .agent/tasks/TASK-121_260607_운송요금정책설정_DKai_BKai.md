@@ -178,11 +178,11 @@ WM 방식 카드 등록 시 `cbm_price` 입력 필드 추가:
 - [x] `zen_transport_pricing_policies` 테이블 생성 + 기본 4행 seed 완료 (`bb81021` — D_Kai)
 - [x] `zen_rate_cards.tiers` JSONB에 `cbm_price` 필드 지원 (기존 데이터 호환) (`bb81021` — D_Kai)
 - [x] `/admin/settings/transport-policies` 화면 구현 + ADMIN 권한 접근 확인 (`5171675` — B_Kai)
-- [ ] `calculate_order_costs` VOLUMETRIC / WM 분기 처리 구현 (Riley 담당)
+- [x] `calculate_order_costs` VOLUMETRIC / WM 분기 처리 구현 (`723db3e` — D_Kai·Riley→D_Kai 재배정)
 - [x] `RateTierEditor` SEA/LAND 시 `cbm_price` 입력 필드 표시 (`0d428a3` — B_Kai)
-- [ ] TC-POLICY-01~05 회귀 테스트 추가 + 전체 PASS (Riley 담당)
-- [ ] `LIVE_REGRESSION_TEST_MAP.md` 업데이트 (Riley 담당)
-- [x] B_Kai 코드 커밋 해시 기재: `5171675` (§2) + `0d428a3` (§4)
+- [x] TC-POLICY-01~05 회귀 테스트 추가 + 전체 PASS (`974e632` — D_Kai · 314/314 PASS)
+- [x] `LIVE_REGRESSION_TEST_MAP.md` 업데이트 (`974e632` — D_Kai)
+- [x] D_Kai 코드 커밋 해시 기재: `723db3e` (§3 migration) + `c0bcab0` (§3 engine) + `974e632` (§5 tests)
 
 ---
 
