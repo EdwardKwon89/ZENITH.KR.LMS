@@ -54,6 +54,7 @@
     "customs_management": "通関管理",
     "customs_rates": "通関サービス料率",
     "delivery_rates": "配送サービス料率",
+    "transport_policies": "運賃算定ポリシー",
     "rates": "運賃料率",
     "rate_cards_management": "料率カード管理",
     "corporate_mgmt": "法人管理",
