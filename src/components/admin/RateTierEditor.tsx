@@ -15,14 +15,12 @@ export interface RateTier {
 interface RateTierEditorProps {
   tiers: RateTier[];
   onChange: (tiers: RateTier[]) => void;
-  transportMode?: string;
+  currency?: string;
 }
 
-export const RateTierEditor: React.FC<RateTierEditorProps> = ({ tiers, onChange, transportMode }) => {
-  const showCbm = transportMode === 'SEA' || transportMode === 'LAND';
-
+export const RateTierEditor: React.FC<RateTierEditorProps> = ({ tiers, onChange, currency = 'USD' }) => {
   const addTier = () => {
-    onChange([...tiers, { weight_min: 0, unit_price: 0, cbm_price: showCbm ? 0 : undefined, min_total_price: 0 }]);
+    onChange([...tiers, { weight_min: 0, unit_price: 0, cbm_price: 0, min_total_price: 0 }]);
   };
 
   const removeTier = (index: number) => {
@@ -72,7 +70,7 @@ export const RateTierEditor: React.FC<RateTierEditorProps> = ({ tiers, onChange,
               </div>
               
               <div className="flex-1 space-y-2">
-                <label className="text-[10px] text-slate-400 font-bold uppercase ml-1">Unit Price ($/kg)</label>
+                <label className="text-[10px] text-slate-400 font-bold uppercase ml-1">Unit Price ({currency}/kg)</label>
                 <div className="relative">
                   <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-500/50" />
                   <ZenInput 
@@ -84,23 +82,21 @@ export const RateTierEditor: React.FC<RateTierEditorProps> = ({ tiers, onChange,
                 </div>
               </div>
 
-              {showCbm && (
-                <div className="flex-1 space-y-2">
-                  <label className="text-[10px] text-slate-400 font-bold uppercase ml-1">CBM Price ($/㎥)</label>
-                  <div className="relative">
-                    <Package className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-500/50" />
-                    <ZenInput 
-                      type="number" 
-                      value={tier.cbm_price ?? 0}
-                      onChange={(e) => updateTier(index, 'cbm_price', Number(e.target.value))}
-                      className="pl-12 bg-slate-50 border-slate-300 text-blue-600 font-bold"
-                    />
-                  </div>
+              <div className="flex-1 space-y-2">
+                <label className="text-[10px] text-slate-400 font-bold uppercase ml-1">CBM Price ({currency}/㎥)</label>
+                <div className="relative">
+                  <Package className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-500/50" />
+                  <ZenInput
+                    type="number"
+                    value={tier.cbm_price ?? 0}
+                    onChange={(e) => updateTier(index, 'cbm_price', Number(e.target.value))}
+                    className="pl-12 bg-slate-50 border-slate-300 text-blue-600 font-bold"
+                  />
                 </div>
-              )}
+              </div>
 
               <div className="flex-1 space-y-2">
-                <label className="text-[10px] text-slate-400 font-bold uppercase ml-1">Min. Charge ($)</label>
+                <label className="text-[10px] text-slate-400 font-bold uppercase ml-1">Min. Charge ({currency})</label>
                 <div className="relative">
                   <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-500/50" />
                   <ZenInput 

@@ -229,7 +229,7 @@ export function RateCardForm(props: RateCardFormProps) {
           </div>
 
           <div className="pt-6 border-t border-slate-200">
-            <RateTierEditor tiers={props.tiers} onChange={props.onTiersChange} />
+            <RateTierEditor tiers={props.tiers} onChange={props.onTiersChange} currency={props.currency} />
           </div>
         </ZenCard>
       </div>
