@@ -162,7 +162,7 @@
 | TASK-119 | 260606 | [P6-SPR-07] 운송 요율 CARRIER 직접 등록 허용 + platform_fee_rate 격리 | P2 | TASK-113 ✅ | D_Kai | ✅ | [TASK-119](tasks/TASK-119_260606_P6SPR07_운송요율CARRIER직접등록_DKai.md) | IMP-103 완료 · `154ea5d` · 267/267 PASS · Aiden 인계 완료 |
 | TASK-120 | 260606 | [P6-SPR-08] Phase 6 회귀 테스트 + E2E 검증 + UAT 절차서 | P2 | TASK-114 ✅ · TASK-115 ✅ · TASK-116 ✅ · TASK-117 ✅ · TASK-118 ✅ · TASK-119 ✅ | D_Kai + B_Kai | ✅ | [TASK-120](tasks/TASK-120_260606_P6SPR08_회귀테스트E2E검증_DKai.md) | D_Kai 완료(ef6e1e6) · E2E 5/5 PASS(710fd60) · code fix(e93204f) · UAT·meta(e0e1c41) · 회귀 309/309 · Aiden ✅ 승인 (260608) |
 | TASK-121 | 260607 | 운송수단별 요금 산정 정책 설정 (정책 테이블 + Admin UI + 엔진 수정) | P2 | TASK-120 ✅ | D_Kai + B_Kai | ✅ | [TASK-121](tasks/TASK-121_260607_운송요금정책설정_DKai_BKai.md) | IMP-105 완료 · D_Kai DB(bb81021) · B_Kai UI(5171675+0d428a3) · D_Kai 엔진(723db3e+c0bcab0+974e632) · 회귀 314/314 · Aiden ✅ 승인 (260608) |
-| TASK-122 | 260608 | 요율 Slab 구조 개편 (무게 Slab / 부피 Slab 분리) | P2 | TASK-121 ✅ | D_Kai + B_Kai | 🔄 | [TASK-122](tasks/TASK-122_260608_요율Slab구조개편_DKai_BKai.md) | IMP-106 · D_Kai DB+엔진 착수 → B_Kai UI 후속 착수 |
+| TASK-122 | 260608 | 요율 Slab 구조 개편 (무게 Slab / 부피 Slab 분리) | P2 | TASK-121 ✅ | D_Kai + B_Kai | 🔔 | [TASK-122](tasks/TASK-122_260608_요율Slab구조개편_DKai_BKai.md) | IMP-106 · D_Kai §1+§3+§4 완료 🔔 · B_Kai §2 UI 착수 가능 (D_Kai §1 완료 조건 충족) |
 | TASK-108 | 260601 | DEF-039 CARRIER RLS + 미스테이지 커밋 + 신원 수정 | P2 | 없음 | D_Kai | ✅ | [TASK-108](tasks/TASK-108_260601_DEF039CARRIER_RLS_미스테이지커밋_DKai.md) | DEF-039 해소 · 4cc88d8+beba338 · CARRIER RLS 3테이블 · 229/229 ✅ · Aiden ✅ 승인 |
 | TASK-109 | 260603 | IMP-095 Rate Card 항로(Port) 기반 매칭 구현 | P1 | TASK-106 ✅ · TASK-108 ✅ | D_Kai (OpenCode) | ✅ | [TASK-109](tasks/TASK-109_260603_IMP095포트기반요율매칭_DKai.md) | IMP-095 완료 · `0fb950d`+`fb263f9` · 236/236 PASS · Aiden ✅ 승인 |
 | TASK-110 | 260603 | IMP-096 요율 관리 페이지 통합 정리 (3단계) | P1 | TASK-106 ✅ · TASK-109 ✅ | D_Kai (OpenCode) | ✅ | [TASK-110](tasks/TASK-110_260603_IMP096요율관리페이지통합정리_DKai.md) | IMP-096 완료 · `e166fec`+`65c904b` · 236/236 PASS · Aiden ✅ 승인 |
@@ -185,9 +185,9 @@
 
 | Agent | 진행 중 | 재작업/조치 필요 | 블로커 대기 |
 |:------|:--------|:----------------|:----------|
-| **D_Kai (OpenCode)** | TASK-122 🔄 (§1 DB 마이그레이션 + §3 엔진 수정 + §4 TC) | Advisory 누적(비차단) | — |
+| **D_Kai (OpenCode)** | TASK-122 🔔 (§1+§3+§4 완료 — Aiden 검토 대기) | Advisory 누적(비차단) | — |
 | **Riley** | — | 토큰 소진·scope 초과 이력 (TASK-121) | 신규 Task 대기 (scope 제한 명시 필수) |
-| **B_Kai** | TASK-122 🔄 (§2 UI — D_Kai §1 완료 후 착수) | 위반 누적 2회 (DoD 허위체크·커밋 순서) | D_Kai §1 완료 대기 |
+| **B_Kai** | TASK-122 🔄 (§2 UI 착수 가능 — D_Kai §1 완료 조건 충족) | 위반 누적 2회 (DoD 허위체크·커밋 순서) | — |
 | N_Kai | TASK-087 ⬜ (재교육 세션 — 완료 후 신규 할당 재개) | R-17 위반 누적 — 신규 할당 중단 유지 | — |
 | Ring | — | — | 신규 할당 중단 유지 (9차 위반 누적) |
 

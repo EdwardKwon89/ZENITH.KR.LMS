@@ -176,23 +176,54 @@ export function calculateWeightSlabRate(
 3. `test`: §4 회귀 테스트 업데이트 + LIVE_REGRESSION_TEST_MAP.md
 4. `docs`: TASK-122 🔔 완료 보고
 
-**B_Kai** (D_Kai §1 완료 후 착수):
+**B_Kai** (D_Kai §1 DB migration 완료 조건 충족 — 즉시 착수 가능):
 1. `feat`: §2 RateTierEditor 분리 + RateCardForm + RateCardsTab + Server Actions
 2. `docs`: TASK-122 🔔 완료 보고
 
 ---
 
+## D_Kai 작업 결과
+
+### Commit 1 — `2cb5927` — DB 마이그레이션 (§1)
+- `supabase/migrations/20260608100000_imp106_tier_slab_restructure.sql` 신규 생성
+- §1: 기존 33개 `zen_rate_cards.tiers` 배열 → `{ weight_slabs, cbm_slabs }` 객체로 변환 (기존 데이터 포함)
+  - `weight_slabs` = 각 항목의 `{ weight_min, unit_price, min_charge }`
+  - `cbm_slabs` = `cbm_price` 존재 시 `{ cbm_min, cbm_price, min_charge }`, 없으면 기본 `[{cbm_min:0, cbm_price:0, min_charge:0}]`
+- §2: `fn_get_best_matching_rate` 4-arg 재정의 — `weight_slabs`(weight_min 기준) / `cbm_slabs`(cbm_min 기준) 각각 매칭
+- §3: `calculate_order_costs` 재정의 — cbm_slabs 기반 cbm_price 조회로 WM 계산
+- `psql` 적용 완료 (33 rows updated) · 데이터 정합성 확인 완료
+
+### Commit 2 — `46bc9f9` — TS 엔진 수정 (§3)
+- **`rate-engine.ts`**: `calculateWeightSlabRate()` 추가 (weight_slabs 배열 입력 지원)
+- **`slab-rate-calculator.ts`**: `bestRate.tiers` → `bestRate.tiers.weight_slabs` 참조 변경, `tiers.length` → `tiers.weight_slabs.length`
+- **`settlement.ts`**: `getCbmPriceFromTiers(bestRate.tiers, weight)` → `getCbmPriceFromCbmSlabs(bestRate.tiers.cbm_slabs, cbm)` 변경, cbm_min 기준 매칭
+- **`composite-pricing.ts`**: `rawTiers?.weight_slabs` 추출로 변경 (2개소)
+- **`service-rates.ts`**: `calculateTransportCost` 신규 tiers 객체 형식 대응
+- **`DatabaseRouteAdapter.ts`**: `tiers.weight_slabs` 참조로 변경
+
+### Commit 3 — `896e193` — 회귀 테스트 업데이트 (§4)
+- `p6-transport-policy.test.ts`: 5개 테스트 DB insert tiers → `{ weight_slabs, cbm_slabs }` 형식 변경
+- `p6-service-rates.test.ts` / `service-rates.test.ts` / `p6-db-01.test.ts`: mock data 형식 일괄 변경
+- `rou-01.test.ts` / `uat-phase3-e2e.test.ts` / `freight-calculator.test.ts`: composite-pricing mock data 형식 변경
+- `LIVE_REGRESSION_TEST_MAP.md`: v1.5.3 갱신
+
+### TC 결과
+- **전체 회귀 테스트: 314/314 PASS** (51.90s)
+- **B_Kai 조건 충족**: §1 DB migration 완료 → §2 UI 착수 가능
+
+---
+
 ## DoD (완료 기준)
 
-- [ ] `zen_rate_cards.tiers` 구조 `{ weight_slabs, cbm_slabs }` 변환 완료 (기존 데이터 포함)
-- [ ] `fn_get_best_matching_rate` weight_slabs 기반 동작 확인
-- [ ] `calculate_order_costs` cbm_slabs 기반 WM 계산 동작 확인
-- [ ] `SlabRateCalculator` / `SettlementEngine` weight_slabs · cbm_slabs 참조 수정
-- [ ] `RateTierEditor` 무게 Slab / 부피 Slab 섹션 분리 + 최소 1개 검증
-- [ ] `RateCardsTab` 동일 구조 적용
-- [ ] TC-POLICY-01~05 신규 tiers 구조 기준 전량 PASS
-- [ ] 전체 회귀 테스트 PASS
-- [ ] `LIVE_REGRESSION_TEST_MAP.md` 업데이트
+- [x] `zen_rate_cards.tiers` 구조 `{ weight_slabs, cbm_slabs }` 변환 완료 (기존 33개 데이터 포함) `2cb5927`
+- [x] `fn_get_best_matching_rate` weight_slabs 기반 동작 확인 `2cb5927`
+- [x] `calculate_order_costs` cbm_slabs 기반 WM 계산 동작 확인 `2cb5927`
+- [x] `SlabRateCalculator` / `SettlementEngine` weight_slabs · cbm_slabs 참조 수정 `46bc9f9`
+- [ ] `RateTierEditor` 무게 Slab / 부피 Slab 섹션 분리 + 최소 1개 검증 (B_Kai §2)
+- [ ] `RateCardsTab` 동일 구조 적용 (B_Kai §2)
+- [x] TC-POLICY-01~05 신규 tiers 구조 기준 전량 PASS `896e193`
+- [x] 전체 회귀 테스트 PASS (314/314) `896e193`
+- [x] `LIVE_REGRESSION_TEST_MAP.md` 업데이트 `896e193`
 
 ---
 
