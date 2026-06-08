@@ -175,14 +175,14 @@ WM 방식 카드 등록 시 `cbm_price` 입력 필드 추가:
 
 ## DoD (완료 기준)
 
-- [ ] `zen_transport_pricing_policies` 테이블 생성 + 기본 4행 seed 완료
-- [ ] `zen_rate_cards.tiers` JSONB에 `cbm_price` 필드 지원 (기존 데이터 호환)
-- [ ] `/admin/settings/transport-policies` 화면 구현 + ADMIN 권한 접근 확인
-- [ ] `calculate_order_costs` VOLUMETRIC / WM 분기 처리 구현
-- [ ] `RateTierEditor` SEA/LAND 시 `cbm_price` 입력 필드 표시
-- [ ] TC-POLICY-01~05 회귀 테스트 추가 + 전체 PASS
-- [ ] `LIVE_REGRESSION_TEST_MAP.md` 업데이트
-- [ ] 코드 커밋 해시 기재
+- [x] `zen_transport_pricing_policies` 테이블 생성 + 기본 4행 seed 완료 (`bb81021` — D_Kai)
+- [x] `zen_rate_cards.tiers` JSONB에 `cbm_price` 필드 지원 (기존 데이터 호환) (`bb81021` — D_Kai)
+- [x] `/admin/settings/transport-policies` 화면 구현 + ADMIN 권한 접근 확인 (`5171675` — B_Kai)
+- [ ] `calculate_order_costs` VOLUMETRIC / WM 분기 처리 구현 (Riley 담당)
+- [x] `RateTierEditor` SEA/LAND 시 `cbm_price` 입력 필드 표시 (`0d428a3` — B_Kai)
+- [ ] TC-POLICY-01~05 회귀 테스트 추가 + 전체 PASS (Riley 담당)
+- [ ] `LIVE_REGRESSION_TEST_MAP.md` 업데이트 (Riley 담당)
+- [x] B_Kai 코드 커밋 해시 기재: `5171675` (§2) + `0d428a3` (§4)
 
 ---
 
@@ -308,27 +308,21 @@ fn_get_best_matching_rate(
 - `calculate_order_costs` 현재 구현 전체 독해 (TASK-076·TASK-092 변경분 포함)
 - [설계 확정] §3 방안 A 숙지
 
-### B_Kai (착수 지시 — 2026-06-08)
+### B_Kai (2026-06-08)
 
-**커밋 순서 (R-17 엄수)**:
+| 항목 | 상태 | 비고 |
+|:-----|:----:|:-----|
+| **§2 — Admin 운송 정책 설정 화면** | ✅ | `/admin/settings/transport-policies` — server action + page + client inline-edit 컴포넌트 |
+| **§2 — 사이드바 메뉴** | ✅ | `기본정보` 하위 "요금 산정 정책" 추가 (NaviSidebar) |
+| **§2 — i18n 번역** | ✅ | ko/en/ja/zh 4개 언어 |
+| **§4 — RateTierEditor cbm_price** | ✅ | SEA/LAND conditional `cbm_price` 필드 + transportMode prop |
+| **회귀 테스트 (309/309)** | ✅ | 5171675 + 0d428a3 기준 PASS |
+| **커밋 1** | `5171675` | `[B_Kai] feat: TASK-121 §2 Admin 운송 정책 설정 화면` |
+| **커밋 2** | `0d428a3` | `[B_Kai] feat: TASK-121 §4 RateTierEditor cbm_price 필드 추가` |
 
-```
-커밋 1 [B_Kai] feat: TASK-121 §2 Admin 운송 정책 설정 화면
-  └ src/app/[locale]/(dashboard)/admin/settings/transport-policies/page.tsx
-  └ src/app/[locale]/(dashboard)/admin/settings/transport-policies/transport-policies-client.tsx
-  └ src/app/actions/admin/transport-policies.ts
-  └ 사이드바 메뉴 추가 (ADMIN only)
-
-커밋 2 [B_Kai] feat: TASK-121 §4 RateTierEditor cbm_price 필드 추가
-  └ src/components/admin/RateTierEditor.tsx
-
-회귀 테스트: rtk npm run test:regression → 전체 PASS 확인
-
-커밋 3 [B_Kai] docs: TASK-121 Admin UI 파트 🔔 완료 보고
-  └ 본 task file [작업 결과] B_Kai 섹션 + ACTIVE_TASK.md
-```
-
-**착수 조건**: D_Kai bb81021 기준 스키마 확정 — 즉시 착수 가능
+**Riley 인계 사항**:
+- DoD 3개 항목 미완료: §3 엔진 수정 + TC-POLICY-01~05 + LIVE_REGRESSION_TEST_MAP.md
+- B_Kai 구현 완료 후 🔔 상태 — Riley §3 완료 후 Aiden ✅ 통합 승인 필요
 
 ---
 
