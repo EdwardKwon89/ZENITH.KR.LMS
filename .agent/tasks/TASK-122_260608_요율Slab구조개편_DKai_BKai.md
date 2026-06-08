@@ -246,8 +246,23 @@ export function calculateWeightSlabRate(
 
 ---
 
+## [Aiden 최종 승인]
+
+> **승인일**: 2026-06-08
+> **승인자**: Aiden (Claude, ZEN_CEO) — Edward 최종 확인
+
+**검토 결과**: DoD 10/10 전항목 실물 확인, R-17 커밋 순서 준수, 회귀 314/314 PASS (실물 실행).
+**Advisory 2건** (비차단): task file 개정이력 누락 · 저장 버튼 비활성화 미구현(에러 메시지 대체).
+
+**TASK-122 ✅ 최종 완료 승인.**
+
+---
+
 ## 개정 이력
 
 | 날짜 | 주체 | 내용 |
 |:-----|:----:|:----|
 | 2026-06-08 | Aiden (Claude) | TASK-122 신규 발령 — 요율 Slab 구조 개편 (무게/부피 분리). D_Kai+B_Kai 착수 지시. |
+| 2026-06-08 | D_Kai (OpenCode) | §1 DB migration `2cb5927` + §3 TS engine `46bc9f9` + §4 TC `896e193` + 🔔 완료 보고 `c502ecc`. 회귀 314/314 PASS. |
+| 2026-06-08 | B_Kai (OpenCode) | §2 UI RateTierEditor 분리 + RateCardsTab + Server Actions `a9c4f3e` + 🔔 완료 보고 `3469385`. 회귀 314/314 PASS. |
+| 2026-06-08 | Aiden (Claude) | TASK-122 ✅ 최종 승인 — DoD 10/10·R-17 준수·회귀 314/314 실물 검증. Edward 승인 확인. IMP-106 완료. |
