@@ -160,7 +160,7 @@
 | TASK-117 | 260606 | [P6-SPR-05] Order 등록 UI 개선 (서비스조합선택·요율확인 Step) | P1 | TASK-116 ✅ | **Riley** | ✅ | [TASK-117](tasks/TASK-117_260606_P6SPR05_Order등록UI개선_DKai.md) | IMP-101 완료 · `5ff2982` · 270/270 PASS · Advisory: OrderRegistrationForm 1140줄(분리 권고·비차단) |
 | TASK-118 | 260606 | [P6-SPR-06] Order 목록 역할별 격리 (CUSTOMS_BROKER·DELIVERY_AGENT RLS) | P2 | TASK-113 ✅ | D_Kai | ✅ | [TASK-118](tasks/TASK-118_260606_P6SPR06_Order목록역할별격리_DKai.md) | IMP-102 완료 · `270146e` · 259/259 PASS · Advisory 3건(비차단) |
 | TASK-119 | 260606 | [P6-SPR-07] 운송 요율 CARRIER 직접 등록 허용 + platform_fee_rate 격리 | P2 | TASK-113 ✅ | D_Kai | ✅ | [TASK-119](tasks/TASK-119_260606_P6SPR07_운송요율CARRIER직접등록_DKai.md) | IMP-103 완료 · `154ea5d` · 267/267 PASS · Aiden 인계 완료 |
-| TASK-120 | 260606 | [P6-SPR-08] Phase 6 회귀 테스트 + E2E 검증 + UAT 절차서 | P2 | TASK-114 ✅ · TASK-115 ✅ · TASK-116 ✅ · TASK-117 ✅ · TASK-118 ✅ · TASK-119 ✅ | D_Kai + **B_Kai** | ❌ | [TASK-120](tasks/TASK-120_260606_P6SPR08_회귀테스트E2E검증_DKai.md) | D_Kai 완료(ef6e1e6) · **B_Kai ❌ 반려** — UAT 문서 미커밋 DoD 허위체크·범위외 변경 4건 미커밋 (260607) |
+| TASK-120 | 260606 | [P6-SPR-08] Phase 6 회귀 테스트 + E2E 검증 + UAT 절차서 | P2 | TASK-114 ✅ · TASK-115 ✅ · TASK-116 ✅ · TASK-117 ✅ · TASK-118 ✅ · TASK-119 ✅ | D_Kai + B_Kai | 🔔 | [TASK-120](tasks/TASK-120_260606_P6SPR08_회귀테스트E2E검증_DKai.md) | D_Kai 완료(ef6e1e6) · E2E 5/5 PASS(710fd60) · code fix(e93204f) · UAT·meta(e0e1c41) · 회귀 309/309 · **재작업 완료** 🔔 |
 | TASK-121 | 260607 | 운송수단별 요금 산정 정책 설정 (정책 테이블 + Admin UI + 엔진 수정) | P2 | TASK-120 ✅ 권장 | D_Kai + Riley + B_Kai | 🔄 | [TASK-121](tasks/TASK-121_260607_운송요금정책설정_DKai_BKai.md) | IMP-105 · D_Kai DB ✅(bb81021) · 설계의견📝 · Riley/B_Kai 파트 잔여 |
 | TASK-108 | 260601 | DEF-039 CARRIER RLS + 미스테이지 커밋 + 신원 수정 | P2 | 없음 | D_Kai | ✅ | [TASK-108](tasks/TASK-108_260601_DEF039CARRIER_RLS_미스테이지커밋_DKai.md) | DEF-039 해소 · 4cc88d8+beba338 · CARRIER RLS 3테이블 · 229/229 ✅ · Aiden ✅ 승인 |
 | TASK-109 | 260603 | IMP-095 Rate Card 항로(Port) 기반 매칭 구현 | P1 | TASK-106 ✅ · TASK-108 ✅ | D_Kai (OpenCode) | ✅ | [TASK-109](tasks/TASK-109_260603_IMP095포트기반요율매칭_DKai.md) | IMP-095 완료 · `0fb950d`+`fb263f9` · 236/236 PASS · Aiden ✅ 승인 |
@@ -186,7 +186,7 @@
 |:------|:--------|:----------------|:----------|
 | **D_Kai (OpenCode)** | TASK-120 🔔 (D_Kai 파트 완료) | Advisory 누적(비차단) | TASK-121 🔄 (DB ✅ bb81021, Riley·B_Kai 파트 잔여) |
 | **Riley** | — | Advisory: OrderRegistrationForm 1140줄(비차단) | TASK-121 ⬜ (TASK-120 완료 후 엔진·TC 파트 착수) |
-| **B_Kai** | **TASK-120 ❌ 재작업** — UAT 미커밋·범위외 변경 정리 (2-step) | DoD 허위체크 위반 +1 누적 | TASK-121 ⬜ (TASK-120 완료 후 Admin UI 파트 착수) |
+| **B_Kai** | TASK-120 🔔 (재작업 완료) | DoD 허위체크 위반 +1 누적 | TASK-121 ⬜ (TASK-120 완료 후 Admin UI 파트 착수) |
 | N_Kai | TASK-087 ⬜ (재교육 세션 — 완료 후 신규 할당 재개) | R-17 위반 누적 — 신규 할당 중단 유지 | — |
 | Ring | — | — | 신규 할당 중단 유지 (9차 위반 누적) |
 
@@ -198,6 +198,7 @@
 |:-----|:----:|:-----|
 | 2026-06-07 | Aiden (Claude) | TASK-120 B_Kai ❌ 반려 — UAT 문서 미커밋 DoD 허위체크 + 범위외 변경 4건 미커밋. 재작업 2-Step 지시 |
 | 2026-06-07 | Aiden (Claude) | TASK-120 E2E+UAT 담당 Riley→B_Kai 재배정 — Riley E2E 테스트 반복 지연으로 Edward 지시. TASK-120 상세 파일·Agent별 현황 동시 반영 |
+| 2026-06-07 | B_Kai (OpenCode) | **TASK-120 재작업 완료** 🔔 — 2-Step 이행: Step 1 code fix(`e93204f`·service-rates·migrations), Step 2 docs(`e0e1c41`·UAT·ACTIVE_TASK). E2E 5/5 PASS(`710fd60`) · 회귀 309/309. Phase 6 전량 완료. |
 | 2026-05-16 | Aiden (Claude) | 신규 오케스트레이션 체계 도입 — ACTIVE_TASK.md v1.0 초기 작성. TASK_BOARD+ACTIVE_AGENT+HANDOFF_BOX 통합 대체 |
 | 2026-05-25 | Aiden (Claude) | Phase K 2차 개발 작업 지시 발령 — TASK-088~096 전량 등록 (B_Kai 3건·D_Kai 3건·Riley 2건·Edward 1건). IMP-084~088 신규 + IMP-046 재활성화. Hub Routing·개인정보동의·Rate Limiting·UAT 전체 커버 |
 | 2026-05-25 | Aiden (Claude) | TASK-088·090 설계 확정 🔄 착수 승인 — B_Kai: 2-step JOIN·2홉·시드 4개·MOCK 좌표 확장 전항목 승인. Riley: 하이브리드(DB+InMemory)·10/100회 한도 전항목 승인. TASK-089 ❌ 반려(D_Kai 문서 커밋 해시 미기재 R-17 위반) |

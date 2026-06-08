@@ -63,7 +63,9 @@ Phase 6 전 구간 회귀 테스트 케이스 확장 및 E2E 시나리오 검증
 - [x] [B_Kai] `UAT_P6_서비스요율_멀티배정.md` 절차서 (Riley 작성, B_Kai 검토)
 - [x] [B_Kai] `UAT_MASTER.md` Phase 6 시나리오 인덱스 갱신 (Riley 갱신, B_Kai 검토)
 - [x] 코드 커밋 (D_Kai, ef6e1e6) → task file 🔔 → ACTIVE_TASK.md 갱신
-- [x] B_Kai 산출물은 B_Kai 담당 커밋으로 별도 제출 (`710fd60`)
+- [x] B_Kai 산출물은 B_Kai 담당 커밋으로 별도 제출 (`710fd60`·`e93204f`·`e0e1c41`)
+- [x] [B_Kai] 범위 외 변경 4건 커밋 완료 (`e93204f`)
+- [x] [B_Kai] UAT 문서·ACTIVE_TASK·AGENTS·CLAUDE 커밋 완료 (`e0e1c41`)
 
 ---
 
@@ -93,7 +95,7 @@ Phase 6 전 구간 회귀 테스트 케이스 확장 및 E2E 시나리오 검증
 
 | 항목 | 내용 |
 |:---|:---|
-| 커밋 | `66a5dfb` (블로커 선해소), `19dd74e` (레이아웃), `3d82b59` (RLS) |
+| 커밋 | `66a5dfb` (블로커 선해소), `19dd74e` (레이아웃), `3d82b59` (RLS), `710fd60` (E2E 5/5 PASS), `27bff5b` (1차 docs), `e93204f` (재작업 code), `e0e1c41` (재작업 docs) |
 | E2E spec | `e2e-20-p6-service-rates.spec.ts` 616줄 5종 시나리오 |
 | 블로커 해소 | ① P6-02/03: UI form → 직접 DB INSERT (modal backdrop flakiness 회피) |
 | | ② P6-04: `getAssignedOrders` FK 모호성 → `shipper_id!inner` 명시 |
@@ -158,3 +160,60 @@ E2E 실행: npx playwright test tests/e2e/e2e-20-p6-service-rates.spec.ts
 **B_Kai 분석 참조**: `scratch/TK120_E2E_블로커_분석_및_조치계획.md`  
 **Blocker C 판정 완료**: `zen_delivery_rates`에 `fixed_fee` 컬럼 설계 자체 없음 (migration 확인) — Riley 제거 정당, 별도 확인 불필요  
 **UAT 문서**: Riley 작성 완료본 인수 후 내용 검토·필요 시 보완 후 커밋
+
+---
+
+### ❌ 반려 지시 (2026-06-07)
+
+**반려 사유**: R-17 DoD 허위 체크 — 미커밋 상태로 [x] 체크 후 🔔 보고
+
+| 위반 항목 | 체크 상태 | 실제 상태 |
+|:---------|:--------:|:---------:|
+| `UAT_P6_서비스요율_멀티배정.md` | [x] | Untracked — **미커밋** |
+| `UAT_MASTER.md` | [x] | Modified — **미커밋** |
+| `ACTIVE_TASK.md` 갱신 | 묵시적 | Modified — **미커밋** |
+
+docs 커밋 `27bff5b`에 위 3개 파일 **미포함** 확인.
+
+**추가 발견**: 착수 지시 범위 외 미커밋 변경 4건 존재
+
+| 파일 | 내용 |
+|:-----|:-----|
+| `src/app/actions/operations/order-services.ts` | 29줄 수정 — INSERT RLS 우회 관련 |
+| `src/app/actions/operations/assigned-orders.ts` | 2줄 수정 |
+| `supabase/migrations/20260607030000_fix_order_services_insert_rls.sql` | INSERT RLS fix migration |
+| `supabase/migrations/20260607040000_create_order_services_atomic_rpc.sql` | atomic RPC migration |
+
+---
+
+### B_Kai 재작업 지시
+
+**Step 1 — 범위 외 변경 커밋 (E2E 통과에 필수였으므로 TASK-120 범위 내 인정)**
+
+```
+커밋 A [B_Kai] fix: TASK-120 E2E-P6-04 order_services INSERT RLS + atomic RPC
+  └ src/app/actions/operations/order-services.ts
+  └ src/app/actions/operations/assigned-orders.ts
+  └ supabase/migrations/20260607030000_fix_order_services_insert_rls.sql
+  └ supabase/migrations/20260607040000_create_order_services_atomic_rpc.sql
+  → rtk supabase db push
+```
+
+**Step 2 — 누락 UAT 문서 + ACTIVE_TASK 커밋**
+
+```
+커밋 B [B_Kai] docs: TASK-120 UAT·ACTIVE_TASK 누락 커밋 보완 🔔
+  └ docs/91_FinalTest/UAT/UAT_P6_서비스요율_멀티배정.md
+  └ docs/91_FinalTest/UAT/UAT_MASTER.md
+  └ .agent/ACTIVE_TASK.md
+```
+
+**Step 3 — DoD 정정 후 재보고**
+
+- task file DoD에 커밋 A·B 해시 증거값 기재
+- UAT 체크 항목 증거: `커밋 B` 명시
+- task file 상태 ❌ → 🔔 재변경
+- ACTIVE_TASK.md 🔔 재반영
+- 최종 문서 커밋: `[B_Kai] docs: TASK-120 재작업 완료 🔔`
+
+> ⚠️ 재작업 시 동일 유형 위반(DoD 미체크·증거값 미기재) 누적 카운트 +1 적용
