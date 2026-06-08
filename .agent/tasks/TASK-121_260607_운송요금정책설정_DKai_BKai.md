@@ -282,31 +282,71 @@ fn_get_best_matching_rate(
 | **회귀 테스트 (309/309)** | ✅ | bb81021 기준 PASS |
 | **커밋** | bb81021 | `[D_Kai] feat: IMP-105 DB 스키마 — zen_transport_pricing_policies + tiers cbm_price` |
 
-### Riley (착수 지시 — 2026-06-08)
+### Riley → D_Kai 인계 (2026-06-08)
+
+**인계 사유**: Riley 토큰 소진 + TASK-121 범위 초과 (settlement.ts rate card 조회 로직 무단 리팩토링 등 scope creep 다수). 미완료 상태로 중단.
+
+**Working Tree 정리 지시 (착수 전 필수)**:
+
+Riley의 scope-creep 변경은 **모두 폐기**하고 착수한다.
+
+```bash
+# scope-creep 변경 전량 폐기
+git restore src/lib/finance/settlement/settlement.ts
+git restore src/app/actions/admin/master.ts
+git restore src/app/actions/admin/corporate.ts
+git restore src/app/actions/admin/index.ts
+git restore src/app/actions/finance/invoice.ts
+git restore src/app/actions/finance/settlement.ts
+git restore src/app/actions/misc/notifications.ts
+git restore src/app/actions/misc/statistics.ts
+git restore src/app/[locale]/(dashboard)/admin/claims/page.tsx
+git restore src/app/[locale]/(dashboard)/admin/transport-costs/page.tsx
+git restore src/app/[locale]/(dashboard)/master-orders/page.tsx
+git restore src/app/[locale]/(dashboard)/master/geo/geo-client.tsx
+git restore src/app/[locale]/(dashboard)/master/geo/page.tsx
+git restore src/app/[locale]/(dashboard)/mypage/corporate/page.tsx
+git restore src/app/[locale]/(dashboard)/orders/new/page.tsx
+git restore src/app/[locale]/(dashboard)/orders/page.tsx
+git restore src/app/[locale]/(dashboard)/maintenance/page.tsx
+git restore src/app/actions/admin/corporate.ts
+git restore tsconfig.json
+git restore tests/unit/logistics/affiliation.test.ts
+```
+
+**보존 파일 (Riley 작성, D_Kai 검토 후 활용 가능)**:
+- `supabase/migrations/20260608010000_imp105_transport_pricing_engine.sql` (untracked) — migration 로직 참고 가능
+- `tests/integration/p6-transport-policy.test.ts` (untracked) — 테스트 케이스 참고 가능
+- `docs/08_Self_Audit/Checklists/LIVE_REGRESSION_TEST_MAP.md` — TC-POLICY-01~05 등재 내용 보존
+
+### D_Kai (착수 지시 — 2026-06-08)
+
+**담당 범위**: §3 비용 산정 엔진 수정 + §5 TC-POLICY-01~05 회귀 테스트
+
+**핵심 제약**:
+- `settlement.ts` rate card 조회 로직(기존 fn_get_best_matching_rate 6-arg 호출부) **절대 수정 금지**
+- VOLUMETRIC/WM 분기 로직만 추가 (기존 구조 유지)
+- `zen_orders.cargo_cbm` 컬럼 존재 여부 착수 전 확인 필수
 
 **커밋 순서 (R-17 엄수)**:
 
 ```
-커밋 1 [Riley] feat: TASK-121 §3 fn_get_best_matching_rate VOLUMETRIC/WM 파라미터 확장
-  └ supabase/migrations/20260608XXXXXX_extend_fn_get_best_matching_rate.sql
+커밋 1 [D_Kai] feat: TASK-121 §3 fn_get_best_matching_rate 4-arg overload + calculate_order_costs VOLUMETRIC/WM
+  └ supabase/migrations/20260608010000_imp105_transport_pricing_engine.sql (Riley 작업물 검토 후 활용 또는 신규 작성)
+  → rtk supabase db push
 
-커밋 2 [Riley] feat: TASK-121 §3 calculate_order_costs VOLUMETRIC/WM 분기 처리
-  └ supabase/migrations/20260608XXXXXX_update_calculate_order_costs.sql
+커밋 2 [D_Kai] feat: TASK-121 §3 SettlementEngine VOLUMETRIC/WM 분기
+  └ src/lib/finance/settlement/settlement.ts (VOLUMETRIC/WM 분기만 추가, rate card 조회 수정 금지)
 
 회귀 테스트: rtk npm run test:regression → 전체 PASS 확인
 
-커밋 3 [Riley] test: TASK-121 TC-POLICY-01~05 통합 테스트 추가
-  └ tests/integration/p6-transport-policy.test.ts (또는 적합한 파일)
-  └ LIVE_REGRESSION_TEST_MAP.md TC-POLICY-01~05 등재
+커밋 3 [D_Kai] test: TASK-121 TC-POLICY-01~05 통합 테스트 추가
+  └ tests/integration/p6-transport-policy.test.ts
+  └ docs/08_Self_Audit/Checklists/LIVE_REGRESSION_TEST_MAP.md
 
-커밋 4 [Riley] docs: TASK-121 엔진 파트 🔔 완료 보고
-  └ 본 task file [작업 결과] Riley 섹션 + ACTIVE_TASK.md
+커밋 4 [D_Kai] docs: TASK-121 엔진 파트 🔔 완료 보고
+  └ 본 task file [작업 결과] D_Kai 엔진 섹션 + ACTIVE_TASK.md
 ```
-
-**착수 전 필수 확인**:
-- `zen_orders.cargo_cbm` 컬럼 존재 여부 확인 → 없으면 D_Kai에게 즉시 보고
-- `calculate_order_costs` 현재 구현 전체 독해 (TASK-076·TASK-092 변경분 포함)
-- [설계 확정] §3 방안 A 숙지
 
 ### B_Kai (2026-06-08)
 
@@ -333,3 +373,4 @@ fn_get_best_matching_rate(
 | 2026-06-07 | Aiden (Claude) | TASK-121 신규 발령 |
 | 2026-06-08 | Aiden (Claude) | 설계 확정 — §1b 애플리케이션 레벨 검증 채택, §3 방안 A 채택. Riley·B_Kai 착수 지시 발령. |
 | 2026-06-07 | Aiden (Claude) | 담당 Agent 개정 — Riley 추가 (비용 산정 엔진·회귀 테스트 담당). Riley 선정 근거: TASK-076 Composite Pricing Engine 구현자. |
+| 2026-06-08 | Aiden (Claude) | §3 엔진 파트 Riley→D_Kai 재배정 — Riley 토큰 소진·scope 초과로 중단. D_Kai 착수 지시 발령. Working tree scope-creep 폐기 지시 포함. |
