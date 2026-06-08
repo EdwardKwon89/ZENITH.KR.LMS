@@ -3,7 +3,7 @@ import { USER_ROLES } from '@/lib/auth/rbac';
 
 function createMockSupabase() {
   const chain: any = {};
-  chain.rpc = vi.fn();
+  chain.rpc = vi.fn(() => Promise.resolve(chain._listResult || { data: null, error: null }));
   chain.from = vi.fn(() => chain);
   chain.select = vi.fn(() => chain);
   chain.insert = vi.fn(() => chain);
@@ -64,7 +64,7 @@ describe('TC-P6-DB-05: 오더-서비스 배정 CRUD + 역할별 격리 통합 �
 
     expect(result.error).toBeNull();
     expect(result.data).toHaveLength(3);
-    expect(supabase.from).toHaveBeenCalledWith('zen_order_services');
+    expect(supabase.rpc).toHaveBeenCalledWith('create_order_services_atomic', expect.any(Object));
   });
 
   it('createOrderServices — customs_rate_id 비활성 차단', async () => {

@@ -2,11 +2,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { USER_ROLES } from '@/lib/auth/rbac';
 
 function createMockSupabase() {
-  const mock: any = {};
-  mock.rpc = vi.fn();
-
   const chain = {
-    rpc: vi.fn().mockReturnThis(),
+    rpc: vi.fn(() => Promise.resolve(chain._listResult || { data: null, error: null })),
     from: vi.fn(() => chain),
     select: vi.fn(() => chain),
     insert: vi.fn(() => chain),
@@ -27,6 +24,7 @@ function createMockSupabase() {
     _singleResult: null,
     _maybeSingleResult: null,
     _listResult: null,
+    _rpcResult: null,
   };
 
   chain.then = (resolve: any) => {
@@ -43,7 +41,6 @@ function createMockSupabase() {
     };
   });
 
-  mock.chain = chain;
   return chain;
 }
 
@@ -113,7 +110,7 @@ describe('TC-P6-DB-01: Phase 6 DB 스키마 연동 통합 테스트', () => {
     ]);
 
     expect(result.error).toBeNull();
-    expect(supabase.from).toHaveBeenCalledWith('zen_order_services');
+    expect(supabase.rpc).toHaveBeenCalledWith('create_order_services_atomic', expect.any(Object));
   });
 
   it('getAvailableServiceRates — 복수 테이블 조회 성공', async () => {

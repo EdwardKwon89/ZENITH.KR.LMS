@@ -23,7 +23,9 @@ const createMockSupabase = () => {
     update: vi.fn().mockReturnThis(),
     eq: vi.fn().mockReturnThis(),
     single: vi.fn(),
+    rpc: vi.fn(() => Promise.resolve(mock.rpcResult || { data: null, error: null })),
     selectPromiseResult: null,
+    rpcResult: null,
   };
   mock.from.mockReturnValue(mock);
   mock.insert.mockReturnValue(mock);
@@ -75,8 +77,8 @@ describe('TC-P6-ORDERUI: createOrderServices 요율 검증 및 등록 통합 테
       error: null,
     });
 
-    // 3. zen_order_services Insert Mock
-    activeMockSupabase.selectPromiseResult = {
+    // 3. create_order_services_atomic RPC Mock
+    activeMockSupabase.rpcResult = {
       data: [{ id: 'order-service-1' }],
       error: null,
     };
