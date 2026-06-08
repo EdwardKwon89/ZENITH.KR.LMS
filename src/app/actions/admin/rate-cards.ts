@@ -13,7 +13,10 @@ interface CreateRateCardData {
   carrier_id: string;
   transport_mode: string;
   currency: string;
-  tiers: { weight_min: number; unit_price: number }[];
+  tiers: {
+    weight_slabs: { weight_min: number; unit_price: number; min_charge: number }[];
+    cbm_slabs: { cbm_min: number; cbm_price: number; min_charge: number }[];
+  };
   valid_from: string;
   valid_until?: string | null;
   carrier_cost?: number | null;
@@ -43,6 +46,10 @@ export async function createRateCard(data: CreateRateCardData) {
 
   if (!profile || profile.role !== USER_ROLES.ADMIN) {
     throw new Error("Rate card creation requires ADMIN role.");
+  }
+
+  if (!data.tiers?.weight_slabs?.length || !data.tiers?.cbm_slabs?.length) {
+    throw new Error("Both weight_slabs and cbm_slabs must have at least 1 entry.");
   }
 
   const { data: overlapping } = await supabase

@@ -1,8 +1,7 @@
 'use client';
 
 import { ZenCard, ZenButton, ZenInput } from '@/components/ui/ZenUI';
-import { RateTierEditor } from '@/components/admin/RateTierEditor';
-import { RateTier } from '@/components/admin/RateTierEditor';
+import { RateTierEditor, RateTiers } from '@/components/admin/RateTierEditor';
 import {
   Truck, Save, Settings2, Box, Plane, Ship, Calendar, DollarSign, Percent, MapPin, Globe
 } from 'lucide-react';
@@ -41,8 +40,8 @@ interface RateCardFormProps {
   onValidFromChange: (v: string) => void;
   validTo: string;
   onValidToChange: (v: string) => void;
-  tiers: RateTier[];
-  onTiersChange: (v: RateTier[]) => void;
+  tiers: RateTiers;
+  onTiersChange: (v: RateTiers) => void;
   loading: boolean;
   onSave: () => void;
   onResetForm: () => void;
@@ -267,10 +266,10 @@ export function RateCardForm(props: RateCardFormProps) {
             <div className="p-4 border border-dashed border-slate-300 rounded-2xl space-y-3">
               <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Pricing Formula</p>
               <div className="text-xs text-slate-500 leading-relaxed font-mono">
-                {props.tiers.length === 0 ? (
+                {props.tiers.weight_slabs.length === 0 ? (
                   `Carrier Cost: ${props.currency} ${props.carrierCost.toFixed(2)}/kg × (1 + ${(props.marginRate + props.platformFeeRate).toFixed(1)}%)`
                 ) : (
-                  `Tiered: ${props.tiers.length} brackets, starting at ${props.currency} ${Math.min(...props.tiers.map(t => t.unit_price)).toFixed(2)}/kg`
+                  `Weight: ${props.tiers.weight_slabs.length} slabs, CBM: ${props.tiers.cbm_slabs.length} slabs · from ${props.currency} ${Math.min(...props.tiers.weight_slabs.map(t => t.unit_price)).toFixed(2)}/kg`
                 )}
               </div>
             </div>

@@ -76,7 +76,10 @@ export const createRateCard = withAction(async function (payload: {
     origin_port_id?: string | null;
     dest_port_id?: string | null;
     transit_days?: number | null;
-    tiers: any[];
+    tiers: {
+      weight_slabs: { weight_min: number; unit_price: number; min_charge: number }[];
+      cbm_slabs: { cbm_min: number; cbm_price: number; min_charge: number }[];
+    };
     valid_from: string;
     valid_to?: string;
     carrier_cost?: number;
@@ -93,6 +96,10 @@ export const createRateCard = withAction(async function (payload: {
   }
 
   if (!payload.card.carrier_id) throw new Error("운송사 정보(carrier_id)가 누락되었습니다.");
+
+  if (!payload.card.tiers?.weight_slabs?.length || !payload.card.tiers?.cbm_slabs?.length) {
+    throw new Error("무게 요율(weight_slabs)과 부피 요율(cbm_slabs)은 각각 최소 1개 이상 입력해야 합니다.");
+  }
 
   if (profile.role === USER_ROLES.CARRIER) {
     const { data: carrier } = await supabase
@@ -164,7 +171,10 @@ export const updateRateCard = withAction(async function (cardId: string, data: {
   origin_port_id?: string | null;
   dest_port_id?: string | null;
   transit_days?: number | null;
-  tiers?: any[];
+  tiers?: {
+    weight_slabs: { weight_min: number; unit_price: number; min_charge: number }[];
+    cbm_slabs: { cbm_min: number; cbm_price: number; min_charge: number }[];
+  };
   valid_from?: string;
   valid_to?: string;
   carrier_cost?: number;

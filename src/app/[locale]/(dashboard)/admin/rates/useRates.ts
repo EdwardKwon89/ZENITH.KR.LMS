@@ -4,7 +4,7 @@ import { logger } from '@/lib/logger';
 import { useState, useEffect } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { createRateCard, deleteRateCard, getRateCards } from '@/app/actions/rates';
-import { RateTier } from '@/components/admin/RateTierEditor';
+import { RateTiers } from '@/components/admin/RateTierEditor';
 import { USER_ROLES } from '@/lib/auth/rbac';
 
 export interface Port {
@@ -40,8 +40,8 @@ export interface RatesFormState {
   setValidFrom: (v: string) => void;
   validTo: string;
   setValidTo: (v: string) => void;
-  tiers: RateTier[];
-  setTiers: (v: RateTier[]) => void;
+  tiers: RateTiers;
+  setTiers: (v: RateTiers) => void;
   loading: boolean;
   rateCards: any[];
   listLoading: boolean;
@@ -71,7 +71,7 @@ export function useRates(): RatesFormState {
   const [transitDays, setTransitDays] = useState(7);
   const [validFrom, setValidFrom] = useState(new Date().toISOString().split('T')[0]);
   const [validTo, setValidTo] = useState('9999-12-31');
-  const [tiers, setTiers] = useState<RateTier[]>([]);
+  const [tiers, setTiers] = useState<RateTiers>({ weight_slabs: [], cbm_slabs: [] });
   const [loading, setLoading] = useState(false);
 
   const [rateCards, setRateCards] = useState<any[]>([]);
@@ -136,7 +136,7 @@ export function useRates(): RatesFormState {
     setOriginPortId('');
     setDestPortId('');
     setTransitDays(7);
-    setTiers([]);
+    setTiers({ weight_slabs: [], cbm_slabs: [] });
     setValidFrom(new Date().toISOString().split('T')[0]);
     setValidTo('9999-12-31');
   };
@@ -152,11 +152,19 @@ export function useRates(): RatesFormState {
     setDestPortId(rate.dest_port_id || '');
     setValidFrom(rate.valid_from ? new Date(rate.valid_from).toISOString().split('T')[0] : '');
     setValidTo(rate.valid_until ? new Date(rate.valid_until).toISOString().split('T')[0] : '');
-    setTiers((rate.tiers || []).map((t: any) => ({
-      weight_min: t.weight_min,
-      unit_price: t.unit_price,
-      min_total_price: t.min_total_price ?? 0,
-    })));
+    const t = rate.tiers || { weight_slabs: [], cbm_slabs: [] };
+    setTiers({
+      weight_slabs: (t.weight_slabs || []).map((s: any) => ({
+        weight_min: Number(s.weight_min),
+        unit_price: Number(s.unit_price),
+        min_charge: Number(s.min_charge ?? 0),
+      })),
+      cbm_slabs: (t.cbm_slabs || []).map((s: any) => ({
+        cbm_min: Number(s.cbm_min),
+        cbm_price: Number(s.cbm_price),
+        min_charge: Number(s.min_charge ?? 0),
+      })),
+    });
   };
 
   const handleSaveRate = async (): Promise<boolean> => {
@@ -174,11 +182,18 @@ export function useRates(): RatesFormState {
           origin_port_id: originPortId || null,
           dest_port_id: destPortId || null,
           transit_days: transitDays,
-          tiers: tiers.map(t => ({
-            weight_min: t.weight_min,
-            unit_price: t.unit_price,
-            min_total_price: t.min_total_price
-          })),
+          tiers: {
+            weight_slabs: tiers.weight_slabs.map(s => ({
+              weight_min: s.weight_min,
+              unit_price: s.unit_price,
+              min_charge: s.min_charge,
+            })),
+            cbm_slabs: tiers.cbm_slabs.map(s => ({
+              cbm_min: s.cbm_min,
+              cbm_price: s.cbm_price,
+              min_charge: s.min_charge,
+            })),
+          },
           valid_from: new Date(validFrom).toISOString(),
           valid_to: new Date(validTo).toISOString(),
           carrier_cost: carrierCost || undefined,

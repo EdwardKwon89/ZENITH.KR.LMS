@@ -47,7 +47,11 @@ describe('Rates Actions Unit Tests', () => {
     mockSupabase.then.mockImplementationOnce((cb: any) => cb({ data: { id: 'new-card' }, error: null }));
 
     const payload = {
-      card: { carrier_id: 'c-1', transport_mode: 'AIR', tiers: [], valid_from: '2026-06-01' },
+      card: {
+        carrier_id: 'c-1', transport_mode: 'AIR',
+        tiers: { weight_slabs: [{ weight_min: 0, unit_price: 10, min_charge: 0 }], cbm_slabs: [{ cbm_min: 0, cbm_price: 0, min_charge: 0 }] },
+        valid_from: '2026-06-01',
+      },
       surcharges: [],
     };
 
@@ -70,7 +74,11 @@ describe('Rates Actions Unit Tests', () => {
     mockSupabase.then.mockImplementationOnce((cb: any) => cb({ data: { id: 'carrier-card' }, error: null }));
 
     const payload = {
-      card: { carrier_id: 'my-carrier-uuid', transport_mode: 'SEA', tiers: [], valid_from: '2026-06-01' },
+      card: {
+        carrier_id: 'my-carrier-uuid', transport_mode: 'SEA',
+        tiers: { weight_slabs: [{ weight_min: 0, unit_price: 10, min_charge: 0 }], cbm_slabs: [{ cbm_min: 0, cbm_price: 0, min_charge: 0 }] },
+        valid_from: '2026-06-01',
+      },
       surcharges: [],
     };
 
@@ -89,7 +97,11 @@ describe('Rates Actions Unit Tests', () => {
     mockSupabase.then.mockImplementationOnce((cb: any) => cb({ data: { id: 'my-carrier-uuid' }, error: null }));
 
     const payload = {
-      card: { carrier_id: 'other-carrier-uuid', transport_mode: 'SEA', tiers: [], valid_from: '2026-06-01' },
+      card: {
+        carrier_id: 'other-carrier-uuid', transport_mode: 'SEA',
+        tiers: { weight_slabs: [{ weight_min: 0, unit_price: 10, min_charge: 0 }], cbm_slabs: [{ cbm_min: 0, cbm_price: 0, min_charge: 0 }] },
+        valid_from: '2026-06-01',
+      },
       surcharges: [],
     };
 
@@ -199,7 +211,7 @@ describe('Rates Actions Unit Tests', () => {
       card: {
         carrier_id: 'carrier-uuid-1',
         transport_mode: 'SEA',
-        tiers: [{ weight_min: 0, unit_price: 2.50 }],
+        tiers: { weight_slabs: [{ weight_min: 0, unit_price: 2.50, min_charge: 0 }], cbm_slabs: [{ cbm_min: 0, cbm_price: 0, min_charge: 0 }] },
         valid_from: '2026-06-01',
         carrier_cost: 1.80,
         margin_rate: 15.0,
@@ -262,7 +274,7 @@ describe('Rates Actions Unit Tests', () => {
         transport_mode: 'AIR',
         origin_port_id: 'port-icn-uuid',
         dest_port_id: 'port-jfk-uuid',
-        tiers: [{ weight_min: 0, unit_price: 3.00 }],
+        tiers: { weight_slabs: [{ weight_min: 0, unit_price: 3.00, min_charge: 0 }], cbm_slabs: [{ cbm_min: 0, cbm_price: 0, min_charge: 0 }] },
         valid_from: '2026-06-01',
         carrier_cost: 2.00,
         margin_rate: 15.0,
@@ -313,7 +325,7 @@ describe('Rates Actions Unit Tests', () => {
         carrier_id: 'carrier-uuid-2',
         transport_mode: 'SEA',
         // no origin_port_id, no dest_port_id
-        tiers: [{ weight_min: 0, unit_price: 1.50 }],
+        tiers: { weight_slabs: [{ weight_min: 0, unit_price: 1.50, min_charge: 0 }], cbm_slabs: [{ cbm_min: 0, cbm_price: 0, min_charge: 0 }] },
         valid_from: '2026-06-01',
         carrier_cost: 1.20,
         margin_rate: 15.0,
@@ -368,7 +380,7 @@ describe('Rates Actions Unit Tests', () => {
         transport_mode: 'AIR',
         origin_port_id: 'port-icn-uuid',
         dest_port_id: 'port-lax-uuid',
-        tiers: [{ weight_min: 0, unit_price: 2.00 }],
+        tiers: { weight_slabs: [{ weight_min: 0, unit_price: 2.00, min_charge: 0 }], cbm_slabs: [{ cbm_min: 0, cbm_price: 0, min_charge: 0 }] },
         valid_from: '2026-06-01',
         carrier_cost: 1.50,
         margin_rate: 10.0,

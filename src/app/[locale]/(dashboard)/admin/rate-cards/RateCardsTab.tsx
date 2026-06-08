@@ -3,7 +3,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { createRateCard, updateRateCard, deleteRateCard, getRateCards } from '@/app/actions/admin/rate-cards';
-import { Trash2, Plus, Save, X } from 'lucide-react';
+import { RateTierEditor, RateTiers } from '@/components/admin/RateTierEditor';
+import { Trash2, Plus, Save } from 'lucide-react';
 
 interface Carrier {
   id: string;
@@ -17,7 +18,7 @@ interface RateCard {
   carrier_id: string;
   transport_mode: string;
   currency: string;
-  tiers: { weight_min: number; unit_price: number }[];
+  tiers: any;
   valid_from: string;
   valid_until: string | null;
   is_active: boolean;
@@ -28,46 +29,6 @@ interface RateCard {
 }
 
 const TRANSPORT_MODES = ['AIR', 'SEA', 'LAND', 'EXP'] as const;
-const EMPTY_TIER = { weight_min: 0, unit_price: 0 };
-
-function RateCardFormRow({ tier, index, onChange, onRemove }: {
-  tier: { weight_min: number; unit_price: number };
-  index: number;
-  onChange: (i: number, field: 'weight_min' | 'unit_price', value: number) => void;
-  onRemove: (i: number) => void;
-}) {
-  return (
-    <div className="flex items-center gap-3">
-      <span className="text-xs text-slate-400 w-4">{index + 1}</span>
-      <div className="flex-1">
-        <label className="text-xs text-slate-500">Weight Min</label>
-        <input
-          type="number"
-          min={0}
-          value={tier.weight_min}
-          onChange={e => onChange(index, 'weight_min', Number(e.target.value))}
-          className="w-full border border-slate-200 rounded px-2 py-1 text-sm"
-        />
-      </div>
-      <div className="flex-1">
-        <label className="text-xs text-slate-500">Unit Price</label>
-        <input
-          type="number"
-          min={0}
-          step={0.01}
-          value={tier.unit_price}
-          onChange={e => onChange(index, 'unit_price', Number(e.target.value))}
-          className="w-full border border-slate-200 rounded px-2 py-1 text-sm"
-        />
-      </div>
-      {index > 0 && (
-        <button onClick={() => onRemove(index)} className="p-1 text-red-400 hover:text-red-600 mt-5">
-          <X className="w-4 h-4" />
-        </button>
-      )}
-    </div>
-  );
-}
 
 export function RateCardsTab() {
   const [cards, setCards] = useState<RateCard[]>([]);
@@ -80,7 +41,7 @@ export function RateCardsTab() {
     carrier_id: '',
     transport_mode: 'AIR' as string,
     currency: 'USD',
-    tiers: [{ ...EMPTY_TIER }],
+    tiers: { weight_slabs: [{ weight_min: 0, unit_price: 0, min_charge: 0 }], cbm_slabs: [{ cbm_min: 0, cbm_price: 0, min_charge: 0 }] } as RateTiers,
     valid_from: new Date().toISOString().split('T')[0],
     valid_until: '',
     carrier_cost: '',
@@ -112,7 +73,7 @@ export function RateCardsTab() {
       carrier_id: '',
       transport_mode: 'AIR',
       currency: 'USD',
-      tiers: [{ ...EMPTY_TIER }],
+      tiers: { weight_slabs: [{ weight_min: 0, unit_price: 0, min_charge: 0 }], cbm_slabs: [{ cbm_min: 0, cbm_price: 0, min_charge: 0 }] },
       valid_from: new Date().toISOString().split('T')[0],
       valid_until: '',
       carrier_cost: '',
@@ -125,11 +86,19 @@ export function RateCardsTab() {
   };
 
   const handleEdit = (card: RateCard) => {
+    const t = card.tiers || { weight_slabs: [], cbm_slabs: [] };
     setFormData({
       carrier_id: card.carrier_id,
       transport_mode: card.transport_mode,
       currency: card.currency,
-      tiers: card.tiers.length > 0 ? card.tiers.map(t => ({ ...t })) : [{ ...EMPTY_TIER }],
+      tiers: {
+        weight_slabs: (t.weight_slabs || []).length > 0
+          ? t.weight_slabs.map((s: any) => ({ weight_min: Number(s.weight_min), unit_price: Number(s.unit_price), min_charge: Number(s.min_charge ?? 0) }))
+          : [{ weight_min: 0, unit_price: 0, min_charge: 0 }],
+        cbm_slabs: (t.cbm_slabs || []).length > 0
+          ? t.cbm_slabs.map((s: any) => ({ cbm_min: Number(s.cbm_min), cbm_price: Number(s.cbm_price), min_charge: Number(s.min_charge ?? 0) }))
+          : [{ cbm_min: 0, cbm_price: 0, min_charge: 0 }],
+      },
       valid_from: card.valid_from.split('T')[0],
       valid_until: card.valid_until ? card.valid_until.split('T')[0] : '',
       carrier_cost: card.carrier_cost?.toString() || '',
@@ -147,8 +116,14 @@ export function RateCardsTab() {
       return;
     }
 
+    if (formData.tiers.weight_slabs.length === 0 || formData.tiers.cbm_slabs.length === 0) {
+      setError('Both Weight Slabs and CBM Slabs must have at least 1 entry.');
+      return;
+    }
+
     const payload = {
       ...formData,
+      tiers: formData.tiers,
       valid_until: formData.valid_until || null,
       carrier_cost: formData.carrier_cost ? Number(formData.carrier_cost) : null,
       margin_rate: formData.margin_rate ? Number(formData.margin_rate) : 15.0,
@@ -176,20 +151,6 @@ export function RateCardsTab() {
     } catch (err: any) {
       setError(err.message);
     }
-  };
-
-  const handleTierChange = (index: number, field: 'weight_min' | 'unit_price', value: number) => {
-    const tiers = [...formData.tiers];
-    tiers[index] = { ...tiers[index], [field]: value };
-    setFormData(prev => ({ ...prev, tiers }));
-  };
-
-  const addTier = () => {
-    setFormData(prev => ({ ...prev, tiers: [...prev.tiers, { ...EMPTY_TIER }] }));
-  };
-
-  const removeTier = (index: number) => {
-    setFormData(prev => ({ ...prev, tiers: prev.tiers.filter((_, i) => i !== index) }));
   };
 
   if (loading) return <div className="text-slate-400 text-sm">Loading...</div>;
@@ -314,15 +275,11 @@ export function RateCardsTab() {
           </div>
 
           <div>
-            <label className="text-xs text-slate-500 font-semibold">Tiers</label>
-            <div className="space-y-2 mt-1">
-              {formData.tiers.map((tier, i) => (
-                <RateCardFormRow key={i} tier={tier} index={i} onChange={handleTierChange} onRemove={removeTier} />
-              ))}
-            </div>
-            <button onClick={addTier} className="flex items-center gap-1 text-sm text-emerald-600 hover:text-emerald-700 mt-2">
-              <Plus className="w-3 h-3" /> Add tier
-            </button>
+            <RateTierEditor
+              tiers={formData.tiers}
+              onChange={(tiers) => setFormData(prev => ({ ...prev, tiers }))}
+              currency={formData.currency}
+            />
           </div>
 
           <div className="flex gap-3 justify-end pt-2">
@@ -364,7 +321,9 @@ export function RateCardsTab() {
                   <span className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-xs font-mono">{card.transport_mode}</span>
                 </td>
                 <td className="px-4 py-3">{card.currency}</td>
-                <td className="px-4 py-3 text-xs text-slate-500">{card.tiers?.length || 0} slabs</td>
+                <td className="px-4 py-3 text-xs text-slate-500">
+                  {card.tiers?.weight_slabs?.length || 0} wt · {card.tiers?.cbm_slabs?.length || 0} cbm
+                </td>
                 <td className="px-4 py-3 text-xs font-mono">{card.carrier_cost != null ? `$${card.carrier_cost}` : '-'}</td>
                 <td className="px-4 py-3 text-xs">{card.margin_rate != null ? `${card.margin_rate}%` : '-'}</td>
                 <td className="px-4 py-3 text-xs">{card.platform_fee_rate != null ? `${card.platform_fee_rate}%` : '-'}</td>
