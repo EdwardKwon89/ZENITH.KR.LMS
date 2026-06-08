@@ -229,7 +229,44 @@ WM 방식 카드 등록 시 `cbm_price` 입력 필드 추가:
 
 ## [설계 확정] — Aiden 전속
 
-*(D_Kai 설계 의견 제출 후 Aiden 작성)*
+**확정일**: 2026-06-08 | **확정자**: Aiden (Claude, ZEN_CEO)
+
+### §1b — tiers cbm_price CHECK 제약
+
+**채택**: 애플리케이션 레벨 검증 (DB CHECK 제약 없음)
+- 이유: JSONB 내부 필드에 DB CHECK 강제 시 `jsonb_typeof` 함수 의존성 증가 → 복잡도 대비 이득 미미
+- Admin UI(B_Kai)에서 SEA/LAND 선택 시에만 `cbm_price` 입력 활성화. AIR/EXP는 UI에서 null 고정.
+
+### §3 — calculate_order_costs 수정 방안
+
+**채택**: 방안 A — `fn_get_best_matching_rate`에 `pricing_method` 파라미터 추가
+
+```sql
+-- 수정 후 시그니처
+fn_get_best_matching_rate(
+  p_rate_card_id UUID,
+  p_weight NUMERIC,
+  p_cbm NUMERIC,            -- 신규
+  p_pricing_method TEXT     -- 'WEIGHT_ONLY'|'VOLUMETRIC'|'WM' 신규
+) RETURNS TABLE(unit_price NUMERIC, cbm_price NUMERIC, min_total_price NUMERIC)
+```
+
+- WEIGHT_ONLY: 기존 로직 유지 (p_cbm 무시)
+- VOLUMETRIC: chargeable_weight = MAX(p_weight, p_cbm × 1,000,000 / divisor) → weight tier 조회
+- WM: weight_cost = p_weight × tier.unit_price, cbm_cost = p_cbm × tier.cbm_price → MAX 채택
+
+**Riley 구현 요점**:
+1. `calculate_order_costs`에서 `zen_transport_pricing_policies` 조회 → `pricing_method` + `volumetric_divisor` 획득
+2. `fn_get_best_matching_rate` 호출 시 `p_cbm`, `p_pricing_method` 전달
+3. `zen_orders.cargo_cbm` 필드 존재 여부 확인 → 없으면 D_Kai에게 즉시 보고 (착수 전 선행 확인)
+4. 기존 AIR/EXP 데이터 호환: `COALESCE(tier.cbm_price, 0)` 처리
+
+**B_Kai 구현 요점**:
+1. D_Kai bb81021 기준 `zen_transport_pricing_policies` 스키마 기반으로 UI 착수
+2. 페이지 경로: `/admin/settings/transport-policies`
+3. 사이드바 `기본정보` 하위 메뉴에 "요금 산정 정책" 추가 (ADMIN only)
+4. 4행 고정 테이블 (AIR/EXP/SEA/LAND — 삭제 불가, 행별 저장 버튼)
+5. `RateTierEditor.tsx`: SEA/LAND 선택 시 `cbm_price` 컬럼 표시 (AIR/EXP 시 숨김)
 
 ---
 
@@ -245,13 +282,53 @@ WM 방식 카드 등록 시 `cbm_price` 입력 필드 추가:
 | **회귀 테스트 (309/309)** | ✅ | bb81021 기준 PASS |
 | **커밋** | bb81021 | `[D_Kai] feat: IMP-105 DB 스키마 — zen_transport_pricing_policies + tiers cbm_price` |
 
-### Riley (TBD)
-- [ ] calculate_order_costs VOLUMETRIC/WM 분기 로직 구현 (설계 의견 방안 A 참조)
-- [ ] TC-POLICY-01~05 통합 테스트 작성
+### Riley (착수 지시 — 2026-06-08)
 
-### B_Kai (TBD)
-- [ ] Admin UI: zen_transport_pricing_policies CRUD 페이지
-- [ ] RateTierEditor: SEA/LAND 시 cbm_price 입력 필드
+**커밋 순서 (R-17 엄수)**:
+
+```
+커밋 1 [Riley] feat: TASK-121 §3 fn_get_best_matching_rate VOLUMETRIC/WM 파라미터 확장
+  └ supabase/migrations/20260608XXXXXX_extend_fn_get_best_matching_rate.sql
+
+커밋 2 [Riley] feat: TASK-121 §3 calculate_order_costs VOLUMETRIC/WM 분기 처리
+  └ supabase/migrations/20260608XXXXXX_update_calculate_order_costs.sql
+
+회귀 테스트: rtk npm run test:regression → 전체 PASS 확인
+
+커밋 3 [Riley] test: TASK-121 TC-POLICY-01~05 통합 테스트 추가
+  └ tests/integration/p6-transport-policy.test.ts (또는 적합한 파일)
+  └ LIVE_REGRESSION_TEST_MAP.md TC-POLICY-01~05 등재
+
+커밋 4 [Riley] docs: TASK-121 엔진 파트 🔔 완료 보고
+  └ 본 task file [작업 결과] Riley 섹션 + ACTIVE_TASK.md
+```
+
+**착수 전 필수 확인**:
+- `zen_orders.cargo_cbm` 컬럼 존재 여부 확인 → 없으면 D_Kai에게 즉시 보고
+- `calculate_order_costs` 현재 구현 전체 독해 (TASK-076·TASK-092 변경분 포함)
+- [설계 확정] §3 방안 A 숙지
+
+### B_Kai (착수 지시 — 2026-06-08)
+
+**커밋 순서 (R-17 엄수)**:
+
+```
+커밋 1 [B_Kai] feat: TASK-121 §2 Admin 운송 정책 설정 화면
+  └ src/app/[locale]/(dashboard)/admin/settings/transport-policies/page.tsx
+  └ src/app/[locale]/(dashboard)/admin/settings/transport-policies/transport-policies-client.tsx
+  └ src/app/actions/admin/transport-policies.ts
+  └ 사이드바 메뉴 추가 (ADMIN only)
+
+커밋 2 [B_Kai] feat: TASK-121 §4 RateTierEditor cbm_price 필드 추가
+  └ src/components/admin/RateTierEditor.tsx
+
+회귀 테스트: rtk npm run test:regression → 전체 PASS 확인
+
+커밋 3 [B_Kai] docs: TASK-121 Admin UI 파트 🔔 완료 보고
+  └ 본 task file [작업 결과] B_Kai 섹션 + ACTIVE_TASK.md
+```
+
+**착수 조건**: D_Kai bb81021 기준 스키마 확정 — 즉시 착수 가능
 
 ---
 
@@ -260,4 +337,5 @@ WM 방식 카드 등록 시 `cbm_price` 입력 필드 추가:
 | 날짜 | 주체 | 내용 |
 |:-----|:----:|:----|
 | 2026-06-07 | Aiden (Claude) | TASK-121 신규 발령 |
+| 2026-06-08 | Aiden (Claude) | 설계 확정 — §1b 애플리케이션 레벨 검증 채택, §3 방안 A 채택. Riley·B_Kai 착수 지시 발령. |
 | 2026-06-07 | Aiden (Claude) | 담당 Agent 개정 — Riley 추가 (비용 산정 엔진·회귀 테스트 담당). Riley 선정 근거: TASK-076 Composite Pricing Engine 구현자. |
