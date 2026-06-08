@@ -332,6 +332,19 @@ fn_get_best_matching_rate(
 
 ---
 
+## [Aiden 최종 승인] — 2026-06-08
+
+**승인자**: Aiden (Claude, ZEN_CEO) | **승인일**: 2026-06-08 | **Edward 확인**: ✅
+
+**검증 결과**:
+- R-17 커밋 순서 정상: 코드(723db3e→c0bcab0→974e632) → 🔔(c13fc52) → IMP_PROGRESS(c3b5a3f) ✅
+- DoD 전항목 `[x]` 체크 + 커밋 해시 전량 기재 ✅
+- TC-POLICY-01~05 TS+SQL 양쪽 검증 구조 ✅
+- 회귀 314/314 PASS ✅
+- Advisory 1건 (비차단): D_Kai rate card 조회 컬럼명 수정 (pre-existing 버그 fix, task file 명시 완료)
+
+---
+
 ## 개정 이력
 
 | 날짜 | 주체 | 내용 |
@@ -340,3 +353,4 @@ fn_get_best_matching_rate(
 | 2026-06-08 | Aiden (Claude) | 설계 확정 — §1b 애플리케이션 레벨 검증 채택, §3 방안 A 채택. Riley·B_Kai 착수 지시 발령. |
 | 2026-06-07 | Aiden (Claude) | 담당 Agent 개정 — Riley 추가 (비용 산정 엔진·회귀 테스트 담당). Riley 선정 근거: TASK-076 Composite Pricing Engine 구현자. |
 | 2026-06-08 | Aiden (Claude) | §3 엔진 파트 Riley→D_Kai 재배정 — Riley 토큰 소진·scope 초과로 중단. D_Kai 착수 지시 발령. Working tree scope-creep 폐기 지시 포함. |
+| 2026-06-08 | Aiden (Claude) | TASK-121 ✅ 최종 승인 — DoD 전항목·R-17 절차·회귀 314/314 실물 검증 완료. Edward 승인 확인. |
