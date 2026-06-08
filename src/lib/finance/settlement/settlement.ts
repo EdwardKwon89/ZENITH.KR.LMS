@@ -60,9 +60,28 @@ export class SettlementEngine {
         return { success: false, message: validation.message };
       }
 
-      // 2. Chargeable Weight 계산
-      const { chargeableWeight } = await this.costAggregator.calculateChargeableWeight(order);
-      logger.info(`[Settlement] Chargeable Weight: ${chargeableWeight}kg`);
+      // 2a. 운송수단별 요금 산정 정책 조회 (IMP-105)
+      const { data: pricingPolicy } = await supabase
+        .from('zen_transport_pricing_policies')
+        .select('pricing_method, volumetric_divisor')
+        .eq('transport_mode', order.transport_mode)
+        .maybeSingle();
+
+      const policyMethod = pricingPolicy?.pricing_method || 'WEIGHT_ONLY';
+      const volumetricDivisor = pricingPolicy?.volumetric_divisor || 6000;
+
+      // 2b. Chargeable Weight 계산 (정책 기반)
+      const { chargeableWeight, totalGrossWeight, totalVolume } = await this.costAggregator.calculateChargeableWeight(order);
+
+      let effectiveChargeableWeight = chargeableWeight;
+      if (policyMethod === 'VOLUMETRIC' && totalVolume > 0) {
+        const volumeWeight = (totalVolume * 1000000.0) / volumetricDivisor;
+        effectiveChargeableWeight = Math.max(totalGrossWeight, volumeWeight);
+      } else if (policyMethod === 'WEIGHT_ONLY' || policyMethod === 'WM') {
+        effectiveChargeableWeight = totalGrossWeight;
+      }
+
+      logger.info(`[Settlement] Chargeable Weight: ${effectiveChargeableWeight}kg (${policyMethod})`);
 
       // 3. 비용 데이터 저장 (멱등성 처리) - 기존 미청구 비용 목록 및 인보이스 상태 확인을 위해 먼저 로드
       const { data: existingCosts, error: costSelectError } = await supabase
@@ -123,7 +142,7 @@ export class SettlementEngine {
 
         if (isSingleCarrier) {
           logger.info(`[Settlement] Single carrier detected: ${carriers[0]}`);
-          const unitPrice = totalFreight / (chargeableWeight || 1);
+          const unitPrice = totalFreight / (effectiveChargeableWeight || 1);
           calculatedUnitPrice = unitPrice;
 
           const { data: insertedCost, error: costInsertError } = await supabase
@@ -132,7 +151,7 @@ export class SettlementEngine {
               order_id: orderId,
               cost_type: 'FREIGHT',
               unit_price: unitPrice,
-              quantity: chargeableWeight,
+              quantity: effectiveChargeableWeight,
               currency: finalCurrency,
               is_revenue: true,
               route_option_id: route.selected_option_id,
@@ -176,30 +195,35 @@ export class SettlementEngine {
         // 요율 매칭 (가장 적합한 Rate Card 검색) - Fallback 시에만 실행
         const { data: rateCard, error: rateError } = await supabase
           .from('zen_rate_cards')
-          .select(`
-            *,
-            tiers:zen_rate_tiers(*)
-          `)
-          .eq('origin_code', order.origin_port.code)
-          .eq('dest_code', order.dest_port.code)
-          .eq('mode', order.transport_mode)
-          .eq('status', 'ACTIVE')
-          .or(`customer_id.eq.${shipperIdStr},customer_id.is.null`)
-          .order('priority', { ascending: false })
+          .select('*')
+          .eq('origin_port_id', order.origin_port_id)
+          .eq('dest_port_id', order.dest_port_id)
+          .eq('transport_mode', order.transport_mode)
+          .eq('is_active', true)
           .order('created_at', { ascending: false });
 
         if (rateError || !rateCard || rateCard.length === 0) {
-          logger.warn(`[Settlement] No matching rate card found for ${order.origin_port.code}->${order.dest_port.code} (${order.transport_mode}). Error: ${rateError?.message}`);
+          logger.warn(`[Settlement] No matching rate card found for ${order.origin_port?.code}->${order.dest_port?.code} (${order.transport_mode}). Error: ${rateError?.message}`);
           return { success: false, message: '매칭되는 유효한 요율 카드가 없습니다.' };
         }
 
         logger.info(`[Settlement] Found ${rateCard.length} potential rate cards`);
-        const bestRate = rateCard.find(r => r.customer_id === shipperIdStr) || rateCard[0];
+        const bestRate = rateCard[0];
         logger.info(`[Settlement] Selected Best Rate: ID=${bestRate.id}`);
 
-        const unitPrice = this.slabRateCalculator.calculateUnitPrice(bestRate, chargeableWeight);
+        const unitPrice = this.slabRateCalculator.calculateUnitPrice(bestRate, effectiveChargeableWeight);
         calculatedUnitPrice = unitPrice;
-        totalFreight = unitPrice * chargeableWeight;
+
+        if (policyMethod === 'WM') {
+          const totalVolume = await this.getTotalCbm(orderId, supabase);
+          const weightCost = totalGrossWeight * unitPrice;
+          const cbmPrice = this.getCbmPriceFromTiers(bestRate.tiers, effectiveChargeableWeight);
+          const cbmCost = totalVolume * (cbmPrice || 0);
+          totalFreight = Math.max(weightCost, cbmCost);
+          effectiveChargeableWeight = totalGrossWeight;
+        } else {
+          totalFreight = unitPrice * effectiveChargeableWeight;
+        }
         finalCurrency = bestRate.currency || 'USD';
 
         const unbilledCost = existingCosts?.find(c => c.invoice_id === null);
@@ -208,8 +232,8 @@ export class SettlementEngine {
           const { data: updatedCost, error: costUpdateError } = await supabase
             .from('zen_order_costs')
             .update({
-              unit_price: unitPrice,
-              quantity: chargeableWeight,
+              unit_price: calculatedUnitPrice || unitPrice,
+              quantity: effectiveChargeableWeight,
               currency: finalCurrency,
               is_revenue: true,
               route_option_id: null,
@@ -230,8 +254,8 @@ export class SettlementEngine {
             .insert({
               order_id: orderId,
               cost_type: 'FREIGHT',
-              unit_price: unitPrice,
-              quantity: chargeableWeight,
+              unit_price: calculatedUnitPrice || unitPrice,
+              quantity: effectiveChargeableWeight,
               currency: finalCurrency,
               is_revenue: true,
               route_option_id: null,
@@ -250,7 +274,7 @@ export class SettlementEngine {
 
       return {
         success: true,
-        chargeableWeight,
+        chargeableWeight: effectiveChargeableWeight,
         unitPrice: calculatedUnitPrice,
         totalFreight,
         currency: finalCurrency,
@@ -260,5 +284,28 @@ export class SettlementEngine {
       logger.error('SettlementEngine Error:', err);
       return { success: false, message: err.message };
     }
+  }
+
+  private async getTotalCbm(orderId: string, supabase: any): Promise<number> {
+    const { data: packages } = await supabase
+      .from('zen_order_packages')
+      .select('volume')
+      .eq('order_id', orderId);
+    if (!packages) return 0;
+    return packages.reduce((sum: number, p: any) => sum + Number(p.volume || 0), 0);
+  }
+
+  private getCbmPriceFromTiers(tiers: any, weight: number): number | null {
+    if (!Array.isArray(tiers)) return null;
+    let matched = null;
+    for (const t of tiers) {
+      if (weight >= Number(t.weight_min || 0)) {
+        matched = t;
+      }
+    }
+    if (matched && matched.cbm_price !== undefined && matched.cbm_price !== null) {
+      return Number(matched.cbm_price);
+    }
+    return matched ? Number(matched.unit_price) : null;
   }
 }
