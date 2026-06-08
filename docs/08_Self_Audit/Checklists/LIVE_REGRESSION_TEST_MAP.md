@@ -1,8 +1,8 @@
 # 🗺️ LIVE Regression Test Master Map
 
 > **상태:** [ACTIVE]  
-> **총 테스트 케이스:** 295 Cases  
-> **최종 검증일:** 2026-06-07 (TASK-120 Phase 6 통합 테스트 28건 추가)  
+> **총 테스트 케이스:** 314 Cases  
+> **최종 검증일:** 2026-06-08 (TASK-121 운송 요금 정책 테스트 5건 추가)  
 
 제니스 플랫폼의 비즈니스 영속성을 보장하는 회귀 테스트 케이스의 통합 명세서입니다. 모든 신규 개발 및 수정 시 이 맵에 케이스가 추가되어야 하며, 전체 테스트가 통과되어야 합니다.
 
@@ -316,12 +316,22 @@
 | **TC-P6-INTG-04** | 통합 서비스 요율 조회 Edge Case — last tier fallback, 빈 tiers, null tiers, port 미조회, carrier name null, 부분 결과, zero weight | 요율 조회 엔진의 다양한 엣지 케이스 처리 검증 | `tests/integration/p6-service-rates.test.ts` |
 | **TC-P6-INTG-05** | 오더-서비스 배정 CRUD + 역할 격리 — 3종 동시 등록 + 비활성/만료 차단 + ADMIN 전역조회 + provider 필터 + 타 provider 차단 + Unauthorized + order not found | 오더-서비스 배정 전 기능 및 역할별 격리 통합 검증 | `tests/integration/p6-order-services.test.ts` |
 
+### 27. 운송 요금 정책 (Transport Pricing Policy)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-POLICY-01** | AIR 오더 부피중량 > 실중량 시 비용 산정 | 부피중량 기준 tier 적용 요율 산정 검증 | `tests/integration/p6-transport-policy.test.ts` |
+| **TC-POLICY-02** | AIR 오더 실중량 > 부피중량 시 비용 산정 | 실중량 기준 tier 적용 요율 산정 검증 | `tests/integration/p6-transport-policy.test.ts` |
+| **TC-POLICY-03** | SEA 오더 중량단가 > 용적단가 시 | 중량단가 채택 요율 산정 검증 | `tests/integration/p6-transport-policy.test.ts` |
+| **TC-POLICY-04** | SEA 오더 용적단가 > 중량단가 시 | 용적단가 채택 요율 산정 검증 | `tests/integration/p6-transport-policy.test.ts` |
+| **TC-POLICY-05** | Admin 정책 VOLUMETRIC->WM 변경 후 오더 산정 | 변경된 방식 즉시 반영 여부 통합 검증 | `tests/integration/p6-transport-policy.test.ts` |
+
 ---
 
 ## 📊 최신 검증 이력 (Execution History)
 
 | 검증일 | 버전 | 성공/실패 | 총 소요시간 | 결과 리포트 |
 | :--- | :--- | :---: | :--- | :--- |
+| 2026-06-08 | v1.5.2 | ✅ PASS | ~45s | TASK-121 운송수단별 요금 산정 정책 설정 완료. TC-POLICY-01~05 (총 5개 케이스) 추가 및 전체 회귀 테스트 314건 통과. |
 | 2026-06-07 | v1.5.1 | ✅ PASS | TBD | TASK-120 Phase 6 통합 테스트 5파일 신규 등록. TC-P6-INTG-01~05 (총 28개 케이스) 추가 및 전체 회귀 테스트 통과. |
 | 2026-06-06 | v1.5.0 | ✅ PASS | 32.15s | Phase 6 Sprint 5 오더 등록 UI 개선 및 이중 요율 검증 완료. TC-P6-ORDERUI-01~03 신규 등록 및 전체 회귀 테스트 통과. |
 | 2026-04-27 | v5.0 | ✅ PASS | 29.10s | 124/124 Phase 4 Sprint 5 (선불 지갑) 완료. 지갑 연동, 충전/결제 액션, 마이페이지 대시보드 구현 및 회귀 테스트 9건(Wallet 관련 9개 TC) 신규 등록. |
