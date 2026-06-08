@@ -213,16 +213,35 @@ export function calculateWeightSlabRate(
 
 ---
 
+## B_Kai 작업 결과
+
+### Commit — `a9c4f3e` — §2 UI 수정 (feat)
+- **`RateTierEditor.tsx`**: 완전 재작성 — `RateTiers {weight_slabs, cbm_slabs}` 타입 도입, 섹션별 독립 Add/Remove, 최소 1개 검증
+- **`RateCardForm.tsx`**: `tiers: RateTier[]` → `RateTiers` 타입 변경, formula 표시 업데이트
+- **`useRates.ts`**: `RateTier` → `RateTiers` 마이그레이션, handleEdit/handleSave 매핑
+- **`RateCardsTab.tsx`**: inline `RateCardFormRow` 제거 → `RateTierEditor` 교체, 테이블 tiers 컬럼 `N wt · M cbm` 표시
+- **`admin/rate-cards.ts`** (deprecated): `CreateRateCardData.tiers` 타입 업데이트 + 최소 1개 검증
+- **`admin/rates.ts`**: `tiers: any[]` → 명시적 타입 + validation 추가
+
+### Commit — `a9c4f3e` — TC 수정 (test)
+- **`rates.test.ts`**: 7개 테스트 payload `tiers: []` → `{weight_slabs, cbm_slabs}` 형식 변경
+
+### TC 결과
+- **전체 회귀 테스트: 314/314 PASS** (52.84s)
+- **DoD-5, DoD-6, DoD-8 충족**
+
+---
+
 ## DoD (완료 기준)
 
 - [x] `zen_rate_cards.tiers` 구조 `{ weight_slabs, cbm_slabs }` 변환 완료 (기존 33개 데이터 포함) `2cb5927`
 - [x] `fn_get_best_matching_rate` weight_slabs 기반 동작 확인 `2cb5927`
 - [x] `calculate_order_costs` cbm_slabs 기반 WM 계산 동작 확인 `2cb5927`
 - [x] `SlabRateCalculator` / `SettlementEngine` weight_slabs · cbm_slabs 참조 수정 `46bc9f9`
-- [ ] `RateTierEditor` 무게 Slab / 부피 Slab 섹션 분리 + 최소 1개 검증 (B_Kai §2)
-- [ ] `RateCardsTab` 동일 구조 적용 (B_Kai §2)
+- [x] `RateTierEditor` 무게 Slab / 부피 Slab 섹션 분리 + 최소 1개 검증 (B_Kai §2) `a9c4f3e`
+- [x] `RateCardsTab` 동일 구조 적용 (B_Kai §2) `a9c4f3e`
 - [x] TC-POLICY-01~05 신규 tiers 구조 기준 전량 PASS `896e193`
-- [x] 전체 회귀 테스트 PASS (314/314) `896e193`
+- [x] 전체 회귀 테스트 PASS (314/314) `896e193` + `a9c4f3e`
 - [x] `LIVE_REGRESSION_TEST_MAP.md` 업데이트 `896e193`
 
 ---
