@@ -110,10 +110,15 @@ describe('IMP-105: Transport Pricing Policy Integration Tests (TC-POLICY-01~05)'
         is_active: true,
         origin_port_id: testPortIcn,
         dest_port_id: testPortSin,
-        tiers: [
-          { weight_min: 0, unit_price: 10 },
-          { weight_min: 100, unit_price: 8 }
-        ]
+        tiers: {
+          weight_slabs: [
+            { weight_min: 0, unit_price: 10, min_charge: 0 },
+            { weight_min: 100, unit_price: 8, min_charge: 0 }
+          ],
+          cbm_slabs: [
+            { cbm_min: 0, cbm_price: 0, min_charge: 0 }
+          ]
+        }
       })
       .select()
       .single();
@@ -186,10 +191,15 @@ describe('IMP-105: Transport Pricing Policy Integration Tests (TC-POLICY-01~05)'
         is_active: true,
         origin_port_id: testPortIcn,
         dest_port_id: testPortSin,
-        tiers: [
-          { weight_min: 0, unit_price: 10 },
-          { weight_min: 100, unit_price: 8 }
-        ]
+        tiers: {
+          weight_slabs: [
+            { weight_min: 0, unit_price: 10, min_charge: 0 },
+            { weight_min: 100, unit_price: 8, min_charge: 0 }
+          ],
+          cbm_slabs: [
+            { cbm_min: 0, cbm_price: 0, min_charge: 0 }
+          ]
+        }
       })
       .select()
       .single();
@@ -252,9 +262,14 @@ describe('IMP-105: Transport Pricing Policy Integration Tests (TC-POLICY-01~05)'
         is_active: true,
         origin_port_id: testPortIcn,
         dest_port_id: testPortSin,
-        tiers: [
-          { weight_min: 0, unit_price: 2.0, cbm_price: 150.0, min_total_price: 50 }
-        ]
+        tiers: {
+          weight_slabs: [
+            { weight_min: 0, unit_price: 2.0, min_charge: 50 }
+          ],
+          cbm_slabs: [
+            { cbm_min: 0, cbm_price: 150.0, min_charge: 50 }
+          ]
+        }
       })
       .select()
       .single();
@@ -320,9 +335,14 @@ describe('IMP-105: Transport Pricing Policy Integration Tests (TC-POLICY-01~05)'
         is_active: true,
         origin_port_id: testPortIcn,
         dest_port_id: testPortSin,
-        tiers: [
-          { weight_min: 0, unit_price: 2.0, cbm_price: 150.0, min_total_price: 50 }
-        ]
+        tiers: {
+          weight_slabs: [
+            { weight_min: 0, unit_price: 2.0, min_charge: 50 }
+          ],
+          cbm_slabs: [
+            { cbm_min: 0, cbm_price: 150.0, min_charge: 50 }
+          ]
+        }
       })
       .select()
       .single();
@@ -384,9 +404,14 @@ describe('IMP-105: Transport Pricing Policy Integration Tests (TC-POLICY-01~05)'
         is_active: true,
         origin_port_id: testPortIcn,
         dest_port_id: testPortSin,
-        tiers: [
-          { weight_min: 0, unit_price: 10.0, cbm_price: 1000.0, min_total_price: 50 }
-        ]
+        tiers: {
+          weight_slabs: [
+            { weight_min: 0, unit_price: 10.0, min_charge: 50 }
+          ],
+          cbm_slabs: [
+            { cbm_min: 0, cbm_price: 1000.0, min_charge: 50 }
+          ]
+        }
       })
       .select()
       .single();

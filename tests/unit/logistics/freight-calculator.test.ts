@@ -55,10 +55,13 @@ describe('Freight Calculator Utility', () => {
               if (table === 'zen_rate_cards') {
                 return {
                   data: {
-                    tiers: [
-                      { weight_min: 0, unit_price: 5.5 },
-                      { weight_min: 100, unit_price: 4.8 }
-                    ],
+                    tiers: {
+                      weight_slabs: [
+                        { weight_min: 0, unit_price: 5.5 },
+                        { weight_min: 100, unit_price: 4.8 }
+                      ],
+                      cbm_slabs: [{ cbm_min: 0, cbm_price: 0, min_charge: 0 }]
+                    },
                     currency: 'USD'
                   },
                   error: null
@@ -124,10 +127,13 @@ describe('Freight Calculator Utility', () => {
               if (table === 'zen_rate_cards') {
                 if ((chain as any).currentCarrier === 'carrier-1') {
                   return {
-                    data: {
-                      tiers: [{ weight_min: 0, unit_price: 10.0 }],
-                      currency: 'USD'
-                    },
+                      data: {
+                        tiers: {
+                          weight_slabs: [{ weight_min: 0, unit_price: 10.0 }],
+                          cbm_slabs: [{ cbm_min: 0, cbm_price: 0, min_charge: 0 }]
+                        },
+                        currency: 'USD'
+                      },
                     error: null
                   };
                 }

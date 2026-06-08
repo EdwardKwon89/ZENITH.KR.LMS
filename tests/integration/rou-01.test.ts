@@ -131,7 +131,7 @@ describe('TC-R.4: getRouteOptions — 3종 옵션 생성 및 UPSERT 정책', () 
           order: vi.fn().mockReturnThis(),
           limit: vi.fn().mockReturnThis(),
           maybeSingle: vi.fn().mockResolvedValue({
-            data: { tiers: [{ weight_min: 0, unit_price: 5.50 }] },
+            data: { tiers: { weight_slabs: [{ weight_min: 0, unit_price: 5.50 }], cbm_slabs: [{ cbm_min: 0, cbm_price: 0, min_charge: 0 }] } },
             error: null
           })
         };
@@ -419,7 +419,7 @@ describe('TC-R.8: Hub 경로 탐색 — DatabaseRouteAdapter.appendHubRoutes', (
           order: vi.fn().mockReturnThis(),
           limit: vi.fn().mockReturnThis(),
           maybeSingle: vi.fn().mockResolvedValue({
-            data: { tiers: [{ weight_min: 0, unit_price: 5.50 }] },
+            data: { tiers: { weight_slabs: [{ weight_min: 0, unit_price: 5.50 }], cbm_slabs: [{ cbm_min: 0, cbm_price: 0, min_charge: 0 }] } },
             error: null
           })
         };
