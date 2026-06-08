@@ -456,6 +456,8 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
       
       const orderResult = await createOrder(finalData as OrderRegistrationInput);
       console.log('E2E_ORDER_RESULT:', orderResult);
+      if (!orderResult || typeof orderResult === 'string') throw new Error('Order creation failed');
+      const r = orderResult as { id: string; order_no: string };
       
       const selectedServicesMapped = requiredServices.map(service => {
         const selected = selectedRates[service.key];
@@ -470,17 +472,17 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
         };
       });
 
-      const serviceResult = await createOrderServices(orderResult.id, selectedServicesMapped);
+      const serviceResult = await createOrderServices(r.id, selectedServicesMapped);
       if (serviceResult.error) {
         throw new Error(`Order services creation failed: ${serviceResult.error}`);
       }
 
       toast.success(t('success_create'), { 
-        description: `Order No: ${orderResult.order_no}`,
+        description: `Order No: ${r.order_no}`,
         icon: <CheckCircle2 className="text-green-500" />
       });
       if (onSuccess) onSuccess();
-      setTimeout(() => router.push(`/orders/${orderResult.id}`), 1000);
+      setTimeout(() => router.push(`/orders/${r.id}`), 1000);
     } catch (err: any) {
       logger.error('Registration failed:', err);
       toast.error('Submission Failed', { 

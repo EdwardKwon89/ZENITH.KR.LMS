@@ -8,6 +8,7 @@ import { USER_ROLES } from "@/lib/auth/rbac";
 
 export const createOrderServices = withAction(async function (orderId: string, services: any[]) {
   const { supabase, profile } = await validateUserAction();
+  if (!profile) throw new Error("User profile not found");
 
   const { data: order, error: orderError } = await supabase
     .from("zen_orders")
@@ -88,6 +89,7 @@ export const createOrderServices = withAction(async function (orderId: string, s
 
 export const getOrderServices = withAction(async function (orderId: string) {
   const { supabase, profile } = await validateUserAction();
+  if (!profile) throw new Error("User profile not found");
 
   const isAdmin = profile.role === USER_ROLES.ADMIN || profile.role === USER_ROLES.MANAGER;
 
@@ -131,6 +133,7 @@ export const getOrderServices = withAction(async function (orderId: string) {
 
 export const updateOrderServiceStatus = withAction(async function (id: string, status: string) {
   const { supabase, profile } = await validateUserAction();
+  if (!profile) throw new Error("User profile not found");
 
   const isAdmin = profile.role === USER_ROLES.ADMIN || profile.role === USER_ROLES.MANAGER;
 

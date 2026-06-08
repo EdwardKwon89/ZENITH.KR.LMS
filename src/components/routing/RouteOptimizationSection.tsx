@@ -163,7 +163,7 @@ export default function RouteOptimizationSection({
                     </td>
                     <td className="py-3 px-2 text-center">
                       <div className="flex justify-center gap-1">
-                        {modes.map((m: string) => (
+                        {(modes as string[]).map((m) => (
                           <span key={m} className={cn(
                             "inline-flex items-center gap-0.5 text-[10px] px-1.5 py-0.5 rounded",
                             m === 'AIR' ? 'bg-indigo-50 text-indigo-600' :

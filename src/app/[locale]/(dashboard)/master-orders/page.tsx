@@ -15,11 +15,13 @@ export default async function MasterOrdersPage({
   await requireAuth();
 
   // 2. 동시 데이터 로드 (Latency 최적화)
-  const [masters, pendingOrders, ports] = await Promise.all([
+  const [{ masterOrders: masters }, { orders: pendingOrders }, dataPorts] = await Promise.all([
     getMasterOrders(),
     getPendingHouseOrders(),
     getPorts()
   ]);
+
+  const ports = dataPorts ?? [];
 
   return (
     <div className="space-y-8 animate-in fade-in duration-1000 pb-20">

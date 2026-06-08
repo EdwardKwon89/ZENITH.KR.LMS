@@ -42,7 +42,7 @@ export const updateOrganizationInfo = withAction(async function (payload: {
 }) {
   const { profile, supabase } = await validateUserAction();
 
-  if (profile.role !== USER_ROLES.CORPORATE && profile.role !== USER_ROLES.ADMIN) {
+  if (!profile || (profile.role !== USER_ROLES.CORPORATE && profile.role !== USER_ROLES.ADMIN)) {
     throw new Error("조직 정보를 수정할 권한이 없습니다.");
   }
 
@@ -109,7 +109,7 @@ export async function getDepartments(page = 1, pageSize = 50) {
 export const createDepartment = withAction(async function (name: string) {
   const { profile, supabase } = await validateUserAction();
 
-  if (profile.role !== USER_ROLES.CORPORATE && profile.role !== USER_ROLES.ADMIN) {
+  if (!profile || (profile.role !== USER_ROLES.CORPORATE && profile.role !== USER_ROLES.ADMIN)) {
     throw new Error("부서 관리 권한이 없습니다.");
   }
 
@@ -139,7 +139,7 @@ export const createDepartment = withAction(async function (name: string) {
 export const updateDepartment = withAction(async function (id: string, name: string) {
   const { profile, supabase } = await validateUserAction();
 
-  if (profile.role !== USER_ROLES.CORPORATE && profile.role !== USER_ROLES.ADMIN) {
+  if (!profile || (profile.role !== USER_ROLES.CORPORATE && profile.role !== USER_ROLES.ADMIN)) {
     throw new Error("부서 관리 권한이 없습니다.");
   }
 
@@ -168,7 +168,7 @@ export const updateDepartment = withAction(async function (id: string, name: str
 export const deleteDepartment = withAction(async function (id: string) {
   const { profile, supabase } = await validateUserAction();
 
-  if (profile.role !== USER_ROLES.CORPORATE && profile.role !== USER_ROLES.ADMIN) {
+  if (!profile || (profile.role !== USER_ROLES.CORPORATE && profile.role !== USER_ROLES.ADMIN)) {
     throw new Error("부서 관리 권한이 없습니다.");
   }
 

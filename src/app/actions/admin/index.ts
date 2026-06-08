@@ -60,18 +60,9 @@ export {
 export {
   generateOrderNo,
   generateMasterOrderNo,
-  getPorts,
-  upsertPort,
-  getNations,
-  getOrganizations,
-  getAirlines,
   getCodeGroups,
-  getCommonCodes,
-  getCommonCodesByGroup,
-  upsertCommonCode,
   updateSystemParam,
   getSystemParams,
-  deleteCommonCode,
   getCurrentUserAffiliation,
 } from './master';
 
@@ -79,7 +70,6 @@ export {
   upsertPort,
   getPorts,
   getNations,
-  getOrganizations,
   getAirlines,
   upsertCommonCode,
   getCommonCodes,

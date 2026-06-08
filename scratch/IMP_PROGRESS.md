@@ -291,7 +291,8 @@
 | K | 1 | 7 | 14.3% | IMP-084·085·086·088·089·046 🔔 |
 | 6 | 9 | 9 | — | IMP-097✅·098✅·099✅·100🔔·101🔔·102🔔·103🔔·104🔔·105✅(D_Kai 엔진+TC 완료) (Phase 6+IMP-105) |
 | UAT | 6 | 7 | 85.7% | IMP-090 ✅ · IMP-091 ⬜ (Carrier Portal — Phase M) · **IMP-092 ✅ (TISA 3계층)** · **IMP-093 ✅ (TISA 실연동, TASK-104)** · IMP-094 ⬜ (요율 워크플로우 고도화, Phase M) · **IMP-095 ✅ (Rate Card 항로 매칭, TASK-109)** · **IMP-096 ✅ (요율 관리 페이지 통합 정리, TASK-110)** |
-| **합계** | **83** | **91** | **91.2%** | Phase K 7건 + UAT 7건 + Phase 6 8건 + IMP-105 기준 |
+| UAT2 | 0 | 2 | 0% | **IMP-107 ⬜** (TISA 스냅샷 강화 — WM slab 이력) · **IMP-108 ⬜** (max_charge + platform_fee 재정의) |
+| **합계** | **86** | **93** | **92.5%** | IMP-106 ✅ + IMP-107·108 신규 등재 (2026-06-08) |
 
 > **UAT 진행 전 필수 처리**: IMP-092 ✅ · IMP-093 ✅ · IMP-095 ✅ — 전량 완료
 > 미완료 IMP: IMP-086·087 🚫 블로커 · IMP-028·069(Future — 통관 연계) · IMP-091 ⬜ (Carrier Portal) · IMP-094 ⬜ (요율 워크플로우 Phase M)
@@ -365,3 +366,4 @@
 | 2026-06-08 | D_Kai (OpenCode) | **IMP-106 🔔 등재 + 완료** — TASK-122 요율 Slab 구조 개편 (무게/부피 분리). DB migration `2cb5927`(33건 tiers 배열→{weight_slabs,cbm_slabs} 변환·fn_get_best_matching_rate weight_slabs/cbm_slabs 매칭·calculate_order_costs cbm_slabs 기반 WM). TS engine `46bc9f9`(rate-engine·SlabRateCalculator·SettlementEngine·composite-pricing·service-rates·route-adapter). TC `896e193`(mock data 일괄 변경·314/314 PASS). |
 | 2026-06-08 | B_Kai (OpenCode) | **IMP-106 🔔 UI 완료** — TASK-122 §2 RateTierEditor 분리(weight_slabs/cbm_slabs 섹션·최소 1개 검증) + RateCardForm 타입 변경 + useRates 매핑 + RateCardsTab 교체 + Server Actions 검증(admin/rates.ts·admin/rate-cards.ts) + rates.test.ts 7개 payload 수정. 회귀 314/314 PASS. 전체 합계 85/92 (92.4%). |
 | 2026-06-08 | Aiden (Claude) | **IMP-106 ✅ 최종 완료** — TASK-122 Aiden 검토 완료·Edward 승인. DoD 10/10·회귀 314/314 실물 확인. 전체 합계 86/92 (93.5%). |
+| 2026-06-08 | Aiden (Claude) | **IMP-107·108 ⬜ 신규 등재** — 간이 테스트 결과 검토 중 도출. IMP-108: max_charge 상한선 + platform_fee_amount 재정의(carrier_cost 제거 보완, High). IMP-107: TISA 스냅샷 강화(WM slab 이력·pricing_basis, Medium). 전체 합계 86/93 (92.5%). |

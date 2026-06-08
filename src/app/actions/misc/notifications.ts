@@ -107,7 +107,7 @@ export async function triggerStatusChangeNotification(
   // EMAIL 발송 + 이력 저장
   await Promise.all(targets.filter(t => t.email).map(async (target) => {
     try {
-      await sendStatusChangeEmail({ email: target.email }, order.order_no, newStatus);
+      await sendStatusChangeEmail({ email: target.email! }, order.order_no, newStatus);
     } catch (e) {
       logger.error("[NOTIF] Email send failed:", e);
     }

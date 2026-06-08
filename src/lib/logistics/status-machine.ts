@@ -27,6 +27,7 @@ const TRANSITION_RULES: Record<OrderStatus, OrderStatus[]> = {
   ], // 보류 해제 시 이전 단계 또는 취소로 복구
   [OrderStatus.CANCELED]: [], // 취소 시 종료
   [OrderStatus.RETURNED]: [OrderStatus.WAREHOUSED, OrderStatus.CANCELED, OrderStatus.DISPOSED],
+  [OrderStatus.DISPOSED]: [], // 폐기 시 종료
   [OrderStatus.MASTERED]: [], // 마스터 결합 시 개별 상태 변경 불가 (먼저 Dissolve 필요)
 };
 

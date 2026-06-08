@@ -86,6 +86,8 @@ export async function validateAdminAction() {
     .eq("id", user.id)
     .single();
 
+  if (!profile) throw new Error("Profile not found");
+
   let orgType = 'GUEST';
   if (profile?.org_id) {
     const { data: org } = await supabase
@@ -134,6 +136,8 @@ export async function validateUserAction() {
     .single();
     
   logger.info("[DEBUG] validateUserAction: profile result", { hasProfile: !!profile, error: profileError });
+
+  if (!profile) throw new Error("Profile not found");
 
   return { user, profile, supabase };
 }

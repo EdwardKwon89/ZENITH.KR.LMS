@@ -46,7 +46,7 @@ export default function TrackingDashboard() {
     setLoading(true);
     try {
       const data = await getGlobalTrackingOverview();
-      setTracks(data);
+      setTracks(data.configs);
     } catch (error) {
       logger.error("Failed to fetch tracking overview:", error);
     } finally {

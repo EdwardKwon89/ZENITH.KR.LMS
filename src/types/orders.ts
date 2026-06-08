@@ -65,9 +65,9 @@ export interface CreateOrderRequest {
 }
 
 export type OrderListItem = Database['public']['Tables']['zen_orders']['Row'] & {
-  shipper: { name: string };
-  origin_port: { name: string, code: string };
-  dest_port: { name: string, code: string };
+  shipper: { name: string } | null;
+  origin_port: { name: string, code: string } | null;
+  dest_port: { name: string, code: string } | null;
 };
 
 export type OrganizationItem = Database['public']['Tables']['zen_organizations']['Row'] & {

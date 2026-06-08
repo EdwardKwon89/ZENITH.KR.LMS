@@ -119,7 +119,7 @@ export const createRateCard = withAction(async function (payload: {
   );
 
   if (existingRates && existingRates.length > 0) {
-    const idsToUpdate = existingRates.map(r => r.id);
+    const idsToUpdate = (existingRates as any[]).map(r => r.id);
     await adminRepo.supersedeRateCards(idsToUpdate);
   }
 
@@ -300,7 +300,7 @@ export async function getRateCards(filters: {
 
   if (profile.role === USER_ROLES.CARRIER) {
     return {
-      rateCards: rateCards.map(({ platform_fee_rate, ...rest }) => rest),
+      rateCards: (rateCards as any[]).map(({ platform_fee_rate, ...rest }) => rest),
       total: count || 0,
     };
   }

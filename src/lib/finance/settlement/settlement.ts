@@ -119,7 +119,7 @@ export class SettlementEngine {
       let calculatedUnitPrice: number | undefined;
       let finalCurrency: string;
 
-      if (selectedOption && Array.isArray(segments) && segments.length > 0) {
+      if (route && selectedOption && Array.isArray(segments) && segments.length > 0) {
         logger.info(`[Settlement] Routing option found: ${route.selected_option_id}`);
         
         // 멱등성 보장: 기존 미청구 FREIGHT 항목 삭제

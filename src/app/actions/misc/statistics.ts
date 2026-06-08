@@ -56,14 +56,14 @@ export async function getCostProfitStats(period: 'WEEK' | 'MONTH' | 'YEAR') {
         if (costs && Array.isArray(costs)) {
           return costs.some((c: any) => {
             const order = Array.isArray(c.order) ? c.order[0] : c.order;
-            const modeVal = order?.transport_mode || order?.trans_mode;
+        const modeVal = order?.transport_mode || (order as any)?.trans_mode;
             return modeVal === targetMode;
           });
         }
         // Unit Test Mock 데이터 구조 대응 (order -> transport_mode/trans_mode)
         const orderData = (i as any).order;
         const order = Array.isArray(orderData) ? orderData[0] : orderData;
-        const modeVal = order?.transport_mode || order?.trans_mode;
+        const modeVal = order?.transport_mode || (order as any)?.trans_mode;
         return modeVal === targetMode;
       })
       .reduce((sum, i) => sum + Number(i.total_amount), 0);
@@ -71,7 +71,7 @@ export async function getCostProfitStats(period: 'WEEK' | 'MONTH' | 'YEAR') {
     const cost = (costData || [])
       .filter(c => {
         const order = Array.isArray(c.order) ? c.order[0] : c.order;
-        const modeVal = order?.transport_mode || order?.trans_mode;
+        const modeVal = order?.transport_mode || (order as any)?.trans_mode;
         return modeVal === targetMode;
       })
       .reduce((sum, c) => sum + Number(c.total_amount), 0);

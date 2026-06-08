@@ -59,7 +59,7 @@ type ClaimOrder = WithRelations<
   }
 >;
 
-export interface ClaimDetail extends Claim {
+export interface ClaimDetail extends Omit<Claim, 'order'> {
   order: ClaimOrder;
   incident_fees: IncidentFee[];
 }

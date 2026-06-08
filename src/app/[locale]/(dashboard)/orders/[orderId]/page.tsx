@@ -112,8 +112,8 @@ export default async function OrderDetailPage({
       address: (order.shipper as any)?.address || 'Seoul, South Korea'
     },
     consignee: {
-      name: order.recipient_name,
-      address: order.recipient_address
+      name: order.recipient_name || '',
+      address: order.recipient_address || '',
     },
     order_no: order.order_no,
     items: order.packages.flatMap((pkg: any) => 
@@ -139,8 +139,8 @@ export default async function OrderDetailPage({
       address: (order.shipper as any)?.address || 'Seoul, South Korea'
     },
     consignee: {
-      name: order.recipient_name,
-      address: order.recipient_address
+      name: order.recipient_name || '',
+      address: order.recipient_address || '',
     },
     order_no: order.order_no,
     items: order.packages.map((pkg: any) => ({

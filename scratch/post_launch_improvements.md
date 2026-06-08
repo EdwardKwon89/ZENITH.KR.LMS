@@ -1185,3 +1185,107 @@
   └ 후행: IMP-094 (요율 워크플로우 고도화 — 단일 진실 공급원 확립 후 설계 가능)
 - **예상 공수**: 1~1.5 MD
 - **우선순위**: **High** — UAT 중 운영자 혼선 유발, IMP-094 설계 전제조건
+
+---
+
+## IMP-107 | TISA 요율 스냅샷 강화 — WM 적용 구간 + pricing basis 저장
+
+- **발견 경위**: TASK-122 IMP-106 완료 후 간이 테스트 중, Aiden 검토에서 스냅샷 이력 추적 부족 발견 (2026-06-08)
+- **현재 상태**: `zen_order_rate_snapshots`에 `applied_unit_price`·`carrier_cost_amount`·`platform_fee_amount`만 저장. WM 방식에서 어떤 weight slab/cbm slab이 매칭됐는지, 실제 weight/cbm 값, 최종 청구 기준(WEIGHT/CBM/MIN_CHARGE/MAX_CHARGE)이 미저장.
+- **임시 조치**: 없음 (이력 추적 기능 부재 상태 유지 중)
+- **목표 구현**:
+
+  **`zen_order_rate_snapshots` 컬럼 추가 (DB 마이그레이션)**
+  ```sql
+  applied_weight_slab_min   NUMERIC,  -- 매칭된 weight slab의 weight_min
+  applied_weight_unit_price NUMERIC,  -- 해당 slab의 unit_price (kg당)
+  applied_cbm_slab_min      NUMERIC,  -- 매칭된 cbm slab의 cbm_min
+  applied_cbm_price         NUMERIC,  -- 해당 slab의 cbm_price (㎥당)
+  applied_weight_cost       NUMERIC,  -- weight × unit_price 계산 금액
+  applied_cbm_cost          NUMERIC,  -- cbm × cbm_price 계산 금액
+  applied_pricing_basis     TEXT,     -- 'WEIGHT' | 'CBM' | 'MIN_CHARGE' | 'MAX_CHARGE'
+  tiers_snapshot            JSONB     -- 적용 시점 tiers 전체 객체 (요율 변경 후 재현용)
+  ```
+
+  **`tr_capture_order_rate_snapshot` 트리거 및 `calculate_order_costs` 함수 업데이트**
+  - 스냅샷 저장 시 위 컬럼에 매칭 결과 기록
+  - WM 방식: weight_cost vs cbm_cost vs min_charge vs max_charge 비교 후 basis 결정
+
+  **`applied_pricing_basis` 판정 로직**
+  ```
+  WEIGHT     — weight_cost ≥ cbm_cost AND weight_cost ≥ min_charge
+  CBM        — cbm_cost > weight_cost AND cbm_cost ≥ min_charge
+  MIN_CHARGE — max(weight_cost, cbm_cost) < min_charge (하한선 발동)
+  MAX_CHARGE — max(weight_cost, cbm_cost) > max_charge (상한선 발동, IMP-108 선행 후)
+  ```
+
+- **관련 파일**:
+  - `supabase/migrations/` (신규 마이그레이션)
+  - `src/app/actions/operations/tisa.ts`
+  - `src/app/actions/admin/rates.ts`
+- **선후행 관계**:
+  ├ 선행: IMP-108 (max_charge 필드 추가 — MAX_CHARGE basis 판정 전제)
+  └ 독립: IMP-106 ✅ 완료
+- **예상 공수**: 0.5~1 MD
+- **우선순위**: **Medium** — 기능 영향 없음, 이력 추적·분쟁 대응 강화
+
+---
+
+## IMP-108 | 요율 Slab max_charge 상한선 필드 + platform_fee_amount 재정의
+
+- **발견 경위**: TASK-122 IMP-106 Carrier Cost 제거 후 간이 테스트 검토 중, platform_fee_amount 계산 단절 및 max_charge 부재 발견 (2026-06-08)
+- **현재 상태**:
+  1. `platform_fee_amount` 계산 공식: `carrier_cost * platform_fee_rate / 100` → IMP-106으로 신규 Rate Card에 `carrier_cost=NULL` 저장 시 `platform_fee_amount=NULL` 발생
+  2. Slab 구조에 `min_charge`(하한선)만 있고 `max_charge`(상한선) 미존재 — 계약상 운임 상한 설정 불가
+- **임시 조치**: 없음 (platform_fee_amount=NULL 상태 유지 중)
+- **목표 구현**:
+
+  **1단계 — Slab 구조에 max_charge 추가**
+  ```typescript
+  export interface WeightSlab {
+    weight_min: number;
+    unit_price: number;
+    min_charge: number;   // 하한선 (필수)
+    max_charge?: number;  // 상한선 (선택)
+  }
+  export interface CbmSlab {
+    cbm_min: number;
+    cbm_price: number;
+    min_charge: number;
+    max_charge?: number;
+  }
+  ```
+  - `RateTierEditor.tsx` UI에 max_charge 선택 입력 필드 추가
+  - DB 마이그레이션: `tiers` JSONB 스키마 변경 (기존 데이터 하위 호환)
+
+  **2단계 — platform_fee_amount 계산 재정의**
+  ```sql
+  -- 현재 (carrier_cost 기반, IMP-106 이후 NULL 반환)
+  CASE WHEN rc.carrier_cost IS NOT NULL THEN rc.carrier_cost * rc.platform_fee_rate / 100.0 END
+
+  -- 개선 (slab unit_price 기반)
+  CASE WHEN rc.platform_fee_rate IS NOT NULL
+    THEN ROUND(
+      (rc.tiers->'weight_slabs'->0->>'unit_price')::DECIMAL * rc.platform_fee_rate / 100.0
+    , 2)
+  END
+  ```
+  - `fn_get_best_matching_rate` 모든 overload 업데이트
+  - `calculate_order_costs` 반영
+
+  **3단계 — WM 계산 로직에 max_charge cap 적용**
+  ```
+  total = CLAMP(max(weight_cost, cbm_cost), min=min_charge, max=max_charge)
+  ```
+
+- **관련 파일**:
+  - `src/components/admin/RateTierEditor.tsx`
+  - `supabase/migrations/` (fn 업데이트 + tiers 스키마)
+  - `src/lib/logistics/rate-engine.ts`
+  - `src/lib/finance/settlement/slab-rate-calculator.ts`
+  - `src/app/actions/operations/tisa.ts`
+- **선후행 관계**:
+  ├ 선행: IMP-106 ✅ (Slab 구조 개편 완료)
+  └ 후행: IMP-107 (max_charge basis 판정 전제)
+- **예상 공수**: 1~1.5 MD
+- **우선순위**: **High** — platform_fee_amount=NULL로 신규 Rate Card 수수료 계산 단절

@@ -13,7 +13,7 @@ export interface GradeMasterItem {
   grade_code: string;
   grade_name_ko: string;
   grade_name_en: string | null;
-  discount_rate: number;
+  discount_rate: number | null;
   benefit_desc: string | null;
 }
 
@@ -227,7 +227,7 @@ export const reviewGradePromotion = withAction(async function (payload: {
   }
 
   if (payload.decision === "APPROVED") {
-    const { error: profileUpdateError } = await adminRepo.updateProfileGrade(request.user_id, request.target_grade);
+    const { error: profileUpdateError } = await adminRepo.updateProfileGrade(request.user_id, request.target_grade!);
     if (profileUpdateError) {
       logger.error("Failed to update profile grade:", profileUpdateError);
     }

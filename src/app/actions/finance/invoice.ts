@@ -31,6 +31,7 @@ export async function generateInvoiceAction(orderId: string) {
 
 export async function issueInvoicePdf(invoiceId: string) {
   const { supabase, profile } = await validateAdminAction();
+  if (!profile) throw new Error("인증 정보가 없습니다.");
   const financeRepo = new FinanceRepository(supabase);
 
   const { data: invoice, error: invError } = await financeRepo.findByIdBasic(invoiceId);
@@ -125,6 +126,7 @@ export async function getInvoicePdfHistory(invoiceId: string) {
 
 export async function issueTaxInvoice(invoiceId: string) {
   const { supabase, profile } = await validateAdminAction();
+  if (!profile) throw new Error("인증 정보가 없습니다.");
   const financeRepo = new FinanceRepository(supabase);
 
   const { data: invoice, error: invError } = await financeRepo.findById(invoiceId);
@@ -148,11 +150,12 @@ export async function issueTaxInvoice(invoiceId: string) {
     business_item: "Freight Forwarding"
   };
 
+  const shipper = invoice.shipper as any || {};
   const buyerInfo = {
-    business_number: invoice.shipper?.business_number || 'N/A',
-    name: invoice.shipper?.name || 'N/A',
+    business_number: shipper.business_number || 'N/A',
+    name: shipper.name || 'N/A',
     ceo_name: 'N/A',
-    address: invoice.shipper?.address || 'N/A',
+    address: shipper.address || 'N/A',
     business_type: 'N/A',
     business_item: 'N/A'
   };
@@ -180,10 +183,10 @@ export async function issueTaxInvoice(invoiceId: string) {
     total_amount: supplyTotal + vatTotal,
     vat_amount: vatTotal,
     applied_exchange_rate: exchangeRate,
-    recipient_email: invoice.shipper?.email || 'test@example.com',
+    recipient_email: (invoice.shipper as any)?.email || 'test@example.com',
     issued_by: profile.id,
     metadata: {
-      ...invoice.metadata,
+      ...(invoice.metadata as Record<string, unknown> | undefined) ?? {},
       snapshot: {
         applied_exchange_rate: exchangeRate,
         vat_rate: vatRate
@@ -237,7 +240,7 @@ export async function sendTaxInvoiceEmail(taxInvoiceId: string, recipientEmail: 
           <p>귀사의 인보이스에 대한 세금계산서가 다음과 같이 발행되었습니다.</p>
           <ul>
             <li>번호: ${escapeHtml(tx.tax_invoice_no)}</li>
-            <li>금액: ${escapeHtml(Number(tx.total_amount).toLocaleString())} ${escapeHtml(tx.currency || 'KRW')}</li>
+            <li>금액: ${escapeHtml(Number(tx.total_amount).toLocaleString())} KRW</li>
           </ul>
           <p>자세한 내용은 시스템에 접속하여 확인해 주시기 바랍니다.</p>
         </div>
@@ -249,7 +252,7 @@ export async function sendTaxInvoiceEmail(taxInvoiceId: string, recipientEmail: 
     await financeRepo.updateTaxInvoiceStatus(taxInvoiceId, {
       status: 'SENT',
       sent_at: new Date().toISOString(),
-      metadata: { ...tx.metadata, resend_id: emailData?.id }
+      metadata: { ...(tx.metadata as Record<string, unknown> | undefined) ?? {}, resend_id: emailData?.id }
     });
 
     revalidatePath('/finance/invoices');
@@ -257,7 +260,7 @@ export async function sendTaxInvoiceEmail(taxInvoiceId: string, recipientEmail: 
   } catch (error: any) {
     await financeRepo.updateTaxInvoiceStatus(taxInvoiceId, {
       status: 'FAILED',
-      metadata: { ...tx.metadata, error: error.message }
+      metadata: { ...(tx.metadata as Record<string, unknown> | undefined) ?? {}, error: error.message }
     });
 
     throw new Error(`이메일 발송 실패: ${error.message}`);

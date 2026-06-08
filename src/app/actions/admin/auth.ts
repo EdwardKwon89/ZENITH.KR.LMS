@@ -26,7 +26,7 @@ export async function findPersonalId(fullName: string) {
       return { error: '일치하는 회원 정보를 찾을 수 없습니다.' };
     }
 
-    const results = profiles.map((p: { email: string; phone_number?: string | null }) => {
+    const results = (profiles as any[]).map((p: { email: string; phone_number?: string | null }) => {
       const [user, domain] = p.email.split('@');
       const maskedUser = user.length <= 3
         ? user.substring(0, 1) + '*'.repeat(user.length - 1)

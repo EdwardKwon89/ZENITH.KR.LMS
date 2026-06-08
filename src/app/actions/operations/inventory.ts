@@ -188,6 +188,7 @@ export async function syncInventoryFromOrder(
     if (!item.sku_code) continue;
 
     const inventory = inventoryBySku.get(item.sku_code);
+    if (!inventory) continue;
 
     let updatePayload: any = {};
     let historyPayload: any = {

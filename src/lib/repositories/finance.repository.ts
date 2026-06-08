@@ -36,7 +36,7 @@ export class FinanceRepository extends BaseRepository {
   async updatePaymentStatus(invoiceId: string, data: Record<string, unknown>) {
     return this.db
       .from('zen_invoices')
-      .update(data)
+      .update(data as any)
       .eq('id', invoiceId)
       .select('metadata')
       .single();
@@ -155,7 +155,7 @@ export class FinanceRepository extends BaseRepository {
   async insertTaxInvoice(data: Record<string, unknown>) {
     return this.db
       .from('zen_tax_invoices')
-      .insert(data)
+      .insert(data as any)
       .select()
       .single();
   }
@@ -163,7 +163,7 @@ export class FinanceRepository extends BaseRepository {
   async findTaxInvoiceById(taxInvoiceId: string) {
     return this.db
       .from('zen_tax_invoices')
-      .select('id, tax_invoice_no, total_amount, currency, status, metadata, created_at')
+      .select('id, tax_invoice_no, total_amount, status, metadata, created_at')
       .eq('id', taxInvoiceId)
       .single();
   }
@@ -171,7 +171,7 @@ export class FinanceRepository extends BaseRepository {
   async updateTaxInvoiceStatus(taxInvoiceId: string, data: Record<string, unknown>) {
     return this.db
       .from('zen_tax_invoices')
-      .update(data)
+      .update(data as any)
       .eq('id', taxInvoiceId);
   }
 
@@ -193,7 +193,7 @@ export class FinanceRepository extends BaseRepository {
   }
 
   async insertPdfHistory(data: Record<string, unknown>) {
-    return this.db.from('zen_invoice_pdf_history').insert(data);
+    return this.db.from('zen_invoice_pdf_history').insert(data as any);
   }
 
   async findPdfHistory(invoiceId: string) {

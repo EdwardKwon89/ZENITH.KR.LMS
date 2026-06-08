@@ -4,7 +4,7 @@ export interface GradeMasterItem {
   grade_code: string;
   grade_name_ko: string;
   grade_name_en: string | null;
-  discount_rate: number;
+  discount_rate: number | null;
   benefit_desc: string | null;
 }
 
@@ -192,7 +192,7 @@ export class AdminRepository extends BaseRepository {
   async insertPromotionRequest(data: Record<string, unknown>) {
     return this.db
       .from('grade_promotion_request')
-      .insert(data)
+      .insert(data as any)
       .select('id')
       .single();
   }
@@ -230,7 +230,7 @@ export class AdminRepository extends BaseRepository {
   async updatePromotionRequest(requestId: string, data: Record<string, unknown>) {
     return this.db
       .from('grade_promotion_request')
-      .update(data)
+      .update(data as any)
       .eq('id', requestId);
   }
 
@@ -286,8 +286,8 @@ export class AdminRepository extends BaseRepository {
 
   async findCommonCodesByGroup(groupCode: string) {
     return this.db
-      .from('zen_common_codes')
-      .select('*')
+      .from('zen_common_codes' as any)
+      .select('*' as any)
       .eq('group_code', groupCode)
       .order('sort_order', { ascending: true });
   }
@@ -313,13 +313,13 @@ export class AdminRepository extends BaseRepository {
   async insertRateCard(data: Record<string, unknown>) {
     return this.db
       .from('zen_rate_cards')
-      .insert(data)
+      .insert(data as any)
       .select('id')
       .single();
   }
 
   async insertRateSurcharges(surcharges: Array<Record<string, unknown>>) {
-    return this.db.from('zen_rate_surcharges').insert(surcharges);
+    return this.db.from('zen_rate_surcharges' as any).insert(surcharges as any);
   }
 
   async deleteRateCard(cardId: string) {

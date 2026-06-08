@@ -25,7 +25,7 @@ export default function MaintenancePage() {
       <p className="text-sm text-slate-400 text-center max-w-sm">
         {t('eta_unknown')}
       </p>
-      <ZenButton variant="outline" onClick={() => router.push(`/${locale}`)}>
+      <ZenButton variant="ghost" onClick={() => router.push(`/${locale}`)}>
         {t('back')}
       </ZenButton>
     </div>

@@ -34,7 +34,7 @@ export default async function OrdersPage({
   });
 
   // 4. Feature Flags 확인
-  const isAiEnabled = await isFeatureEnabled('AI_RECOMMENDATION_ENABLED', profile.org_id);
+  const isAiEnabled = await isFeatureEnabled('AI_RECOMMENDATION_ENABLED', profile?.org_id);
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">

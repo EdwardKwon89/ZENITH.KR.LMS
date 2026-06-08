@@ -46,8 +46,8 @@ export default function MyGradePage({ params: { locale } }: { params: { locale: 
         setPendingRequest(pending);
         
         if (pending) {
-          setTargetGrade(pending.target_grade);
-          setRequestReason(pending.request_reason);
+          setTargetGrade(pending.target_grade ?? '');
+          setRequestReason(pending.request_reason ?? '');
         }
       } catch (err) {
         logger.error(err);

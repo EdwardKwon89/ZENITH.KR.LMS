@@ -155,7 +155,7 @@ export async function authGuard(
         }
       } catch (e) {
         logger.warn(`[AUTH PROXY] DB fallback:`, e);
-        if (isMetadataPlatformAdmin) orgType = 'PLATFORM';
+        if (metadataRole === USER_ROLES.ADMIN || metadataRole === USER_ROLES.ZENITH_SUPER_ADMIN) orgType = 'PLATFORM';
       }
     }
 

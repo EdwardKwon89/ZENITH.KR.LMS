@@ -7,7 +7,7 @@ import { z } from "zod";
 
 export const createVocSchema = z.object({
   order_id: z.string().uuid("유효한 오더 ID가 아닙니다"),
-  type: z.enum(["DELAY", "DAMAGE", "MISDELIVERY", "OTHER"], {
+  type: z.enum(["DELAY", "DAMAGE", "MISDELIVERY", "OTHER"] as const, {
     error: "유효한 VOC 유형이 아닙니다 (DELAY, DAMAGE, MISDELIVERY, OTHER)",
   }),
   title: z.string().min(1, "제목은 필수입니다").max(200, "제목은 200자 이하입니다"),
@@ -53,7 +53,7 @@ export const upsertVesselScheduleSchema = z.object({
   voyage_no: z.string().min(1, "항해번호는 필수입니다").max(50),
   origin_port_id: z.string().uuid("출발항이 유효하지 않습니다"),
   destination_port_id: z.string().uuid("도착항이 유효하지 않습니다"),
-  service_type: z.enum(["AIR", "SEA"], { required_error: "운송모드는 필수입니다" }),
+  service_type: z.enum(["AIR", "SEA"] as const),
   carrier_id: z.string().uuid().optional(),
   etd: z.string().min(1, "ETD는 필수입니다"),
   eta: z.string().min(1, "ETA는 필수입니다"),

@@ -1,0 +1,13 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "command": {
+    "check-task": {
+      "description": "작업 지시서 확인/실시",
+      "template": "작업 지시서 확인해서, 작업 실시. 작업 완료 후 R17 및 DoD 점검항목 Check/미진 사항 보완"
+    },
+    "check-R17-DoD": {
+      "description": "R-17 DoD 검증 — 커밋 전 task file DoD 실물 확인",
+      "template": "당신의 task file(.agent/tasks/)을 읽고 DoD 섹션의 각 항목이: (1) [x] 체크 상태, (2) 실제 증거값(커밋 해시·파일 경로) 기재, (3) '기재 예정'·'TBD'·빈 값 없음을 검증하세요. 미비점이 있으면 커밋을 보류하고 즉시 보완한 후 재검증하세요."
+    }
+  }
+}

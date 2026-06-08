@@ -145,7 +145,7 @@ export const getAvailableServiceRates = withAction(async function (
     const option: DeliveryRateOption = {
       id: r.id,
       orgId: r.org_id,
-      orgName: r.org?.name || '',
+      orgName: r.org?.[0]?.name || '',
       serviceType: r.service_type,
       estimatedCost,
       currency: r.currency || 'USD',

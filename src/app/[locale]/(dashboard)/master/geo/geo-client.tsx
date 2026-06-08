@@ -19,6 +19,7 @@ interface Port {
   code: string;
   name: string;
   port_type: string;
+  is_active?: boolean;
   nations?: { name_ko: string; name_en: string };
 }
 

@@ -153,7 +153,7 @@ export async function getWeeklyRevenueChart() {
   }
 
   invoices?.forEach(inv => {
-    const day = dayNames[new Date(inv.created_at).getDay()];
+    const day = dayNames[new Date(inv.created_at ?? '').getDay()];
     if (chartDataMap[day] !== undefined) {
       chartDataMap[day] += Number(inv.total_amount);
     }

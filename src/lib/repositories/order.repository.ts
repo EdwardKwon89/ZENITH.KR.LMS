@@ -123,7 +123,7 @@ export class OrderRepository extends BaseRepository {
   async updateHeader(orderId: string, data: Record<string, unknown>) {
     return this.db
       .from('zen_orders')
-      .update({ ...data, updated_at: new Date().toISOString() })
+      .update({ ...data, updated_at: new Date().toISOString() } as any)
       .eq('id', orderId);
   }
 
@@ -167,7 +167,7 @@ export class OrderRepository extends BaseRepository {
   async insertPackage(data: Record<string, unknown>) {
     return this.db
       .from('zen_order_packages')
-      .insert(data)
+      .insert(data as any)
       .select('id, order_id, packing_unit, packing_count, length, width, height, gross_weight, volume')
       .single();
   }
@@ -194,13 +194,13 @@ export class OrderRepository extends BaseRepository {
   }
 
   async insertItems(items: Array<Record<string, unknown>>) {
-    return this.db.from('zen_order_items').insert(items);
+    return this.db.from('zen_order_items').insert(items as any);
   }
 
   // ─── order_status_history ─────────────────────────────────────
 
   async insertStatusHistory(data: Record<string, unknown>) {
-    return this.db.from('order_status_history').insert(data);
+    return this.db.from('order_status_history').insert(data as any);
   }
 
   // ─── zen_master_orders ────────────────────────────────────────
@@ -208,7 +208,7 @@ export class OrderRepository extends BaseRepository {
   async insertMasterOrder(data: Record<string, unknown>) {
     return this.db
       .from('zen_master_orders')
-      .insert(data)
+      .insert(data as any)
       .select('id, master_no, status, total_house_count, total_gross_weight, total_volume, carrier_id, vessel_flight_no, origin_port_id, dest_port_id, remarks, created_by')
       .single();
   }

@@ -12,12 +12,15 @@ export default async function TransportCostsPage() {
   }
 
   // 2. 초기 데이터 및 참조 데이터 로드
-  const [costs, ports, orgs] = await Promise.all([
+  const [{ costs: costsData }, dataPorts, dataOrgs] = await Promise.all([
     getTransportCosts(),
     getPorts(),
     getOrganizations(),
   ]);
 
+  const costs = costsData ?? [];
+  const ports = dataPorts ?? [];
+  const orgs = dataOrgs ?? [];
   const carriers = orgs.filter((org: any) => org.type === 'CARRIER');
 
   return (

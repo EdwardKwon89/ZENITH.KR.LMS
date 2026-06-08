@@ -6,7 +6,7 @@
 | 위치 | `docs/91_FinalTest/UAT/` |
 | 작성일 | 2026-05-27 |
 | 관리 주체 | Aiden (Claude) |
-| 최종 갱신 | 2026-06-06 (DEF-048·DEF-049 신규 등록) |
+| 최종 갱신 | 2026-06-08 (DEF-050~DEF-052 신규 등록) |
 
 ---
 
@@ -39,8 +39,8 @@
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|
 | 시나리오 오류 | 1 | 0 | 0 | 0 | 5 | **6** |
 | 기능 보완/개선 | 6 | 0 | 6 | 2 | 1 | **15** |
-| 기능 오류 | 4 | 0 | 17 | 7 | 0 | **28** |
-| **합계** | **11** | **0** | **23** | **9** | **6** | **49** |
+| 기능 오류 | 4 | 0 | 19 | 7 | 0 | **30** |
+| **합계** | **11** | **0** | **25** | **9** | **6** | **51** |
 
 ---
 
@@ -162,3 +162,6 @@
 | 2026-06-05 | D_Kai (OpenCode) | **DEF-047 갱신 — 초기 로드 시 segments 페치**. Order Detail 초기 로드 시 `initialAppliedSegments` 서버사이드 조회 → options null 상태에서도 확정 경로의 flight_no/etd 표시 보장(`3b7fb09`). |
 | 2026-06-06 | D_Kai (OpenCode) | **DEF-048 추가** — 배정된 schedule 미조회. `selectRoute()` 실행 후 segments의 flight_no/etd 모두 NULL. DEF-043 매칭 로직 실패. Aiden 검토 예정. 기능오류 미수정 2→4, 합계 47→49. |
 | 2026-06-06 | D_Kai (OpenCode) | **DEF-049 추가** — Schedule 미배정 order에서 잘못된 schedule 표시. Aiden 협의 예정. |
+| 2026-06-08 | D_Kai (OpenCode) | **DEF-050 추가 — RateCardList tiers 객체 타입 불일치 "Admin Area Error"**. RateCardList.tsx `tiers` 타입이 배열(구)로 남아 `tiers.map()`→TypeError → Admin Error Boundary. TASK-122 D_Kai §2 범위 누락으로 인한 Regression. 기능오류 수정완료. `c5c2066`. 회귀 314/314 PASS. |
+| 2026-06-08 | D_Kai (OpenCode) | **DEF-051 추가 — fn_get_best_matching_rate 6-arg tiers->0 NULL (CRITICAL)**. TASK-122에서 tiers→객체 전환 시 6-arg fn 미수정. `rc.tiers->0->>'unit_price'`가 객체 형식에서 항상 NULL 반환→ `getOrderRateSnapshot()`의 `applied_unit_price=0`. `calculate_order_costs`는 4-arg 별도 호출로 무영향. 기능오류 수정완료. `9a50641`. 회귀 314/314 PASS. |
+| 2026-06-08 | D_Kai (OpenCode) | **DEF-052 추가 — Pre-existing TS Build Errors 5페이지**. `npm run build` TypeScript 단계 실패. 5개 파일 동일 패턴: server action이 `{ data[], total }` 반환하나 client가 `data[]` 직접 기대. `admin/claims/page.tsx`, `admin/transport-costs/page.tsx`, `master-orders/page.tsx`(3건), `master/geo/page.tsx`, `mypage/corporate/page.tsx`(2건). D_Kai·TASK-122 변경과 무관한 선행 오류. 기능오류 미수정. Aiden 협의 예정. |

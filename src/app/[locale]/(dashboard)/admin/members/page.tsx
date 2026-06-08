@@ -8,13 +8,13 @@ import { listMembers, changeMemberStatus, changeMemberGrade } from '@/app/action
 interface Member {
   id: string;
   email: string;
-  full_name: string;
+  full_name: string | null;
   role: string;
-  status: string;
-  grade_code: string;
+  status: string | null;
+  grade_code: string | null;
   org_id: string | null;
-  created_at: string;
-  is_active: boolean;
+  created_at: string | null;
+  is_active: boolean | null;
 }
 
 const STATUS_OPTIONS = ['', 'ACTIVE', 'PENDING', 'SUSPENDED'] as const;
@@ -176,12 +176,12 @@ export default function AdminMembersPage() {
                       </select>
                     </td>
                     <td className="px-4 py-3">
-                      <span className={`px-2 py-0.5 rounded-lg text-xs font-medium ${STATUS_BADGE[m.status] || 'bg-slate-100 text-slate-700'}`}>
+                      <span className={`px-2 py-0.5 rounded-lg text-xs font-medium ${STATUS_BADGE[m.status ?? ''] || 'bg-slate-100 text-slate-700'}`}>
                         {m.status}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-slate-500 text-xs">
-                      {new Date(m.created_at).toLocaleDateString()}
+                      {new Date(m.created_at ?? '').toLocaleDateString()}
                     </td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-2">

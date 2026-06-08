@@ -44,7 +44,7 @@ export default function CorporatePage() {
           getDepartments()
         ]);
         setOrg(orgData);
-        setDepts(deptsData);
+        setDepts(deptsData.departments);
       } catch (err) {
         logger.error(err);
         toast.error('데이터를 불러오는 데 실패했습니다.');
@@ -89,7 +89,8 @@ export default function CorporatePage() {
       if (error) {
         toast.error(error);
       } else {
-        setDepts(await getDepartments());
+        const { departments: updatedDepts } = await getDepartments();
+        setDepts(updatedDepts);
         toast.success(t('success_add_dept'));
       }
     } catch (err: any) {
@@ -105,7 +106,8 @@ export default function CorporatePage() {
       if (error) {
         toast.error(error);
       } else {
-        setDepts(await getDepartments());
+        const { departments: updatedDeptsEdit } = await getDepartments();
+        setDepts(updatedDeptsEdit);
         toast.success(t('success_edit_dept'));
       }
     } catch (err: any) {
@@ -120,7 +122,8 @@ export default function CorporatePage() {
       if (error) {
         toast.error(error);
       } else {
-        setDepts(await getDepartments());
+        const { departments: updatedDeptsDel } = await getDepartments();
+        setDepts(updatedDeptsDel);
         toast.success(t('success_delete_dept'));
       }
     } catch (err: any) {

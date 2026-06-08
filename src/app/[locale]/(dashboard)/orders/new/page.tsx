@@ -14,10 +14,13 @@ export default async function NewOrderPage() {
   const navT = await getTranslations('Navigation');
   
   // Fetch Master Data for the form
-  const [shippers, ports] = await Promise.all([
+  const [dataShippers, dataPorts] = await Promise.all([
     getOrganizations(),
     getPorts()
   ]);
+
+  const shippers = dataShippers ?? [];
+  const ports = dataPorts ?? [];
 
   return (
     <div className="relative min-h-screen animate-in fade-in duration-500">

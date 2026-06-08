@@ -201,9 +201,11 @@ export async function getQnaDetail(qnaId: string): Promise<QnaDetail> {
 
   if (ansError) throw new Error(ansError.message);
 
+  const order = Array.isArray(qna.order) ? qna.order[0] : qna.order;
   return {
     ...qna,
-    order_no: qna.order?.order_no,
+    order_no: order?.order_no || null,
+    answer_count: answers.length,
     answers: answers.map((ans: any) => ({
       ...ans,
       answered_by_name: ans.profile?.full_name || "Admin"

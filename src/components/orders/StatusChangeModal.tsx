@@ -135,7 +135,6 @@ export const StatusChangeModal: React.FC<StatusChangeModalProps> = ({
                 </div>
                 <ZenButton
                   variant="tactile"
-                  size="sm"
                   className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs py-1.5 px-3 rounded-xl shadow-lg shadow-indigo-500/20 transition-all transform hover:scale-105"
                   onClick={() => handleRestore(previousStatus)}
                   disabled={isSubmitting}

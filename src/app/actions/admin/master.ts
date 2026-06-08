@@ -205,6 +205,7 @@ export async function updateSystemParam(key: string, payload: unknown) {
     throw new Error(`입력 검증 실패: ${validated.error}`);
   }
   const { profile } = await validateAdminAction();
+  if (!profile) throw new Error("인증 정보가 없습니다.");
   
   const data = await updateParam(key, validated.data, profile.id);
   

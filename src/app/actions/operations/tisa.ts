@@ -157,7 +157,6 @@ export async function getOrderRateSnapshot(orderId: string): Promise<TisaSnapsho
             applied_rule: "AUTO",
             snapshot_at: new Date().toISOString(),
             carrier_cost_amount: match.carrier_cost,
-            platform_fee_amount: match.platform_fee_amount,
           })
           .select("id, applied_unit_price, applied_currency, carrier_cost_amount, platform_fee_amount, override_reason, is_manual")
           .single();

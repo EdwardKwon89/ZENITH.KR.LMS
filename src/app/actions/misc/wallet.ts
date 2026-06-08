@@ -32,6 +32,10 @@ export async function getWalletBalance() {
     throw new Error(`지갑 조회 실패: ${error.message}`);
   }
 
+  if (!wallet) {
+    throw new Error("지갑 정보를 찾거나 생성할 수 없습니다.");
+  }
+
   return {
     success: true,
     balance: Number(wallet.balance),
@@ -45,6 +49,9 @@ export async function getWalletBalance() {
  */
 export async function topUpWallet(orgId: string, amount: number, description?: string) {
   const { supabase, profile } = await validateAdminAction();
+  if (!profile) {
+    throw new Error("인증된 사용자 프로필을 찾을 수 없습니다.");
+  }
 
   // 1. 지갑 존재 확인 (없으면 생성)
   let { data: wallet } = await supabase
@@ -101,6 +108,9 @@ export async function topUpWallet(orgId: string, amount: number, description?: s
  */
 export async function requestRefund(amount: number, description?: string) {
   const { supabase, profile } = await validateUserAction();
+  if (!profile) {
+    throw new Error("인증된 사용자 프로필을 찾을 수 없습니다.");
+  }
   if (!profile?.org_id) throw new Error("조직 정보가 없습니다.");
 
   // 1. 지갑 확인
@@ -138,6 +148,9 @@ export async function requestRefund(amount: number, description?: string) {
  */
 export async function payInvoiceFromWallet(invoiceId: string) {
   const { supabase, profile } = await validateUserAction();
+  if (!profile) {
+    throw new Error("인증된 사용자 프로필을 찾을 수 없습니다.");
+  }
   
   // 1. 인보이스 정보 조회
   const { data: invoice, error: invError } = await supabase

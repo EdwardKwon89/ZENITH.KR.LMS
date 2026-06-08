@@ -1,5 +1,5 @@
 import { SupabaseClient } from '@supabase/supabase-js';
-import { Database } from '@/types/database.types';
+import { Database } from '@/types/supabase';
 
 /**
  * BaseRepository: Supabase 클라이언트 의존성 주입 기반 공통 DB 접근 추상 클래스
