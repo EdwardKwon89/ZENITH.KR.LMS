@@ -6,6 +6,7 @@ import { Edit3, Trash2, Plane, Ship, Truck, Box, ArrowRight } from 'lucide-react
 import { ZenBadge } from '@/components/ui/ZenUI';
 import ZenDataGrid from '@/components/ui/ZenDataGrid';
 import { cn } from '@/lib/utils';
+import type { RateTiers } from '@/components/admin/RateTierEditor';
 
 interface RateCard {
   id: string;
@@ -25,7 +26,7 @@ interface RateCard {
   origin_port?: { name: string; code: string };
   dest_port?: { name: string; code: string };
   surcharges?: Array<{ surcharge_type: string; calc_type: string; amount: number; currency: string }>;
-  tiers?: Array<{ weight_min: number; unit_price: number }>;
+  tiers?: RateTiers;
 }
 
 const MODE_CONFIG: Record<string, { label: string; icon: React.ElementType; colorClass: string }> = {
@@ -105,15 +106,17 @@ export const RateCardList: React.FC<RateCardListProps> = ({
       header: '중량구간(Slab)',
       cell: ({ row }) => {
         const tiers = row.original.tiers;
-        if (!tiers || tiers.length === 0)
+        if (!tiers?.weight_slabs?.length && !tiers?.cbm_slabs?.length)
           return <span className="text-xs text-slate-400">미설정</span>;
-        const prices = tiers.map(t => t.unit_price);
-        const minP = Math.min(...prices);
-        const maxP = Math.max(...prices);
+        const prices = (tiers?.weight_slabs ?? []).map(t => t.unit_price);
+        const minP = prices.length ? Math.min(...prices) : 0;
+        const maxP = prices.length ? Math.max(...prices) : 0;
         return (
           <span className="text-xs font-mono text-slate-700">
-            <span className="text-slate-400">{tiers.length}구간 · </span>
-            {minP === maxP ? `${minP.toFixed(2)}/kg` : `${minP.toFixed(2)}–${maxP.toFixed(2)}/kg`}
+            <span className="text-slate-400">
+              W:{tiers?.weight_slabs?.length ?? 0} C:{tiers?.cbm_slabs?.length ?? 0} ·
+            </span>
+            {prices.length ? (minP === maxP ? `${minP.toFixed(2)}/kg` : `${minP.toFixed(2)}–${maxP.toFixed(2)}/kg`) : '-'}
           </span>
         );
       },
