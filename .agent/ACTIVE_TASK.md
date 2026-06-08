@@ -163,7 +163,7 @@
 | TASK-120 | 260606 | [P6-SPR-08] Phase 6 회귀 테스트 + E2E 검증 + UAT 절차서 | P2 | TASK-114 ✅ · TASK-115 ✅ · TASK-116 ✅ · TASK-117 ✅ · TASK-118 ✅ · TASK-119 ✅ | D_Kai + B_Kai | ✅ | [TASK-120](tasks/TASK-120_260606_P6SPR08_회귀테스트E2E검증_DKai.md) | D_Kai 완료(ef6e1e6) · E2E 5/5 PASS(710fd60) · code fix(e93204f) · UAT·meta(e0e1c41) · 회귀 309/309 · Aiden ✅ 승인 (260608) |
 | TASK-121 | 260607 | 운송수단별 요금 산정 정책 설정 (정책 테이블 + Admin UI + 엔진 수정) | P2 | TASK-120 ✅ | D_Kai + B_Kai | ✅ | [TASK-121](tasks/TASK-121_260607_운송요금정책설정_DKai_BKai.md) | IMP-105 완료 · D_Kai DB(bb81021) · B_Kai UI(5171675+0d428a3) · D_Kai 엔진(723db3e+c0bcab0+974e632) · 회귀 314/314 · Aiden ✅ 승인 (260608) |
 | TASK-122 | 260608 | 요율 Slab 구조 개편 (무게 Slab / 부피 Slab 분리) | P2 | TASK-121 ✅ | D_Kai + B_Kai | ✅ | [TASK-122](tasks/TASK-122_260608_요율Slab구조개편_DKai_BKai.md) | IMP-106 완료 · D_Kai `2cb5927`+`46bc9f9`+`896e193` · B_Kai `a9c4f3e` · 회귀 314/314 · Aiden ✅ 승인 (260608) |
-| TASK-123 | 260608 | DEF-052 TS 빌드 오류 수정 (50파일) + IMP-108 §2 platform_fee_amount 재정의 | P1 | TASK-122 ✅ | D_Kai | 🔔 | [TASK-123](tasks/TASK-123_260608_DEF052빌드오류+IMP108PlatformFee재정의_DKai.md) | DEF-052: build PASS+314/314 · IMP-108: SQL mig 2건+trigger+tisa.ts 완료 · 커밋 c049bef |
+| TASK-123 | 260608 | DEF-052 TS 빌드 오류 수정 (50파일) + IMP-108 §2 platform_fee_amount 재정의 | P1 | TASK-122 ✅ | D_Kai | ✅ | [TASK-123](tasks/TASK-123_260608_DEF052빌드오류+IMP108PlatformFee재정의_DKai.md) | DEF-052: build PASS+314/314 · IMP-108: SQL mig 2건+trigger+tisa.ts 완료 · 커밋 c049bef · Aiden ✅ 승인 (260609) |
 | TASK-108 | 260601 | DEF-039 CARRIER RLS + 미스테이지 커밋 + 신원 수정 | P2 | 없음 | D_Kai | ✅ | [TASK-108](tasks/TASK-108_260601_DEF039CARRIER_RLS_미스테이지커밋_DKai.md) | DEF-039 해소 · 4cc88d8+beba338 · CARRIER RLS 3테이블 · 229/229 ✅ · Aiden ✅ 승인 |
 | TASK-109 | 260603 | IMP-095 Rate Card 항로(Port) 기반 매칭 구현 | P1 | TASK-106 ✅ · TASK-108 ✅ | D_Kai (OpenCode) | ✅ | [TASK-109](tasks/TASK-109_260603_IMP095포트기반요율매칭_DKai.md) | IMP-095 완료 · `0fb950d`+`fb263f9` · 236/236 PASS · Aiden ✅ 승인 |
 | TASK-110 | 260603 | IMP-096 요율 관리 페이지 통합 정리 (3단계) | P1 | TASK-106 ✅ · TASK-109 ✅ | D_Kai (OpenCode) | ✅ | [TASK-110](tasks/TASK-110_260603_IMP096요율관리페이지통합정리_DKai.md) | IMP-096 완료 · `e166fec`+`65c904b` · 236/236 PASS · Aiden ✅ 승인 |
@@ -198,6 +198,7 @@
 
 | 날짜 | 주체 | 내용 |
 |:-----|:----:|:-----|
+| 2026-06-09 | Aiden (Claude) | TASK-123 ✅ 최종 승인 — DEF-052 build PASS·50파일 전량 수정·IMP-108 §2 total_freight 기반 수수료 재정의·회귀 314/314. R-17 경고: 코드 커밋 내 문서 파일 포함 (D_Kai 1회 기록). UAT_DEFECT_LOG DEF-052 수정완료 갱신. |
 | 2026-06-08 | Aiden (Claude) | TASK-123 신규 발령 — DEF-052 TS 빌드 오류 5파일 (P1 빌드 차단) + IMP-108 §2 platform_fee_amount 재정의. D_Kai 즉시 착수. |
 | 2026-06-08 | Aiden (Claude) | TASK-122 ✅ 최종 승인 — DoD 10/10·R-17 준수·회귀 314/314 실물 검증. Edward 승인 확인. IMP-106 완료. |
 | 2026-06-08 | Aiden (Claude) | TASK-122 신규 발령 — 요율 Slab 구조 개편 (무게/부피 분리). D_Kai(DB+엔진) + B_Kai(UI) 착수 지시. IMP-106. |

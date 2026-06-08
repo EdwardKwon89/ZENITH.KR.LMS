@@ -1,8 +1,12 @@
 <!-- BEGIN:nextjs-agent-rules -->
 # This is NOT the Next.js you know
 
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing code. Heed deprecation notices.
 <!-- END:nextjs-agent-rules -->
+
+<!-- BEGIN:rtk-tool -->
+> **RTK 토큰 최적화**: `git`, `docker`, `gh`, `kubectl`, `npm`, `pnpm`, `ls`, `tree`, `find`, `grep`, `diff`, `wc`, `wget`, `aws`, `psql`, `read`, `dotnet` 명령어 실행 시 기본 `bash` 대신 **`rtk`** 커스텀 툴을 사용하세요. 예: `rtk({ command: "git status" })`. 약 60-90% 토큰 절감 효과.
+<!-- END:rtk-tool -->
 
 
 # AGENTS.md — Noah (Codex) 업무 규정
