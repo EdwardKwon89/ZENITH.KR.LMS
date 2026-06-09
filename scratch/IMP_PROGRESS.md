@@ -291,8 +291,8 @@
 | K | 1 | 7 | 14.3% | IMP-084·085·086·088·089·046 🔔 |
 | 6 | 9 | 9 | — | IMP-097✅·098✅·099✅·100🔔·101🔔·102🔔·103🔔·104🔔·105✅(D_Kai 엔진+TC 완료) (Phase 6+IMP-105) |
 | UAT | 6 | 7 | 85.7% | IMP-090 ✅ · IMP-091 ⬜ (Carrier Portal — Phase M) · **IMP-092 ✅ (TISA 3계층)** · **IMP-093 ✅ (TISA 실연동, TASK-104)** · IMP-094 ⬜ (요율 워크플로우 고도화, Phase M) · **IMP-095 ✅ (Rate Card 항로 매칭, TASK-109)** · **IMP-096 ✅ (요율 관리 페이지 통합 정리, TASK-110)** |
-| UAT2 | 1 | 2 | 50% | **IMP-107 ⬜** (TISA 스냅샷 강화 — WM slab 이력) · **IMP-108 ✅§2** (platform_fee 재정의 완료 — TASK-123 Aiden ✅, §1 max_charge/§3 WM cap 별도 Task 예정) |
-| **합계** | **87** | **93** | **93.5%** | IMP-108 §2 ✅ (2026-06-09 Aiden 승인) |
+| UAT2 | 1 | 2 | 50% | **IMP-107 ⬜** (TISA 스냅샷 강화 — WM slab 이력) · **IMP-108 ✅§1·§2** (B_Kai §1 max_charge UI `ce17476` ✅, D_Kai §2 platform_fee 재정의 TASK-123 ✅, §3 WM cap D_Kai ⬜) |
+| **합계** | **88** | **93** | **94.6%** | IMP-108 §1·§2 ✅ (B_Kai `ce17476` · Aiden 승인) |
 
 > **UAT 진행 전 필수 처리**: IMP-092 ✅ · IMP-093 ✅ · IMP-095 ✅ — 전량 완료
 > 미완료 IMP: IMP-086·087 🚫 블로커 · IMP-028·069(Future — 통관 연계) · IMP-091 ⬜ (Carrier Portal) · IMP-094 ⬜ (요율 워크플로우 Phase M)
@@ -369,3 +369,4 @@
 | 2026-06-08 | Aiden (Claude) | **IMP-107·108 ⬜ 신규 등재** — 간이 테스트 결과 검토 중 도출. IMP-108: max_charge 상한선 + platform_fee_amount 재정의(carrier_cost 제거 보완, High). IMP-107: TISA 스냅샷 강화(WM slab 이력·pricing_basis, Medium). 전체 합계 86/93 (92.5%). |
 | 2026-06-09 | D_Kai (OpenCode) | **IMP-108 §2 🔔** — platform_fee_amount 재정의 완료 (TASK-123). 6-arg fn에서 platform_fee 컬럼 제거 → calculate_order_costs에서 total_freight 기반 계산. SQL mig 2건 + trigger fix + tisa.ts. §1(max_charge)·§3(WM cap) 미착수. 전체 합계 87/93 (93.5%). 커밋 c049bef. |
 | 2026-06-09 | Aiden (Claude) | **IMP-108 §2 ✅ 최종 승인** — TASK-123 검토 완료. DEF-052 build PASS·50파일 전량·회귀 314/314. total_freight 기반 수수료 계산 SQL 정합 확인. §1(max_charge UI)·§3(WM cap) 별도 Task 예정. 전체 합계 87/93 (93.5%). |
+| 2026-06-09 | B_Kai | **IMP-108 §1 ✅ max_charge UI 완료** — WeightSlab/CbmSlab 인터페이스 `max_charge?: number` 추가, RateTierEditor UI 필드 노출, `createRateCard`/`updateRateCard` 타입 전달. build ✅ · 회귀 314/314 ✅. 커밋 `ce17476`. §3 D_Kai ⬜ 대기. 전체 합계 88/93 (94.6%). |

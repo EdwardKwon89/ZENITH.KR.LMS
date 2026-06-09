@@ -168,15 +168,15 @@ RETURN jsonb_build_object(
 
 ## DoD (완료 기준)
 
-- [ ] `WeightSlab.max_charge?: number` · `CbmSlab.max_charge?: number` 인터페이스 추가 — 파일 경로 기재
-- [ ] RateTierEditor UI에 max_charge 입력 필드 노출 (선택, 미입력 허용) — 화면 확인
-- [ ] fn_get_best_matching_rate (4-arg) `max_total_price` 컬럼 반환 확인
-- [ ] WM 모드에서 max_charge cap 적용 — `total_freight > max_charge` 시 `total_freight = max_charge`
-- [ ] `applied_pricing_basis` 반환값 검증: WEIGHT / CBM / MIN_CHARGE / MAX_CHARGE 4가지 케이스
-- [ ] `rtk npm run build` PASS — 커밋 해시 기재
-- [ ] `rtk npm run test:regression` 314/314 PASS — 커밋 해시 기재
-- [ ] 신규 회귀 TC 추가 — max_charge cap 케이스 최소 1개
-- [ ] `LIVE_REGRESSION_TEST_MAP.md` 업데이트
+- [x] `WeightSlab.max_charge?: number` · `CbmSlab.max_charge?: number` 인터페이스 추가 — `src/components/admin/RateTierEditor.tsx:10·17`
+- [x] RateTierEditor UI에 max_charge 입력 필드 노출 (선택, 미입력 허용) — weight slab·CBM slab 행 각 1개 필드
+- [ ] fn_get_best_matching_rate (4-arg) `max_total_price` 컬럼 반환 확인 — §3 D_Kai
+- [ ] WM 모드에서 max_charge cap 적용 — §3 D_Kai
+- [ ] `applied_pricing_basis` 반환값 검증 — §3 D_Kai
+- [x] `rtk npm run build` PASS — B_Kai `ce17476` ✅ / D_Kai
+- [x] `rtk npm run test:regression` 314/314 PASS — B_Kai `ce17476` ✅ / D_Kai
+- [ ] 신규 회귀 TC 추가 — §3 D_Kai
+- [ ] `LIVE_REGRESSION_TEST_MAP.md` 업데이트 — §3 D_Kai
 
 ---
 
@@ -212,7 +212,17 @@ RETURN jsonb_build_object(
 
 ## [작업 결과] — D_Kai/B_Kai 작성란
 
-> 완료 후 기재
+### §1 (B_Kai) — max_charge UI ✅ 완료
+
+**수정 파일**:
+- `src/components/admin/RateTierEditor.tsx` — WeightSlab/CbmSlab 인터페이스에 `max_charge?: number` 추가, max_charge 핸들러 및 UI 입력 필드 추가 (Weight·CBM 양쪽)
+- `src/app/actions/admin/rates.ts` — createRateCard·updateRateCard 타입에 `max_charge?: number` 추가
+
+**검증 결과**:
+- `rtk npm run build` — ✅ PASS
+- `rtk npm run test:regression` — ✅ 314/314 PASS
+
+**커밋**: `ce17476`
 
 ---
 
