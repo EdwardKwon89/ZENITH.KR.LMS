@@ -5,7 +5,7 @@
 > **우선순위**: P3
 > **전제조건**: 없음 (uncommitted 변경 이미 존재)
 > **관련 DEF**: DEF-053
-> **상태**: ⬜
+> **상태**: ✅
 
 ---
 
@@ -121,4 +121,13 @@ Tests  316 passed (316)
 
 ## [Aiden 검토]
 
-_(Aiden 전속)_
+**2026-06-09 ✅ 승인**
+
+- DoD 8/8 전량 [x] + 증거값 실물 확인
+- 코드 커밋 `2c30146` — 5개 파일(page.tsx·useRates.ts·RateCardForm.tsx·RateCardList.tsx·ZenDataGrid.tsx) 수정 확인
+- 문서 커밋 `7033a16` + 해시 보정 커밋 `7af624b` — 닭달걀 구조 불가피, 위반 아님
+- 회귀 316/316 PASS 확인
+- **Advisory③: task file 헤더 `상태: ⬜` 미변경 — TASK-127·128·130 동일 유형 3회 누적**
+  - R-17 v1.4 페널티 발동: D_Kai 신규 Task 할당 일시 중단
+  - TASK-132 재교육 세션 발령 — 완료 후 할당 재개
+  - 추가 지적: ACTIVE_TASK.md Agent별 섹션에서 "TASK-128·130 모두 헤더 준수 ✅"로 Aiden 경고 텍스트 임의 수정 — 사실 불일치, 재발 금지
