@@ -172,7 +172,7 @@
 | TASK-129 | 260609 | DEF-018/009/010 소규모 버그 수정 (CARRIER role + UI) | P2 | 없음 | B_Kai | ✅ | [TASK-129](tasks/TASK-129_260609_DEF018009010_소규모버그수정_BKai.md) | CARRIER 등록 role 코드 수정 + 증빙서류 버튼 + 승인버튼 글자 |
 | TASK-130 | 260609 | DEF-053 요율 UI 개선 5종 커밋 + R-17 완료 보고 | P3 | 없음 | D_Kai | ✅ | [TASK-130](tasks/TASK-130_260609_DEF053_요율UI개선커밋_DKai.md) | DEF-053 5종 ✅ · 코드 `2c30146` · 316/316 · Advisory③ R-17 페널티 발동 |
 | TASK-131 | 260609 | **ADMIN/MANAGER 조직 정보 관리 화면 구축** (CARRIER·CUSTOMS·DELIVERY 조회·등록·승인) | **P1** | 없음 | B_Kai | ⬜ | [TASK-131](tasks/TASK-131_260609_조직관리화면구축_BKai.md) | A안 확정 — `/admin/organizations/manage/` 신규 전용 페이지. B_Kai 즉시 착수 가능. |
-| TASK-132 | 260609 | D_Kai 재교육 세션 3차 (task file 헤더 미변경 3회 + ACTIVE_TASK 임의 수정) | P4 | 없음 | D_Kai | ⬜ | [TASK-132](tasks/TASK-132_260609_DKai재교육세션3차_DKai.md) | R-17 v1.4 페널티 — 신규 Task 할당 중단. 재교육 완료 후 재개. |
+| TASK-132 | 260609 | D_Kai 재교육 세션 3차 (task file 헤더 미변경 3회 + ACTIVE_TASK 임의 수정) | P4 | 없음 | D_Kai | 🔔 | [TASK-132](tasks/TASK-132_260609_DKai재교육세션3차_DKai.md) | R-17 v1.4 페널티 — 재교육 완료, Aiden 검토 대기 |
 | TASK-108 | 260601 | DEF-039 CARRIER RLS + 미스테이지 커밋 + 신원 수정 | P2 | 없음 | D_Kai | ✅ | [TASK-108](tasks/TASK-108_260601_DEF039CARRIER_RLS_미스테이지커밋_DKai.md) | DEF-039 해소 · 4cc88d8+beba338 · CARRIER RLS 3테이블 · 229/229 ✅ · Aiden ✅ 승인 |
 | TASK-109 | 260603 | IMP-095 Rate Card 항로(Port) 기반 매칭 구현 | P1 | TASK-106 ✅ · TASK-108 ✅ | D_Kai (OpenCode) | ✅ | [TASK-109](tasks/TASK-109_260603_IMP095포트기반요율매칭_DKai.md) | IMP-095 완료 · `0fb950d`+`fb263f9` · 236/236 PASS · Aiden ✅ 승인 |
 | TASK-110 | 260603 | IMP-096 요율 관리 페이지 통합 정리 (3단계) | P1 | TASK-106 ✅ · TASK-109 ✅ | D_Kai (OpenCode) | ✅ | [TASK-110](tasks/TASK-110_260603_IMP096요율관리페이지통합정리_DKai.md) | IMP-096 완료 · `e166fec`+`65c904b` · 236/236 PASS · Aiden ✅ 승인 |
@@ -195,7 +195,7 @@
 
 | Agent | 진행 중 | 재작업/조치 필요 | 블로커 대기 |
 |:------|:--------|:----------------|:----------|
-| **D_Kai (OpenCode)** | **TASK-132 ⬜ (재교육 세션 3차 — 착수 가능)** | **신규 Task 할당 중단** — task file 헤더 미변경 3회 누적 (R-17 v1.4 페널티). 재교육 완료 후 재개. | — |
+| **D_Kai (OpenCode)** | **TASK-132 🔔 (검토 요청)** — 재교육 세션 3차 완료 | **신규 Task 할당 중단 유지** — Aiden 검토 후 ✅ 승인 시 재개 | — |
 | **B_Kai** | **TASK-131 ⬜ (즉시 착수 가능)** — 조직 관리 화면 구축 P1 · A안 확정 · `/admin/organizations/manage/` | Advisory: TASK-131 자체 등록 건 (분석 보고만으로 허용, 향후 R-18 ISS 경로 사용) | — |
 | **Riley** | — | 토큰 소진·scope 초과 이력 (TASK-121) | 신규 Task 대기 (scope 제한 명시 필수) |
 | N_Kai | TASK-087 ⬜ (재교육 세션 — 완료 후 신규 할당 재개) | R-17 위반 누적 — 신규 할당 중단 유지 | — |
