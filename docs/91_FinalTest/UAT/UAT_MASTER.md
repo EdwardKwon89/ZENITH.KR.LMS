@@ -157,8 +157,12 @@ Supabase: Cloud 프로젝트 연결
 | UAT-12-03 | Delivery Agent 요율 등록(LOCAL+TOTAL) 및 오더 생성 (배송 서비스 선택) | DELIVERY_AGENT/SHIPPER | [UAT_12](UAT_P6_서비스요율_멀티배정.md) | Riley | ✅ | 필수 |
 | UAT-12-04 | 역할별 오더 목록 조회 격리 (RLS 검증) | SHIPPER/PARTNERS/ADMIN | [UAT_12](UAT_P6_서비스요율_멀티배정.md) | Riley | ✅ | 필수 |
 | UAT-12-05 | 서비스 미지원 시 오더 등록 차단 및 경고 배너 검증 | SHIPPER | [UAT_12](UAT_P6_서비스요율_멀티배정.md) | Riley | ✅ | 필수 |
+| UAT-12-06 | CUSTOMS 조직 신규 등록 | ADMIN | [UAT_12](UAT_12_조직관리화면.md) | D_Kai | ✅ | 일반 |
+| UAT-12-07 | DELIVERY 조직 신규 등록 | ADMIN | [UAT_12](UAT_12_조직관리화면.md) | D_Kai | ✅ | 일반 |
+| UAT-12-08 | 조직 상태 변경 (ACTIVE → SUSPENDED → ACTIVE) | ADMIN | [UAT_12](UAT_12_조직관리화면.md) | D_Kai | ✅ | 일반 |
+| UAT-12-09 | 조직 목록 필터링 (유형·상태·검색 복합) | ADMIN | [UAT_12](UAT_12_조직관리화면.md) | D_Kai | ✅ | 일반 |
 
-**총 89개 시나리오** | 작성 완료: **89 / 89 ✅ 전량 완료** | 필수: **43개** | 일반: **46개**
+**총 93개 시나리오** | 작성 완료: **93 / 93 ✅ 전량 완료** | 필수: **43개** | 일반: **50개**
 
 ---
 
