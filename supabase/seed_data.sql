@@ -52,3 +52,68 @@ BEGIN
     (v_card_id, 1, 120.0, 300), -- 1~5CBM
     (v_card_id, 5, 100.0, 300); -- 5CBM 이상
 END $$;
+
+-- 4. 통관 서비스 조직 (CUSTOMS)
+INSERT INTO zen_organizations (name, type, status, metadata) VALUES
+('Korea Customs Clearance', 'CUSTOMS', 'ACTIVE', '{"business_no": "111-22-33333", "specialty": "CUSTOMS"}'),
+('Japan Broker Services', 'CUSTOMS', 'ACTIVE', '{"business_no": "222-33-44444", "specialty": "CUSTOMS"}')
+ON CONFLICT DO NOTHING;
+
+-- 5. 통관 서비스 요율 (Customs Rates)
+DO $$
+DECLARE
+    v_korea_org UUID;
+    v_japan_org UUID;
+BEGIN
+    SELECT id INTO v_korea_org FROM zen_organizations WHERE name = 'Korea Customs Clearance' LIMIT 1;
+    SELECT id INTO v_japan_org FROM zen_organizations WHERE name = 'Japan Broker Services' LIMIT 1;
+
+    -- Korea Customs: US 통관 요율
+    INSERT INTO zen_customs_rates (org_id, country_code, currency, cost_per_kg, cost_per_cbm, fixed_fee, transit_days, valid_from, is_active)
+    VALUES (v_korea_org, 'US', 'USD', 2.50, 50.00, 100.00, 2, CURRENT_DATE, true);
+
+    -- Korea Customs: CN 통관 요율
+    INSERT INTO zen_customs_rates (org_id, country_code, currency, cost_per_kg, cost_per_cbm, fixed_fee, transit_days, valid_from, is_active)
+    VALUES (v_korea_org, 'CN', 'USD', 1.80, 35.00, 80.00, 3, CURRENT_DATE, true);
+
+    -- Korea Customs: JP 통관 요율
+    INSERT INTO zen_customs_rates (org_id, country_code, currency, cost_per_kg, fixed_fee, transit_days, valid_from, is_active)
+    VALUES (v_korea_org, 'JP', 'JPY', 350.00, 10000.00, 2, CURRENT_DATE, true);
+
+    -- Japan Broker: US 통관 요율
+    INSERT INTO zen_customs_rates (org_id, country_code, currency, cost_per_kg, cost_per_cbm, fixed_fee, transit_days, valid_from, is_active)
+    VALUES (v_japan_org, 'US', 'USD', 3.00, 60.00, 120.00, 2, CURRENT_DATE, true);
+
+    -- Japan Broker: SG 통관 요율
+    INSERT INTO zen_customs_rates (org_id, country_code, currency, cost_per_kg, cost_per_cbm, fixed_fee, transit_days, valid_from, is_active)
+    VALUES (v_japan_org, 'SG', 'USD', 2.20, 40.00, 90.00, 4, CURRENT_DATE, true);
+END $$;
+
+-- 6. 배송 서비스 조직 (DELIVERY)
+INSERT INTO zen_organizations (name, type, status, metadata) VALUES
+('Korea Express Delivery', 'DELIVERY', 'ACTIVE', '{"business_no": "333-44-55555", "specialty": "DELIVERY"}')
+ON CONFLICT DO NOTHING;
+
+-- 7. 배송 서비스 요율 (Delivery Rates — LOCAL / TOTAL)
+DO $$
+DECLARE
+    v_delivery_org UUID;
+BEGIN
+    SELECT id INTO v_delivery_org FROM zen_organizations WHERE name = 'Korea Express Delivery' LIMIT 1;
+
+    -- LOCAL: 국내 배송 (KR)
+    INSERT INTO zen_delivery_rates (org_id, service_type, country_code, currency, cost_per_kg, transit_days, valid_from, is_active)
+    VALUES (v_delivery_org, 'LOCAL', 'KR', 'KRW', 3000.00, 1, CURRENT_DATE, true);
+
+    -- TOTAL: ICN → LAX (AIR) 국제 배송
+    INSERT INTO zen_delivery_rates (org_id, service_type, transport_mode, origin_code, dest_code, currency, cost_per_kg, transit_days, valid_from, is_active)
+    VALUES (v_delivery_org, 'TOTAL', 'AIR', 'ICN', 'LAX', 'USD', 6.50, 3, CURRENT_DATE, true);
+
+    -- TOTAL: PUS → LAX (SEA) 국제 배송
+    INSERT INTO zen_delivery_rates (org_id, service_type, transport_mode, origin_code, dest_code, currency, cost_per_kg, transit_days, valid_from, is_active)
+    VALUES (v_delivery_org, 'TOTAL', 'SEA', 'PUS', 'LAX', 'USD', 3.50, 18, CURRENT_DATE, true);
+
+    -- TOTAL: ICN → HKG (AIR) 국제 배송
+    INSERT INTO zen_delivery_rates (org_id, service_type, transport_mode, origin_code, dest_code, currency, cost_per_kg, transit_days, valid_from, is_active)
+    VALUES (v_delivery_org, 'TOTAL', 'AIR', 'ICN', 'HKG', 'USD', 4.00, 2, CURRENT_DATE, true);
+END $$;
