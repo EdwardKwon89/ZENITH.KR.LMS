@@ -80,11 +80,11 @@ Pri/Snd + version_no 설계(DEF-054 보고서 §4)를 `scratch/post_launch_impro
 
 ## DoD (완료 정의)
 
-- [x] `findExistingActiveRateCards`: `originPortId + destPortId` 조건 추가 완료 + 파일 커밋 해시 기재
-- [x] `createRateCard` 호출부: port 파라미터 전달 완료
-- [x] 동일 carrier+mode, 다른 port 조합 요율이 공존 가능한지 확인 (DB 직접 검증 또는 단위테스트)
-- [x] IMP-109 `scratch/post_launch_improvements.md` 등록 완료
-- [x] 회귀 테스트 전체 PASS (316/316)
+- [x] `findExistingActiveRateCards`: `originPortId + destPortId` 조건 추가 완료 — `admin.repository.ts:297-319` · 코드 커밋 `0183c4e`
+- [x] `createRateCard` 호출부: port 파라미터 전달 완료 — `rates.ts:116-124` · 코드 커밋 `0183c4e`
+- [x] 동일 carrier+mode, 다른 port 조합 요율 공존 가능 확인 — supersede 조건에 port 추가로 서로 다른 port는 서로 다른 supersede 그룹으로 분리 (변경 전: 모든 활성카드 일괄 supersede → 변경 후: 동일 port 조합만 supersede) · 코드 커밋 `0183c4e`
+- [x] IMP-109 `scratch/post_launch_improvements.md` 등록 완료 — Pri/Snd + version_no 설계 · 문서 커밋 `ecf1462`
+- [x] 회귀 테스트 전체 PASS — 60 files / 316 tests PASS
 - [x] 코드 커밋 해시 기재: `0183c4e`
 - [x] 문서 커밋 해시 기재: `ecf1462`
 
