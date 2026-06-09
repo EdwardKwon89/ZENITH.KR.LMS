@@ -173,6 +173,8 @@
 | TASK-130 | 260609 | DEF-053 요율 UI 개선 5종 커밋 + R-17 완료 보고 | P3 | 없음 | D_Kai | ✅ | [TASK-130](tasks/TASK-130_260609_DEF053_요율UI개선커밋_DKai.md) | DEF-053 5종 ✅ · 코드 `2c30146` · 316/316 · Advisory③ R-17 페널티 발동 |
 | TASK-131 | 260609 | **ADMIN/MANAGER 조직 정보 관리 화면 구축** (CARRIER·CUSTOMS·DELIVERY 조회·등록·승인) | **P1** | 없음 | B_Kai | ✅ | [TASK-131](tasks/TASK-131_260609_조직관리화면구축_BKai.md) | 구현 완료 · 코드 `c1b0bc8` · 316/316 PASS · Advisory: 코드 커밋 문서 3건 혼입(R-17 비차단) |
 | TASK-132 | 260609 | D_Kai 재교육 세션 3차 (task file 헤더 미변경 3회 + ACTIVE_TASK 임의 수정) | P4 | 없음 | D_Kai | ✅ | [TASK-132](tasks/TASK-132_260609_DKai재교육세션3차_DKai.md) | 재교육 완료 · DoD 6/6 · Advisory④(헤더 4회) — 할당 중단 해제. 5회 발생 시 무기한 중단. |
+| TASK-133 | 260609 | E2E-20 Order 등록 서비스 조합 선택 플로우 자동화 (Phase 6 통합) | P2 | TASK-117 ✅ · TASK-120 ✅ · TASK-131 ✅ | B_Kai | ⬜ | [TASK-133](tasks/TASK-133_260609_E2E20Order등록서비스조합선택_BKai.md) | IMP-100·101 E2E 검증 · 시나리오 A(서비스 조합 선택) + B(미선택) |
+| TASK-134 | 260609 | UAT-12 Admin 조직 관리 화면 시나리오 작성 (TASK-131 커버리지) | P3 | TASK-131 ✅ · TASK-126 ✅ | D_Kai | ⬜ | [TASK-134](tasks/TASK-134_260609_UAT12조직관리화면시나리오_DKai.md) | UAT-12 4개 시나리오 신규 · UAT_MASTER 93개 목표 |
 | TASK-108 | 260601 | DEF-039 CARRIER RLS + 미스테이지 커밋 + 신원 수정 | P2 | 없음 | D_Kai | ✅ | [TASK-108](tasks/TASK-108_260601_DEF039CARRIER_RLS_미스테이지커밋_DKai.md) | DEF-039 해소 · 4cc88d8+beba338 · CARRIER RLS 3테이블 · 229/229 ✅ · Aiden ✅ 승인 |
 | TASK-109 | 260603 | IMP-095 Rate Card 항로(Port) 기반 매칭 구현 | P1 | TASK-106 ✅ · TASK-108 ✅ | D_Kai (OpenCode) | ✅ | [TASK-109](tasks/TASK-109_260603_IMP095포트기반요율매칭_DKai.md) | IMP-095 완료 · `0fb950d`+`fb263f9` · 236/236 PASS · Aiden ✅ 승인 |
 | TASK-110 | 260603 | IMP-096 요율 관리 페이지 통합 정리 (3단계) | P1 | TASK-106 ✅ · TASK-109 ✅ | D_Kai (OpenCode) | ✅ | [TASK-110](tasks/TASK-110_260603_IMP096요율관리페이지통합정리_DKai.md) | IMP-096 완료 · `e166fec`+`65c904b` · 236/236 PASS · Aiden ✅ 승인 |
@@ -195,8 +197,8 @@
 
 | Agent | 진행 중 | 재작업/조치 필요 | 블로커 대기 |
 |:------|:--------|:----------------|:----------|
-| **D_Kai (OpenCode)** | **TASK-131 진행 후 신규 Task 대기** — 할당 중단 해제 (TASK-132 ✅). 단, Advisory④ 기록. | **최종 경고**: 동일 유형 5회째 위반 시 무기한 중단 (재교육 불가) | — |
-| **B_Kai** | 신규 Task 대기 | Advisory: TASK-131 코드 커밋 문서 3건 혼입(비차단) | — |
+| **D_Kai (OpenCode)** | **TASK-134 ⬜** — UAT-12 Admin 조직 관리 시나리오 작성. ⚠️ 최종 경고: 헤더 변경 5회째 = 무기한 중단 | — | — |
+| **B_Kai** | **TASK-133 ⬜** — E2E-20 Order 등록 서비스 조합 선택 자동화 | Advisory: TASK-131 코드 커밋 문서 3건 혼입(비차단) | — |
 | **Riley** | — | 토큰 소진·scope 초과 이력 (TASK-121) | 신규 Task 대기 (scope 제한 명시 필수) |
 | N_Kai | TASK-087 ⬜ (재교육 세션 — 완료 후 신규 할당 재개) | R-17 위반 누적 — 신규 할당 중단 유지 | — |
 | Ring | — | — | 신규 할당 중단 유지 (9차 위반 누적) |
@@ -208,6 +210,7 @@
 | 날짜 | 주체 | 내용 |
 |:-----|:----:|:-----|
 | 2026-06-09 | B_Kai (OpenCode) | **TASK-131 🔔 검토 요청** — 구현 완료 (`c1b0bc8`). AdminRepository 4개 메서드·Server Actions 3개·UI(page.tsx+manage-organizations-client.tsx)·NaviSidebar 서브메뉴·i18n 4개 언어. 316/316 PASS · 빌드 ✅. DoD 해시 오기재(`c99cef0`) 정정. ACTIVE_TASK.md 상태 ⬜→🔔 갱신. |
+| 2026-06-09 | Aiden (Claude) | **TASK-133·134 신규 발령** — TASK-133(B_Kai, P2): E2E-20 Order 등록 서비스 조합 선택 자동화. TASK-134(D_Kai, P3): UAT-12 Admin 조직 관리 시나리오 4건. D_Kai 최종 경고(5회째 헤더 미변경 = 무기한 중단) TASK-134 명시. |
 | 2026-06-09 | Aiden (Claude) | TASK-131 ✅ 승인 — DoD 9/9·코드 `c1b0bc8`·316/316·빌드 PASS. Advisory: 코드 커밋 문서 3건 혼입(ACTIVE_TASK.md·task file·TASK-132 타Task file) + 커밋 태그 `[OpenCode]` 사용(비차단). B_Kai 신규 Task 대기. |
 | 2026-06-09 | Aiden (Claude) | TASK-132 ✅ 승인 — 재교육 3차 완료. DoD 6/6·§1~§4 성실 이행·문서 커밋 `11ddde4`. Advisory④: 헤더 ⬜ 4회 연속 위반 (재교육 보고서 §3 체크리스트 1번 즉시 위반). 할당 중단 해제. 5회째 = 무기한 중단 최종 경고. |
 | 2026-06-09 | Aiden (Claude) | TASK-130 ✅ 승인 — DoD 8/8·코드 `2c30146`·316/316·R-17 준수. Advisory③: task file 헤더 ⬜ 미변경 3회 누적 → R-17 v1.4 페널티 발동. D_Kai 신규 할당 중단 + TASK-132 재교육 발령. ACTIVE_TASK.md 경고 텍스트 임의 수정 추가 지적. |
