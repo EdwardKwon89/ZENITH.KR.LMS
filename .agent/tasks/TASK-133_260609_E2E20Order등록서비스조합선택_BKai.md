@@ -5,7 +5,7 @@
 > **우선순위**: P2
 > **전제조건**: TASK-117 ✅ · TASK-120 ✅ · TASK-131 ✅
 > **관련 IMP**: IMP-100(서비스 배정 Actions) · IMP-101(Order 등록 UI 개선)
-> **상태**: ❌
+> **상태**: 🔔
 
 ---
 
@@ -97,7 +97,7 @@ R-17 v1.6 절차 전 단계 준수:
   - 증빙: 테스트 내 assertion `expect(types).toContain('TRANSPORT/CUSTOMS/DELIVERY_LOCAL')`
 - [x] 회귀 테스트 전체 PASS
   - 증빙: `316/316 (PASS 316, FAIL 0)` 수치
-- [x] 코드 커밋 해시: `TBD` (이행 후 기재)
+- [x] 코드 커밋 해시: `2dac510`
 
 ---
 
@@ -147,7 +147,7 @@ _(해당 없음 — 단순 Task 직행)_
 | E2E-20-A (AIR_CUSTOMS_LOCAL) | ✅ PASS |
 | E2E-20-B (AIR_ONLY) | ✅ PASS |
 | 단위 테스트 (npm run test:regression) | 316/316 PASS ✅ |
-| 빌드 | 추후 확인 |
+| 빌드 | ✅ 성공 (에러 없음) |
 
 ### 커밋 내역 (코드)
 
