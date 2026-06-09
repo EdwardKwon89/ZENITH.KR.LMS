@@ -170,6 +170,7 @@
 | TASK-127 | 260609 | DEF-054 Rate Card Supersede 조건 port 추가 (A안) | P2 | 없음 | D_Kai | ✅ | [TASK-127](tasks/TASK-127_260609_DEF054_RateCardSupersede포트조건수정_DKai.md) | DEF-054 해소 · `findExistingActiveRateCards` origin+dest port 조건 추가 · 회귀 316/316 · `0183c4e` |
 | TASK-128 | 260609 | DEF-048/049 Schedule 매칭 실패 + 미배정 표시 수정 | P2 | TASK-127 완료 권장 | D_Kai | ✅ | [TASK-128](tasks/TASK-128_260609_DEF048049_Schedule매칭수정_DKai.md) | DEF-048 원인 진단·수정 + DEF-049 미배정 배지 표시 · 코드 `830184c` · 316/316 |
 | TASK-129 | 260609 | DEF-018/009/010 소규모 버그 수정 (CARRIER role + UI) | P2 | 없음 | B_Kai | ✅ | [TASK-129](tasks/TASK-129_260609_DEF018009010_소규모버그수정_BKai.md) | CARRIER 등록 role 코드 수정 + 증빙서류 버튼 + 승인버튼 글자 |
+| TASK-130 | 260609 | DEF-053 요율 UI 개선 5종 커밋 + R-17 완료 보고 | P3 | 없음 | D_Kai | ⬜ | [TASK-130](tasks/TASK-130_260609_DEF053_요율UI개선커밋_DKai.md) | uncommitted 변경 검증·커밋·🔔 제출 |
 | TASK-108 | 260601 | DEF-039 CARRIER RLS + 미스테이지 커밋 + 신원 수정 | P2 | 없음 | D_Kai | ✅ | [TASK-108](tasks/TASK-108_260601_DEF039CARRIER_RLS_미스테이지커밋_DKai.md) | DEF-039 해소 · 4cc88d8+beba338 · CARRIER RLS 3테이블 · 229/229 ✅ · Aiden ✅ 승인 |
 | TASK-109 | 260603 | IMP-095 Rate Card 항로(Port) 기반 매칭 구현 | P1 | TASK-106 ✅ · TASK-108 ✅ | D_Kai (OpenCode) | ✅ | [TASK-109](tasks/TASK-109_260603_IMP095포트기반요율매칭_DKai.md) | IMP-095 완료 · `0fb950d`+`fb263f9` · 236/236 PASS · Aiden ✅ 승인 |
 | TASK-110 | 260603 | IMP-096 요율 관리 페이지 통합 정리 (3단계) | P1 | TASK-106 ✅ · TASK-109 ✅ | D_Kai (OpenCode) | ✅ | [TASK-110](tasks/TASK-110_260603_IMP096요율관리페이지통합정리_DKai.md) | IMP-096 완료 · `e166fec`+`65c904b` · 236/236 PASS · Aiden ✅ 승인 |
@@ -192,7 +193,7 @@
 
 | Agent | 진행 중 | 재작업/조치 필요 | 블로커 대기 |
 |:------|:--------|:----------------|:----------|
-| **D_Kai (OpenCode)** | TASK-128 ✅ 완료 — 신규 Task 대기 | Advisory: task file 헤더 미변경 (TASK-127·128 연속, 누적 2회 경고) | — |
+| **D_Kai (OpenCode)** | **TASK-130 ⬜ (즉시 착수 가능)** — DEF-053 uncommitted 변경 커밋 + R-17 🔔 | Advisory: task file 헤더 미변경 누적 2회 경고 — 이번 Task에서 반드시 준수 | — |
 | **B_Kai** | — (신규 Task 대기) | — | — |
 | **Riley** | — | 토큰 소진·scope 초과 이력 (TASK-121) | 신규 Task 대기 (scope 제한 명시 필수) |
 | N_Kai | TASK-087 ⬜ (재교육 세션 — 완료 후 신규 할당 재개) | R-17 위반 누적 — 신규 할당 중단 유지 | — |
@@ -204,6 +205,7 @@
 
 | 날짜 | 주체 | 내용 |
 |:-----|:----:|:-----|
+| 2026-06-09 | Aiden (Claude) | TASK-130 신규 발령 — D_Kai, DEF-053 uncommitted 변경(5파일) 검증·커밋·R-17 🔔 제출. R-17 v1.6 check-R17-DoD 자가검증 필수. task file 헤더 미변경 Advisory 누적 2회 — 이번 Task 경고 적용. |
 | 2026-06-09 | Aiden (Claude) | TASK-128 ✅ 승인 — DEF-048/049 수정완료. seed 재구현 11건 + RouteSegmentList 미배정 배지. DoD 6/6·316/316. D_Kai 신규 Task 대기. Advisory: task file 헤더 미변경 누적 2회 경고. |
 | 2026-06-09 | Aiden (Claude) | TASK-127 ✅ 승인 — DEF-054 A안 port 조건 수정 완료. DoD 7/7·316/316·IMP-109 등록 확인. TASK-128 전제조건 해제 → D_Kai 즉시 착수 가능. |
 | 2026-06-09 | Aiden (Claude) | TASK-129 ✅ 승인 — DEF-018/009/010/055 일괄 수정 완료. DoD 7/7·316/316·빌드 PASS. DEF-055 추가 수정(동일 근본 원인) 타당 확인. B_Kai 신규 Task 대기. |
