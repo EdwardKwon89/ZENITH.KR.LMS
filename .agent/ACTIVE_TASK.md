@@ -167,9 +167,9 @@
 | TASK-124 | 260609 | IMP-108 §1+§3 max_charge 상한선 구현 (WM Cap + UI) | P2 | TASK-123 ✅ | D_Kai + B_Kai | ✅ | [TASK-124](tasks/TASK-124_260609_IMP108MaxCharge구현_DKai_BKai.md) | §1 B_Kai ✅ `ce17476` · §3 D_Kai ✅ `9d70d87` · 315/315 PASS · Aiden ✅ 승인 (260609) |
 | TASK-125 | 260609 | IMP-107 TISA 요율 스냅샷 강화 (WM slab 이력 + pricing_basis 저장) | P3 | TASK-124 ✅ | D_Kai | ✅ | [TASK-125](tasks/TASK-125_260609_IMP107TISA스냅샷강화_DKai.md) | IMP-107 완료 · `ab6f493`+`ef3ece7`+`3d95e90` · 316/316 PASS · Aiden ✅ 승인 (260609) |
 | TASK-126 | 260609 | Phase 6 + IMP-107/108 반영 UAT 시나리오 보완 | P2 | TASK-124 ✅ · TASK-125 ✅ | B_Kai | ✅ | [TASK-126](tasks/TASK-126_260609_UAT시나리오보완_BKai.md) | UAT-10-08~11 4개 추가 · UAT_MASTER 89개 · 316/316 ✅ · Aiden ✅ 승인 (260609) |
-| TASK-127 | 260609 | DEF-054 Rate Card Supersede 조건 port 추가 (A안) | P2 | 없음 | D_Kai | 🔔 | [TASK-127](tasks/TASK-127_260609_DEF054_RateCardSupersede포트조건수정_DKai.md) | DEF-054 해소 · `findExistingActiveRateCards` origin+dest port 조건 추가 · 회귀 316/316 · `0183c4e` |
+| TASK-127 | 260609 | DEF-054 Rate Card Supersede 조건 port 추가 (A안) | P2 | 없음 | D_Kai | ✅ | [TASK-127](tasks/TASK-127_260609_DEF054_RateCardSupersede포트조건수정_DKai.md) | DEF-054 해소 · `findExistingActiveRateCards` origin+dest port 조건 추가 · 회귀 316/316 · `0183c4e` |
 | TASK-128 | 260609 | DEF-048/049 Schedule 매칭 실패 + 미배정 표시 수정 | P2 | TASK-127 완료 권장 | D_Kai | ⬜ | [TASK-128](tasks/TASK-128_260609_DEF048049_Schedule매칭수정_DKai.md) | DEF-048 원인 진단·수정 + DEF-049 미배정 배지 표시 |
-| TASK-129 | 260609 | DEF-018/009/010 소규모 버그 수정 (CARRIER role + UI) | P2 | 없음 | B_Kai | 🔔 | [TASK-129](tasks/TASK-129_260609_DEF018009010_소규모버그수정_BKai.md) | CARRIER 등록 role 코드 수정 + 증빙서류 버튼 + 승인버튼 글자 |
+| TASK-129 | 260609 | DEF-018/009/010 소규모 버그 수정 (CARRIER role + UI) | P2 | 없음 | B_Kai | ✅ | [TASK-129](tasks/TASK-129_260609_DEF018009010_소규모버그수정_BKai.md) | CARRIER 등록 role 코드 수정 + 증빙서류 버튼 + 승인버튼 글자 |
 | TASK-108 | 260601 | DEF-039 CARRIER RLS + 미스테이지 커밋 + 신원 수정 | P2 | 없음 | D_Kai | ✅ | [TASK-108](tasks/TASK-108_260601_DEF039CARRIER_RLS_미스테이지커밋_DKai.md) | DEF-039 해소 · 4cc88d8+beba338 · CARRIER RLS 3테이블 · 229/229 ✅ · Aiden ✅ 승인 |
 | TASK-109 | 260603 | IMP-095 Rate Card 항로(Port) 기반 매칭 구현 | P1 | TASK-106 ✅ · TASK-108 ✅ | D_Kai (OpenCode) | ✅ | [TASK-109](tasks/TASK-109_260603_IMP095포트기반요율매칭_DKai.md) | IMP-095 완료 · `0fb950d`+`fb263f9` · 236/236 PASS · Aiden ✅ 승인 |
 | TASK-110 | 260603 | IMP-096 요율 관리 페이지 통합 정리 (3단계) | P1 | TASK-106 ✅ · TASK-109 ✅ | D_Kai (OpenCode) | ✅ | [TASK-110](tasks/TASK-110_260603_IMP096요율관리페이지통합정리_DKai.md) | IMP-096 완료 · `e166fec`+`65c904b` · 236/236 PASS · Aiden ✅ 승인 |
@@ -192,8 +192,8 @@
 
 | Agent | 진행 중 | 재작업/조치 필요 | 블로커 대기 |
 |:------|:--------|:----------------|:----------|
-| **D_Kai (OpenCode)** | TASK-127 ⬜ → TASK-128 ⬜ (순차) | Advisory: DoD 허위 해시 보완커밋 (3d95e90) 누적 기록 | — |
-| **B_Kai** | TASK-129 🔔 (Aiden 검토 대기) | — | — |
+| **D_Kai (OpenCode)** | TASK-128 ⬜ (즉시 착수 가능 — TASK-127 ✅) | Advisory: DoD 허위 해시 보완커밋 (3d95e90) 누적 기록 | — |
+| **B_Kai** | — (신규 Task 대기) | — | — |
 | **Riley** | — | 토큰 소진·scope 초과 이력 (TASK-121) | 신규 Task 대기 (scope 제한 명시 필수) |
 | N_Kai | TASK-087 ⬜ (재교육 세션 — 완료 후 신규 할당 재개) | R-17 위반 누적 — 신규 할당 중단 유지 | — |
 | Ring | — | — | 신규 할당 중단 유지 (9차 위반 누적) |
@@ -204,6 +204,8 @@
 
 | 날짜 | 주체 | 내용 |
 |:-----|:----:|:-----|
+| 2026-06-09 | Aiden (Claude) | TASK-127 ✅ 승인 — DEF-054 A안 port 조건 수정 완료. DoD 7/7·316/316·IMP-109 등록 확인. TASK-128 전제조건 해제 → D_Kai 즉시 착수 가능. |
+| 2026-06-09 | Aiden (Claude) | TASK-129 ✅ 승인 — DEF-018/009/010/055 일괄 수정 완료. DoD 7/7·316/316·빌드 PASS. DEF-055 추가 수정(동일 근본 원인) 타당 확인. B_Kai 신규 Task 대기. |
 | 2026-06-09 | Aiden (Claude) | TASK-127/128(D_Kai)·TASK-129(B_Kai) 신규 발령 — DEF 검토 결과: DEF-054 A안 채택(Supersede port 조건), DEF-048/049 Schedule 매칭, DEF-018/009/010 소규모 버그. UAT_DEFECT_LOG 현황 요약 53건으로 갱신. |
 | 2026-06-09 | Aiden (Claude) | TASK-126 ✅ 최종 승인 — DoD 7/7·UAT-10-08~11 4개 신규 시나리오·UAT_MASTER 89개·회귀 316/316 실물 확인. R-17 커밋 순서 완전 준수. |
 | 2026-06-09 | Aiden (Claude) | TASK-126 발령 — B_Kai, Phase 6 + IMP-107/108 반영 UAT 시나리오 보완. max_charge(§1-3) + TISA 스냅샷(§4) + Phase6 역할 커버리지(§3) + UAT_MASTER 갱신. |

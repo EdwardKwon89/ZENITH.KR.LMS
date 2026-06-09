@@ -6,7 +6,7 @@
 | 위치 | `docs/91_FinalTest/UAT/` |
 | 작성일 | 2026-05-27 |
 | 관리 주체 | Aiden (Claude) |
-| 최종 갱신 | 2026-06-09 (DEF-054 수정완료 — TASK-127 `0183c4e`) |
+| 최종 갱신 | 2026-06-09 (TASK-127/129 ✅ 승인 — DEF-054/018/009/010/055 수정완료) |
 
 ---
 
@@ -38,9 +38,9 @@
 | 구분 | 미수정 | 수정중 | 수정완료 | 검증완료 | 시나리오수정 | 합계 |
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|
 | 시나리오 오류 | 1 | 0 | 0 | 0 | 5 | **6** |
-| 기능 보완/개선 | 7 | 0 | 7 | 2 | 1 | **17** |
-| 기능 오류 | 6 | 0 | 19 | 7 | 0 | **32** |
-| **합계** | **14** | **0** | **26** | **9** | **6** | **55** |
+| 기능 보완/개선 | 5 | 0 | 9 | 2 | 1 | **17** |
+| 기능 오류 | 3 | 0 | 22 | 7 | 0 | **32** |
+| **합계** | **9** | **0** | **31** | **9** | **6** | **55** |
 
 ---
 
@@ -56,8 +56,8 @@
 | DEF-006 | UAT-01-01 | 시나리오 오류 | N | 시나리오수정 | Aiden | STEP6 | 가입신청 완료 시 Logout 후 Login 화면으로 이동됨 | - | UAT-01-01 STEP6 기대 결과를 실제 동작(Logout→Login)으로 수정, ⚠️ UAT-01-07 불일치 주석 추가 | ✅ | ⚠️ UAT-01-07 pending 페이지와 동작 상이 — 기능 검토 필요 |
 | DEF-007 | UAT-01-01 | 기능 보완 | N | 시나리오수정 | Aiden | STEP6 | 등록 아이디로 login 시 "오더관리" 메뉴만 표출됨. 다른 메뉴 클릭 시 심사중 메시지 표출 / Logout 버튼 표시 | - | UAT-01-01 STEP7 신규 추가 — PENDING 계정 로그인 후 메뉴 제한 동작 확인 절차 | ✅ | - |
 | DEF-008 | UAT-01-01 | 시나리오 오류 | N | 시나리오수정 | Aiden | - | 법인 등록 신청 후 승인 시나리오 없음 | - | UAT-01-01 비고에 "법인 등록 후 관리자 승인 절차: UAT-09-01 참조" 추가 | ✅ | - |
-| DEF-009 | UAT-09-01 | 기능 오류 | N | 미수정 | - | - | "증빙서류 오딧" 버튼 클릭 시 "파일을 불러올 수 없습니다." 메시지 표출 | - | - | - | - |
-| DEF-010 | UAT-09-01 | 기능 개선 | N | 미수정 | - | - | "법인 최종 승인" 버튼의 글자가 보이지 않음 | - | - | - | - |
+| DEF-009 | UAT-09-01 | 기능 오류 | N | 수정완료 | B_Kai | - | "증빙서류 오딧" 버튼 클릭 시 "파일을 불러올 수 없습니다." 메시지 표출 | `dba695e` | `getDocumentSignedUrl` Server Action 신규 생성 — admin client(service_role) signed URL 생성, client-side RLS 우회 | - | TASK-129 수정 |
+| DEF-010 | UAT-09-01 | 기능 개선 | N | 수정완료 | B_Kai | - | "법인 최종 승인" 버튼의 글자가 보이지 않음 | `dba695e` | `.zen-tactile` `background:#ffffff` 제거 + ZenButton tactile variant `bg-white` 추가 | - | TASK-129 수정 · DEF-055·DEF-033과 동일 근본 원인 |
 | DEF-011 | UAT-01-04 | 기능 오류 | Y | 수정완료 | Aiden | STEP1 | Login 화면의 "ID 찾기" 클릭해도 동작하지 않음 | 737f20a | **원인**: `proxy.ts:48` isAuthPage에 `/find-id` 누락 → 미인증 접근 시 login으로 리다이렉트<br>**수정**: isAuthPage 조건에 `purePath.startsWith('/find-id')` 추가<br>**검증**: 회귀 227/227 PASS | ✅ | DEF-013(설계 모순) 별도 처리 |
 | DEF-012 | UAT-01-05 | 기능 오류 | Y | 수정완료 | Aiden | STEP1 | Login 화면의 "비밀번호 찾기" 클릭해도 동작하지 않음 | 737f20a | **원인**: `proxy.ts:48` isAuthPage에 `/reset-password` 누락 → 미인증 접근 시 login으로 리다이렉트<br>**수정**: isAuthPage 조건에 `purePath.startsWith('/reset-password')` 추가<br>**검증**: DEF-011과 동일 커밋 일괄 수정 | ✅ | - |
 | DEF-013 | UAT-01-04 | 기능 오류 | N | 수정완료 | D_Kai | - | ID 찾기 기능 설계 모순 — E-Mail=ID 구조에서 성명+E-Mail로 ID 찾기 무의미 + 개인/법인 분리 미구현 | 15299bf + 8건 | **원인**: findUserId 설계 모순 (E-Mail=ID 구조에서 E-Mail로 E-Mail 찾기)<br>**1차 수정**(`15299bf`): 개인/법인 탭 분리 재설계 · `zen_profiles.phone_number` 추가 · UAT-01-04 전면 재작성<br>**후속 8건**(`2111a75`·`4b796e4`·`883cd25`·`9f0e3c2`·`c509802`·`e27ec7a`·`199712e`·`d1bc3de`): RLS·컬럼·FK·동명이인·마스킹·overflow — D_Kai 자체 테스트 중 발견·수정<br>**검증**: TASK-098 완료 · 227/227 PASS | ✅ | Edward 재검증 필요 |
@@ -65,7 +65,7 @@
 | DEF-015 | UAT-01-08 | 기능 오류 | Y | 검증완료 | D_Kai | STEP4 | 로그인 성공 후 `/ko/orders` 진입 시 이전 세션 `zen_last_activity` 쿠키 잔재로 즉시 timeout | `1477091` | **원인 1** (`login/actions.ts`): 로그인 성공 시 `zen_last_activity` 미삭제 → old cookie(>2분)가 남아있어 middleware가 즉시 timeout 판정<br>**수정 1**: `login()` 성공 직후 `cookies().delete('zen_last_activity')` 추가<br>**원인 2** (`proxy.ts:89`): timeout 시 `mergeHeaders(response, supabaseResponse)`가 OLD `supabaseResponse`(signOut 전 값)를 참조 → session cookie 삭제 무효화<br>**수정 2**: timeout 경로에서 `mergeHeaders` 제거 — signOut 후에는 신규 `supabaseResponse`로 재생성되어 파라미터 참조는 stale<br>**검증**: 227/227 PASS · Edward 재검증 ✅ | - | - |
 | DEF-016 | UAT-01-08 | 기능 오류 | Y | 검증완료 | D_Kai | STEP4 | `zen_last_activity` 쿠키 maxAge = `SESSION_IDLE_TIMEOUT_MIN * 60` → 2분 후 브라우저가 쿠키 자동 삭제 → `lastActivity` undefined → timeout 체크 skip → 영원히 timeout 미발생 | `f1f20cc` | **원인** (`proxy.ts:100`): `maxAge: SESSION_IDLE_TIMEOUT_MIN * 60` — 쿠키 만료시점 = timeout 기준시점. 브라우저가 쿠키를 먼저 삭제하여 timeout 체크가 실행되지 않음<br>**수정**: `maxAge: 7 * 24 * 60 * 60` (7일) — timeout 체크는 쿠키 VALUE(timestamp)로 판별, maxAge는 단순히 쿠키 보관 기간<br>**검증**: 회귀 227/227 PASS · Edward 재검증 ✅ (session timeout 정상동작 확인) | - | - |
 | DEF-017 | UAT-01-09 | 기능 오류 | Y | 검증완료 | D_Kai | STEP2·3 | 회원 관리 페이지에서 `test_uat01@zenith.kr` 상태를 "미사용"(SUSPENDED)으로 변경해도 화면에 "사용"(ACTIVE)으로 남음 — middleware가 DB가 아닌 JWT `app_metadata.status`를 읽어서 고정 | `37e8bca` | **원인** (`member.ts:302` `changeMemberStatus`): `zen_profiles.status`만 업데이트하고 Supabase Auth `app_metadata`는 갱신하지 않음 → `proxy.ts:116`가 JWT의 old `app_metadata.status`(=ACTIVE)를 계속 사용<br>**수정**: `changeMemberStatus`에 adminClient로 `app_metadata.status` 동기화 추가 (`supabase.auth.admin.updateUserById`)<br>**검증**: 회귀 227/227 PASS | ✅ | DEF-019·020 수정 후 SUSPENDED 프록시 차단 정상 동작 확인 |
-| DEF-018 | UAT-01-09 | 기능 오류 | Y | 미수정 | D_Kai | - | `test_uat01@zenith.kr`을 법인/운송사(CARRIER)로 등록했으나 등급(role)이 ADMIN으로 설정 — `login/actions.ts` 회원가입 시 `isNewOrg ? ADMIN` 로직이 org_type 무시 | 데이터만 조치 | **원인** (`login/actions.ts:146`): `role: isNewOrg ? USER_ROLES.ADMIN : ...` — 신규 조직 생성자 role이 org_type과 무관하게 항상 ADMIN으로 고정<br>**조치**: `test_uat01@zenith.kr`의 role만 CARRIER로 직접 변경 (app_metadata + zen_profiles)<br>**⚠️ 코드 미수정**: 근본 원인인 회원가입 로직은 그대로. IMP 별도 등록 필요 | - | - |
+| DEF-018 | UAT-01-09 | 기능 오류 | Y | 수정완료 | B_Kai | - | `test_uat01@zenith.kr`을 법인/운송사(CARRIER)로 등록했으나 등급(role)이 ADMIN으로 설정 — `login/actions.ts` 회원가입 시 `isNewOrg ? ADMIN` 로직이 org_type 무시 | `dba695e` | **원인** (`login/actions.ts:146`): `role: isNewOrg ? USER_ROLES.ADMIN : ...` — 신규 조직 생성자 role이 org_type과 무관하게 항상 ADMIN으로 고정<br>**조치**: `test_uat01@zenith.kr`의 role만 CARRIER로 직접 변경 (app_metadata + zen_profiles)<br>**코드 수정 완료** (`dba695e`): `login/actions.ts:151` → `orgType === 'CARRIER' ? USER_ROLES.CARRIER : USER_ROLES.ADMIN` + migration trigger(`20260609230000`) 수정 | - | TASK-129 수정 |
 | DEF-019 | UAT-01-09 | 기능 오류 | Y | 검증완료 | Aiden | STEP2 | 회원 관리 페이지에서 상태 변경(정지/해제) 클릭 시 DB가 업데이트되지 않아 상태가 그대로 유지됨 | `6699a90` | **원인** (`supabase/migrations`): `20260507110000_fix_rls_recursion.sql`이 무한재귀 수정을 위해 `zen_profiles` UPDATE 정책을 삭제했으나 재생성하지 않음 → RLS 활성화 상태에서 UPDATE 정책 부재 → 모든 `changeMemberStatus`·`changeMemberGrade`·`updateMyProfile`·`withdrawUser` UPDATE가 0 rows 무성 실패<br>**수정**: `20260528100000_fix_zen_profiles_missing_update_rls.sql` 마이그레이션 — auth.jwt() 기반 UPDATE 정책 2건 추가 (관리자 전체·사용자 본인)<br>**검증**: 로컬 DB 적용 확인, 회귀 227/227 PASS | ✅ | 상태 변경 SUSPENDED 정상 반영 확인 |
 | DEF-020 | UAT-01-09 | 기능 오류 | Y | 검증완료 | Aiden | STEP3 | SUSPENDED 회원이 로그인 시도 시 `/suspended` ↔ `/terminal` 무한 redirect → ERR_TOO_MANY_REDIRECTS | `bd7437c` | **원인** (`proxy.ts:176`): SUSPENDED 유저가 whitelist 경로(`/suspended`)에 있을 때 아래 route access check에서 `/suspended`가 `isAllowedPath`에 미포함 → CARRIER `allowedRoot`(`/terminal`)로 redirect → 다시 SUSPENDED check → `/suspended` → 루프<br>**수정**: `proxy.ts` SUSPENDED whitelist 통과 후 `return null` 조기 반환 추가 — route access check 완전 skip<br>**검증**: 회귀 227/227 PASS | ✅ | /suspended 페이지 정상 표시 확인 |
 | DEF-021 | UAT-02-01 | 기능 개선 | Y | 검증완료 | D_Kai | STEP2 | 오더등록 폼 기본정보에 Login user 정보 및 소속 법인 정보 자동 입력 안 됨 | `ff49b66`·`132851e`·`19d3e17` | **원인 1** (`guards.ts:132`): `validateUserAction()` SELECT에 `full_name`, `phone_number` 누락 → `getCurrentUserAffiliation()`의 `userName`·`userPhone` 항상 undefined<br>**원인 2** (`master.ts`): `getCurrentUserAffiliation()`이 legacy `organizations`에서만 `address`/`biz_no` 조회 → 신규 `zen_organizations` 데이터 미반영<br>**수정 1** (`19d3e17`): `validateUserAction()` SELECT에 `full_name, phone_number` 추가<br>**수정 2** (`ff49b66`): form useEffect에 `shipper_contact_phone`·`shipper_address`·`shipper_biz_no` `setValue` 추가 + 사업자번호/주소 `readOnly ZenInput`으로 변경<br>**수정 3** (`132851e`): `getCurrentUserAffiliation()`에 `zen_organizations.biz_no` fallback 추가 + 법인도 B2C/B2C특송 선택 가능하도록 제한 완화<br>**검증**: 회귀 227/227 PASS · Edward 확인 ✅ | - | - |
@@ -98,8 +98,8 @@
 | DEF-048 | UAT-06-03 | 기능 오류 | N | 미수정 | D_Kai | - | **배정된 schedule 미조회** — `selectRoute()` 실행 후 `zen_route_options.segments`에 `schedule_id`/`flight_no`/`etd`/`eta`가 모두 NULL. DEF-043(`0dfe9a8`)에서 schedule 자동 매칭 로직 추가됐으나 실제 매칭 실패. `zen_vessel_schedules`에 carrier+port+mode 매칭 레코드가 존재해도 미조회. | - | **확인 필요 (Aiden 검토 예정)**<br><br>**① DB 조회 결과**<br>├ #ZEN-2026-000001: segments에 flight_no=NULL, etd=NULL<br>├ #ZEN-2026-000002: segments에 flight_no=NULL, etd=NULL<br>└ 두 order 모두 schedule 매핑 없이 route option만 존재<br><br>**② 추정 원인**<br>├ 경로 확정 시점이 DEF-043 이전 → schedule 매칭 로직이 없는 `selectRoute()`로 저장<br>├ 또는 port_id UUID 매칭 조건 불일치<br>└ 또는 `zen_vessel_schedules`에 해당 carrier+port+mode 조합 데이터 부재<br><br>**③ 필요 조치**<br>├ `zen_vessel_schedules` 적재 현황 확인<br>├ `selectRoute()` schedule 매칭 조건 검증<br>└ 기존 route option 재매칭 로직 필요 시 IMP 등록 | - | - |
 | DEF-049 | UAT-06-03 | 기능 오류 | N | 미수정 | D_Kai | - | **Schedule 미배정 order에서 잘못된 schedule 표시** — schedule 매칭이 없는 order에서 "확정 경로 상세" 섹션이 segment route 정보(carrier/cost/transit_days)를 표시하여 사용자 혼란 유발. | - | **수정 계획 (Aiden 협의 예정)**<br><br>**① 현재 동작**<br>├ 모든 order에서 "확정 경로 상세" 섹션 렌더링<br>├ schedule 미매칭 시에도 port/carrier/cost/transit_days 표시<br>└ `flight_no`/`etd`는 조건부 숨김 → 빈 카드만 남음<br><br>**② 수정 방향**<br>├ `RouteOptimizationSection.tsx`: `appliedSegments` 중 하나라도 `flight_no` 또는 `etd`가 없으면 "Schedule 미배정" amber 배지 표시<br>├ segments의 route info는 유지하되 schedule 미매칭임을 명시적으로 알림<br>└ schedule 매핑 존재 시 현재와 동일하게 flight_no/etd 표시<br><br>**③ 영향 범위**: `RouteOptimizationSection.tsx` only — 1 file | - | - |
 | DEF-053 | UAT-02-04 | 기능 보완 | N | 수정완료 | D_Kai | - | **운송 서비스 요율 UI 개선 5종** — ①Transit Days port 조건부 렌더링 제거 ②수정화면 ✕ New 버튼+onResetForm prop 제거 ③검색 placeholder 한글화 ④운송 수단/상태 ComboBox 필터 추가 ⑤저장 전 client-side validation 보강(Slab·ORG·DES·Margin·PlatformFee). 추가: 입력 필드 폰트 `text-sm` 축소, 시뮬레이션 마진/수수료/총 견적 표시. | - | `useRates.ts` + `RateCardForm.tsx` + `ZenDataGrid.tsx` + `RateCardList.tsx`. 5 files +105/−45. | - | - |
-| DEF-054 | UAT-02-04 | 기능 오류 | N | 수정완료 | D_Kai | `0183c4e` | **Rate Card Supersede 조건에 출발/도착 port 누락** — `createRateCard`가 `carrier_id + transport_mode`만으로 기존 활성 카드를 supersede하여, 경로(출발지/도착지)가 다른 요율도 일괄 비활성화. 동일 carrier+mode에서 경로별 요율 공존 불가. | `0183c4e` | **A안 구현**: `findExistingActiveRateCards()`에 `origin_port_id`·`dest_port_id` 조건 추가 + `rates.ts` 호출부 전달 + test mock 보강. 회귀 316/316. 보고서 §4 Pri/Snd는 IMP-109 등록(post-Go-Live). | ✅ Aiden 검토 대기 | IMP-109 등록 완료 |
-| DEF-055 | UAT-12-01 | 기능 개선 | N | 미수정 | - | - | **"DEPLOY RATE CARD" 버튼 글자(white)와 배경(#ffffff) 동일하여 보이지 않음** — `.zen-tactile` CSS가 `background: #ffffff` 강제 설정하여 `bg-blue-600` override. `text-stone-700`이 `text-white` override. DEF-010(법인 최종 승인)·DEF-033(새문의하기)와 동일 근본 원인. | - | 원인: `globals.css @layer utilities .zen-tactile { background: #ffffff }`. 수정안: `.zen-tactile`에서 `background` 제거 + ZenButton tactile variant에 `bg-white` 추가. | - | - |
+| DEF-054 | UAT-02-04 | 기능 오류 | N | 수정완료 | D_Kai | `0183c4e` | **Rate Card Supersede 조건에 출발/도착 port 누락** — `createRateCard`가 `carrier_id + transport_mode`만으로 기존 활성 카드를 supersede하여, 경로(출발지/도착지)가 다른 요율도 일괄 비활성화. 동일 carrier+mode에서 경로별 요율 공존 불가. | `0183c4e` | **A안 구현**: `findExistingActiveRateCards()`에 `origin_port_id`·`dest_port_id` 조건 추가 + `rates.ts` 호출부 전달 + test mock 보강. 회귀 316/316. 보고서 §4 Pri/Snd는 IMP-109 등록(post-Go-Live). | ✅ Aiden 승인 | IMP-109 등록 완료 |
+| DEF-055 | UAT-12-01 | 기능 개선 | N | 수정완료 | B_Kai | - | **"DEPLOY RATE CARD" 버튼 글자(white)와 배경(#ffffff) 동일하여 보이지 않음** — `.zen-tactile` CSS가 `background: #ffffff` 강제 설정하여 `bg-blue-600` override. `text-stone-700`이 `text-white` override. DEF-010(법인 최종 승인)·DEF-033(새문의하기)와 동일 근본 원인. | `dba695e` | `.zen-tactile` `background:#ffffff` 제거 + ZenButton tactile variant `bg-white` 추가 (TASK-129 DEF-010 수정 시 동일 파일 함께 수정) | - | TASK-129 수정 |
 ---
 
 ## 처리 지침
@@ -116,6 +116,7 @@
 
 | 날짜 | 주체 | 내용 |
 |:-----|:----:|:-----|
+| 2026-06-09 | Aiden (Claude) | TASK-127 ✅ 승인 — DEF-054 port 조건 수정(`0183c4e`). TASK-129 ✅ 승인 — DEF-018/009/010/055 일괄 수정(`dba695e`). 현황 요약 갱신: 미수정 14→9, 수정완료 26→31. |
 | 2026-05-27 | Aiden (Claude) | 파일 생성 — UAT-01-01 결함 8건 초기 등록 |
 | 2026-05-27 | Edward | DEF-009·DEF-010 추가 (UAT-09-01 진행 중 발견) |
 | 2026-05-27 | Aiden (Claude) | DEF-002~008 처리 반영 — 시나리오수정 6건, 현황 요약 갱신 (총 10건) |
