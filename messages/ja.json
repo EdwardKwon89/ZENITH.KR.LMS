@@ -47,6 +47,8 @@
     "admin_error_logs": "エラーログ",
     "grade_promotion_requests": "グレード昇格審査",
     "org_approval": "会員社承認",
+    "org_approval_center": "承認センター",
+    "org_management": "組織管理",
     "my_profile": "プロフィール",
     "my_security": "セキュリティ設定",
     "my_grade": "等級管理",

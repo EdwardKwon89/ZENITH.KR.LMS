@@ -71,6 +71,75 @@ export async function getDocumentSignedUrl(filePath: string) {
 }
 
 /**
+ * [Admin] 전체 조직 목록을 조회합니다 (타입·상태·키워드 필터).
+ */
+export async function getOrganizationsAdmin(filters?: {
+  type?: string;
+  status?: string;
+  keyword?: string;
+  page?: number;
+  pageSize?: number;
+}) {
+  const { supabase } = await validateAdminAction();
+  const adminRepo = new AdminRepository(supabase);
+
+  const { data, error, count } = await adminRepo.findAllOrganizations({
+    type: filters?.type,
+    status: filters?.status,
+    keyword: filters?.keyword,
+    page: filters?.page ?? 1,
+    pageSize: filters?.pageSize ?? 50,
+  });
+
+  if (error) throw new Error(`Failed to fetch organizations: ${error.message}`);
+
+  return { organizations: data || [], total: count || 0 };
+}
+
+/**
+ * [Admin] 신규 조직을 직접 등록합니다.
+ */
+export async function createOrganization(data: {
+  name: string;
+  type: string;
+  biz_no?: string;
+  rep_name?: string;
+  status?: string;
+  metadata?: Record<string, unknown>;
+}) {
+  const { supabase } = await validateAdminAction();
+  const adminRepo = new AdminRepository(supabase);
+
+  const { data: org, error } = await adminRepo.createOrganization(data);
+  if (error) throw new Error(`Failed to create organization: ${error.message}`);
+
+  logger.info(`Organization created by admin: ${org.id} (${data.name}, ${data.type})`);
+  revalidatePath("/admin/organizations/manage");
+  return { success: true, organization: org };
+}
+
+/**
+ * [Admin] 조직 정보를 수정합니다.
+ */
+export async function updateOrganization(id: string, data: {
+  name?: string;
+  biz_no?: string;
+  rep_name?: string;
+  status?: string;
+  metadata?: Record<string, unknown>;
+}) {
+  const { supabase } = await validateAdminAction();
+  const adminRepo = new AdminRepository(supabase);
+
+  const { error } = await adminRepo.updateOrganization(id, data);
+  if (error) throw new Error(`Failed to update organization: ${error.message}`);
+
+  logger.info(`Organization ${id} updated by admin`);
+  revalidatePath("/admin/organizations/manage");
+  return { success: true };
+}
+
+/**
  * 조직 목록을 조회합니다 (가입 대기 중인 조직 우선).
  */
 export async function getOrganizations(status?: string | string[], page = 1, pageSize = 50) {

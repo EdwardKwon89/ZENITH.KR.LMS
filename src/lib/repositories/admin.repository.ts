@@ -267,6 +267,76 @@ export class AdminRepository extends BaseRepository {
     return this.db.rpc('request_organization_supplement', { target_org_id: orgId, comment: reason });
   }
 
+  async findAllOrganizations(params: {
+    type?: string;
+    status?: string;
+    keyword?: string;
+    page?: number;
+    pageSize?: number;
+  }) {
+    const page = params.page ?? 1;
+    const pageSize = params.pageSize ?? 50;
+    const from = (page - 1) * pageSize;
+    const to = from + pageSize - 1;
+
+    let query = this.db
+      .from('zen_organizations')
+      .select('*', { count: 'exact' });
+
+    if (params.type) {
+      query = query.eq('type', params.type);
+    }
+
+    if (params.status) {
+      query = query.eq('status', params.status);
+    }
+
+    if (params.keyword) {
+      query = query.or(`name.ilike.%${params.keyword}%,biz_no.ilike.%${params.keyword}%,rep_name.ilike.%${params.keyword}%`);
+    }
+
+    return query
+      .order('created_at', { ascending: false })
+      .range(from, to);
+  }
+
+  async findOrganizationById(orgId: string) {
+    return this.db
+      .from('zen_organizations')
+      .select('*')
+      .eq('id', orgId)
+      .single();
+  }
+
+  async createOrganization(data: {
+    name: string;
+    type: string;
+    biz_no?: string | null;
+    rep_name?: string | null;
+    status?: string;
+    metadata?: Record<string, unknown>;
+  }) {
+    return this.db
+      .from('zen_organizations')
+      .insert({
+        name: data.name,
+        type: data.type,
+        biz_no: data.biz_no || null,
+        rep_name: data.rep_name || null,
+        status: data.status || 'ACTIVE',
+        metadata: data.metadata || null,
+      } as any)
+      .select('*')
+      .single();
+  }
+
+  async updateOrganization(id: string, data: any) {
+    return this.db
+      .from('zen_organizations')
+      .update(data)
+      .eq('id', id) as any;
+  }
+
   // ─── zen_ports ────────────────────────────────────────────────
 
   async findPortById(portId: string) {

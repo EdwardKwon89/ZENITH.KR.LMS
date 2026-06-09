@@ -121,7 +121,12 @@ export default function NaviSidebar({
     { title: t("claims"), href: "/admin/claims", icon: ShieldAlert, isAdminOnly: true },
     { title: t("member_management"), href: "/admin/members", icon: Users, isAdminOnly: true },
     { title: t("grade_promotion_requests"), href: "/admin/upgrade-requests", icon: TrendingUp, isAdminOnly: true },
-    { title: t("org_approval"), href: "/admin/organizations", icon: Building, isAdminOnly: true },
+    { title: t("org_approval"), href: "/admin/organizations", icon: Building, isAdminOnly: true,
+      children: [
+        { title: t("org_approval_center"), href: "/admin/organizations" },
+        { title: t("org_management"), href: "/admin/organizations/manage" },
+      ]
+    },
     { title: t("customs_management"), href: "/admin/customs", icon: FileText, isAdminOnly: true },
     { title: t("orders_assigned"), href: "/orders/assigned", icon: ClipboardList },
     { title: t("admin_error_logs"), href: "/admin/error-logs", icon: ShieldAlert, isAdminOnly: true },
