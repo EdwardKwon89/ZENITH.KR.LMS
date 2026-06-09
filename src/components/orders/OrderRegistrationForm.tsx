@@ -144,11 +144,11 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
     defaultValues: {
       order_type: 'B2B',
       transport_mode: 'AIR',
-      special_cargo_type: 'NONE',
       packages: [{ 
         packing_unit: 'BOX', 
         packing_count: 1, 
-        gross_weight: 0, 
+        gross_weight: 0,
+        special_cargo_type: 'NONE',
         items: [{ item_name: '', quantity: 1, unit_price: 0, currency: 'USD', item_packing_unit: 'EA' }] 
       }]
     }
@@ -757,32 +757,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                   </div>
                 </ZenCard>
 
-                {/* 📦 Special Cargo Selection */}
-                <ZenCard className="p-3 border-slate-200">
-                  <label className="text-[10px] font-bold text-slate-500 mb-2 block uppercase tracking-wider">{t('special_cargo_label')}</label>
-                  <div className="grid grid-cols-5 gap-1">
-                    {[
-                      { code: 'NONE', label: t('special_cargo_none') },
-                      { code: 'DANGEROUS', label: t('special_cargo_dangerous') },
-                      { code: 'FROZEN', label: t('special_cargo_frozen') },
-                      { code: 'VALUABLE', label: t('special_cargo_valuable') },
-                      { code: 'USED', label: t('special_cargo_used') }
-                    ].map((cargo) => (
-                      <button
-                        key={cargo.code}
-                        type="button"
-                        onClick={() => setValue('special_cargo_type', cargo.code as any)}
-                        className={`py-2 rounded-xl border text-[10px] font-bold transition-all ${
-                          watch('special_cargo_type') === cargo.code
-                            ? 'bg-slate-800 border-slate-800 text-white shadow-md'
-                            : 'bg-white border-slate-200 text-slate-400 hover:bg-slate-50'
-                        }`}
-                      >
-                        {cargo.label}
-                      </button>
-                    ))}
-                  </div>
-                </ZenCard>
+                
               </div>
 
               {/* Right Column: Packages & Items (Hierarchical) */}
@@ -795,7 +770,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                     <ZenButton 
                       type="button" 
                       variant="glass" 
-                      onClick={() => appendPackage({ packing_unit: 'BOX', packing_count: 1, gross_weight: 0, items: [{ item_name: '', quantity: 1, unit_price: 0, currency: 'USD', item_packing_unit: 'EA' }] })}
+                      onClick={() => appendPackage({ packing_unit: 'BOX', packing_count: 1, gross_weight: 0, special_cargo_type: 'NONE', items: [{ item_name: '', quantity: 1, unit_price: 0, currency: 'USD', item_packing_unit: 'EA' }] })}
                       className="px-3 py-1 text-xs"
                     >
                       <Plus size={14} /> 패키지 추가
@@ -851,8 +826,8 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                             </div>
                           </div>
                           <div className="col-span-1 flex items-center justify-end h-9">
-                            <button 
-                              type="button" 
+                            <button
+                              type="button"
                               onClick={() => removePackage(i)}
                               disabled={packageFields.length === 1}
                               className="p-2 text-rose-300 hover:text-rose-500 transition-colors disabled:opacity-0"
@@ -860,6 +835,21 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                               <Trash2 size={18} />
                             </button>
                           </div>
+                        </div>
+
+                        {/* 화물 구분 — DEF-059: special_cargo_type PKG 레벨 이동 */}
+                        <div className="mt-3 flex items-center gap-2">
+                          <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">화물 구분</label>
+                          <select
+                            {...register(`packages.${i}.special_cargo_type`)}
+                            className="flex-1 text-[11px] h-8 bg-slate-50 border border-slate-200 rounded-lg px-2 outline-none focus:ring-1 focus:ring-blue-100"
+                          >
+                            <option value="NONE">일반</option>
+                            <option value="DANGEROUS">위험물</option>
+                            <option value="FROZEN">냉동/냉장</option>
+                            <option value="VALUABLE">고가품</option>
+                            <option value="USED">중고품</option>
+                          </select>
                         </div>
 
                         {/* 📦 Nested Items for this Package */}

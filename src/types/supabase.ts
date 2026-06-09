@@ -2092,6 +2092,7 @@ export type Database = {
           packing_count: number | null
           packing_unit: string
           remarks: string | null
+          special_cargo_type: string | null
           updated_at: string | null
           volume: number | null
           width: number | null
@@ -2106,6 +2107,7 @@ export type Database = {
           packing_count?: number | null
           packing_unit: string
           remarks?: string | null
+          special_cargo_type?: string | null
           updated_at?: string | null
           volume?: number | null
           width?: number | null
@@ -2120,6 +2122,7 @@ export type Database = {
           packing_count?: number | null
           packing_unit?: string
           remarks?: string | null
+          special_cargo_type?: string | null
           updated_at?: string | null
           volume?: number | null
           width?: number | null
