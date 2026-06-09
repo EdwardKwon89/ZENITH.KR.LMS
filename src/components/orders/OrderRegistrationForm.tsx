@@ -9,7 +9,7 @@ import { useForm, useFieldArray, Control, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast, Toaster } from 'sonner';
 import { 
-  Package, User, Globe, Plus, Trash2, Save, 
+  Package, Plus, Trash2, Save, 
   ChevronRight, AlertCircle, CheckCircle2, Box, Layers, Plane, Ship, Zap, Truck
 } from 'lucide-react';
 import { ZenCard, ZenButton, ZenInput, ZenBadge } from '@/components/ui/ZenUI';
@@ -160,6 +160,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
   const [ratesLoading, setRatesLoading] = React.useState(false);
   const [ratesError, setRatesError] = React.useState<string | null>(null);
   const [selectedRates, setSelectedRates] = React.useState<Record<string, any>>({});
+  const [infoTab, setInfoTab] = React.useState<'shipper' | 'consignee'>('shipper');
 
   useEffect(() => {
     async function loadAffiliation() {
@@ -542,15 +543,19 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
         {/* 🚀 Top Action Bar */}
         <div className="flex justify-between items-center mb-8">
           <div className="flex gap-2">
-            {step === 1 && (['B2B', 'B2C_ECOM', 'B2C_EXPRESS'] as const).map((type) => (
+            {step === 1 && [ 
+              { code: 'AIR', icon: Plane, label: '항공' },
+              { code: 'SEA', icon: Ship, label: '해상' },
+              { code: 'EXP', icon: Zap, label: '특송' },
+              { code: 'LAND', icon: Truck, label: '육상' }
+            ].map((mode) => (
               <button
-                key={type}
+                key={mode.code}
                 type="button"
-                disabled={affiliation?.isIndividual && type === 'B2B'}
-                onClick={() => setValue('order_type', type)}
-                className={`px-6 py-2 rounded-xl text-xs font-bold transition-all ${watch('order_type') === type ? 'bg-slate-800 text-white shadow-lg' : 'bg-white text-slate-400 border border-slate-200 hover:bg-slate-50'}`}
+                onClick={() => setValue('transport_mode', mode.code as any)}
+                className={`flex items-center gap-1.5 px-5 py-2 rounded-xl text-xs font-bold transition-all ${watch('transport_mode') === mode.code ? 'bg-slate-800 text-white shadow-lg' : 'bg-white text-slate-400 border border-slate-200 hover:bg-slate-50'}`}
               >
-                {t(`type_${type.toLowerCase()}`)}
+                <mode.icon size={14} /> {mode.label}
               </button>
             ))}
             {step > 1 && (
@@ -608,193 +613,174 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
               transition={{ duration: 0.2 }}
               className="grid grid-cols-1 lg:grid-cols-12 gap-4"
             >
-              {/* Left Column: Basic & Consignee */}
+              {/* Left Column: Basic & Consignee (Tabbed) */}
               <div className="lg:col-span-4 space-y-4">
-                
-                {/* Header 섹션 (Compact) */}
                 <ZenCard className="p-4 bg-slate-50/30 border-slate-200">
-                  <h4 className="text-xs font-bold text-slate-800 mb-4 flex items-center gap-2 uppercase tracking-wide">
-                    <Globe size={14} className="text-blue-500" /> {t('section_header')}
-                  </h4>
-                  <div className="space-y-3">
-                    <div>
-                      <div className="flex justify-between items-center mb-1">
-                        <label className="text-[10px] font-bold text-slate-500">{t('shipper_label')}</label>
-                        <ZenBadge variant={affiliation?.isIndividual ? "info" : "success"} className="text-[9px] py-0 px-1">
-                          {affiliation ? (affiliation.isIndividual ? "개인 화주" : (affiliation.orgName || "법인 화주")) : "Checking..."}
-                        </ZenBadge>
-                      </div>
-                      <select 
-                        {...register('shipper_id')}
-                        disabled={!!affiliation}
-                        className="w-full bg-white border border-slate-200 text-sm px-3 py-2 rounded-xl focus:ring-2 focus:ring-blue-100 outline-none transition-all mb-3"
-                      >
-                        {shippers.map(s => {
-                          const displayName = (s.id === affiliation?.dummyIndividualId && affiliation?.isIndividual)
-                            ? affiliation?.userName 
-                            : (s.id === affiliation?.orgId && !affiliation?.isIndividual)
-                              ? affiliation?.orgName
-                              : s.name;
-                          return <option key={s.id} value={s.id}>{displayName}</option>
-                        })}
-                      </select>
+                  <div className="flex gap-1 mb-4 bg-slate-100 rounded-xl p-0.5">
+                    <button
+                      type="button"
+                      onClick={() => setInfoTab('shipper')}
+                      className={`flex-1 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all ${infoTab === 'shipper' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                    >
+                      기본정보(화주 정보)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setInfoTab('consignee')}
+                      className={`flex-1 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all ${infoTab === 'consignee' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                    >
+                      수하인 정보
+                    </button>
+                  </div>
 
-                      {/* 🏢 Detailed Shipper Information Card (New) */}
-                      <div className="bg-white/60 border border-white rounded-2xl p-4 shadow-sm space-y-3">
-                        <div className="flex flex-col gap-y-4 text-[11px]">
-                          <div>
-                            <p className="text-slate-400 font-bold uppercase tracking-tighter mb-1">{t('contact_person')}</p>
-                            <ZenInput 
-                              placeholder="담당자명"
-                              {...register('shipper_contact_name')}
-                              className="bg-white/80 py-1.5 text-[11px]"
-                            />
+                  {infoTab === 'shipper' && (
+                    <div className="space-y-3">
+                      <div>
+                        <div className="flex justify-between items-center mb-1">
+                          <label className="text-[10px] font-bold text-slate-500">{t('shipper_label')}</label>
+                          <ZenBadge variant={affiliation?.isIndividual ? "info" : "success"} className="text-[9px] py-0 px-1">
+                            {affiliation ? (affiliation.isIndividual ? "개인 화주" : (affiliation.orgName || "법인 화주")) : "Checking..."}
+                          </ZenBadge>
+                        </div>
+                        <select 
+                          {...register('shipper_id')}
+                          disabled={!!affiliation}
+                          className="w-full bg-white border border-slate-200 text-sm px-3 py-2 rounded-xl focus:ring-2 focus:ring-blue-100 outline-none transition-all mb-3"
+                        >
+                          {shippers.map(s => {
+                            const displayName = (s.id === affiliation?.dummyIndividualId && affiliation?.isIndividual)
+                              ? affiliation?.userName 
+                              : (s.id === affiliation?.orgId && !affiliation?.isIndividual)
+                                ? affiliation?.orgName
+                                : s.name;
+                            return <option key={s.id} value={s.id}>{displayName}</option>
+                          })}
+                        </select>
+
+                        <div className="bg-white/60 border border-white rounded-2xl p-4 shadow-sm space-y-3">
+                          <div className="flex flex-col gap-y-4 text-[11px]">
+                            <div>
+                              <p className="text-slate-400 font-bold uppercase tracking-tighter mb-1">{t('contact_person')}</p>
+                              <ZenInput 
+                                placeholder="담당자명"
+                                {...register('shipper_contact_name')}
+                                className="bg-white/80 py-1.5 text-[11px]"
+                              />
+                            </div>
+                            <div>
+                              <p className="text-slate-400 font-bold uppercase tracking-tighter mb-1">{t('shipper_contact')} (Phone)</p>
+                              <ZenInput 
+                                placeholder="010-XXXX-XXXX"
+                                {...register('shipper_contact_phone')}
+                                className="bg-white/80 py-1.5 text-[11px]"
+                              />
+                            </div>
+                            <div>
+                              <p className="text-slate-400 font-bold uppercase tracking-tighter mb-1">E-mail (Reference)</p>
+                              <ZenInput 
+                                placeholder="example@email.com"
+                                {...register('shipper_contact_email')}
+                                className="bg-white/80 py-1.5 text-[11px]"
+                              />
+                            </div>
+                            {!affiliation?.isIndividual && (
+                              <>
+                                <div>
+                                  <p className="text-slate-400 font-bold uppercase tracking-tighter mb-1">{t('shipper_address')}</p>
+                                  <ZenInput
+                                    readOnly
+                                    {...register('shipper_address')}
+                                    className="bg-slate-50 py-1.5 text-[11px] text-slate-700 font-semibold"
+                                  />
+                                </div>
+                                <div>
+                                  <p className="text-slate-400 font-bold uppercase tracking-tighter mb-1">{t('shipper_biz_no')}</p>
+                                  <ZenInput
+                                    readOnly
+                                    {...register('shipper_biz_no')}
+                                    className="bg-slate-50 py-1.5 text-[11px] text-slate-700 font-semibold"
+                                  />
+                                </div>
+                              </>
+                            )}
                           </div>
-                          <div>
-                            <p className="text-slate-400 font-bold uppercase tracking-tighter mb-1">{t('shipper_contact')} (Phone)</p>
-                            <ZenInput 
-                              placeholder="010-XXXX-XXXX"
-                              {...register('shipper_contact_phone')}
-                              className="bg-white/80 py-1.5 text-[11px]"
-                            />
-                          </div>
-                          <div>
-                            <p className="text-slate-400 font-bold uppercase tracking-tighter mb-1">E-mail (Reference)</p>
-                            <ZenInput 
-                              placeholder="example@email.com"
-                              {...register('shipper_contact_email')}
-                              className="bg-white/80 py-1.5 text-[11px]"
-                            />
-                          </div>
-                          {!affiliation?.isIndividual && (
-                            <>
-                              <div>
-                                <p className="text-slate-400 font-bold uppercase tracking-tighter mb-1">{t('shipper_address')}</p>
-                                <ZenInput
-                                  readOnly
-                                  {...register('shipper_address')}
-                                  className="bg-slate-50 py-1.5 text-[11px] text-slate-700 font-semibold"
-                                />
-                              </div>
-                              <div>
-                                <p className="text-slate-400 font-bold uppercase tracking-tighter mb-1">{t('shipper_biz_no')}</p>
-                                <ZenInput
-                                  readOnly
-                                  {...register('shipper_biz_no')}
-                                  className="bg-slate-50 py-1.5 text-[11px] text-slate-700 font-semibold"
-                                />
-                              </div>
-                            </>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* 🚢 Transport Mode Selection (Restored v2.1) */}
-                      <div className="mt-4 mb-4">
-                        <label className="text-[10px] font-bold text-slate-500 mb-1.5 block uppercase tracking-wider">Transport Mode</label>
-                        <div className="grid grid-cols-4 gap-1.5">
-                          {[
-                            { code: 'AIR', icon: Plane, label: '항공' },
-                            { code: 'SEA', icon: Ship, label: '해상' },
-                            { code: 'EXP', icon: Zap, label: '특송' },
-                            { code: 'LAND', icon: Truck, label: '육상' }
-                          ].map((mode) => (
-                            <button
-                              key={mode.code}
-                              type="button"
-                              onClick={() => setValue('transport_mode', mode.code as any)}
-                              className={`flex flex-col items-center justify-center py-2.5 rounded-xl border transition-all ${watch('transport_mode') === mode.code ? 'bg-slate-800 border-slate-800 text-white shadow-md' : 'bg-white border-slate-200 text-slate-400 hover:bg-slate-50'}`}
-                            >
-                              <mode.icon size={14} className="mb-1" />
-                              <span className="text-[9px] font-bold">{mode.label}</span>
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-
-                       {/* 🚢 Port Selection UI (Restored with Dynamic Filtering) */}
-                      <div className="grid grid-cols-2 gap-2 mt-4 pt-4 border-t border-slate-100">
-                        <div className="space-y-1">
-                          <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{t('origin_port')}</label>
-                          <select {...register('origin_port_id')} className="w-full bg-white border border-slate-200 text-xs px-2 py-2 rounded-xl outline-none focus:ring-2 focus:ring-blue-50">
-                            <option value="">{transportMode === 'AIR' || transportMode === 'EXP' ? 'Origin Airport' : 'Origin Port'}</option>
-                            {filteredPorts.map(p => <option key={p.id} value={p.id}>[{p.code}] {p.name}</option>)}
-                          </select>
-                        </div>
-                        <div className="space-y-1">
-                          <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{t('dest_port')}</label>
-                          <select {...register('dest_port_id')} className="w-full bg-white border border-slate-200 text-xs px-2 py-2 rounded-xl outline-none focus:ring-2 focus:ring-blue-50">
-                            <option value="">{transportMode === 'AIR' || transportMode === 'EXP' ? 'Dest Airport' : 'Dest Port'}</option>
-                            {filteredPorts.map(p => <option key={p.id} value={p.id}>[{p.code}] {p.name}</option>)}
-                          </select>
-                        </div>
-                      </div>
-
-                      {/* 📦 Special Cargo Selection UI (IMP-076) */}
-                      <div className="mt-4 pt-4 border-t border-slate-100">
-                        <label className="text-[10px] font-bold text-slate-500 mb-1.5 block uppercase tracking-wider">
-                          {t('special_cargo_label')}
-                        </label>
-                        <div className="grid grid-cols-5 gap-1">
-                          {[
-                            { code: 'NONE', label: t('special_cargo_none') },
-                            { code: 'DANGEROUS', label: t('special_cargo_dangerous') },
-                            { code: 'FROZEN', label: t('special_cargo_frozen') },
-                            { code: 'VALUABLE', label: t('special_cargo_valuable') },
-                            { code: 'USED', label: t('special_cargo_used') }
-                          ].map((cargo) => (
-                            <button
-                              key={cargo.code}
-                              type="button"
-                              onClick={() => setValue('special_cargo_type', cargo.code as any)}
-                              className={`py-2 rounded-xl border text-[10px] font-bold transition-all ${
-                                watch('special_cargo_type') === cargo.code
-                                  ? 'bg-slate-800 border-slate-800 text-white shadow-md'
-                                  : 'bg-white border-slate-200 text-slate-400 hover:bg-slate-50'
-                              }`}
-                            >
-                              {cargo.label}
-                            </button>
-                          ))}
                         </div>
                       </div>
                     </div>
+                  )}
+
+                  {infoTab === 'consignee' && (
+                    <div className="space-y-3">
+                      <div>
+                        <label className="text-[10px] font-bold text-slate-500 mb-1 block">Recipient Name</label>
+                        <ZenInput placeholder="Full Name" {...register('recipient_name')} error={!!errors.recipient_name} className="py-2 text-xs" />
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-bold text-slate-500 mb-1 block">Phone</label>
+                        <ZenInput placeholder="010-XXXX-XXXX" {...register('recipient_phone')} error={!!errors.recipient_phone} className="py-2 text-xs" />
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <label className="text-[10px] font-bold text-slate-500 mb-1 block">PCCC</label>
+                          <ZenInput placeholder="P1234..." {...register('recipient_pccc')} className="py-2 text-xs" />
+                        </div>
+                        <div>
+                          <label className="text-[10px] font-bold text-slate-500 mb-1 block">Zipcode</label>
+                          <ZenInput placeholder="12345" {...register('recipient_zipcode')} className="py-2 text-xs" />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-bold text-slate-500 mb-1 block">Full Address</label>
+                        <textarea 
+                          {...register('recipient_address')}
+                          className="w-full text-xs p-2 border border-slate-200 rounded-xl bg-white resize-none h-16 outline-none focus:ring-2 focus:ring-blue-100"
+                          placeholder="Physical delivery address"
+                        />
+                        {errors.recipient_address && <p className="text-[9px] text-rose-500 mt-1">{errors.recipient_address.message}</p>}
+                      </div>
+                    </div>
+                  )}
+                </ZenCard>
+
+                {/* 🚢 Port Selection */}
+                <ZenCard className="p-3 border-slate-200">
+                  <h4 className="text-[10px] font-bold text-slate-500 mb-2 uppercase tracking-wider">{t('origin_port')} / {t('dest_port')}</h4>
+                  <div className="grid grid-cols-2 gap-2">
+                    <select {...register('origin_port_id')} className="w-full bg-white border border-slate-200 text-xs px-2 py-2 rounded-xl outline-none focus:ring-2 focus:ring-blue-50">
+                      <option value="">{transportMode === 'AIR' || transportMode === 'EXP' ? 'Origin Airport' : 'Origin Port'}</option>
+                      {filteredPorts.map(p => <option key={p.id} value={p.id}>[{p.code}] {p.name}</option>)}
+                    </select>
+                    <select {...register('dest_port_id')} className="w-full bg-white border border-slate-200 text-xs px-2 py-2 rounded-xl outline-none focus:ring-2 focus:ring-blue-50">
+                      <option value="">{transportMode === 'AIR' || transportMode === 'EXP' ? 'Dest Airport' : 'Dest Port'}</option>
+                      {filteredPorts.map(p => <option key={p.id} value={p.id}>[{p.code}] {p.name}</option>)}
+                    </select>
                   </div>
                 </ZenCard>
 
-                {/* 수취인 상세 정보 (Essential Consignee Info) */}
-                <ZenCard className="p-4 border-blue-100 shadow-sm">
-                  <h4 className="text-xs font-bold text-slate-800 mb-4 flex items-center gap-2 uppercase tracking-wide">
-                    <User size={14} className="text-indigo-500" /> {t('section_recipient')}
-                  </h4>
-                  <div className="space-y-3">
-                    <div>
-                      <label className="text-[10px] font-bold text-slate-500 mb-1 block">Recipient Name</label>
-                      <ZenInput placeholder="Full Name" {...register('recipient_name')} error={!!errors.recipient_name} className="py-2 text-xs" />
-                    </div>
-                    <div>
-                      <label className="text-[10px] font-bold text-slate-500 mb-1 block">Phone</label>
-                      <ZenInput placeholder="010-XXXX-XXXX" {...register('recipient_phone')} error={!!errors.recipient_phone} className="py-2 text-xs" />
-                    </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <label className="text-[10px] font-bold text-slate-500 mb-1 block">PCCC</label>
-                        <ZenInput placeholder="P1234..." {...register('recipient_pccc')} className="py-2 text-xs" />
-                      </div>
-                      <div>
-                        <label className="text-[10px] font-bold text-slate-500 mb-1 block">Zipcode</label>
-                        <ZenInput placeholder="12345" {...register('recipient_zipcode')} className="py-2 text-xs" />
-                      </div>
-                    </div>
-                    <div>
-                      <label className="text-[10px] font-bold text-slate-500 mb-1 block">Full Address</label>
-                      <textarea 
-                        {...register('recipient_address')}
-                        className="w-full text-xs p-2 border border-slate-200 rounded-xl bg-white resize-none h-16 outline-none focus:ring-2 focus:ring-blue-100"
-                        placeholder="Physical delivery address"
-                      />
-                      {errors.recipient_address && <p className="text-[9px] text-rose-500 mt-1">{errors.recipient_address.message}</p>}
-                    </div>
+                {/* 📦 Special Cargo Selection */}
+                <ZenCard className="p-3 border-slate-200">
+                  <label className="text-[10px] font-bold text-slate-500 mb-2 block uppercase tracking-wider">{t('special_cargo_label')}</label>
+                  <div className="grid grid-cols-5 gap-1">
+                    {[
+                      { code: 'NONE', label: t('special_cargo_none') },
+                      { code: 'DANGEROUS', label: t('special_cargo_dangerous') },
+                      { code: 'FROZEN', label: t('special_cargo_frozen') },
+                      { code: 'VALUABLE', label: t('special_cargo_valuable') },
+                      { code: 'USED', label: t('special_cargo_used') }
+                    ].map((cargo) => (
+                      <button
+                        key={cargo.code}
+                        type="button"
+                        onClick={() => setValue('special_cargo_type', cargo.code as any)}
+                        className={`py-2 rounded-xl border text-[10px] font-bold transition-all ${
+                          watch('special_cargo_type') === cargo.code
+                            ? 'bg-slate-800 border-slate-800 text-white shadow-md'
+                            : 'bg-white border-slate-200 text-slate-400 hover:bg-slate-50'
+                        }`}
+                      >
+                        {cargo.label}
+                      </button>
+                    ))}
                   </div>
                 </ZenCard>
               </div>

@@ -1,8 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { getCommonCodesByGroup } from '@/app/actions/master';
+import { Plus } from 'lucide-react';
+import { ZenButton } from '@/components/ui/ZenUI';
+import Link from 'next/link';
 
 interface FilterBarProps {
   locale: string;
@@ -11,6 +14,7 @@ interface FilterBarProps {
 export default function OrderFilterBar({ locale }: FilterBarProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const isInitialMount = useRef(true);
   
   const [statuses, setStatuses] = useState<any[]>([]);
   const [types, setTypes] = useState<any[]>([]);
@@ -30,20 +34,25 @@ export default function OrderFilterBar({ locale }: FilterBarProps) {
     loadCodes();
   }, []);
 
-  const handleSearch = () => {
-    const params = new URLSearchParams(searchParams.toString());
-    if (search) params.set('search', search); else params.delete('search');
-    if (selectedStatus) params.set('status', selectedStatus); else params.delete('status');
-    if (selectedType) params.set('order_type', selectedType); else params.delete('order_type');
-    params.set('page', '1'); // 필터 변경 시 첫 페이지로
-    
-    router.push(`?${params.toString()}`);
-  };
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+    const timer = setTimeout(() => {
+      const params = new URLSearchParams();
+      if (search) params.set('search', search);
+      if (selectedStatus) params.set('status', selectedStatus);
+      if (selectedType) params.set('order_type', selectedType);
+      params.set('page', '1');
+      router.push(`?${params.toString()}`);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [search, selectedStatus, selectedType]);
 
   return (
-    <div className="mb-4 p-5 bg-white zen-tactile rounded-2xl flex flex-wrap gap-4 items-end animate-in fade-in slide-in-from-top-4 duration-700">
+    <div className="flex flex-wrap gap-3 items-end">
       <div className="flex-1 min-w-[200px]">
-        <label className="block text-[11px] font-bold text-slate-500 mb-2 ml-1 uppercase tracking-wider">Search</label>
         <input 
           type="text" 
           value={search}
@@ -54,7 +63,6 @@ export default function OrderFilterBar({ locale }: FilterBarProps) {
       </div>
 
       <div className="w-[180px]">
-        <label className="block text-[11px] font-bold text-slate-500 mb-2 ml-1 uppercase tracking-wider">Status</label>
         <select 
           value={selectedStatus}
           onChange={(e) => setSelectedStatus(e.target.value)}
@@ -70,7 +78,6 @@ export default function OrderFilterBar({ locale }: FilterBarProps) {
       </div>
 
       <div className="w-[180px]">
-        <label className="block text-[11px] font-bold text-slate-500 mb-2 ml-1 uppercase tracking-wider">Type</label>
         <select 
           value={selectedType}
           onChange={(e) => setSelectedType(e.target.value)}
@@ -85,12 +92,11 @@ export default function OrderFilterBar({ locale }: FilterBarProps) {
         </select>
       </div>
 
-      <button 
-        onClick={handleSearch}
-        className="px-8 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold rounded-xl shadow-lg shadow-blue-900/20 transform hover:-translate-y-0.5 active:translate-y-0 transition-all text-sm h-[40px]"
-      >
-        Apply Filters
-      </button>
+      <Link href="/orders/new">
+        <ZenButton variant="ghost" className="bg-brand-600 text-white hover:bg-brand-700 px-6 py-2 text-xs font-bold rounded-xl shadow-lg shadow-brand-100 transition-all h-[40px]">
+          <Plus size={14} className="mr-1" /> CREATE NEW ORDER
+        </ZenButton>
+      </Link>
     </div>
   );
 }

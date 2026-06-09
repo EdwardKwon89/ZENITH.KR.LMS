@@ -3,11 +3,13 @@
 import React, { useState } from "react";
 import {
   ColumnDef,
+  Row,
   flexRender,
   getCoreRowModel,
   useReactTable,
   getPaginationRowModel,
   getSortedRowModel,
+  getFilteredRowModel,
   SortingState,
 } from "@tanstack/react-table";
 import { 
@@ -44,16 +46,31 @@ export default function ZenDataGrid<TData, TValue>({
   const [sorting, setSorting] = useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
 
+  function globalFilterFn(row: Row<any>, _columnIds: string[], filterValue: string): boolean {
+    if (!filterValue) return true;
+    const search = filterValue.toLowerCase();
+    return row.getAllCells().some(cell => {
+      const val = cell.getValue();
+      if (val == null) return false;
+      if (typeof val === 'object') return JSON.stringify(val).toLowerCase().includes(search);
+      return String(val).toLowerCase().includes(search);
+    });
+  }
+
   const table = useReactTable({
     data,
     columns,
     state: {
       sorting,
+      globalFilter,
     },
     onSortingChange: setSorting,
+    onGlobalFilterChange: setGlobalFilter,
+    globalFilterFn,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
     initialState: {
       pagination: {
         pageSize: 25,

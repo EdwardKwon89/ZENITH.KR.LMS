@@ -105,7 +105,8 @@ export default function DeliveryRatesClient({ initialRates, organizations, userR
 
   const localColumns: ColumnDef<DeliveryRate>[] = [
     {
-      accessorKey: "org_id",
+      id: "org_id",
+      accessorFn: (row) => orgMap[row.org_id] || row.org_id,
       header: "배송사",
       cell: ({ row }) => (
         <div className="flex items-center gap-2">
@@ -157,7 +158,8 @@ export default function DeliveryRatesClient({ initialRates, organizations, userR
 
   const totalColumns: ColumnDef<DeliveryRate>[] = [
     {
-      accessorKey: "org_id",
+      id: "org_id",
+      accessorFn: (row) => orgMap[row.org_id] || row.org_id,
       header: "배송사",
       cell: ({ row }) => (
         <div className="flex items-center gap-2">

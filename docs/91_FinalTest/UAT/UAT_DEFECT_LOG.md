@@ -6,7 +6,7 @@
 | 위치 | `docs/91_FinalTest/UAT/` |
 | 작성일 | 2026-05-27 |
 | 관리 주체 | Aiden (Claude) |
-| 최종 갱신 | 2026-06-09 (TASK-128 ✅ 승인 — DEF-048/049 수정완료) |
+| 최종 갱신 | 2026-06-09 (DEF-059 화물 구분 PKG 단위 전환 검토 — Noah) |
 
 ---
 
@@ -38,9 +38,9 @@
 | 구분 | 미수정 | 수정중 | 수정완료 | 검증완료 | 시나리오수정 | 합계 |
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|
 | 시나리오 오류 | 1 | 0 | 0 | 0 | 5 | **6** |
-| 기능 보완/개선 | 5 | 0 | 9 | 2 | 1 | **17** |
+| 기능 보완/개선 | 6 | 0 | 12 | 2 | 1 | **21** |
 | 기능 오류 | 1 | 0 | 24 | 7 | 0 | **32** |
-| **합계** | **7** | **0** | **33** | **9** | **6** | **55** |
+| **합계** | **8** | **0** | **36** | **9** | **6** | **59** |
 
 ---
 
@@ -100,6 +100,9 @@
 | DEF-053 | UAT-02-04 | 기능 보완 | N | 수정완료 | D_Kai | `2c30146` | **운송 서비스 요율 UI 개선 5종** — ①Transit Days port 조건부 렌더링 제거 ②수정화면 ✕ New 버튼+onResetForm prop 제거 ③검색 placeholder 한글화 ④운송 수단/상태 ComboBox 필터 추가 ⑤저장 전 client-side validation 보강(Slab·ORG·DES·Margin·PlatformFee). 추가: 입력 필드 폰트 `text-sm` 축소, 시뮬레이션 마진/수수료/총 견적 표시. | - | `useRates.ts` + `RateCardForm.tsx` + `ZenDataGrid.tsx` + `RateCardList.tsx` + `page.tsx`. 5 files +119/−57. | ✅ Aiden 승인 (TASK-130 `2c30146`) | - |
 | DEF-054 | UAT-02-04 | 기능 오류 | N | 수정완료 | D_Kai | `0183c4e` | **Rate Card Supersede 조건에 출발/도착 port 누락** — `createRateCard`가 `carrier_id + transport_mode`만으로 기존 활성 카드를 supersede하여, 경로(출발지/도착지)가 다른 요율도 일괄 비활성화. 동일 carrier+mode에서 경로별 요율 공존 불가. | `0183c4e` | **A안 구현**: `findExistingActiveRateCards()`에 `origin_port_id`·`dest_port_id` 조건 추가 + `rates.ts` 호출부 전달 + test mock 보강. 회귀 316/316. 보고서 §4 Pri/Snd는 IMP-109 등록(post-Go-Live). | ✅ Aiden 승인 | IMP-109 등록 완료 |
 | DEF-055 | UAT-12-01 | 기능 개선 | N | 수정완료 | B_Kai | - | **"DEPLOY RATE CARD" 버튼 글자(white)와 배경(#ffffff) 동일하여 보이지 않음** — `.zen-tactile` CSS가 `background: #ffffff` 강제 설정하여 `bg-blue-600` override. `text-stone-700`이 `text-white` override. DEF-010(법인 최종 승인)·DEF-033(새문의하기)와 동일 근본 원인. | `dba695e` | `.zen-tactile` `background:#ffffff` 제거 + ZenButton tactile variant `bg-white` 추가 (TASK-129 DEF-010 수정 시 동일 파일 함께 수정) | - | TASK-129 수정 |
+| DEF-056 | UAT-02-01 | 기능 보완 | N | 수정완료 | Noah (Codex) | `supabase/seed_rates_realistic.sql` | **Estimated Freight 현실화 — 실물 요율 시드 데이터 등록**. 실제 항공사(KAL/AAR/FEDEX/DHL)·선사(HMM/MSC/EVERGREEN)의 slab 기반 운임 + surcharge 데이터를 `zen_rate_cards`·`zen_surcharges`에 등록. UI "Estimated Freight"(fallback dummy rate)는 유지되나, 서버 billing(`calculateCompositePricing`)은 DB 실요율로 정상 처리. | - | `supabase/seed_rates_realistic.sql` 신규 — 7개 운송사 + 12건 rate card + 30건 surcharge + route network 자동생성. DB 적용 완료. 상세: `.agent/defects/DEF-056_실물요율시드데이터등록.md` | - | post-Go-Live: UI fallback rate 현실화 별도 IMP 가능 || DEF-057 | UAT-02-02 | UI 개선 | N | 수정완료 | Noah (Codex) | `src/app/[locale]/(dashboard)/orders/page.tsx`<br>`src/components/orders/OrderFilterBar.tsx` | **운송 요청 목록 UI 레이아웃 조정**. 요율 페이지와 헤더 스타일 통일(`text-2xl` + 설명 문구). 검색 필터 개선 — "조회"+"CREATE NEW ORDER" 버튼 위치 교환, "Apply Filters"→"조회" 텍스트 변경, Search/Status/Type caption 라벨 삭제. | - | `.agent/defects/DEF-057_운송요청목록UI레이아웃조정.md` | - | - |
+| DEF-058 | UAT-02-02 | 기능 개선 | N | 수정완료 | Noah (Codex) | `src/components/orders/OrderFilterBar.tsx` | **운송 요청 목록 "조회" 버튼 제거 → Debounce 자동 검색 전환**. rates 페이지와 UX 통일. `useEffect` + `setTimeout` 500ms debounce로 입력 시 자동 `router.push()`. 초기 마운트 중복 push 방지. | - | `.agent/defects/DEF-058_운송요청목록조회버튼제거Debounce전환.md` | - | - |
+| DEF-059 | UAT-02-01 | 기능 개선 | N | 미수정 | — | `zen_order_packages` ADD COLUMN<br>`src/lib/validation/order.ts`<br>`create_order_atomic` RPC<br>`OrderRegistrationForm.tsx` | **special_cargo_type Order 레벨 → Package 레벨 전환 검토**. 한 오더 내 PKG별로 다른 화물 구분(위험물/냉동/귀중품/중고)을 가질 수 있도록 구조 변경. DB 마이그레이션, Zod 스키마, RPC, UI 총 4개 영역 수정 필요. | - | `.agent/defects/DEF-059_화물구분PKG단위전환검토.md` | - | Aiden 협의 필요 |
 ---
 
 ## 처리 지침
@@ -177,3 +180,7 @@
 | 2026-06-09 | Aiden (Claude) | DEF 전체 검토 — **DEF-054 A안 채택** (`findExistingActiveRateCards`에 port 조건 추가) · TASK-127(D_Kai) 발령. **DEF-048/049** Schedule 매칭 수정 TASK-128(D_Kai) 발령. **DEF-018/009/010** 소규모 버그 TASK-129(B_Kai) 발령. **DEF-053** 수정완료 반영. **현황 요약 갱신** — DEF-053(기능보완 수정완료)+DEF-054(기능오류 미수정) 반영, 합계 51→53건. |
 | 2026-06-09 | Noah (Codex) | **DEF-055 추가 — "DEPLOY RATE CARD" 버튼 글자(white)와 배경(#ffffff) 동일하여 보이지 않음**. `.zen-tactile` CSS background conflict (DEF-010/033과 동일 근본 원인). 기능개선 미수정 등록. 현황 요약 갱신 — 기능보완 미수정 6→7, 기능오류 미수정 5→6(DEF-054 미반영분), 합계 53→55. |
 | 2026-06-09 | D_Kai (OpenCode) | **DEF-054 수정완료** — TASK-127 구현. `findExistingActiveRateCards()`에 `origin_port_id`·`dest_port_id` 조건 추가. `rates.ts` 호출부 전달. rates.test.ts mock 보강. 회귀 316/316 PASS. 커밋 `0183c4e`. Pri/Snd 설계는 post-Go-Live IMP-109 등록 완료. |
+| 2026-06-09 | Noah (Codex) | **DEF-056 신규 등록** — Estimated Freight 현실화: 실물 요율 시드 데이터(`supabase/seed_rates_realistic.sql`). 7개 운송사+12건 rate card+30건 surcharge 등록. DB 적용 완료. 현황 요약 갱신 (합계 55→56). 상세: `.agent/defects/DEF-056_실물요율시드데이터등록.md` |
+| 2026-06-09 | Noah (Codex) | **DEF-057 신규 등록** — 운송 요청 목록 UI 레이아웃 조정. 요율 페이지와 헤더 통일 + 검색 필터 개선. 현황 요약 갱신 (합계 56→57). 상세: `.agent/defects/DEF-057_운송요청목록UI레이아웃조정.md` |
+| 2026-06-09 | Noah (Codex) | **DEF-058 신규 등록** — 운송 요청 목록 "조회" 버튼 제거 → Debounce 자동 검색 전환. 현황 요약 갱신 (합계 57→58). 상세: `.agent/defects/DEF-058_운송요청목록조회버튼제거Debounce전환.md` |
+| 2026-06-09 | Noah (Codex) | **DEF-059 신규 등록** — special_cargo_type Order 레벨 → Package 레벨 전환 검토 (미착수, Aiden 협의 필요). 현황 요약 갱신 (합계 58→59). 상세: `.agent/defects/DEF-059_화물구분PKG단위전환검토.md` |

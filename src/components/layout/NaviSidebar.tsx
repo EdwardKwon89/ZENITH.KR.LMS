@@ -71,7 +71,7 @@ export default function NaviSidebar({
     { 
       title: t("order_mgmt"), 
       href: "/orders", 
-      icon: ShoppingCart,
+      icon: ClipboardList,
       children: [
         { title: t("orders"), href: "/orders" },
         { title: t("order_new"), href: "/orders/new" },
@@ -147,18 +147,7 @@ export default function NaviSidebar({
     { title: t("settings"), href: "/admin/settings", icon: Settings, isAdminOnly: true },
   ];
 
-  useEffect(() => {
-    const saved = localStorage.getItem("zen-sidebar-collapsed");
-    if (saved === "true") setIsCollapsed(true);
-  }, []);
-
-  const toggleSidebar = () => {
-    setIsCollapsed(prev => {
-      const next = !prev;
-      localStorage.setItem("zen-sidebar-collapsed", String(next));
-      return next;
-    });
-  };
+  const toggleSidebar = () => setIsCollapsed(prev => !prev);
 
   const toggleMenu = (title: string) => {
     if (isCollapsed) return;

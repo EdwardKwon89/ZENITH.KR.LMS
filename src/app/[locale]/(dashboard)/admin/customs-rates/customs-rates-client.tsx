@@ -98,7 +98,8 @@ export default function CustomsRatesClient({ initialRates, organizations, userRo
 
   const columns: ColumnDef<CustomsRate>[] = [
     {
-      accessorKey: "org_id",
+      id: "org_id",
+      accessorFn: (row) => orgMap[row.org_id] || row.org_id,
       header: "통관사",
       cell: ({ row }) => (
         <div className="flex items-center gap-2">

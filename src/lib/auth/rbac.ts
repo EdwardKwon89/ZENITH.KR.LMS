@@ -119,7 +119,7 @@ export async function checkPermissionDB(supabase: any, role: string, path: strin
 export const ALL_RESOURCE_PATHS = [
   { path: '/master', label: '기본 정보 (마스터)' },
   { path: '/admin', label: '관리자 전용 기능' },
-  { path: '/orders', label: '오더 관리' },
+  { path: '/orders', label: '운송 요청 관리' },
   { path: '/logistics', label: '물류/배송 관리' },
   { path: '/tracking', label: '통합 트래킹' },
   { path: '/inventory', label: '재고 관리' },
