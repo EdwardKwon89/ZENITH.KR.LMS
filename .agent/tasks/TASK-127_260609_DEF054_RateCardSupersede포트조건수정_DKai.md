@@ -85,8 +85,8 @@ Pri/Snd + version_no 설계(DEF-054 보고서 §4)를 `scratch/post_launch_impro
 - [x] 동일 carrier+mode, 다른 port 조합 요율이 공존 가능한지 확인 (DB 직접 검증 또는 단위테스트)
 - [x] IMP-109 `scratch/post_launch_improvements.md` 등록 완료
 - [x] 회귀 테스트 전체 PASS (316/316)
-- [ ] 코드 커밋 해시 기재
-- [ ] 문서 커밋 해시 기재
+- [x] 코드 커밋 해시 기재: `0183c4e`
+- [x] 문서 커밋 해시 기재: `ecf1462`
 
 ---
 
