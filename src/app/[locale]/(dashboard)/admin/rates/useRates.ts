@@ -45,6 +45,10 @@ export interface RatesFormState {
   listLoading: boolean;
   searchTerm: string;
   setSearchTerm: (v: string) => void;
+  filterMode: string;
+  setFilterMode: (v: string) => void;
+  filterActive: boolean | null;
+  setFilterActive: (v: boolean | null) => void;
   profile: any;
   canEdit: boolean;
   canDelete: boolean;
@@ -74,6 +78,8 @@ export function useRates(): RatesFormState {
   const [rateCards, setRateCards] = useState<any[]>([]);
   const [listLoading, setListLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [filterMode, setFilterMode] = useState('');
+  const [filterActive, setFilterActive] = useState<boolean | null>(null);
   const [profile, setProfile] = useState<any>(null);
 
   const supabase = createClient();
@@ -168,6 +174,31 @@ export function useRates(): RatesFormState {
       return false;
     }
 
+    if (!tiers.weight_slabs.length || !tiers.cbm_slabs.length) {
+      alert('무게 요율(Weight Slab)과 부피 요율(CBM Slab)은 각각 최소 1개 이상 등록해야 합니다.');
+      return false;
+    }
+
+    if (!originPortId) {
+      alert('출발지(Origin Port)를 선택해주세요.');
+      return false;
+    }
+
+    if (!destPortId) {
+      alert('도착지(Destination Port)를 선택해주세요.');
+      return false;
+    }
+
+    if (marginRate < 0 || marginRate > 100) {
+      alert('Margin Rate는 0~100 사이로 입력해주세요.');
+      return false;
+    }
+
+    if (platformFeeRate < 0 || platformFeeRate > 100) {
+      alert('Platform Fee Rate는 0~100 사이로 입력해주세요.');
+      return false;
+    }
+
     setLoading(true);
     try {
       await createRateCard({
@@ -222,7 +253,10 @@ export function useRates(): RatesFormState {
     if (!r) return false;
     const searchLower = (searchTerm || "").toLowerCase();
     const carrierName = String(r.carrier?.name || r.carrier?.code || "").toLowerCase();
-    return carrierName.includes(searchLower);
+    if (searchLower && !carrierName.includes(searchLower)) return false;
+    if (filterMode && r.transport_mode !== filterMode) return false;
+    if (filterActive !== null && r.is_active !== filterActive) return false;
+    return true;
   });
 
   return {
@@ -236,6 +270,7 @@ export function useRates(): RatesFormState {
     validFrom, setValidFrom, validTo, setValidTo,
     tiers, setTiers, loading,
     rateCards, listLoading, searchTerm, setSearchTerm,
+    filterMode, setFilterMode, filterActive, setFilterActive,
     profile, canEdit, canDelete, filteredRates,
     handleEditRate, handleSaveRate, handleDeleteRate, resetForm,
   };

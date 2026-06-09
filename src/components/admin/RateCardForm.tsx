@@ -23,10 +23,13 @@ interface RatePreviewResult {
   cbmPrice: number;
   weightCost: number;
   cbmCost: number;
-  total: number;
+  transportCost: number;
+  marginAmount: number;
+  feeAmount: number;
+  grandTotal: number;
 }
 
-function calcRatePreview(tiers: RateTiers, weight: number, cbm: number): RatePreviewResult | null {
+function calcRatePreview(tiers: RateTiers, weight: number, cbm: number, marginRate: number, platformFeeRate: number): RatePreviewResult | null {
   if (!tiers.weight_slabs.length || !tiers.cbm_slabs.length) return null;
   const weightSlab = findMatchingSlab(tiers.weight_slabs, weight, 'weight_min');
   const cbmSlab = findMatchingSlab(tiers.cbm_slabs, cbm, 'cbm_min');
@@ -35,14 +38,17 @@ function calcRatePreview(tiers: RateTiers, weight: number, cbm: number): RatePre
   const weightCost = weight * unitPrice;
   const cbmCost = cbm * cbmPrice;
   const minCharge = Math.max(weightSlab?.min_charge ?? 0, cbmSlab?.min_charge ?? 0);
-  const total = Math.max(weightCost, cbmCost, minCharge);
-  return { weightSlab, cbmSlab, unitPrice, cbmPrice, weightCost, cbmCost, total };
+  const transportCost = Math.max(weightCost, cbmCost, minCharge);
+  const marginAmount = transportCost * (marginRate / 100);
+  const feeAmount = transportCost * (platformFeeRate / 100);
+  const grandTotal = transportCost + marginAmount + feeAmount;
+  return { weightSlab, cbmSlab, unitPrice, cbmPrice, weightCost, cbmCost, transportCost, marginAmount, feeAmount, grandTotal };
 }
 
-function RatePreview({ tiers, currency }: { tiers: RateTiers; currency: string }) {
+function RatePreview({ tiers, currency, marginRate, platformFeeRate }: { tiers: RateTiers; currency: string; marginRate: number; platformFeeRate: number }) {
   const [weight, setWeight] = useState(100);
   const [cbm, setCbm] = useState(1);
-  const result = useMemo(() => calcRatePreview(tiers, weight, cbm), [tiers, weight, cbm]);
+  const result = useMemo(() => calcRatePreview(tiers, weight, cbm, marginRate, platformFeeRate), [tiers, weight, cbm, marginRate, platformFeeRate]);
 
   return (
     <div className="space-y-4">
@@ -97,9 +103,21 @@ function RatePreview({ tiers, currency }: { tiers: RateTiers; currency: string }
               <span>CBM Cost</span>
               <span className="font-mono">{currency} {result.cbmCost.toFixed(2)}</span>
             </div>
-            <div className="flex justify-between text-sm font-bold text-slate-900 pt-1.5 border-t border-slate-200">
-              <span>Estimated Total (WM)</span>
-              <span className="font-mono">{currency} {result.total.toFixed(2)}</span>
+            <div className="flex justify-between font-semibold text-slate-700 pt-1.5 border-t border-slate-200">
+              <span>운송요금 (W/M)</span>
+              <span className="font-mono">{currency} {result.transportCost.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between text-slate-500 pl-3">
+              <span>+ 마진 ({marginRate.toFixed(1)}%)</span>
+              <span className="font-mono">{currency} {result.marginAmount.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between text-slate-500 pl-3">
+              <span>+ 수수료 ({platformFeeRate.toFixed(1)}%)</span>
+              <span className="font-mono">{currency} {result.feeAmount.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between text-sm font-bold text-slate-900 pt-1.5 border-t-2 border-slate-300">
+              <span>총 견적 요금</span>
+              <span className="font-mono">{currency} {result.grandTotal.toFixed(2)}</span>
             </div>
           </div>
         </div>
@@ -147,7 +165,6 @@ interface RateCardFormProps {
   onTiersChange: (v: RateTiers) => void;
   loading: boolean;
   onSave: () => void;
-  onResetForm: () => void;
   profile: any;
   isCarrierRole: boolean;
 }
@@ -168,7 +185,7 @@ export function RateCardForm(props: RateCardFormProps) {
               <select
                 value={props.selectedCarrier}
                 onChange={(e) => props.onCarrierChange(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-300 text-slate-900 px-4 py-3 rounded-2xl focus:ring-2 focus:ring-blue-500/30 transition-all appearance-none"
+                className="w-full bg-slate-50 border border-slate-300 text-slate-900 px-3 py-2.5 rounded-2xl text-sm focus:ring-2 focus:ring-blue-500/30 transition-all appearance-none"
               >
                 <option value="" className="bg-white">선택하세요...</option>
                 {props.carriers.map(c => (
@@ -211,7 +228,7 @@ export function RateCardForm(props: RateCardFormProps) {
               <select
                 value={props.originPortId}
                 onChange={(e) => props.onOriginPortIdChange(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-300 text-slate-900 px-4 py-3 rounded-2xl focus:ring-2 focus:ring-blue-500/30 transition-all appearance-none"
+                className="w-full bg-slate-50 border border-slate-300 text-slate-900 px-3 py-2.5 rounded-2xl text-sm focus:ring-2 focus:ring-blue-500/30 transition-all appearance-none"
               >
                 <option value="" className="bg-white">All Origins (Fallback)</option>
                 {props.ports.map(p => (
@@ -227,7 +244,7 @@ export function RateCardForm(props: RateCardFormProps) {
               <select
                 value={props.destPortId}
                 onChange={(e) => props.onDestPortIdChange(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-300 text-slate-900 px-4 py-3 rounded-2xl focus:ring-2 focus:ring-emerald-500/30 transition-all appearance-none"
+                className="w-full bg-slate-50 border border-slate-300 text-slate-900 px-3 py-2.5 rounded-2xl text-sm focus:ring-2 focus:ring-emerald-500/30 transition-all appearance-none"
               >
                 <option value="" className="bg-white">All Destinations (Fallback)</option>
                 {props.ports.map(p => (
@@ -236,20 +253,18 @@ export function RateCardForm(props: RateCardFormProps) {
               </select>
             </div>
 
-            {props.originPortId && props.destPortId ? (
-              <div className="space-y-3">
-                <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
-                  <Calendar className="w-3 h-3 text-blue-500" /> Transit Days
-                </label>
-                <input
-                  type="number"
-                  min={1}
-                  value={props.transitDays}
-                  onChange={(e) => props.onTransitDaysChange(Math.max(1, Number(e.target.value)))}
-                  className="w-full bg-slate-50 border border-slate-300 text-slate-900 px-4 py-3 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500/30"
-                />
-              </div>
-            ) : <div />}
+            <div className="space-y-3">
+              <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
+                <Calendar className="w-3 h-3 text-blue-500" /> Transit Days
+              </label>
+              <input
+                type="number"
+                min={1}
+                value={props.transitDays}
+                onChange={(e) => props.onTransitDaysChange(Math.max(1, Number(e.target.value)))}
+                className="w-full bg-slate-50 border border-slate-300 text-slate-900 px-3 py-2.5 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+              />
+            </div>
 
             <div className="space-y-3">
               <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
@@ -275,7 +290,7 @@ export function RateCardForm(props: RateCardFormProps) {
                 step="0.1"
                 value={props.marginRate}
                 onChange={(e) => props.onMarginRateChange(Number(e.target.value))}
-                className="w-full bg-slate-50 border border-slate-300 text-slate-900 px-4 py-3 rounded-2xl focus:outline-none focus:ring-2 focus:ring-amber-500/30"
+                className="w-full bg-slate-50 border border-slate-300 text-slate-900 px-3 py-2.5 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/30"
                 placeholder="15.0"
               />
             </div>
@@ -289,7 +304,7 @@ export function RateCardForm(props: RateCardFormProps) {
                 step="0.1"
                 value={props.platformFeeRate}
                 onChange={(e) => props.onPlatformFeeRateChange(Number(e.target.value))}
-                className="w-full bg-slate-50 border border-slate-300 text-slate-900 px-4 py-3 rounded-2xl focus:outline-none focus:ring-2 focus:ring-purple-500/30"
+                className="w-full bg-slate-50 border border-slate-300 text-slate-900 px-3 py-2.5 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/30"
                 placeholder="5.0"
               />
             </div>
@@ -303,7 +318,7 @@ export function RateCardForm(props: RateCardFormProps) {
                   type="date"
                   value={props.validFrom}
                   onChange={(e) => props.onValidFromChange(e.target.value)}
-                  className="bg-slate-50 border-slate-300"
+                  className="bg-slate-50 border-slate-300 text-sm"
                 />
               </div>
               <div className="space-y-3">
@@ -314,7 +329,7 @@ export function RateCardForm(props: RateCardFormProps) {
                   type="date"
                   value={props.validTo}
                   onChange={(e) => props.onValidToChange(e.target.value)}
-                  className="bg-slate-50 border-slate-300"
+                  className="bg-slate-50 border-slate-300 text-sm"
                 />
               </div>
             </div>
@@ -330,28 +345,10 @@ export function RateCardForm(props: RateCardFormProps) {
         <ZenCard className="bg-white border-slate-200">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-xl font-bold text-slate-900">TISA 3-Tier Rate Summary</h3>
-            {props.selectedCarrier && props.originPortId ? (
-              <button
-                onClick={props.onResetForm}
-                className="text-[10px] font-bold text-slate-400 hover:text-slate-600 uppercase tracking-wider transition-colors"
-              >
-                ✕ New
-              </button>
-            ) : null}
           </div>
 
           <div className="space-y-6">
-            <RatePreview tiers={props.tiers} currency={props.currency} />
-
-            <div className="flex justify-between items-center text-sm p-4 bg-slate-50 rounded-2xl">
-              <span className="text-slate-500">Margin Rate</span>
-              <span className="text-slate-900 font-mono font-bold">{props.marginRate.toFixed(1)}%</span>
-            </div>
-
-            <div className="flex justify-between items-center text-sm p-4 bg-slate-50 rounded-2xl">
-              <span className="text-slate-500">Platform Fee</span>
-              <span className="text-slate-900 font-mono font-bold">{props.platformFeeRate.toFixed(1)}%</span>
-            </div>
+            <RatePreview tiers={props.tiers} currency={props.currency} marginRate={props.marginRate} platformFeeRate={props.platformFeeRate} />
 
             <ZenButton
               onClick={props.onSave}

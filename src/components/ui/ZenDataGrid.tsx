@@ -25,7 +25,7 @@ import { cn } from "@/lib/utils";
 interface ZenDataGridProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
-  title?: string;
+  title?: React.ReactNode;
   description?: string;
   className?: string;
   loading?: boolean;
@@ -65,8 +65,8 @@ export default function ZenDataGrid<TData, TValue>({
     <div className={cn("space-y-4 w-full", className)}>
       {/* Grid Header & Search */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 px-1">
-        <div>
-          {title && <h3 className="text-xl font-bold text-slate-900 font-heading">{title}</h3>}
+        <div className="flex items-center gap-3">
+          {title}
           {description && <p className="text-sm text-slate-500 mt-0.5">{description}</p>}
         </div>
 
@@ -74,7 +74,7 @@ export default function ZenDataGrid<TData, TValue>({
           <div className="relative w-full md:w-72">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
             <input
-              placeholder="Filter results..."
+              placeholder="운송사명 검색..."
               value={globalFilter}
               onChange={(e) => setGlobalFilter(e.target.value)}
               className="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-500/10 focus:border-brand-500 transition-all"

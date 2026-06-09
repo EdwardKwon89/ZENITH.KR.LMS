@@ -44,6 +44,7 @@ interface RateCardListProps {
   canEdit?: boolean;
   canDelete?: boolean;
   actions?: React.ReactNode;
+  filterBar?: React.ReactNode;
 }
 
 export const RateCardList: React.FC<RateCardListProps> = ({
@@ -54,6 +55,7 @@ export const RateCardList: React.FC<RateCardListProps> = ({
   canEdit = false,
   canDelete = false,
   actions,
+  filterBar,
 }) => {
   const columns: ColumnDef<RateCard>[] = [
     {
@@ -189,6 +191,7 @@ export const RateCardList: React.FC<RateCardListProps> = ({
       columns={columns}
       data={rates}
       loading={loading}
+      title={filterBar}
       actions={actions}
     />
   );

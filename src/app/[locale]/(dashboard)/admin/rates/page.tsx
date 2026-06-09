@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Plus, XCircle, AlertCircle, Truck } from 'lucide-react';
+import { Plus, XCircle, AlertCircle, Truck, Plane, Ship, Box } from 'lucide-react';
 import { ZenCard } from '@/components/ui/ZenUI';
 import { RateCardList } from '@/components/admin/RateCardList';
 import { RateCardForm } from '@/components/admin/RateCardForm';
@@ -22,6 +22,7 @@ export default function RatesManagementPage() {
     validFrom, setValidFrom, validTo, setValidTo,
     tiers, setTiers, loading,
     listLoading, searchTerm, setSearchTerm,
+    filterMode, setFilterMode, filterActive, setFilterActive,
     profile, canEdit, canDelete, filteredRates,
     handleEditRate, handleSaveRate, handleDeleteRate, resetForm,
   } = useRates();
@@ -76,6 +77,33 @@ export default function RatesManagementPage() {
         onDelete={handleDeleteRate}
         canEdit={canEdit}
         canDelete={canDelete}
+        filterBar={(
+          <div className="flex items-center gap-3">
+            <select
+              value={filterMode}
+              onChange={(e) => setFilterMode(e.target.value)}
+              className="bg-white border border-slate-200 text-slate-900 px-3 py-2 rounded-xl text-sm focus:ring-2 focus:ring-brand-500/10 focus:border-brand-500 transition-all appearance-none"
+            >
+              <option value="">전체 운송 수단</option>
+              <option value="AIR">항공</option>
+              <option value="SEA">해운</option>
+              <option value="LAND">육상</option>
+              <option value="EXP">특송</option>
+            </select>
+            <select
+              value={filterActive === null ? '' : filterActive ? 'active' : 'inactive'}
+              onChange={(e) => {
+                const v = e.target.value;
+                setFilterActive(v === '' ? null : v === 'active');
+              }}
+              className="bg-white border border-slate-200 text-slate-900 px-3 py-2 rounded-xl text-sm focus:ring-2 focus:ring-brand-500/10 focus:border-brand-500 transition-all appearance-none"
+            >
+              <option value="">전체 상태</option>
+              <option value="active">활성</option>
+              <option value="inactive">만료</option>
+            </select>
+          </div>
+        )}
         actions={
           !isCarrier ? (
             <button
@@ -136,7 +164,6 @@ export default function RatesManagementPage() {
                   validTo={validTo} onValidToChange={setValidTo}
                   tiers={tiers} onTiersChange={setTiers}
                   loading={loading} onSave={handleSaveAndClose}
-                  onResetForm={resetForm}
                   profile={profile} isCarrierRole={isCarrier}
                 />
               </div>
