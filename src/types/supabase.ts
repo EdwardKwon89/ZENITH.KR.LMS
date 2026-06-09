@@ -4157,6 +4157,8 @@ export type Database = {
               cbm_price: number
               min_total_price: number
               max_total_price: number | null
+              matched_weight_min: number | null
+              matched_cbm_min: number | null
               unit_price: number
             }[]
           }

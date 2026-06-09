@@ -8,7 +8,7 @@ dotenv.config({ path: '.env.local' });
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'http://127.0.0.1:54321';
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-describe('IMP-105: Transport Pricing Policy Integration Tests (TC-POLICY-01~06)', () => {
+describe('IMP-105: Transport Pricing Policy Integration Tests (TC-POLICY-01~07)', () => {
   let supabase: SupabaseClient;
   let engine: SettlementEngine;
   let testShipperId: string;
@@ -61,7 +61,8 @@ describe('IMP-105: Transport Pricing Policy Integration Tests (TC-POLICY-01~06)'
       'TC-POLICY-03-ORD',
       'TC-POLICY-04-ORD',
       'TC-POLICY-05-ORD',
-      'TC-POLICY-06-ORD'
+      'TC-POLICY-06-ORD',
+      'TC-POLICY-07-ORD'
     ];
     const { data: oldOrders } = await supabase
       .from('zen_orders')
@@ -545,6 +546,99 @@ describe('IMP-105: Transport Pricing Policy Integration Tests (TC-POLICY-01~06)'
     expect(sqlResult.success).toBe(true);
     expect(Number(sqlResult.total_freight)).toBe(150);
     expect(sqlResult.applied_pricing_basis).toBe('MAX_CHARGE');
+
+    // Cleanup
+    await cleanupOrderAndCosts(order.id);
+    await supabase.from('zen_rate_cards').delete().eq('id', rateCard.id);
+  });
+
+  it('TC-POLICY-07: WM 계산 후 zen_order_rate_snapshots slab 이력 + pricing_basis 저장 검증', async () => {
+    // Clean up stale SEA rate cards
+    await supabase
+      .from('zen_rate_cards')
+      .update({ is_active: false })
+      .eq('carrier_id', testCarrierId)
+      .eq('transport_mode', 'SEA');
+
+    // Rate card with WM slabs
+    const { data: rateCard } = await supabase
+      .from('zen_rate_cards')
+      .insert({
+        carrier_id: testCarrierId,
+        transport_mode: 'SEA',
+        currency: 'USD',
+        valid_from: new Date().toISOString().split('T')[0],
+        is_active: true,
+        origin_port_id: testPortIcn,
+        dest_port_id: testPortSin,
+        tiers: {
+          weight_slabs: [
+            { weight_min: 0, unit_price: 3.0, min_charge: 20, max_charge: 500 }
+          ],
+          cbm_slabs: [
+            { cbm_min: 0, cbm_price: 200.0, min_charge: 20, max_charge: 500 }
+          ]
+        }
+      })
+      .select()
+      .single();
+
+    // Order: 80kg weight, 0.3 CBM — WEIGHT basis (weight cost = 240 > cbm cost = 60)
+    const { data: order } = await supabase
+      .from('zen_orders')
+      .insert({
+        order_no: 'TC-POLICY-07-ORD',
+        shipper_id: testShipperId,
+        carrier_id: testCarrierId,
+        origin_port_id: testPortIcn,
+        dest_port_id: testPortSin,
+        transport_mode: 'SEA',
+        cargo_details: { total_weight: 80, total_volume: 0.3 },
+        status: 'REGISTERED'
+      })
+      .select()
+      .single();
+
+    await supabase.from('zen_order_packages').insert({
+      order_id: order.id,
+      packing_unit: 'BOX',
+      gross_weight: 80,
+      volume: 0.3,
+      packing_count: 1
+    });
+
+    await supabase
+      .from('zen_transport_pricing_policies')
+      .update({ pricing_method: 'WM' })
+      .eq('transport_mode', 'SEA');
+
+    // Call calculate_order_costs
+    const { data: sqlResult } = await supabase.rpc('calculate_order_costs', { p_order_id: order.id });
+    expect(sqlResult.success).toBe(true);
+
+    // Verify snapshot columns
+    const { data: snapshot } = await supabase
+      .from('zen_order_rate_snapshots')
+      .select('*')
+      .eq('order_id', order.id)
+      .single();
+
+    expect(snapshot).not.toBeNull();
+    // Weight slab: matched weight_min = 0, unit_price = 3.0
+    expect(Number(snapshot.applied_weight_slab_min)).toBe(0);
+    expect(Number(snapshot.applied_weight_unit_price)).toBe(3.0);
+    // CBM slab: matched cbm_min = 0, cbm_price = 200.0
+    expect(Number(snapshot.applied_cbm_slab_min)).toBe(0);
+    expect(Number(snapshot.applied_cbm_price)).toBe(200.0);
+    // Weight cost = 80 * 3.0 = 240, CBM cost = 0.3 * 200 = 60
+    expect(Number(snapshot.applied_weight_cost)).toBe(240);
+    expect(Number(snapshot.applied_cbm_cost)).toBe(60);
+    // WEIGHT basis (weight_cost >= cbm_cost, no cap triggered)
+    expect(snapshot.applied_pricing_basis).toBe('WEIGHT');
+    // tiers_snapshot should be a JSONB object with weight_slabs and cbm_slabs
+    expect(snapshot.tiers_snapshot).not.toBeNull();
+    expect(snapshot.tiers_snapshot.weight_slabs).toBeDefined();
+    expect(snapshot.tiers_snapshot.cbm_slabs).toBeDefined();
 
     // Cleanup
     await cleanupOrderAndCosts(order.id);
