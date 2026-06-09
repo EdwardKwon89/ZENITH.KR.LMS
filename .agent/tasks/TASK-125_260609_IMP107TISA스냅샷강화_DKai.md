@@ -108,13 +108,13 @@ Rate Preview Simulator에서 `applied_pricing_basis` 표시 필요 시 UI 추가
 
 ## DoD (완료 기준)
 
-- [x] `zen_order_rate_snapshots` 마이그레이션 적용 — ALTER TABLE 8개 컬럼 추가 (applied_weight_slab_min·applied_weight_unit_price·applied_cbm_slab_min·applied_cbm_price·applied_weight_cost·applied_cbm_cost·applied_pricing_basis·tiers_snapshot) · 마이그 `20260609200000`
-- [x] `calculate_order_costs` 호출 후 스냅샷에 `applied_pricing_basis` 정상 저장 확인 — TC-POLICY-07 `expect(snapshot.applied_pricing_basis).toBe('WEIGHT')` ✅
-- [x] `tiers_snapshot` JSONB에 적용 시점 tiers 전체 저장 확인 — TC-POLICY-07 `expect(snapshot.tiers_snapshot.weight_slabs).toBeDefined()` · `expect(snapshot.tiers_snapshot.cbm_slabs).toBeDefined()` ✅
-- [x] `rtk npm run build` PASS — 커밋 `a14148b` ✅
-- [x] `rtk npm run test:regression` 316/316 PASS — 커밋 `a14148b` ✅ (기존 315 + TC-POLICY-07 신규 1)
-- [x] 신규 회귀 TC 추가 — TC-POLICY-07 (`tests/integration/p6-transport-policy.test.ts`) 스냅샷 8개 컬럼 저장 검증
-- [x] `LIVE_REGRESSION_TEST_MAP.md` 업데이트 — TC-POLICY-07 등록 + v17.2 이력 갱신
+- [x] `zen_order_rate_snapshots` 마이그레이션 적용 — ALTER TABLE 8개 컬럼 추가 (applied_weight_slab_min·applied_weight_unit_price·applied_cbm_slab_min·applied_cbm_price·applied_weight_cost·applied_cbm_cost·applied_pricing_basis·tiers_snapshot) · 마이그 `20260609200000` · 코드 커밋 `ab6f493`
+- [x] `calculate_order_costs` 호출 후 스냅샷에 `applied_pricing_basis` 정상 저장 확인 — TC-POLICY-07 `expect(snapshot.applied_pricing_basis).toBe('WEIGHT')` ✅ · 코드 커밋 `ab6f493`
+- [x] `tiers_snapshot` JSONB에 적용 시점 tiers 전체 저장 확인 — TC-POLICY-07 `expect(snapshot.tiers_snapshot.weight_slabs).toBeDefined()` · `expect(snapshot.tiers_snapshot.cbm_slabs).toBeDefined()` ✅ · 코드 커밋 `ab6f493`
+- [x] `rtk npm run build` PASS — 코드 커밋 `ab6f493` ✅
+- [x] `rtk npm run test:regression` 316/316 PASS — 코드 커밋 `ab6f493` ✅ (기존 315 + TC-POLICY-07 신규 1)
+- [x] 신규 회귀 TC 추가 — TC-POLICY-07 (`tests/integration/p6-transport-policy.test.ts`) 스냅샷 8개 컬럼 저장 검증 · 코드 커밋 `ab6f493`
+- [x] `LIVE_REGRESSION_TEST_MAP.md` 업데이트 — TC-POLICY-07 등록 + v17.2 이력 갱신 · 문서 커밋 `ef3ece7`
 
 ---
 
@@ -165,7 +165,7 @@ Rate Preview Simulator에서 `applied_pricing_basis` 표시 필요 시 UI 추가
 - `rtk npm run build` — ✅ PASS
 - `rtk npm run test:regression` — ✅ 316/316 PASS (기존 315 + TC-POLICY-07 신규 1)
 
-**커밋**: `a14148b`
+**커밋**: 코드 `ab6f493` · 문서 `ef3ece7`
 
 ---
 

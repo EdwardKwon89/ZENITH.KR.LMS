@@ -291,7 +291,7 @@
 | K | 1 | 7 | 14.3% | IMP-084·085·086·088·089·046 🔔 |
 | 6 | 9 | 9 | — | IMP-097✅·098✅·099✅·100🔔·101🔔·102🔔·103🔔·104🔔·105✅(D_Kai 엔진+TC 완료) (Phase 6+IMP-105) |
 | UAT | 6 | 7 | 85.7% | IMP-090 ✅ · IMP-091 ⬜ (Carrier Portal — Phase M) · **IMP-092 ✅ (TISA 3계층)** · **IMP-093 ✅ (TISA 실연동, TASK-104)** · IMP-094 ⬜ (요율 워크플로우 고도화, Phase M) · **IMP-095 ✅ (Rate Card 항로 매칭, TASK-109)** · **IMP-096 ✅ (요율 관리 페이지 통합 정리, TASK-110)** |
-| UAT2 | 2 | 2 | 100% ✅ | **IMP-107 🔔** (TISA 스냅샷 강화 — WM slab 이력, `a14148b` Aiden 검토 대기) · **IMP-108 ✅§1·§2·§3** (B_Kai §1 max_charge UI ✅, D_Kai §2 platform_fee ✅, §3 WM CLAMP `9d70d87` ✅) |
+| UAT2 | 2 | 2 | 100% ✅ | **IMP-107 🔔** (TISA 스냅샷 강화 — WM slab 이력, `ab6f493` Aiden 검토 대기) · **IMP-108 ✅§1·§2·§3** (B_Kai §1 max_charge UI ✅, D_Kai §2 platform_fee ✅, §3 WM CLAMP `9d70d87` ✅) |
 | **합계** | **90** | **93** | **96.8%** | IMP-107 🔔 · IMP-108 ✅ Aiden 승인 (260609) |
 
 > **UAT 진행 전 필수 처리**: IMP-092 ✅ · IMP-093 ✅ · IMP-095 ✅ — 전량 완료
@@ -371,4 +371,4 @@
 | 2026-06-09 | Aiden (Claude) | **IMP-108 §2 ✅ 최종 승인** — TASK-123 검토 완료. DEF-052 build PASS·50파일 전량·회귀 314/314. total_freight 기반 수수료 계산 SQL 정합 확인. §1(max_charge UI)·§3(WM cap) 별도 Task 예정. 전체 합계 87/93 (93.5%). |
 | 2026-06-09 | B_Kai | **IMP-108 §1 ✅ max_charge UI 완료** — WeightSlab/CbmSlab 인터페이스 `max_charge?: number` 추가, RateTierEditor UI 필드 노출, `createRateCard`/`updateRateCard` 타입 전달. build ✅ · 회귀 314/314 ✅. 커밋 `ce17476`. §3 D_Kai ⬜ 대기. 전체 합계 88/93 (94.6%). |
 | 2026-06-09 | D_Kai (OpenCode) | **IMP-108 §3 🔔 WM CLAMP 완료** — fn_get_best_matching_rate 4-arg `max_total_price` 반환 추가, calculate_order_costs CLAMP(min→max) + `applied_pricing_basis`(WEIGHT/CBM/MIN_CHARGE/MAX_CHARGE) 반환. TC-POLICY-06 신규(max_charge cap=150 → total_freight=150, basis=MAX_CHARGE). build ✅ · 회귀 315/315 ✅. 커밋 `9d70d87`. 전체 합계 89/93 (95.7%). Aiden 검토 대기 🔔. |
-| 2026-06-09 | D_Kai (OpenCode) | **IMP-107 🔔 TISA 스냅샷 강화 완료** — zen_order_rate_snapshots 8개 컬럼 추가(slab 이력 + pricing_basis + tiers_snapshot). fn_get_best_matching_rate 4-arg matched_weight_min/cbm_min 반환. calculate_order_costs snapshot INSERT ON CONFLICT 보강. TC-POLICY-07 신규(snapshot 8개 컬럼 저장 검증). build ✅ · 회귀 316/316 ✅. 커밋 `a14148b`. 전체 합계 90/93 (96.8%). Aiden 검토 대기 🔔. |
+| 2026-06-09 | D_Kai (OpenCode) | **IMP-107 🔔 TISA 스냅샷 강화 완료** — zen_order_rate_snapshots 8개 컬럼 추가(slab 이력 + pricing_basis + tiers_snapshot). fn_get_best_matching_rate 4-arg matched_weight_min/cbm_min 반환. calculate_order_costs snapshot INSERT ON CONFLICT 보강. TC-POLICY-07 신규(snapshot 8개 컬럼 저장 검증). build ✅ · 회귀 316/316 ✅. 커밋 `ab6f493`. 전체 합계 90/93 (96.8%). Aiden 검토 대기 🔔. |
