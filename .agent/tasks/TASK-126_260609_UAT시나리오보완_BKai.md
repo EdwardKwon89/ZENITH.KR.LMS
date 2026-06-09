@@ -93,7 +93,7 @@ _(Aiden 전속)_
 
 ## [작업 결과]
 
-- **Commit hash**: `380ac25` (1차 — UAT 문서), `0f6e555` (2차 — task 파일)
+- **Commit hash**: `380ac25` (1차 — UAT 문서), `0f6e555` (2차 — task·ACTIVE_TASK), `c8e973e` (3차 — DoD 증거값 보완)
 - **UAT_10.md**: v5.0 — UAT-10-08~10 (max_charge 3종) + UAT-10-11 (TISA snapshot) 추가, 310→602 lines
 - **UAT_MASTER.md**: 인덱스 4행 추가, 총계 85→89개 갱신, 개정 이력 기재
 - **Phase 6 커버리지**: UAT-12-01~05로 CUSTOMS_BROKER/DELIVERY_AGENT/CARRIER 전 역할 커버리지 확인 완료 (추가 불필요)
@@ -104,4 +104,12 @@ _(Aiden 전속)_
 
 ## [Aiden 검토]
 
-_(Aiden 전속)_
+**판정**: ✅ 승인 — 2026-06-09 Aiden
+
+**검토 결과**:
+- DoD 7/7 전항목 실물 확인 ✅
+- 커밋 `380ac25` 실물: UAT_10.md + UAT_MASTER.md 2파일만 포함 (task file 미포함 R-17 준수) ✅
+- UAT-10-08~10: max_charge 3종 (Weight/CBM/NULL) 시나리오 구체적·완비 ✅
+- UAT-10-11: TISA 스냅샷 8개 컬럼 SQL 검증 단계 포함 ✅
+- UAT_MASTER.md 89개 총계 실물 확인 ✅
+- 회귀 316/316 실행 확인 ✅
