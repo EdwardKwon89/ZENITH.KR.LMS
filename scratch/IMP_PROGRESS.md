@@ -291,8 +291,8 @@
 | K | 1 | 7 | 14.3% | IMP-084·085·086·088·089·046 🔔 |
 | 6 | 9 | 9 | — | IMP-097✅·098✅·099✅·100🔔·101🔔·102🔔·103🔔·104🔔·105✅(D_Kai 엔진+TC 완료) (Phase 6+IMP-105) |
 | UAT | 6 | 7 | 85.7% | IMP-090 ✅ · IMP-091 ⬜ (Carrier Portal — Phase M) · **IMP-092 ✅ (TISA 3계층)** · **IMP-093 ✅ (TISA 실연동, TASK-104)** · IMP-094 ⬜ (요율 워크플로우 고도화, Phase M) · **IMP-095 ✅ (Rate Card 항로 매칭, TASK-109)** · **IMP-096 ✅ (요율 관리 페이지 통합 정리, TASK-110)** |
-| UAT2 | 1 | 2 | 50% | **IMP-107 ⬜** (TISA 스냅샷 강화 — WM slab 이력) · **IMP-108 ✅§1·§2·§3** (B_Kai §1 max_charge UI ✅, D_Kai §2 platform_fee ✅, §3 WM CLAMP `9d70d87` 🔔) |
-| **합계** | **89** | **93** | **95.7%** | IMP-108 §1·§2·§3 ✅ (B_Kai `ce17476` · D_Kai `9d70d87` · Aiden 검토 대기) |
+| UAT2 | 1 | 2 | 50% | **IMP-107 ⬜** (TISA 스냅샷 강화 — WM slab 이력) · **IMP-108 ✅§1·§2·§3** (B_Kai §1 max_charge UI ✅, D_Kai §2 platform_fee ✅, §3 WM CLAMP `9d70d87` ✅) |
+| **합계** | **89** | **93** | **95.7%** | IMP-108 §1·§2·§3 ✅ Aiden 승인 (260609) · IMP-107 ⬜ D_Kai 착수 가능 |
 
 > **UAT 진행 전 필수 처리**: IMP-092 ✅ · IMP-093 ✅ · IMP-095 ✅ — 전량 완료
 > 미완료 IMP: IMP-086·087 🚫 블로커 · IMP-028·069(Future — 통관 연계) · IMP-091 ⬜ (Carrier Portal) · IMP-094 ⬜ (요율 워크플로우 Phase M)
