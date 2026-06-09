@@ -5,7 +5,7 @@
 > **우선순위**: P2
 > **전제조건**: TASK-125 ✅ (IMP-107 완료), TASK-124 ✅ (IMP-108 완료)
 > **관련 IMP**: IMP-107 · IMP-108 · Phase 6 (IMP-097~105)
-> **상태**: ⬜
+> **상태**: 🔔
 
 ---
 
@@ -63,8 +63,8 @@ Phase 6 완료(신규 서비스 역할 모델 + 멀티 서비스 배정) 및 IMP
 - [x] §3: Phase 6 신규 역할 시나리오 커버리지 확인 완료 ✅ (UAT-12-01~05 커버리지 양호, 추가 불필요)
 - [x] §4: UAT_MASTER.md 갱신 완료 ✅ + 총 시나리오 수: 89개
 - [x] 회귀 테스트 전체 PASS ✅ (`316 passed, 60 files`)
-- [ ] 코드 커밋: `[B_Kai] docs: TASK-126 UAT 시나리오 보완 — IMP-107/108 + Phase6 역할`
-- [ ] 문서 커밋: `[B_Kai] docs: TASK-126 완료 보고 — task file 🔔`
+- [x] 코드 커밋: `[B_Kai] docs: TASK-126 UAT 시나리오 보완 — IMP-107/108 + Phase6 역할` ✅ (`380ac25`)
+- [x] 문서 커밋: `[B_Kai] docs: TASK-126 완료 보고 — task file 🔔` ✅ (`0f6e555`)
 
 ---
 
@@ -93,7 +93,7 @@ _(Aiden 전속)_
 
 ## [작업 결과]
 
-- **Commit hash**: `380ac25` (1차 — UAT 문서), `[TBD]` (2차 — task 파일)
+- **Commit hash**: `380ac25` (1차 — UAT 문서), `0f6e555` (2차 — task 파일)
 - **UAT_10.md**: v5.0 — UAT-10-08~10 (max_charge 3종) + UAT-10-11 (TISA snapshot) 추가, 310→602 lines
 - **UAT_MASTER.md**: 인덱스 4행 추가, 총계 85→89개 갱신, 개정 이력 기재
 - **Phase 6 커버리지**: UAT-12-01~05로 CUSTOMS_BROKER/DELIVERY_AGENT/CARRIER 전 역할 커버리지 확인 완료 (추가 불필요)
