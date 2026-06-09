@@ -58,13 +58,13 @@ rtk npm run test:regression
 
 ## DoD (완료 정의)
 
-- [ ] DEF-053 ① Transit Days 조건부 렌더링 제거 확인
-- [ ] DEF-053 ② 수정화면 ✕ New 버튼 제거 확인
-- [ ] DEF-053 ③ 검색 placeholder 한글화 확인
-- [ ] DEF-053 ④ 운송 수단/상태 ComboBox 필터 동작 확인
-- [ ] DEF-053 ⑤ 저장 전 client-side validation 동작 확인
-- [ ] 회귀 테스트 전체 PASS: N/N
-- [ ] 코드 커밋 해시 기재: (TBD)
+- [x] DEF-053 ① Transit Days 조건부 렌더링 제거 확인: `RateCardForm.tsx` 조건문 제거
+- [x] DEF-053 ② 수정화면 ✕ New 버튼 제거 확인: interface·렌더링·prop 전량 제거
+- [x] DEF-053 ③ 검색 placeholder 한글화 확인: "Filter results..." → "운송사명 검색..."
+- [x] DEF-053 ④ 운송 수단/상태 ComboBox 필터 동작 확인: 2개 select + 필터링 로직
+- [x] DEF-053 ⑤ 저장 전 client-side validation 동작 확인: Slab·ORG·DES·Margin·PlatformFee 5종
+- [x] 회귀 테스트 전체 PASS: 316/316
+- [x] 코드 커밋 해시: `2c30146`
 - [ ] 문서 커밋 해시 기재: (TBD)
 
 ---
@@ -93,7 +93,29 @@ _(Aiden 전속)_
 
 ## [작업 결과]
 
-_(D_Kai 작성 후 🔔 변경)_
+### §1 — DEF-053 5종 검증
+
+`git diff HEAD` 검증 완료 — 5개 파일, 119 insertions(+), 57 deletions(-).
+
+| # | 요구사항 | 상태 | 변경 파일 |
+|:-:|:---------|:----:|:---------|
+| ① | Transit Days port 조건부 렌더링 제거 | ✅ | `RateCardForm.tsx` — 조건문 제거, 항상 표시 |
+| ② | ✕ New 버튼 + onResetForm prop 제거 | ✅ | `RateCardForm.tsx` — interface·렌더링 제거 / `page.tsx` — prop 전달 제거 |
+| ③ | 검색 placeholder 한글화 | ✅ | `ZenDataGrid.tsx` — "Filter results..." → "운송사명 검색..." |
+| ④ | 운송 수단/상태 ComboBox 필터 | ✅ | `page.tsx` — 2개 select / `useRates.ts` — filterMode·filterActive state + 필터링 로직 |
+| ⑤ | 저장 전 client-side validation | ✅ | `useRates.ts` — Slab·ORG·DES·Margin·PlatformFee 5종 alert |
+
+### §2 — 회귀 테스트
+
+```text
+Test Files  60 passed (60)
+Tests  316 passed (316)
+```
+
+### 커밋 정보
+
+- 코드 커밋: `2c30146`
+- 문서 커밋: (TBD)
 
 ---
 
