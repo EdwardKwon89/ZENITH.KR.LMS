@@ -175,9 +175,9 @@
 | TASK-132 | 260609 | D_Kai 재교육 세션 3차 (task file 헤더 미변경 3회 + ACTIVE_TASK 임의 수정) | P4 | 없음 | D_Kai | ✅ | [TASK-132](tasks/TASK-132_260609_DKai재교육세션3차_DKai.md) | 재교육 완료 · DoD 6/6 · Advisory④(헤더 4회) — 할당 중단 해제. 5회 발생 시 무기한 중단. |
 | TASK-133 | 260609 | E2E-20 Order 등록 서비스 조합 선택 플로우 자동화 (Phase 6 통합) | P2 | TASK-117 ✅ · TASK-120 ✅ · TASK-131 ✅ | B_Kai | ✅ | [TASK-133](tasks/TASK-133_260609_E2E20Order등록서비스조합선택_BKai.md) | E2E A/B ✅ · 316/316 PASS · 코드 `2dac510` · 재작업 `61caaee` · Aiden ✅ 승인 (260609) |
 | TASK-134 | 260609 | UAT-12 Admin 조직 관리 화면 시나리오 작성 (TASK-131 커버리지) | P3 | TASK-131 ✅ · TASK-126 ✅ | D_Kai | ✅ | [TASK-134](tasks/TASK-134_260609_UAT12조직관리화면시나리오_DKai.md) | UAT-12-06~09 4건 · UAT_MASTER 93개 · 커밋 `c7fe3d9` · Aiden ✅ 승인 (260609) |
-| TASK-135 | 260609 | DEF-056 실물 요율 시드 SQL 커밋 (`seed_rates_realistic.sql` untracked) | P4 | 없음 | B_Kai | 🔔 | [TASK-135](tasks/TASK-135_260609_DEF056시드SQL커밋_BKai.md) | Edward 직행 커밋 `1ebc9e6` — 파일 포함 확인 ✅ · Aiden 검토 대기 |
+| TASK-135 | 260609 | DEF-056 실물 요율 시드 SQL 커밋 (`seed_rates_realistic.sql` untracked) | P4 | 없음 | B_Kai | ✅ | [TASK-135](tasks/TASK-135_260609_DEF056시드SQL커밋_BKai.md) | 1ebc9e6 포함 · 316/316 · Aiden ✅ 승인 (260609) |
 | TASK-136 | 260609 | DEF-059 §1~§3 PKG 레벨 special_cargo_type 전환 (DB·Zod·RPC·Action) | P3 | 없음 | D_Kai | ✅ | [TASK-136](tasks/TASK-136_260609_DEF059PKG레벨특수화물전환_DKai.md) | IMP-없음 · ad22883 · 316/316 · Aiden ✅ 승인 (260609) |
-| TASK-137 | 260609 | DEF-059 §4 UI 전환 — PKG 카드에 special_cargo_type 선택 UI 이동 | P3 | TASK-136 ✅ | B_Kai | 🔔 | [TASK-137](tasks/TASK-137_260609_DEF059UI전환_BKai.md) | 코드 `ec0fa5a` · 316/316 PASS · Aiden 검토 대기 |
+| TASK-137 | 260609 | DEF-059 §4 UI 전환 — PKG 카드에 special_cargo_type 선택 UI 이동 | P3 | TASK-136 ✅ | B_Kai | ✅ | [TASK-137](tasks/TASK-137_260609_DEF059UI전환_BKai.md) | ec0fa5a · Aiden 직접보완(dabde76) · 316/316 · ✅ 승인 (260609) |
 | TASK-108 | 260601 | DEF-039 CARRIER RLS + 미스테이지 커밋 + 신원 수정 | P2 | 없음 | D_Kai | ✅ | [TASK-108](tasks/TASK-108_260601_DEF039CARRIER_RLS_미스테이지커밋_DKai.md) | DEF-039 해소 · 4cc88d8+beba338 · CARRIER RLS 3테이블 · 229/229 ✅ · Aiden ✅ 승인 |
 | TASK-109 | 260603 | IMP-095 Rate Card 항로(Port) 기반 매칭 구현 | P1 | TASK-106 ✅ · TASK-108 ✅ | D_Kai (OpenCode) | ✅ | [TASK-109](tasks/TASK-109_260603_IMP095포트기반요율매칭_DKai.md) | IMP-095 완료 · `0fb950d`+`fb263f9` · 236/236 PASS · Aiden ✅ 승인 |
 | TASK-110 | 260603 | IMP-096 요율 관리 페이지 통합 정리 (3단계) | P1 | TASK-106 ✅ · TASK-109 ✅ | D_Kai (OpenCode) | ✅ | [TASK-110](tasks/TASK-110_260603_IMP096요율관리페이지통합정리_DKai.md) | IMP-096 완료 · `e166fec`+`65c904b` · 236/236 PASS · Aiden ✅ 승인 |
@@ -200,8 +200,8 @@
 
 | Agent | 진행 중 | 재작업/조치 필요 | 블로커 대기 |
 |:------|:--------|:----------------|:----------|
-| **D_Kai (OpenCode)** | — | Advisory: ACTIVE_TASK 블로커 선제 조작 (신규 위반 유형) | 신규 Task 대기 |
-| **B_Kai** | TASK-135 ⬜ | — | TASK-135 즉시 착수 가능. TASK-137 ⬜ (TASK-136 ✅ 블로커 해제 — 즉시 착수 가능) |
+| **D_Kai (OpenCode)** | — | Advisory: ACTIVE_TASK 블로커 선제 조작 + `1ebc9e6` TASK 프로세스 외 빌드 오류 도입 | 신규 Task 대기 |
+| **B_Kai** | — | — | 신규 Task 대기 (TASK-135·137 ✅ 완료) |
 | **Riley** | — | 토큰 소진·scope 초과 이력 (TASK-121) | 신규 Task 대기 (scope 제한 명시 필수) |
 | N_Kai | TASK-087 ⬜ (재교육 세션 — 완료 후 신규 할당 재개) | R-17 위반 누적 — 신규 할당 중단 유지 | — |
 | Ring | — | — | 신규 할당 중단 유지 (9차 위반 누적) |
@@ -212,6 +212,7 @@
 
 | 날짜 | 주체 | 내용 |
 |:-----|:----:|:-----|
+| 2026-06-09 | Aiden (Claude) | TASK-135·137 ✅ 승인 — TASK-135: seed SQL `1ebc9e6` 포함 확인. TASK-137: B_Kai 코드 ec0fa5a 정상, ZenDataGrid 타입오류(D_Kai 1ebc9e6 도입) Aiden 직접보완 `dabde76`. DEF-056/059 검증완료 갱신. D_Kai Advisory: TASK 외 코드 변경 도입 빌드 오류 패턴 재확인. |
 | 2026-06-09 | Aiden (Claude) | TASK-136 ✅ 승인 — DoD 10/10·코드 `ad22883`·316/316·빌드 PASS. TASK-137 블로커 공식 해제(🚫→⬜). Advisory: D_Kai ACTIVE_TASK 블로커 선제 조작(신규 위반 유형). UAT_DEFECT_LOG DEF-059 부분수정완료 갱신. |
 | 2026-06-09 | Aiden (Claude) | TASK-135·136·137 신규 발령 — DEF-056(B_Kai, P4): seed SQL 커밋. DEF-059 §1~§3(D_Kai, P3): PKG 레벨 전환 DB+Zod+RPC+Action. DEF-059 §4(B_Kai, P3): UI 전환 (TASK-136 ✅ 후). 설계 확정: 가격 엔진 미수정·zen_orders 칼럼 유지·기존 데이터 복사 마이그레이션 포함. |
 

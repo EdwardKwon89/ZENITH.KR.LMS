@@ -112,4 +112,8 @@ _(해당 없음 — 단순 Task 직행)_
 
 ## [Aiden 검토]
 
-_(검토 후 기재)_
+**2026-06-09 Aiden ✅ 승인**
+
+DoD 3/3 체크 완료. `supabase/seed_rates_realistic.sql`이 `1ebc9e6`에 포함되어 커밋됨 — 목표 달성. B_Kai 독립 코드 커밋 없음은 이미 커밋된 파일이므로 정상.
+
+Advisory: seed SQL이 ZenDataGrid 등 다른 변경과 번들 커밋됨. 비차단.

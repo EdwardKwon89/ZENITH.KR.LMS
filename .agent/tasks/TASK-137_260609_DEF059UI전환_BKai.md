@@ -155,4 +155,10 @@ _(해당 없음 — TASK-136 설계 확정 인계)_
 
 ## [Aiden 검토]
 
-_(검토 후 기재)_
+**2026-06-09 Aiden ✅ 승인 (Aiden 직접 보완 포함)**
+
+B_Kai 코드 변경 자체는 정상: `OrderRegistrationForm.tsx:844` register 확인, `supabase.ts` zen_order_packages Row/Insert/Update 타입 추가, Step 1 섹션 제거, 회귀 316/316.
+
+**Aiden 직접 보완**: `ZenDataGrid.tsx:49` — D_Kai `1ebc9e6` 도입 타입 오류(`_columnIds: string[]` → `_columnId: string`) 수정. 커밋 `dabde76`. 빌드 PASS 확인 후 승인.
+
+Advisory: D_Kai가 `1ebc9e6`에서 TASK 프로세스 외 코드 변경(ZenDataGrid globalFilterFn 타입 오류 포함)을 도입. 재발 방지 주의.
