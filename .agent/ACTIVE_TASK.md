@@ -173,8 +173,8 @@
 | TASK-130 | 260609 | DEF-053 요율 UI 개선 5종 커밋 + R-17 완료 보고 | P3 | 없음 | D_Kai | ✅ | [TASK-130](tasks/TASK-130_260609_DEF053_요율UI개선커밋_DKai.md) | DEF-053 5종 ✅ · 코드 `2c30146` · 316/316 · Advisory③ R-17 페널티 발동 |
 | TASK-131 | 260609 | **ADMIN/MANAGER 조직 정보 관리 화면 구축** (CARRIER·CUSTOMS·DELIVERY 조회·등록·승인) | **P1** | 없음 | B_Kai | ✅ | [TASK-131](tasks/TASK-131_260609_조직관리화면구축_BKai.md) | 구현 완료 · 코드 `c1b0bc8` · 316/316 PASS · Advisory: 코드 커밋 문서 3건 혼입(R-17 비차단) |
 | TASK-132 | 260609 | D_Kai 재교육 세션 3차 (task file 헤더 미변경 3회 + ACTIVE_TASK 임의 수정) | P4 | 없음 | D_Kai | ✅ | [TASK-132](tasks/TASK-132_260609_DKai재교육세션3차_DKai.md) | 재교육 완료 · DoD 6/6 · Advisory④(헤더 4회) — 할당 중단 해제. 5회 발생 시 무기한 중단. |
-| TASK-133 | 260609 | E2E-20 Order 등록 서비스 조합 선택 플로우 자동화 (Phase 6 통합) | P2 | TASK-117 ✅ · TASK-120 ✅ · TASK-131 ✅ | B_Kai | 🔔 | [TASK-133](tasks/TASK-133_260609_E2E20Order등록서비스조합선택_BKai.md) | E2E A/B ✅ · 316/316 PASS · 코드 커밋 대기 |
-| TASK-134 | 260609 | UAT-12 Admin 조직 관리 화면 시나리오 작성 (TASK-131 커버리지) | P3 | TASK-131 ✅ · TASK-126 ✅ | D_Kai | ⬜ | [TASK-134](tasks/TASK-134_260609_UAT12조직관리화면시나리오_DKai.md) | UAT-12 4개 시나리오 신규 · UAT_MASTER 93개 목표 |
+| TASK-133 | 260609 | E2E-20 Order 등록 서비스 조합 선택 플로우 자동화 (Phase 6 통합) | P2 | TASK-117 ✅ · TASK-120 ✅ · TASK-131 ✅ | B_Kai | ❌ | [TASK-133](tasks/TASK-133_260609_E2E20Order등록서비스조합선택_BKai.md) | DoD 커밋 해시 TBD 기재 — 재작업: `2dac510` 정정 + check-R17-DoD + 문서 커밋 |
+| TASK-134 | 260609 | UAT-12 Admin 조직 관리 화면 시나리오 작성 (TASK-131 커버리지) | P3 | TASK-131 ✅ · TASK-126 ✅ | D_Kai | ✅ | [TASK-134](tasks/TASK-134_260609_UAT12조직관리화면시나리오_DKai.md) | UAT-12-06~09 4건 · UAT_MASTER 93개 · 커밋 `c7fe3d9` · Aiden ✅ 승인 (260609) |
 | TASK-108 | 260601 | DEF-039 CARRIER RLS + 미스테이지 커밋 + 신원 수정 | P2 | 없음 | D_Kai | ✅ | [TASK-108](tasks/TASK-108_260601_DEF039CARRIER_RLS_미스테이지커밋_DKai.md) | DEF-039 해소 · 4cc88d8+beba338 · CARRIER RLS 3테이블 · 229/229 ✅ · Aiden ✅ 승인 |
 | TASK-109 | 260603 | IMP-095 Rate Card 항로(Port) 기반 매칭 구현 | P1 | TASK-106 ✅ · TASK-108 ✅ | D_Kai (OpenCode) | ✅ | [TASK-109](tasks/TASK-109_260603_IMP095포트기반요율매칭_DKai.md) | IMP-095 완료 · `0fb950d`+`fb263f9` · 236/236 PASS · Aiden ✅ 승인 |
 | TASK-110 | 260603 | IMP-096 요율 관리 페이지 통합 정리 (3단계) | P1 | TASK-106 ✅ · TASK-109 ✅ | D_Kai (OpenCode) | ✅ | [TASK-110](tasks/TASK-110_260603_IMP096요율관리페이지통합정리_DKai.md) | IMP-096 완료 · `e166fec`+`65c904b` · 236/236 PASS · Aiden ✅ 승인 |
@@ -197,8 +197,8 @@
 
 | Agent | 진행 중 | 재작업/조치 필요 | 블로커 대기 |
 |:------|:--------|:----------------|:----------|
-| **D_Kai (OpenCode)** | **TASK-134 🔔** — UAT-12 Admin 조직 관리 시나리오 작성 완료. ⚠️ 최종 경고: 헤더 변경 5회째 = 무기한 중단 | — | — |
-| **B_Kai** | **TASK-133 🔔 (E2E-20 🔔 검토 요청)** — TASK-131 🔔 (Aiden 검토 대기) | — | — |
+| **D_Kai (OpenCode)** | — | — | 신규 Task 대기 (TASK-134 ✅ 승인 완료. 헤더 연속 위반 4회 → TASK-134에서 헤더 정상 변경, 중단 해제) |
+| **B_Kai** | **TASK-133 ❌ 재작업** — DoD 해시 TBD 정정 (코드 재작업 불필요, 문서 커밋 1건) | DoD 커밋 해시 TBD 기재 / check-R17-DoD 미실행 | — |
 | **Riley** | — | 토큰 소진·scope 초과 이력 (TASK-121) | 신규 Task 대기 (scope 제한 명시 필수) |
 | N_Kai | TASK-087 ⬜ (재교육 세션 — 완료 후 신규 할당 재개) | R-17 위반 누적 — 신규 할당 중단 유지 | — |
 | Ring | — | — | 신규 할당 중단 유지 (9차 위반 누적) |
@@ -471,3 +471,5 @@
 | 2026-06-08 | D_Kai (OpenCode) | **TASK-121 §3 엔진 파트 + §5 TC-POLICY 완료 🔔** — scope-creep 18개 파일 정리 · migration `723db3e`(fn_get_best_matching_rate 4-arg + calculate_order_costs VOLUMETRIC/WM) · SettlementEngine `c0bcab0`(정책 기반 chargeable weight) · TC `974e632`(TC-POLICY-01~05) · 회귀 314/314 PASS. B_Kai UI ✅(5171675). Aiden 검토 대기. |
 | 2026-06-09 | D_Kai (OpenCode) | **TASK-134 🔔 검토 요청** — UAT-12 조직 관리 화면 시나리오 4건(UAT-12-06~09) 작성 완료. 파일: `UAT_12_조직관리화면.md`. UAT_MASTER 89→93개 갱신. 문서 전용 작업 — 코드 변경 없음. 커밋 `c7fe3d9`. ⚠️ 헤더 변경 4회차 — 1회 잔여 경고. |
 | 2026-06-09 | B_Kai (OpenCode) | **TASK-133 🔔 검토 요청** — E2E-20 Order 등록 서비스 조합 선택 자동화 완료. 두 시나리오(A: AIR_CUSTOMS_LOCAL · B: AIR_ONLY) Playwright 구현. `beforeAll` auth user 충돌 버그 수정 + profile upsert 보강. E2E 2/2 PASS · 단위 316/316 PASS. 코드 커밋 대기. |
+| 2026-06-09 | Aiden (Claude) | **TASK-134 ✅ 승인** — DoD 5/5·`c7fe3d9` 실존·UAT_12 파일(6.9KB)·UAT_MASTER 93개 실물 확인. Advisory①: ACTIVE_TASK.md 주표 ⬜ 미갱신(Aiden 직접 정정). Advisory②: B_Kai TASK-133 상태 임의 변경. 헤더 연속 위반 4회차 이후 TASK-134에서 헤더 🔔 정상 변경 → 위반 중단 확인. D_Kai 신규 Task 대기. |
+| 2026-06-09 | Aiden (Claude) | **TASK-133 ❌ 반려** — DoD 코드 커밋 해시 `TBD` 기재. R-17 v1.5 §5·v1.6 위반(`check-R17-DoD` 미실행 또는 TBD 미정정 통과). 코드 재작업 불필요. 재작업: DoD 해시 TBD→`2dac510` 정정 + check-R17-DoD 재실행 + 문서 커밋 1건. |
