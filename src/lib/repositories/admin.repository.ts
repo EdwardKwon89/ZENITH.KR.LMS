@@ -294,13 +294,27 @@ export class AdminRepository extends BaseRepository {
 
   // ─── zen_rate_cards (+ surcharges) ────────────────────────────
 
-  async findExistingActiveRateCards(carrierId: string, transportMode: string) {
-    return this.db
+  async findExistingActiveRateCards(carrierId: string, transportMode: string, originPortId?: string | null, destPortId?: string | null) {
+    let query = this.db
       .from('zen_rate_cards')
       .select('id, tiers')
       .eq('carrier_id', carrierId)
       .eq('transport_mode', transportMode)
       .eq('is_active', true);
+
+    if (originPortId === null || originPortId === undefined) {
+      query = query.is('origin_port_id', null);
+    } else {
+      query = query.eq('origin_port_id', originPortId);
+    }
+
+    if (destPortId === null || destPortId === undefined) {
+      query = query.is('dest_port_id', null);
+    } else {
+      query = query.eq('dest_port_id', destPortId);
+    }
+
+    return query;
   }
 
   async supersedeRateCards(ids: string[]) {

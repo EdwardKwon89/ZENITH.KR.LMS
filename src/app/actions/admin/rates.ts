@@ -115,7 +115,9 @@ export const createRateCard = withAction(async function (payload: {
 
   const { data: existingRates } = await adminRepo.findExistingActiveRateCards(
     payload.card.carrier_id,
-    payload.card.transport_mode
+    payload.card.transport_mode,
+    payload.card.origin_port_id,
+    payload.card.dest_port_id,
   );
 
   if (existingRates && existingRates.length > 0) {
