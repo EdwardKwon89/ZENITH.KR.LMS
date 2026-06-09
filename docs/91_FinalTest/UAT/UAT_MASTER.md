@@ -141,6 +141,10 @@ Supabase: Cloud 프로젝트 연결
 | UAT-10-05 | 경로 재산출 (오더 변경 후) | ADMIN | [UAT_10](UAT_10_지능형라우팅_운임.md) | D_Kai | ✅ | 일반 |
 | UAT-10-06 | 라우팅 결과 경로 시각화 확인 | ADMIN/SHIPPER | [UAT_10](UAT_10_지능형라우팅_운임.md) | D_Kai | ✅ | 일반 |
 | UAT-10-07 | TISA Dashboard 역할별 표시 (Admin/Shipper/Fallback) | ADMIN/SHIPPER | [UAT_10](UAT_10_지능형라우팅_운임.md) | B_Kai | 🔄 | 일반 |
+| UAT-10-08 | Weight Slab max_charge 상한선 적용 검증 | ADMIN | [UAT_10](UAT_10_지능형라우팅_운임.md) | B_Kai | ✅ | 일반 |
+| UAT-10-09 | CBM Slab max_charge 상한선 적용 검증 | ADMIN | [UAT_10](UAT_10_지능형라우팅_운임.md) | B_Kai | ✅ | 일반 |
+| UAT-10-10 | max_charge 미설정 시 정상 운임 적용 확인 | ADMIN | [UAT_10](UAT_10_지능형라우팅_운임.md) | B_Kai | ✅ | 일반 |
+| UAT-10-11 | TISA 스냅샷 8개 신규 컬럼 저장 검증 | ADMIN | [UAT_10](UAT_10_지능형라우팅_운임.md) | B_Kai | ✅ | 일반 |
 | UAT-11-01 | 직항 경로 조회 및 비용 확인 | ADMIN/SHIPPER | [UAT_11](UAT_11_Hub라우팅및P0항목.md) | B_Kai | ✅ | 필수 |
 | UAT-11-02 | Hub 경유 경로 조회 및 세그먼트별 비용 확인 | ADMIN | [UAT_11](UAT_11_Hub라우팅및P0항목.md) | B_Kai | ✅ | 필수 |
 | UAT-11-03 | Hub 경로 선택 후 오더 생성 및 경유지 표시 확인 | ADMIN | [UAT_11](UAT_11_Hub라우팅및P0항목.md) | B_Kai | ✅ | 필수 |
@@ -154,7 +158,7 @@ Supabase: Cloud 프로젝트 연결
 | UAT-12-04 | 역할별 오더 목록 조회 격리 (RLS 검증) | SHIPPER/PARTNERS/ADMIN | [UAT_12](UAT_P6_서비스요율_멀티배정.md) | Riley | ✅ | 필수 |
 | UAT-12-05 | 서비스 미지원 시 오더 등록 차단 및 경고 배너 검증 | SHIPPER | [UAT_12](UAT_P6_서비스요율_멀티배정.md) | Riley | ✅ | 필수 |
 
-**총 85개 시나리오** | 작성 완료: **85 / 85 ✅ 전량 완료** | 필수: **43개** | 일반: **42개**
+**총 89개 시나리오** | 작성 완료: **89 / 89 ✅ 전량 완료** | 필수: **43개** | 일반: **46개**
 
 ---
 
@@ -248,4 +252,5 @@ Supabase: Cloud 프로젝트 연결
 | 2026-05-26 | Aiden (Claude) | 필수/일반 구분 컬럼 추가 — 필수 38개·일반 41개. UAT-01~10 도메인별 재정렬(UAT-01-08·09, UAT-02-10 순서 정합). TASK-096 전제조건·상태·UAT-11-07 행 현행화 |
 | 2026-05-26 | Aiden (Claude) | UAT-11-01~07 상태 🔔→✅ 정정 — TASK-095·097 Aiden ✅ PASS 반영 누락분 보완 |
 | 2026-06-07 | Riley (Gemini) | TASK-120 — Phase 6 UAT 시나리오 5종 (UAT-12-01~05) 추가 및 인덱스 갱신, 총계 85개 갱신 |
+| 2026-06-09 | B_Kai (OpenCode) | TASK-126 — IMP-108 max_charge 시나리오 3종(UAT-10-08~10) + IMP-107 TISA 스냅샷 시나리오 1종(UAT-10-11) 추가, 총계 89개 갱신 |
 

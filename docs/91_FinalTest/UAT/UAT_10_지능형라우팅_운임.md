@@ -299,6 +299,149 @@
 
 ---
 
+## [UAT-10-08] Weight Slab 요율 max_charge 상한선 적용 검증
+
+| 항목 | 내용 |
+|:----|:----|
+| 역할 | ADMIN |
+| 화면 URL | /ko/admin/rates (요율 카드 등록) → /ko/orders/[id] (오더 상세 → TISA 패널) |
+| 예상 소요 시간 | 15분 |
+| 사전 조건 | ADMIN 로그인, Weight Slab 요율 카드에 `max_charge` 설정 가능한 Carrier 존재 (예: ZENITH_AIR) |
+| 관련 IMP | IMP-108 §3 |
+
+### 테스트 절차
+
+| 순서 | 화면·URL | 수행 액션 | 입력 데이터 | 기대 결과 | 확인 |
+|:---:|:---------|:---------|:-----------|:---------|:----:|
+| 1 | /ko/admin/rates | ADMIN 로그인 후 Rates 페이지 진입, 기존 AIR 요율 카드 Edit | `admin@zenith.kr` | Rate Card 편집 폼 오픈 | ☐ |
+| 2 | 편집 폼 | Weight Slab Tier에 max_charge 입력 | 예: weight_min=0, unit_price=6.00, max_charge=150 | max_charge 필드 정상 입력, 저장 성공 | ☐ |
+| 3 | /ko/orders | Weight 기반 운임이 max_charge를 초과하는 오더 선택 (예: 중량 200kg, unit_price $6.00/kg → $1,200 > $150) | — | 오더 상세 페이지 진입 | ☐ |
+| 4 | TISA 패널 | Rate Snapshot의 Total Freight 확인 | — | Total Freight = $150 (max_charge capping) | ☐ |
+| 5 | Supabase Studio | `SELECT total_freight, applied_pricing_basis FROM zen_order_rate_snapshots WHERE order_id = '[orderId]'` | — | `total_freight = 150`, `applied_pricing_basis = 'MAX_CHARGE'` | ☐ |
+| 6 | Supabase Studio | `SELECT applied_weight_cost, applied_cbm_cost FROM zen_order_rate_snapshots WHERE order_id = '[orderId]'` | — | weight_cost > cbm_cost (WM: WEIGHT 우세), applied_pricing_basis는 MAX_CHARGE로 override | ☐ |
+
+### 합격 기준
+- [ ] 전 단계 ☑ 완료
+- [ ] max_charge 설정 후 요율 카드 저장 성공
+- [ ] 실제 운임이 max_charge 초과 시 total_freight = max_charge로 capping
+- [ ] DB `applied_pricing_basis = 'MAX_CHARGE'` 확인
+- [ ] WM 비교 결과와 무관하게 MAX_CHARGE가 최종 pricing_basis로 저장
+
+### 결함 기재란
+
+| 결함-ID | 단계 | 현상 | 심각도 |
+|:-------:|:---:|:-----|:------:|
+| | | | |
+
+---
+
+## [UAT-10-09] CBM Slab 요율 max_charge 상한선 적용 검증
+
+| 항목 | 내용 |
+|:----|:----|
+| 역할 | ADMIN |
+| 화면 URL | /ko/admin/rates → /ko/orders/[id] |
+| 예상 소요 시간 | 15분 |
+| 사전 조건 | ADMIN 로그인, CBM Slab 요율 카드에 max_charge 설정 가능한 Carrier 존재 |
+| 관련 IMP | IMP-108 §3 |
+
+### 테스트 절차
+
+| 순서 | 화면·URL | 수행 액션 | 입력 데이터 | 기대 결과 | 확인 |
+|:---:|:---------|:---------|:-----------|:---------|:----:|
+| 1 | /ko/admin/rates | ADMIN 로그인 후 Rates 페이지 진입, CBM Slab 요율 카드에 max_charge 입력 | cbm_min=0, unit_price=80.00, max_charge=500 | max_charge 필드 저장 성공 | ☐ |
+| 2 | /ko/orders | CBM 기반 운임이 max_charge를 초과하는 오더 선택 (예: CBM 10, unit_price $80/CBM → $800 > $500) | — | 오더 상세 페이지 진입 | ☐ |
+| 3 | TISA 패널 | Rate Snapshot의 Total Freight 확인 | — | Total Freight = $500 (max_charge capping) | ☐ |
+| 4 | Supabase Studio | `SELECT total_freight, applied_pricing_basis FROM zen_order_rate_snapshots WHERE order_id = '[orderId]'` | — | `total_freight = 500`, `applied_pricing_basis = 'MAX_CHARGE'` | ☐ |
+| 5 | Supabase Studio | WM 비교 결과 확인 | `SELECT applied_cbm_cost, applied_weight_cost FROM zen_order_rate_snapshots WHERE order_id = '[orderId]'` | cbm_cost > weight_cost (CBM 우세 상황) | ☐ |
+
+### 합격 기준
+- [ ] 전 단계 ☑ 완료
+- [ ] CBM Slab max_charge 설정 저장 성공
+- [ ] CBM 기반 운임이 max_charge 초과 시 total_freight = max_charge로 capping
+- [ ] DB `applied_pricing_basis = 'MAX_CHARGE'` 확인
+- [ ] max_charge capping이 WM 모드(WEIGHT 또는 CBM)보다 우선 적용
+
+### 결함 기재란
+
+| 결함-ID | 단계 | 현상 | 심각도 |
+|:-------:|:---:|:-----|:------:|
+| | | | |
+
+---
+
+## [UAT-10-10] max_charge 미설정 시 정상 운임 적용 확인
+
+| 항목 | 내용 |
+|:----|:----|
+| 역할 | ADMIN |
+| 화면 URL | /ko/admin/rates → /ko/orders/[id] |
+| 예상 소요 시간 | 10분 |
+| 사전 조건 | ADMIN 로그인, max_charge가 NULL인 요율 카드 존재 |
+| 관련 IMP | IMP-108 §3 |
+
+### 테스트 절차
+
+| 순서 | 화면·URL | 수행 액션 | 입력 데이터 | 기대 결과 | 확인 |
+|:---:|:---------|:---------|:-----------|:---------|:----:|
+| 1 | /ko/admin/rates | ADMIN 로그인 후 max_charge가 설정되지 않은(NULL) 요율 카드 1건 확인 또는 신규 등록 | tiers: `[{weight_min: 0, unit_price: 5.00, max_charge: null}]` | max_charge 필드 미입력 상태로 저장 성공 | ☐ |
+| 2 | /ko/orders | 해당 요율이 적용되는 중량(예: 200kg) 오더 선택 | — | 오더 상세 페이지 진입 | ☐ |
+| 3 | TISA 패널 | Total Freight = weight × unit_price = $1,000 확인 | — | 정상 운임 $1,000 (capping 없음) | ☐ |
+| 4 | Supabase Studio | `SELECT total_freight, applied_pricing_basis FROM zen_order_rate_snapshots WHERE order_id = '[orderId]'` | — | `total_freight = 1000`, `applied_pricing_basis`는 WM 결과(`'WEIGHT'` 또는 `'CBM'`) | ☐ |
+| 5 | Supabase Studio | min_charge도 미설정인 경우 하한선 미적용 확인 | `SELECT * FROM zen_order_rate_snapshots WHERE order_id = '[orderId]'` | `applied_pricing_basis`가 `'MIN_CHARGE'` 또는 `'MAX_CHARGE'`가 아님 | ☐ |
+
+### 합격 기준
+- [ ] 전 단계 ☑ 완료
+- [ ] max_charge = NULL 저장 성공
+- [ ] max_charge 미설정 시 계산된 운임 그대로 적용 (capping 없음)
+- [ ] DB applied_pricing_basis가 MAX_CHARGE가 아닌 WM 결과값('WEIGHT' 또는 'CBM')
+
+### 결함 기재란
+
+| 결함-ID | 단계 | 현상 | 심각도 |
+|:-------:|:---:|:-----|:------:|
+| | | | |
+
+---
+
+## [UAT-10-11] TISA 스냅샷 저장 검증 (IMP-107 8개 신규 컬럼)
+
+| 항목 | 내용 |
+|:----|:----|
+| 역할 | ADMIN |
+| 화면 URL | /ko/orders/new (오더 생성) → /ko/orders/[id] (TISA 패널) |
+| 예상 소요 시간 | 15분 |
+| 사전 조건 | ADMIN 로그인, Weight Slab + CBM Slab이 모두 설정된 요율 카드 존재 (WM 모드 검증 가능) |
+| 관련 IMP | IMP-107 |
+
+### 테스트 절차
+
+| 순서 | 화면·URL | 수행 액션 | 입력 데이터 | 기대 결과 | 확인 |
+|:---:|:---------|:---------|:-----------|:---------|:----:|
+| 1 | /ko/orders | ADMIN 로그인 후 신규 오더 생성 | 중량 200kg, CBM 5, AIR, ICN→SIN | 오더 생성 완료, 경로 최적화 진행 가능 | ☐ |
+| 2 | /ko/orders/[id] | 경로 최적화 실행 후 경로 선택 | — | TISA Rate Snapshot 패널에 자동 매칭 요율 정보 표시 | ☐ |
+| 3 | Supabase Studio | `SELECT applied_weight_slab_min, applied_weight_unit_price, applied_weight_cost FROM zen_order_rate_snapshots WHERE order_id = '[orderId]'` | — | `applied_weight_slab_min` = 매칭된 중량 slab 최소값, `applied_weight_unit_price` = 해당 slab 단가, `applied_weight_cost` = weight_cost 계산값 | ☐ |
+| 4 | Supabase Studio | `SELECT applied_cbm_slab_min, applied_cbm_price, applied_cbm_cost FROM zen_order_rate_snapshots WHERE order_id = '[orderId]'` | — | `applied_cbm_slab_min` = 매칭된 CBM slab 최소값, `applied_cbm_price` = 해당 slab CBM 단가, `applied_cbm_cost` = cbm_cost 계산값 | ☐ |
+| 5 | Supabase Studio | `SELECT applied_pricing_basis FROM zen_order_rate_snapshots WHERE order_id = '[orderId]'` | — | `applied_pricing_basis` = WM 비교 결과 (`'WEIGHT'` 또는 `'CBM'`) | ☐ |
+| 6 | Supabase Studio | `SELECT tiers_snapshot FROM zen_order_rate_snapshots WHERE order_id = '[orderId]'` | — | `tiers_snapshot` JSONB: 적용된 rate card의 전체 tiers 배열 저장됨 | ☐ |
+| 7 | Supabase Studio | `SELECT * FROM zen_order_rate_snapshots WHERE order_id = '[orderId]'` — 전체 컬럼 확인 | — | 8개 신규 컬럼 모두 NULL이 아닌 값으로 저장됨 | ☐ |
+
+### 합격 기준
+- [ ] 전 단계 ☑ 완료
+- [ ] 8개 신규 컬럼 모두 정상 저장 확인 (`applied_weight_slab_min`, `applied_weight_unit_price`, `applied_weight_cost`, `applied_cbm_slab_min`, `applied_cbm_price`, `applied_cbm_cost`, `applied_pricing_basis`, `tiers_snapshot`)
+- [ ] weight slab과 cbm slab 각각 매칭된 slab 최소값/단가 정확히 확인
+- [ ] applied_pricing_basis — WM 비교 결과('WEIGHT'/'CBM') 정확히 반영
+- [ ] tiers_snapshot — JSONB 형식으로 rate card의 전체 tiers 구조 저장 확인
+- [ ] 신규 컬럼과 기존 컬럼(total_freight 등) 간 정합성 일치
+
+### 결함 기재란
+
+| 결함-ID | 단계 | 현상 | 심각도 |
+|:-------:|:---:|:-----|:------:|
+| | | | |
+
+---
+
 ## 개정 이력
 
 | 날짜 | 주체 | 내용 |
@@ -308,3 +451,4 @@
 | 2026-05-24 | D_Kai (OpenCode) | v2.1 — UAT-10-03·04·06 절차표 전면 완성 (IMP-081·082·083 구현 반영), 3건 ⬜→✅ |
 | 2026-05-30 | D_Kai (OpenCode) | v3.0 — UAT-10-01·02 3종 카드 → 전체 후보 비교 테이블 전환, SHIPPER 계정 변경, 화면 URL·절차 업데이트 (DEF-030 반영) |
 | 2026-06-01 | B_Kai (OpenCode) | v4.0 — UAT-10-04 Rate Card 폼에 carrier_cost·margin_rate·platform_fee_rate 3개 필드 추가 · UAT-10-07 TISA Dashboard 역할별 표시(Admin/Shipper/Fallback) 신규 3개 시나리오 · TASK-105 |
+| 2026-06-09 | B_Kai (OpenCode) | v5.0 — UAT-10-08~10 IMP-108 max_charge 상한선 시나리오 3종 추가 · UAT-10-11 IMP-107 TISA 스냅샷 8개 신규 컬럼 검증 시나리오 추가 · TASK-126 |
