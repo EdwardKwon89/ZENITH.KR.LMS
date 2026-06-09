@@ -324,64 +324,52 @@ async function seedRouteNetwork(supabase: any, carrierOrgId: string) {
   console.log(`  - Route network: ${created} new, ${routes.length - created} already existed`);
 }
 
-async function seedVesselSchedules(supabase: any, carrierOrgId: string) {
+async function seedVesselSchedules(supabase: any, _carrierOrgId: string) {
   console.log('\nSeeding Vessel Schedules (DEF-043)...');
 
-  const { data: carriers } = await supabase
-    .from('zen_carriers')
-    .select('id, code, transport_mode');
+  const { data: routeNetwork } = await supabase
+    .from('zen_route_network')
+    .select('carrier_id, from_port_id, to_port_id, transport_mode');
 
-  if (!carriers || carriers.length === 0) {
-    console.warn('  - No carriers found, skipping vessel schedules');
+  if (!routeNetwork || routeNetwork.length === 0) {
+    console.warn('  - No route network found, skipping vessel schedules');
     return;
   }
 
+  const allPortCodes = [...new Set(routeNetwork.flatMap((r: any) => [r.from_port_id, r.to_port_id]))];
   const { data: ports } = await supabase
     .from('zen_ports')
     .select('id, code')
-    .in('code', ['ICN', 'LAX', 'JFK', 'SIN', 'PVG']);
+    .in('code', allPortCodes);
 
-  const portMap = Object.fromEntries((ports || []).map((p: any) => [p.code, p.id]));
-
-  const scheduleDefs = [
-    { carrier_code: 'SEED_CARRIER', service_type: 'AIR', origin: 'ICN', dest: 'LAX', vessel_name: 'Boeing 777F', voyage_no: 'KE-701', etd_offset: 7, eta_offset: 9 },
-    { carrier_code: 'SEED_CARRIER', service_type: 'SEA', origin: 'ICN', dest: 'LAX', vessel_name: 'Zenith Voyager', voyage_no: 'ZV-801', etd_offset: 14, eta_offset: 28 },
-    { carrier_code: 'SEED_CARRIER', service_type: 'AIR', origin: 'ICN', dest: 'JFK', vessel_name: 'Boeing 747F', voyage_no: 'KE-501', etd_offset: 10, eta_offset: 12 },
-    { carrier_code: 'SEED_CARRIER', service_type: 'SEA', origin: 'ICN', dest: 'JFK', vessel_name: 'Atlantic Star', voyage_no: 'AS-301', etd_offset: 20, eta_offset: 38 },
-    { carrier_code: 'SEED_CARRIER', service_type: 'AIR', origin: 'ICN', dest: 'SIN', vessel_name: 'Airbus A330F', voyage_no: 'SQ-601', etd_offset: 3, eta_offset: 4 },
-    { carrier_code: 'SEED_CARRIER', service_type: 'SEA', origin: 'ICN', dest: 'SIN', vessel_name: 'Pacific Trader', voyage_no: 'PT-901', etd_offset: 5, eta_offset: 12 },
-    { carrier_code: 'SEED_CARRIER', service_type: 'AIR', origin: 'PVG', dest: 'ICN', vessel_name: 'Boeing 767F', voyage_no: 'CZ-401', etd_offset: 2, eta_offset: 3 },
-    { carrier_code: 'SEED_CARRIER', service_type: 'SEA', origin: 'PVG', dest: 'ICN', vessel_name: 'Yellow Sea Ferry', voyage_no: 'YS-201', etd_offset: 4, eta_offset: 6 },
-  ];
+  const portCodeToUuid = Object.fromEntries((ports || []).map((p: any) => [p.code, p.id]));
 
   const now = new Date();
   let created = 0;
   let skipped = 0;
+  const seen = new Set<string>();
 
-  for (const def of scheduleDefs) {
-    const carrier = (carriers as any[]).find((c: any) => c.code === def.carrier_code);
-    if (!carrier) {
-      console.warn(`  - Carrier ${def.carrier_code} not found, skipping`);
+  for (const route of routeNetwork) {
+    if (route.transport_mode === 'LAND') continue;
+
+    const key = `${route.carrier_id}:${route.from_port_id}:${route.to_port_id}:${route.transport_mode}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+
+    const originUuid = portCodeToUuid[route.from_port_id];
+    const destUuid = portCodeToUuid[route.to_port_id];
+    if (!originUuid || !destUuid) {
+      console.warn(`  - Unknown port: ${route.from_port_id}->${route.to_port_id}, skipping`);
       continue;
     }
-
-    const originId = portMap[def.origin];
-    const destId = portMap[def.dest];
-    if (!originId || !destId) {
-      console.warn(`  - Unknown port: ${def.origin}->${def.dest}, skipping`);
-      continue;
-    }
-
-    const etd = new Date(now.getTime() + def.etd_offset * 24 * 60 * 60 * 1000).toISOString();
-    const eta = new Date(now.getTime() + def.eta_offset * 24 * 60 * 60 * 1000).toISOString();
 
     const { data: existing } = await supabase
       .from('zen_vessel_schedules')
       .select('id')
-      .eq('carrier_id', carrier.id)
-      .eq('origin_port_id', originId)
-      .eq('destination_port_id', destId)
-      .eq('service_type', def.service_type)
+      .eq('carrier_id', route.carrier_id)
+      .eq('origin_port_id', originUuid)
+      .eq('destination_port_id', destUuid)
+      .eq('service_type', route.transport_mode)
       .gte('etd', now.toISOString())
       .limit(1);
 
@@ -390,22 +378,26 @@ async function seedVesselSchedules(supabase: any, carrierOrgId: string) {
       continue;
     }
 
+    const etd = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString();
+    const eta = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000).toISOString();
+    const voyageNo = `VN-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+
     const { error: insertError } = await supabase
       .from('zen_vessel_schedules')
       .insert({
-        carrier_id: carrier.id,
-        service_type: def.service_type,
-        origin_port_id: originId,
-        destination_port_id: destId,
-        vessel_name: def.vessel_name,
-        voyage_no: def.voyage_no,
+        carrier_id: route.carrier_id,
+        service_type: route.transport_mode,
+        origin_port_id: originUuid,
+        destination_port_id: destUuid,
+        vessel_name: `Vessel ${route.transport_mode} ${route.from_port_id}-${route.to_port_id}`,
+        voyage_no: voyageNo,
         etd,
         eta,
         status: 'SCHEDULED',
       });
 
     if (insertError) {
-      console.error(`  - Failed: ${def.origin}->${def.dest} ${def.service_type}: ${insertError.message}`);
+      console.error(`  - Failed: ${route.from_port_id}->${route.to_port_id} ${route.transport_mode}: ${insertError.message}`);
     } else {
       created++;
     }

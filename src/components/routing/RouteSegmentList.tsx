@@ -63,18 +63,23 @@ export function RouteSegmentList({ segments, className }: RouteSegmentListProps)
                   <DollarSign className="w-3 h-3 mr-0.5 opacity-70" />
                   {segment.cost.toLocaleString()} {segment.currency}
                 </div>
-                {segment.flight_no && (
+                {segment.flight_no ? (
                   <div className="flex items-center text-[11px] text-indigo-600 font-medium">
                     <Plane className="w-3 h-3 mr-1" />
                     {segment.flight_no}
                   </div>
-                )}
-                {segment.etd && (
+                ) : segment.etd ? (
                   <div className="flex items-center text-[11px] text-slate-500">
                     <CalendarDays className="w-3 h-3 mr-1 opacity-70" />
                     {new Date(segment.etd).toLocaleDateString()}
                   </div>
-                )}
+                ) : segment.transport_mode !== 'LAND' ? (
+                  <div className="flex items-center text-[11px] text-amber-600 font-medium">
+                    <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-amber-50 border border-amber-200">
+                      Schedule 미배정
+                    </span>
+                  </div>
+                ) : null}
               </div>
             </div>
           </div>
