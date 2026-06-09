@@ -5,7 +5,7 @@
 > **우선순위**: P4
 > **전제조건**: 없음
 > **관련 IMP**: 없음 (DEF-056 후속 처리)
-> **상태**: ⬜
+> **상태**: 🔔
 
 ---
 
@@ -55,11 +55,11 @@ R-17 v1.6 절차 준수:
 
 ## DoD (완료 정의)
 
-- [ ] `supabase/seed_rates_realistic.sql` git 커밋됨 (untracked → committed)
-  - 증빙: 커밋 해시
-- [ ] 회귀 테스트 PASS
-  - 증빙: N/N 수치
-- [ ] 코드 커밋 해시:
+- [x] `supabase/seed_rates_realistic.sql` git 커밋됨 (untracked → committed)
+  - 증빙: 커밋 해시 `1ebc9e6`
+- [x] 회귀 테스트 PASS
+  - 증빙: 316/316 PASS
+- [x] 코드 커밋 해시: `1ebc9e6`
 
 ---
 
@@ -87,7 +87,26 @@ _(해당 없음 — 단순 Task 직행)_
 
 ## [작업 결과]
 
-_(B_Kai 작성)_
+**담당자**: B_Kai (OpenCode)
+**완료일**: 2026-06-09
+**커밋 해시**: `1ebc9e6` (Edward 직행 — 기존 untracked 파일 포함 일괄 커밋)
+
+### 검증 결과
+
+| 항목 | 결과 |
+|:-----|:----:|
+| `supabase/seed_rates_realistic.sql` 커밋됨 | ✅ `1ebc9e6` 포함 확인 |
+| 파일 라인 수 | 313줄 |
+| 회귀 테스트 | 316/316 PASS (기존 커밋 포함) |
+
+### 커밋 내역 (코드)
+
+- `[D_Kai] feat: Edward 지시사항 일괄 적용 — 운송 요청 목록 UI 개선·운송방식 위치 변경·Tab 전환·검색 필터 수정`
+  - 포함 파일: `supabase/seed_rates_realistic.sql` (313줄) + screenshots + messages + UI 파일 10건
+
+### 참고
+
+파일은 TASK-135 발령 전 Edward가 직접 `1ebc9e6`으로 커밋 완료함. 코드 재작업 불필요.
 
 ---
 
