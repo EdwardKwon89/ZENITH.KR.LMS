@@ -2,12 +2,12 @@
   "$schema": "https://opencode.ai/config.json",
   "command": {
     "check-task": {
-      "description": "작업 지시서 확인/실시",
-      "template": "작업 지시서 확인해서, 작업 실시. 작업 완료 후 R17 및 DoD 점검항목 Check/미진 사항 보완"
+      "description": "작업 지시서 확인/실시 (R-17 준수)",
+      "template": "1) .agent/ACTIVE_TASK.md 를 읽어 본인 할당 ⬜ Task를 확인한다. 2) .agent/tasks/TASK-XXX_*.md 상세 파일을 읽고 [설계 확정] 섹션 확인 후 착수 — ACTIVE_TASK.md 상태 🔄로 변경. 3) 작업 중 담당 범위 밖 이슈 발견 시 R-18 준수: task file [발견 이슈] 섹션 요약 기재 + .agent/issues/ISS-NNN_제목.md 별도 보고서 작성. 4) 작업 완료 후 R-17 커밋 순서 준수: [코드 커밋] → [작업 결과] 섹션 + ACTIVE_TASK.md 🔔 변경 → IMP_PROGRESS.md 갱신 → check-R17-DoD 명령어 실행(❌ 항목 자체 수정 후 재실행, 전항목 통과까지 반복) → [문서 커밋](task file·ACTIVE_TASK 포함)."
     },
     "check-R17-DoD": {
-      "description": "R-17 DoD 검증 — 커밋 전 task file DoD 실물 확인",
-      "template": "당신의 task file(.agent/tasks/)을 읽고 DoD 섹션의 각 항목이: (1) [x] 체크 상태, (2) 실제 증거값(커밋 해시·파일 경로) 기재, (3) '기재 예정'·'TBD'·빈 값 없음을 검증하세요. 미비점이 있으면 커밋을 보류하고 즉시 보완한 후 재검증하세요."
+      "description": "R-17 완료 보고 절차 전체 수행 — 코드 커밋부터 문서 커밋까지",
+      "template": "GOV_COMMON.md 의 R-17 완료 보고 절차(v1.6) 전 단계를 순서대로 실행하라. 대상 task file: .agent/ACTIVE_TASK.md 에서 본인 🔄 Task ID 확인 → .agent/tasks/TASK-XXX_*.md. ⚠️ ✅ 전환은 Aiden 단독 권한."
     }
   }
 }
