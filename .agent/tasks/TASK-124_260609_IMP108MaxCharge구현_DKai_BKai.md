@@ -170,14 +170,14 @@ RETURN jsonb_build_object(
 
 - [x] `WeightSlab.max_charge?: number` · `CbmSlab.max_charge?: number` 인터페이스 추가 — `src/components/admin/RateTierEditor.tsx:10·17`
 - [x] RateTierEditor UI에 max_charge 입력 필드 노출 (선택, 미입력 허용) — `src/components/admin/RateTierEditor.tsx` weight slab·CBM slab 행 각 1개 필드
-- [x] fn_get_best_matching_rate (4-arg) `max_total_price` 컬럼 반환 확인 — 마이그 `20260609150000` · 4-arg RETURNS TABLE에 `max_total_price NUMERIC` 추가
-- [x] WM 모드에서 max_charge cap 적용 — `total_freight > max_charge` 시 `total_freight = max_charge`, `v_applied_basis := 'MAX_CHARGE'`
-- [x] `applied_pricing_basis` 반환값 검증 — TC-POLICY-06 `expect(sqlResult.applied_pricing_basis).toBe('MAX_CHARGE')` ✅
+- [x] fn_get_best_matching_rate (4-arg) `max_total_price` 컬럼 반환 확인 — 마이그 `20260609150000` · 4-arg RETURNS TABLE에 `max_total_price NUMERIC` 추가 · 코드 커밋 `9d70d87`
+- [x] WM 모드에서 max_charge cap 적용 — `total_freight > max_charge` 시 `total_freight = max_charge`, `v_applied_basis := 'MAX_CHARGE'` · `supabase/migrations/20260609150000_imp108_wm_cap_logic.sql` · 코드 커밋 `9d70d87`
+- [x] `applied_pricing_basis` 반환값 검증 — TC-POLICY-06 `expect(sqlResult.applied_pricing_basis).toBe('MAX_CHARGE')` ✅ · 코드 커밋 `9d70d87`
 - [x] `rtk npm run build` PASS — B_Kai `ce17476` ✅ / D_Kai `9d70d87` ✅ build PASS
 - [x] `rtk npm run test:regression` 315/315 PASS — B_Kai `ce17476` ✅ 314/314 / D_Kai `9d70d87` ✅ 315/315
-- [x] 신규 회귀 TC 추가 — TC-POLICY-06 (`tests/integration/p6-transport-policy.test.ts`) max_charge cap 케이스
+- [x] 신규 회귀 TC 추가 — TC-POLICY-06 (`tests/integration/p6-transport-policy.test.ts`) max_charge cap 케이스 · 코드 커밋 `9d70d87`
 
-- [x] `LIVE_REGRESSION_TEST_MAP.md` 업데이트 — TC-POLICY-06 등록 + v17.1 이력 갱신
+- [x] `LIVE_REGRESSION_TEST_MAP.md` 업데이트 — TC-POLICY-06 등록 + v17.1 이력 갱신 · 문서 커밋 `11b777d`
 
 ---
 
