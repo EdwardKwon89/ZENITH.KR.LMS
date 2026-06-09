@@ -108,13 +108,13 @@ Rate Preview Simulator에서 `applied_pricing_basis` 표시 필요 시 UI 추가
 
 ## DoD (완료 기준)
 
-- [ ] `zen_order_rate_snapshots` 마이그레이션 적용 — 8개 컬럼 추가 확인
-- [ ] `calculate_order_costs` 호출 후 스냅샷에 `applied_pricing_basis` 정상 저장 확인
-- [ ] `tiers_snapshot` JSONB에 적용 시점 tiers 전체 저장 확인
-- [ ] `rtk npm run build` PASS — 커밋 해시 기재
-- [ ] `rtk npm run test:regression` PASS — 커밋 해시 기재
-- [ ] 신규 회귀 TC 추가 — 스냅샷 컬럼 저장 검증 최소 1개
-- [ ] `LIVE_REGRESSION_TEST_MAP.md` 업데이트
+- [x] `zen_order_rate_snapshots` 마이그레이션 적용 — ALTER TABLE 8개 컬럼 추가 (applied_weight_slab_min·applied_weight_unit_price·applied_cbm_slab_min·applied_cbm_price·applied_weight_cost·applied_cbm_cost·applied_pricing_basis·tiers_snapshot) · 마이그 `20260609200000`
+- [x] `calculate_order_costs` 호출 후 스냅샷에 `applied_pricing_basis` 정상 저장 확인 — TC-POLICY-07 `expect(snapshot.applied_pricing_basis).toBe('WEIGHT')` ✅
+- [x] `tiers_snapshot` JSONB에 적용 시점 tiers 전체 저장 확인 — TC-POLICY-07 `expect(snapshot.tiers_snapshot.weight_slabs).toBeDefined()` · `expect(snapshot.tiers_snapshot.cbm_slabs).toBeDefined()` ✅
+- [x] `rtk npm run build` PASS — 커밋 `a14148b` ✅
+- [x] `rtk npm run test:regression` 316/316 PASS — 커밋 `a14148b` ✅ (기존 315 + TC-POLICY-07 신규 1)
+- [x] 신규 회귀 TC 추가 — TC-POLICY-07 (`tests/integration/p6-transport-policy.test.ts`) 스냅샷 8개 컬럼 저장 검증
+- [x] `LIVE_REGRESSION_TEST_MAP.md` 업데이트 — TC-POLICY-07 등록 + v17.2 이력 갱신
 
 ---
 
@@ -145,7 +145,27 @@ Rate Preview Simulator에서 `applied_pricing_basis` 표시 필요 시 UI 추가
 
 ## [작업 결과] — D_Kai 작성란
 
-> 완료 후 기재
+### IMP-107 TISA 요율 스냅샷 강화 ✅ 완료
+
+**수정 파일**:
+- `supabase/migrations/20260609200000_imp107_rate_snapshot_enhance.sql` — 신규 마이그레이션
+  - §1: `zen_order_rate_snapshots`에 8개 컬럼 추가 (slab 이력 + pricing_basis + tiers_snapshot)
+  - §2: `fn_get_best_matching_rate` (4-arg) — RETURNS TABLE에 `matched_weight_min`, `matched_cbm_min` 추가
+  - §3: `calculate_order_costs` — 운임 계산 후 `zen_order_rate_snapshots` INSERT ON CONFLICT (order_id) DO UPDATE로 저장 보강
+- `src/types/supabase.ts` — 4-arg fn return type에 `matched_weight_min: number | null`, `matched_cbm_min: number | null` 추가
+- `tests/integration/p6-transport-policy.test.ts` — TC-POLICY-07 신규 등록 (snapshot 8개 컬럼 저장 검증)
+- `docs/08_Self_Audit/Checklists/LIVE_REGRESSION_TEST_MAP.md` — TC-POLICY-07 등록 + v17.2 이력 갱신
+
+**엔진 변경 사항**:
+1. `fn_get_best_matching_rate` (4-arg): `matched_weight_min`, `matched_cbm_min` 반환 추가 — snapshot 저장용 slab 경계값
+2. `calculate_order_costs`: `v_matched_weight_min`, `v_matched_cbm_min` 변수로 slab min 추출 후 snapshot 저장
+3. Snapshot INSERT: `applied_rule='CALCULATED'`, `tiers_snapshot`은 rate_card.tiers 전체 JSONB 복사
+
+**검증 결과**:
+- `rtk npm run build` — ✅ PASS
+- `rtk npm run test:regression` — ✅ 316/316 PASS (기존 315 + TC-POLICY-07 신규 1)
+
+**커밋**: `a14148b`
 
 ---
 

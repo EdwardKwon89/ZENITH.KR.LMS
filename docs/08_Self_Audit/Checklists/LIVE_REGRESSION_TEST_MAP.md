@@ -325,6 +325,7 @@
 | **TC-POLICY-04** | SEA 오더 용적단가 > 중량단가 시 | 용적단가 채택 요율 산정 검증 | `tests/integration/p6-transport-policy.test.ts` |
 | **TC-POLICY-05** | Admin 정책 VOLUMETRIC->WM 변경 후 오더 산정 | 변경된 방식 즉시 반영 여부 통합 검증 | `tests/integration/p6-transport-policy.test.ts` |
 | **TC-POLICY-06** | WM max_charge cap 적용 (상한선 발동) | max_charge 초과 시 total_freight = max_charge + applied_pricing_basis = MAX_CHARGE 검증 | `tests/integration/p6-transport-policy.test.ts` |
+| **TC-POLICY-07** | WM 계산 후 snapshot slab 이력 + pricing_basis 저장 | zen_order_rate_snapshots 신규 8개 컬럼 정상 저장 검증 | `tests/integration/p6-transport-policy.test.ts` |
 
 ---
 
@@ -357,7 +358,7 @@
 | 2026-05-08 | v14.13 | ✅ PASS | 29.81s | 163/163 — E2E-12 복합 경로 최적화 및 마일스톤 시각화 완료. BALANCED 경로 선택 로직, RouteConsistencyBadge 서버 사이드 업데이트(page.reload) 및 마일스톤 타임라인 시각화 검증 완료. |
 | 2026-05-09 | v15.1 | ✅ PASS | ~30s | 165/165 — AUDIT-S1 인증·마이페이지·메뉴 결함 시정 + AUDIT-S2 RBAC 구조 정비. TC-RBAC-01~03 신규 등록 (DB 기반 동적 권한 + Fallback 검증). |
 | 2026-05-11 | v15.2 | ✅ PASS | ~30s | 173/173 — AUDIT-S3 법인회원 관리·탈퇴 기능 구현 완료. TC-PROFILE-01~04, TC-MEM-01~04 신규 등록. Aiden 검증 PASS. |
-| 2026-06-09 | v17.1 | ✅ PASS | ~50s | IMP-108 §3 WM CLAMP (max_charge cap) + applied_pricing_basis. TC-POLICY-06 신규 등록. |
+| 2026-06-09 | v17.2 | ✅ PASS | ~50s | IMP-107 TISA 스냅샷 강화 — slab 이력 + pricing_basis 저장. TC-POLICY-07 신규 등록. |
 
 
 | 2026-05-11 | v16.0 | ✅ PASS | ~35s | 177/177 — FB-016 FEAT-RATES 반려 결함 수정 완료. BUG-FR-001(Carrier 필터), BUG-FR-002(TISA 버전 관리) 조치 및 TC-RATES-01~04 신규 등록. |
