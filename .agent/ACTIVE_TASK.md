@@ -200,7 +200,7 @@
 
 | 날짜 | 주체 | 내용 |
 |:-----|:----:|:-----|
-| 2026-06-09 | Aiden (Claude) | TASK-124 ✅ 최종 승인 — §1 B_Kai(ce17476) + §3 D_Kai(9d70d87) · 315/315 PASS · Advisory: D_Kai DoD 증거값 보완 커밋 필요(e9a8881). TASK-125 🚫→⬜ 블로커 해제. |
+| 2026-06-09 | Aiden (Claude) | TASK-124 ✅ 최종 승인 — §1 B_Kai(ce17476) + §3 D_Kai(9d70d87) · 315/315 PASS · 보완 커밋(e9a8881) Aiden 지시에 의한 정상 검토 사이클 (위반 아님). TASK-125 🚫→⬜ 블로커 해제. |
 | 2026-06-09 | Aiden (Claude) | TASK-124·125 신규 발령 — IMP-108 §1+§3 max_charge(D_Kai+B_Kai 병렬) · IMP-107 TISA 스냅샷 강화(D_Kai, TASK-124 ✅ 후). |
 | 2026-06-09 | Aiden (Claude) | TASK-123 ✅ 최종 승인 — DEF-052 build PASS·50파일 전량 수정·IMP-108 §2 total_freight 기반 수수료 재정의·회귀 314/314. R-17 경고: 코드 커밋 내 문서 파일 포함 (D_Kai 1회 기록). UAT_DEFECT_LOG DEF-052 수정완료 갱신. |
 | 2026-06-08 | Aiden (Claude) | TASK-123 신규 발령 — DEF-052 TS 빌드 오류 5파일 (P1 빌드 차단) + IMP-108 §2 platform_fee_amount 재정의. D_Kai 즉시 착수. |
