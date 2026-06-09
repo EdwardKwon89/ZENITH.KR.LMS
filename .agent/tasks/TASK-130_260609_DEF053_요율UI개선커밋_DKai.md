@@ -65,7 +65,7 @@ rtk npm run test:regression
 - [x] DEF-053 ⑤ 저장 전 client-side validation 동작 확인: Slab·ORG·DES·Margin·PlatformFee 5종
 - [x] 회귀 테스트 전체 PASS: 316/316
 - [x] 코드 커밋 해시: `2c30146`
-- [ ] 문서 커밋 해시 기재: (TBD)
+- [x] 문서 커밋 해시: `7033a16`
 
 ---
 
@@ -115,7 +115,7 @@ Tests  316 passed (316)
 ### 커밋 정보
 
 - 코드 커밋: `2c30146`
-- 문서 커밋: (TBD)
+- 문서 커밋: `7033a16`
 
 ---
 
