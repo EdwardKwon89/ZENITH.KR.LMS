@@ -169,7 +169,7 @@ RETURN jsonb_build_object(
 ## DoD (완료 기준)
 
 - [x] `WeightSlab.max_charge?: number` · `CbmSlab.max_charge?: number` 인터페이스 추가 — `src/components/admin/RateTierEditor.tsx:10·17`
-- [x] RateTierEditor UI에 max_charge 입력 필드 노출 (선택, 미입력 허용) — weight slab·CBM slab 행 각 1개 필드
+- [x] RateTierEditor UI에 max_charge 입력 필드 노출 (선택, 미입력 허용) — `src/components/admin/RateTierEditor.tsx` weight slab·CBM slab 행 각 1개 필드
 - [ ] fn_get_best_matching_rate (4-arg) `max_total_price` 컬럼 반환 확인 — §3 D_Kai
 - [ ] WM 모드에서 max_charge cap 적용 — §3 D_Kai
 - [ ] `applied_pricing_basis` 반환값 검증 — §3 D_Kai
