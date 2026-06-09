@@ -5,7 +5,7 @@
 > **우선순위**: P3
 > **전제조건**: 없음
 > **관련 IMP**: 없음 (DEF-059 해소)
-> **상태**: ⬜
+> **상태**: 🔔
 
 ---
 
@@ -135,25 +135,27 @@ R-17 v1.6 절차 준수 (코드 커밋 선행 필수):
 
 ## DoD (완료 정의)
 
-- [ ] 마이그레이션: `zen_order_packages.special_cargo_type` 컬럼 추가 확인
-  - 증빙: 마이그레이션 파일 경로
-- [ ] 마이그레이션: 기존 `zen_orders.special_cargo_type != 'NONE'` 레코드 첫 PKG에 복사 로직 포함 확인
-  - 증빙: UPDATE 구문 코드 리뷰
-- [ ] 마이그레이션: `zen_orders.special_cargo_type` DEPRECATED 주석 추가 확인 (컬럼 유지)
-  - 증빙: COMMENT ON COLUMN 구문 확인
-- [ ] `orderPackageSchema`에 `special_cargo_type` 추가 확인
-  - 증빙: `src/lib/validation/order.ts` 코드 경로
-- [ ] `orderRegistrationSchema`에서 `special_cargo_type` 제거 확인
-  - 증빙: 해당 줄 삭제 확인
-- [ ] RPC PKG INSERT에 `special_cargo_type` 포함 확인
-  - 증빙: 마이그레이션 파일 경로
-- [ ] Server Action `insertPackage` 호출부에 `special_cargo_type` 포함 확인
-  - 증빙: `orders.ts` 파일 경로 + 라인
-- [ ] 빌드 PASS 확인
-  - 증빙: `npm run build` 결과
-- [ ] 회귀 테스트 전체 PASS
-  - 증빙: N/N 수치
-- [ ] 코드 커밋 해시:
+- [x] 마이그레이션: `zen_order_packages.special_cargo_type` 컬럼 추가 확인
+  - 증빙: `supabase/migrations/20260610000000_def059_pkg_special_cargo_type.sql` ✅
+- [x] 마이그레이션: 기존 `zen_orders.special_cargo_type != 'NONE'` 레코드 첫 PKG에 복사 로직 포함 확인
+  - 증빙: UPDATE 구문 (DISTINCT ON + JOIN) ✅
+- [x] 마이그레이션: `zen_orders.special_cargo_type` DEPRECATED 주석 추가 확인 (컬럼 유지)
+  - 증빙: COMMENT ON COLUMN 구문 ✅
+- [x] `orderPackageSchema`에 `special_cargo_type` 추가 확인
+  - 증빙: `src/lib/validation/order.ts:28` ✅
+- [x] `orderRegistrationSchema`에서 `special_cargo_type` 제거 확인
+  - 증빙: `src/lib/validation/order.ts:68` 삭제 ✅
+- [x] RPC PKG INSERT에 `special_cargo_type` 포함 확인
+  - 증빙: `supabase/migrations/20260610000100_def059_create_order_atomic_pkg_cargo.sql` ✅
+- [x] Server Action `insertPackage` 호출부에 `special_cargo_type` 포함 확인
+  - 증빙: `orders.ts:91` ✅
+- [x] 빌드 PASS 확인
+  - 증빙: 0 Errors, 0 Warnings ✅
+- [x] 회귀 테스트 전체 PASS
+  - 증빙: 316/316 ✅
+- [x] TC-A.5 test PKG 레벨로 수정
+  - 증빙: `order-actions.test.ts:167` ✅
+- [x] 코드 커밋 해시: `ad22883`
 
 ---
 
@@ -185,7 +187,32 @@ _(해당 없음 — 직행)_
 
 ## [작업 결과]
 
-_(D_Kai 작성)_
+### §1 DB 마이그레이션 1 ✅
+- `supabase/migrations/20260610000000_def059_pkg_special_cargo_type.sql`
+  - `zen_order_packages.special_cargo_type ADD COLUMN` (CHECK: NONE/DANGEROUS/FROZEN/VALUABLE/USED)
+  - 기존 `zen_orders.special_cargo_type != 'NONE'` 데이터 첫 PKG 복사 UPDATE
+  - `zen_orders.special_cargo_type` DEPRECATED COMMENT 추가 (컬럼 유지)
+
+### §1 DB 마이그레이션 2 (RPC) ✅
+- `supabase/migrations/20260610000100_def059_create_order_atomic_pkg_cargo.sql`
+  - `create_order_atomic` RPC: `zen_orders` INSERT에서 `special_cargo_type` 제거
+  - packages `jsonb_to_recordset`에 `special_cargo_type TEXT` 추가
+  - `zen_order_packages` INSERT에 `special_cargo_type` 포함 (`COALESCE(v_pkg.special_cargo_type, 'NONE')`)
+
+### §2 Zod 스키마 ✅
+- `src/lib/validation/order.ts`:
+  - `orderPackageSchema`에 `special_cargo_type: z.enum([...]).default('NONE')` 추가
+  - `orderRegistrationSchema`에서 `special_cargo_type` 제거 (DEPRECATED)
+
+### §4 Server Action ✅
+- `src/app/actions/operations/orders.ts`:
+  - `updateOrder()`: `updateHeader` 호출부에서 `special_cargo_type` 제거
+  - `insertPackage` 호출부에 `special_cargo_type: pkg.special_cargo_type ?? 'NONE'` 추가
+
+### 테스트 ✅
+- 회귀: 316/316 PASS
+- 빌드: 0 Errors, 0 Warnings
+- DB 마이그레이션: 로컬 DB 적용 완료 (0건 UPDATE — 데이터 없음)
 
 ---
 

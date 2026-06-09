@@ -176,8 +176,8 @@
 | TASK-133 | 260609 | E2E-20 Order 등록 서비스 조합 선택 플로우 자동화 (Phase 6 통합) | P2 | TASK-117 ✅ · TASK-120 ✅ · TASK-131 ✅ | B_Kai | ✅ | [TASK-133](tasks/TASK-133_260609_E2E20Order등록서비스조합선택_BKai.md) | E2E A/B ✅ · 316/316 PASS · 코드 `2dac510` · 재작업 `61caaee` · Aiden ✅ 승인 (260609) |
 | TASK-134 | 260609 | UAT-12 Admin 조직 관리 화면 시나리오 작성 (TASK-131 커버리지) | P3 | TASK-131 ✅ · TASK-126 ✅ | D_Kai | ✅ | [TASK-134](tasks/TASK-134_260609_UAT12조직관리화면시나리오_DKai.md) | UAT-12-06~09 4건 · UAT_MASTER 93개 · 커밋 `c7fe3d9` · Aiden ✅ 승인 (260609) |
 | TASK-135 | 260609 | DEF-056 실물 요율 시드 SQL 커밋 (`seed_rates_realistic.sql` untracked) | P4 | 없음 | B_Kai | ⬜ | [TASK-135](tasks/TASK-135_260609_DEF056시드SQL커밋_BKai.md) | — |
-| TASK-136 | 260609 | DEF-059 §1~§3 PKG 레벨 special_cargo_type 전환 (DB·Zod·RPC·Action) | P3 | 없음 | D_Kai | ⬜ | [TASK-136](tasks/TASK-136_260609_DEF059PKG레벨특수화물전환_DKai.md) | TASK-137 블로커 |
-| TASK-137 | 260609 | DEF-059 §4 UI 전환 — PKG 카드에 special_cargo_type 선택 UI 이동 | P3 | TASK-136 ✅ | B_Kai | 🚫 | [TASK-137](tasks/TASK-137_260609_DEF059UI전환_BKai.md) | TASK-136 완료 후 자동 해제 |
+| TASK-136 | 260609 | DEF-059 §1~§3 PKG 레벨 special_cargo_type 전환 (DB·Zod·RPC·Action) | P3 | 없음 | D_Kai | 🔔 | [TASK-136](tasks/TASK-136_260609_DEF059PKG레벨특수화물전환_DKai.md) | TASK-137 블로커 |
+| TASK-137 | 260609 | DEF-059 §4 UI 전환 — PKG 카드에 special_cargo_type 선택 UI 이동 | P3 | TASK-136 ✅ | B_Kai | ⬜ | [TASK-137](tasks/TASK-137_260609_DEF059UI전환_BKai.md) | 🚫 해제 — TASK-136 ✅ 완료, B_Kai 즉시 착수 가능 |
 | TASK-108 | 260601 | DEF-039 CARRIER RLS + 미스테이지 커밋 + 신원 수정 | P2 | 없음 | D_Kai | ✅ | [TASK-108](tasks/TASK-108_260601_DEF039CARRIER_RLS_미스테이지커밋_DKai.md) | DEF-039 해소 · 4cc88d8+beba338 · CARRIER RLS 3테이블 · 229/229 ✅ · Aiden ✅ 승인 |
 | TASK-109 | 260603 | IMP-095 Rate Card 항로(Port) 기반 매칭 구현 | P1 | TASK-106 ✅ · TASK-108 ✅ | D_Kai (OpenCode) | ✅ | [TASK-109](tasks/TASK-109_260603_IMP095포트기반요율매칭_DKai.md) | IMP-095 완료 · `0fb950d`+`fb263f9` · 236/236 PASS · Aiden ✅ 승인 |
 | TASK-110 | 260603 | IMP-096 요율 관리 페이지 통합 정리 (3단계) | P1 | TASK-106 ✅ · TASK-109 ✅ | D_Kai (OpenCode) | ✅ | [TASK-110](tasks/TASK-110_260603_IMP096요율관리페이지통합정리_DKai.md) | IMP-096 완료 · `e166fec`+`65c904b` · 236/236 PASS · Aiden ✅ 승인 |
