@@ -6,7 +6,7 @@
 | 위치 | `docs/91_FinalTest/UAT/` |
 | 작성일 | 2026-05-27 |
 | 관리 주체 | Aiden (Claude) |
-| 최종 갱신 | 2026-06-09 (DEF-059 화물 구분 PKG 단위 전환 검토 — Noah) |
+| 최종 갱신 | 2026-06-09 (DEF-059 §1~§3 TASK-136 ✅ 승인, §4 UI TASK-137 진행 중) |
 
 ---
 
@@ -102,7 +102,7 @@
 | DEF-055 | UAT-12-01 | 기능 개선 | N | 수정완료 | B_Kai | - | **"DEPLOY RATE CARD" 버튼 글자(white)와 배경(#ffffff) 동일하여 보이지 않음** — `.zen-tactile` CSS가 `background: #ffffff` 강제 설정하여 `bg-blue-600` override. `text-stone-700`이 `text-white` override. DEF-010(법인 최종 승인)·DEF-033(새문의하기)와 동일 근본 원인. | `dba695e` | `.zen-tactile` `background:#ffffff` 제거 + ZenButton tactile variant `bg-white` 추가 (TASK-129 DEF-010 수정 시 동일 파일 함께 수정) | - | TASK-129 수정 |
 | DEF-056 | UAT-02-01 | 기능 보완 | N | 수정완료 | Noah (Codex) | `supabase/seed_rates_realistic.sql` | **Estimated Freight 현실화 — 실물 요율 시드 데이터 등록**. 실제 항공사(KAL/AAR/FEDEX/DHL)·선사(HMM/MSC/EVERGREEN)의 slab 기반 운임 + surcharge 데이터를 `zen_rate_cards`·`zen_surcharges`에 등록. UI "Estimated Freight"(fallback dummy rate)는 유지되나, 서버 billing(`calculateCompositePricing`)은 DB 실요율로 정상 처리. | - | `supabase/seed_rates_realistic.sql` 신규 — 7개 운송사 + 12건 rate card + 30건 surcharge + route network 자동생성. DB 적용 완료. 상세: `.agent/defects/DEF-056_실물요율시드데이터등록.md` | - | post-Go-Live: UI fallback rate 현실화 별도 IMP 가능 || DEF-057 | UAT-02-02 | UI 개선 | N | 수정완료 | Noah (Codex) | `src/app/[locale]/(dashboard)/orders/page.tsx`<br>`src/components/orders/OrderFilterBar.tsx` | **운송 요청 목록 UI 레이아웃 조정**. 요율 페이지와 헤더 스타일 통일(`text-2xl` + 설명 문구). 검색 필터 개선 — "조회"+"CREATE NEW ORDER" 버튼 위치 교환, "Apply Filters"→"조회" 텍스트 변경, Search/Status/Type caption 라벨 삭제. | - | `.agent/defects/DEF-057_운송요청목록UI레이아웃조정.md` | - | - |
 | DEF-058 | UAT-02-02 | 기능 개선 | N | 수정완료 | Noah (Codex) | `src/components/orders/OrderFilterBar.tsx` | **운송 요청 목록 "조회" 버튼 제거 → Debounce 자동 검색 전환**. rates 페이지와 UX 통일. `useEffect` + `setTimeout` 500ms debounce로 입력 시 자동 `router.push()`. 초기 마운트 중복 push 방지. | - | `.agent/defects/DEF-058_운송요청목록조회버튼제거Debounce전환.md` | - | - |
-| DEF-059 | UAT-02-01 | 기능 개선 | N | 미수정 | — | `zen_order_packages` ADD COLUMN<br>`src/lib/validation/order.ts`<br>`create_order_atomic` RPC<br>`OrderRegistrationForm.tsx` | **special_cargo_type Order 레벨 → Package 레벨 전환 검토**. 한 오더 내 PKG별로 다른 화물 구분(위험물/냉동/귀중품/중고)을 가질 수 있도록 구조 변경. DB 마이그레이션, Zod 스키마, RPC, UI 총 4개 영역 수정 필요. | - | `.agent/defects/DEF-059_화물구분PKG단위전환검토.md` | - | Aiden 협의 필요 |
+| DEF-059 | UAT-02-01 | 기능 개선 | N | 부분수정완료 | D_Kai (§1~§3) / B_Kai (§4) | `ad22883` | **special_cargo_type Order 레벨 → Package 레벨 전환**. 한 오더 내 PKG별로 다른 화물 구분(위험물/냉동/귀중품/중고)을 가질 수 있도록 구조 변경. §1~§3(DB+Zod+RPC+Action) TASK-136 ✅ 완료. §4 UI 전환 TASK-137 진행 중. | `ad22883` | §1~§3: `20260610000000` ADD COLUMN + UPDATE copy + DEPRECATED comment. `20260610000100` RPC PKG INSERT 확장. `order.ts` PKG 레벨 Zod 추가/Order 레벨 제거. `orders.ts` insertPackage 호출부 수정. §4 UI: TASK-137(B_Kai) 진행 중. | ⏳ TASK-137 완료 대기 | - |
 ---
 
 ## 처리 지침

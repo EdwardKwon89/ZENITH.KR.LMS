@@ -218,4 +218,8 @@ _(해당 없음 — 직행)_
 
 ## [Aiden 검토]
 
-_(검토 후 기재)_
+**2026-06-09 Aiden ✅ 승인**
+
+DoD 10/10 전항목 체크 완료. 코드 커밋 `ad22883` 실존 확인. 마이그레이션 2건(ADD COLUMN + UPDATE copy + DEPRECATED comment / RPC PKG INSERT 확장), Zod 스키마 수정, Server Action 수정 모두 실물 검증. 빌드 PASS, 316/316 PASS. R-17 커밋 순서 준수.
+
+**Advisory**: 문서 커밋에서 TASK-137 블로커 전환(🚫→⬜) 선제 처리 — R-17 "블로커 전환은 Aiden 전속" 위반. 비차단. D_Kai 새로운 위반 유형("ACTIVE_TASK 내용 조작")으로 별도 카운트.
