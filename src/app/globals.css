@@ -79,7 +79,6 @@
   }
   
   .zen-tactile {
-    background: #ffffff;
     border: 1px solid var(--zen-border-light);
     box-shadow: var(--zen-shadow-tactile);
     transition: var(--zen-transition);

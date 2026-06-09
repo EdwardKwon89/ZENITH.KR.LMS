@@ -12,7 +12,7 @@ export const ZenButton = ({
   loading?: boolean;
 }) => {
   const variants = {
-    tactile: "zen-tactile text-stone-700 font-semibold px-6 py-3 rounded-xl active:scale-95 disabled:opacity-50",
+    tactile: "bg-white zen-tactile text-stone-700 font-semibold px-6 py-3 rounded-xl active:scale-95 disabled:opacity-50",
     glass: "zen-glass text-brand-700 font-semibold px-6 py-3 rounded-xl hover:bg-white/40 active:scale-95 disabled:opacity-50",
     ghost: "bg-transparent text-stone-500 hover:text-stone-800 transition-colors disabled:opacity-50"
   };

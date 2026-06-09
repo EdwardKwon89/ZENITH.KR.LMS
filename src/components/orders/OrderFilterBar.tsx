@@ -41,7 +41,7 @@ export default function OrderFilterBar({ locale }: FilterBarProps) {
   };
 
   return (
-    <div className="mb-4 p-5 zen-tactile rounded-2xl flex flex-wrap gap-4 items-end animate-in fade-in slide-in-from-top-4 duration-700">
+    <div className="mb-4 p-5 bg-white zen-tactile rounded-2xl flex flex-wrap gap-4 items-end animate-in fade-in slide-in-from-top-4 duration-700">
       <div className="flex-1 min-w-[200px]">
         <label className="block text-[11px] font-bold text-slate-500 mb-2 ml-1 uppercase tracking-wider">Search</label>
         <input 
