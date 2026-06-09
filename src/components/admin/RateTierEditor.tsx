@@ -8,12 +8,14 @@ export interface WeightSlab {
   weight_min: number;
   unit_price: number;
   min_charge: number;
+  max_charge?: number;
 }
 
 export interface CbmSlab {
   cbm_min: number;
   cbm_price: number;
   min_charge: number;
+  max_charge?: number;
 }
 
 export interface RateTiers {
@@ -65,6 +67,18 @@ export const RateTierEditor: React.FC<RateTierEditorProps> = ({ tiers, onChange,
   const updateCbmSlab = (index: number, field: keyof CbmSlab, value: number) => {
     const slabs = [...tiers.cbm_slabs];
     slabs[index] = { ...slabs[index], [field]: value };
+    onChange({ ...tiers, cbm_slabs: slabs });
+  };
+
+  const updateWeightSlabMaxCharge = (index: number, value: string) => {
+    const slabs = [...tiers.weight_slabs];
+    slabs[index] = { ...slabs[index], max_charge: value === '' ? undefined : Number(value) };
+    onChange({ ...tiers, weight_slabs: slabs });
+  };
+
+  const updateCbmSlabMaxCharge = (index: number, value: string) => {
+    const slabs = [...tiers.cbm_slabs];
+    slabs[index] = { ...slabs[index], max_charge: value === '' ? undefined : Number(value) };
     onChange({ ...tiers, cbm_slabs: slabs });
   };
 
@@ -130,6 +144,20 @@ export const RateTierEditor: React.FC<RateTierEditorProps> = ({ tiers, onChange,
                         value={slab.min_charge}
                         onChange={(e) => updateWeightSlab(index, 'min_charge', Number(e.target.value))}
                         className="pl-12 bg-slate-50 border-slate-300 text-amber-600 font-bold"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex-1 space-y-2">
+                    <label className="text-[10px] text-slate-400 font-bold uppercase ml-1">Max. Charge ({currency}, 선택)</label>
+                    <div className="relative">
+                      <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-red-400/50" />
+                      <ZenInput
+                        type="number"
+                        value={slab.max_charge ?? ''}
+                        onChange={(e) => updateWeightSlabMaxCharge(index, e.target.value)}
+                        className="pl-12 bg-slate-50 border-slate-300 text-red-500 font-bold"
+                        placeholder="상한 없음"
                       />
                     </div>
                   </div>
@@ -207,6 +235,20 @@ export const RateTierEditor: React.FC<RateTierEditorProps> = ({ tiers, onChange,
                         value={slab.min_charge}
                         onChange={(e) => updateCbmSlab(index, 'min_charge', Number(e.target.value))}
                         className="pl-12 bg-slate-50 border-slate-300 text-amber-600 font-bold"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex-1 space-y-2">
+                    <label className="text-[10px] text-slate-400 font-bold uppercase ml-1">Max. Charge ({currency}, 선택)</label>
+                    <div className="relative">
+                      <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-red-400/50" />
+                      <ZenInput
+                        type="number"
+                        value={slab.max_charge ?? ''}
+                        onChange={(e) => updateCbmSlabMaxCharge(index, e.target.value)}
+                        className="pl-12 bg-slate-50 border-slate-300 text-red-500 font-bold"
+                        placeholder="상한 없음"
                       />
                     </div>
                   </div>

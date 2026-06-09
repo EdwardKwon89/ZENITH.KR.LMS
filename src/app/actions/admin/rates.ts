@@ -77,8 +77,8 @@ export const createRateCard = withAction(async function (payload: {
     dest_port_id?: string | null;
     transit_days?: number | null;
     tiers: {
-      weight_slabs: { weight_min: number; unit_price: number; min_charge: number }[];
-      cbm_slabs: { cbm_min: number; cbm_price: number; min_charge: number }[];
+      weight_slabs: { weight_min: number; unit_price: number; min_charge: number; max_charge?: number }[];
+      cbm_slabs: { cbm_min: number; cbm_price: number; min_charge: number; max_charge?: number }[];
     };
     valid_from: string;
     valid_to?: string;
