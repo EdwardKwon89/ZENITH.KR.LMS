@@ -46,7 +46,7 @@ export default function ZenDataGrid<TData, TValue>({
   const [sorting, setSorting] = useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
 
-  function globalFilterFn(row: Row<any>, _columnIds: string[], filterValue: string): boolean {
+  function globalFilterFn(row: Row<any>, _columnId: string, filterValue: string): boolean {
     if (!filterValue) return true;
     const search = filterValue.toLowerCase();
     return row.getAllCells().some(cell => {
