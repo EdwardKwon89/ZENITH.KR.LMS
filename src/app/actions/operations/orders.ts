@@ -72,7 +72,6 @@ export async function updateOrder(orderId: string, payload: OrderRegistrationInp
     delivery_notes: validated.delivery_notes,
     transport_mode: validated.transport_mode,
     estimated_cost: validated.estimated_cost,
-    special_cargo_type: validated.special_cargo_type,
   });
 
   await orderRepo.deleteItemsByOrderId(orderId);
@@ -89,6 +88,7 @@ export async function updateOrder(orderId: string, payload: OrderRegistrationInp
         height: pkg.height,
         gross_weight: pkg.gross_weight,
         volume: pkg.volume,
+        special_cargo_type: pkg.special_cargo_type ?? 'NONE',
       });
 
       if (pkgError || !packageData) continue;

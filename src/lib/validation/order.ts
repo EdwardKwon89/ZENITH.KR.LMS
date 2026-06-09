@@ -25,6 +25,7 @@ export const orderPackageSchema = z.object({
   height: z.number().nonnegative().optional(),
   gross_weight: z.number().nonnegative('Weight is required'),
   volume: z.number().nonnegative().optional(),
+  special_cargo_type: z.enum(['NONE', 'DANGEROUS', 'FROZEN', 'VALUABLE', 'USED']).default('NONE'),
   items: z.array(orderItemSchema).min(1, 'At least one item per package is required'),
 });
 
@@ -61,10 +62,7 @@ export const orderRegistrationSchema = z.object({
   // 물류 요약 정보 (v2.2)
   estimated_cost: z.number().optional(),
   
-  // 특수화물 기재 (IMP-076)
-  special_cargo_type: z.enum(['NONE', 'DANGEROUS', 'FROZEN', 'VALUABLE', 'USED']).default('NONE'),
-  
-  // 계층형 패킹 데이터
+  // 계층형 패킹 데이터 (special_cargo_type은 PKG 레벨로 이전 — DEF-059)
   packages: z.array(orderPackageSchema).min(1, 'At least one package is required'),
 });
 

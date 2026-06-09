@@ -159,12 +159,12 @@ describe('ZENITH Logistics: Order Creation Logic', () => {
       recipient_name: 'Hong Gil-dong',
       recipient_address: '123 Zenith St, Seoul',
       recipient_phone: '010-1234-5678',
-      special_cargo_type: 'DANGEROUS',
       packages: [
         {
           packing_unit: 'BOX',
           packing_count: 1,
           gross_weight: 10.5,
+          special_cargo_type: 'DANGEROUS',
           items: [{ 
             item_name: 'Chemical Reagents', 
             quantity: 1, 
@@ -184,7 +184,8 @@ describe('ZENITH Logistics: Order Creation Logic', () => {
     // Then
     const rpcCall = mockSupabase.rpc.mock.calls[0];
     expect(rpcCall[0]).toBe('create_order_atomic');
-    expect(rpcCall[1].p_payload.special_cargo_type).toBe('DANGEROUS');
+    const pkg = rpcCall[1].p_payload.packages?.[0];
+    expect(pkg?.special_cargo_type).toBe('DANGEROUS');
   });
 
   describe('Order Status Update: Exception Resilience', () => {
