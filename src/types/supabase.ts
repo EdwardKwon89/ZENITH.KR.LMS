@@ -4156,6 +4156,7 @@ export type Database = {
             Returns: {
               cbm_price: number
               min_total_price: number
+              max_total_price: number | null
               unit_price: number
             }[]
           }

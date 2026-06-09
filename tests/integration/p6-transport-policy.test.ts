@@ -8,7 +8,7 @@ dotenv.config({ path: '.env.local' });
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'http://127.0.0.1:54321';
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-describe('IMP-105: Transport Pricing Policy Integration Tests (TC-POLICY-01~05)', () => {
+describe('IMP-105: Transport Pricing Policy Integration Tests (TC-POLICY-01~06)', () => {
   let supabase: SupabaseClient;
   let engine: SettlementEngine;
   let testShipperId: string;
@@ -60,7 +60,8 @@ describe('IMP-105: Transport Pricing Policy Integration Tests (TC-POLICY-01~05)'
       'TC-POLICY-02-ORD',
       'TC-POLICY-03-ORD',
       'TC-POLICY-04-ORD',
-      'TC-POLICY-05-ORD'
+      'TC-POLICY-05-ORD',
+      'TC-POLICY-06-ORD'
     ];
     const { data: oldOrders } = await supabase
       .from('zen_orders')
@@ -467,6 +468,83 @@ describe('IMP-105: Transport Pricing Policy Integration Tests (TC-POLICY-01~05)'
 
     const tsResult2 = await engine.calculateOrderCosts(order.id);
     expect(tsResult2.totalFreight).toBe(600); // MAX(500, 600) = 600
+
+    // Cleanup
+    await cleanupOrderAndCosts(order.id);
+    await supabase.from('zen_rate_cards').delete().eq('id', rateCard.id);
+  });
+
+  it('TC-POLICY-06: SEA WM max_charge cap 적용 (상한선 발동)', async () => {
+    // Clean up stale SEA rate cards for test carrier to avoid 6-arg fn matching wrong card
+    await supabase
+      .from('zen_rate_cards')
+      .update({ is_active: false })
+      .eq('carrier_id', testCarrierId)
+      .eq('transport_mode', 'SEA');
+
+    // Rate card: max_charge = 150 (clean division with 100kg: 150/100 = 1.5)
+    const { data: rateCard } = await supabase
+      .from('zen_rate_cards')
+      .insert({
+        carrier_id: testCarrierId,
+        transport_mode: 'SEA',
+        currency: 'USD',
+        valid_from: new Date().toISOString().split('T')[0],
+        is_active: true,
+        origin_port_id: testPortIcn,
+        dest_port_id: testPortSin,
+        tiers: {
+          weight_slabs: [
+            { weight_min: 0, unit_price: 2.0, min_charge: 50, max_charge: 150 }
+          ],
+          cbm_slabs: [
+            { cbm_min: 0, cbm_price: 150.0, min_charge: 50, max_charge: 150 }
+          ]
+        }
+      })
+      .select()
+      .single();
+
+    // Order: 100kg weight, 0.5 CBM
+    // Weight cost = 100 * 2.0 = 200
+    // Cbm cost = 0.5 * 150 = 75
+    // Base freight = MAX(200, 75) = 200 (WEIGHT basis)
+    // min_charge = 50 → 200 > 50, no effect
+    // max_charge = 150 → 200 > 150 → cap to 150 → MAX_CHARGE basis
+    const { data: order } = await supabase
+      .from('zen_orders')
+      .insert({
+        order_no: 'TC-POLICY-06-ORD',
+        shipper_id: testShipperId,
+        carrier_id: testCarrierId,
+        origin_port_id: testPortIcn,
+        dest_port_id: testPortSin,
+        transport_mode: 'SEA',
+        cargo_details: { total_weight: 100, total_volume: 0.5 },
+        status: 'REGISTERED'
+      })
+      .select()
+      .single();
+
+    await supabase.from('zen_order_packages').insert({
+      order_id: order.id,
+      packing_unit: 'BOX',
+      gross_weight: 100,
+      volume: 0.5,
+      packing_count: 1
+    });
+
+    // Ensure SEA policy is WM
+    await supabase
+      .from('zen_transport_pricing_policies')
+      .update({ pricing_method: 'WM' })
+      .eq('transport_mode', 'SEA');
+
+    // Test SQL function — applied_pricing_basis = MAX_CHARGE, total_freight = 150
+    const { data: sqlResult } = await supabase.rpc('calculate_order_costs', { p_order_id: order.id });
+    expect(sqlResult.success).toBe(true);
+    expect(Number(sqlResult.total_freight)).toBe(150);
+    expect(sqlResult.applied_pricing_basis).toBe('MAX_CHARGE');
 
     // Cleanup
     await cleanupOrderAndCosts(order.id);
