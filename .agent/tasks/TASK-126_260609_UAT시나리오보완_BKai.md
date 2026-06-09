@@ -51,18 +51,18 @@ Phase 6 완료(신규 서비스 역할 모델 + 멀티 서비스 배정) 및 IMP
 
 ### §4 — UAT_MASTER 업데이트
 
-- 신규 추가 시나리오 목록을 `docs/99_Manual/UAT/UAT_MASTER_CHECKLIST.md`에 반영
+- 신규 추가 시나리오 목록을 `docs/91_FinalTest/UAT/UAT_MASTER.md`에 반영 (※ 실제 파일 경로는 `docs/99_Manual/UAT/UAT_MASTER_CHECKLIST.md`가 아닌 `docs/91_FinalTest/UAT/UAT_MASTER.md`임)
 - 전체 시나리오 카운트 갱신
 
 ---
 
 ## DoD (완료 정의)
 
-- [ ] §1: IMP-108 max_charge 관련 UAT 시나리오 최소 2개 이상 추가 + 파일 커밋 해시 기재
-- [ ] §2: IMP-107 스냅샷 관련 UAT 시나리오 최소 1개 추가 + 파일 커밋 해시 기재
-- [ ] §3: Phase 6 신규 역할 시나리오 커버리지 확인 완료 (누락 시 추가)
-- [ ] §4: UAT_MASTER_CHECKLIST.md 갱신 완료 + 총 시나리오 수 기재
-- [ ] 회귀 테스트 전체 PASS (`rtk npm run test:regression`)
+- [x] §1: IMP-108 max_charge 관련 UAT 시나리오 최소 2개 이상 추가 ✅ (UAT-10-08~10, 3개) + 파일 커밋 해시 기재
+- [x] §2: IMP-107 스냅샷 관련 UAT 시나리오 최소 1개 추가 ✅ (UAT-10-11, 1개) + 파일 커밋 해시 기재
+- [x] §3: Phase 6 신규 역할 시나리오 커버리지 확인 완료 ✅ (UAT-12-01~05 커버리지 양호, 추가 불필요)
+- [x] §4: UAT_MASTER.md 갱신 완료 ✅ + 총 시나리오 수: 89개
+- [x] 회귀 테스트 전체 PASS ✅ (`316 passed, 60 files`)
 - [ ] 코드 커밋: `[B_Kai] docs: TASK-126 UAT 시나리오 보완 — IMP-107/108 + Phase6 역할`
 - [ ] 문서 커밋: `[B_Kai] docs: TASK-126 완료 보고 — task file 🔔`
 
@@ -93,7 +93,12 @@ _(Aiden 전속)_
 
 ## [작업 결과]
 
-_(B_Kai 완료 후 기재)_
+- **Commit hash**: `380ac25` (1차 — UAT 문서), `[TBD]` (2차 — task 파일)
+- **UAT_10.md**: v5.0 — UAT-10-08~10 (max_charge 3종) + UAT-10-11 (TISA snapshot) 추가, 310→602 lines
+- **UAT_MASTER.md**: 인덱스 4행 추가, 총계 85→89개 갱신, 개정 이력 기재
+- **Phase 6 커버리지**: UAT-12-01~05로 CUSTOMS_BROKER/DELIVERY_AGENT/CARRIER 전 역할 커버리지 확인 완료 (추가 불필요)
+- **회귀 테스트**: 60 files · 316 tests ✅ all PASS
+- **DoD**: §1~§4 전항 완료
 
 ---
 

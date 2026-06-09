@@ -166,7 +166,7 @@
 | TASK-123 | 260608 | DEF-052 TS 빌드 오류 수정 (50파일) + IMP-108 §2 platform_fee_amount 재정의 | P1 | TASK-122 ✅ | D_Kai | ✅ | [TASK-123](tasks/TASK-123_260608_DEF052빌드오류+IMP108PlatformFee재정의_DKai.md) | DEF-052: build PASS+314/314 · IMP-108: SQL mig 2건+trigger+tisa.ts 완료 · 커밋 c049bef · Aiden ✅ 승인 (260609) |
 | TASK-124 | 260609 | IMP-108 §1+§3 max_charge 상한선 구현 (WM Cap + UI) | P2 | TASK-123 ✅ | D_Kai + B_Kai | ✅ | [TASK-124](tasks/TASK-124_260609_IMP108MaxCharge구현_DKai_BKai.md) | §1 B_Kai ✅ `ce17476` · §3 D_Kai ✅ `9d70d87` · 315/315 PASS · Aiden ✅ 승인 (260609) |
 | TASK-125 | 260609 | IMP-107 TISA 요율 스냅샷 강화 (WM slab 이력 + pricing_basis 저장) | P3 | TASK-124 ✅ | D_Kai | ✅ | [TASK-125](tasks/TASK-125_260609_IMP107TISA스냅샷강화_DKai.md) | IMP-107 완료 · `ab6f493`+`ef3ece7`+`3d95e90` · 316/316 PASS · Aiden ✅ 승인 (260609) |
-| TASK-126 | 260609 | Phase 6 + IMP-107/108 반영 UAT 시나리오 보완 | P2 | TASK-124 ✅ · TASK-125 ✅ | B_Kai | ⬜ | [TASK-126](tasks/TASK-126_260609_UAT시나리오보완_BKai.md) | max_charge·TISA 스냅샷·Phase6 역할 UAT 시나리오 추가 |
+| TASK-126 | 260609 | Phase 6 + IMP-107/108 반영 UAT 시나리오 보완 | P2 | TASK-124 ✅ · TASK-125 ✅ | B_Kai | 🔔 | [TASK-126](tasks/TASK-126_260609_UAT시나리오보완_BKai.md) | max_charge·TISA 스냅샷·Phase6 역할 UAT 시나리오 추가 · UAT_MASTER 89개 · 회귀 316/316 |
 | TASK-108 | 260601 | DEF-039 CARRIER RLS + 미스테이지 커밋 + 신원 수정 | P2 | 없음 | D_Kai | ✅ | [TASK-108](tasks/TASK-108_260601_DEF039CARRIER_RLS_미스테이지커밋_DKai.md) | DEF-039 해소 · 4cc88d8+beba338 · CARRIER RLS 3테이블 · 229/229 ✅ · Aiden ✅ 승인 |
 | TASK-109 | 260603 | IMP-095 Rate Card 항로(Port) 기반 매칭 구현 | P1 | TASK-106 ✅ · TASK-108 ✅ | D_Kai (OpenCode) | ✅ | [TASK-109](tasks/TASK-109_260603_IMP095포트기반요율매칭_DKai.md) | IMP-095 완료 · `0fb950d`+`fb263f9` · 236/236 PASS · Aiden ✅ 승인 |
 | TASK-110 | 260603 | IMP-096 요율 관리 페이지 통합 정리 (3단계) | P1 | TASK-106 ✅ · TASK-109 ✅ | D_Kai (OpenCode) | ✅ | [TASK-110](tasks/TASK-110_260603_IMP096요율관리페이지통합정리_DKai.md) | IMP-096 완료 · `e166fec`+`65c904b` · 236/236 PASS · Aiden ✅ 승인 |
@@ -190,7 +190,7 @@
 | Agent | 진행 중 | 재작업/조치 필요 | 블로커 대기 |
 |:------|:--------|:----------------|:----------|
 | **D_Kai (OpenCode)** | — | Advisory: DoD 허위 해시 보완커밋 (3d95e90) 누적 기록 | 신규 Task 대기 |
-| **B_Kai** | TASK-126 ⬜ | — | UAT 시나리오 보완 즉시 착수 가능 |
+| **B_Kai** | TASK-126 🔔 | — | UAT 시나리오 보완 완료 · Aiden 검토 대기 |
 | **Riley** | — | 토큰 소진·scope 초과 이력 (TASK-121) | 신규 Task 대기 (scope 제한 명시 필수) |
 | N_Kai | TASK-087 ⬜ (재교육 세션 — 완료 후 신규 할당 재개) | R-17 위반 누적 — 신규 할당 중단 유지 | — |
 | Ring | — | — | 신규 할당 중단 유지 (9차 위반 누적) |
