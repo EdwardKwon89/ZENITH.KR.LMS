@@ -1289,3 +1289,27 @@
   └ 후행: IMP-107 (max_charge basis 판정 전제)
 - **예상 공수**: 1~1.5 MD
 - **우선순위**: **High** — platform_fee_amount=NULL로 신규 Rate Card 수수료 계산 단절
+
+---
+
+## [IMP-109] Rate Card 버전 관리 — Pri/Snd + version_no 도입
+
+- **발견 경위**: DEF-054 분석 중 식별 — `updateRateCard` in-place UPDATE로 Order 요금 소급 변동 위험
+- **현재 상태**:
+  - Order snapshot은 `rate_card_id`(Snd UUID)로 참조하나, `updateRateCard`가 기존 row를 덮어씀
+  - `version_no`는 snapshot에 컬럼만 존재하고 항상 1로 하드코딩
+  - 개정 이력 추적 수단 없음 (supersede 전환 시 CREATE TIME만으로 추적)
+- **목표 구현**:
+  1. `zen_rate_cards`에 `pri_id UUID NOT NULL DEFAULT gen_random_uuid()`, `superseded_at TIMESTAMPTZ`, `version_no INT` 컬럼 추가
+  2. `createRateCard`: `pri_id` 신규 생성, `version_no=1`
+  3. `updateRateCard`: in-place UPDATE → supersede + INSERT 전환 (`pri_id` 유지, `version_no+1`)
+  4. `supersede`: 기존 row `is_active=false`, `superseded_at=now()`, 새 row `is_active=true`
+  5. `pri_id` + `version_no`로 전체 개정 이력 조회 가능
+- **관련 파일**:
+  - `src/lib/repositories/admin.repository.ts`
+  - `src/app/actions/admin/rates.ts`
+  - `src/app/actions/operations/tisa.ts` (version_no 하드코딩 제거)
+  - `supabase/migrations/` (DDL 컬럼 추가)
+- **선후행 관계**: DEF-054 A안 선행 완료 필요 (TASK-127)
+- **예상 공수**: 1~2 MD
+- **우선순위**: Medium (post-Go-Live)
