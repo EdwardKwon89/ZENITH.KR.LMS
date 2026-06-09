@@ -147,8 +147,8 @@ export async function signup(formData: FormData, locale: string = 'ko') {
         phone_number: phoneNumber,
         // Individual users are ACTIVE immediately; Corporate/New Org users are PENDING.
         status: (orgId === null && !isNewOrg) ? 'ACTIVE' : 'PENDING',
-        // New Org creators are ADMIN; Joinees are MEMBER; Individuals are USER.
-        role: isNewOrg ? USER_ROLES.ADMIN : (orgId === null ? USER_ROLES.INDIVIDUAL : USER_ROLES.USER),
+        // New Org creators: CARRIER org → CARRIER, others → ADMIN; Joinees → MEMBER; Individuals → USER.
+        role: isNewOrg ? (orgType === 'CARRIER' ? USER_ROLES.CARRIER : USER_ROLES.ADMIN) : (orgId === null ? USER_ROLES.INDIVIDUAL : USER_ROLES.USER),
       }
     }
   });

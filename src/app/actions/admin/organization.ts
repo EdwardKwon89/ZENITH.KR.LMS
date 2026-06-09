@@ -4,6 +4,7 @@ import { logger } from '@/lib/logger';
 import { validateAdminAction } from "@/lib/auth/guards";
 import { revalidatePath } from "next/cache";
 import { AdminRepository } from '@/lib/repositories';
+import { createAdminClient } from '@/utils/supabase/server';
 
 /**
  * 신규 가입한 조직(화주/포워더 등)을 승인합니다.
@@ -47,6 +48,26 @@ export async function requestOrganizationSupplement(orgId: string, reason: strin
 
   revalidatePath("/admin/organizations");
   return { success: true };
+}
+
+/**
+ * 증빙서류 파일에 대한 Signed URL을 생성합니다 (Admin 전용).
+ * service_role 클라이언트를 사용하여 RLS 우회.
+ */
+export async function getDocumentSignedUrl(filePath: string) {
+  await validateAdminAction();
+
+  const adminClient = await createAdminClient();
+  const { data, error } = await adminClient.storage
+    .from('business_docs')
+    .createSignedUrl(filePath, 60 * 60);
+
+  if (error) {
+    logger.error('[getDocumentSignedUrl] Failed:', error.message);
+    return { error: error.message };
+  }
+
+  return { signedUrl: data.signedUrl };
 }
 
 /**

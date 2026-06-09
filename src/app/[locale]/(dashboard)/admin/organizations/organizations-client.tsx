@@ -6,7 +6,7 @@ import { createClient } from '@/utils/supabase/client';
 import { ZenCard, ZenButton } from '@/components/ui/ZenUI';
 import { Building, FileText, CheckCircle, XCircle, AlertCircle, ExternalLink, ShieldCheck, Fingerprint, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { approveOrganization, rejectOrganization, requestOrganizationSupplement, getOrganizations } from "@/app/actions/organization";
+import { approveOrganization, rejectOrganization, requestOrganizationSupplement, getOrganizations, getDocumentSignedUrl } from "@/app/actions/organization";
 
 interface OrganizationApprovalClientProps {
   initialData: {
@@ -95,13 +95,13 @@ export default function OrganizationApprovalClient({ initialData }: Organization
   };
 
   const handleViewDocument = async (filePath: string) => {
-    const { data, error } = await supabase.storage.from('business_docs').createSignedUrl(filePath, 60 * 60); // 1 hour
-    if (error) {
-      alert('문서를 불러오는 중 오류가 발생했습니다: ' + error.message);
+    const result = await getDocumentSignedUrl(filePath);
+    if (result.error) {
+      alert('문서를 불러오는 중 오류가 발생했습니다: ' + result.error);
       return;
     }
-    if (data?.signedUrl) {
-      window.open(data.signedUrl, '_blank');
+    if (result.signedUrl) {
+      window.open(result.signedUrl, '_blank');
     }
   };
 
