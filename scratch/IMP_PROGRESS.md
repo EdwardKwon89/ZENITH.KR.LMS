@@ -260,6 +260,7 @@
 | 103 | 운송 요율 CARRIER 직접 등록 허용 + platform_fee_rate 격리 | D_Kai | 🔔 | 2026-06-06 |
 | 104 | Phase 6 회귀 테스트 + E2E 검증 + UAT 절차서 | D_Kai+Riley+B_Kai | 🔔 | 2026-06-07 |
 | 105 | 운송수단별 요금 산정 정책 설정 (DB + Admin UI + 엔진) | D_Kai+B_Kai | 🔔 | 2026-06-08 |
+| 109 | 환율 설정 화면 — 기준 통화(`BASE_CURRENCY`) + 환율(`EXCHANGE_RATE_*`) 어드민 UI | 미정 | ⬜ | — |
 
 **Phase 6 완료**: 8 / 8 (100%) — IMP-097✅ · 098✅ · 099✅ · 100🔔 · 101🔔 · 102🔔 · 103🔔 · 104🔔
 **IMP-105**: D_Kai DB ✅(bb81021) · B_Kai UI ✅(5171675+0d428a3) · D_Kai 엔진+TC ✅(723db3e+c0bcab0+974e632) · 회귀 314/314 PASS
@@ -292,7 +293,8 @@
 | 6 | 9 | 9 | — | IMP-097✅·098✅·099✅·100🔔·101🔔·102🔔·103🔔·104🔔·105✅(D_Kai 엔진+TC 완료) (Phase 6+IMP-105) |
 | UAT | 6 | 7 | 85.7% | IMP-090 ✅ · IMP-091 ⬜ (Carrier Portal — Phase M) · **IMP-092 ✅ (TISA 3계층)** · **IMP-093 ✅ (TISA 실연동, TASK-104)** · IMP-094 ⬜ (요율 워크플로우 고도화, Phase M) · **IMP-095 ✅ (Rate Card 항로 매칭, TASK-109)** · **IMP-096 ✅ (요율 관리 페이지 통합 정리, TASK-110)** |
 | UAT2 | 2 | 2 | 100% ✅ | **IMP-107 ✅** (TISA 스냅샷 강화 — WM slab 이력, `ab6f493`+`ef3ece7` Aiden ✅ 승인 260609) · **IMP-108 ✅§1·§2·§3** (B_Kai §1 max_charge UI ✅, D_Kai §2 platform_fee ✅, §3 WM CLAMP `9d70d87` ✅) |
-| **합계** | **91** | **93** | **97.8%** | IMP-107 ✅ Aiden 승인 (260609) · IMP-108 ✅ Aiden 승인 (260609) |
+| 기타 | 0 | 1 | 0% | **IMP-109 ⬜** 환율 설정 화면 (어드민 — 기준 통화 + 환율 설정 UI) |
+| **합계** | **91** | **94** | **96.8%** | IMP-107 ✅ Aiden 승인 (260609) · IMP-108 ✅ Aiden 승인 (260609) · IMP-109 ⬜ 신규 등재 (260610) |
 
 > **UAT 진행 전 필수 처리**: IMP-092 ✅ · IMP-093 ✅ · IMP-095 ✅ — 전량 완료
 > 미완료 IMP: IMP-086·087 🚫 블로커 · IMP-028·069(Future — 통관 연계) · IMP-091 ⬜ (Carrier Portal) · IMP-094 ⬜ (요율 워크플로우 Phase M)

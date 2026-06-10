@@ -6,7 +6,7 @@
 | 위치 | `docs/91_FinalTest/UAT/` |
 | 작성일 | 2026-05-27 |
 | 관리 주체 | Aiden (Claude) |
-| 최종 갱신 | 2026-06-09 (DEF-056 ✅ 완료, DEF-059 §1~§4 전체 ✅ 완료 — TASK-135·136·137 승인) |
+| 최종 갱신 | 2026-06-10 (DEF-060 신규 등록 및 수정완료 — zen_carriers org_id 연결 누락 FK 위반) |
 
 ---
 
@@ -39,8 +39,8 @@
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|
 | 시나리오 오류 | 1 | 0 | 0 | 0 | 5 | **6** |
 | 기능 보완/개선 | 6 | 0 | 12 | 2 | 1 | **21** |
-| 기능 오류 | 1 | 0 | 24 | 7 | 0 | **32** |
-| **합계** | **8** | **0** | **36** | **9** | **6** | **59** |
+| 기능 오류 | 1 | 0 | 25 | 7 | 0 | **33** |
+| **합계** | **8** | **0** | **37** | **9** | **6** | **60** |
 
 ---
 
@@ -103,6 +103,7 @@
 | DEF-056 | UAT-02-01 | 기능 보완 | N | 검증완료 | Noah (Codex) / B_Kai | `1ebc9e6` | **Estimated Freight 현실화 — 실물 요율 시드 데이터 등록**. 실제 항공사(KAL/AAR/FEDEX/DHL)·선사(HMM/MSC/EVERGREEN)의 slab 기반 운임 + surcharge 데이터를 `zen_rate_cards`·`zen_surcharges`에 등록. UI "Estimated Freight"(fallback dummy rate)는 유지되나, 서버 billing(`calculateCompositePricing`)은 DB 실요율로 정상 처리. | - | `supabase/seed_rates_realistic.sql` 신규 — 7개 운송사 + 12건 rate card + 30건 surcharge + route network 자동생성. DB 적용 완료. 상세: `.agent/defects/DEF-056_실물요율시드데이터등록.md` | - | post-Go-Live: UI fallback rate 현실화 별도 IMP 가능 || DEF-057 | UAT-02-02 | UI 개선 | N | 수정완료 | Noah (Codex) | `src/app/[locale]/(dashboard)/orders/page.tsx`<br>`src/components/orders/OrderFilterBar.tsx` | **운송 요청 목록 UI 레이아웃 조정**. 요율 페이지와 헤더 스타일 통일(`text-2xl` + 설명 문구). 검색 필터 개선 — "조회"+"CREATE NEW ORDER" 버튼 위치 교환, "Apply Filters"→"조회" 텍스트 변경, Search/Status/Type caption 라벨 삭제. | - | `.agent/defects/DEF-057_운송요청목록UI레이아웃조정.md` | - | - |
 | DEF-058 | UAT-02-02 | 기능 개선 | N | 수정완료 | Noah (Codex) | `src/components/orders/OrderFilterBar.tsx` | **운송 요청 목록 "조회" 버튼 제거 → Debounce 자동 검색 전환**. rates 페이지와 UX 통일. `useEffect` + `setTimeout` 500ms debounce로 입력 시 자동 `router.push()`. 초기 마운트 중복 push 방지. | - | `.agent/defects/DEF-058_운송요청목록조회버튼제거Debounce전환.md` | - | - |
 | DEF-059 | UAT-02-01 | 기능 개선 | N | 검증완료 | D_Kai (§1~§3) / B_Kai (§4) | `ad22883` + `ec0fa5a` | **special_cargo_type Order 레벨 → Package 레벨 전환**. 한 오더 내 PKG별로 다른 화물 구분(위험물/냉동/귀중품/중고)을 가질 수 있도록 구조 변경. §1~§3(TASK-136) + §4 UI(TASK-137) 전체 완료. | `ad22883` + `ec0fa5a` | §1~§3: 마이그레이션 2건 + Zod + Action. §4: OrderRegistrationForm PKG카드 select + supabase.ts 타입 갱신. Aiden 직접보완(ZenDataGrid 타입오류 `dabde76`). | ✅ Aiden 승인 (TASK-136·137) | - |
+| DEF-060 | - | 기능 오류 | Y | 수정완료 | Aiden (Claude) | - | **zen_carriers.org_id 미설정으로 Order 등록 시 FK 위반**. 신규 운송 요청 Step 3 제출 시 `zen_order_services_provider_id_fkey` FK 위반 오류 발생. 13개 carrier 중 9개 org_id = null → provider_id로 zen_carriers.id가 전달되어 zen_organizations FK 위반. | 마이그레이션 `20260610000300` | FedEx Express: 동명 org 직접 연결. 나머지 8개: zen_organizations CARRIER 타입 신규 생성 후 연결. 13/13 전체 연결 완료. 빌드 ✅ · 회귀 316/316 ✅. | - | `.agent/defects/DEF-060_운송사조직연결누락FK위반.md` |
 ---
 
 ## 처리 지침
@@ -184,3 +185,4 @@
 | 2026-06-09 | Noah (Codex) | **DEF-057 신규 등록** — 운송 요청 목록 UI 레이아웃 조정. 요율 페이지와 헤더 통일 + 검색 필터 개선. 현황 요약 갱신 (합계 56→57). 상세: `.agent/defects/DEF-057_운송요청목록UI레이아웃조정.md` |
 | 2026-06-09 | Noah (Codex) | **DEF-058 신규 등록** — 운송 요청 목록 "조회" 버튼 제거 → Debounce 자동 검색 전환. 현황 요약 갱신 (합계 57→58). 상세: `.agent/defects/DEF-058_운송요청목록조회버튼제거Debounce전환.md` |
 | 2026-06-09 | Noah (Codex) | **DEF-059 신규 등록** — special_cargo_type Order 레벨 → Package 레벨 전환 검토 (미착수, Aiden 협의 필요). 현황 요약 갱신 (합계 58→59). 상세: `.agent/defects/DEF-059_화물구분PKG단위전환검토.md` |
+| 2026-06-10 | Aiden (Claude) | **DEF-060 신규 등록 및 수정완료** — zen_carriers.org_id 미설정(9/13개)으로 Order 등록 Step 3 제출 시 zen_order_services FK 위반. 마이그레이션 `20260610000300` — 동명 org 직접 연결(FedEx) + 8개 신규 org 생성. 13/13 전체 연결 완료. 빌드 ✅ · 316/316 ✅. 현황 요약 갱신 (합계 59→60). 상세: `.agent/defects/DEF-060_운송사조직연결누락FK위반.md` |
