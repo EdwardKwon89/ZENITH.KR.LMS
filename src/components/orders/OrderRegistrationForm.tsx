@@ -17,7 +17,7 @@ import { createOrder } from '@/app/actions/orders';
 import { getCurrentUserAffiliation } from '@/app/actions/master';
 import { orderRegistrationSchema, OrderRegistrationInput } from '@/lib/validation/order';
 import { estimateFreightCost, TransportMode } from '@/utils/logistics/freight-calculator';
-import { getAvailableServiceRates, AvailableServiceRates } from '@/app/actions/operations/service-rates';
+import { getAvailableServiceRates, getUsdKrwRate, getBaseCurrency, AvailableServiceRates } from '@/app/actions/operations/service-rates';
 import { createOrderServices } from '@/app/actions/operations/order-services';
 
 interface OrderRegistrationFormProps {
@@ -160,6 +160,8 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
   const [ratesLoading, setRatesLoading] = React.useState(false);
   const [ratesError, setRatesError] = React.useState<string | null>(null);
   const [selectedRates, setSelectedRates] = React.useState<Record<string, any>>({});
+  const [usdKrwRate, setUsdKrwRate] = React.useState<number>(1350);
+  const [baseCurrency, setBaseCurrency] = React.useState<string>('KRW');
   const [infoTab, setInfoTab] = React.useState<'shipper' | 'consignee'>('shipper');
 
   useEffect(() => {
@@ -174,18 +176,19 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
           setValue('shipper_contact_email', data.userEmail);
           setValue('shipper_contact_phone', data.userPhone || '');
         } else {
+          const matchedShipper = shippers.find((s: any) => s.id === data.orgId);
           setValue('order_type', 'B2B');
           setValue('shipper_id', data.orgId as string);
           setValue('shipper_contact_name', data.userName);
           setValue('shipper_contact_email', data.userEmail);
           setValue('shipper_contact_phone', data.userPhone || '');
-          setValue('shipper_address', data.orgAddress || '');
-          setValue('shipper_biz_no', data.orgBizNo || '');
+          setValue('shipper_address', matchedShipper?.address || data.orgAddress || '');
+          setValue('shipper_biz_no', matchedShipper?.biz_no || data.orgBizNo || '');
         }
       } catch (err) { logger.error(err); } finally { setIsLoadingAffiliation(false); }
     }
     loadAffiliation();
-  }, [setValue]);
+  }, [setValue, shippers]);
 
   const { fields: packageFields, append: appendPackage, remove: removePackage } = useFieldArray({
     control,
@@ -359,7 +362,15 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
   }, [selectedCombination]);
 
   const handleNextToStep2 = async () => {
-    const isStep1Valid = await trigger();
+    const isStep1Valid = await trigger([
+      'shipper_id',
+      'origin_port_id',
+      'dest_port_id',
+      'transport_mode',
+      'recipient_name',
+      'recipient_address',
+      'recipient_phone',
+    ]);
     if (isStep1Valid) {
       setStep(2);
     } else {
@@ -389,14 +400,21 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
       const mode = watch('transport_mode');
       const mappedMode = mode === 'SEA' ? 'SEA' : 'AIR';
 
-      const result = await getAvailableServiceRates({
-        originCode: originPort.code,
-        destCode: destPort.code,
-        destCountryCode: destPort.country_code || 'US',
-        transportMode: mappedMode,
-        cargoWeight: totals.weight,
-        cargoCbm: totals.volume
-      });
+      const [result, fetchedRate, fetchedBase] = await Promise.all([
+        getAvailableServiceRates({
+          originCode: originPort.code,
+          destCode: destPort.code,
+          destCountryCode: destPort.country_code || 'US',
+          transportMode: mappedMode,
+          cargoWeight: totals.weight,
+          cargoCbm: totals.volume
+        }),
+        getUsdKrwRate(),
+        getBaseCurrency(),
+      ]);
+
+      setUsdKrwRate(fetchedRate);
+      setBaseCurrency(fetchedBase);
 
       if (result.error) {
         throw new Error(result.error);
@@ -789,11 +807,19 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                         <div className="flex items-start justify-between absolute -top-3 left-4">
                           <ZenBadge variant="info" className="px-3 py-1 shadow-sm border border-white">PKG #{i + 1}</ZenBadge>
                         </div>
+                        <button
+                          type="button"
+                          onClick={() => removePackage(i)}
+                          disabled={packageFields.length === 1}
+                          className="absolute top-2 right-2 p-1.5 text-rose-300 hover:text-rose-500 transition-colors disabled:opacity-0"
+                        >
+                          <Trash2 size={16} />
+                        </button>
 
                         <div className="grid grid-cols-12 gap-2 mt-4 items-end">
-                          <div className="col-span-2 space-y-1">
+                          <div className="col-span-1 space-y-1">
                             <label className="text-[9px] font-bold text-slate-400">UNIT</label>
-                            <select {...register(`packages.${i}.packing_unit`)} className="w-full text-[11px] h-9 bg-slate-50 border border-slate-100 rounded-lg px-2 outline-none focus:ring-1 focus:ring-blue-100">
+                            <select {...register(`packages.${i}.packing_unit`)} className="w-full text-[11px] h-9 bg-slate-50 border border-slate-100 rounded-lg px-1 outline-none focus:ring-1 focus:ring-blue-100">
                               <option value="BOX">BOX</option><option value="PLT">PLT</option><option value="CRT">CRT</option>
                             </select>
                           </div>
@@ -825,31 +851,19 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                               <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[9px] text-slate-300 font-bold">kg</span>
                             </div>
                           </div>
-                          <div className="col-span-1 flex items-center justify-end h-9">
-                            <button
-                              type="button"
-                              onClick={() => removePackage(i)}
-                              disabled={packageFields.length === 1}
-                              className="p-2 text-rose-300 hover:text-rose-500 transition-colors disabled:opacity-0"
+                          <div className="col-span-2">
+                            <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">화물 구분</label>
+                            <select
+                              {...register(`packages.${i}.special_cargo_type`)}
+                              className="w-full text-[11px] h-9 bg-slate-50 border border-slate-100 rounded-lg px-2 outline-none focus:ring-1 focus:ring-blue-100"
                             >
-                              <Trash2 size={18} />
-                            </button>
+                              <option value="NONE">일반</option>
+                              <option value="DANGEROUS">위험물</option>
+                              <option value="FROZEN">냉동/냉장</option>
+                              <option value="VALUABLE">고가품</option>
+                              <option value="USED">중고품</option>
+                            </select>
                           </div>
-                        </div>
-
-                        {/* 화물 구분 — DEF-059: special_cargo_type PKG 레벨 이동 */}
-                        <div className="mt-3 flex items-center gap-2">
-                          <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">화물 구분</label>
-                          <select
-                            {...register(`packages.${i}.special_cargo_type`)}
-                            className="flex-1 text-[11px] h-8 bg-slate-50 border border-slate-200 rounded-lg px-2 outline-none focus:ring-1 focus:ring-blue-100"
-                          >
-                            <option value="NONE">일반</option>
-                            <option value="DANGEROUS">위험물</option>
-                            <option value="FROZEN">냉동/냉장</option>
-                            <option value="VALUABLE">고가품</option>
-                            <option value="USED">중고품</option>
-                          </select>
                         </div>
 
                         {/* 📦 Nested Items for this Package */}
@@ -875,12 +889,6 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                       <div className="text-right">
                         <p className="text-[9px] text-slate-500 font-bold tracking-tight mb-0.5">TOTAL VOLUME</p>
                         <p className="text-xl font-black">{totals.volume.toFixed(4)}<span className="text-[10px] text-slate-500 ml-1">CBM</span></p>
-                      </div>
-                      <div className="text-right pl-10 border-l border-white/10">
-                        <p className="text-[9px] text-indigo-400 font-bold tracking-tight mb-0.5 uppercase">Estimated Freight</p>
-                        <p className="text-2xl font-black text-indigo-400 leading-none">
-                          {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(totals.freight)}
-                        </p>
                       </div>
                     </div>
                   </div>
@@ -1051,18 +1059,63 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
               </div>
 
               {/* Order Services Total Summary */}
-              {!hasZeroRatesForRequiredService && isAllRatesSelected && (
-                <div className="mt-8 flex justify-between items-center px-6 py-4 bg-slate-900 rounded-3xl text-white shadow-2xl ring-1 ring-white/10">
-                  <span className="text-xs font-bold text-slate-500 tracking-widest text-indigo-400">TOTAL ESTIMATED SERVICES COST</span>
-                  <div className="text-right">
-                    <p className="text-2xl font-black text-indigo-400 leading-none">
-                      {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(
-                        requiredServices.reduce((sum, service) => sum + (selectedRates[service.key]?.estimatedCost || 0), 0)
-                      )}
-                    </p>
+              {!hasZeroRatesForRequiredService && isAllRatesSelected && (() => {
+                const toBase = (amount: number, currency: string): number => {
+                  const from = currency.toUpperCase();
+                  const to = baseCurrency;
+                  if (from === to) return amount;
+                  if (to === 'KRW' && from === 'USD') return amount * usdKrwRate;
+                  if (to === 'USD' && from === 'KRW') return amount / usdKrwRate;
+                  return amount;
+                };
+
+                const totalBase = requiredServices.reduce((sum, service) => {
+                  const rate = selectedRates[service.key];
+                  if (!rate) return sum;
+                  return sum + toBase(rate.estimatedCost || 0, rate.currency || 'USD');
+                }, 0);
+
+                const hasMixed = requiredServices.some(
+                  s => (selectedRates[s.key]?.currency || 'USD').toUpperCase() !== baseCurrency
+                );
+
+                const breakdown = requiredServices
+                  .map(service => {
+                    const rate = selectedRates[service.key];
+                    if (!rate) return null;
+                    const cur = (rate.currency || 'USD').toUpperCase();
+                    const formatted = new Intl.NumberFormat('ko-KR', { style: 'currency', currency: cur }).format(rate.estimatedCost || 0);
+                    return `${service.label}: ${formatted}`;
+                  })
+                  .filter(Boolean);
+
+                const rateLabel = baseCurrency === 'KRW'
+                  ? `USD 1 = ₩${usdKrwRate.toLocaleString('ko-KR')}`
+                  : `₩1 = $${(1 / usdKrwRate).toFixed(6)}`;
+
+                return (
+                  <div className="mt-8 px-6 py-4 bg-slate-900 rounded-3xl text-white shadow-2xl ring-1 ring-white/10">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <span className="text-xs font-bold text-slate-500 tracking-widest text-indigo-400">TOTAL ESTIMATED SERVICES COST</span>
+                        {hasMixed && (
+                          <p className="text-[10px] text-amber-400 mt-1">환율 적용: {rateLabel}</p>
+                        )}
+                      </div>
+                      <p className="text-2xl font-black text-indigo-400 leading-none">
+                        {new Intl.NumberFormat('ko-KR', { style: 'currency', currency: baseCurrency }).format(totalBase)}
+                      </p>
+                    </div>
+                    {hasMixed && breakdown.length > 1 && (
+                      <div className="mt-3 pt-3 border-t border-slate-700 flex gap-4 flex-wrap">
+                        {breakdown.map((line, idx) => (
+                          <span key={idx} className="text-[10px] text-slate-500">{line}</span>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                </div>
-              )}
+                );
+              })()}
             </motion.div>
           )}
         </AnimatePresence>
