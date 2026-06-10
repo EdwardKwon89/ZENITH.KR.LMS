@@ -1,16 +1,15 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { usePathname, useParams, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { 
-  ChevronRight, 
-  ChevronLeft, 
-  LayoutDashboard, 
-  Database, 
-  ShoppingCart, 
-  Truck, 
-  Calculator, 
+import {
+  ChevronRight,
+  ChevronLeft,
+  LayoutDashboard,
+  Database,
+  Truck,
+  Calculator,
   ShieldAlert,
   Settings,
   Menu,
@@ -37,12 +36,18 @@ interface NavItem {
   children?: { title: string; href: string }[];
 }
 
-export default function NaviSidebar({ 
-  user, 
+interface FlyoutState {
+  title: string;
+  top: number;
+  left: number;
+}
+
+export default function NaviSidebar({
+  user,
   profile,
   allowedPaths
-}: { 
-  user?: any; 
+}: {
+  user?: any;
   profile?: any;
   allowedPaths?: string[];
 }) {
@@ -53,6 +58,12 @@ export default function NaviSidebar({
   const locale = params?.locale as string || "ko";
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [openMenus, setOpenMenus] = useState<string[]>([]);
+  const [flyout, setFlyout] = useState<FlyoutState | null>(null);
+  const flyoutTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => { if (flyoutTimerRef.current) clearTimeout(flyoutTimerRef.current); };
+  }, []);
 
   const NAV_ITEMS: NavItem[] = [
     { title: t("dashboard"), href: "/dashboard", icon: LayoutDashboard },
@@ -68,9 +79,9 @@ export default function NaviSidebar({
         { title: t("transport_policies"), href: "/admin/settings/transport-policies" },
       ]
     },
-    { 
-      title: t("order_mgmt"), 
-      href: "/orders", 
+    {
+      title: t("order_mgmt"),
+      href: "/orders",
       icon: ClipboardList,
       children: [
         { title: t("orders"), href: "/orders" },
@@ -88,9 +99,9 @@ export default function NaviSidebar({
         { title: t("logistics_outbound"), href: "/warehouse/outbound" },
       ]
     },
-    { 
-      title: t("finance_group"), 
-      href: "/finance", 
+    {
+      title: t("finance_group"),
+      href: "/finance",
       icon: Calculator,
       children: [
         { title: t("finance_revenue"), href: "/finance/revenue" },
@@ -102,14 +113,14 @@ export default function NaviSidebar({
     },
     { title: t("statistics"), href: "/admin/statistics", icon: BarChartBig, isAdminOnly: true },
     { title: t("schedules"), href: "/schedules", icon: CalendarDays },
-    { 
-      title: t("voc"), 
-      href: profile?.role?.includes(USER_ROLES.ADMIN) ? "/voc/admin" : "/voc", 
-      icon: MessageSquare 
+    {
+      title: t("voc"),
+      href: profile?.role?.includes(USER_ROLES.ADMIN) ? "/voc/admin" : "/voc",
+      icon: MessageSquare
     },
-    { 
-      title: t("support_group"), 
-      href: "/support/qna", 
+    {
+      title: t("support_group"),
+      href: "/support/qna",
       icon: HelpCircle,
       children: [
         { title: t("support_qna"), href: "/support/qna" },
@@ -130,9 +141,9 @@ export default function NaviSidebar({
     { title: t("customs_management"), href: "/admin/customs", icon: FileText, isAdminOnly: true },
     { title: t("orders_assigned"), href: "/orders/assigned", icon: ClipboardList },
     { title: t("admin_error_logs"), href: "/admin/error-logs", icon: ShieldAlert, isAdminOnly: true },
-    { 
-      title: t("mypage"), 
-      href: "/mypage", 
+    {
+      title: t("mypage"),
+      href: "/mypage",
       icon: UserCircle,
       children: [
         { title: t("my_profile"), href: "/mypage/profile" },
@@ -147,14 +158,37 @@ export default function NaviSidebar({
     { title: t("settings"), href: "/admin/settings", icon: Settings, isAdminOnly: true },
   ];
 
-  const toggleSidebar = () => setIsCollapsed(prev => !prev);
+  const toggleSidebar = () => {
+    setIsCollapsed(prev => !prev);
+    setFlyout(null);
+  };
 
   const toggleMenu = (title: string) => {
     if (isCollapsed) return;
-    setOpenMenus(prev => 
+    setOpenMenus(prev =>
       prev.includes(title) ? prev.filter(m => m !== title) : [...prev, title]
     );
   };
+
+  const showFlyout = (title: string, e: React.MouseEvent) => {
+    if (flyoutTimerRef.current) clearTimeout(flyoutTimerRef.current);
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const top = Math.min(rect.top, window.innerHeight - 240);
+    setFlyout({ title, top, left: rect.right });
+  };
+
+  const scheduleFlyoutClose = () => {
+    flyoutTimerRef.current = setTimeout(() => setFlyout(null), 150);
+  };
+
+  const cancelFlyoutClose = () => {
+    if (flyoutTimerRef.current) clearTimeout(flyoutTimerRef.current);
+  };
+
+  const flyoutNavItem = flyout ? NAV_ITEMS.find(item => item.title === flyout.title) : null;
+  const flyoutHasChildren = flyoutNavItem?.children
+    ? flyoutNavItem.children.filter(child => checkPermission(profile?.role || "GUEST", child.href, allowedPaths)).length > 0
+    : false;
 
   return (
     <aside
@@ -172,7 +206,7 @@ export default function NaviSidebar({
             ZENITH<span className="text-brand-500">_LMS</span>
           </span>
         )}
-        <button 
+        <button
           onClick={toggleSidebar}
           className="p-1.5 rounded-lg hover:bg-slate-50 border border-transparent hover:border-slate-200 text-slate-500 transition-all"
         >
@@ -183,7 +217,7 @@ export default function NaviSidebar({
       <nav className="flex-1 px-4 space-y-1.5 overflow-y-auto overflow-x-hidden scrollbar-hide py-2">
         {NAV_ITEMS.filter(item => {
           const isParentAllowed = checkPermission(profile?.role || "GUEST", item.href, allowedPaths);
-          const hasAllowedChild = item.children?.some(child => 
+          const hasAllowedChild = item.children?.some(child =>
             checkPermission(profile?.role || "GUEST", child.href, allowedPaths)
           );
           return isParentAllowed || hasAllowedChild;
@@ -193,7 +227,12 @@ export default function NaviSidebar({
           const hasChildren = item.children && item.children.length > 0;
 
           return (
-            <div key={item.title} className="group">
+            <div
+              key={item.title}
+              className="group"
+              onMouseEnter={(e) => { if (isCollapsed) showFlyout(item.title, e); }}
+              onMouseLeave={() => { if (isCollapsed) scheduleFlyoutClose(); }}
+            >
               <div
                 onClick={() => {
                   if (hasChildren) {
@@ -204,31 +243,26 @@ export default function NaviSidebar({
                 }}
                 className={cn(
                   "flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer transition-all duration-200 relative",
-                  isActive 
-                    ? "bg-brand-50 text-brand-700 font-semibold" 
+                  isActive
+                    ? "bg-brand-50 text-brand-700 font-semibold"
                     : "text-slate-600 hover:bg-slate-50 hover:text-slate-900",
                   isCollapsed && "justify-center px-0"
                 )}
               >
                 <item.icon size={22} className={cn(isActive ? "text-brand-600" : "text-slate-500 Group-hover:text-slate-700")} />
-                
+
                 {!isCollapsed && (
                   <>
                     <span className="flex-1 text-[15px] truncate">{item.title}</span>
                     {hasChildren && (
-                      <ChevronRight 
-                        size={16} 
-                        className={cn("transition-transform duration-200", isOpen && "rotate-90")} 
+                      <ChevronRight
+                        size={16}
+                        className={cn("transition-transform duration-200", isOpen && "rotate-90")}
                       />
                     )}
                   </>
                 )}
 
-                {isCollapsed && (
-                  <div className="absolute left-full ml-4 px-3 py-1.5 bg-slate-900 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-50 transition-opacity">
-                    {item.title}
-                  </div>
-                )}
               </div>
 
               <div
@@ -281,6 +315,65 @@ export default function NaviSidebar({
           </div>
         )}
       </div>
+
+      {/* Flyout submenu panel / tooltip — fixed position bypasses nav overflow clipping */}
+      {flyout && flyoutNavItem && (
+        flyoutHasChildren ? (
+          <div
+            style={{
+              position: "fixed",
+              top: flyout.top,
+              left: flyout.left,
+              zIndex: 200,
+              maxHeight: `calc(100vh - ${flyout.top}px - 16px)`,
+            }}
+            className="bg-white border border-slate-200 rounded-xl shadow-xl min-w-[180px] overflow-y-auto"
+            onMouseEnter={cancelFlyoutClose}
+            onMouseLeave={scheduleFlyoutClose}
+          >
+            <div className="px-3 pt-2.5 pb-2 border-b border-slate-100">
+              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">
+                {flyoutNavItem.title}
+              </span>
+            </div>
+            <div className="p-1.5 space-y-0.5">
+              {flyoutNavItem.children!
+                .filter(child => checkPermission(profile?.role || "GUEST", child.href, allowedPaths))
+                .map((child) => (
+                  <Link
+                    key={child.href}
+                    href={`/${locale}${child.href}`}
+                    onClick={() => setFlyout(null)}
+                    className={cn(
+                      "block px-3 py-2 rounded-lg text-sm transition-colors",
+                      pathname === `/${locale}${child.href}`
+                        ? "text-brand-700 font-semibold bg-brand-50"
+                        : "text-slate-600 hover:bg-slate-50 hover:text-brand-600"
+                    )}
+                  >
+                    {child.title}
+                  </Link>
+                ))}
+            </div>
+          </div>
+        ) : (
+          <div
+            style={{
+              position: "fixed",
+              top: flyout.top,
+              left: flyout.left,
+              zIndex: 200,
+            }}
+            className="bg-white border border-slate-200 rounded-xl shadow-xl pointer-events-none"
+          >
+            <div className="px-3 py-2.5">
+              <span className="text-[13px] font-medium text-slate-700 whitespace-nowrap">
+                {flyoutNavItem.title}
+              </span>
+            </div>
+          </div>
+        )
+      )}
     </aside>
   );
 }
