@@ -101,6 +101,77 @@ export interface UpsFlightPlan {
   created_by: string | null;
 }
 
+// ─── 요금 계산 엔진 타입 (TASK-141 IMP-112) ───────────────────────────────
+
+export interface UpsPricingData {
+  zone: UpsZone;
+  product: UpsProduct;
+  baseRate: UpsBaseRate;
+  fuelSurcharge: UpsFuelSurcharge | null;
+  otherCharges: UpsOtherCharge[];
+}
+
+export interface UpsOtherChargeItem {
+  chargeId: string;
+  chargeCode: string;
+  chargeName: string;
+  unit: string;
+  sellingBase: number;
+  costBase: number;
+  fuelSurchargeSelling: number;
+  fuelSurchargeCost: number;
+}
+
+export interface UpsBreakdown {
+  zone: Pick<UpsZone, 'zone_code' | 'zone_name'>;
+  product: Pick<UpsProduct, 'product_code' | 'product_name' | 'cargo_type'>;
+  actualWeightKg: number;
+  volumetricWeightKg: number;
+  chargeableWeightKg: number;
+  volumetricDivisor: UpsVolumeDivisor;
+  billingWeightKg: number;
+  baseRateId: string;
+  baseSellingPrice: number;
+  baseCostPrice: number;
+  fuelSurchargeId: string | null;
+  fuelSurchargeRate: number;
+  fuelSurchargeSellingAmount: number;
+  fuelSurchargeCostAmount: number;
+  otherChargeItems: UpsOtherChargeItem[];
+  otherChargesSellingTotal: number;
+  otherChargesCostTotal: number;
+}
+
+export interface UpsFreightInput {
+  productId: string;
+  destCountryCode: string;
+  actualWeightKg: number;
+  dimL?: number;
+  dimW?: number;
+  dimH?: number;
+  volumetricDivisor?: UpsVolumeDivisor;
+  deliveryMethod?: 'DDU' | 'DDP';
+  otherChargeIds?: string[];
+  effectiveDate?: string;
+}
+
+export interface UpsFreightResult {
+  chargeableWeightKg: number;
+  billingWeightKg: number;
+  baseSellingPrice: number;
+  baseCostPrice: number;
+  fuelSurchargeSellingAmount: number;
+  fuelSurchargeCostAmount: number;
+  otherChargesSellingTotal: number;
+  otherChargesCostTotal: number;
+  totalSellingPrice: number;
+  totalCostPrice: number;
+  currency: string;
+  breakdown: UpsBreakdown;
+}
+
+// ─── 구 타입 (TASK-138 호환 유지) ────────────────────────────────────────────
+
 // 요금 계산 입력
 export interface UpsFreightCalcInput {
   product_id: string;
