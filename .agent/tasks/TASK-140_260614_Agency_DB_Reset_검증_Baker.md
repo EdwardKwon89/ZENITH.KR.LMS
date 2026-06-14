@@ -79,7 +79,7 @@ npx supabase db reset    # 전체 migration 순차 적용
 - [x] TASK-138 migration 7종 + TASK-139 migration 2종 전체 적용 확인
 - [x] `zen_agency_shippers`, `zen_agency_rate_overrides` 테이블 생성 확인
 - [x] TASK-139 task file DoD `supabase db reset` 항목 체크 완료
-- [x] 코드 커밋 해시: _(커밋 시 기재)_
+- [x] 코드 커밋 해시: `59da68f`
 - [x] DoD 자가 검증 완료
 
 ---
@@ -110,7 +110,7 @@ npx supabase db reset    # 전체 migration 순차 적용
    - `zen_agency_shippers` ✅ (agency_002)
    - `zen_agency_rate_overrides` ✅ (agency_002)
 
-**커밋 해시**: (커밋 시 기재)
+**커밋 해시**: `59da68f` (docs + task files) | `a96fabb` (선행 blocker 보고 커밋)
 
 ---
 
