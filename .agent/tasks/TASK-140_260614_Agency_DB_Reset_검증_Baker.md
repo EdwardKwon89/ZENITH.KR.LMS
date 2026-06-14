@@ -86,10 +86,24 @@ npx supabase db reset    # 전체 migration 순차 적용
 
 ## [작업 결과]
 
-_(Baker 작업 완료 후 기재)_
+**상태**: 🚫 블로커 — Docker 미설치로 supabase db reset 실행 불가
+
+**확인 사항**:
+- 브랜치 체크아웃 ✅ (`feature/ups-spr01-devteam-agency-role`, 최신 커밋 `e6b8bdb`)
+- Docker Desktop: **미설치** (macOS, `/Applications/Docker.app` 없음, `docker` 명령어 미존재)
+- `npx supabase start`: Docker daemon 연결 불가로 실행 불가
+- `npx supabase db reset`: 상동
+
+**원인**: Baker(OpenCode) 실행 환경에 Docker가 설치되어 있지 않음. Jaison 환경과 동일한 제약.
+
+**권장 조치**:
+1. Docker Desktop이 설치된 다른 환경(예: Aiden 또는 다른 개발자 워크스테이션)에서 supabase db reset 실행
+2. 또는 CI/CD 파이프라인(PR 기반)에서 migration 적용 검증
 
 ---
 
 ## [발견 이슈]
 
-_(없음)_
+| DEF# | 제목 | 긴급도 | 상세 보고서 |
+|:----:|:-----|:------:|:-----------|
+| — | Baker/Jaison 환경 Docker 미설치로 supabase db reset 실행 불가 | Medium | — |
