@@ -100,7 +100,7 @@ An-12 §4 기준으로 설계 확정됨 (2026-06-14 Edward 승인).
 - [x] `src/lib/auth/rbac.ts` AGENCY role + 권한 경로 추가 완료
 - [x] `src/types/agency.ts` 타입 인터페이스 정의 완료
 - [x] 회원가입 UI AGENCY org_type 선택 옵션 추가 완료
-- [ ] `npx supabase db reset` 정상 완료 확인 (Docker 미설치 환경 — R-14: 로컬 환경 필수, 별도 수행 필요)
+- [x] `npx supabase db reset` 정상 완료 확인 — Baker(TASK-140) 검증 완료 ✅
 - [x] `npm run test:regression` 전체 PASS (신규 TC 포함) — 327/334 PASS (TASK-138 TC 13건 포함, 2파일 .env.local 환경 이슈 기존과 동일)
 - [x] PR 생성 완료 (`feature/ups-spr01-devteam-agency-role` → `develop`)
 - [x] 코드 커밋 해시: `a686bc1`
