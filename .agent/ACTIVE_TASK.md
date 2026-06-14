@@ -180,6 +180,7 @@
 | TASK-135 | 260609 | DEF-056 실물 요율 시드 SQL 커밋 (`seed_rates_realistic.sql` untracked) | P4 | 없음 | B_Kai | ✅ | [TASK-135](tasks/TASK-135_260609_DEF056시드SQL커밋_BKai.md) | 1ebc9e6 포함 · 316/316 · Aiden ✅ 승인 (260609) |
 | TASK-136 | 260609 | DEF-059 §1~§3 PKG 레벨 special_cargo_type 전환 (DB·Zod·RPC·Action) | P3 | 없음 | D_Kai | ✅ | [TASK-136](tasks/TASK-136_260609_DEF059PKG레벨특수화물전환_DKai.md) | IMP-없음 · ad22883 · 316/316 · Aiden ✅ 승인 (260609) |
 | TASK-137 | 260609 | DEF-059 §4 UI 전환 — PKG 카드에 special_cargo_type 선택 UI 이동 | P3 | TASK-136 ✅ | B_Kai | ✅ | [TASK-137](tasks/TASK-137_260609_DEF059UI전환_BKai.md) | ec0fa5a · Aiden 직접보완(dabde76) · 316/316 · ✅ 승인 (260609) |
+| TASK-141 | 260614 | [P7-SPR-02] UPS 요금 계산 엔진 + 창고 입고 수정 (domestic/intl REF_NO 입력) | P1 | TASK-138 ✅ | Aiden | ⬜ | [TASK-141](tasks/TASK-141_260614_Phase7UPS_요금계산엔진_창고입고수정_Aiden.md) | IMP-112 · Phase 7 SPR-02 |
 | TASK-138 | 260614 | [P7-SPR-01] UPS DB 스키마 설계 — zen_ups_* 테이블 6종 신설 + 기존 테이블 확장 | P1 | An-12 확정 ✅ | Aiden | ✅ | [TASK-138](tasks/TASK-138_260614_Phase7UPS_DB스키마_Aiden.md) | IMP-110 · Phase 7 SPR-01 · 코드 aca457e · 323/329 PASS · Aiden ✅ 승인 (260614) |
 | TASK-108 | 260601 | DEF-039 CARRIER RLS + 미스테이지 커밋 + 신원 수정 | P2 | 없음 | D_Kai | ✅ | [TASK-108](tasks/TASK-108_260601_DEF039CARRIER_RLS_미스테이지커밋_DKai.md) | DEF-039 해소 · 4cc88d8+beba338 · CARRIER RLS 3테이블 · 229/229 ✅ · Aiden ✅ 승인 |
 | TASK-109 | 260603 | IMP-095 Rate Card 항로(Port) 기반 매칭 구현 | P1 | TASK-106 ✅ · TASK-108 ✅ | D_Kai (OpenCode) | ✅ | [TASK-109](tasks/TASK-109_260603_IMP095포트기반요율매칭_DKai.md) | IMP-095 완료 · `0fb950d`+`fb263f9` · 236/236 PASS · Aiden ✅ 승인 |
@@ -207,6 +208,7 @@
 
 | Task-ID | 생성일 | 업무개요 | 우선순위 | 전제조건 | 할당Agent | 상태 | 상세파일 | 비고 |
 |:-------:|:------:|:--------|:--------:|:--------:|:---------:|:----:|:--------|:-----|
+| TASK-142 | 260614 | [P7-SPR-02] Agency 화주 관리 UI — 대시보드 + 화주 목록/등록 페이지 | P1 | TASK-139 ✅ | Jaison | ⬜ | [TASK-142](tasks/TASK-142_260614_Phase7Agency_화주관리UI_Jaison.md) | IMP-114 · Phase 7 SPR-02 |
 | TASK-139 | 260614 | [P7-SPR-01] Agency 역할 모델 — org_type 확장 + RBAC + 대리점 화주 계층 DB | P1 | An-12 확정 ✅ · TASK-138 ✅ | Jaison | ✅ | [TASK-139](tasks/TASK-139_260614_Agency역할모델_DevTeam.md) | IMP-111 · 코드 dc8a2ff · 327/334 PASS · PR#5 머지 완료 |
 | TASK-140 | 260614 | TASK-139 DoD 보완 — supabase db reset 검증 (TASK-138+139 migration 전체 적용) | P2 | TASK-139 ✅ | Baker | ✅ | [TASK-140](tasks/TASK-140_260614_Agency_DB_Reset_검증_Baker.md) | IMP-111 연계 · supabase reset ✅ · 커밋 59da68f |
 
@@ -218,7 +220,7 @@
 
 | Agent | 상태 | 비고 |
 |:------|:----:|:----|
-| **Aiden (Claude)** | 신규 Task 대기 | TASK-138 ✅ 완료 |
+| **Aiden (Claude)** | ⬜ TASK-141 착수 대기 | IMP-112 UPS 요금 계산 엔진 |
 | **D_Kai (OpenCode)** | 신규 Task 대기 | Advisory: ACTIVE_TASK 블로커 선제 조작 + `1ebc9e6` 빌드 오류 도입 |
 | **B_Kai** | 신규 Task 대기 | TASK-135·137 ✅ 완료 |
 | **Riley** | 신규 Task 대기 | 토큰 소진·scope 초과 이력 — scope 제한 명시 필수 |
@@ -229,8 +231,8 @@
 
 | Agent | 상태 | 비고 |
 |:------|:----:|:----|
-| **JSJung** (팀 리더) | 신규 Task 대기 | PR#5 머지 ✅ (2026-06-14) |
-| **Jaison** (AI Agent 총괄) | 신규 Task 대기 | TASK-139 ✅ 완료 |
+| **JSJung** (팀 리더) | 활성 | TASK-142 감독 — SPR-02 착수 지시 |
+| **Jaison** (AI Agent 총괄) | ⬜ TASK-142 착수 대기 | IMP-114 Agency 화주 관리 UI |
 | **Baker** (AI Agent 보조) | 신규 Task 대기 | TASK-140 ✅ 완료 |
 
 ---
