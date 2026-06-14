@@ -8,7 +8,7 @@ import { createClient } from '@/utils/supabase/client';
 import { useParams, useRouter } from 'next/navigation';
 
 type SignupStep = 'TYPE' | 'INFO' | 'ORG_JOIN' | 'ORG_CREATE' | 'DOCS' | 'COMPLETE';
-type OrgType = 'PLATFORM' | 'SHIPPER' | 'CARRIER';
+type OrgType = 'PLATFORM' | 'SHIPPER' | 'CARRIER' | 'AGENCY';
 
 export default function RegisterPage() {
   const params = useParams();
@@ -263,8 +263,8 @@ export default function RegisterPage() {
                 value={businessNumber} 
                 onChange={(e) => setBusinessNumber(e.target.value)} 
               />
-              <div className="grid grid-cols-2 gap-3">
-                  {(['SHIPPER', 'CARRIER'] as OrgType[]).map(type => (
+              <div className="grid grid-cols-3 gap-3">
+                  {(['SHIPPER', 'CARRIER', 'AGENCY'] as OrgType[]).map(type => (
                       <button
                         key={type}
                         onClick={() => setOrgType(type)}
@@ -272,7 +272,7 @@ export default function RegisterPage() {
                             orgType === type ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-stone-100 bg-stone-50 text-stone-500'
                         }`}
                       >
-                          {type === 'SHIPPER' ? '송하인(화주)' : '운송사'}
+                          {type === 'SHIPPER' ? '송하인(화주)' : type === 'CARRIER' ? '운송사' : '대리점'}
                       </button>
                   ))}
               </div>
