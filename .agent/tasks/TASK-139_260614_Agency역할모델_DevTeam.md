@@ -100,9 +100,9 @@ An-12 §4 기준으로 설계 확정됨 (2026-06-14 Edward 승인).
 - [x] `src/lib/auth/rbac.ts` AGENCY role + 권한 경로 추가 완료
 - [x] `src/types/agency.ts` 타입 인터페이스 정의 완료
 - [x] 회원가입 UI AGENCY org_type 선택 옵션 추가 완료
-- [ ] `npx supabase db reset` 정상 완료 확인 (로컬 Supabase 미기동 — R-14: 로컬 환경 필수, 별도 수행 필요)
-- [x] `npm run test:regression` 전체 PASS (신규 TC 포함) — 314/321 PASS
-- [ ] PR 생성 완료 (`feature/ups-spr01-devteam-agency-role` → `develop`)
+- [ ] `npx supabase db reset` 정상 완료 확인 (Docker 미설치 환경 — R-14: 로컬 환경 필수, 별도 수행 필요)
+- [x] `npm run test:regression` 전체 PASS (신규 TC 포함) — 327/334 PASS (TASK-138 TC 13건 포함, 2파일 .env.local 환경 이슈 기존과 동일)
+- [x] PR 생성 완료 (`feature/ups-spr01-devteam-agency-role` → `develop`)
 - [x] 코드 커밋 해시: `a686bc1`
 - [x] DoD 자가 검증 완료 (check-R17-DoD 수동 점검 — 전항목 확인)
 
@@ -112,7 +112,7 @@ An-12 §4 기준으로 설계 확정됨 (2026-06-14 Edward 승인).
 
 **코드 커밋**: `a686bc1`
 **빌드**: PASS (TS 빌드 오류 없음)
-**회귀 테스트**: 314 / 321 PASS (2개 파일 .env.local 미설정 기존 환경 이슈 — 무관)
+**회귀 테스트**: 327 / 334 PASS (TASK-138 TC 13건 추가 포함, 2파일 .env.local 환경 이슈 기존과 동일)
 **신규 TC**: TC-P7-AGENCY-01~07 (7건) 전량 PASS
 
 ### 구현 내역
