@@ -1,0 +1,54 @@
+SNTL UPS Rules
+
+1. 고객 입력 물품 Pick up방법
+	1.1. 고객이 직접 택배로 SNTL 배송 (order번호와 국내택배번호 매핑 필요)
+	1.2. SNTL 직접 Pick up 
+		1.2.1. 고객이 order번호 출력 (barcode 또는 qrcode)
+		1.2.2. Pick up한 SNTL 직원이 pick up 완료 후 사무실에서 출력(barcode 또는 qrcode) 및 부착
+		
+2. SNTL 입고
+	2.1. barcode 또는 qrcode scan을 통해 입고처리
+	2.2. 입고처리 시 UPS 운송원장 출력 (전달된 IF를 통해 처리됨)
+		2.2.1. UPS 운송원장 번호 부여 (UPS에 화물 등록)
+		2.2.2. UPS 운송원장 출력
+		** UPS 운송원장 출력이후, 화물(order)에 대한 정보 수정 불가
+		
+3. SNTL 출고
+	3.1. barcode 또는 qrcode scan을 통해 출고처리
+		3.1.1. 출고처리는 UPS 직원이 직접 방문하여 자사 Hand held 장비를 사용해 Scan 및 UPS인수 처리
+				이후 발송 프로세는 UPS 내부 프로세스를 따름
+		3.1.2. UPS인수처리 후 Tracking 가능
+				** UPS Tracking 방안 확인해야 함.
+
+4. UPS 발송완료
+	4.1. SNTL 출고 및 UPS 인수 후 반환/삭제되는 경우가 있음.
+		  최종 UPS 발송완료 처리 필요 (시스템간 연동은 없음)
+		  
+5. UPS 상품 (정현욱 사장 전달된 정보를 바탕으로..)
+	5.1. UPS Worldwide Express (Documenet, Non-document)
+	5.2. UPS Worldwide Express Saver (Documenet, Non-document)
+	5.3. UPS Worldwide Express Expedited
+	5.4. UPS Worldwide Express Flight
+	5.5. 위 4가지 방법에 DDU, DDP가 있음. (부가금에 대한 착불, 선불 개념)
+	
+6. UPS 원가 적용
+	6.1. 첨부파일 "원가표.xlsx" 및 "sntl_ups.txt" 참조
+	
+7. 사용자 그룹
+	7.1. 관리자
+	7.2. 운영자
+	7.3. 대리점
+		7.3.1. 대리점관리자
+		7.3.2. 대리점운영자
+		7.3.3. 대리점사용자
+			7.3.3.1. 개인사용자
+			7.3.3.2. 법인사용자
+				7.3.3.2.1. 법인관리자
+				7.3.3.2.2. 법인부서관리자
+				7.3.3.2.3. 법인부서사용자
+	7.4.
+		7.4.1. 개인사용자
+		7.4.2. 법인사용자
+			7.4.2.1. 법인관리자
+			7.4.2.2. 법인부서관리자
+			7.4.2.3. 법인부서사용자

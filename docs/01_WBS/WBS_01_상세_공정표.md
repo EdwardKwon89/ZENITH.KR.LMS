@@ -41,7 +41,8 @@ tags:
 | **Phase 4** | 운영 최적화 및 안정화         |    100%    |    0 MD    |   **완료**  |
 | **Phase 5** | 통관 완결 & 시스템 인계       |    100%    |    0 MD    |   **완료**  |
 | **Phase 6** | 신규 서비스 역할+멀티 배정    |     0%     |   40 MD    |   **설계확정** |
-|  **Total**  | **전체 프로젝트 공정**        |   **85%**  |  **40 MD** |  **진행중** |
+| **Phase 7** | UPS 국제 특송 서비스 전용 모듈 |     0%     |   60 MD    |   **설계확정** |
+|  **Total**  | **전체 프로젝트 공정**        |   **80%**  | **100 MD** |  **진행중** |
 
 
 ---
@@ -482,6 +483,95 @@ tags:
 
 ---
 
+### 7. Phase 7: UPS 국제 특송 서비스 전용 모듈 (60 MD)
+> **Goal**: UPS 국제 특송(EXP) 서비스 전용 요율 구조, Agency 역할 모델, IBC/Pactrak Interface 완결
+> **설계 문서**: An-12 (`docs/02_Analysis/An_12_Phase7_UPS특송서비스_설계.md`)
+> **시범 운영**: 2026-06-30 | **Go Live**: 2026-07-20
+> **개발 체계**: Team A (Aiden) + Team B (신규 개발자) 병행 개발
+
+UPS WorldWide Express (Document/Non-Document) + Saver + Expedited + Flight 4개 서비스.
+IBC(国际保税快递)/Pactrak API 기반 국제 운송번호 발부 + 화물 이벤트 추적.
+
+#### 7.1 [SPR-01] DB 스키마 기반 구축 — 병행 (Team A + Team B) (10 MD)
+
+- **7.1.1 UPS 요율 테이블 신설** (5 MD) [Team A]
+    - [ ] 7.1.1.1 `zen_ups_zones` + `zen_ups_zone_countries` + RLS (1 MD) | TASK-138
+    - [ ] 7.1.1.2 `zen_ups_products` + 초기 4개 제품 시드 (0.5 MD) | TASK-138
+    - [ ] 7.1.1.3 `zen_ups_base_rates` (구간×화물유형×0.5kg) + RLS (1 MD) | TASK-138
+    - [ ] 7.1.1.4 `zen_ups_fuel_surcharges` (주별) + `zen_ups_other_charges` + RLS (1 MD) | TASK-138
+    - [ ] 7.1.1.5 `zen_ups_flight_plans` + 기존 테이블 확장(zen_orders·zen_order_packages·zen_organizations) (1.5 MD) | TASK-138
+
+- **7.1.2 Agency 역할 모델** (5 MD) [Team B]
+    - [ ] 7.1.2.1 `zen_organizations.type` AGENCY 추가 + `zen_role_permissions` AGENCY 권한 등록 (1 MD) | TASK-139
+    - [ ] 7.1.2.2 `src/lib/auth/rbac.ts` AGENCY role + STATIC_PERMISSIONS 추가 (0.5 MD) | TASK-139
+    - [ ] 7.1.2.3 `zen_agency_shippers` + `zen_agency_rate_overrides` 테이블 + RLS (2 MD) | TASK-139
+    - [ ] 7.1.2.4 회원가입 UI AGENCY org_type 선택 추가 (1.5 MD) | TASK-139
+
+#### 7.2 [SPR-02] 핵심 기능 구현 — 병행 (Team A + Team B) (14 MD)
+
+- **7.2.1 UPS 요금 계산 엔진 + 창고 처리** (8 MD) [Team A]
+    - [ ] 7.2.1.1 `src/lib/ups/pricing-engine.ts` — Zone 기반 요금 계산 (chargeableWeight + baseFreight + fuelSurcharge + OC) (3 MD)
+    - [ ] 7.2.1.2 `zen_order_packages` PKG REF_NO 흐름 — 창고 입고 UI 수정 (국내 택배번호 확인) (2.5 MD)
+    - [ ] 7.2.1.3 오더 등록 직접배송/픽업 선택 + 간이 송장 PDF 출력 (2.5 MD)
+
+- **7.2.2 Agency 화주 관리 UI** (6 MD) [Team B]
+    - [ ] 7.2.2.1 `/agency/shippers` 페이지 — 화주 목록 + 대리점 화주 등록 폼 (3 MD)
+    - [ ] 7.2.2.2 Agency 화주 등급/할인율 설정 기능 (1.5 MD)
+    - [ ] 7.2.2.3 Agency 대시보드 (`/agency`) 기본 화면 (1.5 MD)
+
+#### 7.3 [SPR-03] 요율 관리 UI — 병행 (12 MD)
+
+- **7.3.1 UPS 요율 Admin UI** (8 MD) [Team A]
+    - [ ] 7.3.1.1 `/admin/ups-rates` Zone 관리 + Zone별 국가 편집 (2 MD)
+    - [ ] 7.3.1.2 기본 요금 테이블 등록/수정 (구간×화물유형×중량) (3 MD)
+    - [ ] 7.3.1.3 유류 할증 주별 갱신 UI + Other Charges 코드 관리 (2 MD)
+    - [ ] 7.3.1.4 항공 비행 계획 관리 (`/admin/ups-rates/flight-plans`) (1 MD)
+
+- **7.3.2 Agency 요율 오버라이드 UI** (4 MD) [Team B]
+    - [ ] 7.3.2.1 `/agency/rate-overrides` — Agency 자체 판매가/원가 설정 (3 MD)
+    - [ ] 7.3.2.2 Agency용 요율 조회 화면 (플랫폼 기본 요율 + 오버라이드 통합 표시) (1 MD)
+
+#### 7.4 [SPR-04] MVP 완성 + 회귀 — 병행 (10 MD)
+
+- **7.4.1 창고 출고 UPS 연계 + 통합** (5 MD) [Team A]
+    - [ ] 7.4.1.1 창고 출고 화면 UPS 발송 상태 연계 (수동 상태 업데이트) (2 MD)
+    - [ ] 7.4.1.2 NaviSidebar UPS 관련 메뉴 등록 (1 MD)
+    - [ ] 7.4.1.3 회귀 테스트 확장 + 빌드 검증 (2 MD)
+
+- **7.4.2 PR 통합 + Team B 회귀** (5 MD) [Team B]
+    - [ ] 7.4.2.1 Team B 전체 PR → develop 머지 (2 MD)
+    - [ ] 7.4.2.2 통합 회귀 테스트 + 빌드 검증 (3 MD)
+
+#### **🚀 7.MVP — 시범 운영 (2026-06-30)**
+
+#### 7.5 [SPR-05] IBC/Pactrak Interface 자동화 (8 MD) [Team A]
+
+- **7.5.1 Pactrak Manifest API 연동**
+    - [ ] 7.5.1.1 Pactrak Manifest API 호출 레이어 (`src/app/actions/ups/interface.ts`) (3 MD)
+    - [ ] 7.5.1.2 국제 운송번호 자동 발부 + `intl_ref_locked` 잠금 처리 (2 MD)
+    - [ ] 7.5.1.3 번호 재발부 프로세스 (폐기 → 신규 발부) (1 MD)
+
+- **7.5.2 일마감 처리** (2 MD) [Team B]
+    - [ ] 7.5.2.1 당일 출고 집계 화면 (확정분/대기분) + 매출/매입 일별 집계 (2 MD)
+
+#### 7.6 [SPR-06] 트래킹 자동화 + Agency 정산 (6 MD)
+
+- **7.6.1 IBC eTrack REST 트래킹** (4 MD) [Team A]
+    - [ ] 7.6.1.1 eTrack REST API 폴링 구현 + zen_tracking_events 업데이트 (4 MD)
+
+- **7.6.2 Agency 정산 조회** (2 MD) [Team B]
+    - [ ] 7.6.2.1 Agency 정산 화면 — 대리점별 오더/매출 조회 (2 MD)
+
+#### 7.7 [SPR-07] 통합 E2E + UAT (8 MD) [Team A + Team B]
+
+- [ ] 7.7.1 UPS 특송 전체 워크플로우 E2E (오더 → 입고 → 번호 발부 → 출고 → 트래킹) (4 MD)
+- [ ] 7.7.2 Agency 워크플로우 E2E (화주 등록 → 오더 → 요율 오버라이드 → 정산) (2 MD)
+- [ ] 7.7.3 UAT 절차서 작성 + 시나리오 검증 (2 MD)
+
+#### **🚀 7.GoLive — Go Live (2026-07-20)**
+
+---
+
 ## 📝 개정 이력 (Revision History)
 
 | 버전 | 날짜       | 작성자      | 설명                                                                |
@@ -528,3 +618,4 @@ tags:
 | v5.4 | 2026-05-08 | Antigravity | Phase 5 및 종합 E2E-01~12 완주 반영 (100% 완료) |
 | v5.5 | 2026-06-06 | Aiden (Claude) | Phase 6 신규 등재 — 고객 리뷰(20260606) 기반: 신규 서비스 역할 모델(CUSTOMS/DELIVERY) + 멀티 서비스 배정(zen_order_services) + 서비스 요율 테이블. SPR-01~08 (40 MD). 설계 문서: An-11. |
 | v5.5 | 2026-05-08 | Aiden | 전 공정 최종 정리 — [>] Deferred 8개 처리 (2.1.3/2.1.4 Skip, 2.1.5.1 완료·5.2 Skip, 4.2.1.1/4.2.2.1 Skip), ROADMAP Phase 5 Milestone 완료 마커 추가 |
+| v7.0 | 2026-06-14 | Aiden (Claude) | Phase 7 신규 등재 — 고객 리뷰(20260609) 기반: UPS 국제 특송 서비스 전용 모듈. IBC/Pactrak Interface + Agency 역할 모델 + UPS 요율 구조 + PKG REF_NO 관리. SPR-01~07 (60 MD). 설계 문서: An-12. 멀티 팀(Team A/B) 병행 개발 체계 도입. 시범 운영 6/30 · Go Live 7/20. |
