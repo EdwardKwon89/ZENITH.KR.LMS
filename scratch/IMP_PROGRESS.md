@@ -294,7 +294,8 @@
 | UAT | 6 | 7 | 85.7% | IMP-090 ✅ · IMP-091 ⬜ (Carrier Portal — Phase M) · **IMP-092 ✅ (TISA 3계층)** · **IMP-093 ✅ (TISA 실연동, TASK-104)** · IMP-094 ⬜ (요율 워크플로우 고도화, Phase M) · **IMP-095 ✅ (Rate Card 항로 매칭, TASK-109)** · **IMP-096 ✅ (요율 관리 페이지 통합 정리, TASK-110)** |
 | UAT2 | 2 | 2 | 100% ✅ | **IMP-107 ✅** (TISA 스냅샷 강화 — WM slab 이력, `ab6f493`+`ef3ece7` Aiden ✅ 승인 260609) · **IMP-108 ✅§1·§2·§3** (B_Kai §1 max_charge UI ✅, D_Kai §2 platform_fee ✅, §3 WM CLAMP `9d70d87` ✅) |
 | 기타 | 0 | 1 | 0% | **IMP-109 ⬜** 환율 설정 화면 (어드민 — 기준 통화 + 환율 설정 UI) |
-| **합계** | **91** | **94** | **96.8%** | IMP-107 ✅ Aiden 승인 (260609) · IMP-108 ✅ Aiden 승인 (260609) · IMP-109 ⬜ 신규 등재 (260610) |
+| **Phase 7** | 1 | 2 | 50% | **IMP-110 🔔** UPS DB 스키마 7종 (TASK-138 aca457e 완료, Aiden 검토 대기) · **IMP-111 ⬜** Agency 역할 모델 (TASK-139, Jaison/Team B 착수 대기) |
+| **합계** | **92** | **96** | **95.8%** | IMP-110 🔔 (TASK-138 Aiden 검토 요청 260614) · IMP-111 ⬜ 신규 등재 (260614) · IMP-107 ✅ Aiden 승인 (260609) |
 
 > **UAT 진행 전 필수 처리**: IMP-092 ✅ · IMP-093 ✅ · IMP-095 ✅ — 전량 완료
 > 미완료 IMP: IMP-086·087 🚫 블로커 · IMP-028·069(Future — 통관 연계) · IMP-091 ⬜ (Carrier Portal) · IMP-094 ⬜ (요율 워크플로우 Phase M)
