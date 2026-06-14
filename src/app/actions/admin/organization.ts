@@ -107,8 +107,9 @@ export async function createOrganization(data: {
   status?: string;
   metadata?: Record<string, unknown>;
 }) {
-  const { supabase } = await validateAdminAction();
-  const adminRepo = new AdminRepository(supabase);
+  const { user } = await validateAdminAction();
+  const adminClient = await createAdminClient();
+  const adminRepo = new AdminRepository(adminClient);
 
   const { data: org, error } = await adminRepo.createOrganization(data);
   if (error) throw new Error(`Failed to create organization: ${error.message}`);
@@ -128,8 +129,9 @@ export async function updateOrganization(id: string, data: {
   status?: string;
   metadata?: Record<string, unknown>;
 }) {
-  const { supabase } = await validateAdminAction();
-  const adminRepo = new AdminRepository(supabase);
+  await validateAdminAction();
+  const adminClient = await createAdminClient();
+  const adminRepo = new AdminRepository(adminClient);
 
   const { error } = await adminRepo.updateOrganization(id, data);
   if (error) throw new Error(`Failed to update organization: ${error.message}`);
