@@ -179,7 +179,7 @@
 | TASK-136 | 260609 | DEF-059 §1~§3 PKG 레벨 special_cargo_type 전환 (DB·Zod·RPC·Action) | P3 | 없음 | D_Kai | ✅ | [TASK-136](tasks/TASK-136_260609_DEF059PKG레벨특수화물전환_DKai.md) | IMP-없음 · ad22883 · 316/316 · Aiden ✅ 승인 (260609) |
 | TASK-137 | 260609 | DEF-059 §4 UI 전환 — PKG 카드에 special_cargo_type 선택 UI 이동 | P3 | TASK-136 ✅ | B_Kai | ✅ | [TASK-137](tasks/TASK-137_260609_DEF059UI전환_BKai.md) | ec0fa5a · Aiden 직접보완(dabde76) · 316/316 · ✅ 승인 (260609) |
 | TASK-138 | 260614 | [P7-SPR-01] UPS DB 스키마 설계 — zen_ups_* 테이블 6종 신설 + 기존 테이블 확장 | P1 | An-12 확정 ✅ | Aiden | ✅ | [TASK-138](tasks/TASK-138_260614_Phase7UPS_DB스키마_Aiden.md) | IMP-110 · Phase 7 SPR-01 · 코드 aca457e · 323/329 PASS · Aiden ✅ 승인 (260614) |
-| TASK-139 | 260614 | [P7-SPR-01] Agency 역할 모델 — org_type 확장 + RBAC + 대리점 화주 계층 DB | P1 | An-12 확정 ✅ | Jaison (Team B) | ⬜ | [TASK-139](tasks/TASK-139_260614_Agency역할모델_DevTeam.md) | IMP-111 · Phase 7 SPR-01 · 팀 리더: JSJung · 브랜치: feature/ups-spr01-devteam-agency-role |
+| TASK-139 | 260614 | [P7-SPR-01] Agency 역할 모델 — org_type 확장 + RBAC + 대리점 화주 계층 DB | P1 | An-12 확정 ✅ | Jaison (Team B) | 🔔 | [TASK-139](tasks/TASK-139_260614_Agency역할모델_DevTeam.md) | IMP-111 · Phase 7 SPR-01 · 팀 리더: JSJung · 브랜치: feature/ups-spr01-devteam-agency-role · 커밋 a686bc1 |
 | TASK-108 | 260601 | DEF-039 CARRIER RLS + 미스테이지 커밋 + 신원 수정 | P2 | 없음 | D_Kai | ✅ | [TASK-108](tasks/TASK-108_260601_DEF039CARRIER_RLS_미스테이지커밋_DKai.md) | DEF-039 해소 · 4cc88d8+beba338 · CARRIER RLS 3테이블 · 229/229 ✅ · Aiden ✅ 승인 |
 | TASK-109 | 260603 | IMP-095 Rate Card 항로(Port) 기반 매칭 구현 | P1 | TASK-106 ✅ · TASK-108 ✅ | D_Kai (OpenCode) | ✅ | [TASK-109](tasks/TASK-109_260603_IMP095포트기반요율매칭_DKai.md) | IMP-095 완료 · `0fb950d`+`fb263f9` · 236/236 PASS · Aiden ✅ 승인 |
 | TASK-110 | 260603 | IMP-096 요율 관리 페이지 통합 정리 (3단계) | P1 | TASK-106 ✅ · TASK-109 ✅ | D_Kai (OpenCode) | ✅ | [TASK-110](tasks/TASK-110_260603_IMP096요율관리페이지통합정리_DKai.md) | IMP-096 완료 · `e166fec`+`65c904b` · 236/236 PASS · Aiden ✅ 승인 |
@@ -203,7 +203,7 @@
 | Agent | 진행 중 | 재작업/조치 필요 | 블로커 대기 |
 |:------|:--------|:----------------|:----------|
 | **Aiden (Claude)** | — | — | **TASK-138 ⬜ 즉시 착수 가능** (Phase 7 SPR-01 UPS DB) |
-| **Jaison (Team B)** · JSJung 팀 리더 | — | 온보딩 완료 후 착수 (`docs/00_GUIDE/ONBOARDING_NEWTEAM.md` 필독) | **TASK-139 ⬜ 즉시 착수 가능** (Phase 7 SPR-01 Agency 역할) |
+| **Jaison (Team B)** · JSJung 팀 리더 | — | **TASK-139 🔔 검토 요청** (a686bc1 · 314/321 PASS) | — |
 | **D_Kai (OpenCode)** | — | Advisory: ACTIVE_TASK 블로커 선제 조작 + `1ebc9e6` TASK 프로세스 외 빌드 오류 도입 | 신규 Task 대기 |
 | **B_Kai** | — | — | 신규 Task 대기 (TASK-135·137 ✅ 완료) |
 | **Riley** | — | 토큰 소진·scope 초과 이력 (TASK-121) | 신규 Task 대기 (scope 제한 명시 필수) |
