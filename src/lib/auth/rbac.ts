@@ -13,6 +13,7 @@ export const USER_ROLES = {
   CARRIER: 'CARRIER',
   CUSTOMS_BROKER: 'CUSTOMS_BROKER',
   DELIVERY_AGENT: 'DELIVERY_AGENT',
+  AGENCY: 'AGENCY',
   CORPORATE: 'CORPORATE',
   INDIVIDUAL: 'INDIVIDUAL',
   USER: 'USER',
@@ -45,6 +46,7 @@ export const STATIC_PERMISSIONS: Record<string, string[]> = {
   [USER_ROLES.CARRIER]: ['/logistics/delivery', '/orders/assigned', '/admin/transport-costs', '/admin/rates', '/voc', '/support', '/mypage'],
   [USER_ROLES.CUSTOMS_BROKER]: ['/admin/customs-rates', '/orders/assigned', '/tracking', '/voc', '/mypage'],
   [USER_ROLES.DELIVERY_AGENT]: ['/admin/delivery-rates', '/orders/assigned', '/tracking', '/voc', '/mypage'],
+  [USER_ROLES.AGENCY]: ['/orders', '/ups-rates', '/agency', '/tracking', '/settlement', '/voc', '/mypage'],
   [USER_ROLES.CORPORATE]: ['/orders', '/billing/invoice', '/tracking', '/finance', '/settlement', '/voc', '/support', '/mypage'],
   [USER_ROLES.INDIVIDUAL]: ['/orders', '/tracking', '/voc', '/support', '/mypage'],
   [USER_ROLES.USER]: ['/dashboard', '/mypage', '/support'],
@@ -137,5 +139,7 @@ export const ALL_RESOURCE_PATHS = [
   { path: '/admin/error-logs', label: '에러 로그 모니터링' },
   { path: '/admin/settings', label: '시스템 설정' },
   { path: '/admin/permissions', label: '권한 관리' },
+  { path: '/agency', label: '대리점 관리' },
+  { path: '/ups-rates', label: 'UPS 요율 조회' },
 ];
 
