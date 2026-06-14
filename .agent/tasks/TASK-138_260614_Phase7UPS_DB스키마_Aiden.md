@@ -9,7 +9,7 @@
 | **전제조건** | An-12 설계 확정 ✅ |
 | **관련 IMP** | IMP-110 |
 | **브랜치** | `feature/ups-spr01-aiden-db-schema` |
-| **상태** | 🔔 |
+| **상태** | ✅ |
 
 ---
 
@@ -88,6 +88,22 @@ An-12 §3 기준으로 설계 확정됨 (2026-06-14 Edward 승인).
 - `zen_ups_products` 시드 6종 (WWExpress Doc/NonDoc, Saver Doc/NonDoc, Expedited, Flight)
 - `src/types/ups.ts`: 9개 인터페이스 + FreightCalcInput/Result 타입
 - `tests/integration/p7-ups-schema.test.ts`: TC-UPS-01~05 (13개 TC) 신규
+
+---
+
+## [Aiden 검토]
+
+**판정**: ✅ 승인 (2026-06-14 Edward 지시)
+
+| 검토 항목 | 결과 |
+|:---------|:----:|
+| DoD 8/8 전항목 체크 | ✅ |
+| 코드 커밋 `aca457e` 확인 | ✅ |
+| supabase db reset 130+ migration 적용 | ✅ |
+| 신규 TC-UPS-01~05 (13건) 전량 PASS | ✅ |
+| 기존 6 FAIL = DEF-065 pre-existing (TASK-138 범위 외) | ✅ 확인 |
+| R-17 커밋 순서 (코드→문서) 준수 | ✅ |
+| PR 생성 → main 머지 | ✅ |
 
 ---
 
