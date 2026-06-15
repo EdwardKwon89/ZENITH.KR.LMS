@@ -1,8 +1,8 @@
 # 🗺️ LIVE Regression Test Master Map
 
 > **상태:** [ACTIVE]  
-> **총 테스트 케이스:** 314 Cases  
-> **최종 검증일:** 2026-06-09 (TASK-123 DEF-052 TS 빌드 오류 수정 + IMP-108 §2 platform_fee 재정의)  
+> **총 테스트 케이스:** 319 Cases  
+> **최종 검증일:** 2026-06-15 (TASK-147 IMP-109 환율 설정 화면 구현)  
 
 제니스 플랫폼의 비즈니스 영속성을 보장하는 회귀 테스트 케이스의 통합 명세서입니다. 모든 신규 개발 및 수정 시 이 맵에 케이스가 추가되어야 하며, 전체 테스트가 통과되어야 합니다.
 
@@ -100,9 +100,18 @@
 | **TC-F.8** | 세금계산서 메일 발송 | Resend 연동 및 SENT/FAILED 상태 전환 확인 | `tests/integration/fin-03.test.ts` |
 | **TC-F.9** | 세금계산서 이력 조회 | 화주/어드민별 발행 및 발송 히스토리 조회 검증 | `tests/integration/fin-03.test.ts` |
 
+### 9. UPS 요율 관리 (Phase 7 SPR-03)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-UPS-ADMIN-01** | Zone CRUD | Zone 등록 및 수정 | `tests/unit/ups/rates-admin-actions.test.ts` |
+| **TC-UPS-ADMIN-02** | 기본요금 UPSERT | Zone×제품×중량 기본 요금 등록·수정 | `tests/unit/ups/rates-admin-actions.test.ts` |
+| **TC-UPS-ADMIN-03** | 유류할증 UPSERT | 주별 유류할증료 등록·수정 | `tests/unit/ups/rates-admin-actions.test.ts` |
+| **TC-UPS-ADMIN-04** | Other Charge CRUD | 부가요금 등록 및 수정 | `tests/unit/ups/rates-admin-actions.test.ts` |
+| **TC-UPS-ADMIN-05** | 역할 인증 가드 | 비관리자의 요율 관리 액션 접근 차단 | `tests/unit/ups/rates-admin-actions.test.ts` |
+
 ---
 
-### 9. 지능형 트래킹 가시성 (Intelligent Tracking)
+### 10. 지능형 트래킹 가시성 (Intelligent Tracking)
 | ID | 테스트 항목 | 목적 | 파일 경로 |
 | :--- | :--- | :--- | :--- |
 | **TC-TR.1** | 공급자 실시간 전환 | `VIRTUAL` <-> `MANUAL` 전환 시 데이터 가시성 및 정합성 보장 | `tests/integration/tracking.test.ts` |
@@ -327,12 +336,20 @@
 | **TC-POLICY-06** | WM max_charge cap 적용 (상한선 발동) | max_charge 초과 시 total_freight = max_charge + applied_pricing_basis = MAX_CHARGE 검증 | `tests/integration/p6-transport-policy.test.ts` |
 | **TC-POLICY-07** | WM 계산 후 snapshot slab 이력 + pricing_basis 저장 | zen_order_rate_snapshots 신규 8개 컬럼 정상 저장 검증 | `tests/integration/p6-transport-policy.test.ts` |
 
+### 28. 환율 설정 (Exchange Rate Settings)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-EXR-01** | getExchangeRateSettings() — 기본값 반환 | 환율 설정 초기 데이터 정상 로드 검증 | `tests/unit/admin/exchange-rate.test.ts` |
+| **TC-EXR-02** | updateExchangeRateSettings() — 정상 저장 | 환율 설정 데이터 저장 및 revalidatePath 동작 확인 | `tests/unit/admin/exchange-rate.test.ts` |
+| **TC-EXR-03** | 잘못된 환율값(음수) 입력 시 Zod 에러 반환 | Zod 유효성 검증을 통한 비정상 환율값 차단 확인 | `tests/unit/admin/exchange-rate.test.ts` |
+
 ---
 
 ## 📊 최신 검증 이력 (Execution History)
 
 | 검증일 | 버전 | 성공/실패 | 총 소요시간 | 결과 리포트 |
 | :--- | :--- | :---: | :--- | :--- |
+| 2026-06-15 | v1.5.4 | ✅ PASS | 7.82s | TASK-147 IMP-109 환율 설정 화면 구현 완료. exchange-rate.test.ts 3개 TC 신규 등록. 전체 회귀 테스트 319건 통과. |
 | 2026-06-08 | v1.5.3 | ✅ PASS | 51.90s | TASK-122 요율 Slab 구조 개편 완료. `tiers` 배열 → `{ weight_slabs, cbm_slabs }` 객체 변환. `fn_get_best_matching_rate` weight_slabs/cbm_slabs 각각 매칭. 엔진/액션/어댑터 tiers 참조 일괄 수정. 기존 314/314 전량 PASS 유지. |
 | 2026-06-08 | v1.5.2 | ✅ PASS | ~45s | TASK-121 운송수단별 요금 산정 정책 설정 완료. TC-POLICY-01~05 (총 5개 케이스) 추가 및 전체 회귀 테스트 314건 통과. |
 | 2026-06-07 | v1.5.1 | ✅ PASS | TBD | TASK-120 Phase 6 통합 테스트 5파일 신규 등록. TC-P6-INTG-01~05 (총 28개 케이스) 추가 및 전체 회귀 테스트 통과. |
