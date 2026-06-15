@@ -1,8 +1,8 @@
 # 🗺️ LIVE Regression Test Master Map
 
 > **상태:** [ACTIVE]  
-> **총 테스트 케이스:** 314 Cases  
-> **최종 검증일:** 2026-06-09 (TASK-123 DEF-052 TS 빌드 오류 수정 + IMP-108 §2 platform_fee 재정의)  
+> **총 테스트 케이스:** 353 Cases  
+> **최종 검증일:** 2026-06-15 (TASK-143 TASK-143 UPS 요율 조회 Server Actions 5종 — TC-UPS-R-01~05 신규 등재)  
 
 제니스 플랫폼의 비즈니스 영속성을 보장하는 회귀 테스트 케이스의 통합 명세서입니다. 모든 신규 개발 및 수정 시 이 맵에 케이스가 추가되어야 하며, 전체 테스트가 통과되어야 합니다.
 
@@ -374,6 +374,15 @@
 | TC-RATES-02 | CARRIER 역할 자사 요율 필터링 | `rates.test.ts` | ✅ | org_id 기반 격리 조회 검증 |
 | TC-RATES-03 | 요율 삭제 권한 가드 (ADMIN 전용) | `rates.test.ts` | ✅ | MANAGER 권한 삭제 시도 차단 |
 | TC-RATES-04 | TISA 버전 관리 (ACTIVE -> SUPERSEDED) | `rates.test.ts` | ✅ | 동일 항로 재등록 시 상태 전이 및 버전 증가 |
+
+### 14. UPS 요율 조회 (Phase 7 SPR-02)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-UPS-R-01** | `getUpsZones()` Zone 목록 + 국가 반환 | Zone + 국가 JOIN 조회 정상 동작 | `tests/unit/ups/rates-actions.test.ts` |
+| **TC-UPS-R-02** | `getUpsProducts('DOC')` cargoType 필터 | 제품 조회 시 cargo_type 조건부 필터링 | `tests/unit/ups/rates-actions.test.ts` |
+| **TC-UPS-R-03** | `getUpsBaseRates({ productId, zoneId })` 복합 필터 | 기본 요금표 productId + zoneId 복합 필터 | `tests/unit/ups/rates-actions.test.ts` |
+| **TC-UPS-R-04** | `getUpsFuelSurcharge()` 기준일 기반 최신 조회 | 유류할증료 effective_week 기준 최신 조회 | `tests/unit/ups/rates-actions.test.ts` |
+| **TC-UPS-R-05** | `getUpsOtherCharges()` 활성 항목만 반환 | 부가요금 is_active 필터 검증 | `tests/unit/ups/rates-actions.test.ts` |
 
 ---
 
