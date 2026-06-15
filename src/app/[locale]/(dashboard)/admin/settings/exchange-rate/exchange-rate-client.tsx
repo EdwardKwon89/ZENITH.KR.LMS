@@ -18,6 +18,7 @@ interface ExchangeRateClientProps {
   initialData: {
     baseCurrency: string;
     rates: { key: string; label: string; value: string }[];
+    updatedAt?: string;
   };
 }
 
@@ -25,6 +26,7 @@ export default function ExchangeRateClient({ initialData }: ExchangeRateClientPr
   const t = useTranslations('admin.settings.exchange_rate');
   const [baseCurrency, setBaseCurrency] = useState(initialData.baseCurrency);
   const [rates, setRates] = useState(initialData.rates);
+  const [updatedAt, setUpdatedAt] = useState<string | undefined>(initialData.updatedAt);
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
@@ -47,6 +49,7 @@ export default function ExchangeRateClient({ initialData }: ExchangeRateClientPr
 
       if (res.success) {
         setToast({ message: '환율 설정이 성공적으로 저장되었습니다.', type: 'success' });
+        setUpdatedAt(new Date().toISOString());
       } else {
         setToast({ message: res.error || '저장 중 오류가 발생했습니다.', type: 'error' });
       }
@@ -147,7 +150,21 @@ export default function ExchangeRateClient({ initialData }: ExchangeRateClientPr
             </table>
           </div>
 
-          <div className="flex justify-end gap-3 pt-2">
+          <div className="flex justify-between items-center pt-2">
+            <div className="text-xs text-slate-400 font-mono">
+              {updatedAt && (
+                <span>
+                  {t('last_updated')}: {new Date(updatedAt).toLocaleString(undefined, {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                  })}
+                </span>
+              )}
+            </div>
             <ZenButton
               onClick={handleSave}
               loading={loading}

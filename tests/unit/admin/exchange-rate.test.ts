@@ -2,10 +2,10 @@ import { describe, it, expect, vi, beforeEach, Mock } from 'vitest';
 import { USER_ROLES } from '@/lib/auth/rbac';
 
 const mockSettingsData = [
-  { key: 'BASE_CURRENCY', label: '기준 통화', value: '"KRW"' },
-  { key: 'EXCHANGE_RATE_USD', label: 'USD 환율', value: '1380.00' },
-  { key: 'EXCHANGE_RATE_CNY', label: 'CNY 환율', value: '190.00' },
-  { key: 'EXCHANGE_RATE_JPY', label: 'JPY 환율', value: '9.20' }
+  { key: 'BASE_CURRENCY', label: '기준 통화', value: '"KRW"', updated_at: '2026-06-15T00:00:00.000Z' },
+  { key: 'EXCHANGE_RATE_USD', label: 'USD 환율', value: '1380.00', updated_at: '2026-06-15T00:00:00.000Z' },
+  { key: 'EXCHANGE_RATE_CNY', label: 'CNY 환율', value: '190.00', updated_at: '2026-06-15T01:00:00.000Z' },
+  { key: 'EXCHANGE_RATE_JPY', label: 'JPY 환율', value: '9.20', updated_at: '2026-06-15T02:00:00.000Z' }
 ];
 
 const mockSupabase = {
@@ -50,6 +50,7 @@ describe('TC-EXR: 환율 설정 어드민 Server Actions', () => {
       label: 'USD 환율',
       value: '1380.00'
     });
+    expect(result.updatedAt).toBe('2026-06-15T02:00:00.000Z');
   });
 
   it('TC-EXR-02: updateExchangeRateSettings() — 정상 저장', async () => {

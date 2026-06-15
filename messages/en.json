@@ -613,7 +613,8 @@
       "exchange_rate": {
         "title": "Exchange Rate Settings",
         "base_currency": "Base Currency",
-        "save": "Save Exchange Rates"
+        "save": "Save Exchange Rates",
+        "last_updated": "Last Updated"
       }
     },
     "ups_rates": {

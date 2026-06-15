@@ -5,30 +5,16 @@ export const ZenButton = ({
   children,
   className,
   variant = 'tactile',
-  size = 'md',
   loading = false,
   ...props
 }: React.ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: 'tactile' | 'glass' | 'ghost';
-  size?: 'sm' | 'md' | 'lg';
   loading?: boolean;
 }) => {
-  const sizeClasses = {
-    sm: "px-3 py-1.5 text-xs rounded-lg",
-    md: "px-6 py-3 text-sm rounded-xl",
-    lg: "px-8 py-4 text-base rounded-2xl"
-  };
-
   const variants = {
-    tactile: cn(
-      "bg-white zen-tactile text-stone-700 font-semibold active:scale-95 disabled:opacity-50",
-      sizeClasses[size]
-    ),
-    glass: cn(
-      "zen-glass text-brand-700 font-semibold hover:bg-white/40 active:scale-95 disabled:opacity-50",
-      sizeClasses[size]
-    ),
-    ghost: "bg-transparent text-stone-500 hover:text-stone-800 transition-colors disabled:opacity-50 px-2 py-1 text-sm"
+    tactile: "bg-white zen-tactile text-stone-700 font-semibold px-6 py-3 rounded-xl active:scale-95 disabled:opacity-50",
+    glass: "zen-glass text-brand-700 font-semibold px-6 py-3 rounded-xl hover:bg-white/40 active:scale-95 disabled:opacity-50",
+    ghost: "bg-transparent text-stone-500 hover:text-stone-800 transition-colors disabled:opacity-50"
   };
 
   return (

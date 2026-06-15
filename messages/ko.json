@@ -583,7 +583,8 @@
       "exchange_rate": {
         "title": "환율 설정",
         "base_currency": "기준 통화",
-        "save": "환율 설정 저장"
+        "save": "환율 설정 저장",
+        "last_updated": "최근 수정일"
       }
     },
     "ups_rates": {

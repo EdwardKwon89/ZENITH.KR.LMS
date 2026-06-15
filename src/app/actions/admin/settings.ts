@@ -22,12 +22,13 @@ const updateSchema = z.object({
 export async function getExchangeRateSettings(): Promise<{
   baseCurrency: string;
   rates: { key: string; label: string; value: string }[];
+  updatedAt?: string;
 }> {
   const { supabase } = await validateAdminAction();
 
   const { data, error } = await supabase
     .from("system_settings")
-    .select("key, label, value")
+    .select("key, label, value, updated_at")
     .in("key", ["BASE_CURRENCY", "EXCHANGE_RATE_USD", "EXCHANGE_RATE_CNY", "EXCHANGE_RATE_JPY"]);
 
   if (error) {
@@ -56,7 +57,13 @@ export async function getExchangeRateSettings(): Promise<{
     };
   });
 
-  return { baseCurrency, rates };
+  const latestUpdatedAt = data.reduce((latest, item) => {
+    if (!item.updated_at) return latest;
+    if (!latest) return item.updated_at;
+    return new Date(item.updated_at) > new Date(latest) ? item.updated_at : latest;
+  }, null as string | null);
+
+  return { baseCurrency, rates, updatedAt: latestUpdatedAt || undefined };
 }
 
 /**
