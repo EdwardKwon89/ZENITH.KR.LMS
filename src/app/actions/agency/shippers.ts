@@ -2,10 +2,39 @@
 
 import { logger } from '@/lib/logger';
 import { validateUserAction, checkPermission } from '@/lib/auth/guards';
+import { SupabaseClient } from '@supabase/supabase-js';
 import { createAdminClient } from '@/utils/supabase/server';
 import { CreateAgencyShipperSchema, UpdateAgencyShipperGradeSchema } from '@/lib/validations/agency';
 import type { CreateAgencyShipperInput } from '@/types/agency';
 import { revalidatePath } from 'next/cache';
+
+async function _createShipperOrg(
+  supabase: SupabaseClient,
+  name: string
+): Promise<string> {
+  const { data, error } = await supabase
+    .from('zen_organizations')
+    .insert({ name, type: 'SHIPPER', status: 'ACTIVE' })
+    .select('id')
+    .single();
+  if (error) throw new Error(`Failed to create shipper org: ${error.message}`);
+  return data.id;
+}
+
+async function _linkShipperToAgency(
+  supabase: SupabaseClient,
+  agencyOrgId: string,
+  shipperOrgId: string,
+  data: Pick<CreateAgencyShipperInput, 'shipper_type' | 'discount_rate' | 'grade'>
+): Promise<string> {
+  const { data: link, error } = await supabase
+    .from('zen_agency_shippers')
+    .insert({ agency_org_id: agencyOrgId, shipper_org_id: shipperOrgId, ...data })
+    .select('id')
+    .single();
+  if (error) throw new Error(`Failed to link shipper: ${error.message}`);
+  return link.id;
+}
 
 export async function getAgencyShippers(agencyOrgId: string) {
   const { profile } = await validateUserAction();
@@ -59,42 +88,14 @@ export async function createAgencyShipper(
   }
 
   const supabase = await createAdminClient();
+  const orgId = await _createShipperOrg(supabase, parsed.data.name);
+  const linkId = await _linkShipperToAgency(
+    supabase, agencyOrgId, orgId, parsed.data
+  );
 
-  const { data: org, error: orgError } = await supabase
-    .from('zen_organizations')
-    .insert({
-      name: parsed.data.name,
-      type: 'SHIPPER',
-      status: 'ACTIVE',
-    })
-    .select('id')
-    .single();
-
-  if (orgError) {
-    logger.error('[createAgencyShipper] Organization creation failed:', orgError.message);
-    throw new Error(`Failed to create shipper organization: ${orgError.message}`);
-  }
-
-  const { data: link, error: linkError } = await supabase
-    .from('zen_agency_shippers')
-    .insert({
-      agency_org_id: agencyOrgId,
-      shipper_org_id: org.id,
-      shipper_type: parsed.data.shipper_type,
-      discount_rate: parsed.data.discount_rate,
-      grade: parsed.data.grade || null,
-    })
-    .select('id')
-    .single();
-
-  if (linkError) {
-    logger.error('[createAgencyShipper] Link creation failed:', linkError.message);
-    throw new Error(`Failed to create agency shipper link: ${linkError.message}`);
-  }
-
-  logger.info(`[createAgencyShipper] Shipper created: org=${org.id}, link=${link.id}`);
+  logger.info(`[createAgencyShipper] Shipper created: org=${orgId}, link=${linkId}`);
   revalidatePath('/agency/shippers');
-  return { success: true, shipperId: link.id };
+  return { success: true, shipperId: linkId };
 }
 
 export async function updateAgencyShipperGrade(
