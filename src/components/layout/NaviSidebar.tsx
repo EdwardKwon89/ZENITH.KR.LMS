@@ -21,6 +21,7 @@ import {
   CalendarDays,
   FileText,
   Building,
+  Building2 as BuildingOffice2Icon,
   Users,
   ClipboardList
 } from "lucide-react";
@@ -141,6 +142,8 @@ export default function NaviSidebar({
     { title: t("customs_management"), href: "/admin/customs", icon: FileText, isAdminOnly: true },
     { title: t("orders_assigned"), href: "/orders/assigned", icon: ClipboardList },
     { title: t("admin_error_logs"), href: "/admin/error-logs", icon: ShieldAlert, isAdminOnly: true },
+    { title: t("agency_management"), href: "/agency", icon: BuildingOffice2Icon },
+    { title: t("agency_shippers_nav"), href: "/agency/shippers", icon: Users },
     {
       title: t("mypage"),
       href: "/mypage",

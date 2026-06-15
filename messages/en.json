@@ -81,7 +81,12 @@
     "transport_policies": "Pricing Policies",
     "rates": "Rates",
     "rate_cards_management": "Rate Cards",
-    "corporate_mgmt": "Corporate Mgmt"
+    "corporate_mgmt": "Corporate Mgmt",
+    "agency_management": "Agency Management",
+    "agency_shippers_nav": "Shipper List",
+    "agency_dashboard": "Agency Dashboard",
+    "agency_registered_shippers": "Registered Shippers",
+    "agency_quick_links": "Quick Links"
   },
   "VOC": {
     "title": "VOC Management",
@@ -634,5 +639,10 @@
     "submit_success": "Shipper registered successfully",
     "submit_error": "An error occurred while registering",
     "loading": "Loading..."
-  }
+  },
+  "agency_management": "Agency Management",
+  "agency_shippers_nav": "Shipper List",
+  "agency_dashboard": "Agency Dashboard",
+  "agency_registered_shippers": "Registered Shippers",
+  "agency_quick_links": "Quick Links"
 }

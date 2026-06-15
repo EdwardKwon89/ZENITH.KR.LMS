@@ -83,7 +83,12 @@
     "transport_policies": "요금 산정 정책",
     "rates": "운송 서비스 요율",
     "rate_cards_management": "요율 카드 관리",
-    "corporate_mgmt": "법인 관리"
+    "corporate_mgmt": "법인 관리",
+    "agency_management": "대리점 관리",
+    "agency_shippers_nav": "화주 목록",
+    "agency_dashboard": "대리점 대시보드",
+    "agency_registered_shippers": "등록 화주",
+    "agency_quick_links": "빠른 이동"
   },
   "VOC": {
     "title": "VOC 관리",
@@ -604,5 +609,10 @@
     "submit_success": "화주가 등록되었습니다",
     "submit_error": "등록 중 오류가 발생했습니다",
     "loading": "로딩 중..."
-  }
+  },
+  "agency_management": "대리점 관리",
+  "agency_shippers_nav": "화주 목록",
+  "agency_dashboard": "대리점 대시보드",
+  "agency_registered_shippers": "등록 화주",
+  "agency_quick_links": "빠른 이동"
 }
