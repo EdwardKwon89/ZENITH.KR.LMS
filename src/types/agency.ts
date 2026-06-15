@@ -11,6 +11,16 @@ export interface AgencyShipper {
   created_at: string;
 }
 
+export interface CreateAgencyShipperInput {
+  name: string;
+  shipper_type: 'INDIVIDUAL' | 'CORPORATE';
+  discount_rate: number;
+  grade?: string;
+  contact_name?: string;
+  contact_email?: string;
+  contact_phone?: string;
+}
+
 export interface AgencyRateOverride {
   id: string;
   agency_org_id: string;
