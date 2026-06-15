@@ -82,7 +82,7 @@ export function ZonesTab() {
         <h2 className="text-lg font-bold">{t('title')}</h2>
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
           <DialogTrigger asChild>
-            <ZenButton size="sm" onClick={() => { setEditing(null); setForm({ zone_code: '', zone_name: '', description: '', sort_order: 0 }); }}>
+            <ZenButton className="px-4 py-2 text-sm" onClick={() => { setEditing(null); setForm({ zone_code: '', zone_name: '', description: '', sort_order: 0 }); }}>
               <Plus size={16} className="mr-1" /> {t('add_zone')}
             </ZenButton>
           </DialogTrigger>
@@ -91,10 +91,22 @@ export function ZonesTab() {
               <DialogTitle>{editing ? t('edit_zone') : t('add_zone')}</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <ZenInput label={t('zone_code')} value={form.zone_code} onChange={e => setForm({ ...form, zone_code: e.target.value })} required />
-              <ZenInput label={t('zone_name')} value={form.zone_name} onChange={e => setForm({ ...form, zone_name: e.target.value })} required />
-              <ZenInput label={t('description')} value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} />
-              <ZenInput label={t('sort_order')} type="number" value={form.sort_order} onChange={e => setForm({ ...form, sort_order: parseInt(e.target.value) || 0 })} />
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">{t('zone_code')}</label>
+                <ZenInput value={form.zone_code} onChange={e => setForm({ ...form, zone_code: e.target.value })} required />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">{t('zone_name')}</label>
+                <ZenInput value={form.zone_name} onChange={e => setForm({ ...form, zone_name: e.target.value })} required />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">{t('description')}</label>
+                <ZenInput value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">{t('sort_order')}</label>
+                <ZenInput type="number" value={form.sort_order} onChange={e => setForm({ ...form, sort_order: parseInt(e.target.value) || 0 })} />
+              </div>
               <ZenButton type="submit" className="w-full">{editing ? t('update') : t('create')}</ZenButton>
             </form>
           </DialogContent>
@@ -114,24 +126,24 @@ export function ZonesTab() {
         <TableBody>
           {zones.map((zone: any) => (
             <TableRow key={zone.id}>
-              <TableCell><ZenBadge variant="outline">{zone.zone_code}</ZenBadge></TableCell>
+              <TableCell><ZenBadge variant="default" className="border-slate-300 bg-white">{zone.zone_code}</ZenBadge></TableCell>
               <TableCell>{zone.zone_name}</TableCell>
               <TableCell>
                 <div className="flex flex-wrap gap-1">
                   {(zone.countries || []).map((c: any) => (
-                    <ZenBadge key={c.id} variant="secondary" className="cursor-pointer" onClick={() => handleRemoveCountry(zone.id, c.country_code)}>
+                    <ZenBadge key={c.id} variant="default" className="cursor-pointer bg-slate-200">
                       {c.country_code} <Trash2 size={10} className="ml-1" />
                     </ZenBadge>
                   ))}
                   <div className="flex items-center gap-1">
-                    <ZenInput size="sm" className="w-16 h-6 text-xs" placeholder="KOR" value={countryCode} onChange={e => setCountryCode(e.target.value)} />
-                    <ZenButton size="sm" className="h-6 px-2" onClick={() => handleAddCountry(zone.id)}><Plus size={10} /></ZenButton>
+                    <ZenInput className="w-16 h-6 text-xs px-2 py-1" placeholder="KOR" value={countryCode} onChange={e => setCountryCode(e.target.value)} />
+                    <ZenButton className="h-6 px-2 py-1 text-xs" onClick={() => handleAddCountry(zone.id)}><Plus size={10} /></ZenButton>
                   </div>
                 </div>
               </TableCell>
               <TableCell>{zone.sort_order}</TableCell>
               <TableCell>
-                <ZenButton variant="ghost" size="sm" onClick={() => { setEditing(zone); setForm(zone); setIsOpen(true); }}>
+                <ZenButton variant="ghost" className="p-1" onClick={() => { setEditing(zone); setForm(zone); setIsOpen(true); }}>
                   <Pencil size={14} />
                 </ZenButton>
               </TableCell>
