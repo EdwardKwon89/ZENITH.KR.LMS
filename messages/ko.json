@@ -575,5 +575,34 @@
       "transit_departed_hub": "환적지 출발",
       "transit_arrived_dest": "목적지 도착"
     }
+  },
+  "AgencyShippers": {
+    "title": "화주 관리",
+    "description": "대리점에 등록된 화주를 조회·관리합니다",
+    "new_shipper": "화주 등록",
+    "table_name": "화주명",
+    "table_type": "유형",
+    "table_grade": "등급",
+    "table_discount": "할인율",
+    "table_status": "상태",
+    "table_created": "등록일",
+    "empty": "등록된 화주가 없습니다",
+    "type_INDIVIDUAL": "개인",
+    "type_CORPORATE": "법인",
+    "status_active": "활성",
+    "status_inactive": "비활성",
+    "grade_placeholder": "등급 없음",
+    "new_title": "화주 등록",
+    "new_description": "신규 화주를 등록합니다",
+    "form_name": "화주명",
+    "form_type": "유형",
+    "form_discount_rate": "할인율",
+    "form_grade": "등급",
+    "form_contact_name": "담당자명",
+    "form_contact_email": "이메일",
+    "form_contact_phone": "연락처",
+    "submit_success": "화주가 등록되었습니다",
+    "submit_error": "등록 중 오류가 발생했습니다",
+    "loading": "로딩 중..."
   }
 }

@@ -605,5 +605,34 @@
       "transit_departed_hub": "Departed from Hub",
       "transit_arrived_dest": "Arrived at Destination"
     }
+  },
+  "AgencyShippers": {
+    "title": "Shipper Management",
+    "description": "View and manage shippers registered to your agency",
+    "new_shipper": "Register Shipper",
+    "table_name": "Shipper Name",
+    "table_type": "Type",
+    "table_grade": "Grade",
+    "table_discount": "Discount Rate",
+    "table_status": "Status",
+    "table_created": "Registered",
+    "empty": "No shippers registered",
+    "type_INDIVIDUAL": "Individual",
+    "type_CORPORATE": "Corporate",
+    "status_active": "Active",
+    "status_inactive": "Inactive",
+    "grade_placeholder": "No grade",
+    "new_title": "Register Shipper",
+    "new_description": "Register a new shipper",
+    "form_name": "Shipper Name",
+    "form_type": "Type",
+    "form_discount_rate": "Discount Rate",
+    "form_grade": "Grade",
+    "form_contact_name": "Contact Name",
+    "form_contact_email": "Email",
+    "form_contact_phone": "Phone",
+    "submit_success": "Shipper registered successfully",
+    "submit_error": "An error occurred while registering",
+    "loading": "Loading..."
   }
 }
