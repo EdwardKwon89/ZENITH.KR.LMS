@@ -519,7 +519,13 @@
     "history_shipper": "Shipper",
     "history_result": "Result",
     "history_operator": "Operator",
-    "empty_history": "No inbound records processed today."
+    "empty_history": "No inbound records processed today.",
+    "pkg_ref_title": "Tracking Number Entry",
+    "domestic_ref_no": "Domestic Tracking No",
+    "intl_ref_no": "UPS International No",
+    "ref_locked": "Locked",
+    "ref_save_btn": "Save",
+    "ref_save_success": "REF_NO saved successfully"
   },
   "WarehouseOutbound": {
     "title": "Outbound Process",

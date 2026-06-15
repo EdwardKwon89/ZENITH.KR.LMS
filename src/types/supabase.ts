@@ -2084,9 +2084,12 @@ export type Database = {
       zen_order_packages: {
         Row: {
           created_at: string | null
+          domestic_ref_no: string | null
           gross_weight: number | null
           height: number | null
           id: string
+          intl_ref_locked: boolean | null
+          intl_ref_no: string | null
           length: number | null
           order_id: string
           packing_count: number | null
@@ -2099,9 +2102,12 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
+          domestic_ref_no?: string | null
           gross_weight?: number | null
           height?: number | null
           id?: string
+          intl_ref_locked?: boolean | null
+          intl_ref_no?: string | null
           length?: number | null
           order_id: string
           packing_count?: number | null
@@ -2114,9 +2120,12 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
+          domestic_ref_no?: string | null
           gross_weight?: number | null
           height?: number | null
           id?: string
+          intl_ref_locked?: boolean | null
+          intl_ref_no?: string | null
           length?: number | null
           order_id?: string
           packing_count?: number | null

@@ -10,11 +10,13 @@ import {
   ZenBadge, 
   ZenTextarea 
 } from "@/components/ui/ZenUI";
-import { 
-  getOrderByBarcodeOrNo, 
-  confirmInbound, 
-  getTodayInboundHistory 
+import {
+  getOrderByBarcodeOrNo,
+  confirmInbound,
+  getTodayInboundHistory,
+  updatePackageRefs,
 } from "@/app/actions/operations";
+import { Lock, Save } from "lucide-react";
 import { OrderStatus } from "@/types/orders";
 import { Search, Barcode, CheckCircle, AlertTriangle, Clock, User, Package, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -31,6 +33,8 @@ export default function InboundProcessForm({ locale }: { locale: string }) {
   const [note, setNote] = useState("");
   const [history, setHistory] = useState<any[]>([]);
   const [errorMsg, setErrorMsg] = useState("");
+  const [pkgRefs, setPkgRefs] = useState<Record<string, { domestic_ref_no: string; intl_ref_no: string }>>({});
+  const [savingPkgId, setSavingPkgId] = useState<string | null>(null);
 
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -106,6 +110,41 @@ export default function InboundProcessForm({ locale }: { locale: string }) {
       setSubmitLoading(false);
       focusInput();
     }
+  };
+
+  const handleSavePkgRefs = async (pkgId: string) => {
+    const refs = pkgRefs[pkgId];
+    if (!refs) return;
+    setSavingPkgId(pkgId);
+    try {
+      const result = await updatePackageRefs({
+        packageId: pkgId,
+        domesticRefNo: refs.domestic_ref_no || null,
+        intlRefNo: refs.intl_ref_no || null,
+      });
+      if (result.success) {
+        toast.success(t("ref_save_success") || "REF_NO 저장 완료");
+        const updated = await getOrderByBarcodeOrNo(barcode.trim());
+        if (updated) {
+          setOrder(updated);
+          const newRefs: Record<string, { domestic_ref_no: string; intl_ref_no: string }> = {};
+          (updated.packages || []).forEach((pkg: any) => {
+            newRefs[pkg.id] = { domestic_ref_no: pkg.domestic_ref_no || "", intl_ref_no: pkg.intl_ref_no || "" };
+          });
+          setPkgRefs(newRefs);
+        }
+      } else {
+        toast.error(result.error || "REF_NO 저장 실패");
+      }
+    } catch (err: any) {
+      toast.error(err.message || "REF_NO 저장 중 오류 발생");
+    } finally {
+      setSavingPkgId(null);
+    }
+  };
+
+  const handlePkgRefChange = (pkgId: string, field: "domestic_ref_no" | "intl_ref_no", value: string) => {
+    setPkgRefs(prev => ({ ...prev, [pkgId]: { ...prev[pkgId], [field]: value } }));
   };
 
   // KST 시간 포맷 유틸리티
@@ -244,6 +283,56 @@ export default function InboundProcessForm({ locale }: { locale: string }) {
                 </table>
               </div>
             </ZenCard>
+
+            {/* 패키지 REF_NO 카드 — An-12 §3.2 */}
+            {(order.packages || []).length > 0 && (
+              <ZenCard className="p-6 bg-white/80 border-slate-100/50 shadow-md">
+                <h3 className="text-md font-black text-slate-900 mb-4 flex items-center gap-2">
+                  <span className="w-1 h-4 bg-amber-500 rounded-full"></span>
+                  {t("pkg_ref_title") || "운송장 번호 입력"}
+                </h3>
+                <div className="space-y-4">
+                  {order.packages.map((pkg: any) => {
+                    const refs = pkgRefs[pkg.id] || { domestic_ref_no: "", intl_ref_no: "" };
+                    const isLocked = pkg.intl_ref_locked === true;
+                    return (
+                      <div key={pkg.id} className="border border-slate-200 rounded-xl p-4 bg-slate-50/50">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-2">
+                            <ZenBadge variant="warning" className="text-[10px]">PKG #{(order.packages || []).indexOf(pkg) + 1}</ZenBadge>
+                            <span className="text-xs text-slate-500">{pkg.packing_unit} × {pkg.packing_count}</span>
+                          </div>
+                          {isLocked && (
+                            <div className="flex items-center gap-1 text-amber-600">
+                              <Lock size={12} />
+                              <span className="text-[10px] font-bold">{t("ref_locked")}</span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <div>
+                            <label className="block text-[10px] font-bold text-slate-500 mb-1 uppercase">{t("domestic_ref_no") || "국내 운송장번호"}</label>
+                            <ZenInput value={refs.domestic_ref_no} onChange={(e) => handlePkgRefChange(pkg.id, "domestic_ref_no", e.target.value)} placeholder="예: CJ대한통운 1234567890" className="bg-white text-xs" />
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-bold text-slate-500 mb-1 uppercase">{t("intl_ref_no") || "UPS 국제번호"}</label>
+                            <div className="relative">
+                              <ZenInput value={refs.intl_ref_no} onChange={(e) => handlePkgRefChange(pkg.id, "intl_ref_no", e.target.value)} placeholder="예: 1Z999AA10123456784" disabled={isLocked} readOnly={isLocked} className={"bg-white text-xs pr-8" + (isLocked ? " bg-slate-100 cursor-not-allowed" : "")} />
+                              {isLocked && <Lock size={12} className="absolute right-3 top-1/2 -translate-y-1/2 text-amber-500" />}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="mt-3 flex justify-end">
+                          <ZenButton size="sm" onClick={() => handleSavePkgRefs(pkg.id)} loading={savingPkgId === pkg.id} className="px-4 py-1.5 text-xs font-bold">
+                            <Save size={12} className="mr-1 inline" />{t("ref_save_btn") || "저장"}
+                          </ZenButton>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </ZenCard>
+            )}
 
             {/* 검수 및 확정 카드 */}
             <ZenCard className="p-6 bg-white/80 border-slate-100/50 shadow-lg relative overflow-hidden">

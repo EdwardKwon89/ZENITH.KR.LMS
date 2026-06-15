@@ -512,9 +512,17 @@ export async function getOrderByBarcodeOrNo(barcodeOrNo: string) {
     throw new Error(`오더 품목 조회 실패: ${itemsError.message}`);
   }
 
+  const { data: packages, error: packagesError } = await supabase
+    .from("zen_order_packages")
+    .select("id, packing_unit, packing_count, domestic_ref_no, intl_ref_no, intl_ref_locked")
+    .eq("order_id", order.id)
+    .order("created_at", { ascending: true });
+  if (packagesError) logger.error("Failed to fetch order packages:", packagesError);
+
   return {
     ...order,
     items: items || [],
+    packages: packages || [],
   };
 }
 

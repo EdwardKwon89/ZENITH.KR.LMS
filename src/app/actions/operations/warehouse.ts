@@ -9,6 +9,48 @@ import { OrderRepository } from "@/lib/repositories";
 import { OrderStatus } from "@/types/orders";
 import { updateOrderStatus } from "./orders";
 
+import { z } from "zod";
+
+export async function updatePackageRefs(
+  raw: { packageId: string; domesticRefNo: string | null; intlRefNo: string | null }
+): Promise<{ success: boolean; error?: string }> {
+  const { supabase, profile } = await validateUserAction();
+  if (!profile) return { success: false, error: "User profile not found" };
+  const isAllowed =
+    profile.role === USER_ROLES.ADMIN ||
+    profile.role === USER_ROLES.MANAGER ||
+    profile.role === USER_ROLES.ZENITH_SUPER_ADMIN;
+  if (!isAllowed) return { success: false, error: "권한이 없습니다." };
+
+  const parsed = z.object({
+    packageId: z.string().uuid("Invalid package ID"),
+    domesticRefNo: z.string().max(100).nullable(),
+    intlRefNo: z.string().max(100).nullable(),
+  }).safeParse(raw);
+  if (!parsed.success) return { success: false, error: parsed.error.issues?.[0]?.message || "Validation failed" };
+
+  const { packageId, domesticRefNo, intlRefNo } = parsed.data;
+
+  const { data: existing, error: fetchError } = await supabase
+    .from("zen_order_packages")
+    .select("id, intl_ref_locked, intl_ref_no")
+    .eq("id", packageId)
+    .maybeSingle();
+  if (fetchError || !existing) return { success: false, error: "패키지를 찾을 수 없습니다." };
+  if (existing.intl_ref_locked && intlRefNo !== existing.intl_ref_no) {
+    return { success: false, error: "UPS 국제번호는 잠금 상태이며 수정할 수 없습니다." };
+  }
+
+  const { error: updateError } = await supabase
+    .from("zen_order_packages")
+    .update({ domestic_ref_no: domesticRefNo, intl_ref_no: intlRefNo, updated_at: new Date().toISOString() })
+    .eq("id", packageId);
+  if (updateError) { logger.error("updatePackageRefs error:", updateError); return { success: false, error: `패키지 REF_NO 업데이트 실패: ${updateError.message}` }; }
+
+  revalidatePath("/(dashboard)/warehouse/inbound", "page");
+  return { success: true };
+}
+
 export async function getWarehousedOrders() {
   const { supabase, profile } = await validateUserAction();
   if (!profile) throw new Error("User profile not found");
