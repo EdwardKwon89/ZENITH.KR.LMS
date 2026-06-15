@@ -56,6 +56,7 @@
     "customs_management": "通関管理",
     "customs_rates": "通関サービス料率",
     "delivery_rates": "配送サービス料率",
+    "ups_rates": "UPS料率管理",
     "transport_policies": "運賃算定ポリシー",
     "rates": "運賃料率",
     "rate_cards_management": "料率カード管理",
@@ -154,6 +155,56 @@
       "transit_arrived_hub": "中継地に到着",
       "transit_departed_hub": "中継地を出発",
       "transit_arrived_dest": "目的地に到着"
+    }
+  },
+  "admin": {
+    "ups_rates": {
+      "title": "UPS料率管理",
+      "subtitle": "UPS国際速達料率データの登録と管理",
+      "tabs": {
+        "zones": "Zone",
+        "products": "製品",
+        "base_rates": "基本料率",
+        "fuel": "燃油サーチャージ",
+        "oc": "その他費用"
+      },
+      "products": {
+        "title": "製品管理",
+        "add_product": "製品追加",
+        "edit_product": "製品編集",
+        "product_code": "製品コード",
+        "sub_code": "サブコード",
+        "product_name": "製品名",
+        "cargo_type": "貨物タイプ",
+        "cargo_doc": "書類",
+        "cargo_non_doc": "非書類",
+        "cargo_both": "両方",
+        "options": "オプション",
+        "actions": "操作",
+        "create": "作成",
+        "update": "更新",
+        "create_success": "製品作成完了",
+        "update_success": "製品更新完了",
+        "coming_soon": "準備中"
+      },
+      "zones": {
+        "title": "Zone管理",
+        "add_zone": "Zone追加",
+        "edit_zone": "Zone編集",
+        "zone_code": "Zoneコード",
+        "zone_name": "Zone名",
+        "description": "説明",
+        "sort_order": "並び順",
+        "countries": "国マッピング",
+        "actions": "操作",
+        "create": "作成",
+        "update": "更新",
+        "create_success": "Zone作成完了",
+        "update_success": "Zone更新完了",
+        "country_added": "国追加完了",
+        "country_removed": "国削除完了",
+        "coming_soon": "準備中"
+      }
     }
   }
 }

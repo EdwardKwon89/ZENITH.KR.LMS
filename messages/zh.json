@@ -42,6 +42,7 @@
     "customs_management": "通关管理",
     "customs_rates": "通关服务费率",
     "delivery_rates": "配送服务费率",
+    "ups_rates": "UPS费率管理",
     "transport_policies": "运费计算政策",
     "rates": "费率",
     "rate_cards_management": "费率卡管理",
