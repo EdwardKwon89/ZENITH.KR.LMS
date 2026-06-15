@@ -209,7 +209,7 @@
 |:-------:|:------:|:--------|:--------:|:--------:|:---------:|:----:|:--------|:-----|
 | TASK-139 | 260614 | [P7-SPR-01] Agency 역할 모델 — org_type 확장 + RBAC + 대리점 화주 계층 DB | P1 | An-12 확정 ✅ · TASK-138 ✅ | Jaison | 🔔 | [TASK-139](tasks/TASK-139_260614_Agency역할모델_DevTeam.md) | IMP-111 · 코드 dc8a2ff · 327/334 PASS · PR#5 Aiden 리뷰 대기 |
 | TASK-140 | 260614 | TASK-139 DoD 보완 — supabase db reset 검증 (TASK-138+139 migration 전체 적용) | P2 | TASK-139 🔔 | Baker | 🔔 | [TASK-140](tasks/TASK-140_260614_Agency_DB_Reset_검증_Baker.md) | IMP-111 연계 · supabase reset ✅ · 커밋 59da68f |
-| TASK-145 | 260615 | [P7-SPR-02] Agency 화주 Server Actions 3종 구현 (getAgencyShippers·createAgencyShipper·updateAgencyShipperGrade) | P1 | TASK-139 ✅ | Dave | 🔄 | [TASK-145](tasks/TASK-145_260615_Agency화주ServerActions_Dave.md) | IMP-114 · ZEN_A4 위반(createAgencyShipper 52줄) — 수정 후 재완료 보고 필요 |
+| TASK-145 | 260615 | [P7-SPR-02] Agency 화주 Server Actions 3종 구현 (getAgencyShippers·createAgencyShipper·updateAgencyShipperGrade) | P1 | TASK-139 ✅ | Dave | 🔔 | [TASK-145](tasks/TASK-145_260615_Agency화주ServerActions_Dave.md) | IMP-114 · 코드 7977e97+4c2cb91 · 340/347 PASS · ZEN_A4 수정 완료(52→24줄) · TASK-146·147 블로커 해제 |
 | TASK-146 | 260615 | [P7-SPR-02] Agency 화주 목록/등록 UI — /agency/shippers + /agency/shippers/new | P1 | TASK-145 ✅ | Baker | 🚫 | [TASK-146](tasks/TASK-146_260615_Agency화주목록등록UI_Baker.md) | IMP-114 · TASK-145 완료 후 착수 |
 | TASK-147 | 260615 | [P7-SPR-02] Agency 대시보드 + NaviSidebar AGENCY 메뉴 추가 — /agency | P1 | TASK-145 ✅ | Gale | 🚫 | [TASK-147](tasks/TASK-147_260615_Agency대시보드NaviSidebar_Gale.md) | IMP-114 · TASK-145 완료 후 착수 |
 
@@ -234,7 +234,7 @@
 |:------|:----:|:----|
 | **JSJung** (팀 리더) | 활성 | SPR-02 작업 지시 완료 |
 | **Jaison** (AI Agent 총괄) | 대기 | TASK-145~147 발령 완료, Dave 완료 후 Baker·Gale 착수 승인 예정 |
-| **Dave** (AI Agent) | 🔄 TASK-145 수정 중 | ZEN_A4 위반 — createAgencyShipper 52줄 분리 리팩터링 수정 지시 |
+| **Dave** (AI Agent) | 🔔 TASK-145 검토 대기 | ZEN_A4 수정 완료(52→24줄) · 재완료 보고 |
 | **Baker** (AI Agent) | 🚫 TASK-146 블로커 | TASK-145(Dave) 완료 후 착수 |
 | **Gale** (AI Agent) | 🚫 TASK-147 블로커 | TASK-145(Dave) 완료 후 착수 |
 

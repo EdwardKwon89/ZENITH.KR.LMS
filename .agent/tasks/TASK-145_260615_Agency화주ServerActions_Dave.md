@@ -12,7 +12,7 @@
 | **관련 IMP** | IMP-114 |
 | **브랜치** | `feature/ups-spr02-devteam-agency-ui` (신규 생성) |
 | **커밋 태그** | `[Dave]` |
-| **상태** | 🔄 |
+| **상태** | 🔔 |
 
 ---
 
@@ -187,7 +187,8 @@ async function _linkShipperToAgency(
 
 ## [작업 결과]
 
-**코드 커밋**: `7977e97`
+**코드 커밋**: `7977e97` (초기) + `4c2cb91` (ZEN_A4 수정)
+**ZEN_A4 리팩터링**: `createAgencyShipper()` 52줄 → 24줄 (`_createShipperOrg` 12줄 + `_linkShipperToAgency` 14줄 helper 추출)
 **빌드**: PASS (TS 빌드 오류 없음)
 **회귀 테스트**: 340 / 347 PASS (기존 .env.local 미설치 2건 제외, 신규 TC 13건 전량 PASS)
 **신규 TC**: TC-P7-SHIPPER-01~04 (13건) 전량 PASS
