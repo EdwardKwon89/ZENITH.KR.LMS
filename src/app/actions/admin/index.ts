@@ -76,3 +76,9 @@ export {
   getCommonCodesByGroup,
   deleteCommonCode,
 } from './master-data';
+
+export {
+  getExchangeRateSettings,
+  updateExchangeRateSettings,
+} from './settings';
+
