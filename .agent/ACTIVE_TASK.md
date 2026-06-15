@@ -210,8 +210,8 @@
 | TASK-139 | 260614 | [P7-SPR-01] Agency 역할 모델 — org_type 확장 + RBAC + 대리점 화주 계층 DB | P1 | An-12 확정 ✅ · TASK-138 ✅ | Jaison | 🔔 | [TASK-139](tasks/TASK-139_260614_Agency역할모델_DevTeam.md) | IMP-111 · 코드 dc8a2ff · 327/334 PASS · PR#5 Aiden 리뷰 대기 |
 | TASK-140 | 260614 | TASK-139 DoD 보완 — supabase db reset 검증 (TASK-138+139 migration 전체 적용) | P2 | TASK-139 🔔 | Baker | 🔔 | [TASK-140](tasks/TASK-140_260614_Agency_DB_Reset_검증_Baker.md) | IMP-111 연계 · supabase reset ✅ · 커밋 59da68f |
 | TASK-145 | 260615 | [P7-SPR-02] Agency 화주 Server Actions 3종 구현 (getAgencyShippers·createAgencyShipper·updateAgencyShipperGrade) | P1 | TASK-139 ✅ | Dave | 🔔 | [TASK-145](tasks/TASK-145_260615_Agency화주ServerActions_Dave.md) | IMP-114 · 코드 7977e97+4c2cb91 · 340/347 PASS · ZEN_A4 수정 완료(52→24줄) · TASK-146·147 블로커 해제 |
-| TASK-146 | 260615 | [P7-SPR-02] Agency 화주 목록/등록 UI — /agency/shippers + /agency/shippers/new | P1 | TASK-145 ✅ | Baker | 🔄 | [TASK-146](tasks/TASK-146_260615_Agency화주목록등록UI_Baker.md) | IMP-114 · ZEN_A4 위반(155줄·140줄) — 하위 컴포넌트 분리 수정 중 |
-| TASK-147 | 260615 | [P7-SPR-02] Agency 대시보드 + NaviSidebar AGENCY 메뉴 추가 — /agency | P1 | TASK-145 ✅ | Gale | ⬜ | [TASK-147](tasks/TASK-147_260615_Agency대시보드NaviSidebar_Gale.md) | IMP-114 · TASK-145 ✅ 블로커 해제 · 착수 가능 |
+| TASK-146 | 260615 | [P7-SPR-02] Agency 화주 목록/등록 UI — /agency/shippers + /agency/shippers/new | P1 | TASK-145 ✅ | Baker | 🔔 | [TASK-146](tasks/TASK-146_260615_Agency화주목록등록UI_Baker.md) | IMP-114 · 1차 ec4d7f5 · ZEN_A4 수정 완료 — 10개 파일 모두 50줄 이하 ✅ |
+| TASK-147 | 260615 | [P7-SPR-02] Agency 대시보드 + NaviSidebar AGENCY 메뉴 추가 — /agency | P1 | TASK-145 ✅ | Gale | 🔄 | [TASK-147](tasks/TASK-147_260615_Agency대시보드NaviSidebar_Gale.md) | IMP-114 · TASK-145 ✅ 블로커 해제 · 착수 가능 |
 
 ---
 
@@ -235,8 +235,8 @@
 | **JSJung** (팀 리더) | 활성 | SPR-02 작업 지시 완료 |
 | **Jaison** (AI Agent 총괄) | 대기 | TASK-145 검증 완료 · TASK-146·147 블로커 해제 |
 | **Dave** (AI Agent) | 🔔 TASK-145 완료 | ZEN_A4 수정 완료(52→24줄) · Aiden 검토 대기 |
-| **Baker** (AI Agent) | 🔄 TASK-146 수정 중 | ZEN_A4 위반(컴포넌트 155·140줄) — 하위 컴포넌트 분리 수정 지시 |
-| **Gale** (AI Agent) | ⬜ TASK-147 착수 가능 | TASK-145 ✅ 블로커 해제 · 즉시 착수 |
+| **Baker** (AI Agent) | 🔔 TASK-146 수정 완료 | ZEN_A4 전 컴포넌트 50줄 이하 · Aiden 검토 대기 |
+| **Gale** (AI Agent) | 🔄 TASK-147 착수 가능 | TASK-145 ✅ 블로커 해제 · 즉시 착수 |
 
 ---
 
