@@ -12,7 +12,7 @@
 | **관련 IMP** | IMP-114 |
 | **브랜치** | `feature/ups-spr02-devteam-agency-ui` (신규 생성) |
 | **커밋 태그** | `[Dave]` |
-| **상태** | 🔔 |
+| **상태** | 🔄 |
 
 ---
 
@@ -132,6 +132,56 @@ export const UpdateAgencyShipperGradeSchema = z.object({
 - [x] `npm run test:regression` 전체 PASS (340/347, .env.local 기존 미설치 2건 제외)
 - [x] 코드 커밋 해시: `7977e97`
 - [x] DoD 자가 검증 (`check-R17-DoD`) 완료
+
+---
+
+## [수정 지시 — Jaison (2026-06-15)]
+
+> **ZEN_A4 위반**: `createAgencyShipper()` 함수 **52줄** (line 47~98) — 50줄 한도 초과
+> **조치**: 아래 방법으로 리팩터링 후 재커밋
+
+**수정 방법 — 두 DB 작업을 private helper로 추출**:
+
+```typescript
+// 추출할 헬퍼 1: org 생성
+async function _createShipperOrg(
+  supabase: SupabaseClient,
+  name: string
+): Promise<string> {
+  const { data, error } = await supabase
+    .from('zen_organizations')
+    .insert({ name, type: 'SHIPPER', status: 'ACTIVE' })
+    .select('id')
+    .single();
+  if (error) throw new Error(`Failed to create shipper org: ${error.message}`);
+  return data.id;
+}
+
+// 추출할 헬퍼 2: agency-shipper 링크 생성
+async function _linkShipperToAgency(
+  supabase: SupabaseClient,
+  agencyOrgId: string,
+  shipperOrgId: string,
+  data: Pick<CreateAgencyShipperInput, 'shipper_type' | 'discount_rate' | 'grade'>
+): Promise<string> {
+  const { data: link, error } = await supabase
+    .from('zen_agency_shippers')
+    .insert({ agency_org_id: agencyOrgId, shipper_org_id: shipperOrgId, ...data })
+    .select('id')
+    .single();
+  if (error) throw new Error(`Failed to link shipper: ${error.message}`);
+  return link.id;
+}
+```
+
+**목표**: `createAgencyShipper()` 본체 ≤ 30줄, 헬퍼 각 ≤ 20줄
+
+**재커밋 순서 (R-17 준수)**:
+1. `[Dave] fix: TASK-145 ZEN_A4 — createAgencyShipper 52줄→분리 리팩터링`
+2. task file DoD 코드 커밋 해시 갱신 + 🔔 재변경
+3. ACTIVE_TASK.md 🔔 반영
+4. `check-R17-DoD` 실행
+5. `[Dave] docs: TASK-145 재완료 보고 — ZEN_A4 수정 후 🔔`
 
 ---
 
