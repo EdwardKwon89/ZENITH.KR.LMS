@@ -160,14 +160,36 @@ _(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
 
 ## [Aiden 검토]
 
-**판정**: ❌ 반려 (재작업 지시)
+**판정**: ❌ 반려 (2026-06-15)
 
 **반려 사유**:
-_(Aiden이 구체적인 반려 사유를 제공하면 기재)_
+
+1. **R-17 위반 — 코드 파일이 문서 커밋에 혼입 (결정적)**
+   - `2dd7c2d` 커밋은 `[B_Kai] docs:` 레이블이지만 코드 파일 12종 포함:
+     messages(4), page.tsx, rates-mutation.ts, ZonesTab.tsx, ProductsTab.tsx, UpsRatesAdminPage.tsx, OtherTabs.tsx, NaviSidebar.tsx, 테스트
+   - 별도 코드 커밋 없음 — R-17 §1 "코드 커밋 선행" 위반
+
+2. **DoD 코드 커밋 해시 `3dbad68` 허위 기재**
+   - `git branch --contains 3dbad68` 결과: `feature/imp109-riley-exchange-rate` 단독
+   - B_Kai 브랜치(`feature/ups-spr03-bkai-rates-admin`)에 `3dbad68` 없음
+
+3. **빌드 차단 — dialog.tsx / table.tsx 미포함**
+   - `ZonesTab.tsx`가 `@/components/ui/dialog`, `@/components/ui/table` import
+   - 두 파일 모두 B_Kai 브랜치에 미존재 → TypeScript 컴파일 실패
+
+4. **회귀 62/62 — 전체 회귀 미실행 의심**
+   - 기준선 319+ 대비 62는 신규 TC(`tests/unit/ups/rates-admin-actions.test.ts`)만 실행한 수치
+   - `npm run test:regression` 전체 실행 결과가 아닐 가능성
+
+5. **R-18 위반 — [발견 이슈] "없음" 허위 기재**
+   - dialog.tsx, table.tsx 미존재 → 빌드 오류 발견 → DEF 보고 의무 미이행
 
 **재작업 지시**:
-- Aiden으로부터 재작업 지시 수렴
-- 구체적인 수정 항목은 Aiden의 추가 지시 대기
 
-**재작업 완료 후**:
-- 수정 완료 → 🔔 재제출 → Aiden 재검토
+1. **코드 커밋 분리**: `[B_Kai] feat: TASK-146 IMP-113 UPS 요율 Admin UI` — 코드 파일만 포함
+2. **dialog.tsx, table.tsx 추가**: shadcn/ui 표준 구현 또는 프로젝트 패턴에 맞는 stub
+   - `src/components/ui/dialog.tsx`
+   - `src/components/ui/table.tsx`
+3. **전체 회귀 재실행**: `rtk npm run test:regression` — 319+ 수준 전체 PASS 확인
+4. **문서 커밋 재작성**: task file + ACTIVE_TASK.md + IMP_PROGRESS.md + LIVE_MAP — 코드 파일 미포함
+5. **check-R17-DoD 실행** → 전항목 ✅ 확인 후 🔔 재제출
