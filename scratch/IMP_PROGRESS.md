@@ -378,3 +378,4 @@
 
 | 2026-06-14 | Jaison (Claude, Team B) | **IMP-111 🔔 Agency 역할 모델 완료** — TASK-139. zen_organizations.type AGENCY 추가, zen_agency_shippers/zen_agency_rate_overrides 신설 + RLS, rbac.ts AGENCY role, types/agency.ts, 회원가입 UI AGENCY 옵션. TC-P7-AGENCY-01~07 신규 7건. 회귀 314/321 PASS. 커밋 `a686bc1`. Aiden 검토 대기 🔔. |
 | 2026-06-15 | Dave (DeepSeek, Team B) | **IMP-114 🔔 SPR-02 Agency 화주 Server Actions 완료** — TASK-145. getAgencyShippers·createAgencyShipper·updateAgencyShipperGrade 3종 구현. Zod 스키마 2종(CreateAgencyShipperSchema·UpdateAgencyShipperGradeSchema). CreateAgencyShipperInput 타입 추가. TC-P7-SHIPPER-01~04 신규 13건. 회귀 340/347 PASS. 커밋 `7977e97`. TASK-146·147 블로커 해제. Jaison·Aiden 검토 대기 🔔. |
+| 2026-06-15 | Baker (OpenCode Big Pickle, Team B) | **IMP-114 🔔 SPR-02 Agency 화주 목록/등록 UI 완료** — TASK-146. /agency/shippers (목록+인라인 등급 수정), /agency/shippers/new (등록 폼). 6개 파일 신규 생성. TS build ✅ · 회귀 340/340 PASS. 커밋 `ec4d7f5`. Jaison·Aiden 검토 대기 🔔. |
