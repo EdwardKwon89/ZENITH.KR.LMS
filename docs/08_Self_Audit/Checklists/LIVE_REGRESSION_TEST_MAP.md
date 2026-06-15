@@ -1,8 +1,8 @@
 # 🗺️ LIVE Regression Test Master Map
 
 > **상태:** [ACTIVE]  
-> **총 테스트 케이스:** 353 Cases  
-> **최종 검증일:** 2026-06-15 (TASK-143 TASK-143 UPS 요율 조회 Server Actions 5종 — TC-UPS-R-01~05 신규 등재)  
+> **총 테스트 케이스:** 357 Cases  
+> **최종 검증일:** 2026-06-15 (TASK-144 창고 입고 REF_NO UI — TC-WH-REF-01~04 신규 등재)  
 
 제니스 플랫폼의 비즈니스 영속성을 보장하는 회귀 테스트 케이스의 통합 명세서입니다. 모든 신규 개발 및 수정 시 이 맵에 케이스가 추가되어야 하며, 전체 테스트가 통과되어야 합니다.
 
@@ -57,6 +57,10 @@
 | **TC-INB.2** | 존재하지 않는 바코드 조회 | 미등록 바코드 조회 시 예외 처리 및 null 반환 검증 | `tests/unit/logistics/inbound.test.ts` |
 | **TC-INB.3** | 입고 확정 처리 | 검수 결과(정상/손상)를 포함하여 WAREHOUSED 상태 전이 성공 확인 | `tests/unit/logistics/inbound.test.ts` |
 | **TC-INB.4** | 오늘의 입고 이력 조회 | 오늘 KST 기준 입고 완료된 이력 목록을 정상 집계 확인 | `tests/unit/logistics/inbound.test.ts` |
+| **TC-WH-REF-01** | REF_NO 정상 업데이트 | domestic_ref_no + intl_ref_no 동시 업데이트 성공 | `tests/unit/logistics/inbound.test.ts` |
+| **TC-WH-REF-02** | REF_NO 잠금 보호 | intl_ref_locked=true 상태에서 intl_ref_no 변경 시 서버 거부 | `tests/unit/logistics/inbound.test.ts` |
+| **TC-WH-REF-03** | REF_NO 길이 제한 | 100자 초과 ref 문자열 Zod 검증 에러 | `tests/unit/logistics/inbound.test.ts` |
+| **TC-WH-REF-04** | REF_NO 패키지 미존재 | 존재하지 않는 패키지 ID로 업데이트 시도 시 거부 | `tests/unit/logistics/inbound.test.ts` |
 
 ### 5. 마스터 오더 거버넌스 (Master Order)
 | ID | 테스트 항목 | 목적 | 파일 경로 |
