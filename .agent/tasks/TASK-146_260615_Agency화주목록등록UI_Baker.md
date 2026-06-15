@@ -12,7 +12,7 @@
 | **관련 IMP** | IMP-114 |
 | **브랜치** | `feature/ups-spr02-devteam-agency-ui` (TASK-145와 동일 브랜치) |
 | **커밋 태그** | `[Baker]` |
-| **상태** | 🚫 |
+| **상태** | ⬜ |
 
 ---
 
