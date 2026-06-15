@@ -207,7 +207,7 @@
 | **Jaison (Team B)** · JSJung 팀 리더 | — | 온보딩 완료 후 착수 (`docs/00_GUIDE/ONBOARDING_NEWTEAM.md` 필독) | **TASK-139 ⬜ 즉시 착수 가능** (Phase 7 SPR-01 Agency 역할) |
 | **D_Kai (OpenCode)** | — | Advisory: ACTIVE_TASK 블로커 선제 조작 + `1ebc9e6` TASK 프로세스 외 빌드 오류 도입 | 신규 Task 대기 |
 | **B_Kai** | — | — | 신규 Task 대기 (TASK-135·137 ✅ 완료) |
-| **Riley** | TASK-147 🔔 | — | 신규 Task 대기 (scope 제한 명시 필수) |
+| **Riley** | ❌ TASK-147 3차 반려 — 빌드 FAIL 허위체크·해시 오기재·블로커 무시 | 🚫 B_Kai TASK-146 완료 후 재제출 가능 |
 | N_Kai | TASK-087 ⬜ (재교육 세션 — 완료 후 신규 할당 재개) | R-17 위반 누적 — 신규 할당 중단 유지 | — |
 | Ring | — | — | 신규 할당 중단 유지 (9차 위반 누적) |
 
