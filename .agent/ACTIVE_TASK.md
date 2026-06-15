@@ -182,7 +182,7 @@
 | TASK-137 | 260609 | DEF-059 §4 UI 전환 — PKG 카드에 special_cargo_type 선택 UI 이동 | P3 | TASK-136 ✅ | B_Kai | ✅ | [TASK-137](tasks/TASK-137_260609_DEF059UI전환_BKai.md) | ec0fa5a · Aiden 직접보완(dabde76) · 316/316 · ✅ 승인 (260609) |
 | TASK-141 | 260614 | [P7-SPR-02] UPS 요금 계산 엔진 코어 (`pricing-engine.ts` + 타입 + `pricing.ts` 래퍼 + TC) | P1 | TASK-138 ✅ | Aiden | ⬜ | [TASK-141](tasks/TASK-141_260614_Phase7UPS_요금계산엔진_창고입고수정_Aiden.md) | IMP-112 코어 · Phase 7 SPR-02 · TASK-143·144 병행 |
 | TASK-143 | 260614 | [P7-SPR-02] UPS 요율 조회 Server Actions 5종 (`rates.ts` — Zone/Product/BaseRate/Fuel/OC) | P1 | TASK-138 ✅ | D_Kai | ✅ | [TASK-143](tasks/TASK-143_260614_UPS_조회ServerActions_DKai.md) | IMP-112 일부 · `fee7bf1` · DoD 8/8 · TC-UPS-R 5/5 · Aiden ✅ 승인 (260615) |
-| TASK-145 | 260615 | D_Kai 재교육 세션 4차 (TASK-143 반려 2회 반복 패턴 개선 — DoD·브랜치·권한영역) | P4 | 없음 | D_Kai | 🔔 | [TASK-145](tasks/TASK-145_260615_DKai재교육세션4차.md) | 코드 변경 없음 · §1 원인분석 + §2 체크리스트 v2.0 + §3 재발방지 3항목 |
+| TASK-145 | 260615 | D_Kai 재교육 세션 4차 (TASK-143 반려 2회 반복 패턴 개선 — DoD·브랜치·권한영역) | P4 | 없음 | D_Kai | ✅ | [TASK-145](tasks/TASK-145_260615_DKai재교육세션4차.md) | `18e7b2d` · §1~§3 전항목 ✅ · 체크리스트 v2.0 · D_Kai 신규 할당 중단 해제 (260615) |
 | TASK-144 | 260614 | [P7-SPR-02] 창고 입고 화면 REF_NO 입력 UI (domestic_ref_no / intl_ref_no + locked 처리) | P1 | TASK-138 ✅ | B_Kai | ❌ | [TASK-144](tasks/TASK-144_260614_창고입고REF_NO_UI_BKai.md) | IMP-112 일부 · ❌ 반려: 커밋 해시 `b7e1f2a` 존재 불가(실제 `b315d49`) + 회귀 62/353 미완 |
 | TASK-138 | 260614 | [P7-SPR-01] UPS DB 스키마 설계 — zen_ups_* 테이블 6종 신설 + 기존 테이블 확장 | P1 | An-12 확정 ✅ | Aiden | ✅ | [TASK-138](tasks/TASK-138_260614_Phase7UPS_DB스키마_Aiden.md) | IMP-110 · Phase 7 SPR-01 · 코드 aca457e · 323/329 PASS · Aiden ✅ 승인 (260614) |
 | TASK-108 | 260601 | DEF-039 CARRIER RLS + 미스테이지 커밋 + 신원 수정 | P2 | 없음 | D_Kai | ✅ | [TASK-108](tasks/TASK-108_260601_DEF039CARRIER_RLS_미스테이지커밋_DKai.md) | DEF-039 해소 · 4cc88d8+beba338 · CARRIER RLS 3테이블 · 229/229 ✅ · Aiden ✅ 승인 |
@@ -224,7 +224,7 @@
 | Agent | 상태 | 비고 |
 |:------|:----:|:----|
 | **Aiden (Claude)** | ⬜ TASK-141 착수 대기 | IMP-112 UPS 요금 계산 엔진 코어 + 타입 + pricing.ts 래퍼 |
-| **D_Kai (OpenCode)** | ✅ TASK-143 완료 · 🔔 TASK-145 재교육 4차 제출 (260615) | IMP-112 rates.ts 5종 — 신규 Task 대기 (재교육 세션 TASK-087형 필요) |
+| **D_Kai (OpenCode)** | ✅ TASK-145 재교육 4차 완료 (260615) | 신규 Task 할당 중단 해제 — 다음 Task 대기 |
 | **B_Kai** | ❌ TASK-144 반려 — 커밋 해시 오기재(`b7e1f2a` 무효) + 회귀 전체 스위트 미실행 | 재작업 후 🔔 재제출 |
 | **Riley** | 신규 Task 대기 | 토큰 소진·scope 초과 이력 — scope 제한 명시 필수 |
 | N_Kai | 재교육 세션 대기 (TASK-087) | R-17 위반 누적 — 신규 할당 중단 유지 |
