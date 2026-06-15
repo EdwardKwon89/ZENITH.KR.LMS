@@ -7,7 +7,7 @@
     },
     "check-R17-DoD": {
       "description": "R-17 완료 보고 절차 전체 수행 — 코드 커밋부터 문서 커밋까지",
-      "template": "GOV_COMMON.md 의 R-17 완료 보고 절차(v1.6) 전 단계를 순서대로 실행하라. 대상 task file: .agent/ACTIVE_TASK.md 에서 본인 🔄 Task ID 확인 → .agent/tasks/TASK-XXX_*.md. ⚠️ ✅ 전환은 Aiden 단독 권한."
+      "template": "GOV_COMMON.md 의 R-17 완료 보고 절차 전 단계를 순서대로 실행하라. 대상 task file: .agent/ACTIVE_TASK.md 에서 본인 🔄 Task ID 확인 → .agent/tasks/TASK-XXX_*.md. ⚠️ ✅ 전환은 Aiden 단독 권한."
     }
   }
 }
