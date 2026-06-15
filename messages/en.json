@@ -78,9 +78,11 @@
     "customs_management": "Customs Management",
     "customs_rates": "Customs Rates",
     "delivery_rates": "Delivery Rates",
+    "ups_rates": "UPS Rates",
     "transport_policies": "Pricing Policies",
     "rates": "Rates",
     "rate_cards_management": "Rate Cards",
+    "exchange_rate": "Exchange Rate Settings",
     "corporate_mgmt": "Corporate Mgmt"
   },
   "VOC": {
@@ -610,6 +612,60 @@
       "transit_arrived_hub": "Arrived at Hub",
       "transit_departed_hub": "Departed from Hub",
       "transit_arrived_dest": "Arrived at Destination"
+    }
+  },
+  "admin": {
+    "settings": {
+      "exchange_rate": {
+        "title": "Exchange Rate Settings",
+        "base_currency": "Base Currency",
+        "save": "Save Exchange Rates"
+      }
+    },
+    "ups_rates": {
+      "title": "UPS Rate Management",
+      "subtitle": "UPS international express rate data registration and management",
+      "tabs": {
+        "zones": "Zones",
+        "products": "Products",
+        "base_rates": "Base Rates",
+        "fuel": "Fuel Surcharge",
+        "oc": "Other Charges"
+      },
+      "zones": {
+        "title": "Zone Management",
+        "add_zone": "Add Zone",
+        "edit_zone": "Edit Zone",
+        "zone_code": "Zone Code",
+        "zone_name": "Zone Name",
+        "description": "Description",
+        "sort_order": "Sort Order",
+        "countries": "Country Mapping",
+        "actions": "Actions",
+        "create": "Create",
+        "update": "Update",
+        "create_success": "Zone created successfully",
+        "update_success": "Zone updated successfully",
+        "country_added": "Country added successfully",
+        "country_removed": "Country removed successfully",
+        "coming_soon": "Coming soon"
+      },
+      "products": {
+        "title": "Product Management",
+        "coming_soon": "Coming soon"
+      },
+      "base_rates": {
+        "title": "Base Rate Management",
+        "coming_soon": "Coming soon"
+      },
+      "fuel": {
+        "title": "Fuel Surcharge Management",
+        "coming_soon": "Coming soon"
+      },
+      "oc": {
+        "title": "Other Charge (OC) Management",
+        "coming_soon": "Coming soon"
+      }
     }
   }
 }
