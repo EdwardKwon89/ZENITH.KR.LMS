@@ -71,7 +71,52 @@ An-12 §6-1 기준으로 대리점 대시보드 페이지를 구현하고, NaviS
 - 수정 전 반드시 `git log origin/develop -- src/components/layout/NaviSidebar.tsx`로 Team A 최신 수정 여부 확인
 - `messages/ko.json`은 `agency_` 접두사 키만 추가 (기존 키 수정 금지)
 - 대시보드 컴포넌트는 서버 컴포넌트로 구현 (데이터 fetching 포함)
-- 함수 50줄 이하 (ZEN_A4)
+- 함수/컴포넌트 **50줄 이하 엄수 (ZEN_A4)** — 초과 시 하위 컴포넌트 즉시 분리
+
+---
+
+## [Jaison 보완 지시 — 2026-06-15]
+
+### NaviSidebar 구조 주의 (⚠️ 필독)
+
+이 프로젝트의 `NaviSidebar.tsx`는 **`roles: ['AGENCY']` 배열 패턴을 사용하지 않음**.  
+`isAdminOnly: boolean` + `checkPermission()` RBAC 경로 필터링 방식으로 동작함.
+
+TASK-139에서 AGENCY role에 `/agency`, `/agency/shippers` 경로가 이미 `STATIC_PERMISSIONS`에 등록됐으므로,  
+아이템 추가 시 `isAdminOnly` 없이 추가하면 AGENCY 유저에게만 자동 노출됨.
+
+```typescript
+// NAV_ITEMS 배열 내 mypage 항목 직전에 추가
+{ title: t("agency_management"), href: "/agency", icon: BuildingOffice2Icon }
+{ title: t("agency_shippers_nav"), href: "/agency/shippers", icon: Users }
+// Users 아이콘은 이미 import되어 있음. BuildingOffice2Icon은 import 추가 필요.
+```
+
+현재 feature 브랜치의 NaviSidebar는 develop 대비 변경 없음 → 충돌 없이 수정 가능.  
+(Team A 마지막 수정: `5b51489`, 2026-06-10)
+
+### i18n 키 — Baker 키와 중복 주의
+
+Baker(TASK-146)가 `messages/ko.json`에 `"AgencyShippers"` **네임스페이스(페이지 콘텐츠용)**를 이미 추가함.  
+Gale은 **nav 레이블용 최상위 키**만 추가 (네임스페이스 아님):
+
+```json
+// ko.json 최상위 레벨에 추가
+"agency_management": "대리점 관리",
+"agency_shippers_nav": "화주 목록",
+"agency_dashboard": "대리점 대시보드",
+"agency_registered_shippers": "등록 화주",
+"agency_quick_links": "빠른 이동"
+```
+
+`en.json`도 동일하게 추가 필요 (Baker가 en.json도 업데이트한 패턴과 동일).
+
+### ZEN_A4 — Baker 사례 반복 금지
+
+TASK-146 Baker가 컴포넌트 155줄·140줄로 ZEN_A4 위반하여 재작업 중.  
+대시보드 page.tsx에서 50줄 초과 시 즉시 하위 컴포넌트로 분리:
+- `AgencyDashboardStats` — 통계 카드 섹션
+- `AgencyQuickLinks` — 빠른 이동 링크 섹션
 
 ---
 
