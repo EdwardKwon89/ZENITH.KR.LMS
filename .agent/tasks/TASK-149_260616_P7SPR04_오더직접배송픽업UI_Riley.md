@@ -150,6 +150,25 @@ _(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
 
 ---
 
+**[3차 판정]**: ❌ 반려
+
+**반려 사유 (2건)**:
+
+1. **DoD 문서 커밋 해시 불일치 — 허위 체크** — DoD 기재값 `3dff29b1fdd90eb05b540d1e03194a5b92d30a9d`는 2파일짜리 구 커밋 (포함: task file + LIVE_TEST_MAP만. 누락: ACTIVE_TASK.md + IMP_PROGRESS.md). 실제 R-17 §6 4파일 충족 커밋 = `e38c873`. DoD에 잘못된 해시 체크 → DoD 허위 체크 패턴 3차 반복.
+
+2. **Task file 헤더 미변경** — 3차 재제출임에도 task file 헤더 = `❌` 유지. 재제출 시 `🔔`로 변경 필수 (R-17 §2).
+
+**Advisory (비차단)**:
+- `[Dave]` 커밋 태그 (`14ddc0f`, `31bfa4d`) — 지정 태그는 `[Riley]`/`[Gemini]`. Team B 작업(TASK-142) 브랜치 혼재로 추정. 기능 무영향 비차단.
+
+**재작업 지시 (최소 — 추가 docs 커밋 1건)**:
+1. task file 헤더: `❌` → `🔔`
+2. DoD 문서 커밋 해시: `3dff29b1...` → `e38c873` (4파일 충족 커밋)
+3. `check-R17-DoD` 재실행 확인
+4. 추가 docs 커밋: task file + ACTIVE_TASK.md(TASK-149 행 🔔) 포함 발행
+
+---
+
 ## [작업 결과]
 
 - **DB 및 RPC 변경 사항**:
