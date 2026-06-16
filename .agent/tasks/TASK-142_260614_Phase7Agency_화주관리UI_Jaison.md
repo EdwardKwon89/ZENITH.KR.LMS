@@ -101,13 +101,69 @@ An-12 §4, §5.2, §6.1 스펙 확정 (Edward 승인, 2026-06-14). 추가 설계
 
 ## [작업 결과]
 
-_(작업 후 기재)_
+Team B (Dave·Baker·Gale→Dave 재배정)가 TASK-145/146/147 서브 태스크로 분해하여 구현 완료.
+PR #7 `feature/ups-spr02-devteam-agency-ui` → `develop` 제출 (2026-06-15).
+회귀 테스트: 340/347 PASS.
 
 ---
 
 ## [Aiden 검토]
 
-_(🔔 제출 후 Aiden 기재)_
+**판정: ❌ 조건부 반려 — 수정 후 재제출** (2026-06-16, Aiden)
+
+### 반려 사유
+
+#### 🔴 MUST FIX — 런타임 오류 (2건)
+
+**Issue 1. `contact_*` 필드 DB 불일치 → 화주 등록 실패**
+- 위치: `src/app/actions/agency/shippers.ts:32`
+- 현상: `_linkShipperToAgency` 내부 `...data` spread 시 `contact_name`, `contact_email`, `contact_phone` 포함 → `zen_agency_shippers` 테이블에 해당 컬럼 없음 → Supabase INSERT 오류
+- TypeScript 구조적 서브타이핑으로 컴파일 통과하지만 런타임 실패
+- 수정: `.insert()` 내 명시적 컬럼 지정으로 교체
+  ```typescript
+  .insert({
+    agency_org_id: agencyOrgId,
+    shipper_org_id: shipperOrgId,
+    shipper_type: data.shipper_type,
+    discount_rate: data.discount_rate,
+    grade: data.grade ?? null,
+  })
+  ```
+
+**Issue 2. `router.push` locale prefix 누락 → 리다이렉트 실패**
+- 위치: `src/app/[locale]/(dashboard)/agency/shippers/new/shipper-form.tsx:35`
+- 현상: `router.push('/agency/shippers')` — 프로젝트 전체 패턴은 `/${locale}/path` 사용
+- Next.js i18n 미들웨어가 redirect loop 또는 404 유발
+- 수정: `useParams()`로 `locale` 추출 후 `router.push(\`/\${locale}/agency/shippers\`)`
+
+#### 🟡 SHOULD FIX (3건)
+
+**Issue 3. `shippers/page.tsx` RBAC 검사 누락**
+- `AgencyShippersPage`에 `checkPermission` 후 redirect 없음 (`AgencyDashboardPage`와 불일치)
+- 비AGENCY 인증 사용자 직접 접근 시 Page 레벨 차단 없음
+
+**Issue 4. `profile.org_id` null 미체크**
+- `zen_profiles.org_id` DB 타입 `string | null`
+- `AgencyShippersPage`, `NewAgencyShipperPage` 모두 null 체크 없이 Server Action 호출
+- org 미설정 AGENCY 사용자 접근 시 예기치 않은 오류
+
+**Issue 5. `agency/page.tsx` i18n 누락**
+- `"대리점 전용 콘솔"`, `"지능형 화주 관리..."` 하드코딩 한글
+- 영문 로케일에서 한글 노출
+
+#### ⚪ MINOR (2건)
+
+**Issue 6.** `shippers-client.tsx:9` — `shippers: any[]` → `AgencyShipper[]` 타입 명시 권장
+**Issue 7.** `shipper-actions.test.ts:3` — TC-P7-SHIPPER-01 테스트 제목과 구현 불일치
+
+---
+
+### PR 브랜치 처리 안내
+
+1. `git pull origin main` — main 동기화 (develop이 main보다 10커밋 뒤처짐)
+2. PR 브랜치 rebase: `git rebase origin/main`
+3. Issue 1~5 코드 수정 후 커밋
+4. PR 재제출 → Aiden 재검토
 
 ---
 
