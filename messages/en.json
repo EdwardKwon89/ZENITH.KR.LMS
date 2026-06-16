@@ -187,7 +187,13 @@
     "special_cargo_dangerous": "Dangerous Goods",
     "special_cargo_frozen": "Frozen/Refrigerated",
     "special_cargo_valuable": "Valuable Cargo",
-    "special_cargo_used": "Used Goods"
+    "special_cargo_used": "Used Goods",
+    "delivery_method_label": "Delivery Method",
+    "delivery_method_direct": "Direct Delivery (DIRECT)",
+    "delivery_method_pickup": "Pickup (PICKUP)",
+    "pickup_location": "Pickup Location",
+    "pickup_contact_name": "Contact Name",
+    "pickup_contact_tel": "Contact Phone"
   },
   "Wallet": {
     "title": "My Wallet",
