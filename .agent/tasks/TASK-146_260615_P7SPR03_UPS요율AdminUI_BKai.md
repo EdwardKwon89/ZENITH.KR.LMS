@@ -103,7 +103,7 @@ TASK-143에서 완성된 조회 Actions 5종을 재사용하고, CRUD Actions를
 - [x] LIVE_REGRESSION_TEST_MAP.md TC-UPS-ADMIN 등재 (324 Cases)
 - [x] 빌드 0 Errors, 0 Warnings ✅
 - [x] 코드 커밋 해시: `0578fb7` (재작업)
-- [x] 문서 커밋 해시: `3370f69` (재작업 후 문서 커밋)
+- [x] 문서 커밋 해시: `437ef59` (재작업 후 문서 커밋 — 1차: `54730c9`)
 - [x] `check-R17-DoD` 실행 완료 — 전항목 ✅ (수동 검증)
   - DoD 10/10 전항목 체크 ✅
   - 코드 커밋 해시 `0578fb7` 실제 존재 확인 ✅ (`git log --oneline -1`)
