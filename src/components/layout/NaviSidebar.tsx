@@ -144,6 +144,7 @@ export default function NaviSidebar({
     { title: t("admin_error_logs"), href: "/admin/error-logs", icon: ShieldAlert, isAdminOnly: true },
     { title: t("agency_management"), href: "/agency", icon: BuildingOffice2Icon },
     { title: t("agency_shippers_nav"), href: "/agency/shippers", icon: Users },
+    { title: t("agency_rate_overrides_nav"), href: "/agency/rate-overrides", icon: TrendingUp },
     {
       title: t("mypage"),
       href: "/mypage",
