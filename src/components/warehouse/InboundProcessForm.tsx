@@ -323,7 +323,7 @@ export default function InboundProcessForm({ locale }: { locale: string }) {
                           </div>
                         </div>
                         <div className="mt-3 flex justify-end">
-                          <ZenButton size="sm" onClick={() => handleSavePkgRefs(pkg.id)} loading={savingPkgId === pkg.id} className="px-4 py-1.5 text-xs font-bold">
+                          <ZenButton onClick={() => handleSavePkgRefs(pkg.id)} loading={savingPkgId === pkg.id} className="px-4 py-1.5 text-xs font-bold">
                             <Save size={12} className="mr-1 inline" />{t("ref_save_btn") || "저장"}
                           </ZenButton>
                         </div>

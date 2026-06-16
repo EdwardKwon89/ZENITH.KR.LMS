@@ -49,3 +49,10 @@ export {
   adjustInventory,
   syncInventoryFromOrder,
 } from './inventory';
+
+export {
+  updatePackageRefs,
+  getWarehousedOrders,
+  getTodayReleasedOrders,
+  confirmOutbound,
+} from './warehouse';
