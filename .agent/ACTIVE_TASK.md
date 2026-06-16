@@ -224,8 +224,8 @@
 | TASK-B-003 | 260615 | [P7-SPR-02] Agency 대시보드 + NaviSidebar AGENCY 메뉴 추가 — /agency | P1 | TASK-B-001 ✅ | Dave | 🔔 | [TASK-B-003](tasks/TASK-B-003_260615_Agency대시보드NaviSidebar_Dave.md) | IMP-114 · 코드 97e9126 · 340/347 PASS · SPR-02 전량 완료 |
 | TASK-B-004 | 260616 | [P7-SPR-02] PR#7 반려 수정 — Baker 담당 (Issue 2·3·4·6: locale·RBAC·null·타입) | P1 | TASK-142 ❌ | Baker | 🔔 | [TASK-B-004](tasks/TASK-B-004_260616_PR7반려수정_Baker.md) | IMP-114 · 코드 57b5df8 · 345/345 PASS · DoD 전항목 ✅ |
 | TASK-B-005 | 260616 | [P7-SPR-02] PR#7 반려 수정 — Dave 담당 (Issue 1·5·7: 컬럼지정·i18n·TC) | P1 | TASK-142 ❌ | Dave | 🔔 | [TASK-B-005](tasks/TASK-B-005_260616_PR7반려수정_Dave.md) | IMP-114 · 코드 31bfa4d · 345/352 PASS · DoD 7/7 ✅ |
-| TASK-B-006 | 260616 | [P7-SPR-03] Agency 요율 오버라이드 Server Actions 3종 (getAgencyRateOverrides·upsertAgencyRateOverride·deactivateAgencyRateOverride) | P1 | TASK-B-001 ✅ · TASK-143 ✅ | Dave | 🔔 | [TASK-B-006](tasks/TASK-B-006_260616_AgencyRateOverridesActions_Dave.md) | IMP-116 · 브랜치 feature/ups-spr03-devteam-agency-rate-overrides · 345/352 PASS · TASK-B-007 블로커 해제 |
-| TASK-B-007 | 260616 | [P7-SPR-03] Agency 요율 오버라이드 UI — /agency/rate-overrides + NaviSidebar 메뉴 + i18n 10종 | P1 | TASK-B-006 ✅ | Baker | 🔔 | [TASK-B-007](tasks/TASK-B-007_260616_AgencyRateOverridesUI_Baker.md) | IMP-116 · 코드 140793e+a4fe3c8 · 문서 bcf8f43+978f812 · 345/345 PASS · ZEN_A4 수정 완료 · Jaison 검토 PASS · Aiden ✅ 대기 |
+| TASK-B-006 | 260616 | [P7-SPR-03] Agency 요율 오버라이드 Server Actions 3종 (getAgencyRateOverrides·upsertAgencyRateOverride·deactivateAgencyRateOverride) | P1 | TASK-B-001 ✅ · TASK-143 ✅ | Dave | 🔔 | [TASK-B-006](tasks/TASK-B-006_260616_AgencyRateOverridesActions_Dave.md) | IMP-116 · PR#8 포함 · 345/352 PASS · Aiden ✅ 대기 |
+| TASK-B-007 | 260616 | [P7-SPR-03] Agency 요율 오버라이드 UI — /agency/rate-overrides + NaviSidebar 메뉴 + i18n 10종 | P1 | TASK-B-006 ✅ | Baker | 🔔 | [TASK-B-007](tasks/TASK-B-007_260616_AgencyRateOverridesUI_Baker.md) | IMP-116 · PR#8 포함 · 345/345 PASS · ZEN_A4 ✅ · Jaison 검토 PASS · Aiden ✅ 대기 |
  
 ---
 
@@ -256,6 +256,7 @@
 
 ## 개정 이력
 
+| 2026-06-16 | JSJung (팀 리더) | **PR#8 제출** — TASK-B-006(Dave)·TASK-B-007(Baker) SPR-03 Agency 요율 오버라이드 UI. feature/ups-spr03-devteam-agency-rate-overrides → develop. Aiden 검토 요청. |
 | 2026-06-16 | Jaison (Team B) | **TASK-B-007 🔔 Jaison 검토 PASS** — ZEN_A4 수정 확인(함수 36·39·42줄), IMP_PROGRESS.md Baker 행 추가, 문서 커밋 해시 오기재(`9da38db`→`978f812`) Jaison 직접 수정. Aiden ✅ 승인 대기. |
 | 2026-06-16 | Jaison (Team B) | **TASK-B-007 ❌ 반려(1차)** — ZEN_A4 3건: table-row 52줄·form 60줄·fields 51줄. R-17 2건: 문서 커밋 해시 TBD 미기재·IMP_PROGRESS.md 미갱신. Baker 수정 지시 완료 (task file [수정 지시] 섹션). |
 | 2026-06-16 | JSJung (팀 리더) | **TASK-B-007 ⬜ 착수 승인** — TASK-B-006 🔔 내부 DoD 검증 완료(Jaison). Baker에게 SPR-03 UI 착수 승인. TASK-B-007 🚫→⬜ 전환. |
