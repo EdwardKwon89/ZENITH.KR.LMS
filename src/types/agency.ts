@@ -37,3 +37,22 @@ export interface AgencyRateOverride {
   created_at: string;
   created_by: string | null;
 }
+
+export interface CreateAgencyRateOverrideInput {
+  base_rate_id: string;
+  selling_price: number;
+  cost_price: number;
+  valid_from: string;
+  valid_until?: string;
+}
+
+export interface AgencyRateOverrideWithRefs extends AgencyRateOverride {
+  base_rate: {
+    product_id: string;
+    zone_id: string;
+    weight_kg: number;
+    currency: string;
+    product: { product_code: string; product_name: string };
+    zone: { zone_code: string; zone_name: string };
+  } | null;
+}
