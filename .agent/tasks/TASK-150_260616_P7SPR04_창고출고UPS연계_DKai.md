@@ -86,7 +86,11 @@ interface ConfirmOutboundResult {
 - [x] LIVE_REGRESSION_TEST_MAP.md TC-UPS-WH 등재
 - [x] 빌드 0 Errors
 - [x] 코드 커밋 해시: `a0dcbd1`
+<<<<<<< HEAD
 - [x] 문서 커밋 해시: `f29c7e7`
+=======
+- [x] 문서 커밋 해시: `51e2d02`
+>>>>>>> a9f73ac ([D_Kai] docs: TASK-150 3차 재작업 완료 — IMP-119 🔔 (단일 커밋: task file + ACTIVE_TASK + IMP_PROGRESS + LIVE_TEST_MAP))
 - [x] `check-R17-DoD` 실행 완료 — 전항목 ✅
 
 ---
@@ -173,7 +177,11 @@ _(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
 **재작업 지시 (최소 — 추가 docs 커밋 1건)**:
 1. task file 헤더: `❌` → `🔔` (현재 Aiden이 ❌로 변경함 — D_Kai가 재제출 시 🔔로 변경)
 2. 추가 docs 커밋: **task file + ACTIVE_TASK.md + IMP_PROGRESS.md + LIVE_REGRESSION_TEST_MAP.md 4파일 전부 포함** (단일 커밋)
+<<<<<<< HEAD
 3. DoD 문서 커밋 해시: `f29c7e7` → 신규 4파일 커밋 해시로 갱신
+=======
+3. DoD 문서 커밋 해시: `51e2d02` → 신규 4파일 커밋 해시로 갱신
+>>>>>>> a9f73ac ([D_Kai] docs: TASK-150 3차 재작업 완료 — IMP-119 🔔 (단일 커밋: task file + ACTIVE_TASK + IMP_PROGRESS + LIVE_TEST_MAP))
 4. `check-R17-DoD` 재실행 — 신규 해시 기재 + 전항목 통과 확인
 5. 재제출
 
