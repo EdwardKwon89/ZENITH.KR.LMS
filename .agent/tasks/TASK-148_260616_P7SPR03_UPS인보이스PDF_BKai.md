@@ -10,7 +10,7 @@
 | **관련 IMP** | IMP-117 |
 | **브랜치** | `feature/ups-spr03-bkai-invoice-pdf` (신규 독립 브랜치) |
 | **커밋 태그** | `[B_Kai]` |
-| **상태** | 🔔 |
+| **상태** | ❌ |
 
 ---
 
@@ -180,6 +180,20 @@ _(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
 **재작업 지시 (최소 재작업)**:
 1. 신규 docs 커밋 **1건** 발행 — `git add`로 4파일 명시적 스테이징 후 단일 커밋
 2. DoD 문서 커밋 해시: 새 커밋 해시로 갱신
+
+---
+
+**[5차 판정]**: ❌ 반려
+
+**반려 사유 (1건)**:
+
+1. **DoD 문서 커밋 해시 잘못된 브랜치 참조** — DoD 기재 해시 `0f4e72b`는 `feature/ups-spr03-bkai-invoice-pdf`(B_Kai 브랜치) 이력에 존재하지 않음. 해당 해시는 `feature/ups-spr04-riley-delivery-method`(Riley 브랜치)에만 존재하는 병렬 커밋. 실제 B_Kai 브랜치 4파일 커밋 = `8b4dded` (동일 내용·동일 시각 생성). DoD 해시는 본인 브랜치에 실제 존재하는 커밋 해시를 기재해야 함.
+
+**재작업 지시 (최소 — docs 커밋 1건)**:
+1. task file 헤더: `❌` → `🔔` (현재 Aiden이 ❌로 변경함 — B_Kai가 재제출 시 🔔로 변경)
+2. DoD 문서 커밋 해시: `0f4e72b` → `8b4dded` (`feature/ups-spr03-bkai-invoice-pdf`에 실제 존재하는 4파일 커밋)
+3. `check-R17-DoD` 재실행 — `8b4dded` 해시 기재 + 전항목 통과 확인
+4. 신규 docs 커밋: task file + ACTIVE_TASK.md + IMP_PROGRESS.md + LIVE_REGRESSION_TEST_MAP.md **4파일** 포함 발행
 
 ---
 
