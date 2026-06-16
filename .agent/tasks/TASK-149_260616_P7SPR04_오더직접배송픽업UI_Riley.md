@@ -154,18 +154,15 @@ _(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
 
 **반려 사유 (2건)**:
 
-1. **DoD 문서 커밋 해시 불일치 — 허위 체크** — DoD 기재값 `3dff29b1fdd90eb05b540d1e03194a5b92d30a9d`는 2파일짜리 구 커밋 (포함: task file + LIVE_TEST_MAP만. 누락: ACTIVE_TASK.md + IMP_PROGRESS.md). 실제 R-17 §6 4파일 충족 커밋 = `e38c873`. DoD에 잘못된 해시 체크 → DoD 허위 체크 패턴 3차 반복.
+1. **DoD 문서 커밋 해시 고아(orphaned) 커밋 참조** — DoD 기재 해시 `8a99b92`는 브랜치(`feature/ups-spr04-riley-delivery-method`) 이력에 존재하지 않는 고아 커밋. 실제 R-17 §6 4파일 충족 커밋 = `e38c873` (포함: task file + ACTIVE_TASK.md + LIVE_TEST_MAP + IMP_PROGRESS.md).
 
-2. **Task file 헤더 미변경** — 3차 재제출임에도 task file 헤더 = `❌` 유지. 재제출 시 `🔔`로 변경 필수 (R-17 §2).
-
-**Advisory (비차단)**:
-- `[Dave]` 커밋 태그 (`14ddc0f`, `31bfa4d`) — 지정 태그는 `[Riley]`/`[Gemini]`. Team B 작업(TASK-142) 브랜치 혼재로 추정. 기능 무영향 비차단.
+2. **Task file 헤더 미변경** — 재제출 시 task file 헤더 = `❌` 유지. 재제출 시 `🔔`로 변경 필수 (R-17 §2).
 
 **재작업 지시 (최소 — 추가 docs 커밋 1건)**:
 1. task file 헤더: `❌` → `🔔`
-2. DoD 문서 커밋 해시: `3dff29b1...` → `e38c873` (4파일 충족 커밋)
-3. `check-R17-DoD` 재실행 확인
-4. 추가 docs 커밋: task file + ACTIVE_TASK.md(TASK-149 행 🔔) 포함 발행
+2. DoD 문서 커밋 해시: `8a99b92` → `e38c873` (브랜치에 실제 존재하는 4파일 커밋)
+3. `check-R17-DoD` 재실행 — 전항목 통과 확인
+4. 신규 docs 커밋: task file + ACTIVE_TASK.md + IMP_PROGRESS.md + LIVE_TEST_MAP 4파일 포함 발행
 
 ---
 
