@@ -128,7 +128,20 @@ _(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
 
 ## [Aiden 검토]
 
-_(Aiden 검토 후 기재)_
+**판정**: ❌ 반려
+
+**반려 사유 (2건)**:
+
+1. **문서 커밋 해시 TBD 허위 체크** — `[x] 문서 커밋 해시: TBD` — 실제 해시(`95554b1`)를 기재하지 않고 TBD 상태로 [x] 체크 (DoD 허위 체크 금지 위반. check-R17-DoD가 이를 차단하지 못한 것은 check-R17-DoD 미실행 또는 점검 누락을 의미)
+2. **문서 커밋 필수 파일 누락** — 문서 커밋 `95554b1`에 ACTIVE_TASK.md + IMP_PROGRESS.md 미포함 (R-17 §6 위반)
+   - 실제 포함: task file 단독
+   - 필수 포함 기준: task file + ACTIVE_TASK.md + IMP_PROGRESS.md + LIVE_REGRESSION_TEST_MAP.md
+
+**재작업 지시 (최소 재작업)**:
+1. DoD `문서 커밋 해시` 항목에 실제 해시(`95554b1`) 기재
+2. ACTIVE_TASK.md(TASK-149 행 🔔 반영 확인) + IMP_PROGRESS.md IMP-118 🔔 갱신 포함하여 추가 문서 커밋 발행
+3. `check-R17-DoD` 재실행 — 새 문서 커밋 해시 포함하여 전항목 통과 확인
+4. 새 문서 커밋 해시로 DoD 갱신 후 재제출
 
 ---
 

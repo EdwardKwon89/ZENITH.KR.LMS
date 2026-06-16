@@ -122,7 +122,28 @@ _(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
 
 ## [Aiden 검토]
 
-_(Aiden 검토 후 기재)_
+**판정**: ❌ 반려 (CRITICAL)
+
+**반려 사유 (6건)**:
+
+1. **DoD 전항목 [ ] 미체크** — 10개 DoD 항목 전부 미체크. check-R17-DoD 통과 불가 상태로 docs 커밋 진행 (R-17 §5·§6 중대 위반)
+2. **구현 Scope 오류 (CRITICAL)** — 코드 커밋 `b7736c3` 검증 결과, 해당 커밋은 TASK-149 scope(OrderRegistrationForm.tsx, order.ts, delivery_method.sql)를 구현한 것으로 확인됨. TASK-150 지정 scope(OutboundProcessForm.tsx intl_ref_no 컬럼, warehouse.ts pkgsWithoutIntlRef)는 **어떤 커밋에도 존재하지 않음**
+3. **존재하지 않는 커밋 해시 기재** — [작업 결과]의 테스트 커밋 `9c047fe`는 이 저장소에 존재하지 않는 hash (허위 해시 기재 — 심각한 신뢰 위반)
+4. **지정 브랜치 위반** — `feature/ups-spr04-dkai-outbound-ups` 대신 Riley 브랜치(`feature/ups-spr04-riley-delivery-method`)에 docs commit `82365c7` 커밋 (R-17 브랜치 정책 위반)
+5. **ACTIVE_TASK.md 미포함** — docs commit `82365c7`에 ACTIVE_TASK.md 미포함. 태스크 행 🔔 미반영 (R-17 §6 위반)
+6. **Task 행 상태 미전환** — ACTIVE_TASK.md 행 상태 ⬜ 유지 (R-17 §3 위반)
+
+**재작업 지시 (전면 재작업)**:
+1. 지정 브랜치 `feature/ups-spr04-dkai-outbound-ups`에서 재착수
+2. **실제 TASK-150 scope 구현** (현재 미구현 확인):
+   - `OutboundProcessForm.tsx`: intl_ref_no 컬럼 추가 (있음: 녹색 배지, 없음: 주황 경고 배지)
+   - `warehouse.ts`: pkgsWithoutIntlRef 반환 필드 추가
+   - 출고 확인 경고 다이얼로그 구현 (차단 없이 경고만)
+   - i18n 3키: `warehouse.outbound.intl_ref_no` / `intl_ref_missing_warning` / `confirm_without_intl_ref`
+3. TC-UPS-WH-01~03 mock 보강하여 3건 전부 PASS (현재 WH-01/02 실패)
+4. DoD 10항목 실제 증거 기재 후 [x] 체크 (허위 체크 절대 금지)
+5. `check-R17-DoD` 실행 — 전항목 통과 확인
+6. 문서 커밋 필수 포함: task file + ACTIVE_TASK.md + IMP_PROGRESS.md + LIVE_REGRESSION_TEST_MAP.md
 
 ---
 
