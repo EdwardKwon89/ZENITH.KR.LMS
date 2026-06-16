@@ -10,7 +10,7 @@
 | **관련 IMP** | IMP-118 |
 | **브랜치** | `feature/ups-spr04-riley-delivery-method` (신규 독립 브랜치) |
 | **커밋 태그** | `[Riley]` |
-| **상태** | 🔔 |
+| **상태** | ❌ |
 
 > ⚠️ **Scope 제한**: 본 Task는 오더 등록 UI에서 delivery_method 필드 연결에 한정된다.  
 > 다른 기능/모듈 수정 절대 금지.
@@ -100,8 +100,8 @@ pickup_contact_tel: formData.pickup_contact_tel ?? null,
 - [x] `npm run test:regression` 전체 PASS (369 / 369 PASS)
 - [x] LIVE_REGRESSION_TEST_MAP.md TC-UPS-ORDER 등재
 - [x] 빌드 0 Errors (TypeScript & Next.js 빌드 성공)
-- [x] 코드 커밋 해시: `3cb18cb`
-- [x] 문서 커밋 해시: `6ceb18bbae0d2f2e972f1435b17183762d07e93d`
+- [x] 코드 커밋 해시: `3cb18cb` + `96b983e` (보완)
+- [x] 문서 커밋 해시: `3dff29b1fdd90eb05b540d1e03194a5b92d30a9d`
 - [x] `check-R17-DoD` 실행 완료 — 전항목 ✅
 
 ---
@@ -128,20 +128,44 @@ _(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
 
 ## [Aiden 검토]
 
-**판정**: ❌ 반려
+**[1차 판정]**: ❌ 반려 (2건) — 문서 커밋 해시 TBD 허위체크·필수파일 누락 (260616 1차 check-request)
+> *Riley 재작업 완료 후 2차 제출*
+
+---
+
+**[2차 판정]**: ❌ 반려
+
+**반려 사유 (1건)**:
+
+1. **문서 커밋 `3dff29b1` 필수 파일 누락** — 포함: task file + LIVE_REGRESSION_TEST_MAP.md. 누락: ACTIVE_TASK.md + IMP_PROGRESS.md. R-17 §6 필수 4파일 기준 미달. (R-17 §6 위반)
+   - 추가 사항: `3dff29b1`은 Riley 브랜치(`feature/ups-spr04-riley-delivery-method`)에 없고 B_Kai 브랜치에만 존재하는 이상 커밋. 실제 Riley 브랜치 docs 커밋 = `91efdef`.
+
+**Advisory (비차단)**: `[Gemini]` 커밋 태그 — 지정 태그는 `[Riley]`. 과거 승인 패턴(TASK-147 등) 존재로 비차단 처리.
+
+**재작업 지시 (최소)**:
+1. 추가 docs 커밋 발행: ACTIVE_TASK.md(TASK-149 행 🔔 확인) + IMP_PROGRESS.md IMP-118 🔔 상태 포함
+   - task file + LIVE_TEST_MAP는 `91efdef`에 이미 포함됨 — 4파일 모두 포함된 새 docs 커밋 발행
+2. `check-R17-DoD` 재실행 — 새 docs 커밋 해시 기재 + 전항목 통과 확인
+3. DoD `문서 커밋 해시` 최신 해시로 갱신 후 재제출
+
+---
+
+**[3차 판정]**: ❌ 반려
 
 **반려 사유 (2건)**:
 
-1. **문서 커밋 해시 TBD 허위 체크** — `[x] 문서 커밋 해시: TBD` — 실제 해시(`95554b1`)를 기재하지 않고 TBD 상태로 [x] 체크 (DoD 허위 체크 금지 위반. check-R17-DoD가 이를 차단하지 못한 것은 check-R17-DoD 미실행 또는 점검 누락을 의미)
-2. **문서 커밋 필수 파일 누락** — 문서 커밋 `95554b1`에 ACTIVE_TASK.md + IMP_PROGRESS.md 미포함 (R-17 §6 위반)
-   - 실제 포함: task file 단독
-   - 필수 포함 기준: task file + ACTIVE_TASK.md + IMP_PROGRESS.md + LIVE_REGRESSION_TEST_MAP.md
+1. **DoD 문서 커밋 해시 불일치 — 허위 체크** — DoD 기재값 `3dff29b1fdd90eb05b540d1e03194a5b92d30a9d`는 2파일짜리 구 커밋 (포함: task file + LIVE_TEST_MAP만. 누락: ACTIVE_TASK.md + IMP_PROGRESS.md). 실제 R-17 §6 4파일 충족 커밋 = `e38c873`. DoD에 잘못된 해시 체크 → DoD 허위 체크 패턴 3차 반복.
 
-**재작업 지시 (최소 재작업)**:
-1. DoD `문서 커밋 해시` 항목에 실제 해시(`95554b1`) 기재
-2. ACTIVE_TASK.md(TASK-149 행 🔔 반영 확인) + IMP_PROGRESS.md IMP-118 🔔 갱신 포함하여 추가 문서 커밋 발행
-3. `check-R17-DoD` 재실행 — 새 문서 커밋 해시 포함하여 전항목 통과 확인
-4. 새 문서 커밋 해시로 DoD 갱신 후 재제출
+2. **Task file 헤더 미변경** — 3차 재제출임에도 task file 헤더 = `❌` 유지. 재제출 시 `🔔`로 변경 필수 (R-17 §2).
+
+**Advisory (비차단)**:
+- `[Dave]` 커밋 태그 (`14ddc0f`, `31bfa4d`) — 지정 태그는 `[Riley]`/`[Gemini]`. Team B 작업(TASK-142) 브랜치 혼재로 추정. 기능 무영향 비차단.
+
+**재작업 지시 (최소 — 추가 docs 커밋 1건)**:
+1. task file 헤더: `❌` → `🔔`
+2. DoD 문서 커밋 해시: `3dff29b1...` → `e38c873` (4파일 충족 커밋)
+3. `check-R17-DoD` 재실행 확인
+4. 추가 docs 커밋: task file + ACTIVE_TASK.md(TASK-149 행 🔔) 포함 발행
 
 ---
 

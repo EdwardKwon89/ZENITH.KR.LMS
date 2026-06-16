@@ -260,7 +260,7 @@
 | 103 | 운송 요율 CARRIER 직접 등록 허용 + platform_fee_rate 격리 | D_Kai | 🔔 | 2026-06-06 |
 | 104 | Phase 6 회귀 테스트 + E2E 검증 + UAT 절차서 | D_Kai+Riley+B_Kai | 🔔 | 2026-06-07 |
 | 105 | 운송수단별 요금 산정 정책 설정 (DB + Admin UI + 엔진) | D_Kai+B_Kai | 🔔 | 2026-06-08 |
-| 109 | 환율 설정 화면 — 기준 통화(`BASE_CURRENCY`) + 환율(`EXCHANGE_RATE_*`) 어드민 UI | Riley | 🔔 | 2026-06-15 |
+| 109 | 환율 설정 화면 — 기준 통화(`BASE_CURRENCY`) + 환율(`EXCHANGE_RATE_*`) 어드민 UI | 미정 | ⬜ | — |
 
 **Phase 6 완료**: 8 / 8 (100%) — IMP-097✅ · 098✅ · 099✅ · 100🔔 · 101🔔 · 102🔔 · 103🔔 · 104🔔
 **IMP-105**: D_Kai DB ✅(bb81021) · B_Kai UI ✅(5171675+0d428a3) · D_Kai 엔진+TC ✅(723db3e+c0bcab0+974e632) · 회귀 314/314 PASS
@@ -292,9 +292,10 @@
 | K | 1 | 7 | 14.3% | IMP-084·085·086·088·089·046 🔔 |
 | 6 | 9 | 9 | — | IMP-097✅·098✅·099✅·100🔔·101🔔·102🔔·103🔔·104🔔·105✅(D_Kai 엔진+TC 완료) (Phase 6+IMP-105) |
 | UAT | 6 | 7 | 85.7% | IMP-090 ✅ · IMP-091 ⬜ (Carrier Portal — Phase M) · **IMP-092 ✅ (TISA 3계층)** · **IMP-093 ✅ (TISA 실연동, TASK-104)** · IMP-094 ⬜ (요율 워크플로우 고도화, Phase M) · **IMP-095 ✅ (Rate Card 항로 매칭, TASK-109)** · **IMP-096 ✅ (요율 관리 페이지 통합 정리, TASK-110)** |
-| 기타 | 1 | 1 | 100% | **IMP-109 ✅** 환율 설정 화면 (TASK-147, 1c67c35, Riley — Aiden ✅ 승인 260616) |
-| **Phase 7** | 6 | 9 | 66.7% | **IMP-110 ✅** UPS DB 스키마 7종 (aca457e) · **IMP-111 ✅** Agency 역할 모델 (dc8a2ff) · **IMP-112 ✅** UPS 요금 계산 엔진 (e60fff0 Aiden·fee7bf1 D_Kai·b315d49+6870271 B_Kai — Aiden ✅ 승인 260615) · **IMP-113 ✅** UPS 요율 Admin UI (TASK-146, 0578fb7, B_Kai — Aiden ✅ 승인 260616) · **IMP-114 ⬜** Agency 화주 관리 UI (TASK-142) · **IMP-115 ⬜** IBC/Pactrak Interface (SPR-05) · **IMP-117 🔔** 간이 UPS 인보이스 PDF (TASK-148, `abc9d20` B_Kai — 381/381 PASS · 브랜치 `feature/ups-spr03-bkai-invoice-pdf` · 🔔 재제출) · **IMP-118 🔔** 오더 직접배송/픽업 UI (TASK-149, Riley) · **IMP-119 🔄** 창고 출고 UPS 연계 (a0dcbd1 D_Kai, 2차 재작업 — main 기반 재설정) |
-| **합계** | **97** | **103** | **94.2%** | IMP-117 🔔 (재작업 완료 `abc9d20` 브랜치 수정) · IMP-113 ✅ (260616) · IMP-109 ✅ (260616) · IMP-112 ✅ (260615) · IMP-111 ✅ (260614) · IMP-110 ✅ (260614) |
+| UAT2 | 2 | 2 | 100% ✅ | **IMP-107 ✅** (TISA 스냅샷 강화 — WM slab 이력, `ab6f493`+`ef3ece7` Aiden ✅ 승인 260609) · **IMP-108 ✅§1·§2·§3** (B_Kai §1 max_charge UI ✅, D_Kai §2 platform_fee ✅, §3 WM CLAMP `9d70d87` ✅) |
+| 기타 | 0 | 1 | 0% | **IMP-109 ⬜** 환율 설정 화면 (어드민 — 기준 통화 + 환율 설정 UI) |
+| **Phase 7** | 3 | 9 | 33.3% | **IMP-110 ✅** UPS DB 스키마 7종 (aca457e) · **IMP-111 ✅** Agency 역할 모델 (dc8a2ff) · **IMP-112 🔔** UPS 요금 엔진 (TASK-143 D_Kai ✅ fee7bf1·TASK-141 Aiden ⬜·TASK-144 B_Kai ❌ 재작업) · **IMP-113 ⬜** UPS 요율 Admin UI (SPR-03) · **IMP-114 ⬜** Agency 화주 관리 UI (TASK-142) · **IMP-115 ⬜** IBC/Pactrak Interface (SPR-05) · **IMP-117 🔔** 간이 UPS 인보이스 PDF (TASK-148, B_Kai — 2차 재작업 완료 · abc9d20 코드 · e994c6b 문서 · TC-UPS-INV-01/02 LIVE_TEST_MAP 등재 · Aiden 검토 대기) · **IMP-118 🔔** 오더 직접배송/픽업 UI (TASK-149, Riley) · **IMP-119 ❌** 창고 출고 UPS 연계 (TASK-150, D_Kai) |
+| **합계** | **94** | **100** | **94.0%** | IMP-112~116 신규 등재 (SPR-02~06 예정) · IMP-111 ✅ (260614) · IMP-110 ✅ (260614) |
 
 > **UAT 진행 전 필수 처리**: IMP-092 ✅ · IMP-093 ✅ · IMP-095 ✅ — 전량 완료
 > 미완료 IMP: IMP-086·087 🚫 블로커 · IMP-028·069(Future — 통관 연계) · IMP-091 ⬜ (Carrier Portal) · IMP-094 ⬜ (요율 워크플로우 Phase M)
