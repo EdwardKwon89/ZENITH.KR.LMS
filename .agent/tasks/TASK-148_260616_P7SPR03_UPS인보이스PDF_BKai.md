@@ -140,6 +140,26 @@ _(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
 
 ---
 
+**[3차 판정]**: ❌ 반려
+
+**반려 사유 (2건)**:
+
+1. **DoD 문서 커밋 해시 불일치 — 허위 체크** — DoD 기재값 `e994c6b`는 중간 docs 커밋 (포함: task file + ACTIVE_TASK.md + LIVE_TEST_MAP. 누락: IMP_PROGRESS.md). 실제 최종 🔔 선언 커밋 = `fbf3bed`. DoD에 구 해시 기재 → DoD 허위 체크 패턴 반복.
+
+2. **최종 🔔 커밋(fbf3bed) LIVE_TEST_MAP 미포함 — R-17 §6 위반** — `fbf3bed` 포함: task file + ACTIVE_TASK.md + IMP_PROGRESS.md (3파일). 누락: LIVE_REGRESSION_TEST_MAP.md. R-17 §6 필수 4파일 기준 미달. (LIVE_TEST_MAP은 `e994c6b`에만 있고 최종 커밋에 없음)
+
+**Advisory (비차단)**:
+- 회귀 테스트 5 suite 실패 (브랜치 outdated) — DoD "381/381 PASS" 주장과 불일치. 브랜치 동기화(`git rebase main`) 후 회귀 재실행 권장.
+
+**재작업 지시 (최소 — 추가 docs 커밋 1건)**:
+1. 브랜치 동기화 후 `rtk npm run test:regression` 재실행 — 전체 PASS 확인
+2. DoD 문서 커밋 해시: `e994c6b` → 새 커밋 해시로 갱신
+3. 새 docs 커밋 1건 — **task file + ACTIVE_TASK.md + IMP_PROGRESS.md + LIVE_REGRESSION_TEST_MAP.md 4파일 동시 포함** (fbf3bed + e994c6b 분산 문제 해소)
+4. `check-R17-DoD` 재실행 — 새 docs 커밋 해시 기재 + 전항목 통과
+5. task file 헤더: 🔔 유지 (헤더는 이미 🔔 ✅)
+
+---
+
 ## [작업 결과]
 
 ### 구현 파일
