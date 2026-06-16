@@ -29,7 +29,13 @@ async function _linkShipperToAgency(
 ): Promise<string> {
   const { data: link, error } = await supabase
     .from('zen_agency_shippers')
-    .insert({ agency_org_id: agencyOrgId, shipper_org_id: shipperOrgId, ...data })
+    .insert({
+      agency_org_id: agencyOrgId,
+      shipper_org_id: shipperOrgId,
+      shipper_type: data.shipper_type,
+      discount_rate: data.discount_rate,
+      grade: data.grade ?? null,
+    })
     .select('id')
     .single();
   if (error) throw new Error(`Failed to link shipper: ${error.message}`);

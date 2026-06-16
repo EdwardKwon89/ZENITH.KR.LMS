@@ -644,5 +644,7 @@
   "agency_shippers_nav": "Shipper List",
   "agency_dashboard": "Agency Dashboard",
   "agency_registered_shippers": "Registered Shippers",
-  "agency_quick_links": "Quick Links"
+  "agency_quick_links": "Quick Links",
+  "agency_console_badge": "Agency Console",
+  "agency_console_desc": "Intelligent shipper management and rate optimization service."
 }

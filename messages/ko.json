@@ -614,5 +614,7 @@
   "agency_shippers_nav": "화주 목록",
   "agency_dashboard": "대리점 대시보드",
   "agency_registered_shippers": "등록 화주",
-  "agency_quick_links": "빠른 이동"
+  "agency_quick_links": "빠른 이동",
+  "agency_console_badge": "대리점 전용 콘솔",
+  "agency_console_desc": "지능형 화주 관리 및 요율 최적화 서비스를 지원합니다."
 }

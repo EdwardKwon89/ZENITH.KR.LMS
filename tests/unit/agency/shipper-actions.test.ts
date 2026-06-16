@@ -1,6 +1,6 @@
 import { CreateAgencyShipperSchema, UpdateAgencyShipperGradeSchema } from '@/lib/validations/agency';
 
-describe('TC-P7-SHIPPER-01: getAgencyShippers — 빈 배열 반환 (초기 상태)', () => {
+describe('TC-P7-SHIPPER-01: CreateAgencyShipperSchema — 최소 입력(minimum valid input) 검증', () => {
   it('should validate that CreateAgencyShipperSchema accepts valid input', () => {
     const result = CreateAgencyShipperSchema.safeParse({
       name: 'Test Shipper',
@@ -44,7 +44,7 @@ describe('TC-P7-SHIPPER-02: CreateAgencyShipperSchema — 유효 입력 검증 P
   });
 });
 
-describe('TC-P7-SHIPPER-03: CreateAgencyShipperSchema — discount_rate > 1 입력 시 실패', () => {
+describe('TC-P7-SHIPPER-03: CreateAgencyShipperSchema — 유효하지 않은 입력 검증 (실패 케이스)', () => {
   it('should reject discount_rate greater than 1', () => {
     const result = CreateAgencyShipperSchema.safeParse({
       name: 'Invalid Shipper',
@@ -92,7 +92,7 @@ describe('TC-P7-SHIPPER-03: CreateAgencyShipperSchema — discount_rate > 1 입�
   });
 });
 
-describe('TC-P7-SHIPPER-04: UpdateAgencyShipperGradeSchema — 유효 등급/할인율 검증 PASS', () => {
+describe('TC-P7-SHIPPER-04: UpdateAgencyShipperGradeSchema — 유효/무효 입력 검증', () => {
   it('should validate valid grade and discount_rate', () => {
     const result = UpdateAgencyShipperGradeSchema.safeParse({
       grade: 'VIP',
