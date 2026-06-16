@@ -10,7 +10,7 @@
 | **관련 IMP** | IMP-118 |
 | **브랜치** | `feature/ups-spr04-riley-delivery-method` (신규 독립 브랜치) |
 | **커밋 태그** | `[Riley]` |
-| **상태** | ⬜ |
+| **상태** | 🔄 |
 
 > ⚠️ **Scope 제한**: 본 Task는 오더 등록 UI에서 delivery_method 필드 연결에 한정된다.  
 > 다른 기능/모듈 수정 절대 금지.
