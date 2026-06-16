@@ -559,7 +559,12 @@
     "history_shipper": "화주",
     "empty_history": "오늘 출고 처리된 내역이 없습니다.",
     "shipping_label": "운송장 출력",
-    "preview_btn": "미리보기"
+    "preview_btn": "미리보기",
+    "intl_ref_missing": "번호 미발부",
+    "intl_ref_warning_title": "국제 운송번호 미발부",
+    "intl_ref_warning_desc": "일부 패키지에 국제 운송번호가 없습니다. 출고를 계속 진행하시겠습니까?",
+    "confirm_continue": "계속 진행",
+    "intl_ref_missing_confirmed": "{count}개 패키지에 국제 운송번호 없이 출고 처리되었습니다."
   },
   "ShippingLabel": {
     "title": "운송장",

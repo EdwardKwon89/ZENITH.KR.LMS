@@ -560,7 +560,12 @@
     "history_shipper": "Shipper",
     "empty_history": "No outbound records processed today.",
     "shipping_label": "Shipping Label",
-    "preview_btn": "Preview"
+    "preview_btn": "Preview",
+    "intl_ref_missing": "No Number",
+    "intl_ref_warning_title": "Missing International Tracking Numbers",
+    "intl_ref_warning_desc": "Some packages have no international tracking number. Continue with outbound?",
+    "confirm_continue": "Continue",
+    "intl_ref_missing_confirmed": "{count} package(s) processed without international tracking number."
   },
   "ShippingLabel": {
     "title": "Shipping Label",
