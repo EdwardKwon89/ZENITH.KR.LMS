@@ -12,7 +12,7 @@
 | **관련 IMP** | IMP-114 |
 | **브랜치** | `feature/ups-spr02-devteam-agency-ui` |
 | **커밋 태그** | `[Baker]` |
-| **상태** | ⬜ |
+| **상태** | 🔔 |
 
 ---
 
@@ -128,19 +128,40 @@ interface AgencyShippersClientProps {
 
 ## [DoD]
 
-- [ ] `shipper-form.tsx` — `useParams()` locale 추출 + `/${locale}/agency/shippers` 리다이렉트
-- [ ] `shippers/page.tsx` — `checkPermission('/agency/shippers')` + redirect 추가
-- [ ] `shippers/page.tsx` + `shippers/new/page.tsx` — `profile.org_id` null 체크 추가
-- [ ] `shippers-client.tsx` — `any[]` → `AgencyShipper[]` 타입 교체
-- [ ] `npm run test:regression` 전체 PASS (회귀 수 기재)
-- [ ] 코드 커밋 해시: _(작업 후 기재)_
-- [ ] DoD 자가 검증 `check-R17-DoD` 실행 완료
+- [x] `shipper-form.tsx` — `useParams()` locale 추출 + `/${locale}/agency/shippers` 리다이렉트
+- [x] `shippers/page.tsx` — `checkPermission('/agency/shippers')` + redirect 추가
+- [x] `shippers/page.tsx` + `shippers/new/page.tsx` — `profile.org_id` null 체크 추가
+- [x] `shippers-client.tsx` — `any[]` → `AgencyShipperRow[]` 타입 교체 (+ `shipper-table.tsx`, `shipper-table-row.tsx` 동기화)
+- [x] `npm run test:regression` — 345/345 PASS (2건 env 누락 기존 이슈)
+- [x] Builder 빌드 PASS
+- [x] 코드 커밋 해시: `57b5df8`
+- [x] DoD 자가 검증 `check-R17-DoD` 실행 완료
+
+> **참고**: `AgencyShipperRow` is `AgencyShipper & { shipper: [...] }` — Supabase join 결과 배열 대응
 
 ---
 
 ## [작업 결과]
 
-_(Baker 작업 후 기재)_
+**수정 완료 ✅** — PR#7 반려 Issue 2·3·4·6 전량 해소
+
+### 수정 내역
+
+| Issue | 파일 | 변경 내용 |
+|:-----:|:----|:---------|
+| 🔴 2 | `shipper-form.tsx` | `useParams()`로 locale 추출 → `/${locale}/agency/shippers` 리다이렉트 |
+| 🟡 3 | `shippers/page.tsx` | `checkPermission('/agency/shippers')` + redirect('/') 추가 |
+| 🟡 4 | `shippers/page.tsx` + `new/page.tsx` | `profile.org_id` null 체크 `if (!profile.org_id) redirect('/')` |
+| ⚪ 6 | `shippers-client.tsx` + `shipper-table.tsx` + `shipper-table-row.tsx` | `any[]` → `AgencyShipperRow[]` (Supabase join 타입) |
+
+### 부수 변경
+- `src/types/agency.ts` — `AgencyShipperRow` 인터페이스 신규 정의
+
+### 브랜치
+
+`feature/ups-spr02-devteam-agency-ui`
+
+**코드 커밋 해시**: `57b5df8`
 
 ---
 
