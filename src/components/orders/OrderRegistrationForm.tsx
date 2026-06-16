@@ -144,6 +144,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
     defaultValues: {
       order_type: 'B2B',
       transport_mode: 'AIR',
+      delivery_method: 'DIRECT',
       packages: [{ 
         packing_unit: 'BOX', 
         packing_count: 1, 
@@ -775,7 +776,89 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                   </div>
                 </ZenCard>
 
-                
+                {/* 🚚 Delivery Method & Pickup Details (IMP-118) */}
+                <ZenCard className="p-3 border-slate-200 mt-3">
+                  <h4 className="text-[10px] font-bold text-slate-500 mb-2 uppercase tracking-wider">
+                    {t('delivery_method_label')}
+                  </h4>
+                  <div className="grid grid-cols-2 gap-2 mb-3">
+                    <button
+                      type="button"
+                      onClick={() => setValue('delivery_method', 'DIRECT')}
+                      className={`px-3 py-2 rounded-xl text-xs font-bold transition-all border ${
+                        watch('delivery_method') === 'DIRECT' || !watch('delivery_method')
+                          ? 'bg-slate-800 text-white border-slate-800 shadow-md'
+                          : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'
+                      }`}
+                    >
+                      {t('delivery_method_direct')}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setValue('delivery_method', 'PICKUP')}
+                      className={`px-3 py-2 rounded-xl text-xs font-bold transition-all border ${
+                        watch('delivery_method') === 'PICKUP'
+                          ? 'bg-slate-800 text-white border-slate-800 shadow-md'
+                          : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'
+                      }`}
+                    >
+                      {t('delivery_method_pickup')}
+                    </button>
+                  </div>
+
+                  {watch('delivery_method') === 'PICKUP' && (
+                    <div className="space-y-3 pt-2 border-t border-slate-100">
+                      <div>
+                        <label className="text-[10px] font-bold text-slate-500 mb-1 block">
+                          {t('pickup_location')} <span className="text-rose-500">*</span>
+                        </label>
+                        <ZenInput
+                          placeholder="픽업 장소 입력"
+                          {...register('pickup_location')}
+                          error={!!errors.pickup_location}
+                          className="py-2 text-xs"
+                        />
+                        {errors.pickup_location && (
+                          <p className="text-[9px] text-rose-500 mt-1">
+                            {errors.pickup_location.message}
+                          </p>
+                        )}
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-bold text-slate-500 mb-1 block">
+                          {t('pickup_contact_name')} <span className="text-rose-500">*</span>
+                        </label>
+                        <ZenInput
+                          placeholder="담당자 이름 입력"
+                          {...register('pickup_contact_name')}
+                          error={!!errors.pickup_contact_name}
+                          className="py-2 text-xs"
+                        />
+                        {errors.pickup_contact_name && (
+                          <p className="text-[9px] text-rose-500 mt-1">
+                            {errors.pickup_contact_name.message}
+                          </p>
+                        )}
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-bold text-slate-500 mb-1 block">
+                          {t('pickup_contact_tel')} <span className="text-rose-500">*</span>
+                        </label>
+                        <ZenInput
+                          placeholder="연락처 입력 (010-XXXX-XXXX)"
+                          {...register('pickup_contact_tel')}
+                          error={!!errors.pickup_contact_tel}
+                          className="py-2 text-xs"
+                        />
+                        {errors.pickup_contact_tel && (
+                          <p className="text-[9px] text-rose-500 mt-1">
+                            {errors.pickup_contact_tel.message}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </ZenCard>
               </div>
 
               {/* Right Column: Packages & Items (Hierarchical) */}

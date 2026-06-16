@@ -64,6 +64,36 @@ export const orderRegistrationSchema = z.object({
   
   // 계층형 패킹 데이터 (special_cargo_type은 PKG 레벨로 이전 — DEF-059)
   packages: z.array(orderPackageSchema).min(1, 'At least one package is required'),
+
+  // 직접배송/픽업 정보 (IMP-118)
+  delivery_method: z.enum(['DIRECT', 'PICKUP']).default('DIRECT'),
+  pickup_location: z.string().optional(),
+  pickup_contact_name: z.string().optional(),
+  pickup_contact_tel: z.string().optional(),
+}).superRefine((data, ctx) => {
+  if (data.delivery_method === 'PICKUP') {
+    if (!data.pickup_location || data.pickup_location.trim() === '') {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Pickup location is required when delivery method is PICKUP',
+        path: ['pickup_location'],
+      });
+    }
+    if (!data.pickup_contact_name || data.pickup_contact_name.trim() === '') {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Pickup contact name is required when delivery method is PICKUP',
+        path: ['pickup_contact_name'],
+      });
+    }
+    if (!data.pickup_contact_tel || data.pickup_contact_tel.trim() === '') {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Pickup contact phone is required when delivery method is PICKUP',
+        path: ['pickup_contact_tel'],
+      });
+    }
+  }
 });
 
 export type OrderItemInput = z.infer<typeof orderItemSchema>;

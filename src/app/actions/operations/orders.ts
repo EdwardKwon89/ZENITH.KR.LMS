@@ -72,6 +72,10 @@ export async function updateOrder(orderId: string, payload: OrderRegistrationInp
     delivery_notes: validated.delivery_notes,
     transport_mode: validated.transport_mode,
     estimated_cost: validated.estimated_cost,
+    delivery_method: validated.delivery_method ?? 'DIRECT',
+    pickup_location: validated.pickup_location ?? null,
+    pickup_contact_name: validated.pickup_contact_name ?? null,
+    pickup_contact_tel: validated.pickup_contact_tel ?? null,
   });
 
   await orderRepo.deleteItemsByOrderId(orderId);

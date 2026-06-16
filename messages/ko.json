@@ -212,7 +212,13 @@
     "special_cargo_dangerous": "위험물",
     "special_cargo_frozen": "냉동/냉장",
     "special_cargo_valuable": "고가품",
-    "special_cargo_used": "중고품"
+    "special_cargo_used": "중고품",
+    "delivery_method_label": "배송 방식",
+    "delivery_method_direct": "직접배송 (DIRECT)",
+    "delivery_method_pickup": "픽업 수령 (PICKUP)",
+    "pickup_location": "픽업 장소",
+    "pickup_contact_name": "담당자 이름",
+    "pickup_contact_tel": "담당자 연락처"
   },
   "Wallet": {
     "title": "내 지갑",
@@ -380,6 +386,35 @@
     "select_language": "언어 선택",
     "error_not_found": "해당 오더를 찾을 수 없습니다.",
     "error_fetch": "데이터 조회 중 오류가 발생했습니다."
+  },
+  "UpsInvoice": {
+    "title": "간이 인보이스",
+    "subtitle": "UPS Simplified Commercial Invoice (세관 신고용)",
+    "issue_date": "발행일",
+    "shipper": "송하인",
+    "consignee": "수하인",
+    "order_ref": "오더 참조",
+    "package_list": "패키지 목록",
+    "pkg_no": "No.",
+    "domestic_ref": "국내번호",
+    "intl_ref": "국제번호",
+    "weight": "중량(kg)",
+    "description": "품명",
+    "quantity": "수량",
+    "declared_value": "신고가격(USD)",
+    "total": "합계",
+    "ups_service": "UPS 서비스",
+    "product": "제품",
+    "zone": "Zone",
+    "delivery_method": "배송방법",
+    "notice": "주의사항",
+    "total_weight": "총 중량",
+    "total_declared_value": "총 신고가격",
+    "shipper_signature": "송하인 서명",
+    "date_label": "날짜",
+    "for_customs_only": "For Customs Purposes Only — 본 문서는 세관 신고용 간이 상업송장입니다.",
+    "generated_on": "생성 일시",
+    "chargeable_weight": "과적중량"
   },
   "Admin": {
     "ErrorLogs": {
