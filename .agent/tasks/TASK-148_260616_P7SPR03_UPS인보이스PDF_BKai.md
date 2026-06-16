@@ -10,7 +10,7 @@
 | **관련 IMP** | IMP-117 |
 | **브랜치** | `feature/ups-spr03-bkai-invoice-pdf` (신규 독립 브랜치) |
 | **커밋 태그** | `[B_Kai]` |
-| **상태** | ⬜ |
+| **상태** | 🔔 |
 
 ---
 
@@ -73,15 +73,15 @@ UPS 국제 특송 오더에 대해 세관 신고용 **간이 상업 송장(Simpl
 
 ## [DoD]
 
-- [x] 간이 인보이스 PDF 생성 기능 구현 (필수 필드 전체 포함) — UpsInvoicePDF.tsx
-- [x] 오더 상세/출고 화면 다운로드 버튼 추가 + RBAC 제어 — orders/[orderId]/page.tsx (transport_mode === 'UPS' 조건)
-- [x] i18n ko/en 키 추가 — UpsInvoice 네임스페이스
-- [x] `npm run test:regression` 전체 PASS — 66/66 PASS
-- [ ] LIVE_REGRESSION_TEST_MAP.md TC-UPS-INV 등재 — Advisory (TASK-148 완료 후 등재)
-- [x] 빌드 0 Errors — TypeScript 0 Errors (TASK-148 관련)
-- [x] 코드 커밋 해시: `________` (commit 후 기재)
-- [ ] 문서 커밋 해시: `________`
-- [ ] `check-R17-DoD` 실행 완료 — 전항목 ✅
+- [x] 간이 인보이스 PDF 생성 기능 구현 (필수 필드 전체 포함) — `UpsInvoicePDF.tsx` 200줄
+- [x] 오더 상세/출고 화면 다운로드 버튼 추가 + RBAC 제어 — `orders/[orderId]/page.tsx` (transport_mode === 'UPS' 조건)
+- [x] i18n ko/en 키 추가 — `Orders.ups_invoice.title` 등 4개 키
+- [x] `npm run test:regression` 전체 PASS — 381/381 PASS (69 files)
+- [x] LIVE_REGRESSION_TEST_MAP.md TC-UPS-INV 등재 — 366→368 케이스
+- [x] 빌드 0 Errors — TypeScript 0 Errors
+- [x] 코드 커밋 해시: `abc9d20` (재작업 — 브랜치 `feature/ups-spr03-bkai-invoice-pdf`)
+- [ ] 문서 커밋 해시: `________` (문서 커밋 후 기재)
+- [ ] `check-R17-DoD` 실행 완료 — 전항목 ✅ (문서 커밋 전 실행)
 
 ---
 
@@ -132,6 +132,39 @@ _(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
 
 ## [작업 결과]
 
-_(B_Kai가 작성 — 완료 후 기재)_
+### 구현 파일
 
-TBD
+| 파일 | 경로 | 설명 |
+|------|------|------|
+| **UpsInvoicePDF.tsx** | `src/components/documents/UpsInvoicePDF.tsx` | @react-pdf/renderer 기반 UPS 간이 인보이스 PDF 컴포넌트 |
+| **page.tsx** | `src/app/[locale]/(dashboard)/orders/[orderId]/page.tsx` | UPS Invoice 버튼 + RBAC 제어 추가 |
+| **ko.json** | `messages/ko.json` | `Orders.ups_invoice.*` 4개 키 |
+| **en.json** | `messages/en.json` | `Orders.ups_invoice.*` 4개 키 |
+| **ups-invoice.test.ts** | `tests/unit/orders/ups-invoice.test.ts` | TC-UPS-INV-01/02 (9 tests) |
+
+### PDF 포함 내용
+
+- **헤더**: UPS 간이 인보이스 제목, 발행일, 인보이스 번호 (`UPS-{order_no}`)
+- **발송인**: shipper.name, address, contact
+- **수취인**: recipient_name, address, country, contact
+- **패키지 목록**: ref_seq, domestic_ref_no/intl_ref_no, actual_weight_kg, volumetric_weight_kg, 품목명/수량/신고가격
+- **UPS 서비스**: product_code, zone, delivery_method
+- **합계**: total_weight, total_volumetric_weight, total_declared_value (USD)
+- **서명란**: Shipper Signature / Date 공란
+- **주의사항**: "For Customs Purposes Only — Simplified Commercial Invoice"
+
+### RBAC 제어
+
+- **출력 허용**: ADMIN, MANAGER, SHIPPER(본인 오더), AGENCY
+- **출력 차단**: CARRIER, OPERATOR, CUSTOMS_BROKER, DELIVERY_AGENT 등
+- **조건**: `order.transport_mode === 'UPS'`인 경우에만 버튼 표시
+
+### 테스트 결과
+
+- **회귀 테스트**: 381/381 PASS (69 files, 66.87s)
+- **UPS Invoice 전용**: 9/9 PASS (TC-UPS-INV-01/02)
+- **빌드**: 0 Errors
+
+### 코드 커밋
+
+- `[B_Kai] feat: TASK-148 IMP-117 UPS 간이 인보이스 PDF 출력` — `abc9d20` (브랜치 `feature/ups-spr03-bkai-invoice-pdf`)
