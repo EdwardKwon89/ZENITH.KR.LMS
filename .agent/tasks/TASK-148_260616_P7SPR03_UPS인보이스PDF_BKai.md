@@ -97,6 +97,17 @@ UPS 국제 특송 오더에 대해 세관 신고용 **간이 상업 송장(Simpl
 
 ---
 
+## [main 병합]
+
+| 항목 | 상태 | 비고 |
+|------|------|------|
+| main merge | ✅ | `feature/ups-spr03-bkai-invoice-pdf`에 main 병합 완료 |
+| 충돌 해소 | ✅ | 11파일 충돌 해소 (ACTIVE_TASK.md, TASK-148, IMP_PROGRESS.md 등) |
+| TC-UPS-INV | ✅ | 9/9 PASS (merge 후 재확인) |
+| 빌드 | ✅ | 0 Errors |
+
+---
+
 ## [R-17 완료 보고 절차]
 
 1. **[코드 커밋]** `[B_Kai] feat: TASK-148 IMP-117 UPS 간이 인보이스 PDF 출력`
@@ -104,7 +115,8 @@ UPS 국제 특송 오더에 대해 세관 신고용 **간이 상업 송장(Simpl
 3. **ACTIVE_TASK.md** ⬜→🔔 반영
 4. **IMP_PROGRESS.md** IMP-117 행 🔔 갱신
 5. **`check-R17-DoD` 실행** — 전항목 통과 확인
-6. **[문서 커밋]** `[B_Kai] docs: TASK-148 완료 보고 — IMP-117 UPS 인보이스 PDF 🔔`
+6. **[main 병합]** `feature/ups-spr03-bkai-invoice-pdf`에 main 병합 + 충돌 해소
+7. **[문서 커밋]** `[B_Kai] docs: TASK-148 완료 보고 — IMP-117 UPS 인보이스 PDF 🔔`
    - 포함: task file + ACTIVE_TASK.md + IMP_PROGRESS.md + LIVE_REGRESSION_TEST_MAP.md
 
 ---
