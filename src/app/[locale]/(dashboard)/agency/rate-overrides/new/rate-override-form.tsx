@@ -8,6 +8,14 @@ import type { UpsBaseRate } from '@/types/ups';
 import { OverrideFormFields } from './override-form-fields';
 import { OverrideFormActions } from './override-form-actions';
 
+function _ErrorAlert({ message }: { message: string }) {
+  return (
+    <div className="flex items-center gap-2 px-4 py-3 mb-6 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
+      <AlertCircle size={16} /> {message}
+    </div>
+  );
+}
+
 interface RateOverrideFormProps {
   agencyOrgId: string;
   baseRates: UpsBaseRate[];
@@ -45,11 +53,7 @@ export function RateOverrideForm({ agencyOrgId, baseRates, t }: RateOverrideForm
     <div className="max-w-2xl mx-auto p-4 md:p-8 animate-in fade-in duration-500">
       <h1 className="text-xl font-black text-slate-900 mb-6">{t('agency_rate_overrides_new')}</h1>
 
-      {error && (
-        <div className="flex items-center gap-2 px-4 py-3 mb-6 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
-          <AlertCircle size={16} /> {error}
-        </div>
-      )}
+      {error && <_ErrorAlert message={error} />}
 
       <form action={handleSubmit} className="bg-white border border-slate-200 rounded-2xl p-6 space-y-5 shadow-sm">
         <OverrideFormFields baseRates={baseRates} t={t} />

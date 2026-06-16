@@ -5,6 +5,19 @@ import { cn } from '@/lib/utils';
 import { deactivateAgencyRateOverride } from '@/app/actions/agency/rate-overrides';
 import type { AgencyRateOverrideWithRefs } from '@/types/agency';
 
+function _StatusBadge({ isActive }: { isActive: boolean }) {
+  return (
+    <span className={cn(
+      "px-2.5 py-1 rounded-full text-[10px] font-bold border",
+      isActive
+        ? 'bg-emerald-100 text-emerald-800 border-emerald-200'
+        : 'bg-slate-100 text-slate-500 border-slate-200'
+    )}>
+      {isActive ? 'Active' : 'Inactive'}
+    </span>
+  );
+}
+
 interface RateOverrideTableRowProps {
   override: AgencyRateOverrideWithRefs;
   onDeactivated: (id: string) => void;
@@ -34,10 +47,7 @@ export function RateOverrideTableRow({ override, onDeactivated, t }: RateOverrid
       <td className="px-4 py-3 text-xs text-slate-500">{new Date(override.valid_from).toLocaleDateString('ko-KR')}</td>
       <td className="px-4 py-3 text-xs text-slate-500">{override.valid_until ? new Date(override.valid_until).toLocaleDateString('ko-KR') : '-'}</td>
       <td className="px-4 py-3">
-        <span className={cn("px-2.5 py-1 rounded-full text-[10px] font-bold border",
-          override.is_active ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : 'bg-slate-100 text-slate-500 border-slate-200')}>
-          {override.is_active ? 'Active' : 'Inactive'}
-        </span>
+        <_StatusBadge isActive={override.is_active} />
       </td>
       <td className="px-4 py-3 text-right">
         {override.is_active && (

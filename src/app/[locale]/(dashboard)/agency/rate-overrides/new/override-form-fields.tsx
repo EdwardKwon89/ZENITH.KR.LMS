@@ -2,12 +2,7 @@
 
 import type { UpsBaseRate } from '@/types/ups';
 
-interface OverrideFormFieldsProps {
-  baseRates: UpsBaseRate[];
-  t: (key: string) => string;
-}
-
-export function OverrideFormFields({ baseRates, t }: OverrideFormFieldsProps) {
+export function OverrideFormFields({ baseRates, t }: { baseRates: UpsBaseRate[]; t: (key: string) => string }) {
   return (
     <>
       <div>
