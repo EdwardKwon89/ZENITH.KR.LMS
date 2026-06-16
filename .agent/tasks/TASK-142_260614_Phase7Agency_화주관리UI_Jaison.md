@@ -190,16 +190,18 @@ PR #7 `feature/ups-spr02-devteam-agency-ui` → `develop` 제출 (2026-06-15).
 
 **재작업 지시 — 최소 재작업 (코드 변경 불필요)**:
 
+> ⚠️ **채번 체계 변경 (GOV_COMMON.md R-19 v2.0, Edward 승인 2026-06-16)**: Team B는 `TASK-B-NNN` 독립 순번으로 전환. 기존 TASK-145~149를 아래와 같이 재채번.
+
 1. **Dave**: `TASK-149_260616_PR7반려수정_Dave.md` DoD 4항목 `[ ]` → `[x]` 체크 (코드는 이미 구현 완료됨)
 2. **Jaison**: TASK 번호 재채번 — 파일명 변경 + ACTIVE_TASK.md Team B 섹션 갱신:
-   | 기존 | 변경 |
-   |:-----|:-----|
-   | TASK-145 (Dave · Agency화주ServerActions) | → TASK-153 |
-   | TASK-146 (Baker · Agency화주목록등록UI) | → TASK-154 |
-   | TASK-147 (Dave · Agency대시보드NaviSidebar) | → TASK-155 |
-   | TASK-148 (Baker · PR#7반려수정) | → TASK-151 |
-   | TASK-149 (Dave · PR#7반려수정) | → TASK-152 |
-3. ACTIVE_TASK.md Team B 섹션 Task 번호 일괄 갱신 (151~155)
+   | 기존 | 변경 (TASK-B 체계) |
+   |:-----|:-----------------|
+   | TASK-145 (Dave · Agency화주ServerActions) | → TASK-B-001 |
+   | TASK-146 (Baker · Agency화주목록등록UI) | → TASK-B-002 |
+   | TASK-147 (Dave · Agency대시보드NaviSidebar) | → TASK-B-003 |
+   | TASK-148 (Baker · PR#7반려수정) | → TASK-B-004 |
+   | TASK-149 (Dave · PR#7반려수정) | → TASK-B-005 |
+3. ACTIVE_TASK.md Team B 섹션 Task 번호 일괄 갱신 (TASK-B-001~005)
 4. `check-R17-DoD` 재실행 후 PR 재제출
 
 ---
