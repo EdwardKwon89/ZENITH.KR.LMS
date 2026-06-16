@@ -86,8 +86,8 @@ interface ConfirmOutboundResult {
 - [x] LIVE_REGRESSION_TEST_MAP.md TC-UPS-WH 등재
 - [x] 빌드 0 Errors
 - [x] 코드 커밋 해시: `a0dcbd1`
-- [ ] 문서 커밋 해시: `________`
-- [ ] `check-R17-DoD` 실행 완료 — 전항목 ✅
+- [x] 문서 커밋 해시: `af89f2b`
+- [x] `check-R17-DoD` 실행 완료 — 전항목 ✅
 
 ---
 
