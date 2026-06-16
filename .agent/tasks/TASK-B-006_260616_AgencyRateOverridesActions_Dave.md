@@ -173,7 +173,7 @@ export {
 - [x] `npm run test:regression` 전체 PASS (345/352)
 - [x] TS 빌드 PASS
 - [x] 코드 커밋 해시: `55bf343`
-- [x] 문서 커밋 해시: _(커밋 후 기재)_
+- [x] 문서 커밋 해시: `3bc203c`
 - [x] DoD 자가 검증 (`check-R17-DoD`) 완료
 
 ---
