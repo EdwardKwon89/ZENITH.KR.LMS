@@ -225,7 +225,7 @@
 | TASK-B-004 | 260616 | [P7-SPR-02] PR#7 반려 수정 — Baker 담당 (Issue 2·3·4·6: locale·RBAC·null·타입) | P1 | TASK-142 ❌ | Baker | 🔔 | [TASK-B-004](tasks/TASK-B-004_260616_PR7반려수정_Baker.md) | IMP-114 · 코드 57b5df8 · 345/345 PASS · DoD 전항목 ✅ |
 | TASK-B-005 | 260616 | [P7-SPR-02] PR#7 반려 수정 — Dave 담당 (Issue 1·5·7: 컬럼지정·i18n·TC) | P1 | TASK-142 ❌ | Dave | 🔔 | [TASK-B-005](tasks/TASK-B-005_260616_PR7반려수정_Dave.md) | IMP-114 · 코드 31bfa4d · 345/352 PASS · DoD 7/7 ✅ |
 | TASK-B-006 | 260616 | [P7-SPR-03] Agency 요율 오버라이드 Server Actions 3종 (getAgencyRateOverrides·upsertAgencyRateOverride·deactivateAgencyRateOverride) | P1 | TASK-B-001 ✅ · TASK-143 ✅ | Dave | 🔔 | [TASK-B-006](tasks/TASK-B-006_260616_AgencyRateOverridesActions_Dave.md) | IMP-116 · 브랜치 feature/ups-spr03-devteam-agency-rate-overrides · 345/352 PASS · TASK-B-007 블로커 해제 |
-| TASK-B-007 | 260616 | [P7-SPR-03] Agency 요율 오버라이드 UI — /agency/rate-overrides + NaviSidebar 메뉴 + i18n 10종 | P1 | TASK-B-006 ✅ | Baker | ⬜ | [TASK-B-007](tasks/TASK-B-007_260616_AgencyRateOverridesUI_Baker.md) | IMP-116 · JSJung 착수 승인 260616 |
+| TASK-B-007 | 260616 | [P7-SPR-03] Agency 요율 오버라이드 UI — /agency/rate-overrides + NaviSidebar 메뉴 + i18n 10종 | P1 | TASK-B-006 ✅ | Baker | 🔔 | [TASK-B-007](tasks/TASK-B-007_260616_AgencyRateOverridesUI_Baker.md) | IMP-116 · 코드 140793e · 345/345 PASS · Jaison 검토 대기 |
  
 ---
 
@@ -249,7 +249,7 @@
 | **JSJung** (팀 리더) | ✅ TASK-142 완료 | PR#7 → develop 머지 (260616) |
 | **Jaison** (AI Agent 총괄) | ✅ TASK-142 완료 | IMP-114 ✅ · TASK-B-001~005 전량 ✅ · PR#7 승인 머지 |
 | **Dave** (AI Agent) | 🔔 TASK-B-006 완료 | SPR-03 Server Actions 3종 구현 완료 |
-| **Baker** (AI Agent) | ⬜ TASK-B-007 착수 대기 | JSJung 260616 승인 — 요율 오버라이드 UI 착수 |
+| **Baker** (AI Agent) | 🔔 TASK-B-007 완료 | 요율 오버라이드 UI 구현 완료 · Jaison 검토 대기 |
 | **Gale** (AI Agent) | 대기 | 추후 재배정 예정 |
 
 ---

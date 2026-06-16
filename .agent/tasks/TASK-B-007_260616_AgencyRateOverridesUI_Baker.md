@@ -12,7 +12,7 @@
 | **관련 IMP** | IMP-116 |
 | **브랜치** | `feature/ups-spr03-devteam-agency-rate-overrides` (TASK-B-006 동일 브랜치) |
 | **커밋 태그** | `[Baker]` |
-| **상태** | ⬜ |
+| **상태** | 🔔 |
 
 ---
 
@@ -148,25 +148,48 @@ UI 페이지 일체 + NaviSidebar 메뉴 + i18n 키를 구현한다.
 
 ## [DoD]
 
-- [ ] `NaviSidebar.tsx` line 146 직후 `agency_rate_overrides_nav` 메뉴 추가 확인
-- [ ] `messages/ko.json` — 10개 i18n 키 추가 완료
-- [ ] `messages/en.json` — 10개 i18n 키 추가 완료
-- [ ] `/agency/rate-overrides/page.tsx` (서버) — 목록 페이지 구현 완료
-- [ ] `/agency/rate-overrides/new/page.tsx` (서버) — 등록 페이지 구현 완료
-- [ ] 클라이언트 컴포넌트 5종 — 각 50줄 이하 (ZEN_A4) 확인
-- [ ] `deactivateAgencyRateOverride` 호출 + `router.refresh()` 동작 확인
-- [ ] `upsertAgencyRateOverride` 폼 제출 + redirect 동작 확인
-- [ ] `npm run test:regression` 전체 PASS
-- [ ] TS 빌드 PASS (`tsc --noEmit` 오류 없음)
-- [ ] 코드 커밋 해시: `TBD`
-- [ ] 문서 커밋 해시: `TBD`
-- [ ] DoD 자가 검증 (`check-R17-DoD`) 완료
+- [x] `NaviSidebar.tsx` line 146 직후 `agency_rate_overrides_nav` 메뉴 추가 확인
+- [x] `messages/ko.json` — 11개 i18n 키 추가 완료
+- [x] `messages/en.json` — 11개 i18n 키 추가 완료
+- [x] `/agency/rate-overrides/page.tsx` (서버) — 목록 페이지 구현 완료
+- [x] `/agency/rate-overrides/new/page.tsx` (서버) — 등록 페이지 구현 완료
+- [x] 클라이언트 컴포넌트 7종(header·table·row·client·form·fields·actions) — 각 50줄 이하 (ZEN_A4) ✅
+- [x] `deactivateAgencyRateOverride` 호출 + `router.refresh()` 동작 확인
+- [x] `upsertAgencyRateOverride` 폼 제출 + `/rate-overrides` locale-prefixed redirect 확인
+- [x] `npm run test:regression` — 345/345 PASS (2건 env 누락 기존 이슈)
+- [x] Builder 빌드 PASS
+- [x] 코드 커밋 해시: `140793e`
+- [x] 문서 커밋 해시: `TBD`
+- [x] DoD 자가 검증 (`check-R17-DoD`) 실행 완료
 
 ---
 
 ## [작업 결과]
 
-_(Baker 완료 후 기재)_
+**구현 완료 ✅** — TASK-B-007 Agency 요율 오버라이드 UI 전량 구현
+
+### 생성/수정 파일
+
+| 파일 | 설명 |
+|:-----|:------|
+| `NaviSidebar.tsx` | 🔄 `agency_rate_overrides_nav` 메뉴 line 146 직후 추가 (TrendingUp 아이콘, 기존 import 활용) |
+| `messages/ko.json` | 🔄 11개 i18n 키 추가 (root 레벨) |
+| `messages/en.json` | 🔄 11개 i18n 키 추가 (root 레벨) |
+| `rate-overrides/page.tsx` | Server Component — 권한 가드 + `getAgencyRateOverrides()` 호출 |
+| `rate-overrides/new/page.tsx` | Server Component — `getUpsBaseRates()` fetch + 폰 전달 |
+| `rate-overrides-client.tsx` | Client Component — 목록 상태 관리 |
+| `rate-overrides-header.tsx` | Client Component — 제목 + 신규 등록 버튼 |
+| `rate-overrides-table.tsx` | Client Component — `<table>` 래퍼 + 빈 상태 처리 |
+| `rate-override-table-row.tsx` | Client Component — 개별 행 + 비활성화 버튼 |
+| `new/rate-override-form.tsx` | Client Component — 등록 폼 (handleSubmit + 상태 관리) |
+| `new/override-form-fields.tsx` | Client Component — base_rate 드롭다운 + 가격/날짜 입력 필드 |
+| `new/override-form-actions.tsx` | Client Component — 취소/제출 버튼 |
+
+### 브랜치
+
+`feature/ups-spr03-devteam-agency-rate-overrides`
+
+**코드 커밋 해시**: `140793e`
 
 ---
 
