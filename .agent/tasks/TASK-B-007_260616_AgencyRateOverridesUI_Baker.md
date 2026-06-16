@@ -12,7 +12,7 @@
 | **관련 IMP** | IMP-116 |
 | **브랜치** | `feature/ups-spr03-devteam-agency-rate-overrides` (TASK-B-006 동일 브랜치) |
 | **커밋 태그** | `[Baker]` |
-| **상태** | ❌ (재작업 중) |
+| **상태** | 🔔 |
 
 ---
 
