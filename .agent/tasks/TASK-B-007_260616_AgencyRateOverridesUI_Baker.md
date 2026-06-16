@@ -159,7 +159,7 @@ UI 페이지 일체 + NaviSidebar 메뉴 + i18n 키를 구현한다.
 - [x] `npm run test:regression` — 345/345 PASS (2건 env 누락 기존 이슈)
 - [x] Builder 빌드 PASS
 - [x] 코드 커밋 해시: `140793e` + `a4fe3c8` (ZEN_A4 수정)
-- [x] 문서 커밋 해시: `bcf8f43` (초기) + `9da38db` (재작업 보고)
+- [x] 문서 커밋 해시: `bcf8f43` (초기) + `978f812` (재작업 보고)
 - [x] DoD 자가 검증 (`check-R17-DoD`) 실행 완료
 
 ---
