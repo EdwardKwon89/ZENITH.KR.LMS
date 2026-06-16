@@ -2,22 +2,23 @@
 
 import { useState } from 'react';
 import { updateAgencyShipperGrade } from '@/app/actions/agency/shippers';
+import type { AgencyShipperRow } from '@/types/agency';
 import { ShippersHeader } from './shippers-header';
 import { ShipperTable } from './shipper-table';
 
 interface AgencyShippersClientProps {
-  shippers: any[];
+  shippers: AgencyShipperRow[];
   t: (key: string) => string;
 }
 
 export function AgencyShippersClient({ shippers, t }: AgencyShippersClientProps) {
-  const [localShippers, setLocalShippers] = useState(shippers);
+  const [localShippers, setLocalShippers] = useState<AgencyShipperRow[]>(shippers);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editGrade, setEditGrade] = useState('');
   const [editRate, setEditRate] = useState(0);
   const [error, setError] = useState('');
 
-  const startEdit = (shipper: any) => {
+  const startEdit = (shipper: AgencyShipperRow) => {
     setEditingId(shipper.id);
     setEditGrade(shipper.grade || '');
     setEditRate(shipper.discount_rate);

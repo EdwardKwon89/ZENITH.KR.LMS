@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { AlertCircle } from 'lucide-react';
 import { createAgencyShipper } from '@/app/actions/agency/shippers';
 import { FormHeader } from './form-header';
@@ -16,6 +16,8 @@ interface AgencyShipperFormProps {
 
 export function AgencyShipperForm({ agencyOrgId, t }: AgencyShipperFormProps) {
   const router = useRouter();
+  const params = useParams();
+  const locale = params.locale as string;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -32,7 +34,7 @@ export function AgencyShipperForm({ agencyOrgId, t }: AgencyShipperFormProps) {
         contact_email: (formData.get('contact_email') as string) || undefined,
         contact_phone: (formData.get('contact_phone') as string) || undefined,
       });
-      router.push('/agency/shippers');
+      router.push(`/${locale}/agency/shippers`);
       router.refresh();
     } catch (err: any) {
       setError(err.message || t('submit_error'));

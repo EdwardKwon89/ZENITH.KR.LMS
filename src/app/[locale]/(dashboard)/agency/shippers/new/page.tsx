@@ -5,7 +5,7 @@ import { AgencyShipperForm } from './shipper-form';
 
 export default async function NewAgencyShipperPage() {
   const { profile } = await requireAuth();
-  if (!profile) redirect('/login');
+  if (!profile || !profile.org_id) redirect('/');
   const t = await getTranslations('AgencyShippers');
 
   return <AgencyShipperForm agencyOrgId={profile.org_id} t={t} />;
