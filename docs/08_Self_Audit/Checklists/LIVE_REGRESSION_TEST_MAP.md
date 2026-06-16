@@ -1,8 +1,7 @@
 # 🗺️ LIVE Regression Test Master Map
 
-> **상태:** [ACTIVE]  
-> **총 테스트 케이스:** 353 Cases  
-> **최종 검증일:** 2026-06-15 (TASK-143 UPS 요율 조회 Server Actions 5종 — TC-UPS-R-01~05 신규 등재)  
+> **총 테스트 케이스:** 368 Cases  
+> **최종 검증일:** 2026-06-16 (TASK-148 IMP-117 UPS 간이 인보이스 PDF + TASK-147/146 통합)  
 
 제니스 플랫폼의 비즈니스 영속성을 보장하는 회귀 테스트 케이스의 통합 명세서입니다. 모든 신규 개발 및 수정 시 이 맵에 케이스가 추가되어야 하며, 전체 테스트가 통과되어야 합니다.
 
@@ -251,6 +250,8 @@
 | ID | 테스트 항목 | 목적 | 파일 경로 |
 | :--- | :--- | :--- | :--- |
 | **TC-DOC-01** | getOrderDocumentData — orderId 기반 shipper/consignee 포함 전체 데이터 반환 | 문서용 데이터 애그리게이션 | `tests/unit/documents/document-actions.test.ts` |
+| **TC-UPS-INV-01** | UPS 간이 인보이스 PDF — 필수 필드(shipper, consignee, packages, UPS service, totals) 전체 포함 | UPS 오더 세관 신고용 PDF 생성 데이터 무결성 | `tests/unit/orders/ups-invoice.test.ts` |
+| **TC-UPS-INV-02** | UPS 인보이스 RBAC — ADMIN/MANAGER/SHIPPER(본인)/AGENCY 출력 가능, CARRIER/OPERATOR 등 타 역할 차단 | 역할별 PDF 출력 권한 통제 | `tests/unit/orders/ups-invoice.test.ts` |
 
 ### 20. 오더 연계 QnA (Order-Linked QnA)
 | ID | 테스트 항목 | 목적 | 파일 경로 |
