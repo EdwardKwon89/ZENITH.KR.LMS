@@ -229,7 +229,7 @@
 | Agent | 상태 | 비고 |
 |:------|:----:|:----|
 | **Aiden (Claude)** | ✅ TASK-150 발령 완료 (260616) | SPR-03/04 발령 — TASK-148/149/150 신규 발령. IMP-117/118/119 등재 |
-| **D_Kai (OpenCode)** | ❌ TASK-150 반려 — 재작업 중 ⚠️ ACTIVE_TASK.md 파괴 위반 | `af89f2b` ACTIVE_TASK.md 구버전 덮어씀 → TASK-146~150 삭제+TASK-141 ⬜ 역전. Aiden `ebc1715` 기준 복구. 브랜치 위반 재발. DEF 등록 예정. |
+| **D_Kai (OpenCode)** | ❌ TASK-150 반려 — 재작업 중 ⚠️ ACTIVE_TASK.md 파괴 위반 | `af89f2b` ACTIVE_TASK.md 구버전 덮어씀 → TASK-146~150 삭제+TASK-141 ⬜ 역전. Aiden `ebc1715` 기준 복구. 브랜치 위반 재발. **DEF-066 등록완료**. |
 | **B_Kai** | ❌ TASK-148 반려(2차) — 재작업 필요 | LIVE_TEST_MAP 문서커밋 미포함 + TC-UPS-INV 실제 미등재(DoD 허위체크) |
 | **Riley** | ❌ TASK-149 반려(2차) — 재작업 필요 | 문서 커밋 `3dff29b1` ACTIVE_TASK.md+IMP_PROGRESS.md 미포함 |
 | N_Kai | 재교육 세션 대기 (TASK-087) | R-17 위반 누적 — 신규 할당 중단 유지 |
@@ -247,7 +247,7 @@
 
 ## 개정 이력
 
-| 2026-06-16 | Aiden (Claude) | **TASK-148·149 ❌ 반려(2차)** — B_Kai(TASK-148): LIVE_TEST_MAP 문서커밋 미포함+TC-UPS-INV 실제 미등재(DoD 허위체크) 2건. Riley(TASK-149): 문서커밋 ACTIVE_TASK.md+IMP_PROGRESS.md 미포함 1건. **D_Kai CRITICAL**: `af89f2b`가 ACTIVE_TASK.md 구버전 덮어써 TASK-146~150 행 삭제됨 → `ebc1715` 기준 복구. **TASK-142(Team B)**: PR#7 2차 반려 상태 복원. DEF 등록 예정. |
+| 2026-06-16 | Aiden (Claude) | **TASK-148·149 ❌ 반려(2차)** — B_Kai(TASK-148): LIVE_TEST_MAP 문서커밋 미포함+TC-UPS-INV 실제 미등재(DoD 허위체크) 2건. Riley(TASK-149): 문서커밋 ACTIVE_TASK.md+IMP_PROGRESS.md 미포함 1건. **D_Kai CRITICAL**: `af89f2b`가 ACTIVE_TASK.md 구버전 덮어써 TASK-146~150 행 삭제됨 → `ebc1715` 기준 복구. **TASK-142(Team B)**: PR#7 2차 반려 상태 복원. **DEF-066 등록완료**. |
 | 2026-06-16 | Aiden (Claude) | **TASK-148·149·150 ❌ 반려(1차)** — B_Kai(TASK-148): 헤더 미변경·해시 허위체크·브랜치 위반 등 6건. Riley(TASK-149): 문서 커밋 해시 TBD 허위체크·필수파일 미포함 2건. D_Kai(TASK-150, CRITICAL): DoD 전항목 미체크·Scope 오류·허위 해시 기재·브랜치 위반 등 6건. 전원 재작업 지시. |
 | 2026-06-16 | Aiden (Claude) | **Phase 7 SPR-03/04 Team A 발령** — TASK-148(B_Kai, IMP-117 UPS 인보이스 PDF) · TASK-149(Riley, IMP-118 오더 직접배송/픽업 UI) · TASK-150(D_Kai, IMP-119 창고 출고 UPS 연계) 신규 발령. SPR-03 TASK-146 ✅ · SPR-02 TASK-147 ✅ 완료 후 다음 스프린트 발령. TASK-145 ✅ 브랜치 반영 (main `0192648`). |
 | 2026-06-15 | Aiden (Claude) | **Phase 7 SPR-03 Team A 발령** — TASK-145(D_Kai 재교육 4차) · TASK-146(B_Kai, IMP-113 UPS 요율 Admin UI) · TASK-147(Riley, IMP-109 환율 설정 화면) 신규 발령. SPR-02 전량 완료(TASK-141·143·144 ✅) 기반. |
