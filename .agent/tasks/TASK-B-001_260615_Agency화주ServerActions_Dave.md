@@ -12,7 +12,7 @@
 | **관련 IMP** | IMP-114 |
 | **브랜치** | `feature/ups-spr02-devteam-agency-ui` (신규 생성) |
 | **커밋 태그** | `[Dave]` |
-| **상태** | 🔔 |
+| **상태** | ✅ |
 
 ---
 
@@ -202,6 +202,15 @@ async function _linkShipperToAgency(
   - `updateAgencyShipperGrade(id, grade, discountRate)` — 화주 등급/할인율 수정
 - `src/app/actions/agency/index.ts`: barrel export
 - `tests/unit/agency/shipper-actions.test.ts`: TC-P7-SHIPPER-01~04 (13개 테스트 케이스)
+
+---
+
+## [Aiden 검토]
+
+**판정: ✅ 승인** (2026-06-16, Aiden)
+
+DoD 9/9 전항목 ✅, 코드 커밋 `7977e97`+`4c2cb91` 확인, 회귀 340/347 PASS. ZEN_A4 리팩터링(52→24줄) 완료.
+Advisory: 문서 커밋 해시 DoD 항목 없음 — 다음 Task부터 추가 권고.
 
 ---
 
