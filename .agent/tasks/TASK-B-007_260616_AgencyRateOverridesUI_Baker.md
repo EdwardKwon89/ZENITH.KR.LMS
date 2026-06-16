@@ -193,6 +193,94 @@ UI 페이지 일체 + NaviSidebar 메뉴 + i18n 키를 구현한다.
 
 ---
 
+## [수정 지시 — Jaison (2026-06-16)]
+
+> **반려 사유**: ZEN_A4 위반 3건 + R-17 위반 2건 — 재작업 지시
+> **코드는 부분 완성**: NaviSidebar·i18n·서버 페이지·4개 클라이언트 컴포넌트 정상. 아래 3파일만 수정.
+
+### 🔴 Issue 1 — `rate-override-table-row.tsx` 52줄 → ≤50줄
+
+Status badge를 파일 상단 private helper 함수로 추출:
+
+```typescript
+function _StatusBadge({ isActive }: { isActive: boolean }) {
+  return (
+    <span className={cn(
+      "px-2.5 py-1 rounded-full text-[10px] font-bold border",
+      isActive
+        ? 'bg-emerald-100 text-emerald-800 border-emerald-200'
+        : 'bg-slate-100 text-slate-500 border-slate-200'
+    )}>
+      {isActive ? 'Active' : 'Inactive'}
+    </span>
+  );
+}
+```
+
+`<td>` 내 인라인 `<span className={cn(...)} ...>` 블록 전체를 `<_StatusBadge isActive={override.is_active} />`로 교체.
+목표: 본체 ≤48줄
+
+---
+
+### 🔴 Issue 2 — `new/rate-override-form.tsx` 60줄 → ≤50줄
+
+error alert 블록을 파일 상단 private helper 함수로 추출:
+
+```typescript
+function _ErrorAlert({ message }: { message: string }) {
+  return (
+    <div className="flex items-center gap-2 px-4 py-3 mb-6 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
+      <AlertCircle size={16} /> {message}
+    </div>
+  );
+}
+```
+
+`{error && (<div ...><AlertCircle .../> {error}</div>)}` 전체를 `{error && <_ErrorAlert message={error} />}`로 교체.
+목표: 본체 ≤50줄
+
+---
+
+### 🔴 Issue 3 — `new/override-form-fields.tsx` 51줄 → ≤50줄
+
+`interface OverrideFormFieldsProps { ... }` 선언 + 앞 빈 줄을 제거하고 함수 파라미터를 인라인 타입으로 교체:
+
+```typescript
+// Before
+interface OverrideFormFieldsProps {
+  baseRates: UpsBaseRate[];
+  t: (key: string) => string;
+}
+export function OverrideFormFields({ baseRates, t }: OverrideFormFieldsProps) {
+
+// After
+export function OverrideFormFields({ baseRates, t }: { baseRates: UpsBaseRate[]; t: (key: string) => string }) {
+```
+
+목표: ≤47줄
+
+---
+
+### 재커밋 순서 (R-17 준수)
+
+```
+1. [Baker] fix: TASK-B-007 ZEN_A4 — table-row·form·fields 3파일 50줄 초과 수정
+2. task file [DoD] 갱신:
+   - 클라이언트 컴포넌트 ZEN_A4 항목: 실제 줄 수 기재 (허위 체크 수정)
+   - i18n 키 "11개" → "10개" 수정
+   - 코드 커밋 해시: 신규 fix 커밋 해시로 갱신 (140793e → fix 커밋)
+   - 문서 커밋 해시: bcf8f43 (기존 문서 커밋) → 신규 문서 커밋 해시
+3. ACTIVE_TASK.md 🔔 상태 유지 (변경 없음)
+4. scratch/IMP_PROGRESS.md IMP-116 Baker 행 추가
+5. check-R17-DoD 실행 → TBD 항목 없어야 통과, 전항목 PASS 확인
+6. [Baker] docs: TASK-B-007 재완료 보고 — ZEN_A4 수정 후 🔔
+```
+
+> ⚠️ `check-R17-DoD` 실행 시 `TBD` 값이 남아있으면 자동 차단됩니다.
+> ⚠️ DoD 허위 체크(실제 미완료 항목에 [x]) 반복 시 R-17 페널티 누적 대상입니다.
+
+---
+
 ## [발견 이슈]
 
 _(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
