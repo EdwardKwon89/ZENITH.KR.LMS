@@ -23,6 +23,11 @@ export async function createOrder(payload: OrderRegistrationInput) {
   if (!profile) throw new Error("User profile not found");
 
   const validated = orderRegistrationSchema.parse(payload);
+  if (validated.delivery_method === 'DIRECT') {
+    delete (validated as any).pickup_location;
+    delete (validated as any).pickup_contact_name;
+    delete (validated as any).pickup_contact_tel;
+  }
 
   const orderRepo = new OrderRepository(supabase);
   const { data: order, error: rpcError } = await orderRepo.createOrderViaRpc(validated, user.id, profile.org_id as string);
@@ -73,9 +78,9 @@ export async function updateOrder(orderId: string, payload: OrderRegistrationInp
     transport_mode: validated.transport_mode,
     estimated_cost: validated.estimated_cost,
     delivery_method: validated.delivery_method ?? 'DIRECT',
-    pickup_location: validated.pickup_location ?? null,
-    pickup_contact_name: validated.pickup_contact_name ?? null,
-    pickup_contact_tel: validated.pickup_contact_tel ?? null,
+    pickup_location: validated.delivery_method === 'PICKUP' ? (validated.pickup_location ?? null) : null,
+    pickup_contact_name: validated.delivery_method === 'PICKUP' ? (validated.pickup_contact_name ?? null) : null,
+    pickup_contact_tel: validated.delivery_method === 'PICKUP' ? (validated.pickup_contact_tel ?? null) : null,
   });
 
   await orderRepo.deleteItemsByOrderId(orderId);

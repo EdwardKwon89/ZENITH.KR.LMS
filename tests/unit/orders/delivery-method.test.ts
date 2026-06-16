@@ -82,6 +82,27 @@ describe('IMP-118: Order Delivery Method Selection and Validation (TC-UPS-ORDER)
     expect(rpcCall[1].p_payload.delivery_method).toBe('DIRECT');
   });
 
+  it('TC-UPS-ORDER-04: DIRECT 선택 + pickup 필드 전달 시 — pickup 필드 제거되어 저장', async () => {
+    const payload = {
+      ...basePayload,
+      delivery_method: 'DIRECT',
+      pickup_location: 'Hidden Value',
+      pickup_contact_name: 'Hidden Name',
+      pickup_contact_tel: 'Hidden Phone',
+    };
+
+    const result = await createOrder(payload as any);
+    expect(result.order_no).toBe(mockOrderNo);
+
+    // Verify RPC payload contains delivery_method: 'DIRECT' and no pickup_* fields
+    const rpcCall = mockSupabase.rpc.mock.calls[0];
+    expect(rpcCall[0]).toBe('create_order_atomic');
+    expect(rpcCall[1].p_payload.delivery_method).toBe('DIRECT');
+    expect(rpcCall[1].p_payload.pickup_location).toBeUndefined();
+    expect(rpcCall[1].p_payload.pickup_contact_name).toBeUndefined();
+    expect(rpcCall[1].p_payload.pickup_contact_tel).toBeUndefined();
+  });
+
   it('TC-UPS-ORDER-02: PICKUP 선택 + pickup_location 입력 — 정상 저장', async () => {
     const payload = {
       ...basePayload,
