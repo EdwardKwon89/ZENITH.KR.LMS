@@ -1,8 +1,8 @@
-# TASK-148 — PR#7 반려 수정 (Baker 담당) — Issue 2·3·4·6
+# TASK-151 — PR#7 반려 수정 (Baker 담당) — Issue 2·3·4·6
 
 | 항목 | 내용 |
 |:----|:----|
-| **Task-ID** | TASK-148 |
+| **Task-ID** | TASK-151 |
 | **생성일** | 2026-06-16 |
 | **할당 Agent** | Baker (Big Pickle) |
 | **지시자** | Jaison (Team B) |

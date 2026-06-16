@@ -1,14 +1,14 @@
-# TASK-146 — SPR-02 Agency 화주 목록/등록 UI 구현
+# TASK-154 — SPR-02 Agency 화주 목록/등록 UI 구현
 
 | 항목 | 내용 |
 |:----|:----|
-| **Task-ID** | TASK-146 |
+| **Task-ID** | TASK-154 |
 | **생성일** | 2026-06-15 |
 | **할당 Agent** | Baker (OpenCode Big Pickle) |
 | **지시자** | Jaison (Team B) |
 | **팀 리더** | JSJung |
 | **우선순위** | P1 |
-| **전제조건** | TASK-145 ✅ (Server Actions 구현 완료) |
+| **전제조건** | TASK-153 ✅ (Server Actions 구현 완료) |
 | **관련 IMP** | IMP-114 |
 | **브랜치** | `feature/ups-spr02-devteam-agency-ui` (TASK-145와 동일 브랜치) |
 | **커밋 태그** | `[Baker]` |
