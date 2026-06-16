@@ -1,14 +1,14 @@
-# TASK-155 — SPR-02 Agency 대시보드 + NaviSidebar 메뉴 추가
+# TASK-B-003 — SPR-02 Agency 대시보드 + NaviSidebar 메뉴 추가
 
 | 항목 | 내용 |
 |:----|:----|
-| **Task-ID** | TASK-155 |
+| **Task-ID** | TASK-B-003 |
 | **생성일** | 2026-06-15 |
 | **할당 Agent** | Dave (DeepSeek) |
 | **지시자** | Jaison (Team B) |
 | **팀 리더** | JSJung |
 | **우선순위** | P1 |
-| **전제조건** | TASK-153 ✅ (Server Actions 구현 완료) |
+| **전제조건** | TASK-B-001 ✅ (Server Actions 구현 완료) |
 | **관련 IMP** | IMP-114 |
 | **브랜치** | `feature/ups-spr02-devteam-agency-ui` (TASK-145·146과 동일 브랜치) |
 | **커밋 태그** | `[Dave]` |

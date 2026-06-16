@@ -1,8 +1,8 @@
-# TASK-153 — SPR-02 Agency 화주 Server Actions 구현
+# TASK-B-001 — SPR-02 Agency 화주 Server Actions 구현
 
 | 항목 | 내용 |
 |:----|:----|
-| **Task-ID** | TASK-153 |
+| **Task-ID** | TASK-B-001 |
 | **생성일** | 2026-06-15 |
 | **할당 Agent** | Dave (OpenCode DeepSeek) |
 | **지시자** | Jaison (Team B) |

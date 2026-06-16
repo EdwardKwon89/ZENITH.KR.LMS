@@ -1,8 +1,8 @@
-# TASK-152 — PR#7 반려 수정 (Dave 담당) — Issue 1·5·7
+# TASK-B-005 — PR#7 반려 수정 (Dave 담당) — Issue 1·5·7
 
 | 항목 | 내용 |
 |:----|:----|
-| **Task-ID** | TASK-152 |
+| **Task-ID** | TASK-B-005 |
 | **생성일** | 2026-06-16 |
 | **할당 Agent** | Dave (DeepSeek) |
 | **지시자** | Jaison (Team B) |

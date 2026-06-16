@@ -211,14 +211,14 @@
 
 | Task-ID | 생성일 | 업무개요 | 우선순위 | 전제조건 | 할당Agent | 상태 | 상세파일 | 비고 |
 |:-------:|:------:|:--------|:--------:|:--------:|:---------:|:----:|:--------|:-----|
-| TASK-142 | 260614 | [P7-SPR-02] Agency 화주 관리 UI — 대시보드 + 화주 목록/등록 페이지 | P1 | TASK-139 ✅ | Jaison | ❌ | [TASK-142](tasks/TASK-142_260614_Phase7Agency_화주관리UI_Jaison.md) | IMP-114 · PR#7 2차 반려 해소 완료 (260616) — TASK재채번(151~155) ✅ + Dave DoD 7/7 ✅ · PR 3차 재제출 대기 |
+| TASK-142 | 260614 | [P7-SPR-02] Agency 화주 관리 UI — 대시보드 + 화주 목록/등록 페이지 | P1 | TASK-139 ✅ | Jaison | ❌ | [TASK-142](tasks/TASK-142_260614_Phase7Agency_화주관리UI_Jaison.md) | IMP-114 · PR#7 2차 반려 (260616) — Dave DoD 7/7 ✅ + TASK-B-001~005 재채번 완료 · PR 재제출 준비 |
 | TASK-139 | 260614 | [P7-SPR-01] Agency 역할 모델 — org_type 확장 + RBAC + 대리점 화주 계층 DB | P1 | An-12 확정 ✅ · TASK-138 ✅ | Jaison | ✅ | [TASK-139](tasks/TASK-139_260614_Agency역할모델_DevTeam.md) | IMP-111 · 코드 dc8a2ff · 327/334 PASS · PR#5 머지 완료 |
 | TASK-140 | 260614 | TASK-139 DoD 보완 — supabase db reset 검증 (TASK-138+139 migration 전체 적용) | P2 | TASK-139 ✅ | Baker | ✅ | [TASK-140](tasks/TASK-140_260614_Agency_DB_Reset_검증_Baker.md) | IMP-111 연계 · supabase reset ✅ · 커밋 59da68f |
-| TASK-153 | 260615 | [P7-SPR-02] Agency 화주 Server Actions 3종 구현 (getAgencyShippers·createAgencyShipper·updateAgencyShipperGrade) | P1 | TASK-139 ✅ | Dave | 🔔 | [TASK-153](tasks/TASK-153_260615_Agency화주ServerActions_Dave.md) | IMP-114 · 코드 7977e97+4c2cb91 · 340/347 PASS · ZEN_A4 수정 완료(52→24줄) |
-| TASK-154 | 260615 | [P7-SPR-02] Agency 화주 목록/등록 UI — /agency/shippers + /agency/shippers/new | P1 | TASK-153 ✅ | Baker | 🔔 | [TASK-154](tasks/TASK-154_260615_Agency화주목록등록UI_Baker.md) | IMP-114 · 코드 ec4d7f5+0976c21 · ZEN_A4 수정 완료 — 10개 파일 모두 50줄 이하 ✅ |
-| TASK-155 | 260615 | [P7-SPR-02] Agency 대시보드 + NaviSidebar AGENCY 메뉴 추가 — /agency | P1 | TASK-153 ✅ | Dave | 🔔 | [TASK-155](tasks/TASK-155_260615_Agency대시보드NaviSidebar_Dave.md) | IMP-114 · 코드 97e9126 · 340/347 PASS · SPR-02 전량 완료 |
-| TASK-151 | 260616 | [P7-SPR-02] PR#7 반려 수정 — Baker 담당 (Issue 2·3·4·6: locale·RBAC·null·타입) | P1 | TASK-142 ❌ | Baker | 🔔 | [TASK-151](tasks/TASK-151_260616_PR7반려수정_Baker.md) | IMP-114 · 코드 57b5df8 · 345/345 PASS · DoD 전항목 ✅ |
-| TASK-152 | 260616 | [P7-SPR-02] PR#7 반려 수정 — Dave 담당 (Issue 1·5·7: 컬럼지정·i18n·TC) | P1 | TASK-142 ❌ | Dave | 🔔 | [TASK-152](tasks/TASK-152_260616_PR7반려수정_Dave.md) | IMP-114 · 코드 31bfa4d · 345/352 PASS · DoD 7/7 ✅ · Baker TASK-151 완료 후 PR#7 재제출 |
+| TASK-B-001 | 260615 | [P7-SPR-02] Agency 화주 Server Actions 3종 구현 (getAgencyShippers·createAgencyShipper·updateAgencyShipperGrade) | P1 | TASK-139 ✅ | Dave | 🔔 | [TASK-B-001](tasks/TASK-B-001_260615_Agency화주ServerActions_Dave.md) | IMP-114 · 코드 7977e97+4c2cb91 · 340/347 PASS · ZEN_A4 수정 완료(52→24줄) |
+| TASK-B-002 | 260615 | [P7-SPR-02] Agency 화주 목록/등록 UI — /agency/shippers + /agency/shippers/new | P1 | TASK-B-001 ✅ | Baker | 🔔 | [TASK-B-002](tasks/TASK-B-002_260615_Agency화주목록등록UI_Baker.md) | IMP-114 · 코드 ec4d7f5+0976c21 · ZEN_A4 수정 완료 — 10개 파일 모두 50줄 이하 ✅ |
+| TASK-B-003 | 260615 | [P7-SPR-02] Agency 대시보드 + NaviSidebar AGENCY 메뉴 추가 — /agency | P1 | TASK-B-001 ✅ | Dave | 🔔 | [TASK-B-003](tasks/TASK-B-003_260615_Agency대시보드NaviSidebar_Dave.md) | IMP-114 · 코드 97e9126 · 340/347 PASS · SPR-02 전량 완료 |
+| TASK-B-004 | 260616 | [P7-SPR-02] PR#7 반려 수정 — Baker 담당 (Issue 2·3·4·6: locale·RBAC·null·타입) | P1 | TASK-142 ❌ | Baker | 🔔 | [TASK-B-004](tasks/TASK-B-004_260616_PR7반려수정_Baker.md) | IMP-114 · 코드 57b5df8 · 345/345 PASS · DoD 전항목 ✅ |
+| TASK-B-005 | 260616 | [P7-SPR-02] PR#7 반려 수정 — Dave 담당 (Issue 1·5·7: 컬럼지정·i18n·TC) | P1 | TASK-142 ❌ | Dave | 🔔 | [TASK-B-005](tasks/TASK-B-005_260616_PR7반려수정_Dave.md) | IMP-114 · 코드 31bfa4d · 345/352 PASS · DoD 7/7 ✅ |
 
 ---
 
@@ -240,9 +240,9 @@
 | Agent | 상태 | 비고 |
 |:------|:----:|:----|
 | **JSJung** (팀 리더) | 활성 | TASK-142 PR#7 반려 수정 감독 |
-| **Jaison** (AI Agent 총괄) | 🔔 PR 3차 재제출 | TASK재채번(151~155) ✅ + TASK-152 DoD ✅ — PR#7 Aiden 3차 검토 요청 중 |
-| **Dave** (AI Agent) | 🔔 TASK-152 DoD 전량 ✅ | DoD 7/7 자가검증 완료 · Baker TASK-151 완료 후 PR#7 재제출 |
-| **Baker** (AI Agent) | 🔔 TASK-151 완료 | Issue 2·3·4·6 전량 해소 · DoD 전항목 ✅ |
+| **Jaison** (AI Agent 총괄) | 🔔 PR 재제출 준비 | TASK-B-001~005 재채번 완료 + DoD 전량 ✅ — PR#7 Aiden 3차 검토 요청 예정 |
+| **Dave** (AI Agent) | 🔔 TASK-B-005 DoD 7/7 ✅ | DoD 자가검증 완료 |
+| **Baker** (AI Agent) | 🔔 TASK-B-004 완료 | Issue 2·3·4·6 전량 해소 · DoD 전항목 ✅ |
 | **Gale** (AI Agent) | 대기 | TASK-147 Dave로 재배정 — 준비 완료 후 재배정 가능 |
 
 ---
