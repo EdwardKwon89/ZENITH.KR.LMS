@@ -51,7 +51,9 @@
 
 ---
 
-## 활성 Task 목록
+## Team A 활성 Task — Aiden (ZEN_CEO) 관할
+
+> **R-19**: Team A 섹션은 Aiden 단독 편집 권한. Team B는 읽기 전용.
 
 | Task-ID | 생성일 | 업무개요 | 우선순위 | 전제조건 | 할당Agent | 상태 | 상세파일 | 비고 |
 |:-------:|:------:|:--------|:--------:|:--------:|:---------:|:----:|:--------|:-----|
@@ -178,9 +180,13 @@
 | TASK-135 | 260609 | DEF-056 실물 요율 시드 SQL 커밋 (`seed_rates_realistic.sql` untracked) | P4 | 없음 | B_Kai | ✅ | [TASK-135](tasks/TASK-135_260609_DEF056시드SQL커밋_BKai.md) | 1ebc9e6 포함 · 316/316 · Aiden ✅ 승인 (260609) |
 | TASK-136 | 260609 | DEF-059 §1~§3 PKG 레벨 special_cargo_type 전환 (DB·Zod·RPC·Action) | P3 | 없음 | D_Kai | ✅ | [TASK-136](tasks/TASK-136_260609_DEF059PKG레벨특수화물전환_DKai.md) | IMP-없음 · ad22883 · 316/316 · Aiden ✅ 승인 (260609) |
 | TASK-137 | 260609 | DEF-059 §4 UI 전환 — PKG 카드에 special_cargo_type 선택 UI 이동 | P3 | TASK-136 ✅ | B_Kai | ✅ | [TASK-137](tasks/TASK-137_260609_DEF059UI전환_BKai.md) | ec0fa5a · Aiden 직접보완(dabde76) · 316/316 · ✅ 승인 (260609) |
-| TASK-138 | 260614 | [P7-SPR-01] UPS DB 스키마 설계 — zen_ups_* 테이블 6종 신설 + 기존 테이블 확장 | P1 | An-12 확정 ✅ | Aiden | ⬜ | [TASK-138](tasks/TASK-138_260614_Phase7UPS_DB스키마_Aiden.md) | IMP-110 · Phase 7 SPR-01 · 브랜치: feature/ups-spr01-aiden-db-schema |
-| TASK-139 | 260614 | [P7-SPR-01] Agency 역할 모델 — org_type 확장 + RBAC + 대리점 화주 계층 DB | P1 | An-12 확정 ✅ | Jaison (Team B) | ⬜ | [TASK-139](tasks/TASK-139_260614_Agency역할모델_DevTeam.md) | IMP-111 · Phase 7 SPR-01 · 팀 리더: JSJung · 브랜치: feature/ups-spr01-devteam-agency-role |
-| TASK-147 | 260615 | IMP-109: 환율 설정 화면 (어드민) | P3 | 없음 | Riley | 🔔 | [TASK-147](tasks/TASK-147_260615_IMP109환율설정화면_Riley.md) | 코드 커밋 `d5147ae` · 325/325 PASS · 범위 외 revert 및 DEF-065 보고서 제출 |
+| TASK-138 | 260614 | [P7-SPR-01] UPS DB 스키마 설계 — zen_ups_* 테이블 6종 신설 + 기존 테이블 확장 | P1 | An-12 확정 ✅ | Aiden | ✅ | [TASK-138](tasks/TASK-138_260614_Phase7UPS_DB스키마_Aiden.md) | IMP-110 · Phase 7 SPR-01 · 코드 aca457e · 323/329 PASS · Aiden ✅ 승인 (260614) |
+| TASK-141 | 260614 | [P7-SPR-02] UPS 요금 계산 엔진 코어 (`pricing-engine.ts` + 타입 + `pricing.ts` 래퍼 + TC) | P1 | TASK-138 ✅ | Aiden | ✅ | [TASK-141](tasks/TASK-141_260614_Phase7UPS_요금계산엔진_창고입고수정_Aiden.md) | IMP-112 코어 · `e60fff0` · TC-UPS-P 12/12 ✅ · Aiden ✅ 승인 (260615) |
+| TASK-143 | 260614 | [P7-SPR-02] UPS 요율 조회 Server Actions 5종 (`rates.ts` — Zone/Product/BaseRate/Fuel/OC) | P1 | TASK-138 ✅ | D_Kai | ✅ | [TASK-143](tasks/TASK-143_260614_UPS_조회ServerActions_DKai.md) | IMP-112 일부 · fee7bf1 · DoD 8/8 · TC-UPS-R 5/5 · Aiden ✅ 승인 (260615) |
+| TASK-144 | 260614 | [P7-SPR-02] 창고 입고 화면 REF_NO 입력 UI (domestic_ref_no / intl_ref_no + locked 처리) | P1 | TASK-138 ✅ | B_Kai | ✅ | [TASK-144](tasks/TASK-144_260614_창고입고REF_NO_UI_BKai.md) | IMP-112 일부 · b315d49+6870271 · DoD 10/10 · TC-WH-REF 4/4 · Aiden ✅ 승인 (260615) |
+| TASK-145 | 260615 | D_Kai 재교육 세션 4차 (TASK-143 반려 2회 반복 패턴 개선) | P4 | 없음 | D_Kai | ❌ | [TASK-145](tasks/TASK-145_260615_DKai재교육세션4차_DKai.md) | 반려 — task file 미작성 상태로 ACTIVE_TASK 단독 🔔 변경 (R-17 위반) |
+| TASK-146 | 260615 | [P7-SPR-03] UPS 요율 Admin UI (Zone/제품/기본요금/유류할증/OC 관리) | P2 | TASK-138 ✅ · TASK-143 ✅ | B_Kai | ✅ | [TASK-146](tasks/TASK-146_260615_P7SPR03_UPS요율AdminUI_BKai.md) | IMP-113 · `0578fb7` · 65 test files PASS · dialog/table/tabs ✅ · Aiden ✅ 승인 (260616) |
+| TASK-147 | 260615 | IMP-109 환율 설정 화면 — 기준통화 + 환율(USD/CNY/JPY) 어드민 UI | P3 | 없음 | Riley | 🔔 | [TASK-147](tasks/TASK-147_260615_IMP109환율설정화면_Riley.md) | 코드 커밋 `d5147ae` · 325/325 PASS · 범위 외 revert 및 DEF-065 보고서 제출 |
 | TASK-108 | 260601 | DEF-039 CARRIER RLS + 미스테이지 커밋 + 신원 수정 | P2 | 없음 | D_Kai | ✅ | [TASK-108](tasks/TASK-108_260601_DEF039CARRIER_RLS_미스테이지커밋_DKai.md) | DEF-039 해소 · 4cc88d8+beba338 · CARRIER RLS 3테이블 · 229/229 ✅ · Aiden ✅ 승인 |
 | TASK-109 | 260603 | IMP-095 Rate Card 항로(Port) 기반 매칭 구현 | P1 | TASK-106 ✅ · TASK-108 ✅ | D_Kai (OpenCode) | ✅ | [TASK-109](tasks/TASK-109_260603_IMP095포트기반요율매칭_DKai.md) | IMP-095 완료 · `0fb950d`+`fb263f9` · 236/236 PASS · Aiden ✅ 승인 |
 | TASK-110 | 260603 | IMP-096 요율 관리 페이지 통합 정리 (3단계) | P1 | TASK-106 ✅ · TASK-109 ✅ | D_Kai (OpenCode) | ✅ | [TASK-110](tasks/TASK-110_260603_IMP096요율관리페이지통합정리_DKai.md) | IMP-096 완료 · `e166fec`+`65c904b` · 236/236 PASS · Aiden ✅ 승인 |
@@ -199,24 +205,50 @@
 
 ---
 
-## Agent별 즉시 착수 가능 Task
+## Team B 활성 Task — Jaison · JSJung 관할
 
-| Agent | 진행 중 | 재작업/조치 필요 | 블로커 대기 |
-|:------|:--------|:----------------|:----------|
-| **Aiden (Claude)** | — | — | **TASK-138 ⬜ 즉시 착수 가능** (Phase 7 SPR-01 UPS DB) |
-| **Jaison (Team B)** · JSJung 팀 리더 | — | 온보딩 완료 후 착수 (`docs/00_GUIDE/ONBOARDING_NEWTEAM.md` 필독) | **TASK-139 ⬜ 즉시 착수 가능** (Phase 7 SPR-01 Agency 역할) |
-| **D_Kai (OpenCode)** | — | Advisory: ACTIVE_TASK 블로커 선제 조작 + `1ebc9e6` TASK 프로세스 외 빌드 오류 도입 | 신규 Task 대기 |
-| **B_Kai** | — | — | 신규 Task 대기 (TASK-135·137 ✅ 완료) |
-| **Riley** | ❌ TASK-147 3차 반려 — 빌드 FAIL 허위체크·해시 오기재·블로커 무시 | 🚫 B_Kai TASK-146 완료 후 재제출 가능 |
-| N_Kai | TASK-087 ⬜ (재교육 세션 — 완료 후 신규 할당 재개) | R-17 위반 누적 — 신규 할당 중단 유지 | — |
-| Ring | — | — | 신규 할당 중단 유지 (9차 위반 누적) |
+> **R-19**: Team B 섹션은 JSJung(팀 리더) / Jaison(AI Agent 총괄) 독립 편집 권한.
+> Team A는 읽기 전용. Task 발령·에이전트 배정·DoD 검증은 Team B 자율 운영.
+> PR 제출 후 Aiden 최종 리뷰(PR 머지 = ✅).
+
+| Task-ID | 생성일 | 업무개요 | 우선순위 | 전제조건 | 할당Agent | 상태 | 상세파일 | 비고 |
+|:-------:|:------:|:--------|:--------:|:--------:|:---------:|:----:|:--------|:-----|
+| TASK-142 | 260614 | [P7-SPR-02] Agency 화주 관리 UI — 대시보드 + 화주 목록/등록 페이지 | P1 | TASK-139 ✅ | Jaison | ⬜ | [TASK-142](tasks/TASK-142_260614_Phase7Agency_화주관리UI_Jaison.md) | IMP-114 · Phase 7 SPR-02 |
+| TASK-139 | 260614 | [P7-SPR-01] Agency 역할 모델 — org_type 확장 + RBAC + 대리점 화주 계층 DB | P1 | An-12 확정 ✅ · TASK-138 ✅ | Jaison | ✅ | [TASK-139](tasks/TASK-139_260614_Agency역할모델_DevTeam.md) | IMP-111 · 코드 dc8a2ff · 327/334 PASS · PR#5 머지 완료 |
+| TASK-140 | 260614 | TASK-139 DoD 보완 — supabase db reset 검증 (TASK-138+139 migration 전체 적용) | P2 | TASK-139 ✅ | Baker | ✅ | [TASK-140](tasks/TASK-140_260614_Agency_DB_Reset_검증_Baker.md) | IMP-111 연계 · supabase reset ✅ · 커밋 59da68f |
+
+---
+
+## Agent 현황
+
+### Team A (Aiden 관할)
+
+| Agent | 상태 | 비고 |
+|:------|:----:|:----|
+| **Aiden (Claude)** | ✅ TASK-141 완료 (260615) | SPR-03 발령 완료 — TASK-145/146/147 신규 발령 |
+| **D_Kai (OpenCode)** | 🔔 TASK-145 재교육 4차 완료 — TASK-143 반려 패턴 분석 + 체크리스트 v2.0 수립 ✅ |
+| **B_Kai** | 🔔 TASK-146 재작업 완료 — Aiden 검토 대기 | IMP-113 · 코드 `0578fb7` · 회귀 65/65 PASS · 🔔 재제출 |
+| **Riley** | 🔔 TASK-147 완료 보고 (2026-06-16) | IMP-109 환율 설정 화면 완료 — 코드 커밋 `d5147ae` |
+| N_Kai | 재교육 세션 대기 (TASK-087) | R-17 위반 누적 — 신규 할당 중단 유지 |
+| Ring | 신규 할당 중단 유지 | 9차 위반 누적 |
+
+### Team B (JSJung · Jaison 관할)
+
+| Agent | 상태 | 비고 |
+|:------|:----:|:----|
+| **JSJung** (팀 리더) | 활성 | TASK-142 감독 — SPR-02 착수 지시 |
+| **Jaison** (AI Agent 총괄) | ⬜ TASK-142 착수 대기 | IMP-114 Agency 화주 관리 UI |
+| **Baker** (AI Agent 보조) | 신규 Task 대기 | TASK-140 ✅ 완료 |
 
 ---
 
 ## 개정 이력
 
-| 2026-06-14 | Aiden (Claude) | **Team B 구성 확정** — 팀 리더: JSJung. AI Agent 총괄: Jaison (Claude). TASK-139 담당 Jaison으로 지정. 커밋 태그: `[JSJung]`·`[Jaison]`·`[Dev_OC]`. 온보딩 가이드 v1.1 Team B 구성표 추가. |
-| 2026-06-14 | Aiden (Claude) | **Phase 7 UPS 특송 착수** — TASK-138(Aiden, P1): UPS DB Schema SPR-01. TASK-139(Jaison·Team B, P1): Agency 역할 모델 SPR-01. An-12 설계 확정(Edward 승인). 온보딩 가이드(`ONBOARDING_NEWTEAM.md`) 작성 완료. 병행 개발 체계: Team A(Aiden)·Team B(JSJung+Jaison) PR 기반 협업. |
+| 2026-06-15 | Aiden (Claude) | **Phase 7 SPR-03 Team A 발령** — TASK-145(D_Kai 재교육 4차) · TASK-146(B_Kai, IMP-113 UPS 요율 Admin UI) · TASK-147(Riley, IMP-109 환율 설정 화면) 신규 발령. SPR-02 전량 완료(TASK-141·143·144 ✅) 기반. |
+| 2026-06-14 | Aiden (Claude) | **SPR-02 Team A 병행 분해** — TASK-141(Aiden, 엔진 코어) 범위 축소. TASK-143(D_Kai, rates.ts 5종 조회) · TASK-144(B_Kai, 창고 입고 REF_NO UI) 신규 발령. 3개 Task 병행 진행으로 SPR-02 납기 준수 목표. |
+| 2026-06-14 | Aiden (Claude) | **R-19 다중팀 거버넌스 신설** — Edward 승인. Team B(JSJung·Jaison) 자율 Task 발령 권한 부여. ACTIVE_TASK.md Team A/B 섹션 분리. TASK-139/140 Jaison의 선행 위반 소급 면제. 5팀 확장 대비 설계 확정. |
+| 2026-06-14 | Aiden (Claude) | **Team B 구성 확정** — 팀 리더: JSJung. AI Agent 총괄: Jaison (Claude). Baker(보조). TASK-139 담당 Jaison으로 지정. 온보딩 가이드 v1.1 Team B 구성표 추가. |
+| 2026-06-14 | Aiden (Claude) | **Phase 7 UPS 특송 착수** — TASK-138(Aiden, P1): UPS DB Schema SPR-01 ✅. TASK-139(Jaison·Team B, P1): Agency 역할 모델 SPR-01 🔔. An-12 설계 확정(Edward 승인). 병행 개발 체계: Team A·Team B PR 기반 협업. |
 
 | 날짜 | 주체 | 내용 |
 |:-----|:----:|:-----|

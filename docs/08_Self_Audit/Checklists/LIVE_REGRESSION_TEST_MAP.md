@@ -1,8 +1,8 @@
 # 🗺️ LIVE Regression Test Master Map
 
 > **상태:** [ACTIVE]  
-> **총 테스트 케이스:** 319 Cases  
-> **최종 검증일:** 2026-06-15 (TASK-147 IMP-109 환율 설정 화면 구현)  
+> **총 테스트 케이스:** 365 Cases  
+> **최종 검증일:** 2026-06-16 (TASK-147 IMP-109 환율 설정 화면 및 TASK-146 UPS 요율 Admin UI 통합)
 
 제니스 플랫폼의 비즈니스 영속성을 보장하는 회귀 테스트 케이스의 통합 명세서입니다. 모든 신규 개발 및 수정 시 이 맵에 케이스가 추가되어야 하며, 전체 테스트가 통과되어야 합니다.
 
@@ -57,6 +57,10 @@
 | **TC-INB.2** | 존재하지 않는 바코드 조회 | 미등록 바코드 조회 시 예외 처리 및 null 반환 검증 | `tests/unit/logistics/inbound.test.ts` |
 | **TC-INB.3** | 입고 확정 처리 | 검수 결과(정상/손상)를 포함하여 WAREHOUSED 상태 전이 성공 확인 | `tests/unit/logistics/inbound.test.ts` |
 | **TC-INB.4** | 오늘의 입고 이력 조회 | 오늘 KST 기준 입고 완료된 이력 목록을 정상 집계 확인 | `tests/unit/logistics/inbound.test.ts` |
+| **TC-WH-REF-01** | REF_NO 정상 업데이트 | domestic_ref_no + intl_ref_no 동시 업데이트 성공 | `tests/unit/logistics/inbound.test.ts` |
+| **TC-WH-REF-02** | REF_NO 잠금 보호 | intl_ref_locked=true 상태에서 intl_ref_no 변경 시 서버 거부 | `tests/unit/logistics/inbound.test.ts` |
+| **TC-WH-REF-03** | REF_NO 길이 제한 | 100자 초과 ref 문자열 Zod 검증 에러 | `tests/unit/logistics/inbound.test.ts` |
+| **TC-WH-REF-04** | REF_NO 패키지 미존재 | 존재하지 않는 패키지 ID로 업데이트 시도 시 거부 | `tests/unit/logistics/inbound.test.ts` |
 
 ### 5. 마스터 오더 거버넌스 (Master Order)
 | ID | 테스트 항목 | 목적 | 파일 경로 |
@@ -391,6 +395,15 @@
 | TC-RATES-02 | CARRIER 역할 자사 요율 필터링 | `rates.test.ts` | ✅ | org_id 기반 격리 조회 검증 |
 | TC-RATES-03 | 요율 삭제 권한 가드 (ADMIN 전용) | `rates.test.ts` | ✅ | MANAGER 권한 삭제 시도 차단 |
 | TC-RATES-04 | TISA 버전 관리 (ACTIVE -> SUPERSEDED) | `rates.test.ts` | ✅ | 동일 항로 재등록 시 상태 전이 및 버전 증가 |
+
+### 14. UPS 요율 조회 (Phase 7 SPR-02)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-UPS-R-01** | `getUpsZones()` Zone 목록 + 국가 반환 | Zone + 국가 JOIN 조회 정상 동작 | `tests/unit/ups/rates-actions.test.ts` |
+| **TC-UPS-R-02** | `getUpsProducts('DOC')` cargoType 필터 | 제품 조회 시 cargo_type 조건부 필터링 | `tests/unit/ups/rates-actions.test.ts` |
+| **TC-UPS-R-03** | `getUpsBaseRates({ productId, zoneId })` 복합 필터 | 기본 요금표 productId + zoneId 복합 필터 | `tests/unit/ups/rates-actions.test.ts` |
+| **TC-UPS-R-04** | `getUpsFuelSurcharge()` 기준일 기반 최신 조회 | 유류할증료 effective_week 기준 최신 조회 | `tests/unit/ups/rates-actions.test.ts` |
+| **TC-UPS-R-05** | `getUpsOtherCharges()` 활성 항목만 반환 | 부가요금 is_active 필터 검증 | `tests/unit/ups/rates-actions.test.ts` |
 
 ---
 

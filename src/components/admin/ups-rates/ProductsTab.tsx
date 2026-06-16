@@ -63,7 +63,7 @@ export function ProductsTab() {
     <ZenCard className="p-6">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-lg font-bold">{t('title')}</h2>
-        <ZenButton size="sm" onClick={() => { setEditing(null); setForm({ product_code: '', sub_code: '', product_name: '', cargo_type: 'BOTH', ddu_available: false, ddp_available: false, sort_order: 0 }); setIsOpen(true); }}>
+        <ZenButton className="px-4 py-2 text-sm" onClick={() => { setEditing(null); setForm({ product_code: '', sub_code: '', product_name: '', cargo_type: 'BOTH', ddu_available: false, ddp_available: false, sort_order: 0 }); setIsOpen(true); }}>
           <Plus size={16} className="mr-1" /> {t('add_product')}
         </ZenButton>
       </div>
@@ -72,9 +72,18 @@ export function ProductsTab() {
         <DialogContent>
           <DialogHeader><DialogTitle>{editing ? t('edit_product') : t('add_product')}</DialogTitle></DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <ZenInput label={t('product_code')} value={form.product_code} onChange={e => setForm({ ...form, product_code: e.target.value })} required />
-            <ZenInput label={t('sub_code')} value={form.sub_code} onChange={e => setForm({ ...form, sub_code: e.target.value })} />
-            <ZenInput label={t('product_name')} value={form.product_name} onChange={e => setForm({ ...form, product_name: e.target.value })} required />
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">{t('product_code')}</label>
+              <ZenInput value={form.product_code} onChange={e => setForm({ ...form, product_code: e.target.value })} required />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">{t('sub_code')}</label>
+              <ZenInput value={form.sub_code} onChange={e => setForm({ ...form, sub_code: e.target.value })} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">{t('product_name')}</label>
+              <ZenInput value={form.product_name} onChange={e => setForm({ ...form, product_name: e.target.value })} required />
+            </div>
             <select value={form.cargo_type} onChange={e => setForm({ ...form, cargo_type: e.target.value as any })} className="w-full border rounded p-2">
               <option value="DOC">{t('cargo_doc')}</option>
               <option value="NON_DOC">{t('cargo_non_doc')}</option>
@@ -102,15 +111,15 @@ export function ProductsTab() {
         <TableBody>
           {products.map((p: any) => (
             <TableRow key={p.id}>
-              <TableCell><ZenBadge variant="outline">{p.product_code}{p.sub_code ? `-${p.sub_code}` : ''}</ZenBadge></TableCell>
+              <TableCell><ZenBadge variant="default" className="border-slate-300 bg-white">{p.product_code}{p.sub_code ? `-${p.sub_code}` : ''}</ZenBadge></TableCell>
               <TableCell>{p.product_name}</TableCell>
               <TableCell>{p.cargo_type}</TableCell>
               <TableCell>
-                {p.ddu_available && <ZenBadge variant="secondary" className="mr-1">DDU</ZenBadge>}
-                {p.ddp_available && <ZenBadge variant="secondary">DDP</ZenBadge>}
+                {p.ddu_available && <ZenBadge variant="default" className="mr-1 bg-slate-200">DDU</ZenBadge>}
+                {p.ddp_available && <ZenBadge variant="default" className="bg-slate-200">DDP</ZenBadge>}
               </TableCell>
               <TableCell>
-                <ZenButton variant="ghost" size="sm" onClick={() => { setEditing(p); setForm(p); setIsOpen(true); }}><Pencil size={14} /></ZenButton>
+                <ZenButton variant="ghost" className="p-1" onClick={() => { setEditing(p); setForm(p); setIsOpen(true); }}><Pencil size={14} /></ZenButton>
               </TableCell>
             </TableRow>
           ))}

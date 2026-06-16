@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { getOrderByBarcodeOrNo, confirmInbound, getTodayInboundHistory } from '@/app/actions/operations/orders';
+import { updatePackageRefs } from '@/app/actions/operations/warehouse';
 import { validateUserAction } from '@/lib/auth/guards';
 import { OrderStatus } from '@/types/orders';
 
@@ -125,6 +126,101 @@ describe('ZENITH Logistics: Inbound Process Unit Tests', () => {
       expect(mockSupabase.from).toHaveBeenCalledWith('order_status_history');
       expect(mockSupabase.gte).toHaveBeenCalled();
       expect(mockSupabase.lte).toHaveBeenCalled();
+    });
+  });
+
+  describe('updatePackageRefs — TC-WH-REF', () => {
+    const mockUser = { id: 'user-123' };
+    const mockProfile = { id: 'user-123', org_id: 'org-456', role: 'ADMIN' };
+    let chain: any;
+    let updateFn: ReturnType<typeof vi.fn>;
+    let selectFn: ReturnType<typeof vi.fn>;
+    let eqFn: ReturnType<typeof vi.fn>;
+    let maybeSingleFn: ReturnType<typeof vi.fn>;
+
+    beforeEach(() => {
+      vi.clearAllMocks();
+      const fromFn = vi.fn();
+      selectFn = vi.fn();
+      eqFn = vi.fn();
+      updateFn = vi.fn();
+      maybeSingleFn = vi.fn();
+      const eqResult = { maybeSingle: maybeSingleFn };
+      const selectChain = { eq: eqFn, select: selectFn };
+      const updateChain = { eq: eqFn, update: updateFn };
+      chain = { ...selectChain, ...updateChain, from: fromFn, maybeSingle: maybeSingleFn };
+      fromFn.mockReturnValue(chain);
+      selectFn.mockReturnValue(selectChain);
+      let eqCallCount = 0;
+      eqFn.mockImplementation(() => {
+        eqCallCount++;
+        if (eqCallCount === 1) return eqResult;
+        return { error: null };
+      });
+      updateFn.mockReturnValue(updateChain);
+      (validateUserAction as any).mockResolvedValue({
+        user: mockUser,
+        profile: mockProfile,
+        supabase: { from: fromFn, select: selectFn, eq: eqFn, update: updateFn, maybeSingle: maybeSingleFn },
+      });
+    });
+
+    it('TC-WH-REF-01: [Success] 정상 업데이트 — domestic_ref_no + intl_ref_no 변경', async () => {
+      const pkgId = '550e8400-e29b-41d4-a716-446655440001';
+      maybeSingleFn.mockResolvedValue({ data: { id: pkgId, intl_ref_locked: false, intl_ref_no: null }, error: null });
+      // eqFn은 beforeEach의 mockImplementation에 의해 첫 호출은 eqResult 반환, 두 번째 호출은 { error: null } 반환
+
+      const result = await updatePackageRefs({
+        packageId: pkgId,
+        domesticRefNo: 'CJ1234567890',
+        intlRefNo: '1Z999AA10123456784',
+      });
+
+      expect(result.success).toBe(true);
+      expect(updateFn).toHaveBeenCalledWith(expect.objectContaining({
+        domestic_ref_no: 'CJ1234567890',
+        intl_ref_no: '1Z999AA10123456784',
+      }));
+    });
+
+    it('TC-WH-REF-02: [Reject] intl_ref_locked=true 상태에서 intl_ref_no 변경 시도 → 거부', async () => {
+      const pkgId = '550e8400-e29b-41d4-a716-446655440002';
+      maybeSingleFn.mockResolvedValue({ data: { id: pkgId, intl_ref_locked: true, intl_ref_no: '1Z999AA10123456784' }, error: null });
+
+      const result = await updatePackageRefs({
+        packageId: pkgId,
+        domesticRefNo: 'CJ9876543210',
+        intlRefNo: '1Z999AA10999999999',
+      });
+
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('잠금');
+      expect(updateFn).not.toHaveBeenCalled();
+    });
+
+    it('TC-WH-REF-03: [Reject] ref 문자열 100자 초과 → Zod 검증 에러', async () => {
+      const result = await updatePackageRefs({
+        packageId: '550e8400-e29b-41d4-a716-446655440003',
+        domesticRefNo: 'A'.repeat(101),
+        intlRefNo: null,
+      });
+
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('100');
+    });
+
+    it('TC-WH-REF-04: [Reject] 패키지를 찾을 수 없음', async () => {
+      const pkgId = '550e8400-e29b-41d4-a716-446655440099';
+      maybeSingleFn.mockResolvedValue({ data: null, error: null });
+
+      const result = await updatePackageRefs({
+        packageId: pkgId,
+        domesticRefNo: 'CJ123',
+        intlRefNo: null,
+      });
+
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('찾을 수 없습니다');
     });
   });
 });

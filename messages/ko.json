@@ -491,7 +491,13 @@
     "history_shipper": "화주",
     "history_result": "검수 결과",
     "history_operator": "담당자",
-    "empty_history": "오늘 입고 처리된 내역이 없습니다."
+    "empty_history": "오늘 입고 처리된 내역이 없습니다.",
+    "pkg_ref_title": "운송장 번호 입력",
+    "domestic_ref_no": "국내 운송장번호",
+    "intl_ref_no": "UPS 국제번호",
+    "ref_locked": "잠금",
+    "ref_save_btn": "저장",
+    "ref_save_success": "REF_NO 저장 완료"
   },
   "WarehouseOutbound": {
     "title": "창고 출고 처리",
