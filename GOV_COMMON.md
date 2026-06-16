@@ -217,12 +217,20 @@ Team C: feature/teamc-*  ─┘
 | 공유 코드 (`rbac.ts` 등) | 공유 | PR 선착순, 후발 팀 리베이스 |
 | Migration 파일 | 작성 팀 | 타 팀 읽기 전용 |
 
-#### TASK 번호 채번 규칙
+#### TASK 번호 채번 규칙 (v2.0 — 팀 접두사 체계)
 
-- 전역 순번 유지 (팀 구분 접두사 없음 — 가독성 우선)
-- 채번 전 `ACTIVE_TASK.md` 전체(모든 팀 섹션) 확인 후 최대값 + 1
+각 팀은 독립 접두사를 사용하여 구조적으로 충돌을 방지한다.
+
+| 팀 | 채번 형식 | 예시 | 비고 |
+|:---|:--------:|:-----|:-----|
+| Team A (Aiden 관할) | `TASK-NNN` | TASK-151 | 기존 TASK-001~150 연속 |
+| Team B (JSJung 관할) | `TASK-B-NNN` | TASK-B-001 | 001부터 독립 순번 |
+| Team C+ (향후) | `TASK-C-NNN` 등 | TASK-C-001 | 팀 투입 시 Aiden이 접두사 지정 |
+
+**채번 절차**:
+- 채번 전 **본인 팀 섹션 최대값 + 1** (타 팀 섹션 확인 불요 — 충돌 구조적 불가)
 - 채번 즉시 ACTIVE_TASK.md 팀 섹션에 등재 (번호 선점)
-- 충돌 발생 시 나중 채번 팀이 번호를 양보
+- 기존 TASK-NNN으로 발령된 타팀 Task(TASK-139/140/142 등)는 그대로 유지 (소급 변경 없음)
 
 #### ACTIVE_TASK.md 구조
 
@@ -389,3 +397,4 @@ PreToolUse GitNexus Hook에서 `Bash`가 제외되었습니다. 아래 경우는
 | v1.7 | 2026-06-09 | Aiden (Claude, ZEN_CEO) | R-17 v1.6 — 완료 보고 step 5 자가 검증 강화(`check-R17-DoD` 실행 의무화 + 자가 수정 루프). 반복 위반 유형에 자가 검증 미실행 추가. R-18 신설 — 발견 이슈 보고 절차(task file `[발견 이슈]` 섹션 + `.agent/issues/ISS-NNN.md` 별도 보고서). |
 | v1.8 | 2026-06-09 | Aiden (Claude, ZEN_CEO) | R-18 개정 — ISS 트랙 폐지, DEF 단일 트랙으로 통합. 등록 경로 `.agent/issues/ISS-NNN.md` → `.agent/defects/DEF-NNN.md`. 긴급도 `즉시`·`High` DEF는 Edward 보고 후 TASK 발령 의무화. (Edward 지시) |
 | v1.9 | 2026-06-14 | Aiden (Claude, ZEN_CEO) | R-19 신설 — 다중팀 거버넌스. 팀 리더 자율 Task 발령·에이전트 배정 권한 부여. ACTIVE_TASK.md 팀별 섹션 분리. 브랜치 전략(feature/teamX-* → develop → main). 파일 소유권 원칙. 5팀 확장 대비 설계. Edward 승인 — 2팀 병행 프로세스 검증 착수. |
+| v2.0 | 2026-06-16 | Aiden (Claude, ZEN_CEO) | R-19 §TASK 번호 채번 규칙 v2.0 — 팀 접두사 체계 도입 (Edward 승인). Team A: `TASK-NNN`, Team B: `TASK-B-NNN`, Team C+: `TASK-C-NNN`. 구조적 충돌 방지, 타 팀 섹션 확인 불요. Team B 기존 TASK-145~149 → TASK-B-001~005 재채번 지시. |

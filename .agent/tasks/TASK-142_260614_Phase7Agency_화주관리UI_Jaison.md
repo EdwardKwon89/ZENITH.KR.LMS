@@ -167,6 +167,45 @@ PR #7 `feature/ups-spr02-devteam-agency-ui` → `develop` 제출 (2026-06-15).
 
 ---
 
+## [Aiden 검토 2차] — 재작업 검토 (2026-06-16)
+
+**코드 품질: ✅ Issue 1~7 전부 수정 확인**
+
+| Issue | 내용 | 판정 |
+|:-----:|:-----|:----:|
+| 1 | `_linkShipperToAgency` 명시적 컬럼 INSERT | ✅ |
+| 2 | `shipper-form.tsx` locale prefix (`useParams()`) | ✅ |
+| 3 | `shippers/page.tsx` `checkPermission` + redirect | ✅ |
+| 4 | `new/page.tsx` `profile.org_id` null 체크 | ✅ |
+| 5 | `agency/page.tsx` i18n 키 교체 | ✅ |
+| 6 | `shippers-client.tsx` `AgencyShipperRow[]` 타입 | ✅ |
+| 7 | TC-P7-SHIPPER-01 테스트 타이틀 수정 | ✅ |
+
+**거버넌스: ❌ 반려 사유 2건**
+
+| # | 사유 | 위반 규칙 |
+|:--|:-----|:---------|
+| 1 | **Dave TASK-149(TeamB) DoD 4항목 전부 미체크** — `[ ]` 상태로 완료 보고. 코드 수정은 정상 완료됐으나 R-17 DoD 체크 의무 미이행. | R-17 §DoD 체크 |
+| 2 | **TASK 번호 충돌** — Jaison이 PR 재작업용 TASK-148(Baker)·TASK-149(Dave) 발령 시 Team A의 기존 TASK-148(B_Kai 인보이스 PDF)·TASK-149(Riley 배송방법)와 번호 충돌. R-19 §TASK 번호 채번 규칙 위반("채번 전 ACTIVE_TASK.md 전체 섹션 확인 후 최대값+1"). 원본 TASK-145/146/147 재채번 미이행도 동일. | R-19 §TASK 번호 채번 규칙 |
+
+**재작업 지시 — 최소 재작업 (코드 변경 불필요)**:
+
+> ⚠️ **채번 체계 변경 (GOV_COMMON.md R-19 v2.0, Edward 승인 2026-06-16)**: Team B는 `TASK-B-NNN` 독립 순번으로 전환. 기존 TASK-145~149를 아래와 같이 재채번.
+
+1. **Dave**: `TASK-149_260616_PR7반려수정_Dave.md` DoD 4항목 `[ ]` → `[x]` 체크 (코드는 이미 구현 완료됨)
+2. **Jaison**: TASK 번호 재채번 — 파일명 변경 + ACTIVE_TASK.md Team B 섹션 갱신:
+   | 기존 | 변경 (TASK-B 체계) |
+   |:-----|:-----------------|
+   | TASK-145 (Dave · Agency화주ServerActions) | → TASK-B-001 |
+   | TASK-146 (Baker · Agency화주목록등록UI) | → TASK-B-002 |
+   | TASK-147 (Dave · Agency대시보드NaviSidebar) | → TASK-B-003 |
+   | TASK-148 (Baker · PR#7반려수정) | → TASK-B-004 |
+   | TASK-149 (Dave · PR#7반려수정) | → TASK-B-005 |
+3. ACTIVE_TASK.md Team B 섹션 Task 번호 일괄 갱신 (TASK-B-001~005)
+4. `check-R17-DoD` 재실행 후 PR 재제출
+
+---
+
 ## [발견 이슈]
 
 _(없음)_
