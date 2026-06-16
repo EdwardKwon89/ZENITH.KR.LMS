@@ -12,7 +12,7 @@
 | **관련 IMP** | IMP-111 |
 | **브랜치** | `feature/ups-spr01-devteam-agency-role` |
 | **커밋 태그** | `[Baker]` |
-| **상태** | 🔔 |
+| **상태** | ✅ |
 
 ---
 

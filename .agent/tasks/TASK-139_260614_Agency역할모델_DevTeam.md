@@ -11,7 +11,7 @@
 | **관련 IMP** | IMP-111 |
 | **브랜치** | `feature/ups-spr01-devteam-agency-role` |
 | **커밋 태그** | `[JSJung]` / `[Jaison]` / `[Dev_OC]` |
-| **상태** | 🔔 |
+| **상태** | ✅ |
 
 ---
 
@@ -122,6 +122,22 @@ An-12 §4 기준으로 설계 확정됨 (2026-06-14 Edward 승인).
 - `src/types/agency.ts`: AgencyShipper, AgencyRateOverride 인터페이스 정의
 - `src/app/[locale]/(auth)/register/page.tsx`: OrgType에 AGENCY 추가 + 법인 등록 화면 대리점 선택 옵션 추가
 - `tests/unit/auth/agency-rbac.test.ts`: TC-P7-AGENCY-01~07 신규 7건
+
+---
+
+## [Aiden 검토]
+
+**판정**: ✅ 승인 (2026-06-14 PR#5 머지 완료)
+
+| 검토 항목 | 결과 |
+|:---------|:----:|
+| DoD 전항목 `[x]` 체크 완료 | ✅ |
+| 코드 커밋 `dc8a2ff` (리베이스 후) 확인 | ✅ |
+| supabase db reset 검증 (TASK-140 Baker 완료) | ✅ |
+| 신규 TC-P7-AGENCY-01~07 (7건) 전량 PASS | ✅ |
+| 기존 7 FAIL = DEF-065 pre-existing (TASK-139 범위 외) | ✅ 확인 |
+| R-19 팀 리더(JSJung/Jaison) 자율 운영 절차 준수 | ✅ |
+| PR#5 → main 머지 | ✅ |
 
 ---
 
