@@ -27,7 +27,8 @@ export async function getWarehousedOrders() {
       packages,
       shipper:profiles!zen_orders_shipper_id_fkey(name),
       origin_port:zen_ports!zen_orders_origin_port_id_fkey(name, code),
-      dest_port:zen_ports!zen_orders_dest_port_id_fkey(name, code)
+      dest_port:zen_ports!zen_orders_dest_port_id_fkey(name, code),
+      order_packages:zen_order_packages!zen_order_packages_order_id_fkey(id, intl_ref_no, packing_unit, packing_count)
     `)
     .eq("status", OrderStatus.WAREHOUSED)
     .order("created_at", { ascending: false });
@@ -97,6 +98,12 @@ export async function confirmOutbound(orderId: string) {
   }, 0);
   const orgId = (order as any).org_id || profile.org_id;
 
+  const { data: pkgs } = await supabase
+    .from("zen_order_packages")
+    .select("id, intl_ref_no, packing_count")
+    .eq("order_id", orderId);
+  const pkgsWithoutIntlRef = (pkgs || []).filter((p) => !p.intl_ref_no).length;
+
   await updateOrderStatus(orderId, OrderStatus.RELEASED, "[출고확정]");
 
   const { error: historyError } = await supabase
@@ -118,5 +125,5 @@ export async function confirmOutbound(orderId: string) {
   revalidatePath("/(dashboard)/warehouse/outbound", "page");
   revalidatePath("/(dashboard)/orders", "page");
 
-  return { success: true };
+  return { success: true, pkgsWithoutIntlRef };
 }
