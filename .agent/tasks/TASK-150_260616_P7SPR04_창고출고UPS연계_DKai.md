@@ -10,7 +10,7 @@
 | **관련 IMP** | IMP-119 |
 | **브랜치** | `feature/ups-spr04-dkai-outbound-ups` (신규 독립 브랜치) |
 | **커밋 태그** | `[D_Kai]` |
-| **상태** | 🔔 |
+| **상태** | ❌ |
 
 > ⚠️ **MVP 범위**: API 자동 발부(Pactrak Manifest API)는 IMP-115(SPR-05, post-MVP) 대상.  
 > 본 Task는 **수동 번호 표시 + 출고 확인 플로우 수정**에 한정.

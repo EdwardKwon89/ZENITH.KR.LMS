@@ -346,12 +346,20 @@
 | **TC-EXR-02** | updateExchangeRateSettings() — 정상 저장 | 환율 설정 데이터 저장 및 revalidatePath 동작 확인 | `tests/unit/admin/exchange-rate.test.ts` |
 | **TC-EXR-03** | 잘못된 환율값(음수) 입력 시 Zod 에러 반환 | Zod 유효성 검증을 통한 비정상 환율값 차단 확인 | `tests/unit/admin/exchange-rate.test.ts` |
 
+### 29. Phase 7 오더 직접배송/픽업 선택 (Phase 7 SPR-04)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-UPS-ORDER-01** | DIRECT 선택 시 pickup 필드 불필요 저장 | 직접배송 선택 시 픽업지 정보 없이 정상 생성 검증 | `tests/unit/orders/delivery-method.test.ts` |
+| **TC-UPS-ORDER-02** | PICKUP 선택 시 필수 필드 존재 시 저장 | 픽업 선택 및 필수 3종 입력 시 정상 생성 검증 | `tests/unit/orders/delivery-method.test.ts` |
+| **TC-UPS-ORDER-03** | PICKUP 선택 시 필수 필드 누락 시 차단 | 픽업 선택하고 정보 누락 시 Zod 유효성 검증 차단 확인 | `tests/unit/orders/delivery-method.test.ts` |
+
 ---
 
 ## 📊 최신 검증 이력 (Execution History)
 
 | 검증일 | 버전 | 성공/실패 | 총 소요시간 | 결과 리포트 |
 | :--- | :--- | :---: | :--- | :--- |
+| 2026-06-16 | v1.5.5 | ✅ PASS | 5.80s | TASK-149 IMP-118 오더 직접배송/픽업 UI 구현 완료. delivery-method.test.ts 3개 TC 신규 등록. 전체 회귀 테스트 통과. |
 | 2026-06-15 | v1.5.4 | ✅ PASS | 7.82s | TASK-147 IMP-109 환율 설정 화면 구현 완료. exchange-rate.test.ts 3개 TC 신규 등록. 전체 회귀 테스트 319건 통과. |
 | 2026-06-08 | v1.5.3 | ✅ PASS | 51.90s | TASK-122 요율 Slab 구조 개편 완료. `tiers` 배열 → `{ weight_slabs, cbm_slabs }` 객체 변환. `fn_get_best_matching_rate` weight_slabs/cbm_slabs 각각 매칭. 엔진/액션/어댑터 tiers 참조 일괄 수정. 기존 314/314 전량 PASS 유지. |
 | 2026-06-08 | v1.5.2 | ✅ PASS | ~45s | TASK-121 운송수단별 요금 산정 정책 설정 완료. TC-POLICY-01~05 (총 5개 케이스) 추가 및 전체 회귀 테스트 314건 통과. |
