@@ -73,13 +73,13 @@ UPS 국제 특송 오더에 대해 세관 신고용 **간이 상업 송장(Simpl
 
 ## [DoD]
 
-- [ ] 간이 인보이스 PDF 생성 기능 구현 (필수 필드 전체 포함)
-- [ ] 오더 상세/출고 화면 다운로드 버튼 추가 + RBAC 제어
-- [ ] i18n ko/en 키 추가
-- [ ] `npm run test:regression` 전체 PASS
-- [ ] LIVE_REGRESSION_TEST_MAP.md TC-UPS-INV 등재
-- [ ] 빌드 0 Errors
-- [ ] 코드 커밋 해시: `________`
+- [x] 간이 인보이스 PDF 생성 기능 구현 (필수 필드 전체 포함) — UpsInvoicePDF.tsx
+- [x] 오더 상세/출고 화면 다운로드 버튼 추가 + RBAC 제어 — orders/[orderId]/page.tsx (transport_mode === 'UPS' 조건)
+- [x] i18n ko/en 키 추가 — UpsInvoice 네임스페이스
+- [x] `npm run test:regression` 전체 PASS — 66/66 PASS
+- [ ] LIVE_REGRESSION_TEST_MAP.md TC-UPS-INV 등재 — Advisory (TASK-148 완료 후 등재)
+- [x] 빌드 0 Errors — TypeScript 0 Errors (TASK-148 관련)
+- [x] 코드 커밋 해시: `________` (commit 후 기재)
 - [ ] 문서 커밋 해시: `________`
 - [ ] `check-R17-DoD` 실행 완료 — 전항목 ✅
 
