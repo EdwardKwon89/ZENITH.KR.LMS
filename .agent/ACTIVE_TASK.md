@@ -189,7 +189,7 @@
 | TASK-147 | 260615 | IMP-109 환율 설정 화면 — 기준통화 + 환율(USD/CNY/JPY) 어드민 UI | P3 | 없음 | Riley | ✅ | [TASK-147](tasks/TASK-147_260615_IMP109환율설정화면_Riley.md) | IMP-109 · `1c67c35` · 366/366 PASS · TASK-146 merge ✅ · Aiden ✅ 승인 (260616) |
 | TASK-148 | 260616 | [P7-SPR-03] 간이 UPS 인보이스 PDF 출력 | P2 | TASK-138 ✅ · TASK-146 ✅ | B_Kai | 🔔 | [TASK-148](tasks/TASK-148_260616_P7SPR03_UPS인보이스PDF_BKai.md) | IMP-117 · `abc9d20` · 381/381 PASS · 🔔 재제출 (브랜치 수정) |
 | TASK-149 | 260616 | [P7-SPR-04] 오더 등록 직접배송/픽업 선택 UI | P1 | TASK-138 ✅ | Riley | 🔔 | [TASK-149](tasks/TASK-149_260616_P7SPR04_오더직접배송픽업UI_Riley.md) | IMP-118 · Phase 7 SPR-04 |
-| TASK-150 | 260616 | [P7-SPR-04] 창고 출고 UPS 발송 연계 | P1 | TASK-138 ✅ · TASK-144 ✅ | D_Kai | ❌ | [TASK-150](tasks/TASK-150_260616_P7SPR04_창고출고UPS연계_DKai.md) | IMP-119 · Phase 7 SPR-04 |
+| TASK-150 | 260616 | [P7-SPR-04] 창고 출고 UPS 발송 연계 | P1 | TASK-138 ✅ · TASK-144 ✅ | D_Kai | 🔄 | [TASK-150](tasks/TASK-150_260616_P7SPR04_창고출고UPS연계_DKai.md) | IMP-119 · 2차 재작업 · 코드 `a0dcbd1` · 381/381 · 빌드 ✅ |
 | TASK-108 | 260601 | DEF-039 CARRIER RLS + 미스테이지 커밋 + 신원 수정 | P2 | 없음 | D_Kai | ✅ | [TASK-108](tasks/TASK-108_260601_DEF039CARRIER_RLS_미스테이지커밋_DKai.md) | DEF-039 해소 · 4cc88d8+beba338 · CARRIER RLS 3테이블 · 229/229 ✅ · Aiden ✅ 승인 |
 | TASK-109 | 260603 | IMP-095 Rate Card 항로(Port) 기반 매칭 구현 | P1 | TASK-106 ✅ · TASK-108 ✅ | D_Kai (OpenCode) | ✅ | [TASK-109](tasks/TASK-109_260603_IMP095포트기반요율매칭_DKai.md) | IMP-095 완료 · `0fb950d`+`fb263f9` · 236/236 PASS · Aiden ✅ 승인 |
 | TASK-110 | 260603 | IMP-096 요율 관리 페이지 통합 정리 (3단계) | P1 | TASK-106 ✅ · TASK-109 ✅ | D_Kai (OpenCode) | ✅ | [TASK-110](tasks/TASK-110_260603_IMP096요율관리페이지통합정리_DKai.md) | IMP-096 완료 · `e166fec`+`65c904b` · 236/236 PASS · Aiden ✅ 승인 |
@@ -229,7 +229,7 @@
 | Agent | 상태 | 비고 |
 |:------|:----:|:----|
 | **Aiden (Claude)** | ✅ TASK-150 발령 완료 (260616) | SPR-03/04 발령 — TASK-148/149/150 신규 발령. IMP-117/118/119 등재 |
-| **D_Kai (OpenCode)** | ❌ TASK-150 반려 (CRITICAL) — 재작업 필요 | IMP-119 창고 출고 UPS 연계 · Scope 오류+허위 해시+브랜치 위반+DoD 전항목 미체크 |
+| **D_Kai (OpenCode)** | 🔄 TASK-150 2차 재작업 착수 | IMP-119 창고 출고 UPS 연계 · 코드 `a0dcbd1` · 브랜치 재설정 완료 |
 | **B_Kai** | ❌ TASK-148 반려 — 재작업 필요 | IMP-117 간이 UPS 인보이스 PDF · 헤더 미변경+해시 허위+브랜치 위반 |
 | **Riley** | 🔔 TASK-149 완료 | IMP-118 오더 직접배송/픽업 UI · 코드 커밋 완료 · 🔔 재제출 |
 | N_Kai | 재교육 세션 대기 (TASK-087) | R-17 위반 누적 — 신규 할당 중단 유지 |
