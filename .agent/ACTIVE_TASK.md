@@ -184,9 +184,12 @@
 | TASK-141 | 260614 | [P7-SPR-02] UPS 요금 계산 엔진 코어 (`pricing-engine.ts` + 타입 + `pricing.ts` 래퍼 + TC) | P1 | TASK-138 ✅ | Aiden | ✅ | [TASK-141](tasks/TASK-141_260614_Phase7UPS_요금계산엔진_창고입고수정_Aiden.md) | IMP-112 코어 · `e60fff0` · TC-UPS-P 12/12 ✅ · Aiden ✅ 승인 (260615) |
 | TASK-143 | 260614 | [P7-SPR-02] UPS 요율 조회 Server Actions 5종 (`rates.ts` — Zone/Product/BaseRate/Fuel/OC) | P1 | TASK-138 ✅ | D_Kai | ✅ | [TASK-143](tasks/TASK-143_260614_UPS_조회ServerActions_DKai.md) | IMP-112 일부 · fee7bf1 · DoD 8/8 · TC-UPS-R 5/5 · Aiden ✅ 승인 (260615) |
 | TASK-144 | 260614 | [P7-SPR-02] 창고 입고 화면 REF_NO 입력 UI (domestic_ref_no / intl_ref_no + locked 처리) | P1 | TASK-138 ✅ | B_Kai | ✅ | [TASK-144](tasks/TASK-144_260614_창고입고REF_NO_UI_BKai.md) | IMP-112 일부 · b315d49+6870271 · DoD 10/10 · TC-WH-REF 4/4 · Aiden ✅ 승인 (260615) |
-| TASK-145 | 260615 | D_Kai 재교육 세션 4차 (TASK-143 반려 2회 반복 패턴 개선) | P4 | 없음 | D_Kai | ❌ | [TASK-145](tasks/TASK-145_260615_DKai재교육세션4차_DKai.md) | 반려 — task file 미작성 상태로 ACTIVE_TASK 단독 🔔 변경 (R-17 위반) |
+| TASK-145 | 260615 | D_Kai 재교육 세션 4차 (TASK-143 반려 2회 반복 패턴 개선) | P4 | 없음 | D_Kai | ✅ | [TASK-145](tasks/TASK-145_260615_DKai재교육세션4차_DKai.md) | 재교육 완료 · `0192648` (main) · Aiden ✅ 승인 (260615) [브랜치 반영] |
 | TASK-146 | 260615 | [P7-SPR-03] UPS 요율 Admin UI (Zone/제품/기본요금/유류할증/OC 관리) | P2 | TASK-138 ✅ · TASK-143 ✅ | B_Kai | ✅ | [TASK-146](tasks/TASK-146_260615_P7SPR03_UPS요율AdminUI_BKai.md) | IMP-113 · `0578fb7` · 65 test files PASS · dialog/table/tabs ✅ · Aiden ✅ 승인 (260616) |
 | TASK-147 | 260615 | IMP-109 환율 설정 화면 — 기준통화 + 환율(USD/CNY/JPY) 어드민 UI | P3 | 없음 | Riley | ✅ | [TASK-147](tasks/TASK-147_260615_IMP109환율설정화면_Riley.md) | IMP-109 · `1c67c35` · 366/366 PASS · TASK-146 merge ✅ · Aiden ✅ 승인 (260616) |
+| TASK-148 | 260616 | [P7-SPR-03] 간이 UPS 인보이스 PDF 출력 | P2 | TASK-138 ✅ · TASK-146 ✅ | B_Kai | ⬜ | [TASK-148](tasks/TASK-148_260616_P7SPR03_UPS인보이스PDF_BKai.md) | IMP-117 · Phase 7 SPR-03 |
+| TASK-149 | 260616 | [P7-SPR-04] 오더 등록 직접배송/픽업 선택 UI | P1 | TASK-138 ✅ | Riley | ⬜ | [TASK-149](tasks/TASK-149_260616_P7SPR04_오더직접배송픽업UI_Riley.md) | IMP-118 · Phase 7 SPR-04 |
+| TASK-150 | 260616 | [P7-SPR-04] 창고 출고 UPS 발송 연계 | P1 | TASK-138 ✅ · TASK-144 ✅ | D_Kai | ⬜ | [TASK-150](tasks/TASK-150_260616_P7SPR04_창고출고UPS연계_DKai.md) | IMP-119 · Phase 7 SPR-04 |
 | TASK-108 | 260601 | DEF-039 CARRIER RLS + 미스테이지 커밋 + 신원 수정 | P2 | 없음 | D_Kai | ✅ | [TASK-108](tasks/TASK-108_260601_DEF039CARRIER_RLS_미스테이지커밋_DKai.md) | DEF-039 해소 · 4cc88d8+beba338 · CARRIER RLS 3테이블 · 229/229 ✅ · Aiden ✅ 승인 |
 | TASK-109 | 260603 | IMP-095 Rate Card 항로(Port) 기반 매칭 구현 | P1 | TASK-106 ✅ · TASK-108 ✅ | D_Kai (OpenCode) | ✅ | [TASK-109](tasks/TASK-109_260603_IMP095포트기반요율매칭_DKai.md) | IMP-095 완료 · `0fb950d`+`fb263f9` · 236/236 PASS · Aiden ✅ 승인 |
 | TASK-110 | 260603 | IMP-096 요율 관리 페이지 통합 정리 (3단계) | P1 | TASK-106 ✅ · TASK-109 ✅ | D_Kai (OpenCode) | ✅ | [TASK-110](tasks/TASK-110_260603_IMP096요율관리페이지통합정리_DKai.md) | IMP-096 완료 · `e166fec`+`65c904b` · 236/236 PASS · Aiden ✅ 승인 |
@@ -225,10 +228,10 @@
 
 | Agent | 상태 | 비고 |
 |:------|:----:|:----|
-| **Aiden (Claude)** | ✅ TASK-141 완료 (260615) | SPR-03 발령 완료 — TASK-145/146/147 신규 발령 |
-| **D_Kai (OpenCode)** | 🔔 TASK-145 재교육 4차 완료 — TASK-143 반려 패턴 분석 + 체크리스트 v2.0 수립 ✅ |
-| **B_Kai** | 🔔 TASK-146 재작업 완료 — Aiden 검토 대기 | IMP-113 · 코드 `0578fb7` · 회귀 65/65 PASS · 🔔 재제출 |
-| **Riley** | 🔔 TASK-147 완료 보고 (2026-06-16) | IMP-109 환율 설정 화면 완료 — 코드 커밋 `1c67c35` |
+| **Aiden (Claude)** | ✅ TASK-150 발령 완료 (260616) | SPR-03/04 발령 — TASK-148/149/150 신규 발령. IMP-117/118/119 등재 |
+| **D_Kai (OpenCode)** | ⬜ TASK-150 착수 대기 | IMP-119 창고 출고 UPS 연계 · TASK-145 ✅ 승인 완료 (main `0192648`) |
+| **B_Kai** | ⬜ TASK-148 착수 대기 | IMP-117 간이 UPS 인보이스 PDF · TASK-146 ✅ 승인 (260616) |
+| **Riley** | ⬜ TASK-149 착수 대기 | IMP-118 오더 직접배송/픽업 UI · TASK-147 ✅ 승인 (260616) |
 | N_Kai | 재교육 세션 대기 (TASK-087) | R-17 위반 누적 — 신규 할당 중단 유지 |
 | Ring | 신규 할당 중단 유지 | 9차 위반 누적 |
 
@@ -244,6 +247,7 @@
 
 ## 개정 이력
 
+| 2026-06-16 | Aiden (Claude) | **Phase 7 SPR-03/04 Team A 발령** — TASK-148(B_Kai, IMP-117 UPS 인보이스 PDF) · TASK-149(Riley, IMP-118 오더 직접배송/픽업 UI) · TASK-150(D_Kai, IMP-119 창고 출고 UPS 연계) 신규 발령. SPR-03 TASK-146 ✅ · SPR-02 TASK-147 ✅ 완료 후 다음 스프린트 발령. TASK-145 ✅ 브랜치 반영 (main `0192648`). |
 | 2026-06-15 | Aiden (Claude) | **Phase 7 SPR-03 Team A 발령** — TASK-145(D_Kai 재교육 4차) · TASK-146(B_Kai, IMP-113 UPS 요율 Admin UI) · TASK-147(Riley, IMP-109 환율 설정 화면) 신규 발령. SPR-02 전량 완료(TASK-141·143·144 ✅) 기반. |
 | 2026-06-14 | Aiden (Claude) | **SPR-02 Team A 병행 분해** — TASK-141(Aiden, 엔진 코어) 범위 축소. TASK-143(D_Kai, rates.ts 5종 조회) · TASK-144(B_Kai, 창고 입고 REF_NO UI) 신규 발령. 3개 Task 병행 진행으로 SPR-02 납기 준수 목표. |
 | 2026-06-14 | Aiden (Claude) | **R-19 다중팀 거버넌스 신설** — Edward 승인. Team B(JSJung·Jaison) 자율 Task 발령 권한 부여. ACTIVE_TASK.md Team A/B 섹션 분리. TASK-139/140 Jaison의 선행 위반 소급 면제. 5팀 확장 대비 설계 확정. |
