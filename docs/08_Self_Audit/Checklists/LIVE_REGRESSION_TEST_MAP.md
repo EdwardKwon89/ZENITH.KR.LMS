@@ -334,6 +334,7 @@
 
 | 검증일 | 버전 | 성공/실패 | 총 소요시간 | 결과 리포트 |
 | :--- | :--- | :---: | :--- | :--- |
+| 2026-06-17 | v1.5.5 | ✅ PASS | 5.80s | TASK-149 IMP-118 오더 직접배송/픽업 UI 구현 완료. delivery-method.test.ts 4개 TC 신규 등록. 전체 회귀 테스트 통과 (4차 재제출). |
 | 2026-06-08 | v1.5.3 | ✅ PASS | 51.90s | TASK-122 요율 Slab 구조 개편 완료. `tiers` 배열 → `{ weight_slabs, cbm_slabs }` 객체 변환. `fn_get_best_matching_rate` weight_slabs/cbm_slabs 각각 매칭. 엔진/액션/어댑터 tiers 참조 일괄 수정. 기존 314/314 전량 PASS 유지. |
 | 2026-06-08 | v1.5.2 | ✅ PASS | ~45s | TASK-121 운송수단별 요금 산정 정책 설정 완료. TC-POLICY-01~05 (총 5개 케이스) 추가 및 전체 회귀 테스트 314건 통과. |
 | 2026-06-07 | v1.5.1 | ✅ PASS | TBD | TASK-120 Phase 6 통합 테스트 5파일 신규 등록. TC-P6-INTG-01~05 (총 28개 케이스) 추가 및 전체 회귀 테스트 통과. |
@@ -384,6 +385,14 @@
 | **TC-UPS-R-03** | `getUpsBaseRates({ productId, zoneId })` 복합 필터 | 기본 요금표 productId + zoneId 복합 필터 | `tests/unit/ups/rates-actions.test.ts` |
 | **TC-UPS-R-04** | `getUpsFuelSurcharge()` 기준일 기반 최신 조회 | 유류할증료 effective_week 기준 최신 조회 | `tests/unit/ups/rates-actions.test.ts` |
 | **TC-UPS-R-05** | `getUpsOtherCharges()` 활성 항목만 반환 | 부가요금 is_active 필터 검증 | `tests/unit/ups/rates-actions.test.ts` |
+
+### 29. Phase 7 오더 직접배송/픽업 선택 (Phase 7 SPR-04)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-UPS-ORDER-01** | DIRECT 선택 시 pickup 필드 불필요 저장 | 직접배송 선택 시 픽업지 정보 없이 정상 생성 검증 | `tests/unit/orders/delivery-method.test.ts` |
+| **TC-UPS-ORDER-02** | PICKUP 선택 시 필수 필드 존재 시 저장 | 픽업 선택 및 필수 3종 입력 시 정상 생성 검증 | `tests/unit/orders/delivery-method.test.ts` |
+| **TC-UPS-ORDER-03** | PICKUP 선택 시 필수 필드 누락 시 차단 | 픽업 선택하고 정보 누락 시 Zod 유효성 검증 차단 확인 | `tests/unit/orders/delivery-method.test.ts` |
+| **TC-UPS-ORDER-04** | DIRECT 선택 + pickup 필드 전달 시 | 직접배송 선택 시 픽업 정보가 초기화되어 저장되는지 검증 | `tests/unit/orders/delivery-method.test.ts` |
 
 ---
 
