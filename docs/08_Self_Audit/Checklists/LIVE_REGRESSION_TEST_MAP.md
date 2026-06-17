@@ -99,6 +99,21 @@
 | **TC-F.8** | 세금계산서 메일 발송 | Resend 연동 및 SENT/FAILED 상태 전환 확인 | `tests/integration/fin-03.test.ts` |
 | **TC-F.9** | 세금계산서 이력 조회 | 화주/어드민별 발행 및 발송 히스토리 조회 검증 | `tests/integration/fin-03.test.ts` |
 
+<<<<<<< HEAD
+=======
+### 9. UPS 요율 관리 (Phase 7 SPR-03)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-UPS-ADMIN-01** | Zone CRUD | Zone 등록 및 수정 | `tests/unit/ups/rates-admin-actions.test.ts` |
+| **TC-UPS-ADMIN-02** | 기본요금 UPSERT | Zone×제품×중량 기본 요금 등록·수정 | `tests/unit/ups/rates-admin-actions.test.ts` |
+| **TC-UPS-ADMIN-03** | 유류할증 UPSERT | 주별 유류할증료 등록·수정 | `tests/unit/ups/rates-admin-actions.test.ts` |
+| **TC-UPS-ADMIN-04** | Other Charge CRUD | 부가요금 등록 및 수정 | `tests/unit/ups/rates-admin-actions.test.ts` |
+| **TC-UPS-ADMIN-05** | 역할 인증 가드 | 비관리자의 요율 관리 액션 접근 차단 | `tests/unit/ups/rates-admin-actions.test.ts` |
+| **TC-UPS-WH-01** | 창고 출고 — intl_ref_no 있음 | 정상 출고 (pkgsWithoutIntlRef=0) | `tests/unit/warehouse/outbound-ups.test.ts` |
+| **TC-UPS-WH-02** | 창고 출고 — intl_ref_no 없음 | pkgsWithoutIntlRef > 0 반환 | `tests/unit/warehouse/outbound-ups.test.ts` |
+| **TC-UPS-WH-03** | 창고 출고 — 상태 전이 | WAREHOUSED→RELEASED 전이 유지 | `tests/unit/warehouse/outbound-ups.test.ts` |
+
+>>>>>>> a9f73ac ([D_Kai] docs: TASK-150 3차 재작업 완료 — IMP-119 🔔 (단일 커밋: task file + ACTIVE_TASK + IMP_PROGRESS + LIVE_TEST_MAP))
 ---
 
 ### 9. 지능형 트래킹 가시성 (Intelligent Tracking)
