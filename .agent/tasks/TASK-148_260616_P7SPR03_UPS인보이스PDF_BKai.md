@@ -81,7 +81,7 @@ UPS 국제 특송 오더에 대해 세관 신고용 **간이 상업 송장(Simpl
 - [x] 빌드 0 Errors — TypeScript 0 Errors
 - [x] 코드 커밋 해시: `abc9d20` (재작업 — 브랜치 `feature/ups-spr03-bkai-invoice-pdf`)
 - [x] 문서 커밋 해시: `8b4dded` (4차 재작업 — 단일 커밋 4파일 동시 포함, 5차 반려 후 최종 확인)
-- [x] `check-R17-DoD` 실행 완료 — 4차 재작업 ✅ (4파일 단일 커밋, TC-UPS-INV 9/9, 빌드 0 Errors)
+- [x] `check-R17-DoD` 실행 완료 — 5차 재작업 ✅ (4파일 단일 커밋 `fecf69a`, TC-UPS-INV 9/9, 빌드 0 Errors, 381/381 PASS)
 
 ---
 
