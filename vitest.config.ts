@@ -17,6 +17,9 @@ export default defineConfig({
       '**/{karma,rollup,webpack,vite,vitest,ava,babel,nyc,cypress,tsup,build}.config.*',
       'tests/e2e/**',
       'scratch/**',
+      // Live-DB integration tests: require real Supabase + .env.local — excluded from CI regression
+      'tests/integration/p6-transport-policy.test.ts',
+      'tests/integration/tracking-business-qa.test.ts',
     ],
     alias: {
       '@': path.resolve(__dirname, './src'),
