@@ -163,6 +163,29 @@ _(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
 
 ---
 
+**[8차 판정]**: ✅ 승인 (PR rebase 후 최종 머지 예정)
+
+| 항목 | 결과 |
+|:----|:----:|
+| 4파일 단일 docs 커밋 `64295b6` | ✅ |
+| DoD 문서 커밋 해시 `64295b6` | ✅ |
+| `Closes #13` 연결 | ✅ |
+| PR body ANSI 없음 | ✅ |
+| 회귀 363/363 PASS (develop 354 + TC-UPS-INV 9) | ✅ |
+| check-R17-DoD 전항목 ✅ | ✅ |
+
+**Advisory (비차단)**:
+- 후속 커밋 `fa950ed` (task file 단독 — DoD 해시 기재) — chicken-and-egg 패턴, 비차단
+
+**후속 조치 (B_Kai 수행)**:
+```bash
+git rebase develop   # @swc/helpers 0.5.23 CI fix (231639b) 반영
+git push --force-with-lease origin feature/ups-spr03-bkai-invoice-pdf-v2
+```
+CI 재실행 확인 후 Aiden이 PR #22 머지합니다.
+
+---
+
 ## [작업 결과]
 
 ### 구현 파일
