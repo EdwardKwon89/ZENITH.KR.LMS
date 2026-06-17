@@ -15,6 +15,7 @@ import { OrderVocTrigger } from '@/components/voc/OrderVocTrigger';
 import DocumentDownloadButton from '@/components/documents/DocumentDownloadButton';
 import CommercialInvoicePDF from '@/components/documents/CommercialInvoicePDF';
 import PackingListPDF from '@/components/documents/PackingListPDF';
+import UpsInvoicePDF from '@/components/documents/UpsInvoicePDF';
 import { getDeclarations } from '@/app/actions/customs';
 import { getOrderRateSnapshot } from '@/app/actions/operations';
 import OrderCustomsSection from '@/components/customs/OrderCustomsSection';
@@ -76,6 +77,12 @@ export default async function OrderDetailPage({
     profile?.role === 'ZENITH_SUPER_ADMIN' || 
     (profile?.role === 'ADMIN' && orgType === 'PLATFORM') || 
     checkPermission(profile?.role, "/admin");
+
+  // UPS Invoice 출력 권한 (TASK-148 IMP-117)
+  const isShipper = order.shipper_id && (profile?.id === order.shipper_id || profile?.org_id === order.shipper_id);
+  const isAgency = profile?.role === 'AGENCY';
+  const canPrintUpsInvoice = isAdmin || profile?.role === 'MANAGER' || isShipper || isAgency;
+  const isUpsOrder = order.transport_mode === 'UPS';
 
   const rawLogsData = isAdmin ? await getTrackingRawLogs(orderId) : { logs: [] };
   const rawLogs = rawLogsData?.logs || [];
@@ -185,6 +192,86 @@ export default async function OrderDetailPage({
     pl_no: tDoc('pl_no'),
     remarks: tDoc('remarks'),
     remarks_text: tDoc('remarks_text'),
+  };
+
+  // 7. UPS Invoice 데이터 준비 (TASK-148 IMP-117)
+  const tOrders = await getTranslations('Orders');
+  const upsInvoiceData = isUpsOrder ? {
+    invoice_no: `UPS-${order.order_no}`,
+    date: new Date().toISOString().split('T')[0],
+    shipper: {
+      name: order.shipper?.name || 'ZENITH LOGISTICS',
+      address: (order.shipper as any)?.address || 'Seoul, South Korea',
+      contact: order.shipper_contact_phone || order.shipper_contact_email || ''
+    },
+    consignee: {
+      name: order.recipient_name || '',
+      address: order.recipient_address || '',
+      country: (order.dest_port as any)?.country_code || (order.dest_port as any)?.name || '',
+      contact: order.recipient_contact || order.recipient_phone || ''
+    },
+    packages: order.packages.map((pkg: any, idx: number) => {
+      const cnt = pkg.packing_count || 1;
+      const actualWeight = (pkg.gross_weight || 0) * cnt;
+      const vol = pkg.volume ?? (pkg.length && pkg.width && pkg.height ? (pkg.length * pkg.width * pkg.height) / 1000000 : 0);
+      const volumetricWeight = vol * 1000000 / 5000;
+      return {
+        ref_seq: idx + 1,
+        domestic_ref_no: pkg.domestic_ref_no,
+        intl_ref_no: pkg.intl_ref_no,
+        actual_weight_kg: actualWeight,
+        volumetric_weight_kg: volumetricWeight,
+        items: pkg.items.map((item: any) => ({
+          item_name: item.item_name,
+          quantity: item.quantity,
+          unit_price: item.unit_price || 0,
+          currency: item.currency || 'USD'
+        }))
+      };
+    }),
+    ups_service: {
+      product_code: (order.cargo_details as any)?.product_code || '',
+      product_name: (order.cargo_details as any)?.product_name || '',
+      zone: (order.cargo_details as any)?.zone || '',
+      delivery_method: (order.cargo_details as any)?.delivery_method || ''
+    },
+    total_weight: order.total_gross_weight || 0,
+    total_volumetric_weight: order.packages.reduce((sum: number, pkg: any) => {
+      const cnt = pkg.packing_count || 1;
+      const vol = pkg.volume ?? (pkg.length && pkg.width && pkg.height ? (pkg.length * pkg.width * pkg.height) / 1000000 : 0);
+      return sum + (vol * cnt * 1000000 / 5000);
+    }, 0),
+    total_declared_value: order.packages.reduce((sum: number, pkg: any) => 
+      sum + pkg.items.reduce((pSum: number, item: any) => pSum + ((item.quantity || 0) * (item.unit_price || 0)), 0), 0),
+    currency: 'USD'
+  } : null;
+
+  const upsInvoiceLabels = {
+    title: tOrders('ups_invoice.title'),
+    issue_date: tDoc('issue_date'),
+    shipper: tOrders('ups_invoice.shipper'),
+    consignee: tOrders('ups_invoice.consignee'),
+    order_ref: tDoc('order_ref'),
+    pkg_seq: '#',
+    ref_no: 'Ref No',
+    item_desc: tDoc('item_desc'),
+    quantity: tDoc('quantity'),
+    weight: tDoc('gross_weight'),
+    vol_weight: 'Vol. Weight',
+    unit_price: tDoc('unit_price'),
+    sub_total: tDoc('sub_total'),
+    total: tDoc('total'),
+    currency: tDoc('currency'),
+    total_weight_label: 'Total Weight',
+    total_vol_weight_label: 'Total Vol. Weight',
+    ups_service: 'UPS Service',
+    product: 'Product',
+    zone: 'Zone',
+    delivery_method: 'Delivery',
+    notice: 'Notice',
+    notice_text: 'For Customs Purposes Only — Simplified Commercial Invoice',
+    signature: 'Signature',
+    generated_on: tDoc('generated_on'),
   };
 
   return (
@@ -450,18 +537,26 @@ export default async function OrderDetailPage({
                 <p className="text-xs text-slate-500 italic mb-4">
                   {tDocs('description')}
                 </p>
-                <div className="flex flex-col gap-3">
-                   <DocumentDownloadButton 
-                     document={<CommercialInvoicePDF data={ciData} labels={docLabels} />}
-                     fileName={`CI_${order.order_no}.pdf`}
-                     label={`${tDocs('ci')} (CI)`}
-                   />
-                   <DocumentDownloadButton 
-                     document={<PackingListPDF data={plData} labels={docLabels} />}
-                     fileName={`PL_${order.order_no}.pdf`}
-                     label={`${tDocs('pl')} (PL)`}
-                   />
-                </div>
+                 <div className="flex flex-col gap-3">
+                    <DocumentDownloadButton 
+                      document={<CommercialInvoicePDF data={ciData} labels={docLabels} />}
+                      fileName={`CI_${order.order_no}.pdf`}
+                      label={`${tDocs('ci')} (CI)`}
+                    />
+                    <DocumentDownloadButton 
+                      document={<PackingListPDF data={plData} labels={docLabels} />}
+                      fileName={`PL_${order.order_no}.pdf`}
+                      label={`${tDocs('pl')} (PL)`}
+                    />
+                    {isUpsOrder && canPrintUpsInvoice && upsInvoiceData && (
+                      <DocumentDownloadButton 
+                        document={<UpsInvoicePDF data={upsInvoiceData} labels={upsInvoiceLabels} />}
+                        fileName={`UPS_INVOICE_${orderId}_${new Date().toISOString().split('T')[0].replace(/-/g, '')}.pdf`}
+                        label={`${tOrders('ups_invoice.download_button')} (UPS)`}
+                        className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/30"
+                      />
+                    )}
+                 </div>
              </div>
           </section>
         </div>
