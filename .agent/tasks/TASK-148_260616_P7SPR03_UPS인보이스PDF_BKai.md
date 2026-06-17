@@ -249,3 +249,7 @@ _(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
 ### 코드 커밋
 
 - `[B_Kai] feat: TASK-148 IMP-117 UPS 간이 인보이스 PDF 출력` — `abc9d20` (브랜치 `feature/ups-spr03-bkai-invoice-pdf`)
+
+### 5차 재작업 문서 커밋
+
+- `[B_Kai] docs: TASK-148 5차 재작업 — 4파일 단일 커밋 (DoD 해시 8b4dded 정정 · 헤더 ❌→🔔 · 381/381 PASS)` — `fecf69a`
