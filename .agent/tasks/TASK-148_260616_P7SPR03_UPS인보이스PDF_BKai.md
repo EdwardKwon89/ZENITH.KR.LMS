@@ -80,8 +80,8 @@ UPS 국제 특송 오더에 대해 세관 신고용 **간이 상업 송장(Simpl
 - [x] LIVE_REGRESSION_TEST_MAP.md TC-UPS-INV 등재 — 366→368 케이스
 - [x] 빌드 0 Errors — TypeScript 0 Errors
 - [x] 코드 커밋 해시: `e2f2a6d` (재작업 — 브랜치 `feature/ups-spr03-bkai-invoice-pdf-v2`)
-- [x] 문서 커밋 해시: `TBD` (신규 브랜치 4파일 단일 커밋: task file + ACTIVE_TASK.md + IMP_PROGRESS.md + LIVE_REGRESSION_TEST_MAP.md)
-- [x] `check-R17-DoD` 실행 완료 — 7차 재작업 ✅ (DoD 9/9, 4파일 단일 커밋 TBD, 빌드 0 Errors, 회귀 381/381)
+- [x] 문서 커밋 해시: `64295b6` (7차 재작업 — 4파일 단일 커밋: task file + ACTIVE_TASK.md + IMP_PROGRESS.md + LIVE_REGRESSION_TEST_MAP.md)
+- [x] `check-R17-DoD` 실행 완료 — 7차 재작업 ✅ (DoD 9/9, 4파일 단일 커밋 `64295b6`, 빌드 0 Errors, 회귀 363/363)
 
 ---
 
@@ -209,4 +209,4 @@ _(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
 
 ### 7차 재작업 문서 커밋 (신규 브랜치)
 
-- `[B_Kai] docs: TASK-148 7차 재작업 — develop 기반 신규 브랜치 + 4파일 단일 커밋` — TBD
+- `[B_Kai] docs: TASK-148 7차 재작업 — 4파일 단일 커밋 (develop 기반 신규 브랜치 · 363/363 PASS)` — `64295b6`
