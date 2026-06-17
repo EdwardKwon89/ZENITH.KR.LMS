@@ -101,7 +101,7 @@ pickup_contact_tel: formData.pickup_contact_tel ?? null,
 - [x] LIVE_REGRESSION_TEST_MAP.md TC-UPS-ORDER 등재
 - [x] 빌드 0 Errors (TypeScript & Next.js 빌드 성공)
 - [x] 코드 커밋 해시: `1e812bf` + `866d978` (보완)
-- [x] 문서 커밋 해시: `30d5996`
+- [x] 문서 커밋 해시: `6ecd9cb`
 - [x] `check-R17-DoD` 실행 완료 — 전항목 ✅
 
 ---
