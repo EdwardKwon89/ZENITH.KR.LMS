@@ -10,7 +10,7 @@
 | **관련 IMP** | IMP-117 |
 | **브랜치** | `feature/ups-spr03-bkai-invoice-pdf` (신규 독립 브랜치) |
 | **커밋 태그** | `[B_Kai]` |
-| **상태** | ❌ |
+| **상태** | 🔔 |
 
 ---
 
@@ -80,7 +80,7 @@ UPS 국제 특송 오더에 대해 세관 신고용 **간이 상업 송장(Simpl
 - [x] LIVE_REGRESSION_TEST_MAP.md TC-UPS-INV 등재 — 366→368 케이스
 - [x] 빌드 0 Errors — TypeScript 0 Errors
 - [x] 코드 커밋 해시: `abc9d20` (재작업 — 브랜치 `feature/ups-spr03-bkai-invoice-pdf`)
-- [x] 문서 커밋 해시: `0f4e72b` (4차 재작업 — 단일 커밋 4파일 동시 포함)
+- [x] 문서 커밋 해시: `8b4dded` (4차 재작업 — 단일 커밋 4파일 동시 포함, 5차 반려 후 최종 확인)
 - [x] `check-R17-DoD` 실행 완료 — 4차 재작업 ✅ (4파일 단일 커밋, TC-UPS-INV 9/9, 빌드 0 Errors)
 
 ---
@@ -207,7 +207,7 @@ _(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
 | LIVE_REGRESSION_TEST_MAP.md | ✅ TC-UPS-INV-01/02 등재 (368 Cases) |
 | TC-UPS-INV 테스트 | ✅ 9/9 PASS |
 | 빌드 | ✅ 0 Errors |
-| **단일 docs 커밋 (4파일)** | ⬜ **진행 중** — task + ACTIVE + IMP + LIVE_TEST_MAP |
+| **단일 docs 커밋 (4파일)** | ✅ `8b4dded` (task + ACTIVE + IMP + LIVE_TEST_MAP)
 
 ---
 
