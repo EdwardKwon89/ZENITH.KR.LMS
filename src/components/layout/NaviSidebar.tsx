@@ -145,6 +145,7 @@ export default function NaviSidebar({
     { title: t("agency_management"), href: "/agency", icon: BuildingOffice2Icon },
     { title: t("agency_shippers_nav"), href: "/agency/shippers", icon: Users },
     { title: t("agency_rate_overrides_nav"), href: "/agency/rate-overrides", icon: TrendingUp },
+    { title: t("agency_settlements_nav"), href: "/agency/settlements", icon: Calculator },
     {
       title: t("mypage"),
       href: "/mypage",
