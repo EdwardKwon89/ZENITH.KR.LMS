@@ -12,7 +12,7 @@
 | **관련 IMP** | IMP-114 |
 | **브랜치** | `feature/ups-spr02-devteam-agency-ui` (TASK-145와 동일 브랜치) |
 | **커밋 태그** | `[Baker]` |
-| **상태** | 🔔 |
+| **상태** | ✅ |
 
 ---
 
@@ -204,6 +204,15 @@ export function ContactFields({ t }: { t: (key: string) => string }) { ... }
 ### 브랜치
 
 `feature/ups-spr02-devteam-agency-ui`
+
+---
+
+## [Aiden 검토]
+
+**판정: ✅ 승인** (2026-06-16, Aiden)
+
+DoD 11/11 전항목 ✅, 코드 커밋 `ec4d7f5`+`0976c21` 확인, 회귀 340/340 PASS. ZEN_A4 10개 파일 분리 완료.
+Advisory: 문서 커밋 해시 DoD 항목 없음 — 다음 Task부터 추가 권고.
 
 ---
 
