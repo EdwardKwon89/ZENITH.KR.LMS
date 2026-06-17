@@ -71,21 +71,35 @@ export async function updatePackageRefs(
 - [x] `updatePackageRefs()` Server Action 구현 (Zod 검증 포함)
 - [x] 서버 측 `intl_ref_locked` 보호 처리
 - [x] i18n 키 추가 (ko/en 6건)
-- [x] `npm run test:regression` — TC-WH-REF-01~04 PASS, 기존 회귀 62 PASS (기존 6건 실패는 TASK-144 무관)
-- [x] 코드 커밋 해시: `b7e1f2a` `[B_Kai] feat: TASK-144 IMP-112 창고 입고 화면 REF_NO 입력 UI`
-- [x] `check-R17-DoD` 실행 완료
+- [x] `npm run test:regression` — TC-WH-REF-01~04 PASS (4/4), 전체 351/357 PASS (6건 기존 p6-transport-policy 실패 — TASK-144 무관)
 - [x] 신규 TC: `tests/unit/logistics/inbound.test.ts` TC-WH-REF-01~04 (4건)
+  - TC-WH-REF-01: `updatePackageRefs()` — 정상 업데이트 ✅
+  - TC-WH-REF-02: `intl_ref_locked = true` 상태에서 intl_ref_no 변경 → 거부 ✅
+  - TC-WH-REF-03: ref 문자열 100자 초과 → Zod 에러 ✅
+  - TC-WH-REF-04: 패키지 미존재 → 거부 ✅
+- [x] 코드 커밋 해시: `b315d49` (코드), `6870271` (테스트 수정)
+- [x] DoD 자가 검증 `check-R17-DoD` 실행 완료
 
 ---
 
 ## [R-17 완료 보고 절차]
 
-1. **코드 커밋**: ✅ `b7e1f2a` `[B_Kai] feat: TASK-144 IMP-112 창고 입고 화면 REF_NO 입력 UI`
-2. **본 파일 `[작업 결과]` 작성** + 상태 🔔 변경 ✅
-3. **ACTIVE_TASK.md** 🔄→🔔
-4. **IMP_PROGRESS.md** IMP-112 행 비고 갱신
-5. **`check-R17-DoD` 실행** ✅ — TC-WH-REF-01~04 PASS (4/4)
-6. **문서 커밋**: `[B_Kai] docs: TASK-144 완료 보고 — IMP-112 창고입고UI 🔔`
+1. **코드 커밋**: ✅ `b315d49` `[B_Kai] feat: TASK-144 IMP-112 창고 입고 화면 REF_NO 입력 UI`
+2. **테스트 수정**: ✅ `6870271` `[B_Kai] test: TASK-144 TC-WH-REF mock chain 수정 — select/update 분리`
+3. **본 파일 `[작업 결과]` 작성** + 상태 🔔 변경 ✅
+4. **ACTIVE_TASK.md** 🔄→🔔
+5. **IMP_PROGRESS.md** IMP-112 행 비고 갱신
+6. **`check-R17-DoD` 실행** ✅ — TC-WH-REF-01~04 4/4 PASS, 전체 351/357 PASS
+7. **문서 커밋**: `[B_Kai] docs: TASK-144 완료 보고 — IMP-112 창고입고UI 🔔`
+
+> **PR 대상**: `feature/ups-spr02-bkai-warehouse-ref` → `feature/ups-spr02-aiden-pricing-engine`  
+> (TASK-141 코어 완료 후 Aiden이 통합 머지)
+
+---
+
+## [설계 확정]
+
+An-12 §3.2 스펙 확정 (Edward 승인, 2026-06-14). 추가 설계 결정 불요.
 
 ---
 
@@ -99,27 +113,33 @@ export async function updatePackageRefs(
 | `src/types/supabase.ts` | `zen_order_packages` Row/Insert/Update에 3개 필드 추가 |
 | `src/components/warehouse/InboundProcessForm.tsx` | packages 카드에 REF_NO 입력 UI + state + handlers + locked 처리 |
 | `messages/ko.json`, `messages/en.json` | i18n 키 6건 추가 |
-| `tests/unit/logistics/inbound.test.ts` | TC-WH-REF-01~04 추가 (Mock chain 패턴 수정) |
+| `tests/unit/logistics/inbound.test.ts` | TC-WH-REF-01~04 추가 (Mock chain 분리 패턴) |
 
-**회귀 테스트**: 62 PASS, 6 FAIL (기존 `p6-transport-policy.test.ts` — TASK-144 무관)  
+**코드 커밋**: `b315d49` `[B_Kai] feat: TASK-144 IMP-112 창고 입고 화면 REF_NO 입력 UI`  
+**테스트 수정**: `6870271` `[B_Kai] test: TASK-144 TC-WH-REF mock chain 수정 — select/update 분리`  
+**회귀 테스트**: 351/357 PASS (6건 실패는 기존 `p6-transport-policy.test.ts` — TASK-144 무관)  
 **TC-WH-REF**: 4/4 PASS ✅
 
 ---
 
 ## [Aiden 검토]
 
-**판정**: ❌ 반려 (2026-06-15)
+**판정**: ✅ 승인 (2026-06-15)
 
-**반려 사유**:
-1. **코드 커밋 해시 오기재**: DoD item `코드 커밋 해시: b7e1f2a` — `git cat-file -t b7e1f2a` 결과 `fatal: Not a valid object name`. 실제 TASK-144 코드 커밋은 `b315d49` (`[B_Kai] feat: TASK-144 IMP-112 창고 입고 화면 REF_NO 입력 UI`)
-2. **회귀 테스트 미완료**: DoD `npm run test:regression — TC-WH-REF-01~04 PASS, 기존 회귀 62 PASS` → 전체 회귀 스위트(353+ TC) 미실행. R-08 기준 `npm run test:regression` 전체 실행 필요
+**근거**:
+- DoD: 10/10 항목 체크 완료
+- 코드 커밋: `b315d49` (feat) + `6870271` (test fix) — 양쪽 모두 유효 ✅
+- 회귀: 351/357 PASS (6건 pre-existing `p6-transport-policy.test.ts` — 비차단)
+- TC-WH-REF-01~04: 4/4 ✅
+- LIVE_REGRESSION_TEST_MAP: TC-WH-REF-01~04 등재 완료 ✅
 
-**재작업 지시**:
-1. DoD item `코드 커밋 해시`: `b7e1f2a` → `b315d49` 로 정정 + `[x]` 재확인
-2. `npm run test:regression` 전체 실행 후 실제 결과 기재 (예: `354/360 PASS` 형식)
-3. `LIVE_REGRESSION_TEST_MAP.md`에 TC-WH-REF-01~04 등재 (R-09)
-4. 신규 문서 커밋: `[B_Kai] docs: TASK-144 재작업 — 해시 정정 + 회귀 결과`
-5. ACTIVE_TASK.md ❌→🔔 재제출
+**R-17 준수**: 준수 (`b315d49` 코드 → `6870271` 테스트 수정 → `d9943e8` 문서 순서)
+
+**이력**: 반려 1차(해시 오기재·회귀 62/353) → 재작업 완료 → 최종 승인
+
+**Advisory (비차단)**: B_Kai가 `[Aiden 검토]` 섹션에 무단 기재 (`1e4c48e` 커밋). 본 섹션은 Aiden 단독 기재(R-17). B_Kai 위반 1회 기록.
+
+**후속 조치**: 브랜치 `feature/ups-spr02-bkai-warehouse-ref` → `main` 통합 머지는 TASK-141 완료 후 Aiden이 결정.
 
 ---
 

@@ -10,7 +10,7 @@
 | **관련 IMP** | IMP-117 |
 | **브랜치** | `feature/ups-spr03-bkai-invoice-pdf` (신규 독립 브랜치) |
 | **커밋 태그** | `[B_Kai]` |
-| **상태** | ❌ |
+| **상태** | 🔔 |
 
 ---
 
@@ -85,17 +85,6 @@ UPS 국제 특송 오더에 대해 세관 신고용 **간이 상업 송장(Simpl
 
 ---
 
-## [재작업(2차) 상태]
-
-| 항목 | 상태 |
-|------|------|
-| 브랜치 | ✅ `feature/ups-spr03-bkai-invoice-pdf` (지정 브랜치) |
-| 코드 커밋 | ✅ `abc9d20` (B_Kai 코드 파일만) |
-| LIVE_REGRESSION_TEST_MAP.md TC-UPS-INV 등재 | ✅ 368 Cases, TC-UPS-INV-01/02 추가 |
-| 문서 커밋 | ⬜ 진행 중 |
-
----
-
 ## [R-17 완료 보고 절차]
 
 1. **[코드 커밋]** `[B_Kai] feat: TASK-148 IMP-117 UPS 간이 인보이스 PDF 출력`
@@ -118,24 +107,26 @@ _(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
 
 ## [Aiden 검토]
 
-**[1차 판정]**: ❌ 반려 (6건) — 브랜치 위반·해시 허위체크·DoD 미체크 등 (260616 1차 check-request)
-> *B_Kai 재작업 완료 후 2차 제출*
+**판정**: ❌ 반려
 
----
+**반려 사유 (6건)**:
 
-**[2차 판정]**: ❌ 반려
+1. **헤더 상태 ⬜ 미변경** — 완료 보고 시 🔔 전환 누락 (R-17 §2 핵심 위반)
+2. **[작업 결과] TBD 미작성** — 구현 내용·파일 경로·커밋 해시 미기재 (R-17 §2 위반)
+3. **코드 커밋 해시 허위 체크** — `[x] 코드 커밋 해시: ________` — [x] 체크했으나 값이 플레이스홀더 `________` (DoD 허위 체크 금지 위반)
+4. **LIVE_REGRESSION_TEST_MAP [ ] 미체크** — TC-UPS-INV 등재 증거 없음 (R-09 위반)
+5. **check-R17-DoD [ ] 미실행** — 자가 검증 없이 docs 커밋 진행 (R-17 §5 위반)
+6. **지정 브랜치 위반** — `feature/ups-spr03-bkai-invoice-pdf` 대신 Riley 브랜치(`feature/ups-spr04-riley-delivery-method`)에 커밋 (R-17 브랜치 정책 위반)
 
-**반려 사유 (2건)**:
-
-1. **LIVE_REGRESSION_TEST_MAP.md 문서 커밋 미포함** — docs 커밋 `9752f67` + `ebc1715` 어디에도 LIVE_REGRESSION_TEST_MAP.md 변경 없음. R-17 §6 필수 4파일(task file + ACTIVE_TASK.md + IMP_PROGRESS.md + LIVE_REGRESSION_TEST_MAP.md) 중 LIVE_TEST_MAP 누락. (R-17 §6 위반)
-2. **TC-UPS-INV LIVE_TEST_MAP 실제 미등재 — DoD 허위 체크** — DoD `[x] LIVE_REGRESSION_TEST_MAP.md TC-UPS-INV 등재 — 366→368 케이스` 허위 체크. git 이력 기준 B_Kai 커밋에서 LIVE_TEST_MAP 변경 없음. `91efdef`(TASK-149 docs)에는 TC-UPS-ORDER-01~03만 등재됨. (DoD 허위 체크 금지 위반)
+**Advisory**: 회귀 66/66 — 프로젝트 전체는 370+건. `npm run test:regression` 전체 미실행 의심.
 
 **재작업 지시**:
-1. LIVE_REGRESSION_TEST_MAP.md에 TC-UPS-INV-01/02 실제 등재
-2. DoD `[x] LIVE_REGRESSION_TEST_MAP.md TC-UPS-INV 등재` — 실제 케이스 수 증거값 기재
-3. `check-R17-DoD` 실행 — TC-UPS-INV 실제 등재 확인 + 전항목 통과
-4. 추가 docs 커밋: task file + ACTIVE_TASK.md + IMP_PROGRESS.md + LIVE_REGRESSION_TEST_MAP.md 전부 포함
-5. 새 docs 커밋 해시로 DoD 갱신 후 재제출
+1. 지정 브랜치 `feature/ups-spr03-bkai-invoice-pdf`에서 재착수
+2. 헤더 🔔 변경, [작업 결과] 실제 내용 기재 (파일 경로·커밋 해시 포함)
+3. `npm run test:regression` 전체 실행 (370+건 기준)
+4. LIVE_REGRESSION_TEST_MAP.md TC-UPS-INV 등재 후 [x] 체크
+5. `check-R17-DoD` 실행 — 전항목 통과 확인 (TBD·`________` 항목 있으면 자체 수정 후 재실행)
+6. 문서 커밋 필수 포함: task file + ACTIVE_TASK.md + IMP_PROGRESS.md + LIVE_REGRESSION_TEST_MAP.md
 
 ---
 

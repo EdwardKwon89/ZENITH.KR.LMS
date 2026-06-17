@@ -1,0 +1,41 @@
+name: 결함 보고 (DEF)
+description: 담당 Task 범위 밖 버그·결함 보고 (R-18)
+labels: ["defect"]
+body:
+  - type: markdown
+    attributes:
+      value: "## 결함 보고서 — R-18 준수"
+  - type: input
+    id: reporter
+    attributes:
+      label: 발견 Agent
+      placeholder: "예: B_Kai"
+    validations:
+      required: true
+  - type: dropdown
+    id: severity
+    attributes:
+      label: 긴급도
+      options:
+        - 즉시
+        - High
+        - Medium
+        - Low
+    validations:
+      required: true
+  - type: textarea
+    id: symptom
+    attributes:
+      label: 현상
+    validations:
+      required: true
+  - type: textarea
+    id: impact
+    attributes:
+      label: 영향 범위
+    validations:
+      required: true
+  - type: textarea
+    id: action
+    attributes:
+      label: 권장 조치
