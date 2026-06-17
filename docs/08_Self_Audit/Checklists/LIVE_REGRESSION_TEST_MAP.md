@@ -1,7 +1,7 @@
 # 🗺️ LIVE Regression Test Master Map
 
-> **총 테스트 케이스:** 368 Cases  
-> **최종 검증일:** 2026-06-17 (TASK-148 IMP-117 7차 재작업 — develop 기반 신규 브랜치 · TC-UPS-INV-01/02 등재 · 381/381 PASS)  
+> **총 테스트 케이스:** 372 Cases  
+> **최종 검증일:** 2026-06-17 (TASK-153 IMP-122 Agency 정산 조회 구현 완료 · TC-P7-SETTLE-01~04 등재 · 374/374 PASS)  
 
 제니스 플랫폼의 비즈니스 영속성을 보장하는 회귀 테스트 케이스의 통합 명세서입니다. 모든 신규 개발 및 수정 시 이 맵에 케이스가 추가되어야 하며, 전체 테스트가 통과되어야 합니다.
 
@@ -349,6 +349,7 @@
 
 | 검증일 | 버전 | 성공/실패 | 총 소요시간 | 결과 리포트 |
 | :--- | :--- | :---: | :--- | :--- |
+| 2026-06-17 | v1.5.6 | ✅ PASS | 58.03s | TASK-153 IMP-122 Agency 정산 조회 구현 완료. p7-agency-settlement.test.ts 4개 TC 신규 등록 및 374/374 PASS. |
 | 2026-06-17 | v1.5.5 | ✅ PASS | 5.80s | TASK-149 IMP-118 오더 직접배송/픽업 UI 구현 완료. delivery-method.test.ts 4개 TC 신규 등록. 전체 회귀 테스트 통과 (4차 재제출). |
 | 2026-06-08 | v1.5.3 | ✅ PASS | 51.90s | TASK-122 요율 Slab 구조 개편 완료. `tiers` 배열 → `{ weight_slabs, cbm_slabs }` 객체 변환. `fn_get_best_matching_rate` weight_slabs/cbm_slabs 각각 매칭. 엔진/액션/어댑터 tiers 참조 일괄 수정. 기존 314/314 전량 PASS 유지. |
 | 2026-06-08 | v1.5.2 | ✅ PASS | ~45s | TASK-121 운송수단별 요금 산정 정책 설정 완료. TC-POLICY-01~05 (총 5개 케이스) 추가 및 전체 회귀 테스트 314건 통과. |
@@ -408,6 +409,14 @@
 | **TC-UPS-ORDER-02** | PICKUP 선택 시 필수 필드 존재 시 저장 | 픽업 선택 및 필수 3종 입력 시 정상 생성 검증 | `tests/unit/orders/delivery-method.test.ts` |
 | **TC-UPS-ORDER-03** | PICKUP 선택 시 필수 필드 누락 시 차단 | 픽업 선택하고 정보 누락 시 Zod 유효성 검증 차단 확인 | `tests/unit/orders/delivery-method.test.ts` |
 | **TC-UPS-ORDER-04** | DIRECT 선택 + pickup 필드 전달 시 | 직접배송 선택 시 픽업 정보가 초기화되어 저장되는지 검증 | `tests/unit/orders/delivery-method.test.ts` |
+
+### 30. Phase 7 대리점 정산 조회 (Phase 7 SPR-06)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-P7-SETTLE-01** | Agency 정산 요약 — 하위 화주 2개 오더 합산 정확 | 대리점 정산 요약 정보의 집계 합산 무결성 검증 | `tests/integration/p7-agency-settlement.test.ts` |
+| **TC-P7-SETTLE-02** | 화주별 정산 — 화주A vs 화주B 분리 집계 정확 | 대리점 하위 화주별 분리 집계 정확성 검증 | `tests/integration/p7-agency-settlement.test.ts` |
+| **TC-P7-SETTLE-03** | Agency 요율 오버라이드 반영 — override 있는 경우 override 금액 사용 | 요율 오버라이드 유무에 따른 정산 금액 반영 확인 | `tests/integration/p7-agency-settlement.test.ts` |
+| **TC-P7-SETTLE-04** | RLS — Agency A 사용자가 Agency B 데이터 조회 불가 | 대리점별 하위 화주 데이터 격리 보안 검증 | `tests/integration/p7-agency-settlement.test.ts` |
 
 ---
 

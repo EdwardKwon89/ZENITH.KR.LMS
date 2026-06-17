@@ -190,6 +190,9 @@
 | TASK-148 | 260616 | [P7-SPR-03] 간이 UPS 인보이스 PDF 출력 | P2 | TASK-138 ✅ · TASK-146 ✅ | B_Kai | ✅ | [TASK-148](tasks/TASK-148_260616_P7SPR03_UPS인보이스PDF_BKai.md) | IMP-117 · PR #22 머지 ✅ (260617) · CI PASS |
 | TASK-149 | 260616 | [P7-SPR-04] 오더 등록 직접배송/픽업 선택 UI | P1 | TASK-138 ✅ | Riley | ✅ | [TASK-149](tasks/TASK-149_260616_P7SPR04_오더직접배송픽업UI_Riley.md) | IMP-118 · PR #21 머지 ✅ (260617) · CI PASS |
 | TASK-150 | 260616 | [P7-SPR-04] 창고 출고 UPS 발송 연계 | P1 | TASK-138 ✅ · TASK-144 ✅ | D_Kai | ✅ | [TASK-150](tasks/TASK-150_260616_P7SPR04_창고출고UPS연계_DKai.md) | IMP-119 · PR #19 머지 ✅ (260617) · CI PASS |
+| TASK-151 | 260617 | [P7-SPR-05] R5 주소록 — zen_address_book DB + CRUD Server Actions + 오더 폼 연동 | P1 | TASK-149 ✅ | B_Kai | ⬜ | [TASK-151](tasks/TASK-151_260617_P7SPR05_주소록_BKai.md) | IMP-120 · Issue #23 |
+| TASK-152 | 260617 | [P7-SPR-05] R7 일마감 처리 — 당일 출고 집계 + 매출/매입 일별 집계 화면 | P1 | TASK-150 ✅ | D_Kai | ⬜ | [TASK-152](tasks/TASK-152_260617_P7SPR05_일마감처리_DKai.md) | IMP-121 · Issue #24 |
+| TASK-153 | 260617 | [P7-SPR-06] Agency 정산 조회 — 화주별 UPS 오더 정산 내역 조회 화면 | P1 | IMP-111 ✅ · IMP-116 ✅ | Riley | 🔔 | [TASK-153](tasks/TASK-153_260617_P7SPR06_Agency정산조회_Riley.md) | IMP-122 · Issue #25 |
 | TASK-108 | 260601 | DEF-039 CARRIER RLS + 미스테이지 커밋 + 신원 수정 | P2 | 없음 | D_Kai | ✅ | [TASK-108](tasks/TASK-108_260601_DEF039CARRIER_RLS_미스테이지커밋_DKai.md) | DEF-039 해소 · 4cc88d8+beba338 · CARRIER RLS 3테이블 · 229/229 ✅ · Aiden ✅ 승인 |
 | TASK-109 | 260603 | IMP-095 Rate Card 항로(Port) 기반 매칭 구현 | P1 | TASK-106 ✅ · TASK-108 ✅ | D_Kai (OpenCode) | ✅ | [TASK-109](tasks/TASK-109_260603_IMP095포트기반요율매칭_DKai.md) | IMP-095 완료 · `0fb950d`+`fb263f9` · 236/236 PASS · Aiden ✅ 승인 |
 | TASK-110 | 260603 | IMP-096 요율 관리 페이지 통합 정리 (3단계) | P1 | TASK-106 ✅ · TASK-109 ✅ | D_Kai (OpenCode) | ✅ | [TASK-110](tasks/TASK-110_260603_IMP096요율관리페이지통합정리_DKai.md) | IMP-096 완료 · `e166fec`+`65c904b` · 236/236 PASS · Aiden ✅ 승인 |
@@ -237,7 +240,7 @@
 | **Aiden (Claude)** | ✅ TASK-148/149/150 머지 완료 (260617) | PR #21/22/19 develop 머지 · CI 수정(vitest live-DB 제외) |
 | **D_Kai (OpenCode)** | ✅ TASK-150 완료 | PR #19 머지 ✅ (260617) · CI PASS |
 | **B_Kai** | ✅ TASK-148 완료 | PR #22 머지 ✅ (260617) · CI PASS |
-| **Riley** | ✅ TASK-149 완료 | PR #21 머지 ✅ (260617) · CI PASS |
+| **Riley** | 🔔 TASK-153 완료 | 374/374 PASS · PR 생성 대기 |
 | N_Kai | 재교육 세션 대기 (TASK-087) | R-17 위반 누적 — 신규 할당 중단 유지 |
 | Ring | 신규 할당 중단 유지 | 9차 위반 누적 |
 

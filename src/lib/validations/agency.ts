@@ -22,3 +22,11 @@ export const CreateAgencyRateOverrideSchema = z.object({
   valid_from: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   valid_until: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
 });
+
+export const AgencySettlementQuerySchema = z.object({
+  agency_org_id: z.string().uuid(),
+  shipper_org_id: z.string().uuid().optional(),
+  from: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  to:   z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+});
+
