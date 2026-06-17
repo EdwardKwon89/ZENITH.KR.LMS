@@ -187,9 +187,9 @@
 | TASK-145 | 260615 | D_Kai 재교육 세션 4차 (TASK-143 반려 2회 반복 패턴 개선) | P4 | 없음 | D_Kai | ✅ | [TASK-145](tasks/TASK-145_260615_DKai재교육세션4차_DKai.md) | 재교육 완료 · `0192648` (main) · Aiden ✅ 승인 (260615) [브랜치 반영] |
 | TASK-146 | 260615 | [P7-SPR-03] UPS 요율 Admin UI (Zone/제품/기본요금/유류할증/OC 관리) | P2 | TASK-138 ✅ · TASK-143 ✅ | B_Kai | ✅ | [TASK-146](tasks/TASK-146_260615_P7SPR03_UPS요율AdminUI_BKai.md) | IMP-113 · `0578fb7` · 65 test files PASS · dialog/table/tabs ✅ · Aiden ✅ 승인 (260616) |
 | TASK-147 | 260615 | IMP-109 환율 설정 화면 — 기준통화 + 환율(USD/CNY/JPY) 어드민 UI | P3 | 없음 | Riley | ✅ | [TASK-147](tasks/TASK-147_260615_IMP109환율설정화면_Riley.md) | IMP-109 · `1c67c35` · 366/366 PASS · TASK-146 merge ✅ · Aiden ✅ 승인 (260616) |
-| TASK-148 | 260616 | [P7-SPR-03] 간이 UPS 인보이스 PDF 출력 | P2 | TASK-138 ✅ · TASK-146 ✅ | B_Kai | 🔔 | [TASK-148](tasks/TASK-148_260616_P7SPR03_UPS인보이스PDF_BKai.md) | IMP-117 · 8차 승인 · PR #22 rebase 후 머지 예정 |
-| TASK-149 | 260616 | [P7-SPR-04] 오더 등록 직접배송/픽업 선택 UI | P1 | TASK-138 ✅ | Riley | 🔔 | [TASK-149](tasks/TASK-149_260616_P7SPR04_오더직접배송픽업UI_Riley.md) | IMP-118 · 5차 승인 · PR #21 rebase 후 머지 예정 |
-| TASK-150 | 260616 | [P7-SPR-04] 창고 출고 UPS 발송 연계 | P1 | TASK-138 ✅ · TASK-144 ✅ | D_Kai | 🔔 | [TASK-150](tasks/TASK-150_260616_P7SPR04_창고출고UPS연계_DKai.md) | IMP-119 · 5차 판정 대기 · PR #19 충돌 해소 중 |
+| TASK-148 | 260616 | [P7-SPR-03] 간이 UPS 인보이스 PDF 출력 | P2 | TASK-138 ✅ · TASK-146 ✅ | B_Kai | ✅ | [TASK-148](tasks/TASK-148_260616_P7SPR03_UPS인보이스PDF_BKai.md) | IMP-117 · PR #22 머지 ✅ (260617) · CI PASS |
+| TASK-149 | 260616 | [P7-SPR-04] 오더 등록 직접배송/픽업 선택 UI | P1 | TASK-138 ✅ | Riley | ✅ | [TASK-149](tasks/TASK-149_260616_P7SPR04_오더직접배송픽업UI_Riley.md) | IMP-118 · PR #21 머지 ✅ (260617) · CI PASS |
+| TASK-150 | 260616 | [P7-SPR-04] 창고 출고 UPS 발송 연계 | P1 | TASK-138 ✅ · TASK-144 ✅ | D_Kai | ✅ | [TASK-150](tasks/TASK-150_260616_P7SPR04_창고출고UPS연계_DKai.md) | IMP-119 · PR #19 머지 ✅ (260617) · CI PASS |
 | TASK-108 | 260601 | DEF-039 CARRIER RLS + 미스테이지 커밋 + 신원 수정 | P2 | 없음 | D_Kai | ✅ | [TASK-108](tasks/TASK-108_260601_DEF039CARRIER_RLS_미스테이지커밋_DKai.md) | DEF-039 해소 · 4cc88d8+beba338 · CARRIER RLS 3테이블 · 229/229 ✅ · Aiden ✅ 승인 |
 | TASK-109 | 260603 | IMP-095 Rate Card 항로(Port) 기반 매칭 구현 | P1 | TASK-106 ✅ · TASK-108 ✅ | D_Kai (OpenCode) | ✅ | [TASK-109](tasks/TASK-109_260603_IMP095포트기반요율매칭_DKai.md) | IMP-095 완료 · `0fb950d`+`fb263f9` · 236/236 PASS · Aiden ✅ 승인 |
 | TASK-110 | 260603 | IMP-096 요율 관리 페이지 통합 정리 (3단계) | P1 | TASK-106 ✅ · TASK-109 ✅ | D_Kai (OpenCode) | ✅ | [TASK-110](tasks/TASK-110_260603_IMP096요율관리페이지통합정리_DKai.md) | IMP-096 완료 · `e166fec`+`65c904b` · 236/236 PASS · Aiden ✅ 승인 |
@@ -234,10 +234,10 @@
 
 | Agent | 상태 | 비고 |
 |:------|:----:|:----|
-| **Aiden (Claude)** | ✅ TASK-150 발령 완료 (260616) | SPR-03/04 발령 — TASK-148/149/150 신규 발령. IMP-117/118/119 등재 |
-| **D_Kai (OpenCode)** | 🔔 TASK-150 재제출 — 5차 판정 대기 | rebase develop 완료 · task file 충돌 해소 중 (Aiden 처리) · PR #19 |
-| **B_Kai** | 🔔 TASK-148 완료 | PR #22 8차 승인 · rebase develop 후 CI 통과 시 머지 예정 |
-| **Riley** | 🔔 TASK-149 완료 | PR #21 5차 승인 · rebase develop 후 CI 통과 시 머지 예정 |
+| **Aiden (Claude)** | ✅ TASK-148/149/150 머지 완료 (260617) | PR #21/22/19 develop 머지 · CI 수정(vitest live-DB 제외) |
+| **D_Kai (OpenCode)** | ✅ TASK-150 완료 | PR #19 머지 ✅ (260617) · CI PASS |
+| **B_Kai** | ✅ TASK-148 완료 | PR #22 머지 ✅ (260617) · CI PASS |
+| **Riley** | ✅ TASK-149 완료 | PR #21 머지 ✅ (260617) · CI PASS |
 | N_Kai | 재교육 세션 대기 (TASK-087) | R-17 위반 누적 — 신규 할당 중단 유지 |
 | Ring | 신규 할당 중단 유지 | 9차 위반 누적 |
 
