@@ -19,6 +19,7 @@ import { orderRegistrationSchema, OrderRegistrationInput } from '@/lib/validatio
 import { estimateFreightCost, TransportMode } from '@/utils/logistics/freight-calculator';
 import { getAvailableServiceRates, getUsdKrwRate, getBaseCurrency, AvailableServiceRates } from '@/app/actions/operations/service-rates';
 import { createOrderServices } from '@/app/actions/operations/order-services';
+import AddressBookSelector from '@/components/address-book/AddressBookSelector';
 
 interface OrderRegistrationFormProps {
   shippers: any[];
@@ -731,6 +732,17 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                   {infoTab === 'consignee' && (
                     <div className="space-y-3">
                       <div>
+                        <label className="text-[10px] font-bold text-slate-500 mb-1 block">Address Book</label>
+                        <AddressBookSelector
+                          onSelect={(entry) => {
+                            setValue('recipient_name', entry.recipient_name);
+                            setValue('recipient_address', entry.recipient_address);
+                            setValue('recipient_address_local', entry.recipient_address_local || '');
+                            setValue('recipient_phone', entry.recipient_phone || '');
+                          }}
+                        />
+                      </div>
+                      <div>
                         <label className="text-[10px] font-bold text-slate-500 mb-1 block">Recipient Name</label>
                         <ZenInput placeholder="Full Name" {...register('recipient_name')} error={!!errors.recipient_name} className="py-2 text-xs" />
                       </div>
@@ -756,6 +768,14 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                           placeholder="Physical delivery address"
                         />
                         {errors.recipient_address && <p className="text-[9px] text-rose-500 mt-1">{errors.recipient_address.message}</p>}
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-bold text-slate-500 mb-1 block">Local Address</label>
+                        <textarea 
+                          {...register('recipient_address_local')}
+                          className="w-full text-xs p-2 border border-slate-200 rounded-xl bg-white resize-none h-16 outline-none focus:ring-2 focus:ring-blue-100"
+                          placeholder="현지어 주소 (선택)"
+                        />
                       </div>
                     </div>
                   )}

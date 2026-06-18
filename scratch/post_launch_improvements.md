@@ -1316,32 +1316,24 @@
 
 ---
 
-## [IMP-123] Agent별 독립 Local Workspace 분리
+## [IMP-123] 브랜치 교차 오염 방지 — R-17 착수 절차 강화 + pre-commit hook
 
-- **발견 경위**: Issue #31 (B_Kai 보고) — TASK-151 커밋이 Riley 브랜치에 오염된 사건에서 도출. Edward 확인 2026-06-18.
+- **발견 경위**: Issue #31 (B_Kai 보고) — TASK-151 커밋이 Riley 브랜치(`feature/ups-spr07-riley-e2e-uat-spec`)에 오염된 사건에서 도출. Edward 확인 2026-06-18.
 - **현재 상태**:
-  - 모든 Agent(B_Kai, Riley, D_Kai 등)가 동일 Local Workspace(`/Users/edward.kwon/WorkSpace/ZENITH_LMS_001`) 공유
-  - 한 Agent가 작업 중 현재 checkout된 브랜치가 타 Agent 브랜치일 경우, 의도치 않은 cross-branch 커밋 발생
-  - 구조적으로 방지 불가능 — Agent 실수가 아닌 환경 문제
-- **임시 조치**: TASK-156 발령 (B_Kai 브랜치 오염 복구)
-- **목표 구현**:
-  - 방안 A (git worktree): 각 Agent별 worktree 생성
-    ```bash
-    git worktree add ~/workspace/bkai feature/ups-spr05-bkai-address-book
-    git worktree add ~/workspace/riley feature/ups-spr07-riley-e2e-uat-spec
-    git worktree add ~/workspace/dkai feature/ups-spr05-dkai-daily-close
-    ```
-  - 방안 B (별도 clone): Agent별 독립 repository clone
-    ```
-    ~/workspace/bkai/   ← B_Kai 전용
-    ~/workspace/riley/  ← Riley 전용
-    ~/workspace/dkai/   ← D_Kai 전용
-    ```
-  - 방안 A 권장 (단일 .git 공유 — push/fetch 공유, disk 절약)
-- **추가 개선**:
-  - 브랜치 네이밍 규칙 강화: `feature/teama-{agent}-{task-id}` (R-19 보완)
-  - pre-commit hook: 커밋 태그(`[B_Kai]`)와 현재 브랜치 소유주 불일치 시 경고
-- **관련 파일**: `.claude/CLAUDE.md`, `GOV_COMMON.md` R-19
+  - 모든 Agent가 동일 Local Workspace(`/Users/edward.kwon/WorkSpace/ZENITH_LMS_001`) 공유
+  - 착수 전 `git checkout feature/[본인 브랜치]` 단계가 R-17 절차에 명시되지 않음
+  - 타 Agent 브랜치 checkout 상태에서 커밋 시 cross-branch 오염 발생 가능
+- **임시 조치**: TASK-156 발령 (B_Kai 브랜치 오염 복구), GOV_COMMON.md R-17 §0 신설
+- **구현 완료** (2026-06-18, Aiden):
+  1. **GOV_COMMON.md R-17 §0 신설** — 착수 절차 최상위에 Git 동기화 5단계 추가:
+     `fetch → checkout develop → pull → checkout 본인 브랜치 → rebase`
+  2. **pre-commit hook Agent Tag ↔ 브랜치 검증** — `.git/hooks/pre-commit` 에 추가:
+     - `[B_Kai]` 커밋은 `bkai` 브랜치에서만 허용
+     - `[D_Kai]` 커밋은 `dkai` 브랜치에서만 허용
+     - `[Riley]/[Gemini]` 커밋은 `riley` 브랜치에서만 허용
+     - `[Claude]/[Aiden]` 커밋은 전체 브랜치 허용 (거버넌스 작업)
+- **git worktree 방안 기각**: Agent가 자신의 worktree 경로를 자동 판별하는 메커니즘 부재. 관리 부담 과도. Edward 승인.
+- **관련 파일**: `GOV_COMMON.md` (R-17 §0), `.git/hooks/pre-commit`, `GOV_COMMON.md` (v2.2 개정 이력)
 - **관련 이슈**: GitHub Issue #31
-- **예상 공수**: 0.5 MD (worktree 설정) + GOV 문서 개정
-- **우선순위**: High (재발 방지 — 6/30 시범 전 적용 권장)
+- **예상 공수**: ✅ 완료 (0.5 MD)
+- **우선순위**: High → **완료**

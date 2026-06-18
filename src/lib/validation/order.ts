@@ -48,6 +48,7 @@ export const orderRegistrationSchema = z.object({
   // 수취인 상세 정보 (v2 핵심 추가)
   recipient_name: z.string().min(1, 'Recipient name is required'),
   recipient_address: z.string().min(1, 'Recipient address is required'),
+  recipient_address_local: z.string().optional(),
   recipient_phone: z.string().min(1, 'Recipient phone is required'),
   recipient_zipcode: z.string().optional(),
   
