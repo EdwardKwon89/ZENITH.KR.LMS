@@ -10,22 +10,21 @@ const ADDRESS_BOOK_SELECT = `
   recipient_phone, country_code, display_mode, is_default, created_at, updated_at
 `;
 
-function buildOwnerFilter(profile: { id: string; org_id?: string | null }) {
-  if (profile.org_id) {
-    return { org_id: profile.org_id, user_id: null };
-  }
-  return { user_id: profile.id, org_id: null };
-}
-
 export async function getAddressBookEntries() {
   const { supabase, profile } = await validateUserAction();
   if (!profile) throw new Error("User profile not found");
 
-  const filter = buildOwnerFilter(profile);
-  const { data, error } = await supabase
+  let query = supabase
     .from("zen_address_book")
-    .select(ADDRESS_BOOK_SELECT)
-    .match(filter)
+    .select(ADDRESS_BOOK_SELECT);
+
+  if (profile.org_id) {
+    query = query.eq("org_id", profile.org_id).is("user_id", null);
+  } else {
+    query = query.eq("user_id", profile.id).is("org_id", null);
+  }
+
+  const { data, error } = await query
     .order("is_default", { ascending: false })
     .order("display_name", { ascending: true });
 
@@ -42,7 +41,9 @@ export async function createAddressBookEntry(input: AddressBookEntryInput) {
   if (!profile) throw new Error("User profile not found");
 
   const parsed = addressBookEntrySchema.parse(input);
-  const owner = buildOwnerFilter(profile);
+  const owner = profile.org_id
+    ? { org_id: profile.org_id, user_id: null }
+    : { user_id: profile.id, org_id: null };
 
   const { data, error } = await supabase
     .from("zen_address_book")
@@ -67,15 +68,22 @@ export async function updateAddressBookEntry(id: string, input: AddressBookEntry
   if (!profile) throw new Error("User profile not found");
 
   const parsed = addressBookEntrySchema.parse(input);
-  const owner = buildOwnerFilter(profile);
 
-  const { data, error } = await supabase
+  let query = supabase
     .from("zen_address_book")
     .update({
       ...parsed,
       updated_at: new Date().toISOString(),
     })
-    .match({ id, ...owner })
+    .eq("id", id);
+
+  if (profile.org_id) {
+    query = query.eq("org_id", profile.org_id).is("user_id", null);
+  } else {
+    query = query.eq("user_id", profile.id).is("org_id", null);
+  }
+
+  const { data, error } = await query
     .select(ADDRESS_BOOK_SELECT)
     .single();
 
@@ -92,11 +100,18 @@ export async function deleteAddressBookEntry(id: string) {
   const { supabase, profile } = await validateUserAction();
   if (!profile) throw new Error("User profile not found");
 
-  const owner = buildOwnerFilter(profile);
-  const { error } = await supabase
+  let query = supabase
     .from("zen_address_book")
     .delete()
-    .match({ id, ...owner });
+    .eq("id", id);
+
+  if (profile.org_id) {
+    query = query.eq("org_id", profile.org_id).is("user_id", null);
+  } else {
+    query = query.eq("user_id", profile.id).is("org_id", null);
+  }
+
+  const { error } = await query;
 
   if (error) {
     logger.error("[ADDRESS_BOOK] deleteAddressBookEntry error:", error);
