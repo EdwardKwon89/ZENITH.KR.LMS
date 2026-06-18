@@ -194,6 +194,7 @@
 | TASK-154 | 260617 | DEF-067 seed_data.sql zen_rate_cards 구스키마 수정 — CI 전체 차단 블로커 복구 | P1 | 없음 | D_Kai | ⬜ | [TASK-154](tasks/TASK-154_260617_DEF067_시드데이터스키마수정_DKai.md) | DEF-067 · Issue #27 |
 | TASK-151 | 260617 | [P7-SPR-05] R5 주소록 — zen_address_book DB + CRUD Server Actions + 오더 폼 연동 | P1 | TASK-149 ✅ | B_Kai | ⬜ | [TASK-151](tasks/TASK-151_260617_P7SPR05_주소록_BKai.md) | IMP-120 · Issue #23 |
 | TASK-152 | 260617 | [P7-SPR-05] R7 일마감 처리 — 당일 출고 집계 + 매출/매입 일별 집계 화면 | P1 | TASK-150 ✅ | D_Kai | ⬜ | [TASK-152](tasks/TASK-152_260617_P7SPR05_일마감처리_DKai.md) | IMP-121 · Issue #24 |
+| TASK-155 | 260618 | [P7-SPR-07] E2E·UAT 선행 스펙 작성 — 주소록(E2E-21·UAT-13) + 일마감(E2E-22·UAT-14) | P2 | TASK-151·152 스펙 확정 ✅ | Riley | ⬜ | [TASK-155](tasks/TASK-155_260618_P7SPR07_E2EUAT선행스펙_Riley.md) | IMP-120·121 · Issue #28 |
 | TASK-153 | 260617 | [P7-SPR-06] Agency 정산 조회 — 화주별 UPS 오더 정산 내역 조회 화면 | P1 | IMP-111 ✅ · IMP-116 ✅ | Riley | ✅ | [TASK-153](tasks/TASK-153_260617_P7SPR06_Agency정산조회_Riley.md) | IMP-122 ✅ · Issue #25 ✅ · PR #26 머지 ✅ (260617) |
 | TASK-155 | 260618 | [P7-SPR-07] E2E·UAT 선행 스펙 작성 (주소록 / 일마감) | P4 | 없음 | Riley | 🔔 | [TASK-155](tasks/TASK-155_260618_P7SPR07_E2EUAT선행스펙_Riley.md) | Issue #28 |
 | TASK-108 | 260601 | DEF-039 CARRIER RLS + 미스테이지 커밋 + 신원 수정 | P2 | 없음 | D_Kai | ✅ | [TASK-108](tasks/TASK-108_260601_DEF039CARRIER_RLS_미스테이지커밋_DKai.md) | DEF-039 해소 · 4cc88d8+beba338 · CARRIER RLS 3테이블 · 229/229 ✅ · Aiden ✅ 승인 |
