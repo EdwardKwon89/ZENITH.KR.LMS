@@ -200,7 +200,8 @@ export async function authGuard(
         purePath.startsWith('/admin/rates') ||
         purePath.startsWith('/admin/transport-costs') ||
         purePath.startsWith('/admin/customs-rates') ||
-        purePath.startsWith('/admin/delivery-rates');
+        purePath.startsWith('/admin/delivery-rates') ||
+        purePath.startsWith('/address-book');
 
       if (!isAllowedPath) {
         const url = request.nextUrl.clone();
