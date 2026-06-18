@@ -1313,3 +1313,35 @@
 - **선후행 관계**: DEF-054 A안 선행 완료 필요 (TASK-127)
 - **예상 공수**: 1~2 MD
 - **우선순위**: Medium (post-Go-Live)
+
+---
+
+## [IMP-123] Agent별 독립 Local Workspace 분리
+
+- **발견 경위**: Issue #31 (B_Kai 보고) — TASK-151 커밋이 Riley 브랜치에 오염된 사건에서 도출. Edward 확인 2026-06-18.
+- **현재 상태**:
+  - 모든 Agent(B_Kai, Riley, D_Kai 등)가 동일 Local Workspace(`/Users/edward.kwon/WorkSpace/ZENITH_LMS_001`) 공유
+  - 한 Agent가 작업 중 현재 checkout된 브랜치가 타 Agent 브랜치일 경우, 의도치 않은 cross-branch 커밋 발생
+  - 구조적으로 방지 불가능 — Agent 실수가 아닌 환경 문제
+- **임시 조치**: TASK-156 발령 (B_Kai 브랜치 오염 복구)
+- **목표 구현**:
+  - 방안 A (git worktree): 각 Agent별 worktree 생성
+    ```bash
+    git worktree add ~/workspace/bkai feature/ups-spr05-bkai-address-book
+    git worktree add ~/workspace/riley feature/ups-spr07-riley-e2e-uat-spec
+    git worktree add ~/workspace/dkai feature/ups-spr05-dkai-daily-close
+    ```
+  - 방안 B (별도 clone): Agent별 독립 repository clone
+    ```
+    ~/workspace/bkai/   ← B_Kai 전용
+    ~/workspace/riley/  ← Riley 전용
+    ~/workspace/dkai/   ← D_Kai 전용
+    ```
+  - 방안 A 권장 (단일 .git 공유 — push/fetch 공유, disk 절약)
+- **추가 개선**:
+  - 브랜치 네이밍 규칙 강화: `feature/teama-{agent}-{task-id}` (R-19 보완)
+  - pre-commit hook: 커밋 태그(`[B_Kai]`)와 현재 브랜치 소유주 불일치 시 경고
+- **관련 파일**: `.claude/CLAUDE.md`, `GOV_COMMON.md` R-19
+- **관련 이슈**: GitHub Issue #31
+- **예상 공수**: 0.5 MD (worktree 설정) + GOV 문서 개정
+- **우선순위**: High (재발 방지 — 6/30 시범 전 적용 권장)

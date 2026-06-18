@@ -190,6 +190,8 @@
 | TASK-148 | 260616 | [P7-SPR-03] 간이 UPS 인보이스 PDF 출력 | P2 | TASK-138 ✅ · TASK-146 ✅ | B_Kai | ✅ | [TASK-148](tasks/TASK-148_260616_P7SPR03_UPS인보이스PDF_BKai.md) | IMP-117 · PR #22 머지 ✅ (260617) · CI PASS |
 | TASK-149 | 260616 | [P7-SPR-04] 오더 등록 직접배송/픽업 선택 UI | P1 | TASK-138 ✅ | Riley | ✅ | [TASK-149](tasks/TASK-149_260616_P7SPR04_오더직접배송픽업UI_Riley.md) | IMP-118 · PR #21 머지 ✅ (260617) · CI PASS |
 | TASK-150 | 260616 | [P7-SPR-04] 창고 출고 UPS 발송 연계 | P1 | TASK-138 ✅ · TASK-144 ✅ | D_Kai | ✅ | [TASK-150](tasks/TASK-150_260616_P7SPR04_창고출고UPS연계_DKai.md) | IMP-119 · PR #19 머지 ✅ (260617) · CI PASS |
+| TASK-156 | 260618 | TASK-151 브랜치 오염 복구 — B_Kai 전용 브랜치 통합 + PR 재제출 | P1 | 없음 | B_Kai | ⬜ | [TASK-156](tasks/TASK-156_260618_브랜치오염복구_BKai.md) | Issue #31·#32 |
+| TASK-154 | 260617 | DEF-067 seed_data.sql zen_rate_cards 구스키마 수정 — CI 전체 차단 블로커 복구 | P1 | 없음 | D_Kai | ⬜ | [TASK-154](tasks/TASK-154_260617_DEF067_시드데이터스키마수정_DKai.md) | DEF-067 · Issue #27 |
 | TASK-151 | 260617 | [P7-SPR-05] R5 주소록 — zen_address_book DB + CRUD Server Actions + 오더 폼 연동 | P1 | TASK-149 ✅ | B_Kai | ⬜ | [TASK-151](tasks/TASK-151_260617_P7SPR05_주소록_BKai.md) | IMP-120 · Issue #23 |
 | TASK-152 | 260617 | [P7-SPR-05] R7 일마감 처리 — 당일 출고 집계 + 매출/매입 일별 집계 화면 | P1 | TASK-150 ✅ | D_Kai | ⬜ | [TASK-152](tasks/TASK-152_260617_P7SPR05_일마감처리_DKai.md) | IMP-121 · Issue #24 |
 | TASK-153 | 260617 | [P7-SPR-06] Agency 정산 조회 — 화주별 UPS 오더 정산 내역 조회 화면 | P1 | IMP-111 ✅ · IMP-116 ✅ | Riley | 🔔 | [TASK-153](tasks/TASK-153_260617_P7SPR06_Agency정산조회_Riley.md) | IMP-122 · Issue #25 |
