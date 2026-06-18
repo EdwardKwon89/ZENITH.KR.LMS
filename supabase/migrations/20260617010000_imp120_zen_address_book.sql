@@ -60,10 +60,13 @@ BEGIN
     END IF;
 END $$;
 
--- 조직 멤버 접근 정책
+-- 조직 멤버 접근 정책 (zen_organization_members 테이블 존재 시에만 생성)
 DO $$
 BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (
+        SELECT 1 FROM pg_tables
+        WHERE schemaname = 'public' AND tablename = 'zen_organization_members'
+    ) AND NOT EXISTS (
         SELECT 1 FROM pg_policies
         WHERE schemaname = 'public' AND tablename = 'zen_address_book' AND policyname = 'zen_address_book_org_member_access'
     ) THEN

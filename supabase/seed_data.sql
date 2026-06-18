@@ -14,44 +14,21 @@ INSERT INTO zen_organizations (name, type, status, metadata) VALUES
 ('Oceanic Logistics', 'CARRIER', 'ACTIVE', '{"business_no": "987-65-43210", "specialty": "SEA"}')
 ON CONFLICT DO NOTHING;
 
--- 3. 요율 카드 및 슬랩 요율 (Marketplace Rates)
+-- 3. 요율 카드 및 슬랩 요율 (Marketplace Rates — 신스키마)
+-- zen_carriers는 migration 20260523130000_imp080_zen_carriers.sql에서 자동 생성됨
 -- Eagle Express (ICN -> LAX, AIR, KG)
-DO $$
-DECLARE
-    v_org_id UUID;
-    v_card_id UUID;
-BEGIN
-    SELECT id INTO v_org_id FROM zen_organizations WHERE name = 'Eagle Express' LIMIT 1;
-    
-    INSERT INTO zen_rate_cards (org_id, origin_code, dest_code, mode, unit_type, unit_price, currency, transit_days, is_direct)
-    VALUES (v_org_id, 'ICN', 'LAX', 'AIR', 'KG', 5.5, 'USD', 2, true)
-    RETURNING id INTO v_card_id;
-
-    -- Slab Tiers for Eagle Express
-    INSERT INTO zen_rate_tiers (rate_card_id, weight_min, unit_price, min_total_price) VALUES
-    (v_card_id, 0, 8.5, 50),   -- 0~45kg 미만: 높은 단가
-    (v_card_id, 45, 6.2, 50),  -- 45kg 이상: 중간 단가
-    (v_card_id, 100, 5.5, 50); -- 100kg 이상: 최적 단가
-END $$;
+INSERT INTO zen_rate_cards (carrier_id, transport_mode, currency, tiers, valid_from)
+SELECT c.id, 'AIR', 'USD',
+  '[{"weight_min": 0, "unit_price": 5.50}, {"weight_min": 100, "unit_price": 4.80}, {"weight_min": 500, "unit_price": 3.90}]'::jsonb,
+  CURRENT_DATE
+FROM zen_carriers c WHERE c.code = 'ZENITH_AIR';
 
 -- Oceanic Logistics (PUS -> LAX, SEA, CBM)
-DO $$
-DECLARE
-    v_org_id UUID;
-    v_card_id UUID;
-BEGIN
-    SELECT id INTO v_org_id FROM zen_organizations WHERE name = 'Oceanic Logistics' LIMIT 1;
-    
-    INSERT INTO zen_rate_cards (org_id, origin_code, dest_code, mode, unit_type, unit_price, currency, transit_days, is_direct)
-    VALUES (v_org_id, 'PUS', 'LAX', 'SEA', 'CBM', 120.0, 'USD', 15, true)
-    RETURNING id INTO v_card_id;
-
-    -- Slab Tiers for Oceanic Logistics
-    INSERT INTO zen_rate_tiers (rate_card_id, weight_min, unit_price, min_total_price) VALUES
-    (v_card_id, 0, 150.0, 300), -- 0~1CBM
-    (v_card_id, 1, 120.0, 300), -- 1~5CBM
-    (v_card_id, 5, 100.0, 300); -- 5CBM 이상
-END $$;
+INSERT INTO zen_rate_cards (carrier_id, transport_mode, currency, tiers, valid_from)
+SELECT c.id, 'SEA', 'USD',
+  '[{"weight_min": 0, "unit_price": 2.10}, {"weight_min": 1000, "unit_price": 1.50}, {"weight_min": 10000, "unit_price": 0.95}]'::jsonb,
+  CURRENT_DATE
+FROM zen_carriers c WHERE c.code = 'ZENITH_SEA';
 
 -- 4. 통관 서비스 조직 (CUSTOMS)
 INSERT INTO zen_organizations (name, type, status, metadata) VALUES
