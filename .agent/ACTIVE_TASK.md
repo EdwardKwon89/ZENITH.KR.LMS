@@ -196,7 +196,6 @@
 | TASK-152 | 260617 | [P7-SPR-05] R7 일마감 처리 — 당일 출고 집계 + 매출/매입 일별 집계 화면 | P1 | TASK-150 ✅ | D_Kai | ✅ | [TASK-152](tasks/TASK-152_260617_P7SPR05_일마감처리_DKai.md) | IMP-121 · PR #29 (Closes #24) · TC-P7-CLOSE-01~04 · Aiden ✅ 승인 (260618) |
 | TASK-155 | 260618 | [P7-SPR-07] E2E·UAT 선행 스펙 작성 — 주소록(E2E-21·UAT-13) + 일마감(E2E-22·UAT-14) | P2 | TASK-151·152 스펙 확정 ✅ | Riley | ✅ | [TASK-155](tasks/TASK-155_260618_P7SPR07_E2EUAT선행스펙_Riley.md) | PR #30 (Closes #28) · 374/374 PASS · Aiden ✅ 승인 (260618) Advisory: PR body 문서커밋해시 정정 권고 |
 | TASK-153 | 260617 | [P7-SPR-06] Agency 정산 조회 — 화주별 UPS 오더 정산 내역 조회 화면 | P1 | IMP-111 ✅ · IMP-116 ✅ | Riley | ✅ | [TASK-153](tasks/TASK-153_260617_P7SPR06_Agency정산조회_Riley.md) | IMP-122 ✅ · Issue #25 ✅ · PR #26 머지 ✅ (260617) |
-| TASK-155 | 260618 | [P7-SPR-07] E2E·UAT 선행 스펙 작성 (주소록 / 일마감) | P4 | 없음 | Riley | 🔔 | [TASK-155](tasks/TASK-155_260618_P7SPR07_E2EUAT선행스펙_Riley.md) | Issue #28 |
 | TASK-108 | 260601 | DEF-039 CARRIER RLS + 미스테이지 커밋 + 신원 수정 | P2 | 없음 | D_Kai | ✅ | [TASK-108](tasks/TASK-108_260601_DEF039CARRIER_RLS_미스테이지커밋_DKai.md) | DEF-039 해소 · 4cc88d8+beba338 · CARRIER RLS 3테이블 · 229/229 ✅ · Aiden ✅ 승인 |
 | TASK-109 | 260603 | IMP-095 Rate Card 항로(Port) 기반 매칭 구현 | P1 | TASK-106 ✅ · TASK-108 ✅ | D_Kai (OpenCode) | ✅ | [TASK-109](tasks/TASK-109_260603_IMP095포트기반요율매칭_DKai.md) | IMP-095 완료 · `0fb950d`+`fb263f9` · 236/236 PASS · Aiden ✅ 승인 |
 | TASK-110 | 260603 | IMP-096 요율 관리 페이지 통합 정리 (3단계) | P1 | TASK-106 ✅ · TASK-109 ✅ | D_Kai (OpenCode) | ✅ | [TASK-110](tasks/TASK-110_260603_IMP096요율관리페이지통합정리_DKai.md) | IMP-096 완료 · `e166fec`+`65c904b` · 236/236 PASS · Aiden ✅ 승인 |
@@ -262,6 +261,7 @@
 
 ## 개정 이력
 
+| 2026-06-18 | Aiden (Claude) | **Phase 7 SPR-05/06 복원 + TASK-151/156 2차 반려** — B_Kai branch reset으로 Phase 7 SPR-05/06 구간(TASK-151~156) 손실 → 복원. TASK-151 ❌ 2차 반려: R-09 LIVE_REGRESSION_TEST_MAP.md 미갱신 + PR #33 Closes #32 누락. TASK-153 ✅ 복원(PR #26 머지). TASK-152 🔄 복원(코드 5f86dfe). TASK-154 ⬜·TASK-155 🔔 복원. |
 | 2026-06-16 | JSJung (팀 리더) | **PR#8 제출** — TASK-B-006(Dave)·TASK-B-007(Baker) SPR-03 Agency 요율 오버라이드 UI. feature/ups-spr03-devteam-agency-rate-overrides → develop. Aiden 검토 요청. |
 | 2026-06-16 | Jaison (Team B) | **TASK-B-007 🔔 Jaison 검토 PASS** — ZEN_A4 수정 확인(함수 36·39·42줄), IMP_PROGRESS.md Baker 행 추가, 문서 커밋 해시 오기재(`9da38db`→`978f812`) Jaison 직접 수정. Aiden ✅ 승인 대기. |
 | 2026-06-16 | Jaison (Team B) | **TASK-B-007 ❌ 반려(1차)** — ZEN_A4 3건: table-row 52줄·form 60줄·fields 51줄. R-17 2건: 문서 커밋 해시 TBD 미기재·IMP_PROGRESS.md 미갱신. Baker 수정 지시 완료 (task file [수정 지시] 섹션). |
