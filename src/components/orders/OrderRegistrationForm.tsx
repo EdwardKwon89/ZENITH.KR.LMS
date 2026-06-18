@@ -19,6 +19,7 @@ import { orderRegistrationSchema, OrderRegistrationInput } from '@/lib/validatio
 import { estimateFreightCost, TransportMode } from '@/utils/logistics/freight-calculator';
 import { getAvailableServiceRates, getUsdKrwRate, getBaseCurrency, AvailableServiceRates } from '@/app/actions/operations/service-rates';
 import { createOrderServices } from '@/app/actions/operations/order-services';
+import AddressBookSelector from '@/components/address-book/AddressBookSelector';
 
 interface OrderRegistrationFormProps {
   shippers: any[];

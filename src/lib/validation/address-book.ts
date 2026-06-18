@@ -11,8 +11,8 @@ export const addressBookEntrySchema = z.object({
   recipient_address_local: z.string().optional(),
   recipient_phone: z.string().optional(),
   country_code: z.string().optional(),
-  display_mode: z.enum(['EN', 'BILINGUAL']).default('EN'),
-  is_default: z.boolean().default(false),
+  display_mode: z.enum(['EN', 'BILINGUAL']),
+  is_default: z.boolean(),
 });
 
 export type AddressBookEntryInput = z.infer<typeof addressBookEntrySchema>;

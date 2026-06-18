@@ -148,7 +148,7 @@ export default function AddressBookClient({ initialEntries }: AddressBookClientP
             {editingId && (
               <ZenButton
                 type="button"
-                variant="secondary"
+                variant="ghost"
                 onClick={() => {
                   setEditingId(null);
                   reset();
@@ -181,10 +181,10 @@ export default function AddressBookClient({ initialEntries }: AddressBookClientP
               </div>
             </div>
             <div className="flex gap-2">
-              <ZenButton size="sm" variant="ghost" onClick={() => handleEdit(entry)}>
+              <ZenButton variant="ghost" onClick={() => handleEdit(entry)}>
                 <Edit2 size={14} />
               </ZenButton>
-              <ZenButton size="sm" variant="ghost" onClick={() => handleDelete(entry.id)}>
+              <ZenButton variant="ghost" onClick={() => handleDelete(entry.id)}>
                 <Trash2 size={14} className="text-rose-500" />
               </ZenButton>
             </div>
