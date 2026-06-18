@@ -161,8 +161,18 @@ Supabase: Cloud 프로젝트 연결
 | UAT-12-07 | DELIVERY 조직 신규 등록 | ADMIN | [UAT_12](UAT_12_조직관리화면.md) | D_Kai | ✅ | 일반 |
 | UAT-12-08 | 조직 상태 변경 (ACTIVE → SUSPENDED → ACTIVE) | ADMIN | [UAT_12](UAT_12_조직관리화면.md) | D_Kai | ✅ | 일반 |
 | UAT-12-09 | 조직 목록 필터링 (유형·상태·검색 복합) | ADMIN | [UAT_12](UAT_12_조직관리화면.md) | D_Kai | ✅ | 일반 |
+| UAT-13-01 | 주소록 신규 등록 | SHIPPER | [UAT_13](UAT_13_주소록.md) | Riley | 🔄 | 필수 |
+| UAT-13-02 | 주소록 목록 조회 및 정렬 | SHIPPER | [UAT_13](UAT_13_주소록.md) | Riley | 🔄 | 일반 |
+| UAT-13-03 | 주소록 항목 수정 | SHIPPER | [UAT_13](UAT_13_주소록.md) | Riley | 🔄 | 일반 |
+| UAT-13-04 | 주소록 항목 삭제 | SHIPPER | [UAT_13](UAT_13_주소록.md) | Riley | 🔄 | 일반 |
+| UAT-13-05 | 기본 배송지 설정 및 자동 단일화 | SHIPPER | [UAT_13](UAT_13_주소록.md) | Riley | 🔄 | 필수 |
+| UAT-14-01 | 일일 출고 내역 집계 | ADMIN | [UAT_14](UAT_14_일마감.md) | Riley | 🔄 | 필수 |
+| UAT-14-02 | 일일 매출/매입/마진 집계 및 마진율 | ADMIN | [UAT_14](UAT_14_일마감.md) | Riley | 🔄 | 필수 |
+| UAT-14-03 | 기간별 마감 이력 조회 및 일자별 그룹핑 | ADMIN | [UAT_14](UAT_14_일마감.md) | Riley | 🔄 | 필수 |
+| UAT-14-04 | 출고 데이터가 없는 날의 집계 처리 | ADMIN | [UAT_14](UAT_14_일마감.md) | Riley | 🔄 | 일반 |
+| UAT-14-05 | 일마감 데이터 권한 검증 | ALL | [UAT_14](UAT_14_일마감.md) | Riley | 🔄 | 필수 |
 
-**총 93개 시나리오** | 작성 완료: **93 / 93 ✅ 전량 완료** | 필수: **43개** | 일반: **50개**
+**총 103개 시나리오** | 작성 완료: **103 / 103 ✅ 전량 완료** | 필수: **49개** | 일반: **54개**
 
 ---
 
@@ -257,4 +267,6 @@ Supabase: Cloud 프로젝트 연결
 | 2026-05-26 | Aiden (Claude) | UAT-11-01~07 상태 🔔→✅ 정정 — TASK-095·097 Aiden ✅ PASS 반영 누락분 보완 |
 | 2026-06-07 | Riley (Gemini) | TASK-120 — Phase 6 UAT 시나리오 5종 (UAT-12-01~05) 추가 및 인덱스 갱신, 총계 85개 갱신 |
 | 2026-06-09 | B_Kai (OpenCode) | TASK-126 — IMP-108 max_charge 시나리오 3종(UAT-10-08~10) + IMP-107 TISA 스냅샷 시나리오 1종(UAT-10-11) 추가, 총계 89개 갱신 |
+| 2026-06-18 | Riley (Gemini) | TASK-155 — 주소록(UAT-13-01~05) 및 일마감(UAT-14-01~05) 신규 10개 시나리오 추가, 총계 103개 갱신 |
+
 

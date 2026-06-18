@@ -1,7 +1,7 @@
 # 🗺️ LIVE Regression Test Master Map
 
-> **총 테스트 케이스:** 372 Cases  
-> **최종 검증일:** 2026-06-17 (TASK-153 IMP-122 Agency 정산 조회 구현 완료 · TC-P7-SETTLE-01~04 등재 · 374/374 PASS)  
+> **총 테스트 케이스:** 382 Cases  
+> **최종 검증일:** 2026-06-18 (TASK-155 [P7-SPR-07] E2E·UAT 선행 스펙 작성 · TC-P7-ADDR-01~05, TC-P7-CLOSE-01~05 등재 · 374/374 PASS)  
 
 제니스 플랫폼의 비즈니스 영속성을 보장하는 회귀 테스트 케이스의 통합 명세서입니다. 모든 신규 개발 및 수정 시 이 맵에 케이스가 추가되어야 하며, 전체 테스트가 통과되어야 합니다.
 
@@ -417,6 +417,24 @@
 | **TC-P7-SETTLE-02** | 화주별 정산 — 화주A vs 화주B 분리 집계 정확 | 대리점 하위 화주별 분리 집계 정확성 검증 | `tests/integration/p7-agency-settlement.test.ts` |
 | **TC-P7-SETTLE-03** | Agency 요율 오버라이드 반영 — override 있는 경우 override 금액 사용 | 요율 오버라이드 유무에 따른 정산 금액 반영 확인 | `tests/integration/p7-agency-settlement.test.ts` |
 | **TC-P7-SETTLE-04** | RLS — Agency A 사용자가 Agency B 데이터 조회 불가 | 대리점별 하위 화주 데이터 격리 보안 검증 | `tests/integration/p7-agency-settlement.test.ts` |
+
+### 31. Phase 7 주소록 (Phase 7 SPR-05)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-P7-ADDR-01** | 주소록 항목 신규 등록 | 주소록 정보 DB 정상 저장 검증 | `tests/unit/operations/address-book.test.ts` |
+| **TC-P7-ADDR-02** | 등록된 주소록 목록 조회 및 정렬 | 기본 배송지 우선, 가나다순 정렬 검증 | `tests/unit/operations/address-book.test.ts` |
+| **TC-P7-ADDR-03** | 주소록 항목 수정 | 기존 등록된 주소록 정보 수정 반영 확인 | `tests/unit/operations/address-book.test.ts` |
+| **TC-P7-ADDR-04** | 주소록 항목 삭제 | 주소록 항목 삭제 시 DB 제거 검증 | `tests/unit/operations/address-book.test.ts` |
+| **TC-P7-ADDR-05** | 기본 배송지 설정 및 자동 단일화 | 신규 지정 시 기존 기본배송지 자동 해제 검증 | `tests/unit/operations/address-book.test.ts` |
+
+### 32. Phase 7 일마감 처리 (Phase 7 SPR-05)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-P7-CLOSE-01** | 일일 출고 내역 집계 | RELEASED 상태 오더 패키지 수 및 중량 집계 검증 | `tests/unit/ups/daily-close.test.ts` |
+| **TC-P7-CLOSE-02** | 일일 매출/매입/마진 집계 및 마진율 | snapshots 기준 매출, 매입, 마진율 계산 정확도 검증 | `tests/unit/ups/daily-close.test.ts` |
+| **TC-P7-CLOSE-03** | 기간별 마감 이력 조회 및 일자별 그룹핑 | 기간 내 일자별 그룹핑 및 정렬 정상 동작 확인 | `tests/unit/ups/daily-close.test.ts` |
+| **TC-P7-CLOSE-04** | 출고 데이터가 없는 날의 집계 처리 | 데이터 없는 일자 조회 시 안전한 0 반환 처리 | `tests/unit/ups/daily-close.test.ts` |
+| **TC-P7-CLOSE-05** | 일마감 데이터 권한 검증 | ADMIN/MANAGER 외 타 역할 접근 차단 검증 | `tests/unit/ups/daily-close.test.ts` |
 
 ---
 
