@@ -191,6 +191,8 @@
 | TASK-149 | 260616 | [P7-SPR-04] 오더 등록 직접배송/픽업 선택 UI | P1 | TASK-138 ✅ | Riley | ✅ | [TASK-149](tasks/TASK-149_260616_P7SPR04_오더직접배송픽업UI_Riley.md) | IMP-118 · PR #21 머지 ✅ (260617) · CI PASS |
 | TASK-150 | 260616 | [P7-SPR-04] 창고 출고 UPS 발송 연계 | P1 | TASK-138 ✅ · TASK-144 ✅ | D_Kai | ✅ | [TASK-150](tasks/TASK-150_260616_P7SPR04_창고출고UPS연계_DKai.md) | IMP-119 · PR #19 머지 ✅ (260617) · CI PASS |
 | TASK-156 | 260618 | TASK-151 브랜치 오염 복구 — B_Kai 전용 브랜치 통합 + PR 재제출 | P1 | 없음 | B_Kai | ✅ | [TASK-156](tasks/TASK-156_260618_브랜치오염복구_BKai.md) | IMP-120 연계 · PR #33 (Closes #23·#32) · Aiden ✅ 승인 (260618) |
+| TASK-157 | 260618 | [P7-SPR-08] E2E-21 주소록 Playwright 자동화 실행 (test.skip 제거 + 완전 구현) | P2 | TASK-151 ✅ · TASK-155 ✅ | B_Kai | ⬜ | [TASK-157](tasks/TASK-157_260618_P7SPR08_E2E21주소록자동화_BKai.md) | IMP-120 E2E · Issue #35 |
+| TASK-158 | 260618 | [P7-SPR-08] E2E-22 일마감 Playwright 자동화 실행 (test.skip 제거 + 완전 구현) | P2 | TASK-152 ✅ · TASK-155 ✅ | D_Kai | ⬜ | [TASK-158](tasks/TASK-158_260618_P7SPR08_E2E22일마감자동화_DKai.md) | IMP-121 E2E · Issue #36 |
 | TASK-154 | 260617 | DEF-067 seed_data.sql + seed_rate_card.sql 구스키마 수정 + IMP-120 migration fix — CI 전체 차단 블로커 복구 | P1 | 없음 | D_Kai | ✅ | [TASK-154](tasks/TASK-154_260617_DEF067_시드데이터스키마수정_DKai.md) | DEF-067 · Issue #27 · 코드 db63986 · 378/378 PASS · Aiden ✅ 승인 (260618) |
 | TASK-151 | 260617 | [P7-SPR-05] R5 주소록 — zen_address_book DB + CRUD Server Actions + 오더 폼 연동 | P1 | TASK-149 ✅ | B_Kai | ✅ | [TASK-151](tasks/TASK-151_260617_P7SPR05_주소록_BKai.md) | IMP-120 · PR #33 (Closes #23·#32) · TC-P7-ADDR-01~05 · Aiden ✅ 승인 (260618) |
 | TASK-152 | 260617 | [P7-SPR-05] R7 일마감 처리 — 당일 출고 집계 + 매출/매입 일별 집계 화면 | P1 | TASK-150 ✅ | D_Kai | ✅ | [TASK-152](tasks/TASK-152_260617_P7SPR05_일마감처리_DKai.md) | IMP-121 · PR #29 (Closes #24) · TC-P7-CLOSE-01~04 · Aiden ✅ 승인 (260618) |
@@ -240,9 +242,9 @@
 
 | Agent | 상태 | 비고 |
 |:------|:----:|:----|
-| **Aiden (Claude)** | ✅ TASK-148/149/150 머지 완료 (260617) | PR #21/22/19 develop 머지 · CI 수정(vitest live-DB 제외) |
-| **D_Kai (OpenCode)** | 🔔 TASK-152 · TASK-154 검토 대기 | PR #29 (Closes #24) · TASK-154: PR pending (Closes #27) · 코드 db63986 · 378/378 PASS · DEF-067 복구 + seed_rate_card.sql + IMP-120 migration 추가 수정 |
-| **B_Kai** | ✅ TASK-151·156 완료 (260618) | PR #33 (Closes #23·#32) · IMP-120 · Aiden ✅ 승인 |
+| **Aiden (Claude)** | ✅ TASK-154 승인 (260618) | PR #34 머지 · DEF-067 CI 블로커 복구 완료 |
+| **D_Kai (OpenCode)** | ⬜ TASK-158 착수 대기 | E2E-22 일마감 Playwright 자동화 · Issue #36 |
+| **B_Kai** | ⬜ TASK-157 착수 대기 | E2E-21 주소록 Playwright 자동화 · Issue #35 |
 | **Riley** | ✅ TASK-155 완료 (260618) | PR #30 (Closes #28) · E2E-21·22 + UAT-13·14 · Aiden ✅ 승인 |
 | N_Kai | 재교육 세션 대기 (TASK-087) | R-17 위반 누적 — 신규 할당 중단 유지 |
 | Ring | 신규 할당 중단 유지 | 9차 위반 누적 |
