@@ -25,6 +25,7 @@ import {
   Users,
   ClipboardList
 } from "lucide-react";
+import { Package } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { checkPermission, USER_ROLES } from "@/lib/auth/rbac";
@@ -114,6 +115,14 @@ export default function NaviSidebar({
     },
     { title: t("statistics"), href: "/admin/statistics", icon: BarChartBig, isAdminOnly: true },
     { title: t("schedules"), href: "/schedules", icon: CalendarDays },
+    {
+      title: t("ups_group"),
+      href: "/ups/daily-close",
+      icon: Package,
+      children: [
+        { title: t("ups_daily_close"), href: "/ups/daily-close" },
+      ]
+    },
     {
       title: t("voc"),
       href: profile?.role?.includes(USER_ROLES.ADMIN) ? "/voc/admin" : "/voc",

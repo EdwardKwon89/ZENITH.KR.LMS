@@ -113,10 +113,17 @@
 | **TC-UPS-WH-02** | 창고 출고 — intl_ref_no 없음 | pkgsWithoutIntlRef > 0 반환 | `tests/unit/warehouse/outbound-ups.test.ts` |
 | **TC-UPS-WH-03** | 창고 출고 — 상태 전이 | WAREHOUSED→RELEASED 전이 유지 | `tests/unit/warehouse/outbound-ups.test.ts` |
 
->>>>>>> a9f73ac ([D_Kai] docs: TASK-150 3차 재작업 완료 — IMP-119 🔔 (단일 커밋: task file + ACTIVE_TASK + IMP_PROGRESS + LIVE_TEST_MAP))
+### 10. UPS 일마감 (Phase 7 SPR-05 Daily Close)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-P7-CLOSE-01** | `getDailyOutboundSummary` — 정상 출고 데이터 집계 | 출고 PKG/중량/Zone 분포 집계 정확성 | `tests/unit/ups/daily-close.test.ts` |
+| **TC-P7-CLOSE-02** | `getDailyOutboundSummary` — 출고 데이터 없음 | 데이터 없을 시 0 반환 및 에러 없음 | `tests/unit/ups/daily-close.test.ts` |
+| **TC-P7-CLOSE-03** | `getDailyRevenueSummary` — 매출/매입 집계 정확도 | Revenue/Cost/Margin/MarginRate 계산 정확성 | `tests/unit/ups/daily-close.test.ts` |
+| **TC-P7-CLOSE-04** | `getDailyCloseHistory` — 기간 조회 및 일자별 그룹핑 | Date range 조회 후 날짜별 Revenue 행 반환 검증 | `tests/unit/ups/daily-close.test.ts` |
+
 ---
 
-### 9. 지능형 트래킹 가시성 (Intelligent Tracking)
+### 11. 지능형 트래킹 가시성 (Intelligent Tracking)
 | ID | 테스트 항목 | 목적 | 파일 경로 |
 | :--- | :--- | :--- | :--- |
 | **TC-TR.1** | 공급자 실시간 전환 | `VIRTUAL` <-> `MANUAL` 전환 시 데이터 가시성 및 정합성 보장 | `tests/integration/tracking.test.ts` |

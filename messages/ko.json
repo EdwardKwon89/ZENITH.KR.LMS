@@ -84,6 +84,8 @@
     "rates": "운송 서비스 요율",
     "rate_cards_management": "요율 카드 관리",
     "corporate_mgmt": "법인 관리",
+    "ups_group": "UPS 관리",
+    "ups_daily_close": "UPS 일마감",
     "agency_management": "대리점 관리",
     "agency_shippers_nav": "화주 목록",
     "agency_dashboard": "대리점 대시보드",
@@ -708,5 +710,24 @@
     "csv_cost": "매입",
     "csv_margin": "마진",
     "csv_margin_rate": "마진율"
+  },
+  "UpsDailyClose": {
+    "title": "일마감 처리",
+    "select_date": "조회일",
+    "search_btn": "조회",
+    "outbound_title": "당일 출고 현황",
+    "total_pkgs": "총 PKG",
+    "total_weight": "총 중량",
+    "zone_distribution": "Zone 분포",
+    "revenue_title": "매출/매입 집계",
+    "date_col": "날짜",
+    "pkg_col": "PKG수",
+    "revenue_col": "매출",
+    "cost_col": "매입",
+    "margin_col": "마진",
+    "margin_rate_col": "마진율",
+    "total_row": "합계",
+    "csv_export": "CSV 내보내기",
+    "no_data": "조회 결과가 없습니다."
   }
 }
