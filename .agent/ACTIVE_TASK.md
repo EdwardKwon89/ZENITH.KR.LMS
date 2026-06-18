@@ -190,6 +190,7 @@
 | TASK-148 | 260616 | [P7-SPR-03] 간이 UPS 인보이스 PDF 출력 | P2 | TASK-138 ✅ · TASK-146 ✅ | B_Kai | ✅ | [TASK-148](tasks/TASK-148_260616_P7SPR03_UPS인보이스PDF_BKai.md) | IMP-117 · PR #22 머지 ✅ (260617) · CI PASS |
 | TASK-149 | 260616 | [P7-SPR-04] 오더 등록 직접배송/픽업 선택 UI | P1 | TASK-138 ✅ | Riley | ✅ | [TASK-149](tasks/TASK-149_260616_P7SPR04_오더직접배송픽업UI_Riley.md) | IMP-118 · PR #21 머지 ✅ (260617) · CI PASS |
 | TASK-150 | 260616 | [P7-SPR-04] 창고 출고 UPS 발송 연계 | P1 | TASK-138 ✅ · TASK-144 ✅ | D_Kai | ✅ | [TASK-150](tasks/TASK-150_260616_P7SPR04_창고출고UPS연계_DKai.md) | IMP-119 · PR #19 머지 ✅ (260617) · CI PASS |
+| TASK-157 | 260618 | [P7-SPR-08] E2E-21 주소록 Playwright 자동화 실행 (test.skip 제거 + 완전 구현) | P2 | TASK-151 ✅ · TASK-155 ✅ | B_Kai | 🔔 | [TASK-157](tasks/TASK-157_260618_P7SPR08_E2E21주소록자동화_BKai.md) | IMP-120 E2E · Issue #35 · 코드 1dc1cfd |
 | TASK-156 | 260618 | TASK-151 브랜치 오염 복구 — B_Kai 전용 브랜치 통합 + PR 재제출 | P1 | 없음 | B_Kai | ✅ | [TASK-156](tasks/TASK-156_260618_브랜치오염복구_BKai.md) | IMP-120 연계 · PR #33 (Closes #23·#32) · Aiden ✅ 승인 (260618) |
 | TASK-157 | 260618 | [P7-SPR-08] E2E-21 주소록 Playwright 자동화 실행 (test.skip 제거 + 완전 구현) | P2 | TASK-151 ✅ · TASK-155 ✅ | B_Kai | ⬜ | [TASK-157](tasks/TASK-157_260618_P7SPR08_E2E21주소록자동화_BKai.md) | IMP-120 E2E · Issue #35 |
 | TASK-158 | 260618 | [P7-SPR-08] E2E-22 일마감 Playwright 자동화 실행 (test.skip 제거 + 완전 구현) | P2 | TASK-152 ✅ · TASK-155 ✅ | D_Kai | ⬜ | [TASK-158](tasks/TASK-158_260618_P7SPR08_E2E22일마감자동화_DKai.md) | IMP-121 E2E · Issue #36 |
@@ -242,9 +243,9 @@
 
 | Agent | 상태 | 비고 |
 |:------|:----:|:----|
-| **Aiden (Claude)** | ✅ TASK-154 승인 (260618) | PR #34 머지 · DEF-067 CI 블로커 복구 완료 |
+| **Aiden (Claude)** | ✅ TASK-154 승인 (260618) · TASK-157 검토 중 | PR #34 머지 · DEF-067 CI 블로커 복구 완료 |
 | **D_Kai (OpenCode)** | ⬜ TASK-158 착수 대기 | E2E-22 일마감 Playwright 자동화 · Issue #36 |
-| **B_Kai** | ⬜ TASK-157 착수 대기 | E2E-21 주소록 Playwright 자동화 · Issue #35 |
+| **B_Kai** | 🔔 TASK-157 완료 (260618) · ✅ TASK-151·156 완료 | TASK-157 E2E-21 주소록 Playwright 자동화 🔔 · PR #38 · Aiden 검토 대기 |
 | **Riley** | ✅ TASK-155 완료 (260618) | PR #30 (Closes #28) · E2E-21·22 + UAT-13·14 · Aiden ✅ 승인 |
 | N_Kai | 재교육 세션 대기 (TASK-087) | R-17 위반 누적 — 신규 할당 중단 유지 |
 | Ring | 신규 할당 중단 유지 | 9차 위반 누적 |
