@@ -122,7 +122,7 @@
 
 ## Phase 7: UPS 특송 + Agency 역할 모델 (Phase 6 후속)
 
-> **설계 확정**: 2026-06-06 (An-12) | **기간**: 2026-06-14 ~ 진행 중 | **전체 진행률**: ~95%
+> **설계 확정**: 2026-06-06 (An-12) | **기간**: 2026-06-14 ~ 진행 중 | **전체 진행률**: ~95% | **Team B**: JSJung/Jaison (SPR-04~08 계획 수립 필요 ⬜)
 
 ### P7-SPR-01: UPS DB Schema (P1)
 
@@ -172,40 +172,61 @@
 
 | L3 WP | L4 Activity | 담당 | 상태 | 코드 | 비고 |
 |:------|:------------|:----:|:----:|:----:|:-----|
+| **Team A — IMP-118/119 오더·창고 UPS** | | | | | |
 | IMP-118 오더 직접배송/픽업 선택 UI | 직접배송 radio 버튼 + 픽업 주소 입력 폼 | Riley | ✅ | PR #21 | TASK-149 · CI PASS |
 | IMP-119 창고 출고 UPS 발송 연계 | 창고 출고 시 UPS 연동 데이터 생성 | D_Kai | ✅ | PR #19 | TASK-150 · CI PASS |
 | | UPS 레이블 발급 연동 | D_Kai | ✅ | PR #19 | |
+| **Team B — JSJung/Jaison** | **PR 통합 + 회귀 테스트 + P8 선행 설계** | **JSJung** | ⬜ | — | **계획 수립 필요** |
+| | Team B 전체 PR(SPR-01~03) → develop 머지 검증 | JSJung | ⬜ | — | |
+| | Phase 7 통합 회귀 테스트 + 빌드 검증 | JSJung | ⬜ | — | |
+| | Phase 8 사전 설계 리서치 (UPS 실물 연동 스펙) | JSJung | ⬜ | — | |
 
 ### P7-SPR-05: Address Book + Daily Close (P1)
 
 | L3 WP | L4 Activity | 담당 | 상태 | 코드 | 비고 |
 |:------|:------------|:----:|:----:|:----:|:-----|
+| **Team A — IMP-120/121 주소록·일마감** | | | | | |
 | **IMP-120 R5 주소록** | | | | | |
 | TASK-151 | `zen_address_book` DB 테이블 + CRUD Server Actions | B_Kai | ✅ | PR #33 | TC-P7-ADDR-01~05 |
 | | 오더 폼 주소록 연동 UI | B_Kai | ✅ | PR #33 | |
 | TASK-156 | 브랜치 오염 복구 + PR 재제출 | B_Kai | ✅ | PR #33 | Closes #23, #32 |
 | **IMP-121 R7 일마감 처리** | | | | | |
 | TASK-152 | 당일 출고 집계 + 매출/매입 일별 집계 화면 | D_Kai | ✅ | PR #29 | TC-P7-CLOSE-01~04 · Closes #24 |
+| **Team B — JSJung/Jaison** | **Agency 추가 기능 + P8 준비** | **JSJung** | ⬜ | — | **계획 수립 필요** |
+| | Agency 정산 내역 엑셀 다운로드 | JSJung | ⬜ | — | |
+| | Agency 대시보드 고도화 (정산 요약 위젯) | JSJung | ⬜ | — | |
+| | Phase 8 설계 참여 (UPS 실물 연동) | JSJung | ⬜ | — | |
 
 ### P7-SPR-06: Agency Settlement Inquiry (P1)
 
 | L3 WP | L4 Activity | 담당 | 상태 | 코드 | 비고 |
 |:------|:------------|:----:|:----:|:----:|:-----|
+| **Team A — IMP-122 정산 조회** | | | | | |
 | IMP-122 Agency 정산 조회 | 화주별 UPS 오더 정산 내역 조회 화면 | Riley | ✅ | PR #26 | TASK-153 · Closes #25 |
+| **Team B — JSJung/Jaison** | **정산 고도화 + 운영 안정화** | **JSJung** | ⬜ | — | **계획 수립 필요** |
+| | 정산 내역 상세 필터링/검색 기능 | JSJung | ⬜ | — | |
+| | Agency-화주 간 정산 Reconciliation 검증 | JSJung | ⬜ | — | |
+| | 긴급 DEF 대응 (Phase 7 통합 후 버퍼) | JSJung | ⬜ | — | |
 
 ### P7-SPR-07: E2E/UAT Pre-spec Writing (P2) — Riley
 
 | L3 WP | L4 Activity | 담당 | 상태 | 코드 | 비고 |
 |:------|:------------|:----:|:----:|:----:|:-----|
+| **Team A — Riley** | | | | | |
 | E2E-21 주소록 spec 초안 | TC-P7-ADDR-01~05 시나리오 정의 | Riley | ✅ | PR #30 | TASK-155 · 374/374 |
 | E2E-22 일마감 spec 초안 | TC-P7-CLOSE-01~04 시나리오 정의 | Riley | ✅ | PR #30 | |
 | UAT-13 주소록 절차서 | UAT 시나리오 5종 | Riley | ✅ | PR #30 | |
 | UAT-14 일마감 절차서 | UAT 시나리오 5종 | Riley | ✅ | PR #30 | |
+| **Team B — JSJung/Jaison** | **UAT 참여 + 피드백 반영** | **JSJung** | ⬜ | — | **계획 수립 필요** |
+| | Agency UAT 시나리오 검토 (Agency 역할 모델 관련) | JSJung | ⬜ | — | TASK-139/142/146 연계 |
+| | UAT 피드백 수렴 + 개선 Task 발굴 | JSJung | ⬜ | — | |
+| | E2E 시나리오 Agency 관점 보완 | JSJung | ⬜ | — | |
 
 ### P7-SPR-08: E2E Playwright Automation (P2)
 
 | L3 WP | L4 Activity | 담당 | 상태 | 코드 | 비고 |
 |:------|:------------|:----:|:----:|:----:|:-----|
+| **Team A — IMP-120/121 E2E** | | | | | |
 | **IMP-120 E2E — E2E-21 주소록** | | | | | |
 | TASK-157 | test.skip 제거 + beforeAll 동적 계정 생성 | B_Kai | ✅ | PR #38 | Closes #35 · 1 passed 17.7s |
 | | `buildOwnerFilter` null UUID 버그 수정 | B_Kai | ✅ | PR #38 | `.match()`→`.eq()`+`.is()` |
@@ -213,6 +234,10 @@
 | **IMP-121 E2E — E2E-22 일마감** | | | | | |
 | TASK-158 | E2E-22 Playwright 자동화 | D_Kai | ❌ | Issue #36 | Aiden ❌ 반려 — admin fixture·RELEASED orders·R-18 위반 3건 |
 | | 재작업 필요 (블로커 해제 후 재제출) | D_Kai | ⬜ | — | |
+| **Team B — JSJung/Jaison** | **UAT E2E + 운영 안정화** | **JSJung** | ⬜ | — | **계획 수립 필요** |
+| | Agency E2E 시나리오 자동화 (Agency 로그인~화주관리~Override) | JSJung | ⬜ | — | TASK-B-001~007 E2E |
+| | Phase 7 종합 회귀 테스트 | JSJung | ⬜ | — | E2E-21 + E2E-22 + Agency E2E |
+| | 긴급 DEF 대응 버퍼 | JSJung | ⬜ | — | |
 
 ### P7 Blockers & Bug Fixes
 
@@ -244,3 +269,4 @@
 | 날짜 | 작성자 | 내용 |
 |:----:|:------|:-----|
 | 2026-06-19 | B_Kai | WBS Level 4 초안 작성 (Phase 6 + Phase 7) · TASK-159 |
+| 2026-06-19 | B_Kai | P7-SPR-04~08 Team B(JSJung/Jaison) 트랙 추가 — 계획 수립 필요 ⬜ |
