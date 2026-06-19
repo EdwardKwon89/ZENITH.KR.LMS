@@ -64,8 +64,8 @@ Phase 6 (SPR-01~08 + 추가 Task) 전량 소급 정리 및 Phase 7 (SPR-01~08) T
 2. `[작업 결과]` 섹션 작성 (코드 커밋 해시 기재) + task file 상태 🔔 변경
 3. ACTIVE_TASK.md 🔄→🔔 반영
 4. **`check-R17-DoD` 실행** → PASS 확인 후 DoD `[ ] check-R17-DoD` 항목 `[x]` 체크 ✅
-5. **[문서 커밋]** `[B_Kai] docs: TASK-159 check-R17-DoD PASS - WBS Level 4 🔔` ← task file · ACTIVE_TASK.md 만 포함 ← **지금 실행 중**
-6. **[PR #41 업데이트]** PR body 최신화 후 Aiden 검토 요청 ← **지금 실행 중**
+5. **[문서 커밋]** `[B_Kai] docs: TASK-159 check-R17-DoD PASS - WBS Level 4 🔔` ← task file · ACTIVE_TASK.md 만 포함 ✅ `fb609b2`
+6. **[PR #41 업데이트]** PR body 최신화 후 Aiden 검토 요청 ← **완료. 검토 대기 중**
 
 ## [check-R17-DoD 자가 검증]
 
@@ -83,8 +83,9 @@ Phase 6 (SPR-01~08 + 추가 Task) 전량 소급 정리 및 Phase 7 (SPR-01~08) T
 
 | 항목 | 내용 |
 |:----|:----|
+| 문서 커밋 | `fb609b2` (B_Kai docs: check-R17-DoD PASS) |
+| 이전 문서 커밋 | `f17d153` (3차 반려 — Aiden 직접 커밋) |
 | 코드 커밋 | `2c04dca` (`feature/wbs-bkai-p6p7-wbs`) |
-| 문서 커밋 | `f17d153` (3차 반려 — Aiden 직접 커밋) |
 | WBS 파일 | `docs/07_Project_Management/P6_P7_WBS.md` |
 | WBS 구조 | Level 4 (Phase → Sprint → Work Package → Activity) |
 | Phase 6 | SPR-01~08 + Post-SPR(IMP-105~108) + DEF Fixes(TASK-127~137) — 전량 ✅ |
