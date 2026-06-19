@@ -143,7 +143,8 @@ export const getAgencyShipperSettlements = withAction(async function (
 
   for (const order of (ordersRes.data || [])) {
     const shipperId = order.shipper_id;
-    const shipperName = order.shipper?.name || 'Unknown';
+    const shipperObj = Array.isArray(order.shipper) ? order.shipper[0] : order.shipper;
+    const shipperName = shipperObj?.name || 'Unknown';
     if (!shipperMap[shipperId]) {
       shipperMap[shipperId] = { shipperName, orderCount: 0, revenue: 0, cost: 0 };
     }
