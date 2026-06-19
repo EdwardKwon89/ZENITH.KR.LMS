@@ -171,8 +171,24 @@ Supabase: Cloud 프로젝트 연결
 | UAT-14-03 | 기간별 마감 이력 조회 및 일자별 그룹핑 | ADMIN | [UAT_14](UAT_14_일마감.md) | Riley | 🔄 | 필수 |
 | UAT-14-04 | 출고 데이터가 없는 날의 집계 처리 | ADMIN | [UAT_14](UAT_14_일마감.md) | Riley | 🔄 | 일반 |
 | UAT-14-05 | 일마감 데이터 권한 검증 | ALL | [UAT_14](UAT_14_일마감.md) | Riley | 🔄 | 필수 |
+| UAT-15-01 | Agency의 하위 화주(Shipper) 신규 등록 | AGENCY | [UAT_15](UAT_15_Agency화주관리.md) | Riley | 🔄 | 필수 |
+| UAT-15-02 | Agency 하위 화주 목록 조회 및 소속 검증 | AGENCY | [UAT_15](UAT_15_Agency화주관리.md) | Riley | 🔄 | 필수 |
+| UAT-15-03 | Agency 화주 등급 수정 | AGENCY | [UAT_15](UAT_15_Agency화주관리.md) | Riley | 🔄 | 일반 |
+| UAT-16-01 | 대리점 요율 오버라이드 신규 등록 | AGENCY | [UAT_16](UAT_16_Agency요율오버라이드.md) | Riley | 🔄 | 필수 |
+| UAT-16-02 | 대리점 요율 오버라이드 목록 조회 및 RLS 검증 | AGENCY | [UAT_16](UAT_16_Agency요율오버라이드.md) | Riley | 🔄 | 필수 |
+| UAT-16-03 | 대리점 요율 오버라이드 비활성화 (Deactivate) | AGENCY | [UAT_16](UAT_16_Agency요율오버라이드.md) | Riley | 🔄 | 일반 |
+| UAT-17-01 | 직접배송(DIRECT) 선택 오더 등록 및 픽업 입력 차단 검증 | SHIPPER/ADMIN | [UAT_17](UAT_17_UPS특송오더발송.md) | Riley | 🔄 | 필수 |
+| UAT-17-02 | 픽업배송(PICKUP) 선택 오더 등록 및 픽업 필수값 유효성 검증 | SHIPPER/ADMIN | [UAT_17](UAT_17_UPS특송오더발송.md) | Riley | 🔄 | 필수 |
+| UAT-17-03 | 대리점 화주 요율 오버라이드가 적용된 UPS 요금 계산 검증 | SHIPPER | [UAT_17](UAT_17_UPS특송오더발송.md) | Riley | 🔄 | 필수 |
+| UAT-18-01 | WAREHOUSED 오더 출고 완료 시 UPS 발송 연계 흐름 | MANAGER/ADMIN | [UAT_18](UAT_18_창고출고UPS연계.md) | Riley | 🔄 | 필수 |
+| UAT-18-02 | UPS 발송 정보 자동 매핑 및 RLS 격리 검증 | SHIPPER | [UAT_18](UAT_18_창고출고UPS연계.md) | Riley | 🔄 | 일반 |
+| UAT-19-01 | UPS 오더 상세 화면에서 간이 인보이스 PDF 출력(미리보기) 검증 | SHIPPER/ADMIN | [UAT_19](UAT_19_UPS인보이스PDF.md) | Riley | 🔄 | 일반 |
+| UAT-19-02 | 인보이스 PDF 다운로드 파일명 및 물류 상세 항목 무결성 검증 | SHIPPER/ADMIN | [UAT_19](UAT_19_UPS인보이스PDF.md) | Riley | 🔄 | 필수 |
+| UAT-20-01 | 대리점 정산 요약 정보 확인 | AGENCY | [UAT_20](UAT_20_Agency정산조회.md) | Riley | 🔄 | 필수 |
+| UAT-20-02 | 대리점 하위 화주별 정산 목록 조회 및 필터링 | AGENCY | [UAT_20](UAT_20_Agency정산조회.md) | Riley | 🔄 | 필수 |
+| UAT-20-03 | 대리점 정산 데이터 CSV 내보내기 (Export) | AGENCY | [UAT_20](UAT_20_Agency정산조회.md) | Riley | 🔄 | 일반 |
 
-**총 103개 시나리오** | 작성 완료: **103 / 103 ✅ 전량 완료** | 필수: **49개** | 일반: **54개**
+**총 119개 시나리오** | 작성 완료: **119 / 119 ✅ 전량 완료** | 필수: **60개** | 일반: **59개**
 
 ---
 
@@ -268,5 +284,6 @@ Supabase: Cloud 프로젝트 연결
 | 2026-06-07 | Riley (Gemini) | TASK-120 — Phase 6 UAT 시나리오 5종 (UAT-12-01~05) 추가 및 인덱스 갱신, 총계 85개 갱신 |
 | 2026-06-09 | B_Kai (OpenCode) | TASK-126 — IMP-108 max_charge 시나리오 3종(UAT-10-08~10) + IMP-107 TISA 스냅샷 시나리오 1종(UAT-10-11) 추가, 총계 89개 갱신 |
 | 2026-06-18 | Riley (Gemini) | TASK-155 — 주소록(UAT-13-01~05) 및 일마감(UAT-14-01~05) 신규 10개 시나리오 추가, 총계 103개 갱신 |
+| 2026-06-19 | Riley (Gemini) | TASK-161 — Phase 7 UPS 특송 6개 기능 UAT 시나리오 신규 추가 (UAT-15 ~ 20), 총계 119개 갱신 |
 
 

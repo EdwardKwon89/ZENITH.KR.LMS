@@ -195,6 +195,7 @@
 | TASK-158 | 260618 | [P7-SPR-08] E2E-22 일마감 Playwright 자동화 실행 (test.skip 제거 + 완전 구현) | P2 | TASK-152 ✅ · TASK-155 ✅ | D_Kai | ✅ | [TASK-158](tasks/TASK-158_260618_P7SPR08_E2E22일마감자동화_DKai.md) | IMP-121 E2E · Issue #36 · Aiden ✅ 승인 (260619) · PR #37 머지 예정 |
 | TASK-159 | 260619 | Phase 6 + Phase 7 WBS Level 4 공정관리 문서 작성 | P4 | 없음 | B_Kai | ✅ | [TASK-159](tasks/TASK-159_260619_P6P7WBS작성_BKai.md) | Issue #40 · Aiden ✅ 승인 (260619) · PR #41 머지 완료 |
 | TASK-160 | 260619 | P7 WBS Team B SPR-04~08 트랙 develop 반영 (d05de26 후속 처리) | P4 | TASK-159 ✅ | B_Kai | ✅ | [TASK-160](tasks/TASK-160_260619_P7WBS_TeamB_SPR04-08_BKai.md) | Issue #43 · PR #44 머지 완료 · Aiden ✅ 승인 (260619) |
+| TASK-161 | 260619 | [P7-UAT] Phase 7 UPS 특송 UAT 시나리오 작성 — Agency·UPS 오더·정산 6개 기능 | P2 | IMP-114·116·117·118·119·122 ✅ | Riley | 🔔 | [TASK-161](tasks/TASK-161_260619_P7UAT시나리오작성_Riley.md) | IMP-123 · Issue #45 |
 | TASK-154 | 260617 | DEF-067 seed_data.sql + seed_rate_card.sql 구스키마 수정 + IMP-120 migration fix — CI 전체 차단 블로커 복구 | P1 | 없음 | D_Kai | ✅ | [TASK-154](tasks/TASK-154_260617_DEF067_시드데이터스키마수정_DKai.md) | DEF-067 · Issue #27 · 코드 db63986 · 378/378 PASS · Aiden ✅ 승인 (260618) |
 | TASK-151 | 260617 | [P7-SPR-05] R5 주소록 — zen_address_book DB + CRUD Server Actions + 오더 폼 연동 | P1 | TASK-149 ✅ | B_Kai | ✅ | [TASK-151](tasks/TASK-151_260617_P7SPR05_주소록_BKai.md) | IMP-120 · PR #33 (Closes #23·#32) · TC-P7-ADDR-01~05 · Aiden ✅ 승인 (260618) |
 | TASK-152 | 260617 | [P7-SPR-05] R7 일마감 처리 — 당일 출고 집계 + 매출/매입 일별 집계 화면 | P1 | TASK-150 ✅ | D_Kai | ✅ | [TASK-152](tasks/TASK-152_260617_P7SPR05_일마감처리_DKai.md) | IMP-121 · PR #29 (Closes #24) · TC-P7-CLOSE-01~04 · Aiden ✅ 승인 (260618) |
@@ -247,7 +248,7 @@
 | **Aiden (Claude)** | ✅ TASK-159 승인 (260619) · ✅ TASK-158 승인 (260619) | PR #41 머지 완료 · PR #37 머지 완료 |
 | **D_Kai (OpenCode)** | ✅ TASK-158 승인 (260619) | PR #37 머지 완료. 다음 Task 배분 대기 |
 | **B_Kai** | ✅ TASK-160 승인 (260619) | PR #44 머지 완료. 다음 Task 배분 대기 |
-| **Riley** | ✅ TASK-155 완료 (260618) | PR #30 (Closes #28) · E2E-21·22 + UAT-13·14 · Aiden ✅ 승인 |
+| **Riley** | 🔄 TASK-161 진행 중 | Phase 7 UAT 시나리오 작성 — Agency·UPS 6개 기능 · Issue #45 |
 | N_Kai | 재교육 세션 대기 (TASK-087) | R-17 위반 누적 — 신규 할당 중단 유지 |
 | Ring | 신규 할당 중단 유지 | 9차 위반 누적 |
 
