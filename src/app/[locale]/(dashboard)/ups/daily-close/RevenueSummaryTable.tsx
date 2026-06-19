@@ -1,5 +1,5 @@
 import { Download } from 'lucide-react';
-import { DailyRevenueRow } from '@/lib/actions/ups-daily-close';
+import type { DailyRevenueRow } from '@/lib/actions/ups-daily-close.shared';
 
 interface Props {
   rows: DailyRevenueRow[];

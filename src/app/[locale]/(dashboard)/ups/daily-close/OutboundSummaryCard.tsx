@@ -1,5 +1,5 @@
 import { Package, Weight, Globe } from 'lucide-react';
-import { DailyOutboundSummary } from '@/lib/actions/ups-daily-close';
+import type { DailyOutboundSummary } from '@/lib/actions/ups-daily-close.shared';
 
 interface Props {
   summary: DailyOutboundSummary;

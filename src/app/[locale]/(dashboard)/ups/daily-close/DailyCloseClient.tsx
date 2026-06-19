@@ -3,7 +3,8 @@
 import { useState, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { Search, CalendarDays } from 'lucide-react';
-import { getDailyOutboundSummary, getDailyRevenueSummary, getDailyCloseHistory, DailyOutboundSummary, DailyRevenueRow } from '@/lib/actions/ups-daily-close';
+import { getDailyOutboundSummary, getDailyRevenueSummary, getDailyCloseHistory } from '@/lib/actions/ups-daily-close';
+import type { DailyOutboundSummary, DailyRevenueRow } from '@/lib/actions/ups-daily-close.shared';
 import { OutboundSummaryCard } from './OutboundSummaryCard';
 import { RevenueSummaryTable } from './RevenueSummaryTable';
 

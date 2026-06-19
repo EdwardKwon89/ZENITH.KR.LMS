@@ -2,6 +2,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import {
   DailyCloseDateSchema,
   DailyCloseRangeSchema,
+} from '@/lib/actions/ups-daily-close.shared';
+import {
   getDailyOutboundSummary,
   getDailyRevenueSummary,
   getDailyCloseHistory,
