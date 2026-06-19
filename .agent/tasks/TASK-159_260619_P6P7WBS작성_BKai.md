@@ -40,16 +40,17 @@ Phase 6 (SPR-01~08 + 추가 Task) 전량 소급 정리 및 Phase 7 (SPR-01~08) T
 
 ## [DoD]
 
-- [ ] Phase 6 전 Task WBS Level 4로 정리
-- [ ] Phase 7 전 Task WBS Level 4로 정리 (Team A/B 분리)
-- [ ] 진행 상태 컬럼 포함 (✅/🔄/⬜/❌)
-- [ ] PR 생성 → Closes #40
+- [x] Phase 6 전 Task WBS Level 4로 정리
+- [x] Phase 7 전 Task WBS Level 4로 정리 (Team A/B 분리)
+- [x] 진행 상태 컬럼 포함 (✅/🔄/⬜/❌)
+- [x] PR 생성 → Closes #40
 - [ ] Aiden 승인
 
 ## [작업 결과]
 
 | 항목 | 내용 |
 |:----|:----|
+| 코드 커밋 | `2c04dca` (`feature/wbs-bkai-p6p7-wbs`) |
 | WBS 파일 | `docs/07_Project_Management/P6_P7_WBS.md` |
 | WBS 구조 | Level 4 (Phase → Sprint → Work Package → Activity) |
 | Phase 6 | SPR-01~08 + Post-SPR(IMP-105~108) + DEF Fixes(TASK-127~137) — 전량 ✅ |
