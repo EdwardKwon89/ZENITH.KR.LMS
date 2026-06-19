@@ -72,7 +72,7 @@ Phase 6 (SPR-01~08 + 추가 Task) 전량 소급 정리 및 Phase 7 (SPR-01~08) T
 | DoD | 항목 | 검증 |
 |:--:|:----|:----:|
 | ① | Phase 6 전 Task WBS Level 4 정리 | `P6_P7_WBS.md` Phase 6 126줄 · SPR-01~08 · IMP-105~108 · DEF-127~137 전량 기재 ✅ |
-| ② | Phase 7 전 Task WBS Level 4 정리 (Team A/B) | `P6_P7_WBS.md` Phase 7 119줄 · SPR-01~08 Team A/B 분리 · TASK-138~158 기재 ✅ |
+| ② | Phase 7 전 Task WBS Level 4 정리 (Team A/B) | `P6_P7_WBS.md` Phase 7 · SPR-01~08 Team A/B 분리 · TASK-138~158 기재 ✅ + Team B(JSJung) SPR-04~08 트랙 추가 (272줄) ✅ |
 | ③ | 진행 상태 컬럼 포함 | ✅/🔄/⬜/❌ 상태 심볼 전 구간 사용 ✅ |
 | ④ | PR 생성 → Closes #40 | PR #41 (`feature/wbs-bkai-p6p7-wbs` → `develop`) Open · Closes #40 ✅ |
 | ⑤ | check-R17-DoD 자가 검증 통과 | 본 항목. DoD 5/5 전항목 검증 완료 ✅ |
