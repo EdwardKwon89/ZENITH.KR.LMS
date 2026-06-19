@@ -192,7 +192,7 @@
 | TASK-150 | 260616 | [P7-SPR-04] 창고 출고 UPS 발송 연계 | P1 | TASK-138 ✅ · TASK-144 ✅ | D_Kai | ✅ | [TASK-150](tasks/TASK-150_260616_P7SPR04_창고출고UPS연계_DKai.md) | IMP-119 · PR #19 머지 ✅ (260617) · CI PASS |
 | TASK-157 | 260618 | [P7-SPR-08] E2E-21 주소록 Playwright 자동화 실행 (test.skip 제거 + 완전 구현) | P2 | TASK-151 ✅ · TASK-155 ✅ | B_Kai | ✅ | [TASK-157](tasks/TASK-157_260618_P7SPR08_E2E21주소록자동화_BKai.md) | IMP-120 E2E · Issue #35 · PR #38 머지 ✅ · Aiden ✅ 승인 (260618) |
 | TASK-156 | 260618 | TASK-151 브랜치 오염 복구 — B_Kai 전용 브랜치 통합 + PR 재제출 | P1 | 없음 | B_Kai | ✅ | [TASK-156](tasks/TASK-156_260618_브랜치오염복구_BKai.md) | IMP-120 연계 · PR #33 (Closes #23·#32) · Aiden ✅ 승인 (260618) |
-| TASK-158 | 260618 | [P7-SPR-08] E2E-22 일마감 Playwright 자동화 실행 (test.skip 제거 + 완전 구현) | P2 | TASK-152 ✅ · TASK-155 ✅ | D_Kai | ❌ | [TASK-158](tasks/TASK-158_260618_P7SPR08_E2E22일마감자동화_DKai.md) | IMP-121 E2E · Issue #36 · Aiden ❌ 반려(2차, 260619) — effc0a9 🔄·DoD⑧ 미체크·ACTIVE_TASK 미업데이트 |
+| TASK-158 | 260618 | [P7-SPR-08] E2E-22 일마감 Playwright 자동화 실행 (test.skip 제거 + 완전 구현) | P2 | TASK-152 ✅ · TASK-155 ✅ | D_Kai | 🔔 | [TASK-158](tasks/TASK-158_260618_P7SPR08_E2E22일마감자동화_DKai.md) | IMP-121 E2E · Issue #36 · 재작업 완료 (260619) — 차단 3건 해소: 🔄→🔔·DoD⑧[x]·ACTIVE_TASK 🔔 |
 | TASK-159 | 260619 | Phase 6 + Phase 7 WBS Level 4 공정관리 문서 작성 | P4 | 없음 | B_Kai | 🔔 | [TASK-159](tasks/TASK-159_260619_P6P7WBS작성_BKai.md) | Issue #40 · `docs/07_Project_Management/P6_P7_WBS.md` 신규 생성 |
 | TASK-154 | 260617 | DEF-067 seed_data.sql + seed_rate_card.sql 구스키마 수정 + IMP-120 migration fix — CI 전체 차단 블로커 복구 | P1 | 없음 | D_Kai | ✅ | [TASK-154](tasks/TASK-154_260617_DEF067_시드데이터스키마수정_DKai.md) | DEF-067 · Issue #27 · 코드 db63986 · 378/378 PASS · Aiden ✅ 승인 (260618) |
 | TASK-151 | 260617 | [P7-SPR-05] R5 주소록 — zen_address_book DB + CRUD Server Actions + 오더 폼 연동 | P1 | TASK-149 ✅ | B_Kai | ✅ | [TASK-151](tasks/TASK-151_260617_P7SPR05_주소록_BKai.md) | IMP-120 · PR #33 (Closes #23·#32) · TC-P7-ADDR-01~05 · Aiden ✅ 승인 (260618) |
@@ -243,8 +243,8 @@
 
 | Agent | 상태 | 비고 |
 |:------|:----:|:----|
-| **Aiden (Claude)** | ❌ TASK-158 반려(2차) · ❌ TASK-159 반려(3차) (260619) | TASK-158: effc0a9 🔄·DoD⑧·ACTIVE_TASK 미업데이트 / TASK-159: 헤더·check-R17-DoD 수동검증 |
-| **D_Kai (OpenCode)** | ❌ TASK-158 반려(2차) (260619) | 재작업: D_Kai 브랜치에서 task file 🔔·DoD⑧[x]·ACTIVE_TASK.md 업데이트 [문서 커밋] 필요 |
+| **Aiden (Claude)** | ❌ TASK-159 반려(3차) (260619) | TASK-159: 헤더·check-R17-DoD 수동검증 |
+| **D_Kai (OpenCode)** | 🔔 TASK-158 재작업 완료 (260619) | 차단 3건 해소: 🔄→🔔·DoD⑧[x]·ACTIVE_TASK🔔·[문서커밋] 완료 — Aiden 검토 대기 |
 | **B_Kai** | ❌ TASK-159 반려(3차) (260619) | 재작업: check-R17-DoD 실행·task file 헤더 🔔·[문서 커밋] |
 | **Riley** | ✅ TASK-155 완료 (260618) | PR #30 (Closes #28) · E2E-21·22 + UAT-13·14 · Aiden ✅ 승인 |
 | N_Kai | 재교육 세션 대기 (TASK-087) | R-17 위반 누적 — 신규 할당 중단 유지 |
