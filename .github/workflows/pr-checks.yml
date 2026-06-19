@@ -24,7 +24,7 @@ jobs:
         run: supabase start
 
       - name: Apply migrations & seed
-        run: supabase db reset --no-confirm
+        run: supabase db reset --yes
 
       - name: Create .env.local for tests
         run: |
