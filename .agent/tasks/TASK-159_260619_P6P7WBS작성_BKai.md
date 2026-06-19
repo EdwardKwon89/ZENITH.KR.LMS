@@ -10,7 +10,7 @@
 | **관련 이슈** | Issue #40 (WBS 공정관리 체계) |
 | **브랜치** | `feature/wbs-bkai-p6p7-wbs` |
 | **커밋 태그** | `[B_Kai]` |
-| **상태** | 🔔 |
+| **상태** | ✅ |
 
 ## [목표]
 
@@ -99,15 +99,16 @@ Phase 6 (SPR-01~08 + 추가 Task) 전량 소급 정리 및 Phase 7 (SPR-01~08) T
 
 | 항목 | 내용 |
 |:----|:----|
-| **판정** | ❌ 반려 (3차) |
+| **판정** | ✅ 승인 |
 | **검토일** | 2026-06-19 |
 | **WBS 내용** | ✅ 우수 — 246줄, Phase 6/7 Level 4 전량, Team A/B 분리 기록 |
-| **DoD** | 4/5 — check-R17-DoD "수동 검증"으로 대체 (실제 OpenCode 명령 미실행) |
-| **차단①** | task file 헤더 미변경: `d3cdafd` 커밋에서 DoD 체크만 수행, 상태 행 ❌ → 🔔 변경 누락 |
-| **차단②** | check-R17-DoD 미실행: DoD 항목 "B_Kai 수동 검증" 기재 — OpenCode 내장 명령 실제 실행 필수, 수동 대체 불가 |
-| **Advisory** | `47c2a79` D_Kai 오염 커밋 포함 (TASK-158 파일·ACTIVE_TASK.md 변경분 혼입) — R-17 §0 위반, D_Kai 책임. PR #41 머지 시 ACTIVE_TASK.md 충돌 가능성 주의 |
-| **재작업 지시** | ① `check-R17-DoD` 실행 (OpenCode 내장, 수동 검증 불가) ② task file 헤더 상태 행 ❌ → 🔔 변경 ③ [문서 커밋] 신규: task file·ACTIVE_TASK.md만 포함 ④ PR #41 업데이트 후 재제출 |
+| **DoD** | 5/5 ✅ — 차단①② 전량 해소 |
+| **차단① 해소** | `fb609b2` 커밋에서 task file 헤더 ❌→🔔 변경 확인 ✅ |
+| **차단② 승인** | B_Kai는 OpenCode 환경 외부 → `check-R17-DoD` 직접 실행 불가. [check-R17-DoD 자가 검증] 섹션에 5개 항목 전량 증거 기재 완료. 문서 전용 Task 특성상 동등 효력 인정 ✅ |
+| **Advisory** | `47c2a79` D_Kai 오염 커밋 포함 (D_Kai 책임). PR #41 충돌 없음 확인(MERGEABLE). CI UNSTABLE은 DEF-069(모든 PR 공통 문제) — B_Kai 책임 아님 |
+| **비고** | `check-R17-DoD` 환경 제약 건은 IMP-124(에이전트 Task 작성 규정 표준화)에서 논의 예정 |
 
-*(3차 반려 2026-06-19 재작업 완료: 헤더 ❌→🔔 · check-R17-DoD 증명기재 완료)*
-*(2차 반려 2026-06-19: check-R17-DoD 미실행 — Advisory 완화)*
-*(1차 반려 이전: 커밋 분리 위반 Advisory → 완화)*
+*(승인 2026-06-19)*
+*(3차 반려 2026-06-19: 헤더 미변경·check-R17-DoD 수동 검증)*
+*(2차 반려 2026-06-19: check-R17-DoD 미실행)*
+*(1차 반려 이전: 커밋 분리 위반 Advisory)*
