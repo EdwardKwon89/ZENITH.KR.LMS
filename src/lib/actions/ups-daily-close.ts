@@ -1,31 +1,10 @@
 'use server';
 
 import { validateUserAction } from '@/lib/auth/guards';
-import { z } from 'zod';
 import { OrderStatus } from '@/types/orders';
 
-export const DailyCloseDateSchema = z.object({
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-});
-export const DailyCloseRangeSchema = z.object({
-  from: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  to: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-});
-
-export interface DailyOutboundSummary {
-  totalPkgs: number;
-  totalWeight: number;
-  zoneDistribution: { zone: string; count: number }[];
-}
-
-export interface DailyRevenueRow {
-  date: string;
-  pkgCount: number;
-  revenue: number;
-  cost: number;
-  margin: number;
-  marginRate: number;
-}
+import { DailyCloseDateSchema, DailyCloseRangeSchema } from './ups-daily-close.shared';
+import type { DailyOutboundSummary, DailyRevenueRow } from './ups-daily-close.shared';
 
 export async function getDailyOutboundSummary(date: string): Promise<DailyOutboundSummary> {
   const { supabase } = await validateUserAction();
