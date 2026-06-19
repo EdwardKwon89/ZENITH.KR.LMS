@@ -84,11 +84,14 @@ Phase 6 (SPR-01~08 + 추가 Task) 전량 소급 정리 및 Phase 7 (SPR-01~08) T
 
 | 항목 | 내용 |
 |:----|:----|
-| **판정** | ❌ 반려 (2차) |
+| **판정** | ❌ 반려 (3차) |
 | **검토일** | 2026-06-19 |
 | **WBS 내용** | ✅ 우수 — 246줄, Phase 6/7 Level 4 전량, Team A/B 분리 기록 |
-| **DoD** | ✅ 4/5 체크 완료 (`c954aec` 보완) |
-| **커밋 해시** | ✅ `2c04dca` 기재 완료 |
-| **Advisory** | `2c04dca` 단일 커밋에 WBS+task file+ACTIVE_TASK 혼입 — 과거 위반, 이력 수정 불필요. 향후 task file 자체 생성 시 [R-17 완료 보고 절차] 섹션 반드시 포함할 것 |
-| **남은 요건** | check-R17-DoD 자가 검증 미실행 — `check-R17-DoD` 실행 후 DoD `[x]` 체크 → [문서 커밋] → PR #41 업데이트 |
-| **재작업 지시** | ① `check-R17-DoD` 실행 (OpenCode 내장 명령) ② DoD `[ ] check-R17-DoD` 항목 `[x]` 체크 ③ [문서 커밋] 신규: task file·ACTIVE_TASK.md만 포함 ④ PR #41 업데이트 후 재제출 |
+| **DoD** | 4/5 — check-R17-DoD "수동 검증"으로 대체 (실제 OpenCode 명령 미실행) |
+| **차단①** | task file 헤더 미변경: `d3cdafd` 커밋에서 DoD 체크만 수행, 상태 행 ❌ → 🔔 변경 누락 |
+| **차단②** | check-R17-DoD 미실행: DoD 항목 "B_Kai 수동 검증" 기재 — OpenCode 내장 명령 실제 실행 필수, 수동 대체 불가 |
+| **Advisory** | `47c2a79` D_Kai 오염 커밋 포함 (TASK-158 파일·ACTIVE_TASK.md 변경분 혼입) — R-17 §0 위반, D_Kai 책임. PR #41 머지 시 ACTIVE_TASK.md 충돌 가능성 주의 |
+| **재작업 지시** | ① `check-R17-DoD` 실행 (OpenCode 내장, 수동 검증 불가) ② task file 헤더 상태 행 ❌ → 🔔 변경 ③ [문서 커밋] 신규: task file·ACTIVE_TASK.md만 포함 ④ PR #41 업데이트 후 재제출 |
+
+*(2차 반려 2026-06-19: check-R17-DoD 미실행 — Advisory 완화)*
+*(1차 반려 이전: 커밋 분리 위반 Advisory → 완화)*
