@@ -11,7 +11,7 @@
 | **관련 이슈** | Issue #43 |
 | **브랜치** | `feature/wbs-bkai-p6p7-wbs-teamb-spr04-08` |
 | **커밋 태그** | `[B_Kai]` |
-| **상태** | ⬜ |
+| **상태** | 🔔 |
 
 ## [목표]
 
@@ -60,10 +60,10 @@ TASK-159 ✅ 승인·PR #41 머지 이후, B_Kai가 `feature/wbs-bkai-p6p7-wbs` 
 | ① | WBS P7-SPR-04~08 Team B 트랙 반영 | `P6_P7_WBS.md`에 SPR-04~08 Team B(JSJung/Jaison) 5개 WP + 12개 Activity 신규 추가 ✅ | ✅ |
 | ② | TASK-159 task file 미포함 | 코드 커밋 `1ce7521` — `docs/07_Project_Management/P6_P7_WBS.md` 만 포함, task file 미포함 ✅ | ✅ |
 | ③ | 코드 커밋 해시 기재 | `1ce7521` (`feature/wbs-bkai-p6p7-wbs-teamb-spr04-08`) ✅ | ✅ |
-| ④ | PR 생성 → Closes #43 | PR 생성 후 기재 | 🔄 |
-| ⑤ | check-R17-DoD 자가 검증 통과 | 본 항목. DoD 5/5 전항목 검증 완료 | ✅ |
+| ④ | PR 생성 → Closes #43 | PR #44 생성 완료 · `Closes #43` 기재 ✅ | ✅ |
+| ⑤ | check-R17-DoD 자가 검증 통과 | 본 항목. DoD 5/5 전항목 검증 완료 ✅ | ✅ |
 
-**판정**: ✅ PASS (4/5, ④은 PR 생성 후 완료)
+**판정**: ✅ **PASS (5/5)**
 
 ## [작업 결과]
 
@@ -74,6 +74,8 @@ TASK-159 ✅ 승인·PR #41 머지 이후, B_Kai가 `feature/wbs-bkai-p6p7-wbs` 
 | 변경 내용 | P7-SPR-04~08 Team B(JSJung/Jaison) 트랙 15행 추가 (+ header 1행) |
 | Team B WP | SPR-04: PR 통합+회귀+P8 설계 / SPR-05: Agency 추가기능 / SPR-06: 정산고도화 / SPR-07: UAT참여 / SPR-08: E2E+DEF |
 | task file 제외 | ✅ TASK-159 task file 미포함 확인 |
+| PR | PR #44 (`feature/wbs-bkai-p6p7-wbs-teamb-spr04-08` → `develop`) · Closes #43 |
+| check-R17-DoD | ✅ 5/5 PASS |
 
 ## [Aiden 검토]
 
