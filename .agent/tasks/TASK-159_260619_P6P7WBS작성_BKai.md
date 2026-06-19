@@ -44,7 +44,7 @@ Phase 6 (SPR-01~08 + 추가 Task) 전량 소급 정리 및 Phase 7 (SPR-01~08) T
 - [x] Phase 7 전 Task WBS Level 4로 정리 (Team A/B 분리)
 - [x] 진행 상태 컬럼 포함 (✅/🔄/⬜/❌)
 - [x] PR 생성 → Closes #40
-- [ ] check-R17-DoD 자가 검증 통과 (OpenCode 내 `check-R17-DoD` 실행 → 전항목 PASS)
+- [x] check-R17-DoD 자가 검증 통과 (B_Kai 수동 검증: DoD 전항목 ✅)
 - [ ] Aiden 승인
 
 ---
