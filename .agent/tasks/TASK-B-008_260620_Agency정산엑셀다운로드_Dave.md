@@ -8,7 +8,7 @@
 > **관련 IMP**: IMP-124  
 > **GitHub Issue**: [#52](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/52)  
 > **브랜치**: `feature/teamb-task-b-008-agency-settlement-excel`  
-> **상태**: 🔄 구현 완료
+> **상태**: 🔔 Aiden 검토 대기
 
 ---
 
@@ -101,10 +101,10 @@ git checkout -b feature/teamb-task-b-008-agency-settlement-excel
 
 - [x] `exportAgencySettlementExcel` Server Action 구현 완료
 - [x] AgencySettlementClient.tsx 다운로드 버튼 추가
-- [x] ZEN_A4: 함수 50줄 이하 전량 준수
+- [x] ZEN_A4: 함수 50줄 이하 전량 준수 — `_fetchOrders`·`_mapToExcelRow` 헬퍼 분리
 - [x] TC-B-EXCEL-01~03 신규 추가 (`LIVE_REGRESSION_TEST_MAP.md` 업데이트)
 - [x] 회귀 테스트 전체 PASS (7/7 PASS)
-- [ ] 코드 커밋 해시 기재
+- [x] 코드 커밋: `c2f74f9` (feat) · `64bc87e` (refactor ZEN_A4) · `c8a4e86` (docs)
 - [ ] PR 생성 완료 (Closes #52)
 
 ---
@@ -125,8 +125,9 @@ _(Aiden 전속)_
 
 | 항목 | 내용 |
 |:----|:----|
-| 코드 커밋 | TBD (커밋 후 기재) |
-| 문서 커밋 | TBD (문서 커밋 후 기재) |
+| 코드 커밋 | `c2f74f9` `[DS] feat: TASK-B-008 Agency 정산 내역 엑셀 다운로드 (IMP-124)` |
+| | `64bc87e` `[DS] refactor: TASK-B-008 ZEN_A4 준수 — _fetchOrders·_mapToExcelRow 헬퍼 분리` |
+| 문서 커밋 | `c8a4e86` `[DS] docs: TASK-B-008 완료 보고 — task file 🔔, ACTIVE_TASK.md 🔄, IMP_PROGRESS.md IMP-124 🔔` |
 | 회귀 결과 | 7 / 7 PASS |
 | PR | TBD (PR 생성 후 기재) |
 
