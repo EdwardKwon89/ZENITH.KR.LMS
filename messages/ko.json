@@ -683,6 +683,8 @@
     "filter_shipper": "화주 필터",
     "all_shippers": "전체 화주",
     "filter_period": "조회 기간",
+    "filter_order_no": "오더번호",
+    "order_no_placeholder": "오더번호 입력",
     "btn_search": "조회",
     "btn_excel": "엑셀 다운로드",
     "summary_orders": "총 오더수",
@@ -715,7 +717,10 @@
     "csv_revenue": "매출",
     "csv_cost": "매입",
     "csv_margin": "마진",
-    "csv_margin_rate": "마진율"
+    "csv_margin_rate": "마진율",
+    "settlement_reconciliation_title": "미가격 오더 알림",
+    "settlement_reconciliation_desc": "요율이 적용되지 않아 정산에서 제외된 오더입니다.",
+    "settlement_reconciliation_count": "{count}건"
   },
   "UpsDailyClose": {
     "title": "일마감 처리",

@@ -684,6 +684,8 @@
     "filter_shipper": "Shipper Filter",
     "all_shippers": "All Shippers",
     "filter_period": "Date Range",
+    "filter_order_no": "Order No.",
+    "order_no_placeholder": "Enter order number",
     "btn_search": "Search",
     "btn_excel": "Download Excel",
     "summary_orders": "Total Orders",
@@ -716,7 +718,10 @@
     "csv_revenue": "Revenue",
     "csv_cost": "Cost",
     "csv_margin": "Margin",
-    "csv_margin_rate": "Margin %"
+    "csv_margin_rate": "Margin %",
+    "settlement_reconciliation_title": "Unpriced Orders Alert",
+    "settlement_reconciliation_desc": "These orders were excluded from settlement due to missing rates.",
+    "settlement_reconciliation_count": "{count} orders"
   },
   "UpsDailyClose": {
     "title": "Daily Close",
