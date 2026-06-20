@@ -2,11 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { Search, Download, RefreshCw } from 'lucide-react';
+import { Search, Download, RefreshCw, Loader2 } from 'lucide-react';
 import {
   getAgencySettlementSummary,
   getAgencyShipperSettlements,
-  getAgencyOrderSettlements
+  getAgencyOrderSettlements,
+  exportAgencySettlementExcel,
 } from '@/app/actions/agency';
 import { AgencySettlementSummary } from './AgencySettlementSummary';
 import { ShipperSettlementTable } from './ShipperSettlementTable';
@@ -41,6 +42,7 @@ export function AgencySettlementClient({ agencyOrgId, shippers }: AgencySettleme
   const [to, setTo] = useState(formatDate(today));
   const [selectedShipperId, setSelectedShipperId] = useState('');
   const [loading, setLoading] = useState(false);
+  const [exporting, setExporting] = useState(false);
 
   const [summary, setSummary] = useState({
     orderCount: 0,
@@ -84,40 +86,31 @@ export function AgencySettlementClient({ agencyOrgId, shippers }: AgencySettleme
     fetchData();
   }, []);
 
-  const handleCsvExport = () => {
-    const headers = [
-      t('csv_shipper_name'),
-      t('csv_order_no'),
-      t('csv_date'),
-      t('csv_pkg_count'),
-      t('csv_weight'),
-      t('csv_revenue'),
-      t('csv_cost'),
-      t('csv_margin'),
-      t('csv_margin_rate')
-    ];
-
-    const rows = ordersData.map(o => [
-      o.shipperName,
-      o.orderNo,
-      new Date(o.createdAt).toLocaleDateString(),
-      o.packagesCount,
-      `${o.totalWeight.toFixed(1)} kg`,
-      o.revenue,
-      o.cost,
-      o.margin,
-      `${o.marginRate.toFixed(1)}%`
-    ]);
-
-    const csvContent = "\uFEFF" + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.setAttribute("href", url);
-    link.setAttribute("download", `Agency_Settlement_${from}_to_${to}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleExcelExport = async () => {
+    setExporting(true);
+    try {
+      const res = await exportAgencySettlementExcel(agencyOrgId, selectedShipperId || undefined, from, to);
+      if (res.error) throw new Error(res.error);
+      const { base64, filename } = res.data!;
+      const binaryStr = atob(base64);
+      const bytes = new Uint8Array(binaryStr.length);
+      for (let i = 0; i < binaryStr.length; i++) {
+        bytes[i] = binaryStr.charCodeAt(i);
+      }
+      const blob = new Blob([bytes], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (err: any) {
+      console.error(err);
+    } finally {
+      setExporting(false);
+    }
   };
 
   return (
@@ -190,12 +183,12 @@ export function AgencySettlementClient({ agencyOrgId, shippers }: AgencySettleme
         <div className="flex justify-between items-center">
           <h2 className="text-lg font-bold text-slate-900">{t('table_title')}</h2>
           <button
-            onClick={handleCsvExport}
-            disabled={ordersData.length === 0}
-            className="px-4 py-2 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-200 text-white disabled:text-slate-400 rounded-xl text-xs font-bold flex items-center gap-2 shadow-sm transition-colors cursor-pointer"
+            onClick={handleExcelExport}
+            disabled={exporting || ordersData.length === 0}
+            className="px-4 py-2 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-200 text-white disabled:text-slate-400 rounded-xl text-xs font-bold flex items-center gap-2 shadow-sm transition-all cursor-pointer"
           >
-            <Download size={14} />
-            {t('btn_csv')}
+            {exporting ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
+            {t('btn_excel')}
           </button>
         </div>
 

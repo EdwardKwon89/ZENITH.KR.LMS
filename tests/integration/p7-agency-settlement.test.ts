@@ -2,7 +2,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import {
   getAgencySettlementSummary,
   getAgencyShipperSettlements,
-  getAgencyOrderSettlements
+  getAgencyOrderSettlements,
+  exportAgencySettlementExcel
 } from '@/lib/actions/agency-settlement';
 import { createAdminClient } from '@/utils/supabase/server';
 import { validateUserAction } from '@/lib/auth/guards';
@@ -172,5 +173,101 @@ describe('Agency Settlement Integration Tests (TC-P7-SETTLE-01~04)', () => {
     // Check that zen_agency_shippers was queried with mockAgencyOrgId (11111111-1111-4111-8111-111111111111) instead of 222
     expect(mockShippersQuery.eq).toHaveBeenCalledWith('agency_org_id', mockAgencyOrgId);
     expect(mockShippersQuery.eq).not.toHaveBeenCalledWith('agency_org_id', '22222222-2222-4222-8222-222222222222');
+  });
+});
+
+describe('TC-B-EXCEL-01~03: Agency 정산 엑셀 다운로드', () => {
+  const mockAgencyOrgId = '11111111-1111-4111-8111-111111111111';
+  const mockShipperAId = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+  const mockShipperBId = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
+
+  const mockShippersLink = [
+    { shipper_org_id: mockShipperAId },
+    { shipper_org_id: mockShipperBId }
+  ];
+
+  const mockBaseRates = [
+    { id: '11111111-2222-4333-8444-555555555551', selling_price: 35000, cost_price: 28000 },
+    { id: '11111111-2222-4333-8444-555555555552', selling_price: 50000, cost_price: 40000 }
+  ];
+
+  const mockOverrides = [
+    { base_rate_id: '11111111-2222-4333-8444-555555555551', selling_price: 33000, cost_price: 25000 }
+  ];
+
+  const mockOrders = [
+    {
+      id: '99999999-9999-4999-8999-999999999991',
+      order_no: 'ZN-2026001',
+      shipper_id: mockShipperAId,
+      created_at: '2026-06-05T12:00:00Z',
+      shipper: { name: 'Shipper A' },
+      packages: [{ gross_weight: 2.5, packing_count: 1 }],
+      snapshot: { rate_card_id: '11111111-2222-4333-8444-555555555551', applied_unit_price: 35000, carrier_cost_amount: 28000 }
+    },
+    {
+      id: '99999999-9999-4999-8999-999999999992',
+      order_no: 'ZN-2026002',
+      shipper_id: mockShipperBId,
+      created_at: '2026-06-10T12:00:00Z',
+      shipper: { name: 'Shipper B' },
+      packages: [{ gross_weight: 5.0, packing_count: 2 }],
+      snapshot: { rate_card_id: '11111111-2222-4333-8444-555555555552', applied_unit_price: 50000, carrier_cost_amount: 40000 }
+    }
+  ];
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockSupabase = createMockSupabase();
+    (createAdminClient as any).mockResolvedValue(mockSupabase);
+    (validateUserAction as any).mockResolvedValue({
+      profile: { id: '33333333-3333-4333-8333-333333333333', role: 'AGENCY', org_id: mockAgencyOrgId }
+    });
+
+    mockSupabase._tableMocks = {
+      zen_agency_shippers: createQueryMock(mockShippersLink),
+      zen_ups_base_rates: createQueryMock(mockBaseRates),
+      zen_agency_rate_overrides: createQueryMock(mockOverrides),
+      zen_orders: createQueryMock(mockOrders)
+    };
+  });
+
+  it('TC-B-EXCEL-01: 기간 설정 후 엑셀 다운로드 — 9개 컬럼 정상 포함', async () => {
+    const result = await exportAgencySettlementExcel(mockAgencyOrgId, undefined, '2026-06-01', '2026-06-15');
+
+    expect(result.data).not.toBeNull();
+    expect(result.error).toBeNull();
+    expect(result.data?.base64).toBeTruthy();
+    expect(typeof result.data?.base64).toBe('string');
+    expect(result.data?.filename).toMatch(/^agency_settlement_\d{8}\.xlsx$/);
+
+    const binaryStr = atob(result.data!.base64);
+    expect(binaryStr.charCodeAt(0)).toBe(0x50);
+    expect(binaryStr.charCodeAt(1)).toBe(0x4B);
+    expect(binaryStr.charCodeAt(2)).toBe(0x03);
+    expect(binaryStr.charCodeAt(3)).toBe(0x04);
+  });
+
+  it('TC-B-EXCEL-02: 데이터 없는 기간 — 헤더만 있는 빈 엑셀 파일', async () => {
+    mockSupabase._tableMocks.zen_agency_shippers = createQueryMock([]);
+
+    const result = await exportAgencySettlementExcel(mockAgencyOrgId, undefined, '2026-01-01', '2026-01-31');
+
+    expect(result.data).not.toBeNull();
+    expect(result.data?.base64).toBeTruthy();
+    expect(result.data?.filename).toMatch(/^agency_settlement_\d{8}\.xlsx$/);
+  });
+
+  it('TC-B-EXCEL-03: 특정 화주 필터 후 다운로드 — 해당 화주 데이터만 포함', async () => {
+    mockSupabase._tableMocks.zen_agency_shippers = createQueryMock([
+      { shipper_org_id: mockShipperAId }
+    ]);
+    mockSupabase._tableMocks.zen_orders = createQueryMock([mockOrders[0]]);
+
+    const result = await exportAgencySettlementExcel(mockAgencyOrgId, mockShipperAId, '2026-06-01', '2026-06-15');
+
+    expect(result.data).not.toBeNull();
+    expect(result.data?.base64).toBeTruthy();
+    expect(result.data?.filename).toMatch(/^agency_settlement_\d{8}\.xlsx$/);
   });
 });
