@@ -1,0 +1,140 @@
+name: "[Sync] Project Status → Issue Label"
+
+# ZENITH LMS — Sprint Board 에서 Status를 수동 변경할 때
+# 연결된 Issue 레이블을 일괄 동기화합니다.
+#
+# Project Status → 레이블 1:1 매핑
+#   등록      → (레이블 없음 — skip)
+#   작업 대기  → status:open
+#   작업 중   → status:in-progress
+#   검토 대기  → status:review
+#   재작업    → status:rework
+#   완료      → status:done
+#
+# 트리거: workflow_dispatch (수동 전체 재동기화)
+#   - 개인 레포는 projects_v2_item 이벤트 미지원 → 수동 실행으로 대체
+#
+# 필수 Secret: GH_PROJECT_TOKEN (project + repo 권한 PAT)
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run (변경 없이 미스매치만 출력)"
+        required: false
+        default: "false"
+        type: choice
+        options: ["false", "true"]
+
+permissions:
+  issues: write
+
+env:
+  PROJECT_ID:      PVT_kwHOD7GZQs4BbIDB
+  STATUS_FIELD_ID: PVTSSF_lAHOD7GZQs4BbIDBzhV60H8
+  REPO:            EdwardKwon89/ZENITH.KR.LMS
+  STATUS_LABELS:   "status:open status:in-progress status:review status:rework status:done"
+
+jobs:
+  sync-all:
+    name: Sprint Board Status → Issue Label (full resync)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Full resync — sprint board status → issue labels
+        env:
+          GH_TOKEN: ${{ secrets.GH_PROJECT_TOKEN }}
+          DRY_RUN:  ${{ github.event.inputs.dry_run }}
+        run: |
+          python3 - <<'PYEOF'
+          import subprocess, json, os
+
+          REPO            = os.environ['REPO']
+          PROJECT_ID      = os.environ['PROJECT_ID']
+          STATUS_FIELD_ID = os.environ['STATUS_FIELD_ID']
+          DRY_RUN         = os.environ['DRY_RUN'] == 'true'
+
+          STATUS_TO_LABEL = {
+              '작업 대기': 'status:open',
+              '작업 중':   'status:in-progress',
+              '검토 대기': 'status:review',
+              '재작업':    'status:rework',
+              '완료':      'status:done',
+              # '등록' 은 레이블 미부여 — skip
+          }
+
+          def gql(query, **vars):
+              cmd = ['gh', 'api', 'graphql', '-f', f'query={query}']
+              for k, v in vars.items():
+                  cmd += ['-f', f'{k}={v}']
+              r = subprocess.run(cmd, capture_output=True, text=True)
+              return json.loads(r.stdout)
+
+          def gh_cli(*args):
+              return subprocess.run(['gh'] + list(args), capture_output=True, text=True)
+
+          # 전체 프로젝트 아이템 조회
+          data = gql('''
+            query($proj: ID!) {
+              node(id: $proj) {
+                ... on ProjectV2 {
+                  items(first: 100) {
+                    nodes {
+                      fieldValues(first: 20) {
+                        nodes {
+                          ... on ProjectV2ItemFieldSingleSelectValue {
+                            name
+                            field { ... on ProjectV2SingleSelectField { id } }
+                          }
+                        }
+                      }
+                      content {
+                        ... on Issue {
+                          number
+                          labels(first: 20) { nodes { name } }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }''', proj=PROJECT_ID)
+
+          items = data['data']['node']['items']['nodes']
+          updated = skipped = mismatch = 0
+
+          for item in items:
+              content = item.get('content', {})
+              issue_num = content.get('number')
+              if not issue_num:
+                  continue
+
+              proj_status = next(
+                  (f['name'] for f in item['fieldValues']['nodes']
+                   if f.get('field', {}).get('id') == STATUS_FIELD_ID),
+                  None
+              )
+              if proj_status not in STATUS_TO_LABEL:
+                  skipped += 1
+                  continue
+
+              target_label = STATUS_TO_LABEL[proj_status]
+              current_labels = [l['name'] for l in content.get('labels', {}).get('nodes', [])]
+              status_labels  = [l for l in current_labels if l.startswith('status:')]
+
+              if status_labels == [target_label]:
+                  continue
+
+              mismatch += 1
+              print(f"{'[DRY]' if DRY_RUN else '[UPDATE]'} Issue #{issue_num}: {status_labels} → [{target_label}]  (Sprint Board: {proj_status})")
+
+              if not DRY_RUN:
+                  if status_labels:
+                      gh_cli('issue', 'edit', str(issue_num), '--repo', REPO,
+                             '--remove-label', ','.join(status_labels))
+                  gh_cli('issue', 'edit', str(issue_num), '--repo', REPO,
+                         '--add-label', target_label)
+                  updated += 1
+
+          print(f"\n{'Dry run' if DRY_RUN else 'Done'}: {mismatch} mismatch(es) found, {updated} updated, {skipped} skipped (등록/no status)")
+          PYEOF
