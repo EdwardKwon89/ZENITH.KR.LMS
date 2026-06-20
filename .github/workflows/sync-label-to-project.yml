@@ -1,0 +1,131 @@
+name: "[Sync] Issue Label → Project Status"
+
+# Issue에 status:* 레이블이 추가/제거되거나 신규 Issue가 열릴 때
+# GitHub Project V2 (ZENITH LMS — Sprint Board) Status 필드를 자동 동기화합니다.
+#
+# 레이블 → Project Status 1:1 매핑
+#   status:open        → 작업 대기
+#   status:in-progress → 작업 중
+#   status:review      → 검토 대기
+#   status:rework      → 재작업
+#   status:done        → 완료
+#   (레이블 없음 + opened) → 등록
+#
+# 필수 Secret: GH_PROJECT_TOKEN (project + repo 권한 PAT)
+
+on:
+  issues:
+    types: [labeled, unlabeled, opened]
+
+permissions:
+  issues: read
+
+env:
+  PROJECT_ID:      PVT_kwHOD7GZQs4BbIDB
+  STATUS_FIELD_ID: PVTSSF_lAHOD7GZQs4BbIDBzhV60H8
+  OPT_REGISTERED:  81474413
+  OPT_OPEN:        c370694b
+  OPT_IN_PROGRESS: e55b1792
+  OPT_REVIEW:      73ab5703
+  OPT_REWORK:      471a3989
+  OPT_DONE:        436a450c
+
+jobs:
+  sync:
+    name: Label → Project Status
+    runs-on: ubuntu-latest
+
+    steps:
+      # ── Step 1: 현재 레이블 전체 기준으로 목표 Status 결정 ─────────
+      - name: Resolve target status
+        id: resolve
+        env:
+          LABELS_JSON: ${{ toJson(github.event.issue.labels) }}
+          EVENT_ACTION: ${{ github.event.action }}
+        run: |
+          TARGET=$(python3 - <<'PYEOF'
+          import json, os
+
+          labels  = [l['name'] for l in json.loads(os.environ['LABELS_JSON'])]
+          action  = os.environ['EVENT_ACTION']
+
+          # 우선순위: done > review > rework > in-progress > open > registered
+          if 'status:done'           in labels: print('done')
+          elif 'status:review'       in labels: print('review')
+          elif 'status:rework'       in labels: print('rework')
+          elif 'status:in-progress'  in labels: print('in-progress')
+          elif 'status:open'         in labels: print('open')
+          elif 'status:draft'        in labels: print('open')
+          elif action == 'opened':             print('registered')  # 신규 이슈 기본값
+          else:                                print('skip')
+          PYEOF
+          )
+          echo "target=$TARGET" >> "$GITHUB_OUTPUT"
+          echo "Resolved: issue=#${{ github.event.issue.number }} action=${{ github.event.action }} → $TARGET"
+
+      # ── Step 2: Project 아이템 조회 (없으면 자동 추가) ────────────
+      - name: Get or add project item
+        id: item
+        if: steps.resolve.outputs.target != 'skip'
+        env:
+          GH_TOKEN:       ${{ secrets.GH_PROJECT_TOKEN }}
+          ISSUE_NODE_ID:  ${{ github.event.issue.node_id }}
+          ISSUE_NUMBER:   ${{ github.event.issue.number }}
+        run: |
+          ITEM_ID=$(gh api graphql -f query='
+            query($proj: ID!) {
+              node(id: $proj) {
+                ... on ProjectV2 {
+                  items(first: 100) {
+                    nodes { id content { ... on Issue { number } } }
+                  }
+                }
+              }
+            }' \
+            -f proj="$PROJECT_ID" \
+            --jq ".data.node.items.nodes[] | select(.content.number == $ISSUE_NUMBER) | .id" \
+            2>/dev/null || true)
+
+          if [ -z "$ITEM_ID" ]; then
+            echo "Issue #$ISSUE_NUMBER not in project — adding..."
+            ITEM_ID=$(gh api graphql -f query='
+              mutation($proj: ID!, $content: ID!) {
+                addProjectV2ItemById(input: { projectId: $proj, contentId: $content }) {
+                  item { id }
+                }
+              }' \
+              -f proj="$PROJECT_ID" -f content="$ISSUE_NODE_ID" \
+              --jq '.data.addProjectV2ItemById.item.id')
+            echo "Added to project: $ITEM_ID"
+          fi
+
+          echo "item_id=$ITEM_ID" >> "$GITHUB_OUTPUT"
+
+      # ── Step 3: Project Status 업데이트 ──────────────────────────
+      - name: Update project status
+        if: steps.resolve.outputs.target != 'skip' && steps.item.outputs.item_id != ''
+        env:
+          GH_TOKEN: ${{ secrets.GH_PROJECT_TOKEN }}
+          TARGET:   ${{ steps.resolve.outputs.target }}
+          ITEM_ID:  ${{ steps.item.outputs.item_id }}
+        run: |
+          case "$TARGET" in
+            registered)  OPT="$OPT_REGISTERED" ;;
+            open)        OPT="$OPT_OPEN" ;;
+            in-progress) OPT="$OPT_IN_PROGRESS" ;;
+            review)      OPT="$OPT_REVIEW" ;;
+            rework)      OPT="$OPT_REWORK" ;;
+            done)        OPT="$OPT_DONE" ;;
+          esac
+
+          gh api graphql -f query='
+            mutation($proj: ID!, $item: ID!, $field: ID!, $val: String!) {
+              updateProjectV2ItemFieldValue(input: {
+                projectId: $proj, itemId: $item, fieldId: $field,
+                value: { singleSelectOptionId: $val }
+              }) { projectV2Item { id } }
+            }' \
+            -f proj="$PROJECT_ID" -f item="$ITEM_ID" \
+            -f field="$STATUS_FIELD_ID" -f val="$OPT"
+
+          echo "✅ Issue #${{ github.event.issue.number }} → Project Status: $TARGET"
