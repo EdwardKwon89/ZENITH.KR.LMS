@@ -279,6 +279,37 @@ function _todayStr(): string {
   return `${yyyy}${mm}${dd}`;
 }
 
+async function _fetchOrders(supabase: any, shipperIds: string[], from: string, to: string) {
+  return supabase
+    .from('zen_orders')
+    .select(`
+      id, order_no, shipper_id, created_at,
+      shipper:shipper_id(name),
+      packages:zen_order_packages(gross_weight, packing_count),
+      snapshot:zen_order_rate_snapshots(rate_card_id, applied_unit_price, carrier_cost_amount)
+    `)
+    .in('shipper_id', shipperIds)
+    .gte('created_at', `${from}T00:00:00Z`)
+    .lte('created_at', `${to}T23:59:59Z`);
+}
+
+function _mapToExcelRow(order: any, baseRates: any[], overrides: any[]): _ExcelRow {
+  const { revenue, cost, margin } = _calculateOrderSettle(order, baseRates, overrides);
+  const totalWeight = order.packages?.reduce((sum: number, p: any) => sum + Number(pkgWeight(p)), 0) || 0;
+  const packagesCount = order.packages?.reduce((sum: number, p: any) => sum + (p.packing_count || 1), 0) || 0;
+  return {
+    orderNo: order.order_no,
+    shipperName: order.shipper?.name || 'Unknown',
+    createdAt: order.created_at,
+    packagesCount,
+    totalWeight,
+    revenue,
+    cost,
+    margin,
+    marginRate: revenue > 0 ? (margin / revenue) * 100 : 0,
+  };
+}
+
 export const exportAgencySettlementExcel = withAction(async function (
   agencyOrgId: string,
   shipperId: string | undefined,
@@ -298,51 +329,24 @@ export const exportAgencySettlementExcel = withAction(async function (
   });
 
   const supabase = await createAdminClient();
-  let shipperIds: string[];
-  if (shipperId) {
-    shipperIds = [shipperId];
-  } else {
-    shipperIds = await _getAgencyShipperIds(supabase, targetAgencyId);
-  }
+  const shipperIds = shipperId
+    ? [shipperId]
+    : await _getAgencyShipperIds(supabase, targetAgencyId);
 
   if (shipperIds.length === 0) {
-    const base64 = _generateXlsxBase64([]);
-    return { base64, filename: `agency_settlement_${_todayStr()}.xlsx` };
+    return { base64: _generateXlsxBase64([]), filename: `agency_settlement_${_todayStr()}.xlsx` };
   }
 
   const [ordersRes, baseData] = await Promise.all([
-    supabase
-      .from('zen_orders')
-      .select(`
-        id, order_no, shipper_id, created_at,
-        shipper:shipper_id(name),
-        packages:zen_order_packages(gross_weight, packing_count),
-        snapshot:zen_order_rate_snapshots(rate_card_id, applied_unit_price, carrier_cost_amount)
-      `)
-      .in('shipper_id', shipperIds)
-      .gte('created_at', `${from}T00:00:00Z`)
-      .lte('created_at', `${to}T23:59:59Z`),
+    _fetchOrders(supabase, shipperIds, from, to),
     _fetchBaseData(supabase, targetAgencyId),
   ]);
 
   if (ordersRes.error) throw ordersRes.error;
 
-  const rows: _ExcelRow[] = (ordersRes.data || []).map((order: any) => {
-    const { revenue, cost, margin } = _calculateOrderSettle(order, baseData.baseRates, baseData.overrides);
-    const totalWeight = order.packages?.reduce((sum: number, p: any) => sum + Number(pkgWeight(p)), 0) || 0;
-    const packagesCount = order.packages?.reduce((sum: number, p: any) => sum + (p.packing_count || 1), 0) || 0;
-    return {
-      orderNo: order.order_no,
-      shipperName: order.shipper?.name || 'Unknown',
-      createdAt: order.created_at,
-      packagesCount,
-      totalWeight,
-      revenue,
-      cost,
-      margin,
-      marginRate: revenue > 0 ? (margin / revenue) * 100 : 0,
-    };
-  });
+  const rows = (ordersRes.data || []).map((order: any) =>
+    _mapToExcelRow(order, baseData.baseRates, baseData.overrides)
+  );
 
   return {
     base64: _generateXlsxBase64(rows),
