@@ -238,7 +238,7 @@
 | TASK-B-006 | 260616 | [P7-SPR-03] Agency 요율 오버라이드 Server Actions 3종 (getAgencyRateOverrides·upsertAgencyRateOverride·deactivateAgencyRateOverride) | P1 | TASK-B-001 ✅ · TASK-143 ✅ | Dave | ✅ | [TASK-B-006](tasks/TASK-B-006_260616_AgencyRateOverridesActions_Dave.md) | IMP-116 · PR#8 머지 완료 260617 · 345/352 PASS · Aiden ✅ 260617 |
 | TASK-B-007 | 260616 | [P7-SPR-03] Agency 요율 오버라이드 UI — /agency/rate-overrides + NaviSidebar 메뉴 + i18n 10종 | P1 | TASK-B-006 ✅ | Baker | ✅ | [TASK-B-007](tasks/TASK-B-007_260616_AgencyRateOverridesUI_Baker.md) | IMP-116 · PR#8 머지 완료 260617 · 345/345 PASS · Aiden ✅ 260617 |
 | TASK-B-008 | 260620 | [P7-SPR-05] Agency 정산 내역 엑셀 다운로드 — exportAgencySettlementExcel + 다운로드 버튼 UI | P2 | IMP-122 ✅ | Dave | ⬜ | [TASK-B-008](tasks/TASK-B-008_260620_Agency정산엑셀다운로드_Dave.md) | IMP-124 · Issue #52 |
-| TASK-B-009 | 260620 | [P7-SPR-05] Agency 대시보드 정산 요약 위젯 — AgencySettlementWidget | P2 | IMP-122 ✅ | Baker | 🔔 | [TASK-B-009](tasks/TASK-B-009_260620_Agency대시보드정산위젯_Baker.md) | IMP-125 · Issue #53 |
+| TASK-B-009 | 260620 | [P7-SPR-05] Agency 대시보드 정산 요약 위젯 — AgencySettlementWidget | P2 | IMP-122 ✅ | Baker | 🔔 | [TASK-B-009](tasks/TASK-B-009_260620_Agency대시보드정산위젯_Baker.md) | IMP-125 · Issue #53 · [PR #54](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/54) |
 ---
 
 ## Agent 현황
@@ -268,6 +268,7 @@
 
 ## 개정 이력
 
+| 2026-06-20 | Baker (Big Pickle) | **TASK-B-009 ✅ 완료(🔔 검토 대기)** — Agency 대시보드 정산 요약 위젯 48줄 구현. i18n 4개국어 5개키. TC-B-DASH-01~02 등재. 회귀 212/214 PASS. 코드 `d763951` + 문서 `b3d35f6`. [PR #54](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/54) (Closes #53). |
 | 2026-06-18 | Aiden (Claude) | **Phase 7 SPR-05/06 복원 + TASK-151/156 2차 반려** — B_Kai branch reset으로 Phase 7 SPR-05/06 구간(TASK-151~156) 손실 → 복원. TASK-151 ❌ 2차 반려: R-09 LIVE_REGRESSION_TEST_MAP.md 미갱신 + PR #33 Closes #32 누락. TASK-153 ✅ 복원(PR #26 머지). TASK-152 🔄 복원(코드 5f86dfe). TASK-154 ⬜·TASK-155 🔔 복원. |
 | 2026-06-16 | JSJung (팀 리더) | **PR#8 제출** — TASK-B-006(Dave)·TASK-B-007(Baker) SPR-03 Agency 요율 오버라이드 UI. feature/ups-spr03-devteam-agency-rate-overrides → develop. Aiden 검토 요청. |
 | 2026-06-16 | Jaison (Team B) | **TASK-B-007 🔔 Jaison 검토 PASS** — ZEN_A4 수정 확인(함수 36·39·42줄), IMP_PROGRESS.md Baker 행 추가, 문서 커밋 해시 오기재(`9da38db`→`978f812`) Jaison 직접 수정. Aiden ✅ 승인 대기. |
