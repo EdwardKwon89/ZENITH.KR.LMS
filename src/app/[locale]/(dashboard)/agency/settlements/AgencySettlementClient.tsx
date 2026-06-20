@@ -2,15 +2,17 @@
 
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { Search, Download, RefreshCw, Loader2 } from 'lucide-react';
+import { Search, Download, RefreshCw, Loader2, FileText } from 'lucide-react';
 import {
   getAgencySettlementSummary,
   getAgencyShipperSettlements,
   getAgencyOrderSettlements,
   exportAgencySettlementExcel,
+  getAgencyUnpricedOrders
 } from '@/app/actions/agency';
 import { AgencySettlementSummary } from './AgencySettlementSummary';
 import { ShipperSettlementTable } from './ShipperSettlementTable';
+import { SettlementReconciliationAlert } from './SettlementReconciliationAlert';
 
 interface ShipperDropdownItem {
   id: string;
@@ -41,6 +43,7 @@ export function AgencySettlementClient({ agencyOrgId, shippers }: AgencySettleme
   const [from, setFrom] = useState(formatDate(firstDay));
   const [to, setTo] = useState(formatDate(today));
   const [selectedShipperId, setSelectedShipperId] = useState('');
+  const [orderNoSearch, setOrderNoSearch] = useState('');
   const [loading, setLoading] = useState(false);
   const [exporting, setExporting] = useState(false);
 
@@ -53,19 +56,22 @@ export function AgencySettlementClient({ agencyOrgId, shippers }: AgencySettleme
   });
   const [shippersData, setShippersData] = useState<any[]>([]);
   const [ordersData, setOrdersData] = useState<any[]>([]);
+  const [unpricedOrders, setUnpricedOrders] = useState<any[]>([]);
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [summaryRes, shippersRes, ordersRes] = await Promise.all([
+      const [summaryRes, shippersRes, ordersRes, unpricedRes] = await Promise.all([
         getAgencySettlementSummary(agencyOrgId, from, to),
         getAgencyShipperSettlements(agencyOrgId, from, to),
-        getAgencyOrderSettlements(agencyOrgId, selectedShipperId || undefined, from, to)
+        getAgencyOrderSettlements(agencyOrgId, selectedShipperId || undefined, from, to),
+        getAgencyUnpricedOrders(agencyOrgId, from, to)
       ]);
 
       if (summaryRes.error) throw new Error(summaryRes.error);
       if (shippersRes.error) throw new Error(shippersRes.error);
       if (ordersRes.error) throw new Error(ordersRes.error);
+      if (unpricedRes.error) throw new Error(unpricedRes.error);
 
       if (summaryRes.data) setSummary(summaryRes.data);
       if (shippersRes.data) {
@@ -75,6 +81,7 @@ export function AgencySettlementClient({ agencyOrgId, shippers }: AgencySettleme
         setShippersData(filteredShippers);
       }
       if (ordersRes.data) setOrdersData(ordersRes.data);
+      if (unpricedRes.data) setUnpricedOrders(unpricedRes.data);
     } catch (err: any) {
       console.error(err);
     } finally {
@@ -159,6 +166,20 @@ export function AgencySettlementClient({ agencyOrgId, shippers }: AgencySettleme
           </div>
         </div>
 
+        <div className="flex flex-col gap-2 flex-1 min-w-[180px]">
+          <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">{t('filter_order_no')}</label>
+          <div className="relative">
+            <FileText size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              value={orderNoSearch}
+              onChange={(e) => setOrderNoSearch(e.target.value)}
+              placeholder={t('order_no_placeholder')}
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-4 py-2.5 text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+            />
+          </div>
+        </div>
+
         <button
           onClick={fetchData}
           disabled={loading}
@@ -168,6 +189,9 @@ export function AgencySettlementClient({ agencyOrgId, shippers }: AgencySettleme
           {t('btn_search')}
         </button>
       </div>
+
+      {/* 미가격 오더 알림 */}
+      <SettlementReconciliationAlert unpricedOrders={unpricedOrders} t={t} />
 
       {/* 요약 카드 */}
       <AgencySettlementSummary
