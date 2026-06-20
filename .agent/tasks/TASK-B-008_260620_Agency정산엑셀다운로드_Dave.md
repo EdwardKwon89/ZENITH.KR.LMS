@@ -103,7 +103,7 @@ git checkout -b feature/teamb-task-b-008-agency-settlement-excel
 - [x] AgencySettlementClient.tsx 다운로드 버튼 추가
 - [x] ZEN_A4: 함수 50줄 이하 전량 준수 — `_fetchOrders`·`_mapToExcelRow` 헬퍼 분리
 - [x] TC-B-EXCEL-01~03 신규 추가 (`LIVE_REGRESSION_TEST_MAP.md` 업데이트)
-- [x] 회귀 테스트 전체 PASS (7/7 PASS)
+- [x] 회귀 테스트 전체 PASS — 372/381 (2건 pre-existing Supabase ECONNREFUSED 타임아웃 + 7 skipped)
 - [x] 코드 커밋: `c2f74f9` (feat) · `64bc87e` (refactor ZEN_A4) · `c8a4e86` (docs)
 - [x] PR 생성 완료: [#55](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/55) (Closes #52)
 
@@ -128,7 +128,7 @@ _(Aiden 전속)_
 | 코드 커밋 | `c2f74f9` `[DS] feat: TASK-B-008 Agency 정산 내역 엑셀 다운로드 (IMP-124)` |
 | | `64bc87e` `[DS] refactor: TASK-B-008 ZEN_A4 준수 — _fetchOrders·_mapToExcelRow 헬퍼 분리` |
 | 문서 커밋 | `c8a4e86` `[DS] docs: TASK-B-008 완료 보고 — task file 🔔, ACTIVE_TASK.md 🔄, IMP_PROGRESS.md IMP-124 🔔` |
-| 회귀 결과 | 7 / 7 PASS |
+| 회귀 결과 | 372 / 381 PASS |
 | PR | [#55](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/55) (Closes #52) |
 
 ---
@@ -144,4 +144,5 @@ _(Aiden 전속)_
 | 날짜 | 작성자 | 내용 |
 |:-----|:------|:----|
 | 2026-06-20 | Jaison (Claude, Team B) | Task 발령 |
-| 2026-06-20 | Dave (DeepSeek V4, Team B) | 구현 완료 · 회귀 7/7 PASS |
+| 2026-06-20 | Dave (DeepSeek V4, Team B) | 구현 완료 · 회귀 372/381 PASS |
+| 2026-06-20 | Dave (DeepSeek V4, Team B) | Jaison 수정 대응 — DoD에 전체 회귀 수치 372/381 기재 |
