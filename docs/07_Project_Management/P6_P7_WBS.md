@@ -232,8 +232,7 @@
 | | `buildOwnerFilter` null UUID 버그 수정 | B_Kai | ✅ | PR #38 | `.match()`→`.eq()`+`.is()` |
 | | proxy.ts `/address-book` whitelist 추가 | B_Kai | ✅ | PR #38 | |
 | **IMP-121 E2E — E2E-22 일마감** | | | | | |
-| TASK-158 | E2E-22 Playwright 자동화 | D_Kai | ❌ | Issue #36 | Aiden ❌ 반려 — admin fixture·RELEASED orders·R-18 위반 3건 |
-| | 재작업 필요 (블로커 해제 후 재제출) | D_Kai | ⬜ | — | |
+| TASK-158 | E2E-22 Playwright 자동화 | D_Kai | ✅ | PR #37 | Aiden ✅ 승인 260619 · DEF-068 해소 (order_status_history RLS policy) · PR #37 머지 완료 |
 | **Team B — JSJung/Jaison** | **UAT E2E + 운영 안정화** | **JSJung** | ⬜ | — | **계획 수립 필요** |
 | | Agency E2E 시나리오 자동화 (Agency 로그인~화주관리~Override) | JSJung | ⬜ | — | TASK-B-001~007 E2E |
 | | Phase 7 종합 회귀 테스트 | JSJung | ⬜ | — | E2E-21 + E2E-22 + Agency E2E |
