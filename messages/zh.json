@@ -178,5 +178,10 @@
   "agency_settlement_orders": "订单数",
   "agency_settlement_revenue": "收入",
   "agency_settlement_cost": "成本",
-  "agency_settlement_margin_rate": "利润率"
+  "agency_settlement_margin_rate": "利润率",
+  "AgencySettlements": {
+    "settlement_reconciliation_title": "未定价订单提醒",
+    "settlement_reconciliation_desc": "因未应用费率而排除在结算之外的订单。",
+    "settlement_reconciliation_count": "{count}件"
+  }
 }
