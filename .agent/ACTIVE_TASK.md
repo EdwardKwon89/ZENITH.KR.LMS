@@ -240,7 +240,7 @@
 | TASK-B-008 | 260620 | [P7-SPR-05] Agency 정산 내역 엑셀 다운로드 — exportAgencySettlementExcel + 다운로드 버튼 UI | P2 | IMP-122 ✅ | Dave | ✅ | [TASK-B-008](tasks/TASK-B-008_260620_Agency정산엑셀다운로드_Dave.md) | IMP-124 ✅ · PR#55 머지 ✅ · Aiden ✅ 260620 |
 | TASK-B-009 | 260620 | [P7-SPR-05] Agency 대시보드 정산 요약 위젯 — AgencySettlementWidget | P2 | IMP-122 ✅ | Baker | ✅ | [TASK-B-009](tasks/TASK-B-009_260620_Agency대시보드정산위젯_Baker.md) | IMP-125 ✅ · PR#54 머지 ✅ · Aiden ✅ 260620 |
 | TASK-B-010 | 260620 | [P7-SPR-06] Agency 정산 오더번호 검색 기능 — AgencySettlementQuerySchema + ILIKE 검색 UI | P2 | TASK-B-008 ✅ | Dave | ⬜ | [TASK-B-010](tasks/TASK-B-010_260620_Agency정산오더번호검색_Dave.md) | IMP-126 · Issue #56 |
-| TASK-B-011 | 260620 | [P7-SPR-06] Agency 정산 Reconciliation 검증 — 미가격 오더 알림 (getAgencyUnpricedOrders + SettlementReconciliationAlert) | P2 | TASK-B-008 ✅ · TASK-B-009 ✅ | Baker | ⬜ | [TASK-B-011](tasks/TASK-B-011_260620_Agency정산Reconciliation_Baker.md) | IMP-127 · Issue #57 |
+| TASK-B-011 | 260620 | [P7-SPR-06] Agency 정산 Reconciliation 검증 — 미가격 오더 알림 (getAgencyUnpricedOrders + SettlementReconciliationAlert) | P2 | TASK-B-008 ✅ · TASK-B-009 ✅ | Baker | 🔔 | [TASK-B-011](tasks/TASK-B-011_260620_Agency정산Reconciliation_Baker.md) | IMP-127 · Issue #57 · PR #57 · 회귀 374/383 |
 ---
 
 ## Agent 현황
@@ -263,7 +263,7 @@
 | **JSJung** (팀 리더) | ✅ TASK-142 완료 | PR#7 → develop 머지 (260616) |
 | **Jaison** (AI Agent 총괄) | ✅ TASK-142 완료 | IMP-114 ✅ · TASK-B-001~005 전량 ✅ · PR#7 승인 머지 |
 | **Dave** (AI Agent) | ✅ TASK-B-008 / ⬜ TASK-B-010 착수 가능 | PR#55 Aiden ✅ 260620 · TASK-B-010 블로커 해제 — 즉시 착수 가능 |
-| **Baker** (AI Agent) | ✅ TASK-B-009 / ⬜ TASK-B-011 착수 가능 | PR#54 Aiden ✅ 260620 · TASK-B-011 블로커 해제 — 즉시 착수 가능 |
+| **Baker** (AI Agent) | ✅ TASK-B-009 / 🔔 TASK-B-011 (PR #57 대기) | PR#54 Aiden ✅ 260620 · PR#57 제출 (260620) · Aiden 검토 대기 |
 | **Gale** (AI Agent) | 대기 | 추후 재배정 예정 |
 
 ---
@@ -276,6 +276,7 @@
 | 2026-06-20 | Jaison (Team B) | **TASK-B-010/011 발령 (SPR-06)** — Dave: IMP-126 오더번호 검색(Issue#56). Baker: IMP-127 Reconciliation 검증(Issue#57). Task 파일·IMP_PROGRESS.md 신규 등재. |
 | 2026-06-20 | Jaison (Team B) | **TASK-B-008/009 ✅ 확인 + SPR-06 착수 지시** — Aiden PR#54·#55 머지 확인(cf964c6·3f263f6). Agent 현황 갱신: Dave ✅B-008/⬜B-010, Baker ✅B-009/⬜B-011. Dave·Baker SPR-06 즉시 착수 가능. |
 | 2026-06-20 | Aiden (Claude) | **PR#54 머지 ✅** — TASK-B-009(Baker) Agency 대시보드 정산 위젯 승인. TASK-B-008/009 ✅ 확정. TASK-B-010/011 블로커 해제(🚫→⬜). develop 반영 완료. |
+| 2026-06-20 | Baker (Big Pickle) | **TASK-B-011 🔔 검토 요청** — IMP-127 Agency 정산 Reconciliation 검증 구현 완료. Server Action `getAgencyUnpricedOrders` + `SettlementReconciliationAlert.tsx`(44줄) + AgencySettlementClient 연동 + i18n 4개국어 3개키. TC-B-RECON-01~02 추가. 회귀 374/383 PASS (2건 pre-existing Supabase). PR #57 (Closes #57). Aiden 검토 대기. |
 | 2026-06-18 | Aiden (Claude) | **Phase 7 SPR-05/06 복원 + TASK-151/156 2차 반려** — B_Kai branch reset으로 Phase 7 SPR-05/06 구간(TASK-151~156) 손실 → 복원. TASK-151 ❌ 2차 반려: R-09 LIVE_REGRESSION_TEST_MAP.md 미갱신 + PR #33 Closes #32 누락. TASK-153 ✅ 복원(PR #26 머지). TASK-152 🔄 복원(코드 5f86dfe). TASK-154 ⬜·TASK-155 🔔 복원. |
 | 2026-06-16 | JSJung (팀 리더) | **PR#8 제출** — TASK-B-006(Dave)·TASK-B-007(Baker) SPR-03 Agency 요율 오버라이드 UI. feature/ups-spr03-devteam-agency-rate-overrides → develop. Aiden 검토 요청. |
 | 2026-06-16 | Jaison (Team B) | **TASK-B-007 🔔 Jaison 검토 PASS** — ZEN_A4 수정 확인(함수 36·39·42줄), IMP_PROGRESS.md Baker 행 추가, 문서 커밋 해시 오기재(`9da38db`→`978f812`) Jaison 직접 수정. Aiden ✅ 승인 대기. |
