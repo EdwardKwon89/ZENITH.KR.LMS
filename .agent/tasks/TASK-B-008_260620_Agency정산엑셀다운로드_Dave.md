@@ -105,7 +105,7 @@ git checkout -b feature/teamb-task-b-008-agency-settlement-excel
 - [x] TC-B-EXCEL-01~03 신규 추가 (`LIVE_REGRESSION_TEST_MAP.md` 업데이트)
 - [x] 회귀 테스트 전체 PASS (7/7 PASS)
 - [x] 코드 커밋: `c2f74f9` (feat) · `64bc87e` (refactor ZEN_A4) · `c8a4e86` (docs)
-- [ ] PR 생성 완료 (Closes #52)
+- [x] PR 생성 완료: [#55](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/55) (Closes #52)
 
 ---
 
@@ -129,7 +129,7 @@ _(Aiden 전속)_
 | | `64bc87e` `[DS] refactor: TASK-B-008 ZEN_A4 준수 — _fetchOrders·_mapToExcelRow 헬퍼 분리` |
 | 문서 커밋 | `c8a4e86` `[DS] docs: TASK-B-008 완료 보고 — task file 🔔, ACTIVE_TASK.md 🔄, IMP_PROGRESS.md IMP-124 🔔` |
 | 회귀 결과 | 7 / 7 PASS |
-| PR | TBD (PR 생성 후 기재) |
+| PR | [#55](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/55) (Closes #52) |
 
 ---
 
