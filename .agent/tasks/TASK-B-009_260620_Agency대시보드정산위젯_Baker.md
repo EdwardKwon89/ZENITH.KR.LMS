@@ -176,3 +176,4 @@ _(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
 |:-----|:------|:----|
 | 2026-06-20 | Jaison (Claude, Team B) | Task 발령 |
 | 2026-06-20 | Baker (Big Pickle) | TASK-B-009 ✅ 완료 🔔 검토 대기 — `AgencySettlementWidget` 48줄, i18n 4개국어, TC 등재, PR #54 (Closes #53), 회귀 212/214 PASS |
+| 2026-06-20 | Baker (Big Pickle) | TASK-B-009 🔄 1차 수정 — Jaison 리뷰: `agency_settlement_widget_title` 키 미사용 → 위젯 제목 `<h2>` 추가 (49줄). 회귀 369/378 PASS (2건 pre-existing Supabase). |
