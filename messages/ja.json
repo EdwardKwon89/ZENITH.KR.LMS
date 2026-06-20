@@ -163,6 +163,9 @@
   "agency_settlement_margin_rate": "利益率",
   "AgencySettlements": {
     "filter_order_no": "注文番号",
-    "order_no_placeholder": "注文番号を入力"
+    "order_no_placeholder": "注文番号を入力",
+    "settlement_reconciliation_title": "未価格オーダー通知",
+    "settlement_reconciliation_desc": "料率が適用されず精算から除外されたオーダーです。",
+    "settlement_reconciliation_count": "{count}件"
   }
 }
