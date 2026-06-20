@@ -173,5 +173,10 @@
       "transit_departed_hub": "离开中转站",
       "transit_arrived_dest": "到达目的地"
     }
-  }
+  },
+  "agency_settlement_widget_title": "本月结算概况",
+  "agency_settlement_orders": "订单数",
+  "agency_settlement_revenue": "收入",
+  "agency_settlement_cost": "成本",
+  "agency_settlement_margin_rate": "利润率"
 }

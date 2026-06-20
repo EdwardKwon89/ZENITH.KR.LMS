@@ -2,8 +2,10 @@ import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { requireAuth, checkPermission } from "@/lib/auth/guards";
 import { getAgencyShippers } from "@/app/actions/agency/shippers";
+import { getAgencySettlementSummary } from "@/app/actions/agency";
 import { AgencyDashboardStats } from "./AgencyDashboardStats";
 import { AgencyQuickLinks } from "./AgencyQuickLinks";
+import { AgencySettlementWidget } from "./AgencySettlementWidget";
 
 interface PageProps {
   params: Promise<{ locale: string }>;
@@ -21,6 +23,12 @@ export default async function AgencyDashboardPage({ params }: PageProps) {
   const { shippers } = await getAgencyShippers(profile.org_id);
   const shipperCount = shippers?.length || 0;
 
+  const today = new Date();
+  const from = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-01`;
+  const to = today.toISOString().split("T")[0];
+  const settlementResult = await getAgencySettlementSummary(profile.org_id, from, to);
+  const settlement = settlementResult.data ?? { orderCount: 0, totalRevenue: 0, totalCost: 0, totalMargin: 0, marginRate: 0 };
+
   return (
     <div className="flex-1 flex flex-col gap-8 p-4 md:p-8 min-h-screen bg-slate-50/30 animate-in fade-in duration-500">
       <header className="flex flex-col gap-1">
@@ -35,7 +43,8 @@ export default async function AgencyDashboardPage({ params }: PageProps) {
         </p>
       </header>
 
-      <AgencyDashboardStats shipperCount={shipperCount} ordersCount={0} t={t} />
+      <AgencyDashboardStats shipperCount={shipperCount} ordersCount={settlement.orderCount} t={t} />
+      <AgencySettlementWidget data={settlement} t={t} />
       <AgencyQuickLinks locale={locale} t={t} />
     </div>
   );

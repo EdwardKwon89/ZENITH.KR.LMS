@@ -1,7 +1,7 @@
 # 🗺️ LIVE Regression Test Master Map
 
-> **총 테스트 케이스:** 382 Cases  
-> **최종 검증일:** 2026-06-18 (TASK-155 [P7-SPR-07] E2E·UAT 선행 스펙 작성 · TC-P7-ADDR-01~05, TC-P7-CLOSE-01~05 등재 · 374/374 PASS)  
+> **총 테스트 케이스:** 384 Cases  
+> **최종 검증일:** 2026-06-20 (TASK-155 [P7-SPR-07] E2E·UAT 선행 스펙 작성 · TC-P7-ADDR-01~05, TC-P7-CLOSE-01~05 등재 · 374/374 PASS)  
 
 제니스 플랫폼의 비즈니스 영속성을 보장하는 회귀 테스트 케이스의 통합 명세서입니다. 모든 신규 개발 및 수정 시 이 맵에 케이스가 추가되어야 하며, 전체 테스트가 통과되어야 합니다.
 
@@ -434,7 +434,20 @@
 | **TC-P7-ADDR-04** | 주소록 항목 삭제 | 주소록 항목 삭제 시 DB 제거 검증 | `tests/unit/operations/address-book.test.ts` |
 | **TC-P7-ADDR-05** | 기본 배송지 설정 및 자동 단일화 | 신규 지정 시 기존 기본배송지 자동 해제 검증 | `tests/unit/operations/address-book.test.ts` |
 
-### 32. Phase 7 일마감 처리 (Phase 7 SPR-05)
+### 32. Agency 정산 내역 엑셀 다운로드 (IMP-124)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-B-EXCEL-01** | Agency 로그인 → 정산 조회 → 기간 설정 → Excel 다운로드 | `.xlsx` 파일 다운로드, 컬럼 9종 정상 | `tests/integration/p7-agency-settlement.test.ts` |
+| **TC-B-EXCEL-02** | 데이터 없는 기간 조회 후 다운로드 | 헤더만 있는 빈 Excel 파일 생성 확인 | `tests/integration/p7-agency-settlement.test.ts` |
+| **TC-B-EXCEL-03** | 특정 화주 필터 후 다운로드 | 해당 화주 데이터만 포함 확인 | `tests/integration/p7-agency-settlement.test.ts` |
+
+### 33. Agency 대시보드 정산 요약 위젯 (IMP-125)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-B-DASH-01** | Agency 로그인 → 대시보드 접속 — 정산 요약 위젯 표시 | 이번 달 정산 요약(오더수·매출·원가·마진율) 정상 렌더링 | 대시보드 페이지 |
+| **TC-B-DASH-02** | 오더 없는 Agency 로그인 → 대시보드 접속 | 데이터 없을 시 위젯 0 표시 (에러 없음) | 대시보드 페이지 |
+
+### 34. Phase 7 일마감 처리 (Phase 7 SPR-05)
 | ID | 테스트 항목 | 목적 | 파일 경로 |
 | :--- | :--- | :--- | :--- |
 | **TC-P7-CLOSE-01** | 일일 출고 내역 집계 | RELEASED 상태 오더 패키지 수 및 중량 집계 검증 | `tests/unit/ups/daily-close.test.ts` |

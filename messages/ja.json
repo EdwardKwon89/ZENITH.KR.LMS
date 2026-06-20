@@ -155,5 +155,10 @@
       "transit_departed_hub": "中継地を出発",
       "transit_arrived_dest": "目的地に到着"
     }
-  }
+  },
+  "agency_settlement_widget_title": "今月の精算状況",
+  "agency_settlement_orders": "オーダ数",
+  "agency_settlement_revenue": "売上",
+  "agency_settlement_cost": "原価",
+  "agency_settlement_margin_rate": "利益率"
 }
