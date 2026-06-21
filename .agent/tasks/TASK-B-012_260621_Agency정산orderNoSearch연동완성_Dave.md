@@ -8,7 +8,7 @@
 > **관련 IMP**: IMP-128  
 > **GitHub Issue**: [#65](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/65)  
 > **브랜치**: `feature/teamb-task-b-012-orderno-search-sync`  
-> **상태**: ⬜
+> **상태**: 🔄
 
 ---
 

@@ -64,7 +64,7 @@ export function AgencySettlementClient({ agencyOrgId, shippers }: AgencySettleme
       const [summaryRes, shippersRes, ordersRes, unpricedRes] = await Promise.all([
         getAgencySettlementSummary(agencyOrgId, from, to),
         getAgencyShipperSettlements(agencyOrgId, from, to),
-        getAgencyOrderSettlements(agencyOrgId, selectedShipperId || undefined, from, to),
+        getAgencyOrderSettlements(agencyOrgId, selectedShipperId || undefined, from, to, orderNoSearch || undefined),
         getAgencyUnpricedOrders(agencyOrgId, from, to)
       ]);
 
@@ -96,7 +96,7 @@ export function AgencySettlementClient({ agencyOrgId, shippers }: AgencySettleme
   const handleExcelExport = async () => {
     setExporting(true);
     try {
-      const res = await exportAgencySettlementExcel(agencyOrgId, selectedShipperId || undefined, from, to);
+      const res = await exportAgencySettlementExcel(agencyOrgId, selectedShipperId || undefined, from, to, orderNoSearch || undefined);
       if (res.error) throw new Error(res.error);
       const { base64, filename } = res.data!;
       const binaryStr = atob(base64);
