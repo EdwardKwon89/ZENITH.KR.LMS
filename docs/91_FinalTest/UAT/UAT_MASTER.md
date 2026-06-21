@@ -187,8 +187,12 @@ Supabase: Cloud 프로젝트 연결
 | UAT-20-01 | 대리점 정산 요약 정보 확인 | AGENCY | [UAT_20](UAT_20_Agency정산조회.md) | Riley | 🔄 | 필수 |
 | UAT-20-02 | 대리점 하위 화주별 정산 목록 조회 및 필터링 | AGENCY | [UAT_20](UAT_20_Agency정산조회.md) | Riley | 🔄 | 필수 |
 | UAT-20-03 | 대리점 정산 데이터 CSV 내보내기 (Export) | AGENCY | [UAT_20](UAT_20_Agency정산조회.md) | Riley | 🔄 | 일반 |
+| UAT-20-04 | 대리점 정산 오더번호 검색 — 일치 결과 표시 | AGENCY | [UAT_20](UAT_20_Agency정산조회.md) | Baker | 🔄 | 일반 |
+| UAT-20-05 | 대리점 정산 오더번호 검색 — 결과 없음 | AGENCY | [UAT_20](UAT_20_Agency정산조회.md) | Baker | 🔄 | 일반 |
+| UAT-20-06 | 대리점 정산 Reconciliation 알림 — 미가격 오더 존재 시 | AGENCY | [UAT_20](UAT_20_Agency정산조회.md) | Baker | 🔄 | 일반 |
+| UAT-20-07 | 대리점 정산 Reconciliation — 미가격 오더 미존재 시 알림 미표시 | AGENCY | [UAT_20](UAT_20_Agency정산조회.md) | Baker | 🔄 | 일반 |
 
-**총 119개 시나리오** | 작성 완료: **119 / 119 ✅ 전량 완료** | 필수: **60개** | 일반: **59개**
+**총 123개 시나리오** | 작성 완료: **123 / 123 ✅ 전량 완료** | 필수: **60개** | 일반: **63개**
 
 ---
 
@@ -285,5 +289,6 @@ Supabase: Cloud 프로젝트 연결
 | 2026-06-09 | B_Kai (OpenCode) | TASK-126 — IMP-108 max_charge 시나리오 3종(UAT-10-08~10) + IMP-107 TISA 스냅샷 시나리오 1종(UAT-10-11) 추가, 총계 89개 갱신 |
 | 2026-06-18 | Riley (Gemini) | TASK-155 — 주소록(UAT-13-01~05) 및 일마감(UAT-14-01~05) 신규 10개 시나리오 추가, 총계 103개 갱신 |
 | 2026-06-19 | Riley (Gemini) | TASK-161 — Phase 7 UPS 특송 6개 기능 UAT 시나리오 신규 추가 (UAT-15 ~ 20), 총계 119개 갱신 |
+| 2026-06-21 | Baker (Big Pickle) | TASK-B-013 — SPR-06 시나리오 4건 추가 (UAT-20-04~07): 오더번호 검색 2건 + Reconciliation 알림 2건, 총계 123개 갱신 |
 
 
