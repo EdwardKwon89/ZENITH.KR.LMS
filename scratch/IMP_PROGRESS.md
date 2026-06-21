@@ -295,8 +295,8 @@
 | **Phase 7 UAT** | 1 | 1 | 100% ✅ | **IMP-123 ✅** Phase 7 UAT 시나리오 작성 — UAT-15~20 16개 시나리오 (TASK-161 Riley · PR #46 머지 ✅ · Aiden ✅ 260619) |
 | **Phase 7 Team B SPR-05** | 2 | 2 | 100% ✅ | **IMP-124 ✅** Agency 정산 엑셀 다운로드 (TASK-B-008 Dave · PR#55 머지 · Aiden ✅ 260620) · **IMP-125 ✅** Agency 대시보드 정산 위젯 (TASK-B-009 Baker · PR#54 머지 · Aiden ✅ 260620) |
 | **Phase 7 Team B SPR-06** | 2 | 2 | 100% ✅ | **IMP-126 ✅** Agency 정산 오더번호 검색 (TASK-B-010 Dave · PR#62 머지 · 384/384 · Aiden ✅ 260621) · **IMP-127 ✅** Agency 정산 Reconciliation 검증 (TASK-B-011 Baker · PR#63 머지 · 384/384 · Aiden ✅ 260621) |
-| **Phase 7 Team B SPR-07** | 0 | 3 | 0% | **IMP-128 🔔** Agency 정산 orderNoSearch 연동 완성 (TASK-B-012 Dave · PR#66 · Issue #65) · **IMP-129 🔔** SettlementReconciliationAlert 오더 링크 + UAT 보완 (TASK-B-013 Baker · PR#67 · Issue #50) · **IMP-130 ⬜** AgencySettlementQuerySchema order_no_search 추가 (TASK-B-014 Dave · Issue #68) |
-| **합계** | **108** | **114** | **94.7%** | IMP-130 ⬜ (신규 등재 260621) · IMP-128/129 🔔 (Dave·Baker PR 제출 260621) · IMP-126/127 ✅ (260621 Aiden ✅ 승인, PR#62·63 머지) · IMP-124/125 ✅ (260620 Aiden ✅ 승인, PR#54·55 머지) · IMP-123 ✅ (260619) · IMP-115 ➖ (제외) |
+| **Phase 7 Team B SPR-07** | 0 | 3 | 0% | **IMP-128 🔔** Agency 정산 orderNoSearch 연동 완성 (TASK-B-012 Dave · PR#66 · Issue #65) · **IMP-129 🔔** SettlementReconciliationAlert 오더 링크 + UAT 보완 (TASK-B-013 Baker · PR#67 · Issue #50) · **IMP-130 🔔** AgencySettlementQuerySchema order_no_search 추가 (TASK-B-014 Dave · PR#69 · Issue #68 · 172f46d) |
+| **합계** | **108** | **114** | **94.7%** | IMP-130 🔔 (TASK-B-014 Dave PR#69 제출 260621) · IMP-128/129 🔔 (Dave·Baker PR 제출 260621) · IMP-126/127 ✅ (260621 Aiden ✅ 승인, PR#62·63 머지) · IMP-124/125 ✅ (260620 Aiden ✅ 승인, PR#54·55 머지) · IMP-123 ✅ (260619) · IMP-115 ➖ (제외) |
 
 > **UAT 진행 전 필수 처리**: IMP-092 ✅ · IMP-093 ✅ · IMP-095 ✅ — 전량 완료
 > 미완료 IMP: IMP-086·087 🚫 블로커 · IMP-028·069(Future — 통관 연계) · IMP-091 ⬜ (Carrier Portal) · IMP-094 ⬜ (요율 워크플로우 Phase M)

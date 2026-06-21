@@ -130,7 +130,7 @@ _(Aiden 전속)_
 
 | 항목 | 내용 |
 |:----|:----|
-| 코드 커밋 | `(커밋예정)` |
+| 코드 커밋 | `172f46d` |
 | 문서 커밋 | 포함 (task file) |
 | 회귀 결과 | 378/387 PASS (2건 pre-existing Supabase) |
 | PR | https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/69 |
