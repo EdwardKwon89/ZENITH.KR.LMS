@@ -1,6 +1,7 @@
 "use server";
 
 import { z } from 'zod';
+import * as XLSX from 'xlsx';
 import { logger } from '@/lib/logger';
 import { validateUserAction, checkPermission } from '@/lib/auth/guards';
 import { createAdminClient } from '@/utils/supabase/server';
@@ -231,4 +232,124 @@ export const getAgencyOrderSettlements = withAction(async function (
       marginRate: revenue > 0 ? (margin / revenue) * 100 : 0
     };
   });
+});
+
+type _ExcelRow = {
+  orderNo: string;
+  shipperName: string;
+  createdAt: string;
+  packagesCount: number;
+  totalWeight: number;
+  revenue: number;
+  cost: number;
+  margin: number;
+  marginRate: number;
+};
+
+function _generateXlsxBase64(rows: _ExcelRow[]): string {
+  const worksheetData = rows.map(r => ({
+    '오더번호': r.orderNo,
+    '화주명': r.shipperName,
+    '생성일': r.createdAt.slice(0, 10),
+    '패키지수': r.packagesCount,
+    '중량(kg)': Number(r.totalWeight.toFixed(1)),
+    '매출(USD)': r.revenue,
+    '원가(USD)': r.cost,
+    '마진(USD)': r.margin,
+    '마진율(%)': Number(r.marginRate.toFixed(2)),
+  }));
+
+  const ws = XLSX.utils.json_to_sheet(worksheetData);
+  ws['!cols'] = [
+    { wch: 22 }, { wch: 16 }, { wch: 12 },
+    { wch: 10 }, { wch: 10 }, { wch: 12 },
+    { wch: 12 }, { wch: 12 }, { wch: 10 },
+  ];
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, '정산내역');
+  return XLSX.write(wb, { type: 'base64', bookType: 'xlsx' });
+}
+
+function _todayStr(): string {
+  const d = new Date();
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${yyyy}${mm}${dd}`;
+}
+
+async function _fetchOrders(supabase: any, shipperIds: string[], from: string, to: string) {
+  return supabase
+    .from('zen_orders')
+    .select(`
+      id, order_no, shipper_id, created_at,
+      shipper:shipper_id(name),
+      packages:zen_order_packages(gross_weight, packing_count),
+      snapshot:zen_order_rate_snapshots(rate_card_id, applied_unit_price, carrier_cost_amount)
+    `)
+    .in('shipper_id', shipperIds)
+    .gte('created_at', `${from}T00:00:00Z`)
+    .lte('created_at', `${to}T23:59:59Z`);
+}
+
+function _mapToExcelRow(order: any, baseRates: any[], overrides: any[]): _ExcelRow {
+  const { revenue, cost, margin } = _calculateOrderSettle(order, baseRates, overrides);
+  const totalWeight = order.packages?.reduce((sum: number, p: any) => sum + Number(pkgWeight(p)), 0) || 0;
+  const packagesCount = order.packages?.reduce((sum: number, p: any) => sum + (p.packing_count || 1), 0) || 0;
+  return {
+    orderNo: order.order_no,
+    shipperName: order.shipper?.name || 'Unknown',
+    createdAt: order.created_at,
+    packagesCount,
+    totalWeight,
+    revenue,
+    cost,
+    margin,
+    marginRate: revenue > 0 ? (margin / revenue) * 100 : 0,
+  };
+}
+
+export const exportAgencySettlementExcel = withAction(async function (
+  agencyOrgId: string,
+  shipperId: string | undefined,
+  from: string,
+  to: string
+) {
+  const { profile } = await validateUserAction();
+  if (!checkPermission(profile.role, '/agency')) {
+    throw new Error('Unauthorized access');
+  }
+  const targetAgencyId = profile.role === 'AGENCY' ? profile.org_id : agencyOrgId;
+  AgencySettlementQuerySchema.parse({
+    agency_org_id: targetAgencyId,
+    shipper_org_id: shipperId || undefined,
+    from,
+    to,
+  });
+
+  const supabase = await createAdminClient();
+  const shipperIds = shipperId
+    ? [shipperId]
+    : await _getAgencyShipperIds(supabase, targetAgencyId);
+
+  if (shipperIds.length === 0) {
+    return { base64: _generateXlsxBase64([]), filename: `agency_settlement_${_todayStr()}.xlsx` };
+  }
+
+  const [ordersRes, baseData] = await Promise.all([
+    _fetchOrders(supabase, shipperIds, from, to),
+    _fetchBaseData(supabase, targetAgencyId),
+  ]);
+
+  if (ordersRes.error) throw ordersRes.error;
+
+  const rows = (ordersRes.data || []).map((order: any) =>
+    _mapToExcelRow(order, baseData.baseRates, baseData.overrides)
+  );
+
+  return {
+    base64: _generateXlsxBase64(rows),
+    filename: `agency_settlement_${_todayStr()}.xlsx`,
+  };
 });
