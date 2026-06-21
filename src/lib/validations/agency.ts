@@ -28,5 +28,6 @@ export const AgencySettlementQuerySchema = z.object({
   shipper_org_id: z.string().uuid().optional(),
   from: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   to:   z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  order_no_search: z.string().optional(),
 });
 

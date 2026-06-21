@@ -5,6 +5,7 @@ import {
   getAgencyOrderSettlements,
   exportAgencySettlementExcel,
 } from '@/lib/actions/agency-settlement';
+import { AgencySettlementQuerySchema } from '@/lib/validations/agency';
 import { createAdminClient } from '@/utils/supabase/server';
 import { validateUserAction } from '@/lib/auth/guards';
 
@@ -311,5 +312,34 @@ describe('TC-B-EXCEL-01~03: Agency 정산 엑셀 다운로드', () => {
     expect(result.data).not.toBeNull();
     expect(result.data?.base64).toBeTruthy();
     expect(result.data?.filename).toMatch(/^agency_settlement_\d{8}\.xlsx$/);
+  });
+
+  it('TC-B-SCHEMA-01: order_no_search "ORD" 포함 schema parse 성공', () => {
+    const result = AgencySettlementQuerySchema.parse({
+      agency_org_id: '11111111-1111-4111-8111-111111111111',
+      from: '2026-06-01',
+      to: '2026-06-15',
+      order_no_search: 'ORD',
+    });
+    expect(result.order_no_search).toBe('ORD');
+  });
+
+  it('TC-B-SCHEMA-02: order_no_search 미포함 schema parse 성공', () => {
+    const result = AgencySettlementQuerySchema.parse({
+      agency_org_id: '11111111-1111-4111-8111-111111111111',
+      from: '2026-06-01',
+      to: '2026-06-15',
+    });
+    expect(result.order_no_search).toBeUndefined();
+  });
+
+  it('TC-B-SCHEMA-03: order_no_search undefined schema parse 성공', () => {
+    const result = AgencySettlementQuerySchema.parse({
+      agency_org_id: '11111111-1111-4111-8111-111111111111',
+      from: '2026-06-01',
+      to: '2026-06-15',
+      order_no_search: undefined,
+    });
+    expect(result.order_no_search).toBeUndefined();
   });
 });
