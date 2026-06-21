@@ -136,14 +136,14 @@ git checkout -b feature/teamb-task-b-013-alert-link-uat
 
 ## [DoD 체크리스트]
 
-- [ ] `SettlementReconciliationAlert.tsx` — `orderId` 필드 추가 + 오더번호 Link 연결
-- [ ] `SettlementReconciliationAlert.tsx` — ≤50줄 ZEN_A4 준수 확인
-- [ ] UAT 시나리오 4건 이상 추가 (오더번호 검색 2건 + Reconciliation 2건)
-- [ ] `UAT_MASTER.md` 시나리오 수 갱신
-- [ ] 회귀 테스트 전체 PASS (`rtk npm run test:regression`)
-- [ ] 코드 커밋 해시 기재 (`§1 feat 커밋`)
-- [ ] 문서 커밋 해시 기재 (`§2 docs 커밋`)
-- [ ] PR 생성 완료 (`Closes #50`)
+- [x] `SettlementReconciliationAlert.tsx` — `orderId` 필드 추가 + 오더번호 Link 연결
+- [x] `SettlementReconciliationAlert.tsx` — ≤50줄 ZEN_A4 준수 확인
+- [x] UAT 시나리오 4건 이상 추가 (오더번호 검색 2건 + Reconciliation 2건)
+- [x] `UAT_MASTER.md` 시나리오 수 갱신
+- [x] 회귀 테스트 전체 PASS (`rtk npm run test:regression`)
+- [x] 코드 커밋 해시 기재 (`§1 feat 커밋`)
+- [x] 문서 커밋 해시 기재 (`§2 docs 커밋`)
+- [x] PR 생성 완료 (`Closes #50`)
 
 ---
 
