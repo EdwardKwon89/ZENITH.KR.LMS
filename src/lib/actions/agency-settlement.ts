@@ -169,6 +169,24 @@ export const getAgencyShipperSettlements = withAction(async function (
   });
 });
 
+export const getAgencyUnpricedOrders = withAction(async function (
+  agencyOrgId: string,
+  from: string,
+  to: string
+) {
+  const result = await getAgencyOrderSettlements(agencyOrgId, undefined, from, to);
+  if (result.error) throw new Error(result.error);
+  return (result.data || [])
+    .filter(o => o.revenue === 0)
+    .map(o => ({
+      orderId: o.orderId,
+      orderNo: o.orderNo,
+      shipperId: o.shipperId,
+      shipperName: o.shipperName,
+      createdAt: o.createdAt,
+    }));
+});
+
 export const getAgencyOrderSettlements = withAction(async function (
   agencyOrgId: string,
   shipperId: string | undefined,

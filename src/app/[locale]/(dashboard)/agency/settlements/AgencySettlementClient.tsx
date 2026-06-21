@@ -8,9 +8,11 @@ import {
   getAgencyShipperSettlements,
   getAgencyOrderSettlements,
   exportAgencySettlementExcel,
+  getAgencyUnpricedOrders,
 } from '@/app/actions/agency';
 import { AgencySettlementSummary } from './AgencySettlementSummary';
 import { ShipperSettlementTable } from './ShipperSettlementTable';
+import { SettlementReconciliationAlert } from './SettlementReconciliationAlert';
 
 interface ShipperDropdownItem {
   id: string;
@@ -54,18 +56,22 @@ export function AgencySettlementClient({ agencyOrgId, shippers }: AgencySettleme
   });
   const [shippersData, setShippersData] = useState<any[]>([]);
   const [ordersData, setOrdersData] = useState<any[]>([]);
+  const [unpricedOrders, setUnpricedOrders] = useState<any[]>([]);
+
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [summaryRes, shippersRes, ordersRes] = await Promise.all([
+      const [summaryRes, shippersRes, ordersRes, unpricedRes] = await Promise.all([
         getAgencySettlementSummary(agencyOrgId, from, to),
         getAgencyShipperSettlements(agencyOrgId, from, to),
         getAgencyOrderSettlements(agencyOrgId, selectedShipperId || undefined, from, to),
+        getAgencyUnpricedOrders(agencyOrgId, from, to)
       ]);
 
       if (summaryRes.error) throw new Error(summaryRes.error);
       if (shippersRes.error) throw new Error(shippersRes.error);
       if (ordersRes.error) throw new Error(ordersRes.error);
+      if (unpricedRes.error) throw new Error(unpricedRes.error);
 
       if (summaryRes.data) setSummary(summaryRes.data);
       if (shippersRes.data) {
@@ -75,6 +81,7 @@ export function AgencySettlementClient({ agencyOrgId, shippers }: AgencySettleme
         setShippersData(filteredShippers);
       }
       if (ordersRes.data) setOrdersData(ordersRes.data);
+      if (unpricedRes.data) setUnpricedOrders(unpricedRes.data);
     } catch (err: any) {
       console.error(err);
     } finally {
@@ -182,6 +189,11 @@ export function AgencySettlementClient({ agencyOrgId, shippers }: AgencySettleme
           {t('btn_search')}
         </button>
       </div>
+
+      {/* 미가격 오더 알림 */}
+      {unpricedOrders.length > 0 && (
+        <SettlementReconciliationAlert unpricedOrders={unpricedOrders} t={t} />
+      )}
 
       {/* 요약 카드 */}
       <AgencySettlementSummary
