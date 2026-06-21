@@ -159,7 +159,7 @@ _(Aiden 전속)_
 | 코드 커밋 | `6ad85a9` (`[BP] feat`) + `b332713` (`[Codex] fixup:`) |
 | 문서 커밋 | `b3ac853` (`[BP] docs`) |
 | 회귀 결과 | 374/383 PASS (2건 pre-existing Supabase) |
-| PR | #59 CLOSED · #TBD 신규 생성 대기 (B-010 머지 후) |
+| PR | #59 CLOSED · #63 신규 생성 (B-010 머지 후 rebase 예정) |
 
 ---
 
