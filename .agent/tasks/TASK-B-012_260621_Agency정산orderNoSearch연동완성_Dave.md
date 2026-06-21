@@ -173,7 +173,7 @@ git checkout -b feature/teamb-task-b-012-orderno-search-sync
 - [x] ZEN_A4: 수정 함수 전량 50줄 이하 확인
 - [x] 회귀 테스트 전체 PASS (375/384, 2건 pre-existing Supabase)
 - [x] 코드 커밋 해시 기재 (`a3a0223`)
-- [ ] PR 생성 완료 (`Closes #65`)
+- [x] PR 생성 완료 (`Closes #65`) — PR#66
 
 ---
 
