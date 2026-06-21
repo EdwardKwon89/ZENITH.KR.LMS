@@ -169,8 +169,46 @@ _(Aiden 전속)_
 
 ---
 
+## [수정 지시] — Jaison 1차 반려 (2026-06-21)
+
+> **반려 사유**: 아래 2건 수정 후 동일 브랜치(또는 `-v2` 브랜치)에 fixup 커밋 + 문서 커밋 재제출 필요
+
+### ❌ Issue 1 — DoD 허위 체크 [필수]
+
+Baker의 코드 커밋(`6ad85a9`) 실제 변경 파일:
+- `messages/ja.json`, `messages/zh.json`
+- `SettlementReconciliationAlert.tsx` (신규)
+- `src/app/actions/agency/index.ts` (barrel export 1줄)
+
+아래 두 DoD 항목은 **Dave(DS)가 B-010 브랜치에서 구현**한 것으로, Baker가 직접 구현하지 않았음에도 체크 처리됨:
+
+| DoD 항목 | 실제 구현자 | 조치 |
+|:--------|:----------:|:-----|
+| `[x] getAgencyUnpricedOrders Server Action 구현 완료` | Dave (B-010) | 체크 해제 후 명기 |
+| `[x] AgencySettlementClient.tsx 연동 완료` | Dave (B-010) | 체크 해제 후 명기 |
+
+**정정 방법**: 두 항목을 아래와 같이 수정
+
+```
+- [ ] `getAgencyUnpricedOrders` Server Action 구현 완료
+      → Dave(DS)가 TASK-B-010(89ffb59)에서 구현. B-011은 해당 함수 의존·barrel export만 추가.
+- [ ] `AgencySettlementClient.tsx` 연동 완료
+      → Dave(DS)가 TASK-B-010(89ffb59)에서 구현. B-011 scope 외.
+```
+
+### ❌ Issue 2 — 문서 커밋 해시 오기재 [필수]
+
+| 항목 | 잘못된 값 | 정정 값 |
+|:----|:--------:|:------:|
+| 문서 커밋 | `acd06c4` | `b3ac853` |
+
+`acd06c4`는 B-011 브랜치에 포함되지 않은 orphan 커밋임. 실제 doc 커밋(`b3ac853`)으로 정정.
+
+---
+
 ## 개정 이력
 
 | 날짜 | 작성자 | 내용 |
 |:-----|:------|:----|
+| 2026-06-21 | Jaison (Claude, Team B) | 1차 반려 — Issue 1·2 수정 지시 (DoD 허위체크·문서커밋 해시) |
 | 2026-06-20 | Jaison (Claude, Team B) | Task 발령 |

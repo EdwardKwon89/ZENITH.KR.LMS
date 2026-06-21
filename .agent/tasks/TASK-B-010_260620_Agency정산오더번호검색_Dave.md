@@ -158,8 +158,59 @@ _(Aiden 전속)_
 
 ---
 
+## [수정 지시] — Jaison 1차 반려 (2026-06-21)
+
+> **반려 사유**: 아래 3건 수정 후 동일 브랜치에 fixup 커밋 + 문서 커밋 재제출 필요
+
+### ❌ Issue 1 — PR URL 오기재 [필수]
+
+`[작업 결과]` 섹션의 PR 항목이 잘못 기재되어 있음.
+
+| 항목 | 잘못된 값 | 정정 값 |
+|:----|:--------:|:------:|
+| PR | `.../pull/56` | `.../pull/58` |
+
+→ Issue #56 번호를 PR 번호로 혼동한 것. **PR#58**로 정정하고 DoD `[ ] PR 생성 완료` 체크.
+
+### ❌ Issue 2 — ja/zh i18n 번역 누락 [필수]
+
+Dave가 en.json·ko.json에 추가한 두 키가 **ja.json·zh.json의 `AgencySettlements` 네임스페이스에 없음**.
+
+누락 키:
+- `filter_order_no`
+- `order_no_placeholder`
+
+수정 방법: `ja.json`, `zh.json`의 `AgencySettlements` 블록에 아래 추가
+
+```json
+"filter_order_no": "注文番号",
+"order_no_placeholder": "注文番号を入力"
+```
+```json
+"filter_order_no": "订单号",
+"order_no_placeholder": "输入订单号"
+```
+
+> ⚠️ Baker의 B-011 브랜치에는 `AgencySettlements` 블록이 있으므로 병합 시 충돌 없이 추가 가능.
+
+### ❌ Issue 3 — R-18 DEF 미등록 [필수]
+
+`exportAgencySettlementExcel` 함수가 develop에 없음을 발견했으나 `[발견 이슈]` 섹션에 **"없음"** 기재 — R-18 위반.
+
+**조치**: `.agent/defects/DEF-NNN_B008엑셀함수develop미반영.md` 신규 작성 후 `[발견 이슈]` 섹션 갱신.
+
+DEF 포함 항목:
+- 발견 경위: TASK-B-010 착수 중 `agency-settlement.ts`에 `exportAgencySettlementExcel` 미존재 확인
+- 현상: PR#55 CLOSED 처리되었으나 실제 엑셀 다운로드 Server Action 코드가 develop에 반영되지 않음
+- 영향: 엑셀 다운로드 기능(TASK-B-008) 미동작
+- 긴급도: High
+- 권장 조치: TASK-B-008 코드 커밋을 develop에 cherry-pick 또는 새 PR 재제출
+
+---
+
 ## 개정 이력
 
 | 날짜 | 작성자 | 내용 |
 |:-----|:------|:----|
+| 2026-06-21 | Jaison (Claude, Team B) | 1차 반려 — Issue 1·2·3 수정 지시 (PR URL·ja/zh i18n·R-18 DEF) |
 | 2026-06-20 | Jaison (Claude, Team B) | Task 발령 |
