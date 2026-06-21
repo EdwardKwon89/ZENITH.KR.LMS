@@ -166,7 +166,7 @@ _(Aiden 전속)_
 | §1 코드 커밋 | `eb7a959` |
 | §2 문서 커밋 | `f5b1c04` |
 | 회귀 결과 | 375 PASS / 7 SKIP / 2 FAIL (기존 Supabase 타임아웃, 변경無 영향) |
-| PR | — |
+| PR | [#67](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/67) |
 
 ---
 
