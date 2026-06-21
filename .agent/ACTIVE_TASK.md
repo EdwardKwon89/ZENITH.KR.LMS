@@ -241,6 +241,8 @@
 | TASK-B-009 | 260620 | [P7-SPR-05] Agency 대시보드 정산 요약 위젯 — AgencySettlementWidget | P2 | IMP-122 ✅ | Baker | ✅ | [TASK-B-009](tasks/TASK-B-009_260620_Agency대시보드정산위젯_Baker.md) | IMP-125 ✅ · PR#54 머지 ✅ · Aiden ✅ 260620 |
 | TASK-B-010 | 260620 | [P7-SPR-06] Agency 정산 오더번호 검색 기능 — AgencySettlementQuerySchema + ILIKE 검색 UI | P2 | TASK-B-008 ✅ | Dave | ✅ | [TASK-B-010](tasks/TASK-B-010_260620_Agency정산오더번호검색_Dave.md) | IMP-126 ✅ · PR#62 머지 ✅ · 384/384 PASS · Aiden ✅ 260621 |
 | TASK-B-011 | 260620 | [P7-SPR-06] Agency 정산 Reconciliation 검증 — 미가격 오더 알림 (getAgencyUnpricedOrders + SettlementReconciliationAlert) | P2 | TASK-B-008 ✅ · TASK-B-009 ✅ | Baker | ✅ | [TASK-B-011](tasks/TASK-B-011_260620_Agency정산Reconciliation_Baker.md) | IMP-127 ✅ · PR#63 머지 ✅ · 384/384 PASS · Aiden ✅ 260621 |
+| TASK-B-012 | 260621 | [P7-SPR-07] Agency 정산 orderNoSearch 연동 완성 — `_fetchOrders` + `exportAgencySettlementExcel` + Client 수정 | P2 | TASK-B-010 ✅ · DEF-061 ✅ | Dave | ⬜ | [TASK-B-012](tasks/TASK-B-012_260621_Agency정산orderNoSearch연동완성_Dave.md) | IMP-128 · Issue #65 |
+| TASK-B-013 | 260621 | [P7-SPR-07] SettlementReconciliationAlert 오더 링크 추가 + Agency SPR-06 UAT 시나리오 보완 | P3 | TASK-B-010 ✅ · TASK-B-011 ✅ | Baker | ⬜ | [TASK-B-013](tasks/TASK-B-013_260621_SettlementAlertOrderLink_UAT보완_Baker.md) | IMP-129 · Issue #50 |
 ---
 
 ## Agent 현황
@@ -262,8 +264,8 @@
 |:------|:----:|:----|
 | **JSJung** (팀 리더) | ✅ TASK-142 완료 | PR#7 → develop 머지 (260616) |
 | **Jaison** (AI Agent 총괄) | ✅ TASK-142 완료 | IMP-114 ✅ · TASK-B-001~005 전량 ✅ · PR#7 승인 머지 |
-| **Dave** (AI Agent) | ✅ TASK-B-008 / ✅ TASK-B-010 | PR#62 Aiden ✅ 260621 머지 완료 |
-| **Baker** (AI Agent) | ✅ TASK-B-009 / ✅ TASK-B-011 | PR#63 Aiden ✅ 260621 머지 완료 |
+| **Dave** (AI Agent) | ✅ TASK-B-010 / ⬜ TASK-B-012 | PR#62 Aiden ✅ 260621 · TASK-B-012 발령 260621 |
+| **Baker** (AI Agent) | ✅ TASK-B-011 / ⬜ TASK-B-013 | PR#63 Aiden ✅ 260621 · TASK-B-013 발령 260621 |
 | **Gale** (AI Agent) | 대기 | 추후 재배정 예정 |
 
 ---
