@@ -8,7 +8,7 @@
 > **관련 IMP**: IMP-129  
 > **GitHub Issue**: [#50](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/50)  
 > **브랜치**: `feature/teamb-task-b-013-alert-link-uat`  
-> **상태**: ⬜
+> **상태**: 🔔
 
 ---
 
@@ -163,8 +163,8 @@ _(Aiden 전속)_
 
 | 항목 | 내용 |
 |:----|:----|
-| §1 코드 커밋 | — |
-| §2 문서 커밋 | — |
+| §1 코드 커밋 | `eb7a959` |
+| §2 문서 커밋 | `f5b1c04` |
 | 회귀 결과 | 375 PASS / 7 SKIP / 2 FAIL (기존 Supabase 타임아웃, 변경無 영향) |
 | PR | — |
 
@@ -181,3 +181,4 @@ _(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
 | 날짜 | 작성자 | 내용 |
 |:-----|:------|:----|
 | 2026-06-21 | Jaison (Claude, Team B) | Task 발령 — §1 SettlementReconciliationAlert 링크, §2 SPR-06 UAT 보완 |
+| 2026-06-21 | Baker (Big Pickle) | §1 코드 커밋 eb7a959 · §2 문서 커밋 f5b1c04 · 회귀 375/384 (2 FAIL pre-existing) |
