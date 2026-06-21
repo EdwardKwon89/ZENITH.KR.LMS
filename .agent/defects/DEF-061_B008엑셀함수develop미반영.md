@@ -4,6 +4,7 @@
 > **발견 경위**: TASK-B-010(Agency 정산 오더번호 검색) 구현 중 `agency-settlement.ts`에 `exportAgencySettlementExcel` 함수 미존재 확인
 > **발견자**: Dave (DeepSeek V4)
 > **관련 Task**: TASK-B-008 · TASK-B-010
+> **상태**: ✅ RESOLVED (2026-06-21)
 
 ---
 
@@ -33,8 +34,20 @@ PR#55가 CLOSED(머지 완료) 처리되었으나, 실제 `exportAgencySettlemen
 
 ---
 
+---
+
+## ✅ 해소 기록
+
+**해소일**: 2026-06-21  
+**해소 방법**: TASK-B-010(PR#62) 머지 과정에서 Dave가 `exportAgencySettlementExcel` 코드를 develop에 재반영. PR#62 Aiden ✅ 260621 머지 완료.  
+**확인 위치**: `src/lib/actions/agency-settlement.ts:332` — `export const exportAgencySettlementExcel`  
+**잔존 사항**: `_fetchOrders` 함수에 `orderNoSearch?` 파라미터 미연동 (엑셀 다운로드 시 검색 필터 미반영) — 별도 신규 Task 발령 필요
+
+---
+
 ## 개정 이력
 
 | 날짜 | 작성자 | 내용 |
 |:-----|:------|:----|
 | 2026-06-21 | Dave (DeepSeek V4) | 최초 등록 (TASK-B-010 1차 반려 조치) |
+| 2026-06-21 | Jaison (Claude, Team B) | ✅ RESOLVED — PR#62 머지로 `exportAgencySettlementExcel` develop 반영 확인 |
