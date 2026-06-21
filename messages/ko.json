@@ -739,6 +739,9 @@
     "margin_rate_col": "마진율",
     "total_row": "합계",
     "csv_export": "CSV 내보내기",
-    "no_data": "조회 결과가 없습니다."
+    "no_data": "조회 결과가 없습니다.",
+    "settlement_reconciliation_title": "미가격 오더 알림",
+    "settlement_reconciliation_desc": "요율이 적용되지 않아 정산에서 제외된 오더입니다.",
+    "settlement_reconciliation_count": "{count}건"
   }
 }
