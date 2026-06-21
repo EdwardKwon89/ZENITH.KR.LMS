@@ -173,7 +173,8 @@ export const getAgencyOrderSettlements = withAction(async function (
   agencyOrgId: string,
   shipperId: string | undefined,
   from: string,
-  to: string
+  to: string,
+  orderNoSearch?: string
 ) {
   const { profile } = await validateUserAction();
   if (!checkPermission(profile.role, '/agency')) {
@@ -181,33 +182,33 @@ export const getAgencyOrderSettlements = withAction(async function (
   }
   const targetAgencyId = profile.role === 'AGENCY' ? profile.org_id : agencyOrgId;
   
-  const queryParams = { agency_org_id: targetAgencyId, shipper_org_id: shipperId || undefined, from, to };
+  const queryParams = { agency_org_id: targetAgencyId, shipper_org_id: shipperId || undefined, from, to, order_no_search: orderNoSearch };
   AgencySettlementQuerySchema.parse(queryParams);
 
   const supabase = await createAdminClient();
-  let shipperIds = [];
-  if (shipperId) {
-    shipperIds = [shipperId];
-  } else {
-    shipperIds = await _getAgencyShipperIds(supabase, targetAgencyId);
-  }
+  const shipperIds = shipperId
+    ? [shipperId]
+    : await _getAgencyShipperIds(supabase, targetAgencyId);
   if (shipperIds.length === 0) return [];
 
+  let query = supabase
+    .from('zen_orders')
+    .select(`
+      id, order_no, shipper_id, created_at,
+      shipper:shipper_id(name),
+      packages:zen_order_packages(gross_weight, packing_count),
+      snapshot:zen_order_rate_snapshots(rate_card_id, applied_unit_price, carrier_cost_amount)
+    `)
+    .in('shipper_id', shipperIds)
+    .gte('created_at', `${from}T00:00:00Z`)
+    .lte('created_at', `${to}T23:59:59Z`);
+
+  if (orderNoSearch) {
+    query = query.ilike('order_no', `%${orderNoSearch}%`);
+  }
+
   const [ordersRes, baseData] = await Promise.all([
-    supabase
-      .from('zen_orders')
-      .select(`
-        id,
-        order_no,
-        shipper_id,
-        created_at,
-        shipper:shipper_id(name),
-        packages:zen_order_packages(gross_weight, packing_count),
-        snapshot:zen_order_rate_snapshots(rate_card_id, applied_unit_price, carrier_cost_amount)
-      `)
-      .in('shipper_id', shipperIds)
-      .gte('created_at', `${from}T00:00:00Z`)
-      .lte('created_at', `${to}T23:59:59Z`),
+    query,
     _fetchBaseData(supabase, targetAgencyId)
   ]);
 

@@ -446,6 +446,15 @@
 | :--- | :--- | :--- | :--- |
 | **TC-B-DASH-01** | Agency 로그인 → 대시보드 접속 — 정산 요약 위젯 표시 | 이번 달 정산 요약(오더수·매출·원가·마진율) 정상 렌더링 | 대시보드 페이지 |
 | **TC-B-DASH-02** | 오더 없는 Agency 로그인 → 대시보드 접속 | 데이터 없을 시 위젯 0 표시 (에러 없음) | 대시보드 페이지 |
+| **TC-B-RECON-01** | 미가격 오더 있는 Agency 로그인 → 정산 조회 | 상단에 미가격 오더 알림 뱃지 + 목록 표시 | 정산 페이지 |
+| **TC-B-RECON-02** | 모든 오더 가격 책정된 Agency → 정산 조회 | 알림 섹션 미표시 (null 반환) | 정산 페이지 |
+
+### 35. Agency 정산 오더번호 검색 (IMP-126)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-B-SEARCH-01** | 오더번호 ILIKE 검색 — "ZN-2026" 입력 | 일치 오더만 반환 (`ilike` 조건 호출 확인) | `tests/integration/p7-agency-settlement.test.ts` |
+| **TC-B-SEARCH-02** | 존재하지 않는 오더번호 검색 | 빈 배열 반환 (에러 없음) | `tests/integration/p7-agency-settlement.test.ts` |
+| **TC-B-SEARCH-03** | 오더번호 + 화주 필터 동시 적용 | 두 조건 AND 결합 결과 확인 | `tests/integration/p7-agency-settlement.test.ts` |
 
 ### 34. Phase 7 일마감 처리 (Phase 7 SPR-05)
 | ID | 테스트 항목 | 목적 | 파일 경로 |

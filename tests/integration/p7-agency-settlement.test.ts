@@ -3,7 +3,7 @@ import {
   getAgencySettlementSummary,
   getAgencyShipperSettlements,
   getAgencyOrderSettlements,
-  exportAgencySettlementExcel
+  exportAgencySettlementExcel,
 } from '@/lib/actions/agency-settlement';
 import { createAdminClient } from '@/utils/supabase/server';
 import { validateUserAction } from '@/lib/auth/guards';
@@ -25,6 +25,7 @@ const createQueryMock = (data: any, error: any = null) => {
     in: vi.fn().mockReturnThis(),
     gte: vi.fn().mockReturnThis(),
     lte: vi.fn().mockReturnThis(),
+    ilike: vi.fn().mockReturnThis(),
     single: vi.fn().mockResolvedValue({ data, error }),
     then: vi.fn().mockImplementation((onFulfilled: any) => {
       return Promise.resolve({ data, error }).then(onFulfilled);
@@ -35,6 +36,7 @@ const createQueryMock = (data: any, error: any = null) => {
   queryChain.in.mockReturnValue(queryChain);
   queryChain.gte.mockReturnValue(queryChain);
   queryChain.lte.mockReturnValue(queryChain);
+  queryChain.ilike.mockReturnValue(queryChain);
   return queryChain;
 };
 
@@ -173,6 +175,46 @@ describe('Agency Settlement Integration Tests (TC-P7-SETTLE-01~04)', () => {
     // Check that zen_agency_shippers was queried with mockAgencyOrgId (11111111-1111-4111-8111-111111111111) instead of 222
     expect(mockShippersQuery.eq).toHaveBeenCalledWith('agency_org_id', mockAgencyOrgId);
     expect(mockShippersQuery.eq).not.toHaveBeenCalledWith('agency_org_id', '22222222-2222-4222-8222-222222222222');
+  });
+
+  it('TC-B-SEARCH-01: 오더번호 ILIKE 검색 — "ZN-2026" 입력 시 일치 오더만 반환', async () => {
+    (validateUserAction as any).mockResolvedValue({
+      profile: { id: '33333333-3333-4333-8333-333333333333', role: 'AGENCY', org_id: mockAgencyOrgId }
+    });
+
+    mockSupabase._tableMocks.zen_orders = createQueryMock(mockOrders);
+
+    await getAgencyOrderSettlements(mockAgencyOrgId, undefined, '2026-06-01', '2026-06-15', 'ZN-2026');
+
+    const ordersQuery = mockSupabase._tableMocks.zen_orders;
+    expect(ordersQuery.ilike).toHaveBeenCalledWith('order_no', '%ZN-2026%');
+  });
+
+  it('TC-B-SEARCH-02: 존재하지 않는 오더번호 검색 — 빈 배열 반환', async () => {
+    (validateUserAction as any).mockResolvedValue({
+      profile: { id: '33333333-3333-4333-8333-333333333333', role: 'AGENCY', org_id: mockAgencyOrgId }
+    });
+
+    mockSupabase._tableMocks.zen_orders = createQueryMock([]);
+
+    const result = await getAgencyOrderSettlements(mockAgencyOrgId, mockShipperAId, '2026-06-01', '2026-06-15', 'NONEXISTENT');
+
+    expect(result.data).toEqual([]);
+  });
+
+  it('TC-B-SEARCH-03: 오더번호 + 화주 필터 동시 적용 — AND 결합', async () => {
+    (validateUserAction as any).mockResolvedValue({
+      profile: { id: '33333333-3333-4333-8333-333333333333', role: 'AGENCY', org_id: mockAgencyOrgId }
+    });
+
+    mockSupabase._tableMocks.zen_orders = createQueryMock([mockOrders[0]]);
+
+    const result = await getAgencyOrderSettlements(mockAgencyOrgId, mockShipperAId, '2026-06-01', '2026-06-15', 'ZN-2026001');
+
+    expect(result.data).not.toBeNull();
+    expect(result.data?.length).toBe(1);
+    expect(result.data?.[0].orderNo).toBe('ZN-2026001');
+    expect(result.data?.[0].shipperId).toBe(mockShipperAId);
   });
 });
 
