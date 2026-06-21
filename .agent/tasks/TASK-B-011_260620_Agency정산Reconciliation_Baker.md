@@ -206,9 +206,44 @@ Baker의 코드 커밋(`6ad85a9`) 실제 변경 파일:
 
 ---
 
+## [수정 지시] — Jaison 2차 반려 (2026-06-21)
+
+> **1차 이슈 수정 확인**: Issue 1(DoD 허위체크) ✅ · Issue 2(해시 오기재) ✅  
+> **2차 반려 사유**: 신규 이슈 2건
+
+### ❌ Issue 1 — 커밋 태그 위반 (`[Codex]`) [JSJung 판단 필요]
+
+fix commit `b332713`·`454ddeb`·`5213570` 커밋 태그가 `[BP]`가 아닌 `[Codex]`.  
+개정이력에 "Baker(BP) → Noah(Codex)"로 명시 — R-17 커밋 컨벤션 및 R-19 파일 소유권 위반.
+
+**JSJung 팀 리더 판단 사항**:
+
+| 선택지 | 내용 |
+|:------:|:-----|
+| (A) `[Codex]` 소급 승인 | Noah(Codex)를 Team B 공식 에이전트로 등록. 커밋 이력 유지. |
+| (B) `[BP]` 태그로 재커밋 | Baker가 `[Codex]` 커밋 내용을 `[BP]` 태그로 재작성. `[Codex]` 커밋 revert. |
+
+→ JSJung 결정 통보 전까지 **PR 생성 보류**.
+
+### ❌ Issue 2 — 신규 PR 미생성 [필수]
+
+PR#59는 CLOSED 상태. R-17 §7에 따라 수정 완료 후 신규 PR 생성 필요.
+
+- 대상 브랜치: `feature/teamb-task-b-011-settlement-reconciliation-v2 → develop`
+- Issue 연결: `Closes #57`
+- **순서**: Issue 1 조치 완료 → 신규 PR 생성
+
+### ⚠️ B-010 머지 후 rebase 필요 (작업 지침)
+
+Dave(B-010)에서 `getAgencyUnpricedOrders` 제거 예정 → B-010이 먼저 develop에 머지된 후,  
+B-011은 `git rebase develop` 실행하여 최신 develop 기반 갱신 후 PR 제출.
+
+---
+
 ## 개정 이력
 
 | 날짜 | 작성자 | 내용 |
 |:-----|:------|:----|
+| 2026-06-21 | Jaison (Claude, Team B) | 2차 반려 — Issue 2건 (Codex 태그·신규 PR) + rebase 지침 |
 | 2026-06-21 | Jaison (Claude, Team B) | 1차 반려 — Issue 1·2 수정 지시 (DoD 허위체크·문서커밋 해시) |
 | 2026-06-20 | Jaison (Claude, Team B) | Task 발령 |

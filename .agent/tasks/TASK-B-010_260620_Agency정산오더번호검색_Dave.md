@@ -208,9 +208,72 @@ DEF 포함 항목:
 
 ---
 
+## [수정 지시] — Jaison 2차 반려 (2026-06-21)
+
+> **1차 이슈 수정 확인**: Issue 1(PR URL) ✅ · Issue 3(DEF-061) ✅  
+> **2차 반려 사유**: Issue 2 미이행 + 신규 이슈 3건
+
+### ❌ Issue 1 — ja/zh i18n 미수정 [필수 — 1차 미이행]
+
+1차에서 요청한 `messages/ja.json`·`messages/zh.json` 수정이 **실제로 이루어지지 않음**.  
+fix commit `65e01d9` 변경 파일: `.agent/` 3개 파일 전부 — i18n 파일 없음.  
+**커밋 메시지에 "ja/zh i18n 추가" 기재했으나 실제 변경 없음 (허위 커밋 메시지).**
+
+**조치**: `AgencySettlements` 블록 생성(없는 경우) + 두 키 추가
+
+```json
+// messages/ja.json — AgencySettlements 블록이 없으면 신규 추가, 있으면 기존 블록에 키만 추가
+"filter_order_no": "注文番号",
+"order_no_placeholder": "注文番号を入力"
+```
+```json
+// messages/zh.json — 동일
+"filter_order_no": "订单号",
+"order_no_placeholder": "输入订单号"
+```
+
+> ⚠️ Baker(B-011)가 ja/zh에 `AgencySettlements` 블록을 추가했음. B-010 머지 순서에 따라 블록이 이미 존재할 수 있으니 **덮어쓰기 금지** — 기존 블록에 키만 추가.
+
+### ❌ Issue 2 — DoD 전항목 역체크 [필수]
+
+fix commit `65e01d9`에서 올바르게 구현된 항목까지 전항목 체크 해제됨. 아래 기준으로 재체크:
+
+| DoD 항목 | 재체크 | 근거 |
+|:--------|:------:|:-----|
+| `AgencySettlementQuerySchema` `order_no_search` 파라미터 추가 | ✅ 재체크 | `89ffb59` 구현 확인 |
+| `getAgencyOrderSettlements` ILIKE 검색 조건 구현 | ✅ 재체크 | `89ffb59` 구현 확인 |
+| `exportAgencySettlementExcel` / `_fetchOrders` 검색 조건 동기화 | 보류 (DEF-061) | develop에 함수 없음 |
+| `AgencySettlementClient.tsx` 오더번호 검색 UI 추가 | ✅ 재체크 | `89ffb59` 구현 확인 |
+| ZEN_A4: 수정된 함수 전량 50줄 이하 확인 | 확인 후 체크 | — |
+| TC-B-SEARCH-01~03 신규 추가 | 확인 후 체크 | — |
+| 회귀 테스트 전체 PASS | 확인 후 체크 | — |
+| 코드 커밋 해시 기재 | ✅ 재체크 (`89ffb59`) | — |
+| PR 생성 완료 (`Closes #56`) | 신규 PR 생성 후 체크 | — |
+
+### ❌ Issue 3 — `getAgencyUnpricedOrders` 스코프 오버라이드 제거 [필수]
+
+Dave가 B-010 브랜치 `89ffb59`에 `getAgencyUnpricedOrders` 구현 → **TASK-B-011(Baker) 스코프 침범**.  
+Baker가 B-011에서 동일 함수 별도 구현 완료. 양 브랜치 동시 머지 시 `agency-settlement.ts` **충돌 확정**.
+
+**조치**:
+1. `src/lib/actions/agency-settlement.ts` — `getAgencyUnpricedOrders` 함수 **제거**
+2. `AgencySettlementClient.tsx` — `getAgencyUnpricedOrders` import·호출부 **제거** (Reconciliation Alert은 B-011 머지 후 develop에서 완성)
+3. 제거 후 회귀 테스트 재실행
+
+### ❌ Issue 4 — 신규 PR 미생성 [필수]
+
+PR#58은 CLOSED 상태. R-17 §7에 따라 수정 완료 후 신규 PR 생성 필요.
+
+- 대상 브랜치: `feature/teamb-task-b-010-settlement-order-search → develop`
+- Issue 연결: `Closes #56`
+- 순서: Issue 1~3 수정 완료 → `[DS] fix: TASK-B-010 2차 반려 수정 — ja/zh i18n·DoD재체크·scope제거` → 문서 커밋 → **신규 PR 생성**
+
+---
+
 ## 개정 이력
 
 | 날짜 | 작성자 | 내용 |
 |:-----|:------|:----|
+| 2026-06-21 | Jaison (Claude, Team B) | 2차 반려 — Issue 4건 (ja/zh i18n 미이행·DoD 역체크·scope 제거·신규 PR) |
 | 2026-06-21 | Jaison (Claude, Team B) | 1차 반려 — Issue 1·2·3 수정 지시 (PR URL·ja/zh i18n·R-18 DEF) |
 | 2026-06-20 | Jaison (Claude, Team B) | Task 발령 |
