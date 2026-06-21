@@ -1,8 +1,10 @@
 import { AlertTriangle, ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import Link from "next/link";
+import { useLocale, useTranslations } from "next-intl";
 
 interface UnpricedOrder {
+  orderId: string;
   orderNo: string;
   shipperName: string;
   createdAt: string;
@@ -15,6 +17,7 @@ interface Props {
 export function SettlementReconciliationAlert({ unpricedOrders }: Props) {
   const t = useTranslations('AgencySettlements');
   const [expanded, setExpanded] = useState(false);
+  const locale = useLocale();
   if (unpricedOrders.length === 0) return null;
 
   return (
@@ -33,7 +36,7 @@ export function SettlementReconciliationAlert({ unpricedOrders }: Props) {
           <ul className="space-y-1">
             {unpricedOrders.map((o) => (
               <li key={o.orderNo} className="text-xs text-amber-800 bg-amber-100/50 rounded-lg px-3 py-1.5 flex justify-between">
-                <span className="font-mono font-medium">{o.orderNo}</span>
+                <Link href={`/${locale}/orders/${o.orderId}`} className="font-mono font-medium text-amber-900 hover:underline">{o.orderNo}</Link>
                 <span className="text-amber-600">{o.shipperName} · {new Date(o.createdAt).toLocaleDateString()}</span>
               </li>
             ))}
