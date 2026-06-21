@@ -160,5 +160,9 @@
   "agency_settlement_orders": "オーダ数",
   "agency_settlement_revenue": "売上",
   "agency_settlement_cost": "原価",
-  "agency_settlement_margin_rate": "利益率"
+  "agency_settlement_margin_rate": "利益率",
+  "AgencySettlements": {
+    "filter_order_no": "注文番号",
+    "order_no_placeholder": "注文番号を入力"
+  }
 }

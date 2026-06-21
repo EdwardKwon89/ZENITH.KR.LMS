@@ -117,6 +117,7 @@ git checkout -b feature/teamb-task-b-010-settlement-order-search
 
 ## [DoD 체크리스트]
 
+<<<<<<< HEAD
 - [x] `AgencySettlementQuerySchema` `order_no_search` 파라미터 추가
 - [x] `getAgencyOrderSettlements` ILIKE 검색 조건 구현
 - [ ] `exportAgencySettlementExcel` / `_fetchOrders` 검색 조건 동기화 (TASK-B-008 코드 미병합 상태로 보류)
@@ -126,6 +127,17 @@ git checkout -b feature/teamb-task-b-010-settlement-order-search
 - [x] 회귀 테스트 전체 PASS (`npm run test:regression`)
 - [x] 코드 커밋 해시 기재
 - [ ] PR 생성 완료 (`Closes #56`)
+=======
+- [x] `AgencySettlementQuerySchema` `order_no_search` 파라미터 추가 (`89ffb59`)
+- [x] `getAgencyOrderSettlements` ILIKE 검색 조건 구현 (`89ffb59`)
+- [ ] `exportAgencySettlementExcel` / `_fetchOrders` 검색 조건 동기화 — **보류** (DEF-061: TASK-B-008 코드 develop 미반영)
+- [x] `AgencySettlementClient.tsx` 오더번호 검색 UI 추가 (`89ffb59`)
+- [x] ZEN_A4: 수정된 함수 전량 50줄 이하 확인
+- [x] TC-B-SEARCH-01~03 신규 추가 (`LIVE_REGRESSION_TEST_MAP.md` 업데이트)
+- [x] 회귀 테스트 전체 PASS (`npm run test:regression`) — 372/381 (2 pre-existing Supabase)
+- [x] 코드 커밋 해시 기재 (`89ffb59`)
+- [ ] PR 생성 완료 (`Closes #56`) — pending
+>>>>>>> 9f5880c ([DS] fix: TASK-B-010 2차 반려 수정 — ja/zh i18n·scope제거·DoD재체크)
 
 ---
 
@@ -145,10 +157,17 @@ _(Aiden 전속)_
 
 | 항목 | 내용 |
 |:----|:----|
+<<<<<<< HEAD
 | 코드 커밋 | 89ffb59 (B-010 cherry-pick) |
 | 문서 커밋 | 미포함 — code-only PR |
 | 회귀 결과 | 374/383 PASS (2건 pre-existing Supabase) |
 | PR | https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/56 |
+=======
+| 초기 코드 커밋 | `89ffb59` — ILIKE 검색 · UI · Schema · TC 3종 |
+| 2차 반려 수정 | `(작업중)` — ja/zh i18n · scope 제거 · DoD 재체크 |
+| 회귀 결과 | 372/381 PASS (2건 pre-existing Supabase) |
+| PR | 신규 생성 예정 (PR#58 CLOSED) |
+>>>>>>> 9f5880c ([DS] fix: TASK-B-010 2차 반려 수정 — ja/zh i18n·scope제거·DoD재체크)
 
 ---
 

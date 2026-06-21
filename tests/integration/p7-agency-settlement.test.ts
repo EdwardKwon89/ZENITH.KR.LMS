@@ -4,7 +4,6 @@ import {
   getAgencyShipperSettlements,
   getAgencyOrderSettlements,
   exportAgencySettlementExcel,
-  getAgencyUnpricedOrders
 } from '@/lib/actions/agency-settlement';
 import { createAdminClient } from '@/utils/supabase/server';
 import { validateUserAction } from '@/lib/auth/guards';
@@ -160,45 +159,6 @@ describe('Agency Settlement Integration Tests (TC-P7-SETTLE-01~04)', () => {
     expect(filteredResult.data?.length).toBe(1);
     expect(filteredResult.data?.[0].revenue).toBe(33000); // Overridden price
     expect(filteredResult.data?.[0].cost).toBe(25000);    // Overridden price
-  });
-
-  it('TC-B-RECON-01: 미가격 오더 필터 — revenue=0인 오더만 반환', async () => {
-    (validateUserAction as any).mockResolvedValue({
-      profile: { id: '33333333-3333-4333-8333-333333333333', role: 'AGENCY', org_id: mockAgencyOrgId }
-    });
-
-    // Add an unpriced order (no snapshot) to mock data
-    const mockWithUnpriced = [
-      ...mockOrders,
-      {
-        id: '99999999-9999-4999-8999-999999999993',
-        order_no: 'ZN-2026003',
-        shipper_id: mockShipperAId,
-        created_at: '2026-06-12T12:00:00Z',
-        shipper: { name: 'Shipper A' },
-        packages: [{ gross_weight: 1.0, packing_count: 1 }],
-        snapshot: null
-      }
-    ];
-    mockSupabase._tableMocks.zen_orders = createQueryMock(mockWithUnpriced);
-
-    const result = await getAgencyUnpricedOrders(mockAgencyOrgId, '2026-06-01', '2026-06-15');
-
-    expect(result.data).not.toBeNull();
-    expect(result.data?.length).toBe(1);
-    expect(result.data?.[0].orderNo).toBe('ZN-2026003');
-    expect(result.data?.[0].revenue).toBeUndefined();
-  });
-
-  it('TC-B-RECON-02: 모든 오더 가격 책정됨 — 빈 배열 반환', async () => {
-    (validateUserAction as any).mockResolvedValue({
-      profile: { id: '33333333-3333-4333-8333-333333333333', role: 'AGENCY', org_id: mockAgencyOrgId }
-    });
-
-    const result = await getAgencyUnpricedOrders(mockAgencyOrgId, '2026-06-01', '2026-06-15');
-
-    expect(result.data).not.toBeNull();
-    expect(result.data?.length).toBe(0);
   });
 
   it('TC-P7-SETTLE-04: RLS — Agency A 사용자가 Agency B 데이터 조회 불가', async () => {
