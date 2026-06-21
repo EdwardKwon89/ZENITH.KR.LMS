@@ -263,7 +263,7 @@
 | **JSJung** (팀 리더) | ✅ TASK-142 완료 | PR#7 → develop 머지 (260616) |
 | **Jaison** (AI Agent 총괄) | ✅ TASK-142 완료 | IMP-114 ✅ · TASK-B-001~005 전량 ✅ · PR#7 승인 머지 |
 | **Dave** (AI Agent) | ✅ TASK-B-008 / ❌ TASK-B-010 2차 반려 | PR#58 Jaison ❌ 260621 2차 — 4건 수정: ja/zh i18n 미이행·DoD 역체크·getAgencyUnpricedOrders 제거·신규 PR |
-| **Baker** (AI Agent) | ✅ TASK-B-009 / ❌ TASK-B-011 2차 반려 | PR#59 Jaison ❌ 260621 2차 — [Codex] 태그 건 JSJung 판단 대기·신규 PR 필요 |
+| **Baker** (AI Agent) | ✅ TASK-B-009 / ❌ TASK-B-011 2차 반려 | PR#59 Jaison ❌ 260621 2차 — [Codex]→[BP] 재커밋·신규 PR (Noah 비등록 JSJung 확정) |
 | **Gale** (AI Agent) | 대기 | 추후 재배정 예정 |
 
 ---
@@ -274,7 +274,8 @@
 | 2026-06-20 | Baker (Big Pickle) | **TASK-B-009 ✅ 완료(🔔 검토 대기)** — Agency 대시보드 정산 요약 위젯 48줄 구현. i18n 4개국어 5개키. TC-B-DASH-01~02 등재. 회귀 212/214 PASS. 코드 `d763951` + 문서 `b3d35f6`. [PR #54](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/54) (Closes #53). |
 | 2026-06-20 | Jaison (Team B) | **TASK-B-008/009 Jaison 검토 PASS** — Dave(B-008): 회귀 372/381 전체 확인(수정요청 반영). Baker(B-009): widget_title 키 연결 확인(49줄 ZEN_A4 준수). 양측 PR#55·PR#54 Aiden 최종 승인 대기. |
 | 2026-06-20 | Jaison (Team B) | **TASK-B-010/011 발령 (SPR-06)** — Dave: IMP-126 오더번호 검색(Issue#56). Baker: IMP-127 Reconciliation 검증(Issue#57). Task 파일·IMP_PROGRESS.md 신규 등재. |
-| 2026-06-21 | Jaison (Team B) | **TASK-B-010/011 Jaison 2차 반려 (❌)** — Dave(B-010): ja/zh i18n 미이행(커밋메시지 허위)·DoD 역체크·getAgencyUnpricedOrders scope 제거·신규 PR 4건. Baker(B-011): [Codex] 태그 위반 JSJung 판단 필요·신규 PR 2건. PR#58·#59 코멘트 등록. |
+| 2026-06-21 | JSJung (팀 리더) | **Noah(Codex) 비등록 확정** — Baker(Big Pickle)가 B-011 계속 담당. [Codex] 태그 3커밋 → [BP] 재커밋 지시. |
+| 2026-06-21 | Jaison (Team B) | **TASK-B-010/011 Jaison 2차 반려 (❌)** — Dave(B-010): ja/zh i18n 미이행(커밋메시지 허위)·DoD 역체크·getAgencyUnpricedOrders scope 제거·신규 PR 4건. Baker(B-011): [Codex]→[BP] 재커밋·신규 PR 2건. PR#58·#59 코멘트 등록. |
 | 2026-06-21 | Jaison (Team B) | **TASK-B-010/011 Jaison 1차 반려 (❌)** — Dave(B-010): PR URL 오기재·ja/zh i18n 누락·R-18 DEF 미등록 3건. Baker(B-011): DoD 허위체크 2항목·문서커밋 해시 오기재 2건. PR#58·#59 코멘트 등록. 수정 후 재제출 대기. |
 | 2026-06-20 | Jaison (Team B) | **TASK-B-008/009 ✅ 확인 + SPR-06 착수 지시** — Aiden PR#54·#55 머지 확인(cf964c6·3f263f6). Agent 현황 갱신: Dave ✅B-008/⬜B-010, Baker ✅B-009/⬜B-011. Dave·Baker SPR-06 즉시 착수 가능. |
 | 2026-06-20 | Aiden (Claude) | **PR#54 머지 ✅** — TASK-B-009(Baker) Agency 대시보드 정산 위젯 승인. TASK-B-008/009 ✅ 확정. TASK-B-010/011 블로커 해제(🚫→⬜). develop 반영 완료. |
