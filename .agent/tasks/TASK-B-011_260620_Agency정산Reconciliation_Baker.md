@@ -135,7 +135,7 @@ git checkout -b feature/teamb-task-b-011-settlement-reconciliation
 - [x] ZEN_A4: 수정된 함수·파일 전량 50줄 이하 확인
 - [ ] TC-B-RECON-01~02 신규 추가 (`LIVE_REGRESSION_TEST_MAP.md` 업데이트) — 불필요 (기존 E2E 시나리오로 충분)
 - [x] 회귀 테스트 전체 PASS (`rtk npm run test:regression`)
-- [x] 코드 커밋 해시 기재 (단, fixup 필요)
+- [x] 코드 커밋 해시 기재 (`6ad85a9` + `b332713`)
 - [x] PR 생성 완료 (`Closes #57`)
 
 ---
@@ -156,7 +156,7 @@ _(Aiden 전속)_
 
 | 항목 | 내용 |
 |:----|:----|
-| 코드 커밋 | `6ad85a9` (`[BP] feat`) + `<rev>` (`[Codex] fixup:`) |
+| 코드 커밋 | `6ad85a9` (`[BP] feat`) + `b332713` (`[Codex] fixup:`) |
 | 문서 커밋 | `b3ac853` (`[BP] docs`) |
 | 회귀 결과 | 374/383 PASS (2건 pre-existing Supabase) |
 | PR | #59 (`feature/teamb-task-b-011-settlement-reconciliation-v2 → develop`)
