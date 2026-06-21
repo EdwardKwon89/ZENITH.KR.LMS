@@ -1362,3 +1362,18 @@
 - **예상 공수**: 0.5~1 MD
 - **우선순위**: Medium (절차 개선 논의 시 처리)
 - **상태**: ⬜ 미착수 — **추후 절차 개선 세션에서 논의 예정** (Edward, 2026-06-19)
+
+---
+
+## [IMP-130] AgencySettlementQuerySchema order_no_search 필드 누락 보완
+
+- **발견 경위**: TASK-B-012 Jaison 1차 검토 (2026-06-21) — `getAgencyOrderSettlements` / `exportAgencySettlementExcel` 양측에서 `order_no_search` 키를 `AgencySettlementQuerySchema.parse()`에 전달하나, 스키마 정의에 해당 필드 없음 → Zod silently strip → 검색어 서버 사이드 유효성 검증 우회
+- **현재 상태**: `src/lib/validations/agency.ts` `AgencySettlementQuerySchema`에 `order_no_search` 필드 미정의. 기능 동작은 정상(ILIKE 직접 변수 참조), 스키마 검증만 실질적으로 무효화됨
+- **임시 조치**: 해당 사항 없음 (기능 영향 없음)
+- **목표 구현**: `AgencySettlementQuerySchema`에 `order_no_search: z.string().optional()` 1줄 추가
+- **관련 파일**: `src/lib/validations/agency.ts`
+- **관련 Task**: TASK-B-014 (Dave)
+- **관련 Issue**: GitHub Issue #68
+- **예상 공수**: 0.1 MD
+- **우선순위**: P4
+- **상태**: ⬜ 미착수 — TASK-B-014 발령 260621
