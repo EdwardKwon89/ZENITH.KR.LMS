@@ -63,7 +63,7 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON public.zen_tracking_raw_logs TO service_
 - [x] 코드 커밋 해시 기재 — `1380b90`
 - [x] IMP_PROGRESS.md IMP-132 등재
 - [x] ACTIVE_TASK.md 🔔 반영
-- [ ] PR 생성 (`feature/teamb-task-b-017-service-role-grant-fix` → `develop`, Closes #74)
+- [x] PR 생성 — [PR#75](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/75) (`feature/teamb-task-b-017-service-role-grant-fix` → `develop`, Closes #74)
 
 ---
 
