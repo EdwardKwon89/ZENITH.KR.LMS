@@ -1,5 +1,6 @@
 import { AlertTriangle, ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 interface UnpricedOrder {
   orderNo: string;
@@ -9,10 +10,10 @@ interface UnpricedOrder {
 
 interface Props {
   unpricedOrders: UnpricedOrder[];
-  t: (key: string) => string;
 }
 
-export function SettlementReconciliationAlert({ unpricedOrders, t }: Props) {
+export function SettlementReconciliationAlert({ unpricedOrders }: Props) {
+  const t = useTranslations('AgencySettlements');
   const [expanded, setExpanded] = useState(false);
   if (unpricedOrders.length === 0) return null;
 

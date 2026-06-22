@@ -192,7 +192,7 @@ export function AgencySettlementClient({ agencyOrgId, shippers }: AgencySettleme
 
       {/* 미가격 오더 알림 */}
       {unpricedOrders.length > 0 && (
-        <SettlementReconciliationAlert unpricedOrders={unpricedOrders} t={t} />
+        <SettlementReconciliationAlert unpricedOrders={unpricedOrders} />
       )}
 
       {/* 요약 카드 */}
