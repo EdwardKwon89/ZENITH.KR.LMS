@@ -245,6 +245,7 @@
 | TASK-B-013 | 260621 | [P7-SPR-07] SettlementReconciliationAlert 오더 링크 추가 + Agency SPR-06 UAT 시나리오 보완 | P3 | TASK-B-010 ✅ · TASK-B-011 ✅ | Baker | 🔔 | [TASK-B-013](tasks/TASK-B-013_260621_SettlementAlertOrderLink_UAT보완_Baker.md) | IMP-129 · Issue #50 · PR#67 |
 | TASK-B-014 | 260621 | [P7-SPR-07] AgencySettlementQuerySchema order_no_search 필드 추가 (Zod 검증 정합성 보완) | P4 | TASK-B-012 🔔 | Dave | ✅ | [TASK-B-014](tasks/TASK-B-014_260621_AgencySettlementQuerySchema_order_no_search_Dave.md) | IMP-130 · PR#69 머지 ✅ · Aiden ✅ 260622 |
 | TASK-B-015 | 260622 | Team B DoD 표준화 — PR 제출 전 빌드 검증(npm run build) + i18n 중복 방지 의무화 | P2 | — | Jaison | ✅ | [TASK-B-015](tasks/TASK-B-015_260622_TeamB_DoD표준화_Jaison.md) | Issue #71 Edward 지시 · TEAM_B_DOD_STANDARD.md 신규 작성 |
+| TASK-B-016 | 260622 | CI pr-checks.yml .env.local 파싱 버그 수정 — supabase status --output env + printf | High | — | Jaison | 🔔 | [TASK-B-016](tasks/TASK-B-016_260622_CI_env_fix_Jaison.md) | IMP-131 · Issue #72 · PR 생성 예정 |
 ---
 
 ## Agent 현황
@@ -265,7 +266,7 @@
 | Agent | 상태 | 비고 |
 |:------|:----:|:----|
 | **JSJung** (팀 리더) | ✅ TASK-142 완료 | PR#7 → develop 머지 (260616) |
-| **Jaison** (AI Agent 총괄) | ✅ TASK-B-015 완료 | Issue #71 DoD 표준화 · PR#66/67 rebase develop 완료 (260622) |
+| **Jaison** (AI Agent 총괄) | 🔔 TASK-B-016 | Issue #72 CI env fix · IMP-131 · 코드 커밋 7259d32 (260622) |
 | **Dave** (AI Agent) | 🔔 TASK-B-012 / ✅ TASK-B-014 | PR#66 rebase ✅ (IMP-128) · PR#69 머지 ✅ (IMP-130) |
 | **Baker** (AI Agent) | 🔔 TASK-B-013 | PR#67 제출 (IMP-129, Closes #50) · 🔔 260621 |
 | **Gale** (AI Agent) | 대기 | 추후 재배정 예정 |
