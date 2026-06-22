@@ -241,12 +241,12 @@
 | TASK-B-009 | 260620 | [P7-SPR-05] Agency 대시보드 정산 요약 위젯 — AgencySettlementWidget | P2 | IMP-122 ✅ | Baker | ✅ | [TASK-B-009](tasks/TASK-B-009_260620_Agency대시보드정산위젯_Baker.md) | IMP-125 ✅ · PR#54 머지 ✅ · Aiden ✅ 260620 |
 | TASK-B-010 | 260620 | [P7-SPR-06] Agency 정산 오더번호 검색 기능 — AgencySettlementQuerySchema + ILIKE 검색 UI | P2 | TASK-B-008 ✅ | Dave | ✅ | [TASK-B-010](tasks/TASK-B-010_260620_Agency정산오더번호검색_Dave.md) | IMP-126 ✅ · PR#62 머지 ✅ · 384/384 PASS · Aiden ✅ 260621 |
 | TASK-B-011 | 260620 | [P7-SPR-06] Agency 정산 Reconciliation 검증 — 미가격 오더 알림 (getAgencyUnpricedOrders + SettlementReconciliationAlert) | P2 | TASK-B-008 ✅ · TASK-B-009 ✅ | Baker | ✅ | [TASK-B-011](tasks/TASK-B-011_260620_Agency정산Reconciliation_Baker.md) | IMP-127 ✅ · PR#63 머지 ✅ · 384/384 PASS · Aiden ✅ 260621 |
-| TASK-B-012 | 260621 | [P7-SPR-07] Agency 정산 orderNoSearch 연동 완성 — `_fetchOrders` + `exportAgencySettlementExcel` + Client 수정 | P2 | TASK-B-010 ✅ · DEF-061 ✅ | Dave | 🔔 | [TASK-B-012](tasks/TASK-B-012_260621_Agency정산orderNoSearch연동완성_Dave.md) | IMP-128 · PR#66 · 회귀 375/384 |
-| TASK-B-013 | 260621 | [P7-SPR-07] SettlementReconciliationAlert 오더 링크 추가 + Agency SPR-06 UAT 시나리오 보완 | P3 | TASK-B-010 ✅ · TASK-B-011 ✅ | Baker | 🔔 | [TASK-B-013](tasks/TASK-B-013_260621_SettlementAlertOrderLink_UAT보완_Baker.md) | IMP-129 · Issue #50 · PR#67 |
+| TASK-B-012 | 260621 | [P7-SPR-07] Agency 정산 orderNoSearch 연동 완성 — `_fetchOrders` + `exportAgencySettlementExcel` + Client 수정 | P2 | TASK-B-010 ✅ · DEF-061 ✅ | Dave | ✅ | [TASK-B-012](tasks/TASK-B-012_260621_Agency정산orderNoSearch연동완성_Dave.md) | IMP-128 ✅ · PR#66 머지 ✅ · Aiden ✅ 260623 |
+| TASK-B-013 | 260621 | [P7-SPR-07] SettlementReconciliationAlert 오더 링크 추가 + Agency SPR-06 UAT 시나리오 보완 | P3 | TASK-B-010 ✅ · TASK-B-011 ✅ | Baker | ✅ | [TASK-B-013](tasks/TASK-B-013_260621_SettlementAlertOrderLink_UAT보완_Baker.md) | IMP-129 ✅ · PR#67 머지 ✅ · Aiden ✅ 260623 |
 | TASK-B-014 | 260621 | [P7-SPR-07] AgencySettlementQuerySchema order_no_search 필드 추가 (Zod 검증 정합성 보완) | P4 | TASK-B-012 🔔 | Dave | ✅ | [TASK-B-014](tasks/TASK-B-014_260621_AgencySettlementQuerySchema_order_no_search_Dave.md) | IMP-130 · PR#69 머지 ✅ · Aiden ✅ 260622 |
 | TASK-B-015 | 260622 | Team B DoD 표준화 — PR 제출 전 빌드 검증(npm run build) + i18n 중복 방지 의무화 | P2 | — | Jaison | ✅ | [TASK-B-015](tasks/TASK-B-015_260622_TeamB_DoD표준화_Jaison.md) | Issue #71 Edward 지시 · TEAM_B_DOD_STANDARD.md 신규 작성 |
-| TASK-B-016 | 260622 | CI pr-checks.yml .env.local 생성 버그 수정 — JWT 파싱 eval 방식 교체 | High | 없음 | Jaison | ✅ | [TASK-B-016](tasks/TASK-B-016_260622_CI_env_fix_Jaison.md) | IMP-131 · Issue #72 · PR#73 머지 ✅ · Aiden ✅ 260622 |
-| TASK-B-017 | 260622 | CI service_role GRANT 누락 — migration fix (zen_rate_cards·zen_orders·zen_tracking_configs·zen_tracking_raw_logs) | High | TASK-B-016 ✅ | Jaison | ✅ | [TASK-B-017](tasks/TASK-B-017_260622_CI_service_role_grant_fix_Jaison.md) | IMP-132 · Issue #74 · PR#75 머지 ✅ · Aiden ✅ 260622 |
+| TASK-B-016 | 260622 | CI pr-checks.yml .env.local 생성 버그 수정 — JWT 파싱 eval 방식 교체 | High | 없음 | Jaison | ✅ | [TASK-B-016](tasks/TASK-B-016_260622_CI_env_fix_Jaison.md) | IMP-131 ✅ · Issue #72 · PR#73 머지 ✅ · Aiden ✅ 260622 |
+| TASK-B-017 | 260622 | CI service_role GRANT 누락 — migration fix (zen_rate_cards·zen_orders·zen_tracking_configs·zen_tracking_raw_logs) | High | TASK-B-016 ✅ | Jaison | ✅ | [TASK-B-017](tasks/TASK-B-017_260622_CI_service_role_grant_fix_Jaison.md) | IMP-132 ✅ · Issue #74 · PR#75 머지 ✅ · CI Run #3 387/387 · Aiden ✅ 260622 |
 ---
 
 ## Agent 현황
@@ -267,9 +267,9 @@
 | Agent | 상태 | 비고 |
 |:------|:----:|:----|
 | **JSJung** (팀 리더) | ✅ TASK-142 완료 | PR#7 → develop 머지 (260616) |
-| **Jaison** (AI Agent 총괄) | ✅ TASK-B-016 · ✅ TASK-B-017 | PR#73·PR#75 머지 ✅ · Aiden ✅ 260622 |
-| **Dave** (AI Agent) | 🔔 TASK-B-012 / ✅ TASK-B-014 | PR#66 rebase 진행 중 (IMP-128) · PR#69 머지 ✅ (IMP-130) |
-| **Baker** (AI Agent) | 🔔 TASK-B-013 | PR#67 제출 (IMP-129, Closes #50) · 🔔 260621 |
+| **Jaison** (AI Agent 총괄) | ✅ TASK-B-016 · ✅ TASK-B-017 | PR#73 머지 ✅ · PR#75 머지 ✅ · Aiden ✅ 260622/260623 · 다음 Task 대기 |
+| **Dave** (AI Agent) | ✅ TASK-B-012 · ✅ TASK-B-014 | PR#66 머지 ✅ (IMP-128) · PR#69 머지 ✅ (IMP-130) · Aiden ✅ 260623 |
+| **Baker** (AI Agent) | ✅ TASK-B-013 | PR#67 머지 ✅ (IMP-129) · Aiden ✅ 260623 |
 | **Gale** (AI Agent) | 대기 | 추후 재배정 예정 |
 
 ---
