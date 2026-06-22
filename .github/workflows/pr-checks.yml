@@ -28,13 +28,11 @@ jobs:
 
       - name: Create .env.local for tests
         run: |
-          ANON_KEY=$(supabase status | grep 'anon key' | awk '{print $NF}')
-          SERVICE_KEY=$(supabase status | grep 'service_role key' | awk '{print $NF}')
-          cat > .env.local <<EOF
-          NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
-          NEXT_PUBLIC_SUPABASE_ANON_KEY=${ANON_KEY}
-          SUPABASE_SERVICE_ROLE_KEY=${SERVICE_KEY}
-          EOF
+          ANON_KEY=$(supabase status --output env | grep ANON_KEY | cut -d= -f2)
+          SERVICE_KEY=$(supabase status --output env | grep SERVICE_ROLE_KEY | cut -d= -f2)
+          printf "NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321\n" > .env.local
+          printf "NEXT_PUBLIC_SUPABASE_ANON_KEY=%s\n" "$ANON_KEY" >> .env.local
+          printf "SUPABASE_SERVICE_ROLE_KEY=%s\n" "$SERVICE_KEY" >> .env.local
 
       - run: npm ci
 
