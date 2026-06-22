@@ -1365,6 +1365,21 @@
 
 ---
 
+## [IMP-131] CI pr-checks.yml .env.local 파싱 버그 수정
+
+- **발견 경위**: PR#66/#67 CI에서 `SUPABASE_SERVICE_ROLE_KEY is required` 반복 실패 — Aiden 근본 원인 분석 (Issue #72, 2026-06-22)
+- **현재 상태**: `supabase status | grep | awk` 파이프라인이 빈 문자열 반환 + heredoc 들여쓰기로 dotenv 키 인식 실패
+- **임시 조치**: 해당 사항 없음
+- **목표 구현**: `supabase status --output env` + `printf` 방식으로 교체
+- **관련 파일**: `.github/workflows/pr-checks.yml`
+- **관련 Task**: TASK-B-016 (Jaison)
+- **관련 Issue**: GitHub Issue #72
+- **예상 공수**: 0.1 MD
+- **우선순위**: High
+- **상태**: 🔔 완료 — TASK-B-016 Jaison 260622, 커밋 `7259d32`
+
+---
+
 ## [IMP-130] AgencySettlementQuerySchema order_no_search 필드 누락 보완
 
 - **발견 경위**: TASK-B-012 Jaison 1차 검토 (2026-06-21) — `getAgencyOrderSettlements` / `exportAgencySettlementExcel` 양측에서 `order_no_search` 키를 `AgencySettlementQuerySchema.parse()`에 전달하나, 스키마 정의에 해당 필드 없음 → Zod silently strip → 검색어 서버 사이드 유효성 검증 우회
