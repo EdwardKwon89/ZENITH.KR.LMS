@@ -75,7 +75,7 @@ printf "SUPABASE_SERVICE_ROLE_KEY=%s\n" "$SERVICE_KEY" >> .env.local
 | DEF# | 제목 | 긴급도 | 상세 보고서 |
 |:----:|:-----|:------:|:-----------|
 | DEF-071 | zen_rate_cards service_role GRANT 누락 | High | `.agent/defects/DEF-071_zen_rate_cards_service_role_grant_누락.md` |
-| DEF-072 | zen_tracking_raw_logs service_role GRANT 누락 | High | `.agent/defects/DEF-072_zen_tracking_raw_logs_service_role_grant_누락.md` |
+| DEF-072 | tracking-business-qa 3개 테이블 service_role GRANT 누락 (zen_orders·zen_tracking_configs·zen_tracking_raw_logs) | High | `.agent/defects/DEF-072_tracking_business_qa_service_role_grant_누락.md` |
 
 ---
 
