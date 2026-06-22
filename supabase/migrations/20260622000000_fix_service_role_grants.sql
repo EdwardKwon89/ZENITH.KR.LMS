@@ -16,3 +16,11 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON public.zen_order_rate_snapshots TO servi
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.zen_order_costs TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.zen_transport_pricing_policies TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.zen_tracking_events TO service_role;
+
+-- [3차 대상] CI 2차 실행 후 추가 확인
+-- zen_ports: SettlementEngine PostgREST JOIN (origin_port:zen_ports!origin_port_id) + beforeAll 포트 조회
+-- zen_organizations: beforeAll testShipperId/testCarrierId 조회 — GRANT 없으면 null → rate card 매칭 실패
+-- zen_order_packages: TC-POLICY-07 패키지 INSERT (weight=80/cbm=0.3 → applied_weight_cost=240/applied_cbm_cost=60 검증)
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.zen_ports TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.zen_organizations TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.zen_order_packages TO service_role;
