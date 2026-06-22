@@ -100,6 +100,7 @@ _(구현 완료 후 기재)_
 |:-----|:-----|
 | 코드 커밋 | `df58b63` |
 | E2E 파일 | `tests/e2e/e2e-23-agency-flow.spec.ts` (280줄, 4 test blocks × 8 시나리오) |
+| PR | [#79](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/79) — §1 Baker ✅, §2 Jaison 통합 대기 |
 | 회귀 결과 | §1 E2E 코드 작성 완료 — 로컬 실행은 Supabase 환경 필요 (Jaison §2에서 통합 실행) |
 | IMP | IMP-133 — §1 Baker ✅ |
 
