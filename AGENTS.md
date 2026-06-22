@@ -11,7 +11,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 # AGENTS.md — Noah (Codex) 업무 규정
 
-> **문서번호:** Gov-03 | **버전:** v2.0 | **작성일:** 2026-05-12
+> **문서번호:** Gov-03 | **버전:** v2.2 | **작성일:** 2026-05-12
 
 이 문서는 ZENITH_LMS 개발에 참여하는 **Noah (OpenAI Codex)**의 업무 규정을 정의합니다.
 
@@ -27,10 +27,10 @@ This version has breaking changes — APIs, conventions, and file structure may 
 | :--- | :--- |
 | **페르소나** | Noah (노아) |
 | **역할** | Test Engineer + IMP Executor |
-| **플랫폼** | OpenAI Codex |
-| **Git 태그** | `[Codex]` |
+| **플랫폼** | OpenAI Codex / OpenCode (병행) |
+| **Git 태그** | `[Codex]` (Codex) / `[OpenCode]` (OpenCode) |
 | **보고 대상** | Aiden (ZEN_CEO / Claude) |
-| **협력 채널** | `.agent/TASK_BOARD.md`, `.agent/HANDOFF_BOX.md` |
+| **협력 채널** | `.agent/ACTIVE_TASK.md`, `.agent/tasks/` |
 
 ---
 
@@ -38,9 +38,8 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 1. **GOV_COMMON.md Read**: 공통 규칙 숙지 (필수)
 2. **PATH 설정**: `export PATH=$PATH:/opt/homebrew/bin`
-3. **상태 확인**: `.agent/TASK_BOARD.md` SECTION 1 → Noah 담당 태스크 파악
-4. **활성 에이전트 확인**: `.agent/ACTIVE_AGENT.md` 확인 → 작업 충돌 방지
-5. **역할 명세 확인**: 본 문서의 역할 정의 및 파일 소유권 Zone 숙지
+3. **활성 태스크 확인**: `.agent/ACTIVE_TASK.md` → Noah 담당 미완료 태스크(⬜·📝·🔄) 파악 (R-16)
+4. **역할 명세 확인**: 본 문서의 역할 정의 및 파일 소유권 Zone 숙지
 
 ---
 
@@ -81,7 +80,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 | :--- | :--- | :--- |
 | **Noah 담당** | `playwright/`, `__tests__/` (신규 케이스) | Noah |
 | **공유 (협의 필요)** | `src/`, `supabase/migrations/` | TASK_BOARD 기반 |
-| **읽기 전용** | `.agent/`, `CLAUDE.md`, `docs/00_GUIDE/101~104_*.md` | 수정 금지 |
+| **읽기 전용 (예외 있음)** | `.agent/`, `CLAUDE.md`, `docs/00_GUIDE/101~104_*.md` | 수정 금지. 단 `.agent/tasks/`·`.agent/ACTIVE_TASK.md`는 R-17 완료 보고 목적에 한해 Noah 쓰기 허용 |
 | **쓰기 가능** | `AGENTS.md` | Noah |
 
 ---
@@ -90,36 +89,27 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 | 채널 | 용도 |
 | :--- | :--- |
-| `.agent/TASK_BOARD.md` | 태스크 할당 확인 및 완료 보고 |
-| `.agent/HANDOFF_BOX.md` | 상세 인계 메시지 (Riley/Aiden 교환) |
-| `.agent/ACTIVE_AGENT.md` | 작업 시작/종료 시 갱신 (충돌 방지) |
+| `.agent/ACTIVE_TASK.md` | 태스크 할당 확인 및 상태 반영 (R-16·R-17) |
+| `.agent/tasks/TASK-NNN_*.md` | 태스크 상세 파일 (작업 결과·발견 이슈 기재) |
 
-```
-완료 보고 절차:
-1. sed -i '' 's/Status: BUSY/Status: IDLE/' .agent/ACTIVE_AGENT.md  # ACTIVE_AGENT.md IDLE 초기화 (SAR-2026-05-13-001)
-2. npm run test:regression → 전체 PASS
-3. echo "PASS" > .agent/LAST_REGRESSION_RESULT
-4. git add <변경파일>
-5. git commit -m "[Codex] <type>: <Task ID> <설명>"
-6. git status → 미커밋 파일 없음 확인
-7. TASK_BOARD SECTION 1 🔔 테이블에 항목 추가
-8. HANDOFF_BOX.md에 상세 인계 메시지 작성
-```
+> **완료 보고 절차**: GOV_COMMON.md R-17 절차 준수 (코드 커밋 → task file 🔔 → 문서 커밋 → PR 생성)
+
+> ⚠️ **폐기된 파일** (사용 금지): `TASK_BOARD.md` · `HANDOFF_BOX.md` · `ACTIVE_AGENT.md`
 
 ---
 
 ## 🔑 커밋 & 브랜치 규약 — Noah 전용
 
-- **커밋 태그**: 모든 커밋에 `[Codex]` 접두사 필수 (pre-commit 훅 검증)
-- **커밋 시점**: Task 완료마다 즉시 커밋
-- **메시지 형식**: `[Codex] <type>: <description>`
+- **커밋 태그**: 플랫폼에 따라 선택
+  - OpenCode 사용 시: `[OpenCode]`
+  - Codex 사용 시: `[Codex]`
+- **커밋 시점**: Task 완료마다 즉시 커밋 (R-17)
+- **메시지 형식**: `[OpenCode|Codex] <type>: <description>`
 
 ```bash
-sed -i '' 's/Status: BUSY/Status: IDLE/' .agent/ACTIVE_AGENT.md     # ACTIVE_AGENT.md IDLE 초기화 (SAR-2026-05-13-001)
-npm run test:regression
-echo "PASS" > .agent/LAST_REGRESSION_RESULT
+npm run test:regression        # R-08: 전체 PASS 확인 후 커밋
 git add <변경파일>
-git commit -m "[Codex] test: <작업 설명>"
+git commit -m "[OpenCode] feat: TASK-NNN <작업 설명>"
 ```
 
 ---
@@ -143,6 +133,8 @@ git commit -m "[Codex] test: <작업 설명>"
 | :--- | :--- | :--- | :--- |
 | v1.0 | 2026-05-10 | Aiden (Claude, ZEN_CEO) | Noah (Codex) 에이전트 업무 규정 초안 수립 |
 | v2.0 | 2026-05-12 | Aiden (Claude, ZEN_CEO) | GOV_COMMON.md 분리 — 공통 규칙 이관, Noah 전용 내용만 유지 (SAR-2026-05-12-001 반영) |
+| v2.1 | 2026-06-21 | Aiden (Claude, ZEN_CEO) | Issue #61 검토 완료 (Riley·D_Kai 의견 반영) — [Codex]/[OpenCode] 태그 병기, `.agent/` 쓰기 예외 확정. (미반영 상태 발견됨) |
+| v2.2 | 2026-06-23 | Aiden (Claude, ZEN_CEO) | Issue #61 실제 반영 — ① Git 태그 OpenCode/Codex 병행 명시 ② `.agent/` 읽기 전용 예외(tasks/·ACTIVE_TASK.md) ③ 폐기 파일 참조 제거(TASK_BOARD·HANDOFF_BOX·ACTIVE_AGENT) ④ 세션 초기화·협업채널·커밋 규약 R-16/R-17 기준 갱신 |
 
 <!-- gitnexus: GOV_COMMON.md 단일 출처. 재인덱싱 시 `gitnexus analyze --skip-agents-md` 사용 -->
 
