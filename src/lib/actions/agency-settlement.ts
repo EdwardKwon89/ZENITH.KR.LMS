@@ -298,8 +298,8 @@ function _todayStr(): string {
   return `${yyyy}${mm}${dd}`;
 }
 
-async function _fetchOrders(supabase: any, shipperIds: string[], from: string, to: string) {
-  return supabase
+async function _fetchOrders(supabase: any, shipperIds: string[], from: string, to: string, orderNoSearch?: string) {
+  let query = supabase
     .from('zen_orders')
     .select(`
       id, order_no, shipper_id, created_at,
@@ -310,6 +310,10 @@ async function _fetchOrders(supabase: any, shipperIds: string[], from: string, t
     .in('shipper_id', shipperIds)
     .gte('created_at', `${from}T00:00:00Z`)
     .lte('created_at', `${to}T23:59:59Z`);
+  if (orderNoSearch) {
+    query = query.ilike('order_no', `%${orderNoSearch}%`);
+  }
+  return query;
 }
 
 function _mapToExcelRow(order: any, baseRates: any[], overrides: any[]): _ExcelRow {
@@ -333,7 +337,8 @@ export const exportAgencySettlementExcel = withAction(async function (
   agencyOrgId: string,
   shipperId: string | undefined,
   from: string,
-  to: string
+  to: string,
+  orderNoSearch?: string
 ) {
   const { profile } = await validateUserAction();
   if (!checkPermission(profile.role, '/agency')) {
@@ -345,6 +350,7 @@ export const exportAgencySettlementExcel = withAction(async function (
     shipper_org_id: shipperId || undefined,
     from,
     to,
+    order_no_search: orderNoSearch,
   });
 
   const supabase = await createAdminClient();
@@ -357,7 +363,7 @@ export const exportAgencySettlementExcel = withAction(async function (
   }
 
   const [ordersRes, baseData] = await Promise.all([
-    _fetchOrders(supabase, shipperIds, from, to),
+    _fetchOrders(supabase, shipperIds, from, to, orderNoSearch),
     _fetchBaseData(supabase, targetAgencyId),
   ]);
 
