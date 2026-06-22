@@ -5,10 +5,10 @@
 > **발령자**: Aiden (ZEN_CEO)
 > **담당 Agent**: Jaison (총괄) · Baker (E2E 자동화 코드)
 > **우선순위**: P2
-> **관련 Issue**: [#51](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/51)
+> **관련 Issue**: [#77](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/77)
 > **전제조건**: SPR-07 ✅ (PR#66·67 머지 완료 — 2026-06-23)
 > **브랜치**: `feature/teamb-task-b-018-agency-e2e-regression`
-> **상태**: ⬜
+> **상태**: ❌
 
 ---
 
@@ -111,8 +111,19 @@ _(구현 완료 후 기재)_
 
 ---
 
+## [Aiden 검토]
+
+| 항목 | 내용 |
+|:----|:----|
+| PR | #79 ❌ 반려 (2026-06-23) |
+| 반려 사유 | ① R-17 위반: PR Closes #51 오기재 (→#77) ② UAT-15-01 화주 신규 등록 누락 ③ TC-AG-05~06 등록 폼 미구현 ④ waitForTimeout 다수 사용 |
+| 재제출 기준 | 4건 전량 수정 + check-R17-DoD 통과 + Closes #77 |
+
+---
+
 ## 개정 이력
 
 | 날짜 | 작성자 | 내용 |
 |:-----|:------|:----|
-| 2026-06-23 | Aiden (Claude, ZEN_CEO) | Task 발령 — Issue #51 SPR-08, SPR-07 완료 전제조건 충족 |
+| 2026-06-23 | Aiden (Claude, ZEN_CEO) | Task 발령 — Issue #77, SPR-07 완료 전제조건 충족 |
+| 2026-06-23 | Aiden (Claude, ZEN_CEO) | PR#79 ❌ 반려 — 4건(R-17 위반·DoD 미달 2건·코드 품질) |

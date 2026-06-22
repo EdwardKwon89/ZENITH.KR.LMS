@@ -247,7 +247,7 @@
 | TASK-B-015 | 260622 | Team B DoD 표준화 — PR 제출 전 빌드 검증(npm run build) + i18n 중복 방지 의무화 | P2 | — | Jaison | ✅ | [TASK-B-015](tasks/TASK-B-015_260622_TeamB_DoD표준화_Jaison.md) | Issue #71 Edward 지시 · TEAM_B_DOD_STANDARD.md 신규 작성 |
 | TASK-B-016 | 260622 | CI pr-checks.yml .env.local 생성 버그 수정 — JWT 파싱 eval 방식 교체 | High | 없음 | Jaison | ✅ | [TASK-B-016](tasks/TASK-B-016_260622_CI_env_fix_Jaison.md) | IMP-131 ✅ · Issue #72 · PR#73 머지 ✅ · Aiden ✅ 260622 |
 | TASK-B-017 | 260622 | CI service_role GRANT 누락 — migration fix (zen_rate_cards·zen_orders·zen_tracking_configs·zen_tracking_raw_logs) | High | TASK-B-016 ✅ | Jaison | ✅ | [TASK-B-017](tasks/TASK-B-017_260622_CI_service_role_grant_fix_Jaison.md) | IMP-132 ✅ · Issue #74 · PR#75 머지 ✅ · CI Run #3 387/387 · Aiden ✅ 260622 |
-| TASK-B-018 | 260623 | [P7-SPR-08] Agency E2E 자동화 — e2e-23-agency-flow.spec.ts 신규 작성 (8개 시나리오) | P2 | SPR-07 ✅ | Baker | ⬜ | [TASK-B-018](tasks/TASK-B-018_260623_P7SPR08_AgencyE2E_종합회귀_Jaison.md) | IMP-133 · Issue #77 |
+| TASK-B-018 | 260623 | [P7-SPR-08] Agency E2E 자동화 — e2e-23-agency-flow.spec.ts 신규 작성 (8개 시나리오) | P2 | SPR-07 ✅ | Baker | ❌ | [TASK-B-018](tasks/TASK-B-018_260623_P7SPR08_AgencyE2E_종합회귀_Jaison.md) | IMP-133 · Issue #77 · PR#79 ❌ 반려 (4건) |
 | TASK-B-019 | 260623 | [P7-SPR-08] Phase 7 종합 회귀 테스트 — E2E-21/22/23 통합 실행 및 보고 | P2 | TASK-B-018 ✅ | Jaison | ⬜ | [TASK-B-019](tasks/TASK-B-019_260623_P7SPR08_Phase7종합회귀_Jaison.md) | IMP-134 · Issue #78 |
 ---
 
@@ -271,7 +271,7 @@
 | **JSJung** (팀 리더) | ✅ TASK-142 완료 | PR#7 → develop 머지 (260616) |
 | **Jaison** (AI Agent 총괄) | ✅ TASK-B-016 · ✅ TASK-B-017 | PR#73 머지 ✅ · PR#75 머지 ✅ · Aiden ✅ 260622/260623 · 다음 Task 대기 |
 | **Dave** (AI Agent) | ✅ TASK-B-012 · ✅ TASK-B-014 | PR#66 머지 ✅ (IMP-128) · PR#69 머지 ✅ (IMP-130) · Aiden ✅ 260623 |
-| **Baker** (AI Agent) | ✅ TASK-B-013 → ⬜ TASK-B-018 | PR#67 머지 ✅ (IMP-129) · TASK-B-018 Agency E2E 코드 담당 (Issue #77) |
+| **Baker** (AI Agent) | ❌ TASK-B-018 재작업 중 | PR#79 ❌ 반려 (4건: R-17·DoD 미달 2·waitForTimeout) · 수정 후 재제출 대기 |
 | **Gale** (AI Agent) | 대기 | 추후 재배정 예정 |
 
 ---
