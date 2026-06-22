@@ -246,7 +246,7 @@
 | TASK-B-014 | 260621 | [P7-SPR-07] AgencySettlementQuerySchema order_no_search 필드 추가 (Zod 검증 정합성 보완) | P4 | TASK-B-012 🔔 | Dave | ✅ | [TASK-B-014](tasks/TASK-B-014_260621_AgencySettlementQuerySchema_order_no_search_Dave.md) | IMP-130 · PR#69 머지 ✅ · Aiden ✅ 260622 |
 | TASK-B-015 | 260622 | Team B DoD 표준화 — PR 제출 전 빌드 검증(npm run build) + i18n 중복 방지 의무화 | P2 | — | Jaison | ✅ | [TASK-B-015](tasks/TASK-B-015_260622_TeamB_DoD표준화_Jaison.md) | Issue #71 Edward 지시 · TEAM_B_DOD_STANDARD.md 신규 작성 |
 | TASK-B-016 | 260622 | CI pr-checks.yml .env.local 생성 버그 수정 — JWT 파싱 eval 방식 교체 | High | 없음 | Jaison | 🔔 | [TASK-B-016](tasks/TASK-B-016_260622_CI_env_fix_Jaison.md) | IMP-131 · Issue #72 · PR#73 머지 ✅ · DEF-071/072 보고 |
-| TASK-B-017 | 260622 | CI service_role GRANT 누락 — migration fix (zen_rate_cards·zen_orders·zen_tracking_configs·zen_tracking_raw_logs) | High | TASK-B-016 🔔 | Jaison | 🔔 | [TASK-B-017](tasks/TASK-B-017_260622_CI_service_role_grant_fix_Jaison.md) | IMP-132 · Issue #74 · PR#75 · DEF-071/072 처리 |
+| TASK-B-017 | 260622 | CI service_role GRANT 누락 — migration fix (zen_rate_cards·zen_orders·zen_tracking_configs·zen_tracking_raw_logs) | High | TASK-B-016 🔔 | Jaison | 🔔 | [TASK-B-017](tasks/TASK-B-017_260622_CI_service_role_grant_fix_Jaison.md) | IMP-132 · Issue #74 · PR#75 · DEF-071/072 처리 · CI Run #3 ✅ 387/387 |
 ---
 
 ## Agent 현황
@@ -267,7 +267,7 @@
 | Agent | 상태 | 비고 |
 |:------|:----:|:----|
 | **JSJung** (팀 리더) | ✅ TASK-142 완료 | PR#7 → develop 머지 (260616) |
-| **Jaison** (AI Agent 총괄) | 🔔 TASK-B-016 · 🔔 TASK-B-017 | PR#73 머지 ✅ · PR#75 rebase 후 CI 대기 (260622) |
+| **Jaison** (AI Agent 총괄) | 🔔 TASK-B-016 · 🔔 TASK-B-017 | PR#73 머지 ✅ · PR#75 CI Run #3 ✅ 387/387 PASS · Aiden 검토 대기 (260622) |
 | **Dave** (AI Agent) | 🔔 TASK-B-012 / ✅ TASK-B-014 | PR#66 rebase ✅ (IMP-128) · PR#69 머지 ✅ (IMP-130) |
 | **Baker** (AI Agent) | 🔔 TASK-B-013 | PR#67 제출 (IMP-129, Closes #50) · 🔔 260621 |
 | **Gale** (AI Agent) | 대기 | 추후 재배정 예정 |
