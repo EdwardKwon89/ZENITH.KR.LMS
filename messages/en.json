@@ -740,9 +740,6 @@
     "margin_rate_col": "Margin Rate",
     "total_row": "Total",
     "csv_export": "Export CSV",
-    "no_data": "No results found.",
-    "settlement_reconciliation_title": "Unpriced Orders Alert",
-    "settlement_reconciliation_desc": "These orders were excluded from settlement due to missing rates.",
-    "settlement_reconciliation_count": "{count} order(s)"
+    "no_data": "No results found."
   }
 }
