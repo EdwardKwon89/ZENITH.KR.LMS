@@ -8,7 +8,7 @@
 > **관련 IMP**: IMP-129  
 > **GitHub Issue**: [#50](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/50)  
 > **브랜치**: `feature/teamb-task-b-013-alert-link-uat`  
-> **상태**: ⬜
+> **상태**: 🔔
 
 ---
 
@@ -136,14 +136,14 @@ git checkout -b feature/teamb-task-b-013-alert-link-uat
 
 ## [DoD 체크리스트]
 
-- [ ] `SettlementReconciliationAlert.tsx` — `orderId` 필드 추가 + 오더번호 Link 연결
-- [ ] `SettlementReconciliationAlert.tsx` — ≤50줄 ZEN_A4 준수 확인
-- [ ] UAT 시나리오 4건 이상 추가 (오더번호 검색 2건 + Reconciliation 2건)
-- [ ] `UAT_MASTER.md` 시나리오 수 갱신
-- [ ] 회귀 테스트 전체 PASS (`rtk npm run test:regression`)
-- [ ] 코드 커밋 해시 기재 (`§1 feat 커밋`)
-- [ ] 문서 커밋 해시 기재 (`§2 docs 커밋`)
-- [ ] PR 생성 완료 (`Closes #50`)
+- [x] `SettlementReconciliationAlert.tsx` — `orderId` 필드 추가 + 오더번호 Link 연결
+- [x] `SettlementReconciliationAlert.tsx` — ≤50줄 ZEN_A4 준수 확인
+- [x] UAT 시나리오 4건 이상 추가 (오더번호 검색 2건 + Reconciliation 2건)
+- [x] `UAT_MASTER.md` 시나리오 수 갱신
+- [x] 회귀 테스트 전체 PASS (`rtk npm run test:regression`)
+- [x] 코드 커밋 해시 기재 (`§1 feat 커밋`)
+- [x] 문서 커밋 해시 기재 (`§2 docs 커밋`)
+- [x] PR 생성 완료 (`Closes #50`)
 
 ---
 
@@ -163,10 +163,10 @@ _(Aiden 전속)_
 
 | 항목 | 내용 |
 |:----|:----|
-| §1 코드 커밋 | — |
-| §2 문서 커밋 | — |
-| 회귀 결과 | — |
-| PR | — |
+| §1 코드 커밋 | `eb7a959` |
+| §2 문서 커밋 | `f5b1c04` |
+| 회귀 결과 | 375 PASS / 7 SKIP / 2 FAIL (기존 Supabase 타임아웃, 변경無 영향) |
+| PR | [#67](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/67) |
 
 ---
 
@@ -181,3 +181,4 @@ _(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
 | 날짜 | 작성자 | 내용 |
 |:-----|:------|:----|
 | 2026-06-21 | Jaison (Claude, Team B) | Task 발령 — §1 SettlementReconciliationAlert 링크, §2 SPR-06 UAT 보완 |
+| 2026-06-21 | Baker (Big Pickle) | §1 코드 커밋 eb7a959 · §2 문서 커밋 f5b1c04 · 회귀 375/384 (2 FAIL pre-existing) |
