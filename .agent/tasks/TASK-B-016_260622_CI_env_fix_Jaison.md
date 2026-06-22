@@ -62,15 +62,19 @@ printf "SUPABASE_SERVICE_ROLE_KEY=%s\n" "$SERVICE_KEY" >> .env.local
 
 | 항목 | 내용 |
 |:----|:----|
-| 코드 커밋 | `7259d32` |
+| 코드 커밋 1차 | `7259d32` — `supabase status --output env` + printf 방식 |
+| 코드 커밋 2차 | `983c392` — Aiden 피드백 반영: jq 방식으로 교체 (단일따옴표 포함 이슈 해결) |
 | 수정 파일 | `.github/workflows/pr-checks.yml` |
 | IMP | IMP-131 |
+| DEF 발견 | DEF-071 (zen_rate_cards service_role GRANT 누락) — R-18 보고 완료 |
 
 ---
 
 ## [발견 이슈]
 
-없음
+| DEF# | 제목 | 긴급도 | 상세 보고서 |
+|:----:|:-----|:------:|:-----------|
+| DEF-071 | zen_rate_cards service_role GRANT 누락 | High | `.agent/defects/DEF-071_zen_rate_cards_service_role_grant_누락.md` |
 
 ---
 
