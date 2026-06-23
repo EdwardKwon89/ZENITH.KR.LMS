@@ -247,8 +247,8 @@
 | TASK-B-015 | 260622 | Team B DoD 표준화 — PR 제출 전 빌드 검증(npm run build) + i18n 중복 방지 의무화 | P2 | — | Jaison | ✅ | [TASK-B-015](tasks/TASK-B-015_260622_TeamB_DoD표준화_Jaison.md) | Issue #71 Edward 지시 · TEAM_B_DOD_STANDARD.md 신규 작성 |
 | TASK-B-016 | 260622 | CI pr-checks.yml .env.local 생성 버그 수정 — JWT 파싱 eval 방식 교체 | High | 없음 | Jaison | ✅ | [TASK-B-016](tasks/TASK-B-016_260622_CI_env_fix_Jaison.md) | IMP-131 ✅ · Issue #72 · PR#73 머지 ✅ · Aiden ✅ 260622 |
 | TASK-B-017 | 260622 | CI service_role GRANT 누락 — migration fix (zen_rate_cards·zen_orders·zen_tracking_configs·zen_tracking_raw_logs) | High | TASK-B-016 ✅ | Jaison | ✅ | [TASK-B-017](tasks/TASK-B-017_260622_CI_service_role_grant_fix_Jaison.md) | IMP-132 ✅ · Issue #74 · PR#75 머지 ✅ · CI Run #3 387/387 · Aiden ✅ 260622 |
-| TASK-B-018 | 260623 | [P7-SPR-08] Agency E2E 자동화 + Phase 7 종합 회귀 테스트 — e2e-23-agency-flow.spec.ts 신규 + 통합 회귀 | P2 | SPR-07 ✅ | Jaison (총괄) · Baker (§1 E2E) · Dave (§2 회귀) | 🔔 | [TASK-B-018](tasks/TASK-B-018_260623_P7SPR08_AgencyE2E_종합회귀_Jaison.md) | IMP-133 · Issue #77 · Baker §1 2차 수정완료 · Dave §2 분석완료 · PR#79 |
-| TASK-B-019 | 260623 | [P7-SPR-08] Phase 7 종합 회귀 테스트 — E2E-21/22/23 통합 실행 및 보고 | P2 | TASK-B-018 ✅ | Jaison | ⬜ | [TASK-B-019](tasks/TASK-B-019_260623_P7SPR08_Phase7종합회귀_Jaison.md) | IMP-134 · Issue #78 |
+| TASK-B-018 | 260623 | [P7-SPR-08] Agency E2E 자동화 + Phase 7 종합 회귀 테스트 — e2e-23-agency-flow.spec.ts 신규 + 통합 회귀 | P2 | SPR-07 ✅ | Jaison (총괄) · Baker (§1 E2E) · Dave (§2 회귀) | ✅ | [TASK-B-018](tasks/TASK-B-018_260623_P7SPR08_AgencyE2E_종합회귀_Jaison.md) | IMP-133 · Issue #77 ✅ · PR#79 → develop 머지 ✅ (260623 Aiden) |
+| TASK-B-019 | 260623 | [P7-SPR-08] Phase 7 종합 회귀 테스트 — E2E-21/22/23 통합 실행 및 보고 | P2 | TASK-B-018 ✅ | Jaison | ⬜ | [TASK-B-019](tasks/TASK-B-019_260623_P7SPR08_Phase7종합회귀_Jaison.md) | IMP-134 · Issue #78 · **전제조건 충족** — 즉시 착수 가능 |
 ---
 
 ## Agent 현황
@@ -269,9 +269,9 @@
 | Agent | 상태 | 비고 |
 |:------|:----:|:----|
 | **JSJung** (팀 리더) | ✅ TASK-142 완료 | PR#7 → develop 머지 (260616) |
-| **Jaison** (AI Agent 총괄) | 🔔 TASK-B-018 총괄 (Aiden F-①② 수정 중) | Baker §1 2차 수정완료 · Dave §2 분석완료 · PR#79 Aiden 신규 미결 2건 처리 중 |
-| **Dave** (AI Agent) | ✅ TASK-B-014 · 🔔 TASK-B-018 §2 분석완료 | §2 회귀 378/387 · 9건 로컬 환경 문제 분석완료 · 코드 회귀 0건 |
-| **Baker** (AI Agent) | 🔔 TASK-B-018 §1 2차 수정완료 | db18854 — 반려 4건 전량 수정 · ZEN_A4 준수 · Aiden F-①② 문서 처리 대기 |
+| **Jaison** (AI Agent 총괄) | ✅ TASK-B-018 완료 · ⬜ TASK-B-019 착수 대기 | PR#79 → develop 머지 ✅ · TASK-B-019 전제조건 충족 (즉시 착수 가능) |
+| **Dave** (AI Agent) | ✅ TASK-B-018 §2 완료 | 회귀 분석 완료 · 코드 회귀 0건 확인 · 다음 Task 배분 대기 |
+| **Baker** (AI Agent) | ✅ TASK-B-018 §1 완료 | PR#79 머지 ✅ · 다음 Task 배분 대기 |
 | **Gale** (AI Agent) | 대기 | 추후 재배정 예정 |
 
 ---
@@ -279,6 +279,7 @@
 ## 개정 이력
 
 | 2026-06-23 | Aiden (ZEN_CEO) | **TASK-B-018 ❌ 2차 반려** — PR#79: ① Closes #51→#77 ② 화주신규등록 누락 ③ 요율등록 미구현 ④ waitForTimeout. Baker §1 재수정 → PR#79 재제출. |
+| 2026-06-23 | Aiden (ZEN_CEO) | **TASK-B-018 ✅ 승인** — PR#79 → develop 머지 완료. DoD 전항목 ✅ · Issue #77 종료 · TASK-B-019 전제조건 충족 — 즉시 착수 가능. |
 | 2026-06-23 | Jaison (Team B) | **TASK-B-018 ❌ 1차 반려** — Baker: ZEN_A4 위반(beforeAll 120줄·TC-AG-07~08 62줄). Dave: 회귀 9건 실패 미설명. 수정 지시 등록. |
 | 2026-06-23 | Jaison (Team B) | **TASK-B-018 🔄 착수 (JSJung 지시)** — Baker(§1 e2e-23-agency-flow.spec.ts 작성) · Dave(§2 Phase 7 종합 회귀 실행) 배정 완료. 브랜치 `feature/teamb-task-b-018-agency-e2e-regression` 생성. |
 | 2026-06-20 | Baker (Big Pickle) | **TASK-B-009 🔄 1차 수정중** — Jaison 검토: `agency_settlement_widget_title` i18n 키 미사용 → 위젯 제목 `<h2>` 추가 완료 (49줄). 회귀 369/378 PASS (2건 pre-existing Supabase). |
