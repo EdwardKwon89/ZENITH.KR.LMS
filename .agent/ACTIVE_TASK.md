@@ -250,7 +250,7 @@
 | TASK-B-017 | 260622 | CI service_role GRANT 누락 — migration fix (zen_rate_cards·zen_orders·zen_tracking_configs·zen_tracking_raw_logs) | High | TASK-B-016 ✅ | Jaison | ✅ | [TASK-B-017](tasks/TASK-B-017_260622_CI_service_role_grant_fix_Jaison.md) | IMP-132 ✅ · Issue #74 · PR#75 머지 ✅ · CI Run #3 387/387 · Aiden ✅ 260622 |
 | TASK-B-018 | 260623 | [P7-SPR-08] Agency E2E 자동화 + Phase 7 종합 회귀 테스트 — e2e-23-agency-flow.spec.ts 신규 + 통합 회귀 | P2 | SPR-07 ✅ | Jaison (총괄) · Baker (§1 E2E) · Dave (§2 회귀) | ✅ | [TASK-B-018](tasks/TASK-B-018_260623_P7SPR08_AgencyE2E_종합회귀_Jaison.md) | IMP-133 · Issue #77 ✅ · PR#79 → develop 머지 ✅ (260623 Aiden) |
 | TASK-B-019 | 260623 | [P7-SPR-08] Phase 7 종합 회귀 테스트 — E2E-21/22/23 통합 실행 및 보고 | P2 | TASK-B-018 ✅ | Jaison | 🔄 | [TASK-B-019](tasks/TASK-B-019_260623_P7SPR08_Phase7종합회귀_Jaison.md) | IMP-134 · Issue #78 · DEF-073·074 블로커 발생 — TASK-B-020·TASK-162 수정 대기 |
-| TASK-B-020 | 260623 | DEF-073 Agency shippers/new · rate-overrides/new Server Action 오류 수정 | P2 | 없음 | Baker | 🔔 | [TASK-B-020](tasks/TASK-B-020_260623_DEF073_AgencyServerAction수정_Baker.md) | Issue #80 · DEF-073 · `getTranslations→useTranslations` 교체 · npm run build ✅ |
+| TASK-B-020 | 260623 | DEF-073 Agency shippers/new · rate-overrides/new Server Action 오류 수정 | P2 | 없음 | Baker | 🔔 | [TASK-B-020](tasks/TASK-B-020_260623_DEF073_AgencyServerAction수정_Baker.md) | Issue #80 · DEF-073 · `getTranslations→useTranslations` 교체 · npm run build ✅ · PR#83 |
 ---
 
 ## Agent 현황
@@ -280,7 +280,7 @@
 
 ## 개정 이력
 
-| 2026-06-23 | Baker (Big Pickle) | **TASK-B-020 🔔 수정완료** — 4개 파일 수정: `getTranslations()`→`useTranslations()` Client 훅 대체. npm run build ✅. PR#80 제출. |
+| 2026-06-23 | Baker (Big Pickle) | **TASK-B-020 🔔 수정완료** — 4개 파일 수정: `getTranslations()`→`useTranslations()` Client 훅 대체. npm run build ✅. PR#83 제출. |
 | 2026-06-23 | Aiden (ZEN_CEO) | **TASK-B-020 · TASK-162 발령** — DEF-073(Baker, Issue #80): Agency Server Action 오류. DEF-074(D_Kai, Issue #81): 주소록 API 500. Edward 승인 (R-18 High DEF). TASK-B-019 🔄 블로커 등록. |
 | 2026-06-23 | Aiden (ZEN_CEO) | **TASK-B-018 ❌ 2차 반려** — PR#79: ① Closes #51→#77 ② 화주신규등록 누락 ③ 요율등록 미구현 ④ waitForTimeout. Baker §1 재수정 → PR#79 재제출. |
 | 2026-06-23 | Aiden (ZEN_CEO) | **TASK-B-018 ✅ 승인** — PR#79 → develop 머지 완료. DoD 전항목 ✅ · Issue #77 종료 · TASK-B-019 전제조건 충족 — 즉시 착수 가능. |
