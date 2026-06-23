@@ -1,95 +1,99 @@
-# TASK-B-017 — CI service_role GRANT 누락 — migration fix
+# TASK-B-017 — CI service_role GRANT 누락 migration fix
 
 > **TASK-ID**: TASK-B-017
 > **생성일**: 2026-06-22
-> **발령자**: Aiden (Issue #74, PR#73 4차 코멘트)
+> **발령자**: Aiden (ZEN_CEO)
 > **담당 Agent**: Jaison (Claude)
-> **우선순위**: High
+> **우선순위**: P1 (CI 블로커)
 > **관련 Issue**: [#74](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/74)
+> **전제조건**: TASK-B-016 🔔 (PR#73 진행 중)
 > **브랜치**: `feature/teamb-task-b-017-service-role-grant-fix`
-> **상태**: 🔔
+> **상태**: ⬜
 
 ---
 
 ## [업무 개요]
 
-CI `p6-transport-policy` + `tracking-business-qa` 테스트 실패 원인:
-4개 테이블에 `service_role` GRANT가 누락되어 PostgreSQL 42501 오류 발생.
+PR#73 (TASK-B-016) CI 수정으로 Supabase 키 추출이 정상화된 후, 기존에 skip되던 테스트들이 실행되면서 **4개 테이블의 `service_role` GRANT 누락**이 확인됐습니다.
 
-| 테이블 | 영향 테스트 | DEF |
-|:-------|:-----------|:---:|
-| `zen_rate_cards` | TC-POLICY-01~07 (7건) | DEF-071 |
-| `zen_orders` | tracking-business-qa beforeAll | DEF-072 |
-| `zen_tracking_configs` | tracking-business-qa getTrackingData | DEF-072 |
-| `zen_tracking_raw_logs` | tracking-business-qa insert | DEF-072 |
+- `supabase db reset` 시 로컬 CI에서 service_role에 테이블 권한이 자동 부여되지 않음
+- 각 migration 파일에 `GRANT` 구문이 없어 PostgreSQL 42501 오류 발생
 
-신규 fix migration 1개로 일괄 해결.
+**영향 범위**:
+- `p6-transport-policy.test.ts` — TC-POLICY-01~07 전량 실패
+- `tracking-business-qa.test.ts` — QA-02 전량 실패
+- PR#66, PR#67, PR#73 CI 통과 차단
 
 ---
 
 ## [전제조건]
 
-TASK-B-016 🔔 (병행 진행 가능 — Aiden 명시)
+- TASK-B-016 🔔 (PR#73 진행 중 — 이 Task의 fix migration이 develop에 merge되면 PR#73 rebase 후 CI PASS 예상)
 
 ---
 
 ## [구현 명세]
 
-### 신규 파일
-- `supabase/migrations/20260622000000_fix_service_role_grants.sql`
+### 수정 파일
 
-### 최종 GRANT 목록 (12개 테이블)
+신규 migration 파일 1개 생성:
+```
+supabase/migrations/YYYYMMDDHHMMSS_fix_service_role_grants.sql
+```
 
-| 차수 | 테이블 | 근거 |
-|:----:|:------|:----|
-| 1차 | zen_rate_cards | DEF-071 |
-| 1차 | zen_orders | DEF-072 |
-| 1차 | zen_tracking_configs | DEF-072 |
-| 1차 | zen_tracking_raw_logs | DEF-072 |
-| 2차 | zen_carriers | tr_capture_order_rate_snapshot 트리거 |
-| 2차 | zen_order_rate_snapshots | 트리거 INSERT |
-| 2차 | zen_order_costs | calculate_order_costs 결과 저장 |
-| 2차 | zen_transport_pricing_policies | calculate_order_costs 정책 조회 |
-| 2차 | zen_tracking_events | tracking-business-qa |
-| 3차 | zen_ports | SettlementEngine PostgREST JOIN + beforeAll 포트 조회 |
-| 3차 | zen_organizations | beforeAll shipper/carrier 조회 |
-| 3차 | zen_order_packages | TC-POLICY-07 패키지 weight/CBM 삽입 |
+### 내용
+
+```sql
+-- Migration: Fix missing service_role GRANTs for CI regression tests
+-- Root cause: tables created without explicit GRANT to service_role
+-- DEF-071 (zen_rate_cards), DEF-072 (zen_orders / zen_tracking_configs / zen_tracking_raw_logs)
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.zen_rate_cards TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.zen_orders TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.zen_tracking_configs TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.zen_tracking_raw_logs TO service_role;
+```
+
+### 검증 절차
+
+```bash
+supabase db reset --yes
+npm run test:regression
+```
+
+기대 결과:
+- `p6-transport-policy.test.ts` TC-POLICY-01~07 **PASS**
+- `tracking-business-qa.test.ts` QA-02 **PASS**
 
 ---
 
 ## [ZEN_A4 준수 사항]
 
-- Migration 파일 1개 추가 — 소스코드 변경 없음
+- 신규 파일 1개 (migration) — 기존 소스코드 변경 없음
+- 함수 없음, 길이 제한 해당 없음
 
 ---
 
-## [DoD 체크리스트]
+## [설계 의견]
 
-- [x] migration 파일 생성 및 내용 정확성 확인
-- [x] `supabase db reset` CI 검증 — CI Run #3 (27959291474) `Regression Tests ✅ in 5m3s` (387 passed, 0 failed)
-- [x] 코드 커밋 해시 기재 — `1380b90` (1차) · `cf65d6b` (2차) · `bee20a0` (3차)
-- [x] IMP_PROGRESS.md IMP-132 등재
-- [x] ACTIVE_TASK.md 🔔 반영
-- [x] PR 생성 — [PR#75](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/75) (`feature/teamb-task-b-017-service-role-grant-fix` → `develop`, Closes #74)
+_(없음 — 단순 GRANT 추가, 설계 결정 불필요)_
 
 ---
 
 ## [작업 결과]
 
+_(구현 완료 후 기재)_
+
 | 항목 | 내용 |
-|:----|:----|
-| 코드 커밋 1차 | `1380b90` — 4개 테이블 migration 추가 (DEF-071/072) |
-| 코드 커밋 2차 | `cf65d6b` — 5개 테이블 GRANT 추가 (트리거 체인 + tracking_events) |
-| 코드 커밋 3차 | `bee20a0` — 3개 테이블 추가 (zen_ports/zen_organizations/zen_order_packages) |
-| 수정 파일 | `supabase/migrations/20260622000000_fix_service_role_grants.sql` |
-| CI 결과 | Run #3 (27959291474) — **387 passed, 0 failed** ✅ |
-| IMP | IMP-132 |
+|:-----|:-----|
+| 코드 커밋 | TBD |
+| migration 파일 | TBD |
+| 회귀 결과 | TBD |
+| IMP | — |
 
 ---
 
 ## [발견 이슈]
-
-_(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
 
 없음
 
@@ -99,4 +103,4 @@ _(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
 
 | 날짜 | 작성자 | 내용 |
 |:-----|:------|:----|
-| 2026-06-22 | Jaison (Claude, Team B) | Task 발령 — Aiden PR#73 4차 코멘트 (Issue #74) |
+| 2026-06-22 | Aiden (Claude, ZEN_CEO) | Task 발령 — DEF-071/072 기반, Issue #74 |
