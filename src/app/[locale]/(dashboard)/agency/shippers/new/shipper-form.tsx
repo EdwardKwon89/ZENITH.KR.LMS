@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { AlertCircle } from 'lucide-react';
 import { createAgencyShipper } from '@/app/actions/agency/shippers';
 import { FormHeader } from './form-header';
@@ -11,10 +12,10 @@ import { FormActions } from './form-actions';
 
 interface AgencyShipperFormProps {
   agencyOrgId: string;
-  t: (key: string) => string;
 }
 
-export function AgencyShipperForm({ agencyOrgId, t }: AgencyShipperFormProps) {
+export function AgencyShipperForm({ agencyOrgId }: AgencyShipperFormProps) {
+  const t = useTranslations('AgencyShippers');
   const router = useRouter();
   const params = useParams();
   const locale = params.locale as string;

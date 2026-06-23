@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { AlertCircle } from 'lucide-react';
 import { upsertAgencyRateOverride } from '@/app/actions/agency/rate-overrides';
 import type { UpsBaseRate } from '@/types/ups';
@@ -19,10 +20,10 @@ function _ErrorAlert({ message }: { message: string }) {
 interface RateOverrideFormProps {
   agencyOrgId: string;
   baseRates: UpsBaseRate[];
-  t: (key: string) => string;
 }
 
-export function RateOverrideForm({ agencyOrgId, baseRates, t }: RateOverrideFormProps) {
+export function RateOverrideForm({ agencyOrgId, baseRates }: RateOverrideFormProps) {
+  const t = useTranslations();
   const router = useRouter();
   const params = useParams();
   const locale = params.locale as string;
