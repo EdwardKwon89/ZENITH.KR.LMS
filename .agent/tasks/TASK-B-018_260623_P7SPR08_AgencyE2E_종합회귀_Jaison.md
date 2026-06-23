@@ -150,7 +150,7 @@ _(없음 — 기존 UAT 시나리오 기반 자동화, 설계 결정 불필요)_
 
 | 항목 | 내용 |
 |:-----|:-----|
-| 코드 커밋 | `df58b63` → `커밋예정` |
+| 코드 커밋 | `df58b63` → `db18854` |
 | E2E 파일 | `tests/e2e/e2e-23-agency-flow.spec.ts` (230줄, 4 test blocks × 10+ 시나리오) |
 | PR | [#79](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/79) |
 | §1 E2E (Baker) 1차 | ✅ e2e-23-agency-flow.spec.ts 280줄, 8개 시나리오 — ❌ Aiden 반려 |
