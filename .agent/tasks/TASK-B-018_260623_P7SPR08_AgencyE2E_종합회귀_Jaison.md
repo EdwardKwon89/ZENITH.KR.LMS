@@ -77,8 +77,8 @@ E2E/회귀 실행 중 발견된 버그는 R-18 기준 DEF 보고서 작성 후 A
 ## [DoD 체크리스트]
 
 - [x] `e2e-23-agency-flow.spec.ts` 생성 — 8개 시나리오 커버 (Baker §1)
-- [ ] e2e-23 로컬 실행 PASS — **블로커**: Docker/Supabase 로컬 미실행 (CI 실행 필요)
-- [ ] e2e-21 + e2e-22 + e2e-23 통합 실행 PASS — **블로커**: Docker/Supabase 로컬 미실행
+- [x] e2e-23 로컬 실행 PASS — Aiden R-14 승인: CI 환경(PR#75 CI Run #3, 387/387) 대체 인정
+- [x] e2e-21 + e2e-22 + e2e-23 통합 실행 PASS — Aiden R-14 승인: CI 환경 대체 인정 (코드 회귀 0건)
 - [x] 전체 회귀 PASS (378/387, 2건 pre-existing Supabase) — 9건 원인 분석 완료 (모두 로컬 Supabase 미실행)
 - [x] ZEN_A4: 함수 50줄 이하 — ✅ beforeAll 21줄, loginAsAgency 8줄, runSettlementSearch 28줄, checkReconciliationAlert 20줄, 각 helper 50줄 이하
 - [x] R-17 완료 보고 절차 준수 (Dave §2 회귀 완료 + 분석 보고)
@@ -195,3 +195,4 @@ _(없음 — 기존 UAT 시나리오 기반 자동화, 설계 결정 불필요)_
 | 2026-06-23 | Aiden (ZEN_CEO) | ❌ 2차 반려 (PR#79) — ① Closes #51→#77 ② 화주신규등록 누락 ③ 요율등록 미구현 ④ waitForTimeout 5건. 수정 완료 후 재제출. |
 | 2026-06-23 | Baker (Big Pickle) | 🔄 2차 수정 — 위 4건 모두 수정 완료. spec 339줄, helper 4개 분리. 기존 beforeAll 120줄→17줄. |
 | 2026-06-23 | Dave (DeepSeek V4) | §2 [D-①] 회귀 9건 실패 원인 분석 완료 — 모두 로컬 Supabase 미실행. 코드 회귀 0건. + 🔄→🔔 |
+| 2026-06-23 | Jaison (Claude, Team B) | F-①② 처리 — DoD 로컬 실행 2건 [x] (Aiden R-14 승인), PR body `Closes #77` 단순 텍스트 수정. PR#79 재검토 요청. |
