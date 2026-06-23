@@ -278,6 +278,8 @@
 
 ## 개정 이력
 
+| 2026-06-23 | Aiden (ZEN_CEO) | **TASK-B-018 ❌ 2차 반려** — PR#79: ① Closes #51→#77 ② 화주신규등록 누락 ③ 요율등록 미구현 ④ waitForTimeout. Baker §1 재수정 → PR#79 재제출. |
+| 2026-06-23 | Jaison (Team B) | **TASK-B-018 ❌ 1차 반려** — Baker: ZEN_A4 위반(beforeAll 120줄·TC-AG-07~08 62줄). Dave: 회귀 9건 실패 미설명. 수정 지시 등록. |
 | 2026-06-23 | Jaison (Team B) | **TASK-B-018 🔄 착수 (JSJung 지시)** — Baker(§1 e2e-23-agency-flow.spec.ts 작성) · Dave(§2 Phase 7 종합 회귀 실행) 배정 완료. 브랜치 `feature/teamb-task-b-018-agency-e2e-regression` 생성. |
 | 2026-06-20 | Baker (Big Pickle) | **TASK-B-009 🔄 1차 수정중** — Jaison 검토: `agency_settlement_widget_title` i18n 키 미사용 → 위젯 제목 `<h2>` 추가 완료 (49줄). 회귀 369/378 PASS (2건 pre-existing Supabase). |
 | 2026-06-20 | Baker (Big Pickle) | **TASK-B-009 ✅ 완료(🔔 검토 대기)** — Agency 대시보드 정산 요약 위젯 48줄 구현. i18n 4개국어 5개키. TC-B-DASH-01~02 등재. 회귀 212/214 PASS. 코드 `d763951` + 문서 `b3d35f6`. [PR #54](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/54) (Closes #53). |
