@@ -57,10 +57,10 @@ npm run test:regression
 
 ## [DoD 체크리스트]
 
-- [ ] e2e-21 + e2e-22 + e2e-23 통합 실행 PASS — ❌ 로컬 불가 (CI 필요, R-14)
-- [x] 전체 회귀 PASS (378/387, pre-existing 2건 제외 = 코드 회귀 0건)
-- [x] 결과 로그 저장 (`docs/08_Self_Audit/Regression_Results/REGRESSION_B019_260623.md`)
-- [ ] R-17 완료 보고 절차 준수 — Dave §1 완료, Baker §2 대기
+- [ ] e2e-21 + e2e-22 + e2e-23 통합 실행 PASS — DEF-073·074 수정 반영 후 Dave §1 재실행 대기
+- [ ] 전체 회귀 PASS (pre-existing 2건 제외) — §1 재실행 포함
+- [ ] 결과 로그 저장 (`docs/08_Self_Audit/Regression_Results/REGRESSION_B019_260623.md`) 갱신
+- [ ] R-17 완료 보고 절차 준수 — Baker §2 담당
 - [ ] PR `Closes #78` — Baker 담당
 
 ---
@@ -73,26 +73,27 @@ _(없음)_
 
 ## [작업 결과]
 
-### §1. Dave 실행 결과 (2026-06-23)
+### §1. Dave 1차 실행 결과 (2026-06-23 — DEF-073·074 수정 전)
 
 #### 전체 회귀 (단위 + 통합)
 - **378/387 PASS** (69 test files: 67 passed / 2 failed)
-- 실패 2건: `tracking-business-qa.test.ts` — `fetch failed` (Supabase 미실행)
+- 실패 2건: `tracking-business-qa.test.ts` — `fetch failed` (Supabase 미실행, pre-existing)
 - Skipped 7건: `p6-transport-policy.test.ts` — `beforeAll` timeout (Supabase 미실행)
 - **코드 회귀 0건** — CI Run #3 기준 387/387 PASS 확인됨
 
-#### Phase 7 E2E 통합 실행
-- e2e-21·e2e-22·e2e-23: 모두 ❌ (Docker/Supabase + Next.js dev server 미구동)
-- 로컬 실행 불가 — CI 환경 필요 (R-14 적용)
+#### Phase 7 E2E 통합 실행 (1차 — DEF-073·074 블로커로 FAIL)
+- e2e-21 ❌ (DEF-074: 주소록 API 500)
+- e2e-22 ✅ 일부 / e2e-23 ❌ (DEF-073: Agency Server Action 오류)
+- → DEF-073 TASK-B-020 ✅ + DEF-074 TASK-162 ✅ develop 반영 완료
+- → **Dave §1 재실행 필요** (DEF 수정 반영 확인)
 
-#### 결과 로그
-- `docs/08_Self_Audit/Regression_Results/REGRESSION_B019_260623.md`
+### §1 재실행 결과 (Dave 담당 — 작성 대기)
 
 | 항목 | 내용 |
 |:-----|:-----|
-| 코드 커밋 | gitnexus (DS) — 작업 없음 (분석만) |
-| 회귀 결과 | 378/387 PASS (코드 회귀 0건) |
-| E2E 통합 | ❌ CI 환경 필요 |
+| 코드 커밋 | TBD |
+| 회귀 결과 | TBD |
+| E2E 통합 | TBD |
 | IMP | IMP-134 |
 
 ---
@@ -116,3 +117,4 @@ _(담당 Task 범위 밖 이슈 — R-18 기준 DEF 등록 완료)_
 | 2026-06-23 | Jaison (Claude, Team B) | 🔄 착수 (JSJung 지시) — Dave(§1 실행·로그) · Baker(§2 문서·PR) 배정. 브랜치 `feature/teamb-task-b-019-phase7-regression` 생성. |
 | 2026-06-23 | Dave (DeepSeek V4) | §1 실행 완료: 전체 회귀 378/387 PASS (코드 회귀 0건). E2E 로컬 불가(CI 필요). 로그 저장 완료. 🔄→🔔 (Baker §2 대기) |
 | 2026-06-23 | Jaison (Claude, Team B) | E2E 로컬 실행 완료 (JSJung 지시): 4/7 PASS. DEF-073·074 발견 — R-18 보고서 등록. Aiden 보고 대기. |
+| 2026-06-23 | Jaison (Claude, Team B) | 🔄 재착수 (JSJung 지시) — DEF-073(TASK-B-020 ✅) · DEF-074(TASK-162 ✅) develop 반영 완료. develop rebase 완료. Dave(§1 재실행) · Baker(§2 문서·PR) 재배정. |
