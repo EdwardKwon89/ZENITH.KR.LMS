@@ -19,6 +19,7 @@ import { orderRegistrationSchema, OrderRegistrationInput } from '@/lib/validatio
 import { estimateFreightCost, TransportMode } from '@/utils/logistics/freight-calculator';
 import { getAvailableServiceRates, getUsdKrwRate, getBaseCurrency, AvailableServiceRates } from '@/app/actions/operations/service-rates';
 import { createOrderServices } from '@/app/actions/operations/order-services';
+import AddressBookSelector from '@/components/address-book/AddressBookSelector';
 
 interface OrderRegistrationFormProps {
   shippers: any[];
@@ -144,6 +145,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
     defaultValues: {
       order_type: 'B2B',
       transport_mode: 'AIR',
+      delivery_method: 'DIRECT',
       packages: [{ 
         packing_unit: 'BOX', 
         packing_count: 1, 
@@ -730,6 +732,17 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                   {infoTab === 'consignee' && (
                     <div className="space-y-3">
                       <div>
+                        <label className="text-[10px] font-bold text-slate-500 mb-1 block">Address Book</label>
+                        <AddressBookSelector
+                          onSelect={(entry) => {
+                            setValue('recipient_name', entry.recipient_name);
+                            setValue('recipient_address', entry.recipient_address);
+                            setValue('recipient_address_local', entry.recipient_address_local || '');
+                            setValue('recipient_phone', entry.recipient_phone || '');
+                          }}
+                        />
+                      </div>
+                      <div>
                         <label className="text-[10px] font-bold text-slate-500 mb-1 block">Recipient Name</label>
                         <ZenInput placeholder="Full Name" {...register('recipient_name')} error={!!errors.recipient_name} className="py-2 text-xs" />
                       </div>
@@ -756,6 +769,14 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                         />
                         {errors.recipient_address && <p className="text-[9px] text-rose-500 mt-1">{errors.recipient_address.message}</p>}
                       </div>
+                      <div>
+                        <label className="text-[10px] font-bold text-slate-500 mb-1 block">Local Address</label>
+                        <textarea 
+                          {...register('recipient_address_local')}
+                          className="w-full text-xs p-2 border border-slate-200 rounded-xl bg-white resize-none h-16 outline-none focus:ring-2 focus:ring-blue-100"
+                          placeholder="현지어 주소 (선택)"
+                        />
+                      </div>
                     </div>
                   )}
                 </ZenCard>
@@ -775,7 +796,89 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                   </div>
                 </ZenCard>
 
-                
+                {/* 🚚 Delivery Method & Pickup Details (IMP-118) */}
+                <ZenCard className="p-3 border-slate-200 mt-3">
+                  <h4 className="text-[10px] font-bold text-slate-500 mb-2 uppercase tracking-wider">
+                    {t('delivery_method_label')}
+                  </h4>
+                  <div className="grid grid-cols-2 gap-2 mb-3">
+                    <button
+                      type="button"
+                      onClick={() => setValue('delivery_method', 'DIRECT')}
+                      className={`px-3 py-2 rounded-xl text-xs font-bold transition-all border ${
+                        watch('delivery_method') === 'DIRECT' || !watch('delivery_method')
+                          ? 'bg-slate-800 text-white border-slate-800 shadow-md'
+                          : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'
+                      }`}
+                    >
+                      {t('delivery_method_direct')}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setValue('delivery_method', 'PICKUP')}
+                      className={`px-3 py-2 rounded-xl text-xs font-bold transition-all border ${
+                        watch('delivery_method') === 'PICKUP'
+                          ? 'bg-slate-800 text-white border-slate-800 shadow-md'
+                          : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'
+                      }`}
+                    >
+                      {t('delivery_method_pickup')}
+                    </button>
+                  </div>
+
+                  {watch('delivery_method') === 'PICKUP' && (
+                    <div className="space-y-3 pt-2 border-t border-slate-100">
+                      <div>
+                        <label className="text-[10px] font-bold text-slate-500 mb-1 block">
+                          {t('pickup_location')} <span className="text-rose-500">*</span>
+                        </label>
+                        <ZenInput
+                          placeholder="픽업 장소 입력"
+                          {...register('pickup_location')}
+                          error={!!errors.pickup_location}
+                          className="py-2 text-xs"
+                        />
+                        {errors.pickup_location && (
+                          <p className="text-[9px] text-rose-500 mt-1">
+                            {errors.pickup_location.message}
+                          </p>
+                        )}
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-bold text-slate-500 mb-1 block">
+                          {t('pickup_contact_name')} <span className="text-rose-500">*</span>
+                        </label>
+                        <ZenInput
+                          placeholder="담당자 이름 입력"
+                          {...register('pickup_contact_name')}
+                          error={!!errors.pickup_contact_name}
+                          className="py-2 text-xs"
+                        />
+                        {errors.pickup_contact_name && (
+                          <p className="text-[9px] text-rose-500 mt-1">
+                            {errors.pickup_contact_name.message}
+                          </p>
+                        )}
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-bold text-slate-500 mb-1 block">
+                          {t('pickup_contact_tel')} <span className="text-rose-500">*</span>
+                        </label>
+                        <ZenInput
+                          placeholder="연락처 입력 (010-XXXX-XXXX)"
+                          {...register('pickup_contact_tel')}
+                          error={!!errors.pickup_contact_tel}
+                          className="py-2 text-xs"
+                        />
+                        {errors.pickup_contact_tel && (
+                          <p className="text-[9px] text-rose-500 mt-1">
+                            {errors.pickup_contact_tel.message}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </ZenCard>
               </div>
 
               {/* Right Column: Packages & Items (Hierarchical) */}

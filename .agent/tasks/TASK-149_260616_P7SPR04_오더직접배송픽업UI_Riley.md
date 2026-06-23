@@ -10,7 +10,7 @@
 | **관련 IMP** | IMP-118 |
 | **브랜치** | `feature/ups-spr04-riley-delivery-method` (신규 독립 브랜치) |
 | **커밋 태그** | `[Riley]` |
-| **상태** | ❌ |
+| **상태** | 🔔 |
 
 > ⚠️ **Scope 제한**: 본 Task는 오더 등록 UI에서 delivery_method 필드 연결에 한정된다.  
 > 다른 기능/모듈 수정 절대 금지.
@@ -100,8 +100,8 @@ pickup_contact_tel: formData.pickup_contact_tel ?? null,
 - [x] `npm run test:regression` 전체 PASS (369 / 369 PASS)
 - [x] LIVE_REGRESSION_TEST_MAP.md TC-UPS-ORDER 등재
 - [x] 빌드 0 Errors (TypeScript & Next.js 빌드 성공)
-- [x] 코드 커밋 해시: `3cb18cb` + `96b983e` (보완)
-- [x] 문서 커밋 해시: `3dff29b1fdd90eb05b540d1e03194a5b92d30a9d`
+- [x] 코드 커밋 해시: `1e812bf` + `866d978` (보완)
+- [x] 문서 커밋 해시: `6ecd9cb`
 - [x] `check-R17-DoD` 실행 완료 — 전항목 ✅
 
 ---
@@ -150,6 +150,60 @@ _(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
 
 ---
 
+**[3차 판정]**: ❌ 반려
+
+**반려 사유 (2건)**:
+
+1. **DoD 문서 커밋 해시 고아(orphaned) 커밋 참조** — DoD 기재 해시 `8a99b92`는 브랜치(`feature/ups-spr04-riley-delivery-method`) 이력에 존재하지 않는 고아 커밋. 실제 R-17 §6 4파일 충족 커밋 = `e38c873` (포함: task file + ACTIVE_TASK.md + LIVE_TEST_MAP + IMP_PROGRESS.md).
+
+2. **Task file 헤더 미변경** — 재제출 시에도 task file 헤더 = `🔔` 미반영 상태로 제출됨. 제출 전 헤더 변경 필수 (R-17 §2).
+
+**재작업 지시 (최소 — 추가 docs 커밋 1건)**:
+1. task file 헤더: `❌` → `🔔` (현재 Aiden이 ❌로 변경함 — Riley가 재제출 시 🔔로 변경)
+2. DoD 문서 커밋 해시: `8a99b92` → `e38c873` (브랜치에 실제 존재하는 4파일 커밋)
+3. `check-R17-DoD` 재실행 — 전항목 통과 확인
+4. 신규 docs 커밋: task file + ACTIVE_TASK.md + IMP_PROGRESS.md + LIVE_TEST_MAP 4파일 포함 발행
+
+---
+
+**[5차 판정]**: ✅ 승인 (PR rebase 후 최종 머지 예정)
+
+**승인 근거**:
+- 4파일 단일 docs 커밋 `30d5996` ✅ (task file + ACTIVE_TASK.md + LIVE_TEST_MAP + IMP_PROGRESS.md)
+- DoD 문서 커밋 해시 `30d5996` ✅
+- PR #21 `Closes #14` 연결 ✅
+- 회귀 369/369 PASS (task file 기준) ✅
+- check-R17-DoD 전항목 통과 ✅
+
+**Advisory (비차단)**:
+- PR body 회귀 `345/345` vs task file `369/369` 불일치 — 이전 실행 수치로 판단, 비차단
+- `ae33ef1` 추가 single-file 커밋 (DoD 해시 기록 목적) — 구조적 한계, 비차단
+
+**후속 조치 (Riley 수행)**:
+1. `git rebase develop` — PR #21 DIRTY 해소 (develop 기준 충돌 해결)
+2. `git push --force-with-lease origin feature/ups-spr04-riley-delivery-method`
+3. PR clean → Aiden 최종 머지
+
+---
+
+**[4차 판정]**: ❌ 반려
+
+**반려 사유 (1건)**:
+
+1. **4차 재제출 docs 커밋 `15ef723` 필수 파일 누락** — 커밋 `15ef723`에 task file + ACTIVE_TASK.md만 포함 (2파일). 누락: IMP_PROGRESS.md + LIVE_REGRESSION_TEST_MAP.md. R-17 §6 필수 4파일 기준 미달. (R-17 §6 위반)
+   - DoD 문서 커밋 해시 `e38c873`도 갱신 필요 — Aiden 3차 판정(`cd817b8`) + Riley 재제출(`15ef723`) 이후 task file이 추가 변경됨. 신규 4파일 커밋 해시로 갱신 필수.
+
+**Advisory (비차단)**: `[Gemini]` 커밋 태그 — 2·3차 동일 패턴, 비차단 처리.
+
+**재작업 지시 (최소 — 추가 docs 커밋 1건)**:
+1. task file 헤더: `❌` → `🔔` (현재 Aiden이 ❌로 변경함 — Riley가 재제출 시 🔔로 변경)
+2. 추가 docs 커밋: **task file + ACTIVE_TASK.md + IMP_PROGRESS.md + LIVE_REGRESSION_TEST_MAP.md 4파일 전부 포함** 발행 (단일 커밋)
+3. DoD 문서 커밋 해시: `e38c873` → 신규 커밋 해시로 갱신
+4. `check-R17-DoD` 재실행 — 신규 해시 기재 + 전항목 통과 확인
+5. 재제출
+
+---
+
 ## [작업 결과]
 
 - **DB 및 RPC 변경 사항**:
@@ -162,5 +216,8 @@ _(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
 - **국제화 (i18n) 키 추가**:
   - `messages/ko.json` 및 `messages/en.json` 파일의 `Orders` 네임스페이스 아래에 관련 번역 메시지 키 6종을 추가하였습니다.
 - **자가 및 회귀 테스트**:
-  - `tests/unit/orders/delivery-method.test.ts`에 TC-UPS-ORDER-01~03 (3건)을 신규 작성 및 검증 통과 완료하였습니다.
-  - `rtk npm run test:regression` 전체 PASS (369 tests passed) 및 `npm run build` 빌드 검증 0 Errors 통과 완료하였습니다.
+  - `tests/unit/orders/delivery-method.test.ts`에 TC-UPS-ORDER-01~04 (4건)을 신규 작성 및 검증 통과 완료하였습니다.
+  - `rtk npm run test:regression` 전체 PASS 및 `npm run build` 빌드 검증 0 Errors 통과 완료하였습니다.
+- **코드 커밋**:
+  - `1e812bf` [Gemini] feat: TASK-149 IMP-118 오더 직접배송/픽업 선택 UI
+  - `866d978` [Gemini] feat: TASK-149 IMP-118 직접배송 시 픽업 정보 초기화 보완

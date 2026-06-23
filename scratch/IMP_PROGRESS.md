@@ -2,7 +2,7 @@
 
 > **프로젝트**: ZENITH_LMS
 > **근거 문서**: [IMP_EXECUTION_PLAN_BKai_20260514.md](IMP_EXECUTION_PLAN_BKai_20260514.md)
-> **최초 작성**: 2026-05-15 (Aiden) / **최근 업데이트**: 2026-06-06 (D_Kai — Phase 6 테이블 신설 + IMP-102 🔔)
+> **최초 작성**: 2026-05-15 (Aiden) / **최근 업데이트**: 2026-06-19 (Aiden — Phase K·6 🔔→✅ 동기화, 합계 갱신)
 > **업데이트 규칙**:
 > - 에이전트는 IMP 완료 커밋 시 해당 행의 `상태`와 `완료일`을 반드시 갱신한다.
 > - 갱신은 IMP 완료 커밋과 **같은 커밋**에 포함하거나, 직후 별도 커밋으로 처리한다.
@@ -215,17 +215,15 @@
 
 | IMP | 내용 | Agent | 상태 | 완료일 |
 |:---:|:-----|:-----:|:----:|:------:|
-| 084 | Hub Route Discovery (DatabaseRouteAdapter BFS + 시드 데이터) | B_Kai | 🔔 | 5616493 · 226/226 · TC-R.8a·8b ✅ |
-| 085 | Order-Route Segment 연결 (zen_orders ↔ 선택 경로) | D_Kai | 🔔 | 0eb5355 · 227/227 · 방안 A' · route_option_id FK + View + selectRoute() |
-| 086 | 303 Stage 1+2: Route Decomposer + TISA 캐리어별 요율 매핑 | Riley | 🔔 | 2026-05-25 |
-| 087 | 환적 상태 추적 A안 (Transit Tracking per Leg) | B_Kai | 🔔 | 82c9fb7 · 227/227 · migration+types+validation+UI+i18n ✅ |
-| 088 | 개인정보 활용동의 체크박스 (회원가입 Wizard) | D_Kai | 🔔 | 5a21467 · 220/220 · migration+UI+action+i18n 4개국어 ✅ |
+| 084 | Hub Route Discovery (DatabaseRouteAdapter BFS + 시드 데이터) | B_Kai | ✅ | 5616493 · 226/226 · TC-R.8a·8b ✅ · TASK-088 Aiden ✅ 승인 |
+| 085 | Order-Route Segment 연결 (zen_orders ↔ 선택 경로) | D_Kai | ✅ | 0eb5355 · 227/227 · 방안 A' · TASK-091 Aiden ✅ 승인 |
+| 086 | 303 Stage 1+2: Route Decomposer + TISA 캐리어별 요율 매핑 | Riley | ✅ | a1c76cb+283e1b9+929c3e8 · 227/227 · TASK-092 Aiden ✅ 승인 |
+| 087 | 환적 상태 추적 A안 (Transit Tracking per Leg) | B_Kai | ✅ | 82c9fb7 · 227/227 · TASK-093 Aiden ✅ 승인 |
+| 088 | 개인정보 활용동의 체크박스 (회원가입 Wizard) | D_Kai | ✅ | 5a21467 · 220/220 · TASK-089 Aiden ✅ 승인 |
 | 089 | ID 찾기 개인/법인 분리 재설계 (phone_number + 탭 UI) | D_Kai | ✅ | `15299bf`+`2111a75`+`4b796e4`+`883cd25`+`9f0e3c2`+`c509802`+`e27ec7a`+`199712e`+`d1bc3de` · 227/227 · mig+가입폰+백엔드2함수+UI탭+UAT재작+버그8건수정 |
-| 046 | Rate Limiting 도입 (Phase C 유예 재활성화) | Riley | 🔔 | 2026-05-25 |
+| 046 | Rate Limiting 도입 (Phase C 유예 재활성화) | Riley | ✅ | 7be8930 · 226/226 · TASK-090 Aiden ✅ 승인 |
 
-> 🚫 IMP-086: IMP-084 완료 후 착수 가능
-
-**Phase K 완료**: 7 / 7 (100%) — IMP-084·085·086·087·088·089·046 🔔
+**Phase K 완료**: 7 / 7 (100%) ✅ — IMP-084·085·086·087·088·089·046 전량 Aiden ✅ 승인
 
 ---
 
@@ -251,19 +249,18 @@
 
 | IMP | 내용 | Agent | 상태 | 완료일 |
 |:---:|:-----|:-----:|:----:|:------:|
-| 097 | DB 스키마 기반 (org_type·rate tables·order_services·RLS·migration) | D_Kai | ✅ | 2026-06-06 |
-| 098 | 통관 서비스 요율 관리 Actions + UI | D_Kai | ✅ | 2026-06-06 |
-| 099 | 배송 서비스 요율 관리 Actions + UI (LOCAL+TOTAL) | D_Kai | ✅ | 2026-06-06 |
-| 100 | 통합 서비스 요율 조회 API + 오더-서비스 배정 Actions | D_Kai | 🔔 | 2026-06-06 |
-| 101 | Order 등록 UI 개선 (서비스조합선택·요율확인·GAP-P6-01 보완) | Riley | 🔔 | 2026-06-06 |
-| 102 | Order 목록 RLS 역할별 격리 (CUSTOMS_BROKER·DELIVERY_AGENT) | D_Kai | 🔔 | 2026-06-06 |
-| 103 | 운송 요율 CARRIER 직접 등록 허용 + platform_fee_rate 격리 | D_Kai | 🔔 | 2026-06-06 |
-| 104 | Phase 6 회귀 테스트 + E2E 검증 + UAT 절차서 | D_Kai+Riley+B_Kai | 🔔 | 2026-06-07 |
-| 105 | 운송수단별 요금 산정 정책 설정 (DB + Admin UI + 엔진) | D_Kai+B_Kai | 🔔 | 2026-06-08 |
-| 109 | 환율 설정 화면 — 기준 통화(`BASE_CURRENCY`) + 환율(`EXCHANGE_RATE_*`) 어드민 UI | 미정 | ⬜ | — |
+| 097 | DB 스키마 기반 (org_type·rate tables·order_services·RLS·migration) | D_Kai | ✅ | 2026-06-06 · TASK-113 Aiden ✅ 승인 |
+| 098 | 통관 서비스 요율 관리 Actions + UI | D_Kai | ✅ | 2026-06-06 · TASK-114 Aiden ✅ 승인 |
+| 099 | 배송 서비스 요율 관리 Actions + UI (LOCAL+TOTAL) | D_Kai | ✅ | 2026-06-06 · TASK-115 Aiden ✅ 승인 |
+| 100 | 통합 서비스 요율 조회 API + 오더-서비스 배정 Actions | D_Kai | ✅ | 154ea5d · 267/267 · TASK-116 Aiden ✅ 승인 |
+| 101 | Order 등록 UI 개선 (서비스조합선택·요율확인·GAP-P6-01 보완) | Riley | ✅ | 5ff2982 · 270/270 · TASK-117 Aiden ✅ 승인 |
+| 102 | Order 목록 RLS 역할별 격리 (CUSTOMS_BROKER·DELIVERY_AGENT) | D_Kai | ✅ | 270146e · 259/259 · TASK-118 Aiden ✅ 승인 |
+| 103 | 운송 요율 CARRIER 직접 등록 허용 + platform_fee_rate 격리 | D_Kai | ✅ | 154ea5d · 267/267 · TASK-119 Aiden ✅ 승인 |
+| 104 | Phase 6 회귀 테스트 + E2E 검증 + UAT 절차서 | D_Kai+Riley+B_Kai | ✅ | e0e1c41 · 309/309 · TASK-120 Aiden ✅ 승인 260608 |
+| 105 | 운송수단별 요금 산정 정책 설정 (DB + Admin UI + 엔진) | D_Kai+B_Kai | ✅ | bb81021+5171675+723db3e · 314/314 · TASK-121 Aiden ✅ 승인 260608 |
+| 109 | 환율 설정 화면 — 기준 통화(`BASE_CURRENCY`) + 환율(`EXCHANGE_RATE_*`) 어드민 UI | Riley | ✅ | 1c67c35 · 366/366 · TASK-147 Aiden ✅ 승인 260616 |
 
-**Phase 6 완료**: 8 / 8 (100%) — IMP-097✅ · 098✅ · 099✅ · 100🔔 · 101🔔 · 102🔔 · 103🔔 · 104🔔
-**IMP-105**: D_Kai DB ✅(bb81021) · B_Kai UI ✅(5171675+0d428a3) · D_Kai 엔진+TC ✅(723db3e+c0bcab0+974e632) · 회귀 314/314 PASS
+**Phase 6 완료**: 10 / 10 (100%) ✅ — IMP-097~105·109 전량 Aiden ✅ 승인
 
 ---
 
@@ -289,13 +286,19 @@
 | H | 5 | 5 | 100% ✅ | |
 | I | 5 | 5 | 100% ✅ | IMP-073~077 전량 완료 (TASK-069~073 ✅) |
 | J | 4 | 4 | 100% ✅ | IMP-080 ✅ · IMP-081 ✅ · IMP-082 ✅ · IMP-083 ✅ |
-| K | 1 | 7 | 14.3% | IMP-084·085·086·088·089·046 🔔 |
-| 6 | 9 | 9 | — | IMP-097✅·098✅·099✅·100🔔·101🔔·102🔔·103🔔·104🔔·105✅(D_Kai 엔진+TC 완료) (Phase 6+IMP-105) |
+| K | 7 | 7 | 100% ✅ | IMP-084·085·086·087·088·089·046 전량 ✅ |
+| 6 | 10 | 10 | 100% ✅ | IMP-097~105·109 전량 ✅ (IMP-109 기타 항목에서 Phase 6 이관) |
 | UAT | 6 | 7 | 85.7% | IMP-090 ✅ · IMP-091 ⬜ (Carrier Portal — Phase M) · **IMP-092 ✅ (TISA 3계층)** · **IMP-093 ✅ (TISA 실연동, TASK-104)** · IMP-094 ⬜ (요율 워크플로우 고도화, Phase M) · **IMP-095 ✅ (Rate Card 항로 매칭, TASK-109)** · **IMP-096 ✅ (요율 관리 페이지 통합 정리, TASK-110)** |
 | UAT2 | 2 | 2 | 100% ✅ | **IMP-107 ✅** (TISA 스냅샷 강화 — WM slab 이력, `ab6f493`+`ef3ece7` Aiden ✅ 승인 260609) · **IMP-108 ✅§1·§2·§3** (B_Kai §1 max_charge UI ✅, D_Kai §2 platform_fee ✅, §3 WM CLAMP `9d70d87` ✅) |
-| 기타 | 0 | 1 | 0% | **IMP-109 ⬜** 환율 설정 화면 (어드민 — 기준 통화 + 환율 설정 UI) |
-| **Phase 7** | 3 | 6 | 50% | **IMP-110 ✅** UPS DB 스키마 7종 (aca457e) · **IMP-111 ✅** Agency 역할 모델 (dc8a2ff) · **IMP-112 🔔** UPS 요금 엔진 (TASK-143 D_Kai ✅ fee7bf1·TASK-141 Aiden ⬜·TASK-144 B_Kai ❌ 재작업) · **IMP-113 ⬜** UPS 요율 Admin UI (SPR-03) · **IMP-114 ⬜** Agency 화주 관리 UI (TASK-142) · **IMP-115 ⬜** IBC/Pactrak Interface (SPR-05) |
-| **합계** | **94** | **100** | **94.0%** | IMP-112~116 신규 등재 (SPR-02~06 예정) · IMP-111 ✅ (260614) · IMP-110 ✅ (260614) |
+| 기타 | 1 | 1 | 100% | **IMP-109 ✅** 환율 설정 화면 (TASK-147, 1c67c35, Riley — Aiden ✅ 승인 260616) |
+| **Phase 7** | 12 | 12 | 100% ✅ | **IMP-110 ✅** UPS DB 스키마 7종 (aca457e) · **IMP-111 ✅** Agency 역할 모델 (dc8a2ff) · **IMP-112 ✅** UPS 요금 계산 엔진 (e60fff0 Aiden·fee7bf1 D_Kai·b315d49+6870271 B_Kai — Aiden ✅ 260615) · **IMP-113 ✅** UPS 요율 Admin UI (TASK-146, 0578fb7, B_Kai — Aiden ✅ 260616) · **IMP-114 ✅** Agency 화주 관리 UI (PR#7 머지) · **IMP-115 ➖** IBC/Pactrak Interface (Edward 지시 260617 — 영구 제외) · **IMP-116 ✅** Agency 요율 오버라이드 (PR#8 머지) · **IMP-117 ✅** 간이 UPS 인보이스 PDF (TASK-148 B_Kai — PR #22 머지 ✅ 260617) · **IMP-118 ✅** 오더 직접배송/픽업 UI (TASK-149 Riley — PR #21 머지 ✅ 260617) · **IMP-119 ✅** 창고 출고 UPS 연계 (TASK-150 D_Kai — PR #19 머지 ✅ 260617) · **IMP-120 ✅** R5 주소록 (TASK-151 B_Kai — PR #33 · Aiden ✅ 승인 260618) · E2E-21: TASK-157 B_Kai — PR #38 머지 ✅ 260618 · **IMP-121 ✅** R7 일마감 처리 (TASK-152 D_Kai — PR #29 (Closes #24) · 5f86dfe+04e7d3f · 374/374 · Aiden ✅ 승인 260618) · **IMP-122 ✅** Agency 정산 조회 (TASK-153 Riley — PR #26 머지 ✅ 260617) |
+| **Phase 7 UAT** | 1 | 1 | 100% ✅ | **IMP-123 ✅** Phase 7 UAT 시나리오 작성 — UAT-15~20 16개 시나리오 (TASK-161 Riley · PR #46 머지 ✅ · Aiden ✅ 260619) |
+| **Phase 7 Team B SPR-05** | 2 | 2 | 100% ✅ | **IMP-124 ✅** Agency 정산 엑셀 다운로드 (TASK-B-008 Dave · PR#55 머지 · Aiden ✅ 260620) · **IMP-125 ✅** Agency 대시보드 정산 위젯 (TASK-B-009 Baker · PR#54 머지 · Aiden ✅ 260620) |
+| **Phase 7 Team B SPR-06** | 2 | 2 | 100% ✅ | **IMP-126 ✅** Agency 정산 오더번호 검색 (TASK-B-010 Dave · PR#62 머지 · 384/384 · Aiden ✅ 260621) · **IMP-127 ✅** Agency 정산 Reconciliation 검증 (TASK-B-011 Baker · PR#63 머지 · 384/384 · Aiden ✅ 260621) |
+| **Phase 7 Team B SPR-07** | 3 | 3 | 100% ✅ | **IMP-128 ✅** Agency 정산 orderNoSearch 연동 완성 (TASK-B-012 Dave · PR#66 머지 ✅ · Aiden ✅ 260623) · **IMP-129 ✅** SettlementReconciliationAlert 오더 링크 + UAT 보완 (TASK-B-013 Baker · PR#67 머지 ✅ · Aiden ✅ 260623) · **IMP-130 ✅** AgencySettlementQuerySchema order_no_search 추가 (TASK-B-014 Dave · PR#69 머지 ✅ · Aiden ✅ 260622) |
+| **Phase 7 Team B SPR-08** | 2 | 2 | 100% ✅ | **IMP-133 ✅** Phase 6 E2E 5종 Playwright spec 수정 (TASK-B-018 D_Kai · PR#79 머지 ✅ · 392/392 · Aiden ✅ 260623) · **IMP-134 🔔** Phase 7 종합 회귀 테스트 결과 문서화 (TASK-B-019 Baker · PR#84 🔔 · 387/387 ALL PASS · Aiden 검토 대기) |
+| **CI 인프라 수정** | 2 | 2 | 100% ✅ | **IMP-131 ✅** CI pr-checks.yml JWT eval 수정 (TASK-B-016 Jaison · PR#73 머지 ✅ · Aiden ✅ 260622) · **IMP-132 ✅** CI service_role GRANT 누락 migration fix (TASK-B-017 Jaison · PR#75 머지 ✅ · CI Run #3 387/387 · Aiden ✅ 260622) |
+| **합계** | **115** | **118** | **97.5%** | IMP-128/129 ✅ (PR#66·67 머지 260623) · IMP-130/131/132/133 ✅ (PR#69·73·75·79 머지 260622~260623) · IMP-134 🔔 (PR#84 · 387/387 · Aiden 검토 대기 260623) |
 
 > **UAT 진행 전 필수 처리**: IMP-092 ✅ · IMP-093 ✅ · IMP-095 ✅ — 전량 완료
 > 미완료 IMP: IMP-086·087 🚫 블로커 · IMP-028·069(Future — 통관 연계) · IMP-091 ⬜ (Carrier Portal) · IMP-094 ⬜ (요율 워크플로우 Phase M)
@@ -376,4 +379,13 @@
 | 2026-06-09 | D_Kai (OpenCode) | **IMP-108 §3 🔔 WM CLAMP 완료** — fn_get_best_matching_rate 4-arg `max_total_price` 반환 추가, calculate_order_costs CLAMP(min→max) + `applied_pricing_basis`(WEIGHT/CBM/MIN_CHARGE/MAX_CHARGE) 반환. TC-POLICY-06 신규(max_charge cap=150 → total_freight=150, basis=MAX_CHARGE). build ✅ · 회귀 315/315 ✅. 커밋 `9d70d87`. 전체 합계 89/93 (95.7%). Aiden 검토 대기 🔔. |
 | 2026-06-09 | D_Kai (OpenCode) | **IMP-107 🔔 TISA 스냅샷 강화 완료** — zen_order_rate_snapshots 8개 컬럼 추가(slab 이력 + pricing_basis + tiers_snapshot). fn_get_best_matching_rate 4-arg matched_weight_min/cbm_min 반환. calculate_order_costs snapshot INSERT ON CONFLICT 보강. TC-POLICY-07 신규(snapshot 8개 컬럼 저장 검증). build ✅ · 회귀 316/316 ✅. 커밋 `ab6f493`. 전체 합계 90/93 (96.8%). Aiden 검토 대기 🔔. |
 
+| 2026-06-19 | Aiden (Claude) | **Phase K·6 상태 동기화** — IMP-084·085·086·087·088·046 🔔→✅ (Phase K 7/7 100%) · IMP-100·101·102·103·104 🔔→✅ (Phase 6 10/10 100%) · IMP-109 Phase 6 이관. GitHub Issues 9건 일괄 종료(#9·10·16·31·36·39·40·43·45). WBS TASK-158 ❌→✅ 수정. |
 | 2026-06-14 | Jaison (Claude, Team B) | **IMP-111 🔔 Agency 역할 모델 완료** — TASK-139. zen_organizations.type AGENCY 추가, zen_agency_shippers/zen_agency_rate_overrides 신설 + RLS, rbac.ts AGENCY role, types/agency.ts, 회원가입 UI AGENCY 옵션. TC-P7-AGENCY-01~07 신규 7건. 회귀 314/321 PASS. 커밋 `a686bc1`. Aiden 검토 대기 🔔. |
+| 2026-06-15 | Dave (DeepSeek, Team B) | **IMP-114 🔔 SPR-02 Agency 화주 Server Actions 완료** — TASK-145. getAgencyShippers·createAgencyShipper·updateAgencyShipperGrade 3종 구현. Zod 스키마 2종(CreateAgencyShipperSchema·UpdateAgencyShipperGradeSchema). CreateAgencyShipperInput 타입 추가. TC-P7-SHIPPER-01~04 신규 13건. 회귀 340/347 PASS. 커밋 `7977e97`. TASK-146·147 블로커 해제. Jaison·Aiden 검토 대기 🔔. |
+| 2026-06-15 | Baker (OpenCode Big Pickle, Team B) | **IMP-114 🔔 SPR-02 Agency 화주 목록/등록 UI 완료** — TASK-146. /agency/shippers (목록+인라인 등급 수정), /agency/shippers/new (등록 폼). 6개 파일 신규 생성. TS build ✅ · 회귀 340/340 PASS. 커밋 `ec4d7f5`. Jaison·Aiden 검토 대기 🔔. |
+| 2026-06-15 | Dave (DeepSeek, Team B) | **IMP-114 🔔 SPR-02 Agency 대시보드 + NaviSidebar AGENCY 메뉴 완료** — TASK-147. /agency 대시보드 페이지(42줄), AgencyDashboardStats(36줄), AgencyQuickLinks(50줄), NaviSidebar 메뉴 2종, i18n agency_* 키. 회귀 340/347 PASS. 커밋 `97e9126`. SPR-02 전량 완료. Jaison·Aiden 검토 대기 🔔. |
+| 2026-06-16 | Dave (DeepSeek, Team B) | **IMP-114 🔔 PR#7 반려 수정 완료** — TASK-B-005 (구 TASK-152). Issue 1·5·7 수정. _linkShipperToAgency ...data spread 제거(명시적 컬럼), page.tsx i18n 교체(agency_console_badge/desc), TC 제목 정정. DoD 7/7 자가검증 ✅. 회귀 345/352 PASS. 커밋 `31bfa4d`. TASK-B 재채번(R-19 v2.0) 완료 · PR#7 재제출 준비. 🔔 |
+| 2026-06-16 | Dave (DeepSeek, Team B) | **IMP-116 🔔 SPR-03 Agency 요율 오버라이드 Server Actions 완료** — TASK-B-006. getAgencyRateOverrides·upsertAgencyRateOverride·deactivateAgencyRateOverride 3종 구현. CreateAgencyRateOverrideSchema Zod 스키마 + CreateAgencyRateOverrideInput/AgencyRateOverrideWithRefs 타입. 브랜치 `feature/ups-spr03-devteam-agency-rate-overrides`. 회귀 345/352 PASS. ZEN_A4 ✅ (31·38·21줄). TASK-B-007(Baker UI) 블로커 해제. 🔔 |
+| 2026-06-16 | Baker (OpenCode Big Pickle, Team B) | **IMP-116 🔔 SPR-03 Agency 요율 오버라이드 UI 완료** — TASK-B-007. /agency/rate-overrides (목록+비활성화), /agency/rate-overrides/new (등록 폼). 9개 파일 신규 생성. NaviSidebar menu + i18n 10종. 회귀 345/345 PASS. 코드 `140793e`. ZEN_A4 수정 완료(_StatusBadge·_ErrorAlert 추출, Props 인라인화). Jaison 검토 대기 🔔. ❌ 반려(1차) → 재작업 완료. |
+| 2026-06-20 | Baker (Big Pickle, Team B) | **IMP-125 🔔 Agency 대시보드 정산 요약 위젯 완료** — TASK-B-009. `AgencySettlementWidget.tsx` 신규(48줄), page.tsx 연동 + 실시간 `orderCount` 반영, i18n 4개국어 5키. TC-B-DASH-01~02 등재. 회귀 212/214 PASS (tracking-business-qa 2건 pre-existing Supabase 미연결). 코드 `d763951`, 문서 `b3d35f6`. Jaison 검토 대기 🔔. [PR #54](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/54) (Closes #53). |
+| 2026-06-23 | Baker (Big Pickle, Team B) | **SPR-08 신규 등재 (IMP-133✅·IMP-134🔔)** — TASK-B-018(D_Kai PR#79 머지 ✅) · TASK-B-019(Baker PR#84 🔔 387/387 ALL PASS). 합계 113/116→115/118 (97.5%). Jaison 반려 수정: LAST_REGRESSION_RESULT FAIL→PASS 원복. |

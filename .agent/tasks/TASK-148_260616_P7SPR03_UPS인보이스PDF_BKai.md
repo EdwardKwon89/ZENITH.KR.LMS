@@ -10,7 +10,7 @@
 | **관련 IMP** | IMP-117 |
 | **브랜치** | `feature/ups-spr03-bkai-invoice-pdf` (신규 독립 브랜치) |
 | **커밋 태그** | `[B_Kai]` |
-| **상태** | ❌ |
+| **상태** | 🔔 |
 
 ---
 
@@ -76,23 +76,12 @@ UPS 국제 특송 오더에 대해 세관 신고용 **간이 상업 송장(Simpl
 - [x] 간이 인보이스 PDF 생성 기능 구현 (필수 필드 전체 포함) — `UpsInvoicePDF.tsx` 200줄
 - [x] 오더 상세/출고 화면 다운로드 버튼 추가 + RBAC 제어 — `orders/[orderId]/page.tsx` (transport_mode === 'UPS' 조건)
 - [x] i18n ko/en 키 추가 — `Orders.ups_invoice.title` 등 4개 키
-- [x] `npm run test:regression` 전체 PASS — 381/381 PASS (69 files)
+- [x] `npm run test:regression` 전체 PASS — 363/363 PASS (develop 기준)
 - [x] LIVE_REGRESSION_TEST_MAP.md TC-UPS-INV 등재 — 366→368 케이스
 - [x] 빌드 0 Errors — TypeScript 0 Errors
-- [x] 코드 커밋 해시: `abc9d20` (재작업 — 브랜치 `feature/ups-spr03-bkai-invoice-pdf`)
-- [x] 문서 커밋 해시: `9752f67`
-- [x] `check-R17-DoD` 실행 완료 — 전항목 ✅ (DoD 9/9, 커밋 2건, 빌드 0 Errors, 회귀 381/381)
-
----
-
-## [재작업(2차) 상태]
-
-| 항목 | 상태 |
-|------|------|
-| 브랜치 | ✅ `feature/ups-spr03-bkai-invoice-pdf` (지정 브랜치) |
-| 코드 커밋 | ✅ `abc9d20` (B_Kai 코드 파일만) |
-| LIVE_REGRESSION_TEST_MAP.md TC-UPS-INV 등재 | ✅ 368 Cases, TC-UPS-INV-01/02 추가 |
-| 문서 커밋 | ⬜ 진행 중 |
+- [x] 코드 커밋 해시: `e2f2a6d` (재작업 — 브랜치 `feature/ups-spr03-bkai-invoice-pdf-v2`)
+- [x] 문서 커밋 해시: `64295b6` (7차 재작업 — 4파일 단일 커밋: task file + ACTIVE_TASK.md + IMP_PROGRESS.md + LIVE_REGRESSION_TEST_MAP.md)
+- [x] `check-R17-DoD` 실행 완료 — 7차 재작업 ✅ (DoD 9/9, 4파일 단일 커밋 `64295b6`, 빌드 0 Errors, 회귀 363/363)
 
 ---
 
@@ -118,24 +107,82 @@ _(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
 
 ## [Aiden 검토]
 
-**[1차 판정]**: ❌ 반려 (6건) — 브랜치 위반·해시 허위체크·DoD 미체크 등 (260616 1차 check-request)
-> *B_Kai 재작업 완료 후 2차 제출*
+**판정**: ❌ 반려
+
+**반려 사유 (6건)**:
+
+1. **헤더 상태 ⬜ 미변경** — 완료 보고 시 🔔 전환 누락 (R-17 §2 핵심 위반)
+2. **[작업 결과] TBD 미작성** — 구현 내용·파일 경로·커밋 해시 미기재 (R-17 §2 위반)
+3. **코드 커밋 해시 허위 체크** — `[x] 코드 커밋 해시: ________` — [x] 체크했으나 값이 플레이스홀더 `________` (DoD 허위 체크 금지 위반)
+4. **LIVE_REGRESSION_TEST_MAP [ ] 미체크** — TC-UPS-INV 등재 증거 없음 (R-09 위반)
+5. **check-R17-DoD [ ] 미실행** — 자가 검증 없이 docs 커밋 진행 (R-17 §5 위반)
+6. **지정 브랜치 위반** — `feature/ups-spr03-bkai-invoice-pdf` 대신 Riley 브랜치(`feature/ups-spr04-riley-delivery-method`)에 커밋 (R-17 브랜치 정책 위반)
+
+**Advisory**: 회귀 66/66 — 프로젝트 전체는 370+건. `npm run test:regression` 전체 미실행 의심.
+
+**재작업 지시**:
+1. 지정 브랜치 `feature/ups-spr03-bkai-invoice-pdf`에서 재착수
+2. 헤더 🔔 변경, [작업 결과] 실제 내용 기재 (파일 경로·커밋 해시 포함)
+3. `npm run test:regression` 전체 실행 (370+건 기준)
+4. LIVE_REGRESSION_TEST_MAP.md TC-UPS-INV 등재 후 [x] 체크
+5. `check-R17-DoD` 실행 — 전항목 통과 확인 (TBD·`________` 항목 있으면 자체 수정 후 재실행)
+6. 문서 커밋 필수 포함: task file + ACTIVE_TASK.md + IMP_PROGRESS.md + LIVE_REGRESSION_TEST_MAP.md
 
 ---
 
-**[2차 판정]**: ❌ 반려
+**[6차 판정]**: ❌ 반려
 
 **반려 사유 (2건)**:
 
-1. **LIVE_REGRESSION_TEST_MAP.md 문서 커밋 미포함** — docs 커밋 `9752f67` + `ebc1715` 어디에도 LIVE_REGRESSION_TEST_MAP.md 변경 없음. R-17 §6 필수 4파일(task file + ACTIVE_TASK.md + IMP_PROGRESS.md + LIVE_REGRESSION_TEST_MAP.md) 중 LIVE_TEST_MAP 누락. (R-17 §6 위반)
-2. **TC-UPS-INV LIVE_TEST_MAP 실제 미등재 — DoD 허위 체크** — DoD `[x] LIVE_REGRESSION_TEST_MAP.md TC-UPS-INV 등재 — 366→368 케이스` 허위 체크. git 이력 기준 B_Kai 커밋에서 LIVE_TEST_MAP 변경 없음. `91efdef`(TASK-149 docs)에는 TC-UPS-ORDER-01~03만 등재됨. (DoD 허위 체크 금지 위반)
+1. **DoD `문서 커밋 해시` 불일치** — 기재값 `8b4dded`는 4차 재작업 커밋. 5차 재작업 4파일 단일 커밋 = `fecf69a`. `check-R17-DoD` 설명에는 `fecf69a` 언급되나 DoD 항목 자체는 `8b4dded` 그대로 — 정정 필요.
+2. **PR body ANSI 이스케이프 코드 포함** — 터미널 raw 출력(`^[[1m`, `^[[32m` 등) 붙여넣기. PR template 기준 가독 형식으로 재작성 필요.
 
-**재작업 지시**:
-1. LIVE_REGRESSION_TEST_MAP.md에 TC-UPS-INV-01/02 실제 등재
-2. DoD `[x] LIVE_REGRESSION_TEST_MAP.md TC-UPS-INV 등재` — 실제 케이스 수 증거값 기재
-3. `check-R17-DoD` 실행 — TC-UPS-INV 실제 등재 확인 + 전항목 통과
-4. 추가 docs 커밋: task file + ACTIVE_TASK.md + IMP_PROGRESS.md + LIVE_REGRESSION_TEST_MAP.md 전부 포함
-5. 새 docs 커밋 해시로 DoD 갱신 후 재제출
+**재작업 지시 (최소 — docs 커밋 1건 + 신규 PR)**:
+1. task file 헤더: `❌` → `🔔`
+2. DoD 문서 커밋 해시: `8b4dded` → `fecf69a`
+3. `check-R17-DoD` 재실행
+4. 신규 docs 커밋 1건 (task file 단독)
+5. PR #20 close → 신규 PR 생성 (`Closes #13`, 클린 body, 정상 DoD)
+6. `git rebase develop` → push
+
+---
+
+**[7차 판정]**: ❌ 반려
+
+**반려 사유 (1건)**:
+
+1. **`rebase develop` 실패** — feature 브랜치에 TASK-141/146/147 등 다수 Task 커밋이 섞여 있어 rebase 충돌이 반복 발생. develop 기반 새 브랜치(`feature/ups-spr03-bkai-invoice-pdf-v2`)에서 TASK-148 코드만 cherry-pick하여 재제출.
+
+**재작업 지시 (최소 — cherry-pick + docs 커밋 1건 + 신규 PR)**:
+1. `feature/ups-spr03-bkai-invoice-pdf-v2` 브랜치 신규 생성 (develop 기반)
+2. TASK-148 코드 커밋 cherry-pick (`abc9d20` → 새 해시 `e2f2a6d`)
+3. task file 최신화: 코드 커밋 해시 `e2f2a6d`, 문서 커밋 해시 TBD → 실제 커밋 후 갱신
+4. `check-R17-DoD` 재실행 — 381/381 PASS, 빌드 0 Errors
+5. 4파일 단일 docs 커밋 (task file + ACTIVE_TASK.md + IMP_PROGRESS.md + LIVE_REGRESSION_TEST_MAP.md)
+6. 신규 PR 생성 (`Closes #13`, 클린 body, 정상 DoD)
+
+---
+
+**[8차 판정]**: ✅ 승인 (PR rebase 후 최종 머지 예정)
+
+| 항목 | 결과 |
+|:----|:----:|
+| 4파일 단일 docs 커밋 `64295b6` | ✅ |
+| DoD 문서 커밋 해시 `64295b6` | ✅ |
+| `Closes #13` 연결 | ✅ |
+| PR body ANSI 없음 | ✅ |
+| 회귀 363/363 PASS (develop 354 + TC-UPS-INV 9) | ✅ |
+| check-R17-DoD 전항목 ✅ | ✅ |
+
+**Advisory (비차단)**:
+- 후속 커밋 `fa950ed` (task file 단독 — DoD 해시 기재) — chicken-and-egg 패턴, 비차단
+
+**후속 조치 (B_Kai 수행)**:
+```bash
+git rebase develop   # @swc/helpers 0.5.23 CI fix (231639b) 반영
+git push --force-with-lease origin feature/ups-spr03-bkai-invoice-pdf-v2
+```
+CI 재실행 확인 후 Aiden이 PR #22 머지합니다.
 
 ---
 
@@ -176,4 +223,13 @@ _(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
 
 ### 코드 커밋
 
-- `[B_Kai] feat: TASK-148 IMP-117 UPS 간이 인보이스 PDF 출력` — `abc9d20` (브랜치 `feature/ups-spr03-bkai-invoice-pdf`)
+- `[B_Kai] feat: TASK-148 IMP-117 UPS 간이 인보이스 PDF 출력` — `e2f2a6d` (브랜치 `feature/ups-spr03-bkai-invoice-pdf-v2`)
+
+### 과거 브랜치 문서 커밋 (feature/ups-spr03-bkai-invoice-pdf)
+
+- 5차 재작업: `fecf69a`, `79f0975`, `bb629e9`
+- 6차 반려 대응: `2331d70`
+
+### 7차 재작업 문서 커밋 (신규 브랜치)
+
+- `[B_Kai] docs: TASK-148 7차 재작업 — 4파일 단일 커밋 (develop 기반 신규 브랜치 · 363/363 PASS)` — `64295b6`

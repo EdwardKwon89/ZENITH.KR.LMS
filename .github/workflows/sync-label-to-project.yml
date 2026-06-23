@@ -1,15 +1,16 @@
 name: "[Sync] Issue Label → Project Status"
 
 # Issue에 status:* 레이블이 추가/제거되거나 신규 Issue가 열릴 때
-# GitHub Project V2 (ZENITH LMS — Sprint Board) Status 필드를 자동 동기화합니다.
+# GitHub Project V2 Status 필드를 자동 동기화합니다.
 #
 # 레이블 → Project Status 1:1 매핑
-#   status:open        → 작업 대기
-#   status:in-progress → 작업 중
-#   status:review      → 검토 대기
-#   status:rework      → 재작업
-#   status:done        → 완료
-#   (레이블 없음 + opened) → 등록
+#   status:open        → Open
+#   status:in-progress → In progress
+#   status:review      → Review
+#   status:rework      → Rework
+#   status:blocked     → Blocked
+#   status:done        → Done
+#   (레이블 없음 + opened) → Open
 #
 # 필수 Secret: GH_PROJECT_TOKEN (project + repo 권한 PAT)
 
@@ -21,14 +22,14 @@ permissions:
   issues: read
 
 env:
-  PROJECT_ID:      PVT_kwHOD7GZQs4BbIDB
-  STATUS_FIELD_ID: PVTSSF_lAHOD7GZQs4BbIDBzhV60H8
-  OPT_REGISTERED:  81474413
-  OPT_OPEN:        c370694b
-  OPT_IN_PROGRESS: e55b1792
-  OPT_REVIEW:      73ab5703
-  OPT_REWORK:      471a3989
-  OPT_DONE:        436a450c
+  PROJECT_ID:      PVT_kwHOD7GZQs4BbEyd
+  STATUS_FIELD_ID: PVTSSF_lAHOD7GZQs4BbEydzhV35VU
+  OPT_OPEN:        23d470b9
+  OPT_IN_PROGRESS: 1dff89be
+  OPT_REVIEW:      297d7cb8
+  OPT_REWORK:      27ab80bb
+  OPT_BLOCKED:     a3930361
+  OPT_DONE:        2f7b333d
 
 jobs:
   sync:
@@ -49,15 +50,16 @@ jobs:
           labels  = [l['name'] for l in json.loads(os.environ['LABELS_JSON'])]
           action  = os.environ['EVENT_ACTION']
 
-          # 우선순위: done > review > rework > in-progress > open > registered
-          if 'status:done'           in labels: print('done')
-          elif 'status:review'       in labels: print('review')
-          elif 'status:rework'       in labels: print('rework')
-          elif 'status:in-progress'  in labels: print('in-progress')
-          elif 'status:open'         in labels: print('open')
-          elif 'status:draft'        in labels: print('open')
-          elif action == 'opened':             print('registered')  # 신규 이슈 기본값
-          else:                                print('skip')
+          # 우선순위: done > review > rework > in-progress > blocked > open
+          if 'status:done'        in labels: print('done')
+          elif 'status:review'    in labels: print('review')
+          elif 'status:rework'    in labels: print('rework')
+          elif 'status:in-progress' in labels: print('in-progress')
+          elif 'status:blocked'   in labels: print('blocked')
+          elif 'status:open'      in labels: print('open')
+          elif 'status:draft'     in labels: print('open')
+          elif action == 'opened':           print('open')   # 신규 이슈 기본값
+          else:                              print('skip')
           PYEOF
           )
           echo "target=$TARGET" >> "$GITHUB_OUTPUT"
@@ -110,11 +112,11 @@ jobs:
           ITEM_ID:  ${{ steps.item.outputs.item_id }}
         run: |
           case "$TARGET" in
-            registered)  OPT="$OPT_REGISTERED" ;;
             open)        OPT="$OPT_OPEN" ;;
             in-progress) OPT="$OPT_IN_PROGRESS" ;;
             review)      OPT="$OPT_REVIEW" ;;
             rework)      OPT="$OPT_REWORK" ;;
+            blocked)     OPT="$OPT_BLOCKED" ;;
             done)        OPT="$OPT_DONE" ;;
           esac
 

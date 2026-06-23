@@ -1,0 +1,64 @@
+name: Task 발령
+description: 신규 Task 발령 (Aiden 전용)
+labels: ["status:draft"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: "## Task 발령 — Aiden (ZEN_CEO) 작성"
+  - type: input
+    id: agent
+    attributes:
+      label: 담당 Agent
+      placeholder: "예: B_Kai / Riley / D_Kai / Baker / Dave"
+    validations:
+      required: true
+  - type: input
+    id: priority
+    attributes:
+      label: 우선순위
+      placeholder: "P1 / P2 / P3 / P4"
+    validations:
+      required: true
+  - type: input
+    id: imp
+    attributes:
+      label: 관련 IMP
+      placeholder: "예: IMP-117"
+  - type: input
+    id: branch
+    attributes:
+      label: 브랜치
+      placeholder: "예: feature/ups-sprNN-agent-title"
+    validations:
+      required: true
+  - type: input
+    id: prereq
+    attributes:
+      label: 전제조건
+      placeholder: "예: #138 ✅ · #146 ✅"
+  - type: textarea
+    id: goal
+    attributes:
+      label: 목표
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: 작업 범위
+    validations:
+      required: true
+  - type: textarea
+    id: dod
+    attributes:
+      label: DoD 체크리스트
+      value: |
+        - [ ] 구현 완료
+        - [ ] `npm run test:regression` PASS — 결과: `NNN/NNN`
+        - [ ] ZEN_A4 함수 ≤50줄 확인
+        - [ ] 코드 커밋 해시: `(기재)`
+        - [ ] 문서 커밋 해시: `(기재)`
+        - [ ] PR 생성 (`feature/* → develop`)
+    validations:
+      required: true

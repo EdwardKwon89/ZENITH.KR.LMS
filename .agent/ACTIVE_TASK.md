@@ -187,9 +187,21 @@
 | TASK-145 | 260615 | D_Kai 재교육 세션 4차 (TASK-143 반려 2회 반복 패턴 개선) | P4 | 없음 | D_Kai | ✅ | [TASK-145](tasks/TASK-145_260615_DKai재교육세션4차_DKai.md) | 재교육 완료 · `0192648` (main) · Aiden ✅ 승인 (260615) [브랜치 반영] |
 | TASK-146 | 260615 | [P7-SPR-03] UPS 요율 Admin UI (Zone/제품/기본요금/유류할증/OC 관리) | P2 | TASK-138 ✅ · TASK-143 ✅ | B_Kai | ✅ | [TASK-146](tasks/TASK-146_260615_P7SPR03_UPS요율AdminUI_BKai.md) | IMP-113 · `0578fb7` · 65 test files PASS · dialog/table/tabs ✅ · Aiden ✅ 승인 (260616) |
 | TASK-147 | 260615 | IMP-109 환율 설정 화면 — 기준통화 + 환율(USD/CNY/JPY) 어드민 UI | P3 | 없음 | Riley | ✅ | [TASK-147](tasks/TASK-147_260615_IMP109환율설정화면_Riley.md) | IMP-109 · `1c67c35` · 366/366 PASS · TASK-146 merge ✅ · Aiden ✅ 승인 (260616) |
-| TASK-148 | 260616 | [P7-SPR-03] 간이 UPS 인보이스 PDF 출력 | P2 | TASK-138 ✅ · TASK-146 ✅ | B_Kai | ❌ | [TASK-148](tasks/TASK-148_260616_P7SPR03_UPS인보이스PDF_BKai.md) | IMP-117 · ❌ 반려(2차) — LIVE_TEST_MAP 미포함 + TC-UPS-INV 실제 미등재(DoD 허위체크) |
-| TASK-149 | 260616 | [P7-SPR-04] 오더 등록 직접배송/픽업 선택 UI | P1 | TASK-138 ✅ | Riley | ❌ | [TASK-149](tasks/TASK-149_260616_P7SPR04_오더직접배송픽업UI_Riley.md) | IMP-118 · ❌ 반려(2차) — docs 커밋 ACTIVE_TASK.md+IMP_PROGRESS.md 미포함 |
-| TASK-150 | 260616 | [P7-SPR-04] 창고 출고 UPS 발송 연계 | P1 | TASK-138 ✅ · TASK-144 ✅ | D_Kai | ❌ | [TASK-150](tasks/TASK-150_260616_P7SPR04_창고출고UPS연계_DKai.md) | IMP-119 · Phase 7 SPR-04 |
+| TASK-148 | 260616 | [P7-SPR-03] 간이 UPS 인보이스 PDF 출력 | P2 | TASK-138 ✅ · TASK-146 ✅ | B_Kai | ✅ | [TASK-148](tasks/TASK-148_260616_P7SPR03_UPS인보이스PDF_BKai.md) | IMP-117 · PR #22 머지 ✅ (260617) · CI PASS |
+| TASK-149 | 260616 | [P7-SPR-04] 오더 등록 직접배송/픽업 선택 UI | P1 | TASK-138 ✅ | Riley | ✅ | [TASK-149](tasks/TASK-149_260616_P7SPR04_오더직접배송픽업UI_Riley.md) | IMP-118 · PR #21 머지 ✅ (260617) · CI PASS |
+| TASK-150 | 260616 | [P7-SPR-04] 창고 출고 UPS 발송 연계 | P1 | TASK-138 ✅ · TASK-144 ✅ | D_Kai | ✅ | [TASK-150](tasks/TASK-150_260616_P7SPR04_창고출고UPS연계_DKai.md) | IMP-119 · PR #19 머지 ✅ (260617) · CI PASS |
+| TASK-157 | 260618 | [P7-SPR-08] E2E-21 주소록 Playwright 자동화 실행 (test.skip 제거 + 완전 구현) | P2 | TASK-151 ✅ · TASK-155 ✅ | B_Kai | ✅ | [TASK-157](tasks/TASK-157_260618_P7SPR08_E2E21주소록자동화_BKai.md) | IMP-120 E2E · Issue #35 · PR #38 머지 ✅ · Aiden ✅ 승인 (260618) |
+| TASK-156 | 260618 | TASK-151 브랜치 오염 복구 — B_Kai 전용 브랜치 통합 + PR 재제출 | P1 | 없음 | B_Kai | ✅ | [TASK-156](tasks/TASK-156_260618_브랜치오염복구_BKai.md) | IMP-120 연계 · PR #33 (Closes #23·#32) · Aiden ✅ 승인 (260618) |
+| TASK-158 | 260618 | [P7-SPR-08] E2E-22 일마감 Playwright 자동화 실행 (test.skip 제거 + 완전 구현) | P2 | TASK-152 ✅ · TASK-155 ✅ | D_Kai | ✅ | [TASK-158](tasks/TASK-158_260618_P7SPR08_E2E22일마감자동화_DKai.md) | IMP-121 E2E · Issue #36 · Aiden ✅ 승인 (260619) · PR #37 머지 예정 |
+| TASK-159 | 260619 | Phase 6 + Phase 7 WBS Level 4 공정관리 문서 작성 | P4 | 없음 | B_Kai | ✅ | [TASK-159](tasks/TASK-159_260619_P6P7WBS작성_BKai.md) | Issue #40 · Aiden ✅ 승인 (260619) · PR #41 머지 완료 |
+| TASK-160 | 260619 | P7 WBS Team B SPR-04~08 트랙 develop 반영 (d05de26 후속 처리) | P4 | TASK-159 ✅ | B_Kai | ✅ | [TASK-160](tasks/TASK-160_260619_P7WBS_TeamB_SPR04-08_BKai.md) | Issue #43 · PR #44 머지 완료 · Aiden ✅ 승인 (260619) |
+| TASK-161 | 260619 | [P7-UAT] Phase 7 UPS 특송 UAT 시나리오 작성 — Agency·UPS 오더·정산 6개 기능 | P2 | IMP-114·116·117·118·119·122 ✅ | Riley | ✅ | [TASK-161](tasks/TASK-161_260619_P7UAT시나리오작성_Riley.md) | IMP-123 ✅ · PR #46 머지 ✅ · Aiden ✅ 승인 (260619) |
+| TASK-162 | 260623 | DEF-074 주소록 조회 API 500 오류 수정 (zen_address_book GRANT) | P2 | 없음 | D_Kai | ✅ | [TASK-162](tasks/TASK-162_260623_DEF074_주소록API500_DKai.md) | Issue #81 · DEF-074 · GRANT migration `20260623000000` · 코드 `3ada1bf` · 387/387 PASS · PR#82 머지 ✅ (260623) · Aiden ✅ 승인 |
+| TASK-154 | 260617 | DEF-067 seed_data.sql + seed_rate_card.sql 구스키마 수정 + IMP-120 migration fix — CI 전체 차단 블로커 복구 | P1 | 없음 | D_Kai | ✅ | [TASK-154](tasks/TASK-154_260617_DEF067_시드데이터스키마수정_DKai.md) | DEF-067 · Issue #27 · 코드 db63986 · 378/378 PASS · Aiden ✅ 승인 (260618) |
+| TASK-151 | 260617 | [P7-SPR-05] R5 주소록 — zen_address_book DB + CRUD Server Actions + 오더 폼 연동 | P1 | TASK-149 ✅ | B_Kai | ✅ | [TASK-151](tasks/TASK-151_260617_P7SPR05_주소록_BKai.md) | IMP-120 · PR #33 (Closes #23·#32) · TC-P7-ADDR-01~05 · Aiden ✅ 승인 (260618) |
+| TASK-152 | 260617 | [P7-SPR-05] R7 일마감 처리 — 당일 출고 집계 + 매출/매입 일별 집계 화면 | P1 | TASK-150 ✅ | D_Kai | ✅ | [TASK-152](tasks/TASK-152_260617_P7SPR05_일마감처리_DKai.md) | IMP-121 · PR #29 (Closes #24) · TC-P7-CLOSE-01~04 · Aiden ✅ 승인 (260618) |
+| TASK-155 | 260618 | [P7-SPR-07] E2E·UAT 선행 스펙 작성 — 주소록(E2E-21·UAT-13) + 일마감(E2E-22·UAT-14) | P2 | TASK-151·152 스펙 확정 ✅ | Riley | ✅ | [TASK-155](tasks/TASK-155_260618_P7SPR07_E2EUAT선행스펙_Riley.md) | PR #30 (Closes #28) · 374/374 PASS · Aiden ✅ 승인 (260618) Advisory: PR body 문서커밋해시 정정 권고 |
+| TASK-153 | 260617 | [P7-SPR-06] Agency 정산 조회 — 화주별 UPS 오더 정산 내역 조회 화면 | P1 | IMP-111 ✅ · IMP-116 ✅ | Riley | ✅ | [TASK-153](tasks/TASK-153_260617_P7SPR06_Agency정산조회_Riley.md) | IMP-122 ✅ · Issue #25 ✅ · PR #26 머지 ✅ (260617) |
 | TASK-108 | 260601 | DEF-039 CARRIER RLS + 미스테이지 커밋 + 신원 수정 | P2 | 없음 | D_Kai | ✅ | [TASK-108](tasks/TASK-108_260601_DEF039CARRIER_RLS_미스테이지커밋_DKai.md) | DEF-039 해소 · 4cc88d8+beba338 · CARRIER RLS 3테이블 · 229/229 ✅ · Aiden ✅ 승인 |
 | TASK-109 | 260603 | IMP-095 Rate Card 항로(Port) 기반 매칭 구현 | P1 | TASK-106 ✅ · TASK-108 ✅ | D_Kai (OpenCode) | ✅ | [TASK-109](tasks/TASK-109_260603_IMP095포트기반요율매칭_DKai.md) | IMP-095 완료 · `0fb950d`+`fb263f9` · 236/236 PASS · Aiden ✅ 승인 |
 | TASK-110 | 260603 | IMP-096 요율 관리 페이지 통합 정리 (3단계) | P1 | TASK-106 ✅ · TASK-109 ✅ | D_Kai (OpenCode) | ✅ | [TASK-110](tasks/TASK-110_260603_IMP096요율관리페이지통합정리_DKai.md) | IMP-096 완료 · `e166fec`+`65c904b` · 236/236 PASS · Aiden ✅ 승인 |
@@ -216,10 +228,29 @@
 
 | Task-ID | 생성일 | 업무개요 | 우선순위 | 전제조건 | 할당Agent | 상태 | 상세파일 | 비고 |
 |:-------:|:------:|:--------|:--------:|:--------:|:---------:|:----:|:--------|:-----|
-| TASK-142 | 260614 | [P7-SPR-02] Agency 화주 관리 UI — 대시보드 + 화주 목록/등록 페이지 | P1 | TASK-139 ✅ | Jaison | ❌ | [TASK-142](tasks/TASK-142_260614_Phase7Agency_화주관리UI_Jaison.md) | IMP-114 · PR#7 2차 반려 (260616) — DoD 미체크(Dave) + TASK번호충돌(145~149→151~155 재채번) |
+| TASK-142 | 260614 | [P7-SPR-02] Agency 화주 관리 UI — 대시보드 + 화주 목록/등록 페이지 | P1 | TASK-139 ✅ | Jaison | ✅ | [TASK-142](tasks/TASK-142_260614_Phase7Agency_화주관리UI_Jaison.md) | IMP-114 ✅ · PR#7 → develop 머지 완료 (260616) · TASK-B-001~005 |
 | TASK-139 | 260614 | [P7-SPR-01] Agency 역할 모델 — org_type 확장 + RBAC + 대리점 화주 계층 DB | P1 | An-12 확정 ✅ · TASK-138 ✅ | Jaison | ✅ | [TASK-139](tasks/TASK-139_260614_Agency역할모델_DevTeam.md) | IMP-111 · 코드 dc8a2ff · 327/334 PASS · PR#5 머지 완료 |
 | TASK-140 | 260614 | TASK-139 DoD 보완 — supabase db reset 검증 (TASK-138+139 migration 전체 적용) | P2 | TASK-139 ✅ | Baker | ✅ | [TASK-140](tasks/TASK-140_260614_Agency_DB_Reset_검증_Baker.md) | IMP-111 연계 · supabase reset ✅ · 커밋 59da68f |
-
+| TASK-B-001 | 260615 | [P7-SPR-02] Agency 화주 Server Actions 3종 구현 (getAgencyShippers·createAgencyShipper·updateAgencyShipperGrade) | P1 | TASK-139 ✅ | Dave | ✅ | [TASK-B-001](tasks/TASK-B-001_260615_Agency화주ServerActions_Dave.md) | IMP-114 · 코드 7977e97+4c2cb91 · 340/347 PASS · Aiden ✅ 260616 |
+| TASK-B-002 | 260615 | [P7-SPR-02] Agency 화주 목록/등록 UI — /agency/shippers + /agency/shippers/new | P1 | TASK-B-001 ✅ | Baker | ✅ | [TASK-B-002](tasks/TASK-B-002_260615_Agency화주목록등록UI_Baker.md) | IMP-114 · 코드 ec4d7f5+0976c21 · 340/340 PASS · Aiden ✅ 260616 |
+| TASK-B-003 | 260615 | [P7-SPR-02] Agency 대시보드 + NaviSidebar AGENCY 메뉴 추가 — /agency | P1 | TASK-B-001 ✅ | Dave | ✅ | [TASK-B-003](tasks/TASK-B-003_260615_Agency대시보드NaviSidebar_Dave.md) | IMP-114 · 코드 97e9126 · 340/347 PASS · Aiden ✅ 260616 |
+| TASK-B-004 | 260616 | [P7-SPR-02] PR#7 반려 수정 — Baker 담당 (Issue 2·3·4·6: locale·RBAC·null·타입) | P1 | TASK-142 ✅ | Baker | ✅ | [TASK-B-004](tasks/TASK-B-004_260616_PR7반려수정_Baker.md) | IMP-114 · 코드 57b5df8 · 345/345 PASS · Aiden ✅ 260616 |
+| TASK-B-005 | 260616 | [P7-SPR-02] PR#7 반려 수정 — Dave 담당 (Issue 1·5·7: 컬럼지정·i18n·TC) | P1 | TASK-142 ✅ | Dave | ✅ | [TASK-B-005](tasks/TASK-B-005_260616_PR7반려수정_Dave.md) | IMP-114 · 코드 31bfa4d · 345/352 PASS · Aiden ✅ 260616 |
+| TASK-B-006 | 260616 | [P7-SPR-03] Agency 요율 오버라이드 Server Actions 3종 (getAgencyRateOverrides·upsertAgencyRateOverride·deactivateAgencyRateOverride) | P1 | TASK-B-001 ✅ · TASK-143 ✅ | Dave | ✅ | [TASK-B-006](tasks/TASK-B-006_260616_AgencyRateOverridesActions_Dave.md) | IMP-116 · PR#8 머지 완료 260617 · 345/352 PASS · Aiden ✅ 260617 |
+| TASK-B-007 | 260616 | [P7-SPR-03] Agency 요율 오버라이드 UI — /agency/rate-overrides + NaviSidebar 메뉴 + i18n 10종 | P1 | TASK-B-006 ✅ | Baker | ✅ | [TASK-B-007](tasks/TASK-B-007_260616_AgencyRateOverridesUI_Baker.md) | IMP-116 · PR#8 머지 완료 260617 · 345/345 PASS · Aiden ✅ 260617 |
+| TASK-B-008 | 260620 | [P7-SPR-05] Agency 정산 내역 엑셀 다운로드 — exportAgencySettlementExcel + 다운로드 버튼 UI | P2 | IMP-122 ✅ | Dave | ✅ | [TASK-B-008](tasks/TASK-B-008_260620_Agency정산엑셀다운로드_Dave.md) | IMP-124 ✅ · PR#55 머지 ✅ · Aiden ✅ 260620 |
+| TASK-B-009 | 260620 | [P7-SPR-05] Agency 대시보드 정산 요약 위젯 — AgencySettlementWidget | P2 | IMP-122 ✅ | Baker | ✅ | [TASK-B-009](tasks/TASK-B-009_260620_Agency대시보드정산위젯_Baker.md) | IMP-125 ✅ · PR#54 머지 ✅ · Aiden ✅ 260620 |
+| TASK-B-010 | 260620 | [P7-SPR-06] Agency 정산 오더번호 검색 기능 — AgencySettlementQuerySchema + ILIKE 검색 UI | P2 | TASK-B-008 ✅ | Dave | ✅ | [TASK-B-010](tasks/TASK-B-010_260620_Agency정산오더번호검색_Dave.md) | IMP-126 ✅ · PR#62 머지 ✅ · 384/384 PASS · Aiden ✅ 260621 |
+| TASK-B-011 | 260620 | [P7-SPR-06] Agency 정산 Reconciliation 검증 — 미가격 오더 알림 (getAgencyUnpricedOrders + SettlementReconciliationAlert) | P2 | TASK-B-008 ✅ · TASK-B-009 ✅ | Baker | ✅ | [TASK-B-011](tasks/TASK-B-011_260620_Agency정산Reconciliation_Baker.md) | IMP-127 ✅ · PR#63 머지 ✅ · 384/384 PASS · Aiden ✅ 260621 |
+| TASK-B-012 | 260621 | [P7-SPR-07] Agency 정산 orderNoSearch 연동 완성 — `_fetchOrders` + `exportAgencySettlementExcel` + Client 수정 | P2 | TASK-B-010 ✅ · DEF-061 ✅ | Dave | ✅ | [TASK-B-012](tasks/TASK-B-012_260621_Agency정산orderNoSearch연동완성_Dave.md) | IMP-128 ✅ · PR#66 머지 ✅ · Aiden ✅ 260623 |
+| TASK-B-013 | 260621 | [P7-SPR-07] SettlementReconciliationAlert 오더 링크 추가 + Agency SPR-06 UAT 시나리오 보완 | P3 | TASK-B-010 ✅ · TASK-B-011 ✅ | Baker | ✅ | [TASK-B-013](tasks/TASK-B-013_260621_SettlementAlertOrderLink_UAT보완_Baker.md) | IMP-129 ✅ · PR#67 머지 ✅ · Aiden ✅ 260623 |
+| TASK-B-014 | 260621 | [P7-SPR-07] AgencySettlementQuerySchema order_no_search 필드 추가 (Zod 검증 정합성 보완) | P4 | TASK-B-012 🔔 | Dave | ✅ | [TASK-B-014](tasks/TASK-B-014_260621_AgencySettlementQuerySchema_order_no_search_Dave.md) | IMP-130 · PR#69 머지 ✅ · Aiden ✅ 260622 |
+| TASK-B-015 | 260622 | Team B DoD 표준화 — PR 제출 전 빌드 검증(npm run build) + i18n 중복 방지 의무화 | P2 | — | Jaison | ✅ | [TASK-B-015](tasks/TASK-B-015_260622_TeamB_DoD표준화_Jaison.md) | Issue #71 Edward 지시 · TEAM_B_DOD_STANDARD.md 신규 작성 |
+| TASK-B-016 | 260622 | CI pr-checks.yml .env.local 생성 버그 수정 — JWT 파싱 eval 방식 교체 | High | 없음 | Jaison | ✅ | [TASK-B-016](tasks/TASK-B-016_260622_CI_env_fix_Jaison.md) | IMP-131 ✅ · Issue #72 · PR#73 머지 ✅ · Aiden ✅ 260622 |
+| TASK-B-017 | 260622 | CI service_role GRANT 누락 — migration fix (zen_rate_cards·zen_orders·zen_tracking_configs·zen_tracking_raw_logs) | High | TASK-B-016 ✅ | Jaison | ✅ | [TASK-B-017](tasks/TASK-B-017_260622_CI_service_role_grant_fix_Jaison.md) | IMP-132 ✅ · Issue #74 · PR#75 머지 ✅ · CI Run #3 387/387 · Aiden ✅ 260622 |
+| TASK-B-018 | 260623 | [P7-SPR-08] Agency E2E 자동화 + Phase 7 종합 회귀 테스트 — e2e-23-agency-flow.spec.ts 신규 + 통합 회귀 | P2 | SPR-07 ✅ | Jaison (총괄) · Baker (§1 E2E) · Dave (§2 회귀) | ✅ | [TASK-B-018](tasks/TASK-B-018_260623_P7SPR08_AgencyE2E_종합회귀_Jaison.md) | IMP-133 · Issue #77 ✅ · PR#79 → develop 머지 ✅ (260623 Aiden) |
+| TASK-B-019 | 260623 | [P7-SPR-08] Phase 7 종합 회귀 테스트 — E2E-21/22/23 통합 실행 및 보고 | P2 | TASK-B-018 ✅ | Jaison | ✅ | [TASK-B-019](tasks/TASK-B-019_260623_P7SPR08_Phase7종합회귀_Jaison.md) | IMP-134 · Issue #78 ✅ · PR#84 머지 ✅ (260623) · E2E-22 PASS · E2E-21/23 R-14 적용 · 387/387 · Aiden ✅ 승인 |
+| TASK-B-020 | 260623 | DEF-073 Agency shippers/new · rate-overrides/new Server Action 오류 수정 | P2 | 없음 | Baker | ✅ | [TASK-B-020](tasks/TASK-B-020_260623_DEF073_AgencyServerAction수정_Baker.md) | Issue #80 · DEF-073 · getTranslations→useTranslations · PR#83 머지 ✅ (260623) · Aiden ✅ 승인 |
 ---
 
 ## Agent 현황
@@ -228,10 +259,10 @@
 
 | Agent | 상태 | 비고 |
 |:------|:----:|:----|
-| **Aiden (Claude)** | ✅ TASK-150 발령 완료 (260616) | SPR-03/04 발령 — TASK-148/149/150 신규 발령. IMP-117/118/119 등재 |
-| **D_Kai (OpenCode)** | ❌ TASK-150 반려 — 재작업 중 ⚠️ ACTIVE_TASK.md 파괴 위반 | `af89f2b` ACTIVE_TASK.md 구버전 덮어씀 → TASK-146~150 삭제+TASK-141 ⬜ 역전. Aiden `ebc1715` 기준 복구. 브랜치 위반 재발. **DEF-066 등록완료**. |
-| **B_Kai** | ❌ TASK-148 반려(2차) — 재작업 필요 | LIVE_TEST_MAP 문서커밋 미포함 + TC-UPS-INV 실제 미등재(DoD 허위체크) |
-| **Riley** | ❌ TASK-149 반려(2차) — 재작업 필요 | 문서 커밋 `3dff29b1` ACTIVE_TASK.md+IMP_PROGRESS.md 미포함 |
+| **Aiden (Claude)** | ✅ TASK-159 승인 (260619) · ✅ TASK-158 승인 (260619) | PR #41 머지 완료 · PR #37 머지 완료 |
+| **D_Kai (OpenCode)** | ✅ TASK-162 완료 (260623) | PR#82 머지 · DEF-074 해소 · 다음 Task 배분 대기 |
+| **B_Kai** | ✅ TASK-160 승인 (260619) | PR #44 머지 완료. 다음 Task 배분 대기 |
+| **Riley** | ✅ TASK-161 승인 (260619) | UAT-15~20 16개 시나리오 · PR #46 머지 · 다음 Task 배분 대기 |
 | N_Kai | 재교육 세션 대기 (TASK-087) | R-17 위반 누적 — 신규 할당 중단 유지 |
 | Ring | 신규 할당 중단 유지 | 9차 위반 누적 |
 
@@ -239,14 +270,38 @@
 
 | Agent | 상태 | 비고 |
 |:------|:----:|:----|
-| **JSJung** (팀 리더) | 활성 | TASK-142 감독 — PR#7 2차 반려(260616), 재작업 중 |
-| **Jaison** (AI Agent 총괄) | ❌ TASK-142 반려(2차) — 재작업 필요 | IMP-114 Agency 화주 관리 UI · PR#7 DoD 미체크(Dave)+TASK번호충돌 |
-| **Baker** (AI Agent 보조) | 신규 Task 대기 | TASK-140 ✅ 완료 |
+| **JSJung** (팀 리더) | ✅ TASK-142 완료 | PR#7 → develop 머지 (260616) |
+| **Jaison** (AI Agent 총괄) | ✅ TASK-B-018 · TASK-B-019 완료 (260623) | PR#79·#84 머지 ✅ · Team B SPR-04~08 전량 완료 |
+| **Dave** (AI Agent) | ✅ TASK-B-018 §2 완료 | 회귀 분석 완료 · 코드 회귀 0건 확인 · 다음 Task 배분 대기 |
+| **Baker** (AI Agent) | ✅ TASK-B-020 완료 (260623) | PR#83 머지 · DEF-073 해소 · 다음 Task 배분 대기 |
+| **Gale** (AI Agent) | 대기 | 추후 재배정 예정 |
 
 ---
 
 ## 개정 이력
 
+| 2026-06-23 | Aiden (ZEN_CEO) | **TASK-B-019 ✅ 승인** — PR#84 머지. E2E-22 PASS · E2E-21/23 R-14 적용(CI 환경 대체) · 387/387 PASS. Team B SPR-04~08 전량 완료 — develop→main 머지 조건 충족. |
+| 2026-06-23 | Aiden (ZEN_CEO) | **TASK-162 ✅ · TASK-B-020 ✅ 승인** — PR#82(D_Kai DEF-074 GRANT) · PR#83(Baker DEF-073 Server Action) 머지 완료. TASK-B-019 블로커(E2E-21·TC-AG-03~06) 전량 해제. Issue#78 Jaison 통보 완료. |
+| 2026-06-23 | Baker (Big Pickle) | **TASK-B-020 🔔 수정완료** — 4개 파일 수정: `getTranslations()`→`useTranslations()` Client 훅 대체. npm run build ✅. PR#83 제출. |
+| 2026-06-23 | Aiden (ZEN_CEO) | **TASK-B-020 · TASK-162 발령** — DEF-073(Baker, Issue #80): Agency Server Action 오류. DEF-074(D_Kai, Issue #81): 주소록 API 500. Edward 승인 (R-18 High DEF). TASK-B-019 🔄 블로커 등록. |
+| 2026-06-23 | Aiden (ZEN_CEO) | **TASK-B-018 ❌ 2차 반려** — PR#79: ① Closes #51→#77 ② 화주신규등록 누락 ③ 요율등록 미구현 ④ waitForTimeout. Baker §1 재수정 → PR#79 재제출. |
+| 2026-06-23 | Aiden (ZEN_CEO) | **TASK-B-018 ✅ 승인** — PR#79 → develop 머지 완료. DoD 전항목 ✅ · Issue #77 종료 · TASK-B-019 전제조건 충족 — 즉시 착수 가능. |
+| 2026-06-23 | Jaison (Team B) | **TASK-B-018 ❌ 1차 반려** — Baker: ZEN_A4 위반(beforeAll 120줄·TC-AG-07~08 62줄). Dave: 회귀 9건 실패 미설명. 수정 지시 등록. |
+| 2026-06-23 | Jaison (Team B) | **TASK-B-018 🔄 착수 (JSJung 지시)** — Baker(§1 e2e-23-agency-flow.spec.ts 작성) · Dave(§2 Phase 7 종합 회귀 실행) 배정 완료. 브랜치 `feature/teamb-task-b-018-agency-e2e-regression` 생성. |
+| 2026-06-20 | Baker (Big Pickle) | **TASK-B-009 🔄 1차 수정중** — Jaison 검토: `agency_settlement_widget_title` i18n 키 미사용 → 위젯 제목 `<h2>` 추가 완료 (49줄). 회귀 369/378 PASS (2건 pre-existing Supabase). |
+| 2026-06-20 | Baker (Big Pickle) | **TASK-B-009 ✅ 완료(🔔 검토 대기)** — Agency 대시보드 정산 요약 위젯 48줄 구현. i18n 4개국어 5개키. TC-B-DASH-01~02 등재. 회귀 212/214 PASS. 코드 `d763951` + 문서 `b3d35f6`. [PR #54](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/54) (Closes #53). |
+| 2026-06-20 | Jaison (Team B) | **TASK-B-008/009 Jaison 검토 PASS** — Dave(B-008): 회귀 372/381 전체 확인(수정요청 반영). Baker(B-009): widget_title 키 연결 확인(49줄 ZEN_A4 준수). 양측 PR#55·PR#54 Aiden 최종 승인 대기. |
+| 2026-06-20 | Jaison (Team B) | **TASK-B-010/011 발령 (SPR-06)** — Dave: IMP-126 오더번호 검색(Issue#56). Baker: IMP-127 Reconciliation 검증(Issue#57). Task 파일·IMP_PROGRESS.md 신규 등재. |
+| 2026-06-21 | JSJung (팀 리더) | **Noah(Codex) 비등록 확정** — Baker(Big Pickle)가 B-011 계속 담당. [Codex] 태그 3커밋 → [BP] 재커밋 지시. |
+| 2026-06-21 | Jaison (Team B) | **TASK-B-010/011 Jaison 2차 반려 (❌)** — Dave(B-010): ja/zh i18n 미이행(커밋메시지 허위)·DoD 역체크·getAgencyUnpricedOrders scope 제거·신규 PR 4건. Baker(B-011): [Codex]→[BP] 재커밋·신규 PR 2건. PR#58·#59 코멘트 등록. |
+| 2026-06-21 | Jaison (Team B) | **TASK-B-010/011 Jaison 1차 반려 (❌)** — Dave(B-010): PR URL 오기재·ja/zh i18n 누락·R-18 DEF 미등록 3건. Baker(B-011): DoD 허위체크 2항목·문서커밋 해시 오기재 2건. PR#58·#59 코멘트 등록. 수정 후 재제출 대기. |
+| 2026-06-20 | Jaison (Team B) | **TASK-B-008/009 ✅ 확인 + SPR-06 착수 지시** — Aiden PR#54·#55 머지 확인(cf964c6·3f263f6). Agent 현황 갱신: Dave ✅B-008/⬜B-010, Baker ✅B-009/⬜B-011. Dave·Baker SPR-06 즉시 착수 가능. |
+| 2026-06-20 | Aiden (Claude) | **PR#54 머지 ✅** — TASK-B-009(Baker) Agency 대시보드 정산 위젯 승인. TASK-B-008/009 ✅ 확정. TASK-B-010/011 블로커 해제(🚫→⬜). develop 반영 완료. |
+| 2026-06-18 | Aiden (Claude) | **Phase 7 SPR-05/06 복원 + TASK-151/156 2차 반려** — B_Kai branch reset으로 Phase 7 SPR-05/06 구간(TASK-151~156) 손실 → 복원. TASK-151 ❌ 2차 반려: R-09 LIVE_REGRESSION_TEST_MAP.md 미갱신 + PR #33 Closes #32 누락. TASK-153 ✅ 복원(PR #26 머지). TASK-152 🔄 복원(코드 5f86dfe). TASK-154 ⬜·TASK-155 🔔 복원. |
+| 2026-06-16 | JSJung (팀 리더) | **PR#8 제출** — TASK-B-006(Dave)·TASK-B-007(Baker) SPR-03 Agency 요율 오버라이드 UI. feature/ups-spr03-devteam-agency-rate-overrides → develop. Aiden 검토 요청. |
+| 2026-06-16 | Jaison (Team B) | **TASK-B-007 🔔 Jaison 검토 PASS** — ZEN_A4 수정 확인(함수 36·39·42줄), IMP_PROGRESS.md Baker 행 추가, 문서 커밋 해시 오기재(`9da38db`→`978f812`) Jaison 직접 수정. Aiden ✅ 승인 대기. |
+| 2026-06-16 | Jaison (Team B) | **TASK-B-007 ❌ 반려(1차)** — ZEN_A4 3건: table-row 52줄·form 60줄·fields 51줄. R-17 2건: 문서 커밋 해시 TBD 미기재·IMP_PROGRESS.md 미갱신. Baker 수정 지시 완료 (task file [수정 지시] 섹션). |
+| 2026-06-16 | JSJung (팀 리더) | **TASK-B-007 ⬜ 착수 승인** — TASK-B-006 🔔 내부 DoD 검증 완료(Jaison). Baker에게 SPR-03 UI 착수 승인. TASK-B-007 🚫→⬜ 전환. |
 | 2026-06-16 | Aiden (Claude) | **TASK-148·149 ❌ 반려(2차)** — B_Kai(TASK-148): LIVE_TEST_MAP 문서커밋 미포함+TC-UPS-INV 실제 미등재(DoD 허위체크) 2건. Riley(TASK-149): 문서커밋 ACTIVE_TASK.md+IMP_PROGRESS.md 미포함 1건. **D_Kai CRITICAL**: `af89f2b`가 ACTIVE_TASK.md 구버전 덮어써 TASK-146~150 행 삭제됨 → `ebc1715` 기준 복구. **TASK-142(Team B)**: PR#7 2차 반려 상태 복원. **DEF-066 등록완료**. |
 | 2026-06-16 | Aiden (Claude) | **TASK-148·149·150 ❌ 반려(1차)** — B_Kai(TASK-148): 헤더 미변경·해시 허위체크·브랜치 위반 등 6건. Riley(TASK-149): 문서 커밋 해시 TBD 허위체크·필수파일 미포함 2건. D_Kai(TASK-150, CRITICAL): DoD 전항목 미체크·Scope 오류·허위 해시 기재·브랜치 위반 등 6건. 전원 재작업 지시. |
 | 2026-06-16 | Aiden (Claude) | **Phase 7 SPR-03/04 Team A 발령** — TASK-148(B_Kai, IMP-117 UPS 인보이스 PDF) · TASK-149(Riley, IMP-118 오더 직접배송/픽업 UI) · TASK-150(D_Kai, IMP-119 창고 출고 UPS 연계) 신규 발령. SPR-03 TASK-146 ✅ · SPR-02 TASK-147 ✅ 완료 후 다음 스프린트 발령. TASK-145 ✅ 브랜치 반영 (main `0192648`). |

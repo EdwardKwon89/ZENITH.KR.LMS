@@ -1313,3 +1313,82 @@
 - **선후행 관계**: DEF-054 A안 선행 완료 필요 (TASK-127)
 - **예상 공수**: 1~2 MD
 - **우선순위**: Medium (post-Go-Live)
+
+---
+
+## [IMP-123] 브랜치 교차 오염 방지 — R-17 착수 절차 강화 + pre-commit hook
+
+- **발견 경위**: Issue #31 (B_Kai 보고) — TASK-151 커밋이 Riley 브랜치(`feature/ups-spr07-riley-e2e-uat-spec`)에 오염된 사건에서 도출. Edward 확인 2026-06-18.
+- **현재 상태**:
+  - 모든 Agent가 동일 Local Workspace(`/Users/edward.kwon/WorkSpace/ZENITH_LMS_001`) 공유
+  - 착수 전 `git checkout feature/[본인 브랜치]` 단계가 R-17 절차에 명시되지 않음
+  - 타 Agent 브랜치 checkout 상태에서 커밋 시 cross-branch 오염 발생 가능
+- **임시 조치**: TASK-156 발령 (B_Kai 브랜치 오염 복구), GOV_COMMON.md R-17 §0 신설
+- **구현 완료** (2026-06-18, Aiden):
+  1. **GOV_COMMON.md R-17 §0 신설** — 착수 절차 최상위에 Git 동기화 5단계 추가:
+     `fetch → checkout develop → pull → checkout 본인 브랜치 → rebase`
+  2. **pre-commit hook Agent Tag ↔ 브랜치 검증** — `.git/hooks/pre-commit` 에 추가:
+     - `[B_Kai]` 커밋은 `bkai` 브랜치에서만 허용
+     - `[D_Kai]` 커밋은 `dkai` 브랜치에서만 허용
+     - `[Riley]/[Gemini]` 커밋은 `riley` 브랜치에서만 허용
+     - `[Claude]/[Aiden]` 커밋은 전체 브랜치 허용 (거버넌스 작업)
+- **git worktree 방안 기각**: Agent가 자신의 worktree 경로를 자동 판별하는 메커니즘 부재. 관리 부담 과도. Edward 승인.
+- **관련 파일**: `GOV_COMMON.md` (R-17 §0), `.git/hooks/pre-commit`, `GOV_COMMON.md` (v2.2 개정 이력)
+- **관련 이슈**: GitHub Issue #31
+- **예상 공수**: ✅ 완료 (0.5 MD)
+- **우선순위**: High → **완료**
+
+---
+
+## [IMP-124] 에이전트 Task 작성 규정 표준화 — Task·Task 상세 파일 작성 지침 문서화
+
+- **발견 경위**: TASK-159 (B_Kai, 2026-06-19) — B_Kai가 task file을 자체 생성 시 [R-17 완료 보고 절차] 섹션을 누락하여 커밋 분리 기준 불명확 → 2차 반려. Aiden 직접 섹션 추가 후 해소.
+- **현재 상태**:
+  - 에이전트가 task file을 자체 생성할 때 참조할 표준 템플릿/규정이 없음
+  - GOV_COMMON.md R-17에 완료 보고 절차는 있으나, **task file 자체 작성 방법·필수 섹션 구성**이 명시되지 않음
+  - 에이전트가 [R-17 완료 보고 절차] 섹션을 누락하면 커밋 분리 기준을 알 수 없어 반복 위반 발생
+- **임시 조치**: Aiden이 TASK-159 task file에 직접 [R-17 완료 보고 절차] 섹션 추가 (1회성)
+- **목표 구현**:
+  1. **Task 작성 규정 문서** 신규 작성 (`docs/00_GUIDE/104_TASK_FILE_SPEC.md` 또는 유사 경로)
+     - Task file 필수 섹션 목록: [목표], [작업 범위], [DoD], [R-17 완료 보고 절차], [발견 이슈], [작업 결과], [Aiden 검토]
+     - 문서 전용 Task / 코드 Task 유형별 [R-17 완료 보고 절차] 작성 기준
+     - [R-17 완료 보고 절차] 내 커밋 단위 파일 명시 규칙 (코드 커밋 포함 금지 파일 목록)
+  2. **Task 파일 템플릿** 제공 (`docs/00_GUIDE/TASK_TEMPLATE.md`)
+  3. **GOV_COMMON.md R-17 보완**: 에이전트가 task file 자체 생성 시 위 규정 문서 참조 의무 명시
+- **논의 필요 사항**:
+  - 에이전트 task 자체 생성 허용 범위 재검토 (Aiden 발령 원칙 강화 vs 에이전트 자율성)
+  - **[신규 2026-06-19] ✅ 완료 후 동일 Task/브랜치 추가 커밋 처리 규정 미비**: B_Kai가 TASK-159 ✅ 승인 후 동일 브랜치(`feature/wbs-bkai-p6p7-wbs`)에 `d05de26` 커밋 직접 추가 — R-17 미정의 케이스. 규정 추가 필요: "✅ 완료 후 동일 Task 범위 추가 작업은 신규 Task/Issue 필수". TASK-160/Issue #43으로 해당 건 처리 중.
+- **관련 파일**: `GOV_COMMON.md` (R-17), `.agent/tasks/TASK-159_*.md`, `.agent/tasks/TASK-160_*.md`
+- **예상 공수**: 0.5~1 MD
+- **우선순위**: Medium (절차 개선 논의 시 처리)
+- **상태**: ⬜ 미착수 — **추후 절차 개선 세션에서 논의 예정** (Edward, 2026-06-19)
+
+---
+
+## [IMP-131] CI pr-checks.yml .env.local 파싱 버그 수정
+
+- **발견 경위**: PR#66/#67 CI에서 `SUPABASE_SERVICE_ROLE_KEY is required` 반복 실패 — Aiden 근본 원인 분석 (Issue #72, 2026-06-22)
+- **현재 상태**: `supabase status | grep | awk` 파이프라인이 빈 문자열 반환 + heredoc 들여쓰기로 dotenv 키 인식 실패
+- **임시 조치**: 해당 사항 없음
+- **목표 구현**: `supabase status --output env` + `printf` 방식으로 교체
+- **관련 파일**: `.github/workflows/pr-checks.yml`
+- **관련 Task**: TASK-B-016 (Jaison)
+- **관련 Issue**: GitHub Issue #72
+- **예상 공수**: 0.1 MD
+- **우선순위**: High
+- **상태**: 🔔 완료 — TASK-B-016 Jaison 260622, 커밋 `7259d32`
+
+---
+
+## [IMP-130] AgencySettlementQuerySchema order_no_search 필드 누락 보완
+
+- **발견 경위**: TASK-B-012 Jaison 1차 검토 (2026-06-21) — `getAgencyOrderSettlements` / `exportAgencySettlementExcel` 양측에서 `order_no_search` 키를 `AgencySettlementQuerySchema.parse()`에 전달하나, 스키마 정의에 해당 필드 없음 → Zod silently strip → 검색어 서버 사이드 유효성 검증 우회
+- **현재 상태**: `src/lib/validations/agency.ts` `AgencySettlementQuerySchema`에 `order_no_search` 필드 미정의. 기능 동작은 정상(ILIKE 직접 변수 참조), 스키마 검증만 실질적으로 무효화됨
+- **임시 조치**: 해당 사항 없음 (기능 영향 없음)
+- **목표 구현**: `AgencySettlementQuerySchema`에 `order_no_search: z.string().optional()` 1줄 추가
+- **관련 파일**: `src/lib/validations/agency.ts`
+- **관련 Task**: TASK-B-014 (Dave)
+- **관련 Issue**: GitHub Issue #68
+- **예상 공수**: 0.1 MD
+- **우선순위**: P4
+- **상태**: ⬜ 미착수 — TASK-B-014 발령 260621

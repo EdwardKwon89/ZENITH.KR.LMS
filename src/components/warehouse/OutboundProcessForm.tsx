@@ -47,6 +47,8 @@ export default function OutboundProcessForm({ locale }: { locale: string }) {
   const [history, setHistory] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const [previewOrder, setPreviewOrder] = useState<any>(null);
+  const [showIntlWarning, setShowIntlWarning] = useState(false);
+  const [pendingOrders, setPendingOrders] = useState<any[]>([]);
 
   useEffect(() => {
     fetchData();
@@ -95,15 +97,38 @@ export default function OutboundProcessForm({ locale }: { locale: string }) {
       return;
     }
 
+    const selectedOrders = orders.filter((o) => selected.has(o.id));
+    const ordersWithMissingIntl = selectedOrders.filter((o) => {
+      const pkgs = o.order_packages || [];
+      return pkgs.some((p: any) => !p.intl_ref_no);
+    });
+
+    if (ordersWithMissingIntl.length > 0) {
+      setPendingOrders(selectedOrders);
+      setShowIntlWarning(true);
+      return;
+    }
+
+    await executeConfirmOutbound(selectedOrders);
+  };
+
+  const executeConfirmOutbound = async (ordersToProcess: any[]) => {
     setSubmitLoading(true);
     try {
       const results = await Promise.all(
-        Array.from(selected).map((id) => confirmOutbound(id))
+        ordersToProcess.map((o) => confirmOutbound(o.id))
       );
       const allSuccess = results.every((r) => r.success);
       if (allSuccess) {
-        toast.success(t("success_msg"));
+        const missingCount = results.reduce((s, r) => s + (r as any).pkgsWithoutIntlRef || 0, 0);
+        if (missingCount > 0) {
+          toast.warning(t("intl_ref_missing_confirmed", { count: missingCount }));
+        } else {
+          toast.success(t("success_msg"));
+        }
         setSelected(new Set());
+        setShowIntlWarning(false);
+        setPendingOrders([]);
         await fetchData();
       } else {
         toast.warning("일부 오더 출고 처리에 실패했습니다.");
@@ -113,6 +138,10 @@ export default function OutboundProcessForm({ locale }: { locale: string }) {
     } finally {
       setSubmitLoading(false);
     }
+  };
+
+  const confirmWithWarning = () => {
+    executeConfirmOutbound(pendingOrders);
   };
 
   const formatKstTime = (dateStr: string) => {
@@ -277,6 +306,24 @@ export default function OutboundProcessForm({ locale }: { locale: string }) {
                         <p className="text-[11px] text-slate-400">
                           {pkgCount} 패키지 · {totalQty}개 품목
                         </p>
+                        <div className="flex flex-wrap gap-1 mt-1.5">
+                          {(order.order_packages || []).map((pkg: any, idx: number) => (
+                            <span
+                              key={pkg.id || idx}
+                              className={cn(
+                                "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border",
+                                pkg.intl_ref_no
+                                  ? "bg-green-50 text-green-700 border-green-200"
+                                  : "bg-orange-50 text-orange-700 border-orange-200"
+                              )}
+                            >
+                              <span className="font-mono">#{idx + 1}</span>
+                              {pkg.intl_ref_no
+                                ? pkg.intl_ref_no
+                                : t("intl_ref_missing")}
+                            </span>
+                          ))}
+                        </div>
                       </div>
                     </div>
 
@@ -390,6 +437,32 @@ export default function OutboundProcessForm({ locale }: { locale: string }) {
           </div>
         </ZenCard>
       </div>
+      {showIntlWarning && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-bold text-slate-900 mb-2">
+              {t("intl_ref_warning_title")}
+            </h3>
+            <p className="text-sm text-slate-600 mb-6">
+              {t("intl_ref_warning_desc")}
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => { setShowIntlWarning(false); setPendingOrders([]); }}
+                className="px-5 py-2.5 text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all"
+              >
+                취소
+              </button>
+              <button
+                onClick={confirmWithWarning}
+                className="px-5 py-2.5 text-sm font-semibold text-white bg-purple-600 hover:bg-purple-700 rounded-xl transition-all"
+              >
+                {t("confirm_continue")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

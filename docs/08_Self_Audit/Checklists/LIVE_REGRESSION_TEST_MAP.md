@@ -1,7 +1,7 @@
 # 🗺️ LIVE Regression Test Master Map
 
-> **총 테스트 케이스:** 368 Cases  
-> **최종 검증일:** 2026-06-16 (TASK-148 IMP-117 UPS 간이 인보이스 PDF + TASK-147/146 통합)  
+> **총 테스트 케이스:** 384 Cases  
+> **최종 검증일:** 2026-06-20 (TASK-155 [P7-SPR-07] E2E·UAT 선행 스펙 작성 · TC-P7-ADDR-01~05, TC-P7-CLOSE-01~05 등재 · 374/374 PASS)  
 
 제니스 플랫폼의 비즈니스 영속성을 보장하는 회귀 테스트 케이스의 통합 명세서입니다. 모든 신규 개발 및 수정 시 이 맵에 케이스가 추가되어야 하며, 전체 테스트가 통과되어야 합니다.
 
@@ -99,9 +99,31 @@
 | **TC-F.8** | 세금계산서 메일 발송 | Resend 연동 및 SENT/FAILED 상태 전환 확인 | `tests/integration/fin-03.test.ts` |
 | **TC-F.9** | 세금계산서 이력 조회 | 화주/어드민별 발행 및 발송 히스토리 조회 검증 | `tests/integration/fin-03.test.ts` |
 
+<<<<<<< HEAD
+=======
+### 9. UPS 요율 관리 (Phase 7 SPR-03)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-UPS-ADMIN-01** | Zone CRUD | Zone 등록 및 수정 | `tests/unit/ups/rates-admin-actions.test.ts` |
+| **TC-UPS-ADMIN-02** | 기본요금 UPSERT | Zone×제품×중량 기본 요금 등록·수정 | `tests/unit/ups/rates-admin-actions.test.ts` |
+| **TC-UPS-ADMIN-03** | 유류할증 UPSERT | 주별 유류할증료 등록·수정 | `tests/unit/ups/rates-admin-actions.test.ts` |
+| **TC-UPS-ADMIN-04** | Other Charge CRUD | 부가요금 등록 및 수정 | `tests/unit/ups/rates-admin-actions.test.ts` |
+| **TC-UPS-ADMIN-05** | 역할 인증 가드 | 비관리자의 요율 관리 액션 접근 차단 | `tests/unit/ups/rates-admin-actions.test.ts` |
+| **TC-UPS-WH-01** | 창고 출고 — intl_ref_no 있음 | 정상 출고 (pkgsWithoutIntlRef=0) | `tests/unit/warehouse/outbound-ups.test.ts` |
+| **TC-UPS-WH-02** | 창고 출고 — intl_ref_no 없음 | pkgsWithoutIntlRef > 0 반환 | `tests/unit/warehouse/outbound-ups.test.ts` |
+| **TC-UPS-WH-03** | 창고 출고 — 상태 전이 | WAREHOUSED→RELEASED 전이 유지 | `tests/unit/warehouse/outbound-ups.test.ts` |
+
+### 10. UPS 일마감 (Phase 7 SPR-05 Daily Close)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-P7-CLOSE-01** | `getDailyOutboundSummary` — 정상 출고 데이터 집계 | 출고 PKG/중량/Zone 분포 집계 정확성 | `tests/unit/ups/daily-close.test.ts` |
+| **TC-P7-CLOSE-02** | `getDailyOutboundSummary` — 출고 데이터 없음 | 데이터 없을 시 0 반환 및 에러 없음 | `tests/unit/ups/daily-close.test.ts` |
+| **TC-P7-CLOSE-03** | `getDailyRevenueSummary` — 매출/매입 집계 정확도 | Revenue/Cost/Margin/MarginRate 계산 정확성 | `tests/unit/ups/daily-close.test.ts` |
+| **TC-P7-CLOSE-04** | `getDailyCloseHistory` — 기간 조회 및 일자별 그룹핑 | Date range 조회 후 날짜별 Revenue 행 반환 검증 | `tests/unit/ups/daily-close.test.ts` |
+
 ---
 
-### 9. 지능형 트래킹 가시성 (Intelligent Tracking)
+### 11. 지능형 트래킹 가시성 (Intelligent Tracking)
 | ID | 테스트 항목 | 목적 | 파일 경로 |
 | :--- | :--- | :--- | :--- |
 | **TC-TR.1** | 공급자 실시간 전환 | `VIRTUAL` <-> `MANUAL` 전환 시 데이터 가시성 및 정합성 보장 | `tests/integration/tracking.test.ts` |
@@ -334,6 +356,8 @@
 
 | 검증일 | 버전 | 성공/실패 | 총 소요시간 | 결과 리포트 |
 | :--- | :--- | :---: | :--- | :--- |
+| 2026-06-17 | v1.5.6 | ✅ PASS | 58.03s | TASK-153 IMP-122 Agency 정산 조회 구현 완료. p7-agency-settlement.test.ts 4개 TC 신규 등록 및 374/374 PASS. |
+| 2026-06-17 | v1.5.5 | ✅ PASS | 5.80s | TASK-149 IMP-118 오더 직접배송/픽업 UI 구현 완료. delivery-method.test.ts 4개 TC 신규 등록. 전체 회귀 테스트 통과 (4차 재제출). |
 | 2026-06-08 | v1.5.3 | ✅ PASS | 51.90s | TASK-122 요율 Slab 구조 개편 완료. `tiers` 배열 → `{ weight_slabs, cbm_slabs }` 객체 변환. `fn_get_best_matching_rate` weight_slabs/cbm_slabs 각각 매칭. 엔진/액션/어댑터 tiers 참조 일괄 수정. 기존 314/314 전량 PASS 유지. |
 | 2026-06-08 | v1.5.2 | ✅ PASS | ~45s | TASK-121 운송수단별 요금 산정 정책 설정 완료. TC-POLICY-01~05 (총 5개 케이스) 추가 및 전체 회귀 테스트 314건 통과. |
 | 2026-06-07 | v1.5.1 | ✅ PASS | TBD | TASK-120 Phase 6 통합 테스트 5파일 신규 등록. TC-P6-INTG-01~05 (총 28개 케이스) 추가 및 전체 회귀 테스트 통과. |
@@ -384,6 +408,62 @@
 | **TC-UPS-R-03** | `getUpsBaseRates({ productId, zoneId })` 복합 필터 | 기본 요금표 productId + zoneId 복합 필터 | `tests/unit/ups/rates-actions.test.ts` |
 | **TC-UPS-R-04** | `getUpsFuelSurcharge()` 기준일 기반 최신 조회 | 유류할증료 effective_week 기준 최신 조회 | `tests/unit/ups/rates-actions.test.ts` |
 | **TC-UPS-R-05** | `getUpsOtherCharges()` 활성 항목만 반환 | 부가요금 is_active 필터 검증 | `tests/unit/ups/rates-actions.test.ts` |
+
+### 29. Phase 7 오더 직접배송/픽업 선택 (Phase 7 SPR-04)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-UPS-ORDER-01** | DIRECT 선택 시 pickup 필드 불필요 저장 | 직접배송 선택 시 픽업지 정보 없이 정상 생성 검증 | `tests/unit/orders/delivery-method.test.ts` |
+| **TC-UPS-ORDER-02** | PICKUP 선택 시 필수 필드 존재 시 저장 | 픽업 선택 및 필수 3종 입력 시 정상 생성 검증 | `tests/unit/orders/delivery-method.test.ts` |
+| **TC-UPS-ORDER-03** | PICKUP 선택 시 필수 필드 누락 시 차단 | 픽업 선택하고 정보 누락 시 Zod 유효성 검증 차단 확인 | `tests/unit/orders/delivery-method.test.ts` |
+| **TC-UPS-ORDER-04** | DIRECT 선택 + pickup 필드 전달 시 | 직접배송 선택 시 픽업 정보가 초기화되어 저장되는지 검증 | `tests/unit/orders/delivery-method.test.ts` |
+
+### 30. Phase 7 대리점 정산 조회 (Phase 7 SPR-06)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-P7-SETTLE-01** | Agency 정산 요약 — 하위 화주 2개 오더 합산 정확 | 대리점 정산 요약 정보의 집계 합산 무결성 검증 | `tests/integration/p7-agency-settlement.test.ts` |
+| **TC-P7-SETTLE-02** | 화주별 정산 — 화주A vs 화주B 분리 집계 정확 | 대리점 하위 화주별 분리 집계 정확성 검증 | `tests/integration/p7-agency-settlement.test.ts` |
+| **TC-P7-SETTLE-03** | Agency 요율 오버라이드 반영 — override 있는 경우 override 금액 사용 | 요율 오버라이드 유무에 따른 정산 금액 반영 확인 | `tests/integration/p7-agency-settlement.test.ts` |
+| **TC-P7-SETTLE-04** | RLS — Agency A 사용자가 Agency B 데이터 조회 불가 | 대리점별 하위 화주 데이터 격리 보안 검증 | `tests/integration/p7-agency-settlement.test.ts` |
+
+### 31. Phase 7 주소록 (Phase 7 SPR-05)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-P7-ADDR-01** | 주소록 항목 신규 등록 | 주소록 정보 DB 정상 저장 검증 | `tests/unit/operations/address-book.test.ts` |
+| **TC-P7-ADDR-02** | 등록된 주소록 목록 조회 및 정렬 | 기본 배송지 우선, 가나다순 정렬 검증 | `tests/unit/operations/address-book.test.ts` |
+| **TC-P7-ADDR-03** | 주소록 항목 수정 | 기존 등록된 주소록 정보 수정 반영 확인 | `tests/unit/operations/address-book.test.ts` |
+| **TC-P7-ADDR-04** | 주소록 항목 삭제 | 주소록 항목 삭제 시 DB 제거 검증 | `tests/unit/operations/address-book.test.ts` |
+| **TC-P7-ADDR-05** | 기본 배송지 설정 및 자동 단일화 | 신규 지정 시 기존 기본배송지 자동 해제 검증 | `tests/unit/operations/address-book.test.ts` |
+
+### 32. Agency 정산 내역 엑셀 다운로드 (IMP-124)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-B-EXCEL-01** | Agency 로그인 → 정산 조회 → 기간 설정 → Excel 다운로드 | `.xlsx` 파일 다운로드, 컬럼 9종 정상 | `tests/integration/p7-agency-settlement.test.ts` |
+| **TC-B-EXCEL-02** | 데이터 없는 기간 조회 후 다운로드 | 헤더만 있는 빈 Excel 파일 생성 확인 | `tests/integration/p7-agency-settlement.test.ts` |
+| **TC-B-EXCEL-03** | 특정 화주 필터 후 다운로드 | 해당 화주 데이터만 포함 확인 | `tests/integration/p7-agency-settlement.test.ts` |
+
+### 33. Agency 대시보드 정산 요약 위젯 (IMP-125)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-B-DASH-01** | Agency 로그인 → 대시보드 접속 — 정산 요약 위젯 표시 | 이번 달 정산 요약(오더수·매출·원가·마진율) 정상 렌더링 | 대시보드 페이지 |
+| **TC-B-DASH-02** | 오더 없는 Agency 로그인 → 대시보드 접속 | 데이터 없을 시 위젯 0 표시 (에러 없음) | 대시보드 페이지 |
+| **TC-B-RECON-01** | 미가격 오더 있는 Agency 로그인 → 정산 조회 | 상단에 미가격 오더 알림 뱃지 + 목록 표시 | 정산 페이지 |
+| **TC-B-RECON-02** | 모든 오더 가격 책정된 Agency → 정산 조회 | 알림 섹션 미표시 (null 반환) | 정산 페이지 |
+
+### 35. Agency 정산 오더번호 검색 (IMP-126)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-B-SEARCH-01** | 오더번호 ILIKE 검색 — "ZN-2026" 입력 | 일치 오더만 반환 (`ilike` 조건 호출 확인) | `tests/integration/p7-agency-settlement.test.ts` |
+| **TC-B-SEARCH-02** | 존재하지 않는 오더번호 검색 | 빈 배열 반환 (에러 없음) | `tests/integration/p7-agency-settlement.test.ts` |
+| **TC-B-SEARCH-03** | 오더번호 + 화주 필터 동시 적용 | 두 조건 AND 결합 결과 확인 | `tests/integration/p7-agency-settlement.test.ts` |
+
+### 34. Phase 7 일마감 처리 (Phase 7 SPR-05)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-P7-CLOSE-01** | 일일 출고 내역 집계 | RELEASED 상태 오더 패키지 수 및 중량 집계 검증 | `tests/unit/ups/daily-close.test.ts` |
+| **TC-P7-CLOSE-02** | 일일 매출/매입/마진 집계 및 마진율 | snapshots 기준 매출, 매입, 마진율 계산 정확도 검증 | `tests/unit/ups/daily-close.test.ts` |
+| **TC-P7-CLOSE-03** | 기간별 마감 이력 조회 및 일자별 그룹핑 | 기간 내 일자별 그룹핑 및 정렬 정상 동작 확인 | `tests/unit/ups/daily-close.test.ts` |
+| **TC-P7-CLOSE-04** | 출고 데이터가 없는 날의 집계 처리 | 데이터 없는 일자 조회 시 안전한 0 반환 처리 | `tests/unit/ups/daily-close.test.ts` |
+| **TC-P7-CLOSE-05** | 일마감 데이터 권한 검증 | ADMIN/MANAGER 외 타 역할 접근 차단 검증 | `tests/unit/ups/daily-close.test.ts` |
 
 ---
 

@@ -21,9 +21,11 @@ import {
   CalendarDays,
   FileText,
   Building,
+  Building2 as BuildingOffice2Icon,
   Users,
   ClipboardList
 } from "lucide-react";
+import { Package } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { checkPermission, USER_ROLES } from "@/lib/auth/rbac";
@@ -114,6 +116,14 @@ export default function NaviSidebar({
     { title: t("statistics"), href: "/admin/statistics", icon: BarChartBig, isAdminOnly: true },
     { title: t("schedules"), href: "/schedules", icon: CalendarDays },
     {
+      title: t("ups_group"),
+      href: "/ups/daily-close",
+      icon: Package,
+      children: [
+        { title: t("ups_daily_close"), href: "/ups/daily-close" },
+      ]
+    },
+    {
       title: t("voc"),
       href: profile?.role?.includes(USER_ROLES.ADMIN) ? "/voc/admin" : "/voc",
       icon: MessageSquare
@@ -141,6 +151,10 @@ export default function NaviSidebar({
     { title: t("customs_management"), href: "/admin/customs", icon: FileText, isAdminOnly: true },
     { title: t("orders_assigned"), href: "/orders/assigned", icon: ClipboardList },
     { title: t("admin_error_logs"), href: "/admin/error-logs", icon: ShieldAlert, isAdminOnly: true },
+    { title: t("agency_management"), href: "/agency", icon: BuildingOffice2Icon },
+    { title: t("agency_shippers_nav"), href: "/agency/shippers", icon: Users },
+    { title: t("agency_rate_overrides_nav"), href: "/agency/rate-overrides", icon: TrendingUp },
+    { title: t("agency_settlements_nav"), href: "/agency/settlements", icon: Calculator },
     {
       title: t("mypage"),
       href: "/mypage",
@@ -150,6 +164,7 @@ export default function NaviSidebar({
         { title: t("my_security"), href: "/mypage/security" },
         { title: t("my_grade"), href: "/mypage/grade" },
         { title: t("my_customs"), href: "/mypage/customs" },
+        { title: t("address_book"), href: "/address-book" },
         ...(profile?.role === USER_ROLES.CORPORATE || profile?.role === USER_ROLES.ADMIN
           ? [{ title: t("corporate_mgmt"), href: "/mypage/corporate" }]
           : []),
