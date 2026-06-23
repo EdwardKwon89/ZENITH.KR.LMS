@@ -82,7 +82,7 @@ _(없음 — 수정 방향 명확)_
 
 | 항목 | 내용 |
 |:-----|:-----|
-| 코드 커밋 | 커밋예정 |
+| 코드 커밋 | `ec72e26` |
 | 수정 파일 | `src/app/[locale]/(dashboard)/agency/shippers/new/page.tsx` · `shipper-form.tsx` · `rate-overrides/new/page.tsx` · `rate-override-form.tsx` |
 | 수정 내용 | `getTranslations()` 서버 함수(`t`)를 Client Component prop으로 전달하던 패턴 → Client Component 내부 `useTranslations()` 훅으로 대체 |
 | 빌드 결과 | `npm run build` ✅ Compiled successfully (0 errors) |
