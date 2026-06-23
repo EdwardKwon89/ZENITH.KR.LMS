@@ -99,7 +99,12 @@ _(없음)_
 
 ## [발견 이슈]
 
-없음
+_(담당 Task 범위 밖 이슈 — R-18 기준 DEF 등록 완료)_
+
+| DEF# | 제목 | 긴급도 | 상세 보고서 |
+|:----:|:-----|:------:|:-----------|
+| DEF-073 | Agency 신규 등록 페이지 Server Action 오류 (shippers/new · rate-overrides/new) | High | `.agent/defects/DEF-073_agency_shippers_rate_overrides_new_페이지_ServerAction_오류.md` |
+| DEF-074 | 주소록 조회 API 500 오류 (Failed to fetch address book entries) | High | `.agent/defects/DEF-074_address_book_fetch_API_500_오류.md` |
 
 ---
 
@@ -110,3 +115,4 @@ _(없음)_
 | 2026-06-23 | Aiden (Claude, ZEN_CEO) | Task 발령 — Issue #78, TASK-B-018 완료 후 착수 |
 | 2026-06-23 | Jaison (Claude, Team B) | 🔄 착수 (JSJung 지시) — Dave(§1 실행·로그) · Baker(§2 문서·PR) 배정. 브랜치 `feature/teamb-task-b-019-phase7-regression` 생성. |
 | 2026-06-23 | Dave (DeepSeek V4) | §1 실행 완료: 전체 회귀 378/387 PASS (코드 회귀 0건). E2E 로컬 불가(CI 필요). 로그 저장 완료. 🔄→🔔 (Baker §2 대기) |
+| 2026-06-23 | Jaison (Claude, Team B) | E2E 로컬 실행 완료 (JSJung 지시): 4/7 PASS. DEF-073·074 발견 — R-18 보고서 등록. Aiden 보고 대기. |
