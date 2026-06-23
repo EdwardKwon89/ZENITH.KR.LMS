@@ -196,7 +196,7 @@
 | TASK-159 | 260619 | Phase 6 + Phase 7 WBS Level 4 공정관리 문서 작성 | P4 | 없음 | B_Kai | ✅ | [TASK-159](tasks/TASK-159_260619_P6P7WBS작성_BKai.md) | Issue #40 · Aiden ✅ 승인 (260619) · PR #41 머지 완료 |
 | TASK-160 | 260619 | P7 WBS Team B SPR-04~08 트랙 develop 반영 (d05de26 후속 처리) | P4 | TASK-159 ✅ | B_Kai | ✅ | [TASK-160](tasks/TASK-160_260619_P7WBS_TeamB_SPR04-08_BKai.md) | Issue #43 · PR #44 머지 완료 · Aiden ✅ 승인 (260619) |
 | TASK-161 | 260619 | [P7-UAT] Phase 7 UPS 특송 UAT 시나리오 작성 — Agency·UPS 오더·정산 6개 기능 | P2 | IMP-114·116·117·118·119·122 ✅ | Riley | ✅ | [TASK-161](tasks/TASK-161_260619_P7UAT시나리오작성_Riley.md) | IMP-123 ✅ · PR #46 머지 ✅ · Aiden ✅ 승인 (260619) |
-| TASK-162 | 260623 | DEF-074 주소록 조회 API 500 오류 수정 (zen_address_book GRANT) | P2 | 없음 | D_Kai | 🔔 | [TASK-162](tasks/TASK-162_260623_DEF074_주소록API500_DKai.md) | Issue #81 · DEF-074 · GRANT migration `20260623000000` · 코드 `3ada1bf` · 387/387 PASS · TASK-B-019 블로커 해소 |
+| TASK-162 | 260623 | DEF-074 주소록 조회 API 500 오류 수정 (zen_address_book GRANT) | P2 | 없음 | D_Kai | ✅ | [TASK-162](tasks/TASK-162_260623_DEF074_주소록API500_DKai.md) | Issue #81 · DEF-074 · GRANT migration `20260623000000` · 코드 `3ada1bf` · 387/387 PASS · PR#82 머지 ✅ (260623) · Aiden ✅ 승인 |
 | TASK-154 | 260617 | DEF-067 seed_data.sql + seed_rate_card.sql 구스키마 수정 + IMP-120 migration fix — CI 전체 차단 블로커 복구 | P1 | 없음 | D_Kai | ✅ | [TASK-154](tasks/TASK-154_260617_DEF067_시드데이터스키마수정_DKai.md) | DEF-067 · Issue #27 · 코드 db63986 · 378/378 PASS · Aiden ✅ 승인 (260618) |
 | TASK-151 | 260617 | [P7-SPR-05] R5 주소록 — zen_address_book DB + CRUD Server Actions + 오더 폼 연동 | P1 | TASK-149 ✅ | B_Kai | ✅ | [TASK-151](tasks/TASK-151_260617_P7SPR05_주소록_BKai.md) | IMP-120 · PR #33 (Closes #23·#32) · TC-P7-ADDR-01~05 · Aiden ✅ 승인 (260618) |
 | TASK-152 | 260617 | [P7-SPR-05] R7 일마감 처리 — 당일 출고 집계 + 매출/매입 일별 집계 화면 | P1 | TASK-150 ✅ | D_Kai | ✅ | [TASK-152](tasks/TASK-152_260617_P7SPR05_일마감처리_DKai.md) | IMP-121 · PR #29 (Closes #24) · TC-P7-CLOSE-01~04 · Aiden ✅ 승인 (260618) |
@@ -249,8 +249,8 @@
 | TASK-B-016 | 260622 | CI pr-checks.yml .env.local 생성 버그 수정 — JWT 파싱 eval 방식 교체 | High | 없음 | Jaison | ✅ | [TASK-B-016](tasks/TASK-B-016_260622_CI_env_fix_Jaison.md) | IMP-131 ✅ · Issue #72 · PR#73 머지 ✅ · Aiden ✅ 260622 |
 | TASK-B-017 | 260622 | CI service_role GRANT 누락 — migration fix (zen_rate_cards·zen_orders·zen_tracking_configs·zen_tracking_raw_logs) | High | TASK-B-016 ✅ | Jaison | ✅ | [TASK-B-017](tasks/TASK-B-017_260622_CI_service_role_grant_fix_Jaison.md) | IMP-132 ✅ · Issue #74 · PR#75 머지 ✅ · CI Run #3 387/387 · Aiden ✅ 260622 |
 | TASK-B-018 | 260623 | [P7-SPR-08] Agency E2E 자동화 + Phase 7 종합 회귀 테스트 — e2e-23-agency-flow.spec.ts 신규 + 통합 회귀 | P2 | SPR-07 ✅ | Jaison (총괄) · Baker (§1 E2E) · Dave (§2 회귀) | ✅ | [TASK-B-018](tasks/TASK-B-018_260623_P7SPR08_AgencyE2E_종합회귀_Jaison.md) | IMP-133 · Issue #77 ✅ · PR#79 → develop 머지 ✅ (260623 Aiden) |
-| TASK-B-019 | 260623 | [P7-SPR-08] Phase 7 종합 회귀 테스트 — E2E-21/22/23 통합 실행 및 보고 | P2 | TASK-B-018 ✅ | Jaison | 🔄 | [TASK-B-019](tasks/TASK-B-019_260623_P7SPR08_Phase7종합회귀_Jaison.md) | IMP-134 · Issue #78 · DEF-073·074 블로커 발생 — TASK-B-020·TASK-162 수정 대기 |
-| TASK-B-020 | 260623 | DEF-073 Agency shippers/new · rate-overrides/new Server Action 오류 수정 | P2 | 없음 | Baker | 🔔 | [TASK-B-020](tasks/TASK-B-020_260623_DEF073_AgencyServerAction수정_Baker.md) | Issue #80 · DEF-073 · `getTranslations→useTranslations` 교체 · npm run build ✅ · PR#83 |
+| TASK-B-019 | 260623 | [P7-SPR-08] Phase 7 종합 회귀 테스트 — E2E-21/22/23 통합 실행 및 보고 | P2 | TASK-B-018 ✅ | Jaison | 🔄 | [TASK-B-019](tasks/TASK-B-019_260623_P7SPR08_Phase7종합회귀_Jaison.md) | IMP-134 · Issue #78 · DEF-073·074 블로커 해제됨 — 즉시 재착수 가능 |
+| TASK-B-020 | 260623 | DEF-073 Agency shippers/new · rate-overrides/new Server Action 오류 수정 | P2 | 없음 | Baker | ✅ | [TASK-B-020](tasks/TASK-B-020_260623_DEF073_AgencyServerAction수정_Baker.md) | Issue #80 · DEF-073 · getTranslations→useTranslations · PR#83 머지 ✅ (260623) · Aiden ✅ 승인 |
 ---
 
 ## Agent 현황
@@ -260,7 +260,7 @@
 | Agent | 상태 | 비고 |
 |:------|:----:|:----|
 | **Aiden (Claude)** | ✅ TASK-159 승인 (260619) · ✅ TASK-158 승인 (260619) | PR #41 머지 완료 · PR #37 머지 완료 |
-| **D_Kai (OpenCode)** | 🔔 TASK-162 완료 — Aiden 검토 대기 | DEF-074 수정: GRANT migration 추가, 387/387 PASS, TASK-B-019 블로커 해소 |
+| **D_Kai (OpenCode)** | ✅ TASK-162 완료 (260623) | PR#82 머지 · DEF-074 해소 · 다음 Task 배분 대기 |
 | **B_Kai** | ✅ TASK-160 승인 (260619) | PR #44 머지 완료. 다음 Task 배분 대기 |
 | **Riley** | ✅ TASK-161 승인 (260619) | UAT-15~20 16개 시나리오 · PR #46 머지 · 다음 Task 배분 대기 |
 | N_Kai | 재교육 세션 대기 (TASK-087) | R-17 위반 누적 — 신규 할당 중단 유지 |
@@ -271,15 +271,16 @@
 | Agent | 상태 | 비고 |
 |:------|:----:|:----|
 | **JSJung** (팀 리더) | ✅ TASK-142 완료 | PR#7 → develop 머지 (260616) |
-| **Jaison** (AI Agent 총괄) | ✅ TASK-B-018 완료 · ⬜ TASK-B-019 착수 대기 | PR#79 → develop 머지 ✅ · TASK-B-019 전제조건 충족 (즉시 착수 가능) |
+| **Jaison** (AI Agent 총괄) | ✅ TASK-B-018 완료 · 🔄 TASK-B-019 재착수 | PR#79 ✅ · DEF-073·074 블로커 해제 — E2E-21/22/23 재실행 진행 중 |
 | **Dave** (AI Agent) | ✅ TASK-B-018 §2 완료 | 회귀 분석 완료 · 코드 회귀 0건 확인 · 다음 Task 배분 대기 |
-| **Baker** (AI Agent) | 🔔 TASK-B-020 수정완료 | `getTranslations→useTranslations` 교체 · npm run build ✅ · PR#80 |
+| **Baker** (AI Agent) | ✅ TASK-B-020 완료 (260623) | PR#83 머지 · DEF-073 해소 · 다음 Task 배분 대기 |
 | **Gale** (AI Agent) | 대기 | 추후 재배정 예정 |
 
 ---
 
 ## 개정 이력
 
+| 2026-06-23 | Aiden (ZEN_CEO) | **TASK-162 ✅ · TASK-B-020 ✅ 승인** — PR#82(D_Kai DEF-074 GRANT) · PR#83(Baker DEF-073 Server Action) 머지 완료. TASK-B-019 블로커(E2E-21·TC-AG-03~06) 전량 해제. Issue#78 Jaison 통보 완료. |
 | 2026-06-23 | Baker (Big Pickle) | **TASK-B-020 🔔 수정완료** — 4개 파일 수정: `getTranslations()`→`useTranslations()` Client 훅 대체. npm run build ✅. PR#83 제출. |
 | 2026-06-23 | Aiden (ZEN_CEO) | **TASK-B-020 · TASK-162 발령** — DEF-073(Baker, Issue #80): Agency Server Action 오류. DEF-074(D_Kai, Issue #81): 주소록 API 500. Edward 승인 (R-18 High DEF). TASK-B-019 🔄 블로커 등록. |
 | 2026-06-23 | Aiden (ZEN_CEO) | **TASK-B-018 ❌ 2차 반려** — PR#79: ① Closes #51→#77 ② 화주신규등록 누락 ③ 요율등록 미구현 ④ waitForTimeout. Baker §1 재수정 → PR#79 재제출. |
