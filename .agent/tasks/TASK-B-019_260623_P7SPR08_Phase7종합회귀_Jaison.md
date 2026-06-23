@@ -57,11 +57,11 @@ npm run test:regression
 
 ## [DoD 체크리스트]
 
-- [ ] e2e-21 + e2e-22 + e2e-23 통합 실행 PASS
-- [ ] 전체 회귀 PASS (pre-existing 제외)
-- [ ] 결과 로그 저장 (`docs/08_Self_Audit/Regression_Results/REGRESSION_B019_260623.md`)
-- [ ] R-17 완료 보고 절차 준수
-- [ ] PR `Closes #78`
+- [ ] e2e-21 + e2e-22 + e2e-23 통합 실행 PASS — ❌ 로컬 불가 (CI 필요, R-14)
+- [x] 전체 회귀 PASS (378/387, pre-existing 2건 제외 = 코드 회귀 0건)
+- [x] 결과 로그 저장 (`docs/08_Self_Audit/Regression_Results/REGRESSION_B019_260623.md`)
+- [ ] R-17 완료 보고 절차 준수 — Dave §1 완료, Baker §2 대기
+- [ ] PR `Closes #78` — Baker 담당
 
 ---
 
@@ -73,12 +73,26 @@ _(없음)_
 
 ## [작업 결과]
 
-_(구현 완료 후 기재)_
+### §1. Dave 실행 결과 (2026-06-23)
+
+#### 전체 회귀 (단위 + 통합)
+- **378/387 PASS** (69 test files: 67 passed / 2 failed)
+- 실패 2건: `tracking-business-qa.test.ts` — `fetch failed` (Supabase 미실행)
+- Skipped 7건: `p6-transport-policy.test.ts` — `beforeAll` timeout (Supabase 미실행)
+- **코드 회귀 0건** — CI Run #3 기준 387/387 PASS 확인됨
+
+#### Phase 7 E2E 통합 실행
+- e2e-21·e2e-22·e2e-23: 모두 ❌ (Docker/Supabase + Next.js dev server 미구동)
+- 로컬 실행 불가 — CI 환경 필요 (R-14 적용)
+
+#### 결과 로그
+- `docs/08_Self_Audit/Regression_Results/REGRESSION_B019_260623.md`
 
 | 항목 | 내용 |
 |:-----|:-----|
-| 코드 커밋 | TBD |
-| 회귀 결과 | TBD |
+| 코드 커밋 | gitnexus (DS) — 작업 없음 (분석만) |
+| 회귀 결과 | 378/387 PASS (코드 회귀 0건) |
+| E2E 통합 | ❌ CI 환경 필요 |
 | IMP | IMP-134 |
 
 ---
@@ -95,3 +109,4 @@ _(구현 완료 후 기재)_
 |:-----|:------|:----|
 | 2026-06-23 | Aiden (Claude, ZEN_CEO) | Task 발령 — Issue #78, TASK-B-018 완료 후 착수 |
 | 2026-06-23 | Jaison (Claude, Team B) | 🔄 착수 (JSJung 지시) — Dave(§1 실행·로그) · Baker(§2 문서·PR) 배정. 브랜치 `feature/teamb-task-b-019-phase7-regression` 생성. |
+| 2026-06-23 | Dave (DeepSeek V4) | §1 실행 완료: 전체 회귀 378/387 PASS (코드 회귀 0건). E2E 로컬 불가(CI 필요). 로그 저장 완료. 🔄→🔔 (Baker §2 대기) |
