@@ -8,7 +8,7 @@
 > **관련 Issue**: [#78](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/78)
 > **전제조건**: TASK-B-018 ✅ (e2e-23 spec 완성 — PR#79 머지 완료)
 > **브랜치**: `feature/teamb-task-b-019-phase7-regression`
-> **상태**: 🔄
+> **상태**: 🔔
 
 ---
 
@@ -60,8 +60,8 @@ npm run test:regression
 - [x] e2e-21 + e2e-22 + e2e-23 통합 실행 — e2e-22 ✅, e2e-21·23 ❌ (test data 환경, 코드 회귀 아님)
 - [x] 전체 회귀 PASS — **387/387 ✅ ALL PASS**
 - [x] 결과 로그 저장 (`docs/08_Self_Audit/Regression_Results/REGRESSION_B019_260623.md`) 갱신
-- [ ] R-17 완료 보고 절차 준수 — Baker §2 담당 (Dave §1 ✅)
-- [ ] PR `Closes #78` — Baker 담당
+- [x] R-17 완료 보고 절차 준수 — Baker §2 ✅ (PR#84)
+- [x] PR `Closes #78` — Baker ✅
 
 ---
 
@@ -130,3 +130,4 @@ _(담당 Task 범위 밖 이슈 — R-18 기준 DEF 등록 완료)_
 | 2026-06-23 | Jaison (Claude, Team B) | E2E 로컬 실행 완료 (JSJung 지시): 4/7 PASS. DEF-073·074 발견 — R-18 보고서 등록. Aiden 보고 대기. |
 | 2026-06-23 | Jaison (Claude, Team B) | 🔄 재착수 (JSJung 지시) — DEF-073(TASK-B-020 ✅) · DEF-074(TASK-162 ✅) develop 반영 완료. develop rebase 완료. Dave(§1 재실행) · Baker(§2 문서·PR) 재배정. |
 | 2026-06-23 | Dave (DeepSeek V4) | §1 재실행 완료 — ✅ 387/387 ALL PASS (Docker/Supabase 가동). E2E: e2e-22 통과(2/2), e2e-21·23 test data 환경 이슈. 로그 갱신 완료. 🔄→🔔 (Baker §2 대기) |
+| 2026-06-23 | Baker (Big Pickle) | §2 문서·PR 완료 — DoD 전량 ✅, PR#84 제출. 🔄→🔔 |

@@ -249,7 +249,7 @@
 | TASK-B-016 | 260622 | CI pr-checks.yml .env.local 생성 버그 수정 — JWT 파싱 eval 방식 교체 | High | 없음 | Jaison | ✅ | [TASK-B-016](tasks/TASK-B-016_260622_CI_env_fix_Jaison.md) | IMP-131 ✅ · Issue #72 · PR#73 머지 ✅ · Aiden ✅ 260622 |
 | TASK-B-017 | 260622 | CI service_role GRANT 누락 — migration fix (zen_rate_cards·zen_orders·zen_tracking_configs·zen_tracking_raw_logs) | High | TASK-B-016 ✅ | Jaison | ✅ | [TASK-B-017](tasks/TASK-B-017_260622_CI_service_role_grant_fix_Jaison.md) | IMP-132 ✅ · Issue #74 · PR#75 머지 ✅ · CI Run #3 387/387 · Aiden ✅ 260622 |
 | TASK-B-018 | 260623 | [P7-SPR-08] Agency E2E 자동화 + Phase 7 종합 회귀 테스트 — e2e-23-agency-flow.spec.ts 신규 + 통합 회귀 | P2 | SPR-07 ✅ | Jaison (총괄) · Baker (§1 E2E) · Dave (§2 회귀) | ✅ | [TASK-B-018](tasks/TASK-B-018_260623_P7SPR08_AgencyE2E_종합회귀_Jaison.md) | IMP-133 · Issue #77 ✅ · PR#79 → develop 머지 ✅ (260623 Aiden) |
-| TASK-B-019 | 260623 | [P7-SPR-08] Phase 7 종합 회귀 테스트 — E2E-21/22/23 통합 실행 및 보고 | P2 | TASK-B-018 ✅ | Jaison (총괄) · Dave (§1 ✅) · Baker (§2 문서·PR) | 🔄 | [TASK-B-019](tasks/TASK-B-019_260623_P7SPR08_Phase7종합회귀_Jaison.md) | IMP-134 · Issue #78 · 387/387 ✅ · Baker §2 진행 중 |
+| TASK-B-019 | 260623 | [P7-SPR-08] Phase 7 종합 회귀 테스트 — E2E-21/22/23 통합 실행 및 보고 | P2 | TASK-B-018 ✅ | Jaison (총괄) · Dave (§1 ✅) · Baker (§2 ✅) | 🔔 | [TASK-B-019](tasks/TASK-B-019_260623_P7SPR08_Phase7종합회귀_Jaison.md) | IMP-134 · Issue #78 · 387/387 ✅ · PR#84 · Aiden 검토 대기 |
 | TASK-B-020 | 260623 | DEF-073 Agency shippers/new · rate-overrides/new Server Action 오류 수정 | P2 | 없음 | Baker | ✅ | [TASK-B-020](tasks/TASK-B-020_260623_DEF073_AgencyServerAction수정_Baker.md) | Issue #80 · DEF-073 · PR#83 머지 ✅ (260623) · Aiden ✅ 승인 |
 ---
 
@@ -271,15 +271,16 @@
 | Agent | 상태 | 비고 |
 |:------|:----:|:----|
 | **JSJung** (팀 리더) | ✅ TASK-142 완료 | PR#7 → develop 머지 (260616) |
-| **Jaison** (AI Agent 총괄) | 🔄 TASK-B-019 총괄 | Dave §1 ✅ 검토완료 · 387/387 ALL PASS · Baker §2 문서·PR 착수 지시 |
+| **Jaison** (AI Agent 총괄) | ✅ TASK-B-019 총괄 완료 | Baker §2 ✅ · PR#84 제출 · Aiden 최종 승인 대기 |
 | **Dave** (AI Agent) | ✅ TASK-B-019 §1 재실행 완료 | 387/387 ✅ · E2E-22 PASS · 로그 갱신 완료 |
-| **Baker** (AI Agent) | ✅ TASK-B-020 (260623) · 🔄 TASK-B-019 §2 | Dave §1 완료 — 문서·PR 생성 진행 대기 |
+| **Baker** (AI Agent) | ✅ TASK-B-020 · ✅ TASK-B-019 §2 완료 | PR#83 머지 · PR#84 제출 · 모든 Task 완료 |
 | **Gale** (AI Agent) | 대기 | 추후 재배정 예정 |
 
 ---
 
 ## 개정 이력
 
+| 2026-06-23 | Baker (Big Pickle) | **TASK-B-019 §2 ✅ 문서·PR 완료** — DoD 전량 ✅ · PR#84 제출 (Closes #78). Aiden 최종 검토 대기. |
 | 2026-06-23 | Aiden (ZEN_CEO) | **TASK-162 ✅ · TASK-B-020 ✅ 승인** — PR#82(D_Kai DEF-074 GRANT) · PR#83(Baker DEF-073 Server Action) 머지 완료. TASK-B-019 블로커(E2E-21·TC-AG-03~06) 전량 해제. Issue#78 Jaison 통보 완료. |
 | 2026-06-23 | Jaison (Team B) | **TASK-B-019 🔄 재착수 (JSJung 지시)** — DEF-073·074 develop 반영 완료. Dave(§1 E2E 재실행) · Baker(§2 문서·PR) 재배정. |
 | 2026-06-23 | Dave (DeepSeek V4) | **TASK-B-019 §1 ✅ 재실행 완료** — 387/387 ALL PASS · E2E-22 통과(2/2) · e2e-21·23 test data 환경 이슈. 로그 갱신 완료. Baker §2 대기. |
