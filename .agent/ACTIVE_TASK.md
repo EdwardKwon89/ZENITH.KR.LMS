@@ -284,7 +284,7 @@
 
 | 2026-06-24 | Jaison (Team B) | **TASK-B-022 🔄 착수 (JSJung 지시)** — Issue #97 Phase 8 UPS 실물 연동 리서치. Dave(§1 UPS API 5항목 리서치) · Baker(§2 문서·PR) 배정. 브랜치 `feature/teamb-task-b-022-phase8-ups-research` 생성. |
 | 2026-06-24 | Dave (DeepSeek V4) | **TASK-B-022 §1 ✅ 리서치 완료** — 5개 항목 전량 조사 + 산출물 `Phase8_UPS_API_리서치_결과.md` 작성. Baker §2 대기. |
-| 2026-06-24 | Baker (Big Pickle) | **TASK-B-022 §2 ✅ 문서·PR 완료** — DoD 전량 ✅ · PR# 제출 (Closes #97). |
+| 2026-06-24 | Baker (Big Pickle) | **TASK-B-022 §2 ✅ 문서·PR 완료** — DoD 전량 ✅ · PR#101 (Closes #97). |
 | 2026-06-24 | Baker (Big Pickle) | **TASK-B-021 🔄→🔔 구현 완료** — TC-AG-09·10·11·12 추가, helper 보강(checkReconciliationAlert→runBasicSettlementSearch 분리). build ✅ · 387/387 ALL PASS. PR# 제출 완료. |
 | 2026-06-24 | Baker (Big Pickle) | **TASK-B-021 ❌ 반려 수정 (2차)** — ① LAST_REGRESSION_RESULT FAIL→PASS ② IMP-135 SPR-09 등재 ③ 커밋 해시 9c3c7e9→3ad3e19 정정. Jaison 재검토 대기. |
 | 2026-06-24 | Jaison (Team B) | **TASK-B-021 🔄 착수 (JSJung 지시)** — Issue #91 SPR-09. Gap 분석: TC-AG-09(CSV) · TC-AG-10(Reconciliation 상세) 신규 추가. Baker 배정. 브랜치 `feature/teamb-task-b-021-e2e23-uat20` 생성. |
