@@ -197,9 +197,9 @@
 | TASK-160 | 260619 | P7 WBS Team B SPR-04~08 트랙 develop 반영 (d05de26 후속 처리) | P4 | TASK-159 ✅ | B_Kai | ✅ | [TASK-160](tasks/TASK-160_260619_P7WBS_TeamB_SPR04-08_BKai.md) | Issue #43 · PR #44 머지 완료 · Aiden ✅ 승인 (260619) |
 | TASK-161 | 260619 | [P7-UAT] Phase 7 UPS 특송 UAT 시나리오 작성 — Agency·UPS 오더·정산 6개 기능 | P2 | IMP-114·116·117·118·119·122 ✅ | Riley | ✅ | [TASK-161](tasks/TASK-161_260619_P7UAT시나리오작성_Riley.md) | IMP-123 ✅ · PR #46 머지 ✅ · Aiden ✅ 승인 (260619) |
 | TASK-162 | 260623 | DEF-074 주소록 조회 API 500 오류 수정 (zen_address_book GRANT) | P2 | 없음 | D_Kai | ✅ | [TASK-162](tasks/TASK-162_260623_DEF074_주소록API500_DKai.md) | Issue #81 · DEF-074 · GRANT migration `20260623000000` · 코드 `3ada1bf` · 387/387 PASS · PR#82 머지 ✅ (260623) · Aiden ✅ 승인 |
-| TASK-163 | 260624 | [SPR-09] E2E-24: UPS 오더 플로우 자동화 (UAT-17 DIRECT/PICKUP/Rate Override) | P2 | TASK-161 ✅ | B_Kai | ⬜ | [TASK-163](tasks/TASK-163_260624_E2E24_UPS오더플로우자동화_BKai.md) | Issue #87 · SPR-09 |
-| TASK-164 | 260624 | [SPR-09] E2E-25: 창고 출고 RELEASED 자동화 (UAT-18 + intl_ref_no) | P2 | TASK-161 ✅ | B_Kai | ⬜ | [TASK-164](tasks/TASK-164_260624_E2E25_창고출고RELEASED자동화_BKai.md) | Issue #87 · SPR-09 |
-| TASK-165 | 260624 | [SPR-09] E2E-26: Invoice PDF 텍스트 추출 검증 자동화 (UAT-19) | P2 | TASK-161 ✅ | D_Kai | ⬜ | [TASK-165](tasks/TASK-165_260624_E2E26_InvoicePDF텍스트추출검증_DKai.md) | Issue #87 · SPR-09 · PDF 텍스트 추출 방식 확정 |
+| TASK-163 | 260624 | [SPR-09] E2E-24: UPS 오더 플로우 자동화 (UAT-17 DIRECT/PICKUP/Rate Override) | P2 | TASK-161 ✅ | B_Kai | ⬜ | [TASK-163](tasks/TASK-163_260624_E2E24_UPS오더플로우자동화_BKai.md) | Issue #90 · SPR-09 |
+| TASK-164 | 260624 | [SPR-09] E2E-25: 창고 출고 RELEASED 자동화 (UAT-18 + intl_ref_no) | P2 | TASK-161 ✅ | B_Kai | ⬜ | [TASK-164](tasks/TASK-164_260624_E2E25_창고출고RELEASED자동화_BKai.md) | Issue #89 · SPR-09 |
+| TASK-165 | 260624 | [SPR-09] E2E-26: Invoice PDF 텍스트 추출 검증 자동화 (UAT-19) | P2 | TASK-161 ✅ | D_Kai | ⬜ | [TASK-165](tasks/TASK-165_260624_E2E26_InvoicePDF텍스트추출검증_DKai.md) | Issue #92 · SPR-09 · PDF 텍스트 추출 방식 확정 |
 | TASK-154 | 260617 | DEF-067 seed_data.sql + seed_rate_card.sql 구스키마 수정 + IMP-120 migration fix — CI 전체 차단 블로커 복구 | P1 | 없음 | D_Kai | ✅ | [TASK-154](tasks/TASK-154_260617_DEF067_시드데이터스키마수정_DKai.md) | DEF-067 · Issue #27 · 코드 db63986 · 378/378 PASS · Aiden ✅ 승인 (260618) |
 | TASK-151 | 260617 | [P7-SPR-05] R5 주소록 — zen_address_book DB + CRUD Server Actions + 오더 폼 연동 | P1 | TASK-149 ✅ | B_Kai | ✅ | [TASK-151](tasks/TASK-151_260617_P7SPR05_주소록_BKai.md) | IMP-120 · PR #33 (Closes #23·#32) · TC-P7-ADDR-01~05 · Aiden ✅ 승인 (260618) |
 | TASK-152 | 260617 | [P7-SPR-05] R7 일마감 처리 — 당일 출고 집계 + 매출/매입 일별 집계 화면 | P1 | TASK-150 ✅ | D_Kai | ✅ | [TASK-152](tasks/TASK-152_260617_P7SPR05_일마감처리_DKai.md) | IMP-121 · PR #29 (Closes #24) · TC-P7-CLOSE-01~04 · Aiden ✅ 승인 (260618) |
@@ -257,7 +257,7 @@
 | TASK-B-018 | 260623 | [P7-SPR-08] Agency E2E 자동화 + Phase 7 종합 회귀 테스트 — e2e-23-agency-flow.spec.ts 신규 + 통합 회귀 | P2 | SPR-07 ✅ | Jaison (총괄) · Baker (§1 E2E) · Dave (§2 회귀) | ✅ | [TASK-B-018](tasks/TASK-B-018_260623_P7SPR08_AgencyE2E_종합회귀_Jaison.md) | IMP-133 · Issue #77 ✅ · PR#79 → develop 머지 ✅ (260623 Aiden) |
 | TASK-B-019 | 260623 | [P7-SPR-08] Phase 7 종합 회귀 테스트 — E2E-21/22/23 통합 실행 및 보고 | P2 | TASK-B-018 ✅ | Jaison | ✅ | [TASK-B-019](tasks/TASK-B-019_260623_P7SPR08_Phase7종합회귀_Jaison.md) | IMP-134 · Issue #78 ✅ · PR#84 머지 ✅ (260623) · E2E-22 PASS · E2E-21/23 R-14 적용 · 387/387 · Aiden ✅ 승인 |
 | TASK-B-020 | 260623 | DEF-073 Agency shippers/new · rate-overrides/new Server Action 오류 수정 | P2 | 없음 | Baker | ✅ | [TASK-B-020](tasks/TASK-B-020_260623_DEF073_AgencyServerAction수정_Baker.md) | Issue #80 · DEF-073 · getTranslations→useTranslations · PR#83 머지 ✅ (260623) · Aiden ✅ 승인 |
-| TASK-B-021 | 260624 | [SPR-09] E2E-23 보강: UAT-20 Agency 정산 CSV·Reconciliation 알림 검증 | P2 | UAT-20 명세 공유 완료 | Jaison (총괄) · Baker (구현) | ⬜ | [TASK-B-021](tasks/TASK-B-021_260624_E2E23보강_UAT20Agency정산_Jaison.md) | Issue #87 · SPR-09 · 착수 전 UAT-20 명세 자체 확인 필수 |
+| TASK-B-021 | 260624 | [SPR-09] E2E-23 보강: UAT-20 Agency 정산 CSV·Reconciliation 알림 검증 | P2 | UAT-20 명세 공유 완료 | Jaison (총괄) · Baker (구현) | ⬜ | [TASK-B-021](tasks/TASK-B-021_260624_E2E23보강_UAT20Agency정산_Jaison.md) | Issue #91 · SPR-09 · 착수 전 UAT-20 명세 자체 확인 필수 |
 ---
 
 ## Agent 현황
