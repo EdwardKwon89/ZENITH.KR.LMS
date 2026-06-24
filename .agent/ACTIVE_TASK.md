@@ -251,6 +251,7 @@
 | TASK-B-018 | 260623 | [P7-SPR-08] Agency E2E 자동화 + Phase 7 종합 회귀 테스트 — e2e-23-agency-flow.spec.ts 신규 + 통합 회귀 | P2 | SPR-07 ✅ | Jaison (총괄) · Baker (§1 E2E) · Dave (§2 회귀) | ✅ | [TASK-B-018](tasks/TASK-B-018_260623_P7SPR08_AgencyE2E_종합회귀_Jaison.md) | IMP-133 · Issue #77 ✅ · PR#79 → develop 머지 ✅ (260623 Aiden) |
 | TASK-B-019 | 260623 | [P7-SPR-08] Phase 7 종합 회귀 테스트 — E2E-21/22/23 통합 실행 및 보고 | P2 | TASK-B-018 ✅ | Jaison | ✅ | [TASK-B-019](tasks/TASK-B-019_260623_P7SPR08_Phase7종합회귀_Jaison.md) | IMP-134 · Issue #78 ✅ · PR#84 머지 ✅ (260623) · E2E-22 PASS · E2E-21/23 R-14 적용 · 387/387 · Aiden ✅ 승인 |
 | TASK-B-020 | 260623 | DEF-073 Agency shippers/new · rate-overrides/new Server Action 오류 수정 | P2 | 없음 | Baker | ✅ | [TASK-B-020](tasks/TASK-B-020_260623_DEF073_AgencyServerAction수정_Baker.md) | Issue #80 · DEF-073 · getTranslations→useTranslations · PR#83 머지 ✅ (260623) · Aiden ✅ 승인 |
+| TASK-B-021 | 260624 | [SPR-09] E2E-23 보강 — UAT-20 Agency 정산 CSV 다운로드 + Reconciliation 알림 상세 검증 | P2 | TASK-B-019 ✅ | Jaison (총괄) · Baker (구현) | 🔔 | [TASK-B-021](tasks/TASK-B-021_260624_E2E23보강_UAT20Agency정산_Jaison.md) | Issue #91 · TC-AG-09~12 ✅ · 387/387 ALL PASS · PR#94 |
 ---
 
 ## Agent 현황
@@ -271,15 +272,18 @@
 | Agent | 상태 | 비고 |
 |:------|:----:|:----|
 | **JSJung** (팀 리더) | ✅ TASK-142 완료 | PR#7 → develop 머지 (260616) |
-| **Jaison** (AI Agent 총괄) | ✅ TASK-B-018 · TASK-B-019 완료 (260623) | PR#79·#84 머지 ✅ · Team B SPR-04~08 전량 완료 |
-| **Dave** (AI Agent) | ✅ TASK-B-018 §2 완료 | 회귀 분석 완료 · 코드 회귀 0건 확인 · 다음 Task 배분 대기 |
-| **Baker** (AI Agent) | ✅ TASK-B-020 완료 (260623) | PR#83 머지 · DEF-073 해소 · 다음 Task 배분 대기 |
+| **Jaison** (AI Agent 총괄) | 🔔 TASK-B-021 총괄 | Baker 구현 완료 · PR# 제출 완료 |
+| **Dave** (AI Agent) | ✅ TASK-B-019 §1 완료 | 다음 Task 배분 대기 |
+| **Baker** (AI Agent) | ✅ TASK-B-021 구현 완료 | TC-AG-09·10·11·12 추가 · build ✅ · 387/387 ✅ |
 | **Gale** (AI Agent) | 대기 | 추후 재배정 예정 |
 
 ---
 
 ## 개정 이력
 
+| 2026-06-24 | Baker (Big Pickle) | **TASK-B-021 🔄→🔔 구현 완료** — TC-AG-09·10·11·12 추가, helper 보강(checkReconciliationAlert→runBasicSettlementSearch 분리). build ✅ · 387/387 ALL PASS. PR# 제출 완료. |
+| 2026-06-24 | Baker (Big Pickle) | **TASK-B-021 ❌ 반려 수정 (2차)** — ① LAST_REGRESSION_RESULT FAIL→PASS ② IMP-135 SPR-09 등재 ③ 커밋 해시 9c3c7e9→3ad3e19 정정. Jaison 재검토 대기. |
+| 2026-06-24 | Jaison (Team B) | **TASK-B-021 🔄 착수 (JSJung 지시)** — Issue #91 SPR-09. Gap 분석: TC-AG-09(CSV) · TC-AG-10(Reconciliation 상세) 신규 추가. Baker 배정. 브랜치 `feature/teamb-task-b-021-e2e23-uat20` 생성. |
 | 2026-06-23 | Aiden (ZEN_CEO) | **TASK-B-019 ✅ 승인** — PR#84 머지. E2E-22 PASS · E2E-21/23 R-14 적용(CI 환경 대체) · 387/387 PASS. Team B SPR-04~08 전량 완료 — develop→main 머지 조건 충족. |
 | 2026-06-23 | Aiden (ZEN_CEO) | **TASK-162 ✅ · TASK-B-020 ✅ 승인** — PR#82(D_Kai DEF-074 GRANT) · PR#83(Baker DEF-073 Server Action) 머지 완료. TASK-B-019 블로커(E2E-21·TC-AG-03~06) 전량 해제. Issue#78 Jaison 통보 완료. |
 | 2026-06-23 | Baker (Big Pickle) | **TASK-B-020 🔔 수정완료** — 4개 파일 수정: `getTranslations()`→`useTranslations()` Client 훅 대체. npm run build ✅. PR#83 제출. |

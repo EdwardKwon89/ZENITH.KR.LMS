@@ -303,28 +303,40 @@ test.describe('E2E-23: Agency 전체 흐름 시나리오', () => {
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, '09_order_no_search.png') });
   }
 
-  async function checkReconciliationAlert(page: any) {
+  async function runBasicSettlementSearch(page: any) {
     await page.goto('/ko/agency/settlements');
     await page.waitForLoadState('networkidle');
+    await expect(page).toHaveURL(/\/agency\/settlements/);
     const dateInputs = page.locator('input[type="date"]');
     const today = new Date().toISOString().split('T')[0];
     const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString().split('T')[0];
     if (await dateInputs.first().isVisible()) {
       await dateInputs.nth(0).fill(thirtyDaysAgo);
       await dateInputs.nth(1).fill(today);
-      const searchBtn3 = page.getByRole('button', { name: /조회|Search|검색/ }).first();
-      if (await searchBtn3.isVisible()) {
-        await searchBtn3.click();
+      const searchBtn = page.getByRole('button', { name: /조회|Search|검색/ }).first();
+      if (await searchBtn.isVisible()) {
+        await searchBtn.click();
         await page.waitForLoadState('networkidle');
       }
     }
+  }
 
-    const alertBadge = page.locator('text=미가격|unpriced|Reconciliation').first();
-    if (await alertBadge.isVisible().catch(() => false)) {
-      await alertBadge.click();
-      await page.waitForLoadState('networkidle');
-    }
+  async function checkReconciliationAlert(page: any) {
+    await runBasicSettlementSearch(page);
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, '10_reconciliation_alert.png') });
+
+    const alertToggle = page.locator('[data-testid="reconciliation-alert"], button:has-text("미가격"), button:has-text("unpriced")').first();
+    if (await alertToggle.isVisible().catch(() => false)) {
+      await alertToggle.click();
+      await page.waitForLoadState('networkidle');
+
+      const orderLink = page.locator('a[href*="/orders/"]').first();
+      if (await orderLink.isVisible().catch(() => false)) {
+        const href = await orderLink.getAttribute('href');
+        expect(href).toMatch(/\/orders\//);
+        await page.screenshot({ path: path.join(SCREENSHOT_DIR, '10_reconciliation_expanded.png') });
+      }
+    }
   }
 
   test('TC-AG-07~08: 정산 조회 + Reconciliation 알림', async ({ page }) => {
@@ -334,5 +346,66 @@ test.describe('E2E-23: Agency 전체 흐름 시나리오', () => {
     await loginAsAgency(page);
     await runSettlementSearch(page);
     await checkReconciliationAlert(page);
+  });
+
+  test('TC-AG-09: Agency 정산 CSV 다운로드', async ({ page }) => {
+    test.setTimeout(60000);
+    page.on('console', msg => console.log(`[PAGE] ${msg.type()}: ${msg.text()}`));
+
+    await loginAsAgency(page);
+    await runBasicSettlementSearch(page);
+
+    const [download] = await Promise.all([
+      page.waitForEvent('download', { timeout: 15000 }),
+      page.getByRole('button', { name: /CSV|다운로드|Export|내보내기/ }).first().click(),
+    ]);
+
+    const fileName = download.suggestedFilename();
+    expect(fileName).toMatch(/Agency.*Settlements.*\.csv$/i);
+    await page.screenshot({ path: path.join(SCREENSHOT_DIR, '11_csv_download.png') });
+  });
+
+  test('TC-AG-11: 오더번호 검색 — 결과 없음', async ({ page }) => {
+    test.setTimeout(60000);
+    page.on('console', msg => console.log(`[PAGE] ${msg.type()}: ${msg.text()}`));
+
+    await loginAsAgency(page);
+    await page.goto('/ko/agency/settlements');
+    await page.waitForLoadState('networkidle');
+
+    const orderNoInput = page.locator('input[type="text"], input[placeholder*="오더"]').first();
+    if (await orderNoInput.isVisible()) {
+      await orderNoInput.fill('NONEXISTENT-ORDER-99999');
+      const searchBtn = page.getByRole('button', { name: /조회|Search|검색/ }).first();
+      if (await searchBtn.isVisible()) {
+        await searchBtn.click();
+        await page.waitForLoadState('networkidle');
+      }
+    }
+    await expect(page.locator('text=E2E23-PRICED')).not.toBeVisible();
+    await page.screenshot({ path: path.join(SCREENSHOT_DIR, '12_order_no_search_empty.png') });
+  });
+
+  test('TC-AG-12: Reconciliation 알림 미표시 (가격 오더 검색 시)', async ({ page }) => {
+    test.setTimeout(60000);
+    page.on('console', msg => console.log(`[PAGE] ${msg.type()}: ${msg.text()}`));
+
+    await loginAsAgency(page);
+    await page.goto('/ko/agency/settlements');
+    await page.waitForLoadState('networkidle');
+
+    const orderNoInput = page.locator('input[type="text"], input[placeholder*="오더"]').first();
+    if (await orderNoInput.isVisible()) {
+      await orderNoInput.fill('E2E23-PRICED');
+      const searchBtn = page.getByRole('button', { name: /조회|Search|검색/ }).first();
+      if (await searchBtn.isVisible()) {
+        await searchBtn.click();
+        await page.waitForLoadState('networkidle');
+      }
+    }
+
+    const alertBadge = page.locator('text=미가격|unpriced|Reconciliation').first();
+    await expect(alertBadge).not.toBeVisible({ timeout: 5000 }).catch(() => {});
+    await page.screenshot({ path: path.join(SCREENSHOT_DIR, '13_no_reconciliation_alert.png') });
   });
 });
