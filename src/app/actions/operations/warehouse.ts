@@ -25,7 +25,7 @@ export async function getWarehousedOrders() {
       id, order_no, status, created_at,
       recipient_name, recipient_contact, recipient_address, recipient_phone,
       packages,
-      shipper:profiles!zen_orders_shipper_id_fkey(name),
+      shipper:zen_organizations!zen_orders_shipper_id_fkey(name),
       origin_port:zen_ports!zen_orders_origin_port_id_fkey(name, code),
       dest_port:zen_ports!zen_orders_dest_port_id_fkey(name, code),
       order_packages:zen_order_packages!zen_order_packages_order_id_fkey(id, intl_ref_no, packing_unit, packing_count)
