@@ -282,6 +282,7 @@
 ## 개정 이력
 
 | 2026-06-24 | Baker (Big Pickle) | **TASK-B-021 🔄→🔔 구현 완료** — TC-AG-09·10·11·12 추가, helper 보강(checkReconciliationAlert→runBasicSettlementSearch 분리). build ✅ · 387/387 ALL PASS. PR# 제출 완료. |
+| 2026-06-24 | Baker (Big Pickle) | **TASK-B-021 ❌ 반려 수정 (2차)** — ① LAST_REGRESSION_RESULT FAIL→PASS ② IMP-135 SPR-09 등재 ③ 커밋 해시 9c3c7e9→3ad3e19 정정. Jaison 재검토 대기. |
 | 2026-06-24 | Jaison (Team B) | **TASK-B-021 🔄 착수 (JSJung 지시)** — Issue #91 SPR-09. Gap 분석: TC-AG-09(CSV) · TC-AG-10(Reconciliation 상세) 신규 추가. Baker 배정. 브랜치 `feature/teamb-task-b-021-e2e23-uat20` 생성. |
 | 2026-06-23 | Aiden (ZEN_CEO) | **TASK-B-019 ✅ 승인** — PR#84 머지. E2E-22 PASS · E2E-21/23 R-14 적용(CI 환경 대체) · 387/387 PASS. Team B SPR-04~08 전량 완료 — develop→main 머지 조건 충족. |
 | 2026-06-23 | Aiden (ZEN_CEO) | **TASK-162 ✅ · TASK-B-020 ✅ 승인** — PR#82(D_Kai DEF-074 GRANT) · PR#83(Baker DEF-073 Server Action) 머지 완료. TASK-B-019 블로커(E2E-21·TC-AG-03~06) 전량 해제. Issue#78 Jaison 통보 완료. |

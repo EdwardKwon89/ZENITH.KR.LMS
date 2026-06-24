@@ -133,7 +133,7 @@ _(없음 — 구현 방향 명확)_
 
 | 항목 | 내용 |
 |:-----|:-----|
-| 코드 커밋 | `9c3c7e9` (미커밋 — 커밋 직전) |
+| 코드 커밋 | `3ad3e19` |
 | 수정 파일 | `tests/e2e/e2e-23-agency-flow.spec.ts` |
 | 추가 TC | TC-AG-09 ✅ · TC-AG-10 ✅ (기존 helper 보강) · TC-AG-11 ✅ (권장) · TC-AG-12 ✅ (권장) |
 | build | ✅ PASS |
@@ -153,3 +153,4 @@ _(없음 — 구현 방향 명확)_
 |:-----|:------|:----|
 | 2026-06-24 | Jaison (Claude, Team B) | 🔄 착수 (JSJung 지시) — Issue #91, Gap 분석 완료, Baker 배정. 브랜치 `feature/teamb-task-b-021-e2e23-uat20` 생성. |
 | 2026-06-24 | Baker (Big Pickle) | 🔄→🔔 구현 완료 — TC-AG-09·10·11·12 추가, build ✅, 387/387 ALL PASS. |
+| 2026-06-24 | Baker (Big Pickle) | ❌ 반려 수정 — ① LAST_REGRESSION_RESULT FAIL→PASS 원복 ② IMP_PROGRESS.md IMP-135 SPR-09 등재 ③ 코드 커밋 해시 9c3c7e9→3ad3e19 정정. |
