@@ -853,6 +853,178 @@ export type Database = {
         }
         Relationships: []
       }
+      zen_address_book: {
+        Row: {
+          country_code: string | null
+          created_at: string
+          display_mode: string
+          display_name: string
+          id: string
+          is_default: boolean
+          org_id: string | null
+          recipient_address: string
+          recipient_address_local: string | null
+          recipient_name: string
+          recipient_phone: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          country_code?: string | null
+          created_at?: string
+          display_mode?: string
+          display_name: string
+          id?: string
+          is_default?: boolean
+          org_id?: string | null
+          recipient_address: string
+          recipient_address_local?: string | null
+          recipient_name: string
+          recipient_phone?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          country_code?: string | null
+          created_at?: string
+          display_mode?: string
+          display_name?: string
+          id?: string
+          is_default?: boolean
+          org_id?: string | null
+          recipient_address?: string
+          recipient_address_local?: string | null
+          recipient_name?: string
+          recipient_phone?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "zen_address_book_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "zen_organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      zen_agency_rate_overrides: {
+        Row: {
+          agency_org_id: string
+          base_rate_id: string
+          cost_price: number
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean
+          selling_price: number
+          valid_from: string
+          valid_until: string | null
+        }
+        Insert: {
+          agency_org_id: string
+          base_rate_id: string
+          cost_price: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          selling_price: number
+          valid_from: string
+          valid_until?: string | null
+        }
+        Update: {
+          agency_org_id?: string
+          base_rate_id?: string
+          cost_price?: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          selling_price?: number
+          valid_from?: string
+          valid_until?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "zen_agency_rate_overrides_agency_org_id_fkey"
+            columns: ["agency_org_id"]
+            isOneToOne: false
+            referencedRelation: "zen_organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "zen_agency_rate_overrides_base_rate_id_fkey"
+            columns: ["base_rate_id"]
+            isOneToOne: false
+            referencedRelation: "zen_ups_base_rates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "zen_agency_rate_overrides_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "zen_agency_rate_overrides_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "zen_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      zen_agency_shippers: {
+        Row: {
+          agency_org_id: string
+          created_at: string
+          discount_rate: number
+          grade: string | null
+          id: string
+          is_active: boolean
+          shipper_org_id: string
+          shipper_type: string
+        }
+        Insert: {
+          agency_org_id: string
+          created_at?: string
+          discount_rate?: number
+          grade?: string | null
+          id?: string
+          is_active?: boolean
+          shipper_org_id: string
+          shipper_type: string
+        }
+        Update: {
+          agency_org_id?: string
+          created_at?: string
+          discount_rate?: number
+          grade?: string | null
+          id?: string
+          is_active?: boolean
+          shipper_org_id?: string
+          shipper_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "zen_agency_shippers_agency_org_id_fkey"
+            columns: ["agency_org_id"]
+            isOneToOne: false
+            referencedRelation: "zen_organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "zen_agency_shippers_shipper_org_id_fkey"
+            columns: ["shipper_org_id"]
+            isOneToOne: false
+            referencedRelation: "zen_organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       zen_carriers: {
         Row: {
           code: string
@@ -2084,45 +2256,60 @@ export type Database = {
       zen_order_packages: {
         Row: {
           created_at: string | null
+          domestic_ref_no: string | null
           gross_weight: number | null
           height: number | null
           id: string
+          intl_ref_issued_at: string | null
+          intl_ref_locked: boolean | null
+          intl_ref_no: string | null
           length: number | null
           order_id: string
           packing_count: number | null
           packing_unit: string
+          ref_seq: number | null
           remarks: string | null
-          special_cargo_type: string | null
+          special_cargo_type: string
           updated_at: string | null
           volume: number | null
           width: number | null
         }
         Insert: {
           created_at?: string | null
+          domestic_ref_no?: string | null
           gross_weight?: number | null
           height?: number | null
           id?: string
+          intl_ref_issued_at?: string | null
+          intl_ref_locked?: boolean | null
+          intl_ref_no?: string | null
           length?: number | null
           order_id: string
           packing_count?: number | null
           packing_unit: string
+          ref_seq?: number | null
           remarks?: string | null
-          special_cargo_type?: string | null
+          special_cargo_type?: string
           updated_at?: string | null
           volume?: number | null
           width?: number | null
         }
         Update: {
           created_at?: string | null
+          domestic_ref_no?: string | null
           gross_weight?: number | null
           height?: number | null
           id?: string
+          intl_ref_issued_at?: string | null
+          intl_ref_locked?: boolean | null
+          intl_ref_no?: string | null
           length?: number | null
           order_id?: string
           packing_count?: number | null
           packing_unit?: string
+          ref_seq?: number | null
           remarks?: string | null
-          special_cargo_type?: string | null
+          special_cargo_type?: string
           updated_at?: string | null
           volume?: number | null
           width?: number | null
@@ -2146,9 +2333,16 @@ export type Database = {
       }
       zen_order_rate_snapshots: {
         Row: {
+          applied_cbm_cost: number | null
+          applied_cbm_price: number | null
+          applied_cbm_slab_min: number | null
           applied_currency: string | null
+          applied_pricing_basis: string | null
           applied_rule: string
           applied_unit_price: number
+          applied_weight_cost: number | null
+          applied_weight_slab_min: number | null
+          applied_weight_unit_price: number | null
           carrier_cost_amount: number | null
           id: string
           is_manual: boolean | null
@@ -2159,12 +2353,20 @@ export type Database = {
           priority: number
           rate_card_id: string | null
           snapshot_at: string | null
+          tiers_snapshot: Json | null
           version_no: number
         }
         Insert: {
+          applied_cbm_cost?: number | null
+          applied_cbm_price?: number | null
+          applied_cbm_slab_min?: number | null
           applied_currency?: string | null
+          applied_pricing_basis?: string | null
           applied_rule: string
           applied_unit_price: number
+          applied_weight_cost?: number | null
+          applied_weight_slab_min?: number | null
+          applied_weight_unit_price?: number | null
           carrier_cost_amount?: number | null
           id?: string
           is_manual?: boolean | null
@@ -2175,12 +2377,20 @@ export type Database = {
           priority?: number
           rate_card_id?: string | null
           snapshot_at?: string | null
+          tiers_snapshot?: Json | null
           version_no?: number
         }
         Update: {
+          applied_cbm_cost?: number | null
+          applied_cbm_price?: number | null
+          applied_cbm_slab_min?: number | null
           applied_currency?: string | null
+          applied_pricing_basis?: string | null
           applied_rule?: string
           applied_unit_price?: number
+          applied_weight_cost?: number | null
+          applied_weight_slab_min?: number | null
+          applied_weight_unit_price?: number | null
           carrier_cost_amount?: number | null
           id?: string
           is_manual?: boolean | null
@@ -2191,6 +2401,7 @@ export type Database = {
           priority?: number
           rate_card_id?: string | null
           snapshot_at?: string | null
+          tiers_snapshot?: Json | null
           version_no?: number
         }
         Relationships: [
@@ -2373,6 +2584,7 @@ export type Database = {
           confirmed_at: string | null
           created_at: string | null
           created_by: string | null
+          delivery_method: string | null
           delivery_notes: string | null
           description: string | null
           dest_port_id: string | null
@@ -2383,8 +2595,12 @@ export type Database = {
           order_no: string
           order_type: string | null
           origin_port_id: string | null
+          pickup_contact_name: string | null
+          pickup_contact_tel: string | null
+          pickup_location: string | null
           received_at: string | null
           recipient_address: string | null
+          recipient_address_local: string | null
           recipient_contact: string | null
           recipient_email: string | null
           recipient_name: string | null
@@ -2408,6 +2624,7 @@ export type Database = {
           confirmed_at?: string | null
           created_at?: string | null
           created_by?: string | null
+          delivery_method?: string | null
           delivery_notes?: string | null
           description?: string | null
           dest_port_id?: string | null
@@ -2418,8 +2635,12 @@ export type Database = {
           order_no: string
           order_type?: string | null
           origin_port_id?: string | null
+          pickup_contact_name?: string | null
+          pickup_contact_tel?: string | null
+          pickup_location?: string | null
           received_at?: string | null
           recipient_address?: string | null
+          recipient_address_local?: string | null
           recipient_contact?: string | null
           recipient_email?: string | null
           recipient_name?: string | null
@@ -2443,6 +2664,7 @@ export type Database = {
           confirmed_at?: string | null
           created_at?: string | null
           created_by?: string | null
+          delivery_method?: string | null
           delivery_notes?: string | null
           description?: string | null
           dest_port_id?: string | null
@@ -2453,8 +2675,12 @@ export type Database = {
           order_no?: string
           order_type?: string | null
           origin_port_id?: string | null
+          pickup_contact_name?: string | null
+          pickup_contact_tel?: string | null
+          pickup_location?: string | null
           received_at?: string | null
           recipient_address?: string | null
+          recipient_address_local?: string | null
           recipient_contact?: string | null
           recipient_email?: string | null
           recipient_name?: string | null
@@ -2590,6 +2816,7 @@ export type Database = {
           rep_name: string | null
           status: string | null
           type: string
+          volumetric_divisor: number | null
         }
         Insert: {
           approval_comment?: string | null
@@ -2606,6 +2833,7 @@ export type Database = {
           rep_name?: string | null
           status?: string | null
           type: string
+          volumetric_divisor?: number | null
         }
         Update: {
           approval_comment?: string | null
@@ -2622,6 +2850,7 @@ export type Database = {
           rep_name?: string | null
           status?: string | null
           type?: string
+          volumetric_divisor?: number | null
         }
         Relationships: [
           {
@@ -3719,6 +3948,392 @@ export type Database = {
         }
         Relationships: []
       }
+      zen_ups_base_rates: {
+        Row: {
+          cost_price: number
+          created_at: string | null
+          created_by: string | null
+          currency: string | null
+          id: string
+          is_active: boolean | null
+          product_id: string
+          selling_price: number
+          valid_from: string
+          valid_until: string | null
+          weight_kg: number
+          zone_id: string
+        }
+        Insert: {
+          cost_price: number
+          created_at?: string | null
+          created_by?: string | null
+          currency?: string | null
+          id?: string
+          is_active?: boolean | null
+          product_id: string
+          selling_price: number
+          valid_from: string
+          valid_until?: string | null
+          weight_kg: number
+          zone_id: string
+        }
+        Update: {
+          cost_price?: number
+          created_at?: string | null
+          created_by?: string | null
+          currency?: string | null
+          id?: string
+          is_active?: boolean | null
+          product_id?: string
+          selling_price?: number
+          valid_from?: string
+          valid_until?: string | null
+          weight_kg?: number
+          zone_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "zen_ups_base_rates_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "zen_ups_base_rates_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "zen_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "zen_ups_base_rates_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "zen_ups_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "zen_ups_base_rates_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zen_ups_zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      zen_ups_flight_plans: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          dest_airport: string
+          eta: string | null
+          etd: string | null
+          flight_no: string
+          frequency: string | null
+          id: string
+          is_active: boolean | null
+          origin_airport: string
+          product_id: string | null
+          valid_from: string
+          valid_until: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          dest_airport: string
+          eta?: string | null
+          etd?: string | null
+          flight_no: string
+          frequency?: string | null
+          id?: string
+          is_active?: boolean | null
+          origin_airport: string
+          product_id?: string | null
+          valid_from: string
+          valid_until?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          dest_airport?: string
+          eta?: string | null
+          etd?: string | null
+          flight_no?: string
+          frequency?: string | null
+          id?: string
+          is_active?: boolean | null
+          origin_airport?: string
+          product_id?: string | null
+          valid_from?: string
+          valid_until?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "zen_ups_flight_plans_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "zen_ups_flight_plans_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "zen_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "zen_ups_flight_plans_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "zen_ups_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      zen_ups_fuel_surcharges: {
+        Row: {
+          cost_rate: number
+          created_at: string | null
+          created_by: string | null
+          effective_week: string
+          id: string
+          product_id: string | null
+          selling_rate: number
+        }
+        Insert: {
+          cost_rate: number
+          created_at?: string | null
+          created_by?: string | null
+          effective_week: string
+          id?: string
+          product_id?: string | null
+          selling_rate: number
+        }
+        Update: {
+          cost_rate?: number
+          created_at?: string | null
+          created_by?: string | null
+          effective_week?: string
+          id?: string
+          product_id?: string | null
+          selling_rate?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "zen_ups_fuel_surcharges_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "zen_ups_fuel_surcharges_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "zen_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "zen_ups_fuel_surcharges_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "zen_ups_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      zen_ups_other_charges: {
+        Row: {
+          charge_code: string
+          charge_name: string
+          cost_price: number | null
+          created_at: string | null
+          created_by: string | null
+          currency: string | null
+          fuel_surcharge_applicable: boolean | null
+          id: string
+          is_active: boolean | null
+          selling_price: number | null
+          unit: string
+        }
+        Insert: {
+          charge_code: string
+          charge_name: string
+          cost_price?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          currency?: string | null
+          fuel_surcharge_applicable?: boolean | null
+          id?: string
+          is_active?: boolean | null
+          selling_price?: number | null
+          unit: string
+        }
+        Update: {
+          charge_code?: string
+          charge_name?: string
+          cost_price?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          currency?: string | null
+          fuel_surcharge_applicable?: boolean | null
+          id?: string
+          is_active?: boolean | null
+          selling_price?: number | null
+          unit?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "zen_ups_other_charges_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "zen_ups_other_charges_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "zen_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      zen_ups_products: {
+        Row: {
+          cargo_type: string
+          created_at: string | null
+          ddp_available: boolean | null
+          ddu_available: boolean | null
+          id: string
+          is_active: boolean | null
+          product_code: string
+          product_name: string
+          sort_order: number | null
+          sub_code: string | null
+        }
+        Insert: {
+          cargo_type: string
+          created_at?: string | null
+          ddp_available?: boolean | null
+          ddu_available?: boolean | null
+          id?: string
+          is_active?: boolean | null
+          product_code: string
+          product_name: string
+          sort_order?: number | null
+          sub_code?: string | null
+        }
+        Update: {
+          cargo_type?: string
+          created_at?: string | null
+          ddp_available?: boolean | null
+          ddu_available?: boolean | null
+          id?: string
+          is_active?: boolean | null
+          product_code?: string
+          product_name?: string
+          sort_order?: number | null
+          sub_code?: string | null
+        }
+        Relationships: []
+      }
+      zen_ups_zone_countries: {
+        Row: {
+          country_code: string
+          created_at: string | null
+          created_by: string | null
+          id: string
+          zone_id: string
+        }
+        Insert: {
+          country_code: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          zone_id: string
+        }
+        Update: {
+          country_code?: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          zone_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "zen_ups_zone_countries_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "zen_ups_zone_countries_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "zen_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "zen_ups_zone_countries_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zen_ups_zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      zen_ups_zones: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          sort_order: number | null
+          zone_code: string
+          zone_name: string
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          sort_order?: number | null
+          zone_code: string
+          zone_name: string
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          sort_order?: number | null
+          zone_code?: string
+          zone_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "zen_ups_zones_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "zen_ups_zones_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "zen_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       zen_vessel_schedules: {
         Row: {
           carrier_id: string | null
@@ -4145,7 +4760,6 @@ export type Database = {
               carrier_cost: number
               currency: string
               id: string
-              platform_fee_amount: number
               unit_price: number
             }[]
           }
@@ -4158,10 +4772,10 @@ export type Database = {
             }
             Returns: {
               cbm_price: number
+              matched_cbm_min: number
+              matched_weight_min: number
+              max_total_price: number
               min_total_price: number
-              max_total_price: number | null
-              matched_weight_min: number | null
-              matched_cbm_min: number | null
               unit_price: number
             }[]
           }
@@ -4347,3 +4961,4 @@ export const Constants = {
     Enums: {},
   },
 } as const
+
