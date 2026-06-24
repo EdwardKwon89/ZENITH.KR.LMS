@@ -16,8 +16,9 @@ This version has breaking changes — APIs, conventions, and file structure may 
 이 문서는 ZENITH_LMS 개발에 참여하는 **Noah (OpenAI Codex)**의 업무 규정을 정의합니다.
 
 > [!IMPORTANT]
-> 공통 규칙(R-01~R-15, GitNexus, ZEN_A4, SAR)은 **[GOV_COMMON.md](GOV_COMMON.md)** 에 정의되어 있습니다.  
-> 세션 시작 시 **반드시 GOV_COMMON.md를 먼저 Read하여 공통 규칙을 숙지**한 후 작업을 시작하십시오.
+> 공통 규칙(R-01~R-15, GitNexus, ZEN_A4, SAR)은 **GOV_COMMON.md** 에 정의되어 있습니다. 아래 인라인 로드됨.
+
+@GOV_COMMON.md
 
 ---
 
@@ -64,7 +65,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 | IMP-002 | 운임 요율 페이지 역할별 UI 분기 | Medium |
 | IMP-003 | Next.js middleware.ts → proxy.ts 마이그레이션 | Low |
 
-> 각 IMP 착수 전 반드시 Aiden(TASK_BOARD 경유)에게 착수 승인을 득해야 합니다.
+> 각 IMP 착수 전 반드시 Aiden(ACTIVE_TASK.md 경유)에게 착수 승인을 득해야 합니다.
 
 ### 영역 3 | 단위 테스트 커버리지 확장
 
@@ -79,7 +80,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 | Zone | 경로 | 소유권 |
 | :--- | :--- | :--- |
 | **Noah 담당** | `playwright/`, `__tests__/` (신규 케이스) | Noah |
-| **공유 (협의 필요)** | `src/`, `supabase/migrations/` | TASK_BOARD 기반 |
+| **공유 (협의 필요)** | `src/`, `supabase/migrations/` | ACTIVE_TASK.md 기반 |
 | **읽기 전용 (예외 있음)** | `.agent/`, `CLAUDE.md`, `docs/00_GUIDE/101~104_*.md` | 수정 금지. 단 `.agent/tasks/`·`.agent/ACTIVE_TASK.md`는 R-17 완료 보고 목적에 한해 Noah 쓰기 허용 |
 | **쓰기 가능** | `AGENTS.md` | Noah |
 
@@ -136,48 +137,4 @@ git commit -m "[OpenCode] feat: TASK-NNN <작업 설명>"
 | v2.1 | 2026-06-21 | Aiden (Claude, ZEN_CEO) | Issue #61 검토 완료 (Riley·D_Kai 의견 반영) — [Codex]/[OpenCode] 태그 병기, `.agent/` 쓰기 예외 확정. (미반영 상태 발견됨) |
 | v2.2 | 2026-06-23 | Aiden (Claude, ZEN_CEO) | Issue #61 실제 반영 — ① Git 태그 OpenCode/Codex 병행 명시 ② `.agent/` 읽기 전용 예외(tasks/·ACTIVE_TASK.md) ③ 폐기 파일 참조 제거(TASK_BOARD·HANDOFF_BOX·ACTIVE_AGENT) ④ 세션 초기화·협업채널·커밋 규약 R-16/R-17 기준 갱신 |
 
-<!-- gitnexus: GOV_COMMON.md 단일 출처. 재인덱싱 시 `gitnexus analyze --skip-agents-md` 사용 -->
-
-<!-- gitnexus:start -->
-# GitNexus — Code Intelligence
-
-This project is indexed by GitNexus as **ZENITH.KR.LMS** (10468 symbols, 14866 relationships, 300 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
-
-> If any GitNexus tool warns the index is stale, run `npx gitnexus analyze` in terminal first.
-
-## Always Do
-
-- **MUST run impact analysis before editing any symbol.** Before modifying a function, class, or method, run `gitnexus_impact({target: "symbolName", direction: "upstream"})` and report the blast radius (direct callers, affected processes, risk level) to the user.
-- **MUST run `gitnexus_detect_changes()` before committing** to verify your changes only affect expected symbols and execution flows.
-- **MUST warn the user** if impact analysis returns HIGH or CRITICAL risk before proceeding with edits.
-- When exploring unfamiliar code, use `gitnexus_query({query: "concept"})` to find execution flows instead of grepping. It returns process-grouped results ranked by relevance.
-- When you need full context on a specific symbol — callers, callees, which execution flows it participates in — use `gitnexus_context({name: "symbolName"})`.
-
-## Never Do
-
-- NEVER edit a function, class, or method without first running `gitnexus_impact` on it.
-- NEVER ignore HIGH or CRITICAL risk warnings from impact analysis.
-- NEVER rename symbols with find-and-replace — use `gitnexus_rename` which understands the call graph.
-- NEVER commit changes without running `gitnexus_detect_changes()` to check affected scope.
-
-## Resources
-
-| Resource | Use for |
-|----------|---------|
-| `gitnexus://repo/ZENITH.KR.LMS/context` | Codebase overview, check index freshness |
-| `gitnexus://repo/ZENITH.KR.LMS/clusters` | All functional areas |
-| `gitnexus://repo/ZENITH.KR.LMS/processes` | All execution flows |
-| `gitnexus://repo/ZENITH.KR.LMS/process/{name}` | Step-by-step execution trace |
-
-## CLI
-
-| Task | Read this skill file |
-|------|---------------------|
-| Understand architecture / "How does X work?" | `.claude/skills/gitnexus/gitnexus-exploring/SKILL.md` |
-| Blast radius / "What breaks if I change X?" | `.claude/skills/gitnexus/gitnexus-impact-analysis/SKILL.md` |
-| Trace bugs / "Why is X failing?" | `.claude/skills/gitnexus/gitnexus-debugging/SKILL.md` |
-| Rename / extract / split / refactor | `.claude/skills/gitnexus/gitnexus-refactoring/SKILL.md` |
-| Tools, resources, schema reference | `.claude/skills/gitnexus/gitnexus-guide/SKILL.md` |
-| Index, status, clean, wiki CLI commands | `.claude/skills/gitnexus/gitnexus-cli/SKILL.md` |
-
-<!-- gitnexus:end -->
+<!-- GitNexus 규정: GOV_COMMON.md 단일 출처 (@GOV_COMMON.md 인라인 로드로 자동 적용) -->
