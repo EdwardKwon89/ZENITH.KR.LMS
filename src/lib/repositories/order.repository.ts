@@ -155,7 +155,7 @@ export class OrderRepository extends BaseRepository {
   async getPackagesByOrderId(orderId: string) {
     return this.db
       .from('zen_order_packages')
-      .select('id, order_id, packing_unit, packing_count, length, width, height, gross_weight, volume, remarks, created_at')
+      .select('id, order_id, packing_unit, packing_count, length, width, height, gross_weight, volume, domestic_ref_no, intl_ref_no, remarks, created_at')
       .eq('order_id', orderId)
       .order('created_at', { ascending: true });
   }
@@ -168,7 +168,7 @@ export class OrderRepository extends BaseRepository {
     return this.db
       .from('zen_order_packages')
       .insert(data as any)
-      .select('id, order_id, packing_unit, packing_count, length, width, height, gross_weight, volume')
+      .select('id, order_id, packing_unit, packing_count, length, width, height, gross_weight, volume, domestic_ref_no, intl_ref_no')
       .single();
   }
 
