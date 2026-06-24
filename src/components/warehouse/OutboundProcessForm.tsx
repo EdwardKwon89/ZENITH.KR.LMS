@@ -164,7 +164,7 @@ export default function OutboundProcessForm({ locale }: { locale: string }) {
   };
 
   const buildLabelData = (order: any) => {
-    const pkgs = order.packages || [];
+    const pkgs = order.order_packages || [];
     const totalPkgs = pkgs.reduce((s: number, p: any) => s + (p.packing_count || 1), 0);
     const totalWeight = pkgs.reduce((s: number, p: any) => s + (p.gross_weight || 0), 0);
     return {
@@ -252,7 +252,7 @@ export default function OutboundProcessForm({ locale }: { locale: string }) {
               </div>
             ) : filteredOrders.length > 0 ? (
               filteredOrders.map((order) => {
-                const pkgs = order.packages || [];
+                const pkgs = order.order_packages || [];
                 const pkgCount = pkgs.length;
                 const totalQty = pkgs.reduce((s: number, p: any) => {
                   const items = p.items || [];
