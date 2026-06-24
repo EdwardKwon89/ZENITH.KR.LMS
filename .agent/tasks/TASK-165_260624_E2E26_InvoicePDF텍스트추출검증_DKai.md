@@ -86,11 +86,11 @@ _(없음 — PDF 텍스트 추출 방식 Edward 확정)_
 
 ## [발견 이슈]
 
-| ID | 내용 | 상태 | 파일·라인 |
-|:--:|:-----|:----:|:---------|
-| F-01 | `zen_order_package_items` 테이블 없음 — fixture insert 대상 오류 | ✅ 수정 | `e2e-26-invoice-pdf.spec.ts:183` |
-| F-02 | `getPackagesByOrderId` SELECT에 `domestic_ref_no`, `intl_ref_no` 누락 | ✅ 수정 | `order.repository.ts:158,171` |
-| F-03 | CSP `connect-src`에 `cdn.jsdelivr.net` 미포함 → font fetch 차단 | ✅ 우회 | `e2e-26-invoice-pdf.spec.ts` route intercept |
+| ID | 내용 | 상태 | DEF | 파일·라인 |
+|:--:|:-----|:----:|:---:|:---------|
+| F-01 | `zen_order_package_items` 테이블 없음 — fixture insert 대상 오류 | ✅ 수정 | [DEF-075](.agent/defects/DEF-075_fixture_zen_order_package_items_테이블_미존재.md) | `e2e-26-invoice-pdf.spec.ts:183` |
+| F-02 | `getPackagesByOrderId` SELECT에 `domestic_ref_no`, `intl_ref_no` 누락 (**생산 영향**) | ✅ 수정 | [DEF-076](.agent/defects/DEF-076_packages_query_domestic_ref_no_intl_ref_no_누락.md) | `order.repository.ts:158,171` |
+| F-03 | CSP `connect-src`에 `cdn.jsdelivr.net` 미포함 → font fetch 차단 | ✅ 우회 | [DEF-077](.agent/defects/DEF-077_CSP_connect_src_cdn_jsdelivr_net_누락.md) | `e2e-26-invoice-pdf.spec.ts` route intercept |
 
 ---
 
@@ -99,3 +99,5 @@ _(없음 — PDF 텍스트 추출 방식 Edward 확정)_
 | 날짜 | 작성자 | 내용 |
 |:-----|:------|:----|
 | 2026-06-24 | Aiden (Claude, ZEN_CEO) | Task 발령 — Issue #87 Edward 승인, SPR-09 E2E-26, PDF 텍스트 추출 방식 확정 |
+| 2026-06-24 | D_Kai (DeepSeek) | 구현 완료 — E2E-26 테스트 2/2 PASS, F-01~F-03 발견 및 수정, DEF-075~077 등록, PR #96 제출 |
+| 2026-06-24 | D_Kai (DeepSeek) | Aiden 1차 검토 반영 — PR #96 Closes #87 제거, DEF 보고서 3건 작성, 커밋 분리 완료, 회귀 테스트 재실행 |
