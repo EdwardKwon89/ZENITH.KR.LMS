@@ -4,7 +4,7 @@
 > **작성일**: 2026-06-24
 > **작성자**: Aiden (Claude, ZEN_CEO)
 > **기반**: An-12(Phase 7 설계) + TASK-B-022 리서치 결과 (`docs/80_RawData/Phase8_UPS_API_리서치_결과.md`)
-> **승인 상태**: 🔍 설계 초안 — **Edward 검토 및 승인 요청**
+> **승인 상태**: ✅ **Edward 승인 완료 (2026-06-24) — 구현 Team B 배정 확정**
 > **관련 Phase**: Phase 8 (UPS 직접 API 연동)
 
 ---
@@ -223,11 +223,11 @@ this.providers.set('UPS_TRACKING', new UpsTrackingProvider());
 
 | Task ID | 담당 | 내용 | 의존 |
 |:--------|:----:|:----|:-----|
-| **IMP-136** | D_Kai | UPS OAuth Client + config + HTTP Client | - |
-| **IMP-137** | D_Kai | UPS Ship API (레이블 발급) + zen_ups_labels Server Action | IMP-136 |
-| **IMP-138** | D_Kai | DB 마이그레이션 (`zen_ups_labels` + `zen_ups_tracking_events`) | - |
-| **IMP-139** | D_Kai | UpsTrackingProvider + zen_ups_tracking_events 저장 | IMP-136·138 |
-| **IMP-140** | B_Kai | E2E 테스트 (레이블 발급 + 트래킹 폴링) | IMP-136~139 |
+| **IMP-136** | Dave (Team B) | UPS OAuth Client + config + HTTP Client | - |
+| **IMP-137** | Dave (Team B) | UPS Ship API (레이블 발급) + zen_ups_labels Server Action | IMP-136 |
+| **IMP-138** | Dave (Team B) | DB 마이그레이션 (`zen_ups_labels` + `zen_ups_tracking_events`) | - |
+| **IMP-139** | Dave (Team B) | UpsTrackingProvider + zen_ups_tracking_events 저장 | IMP-136·138 |
+| **IMP-140** | Baker (Team B) | E2E 테스트 (레이블 발급 + 트래킹 폴링) | IMP-136~139 |
 
 > UI 범위 미결 사항 ② 확정 후 UI 구현 Task(IMP-141~) 별도 발령 예정.
 
@@ -249,7 +249,7 @@ this.providers.set('UPS_TRACKING', new UpsTrackingProvider());
 
 | # | 항목 | 담당 | 현재 상태 |
 |:-:|:----|:----:|:---------|
-| **①** | UPS Sandbox Client ID/Secret 발급 여부 | Edward | 미확인 — UPS 담당자 확인 필요. **개발 착수 전 선행 조건.** |
+| **①** | UPS Sandbox Client ID/Secret 발급 여부 | **JSJung** | JSJung이 고객사 확인 중. **개발 착수 전 선행 조건.** |
 | **②** | 레이블 발급 UI 위치 및 형태 | **JSJung** | JSJung에게 확인 및 방향 결정 요청 — 창고 출고 화면 내 vs 별도 페이지, PDF 인라인 vs 다운로드 링크. UI Task(IMP-141~) 발령은 결정 후 진행. |
 | **③** | ~~운영 서버 IP UPS 허용 목록 등록~~ | — | **비블로커 확정** — UPS REST API는 OAuth 인증, IP 허용 목록 불필요. Vercel 직접 호출 가능. 인프라 추가 작업 없음. |
 
@@ -265,3 +265,4 @@ this.providers.set('UPS_TRACKING', new UpsTrackingProvider());
 | 2026-06-24 | Aiden (Claude, ZEN_CEO) | 초안 작성 — TASK-B-022 리서치 결과 반영, An-12 IBC 제거 반영 |
 | 2026-06-24 | Aiden (Claude, ZEN_CEO) | §8·§9 갱신 — ② JSJung 확인 요청으로 전환, ③ 즉시 불필요(Go Live 전 확인) 반영 (Edward 지시) |
 | 2026-06-24 | Aiden (Claude, ZEN_CEO) | §8·§9 최종 갱신 — ③ 비블로커 확정. UPS REST API OAuth 인증 방식, IP 허용 목록 불필요. Vercel 호스팅으로 충분. Supabase Remote 기존 연결 재사용. |
+| 2026-06-24 | Aiden (Claude, ZEN_CEO) | **Edward 승인 완료** — 승인 상태 ✅ 전환. §7 구현 담당 Team B(Dave·Baker)로 전환. §9 ① 담당 Edward→JSJung(고객사 확인 중). |
