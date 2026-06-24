@@ -70,23 +70,24 @@ _(없음 — 방향 확정)_
 
 ### E2E-25 Playwright 자동화 완료
 
+- **커밋 해시**: `9bdac5c` (`[B_Kai] fix: Issue #95 root cause ❸ — packages 컬럼 제거`)
 - **UAT-18-01** (WAREHOUSED→RELEASED 전이): **PASS** — MANAGER 로그인 → 출고 목록 조회 → 오더 선택 → 출고 확정 → RELEASED 전이 확인
 - **UAT-18-02** (RLS 격리): **PASS** — SHIPPER1(소유) 조회 가능, SHIPPER2(타사) 접근 차단 확인
 - **회귀 테스트**: 387/387 PASS
 
 ### Issue #95 블로커 해소 (D_Kai + B_Kai 공동)
 
-| 원인 | 처리 | 담당 |
-|:----|:----|:----:|
-| Next.js 16 params Promise 타입 불일치 (4개 page.tsx) | `Promise<{locale}>` + `await params` | D_Kai |
-| FK 조인명 오류 (`profiles`→`zen_organizations`) | `warehouse.ts` shipper 조인 수정 | D_Kai |
-| `packages` 컬럼 존재하지 않음 (PostgREST 500) | warehouse.ts 2곳 `packages,` 제거 + `gross_weight` 추가 | B_Kai |
-| `OutboundProcessForm.tsx` `order.packages` 참조 | `order.order_packages`로 대체 | B_Kai |
+| 원인 | 처리 | 담당 | 커밋 |
+|:----|:----|:----:|:----:|
+| Next.js 16 params Promise 타입 불일치 (4개 page.tsx) | `Promise<{locale}>` + `await params` | D_Kai | `fe1477a` |
+| FK 조인명 오류 (`profiles`→`zen_organizations`) | `warehouse.ts` shipper 조인 수정 | D_Kai | `fe1477a` |
+| `packages` 컬럼 존재하지 않음 (PostgREST 500) | warehouse.ts 2곳 `packages,` 제거 + `gross_weight` 추가 | B_Kai | `9bdac5c` |
+| `OutboundProcessForm.tsx` `order.packages` 참조 | `order.order_packages`로 대체 | B_Kai | `9bdac5c` |
 
 ### 결과
 - E2E-25 Playwright 자동화 완료 (2/2 PASS)
 - 기존 `tests/e2e/e2e-25-warehouse-release.spec.ts` 활용 (317줄, 신규 작성 불필요)
-- 스크린샷: `docs/99_Manual/E2E_25_Result/`
+- PR #104 (Closes #87) — Aiden 검토 대기
 
 ---
 
