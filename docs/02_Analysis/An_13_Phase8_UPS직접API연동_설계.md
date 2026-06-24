@@ -241,7 +241,7 @@ this.providers.set('UPS_TRACKING', new UpsTrackingProvider());
 | Sandbox 계정 미발급 | 개발 차단 | Edward → UPS 담당자 확인 선행 (미결 ①) |
 | Rate Limit (`429`) | 트래킹 폴링 중단 | `Retry-After` 준수 + 지수 백오프 |
 | 레이블 재발급 | 기존 번호 폐기 필요 | `is_voided` 플래그 + UPS Void API |
-| IP 허용 목록 미등록 | Connection Refused (운영만) | **개발·테스트 비블로커** — Sandbox는 IP 제한 없음. Go Live 직전 Edward 확인 후 Vercel 고정 IP 또는 프록시 적용. |
+| IP 허용 목록 | 해당 없음 | **비블로커 확정** — UPS REST API는 OAuth 인증 방식, IP 허용 목록 불필요. Vercel Server Actions 직접 호출 가능. |
 
 ---
 
@@ -251,7 +251,7 @@ this.providers.set('UPS_TRACKING', new UpsTrackingProvider());
 |:-:|:----|:----:|:---------|
 | **①** | UPS Sandbox Client ID/Secret 발급 여부 | Edward | 미확인 — UPS 담당자 확인 필요. **개발 착수 전 선행 조건.** |
 | **②** | 레이블 발급 UI 위치 및 형태 | **JSJung** | JSJung에게 확인 및 방향 결정 요청 — 창고 출고 화면 내 vs 별도 페이지, PDF 인라인 vs 다운로드 링크. UI Task(IMP-141~) 발령은 결정 후 진행. |
-| **③** | 운영 서버 IP UPS 허용 목록 등록 | Edward | **즉시 불필요** — Sandbox 개발 중 비블로커. Go Live 전 Edward 확인 예정. |
+| **③** | ~~운영 서버 IP UPS 허용 목록 등록~~ | — | **비블로커 확정** — UPS REST API는 OAuth 인증, IP 허용 목록 불필요. Vercel 직접 호출 가능. 인프라 추가 작업 없음. |
 
 > **설계 승인 조건**: ① Sandbox 계정 확보 후 IMP-136~140 발령 진행.
 > ② UI 방향은 JSJung 회신 후 IMP-141~ 별도 발령.
@@ -264,3 +264,4 @@ this.providers.set('UPS_TRACKING', new UpsTrackingProvider());
 |:-----|:------|:----|
 | 2026-06-24 | Aiden (Claude, ZEN_CEO) | 초안 작성 — TASK-B-022 리서치 결과 반영, An-12 IBC 제거 반영 |
 | 2026-06-24 | Aiden (Claude, ZEN_CEO) | §8·§9 갱신 — ② JSJung 확인 요청으로 전환, ③ 즉시 불필요(Go Live 전 확인) 반영 (Edward 지시) |
+| 2026-06-24 | Aiden (Claude, ZEN_CEO) | §8·§9 최종 갱신 — ③ 비블로커 확정. UPS REST API OAuth 인증 방식, IP 허용 목록 불필요. Vercel 호스팅으로 충분. Supabase Remote 기존 연결 재사용. |
