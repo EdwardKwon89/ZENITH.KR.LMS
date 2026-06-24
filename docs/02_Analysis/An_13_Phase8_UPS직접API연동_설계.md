@@ -221,13 +221,13 @@ this.providers.set('UPS_TRACKING', new UpsTrackingProvider());
 
 ## 7. 구현 순서 및 Phase 8 Task 계획
 
-| Task ID | 담당 | 내용 | 의존 |
-|:--------|:----:|:----|:-----|
-| **IMP-136** | Dave (Team B) | UPS OAuth Client + config + HTTP Client | - |
-| **IMP-137** | Dave (Team B) | UPS Ship API (레이블 발급) + zen_ups_labels Server Action | IMP-136 |
-| **IMP-138** | Dave (Team B) | DB 마이그레이션 (`zen_ups_labels` + `zen_ups_tracking_events`) | - |
-| **IMP-139** | Dave (Team B) | UpsTrackingProvider + zen_ups_tracking_events 저장 | IMP-136·138 |
-| **IMP-140** | Baker (Team B) | E2E 테스트 (레이블 발급 + 트래킹 폴링) | IMP-136~139 |
+| Task ID | 담당 | 내용 | 의존 | Issue |
+|:--------|:----:|:----|:-----|:-----:|
+| **IMP-136** | Dave (Team B) | UPS OAuth Client + config + HTTP Client | - | [#106](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/106) |
+| **IMP-137** | Dave (Team B) | UPS Ship API (레이블 발급) + zen_ups_labels Server Action | IMP-136 | [#107](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/107) |
+| **IMP-138** | Dave (Team B) | DB 마이그레이션 (`zen_ups_labels` + `zen_ups_tracking_events`) | - | [#108](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/108) |
+| **IMP-139** | Dave (Team B) | UpsTrackingProvider + zen_ups_tracking_events 저장 | IMP-136·138 | [#109](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/109) |
+| **IMP-140** | Baker (Team B) | E2E 테스트 (레이블 발급 + 트래킹 폴링) | IMP-136~139 | [#110](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/110) |
 
 > UI 범위 미결 사항 ② 확정 후 UI 구현 Task(IMP-141~) 별도 발령 예정.
 
@@ -266,3 +266,4 @@ this.providers.set('UPS_TRACKING', new UpsTrackingProvider());
 | 2026-06-24 | Aiden (Claude, ZEN_CEO) | §8·§9 갱신 — ② JSJung 확인 요청으로 전환, ③ 즉시 불필요(Go Live 전 확인) 반영 (Edward 지시) |
 | 2026-06-24 | Aiden (Claude, ZEN_CEO) | §8·§9 최종 갱신 — ③ 비블로커 확정. UPS REST API OAuth 인증 방식, IP 허용 목록 불필요. Vercel 호스팅으로 충분. Supabase Remote 기존 연결 재사용. |
 | 2026-06-24 | Aiden (Claude, ZEN_CEO) | **Edward 승인 완료** — 승인 상태 ✅ 전환. §7 구현 담당 Team B(Dave·Baker)로 전환. §9 ① 담당 Edward→JSJung(고객사 확인 중). |
+| 2026-06-25 | Aiden (Claude, ZEN_CEO) | §7 Issue 번호 추가 — IMP-136~140 GitHub Issue #106~#110 생성 완료. |
