@@ -7,8 +7,9 @@ import InboundProcessForm from '@/components/warehouse/InboundProcessForm';
 export default async function WarehouseInboundPage({
   params,
 }: {
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
 }) {
+  const { locale } = await params;
   const { profile } = await requireAuth();
 
   // 권한 체크: ADMIN or MANAGER or SUPER_ADMIN
@@ -17,7 +18,7 @@ export default async function WarehouseInboundPage({
     profile?.role === USER_ROLES.ZENITH_SUPER_ADMIN;
 
   if (!isAllowed) {
-    redirect(`/${params.locale}/dashboard`);
+    redirect(`/${locale}/dashboard`);
   }
 
   const t = await getTranslations('WarehouseInbound');
@@ -40,7 +41,7 @@ export default async function WarehouseInboundPage({
       </div>
 
       <div className="max-w-7xl mx-auto px-8">
-        <InboundProcessForm locale={params.locale} />
+        <InboundProcessForm locale={locale} />
       </div>
     </div>
   );
