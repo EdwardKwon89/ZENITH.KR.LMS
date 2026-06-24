@@ -252,7 +252,7 @@
 | TASK-B-019 | 260623 | [P7-SPR-08] Phase 7 종합 회귀 테스트 — E2E-21/22/23 통합 실행 및 보고 | P2 | TASK-B-018 ✅ | Jaison | ✅ | [TASK-B-019](tasks/TASK-B-019_260623_P7SPR08_Phase7종합회귀_Jaison.md) | IMP-134 · Issue #78 ✅ · PR#84 머지 ✅ (260623) · E2E-22 PASS · E2E-21/23 R-14 적용 · 387/387 · Aiden ✅ 승인 |
 | TASK-B-020 | 260623 | DEF-073 Agency shippers/new · rate-overrides/new Server Action 오류 수정 | P2 | 없음 | Baker | ✅ | [TASK-B-020](tasks/TASK-B-020_260623_DEF073_AgencyServerAction수정_Baker.md) | Issue #80 · DEF-073 · getTranslations→useTranslations · PR#83 머지 ✅ (260623) · Aiden ✅ 승인 |
 | TASK-B-021 | 260624 | [SPR-09] E2E-23 보강 — UAT-20 Agency 정산 CSV 다운로드 + Reconciliation 알림 상세 검증 | P2 | TASK-B-019 ✅ | Jaison (총괄) · Baker (구현) | 🔔 | [TASK-B-021](tasks/TASK-B-021_260624_E2E23보강_UAT20Agency정산_Jaison.md) | Issue #91 · TC-AG-09~12 ✅ · 387/387 ALL PASS · PR#94 |
-| TASK-B-022 | 260624 | Phase 8 UPS 실물 연동 사전 설계 리서치 — 레이블 발급·트래킹 폴링·인보이스·DB 스키마 초안 | P1 | 없음 | Jaison (총괄) · Dave (§1 ✅) · Baker (§2 ✅) | 🔔 | [TASK-B-022](tasks/TASK-B-022_260624_Phase8_UPS실물연동_리서치_JSJung.md) | Issue #97 · IBC/Pactrak 영구 제외 → UPS 직접 API 전환 · Aiden An-13 입력 자료 |
+| TASK-B-022 | 260624 | Phase 8 UPS 실물 연동 사전 설계 리서치 — 레이블 발급·트래킹 폴링·인보이스·DB 스키마 초안 | P1 | 없음 | Jaison (총괄) · Dave (§1 ✅) · Baker (§2 ✅) | 🔔 | [TASK-B-022](tasks/TASK-B-022_260624_Phase8_UPS실물연동_리서치_JSJung.md) | Issue #97 · IBC/Pactrak 영구 제외 → UPS 직접 API 전환 · Aiden An-13 입력 자료 · PR#101 |
 ---
 
 ## Agent 현황
@@ -275,7 +275,7 @@
 | **JSJung** (팀 리더) | ✅ TASK-142 완료 | PR#7 → develop 머지 (260616) |
 | **Jaison** (AI Agent 총괄) | 🔔 TASK-B-022 총괄 | Dave §1 ✅ · Baker §2 문서·PR 대기 |
 | **Dave** (AI Agent) | ✅ TASK-B-022 §1 리서치 완료 | 5개 항목 전량 조사 · 산출물 작성 완료 |
-| **Baker** (AI Agent) | ✅ TASK-B-022 §2 문서·PR 완료 | PR# 제출 완료 (Closes #97) · LAST_REGRESSION_RESULT PASS |
+| **Baker** (AI Agent) | ✅ TASK-B-022 §2 문서·PR 완료 | PR#101 제출 (Closes #97) · LAST_REGRESSION_RESULT PASS |
 | **Gale** (AI Agent) | 대기 | 추후 재배정 예정 |
 
 ---
