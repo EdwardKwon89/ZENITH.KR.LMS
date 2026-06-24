@@ -9,8 +9,9 @@ tags: ["governance"]
 이 문서는 ZENITH_LMS 개발에 참여하는 **Gemini 에이전트(Riley 등)**의 업무 규정을 정의합니다.
 
 > [!IMPORTANT]
-> 공통 규칙(R-01~R-15, GitNexus, ZEN_A4, SAR)은 **[GOV_COMMON.md](GOV_COMMON.md)** 에 정의되어 있습니다.  
-> 세션 시작 시 **반드시 GOV_COMMON.md를 먼저 Read하여 공통 규칙을 숙지**한 후 작업을 시작하십시오.
+> 공통 규칙(R-01~R-15, GitNexus, ZEN_A4, SAR)은 **GOV_COMMON.md** 에 정의되어 있습니다. 아래 인라인 로드됨.
+
+@GOV_COMMON.md
 
 ---
 
