@@ -236,7 +236,7 @@
 |:---:|:-----|:-----:|:----:|:------:|
 | 092 | TISA 요율 3계층 구조 도입 (carrier_cost + margin_rate + platform_fee_rate 분리) | D_Kai | ✅ | `e442ea3`+`8132d98` · 228/228+ · migration+admin UI+fn+trigger+transport_mode fix · Aiden ✅ 승인 |
 
-| 093 | TISA Dashboard 실 Rate Card 연동 (Mock 제거, DB 실조회, 경로 선택 후 스냅샷) | D_Kai | 🔔 | `7225196`+`6a0dbab` · 228/228+ · server action+page+RLS+UI+role 분기+transport_mode fix |
+| 093 | TISA Dashboard 실 Rate Card 연동 (Mock 제거, DB 실조회, 경로 선택 후 스냅샷) | D_Kai | ✅ | `7225196`+`6a0dbab` · 228/228+ · server action+page+RLS+UI+role 분기+transport_mode fix · Aiden ✅ 승인 |
 
 **Phase L 완료**: 2 / 2 (100%)
 
