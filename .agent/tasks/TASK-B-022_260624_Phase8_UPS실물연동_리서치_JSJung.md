@@ -111,9 +111,10 @@ _(없음 — 리서치 범위 명확)_
 
 | 항목 | 내용 |
 |:-----|:------|
+| Dave §1 커밋 해시 | `82496a0` |
 | 상태 | 🔄→🔔 |
 | DoD | 전항목 ✅ |
-| PR | # 제출 완료 (Closes #97) |
+| PR | [#101](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/101) (Closes #97) |
 | LAST_REGRESSION_RESULT | FAIL→PASS 원복 |
 
 ### 권장 구현 순서
@@ -134,3 +135,4 @@ _(없음 — 리서치 범위 명확)_
 | 2026-06-24 | Jaison (Claude, Team B) | 🔄 착수 (JSJung 지시) — Issue #97, Dave(§1 리서치) · Baker(§2 문서·PR) 배정. 브랜치 `feature/teamb-task-b-022-phase8-ups-research` 생성. |
 | 2026-06-24 | Dave (DeepSeek V4) | §1 리서치 완료 — 5개 항목 전량 조사 + 산출물 `Phase8_UPS_API_리서치_결과.md` 작성. 🔄→🔔 (Baker §2 대기) |
 | 2026-06-24 | Baker (Big Pickle) | §2 문서·PR 완료 — DoD 전량 ✅, PR# 제출. 🔄→🔔 |
+| 2026-06-24 | Baker (Big Pickle) | ❌ 반려 수정 — ① §1 커밋 해시 `82496a0` 기재 ② §2 PR# → #101 정정. |
