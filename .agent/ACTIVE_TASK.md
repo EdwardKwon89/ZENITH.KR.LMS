@@ -200,7 +200,7 @@
 | TASK-163 | 260624 | [SPR-09] E2E-24 UPS 오더 플로우 자동화 (UAT-17 3종) | P2 | TASK-161 ✅ | B_Kai | ✅ | [TASK-163](tasks/TASK-163_260624_E2E24_UPS오더플로우자동화_BKai.md) | Issue #90 · PR#99 머지 ✅ (260624) · UAT-17 DIRECT/PICKUP/RateOverride 3/3 PASS · Aiden ✅ 승인 |
 | TASK-164 | 260624 | [SPR-09] E2E-25 창고 출고 RELEASED 자동화 (UAT-18) | P2 | TASK-161 ✅ | B_Kai | 🚫 | [TASK-164](tasks/TASK-164_260624_E2E25_창고출고RELEASED자동화_BKai.md) | Issue #95 재진단 블로커 — TASK-163 완료 후 해제 예정 |
 | TASK-165 | 260624 | [SPR-09] E2E-26 Invoice PDF 텍스트 추출 검증 자동화 (UAT-19) | P2 | TASK-161 ✅ | D_Kai | ✅ | [TASK-165](tasks/TASK-165_260624_E2E26_InvoicePDF텍스트추출검증_DKai.md) | Issue #87 · PR#96 머지 ✅ (260624) · UAT-19 2/2 PASS · DEF-075~077 등록 · Aiden ✅ 승인 |
-| TASK-166 | 260624 | AGENTS.md 페르소나 중립 구조 개편 | P2 | 없음 | D_Kai | 🔔 | [TASK-166](tasks/TASK-166_260624_AGENTS_페르소나중립구조개편_DKai.md) | Issue #93 · PR#98 개정이력 순서·B_Kai 경로 2건 수정 요청 — 재커밋 대기 |
+| TASK-166 | 260624 | AGENTS.md 페르소나 중립 구조 개편 | P2 | 없음 | D_Kai | ✅ | [TASK-166](tasks/TASK-166_260624_AGENTS_페르소나중립구조개편_DKai.md) | Issue #93 · PR#98 머지 ✅ (260624) · 개정이력 순서 + B_Kai 경로 수정 반영 · Aiden ✅ 승인 |
 | TASK-154 | 260617 | DEF-067 seed_data.sql + seed_rate_card.sql 구스키마 수정 + IMP-120 migration fix — CI 전체 차단 블로커 복구 | P1 | 없음 | D_Kai | ✅ | [TASK-154](tasks/TASK-154_260617_DEF067_시드데이터스키마수정_DKai.md) | DEF-067 · Issue #27 · 코드 db63986 · 378/378 PASS · Aiden ✅ 승인 (260618) |
 | TASK-151 | 260617 | [P7-SPR-05] R5 주소록 — zen_address_book DB + CRUD Server Actions + 오더 폼 연동 | P1 | TASK-149 ✅ | B_Kai | ✅ | [TASK-151](tasks/TASK-151_260617_P7SPR05_주소록_BKai.md) | IMP-120 · PR #33 (Closes #23·#32) · TC-P7-ADDR-01~05 · Aiden ✅ 승인 (260618) |
 | TASK-152 | 260617 | [P7-SPR-05] R7 일마감 처리 — 당일 출고 집계 + 매출/매입 일별 집계 화면 | P1 | TASK-150 ✅ | D_Kai | ✅ | [TASK-152](tasks/TASK-152_260617_P7SPR05_일마감처리_DKai.md) | IMP-121 · PR #29 (Closes #24) · TC-P7-CLOSE-01~04 · Aiden ✅ 승인 (260618) |
@@ -265,8 +265,8 @@
 
 | Agent | 상태 | 비고 |
 |:------|:----:|:----|
-| **Aiden (Claude)** | 🔄 PR#98 검토 중 | TASK-163 ✅ PR#99 머지 · TASK-165 ✅ PR#96 머지 · TASK-166 🔔 수정 요청 |
-| **D_Kai (OpenCode)** | 🔔 TASK-166 수정 요청 | 개정이력 순서·B_Kai 경로 2건 수정 후 재커밋 필요 |
+| **Aiden (Claude)** | ✅ SPR-09 검토 완료 (260624) | TASK-163/165/166 ✅ 전량 머지 · DEF-078 핫픽스(PR#100) 머지 |
+| **D_Kai (OpenCode)** | ✅ TASK-166 완료 (260624) | PR#98 머지 ✅ · 다음 Task 배분 대기 |
 | **B_Kai** | ✅ TASK-163 완료 (260624) | PR#99 머지 ✅ · E2E-24 3/3 PASS · TASK-164 🚫 블로커 대기 |
 | **Riley** | ✅ TASK-161 승인 (260619) | UAT-15~20 16개 시나리오 · PR #46 머지 · 다음 Task 배분 대기 |
 | N_Kai | 재교육 세션 대기 (TASK-087) | R-17 위반 누적 — 신규 할당 중단 유지 |
