@@ -1,421 +1,367 @@
 # Phase 8 UPS 실물 API 연동 리서치 결과
 
-> **작성일**: 2026-06-24
-> **작성자**: Dave (DeepSeek V4) — TASK-B-022 §1
+> **작성일**: 2026-06-25
+> **작성자**: Dave (DeepSeek V4) — TASK-B-023
 > **참조 자료**:
 > - `docs/80_RawData/20260609 IBC和UPS Interface.pdf`
-> - `docs/80_RawData/20260609 UPS 특송 부가서비스.pdf`
-> - `docs/80_RawData/20260609 UPS 특송 요금 정보.xlsx`
 > - `docs/02_Analysis/An_09_통관연계_분석_검토보고서.md`
-> - `docs/02_Analysis/An_12_Phase7_UPS특송서비스_설계.md`
-> - 코드베이스: `src/types/ups.ts`, `src/lib/logistics/tracking.ts`, `supabase/migrations/`
+> - **라이브 API 문서**: `https://shxk.rtb56.com/usercenter/manager/api_document.aspx`
+> - **실측 API**: `http://shxk.rtb56.com/webservice/PublicService.asmx/ServiceInterfaceUTF8`
+> - `.env.local` — UPS_API_KEY / UPS_API_TOKEN (발급 완료)
+> - **DEF-079** (260624): 실 연동 대상은 shxk.rtb56.com (제3자 플랫폼)
 
 ---
 
-## ① 레이블 발급 API
+## 리서치 개요
 
-### Context: IBC/Pactrak → UPS 직접 API 전환
-
-Edward (260617) 및 Aiden (260624) 확정: **IBC/Pactrak Interface 영구 제외**, UPS 직접 API 연동으로 전환.
-
-### 제안 Endpoint: UPS Shipping API (RESTful)
-
-| 항목 | 내용 |
-|:-----|:------|
-| **Endpoint** | `POST /api/shipments/v1/ship` 또는 `POST /api/orders/v1/create` |
-| **Base URL (테스트)** | `https://wwwcie.ups.com` |
-| **Base URL (운영)** | `https://onlinetools.ups.com` |
-| **인증 방식** | OAuth 2.0 Client Credentials → `access_token` 발급 (15분~2시간 유효) |
-| **API 버전** | UPS REST API (Legacy XML SOAP → REST 전환 완료) |
-
-### Request Payload 구조 (필수 필드)
-
-```
-ShipmentRequest:
-  ├─ ShipmentRequest: {
-  │   Request: { RequestOption: 'validate' | 'nonvalidate' }
-  │   Shipment: {
-  │     Description: string
-  │     Shipper: {
-  │       Name, AttentionName, Phone, Email
-  │       Address: { AddressLine, City, StateProvinceCode, PostalCode, CountryCode }
-  │     }
-  │     ShipTo: {  (동일 구조)  }
-  │     ShipFrom: {  (동일 구조)  }
-  │     PaymentInformation: {
-  │       ShipmentCharge: {
-  │         Type: '01' (Transportation)
-  │         BillShipper: { AccountNumber: string }
-  │       }
-  │     }
-  │     Service: { Code: string, Description: string }
-  │     Package: [{
-  │       Description: string
-  │       Packaging: { Code: '02' (Customer Supplied) }
-  │       Dimensions: { UnitOfMeasurement: { Code: 'CM' }, Length, Width, Height }
-  │       PackageWeight: { UnitOfMeasurement: { Code: 'KG' }, Weight }
-  │     }]
-  │   }
-  │   LabelSpecification: {
-  │     LabelImageFormat: { Code: 'GIF' | 'PDF' | 'ZPL' }
-  │     HTTPUserAgent: 'Mozilla/4.5'
-  │   }
-  │ }
-  └─ Translated Text → UPS API JSON
-```
-
-### Response 구조
-
-```
-ShipmentResponse:
-  ├─ ShipmentResults: {
-  │   ShipmentNumber: string (운송장번호)
-  │   PackageResults: [{
-  │     TrackingNumber: string (개별 PKG 운송장번호)
-  │     ServiceOptionsCharges: { CurrencyCode, MonetaryValue }
-  │     ShippingLabel: {
-  │       ImageFormat: { Code: 'PDF' | 'GIF' | 'ZPL' }
-  │       GraphicImage: string (Base64)
-  │     }
-  │   }]
-  │   BillingWeight: { UnitOfMeasurement, Weight }
-  │   ShipmentCharges: { TransportationCharges, ServiceOptionsCharges, TotalCharges }
-  │ }
-  └─ Response: { ResponseStatus, Alert, TransactionReference }
-```
-
-### 레이블 형식
-
-| 형식 | 용도 | 비고 |
-|:-----|:-----|:------|
-| **PDF** | 화면 출력, 다운로드 | `@react-pdf` 없이 UPS가 PDF(Base64) 제공 — 저장 후 Storage 업로드 |
-| **ZPL** | 열전사 프린터 | 라벨 프린터 출력용 |
-| **GIF** | 브라우저 미리보기 | 경량 이미지 |
-
-> **권장**: PDF 수신 → `Supabase Storage` `ups_labels` 버킷에 저장 → URL 참조.
-
-### 오류 코드 및 처리 방안
-
-| 오류 범위 | 예시 코드 | 조치 |
-|:----------|:----------|:-----|
-| 인증 오류 | `401`, `403` | 토큰 갱신 후 재시도 (최대 2회) |
-| 검증 오류 | `400` — Invalid Address | 주소 검증 API(Address Validation) 호출 안내 |
-| 서버 오류 | `500`, `502`, `503` | Exponential Backoff (3회, 1s→3s→9s) |
-| Rate Limit | `429` | `Retry-After` 헤더 준수, 최대 5분 대기 |
-| 비즈니스 오류 | `90000`~`99999` | 오류 코드별 사용자 메시지 매핑 |
+- **연동 대상**: `shxk.rtb56.com` — 중국 포워더(3PL) 국제특송 주문 시스템
+- **PDF 표기**: "UPS接口文档"으로 표기되었으나 UPS 공식 API가 아닌 제3자 시스템
+- **라이브 문서 확인 완료**: `https://shxk.rtb56.com/usercenter/manager/api_document.aspx`
+- **API 키 발급 완료** (JSJung → `.env.local`): `UPS_API_KEY` / `UPS_API_TOKEN`
+- **실제 API 호출 검증 완료**: `http://shxk.rtb56.com/webservice/PublicService.asmx/ServiceInterfaceUTF8`
 
 ---
 
-## ② 트래킹 폴링 API
-
-### 제안 Endpoint: UPS Tracking API (RESTful)
+## ① API 기본 정보
 
 | 항목 | 내용 |
 |:-----|:------|
-| **Endpoint** | `GET /api/track/v1/details/{trackingNumber}` |
-| **대안** | `POST /api/track/v1/details` (단건/다건) |
-| **인증** | OAuth 2.0 access_token |
-| **Base URL** | 레이블 발급과 동일 (`wwwcie` / `onlinetools`) |
+| **Base URL** | `http://shxk.rtb56.com/webservice/PublicService.asmx/ServiceInterfaceUTF8` |
+| **Protocol** | HTTP (HTTPS 아님 — PDF에 HTTP 명시) |
+| **Method** | POST |
+| **Content-Type** | `application/x-www-form-urlencoded` |
+| **Auth** | appToken + appKey (POST Body 파라미터로 전송) |
+| **Service 방식** | 단일 엔드포인트 + `serviceMethod` 파라미터로 기능 분기 |
 
-### 이벤트 응답 구조
+**참고**: 엔드포인트는 `tools/submit_ajax.ashx?action=xxx` (웹 내부 AJAX)와
+`webservice/PublicService.asmx/ServiceInterfaceUTF8` (외부 API) 두 가지가 존재함.
+외부 연동은 **asmx 엔드포인트**를 사용해야 함.
+
+### 공통 요청 형식
+
+```
+POST /webservice/PublicService.asmx/ServiceInterfaceUTF8
+Content-Type: application/x-www-form-urlencoded
+
+appToken={token}&appKey={key}&serviceMethod={method}&paramsJson={json}
+```
+
+### 공통 응답 형식
 
 ```json
 {
-  "trackResponse": {
-    "shipment": [{
-      "inquiryNumber": "1Z999AA10123456784",
-      "shipmentType": "01",
-      "candidateBookmark": null,
-      "package": [{
-        "trackingNumber": "1Z999AA10123456784",
-        "deliveryDate": [{ "date": "20240712", "time": "14:30:00" }],
-        "currentStatus": { "code": "OR", "description": "On the Way", "type": "I" },
-        "activity": [{
-          "date": "20240712",
-          "time": "143000",
-          "location": {
-            "address": { "city": "Seoul", "countryCode": "KR" },
-            "signedForByName": null
-          },
-          "status": {
-            "type": "I",
-            "code": "OR",
-            "description": "On the Way to UPS Access Point"
-          },
-          "gmtDate": "20240712",
-          "gmtTime": "053000",
-          "gmtOffset": "09:00"
-        }]
-      }]
+  "success": 0 | 1 | 2,
+  "cnmessage": "중문 메시지",
+  "enmessage": "영문 메시지",
+  "data": { ... }
+}
+```
+
+| 필드 | 타입 | 설명 |
+|:-----|:-----|:-----|
+| `success` | int | 0=실패, 1=성공, 2=중복주문 |
+| `cnmessage` | string | 중문 결과 메시지 |
+| `enmessage` | string | 영문 결과 메시지 |
+| `data` | object/array | 성공 시 반환 데이터 |
+
+---
+
+## ② 사용 가능한 API 목록 (serviceMethod)
+
+| # | serviceMethod | 설명 | 중요도 |
+|:-:|:--------------|:-----|:------:|
+| 1 | `createorder` | 주문 생성 (Draft 또는 즉시예보) | 🔴 필수 |
+| 2 | `submitforecast` | Draft 주문 예보 제출 (2단계) | 🔴 필수 |
+| 3 | `updateorder` | 주문 수정 | 🟡 필요 |
+| 4 | `removeorder` | 주문 삭제 | 🟡 필요 |
+| 5 | `getnewlabel` | 라벨/운송장 PDF/PNG 출력 | 🔴 필수 |
+| 6 | `gettrackingnumber` | 트래킹 번호 조회 | 🔴 필수 |
+| 7 | `gettrack` | 트래킹 기록 조회 | 🔴 필수 |
+| 8 | `getorderfee` | 주문 비용 조회 (항목별 합계) | 🟡 필요 |
+| 9 | `getorderfeedetail` | 주문 비용 상세 조회 | 🟢 옵션 |
+| 10 | `getorderweight` | 주문 중량 조회 | 🟢 옵션 |
+| 11 | `calculateshippingfee` | 운임 견적/사전 계산 | 🟡 필요 |
+| 12 | `getbasicdata` | 기초 데이터 조회(운송방식 등) | 🟡 필요 |
+
+---
+
+## ③ API 상세 스펙
+
+### ③-1. createorder (주문 생성)
+
+**serviceMethod**: `createorder`
+
+**paramsJson 필드**:
+
+| 필드 | 타입 | 길이 | 필수 | 설명 |
+|:-----|:-----|:----:|:----:|:-----|
+| `reference_no` | string | 50 | **Y** | 고객 참조 번호 (유니크) |
+| `shipping_method` | string | | **Y** | 운송 방식 코드 (getbasicdata로 조회) |
+| `shipping_method_no` | string | 50 | | 서비스업체 운송장번호 |
+| `order_weight` | string | 9,3 | | 중량(KG), 3자리 소수, 기본 0.2 |
+| `order_pieces` | string | | | 외포장 건수, 기본 1 |
+| `cargotype` | string | | | 화물유형: W(소포) / D(서류) / B(가방) |
+| `order_status` | string | | | P=예보완료(기본), D=초안 |
+| `mail_cargo_type` | string | | | 신고종류: 1=선물 / 2=상품샘플 / 3=서류 / 4=기타(기본) |
+| `buyer_id` | string | 30 | | 구매자ID (eCommerce) |
+| `order_info` | string | 200 | | 주문 비고 |
+| `platform_id` | string | | | 플랫폼ID (사전등록 필요) |
+| `custom_hawbcode` | string | 50 | | 사용자 지정 운송장번호 |
+| `production_sales_company` | string | | | 생산판매 기업명 |
+| `production_sales_companycode` | string | | | 생산판매 기업코드 |
+| `shipper` | object | | **Y** | 발송인 정보 |
+| `shipper.shipper_name` | string | 200 | **Y** | 발송인 성명 |
+| `shipper.shipper_company` | string | 200 | | 발송인 회사명 |
+| `shipper.shipper_countrycode` | string | 2 | **Y** | 발송인 국가코드 (ISO 2자리) |
+| `shipper.shipper_province` | string | 300 | | 주/도 |
+| `shipper.shipper_city` | string | 300 | | 도시 |
+| `shipper.shipper_district` | string | 300 | | 구/군 |
+| `shipper.shipper_street` | string | 300 | **Y** | 거리주소 |
+| `shipper.shipper_postcode` | string | 100 | | 우편번호 |
+| `shipper.shipper_areacode` | string | 10 | | 지역코드 |
+| `shipper.shipper_telephone` | string | 100 | 조건 | 전화번호 (mobile/telephone 중 1 필수) |
+| `shipper.shipper_mobile` | string | 100 | 조건 | 휴대폰 |
+| `shipper.shipper_email` | string | 100 | | 이메일 |
+| `shipper.shipper_fax` | string | 40 | | 팩스 |
+| `consignee` | object | | **Y** | 수취인 정보 |
+| `consignee.consignee_name` | string | 200 | **Y** | 수취인 성명 |
+| `consignee.consignee_company` | string | 200 | | 수취인 회사명 |
+| `consignee.consignee_countrycode` | string | 2 | **Y** | 수취인 국가코드 |
+| `consignee.consignee_province` | string | 300 | 조건 | 주/도 |
+| `consignee.consignee_city` | string | 300 | 조건 | 도시 |
+| `consignee.consignee_district` | string | 300 | 조건 | 구/군 |
+| `consignee.consignee_street` | string | 300 | **Y** | 거리주소 |
+| `consignee.consignee_postcode` | string | 100 | 조건 | 우편번호 |
+| `consignee.consignee_doorplate` | string | 300 | | 문패번호 |
+| `consignee.consignee_areacode` | string | 10 | | 지역코드 |
+| `consignee.consignee_telephone` | string | 100 | 조건 | 전화번호 |
+| `consignee.consignee_mobile` | string | 100 | 조건 | 휴대폰 |
+| `consignee.consignee_email` | string | 100 | | 이메일 |
+| `consignee.consignee_fax` | string | 100 | | 팩스 |
+| `consignee.consignee_certificatetype` | string | | | 증명서유형: ID(신분증) / PP(여권) |
+| `consignee.consignee_certificatecode` | string | 50 | | 증명서번호 |
+| `consignee.consignee_credentials_period` | string | 50 | | 증명서 유효기간 |
+| `consignee.consignee_tariff` | string | 50 | 조건 | 수취인 세금번호 (EIN/TIN) |
+| `invoice` | array | | **Y** | 통관 신고 품목 목록 |
+| `invoice[].sku` | string | 100 | | SKU |
+| `invoice[].invoice_enname` | string | 500 | **Y** | 영문 품명 |
+| `invoice[].invoice_cnname` | string | 500 | 조건 | 중문 품명 |
+| `invoice[].invoice_quantity` | string | 6 | **Y** | 수량 |
+| `invoice[].unit_code` | string | | | 단위: MTR(미터) / PCE(개) / SET(세트), 기본 PCE |
+| `invoice[].invoice_unitcharge` | string | 12,2 | **Y** | 단가(USD), 소수2자리 |
+| `invoice[].hs_code` | string | 30 | | HS코드 |
+| `invoice[].register_code` | string | 30 | | HTS번호 (미국용) |
+| `invoice[].invoice_note` | string | 255 | | 배송메모 |
+| `invoice[].invoice_url` | string | 255 | | 판매URL |
+| `invoice[].invoice_info` | string | 200 | | 상품이미지 URL |
+| `invoice[].invoice_material` | string | 255 | | 재질 |
+| `invoice[].invoice_spec` | string | 255 | | 규격 |
+| `invoice[].invoice_use` | string | 255 | | 용도 |
+| `invoice[].invoice_brand` | string | 255 | | 브랜드 |
+| `invoice[].posttax_num` | string | 255 | | 행우편세금번호 |
+| `invoice[].country_origin` | string | 50 | | 원산지국가 |
+| `invoice[].net_weight` | string | 9,3 | | 개별 상품중량(KG), 소수3자리 |
+| `cargovolume` | array | | | 포장 체적 정보 (분할선적시) |
+| `cargovolume[].child_number` | string | 60 | | 박스번호(자식운송장) |
+| `cargovolume[].involume_length` | string | 5,1 | | 길이(CM), 소수1자리 |
+| `cargovolume[].involume_width` | string | 5,1 | | 폭(CM), 소수1자리 |
+| `cargovolume[].involume_height` | string | 5,1 | | 높이(CM), 소수1자리 |
+| `cargovolume[].involume_grossweight` | string | 10,3 | | 총중량(KG), 소수3자리 |
+| `extra_service` | array | | | 추가 서비스 |
+| `extra_service[].extra_servicecode` | string | | **Y** | 서비스 유형코드 |
+| `extra_service[].extra_servicevalue` | string | 20 | 조건 | 서비스 값 |
+| `extra_service[].extra_servicenote` | string | 50 | | 비고 |
+
+**응답 예시**:
+```json
+{
+  "success": 1,
+  "cnmessage": "订单创建成功",
+  "enmessage": "Order created successfully",
+  "data": {
+    "order_id": 51770,
+    "refrence_no": "TEST2018000002",
+    "shipping_method_no": "RZ000013260TW",
+    "channel_hawbcode": ""
+  }
+}
+```
+
+### ③-2. submitforecast (예보 제출 — 2단계)
+
+createorder에서 `order_status: "D"`(초안)으로 생성한 후 호출.
+
+**paramsJson**:
+| 필드 | 타입 | 필수 | 설명 |
+|:-----|:-----|:----:|:-----|
+| `reference_no` | string | **Y** | 고객 참조 번호 |
+| `order_weight` | string | | 중량(KG) |
+
+**참고**: `order_status: "P"`로 바로 생성하면 submitforecast 불필요.
+
+### ③-3. updateorder (주문 수정)
+
+**paramsJson**:
+| 필드 | 타입 | 필수 | 설명 |
+|:-----|:-----|:----:|:-----|
+| `reference_no` | string | **Y** | 고객 참조 번호 |
+| `order_weight` | string | **Y** | 수정할 중량 |
+
+### ③-4. removeorder (주문 삭제)
+
+**paramsJson**:
+| 필드 | 타입 | 필수 | 설명 |
+|:-----|:-----|:----:|:-----|
+| `reference_no` | string | **Y** | 고객 참조 번호 |
+
+### ③-5. getnewlabel (라벨 출력)
+
+라벨 파일(PNG/PDF)을 Base64 또는 URL로 반환.
+
+**paramsJson**:
+| 필드 | 타입 | 필수 | 설명 |
+|:-----|:-----|:----:|:-----|
+| `configInfo` | object | **Y** | 출력 설정 |
+| `configInfo.lable_file_type` | string | **Y** | 1=PNG, 2=PDF |
+| `configInfo.lable_paper_type` | string | **Y** | 1=라벨지, 2=A4 |
+| `configInfo.lable_content_type` | string | **Y** | 1=라벨 / 2=세관신고서 / 3=배송물류 / 4=라벨+신고서 / 5=라벨+배송물류 / 6=라벨+신고서+배송물류 |
+| `configInfo.additional_info` | object | **Y** | 추가설정 |
+| `configInfo.additional_info.lable_print_invoiceinfo` | string | | 라벨에 배송정보 출력 (Y/N, 기본 N) |
+| `configInfo.additional_info.lable_print_buyerid` | string | | 라벨에 구매자ID 출력 (Y/N, 기본 N) |
+| `configInfo.additional_info.lable_print_datetime` | string | | 라벨에 날짜 출력 (Y/N, 기본 Y) |
+| `configInfo.additional_info.customsdeclaration_print_actualweight` | string | | 세관신고서에 실중량 출력 (Y/N) |
+| `listorder` | array | **Y** | 출력할 주문 목록 |
+| `listorder[].reference_no` | string | **Y** | 고객 참조 번호 |
+
+### ③-6. gettrackingnumber (트래킹 번호 조회)
+
+**paramsJson**:
+| 필드 | 타입 | 필수 | 설명 |
+|:-----|:-----|:----:|:-----|
+| `reference_no` | string | **Y** | 고객 참조 번호 |
+
+### ③-7. gettrack (트래킹 기록 조회)
+
+**paramsJson**:
+| 필드 | 타입 | 필수 | 설명 |
+|:-----|:-----|:----:|:-----|
+| `tracking_number` | string | **Y** | 서비스업체 운송장번호 (shipping_method_no) |
+
+**응답 예시**:
+```json
+{
+  "success": 1,
+  "data": [{
+    "server_hawbcode": "RZ000013260TW",
+    "destination_country": "US",
+    "track_status": "NT",
+    "track_status_name": "转运中",
+    "signatory_name": "",
+    "details": [{
+      "track_occur_date": "2018-09-04 11:52:27",
+      "track_location": "",
+      "track_description": "快件电子信息已经收到"
     }]
-  }
+  }]
 }
 ```
 
-### 배송 상태 코드 체계
+### ③-8. getorderfee (비용 조회)
 
-| 코드 | 상태 | 의미 |
-|:----:|:-----|:------|
-| `I` | In Transit | 운송 중 |
-| `D` | Delivered | 배송 완료 |
-| `X` | Exception | 예외 발생 |
-| `P` | Pickup | 픽업 완료 |
-| `M` | Manifest | 접수 완료 |
-| `OR` | On the Way | 이동 중 |
-| `OD` | Out for Delivery | 배송 중 |
-| `AS` | Arrived at Facility | 물류센터 도착 |
-| `SF` | Departed from Facility | 물류센터 출발 |
-| `KS` | Customs Clearance | 통관 진행 중 |
-| `RS` | Returned to Shipper | 반송 |
+**paramsJson**:
+| 필드 | 타입 | 필수 | 설명 |
+|:-----|:-----|:----:|:-----|
+| `reference_no` | string | **Y** | 고객 참조 번호 |
 
-> **참고**: `zen_tracking_events.event_code` 필드와 1:1 매핑 가능. 기존 `OR`→`IN_TRANSIT`, `D`→`DELIVERED` 등으로 변환.
+### ③-9. calculateshippingfee (운임 사전 계산)
 
-### 권장 폴링 주기 및 Rate Limit
+견적용 — 주문 생성 전 운임 확인.
 
-| 구간 | 주기 | 비고 |
-|:-----|:----|:------|
-| 출고 후 48시간 | **30분 간격** | 초기 경로 진입 확인 |
-| 이후 ~ 7일 | **2시간 간격** | 장거리 이동 구간 |
-| 7일 초과 | **6시간 간격** | 지연 감지 위주 |
-| 배송 완료 | 폴링 중단 | 최종 이벤트 수신으로 종료 |
+### ③-10. getbasicdata (기초 데이터)
 
-> **UPS Rate Limit**: 분당 1,000건 (Sandbox: 100건/분) — 일반 사용량에 충분.
-
-### 구현 방안 (기존 인프라 재활용)
-
-기존 `ITrackingProvider` 인터페이스 구현:
-
-```typescript
-class UpsTrackingProvider implements ITrackingProvider {
-  name = 'UPS_TRACKING';
-  
-  async track(supabase: SupabaseClient, config: TrackingConfig) {
-    // 1. UPS API 호출 (OAuth 토큰 갱신 포함)
-    // 2. 응답 → zen_tracking_raw_logs 저장 (audit)
-    // 3. 이벤트 디듀플리케이션 (event_code + event_time + location 기준)
-    // 4. 신규 이벤트 → zen_tracking_events 배치 INSERT
-    // 5. 최신 상태 → zen_orders.status 동기화
-  }
-}
-```
-
-**파일 위치**: `src/lib/logistics/providers/ups-tracking-provider.ts` (신규)
+운송 방식 코드 목록 등 시스템 기초 데이터 조회.
 
 ---
 
-## ③ 인보이스 연동
+## ④ 인증 방식
 
-### API 자동 제출 vs 수동 제출
-
-| 방식 | 설명 | 권장 |
-|:-----|:------|:----:|
-| **API 자동 제출** | Ship API 호출 시 `InvoiceLineTotal`·`DescriptionOfGoods` 포함 | ✅ **권장** — UPS에서 선적 시 CI 자동 처리 |
-| **수동 제출** | UPS 포털(Quantum View)에서 별도 업로드 | ❌ 번거로움, 실시간 처리 불가 |
-| **Paperless Invoice API** | `POST /api/shipments/v1/ship` 내 `PaperlessDocumentImage` 활용 | 별도 검토 필요 |
-
-### 필수 필드 목록 (Ship API 내 포함)
-
-| 필드 | 위치 | 비고 |
-|:-----|:-----|:------|
-| `InvoiceLineTotal` | `Shipment.Package[].InvoiceLineTotal` | { CurrencyCode, MonetaryValue } |
-| `DescriptionOfGoods` | `Shipment.Package[].Description` | 품목 설명 (영문) |
-| `Documents` | `Shipment.Documents` | { Type: 'INV', Content: Base64 } |
-| `MerchantAccountNumber` | `Shipment.PaymentInformation` | UPS 계정 번호 |
-| `TermsOfSale` | `Shipment.InvoiceLineTotal.TermsOfSale` | DDU / DDP |
-| `ReasonForExport` | `Shipment.ReasonForExport` | 'SALE', 'GIFT', 'SAMPLE', 'RETURN' |
-
-### 인보이스 형식
-
-| 형식 | 지원 | 비고 |
-|:-----|:----:|:------|
-| **PDF** | ✅ | UPS API가 Base64 PDF 반환 — 기존 `UpsInvoicePDF.tsx` 대체 가능 |
-| **XML** | ✅ | EDI 방식 (대량 처리) |
-| **UPS Paperless Document** | ✅ | UPS 전자문서 시스템 — 별도 업로드 불필요 |
-
-> **기존 자산**: `UpsInvoicePDF.tsx` (`@react-pdf`)는 Phase 7에서 생성한 UI용 PDF. Phase 8에서는 UPS API가 반환하는 PDF를 저장·조회하는 방식으로 전환 권장.
-
----
-
-## ④ 환경 분기
-
-### Endpoint 구조
-
-| 환경 | Base URL | 인증 |
-|:-----|:---------|:-----|
-| **테스트 (Sandbox)** | `https://wwwcie.ups.com` | 별도 Client ID/Secret |
-| **운영 (Production)** | `https://onlinetools.ups.com` | 운영 Client ID/Secret |
-
-IP 허용 목록 기반 (Edward `260624` 확인): IP·Key값만 환경별 상이, Spec은 동일.
-
-### 제안 환경변수
-
-```bash
-# .env.local (개발/테스트)
-UPS_ENVIRONMENT=sandbox
-UPS_CLIENT_ID=your_sandbox_client_id
-UPS_CLIENT_SECRET=your_sandbox_client_secret
-UPS_ACCOUNT_NUMBER=your_test_account_number
-UPS_API_BASE_URL_SANDBOX=https://wwwcie.ups.com
-UPS_API_BASE_URL_PRODUCTION=https://onlinetools.ups.com
-
-# .env.production (운영)
-UPS_ENVIRONMENT=production
-UPS_CLIENT_ID=your_production_client_id
-UPS_CLIENT_SECRET=your_production_client_secret
-UPS_ACCOUNT_NUMBER=your_prod_account_number
-```
-
-### 분기 로직 (제안)
-
-```typescript
-// src/lib/ups/config.ts
-function getUpsBaseUrl(): string {
-  const env = process.env.UPS_ENVIRONMENT || 'sandbox';
-  if (env === 'production') {
-    return process.env.UPS_API_BASE_URL_PRODUCTION || 'https://onlinetools.ups.com';
-  }
-  return process.env.UPS_API_BASE_URL_SANDBOX || 'https://wwwcie.ups.com';
-}
-
-function getUpsAuth(): { clientId: string; clientSecret: string } {
-  return {
-    clientId: process.env.UPS_CLIENT_ID!,
-    clientSecret: process.env.UPS_CLIENT_SECRET!,
-  };
-}
-```
-
-### `.env.example` 업데이트 항목
+- **메커니즘**: `appToken` + `appKey`를 POST Body 파라미터로 전송
+- **헤더 인증 아님** — Authorization 헤더 불필요
+- **매 요청마다** appToken + appKey 포함 필요
+- **토큰 만료 정책**: 문서상 미확인 — 필요시 shxk 관리자 문의
+- **발급 상태**: ✅ JSJung 통해 발급 완료, `.env.local`에 등록됨
 
 ```
-# UPS API Configuration (Phase 8)
-# UPS_ENVIRONMENT=sandbox|production
-# UPS_CLIENT_ID=
-# UPS_CLIENT_SECRET=
-# UPS_ACCOUNT_NUMBER=
+UPS_API_KEY=bd0b5fea5e5821c6eec8e38639d97428
+UPS_API_TOKEN=7315a08b6474676b16747aa39195f29a7315a08b6474676b16747aa39195f29a
 ```
 
 ---
 
-## ⑤ DB 스키마 요건 초안
+## ⑤ 실제 API 호출 검증 결과
 
-### `zen_ups_labels` — 레이블 메타데이터 저장
+| Test | Endpoint | 파라미터 | 결과 |
+|:-----|:---------|:---------|:-----|
+| gettrack | 유효한 자격증명 + 존재하지 않는 tracking_number | `tracking_number: "TEST001"` | `{"success":0,"cnmessage":"跟踪号码不存在"}` ✅ |
+| gettrackingnumber | 유효한 자격증명 + 존재하지 않는 reference_no | `reference_no: "TEST2018000001"` | `{"success":0,"cnmessage":"获取的跟踪单号为空"}` ✅ |
+| getorderinfo | 잘못된 serviceMethod | `serviceMethod: "getorderinfo"` | `{"success":0,"cnmessage":"接口方法不支持"}` ✅ |
 
-```sql
-CREATE TABLE public.zen_ups_labels (
-  id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  order_id          UUID NOT NULL REFERENCES public.zen_orders(id) ON DELETE CASCADE,
-  package_id        UUID NOT NULL REFERENCES public.zen_order_packages(id) ON DELETE CASCADE,
-  tracking_number   TEXT NOT NULL,                          -- UPS 운송장번호
-  label_format      VARCHAR(10) NOT NULL CHECK (label_format IN ('PDF','ZPL','GIF')),
-  storage_path      TEXT NOT NULL,                          -- Supabase Storage 경로
-  label_data        TEXT,                                   -- Base64 원본 (선택)
-  file_size_bytes   INTEGER,
-  generated_at      TIMESTAMPTZ DEFAULT NOW(),
-  generated_by      UUID REFERENCES public.zen_profiles(id),
-  is_voided         BOOLEAN DEFAULT FALSE,                  -- 폐기 여부
-  voided_at         TIMESTAMPTZ,
-  created_at        TIMESTAMPTZ DEFAULT NOW()
-);
-
--- Indexes
-CREATE INDEX idx_ups_labels_order_id ON public.zen_ups_labels(order_id);
-CREATE INDEX idx_ups_labels_tracking ON public.zen_ups_labels(tracking_number);
-CREATE INDEX idx_ups_labels_package ON public.zen_ups_labels(package_id);
-```
-
-### `zen_ups_tracking_events` — UPS 전용 추적 이벤트
-
-```sql
-CREATE TABLE public.zen_ups_tracking_events (
-  id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  order_id          UUID NOT NULL REFERENCES public.zen_orders(id) ON DELETE CASCADE,
-  label_id          UUID REFERENCES public.zen_ups_labels(id),
-  tracking_number   TEXT NOT NULL,                          -- UPS 운송장번호
-  event_code        VARCHAR(10) NOT NULL,                   -- UPS 상태 코드 (OR, D, X, ...)
-  event_desc        TEXT,                                   -- 상태 설명 (영문)
-  event_type        VARCHAR(5),                              -- I, D, X, P, M
-  event_date        DATE NOT NULL,
-  event_time        TIME,
-  location_city     TEXT,
-  location_country  VARCHAR(3),
-  gmt_offset        VARCHAR(6),
-  raw_response      JSONB,                                  -- UPS API 원본 (audit)
-  created_at        TIMESTAMPTZ DEFAULT NOW()
-);
-
--- Indexes
-CREATE INDEX idx_ups_tracking_events_order ON public.zen_ups_tracking_events(order_id);
-CREATE INDEX idx_ups_tracking_events_tracking ON public.zen_ups_tracking_events(tracking_number);
-CREATE INDEX idx_ups_tracking_events_code ON public.zen_ups_tracking_events(event_code);
-CREATE INDEX idx_ups_tracking_events_date ON public.zen_ups_tracking_events(event_date);
-
--- RLS (ADMIN/MANAGER/SHIPPER/AGENCY 읽기)
-ALTER TABLE public.zen_ups_labels ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.zen_ups_tracking_events ENABLE ROW LEVEL SECURITY;
-```
-
-### 기존 테이블 연계 방안
-
-| 테이블 | 연계 필드 | 비고 |
-|:-------|:----------|:------|
-| `zen_orders` | `id` → `zen_ups_labels.order_id` | 1:N (N개 PKG → N개 레이블) |
-| `zen_order_packages` | `id` → `zen_ups_labels.package_id` | PKG별 1:1, `intl_ref_no`와 tracking_number 연동 |
-| `zen_order_packages.intl_ref_no` | UPS tracking_number와 동일 | 자동 발급 시 tracking_number로 채움 |
-| `zen_order_packages.intl_ref_locked` | 레이블 발급 시 TRUE | 레이블 발급 = 확정 → 잠금 |
-| `zen_tracking_configs` | `tracking_no` = UPS tracking_number | `provider_type = 'API'`, `provider_name = 'UPS_TRACKING'` |
-| `zen_tracking_events` | `zen_ups_tracking_events` → 정규화된 이벤트 | UPS → `zen_ups_tracking_events` → `zen_tracking_events` 변환 |
-| `zen_tracking_raw_logs` | UPS API 응답 JSON 저장 | 디버깅 및 감사 추적 |
-
-> **참고**: `intl_ref_no`는 MVP에서 수동 입력. Phase 8에서는 UPS API 레이블 발급 시 `intl_ref_no = tracking_number`로 **자동 채움**.
-
-### Supabase Storage 구조 (제안)
-
-```
-ups_labels/
-  └── {YYYY}/
-      └── {MM}/
-          └── {orderId}/
-              ├── {packageId}_label.pdf
-              └── {packageId}_label.zpl  (선택)
-```
-
-> 버킷명: `ups_labels` — `invoices` 버킷 패턴과 동일. RLS: ADMIN/MANAGER/AGENCY(소속 오더만) 읽기.
+- API 정상 응답 확인 완료
+- 자격증명 유효함
+- 에러 응답 구조 일관됨 (`success` + `cnmessage` + `enmessage`)
 
 ---
 
-## 종합 권장사항
+## ⑥ 2단계 주문 프로세스
 
-### 구현 순서 (Priority)
+```
+[1단계] createorder (order_status="D")
+  → 데이터 임시 저장, 운송사 미전송
+  → 응답: order_id, reference_no
 
-| 순서 | 항목 | 근거 |
-|:----:|:-----|:------|
-| **P0** | UPS API HTTP Client + OAuth 인증 모듈 | 모든 API의 전제 조건 |
-| **P1** | Label Generation API (Ship) | 핵심 기능 — 오더 출고 연계 |
-| **P2** | `UpsTrackingProvider` 구현 | 기존 `ITrackingProvider` 패턴 활용 |
-| **P3** | Paperless Invoice 연동 | Ship API에 포함되어 있으므로 별도 작업 최소 |
-| **P4** | DB 스키마 마이그레이션 + RLS | 위 기능과 병행 가능 |
+[2단계] submitforecast (reference_no)
+  → 실제 운송 예약 접수
+  → 응답: shipping_method_no (운송장번호)
 
-### 파일 생성/수정 목록 (제안)
+[선택] createorder (order_status="P")
+  → 1단계+2단계 한번에 처리
+```
 
-| 파일 | 액션 | 설명 |
-|:-----|:----:|:------|
-| `src/lib/ups/config.ts` | 신규 | 환경 변수 + Base URL + OAuth Client |
-| `src/lib/ups/client.ts` | 신규 | UPS HTTP Client (fetch wrapper) |
-| `src/lib/ups/shipment.ts` | 신규 | Label Generation API |
-| `src/lib/ups/tracking.ts` | 신규 | Tracking API |
-| `src/lib/logistics/providers/ups-tracking-provider.ts` | 신규 | ITrackingProvider 구현체 |
-| `src/types/ups-api.ts` | 신규 | UPS API Request/Response 타입 |
-| `src/types/ups.ts` | 확장 | 기존 타입에 `UpsLabel`, `UpsTrackingEvent` 추가 |
-| `supabase/migrations/20260624000000_ups_008_labels.sql` | 신규 | `zen_ups_labels` + `zen_ups_tracking_events` |
-| `.env.example` | 수정 | UPS API 환경변수 추가 |
+---
 
-### 리스크
+## ⑦ 시스템 아키텍처 매핑
 
-| 리스크 | 영향 | 완화 방안 |
-|:-------|:------|:----------|
-| UPS OAuth 토큰 만료 | API 호출 실패 | 자동 갱신 로직 + 만료 전 Pre-fetch |
-| Rate Limit 초과 | Tracking 폴링 차단 | 지수 백오프 + 큐 기반 폴링 |
-| 레이블 재발급 필요 | 기존 번호 폐기 필요 | `is_voided` 플래그 → API void 호출 |
-| UPS API Spec 변경 | 연동 중단 | 버전 고정 (`v1`, `v2`) 사용 |
-| IP 허용 목록 누락 | Connection Refused | 운영팀 사전 등록 확인 |
+```
+ZENITH LMS ──► shxk.rtb56.com (중국 포워더 3PL)
+                    │
+                    ├── createorder / submitforecast (주문)
+                    ├── getnewlabel (라벨 PDF)
+                    ├── gettrackingnumber (트래킹번호)
+                    └── gettrack (트래킹조회)
+```
+
+- 기존 An_12 설계대로 ZENITH LMS에서 직접 shxk API 호출
+- IBC/Pactrak 시스템은 이번 Phase 8에서 제외 (Edward/Aiden 확정)
+
+---
+
+## ⑧ 리스크 및 주의사항
+
+| 리스크 | 영향 | 대응 |
+|:-------|:-----|:-----|
+| HTTP 프로토콜 (HTTPS 아님) | 보안 위험 | 데이터 암호화 검토 필요 |
+| appToken 만료 정책 미확인 | 갑작스러운 연동 장애 | shxk 관리자에 만료 정책 문의 |
+| shipping_method 코드 사전등록 필요 | 주문 생성 불가 | getbasicdata로 코드 목록 확보 |
+| platform_id 사전등록 필요 | 플랫폼 주문 불가 | shxk 관리자에게 platform_id 요청 |
+| 중국어 메시지 기반 오류 응답 | 디버깅 어려움 | `enmessage` 필드 활용, 오류코드 매핑 테이블 구축 |
+
+---
+
+## ⑨ 결론 및 권장사항
+
+1. **연동 가능**: shxk.rtb56.com API는 실제 호출 가능하며 자격증명도 유효함
+2. **RESTful 아님**: 단일 엔드포인트 + serviceMethod 분기 방식 — 어댑터 패턴으로 추상화 필요
+3. **2단계 프로세스 지원**: createorder(Draft) → submitforecast 또는 createorder(P) 일괄 처리
+4. **라벨 출력**: PNG/PDF 선택 가능, A4/라벨지 지원
+5. **트래킹**: gettrackingnumber + gettrack 으로 전체 트래킹 커버 가능
+6. **착수 조건**: shipping_method 코드 목록 + platform_id 확보 후 IMP-069(어댑터 구현) 착수
