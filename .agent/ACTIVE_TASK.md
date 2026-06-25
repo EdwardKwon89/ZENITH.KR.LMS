@@ -287,7 +287,7 @@
 
 ## 개정 이력
 
-| 2026-06-25 | Baker (Big Pickle) | **TASK-B-023 §2 ✅ 문서·PR 완료** — DoD 전량 ✅, PR# 제출 (Closes #112). |
+| 2026-06-25 | Baker (Big Pickle) | **TASK-B-023 §2 ✅ 문서·PR 완료** — DoD 전량 ✅, PR#113 제출 (Closes #112). |
 | 2026-06-24 | Aiden (ZEN_CEO) | **TASK-163 ✅ 승인** — PR#99 머지. E2E-24 UAT-17 3종 PASS · 회귀 전체 PASS. **TASK-165 ✅** — PR#96 머지 (D_Kai, DEF-075~077 포함). **TASK-166 🔔 수정 요청** — 개정이력 순서 오류 + B_Kai 경로 불일치 2건. **DEF-078** 등록 (supabase.ts 타입 재생성 누락 → PR#100 핫픽스 머지). TASK-B-021 ✅ 승인 · TASK-B-022 신규 등재 (JSJung). |
 | 2026-06-24 | Baker (Big Pickle) | **TASK-B-021 🔄→🔔 구현 완료** — TC-AG-09·10·11·12 추가, helper 보강(checkReconciliationAlert→runBasicSettlementSearch 분리). build ✅ · 387/387 ALL PASS. PR# 제출 완료. |
 | 2026-06-24 | Baker (Big Pickle) | **TASK-B-021 ❌ 반려 수정 (2차)** — ① LAST_REGRESSION_RESULT FAIL→PASS ② IMP-135 SPR-09 등재 ③ 커밋 해시 9c3c7e9→3ad3e19 정정. Jaison 재검토 대기. |
