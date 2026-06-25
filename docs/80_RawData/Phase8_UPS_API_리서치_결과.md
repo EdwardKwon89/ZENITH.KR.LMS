@@ -292,8 +292,8 @@ createorder에서 `order_status: "D"`(초안)으로 생성한 후 호출.
 - **발급 상태**: ✅ JSJung 통해 발급 완료, `.env.local`에 등록됨
 
 ```
-UPS_API_KEY=bd0b5fea5e5821c6eec8e38639d97428
-UPS_API_TOKEN=7315a08b6474676b16747aa39195f29a7315a08b6474676b16747aa39195f29a
+UPS_API_KEY=<.env.local에 등록됨 — 값 미기재>
+UPS_API_TOKEN=<.env.local에 등록됨 — 값 미기재>
 ```
 
 ---
