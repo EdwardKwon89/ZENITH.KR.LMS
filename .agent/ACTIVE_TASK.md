@@ -257,7 +257,7 @@
 | TASK-B-020 | 260623 | DEF-073 Agency shippers/new · rate-overrides/new Server Action 오류 수정 | P2 | 없음 | Baker | ✅ | [TASK-B-020](tasks/TASK-B-020_260623_DEF073_AgencyServerAction수정_Baker.md) | Issue #80 · DEF-073 · getTranslations→useTranslations · PR#83 머지 ✅ (260623) · Aiden ✅ 승인 |
 | TASK-B-021 | 260624 | [SPR-09] E2E-23 보강 — UAT-20 Agency 정산 CSV 다운로드 + Reconciliation 알림 상세 검증 | P2 | TASK-B-019 ✅ | Jaison (총괄) · Baker (구현) | ✅ | [TASK-B-021](tasks/TASK-B-021_260624_E2E23보강_UAT20Agency정산_Jaison.md) | Issue #91 · TC-AG-09~12 ✅ · 387/387 ALL PASS · PR#94 머지 ✅ (260624) · Aiden ✅ 승인 |
 | TASK-B-022 | 260624 | [Phase 8] UPS 실물 연동 사전 설계 리서치 | P1 | 없음 | JSJung | ➖ | [TASK-B-022](tasks/TASK-B-022_260624_Phase8_UPS실물연동_리서치_JSJung.md) | Issue #97 · DEF-079로 대체 — TASK-B-023 발령 (rtb56.com 기반 재리서치) |
-| TASK-B-023 | 260625 | [Phase 8] shxk.rtb56.com API 기반 UPS 연동 리서치 (DEF-079 대응) | P1 | 없음 | Jaison (총괄) · Dave (§1) · Baker (§2) | 🔄 | [TASK-B-023](tasks/TASK-B-023_260625_Phase8_rtb56_UPS_리서치_Jaison.md) | Issue #112 · Closes #111 (DEF-079) · Blocks #106~110 (IMP-136~140) |
+| TASK-B-023 | 260625 | [Phase 8] shxk.rtb56.com API 기반 UPS 연동 리서치 (DEF-079 대응) | P1 | 없음 | Jaison (총괄) · Dave (§1) · Baker (§2) | 🔔 | [TASK-B-023](tasks/TASK-B-023_260625_Phase8_rtb56_UPS_리서치_Jaison.md) | Issue #112 · Closes #111 (DEF-079) · Blocks #106~110 (IMP-136~140) · PR# |
 ---
 
 ## Agent 현황
@@ -279,14 +279,15 @@
 |:------|:----:|:----|
 | **JSJung** (팀 리더) | 모니터링 | TASK-B-023 착수 지시 완료 |
 | **Jaison** (AI Agent 총괄) | 🔄 TASK-B-023 총괄 착수 (260625) | Dave(§1 리서치) · Baker(§2 문서·PR) 배정 완료 |
-| **Dave** (AI Agent) | 🔄 TASK-B-023 §1 배정 | shxk.rtb56.com API 분석 |
-| **Baker** (AI Agent) | 🔄 TASK-B-023 §2 배정 | 리서치 문서 재작성 + PR 생성 |
+| **Dave** (AI Agent) | ✅ TASK-B-023 §1 완료 (260625) | 12개 API 문서화 + 실측 검증 |
+| **Baker** (AI Agent) | ✅ TASK-B-023 §2 완료 | PR# 제출 (Closes #112) |
 | **Gale** (AI Agent) | 대기 | 추후 재배정 예정 |
 
 ---
 
 ## 개정 이력
 
+| 2026-06-25 | Baker (Big Pickle) | **TASK-B-023 §2 ✅ 문서·PR 완료** — DoD 전량 ✅, PR# 제출 (Closes #112). |
 | 2026-06-24 | Aiden (ZEN_CEO) | **TASK-163 ✅ 승인** — PR#99 머지. E2E-24 UAT-17 3종 PASS · 회귀 전체 PASS. **TASK-165 ✅** — PR#96 머지 (D_Kai, DEF-075~077 포함). **TASK-166 🔔 수정 요청** — 개정이력 순서 오류 + B_Kai 경로 불일치 2건. **DEF-078** 등록 (supabase.ts 타입 재생성 누락 → PR#100 핫픽스 머지). TASK-B-021 ✅ 승인 · TASK-B-022 신규 등재 (JSJung). |
 | 2026-06-24 | Baker (Big Pickle) | **TASK-B-021 🔄→🔔 구현 완료** — TC-AG-09·10·11·12 추가, helper 보강(checkReconciliationAlert→runBasicSettlementSearch 분리). build ✅ · 387/387 ALL PASS. PR# 제출 완료. |
 | 2026-06-24 | Baker (Big Pickle) | **TASK-B-021 ❌ 반려 수정 (2차)** — ① LAST_REGRESSION_RESULT FAIL→PASS ② IMP-135 SPR-09 등재 ③ 커밋 해시 9c3c7e9→3ad3e19 정정. Jaison 재검토 대기. |
