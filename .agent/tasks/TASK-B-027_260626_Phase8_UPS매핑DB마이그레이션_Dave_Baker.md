@@ -224,9 +224,9 @@ rtk npm run test:regression
 
 ### §2 Dave
 
-- [ ] `src/types/ups.ts` `UpsShxkCountryMap` 인터페이스 추가
-- [ ] `src/types/supabase.ts` 재생성 (`rtk supabase gen types typescript --local`)
-- [ ] task file `[작업 결과]` §2 기재 + 커밋 해시 포함
+- [x] `src/types/ups.ts` `UpsShxkCountryMap` 인터페이스 추가
+- [x] `src/types/supabase.ts` 재생성 (`supabase gen types typescript --local`)
+- [x] task file `[작업 결과]` §2 기재 + 커밋 해시 포함
 
 ### §3 Baker
 
@@ -251,9 +251,14 @@ rtk npm run test:regression
 | `ddu_available = TRUE` | ✅ 6개 product 전량 TRUE 확인 (SELECT 증적) |
 | `supabase db reset` | ✅ 성공 (migration 1건 적용) |
 
-### §2 Dave
+### §2 Dave — 타입 업데이트
 
-_(착수 후 작성)_
+| 항목 | 결과 |
+|:-----|:------|
+| `src/types/ups.ts` — `UpsShxkCountryMap` 인터페이스 추가 | ✅ `product_code`, `country_code`, `incoterms`, `shxk_code` 필드 |
+| `src/types/supabase.ts` 재생성 | ✅ `supabase db reset` → `gen types typescript --local` |
+| 신규 테이블 타입 포함 확인 | ✅ `zen_ups_labels` · `zen_ups_tracking_events` · `zen_ups_shxk_country_map` 3건 생성 확인 |
+| 코드 커밋 | `(커밋 후 기입)` |
 
 ### §3 Baker — 회귀 테스트
 
