@@ -107,7 +107,7 @@ SHXK_APP_TOKEN=
 - [x] `.env.example` 업데이트 (SHXK_APP_KEY/SHXK_APP_TOKEN 항목 추가)
 - [x] `npm run build` PASS
 - [x] `npm run test:regression` 387/387 PASS (6건 pre-existing p6-transport-policy — local Supabase seed data, R-14)
-- [x] 코드 커밋 해시: `(커밋 후 기입)`
+- [x] 코드 커밋 해시: `f5baa0a`
 
 ### §2 문서 (Dave)
 - [x] task file `[작업 결과]` 섹션 기재 + 상태 🔔
@@ -122,7 +122,7 @@ SHXK_APP_TOKEN=
 
 | 항목 | 내용 |
 |:-----|:-----|
-| 코드 커밋 | `(커밋 후 기입)` |
+| 코드 커밋 | `f5baa0a` |
 | 문서 커밋 | `(커밋 후 기입)` |
 | PR | [#123](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/123) |
 | 회귀 결과 | 387/387 PASS (6건 pre-existing p6-transport-policy — local Supabase seed data, R-14) |
