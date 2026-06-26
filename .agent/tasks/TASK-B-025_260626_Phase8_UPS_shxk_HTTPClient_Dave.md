@@ -123,7 +123,7 @@ SHXK_APP_TOKEN=
 | 항목 | 내용 |
 |:-----|:-----|
 | 코드 커밋 | `f5baa0a` |
-| 문서 커밋 | `(커밋 후 기입)` |
+| 문서 커밋 | `5d16354` |
 | PR | [#123](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/123) |
 | 회귀 결과 | 387/387 PASS (6건 pre-existing p6-transport-policy — local Supabase seed data, R-14) |
 
@@ -156,3 +156,5 @@ SHXK_APP_TOKEN=
 | 2026-06-26 | Dave (DeepSeek V4) | **🔔 1차 반려 수정** — DoD 체크 + 발견이슈 기재 |
 | 2026-06-26 | Aiden | **❌ 2차 반려** — ①경로(`ups/`→`shxk/`) ②env var명(UPS_→SHXK_) ③rebase develop ④B-027 커밋 제거 ⑤`git rm` Aiden 원본 |
 | 2026-06-26 | Dave (DeepSeek V4) | **🔔 2차 반려 수정** — `src/lib/ups/`→`src/lib/shxk/` · env var `SHXK_APP_KEY`/`SHXK_APP_TOKEN` · rebase develop · B-027 커밋 제거 · git rm Aiden 원본(file not in develop). push 후 Jaison 재검토 요청 |
+| 2026-06-26 | Jaison (JSJung) | **❌ 3차 반려** — 문서 커밋 해시 `(커밋 후 기입)` → `5d16354` 필요 |
+| 2026-06-26 | Dave (DeepSeek V4) | **🔔 3차 반려 수정** — 문서 커밋 해시 기재 (`5d16354`) · 개정이력 추가 |
