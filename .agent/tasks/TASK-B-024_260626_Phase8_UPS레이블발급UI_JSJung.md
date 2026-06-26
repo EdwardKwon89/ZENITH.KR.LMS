@@ -22,11 +22,11 @@ Issue #102 Edward 승인 기준: 인라인 배치(Option A) + 출고 확정 시 
 
 | 조건 | 상태 | 비고 |
 |:-----|:----:|:----|
-| TASK-B-023 ✅ | 🚫 | shxk.rtb56.com API 리서치 완료 필요 — PR #113 수정 대기 |
-| DEF-079 해제 | 🚫 | UPS 연동 대상 확정 후 IMP-136~140 착수 가능 |
-| IMP-136~138 ✅ | 🚫 | UPS Ship API Server Action 완료 후 UI 연동 가능 |
+| TASK-B-023 ✅ | ✅ | PR#113 머지 완료 (2026-06-26) |
+| An-13 v2.0 승인 (DEF-079 해소) | ✅ | Edward 승인 완료 (2026-06-26) — shxk.rtb56.com 기반 확정 |
+| IMP-136~138 ✅ (TASK-B-025~027) | 🚫 | shxk 클라이언트·Server Action·DB 마이그레이션 완료 후 착수 가능 |
 
-> TASK-B-023 PR #113 머지 완료 후 🚫→⬜ 전환 (Aiden 전속)
+> IMP-136~138 전량 ✅ 후 🚫→⬜ 전환 (Aiden 전속)
 
 ---
 
