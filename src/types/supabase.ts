@@ -1,3 +1,4 @@
+Connecting to db 5432
 export type Json =
   | string
   | number
@@ -2590,6 +2591,7 @@ export type Database = {
           dest_port_id: string | null
           estimated_cost: number | null
           id: string
+          incoterms: string | null
           master_order_id: string | null
           order_date: string | null
           order_no: string
@@ -2616,6 +2618,7 @@ export type Database = {
           status: string | null
           transport_mode: string | null
           updated_at: string | null
+          ups_product_code: string | null
         }
         Insert: {
           billing_status?: string | null
@@ -2630,6 +2633,7 @@ export type Database = {
           dest_port_id?: string | null
           estimated_cost?: number | null
           id?: string
+          incoterms?: string | null
           master_order_id?: string | null
           order_date?: string | null
           order_no: string
@@ -2656,6 +2660,7 @@ export type Database = {
           status?: string | null
           transport_mode?: string | null
           updated_at?: string | null
+          ups_product_code?: string | null
         }
         Update: {
           billing_status?: string | null
@@ -2670,6 +2675,7 @@ export type Database = {
           dest_port_id?: string | null
           estimated_cost?: number | null
           id?: string
+          incoterms?: string | null
           master_order_id?: string | null
           order_date?: string | null
           order_no?: string
@@ -2696,6 +2702,7 @@ export type Database = {
           status?: string | null
           transport_mode?: string | null
           updated_at?: string | null
+          ups_product_code?: string | null
         }
         Relationships: [
           {
@@ -2753,6 +2760,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "zen_organizations"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "zen_orders_ups_product_code_fkey"
+            columns: ["ups_product_code"]
+            isOneToOne: false
+            referencedRelation: "zen_ups_products"
+            referencedColumns: ["product_code"]
           },
         ]
       }
@@ -4962,3 +4976,5 @@ export const Constants = {
   },
 } as const
 
+A new version of Supabase CLI is available: v2.108.0 (currently installed v2.105.0)
+We recommend updating regularly for new features and bug fixes: https://supabase.com/docs/guides/cli/getting-started#updating-the-supabase-cli
