@@ -75,7 +75,7 @@ export function isDelivered(trackStatus: string): boolean {
 - [x] `DL` 상태 시 `is_active = false` 처리
 - [x] ZEN_A4 함수 50줄 이하 준수 (pollTracking 14줄, isDelivered 3줄, storeTrackingEvents 22줄)
 - [x] `rtk npm run test:regression` — build ✅ + 381/387 PASS (6건 pre-existing p6-transport-policy)
-- [x] 코드 커밋 해시 기재: `(커밋 후 기입)`
+- [x] 코드 커밋 해시 기재: `1f2e2e8`
 
 ---
 
@@ -95,7 +95,7 @@ _Aiden 전속_
 
 | 항목 | 내용 |
 |:-----|:-----|
-| 코드 커밋 | `(커밋 후 기입)` |
+| 코드 커밋 | `1f2e2e8` |
 | 회귀 결과 | 381/387 PASS (6건 pre-existing p6-transport-policy — local Supabase seed data, R-14) |
 
 ### 구현 완료
