@@ -24,7 +24,6 @@ import {
   Building2 as BuildingOffice2Icon,
   Users,
   ClipboardList,
-  Bell,
   Globe,
   LockKeyhole
 } from "lucide-react";
@@ -72,7 +71,6 @@ export default function NaviSidebar({
 
   const NAV_ITEMS: NavItem[] = [
     { title: t("dashboard"), href: "/dashboard", icon: LayoutDashboard },
-    { title: t("notifications"), href: "/notifications", icon: Bell },
     {
       title: t("master"),
       href: "/admin/codes",
