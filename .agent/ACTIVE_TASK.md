@@ -261,7 +261,7 @@
 | TASK-B-023 | 260625 | [Phase 8] shxk.rtb56.com API 기반 UPS 연동 리서치 재작성 | P1 | DEF-079 발견 | Baker (구현) · JSJung (검토) | ✅ | [TASK-B-023](tasks/TASK-B-023_260625_Phase8_rtb56_UPS_리서치_Jaison.md) | Issue #112 · PR#113 ✅ 승인 (2026-06-26) · DoD 9/9 · 387/387 PASS · DEF-079 해소 |
 | TASK-B-024 | 260626 | [Phase 8] UPS 레이블 발급 UI — 창고 출고 화면 인라인 배치 | P1 | TASK-B-025~027 ✅ | JSJung (검토) · Baker (구현) | 🚫 | [TASK-B-024](tasks/TASK-B-024_260626_Phase8_UPS레이블발급UI_JSJung.md) | Issue #114 · IMP-141 · Issue #102 Edward 승인 (인라인 배치 확정) |
 | TASK-B-025 | 260626 | [Phase 8] shxk HTTP Client + config + 공통 타입 (IMP-136) | P1 | An-13 v2.4 ✅ | Dave | ✅ | [TASK-B-025](tasks/TASK-B-025_260626_Phase8_UPS_shxk_HTTPClient_Dave.md) | IMP-136 ✅ · Issue #106 · PR#123 머지 ✅ (260626 Aiden) · 387/387 ALL PASS |
-| TASK-B-026 | 260626 | [Phase 8] createorder + getnewlabel Server Action (IMP-137) | P1 | TASK-B-025 ✅ | JSJung (검토) · Baker (구현) | ⬜ | [TASK-B-026](tasks/TASK-B-026_260626_IMP137_createorder서버액션_Baker.md) | Issue #107 · IMP-137 · An-13 v2.0 §5 |
+| TASK-B-026 | 260626 | [Phase 8] createorder + getnewlabel Server Action (IMP-137) | P1 | TASK-B-025 ✅ | JSJung (검토) · Baker (구현) | 🔔 | [TASK-B-026](tasks/TASK-B-026_260626_IMP137_createorder서버액션_Baker.md) | Issue #107 · IMP-137 · commit `fea8e29` · 회귀 387/387 PASS |
 | TASK-B-027 | 260626 | [Phase 8] zen_ups_shxk_country_map + 레이블/트래킹 테이블 DB migration (IMP-138) | P1 | Issue #121 Aiden 설계 재확정 ✅ | Baker ✅ · Dave ✅ | ✅ | [TASK-B-027](tasks/TASK-B-027_260626_Phase8_UPS매핑DB마이그레이션_Dave_Baker.md) | IMP-138 ✅ · PR#122 머지 ✅ (260626 Aiden) · 387/387 ALL PASS |
 | TASK-B-028 | 260626 | [Phase 8] UpsTrackingProvider + zen_ups_tracking_events 저장 (IMP-139) | P1 | TASK-B-025 ✅ · TASK-B-027 ✅ | JSJung (검토) · Dave (구현) | ⬜ | [TASK-B-028](tasks/TASK-B-028_260626_IMP139_UpsTrackingProvider_Baker.md) | Issue #109 · IMP-139 · An-13 v2.0 §7 · Baker→Dave 재배정 (260626) |
 | TASK-B-029 | 260626 | [Phase 8] E2E 테스트 — createorder→getnewlabel→gettrack 전체 흐름 (IMP-140) | P1 | TASK-B-025~028 ✅ 전량 | Jaison | ⬜ | [TASK-B-029](tasks/TASK-B-029_260626_IMP140_E2E테스트_Jaison.md) | Issue #110 · IMP-140 · E2E-26 |
@@ -294,7 +294,7 @@
 
 ## 개정 이력
 
-| 2026-06-26 | Aiden (ZEN_CEO) | **TASK-B-027 ✅ 승인** — PR#122 머지 완료. DoD 14/14 ✅ · reference_no NOT NULL + UNIQUE INDEX + FK ✅ · 387/387 PASS · An-13 v2.1 반영. TASK-B-028 착수 가능 (B-025 ✅ 전제). |
+| 2026-06-26 | Baker (Big Pickle) | **TASK-B-026 🔔 검토 요청** — createorder/gettrackingnumber/getnewlabel wrappers + issueUpsLabel Server Action 구현. commit `fea8e29` · 회귀 387/387 PASS (6F p6-transport-policy DEF-065 선행). |
 | 2026-06-26 | Aiden (ZEN_CEO) | **TASK-B-025 ❌ 반려** — PR#123 CHANGES_REQUESTED. ①경로 src/lib/ups→shxk ②환경변수명 불일치 ③회귀 381/387 ④B-027혼합 ⑤task file 중복. Dave 수정 재제출 대기. |
 | 2026-06-26 | Edward (ZEN_CEO) | **TASK-087 폐기** — N_Kai 재교육 세션 ➖ 취소. N_Kai 미재배정 확정. |
 | 2026-06-26 | Aiden (ZEN_CEO) | **TASK-B-025~029 발령** — IMP-136~140 Team B 공식 발령. TASK-B-025(shxk 클라이언트)·TASK-B-027(DB 마이그레이션) 병행 착수 가능. TASK-B-024 전제조건 TASK-B-023·DEF-079 ✅ 반영. |

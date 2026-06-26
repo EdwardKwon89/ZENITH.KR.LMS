@@ -80,7 +80,7 @@ src/app/actions/shxk-order.ts  (또는 기존 warehouse actions에 통합)
 - [x] `success: 2` 중복 주문 에러 처리
 - [x] ZEN_A4 함수 50줄 이하 준수 (모든 helper 함수 30줄 미만)
 - [x] `rtk npm run test:regression` 전체 PASS (387 test, 381P/6F — 6건 p6-transport-policy DEF-065 선행 이슈, 본 변경 무관)
-- [x] 코드 커밋 해시 기재: (미정 — 커밋 후 기재)
+- [x] 코드 커밋 해시 기재: `fea8e29`
 
 ---
 
