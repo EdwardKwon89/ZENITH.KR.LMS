@@ -8,7 +8,32 @@
 > **관련 Issue**: [#121](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/121) (Closes [#120](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/120))
 > **전제조건**: Issue #121 Aiden 설계 재확정 ✅ (2026-06-26)
 > **브랜치**: `feature/teamb-task-b-027-ups-shxk-mapping-migration`
-> **상태**: ❌
+> **상태**: 🔔
+
+---
+
+## [수정 지시 — Baker 필독] ❌ Jaison 3차 반려 (2026-06-26)
+
+> **대상**: Baker (Big Pickle)
+> **코드 수정 없음** — 문서 커밋 1건만 필요
+
+**반려 사유 2건 (R-17 DoD 미이행)**:
+
+**① task file 헤더 `❌ → 🔔` 미전환**:
+- Baker는 Aiden 2차 반려 수정 완료 후 헤더를 `🔔`로 전환했어야 하나 `❌` 상태로 남김
+
+**② [작업 결과] §1 코드 커밋 해시 `559a23e` 미기재**:
+- `[작업 결과] §1` 표의 `코드 커밋` 행이 `679c240` (최초 §1 커밋)만 기재
+- Aiden 반려 수정 커밋 `559a23e` (reference_no + UNIQUE INDEX + FK) 추가 기재 필요
+
+**수정 지시 (문서 커밋 1건)**:
+
+1. 이 파일 헤더 `**상태**: ❌ → 🔔`
+2. `[작업 결과] §1` 코드 커밋 행 수정:
+   - `679c240` → `679c240 (§1 최초) · 559a23e (reference_no fix)`
+3. 개정이력 추가
+4. ACTIVE_TASK.md TASK-B-027 행 + Baker 현황 🔔 반영
+5. `[BP] docs: TASK-B-027 🔔 전환 — Jaison 3차 반려 수정` 커밋 후 PR#122 push
 
 ---
 
@@ -342,7 +367,7 @@ rtk npm run test:regression
 | 항목 | 결과 |
 |:-----|:------|
 | migration 파일 | `supabase/migrations/20260626000000_ups_008_labels_tracking_shxk_map.sql` |
-| 코드 커밋 | `679c240` |
+| 코드 커밋 | `679c240` (§1 최초) · `559a23e` (reference_no+FK fix) |
 | `zen_ups_labels` | ✅ 생성 확인 (pg_tables) |
 | `zen_ups_tracking_events` | ✅ 생성 확인 (pg_tables) |
 | `zen_ups_shxk_country_map` + KOR 12행 | ✅ 12행 INSERT 확인 (SELECT 증적) |
@@ -386,3 +411,4 @@ _(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
 | 2026-06-26 | Baker (Big Pickle) | **🔔 DoD 미체크 수정 + supabase.ts CI build FAIL fix** — 헤더 ❌→🔔, DoD #2개 ✅ 체크, supabase.ts stderr 로그 제거(aa8ec41), 회귀 387/387 ALL PASS. |
 | 2026-06-26 | Jaison (JSJung) | **❌ Aiden 2차 반려 Baker 재배정** — 반려①: zen_ups_labels `reference_no TEXT NOT NULL` 컬럼 + UNIQUE INDEX 누락(An-13 §3-1 불일치, 기능 블로커). 반려②: Aiden 원본 task file 2개 중복(거버넌스 위반). Baker 수정 3가지 + R-17 절차 지시 완료. 상태 🔔→❌. |
 | 2026-06-26 | Baker (Big Pickle) | **✅ Aiden 2차 반려 수정 완료** — zen_ups_labels reference_no + UNIQUE INDEX 추가. zen_ups_shxk_country_map FK 추가. Aiden 원본 task file 없음(미존재 확인). build PASS. commit 559a23e. |
+| 2026-06-26 | Jaison (JSJung) | **❌ 3차 반려 (R-17 DoD 미이행 2건)** — ①task file 헤더 ❌→🔔 미전환 ②[작업 결과]§1 코드 커밋 559a23e 미기재. 문서 커밋 1건으로 처리 후 재제출. |
