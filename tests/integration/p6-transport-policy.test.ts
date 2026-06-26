@@ -377,6 +377,12 @@ describe('IMP-105: Transport Pricing Policy Integration Tests (TC-POLICY-01~07)'
       packing_count: 1
     });
 
+    // Make sure SEA policy is WM
+    await supabase
+      .from('zen_transport_pricing_policies')
+      .update({ pricing_method: 'WM' })
+      .eq('transport_mode', 'SEA');
+
     // Test TS SettlementEngine
     const tsResult = await engine.calculateOrderCosts(order.id);
     expect(tsResult.success).toBe(true);
