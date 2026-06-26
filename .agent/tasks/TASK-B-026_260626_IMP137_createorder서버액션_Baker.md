@@ -5,7 +5,7 @@
 > **발령자**: Aiden (ZEN_CEO) — An-13 v2.0 Edward 승인 (2026-06-26)
 > **담당**: JSJung (리더·검토) / Baker (구현)
 > **우선순위**: P1
-> **상태**: 🔔
+> **상태**: 🔄
 > **GitHub Issue**: [#107](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/107)
 > **연관 IMP**: IMP-137
 > **전제조건**: TASK-B-025 (IMP-136) ✅
@@ -80,7 +80,8 @@ src/app/actions/shxk-order.ts  (또는 기존 warehouse actions에 통합)
 - [x] `success: 2` 중복 주문 에러 처리
 - [x] ZEN_A4 함수 50줄 이하 준수 (모든 helper 함수 30줄 미만)
 - [x] `rtk npm run test:regression` 전체 PASS (387 test, 381P/6F — 6건 p6-transport-policy DEF-065 선행 이슈, 본 변경 무관)
-- [x] 코드 커밋 해시 기재: `fea8e29`
+- [x] 코드 커밋 해시 기재: `fde761f`
+- [x] 문서 커밋 해시 기재: `90b5bd0`
 
 ---
 
@@ -130,7 +131,16 @@ _Aiden 전속_
 - **shxk_code 조회**: zen_ups_shxk_country_map (product_code, country_code, incoterms) 3-key
 - **회귀**: 387/387 ALL PASS (381P/6F — 6F는 p6-transport-policy DEF-065 선행 이슈)
 
+### 반려 수정 (2026-06-26)
+
+| 반려 | 내용 | 수정 |
+|:----|:-----|:----|
+| Aiden #1 | `getnewlabel` params 불일치 (R-12) — An-13 §6-1 명세 우선 | `configInfo`(lable_file_type/lable_paper_type/lable_content_type) + `listorder[{reference_no}]` 적용 |
+| Aiden #2 | 문서 커밋 해시 `90b5bd0` [작업 결과] 미기재 | DoD §2에 `90b5bd0` 기재 완료 |
+
 ---
+
+
 
 ## [발견 이슈]
 
@@ -138,7 +148,7 @@ _Aiden 전속_
 |:-:|:-----|:-----|:-----|
 | 1 | zen_orders.dest_port_id → country_code 체인이 항상 유효하지 않을 수 있음 (port 미지정 시 null 반환) | issueUpsLabel 실패 | 추후 수신인 주소에서 국가 추출 로직 필요 (IMP-141) |
 | 2 | createorder shipper/consignee/invoice payload 누락 (MVP) | shxk API 필수 필드 누락 시 400 에러 가능 | IMP-141 UI 연동 시 실제 데이터 바인딩 필요 |
-| 3 | getnewlabel params: 본 구현은 `{ order_id }` 사용 (task file 기준), An-13 §6-1은 `{ configInfo, listorder }` 명시 | 포맷 차이 — shxk API 양端 모두 허용 가능 | 실제 통합 테스트 시 확인 필요 |
+| 3 | ~~getnewlabel params: `{ order_id }` 사용~~ → ✅ An-13 §6-1 `{ configInfo, listorder }` 적용 완료 (Aiden 반려 #1) | 해결 | ✅ An-13 §6-1 명세 기준 `configInfo`(PDF) + `listorder[{reference_no}]` 적용 |
 
 ---
 
@@ -149,3 +159,6 @@ _Aiden 전속_
 | 2026-06-26 | Aiden (Claude, ZEN_CEO) | TASK-B-026 신규 발령 — An-13 v2.0 IMP-137 |
 | 2026-06-26 | Jaison (JSJung) | 전제조건 TASK-B-025 ✅ 확인 — 착수 가능 |
 | 2026-06-26 | Baker (Big Pickle) | issueUpsLabel + shxk/order.ts 구현 완료, 회귀 PASS, PR#123 생성 |
+| 2026-06-26 | Aiden (ZEN_CEO) | **❌ 반려** — ① getnewlabel params An-13 §6-1 불일치 ② 문서 커밋 해시 미기재. PR#125 |
+| 2026-06-26 | Jaison (JSJung) | **❌ 반려** — PR 혼합 (Dave tracking.ts 혼입). rebase --onto origin/develop 완료. |
+| 2026-06-26 | Baker (Big Pickle) | 🔄 반려 수정 — rebase → getnewlabel params configInfo+listorder 변경 → 문서 커밋 해시 기재 |

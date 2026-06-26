@@ -57,10 +57,15 @@ export async function gettrackingnumber(
   }
 }
 
+export interface GetNewLabelParams {
+  reference_no: string
+}
+
 export async function getnewlabel(
-  orderId: string,
+  configInfo: Record<string, unknown>,
+  listorder: GetNewLabelParams[],
 ): Promise<{ success: number; data: GetNewLabelResponse | null; message: string }> {
-  const res = await callShxk('getnewlabel', { order_id: orderId })
+  const res = await callShxk('getnewlabel', { configInfo, listorder })
   return {
     success: res.success,
     data: res.data ? assertData<GetNewLabelResponse>(res.data) : null,

@@ -111,10 +111,15 @@ async function saveInitialLabel(
 
 async function fetchAndSaveLabel(
   supabase: SupabaseClient,
-  shxkOrderId: string,
   packageId: string,
 ): Promise<string | null> {
-  const labelRes = await getnewlabel(shxkOrderId);
+  const configInfo = {
+    lable_file_type: '2',
+    lable_paper_type: '1',
+    lable_content_type: '4',
+    additional_info: { lable_print_datetime: 'Y' },
+  }
+  const labelRes = await getnewlabel(configInfo, [{ reference_no: packageId }]);
 
   if (labelRes.success !== 1 || !labelRes.data) {
     logger.warn(`getnewlabel failed for order ${shxkOrderId}: ${labelRes.message}`);
@@ -178,7 +183,7 @@ export async function issueUpsLabel(
     const insertErr = await saveInitialLabel(supabase, order!.id as string, packageId, packageId, orderResult.trackingNo, profile!.id);
     if (insertErr) return { success: false, error: `Failed to save label record: ${insertErr}` };
 
-    const labelUrl = await fetchAndSaveLabel(supabase, orderResult.orderId, packageId);
+    const labelUrl = await fetchAndSaveLabel(supabase, packageId);
 
     await markPackageIssued(supabase, packageId, orderResult.trackingNo);
 
