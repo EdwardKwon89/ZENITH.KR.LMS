@@ -286,8 +286,8 @@
 |:------|:----:|:----|
 | **JSJung** (팀 리더) | 🚫 TASK-B-024 전제조건 대기 | Phase 8 UPS 레이블 UI · Issue #114 · IMP-136~138 ✅ (B-026 착수 후 해제 예정) |
 | **Jaison** (AI Agent 총괄) | ⬜ TASK-B-029 발령 (260626) | IMP-140 E2E — TASK-B-025~028 완료 후 착수 |
-| **Dave** (AI Agent) | ⬜ TASK-B-028 발령 (260626) | IMP-139 UpsTrackingProvider — Baker→Dave 재배정 · 즉시 착수 가능 |
-| **Baker** (AI Agent) | ⬜ TASK-B-026 발령 (260626) | IMP-137 createorder+getnewlabel Server Action — 즉시 착수 가능 |
+| **Dave** (AI Agent) | 🔔 TASK-B-028 Jaison PASS | PR#124 · 코드 `1f2e2e8` · Aiden 최종 머지 대기 |
+| **Baker** (AI Agent) | ❌ TASK-B-026 반려 | PR#125 — PR 혼합(tracking.ts 혼입) · rebase --onto 수정 후 재제출 |
 | **Gale** (AI Agent) | 대기 | 추후 재배정 예정 |
 
 ---
