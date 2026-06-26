@@ -23,7 +23,10 @@ import {
   Building,
   Building2 as BuildingOffice2Icon,
   Users,
-  ClipboardList
+  ClipboardList,
+  Bell,
+  Globe,
+  LockKeyhole
 } from "lucide-react";
 import { Package } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -69,6 +72,7 @@ export default function NaviSidebar({
 
   const NAV_ITEMS: NavItem[] = [
     { title: t("dashboard"), href: "/dashboard", icon: LayoutDashboard },
+    { title: t("notifications"), href: "/notifications", icon: Bell },
     {
       title: t("master"),
       href: "/admin/codes",
@@ -79,6 +83,8 @@ export default function NaviSidebar({
         { title: t("customs_rates"), href: "/admin/customs-rates" },
         { title: t("delivery_rates"), href: "/admin/delivery-rates" },
         { title: t("transport_policies"), href: "/admin/settings/transport-policies" },
+        { title: t("master_geo"), href: "/master/geo" },
+        { title: t("master_orders"), href: "/master-orders" },
       ]
     },
     {
@@ -151,6 +157,7 @@ export default function NaviSidebar({
     { title: t("customs_management"), href: "/admin/customs", icon: FileText, isAdminOnly: true },
     { title: t("orders_assigned"), href: "/orders/assigned", icon: ClipboardList },
     { title: t("admin_error_logs"), href: "/admin/error-logs", icon: ShieldAlert, isAdminOnly: true },
+    { title: t("permissions"), href: "/admin/permissions", icon: LockKeyhole, isAdminOnly: true },
     { title: t("agency_management"), href: "/agency", icon: BuildingOffice2Icon },
     { title: t("agency_shippers_nav"), href: "/agency/shippers", icon: Users },
     { title: t("agency_rate_overrides_nav"), href: "/agency/rate-overrides", icon: TrendingUp },
