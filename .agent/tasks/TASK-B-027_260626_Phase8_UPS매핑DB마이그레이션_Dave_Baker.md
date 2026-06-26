@@ -8,7 +8,40 @@
 > **관련 Issue**: [#121](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/121) (Closes [#120](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/120))
 > **전제조건**: Issue #121 Aiden 설계 재확정 ✅ (2026-06-26)
 > **브랜치**: `feature/teamb-task-b-027-ups-shxk-mapping-migration`
-> **상태**: 🔄
+> **상태**: 🔔
+
+---
+
+## [수정 지시 — Baker 필독] ❌ Jaison 1차 반려 (2026-06-26)
+
+> **대상**: Baker (Big Pickle)
+> **코드 수정 없음** — 문서 커밋 1건만 필요
+
+**수정 항목 3가지**:
+
+1. **이 파일 헤더** `**상태**: ❌ → 🔔` 로 변경
+2. **DoD §3 미체크 2개** 체크:
+   - `- [ ] ACTIVE_TASK.md 🔔 반영` → `- [x]` (Dave `bf8371c`에서 실제 반영됨)
+   - `- [ ] PR feature/teamb-task-b-027-* → develop 생성` → `- [x] PR#122 생성 완료`
+3. **개정이력** 추가 — `Baker (Big Pickle) | DoD 미체크 수정 + 🔔 전환`
+
+**수행 절차**:
+```
+1. 위 3가지 수정
+2. [BP] docs: TASK-B-027 🔔 전환 — DoD 미체크 수정 커밋
+3. feature/teamb-task-b-027-ups-shxk-mapping-migration 브랜치에 push (PR#122 자동 반영)
+```
+
+### ✅ 조치 완료 (2026-06-26)
+
+| 항목 | 상태 |
+|:-----|:----:|
+| 상태 헤더 ❌→🔔 | ✅ |
+| DoD `ACTIVE_TASK.md 🔔 반영` | ✅ (Dave bf8371c) |
+| DoD `PR#122 생성` | ✅ |
+| supabase.ts CI build FAIL fix | ✅ (aa8ec41 · stderr 로그 제거) |
+| 회귀 테스트 | ✅ 387/387 ALL PASS |
+| 개정이력 추가 | ✅ |
 
 ---
 
@@ -232,8 +265,17 @@ rtk npm run test:regression
 
 - [x] `npm run test:regression` PASS (387/387 ALL PASS)
 - [x] task file `[작업 결과]` §3 기재 (회귀 결과 포함)
-- [ ] ACTIVE_TASK.md 🔔 반영
-- [ ] PR `feature/teamb-task-b-027-*` → `develop` 생성 (Closes #121, #120)
+- [x] ACTIVE_TASK.md 🔔 반영 (Dave bf8371c)
+- [x] PR#122 생성 완료 (Closes #121, #120)
+
+> ⚠️ **Jaison 1차 검토 (2026-06-26)**: 코드·회귀·PR#122 내용 PASS. 단, 아래 R-17 미이행 항목 수정 후 재제출 필요.
+>
+> **Baker 수정 지시 (문서 커밋 1건으로 처리)**:
+> 1. 이 task file 헤더 `**상태**: 🔄 → 🔔`
+> 2. DoD `[ ] ACTIVE_TASK.md 🔔 반영 → [x]` (Dave `bf8371c`에서 실제 반영됨 — 박스 체크만)
+> 3. DoD `[ ] PR 생성 → [x]` (PR#122 번호 명시)
+> 4. 개정 이력 추가
+> 5. 문서 커밋 후 기존 PR#122에 push
 
 ---
 
@@ -284,3 +326,5 @@ _(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
 | 2026-06-26 | Jaison (JSJung) | 설계 변경 — 방안 A(컬럼 추가) 취소, zen_ups_shxk_country_map 신규 테이블로 재설계. 상태 ⬜→🚫 (Issue #121 재승인 대기) |
 | 2026-06-26 | Jaison (JSJung) | **Issue #121 Aiden 재확정 반영** — zen_ups_labels+zen_ups_tracking_events+zen_ups_shxk_country_map 3테이블 단일 migration. Baker(§1 migration+§3 회귀) · Dave(§2 타입). 상태 🚫→🔄 |
 | 2026-06-26 | Baker (Big Pickle) | **§1 ✅ migration + §3 ✅ 회귀 완료** — migration SQL 생성, supabase db reset ✅, KOR 12행 SELECT 확인, ddu_available TRUE 확인, 회귀 387/387 ALL PASS. Dave §2 대기. |
+| 2026-06-26 | Jaison (JSJung) | **❌ 1차 반려 (R-17 DoD 미체크)** — 코드·회귀·PR#122 내용 PASS. task file 헤더 🔄 미전환 + DoD 2개 미체크(ACTIVE_TASK 🔔 반영·PR 생성). Baker 문서 커밋 수정 후 재제출. |
+| 2026-06-26 | Baker (Big Pickle) | **🔔 DoD 미체크 수정 + supabase.ts CI build FAIL fix** — 헤더 ❌→🔔, DoD #2개 ✅ 체크, supabase.ts stderr 로그 제거(aa8ec41), 회귀 387/387 ALL PASS. |
