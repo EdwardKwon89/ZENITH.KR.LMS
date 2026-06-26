@@ -115,6 +115,19 @@
 | ❌ DEF-064 구현 방향 불일치 | 사이드바 항목만 추가, Bell icon 라우팅 미연결 | ✅ `a5e27dd` — Bell → `Link` 래핑 + ChevronDown 분리 |
 | ❌ DEF-063 경로 정리 누락 | `/admin/codes` vs `/master/codes` 중복 미보고 | ✅ R-18 발견 이슈 보고 (상단) |
 
+**2차 판정: ✅ 승인 (2026-06-26)**
+
+| 항목 | 결과 |
+|:----|:----:|
+| DEF-061~063: 사이드바 3개 항목 추가 | ✅ |
+| DEF-064: NotificationBell.tsx Bell → Link 래핑 | ✅ |
+| DEF-064: ChevronDown 드롭다운 분리 | ✅ |
+| i18n 4개국어 추가 | ✅ |
+| DoD 전항목 [x] | ✅ |
+| R-18 발견이슈 보고 (/admin/codes 중복) | ✅ |
+
+Advisory: B_Kai가 D_Kai 브랜치에 최초 커밋 후 cherry-pick으로 이관 — R-17 git sync 규칙 위반 (교차오염 경고, 비차단). 향후 작업 시작 전 반드시 자신의 브랜치로 checkout 후 커밋할 것.
+
 ---
 
 ## 개정 이력
@@ -124,3 +137,4 @@
 | 2026-06-24 | B_Kai (Big Pickle) | NaviSidebar 4건 추가 완료 · PR 생성 |
 | 2026-06-26 | Aiden (ZEN_CEO) | ❌ 반려 — DEF-064 Bell icon 미연결, DEF-063 경로 정리 누락 |
 | 2026-06-26 | B_Kai (Big Pickle) | 2차 수정 — Bell icon 라우팅 추가 (`a5e27dd`), R-18 보고 |
+| 2026-06-26 | Aiden (ZEN_CEO) | ✅ 2차 승인 — DEF-064 Bell/Link 구현 확인. Advisory: 브랜치 교차오염 경고 |
