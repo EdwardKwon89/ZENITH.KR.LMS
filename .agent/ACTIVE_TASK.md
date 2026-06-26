@@ -289,6 +289,7 @@
 
 ## 개정 이력
 
+| 2026-06-26 | Edward (ZEN_CEO) | **An-13 v2.0 승인** — shxk.rtb56.com 기반 전면 개정 확정. JSJung ①HTTP 옵션A ②platform_id 공백 ③getshippingmethod 190개 전항목 확정. Issue #119 종결. **IMP-136~141 Team B 발령 준비 완료.** |
 | 2026-06-26 | Aiden (ZEN_CEO) | **TASK-167 §2+§3 ✅ 승인** — PR#118 머지 (D_Kai). DEF-065 TC-POLICY-04 SEA WM 7/7 PASS · DEF-068 기존 migration 확인 · 회귀 387/387. **TASK-167 §1 ✅ 승인** — PR#117 머지 (B_Kai). DEF-064 Bell→Link 래핑·ChevronDown 분리 확인. Advisory: 브랜치 교차오염(D_Kai 브랜치 커밋 → cherry-pick 이관). |
 | 2026-06-25 | Baker (Big Pickle) | **TASK-B-023 §2 ✅ 문서·PR 완료** — DoD 전량 ✅, PR#113 제출 (Closes #112). |
 | 2026-06-25 | Baker (Big Pickle) | **TASK-B-023 ❌ 2차 반려 수정** — LAST_REGRESSION_RESULT FAIL→PASS (387/387 실측 확인). |
