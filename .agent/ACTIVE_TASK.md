@@ -260,7 +260,8 @@
 | TASK-B-022 | 260624 | [Phase 8] UPS 실물 연동 사전 설계 리서치 | P1 | 없음 | JSJung | ➖ | [TASK-B-022](tasks/TASK-B-022_260624_Phase8_UPS실물연동_리서치_JSJung.md) | TASK-B-023으로 대체 — 취소 (2026-06-26 Aiden) |
 | TASK-B-023 | 260625 | [Phase 8] shxk.rtb56.com API 기반 UPS 연동 리서치 재작성 | P1 | DEF-079 발견 | Baker (구현) · JSJung (검토) | ✅ | [TASK-B-023](tasks/TASK-B-023_260625_Phase8_rtb56_UPS_리서치_Jaison.md) | Issue #112 · PR#113 ✅ 승인 (2026-06-26) · DoD 9/9 · 387/387 PASS · DEF-079 해소 |
 | TASK-B-024 | 260626 | [Phase 8] UPS 레이블 발급 UI — 창고 출고 화면 인라인 배치 | P1 | TASK-B-023 ✅ · IMP-136~138 ✅ | JSJung (검토) · Baker (구현) | 🚫 | [TASK-B-024](tasks/TASK-B-024_260626_Phase8_UPS레이블발급UI_JSJung.md) | Issue #114 · IMP-141 · Issue #102 Edward 승인 (인라인 배치 확정) |
-| TASK-B-027 | 260626 | [Phase 8] zen_ups_shxk_country_map + 레이블/트래킹 테이블 DB migration | P1 | Issue #121 Aiden 설계 재확정 ✅ (260626) | Baker ✅ · Dave ✅ | 🔔 | [TASK-B-027](tasks/TASK-B-027_260626_Phase8_UPS매핑DB마이그레이션_Dave_Baker.md) | reference_no+UNIQUE INDEX+FK 추가 · 387/387 ALL PASS · PR#122 재검토 대기 |
+| TASK-B-027 | 260626 | [Phase 8] zen_ups_shxk_country_map + 레이블/트래킹 테이블 DB migration | P1 | Issue #121 Aiden 설계 재확정 ✅ (260626) | Baker ✅ · Dave ✅ | ✅ | [TASK-B-027](tasks/TASK-B-027_260626_Phase8_UPS매핑DB마이그레이션_Dave_Baker.md) | IMP-138 ✅ · PR#122 머지 ✅ (260626 Aiden) · 387/387 ALL PASS |
+| TASK-B-025 | 260626 | [Phase 8] UPS shxk HTTP Client + config + 공통 타입 | P1 | An-13 v2.4 ✅ · .env.local 자격증명 확보 ✅ | Dave | 🔔 | [TASK-B-025](tasks/TASK-B-025_260626_Phase8_UPS_shxk_HTTPClient_Dave.md) | IMP-136 · Issue #106 · 코드 f5baa0a · 387/387 · PR#123 Jaison PASS ✅ · Aiden 머지 대기 |
 ---
 
 ## Agent 현황
@@ -282,8 +283,8 @@
 |:------|:----:|:----|
 | **JSJung** (팀 리더) | 🚫 TASK-B-024 전제조건 대기 | Phase 8 UPS 레이블 UI · Issue #114 · TASK-B-023 ✅(260626) · IMP-136~138 ✅ 후 착수 |
 | **Jaison** (AI Agent 총괄) | ✅ TASK-B-021 완료 (260624) | PR#94 머지 ✅ · Aiden ✅ 승인 · 다음 Task 배분 대기 |
-| **Dave** (AI Agent) | ✅ TASK-B-027 §2 완료 | UpsShxkCountryMap 인터페이스 추가 + supabase.ts 재생성 ✅ (c0c06df) |
-| **Baker** (AI Agent) | 🔔 TASK-B-027 재제출 완료 | 헤더 🔔 전환 + 559a23e 해시 기재. PR#122 재검토 대기 |
+| **Dave** (AI Agent) | 🔔 TASK-B-025 Jaison PASS | 코드 f5baa0a · 387/387 · PR#123 Aiden 최종 머지 대기 |
+| **Baker** (AI Agent) | ✅ TASK-B-027 Aiden 머지 완료 (260626) | PR#122 머지 ✅ · IMP-138 ✅ · 다음 Task 배분 대기 |
 | **Gale** (AI Agent) | 대기 | 추후 재배정 예정 |
 
 ---
