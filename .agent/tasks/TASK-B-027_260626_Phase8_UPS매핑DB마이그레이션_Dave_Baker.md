@@ -8,7 +8,63 @@
 > **관련 Issue**: [#121](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/121) (Closes [#120](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/120))
 > **전제조건**: Issue #121 Aiden 설계 재확정 ✅ (2026-06-26)
 > **브랜치**: `feature/teamb-task-b-027-ups-shxk-mapping-migration`
-> **상태**: 🔔
+> **상태**: ❌
+
+---
+
+## [수정 지시 — Baker 필독] ❌ Aiden 2차 반려 (2026-06-26)
+
+> **대상**: Baker (Big Pickle)
+> **코드 커밋 + 문서 커밋 2건 필요**
+
+**수정 1 — migration SQL `reference_no` 컬럼 추가 (기능 블로커, 필수)**:
+
+An-13 §3-1 명세에 `reference_no TEXT NOT NULL` 및 `UNIQUE INDEX idx_ups_labels_reference` 가 명시되어 있으나 Baker §1 구현에 누락됨.  
+TASK-B-026(IMP-137) createorder Server Action은 `gettrackinknumber`·`getnewlabel` 호출 시 `reference_no`를 파라미터로 사용 → 저장되지 않으면 재인쇄·재조회 불가 + 중복 주문 방지 UNIQUE 제약 누락.
+
+`supabase/migrations/20260626000000_ups_008_labels_tracking_shxk_map.sql` 의 `zen_ups_labels` CREATE TABLE 수정:
+
+```sql
+CREATE TABLE public.zen_ups_labels (
+  id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  order_id         UUID NOT NULL REFERENCES public.zen_orders(id) ON DELETE CASCADE,
+  package_id       UUID NOT NULL REFERENCES public.zen_order_packages(id) ON DELETE CASCADE,
+  reference_no     TEXT NOT NULL,            -- ← 추가 (shxk reference_no)
+  tracking_number  TEXT NOT NULL,
+  label_format     VARCHAR(10) NOT NULL CHECK (label_format IN ('PDF','ZPL','GIF')),
+  storage_path     TEXT NOT NULL,
+  file_size_bytes  INTEGER,
+  generated_at     TIMESTAMPTZ DEFAULT NOW(),
+  generated_by     UUID REFERENCES public.zen_profiles(id),
+  is_voided        BOOLEAN DEFAULT FALSE,
+  voided_at        TIMESTAMPTZ,
+  created_at       TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 기존 인덱스 3개 유지 + 아래 추가
+CREATE UNIQUE INDEX idx_ups_labels_reference ON public.zen_ups_labels(reference_no); -- ← 추가
+```
+
+**수정 2 — Aiden 원본 task file 제거 (거버넌스 위반, 필수)**:
+
+```bash
+git rm ".agent/tasks/TASK-B-027_260626_IMP138_DB마이그레이션_Baker.md"
+```
+
+**수정 3 — Advisory (권고, 비차단)**: `zen_ups_shxk_country_map.product_code` FK 추가 권고:
+- `product_code VARCHAR(20) NOT NULL REFERENCES public.zen_ups_products(product_code)` 로 변경 시 참조 무결성 강화
+
+**수행 절차 (R-17 커밋 순서 엄수)**:
+```
+1. migration SQL 수정 (reference_no + UNIQUE INDEX 추가)
+2. rtk supabase db reset PASS 확인
+3. rtk npm run test:regression 387/387 PASS 확인
+4. git rm ".agent/tasks/TASK-B-027_260626_IMP138_DB마이그레이션_Baker.md"
+5. [코드 커밋] [BP] fix: TASK-B-027 zen_ups_labels reference_no 누락 + Aiden 원본 task file 제거
+6. task file [작업 결과] §1 코드 커밋 해시 갱신 + 개정이력 추가 + 헤더 🔔 전환 + DoD 코드커밋해시 갱신
+7. [문서 커밋] [BP] docs: TASK-B-027 🔔 전환 — Aiden 2차 반려 수정
+8. PR#122에 push
+```
 
 ---
 
@@ -328,3 +384,5 @@ _(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
 | 2026-06-26 | Baker (Big Pickle) | **§1 ✅ migration + §3 ✅ 회귀 완료** — migration SQL 생성, supabase db reset ✅, KOR 12행 SELECT 확인, ddu_available TRUE 확인, 회귀 387/387 ALL PASS. Dave §2 대기. |
 | 2026-06-26 | Jaison (JSJung) | **❌ 1차 반려 (R-17 DoD 미체크)** — 코드·회귀·PR#122 내용 PASS. task file 헤더 🔄 미전환 + DoD 2개 미체크(ACTIVE_TASK 🔔 반영·PR 생성). Baker 문서 커밋 수정 후 재제출. |
 | 2026-06-26 | Baker (Big Pickle) | **🔔 DoD 미체크 수정 + supabase.ts CI build FAIL fix** — 헤더 ❌→🔔, DoD #2개 ✅ 체크, supabase.ts stderr 로그 제거(aa8ec41), 회귀 387/387 ALL PASS. |
+| 2026-06-26 | Jaison (JSJung) | **❌ Aiden 2차 반려 Baker 재배정** — 반려①: zen_ups_labels `reference_no TEXT NOT NULL` 컬럼 + UNIQUE INDEX 누락(An-13 §3-1 불일치, 기능 블로커). 반려②: Aiden 원본 task file 2개 중복(거버넌스 위반). Baker 수정 3가지 + R-17 절차 지시 완료. 상태 🔔→❌. |
+| 2026-06-26 | Baker (Big Pickle) | **✅ Aiden 2차 반려 수정 완료** — zen_ups_labels reference_no + UNIQUE INDEX 추가. zen_ups_shxk_country_map FK 추가. Aiden 원본 task file 없음(미존재 확인). build PASS. commit 559a23e. |
