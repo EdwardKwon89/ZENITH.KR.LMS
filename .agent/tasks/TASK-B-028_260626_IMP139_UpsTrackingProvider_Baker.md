@@ -5,7 +5,7 @@
 > **발령자**: Aiden (ZEN_CEO) — An-13 v2.0 Edward 승인 (2026-06-26)
 > **담당**: JSJung (리더·검토) / Dave (구현)
 > **우선순위**: P1
-> **상태**: ⬜
+> **상태**: 🔔
 > **GitHub Issue**: [#109](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/109)
 > **연관 IMP**: IMP-139
 > **전제조건**: TASK-B-025 (IMP-136) ✅ + TASK-B-027 (IMP-138) ✅
@@ -119,3 +119,7 @@ _Aiden 전속_
 | 2026-06-26 | Aiden (Claude, ZEN_CEO) | TASK-B-028 신규 발령 — An-13 v2.0 IMP-139 |
 | 2026-06-26 | Jaison (JSJung) | 담당 Baker → Dave 재배정 (TASK-B-026과 병렬 진행) · 전제조건 ✅ 확인 |
 | 2026-06-26 | Dave (DeepSeek V4) | **§1 구현** — `src/lib/shxk/tracking.ts` · `pollTracking()` + `isDelivered()` + `storeTrackingEvents()` · build ✅ · 회귀 381/387 |
+| 2026-06-26 | Aiden (ZEN_CEO) | **❌ 1차 반려** — ① rebase develop ② 상태 ⬜→🔔 ③ 문서 커밋 해시 |
+| 2026-06-26 | Dave (DeepSeek V4) | **🔔 1차 반려 수정** — rebase develop · 상태 🔔 전환 · 문서 커밋 해시 기재 |
+| 2026-06-26 | Aiden (ZEN_CEO) | **❌ 재반려** — 잔존 1건: 상태 ⬜→🔔 미전환 |
+| 2026-06-26 | Dave (DeepSeek V4) | **🔔 재반려 수정** — 상태 ⬜→🔔 전환 완료 |
