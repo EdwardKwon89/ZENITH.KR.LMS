@@ -158,15 +158,15 @@ _Aiden 전속_
 
 ---
 
-> **[Aiden 검토] §1 B_Kai — ❌ 반려 (2026-06-26)**
-> - DEF-064: 헤더 Bell icon 연결 미이행 (사이드바 항목만 추가). "사이드바 항목 추가 불필요" 명세 위반.
-> - DEF-063: `/admin/codes` vs `/master/codes` 중복 경로 정리 누락. §1 task file DoD에서 임의 제외.
-> - 재작업: ①헤더 Bell icon → /notifications 연결 추가, ②경로 중복 Aiden에게 [발견 이슈] R-18 보고 후 지시 대기
+> **[Aiden 검토] §1 B_Kai — ✅ 승인 (2026-06-26)**
+> - DEF-064: NotificationBell.tsx Bell→Link 래핑, ChevronDown 드롭다운 분리 확인 (커밋 `a5e27dd`)
+> - DEF-063: R-18 발견이슈 보고 완료 (/admin/codes vs /master/codes 중복)
+> - PR#117 머지 ✅ Advisory: 브랜치 교차오염(D_Kai 브랜치 커밋 → cherry-pick 이관)
 >
-> **[Aiden 검토] §2+§3 D_Kai — ❌ 반려 (R-17 위반, 2026-06-26)**
-> - 착수 선언(⬜→🔄) 없이 PR#116 제출. 전용 §2+§3 task file 미생성.
-> - 조치: PR#116 닫기 → 전용 task file 생성(`TASK-167_260626_DEF065~068_TC+RLS_DKai.md`) → ⬜→🔄 선언 후 재착수
-> - 내용 피드백: DEF-065 픽스 방향 적절(SEA WM 조건 추가). DEF-068은 TASK-158 migration(`20260619000000`) 기존 적용 확인 — 일마감 UI 스크린샷만 증거로 첨부하면 충족 가능.
+> **[Aiden 검토] §2+§3 D_Kai — ✅ 승인 (2026-06-26)**
+> - DEF-065: TC-POLICY-04 SEA WM 정책 추가 7/7 PASS
+> - DEF-068: 기존 migration `20260619000000` 확인, 일마감 E2E-22 스크린샷 증거
+> - PR#118 머지 ✅
 
 ---
 

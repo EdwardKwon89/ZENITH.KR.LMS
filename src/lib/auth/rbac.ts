@@ -141,5 +141,8 @@ export const ALL_RESOURCE_PATHS = [
   { path: '/admin/permissions', label: '권한 관리' },
   { path: '/agency', label: '대리점 관리' },
   { path: '/ups-rates', label: 'UPS 요율 조회' },
+  { path: '/master/geo', label: '지리 정보' },
+  { path: '/master-orders', label: '마스터 포장' },
+  { path: '/notifications', label: '알림' },
 ];
 
