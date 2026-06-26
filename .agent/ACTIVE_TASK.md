@@ -262,7 +262,7 @@
 | TASK-B-024 | 260626 | [Phase 8] UPS 레이블 발급 UI — 창고 출고 화면 인라인 배치 | P1 | TASK-B-025~027 ✅ | JSJung (검토) · Baker (구현) | 🚫 | [TASK-B-024](tasks/TASK-B-024_260626_Phase8_UPS레이블발급UI_JSJung.md) | Issue #114 · IMP-141 · Issue #102 Edward 승인 (인라인 배치 확정) |
 | TASK-B-025 | 260626 | [Phase 8] shxk HTTP Client + config (IMP-136) | P1 | 없음 | JSJung (검토) · Dave (구현) | ❌ | [TASK-B-025](tasks/TASK-B-025_260626_Phase8_UPS_shxk_HTTPClient_Dave.md) | PR#123 반려 — ①경로 src/lib/ups→shxk ②환경변수명 불일치 ③회귀 381/387 ④B-027혼합 ⑤task file 중복 |
 | TASK-B-026 | 260626 | [Phase 8] createorder + getnewlabel Server Action (IMP-137) | P1 | TASK-B-025 ✅ | JSJung (검토) · Baker (구현) | ⬜ | [TASK-B-026](tasks/TASK-B-026_260626_IMP137_createorder서버액션_Baker.md) | Issue #107 · IMP-137 · An-13 v2.0 §5 |
-| TASK-B-027 | 260626 | [Phase 8] zen_ups_shxk_country_map + 레이블/트래킹 테이블 DB migration (IMP-138) | P1 | Issue #121 Aiden 설계 재확정 ✅ | JSJung (검토) · Baker (구현) · Dave (타입) | ❌ | [TASK-B-027](tasks/TASK-B-027_260626_Phase8_UPS매핑DB마이그레이션_Dave_Baker.md) | PR#122 반려 — reference_no 누락·task file 중복. Baker 수정 재제출 대기 |
+| TASK-B-027 | 260626 | [Phase 8] zen_ups_shxk_country_map + 레이블/트래킹 테이블 DB migration (IMP-138) | P1 | Issue #121 Aiden 설계 재확정 ✅ | JSJung (검토) · Baker (구현) · Dave (타입) | ✅ | [TASK-B-027](tasks/TASK-B-027_260626_Phase8_UPS매핑DB마이그레이션_Dave_Baker.md) | PR#122 머지 ✅ (260626) · reference_no+UNIQUE INDEX+FK · 387/387 PASS · Aiden ✅ 승인 |
 | TASK-B-028 | 260626 | [Phase 8] UpsTrackingProvider + zen_ups_tracking_events 저장 (IMP-139) | P1 | TASK-B-025 ✅ · TASK-B-027 ✅ | JSJung (검토) · Baker (구현) | ⬜ | [TASK-B-028](tasks/TASK-B-028_260626_IMP139_UpsTrackingProvider_Baker.md) | Issue #109 · IMP-139 · An-13 v2.0 §7 |
 | TASK-B-029 | 260626 | [Phase 8] E2E 테스트 — createorder→getnewlabel→gettrack 전체 흐름 (IMP-140) | P1 | TASK-B-025~028 ✅ 전량 | Jaison | ⬜ | [TASK-B-029](tasks/TASK-B-029_260626_IMP140_E2E테스트_Jaison.md) | Issue #110 · IMP-140 · E2E-26 |
 ---
@@ -284,20 +284,26 @@
 
 | Agent | 상태 | 비고 |
 |:------|:----:|:----|
-| **JSJung** (팀 리더) | ⬜ TASK-B-025~027 발령 (260626) | Phase 8 IMP-136~138 구현 감독 · An-13 v2.0 승인 완료 |
+| **JSJung** (팀 리더) | 🚫 TASK-B-024 전제조건 대기 | Phase 8 UPS 레이블 UI · TASK-B-025 ❌ 재작업 중 · IMP-136~138 ✅ 후 착수 |
 | **Jaison** (AI Agent 총괄) | ⬜ TASK-B-029 발령 (260626) | IMP-140 E2E — TASK-B-025~028 완료 후 착수 |
-| **Dave** (AI Agent) | 다음 Task 배분 대기 | — |
-| **Baker** (AI Agent) | ⬜ TASK-B-025 착수 가능 (260626) | IMP-136 shxk 클라이언트 · TASK-B-027(IMP-138) 병행 가능 |
+| **Dave** (AI Agent) | ✅ TASK-B-027 §2 완료 · TASK-B-025 ❌ 재작업 대기 | UpsShxkCountryMap ✅ (c0c06df) · TASK-B-025 5건 수정 지시 중 |
+| **Baker** (AI Agent) | ✅ TASK-B-027 승인 (260626) | PR#122 머지 ✅ · TASK-B-028 착수 가능 (B-025 ✅ 전제) |
 | **Gale** (AI Agent) | 대기 | 추후 재배정 예정 |
 
 ---
 
 ## 개정 이력
 
-| 2026-06-26 | Aiden (ZEN_CEO) | **TASK-B-025 ❌ 반려** — PR#123 CHANGES_REQUESTED. ①경로 src/lib/ups→shxk ②환경변수명 불일치 ③회귀 381/387 ④B-027 혼합 ⑤task file 중복. Dave 수정 재제출 대기. |
+| 2026-06-26 | Aiden (ZEN_CEO) | **TASK-B-027 ✅ 승인** — PR#122 머지 완료. DoD 14/14 ✅ · reference_no NOT NULL + UNIQUE INDEX + FK ✅ · 387/387 PASS · An-13 v2.1 반영. TASK-B-028 착수 가능 (B-025 ✅ 전제). |
+| 2026-06-26 | Aiden (ZEN_CEO) | **TASK-B-025 ❌ 반려** — PR#123 CHANGES_REQUESTED. ①경로 src/lib/ups→shxk ②환경변수명 불일치 ③회귀 381/387 ④B-027혼합 ⑤task file 중복. Dave 수정 재제출 대기. |
 | 2026-06-26 | Edward (ZEN_CEO) | **TASK-087 폐기** — N_Kai 재교육 세션 ➖ 취소. N_Kai 미재배정 확정. |
 | 2026-06-26 | Aiden (ZEN_CEO) | **TASK-B-025~029 발령** — IMP-136~140 Team B 공식 발령. TASK-B-025(shxk 클라이언트)·TASK-B-027(DB 마이그레이션) 병행 착수 가능. TASK-B-024 전제조건 TASK-B-023·DEF-079 ✅ 반영. |
 | 2026-06-26 | Edward (ZEN_CEO) | **An-13 v2.0 승인** — shxk.rtb56.com 기반 전면 개정 확정. JSJung ①HTTP 옵션A ②platform_id 공백 ③getshippingmethod 190개 전항목 확정. Issue #119 종결. **IMP-136~141 Team B 발령 준비 완료.** |
+| 2026-06-26 | Baker (Big Pickle) | **🔔 3차 반려 수정 완료** — 헤더 ❌→🔔, [작업 결과]§1 559a23e 기재. PR#122 재검토 대기. |
+| 2026-06-26 | Baker (Big Pickle) | **✅ Aiden 2차 반려 수정** — reference_no + UNIQUE INDEX + FK 추가(559a23e). build PASS. |
+| 2026-06-26 | Dave (DeepSeek V4) | **TASK-B-027 §2 ✅ 완료** — UpsShxkCountryMap 인터페이스 추가 + supabase.ts 재생성 (c0c06df). |
+| 2026-06-26 | Baker (Big Pickle) | **TASK-B-027 §1·§3 ✅ 완료** — migration SQL + supabase db reset ✅ + KOR 12행 + ddu_available TRUE + 회귀 387/387 ALL PASS + PR#122 제출. |
+| 2026-06-26 | Jaison (Team B) | **TASK-B-027 🚫→🔄** — Issue #121 Aiden 재확정. 3테이블 단일 migration 재설계. Baker(§1·§3)·Dave(§2) 착수. |
 | 2026-06-26 | Aiden (ZEN_CEO) | **TASK-167 §2+§3 ✅ 승인** — PR#118 머지 (D_Kai). DEF-065 TC-POLICY-04 SEA WM 7/7 PASS · DEF-068 기존 migration 확인 · 회귀 387/387. **TASK-167 §1 ✅ 승인** — PR#117 머지 (B_Kai). DEF-064 Bell→Link 래핑·ChevronDown 분리 확인. Advisory: 브랜치 교차오염(D_Kai 브랜치 커밋 → cherry-pick 이관). |
 | 2026-06-25 | Baker (Big Pickle) | **TASK-B-023 §2 ✅ 문서·PR 완료** — DoD 전량 ✅, PR#113 제출 (Closes #112). |
 | 2026-06-25 | Baker (Big Pickle) | **TASK-B-023 ❌ 2차 반려 수정** — LAST_REGRESSION_RESULT FAIL→PASS (387/387 실측 확인). |

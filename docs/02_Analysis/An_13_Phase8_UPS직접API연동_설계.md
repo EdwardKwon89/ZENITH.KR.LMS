@@ -169,40 +169,44 @@ ALTER TABLE public.zen_ups_tracking_events ENABLE ROW LEVEL SECURITY;
 
 ### 3-3. 신규 테이블: `zen_ups_shxk_country_map` (Issue #121 Aiden 확정 2026-06-26)
 
-`getshippingmethod` 전체 190개 코드가 **목적지 국가별로 분리**됨(JSJung 실측). 동일 서비스 레벨이라도 국가가 다르면 shxk 코드가 달라지므로, `zen_ups_products`에 단순 컬럼 추가 방식(Issue #120 방안 A)은 구조적 한계가 있음.
+`getshippingmethod` 전체 190개 코드가 **목적지 국가별로 분리**됨(JSJung 실측). 동일 서비스 레벨이라도 국가가 다르면 shxk 코드가 달라지므로, `zen_ups_products`에 단순 컬럼 추가 방식(Issue #120 방안 A)은 구조적 한계가 있음. `(product_code, country_code, incoterms) → shxk_code` 3-key 매핑 테이블로 관리한다.
 
 ```sql
 CREATE TABLE public.zen_ups_shxk_country_map (
   product_code  VARCHAR(20) NOT NULL REFERENCES public.zen_ups_products(product_code),
-  country_code  VARCHAR(3)  NOT NULL,   -- ISO 3166-1 alpha-3 (프로젝트 표준: ups.ts, zen_ups_zone_countries 일치)
+  country_code  VARCHAR(3)  NOT NULL,  -- ISO 3166-1 alpha-3 (KOR, USA, VNM...)
   incoterms     VARCHAR(3)  NOT NULL CHECK (incoterms IN ('DDU', 'DDP')),
   shxk_code     VARCHAR(20) NOT NULL,
   PRIMARY KEY (product_code, country_code, incoterms)
 );
-
--- 한국(KOR) 초기 시드
-INSERT INTO public.zen_ups_shxk_country_map VALUES
-  ('WW_EXPRESS_DOC',   'KOR', 'DDU', 'KRUPSEXP'),
-  ('WW_EXPRESS_DOC',   'KOR', 'DDP', 'PK0033'),
-  ('WW_EXPRESS_NONDOC','KOR', 'DDU', 'KRUPSEXP'),
-  ('WW_EXPRESS_NONDOC','KOR', 'DDP', 'PK0033'),
-  ('WW_EXPEDITED',     'KOR', 'DDU', 'KRUPSWE'),
-  ('WW_EXPEDITED',     'KOR', 'DDP', 'PK0034'),
-  ('WW_SAVER_DOC',     'KOR', 'DDU', 'FXUPS'),
-  ('WW_SAVER_DOC',     'KOR', 'DDP', 'PK0035'),
-  ('WW_SAVER_NONDOC',  'KOR', 'DDU', 'FXUPS'),
-  ('WW_SAVER_NONDOC',  'KOR', 'DDP', 'PK0035'),
-  ('WW_FLIGHT',        'KOR', 'DDU', 'KRUPSWWEF'),
-  ('WW_FLIGHT',        'KOR', 'DDP', 'PK0032');
-
-ALTER TABLE public.zen_ups_shxk_country_map ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "ADMIN full access"
-  ON public.zen_ups_shxk_country_map FOR ALL TO authenticated
-  USING ((auth.jwt() -> 'app_metadata' ->> 'role') IN ('ADMIN', 'ZENITH_SUPER_ADMIN', 'MANAGER'));
 ```
 
+**KOR 초기 시드 12행** (TASK-B-027 migration 포함):
+
+| product_code | incoterms | shxk_code |
+|:-------------|:---------:|:---------:|
+| `WW_EXPRESS_DOC` / `WW_EXPRESS_NONDOC` | DDU | `KRUPSEXP` |
+| `WW_EXPRESS_DOC` / `WW_EXPRESS_NONDOC` | DDP | `PK0033` |
+| `WW_EXPEDITED` | DDU | `KRUPSWE` |
+| `WW_EXPEDITED` | DDP | `PK0034` |
+| `WW_SAVER_DOC` / `WW_SAVER_NONDOC` | DDU | `FXUPS` |
+| `WW_SAVER_DOC` / `WW_SAVER_NONDOC` | DDP | `PK0035` |
+| `WW_FLIGHT` | DDU | `KRUPSWWEF` |
+| `WW_FLIGHT` | DDP | `PK0032` |
+
+> DOC/NON_DOC 동일 shxk 코드 허용 — shipping_method는 서비스 레벨 코드, 화물 유형은 createorder 페이로드 별도 필드 전달.
 > **확장성**: 신규 국가 추가 시 INSERT만으로 대응 — 스키마 변경 불필요.
-> **참조**: `zen_ups_products.ddu_available=TRUE` UPDATE는 별도 유지 (Issue #121 Request ③).
+
+**조회 예시** (TASK-B-026 createorder Server Action):
+```typescript
+const { data } = await supabase
+  .from('zen_ups_shxk_country_map')
+  .select('shxk_code')
+  .eq('product_code', productCode)
+  .eq('country_code', destinationCountry)  // ISO alpha-3
+  .eq('incoterms', incoterms)              // 'DDU' | 'DDP'
+  .single();
+```
 
 ### 3-4. 기존 테이블 연계
 
@@ -237,7 +241,7 @@ RLS: ADMIN·MANAGER·AGENCY(소속 오더만) 읽기.
 | `src/types/ups-api.ts` | 신규 | shxk Request/Response 타입 (ShxkRequest, ShxkResponse 등) |
 | `src/types/ups.ts` | **확장** | `UpsLabel`, `UpsTrackingEvent` 타입 추가 |
 | `src/app/actions/operations/ups-labels.ts` | 신규 | 레이블 발급 Server Action |
-| `supabase/migrations/ups_008_labels.sql` | 신규 | `zen_ups_labels` + `zen_ups_tracking_events` DDL |
+| `supabase/migrations/20260626000000_ups_008_labels_tracking_shxk_map.sql` | 신규 | `zen_ups_labels` + `zen_ups_tracking_events` + `zen_ups_shxk_country_map` DDL + KOR 시드 |
 | `.env.example` | **수정** | SHXK_APP_TOKEN / SHXK_APP_KEY / SHXK_BASE_URL 추가 |
 
 ---
@@ -361,13 +365,13 @@ const res = await shxkRequest('gettrack', { tracking_number });
 
 ## 8. 구현 순서 및 Phase 8 Task 계획
 
-| Task ID | 담당 | 내용 (v2.0 기준) | 의존 | Issue |
+| Task ID | 담당 | 내용 (v2.1 기준) | 의존 | Issue |
 |:--------|:----:|:----------------|:-----|:-----:|
 | **IMP-136** | Dave (Team B) | shxk HTTP Client + config (appToken/appKey) | - | [#106](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/106) |
-| **IMP-137** | Dave (Team B) | createorder + gettrackingnumber + getnewlabel Server Action | IMP-136 | [#107](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/107) |
-| **IMP-138** | Dave (Team B) | DB 마이그레이션 (`zen_ups_labels` + `zen_ups_tracking_events`) | - | [#108](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/108) |
-| **IMP-139** | Dave (Team B) | UpsTrackingProvider (gettrack 기반) + zen_ups_tracking_events 저장 | IMP-136·138 | [#109](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/109) |
-| **IMP-140** | Baker (Team B) | E2E 테스트 (createorder → getnewlabel → gettrack) | IMP-136~139 | [#110](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/110) |
+| **IMP-137** | Baker (Team B) | createorder + getnewlabel Server Action | IMP-136 | [#107](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/107) |
+| **IMP-138** | Baker (Team B) | DB 마이그레이션 (`zen_ups_labels` + `zen_ups_tracking_events` + `zen_ups_shxk_country_map` + KOR 시드) ✅ | - | [#108](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/108) |
+| **IMP-139** | Baker (Team B) | UpsTrackingProvider (gettrack 기반) + zen_ups_tracking_events 저장 | IMP-136·138 | [#109](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/109) |
+| **IMP-140** | Jaison (Team B) | E2E 테스트 (createorder → getnewlabel → gettrack) | IMP-136~139 | [#110](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/110) |
 | **IMP-141** | Baker (Team B) | UI — 창고 출고 화면 레이블 발급 인라인 배치 | IMP-136~138 | [#114](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/114) |
 
 ---
@@ -406,4 +410,4 @@ const res = await shxkRequest('gettrack', { tracking_number });
 | 2026-06-25 | Aiden (Claude, ZEN_CEO) | §7 Issue 번호 추가 (IMP-136~140 GitHub Issue #106~#110) |
 | 2026-06-26 | Aiden (Claude, ZEN_CEO) | **v2.0 전면 개정** — 연동 대상 shxk.rtb56.com 확정, JSJung Issue #119 ①②③ 반영. §2 아키텍처·§4 모듈·§5 인증·§8→9 리스크·§9→10 승인 전면 교체. |
 | 2026-06-26 | Edward (ZEN_CEO) | **v2.0 승인 완료** — IMP-136~141 Team B 발령 확정. |
-| 2026-06-26 | Aiden (Claude, ZEN_CEO) | **v2.1** — §3-3 `zen_ups_shxk_country_map` 추가 (Issue #121 JSJung 설계 변경 요청 수용). §3-3·§3-4 번호 재조정, §6-1 조회 예시 업데이트, §10 ⑤ 추가. |
+| 2026-06-26 | Aiden (Claude, ZEN_CEO) | **v2.1** — §3-3 `zen_ups_shxk_country_map` 추가 (Issue #121 JSJung 설계 변경 요청 수용). §4 migration 파일명 수정. §8 IMP-138 담당 Baker 반영. §10 ⑤ 추가. |
