@@ -141,7 +141,7 @@
 | TASK-082 | 260524 | UAT 절차서 보완: 출고·운송장·패킹 (UAT-04-06·04-07) | P4 | TASK-070 ✅ · TASK-071 ✅ | B_Kai | ✅ | [TASK-082](tasks/TASK-082_260524_UAT보완_출고패킹화면_BKai.md) | 182ebd7+d4d5706 · UAT-04-06·07 절차표 ✅ · UAT_MASTER 72/72 Aiden보완 |
 | TASK-083 | 260524 | UAT 절차서 보완: 세션보안·회원관리 (UAT-01-08·09·09-11) | P4 | TASK-068 ✅ · TASK-073 ✅ | D_Kai | ✅ | [TASK-083](tasks/TASK-083_260524_UAT보완_보안회원관리_DKai.md) | 78d32b1+4df7c8d · UAT-01-08·09·09-11 ✅ |
 | TASK-084 | 260524 | E2E-16: 창고 통합 플로우 (입고·출고·특수화물) | P3 | TASK-081 ✅ · TASK-082 ✅ | N_Kai | ✅ | [TASK-084](tasks/TASK-084_260524_E2E16_창고통합플로우_NKai.md) | 44b4d06+a7a8772 · 220/220 · e2e-16 336줄 · Aiden 직접 보완 · N_Kai 신규 할당 중단 |
-| TASK-087 | 260524 | N_Kai 재교육 세션 (R-17 v1.4 절차 준수) | P4 | 없음 | N_Kai | ⬜ | [TASK-087](tasks/TASK-087_260524_NKai재교육세션_NKai.md) | ✅ 자체선언 3회 누적 페널티 · 신규 할당 중단 · 재교육 완료 후 재개 |
+| TASK-087 | 260524 | N_Kai 재교육 세션 (R-17 v1.4 절차 준수) | P4 | 없음 | N_Kai | ➖ | [TASK-087](tasks/TASK-087_260524_NKai재교육세션_NKai.md) | **2026-06-26 Edward 지시 폐기** — N_Kai 미재배정 확정 |
 | TASK-085 | 260524 | E2E-17: SUSPENDED 보안·회원관리 플로우 | P3 | TASK-083 ✅ | D_Kai | ✅ | [TASK-085](tasks/TASK-085_260524_E2E17_보안회원관리플로우_DKai.md) | 5a279ac+aa0dbf1 · 220/220 · e2e-17 249 lines · 시나리오 A+B ✅ |
 | TASK-086 | 260524 | E2E-18: 패킹·Composite Pricing·Rate Cards 플로우 | P3 | TASK-082 ✅ | B_Kai | ✅ | [TASK-086](tasks/TASK-086_260524_E2E18_패킹라우팅요율플로우_BKai.md) | f72ed5b+9524a75 · e2e-18 354줄 3개 시나리오 · E2E-12 보강 · 220/220 |
 | TASK-088 | 260525 | Hub 경로 탐색 구현 (DatabaseRouteAdapter BFS 확장 + 시드 데이터) | P2 | 없음 | B_Kai | ✅ | [TASK-088](tasks/TASK-088_260525_Hub경로탐색구현_BKai.md) | IMP-084 완료 · 610cf1b+5616493 · 226/226 · TASK-091·092 블로커 해제 ✅ |
@@ -277,7 +277,7 @@
 | **D_Kai (OpenCode)** | ✅ TASK-167 (§2+§3) 승인 (260626) | PR#118 머지 ✅ · DEF-065/068 완료 · 다음 Task 배분 대기 |
 | **B_Kai** | ✅ TASK-167 (§1) 승인 (260626) | PR#117 머지 ✅ · DEF-064 Bell→Link 확인 · Advisory: 브랜치 교차오염 경고 |
 | **Riley** | ✅ TASK-161 승인 (260619) | UAT-15~20 16개 시나리오 · PR #46 머지 · 다음 Task 배분 대기 |
-| N_Kai | 재교육 세션 대기 (TASK-087) | R-17 위반 누적 — 신규 할당 중단 유지 |
+| N_Kai | ➖ 미재배정 확정 (260626 Edward) | TASK-087 폐기 — 신규 Task 발령 없음 |
 | Ring | 신규 할당 중단 유지 | 9차 위반 누적 |
 
 ### Team B (JSJung · Jaison 관할)
@@ -294,6 +294,7 @@
 
 ## 개정 이력
 
+| 2026-06-26 | Edward (ZEN_CEO) | **TASK-087 폐기** — N_Kai 재교육 세션 ➖ 취소. N_Kai 미재배정 확정. |
 | 2026-06-26 | Aiden (ZEN_CEO) | **TASK-B-025~029 발령** — IMP-136~140 Team B 공식 발령. TASK-B-025(shxk 클라이언트)·TASK-B-027(DB 마이그레이션) 병행 착수 가능. TASK-B-024 전제조건 TASK-B-023·DEF-079 ✅ 반영. |
 | 2026-06-26 | Edward (ZEN_CEO) | **An-13 v2.0 승인** — shxk.rtb56.com 기반 전면 개정 확정. JSJung ①HTTP 옵션A ②platform_id 공백 ③getshippingmethod 190개 전항목 확정. Issue #119 종결. **IMP-136~141 Team B 발령 준비 완료.** |
 | 2026-06-26 | Aiden (ZEN_CEO) | **TASK-167 §2+§3 ✅ 승인** — PR#118 머지 (D_Kai). DEF-065 TC-POLICY-04 SEA WM 7/7 PASS · DEF-068 기존 migration 확인 · 회귀 387/387. **TASK-167 §1 ✅ 승인** — PR#117 머지 (B_Kai). DEF-064 Bell→Link 래핑·ChevronDown 분리 확인. Advisory: 브랜치 교차오염(D_Kai 브랜치 커밋 → cherry-pick 이관). |
