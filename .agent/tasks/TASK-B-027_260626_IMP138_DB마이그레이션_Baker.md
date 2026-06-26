@@ -81,24 +81,44 @@ rtk supabase gen types typescript --local > src/types/supabase.ts
 
 ---
 
-### zen_ups_products 컬럼 추가 (Issue #120 Aiden 확정)
+### `zen_ups_shxk_country_map` 신규 테이블 (Issue #121 Aiden 확정 2026-06-26)
+
+> Issue #120 방안 A(`shxk_ddu_code`/`shxk_ddp_code` 컬럼 추가)는 **취소**. 목적지 국가별 코드 분리 구조를 반영한 매핑 테이블로 대체.
 
 ```sql
-ALTER TABLE public.zen_ups_products
-  ADD COLUMN shxk_ddu_code VARCHAR(20),
-  ADD COLUMN shxk_ddp_code VARCHAR(20);
+CREATE TABLE public.zen_ups_shxk_country_map (
+  product_code  VARCHAR(20) NOT NULL REFERENCES public.zen_ups_products(product_code),
+  country_code  VARCHAR(3)  NOT NULL,
+  incoterms     VARCHAR(3)  NOT NULL CHECK (incoterms IN ('DDU', 'DDP')),
+  shxk_code     VARCHAR(20) NOT NULL,
+  PRIMARY KEY (product_code, country_code, incoterms)
+);
 
-UPDATE public.zen_ups_products SET shxk_ddu_code = 'KRUPSEXP', shxk_ddp_code = 'PK0033', ddu_available = TRUE
-  WHERE product_code IN ('WW_EXPRESS_DOC', 'WW_EXPRESS_NONDOC');
-UPDATE public.zen_ups_products SET shxk_ddu_code = 'KRUPSWE',  shxk_ddp_code = 'PK0034', ddu_available = TRUE
-  WHERE product_code = 'WW_EXPEDITED';
-UPDATE public.zen_ups_products SET shxk_ddu_code = 'FXUPS',    shxk_ddp_code = 'PK0035', ddu_available = TRUE
-  WHERE product_code IN ('WW_SAVER_DOC', 'WW_SAVER_NONDOC');
-UPDATE public.zen_ups_products SET shxk_ddu_code = 'KRUPSWWEF',shxk_ddp_code = 'PK0032', ddu_available = TRUE
-  WHERE product_code = 'WW_FLIGHT';
+-- 한국(KOR) 초기 시드
+INSERT INTO public.zen_ups_shxk_country_map VALUES
+  ('WW_EXPRESS_DOC',   'KOR', 'DDU', 'KRUPSEXP'),
+  ('WW_EXPRESS_DOC',   'KOR', 'DDP', 'PK0033'),
+  ('WW_EXPRESS_NONDOC','KOR', 'DDU', 'KRUPSEXP'),
+  ('WW_EXPRESS_NONDOC','KOR', 'DDP', 'PK0033'),
+  ('WW_EXPEDITED',     'KOR', 'DDU', 'KRUPSWE'),
+  ('WW_EXPEDITED',     'KOR', 'DDP', 'PK0034'),
+  ('WW_SAVER_DOC',     'KOR', 'DDU', 'FXUPS'),
+  ('WW_SAVER_DOC',     'KOR', 'DDP', 'PK0035'),
+  ('WW_SAVER_NONDOC',  'KOR', 'DDU', 'FXUPS'),
+  ('WW_SAVER_NONDOC',  'KOR', 'DDP', 'PK0035'),
+  ('WW_FLIGHT',        'KOR', 'DDU', 'KRUPSWWEF'),
+  ('WW_FLIGHT',        'KOR', 'DDP', 'PK0032');
+
+ALTER TABLE public.zen_ups_shxk_country_map ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "ADMIN full access"
+  ON public.zen_ups_shxk_country_map FOR ALL TO authenticated
+  USING ((auth.jwt() -> 'app_metadata' ->> 'role') IN ('ADMIN', 'ZENITH_SUPER_ADMIN', 'MANAGER'));
+
+-- zen_ups_products ddu_available 전체 TRUE 업데이트 (Issue #121 Request ③ 유지)
+UPDATE public.zen_ups_products SET ddu_available = TRUE;
 ```
 
-> TASK-B-026 연계: createorder Server Action에서 `incoterms === 'DDP' ? shxk_ddp_code : shxk_ddu_code` 조회
+> TASK-B-026 연계: createorder Server Action에서 `(product_code, country_code, incoterms)` → `shxk_code` 조회 (An-13 §6-1 참조)
 
 ---
 
@@ -108,8 +128,9 @@ UPDATE public.zen_ups_products SET shxk_ddu_code = 'KRUPSWWEF',shxk_ddp_code = '
 - [ ] `zen_ups_tracking_events` 테이블 마이그레이션 생성
 - [ ] `reference_no UNIQUE` 제약 적용
 - [ ] RLS 정책 적용 (ADMIN/MANAGER 접근)
-- [ ] `zen_ups_products` `shxk_ddu_code` / `shxk_ddp_code` 컬럼 추가 + 6개 products 값 채움
-- [ ] `zen_ups_products` `ddu_available = TRUE` 전 products 업데이트
+- [ ] `zen_ups_shxk_country_map` 신규 테이블 생성 (Issue #121 Aiden 확정)
+- [ ] KOR 초기 시드 12행 INSERT 완료
+- [ ] `zen_ups_products.ddu_available = TRUE` 전 products 업데이트
 - [ ] `rtk supabase db reset` 후 마이그레이션 PASS
 - [ ] Supabase types 재생성 (`src/types/supabase.ts` 업데이트)
 - [ ] `rtk npm run test:regression` 전체 PASS
@@ -147,3 +168,4 @@ _(없으면 "없음" 기재)_
 |:-----|:------|:----|
 | 2026-06-26 | Aiden (Claude, ZEN_CEO) | TASK-B-027 신규 발령 — An-13 v2.0 IMP-138 |
 | 2026-06-26 | Aiden (Claude, ZEN_CEO) | Issue #120 Aiden 확정 반영 — zen_ups_products shxk_ddu/ddp_code 컬럼 추가 + ddu_available=TRUE 업데이트 (방안 A) |
+| 2026-06-26 | Aiden (Claude, ZEN_CEO) | Issue #121 JSJung 설계 변경 수용 — 방안 A 취소, zen_ups_shxk_country_map 신규 테이블(방안 B)로 교체. DoD 체크리스트 갱신. |
