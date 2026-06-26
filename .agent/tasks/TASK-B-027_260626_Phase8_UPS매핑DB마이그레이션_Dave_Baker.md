@@ -244,6 +244,7 @@ rtk npm run test:regression
 | 항목 | 결과 |
 |:-----|:------|
 | migration 파일 | `supabase/migrations/20260626000000_ups_008_labels_tracking_shxk_map.sql` |
+| 코드 커밋 | `679c240` |
 | `zen_ups_labels` | ✅ 생성 확인 (pg_tables) |
 | `zen_ups_tracking_events` | ✅ 생성 확인 (pg_tables) |
 | `zen_ups_shxk_country_map` + KOR 12행 | ✅ 12행 INSERT 확인 (SELECT 증적) |
