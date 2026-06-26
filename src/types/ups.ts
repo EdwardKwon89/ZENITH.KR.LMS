@@ -130,3 +130,10 @@ export interface UpsFreightCalcResult {
   applied_rate_id: string;
   applied_fuel_surcharge_id: string | null;
 }
+
+export interface UpsShxkCountryMap {
+  product_code: string;
+  country_code: string;
+  incoterms: 'DDU' | 'DDP';
+  shxk_code: string;
+}
