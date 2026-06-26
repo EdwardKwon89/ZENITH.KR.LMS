@@ -82,6 +82,9 @@ appToken={token}&appKey={key}&serviceMethod={method}&paramsJson={json}
 | 10 | `getorderweight` | 주문 중량 조회 | 🟢 옵션 |
 | 11 | `calculateshippingfee` | 운임 견적/사전 계산 | 🟡 필요 |
 | 12 | `getbasicdata` | 기초 데이터 조회(운송방식 등) | 🟡 필요 |
+| 13 | `getshippingmethod` | 운송방식 코드 목록 조회 (190건, 실측 확인) | 🔴 필수 |
+
+> **주의**: `getshippingmethod`는 API 공식 문서에 미등재이나 실측으로 존재 확인 (2026-06-26 JSJung 제안 → Jaison 검증).
 
 ---
 
@@ -96,7 +99,7 @@ appToken={token}&appKey={key}&serviceMethod={method}&paramsJson={json}
 | 필드 | 타입 | 길이 | 필수 | 설명 |
 |:-----|:-----|:----:|:----:|:-----|
 | `reference_no` | string | 50 | **Y** | 고객 참조 번호 (유니크) |
-| `shipping_method` | string | | **Y** | 운송 방식 코드 (getbasicdata로 조회) |
+| `shipping_method` | string | | **Y** | 운송 방식 코드 (`getshippingmethod`로 조회 — 190건 실측 확인) |
 | `shipping_method_no` | string | 50 | | 서비스업체 운송장번호 |
 | `order_weight` | string | 9,3 | | 중량(KG), 3자리 소수, 기본 0.2 |
 | `order_pieces` | string | | | 외포장 건수, 기본 1 |
@@ -349,10 +352,10 @@ ZENITH LMS ──► shxk.rtb56.com (중국 포워더 3PL)
 
 | 리스크 | 영향 | 대응 |
 |:-------|:-----|:-----|
-| HTTP 프로토콜 (HTTPS 아님) | 보안 위험 | 데이터 암호화 검토 필요 |
+| HTTP 프로토콜 (HTTPS 아님) | 보안 위험 | **JSJung 결정**: Server Action 격리로 수용 (옵션 A) |
 | appToken 만료 정책 미확인 | 갑작스러운 연동 장애 | shxk 관리자에 만료 정책 문의 |
-| shipping_method 코드 사전등록 필요 | 주문 생성 불가 | getbasicdata로 코드 목록 확보 |
-| platform_id 사전등록 필요 | 플랫폼 주문 불가 | shxk 관리자에게 platform_id 요청 |
+| shipping_method 코드 목록 | 주문 생성 시 코드 필요 | **해소**: `getshippingmethod` 실측 확인 (190건, UPS 한국 16건) |
+| platform_id / buyer_id | 파라미터 미확인 | **JSJung 결정**: 공백(`""`) 처리 |
 | 중국어 메시지 기반 오류 응답 | 디버깅 어려움 | `enmessage` 필드 활용, 오류코드 매핑 테이블 구축 |
 
 ---
@@ -364,4 +367,4 @@ ZENITH LMS ──► shxk.rtb56.com (중국 포워더 3PL)
 3. **2단계 프로세스 지원**: createorder(Draft) → submitforecast 또는 createorder(P) 일괄 처리
 4. **라벨 출력**: PNG/PDF 선택 가능, A4/라벨지 지원
 5. **트래킹**: gettrackingnumber + gettrack 으로 전체 트래킹 커버 가능
-6. **착수 조건**: shipping_method 코드 목록 + platform_id 확보 후 IMP-069(어댑터 구현) 착수
+6. **착수 조건 해소**: shipping_method → `getshippingmethod` 실측 확인 완료, platform_id → 공백 처리 확정 (JSJung 2026-06-26). IMP-136~140 착수 가능.
