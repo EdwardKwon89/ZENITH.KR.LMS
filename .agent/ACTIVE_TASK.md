@@ -256,7 +256,10 @@
 | TASK-B-019 | 260623 | [P7-SPR-08] Phase 7 종합 회귀 테스트 — E2E-21/22/23 통합 실행 및 보고 | P2 | TASK-B-018 ✅ | Jaison | ✅ | [TASK-B-019](tasks/TASK-B-019_260623_P7SPR08_Phase7종합회귀_Jaison.md) | IMP-134 · Issue #78 ✅ · PR#84 머지 ✅ (260623) · E2E-22 PASS · E2E-21/23 R-14 적용 · 387/387 · Aiden ✅ 승인 |
 | TASK-B-020 | 260623 | DEF-073 Agency shippers/new · rate-overrides/new Server Action 오류 수정 | P2 | 없음 | Baker | ✅ | [TASK-B-020](tasks/TASK-B-020_260623_DEF073_AgencyServerAction수정_Baker.md) | Issue #80 · DEF-073 · getTranslations→useTranslations · PR#83 머지 ✅ (260623) · Aiden ✅ 승인 |
 | TASK-B-021 | 260624 | [SPR-09] E2E-23 보강 — UAT-20 Agency 정산 CSV 다운로드 + Reconciliation 알림 상세 검증 | P2 | TASK-B-019 ✅ | Jaison (총괄) · Baker (구현) | ✅ | [TASK-B-021](tasks/TASK-B-021_260624_E2E23보강_UAT20Agency정산_Jaison.md) | Issue #91 · TC-AG-09~12 ✅ · 387/387 ALL PASS · PR#94 머지 ✅ (260624) · Aiden ✅ 승인 |
+| TASK-167 | 260626 | DEF-061~068 사이드바 메뉴 미등록 + TC-POLICY 픽스 + RLS 수정 | P2 | 없음 | B_Kai (§1 NaviSidebar) · D_Kai (§2 TC+§3 RLS) | ⬜ | [TASK-167](tasks/TASK-167_260626_DEF061~068_사이드바메뉴+TC픽스+RLS수정_BKai_DKai.md) | Issue #115 · DEF-061~068 일괄 처리 |
 | TASK-B-022 | 260624 | [Phase 8] UPS 실물 연동 사전 설계 리서치 | P1 | 없음 | JSJung | ⬜ | [TASK-B-022](tasks/TASK-B-022_260624_Phase8_UPS실물연동_리서치_JSJung.md) | Issue #97 · 레이블 발급·트래킹·인보이스·DB 스키마 요건 조사 · An-13 설계 입력 |
+| TASK-B-023 | 260625 | [Phase 8] shxk.rtb56.com API 기반 UPS 연동 리서치 재작성 | P1 | DEF-079 발견 | Baker (구현) · JSJung (검토) | 🔔 | [TASK-B-023](tasks/TASK-B-023_260625_Phase8_rtb56_UPS_리서치_Jaison.md) | Issue #112 · PR#113 ❌ 반려(Baker 수정 대기) · shxk.rtb56.com 12 API 리서치 · DEF-078 파일명 충돌 수정 필요 |
+| TASK-B-024 | 260626 | [Phase 8] UPS 레이블 발급 UI — 창고 출고 화면 인라인 배치 | P1 | TASK-B-023 ✅ · IMP-136~138 ✅ | JSJung (검토) · Baker (구현) | 🚫 | [TASK-B-024](tasks/TASK-B-024_260626_Phase8_UPS레이블발급UI_JSJung.md) | Issue #114 · IMP-141 · Issue #102 Edward 승인 (인라인 배치 확정) |
 ---
 
 ## Agent 현황
@@ -266,8 +269,8 @@
 | Agent | 상태 | 비고 |
 |:------|:----:|:----|
 | **Aiden (Claude)** | ✅ SPR-09 검토 완료 (260624) | TASK-163/165/166 ✅ 전량 머지 · DEF-078 핫픽스(PR#100) 머지 |
-| **D_Kai (OpenCode)** | ✅ TASK-166 완료 (260624) | PR#98 머지 ✅ · 다음 Task 배분 대기 |
-| **B_Kai** | ✅ TASK-164 완료 (260624) | PR#105 머지 ✅ · UAT-18-01/02 PASS · 다음 Task 배분 대기 |
+| **D_Kai (OpenCode)** | ⬜ TASK-167 (§2+§3) 배정 (260626) | DEF-065 TC픽스 + DEF-068 RLS migration |
+| **B_Kai** | ⬜ TASK-167 (§1) 배정 (260626) | DEF-061~064 NaviSidebar 미등록 4건 |
 | **Riley** | ✅ TASK-161 승인 (260619) | UAT-15~20 16개 시나리오 · PR #46 머지 · 다음 Task 배분 대기 |
 | N_Kai | 재교육 세션 대기 (TASK-087) | R-17 위반 누적 — 신규 할당 중단 유지 |
 | Ring | 신규 할당 중단 유지 | 9차 위반 누적 |
@@ -276,10 +279,10 @@
 
 | Agent | 상태 | 비고 |
 |:------|:----:|:----|
-| **JSJung** (팀 리더) | ⬜ TASK-B-022 착수 대기 | Phase 8 UPS 실물 연동 리서치 · Issue #97 |
-| **Jaison** (AI Agent 총괄) | ✅ TASK-B-021 완료 (260624) | PR#94 머지 ✅ · Aiden ✅ 승인 |
+| **JSJung** (팀 리더) | 🚫 TASK-B-024 전제조건 대기 | Phase 8 UPS 레이블 UI · Issue #114 · TASK-B-023 ✅ 후 착수 |
+| **Jaison** (AI Agent 총괄) | ✅ TASK-B-021 완료 (260624) | PR#94 머지 ✅ · Aiden ✅ 승인 · 다음 Task 배분 대기 |
 | **Dave** (AI Agent) | 다음 Task 배분 대기 | — |
-| **Baker** (AI Agent) | 다음 Task 배분 대기 | — |
+| **Baker** (AI Agent) | ❌ TASK-B-023 PR#113 수정 대기 | DEF-078 파일명 충돌 수정 + [D_Kai]→[Dave] 태그 정정 후 재제출 |
 | **Gale** (AI Agent) | 대기 | 추후 재배정 예정 |
 
 ---
