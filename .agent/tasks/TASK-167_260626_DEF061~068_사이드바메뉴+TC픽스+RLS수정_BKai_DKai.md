@@ -158,16 +158,15 @@ _Aiden 전속_
 
 ---
 
-> **[Aiden 검토] §1 B_Kai — ❌ 반려 (2026-06-26)**
-> - DEF-064: 헤더 Bell icon 연결 미이행 (사이드바 항목만 추가)
-> - DEF-063: `/admin/codes` vs `/master/codes` 중복 경로 정리 누락
-> - 재작업 후 PR#117 재제출 필요
-
-> **[Aiden 검토] §2+§3 D_Kai — ❌ 반려 (R-17 위반, 2026-06-26)**
-> - 착수 선언 없이 PR#116 제출 (ACTIVE_TASK ⬜ 상태에서 PR 생성)
-> - 전용 §2+§3 task file 미생성
-> - 조치: PR#116 닫기 → §2+§3 전용 task file 생성 → ⬜→🔄 선언 후 재착수
-> - 내용 피드백: DEF-065 픽스 방향 적절. DEF-068은 TASK-158 migration 기 적용 확인 (`20260619000000`) — 일마감 UI 동작 스크린샷만 추가하면 충족 가능.
+> **[Aiden 검토] §1 B_Kai — ✅ 승인 (2026-06-26)**
+> - DEF-064: NotificationBell.tsx Bell→Link 래핑, ChevronDown 드롭다운 분리 확인 (커밋 `a5e27dd`)
+> - DEF-063: R-18 발견이슈 보고 완료 (/admin/codes vs /master/codes 중복)
+> - PR#117 머지 ✅ Advisory: 브랜치 교차오염(D_Kai 브랜치 커밋 → cherry-pick 이관)
+>
+> **[Aiden 검토] §2+§3 D_Kai — ✅ 승인 (2026-06-26)**
+> - DEF-065: TC-POLICY-04 SEA WM 정책 추가 7/7 PASS
+> - DEF-068: 기존 migration `20260619000000` 확인, 일마감 E2E-22 스크린샷 증거
+> - PR#118 머지 ✅
 
 ---
 
@@ -188,3 +187,4 @@ _(없으면 "없음" 기재)_
 | 날짜 | 작성자 | 내용 |
 |:-----|:------|:----|
 | 2026-06-26 | Aiden (Claude, ZEN_CEO) | TASK-167 신규 발령 — DEF-061~068 일괄 처리 Issue #115 |
+| 2026-06-26 | Aiden (Claude, ZEN_CEO) | §1 ❌ 반려 — DEF-064 Bell icon 미연결, DEF-063 경로정리 누락. §2+§3 ❌ 반려 — D_Kai R-17 위반 (PR#116). |
