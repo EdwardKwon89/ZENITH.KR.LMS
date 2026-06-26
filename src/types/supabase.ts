@@ -4144,6 +4144,87 @@ export type Database = {
           },
         ]
       }
+      zen_ups_labels: {
+        Row: {
+          created_at: string | null
+          file_size_bytes: number | null
+          generated_at: string | null
+          generated_by: string | null
+          id: string
+          is_voided: boolean | null
+          label_format: string
+          order_id: string
+          package_id: string
+          storage_path: string
+          tracking_number: string
+          voided_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          file_size_bytes?: number | null
+          generated_at?: string | null
+          generated_by?: string | null
+          id?: string
+          is_voided?: boolean | null
+          label_format: string
+          order_id: string
+          package_id: string
+          storage_path: string
+          tracking_number: string
+          voided_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          file_size_bytes?: number | null
+          generated_at?: string | null
+          generated_by?: string | null
+          id?: string
+          is_voided?: boolean | null
+          label_format?: string
+          order_id?: string
+          package_id?: string
+          storage_path?: string
+          tracking_number?: string
+          voided_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "zen_ups_labels_generated_by_fkey"
+            columns: ["generated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "zen_ups_labels_generated_by_fkey"
+            columns: ["generated_by"]
+            isOneToOne: false
+            referencedRelation: "zen_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "zen_ups_labels_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "zen_order_route_summary"
+            referencedColumns: ["order_id"]
+          },
+          {
+            foreignKeyName: "zen_ups_labels_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "zen_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "zen_ups_labels_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "zen_order_packages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       zen_ups_other_charges: {
         Row: {
           charge_code: string
@@ -4239,6 +4320,100 @@ export type Database = {
           sub_code?: string | null
         }
         Relationships: []
+      }
+      zen_ups_shxk_country_map: {
+        Row: {
+          country_code: string
+          incoterms: string
+          product_code: string
+          shxk_code: string
+        }
+        Insert: {
+          country_code: string
+          incoterms: string
+          product_code: string
+          shxk_code: string
+        }
+        Update: {
+          country_code?: string
+          incoterms?: string
+          product_code?: string
+          shxk_code?: string
+        }
+        Relationships: []
+      }
+      zen_ups_tracking_events: {
+        Row: {
+          created_at: string | null
+          event_code: string
+          event_date: string
+          event_desc: string | null
+          event_time: string | null
+          event_type: string | null
+          gmt_offset: string | null
+          id: string
+          label_id: string | null
+          location_city: string | null
+          location_country: string | null
+          order_id: string
+          raw_response: Json | null
+          tracking_number: string
+        }
+        Insert: {
+          created_at?: string | null
+          event_code: string
+          event_date: string
+          event_desc?: string | null
+          event_time?: string | null
+          event_type?: string | null
+          gmt_offset?: string | null
+          id?: string
+          label_id?: string | null
+          location_city?: string | null
+          location_country?: string | null
+          order_id: string
+          raw_response?: Json | null
+          tracking_number: string
+        }
+        Update: {
+          created_at?: string | null
+          event_code?: string
+          event_date?: string
+          event_desc?: string | null
+          event_time?: string | null
+          event_type?: string | null
+          gmt_offset?: string | null
+          id?: string
+          label_id?: string | null
+          location_city?: string | null
+          location_country?: string | null
+          order_id?: string
+          raw_response?: Json | null
+          tracking_number?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "zen_ups_tracking_events_label_id_fkey"
+            columns: ["label_id"]
+            isOneToOne: false
+            referencedRelation: "zen_ups_labels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "zen_ups_tracking_events_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "zen_order_route_summary"
+            referencedColumns: ["order_id"]
+          },
+          {
+            foreignKeyName: "zen_ups_tracking_events_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "zen_orders"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       zen_ups_zone_countries: {
         Row: {
@@ -4961,4 +5136,3 @@ export const Constants = {
     Enums: {},
   },
 } as const
-
