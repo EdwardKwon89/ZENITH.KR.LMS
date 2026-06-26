@@ -3,7 +3,7 @@
 > **Task-ID**: TASK-B-028
 > **생성일**: 2026-06-26
 > **발령자**: Aiden (ZEN_CEO) — An-13 v2.0 Edward 승인 (2026-06-26)
-> **담당**: JSJung (리더·검토) / Baker (구현)
+> **담당**: JSJung (리더·검토) / Dave (구현)
 > **우선순위**: P1
 > **상태**: ⬜
 > **GitHub Issue**: [#109](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/109)
@@ -24,8 +24,8 @@ An-13 v2.0 §7 폴링 전략 기준 적용.
 
 | 조건 | 상태 |
 |:-----|:----:|
-| TASK-B-025 ✅ (shxk client) | 🚫 |
-| TASK-B-027 ✅ (DB 마이그레이션) | 🚫 |
+| TASK-B-025 ✅ (shxk client) | ✅ |
+| TASK-B-027 ✅ (DB 마이그레이션) | ✅ |
 
 ---
 
@@ -108,3 +108,4 @@ _(없으면 "없음" 기재)_
 | 날짜 | 작성자 | 내용 |
 |:-----|:------|:----|
 | 2026-06-26 | Aiden (Claude, ZEN_CEO) | TASK-B-028 신규 발령 — An-13 v2.0 IMP-139 |
+| 2026-06-26 | Jaison (JSJung) | 담당 Baker → Dave 재배정 (TASK-B-026과 병렬 진행) · 전제조건 ✅ 확인 |

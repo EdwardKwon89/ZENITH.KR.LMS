@@ -263,7 +263,7 @@
 | TASK-B-025 | 260626 | [Phase 8] shxk HTTP Client + config + 공통 타입 (IMP-136) | P1 | An-13 v2.4 ✅ | Dave | ✅ | [TASK-B-025](tasks/TASK-B-025_260626_Phase8_UPS_shxk_HTTPClient_Dave.md) | IMP-136 ✅ · Issue #106 · PR#123 머지 ✅ (260626 Aiden) · 387/387 ALL PASS |
 | TASK-B-026 | 260626 | [Phase 8] createorder + getnewlabel Server Action (IMP-137) | P1 | TASK-B-025 ✅ | JSJung (검토) · Baker (구현) | ⬜ | [TASK-B-026](tasks/TASK-B-026_260626_IMP137_createorder서버액션_Baker.md) | Issue #107 · IMP-137 · An-13 v2.0 §5 |
 | TASK-B-027 | 260626 | [Phase 8] zen_ups_shxk_country_map + 레이블/트래킹 테이블 DB migration (IMP-138) | P1 | Issue #121 Aiden 설계 재확정 ✅ | Baker ✅ · Dave ✅ | ✅ | [TASK-B-027](tasks/TASK-B-027_260626_Phase8_UPS매핑DB마이그레이션_Dave_Baker.md) | IMP-138 ✅ · PR#122 머지 ✅ (260626 Aiden) · 387/387 ALL PASS |
-| TASK-B-028 | 260626 | [Phase 8] UpsTrackingProvider + zen_ups_tracking_events 저장 (IMP-139) | P1 | TASK-B-025 ✅ · TASK-B-027 ✅ | JSJung (검토) · Baker (구현) | ⬜ | [TASK-B-028](tasks/TASK-B-028_260626_IMP139_UpsTrackingProvider_Baker.md) | Issue #109 · IMP-139 · An-13 v2.0 §7 |
+| TASK-B-028 | 260626 | [Phase 8] UpsTrackingProvider + zen_ups_tracking_events 저장 (IMP-139) | P1 | TASK-B-025 ✅ · TASK-B-027 ✅ | JSJung (검토) · Dave (구현) | ⬜ | [TASK-B-028](tasks/TASK-B-028_260626_IMP139_UpsTrackingProvider_Baker.md) | Issue #109 · IMP-139 · An-13 v2.0 §7 · Baker→Dave 재배정 (260626) |
 | TASK-B-029 | 260626 | [Phase 8] E2E 테스트 — createorder→getnewlabel→gettrack 전체 흐름 (IMP-140) | P1 | TASK-B-025~028 ✅ 전량 | Jaison | ⬜ | [TASK-B-029](tasks/TASK-B-029_260626_IMP140_E2E테스트_Jaison.md) | Issue #110 · IMP-140 · E2E-26 |
 ---
 
@@ -286,8 +286,8 @@
 |:------|:----:|:----|
 | **JSJung** (팀 리더) | 🚫 TASK-B-024 전제조건 대기 | Phase 8 UPS 레이블 UI · Issue #114 · IMP-136~138 ✅ (B-026 착수 후 해제 예정) |
 | **Jaison** (AI Agent 총괄) | ⬜ TASK-B-029 발령 (260626) | IMP-140 E2E — TASK-B-025~028 완료 후 착수 |
-| **Dave** (AI Agent) | ✅ TASK-B-025 승인 (260626) | PR#123 머지 ✅ · IMP-136 ✅ · 다음 Task 배분 대기 |
-| **Baker** (AI Agent) | ✅ TASK-B-027 Aiden 머지 완료 (260626) | PR#122 머지 ✅ · IMP-138 ✅ · TASK-B-026·028 착수 가능 |
+| **Dave** (AI Agent) | ⬜ TASK-B-028 발령 (260626) | IMP-139 UpsTrackingProvider — Baker→Dave 재배정 · 즉시 착수 가능 |
+| **Baker** (AI Agent) | ⬜ TASK-B-026 발령 (260626) | IMP-137 createorder+getnewlabel Server Action — 즉시 착수 가능 |
 | **Gale** (AI Agent) | 대기 | 추후 재배정 예정 |
 
 ---
