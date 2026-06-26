@@ -1365,6 +1365,22 @@
 
 ---
 
+## [IMP-132] Phase 7 UPS 스키마 설계 갭 — zen_orders 인코텀즈·제품코드 누락
+
+- **발견 경위**: Phase 8 UPS 연동(shxk) 설계 중 Edward 지적 — 고객 주문 시 DDU/DDP 선택·요금 산정·정산 요건 확인 과정에서 발견 (2026-06-26)
+- **현재 상태**: ✅ 수정 완료 — `zen_orders.ups_product_code` + `zen_orders.incoterms` 컬럼 추가 (커밋 `2f57b73`)
+- **임시 조치**: 없음 (Phase 8 구현 착수 전 발견하여 즉시 수정)
+- **목표 구현**: 완료 — migration `20260626100000_phase8_ups_order_incoterms.sql`
+- **근본 원인**: Phase 7 TASK-138 설계 시 캐리어 제품 선택 및 인코텀즈를 오더 레코드에 영속화하는 구조 누락
+- **재발 방지**: SAR `SAR_2026-06-26_001` + DB 스키마 체크리스트에 캐리어 연동 항목 추가
+- **관련 파일**: `supabase/migrations/20260626100000_phase8_ups_order_incoterms.sql`, `src/types/supabase.ts`
+- **관련 SAR**: `SAR_2026-06-26_001_Design_UPS_IncotermsOrderModel_Gap.md`
+- **예상 공수**: 완료
+- **우선순위**: High
+- **상태**: ✅ 완료 (2026-06-26)
+
+---
+
 ## [IMP-131] CI pr-checks.yml .env.local 파싱 버그 수정
 
 - **발견 경위**: PR#66/#67 CI에서 `SUPABASE_SERVICE_ROLE_KEY is required` 반복 실패 — Aiden 근본 원인 분석 (Issue #72, 2026-06-22)
