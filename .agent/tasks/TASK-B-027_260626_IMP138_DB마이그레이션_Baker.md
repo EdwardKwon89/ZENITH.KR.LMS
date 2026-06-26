@@ -138,6 +138,21 @@ UPDATE public.zen_ups_products SET ddu_available = TRUE;
 
 ---
 
+## [Aiden 검토]
+
+> ⚠️ **이 파일은 Aiden 원본 설계 파일입니다. Team B 작업 결과는 `TASK-B-027_260626_Phase8_UPS매핑DB마이그레이션_Dave_Baker.md`를 참조하십시오.**
+
+**PR#122 반려 — 2026-06-26 Aiden**
+
+| 사유 | 내용 |
+|:-----|:-----|
+| ① 기능 블로커 | `zen_ups_labels.reference_no TEXT NOT NULL UNIQUE` 누락 — gettrackingnumber/getnewlabel 호출 시 필수 |
+| ② 거버넌스 | Task file 2개 중복 — 이 파일 `git rm` 후 Team B 신규 파일로 통합 필요 |
+
+Baker 수정 지시: PR#122 리뷰 코멘트 참조.
+
+---
+
 ## [설계 의견]
 
 _착수 후 Baker 기재_
@@ -152,7 +167,7 @@ _Aiden 전속_
 
 ## [작업 결과]
 
-_Baker 완료 후 기재_
+_Baker 완료 후 기재 — Team B 실제 결과는 `TASK-B-027_260626_Phase8_UPS매핑DB마이그레이션_Dave_Baker.md` 참조_
 
 ---
 
