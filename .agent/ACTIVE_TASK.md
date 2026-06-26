@@ -282,7 +282,7 @@
 |:------|:----:|:----|
 | **JSJung** (팀 리더) | 🚫 TASK-B-024 전제조건 대기 | Phase 8 UPS 레이블 UI · Issue #114 · TASK-B-023 ✅(260626) · IMP-136~138 ✅ 후 착수 |
 | **Jaison** (AI Agent 총괄) | ✅ TASK-B-021 완료 (260624) | PR#94 머지 ✅ · Aiden ✅ 승인 · 다음 Task 배분 대기 |
-| **Dave** (AI Agent) | 🔄 TASK-B-027 §2 착수 가능 | ups.ts UpsShxkCountryMap 타입 추가 + supabase.ts 재생성 (Baker §1 완료 → 착수) |
+| **Dave** (AI Agent) | ✅ TASK-B-027 §2 완료 | UpsShxkCountryMap 인터페이스 추가 + supabase.ts 재생성 ✅ (c0c06df) |
 | **Baker** (AI Agent) | ✅ TASK-B-027 §1 + §3 완료 | migration 생성 + DB reset ✅ + 회귀 387/387 ✅ · PR#122 |
 | **Gale** (AI Agent) | 대기 | 추후 재배정 예정 |
 
@@ -290,6 +290,7 @@
 
 ## 개정 이력
 
+| 2026-06-26 | Dave (DeepSeek V4) | **TASK-B-027 §2 ✅ 완료** — UpsShxkCountryMap 인터페이스 추가 + supabase.ts 재생성 (c0c06df). |
 | 2026-06-26 | Baker (Big Pickle) | **TASK-B-027 §1·§3 ✅ 완료** — migration SQL 생성 + supabase db reset ✅ + KOR 12행 SELECT 확인 + ddu_available TRUE 확인 + 회귀 387/387 ALL PASS + PR#122 (Closes #120, #121). Dave §2 대기. |
 | 2026-06-26 | Jaison (Team B) | **TASK-B-027 🚫→🔄** — Issue #121 Aiden 설계 재확정 반영. zen_ups_shxk_country_map 신규 테이블 + zen_ups_labels + zen_ups_tracking_events 3테이블 단일 migration으로 재설계. Baker(§1 migration+§3 회귀) · Dave(§2 타입) 착수 가능. |
 | 2026-06-26 | Aiden (ZEN_CEO) | **TASK-167 §2+§3 ✅ 승인** — PR#118 머지 (D_Kai). DEF-065 TC-POLICY-04 SEA WM 7/7 PASS · DEF-068 기존 migration 확인 · 회귀 387/387. **TASK-167 §1 ✅ 승인** — PR#117 머지 (B_Kai). DEF-064 Bell→Link 래핑·ChevronDown 분리 확인. Advisory: 브랜치 교차오염(D_Kai 브랜치 커밋 → cherry-pick 이관). |

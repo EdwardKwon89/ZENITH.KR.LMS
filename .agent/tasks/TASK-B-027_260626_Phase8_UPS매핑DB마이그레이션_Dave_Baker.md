@@ -258,7 +258,7 @@ rtk npm run test:regression
 | `src/types/ups.ts` — `UpsShxkCountryMap` 인터페이스 추가 | ✅ `product_code`, `country_code`, `incoterms`, `shxk_code` 필드 |
 | `src/types/supabase.ts` 재생성 | ✅ `supabase db reset` → `gen types typescript --local` |
 | 신규 테이블 타입 포함 확인 | ✅ `zen_ups_labels` · `zen_ups_tracking_events` · `zen_ups_shxk_country_map` 3건 생성 확인 |
-| 코드 커밋 | `(커밋 후 기입)` |
+| 코드 커밋 | `c0c06df` |
 
 ### §3 Baker — 회귀 테스트
 
