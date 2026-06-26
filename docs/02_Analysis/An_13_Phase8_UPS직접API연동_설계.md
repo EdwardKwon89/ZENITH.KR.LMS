@@ -132,7 +132,47 @@ ALTER TABLE public.zen_ups_labels          ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.zen_ups_tracking_events ENABLE ROW LEVEL SECURITY;
 ```
 
-### 3-3. 기존 테이블 연계
+### 3-3. 신규 테이블: `zen_ups_shxk_country_map`
+
+shxk.rtb56.com `createorder` API의 필수 파라미터 `shipping_method`는 목적지 국가별·incoterms별로 분리된 코드 체계를 사용한다(190건). `(product_code, country_code, incoterms) → shxk_code` 3-key 매핑 테이블로 관리한다.
+
+```sql
+CREATE TABLE public.zen_ups_shxk_country_map (
+  product_code  VARCHAR(20) NOT NULL,
+  country_code  VARCHAR(3)  NOT NULL,  -- ISO 3166-1 alpha-3 (KOR, USA, VNM...)
+  incoterms     VARCHAR(3)  NOT NULL CHECK (incoterms IN ('DDU', 'DDP')),
+  shxk_code     VARCHAR(20) NOT NULL,
+  PRIMARY KEY (product_code, country_code, incoterms)
+);
+```
+
+**KOR 초기 시드 12행** (TASK-B-027 migration 포함):
+
+| product_code | incoterms | shxk_code |
+|:-------------|:---------:|:---------:|
+| `WW_EXPRESS_DOC` / `WW_EXPRESS_NONDOC` | DDU | `KRUPSEXP` |
+| `WW_EXPRESS_DOC` / `WW_EXPRESS_NONDOC` | DDP | `PK0033` |
+| `WW_EXPEDITED` | DDU | `KRUPSWE` |
+| `WW_EXPEDITED` | DDP | `PK0034` |
+| `WW_SAVER_DOC` / `WW_SAVER_NONDOC` | DDU | `FXUPS` |
+| `WW_SAVER_DOC` / `WW_SAVER_NONDOC` | DDP | `PK0035` |
+| `WW_FLIGHT` | DDU | `KRUPSWWEF` |
+| `WW_FLIGHT` | DDP | `PK0032` |
+
+> DOC/NON_DOC 동일 shxk 코드 허용 — shipping_method는 서비스 레벨 코드, 화물 유형은 createorder 페이로드 별도 필드 전달.
+
+**조회 예시** (TASK-B-026 createorder Server Action):
+```typescript
+const { data } = await supabase
+  .from('zen_ups_shxk_country_map')
+  .select('shxk_code')
+  .eq('product_code', productCode)
+  .eq('country_code', destinationCountry)  // ISO alpha-3
+  .eq('incoterms', incoterms)              // 'DDU' | 'DDP'
+  .single();
+```
+
+### 3-4. 기존 테이블 연계
 
 | 테이블 | 연계 방식 |
 |:-------|:---------|
@@ -142,7 +182,7 @@ ALTER TABLE public.zen_ups_tracking_events ENABLE ROW LEVEL SECURITY;
 | `zen_tracking_events` | `zen_ups_tracking_events` → 정규화 변환 후 저장 (기존 표준 이벤트 구조 유지) |
 | `zen_tracking_raw_logs` | UPS API 원본 응답 저장 (디버깅·감사) |
 
-### 3-4. Supabase Storage 구조
+### 3-5. Supabase Storage 구조
 
 ```
 버킷: ups_labels
@@ -169,7 +209,7 @@ RLS: ADMIN·MANAGER·AGENCY(소속 오더만) 읽기.
 | `src/types/ups-api.ts` | 신규 | UPS Request/Response 타입 (ShipRequest, TrackResponse 등) |
 | `src/types/ups.ts` | **확장** | `UpsLabel`, `UpsTrackingEvent` 타입 추가 |
 | `src/app/actions/operations/ups-labels.ts` | 신규 | 레이블 발급 Server Action |
-| `supabase/migrations/ups_008_labels.sql` | 신규 | `zen_ups_labels` + `zen_ups_tracking_events` DDL |
+| `supabase/migrations/ups_008_labels_tracking_shxk_map.sql` | 신규 | `zen_ups_labels` + `zen_ups_tracking_events` + `zen_ups_shxk_country_map` DDL + KOR 시드 |
 | `.env.example` | **수정** | UPS API 환경변수 항목 추가 |
 
 > **미결 사항 ②**: UI 화면 범위 확정 필요.
@@ -225,7 +265,7 @@ this.providers.set('UPS_TRACKING', new UpsTrackingProvider());
 |:--------|:----:|:----|:-----|:-----:|
 | **IMP-136** | Dave (Team B) | UPS OAuth Client + config + HTTP Client | - | [#106](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/106) |
 | **IMP-137** | Dave (Team B) | UPS Ship API (레이블 발급) + zen_ups_labels Server Action | IMP-136 | [#107](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/107) |
-| **IMP-138** | Dave (Team B) | DB 마이그레이션 (`zen_ups_labels` + `zen_ups_tracking_events`) | - | [#108](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/108) |
+| **IMP-138** | Baker (Team B) | DB 마이그레이션 (`zen_ups_labels` + `zen_ups_tracking_events` + `zen_ups_shxk_country_map` + KOR 시드) | - | [#108](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/108) |
 | **IMP-139** | Dave (Team B) | UpsTrackingProvider + zen_ups_tracking_events 저장 | IMP-136·138 | [#109](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/109) |
 | **IMP-140** | Baker (Team B) | E2E 테스트 (레이블 발급 + 트래킹 폴링) | IMP-136~139 | [#110](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/110) |
 
@@ -267,3 +307,4 @@ this.providers.set('UPS_TRACKING', new UpsTrackingProvider());
 | 2026-06-24 | Aiden (Claude, ZEN_CEO) | §8·§9 최종 갱신 — ③ 비블로커 확정. UPS REST API OAuth 인증 방식, IP 허용 목록 불필요. Vercel 호스팅으로 충분. Supabase Remote 기존 연결 재사용. |
 | 2026-06-24 | Aiden (Claude, ZEN_CEO) | **Edward 승인 완료** — 승인 상태 ✅ 전환. §7 구현 담당 Team B(Dave·Baker)로 전환. §9 ① 담당 Edward→JSJung(고객사 확인 중). |
 | 2026-06-25 | Aiden (Claude, ZEN_CEO) | §7 Issue 번호 추가 — IMP-136~140 GitHub Issue #106~#110 생성 완료. |
+| 2026-06-26 | Jaison (JSJung) | **v2.1** — §3-3 `zen_ups_shxk_country_map` 신규 추가 (Issue #121 Aiden 설계 확정). §3-4→§3-5 번호 조정. §4 migration 파일명 수정. §7 IMP-138 담당 Dave→Baker 변경. |
