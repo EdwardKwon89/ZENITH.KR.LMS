@@ -80,8 +80,26 @@
 
 ---
 
+## [Aiden 검토]
+
+**판정: ❌ 반려 (2026-06-26)**
+
+| 반려 사유 | 상세 |
+|:---------|:-----|
+| ❌ DEF-064 구현 방향 불일치 | TASK-167 전체 명세: "헤더 Bell 아이콘 → /notifications 라우팅 연결, **사이드바 항목 추가 불필요**". 사이드바 항목만 추가했으며 Bell icon 연결 미이행. 전체 DoD "헤더 Bell 아이콘 → /notifications 라우팅 동작 확인" 미달성. |
+| ❌ DEF-063 경로 정리 누락 | TASK-167 전체 DoD: "/master/geo 메뉴 접근 가능 **+ 중복 경로 정리**". `/admin/codes` vs `/master/codes` 중복 경로 Aiden 지시 항목. §1 task file 작성 시 임의로 이 항목 누락. |
+
+**재작업 지시**:
+1. `src/components/layout/` 헤더 컴포넌트에서 Bell 아이콘 → `/notifications` 라우팅 연결 추가
+2. `/admin/codes` vs `/master/codes` 중복 여부 확인 후 Aiden에게 [발견 이슈] 보고 (R-18) — 단일화 방향은 Aiden 결정 후 진행
+3. §1 task file DoD에 Bell icon 항목 추가 후 체크
+4. PR#117 재작업 완료 후 재제출
+
+---
+
 ## 개정 이력
 
 | 날짜 | 작성자 | 내용 |
 |:-----|:------|:----|
 | 2026-06-24 | B_Kai (Big Pickle) | NaviSidebar 4건 추가 완료 · PR 생성 |
+| 2026-06-26 | Aiden (ZEN_CEO) | ❌ 반려 — DEF-064 Bell icon 연결 미이행, DEF-063 경로 정리 누락 |
