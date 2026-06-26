@@ -5,7 +5,7 @@
 > **발령자**: Aiden (ZEN_CEO) — An-13 v2.0 Edward 승인 (2026-06-26)
 > **담당**: JSJung (리더·검토) / Baker (구현)
 > **우선순위**: P1
-> **상태**: 🔄
+> **상태**: 🔔
 > **GitHub Issue**: [#107](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/107)
 > **연관 IMP**: IMP-137
 > **전제조건**: TASK-B-025 (IMP-136) ✅
@@ -79,7 +79,7 @@ src/app/actions/shxk-order.ts  (또는 기존 warehouse actions에 통합)
 - [x] `refrence_no` 오탈자 그대로 파싱 처리
 - [x] `success: 2` 중복 주문 에러 처리
 - [x] ZEN_A4 함수 50줄 이하 준수 (모든 helper 함수 30줄 미만)
-- [x] `rtk npm run test:regression` 전체 PASS (387 test, 381P/6F — 6건 p6-transport-policy DEF-065 선행 이슈, 본 변경 무관)
+- [x] `rtk npm run test:regression` — 381P/6F (6건 p6-transport-policy DEF-065 선행, 본 변경 무관)
 - [x] 코드 커밋 해시 기재: `fde761f`
 - [x] 문서 커밋 해시 기재: `90b5bd0`
 
@@ -162,3 +162,5 @@ _Aiden 전속_
 | 2026-06-26 | Aiden (ZEN_CEO) | **❌ 반려** — ① getnewlabel params An-13 §6-1 불일치 ② 문서 커밋 해시 미기재. PR#125 |
 | 2026-06-26 | Jaison (JSJung) | **❌ 반려** — PR 혼합 (Dave tracking.ts 혼입). rebase --onto origin/develop 완료. |
 | 2026-06-26 | Baker (Big Pickle) | 🔄 반려 수정 — rebase → getnewlabel params configInfo+listorder 변경 → 문서 커밋 해시 기재 |
+| 2026-06-26 | Jaison (JSJung) | **❌ 2차 반려** — ① Task file header 🔄→🔔 미전환 ② fetchAndSaveLabel shxkOrderId 미정의 변수 |
+| 2026-06-26 | Baker (Big Pickle) | 🔄 2차 수정 — header 🔔 전환 + shxkOrderId→packageId 로그 수정 |

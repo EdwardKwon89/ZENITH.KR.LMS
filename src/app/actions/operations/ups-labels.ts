@@ -122,7 +122,7 @@ async function fetchAndSaveLabel(
   const labelRes = await getnewlabel(configInfo, [{ reference_no: packageId }]);
 
   if (labelRes.success !== 1 || !labelRes.data) {
-    logger.warn(`getnewlabel failed for order ${shxkOrderId}: ${labelRes.message}`);
+    logger.warn(`getnewlabel failed for package ${packageId}: ${labelRes.message}`);
     return null;
   }
 
