@@ -266,7 +266,7 @@
 | TASK-B-028 | 260626 | [Phase 8] UpsTrackingProvider + zen_ups_tracking_events 저장 (IMP-139) | P1 | TASK-B-025 ✅ · TASK-B-027 ✅ | JSJung (검토) · Dave (구현) | ✅ | [TASK-B-028](tasks/TASK-B-028_260626_IMP139_UpsTrackingProvider_Baker.md) | IMP-139 ✅ · Issue #109 · PR#124 머지 ✅ (260626 Aiden) · 387/387 ALL PASS |
 | TASK-B-029 | 260626 | [Phase 8] E2E 테스트 — createorder→getnewlabel→gettrack 전체 흐름 (IMP-140) | P1 | TASK-B-025~028 ✅ 전량 | Jaison | 🔄 | [TASK-B-029](tasks/TASK-B-029_260626_IMP140_E2E테스트_Jaison.md) | Issue #110 · IMP-140 · E2E-26 · spec 작성 착수 260627 · 실행은 B-024 완성 후 |
 | TASK-B-030 | 260627 | [Phase 8] DEF-080 country_code ISO 2→3 변환 누락 수정 (IMP-142) | P1 | TASK-B-025 ✅ | JSJung (검토) · Baker (구현) | ⬜ | [TASK-B-030](tasks/TASK-B-030_260627_DEF080_country_code_ISO변환_Baker.md) | Issue #128 · IMP-142 · DEF-080 · ups-labels.ts toIso3() 추가 |
-| TASK-B-031 | 260627 | [Phase 8] E2E-26-05 폐기 버튼 수정 — fetchAndSaveLabel label_data 컬럼 제거 | P1 | TASK-B-029 🔄 | Dave | ❌ | [TASK-B-031](tasks/TASK-B-031_260627_E2E26-05_폐기버튼수정_Dave.md) | PR#130 Aiden CHANGES_REQUESTED — 재작업 4건: GitHub Issue 생성·ACTIVE_TASK 커밋·E2E 스크린샷·Closes #NNN |
+| TASK-B-031 | 260627 | [Phase 8] E2E-26-05 폐기 버튼 수정 — fetchAndSaveLabel label_data 컬럼 제거 | P1 | TASK-B-029 🔄 | Dave | 🔔 | [TASK-B-031](tasks/TASK-B-031_260627_E2E26-05_폐기버튼수정_Dave.md) | IMP-143 · Issue #132 · PR#130 · 코드 a23bda5 · build ✅ · 스크린샷 2종 ✅ · 재작업 완료 |
 | TASK-B-032 | 260627 | [Phase 8] E2E-26-07 tracking_events insert 수정 (B-029 서브) | P1 | TASK-B-029 🔄 | Baker | 🔔 | [TASK-B-032](tasks/TASK-B-032_260627_E2E26-07_tracking_events_수정_Baker.md) | PR#131 · a72301a · B-029 머지 후 base→develop 변경 필요 |
 ---
 
@@ -289,7 +289,7 @@
 |:------|:----:|:----|
 | **JSJung** (팀 리더) | ❌ TASK-B-024 반려 검토 | PR#126 · E2E 스크린샷 3종 첨부 지시 — Baker 수정 대기 |
 | **Jaison** (AI Agent 총괄) | 🔄 TASK-B-029 착수 (260627) | spec 작성 중 · E2E 실행은 B-024 완성 후 |
-| **Dave** (AI Agent) | ❌ TASK-B-031 재작업 대기 (260628) | PR#130 Aiden CHANGES_REQUESTED · 재작업 4건 지시 (Jaison) |
+| **Dave** (AI Agent) | 🔔 TASK-B-031 재작업 완료 | PR#130 · Issue #132 · 스크린샷 2종 · ACTIVE_TASK 반영 |
 | **Baker** (AI Agent) | 🔔 TASK-B-032 검토 대기 (260627) | PR#131 제출 · a72301a · TASK-B-030 ⬜ 병행 |
 | **Gale** (AI Agent) | 대기 | 추후 재배정 예정 |
 
