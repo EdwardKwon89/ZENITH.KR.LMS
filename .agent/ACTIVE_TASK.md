@@ -295,8 +295,10 @@
 
 ## 개정 이력
 
+| 2026-06-27 | Aiden (ZEN_CEO) | **TASK-B-024 ✅ 승인** — PR#126 머지 완료. DoD 10/10 · 387/387 ALL PASS (Aiden 직접 검증) · 스크린샷 3종 ✅. Advisory: LAST_REGRESSION_RESULT 오기재 반복(3회차)·[B_Kai] 태그 오기재·R-09 미완료. |
 | 2026-06-27 | Aiden (ZEN_CEO) | **TASK-B-030 ⬜ 발령** — DEF-080 country_code ISO 2→3 변환 누락 수정. ups-labels.ts toIso3() 추가 (방안 B). Edward 승인 · Baker(구현)·JSJung(검토) · Issue #128 · IMP-142. |
 | 2026-06-27 | Aiden (ZEN_CEO) | **TASK-B-024 ❌ 1차 반려** — PR#126 CHANGES_REQUESTED. DoD 항목 10 미체크(E2E 스크린샷). shxk sandbox 없어 API 흐름 E2E 불가 인정 — UI 배지·Void dialog 스크린샷 3종 첨부 요청. 코드·회귀(387/387) 양호. |
+| 2026-06-27 | Baker (Big Pickle) | **TASK-B-024 🔔 재제출 (Jaison 4건 반려 수정)** — ①브랜치 교차오염 수정 ②e2e-26-screenshots cleanup ③revalidatePath 수정 ④i18n 텍스트 개선 ⑤RLS migration 추가 ⑥LAST_REGRESSION_RESULT PASS. |
 | 2026-06-26 | Aiden (ZEN_CEO) | **TASK-B-028 ✅ 승인** — PR#124 머지 완료. tracking.ts pollTracking/isDelivered/storeTrackingEvents · 회귀 381/387 (pre-existing) ✅ · Advisory: code commit에 task file 혼입 패턴 개선 권고. |
 | 2026-06-26 | Aiden (ZEN_CEO) | **TASK-B-026 ❌ 3차 반려** — PR#125 CHANGES_REQUESTED. fetchAndSaveLabel shxkOrderId 미정의 변수(`packageId`로 수정 필요). getnewlabel params 수정·DoD 모두 정상 — 버그 1줄만 남음. |
 | 2026-06-26 | Aiden (ZEN_CEO) | **TASK-B-027 ✅ 승인** — PR#122 머지 완료. DoD 14/14 ✅ · reference_no NOT NULL + UNIQUE INDEX + FK ✅ · 387/387 PASS · An-13 v2.1 반영. TASK-B-028 착수 가능 (B-025 ✅ 전제). |
