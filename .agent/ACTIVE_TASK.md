@@ -297,6 +297,7 @@
 
 ## 개정 이력
 
+| 2026-06-28 | Jaison (Team B) | **TASK-B-032 보완 지시 → Baker** — Aiden 리뷰 전 선제 보완 3건: ①task file 헤더 ⬜→🔔 커밋 ②GitHub Issue 생성+PR#131 body Closes #NNN ③B-029 develop 머지 후 PR base→develop 변경. develop에 task file 등재. |
 | 2026-06-28 | Jaison (Team B) | **TASK-B-031 ❌ 재작업 지시 → Dave** — Aiden PR#130 CHANGES_REQUESTED 4건: ①GitHub Issue 생성+PR body Closes #NNN ②ACTIVE_TASK.md 🔔 반영 커밋 ③E2E-26-05 스크린샷 2종 (`04_void_dialog.png`·`05_void_completed.png`) ④DoD E2E-26-05 체크. TASK-B-031 ACTIVE_TASK.md 미등재 보완(Jaison 실수). TASK-B-032 상태 🔔 반영. |
 | 2026-06-27 | Aiden (ZEN_CEO) | **TASK-B-024 ✅ 승인** — PR#126 머지 완료. DoD 10/10 · 387/387 ALL PASS (Aiden 직접 검증) · 스크린샷 3종 ✅. Advisory: LAST_REGRESSION_RESULT 오기재 반복(3회차)·[B_Kai] 태그 오기재·R-09 미완료. |
 | 2026-06-27 | Aiden (ZEN_CEO) | **TASK-B-030 ⬜ 발령** — DEF-080 country_code ISO 2→3 변환 누락 수정. ups-labels.ts toIso3() 추가 (방안 B). Edward 승인 · Baker(구현)·JSJung(검토) · Issue #128 · IMP-142. |
