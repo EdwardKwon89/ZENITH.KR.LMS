@@ -104,7 +104,9 @@ _Jaison 완료 후 기재_
 
 ## [발견 이슈]
 
-_(없으면 "없음" 기재)_
+| DEF# | 제목 | 긴급도 | 상세 보고서 |
+|:----:|:-----|:------:|:-----------|
+| DEF-080 | zen_ports.country_code CHAR(2) 'KR' vs shxk_country_map 'KOR' 불일치 — issueUpsLabel 실패 경로 | Medium | `.agent/defects/DEF-080_zen_ports_country_code_CHAR2_vs_shxk_map_KOR_불일치.md` |
 
 ---
 
@@ -114,3 +116,4 @@ _(없으면 "없음" 기재)_
 |:-----|:------|:----|
 | 2026-06-26 | Aiden (Claude, ZEN_CEO) | TASK-B-029 신규 발령 — An-13 v2.0 IMP-140 |
 | 2026-06-27 | Jaison (JSJung) | **🔄 착수** — 전제조건 TASK-B-025~028 ✅ 전량 확인. 브랜치: `feature/teamb-task-b-029-e2e-ups-flow`. spec 파일 작성 착수 / E2E 실행은 TASK-B-024 완성 후. shxk removeorder 정리 의무화 기재 |
+| 2026-06-27 | Jaison (JSJung) | **spec 작성 완료** — `tests/e2e/e2e-26-ups-label-flow.spec.ts` (339줄, E2E-26-01~07). 코드 커밋 `8f1e68d`. DEF-080 발견 및 spec 내 KR fixture 우회 처리. 실행 대기: TASK-B-024 머지 후 |
