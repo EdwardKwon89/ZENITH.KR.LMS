@@ -569,7 +569,18 @@
     "intl_ref_warning_title": "Missing International Tracking Numbers",
     "intl_ref_warning_desc": "Some packages have no international tracking number. Continue with outbound?",
     "confirm_continue": "Continue",
-    "intl_ref_missing_confirmed": "{count} package(s) processed without international tracking number."
+    "intl_ref_missing_confirmed": "{count} package(s) processed without international tracking number.",
+    "ups_label_not_issued": "Label Not Issued",
+    "ups_label_issued": "Label Issued",
+    "ups_label_issuing": "Issuing UPS Label...",
+    "ups_label_download": "PDF",
+    "ups_label_void": "Void",
+    "ups_label_reissue": "Reissue",
+    "ups_label_void_title": "Void UPS Label",
+    "ups_label_void_desc": "Once voided, the same number cannot be reused.",
+    "ups_label_void_confirm": "Confirm Void",
+    "ups_label_voided": "Voided",
+    "ups_label_void_failed": "Failed to void label"
   },
   "ShippingLabel": {
     "title": "Shipping Label",

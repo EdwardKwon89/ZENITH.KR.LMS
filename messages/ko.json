@@ -568,7 +568,18 @@
     "intl_ref_warning_title": "국제 운송번호 미발부",
     "intl_ref_warning_desc": "일부 패키지에 국제 운송번호가 없습니다. 출고를 계속 진행하시겠습니까?",
     "confirm_continue": "계속 진행",
-    "intl_ref_missing_confirmed": "{count}개 패키지에 국제 운송번호 없이 출고 처리되었습니다."
+    "intl_ref_missing_confirmed": "{count}개 패키지에 국제 운송번호 없이 출고 처리되었습니다.",
+    "ups_label_not_issued": "레이블 미발급",
+    "ups_label_issued": "레이블 발급 완료",
+    "ups_label_issuing": "UPS 레이블 발급 중...",
+    "ups_label_download": "PDF",
+    "ups_label_void": "폐기",
+    "ups_label_reissue": "재발급",
+    "ups_label_void_title": "UPS 레이블 폐기 (Void)",
+    "ups_label_void_desc": "폐기 후에는 동일 번호로 재사용이 불가합니다.",
+    "ups_label_void_confirm": "폐기 확정",
+    "ups_label_voided": "폐기됨",
+    "ups_label_void_failed": "레이블 폐기 실패"
   },
   "ShippingLabel": {
     "title": "운송장",

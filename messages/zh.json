@@ -117,7 +117,20 @@
     "history_shipper": "货主",
     "empty_history": "今日没有出库记录。",
     "shipping_label": "运单",
-    "preview_btn": "预览"
+    "preview_btn": "预览",
+    "intl_ref_missing": "未分配号码",
+    "intl_ref_missing_confirmed": "{count}个包裹已在没有国际追踪号码的情况下处理。",
+    "ups_label_not_issued": "标签未签发",
+    "ups_label_issued": "标签已签发",
+    "ups_label_issuing": "UPS标签签发中...",
+    "ups_label_download": "PDF",
+    "ups_label_void": "作废",
+    "ups_label_reissue": "重新签发",
+    "ups_label_void_title": "作废UPS标签",
+    "ups_label_void_desc": "作废后，同一号码无法重复使用。",
+    "ups_label_void_confirm": "确认作废",
+    "ups_label_voided": "已作废",
+    "ups_label_void_failed": "标签作废失败"
   },
   "ShippingLabel": {
     "title": "运单",
