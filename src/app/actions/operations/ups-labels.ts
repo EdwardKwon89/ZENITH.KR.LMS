@@ -4,7 +4,7 @@ import { logger } from '@/lib/logger';
 import { validateUserAction } from '@/lib/auth/guards';
 import { USER_ROLES } from '@/lib/auth/rbac';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { createorder, getnewlabel } from '@/lib/shxk/order';
+import { createorder, getnewlabel, removeorder } from '@/lib/shxk/order';
 import { revalidatePath } from 'next/cache';
 
 export interface IssueUpsLabelResult {
@@ -187,7 +187,7 @@ export async function issueUpsLabel(
 
     await markPackageIssued(supabase, packageId, orderResult.trackingNo);
 
-    revalidatePath('/operations/warehouse');
+    revalidatePath("/(dashboard)/warehouse/outbound", "page");
 
     return {
       success: true,
@@ -201,6 +201,68 @@ export async function issueUpsLabel(
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error';
     logger.error('issueUpsLabel error:', err);
+    return { success: false, error: message };
+  }
+}
+
+async function fetchActiveLabel(
+  supabase: SupabaseClient,
+  packageId: string,
+): Promise<{ id: string; reference_no: string; tracking_number: string | null } | null> {
+  const { data } = await supabase
+    .from('zen_ups_labels')
+    .select('id, reference_no, tracking_number')
+    .eq('package_id', packageId)
+    .eq('is_voided', false)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .single();
+  return data;
+}
+
+async function markLabelVoided(supabase: SupabaseClient, packageId: string): Promise<string | null> {
+  const { error } = await supabase
+    .from('zen_ups_labels')
+    .update({ is_voided: true, voided_at: new Date().toISOString() })
+    .eq('package_id', packageId)
+    .eq('is_voided', false);
+  return error?.message ?? null;
+}
+
+async function unlockPackageIntlRef(supabase: SupabaseClient, packageId: string): Promise<void> {
+  const { error } = await supabase
+    .from('zen_order_packages')
+    .update({ intl_ref_locked: false })
+    .eq('id', packageId);
+  if (error) logger.error('zen_order_packages unlock error:', error);
+}
+
+export async function voidUpsLabel(
+  packageId: string,
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const { supabase, profile } = await validateUserAction();
+    const permErr = await checkLabelPermission(profile);
+    if (permErr) return { success: false, error: permErr };
+
+    const label = await fetchActiveLabel(supabase, packageId);
+    if (!label) return { success: false, error: 'Void할 레이블이 없습니다.' };
+
+    const removeRes = await removeorder(label.reference_no);
+    if (removeRes.success === 0) {
+      logger.warn(`removeorder API warning for package ${packageId}: ${removeRes.message}`);
+    }
+
+    const updateErr = await markLabelVoided(supabase, packageId);
+    if (updateErr) return { success: false, error: '레이블 폐기 기록 실패' };
+
+    await unlockPackageIntlRef(supabase, packageId);
+    revalidatePath("/(dashboard)/warehouse/outbound", "page");
+
+    return { success: true };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Unknown error';
+    logger.error('voidUpsLabel error:', err);
     return { success: false, error: message };
   }
 }

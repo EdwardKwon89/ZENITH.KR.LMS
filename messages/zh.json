@@ -117,7 +117,21 @@
     "history_shipper": "货主",
     "empty_history": "今日没有出库记录。",
     "shipping_label": "运单",
-    "preview_btn": "预览"
+    "preview_btn": "预览",
+    "intl_ref_missing": "号码未分配",
+    "intl_ref_warning_title": "国际运单号码未分配",
+    "intl_ref_warning_desc": "部分包裹没有国际运单号码。是否继续出库？",
+    "confirm_continue": "继续",
+    "intl_ref_missing_confirmed": "有{count}个包裹未分配国际运单号码已完成出库。",
+    "ups_label_issued": "已签发",
+    "ups_label_not_issued": "未签发",
+    "ups_label_issuing": "UPS标签签发中...",
+    "ups_label_void": "废弃",
+    "ups_label_void_title": "UPS标签废弃",
+    "ups_label_void_desc": "确定废弃该UPS标签吗？",
+    "ups_label_void_confirm": "确认废弃",
+    "ups_label_voided": "已废弃",
+    "ups_label_void_failed": "UPS标签废弃失败"
   },
   "ShippingLabel": {
     "title": "运单",
