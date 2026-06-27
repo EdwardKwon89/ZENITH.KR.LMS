@@ -320,11 +320,23 @@ test.describe('E2E-26: UPS 레이블 발급 전체 흐름', () => {
     // zen_ups_tracking_events에 레코드가 있는지 확인
     // (폴링 스케줄러가 미기동이므로 수동 Supabase 직접 insert로 gettrack 저장 확인)
     const mockPayload = { tracking_number: label.tracking_number, status: 'IN_TRANSIT' };
+    const now = new Date();
+
+    // label에서 order_id + tracking_number 조회
+    const { data: labelWithOrder } = await supabase
+      .from('zen_ups_labels')
+      .select('id, tracking_number, order_id')
+      .eq('id', label.id)
+      .single();
+
     await supabase.from('zen_ups_tracking_events').insert({
       label_id: label.id,
+      order_id: labelWithOrder!.order_id,
+      tracking_number: labelWithOrder!.tracking_number,
       event_code: 'IT',
-      event_time: new Date().toISOString(),
-      raw_payload: mockPayload,
+      event_date: now.toISOString().split('T')[0],
+      event_time: now.toTimeString().slice(0, 8),
+      raw_response: mockPayload,
     });
 
     const { data: events } = await supabase
