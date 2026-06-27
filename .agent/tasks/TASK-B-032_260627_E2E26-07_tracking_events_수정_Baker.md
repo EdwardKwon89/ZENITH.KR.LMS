@@ -101,7 +101,7 @@ await supabase.from('zen_ups_tracking_events').insert({
 - [x] E2E-26-07 저장 insert 수정 완료
 - [x] `rtk npm run test:regression` 전체 PASS — 380/387 (7건 pre-existing)
 - [x] 코드 커밋 해시: `a72301a`
-- [x] 문서 커밋 해시: _(문서 커밋 후 기재)_
+- [x] 문서 커밋 해시: `e5b6c83`
 - [x] 코드 커밋: `[Baker] fix: TASK-B-032 E2E-26-07 tracking_events insert 필수 컬럼 추가`
 - [x] 문서 커밋: `[Baker] docs: TASK-B-032 완료 보고 — task file 🔔`
 
@@ -125,7 +125,7 @@ await supabase.from('zen_ups_tracking_events').insert({
 | # | 해시 | 유형 | 내용 |
 |:-:|:----|:----:|:----|
 | 1 | `a72301a` | 코드 | fix: TASK-B-032 E2E-26-07 tracking_events insert 필수 컬럼 추가 |
-| 2 | _(문서 커밋 후)_ | 문서 | docs: TASK-B-032 완료 보고 — task file 🔔 |
+| 2 | `e5b6c83` | 문서 | docs: TASK-B-032 완료 보고 — task file 🔔 |
 
 ---
 
