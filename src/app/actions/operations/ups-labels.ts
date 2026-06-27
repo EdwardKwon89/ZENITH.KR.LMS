@@ -187,7 +187,7 @@ export async function issueUpsLabel(
 
     await markPackageIssued(supabase, packageId, orderResult.trackingNo);
 
-    revalidatePath('/operations/warehouse');
+    revalidatePath("/(dashboard)/warehouse/outbound", "page");
 
     return {
       success: true,
@@ -257,7 +257,7 @@ export async function voidUpsLabel(
     if (updateErr) return { success: false, error: '레이블 폐기 기록 실패' };
 
     await unlockPackageIntlRef(supabase, packageId);
-    revalidatePath('/operations/warehouse');
+    revalidatePath("/(dashboard)/warehouse/outbound", "page");
 
     return { success: true };
   } catch (err) {
