@@ -72,3 +72,13 @@ export async function getnewlabel(
     message: res.enmessage || res.cnmessage || '',
   }
 }
+
+export async function removeorder(
+  referenceNo: string,
+): Promise<{ success: number; message: string }> {
+  const res = await callShxk('removeorder', { reference_no: referenceNo })
+  return {
+    success: res.success,
+    message: res.enmessage || res.cnmessage || '',
+  }
+}
