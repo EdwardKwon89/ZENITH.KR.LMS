@@ -68,7 +68,7 @@ function toIso3(code2: string): string {
 - [x] `rtk npm run test:regression` — 380/387 PASS (7건 pre-existing `p6-transport-policy.test.ts`, develop 동일)
 - [x] R-17 커밋 순서 준수 (코드 커밋 → 문서 커밋)
 - [x] 코드 커밋 해시 기재: `a68753c`
-- [x] 문서 커밋 해시 기재: _(아래 기재)_
+- [x] 문서 커밋 해시 기재: `d83d9df`
 - [x] PR 생성 (`Closes #128`)
 
 ---
@@ -100,7 +100,7 @@ _Aiden 전속_
 | # | 해시 | 유형 | 내용 |
 |:-:|:----|:----:|:----|
 | 1 | `a68753c` | 코드 | `[Baker] fix: TASK-B-030 toIso3() 헬퍼 추가 — country_code ISO 2→3 변환 (IMP-142)` |
-| 2 | _(문서 커밋 후 기재)_ | 문서 | `[Baker] docs: TASK-B-030 완료 보고 — task file + ACTIVE_TASK 🔔` |
+| 2 | `d83d9df` | 문서 | `[Baker] docs: TASK-B-030 완료 보고 — task file + ACTIVE_TASK 🔔` |
 
 ### 회귀
 
