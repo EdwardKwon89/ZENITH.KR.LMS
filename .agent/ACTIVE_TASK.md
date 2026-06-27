@@ -266,7 +266,7 @@
 | TASK-B-028 | 260626 | [Phase 8] UpsTrackingProvider + zen_ups_tracking_events 저장 (IMP-139) | P1 | TASK-B-025 ✅ · TASK-B-027 ✅ | JSJung (검토) · Dave (구현) | ✅ | [TASK-B-028](tasks/TASK-B-028_260626_IMP139_UpsTrackingProvider_Baker.md) | IMP-139 ✅ · Issue #109 · PR#124 머지 ✅ (260626 Aiden) · 387/387 ALL PASS |
 | TASK-B-029 | 260626 | [Phase 8] E2E 테스트 — createorder→getnewlabel→gettrack 전체 흐름 (IMP-140) | P1 | TASK-B-025~028 ✅ 전량 | Jaison | 🔄 | [TASK-B-029](tasks/TASK-B-029_260626_IMP140_E2E테스트_Jaison.md) | Issue #110 · IMP-140 · E2E-26 · spec 작성 착수 260627 · 실행은 B-024 완성 후 |
 | TASK-B-030 | 260627 | [Phase 8] DEF-080 country_code ISO 2→3 변환 누락 수정 (IMP-142) | P1 | TASK-B-025 ✅ | JSJung (검토) · Baker (구현) | ⬜ | [TASK-B-030](tasks/TASK-B-030_260627_DEF080_country_code_ISO변환_Baker.md) | Issue #128 · IMP-142 · DEF-080 · ups-labels.ts toIso3() 추가 |
-| TASK-B-032 | 260627 | [Phase 8] E2E-26-07 tracking_events insert 수정 (B-029 서브) | P1 | TASK-B-029 🔄 | Baker | 🔄 | [TASK-B-032](tasks/TASK-B-032_260627_E2E26-07_tracking_events_수정_Baker.md) | B-029 기반 브랜치 · a72301a · B-029 머지 후 PR 생성 |
+| TASK-B-032 | 260627 | [Phase 8] E2E-26-07 tracking_events insert 수정 (B-029 서브) | P1 | TASK-B-029 🔄 | Baker | 🔔 | [TASK-B-032](tasks/TASK-B-032_260627_E2E26-07_tracking_events_수정_Baker.md) | Issue #133 · a72301a · e5b6c83 · PR#131 🔔 |
 ---
 
 ## Agent 현황
@@ -296,7 +296,8 @@
 
 ## 개정 이력
 
-| 2026-06-27 | Baker (Big Pickle) | **TASK-B-032 🔄 완료** — E2E-26-07 tracking_events insert 버그 수정 (필수컬럼 3건 누락 + raw_payload→raw_response). a72301a. B-029 기반 브랜치. B-029 머지 후 PR 생성 예정. |
+| 2026-06-27 | Baker (Big Pickle) | **TASK-B-032 🔔 보완 완료** — Aiden 반려 4건 correction: header 🔔 + Issue #133 + 발견이슈 기재. PR#131 force push. |
+| 2026-06-27 | Baker (Big Pickle) | **TASK-B-032 🔄 완료** — E2E-26-07 tracking_events insert 버그 수정 (필수컬럼 3건 누락 + raw_payload→raw_response). a72301a. B-029 기반 브랜치. PR#131 → B-029. |
 | 2026-06-27 | Baker (Big Pickle) | **TASK-B-030 🔔 완료** — toIso3() 헬퍼 추가 · ups-labels.ts ISO 2→3 변환 · a68753c · 380/387 PASS. PR#129 제출. |
 | 2026-06-27 | Aiden (ZEN_CEO) | **TASK-B-024 ✅ 승인** — PR#126 머지 완료. DoD 10/10 · 387/387 ALL PASS (Aiden 직접 검증) · 스크린샷 3종 ✅. Advisory: LAST_REGRESSION_RESULT 오기재 반복(3회차)·[B_Kai] 태그 오기재·R-09 미완료. |
 | 2026-06-27 | Aiden (ZEN_CEO) | **TASK-B-030 ⬜ 발령** — DEF-080 country_code ISO 2→3 변환 누락 수정. ups-labels.ts toIso3() 추가 (방안 B). Edward 승인 · Baker(구현)·JSJung(검토) · Issue #128 · IMP-142. |

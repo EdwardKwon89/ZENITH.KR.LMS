@@ -5,7 +5,8 @@
 > **발령자**: Jaison (Team B AI 총괄)
 > **담당**: Baker (구현)
 > **우선순위**: P1
-> **상태**: ⬜
+> **상태**: 🔔
+> **GitHub Issue**: [#133](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/133)
 > **연관 Task**: TASK-B-029 (IMP-140)
 > **전제조건**: TASK-B-029 🔄 (mock 모드 구현 완료)
 
@@ -131,7 +132,7 @@ await supabase.from('zen_ups_tracking_events').insert({
 
 ## [발견 이슈]
 
-_(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
+없음
 
 ---
 
