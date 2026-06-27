@@ -259,7 +259,7 @@
 | TASK-167 | 260626 | DEF-061~068 사이드바 메뉴 미등록 + TC-POLICY 픽스 + RLS 수정 | P2 | 없음 | B_Kai (§1 NaviSidebar) · D_Kai (§2 TC+§3 RLS) | ✅ (§1) / ✅ (§2+§3) | [TASK-167 §1](tasks/TASK-167_260624_DEF061-064_NaviSidebar메뉴등록_BKai.md) · [TASK-167 전체](tasks/TASK-167_260626_DEF061~068_사이드바메뉴+TC픽스+RLS수정_BKai_DKai.md) | Issue #115 · §1: PR#117 머지 ✅ (260626) · §2+§3: PR#118 머지 ✅ (260626) |
 | TASK-B-022 | 260624 | [Phase 8] UPS 실물 연동 사전 설계 리서치 | P1 | 없음 | JSJung | ➖ | [TASK-B-022](tasks/TASK-B-022_260624_Phase8_UPS실물연동_리서치_JSJung.md) | TASK-B-023으로 대체 — 취소 (2026-06-26 Aiden) |
 | TASK-B-023 | 260625 | [Phase 8] shxk.rtb56.com API 기반 UPS 연동 리서치 재작성 | P1 | DEF-079 발견 | Baker (구현) · JSJung (검토) | ✅ | [TASK-B-023](tasks/TASK-B-023_260625_Phase8_rtb56_UPS_리서치_Jaison.md) | Issue #112 · PR#113 ✅ 승인 (2026-06-26) · DoD 9/9 · 387/387 PASS · DEF-079 해소 |
-| TASK-B-024 | 260626 | [Phase 8] UPS 레이블 발급 UI — 창고 출고 화면 인라인 배치 | P1 | TASK-B-025~028 ✅ 전량 | JSJung (검토) · Baker (구현) | 🔄 | [TASK-B-024](tasks/TASK-B-024_260626_Phase8_UPS레이블발급UI_JSJung.md) | Issue #114 · IMP-141 · OutboundProcessForm 인라인 배치 · 착수 260627 |
+| TASK-B-024 | 260626 | [Phase 8] UPS 레이블 발급 UI — 창고 출고 화면 인라인 배치 | P1 | TASK-B-025~027 ✅ | JSJung (검토) · Baker (구현) | ❌ | [TASK-B-024](tasks/TASK-B-024_260626_Phase8_UPS레이블발급UI_JSJung.md) | Issue #114 · IMP-141 · PR#126 · Aiden 1차 반려 — E2E 스크린샷 미첨부 (UI 배지·dialog 스크린샷 3종 요청) |
 | TASK-B-025 | 260626 | [Phase 8] shxk HTTP Client + config + 공통 타입 (IMP-136) | P1 | An-13 v2.4 ✅ | Dave | ✅ | [TASK-B-025](tasks/TASK-B-025_260626_Phase8_UPS_shxk_HTTPClient_Dave.md) | IMP-136 ✅ · Issue #106 · PR#123 머지 ✅ (260626 Aiden) · 387/387 ALL PASS |
 | TASK-B-026 | 260626 | [Phase 8] createorder + getnewlabel Server Action (IMP-137) | P1 | TASK-B-025 ✅ | JSJung (검토) · Baker (구현) | ✅ | [TASK-B-026](tasks/TASK-B-026_260626_IMP137_createorder서버액션_Baker.md) | IMP-137 ✅ · Issue #107 · PR#125 머지 ✅ (260626 Aiden) · 387/387 ALL PASS |
 | TASK-B-027 | 260626 | [Phase 8] zen_ups_shxk_country_map + 레이블/트래킹 테이블 DB migration (IMP-138) | P1 | Issue #121 Aiden 설계 재확정 ✅ | Baker ✅ · Dave ✅ | ✅ | [TASK-B-027](tasks/TASK-B-027_260626_Phase8_UPS매핑DB마이그레이션_Dave_Baker.md) | IMP-138 ✅ · PR#122 머지 ✅ (260626 Aiden) · 387/387 ALL PASS |
@@ -284,16 +284,17 @@
 
 | Agent | 상태 | 비고 |
 |:------|:----:|:----|
-| **JSJung** (팀 리더) | 🔄 TASK-B-024 검토 중 | Baker 구현 감독 · Issue #114 |
+| **JSJung** (팀 리더) | ❌ TASK-B-024 반려 검토 | PR#126 · E2E 스크린샷 3종 첨부 지시 — Baker 수정 대기 |
 | **Jaison** (AI Agent 총괄) | 🔄 TASK-B-029 착수 (260627) | spec 작성 중 · E2E 실행은 B-024 완성 후 |
 | **Dave** (AI Agent) | ✅ TASK-B-028 승인 (260626) | PR#124 머지 ✅ · IMP-139 ✅ · 다음 Task 배분 대기 |
-| **Baker** (AI Agent) | 🔄 TASK-B-024 착수 (260627) | OutboundProcessForm UPS 인라인 UI · IMP-141 |
+| **Baker** (AI Agent) | ❌ TASK-B-024 1차 반려 | PR#126 · UI 스크린샷 3종 첨부 필요 (배지 미발급·발급완료·Void dialog) |
 | **Gale** (AI Agent) | 대기 | 추후 재배정 예정 |
 
 ---
 
 ## 개정 이력
 
+| 2026-06-27 | Aiden (ZEN_CEO) | **TASK-B-024 ❌ 1차 반려** — PR#126 CHANGES_REQUESTED. DoD 항목 10 미체크(E2E 스크린샷). shxk sandbox 없어 API 흐름 E2E 불가 인정 — UI 배지·Void dialog 스크린샷 3종 첨부 요청. 코드·회귀(387/387) 양호. |
 | 2026-06-26 | Aiden (ZEN_CEO) | **TASK-B-028 ✅ 승인** — PR#124 머지 완료. tracking.ts pollTracking/isDelivered/storeTrackingEvents · 회귀 381/387 (pre-existing) ✅ · Advisory: code commit에 task file 혼입 패턴 개선 권고. |
 | 2026-06-26 | Aiden (ZEN_CEO) | **TASK-B-026 ❌ 3차 반려** — PR#125 CHANGES_REQUESTED. fetchAndSaveLabel shxkOrderId 미정의 변수(`packageId`로 수정 필요). getnewlabel params 수정·DoD 모두 정상 — 버그 1줄만 남음. |
 | 2026-06-26 | Aiden (ZEN_CEO) | **TASK-B-027 ✅ 승인** — PR#122 머지 완료. DoD 14/14 ✅ · reference_no NOT NULL + UNIQUE INDEX + FK ✅ · 387/387 PASS · An-13 v2.1 반영. TASK-B-028 착수 가능 (B-025 ✅ 전제). |
