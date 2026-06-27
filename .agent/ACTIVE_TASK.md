@@ -265,7 +265,7 @@
 | TASK-B-027 | 260626 | [Phase 8] zen_ups_shxk_country_map + 레이블/트래킹 테이블 DB migration (IMP-138) | P1 | Issue #121 Aiden 설계 재확정 ✅ | Baker ✅ · Dave ✅ | ✅ | [TASK-B-027](tasks/TASK-B-027_260626_Phase8_UPS매핑DB마이그레이션_Dave_Baker.md) | IMP-138 ✅ · PR#122 머지 ✅ (260626 Aiden) · 387/387 ALL PASS |
 | TASK-B-028 | 260626 | [Phase 8] UpsTrackingProvider + zen_ups_tracking_events 저장 (IMP-139) | P1 | TASK-B-025 ✅ · TASK-B-027 ✅ | JSJung (검토) · Dave (구현) | ✅ | [TASK-B-028](tasks/TASK-B-028_260626_IMP139_UpsTrackingProvider_Baker.md) | IMP-139 ✅ · Issue #109 · PR#124 머지 ✅ (260626 Aiden) · 387/387 ALL PASS |
 | TASK-B-029 | 260626 | [Phase 8] E2E 테스트 — createorder→getnewlabel→gettrack 전체 흐름 (IMP-140) | P1 | TASK-B-025~028 ✅ 전량 | Jaison | 🔄 | [TASK-B-029](tasks/TASK-B-029_260626_IMP140_E2E테스트_Jaison.md) | Issue #110 · IMP-140 · E2E-26 · spec 작성 착수 260627 · 실행은 B-024 완성 후 |
-| TASK-B-030 | 260627 | [Phase 8] DEF-080 country_code ISO 2→3 변환 누락 수정 (IMP-142) | P1 | TASK-B-025 ✅ | JSJung (검토) · Baker (구현) | ⬜ | [TASK-B-030](tasks/TASK-B-030_260627_DEF080_country_code_ISO변환_Baker.md) | Issue #128 · IMP-142 · DEF-080 · ups-labels.ts toIso3() 추가 |
+| TASK-B-030 | 260627 | [Phase 8] DEF-080 country_code ISO 2→3 변환 누락 수정 (IMP-142) | P1 | TASK-B-025 ✅ | JSJung (검토) · Baker (구현) | ✅ | [TASK-B-030](tasks/TASK-B-030_260627_DEF080_country_code_ISO변환_Baker.md) | Issue #128 · IMP-142 · DEF-080 ✅ · ups-labels.ts toIso3() 추가 · 380/387 PASS |
 ---
 
 ## Agent 현황
@@ -295,6 +295,7 @@
 
 ## 개정 이력
 
+| 2026-06-27 | Baker (Big Pickle) | **TASK-B-030 🔔 완료** — toIso3() 헬퍼 추가 · ups-labels.ts ISO 2→3 변환 · a68753c · 380/387 PASS (7건 pre-existing). Jaison 검토 요청. |
 | 2026-06-27 | Aiden (ZEN_CEO) | **TASK-B-024 ✅ 승인** — PR#126 머지 완료. DoD 10/10 · 387/387 ALL PASS (Aiden 직접 검증) · 스크린샷 3종 ✅. Advisory: LAST_REGRESSION_RESULT 오기재 반복(3회차)·[B_Kai] 태그 오기재·R-09 미완료. |
 | 2026-06-27 | Aiden (ZEN_CEO) | **TASK-B-030 ⬜ 발령** — DEF-080 country_code ISO 2→3 변환 누락 수정. ups-labels.ts toIso3() 추가 (방안 B). Edward 승인 · Baker(구현)·JSJung(검토) · Issue #128 · IMP-142. |
 | 2026-06-27 | Aiden (ZEN_CEO) | **TASK-B-024 ❌ 1차 반려** — PR#126 CHANGES_REQUESTED. DoD 항목 10 미체크(E2E 스크린샷). shxk sandbox 없어 API 흐름 E2E 불가 인정 — UI 배지·Void dialog 스크린샷 3종 첨부 요청. 코드·회귀(387/387) 양호. |
