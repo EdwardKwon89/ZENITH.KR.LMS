@@ -5,7 +5,7 @@
 > **발령자**: Aiden (ZEN_CEO) — An-13 v2.0 Edward 승인 (2026-06-26)
 > **담당**: Jaison (구현)
 > **우선순위**: P1
-> **상태**: ⬜
+> **상태**: 🔄
 > **GitHub Issue**: [#110](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/110)
 > **연관 IMP**: IMP-140
 > **전제조건**: TASK-B-025~028 (IMP-136~139) ✅ 전량
@@ -24,10 +24,10 @@ createorder → gettrackingnumber → getnewlabel → gettrack 순서 검증.
 
 | 조건 | 상태 |
 |:-----|:----:|
-| TASK-B-025 ✅ (shxk client) | 🚫 |
-| TASK-B-026 ✅ (Server Action) | 🚫 |
-| TASK-B-027 ✅ (DB 마이그레이션) | 🚫 |
-| TASK-B-028 ✅ (TrackingProvider) | 🚫 |
+| TASK-B-025 ✅ (shxk client) | ✅ |
+| TASK-B-026 ✅ (Server Action) | ✅ |
+| TASK-B-027 ✅ (DB 마이그레이션) | ✅ |
+| TASK-B-028 ✅ (TrackingProvider) | ✅ |
 
 ---
 
@@ -76,7 +76,17 @@ docs/99_Manual/E2E_26_Result/
 
 ## [설계 의견]
 
-_착수 후 Jaison 기재_
+### E2E 실행 순서 및 주요 제약
+
+**E2E-26-01~07은 UI 기반 테스트** → TASK-B-024(OutboundProcessForm UPS UI) 완성 후 실행 가능.  
+spec 파일 작성은 지금 착수, 테스트 실행은 TASK-B-024 🔔 제출 후 병행.
+
+**⚠️ shxk NO sandbox 제약 (R-14 / 프로젝트 제약)**:
+- `createorder` / `getnewlabel` 호출은 실제 UPS 오더 생성
+- 테스트 afterEach / afterAll에 반드시 `removeorder` 호출로 정리 필수
+- 테스트 실행 후 미정리 오더 잔존 금지
+
+**폴링(E2E-26-07)**: `gettrack` 폴링 첫 호출 → DB 저장 확인만. 실제 폴링 스케줄러 미기동.
 
 ---
 
@@ -103,3 +113,4 @@ _(없으면 "없음" 기재)_
 | 날짜 | 작성자 | 내용 |
 |:-----|:------|:----|
 | 2026-06-26 | Aiden (Claude, ZEN_CEO) | TASK-B-029 신규 발령 — An-13 v2.0 IMP-140 |
+| 2026-06-27 | Jaison (JSJung) | **🔄 착수** — 전제조건 TASK-B-025~028 ✅ 전량 확인. 브랜치: `feature/teamb-task-b-029-e2e-ups-flow`. spec 파일 작성 착수 / E2E 실행은 TASK-B-024 완성 후. shxk removeorder 정리 의무화 기재 |

@@ -5,7 +5,7 @@
 > **발령자**: Aiden (ZEN_CEO) — Edward 승인 (Issue #102 2026-06-26)
 > **담당**: JSJung (검토·승인) / Baker (구현)
 > **우선순위**: P1
-> **상태**: 🚫 (전제조건 미충족 — TASK-B-023 ✅ 대기)
+> **상태**: 🔄
 > **GitHub Issue**: [#114](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/114)
 > **연관 IMP**: IMP-141
 
@@ -24,9 +24,8 @@ Issue #102 Edward 승인 기준: 인라인 배치(Option A) + 출고 확정 시 
 |:-----|:----:|:----|
 | TASK-B-023 ✅ | ✅ | PR#113 머지 완료 (2026-06-26) |
 | An-13 v2.0 승인 (DEF-079 해소) | ✅ | Edward 승인 완료 (2026-06-26) — shxk.rtb56.com 기반 확정 |
-| IMP-136~138 ✅ (TASK-B-025~027) | 🚫 | shxk 클라이언트·Server Action·DB 마이그레이션 완료 후 착수 가능 |
-
-> IMP-136~138 전량 ✅ 후 🚫→⬜ 전환 (Aiden 전속)
+| IMP-136~138 ✅ (TASK-B-025~027) | ✅ | PR#122·123·125 머지 완료 (2026-06-26) |
+| IMP-139 ✅ (TASK-B-028) | ✅ | PR#124 머지 완료 (2026-06-26) |
 
 ---
 
@@ -121,3 +120,4 @@ _(없으면 "없음" 기재)_
 | 날짜 | 작성자 | 내용 |
 |:-----|:------|:----|
 | 2026-06-26 | Aiden (Claude, ZEN_CEO) | TASK-B-024 신규 발령 — Edward 승인 Issue #102 반영 |
+| 2026-06-27 | Jaison (JSJung) | **🔄 착수 지시** — 전제조건 IMP-136~139 전량 ✅ 확인. Baker 착수 가능. 브랜치: `feature/teamb-task-b-024-ups-label-ui`. ⚠️ shxk NO sandbox — createorder 호출 발생 시 반드시 `removeorder` 정리 |
