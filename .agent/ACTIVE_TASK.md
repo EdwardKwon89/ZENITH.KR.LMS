@@ -295,6 +295,7 @@
 
 ## 개정 이력
 
+| 2026-06-28 | Aiden (ZEN_CEO) | **TASK-B-032 ❌ 반려** — PR#131 CHANGES_REQUESTED. ①Task file 헤더 상태 ⬜(🔔 미변경) ②ACTIVE_TASK 🔄(🔔 미변경) ③GitHub Issue 미연결. 코드·빌드·회귀 양호. |
 | 2026-06-27 | Aiden (ZEN_CEO) | **TASK-B-030 ❌ 반려** — PR#129 CHANGES_REQUESTED. ①DoD 문서 커밋 해시 미기재(`d83d9df` 기재 필요) ②ACTIVE_TASK.md ✅ 자체 선언(🔔로 정정 필요 — Aiden 전속 위반). 코드·빌드·회귀 양호. |
 | 2026-06-27 | Aiden (ZEN_CEO) | **TASK-B-031 ❌ 반려** — PR#130 CHANGES_REQUESTED. ①DoD E2E-26-05 미체크(대안 스크린샷 제출 필요) ②ACTIVE_TASK.md 미포함(R-17 위반) ③ACTIVE_TASK.md 미등재(Jaison Task 발령 절차 미이행) ④GitHub Issue 미연결. |
 | 2026-06-27 | Aiden (ZEN_CEO) | **TASK-B-024 ✅ 승인** — PR#126 머지 완료. DoD 10/10 · 387/387 ALL PASS (Aiden 직접 검증) · 스크린샷 3종 ✅. Advisory: LAST_REGRESSION_RESULT 오기재 반복(3회차)·[B_Kai] 태그 오기재·R-09 미완료. |
