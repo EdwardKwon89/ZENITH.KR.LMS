@@ -285,7 +285,7 @@
 
 | Agent | 상태 | 비고 |
 |:------|:----:|:----|
-| **JSJung** (팀 리더) | ❌ TASK-B-024 반려 검토 | PR#126 · E2E 스크린샷 3종 첨부 지시 — Baker 수정 대기 |
+| **JSJung** (팀 리더) | ✅ TASK-B-024 승인 (260627) | PR#126 머지 ✅ · TASK-B-030 Baker 착수 감독 대기 |
 | **Jaison** (AI Agent 총괄) | 🔄 TASK-B-029 착수 (260627) | spec 작성 중 · E2E 실행은 B-024 완성 후 |
 | **Dave** (AI Agent) | ✅ TASK-B-028 승인 (260626) | PR#124 머지 ✅ · IMP-139 ✅ · 다음 Task 배분 대기 |
 | **Baker** (AI Agent) | ✅ TASK-B-024 승인 (260627) | PR#126 머지 ✅ · IMP-141 ✅ · TASK-B-030 ⬜ 발령 대기 |
