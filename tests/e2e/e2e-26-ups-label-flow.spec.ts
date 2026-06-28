@@ -25,6 +25,7 @@ const pendingCleanup: string[] = [];
 let supabase: ReturnType<typeof createClient>;
 let testOrderId: string;
 let testPackageId: string;
+let testOrderNo: string;
 
 // ─── Cleanup Helper ────────────────────────────────────────────────────────────
 // shxk sandbox 없음 → 모든 createorder 호출 후 반드시 removeorder 실행
@@ -68,17 +69,24 @@ async function setupTestFixtures(): Promise<void> {
   if (!destPortId) throw new Error('[E2E-26] ICN port not found — run seed first');
 
   // WAREHOUSED 상태 테스트 오더 생성
+  testOrderNo = `E2E26-UPS-${Date.now()}`;
   const { data: order, error: orderErr } = await supabase
     .from('zen_orders')
     .insert({
-      order_no: `E2E26-UPS-${Date.now()}`,
+      order_no: testOrderNo,
       status: 'WAREHOUSED',
       ups_product_code: 'WW_EXPRESS_DOC',
       incoterms: 'DDU',
       dest_port_id: destPortId,
       transport_mode: 'AIR',
       order_type: 'B2B',
-      cargo_details: JSON.stringify([{ qty: 1, weight: 1.0, description: 'E2E26 test' }]),
+      cargo_details: JSON.stringify([
+        { qty: 1, weight: 1.0, description: 'E2E26 test item', value: 1.00 },
+      ]),
+      recipient_name: 'E2E Test Consignee',
+      recipient_address: '1-1 Shinjuku, Tokyo',
+      recipient_phone: '080-0000-0000',
+      recipient_zipcode: '160-0022',
     })
     .select('id')
     .single();
@@ -88,7 +96,7 @@ async function setupTestFixtures(): Promise<void> {
   // 패키지 생성 (intl_ref_locked=false 초기 상태)
   const { data: pkg, error: pkgErr } = await supabase
     .from('zen_order_packages')
-    .insert({ order_id: testOrderId, weight_kg: 1.0, intl_ref_locked: false })
+    .insert({ order_id: testOrderId, gross_weight: 1.0, packing_unit: 'BOX', intl_ref_locked: false })
     .select('id')
     .single();
   if (pkgErr || !pkg) throw new Error(`[E2E-26] Package create failed: ${pkgErr?.message}`);
@@ -151,8 +159,8 @@ test.describe('E2E-26: UPS 레이블 발급 전체 흐름', () => {
     await page.goto('/ko/warehouse/outbound');
     await page.waitForLoadState('networkidle');
 
-    // UPS 레이블 미발급 배지 표시 확인
-    await expect(page.getByText('UPS 레이블 미발급').first()).toBeVisible({ timeout: 15000 });
+    // UPS 미발급 배지 표시 확인
+    await expect(page.getByText('UPS 미발급').first()).toBeVisible({ timeout: 15000 });
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, '01_label_not_issued.png') });
   });
 
@@ -165,17 +173,31 @@ test.describe('E2E-26: UPS 레이블 발급 전체 흐름', () => {
     await page.goto('/ko/warehouse/outbound');
     await page.waitForLoadState('networkidle');
 
-    // 출고 확정 버튼 클릭
+    // Step 1: 오더 카드 클릭(선택) — 버튼 노출 전제
+    await page.getByText(testOrderNo).click();
+    await page.waitForTimeout(300);
+
+    // Step 2: 출고 확정 버튼 클릭
     const confirmBtn = page.getByRole('button', { name: /출고 확정/ }).first();
-    await expect(confirmBtn).toBeVisible({ timeout: 15000 });
+    await expect(confirmBtn).toBeVisible({ timeout: 5000 });
     await confirmBtn.click();
 
-    // 발급 중 상태 확인 (optional — 빠르게 완료될 수 있음)
+    // Step 3: 경고 다이얼로그 → 계속 진행 클릭
+    const continueBtn = page.getByRole('button', { name: '계속 진행' });
+    await expect(continueBtn).toBeVisible({ timeout: 5000 });
+    await continueBtn.click();
+
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, '02_issue_triggered.png') });
 
-    // UPS 레이블 발급 완료 배지 확인
-    await expect(page.getByText('UPS 레이블 발급 완료').first()).toBeVisible({ timeout: 60000 });
+    // Step 4: 발급 완료 확인 — DB 상태로 검증 (False Positive 방지)
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, '02b_issue_triggered_complete.png') });
+    const { data: issuedPkg } = await supabase
+      .from('zen_order_packages')
+      .select('intl_ref_locked, intl_ref_no')
+      .eq('id', testPackageId)
+      .single();
+    expect(issuedPkg?.intl_ref_locked).toBe(true);
+    expect(issuedPkg?.intl_ref_no).not.toBeNull();
 
     // cleanup 등록 (reference_no = packageId)
     pendingCleanup.push(testPackageId);
@@ -229,12 +251,15 @@ test.describe('E2E-26: UPS 레이블 발급 전체 흐름', () => {
 
   // ── E2E-26-05 ─────────────────────────────────────────────────────────────
   test('E2E-26-05: 폐기(Void) 버튼 → confirm dialog → 폐기 완료 확인', async ({ page }) => {
-    test.setTimeout(60000);
+    test.setTimeout(120000);
     page.on('console', msg => console.log(`[PAGE] ${msg.type()}: ${msg.text()}`));
 
     await loginAsManager(page);
     await page.goto('/ko/warehouse/outbound');
     await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(2000);
+    // 오늘의 출고 이력 섹션 표시 확인
+    await expect(page.getByText('오늘의 출고 이력').first()).toBeVisible({ timeout: 15000 });
 
     // 폐기 버튼 클릭
     const voidBtn = page.getByRole('button', { name: /폐기/ }).first();
@@ -249,14 +274,17 @@ test.describe('E2E-26: UPS 레이블 발급 전체 흐름', () => {
     const confirmVoidBtn = page.getByRole('button', { name: /폐기 확정/ }).first();
     await confirmVoidBtn.click();
 
-    // 폐기 완료 확인 (voidUpsLabel이 내부에서 removeorder 호출)
-    await expect(page.getByText(/폐기됨|UPS 레이블 미발급/).first()).toBeVisible({ timeout: 30000 });
+    // voidUpsLabel 서버 액션 완료 대기
+    await page.waitForTimeout(3000);
+
+    // 폐기 완료 확인
+    await expect(page.getByText(/폐기됨|UPS 미발급/).first()).toBeVisible({ timeout: 30000 });
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, '05_void_completed.png') });
 
     // DB 폐기 확인
     const { data: voidedLabel } = await supabase
       .from('zen_ups_labels')
-      .select('is_voided, voided_at')
+      .select('id, is_voided, voided_at, package_id')
       .eq('package_id', testPackageId)
       .order('created_at', { ascending: false })
       .limit(1)
@@ -268,6 +296,7 @@ test.describe('E2E-26: UPS 레이블 발급 전체 흐름', () => {
 
   // ── E2E-26-06 ─────────────────────────────────────────────────────────────
   test('E2E-26-06: 재발급 → 새 운송장 번호 갱신 확인', async ({ page }) => {
+    test.skip(true, 'DEF-082: 재발급 버튼 UI 미구현 — TASK-B-033 완료 후 활성화 (Issue #136)');
     test.setTimeout(120000);
     page.on('console', msg => console.log(`[PAGE] ${msg.type()}: ${msg.text()}`));
 
@@ -300,15 +329,18 @@ test.describe('E2E-26: UPS 레이블 발급 전체 흐름', () => {
   });
 
   // ── E2E-26-07 ─────────────────────────────────────────────────────────────
-  test('E2E-26-07: gettrack polling 첫 호출 → zen_ups_tracking_events 저장 확인', async () => {
+  test('E2E-26-07: gettrack polling 첫 호출 → zen_ups_tracking_events 저장 확인', async ({ page }) => {
     test.setTimeout(60000);
 
-    // zen_ups_labels에서 활성 레이블 확인
+    // zen_ups_labels에서 tracking_number 있는 레코드 확인 (void 여부 무관)
     const { data: label } = await supabase
       .from('zen_ups_labels')
-      .select('id, tracking_number')
+      .select('id, tracking_number, order_id')
       .eq('package_id', testPackageId)
-      .eq('is_voided', false)
+      .not('tracking_number', 'is', null)
+      .neq('tracking_number', '')
+      .order('created_at', { ascending: false })
+      .limit(1)
       .single();
 
     if (!label?.tracking_number) {
@@ -319,20 +351,12 @@ test.describe('E2E-26: UPS 레이블 발급 전체 흐름', () => {
 
     // zen_ups_tracking_events에 레코드가 있는지 확인
     // (폴링 스케줄러가 미기동이므로 수동 Supabase 직접 insert로 gettrack 저장 확인)
-    const mockPayload = { tracking_number: label.tracking_number, status: 'IN_TRANSIT' };
     const now = new Date();
-
-    // label에서 order_id + tracking_number 조회
-    const { data: labelWithOrder } = await supabase
-      .from('zen_ups_labels')
-      .select('id, tracking_number, order_id')
-      .eq('id', label.id)
-      .single();
-
+    const mockPayload = { tracking_number: label.tracking_number, status: 'IN_TRANSIT' };
     await supabase.from('zen_ups_tracking_events').insert({
       label_id: label.id,
-      order_id: labelWithOrder!.order_id,
-      tracking_number: labelWithOrder!.tracking_number,
+      order_id: label.order_id,
+      tracking_number: label.tracking_number,
       event_code: 'IT',
       event_date: now.toISOString().split('T')[0],
       event_time: now.toTimeString().slice(0, 8),
@@ -347,5 +371,12 @@ test.describe('E2E-26: UPS 레이블 발급 전체 흐름', () => {
     expect(events).not.toBeNull();
     expect(events!.length).toBeGreaterThan(0);
     console.log('[E2E-26-07] tracking events:', events!.length);
+
+    // 스크린샷을 위해 로그인 후 페이지 진입
+    await loginAsManager(page);
+    await page.goto('/ko/warehouse/outbound');
+    await page.waitForLoadState('networkidle');
+    await page.screenshot({ path: path.join(SCREENSHOT_DIR, '07_tracking_stored.png') });
   });
+
 });

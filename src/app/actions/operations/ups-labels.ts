@@ -5,6 +5,12 @@ import { validateUserAction } from '@/lib/auth/guards';
 import { USER_ROLES } from '@/lib/auth/rbac';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { createorder, getnewlabel, removeorder } from '@/lib/shxk/order';
+import {
+  SHXK_SHIPPER_NAME, SHXK_SHIPPER_COUNTRY,
+  SHXK_SHIPPER_PROVINCE, SHXK_SHIPPER_CITY,
+  SHXK_SHIPPER_STREET, SHXK_SHIPPER_POSTCODE,
+  SHXK_SHIPPER_PHONE,
+} from '@/lib/shxk/config';
 import { revalidatePath } from 'next/cache';
 
 export interface IssueUpsLabelResult {
@@ -51,6 +57,13 @@ async function resolveCountryCode(supabase: SupabaseClient, destPortId: string):
   return data?.country_code ?? null;
 }
 
+function toIso3(code2: string): string {
+  const map: Record<string, string> = {
+    KR: 'KOR', US: 'USA', CN: 'CHN', JP: 'JPN',
+  };
+  return map[code2] ?? code2;
+}
+
 async function resolveShxkCode(
   supabase: SupabaseClient,
   productCode: string,
@@ -70,13 +83,48 @@ async function resolveShxkCode(
 async function placeShxkOrder(
   packageId: string,
   shxkCode: string,
+  order: Record<string, unknown>,
+  countryCode: string,
 ): Promise<{ orderId: string; trackingNo: string | null; refrenceNo: string } | { error: string }> {
+  const cargoItems = (() => {
+    try {
+      return JSON.parse(order.cargo_details as string) as Array<{
+        qty?: number; weight?: number; description?: string; value?: number
+      }>
+    } catch { return [] }
+  })()
+
+  const invoice = cargoItems.length > 0
+    ? cargoItems.map(item => ({
+        invoice_enname:    item.description || 'General Merchandise',
+        invoice_quantity:  String(item.qty  ?? 1),
+        invoice_unitcharge: String(item.value ?? '1.00'),
+      }))
+    : [{ invoice_enname: 'General Merchandise', invoice_quantity: '1', invoice_unitcharge: '1.00' }]
+
   const orderRes = await createorder({
-    reference_no: packageId,
+    reference_no:    packageId,
     shipping_method: shxkCode,
-    platform_id: '',
-    buyer_id: '',
-    order_status: 'P',
+    platform_id:     '',
+    buyer_id:        '',
+    order_status:    'P',
+    shipper: {
+      shipper_name:        SHXK_SHIPPER_NAME,
+      shipper_countrycode: SHXK_SHIPPER_COUNTRY,
+      shipper_province:    SHXK_SHIPPER_PROVINCE,
+      shipper_city:        SHXK_SHIPPER_CITY,
+      shipper_street:      SHXK_SHIPPER_STREET,
+      shipper_postcode:    SHXK_SHIPPER_POSTCODE,
+      shipper_telephone:   SHXK_SHIPPER_PHONE,
+    },
+    consignee: {
+      consignee_name:        (order.recipient_name    as string) || 'E2E Consignee',
+      consignee_countrycode: countryCode,
+      consignee_street:      (order.recipient_address as string) || 'Unknown Street',
+      consignee_postcode:    (order.recipient_zipcode as string) || '',
+      consignee_telephone:   (order.recipient_phone   as string) || '',
+    },
+    invoice,
   });
 
   if (orderRes.success === 0) return { error: `createorder failed: ${orderRes.message}` };
@@ -103,7 +151,9 @@ async function saveInitialLabel(
     order_id: orderId,
     package_id: packageId,
     reference_no: referenceNo,
-    tracking_number: trackingNumber,
+    tracking_number: trackingNumber ?? '',
+    label_format: 'PDF',
+    storage_path: '',
     generated_by: profileId,
   });
   return error?.message ?? null;
@@ -126,16 +176,14 @@ async function fetchAndSaveLabel(
     return null;
   }
 
-  const labelData = labelRes.data.label_data ?? null;
   const labelUrl = labelRes.data.label_url ?? null;
   const labelFormat = labelRes.data.label_type === 'PDF' ? 'PDF' : 'PNG';
 
   const { error } = await supabase
     .from('zen_ups_labels')
     .update({
-      label_data: labelData,
       label_format: labelFormat,
-      storage_path: labelUrl,
+      storage_path: labelUrl ?? '',
     })
     .eq('package_id', packageId);
 
@@ -147,7 +195,7 @@ async function markPackageIssued(
   supabase: SupabaseClient,
   packageId: string,
   trackingNumber: string | null,
-): Promise<void> {
+): Promise<string | null> {
   const { error } = await supabase
     .from('zen_order_packages')
     .update({
@@ -157,7 +205,11 @@ async function markPackageIssued(
     })
     .eq('id', packageId);
 
-  if (error) logger.error('zen_order_packages update error:', error);
+  if (error) {
+    logger.error('zen_order_packages update error:', error);
+    return error.message;
+  }
+  return null;
 }
 
 export async function issueUpsLabel(
@@ -174,10 +226,11 @@ export async function issueUpsLabel(
     const countryCode = await resolveCountryCode(supabase, order!.dest_port_id as string);
     if (!countryCode) return { success: false, error: 'Destination country code not found' };
 
-    const shxkCode = await resolveShxkCode(supabase, order!.ups_product_code as string, countryCode, order!.incoterms as string);
-    if (!shxkCode) return { success: false, error: `shipping method not found for product=${order!.ups_product_code}, country=${countryCode}, incoterms=${order!.incoterms}` };
+    const iso3Code = toIso3(countryCode);
+    const shxkCode = await resolveShxkCode(supabase, order!.ups_product_code as string, iso3Code, order!.incoterms as string);
+    if (!shxkCode) return { success: false, error: `shipping method not found for product=${order!.ups_product_code}, country=${iso3Code}, incoterms=${order!.incoterms}` };
 
-    const orderResult = await placeShxkOrder(packageId, shxkCode);
+    const orderResult = await placeShxkOrder(packageId, shxkCode, order!, countryCode);
     if ('error' in orderResult) return { success: false, error: orderResult.error };
 
     const insertErr = await saveInitialLabel(supabase, order!.id as string, packageId, packageId, orderResult.trackingNo, profile!.id);
@@ -185,7 +238,8 @@ export async function issueUpsLabel(
 
     const labelUrl = await fetchAndSaveLabel(supabase, packageId);
 
-    await markPackageIssued(supabase, packageId, orderResult.trackingNo);
+    const pkgErr = await markPackageIssued(supabase, packageId, orderResult.trackingNo);
+    if (pkgErr) return { success: false, error: `Failed to mark package issued: ${pkgErr}` };
 
     revalidatePath("/(dashboard)/warehouse/outbound", "page");
 
@@ -221,20 +275,29 @@ async function fetchActiveLabel(
 }
 
 async function markLabelVoided(supabase: SupabaseClient, packageId: string): Promise<string | null> {
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('zen_ups_labels')
     .update({ is_voided: true, voided_at: new Date().toISOString() })
     .eq('package_id', packageId)
-    .eq('is_voided', false);
-  return error?.message ?? null;
+    .eq('is_voided', false)
+    .select('id, is_voided');
+  if (error) {
+    logger.error('zen_ups_labels void update error:', error);
+    return error.message;
+  }
+  return null;
 }
 
-async function unlockPackageIntlRef(supabase: SupabaseClient, packageId: string): Promise<void> {
+async function unlockPackageIntlRef(supabase: SupabaseClient, packageId: string): Promise<string | null> {
   const { error } = await supabase
     .from('zen_order_packages')
     .update({ intl_ref_locked: false })
     .eq('id', packageId);
-  if (error) logger.error('zen_order_packages unlock error:', error);
+  if (error) {
+    logger.error('zen_order_packages unlock error:', error);
+    return error.message;
+  }
+  return null;
 }
 
 export async function voidUpsLabel(
@@ -254,9 +317,10 @@ export async function voidUpsLabel(
     }
 
     const updateErr = await markLabelVoided(supabase, packageId);
-    if (updateErr) return { success: false, error: '레이블 폐기 기록 실패' };
+    if (updateErr) return { success: false, error: `레이블 폐기 기록 실패: ${updateErr}` };
 
-    await unlockPackageIntlRef(supabase, packageId);
+    const unlockErr = await unlockPackageIntlRef(supabase, packageId);
+    if (unlockErr) return { success: false, error: `intl_ref 복원 실패: ${unlockErr}` };
     revalidatePath("/(dashboard)/warehouse/outbound", "page");
 
     return { success: true };

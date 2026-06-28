@@ -257,6 +257,7 @@
 | TASK-B-020 | 260623 | DEF-073 Agency shippers/new · rate-overrides/new Server Action 오류 수정 | P2 | 없음 | Baker | ✅ | [TASK-B-020](tasks/TASK-B-020_260623_DEF073_AgencyServerAction수정_Baker.md) | Issue #80 · DEF-073 · getTranslations→useTranslations · PR#83 머지 ✅ (260623) · Aiden ✅ 승인 |
 | TASK-B-021 | 260624 | [SPR-09] E2E-23 보강 — UAT-20 Agency 정산 CSV 다운로드 + Reconciliation 알림 상세 검증 | P2 | TASK-B-019 ✅ | Jaison (총괄) · Baker (구현) | ✅ | [TASK-B-021](tasks/TASK-B-021_260624_E2E23보강_UAT20Agency정산_Jaison.md) | Issue #91 · TC-AG-09~12 ✅ · 387/387 ALL PASS · PR#94 머지 ✅ (260624) · Aiden ✅ 승인 |
 | TASK-167 | 260626 | DEF-061~068 사이드바 메뉴 미등록 + TC-POLICY 픽스 + RLS 수정 | P2 | 없음 | B_Kai (§1 NaviSidebar) · D_Kai (§2 TC+§3 RLS) | ✅ (§1) / ✅ (§2+§3) | [TASK-167 §1](tasks/TASK-167_260624_DEF061-064_NaviSidebar메뉴등록_BKai.md) · [TASK-167 전체](tasks/TASK-167_260626_DEF061~068_사이드바메뉴+TC픽스+RLS수정_BKai_DKai.md) | Issue #115 · §1: PR#117 머지 ✅ (260626) · §2+§3: PR#118 머지 ✅ (260626) |
+| TASK-168 | 260628 | UAT-17 UPS 특송 오더 발송 — 사전 점검(DB시드·코드·계정) + UAT-17-01~03 실행 (IMP-143) | P1 | 없음 | D_Kai | ⬜ | [TASK-168](tasks/TASK-168_260628_UAT17_UPS특송사전점검및실행_DKai.md) | Issue #134 · IMP-143 · Edward 승인 260628 · 목표완료 260629 |
 | TASK-B-022 | 260624 | [Phase 8] UPS 실물 연동 사전 설계 리서치 | P1 | 없음 | JSJung | ➖ | [TASK-B-022](tasks/TASK-B-022_260624_Phase8_UPS실물연동_리서치_JSJung.md) | TASK-B-023으로 대체 — 취소 (2026-06-26 Aiden) |
 | TASK-B-023 | 260625 | [Phase 8] shxk.rtb56.com API 기반 UPS 연동 리서치 재작성 | P1 | DEF-079 발견 | Baker (구현) · JSJung (검토) | ✅ | [TASK-B-023](tasks/TASK-B-023_260625_Phase8_rtb56_UPS_리서치_Jaison.md) | Issue #112 · PR#113 ✅ 승인 (2026-06-26) · DoD 9/9 · 387/387 PASS · DEF-079 해소 |
 | TASK-B-024 | 260626 | [Phase 8] UPS 레이블 발급 UI — 창고 출고 화면 인라인 배치 | P1 | TASK-B-025~028 ✅ 전량 | JSJung (검토) · Baker (구현) | ✅ | [TASK-B-024](tasks/TASK-B-024_260626_Phase8_UPS레이블발급UI_JSJung.md) | Issue #114 · IMP-141 ✅ · PR#126 머지 ✅ (260627 Aiden) · 387/387 ALL PASS · 스크린샷 3종 ✅ |
@@ -264,9 +265,11 @@
 | TASK-B-026 | 260626 | [Phase 8] createorder + getnewlabel Server Action (IMP-137) | P1 | TASK-B-025 ✅ | JSJung (검토) · Baker (구현) | ✅ | [TASK-B-026](tasks/TASK-B-026_260626_IMP137_createorder서버액션_Baker.md) | IMP-137 ✅ · Issue #107 · PR#125 머지 ✅ (260626 Aiden) · 387/387 ALL PASS |
 | TASK-B-027 | 260626 | [Phase 8] zen_ups_shxk_country_map + 레이블/트래킹 테이블 DB migration (IMP-138) | P1 | Issue #121 Aiden 설계 재확정 ✅ | Baker ✅ · Dave ✅ | ✅ | [TASK-B-027](tasks/TASK-B-027_260626_Phase8_UPS매핑DB마이그레이션_Dave_Baker.md) | IMP-138 ✅ · PR#122 머지 ✅ (260626 Aiden) · 387/387 ALL PASS |
 | TASK-B-028 | 260626 | [Phase 8] UpsTrackingProvider + zen_ups_tracking_events 저장 (IMP-139) | P1 | TASK-B-025 ✅ · TASK-B-027 ✅ | JSJung (검토) · Dave (구현) | ✅ | [TASK-B-028](tasks/TASK-B-028_260626_IMP139_UpsTrackingProvider_Baker.md) | IMP-139 ✅ · Issue #109 · PR#124 머지 ✅ (260626 Aiden) · 387/387 ALL PASS |
-| TASK-B-029 | 260626 | [Phase 8] E2E 테스트 — createorder→getnewlabel→gettrack 전체 흐름 (IMP-140) | P1 | TASK-B-025~028 ✅ 전량 | Jaison | 🔄 | [TASK-B-029](tasks/TASK-B-029_260626_IMP140_E2E테스트_Jaison.md) | Issue #110 · IMP-140 · E2E-26 · spec 작성 착수 260627 · 실행은 B-024 완성 후 |
-| TASK-B-030 | 260627 | [Phase 8] DEF-080 country_code ISO 2→3 변환 누락 수정 (IMP-142) | P1 | TASK-B-025 ✅ | JSJung (검토) · Baker (구현) | ⬜ | [TASK-B-030](tasks/TASK-B-030_260627_DEF080_country_code_ISO변환_Baker.md) | Issue #128 · IMP-142 · DEF-080 · ups-labels.ts toIso3() 추가 |
-| TASK-B-032 | 260627 | [Phase 8] E2E-26-07 tracking_events insert 수정 (B-029 서브) | P1 | TASK-B-029 🔄 | Baker | 🔔 | [TASK-B-032](tasks/TASK-B-032_260627_E2E26-07_tracking_events_수정_Baker.md) | Issue #133 · a72301a · e5b6c83 · PR#131 🔔 |
+| TASK-B-029 | 260626 | [Phase 8] E2E 테스트 — createorder→getnewlabel→gettrack 전체 흐름 (IMP-140) | P1 | TASK-B-025~028 ✅ 전량 | Dave (§1 준비) · Baker (§2 실행) | ✅ | [TASK-B-029](tasks/TASK-B-029_260626_IMP140_E2E테스트_Jaison.md) | Issue #110 · IMP-140 ✅ · E2E-26 6/7 PASS · PR#137 ✅ Aiden 승인 260628 — develop 머지 대기 |
+| TASK-B-030 | 260627 | [Phase 8] DEF-080 country_code ISO 2→3 변환 누락 수정 (IMP-142) | P1 | TASK-B-025 ✅ | JSJung (검토) · Baker (구현) | ✅ | [TASK-B-030](tasks/TASK-B-030_260627_DEF080_country_code_ISO변환_Baker.md) | Issue #128 · IMP-142 · DEF-080 · PR#129 ✅ Aiden 승인 260628 — develop 머지 완료 |
+| TASK-B-031 | 260627 | [Phase 8] E2E-26-05 폐기 버튼 수정 — fetchAndSaveLabel label_data 컬럼 제거 | P1 | TASK-B-029 🔄 | Dave (구현) | ✅ | [TASK-B-031](tasks/TASK-B-031_260627_E2E26-05_폐기버튼수정_Dave.md) | Issue #132 · PR#130 ✅ Aiden 승인 260628 — develop 머지 대기 |
+| TASK-B-032 | 260627 | [Phase 8] E2E-26-07 tracking_events insert 수정 (B-029 서브) | P1 | TASK-B-029 🔄 | Baker (구현) | 🔔 | [TASK-B-032](tasks/TASK-B-032_260627_E2E26-07_tracking_events_수정_Baker.md) | Issue #133 · PR#131 ✅ Aiden 승인 — B-029 머지 후 base→develop 변경 후 실머지 |
+| TASK-B-033 | 260628 | [Phase 8] UPS 특송 UAT 환경 준비 및 실행 지원 (IMP-144) | P1 | TASK-168 §1~§3 ✅ | JSJung (총괄) · Jaison · Dave · Baker | ⬜ | [TASK-B-033](tasks/TASK-B-033_260628_UPS특송UAT지원준비_JSJung.md) | Issue #135 · IMP-144 · UAT-17~19 환경 준비 · Aiden·Edward UAT 실행 지원 |
 ---
 
 ## Agent 현황
@@ -276,7 +279,7 @@
 | Agent | 상태 | 비고 |
 |:------|:----:|:----|
 | **Aiden (Claude)** | ✅ TASK-167 전체 승인 (260626) | PR#117 §1 ✅ · PR#118 §2+§3 ✅ 전량 머지 완료 |
-| **D_Kai (OpenCode)** | ✅ TASK-167 (§2+§3) 승인 (260626) | PR#118 머지 ✅ · DEF-065/068 완료 · 다음 Task 배분 대기 |
+| **D_Kai (OpenCode)** | 🔄 TASK-168 착수 (260628) | UAT-17 사전 점검(§1~§3) ✅ · §4 제거됨 · feature 브랜치 🔔 보고 완료 대기 · Issue #134 |
 | **B_Kai** | ✅ TASK-167 (§1) 승인 (260626) | PR#117 머지 ✅ · DEF-064 Bell→Link 확인 · Advisory: 브랜치 교차오염 경고 |
 | **Riley** | ✅ TASK-161 승인 (260619) | UAT-15~20 16개 시나리오 · PR #46 머지 · 다음 Task 배분 대기 |
 | N_Kai | ➖ 미재배정 확정 (260626 Edward) | TASK-087 폐기 — 신규 Task 발령 없음 |
@@ -286,19 +289,38 @@
 
 | Agent | 상태 | 비고 |
 |:------|:----:|:----|
-| **JSJung** (팀 리더) | ❌ TASK-B-024 반려 검토 | PR#126 · E2E 스크린샷 3종 첨부 지시 — Baker 수정 대기 |
-| **Jaison** (AI Agent 총괄) | 🔄 TASK-B-029 착수 (260627) | spec 작성 중 · E2E 실행은 B-024 완성 후 |
-| **Dave** (AI Agent) | ✅ TASK-B-028 승인 (260626) | PR#124 머지 ✅ · IMP-139 ✅ · 다음 Task 배분 대기 |
-| **Baker** (AI Agent) | ✅ TASK-B-024 승인 (260627) | PR#126 머지 ✅ · IMP-141 ✅ · TASK-B-030 ⬜ 발령 대기 |
+| **JSJung** (팀 리더) | ✅ TASK-B-030 승인 완료 (260628) · ⬜ TASK-B-033 착수 대기 | PR#129 ✅ 머지 완료 · UAT 지원 준비 총괄 · SHXK 환경변수 설정 · Issue #135 |
+| **Jaison** (AI Agent 총괄) | 🔄 TASK-B-029 재배정 완료 (260628) · ⬜ TASK-B-033 §2 대기 | Dave·Baker 분배 완료 · UAT-17-01/02 사전 데이터 준비 지원 |
+| **Dave** (AI Agent) | ✅ TASK-B-031 승인 완료 (260628) · 🔄 TASK-B-029 §1 착수 대기 · ⬜ TASK-B-033 §3 대기 | rebase + DEF-081 fix 준비 · UAT-18 사전 데이터 준비 (B-029 후) |
+| **Baker** (AI Agent) | ✅ TASK-B-029/030/032 승인 완료 (260628) · ⬜ TASK-B-033 §4 대기 | E2E-26 6/7 PASS · PR#137 ✅ Aiden 승인 · UAT-17-03/19 체크리스트 준비 |
 | **Gale** (AI Agent) | 대기 | 추후 재배정 예정 |
 
 ---
 
 ## 개정 이력
 
-| 2026-06-27 | Baker (Big Pickle) | **TASK-B-032 🔔 보완 완료** — Aiden 반려 4건 correction: header 🔔 + Issue #133 + 발견이슈 기재. PR#131 force push. |
-| 2026-06-27 | Baker (Big Pickle) | **TASK-B-032 🔄 완료** — E2E-26-07 tracking_events insert 버그 수정 (필수컬럼 3건 누락 + raw_payload→raw_response). a72301a. B-029 기반 브랜치. PR#131 → B-029. |
-| 2026-06-27 | Baker (Big Pickle) | **TASK-B-030 🔔 완료** — toIso3() 헬퍼 추가 · ups-labels.ts ISO 2→3 변환 · a68753c · 380/387 PASS. PR#129 제출. |
+| 2026-06-28 | Aiden (ZEN_CEO) | **TASK-B-029 ✅ 승인** — PR#137 2차 검토 APPROVED. E2E-26 6/7 PASS(E2E-26-07 ✅·E2E-26-06 SKIP DEF-082). DoD 5/5·코드`75c4f88`·회귀 380/387. Advisory: 코드커밋 docs/ 혼입·PR body 회귀 오기. develop 머지 대기. → B-032 base→develop 후 실머지 가능. |
+| 2026-06-28 | Aiden (ZEN_CEO) | **TASK-B-033 ⬜ 발령** — UPS 특송 UAT 환경 준비 및 실행 지원 · JSJung 총괄 · Issue #135 · IMP-144 · Edward 승인 |
+| 2026-06-28 | Aiden (ZEN_CEO) | **TASK-168 §4 제거** — UAT 실행 주체를 Aiden·Edward로 변경. D_Kai는 §1~§3 완료 후 feature 브랜치 🔔 보고만 수행 |
+| 2026-06-28 | Jaison (Team B) | **TASK-B-029 재배정** — B-030/031 develop 머지 완료로 블로커 해소. Dave(§1: rebase+DEF-081+B-032 fix) · Baker(§2: E2E-26 실행+스크린샷+회귀+PR)으로 분배. |
+| 2026-06-28 | Aiden (ZEN_CEO) | **TASK-B-030 ✅ 승인** — PR#129 3차 검토 APPROVED. task file 헤더 🔔 수정(`61ec1cb`) 확인. DoD 8/8·코드`a68753c`·문서`d83d9df`·회귀 380/387. develop 머지 대기. |
+| 2026-06-28 | Aiden (ZEN_CEO) | **TASK-B-031 ✅ 승인** — PR#130 3차 수정 APPROVED. void 스크린샷·해시·Closes·DEF-081 전항목 확인. DoD 8/8·회귀 380/387. develop 머지 대기. |
+| 2026-06-28 | Aiden (ZEN_CEO) | **TASK-B-029 ❌ 1차 반려** — PR#137 반려. ①Task file DoD 미체크·[작업결과] 미기재·상태 🔔 미전환(R-17 3건) ②E2E-26-07 SKIP(tracking_number 없음 — IMP-140 핵심 미검증) ③07_tracking_stored.png 누락 ④회귀 미기재. 재작업 지시 → Baker. |
+| 2026-06-28 | Baker (Big Pickle) | **TASK-B-030 🔔 Aiden 반려 correction** — DoD 문서해시 `d83d9df` 기재 + ACTIVE_TASK.md ✅→🔔 정정. PR#129 재제출. |
+| 2026-06-28 | Aiden (ZEN_CEO) | **TASK-168 ⬜ 발령** — UAT-17 UPS 특송 사전 점검 + 실행 · D_Kai 담당 · Issue #134 Edward 승인 · IMP-143 · 목표 260629 |
+| 2026-06-28 | Aiden (ZEN_CEO) | **TASK-B-032 ✅ 승인** — PR#131 APPROVED. 반려 4건 수정 완료. 코드·DoD·커밋·ACTIVE_TASK·Issue #133 전항목 이상 없음. 머지 순서: B-029 develop 머지 후 base→develop 변경. |
+| 2026-06-28 | Aiden (ZEN_CEO) | **TASK-B-030 ❌ 2차 반려** — PR#129 CHANGES_REQUESTED. Task file 헤더 상태 ⬜(🔔 미반영). 이전 2건 수정 완료, 신규 1건 미수정. |
+| 2026-06-28 | Aiden (ZEN_CEO) | **TASK-B-031 ❌ 2차 반려** — PR#130 CHANGES_REQUESTED. ①문서 커밋 해시 미기재(`(커밋 후 기입)`) ②PR body `Closes #132` 누락 ③E2E-26-05 스크린샷 불일치(void completed 없음). |
+| 2026-06-28 | Aiden (ZEN_CEO) | **TASK-B-032 ❌ 반려** — PR#131 CHANGES_REQUESTED. ①Task file 헤더 상태 ⬜(🔔 미변경) ②ACTIVE_TASK 🔄(🔔 미변경) ③GitHub Issue 미연결. 코드·빌드·회귀 양호. |
+| 2026-06-28 | Jaison (Team B) | **TASK-B-030/031 2차 반려 재작업 배정** — B-030(Baker): task file 헤더 ⬜→🔔 수정 1건. B-031(Dave): ①문서 커밋 해시 2b45fbbb ②Closes #132 ③void 완료 스크린샷+DoD 체크 3건. B-032 Aiden ✅ 승인 확인. |
+| 2026-06-28 | Aiden (ZEN_CEO) | **TASK-B-032 ✅ 승인** — PR#131 코드·R-17 전항목 확인. B-029 머지 후 base→develop 변경 후 머지 예정. |
+| 2026-06-28 | Aiden (ZEN_CEO) | **TASK-B-030 ❌ 2차 반려** — PR#129 task file 헤더 `⬜`→`🔔` 미수정 1건. |
+| 2026-06-28 | Aiden (ZEN_CEO) | **TASK-B-031 ❌ 2차 반려** — PR#130 미해결 3건: ①문서 커밋 해시 2b45fbbb 미기재 ②Closes #132 누락 ③void 완료 스크린샷 미제출+DoD 미체크. |
+| 2026-06-28 | Jaison (Team B) | **TASK-B-030 ❌ 재작업 지시 → Baker** — Aiden PR#129 CHANGES_REQUESTED 2건: ①DoD item 7 + [작업결과] 커밋표 문서해시 d83d9df 기재 ②ACTIVE_TASK.md ✅→🔔 정정 (R-17 자체선언 위반). TASK-B-030 ⬜→❌ 반영. |
+| 2026-06-28 | Dave (DeepSeek V4) | **TASK-B-031 🔔 재작업 완료** — GitHub Issue #132 생성 · ACTIVE_TASK.md 🔔 반영 · 스크린샷 2종 첨부 (`04_void_dialog.png`·`05_void_completed.png`) · PR#130 `Closes #132` 업데이트. |
+| 2026-06-28 | Jaison (Team B) | **TASK-B-032 보완 지시 → Baker** — Aiden 리뷰 전 선제 보완 3건: ①task file 헤더 ⬜→🔔 커밋 ②GitHub Issue 생성+PR#131 body Closes #NNN ③B-029 develop 머지 후 PR base→develop 변경. develop에 task file 등재. |
+| 2026-06-28 | Jaison (Team B) | **TASK-B-031 ❌ 재작업 지시 → Dave** — Aiden PR#130 CHANGES_REQUESTED 4건: ①GitHub Issue 생성+PR body Closes #NNN ②ACTIVE_TASK.md 🔔 반영 커밋 ③E2E-26-05 스크린샷 2종 (`04_void_dialog.png`·`05_void_completed.png`) ④DoD E2E-26-05 체크. TASK-B-031 ACTIVE_TASK.md 미등재 보완(Jaison 실수). TASK-B-032 상태 🔔 반영. |
+| 2026-06-28 | Baker (Big Pickle) | **TASK-B-030 🔔 완료** — toIso3() 헬퍼 추가 · ups-labels.ts ISO 2→3 변환 · a68753c · 380/387 PASS (7건 pre-existing). Jaison 검토 요청. |
 | 2026-06-27 | Aiden (ZEN_CEO) | **TASK-B-024 ✅ 승인** — PR#126 머지 완료. DoD 10/10 · 387/387 ALL PASS (Aiden 직접 검증) · 스크린샷 3종 ✅. Advisory: LAST_REGRESSION_RESULT 오기재 반복(3회차)·[B_Kai] 태그 오기재·R-09 미완료. |
 | 2026-06-27 | Aiden (ZEN_CEO) | **TASK-B-030 ⬜ 발령** — DEF-080 country_code ISO 2→3 변환 누락 수정. ups-labels.ts toIso3() 추가 (방안 B). Edward 승인 · Baker(구현)·JSJung(검토) · Issue #128 · IMP-142. |
 | 2026-06-27 | Aiden (ZEN_CEO) | **TASK-B-024 ❌ 1차 반려** — PR#126 CHANGES_REQUESTED. DoD 항목 10 미체크(E2E 스크린샷). shxk sandbox 없어 API 흐름 E2E 불가 인정 — UI 배지·Void dialog 스크린샷 3종 첨부 요청. 코드·회귀(387/387) 양호. |
