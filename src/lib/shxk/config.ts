@@ -13,3 +13,11 @@ export function assertShxkConfig(): void {
     )
   }
 }
+
+export const SHXK_SHIPPER_NAME     = process.env.SHXK_SHIPPER_NAME     ?? 'SNTL Korea Co Ltd'
+export const SHXK_SHIPPER_COUNTRY  = process.env.SHXK_SHIPPER_COUNTRY  ?? 'KR'
+export const SHXK_SHIPPER_PROVINCE = process.env.SHXK_SHIPPER_PROVINCE ?? 'Seoul'
+export const SHXK_SHIPPER_CITY     = process.env.SHXK_SHIPPER_CITY     ?? 'Mapo-gu'
+export const SHXK_SHIPPER_STREET   = process.env.SHXK_SHIPPER_STREET   ?? '123 Logistics Blvd Mapo'
+export const SHXK_SHIPPER_POSTCODE = process.env.SHXK_SHIPPER_POSTCODE ?? '04515'
+export const SHXK_SHIPPER_PHONE    = process.env.SHXK_SHIPPER_PHONE    ?? '02-1234-5678'

@@ -80,7 +80,13 @@ async function setupTestFixtures(): Promise<void> {
       dest_port_id: destPortId,
       transport_mode: 'AIR',
       order_type: 'B2B',
-      cargo_details: JSON.stringify([{ qty: 1, weight: 1.0, description: 'E2E26 test' }]),
+      cargo_details: JSON.stringify([
+        { qty: 1, weight: 1.0, description: 'E2E26 test item', value: 1.00 },
+      ]),
+      recipient_name: 'E2E Test Consignee',
+      recipient_address: '1-1 Shinjuku, Tokyo',
+      recipient_phone: '080-0000-0000',
+      recipient_zipcode: '160-0022',
     })
     .select('id')
     .single();
