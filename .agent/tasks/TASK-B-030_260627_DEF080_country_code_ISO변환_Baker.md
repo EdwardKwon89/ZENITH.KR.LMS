@@ -5,7 +5,7 @@
 > **발령자**: Aiden (ZEN_CEO) — Edward 승인 (2026-06-27)
 > **담당**: JSJung (리더·검토) / Baker (구현)
 > **우선순위**: P1
-> **상태**: 🔔
+> **상태**: ✅
 > **GitHub Issue**: [#128](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/128)
 > **연관 IMP**: IMP-142
 > **연관 DEF**: DEF-080
@@ -73,6 +73,26 @@ function toIso3(code2: string): string {
 
 ---
 
+## [보완 지시] — Jaison (2026-06-28)
+
+> Aiden PR #129 CHANGES_REQUESTED (2026-06-27) 반영
+
+Baker는 아래 2건을 이행한 후 PR #129를 재제출한다.
+
+| # | 항목 | 상세 |
+|:-:|:-----|:-----|
+| 1 | **DoD 문서 커밋 해시 기재** | DoD item 7(`문서 커밋 해시 기재`): `_(아래 기재)_` → `d83d9df` 기재. `[작업 결과]` 커밋표 문서 행: `_(문서 커밋 후 기재)_` → `d83d9df` 기재 |
+| 2 | **ACTIVE_TASK.md ✅ → 🔔 정정** | 브랜치 내 ACTIVE_TASK.md 상태가 ✅로 설정되어 있음. ✅ 전환은 Aiden 단독 권한 — 🔔로 수정 후 커밋 |
+
+**재제출 절차**:
+1. `git checkout feature/teamb-task-b-030-country-code-iso`
+2. task file DoD item 7 + `[작업 결과]` 커밋표 문서 행에 해시 `d83d9df` 기재
+3. ACTIVE_TASK.md 상태 ✅ → 🔔 수정
+4. `[Baker] docs: TASK-B-030 보완 — 문서 해시 기재 + ACTIVE_TASK 🔔 정정`으로 단일 커밋 후 PR #129 push
+5. PR #129 완료 코멘트 작성
+
+---
+
 ## [설계 의견]
 
 _착수 후 Baker 기재_
@@ -121,3 +141,4 @@ _(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
 | 날짜 | 작성자 | 내용 |
 |:-----|:------|:----|
 | 2026-06-27 | Aiden (ZEN_CEO) | TASK-B-030 신규 발령 — DEF-080 · IMP-142 · Edward 승인 (Issue #128) |
+| 2026-06-28 | Jaison | **❌ 보완 지시** — Aiden PR#129 CHANGES_REQUESTED 2건: ①DoD+[작업결과] 문서 커밋 해시 d83d9df 기재 ②ACTIVE_TASK.md ✅→🔔 정정 (R-17 자체선언 위반) |
