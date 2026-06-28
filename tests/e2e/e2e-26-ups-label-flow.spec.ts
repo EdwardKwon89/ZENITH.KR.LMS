@@ -329,15 +329,18 @@ test.describe('E2E-26: UPS 레이블 발급 전체 흐름', () => {
   });
 
   // ── E2E-26-07 ─────────────────────────────────────────────────────────────
-  test('E2E-26-07: gettrack polling 첫 호출 → zen_ups_tracking_events 저장 확인', async () => {
+  test('E2E-26-07: gettrack polling 첫 호출 → zen_ups_tracking_events 저장 확인', async ({ page }) => {
     test.setTimeout(60000);
 
-    // zen_ups_labels에서 활성 레이블 확인
+    // zen_ups_labels에서 tracking_number 있는 레코드 확인 (void 여부 무관)
     const { data: label } = await supabase
       .from('zen_ups_labels')
       .select('id, tracking_number, order_id')
       .eq('package_id', testPackageId)
-      .eq('is_voided', false)
+      .not('tracking_number', 'is', null)
+      .neq('tracking_number', '')
+      .order('created_at', { ascending: false })
+      .limit(1)
       .single();
 
     if (!label?.tracking_number) {
@@ -368,5 +371,12 @@ test.describe('E2E-26: UPS 레이블 발급 전체 흐름', () => {
     expect(events).not.toBeNull();
     expect(events!.length).toBeGreaterThan(0);
     console.log('[E2E-26-07] tracking events:', events!.length);
+
+    // 스크린샷을 위해 로그인 후 페이지 진입
+    await loginAsManager(page);
+    await page.goto('/ko/warehouse/outbound');
+    await page.waitForLoadState('networkidle');
+    await page.screenshot({ path: path.join(SCREENSHOT_DIR, '07_tracking_stored.png') });
   });
+
 });
