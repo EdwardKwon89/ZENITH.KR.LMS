@@ -270,6 +270,7 @@
 | TASK-B-031 | 260627 | [Phase 8] E2E-26-05 폐기 버튼 수정 — fetchAndSaveLabel label_data 컬럼 제거 | P1 | TASK-B-029 🔄 | Dave (구현) | ✅ | [TASK-B-031](tasks/TASK-B-031_260627_E2E26-05_폐기버튼수정_Dave.md) | Issue #132 · PR#130 ✅ Aiden 승인 260628 — develop 머지 대기 |
 | TASK-B-032 | 260627 | [Phase 8] E2E-26-07 tracking_events insert 수정 (B-029 서브) | P1 | TASK-B-029 ✅ | Baker (구현) | ✅ | [TASK-B-032](tasks/TASK-B-032_260627_E2E26-07_tracking_events_수정_Baker.md) | Issue #133 · PR#131 ✅ Aiden 승인 260628 — develop 머지 완료 |
 | TASK-B-033 | 260628 | [Phase 8] UPS 특송 UAT 환경 준비 및 실행 지원 (IMP-144) | P1 | TASK-168 §1~§3 ✅ | JSJung (총괄) · Jaison · Dave · Baker | ⬜ | [TASK-B-033](tasks/TASK-B-033_260628_UPS특송UAT지원준비_JSJung.md) | Issue #135 · IMP-144 · UAT-17~19 환경 준비 · Aiden·Edward UAT 실행 지원 |
+| TASK-B-034 | 260628 | [Phase 8] E2E-26-06 재발급 버튼 UI — void 후 재발급 경로 (IMP-143) | P1 | TASK-B-029 ✅ | Dave (구현) | ✅ | [TASK-B-034](tasks/TASK-B-034_260628_E2E26-06_재발급버튼UI_Dave.md) | Issue #136 · DEF-082 해소 · PR#138 ✅ Aiden 승인 260628 — develop 머지 대기 |
 ---
 
 ## Agent 현황
@@ -279,7 +280,7 @@
 | Agent | 상태 | 비고 |
 |:------|:----:|:----|
 | **Aiden (Claude)** | ✅ TASK-167 전체 승인 (260626) | PR#117 §1 ✅ · PR#118 §2+§3 ✅ 전량 머지 완료 |
-| **D_Kai (OpenCode)** | 🔄 TASK-168 착수 (260628) | UAT-17 사전 점검(§1~§3) ✅ · §4 제거됨 · feature 브랜치 🔔 보고 완료 대기 · Issue #134 |
+| **D_Kai (OpenCode)** | 🔄 TASK-168 §1~§3 완료 · PR 미제출 (260628) | §1~§3 ✅ · **PR 제출 지시 완료 (Issue #134 코멘트)** · feature 브랜치 생성·문서커밋·PR 생성 대기 |
 | **B_Kai** | ✅ TASK-167 (§1) 승인 (260626) | PR#117 머지 ✅ · DEF-064 Bell→Link 확인 · Advisory: 브랜치 교차오염 경고 |
 | **Riley** | ✅ TASK-161 승인 (260619) | UAT-15~20 16개 시나리오 · PR #46 머지 · 다음 Task 배분 대기 |
 | N_Kai | ➖ 미재배정 확정 (260626 Edward) | TASK-087 폐기 — 신규 Task 발령 없음 |
@@ -299,6 +300,8 @@
 
 ## 개정 이력
 
+| 2026-06-28 | Aiden (ZEN_CEO) | **TASK-B-034 ✅ 승인** — PR#138 검토 APPROVED. handleReissue UI·i18n·DoD 8/8·회귀 380/387. DEF-082 해소. develop 머지 대기. Advisory: 코드커밋 docs 혼입. |
+| 2026-06-28 | Aiden (ZEN_CEO) | **D_Kai TASK-168 완료 보고 지시** — Issue #134 코멘트. §1~§3 ✅ 완료 확인. feature 브랜치 PR 제출 요청 (목표 6/29). |
 | 2026-06-28 | Aiden (ZEN_CEO) | **PR#137·131 develop 머지 완료** — TASK-B-029·032 순차 머지. TASK-B-033 착수 가능 (⬜ 해제 조건 충족). |
 | 2026-06-28 | Aiden (ZEN_CEO) | **TASK-B-029 ✅ 승인** — PR#137 2차 검토 APPROVED. E2E-26 6/7 PASS(E2E-26-07 ✅·E2E-26-06 SKIP DEF-082). DoD 5/5·코드`75c4f88`·회귀 380/387. Advisory: 코드커밋 docs/ 혼입·PR body 회귀 오기. develop 머지 대기. → B-032 base→develop 후 실머지 가능. |
 | 2026-06-28 | Aiden (ZEN_CEO) | **TASK-B-033 ⬜ 발령** — UPS 특송 UAT 환경 준비 및 실행 지원 · JSJung 총괄 · Issue #135 · IMP-144 · Edward 승인 |
