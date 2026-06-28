@@ -166,8 +166,7 @@ export default function OutboundProcessForm({ locale }: { locale: string }) {
   };
 
   const confirmWithWarning = async () => {
-    await issueLabelsForPackages(pendingOrders);
-    executeConfirmOutbound(pendingOrders);
+    await executeConfirmOutbound(pendingOrders);
   };
 
   const handleVoidLabel = async (packageId: string) => {

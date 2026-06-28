@@ -465,6 +465,16 @@
 | **TC-P7-CLOSE-04** | 출고 데이터가 없는 날의 집계 처리 | 데이터 없는 일자 조회 시 안전한 0 반환 처리 | `tests/unit/ups/daily-close.test.ts` |
 | **TC-P7-CLOSE-05** | 일마감 데이터 권한 검증 | ADMIN/MANAGER 외 타 역할 접근 차단 검증 | `tests/unit/ups/daily-close.test.ts` |
 
+### 36. Phase 8 UPS E2E 레이블 발급 전체 흐름 (IMP-140)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-P8-UPS-01** | 창고 출고 화면 → UPS 레이블 미발급 상태 확인 | 출고 전 `UPS 미발급` 텍스트 표시 확인 | `tests/e2e/e2e-26-ups-label-flow.spec.ts` |
+| **TC-P8-UPS-02** | 출고 확정 → createorder → 운송장번호 발급 | UPS createorder 정상 호출 및 label_data 저장 | `tests/e2e/e2e-26-ups-label-flow.spec.ts` |
+| **TC-P8-UPS-03** | getnewlabel → 레이블 PDF URL 생성 | PDF URL 정상 반환 확인 | `tests/e2e/e2e-26-ups-label-flow.spec.ts` |
+| **TC-P8-UPS-04** | `zen_ups_labels` DB 레코드 삽입 확인 | 테이블 upsert 정상 동작 | `tests/e2e/e2e-26-ups-label-flow.spec.ts` |
+| **TC-P8-UPS-05** | Void 버튼 → confirm → 폐기 완료 | `markLabelVoided` UPDATE 성공 및 UI 반영 | `tests/e2e/e2e-26-ups-label-flow.spec.ts` |
+| **TC-P8-UPS-07** | gettrack polling → tracking_events 저장 | 폴링 첫 호출 후 `zen_ups_tracking_events` 삽입 확인 | `tests/e2e/e2e-26-ups-label-flow.spec.ts` |
+
 ---
 
 ## 📝 가이드라인 (R-09 Enforcement)
