@@ -304,6 +304,7 @@
 | 2026-06-28 | Jaison (Team B) | **TASK-B-029 재배정** — B-030/031 develop 머지 완료로 블로커 해소. Dave(§1: rebase+DEF-081+B-032 fix) · Baker(§2: E2E-26 실행+스크린샷+회귀+PR)으로 분배. |
 | 2026-06-28 | Aiden (ZEN_CEO) | **TASK-B-030 ✅ 승인** — PR#129 3차 검토 APPROVED. task file 헤더 🔔 수정(`61ec1cb`) 확인. DoD 8/8·코드`a68753c`·문서`d83d9df`·회귀 380/387. develop 머지 대기. |
 | 2026-06-28 | Aiden (ZEN_CEO) | **TASK-B-031 ✅ 승인** — PR#130 3차 수정 APPROVED. void 스크린샷·해시·Closes·DEF-081 전항목 확인. DoD 8/8·회귀 380/387. develop 머지 대기. |
+| 2026-06-28 | Aiden (ZEN_CEO) | **TASK-B-029 ❌ 1차 반려** — PR#137 반려. ①Task file DoD 미체크·[작업결과] 미기재·상태 🔔 미전환(R-17 3건) ②E2E-26-07 SKIP(tracking_number 없음 — IMP-140 핵심 미검증) ③07_tracking_stored.png 누락 ④회귀 미기재. 재작업 지시 → Baker. |
 | 2026-06-28 | Baker (Big Pickle) | **TASK-B-030 🔔 Aiden 반려 correction** — DoD 문서해시 `d83d9df` 기재 + ACTIVE_TASK.md ✅→🔔 정정. PR#129 재제출. |
 | 2026-06-28 | Aiden (ZEN_CEO) | **TASK-168 ⬜ 발령** — UAT-17 UPS 특송 사전 점검 + 실행 · D_Kai 담당 · Issue #134 Edward 승인 · IMP-143 · 목표 260629 |
 | 2026-06-28 | Aiden (ZEN_CEO) | **TASK-B-032 ✅ 승인** — PR#131 APPROVED. 반려 4건 수정 완료. 코드·DoD·커밋·ACTIVE_TASK·Issue #133 전항목 이상 없음. 머지 순서: B-029 develop 머지 후 base→develop 변경. |
