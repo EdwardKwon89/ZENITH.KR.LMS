@@ -24,6 +24,7 @@ import {
   FileText,
   Loader2,
   Download,
+  RefreshCw,
   RotateCcw,
   XCircle,
 } from "lucide-react";
@@ -161,7 +162,24 @@ export default function OutboundProcessForm({ locale }: { locale: string }) {
     } catch (err: any) {
       toast.error(err.message || "출고 확정 실패");
     } finally {
-      setSubmitLoading(false);
+      setVoidLoading(false);
+    }
+  };
+
+  const handleReissue = async (packageId: string) => {
+    setIssuingLabels(true);
+    try {
+      const res = await issueUpsLabel(packageId);
+      if (res.success) {
+        toast.success(t("ups_label_issued"));
+        await fetchData();
+      } else {
+        toast.error(res.error || t("ups_label_issue_failed"));
+      }
+    } catch (err: any) {
+      toast.error(err.message || t("ups_label_issue_failed"));
+    } finally {
+      setIssuingLabels(false);
     }
   };
 
@@ -532,9 +550,25 @@ export default function OutboundProcessForm({ locale }: { locale: string }) {
                             </button>
                           </>
                         ) : (
-                          <ZenBadge className="bg-slate-100 text-slate-500 border-slate-200 text-[10px]">
-                            {t("ups_label_voided")}
-                          </ZenBadge>
+                          <>
+                            <ZenBadge className="bg-slate-100 text-slate-500 border-slate-200 text-[10px]">
+                              {t("ups_label_voided")}
+                            </ZenBadge>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const targetPkg = pkgs.find((p: any) =>
+                                  (p.ups_labels || []).some((l: any) => l.is_voided)
+                                );
+                                if (targetPkg) handleReissue(targetPkg.id);
+                              }}
+                              disabled={issuingLabels}
+                              className="inline-flex items-center gap-1 px-2 py-1 text-[10px] font-semibold text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors disabled:opacity-50"
+                            >
+                              <RefreshCw size={12} />
+                              {t("ups_label_reissue")}
+                            </button>
+                          </>
                         )}
                       </div>
                     )}
