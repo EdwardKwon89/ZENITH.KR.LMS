@@ -257,7 +257,7 @@
 | TASK-B-020 | 260623 | DEF-073 Agency shippers/new · rate-overrides/new Server Action 오류 수정 | P2 | 없음 | Baker | ✅ | [TASK-B-020](tasks/TASK-B-020_260623_DEF073_AgencyServerAction수정_Baker.md) | Issue #80 · DEF-073 · getTranslations→useTranslations · PR#83 머지 ✅ (260623) · Aiden ✅ 승인 |
 | TASK-B-021 | 260624 | [SPR-09] E2E-23 보강 — UAT-20 Agency 정산 CSV 다운로드 + Reconciliation 알림 상세 검증 | P2 | TASK-B-019 ✅ | Jaison (총괄) · Baker (구현) | ✅ | [TASK-B-021](tasks/TASK-B-021_260624_E2E23보강_UAT20Agency정산_Jaison.md) | Issue #91 · TC-AG-09~12 ✅ · 387/387 ALL PASS · PR#94 머지 ✅ (260624) · Aiden ✅ 승인 |
 | TASK-167 | 260626 | DEF-061~068 사이드바 메뉴 미등록 + TC-POLICY 픽스 + RLS 수정 | P2 | 없음 | B_Kai (§1 NaviSidebar) · D_Kai (§2 TC+§3 RLS) | ✅ (§1) / ✅ (§2+§3) | [TASK-167 §1](tasks/TASK-167_260624_DEF061-064_NaviSidebar메뉴등록_BKai.md) · [TASK-167 전체](tasks/TASK-167_260626_DEF061~068_사이드바메뉴+TC픽스+RLS수정_BKai_DKai.md) | Issue #115 · §1: PR#117 머지 ✅ (260626) · §2+§3: PR#118 머지 ✅ (260626) |
-| TASK-168 | 260628 | UAT-17 UPS 특송 오더 발송 — 사전 점검(DB시드·코드·계정) + UAT-17-01~03 실행 (IMP-143) | P1 | 없음 | D_Kai | ⬜ | [TASK-168](tasks/TASK-168_260628_UAT17_UPS특송사전점검및실행_DKai.md) | Issue #134 · IMP-143 · Edward 승인 260628 · 목표완료 260629 |
+| TASK-168 | 260628 | UAT-17 UPS 특송 오더 발송 — 사전 점검(DB시드·코드·계정) + UAT-17-01~03 실행 (IMP-143) | P1 | 없음 | D_Kai | 🔄 | [TASK-168](tasks/TASK-168_260628_UAT17_UPS특송사전점검및실행_DKai.md) | Issue #134 · IMP-143 · §1~§3 ✅ · §4 진행 중 · 목표 260629 |
 | TASK-B-022 | 260624 | [Phase 8] UPS 실물 연동 사전 설계 리서치 | P1 | 없음 | JSJung | ➖ | [TASK-B-022](tasks/TASK-B-022_260624_Phase8_UPS실물연동_리서치_JSJung.md) | TASK-B-023으로 대체 — 취소 (2026-06-26 Aiden) |
 | TASK-B-023 | 260625 | [Phase 8] shxk.rtb56.com API 기반 UPS 연동 리서치 재작성 | P1 | DEF-079 발견 | Baker (구현) · JSJung (검토) | ✅ | [TASK-B-023](tasks/TASK-B-023_260625_Phase8_rtb56_UPS_리서치_Jaison.md) | Issue #112 · PR#113 ✅ 승인 (2026-06-26) · DoD 9/9 · 387/387 PASS · DEF-079 해소 |
 | TASK-B-024 | 260626 | [Phase 8] UPS 레이블 발급 UI — 창고 출고 화면 인라인 배치 | P1 | TASK-B-025~028 ✅ 전량 | JSJung (검토) · Baker (구현) | ✅ | [TASK-B-024](tasks/TASK-B-024_260626_Phase8_UPS레이블발급UI_JSJung.md) | Issue #114 · IMP-141 ✅ · PR#126 머지 ✅ (260627 Aiden) · 387/387 ALL PASS · 스크린샷 3종 ✅ |
@@ -278,7 +278,7 @@
 | Agent | 상태 | 비고 |
 |:------|:----:|:----|
 | **Aiden (Claude)** | ✅ TASK-167 전체 승인 (260626) | PR#117 §1 ✅ · PR#118 §2+§3 ✅ 전량 머지 완료 |
-| **D_Kai (OpenCode)** | ⬜ TASK-168 착수 대기 | UAT-17 사전 점검 + 실행 · Issue #134 · IMP-143 · 목표 260629 |
+| **D_Kai (OpenCode)** | 🔄 TASK-168 착수 (260628) | UAT-17 사전 점검(§1~§3) ✅ · §4 UAT-17 실행 중 · Issue #134 · IMP-143 · 목표 260629 |
 | **B_Kai** | ✅ TASK-167 (§1) 승인 (260626) | PR#117 머지 ✅ · DEF-064 Bell→Link 확인 · Advisory: 브랜치 교차오염 경고 |
 | **Riley** | ✅ TASK-161 승인 (260619) | UAT-15~20 16개 시나리오 · PR #46 머지 · 다음 Task 배분 대기 |
 | N_Kai | ➖ 미재배정 확정 (260626 Edward) | TASK-087 폐기 — 신규 Task 발령 없음 |
