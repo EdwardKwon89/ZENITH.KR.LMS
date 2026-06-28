@@ -272,7 +272,7 @@
 | TASK-B-033 | 260628 | [Phase 8] UPS 특송 UAT 주도 실행 (IMP-144) | P1 | TASK-168 §1~§3 ✅ | JSJung (총괄) · Jaison · Dave · Baker | ⬜ | [TASK-B-033](tasks/TASK-B-033_260628_UPS특송UAT지원준비_JSJung.md) | Issue #135 · IMP-144 · **Team B UAT 주도 실행** · Team A 지원+결함방향결정 (260628 Edward 지시) |
 | TASK-B-034 | 260628 | [Phase 8] E2E-26-06 재발급 버튼 UI — void 후 재발급 경로 (IMP-143) | P1 | TASK-B-029 ✅ | Dave (구현) | ✅ | [TASK-B-034](tasks/TASK-B-034_260628_E2E26-06_재발급버튼UI_Dave.md) | Issue #136 · DEF-082 해소 · PR#138 머지 ✅ (260628 Aiden) |
 | TASK-B-035 | 260628 | [Phase 8] DEF-083 zen_ups_labels partial unique index migration (재발급 duplicate key 수정) | P1 | 없음 | Baker (구현) | ⬜ | [TASK-B-035](tasks/TASK-B-035_260628_DEF083_partial_unique_index_Baker.md) | Issue #141 · DEF-083 · Production blocking |
-| TASK-B-036 | 260628 | [Phase 8] E2E-26-06 UPS 재발급 실 UI 버튼 클릭 E2E 재실행 | P1 | TASK-B-035 ✅ | Baker (구현) | 🚫 | [TASK-B-036](tasks/TASK-B-036_260628_E2E26-06_재실행_Baker.md) | Issue #142 · 전제: TASK-B-035 · test.skip 제거 + 실 UI 검증 |
+| TASK-B-036 | 260628 | [Phase 8] E2E-26-06 UPS 재발급 실 UI 버튼 클릭 E2E 재실행 | P1 | TASK-B-035 ✅ | Baker (구현) | 🔔 | [TASK-B-036](tasks/TASK-B-036_260629_E2E26-06_재발급UI_재실행_Baker.md) | Issue #142 · test.skip 제거 완료 · PR#145 |
 | TASK-B-037 | 260628 | [Phase 8] DEF-084 OutboundProcessForm.tsx 재발급 버튼 pkgs.find() scope 오류 수정 | P2 | TASK-B-036 §2 재현 확인 | Dave (구현) | 🚫 | [TASK-B-037](tasks/TASK-B-037_260628_DEF084_OutboundProcessForm_pkgs_find_Dave.md) | Issue #143 · DEF-084 · 재현 확인 후 착수 |
 ---
 
