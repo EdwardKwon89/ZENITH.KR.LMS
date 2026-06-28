@@ -270,7 +270,7 @@
 | TASK-B-031 | 260627 | [Phase 8] E2E-26-05 폐기 버튼 수정 — fetchAndSaveLabel label_data 컬럼 제거 | P1 | TASK-B-029 🔄 | Dave (구현) | ✅ | [TASK-B-031](tasks/TASK-B-031_260627_E2E26-05_폐기버튼수정_Dave.md) | Issue #132 · PR#130 ✅ Aiden 승인 260628 — develop 머지 대기 |
 | TASK-B-032 | 260627 | [Phase 8] E2E-26-07 tracking_events insert 수정 (B-029 서브) | P1 | TASK-B-029 ✅ | Baker (구현) | ✅ | [TASK-B-032](tasks/TASK-B-032_260627_E2E26-07_tracking_events_수정_Baker.md) | Issue #133 · PR#131 ✅ Aiden 승인 260628 — develop 머지 완료 |
 | TASK-B-033 | 260628 | [Phase 8] UPS 특송 UAT 환경 준비 및 실행 지원 (IMP-144) | P1 | TASK-168 §1~§3 ✅ | JSJung (총괄) · Jaison · Dave · Baker | ⬜ | [TASK-B-033](tasks/TASK-B-033_260628_UPS특송UAT지원준비_JSJung.md) | Issue #135 · IMP-144 · UAT-17~19 환경 준비 · Aiden·Edward UAT 실행 지원 |
-| TASK-B-034 | 260628 | [Phase 8] E2E-26-06 재발급 버튼 UI — void 후 재발급 경로 (IMP-143) | P1 | TASK-B-029 ✅ | Dave (구현) | ✅ | [TASK-B-034](tasks/TASK-B-034_260628_E2E26-06_재발급버튼UI_Dave.md) | Issue #136 · DEF-082 해소 · PR#138 ✅ Aiden 승인 260628 — develop 머지 대기 |
+| TASK-B-034 | 260628 | [Phase 8] E2E-26-06 재발급 버튼 UI — void 후 재발급 경로 (IMP-143) | P1 | TASK-B-029 ✅ | Dave (구현) | ✅ | [TASK-B-034](tasks/TASK-B-034_260628_E2E26-06_재발급버튼UI_Dave.md) | Issue #136 · DEF-082 해소 · PR#138 머지 ✅ (260628 Aiden) |
 ---
 
 ## Agent 현황
