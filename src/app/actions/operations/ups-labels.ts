@@ -110,7 +110,9 @@ async function saveInitialLabel(
     order_id: orderId,
     package_id: packageId,
     reference_no: referenceNo,
-    tracking_number: trackingNumber,
+    tracking_number: trackingNumber ?? '',
+    label_format: 'PDF',
+    storage_path: '',
     generated_by: profileId,
   });
   return error?.message ?? null;
