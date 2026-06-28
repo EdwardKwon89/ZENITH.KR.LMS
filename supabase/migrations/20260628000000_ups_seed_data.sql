@@ -35,7 +35,7 @@ ON CONFLICT (country_code) DO NOTHING;
 -- 3. zen_ups_base_rates — 대표 Zone(Z2~Z10) × Product × Weight 샘플 (selling/cost 분리)
 INSERT INTO public.zen_ups_base_rates (product_id, zone_id, weight_kg, selling_price, cost_price, valid_from)
 WITH
-  prods AS (SELECT id, code FROM public.zen_ups_products),
+  prods AS (SELECT id, product_code FROM public.zen_ups_products),
   zns    AS (SELECT id, zone_code FROM public.zen_ups_zones WHERE zone_code != 'Z1'),
   wts    (weight_kg) AS (VALUES (0.5),(1.0),(1.5),(2.0),(2.5),(3.0),(3.5),(4.0),(4.5),(5.0),(7.0),(10.0),(15.0),(20.0),(25.0),(30.0)),
   zone_rates AS (
@@ -54,7 +54,7 @@ WITH
   ),
   prod_factors AS (
     SELECT id,
-      CASE code
+      CASE product_code
         WHEN 'WW_EXPRESS_DOC'    THEN 0.7
         WHEN 'WW_EXPRESS_NONDOC' THEN 1.0
         WHEN 'WW_SAVER_DOC'      THEN 0.6
@@ -122,5 +122,5 @@ FROM (VALUES
   ('ICN-LHR-UPS07', 'ICN', 'LHR', '주 5회'),
   ('ICN-DXB-UPS08', 'ICN', 'DXB', '주 4회')
 ) AS f(flight_no, origin_airport, dest_airport, frequency)
-CROSS JOIN (SELECT id FROM public.zen_ups_products WHERE code = 'WW_FLIGHT') p
+CROSS JOIN (SELECT id FROM public.zen_ups_products WHERE product_code = 'WW_FLIGHT') p
 ON CONFLICT DO NOTHING;
