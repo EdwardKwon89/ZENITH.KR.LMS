@@ -133,16 +133,14 @@ async function fetchAndSaveLabel(
     return null;
   }
 
-  const labelData = labelRes.data.label_data ?? null;
   const labelUrl = labelRes.data.label_url ?? null;
   const labelFormat = labelRes.data.label_type === 'PDF' ? 'PDF' : 'PNG';
 
   const { error } = await supabase
     .from('zen_ups_labels')
     .update({
-      label_data: labelData,
       label_format: labelFormat,
-      storage_path: labelUrl,
+      storage_path: labelUrl ?? '',
     })
     .eq('package_id', packageId);
 
