@@ -268,7 +268,7 @@
 | TASK-B-029 | 260626 | [Phase 8] E2E 테스트 — createorder→getnewlabel→gettrack 전체 흐름 (IMP-140) | P1 | TASK-B-025~028 ✅ 전량 | Dave (§1 준비) · Baker (§2 실행) | ✅ | [TASK-B-029](tasks/TASK-B-029_260626_IMP140_E2E테스트_Jaison.md) | Issue #110 · IMP-140 ✅ · E2E-26 6/7 PASS · PR#137 ✅ Aiden 승인 260628 — develop 머지 대기 |
 | TASK-B-030 | 260627 | [Phase 8] DEF-080 country_code ISO 2→3 변환 누락 수정 (IMP-142) | P1 | TASK-B-025 ✅ | JSJung (검토) · Baker (구현) | ✅ | [TASK-B-030](tasks/TASK-B-030_260627_DEF080_country_code_ISO변환_Baker.md) | Issue #128 · IMP-142 · DEF-080 · PR#129 ✅ Aiden 승인 260628 — develop 머지 완료 |
 | TASK-B-031 | 260627 | [Phase 8] E2E-26-05 폐기 버튼 수정 — fetchAndSaveLabel label_data 컬럼 제거 | P1 | TASK-B-029 🔄 | Dave (구현) | ✅ | [TASK-B-031](tasks/TASK-B-031_260627_E2E26-05_폐기버튼수정_Dave.md) | Issue #132 · PR#130 ✅ Aiden 승인 260628 — develop 머지 대기 |
-| TASK-B-032 | 260627 | [Phase 8] E2E-26-07 tracking_events insert 수정 (B-029 서브) | P1 | TASK-B-029 🔄 | Baker (구현) | 🔔 | [TASK-B-032](tasks/TASK-B-032_260627_E2E26-07_tracking_events_수정_Baker.md) | Issue #133 · PR#131 ✅ Aiden 승인 — B-029 머지 후 base→develop 변경 후 실머지 |
+| TASK-B-032 | 260627 | [Phase 8] E2E-26-07 tracking_events insert 수정 (B-029 서브) | P1 | TASK-B-029 ✅ | Baker (구현) | ✅ | [TASK-B-032](tasks/TASK-B-032_260627_E2E26-07_tracking_events_수정_Baker.md) | Issue #133 · PR#131 ✅ Aiden 승인 260628 — develop 머지 완료 |
 | TASK-B-033 | 260628 | [Phase 8] UPS 특송 UAT 환경 준비 및 실행 지원 (IMP-144) | P1 | TASK-168 §1~§3 ✅ | JSJung (총괄) · Jaison · Dave · Baker | ⬜ | [TASK-B-033](tasks/TASK-B-033_260628_UPS특송UAT지원준비_JSJung.md) | Issue #135 · IMP-144 · UAT-17~19 환경 준비 · Aiden·Edward UAT 실행 지원 |
 ---
 
@@ -292,13 +292,14 @@
 | **JSJung** (팀 리더) | ✅ TASK-B-030 승인 완료 (260628) · ⬜ TASK-B-033 착수 대기 | PR#129 ✅ 머지 완료 · UAT 지원 준비 총괄 · SHXK 환경변수 설정 · Issue #135 |
 | **Jaison** (AI Agent 총괄) | 🔄 TASK-B-029 재배정 완료 (260628) · ⬜ TASK-B-033 §2 대기 | Dave·Baker 분배 완료 · UAT-17-01/02 사전 데이터 준비 지원 |
 | **Dave** (AI Agent) | ✅ TASK-B-031 승인 완료 (260628) · 🔄 TASK-B-029 §1 착수 대기 · ⬜ TASK-B-033 §3 대기 | rebase + DEF-081 fix 준비 · UAT-18 사전 데이터 준비 (B-029 후) |
-| **Baker** (AI Agent) | ✅ TASK-B-029/030/032 승인 완료 (260628) · ⬜ TASK-B-033 §4 대기 | E2E-26 6/7 PASS · PR#137 ✅ Aiden 승인 · UAT-17-03/19 체크리스트 준비 |
+| **Baker** (AI Agent) | ✅ TASK-B-029/030/032 머지 완료 (260628) · ⬜ TASK-B-033 §4 대기 | PR#137·131 develop 머지 완료 · UAT-17-03/19 체크리스트 준비 |
 | **Gale** (AI Agent) | 대기 | 추후 재배정 예정 |
 
 ---
 
 ## 개정 이력
 
+| 2026-06-28 | Aiden (ZEN_CEO) | **PR#137·131 develop 머지 완료** — TASK-B-029·032 순차 머지. TASK-B-033 착수 가능 (⬜ 해제 조건 충족). |
 | 2026-06-28 | Aiden (ZEN_CEO) | **TASK-B-029 ✅ 승인** — PR#137 2차 검토 APPROVED. E2E-26 6/7 PASS(E2E-26-07 ✅·E2E-26-06 SKIP DEF-082). DoD 5/5·코드`75c4f88`·회귀 380/387. Advisory: 코드커밋 docs/ 혼입·PR body 회귀 오기. develop 머지 대기. → B-032 base→develop 후 실머지 가능. |
 | 2026-06-28 | Aiden (ZEN_CEO) | **TASK-B-033 ⬜ 발령** — UPS 특송 UAT 환경 준비 및 실행 지원 · JSJung 총괄 · Issue #135 · IMP-144 · Edward 승인 |
 | 2026-06-28 | Aiden (ZEN_CEO) | **TASK-168 §4 제거** — UAT 실행 주체를 Aiden·Edward로 변경. D_Kai는 §1~§3 완료 후 feature 브랜치 🔔 보고만 수행 |
