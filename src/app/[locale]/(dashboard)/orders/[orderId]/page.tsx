@@ -82,7 +82,7 @@ export default async function OrderDetailPage({
   const isShipper = order.shipper_id && (profile?.id === order.shipper_id || profile?.org_id === order.shipper_id);
   const isAgency = profile?.role === 'AGENCY';
   const canPrintUpsInvoice = isAdmin || profile?.role === 'MANAGER' || isShipper || isAgency;
-  const isUpsOrder = order.transport_mode === 'UPS';
+  const isUpsOrder = order.transport_mode === 'EXP';
 
   const rawLogsData = isAdmin ? await getTrackingRawLogs(orderId) : { logs: [] };
   const rawLogs = rawLogsData?.logs || [];
