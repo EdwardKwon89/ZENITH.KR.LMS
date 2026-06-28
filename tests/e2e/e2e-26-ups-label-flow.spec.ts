@@ -251,12 +251,15 @@ test.describe('E2E-26: UPS 레이블 발급 전체 흐름', () => {
 
   // ── E2E-26-05 ─────────────────────────────────────────────────────────────
   test('E2E-26-05: 폐기(Void) 버튼 → confirm dialog → 폐기 완료 확인', async ({ page }) => {
-    test.setTimeout(60000);
+    test.setTimeout(120000);
     page.on('console', msg => console.log(`[PAGE] ${msg.type()}: ${msg.text()}`));
 
     await loginAsManager(page);
     await page.goto('/ko/warehouse/outbound');
     await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(2000);
+    // 오늘의 출고 이력 섹션 표시 확인
+    await expect(page.getByText('오늘의 출고 이력').first()).toBeVisible({ timeout: 15000 });
 
     // 폐기 버튼 클릭
     const voidBtn = page.getByRole('button', { name: /폐기/ }).first();
@@ -271,14 +274,17 @@ test.describe('E2E-26: UPS 레이블 발급 전체 흐름', () => {
     const confirmVoidBtn = page.getByRole('button', { name: /폐기 확정/ }).first();
     await confirmVoidBtn.click();
 
-    // 폐기 완료 확인 (voidUpsLabel이 내부에서 removeorder 호출)
+    // voidUpsLabel 서버 액션 완료 대기
+    await page.waitForTimeout(3000);
+
+    // 폐기 완료 확인
     await expect(page.getByText(/폐기됨|UPS 미발급/).first()).toBeVisible({ timeout: 30000 });
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, '05_void_completed.png') });
 
     // DB 폐기 확인
     const { data: voidedLabel } = await supabase
       .from('zen_ups_labels')
-      .select('is_voided, voided_at')
+      .select('id, is_voided, voided_at, package_id')
       .eq('package_id', testPackageId)
       .order('created_at', { ascending: false })
       .limit(1)

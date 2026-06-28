@@ -195,7 +195,7 @@ async function markPackageIssued(
   supabase: SupabaseClient,
   packageId: string,
   trackingNumber: string | null,
-): Promise<void> {
+): Promise<string | null> {
   const { error } = await supabase
     .from('zen_order_packages')
     .update({
@@ -205,7 +205,11 @@ async function markPackageIssued(
     })
     .eq('id', packageId);
 
-  if (error) logger.error('zen_order_packages update error:', error);
+  if (error) {
+    logger.error('zen_order_packages update error:', error);
+    return error.message;
+  }
+  return null;
 }
 
 export async function issueUpsLabel(
@@ -234,7 +238,8 @@ export async function issueUpsLabel(
 
     const labelUrl = await fetchAndSaveLabel(supabase, packageId);
 
-    await markPackageIssued(supabase, packageId, orderResult.trackingNo);
+    const pkgErr = await markPackageIssued(supabase, packageId, orderResult.trackingNo);
+    if (pkgErr) return { success: false, error: `Failed to mark package issued: ${pkgErr}` };
 
     revalidatePath("/(dashboard)/warehouse/outbound", "page");
 
@@ -270,20 +275,29 @@ async function fetchActiveLabel(
 }
 
 async function markLabelVoided(supabase: SupabaseClient, packageId: string): Promise<string | null> {
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('zen_ups_labels')
     .update({ is_voided: true, voided_at: new Date().toISOString() })
     .eq('package_id', packageId)
-    .eq('is_voided', false);
-  return error?.message ?? null;
+    .eq('is_voided', false)
+    .select('id, is_voided');
+  if (error) {
+    logger.error('zen_ups_labels void update error:', error);
+    return error.message;
+  }
+  return null;
 }
 
-async function unlockPackageIntlRef(supabase: SupabaseClient, packageId: string): Promise<void> {
+async function unlockPackageIntlRef(supabase: SupabaseClient, packageId: string): Promise<string | null> {
   const { error } = await supabase
     .from('zen_order_packages')
     .update({ intl_ref_locked: false })
     .eq('id', packageId);
-  if (error) logger.error('zen_order_packages unlock error:', error);
+  if (error) {
+    logger.error('zen_order_packages unlock error:', error);
+    return error.message;
+  }
+  return null;
 }
 
 export async function voidUpsLabel(
@@ -303,9 +317,10 @@ export async function voidUpsLabel(
     }
 
     const updateErr = await markLabelVoided(supabase, packageId);
-    if (updateErr) return { success: false, error: '레이블 폐기 기록 실패' };
+    if (updateErr) return { success: false, error: `레이블 폐기 기록 실패: ${updateErr}` };
 
-    await unlockPackageIntlRef(supabase, packageId);
+    const unlockErr = await unlockPackageIntlRef(supabase, packageId);
+    if (unlockErr) return { success: false, error: `intl_ref 복원 실패: ${unlockErr}` };
     revalidatePath("/(dashboard)/warehouse/outbound", "page");
 
     return { success: true };
