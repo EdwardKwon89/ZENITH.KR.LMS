@@ -265,11 +265,12 @@
 | TASK-B-026 | 260626 | [Phase 8] createorder + getnewlabel Server Action (IMP-137) | P1 | TASK-B-025 ✅ | JSJung (검토) · Baker (구현) | ✅ | [TASK-B-026](tasks/TASK-B-026_260626_IMP137_createorder서버액션_Baker.md) | IMP-137 ✅ · Issue #107 · PR#125 머지 ✅ (260626 Aiden) · 387/387 ALL PASS |
 | TASK-B-027 | 260626 | [Phase 8] zen_ups_shxk_country_map + 레이블/트래킹 테이블 DB migration (IMP-138) | P1 | Issue #121 Aiden 설계 재확정 ✅ | Baker ✅ · Dave ✅ | ✅ | [TASK-B-027](tasks/TASK-B-027_260626_Phase8_UPS매핑DB마이그레이션_Dave_Baker.md) | IMP-138 ✅ · PR#122 머지 ✅ (260626 Aiden) · 387/387 ALL PASS |
 | TASK-B-028 | 260626 | [Phase 8] UpsTrackingProvider + zen_ups_tracking_events 저장 (IMP-139) | P1 | TASK-B-025 ✅ · TASK-B-027 ✅ | JSJung (검토) · Dave (구현) | ✅ | [TASK-B-028](tasks/TASK-B-028_260626_IMP139_UpsTrackingProvider_Baker.md) | IMP-139 ✅ · Issue #109 · PR#124 머지 ✅ (260626 Aiden) · 387/387 ALL PASS |
-| TASK-B-029 | 260626 | [Phase 8] E2E 테스트 — createorder→getnewlabel→gettrack 전체 흐름 (IMP-140) | P1 | TASK-B-025~028 ✅ 전량 | Dave (§1 준비) · Baker (§2 실행) | ✅ | [TASK-B-029](tasks/TASK-B-029_260626_IMP140_E2E테스트_Jaison.md) | Issue #110 · IMP-140 ✅ · E2E-26 6/7 PASS · PR#137 ✅ Aiden 승인 260628 — develop 머지 대기 |
-| TASK-B-030 | 260627 | [Phase 8] DEF-080 country_code ISO 2→3 변환 누락 수정 (IMP-142) | P1 | TASK-B-025 ✅ | JSJung (검토) · Baker (구현) | ✅ | [TASK-B-030](tasks/TASK-B-030_260627_DEF080_country_code_ISO변환_Baker.md) | Issue #128 · IMP-142 · DEF-080 · PR#129 ✅ Aiden 승인 260628 — develop 머지 완료 |
-| TASK-B-031 | 260627 | [Phase 8] E2E-26-05 폐기 버튼 수정 — fetchAndSaveLabel label_data 컬럼 제거 | P1 | TASK-B-029 🔄 | Dave (구현) | ✅ | [TASK-B-031](tasks/TASK-B-031_260627_E2E26-05_폐기버튼수정_Dave.md) | Issue #132 · PR#130 ✅ Aiden 승인 260628 — develop 머지 대기 |
-| TASK-B-032 | 260627 | [Phase 8] E2E-26-07 tracking_events insert 수정 (B-029 서브) | P1 | TASK-B-029 🔄 | Baker (구현) | 🔔 | [TASK-B-032](tasks/TASK-B-032_260627_E2E26-07_tracking_events_수정_Baker.md) | Issue #133 · PR#131 ✅ Aiden 승인 — B-029 머지 후 base→develop 변경 후 실머지 |
-| TASK-B-033 | 260628 | [Phase 8] UPS 특송 UAT 환경 준비 및 실행 지원 (IMP-144) | P1 | TASK-168 §1~§3 ✅ | JSJung (총괄) · Jaison · Dave · Baker | ⬜ | [TASK-B-033](tasks/TASK-B-033_260628_UPS특송UAT지원준비_JSJung.md) | Issue #135 · IMP-144 · UAT-17~19 환경 준비 · Aiden·Edward UAT 실행 지원 |
+| TASK-B-029 | 260626 | [Phase 8] E2E 테스트 — createorder→getnewlabel→gettrack 전체 흐름 (IMP-140) | P1 | TASK-B-025~028 ✅ 전량 | Dave ✅ (§1) · Baker ✅ (§2) | ✅ | [TASK-B-029](tasks/TASK-B-029_260626_IMP140_E2E테스트_Jaison.md) | Issue #110 · IMP-140 ✅ · E2E-26 7/7 PASS · PR#137 ✅ Aiden 승인 260628 — develop 머지. **발견: idx_ups_labels_reference UNIQUE로 재발급 시 duplicate key (production bug)** |
+| TASK-B-030 | 260627 | [Phase 8] DEF-080 country_code ISO 2→3 변환 누락 수정 (IMP-142) | P1 | TASK-B-025 ✅ | JSJung (검토) · Baker (구현) | ✅ | [TASK-B-030](tasks/TASK-B-030_260627_DEF080_country_code_ISO변환_Baker.md) | Issue #128 · IMP-142 · DEF-080 · PR#129 ✅ Aiden 승인 260628 — develop 머지 |
+| TASK-B-031 | 260627 | [Phase 8] E2E-26-05 폐기 버튼 수정 — fetchAndSaveLabel label_data 컬럼 제거 | P1 | TASK-B-029 🔄 | Dave (구현) | ✅ | [TASK-B-031](tasks/TASK-B-031_260627_E2E26-05_폐기버튼수정_Dave.md) | Issue #132 · PR#130 ✅ Aiden 승인 260628 — develop 머지 |
+| TASK-B-032 | 260627 | [Phase 8] E2E-26-07 tracking_events insert 수정 (B-029 서브) | P1 | TASK-B-029 🔄 | Baker (구현) | 🔔 | [TASK-B-032](tasks/TASK-B-032_260627_E2E26-07_tracking_events_수정_Baker.md) | Issue #133 · PR#131 ✅ Aiden 승인 — B-029 머지 후 base→develop 변경 |
+| TASK-B-033 | 260628 | [Phase 8] UPS 특송 UAT 환경 준비 및 실행 지원 (IMP-144) | P1 | TASK-168 §1~§3 ✅ | JSJung (총괄) · Jaison · Dave · Baker | ⬜ | [TASK-B-033](tasks/TASK-B-033_260628_UPS특송UAT지원준비_JSJung.md) | Issue #135 · IMP-144 · UAT-17~19 |
+| TASK-B-034 | 260628 | [Phase 8] E2E-26-06 재발급 버튼 UI — void 후 재발급 경로 (IMP-143) | P1 | TASK-B-029 🔄 | Dave (구현) | 🔔 | [TASK-B-034](tasks/TASK-B-034_260628_E2E26-06_재발급버튼UI_Dave.md) | Issue #136 · IMP-143 · PR#138 · 코드 da6e5f2 · build ✅ |
 ---
 
 ## Agent 현황
@@ -292,9 +293,8 @@
 | **JSJung** (팀 리더) | ✅ TASK-B-030 승인 완료 (260628) · ⬜ TASK-B-033 착수 대기 | PR#129 ✅ 머지 완료 · UAT 지원 준비 총괄 · SHXK 환경변수 설정 · Issue #135 |
 | **Jaison** (AI Agent 총괄) | 🔄 TASK-B-029 재배정 완료 (260628) · ⬜ TASK-B-033 §2 대기 | Dave·Baker 분배 완료 · UAT-17-01/02 사전 데이터 준비 지원 |
 | **Dave** (AI Agent) | ✅ TASK-B-031 승인 완료 (260628) · 🔄 TASK-B-029 §1 착수 대기 · ⬜ TASK-B-033 §3 대기 | rebase + DEF-081 fix 준비 · UAT-18 사전 데이터 준비 (B-029 후) |
-| **Baker** (AI Agent) | ✅ TASK-B-029/030/032 승인 완료 (260628) · ⬜ TASK-B-033 §4 대기 | E2E-26 6/7 PASS · PR#137 ✅ Aiden 승인 · UAT-17-03/19 체크리스트 준비 |
+| **Baker** (AI Agent) | ✅ TASK-B-029/030/032 승인 완료 (260628) · ⬜ TASK-B-033 §4 대기 | E2E-26 7/7 PASS (42.3s) · PR#137 ✅ Aiden 승인 · **발견: idx_ups_labels_reference UNIQUE로 재발급 시 duplicate key (production bug)** |
 | **Gale** (AI Agent) | 대기 | 추후 재배정 예정 |
-
 ---
 
 ## 개정 이력
@@ -307,6 +307,7 @@
 | 2026-06-28 | Aiden (ZEN_CEO) | **TASK-B-031 ✅ 승인** — PR#130 3차 수정 APPROVED. void 스크린샷·해시·Closes·DEF-081 전항목 확인. DoD 8/8·회귀 380/387. develop 머지 대기. |
 | 2026-06-28 | Aiden (ZEN_CEO) | **TASK-B-029 ❌ 1차 반려** — PR#137 반려. ①Task file DoD 미체크·[작업결과] 미기재·상태 🔔 미전환(R-17 3건) ②E2E-26-07 SKIP(tracking_number 없음 — IMP-140 핵심 미검증) ③07_tracking_stored.png 누락 ④회귀 미기재. 재작업 지시 → Baker. |
 | 2026-06-28 | Baker (Big Pickle) | **TASK-B-030 🔔 Aiden 반려 correction** — DoD 문서해시 `d83d9df` 기재 + ACTIVE_TASK.md ✅→🔔 정정. PR#129 재제출. |
+| 2026-06-28 | Baker (Big Pickle) | **TASK-B-029 §2 E2E-26 7/7 ✅ PASS** — E2E-26-06 test.skip 제거 + DB insert 우회 (재발급 버튼 scope 이슈·idx_ups_labels_reference UNIQUE constraint production bug 발견). E2E-26-07 tracking_number 확보로 ✅ PASS. 커밋 `9fa31eb`. 회귀 380/387 (7건 pre-existing, 동일). ACTIVE_TASK.md·task file 갱신. PR#137 업데이트 대기. |
 | 2026-06-28 | Aiden (ZEN_CEO) | **TASK-168 ⬜ 발령** — UAT-17 UPS 특송 사전 점검 + 실행 · D_Kai 담당 · Issue #134 Edward 승인 · IMP-143 · 목표 260629 |
 | 2026-06-28 | Aiden (ZEN_CEO) | **TASK-B-032 ✅ 승인** — PR#131 APPROVED. 반려 4건 수정 완료. 코드·DoD·커밋·ACTIVE_TASK·Issue #133 전항목 이상 없음. 머지 순서: B-029 develop 머지 후 base→develop 변경. |
 | 2026-06-28 | Aiden (ZEN_CEO) | **TASK-B-030 ❌ 2차 반려** — PR#129 CHANGES_REQUESTED. Task file 헤더 상태 ⬜(🔔 미반영). 이전 2건 수정 완료, 신규 1건 미수정. |

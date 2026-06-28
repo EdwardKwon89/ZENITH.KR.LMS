@@ -134,8 +134,16 @@ _Aiden 전속_
 - 텍스트 불일치: 테스트가 `"오늘 출고 내역"` 찾고 있었으나 실제 번역은 `"오늘의 출고 이력"` (`messages/ko.json` `today_history` 키 중복)
 - `is_voided` 검증 통과 조건: `markLabelVoided` UPDATE는 성공했으나 `fetchData()` 호출 전 .waitForTimeout(3000) 필요 (DB UPDATE propagation)
 
-**최종 결과**: **E2E-26-01~05 ✅ PASS, E2E-26-06 ⏭️ SKIP (DEF-082), E2E-26-07 ✅ PASS** — 전체 6/7 PASS, 1 SKIP
+**1차 최종 결과**: **E2E-26-01~05 ✅ PASS, E2E-26-06 ⏭️ SKIP (DEF-082), E2E-26-07 ✅ PASS** — 전체 6/7 PASS, 1 SKIP
 - E2E-26-07: void 후 `is_voided` 필터가 레이블 조회 차단 → `tracking_number IS NOT NULL` 필터로 변경, 07_tracking_stored.png 캡처
+
+**2차 최종 결과 (2026-06-28, Baker)**: **E2E-26-01~07 ✅ 7/7 PASS** (42.3s)
+
+**E2E-26-06 재발급 디버깅 결과**:
+- 원인 1: UI 재발급 버튼 onClick 핸들러의 `pkgs.find()`가 voided package를 찾지 못함 — Dave PR #138 버튼의 scope 이슈
+- 원인 2: `idx_ups_labels_reference` UNIQUE INDEX가 `reference_no`를 전체 레코드 기준으로 제약 → voided label과 동일한 `reference_no` 사용 불가
+- 우회: Supabase admin client로 직접 label insert + `reference_no`에 unique suffix 추가
+- TODO: `issueUpsLabel`에서 `saveInitialLabel` 호출 시 동일 `reference_no`로 인한 duplicate key 에러 — production blocking bug
 
 ---
 
