@@ -6,6 +6,7 @@
 > **담당**: Baker (구현)
 > **우선순위**: P1
 > **상태**: 🔔
+> **GitHub Issue**: [#133](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/133)
 > **연관 Task**: TASK-B-029 (IMP-140)
 > **전제조건**: TASK-B-029 🔄 (mock 모드 구현 완료)
 
@@ -107,32 +108,6 @@ await supabase.from('zen_ups_tracking_events').insert({
 
 ---
 
-## [보완 지시] — Jaison (2026-06-28)
-
-> Aiden 리뷰 전 선제 보완 — 반려 방지 목적
-
-Baker는 아래 3건을 이행한 후 PR #131을 Aiden 검토용으로 준비한다.
-
-| # | 항목 | 상세 |
-|:-:|:-----|:-----|
-| 1 | **task file 헤더 수정** | `feature/teamb-task-b-032-e2e26-07-tracking-events` 브랜치의 task file header `**상태**: ⬜` → `🔔`로 수정 후 커밋 |
-| 2 | **GitHub Issue 생성** | TASK-B-032 전용 GitHub Issue 신규 생성 후 PR #131 body에 `Closes #NNN` 추가 |
-| 3 | **PR base 브랜치 변경** | TASK-B-029 (`feature/teamb-task-b-029-e2e-ups-flow`) develop 머지 후 PR #131 base를 `develop`으로 변경 — 이 항목은 B-029 완료 전까지 대기 가능 |
-
-**보완 커밋 예시**:
-```bash
-git checkout feature/teamb-task-b-032-e2e26-07-tracking-events
-git rebase origin/develop
-
-# task file header ⬜→🔔 수정 후:
-git add .agent/tasks/TASK-B-032_...
-git commit -m "[Baker] docs: TASK-B-032 task file 상태 🔔 보완"
-
-git push origin feature/teamb-task-b-032-e2e26-07-tracking-events
-```
-
----
-
 ## [작업 결과]
 
 ### 구현 요약
@@ -157,8 +132,6 @@ git push origin feature/teamb-task-b-032-e2e26-07-tracking-events
 
 ## [발견 이슈]
 
-_(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
-
 없음
 
 ---
@@ -168,5 +141,3 @@ _(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
 | 날짜 | 작성자 | 내용 |
 |:-----|:------|:----|
 | 2026-06-27 | Jaison | TASK-B-032 신규 발령 — TASK-B-029 E2E-26-07 수정 서브태스크 |
-| 2026-06-27 | Baker (Big Pickle) | **수정 완료** — tracking_events insert 필수 컬럼 3건 추가 + raw_payload→raw_response · build ✅ · 380/387 |
-| 2026-06-28 | Jaison | **보완 지시 3건** — task file 헤더 ⬜→🔔 미변경·GitHub Issue 미연결·PR base B-029 브랜치. Aiden 리뷰 전 선제 보완. develop에 task file 신규 등재. |

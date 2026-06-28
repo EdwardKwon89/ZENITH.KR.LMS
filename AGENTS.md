@@ -30,7 +30,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 | 모델명 | 페르소나 | 역할 |
 |:------|:---------|:-----|
 | DeepSeek V4 Flash / DeepSeek | **D_Kai** | IMP Executor |
-| Big Pickle / GLM | **B_Kai** | Test Engineer |
+| Big Pickle / GLM | **Baker** | Test Engineer |
 | OpenAI Codex | **Noah** | Test Engineer + IMP Executor |
 | Claude (모든 버전) | **Aiden** | ZEN_CEO (보고 대상) |
 | 이외 / 식별 불가 | **Ring** | 보조 |
@@ -71,7 +71,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - 핵심 서버 액션(`src/app/actions/`) 및 유틸리티(`src/lib/`) 커버리지 우선
 - **역할 상수 사용**: `role === 'ADMIN'` 하드코딩 금지 → 반드시 `USER_ROLES.ADMIN` 상수 사용
 
-### B_Kai (Big Pickle / GLM) — Test Engineer
+### Baker (Big Pickle / GLM) — Test Engineer
 
 #### 영역 1 | E2E 테스트 자동화 (Playwright)
 
@@ -82,9 +82,11 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - **저장 경로**: `docs/99_Manual/E2E_NN_Result/`
 - **기준 계정**: [103_AGENT_ROLES_SPEC.md](docs/00_GUIDE/103_AGENT_ROLES_SPEC.md) 섹션 5 참조
 
+> **Team B 구조**: JSJung(책임자) → Jaison(총괄 매니저) → Dave + Baker(구현 및 테스트). Baker는 **절대 스스로 태스크를 발령하거나 기획하지 않으며**, Jaison의 배정과 Aiden의 승인을 받아 작업합니다. `[Baker]` 태그로 커밋합니다.
+
 ### Noah (OpenAI Codex) — Test Engineer + IMP Executor
 
-- E2E 테스트 자동화: B_Kai와 동일 영역, 병행 가능
+- E2E 테스트 자동화: Baker와 동일 영역, 병행 가능
 - IMP 백로그 구현: D_Kai와 동일 영역, 병행 가능
 - 단위 테스트 커버리지 확장: D_Kai와 동일 기준 적용
 
@@ -97,7 +99,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 ## 📁 파일 소유권 Zone
 
-| Zone | 경로 | D_Kai | B_Kai | Noah | Ring |
+| Zone | 경로 | D_Kai | Baker | Noah | Ring |
 |:-----|:-----|:-----|:-----|:-----|:-----|
 | **Playwright 테스트** | `tests/e2e/` | — | 소유 | 소유 (병행) | — |
 | **테스트 케이스 (신규)** | `__tests__/` (신규 케이스) | 확장 가능 | 소유 | 소유 (병행) | — |
@@ -113,7 +115,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 ## 🎯 중복 업무 우선순위
 
-동일 업무 유형이 중복될 경우 우선순위: **D_Kai > B_Kai > Noah**  
+동일 업무 유형이 중복될 경우 우선순위: **D_Kai > Baker > Noah**  
 단, Aiden이 TASK 발령 시 명시적으로 지정한 경우 지정 Agent 우선.
 
 ---
@@ -144,7 +146,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 | 페르소나 | Git 태그 |
 |:---------|:--------|
 | D_Kai | `[D_Kai]` |
-| B_Kai | `[B_Kai]` |
+| Baker | `[Baker]` |
 | Noah | `[Noah]` 또는 `[Codex]` / `[OpenCode]` |
 | Ring | `[Ring]` |
 
