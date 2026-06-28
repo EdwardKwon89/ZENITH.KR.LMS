@@ -5,7 +5,7 @@
 > **발령자**: Aiden (ZEN_CEO) — Edward 승인 (2026-06-27)
 > **담당**: JSJung (리더·검토) / Baker (구현)
 > **우선순위**: P1
-> **상태**: ⬜
+> **상태**: 🔔
 > **GitHub Issue**: [#128](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/128)
 > **연관 IMP**: IMP-142
 > **연관 DEF**: DEF-080
