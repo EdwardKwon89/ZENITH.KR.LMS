@@ -300,11 +300,17 @@
 
 | 2026-06-28 | Aiden (ZEN_CEO) | **TASK-168 ⬜ 발령** — UAT-17 UPS 특송 사전 점검 + 실행 · D_Kai 담당 · Issue #134 Edward 승인 · IMP-143 · 목표 260629 |
 | 2026-06-28 | Aiden (ZEN_CEO) | **TASK-B-032 ✅ 승인** — PR#131 APPROVED. 반려 4건 수정 완료. 코드·DoD·커밋·ACTIVE_TASK·Issue #133 전항목 이상 없음. 머지 순서: B-029 develop 머지 후 base→develop 변경. |
-| 2026-06-28 | Aiden (ZEN_CEO) | **TASK-B-030 ❌ 2차 반려** — PR#129 CHANGES_REQUESTED. Task file 헤더 `상태: ⬜`(🔔 미반영). 이전 2건 수정 완료, 신규 1건 미수정. |
+| 2026-06-28 | Aiden (ZEN_CEO) | **TASK-B-030 ❌ 2차 반려** — PR#129 CHANGES_REQUESTED. Task file 헤더 상태 ⬜(🔔 미반영). 이전 2건 수정 완료, 신규 1건 미수정. |
 | 2026-06-28 | Aiden (ZEN_CEO) | **TASK-B-031 ❌ 2차 반려** — PR#130 CHANGES_REQUESTED. ①문서 커밋 해시 미기재(`(커밋 후 기입)`) ②PR body `Closes #132` 누락 ③E2E-26-05 스크린샷 불일치(void completed 없음). |
 | 2026-06-28 | Aiden (ZEN_CEO) | **TASK-B-032 ❌ 반려** — PR#131 CHANGES_REQUESTED. ①Task file 헤더 상태 ⬜(🔔 미변경) ②ACTIVE_TASK 🔄(🔔 미변경) ③GitHub Issue 미연결. 코드·빌드·회귀 양호. |
-| 2026-06-27 | Aiden (ZEN_CEO) | **TASK-B-030 ❌ 반려** — PR#129 CHANGES_REQUESTED. ①DoD 문서 커밋 해시 미기재(`d83d9df` 기재 필요) ②ACTIVE_TASK.md ✅ 자체 선언(🔔로 정정 필요 — Aiden 전속 위반). 코드·빌드·회귀 양호. |
-| 2026-06-27 | Aiden (ZEN_CEO) | **TASK-B-031 ❌ 반려** — PR#130 CHANGES_REQUESTED. ①DoD E2E-26-05 미체크(대안 스크린샷 제출 필요) ②ACTIVE_TASK.md 미포함(R-17 위반) ③ACTIVE_TASK.md 미등재(Jaison Task 발령 절차 미이행) ④GitHub Issue 미연결. |
+| 2026-06-28 | Jaison (Team B) | **TASK-B-030/031 2차 반려 재작업 배정** — B-030(Baker): task file 헤더 ⬜→🔔 수정 1건. B-031(Dave): ①문서 커밋 해시 2b45fbbb ②Closes #132 ③void 완료 스크린샷+DoD 체크 3건. B-032 Aiden ✅ 승인 확인. |
+| 2026-06-28 | Aiden (ZEN_CEO) | **TASK-B-032 ✅ 승인** — PR#131 코드·R-17 전항목 확인. B-029 머지 후 base→develop 변경 후 머지 예정. |
+| 2026-06-28 | Aiden (ZEN_CEO) | **TASK-B-030 ❌ 2차 반려** — PR#129 task file 헤더 `⬜`→`🔔` 미수정 1건. |
+| 2026-06-28 | Aiden (ZEN_CEO) | **TASK-B-031 ❌ 2차 반려** — PR#130 미해결 3건: ①문서 커밋 해시 2b45fbbb 미기재 ②Closes #132 누락 ③void 완료 스크린샷 미제출+DoD 미체크. |
+| 2026-06-28 | Jaison (Team B) | **TASK-B-030 ❌ 재작업 지시 → Baker** — Aiden PR#129 CHANGES_REQUESTED 2건: ①DoD item 7 + [작업결과] 커밋표 문서해시 d83d9df 기재 ②ACTIVE_TASK.md ✅→🔔 정정 (R-17 자체선언 위반). TASK-B-030 ⬜→❌ 반영. |
+| 2026-06-28 | Dave (DeepSeek V4) | **TASK-B-031 🔔 재작업 완료** — GitHub Issue #132 생성 · ACTIVE_TASK.md 🔔 반영 · 스크린샷 2종 첨부 (`04_void_dialog.png`·`05_void_completed.png`) · PR#130 `Closes #132` 업데이트. |
+| 2026-06-28 | Jaison (Team B) | **TASK-B-032 보완 지시 → Baker** — Aiden 리뷰 전 선제 보완 3건: ①task file 헤더 ⬜→🔔 커밋 ②GitHub Issue 생성+PR#131 body Closes #NNN ③B-029 develop 머지 후 PR base→develop 변경. develop에 task file 등재. |
+| 2026-06-28 | Jaison (Team B) | **TASK-B-031 ❌ 재작업 지시 → Dave** — Aiden PR#130 CHANGES_REQUESTED 4건: ①GitHub Issue 생성+PR body Closes #NNN ②ACTIVE_TASK.md 🔔 반영 커밋 ③E2E-26-05 스크린샷 2종 (`04_void_dialog.png`·`05_void_completed.png`) ④DoD E2E-26-05 체크. TASK-B-031 ACTIVE_TASK.md 미등재 보완(Jaison 실수). TASK-B-032 상태 🔔 반영. |
 | 2026-06-27 | Aiden (ZEN_CEO) | **TASK-B-024 ✅ 승인** — PR#126 머지 완료. DoD 10/10 · 387/387 ALL PASS (Aiden 직접 검증) · 스크린샷 3종 ✅. Advisory: LAST_REGRESSION_RESULT 오기재 반복(3회차)·[B_Kai] 태그 오기재·R-09 미완료. |
 | 2026-06-27 | Aiden (ZEN_CEO) | **TASK-B-030 ⬜ 발령** — DEF-080 country_code ISO 2→3 변환 누락 수정. ups-labels.ts toIso3() 추가 (방안 B). Edward 승인 · Baker(구현)·JSJung(검토) · Issue #128 · IMP-142. |
 | 2026-06-27 | Aiden (ZEN_CEO) | **TASK-B-024 ❌ 1차 반려** — PR#126 CHANGES_REQUESTED. DoD 항목 10 미체크(E2E 스크린샷). shxk sandbox 없어 API 흐름 E2E 불가 인정 — UI 배지·Void dialog 스크린샷 3종 첨부 요청. 코드·회귀(387/387) 양호. |
