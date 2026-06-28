@@ -271,9 +271,9 @@
 | TASK-B-032 | 260627 | [Phase 8] E2E-26-07 tracking_events insert 수정 (B-029 서브) | P1 | TASK-B-029 ✅ | Baker (구현) | ✅ | [TASK-B-032](tasks/TASK-B-032_260627_E2E26-07_tracking_events_수정_Baker.md) | Issue #133 · PR#131 ✅ Aiden 승인 260628 — develop 머지 완료 |
 | TASK-B-033 | 260628 | [Phase 8] UPS 특송 UAT 주도 실행 (IMP-144) | P1 | TASK-168 §1~§3 ✅ | JSJung (총괄) · Jaison · Dave · Baker | ⬜ | [TASK-B-033](tasks/TASK-B-033_260628_UPS특송UAT지원준비_JSJung.md) | Issue #135 · IMP-144 · **Team B UAT 주도 실행** · Team A 지원+결함방향결정 (260628 Edward 지시) |
 | TASK-B-034 | 260628 | [Phase 8] E2E-26-06 재발급 버튼 UI — void 후 재발급 경로 (IMP-143) | P1 | TASK-B-029 ✅ | Dave (구현) | ✅ | [TASK-B-034](tasks/TASK-B-034_260628_E2E26-06_재발급버튼UI_Dave.md) | Issue #136 · DEF-082 해소 · PR#138 머지 ✅ (260628 Aiden) |
-| TASK-B-035 | 260628 | [Phase 8] DEF-083 zen_ups_labels partial unique index migration (재발급 duplicate key 수정) | P1 | 없음 | Baker (구현) | ⬜ | [TASK-B-035](tasks/TASK-B-035_260628_DEF083_partial_unique_index_Baker.md) | Issue #141 · DEF-083 · Production blocking |
-| TASK-B-036 | 260628 | [Phase 8] E2E-26-06 UPS 재발급 실 UI 버튼 클릭 E2E 재실행 | P1 | TASK-B-035 ✅ | Baker (구현) | 🚫 | [TASK-B-036](tasks/TASK-B-036_260628_E2E26-06_재실행_Baker.md) | Issue #142 · 전제: TASK-B-035 · test.skip 제거 + 실 UI 검증 |
-| TASK-B-037 | 260628 | [Phase 8] DEF-084 OutboundProcessForm.tsx 재발급 버튼 pkgs.find() scope 오류 수정 | P2 | TASK-B-036 §2 재현 확인 | Dave (구현) | 🚫 | [TASK-B-037](tasks/TASK-B-037_260628_DEF084_OutboundProcessForm_pkgs_find_Dave.md) | Issue #143 · DEF-084 · 재현 확인 후 착수 |
+| TASK-B-035 | 260629 | [Phase 8] DEF-083 zen_ups_labels.reference_no partial unique index 수정 | P1 | 없음 | Baker (구현) | ✅ | [TASK-B-035](tasks/TASK-B-035_260629_DEF083_reference_no_partial_unique_index_Baker.md) | Issue #141 · DEF-083 · PR#144 머지 ✅ 260629 · 코드 8b6cae8 |
+| TASK-B-036 | 260629 | [Phase 8] E2E-26-06 실 UI 재발급 버튼 클릭 플로우 E2E 재검증 | P1 | TASK-B-035 ✅ | Baker (구현) | ⬜ | [TASK-B-036](tasks/TASK-B-036_260629_E2E26-06_재발급UI_재실행_Baker.md) | Issue #142 · DEF-082 완결 · DEF-084 재현 확인 포함 |
+| TASK-B-037 | 260629 | [Phase 8] DEF-084 OutboundProcessForm pkgs.find() → pkg.id 직접 사용 수정 | P2 | TASK-B-036 §2 재현 확인 | Dave (구현) | 🚫 | [TASK-B-037](tasks/TASK-B-037_260629_DEF084_OutboundProcessForm_pkgs_find_fix_Dave.md) | Issue #143 · DEF-084 · 조건부 착수 (미재현 시 Aiden 보고 후 취소 여부 결정) |
 ---
 
 ## Agent 현황
@@ -295,8 +295,8 @@
 |:------|:----:|:----|
 | **JSJung** (팀 리더) | ✅ TASK-B-030 승인 완료 (260628) · ⬜ TASK-B-033 착수 대기 | PR#129 ✅ 머지 완료 · UAT 지원 준비 총괄 · SHXK 환경변수 설정 · Issue #135 |
 | **Jaison** (AI Agent 총괄) | 🔄 TASK-B-029 재배정 완료 (260628) · ⬜ TASK-B-033 §2 대기 | Dave·Baker 분배 완료 · UAT-17-01/02 사전 데이터 준비 지원 |
-| **Dave** (AI Agent) | ✅ TASK-B-031/034 승인 완료 (260628) · 🚫 TASK-B-037 재현 확인 대기 | DEF-084 보고서 확인 · TASK-B-036 §2 재현 확인 후 착수 여부 결정 |
-| **Baker** (AI Agent) | ✅ TASK-B-029/030/032 머지 완료 (260628) · ⬜ TASK-B-035 착수 대기 | DEF-083/084 보고서 제출 완료 (`0bc7445`) · TASK-B-035 즉시 착수 가능 |
+| **Dave** (AI Agent) | ✅ TASK-B-031/034 승인 완료 (260628) · 🚫 TASK-B-037 (B-036 §2 재현 확인 후) · ⬜ TASK-B-033 §3 대기 | DEF-084 조건부 착수 대기 · UAT-18 사전 데이터 준비 (B-036 후) |
+| **Baker** (AI Agent) | ✅ TASK-B-035 승인 (260629) · ⬜ TASK-B-036 착수 가능 · ⬜ TASK-B-033 §4 대기 | PR#144 머지 ✅ · DEF-083 해소 → E2E-26-06 재실행 착수 가능 |
 | **Gale** (AI Agent) | 대기 | 추후 재배정 예정 |
 
 ---
@@ -309,6 +309,7 @@
 | 2026-06-28 | Aiden (ZEN_CEO) | **D_Kai TASK-168 완료 보고 지시** — Issue #134 코멘트. §1~§3 ✅ 완료 확인. feature 브랜치 PR 제출 요청 (목표 6/29). |
 | 2026-06-28 | Aiden (ZEN_CEO) | **PR#137·131 develop 머지 완료** — TASK-B-029·032 순차 머지. TASK-B-033 착수 가능 (⬜ 해제 조건 충족). |
 | 2026-06-28 | Aiden (ZEN_CEO) | **TASK-B-029 ✅ 승인** — PR#137 2차 검토 APPROVED. E2E-26 6/7 PASS(E2E-26-07 ✅·E2E-26-06 SKIP DEF-082). DoD 5/5·코드`75c4f88`·회귀 380/387. Advisory: 코드커밋 docs/ 혼입·PR body 회귀 오기. develop 머지 대기. → B-032 base→develop 후 실머지 가능. |
+| 2026-06-29 | Jaison (Team B AI 총괄) | **TASK-B-035/036/037 파일 생성** — Aiden Issue #110 승인(260628) 기반. B-035(Baker ⬜)·B-036(Baker 🚫)·B-037(Dave 🚫 조건부) 등재. Agent 현황표 갱신. |
 | 2026-06-28 | Aiden (ZEN_CEO) | **TASK-B-033 ⬜ 발령** — UPS 특송 UAT 환경 준비 및 실행 지원 · JSJung 총괄 · Issue #135 · IMP-144 · Edward 승인 |
 | 2026-06-28 | Aiden (ZEN_CEO) | **TASK-168 §4 제거** — UAT 실행 주체를 Aiden·Edward로 변경. D_Kai는 §1~§3 완료 후 feature 브랜치 🔔 보고만 수행 |
 | 2026-06-28 | Jaison (Team B) | **TASK-B-029 재배정** — B-030/031 develop 머지 완료로 블로커 해소. Dave(§1: rebase+DEF-081+B-032 fix) · Baker(§2: E2E-26 실행+스크린샷+회귀+PR)으로 분배. |
