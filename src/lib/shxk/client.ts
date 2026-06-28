@@ -6,6 +6,72 @@ import type {
   ShxkServiceMethod,
 } from '@/types/ups-api'
 
+const IS_MOCK = process.env.SHXK_TEST_MOCK === 'true'
+
+function buildMockResponse(
+  method: ShxkServiceMethod,
+  params?: Record<string, unknown>,
+): ShxkBaseResponse {
+  const refNo =
+    (params?.reference_no as string) ||
+    ((params?.listorder as Array<{ reference_no: string }>)?.[0]?.reference_no) ||
+    'MOCK-REF'
+  const mockTrackNo = `MOCK-${refNo.slice(-8).toUpperCase()}`
+
+  switch (method) {
+    case 'createorder':
+      return {
+        success: 1,
+        cnmessage: '订单创建成功',
+        enmessage: 'Order created successfully',
+        data: {
+          order_id: 99999,
+          refrence_no: refNo,
+          shipping_method_no: mockTrackNo,
+        },
+      }
+    case 'getnewlabel':
+      return {
+        success: 1,
+        cnmessage: '标签生成成功',
+        enmessage: 'Label generated successfully',
+        data: {
+          label_url: `https://mock-shxk.test/labels/${refNo}.pdf`,
+          label_type: 'PDF',
+        },
+      }
+    case 'gettrackingnumber':
+      return {
+        success: 1,
+        cnmessage: '成功',
+        enmessage: 'Success',
+        data: { tracking_number: mockTrackNo },
+      }
+    case 'removeorder':
+      return {
+        success: 1,
+        cnmessage: '删除成功',
+        enmessage: 'Order removed successfully',
+        data: undefined,
+      }
+    case 'gettrack':
+      return {
+        success: 1,
+        cnmessage: '成功',
+        enmessage: 'Success',
+        data: {
+          server_hawbcode: (params?.tracking_number as string) ?? mockTrackNo,
+          track_status: 'NT',
+          track_occur_date: new Date().toISOString().split('T')[0],
+          track_location: 'ICN KR',
+          track_description: '[MOCK] Package received at origin',
+        },
+      }
+    default:
+      return { success: 1, cnmessage: 'Mock OK', enmessage: 'Mock OK', data: {} }
+  }
+}
+
 function buildShxkBody(
   method: ShxkServiceMethod,
   params?: Record<string, unknown>,
@@ -44,6 +110,9 @@ export async function callShxk(
   method: ShxkServiceMethod,
   params?: Record<string, unknown>,
 ): Promise<ShxkBaseResponse> {
+  if (IS_MOCK) {
+    return buildMockResponse(method, params)
+  }
   const body = buildShxkBody(method, params)
   let res: Response
   try {
