@@ -88,7 +88,7 @@ async function setupTestFixtures(): Promise<void> {
   // 패키지 생성 (intl_ref_locked=false 초기 상태)
   const { data: pkg, error: pkgErr } = await supabase
     .from('zen_order_packages')
-    .insert({ order_id: testOrderId, weight_kg: 1.0, intl_ref_locked: false })
+    .insert({ order_id: testOrderId, gross_weight: 1.0, intl_ref_locked: false })
     .select('id')
     .single();
   if (pkgErr || !pkg) throw new Error(`[E2E-26] Package create failed: ${pkgErr?.message}`);
@@ -319,12 +319,16 @@ test.describe('E2E-26: UPS 레이블 발급 전체 흐름', () => {
 
     // zen_ups_tracking_events에 레코드가 있는지 확인
     // (폴링 스케줄러가 미기동이므로 수동 Supabase 직접 insert로 gettrack 저장 확인)
+    const now = new Date();
     const mockPayload = { tracking_number: label.tracking_number, status: 'IN_TRANSIT' };
     await supabase.from('zen_ups_tracking_events').insert({
       label_id: label.id,
+      order_id: label.order_id,
+      tracking_number: label.tracking_number,
       event_code: 'IT',
-      event_time: new Date().toISOString(),
-      raw_payload: mockPayload,
+      event_date: now.toISOString().split('T')[0],
+      event_time: now.toTimeString().slice(0, 8),
+      raw_response: mockPayload,
     });
 
     const { data: events } = await supabase
