@@ -66,34 +66,23 @@ SELECT COUNT(*) FROM zen_ups_zone_countries;
 
 AGENCY 계정 미존재 시 → Supabase에서 신규 생성 후 요율 오버라이드 설정.
 
-### §4 — UAT-17 실행
+### §4 — UAT-17 실행 ~~[제거됨]~~
 
-참조: `docs/91_FinalTest/UAT/UAT_17_UPS특송오더발송.md`
-
-| 시나리오 | 내용 |
-|:--------|:-----|
-| UAT-17-01 | DIRECT 선택 → 오더 등록 → DB `delivery_method='DIRECT'` 확인 |
-| UAT-17-02 | PICKUP 선택 → 픽업 필수값 Zod 차단 → 정상 등록 → DB 적재 확인 |
-| UAT-17-03 | 대리점 소속 화주 → 요율 오버라이드 마크업 반영 운임 확인 → `zen_order_rate_snapshots` 확인 |
-
-스크린샷 저장: `docs/99_Manual/UAT_17_Result/`
+> **[2026-06-28 Aiden 지시]** UAT 실행 주체 변경 — Aiden·Edward가 직접 실행.  
+> D_Kai는 §1~§3 완료 보고 후 Task 종료. UAT 지원은 TASK-B-033(Team B)에서 수행.
 
 ---
 
 ## DoD (Definition of Done)
 
-- [ ] §1 DB 시드 데이터 5종 확인 완료 (없으면 seed 투입 후 확인)
-- [ ] §2 /orders/new UPS DIRECT/PICKUP 분기 정상 동작 확인
-- [ ] §2 DB 적재 확인 (`delivery_method` · `pickup_*`) + 500 에러 없음
-- [ ] §3 테스트 계정 3종 로그인 확인
-- [ ] §3 `.env.local` SHXK 키 설정 확인
-- [ ] UAT-17-01 PASS + 스크린샷
-- [ ] UAT-17-02 PASS + 스크린샷
-- [ ] UAT-17-03 PASS + 스크린샷
-- [ ] 발견 결함 DEF 보고서 작성 (결함 없으면 "없음" 기재)
-- [ ] R-17 커밋 순서 준수 (코드/seed 커밋 → 문서 커밋)
-- [ ] 코드 커밋 해시 기재: _(구현 후 기재)_
-- [ ] 문서 커밋 해시 기재: _(구현 후 기재)_
+- [x] §1 DB 시드 데이터 5종 확인 완료 (6종 누락 → seed SQL 생성·적용)
+- [x] §2 /orders/new UPS DIRECT/PICKUP 분기 정상 동작 확인
+- [x] §2 DB 적재 확인 (`delivery_method` · `pickup_*`) + 500 에러 없음
+- [x] §3 테스트 계정 3종 로그인 확인
+- [x] §3 `.env.local` SHXK 키 설정 확인 → JSJung 담당으로 이관 (TASK-B-033)
+- [ ] R-17 커밋 순서 준수 (feature 브랜치 → 문서 커밋)
+- [x] 코드 커밋 해시 기재: `5721181` · `757419c` · `df48788`
+- [ ] 문서 커밋 해시 기재: _(feature 브랜치 문서 커밋 후 기재)_
 - [ ] PR 생성 (`Closes #134`)
 
 ---
