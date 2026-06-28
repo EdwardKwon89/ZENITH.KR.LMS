@@ -300,6 +300,7 @@
 
 | 2026-06-28 | Aiden (ZEN_CEO) | **TASK-B-030 ✅ 승인** — PR#129 3차 검토 APPROVED. task file 헤더 🔔 수정(`61ec1cb`) 확인. DoD 8/8·코드`a68753c`·문서`d83d9df`·회귀 380/387. develop 머지 대기. |
 | 2026-06-28 | Aiden (ZEN_CEO) | **TASK-B-031 ✅ 승인** — PR#130 3차 수정 APPROVED. void 스크린샷·해시·Closes·DEF-081 전항목 확인. DoD 8/8·회귀 380/387. develop 머지 대기. |
+| 2026-06-28 | Baker (Big Pickle) | **TASK-B-030 🔔 Aiden 반려 correction** — DoD 문서해시 `d83d9df` 기재 + ACTIVE_TASK.md ✅→🔔 정정. PR#129 재제출. |
 | 2026-06-28 | Aiden (ZEN_CEO) | **TASK-168 ⬜ 발령** — UAT-17 UPS 특송 사전 점검 + 실행 · D_Kai 담당 · Issue #134 Edward 승인 · IMP-143 · 목표 260629 |
 | 2026-06-28 | Aiden (ZEN_CEO) | **TASK-B-032 ✅ 승인** — PR#131 APPROVED. 반려 4건 수정 완료. 코드·DoD·커밋·ACTIVE_TASK·Issue #133 전항목 이상 없음. 머지 순서: B-029 develop 머지 후 base→develop 변경. |
 | 2026-06-28 | Aiden (ZEN_CEO) | **TASK-B-030 ❌ 2차 반려** — PR#129 CHANGES_REQUESTED. Task file 헤더 상태 ⬜(🔔 미반영). 이전 2건 수정 완료, 신규 1건 미수정. |
@@ -313,6 +314,7 @@
 | 2026-06-28 | Dave (DeepSeek V4) | **TASK-B-031 🔔 재작업 완료** — GitHub Issue #132 생성 · ACTIVE_TASK.md 🔔 반영 · 스크린샷 2종 첨부 (`04_void_dialog.png`·`05_void_completed.png`) · PR#130 `Closes #132` 업데이트. |
 | 2026-06-28 | Jaison (Team B) | **TASK-B-032 보완 지시 → Baker** — Aiden 리뷰 전 선제 보완 3건: ①task file 헤더 ⬜→🔔 커밋 ②GitHub Issue 생성+PR#131 body Closes #NNN ③B-029 develop 머지 후 PR base→develop 변경. develop에 task file 등재. |
 | 2026-06-28 | Jaison (Team B) | **TASK-B-031 ❌ 재작업 지시 → Dave** — Aiden PR#130 CHANGES_REQUESTED 4건: ①GitHub Issue 생성+PR body Closes #NNN ②ACTIVE_TASK.md 🔔 반영 커밋 ③E2E-26-05 스크린샷 2종 (`04_void_dialog.png`·`05_void_completed.png`) ④DoD E2E-26-05 체크. TASK-B-031 ACTIVE_TASK.md 미등재 보완(Jaison 실수). TASK-B-032 상태 🔔 반영. |
+| 2026-06-28 | Baker (Big Pickle) | **TASK-B-030 🔔 완료** — toIso3() 헬퍼 추가 · ups-labels.ts ISO 2→3 변환 · a68753c · 380/387 PASS (7건 pre-existing). Jaison 검토 요청. |
 | 2026-06-27 | Aiden (ZEN_CEO) | **TASK-B-024 ✅ 승인** — PR#126 머지 완료. DoD 10/10 · 387/387 ALL PASS (Aiden 직접 검증) · 스크린샷 3종 ✅. Advisory: LAST_REGRESSION_RESULT 오기재 반복(3회차)·[B_Kai] 태그 오기재·R-09 미완료. |
 | 2026-06-27 | Aiden (ZEN_CEO) | **TASK-B-030 ⬜ 발령** — DEF-080 country_code ISO 2→3 변환 누락 수정. ups-labels.ts toIso3() 추가 (방안 B). Edward 승인 · Baker(구현)·JSJung(검토) · Issue #128 · IMP-142. |
 | 2026-06-27 | Aiden (ZEN_CEO) | **TASK-B-024 ❌ 1차 반려** — PR#126 CHANGES_REQUESTED. DoD 항목 10 미체크(E2E 스크린샷). shxk sandbox 없어 API 흐름 E2E 불가 인정 — UI 배지·Void dialog 스크린샷 3종 첨부 요청. 코드·회귀(387/387) 양호. |
