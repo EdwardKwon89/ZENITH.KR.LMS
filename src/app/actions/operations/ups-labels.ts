@@ -51,6 +51,13 @@ async function resolveCountryCode(supabase: SupabaseClient, destPortId: string):
   return data?.country_code ?? null;
 }
 
+function toIso3(code2: string): string {
+  const map: Record<string, string> = {
+    KR: 'KOR', US: 'USA', CN: 'CHN', JP: 'JPN',
+  };
+  return map[code2] ?? code2;
+}
+
 async function resolveShxkCode(
   supabase: SupabaseClient,
   productCode: string,
@@ -172,8 +179,9 @@ export async function issueUpsLabel(
     const countryCode = await resolveCountryCode(supabase, order!.dest_port_id as string);
     if (!countryCode) return { success: false, error: 'Destination country code not found' };
 
-    const shxkCode = await resolveShxkCode(supabase, order!.ups_product_code as string, countryCode, order!.incoterms as string);
-    if (!shxkCode) return { success: false, error: `shipping method not found for product=${order!.ups_product_code}, country=${countryCode}, incoterms=${order!.incoterms}` };
+    const iso3Code = toIso3(countryCode);
+    const shxkCode = await resolveShxkCode(supabase, order!.ups_product_code as string, iso3Code, order!.incoterms as string);
+    if (!shxkCode) return { success: false, error: `shipping method not found for product=${order!.ups_product_code}, country=${iso3Code}, incoterms=${order!.incoterms}` };
 
     const orderResult = await placeShxkOrder(packageId, shxkCode);
     if ('error' in orderResult) return { success: false, error: orderResult.error };
