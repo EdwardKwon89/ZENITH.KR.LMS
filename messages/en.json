@@ -578,7 +578,9 @@
     "ups_label_void_desc": "Are you sure you want to void this UPS label?",
     "ups_label_void_confirm": "Confirm Void",
     "ups_label_voided": "Voided",
-    "ups_label_void_failed": "Failed to void UPS label"
+    "ups_label_void_failed": "Failed to void UPS label",
+    "ups_label_reissue": "Reissue",
+    "ups_label_issue_failed": "Failed to issue label."
   },
   "ShippingLabel": {
     "title": "Shipping Label",

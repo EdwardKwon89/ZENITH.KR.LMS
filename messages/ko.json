@@ -577,7 +577,9 @@
     "ups_label_void_desc": "해당 UPS 레이블을 폐기하시겠습니까?",
     "ups_label_void_confirm": "폐기 확정",
     "ups_label_voided": "폐기됨",
-    "ups_label_void_failed": "UPS 레이블 폐기 실패"
+    "ups_label_void_failed": "UPS 레이블 폐기 실패",
+    "ups_label_reissue": "재발급",
+    "ups_label_issue_failed": "레이블 발급에 실패했습니다."
   },
   "ShippingLabel": {
     "title": "운송장",
