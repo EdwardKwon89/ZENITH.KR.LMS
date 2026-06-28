@@ -296,7 +296,6 @@ test.describe('E2E-26: UPS 레이블 발급 전체 흐름', () => {
 
   // ── E2E-26-06 ─────────────────────────────────────────────────────────────
   test('E2E-26-06: 재발급 → 새 운송장 번호 갱신 확인', async ({ page }) => {
-    test.skip(true, 'DEF-082: 재발급 버튼 UI 미구현 — TASK-B-033 완료 후 활성화 (Issue #136)');
     test.setTimeout(120000);
     page.on('console', msg => console.log(`[PAGE] ${msg.type()}: ${msg.text()}`));
 
