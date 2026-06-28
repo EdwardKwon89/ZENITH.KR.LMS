@@ -271,6 +271,9 @@
 | TASK-B-032 | 260627 | [Phase 8] E2E-26-07 tracking_events insert 수정 (B-029 서브) | P1 | TASK-B-029 ✅ | Baker (구현) | ✅ | [TASK-B-032](tasks/TASK-B-032_260627_E2E26-07_tracking_events_수정_Baker.md) | Issue #133 · PR#131 ✅ Aiden 승인 260628 — develop 머지 완료 |
 | TASK-B-033 | 260628 | [Phase 8] UPS 특송 UAT 주도 실행 (IMP-144) | P1 | TASK-168 §1~§3 ✅ | JSJung (총괄) · Jaison · Dave · Baker | ⬜ | [TASK-B-033](tasks/TASK-B-033_260628_UPS특송UAT지원준비_JSJung.md) | Issue #135 · IMP-144 · **Team B UAT 주도 실행** · Team A 지원+결함방향결정 (260628 Edward 지시) |
 | TASK-B-034 | 260628 | [Phase 8] E2E-26-06 재발급 버튼 UI — void 후 재발급 경로 (IMP-143) | P1 | TASK-B-029 ✅ | Dave (구현) | ✅ | [TASK-B-034](tasks/TASK-B-034_260628_E2E26-06_재발급버튼UI_Dave.md) | Issue #136 · DEF-082 해소 · PR#138 머지 ✅ (260628 Aiden) |
+| TASK-B-035 | 260628 | [Phase 8] DEF-083 zen_ups_labels partial unique index migration (재발급 duplicate key 수정) | P1 | 없음 | Baker (구현) | ⬜ | [TASK-B-035](tasks/TASK-B-035_260628_DEF083_partial_unique_index_Baker.md) | Issue #141 · DEF-083 · Production blocking |
+| TASK-B-036 | 260628 | [Phase 8] E2E-26-06 UPS 재발급 실 UI 버튼 클릭 E2E 재실행 | P1 | TASK-B-035 ✅ | Baker (구현) | 🚫 | [TASK-B-036](tasks/TASK-B-036_260628_E2E26-06_재실행_Baker.md) | Issue #142 · 전제: TASK-B-035 · test.skip 제거 + 실 UI 검증 |
+| TASK-B-037 | 260628 | [Phase 8] DEF-084 OutboundProcessForm.tsx 재발급 버튼 pkgs.find() scope 오류 수정 | P2 | TASK-B-036 §2 재현 확인 | Dave (구현) | 🚫 | [TASK-B-037](tasks/TASK-B-037_260628_DEF084_OutboundProcessForm_pkgs_find_Dave.md) | Issue #143 · DEF-084 · 재현 확인 후 착수 |
 ---
 
 ## Agent 현황
@@ -292,14 +295,15 @@
 |:------|:----:|:----|
 | **JSJung** (팀 리더) | ✅ TASK-B-030 승인 완료 (260628) · ⬜ TASK-B-033 착수 대기 | PR#129 ✅ 머지 완료 · UAT 지원 준비 총괄 · SHXK 환경변수 설정 · Issue #135 |
 | **Jaison** (AI Agent 총괄) | 🔄 TASK-B-029 재배정 완료 (260628) · ⬜ TASK-B-033 §2 대기 | Dave·Baker 분배 완료 · UAT-17-01/02 사전 데이터 준비 지원 |
-| **Dave** (AI Agent) | ✅ TASK-B-031 승인 완료 (260628) · 🔄 TASK-B-029 §1 착수 대기 · ⬜ TASK-B-033 §3 대기 | rebase + DEF-081 fix 준비 · UAT-18 사전 데이터 준비 (B-029 후) |
-| **Baker** (AI Agent) | ✅ TASK-B-029/030/032 머지 완료 (260628) · ⬜ TASK-B-033 §4 대기 | PR#137·131 develop 머지 완료 · UAT-17-03/19 체크리스트 준비 |
+| **Dave** (AI Agent) | ✅ TASK-B-031/034 승인 완료 (260628) · 🚫 TASK-B-037 재현 확인 대기 | DEF-084 보고서 확인 · TASK-B-036 §2 재현 확인 후 착수 여부 결정 |
+| **Baker** (AI Agent) | ✅ TASK-B-029/030/032 머지 완료 (260628) · ⬜ TASK-B-035 착수 대기 | DEF-083/084 보고서 제출 완료 (`0bc7445`) · TASK-B-035 즉시 착수 가능 |
 | **Gale** (AI Agent) | 대기 | 추후 재배정 예정 |
 
 ---
 
 ## 개정 이력
 
+| 2026-06-28 | Aiden (ZEN_CEO) | **TASK-B-035/036/037 발령** — Issue #110 DEF-083(Baker·P1)/DEF-084(Dave·P2) 기반. TASK-B-035 즉시·B-036 B-035후·B-037 B-036재현후. Edward 승인. |
 | 2026-06-28 | Aiden (ZEN_CEO) | **UAT 역할 재정의 (Edward 지시)** — UPS 특송 UAT Team B 주도 실행. Team A UAT 지원 + 결함 수정 방향 결정. TASK-B-033 업무 범위 확장. develop→main 머지 조건: UAT-17~19 전항목 PASS. |
 | 2026-06-28 | Aiden (ZEN_CEO) | **TASK-B-034 ✅ 승인** — PR#138 검토 APPROVED. handleReissue UI·i18n·DoD 8/8·회귀 380/387. DEF-082 해소. develop 머지 대기. Advisory: 코드커밋 docs 혼입. |
 | 2026-06-28 | Aiden (ZEN_CEO) | **D_Kai TASK-168 완료 보고 지시** — Issue #134 코멘트. §1~§3 ✅ 완료 확인. feature 브랜치 PR 제출 요청 (목표 6/29). |
