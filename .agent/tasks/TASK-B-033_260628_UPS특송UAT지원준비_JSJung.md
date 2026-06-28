@@ -1,30 +1,33 @@
-# TASK-B-033 — UPS 특송 UAT 환경 준비 및 실행 지원 (IMP-144)
+# TASK-B-033 — UPS 특송 UAT 주도 실행 (IMP-144)
 
 > **Task-ID**: TASK-B-033
 > **생성일**: 2026-06-28
 > **발령자**: Aiden (ZEN_CEO) — Edward 승인 (2026-06-28)
-> **담당**: JSJung (총괄) · Jaison · Dave · Baker (지원)
+> **담당**: JSJung (총괄) · Jaison · Dave · Baker
 > **우선순위**: P1
 > **상태**: ⬜
 > **GitHub Issue**: [#135](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/135)
 > **연관 IMP**: IMP-144
 > **전제조건**: D_Kai TASK-168 §1~§3 완료 ✅ (seed SQL·isUpsOrder 수정·계정 준비)
-> **목표 완료일**: 2026-06-28 (당일 — Aiden·Edward UAT 실행 즉시 지원)
+> **목표 완료일**: 2026-06-29
 
 ---
 
 ## 업무 개요
 
-UPS 특송 UAT(UAT-17~19)를 **Aiden·Edward가 직접 실행**할 수 있도록 Team B가 환경·데이터·체크리스트를 완비하고 실행 지원 대기.
+UPS 특송 UAT(UAT-17~19)를 **Team B(JSJung 주도)가 직접 실행**한다. Team A는 UAT 지원 및 발견 결함의 수정 방향 결정을 담당한다.
+
+> **[2026-06-28 Edward 지시]** UPS 특송 기능 UAT는 Team B 주도로 진행.  
+> Team A(Aiden·D_Kai·B_Kai)는 UAT 지원 및 결함 수정 방향 결정 담당.
 
 ### UAT 역할 분담
 
 | 역할 | 담당 |
 |:-----|:-----|
-| UAT 실행 및 최종 통과 판정 | **Aiden (ZEN_CEO) · Edward** |
-| UAT 환경 준비 · 지원 | **Team B (JSJung 주도)** |
-| UAT 중 결함 수정 의사결정 | Team A |
-| UAT 중 결함 수정 구현 | Team B |
+| **UAT 주도 실행 및 결과 보고** | **Team B (JSJung 총괄 · Jaison · Dave · Baker)** |
+| UAT 최종 통과 판정 | **Edward (ZEN_CEO)** |
+| UAT 지원 · 결함 수정 방향 결정 | **Team A (Aiden 주도 · D_Kai · B_Kai)** |
+| UAT 결함 수정 구현 | Team A 또는 Team B (Aiden 결정) |
 
 ---
 
@@ -72,23 +75,31 @@ UAT-17-03 실행을 위한 agency@zenith.kr 요율 오버라이드 등록:
 
 ### §4 — UAT 체크리스트 완비 (JSJung 담당)
 
-각 시나리오별 예상 DB 결과값을 사전 기재하여 Aiden·Edward 실행 시 즉시 대조 가능하도록 준비.
+각 시나리오별 예상 DB 결과값을 사전 기재.
 
-| UAT | 시나리오 | 실행 가능 시점 | 담당 점검자 |
-|:----|:--------|:------------:|:----------|
-| UAT-17-01 | DIRECT 오더 등록 | 즉시 | Jaison |
-| UAT-17-02 | PICKUP 오더 등록 + Zod 차단 | 즉시 | Jaison |
-| UAT-17-03 | 대리점 요율 오버라이드 | 즉시 | Baker |
-| UAT-18-01 | 창고 출고 → UPS 레이블 채번 | TASK-B-029 완료 후 | Dave |
-| UAT-18-02 | UPS 발송 정보 RLS 격리 | TASK-B-029 완료 후 | Dave |
-| UAT-19-01 | UPS 인보이스 PDF 출력 | 즉시 | Baker |
-| UAT-19-02 | PDF 다운로드 파일명·내용 검증 | 즉시 | Baker |
+| UAT | 시나리오 | 실행 주체 | 담당 |
+|:----|:--------|:--------:|:-----|
+| UAT-17-01 | DIRECT 오더 등록 | Jaison | Jaison |
+| UAT-17-02 | PICKUP 오더 등록 + Zod 차단 | Jaison | Jaison |
+| UAT-17-03 | 대리점 요율 오버라이드 | Baker | Baker |
+| UAT-18-01 | 창고 출고 → UPS 레이블 채번 | Dave | Dave |
+| UAT-18-02 | UPS 발송 정보 RLS 격리 | Dave | Dave |
+| UAT-19-01 | UPS 인보이스 PDF 출력 | Baker | Baker |
+| UAT-19-02 | PDF 다운로드 파일명·내용 검증 | Baker | Baker |
 
-### §5 — 실행 지원 대기 (전원)
+### §5 — UAT 실행 (Team B 주도)
 
-Aiden·Edward UAT 실행 시 즉각 기술 지원:
-- 결함 발생 시 원인 분석 및 Aiden에게 보고
-- Aiden 의사결정 후 즉시 수정 착수 가능한 상태 유지
+Team B가 UAT-17~19 시나리오를 직접 실행하고 결과를 기록:
+- 스크린샷: `docs/99_Manual/UAT_17_Result/` · `UAT_18_Result/` · `UAT_19_Result/`
+- 결함 발견 시 R-18 절차: `.agent/defects/DEF-NNN.md` 작성 → Aiden 즉시 보고
+- Aiden 수정 방향 결정 후 Team A 또는 Team B 구현 착수
+
+### §6 — 결함 보고 (전원)
+
+UAT 중 발견 결함:
+1. `[발견 이슈]` 섹션에 요약 기재
+2. `.agent/defects/DEF-NNN_제목.md` 상세 보고서 작성
+3. Aiden에게 즉시 보고 (수정 방향 결정 대기)
 
 ---
 
@@ -96,11 +107,13 @@ Aiden·Edward UAT 실행 시 즉각 기술 지원:
 
 - [ ] §1 SHXK 환경변수 설정 완료 + 동작 확인
 - [ ] §2 agency@zenith.kr 요율 오버라이드 등록 확인
-- [ ] §3 WAREHOUSED UPS 오더 1건 준비 (TASK-B-029 완료 후)
-- [ ] §4 UAT-17-01~03 체크리스트 예상 결과값 기재 완료
-- [ ] §4 UAT-18-01~02 체크리스트 예상 결과값 기재 완료 (TASK-B-029 완료 후)
-- [ ] §4 UAT-19-01~02 체크리스트 예상 결과값 기재 완료
-- [ ] Aiden·Edward UAT 실행 준비 완료 코멘트 게시 (Issue #135)
+- [ ] §3 WAREHOUSED UPS 오더 1건 준비
+- [ ] §4 UAT-17~19 체크리스트 예상 결과값 기재 완료
+- [ ] §5 UAT-17-01~03 실행 완료 + 스크린샷 증적
+- [ ] §5 UAT-18-01~02 실행 완료 + 스크린샷 증적
+- [ ] §5 UAT-19-01~02 실행 완료 + 스크린샷 증적
+- [ ] §6 발견 결함 전량 R-18 DEF 보고서 제출 + Aiden 보고
+- [ ] Edward UAT 최종 통과 판정 확인
 - [ ] R-17 커밋 순서 준수
 - [ ] 코드 커밋 해시 기재: _(구현 후 기재)_
 - [ ] 문서 커밋 해시 기재: _(구현 후 기재)_
@@ -139,3 +152,4 @@ _(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
 | 날짜 | 작성자 | 내용 |
 |:-----|:------|:----|
 | 2026-06-28 | Aiden (ZEN_CEO) | TASK-B-033 신규 발령 — UPS 특송 UAT 지원 준비 · JSJung 주도 · Issue #135 · IMP-144 · Edward 승인 |
+| 2026-06-28 | Aiden (ZEN_CEO) | **UAT 역할 재정의 (Edward 지시)** — Team B UAT 주도 실행 · Team A UAT 지원 + 결함 수정 방향 결정 · DoD §5~§6 추가 |

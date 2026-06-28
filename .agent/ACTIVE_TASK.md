@@ -269,7 +269,7 @@
 | TASK-B-030 | 260627 | [Phase 8] DEF-080 country_code ISO 2→3 변환 누락 수정 (IMP-142) | P1 | TASK-B-025 ✅ | JSJung (검토) · Baker (구현) | ✅ | [TASK-B-030](tasks/TASK-B-030_260627_DEF080_country_code_ISO변환_Baker.md) | Issue #128 · IMP-142 · DEF-080 · PR#129 ✅ Aiden 승인 260628 — develop 머지 완료 |
 | TASK-B-031 | 260627 | [Phase 8] E2E-26-05 폐기 버튼 수정 — fetchAndSaveLabel label_data 컬럼 제거 | P1 | TASK-B-029 🔄 | Dave (구현) | ✅ | [TASK-B-031](tasks/TASK-B-031_260627_E2E26-05_폐기버튼수정_Dave.md) | Issue #132 · PR#130 ✅ Aiden 승인 260628 — develop 머지 대기 |
 | TASK-B-032 | 260627 | [Phase 8] E2E-26-07 tracking_events insert 수정 (B-029 서브) | P1 | TASK-B-029 ✅ | Baker (구현) | ✅ | [TASK-B-032](tasks/TASK-B-032_260627_E2E26-07_tracking_events_수정_Baker.md) | Issue #133 · PR#131 ✅ Aiden 승인 260628 — develop 머지 완료 |
-| TASK-B-033 | 260628 | [Phase 8] UPS 특송 UAT 환경 준비 및 실행 지원 (IMP-144) | P1 | TASK-168 §1~§3 ✅ | JSJung (총괄) · Jaison · Dave · Baker | ⬜ | [TASK-B-033](tasks/TASK-B-033_260628_UPS특송UAT지원준비_JSJung.md) | Issue #135 · IMP-144 · UAT-17~19 환경 준비 · Aiden·Edward UAT 실행 지원 |
+| TASK-B-033 | 260628 | [Phase 8] UPS 특송 UAT 주도 실행 (IMP-144) | P1 | TASK-168 §1~§3 ✅ | JSJung (총괄) · Jaison · Dave · Baker | ⬜ | [TASK-B-033](tasks/TASK-B-033_260628_UPS특송UAT지원준비_JSJung.md) | Issue #135 · IMP-144 · **Team B UAT 주도 실행** · Team A 지원+결함방향결정 (260628 Edward 지시) |
 | TASK-B-034 | 260628 | [Phase 8] E2E-26-06 재발급 버튼 UI — void 후 재발급 경로 (IMP-143) | P1 | TASK-B-029 ✅ | Dave (구현) | ✅ | [TASK-B-034](tasks/TASK-B-034_260628_E2E26-06_재발급버튼UI_Dave.md) | Issue #136 · DEF-082 해소 · PR#138 머지 ✅ (260628 Aiden) |
 ---
 
@@ -300,6 +300,7 @@
 
 ## 개정 이력
 
+| 2026-06-28 | Aiden (ZEN_CEO) | **UAT 역할 재정의 (Edward 지시)** — UPS 특송 UAT Team B 주도 실행. Team A UAT 지원 + 결함 수정 방향 결정. TASK-B-033 업무 범위 확장. develop→main 머지 조건: UAT-17~19 전항목 PASS. |
 | 2026-06-28 | Aiden (ZEN_CEO) | **TASK-B-034 ✅ 승인** — PR#138 검토 APPROVED. handleReissue UI·i18n·DoD 8/8·회귀 380/387. DEF-082 해소. develop 머지 대기. Advisory: 코드커밋 docs 혼입. |
 | 2026-06-28 | Aiden (ZEN_CEO) | **D_Kai TASK-168 완료 보고 지시** — Issue #134 코멘트. §1~§3 ✅ 완료 확인. feature 브랜치 PR 제출 요청 (목표 6/29). |
 | 2026-06-28 | Aiden (ZEN_CEO) | **PR#137·131 develop 머지 완료** — TASK-B-029·032 순차 머지. TASK-B-033 착수 가능 (⬜ 해제 조건 충족). |
