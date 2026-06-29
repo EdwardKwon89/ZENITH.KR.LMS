@@ -312,6 +312,7 @@
 | 2026-06-28 | Aiden (ZEN_CEO) | **D_Kai TASK-168 완료 보고 지시** — Issue #134 코멘트. §1~§3 ✅ 완료 확인. feature 브랜치 PR 제출 요청 (목표 6/29). |
 | 2026-06-28 | Aiden (ZEN_CEO) | **PR#137·131 develop 머지 완료** — TASK-B-029·032 순차 머지. TASK-B-033 착수 가능 (⬜ 해제 조건 충족). |
 | 2026-06-28 | Aiden (ZEN_CEO) | **TASK-B-029 ✅ 승인** — PR#137 2차 검토 APPROVED. E2E-26 6/7 PASS(E2E-26-07 ✅·E2E-26-06 SKIP DEF-082). DoD 5/5·코드`75c4f88`·회귀 380/387. Advisory: 코드커밋 docs/ 혼입·PR body 회귀 오기. develop 머지 대기. → B-032 base→develop 후 실머지 가능. |
+| 2026-06-29 | Aiden (ZEN_CEO) | **TASK-B-036 ✅ 승인** — PR#145 머지 완료 (squash `ba418f9`). E2E 7/7 PASS · DEF-084 미재현 · DEF-085 R-18 보고 · R-08 면제(p6-transport-policy 6건 pre-existing) · B-037 ➖ 취소. Baker 다음 Task: B-033 §4. |
 | 2026-06-29 | Aiden (ZEN_CEO) | **TASK-B-036 ❌ 반려** — PR#145 DoD 미체크·E2E 미실행(Playwright Chromium Frameworks 누락)·작업결과 미기재 7건. Baker 재작업 지시. |
 | 2026-06-29 | Aiden (ZEN_CEO) | **TASK-B-035 ✅ 승인** — PR#144 머지 완료. SQL 내용 정확·R-17 준수·Jaison 검토 통과. R-08 면제(migration-only·코드 변경 없음). B-036 🚫→⬜ 전환. Baker 즉시 착수 가능. |
 | 2026-06-29 | Jaison (Team B AI 총괄) | **TASK-B-035/036/037 파일 생성** — Aiden Issue #110 승인(260628) 기반. B-035(Baker ⬜)·B-036(Baker 🚫)·B-037(Dave 🚫 조건부) 등재. Agent 현황표 갱신. |
