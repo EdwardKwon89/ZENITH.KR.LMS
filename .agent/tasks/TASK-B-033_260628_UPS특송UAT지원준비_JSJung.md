@@ -110,7 +110,7 @@ UAT 중 발견 결함:
 - [ ] §3 WAREHOUSED UPS 오더 1건 준비
 - [x] §4 UAT-17~19 체크리스트 예상 결과값 기재 완료
 - [ ] §5 UAT-17-01~03 실행 완료 + 스크린샷 증적
-- [ ] §5 UAT-18-01~02 실행 완료 + 스크린샷 증적
+- [x] §5 UAT-18-01~02 실행 완료 + 스크린샷 증적
 - [ ] §5 UAT-19-01~02 실행 완료 + 스크린샷 증적
 - [ ] §6 발견 결함 전량 R-18 DEF 보고서 제출 + Aiden 보고
 - [ ] Edward UAT 최종 통과 판정 확인
@@ -144,6 +144,21 @@ _Aiden 전속_
 | UAT-19-02 | 인보이스 PDF 다운로드 파일명 및 내용 무결성 검증 | ✅ | 예상 DB 결과값 기재 완료 (UAT_19_UPS인보이스PDF.md) |
 
 각 시나리오별 예상 SQL 결과값을 `### 예상 DB 결과값 (UAT §4 체크리스트)` 섹션으로 UAT 문서에 추가 완료.
+
+---
+
+### Dave (§5) — 2026-06-30 (TASK-B-039)
+
+| UAT | 시나리오 | 상태 | 비고 |
+|:----|:--------|:----:|:-----|
+| UAT-18-01 | 창고 출고 → UPS 레이블 채번 (WAREHOUSED→RELEASED) | ✅ | `intl_ref_no = MOCK-E6B13732`, `intl_ref_locked = true` |
+| UAT-18-02a | RLS 소유 shipper 정상 조회 | ✅ | 오더 상세 정상 표시 |
+| UAT-18-02b | RLS 타 shipper 접근 차단 | ✅ | agency_shipper@zenith.kr → 접근 차단 (403/리다이렉트) |
+
+자동화 스크립트: `tests/e2e/e2e-27-uat18-outbound-ups.spec.ts` · Playwright 3/3 PASS  
+회귀 테스트: **387/387 PASS** (69 files)  
+스크린샷: `docs/99_Manual/UAT_18_Result/` 5종  
+PR: [#147](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/147)
 
 ---
 
