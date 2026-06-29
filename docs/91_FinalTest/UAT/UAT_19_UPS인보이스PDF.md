@@ -31,6 +31,15 @@
 - [ ] PDF 출력 버튼 클릭 시 깨진 텍스트나 레이아웃 왜곡 없이 브라우저 PDF 뷰어가 실행됨
 - [ ] 500 에러 없음
 
+### 예상 DB 결과값 (UAT §4 체크리스트)
+
+| 검증 포인트 | SQL | 예상 결과 |
+|:-----------|:----|:---------|
+| 인보이스 생성 확인 | `SELECT id, order_id, status, total_amount, created_at FROM zen_invoices WHERE order_id = '[오더ID]'` | 1 row, `status` = `'ISSUED'`, `total_amount` = 오더 정산 금액과 일치 |
+| PDF 생성 이력 | `SELECT id, invoice_id, file_name, file_size, created_at FROM zen_invoice_files WHERE invoice_id = '[인보이스ID]' ORDER BY created_at DESC LIMIT 1` | `file_name` = `'Invoice_UPS_[오더번호].pdf'`, `file_size` > 0 |
+| 오더 금액 정합성 | `SELECT o.order_no, o.total_freight, i.total_amount FROM zen_orders o JOIN zen_invoices i ON i.order_id = o.id WHERE o.id = '[오더ID]'` | `o.total_freight` = `i.total_amount` (정합) |
+| 스냅샷 데이터 존재 | `SELECT COUNT(*) FROM zen_order_rate_snapshots WHERE order_id = '[오더ID]'` | > 0 (PDF 내 금액 표기용 데이터 존재) |
+
 ### 결함 기재란
 
 | 결함-ID | 단계 | 현상 | 심각도 |
@@ -61,6 +70,16 @@
 - [ ] 다운로드된 파일명 형식이 규격에 맞게 생성됨
 - [ ] PDF 내 기재 금액 및 패키지 사양이 실제 오더 데이터와 정확히 1:1 일치함
 - [ ] 500 에러 없음
+
+### 예상 DB 결과값 (UAT §4 체크리스트)
+
+| 검증 포인트 | SQL | 예상 결과 |
+|:-----------|:----|:---------|
+| 파일명 규격 | `SELECT file_name FROM zen_invoice_files WHERE invoice_id = '[인보이스ID]'` | `'Invoice_UPS_[오더번호].pdf'` 패턴 일치 (예: `Invoice_UPS_ORD-20260629-001.pdf`) |
+| 패키지 정보 정합성 | `SELECT pkg_seq, weight_kg, volume_cbm, description FROM zen_order_packages WHERE order_id = '[오더ID]' ORDER BY pkg_seq` | PDF 내 패키지 목록과 1:1 일치 (seq·중량·볼륨·품명) |
+| Selling Price 정합성 | `SELECT applied_unit_price, override_type, override_value FROM zen_order_rate_snapshots WHERE order_id = '[오더ID]'` | `applied_unit_price` = PDF Selling Price 필드값과 일치 |
+| 송하인/수하인 정합성 | `SELECT shipper_name, consignee_name, origin_code, dest_code FROM zen_orders WHERE id = '[오더ID]'` | PDF 내 송하인·수하인·출발지·도착지 정보와 일치 |
+| 통화 일치 | `SELECT currency FROM zen_orders WHERE id = '[오더ID]'` | PDF 금액 표기 통화와 일치 (예: `USD`) |
 
 ### 결함 기재란
 
