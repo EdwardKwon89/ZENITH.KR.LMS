@@ -75,6 +75,7 @@ async function setupTestFixtures(): Promise<void> {
     .insert({
       order_no: testOrderNo,
       status: 'WAREHOUSED',
+      shipper_id: '00000000-0000-0000-0000-000000000001',
       ups_product_code: 'WW_EXPRESS_DOC',
       incoterms: 'DDU',
       dest_port_id: destPortId,
@@ -296,7 +297,6 @@ test.describe('E2E-26: UPS 레이블 발급 전체 흐름', () => {
 
   // ── E2E-26-06 ─────────────────────────────────────────────────────────────
   test('E2E-26-06: 재발급 → 새 운송장 번호 갱신 확인', async ({ page }) => {
-    test.skip(true, 'DEF-082: 재발급 버튼 UI 미구현 — TASK-B-033 완료 후 활성화 (Issue #136)');
     test.setTimeout(120000);
     page.on('console', msg => console.log(`[PAGE] ${msg.type()}: ${msg.text()}`));
 
@@ -304,28 +304,28 @@ test.describe('E2E-26: UPS 레이블 발급 전체 흐름', () => {
     await page.goto('/ko/warehouse/outbound');
     await page.waitForLoadState('networkidle');
 
-    // 재발급 버튼 또는 출고 확정 재클릭
-    const reissueBtn = page.getByRole('button', { name: /재발급|출고 확정/ }).first();
-    await expect(reissueBtn).toBeVisible({ timeout: 15000 });
-    await reissueBtn.click();
+    // 재발급 버튼 클릭
+    const reissueBtn = page.locator('button').filter({ hasText: '재발급' }).first();
+    await expect(reissueBtn).toHaveCount(1, { timeout: 5000 });
+    await reissueBtn.click({ timeout: 5000 });
 
-    // 발급 완료 확인
-    await expect(page.getByText('UPS 레이블 발급 완료').first()).toBeVisible({ timeout: 60000 });
-    await page.screenshot({ path: path.join(SCREENSHOT_DIR, '06_reissue_completed.png') });
-
-    // cleanup 등록 (재발급 후 정리 필요)
-    pendingCleanup.push(testPackageId);
-
-    // DB에서 새 레코드 확인
-    const { data: labels } = await supabase
-      .from('zen_ups_labels')
-      .select('id, tracking_number, created_at')
-      .eq('package_id', testPackageId)
-      .order('created_at', { ascending: false });
-
-    expect(labels).not.toBeNull();
-    expect(labels!.length).toBeGreaterThanOrEqual(2);
-    console.log('[E2E-26-06] labels count:', labels!.length);
+    // DB 폴링: 새 레이블 레코드 생성될 때까지 대기 (toast는 auto-dismiss 되므로 UI보다 DB 검증)
+    let newLabelCount = 0;
+    for (let i = 0; i < 30; i++) {
+      await page.waitForTimeout(2000);
+      const { data: labels } = await supabase
+        .from('zen_ups_labels')
+        .select('id, tracking_number, is_voided, created_at')
+        .eq('package_id', testPackageId)
+        .order('created_at', { ascending: false });
+      if (labels && labels.length >= 2 && labels.some(l => !l.is_voided)) {
+        newLabelCount = labels.length;
+        await page.screenshot({ path: path.join(SCREENSHOT_DIR, '06_reissue_completed.png') });
+        break;
+      }
+    }
+    expect(newLabelCount).toBeGreaterThanOrEqual(2);
+    console.log('[E2E-26-06] labels count after reissue:', newLabelCount);
   });
 
   // ── E2E-26-07 ─────────────────────────────────────────────────────────────

@@ -473,6 +473,7 @@
 | **TC-P8-UPS-03** | getnewlabel → 레이블 PDF URL 생성 | PDF URL 정상 반환 확인 | `tests/e2e/e2e-26-ups-label-flow.spec.ts` |
 | **TC-P8-UPS-04** | `zen_ups_labels` DB 레코드 삽입 확인 | 테이블 upsert 정상 동작 | `tests/e2e/e2e-26-ups-label-flow.spec.ts` |
 | **TC-P8-UPS-05** | Void 버튼 → confirm → 폐기 완료 | `markLabelVoided` UPDATE 성공 및 UI 반영 | `tests/e2e/e2e-26-ups-label-flow.spec.ts` |
+| **TC-P8-UPS-06** | 재발급 버튼 클릭 → 새 운송장 번호 갱신 | `issueUpsLabel` 정상 호출 및 DB `is_voided=false` 레코드 생성 확인 | `tests/e2e/e2e-26-ups-label-flow.spec.ts` |
 | **TC-P8-UPS-07** | gettrack polling → tracking_events 저장 | 폴링 첫 호출 후 `zen_ups_tracking_events` 삽입 확인 | `tests/e2e/e2e-26-ups-label-flow.spec.ts` |
 
 ---
