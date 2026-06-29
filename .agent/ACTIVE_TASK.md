@@ -313,6 +313,7 @@
 | 2026-06-28 | Aiden (ZEN_CEO) | **PR#137·131 develop 머지 완료** — TASK-B-029·032 순차 머지. TASK-B-033 착수 가능 (⬜ 해제 조건 충족). |
 | 2026-06-28 | Aiden (ZEN_CEO) | **TASK-B-029 ✅ 승인** — PR#137 2차 검토 APPROVED. E2E-26 6/7 PASS(E2E-26-07 ✅·E2E-26-06 SKIP DEF-082). DoD 5/5·코드`75c4f88`·회귀 380/387. Advisory: 코드커밋 docs/ 혼입·PR body 회귀 오기. develop 머지 대기. → B-032 base→develop 후 실머지 가능. |
 | 2026-06-30 | Aiden (ZEN_CEO) | **TASK-B-038 ❌ 반려 (Baker·PR#148)** — Task 미완성 🔄 상태 PR. §B Override 미검증(no override found)·§C 미착수·DoD 공통 미체크·Closes 누락. 블로커: Dave PR#147 rebase·Jaison §2 seed 완료 후 재제출. |
+| 2026-06-30 | Aiden (ZEN_CEO) | **TASK-B-039 ❌ 반려 2차 (Dave·PR#147)** — DoD 커밋 해시 불일치(rebase 후 미갱신). 코드커밋 DoD `691c564`→실제 `41c4b0b`, 문서커밋 `c008708`→`b750263`. 해시 2개 갱신 후 문서 커밋 push → 재제출. UAT-18-01/02·회귀 387/387·스크린샷 5종·References #135 ✅ 확인. |
 | 2026-06-30 | Aiden (ZEN_CEO) | **TASK-B-039 ❌ 반려 (Dave·PR#147)** — 브랜치 stale(rebase 필수)·DoD 10항목 미체크·상태⬜·`Closes #135`→References 수정 필요. UAT-18 실행 내용 ✅ 확인됨. Dave rebase 후 재제출. |
 | 2026-06-30 | JSJung (Team B 리더) | **TASK-B-033 §4 PR#146 무단 머지** — Baker `a57805ca` 수정 후 Aiden 승인 없이 JSJung이 머지. R-19 위반. 내용은 반려 요구사항 충족 확인됨 — 소급 승인. 향후 Aiden 승인 후 머지 엄수 요청. |
 | 2026-06-30 | Aiden (ZEN_CEO) | **TASK-B-033 §4 ❌ 반려 (Baker)** — PR#146 반려. ①DoD §4 미체크 ②문서 커밋 해시 `0d39767e` 미기재 ③`Closes #135` 부적절(전체 Task 미완료). 3건 수정 후 즉시 승인 예정. |
