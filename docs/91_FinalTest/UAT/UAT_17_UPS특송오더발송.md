@@ -99,6 +99,15 @@
 - [ ] 대리점 하위 화주 오더 등록 시, 대리점 요율 오버라이드 마크업 가격이 정상 계산되어 실시간 UI 및 요율 스냅샷(DB)에 정확히 반영됨
 - [ ] 500 에러 없음
 
+### 예상 DB 결과값 (UAT §4 체크리스트)
+
+| 검증 포인트 | SQL | 예상 결과 |
+|:-----------|:----|:---------|
+| 요율 스냅샷에 마크업 반영 | `SELECT applied_unit_price, pricing_basis FROM zen_order_rate_snapshots WHERE order_id = '[오더ID]'` | `applied_unit_price` = 115.00 (기본 100 + MARKUP_FLAT 15), `pricing_basis` = `'MARKUP'` |
+| 수수료 스냅샷 agency 정보 | `SELECT override_type, override_value FROM zen_agency_rate_overrides ra JOIN zen_order_rate_snapshots rs ON ra.rate_card_id = rs.rate_card_id WHERE rs.order_id = '[오더ID]'` | `override_type` = `'MARKUP_FLAT'`, `override_value` = 15.00 |
+| 오더 최종 금액 정합성 | `SELECT o.id, o.total_freight FROM zen_orders o JOIN zen_order_rate_snapshots rs ON rs.order_id = o.id WHERE o.order_no = '[생성된오더번호]'` | `o.total_freight` = `rs.applied_unit_price` (115.00) |
+| 대리점별 격리 | `SELECT COUNT(*) FROM zen_order_rate_snapshots rs JOIN zen_orders o ON o.id = rs.order_id WHERE o.shipper_id != '[대리점소속화주org_id]' AND rs.override_type IS NOT NULL` | 0 (타 대리점 데이터 영향 없음) |
+
 ### 결함 기재란
 
 | 결함-ID | 단계 | 현상 | 심각도 |
