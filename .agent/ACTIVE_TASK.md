@@ -275,7 +275,7 @@
 | TASK-B-036 | 260629 | [Phase 8] E2E-26-06 실 UI 재발급 버튼 클릭 플로우 E2E 재검증 | P1 | TASK-B-035 ✅ | Baker (구현) | ✅ | [TASK-B-036](tasks/TASK-B-036_260629_E2E26-06_재발급UI_재실행_Baker.md) | Issue #142 · E2E 7/7 PASS ✅ · DEF-084 미재현 · DEF-085 발견 · PR#145 ✅ 승인 260629 |
 | TASK-B-037 | 260629 | [Phase 8] DEF-084 OutboundProcessForm pkgs.find() → pkg.id 직접 사용 수정 | P2 | TASK-B-036 §2 재현 확인 | Dave (구현) | ➖ | [TASK-B-037](tasks/TASK-B-037_260629_DEF084_OutboundProcessForm_pkgs_find_fix_Dave.md) | Issue #143 · DEF-084 미재현 확인 (Baker TASK-B-036 §2, 260629) → 취소 |
 | TASK-B-038 | 260630 | [Phase 8] TASK-B-033 §4 예상값 수정 + §5 UAT-17-03·19-01·19-02 실행 | P1 | 없음 | Baker (구현) | 🔄 | [TASK-B-038](tasks/TASK-B-038_260630_B033-S4수정+S5-UAT1719실행_Baker.md) | Issue #135 · §A PR#146 · §B Playwright 1/1 PASS · §2 override 미등록 (Jaison) |
-| TASK-B-039 | 260630 | [Phase 8] TASK-B-033 §5 UAT-18-01·18-02 창고 출고 UPS 연계 실행 | P1 | 없음 | Dave (구현) | ⬜ | [TASK-B-039](tasks/TASK-B-039_260630_B033-S5-UAT18실행_Dave.md) | Issue #135 · UAT-18-TEST-001 오더 활용 · SHXK_TEST_MOCK=true |
+| TASK-B-039 | 260630 | [Phase 8] TASK-B-033 §5 UAT-18-01·18-02 창고 출고 UPS 연계 실행 | P1 | 없음 | Dave (구현) | 🔔 | [TASK-B-039](tasks/TASK-B-039_260630_B033-S5-UAT18실행_Dave.md) | Issue #135 · PR#147 · 코드 691c564 · 회귀 387/387 · Aiden 검토 대기 |
 ---
 
 ## Agent 현황
