@@ -272,8 +272,8 @@
 | TASK-B-033 | 260628 | [Phase 8] UPS 특송 UAT 주도 실행 (IMP-144) | P1 | TASK-168 §1~§3 ✅ | JSJung (총괄) · Jaison · Dave · Baker | ⬜ | [TASK-B-033](tasks/TASK-B-033_260628_UPS특송UAT지원준비_JSJung.md) | Issue #135 · IMP-144 · **Team B UAT 주도 실행** · Team A 지원+결함방향결정 (260628 Edward 지시) |
 | TASK-B-034 | 260628 | [Phase 8] E2E-26-06 재발급 버튼 UI — void 후 재발급 경로 (IMP-143) | P1 | TASK-B-029 ✅ | Dave (구현) | ✅ | [TASK-B-034](tasks/TASK-B-034_260628_E2E26-06_재발급버튼UI_Dave.md) | Issue #136 · DEF-082 해소 · PR#138 머지 ✅ (260628 Aiden) |
 | TASK-B-035 | 260628 | [Phase 8] DEF-083 zen_ups_labels partial unique index migration (재발급 duplicate key 수정) | P1 | 없음 | Baker (구현) | ⬜ | [TASK-B-035](tasks/TASK-B-035_260628_DEF083_partial_unique_index_Baker.md) | Issue #141 · DEF-083 · Production blocking |
-| TASK-B-036 | 260628 | [Phase 8] E2E-26-06 UPS 재발급 실 UI 버튼 클릭 E2E 재실행 | P1 | TASK-B-035 ✅ | Baker (구현) | 🔔 | [TASK-B-036](tasks/TASK-B-036_260629_E2E26-06_재발급UI_재실행_Baker.md) | Issue #142 · test.skip 제거 완료 · PR#145 |
-| TASK-B-037 | 260628 | [Phase 8] DEF-084 OutboundProcessForm.tsx 재발급 버튼 pkgs.find() scope 오류 수정 | P2 | TASK-B-036 §2 재현 확인 | Dave (구현) | 🚫 | [TASK-B-037](tasks/TASK-B-037_260628_DEF084_OutboundProcessForm_pkgs_find_Dave.md) | Issue #143 · DEF-084 · 재현 확인 후 착수 |
+| TASK-B-036 | 260628 | [Phase 8] E2E-26-06 UPS 재발급 실 UI 버튼 클릭 E2E 재실행 | P1 | TASK-B-035 ✅ | Baker (구현) | 🔔 | [TASK-B-036](tasks/TASK-B-036_260629_E2E26-06_재발급UI_재실행_Baker.md) | Issue #142 · 7/7 PASS ✅ · DEF-084 미재현 · PR#145 |
+| TASK-B-037 | 260628 | [Phase 8] DEF-084 OutboundProcessForm.tsx 재발급 버튼 pkgs.find() scope 오류 수정 | P2 | TASK-B-036 §2 재현 확인 → 미재현 | Dave (구현) | ➖ | [TASK-B-037](tasks/TASK-B-037_260628_DEF084_OutboundProcessForm_pkgs_find_Dave.md) | Issue #143 · DEF-084 재현되지 않음 — 취소 |
 ---
 
 ## Agent 현황
@@ -295,8 +295,8 @@
 |:------|:----:|:----|
 | **JSJung** (팀 리더) | ✅ TASK-B-030 승인 완료 (260628) · ⬜ TASK-B-033 착수 대기 | PR#129 ✅ 머지 완료 · UAT 지원 준비 총괄 · SHXK 환경변수 설정 · Issue #135 |
 | **Jaison** (AI Agent 총괄) | 🔄 TASK-B-029 재배정 완료 (260628) · ⬜ TASK-B-033 §2 대기 | Dave·Baker 분배 완료 · UAT-17-01/02 사전 데이터 준비 지원 |
-| **Dave** (AI Agent) | ✅ TASK-B-031/034 승인 완료 (260628) · 🚫 TASK-B-037 재현 확인 대기 | DEF-084 보고서 확인 · TASK-B-036 §2 재현 확인 후 착수 여부 결정 |
-| **Baker** (AI Agent) | ✅ TASK-B-029/030/032 머지 완료 (260628) · ⬜ TASK-B-035 착수 대기 | DEF-083/084 보고서 제출 완료 (`0bc7445`) · TASK-B-035 즉시 착수 가능 |
+| **Dave** (AI Agent) | ✅ TASK-B-031/034 승인 완료 (260628) · ➖ TASK-B-037 취소 (DEF-084 미재현) | DEF-084 보고서 확인 · TASK-B-036 §2 재현 확인 완료 — 재현 안됨, 취소 |
+| **Baker** (AI Agent) | ✅ TASK-B-029/030/032 머지 완료 (260628) · 🔔 TASK-B-036 7/7 PASS 완료 | Issue #142 · PR#145 · DEF-083/084 보고서 제출 완료 |
 | **Gale** (AI Agent) | 대기 | 추후 재배정 예정 |
 
 ---
