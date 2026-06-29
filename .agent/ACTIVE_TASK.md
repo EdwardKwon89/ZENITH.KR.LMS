@@ -274,7 +274,7 @@
 | TASK-B-035 | 260629 | [Phase 8] DEF-083 zen_ups_labels.reference_no partial unique index 수정 | P1 | 없음 | Baker (구현) | ✅ | [TASK-B-035](tasks/TASK-B-035_260629_DEF083_reference_no_partial_unique_index_Baker.md) | Issue #141 · DEF-083 · PR#144 머지 ✅ 260629 · 코드 8b6cae8 |
 | TASK-B-036 | 260629 | [Phase 8] E2E-26-06 실 UI 재발급 버튼 클릭 플로우 E2E 재검증 | P1 | TASK-B-035 ✅ | Baker (구현) | ✅ | [TASK-B-036](tasks/TASK-B-036_260629_E2E26-06_재발급UI_재실행_Baker.md) | Issue #142 · E2E 7/7 PASS ✅ · DEF-084 미재현 · DEF-085 발견 · PR#145 ✅ 승인 260629 |
 | TASK-B-037 | 260629 | [Phase 8] DEF-084 OutboundProcessForm pkgs.find() → pkg.id 직접 사용 수정 | P2 | TASK-B-036 §2 재현 확인 | Dave (구현) | ➖ | [TASK-B-037](tasks/TASK-B-037_260629_DEF084_OutboundProcessForm_pkgs_find_fix_Dave.md) | Issue #143 · DEF-084 미재현 확인 (Baker TASK-B-036 §2, 260629) → 취소 |
-| TASK-B-038 | 260630 | [Phase 8] TASK-B-033 §4 예상값 수정 + §5 UAT-17-03·19-01·19-02 실행 | P1 | 없음 | Baker (구현) | ⬜ | [TASK-B-038](tasks/TASK-B-038_260630_B033-S4수정+S5-UAT1719실행_Baker.md) | Issue #135 · §4 스키마 수정(selling_price/cost_price) + §5 UAT-17-03/19 실행 |
+| TASK-B-038 | 260630 | [Phase 8] TASK-B-033 §4 예상값 수정 + §5 UAT-17-03·19-01·19-02 실행 | P1 | 없음 | Baker (구현) | 🔄 | [TASK-B-038](tasks/TASK-B-038_260630_B033-S4수정+S5-UAT1719실행_Baker.md) | Issue #135 · §A PR#146 · §B Playwright 1/1 PASS · §2 override 미등록 (Jaison) |
 | TASK-B-039 | 260630 | [Phase 8] TASK-B-033 §5 UAT-18-01·18-02 창고 출고 UPS 연계 실행 | P1 | 없음 | Dave (구현) | ⬜ | [TASK-B-039](tasks/TASK-B-039_260630_B033-S5-UAT18실행_Dave.md) | Issue #135 · UAT-18-TEST-001 오더 활용 · SHXK_TEST_MOCK=true |
 ---
 
@@ -297,8 +297,8 @@
 |:------|:----:|:----|
 | **JSJung** (팀 리더) | ✅ TASK-B-030 승인 완료 (260628) · ⬜ TASK-B-033 착수 대기 | PR#129 ✅ 머지 완료 · UAT 지원 준비 총괄 · SHXK 환경변수 설정 · Issue #135 |
 | **Jaison** (AI Agent 총괄) | 🔄 TASK-B-029 재배정 완료 (260628) · ⬜ TASK-B-033 §2 대기 | Dave·Baker 분배 완료 · UAT-17-01/02 사전 데이터 준비 지원 |
-| **Dave** (AI Agent) | ✅ TASK-B-031/034 승인 완료 (260628) · ➖ TASK-B-037 취소 (DEF-084 미재현) · ⬜ TASK-B-033 §3 대기 | DEF-084 미재현 확인 — B-037 ➖ 취소. UAT-18 사전 데이터 준비 대기 |
-| **Baker** (AI Agent) | ✅ TASK-B-035 승인 (260629) · ✅ TASK-B-036 승인 (260629) · 🔄 TASK-B-033 §4 착수 중 | PR#145 ✅ 머지 — E2E 7/7 PASS · DEF-085 발견 보고 (R-18) · UAT-17-03·19-01·19-02 예상 DB 결과값 기재 중 |
+| **Dave** (AI Agent) | ✅ TASK-B-031/034 완료 · 🔔 **TASK-B-039** UAT-18-01/02 제출 (PR#147) | 회귀 387/387 · Aiden 검토 대기 |
+| **Baker** (AI Agent) | ✅ TASK-B-035/036 승인 (260629) · 🔄 **TASK-B-038** §A완료·§B진행중 | PR#146 §A (§4 수정) · §B UAT-17-03 Playwright 1/1 PASS · §C Dave UAT-18 대기 · §2 Override 미완료 (Jaison) |
 | **Gale** (AI Agent) | 대기 | 추후 재배정 예정 |
 
 ---
