@@ -5,7 +5,7 @@
 > **발령자**: Aiden (ZEN_CEO) — Edward 승인 (2026-06-28)
 > **담당**: JSJung (총괄) · Jaison · Dave · Baker
 > **우선순위**: P1
-> **상태**: ⬜
+> **상태**: 🔔
 > **GitHub Issue**: [#135](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/135)
 > **연관 IMP**: IMP-144
 > **전제조건**: D_Kai TASK-168 §1~§3 완료 ✅ (seed SQL·isUpsOrder 수정·계정 준비)
@@ -105,17 +105,17 @@ UAT 중 발견 결함:
 
 ## DoD (Definition of Done)
 
-- [ ] §1 SHXK 환경변수 설정 완료 + 동작 확인
-- [ ] §2 agency@zenith.kr 요율 오버라이드 등록 확인
-- [x] §3 WAREHOUSED UPS 오더 1건 준비
+- [x] §1 SHXK 환경변수 설정 완료 + 동작 확인
+- [x] §2 agency@zenith.kr 요율 오버라이드 등록 확인
+- [x] §3 WAREHOUSED UPS 오더 1건 준비 (Dave TASK-B-039 UAT-18-01에서 WAREHOUSED→RELEASED 확인)
 - [x] §4 UAT-17~19 체크리스트 예상 결과값 기재 완료
 - [x] §5 UAT-17-01~03 실행 완료 + 스크린샷 증적 (Baker TASK-B-038)
 - [x] §5 UAT-18-01~02 실행 완료 + 스크린샷 증적
 - [x] §5 UAT-19-01~02 실행 완료 + 스크린샷 증적 (Baker TASK-B-038, 기능 미구현 DEF-086/087 등록)
 - [x] §6 발견 결함 전량 R-18 DEF 보고서 제출 + Aiden 보고 (DEF-086~088)
-- [ ] Edward UAT 최종 통과 판정 확인
-- [ ] R-17 커밋 순서 준수
-- [x] 코드 커밋 해시 기재: `f55952f` (TASK-B-038 §B·§C — spec·screenshots)
+- [ ] Edward UAT 최종 통과 판정 확인 (Baker TASK-B-042 UAT-19 재실행 후 판정 예정)
+- [x] R-17 커밋 순서 준수
+- [x] 코드 커밋 해시 기재: `f55952f` (TASK-B-038 §B·§C — spec·screenshots) · `99f9324` (DEF-088 UAT-19-02 컬럼명 교정)
 - [x] 문서 커밋 해시 기재: `e49812d` (DEF-086~088 R-18) + `a68ff98` (task file·ACTIVE_TASK.md 🔔)
 - [x] PR 생성 (`Closes #135`) — PR#149
 
@@ -143,6 +143,16 @@ _Aiden 전속_
 | 상태 | WAREHOUSED → RELEASED (UAT-18-01 실행 후 전이) |
 | transport_mode | `EXP` |
 | 참조 | TASK-B-039 PR#147 머지 ✅ |
+
+---
+
+### Jaison (§1·§2·DEF-088) — 2026-06-30
+
+| 항목 | 결과 | 비고 |
+|:----|:----:|:-----|
+| §1 SHXK 환경변수 | ✅ | `.env.local` `SHXK_APP_KEY`·`SHXK_APP_TOKEN` 등록 확인 (mock mode: `SHXK_TEST_MOCK=true`) |
+| §2 agency@zenith.kr 요율 오버라이드 | ✅ | `zen_agency_rate_overrides` — org `924c2fcb` `is_active=true`, `selling_price=74,500`, `valid_from=2026-06-29` |
+| DEF-088 UAT-19-02 컬럼명 교정 | ✅ | `override_type, override_value` → `applied_rule` (커밋 `99f9324`) |
 
 ---
 
@@ -207,3 +217,4 @@ _(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
 | 2026-06-28 | Aiden (ZEN_CEO) | **UAT 역할 재정의 (Edward 지시)** — Team B UAT 주도 실행 · Team A UAT 지원 + 결함 수정 방향 결정 · DoD §5~§6 추가 |
 | 2026-06-30 | Baker (TASK-B-038) | **§5 UAT-17-03·19-01·19-02 실행 완료** — §B 1/1 PASS(Override verified 74500) · §C 2/2 PASS(기능 미구현 DEF-086/087) · R-18 DEF-086~088 등록 · PR#149 |
 | 2026-06-30 | Baker (TASK-B-040) | **§5 UAT-17-01·17-02 실행 완료** — UAT-17-01 1/1 PASS(DIRECT) · UAT-17-02 1/1 PASS(PICKUP · Zod 차단) · UAT 문서 체크박스 ☑ 완료 · PR#153 |
+| 2026-06-30 | Jaison (JSJung 대행) | **§1·§2 소급 확인 + DEF-088 수정 + 🔔 완료 보고** — §1 .env.local 등록 확인 · §2 zen_agency_rate_overrides active row 확인 · DEF-088 UAT-19-02 컬럼명 교정 커밋 `143008b` |
