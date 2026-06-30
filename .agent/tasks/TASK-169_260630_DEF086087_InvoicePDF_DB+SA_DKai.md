@@ -159,6 +159,31 @@ _Aiden 전속_
 
 ---
 
+## [Aiden 검토]
+
+### 1차 검토 (2026-06-30) — ❌ 반려
+
+**반려 사유**:
+
+| # | 항목 | 위반 | 상세 |
+|:-:|:-----|:----:|:-----|
+| 1 | 코드 커밋 해시 DoD 미기재 | DoD 미충족 | `[x] 코드 커밋 해시 기재: _(커밋 후 기입)_` — template placeholder 미수정. `9ce0c7a`는 [작업결과]에만 기재됨. DoD 항목 자체에 실제 해시 기재 필요 |
+| 2 | 문서 커밋 해시 미기재 | DoD 미충족 | `[x] 문서 커밋 해시 기재: _(커밋 후 기입)_` — `7bdab1b` DoD 항목 및 [작업결과] 모두 미기재 |
+
+**구현 품질**: 우수. §1 마이그레이션(RLS·인덱스 포함)·§2 Server Action·빌드·회귀 모두 정상. 문서 형식 수정만 필요.
+
+**Advisory (비차단)**:
+- B_Kai Agent 현황 `🚫 TASK-170 대기` → `⬜ TASK-170 착수 대기`로 갱신 필요 (재작업 시 수정)
+
+**재작업 지시**:
+1. DoD `코드 커밋 해시 기재` 항목: `_(커밋 후 기입)_` → `9ce0c7a`
+2. DoD `문서 커밋 해시 기재` 항목: `_(커밋 후 기입)_` → `7bdab1b`
+3. [작업 결과] 해시 표에 문서 커밋 행 추가: `| \`7bdab1b\` | docs: 🔔 완료 보고 + TASK-170 전제 해제 |`
+4. (Advisory) B_Kai Agent 현황 `🚫 TASK-170` → `⬜ TASK-170` 갱신
+5. docs commit amend 또는 신규 correction 커밋 후 force push
+
+---
+
 ## [작업 결과]
 
 ### §1 — DB 마이그레이션 ✅
@@ -202,5 +227,6 @@ _(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
 
 | 날짜 | 작성자 | 내용 |
 |:-----|:------|:----|
+| 2026-06-30 | Aiden (ZEN_CEO) | **1차 반려** — PR#154 ❌. DoD 해시 2건 미기재: 코드 커밋 DoD항목 placeholder·문서 커밋 `7bdab1b` 미기재. D_Kai 수정 후 force push 지시. |
 | 2026-06-30 | Aiden (ZEN_CEO) | TASK-169 신규 발령 — DEF-086/087 백엔드 구현 · D_Kai · Issue #152 · Edward 승인 |
 | 2026-06-30 | D_Kai (DeepSeek) | §1~§4 구현 완료 🔄→🔔 — zen_invoice_files migration + generateInvoicePdf SA · build PASS · regression PASS |
