@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { validateUserAction } from '@/lib/auth/guards'
-import { generateInvoicePdfBuffer } from '@/lib/finance/pdf'
+import { generateInvoicePdfBuffer, type InvoicePdfData } from '@/lib/finance/pdf'
 import { logger } from '@/lib/logger'
 
 export async function generateInvoicePdf(orderId: string): Promise<{ fileUrl: string; fileName: string }> {
@@ -52,7 +52,7 @@ export async function generateInvoicePdf(orderId: string): Promise<{ fileUrl: st
   }
 
   const shipperMeta = (invoice.shipper as any)?.metadata || {}
-  const pdfData = {
+  const pdfData: InvoicePdfData = {
     invoice_no: invoice.invoice_no,
     due_date: invoice.due_date,
     total_amount: invoice.total_amount,

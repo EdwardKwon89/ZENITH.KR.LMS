@@ -24,3 +24,7 @@ export {
   upsertTransportCost,
   deleteTransportCost,
 } from './fees';
+
+export {
+  generateInvoicePdf,
+} from './invoice-files';
