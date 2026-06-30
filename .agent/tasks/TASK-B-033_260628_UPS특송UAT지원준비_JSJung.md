@@ -173,19 +173,21 @@ PR: [#147](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/147)
 
 ---
 
-### Baker (§5) — 2026-06-30 (TASK-B-038)
+### Baker (§5) — 2026-06-30 (TASK-B-038 · TASK-B-040)
 
 | UAT | 시나리오 | 상태 | 비고 |
 |:----|:--------|:----:|:-----|
+| UAT-17-01 | DIRECT 배송 — 픽업 폼 차단 + DB null 검증 | ✅ | spec 1/1 PASS · UI pickup hidden + DB delivery_method=DIRECT |
+| UAT-17-02 | PICKUP 배송 — 픽업 폼 활성화 + Zod 차단 + DB 적재 | ✅ | spec 1/1 PASS · UI pickup visible + Zod 차단 + DB 정상 적재 |
 | UAT-17-03 | 대리점 요율 오버라이드 UPS 요금 검증 | ✅ | selling_price=74500 KRW 확인, Override DB 검증 완료 |
 | UAT-19-01 | UPS 인보이스 PDF 출력 검증 | ❌ | DEF-087 — 인보이스 PDF 출력 버튼 미구현 |
 | UAT-19-02 | PDF 다운로드 파일명·내용 검증 | ❌ | DEF-086 — zen_invoice_files 테이블 미존재 |
 
-자동화 스크립트: `tests/e2e/uat-17-03-agency-rate-override.spec.ts` (1/1 PASS) · `tests/e2e/uat-19-invoice-pdf.spec.ts` (2/2 PASS, 기능 미구현으로 제한적)  
+자동화 스크립트: `tests/e2e/uat-17-01-direct-order.spec.ts` (1/1 PASS) · `tests/e2e/uat-17-02-pickup-order.spec.ts` (1/1 PASS) · `tests/e2e/uat-17-03-agency-rate-override.spec.ts` (1/1 PASS) · `tests/e2e/uat-19-invoice-pdf.spec.ts` (2/2 PASS, 기능 미구현으로 제한적)  
 회귀 테스트: **387/387 PASS**  
-스크린샷: `docs/99_Manual/UAT_17_Result/` 5종 · `docs/99_Manual/UAT_19_Result/` 2종  
+스크린샷: `docs/99_Manual/UAT_17_Result/` 7종 · `docs/99_Manual/UAT_19_Result/` 2종  
 R-18 DEF 등록: DEF-086, DEF-087, DEF-088  
-PR: [#149](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/149)
+PR: [#149](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/149) · TASK-B-040
 
 ---
 
@@ -204,3 +206,4 @@ _(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
 | 2026-06-28 | Aiden (ZEN_CEO) | TASK-B-033 신규 발령 — UPS 특송 UAT 지원 준비 · JSJung 주도 · Issue #135 · IMP-144 · Edward 승인 |
 | 2026-06-28 | Aiden (ZEN_CEO) | **UAT 역할 재정의 (Edward 지시)** — Team B UAT 주도 실행 · Team A UAT 지원 + 결함 수정 방향 결정 · DoD §5~§6 추가 |
 | 2026-06-30 | Baker (TASK-B-038) | **§5 UAT-17-03·19-01·19-02 실행 완료** — §B 1/1 PASS(Override verified 74500) · §C 2/2 PASS(기능 미구현 DEF-086/087) · R-18 DEF-086~088 등록 · PR#149 |
+| 2026-06-30 | Baker (TASK-B-040) | **§5 UAT-17-01·17-02 실행 완료** — UAT-17-01 1/1 PASS(DIRECT) · UAT-17-02 1/1 PASS(PICKUP · Zod 차단) · UAT 문서 체크박스 ☑ 완료 · PR#153 |

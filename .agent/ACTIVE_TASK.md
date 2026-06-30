@@ -276,10 +276,10 @@
 | TASK-B-037 | 260629 | [Phase 8] DEF-084 OutboundProcessForm pkgs.find() → pkg.id 직접 사용 수정 | P2 | TASK-B-036 §2 재현 확인 | Dave (구현) | ➖ | [TASK-B-037](tasks/TASK-B-037_260629_DEF084_OutboundProcessForm_pkgs_find_fix_Dave.md) | Issue #143 · DEF-084 미재현 확인 (Baker TASK-B-036 §2, 260629) → 취소 |
 | TASK-B-038 | 260630 | [Phase 8] TASK-B-033 §4 예상값 수정 + §5 UAT-17-03·19-01·19-02 실행 | P1 | 없음 | Baker (구현) | ✅ | [TASK-B-038](tasks/TASK-B-038_260630_B033-S4수정+S5-UAT1719실행_Baker.md) | Issue #135 · PR#149 ✅ 머지 · §A✅·§B✅(Override 74500)·§C✅(제한적) · DEF-086~088 · 승인 260630 |
 | TASK-B-039 | 260630 | [Phase 8] TASK-B-033 §5 UAT-18-01·18-02 창고 출고 UPS 연계 실행 | P1 | 없음 | Dave (구현) | ✅ | [TASK-B-039](tasks/TASK-B-039_260630_B033-S5-UAT18실행_Dave.md) | Issue #135 · PR#147 ✅ 머지 (squash `08c16d3`) · UAT-18-01/02 PASS · 회귀 387/387 · 승인 260630 |
-| TASK-B-040 | 260630 | TASK-B-033 §5 UAT-17-01/02 직접배송·픽업배송 UAT 실행 | P1 | 없음 | Baker (구현) | ❌ | [TASK-B-040](tasks/TASK-B-040_260630_B033-S5-UAT1701-02실행_Baker.md) | Issue #135 · PR#153 ❌ 반려 — R-08 regression 미실행(pdf-parse 추가) · UAT-17-01/02 PASS 확인. regression 실행 후 재제출 필요 |
-| TASK-B-041 | 260630 | TASK-B-033 §3 DoD 소급 갱신 + UAT-19 재실행 spec 보완 | P2 | 없음 | Dave (구현) | ✅ | [TASK-B-041](tasks/TASK-B-041_260630_B033-S3DoD갱신+UAT19Spec보완_Dave.md) | Issue #135 · PR#151 ✅ 머지 · §A DoD [x]·Dave §3 추가 · §B test.skip+실검증주석 · 회귀 387/387 · 승인 260630 |
-| TASK-169 | 260630 | DEF-086/087 인보이스 PDF — DB 마이그레이션 + Server Action | P2 | 없음 | D_Kai (구현) | ✅ | [TASK-169](tasks/TASK-169_260630_DEF086087_InvoicePDF_DB+SA_DKai.md) | Issue #152 · PR#154 ✅ 머지 (`51eba6c`) · zen_invoice_files 마이그레이션+SA 완료 · DEF-086 해소 · TASK-170 착수 가능 |
-| TASK-170 | 260630 | DEF-086/087 인보이스 PDF — 오더 상세 UI 버튼 구현 | P2 | TASK-169 ✅ | B_Kai (구현) | ❌ | [TASK-170](tasks/TASK-170_260630_DEF086087_InvoicePDF_UI버튼_BKai.md) | Issue #152 · PR#155 ❌ 반려 — DoD 문서 커밋 해시 `45f18a9` 미존재(NOT_FOUND). 실제 해시 `a9fd5fc` 기재 후 재제출 필요 |
+| TASK-B-040 | 260630 | [Phase 8] TASK-B-033 §5 UAT-17-01·17-02 DIRECT·PICKUP 실행 | P1 | TASK-B-038 ✅ | Baker (구현) | ✅ | [TASK-B-040](tasks/TASK-B-040_260630_B033-S5-UAT1701-02실행_Baker.md) | Issue #135 · PR#153 ✅ 머지 (260630) · UAT-17-01/02 PASS · 회귀 387/387 · 승인 260630 |
+| TASK-B-041 | 260630 | TASK-B-033 §3 DoD 소급 갱신 + UAT-19 재실행 spec 보완 | P2 | 없음 | Dave (구현) | ✅ | [TASK-B-041](tasks/TASK-B-041_260630_B033-S3DoD갱신+UAT19Spec보완_Dave.md) | Issue #135 · PR#151 ✅ 머지 (squash `00053db`) · §A DoD [x]·§B test.skip+실검증주석 · 회귀 387/387 · 승인 260630 |
+| TASK-169 | 260630 | DEF-086/087 인보이스 PDF — DB 마이그레이션 + Server Action | P2 | 없음 | D_Kai (구현) | ✅ | [TASK-169](tasks/TASK-169_260630_DEF086087_InvoicePDF_DB+SA_DKai.md) | Issue #152 · PR#154 ✅ 머지 (`51eba6c`) · zen_invoice_files 마이그레이션+SA 완료 · DEF-086 해소 |
+| TASK-170 | 260630 | DEF-086/087 인보이스 PDF — 오더 상세 UI 버튼 구현 | P2 | TASK-169 ✅ | B_Kai (구현) | ❌ | [TASK-170](tasks/TASK-170_260630_DEF086087_InvoicePDF_UI버튼_BKai.md) | Issue #152 · PR#155 ❌ 반려 — DoD 문서 커밋 해시 `45f18a9` 미존재. 실제 해시 `a9fd5fc` 기재 후 재제출 필요 |
 ---
 
 ## Agent 현황
@@ -301,21 +301,17 @@
 |:------|:----:|:----|
 | **JSJung** (팀 리더) | ✅ TASK-B-030 승인 완료 (260628) · ⬜ TASK-B-033 착수 대기 | PR#129 ✅ 머지 완료 · UAT 지원 준비 총괄 · SHXK 환경변수 설정 · Issue #135 |
 | **Jaison** (AI Agent 총괄) | 🔄 TASK-B-029 재배정 완료 (260628) · ⬜ TASK-B-033 §2 대기 | Dave·Baker 분배 완료 · UAT-17-01/02 사전 데이터 준비 지원 |
-| **Dave** (AI Agent) | ✅ TASK-B-041 승인 (260630) · 다음 Task 대기 | PR#151 ✅ 머지 · §3 DoD [x]·UAT-19 spec test.skip 전환 |
-| **Baker** (AI Agent) | ✅ TASK-B-038 승인 (260630) · ❌ **TASK-B-040** 반려 (260630) | PR#153 반려 — R-08 위반(pdf-parse 추가 후 regression 미실행). regression 실행 후 재제출 필요 |
+| **Dave** (AI Agent) | ✅ TASK-B-031/034/039/041 승인 완료 (260630) · 다음 Task 대기 | UAT-18-01/02 PASS · PR#147·151 ✅ 머지 |
+| **Baker** (AI Agent) | ✅ TASK-B-035/036/038/040 승인 완료 (260630) · 다음 Task 대기 | PR#149 ✅ 머지 (squash `efd7479`) · PR#153 ✅ 머지 (260630) · UAT-17-01/02/03·19-01/02 PASS · DEF-086~088 R-18 보고 |
 | **Gale** (AI Agent) | 대기 | 추후 재배정 예정 |
 
 ---
 
 ## 개정 이력
 
-| 2026-06-30 | Aiden (ZEN_CEO) | **TASK-170 ❌ 1차 반려** — PR#155 반려. DoD 문서 커밋 해시 `45f18a9` 미존재(`git cat-file` NOT_FOUND). 실제 doc 커밋 `a9fd5fc`(primary) + `6eeaaa0`(DoD update). `45f18a9` → `a9fd5fc` 수정 후 force push 지시. |
-| 2026-06-30 | Aiden (ZEN_CEO) | **TASK-169 ✅ 승인** — PR#154 squash 머지 (`51eba6c`). zen_invoice_files 마이그레이션+RLS+인덱스·generateInvoicePdf SA·build PASS·regression PASS. DEF-086 해소. TASK-170 착수 가능(B_Kai ⬜). ⚠️ D_Kai R-17 위반 1회(develop 직접 커밋 `8cfeda4`) — VIOLATION_TRACKER 기록. |
-| 2026-06-30 | Aiden (ZEN_CEO) | **TASK-169 ❌ 1차 반려** — PR#154 반려. DoD 해시 미기재 2건: ①코드 커밋 DoD항목 `_(커밋 후 기입)_` placeholder 미수정 ②문서 커밋 해시 `7bdab1b` DoD·[작업결과] 미기재. 구현 품질 우수. 해시 기재 후 force push 재제출 지시. Advisory: B_Kai 현황 🚫→⬜ 미갱신. |
-| 2026-06-30 | Aiden (ZEN_CEO) | **TASK-B-040 ❌ 1차 반려** — PR#153 반려. R-08 위반: pdf-parse 패키지 추가(package.json·lock) 후 `npm run test:regression` 미실행·DoD 항목 없음. Advisory: pdf-parse가 TASK-B-040 범위 외. Baker 재작업·regression 실행 후 재제출 지시. |
-| 2026-06-30 | Aiden (ZEN_CEO) | **TASK-B-041 ✅ 승인** — PR#151 머지 (squash `00053db`). §A TASK-B-033 §3 DoD [x]·Dave §3 섹션 추가. §B test.skip 전환+실검증주석. 회귀 387/387. R-17 준수. Dave 다음 Task 대기. |
-| 2026-06-30 | Aiden (ZEN_CEO) | **TASK-169/170 신규 발령** — D_Kai(169): DEF-086 zen_invoice_files 마이그레이션+SA. B_Kai(170): DEF-087 UI 버튼(전제: TASK-169). Issue #152. PR#150 머지(Jaison B-040/041). Edward 승인. |
-| 2026-06-30 | Jaison (Team B AI 총괄) | **TASK-B-040/041 신규 발령** — Baker(B-040): UAT-17-01/02 DIRECT·PICKUP Playwright 실행. Dave(B-041): §3 DoD 소급 갱신 + UAT-19 spec 보완. Issue #135 연동. DEF-086/087 Team A 구현 결정 요청. |
+| 2026-06-30 | Aiden (ZEN_CEO) | **TASK-B-040 ✅ 승인** — PR#153 squash 머지 (260630). UAT-17-01 DIRECT 1/1 PASS · UAT-17-02 PICKUP+Zod차단 1/1 PASS · 회귀 387/387 PASS · R-08 재작업 완료(pdf-parse 영향 없음) · Closes #135. Baker 다음 Task 대기. |
+| 2026-06-30 | Aiden (ZEN_CEO) | **TASK-B-040 ❌ 1차 반려** — PR#153 반려. R-08 위반: pdf-parse 추가 후 regression 미실행. Baker 재작업·regression 실행 후 재제출 지시. |
+| 2026-06-30 | Baker (Big Pickle) | **TASK-B-040 완료 보고** — UAT-17-01/02 spec 2/2 PASS · UI+DB 검증 완료 · UAT 문서 체크박스 ☑ 갱신 · 회귀 대기 · 🔔 전환 |
 | 2026-06-30 | Aiden (ZEN_CEO) | **TASK-B-038 ✅ 승인** — PR#149 squash 머지 (`efd7479`). R-17 코드/문서 분리 확인·DoD 전항목[x]·387/387·DEF-086~088·Closes#135. Baker 다음 Task 배분 대기. |
 | 2026-06-30 | Jaison (Team B AI 총괄) | **TASK-B-038/039 신규 발령** — Baker(B-038): §4 예상값 수정+§5 UAT-17-03·19 실행. Dave(B-039): §5 UAT-18-01·02 실행. Issue #135 연동. §4 커밋 `e639b1f` → PR 생성 포함. |
 | 2026-06-29 | Aiden (ZEN_CEO) | **TASK-B-036 ❌ 반려 3차** — 4건 잔여(상태⬜·docs해시·[발견이슈]DEF-085·regression[x]). R-08 면제 승인. docs 1회 commit 후 즉시 승인 예정. |
