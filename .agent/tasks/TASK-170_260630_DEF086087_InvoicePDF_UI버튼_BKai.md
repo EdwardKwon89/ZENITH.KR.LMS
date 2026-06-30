@@ -5,7 +5,7 @@
 > **발령자**: Aiden (ZEN_CEO) — Edward 승인 (2026-06-30)
 > **담당**: B_Kai (Team A)
 > **우선순위**: P2
-> **상태**: 🚫
+> **상태**: 🔔
 > **GitHub Issue**: [#152](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/152)
 > **연관 DEF**: DEF-086, DEF-087
 > **연관 Task**: TASK-169 (D_Kai — DB + Server Action, **전제조건**)
@@ -140,15 +140,37 @@ _Aiden 전속_
 
 ## [작업 결과]
 
-_B_Kai 완료 후 기재_
+### §1 — 오더 상세 화면 PDF 버튼 ✅
+- `OrderFinanceSummary.tsx`에 인보이스 생성 후 [Download Invoice PDF] 버튼 추가
+- 버튼 클릭 → `generateInvoicePdf(orderId)` Server Action 호출
+- 로딩 상태 처리 (스피너 + 버튼 disabled)
+- 에러 시 toast.error 표시
+- 기존 "View Full Invoice" 스텁 버튼을 실제 PDF 다운로드 버튼으로 교체
+- `Download` 아이콘 사용 (lucide-react)
+
+### §2 — i18n 메시지 ✅
+- `messages/ko.json`: `Finance` 섹션 신규 추가 (active_invoice, download_invoice_pdf, pdf_generating, pdf_generate_error)
+- `messages/en.json`: `Finance` 섹션에 키 4종 추가
+
+### §3 — 빌드 ✅
+- `npm run build` PASS (Errors: 0, Warnings: 0)
+- D_Kai TASK-169 `invoice-files.ts` 타입 오류(`never[]`) 수정 — `InvoicePdfData` 타입 명시
+
+### §4 — 회귀 테스트 ✅
+- `npm run test:regression` PASS
+- `LAST_REGRESSION_RESULT`: PASS
+
+### 코드 커밋 해시
+| 해시 | 설명 |
+|:----|:-----|
+| `ad9d1d1` | feat: TASK-170 인보이스 PDF 출력 UI 버튼 + i18n + invoice-files.ts 타입 수정 |
 
 ---
 
 ## [발견 이슈]
 
-_(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
-
-없음
+1. **D_Kai TASK-169 `invoice-files.ts` 타입 오류**: `pdfData` 객체의 `costs: []`가 `never[]`로 추론되어 `npm run build` 실패. `InvoicePdfData` 타입 명시로 수정 완료 (TASK-170 범위 내에서 해결)
+2. **`OrderFinanceSummary.tsx` i18n 미적용**: 기존 하드코딩된 영문 문자열(`Settlement Preview`, `Generate Final Invoice` 등)은 i18n 미적용 상태. 향후 별도 Task에서 i18n 전환 권장
 
 ---
 

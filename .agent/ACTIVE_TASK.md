@@ -279,7 +279,7 @@
 | TASK-B-040 | 260630 | TASK-B-033 §5 UAT-17-01/02 직접배송·픽업배송 UAT 실행 | P1 | 없음 | Baker (구현) | ❌ | [TASK-B-040](tasks/TASK-B-040_260630_B033-S5-UAT1701-02실행_Baker.md) | Issue #135 · PR#153 ❌ 반려 — R-08 regression 미실행(pdf-parse 추가) · UAT-17-01/02 PASS 확인. regression 실행 후 재제출 필요 |
 | TASK-B-041 | 260630 | TASK-B-033 §3 DoD 소급 갱신 + UAT-19 재실행 spec 보완 | P2 | 없음 | Dave (구현) | ✅ | [TASK-B-041](tasks/TASK-B-041_260630_B033-S3DoD갱신+UAT19Spec보완_Dave.md) | Issue #135 · PR#151 ✅ 머지 · §A DoD [x]·Dave §3 추가 · §B test.skip+실검증주석 · 회귀 387/387 · 승인 260630 |
 | TASK-169 | 260630 | DEF-086/087 인보이스 PDF — DB 마이그레이션 + Server Action | P2 | 없음 | D_Kai (구현) | ✅ | [TASK-169](tasks/TASK-169_260630_DEF086087_InvoicePDF_DB+SA_DKai.md) | Issue #152 · PR#154 ✅ 머지 (`51eba6c`) · zen_invoice_files 마이그레이션+SA 완료 · DEF-086 해소 · TASK-170 착수 가능 |
-| TASK-170 | 260630 | DEF-086/087 인보이스 PDF — 오더 상세 UI 버튼 구현 | P2 | TASK-169 ✅ | B_Kai (구현) | ⬜ | [TASK-170](tasks/TASK-170_260630_DEF086087_InvoicePDF_UI버튼_BKai.md) | Issue #152 · DEF-087(UI 버튼) · TASK-169 ✅ 전제 해제 · Edward 승인 260630 |
+| TASK-170 | 260630 | DEF-086/087 인보이스 PDF — 오더 상세 UI 버튼 구현 | P2 | TASK-169 ✅ | B_Kai (구현) | 🔔 | [TASK-170](tasks/TASK-170_260630_DEF086087_InvoicePDF_UI버튼_BKai.md) | Issue #152 · 코드 `ad9d1d1` · build ✅ · regression ✅ · Aiden 검토 대기 |
 ---
 
 ## Agent 현황
@@ -290,7 +290,7 @@
 |:------|:----:|:----|
 | **Aiden (Claude)** | ✅ TASK-167 전체 승인 (260626) | PR#117 §1 ✅ · PR#118 §2+§3 ✅ 전량 머지 완료 |
 | **D_Kai (OpenCode)** | ✅ TASK-169 승인 (260630) · 다음 Task 대기 | PR#154 ✅ 머지 · zen_invoice_files 마이그레이션+generateInvoicePdf SA · DEF-086 해소 · ⚠️ R-17 위반 1회(develop 직접 커밋 `8cfeda4`) |
-| **B_Kai** | ✅ TASK-167 (§1) 승인 (260626) · ⬜ **TASK-170** 착수 가능 | TASK-169 ✅ 전제 해제 — 오더 상세 [인보이스 PDF 출력] UI 버튼 착수 가능 (Issue #152) |
+| **B_Kai** | ✅ TASK-167 (§1) 승인 (260626) · 🔔 **TASK-170** 검토 대기 | 코드 `ad9d1d1` · OrderFinanceSummary PDF 버튼 구현 완료 · build ✅·regression ✅ (Issue #152) |
 | **Riley** | ✅ TASK-161 승인 (260619) | UAT-15~20 16개 시나리오 · PR #46 머지 · 다음 Task 배분 대기 |
 | N_Kai | ➖ 미재배정 확정 (260626 Edward) | TASK-087 폐기 — 신규 Task 발령 없음 |
 | Ring | 신규 할당 중단 유지 | 9차 위반 누적 |
