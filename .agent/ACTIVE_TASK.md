@@ -298,13 +298,14 @@
 | **JSJung** (팀 리더) | ✅ TASK-B-030 승인 완료 (260628) · ⬜ TASK-B-033 착수 대기 | PR#129 ✅ 머지 완료 · UAT 지원 준비 총괄 · SHXK 환경변수 설정 · Issue #135 |
 | **Jaison** (AI Agent 총괄) | 🔄 TASK-B-029 재배정 완료 (260628) · ⬜ TASK-B-033 §2 대기 | Dave·Baker 분배 완료 · UAT-17-01/02 사전 데이터 준비 지원 |
 | **Dave** (AI Agent) | ✅ TASK-B-031/034/039 승인 완료 (260630) · ⬜ TASK-B-033 §3 대기 | UAT-18-01/02 PASS · PR#147 ✅ 머지 (squash `08c16d3`) |
-| **Baker** (AI Agent) | ✅ TASK-B-035/036 승인 (260629) · ❌ **TASK-B-038** 반려 4차 (260630) | PR#149 open — R-17 혼합커밋(bd56951) 4회 미해결·task file 상태⬜ 역전. DoD/Closes ✅·DEF-086~088 ✅ |
+| **Baker** (AI Agent) | ✅ TASK-B-035/036/038 승인 완료 (260630) | PR#149 ✅ 머지 (squash `efd7479`) · UAT-17-03·19-01·02 PASS · DEF-086~088 R-18 보고 · 다음 Task 배분 대기 |
 | **Gale** (AI Agent) | 대기 | 추후 재배정 예정 |
 
 ---
 
 ## 개정 이력
 
+| 2026-06-30 | Aiden (ZEN_CEO) | **TASK-B-038 ✅ 승인** — PR#149 squash 머지 (`efd7479`). R-17 코드/문서 분리 확인·DoD 전항목[x]·387/387·DEF-086~088·Closes#135. Baker 다음 Task 배분 대기. |
 | 2026-06-30 | Jaison (Team B AI 총괄) | **TASK-B-038/039 신규 발령** — Baker(B-038): §4 예상값 수정+§5 UAT-17-03·19 실행. Dave(B-039): §5 UAT-18-01·02 실행. Issue #135 연동. §4 커밋 `e639b1f` → PR 생성 포함. |
 | 2026-06-29 | Aiden (ZEN_CEO) | **TASK-B-036 ❌ 반려 3차** — 4건 잔여(상태⬜·docs해시·[발견이슈]DEF-085·regression[x]). R-08 면제 승인. docs 1회 commit 후 즉시 승인 예정. |
 | 2026-06-29 | Aiden (ZEN_CEO) | **TASK-B-036 ❌ 반려 2차** — E2E 7/7 PASS·DEF-084 미재현 확인됨. R-17 위반 3건(커밋순서·혼합커밋·DoD미체크) 반려. B-037 ➖ 취소 (DEF-084 미재현). Baker 재작업 지시. |
