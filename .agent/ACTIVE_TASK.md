@@ -277,7 +277,7 @@
 | TASK-B-038 | 260630 | [Phase 8] TASK-B-033 §4 예상값 수정 + §5 UAT-17-03·19-01·19-02 실행 | P1 | 없음 | Baker (구현) | ✅ | [TASK-B-038](tasks/TASK-B-038_260630_B033-S4수정+S5-UAT1719실행_Baker.md) | Issue #135 · PR#149 ✅ 머지 · §A✅·§B✅(Override 74500)·§C✅(제한적) · DEF-086~088 · 승인 260630 |
 | TASK-B-039 | 260630 | [Phase 8] TASK-B-033 §5 UAT-18-01·18-02 창고 출고 UPS 연계 실행 | P1 | 없음 | Dave (구현) | ✅ | [TASK-B-039](tasks/TASK-B-039_260630_B033-S5-UAT18실행_Dave.md) | Issue #135 · PR#147 ✅ 머지 (squash `08c16d3`) · UAT-18-01/02 PASS · 회귀 387/387 · 승인 260630 |
 | TASK-B-040 | 260630 | TASK-B-033 §5 UAT-17-01/02 직접배송·픽업배송 UAT 실행 | P1 | 없음 | Baker (구현) | ⬜ | [TASK-B-040](tasks/TASK-B-040_260630_B033-S5-UAT1701-02실행_Baker.md) | Issue #135 · UAT-17-01 DIRECT·UAT-17-02 PICKUP+Zod 차단 · Jaison 위임 |
-| TASK-B-041 | 260630 | TASK-B-033 §3 DoD 소급 갱신 + UAT-19 재실행 spec 보완 | P2 | 없음 | Dave (구현) | ⬜ | [TASK-B-041](tasks/TASK-B-041_260630_B033-S3DoD갱신+UAT19Spec보완_Dave.md) | Issue #135 · §3 소급 갱신 + uat-19-invoice-pdf.spec.ts 개선 |
+| TASK-B-041 | 260630 | TASK-B-033 §3 DoD 소급 갱신 + UAT-19 재실행 spec 보완 | P2 | 없음 | Dave (구현) | 🔔 | [TASK-B-041](tasks/TASK-B-041_260630_B033-S3DoD갱신+UAT19Spec보완_Dave.md) | Issue #135 · PR#151 · §A DoD [x]·Dave §3 추가 · §B test.skip+실검증주석 · 회귀 387/387 |
 | TASK-169 | 260630 | DEF-086/087 인보이스 PDF — DB 마이그레이션 + Server Action | P2 | 없음 | D_Kai (구현) | ⬜ | [TASK-169](tasks/TASK-169_260630_DEF086087_InvoicePDF_DB+SA_DKai.md) | Issue #152 · DEF-086(zen_invoice_files 생성)·DEF-087(SA) · TASK-170 전제조건 · Edward 승인 260630 |
 | TASK-170 | 260630 | DEF-086/087 인보이스 PDF — 오더 상세 UI 버튼 구현 | P2 | TASK-169 ✅ | B_Kai (구현) | 🚫 | [TASK-170](tasks/TASK-170_260630_DEF086087_InvoicePDF_UI버튼_BKai.md) | Issue #152 · DEF-087(UI 버튼) · 전제: TASK-169 ✅ · Edward 승인 260630 |
 ---
@@ -301,7 +301,7 @@
 |:------|:----:|:----|
 | **JSJung** (팀 리더) | ✅ TASK-B-030 승인 완료 (260628) · ⬜ TASK-B-033 착수 대기 | PR#129 ✅ 머지 완료 · UAT 지원 준비 총괄 · SHXK 환경변수 설정 · Issue #135 |
 | **Jaison** (AI Agent 총괄) | 🔄 TASK-B-029 재배정 완료 (260628) · ⬜ TASK-B-033 §2 대기 | Dave·Baker 분배 완료 · UAT-17-01/02 사전 데이터 준비 지원 |
-| **Dave** (AI Agent) | ✅ TASK-B-039 승인 (260630) · ⬜ **TASK-B-041** 착수 대기 | §3 DoD 소급 갱신 + UAT-19 spec 보완 (Jaison 발령 260630) |
+| **Dave** (AI Agent) | ✅ TASK-B-039 승인 (260630) · 🔔 **TASK-B-041** Aiden 검토 대기 | §3 DoD 소급 갱신 + UAT-19 spec 보완 · PR#151 제출 (260630) |
 | **Baker** (AI Agent) | ✅ TASK-B-038 승인 (260630) · ⬜ **TASK-B-040** 착수 대기 | UAT-17-01/02 DIRECT·PICKUP 실행 (Jaison 위임 260630) |
 | **Gale** (AI Agent) | 대기 | 추후 재배정 예정 |
 
