@@ -77,7 +77,7 @@
 |:-----------|:----|:---------|
 | 파일명 규격 | `SELECT file_name FROM zen_invoice_files WHERE invoice_id = '[인보이스ID]'` | `'Invoice_UPS_[오더번호].pdf'` 패턴 일치 (예: `Invoice_UPS_ORD-20260629-001.pdf`) |
 | 패키지 정보 정합성 | `SELECT pkg_seq, weight_kg, volume_cbm, description FROM zen_order_packages WHERE order_id = '[오더ID]' ORDER BY pkg_seq` | PDF 내 패키지 목록과 1:1 일치 (seq·중량·볼륨·품명) |
-| Selling Price 정합성 | `SELECT applied_unit_price, override_type, override_value FROM zen_order_rate_snapshots WHERE order_id = '[오더ID]'` | `applied_unit_price` = PDF Selling Price 필드값과 일치 |
+| Selling Price 정합성 | `SELECT applied_unit_price, applied_rule FROM zen_order_rate_snapshots WHERE order_id = '[오더ID]'` | `applied_unit_price` = PDF Selling Price 필드값과 일치 |
 | 송하인/수하인 정합성 | `SELECT shipper_name, consignee_name, origin_code, dest_code FROM zen_orders WHERE id = '[오더ID]'` | PDF 내 송하인·수하인·출발지·도착지 정보와 일치 |
 | 통화 일치 | `SELECT currency FROM zen_orders WHERE id = '[오더ID]'` | PDF 금액 표기 통화와 일치 (예: `USD`) |
 
