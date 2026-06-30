@@ -115,8 +115,8 @@ UAT 중 발견 결함:
 - [x] §6 발견 결함 전량 R-18 DEF 보고서 제출 + Aiden 보고 (DEF-086~088)
 - [ ] Edward UAT 최종 통과 판정 확인
 - [ ] R-17 커밋 순서 준수
-- [x] 코드 커밋 해시 기재: `bd56951` (TASK-B-038 §A·§B·§C)
-- [x] 문서 커밋 해시 기재: `7836ac2` (DEF-086~088 R-18) + `bd56951` (task file·ACTIVE_TASK.md)
+- [x] 코드 커밋 해시 기재: `f55952f` (TASK-B-038 §B·§C — spec·screenshots)
+- [x] 문서 커밋 해시 기재: `e49812d` (DEF-086~088 R-18) + `a68ff98` (task file·ACTIVE_TASK.md 🔔)
 - [x] PR 생성 (`Closes #135`) — PR#149
 
 ---
