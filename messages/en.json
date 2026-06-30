@@ -203,7 +203,13 @@
     "delivery_method_pickup": "Pickup (PICKUP)",
     "pickup_location": "Pickup Location",
     "pickup_contact_name": "Contact Name",
-    "pickup_contact_tel": "Contact Phone"
+    "pickup_contact_tel": "Contact Phone",
+    "ups_invoice": {
+      "download_button": "Download Invoice PDF",
+      "title": "Simplified Invoice",
+      "shipper": "Shipper",
+      "consignee": "Consignee"
+    }
   },
   "Wallet": {
     "title": "My Wallet",

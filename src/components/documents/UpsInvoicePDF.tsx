@@ -336,7 +336,7 @@ const UpsInvoicePDF = ({ data, labels }: UpsInvoicePDFProps) => (
             <Text style={styles.colWeight}>{pkg.actual_weight_kg.toFixed(2)} kg</Text>
             <Text style={styles.colVolWeight}>{pkg.volumetric_weight_kg.toFixed(2)} kg</Text>
             <Text style={styles.colPrice}>
-              {pkg.items.reduce((sum, item) => sum + (item.quantity * item.unit_price), 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+              {(pkg.items.reduce((sum, item) => sum + (item.quantity * item.unit_price), 0)).toFixed(2)}
             </Text>
           </View>
         ))}
@@ -355,7 +355,7 @@ const UpsInvoicePDF = ({ data, labels }: UpsInvoicePDFProps) => (
           </View>
           <View style={{ flex: 1, borderLeft: '1pt solid #e5e7eb', paddingLeft: 8 }}>
             <Text style={styles.totalLabel}>{labels.total} ({data.currency})</Text>
-            <Text style={styles.totalValue}>{data.total_declared_value.toLocaleString(undefined, { minimumFractionDigits: 2 })}</Text>
+            <Text style={styles.totalValue}>{data.total_declared_value.toFixed(2)}</Text>
           </View>
         </View>
       </View>
@@ -381,7 +381,7 @@ const UpsInvoicePDF = ({ data, labels }: UpsInvoicePDFProps) => (
 
       {/* Footer */}
       <Text style={styles.footer}>
-        ZENITH LMS Digital Document Services • {labels.generated_on} {new Date().toLocaleString()} • For Customs Purposes Only
+        ZENITH LMS Digital Document Services • {labels.generated_on} {new Date().toISOString().slice(0, 10)} • For Customs Purposes Only
       </Text>
     </Page>
   </Document>

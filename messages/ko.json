@@ -225,7 +225,13 @@
     "delivery_method_pickup": "픽업 수령 (PICKUP)",
     "pickup_location": "픽업 장소",
     "pickup_contact_name": "담당자 이름",
-    "pickup_contact_tel": "담당자 연락처"
+    "pickup_contact_tel": "담당자 연락처",
+    "ups_invoice": {
+      "download_button": "인보이스 PDF 출력",
+      "title": "간이 인보이스",
+      "shipper": "송하인",
+      "consignee": "수하인"
+    }
   },
   "Wallet": {
     "title": "내 지갑",

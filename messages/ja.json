@@ -65,6 +65,14 @@
     "corporate_mgmt": "法人管理",
     "member_management": "会員管理"
   },
+  "Orders": {
+    "ups_invoice": {
+      "download_button": "インボイスPDFを出力",
+      "title": "簡易インボイス",
+      "shipper": "荷送人",
+      "consignee": "荷受人"
+    }
+  },
   "Auth": {
     "login_title": "Zenithにサインイン",
     "login_subtitle": "グローバル統合物流プラットフォーム",

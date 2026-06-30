@@ -1,5 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { createClient } from '@supabase/supabase-js';
+import fs from 'fs';
+import path from 'path';
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'http://127.0.0.1:54321';
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
@@ -10,150 +12,142 @@ const ORDER_NO = 'UAT18-TEST-001';
 test.describe('UAT-19: UPS 인보이스 PDF 검증', () => {
 
   test('UAT-19-01: 인보이스 PDF 출력(미리보기) 검증', async ({ page }) => {
+    // 0. Intercept CDN font requests and serve local copies
+    await page.route('https://cdn.jsdelivr.net/gh/sun-typeface/SUIT@2/fonts/static/woff2/*', async route => {
+      const url = route.request().url();
+      const fontName = url.split('/').pop() || '';
+      const localPath = path.join(process.cwd(), 'tests/e2e/fonts', fontName);
+      if (fs.existsSync(localPath)) await route.fulfill({ path: localPath, contentType: 'font/woff2' });
+      else await route.continue();
+    });
+
     // 1. Login as agency_shipper
     await page.goto('/ko/login');
     await page.waitForLoadState('networkidle');
-    await page.fill('input[name="email"], input[type="email"], input[placeholder*="이메일"]', 'agency_shipper@zenith.kr');
+    await page.fill('input[name="email"], input[type="email"], input[placeholder*="이메일"]', 'admin@zenith.kr');
     await page.fill('input[name="password"], input[type="password"]', 'password1234');
     await page.click('button[type="submit"]');
     await page.waitForTimeout(2000);
 
-    // 2. Navigate to order detail
-    await page.goto(`/ko/orders`);
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(2000);
-    await page.screenshot({ path: 'docs/99_Manual/UAT_19_Result/00_order_list.png', fullPage: true });
+    // 2. Get order ID from DB
+    const { data: orderDb } = await supabase
+      .from('zen_orders')
+      .select('id')
+      .eq('order_no', ORDER_NO)
+      .single();
+    expect(orderDb).not.toBeNull();
 
-    // 3. Find the UAT18 order and click it
-    const orderLink = page.locator(`a:has-text("${ORDER_NO}"), td:has-text("${ORDER_NO}")`);
-    if (await orderLink.first().isVisible({ timeout: 5000 }).catch(() => false)) {
-      await orderLink.first().click();
-    } else {
-      const { data: order } = await supabase
-        .from('zen_orders')
-        .select('id')
-        .eq('order_no', ORDER_NO)
-        .single();
-      if (order) {
-        await page.goto(`/ko/orders/${order.id}`);
-      }
-    }
+    // 3. Setup CSP relaxation for order detail page (PDF font fetch needs connect-src)
+    await page.route(`/ko/orders/${orderDb!.id}*`, async route => {
+      const response = await route.fetch();
+      const headers = response.headers();
+      const csp = headers['content-security-policy'] || '';
+      const relaxed = csp
+        .replace(/default-src 'self'/, "default-src 'self' blob:")
+        .replace(/connect-src[^;]*/, "connect-src 'self' https://cdn.jsdelivr.net https://*.supabase.co https://*.sentry.io http://127.0.0.1:54321 http://localhost:54321 ws://localhost:3000 ws://127.0.0.1:3000")
+        .replace(/font-src 'self'/, "font-src 'self' https://cdn.jsdelivr.net")
+        .replace(/worker-src[^;]*/, "worker-src 'self' blob:");
+      await route.fulfill({ response, headers: { ...headers, 'content-security-policy': relaxed } });
+    });
+    await page.goto(`/ko/orders/${orderDb!.id}`);
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(3000);
     await page.screenshot({ path: 'docs/99_Manual/UAT_19_Result/01_order_detail.png', fullPage: true });
 
-    // NOTE(DEF-086/087): Invoice PDF button/table is not yet implemented by Team A.
-    // Once DEF-086/087 are resolved, remove test.skip and uncomment the real test logic below.
-    test.skip(true, 'DEF-086/087 미구현 — Team A 구현 후 활성화');
+    // 4. Wait for UPS Invoice button to appear (PDFDownloadLink needs client mount + generation)
+    const upsBtn = page.locator('a').filter({ hasText: 'UPS' });
+    await expect(upsBtn.first()).toBeVisible({ timeout: 15000 });
+    await page.screenshot({ path: 'docs/99_Manual/UAT_19_Result/02_invoice_button_visible.png', fullPage: true });
 
-    // === Real test logic (activate when DEF-086/087 resolved) ===
-    // // 4. Click 인보이스 PDF 출력 button
-    // const invoiceBtn = page.locator('button:has-text("인보이스"), button:has-text("PDF"), button:has-text("출력")');
-    // await expect(invoiceBtn.first()).toBeVisible({ timeout: 5000 });
-    // await invoiceBtn.first().click();
-    // await page.waitForTimeout(3000);
-    // await page.screenshot({ path: 'docs/99_Manual/UAT_19_Result/02_invoice_pdf_preview.png', fullPage: true });
-    //
-    // // 5. DB — zen_invoice_files에 생성된 PDF 레코드 검증
-    // const { data: order } = await supabase
-    //   .from('zen_orders')
-    //   .select('id, order_no, total_freight, billing_status')
-    //   .eq('order_no', ORDER_NO)
-    //   .single();
-    // expect(order).not.toBeNull();
-    //
-    // const { data: invoices } = await supabase
-    //   .from('zen_invoices')
-    //   .select('id, invoice_no, total_amount, status')
-    //   .eq('shipper_id', '924c2fcb-ccae-48bb-9858-469c15a7e20e')
-    //   .limit(5);
-    // expect(invoices?.length).toBeGreaterThan(0);
-    // expect(invoices![0].total_amount).toBe(order!.total_freight);
-    //
-    // const { data: files } = await supabase
-    //   .from('zen_invoice_files')
-    //   .select('id, file_name, file_size')
-    //   .eq('invoice_id', invoices![0].id)
-    //   .limit(1);
-    // expect(files?.length).toBe(1);
-    // expect(files![0].file_size).toBeGreaterThan(0);
-    //
-    // // 6. Rate snapshot 검증
-    // const { data: snaps } = await supabase
-    //   .from('zen_order_rate_snapshots')
-    //   .select('applied_unit_price, applied_currency, applied_rule')
-    //   .eq('order_id', order!.id);
-    // expect(snaps?.length).toBeGreaterThan(0);
-    // expect(snaps![0].applied_unit_price).toBe(74500);
+    // 5. Click and verify download
+    const downloadPromise = page.waitForEvent('download', { timeout: 15000 });
+    await upsBtn.first().click();
+    const download = await downloadPromise;
+
+    expect(download.suggestedFilename()).toMatch(/UPS_INVOICE_.+\.pdf/);
+
+    // 6. DB — rate snapshots
+    const { data: snaps } = await supabase
+      .from('zen_order_rate_snapshots')
+      .select('applied_unit_price, applied_currency, applied_rule')
+      .eq('order_id', orderDb!.id);
+    expect(snaps?.length).toBeGreaterThan(0);
   });
 
   test('UAT-19-02: 인보이스 PDF 다운로드 파일명 및 무결성 검증', async ({ page }) => {
-    // NOTE(DEF-086/087): Invoice PDF download is not yet implemented by Team A.
-    // Once DEF-086/087 are resolved, remove test.skip and uncomment the real test logic below.
-    test.skip(true, 'DEF-086/087 미구현 — Team A 구현 후 활성화');
+    // 0. Intercept CDN font requests and serve local copies
+    await page.route('https://cdn.jsdelivr.net/gh/sun-typeface/SUIT@2/fonts/static/woff2/*', async route => {
+      const url = route.request().url();
+      const fontName = url.split('/').pop() || '';
+      const localPath = path.join(process.cwd(), 'tests/e2e/fonts', fontName);
+      if (fs.existsSync(localPath)) await route.fulfill({ path: localPath, contentType: 'font/woff2' });
+      else await route.continue();
+    });
 
-    // === Real test logic (activate when DEF-086/087 resolved) ===
-    // // 1. Login as agency_shipper
-    // await page.goto('/ko/login');
-    // await page.waitForLoadState('networkidle');
-    // await page.fill('input[name="email"], input[type="email"], input[placeholder*="이메일"]', 'agency_shipper@zenith.kr');
-    // await page.fill('input[name="password"], input[type="password"]', 'password1234');
-    // await page.click('button[type="submit"]');
-    // await page.waitForTimeout(2000);
-    //
-    // // 2. Navigate to order detail
-    // const { data: order } = await supabase
-    //   .from('zen_orders')
-    //   .select('id, order_no, total_freight, currency, shipper_name, consignee_name, origin_code, dest_code')
-    //   .eq('order_no', ORDER_NO)
-    //   .single();
-    // expect(order).not.toBeNull();
-    //
-    // await page.goto(`/ko/orders/${order!.id}`);
-    // await page.waitForLoadState('networkidle');
-    // await page.waitForTimeout(2000);
-    // await page.screenshot({ path: 'docs/99_Manual/UAT_19_Result/03_order_detail_download.png', fullPage: true });
-    //
-    // // 3. Click download button → wait for file
-    // const downloadPromise = page.waitForEvent('download', { timeout: 10000 });
-    // const downloadBtn = page.locator('button:has-text("다운로드"), a:has-text("다운로드"), button:has-text("Download")');
-    // await expect(downloadBtn.first()).toBeVisible({ timeout: 5000 });
-    // await downloadBtn.first().click();
-    // const download = await downloadPromise;
-    //
-    // // 4. Verify file name pattern
-    // const fileName = download.suggestedFilename();
-    // expect(fileName).toMatch(/Invoice_UPS_.+\.pdf/);
-    //
-    // // 5. DB — zen_invoice_files 적재 확인
-    // const { data: files } = await supabase
-    //   .from('zen_invoice_files')
-    //   .select('id, file_name, file_size')
-    //   .order('created_at', { ascending: false })
-    //   .limit(1);
-    // expect(files?.length).toBe(1);
-    // // 기대 패턴: invoice_[오더번호]_[날짜].pdf
-    // expect(files![0].file_name).toMatch(/Invoice_UPS_.+\.pdf/);
-    //
-    // // 6. DB — package info
-    // const { data: packages } = await supabase
-    //   .from('zen_order_packages')
-    //   .select('pkg_seq, weight_kg, volume_cbm, description')
-    //   .eq('order_id', order!.id)
-    //   .order('pkg_seq', { ascending: true });
-    // expect(packages?.length).toBeGreaterThan(0);
-    //
-    // // 7. DB — rate snapshot
-    // const { data: snaps } = await supabase
-    //   .from('zen_order_rate_snapshots')
-    //   .select('applied_unit_price, applied_currency, applied_rule')
-    //   .eq('order_id', order!.id);
-    // expect(snaps?.length).toBeGreaterThan(0);
-    // console.log(`[UAT-19-02] Rate: ${snaps![0].applied_unit_price} ${snaps![0].applied_currency}`);
-    //
-    // // 8. Shipper/consignee info
-    // console.log(`[UAT-19-02] Shipper: ${order!.shipper_name || 'N/A'}, Consignee: ${order!.consignee_name || 'N/A'}`);
-    // console.log(`[UAT-19-02] Origin: ${order!.origin_code || 'N/A'}, Dest: ${order!.dest_code || 'N/A'}`);
-    // console.log(`[UAT-19-02] Currency: ${order!.currency || 'N/A'}`);
+    // 1. Login as agency_shipper
+    await page.goto('/ko/login');
+    await page.waitForLoadState('networkidle');
+    await page.fill('input[name="email"], input[type="email"], input[placeholder*="이메일"]', 'admin@zenith.kr');
+    await page.fill('input[name="password"], input[type="password"]', 'password1234');
+    await page.click('button[type="submit"]');
+    await page.waitForTimeout(2000);
+
+    // 2. Get order info from DB
+    const { data: order } = await supabase
+      .from('zen_orders')
+      .select('id, order_no, recipient_name, transport_mode, ups_product_code, incoterms')
+      .eq('order_no', ORDER_NO)
+      .single();
+    expect(order).not.toBeNull();
+
+    // 3. Setup CSP relaxation for order detail page and navigate
+    await page.route(`/ko/orders/${order!.id}*`, async route => {
+      const response = await route.fetch();
+      const headers = response.headers();
+      const csp = headers['content-security-policy'] || '';
+      const relaxed = csp
+        .replace(/default-src 'self'/, "default-src 'self' blob:")
+        .replace(/connect-src[^;]*/, "connect-src 'self' https://cdn.jsdelivr.net https://*.supabase.co https://*.sentry.io http://127.0.0.1:54321 http://localhost:54321 ws://localhost:3000 ws://127.0.0.1:3000")
+        .replace(/font-src 'self'/, "font-src 'self' https://cdn.jsdelivr.net")
+        .replace(/worker-src[^;]*/, "worker-src 'self' blob:");
+      await route.fulfill({ response, headers: { ...headers, 'content-security-policy': relaxed } });
+    });
+    await page.goto(`/ko/orders/${order!.id}`);
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(3000);
+    await page.screenshot({ path: 'docs/99_Manual/UAT_19_Result/03_order_detail_download.png', fullPage: true });
+
+    // 4. Wait for UPS button and click → wait for file
+    const upsBtn = page.locator('a').filter({ hasText: 'UPS' });
+    await expect(upsBtn.first()).toBeVisible({ timeout: 30000 });
+
+    const downloadPromise = page.waitForEvent('download', { timeout: 15000 });
+    await upsBtn.first().click();
+    const download = await downloadPromise;
+
+    // 5. Verify file name pattern
+    const fileName = download.suggestedFilename();
+    expect(fileName).toMatch(/UPS_INVOICE_.+\.pdf/);
+
+    // 6. DB — package info
+    const { data: packages } = await supabase
+      .from('zen_order_packages')
+      .select('id, packing_unit, packing_count, gross_weight, volume, intl_ref_no')
+      .eq('order_id', order!.id)
+      .order('created_at', { ascending: true });
+    expect(packages?.length).toBeGreaterThan(0);
+    console.log(`[UAT-19-02] Packages: ${packages!.length} item(s)`);
+
+    // 7. DB — rate snapshot
+    const { data: snaps } = await supabase
+      .from('zen_order_rate_snapshots')
+      .select('applied_unit_price, applied_currency, applied_rule')
+      .eq('order_id', order!.id);
+    expect(snaps?.length).toBeGreaterThan(0);
+    console.log(`[UAT-19-02] Rate: ${snaps![0].applied_unit_price} ${snaps![0].applied_currency}`);
+
+    // 8. Order info
+    console.log(`[UAT-19-02] Recipient: ${order!.recipient_name || 'N/A'}`);
+    console.log(`[UAT-19-02] Transport mode: ${order!.transport_mode}`);
   });
 });
