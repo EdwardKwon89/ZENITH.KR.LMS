@@ -32,6 +32,7 @@
     "next": "16.2.4",
     "next-intl": "^4.9.1",
     "next-themes": "^0.4.6",
+    "pdf-parse": "^2.4.5",
     "playwright": "^1.59.1",
     "react": "19.2.4",
     "react-barcode": "^1.6.1",
@@ -46,8 +47,8 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@swc/helpers": "^0.5.23",
     "@playwright/test": "^1.59.1",
+    "@swc/helpers": "^0.5.23",
     "@tailwindcss/postcss": "^4",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
