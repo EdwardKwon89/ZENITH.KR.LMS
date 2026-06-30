@@ -4,9 +4,9 @@
 > **생성일**: 2026-06-30  
 > **담당자**: Baker (Test Engineer)  
 > **우선순위**: P1  
-> **상태**: 🔔 (Aiden 승인 대기 → 완료)  
+> **상태**: ✅ 완료  
 > **관련 Issue**: [#157](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/157)  
-> **관련 PR**: [#PR-NNN](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/NNN)  
+> **관련 PR**: [#158](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/158)  
 > **선행 Task**: TASK-169 ✅ (D_Kai — generateInvoicePdf SA) · TASK-170 ✅ (B_Kai — UI 버튼 ec2a344)
 
 ---
@@ -58,7 +58,7 @@ $ npx playwright test tests/e2e/uat-19-invoice-pdf.spec.ts
 
 ```bash
 $ npm run test:regression
-# ✅ NNN/NNN PASS
+# ✅ 387/387 PASS (69 files)
 ```
 
 ### §4 문서 갱신
@@ -78,12 +78,12 @@ $ npm run test:regression
 - [x] 파일명 정규식 `/UPS_INVOICE_.+\.pdf/` 적용
 - [x] i18n 키 `Orders.ups_invoice.download_button` ko/en/ja/zh 4종 추가
 - [x] `npx playwright test tests/e2e/uat-19-invoice-pdf.spec.ts` — 2/2 PASS
-- [x] `npm run test:regression` — NNN/NNN PASS
+- [x] `npm run test:regression` — 387/387 PASS
 - [x] `docs/91_FinalTest/UAT/UAT_19_UPS인보이스PDF.md` 체크박스 갱신
 - [x] 스크린샷 `docs/99_Manual/UAT_19_Result/` 저장
 - [x] 코드 커밋 (1차)
 - [x] 문서 커밋 (2차) — R-17 준수
-- [x] PR 생성 (`Closes #157`)
+- [x] PR 생성 (`Closes #157`) → #158
 - [x] Jaison 보고 완료
 
 ---
@@ -102,3 +102,4 @@ $ npm run test:regression
 | 버전 | 날짜 | 작성자 | 설명 |
 |:----|:-----|:-------|:-----|
 | v1.0 | 2026-06-30 | Baker | 최초 작성 — Issue #157 기반 |
+| v1.1 | 2026-06-30 | Baker | 🔔 완료 보고 — PR #158, 387/387 PASS |
