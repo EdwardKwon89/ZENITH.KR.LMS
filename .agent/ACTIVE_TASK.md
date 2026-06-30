@@ -277,7 +277,7 @@
 | TASK-B-038 | 260630 | [Phase 8] TASK-B-033 §4 예상값 수정 + §5 UAT-17-03·19-01·19-02 실행 | P1 | 없음 | Baker (구현) | ✅ | [TASK-B-038](tasks/TASK-B-038_260630_B033-S4수정+S5-UAT1719실행_Baker.md) | Issue #135 · PR#149 ✅ 머지 · §A✅·§B✅(Override 74500)·§C✅(제한적) · DEF-086~088 · 승인 260630 |
 | TASK-B-039 | 260630 | [Phase 8] TASK-B-033 §5 UAT-18-01·18-02 창고 출고 UPS 연계 실행 | P1 | 없음 | Dave (구현) | ✅ | [TASK-B-039](tasks/TASK-B-039_260630_B033-S5-UAT18실행_Dave.md) | Issue #135 · PR#147 ✅ 머지 (squash `08c16d3`) · UAT-18-01/02 PASS · 회귀 387/387 · 승인 260630 |
 | TASK-B-039 | 260630 | [Phase 8] TASK-B-033 §5 UAT-18-01·18-02 창고 출고 UPS 연계 실행 | P1 | 없음 | Dave (구현) | ✅ | [TASK-B-039](tasks/TASK-B-039_260630_B033-S5-UAT18실행_Dave.md) | Issue #135 · PR#147 ✅ 머지 (squash `08c16d3`) · UAT-18-01/02 PASS · 회귀 387/387 · 승인 260630 |
-| TASK-B-040 | 260630 | [Phase 8] TASK-B-033 §5 UAT-17-01·17-02 DIRECT·PICKUP 실행 | P1 | TASK-B-038 ✅ | Baker (구현) | 🔔 | [TASK-B-040](tasks/TASK-B-040_260630_B033-S5-UAT1701-02실행_Baker.md) | Issue #135 · spec 2종 2/2 PASS · UAT-17-01/02 체크박스 ☑ · 회귀 대기 |
+| TASK-B-040 | 260630 | [Phase 8] TASK-B-033 §5 UAT-17-01·17-02 DIRECT·PICKUP 실행 | P1 | TASK-B-038 ✅ | Baker (구현) | 🔔 | [TASK-B-040](tasks/TASK-B-040_260630_B033-S5-UAT1701-02실행_Baker.md) | Issue #135 · spec 2종 2/2 PASS · UAT-17-01/02 체크박스 ☑ · 회귀 387/387 ✅ |
 | TASK-B-041 | 260630 | TASK-B-033 §3 DoD 소급 갱신 + UAT-19 재실행 spec 보완 | P2 | 없음 | Dave (구현) | 🔔 | [TASK-B-041](tasks/TASK-B-041_260630_B033-S3DoD갱신+UAT19Spec보완_Dave.md) | Issue #135 · PR#151 · §A DoD [x] · §B test.skip+실검증주석 · 회귀 387/387 |
 ---
 
