@@ -278,6 +278,8 @@
 | TASK-B-039 | 260630 | [Phase 8] TASK-B-033 §5 UAT-18-01·18-02 창고 출고 UPS 연계 실행 | P1 | 없음 | Dave (구현) | ✅ | [TASK-B-039](tasks/TASK-B-039_260630_B033-S5-UAT18실행_Dave.md) | Issue #135 · PR#147 ✅ 머지 (squash `08c16d3`) · UAT-18-01/02 PASS · 회귀 387/387 · 승인 260630 |
 | TASK-B-040 | 260630 | TASK-B-033 §5 UAT-17-01/02 직접배송·픽업배송 UAT 실행 | P1 | 없음 | Baker (구현) | ⬜ | [TASK-B-040](tasks/TASK-B-040_260630_B033-S5-UAT1701-02실행_Baker.md) | Issue #135 · UAT-17-01 DIRECT·UAT-17-02 PICKUP+Zod 차단 · Jaison 위임 |
 | TASK-B-041 | 260630 | TASK-B-033 §3 DoD 소급 갱신 + UAT-19 재실행 spec 보완 | P2 | 없음 | Dave (구현) | ⬜ | [TASK-B-041](tasks/TASK-B-041_260630_B033-S3DoD갱신+UAT19Spec보완_Dave.md) | Issue #135 · §3 소급 갱신 + uat-19-invoice-pdf.spec.ts 개선 |
+| TASK-169 | 260630 | DEF-086/087 인보이스 PDF — DB 마이그레이션 + Server Action | P2 | 없음 | D_Kai (구현) | ⬜ | [TASK-169](tasks/TASK-169_260630_DEF086087_InvoicePDF_DB+SA_DKai.md) | Issue #152 · DEF-086(zen_invoice_files 생성)·DEF-087(SA) · TASK-170 전제조건 · Edward 승인 260630 |
+| TASK-170 | 260630 | DEF-086/087 인보이스 PDF — 오더 상세 UI 버튼 구현 | P2 | TASK-169 ✅ | B_Kai (구현) | 🚫 | [TASK-170](tasks/TASK-170_260630_DEF086087_InvoicePDF_UI버튼_BKai.md) | Issue #152 · DEF-087(UI 버튼) · 전제: TASK-169 ✅ · Edward 승인 260630 |
 ---
 
 ## Agent 현황
@@ -287,8 +289,8 @@
 | Agent | 상태 | 비고 |
 |:------|:----:|:----|
 | **Aiden (Claude)** | ✅ TASK-167 전체 승인 (260626) | PR#117 §1 ✅ · PR#118 §2+§3 ✅ 전량 머지 완료 |
-| **D_Kai (OpenCode)** | ✅ TASK-168 승인 (260628) | §1~§3 ✅ · gotrue 로그인 버그 수정 ✅ · PR#139 머지 ✅ · 다음 Task 배분 대기 |
-| **B_Kai** | ✅ TASK-167 (§1) 승인 (260626) | PR#117 머지 ✅ · DEF-064 Bell→Link 확인 · Advisory: 브랜치 교차오염 경고 |
+| **D_Kai (OpenCode)** | ✅ TASK-168 승인 (260628) · ⬜ **TASK-169** 착수 대기 | DEF-086/087 zen_invoice_files 마이그레이션 + generateInvoicePdf SA 구현 (Issue #152) |
+| **B_Kai** | ✅ TASK-167 (§1) 승인 (260626) · 🚫 **TASK-170** 대기 (TASK-169 전제) | DEF-086/087 오더 상세 [인보이스 PDF 출력] UI 버튼 (Issue #152) |
 | **Riley** | ✅ TASK-161 승인 (260619) | UAT-15~20 16개 시나리오 · PR #46 머지 · 다음 Task 배분 대기 |
 | N_Kai | ➖ 미재배정 확정 (260626 Edward) | TASK-087 폐기 — 신규 Task 발령 없음 |
 | Ring | 신규 할당 중단 유지 | 9차 위반 누적 |
@@ -307,6 +309,7 @@
 
 ## 개정 이력
 
+| 2026-06-30 | Aiden (ZEN_CEO) | **TASK-169/170 신규 발령** — D_Kai(169): DEF-086 zen_invoice_files 마이그레이션+SA. B_Kai(170): DEF-087 UI 버튼(전제: TASK-169). Issue #152. PR#150 머지(Jaison B-040/041). Edward 승인. |
 | 2026-06-30 | Jaison (Team B AI 총괄) | **TASK-B-040/041 신규 발령** — Baker(B-040): UAT-17-01/02 DIRECT·PICKUP Playwright 실행. Dave(B-041): §3 DoD 소급 갱신 + UAT-19 spec 보완. Issue #135 연동. DEF-086/087 Team A 구현 결정 요청. |
 | 2026-06-30 | Aiden (ZEN_CEO) | **TASK-B-038 ✅ 승인** — PR#149 squash 머지 (`efd7479`). R-17 코드/문서 분리 확인·DoD 전항목[x]·387/387·DEF-086~088·Closes#135. Baker 다음 Task 배분 대기. |
 | 2026-06-30 | Jaison (Team B AI 총괄) | **TASK-B-038/039 신규 발령** — Baker(B-038): §4 예상값 수정+§5 UAT-17-03·19 실행. Dave(B-039): §5 UAT-18-01·02 실행. Issue #135 연동. §4 커밋 `e639b1f` → PR 생성 포함. |
