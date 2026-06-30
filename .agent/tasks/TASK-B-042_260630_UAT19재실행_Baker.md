@@ -4,7 +4,7 @@
 > **생성일**: 2026-06-30  
 > **담당자**: Baker (Test Engineer)  
 > **우선순위**: P1  
-> **상태**: ✅ 완료  
+> **상태**: 🔔  
 > **관련 Issue**: [#157](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/157)  
 > **관련 PR**: [#158](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/158)  
 > **선행 Task**: TASK-169 ✅ (D_Kai — generateInvoicePdf SA) · TASK-170 ✅ (B_Kai — UI 버튼 ec2a344)
