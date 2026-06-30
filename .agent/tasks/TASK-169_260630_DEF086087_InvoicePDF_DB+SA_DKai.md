@@ -5,7 +5,7 @@
 > **발령자**: Aiden (ZEN_CEO) — Edward 승인 (2026-06-30)
 > **담당**: D_Kai (Team A)
 > **우선순위**: P2
-> **상태**: ⬜
+> **상태**: 🔔
 > **GitHub Issue**: [#152](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/152)
 > **연관 DEF**: DEF-086, DEF-087
 > **연관 Task**: TASK-170 (B_Kai — UI 버튼, 본 Task 완료 후 착수)
@@ -133,17 +133,17 @@ rtk npm run test:regression
 
 ## DoD (Definition of Done)
 
-- [ ] Git 동기화 + 브랜치 `feature/teama-task-169-invoice-pdf-db-sa-dkai` 생성
-- [ ] §1 마이그레이션 파일 작성 + 로컬 Supabase 적용 확인 (`zen_invoice_files` 테이블 존재)
-- [ ] §1 RLS 정책 적용 확인 (Supabase Studio 또는 SQL 쿼리)
-- [ ] §2 `generateInvoicePdf` Server Action 구현 완료 (빌드 통과 수준)
-- [ ] §3 `npm run build` PASS
-- [ ] §4 `npm run test:regression` PASS + 결과 기재
-- [ ] R-17 커밋 순서 준수 (코드 커밋 → 문서 커밋)
+- [x] Git 동기화 + 브랜치 `feature/teama-task-169-invoice-pdf-db-sa-dkai` 생성
+- [x] §1 마이그레이션 파일 작성 + 로컬 Supabase 적용 확인 (`zen_invoice_files` 테이블 존재)
+- [x] §1 RLS 정책 적용 확인 (Supabase Studio 또는 SQL 쿼리)
+- [x] §2 `generateInvoicePdf` Server Action 구현 완료 (빌드 통과 수준)
+- [x] §3 `npm run build` PASS
+- [x] §4 `npm run test:regression` PASS + 결과 기재
+- [x] R-17 커밋 순서 준수 (코드 커밋 → 문서 커밋)
 - [x] 코드 커밋 해시 기재: `9ce0c7a`
 - [x] 문서 커밋 해시 기재: `7bdab1b`
-- [ ] PR 생성 (`Closes #152` 또는 `References #152`)
-- [ ] TASK-170 착수 가능 여부 ACTIVE_TASK.md에 명시
+- [x] PR 생성 (`Closes #152` 또는 `References #152`)
+- [x] TASK-170 착수 가능 여부 ACTIVE_TASK.md에 명시
 
 ---
 
@@ -186,7 +186,31 @@ _Aiden 전속_
 
 ## [작업 결과]
 
-_D_Kai 완료 후 기재_
+### §1 — DB 마이그레이션 ✅
+- `supabase/migrations/20260630000000_create_zen_invoice_files.sql` 생성
+- `zen_invoice_files` 테이블 생성 완료 (FK → zen_invoices, CASCADE)
+- RLS 정책 2종: `org_isolation`(조직 격리) + `admins_all`(관리자 전체 접근)
+- 인덱스: `idx_zen_invoice_files_invoice_id`
+
+### §2 — Server Action ✅
+- `src/app/actions/finance/invoice-files.ts` 신규 생성
+- `generateInvoicePdf(orderId)` — invoiceId 조회 → 기존 PDF 확인(중복 생성 방지) → PDF 생성(jspdf) → Storage 업로드 → zen_invoice_files INSERT → signed URL 반환
+- 기존 `generateInvoicePdfBuffer`(`@/lib/finance/pdf`) 재사용
+- Storage bucket `invoices` 사용
+
+### §3 — 빌드 ✅
+- `npm run build` PASS (Errors: 0, Warnings: 0)
+
+### §4 — 회귀 테스트 ✅
+- `LAST_REGRESSION_RESULT`: PASS
+- 기존 테스트 영향 없음 (신규 파일만 추가, 기존 코드 수정 없음)
+
+### 코드 커밋 해시
+| 해시 | 설명 |
+|:----|:-----|
+| `9ce0c7a` | migration + SA: zen_invoice_files + generateInvoicePdf |
+
+> ⚠️ `supabase migration up --local` 실패 (기존 정책 중복). `psql -f`로 직접 적용 완료.
 
 ---
 
@@ -194,7 +218,8 @@ _D_Kai 완료 후 기재_
 
 _(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
 
-없음
+1. `supabase migration up --local` 실패: `zen_ups_labels` 정책 중복 (기존 migration과 충돌). 신규 migration은 `psql -f`로 직접 적용.
+2. `zen_invoice_pdf_history` 테이블과 `zen_invoice_files` 테이블이 유사 목적. 추후 통합 검토 권장.
 
 ---
 
@@ -204,3 +229,4 @@ _(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
 |:-----|:------|:----|
 | 2026-06-30 | Aiden (ZEN_CEO) | **1차 반려** — PR#154 ❌. DoD 해시 2건 미기재: 코드 커밋 DoD항목 placeholder·문서 커밋 `7bdab1b` 미기재. D_Kai 수정 후 force push 지시. |
 | 2026-06-30 | Aiden (ZEN_CEO) | TASK-169 신규 발령 — DEF-086/087 백엔드 구현 · D_Kai · Issue #152 · Edward 승인 |
+| 2026-06-30 | D_Kai (DeepSeek) | §1~§4 구현 완료 🔄→🔔 — zen_invoice_files migration + generateInvoicePdf SA · build PASS · regression PASS |
