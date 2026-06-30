@@ -22,17 +22,17 @@
 
 | 순서 | 화면·URL | 수행 액션 | 입력 데이터 | 기대 결과 | 확인 |
 |:---:|:---------|:---------|:-----------|:---------|:----:|
-| 1 | /ko/orders/new | 사이드바 > 오더 관리 > [오더 등록] 메뉴 클릭 | — | 신규 오더 생성 마법사 진입 | ☐ |
-| 2 | /ko/orders/new | 운송 수단에서 `UPS Express` 선택 | — | UPS 전용 입력 서식 활성화 및 발송 유형 라디오 버튼 노출 | ☐ |
-| 3 | /ko/orders/new | 발송 유형에서 [직접 배송 (DIRECT)] 선택 | — | 픽업지 주소, 픽업 연락처 등의 입력 폼이 비활성화되거나 숨김 처리됨 | ☐ |
-| 4 | /ko/orders/new | 나머지 오더 필수 정보 입력 후 [등록] 클릭 | 목적지: `US` / 수취인명: `John Doe` / 중량: `5.0 kg` 등 | 오더가 오류 없이 정상 생성됨 | ☐ |
-| 5 | Supabase Studio | `SELECT delivery_method, pickup_location FROM zen_orders WHERE order_no = '[생성된오더번호]'` | — | `delivery_method = 'DIRECT'`, `pickup_location`를 포함한 픽업 관련 컬럼들이 전부 `NULL`로 적재됨 확인 | ☐ |
+| 1 | /ko/orders/new | 사이드바 > 오더 관리 > [오더 등록] 메뉴 클릭 | — | 신규 오더 생성 마법사 진입 | ☑ |
+| 2 | /ko/orders/new | 운송 수단에서 `UPS Express` 선택 | — | UPS 전용 입력 서식 활성화 및 발송 유형 라디오 버튼 노출 | ☑ |
+| 3 | /ko/orders/new | 발송 유형에서 [직접 배송 (DIRECT)] 선택 | — | 픽업지 주소, 픽업 연락처 등의 입력 폼이 비활성화되거나 숨김 처리됨 | ☑ |
+| 4 | /ko/orders/new | 나머지 오더 필수 정보 입력 후 [등록] 클릭 | 목적지: `US` / 수취인명: `John Doe` / 중량: `5.0 kg` 등 | 오더가 오류 없이 정상 생성됨 | ☑ |
+| 5 | Supabase Studio | `SELECT delivery_method, pickup_location FROM zen_orders WHERE order_no = '[생성된오더번호]'` | — | `delivery_method = 'DIRECT'`, `pickup_location`를 포함한 픽업 관련 컬럼들이 전부 `NULL`로 적재됨 확인 | ☑ |
 
 ### 합격 기준
-- [ ] 전 단계 ☑ 완료
-- [ ] 직접 배송(DIRECT) 선택 시 UI에서 픽업지 입력 서식이 제어됨
-- [ ] DB 저장 시 픽업지 정보가 안전하게 null로 초기화됨
-- [ ] 500 에러 없음
+- [x] 전 단계 ☑ 완료
+- [x] 직접 배송(DIRECT) 선택 시 UI에서 픽업지 입력 서식이 제어됨
+- [x] DB 저장 시 픽업지 정보가 안전하게 null로 초기화됨
+- [x] 500 에러 없음
 
 ### 결함 기재란
 
@@ -55,17 +55,17 @@
 
 | 순서 | 화면·URL | 수행 액션 | 입력 데이터 | 기대 결과 | 확인 |
 |:---:|:---------|:---------|:-----------|:---------|:----:|
-| 1 | /ko/orders/new | 오더 등록 페이지 진입 및 `UPS Express` 운송 선택 | — | UPS 전용 폼 노출 | ☐ |
-| 2 | /ko/orders/new | 발송 유형에서 [픽업 요청 (PICKUP)] 선택 | — | 픽업지 주소, 픽업 연락처, 담당자명 등의 입력 폼 활성화 확인 | ☐ |
-| 3 | /ko/orders/new | 픽업 필수 입력란을 비워둔 상태로 [등록] 버튼 클릭 | — | "픽업지 주소는 필수입니다." 및 "연락처는 필수입니다." 등의 검증 오류가 노출되며 등록이 차단됨 | ☐ |
-| 4 | /ko/orders/new | 픽업 필수 입력 정보를 정상 입력 후 [등록] 클릭 | 픽업지 주소: `인천 서구 경서동 123` / 픽업 연락처: `032-111-2222` / 담당자: `김픽업` | 오더가 정상 생성됨 | ☐ |
-| 5 | Supabase Studio | `SELECT delivery_method, pickup_location, pickup_contact_name, pickup_contact_tel FROM public.zen_orders WHERE order_no = '[생성된오더번호]'` | — | `delivery_method = 'PICKUP'` 및 입력한 픽업 정보들이 정상 적재됨을 확인 | ☐ |
+| 1 | /ko/orders/new | 오더 등록 페이지 진입 및 `UPS Express` 운송 선택 | — | UPS 전용 폼 노출 | ☑ |
+| 2 | /ko/orders/new | 발송 유형에서 [픽업 요청 (PICKUP)] 선택 | — | 픽업지 주소, 픽업 연락처, 담당자명 등의 입력 폼 활성화 확인 | ☑ |
+| 3 | /ko/orders/new | 픽업 필수 입력란을 비워둔 상태로 [등록] 버튼 클릭 | — | "픽업지 주소는 필수입니다." 및 "연락처는 필수입니다." 등의 검증 오류가 노출되며 등록이 차단됨 | ☑ |
+| 4 | /ko/orders/new | 픽업 필수 입력 정보를 정상 입력 후 [등록] 클릭 | 픽업지 주소: `인천 서구 경서동 123` / 픽업 연락처: `032-111-2222` / 담당자: `김픽업` | 오더가 정상 생성됨 | ☑ |
+| 5 | Supabase Studio | `SELECT delivery_method, pickup_location, pickup_contact_name, pickup_contact_tel FROM public.zen_orders WHERE order_no = '[생성된오더번호]'` | — | `delivery_method = 'PICKUP'` 및 입력한 픽업 정보들이 정상 적재됨을 확인 | ☑ |
 
 ### 합격 기준
-- [ ] 전 단계 ☑ 완료
-- [ ] 픽업 요청 시 픽업지 주소, 연락처, 담당자명의 Zod 유효성 검증이 올바르게 차단 기능을 수행함
-- [ ] DB에 입력한 픽업 데이터가 누락 없이 적재됨
-- [ ] 500 에러 없음
+- [x] 전 단계 ☑ 완료
+- [x] 픽업 요청 시 픽업지 주소, 연락처, 담당자명의 Zod 유효성 검증이 올바르게 차단 기능을 수행함
+- [x] DB에 입력한 픽업 데이터가 누락 없이 적재됨
+- [x] 500 에러 없음
 
 ### 결함 기재란
 

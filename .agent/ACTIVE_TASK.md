@@ -276,6 +276,9 @@
 | TASK-B-037 | 260629 | [Phase 8] DEF-084 OutboundProcessForm pkgs.find() → pkg.id 직접 사용 수정 | P2 | TASK-B-036 §2 재현 확인 | Dave (구현) | ➖ | [TASK-B-037](tasks/TASK-B-037_260629_DEF084_OutboundProcessForm_pkgs_find_fix_Dave.md) | Issue #143 · DEF-084 미재현 확인 (Baker TASK-B-036 §2, 260629) → 취소 |
 | TASK-B-038 | 260630 | [Phase 8] TASK-B-033 §4 예상값 수정 + §5 UAT-17-03·19-01·19-02 실행 | P1 | 없음 | Baker (구현) | ✅ | [TASK-B-038](tasks/TASK-B-038_260630_B033-S4수정+S5-UAT1719실행_Baker.md) | Issue #135 · PR#149 ✅ 머지 · §A✅·§B✅(Override 74500)·§C✅(제한적) · DEF-086~088 · 승인 260630 |
 | TASK-B-039 | 260630 | [Phase 8] TASK-B-033 §5 UAT-18-01·18-02 창고 출고 UPS 연계 실행 | P1 | 없음 | Dave (구현) | ✅ | [TASK-B-039](tasks/TASK-B-039_260630_B033-S5-UAT18실행_Dave.md) | Issue #135 · PR#147 ✅ 머지 (squash `08c16d3`) · UAT-18-01/02 PASS · 회귀 387/387 · 승인 260630 |
+| TASK-B-039 | 260630 | [Phase 8] TASK-B-033 §5 UAT-18-01·18-02 창고 출고 UPS 연계 실행 | P1 | 없음 | Dave (구현) | ✅ | [TASK-B-039](tasks/TASK-B-039_260630_B033-S5-UAT18실행_Dave.md) | Issue #135 · PR#147 ✅ 머지 (squash `08c16d3`) · UAT-18-01/02 PASS · 회귀 387/387 · 승인 260630 |
+| TASK-B-040 | 260630 | [Phase 8] TASK-B-033 §5 UAT-17-01·17-02 DIRECT·PICKUP 실행 | P1 | TASK-B-038 ✅ | Baker (구현) | 🔔 | [TASK-B-040](tasks/TASK-B-040_260630_B033-S5-UAT1701-02실행_Baker.md) | Issue #135 · spec 2종 2/2 PASS · UAT-17-01/02 체크박스 ☑ · 회귀 대기 |
+| TASK-B-041 | 260630 | TASK-B-033 §3 DoD 소급 갱신 + UAT-19 재실행 spec 보완 | P2 | 없음 | Dave (구현) | 🔔 | [TASK-B-041](tasks/TASK-B-041_260630_B033-S3DoD갱신+UAT19Spec보완_Dave.md) | Issue #135 · PR#151 · §A DoD [x] · §B test.skip+실검증주석 · 회귀 387/387 |
 ---
 
 ## Agent 현황
@@ -297,14 +300,20 @@
 |:------|:----:|:----|
 | **JSJung** (팀 리더) | ✅ TASK-B-030 승인 완료 (260628) · ⬜ TASK-B-033 착수 대기 | PR#129 ✅ 머지 완료 · UAT 지원 준비 총괄 · SHXK 환경변수 설정 · Issue #135 |
 | **Jaison** (AI Agent 총괄) | 🔄 TASK-B-029 재배정 완료 (260628) · ⬜ TASK-B-033 §2 대기 | Dave·Baker 분배 완료 · UAT-17-01/02 사전 데이터 준비 지원 |
+<<<<<<< Updated upstream
 | **Dave** (AI Agent) | ✅ TASK-B-031/034/039 승인 완료 (260630) · ⬜ TASK-B-033 §3 대기 | UAT-18-01/02 PASS · PR#147 ✅ 머지 (squash `08c16d3`) |
 | **Baker** (AI Agent) | ✅ TASK-B-035/036/038 승인 완료 (260630) | PR#149 ✅ 머지 (squash `efd7479`) · UAT-17-03·19-01·02 PASS · DEF-086~088 R-18 보고 · 다음 Task 배분 대기 |
+=======
+| **Dave** (AI Agent) | ✅ TASK-B-031/034/039 승인 완료 (260630) · 🔔 **TASK-B-041** PR#151 대기 | §3 DoD 갱신 + UAT-19 spec 보완 · 회귀 387/387 |
+| **Baker** (AI Agent) | ✅ TASK-B-035/036/038 승인 완료 (260630) · 🔔 TASK-B-040 완료 대기 | PR#149 ✅ 머지 (squash `efd7479`) · UAT-17-03·19-01·02 PASS · B-040 UAT-17-01/02 spec 2/2 PASS · DEF-086~088 R-18 보고 |
+>>>>>>> Stashed changes
 | **Gale** (AI Agent) | 대기 | 추후 재배정 예정 |
 
 ---
 
 ## 개정 이력
 
+| 2026-06-30 | Baker (Big Pickle) | **TASK-B-040 완료 보고** — UAT-17-01/02 spec 2/2 PASS · UI+DB 검증 완료 · UAT 문서 체크박스 ☑ 갱신 · 회귀 대기 · 🔔 전환 |
 | 2026-06-30 | Aiden (ZEN_CEO) | **TASK-B-038 ✅ 승인** — PR#149 squash 머지 (`efd7479`). R-17 코드/문서 분리 확인·DoD 전항목[x]·387/387·DEF-086~088·Closes#135. Baker 다음 Task 배분 대기. |
 | 2026-06-30 | Jaison (Team B AI 총괄) | **TASK-B-038/039 신규 발령** — Baker(B-038): §4 예상값 수정+§5 UAT-17-03·19 실행. Dave(B-039): §5 UAT-18-01·02 실행. Issue #135 연동. §4 커밋 `e639b1f` → PR 생성 포함. |
 | 2026-06-29 | Aiden (ZEN_CEO) | **TASK-B-036 ❌ 반려 3차** — 4건 잔여(상태⬜·docs해시·[발견이슈]DEF-085·regression[x]). R-08 면제 승인. docs 1회 commit 후 즉시 승인 예정. |
