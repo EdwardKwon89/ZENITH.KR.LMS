@@ -274,8 +274,8 @@
 | TASK-B-035 | 260629 | [Phase 8] DEF-083 zen_ups_labels.reference_no partial unique index 수정 | P1 | 없음 | Baker (구현) | ✅ | [TASK-B-035](tasks/TASK-B-035_260629_DEF083_reference_no_partial_unique_index_Baker.md) | Issue #141 · DEF-083 · PR#144 머지 ✅ 260629 · 코드 8b6cae8 |
 | TASK-B-036 | 260629 | [Phase 8] E2E-26-06 실 UI 재발급 버튼 클릭 플로우 E2E 재검증 | P1 | TASK-B-035 ✅ | Baker (구현) | ✅ | [TASK-B-036](tasks/TASK-B-036_260629_E2E26-06_재발급UI_재실행_Baker.md) | Issue #142 · E2E 7/7 PASS ✅ · DEF-084 미재현 · DEF-085 발견 · PR#145 ✅ 승인 260629 |
 | TASK-B-037 | 260629 | [Phase 8] DEF-084 OutboundProcessForm pkgs.find() → pkg.id 직접 사용 수정 | P2 | TASK-B-036 §2 재현 확인 | Dave (구현) | ➖ | [TASK-B-037](tasks/TASK-B-037_260629_DEF084_OutboundProcessForm_pkgs_find_fix_Dave.md) | Issue #143 · DEF-084 미재현 확인 (Baker TASK-B-036 §2, 260629) → 취소 |
-| TASK-B-038 | 260630 | [Phase 8] TASK-B-033 §4 예상값 수정 + §5 UAT-17-03·19-01·19-02 실행 | P1 | 없음 | Baker (구현) | ❌ | [TASK-B-038](tasks/TASK-B-038_260630_B033-S4수정+S5-UAT1719실행_Baker.md) | Issue #135 · Aiden 반려 · §A✅ PR#146 머지 · §B🟡 1/1 PASS (Override §2 미완료) · §C⏳ · PR#148 닫음 |
-| TASK-B-039 | 260630 | [Phase 8] TASK-B-033 §5 UAT-18-01·18-02 창고 출고 UPS 연계 실행 | P1 | 없음 | Dave (구현) | 🔔 | [TASK-B-039](tasks/TASK-B-039_260630_B033-S5-UAT18실행_Dave.md) | Issue #135 · PR#147 · 코드 691c564 · 회귀 387/387 · Aiden 검토 대기 |
+| TASK-B-038 | 260630 | [Phase 8] TASK-B-033 §4 예상값 수정 + §5 UAT-17-03·19-01·19-02 실행 | P1 | 없음 | Baker (구현) | ❌ | [TASK-B-038](tasks/TASK-B-038_260630_B033-S4수정+S5-UAT1719실행_Baker.md) | Issue #135 · 반려 3차 (260630) · §A✅·§B✅·§C✅(제한적) · DEF-086~088 생성 · PR#149 — R-17 혼합커밋·Closes누락·DoD[x]미갱신 |
+| TASK-B-039 | 260630 | [Phase 8] TASK-B-033 §5 UAT-18-01·18-02 창고 출고 UPS 연계 실행 | P1 | 없음 | Dave (구현) | ✅ | [TASK-B-039](tasks/TASK-B-039_260630_B033-S5-UAT18실행_Dave.md) | Issue #135 · PR#147 ✅ 머지 (squash `08c16d3`) · UAT-18-01/02 PASS · 회귀 387/387 · 승인 260630 |
 ---
 
 ## Agent 현황
@@ -298,7 +298,7 @@
 | **JSJung** (팀 리더) | ✅ TASK-B-030 승인 완료 (260628) · ⬜ TASK-B-033 착수 대기 | PR#129 ✅ 머지 완료 · UAT 지원 준비 총괄 · SHXK 환경변수 설정 · Issue #135 |
 | **Jaison** (AI Agent 총괄) | 🔄 TASK-B-029 재배정 완료 (260628) · ⬜ TASK-B-033 §2 대기 | Dave·Baker 분배 완료 · UAT-17-01/02 사전 데이터 준비 지원 |
 | **Dave** (AI Agent) | ✅ TASK-B-031/034/039 승인 완료 (260630) · ⬜ TASK-B-033 §3 대기 | UAT-18-01/02 PASS · PR#147 ✅ 머지 (squash `08c16d3`) |
-| **Baker** (AI Agent) | ✅ TASK-B-035/036 승인 (260629) · 🔄 **TASK-B-038** §A완료·§B진행중 | PR#146 §A (§4 수정) · §B UAT-17-03 Playwright 1/1 PASS · §C Dave UAT-18 대기 · §2 Override 미완료 (Jaison) |
+| **Baker** (AI Agent) | ✅ TASK-B-035/036 승인 (260629) · ❌ **TASK-B-038** 반려 3차 (260630) | PR#149 open — R-17 혼합커밋 미해결·Closes#135 누락·DoD [zen_invoice_files] 미갱신. DEF-086~088 ✅ |
 | **Gale** (AI Agent) | 대기 | 추후 재배정 예정 |
 
 ---
@@ -316,6 +316,8 @@
 | 2026-06-28 | Aiden (ZEN_CEO) | **PR#137·131 develop 머지 완료** — TASK-B-029·032 순차 머지. TASK-B-033 착수 가능 (⬜ 해제 조건 충족). |
 | 2026-06-28 | Aiden (ZEN_CEO) | **TASK-B-029 ✅ 승인** — PR#137 2차 검토 APPROVED. E2E-26 6/7 PASS(E2E-26-07 ✅·E2E-26-06 SKIP DEF-082). DoD 5/5·코드`75c4f88`·회귀 380/387. Advisory: 코드커밋 docs/ 혼입·PR body 회귀 오기. develop 머지 대기. → B-032 base→develop 후 실머지 가능. |
 | 2026-06-30 | Aiden (ZEN_CEO) | **TASK-B-039 ✅ 승인** — PR#147 머지 완료 (squash `08c16d3`). UAT-18-01/02 PASS · 회귀 387/387 · 스크린샷 5종 · DoD 전항목 [x]. Dave 다음 Task: TASK-B-033 §3 대기. |
+| 2026-06-30 | Aiden (ZEN_CEO) | **TASK-B-038 ❌ 반려 3차 (Baker·PR#149)** — ①R-17 혼합 커밋 미해결(bd56951 코드+문서 혼합 유지, 7836ac2 DEF 추가로 해결 안 됨) ②PR body `References #135` → `Closes #135` 필수 ③DoD `[ ] zen_invoice_files` 미갱신(DEF-086~088 생성 완료 → `[x]` 갱신 필요). 개선: DEF-086~088 R-18 보고 ✅. 재작업: git rebase -i로 bd56951 분리(코드/문서) + force push + DoD [x] 갱신 + Closes #135. |
+| 2026-06-30 | Aiden (ZEN_CEO) | **TASK-B-039 ✅ 상태 정정** — 승인 이력 기존 기재됨(2026-06-30)이나 task table 🔔→✅ 미반영. 정정 완료. |
 | 2026-06-30 | Aiden (ZEN_CEO) | **TASK-B-038 ❌ 반려 2차 (Baker·PR#149)** — R-17 혼합 커밋(단일 커밋 bd56951에 코드+문서 혼합)·커밋 해시 미기재·R-18 DEF-086 미생성(zen_invoice_files). 코드/문서 분리 + DEF-086 생성 후 재제출. §A·§B·§C 실행 내용 ✅. |
 | 2026-06-30 | Aiden (ZEN_CEO) | **TASK-B-038 ❌ 반려 (Baker·PR#148)** — Task 미완성 🔄 상태 PR. §B Override 미검증(no override found)·§C 미착수·DoD 공통 미체크·Closes 누락. 블로커: Dave PR#147 rebase·Jaison §2 seed 완료 후 재제출. |
 | 2026-06-30 | Aiden (ZEN_CEO) | **TASK-B-039 ❌ 반려 2차 (Dave·PR#147)** — DoD 커밋 해시 불일치(rebase 후 미갱신). 코드커밋 DoD `691c564`→실제 `41c4b0b`, 문서커밋 `c008708`→`b750263`. 해시 2개 갱신 후 문서 커밋 push → 재제출. UAT-18-01/02·회귀 387/387·스크린샷 5종·References #135 ✅ 확인. |
