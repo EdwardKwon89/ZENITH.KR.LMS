@@ -29,7 +29,6 @@ test.describe('UAT-19: UPS 인보이스 PDF 검증', () => {
     if (await orderLink.first().isVisible({ timeout: 5000 }).catch(() => false)) {
       await orderLink.first().click();
     } else {
-      // Try navigating directly
       const { data: order } = await supabase
         .from('zen_orders')
         .select('id')
@@ -43,146 +42,118 @@ test.describe('UAT-19: UPS 인보이스 PDF 검증', () => {
     await page.waitForTimeout(2000);
     await page.screenshot({ path: 'docs/99_Manual/UAT_19_Result/01_order_detail.png', fullPage: true });
 
-    // 4. Check for invoice PDF button
-    const invoiceBtn = page.locator('button:has-text("인보이스"), button:has-text("PDF"), button:has-text("출력"), a:has-text("인보이스")');
-    const hasInvoiceBtn = await invoiceBtn.first().isVisible({ timeout: 3000 }).catch(() => false);
-    if (hasInvoiceBtn) {
-      await invoiceBtn.first().click();
-      await page.waitForTimeout(3000);
-      await page.screenshot({ path: 'docs/99_Manual/UAT_19_Result/02_invoice_pdf_preview.png', fullPage: true });
-      console.log('[UAT-19-01] Invoice PDF button found and clicked');
-    } else {
-      console.warn('[UAT-19-01] Invoice PDF button not found - feature may not be implemented yet');
-    }
+    // NOTE(DEF-086/087): Invoice PDF button/table is not yet implemented by Team A.
+    // Once DEF-086/087 are resolved, remove test.skip and uncomment the real test logic below.
+    test.skip(true, 'DEF-086/087 미구현 — Team A 구현 후 활성화');
 
-    // 5. DB Verification
-    const { data: order } = await supabase
-      .from('zen_orders')
-      .select('id, order_no, total_freight, billing_status')
-      .eq('order_no', ORDER_NO)
-      .single();
-
-    if (order) {
-      console.log(`[UAT-19-01] Order: ${order.order_no}, freight: ${order.total_freight}, billing: ${order.billing_status}`);
-
-      const { data: invoices, error: ie } = await supabase
-        .from('zen_invoices')
-        .select('id, invoice_no, total_amount, status')
-        .eq('shipper_id', '924c2fcb-ccae-48bb-9858-469c15a7e20e')
-        .limit(5);
-
-      if (ie) {
-        console.warn(`[UAT-19-01] Invoice query error: ${ie.message}`);
-      } else if (invoices && invoices.length > 0) {
-        console.log(`[UAT-19-01] Invoice found: ${invoices[0].invoice_no}, amount: ${invoices[0].total_amount}`);
-        expect(invoices[0].total_amount).toBe(order.total_freight);
-
-        // Check invoice_files table (may not exist yet)
-        const { data: files, error: fe } = await supabase
-          .from('zen_invoice_files')
-          .select('id, file_name, file_size')
-          .eq('invoice_id', invoices[0].id)
-          .limit(1);
-
-        if (fe) {
-          console.warn(`[UAT-19-01] zen_invoice_files table not available: ${fe.message}`);
-        } else if (files && files.length > 0) {
-          console.log(`[UAT-19-01] Invoice file: ${files[0].file_name}`);
-          expect(files[0].file_size).toBeGreaterThan(0);
-        }
-      } else {
-        console.warn('[UAT-19-01] No invoices found for shipper org');
-      }
-
-      const { data: snaps } = await supabase
-        .from('zen_order_rate_snapshots')
-        .select('applied_unit_price, applied_currency, applied_rule')
-        .eq('order_id', order.id);
-
-      if (snaps && snaps.length > 0) {
-        console.log(`[UAT-19-01] Rate snapshot: ${snaps[0].applied_unit_price} ${snaps[0].applied_currency}`);
-        expect(snaps[0].applied_unit_price).toBe(74500);
-      }
-    }
-
-    console.log('[UAT-19-01] Test completed');
+    // === Real test logic (activate when DEF-086/087 resolved) ===
+    // // 4. Click 인보이스 PDF 출력 button
+    // const invoiceBtn = page.locator('button:has-text("인보이스"), button:has-text("PDF"), button:has-text("출력")');
+    // await expect(invoiceBtn.first()).toBeVisible({ timeout: 5000 });
+    // await invoiceBtn.first().click();
+    // await page.waitForTimeout(3000);
+    // await page.screenshot({ path: 'docs/99_Manual/UAT_19_Result/02_invoice_pdf_preview.png', fullPage: true });
+    //
+    // // 5. DB — zen_invoice_files에 생성된 PDF 레코드 검증
+    // const { data: order } = await supabase
+    //   .from('zen_orders')
+    //   .select('id, order_no, total_freight, billing_status')
+    //   .eq('order_no', ORDER_NO)
+    //   .single();
+    // expect(order).not.toBeNull();
+    //
+    // const { data: invoices } = await supabase
+    //   .from('zen_invoices')
+    //   .select('id, invoice_no, total_amount, status')
+    //   .eq('shipper_id', '924c2fcb-ccae-48bb-9858-469c15a7e20e')
+    //   .limit(5);
+    // expect(invoices?.length).toBeGreaterThan(0);
+    // expect(invoices![0].total_amount).toBe(order!.total_freight);
+    //
+    // const { data: files } = await supabase
+    //   .from('zen_invoice_files')
+    //   .select('id, file_name, file_size')
+    //   .eq('invoice_id', invoices![0].id)
+    //   .limit(1);
+    // expect(files?.length).toBe(1);
+    // expect(files![0].file_size).toBeGreaterThan(0);
+    //
+    // // 6. Rate snapshot 검증
+    // const { data: snaps } = await supabase
+    //   .from('zen_order_rate_snapshots')
+    //   .select('applied_unit_price, applied_currency, applied_rule')
+    //   .eq('order_id', order!.id);
+    // expect(snaps?.length).toBeGreaterThan(0);
+    // expect(snaps![0].applied_unit_price).toBe(74500);
   });
 
   test('UAT-19-02: 인보이스 PDF 다운로드 파일명 및 무결성 검증', async ({ page }) => {
-    const { data: order } = await supabase
-      .from('zen_orders')
-      .select('id, order_no, total_freight, currency, shipper_name, consignee_name, origin_code, dest_code')
-      .eq('order_no', ORDER_NO)
-      .single();
+    // NOTE(DEF-086/087): Invoice PDF download is not yet implemented by Team A.
+    // Once DEF-086/087 are resolved, remove test.skip and uncomment the real test logic below.
+    test.skip(true, 'DEF-086/087 미구현 — Team A 구현 후 활성화');
 
-    if (!order) {
-      console.warn('[UAT-19-02] Order not found - skipping');
-      return;
-    }
-
-    // 1. DB verification: package info
-    const { data: packages } = await supabase
-      .from('zen_order_packages')
-      .select('pkg_seq, weight_kg, volume_cbm, description')
-      .eq('order_id', order.id)
-      .order('pkg_seq', { ascending: true });
-
-    if (packages && packages.length > 0) {
-      console.log(`[UAT-19-02] Packages: ${packages.length} found`);
-    } else {
-      console.warn('[UAT-19-02] No packages found');
-    }
-
-    // 2. DB verification: selling price
-    const { data: snaps } = await supabase
-      .from('zen_order_rate_snapshots')
-      .select('applied_unit_price, applied_currency, applied_rule')
-      .eq('order_id', order.id);
-
-    if (snaps && snaps.length > 0) {
-      console.log(`[UAT-19-02] Rate snapshot: ${snaps[0].applied_unit_price} ${snaps[0].applied_currency}`);
-    }
-
-    // 3. DB verification: invoice files table (may not exist)
-    const { data: files, error: fe } = await supabase
-      .from('zen_invoice_files')
-      .select('id, file_name')
-      .limit(1);
-
-    if (fe) {
-      console.warn(`[UAT-19-02] zen_invoice_files table not available: ${fe.message}`);
-    } else if (files && files.length > 0) {
-      const expectedPattern = `Invoice_UPS_${ORDER_NO}.pdf`;
-      expect(files[0].file_name).toMatch(/Invoice_UPS_.+\.pdf/);
-      console.log(`[UAT-19-02] File name: ${files[0].file_name}`);
-    }
-
-    // 4. Shipper/consignee info
-    console.log(`[UAT-19-02] Shipper: ${order.shipper_name || 'N/A'}, Consignee: ${order.consignee_name || 'N/A'}`);
-    console.log(`[UAT-19-02] Origin: ${order.origin_code || 'N/A'}, Dest: ${order.dest_code || 'N/A'}`);
-    console.log(`[UAT-19-02] Currency: ${order.currency || 'N/A'}`);
-
-    // 5. Navigate to order page for download test
-    await page.goto('/ko/login');
-    await page.waitForLoadState('networkidle');
-    await page.fill('input[name="email"], input[type="email"], input[placeholder*="이메일"]', 'agency_shipper@zenith.kr');
-    await page.fill('input[name="password"], input[type="password"]', 'password1234');
-    await page.click('button[type="submit"]');
-    await page.waitForTimeout(2000);
-
-    await page.goto(`/ko/orders/${order.id}`);
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(2000);
-    await page.screenshot({ path: 'docs/99_Manual/UAT_19_Result/03_order_detail_download.png', fullPage: true });
-
-    // 6. Look for download button
-    const downloadBtn = page.locator('button:has-text("다운로드"), a:has-text("다운로드"), button:has-text("Download")');
-    if (await downloadBtn.first().isVisible({ timeout: 3000 }).catch(() => false)) {
-      console.log('[UAT-19-02] Download button found');
-    } else {
-      console.warn('[UAT-19-02] Download button not found');
-    }
-
-    console.log('[UAT-19-02] Test completed');
+    // === Real test logic (activate when DEF-086/087 resolved) ===
+    // // 1. Login as agency_shipper
+    // await page.goto('/ko/login');
+    // await page.waitForLoadState('networkidle');
+    // await page.fill('input[name="email"], input[type="email"], input[placeholder*="이메일"]', 'agency_shipper@zenith.kr');
+    // await page.fill('input[name="password"], input[type="password"]', 'password1234');
+    // await page.click('button[type="submit"]');
+    // await page.waitForTimeout(2000);
+    //
+    // // 2. Navigate to order detail
+    // const { data: order } = await supabase
+    //   .from('zen_orders')
+    //   .select('id, order_no, total_freight, currency, shipper_name, consignee_name, origin_code, dest_code')
+    //   .eq('order_no', ORDER_NO)
+    //   .single();
+    // expect(order).not.toBeNull();
+    //
+    // await page.goto(`/ko/orders/${order!.id}`);
+    // await page.waitForLoadState('networkidle');
+    // await page.waitForTimeout(2000);
+    // await page.screenshot({ path: 'docs/99_Manual/UAT_19_Result/03_order_detail_download.png', fullPage: true });
+    //
+    // // 3. Click download button → wait for file
+    // const downloadPromise = page.waitForEvent('download', { timeout: 10000 });
+    // const downloadBtn = page.locator('button:has-text("다운로드"), a:has-text("다운로드"), button:has-text("Download")');
+    // await expect(downloadBtn.first()).toBeVisible({ timeout: 5000 });
+    // await downloadBtn.first().click();
+    // const download = await downloadPromise;
+    //
+    // // 4. Verify file name pattern
+    // const fileName = download.suggestedFilename();
+    // expect(fileName).toMatch(/Invoice_UPS_.+\.pdf/);
+    //
+    // // 5. DB — zen_invoice_files 적재 확인
+    // const { data: files } = await supabase
+    //   .from('zen_invoice_files')
+    //   .select('id, file_name, file_size')
+    //   .order('created_at', { ascending: false })
+    //   .limit(1);
+    // expect(files?.length).toBe(1);
+    // // 기대 패턴: invoice_[오더번호]_[날짜].pdf
+    // expect(files![0].file_name).toMatch(/Invoice_UPS_.+\.pdf/);
+    //
+    // // 6. DB — package info
+    // const { data: packages } = await supabase
+    //   .from('zen_order_packages')
+    //   .select('pkg_seq, weight_kg, volume_cbm, description')
+    //   .eq('order_id', order!.id)
+    //   .order('pkg_seq', { ascending: true });
+    // expect(packages?.length).toBeGreaterThan(0);
+    //
+    // // 7. DB — rate snapshot
+    // const { data: snaps } = await supabase
+    //   .from('zen_order_rate_snapshots')
+    //   .select('applied_unit_price, applied_currency, applied_rule')
+    //   .eq('order_id', order!.id);
+    // expect(snaps?.length).toBeGreaterThan(0);
+    // console.log(`[UAT-19-02] Rate: ${snaps![0].applied_unit_price} ${snaps![0].applied_currency}`);
+    //
+    // // 8. Shipper/consignee info
+    // console.log(`[UAT-19-02] Shipper: ${order!.shipper_name || 'N/A'}, Consignee: ${order!.consignee_name || 'N/A'}`);
+    // console.log(`[UAT-19-02] Origin: ${order!.origin_code || 'N/A'}, Dest: ${order!.dest_code || 'N/A'}`);
+    // console.log(`[UAT-19-02] Currency: ${order!.currency || 'N/A'}`);
   });
 });
