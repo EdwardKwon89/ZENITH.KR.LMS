@@ -754,5 +754,11 @@
     "total_row": "합계",
     "csv_export": "CSV 내보내기",
     "no_data": "조회 결과가 없습니다."
+  },
+  "Finance": {
+    "active_invoice": "활성 인보이스",
+    "download_invoice_pdf": "인보이스 PDF 출력",
+    "pdf_generating": "PDF 생성 중...",
+    "pdf_generate_error": "PDF 생성에 실패했습니다."
   }
 }

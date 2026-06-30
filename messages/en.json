@@ -402,7 +402,11 @@
     "table_date": "Date",
     "table_origin": "Origin",
     "table_dest": "Destination",
-    "table_carrier": "Carrier"
+    "table_carrier": "Carrier",
+    "active_invoice": "Active Invoice",
+    "download_invoice_pdf": "Download Invoice PDF",
+    "pdf_generating": "Generating PDF...",
+    "pdf_generate_error": "Failed to generate PDF."
   },
   "Statistics": {
     "dashboard_title": "Statistics Dashboard",
