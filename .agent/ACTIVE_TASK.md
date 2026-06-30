@@ -278,6 +278,7 @@
 | TASK-B-039 | 260630 | [Phase 8] TASK-B-033 §5 UAT-18-01·18-02 창고 출고 UPS 연계 실행 | P1 | 없음 | Dave (구현) | ✅ | [TASK-B-039](tasks/TASK-B-039_260630_B033-S5-UAT18실행_Dave.md) | Issue #135 · PR#147 ✅ 머지 (squash `08c16d3`) · UAT-18-01/02 PASS · 회귀 387/387 · 승인 260630 |
 | TASK-B-040 | 260630 | [Phase 8] TASK-B-033 §5 UAT-17-01·17-02 DIRECT·PICKUP 실행 | P1 | TASK-B-038 ✅ | Baker (구현) | ✅ | [TASK-B-040](tasks/TASK-B-040_260630_B033-S5-UAT1701-02실행_Baker.md) | Issue #135 · PR#153 ✅ 머지 (squash `d091f09`) · UAT-17-01/02 spec 2/2 PASS · 회귀 387/387 · 승인 260630 |
 | TASK-B-041 | 260630 | TASK-B-033 §3 DoD 소급 갱신 + UAT-19 재실행 spec 보완 | P2 | 없음 | Dave (구현) | ✅ | [TASK-B-041](tasks/TASK-B-041_260630_B033-S3DoD갱신+UAT19Spec보완_Dave.md) | Issue #135 · PR#151 ✅ 머지 (squash `00053db`) · §A DoD [x]·§B test.skip+실검증주석 · 회귀 387/387 · 승인 260630 |
+| TASK-B-042 | 260630 | UAT-19 재실행 — DEF-086/087 해소 후 인보이스 PDF 검증 | P1 | TASK-169 ✅ · TASK-170 ✅ | Baker (구현) | ⬜ | [TASK-B-042](tasks/TASK-B-042_260630_UAT19재실행_Baker.md) | Issue #157 · test.skip 제거 + UAT-19-01/02 실검증 · Edward UAT 최종 판정 전제 |
 | TASK-169 | 260630 | DEF-086/087 인보이스 PDF — DB 마이그레이션 + Server Action | P2 | 없음 | D_Kai (구현) | ✅ | [TASK-169](tasks/TASK-169_260630_DEF086087_InvoicePDF_DB+SA_DKai.md) | Issue #152 · PR#154 ✅ 머지 (`51eba6c`) · zen_invoice_files 마이그레이션+SA 완료 · DEF-086 해소 |
 | TASK-170 | 260630 | DEF-086/087 인보이스 PDF — 오더 상세 UI 버튼 구현 | P2 | TASK-169 ✅ | B_Kai (구현) | ✅ | [TASK-170](tasks/TASK-170_260630_DEF086087_InvoicePDF_UI버튼_BKai.md) | Issue #152 · PR#155 ✅ 승인 — DoD 13/13·빌드·회귀 PASS · squash merge 대기 (Edward 승인 필요) |
 ---
@@ -302,13 +303,15 @@
 | **JSJung** (팀 리더) | ✅ TASK-B-030 승인 완료 (260628) · 🔔 TASK-B-033 완료 보고 제출 | §1§2 확인 완료 · DEF-088 교정 완료 · PR 생성 대기 · Issue #135 |
 | **Jaison** (AI Agent 총괄) | 🔔 TASK-B-033 §1§2·DEF-088 완료 보고 (260630) | §1 .env.local 확인 · §2 zen_agency_rate_overrides 확인 · DEF-088 컬럼명 교정 |
 | **Dave** (AI Agent) | ✅ TASK-B-031/034/039/041 승인 완료 (260630) · 다음 Task 대기 | UAT-18-01/02 PASS · PR#147·151 ✅ 머지 |
-| **Baker** (AI Agent) | ✅ TASK-B-035/036/038/040 승인 완료 (260630) · 다음 Task 대기 | PR#149 ✅ 머지 (squash `efd7479`) · PR#153 ✅ 머지 (squash `d091f09`) · UAT-17-01/02/03·19-01/02 PASS · DEF-086~088 R-18 보고 |
+| **Baker** (AI Agent) | ✅ TASK-B-040 승인 완료 (260630) · ⬜ **TASK-B-042** 착수 대기 | UAT-19 재실행 — test.skip 제거 + DEF-086/087 해소 후 실검증 · Issue #157 |
 | **Gale** (AI Agent) | 대기 | 추후 재배정 예정 |
 
 ---
 
 ## 개정 이력
 
+| 2026-06-30 | Aiden (ZEN_CEO) | **TASK-B-042 신규 발령** — UAT-19 재실행 · Baker · Issue #157 · DEF-086/087 해소(TASK-169·170) 후 test.skip 제거 + 실검증 · Edward 승인 |
+| 2026-06-30 | Aiden (ZEN_CEO) | **TASK-B-033 ✅ 승인** — PR#156 squash 머지 (`e2bf48b`). §1 SHXK 환경변수·§2 요율 오버라이드·DEF-088 교정 완료. IMP-144 해소. |
 | 2026-06-30 | Aiden (ZEN_CEO) | **TASK-170 ✅ 2차 승인** — PR#155 DoD 13/13·ad9d1d1·a9fd5fc 실존·빌드·회귀 PASS. squash merge 대기 (Edward 승인 필요). B_Kai 다음 Task 대기. |
 | 2026-06-30 | Aiden (ZEN_CEO) | **TASK-170 ❌ 1차 반려** — DoD 문서 커밋 해시 `45f18a9` NOT_FOUND. `a9fd5fc` 기재 후 force push 재제출 지시. |
 | 2026-06-30 | Aiden (ZEN_CEO) | **TASK-B-040 ✅ 승인** — PR#153 squash 머지 (260630). UAT-17-01 DIRECT 1/1 PASS · UAT-17-02 PICKUP+Zod차단 1/1 PASS · 회귀 387/387 PASS · R-08 재작업 완료(pdf-parse 영향 없음) · Closes #135. Baker 다음 Task 대기. |
