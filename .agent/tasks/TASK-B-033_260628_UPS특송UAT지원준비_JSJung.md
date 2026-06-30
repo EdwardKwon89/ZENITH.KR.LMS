@@ -195,4 +195,4 @@ _(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
 | 2026-06-28 | Aiden (ZEN_CEO) | TASK-B-033 신규 발령 — UPS 특송 UAT 지원 준비 · JSJung 주도 · Issue #135 · IMP-144 · Edward 승인 |
 | 2026-06-28 | Aiden (ZEN_CEO) | **UAT 역할 재정의 (Edward 지시)** — Team B UAT 주도 실행 · Team A UAT 지원 + 결함 수정 방향 결정 · DoD §5~§6 추가 |
 | 2026-06-30 | Baker (TASK-B-038) | **§5 UAT-17-03·19-01·19-02 실행 완료** — §B 1/1 PASS(Override verified 74500) · §C 2/2 PASS(기능 미구현 DEF-086/087) · R-18 DEF-086~088 등록 · PR#149 |
-| 2026-06-30 | Baker (TASK-B-040) | **§5 UAT-17-01·17-02 실행 완료** — UAT-17-01 1/1 PASS(DIRECT) · UAT-17-02 1/1 PASS(PICKUP · Zod 차단) · UAT 문서 체크박스 ☑ 완료 · PR#?? 생성 대기 |
+| 2026-06-30 | Baker (TASK-B-040) | **§5 UAT-17-01·17-02 실행 완료** — UAT-17-01 1/1 PASS(DIRECT) · UAT-17-02 1/1 PASS(PICKUP · Zod 차단) · UAT 문서 체크박스 ☑ 완료 · PR#153 |
