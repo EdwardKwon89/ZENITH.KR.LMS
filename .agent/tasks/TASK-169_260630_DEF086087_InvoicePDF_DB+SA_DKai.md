@@ -140,8 +140,8 @@ rtk npm run test:regression
 - [ ] §3 `npm run build` PASS
 - [ ] §4 `npm run test:regression` PASS + 결과 기재
 - [ ] R-17 커밋 순서 준수 (코드 커밋 → 문서 커밋)
-- [ ] 코드 커밋 해시 기재: `______`
-- [ ] 문서 커밋 해시 기재: `______`
+- [x] 코드 커밋 해시 기재: `9ce0c7a`
+- [x] 문서 커밋 해시 기재: `7bdab1b`
 - [ ] PR 생성 (`Closes #152` 또는 `References #152`)
 - [ ] TASK-170 착수 가능 여부 ACTIVE_TASK.md에 명시
 
