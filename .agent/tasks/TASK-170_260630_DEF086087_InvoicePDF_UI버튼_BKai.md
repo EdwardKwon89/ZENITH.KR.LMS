@@ -110,19 +110,19 @@ rtk npm run test:regression
 
 ## DoD (Definition of Done)
 
-- [ ] Git 동기화 + 브랜치 `feature/teama-task-170-invoice-pdf-ui-bkai` 생성
-- [ ] §1 오더 상세 화면 [인보이스 PDF 출력] 버튼 추가 완료
-- [ ] §1 버튼 클릭 → `generateInvoicePdf` 정상 호출 확인 (로컬 테스트)
-- [ ] §1 로딩 상태·에러 처리 구현 확인
-- [ ] §2 i18n 키 추가 완료 (`ko.json`, `en.json`)
-- [ ] §3 `npm run build` PASS
-- [ ] §4 `npm run test:regression` PASS + 결과 기재
-- [ ] 스크린샷: `docs/99_Manual/TASK-170_Result/01_invoice_pdf_button.png` (버튼 UI)
-- [ ] 스크린샷: `docs/99_Manual/TASK-170_Result/02_pdf_download.png` (PDF 다운로드 확인)
-- [ ] R-17 커밋 순서 준수 (코드 커밋 → 문서 커밋)
-- [ ] 코드 커밋 해시 기재: `______`
-- [ ] 문서 커밋 해시 기재: `______`
-- [ ] PR 생성 (`References #152`)
+- [x] Git 동기화 + 브랜치 `feature/teama-task-170-invoice-pdf-ui-bkai` 생성
+- [x] §1 오더 상세 화면 [인보이스 PDF 출력] 버튼 추가 완료
+- [x] §1 버튼 클릭 → `generateInvoicePdf` 정상 호출 확인 (로컬 테스트)
+- [x] §1 로딩 상태·에러 처리 구현 확인
+- [x] §2 i18n 키 추가 완료 (`ko.json`, `en.json`)
+- [x] §3 `npm run build` PASS
+- [x] §4 `npm run test:regression` PASS + 결과 기재
+- [x] 스크린샷: `docs/99_Manual/TASK-170_Result/01_invoice_pdf_button.png` (버튼 UI)
+- [x] 스크린샷: `docs/99_Manual/TASK-170_Result/02_pdf_download.png` (PDF 다운로드 확인)
+- [x] R-17 커밋 순서 준수 (코드 커밋 → 문서 커밋)
+- [x] 코드 커밋 해시 기재: `ad9d1d1`
+- [x] 문서 커밋 해시 기재: `a9fd5fc`
+- [x] PR 생성 (`References #152`)
 
 ---
 
