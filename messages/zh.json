@@ -56,6 +56,14 @@
     "claims": "索赔管理",
     "orders_assigned": "分配订单"
   },
+  "Orders": {
+    "ups_invoice": {
+      "download_button": "下载发票PDF",
+      "title": "简易发票",
+      "shipper": "发货人",
+      "consignee": "收货人"
+    }
+  },
   "Auth": {
     "login_title": "登录 Zenith",
     "login_subtitle": "全球综合物流平台",
