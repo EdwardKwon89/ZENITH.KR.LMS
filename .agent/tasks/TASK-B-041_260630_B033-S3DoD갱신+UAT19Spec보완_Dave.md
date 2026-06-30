@@ -56,8 +56,8 @@ Team A가 Invoice PDF 기능(DEF-086/087)을 구현하면 Baker가 UAT-19를 재
 - [x] §B: `uat-19-invoice-pdf.spec.ts` 개선 완료 (우회 코드 → `test.skip` + 실 검증 로직 주석)
 - [x] `npm run test:regression` PASS — **387/387 PASS** (69 files)
 - [x] 코드 커밋 해시: `41e68cb`
-- [x] 문서 커밋 해시: `__pending__`
-- [x] PR 생성 (`References #135`)
+- [x] 문서 커밋 해시: `ba655e6`
+- [x] PR 생성 (`References #135`) — PR#151
 
 ---
 
