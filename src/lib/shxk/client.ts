@@ -4,6 +4,7 @@ import type {
   ShxkBaseResponse,
   ShxkBaseRequest,
   ShxkServiceMethod,
+  GetCountryItem,
 } from '@/types/ups-api'
 
 const IS_MOCK = process.env.SHXK_TEST_MOCK === 'true'
@@ -66,6 +67,29 @@ function buildMockResponse(
           track_location: 'ICN KR',
           track_description: '[MOCK] Package received at origin',
         },
+      }
+    case 'getcountry':
+      return {
+        success: 1,
+        cnmessage: null,
+        enmessage: null,
+        data: [
+          { code: 'KR', cnname: '韩国', enname: 'Korea (South)', note: '' },
+          { code: 'US', cnname: '美国', enname: 'United States', note: '' },
+          { code: 'CN', cnname: '中国', enname: 'China', note: '' },
+          { code: 'JP', cnname: '日本', enname: 'Japan', note: '' },
+          { code: 'DE', cnname: '德国', enname: 'Germany', note: '' },
+          { code: 'GB', cnname: '英国', enname: 'United Kingdom', note: '' },
+          { code: 'FR', cnname: '法国', enname: 'France', note: '' },
+          { code: 'SG', cnname: '新加坡', enname: 'Singapore', note: '' },
+          { code: 'VN', cnname: '越南', enname: 'Vietnam', note: '' },
+          { code: 'TH', cnname: '泰国', enname: 'Thailand', note: '' },
+          { code: 'TW', cnname: '台湾', enname: 'Taiwan', note: '' },
+          { code: 'HK', cnname: '香港', enname: 'Hong Kong', note: '' },
+          { code: 'AU', cnname: '澳大利亚', enname: 'Australia', note: '' },
+          { code: 'CA', cnname: '加拿大', enname: 'Canada', note: '' },
+          { code: 'NL', cnname: '荷兰', enname: 'Netherlands', note: '' },
+        ],
       }
     default:
       return { success: 1, cnmessage: 'Mock OK', enmessage: 'Mock OK', data: {} }
