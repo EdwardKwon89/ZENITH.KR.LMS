@@ -279,7 +279,7 @@
 | TASK-B-040 | 260630 | [Phase 8] TASK-B-033 §5 UAT-17-01·17-02 DIRECT·PICKUP 실행 | P1 | TASK-B-038 ✅ | Baker (구현) | ✅ | [TASK-B-040](tasks/TASK-B-040_260630_B033-S5-UAT1701-02실행_Baker.md) | Issue #135 · PR#153 ✅ 머지 (260630) · UAT-17-01/02 PASS · 회귀 387/387 · 승인 260630 |
 | TASK-B-041 | 260630 | TASK-B-033 §3 DoD 소급 갱신 + UAT-19 재실행 spec 보완 | P2 | 없음 | Dave (구현) | ✅ | [TASK-B-041](tasks/TASK-B-041_260630_B033-S3DoD갱신+UAT19Spec보완_Dave.md) | Issue #135 · PR#151 ✅ 머지 (squash `00053db`) · §A DoD [x]·§B test.skip+실검증주석 · 회귀 387/387 · 승인 260630 |
 | TASK-169 | 260630 | DEF-086/087 인보이스 PDF — DB 마이그레이션 + Server Action | P2 | 없음 | D_Kai (구현) | ✅ | [TASK-169](tasks/TASK-169_260630_DEF086087_InvoicePDF_DB+SA_DKai.md) | Issue #152 · PR#154 ✅ 머지 (`51eba6c`) · zen_invoice_files 마이그레이션+SA 완료 · DEF-086 해소 |
-| TASK-170 | 260630 | DEF-086/087 인보이스 PDF — 오더 상세 UI 버튼 구현 | P2 | TASK-169 ✅ | B_Kai (구현) | ❌ | [TASK-170](tasks/TASK-170_260630_DEF086087_InvoicePDF_UI버튼_BKai.md) | Issue #152 · PR#155 ❌ 반려 — DoD 문서 커밋 해시 `45f18a9` 미존재. 실제 해시 `a9fd5fc` 기재 후 재제출 필요 |
+| TASK-170 | 260630 | DEF-086/087 인보이스 PDF — 오더 상세 UI 버튼 구현 | P2 | TASK-169 ✅ | B_Kai (구현) | ✅ | [TASK-170](tasks/TASK-170_260630_DEF086087_InvoicePDF_UI버튼_BKai.md) | Issue #152 · PR#155 ✅ 승인 — DoD 13/13·빌드·회귀 PASS · squash merge 대기 (Edward 승인 필요) |
 ---
 
 ## Agent 현황
@@ -290,7 +290,7 @@
 |:------|:----:|:----|
 | **Aiden (Claude)** | ✅ TASK-167 전체 승인 (260626) | PR#117 §1 ✅ · PR#118 §2+§3 ✅ 전량 머지 완료 |
 | **D_Kai (OpenCode)** | ✅ TASK-169 승인 (260630) · 다음 Task 대기 | PR#154 ✅ 머지 · zen_invoice_files 마이그레이션+generateInvoicePdf SA · DEF-086 해소 · ⚠️ R-17 위반 1회(develop 직접 커밋 `8cfeda4`) |
-| **B_Kai** | ✅ TASK-167 (§1) 승인 (260626) · ❌ **TASK-170** 1차 반려 (260630) | PR#155 반려 — DoD 문서 커밋 해시 `45f18a9` 미존재. `a9fd5fc` 기재 후 force push 재제출 지시 |
+| **B_Kai** | ✅ TASK-167 (§1) 승인 (260626) · ✅ **TASK-170** 2차 승인 (260630) | PR#155 ✅ 승인 — DoD 13/13·빌드·회귀 PASS · squash merge 대기 (Edward 승인 필요) |
 | **Riley** | ✅ TASK-161 승인 (260619) | UAT-15~20 16개 시나리오 · PR #46 머지 · 다음 Task 배분 대기 |
 | N_Kai | ➖ 미재배정 확정 (260626 Edward) | TASK-087 폐기 — 신규 Task 발령 없음 |
 | Ring | 신규 할당 중단 유지 | 9차 위반 누적 |
@@ -309,6 +309,8 @@
 
 ## 개정 이력
 
+| 2026-06-30 | Aiden (ZEN_CEO) | **TASK-170 ✅ 2차 승인** — PR#155 DoD 13/13·ad9d1d1·a9fd5fc 실존·빌드·회귀 PASS. squash merge 대기 (Edward 승인 필요). B_Kai 다음 Task 대기. |
+| 2026-06-30 | Aiden (ZEN_CEO) | **TASK-170 ❌ 1차 반려** — DoD 문서 커밋 해시 `45f18a9` NOT_FOUND. `a9fd5fc` 기재 후 force push 재제출 지시. |
 | 2026-06-30 | Aiden (ZEN_CEO) | **TASK-B-040 ✅ 승인** — PR#153 squash 머지 (260630). UAT-17-01 DIRECT 1/1 PASS · UAT-17-02 PICKUP+Zod차단 1/1 PASS · 회귀 387/387 PASS · R-08 재작업 완료(pdf-parse 영향 없음) · Closes #135. Baker 다음 Task 대기. |
 | 2026-06-30 | Aiden (ZEN_CEO) | **TASK-B-040 ❌ 1차 반려** — PR#153 반려. R-08 위반: pdf-parse 추가 후 regression 미실행. Baker 재작업·regression 실행 후 재제출 지시. |
 | 2026-06-30 | Baker (Big Pickle) | **TASK-B-040 완료 보고** — UAT-17-01/02 spec 2/2 PASS · UI+DB 검증 완료 · UAT 문서 체크박스 ☑ 갱신 · 회귀 대기 · 🔔 전환 |
