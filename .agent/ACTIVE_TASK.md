@@ -269,7 +269,7 @@
 | TASK-B-030 | 260627 | [Phase 8] DEF-080 country_code ISO 2→3 변환 누락 수정 (IMP-142) | P1 | TASK-B-025 ✅ | JSJung (검토) · Baker (구현) | ✅ | [TASK-B-030](tasks/TASK-B-030_260627_DEF080_country_code_ISO변환_Baker.md) | Issue #128 · IMP-142 · DEF-080 · PR#129 ✅ Aiden 승인 260628 — develop 머지 완료 |
 | TASK-B-031 | 260627 | [Phase 8] E2E-26-05 폐기 버튼 수정 — fetchAndSaveLabel label_data 컬럼 제거 | P1 | TASK-B-029 🔄 | Dave (구현) | ✅ | [TASK-B-031](tasks/TASK-B-031_260627_E2E26-05_폐기버튼수정_Dave.md) | Issue #132 · PR#130 ✅ Aiden 승인 260628 — develop 머지 대기 |
 | TASK-B-032 | 260627 | [Phase 8] E2E-26-07 tracking_events insert 수정 (B-029 서브) | P1 | TASK-B-029 ✅ | Baker (구현) | ✅ | [TASK-B-032](tasks/TASK-B-032_260627_E2E26-07_tracking_events_수정_Baker.md) | Issue #133 · PR#131 ✅ Aiden 승인 260628 — develop 머지 완료 |
-| TASK-B-033 | 260628 | [Phase 8] UPS 특송 UAT 주도 실행 (IMP-144) | P1 | TASK-168 §1~§3 ✅ | JSJung (총괄) · Jaison · Dave · Baker | 🔔 | [TASK-B-033](tasks/TASK-B-033_260628_UPS특송UAT지원준비_JSJung.md) | Issue #135 · IMP-144 · **Team B UAT 주도 실행** · Team A 지원+결함방향결정 (260628 Edward 지시) · §1§2 확인·DEF-088 교정 완료 |
+| TASK-B-033 | 260628 | [Phase 8] UPS 특송 UAT 주도 실행 (IMP-144) | P1 | TASK-168 §1~§3 ✅ | JSJung (총괄) · Jaison · Dave · Baker | ✅ | [TASK-B-033](tasks/TASK-B-033_260628_UPS특송UAT지원준비_JSJung.md) | Issue #135 · IMP-144 · **Team B UAT 주도 실행** · §1§2·DEF-088 완료 · PR#156 ✅ squash 머지 (e2bf48b) · Aiden ✅ 260701 |
 | TASK-B-034 | 260628 | [Phase 8] E2E-26-06 재발급 버튼 UI — void 후 재발급 경로 (IMP-143) | P1 | TASK-B-029 ✅ | Dave (구현) | ✅ | [TASK-B-034](tasks/TASK-B-034_260628_E2E26-06_재발급버튼UI_Dave.md) | Issue #136 · DEF-082 해소 · PR#138 머지 ✅ (260628 Aiden) |
 | TASK-B-035 | 260629 | [Phase 8] DEF-083 zen_ups_labels.reference_no partial unique index 수정 | P1 | 없음 | Baker (구현) | ✅ | [TASK-B-035](tasks/TASK-B-035_260629_DEF083_reference_no_partial_unique_index_Baker.md) | Issue #141 · DEF-083 · PR#144 머지 ✅ 260629 · 코드 8b6cae8 |
 | TASK-B-036 | 260629 | [Phase 8] E2E-26-06 실 UI 재발급 버튼 클릭 플로우 E2E 재검증 | P1 | TASK-B-035 ✅ | Baker (구현) | ✅ | [TASK-B-036](tasks/TASK-B-036_260629_E2E26-06_재발급UI_재실행_Baker.md) | Issue #142 · E2E 7/7 PASS ✅ · DEF-084 미재현 · DEF-085 발견 · PR#145 ✅ 승인 260629 |
@@ -300,8 +300,8 @@
 
 | Agent | 상태 | 비고 |
 |:------|:----:|:----|
-| **JSJung** (팀 리더) | ✅ TASK-B-030 승인 완료 (260628) · 🔔 TASK-B-033 완료 보고 제출 | §1§2 확인 완료 · DEF-088 교정 완료 · PR 생성 대기 · Issue #135 |
-| **Jaison** (AI Agent 총괄) | 🔔 TASK-B-033 §1§2·DEF-088 완료 보고 (260630) | §1 .env.local 확인 · §2 zen_agency_rate_overrides 확인 · DEF-088 컬럼명 교정 |
+| **JSJung** (팀 리더) | ✅ TASK-B-030 승인 완료 (260628) · ✅ TASK-B-033 승인 완료 (260701) | §1§2 확인 완료 · DEF-088 교정 완료 · PR#156 squash 머지 (e2bf48b) |
+| **Jaison** (AI Agent 총괄) | ✅ TASK-B-033 완료 보고 승인 (260701) | §1 .env.local 확인 · §2 zen_agency_rate_overrides 확인 · DEF-088 컬럼명 교정 · PR#156 머지 완료 |
 | **Dave** (AI Agent) | ✅ TASK-B-031/034/039/041 승인 완료 (260630) · 다음 Task 대기 | UAT-18-01/02 PASS · PR#147·151 ✅ 머지 |
 | **Baker** (AI Agent) | ✅ **TASK-B-042** 승인 완료 (260701) · 다음 Task 대기 | PR#158 squash 머지 · UAT-19 E2E 2/2 PASS · DEF-086/087 해소 · Aiden ✅ 260701 |
 | **Gale** (AI Agent) | 대기 | 추후 재배정 예정 |
