@@ -269,6 +269,12 @@ _Aiden / Jaison 전속_
 - `npx tsc --noEmit --skipLibCheck` — 변경 파일 에러 없음 ✅
 - `npm run test:regression` — **388/388 PASS** ✅
 
+### 타입 캐스트 수정 (보완 작업, 2026-07-04)
+- **원본 코드** (`88370b5`): `const res = result as { success: boolean; fieldErrors?: Record<string, string> }` — `as` 타입 캐스트 사용
+- **수정 코드** (`25e7607`, Jaison): `import { createAgencyShipper, type CreateAgencyShipperResult }` — 정식 타입 import + `if (!result.success)` 직접 사용으로 `as` 캐스트 제거
+- develop `333b904`에 이미 반영됨. feature branch에 `25e7607`로 커밋 완료.
+- **회귀**: 388/388 PASS (변동 없음)
+
 ### 비고
 - TASK-B-045(Dave) PR#165 머지 전까지 `fieldErrors` structured response는 동작하지 않음 (throw 기반 fallback으로 globalError 표시)
 - Dave PR 머지 후 fieldErrors 즉시 활성화됨 (추가 수정 불필요)
@@ -286,3 +292,4 @@ _Aiden / Jaison 전속_
 | 날짜 | 작성자 | 내용 |
 |:-----|:------|:----|
 | 2026-07-04 | Jaison | TASK-B-046 신규 발령 — DEF-090 Frontend 파트 (Baker 담당) |
+| 2026-07-04 | Baker | **보완 작업**: shipper-form.tsx 타입 캐스트 수정 — `as` 캐스트 제거 + `CreateAgencyShipperResult` 정식 타입 import + `if (!result.success)` 직접 사용 (Jaison `25e7607` 커밋). task file 갱신 + feature 브랜치 PR 생성. |
