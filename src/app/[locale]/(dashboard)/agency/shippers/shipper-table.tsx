@@ -28,8 +28,9 @@ export function ShipperTable(props: ShipperTableProps) {
   }
 
   return (
-    <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
-      <table className="w-full">
+    <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+      <div className="overflow-x-auto">
+      <table className="w-full min-w-[720px]">
         <thead>
           <tr className="bg-slate-50 border-b border-slate-200">
             {['name', 'type', 'grade', 'discount_rate', 'status', 'created_at', 'actions'].map((col) => (
@@ -57,6 +58,7 @@ export function ShipperTable(props: ShipperTableProps) {
           ))}
         </tbody>
       </table>
+      </div>
     </div>
   );
 }
