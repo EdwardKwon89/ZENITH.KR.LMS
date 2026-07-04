@@ -215,6 +215,9 @@
     "form_contact_phone": "電話番号",
     "form_biz_no": "法人番号",
     "form_rep_name": "代表者名",
+    "edit_title": "荷主情報編集",
+    "edit_description": "荷主の詳細情報を編集します",
+    "edit_submit": "保存",
     "submit_success": "荷主が登録されました",
     "submit_error": "登録中にエラーが発生しました",
     "loading": "読み込み中..."

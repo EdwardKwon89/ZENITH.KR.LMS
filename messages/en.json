@@ -684,6 +684,9 @@
     "form_contact_phone": "Phone",
     "form_biz_no": "Business Registration No.",
     "form_rep_name": "Representative Name",
+    "edit_title": "Edit Shipper",
+    "edit_description": "Edit shipper details",
+    "edit_submit": "Save",
     "submit_success": "Shipper registered successfully",
     "submit_error": "An error occurred while registering",
     "loading": "Loading..."
