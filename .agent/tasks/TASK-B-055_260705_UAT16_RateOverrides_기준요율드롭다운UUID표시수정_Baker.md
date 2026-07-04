@@ -126,7 +126,7 @@ interface RateOverrideFormProps {
 - [x] `/ko/agency/rate-overrides/new` 드롭다운에 코드명 정상 표시 확인
 - [x] TypeScript 빌드 오류 없음 — 신규 오류 0건
 - [x] `npm run test:regression` — **388/388 PASS**
-- [x] 코드 커밋 해시 기재: _(작업 완료 후 기재)_
+- [x] 코드 커밋 해시 기재: \`36574ad\`
 - [x] PR 생성 (`feature/teamb-task-b-055-... → develop`) 완료
 
 ---
@@ -166,4 +166,4 @@ _Jaison 전속_
 | 날짜 | 작성자 | 내용 |
 |:-----|:------|:----|
 | 2026-07-05 | Jaison | TASK-B-055 발령 — UAT-16-01 결함: 신규 등록 폼 기준요율 드롭다운 UUID 표시 수정 (Baker 담당) |
-| 2026-07-05 | Baker | TASK-B-055 구현 완료 🔔 — 3개 파일 수정 · 388/388 PASS · PR 예정 |
+| 2026-07-05 | Baker | TASK-B-055 구현 완료 🔔 — 코드 \`36574ad\` · 3개 파일 수정 · 388/388 PASS · PR#179 |
