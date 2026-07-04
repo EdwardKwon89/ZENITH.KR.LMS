@@ -108,7 +108,7 @@ return <RateOverridesClient overrides={overrides} />;
 - [x] `/ko/agency/rate-overrides` 500 에러 해소 — `useTranslations()`로 전환 완료
 - [x] TypeScript 빌드 오류 없음 (`npx tsc --noEmit --skipLibCheck`) — 신규 오류 0건 (기존 pre-existing만)
 - [x] `npm run test:regression` — **388/388 PASS**
-- [x] 코드 커밋 해시 기재: _(작업 완료 후 기재)_
+- [x] 코드 커밋 해시 기재: \`7fe0bb2\`
 - [x] PR 생성 (`feature/teamb-task-b-054-... → develop`) 완료
 
 ---
@@ -150,4 +150,4 @@ _Jaison 전속_
 | 날짜 | 작성자 | 내용 |
 |:-----|:------|:----|
 | 2026-07-05 | Jaison | TASK-B-054 발령 — UAT-16 블로커: rate-overrides 서버 t 함수 클라이언트 전달 500 에러 수정 (Baker 담당) |
-| 2026-07-05 | Baker | TASK-B-054 구현 완료 🔔 — 5개 파일 `useTranslations()` 전환 · 388/388 PASS · PR 예정 |
+| 2026-07-05 | Baker | TASK-B-054 구현 완료 🔔 — 코드 \`7fe0bb2\` · 5개 파일 \`useTranslations()\` 전환 · 388/388 PASS · PR#178 |
