@@ -1,8 +1,8 @@
 'use client';
 
-import type { UpsBaseRate } from '@/types/ups';
+import type { UpsBaseRateWithRefs } from '@/types/ups';
 
-export function OverrideFormFields({ baseRates, t }: { baseRates: UpsBaseRate[]; t: (key: string) => string }) {
+export function OverrideFormFields({ baseRates, t }: { baseRates: UpsBaseRateWithRefs[]; t: (key: string) => string }) {
   return (
     <>
       <div>
@@ -10,7 +10,7 @@ export function OverrideFormFields({ baseRates, t }: { baseRates: UpsBaseRate[];
         <select name="base_rate_id" required className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20">
           {baseRates.map((r) => (
             <option key={r.id} value={r.id}>
-              {r.product_id} / {r.zone_id} / {r.weight_kg}kg — {r.selling_price.toLocaleString()}
+              {r.product?.product_code ?? r.product_id} / {r.zone?.zone_code ?? r.zone_id} / {r.weight_kg}kg — {r.selling_price.toLocaleString()}
             </option>
           ))}
         </select>

@@ -5,7 +5,7 @@ import { validateUserAction } from '@/lib/auth/guards';
 import type {
   UpsZoneWithCountries,
   UpsProduct,
-  UpsBaseRate,
+  UpsBaseRateWithRefs,
   UpsFuelSurcharge,
   UpsOtherCharge,
   UpsCargoType,
@@ -38,12 +38,12 @@ export async function getUpsBaseRates(filters?: {
   productId?: string;
   zoneId?: string;
   referenceDate?: string;
-}): Promise<UpsBaseRate[]> {
+}): Promise<UpsBaseRateWithRefs[]> {
   const { supabase } = await validateUserAction();
   const refDate = filters?.referenceDate ?? new Date().toISOString().split('T')[0];
   let base = supabase
     .from('zen_ups_base_rates')
-    .select('*')
+    .select('*, product:product_id(product_code, product_name, cargo_type), zone:zone_id(zone_code, zone_name)')
     .eq('is_active', true)
     .lte('valid_from', refDate)
     .or(`valid_until.is.null,valid_until.gte.${refDate}`);

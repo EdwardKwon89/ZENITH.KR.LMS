@@ -5,7 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { AlertCircle } from 'lucide-react';
 import { upsertAgencyRateOverride } from '@/app/actions/agency/rate-overrides';
-import type { UpsBaseRate } from '@/types/ups';
+import type { UpsBaseRateWithRefs } from '@/types/ups';
 import { OverrideFormFields } from './override-form-fields';
 import { OverrideFormActions } from './override-form-actions';
 
@@ -19,7 +19,7 @@ function _ErrorAlert({ message }: { message: string }) {
 
 interface RateOverrideFormProps {
   agencyOrgId: string;
-  baseRates: UpsBaseRate[];
+  baseRates: UpsBaseRateWithRefs[];
 }
 
 export function RateOverrideForm({ agencyOrgId, baseRates }: RateOverrideFormProps) {
