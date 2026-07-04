@@ -279,8 +279,8 @@
 | TASK-B-040 | 260630 | [Phase 8] TASK-B-033 §5 UAT-17-01·17-02 DIRECT·PICKUP 실행 | P1 | TASK-B-038 ✅ | Baker (구현) | ✅ | [TASK-B-040](tasks/TASK-B-040_260630_B033-S5-UAT1701-02실행_Baker.md) | Issue #135 · PR#153 ✅ 머지 (squash `d091f09`) · UAT-17-01/02 spec 2/2 PASS · 회귀 387/387 · 승인 260630 |
 | TASK-B-041 | 260630 | TASK-B-033 §3 DoD 소급 갱신 + UAT-19 재실행 spec 보완 | P2 | 없음 | Dave (구현) | ✅ | [TASK-B-041](tasks/TASK-B-041_260630_B033-S3DoD갱신+UAT19Spec보완_Dave.md) | Issue #135 · PR#151 ✅ 머지 (squash `00053db`) · §A DoD [x]·§B test.skip+실검증주석 · 회귀 387/387 · 승인 260630 |
 | TASK-B-042 | 260630 | UAT-19 재실행 — DEF-086/087 해소 후 인보이스 PDF 검증 | P1 | TASK-169 ✅ · TASK-170 ✅ | Baker (구현) | ✅ | [TASK-B-042](tasks/TASK-B-042_260630_UAT19재실행_Baker.md) | Issue #157 · PR#158 ✅ squash 머지 (`260701 Aiden`) · UAT-19 E2E 2/2 · 회귀 387/387 · Aiden ✅ 승인 260701 |
-| TASK-B-043 | 260704 | DEF-089 법인 화주 등록 백엔드 수정 (types·validation·action) | P1 | 없음 | Dave (구현) | ⬜ | [TASK-B-043](tasks/TASK-B-043_260704_DEF089_법인화주_백엔드수정_Dave.md) | Issue #159 · DEF-089 · TASK-B-044(Baker)과 병렬 착수 가능 |
-| TASK-B-044 | 260704 | DEF-089 법인 화주 등록 프론트엔드 수정 (required-fields·shipper-form·i18n) | P1 | 없음 | Baker (구현) | ⬜ | [TASK-B-044](tasks/TASK-B-044_260704_DEF089_법인화주_프론트엔드수정_Baker.md) | Issue #159 · DEF-089 · TASK-B-043(Dave)과 병렬 착수 가능 |
+| TASK-B-043 | 260704 | DEF-089 법인 화주 등록 백엔드 수정 (types·validation·action) | P1 | 없음 | Dave (구현) | 🔔 | [TASK-B-043](tasks/TASK-B-043_260704_DEF089_법인화주_백엔드수정_Dave.md) | Issue #159 · DEF-089 · 커밋 `84c103e` · 388/388 PASS · ⚠️ develop 직접 커밋(R-17 위반) · task file 미업데이트(Jaison 대행) · PR 미생성 |
+| TASK-B-044 | 260704 | DEF-089 법인 화주 등록 프론트엔드 수정 (required-fields·shipper-form·i18n) | P1 | 없음 | Baker (구현) | 🔔 | [TASK-B-044](tasks/TASK-B-044_260704_DEF089_법인화주_프론트엔드수정_Baker.md) | Issue #159 · DEF-089 · 커밋 `08dc986` · 388/388 PASS · ⚠️ develop 직접 커밋(R-17 위반) · task file 상태 ⬜ 미전환(Jaison 대행) · PR 미생성 |
 | TASK-169 | 260630 | DEF-086/087 인보이스 PDF — DB 마이그레이션 + Server Action | P2 | 없음 | D_Kai (구현) | ✅ | [TASK-169](tasks/TASK-169_260630_DEF086087_InvoicePDF_DB+SA_DKai.md) | Issue #152 · PR#154 ✅ 머지 (`51eba6c`) · zen_invoice_files 마이그레이션+SA 완료 · DEF-086 해소 |
 | TASK-170 | 260630 | DEF-086/087 인보이스 PDF — 오더 상세 UI 버튼 구현 | P2 | TASK-169 ✅ | B_Kai (구현) | ✅ | [TASK-170](tasks/TASK-170_260630_DEF086087_InvoicePDF_UI버튼_BKai.md) | Issue #152 · PR#155 ✅ 머지 (`ad9d1d1` develop 반영 확인) · DoD 13/13 · Aiden ✅ 260701 |
 ---
@@ -304,14 +304,15 @@
 |:------|:----:|:----|
 | **JSJung** (팀 리더) | ✅ TASK-B-030 승인 완료 (260628) · ✅ TASK-B-033 승인 완료 (260701) | §1§2 확인 완료 · DEF-088 교정 완료 · PR#156 squash 머지 (e2bf48b) |
 | **Jaison** (AI Agent 총괄) | ✅ TASK-B-033 완료 보고 승인 (260701) | §1 .env.local 확인 · §2 zen_agency_rate_overrides 확인 · DEF-088 컬럼명 교정 · PR#156 머지 완료 |
-| **Dave** (AI Agent) | ⬜ **TASK-B-043** 착수 대기 (260704 발령) | DEF-089 Backend — types·validation·action 수정 |
-| **Baker** (AI Agent) | ⬜ **TASK-B-044** 착수 대기 (260704 발령) | DEF-089 Frontend — required-fields·shipper-form·i18n 수정 |
+| **Dave** (AI Agent) | 🔔 **TASK-B-043** 완료 보고 (260704) | DEF-089 Backend 커밋 `84c103e` · 388/388 PASS · ⚠️ develop 직접 커밋·task file 미업데이트 (R-17 위반 기록됨) |
+| **Baker** (AI Agent) | 🔔 **TASK-B-044** 완료 보고 (260704) | DEF-089 Frontend 커밋 `08dc986` · 388/388 PASS · ⚠️ develop 직접 커밋·task file 상태 미전환 (R-17 위반 기록됨) |
 | **Gale** (AI Agent) | 대기 | 추후 재배정 예정 |
 
 ---
 
 ## 개정 이력
 
+| 2026-07-04 | Jaison (Team B) | **TASK-B-043/044 🔔 갱신** — 커밋 `84c103e`(Dave)/`08dc986`(Baker) 확인 · 388/388 PASS · R-17 위반(develop 직접 커밋·task file 미업데이트) VIOLATION_TRACKER 기록 · PR 미생성 — JSJung 판단 요청 |
 | 2026-07-04 | Jaison (Team B) | **TASK-B-043/044 신규 발령** — DEF-089 법인 화주 등록 biz_no/rep_name 누락 수정 · Dave(Backend) · Baker(Frontend) · Issue #159 · UAT-15-01 Step 3 블로킹 결함 |
 | 2026-06-30 | Aiden (ZEN_CEO) | **TASK-B-042 신규 발령** — UAT-19 재실행 · Baker · Issue #157 · DEF-086/087 해소(TASK-169·170) 후 test.skip 제거 + 실검증 · Edward 승인 |
 | 2026-06-30 | Aiden (ZEN_CEO) | **TASK-B-033 ✅ 승인** — PR#156 squash 머지 (`e2bf48b`). §1 SHXK 환경변수·§2 요율 오버라이드·DEF-088 교정 완료. IMP-144 해소. |
