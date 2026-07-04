@@ -11,20 +11,10 @@ const TYPE_BADGE: Record<string, string> = {
 
 interface ShipperTableRowProps {
   shipper: AgencyShipperRow;
-  isEditing: boolean;
-  editGrade: string;
-  editRate: number;
-  onEdit: () => void;
-  onCancel: () => void;
-  onSave: () => void;
-  onGradeChange: (v: string) => void;
-  onRateChange: (v: number) => void;
   t: (key: string) => string;
 }
 
-export function ShipperTableRow(props: ShipperTableRowProps) {
-  const { shipper, isEditing, editGrade, editRate, onEdit, onCancel, onSave, onGradeChange, onRateChange, t } = props;
-
+export function ShipperTableRow({ shipper, t }: ShipperTableRowProps) {
   return (
     <tr className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
       <td className="px-4 py-3 font-medium text-slate-900">{shipper.shipper?.name || '-'}</td>
@@ -34,10 +24,10 @@ export function ShipperTableRow(props: ShipperTableRowProps) {
         </span>
       </td>
       <td className="px-4 py-3">
-        <EditableGradeCell isEditing={isEditing} value={editGrade} onChange={onGradeChange} displayValue={shipper.grade} placeholder={t('grade_placeholder')} />
+        <EditableGradeCell displayValue={shipper.grade} placeholder={t('grade_placeholder')} />
       </td>
       <td className="px-4 py-3">
-        <EditableRateCell isEditing={isEditing} value={editRate} onChange={onRateChange} displayRate={shipper.discount_rate} />
+        <EditableRateCell displayRate={shipper.discount_rate} />
       </td>
       <td className="px-4 py-3">
         <span className={cn("px-2.5 py-1 rounded-full text-[10px] font-bold border",
@@ -49,7 +39,7 @@ export function ShipperTableRow(props: ShipperTableRowProps) {
         {shipper.created_at ? new Date(shipper.created_at).toLocaleDateString('ko-KR') : '-'}
       </td>
       <td className="px-4 py-3 text-right">
-        <ActionCell isEditing={isEditing} onEdit={onEdit} onCancel={onCancel} onSave={onSave} shipperId={shipper.id} />
+        <ActionCell shipperId={shipper.id} />
       </td>
     </tr>
   );
