@@ -3,9 +3,10 @@
 > **문서번호**: UAT-15
 > **작성일**: 2026-06-19
 > **작성자**: Riley (Gemini)
-> **버전**: v1.0
+> **버전**: v1.1
 > **담당 문서**: [UAT_MASTER.md](UAT_MASTER.md)
 > **관련 Task**: TASK-161 — Phase 7 UPS 특송 UAT 시나리오 작성
+> **개정 이력**: v1.1 (2026-07-04, Jaison) — UAT-15-01 담당자 표출·포매터·유효성 검사 단계 보완 / UAT-15-03 상세편집 페이지 방식으로 전면 개정 (TASK-B-049 DEF-093 인라인 편집 제거 반영)
 
 ---
 
@@ -15,22 +16,29 @@
 |:----|:----|
 | 역할 | AGENCY (대리점) |
 | 화면 URL | /ko/agency/shippers/new |
-| 예상 소요 시간 | 5분 |
+| 예상 소요 시간 | 10분 |
 | 사전 조건 | AGENCY 권한 계정으로 로그인 상태 |
 
 ### 테스트 절차
 
 | 순서 | 화면·URL | 수행 액션 | 입력 데이터 | 기대 결과 | 확인 |
 |:---:|:---------|:---------|:-----------|:---------|:----:|
-| 1 | /ko/agency/shippers | 사이드바 > 대리점 관리 > [화주 관리] 메뉴 클릭 | — | Agency 화주 목록 페이지 진입 | ☐ |
-| 2 | /ko/agency/shippers | [신규 화주 등록] 버튼 클릭 | — | 신규 화주 등록 페이지(/ko/agency/shippers/new)로 이동 | ☐ |
-| 3 | /ko/agency/shippers/new | 화주 정보 입력 후 [등록] 클릭 | 화주명: `UAT Agency Shipper` / 사업자번호: `120-11-22334` / 대표자명: `이대리` | "화주 조직이 정상적으로 등록되었습니다." 메시지 표시 및 목록 페이지로 리다이렉트 | ☐ |
-| 4 | /ko/agency/shippers | 등록 결과 목록 확인 | — | 화주 목록 테이블에 `UAT Agency Shipper`가 기본 등급(`BRONZE`) 및 `ACTIVE` 상태로 정상 표시됨 | ☐ |
-| 5 | Supabase Studio | `SELECT * FROM zen_organizations WHERE name = 'UAT Agency Shipper'` | — | 해당 조직이 `org_type = 'SHIPPER'`로 등록되어 있고, `zen_agency_shippers`에 대리점과의 연결 정보가 생성됨 확인 | ☐ |
+| 1 | /ko/agency/shippers | 사이드바 > 대리점 관리 > [화주 관리] 메뉴 클릭 | — | Agency 화주 목록 페이지 진입. 컬럼 헤더(화주명·유형·등급·할인율·담당자명·이메일·연락처·상태·등록일·관리)가 **가운데 정렬**로 표시됨 | ☐ |
+| 2 | /ko/agency/shippers | [신규 화주 등록] 버튼 클릭 | — | 신규 화주 등록 페이지(`/ko/agency/shippers/new`)로 이동 | ☐ |
+| 3 | /ko/agency/shippers/new | 사업자번호 입력란에 숫자만 연속 입력 | `12011222334` (숫자 11자리) | 자동 하이픈 포매팅 동작: `120-11-222334` 형태로 실시간 변환됨. 최대 12자 제한 적용 | ☐ |
+| 4 | /ko/agency/shippers/new | 연락처 입력란에 숫자만 연속 입력 | `01012345678` (숫자 11자리) | 자동 하이픈 포매팅 동작: `010-1234-5678` 형태로 실시간 변환됨. 최대 13자 제한 적용 | ☐ |
+| 5 | /ko/agency/shippers/new | 전체 화주 정보 입력 후 [등록] 클릭 | 화주명: `UAT Agency Shipper` / 사업자번호: `120-11-22334` / 대표자명: `이대리` / 담당자명: `UAT 담당자` / 연락처: `010-1234-5678` / 이메일: `uat@test.com` | "화주 조직이 정상적으로 등록되었습니다." 메시지 표시 및 목록 페이지로 리다이렉트 | ☐ |
+| 6 | /ko/agency/shippers | 등록 결과 목록 확인 | — | `UAT Agency Shipper`가 기본 등급(`BRONZE`) · `ACTIVE` 상태로 표시되며, **담당자명** `UAT 담당자` · **이메일** `uat@test.com` · **연락처** `010-1234-5678` 컬럼에 정상 표출됨 | ☐ |
+| 7 | Supabase Studio | `SELECT * FROM zen_organizations WHERE name = 'UAT Agency Shipper'` | — | `org_type = 'SHIPPER'`로 등록, `contact_name`·`contact_email`·`contact_phone` 값 정상 저장, `zen_agency_shippers`에 대리점 연결 정보 생성 확인 | ☐ |
+| 8 | /ko/agency/shippers/new | 유효성 검사 오류 확인: 잘못된 포맷 입력 후 [등록] | 사업자번호: `123456` (하이픈 없는 숫자) / 연락처: `1234` (포맷 불일치) / 이메일: `notanemail` | 각 필드 하단에 Zod 유효성 오류 메시지 표시됨 (`사업자번호 형식이 올바르지 않습니다.` / `연락처 형식이 올바르지 않습니다.` / `유효한 이메일 형식이 아닙니다.`) | ☐ |
 
 ### 합격 기준
 - [ ] 전 단계 ☑ 완료
-- [ ] 필수 정보(화주명, 사업자번호 등) 미입력 시 Zod 벨리데이션 오류가 화면에 적절히 표시됨
+- [ ] 화주 목록 컬럼 헤더 전체 **가운데 정렬** 적용됨
+- [ ] 담당자명·이메일·연락처 컬럼이 목록에 표출됨
+- [ ] 사업자번호 자동 하이픈 포매팅 동작 (`XXX-XX-XXXXX`)
+- [ ] 연락처 자동 하이픈 포매팅 동작 (`0XX-XXXX-XXXX`)
+- [ ] 포맷 불일치 입력 시 필드별 Zod 유효성 오류 메시지 표시됨
 - [ ] 대리점과 하위 화주 간의 연결 정보가 `zen_agency_shippers`에 정확히 삽입됨
 - [ ] 500 에러 없음
 
@@ -72,28 +80,33 @@
 
 ---
 
-## [UAT-15-03] Agency 화주 등급 수정
+## [UAT-15-03] Agency 화주 상세 정보 수정
+
+> **⚠️ v1.1 전면 개정** — TASK-B-049 (DEF-093) 인라인 편집 제거로, 목록 화면 드롭다운 방식 → 상세편집 페이지(`/[id]/edit`) 방식으로 변경됨.
 
 | 항목 | 내용 |
 |:----|:----|
 | 역할 | AGENCY (대리점) |
-| 화면 URL | /ko/agency/shippers |
+| 화면 URL | /ko/agency/shippers → /ko/agency/shippers/[id]/edit |
 | 예상 소요 시간 | 5분 |
-| 사전 조건 | 대리점 하위에 `BRONZE` 등급인 화주가 1개 이상 존재할 것 |
+| 사전 조건 | 대리점 하위에 `BRONZE` 등급인 화주가 1개 이상 존재할 것 (UAT-15-01 완료 후 수행 가능) |
 
 ### 테스트 절차
 
 | 순서 | 화면·URL | 수행 액션 | 입력 데이터 | 기대 결과 | 확인 |
 |:---:|:---------|:---------|:-----------|:---------|:----:|
-| 1 | /ko/agency/shippers | 대상 화주 행의 [등급 변경] 드롭다운 또는 버튼 클릭 | — | 등급 수정 선택 상자 표시 | ☐ |
-| 2 | /ko/agency/shippers | 등급을 변경하여 [저장] 또는 [적용] 클릭 | 등급: `GOLD` | "화주 등급이 수정되었습니다." 알림 표시 | ☐ |
-| 3 | /ko/agency/shippers | 등급 변경 결과 확인 | — | 목록 테이블에서 해당 화주의 등급이 `GOLD`로 실시간 업데이트되어 표시됨 | ☐ |
-| 4 | Supabase Studio | `SELECT shipper_grade FROM zen_agency_shippers WHERE shipper_org_id = '[화주ID]'` | — | `shipper_grade` 컬럼이 `'GOLD'`로 변경되었음을 확인 | ☐ |
+| 1 | /ko/agency/shippers | 수정할 화주(`UAT Agency Shipper`) 행의 [상세 편집] 버튼 클릭 | — | 상세 편집 페이지(`/ko/agency/shippers/[id]/edit`)로 이동. 기존 등록 정보(화주명·사업자번호·담당자 정보 등)가 폼에 pre-fill됨 | ☐ |
+| 2 | /ko/agency/shippers/[id]/edit | 등급을 `GOLD`로 변경 후 [저장] 클릭 | 등급: `GOLD` | "화주 정보가 수정되었습니다." 메시지 표시 및 목록 페이지로 리다이렉트 | ☐ |
+| 3 | /ko/agency/shippers | 등급 변경 결과 목록 확인 | — | `UAT Agency Shipper` 행의 등급이 `GOLD`로 표시됨 | ☐ |
+| 4 | /ko/agency/shippers/[id]/edit | 연락처 수정 확인: [상세 편집] 재진입 후 연락처 변경 | 연락처: `02-9876-5432` (서울 지역번호 포매터 확인) | 자동 하이픈 포매팅 동작: `02-9876-5432` 형태로 실시간 변환됨. [저장] 후 목록 연락처 컬럼에 변경값 반영됨 | ☐ |
+| 5 | Supabase Studio | `SELECT shipper_grade FROM zen_agency_shippers WHERE shipper_org_id = '[화주ID]'` | — | `shipper_grade` 컬럼이 `'GOLD'`로 변경되었음을 확인 | ☐ |
 
 ### 합격 기준
 - [ ] 전 단계 ☑ 완료
-- [ ] 대리점 권한으로 하위 화주의 등급을 변경할 수 있음
+- [ ] 목록 화면에 [상세 편집] 버튼이 표시되며 정상 진입됨 (인라인 수정 버튼 없음)
+- [ ] 상세 편집 폼에 기존 값 pre-fill됨
 - [ ] 등급 수정 사항이 `zen_agency_shippers.shipper_grade`에 정상 반영됨
+- [ ] 서울 지역번호(`02-`) 연락처 포매팅 동작 (`02-XXXX-XXXX`)
 - [ ] 500 에러 없음
 
 ### 결함 기재란
