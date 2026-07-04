@@ -1,17 +1,19 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import type { AgencyRateOverrideWithRefs } from '@/types/agency';
 import { RateOverrideTableRow } from './rate-override-table-row';
 
 interface RateOverridesTableProps {
   overrides: AgencyRateOverrideWithRefs[];
   onDeactivated: (id: string) => void;
-  t: (key: string) => string;
 }
 
 const COLS = ['base_rate', 'selling', 'cost', 'valid_from', 'valid_until', 'status', 'actions'];
 
-export function RateOverridesTable({ overrides, onDeactivated, t }: RateOverridesTableProps) {
+export function RateOverridesTable({ overrides, onDeactivated }: RateOverridesTableProps) {
+  const t = useTranslations();
+
   if (overrides.length === 0) {
     return (
       <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center">
@@ -34,7 +36,7 @@ export function RateOverridesTable({ overrides, onDeactivated, t }: RateOverride
         </thead>
         <tbody>
           {overrides.map((o) => (
-            <RateOverrideTableRow key={o.id} override={o} onDeactivated={onDeactivated} t={t} />
+            <RateOverrideTableRow key={o.id} override={o} onDeactivated={onDeactivated} />
           ))}
         </tbody>
       </table>
