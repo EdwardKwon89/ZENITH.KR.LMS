@@ -1,9 +1,11 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { Plus } from 'lucide-react';
 
-export function RateOverridesHeader({ t }: { t: (key: string) => string }) {
+export function RateOverridesHeader() {
+  const t = useTranslations();
   return (
     <header className="flex items-center justify-between">
       <div>

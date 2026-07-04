@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { deactivateAgencyRateOverride } from '@/app/actions/agency/rate-overrides';
 import type { AgencyRateOverrideWithRefs } from '@/types/agency';
@@ -21,10 +22,10 @@ function _StatusBadge({ isActive }: { isActive: boolean }) {
 interface RateOverrideTableRowProps {
   override: AgencyRateOverrideWithRefs;
   onDeactivated: (id: string) => void;
-  t: (key: string) => string;
 }
 
-export function RateOverrideTableRow({ override, onDeactivated, t }: RateOverrideTableRowProps) {
+export function RateOverrideTableRow({ override, onDeactivated }: RateOverrideTableRowProps) {
+  const t = useTranslations();
   const [deactivating, setDeactivating] = useState(false);
 
   const handleDeactivate = async () => {
