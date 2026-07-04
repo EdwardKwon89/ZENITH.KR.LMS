@@ -10,11 +10,13 @@ import { revalidatePath } from 'next/cache';
 
 async function _createShipperOrg(
   supabase: SupabaseClient,
-  name: string
+  name: string,
+  bizNo?: string | null,
+  repName?: string | null,
 ): Promise<string> {
   const { data, error } = await supabase
     .from('zen_organizations')
-    .insert({ name, type: 'SHIPPER', status: 'ACTIVE' })
+    .insert({ name, type: 'SHIPPER', status: 'ACTIVE', biz_no: bizNo ?? null, rep_name: repName ?? null })
     .select('id')
     .single();
   if (error) throw new Error(`Failed to create shipper org: ${error.message}`);
@@ -94,7 +96,7 @@ export async function createAgencyShipper(
   }
 
   const supabase = await createAdminClient();
-  const orgId = await _createShipperOrg(supabase, parsed.data.name);
+  const orgId = await _createShipperOrg(supabase, parsed.data.name, parsed.data.biz_no, parsed.data.rep_name);
   const linkId = await _linkShipperToAgency(
     supabase, agencyOrgId, orgId, parsed.data
   );

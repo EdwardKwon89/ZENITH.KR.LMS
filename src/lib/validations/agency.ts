@@ -8,6 +8,16 @@ export const CreateAgencyShipperSchema = z.object({
   contact_name: z.string().optional(),
   contact_email: z.string().email().optional(),
   contact_phone: z.string().optional(),
+  biz_no: z.string().optional(),
+  rep_name: z.string().optional(),
+}).superRefine((data, ctx) => {
+  if (data.shipper_type === 'CORPORATE' && !data.biz_no) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['biz_no'],
+      message: '법인 화주는 사업자번호를 필수로 입력해야 합니다.',
+    });
+  }
 });
 
 export const UpdateAgencyShipperGradeSchema = z.object({

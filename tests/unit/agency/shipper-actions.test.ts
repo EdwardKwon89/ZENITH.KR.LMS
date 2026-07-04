@@ -21,6 +21,8 @@ describe('TC-P7-SHIPPER-02: CreateAgencyShipperSchema — 유효 입력 검증 P
       contact_name: 'John Doe',
       contact_email: 'john@example.com',
       contact_phone: '010-1234-5678',
+      biz_no: '120-11-22334',
+      rep_name: '홍길동',
     });
     expect(result.success).toBe(true);
   });
@@ -39,6 +41,7 @@ describe('TC-P7-SHIPPER-02: CreateAgencyShipperSchema — 유효 입력 검증 P
       name: 'Max Rate Shipper',
       shipper_type: 'CORPORATE',
       discount_rate: 0.9999,
+      biz_no: '123-45-67890',
     });
     expect(result.success).toBe(true);
   });
@@ -76,6 +79,15 @@ describe('TC-P7-SHIPPER-03: CreateAgencyShipperSchema — 유효하지 않은 �
     const result = CreateAgencyShipperSchema.safeParse({
       name: 'Bad Type',
       shipper_type: 'INVALID',
+      discount_rate: 0.1,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('should reject CORPORATE without biz_no', () => {
+    const result = CreateAgencyShipperSchema.safeParse({
+      name: 'No Biz No',
+      shipper_type: 'CORPORATE',
       discount_rate: 0.1,
     });
     expect(result.success).toBe(false);

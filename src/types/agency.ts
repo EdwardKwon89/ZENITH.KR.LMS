@@ -23,6 +23,8 @@ export interface CreateAgencyShipperInput {
   contact_name?: string;
   contact_email?: string;
   contact_phone?: string;
+  biz_no?: string;
+  rep_name?: string;
 }
 
 export interface AgencyRateOverride {
