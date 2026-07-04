@@ -287,7 +287,7 @@
 | TASK-B-048 | 260704 | DEF-091 화주 상세 정보 Frontend — 등급 드롭다운·상세 편집 버튼·편집 페이지 | P1 | TASK-B-047 ✅ | Baker (구현) | ✅ | [TASK-B-048](tasks/TASK-B-048_260704_DEF091_화주상세정보_Frontend_Baker.md) | Issue #159 · DEF-091 · PR#168 ✅ 머지 (`8d5b497`) · 388/388 · Aiden ✅ 머지승인 260704 |
 | TASK-B-049 | 260704 | DEF-093 화주 목록 인라인 편집 제거 + 테이블 정리 | P1 | 없음 | Baker (구현) | ✅ | [TASK-B-049](tasks/TASK-B-049_260704_DEF093_화주목록인라인편집제거_Baker.md) | Issue #171 · DEF-093 · PR#169 ✅ 머지 (`425bff1`) · 388/388 · Aiden ✅ 머지승인 260704 |
 | TASK-B-050 | 260704 | DEF-094 Supabase 타입 재생성 + 담당자 정보 E2E 검증 | P1 | 없음 | Dave (구현) | ✅ | [TASK-B-050](tasks/TASK-B-050_260704_DEF094_Supabase타입재생성_담당자정보검증_Dave.md) | Issue #159 · DEF-094 · PR#170 ✅ 머지 (`e8fd413`) · 388/388 · Aiden ✅ 머지승인 260704 |
-| TASK-B-051 | 260704 | UAT-15 피드백 — 화주목록 담당자 정보 조회 + Zod 포맷 유효성 강화 | P1 | 없음 | Dave (구현) | 🔔 | [TASK-B-051](tasks/TASK-B-051_260704_UAT15_화주목록담당자표출_Zod포맷검증_Dave.md) | UAT-15-01 JSJung 요구사항 · 코드 `8c8b463` · 388/388 · PR#176 · TASK-B-052 후행 |
+| TASK-B-051 | 260704 | UAT-15 피드백 — 화주목록 담당자 정보 조회 + Zod 포맷 유효성 강화 | P1 | 없음 | Dave (구현) | 🔔 | [TASK-B-051](tasks/TASK-B-051_260704_UAT15_화주목록담당자표출_Zod포맷검증_Dave.md) | UAT-15-01 JSJung 요구사항 · 코드 `8c8b463` · 388/388 · PR#175 · TASK-B-052 후행 |
 | TASK-B-052 | 260704 | UAT-15 피드백 — 화주목록 담당자 컬럼 + 헤더 정렬 + 입력 포매터 | P1 | TASK-B-051 ✅ | Baker (구현) | 🚫 | [TASK-B-052](tasks/TASK-B-052_260704_UAT15_화주목록UI개선_입력포매터_Baker.md) | UAT-15-01 JSJung 요구사항 · TASK-B-051 완료 후 착수 |
 | TASK-169 | 260630 | DEF-086/087 인보이스 PDF — DB 마이그레이션 + Server Action | P2 | 없음 | D_Kai (구현) | ✅ | [TASK-169](tasks/TASK-169_260630_DEF086087_InvoicePDF_DB+SA_DKai.md) | Issue #152 · PR#154 ✅ 머지 (`51eba6c`) · zen_invoice_files 마이그레이션+SA 완료 · DEF-086 해소 |
 | TASK-170 | 260630 | DEF-086/087 인보이스 PDF — 오더 상세 UI 버튼 구현 | P2 | TASK-169 ✅ | B_Kai (구현) | ✅ | [TASK-170](tasks/TASK-170_260630_DEF086087_InvoicePDF_UI버튼_BKai.md) | Issue #152 · PR#155 ✅ 머지 (`ad9d1d1` develop 반영 확인) · DoD 13/13 · Aiden ✅ 260701 |
@@ -329,7 +329,7 @@
 
 ## 개정 이력
 
-| 2026-07-04 | Dave | **TASK-B-051 🔔 완료** — UAT-15 피드백: 화주목록 contact 필드 조회 + Zod regex 강화 · 코드 `8c8b463` · 388/388 · PR#176 |
+| 2026-07-04 | Dave | **TASK-B-051 🔔 완료** — UAT-15 피드백: 화주목록 contact 필드 조회 + Zod regex 강화 · 코드 `8c8b463` · 388/388 · PR#175 |
 | 2026-07-04 | Aiden | **TASK-B-043/044/045/046/047/048/049/050 ✅ 머지 승인** — PR#173/174/167/168/169/170 전량 develop 머지 완료 · ACTIVE_TASK ✅ 갱신 |
 | 2026-07-04 | Dave | **TASK-B-045 🔔 사후 마감** — DEF-090 Backend · PR#165 → Jaison develop 반영 (`333b904`) · code+docs task file 정리 |
 | 2026-07-04 | Dave | **TASK-B-050 🔔 완료** — DEF-094 Supabase 타입 재생성 + 담당자 정보 E2E 검증 · 코드 `e8fd413` · 회귀 388/388 · PR#170 |
