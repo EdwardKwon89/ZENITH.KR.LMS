@@ -281,7 +281,7 @@
 | TASK-B-042 | 260630 | UAT-19 재실행 — DEF-086/087 해소 후 인보이스 PDF 검증 | P1 | TASK-169 ✅ · TASK-170 ✅ | Baker (구현) | ✅ | [TASK-B-042](tasks/TASK-B-042_260630_UAT19재실행_Baker.md) | Issue #157 · PR#158 ✅ squash 머지 (`260701 Aiden`) · UAT-19 E2E 2/2 · 회귀 387/387 · Aiden ✅ 승인 260701 |
 | TASK-B-043 | 260704 | DEF-089 법인 화주 등록 백엔드 수정 (types·validation·action) | P1 | 없음 | Dave (구현) | 🔔 | [TASK-B-043](tasks/TASK-B-043_260704_DEF089_법인화주_백엔드수정_Dave.md) | Issue #159 · DEF-089 · 커밋 `84c103e` · 388/388 PASS · ⚠️ develop 직접 커밋(R-17 위반) · task file 미업데이트(Jaison 대행) · PR 미생성 |
 | TASK-B-044 | 260704 | DEF-089 법인 화주 등록 프론트엔드 수정 (required-fields·shipper-form·i18n) | P1 | 없음 | Baker (구현) | 🔔 | [TASK-B-044](tasks/TASK-B-044_260704_DEF089_법인화주_프론트엔드수정_Baker.md) | Issue #159 · DEF-089 · 커밋 `08dc986` · 388/388 PASS · ⚠️ develop 직접 커밋(R-17 위반) · task file 상태 ⬜ 미전환(Jaison 대행) · PR 미생성 |
-| TASK-B-045 | 260704 | DEF-090 화주 등록 폼 Backend — fieldErrors 반환 + Zod 오류 메시지 한글화 | P1 | 없음 | Dave (구현) | ⬜ | [TASK-B-045](tasks/TASK-B-045_260704_DEF090_화주등록폼_백엔드수정_Dave.md) | Issue #159 · DEF-090 · TASK-B-046(Baker)과 병렬 착수 가능 |
+| TASK-B-045 | 260704 | DEF-090 화주 등록 폼 Backend — fieldErrors 반환 + Zod 오류 메시지 한글화 | P1 | 없음 | Dave (구현) | 🔔 | [TASK-B-045](tasks/TASK-B-045_260704_DEF090_화주등록폼_백엔드수정_Dave.md) | Issue #159 · DEF-090 · PR#165 → Jaison develop 직접 반영 (`333b904`) · 388/388 · 후행 TASK-B-046 Baker |
 | TASK-B-046 | 260704 | DEF-090 화주 등록 폼 Frontend — 할인율 변환·폼값 유지·필드별 오류 표시 | P1 | TASK-B-045 착수 후 권장 | Baker (구현) | ⬜ | [TASK-B-046](tasks/TASK-B-046_260704_DEF090_화주등록폼_프론트엔드수정_Baker.md) | Issue #159 · DEF-090 · TASK-B-045(Dave) 반환 타입 확인 후 착수 |
 | TASK-169 | 260630 | DEF-086/087 인보이스 PDF — DB 마이그레이션 + Server Action | P2 | 없음 | D_Kai (구현) | ✅ | [TASK-169](tasks/TASK-169_260630_DEF086087_InvoicePDF_DB+SA_DKai.md) | Issue #152 · PR#154 ✅ 머지 (`51eba6c`) · zen_invoice_files 마이그레이션+SA 완료 · DEF-086 해소 |
 | TASK-170 | 260630 | DEF-086/087 인보이스 PDF — 오더 상세 UI 버튼 구현 | P2 | TASK-169 ✅ | B_Kai (구현) | ✅ | [TASK-170](tasks/TASK-170_260630_DEF086087_InvoicePDF_UI버튼_BKai.md) | Issue #152 · PR#155 ✅ 머지 (`ad9d1d1` develop 반영 확인) · DoD 13/13 · Aiden ✅ 260701 |
@@ -315,7 +315,7 @@
 |:------|:----:|:----|
 | **JSJung** (팀 리더) | ✅ TASK-B-030 승인 완료 (260628) · ✅ TASK-B-033 승인 완료 (260701) | §1§2 확인 완료 · DEF-088 교정 완료 · PR#156 squash 머지 (e2bf48b) |
 | **Jaison** (AI Agent 총괄) | ✅ TASK-B-033 완료 보고 승인 (260701) | §1 .env.local 확인 · §2 zen_agency_rate_overrides 확인 · DEF-088 컬럼명 교정 · PR#156 머지 완료 |
-| **Dave** (AI Agent) | ⬜ **TASK-B-045** 착수 대기 (260704 발령) | DEF-090 Backend — fieldErrors 반환 + Zod 오류 한글화 |
+| **Dave** (AI Agent) | 🔔 **TASK-B-045** · 🔔 **TASK-B-047** · 🔔 **TASK-B-050** | DEF-090 Backend ✅ (Jaison develop 반영 `333b904`) · DEF-091 Backend ✅ (PR#167) · DEF-094 타입 재생성 ✅ (PR#170) |
 | **Baker** (AI Agent) | ⬜ **TASK-B-046** 착수 대기 (260704 발령) | DEF-090 Frontend — 할인율 변환·폼값 유지·필드별 오류 표시 |
 | **Gale** (AI Agent) | 대기 | 추후 재배정 예정 |
 
@@ -323,6 +323,8 @@
 
 ## 개정 이력
 
+| 2026-07-04 | Dave | **TASK-B-045 🔔 사후 마감** — DEF-090 Backend · PR#165 → Jaison develop 반영 (`333b904`) · code+docs task file 정리 |
+| 2026-07-04 | Dave | **TASK-B-050 🔔 완료** — DEF-094 Supabase 타입 재생성 + 담당자 정보 E2E 검증 · 코드 `e8fd413` · 회귀 388/388 · PR#170 |
 | 2026-07-04 | Jaison (Team B) | **TASK-B-045/046 신규 발령** — DEF-090 화주 등록 폼 유효성 검사 UX 결함 · 할인율 단위 불일치·폼 초기화·필드별 오류 미표시 · Dave(Backend) · Baker(Frontend) · Issue #159 |
 | 2026-07-04 | JSJung (팀 리더) | **TASK-B-043/044 R-17 위반 면제** — 초회 위반 특성 고려. 이후 Dave·Baker 작업 지시 시 재발 방지 필독 공지 ACTIVE_TASK 고정 적용 |
 | 2026-07-04 | Jaison (Team B) | **TASK-B-043/044 🔔 갱신** — 커밋 `84c103e`(Dave)/`08dc986`(Baker) 확인 · 388/388 PASS · R-17 위반 기록 후 JSJung 면제 결정 반영 |
