@@ -1,0 +1,264 @@
+# TASK-B-046: DEF-090 화주 등록 폼 Frontend 수정 — 할인율 변환·폼값 유지·필드별 오류 표시
+
+> **태스크 ID**: TASK-B-046
+> **생성일**: 2026-07-04
+> **발령자**: Jaison (Team B 총괄)
+> **담당자**: Baker (Big Pickle)
+> **우선순위**: P1
+> **상태**: ⬜
+> **관련 Issue**: [#159](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/159)
+> **관련 DEF**: DEF-090
+> **선행 Task**: TASK-B-045 (Dave) — `createAgencyShipper` 반환 타입 변경 완료 후 착수 권장 (병렬 가능하나 타입 먼저 확인 후 구현)
+> **후행 Task**: 없음
+
+---
+
+## ⚠️ 착수 전 필독 — R-17 브랜치/PR 절차
+
+1. `git fetch origin && git checkout develop && git pull origin develop`
+2. `git checkout -b feature/teamb-task-b-046-def090-frontend-baker`
+3. 완료 보고: 코드 커밋 → task file 🔔 기재 → ACTIVE_TASK 반영 → PR 생성 (`Closes #159`)
+4. **develop 직접 커밋 절대 금지 — 위반 즉시 기록됨**
+
+---
+
+## 개요
+
+UAT-15-01 Step 3 중 발견된 DEF-090 — 화주 등록 폼 유효성 검사 UX 결함.
+Baker는 3개 프론트엔드 파일을 수정하여 할인율 단위 변환, 오류 시 폼값 보존, 필드별 오류 메시지 표시를 구현한다.
+
+---
+
+## 구현 범위
+
+### §1 — `src/app/[locale]/(dashboard)/agency/shippers/new/shipper-form.tsx`
+
+**3가지 수정**:
+
+```typescript
+'use client';
+
+import { useState } from 'react';
+import { useRouter, useParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { AlertCircle } from 'lucide-react';
+import { createAgencyShipper } from '@/app/actions/agency/shippers';
+import { FormHeader } from './form-header';
+import { RequiredFields } from './required-fields';
+import { ContactFields } from './contact-fields';
+import { FormActions } from './form-actions';
+
+interface AgencyShipperFormProps {
+  agencyOrgId: string;
+}
+
+// 폼값 보존을 위한 타입
+interface FormValues {
+  name: string;
+  shipper_type: 'INDIVIDUAL' | 'CORPORATE';
+  discount_rate: string;
+  grade: string;
+  biz_no: string;
+  rep_name: string;
+  contact_name: string;
+  contact_email: string;
+  contact_phone: string;
+}
+
+export function AgencyShipperForm({ agencyOrgId }: AgencyShipperFormProps) {
+  const t = useTranslations('AgencyShippers');
+  const router = useRouter();
+  const params = useParams();
+  const locale = params.locale as string;
+  const [loading, setLoading] = useState(false);
+  const [globalError, setGlobalError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});   // 필드별 오류
+  const [savedValues, setSavedValues] = useState<Partial<FormValues>>({});       // 오류 시 값 보존
+
+  async function handleSubmit(formData: FormData) {
+    setLoading(true);
+    setGlobalError('');
+    setFieldErrors({});
+
+    // 현재 입력값 캡처 (오류 시 복원용)
+    const currentValues: Partial<FormValues> = {
+      name: formData.get('name') as string,
+      shipper_type: formData.get('shipper_type') as 'INDIVIDUAL' | 'CORPORATE',
+      discount_rate: formData.get('discount_rate') as string,
+      grade: formData.get('grade') as string,
+      biz_no: formData.get('biz_no') as string,
+      rep_name: formData.get('rep_name') as string,
+      contact_name: formData.get('contact_name') as string,
+      contact_email: formData.get('contact_email') as string,
+      contact_phone: formData.get('contact_phone') as string,
+    };
+
+    try {
+      const result = await createAgencyShipper(agencyOrgId, {
+        name: currentValues.name!,
+        shipper_type: currentValues.shipper_type!,
+        discount_rate: Number(currentValues.discount_rate) / 100,  // ① % → 소수 변환
+        grade: currentValues.grade || undefined,
+        biz_no: currentValues.biz_no || undefined,
+        rep_name: currentValues.rep_name || undefined,
+        contact_name: currentValues.contact_name || undefined,
+        contact_email: currentValues.contact_email || undefined,
+        contact_phone: currentValues.contact_phone || undefined,
+      });
+
+      if (!result.success) {
+        setSavedValues(currentValues);         // ② 오류 시 입력값 보존
+        setFieldErrors(result.fieldErrors);    // ③ 필드별 오류 표시
+        if (result.fieldErrors._form) setGlobalError(result.fieldErrors._form);
+        return;
+      }
+
+      router.push(`/${locale}/agency/shippers`);
+      router.refresh();
+    } catch (err: any) {
+      setSavedValues(currentValues);
+      setGlobalError(err.message || t('submit_error'));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="relative min-h-screen animate-in fade-in duration-500">
+      <FormHeader t={t} />
+
+      <div className="max-w-2xl mx-auto px-8">
+        {globalError && (
+          <div className="flex items-center gap-2 px-4 py-3 mb-6 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
+            <AlertCircle size={16} /> {globalError}
+          </div>
+        )}
+
+        <form action={handleSubmit} className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+          <div className="p-6 space-y-5">
+            <RequiredFields t={t} defaultValues={savedValues} fieldErrors={fieldErrors} />
+            <ContactFields t={t} defaultValues={savedValues} fieldErrors={fieldErrors} />
+          </div>
+          <FormActions loading={loading} submitLabel={t('new_shipper')} loadingLabel={t('loading')} />
+        </form>
+      </div>
+    </div>
+  );
+}
+```
+
+### §2 — `src/app/[locale]/(dashboard)/agency/shippers/new/required-fields.tsx`
+
+`defaultValues`와 `fieldErrors` props를 받아 각 input에 적용:
+
+```typescript
+'use client';
+
+import { useState } from 'react';
+
+interface RequiredFieldsProps {
+  t: (key: string) => string;
+  defaultValues?: Partial<{
+    name: string;
+    shipper_type: 'INDIVIDUAL' | 'CORPORATE';
+    discount_rate: string;
+    grade: string;
+    biz_no: string;
+    rep_name: string;
+  }>;
+  fieldErrors?: Record<string, string>;
+}
+
+export function RequiredFields({ t, defaultValues = {}, fieldErrors = {} }: RequiredFieldsProps) {
+  const [shipperType, setShipperType] = useState<'INDIVIDUAL' | 'CORPORATE'>(
+    defaultValues.shipper_type ?? 'INDIVIDUAL'
+  );
+  // ...
+  // 각 input에 defaultValue={defaultValues.xxx} 추가
+  // 각 input 아래에 fieldErrors.xxx 있으면 <p className="text-xs text-red-500 mt-1">{fieldErrors.xxx}</p> 표시
+}
+```
+
+**핵심 수정 포인트**:
+- `name` input: `defaultValue={defaultValues.name}`
+- `discount_rate` input: `defaultValue={defaultValues.discount_rate}` + 아래 오류 메시지
+- `shipper_type` select: `defaultValue`는 state 초기값으로 반영 (위의 `useState` 초기값 변경)
+- `grade` select: `defaultValue={defaultValues.grade}`
+- `biz_no` input: `defaultValue={defaultValues.biz_no}` + 아래 오류 메시지
+- `rep_name` input: `defaultValue={defaultValues.rep_name}`
+
+**오류 메시지 표시 패턴** (각 input 바로 아래):
+```tsx
+{fieldErrors.discount_rate && (
+  <p className="text-xs text-red-500 mt-1">{fieldErrors.discount_rate}</p>
+)}
+```
+
+### §3 — `src/app/[locale]/(dashboard)/agency/shippers/new/contact-fields.tsx`
+
+`defaultValues`와 `fieldErrors` props 추가:
+
+```typescript
+interface ContactFieldsProps {
+  t: (key: string) => string;
+  defaultValues?: Partial<{
+    contact_name: string;
+    contact_email: string;
+    contact_phone: string;
+  }>;
+  fieldErrors?: Record<string, string>;
+}
+```
+
+각 input에 `defaultValue={defaultValues.xxx}` 및 `fieldErrors.xxx` 오류 메시지 표시 추가.
+
+---
+
+## DoD (Definition of Done)
+
+- [ ] `shipper-form.tsx` — `discount_rate / 100` 변환 적용 (% 입력 → 소수 저장)
+- [ ] `shipper-form.tsx` — `savedValues` state: 오류 발생 시 모든 필드 입력값 보존
+- [ ] `shipper-form.tsx` — `fieldErrors` state: 서버 반환 필드별 오류 수신 및 하위 전달
+- [ ] `required-fields.tsx` — `defaultValues` props: 오류 후 필드값 복원 확인
+- [ ] `required-fields.tsx` — `fieldErrors` props: 오류 필드 하단에 빨간 메시지 표시
+- [ ] `contact-fields.tsx` — `defaultValues` + `fieldErrors` props 동일 적용
+- [ ] **동작 검증**: 할인율 `1` 입력 시 오류 → 다른 필드 값 유지 + discount_rate 필드 아래 오류 메시지 표시
+- [ ] **동작 검증**: 정상 등록 시 (`discount_rate: 5` = 5% → DB에 `0.05` 저장) 확인
+- [ ] TypeScript 빌드 오류 없음 (`npx tsc --noEmit --skipLibCheck` PASS)
+- [ ] `npm run test:regression` — 388/388 이상 PASS
+- [ ] R-17 커밋 순서 준수 (feature 브랜치 → 코드 커밋 → task file 🔔 → PR)
+- [ ] 코드 커밋 해시 기재: (TBD)
+- [ ] 문서 커밋 해시 기재: (TBD)
+- [ ] PR 생성 (`Closes #159`) 완료
+
+---
+
+## [설계 의견]
+
+_(Baker 기재)_
+
+---
+
+## [설계 확정]
+
+_Aiden / Jaison 전속_
+
+---
+
+## [작업 결과]
+
+_(Baker 작업 완료 후 기재)_
+
+---
+
+## [발견 이슈]
+
+없음
+
+---
+
+## 개정 이력
+
+| 날짜 | 작성자 | 내용 |
+|:-----|:------|:----|
+| 2026-07-04 | Jaison | TASK-B-046 신규 발령 — DEF-090 Frontend 파트 (Baker 담당) |
