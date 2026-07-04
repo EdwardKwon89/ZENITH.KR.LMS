@@ -49,7 +49,7 @@ export function ShipperTableRow(props: ShipperTableRowProps) {
         {shipper.created_at ? new Date(shipper.created_at).toLocaleDateString('ko-KR') : '-'}
       </td>
       <td className="px-4 py-3 text-right">
-        <ActionCell isEditing={isEditing} onEdit={onEdit} onCancel={onCancel} onSave={onSave} />
+        <ActionCell isEditing={isEditing} onEdit={onEdit} onCancel={onCancel} onSave={onSave} shipperId={shipper.id} />
       </td>
     </tr>
   );

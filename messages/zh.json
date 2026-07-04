@@ -233,6 +233,9 @@
     "form_contact_phone": "电话",
     "form_biz_no": "营业执照号",
     "form_rep_name": "代表人姓名",
+    "edit_title": "编辑货主信息",
+    "edit_description": "编辑货主详细信息",
+    "edit_submit": "保存",
     "submit_success": "货主已注册",
     "submit_error": "注册时发生错误",
     "loading": "加载中..."

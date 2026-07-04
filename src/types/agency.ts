@@ -15,6 +15,8 @@ export interface AgencyShipperRow extends AgencyShipper {
   shipper: { id: string; name: string; biz_no: string | null; status: string } | null;
 }
 
+export type UpdateAgencyShipperInput = CreateAgencyShipperInput;
+
 export interface CreateAgencyShipperInput {
   name: string;
   shipper_type: 'INDIVIDUAL' | 'CORPORATE';

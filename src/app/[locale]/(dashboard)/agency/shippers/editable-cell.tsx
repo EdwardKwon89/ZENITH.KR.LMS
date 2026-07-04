@@ -1,5 +1,8 @@
 'use client';
 
+import { useLocale } from 'next-intl';
+import { useRouter } from 'next/navigation';
+
 interface EditableGradeCellProps {
   isEditing: boolean;
   value: string;
@@ -8,12 +11,17 @@ interface EditableGradeCellProps {
   placeholder: string;
 }
 
+const GRADE_OPTIONS = ['', 'BRONZE', 'SILVER', 'GOLD', 'PLATINUM'];
+
 export function EditableGradeCell({ isEditing, value, onChange, displayValue, placeholder }: EditableGradeCellProps) {
   if (isEditing) {
     return (
-      <input value={value} onChange={(e) => onChange(e.target.value)}
-        className="w-24 px-2 py-1 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-        placeholder={placeholder} />
+      <select value={value} onChange={(e) => onChange(e.target.value)}
+        className="w-28 px-2 py-1 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 bg-white">
+        {GRADE_OPTIONS.map((g) => (
+          <option key={g} value={g}>{g || placeholder}</option>
+        ))}
+      </select>
     );
   }
   return <span className="text-slate-700">{displayValue || <span className="text-slate-400">{placeholder}</span>}</span>;
@@ -45,9 +53,13 @@ interface ActionCellProps {
   onEdit: () => void;
   onCancel: () => void;
   onSave: () => void;
+  shipperId: string;
 }
 
-export function ActionCell({ isEditing, onEdit, onCancel, onSave }: ActionCellProps) {
+export function ActionCell({ isEditing, onEdit, onCancel, onSave, shipperId }: ActionCellProps) {
+  const locale = useLocale();
+  const router = useRouter();
+
   if (isEditing) {
     return (
       <div className="flex items-center justify-end gap-1">
@@ -56,5 +68,11 @@ export function ActionCell({ isEditing, onEdit, onCancel, onSave }: ActionCellPr
       </div>
     );
   }
-  return <button onClick={onEdit} className="px-2 py-1 text-xs font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50">수정</button>;
+  return (
+    <div className="flex items-center justify-end gap-1">
+      <button onClick={() => router.push(`/${locale}/agency/shippers/${shipperId}/edit`)}
+        className="px-2 py-1 text-xs font-medium text-blue-600 bg-white border border-blue-200 rounded-lg hover:bg-blue-50">상세 편집</button>
+      <button onClick={onEdit} className="px-2 py-1 text-xs font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50">수정</button>
+    </div>
+  );
 }
