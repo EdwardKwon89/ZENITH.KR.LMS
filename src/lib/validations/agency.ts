@@ -27,6 +27,28 @@ export const UpdateAgencyShipperGradeSchema = z.object({
   discount_rate: z.number().min(0).max(0.9999),
 });
 
+export const UpdateAgencyShipperSchema = z.object({
+  name: z.string().min(1, '화주명을 입력해주세요.').max(100, '화주명은 100자 이하여야 합니다.'),
+  shipper_type: z.enum(['INDIVIDUAL', 'CORPORATE'], { message: '화주 유형을 선택해주세요.' }),
+  discount_rate: z.number({ message: '할인율을 입력해주세요.' })
+    .min(0, '할인율은 0 이상이어야 합니다.')
+    .max(0.9999, '할인율은 99.99% 이하여야 합니다.'),
+  grade: z.string().max(20).optional(),
+  contact_name: z.string().optional(),
+  contact_email: z.string().email('유효한 이메일 형식이 아닙니다.').optional().or(z.literal('')),
+  contact_phone: z.string().optional(),
+  biz_no: z.string().optional(),
+  rep_name: z.string().optional(),
+}).superRefine((data, ctx) => {
+  if (data.shipper_type === 'CORPORATE' && !data.biz_no) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['biz_no'],
+      message: '법인 화주는 사업자번호를 필수로 입력해야 합니다.',
+    });
+  }
+});
+
 export const CreateAgencyRateOverrideSchema = z.object({
   base_rate_id: z.string().uuid(),
   selling_price: z.number().min(0),

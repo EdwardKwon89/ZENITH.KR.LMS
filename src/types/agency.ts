@@ -27,6 +27,8 @@ export interface CreateAgencyShipperInput {
   rep_name?: string;
 }
 
+export type UpdateAgencyShipperInput = CreateAgencyShipperInput;
+
 export interface AgencyRateOverride {
   id: string;
   agency_org_id: string;
