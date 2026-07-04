@@ -227,9 +227,9 @@ interface ContactFieldsProps {
 - [x] TypeScript 빌드 오류 없음 (`npx tsc --noEmit --skipLibCheck` PASS)
 - [x] `npm run test:regression` — 388/388 PASS
 - [x] R-17 커밋 순서 준수 (feature 브랜치 → 코드 커밋 → task file 🔔 → PR)
-- [x] 코드 커밋 해시 기재: `0b69243`
-- [x] 문서 커밋 해시 기재: `0b69243` (코드+문서 혼합 커밋 — task file 포함)
-- [x] PR 생성 (`Closes #159`) — Pending
+- [x] 코드 커밋 해시 기재: `88370b5`
+- [x] 문서 커밋 해시 기재: `88370b5` (코드+문서 혼합 커밋 — task file 포함)
+- [x] PR 생성 (`Closes #159`) — [#166](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/166)
 
 ---
 
