@@ -63,7 +63,8 @@
     "rates": "運賃料率",
     "rate_cards_management": "料率カード管理",
     "corporate_mgmt": "法人管理",
-    "member_management": "会員管理"
+    "member_management": "会員管理",
+    "agency_rate_overrides_nav": "レート上書き"
   },
   "Orders": {
     "ups_invoice": {
