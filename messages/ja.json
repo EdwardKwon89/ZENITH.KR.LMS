@@ -181,6 +181,10 @@
       "transit_arrived_dest": "目的地に到着"
     }
   },
+  "AgencyShippers": {
+    "form_biz_no": "法人番号",
+    "form_rep_name": "代表者名"
+  },
   "agency_settlement_widget_title": "今月の精算状況",
   "agency_settlement_orders": "オーダ数",
   "agency_settlement_revenue": "売上",

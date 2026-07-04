@@ -31,6 +31,8 @@ export function AgencyShipperForm({ agencyOrgId }: AgencyShipperFormProps) {
         shipper_type: formData.get('shipper_type') as 'INDIVIDUAL' | 'CORPORATE',
         discount_rate: Number(formData.get('discount_rate')),
         grade: (formData.get('grade') as string) || undefined,
+        biz_no: (formData.get('biz_no') as string) || undefined,
+        rep_name: (formData.get('rep_name') as string) || undefined,
         contact_name: (formData.get('contact_name') as string) || undefined,
         contact_email: (formData.get('contact_email') as string) || undefined,
         contact_phone: (formData.get('contact_phone') as string) || undefined,

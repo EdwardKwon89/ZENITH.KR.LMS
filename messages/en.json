@@ -675,6 +675,8 @@
     "form_contact_name": "Contact Name",
     "form_contact_email": "Email",
     "form_contact_phone": "Phone",
+    "form_biz_no": "Business Registration No.",
+    "form_rep_name": "Representative Name",
     "submit_success": "Shipper registered successfully",
     "submit_error": "An error occurred while registering",
     "loading": "Loading..."

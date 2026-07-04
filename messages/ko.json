@@ -670,6 +670,8 @@
     "form_contact_name": "담당자명",
     "form_contact_email": "이메일",
     "form_contact_phone": "연락처",
+    "form_biz_no": "사업자번호",
+    "form_rep_name": "대표자명",
     "submit_success": "화주가 등록되었습니다",
     "submit_error": "등록 중 오류가 발생했습니다",
     "loading": "로딩 중..."

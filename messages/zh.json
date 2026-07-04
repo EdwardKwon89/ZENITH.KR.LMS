@@ -199,6 +199,10 @@
       "transit_arrived_dest": "到达目的地"
     }
   },
+  "AgencyShippers": {
+    "form_biz_no": "营业执照号",
+    "form_rep_name": "代表人姓名"
+  },
   "agency_settlement_widget_title": "本月结算概况",
   "agency_settlement_orders": "订单数",
   "agency_settlement_revenue": "收入",
