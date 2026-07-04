@@ -156,10 +156,13 @@ export default function NaviSidebar({
     { title: t("orders_assigned"), href: "/orders/assigned", icon: ClipboardList },
     { title: t("admin_error_logs"), href: "/admin/error-logs", icon: ShieldAlert, isAdminOnly: true },
     { title: t("permissions"), href: "/admin/permissions", icon: LockKeyhole, isAdminOnly: true },
-    { title: t("agency_management"), href: "/agency", icon: BuildingOffice2Icon },
-    { title: t("agency_shippers_nav"), href: "/agency/shippers", icon: Users },
-    { title: t("agency_rate_overrides_nav"), href: "/agency/rate-overrides", icon: TrendingUp },
-    { title: t("agency_settlements_nav"), href: "/agency/settlements", icon: Calculator },
+    { title: t("agency_management"), href: "/agency", icon: BuildingOffice2Icon,
+      children: [
+        { title: t("agency_shippers_nav"), href: "/agency/shippers" },
+        { title: t("agency_rate_overrides_nav"), href: "/agency/rate-overrides" },
+        { title: t("agency_settlements_nav"), href: "/agency/settlements" },
+      ]
+    },
     {
       title: t("mypage"),
       href: "/mypage",

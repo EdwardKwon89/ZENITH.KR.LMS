@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { updateAgencyShipperGrade } from '@/app/actions/agency/shippers';
 import type { AgencyShipperRow } from '@/types/agency';
 import { ShippersHeader } from './shippers-header';
@@ -8,10 +9,10 @@ import { ShipperTable } from './shipper-table';
 
 interface AgencyShippersClientProps {
   shippers: AgencyShipperRow[];
-  t: (key: string) => string;
 }
 
-export function AgencyShippersClient({ shippers, t }: AgencyShippersClientProps) {
+export function AgencyShippersClient({ shippers }: AgencyShippersClientProps) {
+  const t = useTranslations('AgencyShippers');
   const [localShippers, setLocalShippers] = useState<AgencyShipperRow[]>(shippers);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editGrade, setEditGrade] = useState('');
