@@ -117,13 +117,13 @@ zen_organizations 컬럼: contact_name, contact_email, contact_phone — 존재 
 ### 종합
 - **회귀**: 388/388 PASS
 - **TypeScript**: PASS (pre-existing only)
-- **커밋**: _(TBD)_
+- **커밋**: `e8fd413`
 
 ---
 
 ## [발견 이슈]
 
-_(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
+없음
 
 ---
 
