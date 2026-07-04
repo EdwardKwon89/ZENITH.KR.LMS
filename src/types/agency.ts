@@ -12,7 +12,7 @@ export interface AgencyShipper {
 }
 
 export interface AgencyShipperRow extends AgencyShipper {
-  shipper: { id: string; name: string; biz_no: string | null; status: string }[] | null;
+  shipper: { id: string; name: string; biz_no: string | null; status: string } | null;
 }
 
 export interface CreateAgencyShipperInput {

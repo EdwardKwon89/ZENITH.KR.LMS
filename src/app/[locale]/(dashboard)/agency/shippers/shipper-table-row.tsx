@@ -27,7 +27,7 @@ export function ShipperTableRow(props: ShipperTableRowProps) {
 
   return (
     <tr className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
-      <td className="px-4 py-3 font-medium text-slate-900">{shipper.shipper?.[0]?.name || '-'}</td>
+      <td className="px-4 py-3 font-medium text-slate-900">{shipper.shipper?.name || '-'}</td>
       <td className="px-4 py-3">
         <span className={cn("px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider", TYPE_BADGE[shipper.shipper_type] || 'bg-slate-100 text-slate-600')}>
           {t(`type_${shipper.shipper_type}`)}

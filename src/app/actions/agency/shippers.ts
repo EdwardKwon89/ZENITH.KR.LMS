@@ -5,7 +5,7 @@ import { validateUserAction, checkPermission } from '@/lib/auth/guards';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { createAdminClient } from '@/utils/supabase/server';
 import { CreateAgencyShipperSchema, UpdateAgencyShipperGradeSchema } from '@/lib/validations/agency';
-import type { CreateAgencyShipperInput } from '@/types/agency';
+import type { CreateAgencyShipperInput, AgencyShipperRow } from '@/types/agency';
 import { revalidatePath } from 'next/cache';
 
 async function _createShipperOrg(
@@ -78,7 +78,7 @@ export async function getAgencyShippers(agencyOrgId: string) {
     throw new Error(`Failed to fetch agency shippers: ${error.message}`);
   }
 
-  return { shippers: data || [] };
+  return { shippers: (data || []) as unknown as AgencyShipperRow[] };
 }
 
 export type CreateAgencyShipperResult =
@@ -97,7 +97,7 @@ export async function createAgencyShipper(
   const parsed = CreateAgencyShipperSchema.safeParse(shipperData);
   if (!parsed.success) {
     const fieldErrors: Record<string, string> = {};
-    parsed.error.errors.forEach((e) => {
+    parsed.error.issues.forEach((e) => {
       const field = String(e.path[0] ?? '_form');
       if (!fieldErrors[field]) fieldErrors[field] = e.message;
     });
