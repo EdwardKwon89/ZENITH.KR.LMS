@@ -11,6 +11,18 @@ interface ContactFieldsProps {
 }
 
 export function ContactFields({ t, defaultValues = {}, fieldErrors = {} }: ContactFieldsProps) {
+  function formatPhone(value: string): string {
+    const digits = value.replace(/\D/g, '').slice(0, 11);
+    if (digits.length <= 3) return digits;
+    if (digits.startsWith('02')) {
+      if (digits.length <= 6) return `${digits.slice(0, 2)}-${digits.slice(2)}`;
+      return `${digits.slice(0, 2)}-${digits.slice(2, 6)}-${digits.slice(6)}`;
+    }
+    if (digits.length <= 6) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+    if (digits.length <= 10) return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`;
+    return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`;
+  }
+
   return (
     <div className="border-t border-slate-100 pt-5">
       <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">선택 입력</p>
@@ -28,7 +40,7 @@ export function ContactFields({ t, defaultValues = {}, fieldErrors = {} }: Conta
       </div>
       <div className="mt-4">
         <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">{t('form_contact_phone')}</label>
-        <input name="contact_phone" defaultValue={defaultValues.contact_phone} className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
+        <input name="contact_phone" defaultValue={defaultValues.contact_phone} onChange={(e) => { e.target.value = formatPhone(e.target.value); }} maxLength={13} className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
         {fieldErrors.contact_phone && <p className="text-xs text-red-500 mt-1">{fieldErrors.contact_phone}</p>}
       </div>
     </div>

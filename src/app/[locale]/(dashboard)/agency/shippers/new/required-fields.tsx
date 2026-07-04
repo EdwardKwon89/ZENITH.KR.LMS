@@ -20,6 +20,13 @@ export function RequiredFields({ t, defaultValues = {}, fieldErrors = {} }: Requ
     defaultValues.shipper_type ?? 'INDIVIDUAL'
   );
 
+  function formatBizNo(value: string): string {
+    const digits = value.replace(/\D/g, '').slice(0, 10);
+    if (digits.length <= 3) return digits;
+    if (digits.length <= 5) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+    return `${digits.slice(0, 3)}-${digits.slice(3, 5)}-${digits.slice(5)}`;
+  }
+
   return (
     <>
       <div>
@@ -76,6 +83,8 @@ export function RequiredFields({ t, defaultValues = {}, fieldErrors = {} }: Requ
               required
               placeholder="000-00-00000"
               defaultValue={defaultValues.biz_no}
+              onChange={(e) => { e.target.value = formatBizNo(e.target.value); }}
+              maxLength={12}
               className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
             />
             {fieldErrors.biz_no && <p className="text-xs text-red-500 mt-1">{fieldErrors.biz_no}</p>}
