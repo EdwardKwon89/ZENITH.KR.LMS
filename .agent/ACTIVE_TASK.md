@@ -279,10 +279,14 @@
 | TASK-B-040 | 260630 | [Phase 8] TASK-B-033 §5 UAT-17-01·17-02 DIRECT·PICKUP 실행 | P1 | TASK-B-038 ✅ | Baker (구현) | ✅ | [TASK-B-040](tasks/TASK-B-040_260630_B033-S5-UAT1701-02실행_Baker.md) | Issue #135 · PR#153 ✅ 머지 (squash `d091f09`) · UAT-17-01/02 spec 2/2 PASS · 회귀 387/387 · 승인 260630 |
 | TASK-B-041 | 260630 | TASK-B-033 §3 DoD 소급 갱신 + UAT-19 재실행 spec 보완 | P2 | 없음 | Dave (구현) | ✅ | [TASK-B-041](tasks/TASK-B-041_260630_B033-S3DoD갱신+UAT19Spec보완_Dave.md) | Issue #135 · PR#151 ✅ 머지 (squash `00053db`) · §A DoD [x]·§B test.skip+실검증주석 · 회귀 387/387 · 승인 260630 |
 | TASK-B-042 | 260630 | UAT-19 재실행 — DEF-086/087 해소 후 인보이스 PDF 검증 | P1 | TASK-169 ✅ · TASK-170 ✅ | Baker (구현) | ✅ | [TASK-B-042](tasks/TASK-B-042_260630_UAT19재실행_Baker.md) | Issue #157 · PR#158 ✅ squash 머지 (`260701 Aiden`) · UAT-19 E2E 2/2 · 회귀 387/387 · Aiden ✅ 승인 260701 |
-| TASK-B-043 | 260704 | DEF-089 법인 화주 등록 백엔드 수정 (types·validation·action) | P1 | 없음 | Dave (구현) | 🔔 | [TASK-B-043](tasks/TASK-B-043_260704_DEF089_법인화주_백엔드수정_Dave.md) | Issue #159 · DEF-089 · 커밋 `84c103e` · 388/388 PASS · ⚠️ develop 직접 커밋(R-17 위반) · task file 미업데이트(Jaison 대행) · PR 미생성 |
-| TASK-B-044 | 260704 | DEF-089 법인 화주 등록 프론트엔드 수정 (required-fields·shipper-form·i18n) | P1 | 없음 | Baker (구현) | 🔔 | [TASK-B-044](tasks/TASK-B-044_260704_DEF089_법인화주_프론트엔드수정_Baker.md) | Issue #159 · DEF-089 · 커밋 `08dc986` · 388/388 PASS · ⚠️ develop 직접 커밋(R-17 위반) · task file 상태 ⬜ 미전환(Jaison 대행) · PR 미생성 |
-| TASK-B-045 | 260704 | DEF-090 화주 등록 폼 Backend — fieldErrors 반환 + Zod 오류 메시지 한글화 | P1 | 없음 | Dave (구현) | 🔔 | [TASK-B-045](tasks/TASK-B-045_260704_DEF090_화주등록폼_백엔드수정_Dave.md) | Issue #159 · DEF-090 · PR#165 → Jaison develop 직접 반영 (`333b904`) · 388/388 · 후행 TASK-B-046 Baker |
-| TASK-B-046 | 260704 | DEF-090 화주 등록 폼 Frontend — 할인율 변환·폼값 유지·필드별 오류 표시 | P1 | TASK-B-045 착수 후 권장 | Baker (구현) | ⬜ | [TASK-B-046](tasks/TASK-B-046_260704_DEF090_화주등록폼_프론트엔드수정_Baker.md) | Issue #159 · DEF-090 · TASK-B-045(Dave) 반환 타입 확인 후 착수 |
+| TASK-B-043 | 260704 | DEF-089 법인 화주 등록 백엔드 수정 (types·validation·action) | P1 | 없음 | Dave (구현) | ✅ | [TASK-B-043](tasks/TASK-B-043_260704_DEF089_법인화주_백엔드수정_Dave.md) | Issue #159 · DEF-089 · 커밋 `84c103e` · 388/388 PASS · ⚠️ develop 직접 커밋(R-17 위반) · JSJung 초회 면제 · Aiden ✅ 260704 |
+| TASK-B-044 | 260704 | DEF-089 법인 화주 등록 프론트엔드 수정 (required-fields·shipper-form·i18n) | P1 | 없음 | Baker (구현) | ✅ | [TASK-B-044](tasks/TASK-B-044_260704_DEF089_법인화주_프론트엔드수정_Baker.md) | Issue #159 · DEF-089 · 커밋 `08dc986` · 388/388 PASS · ⚠️ develop 직접 커밋(R-17 위반) · JSJung 초회 면제 · Aiden ✅ 260704 |
+| TASK-B-045 | 260704 | DEF-090 화주 등록 폼 Backend — fieldErrors 반환 + Zod 오류 메시지 한글화 | P1 | 없음 | Dave (구현) | ✅ | [TASK-B-045](tasks/TASK-B-045_260704_DEF090_화주등록폼_백엔드수정_Dave.md) | Issue #159 · DEF-090 · PR#173 ✅ 머지 (`333b904`) · 388/388 · Aiden ✅ 머지승인 260704 |
+| TASK-B-046 | 260704 | DEF-090 화주 등록 폼 Frontend — 할인율 변환·폼값 유지·필드별 오류 표시 | P1 | TASK-B-045 ✅ | Baker (구현) | ✅ | [TASK-B-046](tasks/TASK-B-046_260704_DEF090_화주등록폼_프론트엔드수정_Baker.md) | Issue #159 · DEF-090 · PR#174 ✅ 머지 (`88370b5`) · 388/388 · Aiden ✅ 머지승인 260704 |
+| TASK-B-047 | 260704 | DEF-091 화주 상세 정보 Backend — contact 컬럼 마이그레이션 + Server Actions | P1 | 없음 | Dave (구현) | ✅ | [TASK-B-047](tasks/TASK-B-047_260704_DEF091_화주상세정보_Backend_Dave.md) | Issue #159 · DEF-091 · PR#167 ✅ 머지 (`df83d89`) · 388/388 · Aiden ✅ 머지승인 260704 |
+| TASK-B-048 | 260704 | DEF-091 화주 상세 정보 Frontend — 등급 드롭다운·상세 편집 버튼·편집 페이지 | P1 | TASK-B-047 ✅ | Baker (구현) | ✅ | [TASK-B-048](tasks/TASK-B-048_260704_DEF091_화주상세정보_Frontend_Baker.md) | Issue #159 · DEF-091 · PR#168 ✅ 머지 (`8d5b497`) · 388/388 · Aiden ✅ 머지승인 260704 |
+| TASK-B-049 | 260704 | DEF-093 화주 목록 인라인 편집 제거 + 테이블 정리 | P1 | 없음 | Baker (구현) | ✅ | [TASK-B-049](tasks/TASK-B-049_260704_DEF093_화주목록인라인편집제거_Baker.md) | Issue #171 · DEF-093 · PR#169 ✅ 머지 (`425bff1`) · 388/388 · Aiden ✅ 머지승인 260704 |
+| TASK-B-050 | 260704 | DEF-094 Supabase 타입 재생성 + 담당자 정보 E2E 검증 | P1 | 없음 | Dave (구현) | ✅ | [TASK-B-050](tasks/TASK-B-050_260704_DEF094_Supabase타입재생성_담당자정보검증_Dave.md) | Issue #159 · DEF-094 · PR#170 ✅ 머지 (`e8fd413`) · 388/388 · Aiden ✅ 머지승인 260704 |
 | TASK-169 | 260630 | DEF-086/087 인보이스 PDF — DB 마이그레이션 + Server Action | P2 | 없음 | D_Kai (구현) | ✅ | [TASK-169](tasks/TASK-169_260630_DEF086087_InvoicePDF_DB+SA_DKai.md) | Issue #152 · PR#154 ✅ 머지 (`51eba6c`) · zen_invoice_files 마이그레이션+SA 완료 · DEF-086 해소 |
 | TASK-170 | 260630 | DEF-086/087 인보이스 PDF — 오더 상세 UI 버튼 구현 | P2 | TASK-169 ✅ | B_Kai (구현) | ✅ | [TASK-170](tasks/TASK-170_260630_DEF086087_InvoicePDF_UI버튼_BKai.md) | Issue #152 · PR#155 ✅ 머지 (`ad9d1d1` develop 반영 확인) · DoD 13/13 · Aiden ✅ 260701 |
 ---
@@ -315,14 +319,15 @@
 |:------|:----:|:----|
 | **JSJung** (팀 리더) | ✅ TASK-B-030 승인 완료 (260628) · ✅ TASK-B-033 승인 완료 (260701) | §1§2 확인 완료 · DEF-088 교정 완료 · PR#156 squash 머지 (e2bf48b) |
 | **Jaison** (AI Agent 총괄) | ✅ TASK-B-033 완료 보고 승인 (260701) | §1 .env.local 확인 · §2 zen_agency_rate_overrides 확인 · DEF-088 컬럼명 교정 · PR#156 머지 완료 |
-| **Dave** (AI Agent) | 🔔 **TASK-B-045** · 🔔 **TASK-B-047** · 🔔 **TASK-B-050** | DEF-090 Backend ✅ (Jaison develop 반영 `333b904`) · DEF-091 Backend ✅ (PR#167) · DEF-094 타입 재생성 ✅ (PR#170) |
-| **Baker** (AI Agent) | ⬜ **TASK-B-046** 착수 대기 (260704 발령) | DEF-090 Frontend — 할인율 변환·폼값 유지·필드별 오류 표시 |
+| **Dave** (AI Agent) | ✅ TASK-B-045/047/050 승인 완료 (260704) | DEF-090 Backend · DEF-091 Backend · DEF-094 타입 재생성 — PR#173/167/170 ✅ 머지 |
+| **Baker** (AI Agent) | ✅ TASK-B-046/048/049 승인 완료 (260704) | DEF-090 Frontend · DEF-091 Frontend · DEF-093 인라인 편집 제거 — PR#174/168/169 ✅ 머지 |
 | **Gale** (AI Agent) | 대기 | 추후 재배정 예정 |
 
 ---
 
 ## 개정 이력
 
+| 2026-07-04 | Aiden | **TASK-B-043/044/045/046/047/048/049/050 ✅ 머지 승인** — PR#173/174/167/168/169/170 전량 develop 머지 완료 · ACTIVE_TASK ✅ 갱신 |
 | 2026-07-04 | Dave | **TASK-B-045 🔔 사후 마감** — DEF-090 Backend · PR#165 → Jaison develop 반영 (`333b904`) · code+docs task file 정리 |
 | 2026-07-04 | Dave | **TASK-B-050 🔔 완료** — DEF-094 Supabase 타입 재생성 + 담당자 정보 E2E 검증 · 코드 `e8fd413` · 회귀 388/388 · PR#170 |
 | 2026-07-04 | Jaison (Team B) | **TASK-B-045/046 신규 발령** — DEF-090 화주 등록 폼 유효성 검사 UX 결함 · 할인율 단위 불일치·폼 초기화·필드별 오류 미표시 · Dave(Backend) · Baker(Frontend) · Issue #159 |
