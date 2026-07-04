@@ -99,13 +99,13 @@
 | 2 | /ko/agency/shippers/[id]/edit | 등급을 `GOLD`로 변경 후 [저장] 클릭 | 등급: `GOLD` | "화주 정보가 수정되었습니다." 메시지 표시 및 목록 페이지로 리다이렉트 | ☐ |
 | 3 | /ko/agency/shippers | 등급 변경 결과 목록 확인 | — | `UAT Agency Shipper` 행의 등급이 `GOLD`로 표시됨 | ☐ |
 | 4 | /ko/agency/shippers/[id]/edit | 연락처 수정 확인: [상세 편집] 재진입 후 연락처 변경 | 연락처: `02-9876-5432` (서울 지역번호 포매터 확인) | 자동 하이픈 포매팅 동작: `02-9876-5432` 형태로 실시간 변환됨. [저장] 후 목록 연락처 컬럼에 변경값 반영됨 | ☐ |
-| 5 | Supabase Studio | `SELECT shipper_grade FROM zen_agency_shippers WHERE shipper_org_id = '[화주ID]'` | — | `shipper_grade` 컬럼이 `'GOLD'`로 변경되었음을 확인 | ☐ |
+| 5 | Supabase Studio | `SELECT grade FROM zen_agency_shippers WHERE shipper_org_id = '[화주ID]'` | — | `grade` 컬럼이 `'GOLD'`로 변경되었음을 확인 | ☐ |
 
 ### 합격 기준
 - [ ] 전 단계 ☑ 완료
 - [ ] 목록 화면에 [상세 편집] 버튼이 표시되며 정상 진입됨 (인라인 수정 버튼 없음)
 - [ ] 상세 편집 폼에 기존 값 pre-fill됨
-- [ ] 등급 수정 사항이 `zen_agency_shippers.shipper_grade`에 정상 반영됨
+- [ ] 등급 수정 사항이 `zen_agency_shippers.grade`에 정상 반영됨
 - [ ] 서울 지역번호(`02-`) 연락처 포매팅 동작 (`02-XXXX-XXXX`)
 - [ ] 500 에러 없음
 
