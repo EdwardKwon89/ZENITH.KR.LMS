@@ -8,9 +8,9 @@ export const CreateAgencyShipperSchema = z.object({
     .max(0.9999, '할인율은 99.99% 이하여야 합니다.'),
   grade: z.string().max(20).optional(),
   contact_name: z.string().optional(),
-  contact_email: z.string().email('유효한 이메일 형식이 아닙니다.').optional(),
-  contact_phone: z.string().optional(),
-  biz_no: z.string().optional(),
+  contact_email: z.string().email('유효한 이메일 형식이 아닙니다.').optional().or(z.literal('')),
+  contact_phone: z.string().regex(/^0\d{1,2}-\d{3,4}-\d{4}$/, '연락처 형식이 올바르지 않습니다. (예: 010-1234-5678)').optional().or(z.literal('')),
+  biz_no: z.string().regex(/^\d{3}-\d{2}-\d{5}$/, '사업자번호 형식이 올바르지 않습니다. (예: 123-45-67890)').optional().or(z.literal('')),
   rep_name: z.string().optional(),
 }).superRefine((data, ctx) => {
   if (data.shipper_type === 'CORPORATE' && !data.biz_no) {
@@ -36,8 +36,8 @@ export const UpdateAgencyShipperSchema = z.object({
   grade: z.string().max(20).optional(),
   contact_name: z.string().optional(),
   contact_email: z.string().email('유효한 이메일 형식이 아닙니다.').optional().or(z.literal('')),
-  contact_phone: z.string().optional(),
-  biz_no: z.string().optional(),
+  contact_phone: z.string().regex(/^0\d{1,2}-\d{3,4}-\d{4}$/, '연락처 형식이 올바르지 않습니다. (예: 010-1234-5678)').optional().or(z.literal('')),
+  biz_no: z.string().regex(/^\d{3}-\d{2}-\d{5}$/, '사업자번호 형식이 올바르지 않습니다. (예: 123-45-67890)').optional().or(z.literal('')),
   rep_name: z.string().optional(),
 }).superRefine((data, ctx) => {
   if (data.shipper_type === 'CORPORATE' && !data.biz_no) {

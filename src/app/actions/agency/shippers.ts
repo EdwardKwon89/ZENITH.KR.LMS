@@ -79,7 +79,10 @@ export async function getAgencyShippers(agencyOrgId: string) {
         id,
         name,
         biz_no,
-        status
+        status,
+        contact_name,
+        contact_email,
+        contact_phone
       )
     `)
     .eq('agency_org_id', agencyOrgId)
