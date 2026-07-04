@@ -23,8 +23,8 @@ export function ShipperTable({ shippers, t }: ShipperTableProps) {
       <table className="w-full min-w-[720px]">
         <thead>
           <tr className="bg-slate-50 border-b border-slate-200">
-            {['name', 'type', 'grade', 'discount_rate', 'status', 'created_at', 'actions'].map((col) => (
-              <th key={col} className="px-4 py-3 text-left text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+            {['name', 'type', 'grade', 'discount_rate', 'contact_name', 'contact_email', 'contact_phone', 'status', 'created_at', 'actions'].map((col) => (
+              <th key={col} className="px-4 py-3 text-center text-[10px] font-bold text-slate-500 uppercase tracking-widest">
                 {t(`col_${col}`)}
               </th>
             ))}

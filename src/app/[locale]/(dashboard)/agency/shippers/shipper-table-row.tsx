@@ -29,6 +29,15 @@ export function ShipperTableRow({ shipper, t }: ShipperTableRowProps) {
       <td className="px-4 py-3">
         <EditableRateCell displayRate={shipper.discount_rate} />
       </td>
+      <td className="px-4 py-3 text-center text-slate-600 text-xs">
+        {shipper.shipper?.contact_name || '-'}
+      </td>
+      <td className="px-4 py-3 text-center text-slate-600 text-xs">
+        {shipper.shipper?.contact_email || '-'}
+      </td>
+      <td className="px-4 py-3 text-center text-slate-600 text-xs">
+        {shipper.shipper?.contact_phone || '-'}
+      </td>
       <td className="px-4 py-3">
         <span className={cn("px-2.5 py-1 rounded-full text-[10px] font-bold border",
           shipper.is_active ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : 'bg-slate-100 text-slate-500 border-slate-200')}>

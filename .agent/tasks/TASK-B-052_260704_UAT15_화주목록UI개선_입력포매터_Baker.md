@@ -5,8 +5,8 @@
 > **발령자**: Jaison (Team B 총괄)
 > **담당자**: Baker (Big Pickle)
 > **우선순위**: P1
-> **상태**: ⬜
-> **선행 Task**: TASK-B-051 (Dave — 쿼리/타입 수정) 완료 후 착수
+> **상태**: 🔔
+> **선행 Task**: TASK-B-051 (Dave) ✅ — PR#175 머지 완료
 > **후행 Task**: 없음
 
 ---
@@ -155,16 +155,16 @@ input:
 
 ## DoD (Definition of Done)
 
-- [ ] `shipper-table.tsx`: `contact_name`·`contact_email`·`contact_phone` 컬럼 헤더 추가
-- [ ] `shipper-table.tsx`: 전체 `<th>` `text-center` 정렬 적용
-- [ ] `shipper-table-row.tsx`: contact 3개 `<td>` 추가, `text-center` 정렬
-- [ ] `required-fields.tsx`: `biz_no` 자동 하이픈 포매터 (`XXX-XX-XXXXX`)
-- [ ] `contact-fields.tsx`: `contact_phone` 자동 하이픈 포매터 (`0XX-XXXX-XXXX`)
-- [ ] i18n 4개국어 `col_contact_name`·`col_contact_email`·`col_contact_phone` 키 추가
-- [ ] TypeScript 빌드 오류 없음 (`npx tsc --noEmit --skipLibCheck` PASS)
-- [ ] `npm run test:regression` — **전체 PASS**
-- [ ] 코드 커밋 해시 기재: _(작업 완료 후 기재)_
-- [ ] PR 생성 (`feature/teamb-task-b-052-... → develop`) 완료
+- [x] `shipper-table.tsx`: `contact_name`·`contact_email`·`contact_phone` 컬럼 헤더 추가
+- [x] `shipper-table.tsx`: 전체 `<th>` `text-center` 정렬 적용
+- [x] `shipper-table-row.tsx`: contact 3개 `<td>` 추가, `text-center` 정렬
+- [x] `required-fields.tsx`: `biz_no` 자동 하이픈 포매터 (`XXX-XX-XXXXX`)
+- [x] `contact-fields.tsx`: `contact_phone` 자동 하이픈 포매터 (`0XX-XXXX-XXXX`)
+- [x] i18n 4개국어 `col_contact_name`·`col_contact_email`·`col_contact_phone` 키 추가
+- [x] TypeScript 빌드 오류 없음 (`npm run test:regression` 전체 PASS)
+- [x] `npm run test:regression` — **388/388 PASS**
+- [x] 코드 커밋 해시: `12283ec`
+- [x] PR 생성: PR#176
 
 ---
 
@@ -182,7 +182,13 @@ _Jaison 전속_
 
 ## [작업 결과]
 
-_(Baker 작업 완료 후 기재)_
+2026-07-04 Baker 구현 완료
+
+- **코드 커밋**: `12283ec`
+- **브랜치**: `feature/teamb-task-b-052-uat15-frontend-baker`
+- **변경 파일**: 8 files, +45/-3 lines
+- **회귀**: 388/388 PASS
+- **선행 Task**: TASK-B-051 (Dave) PR#175 머지 완료 — contact 타입/쿼리 선행
 
 ---
 
