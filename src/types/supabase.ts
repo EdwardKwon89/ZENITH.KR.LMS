@@ -1726,6 +1726,44 @@ export type Database = {
           },
         ]
       }
+      zen_invoice_files: {
+        Row: {
+          content_type: string
+          created_at: string
+          file_name: string
+          file_size: number | null
+          file_url: string
+          id: string
+          invoice_id: string
+        }
+        Insert: {
+          content_type?: string
+          created_at?: string
+          file_name: string
+          file_size?: number | null
+          file_url: string
+          id?: string
+          invoice_id: string
+        }
+        Update: {
+          content_type?: string
+          created_at?: string
+          file_name?: string
+          file_size?: number | null
+          file_url?: string
+          id?: string
+          invoice_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "zen_invoice_files_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "zen_invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       zen_invoice_history: {
         Row: {
           changed_by: string
@@ -2818,6 +2856,9 @@ export type Database = {
           approval_comment: string | null
           approval_date: string | null
           biz_no: string | null
+          contact_email: string | null
+          contact_name: string | null
+          contact_phone: string | null
           corporate_id: string | null
           created_at: string | null
           iata_code: string | null
@@ -2835,6 +2876,9 @@ export type Database = {
           approval_comment?: string | null
           approval_date?: string | null
           biz_no?: string | null
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
           corporate_id?: string | null
           created_at?: string | null
           iata_code?: string | null
@@ -2852,6 +2896,9 @@ export type Database = {
           approval_comment?: string | null
           approval_date?: string | null
           biz_no?: string | null
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
           corporate_id?: string | null
           created_at?: string | null
           iata_code?: string | null
@@ -4168,6 +4215,7 @@ export type Database = {
           label_format: string
           order_id: string
           package_id: string
+          reference_no: string
           storage_path: string
           tracking_number: string
           voided_at: string | null
@@ -4182,6 +4230,7 @@ export type Database = {
           label_format: string
           order_id: string
           package_id: string
+          reference_no: string
           storage_path: string
           tracking_number: string
           voided_at?: string | null
@@ -4196,6 +4245,7 @@ export type Database = {
           label_format?: string
           order_id?: string
           package_id?: string
+          reference_no?: string
           storage_path?: string
           tracking_number?: string
           voided_at?: string | null
@@ -4353,7 +4403,15 @@ export type Database = {
           product_code?: string
           shxk_code?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "zen_ups_shxk_country_map_product_code_fkey"
+            columns: ["product_code"]
+            isOneToOne: false
+            referencedRelation: "zen_ups_products"
+            referencedColumns: ["product_code"]
+          },
+        ]
       }
       zen_ups_tracking_events: {
         Row: {
