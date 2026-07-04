@@ -272,7 +272,7 @@ export interface UpdateAgencyShipperInput {
 - [x] `npm run test:regression` — **388/388 PASS**
 - [x] R-17 커밋 순서 준수 (feature 브랜치 → 코드 커밋 → task file 🔔 → PR)
 - [x] 코드 커밋 해시 기재: `d8efa7f`
-- [ ] 문서 커밋 해시 기재: (TBD)
+- [x] 문서 커밋 해시 기재: `4a25fa1`
 - [ ] PR 생성 (`Closes #159`) 완료
 
 ---
