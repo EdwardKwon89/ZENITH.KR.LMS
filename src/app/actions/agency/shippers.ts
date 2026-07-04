@@ -4,8 +4,8 @@ import { logger } from '@/lib/logger';
 import { validateUserAction, checkPermission } from '@/lib/auth/guards';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { createAdminClient } from '@/utils/supabase/server';
-import { CreateAgencyShipperSchema, UpdateAgencyShipperGradeSchema } from '@/lib/validations/agency';
-import type { CreateAgencyShipperInput, AgencyShipperRow } from '@/types/agency';
+import { CreateAgencyShipperSchema, UpdateAgencyShipperGradeSchema, UpdateAgencyShipperSchema } from '@/lib/validations/agency';
+import type { CreateAgencyShipperInput, UpdateAgencyShipperInput, AgencyShipperRow } from '@/types/agency';
 import { revalidatePath } from 'next/cache';
 
 async function _createShipperOrg(
@@ -13,10 +13,22 @@ async function _createShipperOrg(
   name: string,
   bizNo?: string | null,
   repName?: string | null,
+  contactName?: string | null,
+  contactEmail?: string | null,
+  contactPhone?: string | null,
 ): Promise<string> {
   const { data, error } = await supabase
     .from('zen_organizations')
-    .insert({ name, type: 'SHIPPER', status: 'ACTIVE', biz_no: bizNo ?? null, rep_name: repName ?? null })
+    .insert({
+      name,
+      type: 'SHIPPER',
+      status: 'ACTIVE',
+      biz_no: bizNo ?? null,
+      rep_name: repName ?? null,
+      contact_name: contactName ?? null,
+      contact_email: contactEmail ?? null,
+      contact_phone: contactPhone ?? null,
+    })
     .select('id')
     .single();
   if (error) throw new Error(`Failed to create shipper org: ${error.message}`);
@@ -105,7 +117,15 @@ export async function createAgencyShipper(
   }
 
   const supabase = await createAdminClient();
-  const orgId = await _createShipperOrg(supabase, parsed.data.name, parsed.data.biz_no, parsed.data.rep_name);
+  const orgId = await _createShipperOrg(
+    supabase,
+    parsed.data.name,
+    parsed.data.biz_no,
+    parsed.data.rep_name,
+    parsed.data.contact_name,
+    parsed.data.contact_email,
+    parsed.data.contact_phone,
+  );
   const linkId = await _linkShipperToAgency(
     supabase, agencyOrgId, orgId, parsed.data
   );
@@ -146,6 +166,106 @@ export async function updateAgencyShipperGrade(
   }
 
   logger.info(`[updateAgencyShipperGrade] Shipper ${id} grade updated`);
+  revalidatePath('/agency/shippers');
+  return { success: true };
+}
+
+export async function getAgencyShipperById(shipperId: string) {
+  const { profile } = await validateUserAction();
+  if (!checkPermission(profile.role, '/agency')) {
+    throw new Error('Unauthorized access');
+  }
+
+  const supabase = await createAdminClient();
+
+  const { data, error } = await supabase
+    .from('zen_agency_shippers')
+    .select(`
+      id,
+      agency_org_id,
+      shipper_org_id,
+      shipper_type,
+      discount_rate,
+      grade,
+      is_active,
+      created_at,
+      org:shipper_org_id (
+        id,
+        name,
+        biz_no,
+        rep_name,
+        contact_name,
+        contact_email,
+        contact_phone
+      )
+    `)
+    .eq('id', shipperId)
+    .single();
+
+  if (error) {
+    logger.error('[getAgencyShipperById] Failed:', error.message);
+    throw new Error(`Failed to fetch shipper: ${error.message}`);
+  }
+
+  return { shipper: data };
+}
+
+export type UpdateAgencyShipperResult =
+  | { success: true }
+  | { success: false; fieldErrors: Record<string, string> };
+
+export async function updateAgencyShipper(
+  shipperId: string,
+  data: UpdateAgencyShipperInput
+): Promise<UpdateAgencyShipperResult> {
+  const { profile } = await validateUserAction();
+  if (!checkPermission(profile.role, '/agency')) {
+    return { success: false, fieldErrors: { _form: '접근 권한이 없습니다.' } };
+  }
+
+  const parsed = UpdateAgencyShipperSchema.safeParse(data);
+  if (!parsed.success) {
+    const fieldErrors: Record<string, string> = {};
+    parsed.error.issues.forEach((e) => {
+      const field = String(e.path[0] ?? '_form');
+      if (!fieldErrors[field]) fieldErrors[field] = e.message;
+    });
+    return { success: false, fieldErrors };
+  }
+
+  const supabase = await createAdminClient();
+
+  const { data: link, error: linkError } = await supabase
+    .from('zen_agency_shippers')
+    .select('shipper_org_id')
+    .eq('id', shipperId)
+    .single();
+  if (linkError || !link) throw new Error('Shipper not found');
+
+  const { error: orgError } = await supabase
+    .from('zen_organizations')
+    .update({
+      name: parsed.data.name,
+      biz_no: parsed.data.biz_no ?? null,
+      rep_name: parsed.data.rep_name ?? null,
+      contact_name: parsed.data.contact_name ?? null,
+      contact_email: parsed.data.contact_email ?? null,
+      contact_phone: parsed.data.contact_phone ?? null,
+    })
+    .eq('id', link.shipper_org_id);
+  if (orgError) throw new Error(`Failed to update org: ${orgError.message}`);
+
+  const { error: shipperError } = await supabase
+    .from('zen_agency_shippers')
+    .update({
+      shipper_type: parsed.data.shipper_type,
+      discount_rate: parsed.data.discount_rate,
+      grade: parsed.data.grade ?? null,
+    })
+    .eq('id', shipperId);
+  if (shipperError) throw new Error(`Failed to update shipper: ${shipperError.message}`);
+
+  logger.info(`[updateAgencyShipper] Shipper ${shipperId} updated`);
   revalidatePath('/agency/shippers');
   return { success: true };
 }
