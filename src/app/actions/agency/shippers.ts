@@ -81,18 +81,27 @@ export async function getAgencyShippers(agencyOrgId: string) {
   return { shippers: data || [] };
 }
 
+export type CreateAgencyShipperResult =
+  | { success: true; shipperId: string }
+  | { success: false; fieldErrors: Record<string, string> };
+
 export async function createAgencyShipper(
   agencyOrgId: string,
   shipperData: CreateAgencyShipperInput
-) {
+): Promise<CreateAgencyShipperResult> {
   const { profile } = await validateUserAction();
   if (!checkPermission(profile.role, '/agency')) {
-    throw new Error('Unauthorized access');
+    return { success: false, fieldErrors: { _form: '접근 권한이 없습니다.' } };
   }
 
   const parsed = CreateAgencyShipperSchema.safeParse(shipperData);
   if (!parsed.success) {
-    throw new Error(`Validation failed: ${parsed.error.message}`);
+    const fieldErrors: Record<string, string> = {};
+    parsed.error.errors.forEach((e) => {
+      const field = String(e.path[0] ?? '_form');
+      if (!fieldErrors[field]) fieldErrors[field] = e.message;
+    });
+    return { success: false, fieldErrors };
   }
 
   const supabase = await createAdminClient();

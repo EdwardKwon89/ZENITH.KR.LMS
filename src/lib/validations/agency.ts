@@ -1,12 +1,14 @@
 import { z } from 'zod';
 
 export const CreateAgencyShipperSchema = z.object({
-  name: z.string().min(1).max(100),
-  shipper_type: z.enum(['INDIVIDUAL', 'CORPORATE']),
-  discount_rate: z.number().min(0).max(0.9999),
+  name: z.string().min(1, '화주명을 입력해주세요.').max(100, '화주명은 100자 이하여야 합니다.'),
+  shipper_type: z.enum(['INDIVIDUAL', 'CORPORATE'], { message: '화주 유형을 선택해주세요.' }),
+  discount_rate: z.number({ message: '할인율을 입력해주세요.' })
+    .min(0, '할인율은 0 이상이어야 합니다.')
+    .max(0.9999, '할인율은 99.99% 이하여야 합니다.'),
   grade: z.string().max(20).optional(),
   contact_name: z.string().optional(),
-  contact_email: z.string().email().optional(),
+  contact_email: z.string().email('유효한 이메일 형식이 아닙니다.').optional(),
   contact_phone: z.string().optional(),
   biz_no: z.string().optional(),
   rep_name: z.string().optional(),
