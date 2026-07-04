@@ -289,6 +289,7 @@
 | TASK-B-050 | 260704 | DEF-094 Supabase 타입 재생성 + 담당자 정보 E2E 검증 | P1 | 없음 | Dave (구현) | ✅ | [TASK-B-050](tasks/TASK-B-050_260704_DEF094_Supabase타입재생성_담당자정보검증_Dave.md) | Issue #159 · DEF-094 · PR#170 ✅ 머지 (`e8fd413`) · 388/388 · Aiden ✅ 머지승인 260704 |
 | TASK-B-051 | 260704 | UAT-15 피드백 — 화주목록 담당자 정보 조회 + Zod 포맷 유효성 강화 | P1 | 없음 | Dave (구현) | ✅ | [TASK-B-051](tasks/TASK-B-051_260704_UAT15_화주목록담당자표출_Zod포맷검증_Dave.md) | UAT-15-01 JSJung 요구사항 · 코드 `8c8b463` · 388/388 · PR#175 ✅ 머지 · Aiden ✅ 260705 |
 | TASK-B-052 | 260704 | UAT-15 피드백 — 화주목록 담당자 컬럼 + 헤더 정렬 + 입력 포매터 | P1 | TASK-B-051 ✅ | Baker (구현) | ✅ | [TASK-B-052](tasks/TASK-B-052_260704_UAT15_화주목록UI개선_입력포매터_Baker.md) | Issue #159 · PR#176 ✅ 머지 (`12283ec`) · 388/388 · Aiden ✅ 260705 |
+| TASK-B-053 | 260705 | UAT-16 사전 수정 — 요율 오버라이드 사이드바 메뉴 i18n 누락 | P1 | 없음 | Baker (구현) | ⬜ | [TASK-B-053](tasks/TASK-B-053_260705_UAT16_요율오버라이드_메뉴i18n_Baker.md) | UAT-16 수행 선행 조건 · Navigation 네임스페이스 4개국어 키 추가 |
 | TASK-169 | 260630 | DEF-086/087 인보이스 PDF — DB 마이그레이션 + Server Action | P2 | 없음 | D_Kai (구현) | ✅ | [TASK-169](tasks/TASK-169_260630_DEF086087_InvoicePDF_DB+SA_DKai.md) | Issue #152 · PR#154 ✅ 머지 (`51eba6c`) · zen_invoice_files 마이그레이션+SA 완료 · DEF-086 해소 |
 | TASK-170 | 260630 | DEF-086/087 인보이스 PDF — 오더 상세 UI 버튼 구현 | P2 | TASK-169 ✅ | B_Kai (구현) | ✅ | [TASK-170](tasks/TASK-170_260630_DEF086087_InvoicePDF_UI버튼_BKai.md) | Issue #152 · PR#155 ✅ 머지 (`ad9d1d1` develop 반영 확인) · DoD 13/13 · Aiden ✅ 260701 |
 ---
