@@ -287,8 +287,8 @@
 | TASK-B-048 | 260704 | DEF-091 화주 상세 정보 Frontend — 등급 드롭다운·상세 편집 버튼·편집 페이지 | P1 | TASK-B-047 ✅ | Baker (구현) | ✅ | [TASK-B-048](tasks/TASK-B-048_260704_DEF091_화주상세정보_Frontend_Baker.md) | Issue #159 · DEF-091 · PR#168 ✅ 머지 (`8d5b497`) · 388/388 · Aiden ✅ 머지승인 260704 |
 | TASK-B-049 | 260704 | DEF-093 화주 목록 인라인 편집 제거 + 테이블 정리 | P1 | 없음 | Baker (구현) | ✅ | [TASK-B-049](tasks/TASK-B-049_260704_DEF093_화주목록인라인편집제거_Baker.md) | Issue #171 · DEF-093 · PR#169 ✅ 머지 (`425bff1`) · 388/388 · Aiden ✅ 머지승인 260704 |
 | TASK-B-050 | 260704 | DEF-094 Supabase 타입 재생성 + 담당자 정보 E2E 검증 | P1 | 없음 | Dave (구현) | ✅ | [TASK-B-050](tasks/TASK-B-050_260704_DEF094_Supabase타입재생성_담당자정보검증_Dave.md) | Issue #159 · DEF-094 · PR#170 ✅ 머지 (`e8fd413`) · 388/388 · Aiden ✅ 머지승인 260704 |
-| TASK-B-051 | 260704 | UAT-15 피드백 — 화주목록 담당자 정보 조회 + Zod 포맷 유효성 강화 | P1 | 없음 | Dave (구현) | 🔔 | [TASK-B-051](tasks/TASK-B-051_260704_UAT15_화주목록담당자표출_Zod포맷검증_Dave.md) | UAT-15-01 JSJung 요구사항 · 코드 `8c8b463` · 388/388 · PR#175 · TASK-B-052 후행 |
-| TASK-B-052 | 260704 | UAT-15 피드백 — 화주목록 담당자 컬럼 + 헤더 정렬 + 입력 포매터 | P1 | TASK-B-051 ✅ | Baker (구현) | 🚫 | [TASK-B-052](tasks/TASK-B-052_260704_UAT15_화주목록UI개선_입력포매터_Baker.md) | UAT-15-01 JSJung 요구사항 · TASK-B-051 완료 후 착수 |
+| TASK-B-051 | 260704 | UAT-15 피드백 — 화주목록 담당자 정보 조회 + Zod 포맷 유효성 강화 | P1 | 없음 | Dave (구현) | ✅ | [TASK-B-051](tasks/TASK-B-051_260704_UAT15_화주목록담당자표출_Zod포맷검증_Dave.md) | UAT-15-01 JSJung 요구사항 · 코드 `8c8b463` · 388/388 · PR#175 ✅ 머지 · Aiden ✅ 260705 |
+| TASK-B-052 | 260704 | UAT-15 피드백 — 화주목록 담당자 컬럼 + 헤더 정렬 + 입력 포매터 | P1 | TASK-B-051 ✅ | Baker (구현) | ⬜ | [TASK-B-052](tasks/TASK-B-052_260704_UAT15_화주목록UI개선_입력포매터_Baker.md) | UAT-15-01 JSJung 요구사항 · TASK-B-051 ✅ 선행조건 해제 260705 |
 | TASK-169 | 260630 | DEF-086/087 인보이스 PDF — DB 마이그레이션 + Server Action | P2 | 없음 | D_Kai (구현) | ✅ | [TASK-169](tasks/TASK-169_260630_DEF086087_InvoicePDF_DB+SA_DKai.md) | Issue #152 · PR#154 ✅ 머지 (`51eba6c`) · zen_invoice_files 마이그레이션+SA 완료 · DEF-086 해소 |
 | TASK-170 | 260630 | DEF-086/087 인보이스 PDF — 오더 상세 UI 버튼 구현 | P2 | TASK-169 ✅ | B_Kai (구현) | ✅ | [TASK-170](tasks/TASK-170_260630_DEF086087_InvoicePDF_UI버튼_BKai.md) | Issue #152 · PR#155 ✅ 머지 (`ad9d1d1` develop 반영 확인) · DoD 13/13 · Aiden ✅ 260701 |
 ---
@@ -321,8 +321,8 @@
 |:------|:----:|:----|
 | **JSJung** (팀 리더) | ✅ TASK-B-030 승인 완료 (260628) · ✅ TASK-B-033 승인 완료 (260701) | §1§2 확인 완료 · DEF-088 교정 완료 · PR#156 squash 머지 (e2bf48b) |
 | **Jaison** (AI Agent 총괄) | ✅ TASK-B-033 완료 보고 승인 (260701) | §1 .env.local 확인 · §2 zen_agency_rate_overrides 확인 · DEF-088 컬럼명 교정 · PR#156 머지 완료 |
-| **Dave** (AI Agent) | ✅ TASK-B-045/047/050 승인 완료 (260704) | DEF-090 Backend · DEF-091 Backend · DEF-094 타입 재생성 — PR#173/167/170 ✅ 머지 |
-| **Baker** (AI Agent) | ✅ TASK-B-046/048/049 승인 완료 (260704) | DEF-090 Frontend · DEF-091 Frontend · DEF-093 인라인 편집 제거 — PR#174/168/169 ✅ 머지 |
+| **Dave** (AI Agent) | ✅ TASK-B-051 승인 완료 (260705) | UAT-15 Backend — PR#175 ✅ 머지 · 다음: 없음 (B-052 Baker 담당) |
+| **Baker** (AI Agent) | ⬜ **TASK-B-052** 착수 가능 (260705 선행조건 해제) | UAT-15 Frontend — 화주목록 담당자 컬럼 + 입력 포매터 |
 | **Gale** (AI Agent) | 대기 | 추후 재배정 예정 |
 
 ---
