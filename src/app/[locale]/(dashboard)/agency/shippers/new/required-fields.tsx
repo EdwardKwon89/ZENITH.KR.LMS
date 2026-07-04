@@ -4,16 +4,33 @@ import { useState } from 'react';
 
 interface RequiredFieldsProps {
   t: (key: string) => string;
+  defaultValues?: Partial<{
+    name: string;
+    shipper_type: 'INDIVIDUAL' | 'CORPORATE';
+    discount_rate: string;
+    grade: string;
+    biz_no: string;
+    rep_name: string;
+  }>;
+  fieldErrors?: Record<string, string>;
 }
 
-export function RequiredFields({ t }: RequiredFieldsProps) {
-  const [shipperType, setShipperType] = useState<'INDIVIDUAL' | 'CORPORATE'>('INDIVIDUAL');
+export function RequiredFields({ t, defaultValues = {}, fieldErrors = {} }: RequiredFieldsProps) {
+  const [shipperType, setShipperType] = useState<'INDIVIDUAL' | 'CORPORATE'>(
+    defaultValues.shipper_type ?? 'INDIVIDUAL'
+  );
 
   return (
     <>
       <div>
         <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">{t('form_name')} *</label>
-        <input name="name" required className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" />
+        <input
+          name="name"
+          required
+          defaultValue={defaultValues.name}
+          className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+        />
+        {fieldErrors.name && <p className="text-xs text-red-500 mt-1">{fieldErrors.name}</p>}
       </div>
 
       <div className="grid grid-cols-2 gap-4">
@@ -29,14 +46,24 @@ export function RequiredFields({ t }: RequiredFieldsProps) {
             <option value="INDIVIDUAL">{t('type_INDIVIDUAL')}</option>
             <option value="CORPORATE">{t('type_CORPORATE')}</option>
           </select>
+          {fieldErrors.shipper_type && <p className="text-xs text-red-500 mt-1">{fieldErrors.shipper_type}</p>}
         </div>
         <div>
           <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">{t('form_discount_rate')} *</label>
           <div className="relative">
-            <input name="discount_rate" type="number" step="0.1" min="0" max="99.99" required
-              className="w-full px-3 py-2.5 pr-7 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" />
+            <input
+              name="discount_rate"
+              type="number"
+              step="0.1"
+              min="0"
+              max="99.99"
+              required
+              defaultValue={defaultValues.discount_rate}
+              className="w-full px-3 py-2.5 pr-7 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+            />
             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">%</span>
           </div>
+          {fieldErrors.discount_rate && <p className="text-xs text-red-500 mt-1">{fieldErrors.discount_rate}</p>}
         </div>
       </div>
 
@@ -48,15 +75,19 @@ export function RequiredFields({ t }: RequiredFieldsProps) {
               name="biz_no"
               required
               placeholder="000-00-00000"
+              defaultValue={defaultValues.biz_no}
               className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
             />
+            {fieldErrors.biz_no && <p className="text-xs text-red-500 mt-1">{fieldErrors.biz_no}</p>}
           </div>
           <div>
             <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">{t('form_rep_name')}</label>
             <input
               name="rep_name"
+              defaultValue={defaultValues.rep_name}
               className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
             />
+            {fieldErrors.rep_name && <p className="text-xs text-red-500 mt-1">{fieldErrors.rep_name}</p>}
           </div>
         </div>
       )}
@@ -64,13 +95,14 @@ export function RequiredFields({ t }: RequiredFieldsProps) {
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">{t('form_grade')}</label>
-          <select name="grade" className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+          <select name="grade" defaultValue={defaultValues.grade} className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20">
             <option value="">{t('grade_placeholder')}</option>
             <option value="BRONZE">BRONZE</option>
             <option value="SILVER">SILVER</option>
             <option value="GOLD">GOLD</option>
             <option value="PLATINUM">PLATINUM</option>
           </select>
+          {fieldErrors.grade && <p className="text-xs text-red-500 mt-1">{fieldErrors.grade}</p>}
         </div>
       </div>
     </>
