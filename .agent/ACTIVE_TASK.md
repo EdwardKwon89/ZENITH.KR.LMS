@@ -300,19 +300,29 @@
 
 ### Team B (JSJung · Jaison 관할)
 
+> **⚠️ Dave · Baker 필독 — R-17 브랜치/PR 착수 절차 (2026-07-04 JSJung 지시, 모든 Task에 영구 적용)**
+>
+> 1. **Git 동기화** (착수 전 필수): `git fetch origin` → `git checkout develop` → `git pull origin develop`
+> 2. **feature 브랜치 생성**: `git checkout -b feature/teamb-task-b-NNN-설명` (develop 직접 커밋 절대 금지)
+> 3. **완료 보고 순서**: ① 코드 커밋 → ② task file 🔔 전환 + 결과 기재 → ③ ACTIVE_TASK 반영 → ④ PR 생성 (`Closes #NNN`)
+> 4. **PR 미생성 = 완료 불인정**: 🔔 상태는 PR 생성 후에만 유효. develop 직접 push는 R-17 위반으로 기록됨.
+>
+> _위반 시 면제 없음 (TASK-B-043/044 위반은 초회 특성으로 면제 처리됨)_
+
 | Agent | 상태 | 비고 |
 |:------|:----:|:----|
 | **JSJung** (팀 리더) | ✅ TASK-B-030 승인 완료 (260628) · ✅ TASK-B-033 승인 완료 (260701) | §1§2 확인 완료 · DEF-088 교정 완료 · PR#156 squash 머지 (e2bf48b) |
 | **Jaison** (AI Agent 총괄) | ✅ TASK-B-033 완료 보고 승인 (260701) | §1 .env.local 확인 · §2 zen_agency_rate_overrides 확인 · DEF-088 컬럼명 교정 · PR#156 머지 완료 |
-| **Dave** (AI Agent) | 🔔 **TASK-B-043** 완료 보고 (260704) | DEF-089 Backend 커밋 `84c103e` · 388/388 PASS · ⚠️ develop 직접 커밋·task file 미업데이트 (R-17 위반 기록됨) |
-| **Baker** (AI Agent) | 🔔 **TASK-B-044** 완료 보고 (260704) | DEF-089 Frontend 커밋 `08dc986` · 388/388 PASS · ⚠️ develop 직접 커밋·task file 상태 미전환 (R-17 위반 기록됨) |
+| **Dave** (AI Agent) | 🔔 **TASK-B-043** 완료 보고 (260704) | DEF-089 Backend 커밋 `84c103e` · 388/388 PASS · 위반 면제 처리(JSJung 260704) |
+| **Baker** (AI Agent) | 🔔 **TASK-B-044** 완료 보고 (260704) | DEF-089 Frontend 커밋 `08dc986` · 388/388 PASS · 위반 면제 처리(JSJung 260704) |
 | **Gale** (AI Agent) | 대기 | 추후 재배정 예정 |
 
 ---
 
 ## 개정 이력
 
-| 2026-07-04 | Jaison (Team B) | **TASK-B-043/044 🔔 갱신** — 커밋 `84c103e`(Dave)/`08dc986`(Baker) 확인 · 388/388 PASS · R-17 위반(develop 직접 커밋·task file 미업데이트) VIOLATION_TRACKER 기록 · PR 미생성 — JSJung 판단 요청 |
+| 2026-07-04 | JSJung (팀 리더) | **TASK-B-043/044 R-17 위반 면제** — 초회 위반 특성 고려. 이후 Dave·Baker 작업 지시 시 재발 방지 필독 공지 ACTIVE_TASK 고정 적용 |
+| 2026-07-04 | Jaison (Team B) | **TASK-B-043/044 🔔 갱신** — 커밋 `84c103e`(Dave)/`08dc986`(Baker) 확인 · 388/388 PASS · R-17 위반 기록 후 JSJung 면제 결정 반영 |
 | 2026-07-04 | Jaison (Team B) | **TASK-B-043/044 신규 발령** — DEF-089 법인 화주 등록 biz_no/rep_name 누락 수정 · Dave(Backend) · Baker(Frontend) · Issue #159 · UAT-15-01 Step 3 블로킹 결함 |
 | 2026-06-30 | Aiden (ZEN_CEO) | **TASK-B-042 신규 발령** — UAT-19 재실행 · Baker · Issue #157 · DEF-086/087 해소(TASK-169·170) 후 test.skip 제거 + 실검증 · Edward 승인 |
 | 2026-06-30 | Aiden (ZEN_CEO) | **TASK-B-033 ✅ 승인** — PR#156 squash 머지 (`e2bf48b`). §1 SHXK 환경변수·§2 요율 오버라이드·DEF-088 교정 완료. IMP-144 해소. |

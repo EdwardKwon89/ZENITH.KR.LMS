@@ -8,17 +8,17 @@
 | B_Kai | task file 절차 미준수 | **2회** | TASK-018 재작업 | 할당 중단 기준(3회) 미달 |
 | Ring  | task file 절차 미준수 | **4회** | TASK-010 1·2차, TASK-012 1·2차 | ⚠️ 기준 초과 — 할당 중단 중 |
 | D_Kai | develop 직접 커밋 (R-17 브랜치 규칙 위반) | **1회** | TASK-169 (`8cfeda4`) | 1차 위반 — 할당 중단 기준(3회) 미달. DoD 해시 correction을 feature 브랜치가 아닌 develop에 직접 push |
-| Dave | develop 직접 커밋 (R-17 브랜치/PR 규칙 위반) | **1회** | TASK-B-043 (`84c103e`) | 1차 위반. feature 브랜치 없이 develop 직접 push, task file 미업데이트, PR 미생성 |
-| Dave | task file 미업데이트 (R-17 완료 보고 절차 위반) | **1회** | TASK-B-043 (`84c103e`) | 1차 위반. 커밋 후 task file 🔔 전환·결과 기재 누락. Jaison 대행 갱신. |
-| Baker | develop 직접 커밋 (R-17 브랜치/PR 규칙 위반) | **1회** | TASK-B-044 (`08dc986`) | 1차 위반. feature 브랜치 없이 develop 직접 push, PR 미생성 |
-| Baker | task file 상태 미전환 (R-17 완료 보고 절차 위반) | **1회** | TASK-B-044 (`08dc986`) | 1차 위반. task file 내용은 기재했으나 헤더 상태 ⬜→🔔 미전환. Jaison 대행 갱신. |
+| ~~Dave~~ | ~~develop 직접 커밋 (R-17 브랜치/PR 규칙 위반)~~ | ~~1회~~ | ~~TASK-B-043 (`84c103e`)~~ | **면제** (2026-07-04 JSJung 결정) — 초회 위반 특성 고려, 횟수 카운트 제외 |
+| ~~Dave~~ | ~~task file 미업데이트 (R-17 완료 보고 절차 위반)~~ | ~~1회~~ | ~~TASK-B-043 (`84c103e`)~~ | **면제** (2026-07-04 JSJung 결정) — 횟수 카운트 제외 |
+| ~~Baker~~ | ~~develop 직접 커밋 (R-17 브랜치/PR 규칙 위반)~~ | ~~1회~~ | ~~TASK-B-044 (`08dc986`)~~ | **면제** (2026-07-04 JSJung 결정) — 초회 위반 특성 고려, 횟수 카운트 제외 |
+| ~~Baker~~ | ~~task file 상태 미전환 (R-17 완료 보고 절차 위반)~~ | ~~1회~~ | ~~TASK-B-044 (`08dc986`)~~ | **면제** (2026-07-04 JSJung 결정) — 횟수 카운트 제외 |
 
 ## 처리 이력
 
 | 일자 | Agent | 조치 | 비고 |
 |:----|:------|:----|:----|
 | 2026-05-20 | Ring | 신규 Task 할당 일시 중단 | 4회 누적, 재교육 대기 |
-| 2026-07-04 | Dave | 위반 기록 — 할당 중단 기준(3회) 미달 | TASK-B-043: develop 직접 커밋 1회 + task file 미업데이트 1회 |
-| 2026-07-04 | Baker | 위반 기록 — 할당 중단 기준(3회) 미달 | TASK-B-044: develop 직접 커밋 1회 + task file 상태 미전환 1회 |
+| 2026-07-04 | Dave | **면제** — TASK-B-043 위반 2건 카운트 제외 | JSJung 결정. 재발 방지 지시 task file 표준화 적용 |
+| 2026-07-04 | Baker | **면제** — TASK-B-044 위반 2건 카운트 제외 | JSJung 결정. 재발 방지 지시 task file 표준화 적용 |
 
-_최종 갱신: 2026-07-04 (Dave TASK-B-043, Baker TASK-B-044 R-17 위반 각 2회 추가)_
+_최종 갱신: 2026-07-04 (Dave·Baker TASK-B-043/044 위반 면제 처리 — JSJung 결정)_
