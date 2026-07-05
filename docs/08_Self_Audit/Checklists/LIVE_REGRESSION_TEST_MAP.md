@@ -509,9 +509,9 @@
 
 | ID | 테스트 항목 | 목적 | 파일 경로 |
 | :--- | :--- | :--- | :--- |
-| **TC-UPS-ZONEMAP-01** | 정확 매치: service+direction 일치 → Zone 반환 | Fallback 없이 정확한 Zone 매핑 검증 | `tests/unit/ups/zone-map.test.ts` |
-| **TC-UPS-ZONEMAP-02** | 1단계 Fallback: direction 없음 → `null` 방향 폴백 | direction 미지정 시 자동 폴백 검증 | `tests/unit/ups/zone-map.test.ts` |
-| **TC-UPS-ZONEMAP-03** | 2단계 Fallback: service+direction 전부 불일치 → `null` 반환 | 완전 미매핑 국가의 null 반환 + `fallbackApplied` 필드 검증 | `tests/unit/ups/zone-map.test.ts` |
+| **TC-UPS-ZONEMAP-01** | 정확 매치: service+direction 일치 → Zone 반환 | Fallback 없이 정확한 Zone 매핑 검증 | `tests/unit/ups/pricing-engine.test.ts` |
+| **TC-UPS-ZONEMAP-02** | 1단계 Fallback: direction 없음 → `null` 방향 폴백 | direction 미지정 시 자동 폴백 검증 | `tests/unit/ups/pricing-engine.test.ts` |
+| **TC-UPS-ZONEMAP-03** | 2단계 Fallback: service+direction 전부 불일치 → `null` 반환 | 완전 미매핑 국가의 null 반환 + `fallbackApplied` 필드 검증 | `tests/unit/ups/pricing-engine.test.ts` |
 
 ### 41. Hotfix DEF-095 — WW_EXPEDITED 상품별 중량 반올림 규칙 (TASK-181)
 
