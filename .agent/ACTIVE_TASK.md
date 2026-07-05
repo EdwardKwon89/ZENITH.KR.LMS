@@ -304,10 +304,10 @@
 | TASK-177 | 260705 | Ds_11 API 명세 갱신(Team B 인계 계약 명시) + UAT-17-03 완료처리 + 신규 UAT-22/23 작성 + 전체 회귀 (An-14 §6·7) | TASK-175·176 ✅ | **D_Kai** | ✅ | [TASK-177](tasks/TASK-177_260705_P71SPR07_명세UAT회귀_DKai.md) | Aiden 재검토 ✅ 승인(260705) — Ds_11갱신+UAT-22/23(UAT-17-03 정직 미완료 기재)+회귀424/424 PASS |
 | TASK-178 | 260705 | D_Kai 재교육 세션 5차 — 코드/문서 커밋 혼입 3회 연속(R-17 v1.4 페널티) | 없음 | D_Kai | ✅ | [TASK-178](tasks/TASK-178_260705_DKai재교육세션5차_DKai.md) | Aiden 조건부 승인(260705) — 신규 할당 중단 해제. 단 재교육 커밋 자체가 develop 직접 커밋(브랜치 없음) — 신규 위반 1건 별도 기록 |
 | **── Phase 7.2 (IMP-146) ──** | | **UPS 요율표 구조 정밀화 — An-14 §9·§12 백로그 (Go-Live 비차단)** | | | | | | **Edward 발령(260705) — [An-14 §12](../docs/02_Analysis/An_14_Phase7_UPS요금관리_설계보완.md#12-imp-146-설계--요율표-구조-정밀화-9-백로그-착수-2026-07-05-edward-발령)** |
-| TASK-179 | 260705 | Box 상품 등록 + Zone-서비스-방향 매핑 정밀화 (An-14 §12-1 #2·#3) | 없음 | B_Kai | 🔔 | [TASK-179](tasks/TASK-179_260705_P72IMP146_ZoneBox구조정밀화_BKai.md) | PR#190 · 436/436 PASS · tsc 0 new err · TC-UPS-ZONEMAP-01/02/03 · 🔔 Aiden 검토 대기 |
-| TASK-180 | 260705 | 20kg 초과 티어 요금 + DWB + Freight 최소운임 (An-14 §12-1 #1·#4·#5) | TASK-179 ✅ | Riley | 🔍 | [TASK-180](tasks/TASK-180_260705_P72IMP146_티어DWB최소운임_Riley.md) | Aiden 설계 확정(260705, 원문 대조 검증) — TASK-181 선반영으로 반올림함수 DoD 축소, TASK-179 완료 시 착수 |
+| TASK-179 | 260705 | Box 상품 등록 + Zone-서비스-방향 매핑 정밀화 (An-14 §12-1 #2·#3) | 없음 | B_Kai | ✅ | [TASK-179](tasks/TASK-179_260705_P72IMP146_ZoneBox구조정밀화_BKai.md) | Aiden 승인·머지 완료(260705) — PR#190 · 코드 `ac36f9d` · 436/436 PASS · TC-UPS-ZONEMAP-01/02/03 |
+| TASK-180 | 260705 | 20kg 초과 티어 요금 + DWB + Freight 최소운임 (An-14 §12-1 #1·#4·#5) | TASK-179 ✅ | Riley | 🔍 | [TASK-180](tasks/TASK-180_260705_P72IMP146_티어DWB최소운임_Riley.md) | TASK-179 완료로 전제조건 해제, 즉시 착수 가능 — 반올림함수 DoD는 TASK-181 선반영 완료로 축소됨 |
 | **── Hotfix ──** | | **DEF-095 즉시 처리 (Edward 지시, TASK-180 완료 대기 없이 우선 처리)** | | | | | | |
-| TASK-181 | 260705 | WW_EXPEDITED 중량 반올림 규칙 오류 수정 (DEF-095) | 없음 | Aiden | 🔔 | [TASK-181](tasks/TASK-181_260705_Hotfix_DEF095_WWExpeditedRounding_Aiden.md) | 코드 `b1d0725` · TC-UPS-EXPEDITED-ROUND-01~05 신규 · 회귀 429/429 예상 |
+| TASK-181 | 260705 | WW_EXPEDITED 중량 반올림 규칙 오류 수정 (DEF-095) | 없음 | Aiden | ✅ | [TASK-181](tasks/TASK-181_260705_Hotfix_DEF095_WWExpeditedRounding_Aiden.md) | 머지 완료(260705, PR#191) — 코드 `b1d0725` · TC-UPS-EXPEDITED-ROUND-01~05 · develop 회귀 436/436 PASS |
 ---
 
 ## Agent 현황
@@ -318,8 +318,8 @@
 |:------|:----:|:----|
 | **Aiden (Claude)** | ✅ TASK-167 전체 승인 (260626) | PR#117 §1 ✅ · PR#118 §2+§3 ✅ 전량 머지 완료 |
 | **D_Kai (OpenCode)** | ✅ TASK-178 재교육 5차 조건부 승인 (260705) — 신규 Task 배정 재개 | §1~§5 우수(특히 `git add -A` 공통 근본원인 분석·코드↔문서 대칭원칙 자각). **그러나 재교육 완료 커밋(`57648c4`·`0a37c47`) 자체가 브랜치 없이 develop 직접 커밋 — R-17 §0 위반 신규 1건 기록**(develop 이미 반영, 무해한 문서 변경이라 되돌리지 않음). **다음 Task부터 브랜치 절차 위반 시 즉시 6차 재교육 + 장기 중단 검토 — 최종 경고.** |
-| **B_Kai** | 🔔 TASK-179 완료 보고 (260705) | Phase 7.2 IMP-146 Box상품+Zone매핑 정밀화 · PR#190 · 436/436 PASS · tsc 0 new err · 🔔 Aiden 검토 대기 |
-| **Riley** | 🔍 TASK-180 설계 확정 (260705) | Phase 7.2 IMP-146 티어 요금+DWB+Freight 최소운임 · TASK-179 완료 대기 중 DoD 2건 보완사항 통보됨 |
+| **B_Kai** | ✅ TASK-179 승인·머지 완료 (260705) | Phase 7.2 IMP-146 Box상품+Zone매핑 정밀화 · PR#190 · 436/436 PASS · 신규 Task 대기 |
+| **Riley** | 🔍 TASK-180 착수 가능 (260705) | Phase 7.2 IMP-146 티어 요금+DWB+Freight 최소운임 · TASK-179 완료로 전제조건 해제, 즉시 착수 가능 |
 | N_Kai | ➖ 미재배정 확정 (260626 Edward) | TASK-087 폐기 — 신규 Task 발령 없음 |
 | Ring | 신규 할당 중단 유지 | 9차 위반 누적 |
 
@@ -748,3 +748,4 @@
 | 2026-07-05 | Aiden (Claude) | **Phase 7.1 신설 — UPS 요금관리 보완 설계(An-14)**. `20260705 UPS특송 요금관리.md` 요구사항 대비 구현현황 조사 결과 Admin 요율 UI(TASK-146)·요금계산엔진(TASK-141) 브랜치 develop 미병합 확인, Agency/화주 할인·마진 계산 로직 전면 미구현 확인. SNTL 원자료(`sntl_ups.txt`, UPS 2026 Rate Guide) 대조로 원가+7%룰·현지통관 OC 4종·대형포장물 특수룰 반영. TASK-171~178 🚫 등록 — Edward 설계 승인 대기. 요율표 구조 정확도 리스크(20kg초과 구간·Box상품·Zone서비스별상이·DWB·Freight최소운임) 5건은 §9 백로그(IMP-146 가칭)로 분리. |
 | 2026-07-05 | Aiden (Claude) | **TASK-179 설계 검토 완료 (📝→🔍)** — B_Kai 제출 설계의견(Zone 매핑 2단계 Fallback 체인, `resolveZoneByCountry()` 생산코드 호출자 0건 조사) 직접 코드 확인(`freight.ts:66-70` 인라인 로직)으로 재검증, 판단 근거 모두 타당해 그대로 승인. DoD에 `fallbackApplied` 투명성 필드 1건 추가(기존 `applied`/`dwbApplied` breakdown 관례와 통일). 즉시 착수 가능. PR#188(→B_Kai 브랜치 병합). |
 | 2026-07-05 | Aiden (Claude) | **TASK-181 Hotfix 완료 — DEF-095 해소** (Edward 지시: "DEF-095 Hotfix로 먼저 처리"). TASK-180 완료(TASK-179 선행 필요)를 기다리지 않고 즉시 처리. `resolveBillingWeight()` 신규 함수로 `ceilToHalfKg()` 전체 호출부 교체 — WW_EXPEDITED 상시 1kg 올림, 그 외 20kg 이하 0.5kg·초과 1kg 유지. TC-UPS-EXPEDITED-ROUND-01~05 신규(429 케이스). 코드 커밋 `b1d0725`. **참고**: 커밋 시점에 B_Kai가 동일 파일(`pricing-engine.ts`)에서 TASK-179를 병행 작업 중이어서 git index 레벨로 본 변경분만 정밀 분리해 커밋, B_Kai 작업물은 무손상 보존됨. TASK-180 DoD 중 반올림함수 교체 항목은 본 Hotfix로 선반영 완료 — Riley에게 공유 필요. DEF-095 상태 ✅ 해소 갱신. |
+| 2026-07-05 | Aiden (Claude) | **TASK-179 ✅ 승인·머지 완료 (PR#190)** + **TASK-181 PR#191 머지 완료** — 두 PR 모두 develop 머지, `npm run test:regression` **436/436 PASS** 재확인. B_Kai TASK-179 구현(코드 `ac36f9d`) 검증: `resolveZoneByCountry()` 2단계 Fallback+`fallbackApplied` 반환이 설계 확정 내용과 정확히 일치, DoD 11/11 완료, TC-UPS-ZONEMAP-01~03 확인. **환경 이슈 기록(비차단, B_Kai 귀책 아님)**: 본 세션에서 Aiden과 B_Kai가 동일 로컬 저장소/작업 디렉터리를 실시간 병행 사용 — B_Kai의 코드 커밋(`ac36f9d`)에 Aiden이 편집 중이던 `ACTIVE_TASK.md`가, 후속 문서 커밋(`6c0287c`)에 Aiden의 `DEF-095`·`TASK-181` 문서가 각각 의도치 않게 혼입됨(내용 자체는 정확·무해). R-17 §1 문언상 위반이나 원인이 공유 워크스페이스 동시성 경합이라 B_Kai 개인 위반 카운트에는 반영하지 않음. **후속 조치 필요**: 복수 Agent 동시 세션 운용 시 작업 디렉터리 격리(git worktree 등) 필요성을 Edward에게 별도 보고 예정. |
