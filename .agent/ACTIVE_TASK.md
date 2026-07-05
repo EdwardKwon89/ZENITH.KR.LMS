@@ -294,15 +294,14 @@
 | TASK-B-055 | 260705 | UAT-16 결함 수정 — 요율 오버라이드 신규 등록 폼 기준요율 드롭다운 UUID 표시 | P1 | 없음 | Baker (구현) | ✅ | [TASK-B-055](tasks/TASK-B-055_260705_UAT16_RateOverrides_기준요율드롭다운UUID표시수정_Baker.md) | UAT-16-01 Step2 결함 · getUpsBaseRates join 추가 + 드롭다운 코드명 표시 · 코드 `36574ad` · 388/388 PASS · PR#179 ✅ 머지 · Aiden ✅ 260705 |
 | TASK-169 | 260630 | DEF-086/087 인보이스 PDF — DB 마이그레이션 + Server Action | P2 | 없음 | D_Kai (구현) | ✅ | [TASK-169](tasks/TASK-169_260630_DEF086087_InvoicePDF_DB+SA_DKai.md) | Issue #152 · PR#154 ✅ 머지 (`51eba6c`) · zen_invoice_files 마이그레이션+SA 완료 · DEF-086 해소 |
 | TASK-170 | 260630 | DEF-086/087 인보이스 PDF — 오더 상세 UI 버튼 구현 | P2 | TASK-169 ✅ | B_Kai (구현) | ✅ | [TASK-170](tasks/TASK-170_260630_DEF086087_InvoicePDF_UI버튼_BKai.md) | Issue #152 · PR#155 ✅ 머지 (`ad9d1d1` develop 반영 확인) · DoD 13/13 · Aiden ✅ 260701 |
-| **── Phase 7.1 ──** | | **UPS 특송 요금 관리 보완 (Admin/Agency/Shipper 계산 파이프라인)** | | | | | | **✅ Edward 설계 승인(260705) — Team A(Aiden) 구현, [An_14_Phase7_UPS요금관리_설계보완.md](../docs/02_Analysis/An_14_Phase7_UPS요금관리_설계보완.md)** |
-| TASK-171 | 260705 | 스키마: Agency 할인율정책·Agency부가요금 신규 + rate_overrides RLS/트리거 + OC 4종 추가 (An-14 §3) | P1 | 없음 | Aiden | 🔄 | — | 브랜치 `feature/teama-phase71-ups-rate-management` 착수 |
-| TASK-172 | 260705 | `feature/ups-spr03-bkai-rates-admin` 브랜치 코드 이식 — pricing-engine.ts 복원 (An-14 §4) | TASK-171 | Aiden | 🚫 | — | TASK-171 완료 후 착수 |
+| **── Phase 7.1 ──** | | **UPS 특송 요금 "등록" 관리 (Admin/Agency 계산엔진+등록UI, Team A 범위)** | | | | | | **✅ Edward 설계 승인(260705) — Team A(Aiden), [An_14](../docs/02_Analysis/An_14_Phase7_UPS요금관리_설계보완.md) · GH#182 · Team B 인계(오더연동+정산)는 GH#181 참조** |
+| TASK-171 | 260705 | 스키마: Agency 할인율정책·Agency부가요금 신규 + rate_overrides RLS/트리거 + OC 4종 추가 (An-14 §3) | P1 | 없음 | Aiden | 🔔 | [TASK-171](tasks/TASK-171_260705_P71SPR01_AgencyPricingPolicy_Aiden.md) | 코드 `ac2e81c`+문서 `1bebf47` · 393/393 PASS |
+| TASK-172 | 260705 | `feature/ups-spr03-bkai-rates-admin` 브랜치 코드 이식 — pricing-engine.ts 복원 (An-14 §4) | TASK-171 ✅ | Aiden | ⬜ | — | 즉시 착수 가능 |
 | TASK-173 | 260705 | pricing-engine 보강(원가×1.07·대형포장물룰) + agency/shipper 계산 모듈 신규 (An-14 §4) | TASK-172 | Aiden | 🚫 | — | TASK-172 완료 후 착수 |
-| TASK-174 | 260705 | estimateUpsFreight 통합 Action + 오더등록 실시간 미리보기 + 스냅샷 연동 (An-14 §4) | TASK-173 | Aiden | 🚫 | — | TASK-173 완료 후 착수 |
+| TASK-174 | 260705 | estimateUpsFreight Action **노출만**(계산 API) — 오더등록 연동·agency_org_id·스냅샷은 Team B(GH#181) 인계 (An-14 §4·§11) | TASK-173 | Aiden | 🚫 | — | TASK-173 완료 후 착수 |
 | TASK-175 | 260705 | Admin UI 완성 — 기준요금·유류할증·OC 3탭 + Agency 할인율정책 탭 신규 (An-14 §5) | TASK-171·172 | Aiden | 🚫 | — | TASK-172 완료 후 착수 |
-| TASK-176 | 260705 | Agency UI 수정 — rate-overrides cost_price 읽기전용화 + Agency 부가요금 등록 (An-14 §5) | TASK-171 | Aiden | 🚫 | — | TASK-171 완료 후 착수 |
-| TASK-177 | 260705 | Ds_11 API 명세 갱신 + UAT-17-03 완료처리 + 신규 UAT-20/21/22 작성 (An-14 §6·7) | TASK-174~176 | Aiden | 🚫 | — | TASK-174~176 완료 후 착수 |
-| TASK-178 | 260705 | 전체 회귀 + E2E-24 재검증 | TASK-171~177 | Aiden | 🚫 | — | 전량 완료 후 착수 |
+| TASK-176 | 260705 | Agency UI 수정 — rate-overrides cost_price 읽기전용화 + Agency 부가요금 등록 (An-14 §5) | TASK-171 ✅ | Aiden | ⬜ | — | 즉시 착수 가능 |
+| TASK-177 | 260705 | Ds_11 API 명세 갱신(Team B 인계 계약 명시) + UAT-17-03 완료처리 + 신규 UAT-20/21 작성 + 전체 회귀 (An-14 §6·7) | TASK-174~176 | Aiden | 🚫 | — | TASK-174~176 완료 후 착수 |
 ---
 
 ## Agent 현황
