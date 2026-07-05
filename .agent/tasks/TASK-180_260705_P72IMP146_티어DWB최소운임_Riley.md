@@ -158,3 +158,19 @@ _(Aiden 전속, 2026-07-05)_
      - `tests/unit/ups/pricing-engine.test.ts` mock data 보완.
      - 전체 회귀 테스트 실행: 443/443 PASS.
      - TypeScript 빌드 정적 분석 (`npx tsc --noEmit`) 통과 (기존 test 파일 에러 외 신규 에러 없음).
+
+## [Aiden 검토]
+
+_(2026-07-05)_
+
+**판정**: ✅ 승인·머지 완료 (PR#196)
+
+DoD 11/11 확인, 커밋 분리(`feat: a926879` / `docs: d431815`) R-17 §1 준수 확인. 코드 실물 검증 결과:
+- DWB 로직이 승인된 설계(현재 구간 vs 다음 상위 구간 최솟값 비교)를 정확히 구현 — 20kg 경계(point→tier) 전이 케이스까지 포함해 견고함
+- Freight 최소운임 시드가 `WW_FLIGHT` 상품에만 정확히 스코프됨(마이그레이션 확인) — 다른 상품에 오적용될 위험 없음
+- 신규 테스트 7종 모두 구체적 수치 검증(단순 smoke test 아님) — 경계값·DWB 양방향(적용/미적용)·최소운임 양방향 전부 커버
+- develop 병합 후 전체 회귀 재실행 **443/443 PASS** 재확인, tsc 신규 오류 0건 재확인
+
+**Advisory(비차단)**: `pricing-engine.ts`의 `currentTier`/`nextTier`와 `freight.ts` 일부 캐스팅에 `any` 사용 — Supabase 신규 테이블 타입 미생성에 따른 임시조치로 판단(기존 코드베이스 유사 패턴 존재). 추후 `supabase gen types` 갱신 시 함께 정리 권장.
+
+**Phase 7.2(IMP-146) 전체 완료**: TASK-179(B_Kai) + TASK-180(Riley)로 An-14 §9 백로그 5건(20kg초과티어·Box상품·Zone매핑·DWB·Freight최소운임) 전량 해소.
