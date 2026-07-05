@@ -312,6 +312,13 @@
 | TASK-180 | 260705 | 20kg 초과 티어 요금 + DWB + Freight 최소운임 (An-14 §12-1 #1·#4·#5) | 없음 (해제됨) | Riley | ✅ | [TASK-180](tasks/TASK-180_260705_P72IMP146_티어DWB최소운임_Riley.md) | Aiden 승인·머지 완료(260705) — PR#196 · 코드 `a926879` · 443/443 PASS · TC-UPS-TIER/DWB/FREIGHTMIN 7종 · **Phase 7.2(IMP-146) 전체 완료** |
 | **── Hotfix ──** | | **DEF-095 즉시 처리 (Edward 지시, TASK-180 완료 대기 없이 우선 처리)** | | | | | | |
 | TASK-181 | 260705 | WW_EXPEDITED 중량 반올림 규칙 오류 수정 (DEF-095) | 없음 | Aiden | ✅ | [TASK-181](tasks/TASK-181_260705_Hotfix_DEF095_WWExpeditedRounding_Aiden.md) | 머지 완료(260705, PR#191) — 코드 `b1d0725` · TC-UPS-EXPEDITED-ROUND-01~05 · develop 회귀 436/436 PASS |
+| **── Phase 7.3 (An-15) ──** | | **UPS 특송 전체점검 보완계획 — [An-15](../docs/02_Analysis/An_15_Phase7_UPS특송_전체점검_및_보완계획.md)** | | | | | | **⚠️ Issue #86 B방안 적용 — 본 섹션은 GitHub Issue의 동기화 캐시. 진실의 근거는 각 GH Issue이며, 상세 Task file은 담당 Agent 착수 시(⬜→🔄) R-17 절차에 따라 생성됨** |
+| GH#201 | 260705 | [DEF-096] OVERSIZE 부가요금 시드값 오류(15,000/12,000→69,200원) | 없음 | D_Kai | ⬜ | [Issue #201](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/201) | Critical(P1) — Hotfix 성격, 즉시 착수 가능 |
+| GH#202 | 260705 | estimateUpsFreight()가 resolveZoneByCountry() 미사용 | 없음 | B_Kai | ⬜ | [Issue #202](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/202) | Critical(P1) — Team B B-060 착수 전 완료 권장 |
+| GH#203 | 260705 | Ds_11 API 명세서 Phase 7.2 신규기능 반영 누락 | GH#202 | Aiden | ⬜ | [Issue #203](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/203) | Critical(P1) — GH#202 완료 후 확정 계약 문서화 |
+| GH#204 | 260705 | Admin UI — 20kg 초과 티어·Freight 최소운임 관리 탭 신규 | 없음 | Riley | ⬜ | [Issue #204](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/204) | High(P2) |
+| GH#205 | 260705 | An-14 담당 불일치 정정 + UAT_DEFECT_LOG·UAT_MASTER 동기화 | 없음 | Aiden | ⬜ | [Issue #205](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/205) | High(P2) |
+| GH#206 | 260705 | UPS 문서 정리 백로그 (Medium 6 + Low 7건) | 없음 | Aiden | ⬜ | [Issue #206](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/206) | Medium/Low(P3) — 트래킹 목적, 순차 처리 |
 ---
 
 ## Agent 현황
@@ -321,9 +328,9 @@
 | Agent | 상태 | 비고 |
 |:------|:----:|:----|
 | **Aiden (Claude)** | ✅ TASK-167 전체 승인 (260626) | PR#117 §1 ✅ · PR#118 §2+§3 ✅ 전량 머지 완료 |
-| **D_Kai (OpenCode)** | ✅ TASK-178 재교육 5차 조건부 승인 (260705) — 신규 Task 배정 재개 | §1~§5 우수(특히 `git add -A` 공통 근본원인 분석·코드↔문서 대칭원칙 자각). **그러나 재교육 완료 커밋(`57648c4`·`0a37c47`) 자체가 브랜치 없이 develop 직접 커밋 — R-17 §0 위반 신규 1건 기록**(develop 이미 반영, 무해한 문서 변경이라 되돌리지 않음). **다음 Task부터 브랜치 절차 위반 시 즉시 6차 재교육 + 장기 중단 검토 — 최종 경고.** |
-| **B_Kai** | ✅ TASK-179 승인·머지 완료 (260705) | Phase 7.2 IMP-146 Box상품+Zone매핑 정밀화 · PR#190 · 436/436 PASS · 신규 Task 대기 |
-| **Riley** | ✅ TASK-180 승인·머지 완료 (260705) | Phase 7.2 IMP-146 티어 요금+DWB+Freight 최소운임 · PR#196 · 443/443 PASS · 신규 Task 대기 |
+| **D_Kai (OpenCode)** | ⬜ GH#201 발령 (260705) | DEF-096 OVERSIZE 시드값 오류 수정 — Critical, 소규모 Hotfix. **브랜치 절차 최종 경고 유효 — R-17 §0 재위반 시 6차 재교육.** |
+| **B_Kai** | ⬜ GH#202 발령 (260705) | estimateUpsFreight() Zone 정밀화 연결 — Critical, Team B B-060 착수 전 완료 필요 |
+| **Riley** | ⬜ GH#204 발령 (260705) | Admin UI 티어/최소운임 관리 탭 신규 — High |
 | N_Kai | ➖ 미재배정 확정 (260626 Edward) | TASK-087 폐기 — 신규 Task 발령 없음 |
 | Ring | 신규 할당 중단 유지 | 9차 위반 누적 |
 
@@ -760,3 +767,4 @@
 | 2026-07-05 | Aiden (Claude) | **TASK-181 Hotfix 완료 — DEF-095 해소** (Edward 지시: "DEF-095 Hotfix로 먼저 처리"). TASK-180 완료(TASK-179 선행 필요)를 기다리지 않고 즉시 처리. `resolveBillingWeight()` 신규 함수로 `ceilToHalfKg()` 전체 호출부 교체 — WW_EXPEDITED 상시 1kg 올림, 그 외 20kg 이하 0.5kg·초과 1kg 유지. TC-UPS-EXPEDITED-ROUND-01~05 신규(429 케이스). 코드 커밋 `b1d0725`. **참고**: 커밋 시점에 B_Kai가 동일 파일(`pricing-engine.ts`)에서 TASK-179를 병행 작업 중이어서 git index 레벨로 본 변경분만 정밀 분리해 커밋, B_Kai 작업물은 무손상 보존됨. TASK-180 DoD 중 반올림함수 교체 항목은 본 Hotfix로 선반영 완료 — Riley에게 공유 필요. DEF-095 상태 ✅ 해소 갱신. |
 | 2026-07-05 | Aiden (Claude) | **TASK-179 ✅ 승인·머지 완료 (PR#190)** + **TASK-181 PR#191 머지 완료** — 두 PR 모두 develop 머지, `npm run test:regression` **436/436 PASS** 재확인. B_Kai TASK-179 구현(코드 `ac36f9d`) 검증: `resolveZoneByCountry()` 2단계 Fallback+`fallbackApplied` 반환이 설계 확정 내용과 정확히 일치, DoD 11/11 완료, TC-UPS-ZONEMAP-01~03 확인. **환경 이슈 기록(비차단, B_Kai 귀책 아님)**: 본 세션에서 Aiden과 B_Kai가 동일 로컬 저장소/작업 디렉터리를 실시간 병행 사용 — B_Kai의 코드 커밋(`ac36f9d`)에 Aiden이 편집 중이던 `ACTIVE_TASK.md`가, 후속 문서 커밋(`6c0287c`)에 Aiden의 `DEF-095`·`TASK-181` 문서가 각각 의도치 않게 혼입됨(내용 자체는 정확·무해). R-17 §1 문언상 위반이나 원인이 공유 워크스페이스 동시성 경합이라 B_Kai 개인 위반 카운트에는 반영하지 않음. **후속 조치 필요**: 복수 Agent 동시 세션 운용 시 작업 디렉터리 격리(git worktree 등) 필요성을 Edward에게 별도 보고 예정. |
 | 2026-07-05 | Aiden (Claude) | **TASK-180 ✅ 승인·머지 완료 (PR#196) — Phase 7.2(IMP-146) 전체 완료**. Riley 구현(코드 `a926879`) 실물 검증: DWB 로직이 승인된 설계(현재 구간 vs 다음 상위 구간 최솟값 비교)를 20kg 경계 전이 케이스까지 포함해 정확히 구현, Freight 최소운임이 `WW_FLIGHT` 상품에만 정확히 스코프됨(마이그레이션 확인), 신규 테스트 7종 모두 구체적 수치 검증(품질 우수). DoD 11/11·커밋분리(R-17 §1 준수)·회귀 443/443 PASS·tsc 신규오류 0건 확인. Advisory(비차단): `any` 타입 일부 사용 — 추후 `supabase gen types` 갱신 시 정리 권장. An-14 §9 백로그 5건(TASK-179+180) 전량 해소로 Phase 7.2 종료. |
+| 2026-07-05 | Aiden (Claude) | **An-15 전체점검 완료 + Issue #86 B방안(GH Issue 중심 관리) 최초 적용 — Phase 7.3 발령**. Edward 지시(Team A 등록 완료여부 + 전체 요구사항/설계/구현 차이 분석)로 원본요구사항·SNTL 원자료·An-13·An-14 전수 대조(병렬 조사 2건) + 코드/스키마 직접 검증 실시, 21건 발견(Critical 3·High 5·Medium 6·Low 7) — `docs/02_Analysis/An_15_Phase7_UPS특송_전체점검_및_보완계획.md`. Edward 지시대로 **GitHub Issue를 진실의 근거로, 본 파일은 동기화 캐시로 전환**(Issue #86 B방안 최초 실적용) — GH#201(D_Kai, OVERSIZE 시드오류)·GH#202(B_Kai, Zone정밀화 연결)·GH#203(Aiden, API명세 갱신)·GH#204(Riley, Admin UI 신규탭)·GH#205·GH#206(Aiden, 문서정리) 신규 발령. Team B Issue #181에 착수 순서 코멘트(B-059 즉시 가능, B-060은 GH#202·203 완료 후 권장) 게시. |
