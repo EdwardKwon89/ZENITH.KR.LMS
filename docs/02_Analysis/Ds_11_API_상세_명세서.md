@@ -504,6 +504,18 @@ Team A가 제공하는 API 계약 — Team B가 오더 등록 화면 연동 시 
 - **요율 저장 방식**: 별도 API·로직 분기 없이 기존 `zen_ups_base_rates`(제품×Zone×1kg 단위 weight_kg) 구조를 그대로 사용 — `estimateUpsFreight()` 계산 경로는 일반 상품과 동일하다. `max_weight_kg`는 현재 소스코드 어디에서도 참조되지 않는 메타데이터 컬럼(참고용 시딩)이며, 실중량이 상한을 초과해도 서버측에서 별도로 차단하지 않는다 — 개선 필요 여부는 후속 검토 대상(본 이슈 범위 밖).
 - **Zone 범위**: Z1(국내) 제외, Z2~Z10에 대해서만 요율 시드.
 
+### 11.10 UPS 용어 정의 (Glossary)
+
+| 용어 | 영문 | 정의 | 사용처 |
+|:----|:----|:----|:------|
+| 부피 할증 | Oversize Rule | 일정 기준 초과 포장물에 추가 요금을 부과하는 룰. `applyOversizeRule()` 함수로 구현됨. | `pricing-engine.ts` |
+| 유류 할증 | Fuel Surcharge | 유가 변동에 따른 할증료. `zen_ups_fuel_surcharges` 테이블 기준, 판매가/원가 각각 비율 적용. | `pricing-engine.ts` |
+| 부가요금 | Other Charges | DDU/DDP/OVERSIZE 등 건별 부가 비용. `unit: 'PKG' | 'KG' | 'LOT'` 단위로 설정. 배송 건수 곱 적용은 미구현(GH#206 #10 참조). | `freight.ts`, `agency-pricing.ts` |
+| DWB | Deficit Weight Billing | 청구 중량 부족분 보전 로직. 20kg 초과 구간에서 현재 중량 vs 다음 티어 최소 중량 차이를 비교하여 더 큰 쪽으로 청구. `dwbApplied` 필드로 추적. | `pricing-engine.ts` |
+| 최소운임 | Freight Minimum | WW_FLIGHT 상품에만 적용되는 최소 청구 금액. `zen_ups_freight_minimums` 테이블 참조. | `freight.ts` |
+| SHXK 국가매핑 | SHXK Country Map | UPS 라벨 발급용 SHXK 코드 매핑 테이블(`zen_ups_shxk_country_map`). 요율 계산과 무관. | `ups-labels.ts` |
+| Zone 국가매핑 | Zone Country Map | Zone 기반 요율 계산용 국가 매핑 테이블(`zen_ups_zone_countries`). SHXK 매핑과 목적 및 관리 주체가 다름. | `freight.ts`, `rates.ts` |
+
 ---
 
 ## ⚠️ 확인된 사항 (Findings & Gaps)
