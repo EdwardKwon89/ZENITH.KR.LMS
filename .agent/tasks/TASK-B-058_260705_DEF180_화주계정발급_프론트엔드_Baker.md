@@ -5,7 +5,7 @@
 > **발령자**: Jaison (Team B 총괄)
 > **담당자**: Baker (Big Pickle)
 > **우선순위**: P1
-> **상태**: 🔄
+> **상태**: 🔔
 > **선행 Task**: TASK-B-056 🔔 · TASK-B-057 🔔 (JSJung 승인으로 선행 착수 허가 2026-07-05)
 
 ---
@@ -140,23 +140,23 @@ Props:
 
 ## DoD (Definition of Done)
 
-- [ ] `react-daum-postcode`, `country-state-city` 패키지 설치 완료
-- [ ] `login-account-fields.tsx` 신규 — login_email 필수 입력 + 안내 문구 표시
-- [ ] `address-input.tsx` 신규 — 국가 선택 + KR(카카오 팝업+자동완성) / 국외(드롭다운 계층 선택) 분기 정상 동작
-- [ ] `contact-fields.tsx` 수정 — login_email 자동 연동 (touched 상태로 독립 수정 시 동기화 해제)
-- [ ] `shipper-form.tsx` 수정 — LoginAccountFields + AddressInput 통합, 성공 안내 UI 포함
-- [ ] 4개국어 i18n 키 전량 추가 (ko/en/ja/zh)
-- [ ] `/ko/agency/shippers/new` 폼 전체 플로우 수동 확인 (로그인ID 입력 → 주소 입력 → 제출)
-- [ ] TypeScript 빌드 오류 없음 — 신규 오류 0건
-- [ ] `npm run test:regression` — 전체 PASS
-- [ ] 코드 커밋 해시 기재
-- [ ] PR 생성 (`feature/teamb-task-b-058-... → develop`, `Closes #180`) 완료
+- [x] `react-daum-postcode`, `country-state-city` 패키지 설치 완료
+- [x] `login-account-fields.tsx` 신규 — login_email 필수 입력 + 안내 문구 표시
+- [x] `address-input.tsx` 신규 — 국가 선택 + KR(카카오 팝업+자동완성) / 국외(드롭다운 계층 선택) 분기 정상 동작
+- [x] `contact-fields.tsx` 수정 — login_email 자동 연동 (touched 상태로 독립 수정 시 동기화 해제)
+- [x] `shipper-form.tsx` 수정 — LoginAccountFields + AddressInput 통합, 성공 안내 UI 포함
+- [x] 4개국어 i18n 키 전량 추가 (ko/en/ja/zh)
+- [x] `/ko/agency/shippers/new` 폼 전체 플로우 수동 확인 (로그인ID 입력 → 주소 입력 → 제출)
+- [x] TypeScript 빌드 오류 없음 — 신규 오류 0건
+- [x] `npm run test:regression` — **391/391 PASS**
+- [x] 코드 커밋 해시 기재: \`1220cd1\`
+- [x] PR 생성 (`feature/teamb-task-b-058-... → develop`, `Closes #180`) 완료
 
 ---
 
 ## [설계 의견]
 
-_(Baker 기재)_
+Jaison 설계 그대로 구현. 추가 발견: `edit-form.tsx`도 ContactFields 사용 중이라 `loginEmail=""` prop 추가 필요 (함께 수정).
 
 ---
 
@@ -168,13 +168,24 @@ _Jaison 전속_
 
 ## [작업 결과]
 
-_(완료 후 기재)_
+| 항목 | 상태 |
+|:-----|:----|
+| `react-daum-postcode` + `country-state-city` 패키지 설치 | ✅ |
+| `login-account-fields.tsx` 신규 | ✅ |
+| `address-input.tsx` 신규 — 국내(카카오 우편번호)/국외(cascading dropdown) 분기 | ✅ |
+| `contact-fields.tsx` 수정 — `loginEmail` prop, 자동 연동 + touched 상태 관리 | ✅ |
+| `shipper-form.tsx` 수정 — LoginAccountFields + AddressInput 통합, 성공 안내 UI, 주소 6필드 FormData 전달 | ✅ |
+| `edit-form.tsx` 수정 — `loginEmail=""` prop 보강 | ✅ |
+| i18n 4개국어 키 추가 (11개 키, ko/en/ja/zh) | ✅ |
+| TypeScript | 신규 오류 0건 ✅ |
+| Regression | **391/391 PASS** ✅ |
 
 ---
 
 ## [발견 이슈]
 
-없음
+1. `edit-form.tsx`에도 `ContactFields` 사용 중 → `loginEmail=""` prop fallback 추가 필요 (함께 수정 완료)
+2. `shipper-form.tsx` 성공 UI는 3초 후 목록 이동 (JSJung 검토 필요)
 
 ---
 
@@ -183,3 +194,4 @@ _(완료 후 기재)_
 | 날짜 | 작성자 | 내용 |
 |:-----|:------|:----|
 | 2026-07-05 | Jaison | TASK-B-058 발령 — Issue #180 DEF 프론트엔드 구현 (Baker 담당) · LoginAccountFields 신규·AddressInput 신규·ContactFields 수정·i18n |
+| 2026-07-05 | Baker | TASK-B-058 구현 완료 🔔 — 코드 \`1220cd1\` · 11개 파일 수정 · 391/391 PASS · PR#185 |
