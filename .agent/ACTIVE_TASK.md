@@ -294,6 +294,15 @@
 | TASK-B-055 | 260705 | UAT-16 결함 수정 — 요율 오버라이드 신규 등록 폼 기준요율 드롭다운 UUID 표시 | P1 | 없음 | Baker (구현) | ✅ | [TASK-B-055](tasks/TASK-B-055_260705_UAT16_RateOverrides_기준요율드롭다운UUID표시수정_Baker.md) | UAT-16-01 Step2 결함 · getUpsBaseRates join 추가 + 드롭다운 코드명 표시 · 코드 `36574ad` · 388/388 PASS · PR#179 ✅ 머지 · Aiden ✅ 260705 |
 | TASK-169 | 260630 | DEF-086/087 인보이스 PDF — DB 마이그레이션 + Server Action | P2 | 없음 | D_Kai (구현) | ✅ | [TASK-169](tasks/TASK-169_260630_DEF086087_InvoicePDF_DB+SA_DKai.md) | Issue #152 · PR#154 ✅ 머지 (`51eba6c`) · zen_invoice_files 마이그레이션+SA 완료 · DEF-086 해소 |
 | TASK-170 | 260630 | DEF-086/087 인보이스 PDF — 오더 상세 UI 버튼 구현 | P2 | TASK-169 ✅ | B_Kai (구현) | ✅ | [TASK-170](tasks/TASK-170_260630_DEF086087_InvoicePDF_UI버튼_BKai.md) | Issue #152 · PR#155 ✅ 머지 (`ad9d1d1` develop 반영 확인) · DoD 13/13 · Aiden ✅ 260701 |
+| **── Phase 7.1 ──** | | **UPS 특송 요금 관리 보완 (Admin/Agency/Shipper 계산 파이프라인)** | | | | | | **✅ Edward 설계 승인(260705) — Team A(Aiden) 구현, [An_14_Phase7_UPS요금관리_설계보완.md](../docs/02_Analysis/An_14_Phase7_UPS요금관리_설계보완.md)** |
+| TASK-171 | 260705 | 스키마: Agency 할인율정책·Agency부가요금 신규 + rate_overrides RLS/트리거 + OC 4종 추가 (An-14 §3) | P1 | 없음 | Aiden | 🔄 | — | 브랜치 `feature/teama-phase71-ups-rate-management` 착수 |
+| TASK-172 | 260705 | `feature/ups-spr03-bkai-rates-admin` 브랜치 코드 이식 — pricing-engine.ts 복원 (An-14 §4) | TASK-171 | Aiden | 🚫 | — | TASK-171 완료 후 착수 |
+| TASK-173 | 260705 | pricing-engine 보강(원가×1.07·대형포장물룰) + agency/shipper 계산 모듈 신규 (An-14 §4) | TASK-172 | Aiden | 🚫 | — | TASK-172 완료 후 착수 |
+| TASK-174 | 260705 | estimateUpsFreight 통합 Action + 오더등록 실시간 미리보기 + 스냅샷 연동 (An-14 §4) | TASK-173 | Aiden | 🚫 | — | TASK-173 완료 후 착수 |
+| TASK-175 | 260705 | Admin UI 완성 — 기준요금·유류할증·OC 3탭 + Agency 할인율정책 탭 신규 (An-14 §5) | TASK-171·172 | Aiden | 🚫 | — | TASK-172 완료 후 착수 |
+| TASK-176 | 260705 | Agency UI 수정 — rate-overrides cost_price 읽기전용화 + Agency 부가요금 등록 (An-14 §5) | TASK-171 | Aiden | 🚫 | — | TASK-171 완료 후 착수 |
+| TASK-177 | 260705 | Ds_11 API 명세 갱신 + UAT-17-03 완료처리 + 신규 UAT-20/21/22 작성 (An-14 §6·7) | TASK-174~176 | Aiden | 🚫 | — | TASK-174~176 완료 후 착수 |
+| TASK-178 | 260705 | 전체 회귀 + E2E-24 재검증 | TASK-171~177 | Aiden | 🚫 | — | 전량 완료 후 착수 |
 ---
 
 ## Agent 현황
@@ -724,3 +733,4 @@
 | 2026-06-09 | Aiden (Claude) | **TASK-133 ❌ 반려** — DoD 코드 커밋 해시 `TBD` 기재. R-17 v1.5 §5·v1.6 위반(`check-R17-DoD` 미실행 또는 TBD 미정정 통과). 코드 재작업 불필요. 재작업: DoD 해시 TBD→`2dac510` 정정 + check-R17-DoD 재실행 + 문서 커밋 1건. |
 | 2026-06-09 | B_Kai (OpenCode) | **TASK-133 재작업 🔔** — DoD 해시 TBD→`2dac510` 정정, 빌드 ✅ 기재, 헤더 ❌→🔔. 재작업 커밋 `61caaee`. |
 | 2026-06-09 | Aiden (Claude) | **TASK-133 ✅ 최종 승인** (재검토) — DoD 6/6·코드 `2dac510`·재작업 `61caaee`·316/316 PASS·빌드 ✅ 실물 확인. R-17 준수. B_Kai 신규 Task 대기. |
+| 2026-07-05 | Aiden (Claude) | **Phase 7.1 신설 — UPS 요금관리 보완 설계(An-14)**. `20260705 UPS특송 요금관리.md` 요구사항 대비 구현현황 조사 결과 Admin 요율 UI(TASK-146)·요금계산엔진(TASK-141) 브랜치 develop 미병합 확인, Agency/화주 할인·마진 계산 로직 전면 미구현 확인. SNTL 원자료(`sntl_ups.txt`, UPS 2026 Rate Guide) 대조로 원가+7%룰·현지통관 OC 4종·대형포장물 특수룰 반영. TASK-171~178 🚫 등록 — Edward 설계 승인 대기. 요율표 구조 정확도 리스크(20kg초과 구간·Box상품·Zone서비스별상이·DWB·Freight최소운임) 5건은 §9 백로그(IMP-146 가칭)로 분리. |

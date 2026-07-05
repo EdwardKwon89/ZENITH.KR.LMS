@@ -1,7 +1,7 @@
 # 🗺️ LIVE Regression Test Master Map
 
-> **총 테스트 케이스:** 384 Cases  
-> **최종 검증일:** 2026-06-20 (TASK-155 [P7-SPR-07] E2E·UAT 선행 스펙 작성 · TC-P7-ADDR-01~05, TC-P7-CLOSE-01~05 등재 · 374/374 PASS)  
+> **총 테스트 케이스:** 393 Cases (vitest 개별 테스트 기준, 70 test files)
+> **최종 검증일:** 2026-07-05 (TASK-171 Phase 7.1 UPS Agency 할인율 정책 · TC-UPS-AGPOL-01~05 등재 · 393/393 PASS)  
 
 제니스 플랫폼의 비즈니스 영속성을 보장하는 회귀 테스트 케이스의 통합 명세서입니다. 모든 신규 개발 및 수정 시 이 맵에 케이스가 추가되어야 하며, 전체 테스트가 통과되어야 합니다.
 
@@ -475,6 +475,15 @@
 | **TC-P8-UPS-05** | Void 버튼 → confirm → 폐기 완료 | `markLabelVoided` UPDATE 성공 및 UI 반영 | `tests/e2e/e2e-26-ups-label-flow.spec.ts` |
 | **TC-P8-UPS-06** | 재발급 버튼 클릭 → 새 운송장 번호 갱신 | `issueUpsLabel` 정상 호출 및 DB `is_voided=false` 레코드 생성 확인 | `tests/e2e/e2e-26-ups-label-flow.spec.ts` |
 | **TC-P8-UPS-07** | gettrack polling → tracking_events 저장 | 폴링 첫 호출 후 `zen_ups_tracking_events` 삽입 확인 | `tests/e2e/e2e-26-ups-label-flow.spec.ts` |
+
+### 37. Phase 7.1 UPS Agency 할인율 정책 + 원가 자동계산 (IMP-145)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-UPS-AGPOL-01** | 할인율 정책 없는 대리점 오버라이드 등록 차단 | `zen_agency_pricing_policies` 부재 시 INSERT 에러 발생 확인 | `tests/integration/p71-ups-agency-pricing.test.ts` |
+| **TC-UPS-AGPOL-02** | cost_price = 판매가×(1-할인율) 자동계산 | 트리거가 Agency 입력값을 무시하고 재계산하는지 확인 | `tests/integration/p71-ups-agency-pricing.test.ts` |
+| **TC-UPS-AGPOL-03** | UPDATE 시에도 cost_price 자동 재계산 유지 | Agency가 임의 값으로 갱신 시도해도 트리거값 유지 확인 | `tests/integration/p71-ups-agency-pricing.test.ts` |
+| **TC-UPS-AGPOL-04** | 현지통관/기타 부가수수료 4종 시드 확인 | DUTY_AMOUNT 등 4종, fuel_surcharge_applicable=false 확인 | `tests/integration/p71-ups-agency-pricing.test.ts` |
+| **TC-UPS-AGPOL-05** | `fn_get_ups_agency_selling_price` 반환값 검증 | Agency override selling_price 정상 반환 확인 | `tests/integration/p71-ups-agency-pricing.test.ts` |
 
 ---
 
