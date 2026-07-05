@@ -23,8 +23,6 @@ export interface AgencyShipperRow extends AgencyShipper {
   } | null;
 }
 
-export type UpdateAgencyShipperInput = CreateAgencyShipperInput;
-
 export interface CreateAgencyShipperInput {
   name: string;
   shipper_type: 'INDIVIDUAL' | 'CORPORATE';
@@ -35,9 +33,16 @@ export interface CreateAgencyShipperInput {
   contact_phone?: string;
   biz_no?: string;
   rep_name?: string;
+  login_email: string;
+  country_code?: string;
+  state_province?: string;
+  city?: string;
+  address?: string;
+  address_detail?: string;
+  zipcode?: string;
 }
 
-export type UpdateAgencyShipperInput = CreateAgencyShipperInput;
+export type UpdateAgencyShipperInput = Omit<CreateAgencyShipperInput, 'login_email'>;
 
 export interface AgencyRateOverride {
   id: string;

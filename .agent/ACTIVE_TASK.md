@@ -292,6 +292,9 @@
 | TASK-B-053 | 260705 | UAT-16 사전 수정 — 요율 오버라이드 사이드바 메뉴 i18n 누락 | P1 | 없음 | Baker (구현) | ✅ | [TASK-B-053](tasks/TASK-B-053_260705_UAT16_요율오버라이드_메뉴i18n_Baker.md) | UAT-16 수행 선행 조건 · Navigation 네임스페이스 4개국어 키 추가 · PR#177 ✅ 머지 (`cca72cc`) · 388/388 · Aiden ✅ 260705 |
 | TASK-B-054 | 260705 | UAT-16 블로커 수정 — rate-overrides 서버 `t` 함수 클라이언트 전달 500 에러 | P1 | 없음 | Baker (구현) | ✅ | [TASK-B-054](tasks/TASK-B-054_260705_UAT16_RateOverrides_서버t함수클라이언트전달수정_Baker.md) | Issue #160 · 코드 `7fe0bb2` · 388/388 PASS · PR#178 ✅ 머지 · Aiden ✅ 260705 |
 | TASK-B-055 | 260705 | UAT-16 결함 수정 — 요율 오버라이드 신규 등록 폼 기준요율 드롭다운 UUID 표시 | P1 | 없음 | Baker (구현) | ✅ | [TASK-B-055](tasks/TASK-B-055_260705_UAT16_RateOverrides_기준요율드롭다운UUID표시수정_Baker.md) | UAT-16-01 Step2 결함 · getUpsBaseRates join 추가 + 드롭다운 코드명 표시 · 코드 `36574ad` · 388/388 PASS · PR#179 ✅ 머지 · Aiden ✅ 260705 |
+| TASK-B-056 | 260705 | Issue #180 DEF — 화주 계정 발급 기반 구축 (DB migration · RBAC · Validation · Types) | P1 | 없음 | Jaison | 🔔 | [TASK-B-056](tasks/TASK-B-056_260705_DEF180_화주계정발급_기반구축_Jaison.md) | Issue #180 · 코드 `d2e3b98` · 391/391 · PR 생성 대기 · TASK-B-057·058 전제조건 |
+| TASK-B-057 | 260705 | Issue #180 DEF — 화주 계정 발급 백엔드 (Auth createUser · 임시PW · Resend 이메일 · 롤백) | P1 | TASK-B-056 ✅ | Dave (구현) | 🚫 | [TASK-B-057](tasks/TASK-B-057_260705_DEF180_화주계정발급_백엔드_Dave.md) | Issue #180 · createAgencyShipper 재구현 + sendShipperWelcomeEmail |
+| TASK-B-058 | 260705 | Issue #180 DEF — 화주 계정 발급 프론트엔드 (LoginAccountFields · AddressInput · i18n) | P1 | TASK-B-056 ✅ · TASK-B-057 ✅ 권장 | Baker (구현) | 🚫 | [TASK-B-058](tasks/TASK-B-058_260705_DEF180_화주계정발급_프론트엔드_Baker.md) | Issue #180 · react-daum-postcode + country-state-city |
 | TASK-169 | 260630 | DEF-086/087 인보이스 PDF — DB 마이그레이션 + Server Action | P2 | 없음 | D_Kai (구현) | ✅ | [TASK-169](tasks/TASK-169_260630_DEF086087_InvoicePDF_DB+SA_DKai.md) | Issue #152 · PR#154 ✅ 머지 (`51eba6c`) · zen_invoice_files 마이그레이션+SA 완료 · DEF-086 해소 |
 | TASK-170 | 260630 | DEF-086/087 인보이스 PDF — 오더 상세 UI 버튼 구현 | P2 | TASK-169 ✅ | B_Kai (구현) | ✅ | [TASK-170](tasks/TASK-170_260630_DEF086087_InvoicePDF_UI버튼_BKai.md) | Issue #152 · PR#155 ✅ 머지 (`ad9d1d1` develop 반영 확인) · DoD 13/13 · Aiden ✅ 260701 |
 | **── Phase 7.1 ──** | | **UPS 특송 요금 "등록" 관리 (Admin/Agency 계산엔진+등록UI, Team A 범위)** | | | | | | **✅✅ develop 머지 완료(260705, PR#186 `55adff5`) — [An_14](../docs/02_Analysis/An_14_Phase7_UPS요금관리_설계보완.md) · GH#182(main 머지 시 클로즈 예정) · Team B 인계(오더연동+정산)는 GH#181 참조 · 회귀 424/424 PASS(develop 재검증 완료)** |
@@ -337,15 +340,17 @@
 | Agent | 상태 | 비고 |
 |:------|:----:|:----|
 | **JSJung** (팀 리더) | ✅ TASK-B-030 승인 완료 (260628) · ✅ TASK-B-033 승인 완료 (260701) | §1§2 확인 완료 · DEF-088 교정 완료 · PR#156 squash 머지 (e2bf48b) |
-| **Jaison** (AI Agent 총괄) | ✅ TASK-B-033 완료 보고 승인 (260701) | §1 .env.local 확인 · §2 zen_agency_rate_overrides 확인 · DEF-088 컬럼명 교정 · PR#156 머지 완료 |
-| **Dave** (AI Agent) | ✅ TASK-B-051 승인 완료 (260705) | UAT-15 Backend — PR#175 ✅ 머지 · 다음: 없음 (B-052 Baker 담당) |
-| **Baker** (AI Agent) | ✅ TASK-B-055 완료 (260705) | UAT-16-01 결함 — 기준요율 드롭다운 UUID → 코드명 표시 · PR#179 · 388/388 ✅ |
+| **Jaison** (AI Agent 총괄) | 🔔 TASK-B-056 검토 요청 (260705) | 코드 `d2e3b98` · 391/391 PASS · PR 생성 대기 |
+| **Dave** (AI Agent) | 🚫 TASK-B-057 대기 — TASK-B-056 ✅ 후 착수 | Issue #180 Backend — Auth createUser + 임시PW + 이메일 + 롤백 |
+| **Baker** (AI Agent) | 🚫 TASK-B-058 대기 — TASK-B-056 ✅ + TASK-B-057 ✅ 권장 후 착수 | Issue #180 Frontend — LoginAccountFields · AddressInput · i18n |
 | **Gale** (AI Agent) | 대기 | 추후 재배정 예정 |
 
 ---
 
 ## 개정 이력
 
+| 2026-07-05 | Jaison (Team B) | **TASK-B-056 🔔 완료 보고** — DB migration 6컬럼 · RBAC AGENCY_SHIPPER · login_email 스키마 · 타입 분리 · TC-P7-SHIPPER-05 신규 3건. 코드 `d2e3b98` · 391/391 PASS · PR 생성 대기 |
+| 2026-07-05 | Jaison (Team B) | **TASK-B-056/057/058 신규 발령** — Issue #180 DEF 화주 계정 발급 3-Task 분할. Jaison(B-056 기반구축) · Dave(B-057 Backend, 🚫 B-056 대기) · Baker(B-058 Frontend, 🚫 B-056·057 대기). 설계 확정 내용 Issue #180 코멘트 등록 완료 |
 | 2026-07-04 | Dave | **TASK-B-051 🔔 완료** — UAT-15 피드백: 화주목록 contact 필드 조회 + Zod regex 강화 · 코드 `8c8b463` · 388/388 · PR#175 |
 | 2026-07-04 | Aiden | **TASK-B-043/044/045/046/047/048/049/050 ✅ 머지 승인** — PR#173/174/167/168/169/170 전량 develop 머지 완료 · ACTIVE_TASK ✅ 갱신 |
 | 2026-07-04 | Dave | **TASK-B-045 🔔 사후 마감** — DEF-090 Backend · PR#165 → Jaison develop 반영 (`333b904`) · code+docs task file 정리 |

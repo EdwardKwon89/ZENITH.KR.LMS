@@ -12,6 +12,15 @@ export const CreateAgencyShipperSchema = z.object({
   contact_phone: z.string().regex(/^0\d{1,2}-\d{3,4}-\d{4}$/, '연락처 형식이 올바르지 않습니다. (예: 010-1234-5678)').optional().or(z.literal('')),
   biz_no: z.string().regex(/^\d{3}-\d{2}-\d{5}$/, '사업자번호 형식이 올바르지 않습니다. (예: 123-45-67890)').optional().or(z.literal('')),
   rep_name: z.string().optional(),
+  login_email: z.string()
+    .email('유효한 이메일 형식이 아닙니다.')
+    .min(1, '로그인 ID를 입력해주세요.'),
+  country_code: z.string().length(2).default('KR'),
+  state_province: z.string().max(100).optional(),
+  city: z.string().max(100).optional(),
+  address: z.string().max(200).optional(),
+  address_detail: z.string().max(100).optional(),
+  zipcode: z.string().max(20).optional().or(z.literal('')),
 }).superRefine((data, ctx) => {
   if (data.shipper_type === 'CORPORATE' && !data.biz_no) {
     ctx.addIssue({
