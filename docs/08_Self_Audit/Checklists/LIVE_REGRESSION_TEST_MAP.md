@@ -516,6 +516,16 @@
 | **TC-UPS-ZONEMAP-02** | 1단계 Fallback: direction 없음 → `null` 방향 폴백 | direction 미지정 시 자동 폴백 검증 | `tests/unit/ups/zone-map.test.ts` |
 | **TC-UPS-ZONEMAP-03** | 2단계 Fallback: service+direction 전부 불일치 → `null` 반환 | 완전 미매핑 국가의 null 반환 + `fallbackApplied` 필드 검증 | `tests/unit/ups/zone-map.test.ts` |
 
+### 41. Hotfix DEF-095 — WW_EXPEDITED 상품별 중량 반올림 규칙 (TASK-181)
+
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-UPS-EXPEDITED-ROUND-01** | WW_EXPEDITED 20kg 이하 1kg 단위 올림 | 공식 Rate Guide p.2 원문 규칙 준수 확인 | `tests/unit/ups/pricing-engine.test.ts` |
+| **TC-UPS-EXPEDITED-ROUND-02** | WW_EXPEDITED 20kg 초과 1kg 단위 올림 | 경계값 이후에도 규칙 유지 확인 | `tests/unit/ups/pricing-engine.test.ts` |
+| **TC-UPS-EXPEDITED-ROUND-03** | 그 외 상품 20kg 이하 0.5kg 단위 올림 | 기존 규칙 회귀 방지 | `tests/unit/ups/pricing-engine.test.ts` |
+| **TC-UPS-EXPEDITED-ROUND-04** | 그 외 상품 20kg 초과 1kg 단위 올림 | 경계 전환 정확성 확인 | `tests/unit/ups/pricing-engine.test.ts` |
+| **TC-UPS-EXPEDITED-ROUND-05** | `computeUpsFreight` 통합 — WW_EXPEDITED 청구중량 반영 | 실제 계산 흐름에 반올림 함수 정상 연결 확인 | `tests/unit/ups/pricing-engine.test.ts` |
+
 ---
 
 ## 📝 가이드라인 (R-09 Enforcement)
