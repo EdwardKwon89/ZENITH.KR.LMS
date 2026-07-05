@@ -7,6 +7,10 @@ import {
   upsertUpsFuelSurcharge,
   createUpsOtherCharge,
   upsertAgencyPricingPolicy,
+  upsertUpsWeightTierRate,
+  deleteUpsWeightTierRate,
+  upsertUpsFreightMinimum,
+  deleteUpsFreightMinimum,
 } from '@/app/actions/ups/rates-mutation';
 import { validateUserAction } from '@/lib/auth/guards';
 
@@ -108,5 +112,31 @@ describe('TC-UPS-ADMIN: UPS Admin Rate CRUD Actions', () => {
       supabase: mockSupabase,
     });
     await expect(createUpsZone({ zone_code: 'Z1', zone_name: 'Test' })).rejects.toThrow('UPS 요율 관리 권한이 없습니다.');
+  });
+
+  it('TC-UPS-ADMIN-08: upsertUpsWeightTierRate — 20kg 초과 티어 요율 등록', async () => {
+    await upsertUpsWeightTierRate({
+      product_id: 'prod-001', zone_id: 'zone-001', tier_min_kg: 21,
+      price_per_kg_selling: 6000, price_per_kg_cost: 5000, valid_from: '2026-07-01'
+    });
+    expect(mockSupabase.from).toHaveBeenCalledWith('zen_ups_weight_tier_rates');
+  });
+
+  it('TC-UPS-ADMIN-09: deleteUpsWeightTierRate — 20kg 초과 티어 요율 삭제/비활성화', async () => {
+    await deleteUpsWeightTierRate('tier-rate-001');
+    expect(mockSupabase.from).toHaveBeenCalledWith('zen_ups_weight_tier_rates');
+  });
+
+  it('TC-UPS-ADMIN-10: upsertUpsFreightMinimum — Freight 최소운임 등록', async () => {
+    await upsertUpsFreightMinimum({
+      product_id: 'prod-001', zone_id: 'zone-001',
+      min_charge_selling: 180000, min_charge_cost: 150000
+    });
+    expect(mockSupabase.from).toHaveBeenCalledWith('zen_ups_freight_minimums');
+  });
+
+  it('TC-UPS-ADMIN-11: deleteUpsFreightMinimum — Freight 최소운임 삭제/비활성화', async () => {
+    await deleteUpsFreightMinimum('freight-min-001');
+    expect(mockSupabase.from).toHaveBeenCalledWith('zen_ups_freight_minimums');
   });
 });

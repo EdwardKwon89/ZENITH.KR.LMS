@@ -409,3 +409,5 @@
 | 2026-07-05 | Aiden (Claude, ZEN_CEO) | **IMP-146 ✅ TASK-180 Aiden 승인·머지 완료 (PR#196) — IMP-146 전체 완료.** DWB 로직(20kg 경계 전이 포함)·Freight 최소운임(WW_FLIGHT 스코프)·테스트 7종 실물 검증 완료, R-17 커밋분리 준수 확인. Advisory: `any` 타입 일부 잔존(비차단). An-14 §9 백로그 5건(TASK-179+180) 전량 해소. |
 | 2026-07-05 | Jaison (Team B) | **TASK-B-056 🔔 Issue #180 DEF 기반 구축 완료** — DB migration(주소 6컬럼), RBAC AGENCY_SHIPPER role, Validation login_email 필수+주소 6필드, Types UpdateAgencyShipperInput Omit 분리. TC-P7-SHIPPER-05 신규 3건(R-09). 회귀 391/391 PASS. 코드 `d2e3b98`. PR 생성 대기. |
 | 2026-07-05 | Aiden (Claude, ZEN_CEO) | **An-15 UPS 특송 전체점검 완료 — Phase 7.3 GH Issue 발령(Issue #86 B방안 최초 적용)** — Critical 3건(GH#201 OVERSIZE 시드오류·GH#202 Zone정밀화 미연결·GH#203 API명세 갱신)·High 2건(GH#204 Admin UI·GH#205 문서정합성)·Medium/Low 묶음(GH#206) 등록. 이후 IMP 진행상황은 각 GH Issue/PR에서 관리, 본 파일은 요약 참고용으로만 갱신 예정. |
+| 2026-07-06 | Riley (Gemini) | **IMP-146 🔔 GH#204 어드민 UI 요율 탭 추가 완료** — `/admin/ups-rates` 어드민 화면에 20kg 초과 티어 요율 및 Freight 최소운임 탭 신규 구현. CRUD Server Actions 및 UI 목록 그리드/모달 등록 폼 완료. TC-UPS-ADMIN-08~11 4개 신규 테스트 케이스 작성 및 회귀 454/454 PASS. |
+

@@ -1,12 +1,12 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { Plus, Edit2, Trash2, XCircle, Globe, Package, DollarSign, Fuel, FileText, Building } from 'lucide-react';
+import { Plus, Edit2, Trash2, XCircle, Globe, Package, DollarSign, Fuel, FileText, Building, Scale, Layers } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { USER_ROLES } from '@/lib/auth/rbac';
 import { ZenBadge } from '@/components/ui/ZenUI';
 import ZenDataGrid from '@/components/ui/ZenDataGrid';
-import type { UpsZoneWithCountries, UpsProduct, UpsBaseRateWithRefs, UpsFuelSurcharge, UpsOtherCharge } from '@/types/ups';
+import type { UpsZoneWithCountries, UpsProduct, UpsBaseRateWithRefs, UpsFuelSurcharge, UpsOtherCharge, UpsWeightTierRateWithRefs, UpsFreightMinimumWithRefs } from '@/types/ups';
 import {
   createUpsZone, updateUpsZone, deleteUpsZone,
   addZoneCountry, removeZoneCountry,
@@ -15,6 +15,8 @@ import {
   upsertUpsFuelSurcharge,
   createUpsOtherCharge, updateUpsOtherCharge, deleteUpsOtherCharge,
   upsertAgencyPricingPolicy,
+  upsertUpsWeightTierRate, deleteUpsWeightTierRate,
+  upsertUpsFreightMinimum, deleteUpsFreightMinimum,
 } from '@/app/actions/ups/rates-mutation';
 import type { ColumnDef } from '@tanstack/react-table';
 
@@ -30,10 +32,12 @@ interface Props {
   otherCharges: UpsOtherCharge[];
   agencyPolicies: AgencyPolicy[];
   agencies: Agency[];
+  weightTierRates: UpsWeightTierRateWithRefs[];
+  freightMinimums: UpsFreightMinimumWithRefs[];
   userRole: string;
 }
 
-type TabKey = 'zones' | 'products' | 'baseRates' | 'fuelSurcharges' | 'otherCharges' | 'agencyPolicies';
+type TabKey = 'zones' | 'products' | 'baseRates' | 'fuelSurcharges' | 'otherCharges' | 'agencyPolicies' | 'weightTierRates' | 'freightMinimums';
 
 const TABS: { key: TabKey; label: string; icon: React.ElementType }[] = [
   { key: 'zones', label: 'Zone 관리', icon: Globe },
@@ -42,9 +46,11 @@ const TABS: { key: TabKey; label: string; icon: React.ElementType }[] = [
   { key: 'fuelSurcharges', label: '유류할증', icon: Fuel },
   { key: 'otherCharges', label: '부가요금', icon: FileText },
   { key: 'agencyPolicies', label: 'Agency 할인율 정책', icon: Building },
+  { key: 'weightTierRates', label: '20kg 초과 티어 요율', icon: Layers },
+  { key: 'freightMinimums', label: 'Freight 최소운임', icon: Scale },
 ];
 
-export default function UpsRatesClient({ zones, products, baseRates, fuelSurcharges, otherCharges, agencyPolicies, agencies, userRole }: Props) {
+export default function UpsRatesClient({ zones, products, baseRates, fuelSurcharges, otherCharges, agencyPolicies, agencies, weightTierRates, freightMinimums, userRole }: Props) {
   const [activeTab, setActiveTab] = useState<TabKey>('zones');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
@@ -61,8 +67,23 @@ export default function UpsRatesClient({ zones, products, baseRates, fuelSurchar
   const handleSubmit = async () => {
     setLoading(true);
     try {
-      const submit: Record<string, any> = { zones: createUpsZone, products: createUpsProduct, baseRates: upsertUpsBaseRate, fuelSurcharges: upsertUpsFuelSurcharge, otherCharges: createUpsOtherCharge, agencyPolicies: upsertAgencyPricingPolicy };
-      const update: Record<string, any> = { zones: updateUpsZone, products: updateUpsProduct, otherCharges: updateUpsOtherCharge };
+      const submit: Record<string, any> = {
+        zones: createUpsZone,
+        products: createUpsProduct,
+        baseRates: upsertUpsBaseRate,
+        fuelSurcharges: upsertUpsFuelSurcharge,
+        otherCharges: createUpsOtherCharge,
+        agencyPolicies: upsertAgencyPricingPolicy,
+        weightTierRates: upsertUpsWeightTierRate,
+        freightMinimums: upsertUpsFreightMinimum,
+      };
+      const update: Record<string, any> = {
+        zones: updateUpsZone,
+        products: updateUpsProduct,
+        otherCharges: updateUpsOtherCharge,
+        weightTierRates: (id: string, data: any) => upsertUpsWeightTierRate({ ...data, id }),
+        freightMinimums: (id: string, data: any) => upsertUpsFreightMinimum({ ...data, id }),
+      };
       if (editingItem && update[activeTab]) {
         const { error } = await update[activeTab](editingItem.id, form);
         if (error) throw new Error(error);
@@ -82,7 +103,13 @@ export default function UpsRatesClient({ zones, products, baseRates, fuelSurchar
     if (!confirm('비활성화하시겠습니까?')) return;
     setLoading(true);
     try {
-      const del: Record<string, any> = { zones: deleteUpsZone, products: (id: string) => updateUpsProduct(id, { is_active: false }), otherCharges: deleteUpsOtherCharge };
+      const del: Record<string, any> = {
+        zones: deleteUpsZone,
+        products: (id: string) => updateUpsProduct(id, { is_active: false }),
+        otherCharges: deleteUpsOtherCharge,
+        weightTierRates: deleteUpsWeightTierRate,
+        freightMinimums: deleteUpsFreightMinimum,
+      };
       await del[activeTab]?.(id);
       window.location.reload();
     } catch (e) {
@@ -100,6 +127,8 @@ export default function UpsRatesClient({ zones, products, baseRates, fuelSurchar
       case 'fuelSurcharges': return <FuelSurchargeForm form={form} setForm={setForm} products={products} />;
       case 'otherCharges': return <OtherChargeForm form={form} setForm={setForm} editingItem={editingItem} />;
       case 'agencyPolicies': return <AgencyPolicyForm form={form} setForm={setForm} agencies={agencies} />;
+      case 'weightTierRates': return <WeightTierRateForm form={form} setForm={setForm} products={products} zones={zones} />;
+      case 'freightMinimums': return <FreightMinimumForm form={form} setForm={setForm} products={products} zones={zones} />;
       default: return null;
     }
   };
@@ -112,6 +141,8 @@ export default function UpsRatesClient({ zones, products, baseRates, fuelSurchar
       case 'fuelSurcharges': return <FuelSurchargeTable rows={fuelSurcharges} />;
       case 'otherCharges': return <OtherChargeTable otherCharges={otherCharges} canEdit={canEdit} onEdit={openEdit} onDelete={handleDelete} />;
       case 'agencyPolicies': return <AgencyPolicyTable policies={agencyPolicies} canEdit={canEdit} onEdit={openEdit} agencies={agencies} />;
+      case 'weightTierRates': return <WeightTierRateTable weightTierRates={weightTierRates} canEdit={canEdit} onEdit={openEdit} onDelete={handleDelete} />;
+      case 'freightMinimums': return <FreightMinimumTable freightMinimums={freightMinimums} canEdit={canEdit} onEdit={openEdit} onDelete={handleDelete} />;
       default: return null;
     }
   };
@@ -135,7 +166,7 @@ export default function UpsRatesClient({ zones, products, baseRates, fuelSurchar
         {canEdit && activeTab !== 'baseRates' && activeTab !== 'fuelSurcharges' && (
           <button onClick={openNew} className="flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-xl hover:bg-brand-700 transition-all font-semibold shadow-sm hover:shadow-brand-500/20">
             <Plus size={18} />
-            {activeTab === 'zones' ? 'Zone 등록' : activeTab === 'products' ? '제품 등록' : activeTab === 'otherCharges' ? '부가요금 등록' : activeTab === 'agencyPolicies' ? '할인율 정책 등록' : '등록'}
+            {activeTab === 'zones' ? 'Zone 등록' : activeTab === 'products' ? '제품 등록' : activeTab === 'otherCharges' ? '부가요금 등록' : activeTab === 'agencyPolicies' ? '할인율 정책 등록' : activeTab === 'weightTierRates' ? '티어 요율 등록' : activeTab === 'freightMinimums' ? '최소운임 등록' : '등록'}
           </button>
         )}
       </div>
@@ -454,4 +485,100 @@ function ActionsCell({ row, onEdit, onDelete }: any) {
       <button onClick={() => onDelete(row.original.id)} className="p-2 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-rose-600 transition-colors"><Trash2 size={16} /></button>
     </div>
   );
+}
+
+// ─── Weight Tier Rate Form & Table ─────────────────────────────
+
+function WeightTierRateForm({ form, setForm, products, zones }: any) {
+  return (
+    <>
+      <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-1">
+          <label className="text-xs font-bold text-slate-500 uppercase">적용 제품</label>
+          <select value={form.product_id || ''} onChange={e => setForm({ ...form, product_id: e.target.value })}
+            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm">
+            <option value="">선택</option>
+            {products.map((p: any) => <option key={p.id} value={p.id}>{p.product_code}</option>)}
+          </select>
+        </div>
+        <div className="space-y-1">
+          <label className="text-xs font-bold text-slate-500 uppercase">적용 Zone</label>
+          <select value={form.zone_id || ''} onChange={e => setForm({ ...form, zone_id: e.target.value })}
+            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm">
+            <option value="">선택</option>
+            {zones.map((z: any) => <option key={z.id} value={z.id}>{z.zone_code}</option>)}
+          </select>
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <Field label="최소 중량 (kg)" type="number" value={form.tier_min_kg ?? ''} onChange={(v: any) => setForm({ ...form, tier_min_kg: v ? Number(v) : 0 })} />
+        <Field label="최대 중량 (kg, 무기한인 경우 비워둠)" type="number" value={form.tier_max_kg ?? ''} onChange={(v: any) => setForm({ ...form, tier_max_kg: v ? Number(v) : null })} />
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <Field label="판매가 (kg당)" type="number" value={form.price_per_kg_selling ?? ''} onChange={(v: any) => setForm({ ...form, price_per_kg_selling: v ? Number(v) : 0 })} />
+        <Field label="원가 (kg당)" type="number" value={form.price_per_kg_cost ?? ''} onChange={(v: any) => setForm({ ...form, price_per_kg_cost: v ? Number(v) : 0 })} />
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <Field label="유효 시작일" type="date" value={form.valid_from ?? ''} onChange={(v: string) => setForm({ ...form, valid_from: v })} />
+        <Field label="유효 종료일" type="date" value={form.valid_until ?? ''} onChange={(v: string) => setForm({ ...form, valid_until: v || null })} />
+      </div>
+      <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.is_active ?? true} onChange={e => setForm({ ...form, is_active: e.target.checked })} /> 활성</label>
+    </>
+  );
+}
+
+function WeightTierRateTable({ weightTierRates, canEdit, onEdit, onDelete }: any) {
+  const columns: ColumnDef<UpsWeightTierRateWithRefs>[] = [
+    { id: 'product', header: '제품', cell: ({ row }) => <span className="text-sm font-medium">{row.original.product?.product_code}</span> },
+    { id: 'zone', header: 'Zone', cell: ({ row }) => <ZenBadge variant="default" className="font-mono">{row.original.zone?.zone_code}</ZenBadge> },
+    { id: 'tier', header: '중량 구간', cell: ({ row }) => <span className="font-mono text-sm">{row.original.tier_min_kg}kg ~ {row.original.tier_max_kg != null ? `${row.original.tier_max_kg}kg` : '∞'}</span> },
+    { accessorKey: 'price_per_kg_selling', header: '판매가 / kg', cell: ({ row }) => <span className="font-mono text-sm">{row.original.price_per_kg_selling.toLocaleString()}원</span> },
+    { accessorKey: 'price_per_kg_cost', header: '원가 / kg', cell: ({ row }) => <span className="font-mono text-sm text-slate-500">{row.original.price_per_kg_cost.toLocaleString()}원</span> },
+    { id: 'validity', header: '유효기간', cell: ({ row }) => <span className="text-xs font-mono text-slate-500">{row.original.valid_from} ~ {row.original.valid_until ?? '무기한'}</span> },
+    ...(canEdit ? [{ id: 'actions' as const, header: '관리', cell: ({ row }: any) => <ActionsCell row={row} onEdit={onEdit} onDelete={onDelete} /> }] : []),
+  ];
+  return <ZenDataGrid columns={columns} data={weightTierRates} />;
+}
+
+// ─── Freight Minimum Form & Table ──────────────────────────────
+
+function FreightMinimumForm({ form, setForm, products, zones }: any) {
+  return (
+    <>
+      <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-1">
+          <label className="text-xs font-bold text-slate-500 uppercase">적용 제품</label>
+          <select value={form.product_id || ''} onChange={e => setForm({ ...form, product_id: e.target.value })}
+            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm">
+            <option value="">선택</option>
+            {products.map((p: any) => <option key={p.id} value={p.id}>{p.product_code}</option>)}
+          </select>
+        </div>
+        <div className="space-y-1">
+          <label className="text-xs font-bold text-slate-500 uppercase">적용 Zone</label>
+          <select value={form.zone_id || ''} onChange={e => setForm({ ...form, zone_id: e.target.value })}
+            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm">
+            <option value="">선택</option>
+            {zones.map((z: any) => <option key={z.id} value={z.id}>{z.zone_code}</option>)}
+          </select>
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <Field label="최소 판매가" type="number" value={form.min_charge_selling ?? ''} onChange={(v: any) => setForm({ ...form, min_charge_selling: v ? Number(v) : 0 })} />
+        <Field label="최소 원가" type="number" value={form.min_charge_cost ?? ''} onChange={(v: any) => setForm({ ...form, min_charge_cost: v ? Number(v) : 0 })} />
+      </div>
+      <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.is_active ?? true} onChange={e => setForm({ ...form, is_active: e.target.checked })} /> 활성</label>
+    </>
+  );
+}
+
+function FreightMinimumTable({ freightMinimums, canEdit, onEdit, onDelete }: any) {
+  const columns: ColumnDef<UpsFreightMinimumWithRefs>[] = [
+    { id: 'product', header: '제품', cell: ({ row }) => <span className="text-sm font-medium">{row.original.product?.product_code}</span> },
+    { id: 'zone', header: 'Zone', cell: ({ row }) => <ZenBadge variant="default" className="font-mono">{row.original.zone?.zone_code}</ZenBadge> },
+    { accessorKey: 'min_charge_selling', header: '최소 판매가', cell: ({ row }) => <span className="font-mono text-sm">{row.original.min_charge_selling.toLocaleString()}원</span> },
+    { accessorKey: 'min_charge_cost', header: '최소 원가', cell: ({ row }) => <span className="font-mono text-sm text-slate-500">{row.original.min_charge_cost.toLocaleString()}원</span> },
+    ...(canEdit ? [{ id: 'actions' as const, header: '관리', cell: ({ row }: any) => <ActionsCell row={row} onEdit={onEdit} onDelete={onDelete} /> }] : []),
+  ];
+  return <ZenDataGrid columns={columns} data={freightMinimums} />;
 }

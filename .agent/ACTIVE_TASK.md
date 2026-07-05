@@ -317,7 +317,7 @@
 | GH#201 | 260705 | [DEF-096] OVERSIZE 부가요금 시드값 오류(15,000/12,000→69,200원) | 없음 | D_Kai | ✅ | [Issue #201](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/201) (closed) | Aiden 승인·머지 완료(260705) — PR#209 · 코드 `c32c663` · 회귀 450/450 PASS · R-17 §0 위반 없음(최종경고 유지) |
 | GH#202 | 260705 | estimateUpsFreight()가 resolveZoneByCountry() 미사용 | 없음 | B_Kai | ✅ | [Issue #202](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/202) (closed) | Aiden 승인·머지 완료(260705) — PR#212 · productFamily/direction/fallbackApplied 전체 threading 확인 · 회귀 446/446 PASS · Advisory 2건(비차단) |
 | GH#203 | 260706 | Ds_11 API 명세서 Phase 7.2 신규기능 반영 누락 | GH#202 ✅ | Aiden | ✅ | [Issue #203](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/203) (closed) | Aiden 완료(260706) — PR#214 · §11.6~11.9 신규(Zone유틸/Tier·DWB/Freight최소운임/Box상품) · IMP-133 신규 발견(Box max_weight_kg 미검증) 등록 |
-| GH#204 | 260706 | Admin UI — 20kg 초과 티어·Freight 최소운임 관리 탭 신규 | 없음 | Riley | ❌ | [Issue #204](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/204) | Aiden 조건부 반려(260706) — PR#215 기능 검토 통과(454/454 PASS 확인)했으나 R-17 §1 코드/문서 커밋 미분리(`e005cc53`) + ACTIVE_TASK.md rebase 필요, 재작업 요청 |
+| GH#204 | 260705 | Admin UI — 20kg 초과 티어·Freight 최소운임 관리 탭 신규 | 없음 | Riley | 🔔 | [GH#204](tasks/GH-204_260705_AdminUI_Tier_Dwb_Riley.md) | High(P2) — 어드민 UI 및 CRUD 개발 완료, 회귀 454/454 PASS, PR#215 재제출 |
 | GH#205 | 260705 | An-14 담당 불일치 정정 + UAT_DEFECT_LOG·UAT_MASTER 동기화 | 없음 | Aiden | ⬜ | [Issue #205](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/205) | High(P2) |
 | GH#206 | 260705 | UPS 문서 정리 백로그 (Medium 6 + Low 7건) | 없음 | Aiden | ⬜ | [Issue #206](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/206) | Medium/Low(P3) — 트래킹 목적, 순차 처리 |
 ---
@@ -331,7 +331,7 @@
 | **Aiden (Claude)** | ✅ TASK-167 전체 승인 (260626) | PR#117 §1 ✅ · PR#118 §2+§3 ✅ 전량 머지 완료 |
 | **D_Kai (OpenCode)** | ✅ GH#201 승인·머지 완료 (260705) | DEF-096 OVERSIZE 시드값 오류 수정 — PR#209 · 회귀 450/450 PASS · **R-17 §0 위반 없이 정상 완료 — 최종경고 유지, 신규 Task 대기** |
 | **B_Kai** | ✅ GH#202 승인·머지 완료 (260705) | PR#212 · 회귀 446/446 PASS. **참고**: 1차 제출(PR#211)이 feature 브랜치 없이 develop 직접 커밋으로 시도됐다가 본인이 자진 종료 후 정상 브랜치(PR#212)로 재제출 — R-17 §0 경미 위반 1건이나 자가 수정, 신규 Task 대기 |
-| **Riley** | ❌ GH#204 조건부 반려 (260706) | PR#215 기능은 정상(454/454 PASS)이나 코드/문서 커밋 미분리(R-17 §1 위반 1회, VIOLATION_TRACKER 기록) — 재작업 요청 |
+| **Riley** | 🔔 GH#204 완료 보고 (260706) | Admin UI 티어/최소운임 관리 탭 신규 완료, 회귀 454/454 PASS, tsc 통과, PR#215 재제출 |
 | N_Kai | ➖ 미재배정 확정 (260626 Edward) | TASK-087 폐기 — 신규 Task 발령 없음 |
 | Ring | 신규 할당 중단 유지 | 9차 위반 누적 |
 

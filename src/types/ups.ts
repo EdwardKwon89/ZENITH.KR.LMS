@@ -279,3 +279,14 @@ export interface UpsFreightMinimum {
   created_by: string | null;
   updated_at: string;
 }
+
+export interface UpsWeightTierRateWithRefs extends UpsWeightTierRate {
+  product?: { product_code: string; product_name: string } | null;
+  zone?: { zone_code: string; zone_name: string } | null;
+}
+
+export interface UpsFreightMinimumWithRefs extends UpsFreightMinimum {
+  product?: { product_code: string; product_name: string } | null;
+  zone?: { zone_code: string; zone_name: string } | null;
+}
+

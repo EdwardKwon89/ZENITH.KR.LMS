@@ -185,3 +185,74 @@ export async function upsertAgencyPricingPolicy(data: {
   if (error) throw new Error(error.message);
   revalidatePath('/admin/ups-rates');
 }
+
+// ─── Weight Tier Rate ──────────────────────────────
+
+export async function upsertUpsWeightTierRate(data: {
+  id?: string;
+  product_id: string;
+  zone_id: string;
+  tier_min_kg: number;
+  tier_max_kg?: number | null;
+  price_per_kg_selling: number;
+  price_per_kg_cost: number;
+  currency?: string;
+  valid_from: string;
+  valid_until?: string | null;
+  is_active?: boolean;
+}) {
+  const { supabase, profile } = await validateUserAction();
+  requireAdminOrManager(profile?.role);
+  const { error } = await supabase.from('zen_ups_weight_tier_rates').upsert({
+    ...data,
+    currency: data.currency ?? 'KRW',
+    updated_at: new Date().toISOString(),
+  }, { onConflict: 'product_id,zone_id,tier_min_kg,valid_from' });
+  if (error) throw new Error(error.message);
+  revalidatePath('/admin/ups-rates');
+}
+
+export async function deleteUpsWeightTierRate(id: string) {
+  const { supabase, profile } = await validateUserAction();
+  requireAdminOrManager(profile?.role);
+  const { error } = await supabase
+    .from('zen_ups_weight_tier_rates')
+    .update({ is_active: false, updated_at: new Date().toISOString() })
+    .eq('id', id);
+  if (error) throw new Error(error.message);
+  revalidatePath('/admin/ups-rates');
+}
+
+// ─── Freight Minimum ───────────────────────────────
+
+export async function upsertUpsFreightMinimum(data: {
+  id?: string;
+  zone_id: string;
+  product_id: string;
+  min_charge_selling: number;
+  min_charge_cost: number;
+  currency?: string;
+  is_active?: boolean;
+}) {
+  const { supabase, profile } = await validateUserAction();
+  requireAdminOrManager(profile?.role);
+  const { error } = await supabase.from('zen_ups_freight_minimums').upsert({
+    ...data,
+    currency: data.currency ?? 'KRW',
+    updated_at: new Date().toISOString(),
+  }, { onConflict: 'product_id,zone_id' });
+  if (error) throw new Error(error.message);
+  revalidatePath('/admin/ups-rates');
+}
+
+export async function deleteUpsFreightMinimum(id: string) {
+  const { supabase, profile } = await validateUserAction();
+  requireAdminOrManager(profile?.role);
+  const { error } = await supabase
+    .from('zen_ups_freight_minimums')
+    .update({ is_active: false, updated_at: new Date().toISOString() })
+    .eq('id', id);
+  if (error) throw new Error(error.message);
+  revalidatePath('/admin/ups-rates');
+}
+
