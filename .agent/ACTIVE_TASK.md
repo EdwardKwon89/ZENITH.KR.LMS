@@ -302,7 +302,7 @@
 | TASK-175 | 260705 | Admin UI 완성 — 기준요금·유류할증·OC 3탭 + Agency 할인율정책 탭 신규 (An-14 §5, TASK-172 발견 버그 4건 수정 포함) | TASK-171·172 ✅ | **D_Kai** | ✅ | [TASK-175](tasks/TASK-175_260705_P71SPR05_AdminUpsRatesUI_DKai.md) | Aiden 재검토 ✅ 승인(260705) — TC 9종+회귀 424/424 PASS·해시/무관파일 Aiden 직접 보완 |
 | TASK-176 | 260705 | Agency UI 수정 — rate-overrides cost_price 읽기전용화 + Agency 부가요금 등록 (An-14 §5) | TASK-171 ✅ | **D_Kai** | ✅ | [TASK-176](tasks/TASK-176_260705_P71SPR06_AgencyRateOverridesUI_DKai.md) | Aiden 재검토 ✅ 승인(260705, R-17 페널티 별도 기록) — TC 3종+tsc 수정+회귀 424/424 PASS |
 | TASK-177 | 260705 | Ds_11 API 명세 갱신(Team B 인계 계약 명시) + UAT-17-03 완료처리 + 신규 UAT-22/23 작성 + 전체 회귀 (An-14 §6·7) | TASK-175·176 ✅ | **D_Kai** | ✅ | [TASK-177](tasks/TASK-177_260705_P71SPR07_명세UAT회귀_DKai.md) | Aiden 재검토 ✅ 승인(260705) — Ds_11갱신+UAT-22/23(UAT-17-03 정직 미완료 기재)+회귀424/424 PASS |
-| TASK-178 | 260705 | D_Kai 재교육 세션 5차 — 코드/문서 커밋 혼입 3회 연속(R-17 v1.4 페널티) | 없음 | D_Kai | ⬜ | [TASK-178](tasks/TASK-178_260705_DKai재교육세션5차_DKai.md) | **신규 Task 할당 중단 해제 전제조건** — 본 재교육 Aiden 승인 전까지 D_Kai 신규 배정 불가 |
+| TASK-178 | 260705 | D_Kai 재교육 세션 5차 — 코드/문서 커밋 혼입 3회 연속(R-17 v1.4 페널티) | 없음 | D_Kai | 🔔 | [TASK-178](tasks/TASK-178_260705_DKai재교육세션5차_DKai.md) | §1~§5 전량 완료 · Aiden 승인 대기 — 신규 Task 할당 재개 조건 |
 ---
 
 ## Agent 현황
