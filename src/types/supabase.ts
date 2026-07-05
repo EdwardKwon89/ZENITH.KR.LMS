@@ -909,6 +909,120 @@ export type Database = {
           },
         ]
       }
+      zen_agency_other_charges: {
+        Row: {
+          agency_org_id: string
+          cost_price: number
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean
+          other_charge_id: string
+          selling_price: number
+        }
+        Insert: {
+          agency_org_id: string
+          cost_price: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          other_charge_id: string
+          selling_price: number
+        }
+        Update: {
+          agency_org_id?: string
+          cost_price?: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          other_charge_id?: string
+          selling_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "zen_agency_other_charges_agency_org_id_fkey"
+            columns: ["agency_org_id"]
+            isOneToOne: false
+            referencedRelation: "zen_organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "zen_agency_other_charges_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "zen_agency_other_charges_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "zen_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "zen_agency_other_charges_other_charge_id_fkey"
+            columns: ["other_charge_id"]
+            isOneToOne: false
+            referencedRelation: "zen_ups_other_charges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      zen_agency_pricing_policies: {
+        Row: {
+          agency_org_id: string
+          created_at: string
+          discount_rate: number
+          id: string
+          is_active: boolean
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          agency_org_id: string
+          created_at?: string
+          discount_rate: number
+          id?: string
+          is_active?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          agency_org_id?: string
+          created_at?: string
+          discount_rate?: number
+          id?: string
+          is_active?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "zen_agency_pricing_policies_agency_org_id_fkey"
+            columns: ["agency_org_id"]
+            isOneToOne: true
+            referencedRelation: "zen_organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "zen_agency_pricing_policies_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "zen_agency_pricing_policies_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "zen_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       zen_agency_rate_overrides: {
         Row: {
           agency_org_id: string
@@ -5025,6 +5139,18 @@ export type Database = {
               unit_price: number
             }[]
           }
+      fn_get_ups_agency_other_charge_price: {
+        Args: { p_agency_org_id: string; p_other_charge_id: string }
+        Returns: number
+      }
+      fn_get_ups_agency_selling_price: {
+        Args: {
+          p_agency_org_id: string
+          p_base_rate_id: string
+          p_reference_date?: string
+        }
+        Returns: number
+      }
       generate_master_order_no: { Args: never; Returns: string }
       get_my_role: { Args: never; Returns: string }
       get_next_order_sequence: {
@@ -5207,3 +5333,4 @@ export const Constants = {
     Enums: {},
   },
 } as const
+
