@@ -305,7 +305,7 @@
 | TASK-178 | 260705 | D_Kai 재교육 세션 5차 — 코드/문서 커밋 혼입 3회 연속(R-17 v1.4 페널티) | 없음 | D_Kai | ✅ | [TASK-178](tasks/TASK-178_260705_DKai재교육세션5차_DKai.md) | Aiden 조건부 승인(260705) — 신규 할당 중단 해제. 단 재교육 커밋 자체가 develop 직접 커밋(브랜치 없음) — 신규 위반 1건 별도 기록 |
 | **── Phase 7.2 (IMP-146) ──** | | **UPS 요율표 구조 정밀화 — An-14 §9·§12 백로그 (Go-Live 비차단)** | | | | | | **Edward 발령(260705) — [An-14 §12](../docs/02_Analysis/An_14_Phase7_UPS요금관리_설계보완.md#12-imp-146-설계--요율표-구조-정밀화-9-백로그-착수-2026-07-05-edward-발령)** |
 | TASK-179 | 260705 | Box 상품 등록 + Zone-서비스-방향 매핑 정밀화 (An-14 §12-1 #2·#3) | 없음 | B_Kai | ✅ | [TASK-179](tasks/TASK-179_260705_P72IMP146_ZoneBox구조정밀화_BKai.md) | Aiden 승인·머지 완료(260705) — PR#190 · 코드 `ac36f9d` · 436/436 PASS · TC-UPS-ZONEMAP-01/02/03 |
-| TASK-180 | 260705 | 20kg 초과 티어 요금 + DWB + Freight 최소운임 (An-14 §12-1 #1·#4·#5) | 없음 (해제됨) | Riley | ⬜ | [TASK-180](tasks/TASK-180_260705_P72IMP146_티어DWB최소운임_Riley.md) | 설계 확정·전제조건 해제 완료 — 반올림함수는 TASK-181 선반영으로 DoD 축소, 즉시 착수 가능 |
+| TASK-180 | 260705 | 20kg 초과 티어 요금 + DWB + Freight 최소운임 (An-14 §12-1 #1·#4·#5) | 없음 (해제됨) | Riley | 🔔 | [TASK-180](tasks/TASK-180_260705_P72IMP146_티어DWB최소운임_Riley.md) | 443/443 PASS · 커밋 예정 |
 | **── Hotfix ──** | | **DEF-095 즉시 처리 (Edward 지시, TASK-180 완료 대기 없이 우선 처리)** | | | | | | |
 | TASK-181 | 260705 | WW_EXPEDITED 중량 반올림 규칙 오류 수정 (DEF-095) | 없음 | Aiden | ✅ | [TASK-181](tasks/TASK-181_260705_Hotfix_DEF095_WWExpeditedRounding_Aiden.md) | 머지 완료(260705, PR#191) — 코드 `b1d0725` · TC-UPS-EXPEDITED-ROUND-01~05 · develop 회귀 436/436 PASS |
 ---
@@ -319,7 +319,7 @@
 | **Aiden (Claude)** | ✅ TASK-167 전체 승인 (260626) | PR#117 §1 ✅ · PR#118 §2+§3 ✅ 전량 머지 완료 |
 | **D_Kai (OpenCode)** | ✅ TASK-178 재교육 5차 조건부 승인 (260705) — 신규 Task 배정 재개 | §1~§5 우수(특히 `git add -A` 공통 근본원인 분석·코드↔문서 대칭원칙 자각). **그러나 재교육 완료 커밋(`57648c4`·`0a37c47`) 자체가 브랜치 없이 develop 직접 커밋 — R-17 §0 위반 신규 1건 기록**(develop 이미 반영, 무해한 문서 변경이라 되돌리지 않음). **다음 Task부터 브랜치 절차 위반 시 즉시 6차 재교육 + 장기 중단 검토 — 최종 경고.** |
 | **B_Kai** | ✅ TASK-179 승인·머지 완료 (260705) | Phase 7.2 IMP-146 Box상품+Zone매핑 정밀화 · PR#190 · 436/436 PASS · 신규 Task 대기 |
-| **Riley** | 🔍 TASK-180 착수 가능 (260705) | Phase 7.2 IMP-146 티어 요금+DWB+Freight 최소운임 · TASK-179 완료로 전제조건 해제, 즉시 착수 가능 |
+| **Riley** | 🔔 TASK-180 완료 보고 (260705) | Phase 7.2 IMP-146 티어 요금+DWB+Freight 최소운임 · 443/443 PASS · PR 생성 예정 |
 | N_Kai | ➖ 미재배정 확정 (260626 Edward) | TASK-087 폐기 — 신규 Task 발령 없음 |
 | Ring | 신규 할당 중단 유지 | 9차 위반 누적 |
 

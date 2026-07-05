@@ -1,7 +1,7 @@
 # 🗺️ LIVE Regression Test Master Map
 
-> **총 테스트 케이스:** 436 Cases (vitest 개별 테스트 기준, 75 test files)
-> **최종 검증일:** 2026-07-05 (TASK-179 Phase 7.2 IMP-146 Zone-Box 정밀화 · TC-UPS-ZONEMAP-01~03 등재 · 436/436 PASS)  
+> **총 테스트 케이스:** 443 Cases (vitest 개별 테스트 기준, 76 test files)
+> **최종 검증일:** 2026-07-05 (TASK-180 Phase 7.2 IMP-146 20kg 초과 티어/DWB/최소운임 · TC-UPS-TIER/DWB/FREIGHTMIN-* 등재 · 443/443 PASS)  
 
 제니스 플랫폼의 비즈니스 영속성을 보장하는 회귀 테스트 케이스의 통합 명세서입니다. 모든 신규 개발 및 수정 시 이 맵에 케이스가 추가되어야 하며, 전체 테스트가 통과되어야 합니다.
 
@@ -525,6 +525,13 @@
 | **TC-UPS-EXPEDITED-ROUND-03** | 그 외 상품 20kg 이하 0.5kg 단위 올림 | 기존 규칙 회귀 방지 | `tests/unit/ups/pricing-engine.test.ts` |
 | **TC-UPS-EXPEDITED-ROUND-04** | 그 외 상품 20kg 초과 1kg 단위 올림 | 경계 전환 정확성 확인 | `tests/unit/ups/pricing-engine.test.ts` |
 | **TC-UPS-EXPEDITED-ROUND-05** | `computeUpsFreight` 통합 — WW_EXPEDITED 청구중량 반영 | 실제 계산 흐름에 반올림 함수 정상 연결 확인 | `tests/unit/ups/pricing-engine.test.ts` |
+| **TC-UPS-TIER-01** | 20kg 초과 per-kg 요율 적용 | 20kg 초과 화물에 대해 구간별 kg당 단가 × 중량 계산 검증 | `tests/unit/ups/pricing-engine-tier-dwb.test.ts` |
+| **TC-UPS-TIER-02** | 20kg 초과 중량 올림 매칭 | 20kg 초과 시 서비스 무관 1.0kg 단위 올림 매칭 검증 | `tests/unit/ups/pricing-engine-tier-dwb.test.ts` |
+| **TC-UPS-DWB-01** | DWB 적용 대상 계산 | 다음 상위 중량 구간 최소중량가 적용 시 비용 절감 및 `dwbApplied: true` 확인 | `tests/unit/ups/pricing-engine-tier-dwb.test.ts` |
+| **TC-UPS-DWB-02** | DWB 미적용 대상 계산 | 다음 구간 적용 시 비용이 더 크면 기존 중량가 유지 및 `dwbApplied: false` 확인 | `tests/unit/ups/pricing-engine-tier-dwb.test.ts` |
+| **TC-UPS-DWB-03** | DWB 20kg 경계 전이 | 20.0kg 이하에서 21.0kg(per-kg 첫 티어 최소값)으로의 DWB 전이 및 단가 변경 검증 | `tests/unit/ups/pricing-engine-tier-dwb.test.ts` |
+| **TC-UPS-FREIGHTMIN-01** | Freight 최소운임 상향 적용 | 계산 요금이 Zone/Product 최소운임 미만일 때 최소운임 강제 상향 검증 | `tests/unit/ups/pricing-engine-tier-dwb.test.ts` |
+| **TC-UPS-FREIGHTMIN-02** | Freight 최소운임 이상 정상 적용 | 계산 요금이 최소운임 이상일 때 상향 조정 미적용 검증 | `tests/unit/ups/pricing-engine-tier-dwb.test.ts` |
 
 ---
 

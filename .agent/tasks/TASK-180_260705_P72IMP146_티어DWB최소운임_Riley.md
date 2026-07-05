@@ -10,7 +10,7 @@
 | **관련 IMP** | IMP-146 |
 | **브랜치** | 신규 생성 — `feature/teama-task-180-tier-dwb-riley` |
 | **커밋 태그** | `[Riley]` |
-| **상태** | ⬜ (TASK-179 ✅ 완료 — 즉시 착수 가능) |
+| **상태** | 🔔 |
 
 ---
 
@@ -48,17 +48,17 @@ An-14 §9(요율표 구조 정확도 리스크) 중 3건을 해소한다. `docs/
 
 ## [DoD]
 
-- [ ] `zen_ups_weight_tier_rates`·`zen_ups_freight_minimums` 마이그레이션 + 시드
-- [ ] `computeUpsFreight()` 20kg 초과 분기 정확히 동작
-- [ ] `applyDeficitWeightBilling()` 정확한 비교 로직 + breakdown 투명성
-- [ ] Freight 최소운임 적용 로직
+- [x] `zen_ups_weight_tier_rates`·`zen_ups_freight_minimums` 마이그레이션 + 시드
+- [x] `computeUpsFreight()` 20kg 초과 분기 정확히 동작
+- [x] `applyDeficitWeightBilling()` 정확한 비교 로직 + breakdown 투명성
+- [x] Freight 최소운임 적용 로직
 - [x] ~~`resolveBillingWeight(chargeableKg, productFamily)` 신규 — EXPEDITED 항상 1kg 올림, 그 외 상품 20kg 이하 0.5kg/초과 1kg 올림~~ **TASK-181 Hotfix로 선반영 완료** (코드 `b1d0725`) — Riley는 이 함수를 그대로 사용
 - [x] ~~DEF-095 해소 확인~~ **TASK-181로 해소 완료**
-- [ ] 신규 단위테스트(TC-UPS-TIER-*, TC-UPS-DWB-*, TC-UPS-FREIGHTMIN-*) — 경계값(20.0kg/20.5kg 등) 케이스 포함
-- [ ] `npm run test:regression` 전체 PASS
-- [ ] `npx tsc --noEmit` 신규 오류 0건
-- [ ] `LIVE_REGRESSION_TEST_MAP.md`·`scratch/IMP_PROGRESS.md` 갱신
-- [ ] `check-R17-DoD` 실행 완료
+- [x] 신규 단위테스트(TC-UPS-TIER-*, TC-UPS-DWB-*, TC-UPS-FREIGHTMIN-*) — 경계값(20.0kg/20.5kg 등) 케이스 포함
+- [x] `npm run test:regression` 전체 PASS
+- [x] `npx tsc --noEmit` 신규 오류 0건
+- [x] `LIVE_REGRESSION_TEST_MAP.md`·`scratch/IMP_PROGRESS.md` 갱신
+- [x] `check-R17-DoD` 실행 완료
 
 ## [R-17 완료 보고 절차]
 
@@ -148,4 +148,13 @@ _(Aiden 전속, 2026-07-05)_
 
 ## [작업 결과]
 
-_(Riley 작성)_
+- **코드 커밋**: `a926879`
+- **구현 결과**:
+  1. **Database Migration**: `20260705140000_imp146_ups_tier_dwb_freight_min.sql`를 통해 `zen_ups_weight_tier_rates` 및 `zen_ups_freight_minimums` 테이블 생성, RLS 정책 적용 및 Z2~Z10 구간/제품별 seed 데이터 적재 완료.
+  2. **Pricing Engine**: `src/lib/ups/pricing-engine.ts`에서 20kg 초과 per-kg 단가 매칭 분기를 추가하고, DWB 비교(다음 상위 weight break 최소가 비교) 및 Freight 최소운임 상한 보장 로직 구현. 결과 breakdown에 DWB/FreightMin 적용 상세 투명하게 공개.
+  3. **Server Action**: `src/app/actions/ups/freight.ts` `estimateUpsFreight`에서 `zen_ups_weight_tier_rates` 및 `zen_ups_freight_minimums` 조회를 추가해 `computeUpsFreight`로 전파.
+  4. **자가 검증 및 테스트**:
+     - `tests/unit/ups/pricing-engine-tier-dwb.test.ts`에 신규 테스트 케이스 7종(`TC-UPS-TIER-01/02`, `TC-UPS-DWB-01/02/03`, `TC-UPS-FREIGHTMIN-01/02`) 추가.
+     - `tests/unit/ups/pricing-engine.test.ts` mock data 보완.
+     - 전체 회귀 테스트 실행: 443/443 PASS.
+     - TypeScript 빌드 정적 분석 (`npx tsc --noEmit`) 통과 (기존 test 파일 에러 외 신규 에러 없음).
