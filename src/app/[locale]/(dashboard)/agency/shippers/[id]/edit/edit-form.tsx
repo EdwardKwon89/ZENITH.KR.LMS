@@ -123,7 +123,7 @@ export function EditShipperForm({ shipper }: EditShipperFormProps) {
         <form action={handleSubmit} className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
           <div className="p-6 space-y-5">
             <RequiredFields t={t} defaultValues={initialValues} fieldErrors={fieldErrors} />
-            <ContactFields t={t} defaultValues={initialValues} fieldErrors={fieldErrors} />
+            <ContactFields t={t} loginEmail="" defaultValues={initialValues} fieldErrors={fieldErrors} />
           </div>
           <div className="px-6 py-4 border-t border-slate-100 bg-slate-50/50 flex justify-end gap-3">
             <Link href={`/${locale}/agency/shippers`}

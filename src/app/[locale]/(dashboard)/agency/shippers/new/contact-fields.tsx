@@ -1,7 +1,10 @@
 'use client';
 
+import { useState, useEffect } from 'react';
+
 interface ContactFieldsProps {
   t: (key: string) => string;
+  loginEmail: string;
   defaultValues?: Partial<{
     contact_name: string;
     contact_email: string;
@@ -10,7 +13,16 @@ interface ContactFieldsProps {
   fieldErrors?: Record<string, string>;
 }
 
-export function ContactFields({ t, defaultValues = {}, fieldErrors = {} }: ContactFieldsProps) {
+export function ContactFields({ t, loginEmail, defaultValues = {}, fieldErrors = {} }: ContactFieldsProps) {
+  const [touched, setTouched] = useState(false);
+  const [contactEmail, setContactEmail] = useState(defaultValues.contact_email || '');
+
+  useEffect(() => {
+    if (!touched && loginEmail) {
+      setContactEmail(loginEmail);
+    }
+  }, [loginEmail, touched]);
+
   function formatPhone(value: string): string {
     const digits = value.replace(/\D/g, '').slice(0, 11);
     if (digits.length <= 3) return digits;
@@ -25,7 +37,7 @@ export function ContactFields({ t, defaultValues = {}, fieldErrors = {} }: Conta
 
   return (
     <div className="border-t border-slate-100 pt-5">
-      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">선택 입력</p>
+      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">{t('form_contact_name')}</p>
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">{t('form_contact_name')}</label>
@@ -34,7 +46,16 @@ export function ContactFields({ t, defaultValues = {}, fieldErrors = {} }: Conta
         </div>
         <div>
           <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">{t('form_contact_email')}</label>
-          <input name="contact_email" type="email" defaultValue={defaultValues.contact_email} className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
+          <input
+            name="contact_email"
+            type="email"
+            value={contactEmail}
+            onChange={(e) => {
+              setTouched(true);
+              setContactEmail(e.target.value);
+            }}
+            className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+          />
           {fieldErrors.contact_email && <p className="text-xs text-red-500 mt-1">{fieldErrors.contact_email}</p>}
         </div>
       </div>

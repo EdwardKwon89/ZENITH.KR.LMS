@@ -3,11 +3,13 @@
 import { useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, CheckCircle } from 'lucide-react';
 import { createAgencyShipper, type CreateAgencyShipperResult } from '@/app/actions/agency/shippers';
 import { FormHeader } from './form-header';
 import { RequiredFields } from './required-fields';
+import { LoginAccountFields } from './login-account-fields';
 import { ContactFields } from './contact-fields';
+import { AddressInput } from './address-input';
 import { FormActions } from './form-actions';
 
 interface AgencyShipperFormProps {
@@ -35,6 +37,8 @@ export function AgencyShipperForm({ agencyOrgId }: AgencyShipperFormProps) {
   const [globalError, setGlobalError] = useState('');
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [savedValues, setSavedValues] = useState<Partial<FormValues>>({});
+  const [loginEmail, setLoginEmail] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
   async function handleSubmit(formData: FormData) {
     setLoading(true);
@@ -65,6 +69,12 @@ export function AgencyShipperForm({ agencyOrgId }: AgencyShipperFormProps) {
         contact_email: currentValues.contact_email || undefined,
         contact_phone: currentValues.contact_phone || undefined,
         login_email: (formData.get('login_email') as string) || '',
+        country_code: (formData.get('country_code') as string) || undefined,
+        state_province: (formData.get('state_province') as string) || undefined,
+        city: (formData.get('city') as string) || undefined,
+        address: (formData.get('address') as string) || undefined,
+        address_detail: (formData.get('address_detail') as string) || undefined,
+        zipcode: (formData.get('zipcode') as string) || undefined,
       });
 
       if (!result.success) {
@@ -74,14 +84,35 @@ export function AgencyShipperForm({ agencyOrgId }: AgencyShipperFormProps) {
         return;
       }
 
-      router.push(`/${locale}/agency/shippers`);
-      router.refresh();
+      const sentEmail = formData.get('login_email') as string;
+      setSuccessMessage(t('submit_invite_sent', {
+        name: currentValues.name,
+        email: sentEmail,
+      }));
+      setTimeout(() => {
+        router.push(`/${locale}/agency/shippers`);
+        router.refresh();
+      }, 3000);
     } catch (err: any) {
       setSavedValues(currentValues);
       setGlobalError(err.message || t('submit_error'));
     } finally {
       setLoading(false);
     }
+  }
+
+  if (successMessage) {
+    return (
+      <div className="relative min-h-screen animate-in fade-in duration-500">
+        <div className="max-w-2xl mx-auto px-8 pt-16">
+          <div className="bg-white border border-emerald-200 rounded-2xl p-8 shadow-sm text-center">
+            <CheckCircle size={48} className="mx-auto mb-4 text-emerald-500" />
+            <p className="text-lg font-bold text-slate-900 mb-2">{successMessage}</p>
+            <p className="text-sm text-slate-500">{t('loading')}</p>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -98,7 +129,9 @@ export function AgencyShipperForm({ agencyOrgId }: AgencyShipperFormProps) {
         <form action={handleSubmit} className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
           <div className="p-6 space-y-5">
             <RequiredFields t={t} defaultValues={savedValues} fieldErrors={fieldErrors} />
-            <ContactFields t={t} defaultValues={savedValues} fieldErrors={fieldErrors} />
+            <LoginAccountFields t={t} onLoginEmailChange={setLoginEmail} fieldErrors={fieldErrors} />
+            <ContactFields t={t} loginEmail={loginEmail} defaultValues={savedValues} fieldErrors={fieldErrors} />
+            <AddressInput t={t} fieldErrors={fieldErrors} />
           </div>
           <FormActions loading={loading} submitLabel={t('new_shipper')} loadingLabel={t('loading')} />
         </form>
