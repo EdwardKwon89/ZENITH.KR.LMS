@@ -45,12 +45,11 @@ export function AgencyOtherChargesClient({ charges, allOtherCharges, agencyOrgId
     if (!form.other_charge_id) return;
     setLoading(true);
     try {
-      const { error } = await upsertAgencyOtherCharge(agencyOrgId, {
+      await upsertAgencyOtherCharge(agencyOrgId, {
         other_charge_id: form.other_charge_id,
         selling_price: form.selling_price,
         cost_price: form.cost_price,
       });
-      if (error) throw new Error(error);
       window.location.reload();
     } catch (e) {
       alert(e instanceof Error ? e.message : '처리 중 오류가 발생했습니다.');

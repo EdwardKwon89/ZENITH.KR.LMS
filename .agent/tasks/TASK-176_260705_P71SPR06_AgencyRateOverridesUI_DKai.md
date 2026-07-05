@@ -10,7 +10,7 @@
 | **관련 IMP** | IMP-145 |
 | **브랜치** | `feature/teama-phase71-ups-rate-management` (TASK-175와 동일 브랜치 이어서 사용) |
 | **커밋 태그** | `[D_Kai]` |
-| **상태** | ⬜ |
+| **상태** | 🔄 (Aiden 반려 재작업) |
 
 ---
 
@@ -57,15 +57,15 @@ An-14 §0(조사 결과) — 현재 `zen_agency_rate_overrides.cost_price`를 Ag
 
 ## [DoD]
 
-- [ ] Team B 최신 develop 변경분 확인 후 병합/리베이스 완료
-- [ ] `cost_price` 입력 필드 제거·읽기전용 전환 확인
-- [ ] 정책 미등록 에러 메시지 사용자 친화적으로 표시 확인
-- [ ] `zen_agency_other_charges` CRUD Action 3종 + UI 구현
-- [ ] i18n 4개국어 반영
-- [ ] 신규 테스트 전량 PASS
-- [ ] `npm run test:regression` 전체 PASS (TASK-175 완료 기준선 이상 유지)
-- [ ] `LIVE_REGRESSION_TEST_MAP.md` 등재
-- [ ] `check-R17-DoD` 실행 완료
+- [x] Team B 최신 develop 변경분 확인 후 병합/리베이스 완료
+- [x] `cost_price` 입력 필드 제거·읽기전용 전환 확인
+- [x] 정책 미등록 에러 메시지 사용자 친화적으로 표시 확인
+- [x] `zen_agency_other_charges` CRUD Action 3종 + UI 구현
+- [x] i18n 4개국어 반영
+- [x] 신규 테스트 전량 PASS (TC-AG-OC-01~03, 3 tests)
+- [x] `npm run test:regression` 전체 PASS (424 tests, 기준선 412 이상 유지)
+- [x] `LIVE_REGRESSION_TEST_MAP.md` 등재 (Section 39, TC-AG-OC-01~03)
+- [x] `check-R17-DoD` 실행 완료
 
 ## [R-17 완료 보고 절차]
 

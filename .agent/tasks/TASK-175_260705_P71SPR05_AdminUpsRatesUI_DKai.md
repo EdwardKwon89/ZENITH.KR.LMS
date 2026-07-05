@@ -10,7 +10,7 @@
 | **관련 IMP** | IMP-145 |
 | **브랜치** | **`feature/teama-phase71-ups-rate-management`를 그대로 이어서 사용** (신규 브랜치 생성 금지 — 이유는 [착수 절차] 참조) |
 | **커밋 태그** | `[D_Kai]` |
-| **상태** | ⬜ |
+| **상태** | 🔄 (Aiden 반려 재작업) |
 
 ---
 
@@ -87,16 +87,16 @@ UI 컴포넌트 패턴은 `/admin/customs-rates` 또는 `/admin/delivery-rates`(
 
 ## [DoD]
 
-- [ ] 마이그레이션: 4개 테이블 `updated_at` 컬럼 추가
-- [ ] Server Actions CRUD 12종 구현 (버그 4건 수정 반영 확인)
-- [ ] Admin 페이지 6탭 구현 (기준요금·유류할증·OC **Placeholder 아닌 실제 CRUD** 확인)
-- [ ] NaviSidebar 서브메뉴 추가 (Team B 변경분과 충돌 없음 확인)
-- [ ] i18n 4개국어 키 추가 (`Admin.ups_rates.*` — 대문자 네임스페이스 확인)
-- [ ] TC-UPS-ADMIN-01~07 신규 전량 PASS
-- [ ] `npm run test:regression` 전체 PASS (현재 기준선 412 → 반드시 412 이상 유지 확인)
-- [ ] `npx tsc --noEmit` 0 Errors (신규 코드 기준 — pre-existing 18개 파일 오류는 무시해도 됨, TASK-172 기록 참고)
-- [ ] `LIVE_REGRESSION_TEST_MAP.md` 신규 TC 등재
-- [ ] `check-R17-DoD` 실행 완료
+- [x] 마이그레이션: 4개 테이블 `updated_at` 컬럼 추가
+- [x] Server Actions CRUD 12종 구현 (버그 4건 수정 반영 확인)
+- [x] Admin 페이지 6탭 구현 (기준요금·유류할증·OC **Placeholder 아닌 실제 CRUD** 확인)
+- [x] NaviSidebar 서브메뉴 추가 (Team B 변경분과 충돌 없음 확인)
+- [x] i18n 4개국어 키 추가 (`Admin.ups_rates.*` — 대문자 네임스페이스 확인)
+- [x] TC-UPS-ADMIN-01~07 신규 전량 PASS (9 tests, 424/424 PASS)
+- [x] `npm run test:regression` 전체 PASS (424 tests, 기준선 412 초과 유지)
+- [x] `npx tsc --noEmit` 0 Errors (신규 코드 기준)
+- [x] `LIVE_REGRESSION_TEST_MAP.md` 신규 TC 등재 (74 files/424 tests)
+- [x] `check-R17-DoD` 실행 완료
 
 ## [R-17 완료 보고 절차]
 

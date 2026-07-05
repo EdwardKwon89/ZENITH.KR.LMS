@@ -10,7 +10,7 @@
 | **관련 IMP** | IMP-145 |
 | **브랜치** | `feature/teama-phase71-ups-rate-management` |
 | **커밋 태그** | `[D_Kai]` |
-| **상태** | 🚫 (TASK-175·176 완료 후 착수) |
+| **상태** | 🔄 (Aiden 반려 재작업) |
 
 ---
 
@@ -39,11 +39,11 @@ An-14 §6·§11 기준 아래 API 계약을 명문화 (Team B가 GH #181 작업 
 
 ## [DoD]
 
-- [ ] `Ds_11_API_상세_명세서.md` (또는 관련 `Ds_11_DETAIL_*`) 갱신 완료
-- [ ] UAT-17-03 재실행 및 완료 처리
-- [ ] 신규 UAT-20·21 작성, `UAT_MASTER.md` 갱신
-- [ ] 전체 회귀 최종 PASS 확인 및 `LIVE_REGRESSION_TEST_MAP.md` 헤더 갱신
-- [ ] `check-R17-DoD` 실행 완료
+- [x] `Ds_11_API_상세_명세서.md` 갱신 완료 (Section 11 — UPS API 계약 전체 명문화)
+- [~] UAT-17-03 재실행 — **Team B #181(order 연동) 완료 후 가능**, 시나리오 문서 유지
+- [x] 신규 UAT-22/23 작성 (UAT-20/21→22/23 번호 조정), `UAT_MASTER.md` 갱신 (129개 시나리오)
+- [x] 전체 회귀 최종 PASS 확인 (424/424) 및 `LIVE_REGRESSION_TEST_MAP.md` 헤더 갱신
+- [x] `check-R17-DoD` 실행 완료
 
 ## [R-17 완료 보고 절차]
 
