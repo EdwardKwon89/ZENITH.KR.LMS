@@ -52,7 +52,7 @@ export const UpdateAgencyShipperSchema = z.object({
 export const CreateAgencyRateOverrideSchema = z.object({
   base_rate_id: z.string().uuid(),
   selling_price: z.number().min(0),
-  cost_price: z.number().min(0),
+  cost_price: z.number().min(0).optional(),
   valid_from: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   valid_until: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
 });

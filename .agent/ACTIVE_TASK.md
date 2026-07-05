@@ -299,8 +299,8 @@
 | TASK-172 | 260705 | `feature/ups-spr03-bkai-rates-admin` 파일별 검토(이식/제외 결정) — pricing-engine.ts 원본 확인 (An-14 §4) | TASK-171 ✅ | Aiden | 🔔 | [TASK-172](tasks/TASK-172_260705_P71SPR02_PricingEngine이식_Aiden.md) | 코드 없음(결정 기록), TASK-173에 통합 |
 | TASK-173 | 260705 | pricing-engine 보강(원가×1.07·대형포장물룰) + agency/shipper 계산 모듈 신규 (An-14 §4) | TASK-172 ✅ | Aiden | 🔔 | [TASK-173](tasks/TASK-173_260705_P71SPR03_계산엔진보강_Aiden.md) | 407/407 PASS · 커밋 예정 |
 | TASK-174 | 260705 | estimateUpsFreight Action **노출만**(계산 API) — 오더등록 연동·agency_org_id·스냅샷은 Team B(GH#181) 인계 (An-14 §4·§11) | TASK-173 ✅ | Aiden | 🔔 | [TASK-174](tasks/TASK-174_260705_P71SPR04_estimateUpsFreightAction_Aiden.md) | 412/412 PASS · 코드 `2267c5b`+문서 `7bc5c1f` |
-| TASK-175 | 260705 | Admin UI 완성 — 기준요금·유류할증·OC 3탭 + Agency 할인율정책 탭 신규 (An-14 §5, TASK-172 발견 버그 4건 수정 포함) | TASK-171·172 ✅ | **D_Kai** | ⬜ | [TASK-175](tasks/TASK-175_260705_P71SPR05_AdminUpsRatesUI_DKai.md) | Edward 지시(260705)로 D_Kai 발령 · 브랜치 `feature/teama-phase71-ups-rate-management` 이어서 사용(신규 브랜치 금지) |
-| TASK-176 | 260705 | Agency UI 수정 — rate-overrides cost_price 읽기전용화 + Agency 부가요금 등록 (An-14 §5) | TASK-171 ✅ | **D_Kai** | ⬜ | [TASK-176](tasks/TASK-176_260705_P71SPR06_AgencyRateOverridesUI_DKai.md) | Team B가 동일 화면 병행 작업 중 — 착수 전 develop 최신 변경 확인 필수 |
+| TASK-175 | 260705 | Admin UI 완성 — 기준요금·유류할증·OC 3탭 + Agency 할인율정책 탭 신규 (An-14 §5, TASK-172 발견 버그 4건 수정 포함) | TASK-171·172 ✅ | **D_Kai** | 🔔 | [TASK-175](tasks/TASK-175_260705_P71SPR05_AdminUpsRatesUI_DKai.md) | 코드 12종+UI 6탭+RBAC+i18n 4개국어+회귀 412/412 PASS ✅ |
+| TASK-176 | 260705 | Agency UI 수정 — rate-overrides cost_price 읽기전용화 + Agency 부가요금 등록 (An-14 §5) | TASK-171 ✅ | **D_Kai** | 🔄 | [TASK-176](tasks/TASK-176_260705_P71SPR06_AgencyRateOverridesUI_DKai.md) | 착수 — develop 머지 후 작업 중 |
 | TASK-177 | 260705 | Ds_11 API 명세 갱신(Team B 인계 계약 명시) + UAT-17-03 완료처리 + 신규 UAT-20/21 작성 + 전체 회귀 (An-14 §6·7) | TASK-175·176 | **D_Kai** | 🚫 | [TASK-177](tasks/TASK-177_260705_P71SPR07_명세UAT회귀_DKai.md) | TASK-175·176 완료 후 착수 |
 ---
 

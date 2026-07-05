@@ -108,6 +108,21 @@ UI 컴포넌트 패턴은 `/admin/customs-rates` 또는 `/admin/delivery-rates`(
 6. 문서 커밋 `[D_Kai] docs: TASK-175 완료 보고 — IMP-145 Admin UI 🔔`
 7. **PR 생성 금지** — 이 브랜치는 TASK-171~177 전체를 묶어 Aiden이 최종 1개 PR로 생성한다. D_Kai는 브랜치에 커밋만 추가하고 push.
 
-## [발견 이슈]
+## [작업 결과]
 
-_(담당 Task 범위 밖 이슈 발견 시 기재. 없으면 "없음")_
+| 항목 | 상태 |
+|:-----|:----:|
+| Migration: 4개 테이블 `updated_at` 컬럼 추가 (`20260705110000`) | ✅ |
+| Server Actions `rates-mutation.ts` CRUD 12종 | ✅ |
+| Admin 6-Tab UI (`/admin/ups-rates/`) — Zone·제품·기준요금·유류할증·OC·Agency정책 | ✅ |
+| NaviSidebar "UPS 요율 관리" 서브메뉴 추가 (Master 그룹) | ✅ |
+| RBAC MANAGER에 `/admin/ups-rates` 권한 추가 | ✅ |
+| i18n 4개국어 (`Navigation.ups_rates` + `Admin.ups_rates.*`) | ✅ |
+| `npx tsc --noEmit` 0 errors (신규 코드 기준) | ✅ |
+| `npm run test:regression` 72 files / 412 PASS (기준선 유지) | ✅ |
+
+**커밋**: `<커밋 해시 기입>`
+
+**[발견 이슈]**
+
+_(담당 Task 범위 밖 이슈 발견 시 기재. 없으면 "없음")__

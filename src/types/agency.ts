@@ -55,7 +55,7 @@ export interface AgencyRateOverride {
 export interface CreateAgencyRateOverrideInput {
   base_rate_id: string;
   selling_price: number;
-  cost_price: number;
+  cost_price?: number;
   valid_from: string;
   valid_until?: string;
 }

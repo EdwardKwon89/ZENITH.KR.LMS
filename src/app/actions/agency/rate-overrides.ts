@@ -61,7 +61,7 @@ export async function upsertAgencyRateOverride(
       agency_org_id: agencyOrgId,
       base_rate_id: parsed.data.base_rate_id,
       selling_price: parsed.data.selling_price,
-      cost_price: parsed.data.cost_price,
+      cost_price: parsed.data.cost_price ?? 0,
       valid_from: parsed.data.valid_from,
       valid_until: parsed.data.valid_until ?? null,
       is_active: true,
@@ -70,6 +70,9 @@ export async function upsertAgencyRateOverride(
 
   if (error) {
     logger.error('[upsertAgencyRateOverride] Failed:', error.message);
+    if (error.message?.includes('할인율 정책이 없는 대리점')) {
+      throw new Error('담당 관리자에게 할인율 정책 등록을 요청하세요. 할인율이 설정되지 않은 대리점은 요율을 등록할 수 없습니다.');
+    }
     throw new Error(`Failed to upsert rate override: ${error.message}`);
   }
 
