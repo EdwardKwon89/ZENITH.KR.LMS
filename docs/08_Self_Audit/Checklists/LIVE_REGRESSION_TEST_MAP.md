@@ -1,7 +1,7 @@
 # 🗺️ LIVE Regression Test Master Map
 
-> **총 테스트 케이스:** 424 Cases (vitest 개별 테스트 기준, 74 test files)
-> **최종 검증일:** 2026-07-05 (TASK-175·176·177 Phase 7.1 UPS Admin UI + Agency UI · TC-UPS-ADMIN-01~07 + TC-AG-OC-01~03 등재 · 424/424 PASS)  
+> **총 테스트 케이스:** 436 Cases (vitest 개별 테스트 기준, 75 test files)
+> **최종 검증일:** 2026-07-05 (TASK-179 Phase 7.2 IMP-146 Zone-Box 정밀화 · TC-UPS-ZONEMAP-01~03 등재 · 436/436 PASS)  
 
 제니스 플랫폼의 비즈니스 영속성을 보장하는 회귀 테스트 케이스의 통합 명세서입니다. 모든 신규 개발 및 수정 시 이 맵에 케이스가 추가되어야 하며, 전체 테스트가 통과되어야 합니다.
 
@@ -507,6 +507,14 @@
 | **TC-AG-OC-01** | 부가요금 목록 조회 | `getAgencyOtherCharges` 정상 동작 | `tests/unit/agency/other-charges-actions.test.ts` |
 | **TC-AG-OC-02** | 부가요금 등록 | `upsertAgencyOtherCharge` 정상 동작 (unique: agency_org_id + other_charge_id) | `tests/unit/agency/other-charges-actions.test.ts` |
 | **TC-AG-OC-03** | 부가요금 비활성화 | `deactivateAgencyOtherCharge` 정상 동작 | `tests/unit/agency/other-charges-actions.test.ts` |
+
+### 40. Phase 7.2 IMP-146 UPS Zone-Box 매핑 정밀화
+
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-UPS-ZONEMAP-01** | 정확 매치: service+direction 일치 → Zone 반환 | Fallback 없이 정확한 Zone 매핑 검증 | `tests/unit/ups/zone-map.test.ts` |
+| **TC-UPS-ZONEMAP-02** | 1단계 Fallback: direction 없음 → `null` 방향 폴백 | direction 미지정 시 자동 폴백 검증 | `tests/unit/ups/zone-map.test.ts` |
+| **TC-UPS-ZONEMAP-03** | 2단계 Fallback: service+direction 전부 불일치 → `null` 반환 | 완전 미매핑 국가의 null 반환 + `fallbackApplied` 필드 검증 | `tests/unit/ups/zone-map.test.ts` |
 
 ---
 

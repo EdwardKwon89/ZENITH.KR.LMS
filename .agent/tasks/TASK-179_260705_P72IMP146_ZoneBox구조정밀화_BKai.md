@@ -53,8 +53,8 @@ An-14 §9(요율표 구조 정확도 리스크) 중 2건을 해소한다. `docs/
 - [x] 신규 단위테스트(TC-UPS-ZONEMAP-01/02/03 정확매치/fallback/null)
 - [x] `npm run test:regression` 전체 PASS (436/436)
 - [x] `npx tsc --noEmit` 신규 오류 0건 (기존 pre-existing 12건)
-- [ ] `LIVE_REGRESSION_TEST_MAP.md`·`scratch/IMP_PROGRESS.md` 갱신
-- [ ] `check-R17-DoD` 실행 완료
+- [x] `LIVE_REGRESSION_TEST_MAP.md`·`scratch/IMP_PROGRESS.md` 갱신
+- [x] `check-R17-DoD` 실행 완료
 
 ## [R-17 완료 보고 절차]
 
