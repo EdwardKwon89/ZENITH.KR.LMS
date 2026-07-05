@@ -109,7 +109,9 @@ export interface UpsFlightPlan {
 export interface UpsPricingData {
   zone: UpsZone;
   product: UpsProduct;
-  baseRate: UpsBaseRate;
+  baseRate: UpsBaseRate | null;
+  weightTierRates?: UpsWeightTierRate[] | null;
+  freightMinimum?: UpsFreightMinimum | null;
   fuelSurcharge: UpsFuelSurcharge | null;
   otherCharges: UpsOtherCharge[];
 }
@@ -145,6 +147,13 @@ export interface UpsBreakdown {
   otherChargesSellingTotal: number;
   otherChargesCostTotal: number;
   oversizeApplied: boolean;
+  dwbApplied?: boolean;
+  dwbOriginalWeightKg?: number;
+  dwbOriginalSellingPrice?: number;
+  dwbOriginalCostPrice?: number;
+  freightMinApplied?: boolean;
+  freightMinOriginalSelling?: number;
+  freightMinOriginalCost?: number;
 }
 
 export interface UpsFreightInput {
@@ -172,6 +181,8 @@ export interface UpsFreightResult {
   totalSellingPrice: number;
   totalCostPrice: number;
   currency: string;
+  dwbApplied?: boolean;
+  freightMinApplied?: boolean;
   breakdown: UpsBreakdown;
 }
 
@@ -235,4 +246,34 @@ export interface UpsShxkCountryMap {
   country_code: string;
   incoterms: 'DDU' | 'DDP';
   shxk_code: string;
+}
+
+export interface UpsWeightTierRate {
+  id: string;
+  product_id: string;
+  zone_id: string;
+  tier_min_kg: number;
+  tier_max_kg: number | null;
+  price_per_kg_selling: number;
+  price_per_kg_cost: number;
+  currency: string;
+  valid_from: string;
+  valid_until: string | null;
+  is_active: boolean;
+  created_at: string;
+  created_by: string | null;
+  updated_at: string;
+}
+
+export interface UpsFreightMinimum {
+  id: string;
+  zone_id: string;
+  product_id: string;
+  min_charge_selling: number;
+  min_charge_cost: number;
+  currency: string;
+  is_active: boolean;
+  created_at: string;
+  created_by: string | null;
+  updated_at: string;
 }

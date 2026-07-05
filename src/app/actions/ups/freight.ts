@@ -76,18 +76,44 @@ export async function estimateUpsFreight(input: EstimateUpsFreightInput): Promis
   const { chargeableKg } = calcChargeableWeight(input.actualWeightKg, dims, input.volumetricDivisor);
   const { billingKg } = applyOversizeRule(resolveBillingWeight(chargeableKg, product.product_code), dims);
 
-  const { data: baseRate, error: baseRateError } = await supabase
-    .from('zen_ups_base_rates')
+  // 2. 20kg 이하일 때만 기준 요금 조회
+  let baseRate = null;
+  if (billingKg <= 20.0) {
+    const { data: rRow, error: baseRateError } = await supabase
+      .from('zen_ups_base_rates')
+      .select('*')
+      .eq('product_id', input.productId)
+      .eq('zone_id', zone.id)
+      .eq('weight_kg', billingKg)
+      .eq('is_active', true)
+      .lte('valid_from', refDate)
+      .or(`valid_until.is.null,valid_until.gte.${refDate}`)
+      .maybeSingle();
+    if (baseRateError) throw new Error(`기준요금 조회 실패: ${baseRateError.message}`);
+    if (!rRow) throw new Error(`해당 조건(제품·Zone·중량 ${billingKg}kg)의 기준요금이 등록되어 있지 않습니다.`);
+    baseRate = rRow;
+  }
+
+  // 3. 20kg 초과 per-kg 요율 구간 조회 (DWB 비교를 위해 20kg 이하일 때도 조회 가능하도록 함)
+  const { data: weightTierRates, error: tierError } = await supabase
+    .from('zen_ups_weight_tier_rates')
     .select('*')
     .eq('product_id', input.productId)
     .eq('zone_id', zone.id)
-    .eq('weight_kg', billingKg)
     .eq('is_active', true)
     .lte('valid_from', refDate)
-    .or(`valid_until.is.null,valid_until.gte.${refDate}`)
+    .or(`valid_until.is.null,valid_until.gte.${refDate}`);
+  if (tierError) throw new Error(`20kg 초과 구간요금 조회 실패: ${tierError.message}`);
+
+  // 4. Freight 최소운임 조회
+  const { data: freightMinimum, error: minError } = await supabase
+    .from('zen_ups_freight_minimums')
+    .select('*')
+    .eq('product_id', input.productId)
+    .eq('zone_id', zone.id)
+    .eq('is_active', true)
     .maybeSingle();
-  if (baseRateError) throw new Error(`기준요금 조회 실패: ${baseRateError.message}`);
-  if (!baseRate) throw new Error(`해당 조건(제품·Zone·중량 ${billingKg}kg)의 기준요금이 등록되어 있지 않습니다.`);
+  if (minError) throw new Error(`최소운임 조회 실패: ${minError.message}`);
 
   const { data: fuelRows } = await supabase
     .from('zen_ups_fuel_surcharges')
@@ -123,7 +149,9 @@ export async function estimateUpsFreight(input: EstimateUpsFreightInput): Promis
     {
       zone: zone as unknown as UpsZoneWithCountries,
       product,
-      baseRate,
+      baseRate: baseRate as any,
+      weightTierRates: weightTierRates as any,
+      freightMinimum: freightMinimum as any,
       fuelSurcharge,
       otherCharges: selectedOtherCharges,
       oversizeCharge,
