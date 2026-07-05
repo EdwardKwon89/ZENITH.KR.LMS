@@ -2,6 +2,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   ceilToHalfKg,
+  resolveBillingWeight,
   calcChargeableWeight,
   isOversizePackage,
   applyOversizeRule,
@@ -95,6 +96,37 @@ describe('TC-UPS-ENGINE-03: 대형포장물(OVERSIZE) 특수 판정 (An-14 §0-1
     const result = computeUpsFreight(baseInput(), data);
     expect(result.breakdown.oversizeApplied).toBe(false);
     expect(result.breakdown.otherChargeItems.some((c) => c.chargeCode === 'OVERSIZE')).toBe(false);
+  });
+});
+
+describe('TC-UPS-EXPEDITED-ROUND: 상품별 중량 반올림 (DEF-095)', () => {
+  it('WW_EXPEDITED는 20kg 이하에서도 항상 1kg 단위로 올림한다', () => {
+    expect(resolveBillingWeight(12.3, 'WW_EXPEDITED')).toBe(13);
+    expect(resolveBillingWeight(12.0, 'WW_EXPEDITED')).toBe(12);
+  });
+
+  it('WW_EXPEDITED는 20kg 초과 시에도 1kg 단위로 올림한다', () => {
+    expect(resolveBillingWeight(20.3, 'WW_EXPEDITED')).toBe(21);
+  });
+
+  it('그 외 상품은 20kg 이하에서 0.5kg 단위로 올림한다', () => {
+    expect(resolveBillingWeight(12.3, 'WW_EXPRESS_NONDOC')).toBe(12.5);
+    expect(resolveBillingWeight(20.0, 'WW_EXPRESS_NONDOC')).toBe(20);
+  });
+
+  it('그 외 상품은 20kg 초과 시 1kg 단위로 올림한다', () => {
+    expect(resolveBillingWeight(20.1, 'WW_EXPRESS_NONDOC')).toBe(21);
+    expect(resolveBillingWeight(20.5, 'WW_SAVER_NONDOC')).toBe(21);
+  });
+
+  it('computeUpsFreight가 WW_EXPEDITED 청구중량을 1kg 단위로 반영한다', () => {
+    const data = {
+      ...baseData(),
+      product: { ...baseData().product, product_code: 'WW_EXPEDITED' },
+    };
+    const input: UpsFreightInput = { ...baseInput(), actualWeightKg: 12.3 };
+    const result = computeUpsFreight(input, data);
+    expect(result.billingWeightKg).toBe(13);
   });
 });
 

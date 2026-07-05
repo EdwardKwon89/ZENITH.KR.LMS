@@ -29,6 +29,13 @@ export function ceilToHalfKg(weightKg: number): number {
   return Math.ceil(weightKg * 2) / 2;
 }
 
+// DEF-095: 상품별 중량 반올림 단위. UPS 공식 Rate Guide(p.2) 원문 —
+// WW_EXPEDITED는 중량과 무관하게 항상 1kg 단위, 그 외 상품은 20kg 이하 0.5kg / 초과 1kg 단위로 올림.
+export function resolveBillingWeight(chargeableKg: number, productCode: string): number {
+  if (productCode === 'WW_EXPEDITED') return Math.ceil(chargeableKg);
+  return chargeableKg <= 20 ? ceilToHalfKg(chargeableKg) : Math.ceil(chargeableKg);
+}
+
 // 목적지 국가코드로 Zone 탐색
 export function resolveZoneByCountry(
   destCountryCode: string,
@@ -143,7 +150,7 @@ export function computeUpsFreight(
     input.actualWeightKg, dims, input.volumetricDivisor
   );
   const { billingKg: chargeableAfterOversize, applied: oversizeApplied } = applyOversizeRule(
-    ceilToHalfKg(chargeableKg), dims
+    resolveBillingWeight(chargeableKg, data.product.product_code), dims
   );
   const billingKg = chargeableAfterOversize;
 
