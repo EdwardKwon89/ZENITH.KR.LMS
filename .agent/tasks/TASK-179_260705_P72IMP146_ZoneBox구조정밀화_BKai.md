@@ -10,7 +10,7 @@
 | **관련 IMP** | IMP-146 |
 | **브랜치** | 신규 생성 — `feature/teama-task-179-zone-box-precision-bkai` |
 | **커밋 태그** | `[B_Kai]` |
-| **상태** | ⬜ |
+| **상태** | 📝 |
 
 ---
 
@@ -65,7 +65,51 @@ _(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
 
 ## [설계 의견]
 
-_(B_Kai 작성)_
+### 의견 1: Zone 매핑 폴백 전략
+
+**문제**: 마이그레이션 후 46개국 시드는 `product_family='EXPRESS', direction='EXPORT'`로 초기화됨. SAVER/EXPORT, EXPRESS/IMPORT 등 다른 조합 조회 시 매핑이 없어 zone 미발견(null) 상태 발생 가능.
+
+**제안: 2단계 Fallback Chain**
+
+1. **정확 매치**: `(country_code, product_family, direction)` — 최우선
+2. **Fallback → EXPRESS/EXPORT**: 정확 매치 실패 시 `(country_code, 'EXPRESS', 'EXPORT')`로 재조회 (기존 단일 매핑과 동일)
+
+**근거**:
+- EXPRESS/EXPORT가 모든 국가에 존재하는 유일한 보장 조합 (마이그레이션 결과)
+- 기존 단일 매핑(`UNIQUE(country_code)`) 동작과 100% 하위호환
+- Admin이 SAVER/IMPORT 등 특수 매핑을 점진 추가해도 EXPRESS/EXPORT가 안전폴백
+- 3단계 이상 복잡한 폴백(방향/계열 순차)은 실제 사용 패턴이 확인될 때까지 오버엔지니어링
+
+**의사코드**:
+```ts
+resolveZoneByCountry(code, zones, pf='EXPRESS', dir='EXPORT') {
+  // 1) 정확 매치
+  const exact = zones.find(z => z.countries.some(
+    c => c.country_code===code && c.product_family===pf && c.direction===dir
+  ));
+  if (exact) return exact;
+  // 2) Fallback: EXPRESS/EXPORT
+  return zones.find(z => z.countries.some(
+    c => c.country_code===code && c.product_family==='EXPRESS' && c.direction==='EXPORT'
+  )) ?? null;
+}
+```
+
+### 의견 2: `resolveZoneByCountry()` 시그니처 변경 영향
+
+**조사 결과**: `resolveZoneByCountry()`의 **현재 생산코드 호출자 0건**. TASK-174 `freight.ts`는 인라인 `.some()`으로 Zone 해결 (`src/app/actions/ups/freight.ts:66-70`).
+
+**영향 분석**:
+| 항목 | 내용 |
+|:-----|:-----|
+| 생산코드 직접 호출 | **0건** — 변경으로 인한 Side effect 없음 |
+| TASK-174 `freight.ts` | 인라인 로직이므로 별도 마이그레이션 필요 없음. 단, TASK-180(Riley)가 이 함수 사용 예정 |
+| 단위테스트 | **0건** — 신규 작성 필요(DoD TC-UPS-ZONEMAP-*) |
+| 하위호환 | 기본파라미터 `productFamily='EXPRESS', direction='EXPORT'`로 완전 보장 |
+
+**제안**: 기본파라미터 추가로 기존 미래 호출자(TASK-174/180)에 안전한 시그니처 제공.
+
+**추가 권고**: TASK-174 `freight.ts`의 인라인 Zone 해결 로직도 `resolveZoneByCountry()`로 통일할 것을 권장 (TASK-180 이후 리팩터링 Task로 분리 가능).
 
 ## [설계 확정]
 
