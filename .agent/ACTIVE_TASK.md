@@ -298,7 +298,7 @@
 | TASK-171 | 260705 | 스키마: Agency 할인율정책·Agency부가요금 신규 + rate_overrides RLS/트리거 + OC 4종 추가 (An-14 §3) | P1 | 없음 | Aiden | 🔔 | [TASK-171](tasks/TASK-171_260705_P71SPR01_AgencyPricingPolicy_Aiden.md) | 코드 `ac2e81c`+문서 `1bebf47` · 393/393 PASS |
 | TASK-172 | 260705 | `feature/ups-spr03-bkai-rates-admin` 파일별 검토(이식/제외 결정) — pricing-engine.ts 원본 확인 (An-14 §4) | TASK-171 ✅ | Aiden | 🔔 | [TASK-172](tasks/TASK-172_260705_P71SPR02_PricingEngine이식_Aiden.md) | 코드 없음(결정 기록), TASK-173에 통합 |
 | TASK-173 | 260705 | pricing-engine 보강(원가×1.07·대형포장물룰) + agency/shipper 계산 모듈 신규 (An-14 §4) | TASK-172 ✅ | Aiden | 🔔 | [TASK-173](tasks/TASK-173_260705_P71SPR03_계산엔진보강_Aiden.md) | 407/407 PASS · 커밋 예정 |
-| TASK-174 | 260705 | estimateUpsFreight Action **노출만**(계산 API) — 오더등록 연동·agency_org_id·스냅샷은 Team B(GH#181) 인계 (An-14 §4·§11) | TASK-173 ✅ | Aiden | ⬜ | — | 즉시 착수 가능 |
+| TASK-174 | 260705 | estimateUpsFreight Action **노출만**(계산 API) — 오더등록 연동·agency_org_id·스냅샷은 Team B(GH#181) 인계 (An-14 §4·§11) | TASK-173 ✅ | Aiden | 🔔 | [TASK-174](tasks/TASK-174_260705_P71SPR04_estimateUpsFreightAction_Aiden.md) | 412/412 PASS · 커밋 예정 |
 | TASK-175 | 260705 | Admin UI 완성 — 기준요금·유류할증·OC 3탭 + Agency 할인율정책 탭 신규 (An-14 §5, TASK-172 발견 버그 4건 수정 포함) | TASK-171·172 ✅ | Aiden | ⬜ | — | 즉시 착수 가능 |
 | TASK-176 | 260705 | Agency UI 수정 — rate-overrides cost_price 읽기전용화 + Agency 부가요금 등록 (An-14 §5) | TASK-171 ✅ | Aiden | ⬜ | — | 즉시 착수 가능 |
 | TASK-177 | 260705 | Ds_11 API 명세 갱신(Team B 인계 계약 명시) + UAT-17-03 완료처리 + 신규 UAT-20/21 작성 + 전체 회귀 (An-14 §6·7) | TASK-174~176 | Aiden | 🚫 | — | TASK-174~176 완료 후 착수 |

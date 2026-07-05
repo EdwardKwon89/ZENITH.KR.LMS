@@ -1,7 +1,7 @@
 # 🗺️ LIVE Regression Test Master Map
 
-> **총 테스트 케이스:** 407 Cases (vitest 개별 테스트 기준, 71 test files)
-> **최종 검증일:** 2026-07-05 (TASK-173 Phase 7.1 요금계산엔진 보강 · TC-UPS-ENGINE-01~05 등재 · 407/407 PASS)  
+> **총 테스트 케이스:** 412 Cases (vitest 개별 테스트 기준, 72 test files)
+> **최종 검증일:** 2026-07-05 (TASK-174 Phase 7.1 estimateUpsFreight Action · TC-UPS-FREIGHT-01 등재 · 412/412 PASS)  
 
 제니스 플랫폼의 비즈니스 영속성을 보장하는 회귀 테스트 케이스의 통합 명세서입니다. 모든 신규 개발 및 수정 시 이 맵에 케이스가 추가되어야 하며, 전체 테스트가 통과되어야 합니다.
 
@@ -493,6 +493,11 @@
 | **TC-UPS-ENGINE-03** | 대형포장물(OVERSIZE) 특수 판정 6종 | 길이+둘레 300~400cm 조건·최소청구중량 40kg 강제 확인 | `tests/unit/ups/pricing-engine.test.ts` |
 | **TC-UPS-ENGINE-04** | Agency 단계 계산(override/폴백 분기) | R3~R5 공식 정확성 확인 | `tests/unit/ups/pricing-engine.test.ts` |
 | **TC-UPS-ENGINE-05** | Shipper 단계 계산(화주 할인 적용) | R6 공식 정확성 확인 | `tests/unit/ups/pricing-engine.test.ts` |
+
+### 39. Phase 7.1 estimateUpsFreight 통합 Action (IMP-145)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-UPS-FREIGHT-01** | Platform/Agency/Shipper 3단계 견적 조회(agencyOrgId·shipperOrgId 유무별 분기, Zone/기준요금 미존재 에러) | An-14 §4·§11 API 계약 검증 | `tests/unit/ups/freight-actions.test.ts` |
 
 ---
 
