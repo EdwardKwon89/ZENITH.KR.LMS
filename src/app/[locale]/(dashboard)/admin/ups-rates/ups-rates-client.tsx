@@ -169,13 +169,15 @@ export default function UpsRatesClient({ zones, products, baseRates, fuelSurchar
 
 function ZoneForm({ form, setForm, editingItem, zones, addZoneCountry, removeZoneCountry }: any) {
   const [countryCode, setCountryCode] = useState('');
+  const [countryFamily, setCountryFamily] = useState('EXPRESS');
+  const [countryDirection, setCountryDirection] = useState('EXPORT');
   const zoneCountries = zones.find((z: any) => z.id === form.id)?.countries ?? form.countries ?? [];
 
   const handleAddCountry = async () => {
     if (!countryCode.trim()) return;
     const zoneId = editingItem?.id || form.id;
     if (!zoneId) return;
-    await addZoneCountry(zoneId, countryCode.trim());
+    await addZoneCountry(zoneId, countryCode.trim(), countryFamily, countryDirection);
     setCountryCode('');
     window.location.reload();
   };
@@ -193,12 +195,24 @@ function ZoneForm({ form, setForm, editingItem, zones, addZoneCountry, removeZon
           <label className="text-xs font-bold text-slate-500 uppercase">국가 매핑</label>
           <div className="flex gap-2">
             <input type="text" value={countryCode} onChange={e => setCountryCode(e.target.value.toUpperCase())} placeholder="ISO 3자리 코드" maxLength={3} className="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-mono" />
+            <select value={countryFamily} onChange={e => setCountryFamily(e.target.value)} className="px-2 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium">
+              <option value="EXPRESS">EXPRESS</option>
+              <option value="SAVER">SAVER</option>
+              <option value="EXPEDITED">EXPEDITED</option>
+              <option value="FREIGHT">FREIGHT</option>
+            </select>
+            <select value={countryDirection} onChange={e => setCountryDirection(e.target.value)} className="px-2 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium">
+              <option value="EXPORT">EXPORT</option>
+              <option value="IMPORT">IMPORT</option>
+            </select>
             <button onClick={handleAddCountry} className="px-4 py-2 bg-brand-600 text-white rounded-lg text-sm font-semibold hover:bg-brand-700 transition-all">추가</button>
           </div>
           <div className="flex flex-wrap gap-1.5">
             {(zoneCountries as any[]).map((c: any) => (
               <span key={c.id || c.country_code} className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-100 rounded-full text-xs font-mono font-medium">
                 {c.country_code}
+                {c.product_family && <span className="text-[10px] text-slate-400">| {c.product_family}</span>}
+                {c.direction && <span className="text-[10px] text-slate-400">| {c.direction}</span>}
                 <button onClick={() => removeZoneCountry(c.id)} className="text-slate-400 hover:text-rose-500"><XCircle size={12} /></button>
               </span>
             ))}
@@ -229,8 +243,11 @@ function ProductForm({ form, setForm, editingItem }: any) {
         </select>
       </div>
       <div className="grid grid-cols-2 gap-3">
-        <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.ddu_available ?? false} onChange={e => setForm({ ...form, ddu_available: e.target.checked })} /> DDU 가능</label>
-        <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.ddp_available ?? false} onChange={e => setForm({ ...form, ddp_available: e.target.checked })} /> DDP 가능</label>
+        <Field label="Box 최대중량 (kg, Box 상품만)" type="number" value={form.max_weight_kg} onChange={(v: any) => setForm({ ...form, max_weight_kg: v ? Number(v) : null })} />
+        <div className="flex items-end gap-2 pb-1">
+          <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.ddu_available ?? false} onChange={e => setForm({ ...form, ddu_available: e.target.checked })} /> DDU 가능</label>
+          <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.ddp_available ?? false} onChange={e => setForm({ ...form, ddp_available: e.target.checked })} /> DDP 가능</label>
+        </div>
       </div>
       <Field label="Sort Order" type="number" value={form.sort_order} onChange={(v: any) => setForm({ ...form, sort_order: v ? Number(v) : 0 })} />
       {editingItem && (
@@ -347,7 +364,7 @@ function ZoneTable({ zones, canEdit, onEdit, onDelete }: any) {
     { accessorKey: 'zone_code', header: '코드', cell: ({ row }) => <ZenBadge variant="default" className="font-mono">{row.original.zone_code}</ZenBadge> },
     { accessorKey: 'zone_name', header: '명칭' },
     { accessorKey: 'description', header: '설명', cell: ({ row }) => <span className="text-xs text-slate-500">{row.original.description ?? '-'}</span> },
-    { id: 'countries', header: '국가', cell: ({ row }) => <span className="font-mono text-xs">{row.original.countries.map(c => c.country_code).join(', ')}</span> },
+    { id: 'countries', header: '국가 (서비스/방향)', cell: ({ row }) => <span className="font-mono text-xs leading-relaxed">{row.original.countries.map(c => `${c.country_code}(${c.product_family ?? 'EXPRESS'}/${c.direction ?? 'EXPORT'})`).join(', ')}</span> },
     { accessorKey: 'sort_order', header: '순서', cell: ({ row }) => <span className="text-sm font-mono">{row.original.sort_order}</span> },
     ...(canEdit ? [{ id: 'actions' as const, header: '관리', cell: ({ row }: any) => <ActionsCell row={row} onEdit={onEdit} onDelete={onDelete} /> }] : []),
   ];
@@ -359,6 +376,7 @@ function ProductTable({ products, canEdit, onEdit, onDelete }: any) {
     { accessorKey: 'product_code', header: '코드', cell: ({ row }) => <ZenBadge variant="default" className="font-mono">{row.original.product_code}</ZenBadge> },
     { accessorKey: 'product_name', header: '명칭' },
     { accessorKey: 'cargo_type', header: '유형', cell: ({ row }) => <ZenBadge variant={row.original.cargo_type === 'DOC' ? 'info' : 'warning'}>{row.original.cargo_type}</ZenBadge> },
+    { id: 'max_weight_kg', header: 'Box 최대중량', cell: ({ row }) => <span className="font-mono text-xs">{row.original.max_weight_kg != null ? `${row.original.max_weight_kg}kg` : '-'}</span> },
     { id: 'ddu', header: 'DDU', cell: ({ row }) => <ZenBadge variant={row.original.ddu_available ? 'success' : 'default'}>{row.original.ddu_available ? '가능' : '불가'}</ZenBadge> },
     { id: 'ddp', header: 'DDP', cell: ({ row }) => <ZenBadge variant={row.original.ddp_available ? 'success' : 'default'}>{row.original.ddp_available ? '가능' : '불가'}</ZenBadge> },
     { accessorKey: 'sort_order', header: '순서', cell: ({ row }) => <span className="font-mono text-sm">{row.original.sort_order}</span> },

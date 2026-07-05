@@ -42,10 +42,17 @@ export async function deleteUpsZone(id: string) {
 
 // ─── Zone Countries ────────────────────────────────
 
-export async function addZoneCountry(zoneId: string, countryCode: string) {
+export async function addZoneCountry(zoneId: string, countryCode: string, productFamily: string = 'EXPRESS', direction: string = 'EXPORT') {
   const { supabase, profile } = await validateUserAction();
   requireAdminOrManager(profile?.role);
-  const { error } = await supabase.from('zen_ups_zone_countries').insert({ zone_id: zoneId, country_code: countryCode.toUpperCase() });
+  const pf = productFamily.toUpperCase();
+  const dir = direction.toUpperCase();
+  if (!['EXPRESS','SAVER','EXPEDITED','FREIGHT'].includes(pf)) throw new Error('Invalid product_family');
+  if (!['EXPORT','IMPORT'].includes(dir)) throw new Error('Invalid direction');
+  const { error } = await supabase.from('zen_ups_zone_countries').insert({
+    zone_id: zoneId, country_code: countryCode.toUpperCase(),
+    product_family: pf, direction: dir,
+  });
   if (error) throw new Error(error.message);
   revalidatePath('/admin/ups-rates');
 }
@@ -64,6 +71,7 @@ export async function createUpsProduct(data: {
   product_code: string; sub_code?: string; product_name: string;
   cargo_type: 'DOC' | 'NON_DOC' | 'BOTH';
   ddu_available?: boolean; ddp_available?: boolean; sort_order?: number;
+  max_weight_kg?: number | null;
 }) {
   const { supabase, profile } = await validateUserAction();
   requireAdminOrManager(profile?.role);
@@ -76,6 +84,7 @@ export async function updateUpsProduct(id: string, data: {
   product_code?: string; sub_code?: string; product_name?: string;
   cargo_type?: 'DOC' | 'NON_DOC' | 'BOTH';
   ddu_available?: boolean; ddp_available?: boolean; is_active?: boolean; sort_order?: number;
+  max_weight_kg?: number | null;
 }) {
   const { supabase, profile } = await validateUserAction();
   requireAdminOrManager(profile?.role);

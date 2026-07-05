@@ -3,6 +3,7 @@ import { describe, it, expect } from 'vitest';
 import {
   ceilToHalfKg,
   resolveBillingWeight,
+  resolveZoneByCountry,
   calcChargeableWeight,
   isOversizePackage,
   applyOversizeRule,
@@ -11,7 +12,7 @@ import {
 } from '@/lib/ups/pricing-engine';
 import { computeAgencyFreight } from '@/lib/ups/agency-pricing';
 import { computeShipperFreight } from '@/lib/ups/shipper-pricing';
-import type { UpsPricingData, UpsFreightInput, UpsOtherCharge } from '@/types/ups';
+import type { UpsPricingData, UpsFreightInput, UpsOtherCharge, UpsZoneWithCountries } from '@/types/ups';
 
 const baseData = (): UpsPricingData => ({
   zone: { id: 'z1', zone_code: 'Z8', zone_name: 'North America', description: null, is_active: true, sort_order: 8, created_at: '', created_by: null } as any,
@@ -166,5 +167,71 @@ describe('TC-UPS-ENGINE-05: Shipper 단계 계산 (An-14 R6)', () => {
   it('할인율 0이면 Agency 판매가와 동일하다', () => {
     const result = computeShipperFreight(50000, 0);
     expect(result.finalFreight).toBe(50000);
+  });
+});
+
+// ─── TASK-179: Zone 해석 ─────────────────────────────────────────
+
+const mockZones: UpsZoneWithCountries[] = [
+  { id: 'z2', zone_code: 'Z2', zone_name: 'East Asia', description: null, is_active: true, sort_order: 2, created_at: '', created_by: null,
+    countries: [
+      { id: 'c1', zone_id: 'z2', country_code: 'JPN', product_family: 'EXPRESS', direction: 'EXPORT', created_at: '', created_by: null },
+      { id: 'c2', zone_id: 'z2', country_code: 'JPN', product_family: 'SAVER', direction: 'EXPORT', created_at: '', created_by: null },
+      { id: 'c3', zone_id: 'z2', country_code: 'CHN', product_family: 'EXPRESS', direction: 'EXPORT', created_at: '', created_by: null },
+    ] as any },
+  { id: 'z6', zone_code: 'Z6', zone_name: 'Europe Core', description: null, is_active: true, sort_order: 6, created_at: '', created_by: null,
+    countries: [
+      { id: 'c4', zone_id: 'z6', country_code: 'DEU', product_family: 'EXPRESS', direction: 'EXPORT', created_at: '', created_by: null },
+      { id: 'c5', zone_id: 'z6', country_code: 'DEU', product_family: 'EXPRESS', direction: 'IMPORT', created_at: '', created_by: null },
+    ] as any },
+];
+
+describe('TC-UPS-ZONEMAP-01: resolveZoneByCountry — 정확매치 + 파라미터 확장', () => {
+  it('기본 파라미터(EXPRESS/EXPORT)로 정확매치', () => {
+    const result = resolveZoneByCountry('JPN', mockZones);
+    expect(result.zone?.zone_code).toBe('Z2');
+    expect(result.fallbackApplied).toBe(false);
+  });
+
+  it('SAVER/EXPORT 정확매치', () => {
+    const result = resolveZoneByCountry('JPN', mockZones, 'SAVER', 'EXPORT');
+    expect(result.zone?.zone_code).toBe('Z2');
+    expect(result.fallbackApplied).toBe(false);
+  });
+
+  it('EXPRESS/IMPORT 정확매치 (DEU)', () => {
+    const result = resolveZoneByCountry('DEU', mockZones, 'EXPRESS', 'IMPORT');
+    expect(result.zone?.zone_code).toBe('Z6');
+    expect(result.fallbackApplied).toBe(false);
+  });
+});
+
+describe('TC-UPS-ZONEMAP-02: resolveZoneByCountry — Fallback', () => {
+  it('매핑 없는 계열(EXPEDITED) → EXPRESS/EXPORT fallback', () => {
+    const result = resolveZoneByCountry('JPN', mockZones, 'EXPEDITED', 'EXPORT');
+    // JPN has EXPRESS/EXPORT mapping, but not EXPEDITED/EXPORT → fallback
+    expect(result.zone?.zone_code).toBe('Z2');
+    expect(result.fallbackApplied).toBe(true);
+  });
+
+  it('매핑 없는 방향(IMPORT) → EXPRESS/EXPORT fallback', () => {
+    const result = resolveZoneByCountry('CHN', mockZones, 'EXPRESS', 'IMPORT');
+    // CHN has only EXPRESS/EXPORT → fallback
+    expect(result.zone?.zone_code).toBe('Z2');
+    expect(result.fallbackApplied).toBe(true);
+  });
+});
+
+describe('TC-UPS-ZONEMAP-03: resolveZoneByCountry — 미등록 국가 null', () => {
+  it('매핑 없는 국가는 null 반환', () => {
+    const result = resolveZoneByCountry('XXX', mockZones);
+    expect(result.zone).toBeNull();
+    expect(result.fallbackApplied).toBe(false);
+  });
+
+  it('빈 zones 배열에서 검색 시 null', () => {
+    const result = resolveZoneByCountry('JPN', []);
+    expect(result.zone).toBeNull();
+    expect(result.fallbackApplied).toBe(false);
   });
 });

@@ -20,6 +20,8 @@ export interface UpsZoneCountry {
   id: string;
   zone_id: string;
   country_code: string;    // ISO 3166-1 alpha-3
+  product_family: string;  // 'EXPRESS' | 'SAVER' | 'EXPEDITED' | 'FREIGHT'
+  direction: string;       // 'EXPORT' | 'IMPORT'
   created_at: string;
   created_by: string | null;
 }
@@ -38,6 +40,7 @@ export interface UpsProduct {
   ddp_available: boolean;
   is_active: boolean;
   sort_order: number;
+  max_weight_kg: number | null;
   created_at: string;
 }
 
@@ -170,6 +173,12 @@ export interface UpsFreightResult {
   totalCostPrice: number;
   currency: string;
   breakdown: UpsBreakdown;
+}
+
+// Zone 해석 결과 (TASK-179: fallback 여부 추적)
+export interface ZoneResolveResult {
+  zone: UpsZone | null;
+  fallbackApplied: boolean;
 }
 
 // Agency 단계 (An-14 R3~R5)
