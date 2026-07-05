@@ -10,7 +10,7 @@
 | **관련 IMP** | IMP-146 |
 | **브랜치** | 신규 생성 — `feature/teama-task-179-zone-box-precision-bkai` |
 | **커밋 태그** | `[B_Kai]` |
-| **상태** | 🔄 |
+| **상태** | 🔔 |
 
 ---
 
@@ -44,15 +44,15 @@ An-14 §9(요율표 구조 정확도 리스크) 중 2건을 해소한다. `docs/
 
 ## [DoD]
 
-- [ ] `zen_ups_products.max_weight_kg` 컬럼 추가 + Box 제품 2종 시드
-- [ ] Box 상품 요율 시드(공식 Rate Guide 기준, 최소 Zone 2~10 × 1~15kg 구간)
-- [ ] `zen_ups_zone_countries` 컬럼 2종 추가 + UNIQUE 재정의 + 기존 데이터 마이그레이션(하위호환)
-- [ ] `resolveZoneByCountry()` 파라미터 확장(하위호환 기본값 포함) + 폴백 2단계 로직 + `fallbackApplied` 반환 필드 포함
-- [ ] 기존 호출부 정상 동작 확인(zero callers actual, but freight.ts 인라인 로직 호환)
-- [ ] Admin UI 반영(Box 상품 필드, Zone 매핑 필터)
-- [ ] 신규 단위테스트(TC-UPS-BOX-*, TC-UPS-ZONEMAP-*)
-- [ ] `npm run test:regression` 전체 PASS (현재 기준선 424 이상 유지)
-- [ ] `npx tsc --noEmit` 신규 오류 0건
+- [x] `zen_ups_products.max_weight_kg` 컬럼 추가 + Box 제품 2종 시드
+- [x] Box 상품 요율 시드(Zone 2~10 × 1~15kg / 1~25kg 1kg 단위)
+- [x] `zen_ups_zone_countries` 컬럼 2종 추가 + UNIQUE 재정의 + 기존 데이터 마이그레이션(하위호환)
+- [x] `resolveZoneByCountry()` 파라미터 확장(하위호환 기본값 포함) + 폴백 2단계 로직 + `fallbackApplied` 반환 필드 포함
+- [x] 기존 호출부 정상 동작 확인(zero callers actual, freight.ts 인라인 로직 호환)
+- [x] Admin UI 반영(Box 상품 max_weight_kg 필드, Zone 매핑 product_family/direction 셀렉터)
+- [x] 신규 단위테스트(TC-UPS-ZONEMAP-01/02/03 정확매치/fallback/null)
+- [x] `npm run test:regression` 전체 PASS (436/436)
+- [x] `npx tsc --noEmit` 신규 오류 0건 (기존 pre-existing 12건)
 - [ ] `LIVE_REGRESSION_TEST_MAP.md`·`scratch/IMP_PROGRESS.md` 갱신
 - [ ] `check-R17-DoD` 실행 완료
 
@@ -62,7 +62,7 @@ An-14 §9(요율표 구조 정확도 리스크) 중 2건을 해소한다. `docs/
 
 ## [발견 이슈]
 
-_(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
+없음
 
 ## [설계 의견]
 
@@ -123,4 +123,13 @@ resolveZoneByCountry(code, zones, pf='EXPRESS', dir='EXPORT') {
 
 ## [작업 결과]
 
-_(B_Kai 작성)_
+| 항목 | 내용 |
+|:-----|:------|
+| **코드 커밋** | `ac36f9d` (feat: TASK-179) |
+| **문서 커밋** | `a43c2f5` (docs: 설계 확정 반영) |
+| **PR** | [#190](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/190) |
+| **회귀 테스트** | 436/436 PASS |
+| **tsc 신규 오류** | 0건 |
+| **신규 단위테스트** | TC-UPS-ZONEMAP-01/02/03 (7개 케이스) |
+| **DoD** | 9/11 ✅ (LIVE_REGRESSION·check-R17-DoD pending) |
+| **설계 확정** | Aiden ✅ (260705) — Fallback 2단계 + fallbackApplied · 시그니처 기본파라미터 |
