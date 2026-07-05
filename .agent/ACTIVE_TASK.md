@@ -318,7 +318,7 @@
 | GH#202 | 260705 | estimateUpsFreight()가 resolveZoneByCountry() 미사용 | 없음 | B_Kai | ✅ | [Issue #202](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/202) (closed) | Aiden 승인·머지 완료(260705) — PR#212 · productFamily/direction/fallbackApplied 전체 threading 확인 · 회귀 446/446 PASS · Advisory 2건(비차단) |
 | GH#203 | 260706 | Ds_11 API 명세서 Phase 7.2 신규기능 반영 누락 | GH#202 ✅ | Aiden | ✅ | [Issue #203](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/203) (closed) | Aiden 완료(260706) — PR#214 · §11.6~11.9 신규(Zone유틸/Tier·DWB/Freight최소운임/Box상품) · IMP-133 신규 발견(Box max_weight_kg 미검증) 등록 |
 | GH#204 | 260706 | Admin UI — 20kg 초과 티어·Freight 최소운임 관리 탭 신규 | 없음 | Riley | ✅ | [Issue #204](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/204) (closed) | Aiden 승인·머지 완료(260706) — PR#215(코드 `f4031caf`+문서 `4348cb2a` 분리) · base branch main→develop 오류 정정 후 병합 · 회귀 454/454 PASS |
-| GH#205 | 260705 | An-14 담당 불일치 정정 + UAT_DEFECT_LOG·UAT_MASTER 동기화 | 없음 | Aiden | ⬜ | [Issue #205](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/205) | High(P2) |
+| GH#205 | 260706 | An-14 담당 불일치 정정 + UAT_DEFECT_LOG·UAT_MASTER 동기화 | 없음 | Aiden | ✅ | [Issue #205](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/205) (closed) | Aiden 완료(260706) — PR#219 · An-14 §4/§11 정정 · DEF-089~095 소급 등재(7건) · UAT_MASTER 실행상태 동기화(4건) · 회귀 454/454 PASS |
 | GH#206 | 260706 | UPS 문서 정리 백로그 (Medium 6 + Low 7건) | 없음 | B_Kai | ⬜ | [Issue #206](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/206) | Medium/Low(P3) — Edward 지시로 Aiden→B_Kai 재배정(260706), #9~14 착수 대상·#15~21 Edward 사인오프 제외 |
 ---
 
