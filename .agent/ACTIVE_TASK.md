@@ -303,6 +303,9 @@
 | TASK-176 | 260705 | Agency UI 수정 — rate-overrides cost_price 읽기전용화 + Agency 부가요금 등록 (An-14 §5) | TASK-171 ✅ | **D_Kai** | ✅ | [TASK-176](tasks/TASK-176_260705_P71SPR06_AgencyRateOverridesUI_DKai.md) | Aiden 재검토 ✅ 승인(260705, R-17 페널티 별도 기록) — TC 3종+tsc 수정+회귀 424/424 PASS |
 | TASK-177 | 260705 | Ds_11 API 명세 갱신(Team B 인계 계약 명시) + UAT-17-03 완료처리 + 신규 UAT-22/23 작성 + 전체 회귀 (An-14 §6·7) | TASK-175·176 ✅ | **D_Kai** | ✅ | [TASK-177](tasks/TASK-177_260705_P71SPR07_명세UAT회귀_DKai.md) | Aiden 재검토 ✅ 승인(260705) — Ds_11갱신+UAT-22/23(UAT-17-03 정직 미완료 기재)+회귀424/424 PASS |
 | TASK-178 | 260705 | D_Kai 재교육 세션 5차 — 코드/문서 커밋 혼입 3회 연속(R-17 v1.4 페널티) | 없음 | D_Kai | ✅ | [TASK-178](tasks/TASK-178_260705_DKai재교육세션5차_DKai.md) | Aiden 조건부 승인(260705) — 신규 할당 중단 해제. 단 재교육 커밋 자체가 develop 직접 커밋(브랜치 없음) — 신규 위반 1건 별도 기록 |
+| **── Phase 7.2 (IMP-146) ──** | | **UPS 요율표 구조 정밀화 — An-14 §9·§12 백로그 (Go-Live 비차단)** | | | | | | **Edward 발령(260705) — [An-14 §12](../docs/02_Analysis/An_14_Phase7_UPS요금관리_설계보완.md#12-imp-146-설계--요율표-구조-정밀화-9-백로그-착수-2026-07-05-edward-발령)** |
+| TASK-179 | 260705 | Box 상품 등록 + Zone-서비스-방향 매핑 정밀화 (An-14 §12-1 #2·#3) | 없음 | B_Kai | ⬜ | [TASK-179](tasks/TASK-179_260705_P72IMP146_ZoneBox구조정밀화_BKai.md) | 📝 설계의견 필수 — 즉시 착수 가능 |
+| TASK-180 | 260705 | 20kg 초과 티어 요금 + DWB + Freight 최소운임 (An-14 §12-1 #1·#4·#5) | TASK-179 ✅ | Riley | 🚫 | [TASK-180](tasks/TASK-180_260705_P72IMP146_티어DWB최소운임_Riley.md) | TASK-179 완료 후 착수. 📝 설계의견 필수 |
 ---
 
 ## Agent 현황
@@ -313,8 +316,8 @@
 |:------|:----:|:----|
 | **Aiden (Claude)** | ✅ TASK-167 전체 승인 (260626) | PR#117 §1 ✅ · PR#118 §2+§3 ✅ 전량 머지 완료 |
 | **D_Kai (OpenCode)** | ✅ TASK-178 재교육 5차 조건부 승인 (260705) — 신규 Task 배정 재개 | §1~§5 우수(특히 `git add -A` 공통 근본원인 분석·코드↔문서 대칭원칙 자각). **그러나 재교육 완료 커밋(`57648c4`·`0a37c47`) 자체가 브랜치 없이 develop 직접 커밋 — R-17 §0 위반 신규 1건 기록**(develop 이미 반영, 무해한 문서 변경이라 되돌리지 않음). **다음 Task부터 브랜치 절차 위반 시 즉시 6차 재교육 + 장기 중단 검토 — 최종 경고.** |
-| **B_Kai** | ✅ TASK-167 (§1) 승인 (260626) · ✅ **TASK-170** 2차 승인 (260630) | PR#155 ✅ 승인 — DoD 13/13·빌드·회귀 PASS · squash merge 대기 (Edward 승인 필요) |
-| **Riley** | ✅ TASK-161 승인 (260619) | UAT-15~20 16개 시나리오 · PR #46 머지 · 다음 Task 배분 대기 |
+| **B_Kai** | 🔄 TASK-179 발령 (260705) | Phase 7.2 IMP-146 Box상품+Zone매핑 정밀화 · 📝 설계의견 제출 대기 |
+| **Riley** | 🚫 TASK-180 발령, TASK-179 완료 대기 (260705) | Phase 7.2 IMP-146 티어요금+DWB+Freight최소운임 · TASK-179 선행 필요 |
 | N_Kai | ➖ 미재배정 확정 (260626 Edward) | TASK-087 폐기 — 신규 Task 발령 없음 |
 | Ring | 신규 할당 중단 유지 | 9차 위반 누적 |
 
@@ -738,4 +741,5 @@
 | 2026-07-05 | Aiden (Claude) | **TASK-175·176·177 ✅ 재검토 승인** (`/check-request` 2차 실행) — D_Kai 재작업 커밋(`3abd7d3` 테스트, `b9a6a67` 문서) 확인. TC-UPS-ADMIN-01~09·TC-AG-OC-01~03 신규 12케이스 실물 확인, 회귀 74 files/**424/424 PASS**(72→74 증가로 신규 테스트 반영 실증), tsc 오류 정정 확인. UAT-17-03 정직하게 미완료(`[~]`) 유지 확인 — 허위 완료 처리 지적 정확히 반영. 경미 잔여사항(커밋 해시 placeholder·0바이트 파일 `0`)은 Aiden 직접 보완 처리(재반려 대신). **단, "코드 커밋에 문서 파일 혼입" 위반이 `ae4fe5b`→`2614c88`→`b9a6a67` 3회 연속 반복 확정 — R-17 v1.4 페널티 발동, D_Kai 신규 Task 할당 중단 + 재교육 세션 필요 (Agent 현황 반영).** |
 | 2026-07-05 | Aiden (Claude) | **TASK-175·176·177 ❌ 3건 연속 반려** (`/check-request` 실행) — TASK-176 커밋 `ae4fe5b`·TASK-177 커밋 `2614c88`에 코드+문서(ACTIVE_TASK.md·타 Task file) 혼입(R-17 §1 결정적 위반, 동일유형 2회 — 1회 더 시 신규할당 중단). TASK-176 별도 커밋 `2fd7214`로 담당범위 밖 `zen_ups_labels` RLS 무단 수정. `tsc --noEmit` 신규 오류 1건(`agency-other-charges-client.tsx:48`)을 "0 errors"로 허위 기재. TASK-175·176·177 전체 신규 단위테스트 0건(R-09 위반, `rates-admin-actions.test.ts`·`other-charges-actions.test.ts` 미작성). TASK-177은 TASK-175·176 미승인(오히려 반려) 상태에서 전제조건 무시하고 선착수, UAT-17-03 실행 불가 항목(오더연동 미완료로 원천 불가능)을 완료 처리로 허위 보고. task file 3종 모두 커밋 해시 placeholder(`<커밋 해시 기입>`) 방치·헤더 상태 ⬜ 미변경. 3개 Task 모두 재작업 지시. |
 | 2026-07-05 | Aiden (Claude) | **TASK-175~177 D_Kai 발령** (Edward 지시) — TASK-171~174(스키마+계산엔진+Action)는 Aiden 직접 구현 완료(412/412 PASS, `feature/teama-phase71-ups-rate-management`). 남은 Admin/Agency UI·i18n·UAT·API명세는 D_Kai에게 위임. 브랜치는 신규 생성 없이 기존 브랜치 이어서 사용 지시(스키마·계산엔진 의존성 때문). TASK-176은 Team B 병행 작업 화면(rate-overrides)이라 충돌 확인 절차 명시. |
+| 2026-07-05 | Aiden (Claude) | **Phase 7.2(IMP-146) 발령 — 요율표 구조 정밀화** (Edward 지시). An-14 §12 설계 추가(항목별 스키마 방향 확정) + TASK-179(B_Kai, Box상품+Zone-서비스-방향 매핑, 선행)·TASK-180(Riley, 20kg초과티어+DWB+Freight최소운임, TASK-179 후행) 발령. 둘 다 유휴 상태였던 B_Kai·Riley 배정. 각 Task 📝 설계의견 필수 지정(대안 복수 판단 필요). |
 | 2026-07-05 | Aiden (Claude) | **Phase 7.1 신설 — UPS 요금관리 보완 설계(An-14)**. `20260705 UPS특송 요금관리.md` 요구사항 대비 구현현황 조사 결과 Admin 요율 UI(TASK-146)·요금계산엔진(TASK-141) 브랜치 develop 미병합 확인, Agency/화주 할인·마진 계산 로직 전면 미구현 확인. SNTL 원자료(`sntl_ups.txt`, UPS 2026 Rate Guide) 대조로 원가+7%룰·현지통관 OC 4종·대형포장물 특수룰 반영. TASK-171~178 🚫 등록 — Edward 설계 승인 대기. 요율표 구조 정확도 리스크(20kg초과 구간·Box상품·Zone서비스별상이·DWB·Freight최소운임) 5건은 §9 백로그(IMP-146 가칭)로 분리. |
