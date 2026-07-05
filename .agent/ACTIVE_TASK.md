@@ -314,7 +314,7 @@
 | **── Hotfix ──** | | **DEF-095 즉시 처리 (Edward 지시, TASK-180 완료 대기 없이 우선 처리)** | | | | | | |
 | TASK-181 | 260705 | WW_EXPEDITED 중량 반올림 규칙 오류 수정 (DEF-095) | 없음 | Aiden | ✅ | [TASK-181](tasks/TASK-181_260705_Hotfix_DEF095_WWExpeditedRounding_Aiden.md) | 머지 완료(260705, PR#191) — 코드 `b1d0725` · TC-UPS-EXPEDITED-ROUND-01~05 · develop 회귀 436/436 PASS |
 | **── Phase 7.3 (An-15) ──** | | **UPS 특송 전체점검 보완계획 — [An-15](../docs/02_Analysis/An_15_Phase7_UPS특송_전체점검_및_보완계획.md)** | | | | | | **⚠️ Issue #86 B방안 적용 — 본 섹션은 GitHub Issue의 동기화 캐시. 진실의 근거는 각 GH Issue이며, 상세 Task file은 담당 Agent 착수 시(⬜→🔄) R-17 절차에 따라 생성됨** |
-| GH#201 | 260705 | [DEF-096] OVERSIZE 부가요금 시드값 오류(15,000/12,000→69,200원) | 없음 | D_Kai | ⬜ | [Issue #201](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/201) | Critical(P1) — Hotfix 성격, 즉시 착수 가능 |
+| GH#201 | 260705 | [DEF-096] OVERSIZE 부가요금 시드값 오류(15,000/12,000→69,200원) | 없음 | D_Kai | ✅ | [Issue #201](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/201) (closed) | Aiden 승인·머지 완료(260705) — PR#209 · 코드 `c32c663` · 회귀 450/450 PASS · R-17 §0 위반 없음(최종경고 유지) |
 | GH#202 | 260705 | estimateUpsFreight()가 resolveZoneByCountry() 미사용 | 없음 | B_Kai | ⬜ | [Issue #202](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/202) | Critical(P1) — Team B B-060 착수 전 완료 권장 |
 | GH#203 | 260705 | Ds_11 API 명세서 Phase 7.2 신규기능 반영 누락 | GH#202 | Aiden | ⬜ | [Issue #203](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/203) | Critical(P1) — GH#202 완료 후 확정 계약 문서화 |
 | GH#204 | 260705 | Admin UI — 20kg 초과 티어·Freight 최소운임 관리 탭 신규 | 없음 | Riley | ⬜ | [Issue #204](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/204) | High(P2) |
@@ -329,7 +329,7 @@
 | Agent | 상태 | 비고 |
 |:------|:----:|:----|
 | **Aiden (Claude)** | ✅ TASK-167 전체 승인 (260626) | PR#117 §1 ✅ · PR#118 §2+§3 ✅ 전량 머지 완료 |
-| **D_Kai (OpenCode)** | ⬜ GH#201 발령 (260705) | DEF-096 OVERSIZE 시드값 오류 수정 — Critical, 소규모 Hotfix. **브랜치 절차 최종 경고 유효 — R-17 §0 재위반 시 6차 재교육.** |
+| **D_Kai (OpenCode)** | ✅ GH#201 승인·머지 완료 (260705) | DEF-096 OVERSIZE 시드값 오류 수정 — PR#209 · 회귀 450/450 PASS · **R-17 §0 위반 없이 정상 완료 — 최종경고 유지, 신규 Task 대기** |
 | **B_Kai** | ⬜ GH#202 발령 (260705) | estimateUpsFreight() Zone 정밀화 연결 — Critical, Team B B-060 착수 전 완료 필요 |
 | **Riley** | ⬜ GH#204 발령 (260705) | Admin UI 티어/최소운임 관리 탭 신규 — High |
 | N_Kai | ➖ 미재배정 확정 (260626 Edward) | TASK-087 폐기 — 신규 Task 발령 없음 |
