@@ -1408,3 +1408,17 @@
 - **예상 공수**: 0.1 MD
 - **우선순위**: P4
 - **상태**: ⬜ 미착수 — TASK-B-014 발령 260621
+
+---
+
+## [IMP-133] UPS Box 상품(`UPS_10KG_BOX`/`UPS_25KG_BOX`) max_weight_kg 상한 미검증
+
+- **발견 경위**: GH#203(API 명세서 Phase 7.2 갱신) 작업 중 Aiden이 소스코드 전수 확인 과정에서 발견 (2026-07-05)
+- **현재 상태**: `zen_ups_products.max_weight_kg` 컬럼(마이그레이션 `20260705120000_imp146_ups_products_box_max_weight.sql`)이 시딩만 되어 있고, `estimateUpsFreight()`/`computeUpsFreight()` 등 요금 계산 경로 어디에서도 참조되지 않음 — 화주가 Box 상품 상한(10kg/25kg)을 초과하는 실중량을 입력해도 서버가 차단하지 않고 그대로 계산을 진행함(단, 초과 중량에 대한 요율 자체가 시드되어 있지 않으므로 "기준요금 없음" 에러로 우회 차단되는 정도)
+- **임시 조치**: 없음 (요율 미시딩으로 인한 간접 차단에 의존 중 — 명시적 검증 아님)
+- **목표 구현**: `computeUpsFreight()` 또는 `estimateUpsFreight()`에 `actualWeightKg > product.max_weight_kg` 체크 추가, 명확한 사용자 메시지("Box 상품은 최대 N kg까지만 이용 가능합니다") 반환
+- **관련 파일**: `src/lib/ups/pricing-engine.ts`, `src/app/actions/ups/freight.ts`, `supabase/migrations/20260705120000_imp146_ups_products_box_max_weight.sql`
+- **관련 Issue**: GH#203 작업 중 발견 (범위 밖 — 별도 Task 필요)
+- **예상 공수**: 0.3 MD
+- **우선순위**: Low (요율 미시딩으로 인한 간접 차단이 사실상 동일한 효과를 내고 있어 실사용 영향 낮음)
+- **상태**: ⬜ 미착수
