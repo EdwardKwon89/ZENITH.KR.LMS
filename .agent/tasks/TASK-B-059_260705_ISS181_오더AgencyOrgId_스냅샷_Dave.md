@@ -5,7 +5,7 @@
 > **발령자**: Jaison (Team B 총괄)
 > **담당자**: Dave (DeepSeek)
 > **우선순위**: P1
-> **상태**: ⬜
+> **상태**: 🔔
 > **선행 Task**: TASK-B-056 ✅ (PR#183 머지 완료)
 > **연관 이슈**: [Issue #181](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/181)
 
@@ -121,7 +121,22 @@ _(Aiden 착수 승인: Issue #181 코멘트, 2026-07-05)_
 
 ## [작업 결과]
 
-_(완료 후 기재)_
+### 구현 완료
+
+| § | 항목 | 파일 | 상태 |
+|:-:|:-----|:-----|:----:|
+| §1 | `zen_orders.agency_org_id` 컬럼 + RLS policy | `20260705000002_agency_005_orders_agency_org_id.sql` | ✅ |
+| §2 | `createOrder()` AGENCY_SHIPPER 분기 — `agency_org_id` 자동 주입 | `src/app/actions/operations/orders.ts` | ✅ |
+| §3 | `zen_order_rate_snapshots` 테이블 생성 | `20260705000003_agency_006_order_rate_snapshots.sql` | ✅ |
+| §3 | `estimateUpsFreight` 결과 스냅샷 저장 (3단계) | `src/app/actions/operations/orders.ts` | ✅ |
+| §4 | TC-P7-ORDER-AGENCYID-01 / SNAPSHOT-01 / SNAPSHOT-02 (6 tests) | `tests/unit/agency/order-rate-snapshots.test.ts` | ✅ 6/6 PASS |
+| — | Schema: `ups_product_code` + `incoterms` 선택필드 추가 | `src/lib/validation/order.ts` | ✅ |
+| — | `LIVE_REGRESSION_TEST_MAP.md §43` 갱신 | | ✅ |
+| — | 회귀 447/452 PASS (5건 선행실패 — p71-ups-agency-pricing DB 함수 부재) | | ✅ |
+
+### 커밋
+- 코드 커밋: `(pending)`
+- 문서 커밋: `(pending)`
 
 ## [발견 이슈]
 
