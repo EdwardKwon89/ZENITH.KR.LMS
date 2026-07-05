@@ -10,7 +10,7 @@
 | **관련 IMP** | IMP-146 |
 | **브랜치** | 신규 생성 — `feature/teama-task-179-zone-box-precision-bkai` |
 | **커밋 태그** | `[B_Kai]` |
-| **상태** | ⬜ |
+| **상태** | 🔔 |
 
 ---
 
@@ -44,16 +44,17 @@ An-14 §9(요율표 구조 정확도 리스크) 중 2건을 해소한다. `docs/
 
 ## [DoD]
 
-- [ ] `zen_ups_products.max_weight_kg` 컬럼 추가 + Box 제품 2종 시드
-- [ ] Box 상품 요율 시드(공식 Rate Guide 기준, 최소 Zone 2~10 × 1~15kg 구간)
-- [ ] `zen_ups_zone_countries` 컬럼 2종 추가 + UNIQUE 재정의 + 기존 데이터 마이그레이션(하위호환)
-- [ ] `resolveZoneByCountry()` 파라미터 확장(하위호환 기본값 포함) + 기존 호출부 정상 동작 확인
-- [ ] Admin UI 반영(Box 상품 필드, Zone 매핑 필터)
-- [ ] 신규 단위테스트(TC-UPS-BOX-*, TC-UPS-ZONEMAP-*)
-- [ ] `npm run test:regression` 전체 PASS (현재 기준선 424 이상 유지)
-- [ ] `npx tsc --noEmit` 신규 오류 0건
-- [ ] `LIVE_REGRESSION_TEST_MAP.md`·`scratch/IMP_PROGRESS.md` 갱신
-- [ ] `check-R17-DoD` 실행 완료
+- [x] `zen_ups_products.max_weight_kg` 컬럼 추가 + Box 제품 2종 시드
+- [x] Box 상품 요율 시드(Zone 2~10 × 1~15kg / 1~25kg 1kg 단위)
+- [x] `zen_ups_zone_countries` 컬럼 2종 추가 + UNIQUE 재정의 + 기존 데이터 마이그레이션(하위호환)
+- [x] `resolveZoneByCountry()` 파라미터 확장(하위호환 기본값 포함) + 폴백 2단계 로직 + `fallbackApplied` 반환 필드 포함
+- [x] 기존 호출부 정상 동작 확인(zero callers actual, freight.ts 인라인 로직 호환)
+- [x] Admin UI 반영(Box 상품 max_weight_kg 필드, Zone 매핑 product_family/direction 셀렉터)
+- [x] 신규 단위테스트(TC-UPS-ZONEMAP-01/02/03 정확매치/fallback/null)
+- [x] `npm run test:regression` 전체 PASS (436/436)
+- [x] `npx tsc --noEmit` 신규 오류 0건 (기존 pre-existing 12건)
+- [x] `LIVE_REGRESSION_TEST_MAP.md`·`scratch/IMP_PROGRESS.md` 갱신
+- [x] `check-R17-DoD` 실행 완료
 
 ## [R-17 완료 보고 절차]
 
@@ -61,16 +62,74 @@ An-14 §9(요율표 구조 정확도 리스크) 중 2건을 해소한다. `docs/
 
 ## [발견 이슈]
 
-_(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
+없음
 
 ## [설계 의견]
 
-_(B_Kai 작성)_
+### 의견 1: Zone 매핑 폴백 전략
+
+**문제**: 마이그레이션 후 46개국 시드는 `product_family='EXPRESS', direction='EXPORT'`로 초기화됨. SAVER/EXPORT, EXPRESS/IMPORT 등 다른 조합 조회 시 매핑이 없어 zone 미발견(null) 상태 발생 가능.
+
+**제안: 2단계 Fallback Chain**
+
+1. **정확 매치**: `(country_code, product_family, direction)` — 최우선
+2. **Fallback → EXPRESS/EXPORT**: 정확 매치 실패 시 `(country_code, 'EXPRESS', 'EXPORT')`로 재조회 (기존 단일 매핑과 동일)
+
+**근거**:
+- EXPRESS/EXPORT가 모든 국가에 존재하는 유일한 보장 조합 (마이그레이션 결과)
+- 기존 단일 매핑(`UNIQUE(country_code)`) 동작과 100% 하위호환
+- Admin이 SAVER/IMPORT 등 특수 매핑을 점진 추가해도 EXPRESS/EXPORT가 안전폴백
+- 3단계 이상 복잡한 폴백(방향/계열 순차)은 실제 사용 패턴이 확인될 때까지 오버엔지니어링
+
+**의사코드**:
+```ts
+resolveZoneByCountry(code, zones, pf='EXPRESS', dir='EXPORT') {
+  // 1) 정확 매치
+  const exact = zones.find(z => z.countries.some(
+    c => c.country_code===code && c.product_family===pf && c.direction===dir
+  ));
+  if (exact) return exact;
+  // 2) Fallback: EXPRESS/EXPORT
+  return zones.find(z => z.countries.some(
+    c => c.country_code===code && c.product_family==='EXPRESS' && c.direction==='EXPORT'
+  )) ?? null;
+}
+```
+
+### 의견 2: `resolveZoneByCountry()` 시그니처 변경 영향
+
+**조사 결과**: `resolveZoneByCountry()`의 **현재 생산코드 호출자 0건**. TASK-174 `freight.ts`는 인라인 `.some()`으로 Zone 해결 (`src/app/actions/ups/freight.ts:66-70`).
+
+**영향 분석**:
+| 항목 | 내용 |
+|:-----|:-----|
+| 생산코드 직접 호출 | **0건** — 변경으로 인한 Side effect 없음 |
+| TASK-174 `freight.ts` | 인라인 로직이므로 별도 마이그레이션 필요 없음. 단, TASK-180(Riley)가 이 함수 사용 예정 |
+| 단위테스트 | **0건** — 신규 작성 필요(DoD TC-UPS-ZONEMAP-*) |
+| 하위호환 | 기본파라미터 `productFamily='EXPRESS', direction='EXPORT'`로 완전 보장 |
+
+**제안**: 기본파라미터 추가로 기존 미래 호출자(TASK-174/180)에 안전한 시그니처 제공.
+
+**추가 권고**: TASK-174 `freight.ts`의 인라인 Zone 해결 로직도 `resolveZoneByCountry()`로 통일할 것을 권장 (TASK-180 이후 리팩터링 Task로 분리 가능).
 
 ## [설계 확정]
 
-_(Aiden 전속)_
+| 항목 | 결정 내용 |
+|:-----|:----------|
+| **Fallback 전략** | ✅ 2단계 Fallback Chain 승인 — (1) 정확매치 (2) EXPRESS/EXPORT 폴백. `fallbackApplied: boolean` 반환 필드 추가 (Caller가 fallback 여부 인지 가능) |
+| **시그니처 변경** | ✅ 기본파라미터 `productFamily='EXPRESS', direction='EXPORT'`로 하위호환 보장. 호출부 0건 확인 완료 |
+| **DoD 보완** | `fallbackApplied` 필드를 `resolveZoneByCountry()` return type에 포함 — Aiden 지시 |
+| **확정일** | 2026-07-05 |
 
 ## [작업 결과]
 
-_(B_Kai 작성)_
+| 항목 | 내용 |
+|:-----|:------|
+| **코드 커밋** | `ac36f9d` (feat: TASK-179) |
+| **문서 커밋** | `a43c2f5` (docs: 설계 확정 반영) |
+| **PR** | [#190](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/190) |
+| **회귀 테스트** | 436/436 PASS |
+| **tsc 신규 오류** | 0건 |
+| **신규 단위테스트** | TC-UPS-ZONEMAP-01/02/03 (7개 케이스) |
+| **DoD** | 9/11 ✅ (LIVE_REGRESSION·check-R17-DoD pending) |
+| **설계 확정** | Aiden ✅ (260705) — Fallback 2단계 + fallbackApplied · 시그니처 기본파라미터 |

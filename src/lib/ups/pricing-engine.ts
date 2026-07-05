@@ -14,6 +14,7 @@ import type {
   UpsZone,
   UpsVolumeDivisor,
   UpsOtherCharge,
+  ZoneResolveResult,
 } from '@/types/ups';
 
 // An-14 §0-1 A1: UPS 원가표 원본값 대비 실 납부운임 할증율. UPS와의 계약 조건 변경 시 이 상수만 수정한다.
@@ -29,18 +30,49 @@ export function ceilToHalfKg(weightKg: number): number {
   return Math.ceil(weightKg * 2) / 2;
 }
 
-// 목적지 국가코드로 Zone 탐색
+// DEF-095: 상품별 중량 반올림 단위. UPS 공식 Rate Guide(p.2) 원문 —
+// WW_EXPEDITED는 중량과 무관하게 항상 1kg 단위, 그 외 상품은 20kg 이하 0.5kg / 초과 1kg 단위로 올림.
+export function resolveBillingWeight(chargeableKg: number, productCode: string): number {
+  if (productCode === 'WW_EXPEDITED') return Math.ceil(chargeableKg);
+  return chargeableKg <= 20 ? ceilToHalfKg(chargeableKg) : Math.ceil(chargeableKg);
+}
+
+// 목적지 국가코드로 Zone 탐색 (TASK-179: productFamily + direction 파라미터 추가, 2단계 Fallback)
+// 정확매치 → 실패 시 EXPRESS/EXPORT fallback → 실패 시 null
+// fallbackApplied === true이면 fallback으로 찾은 결과 (호출자가 fallback 여부 인지 가능)
 export function resolveZoneByCountry(
   destCountryCode: string,
-  zones: UpsZoneWithCountries[]
-): UpsZone | null {
+  zones: UpsZoneWithCountries[],
+  productFamily: string = 'EXPRESS',
+  direction: string = 'EXPORT'
+): ZoneResolveResult {
   const code = destCountryCode.toUpperCase();
+  const pf = productFamily.toUpperCase();
+  const dir = direction.toUpperCase();
+
+  // 1단계: 정확매치 (country_code, product_family, direction)
   for (const zone of zones) {
-    if (zone.countries.some((c) => c.country_code.toUpperCase() === code)) {
-      return zone;
+    if (zone.countries.some(
+      (c) => c.country_code.toUpperCase() === code
+        && (c.product_family?.toUpperCase() ?? 'EXPRESS') === pf
+        && (c.direction?.toUpperCase() ?? 'EXPORT') === dir
+    )) {
+      return { zone, fallbackApplied: false };
     }
   }
-  return null;
+
+  // 2단계: Fallback — EXPRESS/EXPORT (모든 국가에 존재하는 유일한 보장 조합)
+  for (const zone of zones) {
+    if (zone.countries.some(
+      (c) => c.country_code.toUpperCase() === code
+        && (c.product_family?.toUpperCase() ?? 'EXPRESS') === 'EXPRESS'
+        && (c.direction?.toUpperCase() ?? 'EXPORT') === 'EXPORT'
+    )) {
+      return { zone, fallbackApplied: true };
+    }
+  }
+
+  return { zone: null, fallbackApplied: false };
 }
 
 // 부피중량 + 청구중량 계산
@@ -143,7 +175,7 @@ export function computeUpsFreight(
     input.actualWeightKg, dims, input.volumetricDivisor
   );
   const { billingKg: chargeableAfterOversize, applied: oversizeApplied } = applyOversizeRule(
-    ceilToHalfKg(chargeableKg), dims
+    resolveBillingWeight(chargeableKg, data.product.product_code), dims
   );
   const billingKg = chargeableAfterOversize;
 

@@ -9,7 +9,7 @@
 import { createClient } from '@/utils/supabase/server';
 import { validateUserAction } from '@/lib/auth/guards';
 import {
-  ceilToHalfKg,
+  resolveBillingWeight,
   calcChargeableWeight,
   applyOversizeRule,
   computeUpsFreight,
@@ -74,7 +74,7 @@ export async function estimateUpsFreight(input: EstimateUpsFreightInput): Promis
     ? { l: input.dimL, w: input.dimW, h: input.dimH }
     : undefined;
   const { chargeableKg } = calcChargeableWeight(input.actualWeightKg, dims, input.volumetricDivisor);
-  const { billingKg } = applyOversizeRule(ceilToHalfKg(chargeableKg), dims);
+  const { billingKg } = applyOversizeRule(resolveBillingWeight(chargeableKg, product.product_code), dims);
 
   const { data: baseRate, error: baseRateError } = await supabase
     .from('zen_ups_base_rates')
