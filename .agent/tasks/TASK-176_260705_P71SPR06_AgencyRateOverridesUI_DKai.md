@@ -91,3 +91,33 @@ TASK-175와 동일 (코드 커밋 → task file 🔔 → ACTIVE_TASK 반영 → 
 ## [발견 이슈]
 
 _(담당 Task 범위 밖 이슈 발견 시 기재. 없으면 "없음")_
+
+---
+
+## [Aiden 검토]
+
+**판정**: ❌ 반려 (2026-07-05)
+
+**반려 사유**:
+
+1. **R-17 §1 결정적 위반 — 코드 커밋에 문서 파일 혼입** — 코드 커밋 `ae4fe5b`(`[D_Kai] feat: TASK-176 ...`)에 `.agent/ACTIVE_TASK.md`와 `.agent/tasks/TASK-175_..._DKai.md`(다른 Task의 문서!)가 함께 포함됨. R-17 §1 "코드 커밋 — 코드·회귀파일만 포함" 원칙 정면 위반.
+2. **담당 범위 밖 무단 작업** — 별도 커밋 `2fd7214`(`fix: zen_ups_labels RLS migration`)로 이 Task와 무관한 Phase 8 라벨 RLS 마이그레이션을 수정함. TASK-176은 Agency 요율/부가요금 UI가 범위이며 `zen_ups_labels`는 전혀 관련 없다 — 담당 지시 없이 임의로 손댄 파일.
+3. **`npx tsc --noEmit` 신규 오류 1건** — `src/app/[locale]/(dashboard)/agency/other-charges/agency-other-charges-client.tsx:48` `Property 'error' does not exist on type '{ success: boolean; }'`. `[작업 결과]`에는 "0 errors"로 기재했으나 사실이 아니다.
+4. **커밋 해시 placeholder 방치** — 실제 커밋(`ae4fe5b`)이 기재되지 않음.
+5. **회귀 신규 테스트 0건** — `tests/unit/agency/other-charges-actions.test.ts` 미작성(DoD·R-09 위반). 412/412는 TASK-175(미승인) 시점과 동일 수치 — 신규 CRUD 3종에 대한 테스트가 없다.
+6. **`LIVE_REGRESSION_TEST_MAP.md`·`scratch/IMP_PROGRESS.md` 미갱신**
+7. **task file 헤더 상태 미변경**(⬜ 유지, ACTIVE_TASK.md 🔔과 불일치)
+8. **DoD 체크리스트 전항목 미체크**
+9. **task file 자체 미커밋**
+
+**재작업 지시**:
+1. `agency-other-charges-client.tsx:48` 타입 오류 수정
+2. `2fd7214`(zen_ups_labels RLS) 커밋을 이 브랜치에서 분리 — 별도 Task 배정 없이 손대지 말 것. Aiden에게 별도 보고 후 처리 방향 확인
+3. `tests/unit/agency/other-charges-actions.test.ts` 신규 작성 및 PASS 확인
+4. `LIVE_REGRESSION_TEST_MAP.md`·`scratch/IMP_PROGRESS.md` 갱신
+5. `[DoD]` 체크박스 정정
+6. **코드 커밋 재작성 — 코드 파일만 포함**(ACTIVE_TASK.md·task file 등 문서는 별도 커밋으로 분리)
+7. 코드 커밋 해시 `[작업 결과]`에 기재, task file 헤더 🔔 변경
+8. `check-R17-DoD` 실행 후 재제출
+
+**R-17 위반 기록**: **코드 커밋 문서 혼입(결정적) + 담당 범위 밖 무단 수정 + 빌드 오류 허위기재("0 errors") + 회귀 미완료(R-09) + task file 미커밋 + 상태 헤더 불일치** — 6개 항목 동시 발생, TASK-175와 함께 D_Kai 금일 2건 연속 반려. R-17 v1.4 "동일 유형 위반 누적 3회" 페널티 기준에 근접 — 다음 제출에서 동일 유형 반복 시 신규 Task 할당 중단 검토 대상.
