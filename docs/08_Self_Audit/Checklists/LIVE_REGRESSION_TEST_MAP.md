@@ -1,7 +1,7 @@
 # 🗺️ LIVE Regression Test Master Map
 
-> **총 테스트 케이스:** 393 Cases (vitest 개별 테스트 기준, 70 test files)
-> **최종 검증일:** 2026-07-05 (TASK-171 Phase 7.1 UPS Agency 할인율 정책 · TC-UPS-AGPOL-01~05 등재 · 393/393 PASS)  
+> **총 테스트 케이스:** 407 Cases (vitest 개별 테스트 기준, 71 test files)
+> **최종 검증일:** 2026-07-05 (TASK-173 Phase 7.1 요금계산엔진 보강 · TC-UPS-ENGINE-01~05 등재 · 407/407 PASS)  
 
 제니스 플랫폼의 비즈니스 영속성을 보장하는 회귀 테스트 케이스의 통합 명세서입니다. 모든 신규 개발 및 수정 시 이 맵에 케이스가 추가되어야 하며, 전체 테스트가 통과되어야 합니다.
 
@@ -484,6 +484,15 @@
 | **TC-UPS-AGPOL-03** | UPDATE 시에도 cost_price 자동 재계산 유지 | Agency가 임의 값으로 갱신 시도해도 트리거값 유지 확인 | `tests/integration/p71-ups-agency-pricing.test.ts` |
 | **TC-UPS-AGPOL-04** | 현지통관/기타 부가수수료 4종 시드 확인 | DUTY_AMOUNT 등 4종, fuel_surcharge_applicable=false 확인 | `tests/integration/p71-ups-agency-pricing.test.ts` |
 | **TC-UPS-AGPOL-05** | `fn_get_ups_agency_selling_price` 반환값 검증 | Agency override selling_price 정상 반환 확인 | `tests/integration/p71-ups-agency-pricing.test.ts` |
+
+### 38. Phase 7.1 UPS 요금 계산 엔진 보강 — Platform/Agency/Shipper (IMP-145)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-UPS-ENGINE-01** | 청구중량 계산(0.5kg 올림·실중량/부피중량 비교) | 기존 로직 정합성 확인 | `tests/unit/ups/pricing-engine.test.ts` |
+| **TC-UPS-ENGINE-02** | 원가 ×1.07 반영 | SNTL 원자료 원가 할증 규칙 정확성 확인 | `tests/unit/ups/pricing-engine.test.ts` |
+| **TC-UPS-ENGINE-03** | 대형포장물(OVERSIZE) 특수 판정 6종 | 길이+둘레 300~400cm 조건·최소청구중량 40kg 강제 확인 | `tests/unit/ups/pricing-engine.test.ts` |
+| **TC-UPS-ENGINE-04** | Agency 단계 계산(override/폴백 분기) | R3~R5 공식 정확성 확인 | `tests/unit/ups/pricing-engine.test.ts` |
+| **TC-UPS-ENGINE-05** | Shipper 단계 계산(화주 할인 적용) | R6 공식 정확성 확인 | `tests/unit/ups/pricing-engine.test.ts` |
 
 ---
 
