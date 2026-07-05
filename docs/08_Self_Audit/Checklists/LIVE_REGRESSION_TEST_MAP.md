@@ -531,6 +531,13 @@
 | **TC-UPS-FREIGHTMIN-01** | Freight 최소운임 상향 적용 | 계산 요금이 Zone/Product 최소운임 미만일 때 최소운임 강제 상향 검증 | `tests/unit/ups/pricing-engine-tier-dwb.test.ts` |
 | **TC-UPS-FREIGHTMIN-02** | Freight 최소운임 이상 정상 적용 | 계산 요금이 최소운임 이상일 때 상향 조정 미적용 검증 | `tests/unit/ups/pricing-engine-tier-dwb.test.ts` |
 
+### 42. Agency 화주 계정 발급 기반 검증 (Issue #180 TASK-B-056)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-P7-SHIPPER-05a** | `login_email` 미입력 시 스키마 거부 | 필수 필드 누락 검증 | `tests/unit/agency/shipper-actions.test.ts` |
+| **TC-P7-SHIPPER-05b** | `login_email` 잘못된 이메일 형식 거부 | 이메일 형식 유효성 검증 | `tests/unit/agency/shipper-actions.test.ts` |
+| **TC-P7-SHIPPER-05c** | `login_email` + 주소 6필드 정상 통과 | 국외 화주 등록 전체 필드 통과 확인 | `tests/unit/agency/shipper-actions.test.ts` |
+
 ---
 
 ## 📝 가이드라인 (R-09 Enforcement)
