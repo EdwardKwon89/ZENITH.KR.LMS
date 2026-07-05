@@ -10,7 +10,7 @@
 | **관련 IMP** | IMP-146 |
 | **브랜치** | 신규 생성 — `feature/teama-task-179-zone-box-precision-bkai` |
 | **커밋 태그** | `[B_Kai]` |
-| **상태** | 📝 |
+| **상태** | 🔍 (설계 확정 — 즉시 착수 가능) |
 
 ---
 
@@ -48,6 +48,7 @@ An-14 §9(요율표 구조 정확도 리스크) 중 2건을 해소한다. `docs/
 - [ ] Box 상품 요율 시드(공식 Rate Guide 기준, 최소 Zone 2~10 × 1~15kg 구간)
 - [ ] `zen_ups_zone_countries` 컬럼 2종 추가 + UNIQUE 재정의 + 기존 데이터 마이그레이션(하위호환)
 - [ ] `resolveZoneByCountry()` 파라미터 확장(하위호환 기본값 포함) + 기존 호출부 정상 동작 확인
+- [ ] **(Aiden 설계확정 추가)** `resolveZoneByCountry()` 반환값에 `fallbackApplied: boolean` 추가 — EXPRESS/EXPORT 폴백 발동 여부 투명성 확보
 - [ ] Admin UI 반영(Box 상품 필드, Zone 매핑 필터)
 - [ ] 신규 단위테스트(TC-UPS-BOX-*, TC-UPS-ZONEMAP-*)
 - [ ] `npm run test:regression` 전체 PASS (현재 기준선 424 이상 유지)
@@ -113,7 +114,18 @@ resolveZoneByCountry(code, zones, pf='EXPRESS', dir='EXPORT') {
 
 ## [설계 확정]
 
-_(Aiden 전속)_
+_(Aiden 전속, 2026-07-05)_
+
+**판정**: ✅ 설계 승인 — 즉시 착수 가능.
+
+**검토 근거**:
+1. **의견1(Fallback 전략)** — 2단계(정확 매치→EXPRESS/EXPORT) 체인 채택. "실제 사용 패턴 확인 전 3단계 이상 폴백은 오버엔지니어링"이라는 판단 타당 — ZEN_A4 원칙(불필요한 추상화 금지)과 부합. 그대로 승인.
+2. **의견2(호출부 영향)** — `resolveZoneByCountry()` 생산코드 호출자 0건, `freight.ts:66-70` 인라인 로직이라는 조사 결과를 직접 코드 확인으로 재검증함(정확). 리팩터링(인라인→함수 통일)을 지금 하지 않고 별도 Task로 분리 제안한 판단도 타당 — 범위 확대 방지.
+
+**DoD 보완 지시** (착수 전 상세파일 DoD에 아래 1건 추가):
+1. Fallback 발동 시 투명성 확보 — `resolveZoneByCountry()`가 EXPRESS/EXPORT 폴백을 사용했는지 여부를 반환값에 포함(예: `{ zone, fallbackApplied: boolean }`). 근거: 기존 `applyOversizeRule()`의 `applied` 필드, TASK-180 `applyDeficitWeightBilling()`의 `dwbApplied` 필드와 동일한 "암묵적 규칙 적용 시 breakdown에 명시" 관례를 따름 — SAVER/IMPORT 등 미매핑 조합에 EXPRESS/EXPORT Zone이 잘못 적용된 견적을 추후 감사(audit)로 식별 가능하게 함.
+
+**의견2 추가 확인**: TASK-180(Riley)이 `resolveZoneByCountry()`를 실사용할 예정이므로, 본 Task 완료 후 반환 타입 변경분(`fallbackApplied` 추가)을 TASK-180 착수 전 Riley에게 공유할 것.
 
 ## [작업 결과]
 
