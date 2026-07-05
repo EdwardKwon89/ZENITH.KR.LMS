@@ -6,6 +6,7 @@
 > **긴급도**: High
 > **상태**: ✅ 해소 (2026-07-05, Hotfix TASK-181)
 > **관련 Task**: TASK-181 (Aiden, Hotfix)
+> **GitHub Issue**: [#194](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/194) (등록 즉시 종료 — 이미 해소된 결함 기록용)
 
 ---
 
