@@ -37,6 +37,23 @@ export function resolveBillingWeight(chargeableKg: number, productCode: string):
   return chargeableKg <= 20 ? ceilToHalfKg(chargeableKg) : Math.ceil(chargeableKg);
 }
 
+// GH#202: UPS product_code → productFamily 매핑 (Zone 조회용)
+const PRODUCT_FAMILY_MAP: Record<string, string> = {
+  WW_EXPRESS: 'EXPRESS',
+  WW_EXPRESS_NONDOC: 'EXPRESS',
+  WW_EXPEDITED: 'EXPEDITED',
+  WW_SAVER: 'SAVER',
+  WW_SAVER_NONDOC: 'SAVER',
+  WW_FLIGHT: 'FREIGHT',
+  WW_FLIGHT_NONDOC: 'FREIGHT',
+};
+export function productFamilyFromCode(productCode: string): string {
+  for (const [prefix, family] of Object.entries(PRODUCT_FAMILY_MAP)) {
+    if (productCode.startsWith(prefix)) return family;
+  }
+  return 'EXPRESS';
+}
+
 // 목적지 국가코드로 Zone 탐색 (TASK-179: productFamily + direction 파라미터 추가, 2단계 Fallback)
 // 정확매치 → 실패 시 EXPRESS/EXPORT fallback → 실패 시 null
 // fallbackApplied === true이면 fallback으로 찾은 결과 (호출자가 fallback 여부 인지 가능)
@@ -171,6 +188,7 @@ function buildBreakdown(
     otherChargesSellingTotal: oc.sellingTotal,
     otherChargesCostTotal: oc.costTotal,
     oversizeApplied,
+    fallbackApplied: data.fallbackApplied ?? false,
     dwbApplied: dwbDetails?.dwbApplied ?? false,
     dwbOriginalWeightKg: dwbDetails?.dwbOriginalWeightKg,
     dwbOriginalSellingPrice: dwbDetails?.dwbOriginalSellingPrice,

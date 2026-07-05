@@ -30,9 +30,20 @@ const PRODUCT = {
   id: 'p1', product_code: 'WW_EXPRESS_NONDOC', sub_code: null, product_name: 'Express',
   cargo_type: 'NON_DOC', ddu_available: false, ddp_available: true, is_active: true, sort_order: 1, created_at: '',
 };
+const BOX_PRODUCT = {
+  id: 'p2', product_code: 'WW_FLIGHT', sub_code: null, product_name: 'Flight',
+  cargo_type: 'BOX', ddu_available: false, ddp_available: true, is_active: true, sort_order: 2, created_at: '',
+};
 const ZONE = {
   id: 'z1', zone_code: 'Z8', zone_name: 'North America', description: null, is_active: true, sort_order: 8,
   created_at: '', created_by: null, countries: [{ id: 'c1', zone_id: 'z1', country_code: 'USA', created_at: '', created_by: null }],
+};
+const IMPORT_ZONE = {
+  id: 'z2', zone_code: 'Z5', zone_name: 'Asia Import', description: null, is_active: true, sort_order: 5,
+  created_at: '', created_by: null, countries: [{
+    id: 'c2', zone_id: 'z2', country_code: 'JPN', product_family: 'FREIGHT', direction: 'IMPORT',
+    created_at: '', created_by: null,
+  }],
 };
 const BASE_RATE = {
   id: 'r1', product_id: 'p1', zone_id: 'z1', weight_kg: 5, selling_price: 85000, cost_price: 68000,
@@ -125,5 +136,64 @@ describe('TC-UPS-FREIGHT-01: estimateUpsFreight', () => {
     await expect(
       estimateUpsFreight({ productId: 'p1', destCountryCode: 'USA', actualWeightKg: 5 })
     ).rejects.toThrow(/기준요금/);
+  });
+});
+
+describe('TC-UPS-FREIGHT-02: resolveZoneByCountry 연동 (GH#202)', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it('Box 상품(FREIGHT family) + IMPORT 방향 Zone이 정확 매치된다', async () => {
+    (validateUserAction as any).mockResolvedValue({
+      supabase: buildMockSupabase({
+        zen_ups_products: createQueryMock({ data: BOX_PRODUCT }),
+        zen_ups_zones: createQueryMock({ data: [IMPORT_ZONE] }),
+        zen_ups_base_rates: createQueryMock({ data: null }),
+      }),
+    });
+
+    await expect(
+      estimateUpsFreight({ productId: 'p2', destCountryCode: 'JPN', actualWeightKg: 10, direction: 'IMPORT' })
+    ).rejects.toThrow(/기준요금/);
+  });
+
+  it('IMPORT 방향 Zone이 direction=IMPORT로 정확 매치된다', async () => {
+    (validateUserAction as any).mockResolvedValue({
+      supabase: buildMockSupabase({
+        zen_ups_products: createQueryMock({ data: BOX_PRODUCT }),
+        zen_ups_zones: createQueryMock({ data: [IMPORT_ZONE] }),
+        zen_ups_base_rates: createQueryMock({ data: null }),
+      }),
+    });
+
+    await expect(
+      estimateUpsFreight({
+        productId: 'p2', destCountryCode: 'JPN', actualWeightKg: 10, direction: 'IMPORT',
+      })
+    ).rejects.toThrow(/기준요금/);
+  });
+
+  it('direction 미지정(EXPORT 기본값)으로 IMPORT 전용 Zone 조회 시 Zone 에러', async () => {
+    (validateUserAction as any).mockResolvedValue({
+      supabase: buildMockSupabase({
+        zen_ups_products: createQueryMock({ data: BOX_PRODUCT }),
+        zen_ups_zones: createQueryMock({ data: [IMPORT_ZONE] }),
+      }),
+    });
+
+    await expect(
+      estimateUpsFreight({ productId: 'p2', destCountryCode: 'JPN', actualWeightKg: 10 })
+    ).rejects.toThrow(/Zone/);
+  });
+
+  it('EXPRESS EXPORT 정확매치 시 fallbackApplied=false가 breakdown에 전달된다', async () => {
+    (validateUserAction as any).mockResolvedValue({
+      supabase: buildMockSupabase(),
+    });
+
+    const result = await estimateUpsFreight({
+      productId: 'p1', destCountryCode: 'USA', actualWeightKg: 5,
+    });
+
+    expect(result.platform.breakdown.fallbackApplied).toBe(false);
   });
 });

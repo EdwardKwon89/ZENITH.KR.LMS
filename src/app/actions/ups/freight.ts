@@ -13,6 +13,8 @@ import {
   calcChargeableWeight,
   applyOversizeRule,
   computeUpsFreight,
+  resolveZoneByCountry,
+  productFamilyFromCode,
 } from '@/lib/ups/pricing-engine';
 import { computeAgencyFreight } from '@/lib/ups/agency-pricing';
 import { computeShipperFreight } from '@/lib/ups/shipper-pricing';
@@ -39,6 +41,8 @@ export interface EstimateUpsFreightInput {
   /** 화주 본인 org id. discount_rate 조회용(zen_agency_shippers). */
   shipperOrgId?: string | null;
   referenceDate?: string;
+  /** Zone 조회 방향 (EXPORT | IMPORT). 기본값 EXPORT. */
+  direction?: string;
 }
 
 export interface UpsFreightEstimate {
@@ -63,10 +67,13 @@ export async function estimateUpsFreight(input: EstimateUpsFreightInput): Promis
     .select('*, countries:zen_ups_zone_countries(*)')
     .eq('is_active', true);
   if (zonesError) throw new Error(`Zone 조회 실패: ${zonesError.message}`);
-  const zone = (zonesRaw ?? []).find((z) =>
-    (z as unknown as UpsZoneWithCountries).countries.some(
-      (c) => c.country_code.toUpperCase() === input.destCountryCode.toUpperCase()
-    )
+  const productFamily = productFamilyFromCode(product.product_code);
+  const direction = input.direction ?? 'EXPORT';
+  const { zone, fallbackApplied } = resolveZoneByCountry(
+    input.destCountryCode,
+    zonesRaw as UpsZoneWithCountries[],
+    productFamily,
+    direction
   );
   if (!zone) throw new Error(`목적지 국가(${input.destCountryCode})에 매핑된 Zone이 없습니다.`);
 
@@ -155,6 +162,7 @@ export async function estimateUpsFreight(input: EstimateUpsFreightInput): Promis
       fuelSurcharge,
       otherCharges: selectedOtherCharges,
       oversizeCharge,
+      fallbackApplied,
     }
   );
 

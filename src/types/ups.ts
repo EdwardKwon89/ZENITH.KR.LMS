@@ -114,6 +114,7 @@ export interface UpsPricingData {
   freightMinimum?: UpsFreightMinimum | null;
   fuelSurcharge: UpsFuelSurcharge | null;
   otherCharges: UpsOtherCharge[];
+  fallbackApplied?: boolean;
 }
 
 export interface UpsOtherChargeItem {
@@ -147,6 +148,7 @@ export interface UpsBreakdown {
   otherChargesSellingTotal: number;
   otherChargesCostTotal: number;
   oversizeApplied: boolean;
+  fallbackApplied?: boolean;
   dwbApplied?: boolean;
   dwbOriginalWeightKg?: number;
   dwbOriginalSellingPrice?: number;
