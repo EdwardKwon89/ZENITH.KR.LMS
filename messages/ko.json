@@ -90,6 +90,7 @@
     "corporate_mgmt": "법인 관리",
     "ups_group": "UPS 관리",
     "ups_daily_close": "UPS 일마감",
+    "ups_rates": "UPS 요율 관리",
     "agency_management": "대리점 관리",
     "agency_shippers_nav": "화주 목록",
     "agency_rate_overrides_nav": "요율 오버라이드",
@@ -448,6 +449,18 @@
       "url": "발생 URL",
       "sentry_link": "Sentry 상세 보기",
       "success_resolve": "에러 로그가 해결됨으로 표시되었습니다."
+    },
+    "ups_rates": {
+      "title": "UPS 요율 관리",
+      "description": "UPS 특송 기준요금·유류할증·부가요금 및 대리점 할인율 정책을 관리합니다.",
+      "tabs": {
+        "zones": "Zone 관리",
+        "products": "제품 관리",
+        "baseRates": "기준요금",
+        "fuelSurcharges": "유류할증",
+        "otherCharges": "부가요금",
+        "agencyPolicies": "Agency 할인율 정책"
+      }
     }
   },
   "Dashboard": {

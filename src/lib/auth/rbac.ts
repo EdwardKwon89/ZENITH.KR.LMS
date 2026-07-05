@@ -41,7 +41,7 @@ function normalizePath(path: string): string {
  */
 export const STATIC_PERMISSIONS: Record<string, string[]> = {
   [USER_ROLES.ADMIN]: ['/master', '/admin', '/orders', '/logistics', '/billing', '/tracking', '/inventory', '/finance', '/settlement', '/voc', '/support', '/mypage', '/warehouse'],
-  [USER_ROLES.MANAGER]: ['/orders', '/logistics', '/billing', '/reports', '/tracking', '/inventory', '/finance', '/settlement', '/voc', '/support', '/mypage', '/warehouse'],
+  [USER_ROLES.MANAGER]: ['/orders', '/logistics', '/billing', '/reports', '/tracking', '/inventory', '/finance', '/settlement', '/voc', '/support', '/mypage', '/warehouse', '/admin/ups-rates'],
   [USER_ROLES.OPERATOR]: ['/orders', '/logistics', '/tracking', '/voc', '/support', '/mypage'],
   [USER_ROLES.CARRIER]: ['/logistics/delivery', '/orders/assigned', '/admin/transport-costs', '/admin/rates', '/voc', '/support', '/mypage'],
   [USER_ROLES.CUSTOMS_BROKER]: ['/admin/customs-rates', '/orders/assigned', '/tracking', '/voc', '/mypage'],
