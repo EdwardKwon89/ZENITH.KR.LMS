@@ -9,6 +9,8 @@ import type {
   UpsFuelSurcharge,
   UpsOtherCharge,
   UpsCargoType,
+  UpsWeightTierRateWithRefs,
+  UpsFreightMinimumWithRefs,
 } from '@/types/ups';
 
 export async function getUpsZones(): Promise<UpsZoneWithCountries[]> {
@@ -79,6 +81,27 @@ export async function getUpsOtherCharges(): Promise<UpsOtherCharge[]> {
     .select('*')
     .eq('is_active', true)
     .order('charge_code');
+  if (error) throw new Error(error.message);
+  return data ?? [];
+}
+
+export async function getUpsWeightTierRates(): Promise<UpsWeightTierRateWithRefs[]> {
+  const { supabase } = await validateUserAction();
+  const { data, error } = await supabase
+    .from('zen_ups_weight_tier_rates')
+    .select('*, product:product_id(product_code, product_name), zone:zone_id(zone_code, zone_name)')
+    .eq('is_active', true)
+    .order('tier_min_kg');
+  if (error) throw new Error(error.message);
+  return data ?? [];
+}
+
+export async function getUpsFreightMinimums(): Promise<UpsFreightMinimumWithRefs[]> {
+  const { supabase } = await validateUserAction();
+  const { data, error } = await supabase
+    .from('zen_ups_freight_minimums')
+    .select('*, product:product_id(product_code, product_name), zone:zone_id(zone_code, zone_name)')
+    .eq('is_active', true);
   if (error) throw new Error(error.message);
   return data ?? [];
 }
