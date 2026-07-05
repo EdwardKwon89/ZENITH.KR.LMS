@@ -5,19 +5,26 @@
 > **발령자**: Jaison (Team B 총괄)
 > **담당자**: Baker (Big Pickle)
 > **우선순위**: P1
-> **상태**: 🚫
-> **선행 Task**: TASK-B-056 ✅ (타입 확정 필요) · TASK-B-057 ✅ 권장 (Action 인터페이스 확정 후 통합)
+> **상태**: 🔄
+> **선행 Task**: TASK-B-056 🔔 · TASK-B-057 🔔 (JSJung 승인으로 선행 착수 허가 2026-07-05)
 
 ---
 
 ## ⚠️ 착수 전 필독 — R-17 브랜치/Git 절차
 
 ```bash
+# ⚠️ B-056/057 머지 전 선행 착수 — B-057 브랜치 위에서 시작 (JSJung 승인 2026-07-05)
 git fetch origin
-git checkout develop
-git pull origin develop
-git checkout -b feature/teamb-task-b-058-def180-frontend-baker
+git checkout feature/teamb-task-b-058-def180-frontend-baker
+# 브랜치는 Jaison이 미리 생성 완료 (B-057 브랜치 기반)
 ```
+
+> B-056·057이 develop에 머지된 후 `git rebase develop` 실행하여 정리할 것.
+
+**참조 인터페이스 (B-056/057 확정값):**
+- `CreateAgencyShipperInput.login_email: string` (필수)
+- `CreateAgencyShipperResult = { success: true; shipperId: string; inviteEmailSent: boolean } | { success: false; fieldErrors }`
+- 주소 6필드: `country_code / state_province / city / address / address_detail / zipcode`
 
 완료 보고: **① 코드 커밋 → ② task file 🔔 기재 → ③ ACTIVE_TASK 반영 → ④ PR 생성** (`develop` 대상)
 
