@@ -64,6 +64,7 @@ export function AgencyShipperForm({ agencyOrgId }: AgencyShipperFormProps) {
         contact_name: currentValues.contact_name || undefined,
         contact_email: currentValues.contact_email || undefined,
         contact_phone: currentValues.contact_phone || undefined,
+        login_email: (formData.get('login_email') as string) || '',
       });
 
       if (!result.success) {
