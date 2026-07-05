@@ -304,7 +304,7 @@
 | TASK-177 | 260705 | Ds_11 API 명세 갱신(Team B 인계 계약 명시) + UAT-17-03 완료처리 + 신규 UAT-22/23 작성 + 전체 회귀 (An-14 §6·7) | TASK-175·176 ✅ | **D_Kai** | ✅ | [TASK-177](tasks/TASK-177_260705_P71SPR07_명세UAT회귀_DKai.md) | Aiden 재검토 ✅ 승인(260705) — Ds_11갱신+UAT-22/23(UAT-17-03 정직 미완료 기재)+회귀424/424 PASS |
 | TASK-178 | 260705 | D_Kai 재교육 세션 5차 — 코드/문서 커밋 혼입 3회 연속(R-17 v1.4 페널티) | 없음 | D_Kai | ✅ | [TASK-178](tasks/TASK-178_260705_DKai재교육세션5차_DKai.md) | Aiden 조건부 승인(260705) — 신규 할당 중단 해제. 단 재교육 커밋 자체가 develop 직접 커밋(브랜치 없음) — 신규 위반 1건 별도 기록 |
 | **── Phase 7.2 (IMP-146) ──** | | **UPS 요율표 구조 정밀화 — An-14 §9·§12 백로그 (Go-Live 비차단)** | | | | | | **Edward 발령(260705) — [An-14 §12](../docs/02_Analysis/An_14_Phase7_UPS요금관리_설계보완.md#12-imp-146-설계--요율표-구조-정밀화-9-백로그-착수-2026-07-05-edward-발령)** |
-| TASK-179 | 260705 | Box 상품 등록 + Zone-서비스-방향 매핑 정밀화 (An-14 §12-1 #2·#3) | 없음 | B_Kai | 🔍 | [TASK-179](tasks/TASK-179_260705_P72IMP146_ZoneBox구조정밀화_BKai.md) | Aiden 설계 확정(260705, Fallback 전략+호출부 영향 재검증) — DoD 1건 보완(fallbackApplied 필드) 후 즉시 착수 가능 |
+| TASK-179 | 260705 | Box 상품 등록 + Zone-서비스-방향 매핑 정밀화 (An-14 §12-1 #2·#3) | 없음 | B_Kai | 🔄 | [TASK-179](tasks/TASK-179_260705_P72IMP146_ZoneBox구조정밀화_BKai.md) | Aiden 설계 확정(260705) · 구현 진행 중 · Box 상품 마이그레이션 + Zone 매핑 정밀화 + resolveZoneByCountry() 보강 + Admin UI |
 | TASK-180 | 260705 | 20kg 초과 티어 요금 + DWB + Freight 최소운임 (An-14 §12-1 #1·#4·#5) | TASK-179 ✅ | Riley | 🔍 | [TASK-180](tasks/TASK-180_260705_P72IMP146_티어DWB최소운임_Riley.md) | Aiden 설계 확정(260705, 원문 대조 검증) — DoD 2건 보완(반올림함수 교체+DEF-095) 후 TASK-179 완료 시 착수 |
 ---
 
@@ -316,7 +316,7 @@
 |:------|:----:|:----|
 | **Aiden (Claude)** | ✅ TASK-167 전체 승인 (260626) | PR#117 §1 ✅ · PR#118 §2+§3 ✅ 전량 머지 완료 |
 | **D_Kai (OpenCode)** | ✅ TASK-178 재교육 5차 조건부 승인 (260705) — 신규 Task 배정 재개 | §1~§5 우수(특히 `git add -A` 공통 근본원인 분석·코드↔문서 대칭원칙 자각). **그러나 재교육 완료 커밋(`57648c4`·`0a37c47`) 자체가 브랜치 없이 develop 직접 커밋 — R-17 §0 위반 신규 1건 기록**(develop 이미 반영, 무해한 문서 변경이라 되돌리지 않음). **다음 Task부터 브랜치 절차 위반 시 즉시 6차 재교육 + 장기 중단 검토 — 최종 경고.** |
-| **B_Kai** | 🔍 TASK-179 설계 확정 (260705) | Phase 7.2 IMP-146 Box상품+Zone매핑 정밀화 · DoD 1건 보완사항 통보됨, 즉시 착수 가능 |
+| **B_Kai** | 🔄 TASK-179 구현 진행 (260705) | Phase 7.2 IMP-146 Box상품+Zone매핑 정밀화 · 설계 확정 ✅ · 구현 중 · Box migration + Zone migration + 타입/엔진 보강 + Admin UI |
 | **Riley** | 🔍 TASK-180 설계 확정 (260705) | Phase 7.2 IMP-146 티어 요금+DWB+Freight 최소운임 · TASK-179 완료 대기 중 DoD 2건 보완사항 통보됨 |
 | N_Kai | ➖ 미재배정 확정 (260626 Edward) | TASK-087 폐기 — 신규 Task 발령 없음 |
 | Ring | 신규 할당 중단 유지 | 9차 위반 누적 |
