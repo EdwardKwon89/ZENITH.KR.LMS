@@ -317,7 +317,7 @@
 | GH#201 | 260705 | [DEF-096] OVERSIZE 부가요금 시드값 오류(15,000/12,000→69,200원) | 없음 | D_Kai | ✅ | [Issue #201](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/201) (closed) | Aiden 승인·머지 완료(260705) — PR#209 · 코드 `c32c663` · 회귀 450/450 PASS · R-17 §0 위반 없음(최종경고 유지) |
 | GH#202 | 260705 | estimateUpsFreight()가 resolveZoneByCountry() 미사용 | 없음 | B_Kai | ✅ | [Issue #202](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/202) (closed) | Aiden 승인·머지 완료(260705) — PR#212 · productFamily/direction/fallbackApplied 전체 threading 확인 · 회귀 446/446 PASS · Advisory 2건(비차단) |
 | GH#203 | 260706 | Ds_11 API 명세서 Phase 7.2 신규기능 반영 누락 | GH#202 ✅ | Aiden | ✅ | [Issue #203](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/203) (closed) | Aiden 완료(260706) — PR#214 · §11.6~11.9 신규(Zone유틸/Tier·DWB/Freight최소운임/Box상품) · IMP-133 신규 발견(Box max_weight_kg 미검증) 등록 |
-| GH#204 | 260705 | Admin UI — 20kg 초과 티어·Freight 최소운임 관리 탭 신규 | 없음 | Riley | ⬜ | [Issue #204](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/204) | High(P2) |
+| GH#204 | 260706 | Admin UI — 20kg 초과 티어·Freight 최소운임 관리 탭 신규 | 없음 | Riley | ❌ | [Issue #204](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/204) | Aiden 조건부 반려(260706) — PR#215 기능 검토 통과(454/454 PASS 확인)했으나 R-17 §1 코드/문서 커밋 미분리(`e005cc53`) + ACTIVE_TASK.md rebase 필요, 재작업 요청 |
 | GH#205 | 260705 | An-14 담당 불일치 정정 + UAT_DEFECT_LOG·UAT_MASTER 동기화 | 없음 | Aiden | ⬜ | [Issue #205](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/205) | High(P2) |
 | GH#206 | 260705 | UPS 문서 정리 백로그 (Medium 6 + Low 7건) | 없음 | Aiden | ⬜ | [Issue #206](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/206) | Medium/Low(P3) — 트래킹 목적, 순차 처리 |
 ---
@@ -331,7 +331,7 @@
 | **Aiden (Claude)** | ✅ TASK-167 전체 승인 (260626) | PR#117 §1 ✅ · PR#118 §2+§3 ✅ 전량 머지 완료 |
 | **D_Kai (OpenCode)** | ✅ GH#201 승인·머지 완료 (260705) | DEF-096 OVERSIZE 시드값 오류 수정 — PR#209 · 회귀 450/450 PASS · **R-17 §0 위반 없이 정상 완료 — 최종경고 유지, 신규 Task 대기** |
 | **B_Kai** | ✅ GH#202 승인·머지 완료 (260705) | PR#212 · 회귀 446/446 PASS. **참고**: 1차 제출(PR#211)이 feature 브랜치 없이 develop 직접 커밋으로 시도됐다가 본인이 자진 종료 후 정상 브랜치(PR#212)로 재제출 — R-17 §0 경미 위반 1건이나 자가 수정, 신규 Task 대기 |
-| **Riley** | ⬜ GH#204 발령 (260705) | Admin UI 티어/최소운임 관리 탭 신규 — High |
+| **Riley** | ❌ GH#204 조건부 반려 (260706) | PR#215 기능은 정상(454/454 PASS)이나 코드/문서 커밋 미분리(R-17 §1 위반 1회, VIOLATION_TRACKER 기록) — 재작업 요청 |
 | N_Kai | ➖ 미재배정 확정 (260626 Edward) | TASK-087 폐기 — 신규 Task 발령 없음 |
 | Ring | 신규 할당 중단 유지 | 9차 위반 누적 |
 
@@ -772,3 +772,4 @@
 | 2026-07-05 | Aiden (Claude) | **An-15 전체점검 완료 + Issue #86 B방안(GH Issue 중심 관리) 최초 적용 — Phase 7.3 발령**. Edward 지시(Team A 등록 완료여부 + 전체 요구사항/설계/구현 차이 분석)로 원본요구사항·SNTL 원자료·An-13·An-14 전수 대조(병렬 조사 2건) + 코드/스키마 직접 검증 실시, 21건 발견(Critical 3·High 5·Medium 6·Low 7) — `docs/02_Analysis/An_15_Phase7_UPS특송_전체점검_및_보완계획.md`. Edward 지시대로 **GitHub Issue를 진실의 근거로, 본 파일은 동기화 캐시로 전환**(Issue #86 B방안 최초 실적용) — GH#201(D_Kai, OVERSIZE 시드오류)·GH#202(B_Kai, Zone정밀화 연결)·GH#203(Aiden, API명세 갱신)·GH#204(Riley, Admin UI 신규탭)·GH#205·GH#206(Aiden, 문서정리) 신규 발령. Team B Issue #181에 착수 순서 코멘트(B-059 즉시 가능, B-060은 GH#202·203 완료 후 권장) 게시. |
 | 2026-07-05 | B_Kai (Big Pickle) | **GH#202 ⬜ 구현 완료 — PR#212 Aiden 검토 대기** — estimateUpsFreight 인라인 Zone 조회 → resolveZoneByCountry() 교체. productFamilyFromCode() 매핑 함수 신규. direction 파라미터 노출 + fallbackApplied breakdown 반영. 75 files/446 PASS. tsc 신규 0건. PR#212. **분실 복구 이력**: `b34beb80`(코드) + `1ee6f088`(ACTIVE_TASK.md) 커밋으로 feature 브랜치 재구성, force push 완료. |
 | 2026-07-06 | Aiden (Claude) | **GH#203 ✅ 완료 — API 명세서 Phase 7.2 신규기능 반영 (PR#214)**. GH#202 병합으로 전제조건 해제 후 즉시 착수. `Ds_11_API_상세_명세서.md` §11에 §11.6(Zone유틸: resolveZoneByCountry/productFamilyFromCode/resolveBillingWeight)·§11.7(20kg초과 Tier+DWB)·§11.8(Freight최소운임)·§11.9(Box상품) 4개 서브섹션 신설, 실제 소스코드(`pricing-engine.ts`/`freight.ts`/마이그레이션) 직접 대조로 함수 시그니처·필드 전체 명문화. estimateUpsFreight() Input/Output에 GH#202의 `direction`/`fallbackApplied` 및 `dwbApplied`/`freightMinApplied` 필드 반영. 작업 중 신규 갭 발견(Box `max_weight_kg` 상한 서버측 미검증) — R-15에 따라 IMP-133 등록(Low, 별도 Task 필요). 회귀 454/454 PASS. 코드 커밋 없음(문서 전용). |
+| 2026-07-06 | Aiden (Claude) | **GH#204 PR#215 조건부 반려** — Riley 제출 Admin UI 티어/Freight최소운임 탭 CRUD 검토. `gh pr view`가 보고한 CONFLICTING/272파일 변경은 낡은 API 캐시로 확인(로컬 worktree merge 직접 검증 결과 실제 diff 11파일/+337-14, DoD와 정확히 일치, 회귀 454/454 PASS 재확인). 기능·컨벤션 준수 자체는 문제 없음. 다만 단일 커밋(`e005cc53`)에 코드 파일과 task file·LIVE_REGRESSION_TEST_MAP.md·IMP_PROGRESS.md·ACTIVE_TASK.md 문서 파일이 혼입(R-17 §1 위반) + ACTIVE_TASK.md가 Aiden의 GH#203 캐시 갱신과 충돌 — PR#215에 반려 코멘트 게시, 커밋 분리 및 rebase 후 재제출 요청. VIOLATION_TRACKER.md에 Riley 1회 기록(할당 중단 기준 3회 미달). |
