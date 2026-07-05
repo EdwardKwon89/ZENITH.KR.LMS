@@ -168,7 +168,8 @@ RLS: `ADMIN/MANAGER`만 INSERT/UPDATE, `AGENCY`(본인 org)는 SELECT만 — R3 
 | `src/lib/ups/agency-pricing.ts` | **신규** | `computeAgencyFreight(platformResult, policy, override?, agencyCharges[])` — R3/R4/R5 |
 | `src/lib/ups/shipper-pricing.ts` | **신규** | `computeShipperFreight(agencyResult, shipperDiscountRate)` — R6 |
 | `src/app/actions/ups/freight.ts` | **신규** | `estimateUpsFreight(orderInput)` — 3단계 통합 호출, 오더 등록 화면에서 실시간 미리보기용 |
-| `src/lib/ups/order-integration.ts` | **신규** | 오더 확정 시 계산 결과를 `zen_order_rate_snapshots`에 저장(기존 스냅샷 관례 재사용, TISA 패턴과 동일) |
+
+> **오더 확정 시 `zen_order_rate_snapshots` 저장은 Team A 범위가 아님** — §11 표 3번 항목대로 **Team B(Issue #181)** 단독 소유. (2026-07-06 정정 — 본 표에 `order-integration.ts` 신규 파일이 Team A 산출물로 중복 기재됐던 오류를 GH#205에서 삭제)
 
 원가 산출(Agency 단계)은 위 3-3의 **DB 트리거가 최종 권위(source of truth)** 이며, 애플리케이션 계산 함수는 오더 등록 시점의 견적 미리보기 + 스냅샷 기록용으로 동일 공식을 재사용한다(이중 계산 로직 불일치 방지를 위해 트리거 SQL 공식과 TS 공식을 §7 테스트로 교차 검증).
 

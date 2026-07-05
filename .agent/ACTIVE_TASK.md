@@ -319,7 +319,7 @@
 | GH#203 | 260706 | Ds_11 API 명세서 Phase 7.2 신규기능 반영 누락 | GH#202 ✅ | Aiden | ✅ | [Issue #203](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/203) (closed) | Aiden 완료(260706) — PR#214 · §11.6~11.9 신규(Zone유틸/Tier·DWB/Freight최소운임/Box상품) · IMP-133 신규 발견(Box max_weight_kg 미검증) 등록 |
 | GH#204 | 260706 | Admin UI — 20kg 초과 티어·Freight 최소운임 관리 탭 신규 | 없음 | Riley | ✅ | [Issue #204](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/204) (closed) | Aiden 승인·머지 완료(260706) — PR#215(코드 `f4031caf`+문서 `4348cb2a` 분리) · base branch main→develop 오류 정정 후 병합 · 회귀 454/454 PASS |
 | GH#205 | 260705 | An-14 담당 불일치 정정 + UAT_DEFECT_LOG·UAT_MASTER 동기화 | 없음 | Aiden | ⬜ | [Issue #205](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/205) | High(P2) |
-| GH#206 | 260705 | UPS 문서 정리 백로그 (Medium 6 + Low 7건) | 없음 | Aiden | ⬜ | [Issue #206](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/206) | Medium/Low(P3) — 트래킹 목적, 순차 처리 |
+| GH#206 | 260706 | UPS 문서 정리 백로그 (Medium 6 + Low 7건) | 없음 | B_Kai | ⬜ | [Issue #206](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/206) | Medium/Low(P3) — Edward 지시로 Aiden→B_Kai 재배정(260706), #9~14 착수 대상·#15~21 Edward 사인오프 제외 |
 ---
 
 ## Agent 현황
@@ -330,7 +330,7 @@
 |:------|:----:|:----|
 | **Aiden (Claude)** | ✅ TASK-167 전체 승인 (260626) | PR#117 §1 ✅ · PR#118 §2+§3 ✅ 전량 머지 완료 |
 | **D_Kai (OpenCode)** | ✅ GH#201 승인·머지 완료 (260705) | DEF-096 OVERSIZE 시드값 오류 수정 — PR#209 · 회귀 450/450 PASS · **R-17 §0 위반 없이 정상 완료 — 최종경고 유지, 신규 Task 대기** |
-| **B_Kai** | ✅ GH#202 승인·머지 완료 (260705) | PR#212 · 회귀 446/446 PASS. **참고**: 1차 제출(PR#211)이 feature 브랜치 없이 develop 직접 커밋으로 시도됐다가 본인이 자진 종료 후 정상 브랜치(PR#212)로 재제출 — R-17 §0 경미 위반 1건이나 자가 수정, 신규 Task 대기 |
+| **B_Kai** | ⬜ GH#206 발령 (260706) | UPS 문서 정리 백로그(#9~14) — Edward 지시로 Aiden→B_Kai 재배정. 직전 GH#202(PR#212, 446/446 PASS) 정상 완료 |
 | **Riley** | ✅ GH#204 승인·머지 완료 (260706) | PR#215 · R-17 §1 위반(코드/문서 커밋 혼입) 자가수정 확인 후 승인, 신규 Task 대기 |
 | N_Kai | ➖ 미재배정 확정 (260626 Edward) | TASK-087 폐기 — 신규 Task 발령 없음 |
 | Ring | 신규 할당 중단 유지 | 9차 위반 누적 |
@@ -774,3 +774,5 @@
 | 2026-07-06 | Aiden (Claude) | **GH#203 ✅ 완료 — API 명세서 Phase 7.2 신규기능 반영 (PR#214)**. GH#202 병합으로 전제조건 해제 후 즉시 착수. `Ds_11_API_상세_명세서.md` §11에 §11.6(Zone유틸: resolveZoneByCountry/productFamilyFromCode/resolveBillingWeight)·§11.7(20kg초과 Tier+DWB)·§11.8(Freight최소운임)·§11.9(Box상품) 4개 서브섹션 신설, 실제 소스코드(`pricing-engine.ts`/`freight.ts`/마이그레이션) 직접 대조로 함수 시그니처·필드 전체 명문화. estimateUpsFreight() Input/Output에 GH#202의 `direction`/`fallbackApplied` 및 `dwbApplied`/`freightMinApplied` 필드 반영. 작업 중 신규 갭 발견(Box `max_weight_kg` 상한 서버측 미검증) — R-15에 따라 IMP-133 등록(Low, 별도 Task 필요). 회귀 454/454 PASS. 코드 커밋 없음(문서 전용). |
 | 2026-07-06 | Aiden (Claude) | **GH#204 PR#215 조건부 반려** — Riley 제출 Admin UI 티어/Freight최소운임 탭 CRUD 검토. `gh pr view`가 보고한 CONFLICTING/272파일 변경은 낡은 API 캐시로 확인(로컬 worktree merge 직접 검증 결과 실제 diff 11파일/+337-14, DoD와 정확히 일치, 회귀 454/454 PASS 재확인). 기능·컨벤션 준수 자체는 문제 없음. 다만 단일 커밋(`e005cc53`)에 코드 파일과 task file·LIVE_REGRESSION_TEST_MAP.md·IMP_PROGRESS.md·ACTIVE_TASK.md 문서 파일이 혼입(R-17 §1 위반) + ACTIVE_TASK.md가 Aiden의 GH#203 캐시 갱신과 충돌 — PR#215에 반려 코멘트 게시, 커밋 분리 및 rebase 후 재제출 요청. VIOLATION_TRACKER.md에 Riley 1회 기록(할당 중단 기준 3회 미달). |
 | 2026-07-06 | Aiden (Claude) | **GH#204 PR#215 ✅ 재검토·승인·머지 완료** — Riley가 커밋 분리(`f4031caf` 코드/`4348cb2a` 문서)·rebase 자가수정 후 재제출. 로컬 worktree merge 재검증 결과 `Already up to date`(충돌 없음). 그런데 `gh pr merge` 실행 시 재차 `CONFLICTING` 오류 — 원인 추적 결과 **PR#215의 base branch가 애초부터 `develop`이 아닌 `main`으로 잘못 설정**되어 있었음이 확인됨(직전 로그의 "낡은 API 캐시" 진단은 오판이었고, 실제로는 `main`이 `develop` 대비 크게 뒤처져 있어 발생한 **진짜 충돌**). `gh pr edit --base develop`으로 정정 후 `mergeStateStatus: CLEAN` 확인, 정상 머지. **후속 확인 필요**: 다른 Team A PR 생성 시에도 base branch 기본값이 `main`으로 설정되지 않는지 점검 권장. **별도 발견(중대)**: 검토 도중 확인된바 Team B(Baker)가 TASK-B-060 착수를 알리려 로컬 워킹트리에 남겨뒀던 미커밋 `ACTIVE_TASK.md` 기록(담당자 오기 "B_Kai"도 포함)이, 같은 공유 저장소를 Riley 세션이 동시에 `checkout`/`reset`하는 과정에서 유실됨 확인 — Issue #181에 Team B 앞 안내 및 재작성 요청 게시. 공유 워크스페이스 동시성 문제(git worktree 격리 필요성) 재확인 사례로 기록. |
+| 2026-07-06 | Aiden (Claude) | **GH#205 착수 — An-14 §4/§11 담당 불일치 정정 완료**. `order-integration.ts`(오더 확정 시 스냅샷 저장)가 §4엔 Team A 산출물로, §11엔 Team B 담당(#3)으로 중복 기재된 것을 확인 — §4 표에서 해당 행 삭제 + §11 Team B 단독 소유 명확화하는 각주 추가. **DEF-089~095 소급 등재**: `UAT_DEFECT_LOG.md`가 2026-06-10 이후 미갱신 상태였던 것을 각 Task file(TASK-B-043~050)·ACTIVE_TASK.md 교차 확인으로 커밋 해시·PR 번호·회귀 결과(388/388) 전량 검증 후 7건 소급 반영, 현황 요약 갱신(합계 60→67). UAT_MASTER.md 인덱스 동기화는 다음 단계로 진행 예정. |
+| 2026-07-06 | Aiden (Claude) | **GH#206 Aiden→B_Kai 재배정** (Edward 지시). #9(고아 테이블 정리 결정)·#12(이원 관리 테이블 동기화 규칙 설계) 등 코드베이스 추적 기반 판단이 많아 GH#202에서 검증된 B_Kai의 통합 추적·수정 역량이 적합하다고 판단 — Issue 본문·코멘트로 배정 통보, ACTIVE_TASK.md 반영. D_Kai는 어제(260705) 5차 재교육(TASK-178, 코드/문서 커밋 혼입 3연속) 완료 직후라 동일 위험 유형 재발 우려로 이번엔 배제 권고. |
