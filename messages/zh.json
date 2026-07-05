@@ -46,6 +46,7 @@
     "delivery_rates": "配送服务费率",
     "transport_policies": "运费计算政策",
     "rates": "费率",
+    "ups_rates": "UPS费率管理",
     "rate_cards_management": "费率卡管理",
     "member_management": "会员管理",
     "permissions": "权限管理",
@@ -55,7 +56,8 @@
     "org_management": "组织管理",
     "claims": "索赔管理",
     "orders_assigned": "分配订单",
-    "agency_rate_overrides_nav": "费率覆盖"
+    "agency_rate_overrides_nav": "费率覆盖",
+    "agency_other_charges_nav": "附加费管理"
   },
   "Orders": {
     "ups_invoice": {
@@ -244,6 +246,10 @@
     "submit_error": "注册时发生错误",
     "loading": "加载中..."
   },
+  "agency_rate_overrides_selling_hint": "输入包含利润的最终售价。",
+  "agency_rate_overrides_cost_label": "成本价",
+  "agency_rate_overrides_cost_auto": "根据管理员设置的折扣率自动计算",
+  "agency_rate_overrides_cost_hint": "保存后将自动显示计算后的成本价。",
   "agency_settlement_widget_title": "本月结算概况",
   "agency_settlement_orders": "订单数",
   "agency_settlement_revenue": "收入",
@@ -255,5 +261,19 @@
     "settlement_reconciliation_title": "未定价订单提醒",
     "settlement_reconciliation_desc": "因未应用费率而排除在结算之外的订单。",
     "settlement_reconciliation_count": "{count}件"
+  },
+  "Admin": {
+    "ups_rates": {
+      "title": "UPS费率管理",
+      "description": "管理UPS基准费率、燃油附加费、附加费用及代理折扣政策。",
+      "tabs": {
+        "zones": "区域管理",
+        "products": "产品管理",
+        "baseRates": "基准费率",
+        "fuelSurcharges": "燃油附加费",
+        "otherCharges": "附加费用",
+        "agencyPolicies": "代理折扣政策"
+      }
+    }
   }
 }

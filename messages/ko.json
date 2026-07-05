@@ -90,9 +90,11 @@
     "corporate_mgmt": "법인 관리",
     "ups_group": "UPS 관리",
     "ups_daily_close": "UPS 일마감",
+    "ups_rates": "UPS 요율 관리",
     "agency_management": "대리점 관리",
     "agency_shippers_nav": "화주 목록",
     "agency_rate_overrides_nav": "요율 오버라이드",
+    "agency_other_charges_nav": "부가요금 관리",
     "agency_dashboard": "대리점 대시보드",
     "agency_registered_shippers": "등록 화주",
     "agency_quick_links": "빠른 이동",
@@ -448,6 +450,18 @@
       "url": "발생 URL",
       "sentry_link": "Sentry 상세 보기",
       "success_resolve": "에러 로그가 해결됨으로 표시되었습니다."
+    },
+    "ups_rates": {
+      "title": "UPS 요율 관리",
+      "description": "UPS 특송 기준요금·유류할증·부가요금 및 대리점 할인율 정책을 관리합니다.",
+      "tabs": {
+        "zones": "Zone 관리",
+        "products": "제품 관리",
+        "baseRates": "기준요금",
+        "fuelSurcharges": "유류할증",
+        "otherCharges": "부가요금",
+        "agencyPolicies": "Agency 할인율 정책"
+      }
     }
   },
   "Dashboard": {
@@ -703,10 +717,14 @@
   "agency_rate_overrides_new": "신규 요율 등록",
   "agency_rate_overrides_base_rate": "기준 요율",
   "agency_rate_overrides_selling": "판매가",
-  "agency_rate_overrides_cost": "원가",
+  "agency_rate_overrides_selling_hint": "마진을 반영한 최종 판매가를 입력하세요.",
+  "agency_rate_overrides_cost_label": "원가",
+  "agency_rate_overrides_cost_auto": "Admin이 설정한 할인율에 따라 자동 계산됩니다",
+  "agency_rate_overrides_cost_hint": "저장 후 자동 계산된 원가가 표시됩니다.",
   "agency_rate_overrides_valid_from": "적용 시작일",
   "agency_rate_overrides_valid_until": "적용 종료일",
   "agency_rate_overrides_deactivate": "비활성화",
+  "agency_other_charges_nav": "부가요금 관리",
   "agency_settlements_nav": "정산 조회",
   "agency_settlement_widget_title": "이번 달 정산 현황",
   "agency_settlement_orders": "오더수",

@@ -1,7 +1,7 @@
 # 🗺️ LIVE Regression Test Master Map
 
-> **총 테스트 케이스:** 384 Cases  
-> **최종 검증일:** 2026-06-20 (TASK-155 [P7-SPR-07] E2E·UAT 선행 스펙 작성 · TC-P7-ADDR-01~05, TC-P7-CLOSE-01~05 등재 · 374/374 PASS)  
+> **총 테스트 케이스:** 424 Cases (vitest 개별 테스트 기준, 74 test files)
+> **최종 검증일:** 2026-07-05 (TASK-175·176·177 Phase 7.1 UPS Admin UI + Agency UI · TC-UPS-ADMIN-01~07 + TC-AG-OC-01~03 등재 · 424/424 PASS)  
 
 제니스 플랫폼의 비즈니스 영속성을 보장하는 회귀 테스트 케이스의 통합 명세서입니다. 모든 신규 개발 및 수정 시 이 맵에 케이스가 추가되어야 하며, 전체 테스트가 통과되어야 합니다.
 
@@ -104,11 +104,12 @@
 ### 9. UPS 요율 관리 (Phase 7 SPR-03)
 | ID | 테스트 항목 | 목적 | 파일 경로 |
 | :--- | :--- | :--- | :--- |
-| **TC-UPS-ADMIN-01** | Zone CRUD | Zone 등록 및 수정 | `tests/unit/ups/rates-admin-actions.test.ts` |
-| **TC-UPS-ADMIN-02** | 기본요금 UPSERT | Zone×제품×중량 기본 요금 등록·수정 | `tests/unit/ups/rates-admin-actions.test.ts` |
-| **TC-UPS-ADMIN-03** | 유류할증 UPSERT | 주별 유류할증료 등록·수정 | `tests/unit/ups/rates-admin-actions.test.ts` |
-| **TC-UPS-ADMIN-04** | Other Charge CRUD | 부가요금 등록 및 수정 | `tests/unit/ups/rates-admin-actions.test.ts` |
-| **TC-UPS-ADMIN-05** | 역할 인증 가드 | 비관리자의 요율 관리 액션 접근 차단 | `tests/unit/ups/rates-admin-actions.test.ts` |
+| **TC-UPS-ADMIN-01** | Zone 신규 등록 + 정보 수정 | `createUpsZone`·`updateUpsZone` 정상 동작 | `tests/unit/ups/rates-admin-actions.test.ts` |
+| **TC-UPS-ADMIN-02** | 제품 신규 등록 | `createUpsProduct` 정상 동작 | `tests/unit/ups/rates-admin-actions.test.ts` |
+| **TC-UPS-ADMIN-03** | 기본요금 UPSERT | `upsertUpsBaseRate` 정상 동작 (currency='KRW') | `tests/unit/ups/rates-admin-actions.test.ts` |
+| **TC-UPS-ADMIN-04** | 유류할증 UPSERT | `upsertUpsFuelSurcharge` 정상 동작 | `tests/unit/ups/rates-admin-actions.test.ts` |
+| **TC-UPS-ADMIN-05** | Other Charge + Agency 정책 CRUD | `createUpsOtherCharge`·`upsertAgencyPricingPolicy` 정상 동작 | `tests/unit/ups/rates-admin-actions.test.ts` |
+| **TC-UPS-ADMIN-07** | 역할 인증 가드 | MANAGER 접근 허용 + GUEST 차단 | `tests/unit/ups/rates-admin-actions.test.ts` |
 | **TC-UPS-WH-01** | 창고 출고 — intl_ref_no 있음 | 정상 출고 (pkgsWithoutIntlRef=0) | `tests/unit/warehouse/outbound-ups.test.ts` |
 | **TC-UPS-WH-02** | 창고 출고 — intl_ref_no 없음 | pkgsWithoutIntlRef > 0 반환 | `tests/unit/warehouse/outbound-ups.test.ts` |
 | **TC-UPS-WH-03** | 창고 출고 — 상태 전이 | WAREHOUSED→RELEASED 전이 유지 | `tests/unit/warehouse/outbound-ups.test.ts` |
@@ -475,6 +476,37 @@
 | **TC-P8-UPS-05** | Void 버튼 → confirm → 폐기 완료 | `markLabelVoided` UPDATE 성공 및 UI 반영 | `tests/e2e/e2e-26-ups-label-flow.spec.ts` |
 | **TC-P8-UPS-06** | 재발급 버튼 클릭 → 새 운송장 번호 갱신 | `issueUpsLabel` 정상 호출 및 DB `is_voided=false` 레코드 생성 확인 | `tests/e2e/e2e-26-ups-label-flow.spec.ts` |
 | **TC-P8-UPS-07** | gettrack polling → tracking_events 저장 | 폴링 첫 호출 후 `zen_ups_tracking_events` 삽입 확인 | `tests/e2e/e2e-26-ups-label-flow.spec.ts` |
+
+### 37. Phase 7.1 UPS Agency 할인율 정책 + 원가 자동계산 (IMP-145)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-UPS-AGPOL-01** | 할인율 정책 없는 대리점 오버라이드 등록 차단 | `zen_agency_pricing_policies` 부재 시 INSERT 에러 발생 확인 | `tests/integration/p71-ups-agency-pricing.test.ts` |
+| **TC-UPS-AGPOL-02** | cost_price = 판매가×(1-할인율) 자동계산 | 트리거가 Agency 입력값을 무시하고 재계산하는지 확인 | `tests/integration/p71-ups-agency-pricing.test.ts` |
+| **TC-UPS-AGPOL-03** | UPDATE 시에도 cost_price 자동 재계산 유지 | Agency가 임의 값으로 갱신 시도해도 트리거값 유지 확인 | `tests/integration/p71-ups-agency-pricing.test.ts` |
+| **TC-UPS-AGPOL-04** | 현지통관/기타 부가수수료 4종 시드 확인 | DUTY_AMOUNT 등 4종, fuel_surcharge_applicable=false 확인 | `tests/integration/p71-ups-agency-pricing.test.ts` |
+| **TC-UPS-AGPOL-05** | `fn_get_ups_agency_selling_price` 반환값 검증 | Agency override selling_price 정상 반환 확인 | `tests/integration/p71-ups-agency-pricing.test.ts` |
+
+### 38. Phase 7.1 UPS 요금 계산 엔진 보강 — Platform/Agency/Shipper (IMP-145)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-UPS-ENGINE-01** | 청구중량 계산(0.5kg 올림·실중량/부피중량 비교) | 기존 로직 정합성 확인 | `tests/unit/ups/pricing-engine.test.ts` |
+| **TC-UPS-ENGINE-02** | 원가 ×1.07 반영 | SNTL 원자료 원가 할증 규칙 정확성 확인 | `tests/unit/ups/pricing-engine.test.ts` |
+| **TC-UPS-ENGINE-03** | 대형포장물(OVERSIZE) 특수 판정 6종 | 길이+둘레 300~400cm 조건·최소청구중량 40kg 강제 확인 | `tests/unit/ups/pricing-engine.test.ts` |
+| **TC-UPS-ENGINE-04** | Agency 단계 계산(override/폴백 분기) | R3~R5 공식 정확성 확인 | `tests/unit/ups/pricing-engine.test.ts` |
+| **TC-UPS-ENGINE-05** | Shipper 단계 계산(화주 할인 적용) | R6 공식 정확성 확인 | `tests/unit/ups/pricing-engine.test.ts` |
+
+### 39. Phase 7.1 estimateUpsFreight 통합 Action (IMP-145)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-UPS-FREIGHT-01** | Platform/Agency/Shipper 3단계 견적 조회(agencyOrgId·shipperOrgId 유무별 분기, Zone/기준요금 미존재 에러) | An-14 §4·§11 API 계약 검증 | `tests/unit/ups/freight-actions.test.ts` |
+
+### 39. Phase 7.1 Agency 부가요금 CRUD (IMP-145)
+
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-AG-OC-01** | 부가요금 목록 조회 | `getAgencyOtherCharges` 정상 동작 | `tests/unit/agency/other-charges-actions.test.ts` |
+| **TC-AG-OC-02** | 부가요금 등록 | `upsertAgencyOtherCharge` 정상 동작 (unique: agency_org_id + other_charge_id) | `tests/unit/agency/other-charges-actions.test.ts` |
+| **TC-AG-OC-03** | 부가요금 비활성화 | `deactivateAgencyOtherCharge` 정상 동작 | `tests/unit/agency/other-charges-actions.test.ts` |
 
 ---
 

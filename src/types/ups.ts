@@ -101,6 +101,96 @@ export interface UpsFlightPlan {
   created_by: string | null;
 }
 
+// ─── 요금 계산 엔진 타입 (Phase 7.1 TASK-172·173, An-14 §4) ────────────────
+
+export interface UpsPricingData {
+  zone: UpsZone;
+  product: UpsProduct;
+  baseRate: UpsBaseRate;
+  fuelSurcharge: UpsFuelSurcharge | null;
+  otherCharges: UpsOtherCharge[];
+}
+
+export interface UpsOtherChargeItem {
+  chargeId: string;
+  chargeCode: string;
+  chargeName: string;
+  unit: string;
+  sellingBase: number;
+  costBase: number;
+  fuelSurchargeSelling: number;
+  fuelSurchargeCost: number;
+}
+
+export interface UpsBreakdown {
+  zone: Pick<UpsZone, 'zone_code' | 'zone_name'>;
+  product: Pick<UpsProduct, 'product_code' | 'product_name' | 'cargo_type'>;
+  actualWeightKg: number;
+  volumetricWeightKg: number;
+  chargeableWeightKg: number;
+  volumetricDivisor: UpsVolumeDivisor;
+  billingWeightKg: number;
+  baseRateId: string;
+  baseSellingPrice: number;
+  baseCostPrice: number;
+  costSurchargeRate: number;
+  fuelSurchargeId: string | null;
+  fuelSurchargeRate: number;
+  fuelSurchargeSellingAmount: number;
+  fuelSurchargeCostAmount: number;
+  otherChargeItems: UpsOtherChargeItem[];
+  otherChargesSellingTotal: number;
+  otherChargesCostTotal: number;
+  oversizeApplied: boolean;
+}
+
+export interface UpsFreightInput {
+  productId: string;
+  destCountryCode: string;
+  actualWeightKg: number;
+  dimL?: number;
+  dimW?: number;
+  dimH?: number;
+  volumetricDivisor?: UpsVolumeDivisor;
+  incoterms?: 'DDU' | 'DDP';
+  otherChargeIds?: string[];
+  effectiveDate?: string;
+}
+
+export interface UpsFreightResult {
+  chargeableWeightKg: number;
+  billingWeightKg: number;
+  baseSellingPrice: number;
+  baseCostPrice: number;
+  fuelSurchargeSellingAmount: number;
+  fuelSurchargeCostAmount: number;
+  otherChargesSellingTotal: number;
+  otherChargesCostTotal: number;
+  totalSellingPrice: number;
+  totalCostPrice: number;
+  currency: string;
+  breakdown: UpsBreakdown;
+}
+
+// Agency 단계 (An-14 R3~R5)
+export interface UpsAgencyFreightResult {
+  platformSellingTotal: number;
+  agencyCostPrice: number;
+  agencySellingPrice: number;
+  discountRate: number;
+  agencyOtherChargesTotal: number;
+  source: 'override' | 'platform_fallback';
+}
+
+// Shipper 단계 (An-14 R6)
+export interface UpsShipperFreightResult {
+  agencySellingPrice: number;
+  shipperDiscountRate: number;
+  finalFreight: number;
+}
+
+// ─── 구 타입 (TASK-138 호환 유지 — 참조처 없음, 삭제는 별도 정리 시점에) ──────
+
 // 요금 계산 입력
 export interface UpsFreightCalcInput {
   product_id: string;

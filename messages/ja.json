@@ -61,10 +61,12 @@
     "delivery_rates": "配送サービス料率",
     "transport_policies": "運賃算定ポリシー",
     "rates": "運賃料率",
+    "ups_rates": "UPS料率管理",
     "rate_cards_management": "料率カード管理",
     "corporate_mgmt": "法人管理",
     "member_management": "会員管理",
-    "agency_rate_overrides_nav": "レート上書き"
+    "agency_rate_overrides_nav": "レート上書き",
+    "agency_other_charges_nav": "諸掛管理"
   },
   "Orders": {
     "ups_invoice": {
@@ -226,6 +228,10 @@
     "submit_error": "登録中にエラーが発生しました",
     "loading": "読み込み中..."
   },
+  "agency_rate_overrides_selling_hint": "マージンを含む最終販売価格を入力してください。",
+  "agency_rate_overrides_cost_label": "原価",
+  "agency_rate_overrides_cost_auto": "管理者が設定した割引率に基づき自動計算されます",
+  "agency_rate_overrides_cost_hint": "保存後、自動計算された原価が表示されます。",
   "agency_settlement_widget_title": "今月の精算状況",
   "agency_settlement_orders": "オーダ数",
   "agency_settlement_revenue": "売上",
@@ -237,5 +243,19 @@
     "settlement_reconciliation_title": "未価格オーダー通知",
     "settlement_reconciliation_desc": "料率が適用されず精算から除外されたオーダーです。",
     "settlement_reconciliation_count": "{count}件"
+  },
+  "Admin": {
+    "ups_rates": {
+      "title": "UPS料率管理",
+      "description": "UPS基準料金・燃料割増・諸掛および代理店割引ポリシーを管理します。",
+      "tabs": {
+        "zones": "ゾーン管理",
+        "products": "商品管理",
+        "baseRates": "基準料金",
+        "fuelSurcharges": "燃料割増",
+        "otherCharges": "諸掛",
+        "agencyPolicies": "代理店割引ポリシー"
+      }
+    }
   }
 }

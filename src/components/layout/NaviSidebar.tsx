@@ -80,6 +80,7 @@ export default function NaviSidebar({
         { title: t("rates"), href: "/admin/rates" },
         { title: t("customs_rates"), href: "/admin/customs-rates" },
         { title: t("delivery_rates"), href: "/admin/delivery-rates" },
+        { title: t("ups_rates"), href: "/admin/ups-rates" },
         { title: t("transport_policies"), href: "/admin/settings/transport-policies" },
         { title: t("master_geo"), href: "/master/geo" },
         { title: t("master_orders"), href: "/master-orders" },
@@ -160,6 +161,7 @@ export default function NaviSidebar({
       children: [
         { title: t("agency_shippers_nav"), href: "/agency/shippers" },
         { title: t("agency_rate_overrides_nav"), href: "/agency/rate-overrides" },
+        { title: t("agency_other_charges_nav"), href: "/agency/other-charges" },
         { title: t("agency_settlements_nav"), href: "/agency/settlements" },
       ]
     },

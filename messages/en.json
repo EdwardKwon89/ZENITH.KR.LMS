@@ -88,9 +88,11 @@
     "corporate_mgmt": "Corporate Mgmt",
     "ups_group": "UPS Management",
     "ups_daily_close": "UPS Daily Close",
+    "ups_rates": "UPS Rate Management",
     "agency_management": "Agency Management",
     "agency_shippers_nav": "Shipper List",
     "agency_rate_overrides_nav": "Rate Overrides",
+    "agency_other_charges_nav": "Other Charges",
     "agency_dashboard": "Agency Dashboard",
     "agency_registered_shippers": "Registered Shippers",
     "agency_quick_links": "Quick Links",
@@ -453,6 +455,18 @@
       "url": "URL",
       "sentry_link": "View in Sentry",
       "success_resolve": "Error log has been marked as resolved."
+    },
+    "ups_rates": {
+      "title": "UPS Rate Management",
+      "description": "Manage UPS base rates, fuel surcharges, other charges, and agency discount policies.",
+      "tabs": {
+        "zones": "Zone Management",
+        "products": "Product Management",
+        "baseRates": "Base Rates",
+        "fuelSurcharges": "Fuel Surcharges",
+        "otherCharges": "Other Charges",
+        "agencyPolicies": "Agency Discount Policy"
+      }
     }
   },
   "Dashboard": {
@@ -708,10 +722,14 @@
   "agency_rate_overrides_new": "New Rate Override",
   "agency_rate_overrides_base_rate": "Base Rate",
   "agency_rate_overrides_selling": "Selling Price",
-  "agency_rate_overrides_cost": "Cost Price",
+  "agency_rate_overrides_selling_hint": "Enter the final selling price including your margin.",
+  "agency_rate_overrides_cost_label": "Cost Price",
+  "agency_rate_overrides_cost_auto": "Auto-calculated based on Admin discount rate",
+  "agency_rate_overrides_cost_hint": "The cost price will be calculated automatically after saving.",
   "agency_rate_overrides_valid_from": "Valid From",
   "agency_rate_overrides_valid_until": "Valid Until",
   "agency_rate_overrides_deactivate": "Deactivate",
+  "agency_other_charges_nav": "Other Charges",
   "agency_settlements_nav": "Settlements",
   "agency_settlement_widget_title": "Monthly Settlement",
   "agency_settlement_orders": "Orders",

@@ -191,8 +191,14 @@ Supabase: Cloud 프로젝트 연결
 | UAT-20-05 | 대리점 정산 오더번호 검색 — 결과 없음 | AGENCY | [UAT_20](UAT_20_Agency정산조회.md) | Baker | 🔄 | 일반 |
 | UAT-20-06 | 대리점 정산 Reconciliation 알림 — 미가격 오더 존재 시 | AGENCY | [UAT_20](UAT_20_Agency정산조회.md) | Baker | 🔄 | 일반 |
 | UAT-20-07 | 대리점 정산 Reconciliation — 미가격 오더 미존재 시 알림 미표시 | AGENCY | [UAT_20](UAT_20_Agency정산조회.md) | Baker | 🔄 | 일반 |
+| UAT-22-01 | UPS Zone 등록 및 국가 매핑 | ADMIN | [UAT_22](UAT_22_UPS요율Admin등록.md) | D_Kai | ⬜ | 일반 |
+| UAT-22-02 | UPS 기준요금 조회 | ADMIN | [UAT_22](UAT_22_UPS요율Admin등록.md) | D_Kai | ⬜ | 일반 |
+| UAT-22-03 | UPS 유류할증 및 부가요금 조회 (신규 4종 포함) | ADMIN | [UAT_22](UAT_22_UPS요율Admin등록.md) | D_Kai | ⬜ | 일반 |
+| UAT-23-01 | Admin 대리점 할인율 정책 등록 | ADMIN | [UAT_23](UAT_23_UPS_Agency할인율정책.md) | D_Kai | ⬜ | 일반 |
+| UAT-23-02 | AGENCY 계정 cost_price 읽기전용 확인 및 자동계산 검증 | AGENCY | [UAT_23](UAT_23_UPS_Agency할인율정책.md) | D_Kai | ⬜ | 일반 |
+| UAT-23-03 | 할인율 정책 미등록 시 에러 메시지 확인 | AGENCY | [UAT_23](UAT_23_UPS_Agency할인율정책.md) | D_Kai | ⬜ | 일반 |
 
-**총 123개 시나리오** | 작성 완료: **123 / 123 ✅ 전량 완료** | 필수: **60개** | 일반: **63개**
+**총 129개 시나리오** | 작성 완료: **129 / 129 ✅ 전량 완료** | 필수: **60개** | 일반: **69개**
 
 ---
 

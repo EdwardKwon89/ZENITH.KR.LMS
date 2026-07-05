@@ -37,7 +37,6 @@ export function RateOverrideForm({ agencyOrgId, baseRates }: RateOverrideFormPro
       await upsertAgencyRateOverride(agencyOrgId, {
         base_rate_id: formData.get('base_rate_id') as string,
         selling_price: Number(formData.get('selling_price')),
-        cost_price: Number(formData.get('cost_price')),
         valid_from: formData.get('valid_from') as string,
         valid_until: (formData.get('valid_until') as string) || undefined,
       });
