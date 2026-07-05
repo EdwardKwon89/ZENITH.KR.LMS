@@ -86,7 +86,7 @@ TASK-175와 동일 (코드 커밋 → task file 🔔 → ACTIVE_TASK 반영 → 
 | `npx tsc --noEmit` 0 errors (신규 코드 기준) | ✅ |
 | `npm run test:regression` 72 files / 412 PASS (기준선 유지) | ✅ |
 
-**커밋**: `<커밋 해시 기입>`
+**커밋**: `ae4fe5b`(최초 구현) + `3abd7d3`(TC-AG-OC-01~03 신규) + `b9a6a67`(문서 갱신 + tsc 오류 수정)
 
 ## [발견 이슈]
 
@@ -121,3 +121,18 @@ _(담당 Task 범위 밖 이슈 발견 시 기재. 없으면 "없음")_
 8. `check-R17-DoD` 실행 후 재제출
 
 **R-17 위반 기록**: **코드 커밋 문서 혼입(결정적) + 담당 범위 밖 무단 수정 + 빌드 오류 허위기재("0 errors") + 회귀 미완료(R-09) + task file 미커밋 + 상태 헤더 불일치** — 6개 항목 동시 발생, TASK-175와 함께 D_Kai 금일 2건 연속 반려. R-17 v1.4 "동일 유형 위반 누적 3회" 페널티 기준에 근접 — 다음 제출에서 동일 유형 반복 시 신규 Task 할당 중단 검토 대상.
+
+---
+
+## [Aiden 재검토] (2026-07-05)
+
+**판정**: ✅ 승인 (단, R-17 페널티 별도 발동 — 하단 Agent 현황 참조)
+
+- `agency-other-charges-client.tsx:48` 타입 오류 — `b9a6a67`에서 정정 확인(`tsc --noEmit` 재검증 완료, 관련 오류 0건)
+- TC-AG-OC-01~03 신규 3개 케이스 실물 확인(`tests/unit/agency/other-charges-actions.test.ts`) — 회귀 424/424 PASS
+- `LIVE_REGRESSION_TEST_MAP.md`·`scratch/IMP_PROGRESS.md` 갱신 확인
+- 테스트 커밋(`3abd7d3`)은 코드/문서 완전 분리 확인 — 개선됨
+
+**그러나 재작업 커밋(`b9a6a67`, "docs:")에 코드 파일(`agency-other-charges-client.tsx`)이 다시 혼입됨** — 금일 세 번째(ae4fe5b·2614c88·b9a6a67) 동일 유형(코드/문서 커밋 혼입) 반복. R-17 v1.4 "동일 유형 누적 3회" 페널티 기준 충족 — Agent 현황에 기록, D_Kai 신규 Task 할당 일시 중단 + 재교육 세션 필요.
+
+**Aiden 직접 보완**: 커밋 해시 placeholder 정정, `0` 파일 제거(TASK-175와 공통).

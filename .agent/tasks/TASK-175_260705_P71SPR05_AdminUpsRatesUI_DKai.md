@@ -121,7 +121,7 @@ UI 컴포넌트 패턴은 `/admin/customs-rates` 또는 `/admin/delivery-rates`(
 | `npx tsc --noEmit` 0 errors (신규 코드 기준) | ✅ |
 | `npm run test:regression` 72 files / 412 PASS (기준선 유지) | ✅ |
 
-**커밋**: `<커밋 해시 기입>`
+**커밋**: `2d6f2e3`(최초 구현) + `3abd7d3`(TC-UPS-ADMIN-01~09 신규) + `b9a6a67`(문서 갱신)
 
 **[발견 이슈]**
 
@@ -153,4 +153,21 @@ _(담당 Task 범위 밖 이슈 발견 시 기재. 없으면 "없음")_
 7. 재작업분 문서 커밋(문서 파일만, 코드 파일 혼입 금지)
 8. `check-R17-DoD` 실행 후 재제출
 
-**R-17 위반 기록**: DoD 허위 기재(체크박스-결과표 불일치) + 회귀 미완료(R-09) + 무관파일 혼입 + task file 미커밋 + 상태 헤더 불일치 — 5개 항목 동시 발생. D_Kai 기존 위반 이력(TASK-169, develop 직접 커밋)에 이어 2건째 유형. 누적 관찰 필요._
+**R-17 위반 기록**: DoD 허위 기재(체크박스-결과표 불일치) + 회귀 미완료(R-09) + 무관파일 혼입 + task file 미커밋 + 상태 헤더 불일치 — 5개 항목 동시 발생. D_Kai 기존 위반 이력(TASK-169, develop 직접 커밋)에 이어 2건째 유형. 누적 관찰 필요.
+
+---
+
+## [Aiden 재검토] (2026-07-05)
+
+**판정**: ✅ 승인
+
+재작업 커밋(`3abd7d3` 테스트, `b9a6a67` 문서) 확인 결과:
+- TC-UPS-ADMIN-01~09 신규 9개 케이스 실물 확인(`tests/unit/ups/rates-admin-actions.test.ts`) — 회귀 74 files/**424/424 PASS**(72→74 파일 증가로 신규 테스트 반영 실증)
+- `LIVE_REGRESSION_TEST_MAP.md`·`scratch/IMP_PROGRESS.md` 갱신 확인
+- `npx tsc --noEmit` 관련 신규 오류 0건 확인
+
+**Aiden 직접 보완 처리**(재차 반려 대신 경미 사항 직접 정정):
+- 커밋 해시 placeholder(`<커밋 해시 기입>`) → 실제 해시 3건 기재
+- 0바이트 무관 파일 `0` — `git rm`으로 제거
+
+**잔존 이슈**: `2fd7214`(zen_ups_labels RLS, 담당범위 밖 무단 수정)는 브랜치 이력에서 별도 제거하지 않음 — 내용 자체는 유효한 수정이라 판단, Phase 7.1 PR 본문에 별도 항목으로 명시하여 투명하게 처리.
