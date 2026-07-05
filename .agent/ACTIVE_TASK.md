@@ -293,7 +293,7 @@
 | TASK-B-054 | 260705 | UAT-16 블로커 수정 — rate-overrides 서버 `t` 함수 클라이언트 전달 500 에러 | P1 | 없음 | Baker (구현) | ✅ | [TASK-B-054](tasks/TASK-B-054_260705_UAT16_RateOverrides_서버t함수클라이언트전달수정_Baker.md) | Issue #160 · 코드 `7fe0bb2` · 388/388 PASS · PR#178 ✅ 머지 · Aiden ✅ 260705 |
 | TASK-B-055 | 260705 | UAT-16 결함 수정 — 요율 오버라이드 신규 등록 폼 기준요율 드롭다운 UUID 표시 | P1 | 없음 | Baker (구현) | ✅ | [TASK-B-055](tasks/TASK-B-055_260705_UAT16_RateOverrides_기준요율드롭다운UUID표시수정_Baker.md) | UAT-16-01 Step2 결함 · getUpsBaseRates join 추가 + 드롭다운 코드명 표시 · 코드 `36574ad` · 388/388 PASS · PR#179 ✅ 머지 · Aiden ✅ 260705 |
 | TASK-B-056 | 260705 | Issue #180 DEF — 화주 계정 발급 기반 구축 (DB migration · RBAC · Validation · Types) | P1 | 없음 | Jaison | 🔔 | [TASK-B-056](tasks/TASK-B-056_260705_DEF180_화주계정발급_기반구축_Jaison.md) | Issue #180 · 코드 `d2e3b98` · 391/391 · PR 생성 대기 · TASK-B-057·058 전제조건 |
-| TASK-B-057 | 260705 | Issue #180 DEF — 화주 계정 발급 백엔드 (Auth createUser · 임시PW · Resend 이메일 · 롤백) | P1 | TASK-B-056 ✅ | Dave (구현) | 🚫 | [TASK-B-057](tasks/TASK-B-057_260705_DEF180_화주계정발급_백엔드_Dave.md) | Issue #180 · createAgencyShipper 재구현 + sendShipperWelcomeEmail |
+| TASK-B-057 | 260705 | Issue #180 DEF — 화주 계정 발급 백엔드 (Auth createUser · 임시PW · Resend 이메일 · 롤백) | P1 | TASK-B-056 🔔 | Dave (구현) | 🔄 | [TASK-B-057](tasks/TASK-B-057_260705_DEF180_화주계정발급_백엔드_Dave.md) | JSJung 선행 착수 승인 (2026-07-05) · B-056 브랜치 위 착수 |
 | TASK-B-058 | 260705 | Issue #180 DEF — 화주 계정 발급 프론트엔드 (LoginAccountFields · AddressInput · i18n) | P1 | TASK-B-056 ✅ · TASK-B-057 ✅ 권장 | Baker (구현) | 🚫 | [TASK-B-058](tasks/TASK-B-058_260705_DEF180_화주계정발급_프론트엔드_Baker.md) | Issue #180 · react-daum-postcode + country-state-city |
 | TASK-169 | 260630 | DEF-086/087 인보이스 PDF — DB 마이그레이션 + Server Action | P2 | 없음 | D_Kai (구현) | ✅ | [TASK-169](tasks/TASK-169_260630_DEF086087_InvoicePDF_DB+SA_DKai.md) | Issue #152 · PR#154 ✅ 머지 (`51eba6c`) · zen_invoice_files 마이그레이션+SA 완료 · DEF-086 해소 |
 | TASK-170 | 260630 | DEF-086/087 인보이스 PDF — 오더 상세 UI 버튼 구현 | P2 | TASK-169 ✅ | B_Kai (구현) | ✅ | [TASK-170](tasks/TASK-170_260630_DEF086087_InvoicePDF_UI버튼_BKai.md) | Issue #152 · PR#155 ✅ 머지 (`ad9d1d1` develop 반영 확인) · DoD 13/13 · Aiden ✅ 260701 |
@@ -341,7 +341,7 @@
 |:------|:----:|:----|
 | **JSJung** (팀 리더) | ✅ TASK-B-030 승인 완료 (260628) · ✅ TASK-B-033 승인 완료 (260701) | §1§2 확인 완료 · DEF-088 교정 완료 · PR#156 squash 머지 (e2bf48b) |
 | **Jaison** (AI Agent 총괄) | 🔔 TASK-B-056 검토 요청 (260705) | 코드 `d2e3b98` · 391/391 PASS · PR 생성 대기 |
-| **Dave** (AI Agent) | 🚫 TASK-B-057 대기 — TASK-B-056 ✅ 후 착수 | Issue #180 Backend — Auth createUser + 임시PW + 이메일 + 롤백 |
+| **Dave** (AI Agent) | 🔄 TASK-B-057 착수 중 — JSJung 승인, B-056 브랜치 위 선행 착수 | `feature/teamb-task-b-057-def180-backend-dave` |
 | **Baker** (AI Agent) | 🚫 TASK-B-058 대기 — TASK-B-056 ✅ + TASK-B-057 ✅ 권장 후 착수 | Issue #180 Frontend — LoginAccountFields · AddressInput · i18n |
 | **Gale** (AI Agent) | 대기 | 추후 재배정 예정 |
 
