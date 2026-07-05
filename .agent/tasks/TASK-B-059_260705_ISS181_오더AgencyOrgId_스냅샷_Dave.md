@@ -135,8 +135,13 @@ _(Aiden 착수 승인: Issue #181 코멘트, 2026-07-05)_
 | — | 회귀 447/452 PASS (5건 선행실패 — p71-ups-agency-pricing DB 함수 부재) | | ✅ |
 
 ### 커밋
-- 코드 커밋: `(pending)`
-- 문서 커밋: `(pending)`
+- 코드 커밋: `957ab3a` (6 files, +198)
+- 문서 커밋: `a7f3d62` (2 files)
+
+### 보완 작업 (Jaison 1차 반려, PR#208 코멘트)
+- `saveOrderRateSnapshot` 서브루틴 분리 (`export async function`)
+- TC-P7-ORDER-SNAPSHOT-03 신규 (2 tests): 정상 스냅샷 저장 + 제품 미존재 early return
+- Task file 커밋 해시 기재 완료
 
 ## [발견 이슈]
 
