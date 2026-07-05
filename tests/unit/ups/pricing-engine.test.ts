@@ -20,6 +20,41 @@ const baseData = (): UpsPricingData => ({
   baseRate: { id: 'r1', product_id: 'p1', zone_id: 'z1', weight_kg: 5, selling_price: 85000, cost_price: 68000, currency: 'KRW', valid_from: '2026-07-01', valid_until: null, is_active: true, created_at: '', created_by: null } as any,
   fuelSurcharge: { id: 'f1', product_id: null, effective_week: '2026-06-29', selling_rate: 0.185, cost_rate: 0.155, created_at: '', created_by: null } as any,
   otherCharges: [],
+  weightTierRates: [
+    {
+      id: 't1',
+      product_id: 'p1',
+      zone_id: 'z1',
+      tier_min_kg: 21,
+      tier_max_kg: 44,
+      price_per_kg_selling: 6000,
+      price_per_kg_cost: 5000,
+      currency: 'KRW',
+      valid_from: '2026-07-01',
+      valid_until: null,
+      is_active: true,
+      created_at: '',
+      created_by: null,
+      updated_at: '',
+    },
+    {
+      id: 't2',
+      product_id: 'p1',
+      zone_id: 'z1',
+      tier_min_kg: 45,
+      tier_max_kg: 100,
+      price_per_kg_selling: 4500,
+      price_per_kg_cost: 3800,
+      currency: 'KRW',
+      valid_from: '2026-07-01',
+      valid_until: null,
+      is_active: true,
+      created_at: '',
+      created_by: null,
+      updated_at: '',
+    }
+  ],
+  freightMinimum: null,
 });
 
 const baseInput = (): UpsFreightInput => ({

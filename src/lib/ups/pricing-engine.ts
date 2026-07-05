@@ -134,10 +134,22 @@ function buildBreakdown(
   volumetricKg: number,
   billingKg: number,
   oc: ReturnType<typeof applyOtherCharges>,
-  oversizeApplied: boolean
+  oversizeApplied: boolean,
+  baseRateId: string,
+  baseSellingPrice: number,
+  baseCostPrice: number,
+  dwbDetails?: {
+    dwbApplied: boolean;
+    dwbOriginalWeightKg?: number;
+    dwbOriginalSellingPrice?: number;
+    dwbOriginalCostPrice?: number;
+  },
+  freightMinDetails?: {
+    freightMinApplied: boolean;
+    freightMinOriginalSelling?: number;
+    freightMinOriginalCost?: number;
+  }
 ): UpsBreakdown {
-  const base_s = Number(data.baseRate.selling_price);
-  const base_c = Number(data.baseRate.cost_price) * (1 + UPS_COST_SURCHARGE_RATE);
   const fuelRate = Number(data.fuelSurcharge?.selling_rate ?? 0);
   const fuelCostRate = Number(data.fuelSurcharge?.cost_rate ?? 0);
   return {
@@ -150,15 +162,22 @@ function buildBreakdown(
     actualWeightKg: input.actualWeightKg, volumetricWeightKg: volumetricKg,
     chargeableWeightKg: chargeableKg, volumetricDivisor: input.volumetricDivisor ?? 5000,
     billingWeightKg: billingKg,
-    baseRateId: data.baseRate.id, baseSellingPrice: base_s, baseCostPrice: base_c,
+    baseRateId, baseSellingPrice, baseCostPrice,
     costSurchargeRate: UPS_COST_SURCHARGE_RATE,
     fuelSurchargeId: data.fuelSurcharge?.id ?? null, fuelSurchargeRate: fuelRate,
-    fuelSurchargeSellingAmount: base_s * fuelRate,
-    fuelSurchargeCostAmount: base_c * fuelCostRate,
+    fuelSurchargeSellingAmount: baseSellingPrice * fuelRate,
+    fuelSurchargeCostAmount: baseCostPrice * fuelCostRate,
     otherChargeItems: oc.items,
     otherChargesSellingTotal: oc.sellingTotal,
     otherChargesCostTotal: oc.costTotal,
     oversizeApplied,
+    dwbApplied: dwbDetails?.dwbApplied ?? false,
+    dwbOriginalWeightKg: dwbDetails?.dwbOriginalWeightKg,
+    dwbOriginalSellingPrice: dwbDetails?.dwbOriginalSellingPrice,
+    dwbOriginalCostPrice: dwbDetails?.dwbOriginalCostPrice,
+    freightMinApplied: freightMinDetails?.freightMinApplied ?? false,
+    freightMinOriginalSelling: freightMinDetails?.freightMinOriginalSelling,
+    freightMinOriginalCost: freightMinDetails?.freightMinOriginalCost,
   };
 }
 
@@ -174,33 +193,164 @@ export function computeUpsFreight(
   const { chargeableKg, volumetricKg } = calcChargeableWeight(
     input.actualWeightKg, dims, input.volumetricDivisor
   );
-  const { billingKg: chargeableAfterOversize, applied: oversizeApplied } = applyOversizeRule(
-    resolveBillingWeight(chargeableKg, data.product.product_code), dims
+  
+  // 1. 중량 반올림 및 대형포장물 룰 적용
+  const initialBillingWeight = resolveBillingWeight(chargeableKg, data.product.product_code);
+  const { billingKg: billingAfterOversize, applied: oversizeApplied } = applyOversizeRule(
+    initialBillingWeight, dims
   );
-  const billingKg = chargeableAfterOversize;
-
+  
+  // 2. 기본 요율 계산 (Flat vs. Per-kg Tier)
+  let actualWeight = billingAfterOversize;
+  let baseSellingPrice = 0;
+  let baseCostPrice = 0;
+  let baseRateId = '';
+  
+  let currentTier: any = null;
+  
+  if (actualWeight <= 20.0) {
+    if (!data.baseRate) {
+      throw new Error(`해당 조건(제품·Zone·중량 ${actualWeight}kg)의 기준요금이 등록되어 있지 않습니다.`);
+    }
+    baseSellingPrice = Number(data.baseRate.selling_price);
+    baseCostPrice = Number(data.baseRate.cost_price) * (1 + UPS_COST_SURCHARGE_RATE);
+    baseRateId = data.baseRate.id;
+  } else {
+    // 20kg 초과 per-kg 티어 요금 적용
+    if (!data.weightTierRates || data.weightTierRates.length === 0) {
+      throw new Error(`20kg 초과 중량(${actualWeight}kg)에 적용할 per-kg 요율 테이블이 비어 있습니다.`);
+    }
+    // W가 속한 티어 탐색
+    currentTier = data.weightTierRates.find(
+      (t) => Number(t.tier_min_kg) <= actualWeight && (t.tier_max_kg === null || actualWeight <= Number(t.tier_max_kg))
+    );
+    if (!currentTier) {
+      throw new Error(`해당 중량(${actualWeight}kg)에 매핑되는 20kg 초과 요율 구간을 찾을 수 없습니다.`);
+    }
+    baseSellingPrice = actualWeight * Number(currentTier.price_per_kg_selling);
+    baseCostPrice = actualWeight * Number(currentTier.price_per_kg_cost) * (1 + UPS_COST_SURCHARGE_RATE);
+    baseRateId = currentTier.id;
+  }
+  
+  // 3. DWB (Deficit Weight Billing) 적용
+  let finalBillingWeight = actualWeight;
+  let dwbApplied = false;
+  let dwbOriginalWeightKg: number | undefined;
+  let dwbOriginalSellingPrice: number | undefined;
+  let dwbOriginalCostPrice: number | undefined;
+  
+  // 다음 상위 구간(nextTier) 탐색
+  let nextTier: any = null;
+  if (data.weightTierRates && data.weightTierRates.length > 0) {
+    if (actualWeight <= 20.0) {
+      // 20kg 이하인 경우 다음 상위 구간은 첫 번째 per-kg 티어 (최소 min_kg를 가짐)
+      nextTier = data.weightTierRates.reduce((minTier: any, t: any) => {
+        if (!minTier) return t;
+        return Number(t.tier_min_kg) < Number(minTier.tier_min_kg) ? t : minTier;
+      }, null);
+    } else if (currentTier) {
+      // 20kg 초과인 경우, 현재 티어보다 tier_min_kg가 큰 티어 중 가장 작은 것
+      nextTier = data.weightTierRates.reduce((minTier: any, t: any) => {
+        if (Number(t.tier_min_kg) <= Number(currentTier.tier_min_kg)) return minTier;
+        if (!minTier) return t;
+        return Number(t.tier_min_kg) < Number(minTier.tier_min_kg) ? t : minTier;
+      }, null);
+    }
+  }
+  
+  if (nextTier) {
+    const nextWeight = Number(nextTier.tier_min_kg);
+    const nextSelling = nextWeight * Number(nextTier.price_per_kg_selling);
+    const nextCost = nextWeight * Number(nextTier.price_per_kg_cost) * (1 + UPS_COST_SURCHARGE_RATE);
+    
+    if (nextSelling < baseSellingPrice) {
+      // DWB 적용
+      dwbApplied = true;
+      dwbOriginalWeightKg = actualWeight;
+      dwbOriginalSellingPrice = baseSellingPrice;
+      dwbOriginalCostPrice = baseCostPrice;
+      
+      finalBillingWeight = nextWeight;
+      baseSellingPrice = nextSelling;
+      baseCostPrice = nextCost;
+      baseRateId = nextTier.id;
+    }
+  }
+  
+  // 4. Freight 최소 운임 한도 적용
+  let freightMinApplied = false;
+  let freightMinOriginalSelling: number | undefined;
+  let freightMinOriginalCost: number | undefined;
+  
+  if (data.freightMinimum) {
+    const minSelling = Number(data.freightMinimum.min_charge_selling);
+    const minCost = Number(data.freightMinimum.min_charge_cost);
+    
+    if (baseSellingPrice < minSelling) {
+      freightMinApplied = true;
+      freightMinOriginalSelling = baseSellingPrice;
+      baseSellingPrice = minSelling;
+    }
+    if (baseCostPrice < minCost) {
+      freightMinApplied = true;
+      freightMinOriginalCost = baseCostPrice;
+      baseCostPrice = minCost;
+    }
+  }
+  
+  // 5. 부가요금 및 유류할증료 계산
   const fuelRate = Number(data.fuelSurcharge?.selling_rate ?? 0);
   const fuelCostRate = Number(data.fuelSurcharge?.cost_rate ?? 0);
-  const base_s = Number(data.baseRate.selling_price);
-  // An-14 §0-1 A1: 원가표 원본값에 +7% 적용 — 실 납부운임
-  const base_c = Number(data.baseRate.cost_price) * (1 + UPS_COST_SURCHARGE_RATE);
-  const fuelSellAmt = base_s * fuelRate;
-  const fuelCostAmt = base_c * fuelCostRate;
-
+  
+  const fuelSellAmt = baseSellingPrice * fuelRate;
+  const fuelCostAmt = baseCostPrice * fuelCostRate;
+  
   const effectiveOtherCharges = [...data.otherCharges];
   if (oversizeApplied && data.oversizeCharge && !effectiveOtherCharges.some((c) => c.id === data.oversizeCharge!.id)) {
     effectiveOtherCharges.push(data.oversizeCharge);
   }
   const oc = applyOtherCharges(effectiveOtherCharges, fuelRate);
-
+  
+  const dwbDetails = {
+    dwbApplied,
+    dwbOriginalWeightKg,
+    dwbOriginalSellingPrice,
+    dwbOriginalCostPrice,
+  };
+  
+  const freightMinDetails = {
+    freightMinApplied,
+    freightMinOriginalSelling,
+    freightMinOriginalCost,
+  };
+  
   return {
-    chargeableWeightKg: chargeableKg, billingWeightKg: billingKg,
-    baseSellingPrice: base_s, baseCostPrice: base_c,
-    fuelSurchargeSellingAmount: fuelSellAmt, fuelSurchargeCostAmount: fuelCostAmt,
-    otherChargesSellingTotal: oc.sellingTotal, otherChargesCostTotal: oc.costTotal,
-    totalSellingPrice: base_s + fuelSellAmt + oc.sellingTotal,
-    totalCostPrice: base_c + fuelCostAmt + oc.costTotal,
-    currency: data.baseRate.currency,
-    breakdown: buildBreakdown(input, data, chargeableKg, volumetricKg, billingKg, oc, oversizeApplied),
+    chargeableWeightKg: chargeableKg,
+    billingWeightKg: finalBillingWeight,
+    baseSellingPrice,
+    baseCostPrice,
+    fuelSurchargeSellingAmount: fuelSellAmt,
+    fuelSurchargeCostAmount: fuelCostAmt,
+    otherChargesSellingTotal: oc.sellingTotal,
+    otherChargesCostTotal: oc.costTotal,
+    totalSellingPrice: baseSellingPrice + fuelSellAmt + oc.sellingTotal,
+    totalCostPrice: baseCostPrice + fuelCostAmt + oc.costTotal,
+    currency: data.baseRate?.currency || data.weightTierRates?.[0]?.currency || 'KRW',
+    dwbApplied,
+    freightMinApplied,
+    breakdown: buildBreakdown(
+      input,
+      data,
+      chargeableKg,
+      volumetricKg,
+      finalBillingWeight,
+      oc,
+      oversizeApplied,
+      baseRateId,
+      baseSellingPrice,
+      baseCostPrice,
+      dwbDetails,
+      freightMinDetails
+    ),
   };
 }
