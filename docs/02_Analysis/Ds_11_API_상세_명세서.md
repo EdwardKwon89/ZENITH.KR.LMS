@@ -355,6 +355,97 @@
 
 ---
 
+## 11. UPS 특송 요금 관리 (Phase 7.1 — IMP-145)
+
+> **설계 문서**: An-14_Phase7_UPS요금관리_설계보완.md
+> **마지막 갱신**: 2026-07-05 (TASK-171~176)
+> **Team B 인계 범위**: GH #181 (오더 등록 연동 + 정산)
+>
+> **핵심 계약**: `zen_agency_rate_overrides.cost_price`는 DB 트리거(`trg_agency_rate_override_calc_cost`)가 `base_rate.selling_price × (1 - policy.discount_rate)`로 **서버에서 자동 계산**한다. 클라이언트가 `cost_price` 값을 보내도 **무시**된다. Agency는 `selling_price`(마진 포함)만 입력할 수 있다.
+
+### 11.1 요금 계산 API
+
+#### estimateUpsFreight(input) — Server Action
+- **Path**: `src/app/actions/ups/freight.ts`
+- **설명**: UPS 운송 요금을 3단계(Platform/Agency/Shipper)로 계산하여 반환. 오더 등록 화면에서 실시간 견적 표시용.
+- **Input** (`EstimateUpsFreightInput`):
+  - `productId: string` — UPS 제품 ID
+  - `destCountryCode: string` — 목적지 국가코드 (ISO alpha-3)
+  - `actualWeightKg: number` — 실중량
+  - `dimL/dimW/dimH?: number` — 가로/세로/높이(cm)
+  - `incoterms?: 'DDU' | 'DDP'`
+  - `volumetricDivisor?: 5000 | 5500 | 6000`
+  - `otherChargeIds?: string[]` — 적용할 부가요금 ID 목록
+  - `agencyOrgId?: string | null` — 대리점 org_id (null이면 Agency/Shipper 단계 생략)
+  - `shipperOrgId?: string | null` — 화주 org_id (null이면 Shipper 단계 생략)
+  - `referenceDate?: string` — 기준일자 (YYYY-MM-DD, 미전달 시 오늘)
+- **Output** (`UpsFreightEstimate`):
+  - `platform: UpsFreightResult` — Platform 단계 (기준요금 + 유류할증 + OC)
+  - `agency: UpsAgencyFreightResult | null` — Agency 단계 (할인율 적용 + 마진)
+  - `shipper: UpsShipperFreightResult | null` — Shipper 단계 (화주 할인율 적용)
+
+**동작 분기**:
+- `agencyOrgId` 미전달 → Platform 단계만 계산, agency/shipper는 null
+- `agencyOrgId` 전달 + `shipperOrgId` 미전달 → Platform + Agency 단계 계산
+- `agencyOrgId` + `shipperOrgId` 전달 → 3단계 전부 계산
+
+### 11.2 Admin 요율 CRUD Actions
+
+- **Path**: `src/app/actions/ups/rates-mutation.ts`
+- **인증**: ADMIN / MANAGER / ZENITH_SUPER_ADMIN만 접근 가능 (`requireAdminOrManager()`)
+
+| Action | 설명 |
+|:-------|:-----|
+| `createUpsZone(data)` | Zone 신규 등록 |
+| `updateUpsZone(id, data)` | Zone 정보 수정 |
+| `deleteUpsZone(id)` | Zone 비활성화 |
+| `addZoneCountry(zoneId, countryCode)` | Zone에 국가 매핑 추가 |
+| `removeZoneCountry(id)` | Zone 국가 매핑 제거 |
+| `createUpsProduct(data)` | 제품 신규 등록 |
+| `updateUpsProduct(id, data)` | 제품 정보 수정 |
+| `upsertUpsBaseRate(data)` | 기준요금 등록/수정 (unique: product_id+zone_id+weight_kg+valid_from) |
+| `upsertUpsFuelSurcharge(data)` | 유류할증료 등록/수정 (unique: product_id+effective_week) |
+| `createUpsOtherCharge(data)` | 부가요금 코드 신규 등록 |
+| `updateUpsOtherCharge(id, data)` | 부가요금 정보 수정 |
+| `deleteUpsOtherCharge(id)` | 부가요금 비활성화 |
+| `upsertAgencyPricingPolicy(data)` | 대리점 할인율 정책 등록/수정 (unique: agency_org_id) |
+| `getAgencyPricingPolicy(agencyOrgId)` | 대리점 할인율 정책 조회 |
+
+### 11.3 Agency 요율 Actions
+
+- **Path**: `src/app/actions/agency/rate-overrides.ts`
+- `getAgencyRateOverrides(agencyOrgId)` — Agency 요율 오버라이드 목록
+- `upsertAgencyRateOverride(agencyOrgId, data)` — 오버라이드 등록/수정. **`cost_price`는 서버 트리거가 자동 계산 → 클라이언트 전송값 무시**
+- `deactivateAgencyRateOverride(id)` — 오버라이드 비활성화
+
+- **Path**: `src/app/actions/agency/other-charges.ts` (신규)
+- `getAgencyOtherCharges(agencyOrgId)` — Agency별 부가요금 목록
+- `upsertAgencyOtherCharge(agencyOrgId, data)` — 부가요금 등록/수정
+- `deactivateAgencyOtherCharge(id)` — 부가요금 비활성화
+
+### 11.4 DB 함수 (Security Definer)
+
+#### `fn_get_ups_agency_selling_price(agency_org_id, base_rate_id)`
+- **설명**: 화주 세션이 Agency의 `cost_price`나 `discount_rate`를 보지 않고 `selling_price`만 조회. `SECURITY DEFINER`로 실행되어 RLS 우회.
+- **호출 권한**: `service_role`, ADMIN/MANAGER, 해당 Agency 본인, 또는 해당 Agency 소속 화주
+
+#### `fn_get_ups_agency_other_charge_price(agency_org_id, other_charge_id)`
+- **설명**: Agency 부가요금 판매가 조회 (동일 보안 모델)
+
+### 11.5 Team B 인계 계약 (GH #181)
+
+Team A가 제공하는 API 계약 — Team B가 오더 등록 화면 연동 시 그대로 소비:
+
+| 항목 | Team A 제공 | Team B 소비 |
+|:-----|:-----------|:-----------|
+| 요금 계산 API | `estimateUpsFreight()` Action 노출 | 오더 등록 화면에서 호출하여 실시간 견적 표시 |
+| 오더-Agency 연결 | — | `zen_orders.agency_org_id` 저장 (`zen_agency_shippers` 조회) |
+| 요율 스냅샷 저장 | — | 오더 확정 시 `zen_order_rate_snapshots` 기록 |
+| 정산 분리 | — | 화주→Agency, Agency→플랫폼 청구 구분 |
+| RBAC AGENCY 격리 | 기존 RLS 활용 | AGENCY 화주 역할이 본인 소속 요율만 노출되도록 적용 |
+
+---
+
 ## ⚠️ 확인된 사항 (Findings & Gaps)
 ... (생략)
 

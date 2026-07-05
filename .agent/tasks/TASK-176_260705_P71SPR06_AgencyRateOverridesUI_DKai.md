@@ -71,6 +71,23 @@ An-14 §0(조사 결과) — 현재 `zen_agency_rate_overrides.cost_price`를 Ag
 
 TASK-175와 동일 (코드 커밋 → task file 🔔 → ACTIVE_TASK 반영 → IMP_PROGRESS 갱신 → check-R17-DoD → 문서 커밋). **PR 생성 금지** — Aiden이 Phase 7.1 통합 PR 1개로 생성.
 
+## [작업 결과]
+
+| 항목 | 상태 |
+|:-----|:----:|
+| Team B develop 변경분 확인 (merged, 충돌 없음) | ✅ |
+| `cost_price` Zod 선택적 필드 전환 (`types/agency.ts` + `validations/agency.ts`) | ✅ |
+| `upsertAgencyRateOverride` — `cost_price` 전송 제거, 정책 미등록 시 친화적 에러 메시지 | ✅ |
+| 요율 오버라이드 폼 — `cost_price` 입력필드 → 읽기전용 자동계산 안내로 교체 | ✅ |
+| `src/app/actions/agency/other-charges.ts` 신규 — CRUD 3종 | ✅ |
+| `/agency/other-charges/` UI page + client 컴포넌트 | ✅ |
+| NaviSidebar Agency 메뉴에 "부가요금 관리" 서브메뉴 추가 | ✅ |
+| i18n 4개국어 — `agency_other_charges_nav` + `agency_rate_overrides_*` 신규 키 | ✅ |
+| `npx tsc --noEmit` 0 errors (신규 코드 기준) | ✅ |
+| `npm run test:regression` 72 files / 412 PASS (기준선 유지) | ✅ |
+
+**커밋**: `<커밋 해시 기입>`
+
 ## [발견 이슈]
 
 _(담당 Task 범위 밖 이슈 발견 시 기재. 없으면 "없음")_
