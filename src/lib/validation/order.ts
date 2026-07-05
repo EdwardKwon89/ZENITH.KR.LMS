@@ -71,6 +71,10 @@ export const orderRegistrationSchema = z.object({
   pickup_location: z.string().optional(),
   pickup_contact_name: z.string().optional(),
   pickup_contact_tel: z.string().optional(),
+
+  // UPS 특송 정보 (TASK-B-059)
+  ups_product_code: z.string().optional(),
+  incoterms: z.enum(['DDU', 'DDP']).optional(),
 }).superRefine((data, ctx) => {
   if (data.delivery_method === 'PICKUP') {
     if (!data.pickup_location || data.pickup_location.trim() === '') {

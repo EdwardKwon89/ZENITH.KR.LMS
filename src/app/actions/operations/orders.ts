@@ -14,6 +14,7 @@ import { generateInvoicesForOrder } from "../finance";
 import { OrderRegistrationInput, orderRegistrationSchema } from "@/lib/validation/order";
 import { generateTrackingHistory } from "@/lib/logistics/tracking";
 import { syncInventoryFromOrder } from "./inventory";
+import { estimateUpsFreight } from "@/app/actions/ups/freight";
 
 /**
  * 신규 하우스 오더를 생성합니다. (Header -> Packages -> Items 계층형 저장)
@@ -34,6 +35,85 @@ export async function createOrder(payload: OrderRegistrationInput) {
 
   if (rpcError) {
     throw new Error(`Order creation failed: ${rpcError.message}`);
+  }
+
+  const orderId = (order as any)?.id;
+  if (!orderId) throw new Error("Order creation returned no ID");
+
+  const updates: Record<string, unknown> = {};
+
+  if (profile.role === USER_ROLES.AGENCY_SHIPPER) {
+    updates.agency_org_id = profile.org_id;
+  }
+
+  if (validated.ups_product_code) {
+    updates.ups_product_code = validated.ups_product_code;
+  }
+
+  if (validated.incoterms) {
+    updates.incoterms = validated.incoterms;
+  }
+
+  if (Object.keys(updates).length > 0) {
+    const { error: updateError } = await supabase
+      .from('zen_orders')
+      .update(updates)
+      .eq('id', orderId);
+    if (updateError) {
+      logger.error('[ORDER] Failed to update supplemental fields:', updateError);
+    }
+  }
+
+  if (profile.role === USER_ROLES.AGENCY_SHIPPER && validated.ups_product_code) {
+    try {
+      const { data: product } = await supabase
+        .from('zen_ups_products')
+        .select('id')
+        .eq('product_code', validated.ups_product_code)
+        .maybeSingle();
+
+      if (product) {
+        const totalWeight = validated.packages.reduce(
+          (sum, pkg) => sum + (pkg.gross_weight || 0) * (pkg.packing_count || 1), 0
+        );
+
+        const { data: port } = await supabase
+          .from('zen_ports')
+          .select('country_code')
+          .eq('id', validated.dest_port_id)
+          .maybeSingle();
+
+        if (totalWeight > 0 && port?.country_code) {
+          const estimate = await estimateUpsFreight({
+            productId: product.id,
+            destCountryCode: port.country_code,
+            actualWeightKg: totalWeight,
+            dimL: validated.packages[0]?.length,
+            dimW: validated.packages[0]?.width,
+            dimH: validated.packages[0]?.height,
+            incoterms: validated.incoterms,
+            agencyOrgId: profile.org_id,
+            shipperOrgId: profile.org_id,
+          });
+
+          const { error: snapError } = await supabase
+            .from('zen_order_rate_snapshots')
+            .insert({
+              order_id: orderId,
+              platform_price: estimate.platform.totalSellingPrice,
+              agency_price: estimate.agency?.agencySellingPrice ?? 0,
+              shipper_price: estimate.shipper?.finalFreight ?? 0,
+              currency: estimate.platform.currency ?? 'USD',
+              snapshot_data: estimate as unknown as JSON,
+            });
+          if (snapError) {
+            logger.error('[SNAPSHOT] Failed to insert rate snapshot:', snapError);
+          }
+        }
+      }
+    } catch (err) {
+      logger.error('[SNAPSHOT] Failed to save rate snapshot:', err);
+    }
   }
 
   revalidatePath("/(dashboard)/orders", "page");
