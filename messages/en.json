@@ -706,6 +706,7 @@
     "form_grade": "Grade",
     "form_login_email": "Login ID",
     "form_login_email_hint": "An invitation email will be sent to the entered email. The shipper can set their password and log in by clicking the link.",
+    "form_login_email_invalid": "Invalid email format",
     "form_name": "Shipper Name",
     "form_rep_name": "Representative Name",
     "form_state_province": "State/Province",

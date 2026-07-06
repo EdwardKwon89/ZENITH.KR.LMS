@@ -225,6 +225,7 @@
     "form_grade": "等級",
     "form_login_email": "ログインID",
     "form_login_email_hint": "ご入力のメールへ招待メールが送信されます。荷主がリンクをクリックするとパスワード設定後ログインできます。",
+    "form_login_email_invalid": "メールアドレスの形式が正しくありません",
     "form_name": "荷主名",
     "form_rep_name": "代表者名",
     "form_state_province": "州/省",

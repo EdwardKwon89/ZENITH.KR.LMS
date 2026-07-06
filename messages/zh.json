@@ -243,6 +243,7 @@
     "form_grade": "等级",
     "form_login_email": "登录ID",
     "form_login_email_hint": "将向输入的邮箱发送邀请邮件。货主点击链接后即可设置密码并登录。",
+    "form_login_email_invalid": "邮箱格式不正确",
     "form_name": "货主名",
     "form_rep_name": "代表人姓名",
     "form_state_province": "州/省",

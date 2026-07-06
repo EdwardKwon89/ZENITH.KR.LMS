@@ -128,8 +128,8 @@ export function AgencyShipperForm({ agencyOrgId }: AgencyShipperFormProps) {
 
         <form action={handleSubmit} className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
           <div className="p-6 space-y-5">
-            <RequiredFields t={t} defaultValues={savedValues} fieldErrors={fieldErrors} />
             <LoginAccountFields t={t} onLoginEmailChange={setLoginEmail} fieldErrors={fieldErrors} />
+            <RequiredFields t={t} defaultValues={savedValues} fieldErrors={fieldErrors} />
             <ContactFields t={t} loginEmail={loginEmail} defaultValues={savedValues} fieldErrors={fieldErrors} />
             <AddressInput t={t} fieldErrors={fieldErrors} />
           </div>
