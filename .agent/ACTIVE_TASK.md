@@ -355,7 +355,7 @@
 |:------|:----:|:----|
 | **JSJung** (팀 리더) | ✅ TASK-B-030 승인 완료 (260628) · ✅ TASK-B-033 승인 완료 (260701) | §1§2 확인 완료 · DEF-088 교정 완료 · PR#156 squash 머지 (e2bf48b) |
 | **Jaison** (AI Agent 총괄) | 🔔 TASK-B-056 검토 요청 (260705) | 코드 `d2e3b98` · 391/391 PASS · PR 생성 대기 |
-| **Dave** (AI Agent) | 🔔 **TASK-B-059** Jaison 최종 PASS · 🔔 **TASK-B-063** Jaison PASS · ⬜ **TASK-B-064** 발령 | B-059: PR#208 Aiden 머지 대기 · B-063: PR#225 Aiden 머지 대기 · B-064: 개인/법인 할인율 분기 + 상세조회 주소 필드 추가 |
+| **Dave** (AI Agent) | 🔔 **TASK-B-059** Jaison 최종 PASS · 🔔 **TASK-B-063** Jaison PASS · 🔔 **TASK-B-064** 구현 완료 | B-059: PR#208 Aiden 머지 대기 · B-063: PR#225 Aiden 머지 대기 · B-064: 코드 `c43673c` · TC 7/7 · 회귀 479/479 · PR 대기 |
 | **Baker** (AI Agent) | 🔄 **TASK-B-060** 착수 · 🔔 **TASK-B-061** Aiden 머지 완료 · ⬜ **TASK-B-065** 발령 | B-060: B-059 머지 후 rebase 필수 · B-061: PR#223 Aiden 머지 완료(260706) · B-065: §1·§2 즉시 착수 가능, §3은 B-064 완료 후 |
 | **Gale** (AI Agent) | 대기 | 추후 재배정 예정 |
 
@@ -364,6 +364,7 @@
 ## 개정 이력
 
 | 2026-07-06 | Jaison (Team B) | **TASK-B-064/065 ⬜ 발령** — Issue #180 JSJung 추가 요구사항(4건). Dave(B-064): 개인/법인 할인율 분기(INDIVIDUAL→hidden 0, CORPORATE→표시) + RequiredFields readOnly prop + getAgencyShipperById 주소 필드 추가 + updateAgencyShipper INDIVIDUAL discount_rate=0 강제. Baker(B-065): select/input h-10 높이 통일 + 주소검색버튼 재배치(전체폭 독립행) + edit-form.tsx 상세보기 동기화(readOnly + 주소섹션). §1·§2 즉시 착수, §3은 B-064 완료 후. |
+| 2026-07-06 | Dave (D_Kai) | **TASK-B-064 🔔 구현 완료** — §1 required-fields.tsx readOnly prop + INDIVIDUAL→hidden discount_rate=0, CORPORATE→표시. §2 shippers.ts getAgencyShipperById 주소 6필드 추가 + updateAgencyShipper INDIVIDUAL discount_rate=0 강제. §3 TC-P7-UI-REQ-01/02/03 7 tests PASS. 코드 `c43673c`. 회귀 479/479 PASS. PR 대기. |
 | 2026-07-06 | Jaison (Team B) | **TASK-B-061/062 ⬜ 발령** — Issue #180 로컬 테스트(260706) 결과 추가 보완. Baker(B-061): 로그인ID 최상단 배치 + 이메일 유효성 + BRONZE 기본값. Dave(B-062): 주소 검색 버튼 미동작 원인 조사+수정. Issue #180 코멘트 등록 완료. |
 | 2026-07-06 | Baker | **TASK-B-061 🔄 착수** — develop `9f89948` 기준 브랜치 생성 |
 | 2026-07-06 | Baker | **TASK-B-061 🔔 구현 완료** — §1~§3 코드 수정(`c146495`) · TC 3종 6 tests · 회귀 460/460 PASS · PR#223 |
