@@ -24,6 +24,12 @@ interface EditShipperFormProps {
       contact_name: string | null;
       contact_email: string | null;
       contact_phone: string | null;
+      country_code: string | null;
+      state_province: string | null;
+      city: string | null;
+      address: string | null;
+      address_detail: string | null;
+      zipcode: string | null;
     };
   };
 }
@@ -122,8 +128,35 @@ export function EditShipperForm({ shipper }: EditShipperFormProps) {
 
         <form action={handleSubmit} className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
           <div className="p-6 space-y-5">
-            <RequiredFields t={t} defaultValues={initialValues} fieldErrors={fieldErrors} />
+            <RequiredFields t={t} defaultValues={initialValues} fieldErrors={fieldErrors} readOnly />
             <ContactFields t={t} loginEmail="" defaultValues={initialValues} fieldErrors={fieldErrors} />
+            <div className="border-t border-slate-100 pt-5">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">{t('form_address')}</p>
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">{t('form_country')}</label>
+                  <input readOnly value={shipper.org.country_code ?? ''}
+                    className="w-full h-10 px-3 py-2 text-sm border border-slate-200 rounded-xl bg-slate-50" />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">{t('form_zipcode')}</label>
+                  <input readOnly value={shipper.org.zipcode ?? ''}
+                    className="w-full h-10 px-3 py-2 text-sm border border-slate-200 rounded-xl bg-slate-50" />
+                </div>
+              </div>
+              <div className="mb-4">
+                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">{t('form_address')}</label>
+                <input readOnly value={shipper.org.address ?? ''}
+                  className="w-full h-10 px-3 py-2 text-sm border border-slate-200 rounded-xl bg-slate-50" />
+              </div>
+              {shipper.org.address_detail && (
+                <div className="mb-4">
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">{t('form_address_detail')}</label>
+                  <input readOnly value={shipper.org.address_detail}
+                    className="w-full h-10 px-3 py-2 text-sm border border-slate-200 rounded-xl bg-slate-50" />
+                </div>
+              )}
+            </div>
           </div>
           <div className="px-6 py-4 border-t border-slate-100 bg-slate-50/50 flex justify-end gap-3">
             <Link href={`/${locale}/agency/shippers`}
