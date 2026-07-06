@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { useKakaoPostcodePopup } from 'react-daum-postcode';
+import { useState, useEffect } from 'react';
+import { DaumPostcodeEmbed } from 'react-daum-postcode';
 import { Country, State, City } from 'country-state-city';
 import type { ICountry, IState, ICity } from 'country-state-city';
 
@@ -21,8 +21,7 @@ export function AddressInput({ t, fieldErrors = {} }: AddressInputProps) {
   const [detailAddress, setDetailAddress] = useState('');
   const [postalCode, setPostalCode] = useState('');
   const [roadAddress, setRoadAddress] = useState('');
-
-  const openPopup = useKakaoPostcodePopup();
+  const [showPostcode, setShowPostcode] = useState(false);
 
   useEffect(() => {
     setCountries(Country.getAllCountries());
@@ -43,15 +42,6 @@ export function AddressInput({ t, fieldErrors = {} }: AddressInputProps) {
       setSelectedCity('');
     }
   }, [selectedState, countryCode]);
-
-  const handleKakaoSearch = useCallback(() => {
-    openPopup({
-      onComplete: (data) => {
-        setRoadAddress(data.roadAddress);
-        setPostalCode(data.zonecode);
-      },
-    });
-  }, [openPopup]);
 
   return (
     <div className="border-t border-slate-100 pt-5">
@@ -82,7 +72,7 @@ export function AddressInput({ t, fieldErrors = {} }: AddressInputProps) {
                 placeholder={t('form_zipcode')}
                 className="flex-1 px-3 py-2.5 text-sm border border-slate-200 rounded-xl bg-slate-50 focus:outline-none"
               />
-              <button type="button" onClick={handleKakaoSearch}
+              <button type="button" onClick={() => setShowPostcode(true)}
                 className="px-3 py-2.5 text-xs font-bold text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition-colors shrink-0">
                 {t('form_address_search')}
               </button>
@@ -187,6 +177,27 @@ export function AddressInput({ t, fieldErrors = {} }: AddressInputProps) {
             </div>
           </div>
         </>
+      )}
+
+      {showPostcode && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+          onClick={() => setShowPostcode(false)}
+        >
+          <div
+            className="bg-white rounded-2xl overflow-hidden w-full max-w-md shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <DaumPostcodeEmbed
+              onComplete={(data) => {
+                setRoadAddress(data.roadAddress);
+                setPostalCode(data.zonecode);
+                setShowPostcode(false);
+              }}
+              style={{ height: 460 }}
+            />
+          </div>
+        </div>
       )}
     </div>
   );

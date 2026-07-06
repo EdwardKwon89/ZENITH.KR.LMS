@@ -547,6 +547,8 @@
 | **TC-P7-UI-SHIPPER-01** | 화주 등록 폼 초기 로드 시 LoginAccountFields가 RequiredFields 앞에 위치 | 섹션 순서 검증 | `tests/unit/agency/shipper-form-ui.test.tsx` |
 | **TC-P7-UI-SHIPPER-02** | 잘못된 이메일 형식 입력 시 유효성 오류 메시지 표시 | 클라이언트 유효성 검사 | `tests/unit/agency/shipper-form-ui.test.tsx` |
 | **TC-P7-UI-SHIPPER-03** | 신규 등록 폼 초기 로드 시 grade 기본값 = BRONZE | 기본값 설정 | `tests/unit/agency/shipper-form-ui.test.tsx` |
+| **TC-P7-UI-ADDR-01** | 국가 KR/US/JP별 주소 검색 UI 분기 (popup→embed 전환) | 국가별 입력 필드 렌더링 + Kakao Postcode embed 모달 표시 검증 | `tests/unit/agency/address-input.test.tsx` |
+| **TC-P7-UI-ADDR-02** | 주소 검색 임베드 모달 내 주소 선택 시 roadAddress/zipcode 자동 반영 | DaumPostcodeEmbed onComplete 콜백 → roadAddress + zonecode 입력 + 모달 닫힘 검증 | `tests/unit/agency/address-input.test.tsx` |
 
 ---
 

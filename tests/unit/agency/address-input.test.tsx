@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, act, waitFor } from '@testing-library/react';
+import { describe, it, expect, vi } from 'vitest';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { AddressInput } from '@/app/[locale]/(dashboard)/agency/shippers/new/address-input';
 
 const mockT = (key: string) => {
@@ -15,11 +15,16 @@ const mockT = (key: string) => {
   return map[key] ?? key;
 };
 
-let mockOnComplete: ((data: any) => void) | null = null;
-const mockOpenPopup = vi.fn();
-
 vi.mock('react-daum-postcode', () => ({
-  useKakaoPostcodePopup: () => mockOpenPopup,
+  DaumPostcodeEmbed: ({ onComplete }: { onComplete: (data: any) => void }) => (
+    <div data-testid="daum-postcode-embed">
+      <button
+        onClick={() => onComplete({ roadAddress: '123 Teheran-ro', zonecode: '061234' })}
+      >
+        select-address
+      </button>
+    </div>
+  ),
 }));
 
 vi.mock('country-state-city', () => ({
@@ -45,13 +50,6 @@ vi.mock('country-state-city', () => ({
 }));
 
 describe('TC-P7-UI-ADDR-01: 국가 KR 선택 시 주소 검색 버튼 표시 확인', () => {
-  beforeEach(() => {
-    mockOnComplete = null;
-    mockOpenPopup.mockImplementation(({ onComplete }) => {
-      mockOnComplete = onComplete;
-    });
-  });
-
   it('KR 선택 시: zipcode input(readOnly) + 주소 검색 버튼 표시', () => {
     render(<AddressInput t={mockT} />);
 
@@ -87,32 +85,33 @@ describe('TC-P7-UI-ADDR-01: 국가 KR 선택 시 주소 검색 버튼 표시 확
       expect(screen.queryByRole('button', { name: 'Search' })).not.toBeInTheDocument();
     });
   });
-});
 
-describe('TC-P7-UI-ADDR-02: 주소 검색 완료 후 roadAddress + zipcode 상태 반영', () => {
-  beforeEach(() => {
-    mockOnComplete = null;
-    mockOpenPopup.mockImplementation(({ onComplete }) => {
-      mockOnComplete = onComplete;
-    });
-  });
-
-  it('KR 선택 → 검색 버튼 클릭 → onComplete → roadAddress/zipcode 반영', () => {
+  it('KR 선택 → 검색 버튼 클릭 → DaumPostcodeEmbed 모달 표시', () => {
     render(<AddressInput t={mockT} />);
 
     const searchButton = screen.getByRole('button', { name: 'Search' });
     fireEvent.click(searchButton);
 
-    expect(mockOnComplete).not.toBeNull();
+    expect(screen.getByTestId('daum-postcode-embed')).toBeInTheDocument();
+  });
+});
 
-    act(() => {
-      mockOnComplete!({ roadAddress: '123 Teheran-ro', zonecode: '061234' });
-    });
+describe('TC-P7-UI-ADDR-02: 주소 검색 완료 후 roadAddress + zipcode 상태 반영', () => {
+  it('KR 선택 → 검색 버튼 클릭 → 모달 내 주소 선택 → roadAddress/zipcode 반영', () => {
+    render(<AddressInput t={mockT} />);
+
+    const searchButton = screen.getByRole('button', { name: 'Search' });
+    fireEvent.click(searchButton);
+
+    const selectAddressButton = screen.getByRole('button', { name: 'select-address' });
+    fireEvent.click(selectAddressButton);
 
     const addressInput = screen.getByPlaceholderText('Search') as HTMLInputElement;
     expect(addressInput.value).toBe('123 Teheran-ro');
 
     const zipInput = screen.getByPlaceholderText('Zip Code') as HTMLInputElement;
     expect(zipInput.value).toBe('061234');
+
+    expect(screen.queryByTestId('daum-postcode-embed')).not.toBeInTheDocument();
   });
 });
