@@ -13,9 +13,10 @@ interface RequiredFieldsProps {
     rep_name: string;
   }>;
   fieldErrors?: Record<string, string>;
+  readOnly?: boolean;
 }
 
-export function RequiredFields({ t, defaultValues = {}, fieldErrors = {} }: RequiredFieldsProps) {
+export function RequiredFields({ t, defaultValues = {}, fieldErrors = {}, readOnly = false }: RequiredFieldsProps) {
   const [shipperType, setShipperType] = useState<'INDIVIDUAL' | 'CORPORATE'>(
     defaultValues.shipper_type ?? 'INDIVIDUAL'
   );
@@ -35,7 +36,8 @@ export function RequiredFields({ t, defaultValues = {}, fieldErrors = {} }: Requ
           name="name"
           required
           defaultValue={defaultValues.name}
-          className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+          disabled={readOnly}
+          className={`w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 ${readOnly ? 'bg-slate-50' : ''}`}
         />
         {fieldErrors.name && <p className="text-xs text-red-500 mt-1">{fieldErrors.name}</p>}
       </div>
@@ -48,30 +50,35 @@ export function RequiredFields({ t, defaultValues = {}, fieldErrors = {} }: Requ
             required
             value={shipperType}
             onChange={(e) => setShipperType(e.target.value as 'INDIVIDUAL' | 'CORPORATE')}
-            className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+            disabled={readOnly}
+            className={`w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${readOnly ? 'bg-slate-50' : ''}`}
           >
             <option value="INDIVIDUAL">{t('type_INDIVIDUAL')}</option>
             <option value="CORPORATE">{t('type_CORPORATE')}</option>
           </select>
           {fieldErrors.shipper_type && <p className="text-xs text-red-500 mt-1">{fieldErrors.shipper_type}</p>}
         </div>
-        <div>
-          <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">{t('form_discount_rate')} *</label>
-          <div className="relative">
-            <input
-              name="discount_rate"
-              type="number"
-              step="0.1"
-              min="0"
-              max="99.99"
-              required
-              defaultValue={defaultValues.discount_rate}
-              className="w-full px-3 py-2.5 pr-7 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-            />
-            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">%</span>
+        {shipperType === 'CORPORATE' ? (
+          <div>
+            <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">{t('form_discount_rate')} *</label>
+            <div className="relative">
+              <input
+                name="discount_rate"
+                type="number"
+                step="0.1"
+                min="0"
+                max="99.99"
+                required
+                defaultValue={defaultValues.discount_rate}
+                className="w-full px-3 py-2.5 pr-7 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+              />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">%</span>
+            </div>
+            {fieldErrors.discount_rate && <p className="text-xs text-red-500 mt-1">{fieldErrors.discount_rate}</p>}
           </div>
-          {fieldErrors.discount_rate && <p className="text-xs text-red-500 mt-1">{fieldErrors.discount_rate}</p>}
-        </div>
+        ) : (
+          <input type="hidden" name="discount_rate" value="0" />
+        )}
       </div>
 
       {shipperType === 'CORPORATE' && (
@@ -85,7 +92,8 @@ export function RequiredFields({ t, defaultValues = {}, fieldErrors = {} }: Requ
               defaultValue={defaultValues.biz_no}
               onChange={(e) => { e.target.value = formatBizNo(e.target.value); }}
               maxLength={12}
-              className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+              disabled={readOnly}
+              className={`w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 ${readOnly ? 'bg-slate-50' : ''}`}
             />
             {fieldErrors.biz_no && <p className="text-xs text-red-500 mt-1">{fieldErrors.biz_no}</p>}
           </div>
