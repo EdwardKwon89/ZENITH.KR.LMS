@@ -262,6 +262,9 @@ _(Aiden 전속)_
 ### PR
 - PR#227: `feature/teamb-jaison-b064-b065-dispatch` → `develop` (rebase 후 force-push 완료)
 
+### PR
+- PR#227: `feature/teamb-jaison-b064-b065-dispatch` → `develop`
+
 ---
 
 ## [발견 이슈]
