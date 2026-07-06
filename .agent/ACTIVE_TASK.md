@@ -295,8 +295,9 @@
 | TASK-B-056 | 260705 | Issue #180 DEF — 화주 계정 발급 기반 구축 (DB migration · RBAC · Validation · Types) | P1 | 없음 | Jaison | 🔔 | [TASK-B-056](tasks/TASK-B-056_260705_DEF180_화주계정발급_기반구축_Jaison.md) | Issue #180 · 코드 `d2e3b98` · 391/391 · PR 생성 대기 · TASK-B-057·058 전제조건 |
 | TASK-B-057 | 260705 | Issue #180 DEF — 화주 계정 발급 백엔드 (Auth createUser · 임시PW · Resend 이메일 · 롤백) | P1 | TASK-B-056 🔔 | Dave (구현) | 🔔 | [TASK-B-057](tasks/TASK-B-057_260705_DEF180_화주계정발급_백엔드_Dave.md) | JSJung 선행 착수 승인 · 코드 `17105be` · 391/391 · PR#184 · B-056 브랜치 위 구현 |
 | TASK-B-058 | 260705 | Issue #180 DEF — 화주 계정 발급 프론트엔드 (LoginAccountFields · AddressInput · i18n) | P1 | TASK-B-056 🔔 · TASK-B-057 🔔 | Baker (구현) | 🔔 | [TASK-B-058](tasks/TASK-B-058_260705_DEF180_화주계정발급_프론트엔드_Baker.md) | 코드 \`1220cd1\` · 11개 파일 · 391/391 PASS · PR#185 |
-| TASK-B-059 | 260705 | Issue #181 — zen_orders.agency_org_id migration + createOrder 수정 + 요금 스냅샷 저장 | P1 | TASK-B-056 ✅ | Dave (구현) | ⬜ | [TASK-B-059](tasks/TASK-B-059_260705_ISS181_오더AgencyOrgId_스냅샷_Dave.md) | Issue #181 · Aiden 착수 승인(260705) |
+| TASK-B-059 | 260705 | Issue #181 — zen_orders.agency_org_id migration + createOrder 수정 + 요금 스냅샷 저장 | P1 | TASK-B-056 ✅ | Dave (구현) | 🔔 | [TASK-B-059](tasks/TASK-B-059_260705_ISS181_오더AgencyOrgId_스냅샷_Dave.md) | Issue #181 · 코드 `957ab3a`+`a7f3d62` · TC 8/8 PASS · 회귀 449/454 PASS(5건 선행실패) · PR#208 · Closes #181 · Jaison 1차 반려 보완 완료 |
 | TASK-B-060 | 260705 | Issue #181 — 오더 등록 화면 estimateUpsFreight 연동 + UPS 견적 UI 표시 | P1 | TASK-B-059 🔔 권장 (JSJung 선행 착수 허가) | Baker (구현) | ⬜ | [TASK-B-060](tasks/TASK-B-060_260705_ISS181_UPS견적UI연동_Baker.md) | Issue #181 · Jaison 착수 승인(260705) |
+| TASK-B-062 | 260706 | Issue #180 — 화주 등록 폼 주소 검색 버튼 미동작 수정 (CSP 차단) + 단위 테스트 | P1 | 없음 | Dave (구현) | 🔔 | [TASK-B-062](tasks/TASK-B-062_260706_ISS180_주소검색버튼수정_Dave.md) | Issue #180 · 코드 `cb20c5f` · TC-P7-UI-ADDR-01/02 4/4 PASS · 회귀 458/458 PASS · CSP script-src/img-src에 t1.kakaocdn.net 추가 |
 | TASK-169 | 260630 | DEF-086/087 인보이스 PDF — DB 마이그레이션 + Server Action | P2 | 없음 | D_Kai (구현) | ✅ | [TASK-169](tasks/TASK-169_260630_DEF086087_InvoicePDF_DB+SA_DKai.md) | Issue #152 · PR#154 ✅ 머지 (`51eba6c`) · zen_invoice_files 마이그레이션+SA 완료 · DEF-086 해소 |
 | TASK-170 | 260630 | DEF-086/087 인보이스 PDF — 오더 상세 UI 버튼 구현 | P2 | TASK-169 ✅ | B_Kai (구현) | ✅ | [TASK-170](tasks/TASK-170_260630_DEF086087_InvoicePDF_UI버튼_BKai.md) | Issue #152 · PR#155 ✅ 머지 (`ad9d1d1` develop 반영 확인) · DoD 13/13 · Aiden ✅ 260701 |
 | **── Phase 7.1 ──** | | **UPS 특송 요금 "등록" 관리 (Admin/Agency 계산엔진+등록UI, Team A 범위)** | | | | | | **✅✅ develop 머지 완료(260705, PR#186 `55adff5`) — [An_14](../docs/02_Analysis/An_14_Phase7_UPS요금관리_설계보완.md) · GH#182(main 머지 시 클로즈 예정) · Team B 인계(오더연동+정산)는 GH#181 참조 · 회귀 424/424 PASS(develop 재검증 완료)** |
@@ -350,8 +351,8 @@
 |:------|:----:|:----|
 | **JSJung** (팀 리더) | ✅ TASK-B-030 승인 완료 (260628) · ✅ TASK-B-033 승인 완료 (260701) | §1§2 확인 완료 · DEF-088 교정 완료 · PR#156 squash 머지 (e2bf48b) |
 | **Jaison** (AI Agent 총괄) | 🔔 TASK-B-056 검토 요청 (260705) | 코드 `d2e3b98` · 391/391 PASS · PR 생성 대기 |
-| **Dave** (AI Agent) | ⬜ **TASK-B-059** 대기 (260705 발령) | Issue #181 · B-056/057/058 머지 완료 · 착수 가능 |
-| **Baker** (AI Agent) | 🔔 TASK-B-058 검토 요청 · ⬜ **TASK-B-060** 대기 (260705) | B-058: PR#185 · 391/391 ✅ · B-060: Issue #181 UPS 견적 UI 연동 (B-059 착수 후 선행 착수 가능) |
+| **Dave** (AI Agent) | 🔔 TASK-B-059 보완 완료 · 🔔 **TASK-B-062** 완료 (260706) | B-059: PR#208 (Jaison 검토 대기) · B-062: PR#209 (신규) · Closes #180 |
+| **Baker** (AI Agent) | 🔔 TASK-B-058 검토 요청 · ⬜ **TASK-B-060** 대기 (260705) | B-058: PR#185 · 391/391 ✅ · B-060: Issue #181 UPS 견적 UI 연동 (B-059 🔔 전제조건 충족 — 선행 착수 가능) |
 | **Gale** (AI Agent) | 대기 | 추후 재배정 예정 |
 
 ---
@@ -778,3 +779,5 @@
 | 2026-07-06 | Aiden (Claude) | **GH#206 Aiden→B_Kai 재배정** (Edward 지시). #9(고아 테이블 정리 결정)·#12(이원 관리 테이블 동기화 규칙 설계) 등 코드베이스 추적 기반 판단이 많아 GH#202에서 검증된 B_Kai의 통합 추적·수정 역량이 적합하다고 판단 — Issue 본문·코멘트로 배정 통보, ACTIVE_TASK.md 반영. D_Kai는 어제(260705) 5차 재교육(TASK-178, 코드/문서 커밋 혼입 3연속) 완료 직후라 동일 위험 유형 재발 우려로 이번엔 배제 권고. |
 | 2026-07-06 | B_Kai (Big Pickle) | **GH#206 ✅ 조사 완료 (PR#221)** — #9~#14 전수 조사 후 GitHub Issue 코멘트에 결과 게시. #14(UAT_22/23 오채번) 직접 수정. Ds_11 §11.10 용어 정의(GLOSSARY) 추가. #9 고아 테이블 확인·#10 부가요금 건당계산 미구현 확인·#11 용어 모호성 해소·#12 이원테이블 용도분리 문서화·#13 docs/03_Design 클러스터 17개 파일 아카이브 방안 PR 코멘트로 제출. |
 | 2026-07-06 | Aiden (Claude) | **GH#206 ✅ 승인·머지 완료 (PR#221)** — B_Kai #9~14 조사 검토. #13(Ds_11 3파일 정리)에서 최초 조사가 `docs/02_Analysis/`만 확인하고 `docs/03_Design/`을 누락한 사실 오류 발견(실제 17개 DEPRECATED/Draft/INDEX/DETAIL 클러스터 존재) — 재조사 요청. B_Kai가 정확히 재조사 후 `docs/03_Design/_archive/ds_11/`로 아카이브 이동 제안, 승인 후 git mv로 깨끗하게 실행 확인(0 insertions/deletions, 순수 rename). 나머지 #9·#10·#11·#12·#14 및 Ds_11 §11.10 Glossary는 최초 제출부터 정확했음. 로컬 merge 테스트 충돌 없음, Issue #206 종료. |
+| 2026-07-06 | Dave (D_Kai) | **TASK-B-059 🔔 보완 완료** — Jaison 1차 반려(PR#208): ①Task file 커밋 해시 기재(957ab3a/a7f3d62) ②saveOrderRateSnapshot 분리(estimateFn 파라미터 주입) + TC-P7-ORDER-SNAPSHOT-03 2건 신규. 회귀 449/454 PASS(5건 선행실패). |
+| 2026-07-06 | Dave (D_Kai) | **TASK-B-062 🔔 완료** — Issue #180 화주 등록 폼 주소 검색 버튼 미동작(CSP 차단) 수정. §1 next.config.ts CSP script-src/img-src에 t1.kakaocdn.net 추가. §2 TC-P7-UI-ADDR-01/02 4건 신규. 회귀 458/458 PASS(76 files). 코드 `cb20c5f`. PR#209. |
