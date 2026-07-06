@@ -361,6 +361,7 @@
 ## 개정 이력
 
 | 2026-07-06 | Jaison (Team B) | **TASK-B-061/062 ⬜ 발령** — Issue #180 로컬 테스트(260706) 결과 추가 보완. Baker(B-061): 로그인ID 최상단 배치 + 이메일 유효성 + BRONZE 기본값. Dave(B-062): 주소 검색 버튼 미동작 원인 조사+수정. Issue #180 코멘트 등록 완료. |
+| 2026-07-06 | Baker | **TASK-B-061 🔄 착수** — develop `9f89948` 기준 브랜치 생성 |
 | 2026-07-06 | Baker | **TASK-B-061 🔔 구현 완료** — §1~§3 코드 수정(`c146495`) · TC 3종 6 tests · 회귀 460/460 PASS · PR#223 |
 | 2026-07-05 | Jaison (Team B) | **TASK-B-060 ⬜ 발령** — Issue #181 UPS 견적 UI 연동. Baker 담당. 전제조건 B-059 🔔 권장(JSJung 선행 착수 허가). UpsFreightEstimatePanel + OrderRegistrationForm estimateUpsFreight 연동 + createOrder snapshotData 전달. |
 | 2026-07-05 | Jaison (Team B) | **TASK-B-059 ⬜ 발령** — Issue #181 오더 agency_org_id 주입 + 요금 스냅샷 저장. Dave 담당. 전제조건 B-056 ✅(PR#183 머지) 충족. Aiden 착수 승인(Issue #181, 260705) 반영. |
