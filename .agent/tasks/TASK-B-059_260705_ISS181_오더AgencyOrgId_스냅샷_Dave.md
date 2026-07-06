@@ -152,6 +152,14 @@ _(Aiden 착수 승인: Issue #181 코멘트, 2026-07-05)_
 | J2 | **② INSERT 실제 컬럼명 + metadata 전체 객체** | `platform_price`/`agency_price`/`shipper_price`/`currency`/`snapshot_data` → `applied_unit_price`/`applied_currency`/`applied_rule`(`'UPS_3TIER'`)/`metadata`: `estimate as Record<string, unknown>` (전체 estimate 객체 — 기준요율·유류할증·DWB 등 산출 근거 보존) | ✅ |
 | J2 | **③ TC 기대값 수정** | TC-P7-ORDER-SNAPSHOT-03 기대값을 실제 컬럼명으로 변경 (`applied_rule: 'UPS_3TIER'` 포함) | ✅ |
 | J2 | **회귀** | TC 8/8 PASS, 전체 454/454 PASS (76 files, 5건 선행실패 동일) | ✅ |
+| **J3** | **① agency_org_id zen_agency_shippers 조회** | `createOrder()`: `profile.org_id` 직접 사용 → `zen_agency_shippers`에서 `shipper_org_id` 기준 `agency_org_id` 조회 · `is_active = true` 조건 | ✅ |
+| **J3** | **② saveOrderRateSnapshot agencyOrgId 파라미터** | 시그니처에 `agencyOrgId?: string | null` 추가 · `estimateFn` 호출 시 `agencyOrgId: agencyOrgId ?? undefined` 전달 | ✅ |
+| **J3** | **③ TC mock 보강** | `zen_agency_shippers` mock 추가 + `mockAgencyOrgId` 상수 + `agencyOrgId: mockAgencyOrgId` assert | ✅ |
+| **J3** | **rebase** | `origin/develop` rebase 완료 (ACTIVE_TASK.md·LIVE_REGRESSION_TEST_MAP.md HEAD 유지) | ✅ |
+| **J3** | **회귀** | 472/472 PASS (78 files) | ✅ |
+
+### 커밋 (계속)
+- J3 코드: `de5eaa5` (orders.ts + tests) — R-17 코드 단독 커밋
 
 ## [발견 이슈]
 
