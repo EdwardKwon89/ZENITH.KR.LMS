@@ -208,7 +208,7 @@ ContactFields 아래에 주소 표시 섹션 추가 (모든 필드 readOnly):
 - [x] EditShipperFormProps에 주소 6개 필드 추가
 - [x] TC-P7-UI-EDIT-01/02/03 PASS
 - [x] LIVE_REGRESSION_TEST_MAP.md 갱신
-- [x] 전체 회귀 PASS (rtk npm run test:regression) — 483/483
+- [x] 전체 회귀 PASS (rtk npm run test:regression) — 484/484
 - [x] R-17 커밋 분리: 코드 커밋 / 문서 커밋
 - [ ] PR 생성 (References #180, develop 대상)
 
@@ -236,6 +236,7 @@ _(Aiden 전속)_
 - `country` select, `zipcode` input, 주소검색 button에 `h-10` + `py-2` 적용
 - KR 우편번호+검색버튼을 grid 우측 컬럼에서 전체 폭 독립 행으로 분리
 - 국외 주소 입력 컨트롤(state, city, address, address_detail, zipcode)도 h-10 통일
+- **rebase 보완**: develop 기준 `DaumPostcodeEmbed` 인라인 모달 유지, `useKakaoPostcodePopup` 롤백 방지
 
 ### §3 — edit-form.tsx: 상세보기 동기화 ✅
 - `EditShipperFormProps.org`에 주소 6개 필드(`country_code`, `state_province`, `city`, `address`, `address_detail`, `zipcode`) 추가
@@ -249,14 +250,15 @@ _(Aiden 전속)_
   - TC-P7-UI-EDIT-03: 주소 섹션 readOnly (address, zipcode, address_detail)
 
 ### 회귀 테스트
-- **80 files, 483/483 PASS** (기존 479 → 4 tests 신규)
+- **80 files, 484/484 PASS** (B-063 DaumPostcodeEmbed 기준 5 tests + B-065 4 tests)
 
 ### 커밋
-- 코드: `[Baker] feat: TASK-B-065 Issue #180 화주 폼 UI 통일 + 상세보기 동기화`
-- 문서: `[Baker] docs: TASK-B-065 완료 보고 — task file + LIVE_REGRESSION_TEST_MAP.md`
+- 코드: `7da02dd` — `[Baker] feat: TASK-B-065 Issue #180 화주 폼 UI 통일 + 상세보기 동기화`
+- 문서: `744f824` — `[Baker] docs: TASK-B-065 완료 보고 — task file + LIVE_REGRESSION_TEST_MAP.md`
+- 문서: `2c329e1` — `[Baker] docs: TASK-B-065 PR#227 기록`
 
 ### PR
-- PR#227: `feature/teamb-jaison-b064-b065-dispatch` → `develop`
+- PR#227: `feature/teamb-jaison-b064-b065-dispatch` → `develop` (rebase 후 force-push 완료)
 
 ---
 
