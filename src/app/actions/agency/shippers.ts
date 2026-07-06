@@ -305,7 +305,9 @@ export async function getAgencyShipperById(shipperId: string) {
         rep_name,
         contact_name,
         contact_email,
-        contact_phone
+        contact_phone,
+        country_code, state_province, city,
+        address, address_detail, zipcode
       )
     `)
     .eq('id', shipperId)
@@ -344,6 +346,10 @@ export async function updateAgencyShipper(
 
   const supabase = await createAdminClient();
 
+  const effectiveDiscountRate = parsed.data.shipper_type === 'INDIVIDUAL'
+    ? 0
+    : Number(parsed.data.discount_rate);
+
   const { data: link, error: linkError } = await supabase
     .from('zen_agency_shippers')
     .select('shipper_org_id')
@@ -368,7 +374,7 @@ export async function updateAgencyShipper(
     .from('zen_agency_shippers')
     .update({
       shipper_type: parsed.data.shipper_type,
-      discount_rate: parsed.data.discount_rate,
+      discount_rate: effectiveDiscountRate,
       grade: parsed.data.grade ?? null,
     })
     .eq('id', shipperId);
