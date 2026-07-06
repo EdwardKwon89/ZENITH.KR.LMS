@@ -64,11 +64,10 @@ export async function saveOrderRateSnapshot({
       .from('zen_order_rate_snapshots')
       .insert({
         order_id: orderId,
-        platform_price: estimate.platform.totalSellingPrice,
-        agency_price: estimate.agency?.agencySellingPrice ?? 0,
-        shipper_price: estimate.shipper?.finalFreight ?? 0,
-        currency: estimate.platform.currency ?? 'USD',
-        snapshot_data: estimate as unknown as JSON,
+        applied_unit_price: estimate.platform.totalSellingPrice,
+        applied_currency: estimate.platform.currency ?? 'USD',
+        applied_rule: 'UPS_3TIER',
+        metadata: estimate as unknown as Record<string, unknown>,
       });
     if (snapError) {
       logger.error('[SNAPSHOT] Failed to insert rate snapshot:', snapError);

@@ -163,11 +163,10 @@ describe('TC-P7-ORDER-SNAPSHOT-03: saveOrderRateSnapshot — DB 조회 + estimat
     expect(mockSupabase.from).toHaveBeenCalledWith('zen_order_rate_snapshots');
     expect(mockInsertTable.insert).toHaveBeenCalledWith({
       order_id: mockOrderId,
-      platform_price: 150.00,
-      agency_price: 135.00,
-      shipper_price: 128.25,
-      currency: 'USD',
-      snapshot_data: mockEstimate,
+      applied_unit_price: 150.00,
+      applied_currency: 'USD',
+      applied_rule: 'UPS_3TIER',
+      metadata: mockEstimate,
     });
   });
 
