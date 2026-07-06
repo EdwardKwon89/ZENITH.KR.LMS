@@ -93,6 +93,7 @@ describe('TC-P7-ORDER-SNAPSHOT-03: saveOrderRateSnapshot — DB 조회 + estimat
     shipper: { finalFreight: 128.25 },
   };
   const mockOrderId = 'order-1234-5678';
+  const mockAgencyOrgId = 'agency-org-id-mock';
 
   let mockSupabase: any;
   let mockInsertTable: any;
@@ -123,6 +124,13 @@ describe('TC-P7-ORDER-SNAPSHOT-03: saveOrderRateSnapshot — DB 조회 + estimat
         if (table === 'zen_order_rate_snapshots') {
           return mockInsertTable;
         }
+        if (table === 'zen_agency_shippers') {
+          return {
+            select: vi.fn().mockReturnThis(),
+            eq: vi.fn().mockReturnThis(),
+            maybeSingle: vi.fn().mockResolvedValue({ data: { agency_org_id: mockAgencyOrgId }, error: null }),
+          };
+        }
         return { select: vi.fn().mockReturnThis(), eq: vi.fn().mockReturnThis(), maybeSingle: vi.fn(), insert: vi.fn() };
       }),
     };
@@ -144,6 +152,7 @@ describe('TC-P7-ORDER-SNAPSHOT-03: saveOrderRateSnapshot — DB 조회 + estimat
       orderId: mockOrderId,
       validated,
       profile,
+      agencyOrgId: mockAgencyOrgId,
       estimateFn: estimateUpsFreight,
     });
 
@@ -157,7 +166,7 @@ describe('TC-P7-ORDER-SNAPSHOT-03: saveOrderRateSnapshot — DB 조회 + estimat
       dimW: undefined,
       dimH: undefined,
       incoterms: undefined,
-      agencyOrgId: profile.org_id,
+      agencyOrgId: mockAgencyOrgId,
       shipperOrgId: profile.org_id,
     });
     expect(mockSupabase.from).toHaveBeenCalledWith('zen_order_rate_snapshots');

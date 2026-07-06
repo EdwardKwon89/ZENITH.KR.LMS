@@ -21,11 +21,12 @@ interface SaveOrderRateSnapshotParams {
   orderId: string;
   validated: OrderRegistrationInput;
   profile: { org_id: string | null; role: string };
+  agencyOrgId?: string | null;
   estimateFn: typeof estimateUpsFreightFn;
 }
 
 export async function saveOrderRateSnapshot({
-  supabase, orderId, validated, profile, estimateFn,
+  supabase, orderId, validated, profile, agencyOrgId, estimateFn,
 }: SaveOrderRateSnapshotParams) {
   try {
     const { data: product } = await supabase
@@ -56,7 +57,7 @@ export async function saveOrderRateSnapshot({
       dimW: validated.packages[0]?.width,
       dimH: validated.packages[0]?.height,
       incoterms: validated.incoterms,
-      agencyOrgId: profile.org_id,
+      agencyOrgId: agencyOrgId ?? undefined,
       shipperOrgId: profile.org_id,
     });
 
@@ -103,8 +104,18 @@ export async function createOrder(payload: OrderRegistrationInput) {
 
   const updates: Record<string, unknown> = {};
 
+  let resolvedAgencyOrgId: string | null = null;
   if (profile.role === USER_ROLES.AGENCY_SHIPPER) {
-    updates.agency_org_id = profile.org_id;
+    const { data: agencyLink } = await supabase
+      .from('zen_agency_shippers')
+      .select('agency_org_id')
+      .eq('shipper_org_id', profile.org_id as string)
+      .eq('is_active', true)
+      .maybeSingle();
+    resolvedAgencyOrgId = agencyLink?.agency_org_id ?? null;
+    if (resolvedAgencyOrgId) {
+      updates.agency_org_id = resolvedAgencyOrgId;
+    }
   }
 
   if (validated.ups_product_code) {
@@ -126,7 +137,7 @@ export async function createOrder(payload: OrderRegistrationInput) {
   }
 
   if (profile.role === USER_ROLES.AGENCY_SHIPPER && validated.ups_product_code) {
-    await saveOrderRateSnapshot({ supabase, orderId, validated, profile, estimateFn: estimateUpsFreightFn });
+    await saveOrderRateSnapshot({ supabase, orderId, validated, profile, agencyOrgId: resolvedAgencyOrgId, estimateFn: estimateUpsFreightFn });
   }
 
   revalidatePath("/(dashboard)/orders", "page");
