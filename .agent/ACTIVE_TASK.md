@@ -319,7 +319,7 @@
 | GH#203 | 260706 | Ds_11 API 명세서 Phase 7.2 신규기능 반영 누락 | GH#202 ✅ | Aiden | ✅ | [Issue #203](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/203) (closed) | Aiden 완료(260706) — PR#214 · §11.6~11.9 신규(Zone유틸/Tier·DWB/Freight최소운임/Box상품) · IMP-133 신규 발견(Box max_weight_kg 미검증) 등록 |
 | GH#204 | 260706 | Admin UI — 20kg 초과 티어·Freight 최소운임 관리 탭 신규 | 없음 | Riley | ✅ | [Issue #204](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/204) (closed) | Aiden 승인·머지 완료(260706) — PR#215(코드 `f4031caf`+문서 `4348cb2a` 분리) · base branch main→develop 오류 정정 후 병합 · 회귀 454/454 PASS |
 | GH#205 | 260706 | An-14 담당 불일치 정정 + UAT_DEFECT_LOG·UAT_MASTER 동기화 | 없음 | Aiden | ✅ | [Issue #205](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/205) (closed) | Aiden 완료(260706) — PR#219 · An-14 §4/§11 정정 · DEF-089~095 소급 등재(7건) · UAT_MASTER 실행상태 동기화(4건) · 회귀 454/454 PASS |
-| GH#206 | 260706 | UPS 문서 정리 백로그 (Medium 6 + Low 7건) | 없음 | B_Kai | ⬜ | [Issue #206](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/206) | Medium/Low(P3) — Edward 지시로 Aiden→B_Kai 재배정(260706), #9~14 착수 대상·#15~21 Edward 사인오프 제외 |
+| GH#206 | 260706 | UPS 문서 정리 백로그 (Medium 6 + Low 7건) | 없음 | B_Kai | ✅ | [Issue #206](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/206) (closed) | B_Kai 완료(260706) — PR#221 · #9~14 전항목 처리(#13 재조사 후 정정, docs/03_Design 17개 파일 아카이브) · Aiden 승인·머지 |
 ---
 
 ## Agent 현황
@@ -330,7 +330,7 @@
 |:------|:----:|:----|
 | **Aiden (Claude)** | ✅ TASK-167 전체 승인 (260626) | PR#117 §1 ✅ · PR#118 §2+§3 ✅ 전량 머지 완료 |
 | **D_Kai (OpenCode)** | ✅ GH#201 승인·머지 완료 (260705) | DEF-096 OVERSIZE 시드값 오류 수정 — PR#209 · 회귀 450/450 PASS · **R-17 §0 위반 없이 정상 완료 — 최종경고 유지, 신규 Task 대기** |
-| **B_Kai** | ⬜ GH#206 발령 (260706) | UPS 문서 정리 백로그(#9~14) — Edward 지시로 Aiden→B_Kai 재배정. 직전 GH#202(PR#212, 446/446 PASS) 정상 완료 |
+| **B_Kai** | ✅ GH#206 승인·머지 완료 (260706) | PR#221 · #13 재조사 요청에 신속·정확 대응(docs/03_Design 17개 파일 아카이브), 신규 Task 대기 |
 | **Riley** | ✅ GH#204 승인·머지 완료 (260706) | PR#215 · R-17 §1 위반(코드/문서 커밋 혼입) 자가수정 확인 후 승인, 신규 Task 대기 |
 | N_Kai | ➖ 미재배정 확정 (260626 Edward) | TASK-087 폐기 — 신규 Task 발령 없음 |
 | Ring | 신규 할당 중단 유지 | 9차 위반 누적 |
@@ -777,3 +777,4 @@
 | 2026-07-06 | Aiden (Claude) | **GH#205 착수 — An-14 §4/§11 담당 불일치 정정 완료**. `order-integration.ts`(오더 확정 시 스냅샷 저장)가 §4엔 Team A 산출물로, §11엔 Team B 담당(#3)으로 중복 기재된 것을 확인 — §4 표에서 해당 행 삭제 + §11 Team B 단독 소유 명확화하는 각주 추가. **DEF-089~095 소급 등재**: `UAT_DEFECT_LOG.md`가 2026-06-10 이후 미갱신 상태였던 것을 각 Task file(TASK-B-043~050)·ACTIVE_TASK.md 교차 확인으로 커밋 해시·PR 번호·회귀 결과(388/388) 전량 검증 후 7건 소급 반영, 현황 요약 갱신(합계 60→67). UAT_MASTER.md 인덱스 동기화는 다음 단계로 진행 예정. |
 | 2026-07-06 | Aiden (Claude) | **GH#206 Aiden→B_Kai 재배정** (Edward 지시). #9(고아 테이블 정리 결정)·#12(이원 관리 테이블 동기화 규칙 설계) 등 코드베이스 추적 기반 판단이 많아 GH#202에서 검증된 B_Kai의 통합 추적·수정 역량이 적합하다고 판단 — Issue 본문·코멘트로 배정 통보, ACTIVE_TASK.md 반영. D_Kai는 어제(260705) 5차 재교육(TASK-178, 코드/문서 커밋 혼입 3연속) 완료 직후라 동일 위험 유형 재발 우려로 이번엔 배제 권고. |
 | 2026-07-06 | B_Kai (Big Pickle) | **GH#206 ✅ 조사 완료 (PR#221)** — #9~#14 전수 조사 후 GitHub Issue 코멘트에 결과 게시. #14(UAT_22/23 오채번) 직접 수정. Ds_11 §11.10 용어 정의(GLOSSARY) 추가. #9 고아 테이블 확인·#10 부가요금 건당계산 미구현 확인·#11 용어 모호성 해소·#12 이원테이블 용도분리 문서화·#13 docs/03_Design 클러스터 17개 파일 아카이브 방안 PR 코멘트로 제출. |
+| 2026-07-06 | Aiden (Claude) | **GH#206 ✅ 승인·머지 완료 (PR#221)** — B_Kai #9~14 조사 검토. #13(Ds_11 3파일 정리)에서 최초 조사가 `docs/02_Analysis/`만 확인하고 `docs/03_Design/`을 누락한 사실 오류 발견(실제 17개 DEPRECATED/Draft/INDEX/DETAIL 클러스터 존재) — 재조사 요청. B_Kai가 정확히 재조사 후 `docs/03_Design/_archive/ds_11/`로 아카이브 이동 제안, 승인 후 git mv로 깨끗하게 실행 확인(0 insertions/deletions, 순수 rename). 나머지 #9·#10·#11·#12·#14 및 Ds_11 §11.10 Glossary는 최초 제출부터 정확했음. 로컬 merge 테스트 충돌 없음, Issue #206 종료. |
