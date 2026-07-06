@@ -104,7 +104,7 @@ export function RequiredFields({ t, defaultValues = {}, fieldErrors = {} }: Requ
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">{t('form_grade')}</label>
-          <select name="grade" defaultValue={defaultValues.grade} className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+          <select name="grade" defaultValue={defaultValues.grade ?? 'BRONZE'} className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20">
             <option value="">{t('grade_placeholder')}</option>
             <option value="BRONZE">BRONZE</option>
             <option value="SILVER">SILVER</option>

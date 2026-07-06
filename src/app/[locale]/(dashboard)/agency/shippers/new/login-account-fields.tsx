@@ -1,5 +1,9 @@
 'use client';
 
+import { useState } from 'react';
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 interface LoginAccountFieldsProps {
   t: (key: string) => string;
   onLoginEmailChange: (email: string) => void;
@@ -7,6 +11,17 @@ interface LoginAccountFieldsProps {
 }
 
 export function LoginAccountFields({ t, onLoginEmailChange, fieldErrors = {} }: LoginAccountFieldsProps) {
+  const [emailError, setEmailError] = useState('');
+
+  function handleBlur(e: React.FocusEvent<HTMLInputElement>) {
+    const value = e.target.value;
+    if (value && !EMAIL_REGEX.test(value)) {
+      setEmailError(t('form_login_email_invalid') || '올바른 이메일 형식이 아닙니다');
+    } else {
+      setEmailError('');
+    }
+  }
+
   return (
     <div className="border-b border-slate-100 pb-5">
       <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">{t('new_title')}</p>
@@ -17,10 +32,13 @@ export function LoginAccountFields({ t, onLoginEmailChange, fieldErrors = {} }: 
           type="email"
           required
           onChange={(e) => onLoginEmailChange(e.target.value)}
+          onBlur={handleBlur}
           className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
         />
         <p className="text-xs text-slate-400 mt-1.5 leading-relaxed">{t('form_login_email_hint')}</p>
-        {fieldErrors.login_email && <p className="text-xs text-red-500 mt-1">{fieldErrors.login_email}</p>}
+        {(emailError || fieldErrors.login_email) && (
+          <p className="text-xs text-red-500 mt-1">{emailError || fieldErrors.login_email}</p>
+        )}
       </div>
     </div>
   );
