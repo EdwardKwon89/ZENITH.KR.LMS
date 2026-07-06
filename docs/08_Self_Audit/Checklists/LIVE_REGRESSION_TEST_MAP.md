@@ -550,6 +550,13 @@
 | **TC-P7-UI-ADDR-01** | 국가 KR/US/JP별 주소 검색 UI 분기 (popup→embed 전환) | 국가별 입력 필드 렌더링 + Kakao Postcode embed 모달 표시 검증 | `tests/unit/agency/address-input.test.tsx` |
 | **TC-P7-UI-ADDR-02** | 주소 검색 임베드 모달 내 주소 선택 시 roadAddress/zipcode 자동 반영 | DaumPostcodeEmbed onComplete 콜백 → roadAddress + zonecode 입력 + 모달 닫힘 검증 | `tests/unit/agency/address-input.test.tsx` |
 
+### 44. 화주 상세보기/편집 폼 UI (Issue #180 TASK-B-065)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-P7-UI-EDIT-01** | edit-form: name, shipper_type input disabled 확인 | 상세보기 모드에서 필수 항목 수정 불가 | `tests/unit/agency/edit-form.test.tsx` |
+| **TC-P7-UI-EDIT-02** | CORPORATE인 경우 biz_no disabled 확인 | 법인 사업자번호 수정 불가 | `tests/unit/agency/edit-form.test.tsx` |
+| **TC-P7-UI-EDIT-03** | 주소 섹션 표시 + readOnly 확인 (address, zipcode) | 등록 폼과 동일한 주소 필드 readOnly 표시 | `tests/unit/agency/edit-form.test.tsx` |
+
 ---
 
 ## 📝 가이드라인 (R-09 Enforcement)
