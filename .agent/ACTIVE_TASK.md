@@ -298,7 +298,10 @@
 | TASK-B-059 | 260705 | Issue #181 — zen_orders.agency_org_id migration + createOrder 수정 + 요금 스냅샷 저장 | P1 | TASK-B-056 ✅ | Dave (구현) | 🔔 | [TASK-B-059](tasks/TASK-B-059_260705_ISS181_오더AgencyOrgId_스냅샷_Dave.md) | Issue #181 · PR#208 · J3 보완 완료 (zen_agency_shippers 조회 + agencyOrgId 파라미터 + TC mock) · develop rebase 완료 · TC 8/8 PASS · 회귀 472/472 PASS · Jaison 검토 대기 |
 | TASK-B-060 | 260705 | Issue #181 — 오더 등록 화면 estimateUpsFreight 연동 + UPS 견적 UI 표시 | P1 | TASK-B-059 🔔 권장 (JSJung 선행 착수 허가) | Baker (구현) | ⬜ | [TASK-B-060](tasks/TASK-B-060_260705_ISS181_UPS견적UI연동_Baker.md) | Issue #181 · Jaison 착수 승인(260705) |
 | TASK-B-061 | 260706 | Issue #180 — 화주 등록 폼 UI 보완 (로그인 ID 최상단 배치 · 이메일 유효성 · BRONZE 기본 선택) | P1 | TASK-B-058 ✅ | Baker (구현) | 🔔 | [TASK-B-061](tasks/TASK-B-061_260706_ISS180_화주폼UI보완_Baker.md) | Issue #180 · 코드 \`c146495\` · 460/460 PASS · PR#223 |
-| TASK-B-062 | 260706 | Issue #180 — 화주 등록 폼 주소 검색 버튼 미동작 수정 (CSP 차단) + 단위 테스트 | P1 | 없음 | Dave (구현) | 🔔 | [TASK-B-062](tasks/TASK-B-062_260706_ISS180_주소검색버튼수정_Dave.md) | Issue #180 · 코드 \`cb20c5f\` · TC-P7-UI-ADDR-01/02 4/4 PASS · 회귀 458/458 PASS · PR#224 · CSP script-src/img-src에 t1.kakaocdn.net 추가 |
+| TASK-B-062 | 260706 | Issue #180 — 화주 등록 폼 주소 검색 버튼 미동작 수정 (CSP 차단) + 단위 테스트 | P1 | 없음 | Dave (구현) | 🔔 | [TASK-B-062](tasks/TASK-B-062_260706_ISS180_주소검색버튼수정_Dave.md) | Issue #180 · 코드 \`cb20c5f\` · TC-P7-UI-ADDR-01/02 4/4 PASS · 회귀 458/458 PASS · PR#224 · **Aiden 승인·머지 완료(260706)** |
+| TASK-B-063 | 260706 | Issue #180 — 주소 검색 근본 수정 (DaumPostcodeEmbed 전환 + CSP frame-src/script-src 보완) | P1 | TASK-B-062 ✅ | Dave (구현) | 🔔 | [TASK-B-063](tasks/TASK-B-063_260706_ISS180_주소검색근본수정_Dave.md) | Issue #180 · 코드 \`987c0ad\` · 473/473 PASS · PR#225 · Jaison PASS · Aiden 머지 대기 |
+| TASK-B-064 | 260706 | Issue #180 — 개인/법인 할인율 표시 분기 + 상세조회 주소 필드 추가 | P1 | 없음 | Dave (구현) | ⬜ | [TASK-B-064](tasks/TASK-B-064_260706_ISS180_유형별할인율분기+상세조회주소_Dave.md) | Issue #180 |
+| TASK-B-065 | 260706 | Issue #180 — 화주 폼 컨트롤 높이 통일 + 주소버튼 재배치 + 상세보기 동기화 | P1 | TASK-B-064 완료 (§3만 / §1·§2 즉시 착수 가능) | Baker (구현) | ⬜ | [TASK-B-065](tasks/TASK-B-065_260706_ISS180_화주폼UI통일+상세보기동기화_Baker.md) | Issue #180 |
 | TASK-169 | 260630 | DEF-086/087 인보이스 PDF — DB 마이그레이션 + Server Action | P2 | 없음 | D_Kai (구현) | ✅ | [TASK-169](tasks/TASK-169_260630_DEF086087_InvoicePDF_DB+SA_DKai.md) | Issue #152 · PR#154 ✅ 머지 (`51eba6c`) · zen_invoice_files 마이그레이션+SA 완료 · DEF-086 해소 |
 | TASK-170 | 260630 | DEF-086/087 인보이스 PDF — 오더 상세 UI 버튼 구현 | P2 | TASK-169 ✅ | B_Kai (구현) | ✅ | [TASK-170](tasks/TASK-170_260630_DEF086087_InvoicePDF_UI버튼_BKai.md) | Issue #152 · PR#155 ✅ 머지 (`ad9d1d1` develop 반영 확인) · DoD 13/13 · Aiden ✅ 260701 |
 | **── Phase 7.1 ──** | | **UPS 특송 요금 "등록" 관리 (Admin/Agency 계산엔진+등록UI, Team A 범위)** | | | | | | **✅✅ develop 머지 완료(260705, PR#186 `55adff5`) — [An_14](../docs/02_Analysis/An_14_Phase7_UPS요금관리_설계보완.md) · GH#182(main 머지 시 클로즈 예정) · Team B 인계(오더연동+정산)는 GH#181 참조 · 회귀 424/424 PASS(develop 재검증 완료)** |
@@ -352,14 +355,15 @@
 |:------|:----:|:----|
 | **JSJung** (팀 리더) | ✅ TASK-B-030 승인 완료 (260628) · ✅ TASK-B-033 승인 완료 (260701) | §1§2 확인 완료 · DEF-088 교정 완료 · PR#156 squash 머지 (e2bf48b) |
 | **Jaison** (AI Agent 총괄) | 🔔 TASK-B-056 검토 요청 (260705) | 코드 `d2e3b98` · 391/391 PASS · PR 생성 대기 |
-| **Dave** (AI Agent) | 🔔 **TASK-B-059** J3 보완 완료 · 🔔 **TASK-B-062** PR#224 머지 대기 | B-059: PR#208(J3: zen_agency_shippers 조회·rebase 완료·Jaison 검토 대기) · B-062: PR#224(CSP fix·Aiden 머지 대기) |
-| **Baker** (AI Agent) | 🔔 TASK-B-058 검토 요청 · ⬜ **TASK-B-060** 대기 (260705) · 🔔 **TASK-B-061** 구현 완료 | B-058: PR#185 · 391/391 ✅ · B-060: Issue #181 UPS 견적 UI 연동 (B-059 🔔 전제조건 충족 — 선행 착수 가능) · B-061: PR#223 · 460/460 PASS |
+| **Dave** (AI Agent) | 🔔 **TASK-B-059** Jaison 최종 PASS · 🔔 **TASK-B-063** Jaison PASS · ⬜ **TASK-B-064** 발령 | B-059: PR#208 Aiden 머지 대기 · B-063: PR#225 Aiden 머지 대기 · B-064: 개인/법인 할인율 분기 + 상세조회 주소 필드 추가 |
+| **Baker** (AI Agent) | 🔄 **TASK-B-060** 착수 · 🔔 **TASK-B-061** Aiden 머지 완료 · ⬜ **TASK-B-065** 발령 | B-060: B-059 머지 후 rebase 필수 · B-061: PR#223 Aiden 머지 완료(260706) · B-065: §1·§2 즉시 착수 가능, §3은 B-064 완료 후 |
 | **Gale** (AI Agent) | 대기 | 추후 재배정 예정 |
 
 ---
 
 ## 개정 이력
 
+| 2026-07-06 | Jaison (Team B) | **TASK-B-064/065 ⬜ 발령** — Issue #180 JSJung 추가 요구사항(4건). Dave(B-064): 개인/법인 할인율 분기(INDIVIDUAL→hidden 0, CORPORATE→표시) + RequiredFields readOnly prop + getAgencyShipperById 주소 필드 추가 + updateAgencyShipper INDIVIDUAL discount_rate=0 강제. Baker(B-065): select/input h-10 높이 통일 + 주소검색버튼 재배치(전체폭 독립행) + edit-form.tsx 상세보기 동기화(readOnly + 주소섹션). §1·§2 즉시 착수, §3은 B-064 완료 후. |
 | 2026-07-06 | Jaison (Team B) | **TASK-B-061/062 ⬜ 발령** — Issue #180 로컬 테스트(260706) 결과 추가 보완. Baker(B-061): 로그인ID 최상단 배치 + 이메일 유효성 + BRONZE 기본값. Dave(B-062): 주소 검색 버튼 미동작 원인 조사+수정. Issue #180 코멘트 등록 완료. |
 | 2026-07-06 | Baker | **TASK-B-061 🔄 착수** — develop `9f89948` 기준 브랜치 생성 |
 | 2026-07-06 | Baker | **TASK-B-061 🔔 구현 완료** — §1~§3 코드 수정(`c146495`) · TC 3종 6 tests · 회귀 460/460 PASS · PR#223 |
