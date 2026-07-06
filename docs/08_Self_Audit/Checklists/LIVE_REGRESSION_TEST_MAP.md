@@ -1,6 +1,6 @@
 # 🗺️ LIVE Regression Test Master Map
 
-> **총 테스트 케이스:** 454 Cases (vitest 개별 테스트 기준, 75 test files)
+> **총 테스트 케이스:** 460 Cases (vitest 개별 테스트 기준, 76 test files)
 > **최종 검증일:** 2026-07-06 (GH#204 어드민 UI 요율 탭 추가 · TC-UPS-ADMIN-08~11 등재 · 454/454 PASS)  
 
 제니스 플랫폼의 비즈니스 영속성을 보장하는 회귀 테스트 케이스의 통합 명세서입니다. 모든 신규 개발 및 수정 시 이 맵에 케이스가 추가되어야 하며, 전체 테스트가 통과되어야 합니다.
@@ -540,6 +540,13 @@
 | **TC-P7-SHIPPER-05a** | `login_email` 미입력 시 스키마 거부 | 필수 필드 누락 검증 | `tests/unit/agency/shipper-actions.test.ts` |
 | **TC-P7-SHIPPER-05b** | `login_email` 잘못된 이메일 형식 거부 | 이메일 형식 유효성 검증 | `tests/unit/agency/shipper-actions.test.ts` |
 | **TC-P7-SHIPPER-05c** | `login_email` + 주소 6필드 정상 통과 | 국외 화주 등록 전체 필드 통과 확인 | `tests/unit/agency/shipper-actions.test.ts` |
+
+### 43. 화주 등록 폼 UI (Issue #180 TASK-B-061)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-P7-UI-SHIPPER-01** | 화주 등록 폼 초기 로드 시 LoginAccountFields가 RequiredFields 앞에 위치 | 섹션 순서 검증 | `tests/unit/agency/shipper-form-ui.test.tsx` |
+| **TC-P7-UI-SHIPPER-02** | 잘못된 이메일 형식 입력 시 유효성 오류 메시지 표시 | 클라이언트 유효성 검사 | `tests/unit/agency/shipper-form-ui.test.tsx` |
+| **TC-P7-UI-SHIPPER-03** | 신규 등록 폼 초기 로드 시 grade 기본값 = BRONZE | 기본값 설정 | `tests/unit/agency/shipper-form-ui.test.tsx` |
 
 ---
 

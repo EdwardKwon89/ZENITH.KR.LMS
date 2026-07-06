@@ -297,7 +297,8 @@
 | TASK-B-058 | 260705 | Issue #180 DEF — 화주 계정 발급 프론트엔드 (LoginAccountFields · AddressInput · i18n) | P1 | TASK-B-056 🔔 · TASK-B-057 🔔 | Baker (구현) | 🔔 | [TASK-B-058](tasks/TASK-B-058_260705_DEF180_화주계정발급_프론트엔드_Baker.md) | 코드 \`1220cd1\` · 11개 파일 · 391/391 PASS · PR#185 |
 | TASK-B-059 | 260705 | Issue #181 — zen_orders.agency_org_id migration + createOrder 수정 + 요금 스냅샷 저장 | P1 | TASK-B-056 ✅ | Dave (구현) | 🔔 | [TASK-B-059](tasks/TASK-B-059_260705_ISS181_오더AgencyOrgId_스냅샷_Dave.md) | Issue #181 · 코드 `957ab3a`+`a7f3d62` · TC 8/8 PASS · 회귀 449/454 PASS(5건 선행실패) · PR#208 · Closes #181 · Jaison 1차 반려 보완 완료 |
 | TASK-B-060 | 260705 | Issue #181 — 오더 등록 화면 estimateUpsFreight 연동 + UPS 견적 UI 표시 | P1 | TASK-B-059 🔔 권장 (JSJung 선행 착수 허가) | Baker (구현) | ⬜ | [TASK-B-060](tasks/TASK-B-060_260705_ISS181_UPS견적UI연동_Baker.md) | Issue #181 · Jaison 착수 승인(260705) |
-| TASK-B-062 | 260706 | Issue #180 — 화주 등록 폼 주소 검색 버튼 미동작 수정 (CSP 차단) + 단위 테스트 | P1 | 없음 | Dave (구현) | 🔔 | [TASK-B-062](tasks/TASK-B-062_260706_ISS180_주소검색버튼수정_Dave.md) | Issue #180 · 코드 `cb20c5f` · TC-P7-UI-ADDR-01/02 4/4 PASS · 회귀 458/458 PASS · PR#224 · CSP script-src/img-src에 t1.kakaocdn.net 추가 |
+| TASK-B-061 | 260706 | Issue #180 — 화주 등록 폼 UI 보완 (로그인 ID 최상단 배치 · 이메일 유효성 · BRONZE 기본 선택) | P1 | TASK-B-058 ✅ | Baker (구현) | 🔔 | [TASK-B-061](tasks/TASK-B-061_260706_ISS180_화주폼UI보완_Baker.md) | Issue #180 · 코드 \`c146495\` · 460/460 PASS · PR#223 |
+| TASK-B-062 | 260706 | Issue #180 — 화주 등록 폼 주소 검색 버튼 미동작 수정 (CSP 차단) + 단위 테스트 | P1 | 없음 | Dave (구현) | 🔔 | [TASK-B-062](tasks/TASK-B-062_260706_ISS180_주소검색버튼수정_Dave.md) | Issue #180 · 코드 \`cb20c5f\` · TC-P7-UI-ADDR-01/02 4/4 PASS · 회귀 458/458 PASS · PR#224 · CSP script-src/img-src에 t1.kakaocdn.net 추가 |
 | TASK-169 | 260630 | DEF-086/087 인보이스 PDF — DB 마이그레이션 + Server Action | P2 | 없음 | D_Kai (구현) | ✅ | [TASK-169](tasks/TASK-169_260630_DEF086087_InvoicePDF_DB+SA_DKai.md) | Issue #152 · PR#154 ✅ 머지 (`51eba6c`) · zen_invoice_files 마이그레이션+SA 완료 · DEF-086 해소 |
 | TASK-170 | 260630 | DEF-086/087 인보이스 PDF — 오더 상세 UI 버튼 구현 | P2 | TASK-169 ✅ | B_Kai (구현) | ✅ | [TASK-170](tasks/TASK-170_260630_DEF086087_InvoicePDF_UI버튼_BKai.md) | Issue #152 · PR#155 ✅ 머지 (`ad9d1d1` develop 반영 확인) · DoD 13/13 · Aiden ✅ 260701 |
 | **── Phase 7.1 ──** | | **UPS 특송 요금 "등록" 관리 (Admin/Agency 계산엔진+등록UI, Team A 범위)** | | | | | | **✅✅ develop 머지 완료(260705, PR#186 `55adff5`) — [An_14](../docs/02_Analysis/An_14_Phase7_UPS요금관리_설계보완.md) · GH#182(main 머지 시 클로즈 예정) · Team B 인계(오더연동+정산)는 GH#181 참조 · 회귀 424/424 PASS(develop 재검증 완료)** |
@@ -352,13 +353,15 @@
 | **JSJung** (팀 리더) | ✅ TASK-B-030 승인 완료 (260628) · ✅ TASK-B-033 승인 완료 (260701) | §1§2 확인 완료 · DEF-088 교정 완료 · PR#156 squash 머지 (e2bf48b) |
 | **Jaison** (AI Agent 총괄) | 🔔 TASK-B-056 검토 요청 (260705) | 코드 `d2e3b98` · 391/391 PASS · PR 생성 대기 |
 | **Dave** (AI Agent) | 🔔 TASK-B-059 보완 완료 · 🔔 **TASK-B-062** 완료 (260706) | B-059: PR#208 (Jaison 검토 대기) · B-062: PR#224 (신규) · References #180 |
-| **Baker** (AI Agent) | 🔔 TASK-B-058 검토 요청 · ⬜ **TASK-B-060** 대기 (260705) | B-058: PR#185 · 391/391 ✅ · B-060: Issue #181 UPS 견적 UI 연동 (B-059 🔔 전제조건 충족 — 선행 착수 가능) |
+| **Baker** (AI Agent) | 🔔 TASK-B-058 검토 요청 · ⬜ **TASK-B-060** 대기 (260705) · 🔔 **TASK-B-061** 구현 완료 | B-058: PR#185 · 391/391 ✅ · B-060: Issue #181 UPS 견적 UI 연동 (B-059 🔔 전제조건 충족 — 선행 착수 가능) · B-061: PR#223 · 460/460 PASS |
 | **Gale** (AI Agent) | 대기 | 추후 재배정 예정 |
 
 ---
 
 ## 개정 이력
 
+| 2026-07-06 | Jaison (Team B) | **TASK-B-061/062 ⬜ 발령** — Issue #180 로컬 테스트(260706) 결과 추가 보완. Baker(B-061): 로그인ID 최상단 배치 + 이메일 유효성 + BRONZE 기본값. Dave(B-062): 주소 검색 버튼 미동작 원인 조사+수정. Issue #180 코멘트 등록 완료. |
+| 2026-07-06 | Baker | **TASK-B-061 🔔 구현 완료** — §1~§3 코드 수정(`c146495`) · TC 3종 6 tests · 회귀 460/460 PASS · PR#223 |
 | 2026-07-05 | Jaison (Team B) | **TASK-B-060 ⬜ 발령** — Issue #181 UPS 견적 UI 연동. Baker 담당. 전제조건 B-059 🔔 권장(JSJung 선행 착수 허가). UpsFreightEstimatePanel + OrderRegistrationForm estimateUpsFreight 연동 + createOrder snapshotData 전달. |
 | 2026-07-05 | Jaison (Team B) | **TASK-B-059 ⬜ 발령** — Issue #181 오더 agency_org_id 주입 + 요금 스냅샷 저장. Dave 담당. 전제조건 B-056 ✅(PR#183 머지) 충족. Aiden 착수 승인(Issue #181, 260705) 반영. |
 | 2026-07-05 | Jaison (Team B) | **TASK-B-058 🔄 착수 승인** — JSJung 선행 착수 허가. B-057 브랜치 위 착수. Baker 구현 시작 |
