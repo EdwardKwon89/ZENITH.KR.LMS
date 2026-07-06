@@ -255,6 +255,9 @@ _(Aiden 전속)_
 - 코드: `[Baker] feat: TASK-B-065 Issue #180 화주 폼 UI 통일 + 상세보기 동기화`
 - 문서: `[Baker] docs: TASK-B-065 완료 보고 — task file + LIVE_REGRESSION_TEST_MAP.md`
 
+### PR
+- PR#227: `feature/teamb-jaison-b064-b065-dispatch` → `develop`
+
 ---
 
 ## [발견 이슈]
