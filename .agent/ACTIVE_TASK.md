@@ -15,11 +15,7 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
-| [#245](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/245) | [DEF] Agency 화주관리 보완 — 상태관리·주소편집·비밀번호 변경 | b | p1 | - | 미배정 | 2026-07-07 |
-| [#231](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/231) | [Team B 인계] Issue #181 항목4 — 정산 분리 (화주→Agency, Agency→플랫폼 청구 구분) | b | p1 | open | jungjs | 2026-07-07 |
 | [#182](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/182) | [Phase 7.1] UPS 특송 요금 관리 보완 — Agency/Shipper 계산 파이프라인 (An-14) | a | p1 | open | 미배정 | 2026-07-05 |
-| [#181](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/181) | [DEF] Agency 화주 오더 등록 및 Agency 요율 기준 정산 미구현 | b | p1 | open | 미배정 | 2026-07-07 |
-| [#180](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/180) | [DEF] Agency 화주 로그인 계정 미발급 — createAgencyShipper Supabase Auth 생성 누락 | b | p1 | open | 미배정 | 2026-07-07 |
 | [#164](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/164) | [UAT-Epic] UPS 특송 서비스 — Team B 인수 테스트 (UAT-15~19) | b | p1 | open | jungjs | 2026-07-07 |
 | [#163](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/163) | [UAT-19] UPS 인보이스 PDF — Team B 수동 브라우저 UAT | b | p1 | open | jungjs | 2026-07-01 |
 | [#162](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/162) | [UAT-18] 창고 출고 UPS 연계 — Team B 수동 브라우저 UAT | b | p1 | open | jungjs | 2026-07-01 |
