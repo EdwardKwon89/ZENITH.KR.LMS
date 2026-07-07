@@ -6,7 +6,7 @@ import crypto from 'crypto';
 
 const resendApiKey = process.env.RESEND_API_KEY;
 const resend = resendApiKey ? new Resend(resendApiKey) : null;
-const FROM = "ZENITH LMS <noreply@zenith-lms.com>";
+const FROM = process.env.RESEND_FROM ?? "ZENITH LMS <noreply@zenith-lms.com>";
 
 export function generateTempPassword(): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
