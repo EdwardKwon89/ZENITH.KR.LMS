@@ -183,7 +183,7 @@ export function AddressInput({ t, fieldErrors = {} }: AddressInputProps) {
           onClick={() => setShowPostcode(false)}
         >
           <div
-            className="bg-white rounded-2xl overflow-hidden w-full max-w-md shadow-xl"
+            className="bg-white rounded-2xl overflow-auto w-full max-w-md shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
             <DaumPostcodeEmbed
