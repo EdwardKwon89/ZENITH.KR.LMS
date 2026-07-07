@@ -15,7 +15,6 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
-| [#245](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/245) | [DEF] Agency 화주관리 보완 — 상태관리·주소편집·비밀번호 변경 | b | p1 | - | 미배정 | 2026-07-07 |
 | [#231](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/231) | [Team B 인계] Issue #181 항목4 — 정산 분리 (화주→Agency, Agency→플랫폼 청구 구분) | b | p1 | open | jungjs | 2026-07-07 |
 | [#182](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/182) | [Phase 7.1] UPS 특송 요금 관리 보완 — Agency/Shipper 계산 파이프라인 (An-14) | a | p1 | open | 미배정 | 2026-07-05 |
 | [#181](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/181) | [DEF] Agency 화주 오더 등록 및 Agency 요율 기준 정산 미구현 | b | p1 | open | 미배정 | 2026-07-07 |
