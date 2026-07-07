@@ -109,19 +109,23 @@ export function RequiredFields({ t, defaultValues = {}, fieldErrors = {}, readOn
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">{t('form_grade')}</label>
-          <select name="grade" defaultValue={defaultValues.grade ?? 'BRONZE'} className="w-full h-10 px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20">
-            <option value="">{t('grade_placeholder')}</option>
-            <option value="BRONZE">BRONZE</option>
-            <option value="SILVER">SILVER</option>
-            <option value="GOLD">GOLD</option>
-            <option value="PLATINUM">PLATINUM</option>
-          </select>
-          {fieldErrors.grade && <p className="text-xs text-red-500 mt-1">{fieldErrors.grade}</p>}
+      {shipperType === 'INDIVIDUAL' ? (
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">{t('form_grade')}</label>
+            <select name="grade" defaultValue={defaultValues.grade ?? 'BRONZE'} className="w-full h-10 px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+              <option value="">{t('grade_placeholder')}</option>
+              <option value="BRONZE">BRONZE</option>
+              <option value="SILVER">SILVER</option>
+              <option value="GOLD">GOLD</option>
+              <option value="PLATINUM">PLATINUM</option>
+            </select>
+            {fieldErrors.grade && <p className="text-xs text-red-500 mt-1">{fieldErrors.grade}</p>}
+          </div>
         </div>
-      </div>
+      ) : (
+        <input type="hidden" name="grade" value="" />
+      )}
     </>
   );
 }

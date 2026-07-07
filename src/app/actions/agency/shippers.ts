@@ -229,7 +229,7 @@ export async function createAgencyShipper(
     linkId = await _linkShipperToAgency(supabase, agencyOrgId, orgId, {
       shipper_type: rest.shipper_type,
       discount_rate: rest.discount_rate,
-      grade: rest.grade ?? 'BRONZE',
+      grade: rest.shipper_type === 'INDIVIDUAL' ? (rest.grade ?? 'BRONZE') : null,
     });
   } catch {
     // Rollback: delete auth user + org + profile
@@ -375,7 +375,7 @@ export async function updateAgencyShipper(
     .update({
       shipper_type: parsed.data.shipper_type,
       discount_rate: effectiveDiscountRate,
-      grade: parsed.data.grade ?? null,
+      grade: parsed.data.shipper_type === 'INDIVIDUAL' ? (parsed.data.grade ?? null) : null,
     })
     .eq('id', shipperId);
   if (shipperError) throw new Error(`Failed to update shipper: ${shipperError.message}`);
