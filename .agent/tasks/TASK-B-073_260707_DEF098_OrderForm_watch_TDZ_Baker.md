@@ -77,10 +77,10 @@ git checkout -b feature/teamb-def-098
 
 ### 커밋
 - 코드: `ed601e6` — `[Baker] fix: DEF-098 OrderRegistrationForm watch TDZ — isAgencyShipper·destPort useForm 하단 이동`
-- 문서: `<TBD>` — `[Baker] docs: TASK-B-073 완료 보고 — task file + ACTIVE_TASK.md`
+- 문서: `7cbd50f` — `[Baker] docs: TASK-B-073 완료 보고 — task file + ACTIVE_TASK.md + DEF-098 보고서`
 
 ### PR
-- PR#NNN: `feature/teamb-def-098` → `develop` (`Closes #250`)
+- PR#252: https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/252 (`feature/teamb-def-098` → `develop`, `Closes #250`)
 
 ---
 
