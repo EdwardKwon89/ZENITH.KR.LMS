@@ -15,6 +15,7 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
+| [#229](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/229) | [TEST] Phase 2 자동화 검증용 - 확인 후 즉시 삭제 | - | - | - | 미배정 | 2026-07-07 |
 | [#182](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/182) | [Phase 7.1] UPS 특송 요금 관리 보완 — Agency/Shipper 계산 파이프라인 (An-14) | a | p1 | open | 미배정 | 2026-07-05 |
 | [#181](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/181) | [DEF] Agency 화주 오더 등록 및 Agency 요율 기준 정산 미구현 | b | p1 | open | 미배정 | 2026-07-06 |
 | [#180](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/180) | [DEF] Agency 화주 로그인 계정 미발급 — createAgencyShipper Supabase Auth 생성 누락 | b | p1 | open | 미배정 | 2026-07-07 |
