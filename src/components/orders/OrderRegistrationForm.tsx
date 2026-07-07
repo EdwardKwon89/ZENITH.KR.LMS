@@ -15,6 +15,8 @@ import {
 import { ZenCard, ZenButton, ZenInput, ZenBadge } from '@/components/ui/ZenUI';
 import { createOrder } from '@/app/actions/orders';
 import { getCurrentUserAffiliation } from '@/app/actions/master';
+import { UpsFreightEstimateSection } from './UpsFreightEstimateSection';
+import { USER_ROLES } from '@/lib/auth/rbac';
 import { orderRegistrationSchema, OrderRegistrationInput } from '@/lib/validation/order';
 import { estimateFreightCost, TransportMode } from '@/utils/logistics/freight-calculator';
 import { getAvailableServiceRates, getUsdKrwRate, getBaseCurrency, AvailableServiceRates } from '@/app/actions/operations/service-rates';
@@ -131,6 +133,10 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
   const router = useRouter();
   const [affiliation, setAffiliation] = React.useState<Affiliation>(null);
   const [isLoadingAffiliation, setIsLoadingAffiliation] = React.useState(true);
+
+  const isAgencyShipper = affiliation?.role === USER_ROLES.AGENCY_SHIPPER;
+  const destPort = ports.find((p) => p.id === watch('dest_port_id'));
+
 
   const { 
     register, 
@@ -996,6 +1002,25 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                     </div>
                   </div>
                 </ZenCard>
+
+                {/* 🚚 UPS Freight Estimate (AGENCY_SHIPPER only) */}
+                {isAgencyShipper && (
+                  <ZenCard className="p-4 border-blue-100">
+                    <h4 className="text-xs font-bold text-slate-800 mb-3 flex items-center gap-2 uppercase tracking-wide">
+                      <Truck size={14} className="text-blue-500" /> UPS 견적
+                    </h4>
+                    <UpsFreightEstimateSection
+                      shipperOrgId={affiliation?.orgId ?? null}
+                      destCountryCode={destPort?.country_code}
+                      packages={watchedPackages || []}
+                      selectedProductId={watch('ups_product_code')}
+                      selectedIncoterms={watch('incoterms')}
+                      onProductChange={(id) => setValue('ups_product_code', id)}
+                      onIncotermsChange={(value) => setValue('incoterms', value)}
+                    />
+                  </ZenCard>
+                )}
+
                 {/* 📝 Remarks / Special Instructions */}
                 <ZenCard className="p-4 border-slate-200">
                   <h4 className="text-xs font-bold text-slate-800 mb-4 flex items-center gap-2 uppercase tracking-wide">
