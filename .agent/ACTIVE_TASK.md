@@ -15,7 +15,6 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
-| [#250](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/250) | [DEF-098] OrderRegistrationForm watch TDZ 오류 — 오더 등록 페이지 진입 불가 긴급 수정 | b | p1 | - | 미배정 | 2026-07-07 |
 | [#182](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/182) | [Phase 7.1] UPS 특송 요금 관리 보완 — Agency/Shipper 계산 파이프라인 (An-14) | a | p1 | open | 미배정 | 2026-07-05 |
 | [#164](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/164) | [UAT-Epic] UPS 특송 서비스 — Team B 인수 테스트 (UAT-15~19) | b | p1 | open | jungjs | 2026-07-07 |
 | [#163](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/163) | [UAT-19] UPS 인보이스 PDF — Team B 수동 브라우저 UAT | b | p1 | open | jungjs | 2026-07-01 |
