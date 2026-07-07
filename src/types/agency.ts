@@ -40,6 +40,7 @@ export interface CreateAgencyShipperInput {
   address?: string;
   address_detail?: string;
   zipcode?: string;
+  is_active?: boolean;
 }
 
 export type UpdateAgencyShipperInput = Omit<CreateAgencyShipperInput, 'login_email'>;

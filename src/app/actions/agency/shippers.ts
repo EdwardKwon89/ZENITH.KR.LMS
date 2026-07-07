@@ -377,17 +377,28 @@ export async function updateAgencyShipper(
       contact_name: parsed.data.contact_name ?? null,
       contact_email: parsed.data.contact_email ?? null,
       contact_phone: parsed.data.contact_phone ?? null,
+      country_code: parsed.data.country_code ?? null,
+      state_province: parsed.data.state_province ?? null,
+      city: parsed.data.city ?? null,
+      address: parsed.data.address ?? null,
+      address_detail: parsed.data.address_detail ?? null,
+      zipcode: parsed.data.zipcode ?? null,
     })
     .eq('id', link.shipper_org_id);
   if (orgError) throw new Error(`Failed to update org: ${orgError.message}`);
 
+  const shipperUpdate: Record<string, any> = {
+    shipper_type: parsed.data.shipper_type,
+    discount_rate: effectiveDiscountRate,
+    grade: parsed.data.shipper_type === 'INDIVIDUAL' ? (parsed.data.grade ?? null) : null,
+  };
+  if (parsed.data.is_active !== undefined) {
+    shipperUpdate.is_active = parsed.data.is_active;
+  }
+
   const { error: shipperError } = await supabase
     .from('zen_agency_shippers')
-    .update({
-      shipper_type: parsed.data.shipper_type,
-      discount_rate: effectiveDiscountRate,
-      grade: parsed.data.shipper_type === 'INDIVIDUAL' ? (parsed.data.grade ?? null) : null,
-    })
+    .update(shipperUpdate)
     .eq('id', shipperId);
   if (shipperError) throw new Error(`Failed to update shipper: ${shipperError.message}`);
 
