@@ -1422,3 +1422,17 @@
 - **예상 공수**: 0.3 MD
 - **우선순위**: Low (요율 미시딩으로 인한 간접 차단이 사실상 동일한 효과를 내고 있어 실사용 영향 낮음)
 - **상태**: ⬜ 미착수
+
+---
+
+## [IMP-134] `tests/` 전역 TypeScript 오류 222건 — `test:regression`(vitest)이 못 잡는 타입 결함 누적
+
+- **발견 경위**: Edward "GitHub Action 오류 후속 조치 확인" 질의로 PR Checks 실패 이력 조사 중, `npx tsc --noEmit` 전체 프로젝트 실행 결과 `src/`(앱 코드) 1건(별도 DEF-097로 수정 완료) 외 `tests/` 하위에서 222건의 타입 오류 확인 (2026-07-07)
+- **현재 상태**: `test:regression` 스크립트가 `vitest run`만 실행하며 vitest는 esbuild/swc 기반 트랜스파일로 타입 체크를 강제하지 않으므로, 실제로는 깨진 타입에도 테스트가 PASS로 통과됨. 대표 사례: `tests/unit/monitoring/logger.test.ts`(NODE_ENV 읽기전용 할당), `tests/e2e/uat11-hub-routing-p0.spec.ts`(암묵적 any 5건), `tests/integration/p7-ups-schema.test.ts`(타입 불일치 4건) 등 다수 파일에 누적
+- **임시 조치**: 없음 — `next build`가 `src/`만 타입체크 대상으로 삼아 CI 빌드 자체는 통과하므로 당장 배포 블로킹은 아님
+- **목표 구현**: (1) CI `PR Checks`에 `npx tsc --noEmit` 단계 추가해 신규 타입 오류 유입 차단, (2) 기존 222건은 파일 단위로 점진 정리(테스트 로직 자체는 vitest 통과 중이므로 급하지 않음, Backlog)
+- **관련 파일**: `tests/**/*.{ts,tsx}` 다수, `package.json`(`test:regression` 스크립트), `.github/workflows/pr-checks.yml`
+- **관련 Issue**: 없음 — Edward 질의 계기 자체 발견
+- **예상 공수**: (1) CI 단계 추가 0.1 MD / (2) 전체 정리 1.5~2 MD (별도 Task 분할 권장)
+- **우선순위**: Medium — (1)은 재발 방지 차원에서 우선 권장, (2)는 Low
+- **상태**: ⬜ 미착수
