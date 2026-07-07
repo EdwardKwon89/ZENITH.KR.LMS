@@ -100,7 +100,7 @@
     "password_min_length": "密码至少为8个字符。",
     "change_password_success": "密码已成功更改。",
     "change_password_error": "更改密码时发生错误。",
-    "error_occurred": "发生错误。"
+    "error_occurred": "发生错误。",
     "full_name_label": "姓名",
     "full_name_placeholder": "请输入您的姓名",
     "email_label": "电子邮箱",
