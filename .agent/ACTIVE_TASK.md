@@ -331,7 +331,8 @@
 | TASK-B-066 | 260707 | Issue #180 — next.config.ts CSP Kakao 도메인 보완 (connect-src + frame-src http://) | P1 | 없음 | Dave (구현) | 🔔 | [TASK-B-066](tasks/TASK-B-066_260707_ISS180_CSP_Kakao보완_Dave.md) | Issue #180 · 코드 `64ad5d4` · 회귀 485/485 PASS |
 | TASK-B-067 | 260707 | Issue #180 — 주소 검색 모달 iframe 잘림 수정 (overflow-hidden → overflow-auto) | P2 | TASK-B-066 ✅ 권장 | Baker (구현) | ⬜ | [TASK-B-067](tasks/TASK-B-067_260707_ISS180_AddressInput_Overflow_Baker.md) | Issue #180 · Jaison 발령(260707) |
 | TASK-B-068 | 260707 | Issue #231 — 정산 분리: 화주→Agency, Agency→플랫폼 청구 구분 / daily-close Agency 집계 + AgencySettlementCard 신규 | P1 | TASK-B-060 ✅ | Dave (구현) | 🔔 | [TASK-B-068](tasks/TASK-B-068_260707_ISS231_정산분리_Agency청구구분_Dave.md) | Issue #231 · An-14 §11 항목4 · 코드 `1c62b55` · 회귀 489/489 PASS |
-| TASK-B-069 | 260707 | Issue #245 — 화주 상태·주소 편집 백엔드: UpdateAgencyShipperSchema is_active+주소 6필드 추가 + updateAgencyShipper zen_organizations 주소·zen_agency_shippers is_active 업데이트 | P1 | TASK-B-068 ✅ | Dave (구현) | 🔔 | [TASK-B-069](tasks/TASK-B-069_260707_ISS245_화주상태주소편집_백엔드_Dave.md) | Issue #245 · 코드 `a37dab3` · 회귀 489/489 PASS |
+| TASK-B-069 | 260707 | Issue #245 — 화주 상태·주소 편집 백엔드: UpdateAgencyShipperSchema is_active+주소 6필드 추가 + updateAgencyShipper zen_organizations 주소·zen_agency_shippers is_active 업데이트 | P1 | TASK-B-068 ✅ | Dave (구현) | ✅ | [TASK-B-069](tasks/TASK-B-069_260707_ISS245_화주상태주소편집_백엔드_Dave.md) | Issue #245 · 코드 `a37dab3` · 회귀 489/489 PASS · PR#247 ✅ Aiden 머지 완료(`73c35ddb`, 260707) |
+| TASK-B-070 | 260707 | Issue #245 — 화주 상태·주소·국가명·비밀번호 재인증 프론트엔드 | P1 | TASK-B-069 ✅ | Baker (구현) | ✅ | [TASK-B-070](tasks/TASK-B-070_260707_ISS245_화주상태주소국가명패스워드_프론트_Baker.md) | Issue #245 · 코드 `1e28eb0` · 수정 `aff3ffd` · 문서 `f55f549` · build PASS · PR#248 |
 | TASK-169 | 260630 | DEF-086/087 인보이스 PDF — DB 마이그레이션 + Server Action | P2 | 없음 | D_Kai (구현) | ✅ | [TASK-169](tasks/TASK-169_260630_DEF086087_InvoicePDF_DB+SA_DKai.md) | Issue #152 · PR#154 ✅ 머지 (`51eba6c`) · zen_invoice_files 마이그레이션+SA 완료 · DEF-086 해소 |
 | TASK-170 | 260630 | DEF-086/087 인보이스 PDF — 오더 상세 UI 버튼 구현 | P2 | TASK-169 ✅ | B_Kai (구현) | ✅ | [TASK-170](tasks/TASK-170_260630_DEF086087_InvoicePDF_UI버튼_BKai.md) | Issue #152 · PR#155 ✅ 머지 (`ad9d1d1` develop 반영 확인) · DoD 13/13 · Aiden ✅ 260701 |
 | **── Phase 7.1 ──** | | **UPS 특송 요금 "등록" 관리 (Admin/Agency 계산엔진+등록UI, Team A 범위)** | | | | | | **✅✅ develop 머지 완료(260705, PR#186 `55adff5`) — [An_14](../docs/02_Analysis/An_14_Phase7_UPS요금관리_설계보완.md) · GH#182(main 머지 시 클로즈 예정) · Team B 인계(오더연동+정산)는 GH#181 참조 · 회귀 424/424 PASS(develop 재검증 완료)** |
@@ -385,14 +386,15 @@
 |:------|:----:|:----|
 | **JSJung** (팀 리더) | ✅ TASK-B-030 승인 완료 (260628) · ✅ TASK-B-033 승인 완료 (260701) | §1§2 확인 완료 · DEF-088 교정 완료 · PR#156 squash 머지 (e2bf48b) |
 | **Jaison** (AI Agent 총괄) | 🔔 TASK-B-056 검토 요청 (260705) | 코드 `d2e3b98` · 391/391 PASS · PR 생성 대기 |
-| **Dave** (AI Agent) | ✅ **TASK-B-059** Aiden 머지 완료 · ✅ **TASK-B-062** Aiden 머지 완료 · ✅ **TASK-B-063** Aiden 머지 완료 · ✅ **TASK-B-064** Aiden 머지 완료 · 🔔 **TASK-B-066** 구현 완료 · 🔔 **TASK-B-068** 구현 완료 · 🔔 **TASK-B-069** 구현 완료 | B-066: CSP Kakao · B-068: 정산 분리 · B-069: 화주 상태·주소 편집 백엔드 · 코드 `a37dab3` · 회귀 489/489 |
-| **Baker** (AI Agent) | 🔔 **TASK-B-060** 구현 완료 · ✅ **TASK-B-061** Aiden 머지 완료 · ✅ **TASK-B-065** Aiden 승인·머지 완료 · 🔔 **TASK-B-067** 구현 완료 | B-060: Issue #181 UPS 견적 UI 연동, 회귀 489/489 PASS, PR 생성 대기 · B-061: PR#223 Aiden 머지 완료(260706) · B-065: PR#227 (`8a8b976`) Aiden 승인·머지 완료(260707) — state_province/city 보완 재검토 후 승인 · B-067: PR#241 머지 대기 |
+| **Dave** (AI Agent) | ✅ **B-069** Aiden 머지 완료 (260707) | PR#247(`73c35ddb`) · B-066/068/069 전량 완료 · 신규 Task 대기 |
+| **Baker** (AI Agent) | 🔔 **TASK-B-060** 구현 완료 · ✅ **TASK-B-061** Aiden 머지 완료 · ✅ **TASK-B-065** Aiden 승인·머지 완료 · 🔔 **TASK-B-067** 구현 완료 · 🔔 **TASK-B-070** 구현 완료 | B-060: Issue #181 UPS 견적 UI 연동, 회귀 489/489 PASS, PR 생성 대기 · B-061: PR#223 Aiden 머지 완료(260706) · B-065: PR#227 (`8a8b976`) Aiden 승인·머지 완료(260707) — state_province/city 보완 재검토 후 승인 · B-067: PR#241 머지 대기 · B-070: Issue #245 프론트엔드, PR 생성 대기 |
 | **Gale** (AI Agent) | 대기 | 추후 재배정 예정 |
 
 ---
 
 ## 개정 이력
 
+| 2026-07-07 | Jaison (Team B) | **TASK-B-069 ✅ 머지 완료** — Aiden 승인 PR#247 `73c35ddb` 머지 완료(260707). Baker B-070 rebase 후 착수 지시. |
 | 2026-07-06 | Jaison (Team B) | **TASK-B-064/065 ⬜ 발령** — Issue #180 JSJung 추가 요구사항(4건). Dave(B-064): 개인/법인 할인율 분기(INDIVIDUAL→hidden 0, CORPORATE→표시) + RequiredFields readOnly prop + getAgencyShipperById 주소 필드 추가 + updateAgencyShipper INDIVIDUAL discount_rate=0 강제. Baker(B-065): select/input h-10 높이 통일 + 주소검색버튼 재배치(전체폭 독립행) + edit-form.tsx 상세보기 동기화(readOnly + 주소섹션). §1·§2 즉시 착수, §3은 B-064 완료 후. |
 | 2026-07-06 | Dave (D_Kai) | **TASK-B-064 🔔 구현 완료** — §1 required-fields.tsx readOnly prop + INDIVIDUAL→hidden discount_rate=0, CORPORATE→표시. §2 shippers.ts getAgencyShipperById 주소 6필드 추가 + updateAgencyShipper INDIVIDUAL discount_rate=0 강제. §3 TC-P7-UI-REQ-01/02/03 7 tests PASS. 코드 `c43673c`. 회귀 479/479 PASS. PR#226 |
 | 2026-07-07 | Jaison (Team B) | **TASK-B-066 ⬜ 발령** — Dave 담당, next.config.ts CSP kakao 도메인(connect-src+frame-src http://) 보완. **TASK-B-067 ⬜ 발령** — Baker 담당, address-input.tsx 모달 overflow-hidden→overflow-auto 수정. |

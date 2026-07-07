@@ -555,7 +555,7 @@
 | :--- | :--- | :--- | :--- |
 | **TC-P7-UI-EDIT-01** | edit-form: name, shipper_type input disabled 확인 | 상세보기 모드에서 필수 항목 수정 불가 | `tests/unit/agency/edit-form.test.tsx` |
 | **TC-P7-UI-EDIT-02** | CORPORATE인 경우 biz_no disabled 확인 | 법인 사업자번호 수정 불가 | `tests/unit/agency/edit-form.test.tsx` |
-| **TC-P7-UI-EDIT-03** | 주소 섹션 표시 + readOnly 확인 (address, zipcode) | 등록 폼과 동일한 주소 필드 readOnly 표시 | `tests/unit/agency/edit-form.test.tsx` |
+| **TC-P7-UI-EDIT-03** | 주소 섹션 표시 + `AddressInput` 렌더링 (B-070 편집 가능 전환) | `AddressInput`에 기본값 전달 및 주소 필드 렌더링 확인 | `tests/unit/agency/edit-form.test.tsx` |
 
 ### 45. UPS 견적 UI 연동 (Issue #181 TASK-B-060)
 | ID | 테스트 항목 | 목적 | 파일 경로 |

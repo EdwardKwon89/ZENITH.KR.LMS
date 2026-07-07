@@ -26,6 +26,9 @@ vi.mock('next-intl', () => ({
       form_address_detail: 'Address Detail',
       form_state_province: 'State/Province',
       form_city: 'City',
+      form_status: 'Status',
+      status_active: 'Active',
+      status_inactive: 'Inactive',
     };
     return fallback[key] ?? key;
   },
@@ -38,6 +41,19 @@ vi.mock('next/navigation', () => ({
 
 vi.mock('@/app/actions/agency/shippers', () => ({
   updateAgencyShipper: vi.fn(),
+}));
+
+vi.mock('@/app/[locale]/(dashboard)/agency/shippers/new/address-input', () => ({
+  AddressInput: ({ defaultValues }: any) => (
+    <div data-testid="address-input">
+      <input name="country_code" defaultValue={defaultValues?.country_code || ''} />
+      <input name="state_province" defaultValue={defaultValues?.state_province || ''} />
+      <input name="city" defaultValue={defaultValues?.city || ''} />
+      <input name="address" defaultValue={defaultValues?.address || ''} />
+      <input name="address_detail" defaultValue={defaultValues?.address_detail || ''} />
+      <input name="zipcode" defaultValue={defaultValues?.zipcode || ''} />
+    </div>
+  ),
 }));
 
 import { EditShipperForm } from '@/app/[locale]/(dashboard)/agency/shippers/[id]/edit/edit-form';
@@ -96,27 +112,17 @@ describe('TC-P7-UI-EDIT-02: CORPORATE biz_no disabled', () => {
   });
 });
 
-describe('TC-P7-UI-EDIT-03: address section readOnly', () => {
-  it('should render address section with readOnly address and zipcode inputs', () => {
+describe('TC-P7-UI-EDIT-03: address section rendered via AddressInput', () => {
+  it('should render AddressInput with default address values', () => {
     const { container } = render(<EditShipperForm shipper={baseShipper} />);
 
-    const addressInput = container.querySelector('input[value="Seoul Gangnam"]') as HTMLInputElement;
-    const zipcodeInput = container.querySelector('input[value="06234"]') as HTMLInputElement;
-    const addressDetailInput = container.querySelector('input[value="101 Unit"]') as HTMLInputElement;
-
-    expect(addressInput).not.toBeNull();
-    expect(addressInput.readOnly).toBe(true);
-
-    expect(zipcodeInput).not.toBeNull();
-    expect(zipcodeInput.readOnly).toBe(true);
-
-    expect(addressDetailInput).not.toBeNull();
-    expect(addressDetailInput.readOnly).toBe(true);
-
-    expect(screen.getByText('Address', { selector: 'p' })).toBeDefined();
+    expect(container.querySelector('[data-testid="address-input"]')).not.toBeNull();
+    expect(container.querySelector('input[name="address"]')).not.toBeNull();
+    expect(container.querySelector('input[name="zipcode"]')).not.toBeNull();
+    expect(container.querySelector('input[name="address_detail"]')).not.toBeNull();
   });
 
-  it('should render state_province and city when present for non-KR shipper', () => {
+  it('should pass state_province and city defaults to AddressInput for non-KR shipper', () => {
     const nonKrShipper = {
       ...baseShipper,
       org: {
@@ -127,11 +133,11 @@ describe('TC-P7-UI-EDIT-03: address section readOnly', () => {
       },
     };
     const { container } = render(<EditShipperForm shipper={nonKrShipper} />);
-    const stateInput = container.querySelector('input[value="CA"]') as HTMLInputElement;
-    const cityInput = container.querySelector('input[value="Los Angeles"]') as HTMLInputElement;
+    const stateInput = container.querySelector('input[name="state_province"]') as HTMLInputElement;
+    const cityInput = container.querySelector('input[name="city"]') as HTMLInputElement;
     expect(stateInput).not.toBeNull();
-    expect(stateInput.readOnly).toBe(true);
+    expect(stateInput.defaultValue).toBe('CA');
     expect(cityInput).not.toBeNull();
-    expect(cityInput.readOnly).toBe(true);
+    expect(cityInput.defaultValue).toBe('Los Angeles');
   });
 });

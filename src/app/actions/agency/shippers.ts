@@ -136,7 +136,8 @@ export async function getAgencyShippers(agencyOrgId: string) {
         status,
         contact_name,
         contact_email,
-        contact_phone
+        contact_phone,
+        country_code
       )
     `)
     .eq('agency_org_id', agencyOrgId)

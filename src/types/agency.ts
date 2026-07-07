@@ -20,6 +20,7 @@ export interface AgencyShipperRow extends AgencyShipper {
     contact_name: string | null;
     contact_email: string | null;
     contact_phone: string | null;
+    country_code: string | null;
   } | null;
 }
 

@@ -1,6 +1,8 @@
 'use client';
 
+import { useParams } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { getCountryName } from '@/lib/utils/country';
 import type { AgencyShipperRow } from '@/types/agency';
 import { EditableGradeCell, EditableRateCell, ActionCell } from './editable-cell';
 
@@ -15,6 +17,9 @@ interface ShipperTableRowProps {
 }
 
 export function ShipperTableRow({ shipper, t }: ShipperTableRowProps) {
+  const params = useParams();
+  const locale = (params?.locale as string) || 'ko';
+
   return (
     <tr className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
       <td className="px-4 py-3 font-medium text-slate-900">{shipper.shipper?.name || '-'}</td>
@@ -37,6 +42,9 @@ export function ShipperTableRow({ shipper, t }: ShipperTableRowProps) {
       </td>
       <td className="px-4 py-3 text-center text-slate-600 text-xs">
         {shipper.shipper?.contact_phone || '-'}
+      </td>
+      <td className="px-4 py-3 text-center text-slate-600 text-xs">
+        {shipper.shipper?.country_code ? getCountryName(shipper.shipper.country_code, locale) : '-'}
       </td>
       <td className="px-4 py-3">
         <span className={cn("px-2.5 py-1 rounded-full text-[10px] font-bold border",

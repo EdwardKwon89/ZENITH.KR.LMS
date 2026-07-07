@@ -8,6 +8,8 @@ import { ChevronLeft, AlertCircle } from 'lucide-react';
 import { updateAgencyShipper } from '@/app/actions/agency/shippers';
 import { RequiredFields } from '../../new/required-fields';
 import { ContactFields } from '../../new/contact-fields';
+import { AddressInput } from '../../new/address-input';
+import { getCountryName } from '@/lib/utils/country';
 
 interface EditShipperFormProps {
   shipper: {
@@ -44,6 +46,7 @@ interface FormValues {
   contact_name: string;
   contact_email: string;
   contact_phone: string;
+  is_active: boolean;
 }
 
 export function EditShipperForm({ shipper }: EditShipperFormProps) {
@@ -54,6 +57,7 @@ export function EditShipperForm({ shipper }: EditShipperFormProps) {
   const [loading, setLoading] = useState(false);
   const [globalError, setGlobalError] = useState('');
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [isActive, setIsActive] = useState(shipper.is_active);
 
   const initialValues: Partial<FormValues> = {
     name: shipper.org.name,
@@ -65,6 +69,7 @@ export function EditShipperForm({ shipper }: EditShipperFormProps) {
     contact_name: shipper.org.contact_name || '',
     contact_email: shipper.org.contact_email || '',
     contact_phone: shipper.org.contact_phone || '',
+    is_active: shipper.is_active,
   };
 
   async function handleSubmit(formData: FormData) {
@@ -83,6 +88,13 @@ export function EditShipperForm({ shipper }: EditShipperFormProps) {
         contact_name: (formData.get('contact_name') as string) || undefined,
         contact_email: (formData.get('contact_email') as string) || undefined,
         contact_phone: (formData.get('contact_phone') as string) || undefined,
+        is_active: isActive,
+        country_code: (formData.get('country_code') as string) || undefined,
+        state_province: (formData.get('state_province') as string) || undefined,
+        city: (formData.get('city') as string) || undefined,
+        address: (formData.get('address') as string) || undefined,
+        address_detail: (formData.get('address_detail') as string) || undefined,
+        zipcode: (formData.get('zipcode') as string) || undefined,
       });
 
       if (!result.success) {
@@ -128,53 +140,40 @@ export function EditShipperForm({ shipper }: EditShipperFormProps) {
 
         <form action={handleSubmit} className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
           <div className="p-6 space-y-5">
+            <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-100">
+              <div>
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{t('form_status')}</p>
+                <p className="text-sm font-bold text-slate-800">{isActive ? t('status_active') : t('status_inactive')}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsActive((prev) => !prev)}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${isActive ? 'bg-blue-600' : 'bg-slate-300'}`}
+                aria-pressed={isActive}
+              >
+                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${isActive ? 'translate-x-6' : 'translate-x-1'}`} />
+              </button>
+            </div>
+
             <RequiredFields t={t} defaultValues={initialValues} fieldErrors={fieldErrors} readOnly />
             <ContactFields t={t} loginEmail="" defaultValues={initialValues} fieldErrors={fieldErrors} />
-            <div className="border-t border-slate-100 pt-5">
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">{t('form_address')}</p>
-              <div className="grid grid-cols-2 gap-4 mb-4">
-                <div>
-                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">{t('form_country')}</label>
-                  <input readOnly value={shipper.org.country_code ?? ''}
-                    className="w-full h-10 px-3 py-2 text-sm border border-slate-200 rounded-xl bg-slate-50" />
-                </div>
-                <div>
-                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">{t('form_zipcode')}</label>
-                  <input readOnly value={shipper.org.zipcode ?? ''}
-                    className="w-full h-10 px-3 py-2 text-sm border border-slate-200 rounded-xl bg-slate-50" />
-                </div>
-              </div>
-              {(shipper.org.state_province || shipper.org.city) && (
-                <div className="grid grid-cols-2 gap-4 mb-4">
-                  {shipper.org.state_province && (
-                    <div>
-                      <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">{t('form_state_province')}</label>
-                      <input readOnly value={shipper.org.state_province}
-                        className="w-full h-10 px-3 py-2 text-sm border border-slate-200 rounded-xl bg-slate-50" />
-                    </div>
-                  )}
-                  {shipper.org.city && (
-                    <div>
-                      <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">{t('form_city')}</label>
-                      <input readOnly value={shipper.org.city}
-                        className="w-full h-10 px-3 py-2 text-sm border border-slate-200 rounded-xl bg-slate-50" />
-                    </div>
-                  )}
-                </div>
-              )}
-              <div className="mb-4">
-                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">{t('form_address')}</label>
-                <input readOnly value={shipper.org.address ?? ''}
-                  className="w-full h-10 px-3 py-2 text-sm border border-slate-200 rounded-xl bg-slate-50" />
-              </div>
-              {shipper.org.address_detail && (
-                <div className="mb-4">
-                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">{t('form_address_detail')}</label>
-                  <input readOnly value={shipper.org.address_detail}
-                    className="w-full h-10 px-3 py-2 text-sm border border-slate-200 rounded-xl bg-slate-50" />
-                </div>
-              )}
-            </div>
+            <AddressInput
+              t={t}
+              fieldErrors={fieldErrors}
+              defaultValues={{
+                country_code: shipper.org.country_code,
+                state_province: shipper.org.state_province,
+                city: shipper.org.city,
+                address: shipper.org.address,
+                address_detail: shipper.org.address_detail,
+                zipcode: shipper.org.zipcode,
+              }}
+            />
+            {shipper.org.country_code && (
+              <p className="text-xs text-slate-500">
+                {t('form_country')}: {getCountryName(shipper.org.country_code, locale)}
+              </p>
+            )}
           </div>
           <div className="px-6 py-4 border-t border-slate-100 bg-slate-50/50 flex justify-end gap-3">
             <Link href={`/${locale}/agency/shippers`}
