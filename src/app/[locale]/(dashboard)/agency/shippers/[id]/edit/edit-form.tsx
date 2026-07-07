@@ -144,6 +144,24 @@ export function EditShipperForm({ shipper }: EditShipperFormProps) {
                     className="w-full h-10 px-3 py-2 text-sm border border-slate-200 rounded-xl bg-slate-50" />
                 </div>
               </div>
+              {(shipper.org.state_province || shipper.org.city) && (
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                  {shipper.org.state_province && (
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">{t('form_state_province')}</label>
+                      <input readOnly value={shipper.org.state_province}
+                        className="w-full h-10 px-3 py-2 text-sm border border-slate-200 rounded-xl bg-slate-50" />
+                    </div>
+                  )}
+                  {shipper.org.city && (
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">{t('form_city')}</label>
+                      <input readOnly value={shipper.org.city}
+                        className="w-full h-10 px-3 py-2 text-sm border border-slate-200 rounded-xl bg-slate-50" />
+                    </div>
+                  )}
+                </div>
+              )}
               <div className="mb-4">
                 <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">{t('form_address')}</label>
                 <input readOnly value={shipper.org.address ?? ''}

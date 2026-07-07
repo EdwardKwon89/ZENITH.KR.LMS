@@ -24,6 +24,8 @@ vi.mock('next-intl', () => ({
       form_country: 'Country',
       form_zipcode: 'Zip Code',
       form_address_detail: 'Address Detail',
+      form_state_province: 'State/Province',
+      form_city: 'City',
     };
     return fallback[key] ?? key;
   },
@@ -112,5 +114,24 @@ describe('TC-P7-UI-EDIT-03: address section readOnly', () => {
     expect(addressDetailInput.readOnly).toBe(true);
 
     expect(screen.getByText('Address', { selector: 'p' })).toBeDefined();
+  });
+
+  it('should render state_province and city when present for non-KR shipper', () => {
+    const nonKrShipper = {
+      ...baseShipper,
+      org: {
+        ...baseShipper.org,
+        country_code: 'US',
+        state_province: 'CA',
+        city: 'Los Angeles',
+      },
+    };
+    const { container } = render(<EditShipperForm shipper={nonKrShipper} />);
+    const stateInput = container.querySelector('input[value="CA"]') as HTMLInputElement;
+    const cityInput = container.querySelector('input[value="Los Angeles"]') as HTMLInputElement;
+    expect(stateInput).not.toBeNull();
+    expect(stateInput.readOnly).toBe(true);
+    expect(cityInput).not.toBeNull();
+    expect(cityInput.readOnly).toBe(true);
   });
 });
