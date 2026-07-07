@@ -102,10 +102,10 @@ Issue #245의 프론트엔드 파트. TASK-B-069에서 백엔드(`updateAgencySh
 
 ### 커밋
 - 코드: `1e28eb0` — `[Baker] feat: TASK-B-070 Issue #245 화주 상태·주소·국가명·비밀번호 재인증 프론트엔드`
-- 문서: `<TBD>` — `[Baker] docs: TASK-B-070 완료 보고 — task file + ACTIVE_TASK.md`
+- 문서: `f55f549` — `[Baker] docs: TASK-B-070 완료 보고 — task file + ACTIVE_TASK.md + LIVE_REGRESSION_TEST_MAP.md`
 
 ### PR
-- PR#NNN: `feature/teamb-task-b-070-iss245-shipper-frontend-baker` → `develop`
+- PR#248: https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/248 (`feature/teamb-task-b-070-iss245-shipper-frontend-baker` → `develop`)
 
 ---
 
