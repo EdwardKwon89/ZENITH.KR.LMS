@@ -268,5 +268,28 @@
         "agencyPolicies": "代理店割引ポリシー"
       }
     }
+  },
+  "UpsDailyClose": {
+    "title": "日次クローズ",
+    "select_date": "照会日",
+    "search_btn": "照会",
+    "outbound_title": "当日出荷サマリー",
+    "total_pkgs": "総PKG数",
+    "total_weight": "総重量",
+    "zone_distribution": "ゾーン分布",
+    "revenue_title": "売上 / 仕入集計",
+    "date_col": "日付",
+    "pkg_col": "PKG数",
+    "revenue_col": "売上",
+    "cost_col": "仕入",
+    "margin_col": "マージン",
+    "margin_rate_col": "マージン率",
+    "total_row": "合計",
+    "csv_export": "CSVエクスポート",
+    "no_data": "データがありません。",
+    "agency_settlement_title": "代理店別精算状況",
+    "agency_col": "代理店",
+    "shipper_revenue_col": "荷主支払額",
+    "agency_revenue_col": "代理店支払額"
   }
 }

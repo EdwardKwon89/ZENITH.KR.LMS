@@ -3,10 +3,11 @@
 import { useState, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { Search, CalendarDays } from 'lucide-react';
-import { getDailyOutboundSummary, getDailyRevenueSummary, getDailyCloseHistory } from '@/lib/actions/ups-daily-close';
-import type { DailyOutboundSummary, DailyRevenueRow } from '@/lib/actions/ups-daily-close.shared';
+import { getDailyOutboundSummary, getDailyRevenueSummary, getDailyCloseHistory, getDailyAgencySettlementSummary } from '@/lib/actions/ups-daily-close';
+import type { DailyOutboundSummary, DailyRevenueRow, AgencySettlementRow } from '@/lib/actions/ups-daily-close.shared';
 import { OutboundSummaryCard } from './OutboundSummaryCard';
 import { RevenueSummaryTable } from './RevenueSummaryTable';
+import { AgencySettlementCard } from './AgencySettlementCard';
 
 function todayStr() {
   const d = new Date();
@@ -27,6 +28,7 @@ export default function DailyCloseClient() {
   const [toDate, setToDate] = useState(todayStr());
   const [outbound, setOutbound] = useState<DailyOutboundSummary | null>(null);
   const [revenueRows, setRevenueRows] = useState<DailyRevenueRow[]>([]);
+  const [agencyRows, setAgencyRows] = useState<AgencySettlementRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -34,12 +36,14 @@ export default function DailyCloseClient() {
     setLoading(true);
     setError('');
     try {
-      const [summary, revenue, history] = await Promise.all([
+      const [summary, revenue, history, agencySettlement] = await Promise.all([
         getDailyOutboundSummary(toDate),
         getDailyRevenueSummary(toDate),
         getDailyCloseHistory(fromDate, toDate),
+        getDailyAgencySettlementSummary(toDate),
       ]);
       setOutbound(summary);
+      setAgencyRows(agencySettlement.rows);
       setRevenueRows([
         ...(revenue.rows.length > 0 && !history.rows.find(r => r.date === revenue.rows[0].date)
           ? revenue.rows
@@ -119,6 +123,10 @@ export default function DailyCloseClient() {
 
       {!loading && outbound && (
         <OutboundSummaryCard summary={outbound} t={t} />
+      )}
+
+      {!loading && agencyRows.length > 0 && (
+        <AgencySettlementCard rows={agencyRows} t={t} />
       )}
 
       {!loading && revenueRows.length > 0 && (

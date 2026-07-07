@@ -92,8 +92,8 @@ describe('TC-P7-CLOSE: UPS Daily Close Server Actions', () => {
     mockSupabase.in
       .mockResolvedValueOnce({
         data: [
-          { order_id: 'ord-1', applied_unit_price: 150, carrier_cost_amount: 80, platform_fee_amount: 10 },
-          { order_id: 'ord-2', applied_unit_price: 200, carrier_cost_amount: 100, platform_fee_amount: 15 },
+          { order_id: 'ord-1', applied_unit_price: 150, carrier_cost_amount: 80, platform_fee_amount: 10, metadata: null },
+          { order_id: 'ord-2', applied_unit_price: 200, carrier_cost_amount: 100, platform_fee_amount: 15, metadata: null },
         ],
         error: null,
       })
@@ -103,6 +103,17 @@ describe('TC-P7-CLOSE: UPS Daily Close Server Actions', () => {
           { order_id: 'ord-1' },
           { order_id: 'ord-2' },
         ],
+        error: null,
+      })
+      .mockResolvedValueOnce({
+        data: [
+          { id: 'ord-1', agency_org_id: null },
+          { id: 'ord-2', agency_org_id: null },
+        ],
+        error: null,
+      })
+      .mockResolvedValueOnce({
+        data: [],
         error: null,
       });
 

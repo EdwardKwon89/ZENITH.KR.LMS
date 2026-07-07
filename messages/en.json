@@ -809,6 +809,10 @@
     "margin_rate_col": "Margin Rate",
     "total_row": "Total",
     "csv_export": "Export CSV",
-    "no_data": "No results found."
+    "no_data": "No results found.",
+    "agency_settlement_title": "Agency Settlement Summary",
+    "agency_col": "Agency",
+    "shipper_revenue_col": "Shipper Revenue",
+    "agency_revenue_col": "Agency Revenue"
   }
 }
