@@ -19,7 +19,7 @@
 | [#164](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/164) | [UAT-Epic] UPS 특송 서비스 — Team B 인수 테스트 (UAT-15~19) | b | p1 | open | jungjs | 2026-07-07 |
 | [#163](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/163) | [UAT-19] UPS 인보이스 PDF — Team B 수동 브라우저 UAT | b | p1 | open | jungjs | 2026-07-01 |
 | [#162](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/162) | [UAT-18] 창고 출고 UPS 연계 — Team B 수동 브라우저 UAT | b | p1 | open | jungjs | 2026-07-01 |
-| [#161](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/161) | [UAT-17] UPS 특송 오더 발송 — Team B 수동 브라우저 UAT | b | p1 | open | jungjs | 2026-07-01 |
+| [#161](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/161) | [UAT-17] UPS 특송 오더 발송 — Team B 수동 브라우저 UAT | b | p1 | in-progress | jungjs | 2026-07-07 |
 | [#86](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/86) | [Aiden] GitHub Issues ↔ ACTIVE_TASK.md 하이브리드 태스크 관리 체계 전환 (B방안) | a | p3 | open | 미배정 | 2026-07-07 |
 | [#76](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/76) | [설계안] B_Kai/D_Kai 작업 자동화 — OpenCode headless 기반 자율 에이전트 실행 체계 | - | - | - | 미배정 | 2026-06-22 |
 <!-- GH_ISSUES_SYNC:END -->
