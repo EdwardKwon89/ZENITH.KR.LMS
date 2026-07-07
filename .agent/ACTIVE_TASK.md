@@ -321,7 +321,7 @@
 | TASK-B-057 | 260705 | Issue #180 DEF — 화주 계정 발급 백엔드 (Auth createUser · 임시PW · Resend 이메일 · 롤백) | P1 | TASK-B-056 🔔 | Dave (구현) | 🔔 | [TASK-B-057](tasks/TASK-B-057_260705_DEF180_화주계정발급_백엔드_Dave.md) | JSJung 선행 착수 승인 · 코드 `17105be` · 391/391 · PR#184 · B-056 브랜치 위 구현 |
 | TASK-B-058 | 260705 | Issue #180 DEF — 화주 계정 발급 프론트엔드 (LoginAccountFields · AddressInput · i18n) | P1 | TASK-B-056 🔔 · TASK-B-057 🔔 | Baker (구현) | 🔔 | [TASK-B-058](tasks/TASK-B-058_260705_DEF180_화주계정발급_프론트엔드_Baker.md) | 코드 \`1220cd1\` · 11개 파일 · 391/391 PASS · PR#185 |
 | TASK-B-059 | 260705 | Issue #181 — zen_orders.agency_org_id migration + createOrder 수정 + 요금 스냅샷 저장 | P1 | TASK-B-056 ✅ | Dave (구현) | ✅ | [TASK-B-059](tasks/TASK-B-059_260705_ISS181_오더AgencyOrgId_스냅샷_Dave.md) | Issue #181 · PR#208 ✅ Aiden 머지 완료(`6e3ad05`, 260706) · J3 보완(zen_agency_shippers 조회 + agencyOrgId 파라미터 + TC mock) · TC 8/8 PASS · 회귀 472/472 PASS |
-| TASK-B-060 | 260705 | Issue #181 — 오더 등록 화면 estimateUpsFreight 연동 + UPS 견적 UI 표시 | P1 | TASK-B-059 🔔 권장 (JSJung 선행 착수 허가) | Baker (구현) | ⬜ | [TASK-B-060](tasks/TASK-B-060_260705_ISS181_UPS견적UI연동_Baker.md) | Issue #181 · Jaison 착수 승인(260705) |
+| TASK-B-060 | 260705 | Issue #181 — 오더 등록 화면 estimateUpsFreight 연동 + UPS 견적 UI 표시 | P1 | TASK-B-059 ✅ | Baker (구현) | 🔔 | [TASK-B-060](tasks/TASK-B-060_260705_ISS181_UPS견적UI연동_Baker.md) | Issue #181 · 코드 `<TBD>` · 회귀 489/489 PASS · PR 생성 대기 |
 | TASK-B-061 | 260706 | Issue #180 — 화주 등록 폼 UI 보완 (로그인 ID 최상단 배치 · 이메일 유효성 · BRONZE 기본 선택) | P1 | TASK-B-058 ✅ | Baker (구현) | 🔔 | [TASK-B-061](tasks/TASK-B-061_260706_ISS180_화주폼UI보완_Baker.md) | Issue #180 · 코드 \`c146495\` · 460/460 PASS · PR#223 |
 | TASK-B-062 | 260706 | Issue #180 — 화주 등록 폼 주소 검색 버튼 미동작 수정 (CSP 차단) + 단위 테스트 | P1 | 없음 | Dave (구현) | ✅ | [TASK-B-062](tasks/TASK-B-062_260706_ISS180_주소검색버튼수정_Dave.md) | Issue #180 · 코드 \`cb20c5f\` · TC-P7-UI-ADDR-01/02 4/4 PASS · 회귀 458/458 PASS · PR#224 ✅ Aiden 승인·머지 완료(\`d920901\`, 260706) |
 | TASK-B-063 | 260706 | Issue #180 — 주소 검색 근본 수정 (DaumPostcodeEmbed 전환 + CSP frame-src/script-src 보완) | P1 | TASK-B-062 ✅ | Dave (구현) | ✅ | [TASK-B-063](tasks/TASK-B-063_260706_ISS180_주소검색근본수정_Dave.md) | Issue #180 · 코드 \`987c0ad\` · 473/473 PASS · PR#225 ✅ Aiden 머지 완료(\`20b4c92\`, 260706) |
@@ -383,7 +383,7 @@
 | **JSJung** (팀 리더) | ✅ TASK-B-030 승인 완료 (260628) · ✅ TASK-B-033 승인 완료 (260701) | §1§2 확인 완료 · DEF-088 교정 완료 · PR#156 squash 머지 (e2bf48b) |
 | **Jaison** (AI Agent 총괄) | 🔔 TASK-B-056 검토 요청 (260705) | 코드 `d2e3b98` · 391/391 PASS · PR 생성 대기 |
 | **Dave** (AI Agent) | ✅ **TASK-B-059** Aiden 머지 완료 · ✅ **TASK-B-062** Aiden 머지 완료 · ✅ **TASK-B-063** Aiden 머지 완료 · ✅ **TASK-B-064** Aiden 머지 완료 · 🔔 **TASK-B-066** 구현 완료 | B-059: PR#208 (`6e3ad05`) · B-062: PR#224 (`d920901`) · B-063: PR#225 (`20b4c92`) · B-064: PR#226 (`c57dada`) — 전항목 develop 반영 완료(260706) · B-066: CSP Kakao 도메인 보완(connect-src + frame-src http://) · PR 대기 |
-| **Baker** (AI Agent) | 🔄 **TASK-B-060** 착수 · ✅ **TASK-B-061** Aiden 머지 완료 · ✅ **TASK-B-065** Aiden 승인·머지 완료 | B-060: B-059 머지 완료, rebase 후 진행 중 · B-061: PR#223 Aiden 머지 완료(260706) · B-065: PR#227 (`8a8b976`) Aiden 승인·머지 완료(260707) — state_province/city 보완 재검토 후 승인 |
+| **Baker** (AI Agent) | 🔔 **TASK-B-060** 구현 완료 · ✅ **TASK-B-061** Aiden 머지 완료 · ✅ **TASK-B-065** Aiden 승인·머지 완료 · 🔔 **TASK-B-067** 구현 완료 | B-060: Issue #181 UPS 견적 UI 연동, 회귀 489/489 PASS, PR 생성 대기 · B-061: PR#223 Aiden 머지 완료(260706) · B-065: PR#227 (`8a8b976`) Aiden 승인·머지 완료(260707) — state_province/city 보완 재검토 후 승인 · B-067: PR#241 머지 대기 |
 | **Gale** (AI Agent) | 대기 | 추후 재배정 예정 |
 
 ---
