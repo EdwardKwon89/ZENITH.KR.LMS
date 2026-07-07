@@ -1,0 +1,62 @@
+name: "[Sync] GitHub Issues → ACTIVE_TASK.md"
+
+# Issue #86 Phase 2
+# Issue 생성/라벨변경/종료/재오픈/담당자변경 시 .agent/ACTIVE_TASK.md 상단의
+# "GitHub Issues 현황(자동 동기화)" 섹션을 최신 오픈 이슈 목록으로 재생성합니다.
+# 팀별 상세 Task 표(수기 관리)는 건드리지 않습니다 — 대상은 GH_ISSUES_SYNC 마커 사이 블록뿐입니다.
+# Edward 승인(2026-07-07): develop 직접 커밋 방식 채택. 푸시 실패 시 재동기화 후 재시도.
+
+on:
+  issues:
+    types: [opened, edited, labeled, unlabeled, assigned, unassigned, closed, reopened]
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  issues: read
+
+concurrency:
+  group: sync-active-task-md
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout develop
+        uses: actions/checkout@v4
+        with:
+          ref: develop
+          fetch-depth: 0
+
+      - name: Regenerate synced section
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 .github/scripts/sync_active_task.py "${{ github.repository }}"
+
+      - name: Commit and push (retry on race)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          for attempt in 1 2 3 4 5; do
+            git add .agent/ACTIVE_TASK.md
+            if git diff --cached --quiet; then
+              echo "No changes to commit."
+              exit 0
+            fi
+            git commit -m "[Bot] docs: GitHub Issues 현황 자동 동기화"
+            if git push origin HEAD:develop; then
+              echo "Push succeeded on attempt ${attempt}."
+              exit 0
+            fi
+            echo "Push rejected (attempt ${attempt}), re-syncing against latest develop..."
+            git reset --soft HEAD~1
+            git fetch origin develop
+            git reset --hard origin/develop
+            python3 .github/scripts/sync_active_task.py "${{ github.repository }}"
+          done
+          echo "Failed to push after retries" >&2
+          exit 1
