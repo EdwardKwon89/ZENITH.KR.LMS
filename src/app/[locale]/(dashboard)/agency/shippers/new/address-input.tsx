@@ -8,19 +8,27 @@ import type { ICountry, IState, ICity } from 'country-state-city';
 interface AddressInputProps {
   t: (key: string) => string;
   fieldErrors?: Record<string, string>;
+  defaultValues?: {
+    country_code?: string | null;
+    state_province?: string | null;
+    city?: string | null;
+    address?: string | null;
+    address_detail?: string | null;
+    zipcode?: string | null;
+  };
 }
 
-export function AddressInput({ t, fieldErrors = {} }: AddressInputProps) {
-  const [countryCode, setCountryCode] = useState('KR');
+export function AddressInput({ t, fieldErrors = {}, defaultValues = {} }: AddressInputProps) {
+  const [countryCode, setCountryCode] = useState(defaultValues.country_code || 'KR');
   const [countries, setCountries] = useState<ICountry[]>([]);
   const [states, setStates] = useState<IState[]>([]);
   const [cities, setCities] = useState<ICity[]>([]);
-  const [selectedState, setSelectedState] = useState('');
-  const [selectedCity, setSelectedCity] = useState('');
-  const [streetAddress, setStreetAddress] = useState('');
-  const [detailAddress, setDetailAddress] = useState('');
-  const [postalCode, setPostalCode] = useState('');
-  const [roadAddress, setRoadAddress] = useState('');
+  const [selectedState, setSelectedState] = useState(defaultValues.state_province || '');
+  const [selectedCity, setSelectedCity] = useState(defaultValues.city || '');
+  const [streetAddress, setStreetAddress] = useState(defaultValues.address || '');
+  const [detailAddress, setDetailAddress] = useState(defaultValues.address_detail || '');
+  const [postalCode, setPostalCode] = useState(defaultValues.zipcode || '');
+  const [roadAddress, setRoadAddress] = useState(defaultValues.country_code === 'KR' ? (defaultValues.address || '') : '');
   const [showPostcode, setShowPostcode] = useState(false);
 
   useEffect(() => {

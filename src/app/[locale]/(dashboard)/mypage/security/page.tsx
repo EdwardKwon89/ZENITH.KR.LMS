@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { changePassword } from '@/app/actions/auth';
+import { changePasswordWithReauth } from '@/app/actions/auth';
 import { ZenCard, ZenButton, ZenInput } from '@/components/ui/ZenUI';
 import { ShieldCheck, Lock, AlertCircle, Loader2, CheckCircle2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
@@ -25,33 +25,40 @@ export default function SecurityPage() {
     setError(null);
 
     const formData = new FormData(event.currentTarget);
+    const currentPassword = formData.get('currentPassword') as string;
     const password = formData.get('password') as string;
     const confirmPassword = formData.get('confirmPassword') as string;
 
+    if (!currentPassword) {
+      setError(t('current_password_required') || '현재 비밀번호를 입력해주세요.');
+      setIsPending(false);
+      return;
+    }
+
     if (password !== confirmPassword) {
-      setError('비밀번호가 일치하지 않습니다.');
+      setError(t('password_mismatch') || '비밀번호가 일치하지 않습니다.');
       setIsPending(false);
       return;
     }
 
     if (password.length < 8) {
-      setError('비밀번호는 최소 8자 이상이어야 합니다.');
+      setError(t('password_min_length') || '비밀번호는 최소 8자 이상이어야 합니다.');
       setIsPending(false);
       return;
     }
 
     try {
-      const res = await changePassword(password);
+      const res = await changePasswordWithReauth(currentPassword, password);
       if (res.error) {
         setError(res.error);
         toast.error(res.error);
       } else {
         setIsSuccess(true);
-        toast.success('비밀번호가 성공적으로 변경되었습니다.');
+        toast.success(t('change_password_success') || '비밀번호가 성공적으로 변경되었습니다.');
       }
     } catch (err) {
-      setError('비밀번호 변경 중 오류가 발생했습니다.');
-      toast.error('오류가 발생했습니다.');
+      setError(t('change_password_error') || '비밀번호 변경 중 오류가 발생했습니다.');
+      toast.error(t('error_occurred') || '오류가 발생했습니다.');
     } finally {
       setIsPending(false);
     }
@@ -86,6 +93,22 @@ export default function SecurityPage() {
         {!isSuccess ? (
           <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
             <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">
+                  {t('current_password_label') || '현재 비밀번호'}
+                </label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
+                  <ZenInput
+                    name="currentPassword"
+                    type="password"
+                    placeholder="••••••••"
+                    className="pl-10"
+                    required
+                  />
+                </div>
+              </div>
+
               <div className="space-y-2">
                 <label className="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">
                   {t('new_password_label') || '새 비밀번호'}
