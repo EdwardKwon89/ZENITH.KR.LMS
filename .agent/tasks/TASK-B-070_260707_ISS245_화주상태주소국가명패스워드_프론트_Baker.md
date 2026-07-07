@@ -103,9 +103,13 @@ Issue #245의 프론트엔드 파트. TASK-B-069에서 백엔드(`updateAgencySh
 ### 커밋
 - 코드: `1e28eb0` — `[Baker] feat: TASK-B-070 Issue #245 화주 상태·주소·국가명·비밀번호 재인증 프론트엔드`
 - 문서: `f55f549` — `[Baker] docs: TASK-B-070 완료 보고 — task file + ACTIVE_TASK.md + LIVE_REGRESSION_TEST_MAP.md`
+- 수정: `aff3ffd` — `[Baker] fix: messages/zh.json error_occurred 뒤 콤마 누락 수정`
 
 ### PR
 - PR#248: https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/248 (`feature/teamb-task-b-070-iss245-shipper-frontend-baker` → `develop`)
+
+### 재작업 이력
+- 260707 10:57 Jaison 재작업 지시: `messages/zh.json` 103줄 콤마 누락 → `npm run build` PASS 확인 후 `aff3ffd` 커밋/push
 
 ---
 
