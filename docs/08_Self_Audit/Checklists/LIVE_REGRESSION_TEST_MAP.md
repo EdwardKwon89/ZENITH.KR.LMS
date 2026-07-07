@@ -1,7 +1,7 @@
 # 🗺️ LIVE Regression Test Master Map
 
-> **총 테스트 케이스:** 460 Cases (vitest 개별 테스트 기준, 76 test files)
-> **최종 검증일:** 2026-07-06 (GH#204 어드민 UI 요율 탭 추가 · TC-UPS-ADMIN-08~11 등재 · 454/454 PASS)  
+> **총 테스트 케이스:** 464 Cases (vitest 개별 테스트 기준, 77 test files)
+> **최종 검증일:** 2026-07-07 (TASK-B-060 UPS 견적 UI 연동 · TC-P7-UI-ESTIMATE-01/02 등재 · 485/485 PASS)  
 
 제니스 플랫폼의 비즈니스 영속성을 보장하는 회귀 테스트 케이스의 통합 명세서입니다. 모든 신규 개발 및 수정 시 이 맵에 케이스가 추가되어야 하며, 전체 테스트가 통과되어야 합니다.
 
@@ -556,6 +556,12 @@
 | **TC-P7-UI-EDIT-01** | edit-form: name, shipper_type input disabled 확인 | 상세보기 모드에서 필수 항목 수정 불가 | `tests/unit/agency/edit-form.test.tsx` |
 | **TC-P7-UI-EDIT-02** | CORPORATE인 경우 biz_no disabled 확인 | 법인 사업자번호 수정 불가 | `tests/unit/agency/edit-form.test.tsx` |
 | **TC-P7-UI-EDIT-03** | 주소 섹션 표시 + readOnly 확인 (address, zipcode) | 등록 폼과 동일한 주소 필드 readOnly 표시 | `tests/unit/agency/edit-form.test.tsx` |
+
+### 45. UPS 견적 UI 연동 (Issue #181 TASK-B-060)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-P7-UI-ESTIMATE-01** | AGENCY_SHIPPER 역할 + 필수 입력 완료 시 UPS 견적 패널 표시 | UI 조건 분기 검증 | `tests/unit/orders/ups-estimate-panel.test.tsx` |
+| **TC-P7-UI-ESTIMATE-02** | AGENCY_SHIPPER 아닌 역할에서 패널 미표시 | 역할 기반 표시 격리 | `tests/unit/orders/ups-estimate-panel.test.tsx` |
 
 ---
 
