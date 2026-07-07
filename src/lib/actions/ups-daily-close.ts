@@ -4,7 +4,7 @@ import { validateUserAction } from '@/lib/auth/guards';
 import { OrderStatus } from '@/types/orders';
 
 import { DailyCloseDateSchema, DailyCloseRangeSchema } from './ups-daily-close.shared';
-import type { DailyOutboundSummary, DailyRevenueRow } from './ups-daily-close.shared';
+import type { DailyOutboundSummary, DailyRevenueRow, AgencySettlementRow } from './ups-daily-close.shared';
 
 export async function getDailyOutboundSummary(date: string): Promise<DailyOutboundSummary> {
   const { supabase } = await validateUserAction();
@@ -72,13 +72,32 @@ export async function getDailyRevenueSummary(date: string): Promise<{ rows: Dail
 
   const { data: snapshots } = await supabase
     .from('zen_order_rate_snapshots')
-    .select('order_id, applied_unit_price, carrier_cost_amount, platform_fee_amount')
+    .select('order_id, applied_unit_price, carrier_cost_amount, platform_fee_amount, metadata')
     .in('order_id', orderIds);
 
   const { data: pkgs } = await supabase
     .from('zen_order_packages')
     .select('order_id')
     .in('order_id', orderIds);
+
+  const { data: orders } = await supabase
+    .from('zen_orders')
+    .select('id, agency_org_id')
+    .in('id', orderIds);
+
+  const agencyOrgMap = new Map<string, string>();
+  for (const o of orders || []) {
+    if (o.agency_org_id) agencyOrgMap.set(o.id, o.agency_org_id);
+  }
+
+  const agencyIds = [...new Set(agencyOrgMap.values())];
+  const { data: agencies } = await supabase
+    .from('zen_organizations')
+    .select('id, name')
+    .in('id', agencyIds.length > 0 ? agencyIds : ['none']);
+
+  const agencyNameMap = new Map<string, string>();
+  for (const a of agencies || []) agencyNameMap.set(a.id, a.name);
 
   const pkgCountByOrder = new Map<string, number>();
   for (const p of pkgs || []) {
@@ -108,6 +127,85 @@ export async function getDailyRevenueSummary(date: string): Promise<{ rows: Dail
       marginRate,
     }],
   };
+}
+
+export async function getDailyAgencySettlementSummary(date: string): Promise<{ rows: AgencySettlementRow[] }> {
+  const { supabase } = await validateUserAction();
+  const parsed = DailyCloseDateSchema.parse({ date });
+
+  const { data: historyItems } = await supabase
+    .from('order_status_history')
+    .select('order_id')
+    .eq('next_status', OrderStatus.RELEASED)
+    .gte('created_at', `${parsed.date}T00:00:00`)
+    .lt('created_at', `${parsed.date}T23:59:59`);
+
+  const orderIds = (historyItems || []).map(h => h.order_id);
+  if (orderIds.length === 0) return { rows: [] };
+
+  const { data: snapshots } = await supabase
+    .from('zen_order_rate_snapshots')
+    .select('order_id, applied_unit_price, metadata')
+    .in('order_id', orderIds);
+
+  const { data: pkgs } = await supabase
+    .from('zen_order_packages')
+    .select('order_id')
+    .in('order_id', orderIds);
+
+  const { data: orders } = await supabase
+    .from('zen_orders')
+    .select('id, agency_org_id')
+    .in('id', orderIds);
+
+  const agencyOrgMap = new Map<string, string>();
+  for (const o of orders || []) {
+    if (o.agency_org_id) agencyOrgMap.set(o.id, o.agency_org_id);
+  }
+
+  const agencyIds = [...new Set(agencyOrgMap.values())];
+  const { data: agencies } = await supabase
+    .from('zen_organizations')
+    .select('id, name')
+    .in('id', agencyIds.length > 0 ? agencyIds : ['none']);
+
+  const agencyNameMap = new Map<string, string>();
+  for (const a of agencies || []) agencyNameMap.set(a.id, a.name);
+
+  const pkgCountByOrder = new Map<string, number>();
+  for (const p of pkgs || []) {
+    pkgCountByOrder.set(p.order_id, (pkgCountByOrder.get(p.order_id) || 0) + 1);
+  }
+
+  const agencyMap = new Map<string, { shipperRevenue: number; agencyRevenue: number; pkgCount: number }>();
+
+  for (const snap of snapshots || []) {
+    const agencyOrgId = agencyOrgMap.get(snap.order_id);
+    if (!agencyOrgId) continue;
+
+    const meta = snap.metadata as Record<string, any> | null;
+    const shipperRev = meta?.shipper?.finalFreight ?? snap.applied_unit_price ?? 0;
+    const agencyRev = meta?.agency?.agencySellingPrice ?? null;
+
+    const entry = agencyMap.get(agencyOrgId) ?? { shipperRevenue: 0, agencyRevenue: 0, pkgCount: 0 };
+    entry.shipperRevenue += Number(shipperRev) || 0;
+    if (agencyRev !== null) entry.agencyRevenue += Number(agencyRev) || 0;
+    entry.pkgCount += pkgCountByOrder.get(snap.order_id) || 0;
+    agencyMap.set(agencyOrgId, entry);
+  }
+
+  const rows: AgencySettlementRow[] = [];
+  for (const [agencyOrgId, data] of agencyMap) {
+    rows.push({
+      agencyOrgId,
+      agencyName: agencyNameMap.get(agencyOrgId) ?? agencyOrgId,
+      shipperRevenue: Math.round(data.shipperRevenue * 100) / 100,
+      agencyRevenue: Math.round(data.agencyRevenue * 100) / 100,
+      pkgCount: data.pkgCount,
+    });
+  }
+
+  return { rows };
 }
 
 export async function getDailyCloseHistory(from: string, to: string): Promise<{ rows: DailyRevenueRow[] }> {

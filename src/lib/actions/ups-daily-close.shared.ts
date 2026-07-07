@@ -22,3 +22,11 @@ export interface DailyRevenueRow {
   margin: number;
   marginRate: number;
 }
+
+export interface AgencySettlementRow {
+  agencyOrgId: string;
+  agencyName: string;
+  shipperRevenue: number;
+  agencyRevenue: number;
+  pkgCount: number;
+}
