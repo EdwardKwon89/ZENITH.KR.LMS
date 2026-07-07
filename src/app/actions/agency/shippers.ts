@@ -229,7 +229,7 @@ export async function createAgencyShipper(
     linkId = await _linkShipperToAgency(supabase, agencyOrgId, orgId, {
       shipper_type: rest.shipper_type,
       discount_rate: rest.discount_rate,
-      grade: rest.shipper_type === 'INDIVIDUAL' ? (rest.grade ?? 'BRONZE') : null,
+      grade: rest.shipper_type === 'INDIVIDUAL' ? (rest.grade ?? 'BRONZE') : undefined,
     });
   } catch {
     // Rollback: delete auth user + org + profile
