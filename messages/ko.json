@@ -804,7 +804,11 @@
     "margin_rate_col": "마진율",
     "total_row": "합계",
     "csv_export": "CSV 내보내기",
-    "no_data": "조회 결과가 없습니다."
+    "no_data": "조회 결과가 없습니다.",
+    "agency_settlement_title": "대리점별 정산 현황",
+    "agency_col": "대리점",
+    "shipper_revenue_col": "화주 납부액",
+    "agency_revenue_col": "대리점 납부액"
   },
   "Finance": {
     "active_invoice": "활성 인보이스",

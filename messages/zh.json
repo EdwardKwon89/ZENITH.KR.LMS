@@ -286,5 +286,28 @@
         "agencyPolicies": "代理折扣政策"
       }
     }
+  },
+  "UpsDailyClose": {
+    "title": "日结处理",
+    "select_date": "查询日期",
+    "search_btn": "查询",
+    "outbound_title": "当日出货概况",
+    "total_pkgs": "总PKG数",
+    "total_weight": "总重量",
+    "zone_distribution": "区域分布",
+    "revenue_title": "收入 / 成本汇总",
+    "date_col": "日期",
+    "pkg_col": "PKG数",
+    "revenue_col": "收入",
+    "cost_col": "成本",
+    "margin_col": "利润",
+    "margin_rate_col": "利润率",
+    "total_row": "合计",
+    "csv_export": "导出CSV",
+    "no_data": "无查询结果。",
+    "agency_settlement_title": "代理商结算概况",
+    "agency_col": "代理商",
+    "shipper_revenue_col": "货主支付额",
+    "agency_revenue_col": "代理商支付额"
   }
 }
