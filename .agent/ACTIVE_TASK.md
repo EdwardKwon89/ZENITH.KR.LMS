@@ -15,6 +15,7 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
+| [#239](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/239) | [TEST] 봇 PR 생성 재검증 (GH_PROJECT_TOKEN 적용) | - | - | - | 미배정 | 2026-07-07 |
 | [#236](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/236) | [TEST] 봇 PR 생성 방식 재검증 (방안 B) | - | - | - | 미배정 | 2026-07-07 |
 | [#231](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/231) | [Team B 인계] Issue #181 항목4 — 정산 분리 (화주→Agency, Agency→플랫폼 청구 구분) | b | p1 | open | jungjs | 2026-07-07 |
 | [#182](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/182) | [Phase 7.1] UPS 특송 요금 관리 보완 — Agency/Shipper 계산 파이프라인 (An-14) | a | p1 | open | 미배정 | 2026-07-05 |
