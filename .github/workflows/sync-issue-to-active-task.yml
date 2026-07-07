@@ -10,6 +10,14 @@ name: "[Sync] GitHub Issues → ACTIVE_TASK.md"
 # 아님)의 직접 push가 GH006으로 거부됨. 관리자 PAT 우회나 봇 자체 병합 대신, 이 봇은
 # PR만 생성하고 병합은 Aiden이 검토 후 수동으로 진행한다. 우회 경로·자동 병합 권한
 # 모두 만들지 않는다. 열려있는 봇 PR이 있으면 새로 만들지 않고 같은 브랜치를 갱신한다.
+#
+# 2026-07-07 추가 수정 (Edward 명시 승인): repo 기본 설정("Allow GitHub Actions to
+# create and approve pull requests")이 꺼져 있어 GITHUB_TOKEN으로는 `gh pr create`
+# 자체가 거부됨(GraphQL: not permitted to create or approve pull requests).
+# repo 전역 설정을 여는 대신(승인 권한까지 함께 열리는 더 넓은 변경이라 배제),
+# PR 생성 단계의 GH_TOKEN만 GH_PROJECT_TOKEN(Admin PAT)으로 교체 — "생성"만
+# 가능해지며, 병합은 여전히 Aiden이 CI 통과 확인 후 수동 진행하므로 체크 우회는
+# 발생하지 않음.
 
 on:
   issues:
@@ -37,7 +45,7 @@ jobs:
 
       - name: Prepare bot branch, regenerate, and open/update PR (no auto-merge)
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_PROJECT_TOKEN }}
         run: |
           set -e
           git config user.name "github-actions[bot]"
