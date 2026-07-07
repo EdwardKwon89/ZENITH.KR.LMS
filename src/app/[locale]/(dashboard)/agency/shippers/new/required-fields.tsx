@@ -37,7 +37,7 @@ export function RequiredFields({ t, defaultValues = {}, fieldErrors = {}, readOn
           required
           defaultValue={defaultValues.name}
           disabled={readOnly}
-          className={`w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 ${readOnly ? 'bg-slate-50' : ''}`}
+          className={`w-full h-10 px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 ${readOnly ? 'bg-slate-50' : ''}`}
         />
         {fieldErrors.name && <p className="text-xs text-red-500 mt-1">{fieldErrors.name}</p>}
       </div>
@@ -51,7 +51,7 @@ export function RequiredFields({ t, defaultValues = {}, fieldErrors = {}, readOn
             value={shipperType}
             onChange={(e) => setShipperType(e.target.value as 'INDIVIDUAL' | 'CORPORATE')}
             disabled={readOnly}
-            className={`w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${readOnly ? 'bg-slate-50' : ''}`}
+            className={`w-full h-10 px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${readOnly ? 'bg-slate-50' : ''}`}
           >
             <option value="INDIVIDUAL">{t('type_INDIVIDUAL')}</option>
             <option value="CORPORATE">{t('type_CORPORATE')}</option>
@@ -70,7 +70,7 @@ export function RequiredFields({ t, defaultValues = {}, fieldErrors = {}, readOn
                 max="99.99"
                 required
                 defaultValue={defaultValues.discount_rate}
-                className="w-full px-3 py-2.5 pr-7 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                className="w-full h-10 px-3 py-2 pr-7 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">%</span>
             </div>
@@ -93,7 +93,7 @@ export function RequiredFields({ t, defaultValues = {}, fieldErrors = {}, readOn
               onChange={(e) => { e.target.value = formatBizNo(e.target.value); }}
               maxLength={12}
               disabled={readOnly}
-              className={`w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 ${readOnly ? 'bg-slate-50' : ''}`}
+              className={`w-full h-10 px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 ${readOnly ? 'bg-slate-50' : ''}`}
             />
             {fieldErrors.biz_no && <p className="text-xs text-red-500 mt-1">{fieldErrors.biz_no}</p>}
           </div>
@@ -102,26 +102,30 @@ export function RequiredFields({ t, defaultValues = {}, fieldErrors = {}, readOn
             <input
               name="rep_name"
               defaultValue={defaultValues.rep_name}
-              className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+              className="w-full h-10 px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
             />
             {fieldErrors.rep_name && <p className="text-xs text-red-500 mt-1">{fieldErrors.rep_name}</p>}
           </div>
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">{t('form_grade')}</label>
-          <select name="grade" defaultValue={defaultValues.grade ?? 'BRONZE'} className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20">
-            <option value="">{t('grade_placeholder')}</option>
-            <option value="BRONZE">BRONZE</option>
-            <option value="SILVER">SILVER</option>
-            <option value="GOLD">GOLD</option>
-            <option value="PLATINUM">PLATINUM</option>
-          </select>
-          {fieldErrors.grade && <p className="text-xs text-red-500 mt-1">{fieldErrors.grade}</p>}
+      {shipperType === 'INDIVIDUAL' ? (
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">{t('form_grade')}</label>
+            <select name="grade" defaultValue={defaultValues.grade ?? 'BRONZE'} className="w-full h-10 px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+              <option value="">{t('grade_placeholder')}</option>
+              <option value="BRONZE">BRONZE</option>
+              <option value="SILVER">SILVER</option>
+              <option value="GOLD">GOLD</option>
+              <option value="PLATINUM">PLATINUM</option>
+            </select>
+            {fieldErrors.grade && <p className="text-xs text-red-500 mt-1">{fieldErrors.grade}</p>}
+          </div>
         </div>
-      </div>
+      ) : (
+        <input type="hidden" name="grade" value="" />
+      )}
     </>
   );
 }

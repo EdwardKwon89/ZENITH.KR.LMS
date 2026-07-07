@@ -4,7 +4,7 @@
 > **발령자**: Jaison (Team B 총괄)
 > **담당자**: Baker (Kimi)
 > **우선순위**: P1
-> **상태**: ⬜
+> **상태**: 🔔 검토 요청
 > **선행 Task**: §1·§2는 즉시 착수 가능 / §3은 TASK-B-064 완료 후 착수
 > **연관 이슈**: [Issue #180](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/180)
 
@@ -201,15 +201,15 @@ ContactFields 아래에 주소 표시 섹션 추가 (모든 필드 readOnly):
 
 ## DoD (완료 기준)
 
-- [ ] select/input `h-10` 높이 통일 (required-fields.tsx, address-input.tsx)
-- [ ] 주소 검색 버튼: zipcode+버튼 전체 폭 독립 행으로 재배치
-- [ ] edit-form.tsx: name·shipper_type·biz_no disabled (readOnly prop 활용)
-- [ ] edit-form.tsx: 주소 섹션 readonly 표시 추가
-- [ ] EditShipperFormProps에 주소 6개 필드 추가
-- [ ] TC-P7-UI-EDIT-01/02/03 PASS
-- [ ] LIVE_REGRESSION_TEST_MAP.md 갱신
-- [ ] 전체 회귀 PASS (rtk npm run test:regression)
-- [ ] R-17 커밋 분리: 코드 커밋 / 문서 커밋
+- [x] select/input `h-10` 높이 통일 (required-fields.tsx, address-input.tsx)
+- [x] 주소 검색 버튼: zipcode+버튼 전체 폭 독립 행으로 재배치
+- [x] edit-form.tsx: name·shipper_type·biz_no disabled (readOnly prop 활용)
+- [x] edit-form.tsx: 주소 섹션 readonly 표시 추가
+- [x] EditShipperFormProps에 주소 6개 필드 추가
+- [x] TC-P7-UI-EDIT-01/02/03 PASS
+- [x] LIVE_REGRESSION_TEST_MAP.md 갱신
+- [x] 전체 회귀 PASS (rtk npm run test:regression) — 485/485
+- [x] R-17 커밋 분리: 코드 커밋 / 문서 커밋
 - [ ] PR 생성 (References #180, develop 대상)
 
 ---
@@ -228,7 +228,39 @@ _(Aiden 전속)_
 
 ## [작업 결과]
 
-_(Baker 작성)_
+### §1 — required-fields.tsx: select/input 높이 h-10 통일 ✅
+- `name`, `shipper_type`, `discount_rate`, `biz_no`, `rep_name`, `grade` 컨트롤에 `h-10` + `py-2` 적용
+- 브라우저 간 일관된 40px 높이 보장
+
+### §2 — address-input.tsx: 높이 통일 + 주소검색버튼 재배치 ✅
+- `country` select, `zipcode` input, 주소검색 button에 `h-10` + `py-2` 적용
+- KR 우편번호+검색버튼을 grid 우측 컬럼에서 전체 폭 독립 행으로 분리
+- 국외 주소 입력 컨트롤(state, city, address, address_detail, zipcode)도 h-10 통일
+- **rebase 보완**: develop 기준 `DaumPostcodeEmbed` 인라인 모달 유지, `useKakaoPostcodePopup` 롤백 방지
+
+### §3 — edit-form.tsx: 상세보기 동기화 ✅
+- `EditShipperFormProps.org`에 주소 6개 필드(`country_code`, `state_province`, `city`, `address`, `address_detail`, `zipcode`) 추가
+- `<RequiredFields readOnly />` 전달 → name·shipper_type·biz_no disabled
+- ContactFields 아래에 readOnly 주소 섹션 추가 (country/zipcode 2열, address 1열, address_detail 조걶� 표시)
+- **보완**: country/zipcode 행 아래 `state_province`·`city` 조걶� readOnly 표시 추가 (비KR 화주 대응)
+
+### §4 — TC 업데이트 ✅
+- `tests/unit/agency/edit-form.test.tsx` (5 tests)
+  - TC-P7-UI-EDIT-01: name, shipper_type disabled
+  - TC-P7-UI-EDIT-02: CORPORATE biz_no disabled
+  - TC-P7-UI-EDIT-03: 주소 섹션 readOnly (address, zipcode, address_detail, state_province, city)
+
+### 회귀 테스트
+- **80 files, 485/485 PASS** (B-063 DaumPostcodeEmbed 기준 5 tests + B-065 5 tests)
+
+### 커밋
+- 코드: `7da02dd` — `[Baker] feat: TASK-B-065 Issue #180 화주 폼 UI 통일 + 상세보기 동기화`
+- 코드: `95efe89` — `[Baker] fix: TASK-B-065 edit-form state_province·city 렌더링 추가`
+- 문서: `744f824` — `[Baker] docs: TASK-B-065 완료 보고 — task file + LIVE_REGRESSION_TEST_MAP.md`
+- 문서: `2c329e1` — `[Baker] docs: TASK-B-065 PR#227 기록`
+
+### PR
+- PR#227: `feature/teamb-jaison-b064-b065-dispatch` → `develop` (rebase 후 force-push 완료)
 
 ---
 
