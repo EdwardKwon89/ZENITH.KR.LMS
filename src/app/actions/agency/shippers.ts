@@ -58,7 +58,7 @@ async function _createShipperProfile(
   orgId: string,
   phone?: string | null,
 ): Promise<void> {
-  const { error } = await supabase.from('zen_profiles').insert({
+  const { error } = await supabase.from('zen_profiles').upsert({
     id: authUid,
     email,
     full_name: fullName,
@@ -91,6 +91,23 @@ async function _linkShipperToAgency(
     .single();
   if (error) throw new Error(`Failed to link shipper: ${error.message}`);
   return link.id;
+}
+
+async function _rollbackShipper(
+  supabase: SupabaseClient,
+  authUid: string,
+  orgId?: string,
+): Promise<void> {
+  const { error: profileErr } = await supabase.from('zen_profiles').delete().eq('id', authUid);
+  if (profileErr) logger.warn(`[rollback] zen_profiles delete failed for ${authUid}: ${profileErr.message}`);
+
+  const { error: authErr } = await supabase.auth.admin.deleteUser(authUid);
+  if (authErr) logger.warn(`[rollback] auth.deleteUser failed for ${authUid}: ${authErr.message}`);
+
+  if (orgId) {
+    const { error: orgErr } = await supabase.from('zen_organizations').delete().eq('id', orgId);
+    if (orgErr) logger.warn(`[rollback] zen_organizations delete failed for ${orgId}: ${orgErr.message}`);
+  }
 }
 
 export async function getAgencyShippers(agencyOrgId: string) {
@@ -173,18 +190,18 @@ export async function createAgencyShipper(
   }
   const authUid = authData.user.id;
 
+  // ③ Send welcome email (best-effort — non-fatal)
+  let inviteEmailSent = false;
   try {
-    // ③ Send welcome email
     await sendShipperWelcomeEmail({
       email: login_email,
       shipperName: name,
       tempPassword,
       agencyContactEmail: contact_email ?? undefined,
     });
-  } catch {
-    // Rollback: delete auth user
-    await supabase.auth.admin.deleteUser(authUid);
-    return { success: false, fieldErrors: { _form: '초대 이메일 발송에 실패했습니다. 다시 시도해주세요.' } };
+    inviteEmailSent = true;
+  } catch (emailErr) {
+    logger.warn(`[createAgencyShipper] Welcome email failed (non-fatal): ${emailErr}`);
   }
 
   let orgId: string;
@@ -208,18 +225,15 @@ export async function createAgencyShipper(
       },
     );
   } catch {
-    // Rollback: delete auth user
-    await supabase.auth.admin.deleteUser(authUid);
+    await _rollbackShipper(supabase, authUid);
     return { success: false, fieldErrors: { _form: '화주 조직 생성에 실패했습니다.' } };
   }
 
   try {
-    // ⑤ Create shipper profile
+    // ⑤ Create/upsert shipper profile
     await _createShipperProfile(supabase, authUid, login_email, name, orgId, contact_phone);
   } catch {
-    // Rollback: delete auth user + org
-    await supabase.auth.admin.deleteUser(authUid);
-    await supabase.from('zen_organizations').delete().eq('id', orgId);
+    await _rollbackShipper(supabase, authUid, orgId);
     return { success: false, fieldErrors: { _form: '화주 프로필 생성에 실패했습니다.' } };
   }
 
@@ -232,16 +246,13 @@ export async function createAgencyShipper(
       grade: rest.shipper_type === 'INDIVIDUAL' ? (rest.grade ?? 'BRONZE') : undefined,
     });
   } catch {
-    // Rollback: delete auth user + org + profile
-    await supabase.auth.admin.deleteUser(authUid);
-    await supabase.from('zen_organizations').delete().eq('id', orgId);
-    await supabase.from('zen_profiles').delete().eq('id', authUid);
+    await _rollbackShipper(supabase, authUid, orgId);
     return { success: false, fieldErrors: { _form: '화주 연결에 실패했습니다.' } };
   }
 
   logger.info(`[createAgencyShipper] Shipper created: auth=${authUid}, org=${orgId}, link=${linkId}`);
   revalidatePath('/agency/shippers');
-  return { success: true, shipperId: linkId, inviteEmailSent: true };
+  return { success: true, shipperId: linkId, inviteEmailSent };
 }
 
 export async function updateAgencyShipperGrade(
