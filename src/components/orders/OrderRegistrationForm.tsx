@@ -134,10 +134,6 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
   const [affiliation, setAffiliation] = React.useState<Affiliation>(null);
   const [isLoadingAffiliation, setIsLoadingAffiliation] = React.useState(true);
 
-  const isAgencyShipper = affiliation?.role === USER_ROLES.AGENCY_SHIPPER;
-  const destPort = ports.find((p) => p.id === watch('dest_port_id'));
-
-
   const { 
     register, 
     control, 
@@ -161,6 +157,9 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
       }]
     }
   });
+
+  const isAgencyShipper = affiliation?.role === USER_ROLES.AGENCY_SHIPPER;
+  const destPort = ports.find((p) => p.id === watch('dest_port_id'));
 
   const [step, setStep] = React.useState<1 | 2 | 3>(1);
   const [selectedCombination, setSelectedCombination] = React.useState<string>('');
