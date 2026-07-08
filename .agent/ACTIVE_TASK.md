@@ -15,6 +15,7 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
+| [#261](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/261) | [feat] TASK-B-078 REQ-06 아이템명 → HScode 자동 추출 (Claude Haiku 4.5 API) | b | p1 | open | jungjs | 2026-07-08 |
 | [#260](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/260) | [feat] TASK-B-075 REQ-01/02 화주 주소 자동완성 + AddressInput 공통 컴포넌트화 | b | p1 | open | jungjs | 2026-07-08 |
 | [#259](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/259) | [feat] TASK-B-079 REQ-07 UPS Direct 운송 모드 추가 + UpsServiceSelector | b | p1 | open | jungjs | 2026-07-08 |
 | [#258](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/258) | [feat] TASK-B-076 REQ-03/04 패키지 content_type(GENERAL/DOC/NONDOC) + 지역운송장번호 | b | p2 | open | jungjs | 2026-07-08 |
