@@ -176,8 +176,6 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
         packing_count: 1, 
         gross_weight: 0,
         special_cargo_type: 'NONE',
-        content_type: 'GENERAL',
-        domestic_ref_no: '',
         items: [{ item_name: '', quantity: 1, unit_price: 0, currency: 'USD', item_packing_unit: 'EA' }] 
       }]
     }
@@ -939,7 +937,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                     <ZenButton 
                       type="button" 
                       variant="glass" 
-                      onClick={() => appendPackage({ packing_unit: 'BOX', packing_count: 1, gross_weight: 0, special_cargo_type: 'NONE', content_type: 'GENERAL', domestic_ref_no: '', items: [{ item_name: '', quantity: 1, unit_price: 0, currency: 'USD', item_packing_unit: 'EA' }] })}
+                      onClick={() => appendPackage({ packing_unit: 'BOX', packing_count: 1, gross_weight: 0, special_cargo_type: 'NONE', items: [{ item_name: '', quantity: 1, unit_price: 0, currency: 'USD', item_packing_unit: 'EA' }] })}
                       className="px-3 py-1 text-xs"
                     >
                       <Plus size={14} /> 패키지 추가
