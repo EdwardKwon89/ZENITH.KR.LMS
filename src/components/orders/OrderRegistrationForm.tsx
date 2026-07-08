@@ -22,6 +22,7 @@ import { estimateFreightCost, TransportMode } from '@/utils/logistics/freight-ca
 import { getAvailableServiceRates, getUsdKrwRate, getBaseCurrency, AvailableServiceRates } from '@/app/actions/operations/service-rates';
 import { createOrderServices } from '@/app/actions/operations/order-services';
 import AddressBookSelector from '@/components/address-book/AddressBookSelector';
+import { AddressInput } from '@/components/common/AddressInput';
 
 interface OrderRegistrationFormProps {
   shippers: any[];
@@ -213,6 +214,11 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
           setValue('shipper_contact_phone', data.userPhone || '');
           setValue('shipper_address', matchedShipper?.address || data.orgAddress || '');
           setValue('shipper_biz_no', matchedShipper?.biz_no || data.orgBizNo || '');
+          setValue('shipper_country_code', data.orgCountryCode || 'KR');
+          setValue('shipper_state_province', data.orgStateProvince || '');
+          setValue('shipper_city', data.orgCity || '');
+          setValue('shipper_address_detail', data.orgAddressDetail || '');
+          setValue('shipper_zipcode', data.orgZipcode || '');
         }
       } catch (err) { logger.error(err); } finally { setIsLoadingAffiliation(false); }
     }
@@ -593,7 +599,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
             {step === 1 && [ 
               { code: 'AIR', icon: Plane, label: '항공' },
               { code: 'SEA', icon: Ship, label: '해상' },
-              { code: 'EXP', icon: Zap, label: '특송' },
+              { code: 'EXP', icon: Zap, label: 'UPS Direct' },
               { code: 'LAND', icon: Truck, label: '육상' }
             ].map((mode) => (
               <button
@@ -731,13 +737,14 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                               />
                             </div>
                             {!affiliation?.isIndividual && (
-                              <>
+                               <>
                                 <div>
                                   <p className="text-slate-400 font-bold uppercase tracking-tighter mb-1">{t('shipper_address')}</p>
-                                  <ZenInput
-                                    readOnly
-                                    {...register('shipper_address')}
-                                    className="bg-slate-50 py-1.5 text-[11px] text-slate-700 font-semibold"
+                                  <AddressInput
+                                    mode="rhf"
+                                    prefix="shipper"
+                                    register={register}
+                                    t={t}
                                   />
                                 </div>
                                 <div>
@@ -953,11 +960,19 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                               <option value="BOX">BOX</option><option value="PLT">PLT</option><option value="CRT">CRT</option>
                             </select>
                           </div>
-                          <div className="col-span-2">
+                          <div className="col-span-1">
                             <label className="text-[9px] font-bold text-slate-400">COUNT</label>
                             <ZenInput type="number" {...register(`packages.${i}.packing_count`, { valueAsNumber: true })} className="py-2 text-xs" />
                           </div>
-                          <div className="col-span-5">
+                          {transportMode === 'EXP' && (
+                            <div className="col-span-2">
+                              <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">&nbsp;</label>
+                              <div className="text-[11px] h-9 flex items-center text-slate-400 px-2 border border-slate-100 rounded-lg bg-slate-50">
+                                EXP
+                              </div>
+                            </div>
+                          )}
+                          <div className={`${transportMode === 'EXP' ? 'col-span-4' : 'col-span-5'}`}>
                             <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Dimensions (L/W/H) <span className="text-[8px] text-slate-300 ml-1">cm</span></label>
                             <div className="grid grid-cols-3 gap-1 relative">
                               <div className="relative">
@@ -974,14 +989,14 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                               </div>
                             </div>
                           </div>
-                          <div className="col-span-2 ml-1">
+                          <div className={`${transportMode === 'EXP' ? 'col-span-2' : 'col-span-2'} ml-1`}>
                             <label className="text-[9px] font-bold text-slate-400">WEIGHT <span className="text-[8px] text-slate-300">kg</span></label>
                             <div className="relative">
                               <ZenInput type="number" step="0.01" {...register(`packages.${i}.gross_weight`, { valueAsNumber: true })} className="py-2 text-xs pr-6" />
                               <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[9px] text-slate-300 font-bold">kg</span>
                             </div>
                           </div>
-                          <div className="col-span-2">
+                          <div className={`${transportMode === 'EXP' ? 'col-span-2' : 'col-span-2'}`}>
                             <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">화물 구분</label>
                             <select
                               {...register(`packages.${i}.special_cargo_type`)}

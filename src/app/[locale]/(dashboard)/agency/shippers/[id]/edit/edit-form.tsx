@@ -8,7 +8,7 @@ import { ChevronLeft, AlertCircle } from 'lucide-react';
 import { updateAgencyShipper } from '@/app/actions/agency/shippers';
 import { RequiredFields } from '../../new/required-fields';
 import { ContactFields } from '../../new/contact-fields';
-import { AddressInput } from '../../new/address-input';
+import { AddressInput } from '@/components/common/AddressInput';
 import { getCountryName } from '@/lib/utils/country';
 
 interface EditShipperFormProps {

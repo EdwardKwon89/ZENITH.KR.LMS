@@ -9,7 +9,7 @@ import { FormHeader } from './form-header';
 import { RequiredFields } from './required-fields';
 import { LoginAccountFields } from './login-account-fields';
 import { ContactFields } from './contact-fields';
-import { AddressInput } from './address-input';
+import { AddressInput } from '@/components/common/AddressInput';
 import { FormActions } from './form-actions';
 
 interface AgencyShipperFormProps {

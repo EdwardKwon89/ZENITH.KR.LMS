@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { AddressInput } from '@/app/[locale]/(dashboard)/agency/shippers/new/address-input';
+import { AddressInput } from '@/components/common/AddressInput';
 
 const mockT = (key: string) => {
   const map: Record<string, string> = {
