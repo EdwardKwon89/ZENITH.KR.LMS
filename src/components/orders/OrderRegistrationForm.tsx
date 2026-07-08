@@ -40,6 +40,12 @@ type Affiliation = {
   orgName: string | null;
   orgAddress: string | null;
   orgBizNo: string | null;
+  orgCountryCode: string | null;
+  orgStateProvince: string | null;
+  orgCity: string | null;
+  orgAddressStreet: string | null;
+  orgAddressDetail: string | null;
+  orgZipcode: string | null;
   isIndividual: boolean;
   dummyIndividualId: string;
 } | null;
@@ -838,14 +844,23 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                             </div>
                             {!affiliation?.isIndividual && (
                                <>
-                                <div>
-                                  <p className="text-slate-400 font-bold uppercase tracking-tighter mb-1">{t('shipper_address')}</p>
-                                  <AddressInput
-                                    mode="rhf"
-                                    prefix="shipper"
-                                    register={register}
-                                    t={t}
-                                  />
+                                 <div>
+                                     <AddressInput
+                                       mode="rhf"
+                                       prefix="shipper"
+                                       register={register}
+                                       setValue={setValue}
+                                       t={t}
+                                       key={affiliation?.orgId || 'no-org'}
+                                       defaultValues={{
+                                         country_code: affiliation?.orgCountryCode ?? 'KR',
+                                         state_province: affiliation?.orgStateProvince ?? '',
+                                         city: affiliation?.orgCity ?? '',
+                                         address: affiliation?.orgAddressStreet ?? affiliation?.orgAddress ?? '',
+                                        address_detail: affiliation?.orgAddressDetail ?? '',
+                                        zipcode: affiliation?.orgZipcode ?? '',
+                                      }}
+                                   />
                                 </div>
                                 <div>
                                   <p className="text-slate-400 font-bold uppercase tracking-tighter mb-1">{t('shipper_biz_no')}</p>
@@ -884,32 +899,18 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                         <label className="text-[10px] font-bold text-slate-500 mb-1 block">Phone</label>
                         <ZenInput placeholder="010-XXXX-XXXX" {...register('recipient_phone')} error={!!errors.recipient_phone} className="py-2 text-xs" />
                       </div>
-                      <div className="grid grid-cols-2 gap-2">
-                        <div>
-                          <label className="text-[10px] font-bold text-slate-500 mb-1 block">PCCC</label>
-                          <ZenInput placeholder="P1234..." {...register('recipient_pccc')} className="py-2 text-xs" />
-                        </div>
-                        <div>
-                          <label className="text-[10px] font-bold text-slate-500 mb-1 block">Zipcode</label>
-                          <ZenInput placeholder="12345" {...register('recipient_zipcode')} className="py-2 text-xs" />
-                        </div>
+                      <div>
+                        <label className="text-[10px] font-bold text-slate-500 mb-1 block">PCCC</label>
+                        <ZenInput placeholder="P1234..." {...register('recipient_pccc')} className="py-2 text-xs" />
                       </div>
                       <div>
-                        <label className="text-[10px] font-bold text-slate-500 mb-1 block">Full Address</label>
-                        <textarea 
-                          {...register('recipient_address')}
-                          className="w-full text-xs p-2 border border-slate-200 rounded-xl bg-white resize-none h-16 outline-none focus:ring-2 focus:ring-blue-100"
-                          placeholder="Physical delivery address"
-                        />
-                        {errors.recipient_address && <p className="text-[9px] text-rose-500 mt-1">{errors.recipient_address.message}</p>}
-                      </div>
-                      <div>
-                        <label className="text-[10px] font-bold text-slate-500 mb-1 block">Local Address</label>
-                        <textarea 
-                          {...register('recipient_address_local')}
-                          className="w-full text-xs p-2 border border-slate-200 rounded-xl bg-white resize-none h-16 outline-none focus:ring-2 focus:ring-blue-100"
-                          placeholder="현지어 주소 (선택)"
-                        />
+                         <AddressInput
+                           mode="rhf"
+                           prefix="recipient"
+                           register={register}
+                           setValue={setValue}
+                           t={t}
+                         />
                       </div>
                     </div>
                   )}
