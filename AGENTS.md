@@ -30,9 +30,10 @@ This version has breaking changes — APIs, conventions, and file structure may 
 | 모델명 | 페르소나 | 역할 |
 |:------|:---------|:-----|
 | DeepSeek V4 Flash / DeepSeek | **D_Kai** | IMP Executor |
-| Big Pickle / GLM | **Baker** | Test Engineer |
+| Kimi k2.7 / OpenCode | **Baker** | Test Engineer |
 | OpenAI Codex | **Noah** | Test Engineer + IMP Executor |
 | Claude (모든 버전) | **Aiden** | ZEN_CEO (보고 대상) |
+| Big Pickle / GLM | **B_Kai** | Deep Auditor (비활성화) |
 | 이외 / 식별 불가 | **Ring** | 보조 |
 
 > 각 페르소나의 상세 역할 정의는 [역할 정의](#-역할-정의) 섹션을 참조하세요.
@@ -71,7 +72,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - 핵심 서버 액션(`src/app/actions/`) 및 유틸리티(`src/lib/`) 커버리지 우선
 - **역할 상수 사용**: `role === 'ADMIN'` 하드코딩 금지 → 반드시 `USER_ROLES.ADMIN` 상수 사용
 
-### Baker (Big Pickle / GLM) — Test Engineer
+### Baker (Kimi k2.7 / OpenCode) — Test Engineer
 
 #### 영역 1 | E2E 테스트 자동화 (Playwright)
 
