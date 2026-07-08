@@ -910,14 +910,6 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                           t={t}
                         />
                       </div>
-                      <div>
-                        <label className="text-[10px] font-bold text-slate-500 mb-1 block">Local Address</label>
-                        <textarea 
-                          {...register('recipient_address_local')}
-                          className="w-full text-xs p-2 border border-slate-200 rounded-xl bg-white resize-none h-16 outline-none focus:ring-2 focus:ring-blue-100"
-                          placeholder="현지어 주소 (선택)"
-                        />
-                      </div>
                     </div>
                   )}
                 </ZenCard>
