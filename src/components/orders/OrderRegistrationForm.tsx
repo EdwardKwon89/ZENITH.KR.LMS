@@ -275,18 +275,6 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
     setSelectedCombination('');
   }, [transportMode]);
 
-  // 🔄 DOC content_type 선택 시 치수 초기화 (TASK-B-076)
-  useEffect(() => {
-    if (!watchedPackages) return;
-    watchedPackages.forEach((pkg, i) => {
-      if (pkg.content_type === 'DOC') {
-        setValue(`packages.${i}.length`, undefined);
-        setValue(`packages.${i}.width`, undefined);
-        setValue(`packages.${i}.height`, undefined);
-      }
-    });
-  }, [watchedPackages, setValue]);
-
   const filteredPorts = useMemo(() => {
     if (!transportMode) return ports;
     const mappedType = transportMode === 'EXP' ? 'AIR' : transportMode;
@@ -978,38 +966,27 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                           </div>
                           {transportMode === 'EXP' && (
                             <div className="col-span-2">
-                              <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">CONTENT</label>
-                              <select
-                                {...register(`packages.${i}.content_type`)}
-                                className="w-full text-[11px] h-9 bg-slate-50 border border-slate-100 rounded-lg px-2 outline-none focus:ring-1 focus:ring-blue-100"
-                              >
-                                <option value="NONDOC">NONDOC</option>
-                                <option value="DOC">DOC</option>
-                              </select>
+                              <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">&nbsp;</label>
+                              <div className="text-[11px] h-9 flex items-center text-slate-400 px-2 border border-slate-100 rounded-lg bg-slate-50">
+                                EXP
+                              </div>
                             </div>
                           )}
                           <div className={`${transportMode === 'EXP' ? 'col-span-4' : 'col-span-5'}`}>
                             <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Dimensions (L/W/H) <span className="text-[8px] text-slate-300 ml-1">cm</span></label>
                             <div className="grid grid-cols-3 gap-1 relative">
-                              {(() => {
-                                const isDoc = watch(`packages.${i}.content_type`) === 'DOC';
-                                return (
-                                  <>
-                                    <div className="relative">
-                                      <ZenInput type="number" placeholder="L" disabled={isDoc} {...register(`packages.${i}.length`, { valueAsNumber: true })} className={`py-2 text-xs pr-4 ${isDoc ? 'opacity-40 bg-slate-100' : ''}`} />
-                                      <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[8px] text-slate-300 font-bold">L</span>
-                                    </div>
-                                    <div className="relative">
-                                      <ZenInput type="number" placeholder="W" disabled={isDoc} {...register(`packages.${i}.width`, { valueAsNumber: true })} className={`py-2 text-xs pr-4 ${isDoc ? 'opacity-40 bg-slate-100' : ''}`} />
-                                      <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[8px] text-slate-300 font-bold">W</span>
-                                    </div>
-                                    <div className="relative">
-                                      <ZenInput type="number" placeholder="H" disabled={isDoc} {...register(`packages.${i}.height`, { valueAsNumber: true })} className={`py-2 text-xs pr-4 ${isDoc ? 'opacity-40 bg-slate-100' : ''}`} />
-                                      <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[8px] text-slate-300 font-bold">H</span>
-                                    </div>
-                                  </>
-                                );
-                              })()}
+                              <div className="relative">
+                                <ZenInput type="number" placeholder="L" {...register(`packages.${i}.length`, { valueAsNumber: true })} className="py-2 text-xs pr-4" />
+                                <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[8px] text-slate-300 font-bold">L</span>
+                              </div>
+                              <div className="relative">
+                                <ZenInput type="number" placeholder="W" {...register(`packages.${i}.width`, { valueAsNumber: true })} className="py-2 text-xs pr-4" />
+                                <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[8px] text-slate-300 font-bold">W</span>
+                              </div>
+                              <div className="relative">
+                                <ZenInput type="number" placeholder="H" {...register(`packages.${i}.height`, { valueAsNumber: true })} className="py-2 text-xs pr-4" />
+                                <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[8px] text-slate-300 font-bold">H</span>
+                              </div>
                             </div>
                           </div>
                           <div className={`${transportMode === 'EXP' ? 'col-span-2' : 'col-span-2'} ml-1`}>
@@ -1031,20 +1008,6 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                               <option value="VALUABLE">고가품</option>
                               <option value="USED">중고품</option>
                             </select>
-                          </div>
-                        </div>
-
-                        {/* 📦 Local Tracking No */}
-                        <div className="grid grid-cols-12 gap-2 mt-2 items-end">
-                          <div className="col-span-4">
-                            <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">
-                              LOCAL TRACKING NO <span className="text-[8px] text-slate-300">(지역택배 운송장)</span>
-                            </label>
-                            <ZenInput
-                              placeholder="지역 택배 운송장번호 입력 (선택)"
-                              {...register(`packages.${i}.domestic_ref_no`)}
-                              className="py-2 text-xs"
-                            />
                           </div>
                         </div>
 
