@@ -4,7 +4,7 @@
 > **발령자**: Jaison (Team B 총괄)
 > **담당자**: Baker (Big Pickle)
 > **우선순위**: P2
-> **상태**: 🔔 검토 요청 (재제출 — v3)
+> **상태**: 🔔 Aiden 승인 완료 — develop 병합 충돌 rebase 해소, 병합 대기
 > **연관 이슈**: [Issue #258](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/258)
 > **설계 원본**: [Issue #254](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/254) · `.agent/tasks/TASK-B-074_260707_ISS254_오더폼보완_설계.md`
 > **설계 확정**: EXP 유지, UI 라벨 "UPS Direct" (2026-07-08 사용자 확인)
@@ -196,13 +196,23 @@ git checkout -b feature/teamb-task-b076-iss258-v3
 ### 검증
 - `npm run build` **PASS**
 - `npm run test:regression` **81 files, NN/NN PASS**
-
 ### 커밋
-- 코드: `5875896` — `[Baker] feat: TASK-B-076 REQ-03/04 패키지 content_type + domestic_ref_no (v3)`
-- 문서: `3ff1065` — `[Baker] docs: TASK-B-076 재제출 완료 보고 — v3 브랜치, 코드 해시, ACTIVE_TASK.md 갱신`
+
+- 코드: `a3eef64` — `[Baker] feat: TASK-B-076 REQ-03/04 패키지 content_type + domestic_ref_no (v3)`
+- 문서: `ac6f26e` — `[Baker] docs: TASK-B-076 재제출 완료 보고 — v3 브랜치, 코드 해시, ACTIVE_TASK.md 갱신`
+- 문서: `526ceaf` — `[Baker] docs: TASK-B-076 PR#266 기록 및 ACTIVE_TASK.md 상태 갱신`
 
 ### PR
 - PR#266: https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/266 (`feature/teamb-task-b076-iss258-v3` → `develop`, `Closes #258`)
+
+### 병합 충돌 해소 (2026-07-08)
+- Aiden 내용 승인 후 PR#265(`TASK-B-075`) 선 병합으로 `OrderRegistrationForm.tsx` 충돌 발생
+- `feature/teamb-task-b076-iss258-v3`를 `origin/develop` 최신으로 rebase
+- 충돌 지점: EXP 모드 셀 — develop(B-075)의 정적 "EXP" 표시 vs B-076의 `content_type` 셀렉트
+- 해소: B-076 기능(`content_type` 셀렉트) 유지, B-075 "EXP" 정적 표시는 대체 제거
+- rebase 과정에서 B-075 교차 오염 제거 커밋(`a9c1bb8`)이 B-076 변경을 되돌리는 형태로 포함되어 해당 커밋 drop 처리
+- 검증: `npm run build` PASS, `npm run test:regression` 81 files / 489/489 PASS
+- force-push 완료: `git push --force-with-lease origin feature/teamb-task-b076-iss258-v3`
 
 ---
 
@@ -228,3 +238,4 @@ git checkout -b feature/teamb-task-b076-iss258-v3
 | 2026-07-08 | Baker | TASK-B-076 PR#263 제출 |
 | 2026-07-08 | Jaison | TASK-B-076 반려 — 구조적 문제 3건 + 설계 이탈 1건 |
 | 2026-07-08 | Baker | TASK-B-076 재착수 — EXP 유지 확정, 브랜치/마이그레이션 버전 정리 |
+| 2026-07-08 | Baker | TASK-B-076 Aiden 승인 — PR#265 선 병합 충돌 rebase 해소, force-push 완료, 병합 대기 |
