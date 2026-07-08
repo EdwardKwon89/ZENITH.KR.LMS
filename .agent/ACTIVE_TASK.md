@@ -359,7 +359,7 @@
 | GH#202 | 260705 | estimateUpsFreight()가 resolveZoneByCountry() 미사용 | 없음 | B_Kai | ✅ | [Issue #202](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/202) (closed) | Aiden 승인·머지 완료(260705) — PR#212 · productFamily/direction/fallbackApplied 전체 threading 확인 · 회귀 446/446 PASS · Advisory 2건(비차단) |
 | GH#203 | 260706 | Ds_11 API 명세서 Phase 7.2 신규기능 반영 누락 | GH#202 ✅ | Aiden | ✅ | [Issue #203](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/203) (closed) | Aiden 완료(260706) — PR#214 · §11.6~11.9 신규(Zone유틸/Tier·DWB/Freight최소운임/Box상품) · IMP-133 신규 발견(Box max_weight_kg 미검증) 등록 |
 | GH#204 | 260706 | Admin UI — 20kg 초과 티어·Freight 최소운임 관리 탭 신규 | 없음 | Riley | ✅ | [Issue #204](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/204) (closed) | Aiden 승인·머지 완료(260706) — PR#215(코드 `f4031caf`+문서 `4348cb2a` 분리) · base branch main→develop 오류 정정 후 병합 · 회귀 454/454 PASS |
-| TASK-182 | 260708 | 기준요금 매트릭스 UI 개선 — Zone×중량 요율표 + 제품 콤보박스 + 할인율 표시 (Issue #271) | 없음 | D_Kai | 🔄 | [TASK-182](tasks/TASK-182_260708_BaseRateMatrixUI_DKai.md) | Aiden 설계 승인·발령(260708) — An-16 설계문서 작성 완료 · 순수 프론트엔드(백엔드 변경 없음) |
+| TASK-182 | 260708 | 기준요금 매트릭스 UI 개선 — Zone×중량 요율표 + 제품 콤보박스 + 할인율 표시 (Issue #271) | 없음 | D_Kai | 🔔 | [TASK-182](tasks/TASK-182_260708_BaseRateMatrixUI_DKai.md) | PR #275 생성 (Aiden 검토 대기) · UpsBaseRateMatrix.tsx · 81/489 PASS · 백엔드 변경 0건 |
 | GH#205 | 260706 | An-14 담당 불일치 정정 + UAT_DEFECT_LOG·UAT_MASTER 동기화 | 없음 | Aiden | ✅ | [Issue #205](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/205) (closed) | Aiden 완료(260706) — PR#219 · An-14 §4/§11 정정 · DEF-089~095 소급 등재(7건) · UAT_MASTER 실행상태 동기화(4건) · 회귀 454/454 PASS |
 | GH#206 | 260706 | UPS 문서 정리 백로그 (Medium 6 + Low 7건) | 없음 | B_Kai | ✅ | [Issue #206](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/206) (closed) | B_Kai 완료(260706) — PR#221 · #9~14 전항목 처리(#13 재조사 후 정정, docs/03_Design 17개 파일 아카이브) · Aiden 승인·머지 |
 ---
@@ -371,7 +371,7 @@
 | Agent | 상태 | 비고 |
 |:------|:----:|:----|
 | **Aiden (Claude)** | ✅ TASK-167 전체 승인 (260626) | PR#117 §1 ✅ · PR#118 §2+§3 ✅ 전량 머지 완료 |
-| **D_Kai (OpenCode)** | 🔄 TASK-182 착수 (260708) | 기준요금 매트릭스 UI — Issue #271 · Aiden 설계 승인·발령 · An-16 설계문서 완료 · `feature/teama-182-base-rate-matrix` 브랜치 작업 예정 |
+| **D_Kai (OpenCode)** | 🔔 TASK-182 PR #275 생성 (Aiden 검토 대기) | 기준요금 매트릭스 UI — Issue #271 · Aiden 설계 승인 · UpsBaseRateMatrix.tsx · 회귀 81/489 PASS · 백엔드 변경 0건 |
 | **B_Kai** | ✅ GH#206 승인·머지 완료 (260706) | PR#221 · #13 재조사 요청에 신속·정확 대응(docs/03_Design 17개 파일 아카이브), 신규 Task 대기 |
 | **Riley** | ✅ GH#204 승인·머지 완료 (260706) | PR#215 · R-17 §1 위반(코드/문서 커밋 혼입) 자가수정 확인 후 승인, 신규 Task 대기 |
 | N_Kai | ➖ 미재배정 확정 (260626 Edward) | TASK-087 폐기 — 신규 Task 발령 없음 |

@@ -10,7 +10,7 @@
 | **관련 문서** | [An-16](../docs/02_Analysis/An_16_UPS_BaseRate_Matrix_UI.md), Issue #271 |
 | **커밋 태그** | `[D_Kai]` |
 | **브랜치** | `feature/teama-182-base-rate-matrix` (신규) |
-| **상태** | ⬜ |
+| **상태** | 🔔 |
 
 ---
 
@@ -39,15 +39,35 @@ Issue #271 — Edward 요구사항, Aiden 설계 승인 완료.
 
 필요시 신규 키 추가 (매트릭스 헤더, Agency 미리보기 레이블 등)
 
+## [작업 결과]
+
+### 구현
+- `src/components/ups/UpsBaseRateMatrix.tsx` 신규 (239줄)
+  - 제품 선택 콤보박스 (DOC/NON_DOC optgroup)
+  - Zone(Z1~Z10) × 중량(0.5~30kg) 2D 매트릭스
+  - 셀: 판매가(윗줄) / 원가(아랫줄, 회색)
+  - 할인율 미리보기: Agency 드롭다운 (기본 OFF) → 할인가 표시 + 배지
+  - 셀 클릭 → 수정 모달 (기존 BaseRateForm 재사용, 프리필)
+- `ups-rates-client.tsx` — BaseRateTable 제거, 신규등록 버튼 활성화
+
+### 검증
+- `npx tsc --noEmit`: 0 errors ✅
+- `npm run test:regression`: 81 files / 489 PASS ✅
+- 백엔드/DB 변경: 0건
+
+### 관련 링크
+- PR: #275
+- Issue: #271
+
 ## DoD
 
-- [ ] `UpsBaseRateMatrix.tsx` 정상 렌더링 (제품 선택 → 매트릭스 표시)
-- [ ] 제품 콤보박스 DOC/NON_DOC 그룹핑 정상
-- [ ] 셀 클릭 시 수정 모달 product/zone/weight 프리필 확인
-- [ ] 신규등록 버튼 정상 동작
-- [ ] Agency 미리보기 ON/OFF 정상
-- [ ] `npm run test:regression` 전체 PASS
-- [ ] `npx tsc --noEmit` 0 errors (신규 코드 기준)
+- [x] `UpsBaseRateMatrix.tsx` 정상 렌더링 (제품 선택 → 매트릭스 표시)
+- [x] 제품 콤보박스 DOC/NON_DOC 그룹핑 정상
+- [x] 셀 클릭 시 수정 모달 product/zone/weight 프리필 확인
+- [x] 신규등록 버튼 정상 동작
+- [x] Agency 미리보기 ON/OFF 정상
+- [x] `npm run test:regression` 전체 PASS (489/489)
+- [x] `npx tsc --noEmit` 0 errors (신규 코드 기준)
 
 ## R-17 완료 보고 절차
 
