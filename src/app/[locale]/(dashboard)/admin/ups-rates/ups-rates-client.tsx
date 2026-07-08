@@ -19,6 +19,7 @@ import {
   upsertUpsFreightMinimum, deleteUpsFreightMinimum,
 } from '@/app/actions/ups/rates-mutation';
 import type { ColumnDef } from '@tanstack/react-table';
+import UpsBaseRateMatrix from '@/components/ups/UpsBaseRateMatrix';
 
 interface AgencyPolicy { id: string; agency_org_id: string; discount_rate: string; is_active: boolean; agency: { name: string } | null; }
 interface Agency { id: string; name: string; }
@@ -60,6 +61,18 @@ export default function UpsRatesClient({ zones, products, baseRates, fuelSurchar
   const canEdit = userRole === USER_ROLES.ADMIN || userRole === USER_ROLES.MANAGER || userRole === USER_ROLES.ZENITH_SUPER_ADMIN;
 
   const resetForm = useCallback(() => { setForm({}); setEditingItem(null); }, []);
+
+  const handleBaseRateCellClick = useCallback((params: { productId: string; zoneId: string; weightKg: number }) => {
+    const existing = baseRates.find(r => r.product_id === params.productId && r.zone_id === params.zoneId && Number(r.weight_kg) === params.weightKg);
+    if (existing) {
+      setForm({ ...existing });
+      setEditingItem(existing);
+    } else {
+      setForm({ product_id: params.productId, zone_id: params.zoneId, weight_kg: params.weightKg, selling_price: '', cost_price: '', valid_from: new Date().toISOString().split('T')[0], valid_until: '' });
+      setEditingItem(null);
+    }
+    setIsModalOpen(true);
+  }, [baseRates]);
 
   const openNew = () => { resetForm(); setIsModalOpen(true); };
   const openEdit = (item: any) => { setForm({ ...item }); setEditingItem(item); setIsModalOpen(true); };
@@ -137,7 +150,16 @@ export default function UpsRatesClient({ zones, products, baseRates, fuelSurchar
     switch (activeTab) {
       case 'zones': return <ZoneTable zones={zones} canEdit={canEdit} onEdit={openEdit} onDelete={handleDelete} />;
       case 'products': return <ProductTable products={products} canEdit={canEdit} onEdit={openEdit} onDelete={handleDelete} />;
-      case 'baseRates': return <BaseRateTable baseRates={baseRates} />;
+      case 'baseRates': return (
+        <UpsBaseRateMatrix
+          products={products}
+          zones={zones}
+          agencies={agencies}
+          canEdit={canEdit}
+          onCellClick={handleBaseRateCellClick}
+          onNewClick={openNew}
+        />
+      );
       case 'fuelSurcharges': return <FuelSurchargeTable rows={fuelSurcharges} />;
       case 'otherCharges': return <OtherChargeTable otherCharges={otherCharges} canEdit={canEdit} onEdit={openEdit} onDelete={handleDelete} />;
       case 'agencyPolicies': return <AgencyPolicyTable policies={agencyPolicies} canEdit={canEdit} onEdit={openEdit} agencies={agencies} />;
@@ -163,7 +185,7 @@ export default function UpsRatesClient({ zones, products, baseRates, fuelSurchar
       </div>
 
       <div className="flex justify-end">
-        {canEdit && activeTab !== 'baseRates' && activeTab !== 'fuelSurcharges' && (
+        {canEdit && activeTab !== 'fuelSurcharges' && (
           <button onClick={openNew} className="flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-xl hover:bg-brand-700 transition-all font-semibold shadow-sm hover:shadow-brand-500/20">
             <Plus size={18} />
             {activeTab === 'zones' ? 'Zone 등록' : activeTab === 'products' ? '제품 등록' : activeTab === 'otherCharges' ? '부가요금 등록' : activeTab === 'agencyPolicies' ? '할인율 정책 등록' : activeTab === 'weightTierRates' ? '티어 요율 등록' : activeTab === 'freightMinimums' ? '최소운임 등록' : '등록'}
@@ -414,18 +436,6 @@ function ProductTable({ products, canEdit, onEdit, onDelete }: any) {
     ...(canEdit ? [{ id: 'actions' as const, header: '관리', cell: ({ row }: any) => <ActionsCell row={row} onEdit={onEdit} onDelete={onDelete} /> }] : []),
   ];
   return <ZenDataGrid columns={columns} data={products} />;
-}
-
-function BaseRateTable({ baseRates }: any) {
-  const columns: ColumnDef<UpsBaseRateWithRefs>[] = [
-    { id: 'product', header: '제품', cell: ({ row }) => <span className="text-sm font-medium">{row.original.product?.product_code}</span> },
-    { id: 'zone', header: 'Zone', cell: ({ row }) => <ZenBadge variant="default" className="font-mono">{row.original.zone?.zone_code}</ZenBadge> },
-    { accessorKey: 'weight_kg', header: '중량', cell: ({ row }) => <span className="font-mono text-sm">{row.original.weight_kg}kg</span> },
-    { accessorKey: 'selling_price', header: '판매가', cell: ({ row }) => <span className="font-mono text-sm">{row.original.selling_price.toLocaleString()}원</span> },
-    { accessorKey: 'cost_price', header: '원가', cell: ({ row }) => <span className="font-mono text-sm text-slate-500">{row.original.cost_price.toLocaleString()}원</span> },
-    { id: 'validity', header: '유효기간', cell: ({ row }) => <span className="text-xs font-mono text-slate-500">{row.original.valid_from}~{row.original.valid_until ?? '무기한'}</span> },
-  ];
-  return <ZenDataGrid columns={columns} data={baseRates} />;
 }
 
 function FuelSurchargeTable({ rows }: any) {
