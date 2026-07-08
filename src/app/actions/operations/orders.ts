@@ -202,6 +202,8 @@ export async function updateOrder(orderId: string, payload: OrderRegistrationInp
         gross_weight: pkg.gross_weight,
         volume: pkg.volume,
         special_cargo_type: pkg.special_cargo_type ?? 'NONE',
+        content_type: pkg.content_type ?? 'GENERAL',
+        domestic_ref_no: pkg.domestic_ref_no ?? null,
       });
 
       if (pkgError || !packageData) continue;

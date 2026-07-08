@@ -26,6 +26,8 @@ export const orderPackageSchema = z.object({
   gross_weight: z.number().nonnegative('Weight is required'),
   volume: z.number().nonnegative().optional(),
   special_cargo_type: z.enum(['NONE', 'DANGEROUS', 'FROZEN', 'VALUABLE', 'USED']).default('NONE'),
+  content_type: z.enum(['GENERAL', 'DOC', 'NONDOC']).default('GENERAL'),
+  domestic_ref_no: z.string().optional(),
   items: z.array(orderItemSchema).min(1, 'At least one item per package is required'),
 });
 
