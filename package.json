@@ -17,6 +17,7 @@
     "check:i18n": "tsx scripts/audit-i18n.ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.110.0",
     "@hookform/resolvers": "^5.2.2",
     "@react-pdf/renderer": "^4.5.1",
     "@sentry/nextjs": "^10.50.0",

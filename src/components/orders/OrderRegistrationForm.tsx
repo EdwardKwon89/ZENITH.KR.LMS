@@ -225,7 +225,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
       const res = await fetch('/api/hs-lookup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ item_name: itemName.trim() }),
+        body: JSON.stringify({ item_name: itemName.trim(), dest_country_code: destPort?.country_code }),
       });
       if (!res.ok) return;
       const { hs_code } = await res.json();
@@ -237,7 +237,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
     } finally {
       setHsLookupLoading(key, false);
     }
-  }, [watch, setValue, setHsLookupLoading]);
+  }, [watch, setValue, setHsLookupLoading, destPort?.country_code]);
 
   useEffect(() => {
     async function loadAffiliation() {
