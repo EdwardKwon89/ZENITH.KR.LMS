@@ -15,6 +15,7 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
+| [#259](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/259) | [feat] TASK-B-079 REQ-07 UPS Direct 운송 모드 추가 + UpsServiceSelector | b | p1 | open | jungjs | 2026-07-08 |
 | [#258](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/258) | [feat] TASK-B-076 REQ-03/04 패키지 content_type(GENERAL/DOC/NONDOC) + 지역운송장번호 | b | p2 | open | jungjs | 2026-07-08 |
 | [#256](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/256) | [feat] TASK-B-077 REQ-05 아이템 가격 UI 노출 (unit_price) | b | p3 | open | jungjs | 2026-07-08 |
 | [#254](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/254) | [feat] 오더 등록 폼 보완 — 화주주소 자동완성·DOC/NONDOC·지역운송장번호·아이템가격·HScode 자동추출 | b | p2 | open | 미배정 | 2026-07-08 |
