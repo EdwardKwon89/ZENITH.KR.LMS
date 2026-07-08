@@ -792,7 +792,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                     </button>
                   </div>
 
-                  {infoTab === 'shipper' && (
+                  <div className={infoTab === 'shipper' ? '' : 'hidden'}>
                     <div className="space-y-3">
                       <div>
                         <div className="flex justify-between items-center mb-1">
@@ -876,9 +876,9 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                         </div>
                       </div>
                     </div>
-                  )}
+                  </div>
 
-                  {infoTab === 'consignee' && (
+                  <div className={infoTab === 'consignee' ? '' : 'hidden'}>
                     <div className="space-y-3">
                       <div>
                         <label className="text-[10px] font-bold text-slate-500 mb-1 block">Address Book</label>
@@ -902,21 +902,19 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                       <div>
                         <label className="text-[10px] font-bold text-slate-500 mb-1 block">PCCC</label>
                         <ZenInput placeholder="P1234..." {...register('recipient_pccc')} className="py-2 text-xs" />
-                      </div>
-                      <div>
                          <AddressInput
-                           mode="rhf"
-                           prefix="recipient"
-                           register={register}
-                           setValue={setValue}
-                           t={t}
-                         />
-                      </div>
-                    </div>
-                  )}
-                </ZenCard>
+                            mode="rhf"
+                            prefix="recipient"
+                            register={register}
+                            setValue={setValue}
+                            t={t}
+                          />
+                       </div>
+                     </div>
+                   </div>
+                 </ZenCard>
 
-                {/* 🚢 Port Selection */}
+                 {/* 🚢 Port Selection */}
                 <ZenCard className="p-3 border-slate-200">
                   <h4 className="text-[10px] font-bold text-slate-500 mb-2 uppercase tracking-wider">{t('origin_port')} / {t('dest_port')}</h4>
                   <div className="grid grid-cols-2 gap-2">
