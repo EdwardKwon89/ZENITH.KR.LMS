@@ -135,6 +135,16 @@ git checkout -b feature/teamb-task-b078-iss261
 - 반려 사유 ②: `[작업 결과]`에 PR#277 링크 미기재 → 본 섹션에 PR 링크 추가
 - 코드 재작성 불필요 (task file 수정만으로 재제출)
 
+### Aiden 1차 반려 수정 (2026-07-08) — 보안 결함
+
+- 반려 사유: `hs-lookup/route.ts` 인증 체크 누락 (미인증 사용자의 외부 API 비용 발생 가능)
+- 추가 지적: `item_name` 최대 길이 제한 없음 (토큰 비용 증가 방지)
+- Advisory(비차단): AGENTS.md 정정 커밋이 PR에 섞여 있음 — 차후 별도 분리 권장
+- 수정 처리:
+  - `supabase.auth.getUser()` 인증 체크 추가 (미인증 시 401) — `finance/export/route.ts` 패턴 준용
+  - `MAX_ITEM_NAME_LENGTH = 200` 상수 추가, 200자 초과 시 truncation
+  - 검증: build PASS · 회귀 489/489 PASS
+
 ---
 
 ## [발견 이슈]
@@ -155,3 +165,5 @@ _(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
 | 2026-07-08 | Baker | TASK-B-078 재착수 — 신규 브랜치 `feature/teamb-task-b078-iss261` (이전 작업 무시, 처음부터) |
 | 2026-07-08 | Jaison | TASK-B-078 1차 반려 — DoD 미체크 + PR 링크 미기재 (코드 재작성 불필요) |
 | 2026-07-08 | Baker | TASK-B-078 반려 수정 — DoD `[x]` 처리 + PR#277 링크 추가 |
+| 2026-07-08 | Aiden | TASK-B-078 1차 반려 — 보안 결함 (인증 체크 누락) + item_name 최대 길이 제한 권장 |
+| 2026-07-08 | Baker | TASK-B-078 Aiden 반려 수정 — supabase.auth.getUser() 401 체크 + MAX_ITEM_NAME_LENGTH=200 |
