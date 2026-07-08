@@ -97,10 +97,10 @@ git checkout -b feature/teamb-task-b077
 
 ### 커밋
 - 코드: `6b85fde` — `[Baker] feat: TASK-B-077 REQ-05 NestedItems unit_price + currency UI 노출`
-- 문서: `<TBD>` — `[Baker] docs: TASK-B-077 완료 보고 — task file + ACTIVE_TASK.md`
+- 문서: `55596af` — `[Baker] docs: TASK-B-077 완료 보고 — task file + ACTIVE_TASK.md`
 
 ### PR
-- PR#NNN: `feature/teamb-task-b077` → `develop` (`Closes #256`)
+- PR#262: https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/262 (`feature/teamb-task-b077` → `develop`, `Closes #256`)
 
 ---
 
