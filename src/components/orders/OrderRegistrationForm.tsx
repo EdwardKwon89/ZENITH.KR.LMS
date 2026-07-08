@@ -75,20 +75,42 @@ const NestedItems: React.FC<{
       <div className="space-y-2">
         {fields.map((item, k) => (
           <div key={item.id} className="grid grid-cols-12 gap-2 items-start bg-slate-50/50 p-2 rounded-xl border border-dashed border-slate-200 group">
-            <div className="col-span-4">
+            <div className="col-span-3">
               <ZenInput 
                 placeholder={t('item_name')}
                 {...register(`packages.${nestIndex}.items.${k}.item_name`)}
                 className="bg-white py-2 text-xs"
               />
             </div>
-            <div className="col-span-2">
+            <div className="col-span-1">
               <ZenInput 
                 type="number"
                 placeholder="Qty"
                 {...register(`packages.${nestIndex}.items.${k}.quantity`, { valueAsNumber: true })}
                 className="bg-white py-2 text-xs"
               />
+            </div>
+            <div className="col-span-2">
+              <ZenInput
+                type="number"
+                step="0.0001"
+                min="0"
+                placeholder="0.0000"
+                {...register(`packages.${nestIndex}.items.${k}.unit_price`, { valueAsNumber: true })}
+                className="bg-white py-2 text-xs"
+              />
+            </div>
+            <div className="col-span-1">
+              <select
+                {...register(`packages.${nestIndex}.items.${k}.currency`)}
+                className="w-full text-xs h-9 bg-white border border-slate-200 rounded-lg"
+              >
+                <option value="USD">USD</option>
+                <option value="KRW">KRW</option>
+                <option value="EUR">EUR</option>
+                <option value="JPY">JPY</option>
+                <option value="CNY">CNY</option>
+              </select>
             </div>
             <div className="col-span-3">
               <ZenInput 
@@ -97,7 +119,7 @@ const NestedItems: React.FC<{
                 className="bg-white py-2 text-xs"
               />
             </div>
-            <div className="col-span-2">
+            <div className="col-span-1">
               <select 
                 {...register(`packages.${nestIndex}.items.${k}.item_packing_unit`)}
                 className="w-full text-xs h-9 bg-white border border-slate-200 rounded-lg focus:outline-none"
