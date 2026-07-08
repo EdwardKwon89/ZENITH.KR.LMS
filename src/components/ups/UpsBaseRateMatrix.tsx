@@ -115,7 +115,7 @@ export default function UpsBaseRateMatrix({ products, zones, agencies, onCellCli
             {productGroups.map(g => (
               <optgroup key={g.label} label={`── ${g.label} ──`}>
                 {g.items.map(p => (
-                  <option key={p.id} value={p.id}>{p.product_code} — {p.product_name}</option>
+                  <option key={p.id} value={p.id}>{p.product_name}</option>
                 ))}
               </optgroup>
             ))}
@@ -149,9 +149,16 @@ export default function UpsBaseRateMatrix({ products, zones, agencies, onCellCli
 
         <div className="flex-1" />
 
-        {/* Agency 할인율 미리보기 */}
-        <div className="flex items-center gap-2">
-          {previewAgencyId ? <Eye size={14} className="text-rose-400" /> : <EyeOff size={14} className="text-slate-400" />}
+        {/* 신규등록 버튼 (제품 선택 콤보와 동일 높이로 우측 배치) */}
+        {canEdit && selectedProductId && (
+          <button onClick={onNewClick} className="flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-xl hover:bg-brand-700 transition-all font-semibold text-xs shadow-sm shrink-0">
+            기준요금 신규 등록
+          </button>
+        )}
+
+        {/* Agency 할인율 미리보기 — 고정 높이로 배지 표시시 위치 변경 없음 */}
+        <div className="flex items-center gap-2 h-[38px]">
+          {previewAgencyId ? <Eye size={14} className="text-rose-400 shrink-0" /> : <EyeOff size={14} className="text-slate-400 shrink-0" />}
           <select
             value={previewAgencyId}
             onChange={e => setPreviewAgencyId(e.target.value)}
@@ -160,11 +167,13 @@ export default function UpsBaseRateMatrix({ products, zones, agencies, onCellCli
             <option value="">Agency 미리보기 (OFF)</option>
             {agencies.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
           </select>
-          {previewDiscount && (
-            <ZenBadge variant="danger" className="text-xs">
-              {previewDiscount.name} {previewDiscount.rate * 100}% 할인
-            </ZenBadge>
-          )}
+          <div className="w-auto min-w-[80px]">
+            {previewDiscount && (
+              <ZenBadge variant="danger" className="text-xs whitespace-nowrap">
+                {previewDiscount.name} {previewDiscount.rate * 100}% 할인
+              </ZenBadge>
+            )}
+          </div>
         </div>
       </div>
 
@@ -254,15 +263,6 @@ export default function UpsBaseRateMatrix({ products, zones, agencies, onCellCli
             <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded bg-amber-50 border border-amber-200 inline-block"/> 30일 내 만료 예정</span>
             <span className="flex items-center gap-1"><Calendar size={10}/> 기준일: {referenceDate}</span>
           </div>
-        </div>
-      )}
-
-      {/* 신규등록 버튼 */}
-      {canEdit && selectedProductId && (
-        <div className="flex justify-end">
-          <button onClick={onNewClick} className="flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-xl hover:bg-brand-700 transition-all font-semibold text-sm shadow-sm">
-            기준요금 신규 등록
-          </button>
         </div>
       )}
 
