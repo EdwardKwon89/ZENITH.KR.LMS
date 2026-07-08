@@ -16,11 +16,7 @@
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
 | [#271](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/271) | [DESIGN] 기준요금 매트릭스 UI 개선 — Zone×중량 요율표 + 제품 콤보박스 + 할인율 표시 | a | p2 | - | EdwardKwon89 | 2026-07-08 |
-| [#261](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/261) | [feat] TASK-B-078 REQ-06 아이템명 → HScode 자동 추출 (Claude Haiku 4.5 API) | b | p1 | in-progress | jungjs | 2026-07-08 |
-| [#260](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/260) | [feat] TASK-B-075 REQ-01/02 화주 주소 자동완성 + AddressInput 공통 컴포넌트화 | b | p1 | review | jungjs | 2026-07-08 |
-| [#259](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/259) | [feat] TASK-B-079 REQ-07 UPS Direct 운송 모드 추가 + UpsServiceSelector | b | p1 | rework | jungjs | 2026-07-08 |
-| [#256](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/256) | [feat] TASK-B-077 REQ-05 아이템 가격 UI 노출 (unit_price) | b | p3 | review | jungjs | 2026-07-08 |
-| [#254](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/254) | [feat] 오더 등록 폼 보완 — 화주주소 자동완성·DOC/NONDOC·지역운송장번호·아이템가격·HScode 자동추출 | b | p2 | open | 미배정 | 2026-07-08 |
+| [#261](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/261) | [feat] TASK-B-078 REQ-06 아이템명 → HScode 자동 추출 (Claude Haiku 4.5 API) | b | p1 | review | jungjs | 2026-07-08 |
 | [#182](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/182) | [Phase 7.1] UPS 특송 요금 관리 보완 — Agency/Shipper 계산 파이프라인 (An-14) | a | p1 | open | 미배정 | 2026-07-05 |
 | [#164](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/164) | [UAT-Epic] UPS 특송 서비스 — Team B 인수 테스트 (UAT-15~19) | b | p1 | open | jungjs | 2026-07-07 |
 | [#163](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/163) | [UAT-19] UPS 인보이스 PDF — Team B 수동 브라우저 UAT | b | p1 | open | jungjs | 2026-07-01 |
