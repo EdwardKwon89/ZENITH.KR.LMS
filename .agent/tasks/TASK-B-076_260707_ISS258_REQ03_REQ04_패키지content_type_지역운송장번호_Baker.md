@@ -199,10 +199,10 @@ git checkout -b feature/teamb-task-b076-iss258-v3
 
 ### 커밋
 - 코드: `5875896` — `[Baker] feat: TASK-B-076 REQ-03/04 패키지 content_type + domestic_ref_no (v3)`
-- 문서: `<TBD>` — `[Baker] docs: TASK-B-076 재제출 완료 보고 — task file + ACTIVE_TASK.md`
+- 문서: `3ff1065` — `[Baker] docs: TASK-B-076 재제출 완료 보고 — v3 브랜치, 코드 해시, ACTIVE_TASK.md 갱신`
 
 ### PR
-- PR#NNN: `feature/teamb-task-b076-iss258-v3` → `develop` (`Closes #258`)
+- PR#266: https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/266 (`feature/teamb-task-b076-iss258-v3` → `develop`, `Closes #258`)
 
 ---
 
