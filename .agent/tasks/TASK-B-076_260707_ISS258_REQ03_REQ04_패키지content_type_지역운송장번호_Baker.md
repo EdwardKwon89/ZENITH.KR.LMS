@@ -195,7 +195,7 @@ git checkout -b feature/teamb-task-b076-iss258-v3
 
 ### 검증
 - `npm run build` **PASS**
-- `npm run test:regression` **81 files, NN/NN PASS**
+- `npm run test:regression` **81 files, 489/489 PASS**
 ### 커밋
 
 - 코드: `a3eef64` — `[Baker] feat: TASK-B-076 REQ-03/04 패키지 content_type + domestic_ref_no (v3)`
