@@ -428,6 +428,18 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
   };
 
   const handleGoToStep3 = async () => {
+    const currentMode = watch('transport_mode');
+
+    if (currentMode === 'UPS') {
+      const family = watch('ups_service_family');
+      if (!family) {
+        toast.error("UPS 서비스를 선택해주세요.");
+        return;
+      }
+      setStep(3);
+      return;
+    }
+
     if (!selectedCombination) {
       toast.error("서비스 조합을 선택해주세요.");
       return;
@@ -513,6 +525,36 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
 
   const onSubmit = async (data: any) => {
     try {
+      // UPS: ups_product_code 자동 결정 + 서비스 조합 우회
+      if (data.transport_mode === 'UPS') {
+        if (data.ups_service_family) {
+          const hasNondoc = data.packages?.some((p: any) => p.content_type === 'NONDOC');
+          const map: Record<string, string> = {
+            WW_EXPRESS:   hasNondoc ? 'WW_EXPRESS_NONDOC' : 'WW_EXPRESS_DOC',
+            WW_SAVER:     hasNondoc ? 'WW_SAVER_NONDOC'   : 'WW_SAVER_DOC',
+            WW_EXPEDITED: 'WW_EXPEDITED',
+            WW_FLIGHT:    'WW_FLIGHT',
+          };
+          data.ups_product_code = map[data.ups_service_family];
+        }
+        const finalData = {
+          ...data,
+          estimated_cost: totals.freight,
+          ups_product_code: data.ups_product_code,
+        };
+        const orderResult = await createOrder(finalData as OrderRegistrationInput);
+        console.log('E2E_ORDER_RESULT:', orderResult);
+        if (!orderResult || typeof orderResult === 'string') throw new Error('Order creation failed');
+        const r = orderResult as { id: string; order_no: string };
+        toast.success(t('success_create'), {
+          description: `Order No: ${r.order_no}`,
+          icon: <CheckCircle2 className="text-green-500" />
+        });
+        if (onSuccess) onSuccess();
+        setTimeout(() => router.push(`/orders/${r.id}`), 1000);
+        return;
+      }
+
       if (hasZeroRatesForRequiredService || !isAllRatesSelected) {
         throw new Error("선택하신 서비스 중 일부 서비스에 등록된 비용 정보가 없거나 요율을 선택하지 않았습니다.");
       }
@@ -1121,17 +1163,32 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
               className="space-y-6"
             >
               <ZenCard className="p-6">
-                <h3 className="text-base font-black text-slate-800 mb-2 flex items-center gap-2">
-                  <Layers size={18} className="text-blue-500" /> 배송 서비스 조합 선택
-                </h3>
-                <p className="text-xs text-slate-500 mb-6">
-                  화물의 운송 모드({transportMode === 'SEA' ? '해상' : transportMode === 'AIR' ? '항공' : transportMode === 'EXP' ? '특송' : '육상'})에 따라 제공되는 서비스 조합 중 원하시는 방식을 선택해주세요.
-                </p>
+                {transportMode === 'UPS' ? (
+                  <>
+                    <h3 className="text-base font-black text-slate-800 mb-2 flex items-center gap-2">
+                      <PackageCheck size={18} className="text-brand-600" /> UPS 서비스 선택
+                    </h3>
+                    <p className="text-xs text-slate-500 mb-6">
+                      UPS Direct 운송에 사용할 서비스 종류를 선택해주세요.
+                    </p>
+                    <UpsServiceSelector control={control} register={register} />
+                  </>
+                ) : (
+                  <>
+                    <h3 className="text-base font-black text-slate-800 mb-2 flex items-center gap-2">
+                      <Layers size={18} className="text-blue-500" /> 배송 서비스 조합 선택
+                    </h3>
+                    <p className="text-xs text-slate-500 mb-6">
+                      화물의 운송 모드({transportMode === 'SEA' ? '해상' : transportMode === 'AIR' ? '항공' : transportMode === 'EXP' ? '특송' : '육상'})에 따라 제공되는 서비스 조합 중 원하시는 방식을 선택해주세요.
+                    </p>
+                  </>
+                )}
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {availableCombinations.map((combo) => {
-                    const isSelected = selectedCombination === combo.code;
-                    return (
+                {transportMode !== 'UPS' && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {availableCombinations.map((combo) => {
+                      const isSelected = selectedCombination === combo.code;
+                      return (
                       <button
                         key={combo.code}
                         type="button"
