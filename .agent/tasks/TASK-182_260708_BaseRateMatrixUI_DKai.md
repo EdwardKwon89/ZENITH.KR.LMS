@@ -55,8 +55,13 @@ Issue #271 — Edward 요구사항, Aiden 설계 승인 완료.
 - `npm run test:regression`: 81 files / 489 PASS ✅
 - 백엔드/DB 변경: 0건
 
+### 작업 주체
+- **지시·승인**: Edward (ZEN_CEO) — 실시간 협업 세션에서 UI 배치·표시 항목 직접 지시
+- **구현**: D_Kai (DeepSeek)
+- **모니터링**: Aiden (Claude) — PR 리뷰 및 R-17 준수 감독
+
 ### 관련 링크
-- PR: #275
+- PR: #275 (초기, closed) / #280 (최종)
 - Issue: #271
 
 ## DoD
