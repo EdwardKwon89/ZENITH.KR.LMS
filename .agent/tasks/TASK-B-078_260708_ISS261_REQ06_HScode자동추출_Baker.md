@@ -52,15 +52,15 @@
 
 ## DoD
 
-- [ ] `src/app/api/hs-lookup/route.ts` 신규 생성
-- [ ] Haiku 4.5 API 호출 — 6자리 HS Code 추출
-- [ ] `item_name` onBlur 시 자동 호출 (이미 입력된 경우 스킵)
-- [ ] 로딩 인디케이터 표시
-- [ ] API 실패 시 조용히 무시
-- [ ] `ANTHROPIC_API_KEY` 환경변수 확인
-- [ ] `npm run build` PASS
-- [ ] `npm run test:regression` PASS
-- [ ] R-17 커밋 순서 엄수 + PR 생성 (`Closes #261`)
+- [x] `src/app/api/hs-lookup/route.ts` 신규 생성
+- [x] Haiku 4.5 API 호출 — 6자리 HS Code 추출
+- [x] `item_name` onBlur 시 자동 호출 (이미 입력된 경우 스킵)
+- [x] 로딩 인디케이터 표시
+- [x] API 실패 시 조용히 무시
+- [x] `ANTHROPIC_API_KEY` 환경변수 확인 (미설치 — 실행 시 조용히 무시)
+- [x] `npm run build` PASS
+- [x] `npm run test:regression` PASS (489/489)
+- [x] R-17 커밋 순서 엄수 + PR 생성 (`Closes #261`) — PR #277
 
 ---
 
@@ -122,6 +122,18 @@ git checkout -b feature/teamb-task-b078-iss261
 - 코드: `0256484` — `[Baker] feat: TASK-B-078 REQ-06 HScode 자동 추출 (Claude Haiku 4.5 API)`
   - `src/app/api/hs-lookup/route.ts` (신규, 81줄)
   - `src/components/orders/OrderRegistrationForm.tsx` (+47줄)
+- 문서: `429271a` — `[Baker] docs: TASK-B-078 완료 보고 — task file 🔔 + ACTIVE_TASK.md 상태 갱신`
+
+### PR
+
+- **[PR #277](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/277)** — `Closes #261`
+- base: `develop` ← head: `feature/teamb-task-b078-iss261`
+
+### Jaison 1차 반려 수정 (2026-07-08)
+
+- 반려 사유 ①: Task file DoD 미체크 (R-17 위반) → DoD 전 항목 `[x]` 처리
+- 반려 사유 ②: `[작업 결과]`에 PR#277 링크 미기재 → 본 섹션에 PR 링크 추가
+- 코드 재작성 불필요 (task file 수정만으로 재제출)
 
 ---
 
@@ -141,3 +153,5 @@ _(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
 |:-----|:------|:----|
 | 2026-07-08 | Jaison | TASK-B-078 발령 — Issue #261 생성, Dave → Baker 재배정 |
 | 2026-07-08 | Baker | TASK-B-078 재착수 — 신규 브랜치 `feature/teamb-task-b078-iss261` (이전 작업 무시, 처음부터) |
+| 2026-07-08 | Jaison | TASK-B-078 1차 반려 — DoD 미체크 + PR 링크 미기재 (코드 재작성 불필요) |
+| 2026-07-08 | Baker | TASK-B-078 반려 수정 — DoD `[x]` 처리 + PR#277 링크 추가 |
