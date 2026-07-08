@@ -163,7 +163,7 @@ export default function UpsBaseRateMatrix({ products, zones, agencies, onCellCli
           <div className="w-auto min-w-[80px]">
             {previewDiscount && (
               <ZenBadge variant="danger" className="text-xs whitespace-nowrap">
-                {previewDiscount.name} {previewDiscount.rate * 100}% 할인
+                {(previewDiscount.rate * 100).toFixed(0)}% 할인
               </ZenBadge>
             )}
           </div>
