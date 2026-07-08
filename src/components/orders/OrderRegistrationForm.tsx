@@ -22,6 +22,7 @@ import { estimateFreightCost, TransportMode } from '@/utils/logistics/freight-ca
 import { getAvailableServiceRates, getUsdKrwRate, getBaseCurrency, AvailableServiceRates } from '@/app/actions/operations/service-rates';
 import { createOrderServices } from '@/app/actions/operations/order-services';
 import AddressBookSelector from '@/components/address-book/AddressBookSelector';
+import { AddressInput } from '@/components/common/AddressInput';
 
 interface OrderRegistrationFormProps {
   shippers: any[];
@@ -213,6 +214,11 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
           setValue('shipper_contact_phone', data.userPhone || '');
           setValue('shipper_address', matchedShipper?.address || data.orgAddress || '');
           setValue('shipper_biz_no', matchedShipper?.biz_no || data.orgBizNo || '');
+          setValue('shipper_country_code', data.orgCountryCode || 'KR');
+          setValue('shipper_state_province', data.orgStateProvince || '');
+          setValue('shipper_city', data.orgCity || '');
+          setValue('shipper_address_detail', data.orgAddressDetail || '');
+          setValue('shipper_zipcode', data.orgZipcode || '');
         }
       } catch (err) { logger.error(err); } finally { setIsLoadingAffiliation(false); }
     }
@@ -734,10 +740,12 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                               <>
                                 <div>
                                   <p className="text-slate-400 font-bold uppercase tracking-tighter mb-1">{t('shipper_address')}</p>
-                                  <ZenInput
+                                  <AddressInput
+                                    mode="rhf"
+                                    prefix="shipper"
+                                    register={register}
+                                    t={t}
                                     readOnly
-                                    {...register('shipper_address')}
-                                    className="bg-slate-50 py-1.5 text-[11px] text-slate-700 font-semibold"
                                   />
                                 </div>
                                 <div>

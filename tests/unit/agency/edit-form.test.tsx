@@ -43,7 +43,7 @@ vi.mock('@/app/actions/agency/shippers', () => ({
   updateAgencyShipper: vi.fn(),
 }));
 
-vi.mock('@/app/[locale]/(dashboard)/agency/shippers/new/address-input', () => ({
+vi.mock('@/components/common/AddressInput', () => ({
   AddressInput: ({ defaultValues }: any) => (
     <div data-testid="address-input">
       <input name="country_code" defaultValue={defaultValues?.country_code || ''} />

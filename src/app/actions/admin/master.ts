@@ -250,13 +250,19 @@ export async function getCurrentUserAffiliation() {
   if (profile?.org_id) {
     const [legacyRes, modernRes] = await Promise.all([
       supabase.from("organizations").select("org_name_ko, address, biz_no").eq("id", profile.org_id).single(),
-      supabase.from("zen_organizations").select("name, biz_no").eq("id", profile.org_id).single()
+      supabase.from("zen_organizations").select("name, biz_no, country_code, state_province, city, address, address_detail, zipcode").eq("id", profile.org_id).single()
     ]);
     
     orgData = {
       name: legacyRes.data?.org_name_ko || modernRes.data?.name || "Unknown Org",
       address: legacyRes.data?.address,
-      bizNo: legacyRes.data?.biz_no || modernRes.data?.biz_no
+      bizNo: legacyRes.data?.biz_no || modernRes.data?.biz_no,
+      countryCode: modernRes.data?.country_code ?? 'KR',
+      stateProvince: modernRes.data?.state_province ?? null,
+      city: modernRes.data?.city ?? null,
+      addressStreet: modernRes.data?.address ?? legacyRes.data?.address ?? null,
+      addressDetail: modernRes.data?.address_detail ?? null,
+      zipcode: modernRes.data?.zipcode ?? null,
     };
   }
 
@@ -270,6 +276,12 @@ export async function getCurrentUserAffiliation() {
     orgName: orgData?.name || null,
     orgAddress: orgData?.address,
     orgBizNo: orgData?.bizNo,
+    orgCountryCode: orgData?.countryCode ?? 'KR',
+    orgStateProvince: orgData?.stateProvince ?? null,
+    orgCity: orgData?.city ?? null,
+    orgAddressStreet: orgData?.addressStreet ?? null,
+    orgAddressDetail: orgData?.addressDetail ?? null,
+    orgZipcode: orgData?.zipcode ?? null,
     isIndividual: !profile?.org_id,
     dummyIndividualId: SYSTEM_INDIVIDUAL_SHIPPER_ID
   };
