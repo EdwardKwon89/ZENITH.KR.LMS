@@ -1,6 +1,7 @@
 import { logger } from '@/lib/logger';
 import Anthropic from '@anthropic-ai/sdk';
 import { NextResponse } from 'next/server';
+import { createClient } from '@/utils/supabase/server';
 
 const client = new Anthropic();
 
@@ -15,12 +16,25 @@ interface HsLookupResponse {
   note?: string;
 }
 
+const MAX_ITEM_NAME_LENGTH = 200;
+
 /**
  * [REQ-06] 아이템명 → HS Code 자동 추출 (Claude Haiku 4.5)
  * POST /api/hs-lookup
+ *
+ * 인증 필수 — 로그인하지 않은 사용자의 외부 API 비용 발생 방지.
+ * `/api/*` 경로는 middleware.ts authGuard가 스킵하므로 route 자체 인증 체크.
  */
 export async function POST(req: Request) {
   try {
+    // 1. 인증 체크 (finance/export/route.ts 패턴 준용)
+    const supabase = await createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return new NextResponse('Unauthorized', { status: 401 });
+    }
+
+    // 2. 입력 검증
     const body: HsLookupRequest = await req.json();
     const itemName = body.item_name?.trim() ?? '';
 
@@ -28,8 +42,11 @@ export async function POST(req: Request) {
       return NextResponse.json<HsLookupResponse>({ hs_code: null, confidence: 'low' });
     }
 
+    // 최대 길이 제한 — 과도하게 긴 입력으로 토큰 비용 증가 방지
+    const truncatedName = itemName.slice(0, MAX_ITEM_NAME_LENGTH);
     const destCountry = body.dest_country_code?.trim();
 
+    // 3. Haiku 4.5 API 호출
     const message = await client.messages.create({
       model: 'claude-haiku-4-5-20251001',
       max_tokens: 64,
@@ -38,7 +55,7 @@ export async function POST(req: Request) {
       messages: [
         {
           role: 'user',
-          content: `Item name: "${itemName}"${destCountry ? `, destination: ${destCountry}` : ''}`,
+          content: `Item name: "${truncatedName}"${destCountry ? `, destination: ${destCountry}` : ''}`,
         },
       ],
     });
