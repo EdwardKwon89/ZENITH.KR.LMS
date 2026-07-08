@@ -37,6 +37,8 @@ export default function UpsBaseRateMatrix({ products, zones, agencies, onCellCli
   const [matrixRates, setMatrixRates] = useState<UpsBaseRateWithRefs[]>([]);
   const [loading, setLoading] = useState(false);
   const [referenceDate, setReferenceDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [showAllPeriods, setShowAllPeriods] = useState(false);
+  const effectiveDate = showAllPeriods ? '2099-12-31' : referenceDate;
 
   // 제품 그룹핑 (DOC 상단, NON_DOC 하단)
   const productGroups = useMemo(() => {
@@ -61,11 +63,11 @@ export default function UpsBaseRateMatrix({ products, zones, agencies, onCellCli
   useEffect(() => {
     if (!selectedProductId) { setMatrixRates([]); return; }
     setLoading(true);
-    getUpsBaseRates({ productId: selectedProductId, referenceDate })
+    getUpsBaseRates({ productId: selectedProductId, referenceDate: effectiveDate })
       .then(setMatrixRates)
       .catch(() => setMatrixRates([]))
       .finally(() => setLoading(false));
-  }, [selectedProductId, referenceDate]);
+  }, [selectedProductId, effectiveDate]);
 
   // 매트릭스 데이터 변환: { [zoneId]: { [weightKg]: rate } }
   const zoneWeights = useMemo(() => {
@@ -126,15 +128,22 @@ export default function UpsBaseRateMatrix({ products, zones, agencies, onCellCli
           <Calendar size={14} className="text-slate-400" />
           <input
             type="date"
-            value={referenceDate}
-            onChange={e => setReferenceDate(e.target.value)}
-            className="px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-mono focus:outline-none focus:ring-2 focus:ring-brand-500/20"
+            value={showAllPeriods ? '2099-12-31' : referenceDate}
+            onChange={e => { setShowAllPeriods(false); setReferenceDate(e.target.value); }}
+            disabled={showAllPeriods}
+            className={`px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-mono focus:outline-none focus:ring-2 focus:ring-brand-500/20 ${showAllPeriods ? 'opacity-40' : ''}`}
           />
           <button
-            onClick={() => setReferenceDate(new Date().toISOString().split('T')[0])}
+            onClick={() => { setShowAllPeriods(false); setReferenceDate(new Date().toISOString().split('T')[0]); }}
             className="px-2 py-1.5 text-[10px] font-semibold text-brand-600 hover:text-brand-700 bg-brand-50 rounded-lg hover:bg-brand-100 transition-colors"
           >
             오늘
+          </button>
+          <button
+            onClick={() => setShowAllPeriods(!showAllPeriods)}
+            className={`px-2 py-1.5 text-[10px] font-semibold rounded-lg transition-colors ${showAllPeriods ? 'bg-brand-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+          >
+            {showAllPeriods ? '기간별 보기' : '전체 기간'}
           </button>
         </div>
 
@@ -188,10 +197,12 @@ export default function UpsBaseRateMatrix({ products, zones, agencies, onCellCli
                     const discounted = previewDiscount && rate
                       ? Math.round(Number(rate.selling_price) * (1 - previewDiscount.rate))
                       : null;
+                    const periodStr = rate ? `${rate.valid_from}~${rate.valid_until || '무기한'}` : '';
                     return (
                       <td
                         key={z.id}
                         onClick={() => handleCellClick(z.id, w)}
+                        title={periodStr}
                         className={`px-3 py-2 text-center border-r border-slate-100 last:border-r-0 ${canEdit && rate ? 'cursor-pointer hover:bg-brand-100/50' : ''} ${rate ? '' : 'text-slate-300'} ${validity === 'expired' ? 'bg-rose-50/50' : validity === 'soon' ? 'bg-amber-50/50' : ''}`}
                       >
                         {rate ? (
@@ -207,14 +218,14 @@ export default function UpsBaseRateMatrix({ products, zones, agencies, onCellCli
                             <div className="font-mono text-[10px] text-slate-400">
                               ({Number(rate.cost_price).toLocaleString()})
                             </div>
+                            <div className="font-mono text-[8px] text-slate-400 leading-tight">
+                              {rate.valid_from}~{rate.valid_until || '∞'}
+                            </div>
                             {validity === 'expired' && (
                               <div className="font-mono text-[9px] text-rose-500 font-semibold">만료</div>
                             )}
                             {validity === 'soon' && (
                               <div className="font-mono text-[9px] text-amber-600">~{rate.valid_until?.split('T')[0]}</div>
-                            )}
-                            {validity === 'ok' && rate.valid_until && (
-                              <div className="font-mono text-[9px] text-slate-400">~{rate.valid_until?.split('T')[0]}</div>
                             )}
                           </div>
                         ) : (
@@ -260,7 +271,8 @@ export default function UpsBaseRateMatrix({ products, zones, agencies, onCellCli
         <p className="text-[10px] text-slate-400">
           {zoneWeights.weights.length}개 중량 × {zoneWeights.zones.length}개 Zone = 총 {matrixRates.length}건 기준요금
           {previewDiscount && ` · ${previewDiscount.name} 할인율 ${(previewDiscount.rate * 100).toFixed(0)}% 적용 표시`}
-          {referenceDate !== new Date().toISOString().split('T')[0] && ` · 기준일: ${referenceDate} (과거/미래 조회)`}
+          {showAllPeriods ? ' · 전체 기간' : ` · 기준일: ${referenceDate}`}
+          {!showAllPeriods && referenceDate !== new Date().toISOString().split('T')[0] && ' (과거/미래 조회)'}
         </p>
       )}
     </div>
