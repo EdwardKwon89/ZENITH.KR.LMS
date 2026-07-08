@@ -840,12 +840,21 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                                <>
                                 <div>
                                   <p className="text-slate-400 font-bold uppercase tracking-tighter mb-1">{t('shipper_address')}</p>
-                                  <AddressInput
-                                    mode="rhf"
-                                    prefix="shipper"
-                                    register={register}
-                                    t={t}
-                                  />
+                                   <AddressInput
+                                     mode="rhf"
+                                     prefix="shipper"
+                                     register={register}
+                                     t={t}
+                                     key={affiliation?.orgId || 'no-org'}
+                                     defaultValues={{
+                                       country_code: affiliation?.orgCountryCode ?? 'KR',
+                                       state_province: affiliation?.orgStateProvince ?? '',
+                                       city: affiliation?.orgCity ?? '',
+                                       address: affiliation?.orgAddressStreet ?? affiliation?.orgAddress ?? '',
+                                       address_detail: affiliation?.orgAddressDetail ?? '',
+                                       zipcode: affiliation?.orgZipcode ?? '',
+                                     }}
+                                   />
                                 </div>
                                 <div>
                                   <p className="text-slate-400 font-bold uppercase tracking-tighter mb-1">{t('shipper_biz_no')}</p>
@@ -896,10 +905,11 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                       </div>
                       <div>
                         <label className="text-[10px] font-bold text-slate-500 mb-1 block">Full Address</label>
-                        <textarea 
-                          {...register('recipient_address')}
-                          className="w-full text-xs p-2 border border-slate-200 rounded-xl bg-white resize-none h-16 outline-none focus:ring-2 focus:ring-blue-100"
-                          placeholder="Physical delivery address"
+                        <AddressInput
+                          mode="rhf"
+                          prefix="recipient"
+                          register={register}
+                          t={t}
                         />
                         {errors.recipient_address && <p className="text-[9px] text-rose-500 mt-1">{errors.recipient_address.message}</p>}
                       </div>
