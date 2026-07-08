@@ -893,25 +893,17 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                         <label className="text-[10px] font-bold text-slate-500 mb-1 block">Phone</label>
                         <ZenInput placeholder="010-XXXX-XXXX" {...register('recipient_phone')} error={!!errors.recipient_phone} className="py-2 text-xs" />
                       </div>
-                      <div className="grid grid-cols-2 gap-2">
-                        <div>
-                          <label className="text-[10px] font-bold text-slate-500 mb-1 block">PCCC</label>
-                          <ZenInput placeholder="P1234..." {...register('recipient_pccc')} className="py-2 text-xs" />
-                        </div>
-                        <div>
-                          <label className="text-[10px] font-bold text-slate-500 mb-1 block">Zipcode</label>
-                          <ZenInput placeholder="12345" {...register('recipient_zipcode')} className="py-2 text-xs" />
-                        </div>
+                      <div>
+                        <label className="text-[10px] font-bold text-slate-500 mb-1 block">PCCC</label>
+                        <ZenInput placeholder="P1234..." {...register('recipient_pccc')} className="py-2 text-xs" />
                       </div>
                       <div>
-                        <label className="text-[10px] font-bold text-slate-500 mb-1 block">Full Address</label>
                         <AddressInput
                           mode="rhf"
                           prefix="recipient"
                           register={register}
                           t={t}
                         />
-                        {errors.recipient_address && <p className="text-[9px] text-rose-500 mt-1">{errors.recipient_address.message}</p>}
                       </div>
                       <div>
                         <label className="text-[10px] font-bold text-slate-500 mb-1 block">Local Address</label>
