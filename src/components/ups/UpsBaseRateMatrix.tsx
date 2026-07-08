@@ -149,6 +149,13 @@ export default function UpsBaseRateMatrix({ products, zones, agencies, onCellCli
 
         <div className="flex-1" />
 
+        {/* 기준요금 신규 등록 (Agency 미리보기 우측) */}
+        {canEdit && selectedProductId && (
+          <button onClick={onNewClick} className="flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-xl hover:bg-brand-700 transition-all font-semibold text-xs shadow-sm shrink-0">
+            기준요금 신규 등록
+          </button>
+        )}
+
         {/* Agency 할인율 미리보기 — 고정 높이로 배지 표시시 위치 변경 없음 */}
         <div className="flex items-center gap-2 h-[38px]">
           {previewAgencyId ? <Eye size={14} className="text-rose-400 shrink-0" /> : <EyeOff size={14} className="text-slate-400 shrink-0" />}
