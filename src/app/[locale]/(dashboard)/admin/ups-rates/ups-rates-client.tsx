@@ -185,7 +185,7 @@ export default function UpsRatesClient({ zones, products, baseRates, fuelSurchar
       </div>
 
       <div className="flex justify-end">
-        {canEdit && activeTab !== 'fuelSurcharges' && (
+        {canEdit && activeTab !== 'baseRates' && activeTab !== 'fuelSurcharges' && (
           <button onClick={openNew} className="flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-xl hover:bg-brand-700 transition-all font-semibold shadow-sm hover:shadow-brand-500/20">
             <Plus size={18} />
             {activeTab === 'zones' ? 'Zone 등록' : activeTab === 'products' ? '제품 등록' : activeTab === 'otherCharges' ? '부가요금 등록' : activeTab === 'agencyPolicies' ? '할인율 정책 등록' : activeTab === 'weightTierRates' ? '티어 요율 등록' : activeTab === 'freightMinimums' ? '최소운임 등록' : '등록'}
