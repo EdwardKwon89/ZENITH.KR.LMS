@@ -4,7 +4,7 @@
  */
 
 
-export type TransportMode = 'AIR' | 'SEA' | 'EXP' | 'LAND';
+export type TransportMode = 'AIR' | 'SEA' | 'EXP' | 'LAND' | 'UPS';
 
 export interface FreightCalcInput {
   weight: number;      // Actual Weight (kg)
@@ -14,11 +14,12 @@ export interface FreightCalcInput {
 
 // 📐 가변 요율 정의 (DB 미연동 시의 동기 Fallback 정책용 더미값)
 const DEFAULT_FALLBACK_RATES = {
-  AIR: 5.5,   // $ per kg
-  EXP: 9.0,   // $ per kg
-  SEA: 120.0, // $ per CBM (LCL 기본)
-  LAND: 2500, // $ per container/truck (Flat - 예시)
-};
+  AIR: 5.5,
+  EXP: 9.0,
+  SEA: 120.0,
+  LAND: 2500,
+  UPS: 9.0,
+} as const;
 
 /**
  * Chargeable Weight 산출 로직
@@ -56,7 +57,7 @@ export function estimateFreightCost(input: FreightCalcInput): number {
   }
 
   // 항공, 특송 등은 중량 기준 단가 적용
-  const rate = DEFAULT_FALLBACK_RATES[mode] || 0;
+  const rate = (DEFAULT_FALLBACK_RATES as Record<string, number>)[mode] || 0;
   return chargeable * rate;
 }
 

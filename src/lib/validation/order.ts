@@ -65,7 +65,9 @@ export const orderRegistrationSchema = z.object({
   delivery_notes: z.string().optional(),
   
   // 운송 수단 (v2.1)
-  transport_mode: z.enum(['AIR', 'SEA', 'EXP', 'LAND']).default('AIR'),
+  transport_mode: z.enum(['AIR', 'SEA', 'EXP', 'LAND', 'UPS']).default('AIR'),
+
+  ups_service_family: z.enum(['WW_EXPRESS', 'WW_SAVER', 'WW_EXPEDITED', 'WW_FLIGHT']).optional(),
   
   // 물류 요약 정보 (v2.2)
   estimated_cost: z.number().optional(),
