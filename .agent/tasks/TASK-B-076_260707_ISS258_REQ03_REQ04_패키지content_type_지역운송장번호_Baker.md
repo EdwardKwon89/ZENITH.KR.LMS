@@ -4,7 +4,7 @@
 > **발령자**: Jaison (Team B 총괄)
 > **담당자**: Baker (Big Pickle)
 > **우선순위**: P2
-> **상태**: 🔔 검토 요청
+> **상태**: ❌ 반려 — 구조적 문제 3건 + 설계 이탈 1건 (Aiden 판단 대기)
 > **연관 이슈**: [Issue #258](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/258)
 > **설계 원본**: [Issue #254](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/254) · `.agent/tasks/TASK-B-074_260707_ISS254_오더폼보완_설계.md`
 > **전제조건**: TASK-B-077 ✅ (PR#262 머지 완료)
@@ -200,7 +200,14 @@ git checkout -b feature/teamb-task-b076-iss258
 
 ## [발견 이슈]
 
-없음
+### 반려 기록 (2026-07-08, Jaison)
+
+| # | 사유 | 조치 필요 |
+|:--|:-----|:----------|
+| 1 | **브랜치 교차 오염**: `feature/teamb-task-b076-iss258`에 Dave의 B-075 커밋(`8c21ea7`)이 포함됨 | develop 최신에서 새 브랜치 생성 후 B-076 변경사항만 재커밋 |
+| 2 | **마이그레이션 버전 중복**: `20260708` 접두사 중복 | 파일명에 시간 추가: `20260708000100_ord_001_pkg_content_type.sql`, `20260708000200_rpc_create_order_atomic_v4.sql` |
+| 3 | **PR 미생성/종료**: PR#263 CLOSED 상태 | 코드 재커밋 후 `Closes #258` 포함 신규 PR 생성 |
+| 4 | **설계 이탈**: `transport_mode === 'EXP'` 사용은 Aiden 확정 설계(`'UPS'`)와 다름 | Aiden 판단 대기 — 방향 확정 후 재착수 |
 
 ---
 
@@ -210,3 +217,5 @@ git checkout -b feature/teamb-task-b076-iss258
 |:-----|:------|:----|
 | 2026-07-08 | Jaison | TASK-B-076 발령 — Issue #258 생성 |
 | 2026-07-08 | Baker | TASK-B-076 착수 — feature/teamb-task-b076-iss258 브랜치 생성 |
+| 2026-07-08 | Baker | TASK-B-076 PR#263 제출 |
+| 2026-07-08 | Jaison | TASK-B-076 반려 — 구조적 문제 3건 + 설계 이탈 1건 |
