@@ -78,13 +78,17 @@ export function AddressInput({
         <select
           value={countryCode}
           onChange={(e) => setCountryCode(e.target.value)}
-          className="w-full h-10 px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+          disabled={readOnly}
+          className={`w-full h-10 px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${readOnly ? 'bg-slate-50' : ''}`}
         >
           {countries.map((c) => (
             <option key={c.isoCode} value={c.isoCode}>{c.name}</option>
           ))}
         </select>
-        {mode === 'form-action' && <input name="country_code" type="hidden" value={countryCode} />}
+        {mode === 'form-action'
+          ? <input name="country_code" type="hidden" value={countryCode} />
+          : <input type="hidden" {...rhf(prefix, 'country_code', register)} value={countryCode} />
+        }
       </div>
 
       {countryCode === 'KR' ? (
@@ -99,7 +103,8 @@ export function AddressInput({
               className="flex-1 h-10 px-3 py-2 text-sm border border-slate-200 rounded-xl bg-slate-50 focus:outline-none"
             />
             <button type="button" onClick={() => setShowPostcode(true)}
-              className="h-10 px-4 py-2 text-xs font-bold text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition-colors shrink-0">
+              disabled={readOnly}
+              className="h-10 px-4 py-2 text-xs font-bold text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition-colors shrink-0 disabled:opacity-50">
               {t('form_address_search')}
             </button>
           </div>
@@ -125,7 +130,8 @@ export function AddressInput({
               {...a('address_detail')}
               value={detailAddress}
               onChange={(e) => setDetailAddress(e.target.value)}
-              className="w-full h-10 px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+              disabled={readOnly}
+              className={`w-full h-10 px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${readOnly ? 'bg-slate-50' : ''}`}
             />
             {fieldErrors.address_detail && <p className="text-xs text-red-500 mt-1">{fieldErrors.address_detail}</p>}
           </div>
@@ -140,7 +146,8 @@ export function AddressInput({
               <select
                 value={selectedState}
                 onChange={(e) => setSelectedState(e.target.value)}
-                className="w-full h-10 px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                disabled={readOnly || !countryCode}
+                className={`w-full h-10 px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${readOnly ? 'bg-slate-50' : ''}`}
               >
                 <option value="">{t('form_state_province')}</option>
                 {states.map((s) => (
@@ -155,8 +162,8 @@ export function AddressInput({
               <select
                 value={selectedCity}
                 onChange={(e) => setSelectedCity(e.target.value)}
-                disabled={!selectedState}
-                className="w-full h-10 px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 disabled:opacity-50"
+                disabled={readOnly || !selectedState}
+                className={`w-full h-10 px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 disabled:opacity-50 ${readOnly ? 'bg-slate-50' : ''}`}
               >
                 <option value="">{t('form_city')}</option>
                 {cities.map((c) => (
@@ -173,7 +180,8 @@ export function AddressInput({
               {...a('address')}
               value={streetAddress}
               onChange={(e) => setStreetAddress(e.target.value)}
-              className="w-full h-10 px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+              disabled={readOnly}
+              className={`w-full h-10 px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${readOnly ? 'bg-slate-50' : ''}`}
             />
             {fieldErrors.address && <p className="text-xs text-red-500 mt-1">{fieldErrors.address}</p>}
           </div>
@@ -184,7 +192,8 @@ export function AddressInput({
                 {...a('address_detail')}
                 value={detailAddress}
                 onChange={(e) => setDetailAddress(e.target.value)}
-                className="w-full h-10 px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                disabled={readOnly}
+                className={`w-full h-10 px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${readOnly ? 'bg-slate-50' : ''}`}
               />
               {fieldErrors.address_detail && <p className="text-xs text-red-500 mt-1">{fieldErrors.address_detail}</p>}
             </div>
@@ -194,7 +203,8 @@ export function AddressInput({
                 {...a('zipcode')}
                 value={postalCode}
                 onChange={(e) => setPostalCode(e.target.value)}
-                className="w-full h-10 px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                disabled={readOnly}
+                className={`w-full h-10 px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${readOnly ? 'bg-slate-50' : ''}`}
               />
               {fieldErrors.zipcode && <p className="text-xs text-red-500 mt-1">{fieldErrors.zipcode}</p>}
             </div>
