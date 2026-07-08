@@ -1,11 +1,10 @@
 'use client';
 
-import { useWatch, useFormContext } from 'react-hook-form';
-import type { Control, UseFormRegister } from 'react-hook-form';
+import { useWatch } from 'react-hook-form';
 
 interface UpsServiceSelectorProps {
-  control: Control<any>;
-  register: UseFormRegister<any>;
+  control: any;
+  register: any;
 }
 
 const SERVICES = [

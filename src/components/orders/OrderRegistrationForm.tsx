@@ -16,6 +16,7 @@ import { ZenCard, ZenButton, ZenInput, ZenBadge } from '@/components/ui/ZenUI';
 import { createOrder } from '@/app/actions/orders';
 import { getCurrentUserAffiliation } from '@/app/actions/master';
 import { UpsFreightEstimateSection } from './UpsFreightEstimateSection';
+import { UpsServiceSelector } from './UpsServiceSelector';
 import { USER_ROLES } from '@/lib/auth/rbac';
 import { orderRegistrationSchema, OrderRegistrationInput } from '@/lib/validation/order';
 import { estimateFreightCost, TransportMode } from '@/utils/logistics/freight-calculator';
@@ -48,13 +49,11 @@ type Affiliation = {
  */
 const NestedItems: React.FC<{
   nestIndex: number;
-  control: any; // 타각적 타입 에러 방지 (Complex Generic mismatch)
+  control: any;
   register: any;
   errors: any;
   t: any;
-  hsLookupLoadingMap?: Record<string, boolean>;
-  onItemNameBlur?: (k: number) => void;
-}> = ({ nestIndex, control, register, errors, t, hsLookupLoadingMap = {}, onItemNameBlur }) => {
+}> = ({ nestIndex, control, register, errors, t }) => {
   const { fields, append, remove } = useFieldArray({
     control,
     name: `packages.${nestIndex}.items` as any
@@ -82,10 +81,6 @@ const NestedItems: React.FC<{
               <ZenInput 
                 placeholder={t('item_name')}
                 {...register(`packages.${nestIndex}.items.${k}.item_name`)}
-                onBlur={(e) => {
-                  register(`packages.${nestIndex}.items.${k}.item_name`).onBlur?.(e);
-                  onItemNameBlur?.(k);
-                }}
                 className="bg-white py-2 text-xs"
               />
             </div>
@@ -119,17 +114,12 @@ const NestedItems: React.FC<{
                 <option value="CNY">CNY</option>
               </select>
             </div>
-            <div className="col-span-3 relative">
+            <div className="col-span-3">
               <ZenInput 
                 placeholder="HS Code"
                 {...register(`packages.${nestIndex}.items.${k}.hs_code`)}
                 className="bg-white py-2 text-xs"
               />
-              {hsLookupLoadingMap[`${nestIndex}-${k}`] && (
-                <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] text-blue-400 animate-pulse">
-                  AI 추출 중...
-                </span>
-              )}
             </div>
             <div className="col-span-1">
               <select 
@@ -206,38 +196,6 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
   const [usdKrwRate, setUsdKrwRate] = React.useState<number>(1350);
   const [baseCurrency, setBaseCurrency] = React.useState<string>('KRW');
   const [infoTab, setInfoTab] = React.useState<'shipper' | 'consignee'>('shipper');
-  const [hsLookupLoadingMap, setHsLookupLoadingMap] = React.useState<Record<string, boolean>>({});
-
-  const setHsLookupLoading = React.useCallback((key: string, val: boolean) => {
-    setHsLookupLoadingMap(prev => ({ ...prev, [key]: val }));
-  }, []);
-
-  const handleItemNameBlur = React.useCallback(async (nestIndex: number, k: number) => {
-    const itemName = watch(`packages.${nestIndex}.items.${k}.item_name`) as string | undefined;
-    if (!itemName || itemName.trim().length < 2) return;
-
-    const currentHsCode = watch(`packages.${nestIndex}.items.${k}.hs_code`) as string | undefined;
-    if (currentHsCode) return;
-
-    const key = `${nestIndex}-${k}`;
-    setHsLookupLoading(key, true);
-    try {
-      const res = await fetch('/api/hs-lookup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ item_name: itemName.trim(), dest_country_code: destPort?.country_code }),
-      });
-      if (!res.ok) return;
-      const { hs_code } = await res.json();
-      if (hs_code) {
-        setValue(`packages.${nestIndex}.items.${k}.hs_code`, hs_code, { shouldValidate: false });
-      }
-    } catch {
-      // 실패 시 조용히 무시 — 사용자가 수동 입력
-    } finally {
-      setHsLookupLoading(key, false);
-    }
-  }, [watch, setValue, setHsLookupLoading, destPort?.country_code]);
 
   useEffect(() => {
     async function loadAffiliation() {
@@ -334,7 +292,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
 
   const filteredPorts = useMemo(() => {
     if (!transportMode) return ports;
-    const mappedType = transportMode === 'EXP' ? 'AIR' : transportMode;
+    const mappedType = (transportMode === 'EXP' || transportMode === 'UPS') ? 'AIR' : transportMode;
     return ports.filter(p => p.type === mappedType);
   }, [ports, transportMode]);
 
@@ -919,11 +877,11 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                   <h4 className="text-[10px] font-bold text-slate-500 mb-2 uppercase tracking-wider">{t('origin_port')} / {t('dest_port')}</h4>
                   <div className="grid grid-cols-2 gap-2">
                     <select {...register('origin_port_id')} className="w-full bg-white border border-slate-200 text-xs px-2 py-2 rounded-xl outline-none focus:ring-2 focus:ring-blue-50">
-                      <option value="">{transportMode === 'AIR' || transportMode === 'EXP' ? 'Origin Airport' : 'Origin Port'}</option>
+                      <option value="">{transportMode === 'AIR' || transportMode === 'EXP' || transportMode === 'UPS' ? 'Origin Airport' : 'Origin Port'}</option>
                       {filteredPorts.map(p => <option key={p.id} value={p.id}>[{p.code}] {p.name}</option>)}
                     </select>
                     <select {...register('dest_port_id')} className="w-full bg-white border border-slate-200 text-xs px-2 py-2 rounded-xl outline-none focus:ring-2 focus:ring-blue-50">
-                      <option value="">{transportMode === 'AIR' || transportMode === 'EXP' ? 'Dest Airport' : 'Dest Port'}</option>
+                      <option value="">{transportMode === 'AIR' || transportMode === 'EXP' || transportMode === 'UPS' ? 'Dest Airport' : 'Dest Port'}</option>
                       {filteredPorts.map(p => <option key={p.id} value={p.id}>[{p.code}] {p.name}</option>)}
                     </select>
                   </div>
@@ -1142,8 +1100,6 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                           register={register}
                           errors={errors}
                           t={t}
-                          hsLookupLoadingMap={hsLookupLoadingMap}
-                          onItemNameBlur={(k) => handleItemNameBlur(i, k)}
                         />
                       </motion.div>
                     ))}
@@ -1224,7 +1180,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                       <Layers size={18} className="text-blue-500" /> 배송 서비스 조합 선택
                     </h3>
                     <p className="text-xs text-slate-500 mb-6">
-                      화물의 운송 모드({transportMode === 'SEA' ? '해상' : transportMode === 'AIR' ? '항공' : transportMode === 'EXP' ? '특송' : '육상'})에 따라 제공되는 서비스 조합 중 원하시는 방식을 선택해주세요.
+                      화물의 운송 모드({(transportMode as string) === 'SEA' ? '해상' : (transportMode as string) === 'AIR' ? '항공' : (transportMode as string) === 'EXP' ? '특송' : (transportMode as string) === 'UPS' ? 'UPS Direct' : '육상'})에 따라 제공되는 서비스 조합 중 원하시는 방식을 선택해주세요.
                     </p>
                   </>
                 )}
@@ -1260,6 +1216,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                     );
                   })}
                 </div>
+              )}
               </ZenCard>
             </motion.div>
           )}
