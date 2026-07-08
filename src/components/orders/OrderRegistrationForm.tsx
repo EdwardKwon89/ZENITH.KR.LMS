@@ -40,6 +40,12 @@ type Affiliation = {
   orgName: string | null;
   orgAddress: string | null;
   orgBizNo: string | null;
+  orgCountryCode: string | null;
+  orgStateProvince: string | null;
+  orgCity: string | null;
+  orgAddressStreet: string | null;
+  orgAddressDetail: string | null;
+  orgZipcode: string | null;
   isIndividual: boolean;
   dummyIndividualId: string;
 } | null;
