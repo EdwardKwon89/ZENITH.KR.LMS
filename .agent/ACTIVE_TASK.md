@@ -15,7 +15,7 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
-| [#285](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/285) | [fix] 신규운송요청 탭 전환 시 화주/수하인 입력값 초기화 버그 | b | p2 | - | jungjs | 2026-07-08 |
+| [#285](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/285) | [fix] 신규운송요청 탭 전환 시 화주/수하인 입력값 초기화 버그 | b | p2 | rework | jungjs | 2026-07-08 |
 | [#261](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/261) | [feat] TASK-B-078 REQ-06 아이템명 → HScode 자동 추출 (Claude Haiku 4.5 API) | b | p1 | review | jungjs | 2026-07-08 |
 | [#182](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/182) | [Phase 7.1] UPS 특송 요금 관리 보완 — Agency/Shipper 계산 파이프라인 (An-14) | a | p1 | open | 미배정 | 2026-07-05 |
 | [#164](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/164) | [UAT-Epic] UPS 특송 서비스 — Team B 인수 테스트 (UAT-15~19) | b | p1 | open | jungjs | 2026-07-07 |
