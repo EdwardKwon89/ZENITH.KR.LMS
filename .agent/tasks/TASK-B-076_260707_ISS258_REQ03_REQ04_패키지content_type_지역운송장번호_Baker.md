@@ -203,7 +203,8 @@ git checkout -b feature/teamb-task-b076-iss258-v3
 - 문서: `526ceaf` — `[Baker] docs: TASK-B-076 PR#266 기록 및 ACTIVE_TASK.md 상태 갱신`
 
 ### PR
-- PR#266: https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/266 (`feature/teamb-task-b076-iss258-v3` → `develop`, `Closes #258`)
+- PR#266: https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/266 (`feature/teamb-task-b076-iss258-v3` → `develop`, `Closes #258`) — ✅ Aiden 머지 완료
+- PR#267: https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/267 (`feature/teamb-task-b076-iss258-taskfile-fix` → `develop`) — task file 회귀 결과값 보완
 
 ### 병합 충돌 해소 (2026-07-08)
 - Aiden 내용 승인 후 PR#265(`TASK-B-075`) 선 병합으로 `OrderRegistrationForm.tsx` 충돌 발생
