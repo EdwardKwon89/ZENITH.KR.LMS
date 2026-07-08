@@ -175,6 +175,8 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
         packing_count: 1, 
         gross_weight: 0,
         special_cargo_type: 'NONE',
+        content_type: 'GENERAL',
+        domestic_ref_no: '',
         items: [{ item_name: '', quantity: 1, unit_price: 0, currency: 'USD', item_packing_unit: 'EA' }] 
       }]
     }
@@ -268,6 +270,18 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
   useEffect(() => {
     setSelectedCombination('');
   }, [transportMode]);
+
+  // 🔄 DOC content_type 선택 시 치수 초기화 (TASK-B-076)
+  useEffect(() => {
+    if (!watchedPackages) return;
+    watchedPackages.forEach((pkg, i) => {
+      if (pkg.content_type === 'DOC') {
+        setValue(`packages.${i}.length`, undefined);
+        setValue(`packages.${i}.width`, undefined);
+        setValue(`packages.${i}.height`, undefined);
+      }
+    });
+  }, [watchedPackages, setValue]);
 
   const filteredPorts = useMemo(() => {
     if (!transportMode) return ports;
@@ -593,7 +607,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
             {step === 1 && [ 
               { code: 'AIR', icon: Plane, label: '항공' },
               { code: 'SEA', icon: Ship, label: '해상' },
-              { code: 'EXP', icon: Zap, label: '특송' },
+              { code: 'EXP', icon: Zap, label: 'UPS Direct' },
               { code: 'LAND', icon: Truck, label: '육상' }
             ].map((mode) => (
               <button
@@ -918,7 +932,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                     <ZenButton 
                       type="button" 
                       variant="glass" 
-                      onClick={() => appendPackage({ packing_unit: 'BOX', packing_count: 1, gross_weight: 0, special_cargo_type: 'NONE', items: [{ item_name: '', quantity: 1, unit_price: 0, currency: 'USD', item_packing_unit: 'EA' }] })}
+                      onClick={() => appendPackage({ packing_unit: 'BOX', packing_count: 1, gross_weight: 0, special_cargo_type: 'NONE', content_type: 'GENERAL', domestic_ref_no: '', items: [{ item_name: '', quantity: 1, unit_price: 0, currency: 'USD', item_packing_unit: 'EA' }] })}
                       className="px-3 py-1 text-xs"
                     >
                       <Plus size={14} /> 패키지 추가
@@ -953,35 +967,54 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                               <option value="BOX">BOX</option><option value="PLT">PLT</option><option value="CRT">CRT</option>
                             </select>
                           </div>
-                          <div className="col-span-2">
+                          <div className="col-span-1">
                             <label className="text-[9px] font-bold text-slate-400">COUNT</label>
                             <ZenInput type="number" {...register(`packages.${i}.packing_count`, { valueAsNumber: true })} className="py-2 text-xs" />
                           </div>
-                          <div className="col-span-5">
+                          {transportMode === 'EXP' && (
+                            <div className="col-span-2">
+                              <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">CONTENT</label>
+                              <select
+                                {...register(`packages.${i}.content_type`)}
+                                className="w-full text-[11px] h-9 bg-slate-50 border border-slate-100 rounded-lg px-2 outline-none focus:ring-1 focus:ring-blue-100"
+                              >
+                                <option value="NONDOC">NONDOC</option>
+                                <option value="DOC">DOC</option>
+                              </select>
+                            </div>
+                          )}
+                          <div className={`${transportMode === 'EXP' ? 'col-span-4' : 'col-span-5'}`}>
                             <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Dimensions (L/W/H) <span className="text-[8px] text-slate-300 ml-1">cm</span></label>
                             <div className="grid grid-cols-3 gap-1 relative">
-                              <div className="relative">
-                                <ZenInput type="number" placeholder="L" {...register(`packages.${i}.length`, { valueAsNumber: true })} className="py-2 text-xs pr-4" />
-                                <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[8px] text-slate-300 font-bold">L</span>
-                              </div>
-                              <div className="relative">
-                                <ZenInput type="number" placeholder="W" {...register(`packages.${i}.width`, { valueAsNumber: true })} className="py-2 text-xs pr-4" />
-                                <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[8px] text-slate-300 font-bold">W</span>
-                              </div>
-                              <div className="relative">
-                                <ZenInput type="number" placeholder="H" {...register(`packages.${i}.height`, { valueAsNumber: true })} className="py-2 text-xs pr-4" />
-                                <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[8px] text-slate-300 font-bold">H</span>
-                              </div>
+                              {(() => {
+                                const isDoc = watch(`packages.${i}.content_type`) === 'DOC';
+                                return (
+                                  <>
+                                    <div className="relative">
+                                      <ZenInput type="number" placeholder="L" disabled={isDoc} {...register(`packages.${i}.length`, { valueAsNumber: true })} className={`py-2 text-xs pr-4 ${isDoc ? 'opacity-40 bg-slate-100' : ''}`} />
+                                      <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[8px] text-slate-300 font-bold">L</span>
+                                    </div>
+                                    <div className="relative">
+                                      <ZenInput type="number" placeholder="W" disabled={isDoc} {...register(`packages.${i}.width`, { valueAsNumber: true })} className={`py-2 text-xs pr-4 ${isDoc ? 'opacity-40 bg-slate-100' : ''}`} />
+                                      <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[8px] text-slate-300 font-bold">W</span>
+                                    </div>
+                                    <div className="relative">
+                                      <ZenInput type="number" placeholder="H" disabled={isDoc} {...register(`packages.${i}.height`, { valueAsNumber: true })} className={`py-2 text-xs pr-4 ${isDoc ? 'opacity-40 bg-slate-100' : ''}`} />
+                                      <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[8px] text-slate-300 font-bold">H</span>
+                                    </div>
+                                  </>
+                                );
+                              })()}
                             </div>
                           </div>
-                          <div className="col-span-2 ml-1">
+                          <div className={`${transportMode === 'EXP' ? 'col-span-2' : 'col-span-2'} ml-1`}>
                             <label className="text-[9px] font-bold text-slate-400">WEIGHT <span className="text-[8px] text-slate-300">kg</span></label>
                             <div className="relative">
                               <ZenInput type="number" step="0.01" {...register(`packages.${i}.gross_weight`, { valueAsNumber: true })} className="py-2 text-xs pr-6" />
                               <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[9px] text-slate-300 font-bold">kg</span>
                             </div>
                           </div>
-                          <div className="col-span-2">
+                          <div className={`${transportMode === 'EXP' ? 'col-span-2' : 'col-span-2'}`}>
                             <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">화물 구분</label>
                             <select
                               {...register(`packages.${i}.special_cargo_type`)}
@@ -993,6 +1026,20 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                               <option value="VALUABLE">고가품</option>
                               <option value="USED">중고품</option>
                             </select>
+                          </div>
+                        </div>
+
+                        {/* 📦 Local Tracking No */}
+                        <div className="grid grid-cols-12 gap-2 mt-2 items-end">
+                          <div className="col-span-4">
+                            <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">
+                              LOCAL TRACKING NO <span className="text-[8px] text-slate-300">(지역택배 운송장)</span>
+                            </label>
+                            <ZenInput
+                              placeholder="지역 택배 운송장번호 입력 (선택)"
+                              {...register(`packages.${i}.domestic_ref_no`)}
+                              className="py-2 text-xs"
+                            />
                           </div>
                         </div>
 
