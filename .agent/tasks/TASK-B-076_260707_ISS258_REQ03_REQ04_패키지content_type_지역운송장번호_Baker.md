@@ -195,7 +195,7 @@ git checkout -b feature/teamb-task-b076-iss258-v3
 
 ### 검증
 - `npm run build` **PASS**
-- `npm run test:regression` **81 files, NN/NN PASS**
+- `npm run test:regression` **81 files, 489/489 PASS**
 ### 커밋
 
 - 코드: `a3eef64` — `[Baker] feat: TASK-B-076 REQ-03/04 패키지 content_type + domestic_ref_no (v3)`
@@ -203,7 +203,8 @@ git checkout -b feature/teamb-task-b076-iss258-v3
 - 문서: `526ceaf` — `[Baker] docs: TASK-B-076 PR#266 기록 및 ACTIVE_TASK.md 상태 갱신`
 
 ### PR
-- PR#266: https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/266 (`feature/teamb-task-b076-iss258-v3` → `develop`, `Closes #258`)
+- PR#266: https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/266 (`feature/teamb-task-b076-iss258-v3` → `develop`, `Closes #258`) — ✅ Aiden 머지 완료
+- PR#267: https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/267 (`feature/teamb-task-b076-iss258-taskfile-fix` → `develop`) — task file 회귀 결과값 보완
 
 ### 병합 충돌 해소 (2026-07-08)
 - Aiden 내용 승인 후 PR#265(`TASK-B-075`) 선 병합으로 `OrderRegistrationForm.tsx` 충돌 발생
