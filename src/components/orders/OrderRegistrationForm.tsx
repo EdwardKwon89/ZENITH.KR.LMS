@@ -845,20 +845,21 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                             {!affiliation?.isIndividual && (
                                <>
                                  <div>
-                                    <AddressInput
-                                      mode="rhf"
-                                      prefix="shipper"
-                                      register={register}
-                                      t={t}
-                                      key={affiliation?.orgId || 'no-org'}
-                                      defaultValues={{
-                                        country_code: affiliation?.orgCountryCode ?? 'KR',
-                                        state_province: affiliation?.orgStateProvince ?? '',
-                                        city: affiliation?.orgCity ?? '',
-                                        address: affiliation?.orgAddressStreet ?? affiliation?.orgAddress ?? '',
-                                       address_detail: affiliation?.orgAddressDetail ?? '',
-                                       zipcode: affiliation?.orgZipcode ?? '',
-                                     }}
+                                     <AddressInput
+                                       mode="rhf"
+                                       prefix="shipper"
+                                       register={register}
+                                       setValue={setValue}
+                                       t={t}
+                                       key={affiliation?.orgId || 'no-org'}
+                                       defaultValues={{
+                                         country_code: affiliation?.orgCountryCode ?? 'KR',
+                                         state_province: affiliation?.orgStateProvince ?? '',
+                                         city: affiliation?.orgCity ?? '',
+                                         address: affiliation?.orgAddressStreet ?? affiliation?.orgAddress ?? '',
+                                        address_detail: affiliation?.orgAddressDetail ?? '',
+                                        zipcode: affiliation?.orgZipcode ?? '',
+                                      }}
                                    />
                                 </div>
                                 <div>
@@ -903,12 +904,13 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                         <ZenInput placeholder="P1234..." {...register('recipient_pccc')} className="py-2 text-xs" />
                       </div>
                       <div>
-                        <AddressInput
-                          mode="rhf"
-                          prefix="recipient"
-                          register={register}
-                          t={t}
-                        />
+                         <AddressInput
+                           mode="rhf"
+                           prefix="recipient"
+                           register={register}
+                           setValue={setValue}
+                           t={t}
+                         />
                       </div>
                     </div>
                   )}

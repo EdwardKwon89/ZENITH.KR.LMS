@@ -20,6 +20,7 @@ interface AddressInputProps {
   prefix?: string;
   register?: any;
   readOnly?: boolean;
+  setValue?: (name: any, value: any) => void;
 }
 
 function rhf(p: string, n: string, r?: any) {
@@ -34,6 +35,7 @@ export function AddressInput({
   prefix = '',
   register,
   readOnly = false,
+  setValue,
 }: AddressInputProps) {
   const [countryCode, setCountryCode] = useState(defaultValues.country_code || 'KR');
   const [countries, setCountries] = useState<ICountry[]>([]);
@@ -129,7 +131,10 @@ export function AddressInput({
             <input
               {...a('address_detail')}
               value={detailAddress}
-              onChange={(e) => setDetailAddress(e.target.value)}
+              onChange={(e) => {
+                setDetailAddress(e.target.value);
+                if (setValue && prefix) setValue(`${prefix}_address_detail`, e.target.value);
+              }}
               disabled={readOnly}
               className={`w-full h-10 px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${readOnly ? 'bg-slate-50' : ''}`}
             />
@@ -191,7 +196,10 @@ export function AddressInput({
               <input
                 {...a('address_detail')}
                 value={detailAddress}
-                onChange={(e) => setDetailAddress(e.target.value)}
+              onChange={(e) => {
+                setDetailAddress(e.target.value);
+                if (setValue && prefix) setValue(`${prefix}_address_detail`, e.target.value);
+              }}
                 disabled={readOnly}
                 className={`w-full h-10 px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${readOnly ? 'bg-slate-50' : ''}`}
               />
@@ -226,6 +234,12 @@ export function AddressInput({
                 setRoadAddress(data.roadAddress);
                 setPostalCode(data.zonecode);
                 setShowPostcode(false);
+                if (setValue && prefix) {
+                  setValue(`${prefix}_address`, data.roadAddress);
+                  setValue(`${prefix}_zipcode`, data.zonecode);
+                  setValue(`${prefix}_address_detail`, '');
+                }
+                setDetailAddress('');
               }}
               style={{ height: 460 }}
             />
