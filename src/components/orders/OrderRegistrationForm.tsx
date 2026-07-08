@@ -838,19 +838,18 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                             </div>
                             {!affiliation?.isIndividual && (
                                <>
-                                <div>
-                                  <p className="text-slate-400 font-bold uppercase tracking-tighter mb-1">{t('shipper_address')}</p>
-                                   <AddressInput
-                                     mode="rhf"
-                                     prefix="shipper"
-                                     register={register}
-                                     t={t}
-                                     key={affiliation?.orgId || 'no-org'}
-                                     defaultValues={{
-                                       country_code: affiliation?.orgCountryCode ?? 'KR',
-                                       state_province: affiliation?.orgStateProvince ?? '',
-                                       city: affiliation?.orgCity ?? '',
-                                       address: affiliation?.orgAddressStreet ?? affiliation?.orgAddress ?? '',
+                                 <div>
+                                    <AddressInput
+                                      mode="rhf"
+                                      prefix="shipper"
+                                      register={register}
+                                      t={t}
+                                      key={affiliation?.orgId || 'no-org'}
+                                      defaultValues={{
+                                        country_code: affiliation?.orgCountryCode ?? 'KR',
+                                        state_province: affiliation?.orgStateProvince ?? '',
+                                        city: affiliation?.orgCity ?? '',
+                                        address: affiliation?.orgAddressStreet ?? affiliation?.orgAddress ?? '',
                                        address_detail: affiliation?.orgAddressDetail ?? '',
                                        zipcode: affiliation?.orgZipcode ?? '',
                                      }}
