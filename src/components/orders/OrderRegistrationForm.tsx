@@ -353,17 +353,6 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
     });
   }, [watchedPackages, setValue]);
 
-  // REQ-11: Auto-compute packing_count from items.length
-  useEffect(() => {
-    if (!watchedPackages) return;
-    watchedPackages.forEach((pkg, i) => {
-      if (pkg.items) {
-        const itemLen = pkg.items.length;
-        setValue(`packages.${i}.packing_count`, itemLen, { shouldValidate: false });
-      }
-    });
-  }, [watchedPackages, setValue]);
-
   const filteredPorts = useMemo(() => {
     if (!transportMode) return ports;
     const mappedType = (transportMode === 'EXP' || transportMode === 'UPS') ? 'AIR' : transportMode;
@@ -1101,7 +1090,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                           </div>
                           <div className="col-span-3">
                             <label className="text-[9px] font-bold text-slate-400">COUNT</label>
-                            <ZenInput type="number" readOnly disabled {...register(`packages.${i}.packing_count`, { valueAsNumber: true })} className="py-2 text-xs bg-slate-100 opacity-80" />
+                            <ZenInput type="number" {...register(`packages.${i}.packing_count`, { valueAsNumber: true })} className="py-2 text-xs" />
                           </div>
                           <div className="col-span-3">
                             <label className="text-[9px] font-bold text-slate-400">WEIGHT <span className="text-rose-500">*</span> <span className="text-[8px] text-slate-300">kg</span></label>
