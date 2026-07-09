@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { ZenCard, ZenButton, ZenInput, ZenBadge } from '@/components/ui/ZenUI';
 import { createOrder } from '@/app/actions/orders';
+import { createAddressBookEntry } from '@/app/actions/operations/address-book';
 import { getCurrentUserAffiliation } from '@/app/actions/master';
 import { UpsFreightEstimateSection } from './UpsFreightEstimateSection';
 import { UpsServiceSelector } from './UpsServiceSelector';
@@ -60,8 +61,10 @@ const NestedItems: React.FC<{
   errors: any;
   t: any;
   hsLookupLoadingMap?: Record<string, boolean>;
+  hsLookupResultMap?: Record<string, { hs_code: string; confidence: 'high' | 'medium' | 'low' } | null>;
   onItemNameBlur?: (k: number) => void;
-}> = ({ nestIndex, control, register, errors, t, hsLookupLoadingMap = {}, onItemNameBlur }) => {
+  onAcceptHsLookup?: (k: number) => void;
+}> = ({ nestIndex, control, register, errors, t, hsLookupLoadingMap = {}, hsLookupResultMap = {}, onItemNameBlur, onAcceptHsLookup }) => {
   const { fields, append, remove } = useFieldArray({
     control,
     name: `packages.${nestIndex}.items` as any
@@ -113,6 +116,30 @@ const NestedItems: React.FC<{
                     </span>
                   )}
                 </div>
+                {hsLookupResultMap[`${nestIndex}-${k}`] && !hsLookupLoadingMap[`${nestIndex}-${k}`] && (
+                  <div className="mt-1 flex items-center gap-1">
+                    <span className={`text-[9px] font-bold px-1 rounded ${
+                      hsLookupResultMap[`${nestIndex}-${k}`]!.confidence === 'high'
+                        ? 'text-emerald-600 bg-emerald-50'
+                        : hsLookupResultMap[`${nestIndex}-${k}`]!.confidence === 'medium'
+                          ? 'text-amber-600 bg-amber-50'
+                          : 'text-slate-500 bg-slate-100'
+                    }`}>
+                      {hsLookupResultMap[`${nestIndex}-${k}`]!.confidence === 'high' ? 'High'
+                        : hsLookupResultMap[`${nestIndex}-${k}`]!.confidence === 'medium' ? 'Medium' : 'Low'}
+                    </span>
+                    <span className="text-[10px] text-slate-500 font-mono">
+                      {hsLookupResultMap[`${nestIndex}-${k}`]!.hs_code}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => onAcceptHsLookup?.(k)}
+                      className="text-[9px] text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-1.5 py-0.5 rounded transition-colors font-bold"
+                    >
+                      적용
+                    </button>
+                  </div>
+                )}
               </div>
               <div className="col-span-4">
                 <label className="text-[9px] font-bold text-slate-400 mb-1 block">Qty <span className="text-rose-500">*</span></label>
@@ -227,21 +254,27 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
   const [usdKrwRate, setUsdKrwRate] = React.useState<number>(1350);
   const [baseCurrency, setBaseCurrency] = React.useState<string>('KRW');
   const [infoTab, setInfoTab] = React.useState<'shipper' | 'consignee'>('shipper');
+  const [savingToAddressBook, setSavingToAddressBook] = React.useState(false);
+  const [refetchAddressBook, setRefetchAddressBook] = React.useState(0);
   const [hsLookupLoadingMap, setHsLookupLoadingMap] = React.useState<Record<string, boolean>>({});
+  const [hsLookupResultMap, setHsLookupResultMap] = React.useState<Record<string, { hs_code: string; confidence: 'high' | 'medium' | 'low' } | null>>({});
 
   const setHsLookupLoading = useCallback((key: string, val: boolean) => {
     setHsLookupLoadingMap(prev => ({ ...prev, [key]: val }));
+  }, []);
+
+  const setHsLookupResult = useCallback((key: string, result: { hs_code: string; confidence: 'high' | 'medium' | 'low' } | null) => {
+    setHsLookupResultMap(prev => ({ ...prev, [key]: result }));
   }, []);
 
   const handleItemNameBlur = useCallback(async (nestIndex: number, k: number) => {
     const itemName = watch(`packages.${nestIndex}.items.${k}.item_name`) as string | undefined;
     if (!itemName || itemName.trim().length < 2) return;
 
-    const currentHsCode = watch(`packages.${nestIndex}.items.${k}.hs_code`) as string | undefined;
-    if (currentHsCode) return;
-
     const key = `${nestIndex}-${k}`;
     setHsLookupLoading(key, true);
+    setHsLookupResult(key, null);
+    setValue(`packages.${nestIndex}.items.${k}.hs_code`, '', { shouldValidate: false });
     try {
       const res = await fetch('/api/hs-lookup', {
         method: 'POST',
@@ -249,16 +282,58 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
         body: JSON.stringify({ item_name: itemName.trim(), dest_country_code: destPort?.country_code }),
       });
       if (!res.ok) return;
-      const { hs_code } = await res.json();
-      if (hs_code) {
-        setValue(`packages.${nestIndex}.items.${k}.hs_code`, hs_code, { shouldValidate: false });
+      const result = await res.json();
+      if (result.hs_code) {
+        setHsLookupResult(key, { hs_code: result.hs_code, confidence: result.confidence });
+      } else {
+        setHsLookupResult(key, null);
       }
     } catch {
-      // 실패 시 조용히 무시 — 사용자가 수동 입력
+      setHsLookupResult(key, null);
     } finally {
       setHsLookupLoading(key, false);
     }
-  }, [watch, setValue, destPort?.country_code, setHsLookupLoading]);
+  }, [watch, setValue, destPort?.country_code, setHsLookupLoading, setHsLookupResult]);
+
+  const handleAcceptHsLookup = useCallback((nestIndex: number, k: number) => {
+    const key = `${nestIndex}-${k}`;
+    const result = hsLookupResultMap[key];
+    if (result?.hs_code) {
+      setValue(`packages.${nestIndex}.items.${k}.hs_code`, result.hs_code, { shouldValidate: false });
+      setHsLookupResult(key, null);
+    }
+  }, [hsLookupResultMap, setValue, setHsLookupResult]);
+
+  const handleSaveToAddressBook = useCallback(async () => {
+    const name = watch('recipient_name');
+    const address = watch('recipient_address');
+    const addressLocal = watch('recipient_address_local') || '';
+    const phone = watch('recipient_phone') || '';
+    if (!name || !address) {
+      toast.error('저장하려면 수하인 이름과 주소를 입력해주세요.');
+      return;
+    }
+    const displayName = window.prompt('주소록에 저장할 이름을 입력해주세요:', name);
+    if (!displayName) return;
+    setSavingToAddressBook(true);
+    try {
+      await createAddressBookEntry({
+        display_name: displayName,
+        recipient_name: name,
+        recipient_address: address,
+        recipient_address_local: addressLocal || undefined,
+        recipient_phone: phone || undefined,
+        display_mode: 'EN',
+        is_default: false,
+      });
+      toast.success('주소록에 저장되었습니다.');
+      setRefetchAddressBook(prev => prev + 1);
+    } catch (err: any) {
+      toast.error('주소록 저장 실패', { description: err.message });
+    } finally {
+      setSavingToAddressBook(false);
+    }
+  }, [watch]);
 
   useEffect(() => {
     async function loadAffiliation() {
@@ -895,8 +970,19 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                   <div className={infoTab === 'consignee' ? '' : 'hidden'}>
                     <div className="space-y-3">
                       <div>
-                        <label className="text-[10px] font-bold text-slate-500 mb-1 block">Address Book</label>
+                        <div className="flex items-center justify-between mb-1">
+                          <label className="text-[10px] font-bold text-slate-500">Address Book</label>
+                          <button
+                            type="button"
+                            onClick={handleSaveToAddressBook}
+                            disabled={savingToAddressBook}
+                            className="text-[9px] text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-2 py-0.5 rounded transition-colors font-bold disabled:opacity-50"
+                          >
+                            {savingToAddressBook ? '저장 중...' : '+ 주소록에 저장'}
+                          </button>
+                        </div>
                         <AddressBookSelector
+                          key={refetchAddressBook}
                           onSelect={(entry) => {
                             setValue('recipient_name', entry.recipient_name);
                             setValue('recipient_address', entry.recipient_address);
@@ -1159,7 +1245,9 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                           errors={errors}
                           t={t}
                           hsLookupLoadingMap={hsLookupLoadingMap}
+                          hsLookupResultMap={hsLookupResultMap}
                           onItemNameBlur={(k) => handleItemNameBlur(i, k)}
+                          onAcceptHsLookup={(k) => handleAcceptHsLookup(i, k)}
                         />
                       </motion.div>
                     ))}
