@@ -85,9 +85,9 @@ const NestedItems: React.FC<{
       <div className="space-y-2">
         {fields.map((item, k) => (
           <div key={item.id} className="bg-slate-50/50 p-2 rounded-xl border border-dashed border-slate-200 group">
-            {/* REQ-07: Row 1 — item명 / 수량 / 단가 + 통화 */}
+            {/* REQ-07/J: Row 1 — 품명 / HSCode / Qty */}
             <div className="grid grid-cols-12 gap-2 items-start mb-2">
-              <div className="col-span-5">
+              <div className="col-span-4">
                 <label className="text-[9px] font-bold text-slate-400 mb-1 block">{t('item_name')} <span className="text-rose-500">*</span></label>
                 <ZenInput 
                   placeholder={t('item_name')}
@@ -99,43 +99,7 @@ const NestedItems: React.FC<{
                   className="bg-white py-2 text-xs"
                 />
               </div>
-              <div className="col-span-3">
-                <label className="text-[9px] font-bold text-slate-400 mb-1 block">Qty <span className="text-rose-500">*</span></label>
-                <ZenInput 
-                  type="number"
-                  placeholder="Qty"
-                  {...register(`packages.${nestIndex}.items.${k}.quantity`, { valueAsNumber: true })}
-                  className="bg-white py-2 text-xs"
-                />
-              </div>
-              <div className="col-span-2">
-                <label className="text-[9px] font-bold text-slate-400 mb-1 block">Unit Price</label>
-                <ZenInput
-                  type="number"
-                  step="0.0001"
-                  min="0"
-                  placeholder="0.0000"
-                  {...register(`packages.${nestIndex}.items.${k}.unit_price`, { valueAsNumber: true })}
-                  className="bg-white py-2 text-xs"
-                />
-              </div>
-              <div className="col-span-2">
-                <label className="text-[9px] font-bold text-slate-400 mb-1 block">Currency</label>
-                <select
-                  {...register(`packages.${nestIndex}.items.${k}.currency`)}
-                  className="w-full text-xs h-9 bg-white border border-slate-200 rounded-lg"
-                >
-                  <option value="USD">USD</option>
-                  <option value="KRW">KRW</option>
-                  <option value="EUR">EUR</option>
-                  <option value="JPY">JPY</option>
-                  <option value="CNY">CNY</option>
-                </select>
-              </div>
-            </div>
-            {/* REQ-07: Row 2 — HSCode / 포장단위 / 삭제버튼 */}
-            <div className="grid grid-cols-12 gap-2 items-start">
-              <div className="col-span-6">
+              <div className="col-span-4">
                 <label className="text-[9px] font-bold text-slate-400 mb-1 block">HS Code</label>
                 <div className="relative">
                   <ZenInput 
@@ -150,6 +114,18 @@ const NestedItems: React.FC<{
                   )}
                 </div>
               </div>
+              <div className="col-span-4">
+                <label className="text-[9px] font-bold text-slate-400 mb-1 block">Qty <span className="text-rose-500">*</span></label>
+                <ZenInput 
+                  type="number"
+                  placeholder="Qty"
+                  {...register(`packages.${nestIndex}.items.${k}.quantity`, { valueAsNumber: true })}
+                  className="bg-white py-2 text-xs"
+                />
+              </div>
+            </div>
+            {/* REQ-07/J: Row 2 — Packing Unit / Unit Price / Currency / 삭제 */}
+            <div className="grid grid-cols-12 gap-2 items-start">
               <div className="col-span-3">
                 <label className="text-[9px] font-bold text-slate-400 mb-1 block">Packing Unit</label>
                 <select 
@@ -159,6 +135,30 @@ const NestedItems: React.FC<{
                   <option value="EA">EA</option>
                   <option value="SET">SET</option>
                   <option value="PCS">PCS</option>
+                </select>
+              </div>
+              <div className="col-span-3">
+                <label className="text-[9px] font-bold text-slate-400 mb-1 block">Unit Price</label>
+                <ZenInput
+                  type="number"
+                  step="0.0001"
+                  min="0"
+                  placeholder="0.0000"
+                  {...register(`packages.${nestIndex}.items.${k}.unit_price`, { valueAsNumber: true })}
+                  className="bg-white py-2 text-xs"
+                />
+              </div>
+              <div className="col-span-3">
+                <label className="text-[9px] font-bold text-slate-400 mb-1 block">Currency</label>
+                <select
+                  {...register(`packages.${nestIndex}.items.${k}.currency`)}
+                  className="w-full text-xs h-9 bg-white border border-slate-200 rounded-lg"
+                >
+                  <option value="USD">USD</option>
+                  <option value="KRW">KRW</option>
+                  <option value="EUR">EUR</option>
+                  <option value="JPY">JPY</option>
+                  <option value="CNY">CNY</option>
                 </select>
               </div>
               <div className="col-span-3 flex items-end justify-center pb-1">
@@ -1067,7 +1067,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                           <Trash2 size={16} />
                         </button>
 
-                        {/* REQ-07: Row 1 — 화물구분 / UNIT / COUNT / WEIGHT */}
+                        {/* REQ-07/J: Row 1 — 화물구분 / UNIT / COUNT / LOCAL TRACKING NO */}
                         <div className="grid grid-cols-12 gap-2 mt-4 items-end">
                           <div className="col-span-3">
                             <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">화물 구분</label>
@@ -1093,15 +1093,18 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                             <ZenInput type="number" {...register(`packages.${i}.packing_count`, { valueAsNumber: true })} className="py-2 text-xs" />
                           </div>
                           <div className="col-span-3">
-                            <label className="text-[9px] font-bold text-slate-400">WEIGHT <span className="text-rose-500">*</span> <span className="text-[8px] text-slate-300">kg</span></label>
-                            <div className="relative">
-                              <ZenInput type="number" step="0.01" {...register(`packages.${i}.gross_weight`, { valueAsNumber: true })} className="py-2 text-xs pr-6" />
-                              <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[9px] text-slate-300 font-bold">kg</span>
-                            </div>
+                            <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">
+                              LOCAL TRACKING NO <span className="text-[8px] text-slate-300">(택배운송장)</span>
+                            </label>
+                            <ZenInput
+                              placeholder="지역 택배 운송장번호 입력 (선택)"
+                              {...register(`packages.${i}.domestic_ref_no`)}
+                              className="py-2 text-xs"
+                            />
                           </div>
                         </div>
 
-                        {/* REQ-07: Row 2 — CONTENT + 치수 L/W/H */}
+                        {/* REQ-07/J: Row 2 — CONTENT(EXP only) + 치수 L/W/H + WEIGHT */}
                         <div className="grid grid-cols-12 gap-2 mt-2 items-end">
                           {transportMode === 'EXP' && (
                             <div className="col-span-2">
@@ -1115,7 +1118,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                               </select>
                             </div>
                           )}
-                          <div className={transportMode === 'EXP' ? 'col-span-10' : 'col-span-12'}>
+                          <div className={transportMode === 'EXP' ? 'col-span-7' : 'col-span-9'}>
                             <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Dimensions (L/W/H) <span className="text-[8px] text-slate-300 ml-1">cm</span></label>
                             <div className="grid grid-cols-3 gap-1 relative">
                               {(() => {
@@ -1139,19 +1142,12 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                               })()}
                             </div>
                           </div>
-                        </div>
-
-                        {/* 📦 Local Tracking No */}
-                        <div className="grid grid-cols-12 gap-2 mt-2 items-end">
-                          <div className="col-span-4">
-                            <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">
-                              LOCAL TRACKING NO <span className="text-[8px] text-slate-300">(지역택배 운송장)</span>
-                            </label>
-                            <ZenInput
-                              placeholder="지역 택배 운송장번호 입력 (선택)"
-                              {...register(`packages.${i}.domestic_ref_no`)}
-                              className="py-2 text-xs"
-                            />
+                          <div className={transportMode === 'EXP' ? 'col-span-3' : 'col-span-3'}>
+                            <label className="text-[9px] font-bold text-slate-400">WEIGHT <span className="text-rose-500">*</span> <span className="text-[8px] text-slate-300">kg</span></label>
+                            <div className="relative">
+                              <ZenInput type="number" step="0.01" {...register(`packages.${i}.gross_weight`, { valueAsNumber: true })} className="py-2 text-xs pr-6" />
+                              <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[9px] text-slate-300 font-bold">kg</span>
+                            </div>
                           </div>
                         </div>
 
