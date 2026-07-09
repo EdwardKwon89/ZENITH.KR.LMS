@@ -2,7 +2,7 @@
 
 - **발령**: Jaison (Team B 총괄) · 2026-07-09
 - **담당**: Baker
-- **PR**: #??
+- **PR**: #298
 - **브랜치**: `feature/teamb-issue-296-ups-mode-fix`
 
 ---
