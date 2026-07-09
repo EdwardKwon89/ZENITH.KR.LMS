@@ -55,8 +55,14 @@
 - TypeScript 컴파일: 기존 오류 외新增 없음
 - 회귀 테스트: `npm test` 진행 예정
 
+## PR
+
+- **PR:** [#297](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/297)
+- **재작업 (Jaison 반려):** ① hs_code 강제 초기화 버그 수정 (setValue 제거) ② window.prompt → 인라인 입력창 ③ develop 기준 신규 브랜치 ④ 회귀 테스트 489/489 PASS
+
 ## 커밋
 
 ```
 [Dave] feat: TASK-B-083 Issue #290 REQ-09/10 HSCode 확인 UX + 주소록 저장 버튼
+[Dave] fix: TASK-B-083 반려 수정 — hs_code 초기화 버그 제거 + window.prompt→인라인 입력 교체
 ```
