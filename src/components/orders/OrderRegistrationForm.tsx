@@ -256,6 +256,8 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
   const [infoTab, setInfoTab] = React.useState<'shipper' | 'consignee'>('shipper');
   const [savingToAddressBook, setSavingToAddressBook] = React.useState(false);
   const [refetchAddressBook, setRefetchAddressBook] = React.useState(0);
+  const [showAddressBookInput, setShowAddressBookInput] = React.useState(false);
+  const [addressBookDisplayName, setAddressBookDisplayName] = React.useState('');
   const [hsLookupLoadingMap, setHsLookupLoadingMap] = React.useState<Record<string, boolean>>({});
   const [hsLookupResultMap, setHsLookupResultMap] = React.useState<Record<string, { hs_code: string; confidence: 'high' | 'medium' | 'low' } | null>>({});
 
@@ -274,7 +276,6 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
     const key = `${nestIndex}-${k}`;
     setHsLookupLoading(key, true);
     setHsLookupResult(key, null);
-    setValue(`packages.${nestIndex}.items.${k}.hs_code`, '', { shouldValidate: false });
     try {
       const res = await fetch('/api/hs-lookup', {
         method: 'POST',
@@ -293,7 +294,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
     } finally {
       setHsLookupLoading(key, false);
     }
-  }, [watch, setValue, destPort?.country_code, setHsLookupLoading, setHsLookupResult]);
+  }, [watch, destPort?.country_code, setHsLookupLoading, setHsLookupResult]);
 
   const handleAcceptHsLookup = useCallback((nestIndex: number, k: number) => {
     const key = `${nestIndex}-${k}`;
@@ -304,17 +305,32 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
     }
   }, [hsLookupResultMap, setValue, setHsLookupResult]);
 
-  const handleSaveToAddressBook = useCallback(async () => {
+  const handleShowAddressBookInput = useCallback(() => {
     const name = watch('recipient_name');
     const address = watch('recipient_address');
-    const addressLocal = watch('recipient_address_local') || '';
-    const phone = watch('recipient_phone') || '';
     if (!name || !address) {
       toast.error('저장하려면 수하인 이름과 주소를 입력해주세요.');
       return;
     }
-    const displayName = window.prompt('주소록에 저장할 이름을 입력해주세요:', name);
-    if (!displayName) return;
+    setAddressBookDisplayName(name);
+    setShowAddressBookInput(true);
+  }, [watch]);
+
+  const handleCancelSaveAddressBook = useCallback(() => {
+    setShowAddressBookInput(false);
+    setAddressBookDisplayName('');
+  }, []);
+
+  const handleConfirmSaveAddressBook = useCallback(async () => {
+    const displayName = addressBookDisplayName.trim();
+    if (!displayName) {
+      toast.error('저장할 이름을 입력해주세요.');
+      return;
+    }
+    const name = watch('recipient_name');
+    const address = watch('recipient_address');
+    const addressLocal = watch('recipient_address_local') || '';
+    const phone = watch('recipient_phone') || '';
     setSavingToAddressBook(true);
     try {
       await createAddressBookEntry({
@@ -328,12 +344,14 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
       });
       toast.success('주소록에 저장되었습니다.');
       setRefetchAddressBook(prev => prev + 1);
+      setShowAddressBookInput(false);
+      setAddressBookDisplayName('');
     } catch (err: any) {
       toast.error('주소록 저장 실패', { description: err.message });
     } finally {
       setSavingToAddressBook(false);
     }
-  }, [watch]);
+  }, [addressBookDisplayName, watch]);
 
   useEffect(() => {
     async function loadAffiliation() {
@@ -972,14 +990,41 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                       <div>
                         <div className="flex items-center justify-between mb-1">
                           <label className="text-[10px] font-bold text-slate-500">Address Book</label>
-                          <button
-                            type="button"
-                            onClick={handleSaveToAddressBook}
-                            disabled={savingToAddressBook}
-                            className="text-[9px] text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-2 py-0.5 rounded transition-colors font-bold disabled:opacity-50"
-                          >
-                            {savingToAddressBook ? '저장 중...' : '+ 주소록에 저장'}
-                          </button>
+                          {!showAddressBookInput ? (
+                            <button
+                              type="button"
+                              onClick={handleShowAddressBookInput}
+                              className="text-[9px] text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-2 py-0.5 rounded transition-colors font-bold"
+                            >
+                              + 주소록에 저장
+                            </button>
+                          ) : (
+                            <div className="flex items-center gap-1">
+                              <input
+                                type="text"
+                                value={addressBookDisplayName}
+                                onChange={(e) => setAddressBookDisplayName(e.target.value)}
+                                placeholder="저장할 이름"
+                                className="w-28 text-[9px] h-6 px-1.5 border border-slate-200 rounded"
+                                autoFocus
+                              />
+                              <button
+                                type="button"
+                                onClick={handleConfirmSaveAddressBook}
+                                disabled={savingToAddressBook}
+                                className="text-[9px] text-white bg-blue-600 hover:bg-blue-700 px-1.5 py-0.5 rounded transition-colors font-bold disabled:opacity-50"
+                              >
+                                {savingToAddressBook ? '...' : '저장'}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={handleCancelSaveAddressBook}
+                                className="text-[9px] text-slate-500 hover:text-slate-700 px-1 py-0.5 rounded"
+                              >
+                                취소
+                              </button>
+                            </div>
+                          )}
                         </div>
                         <AddressBookSelector
                           key={refetchAddressBook}
