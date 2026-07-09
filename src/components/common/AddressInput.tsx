@@ -21,6 +21,7 @@ interface AddressInputProps {
   register?: any;
   readOnly?: boolean;
   setValue?: (name: any, value: any) => void;
+  required?: boolean;
 }
 
 function rhf(p: string, n: string, r?: any) {
@@ -36,6 +37,7 @@ export function AddressInput({
   register,
   readOnly = false,
   setValue,
+  required = false,
 }: AddressInputProps) {
   const [countryCode, setCountryCode] = useState(defaultValues.country_code || 'KR');
   const [countries, setCountries] = useState<ICountry[]>([]);
@@ -73,7 +75,7 @@ export function AddressInput({
 
   return (
     <div className="border-t border-slate-100 pt-5">
-      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">{t('form_address')}</p>
+      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">{t('form_address')}{required && <span className="text-rose-500"> *</span>}</p>
 
       <div className="mb-4">
         <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">{t('form_country')}</label>

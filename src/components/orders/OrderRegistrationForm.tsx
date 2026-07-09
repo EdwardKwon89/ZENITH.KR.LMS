@@ -84,79 +84,93 @@ const NestedItems: React.FC<{
 
       <div className="space-y-2">
         {fields.map((item, k) => (
-          <div key={item.id} className="grid grid-cols-12 gap-2 items-start bg-slate-50/50 p-2 rounded-xl border border-dashed border-slate-200 group">
-            <div className="col-span-3">
-              <ZenInput 
-                placeholder={t('item_name')}
-                {...register(`packages.${nestIndex}.items.${k}.item_name`)}
-                onBlur={(e) => {
-                  register(`packages.${nestIndex}.items.${k}.item_name`).onBlur?.(e);
-                  onItemNameBlur?.(k);
-                }}
-                className="bg-white py-2 text-xs"
-              />
+          <div key={item.id} className="bg-slate-50/50 p-2 rounded-xl border border-dashed border-slate-200 group">
+            {/* REQ-07: Row 1 — item명 / 수량 / 단가 + 통화 */}
+            <div className="grid grid-cols-12 gap-2 items-start mb-2">
+              <div className="col-span-5">
+                <label className="text-[9px] font-bold text-slate-400 mb-1 block">{t('item_name')} <span className="text-rose-500">*</span></label>
+                <ZenInput 
+                  placeholder={t('item_name')}
+                  {...register(`packages.${nestIndex}.items.${k}.item_name`)}
+                  onBlur={(e) => {
+                    register(`packages.${nestIndex}.items.${k}.item_name`).onBlur?.(e);
+                    onItemNameBlur?.(k);
+                  }}
+                  className="bg-white py-2 text-xs"
+                />
+              </div>
+              <div className="col-span-3">
+                <label className="text-[9px] font-bold text-slate-400 mb-1 block">Qty <span className="text-rose-500">*</span></label>
+                <ZenInput 
+                  type="number"
+                  placeholder="Qty"
+                  {...register(`packages.${nestIndex}.items.${k}.quantity`, { valueAsNumber: true })}
+                  className="bg-white py-2 text-xs"
+                />
+              </div>
+              <div className="col-span-2">
+                <label className="text-[9px] font-bold text-slate-400 mb-1 block">Unit Price</label>
+                <ZenInput
+                  type="number"
+                  step="0.0001"
+                  min="0"
+                  placeholder="0.0000"
+                  {...register(`packages.${nestIndex}.items.${k}.unit_price`, { valueAsNumber: true })}
+                  className="bg-white py-2 text-xs"
+                />
+              </div>
+              <div className="col-span-2">
+                <label className="text-[9px] font-bold text-slate-400 mb-1 block">Currency</label>
+                <select
+                  {...register(`packages.${nestIndex}.items.${k}.currency`)}
+                  className="w-full text-xs h-9 bg-white border border-slate-200 rounded-lg"
+                >
+                  <option value="USD">USD</option>
+                  <option value="KRW">KRW</option>
+                  <option value="EUR">EUR</option>
+                  <option value="JPY">JPY</option>
+                  <option value="CNY">CNY</option>
+                </select>
+              </div>
             </div>
-            <div className="col-span-1">
-              <ZenInput 
-                type="number"
-                placeholder="Qty"
-                {...register(`packages.${nestIndex}.items.${k}.quantity`, { valueAsNumber: true })}
-                className="bg-white py-2 text-xs"
-              />
-            </div>
-            <div className="col-span-2">
-              <ZenInput
-                type="number"
-                step="0.0001"
-                min="0"
-                placeholder="0.0000"
-                {...register(`packages.${nestIndex}.items.${k}.unit_price`, { valueAsNumber: true })}
-                className="bg-white py-2 text-xs"
-              />
-            </div>
-            <div className="col-span-1">
-              <select
-                {...register(`packages.${nestIndex}.items.${k}.currency`)}
-                className="w-full text-xs h-9 bg-white border border-slate-200 rounded-lg"
-              >
-                <option value="USD">USD</option>
-                <option value="KRW">KRW</option>
-                <option value="EUR">EUR</option>
-                <option value="JPY">JPY</option>
-                <option value="CNY">CNY</option>
-              </select>
-            </div>
-            <div className="col-span-3 relative">
-              <ZenInput 
-                placeholder="HS Code"
-                {...register(`packages.${nestIndex}.items.${k}.hs_code`)}
-                className="bg-white py-2 text-xs"
-              />
-              {hsLookupLoadingMap[`${nestIndex}-${k}`] && (
-                <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] text-blue-400 animate-pulse">
-                  AI 추출 중...
-                </span>
-              )}
-            </div>
-            <div className="col-span-1">
-              <select 
-                {...register(`packages.${nestIndex}.items.${k}.item_packing_unit`)}
-                className="w-full text-xs h-9 bg-white border border-slate-200 rounded-lg focus:outline-none"
-              >
-                <option value="EA">EA</option>
-                <option value="SET">SET</option>
-                <option value="PCS">PCS</option>
-              </select>
-            </div>
-            <div className="col-span-1 flex justify-center pt-2">
-              <button 
-                type="button" 
-                onClick={() => remove(k)}
-                disabled={fields.length === 1}
-                className="text-slate-300 hover:text-rose-500 transition-colors disabled:opacity-0"
-              >
-                <Trash2 size={14} />
-              </button>
+            {/* REQ-07: Row 2 — HSCode / 포장단위 / 삭제버튼 */}
+            <div className="grid grid-cols-12 gap-2 items-start">
+              <div className="col-span-6">
+                <label className="text-[9px] font-bold text-slate-400 mb-1 block">HS Code</label>
+                <div className="relative">
+                  <ZenInput 
+                    placeholder="HS Code"
+                    {...register(`packages.${nestIndex}.items.${k}.hs_code`)}
+                    className="bg-white py-2 text-xs"
+                  />
+                  {hsLookupLoadingMap[`${nestIndex}-${k}`] && (
+                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] text-blue-400 animate-pulse">
+                      AI 추출 중...
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div className="col-span-3">
+                <label className="text-[9px] font-bold text-slate-400 mb-1 block">Packing Unit</label>
+                <select 
+                  {...register(`packages.${nestIndex}.items.${k}.item_packing_unit`)}
+                  className="w-full text-xs h-9 bg-white border border-slate-200 rounded-lg focus:outline-none"
+                >
+                  <option value="EA">EA</option>
+                  <option value="SET">SET</option>
+                  <option value="PCS">PCS</option>
+                </select>
+              </div>
+              <div className="col-span-3 flex items-end justify-center pb-1">
+                <button 
+                  type="button" 
+                  onClick={() => remove(k)}
+                  disabled={fields.length === 1}
+                  className="text-slate-300 hover:text-rose-500 transition-colors disabled:opacity-0"
+                >
+                  <Trash2 size={14} />
+                </button>
+              </div>
             </div>
           </div>
         ))}
@@ -335,6 +349,17 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
         setValue(`packages.${i}.length`, undefined);
         setValue(`packages.${i}.width`, undefined);
         setValue(`packages.${i}.height`, undefined);
+      }
+    });
+  }, [watchedPackages, setValue]);
+
+  // REQ-11: Auto-compute packing_count from items.length
+  useEffect(() => {
+    if (!watchedPackages) return;
+    watchedPackages.forEach((pkg, i) => {
+      if (pkg.items) {
+        const itemLen = pkg.items.length;
+        setValue(`packages.${i}.packing_count`, itemLen, { shouldValidate: false });
       }
     });
   }, [watchedPackages, setValue]);
@@ -796,7 +821,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                     <div className="space-y-3">
                       <div>
                         <div className="flex justify-between items-center mb-1">
-                          <label className="text-[10px] font-bold text-slate-500">{t('shipper_label')}</label>
+                          <label className="text-[10px] font-bold text-slate-500">{t('shipper_label')} <span className="text-rose-500">*</span></label>
                           <ZenBadge variant={affiliation?.isIndividual ? "info" : "success"} className="text-[9px] py-0 px-1">
                             {affiliation ? (affiliation.isIndividual ? "개인 화주" : (affiliation.orgName || "법인 화주")) : "Checking..."}
                           </ZenBadge>
@@ -892,11 +917,11 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                         />
                       </div>
                       <div>
-                        <label className="text-[10px] font-bold text-slate-500 mb-1 block">Recipient Name</label>
+                        <label className="text-[10px] font-bold text-slate-500 mb-1 block">Recipient Name <span className="text-rose-500">*</span></label>
                         <ZenInput placeholder="Full Name" {...register('recipient_name')} error={!!errors.recipient_name} className="py-2 text-xs" />
                       </div>
                       <div>
-                        <label className="text-[10px] font-bold text-slate-500 mb-1 block">Phone</label>
+                        <label className="text-[10px] font-bold text-slate-500 mb-1 block">Phone <span className="text-rose-500">*</span></label>
                         <ZenInput placeholder="010-XXXX-XXXX" {...register('recipient_phone')} error={!!errors.recipient_phone} className="py-2 text-xs" />
                       </div>
                       <div>
@@ -908,6 +933,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                             register={register}
                             setValue={setValue}
                             t={t}
+                            required
                           />
                        </div>
                      </div>
@@ -916,7 +942,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
 
                  {/* 🚢 Port Selection */}
                 <ZenCard className="p-3 border-slate-200">
-                  <h4 className="text-[10px] font-bold text-slate-500 mb-2 uppercase tracking-wider">{t('origin_port')} / {t('dest_port')}</h4>
+                  <h4 className="text-[10px] font-bold text-slate-500 mb-2 uppercase tracking-wider">{t('origin_port')} / {t('dest_port')} <span className="text-rose-500">*</span></h4>
                   <div className="grid grid-cols-2 gap-2">
                     <select {...register('origin_port_id')} className="w-full bg-white border border-slate-200 text-xs px-2 py-2 rounded-xl outline-none focus:ring-2 focus:ring-blue-50">
                       <option value="">{transportMode === 'AIR' || transportMode === 'EXP' || transportMode === 'UPS' ? 'Origin Airport' : 'Origin Port'}</option>
@@ -1052,17 +1078,42 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                           <Trash2 size={16} />
                         </button>
 
+                        {/* REQ-07: Row 1 — 화물구분 / UNIT / COUNT / WEIGHT */}
                         <div className="grid grid-cols-12 gap-2 mt-4 items-end">
-                          <div className="col-span-1 space-y-1">
-                            <label className="text-[9px] font-bold text-slate-400">UNIT</label>
+                          <div className="col-span-3">
+                            <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">화물 구분</label>
+                            <select
+                              {...register(`packages.${i}.special_cargo_type`)}
+                              className="w-full text-[11px] h-9 bg-slate-50 border border-slate-100 rounded-lg px-2 outline-none focus:ring-1 focus:ring-blue-100"
+                            >
+                              <option value="NONE">일반</option>
+                              <option value="DANGEROUS">위험물</option>
+                              <option value="FROZEN">냉동/냉장</option>
+                              <option value="VALUABLE">고가품</option>
+                              <option value="USED">중고품</option>
+                            </select>
+                          </div>
+                          <div className="col-span-3">
+                            <label className="text-[9px] font-bold text-slate-400">UNIT <span className="text-rose-500">*</span></label>
                             <select {...register(`packages.${i}.packing_unit`)} className="w-full text-[11px] h-9 bg-slate-50 border border-slate-100 rounded-lg px-1 outline-none focus:ring-1 focus:ring-blue-100">
                               <option value="BOX">BOX</option><option value="PLT">PLT</option><option value="CRT">CRT</option>
                             </select>
                           </div>
-                          <div className="col-span-1">
+                          <div className="col-span-3">
                             <label className="text-[9px] font-bold text-slate-400">COUNT</label>
-                            <ZenInput type="number" {...register(`packages.${i}.packing_count`, { valueAsNumber: true })} className="py-2 text-xs" />
+                            <ZenInput type="number" readOnly disabled {...register(`packages.${i}.packing_count`, { valueAsNumber: true })} className="py-2 text-xs bg-slate-100 opacity-80" />
                           </div>
+                          <div className="col-span-3">
+                            <label className="text-[9px] font-bold text-slate-400">WEIGHT <span className="text-rose-500">*</span> <span className="text-[8px] text-slate-300">kg</span></label>
+                            <div className="relative">
+                              <ZenInput type="number" step="0.01" {...register(`packages.${i}.gross_weight`, { valueAsNumber: true })} className="py-2 text-xs pr-6" />
+                              <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[9px] text-slate-300 font-bold">kg</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* REQ-07: Row 2 — CONTENT + 치수 L/W/H */}
+                        <div className="grid grid-cols-12 gap-2 mt-2 items-end">
                           {transportMode === 'EXP' && (
                             <div className="col-span-2">
                               <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">CONTENT</label>
@@ -1075,7 +1126,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                               </select>
                             </div>
                           )}
-                          <div className={`${transportMode === 'EXP' ? 'col-span-4' : 'col-span-5'}`}>
+                          <div className={transportMode === 'EXP' ? 'col-span-10' : 'col-span-12'}>
                             <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Dimensions (L/W/H) <span className="text-[8px] text-slate-300 ml-1">cm</span></label>
                             <div className="grid grid-cols-3 gap-1 relative">
                               {(() => {
@@ -1098,26 +1149,6 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                                 );
                               })()}
                             </div>
-                          </div>
-                          <div className={`${transportMode === 'EXP' ? 'col-span-2' : 'col-span-2'} ml-1`}>
-                            <label className="text-[9px] font-bold text-slate-400">WEIGHT <span className="text-[8px] text-slate-300">kg</span></label>
-                            <div className="relative">
-                              <ZenInput type="number" step="0.01" {...register(`packages.${i}.gross_weight`, { valueAsNumber: true })} className="py-2 text-xs pr-6" />
-                              <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[9px] text-slate-300 font-bold">kg</span>
-                            </div>
-                          </div>
-                          <div className={`${transportMode === 'EXP' ? 'col-span-2' : 'col-span-2'}`}>
-                            <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">화물 구분</label>
-                            <select
-                              {...register(`packages.${i}.special_cargo_type`)}
-                              className="w-full text-[11px] h-9 bg-slate-50 border border-slate-100 rounded-lg px-2 outline-none focus:ring-1 focus:ring-blue-100"
-                            >
-                              <option value="NONE">일반</option>
-                              <option value="DANGEROUS">위험물</option>
-                              <option value="FROZEN">냉동/냉장</option>
-                              <option value="VALUABLE">고가품</option>
-                              <option value="USED">중고품</option>
-                            </select>
                           </div>
                         </div>
 
