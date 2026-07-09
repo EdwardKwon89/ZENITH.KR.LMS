@@ -91,11 +91,11 @@ export function UpsFreightEstimateSection({
   }, [cargoType]);
 
   useEffect(() => {
-    if (!selectedProductId) return;
-    const stillExists = products.some((p) => p.id === selectedProductId);
-    if (!stillExists && products.length > 0) {
-      onProductChange(products[0].id);
-    }
+    if (products.length === 0) return;
+    const stillExists = selectedProductId && products.some((p) => p.id === selectedProductId);
+    if (stillExists) return;
+    const saver = products.find((p) => extractFamily(p.product_code) === 'WW_SAVER');
+    onProductChange(saver?.id || products[0].id);
   }, [products, selectedProductId, onProductChange]);
 
   useEffect(() => {
