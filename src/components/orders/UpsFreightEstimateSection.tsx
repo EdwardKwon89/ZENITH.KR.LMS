@@ -28,7 +28,7 @@ export function UpsFreightEstimateSection({
   destCountryCode,
   packages,
   selectedProductId,
-  selectedIncoterms = 'DDU',
+  selectedIncoterms = 'DDP',
   onProductChange,
   onIncotermsChange,
 }: UpsFreightEstimateSectionProps) {
@@ -38,6 +38,8 @@ export function UpsFreightEstimateSection({
   const [estimate, setEstimate] = useState<UpsFreightEstimate | null>(null);
   const [estimateLoading, setEstimateLoading] = useState(false);
   const [estimateError, setEstimateError] = useState<string | null>(null);
+
+  const cargoType = packages[0]?.content_type === 'DOC' ? 'DOC' : 'NON_DOC';
 
   useEffect(() => {
     if (!shipperOrgId) return;
@@ -54,18 +56,18 @@ export function UpsFreightEstimateSection({
 
   useEffect(() => {
     let cancelled = false;
-    getUpsProducts()
+    getUpsProducts(cargoType)
       .then((data) => {
         if (!cancelled) setProducts(data as UpsProduct[]);
       })
       .catch(() => {
-        if (!cancelled) setEstimateError('UPS 제품 목록을 불러오지 못했습니다.');
+        if (!cancelled) setEstimateError('UPS 서비스 티어 목록을 불러오지 못했습니다.');
       })
       .finally(() => {
         if (!cancelled) setProductsLoading(false);
       });
     return () => { cancelled = true; };
-  }, []);
+  }, [cargoType]);
 
   useEffect(() => {
     const totalWeight = packages.reduce(
@@ -112,14 +114,14 @@ export function UpsFreightEstimateSection({
     <div className="space-y-3">
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">UPS 제품</label>
+          <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">서비스 티어</label>
           <select
             value={selectedProductId || ''}
             onChange={(e) => onProductChange(e.target.value)}
             disabled={productsLoading}
             className="w-full bg-white border border-slate-200 text-xs px-3 py-2 rounded-xl outline-none focus:ring-2 focus:ring-blue-50"
           >
-            <option value="">{productsLoading ? '로딩 중...' : '제품 선택'}</option>
+            <option value="">{productsLoading ? '로딩 중...' : '서비스 티어 선택'}</option>
             {products.map((p) => (
               <option key={p.id} value={p.id}>
                 {p.product_name} ({p.product_code})
@@ -134,8 +136,8 @@ export function UpsFreightEstimateSection({
             onChange={(e) => onIncotermsChange(e.target.value as 'DDU' | 'DDP')}
             className="w-full bg-white border border-slate-200 text-xs px-3 py-2 rounded-xl outline-none focus:ring-2 focus:ring-blue-50"
           >
-            <option value="DDU">DDU</option>
             <option value="DDP">DDP</option>
+            <option value="DDU">DDU</option>
           </select>
         </div>
       </div>
