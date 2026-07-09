@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { estimateUpsFreight, UpsFreightEstimate } from '@/app/actions/ups/freight';
 import { getUpsProducts } from '@/app/actions/ups/rates';
 import { getAgencyOrgIdByShipper } from '@/app/actions/agency/shipper-link';
@@ -11,6 +11,7 @@ interface UpsProduct {
   id: string;
   product_code: string;
   product_name: string;
+  cargo_type: string;
 }
 
 interface UpsFreightEstimateSectionProps {
@@ -23,12 +24,23 @@ interface UpsFreightEstimateSectionProps {
   onIncotermsChange: (incoterms: 'DDU' | 'DDP') => void;
 }
 
+const FAMILY_LABELS: Record<string, string> = {
+  WW_EXPRESS: 'WW Express',
+  WW_SAVER: 'Saver',
+  WW_EXPEDITED: 'Expedited',
+  WW_FLIGHT: 'Freight',
+};
+
+function extractFamily(productCode: string): string {
+  return productCode.replace(/_(DOC|NONDOC)$/, '');
+}
+
 export function UpsFreightEstimateSection({
   shipperOrgId,
   destCountryCode,
   packages,
   selectedProductId,
-  selectedIncoterms = 'DDU',
+  selectedIncoterms = 'DDP',
   onProductChange,
   onIncotermsChange,
 }: UpsFreightEstimateSectionProps) {
@@ -38,6 +50,18 @@ export function UpsFreightEstimateSection({
   const [estimate, setEstimate] = useState<UpsFreightEstimate | null>(null);
   const [estimateLoading, setEstimateLoading] = useState(false);
   const [estimateError, setEstimateError] = useState<string | null>(null);
+
+  const cargoType = packages[0]?.content_type === 'DOC' ? 'DOC' : 'NON_DOC';
+
+  const productFamilies = useMemo(() => {
+    const seen = new Set<string>();
+    return products.filter((p) => {
+      const family = extractFamily(p.product_code);
+      if (seen.has(family)) return false;
+      seen.add(family);
+      return true;
+    });
+  }, [products]);
 
   useEffect(() => {
     if (!shipperOrgId) return;
@@ -56,16 +80,29 @@ export function UpsFreightEstimateSection({
     let cancelled = false;
     getUpsProducts()
       .then((data) => {
-        if (!cancelled) setProducts(data as UpsProduct[]);
+        if (!cancelled) {
+          const filtered = (data as UpsProduct[]).filter(
+            (p) => p.cargo_type === cargoType || p.cargo_type === 'BOTH'
+          );
+          setProducts(filtered);
+        }
       })
       .catch(() => {
-        if (!cancelled) setEstimateError('UPS 제품 목록을 불러오지 못했습니다.');
+        if (!cancelled) setEstimateError('UPS 서비스 티어 목록을 불러오지 못했습니다.');
       })
       .finally(() => {
         if (!cancelled) setProductsLoading(false);
       });
     return () => { cancelled = true; };
-  }, []);
+  }, [cargoType]);
+
+  useEffect(() => {
+    if (products.length === 0) return;
+    const stillExists = selectedProductId && products.some((p) => p.id === selectedProductId);
+    if (stillExists) return;
+    const saver = products.find((p) => extractFamily(p.product_code) === 'WW_SAVER');
+    onProductChange(saver?.id || products[0].id);
+  }, [products, selectedProductId, onProductChange]);
 
   useEffect(() => {
     const totalWeight = packages.reduce(
@@ -112,17 +149,17 @@ export function UpsFreightEstimateSection({
     <div className="space-y-3">
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">UPS 제품</label>
+          <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">서비스 티어</label>
           <select
             value={selectedProductId || ''}
             onChange={(e) => onProductChange(e.target.value)}
             disabled={productsLoading}
             className="w-full bg-white border border-slate-200 text-xs px-3 py-2 rounded-xl outline-none focus:ring-2 focus:ring-blue-50"
           >
-            <option value="">{productsLoading ? '로딩 중...' : '제품 선택'}</option>
-            {products.map((p) => (
+            <option value="">{productsLoading ? '로딩 중...' : '서비스 티어 선택'}</option>
+            {productFamilies.map((p) => (
               <option key={p.id} value={p.id}>
-                {p.product_name} ({p.product_code})
+                {FAMILY_LABELS[extractFamily(p.product_code)] || p.product_code}
               </option>
             ))}
           </select>
@@ -134,8 +171,8 @@ export function UpsFreightEstimateSection({
             onChange={(e) => onIncotermsChange(e.target.value as 'DDU' | 'DDP')}
             className="w-full bg-white border border-slate-200 text-xs px-3 py-2 rounded-xl outline-none focus:ring-2 focus:ring-blue-50"
           >
-            <option value="DDU">DDU</option>
             <option value="DDP">DDP</option>
+            <option value="DDU">DDU</option>
           </select>
         </div>
       </div>

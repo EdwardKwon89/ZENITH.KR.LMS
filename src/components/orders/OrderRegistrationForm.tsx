@@ -1199,7 +1199,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                           <Trash2 size={16} />
                         </button>
 
-                        {/* REQ-07/J: Row 1 — 화물구분 / UNIT / COUNT / LOCAL TRACKING NO */}
+                        {/* REQ-07/J: Row 1 — 화물구분 / UNIT·CONTENT(통합) / COUNT / LOCAL TRACKING NO */}
                         <div className="grid grid-cols-12 gap-2 mt-4 items-end">
                           <div className="col-span-3">
                             <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">화물 구분</label>
@@ -1215,10 +1215,22 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                             </select>
                           </div>
                           <div className="col-span-3">
-                            <label className="text-[9px] font-bold text-slate-400">UNIT <span className="text-rose-500">*</span></label>
-                            <select {...register(`packages.${i}.packing_unit`)} className="w-full text-[11px] h-9 bg-slate-50 border border-slate-100 rounded-lg px-1 outline-none focus:ring-1 focus:ring-blue-100">
-                              <option value="BOX">BOX</option><option value="PLT">PLT</option><option value="CRT">CRT</option>
-                            </select>
+                            {transportMode === 'UPS' ? (
+                              <>
+                                <label className="text-[9px] font-bold text-slate-400">CONTENT <span className="text-rose-500">*</span></label>
+                                <select {...register(`packages.${i}.content_type`)} className="w-full text-[11px] h-9 bg-slate-50 border border-slate-100 rounded-lg px-2 outline-none focus:ring-1 focus:ring-blue-100">
+                                  <option value="NONDOC">NONDOC</option>
+                                  <option value="DOC">DOC</option>
+                                </select>
+                              </>
+                            ) : (
+                              <>
+                                <label className="text-[9px] font-bold text-slate-400">UNIT <span className="text-rose-500">*</span></label>
+                                <select {...register(`packages.${i}.packing_unit`)} className="w-full text-[11px] h-9 bg-slate-50 border border-slate-100 rounded-lg px-1 outline-none focus:ring-1 focus:ring-blue-100">
+                                  <option value="BOX">BOX</option><option value="PLT">PLT</option><option value="CRT">CRT</option>
+                                </select>
+                              </>
+                            )}
                           </div>
                           <div className="col-span-3">
                             <label className="text-[9px] font-bold text-slate-400">COUNT</label>
@@ -1236,21 +1248,9 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                           </div>
                         </div>
 
-                        {/* REQ-07/J: Row 2 — CONTENT(EXP only) + 치수 L/W/H + WEIGHT */}
+                        {/* REQ-07/J: Row 2 — 치수 L/W/H + WEIGHT */}
                         <div className="grid grid-cols-12 gap-2 mt-2 items-end">
-                          {(transportMode === 'EXP' || transportMode === 'UPS') && (
-                            <div className="col-span-2">
-                              <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">CONTENT</label>
-                              <select
-                                {...register(`packages.${i}.content_type`)}
-                                className="w-full text-[11px] h-9 bg-slate-50 border border-slate-100 rounded-lg px-2 outline-none focus:ring-1 focus:ring-blue-100"
-                              >
-                                <option value="NONDOC">NONDOC</option>
-                                <option value="DOC">DOC</option>
-                              </select>
-                            </div>
-                          )}
-                          <div className={(transportMode === 'EXP' || transportMode === 'UPS') ? 'col-span-7' : 'col-span-9'}>
+                          <div className="col-span-9">
                             <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Dimensions (L/W/H) <span className="text-[8px] text-slate-300 ml-1">cm</span></label>
                             <div className="grid grid-cols-3 gap-1 relative">
                               {(() => {
@@ -1274,7 +1274,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                               })()}
                             </div>
                           </div>
-                          <div className={transportMode === 'EXP' ? 'col-span-3' : 'col-span-3'}>
+                          <div className="col-span-3">
                             <label className="text-[9px] font-bold text-slate-400">WEIGHT <span className="text-rose-500">*</span> <span className="text-[8px] text-slate-300">kg</span></label>
                             <div className="relative">
                               <ZenInput type="number" step="0.01" {...register(`packages.${i}.gross_weight`, { valueAsNumber: true })} className="py-2 text-xs pr-6" />
@@ -1299,6 +1299,24 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                     ))}
                   </div>
 
+                  {/* 🚚 UPS Freight Estimate (inside packages section, ISS300) */}
+                  {transportMode === 'UPS' && (
+                    <div className="mt-6 p-4 bg-blue-50/30 border border-blue-100 rounded-2xl">
+                      <h4 className="text-xs font-bold text-slate-800 mb-3 flex items-center gap-2 uppercase tracking-wide">
+                        <Truck size={14} className="text-blue-500" /> UPS 서비스
+                      </h4>
+                      <UpsFreightEstimateSection
+                        shipperOrgId={affiliation?.orgId ?? null}
+                        destCountryCode={destPort?.country_code}
+                        packages={watchedPackages || []}
+                        selectedProductId={watch('ups_product_code')}
+                        selectedIncoterms={watch('incoterms')}
+                        onProductChange={(id) => setValue('ups_product_code', id)}
+                        onIncotermsChange={(value) => setValue('incoterms', value)}
+                      />
+                    </div>
+                  )}
+
                   {/* 📊 Aggregated Stats (Live) */}
                   <div className="mt-8 flex justify-between items-center px-6 py-4 bg-slate-900 rounded-3xl text-white shadow-2xl ring-1 ring-white/10">
                     <span className="text-xs font-bold text-slate-500 tracking-widest">SHIPMENT SUMMARY</span>
@@ -1314,24 +1332,6 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                     </div>
                   </div>
                 </ZenCard>
-
-                {/* 🚚 UPS Freight Estimate (AGENCY_SHIPPER only) */}
-                {isAgencyShipper && (
-                  <ZenCard className="p-4 border-blue-100">
-                    <h4 className="text-xs font-bold text-slate-800 mb-3 flex items-center gap-2 uppercase tracking-wide">
-                      <Truck size={14} className="text-blue-500" /> UPS 견적
-                    </h4>
-                    <UpsFreightEstimateSection
-                      shipperOrgId={affiliation?.orgId ?? null}
-                      destCountryCode={destPort?.country_code}
-                      packages={watchedPackages || []}
-                      selectedProductId={watch('ups_product_code')}
-                      selectedIncoterms={watch('incoterms')}
-                      onProductChange={(id) => setValue('ups_product_code', id)}
-                      onIncotermsChange={(value) => setValue('incoterms', value)}
-                    />
-                  </ZenCard>
-                )}
 
                 {/* 📝 Remarks / Special Instructions */}
                 <ZenCard className="p-4 border-slate-200">
