@@ -1300,10 +1300,10 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                   </div>
 
                   {/* 🚚 UPS Freight Estimate (inside packages section, ISS300) */}
-                  {isAgencyShipper && transportMode === 'UPS' && (
+                  {transportMode === 'UPS' && (
                     <div className="mt-6 p-4 bg-blue-50/30 border border-blue-100 rounded-2xl">
                       <h4 className="text-xs font-bold text-slate-800 mb-3 flex items-center gap-2 uppercase tracking-wide">
-                        <Truck size={14} className="text-blue-500" /> UPS 견적
+                        <Truck size={14} className="text-blue-500" /> UPS 서비스
                       </h4>
                       <UpsFreightEstimateSection
                         shipperOrgId={affiliation?.orgId ?? null}

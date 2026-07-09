@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { estimateUpsFreight, UpsFreightEstimate } from '@/app/actions/ups/freight';
 import { getUpsProducts } from '@/app/actions/ups/rates';
 import { getAgencyOrgIdByShipper } from '@/app/actions/agency/shipper-link';
@@ -23,6 +23,17 @@ interface UpsFreightEstimateSectionProps {
   onIncotermsChange: (incoterms: 'DDU' | 'DDP') => void;
 }
 
+const FAMILY_LABELS: Record<string, string> = {
+  WW_EXPRESS: 'WW Express',
+  WW_SAVER: 'Saver',
+  WW_EXPEDITED: 'Expedited',
+  WW_FLIGHT: 'Freight',
+};
+
+function extractFamily(productCode: string): string {
+  return productCode.replace(/_(DOC|NONDOC)$/, '');
+}
+
 export function UpsFreightEstimateSection({
   shipperOrgId,
   destCountryCode,
@@ -40,6 +51,16 @@ export function UpsFreightEstimateSection({
   const [estimateError, setEstimateError] = useState<string | null>(null);
 
   const cargoType = packages[0]?.content_type === 'DOC' ? 'DOC' : 'NON_DOC';
+
+  const productFamilies = useMemo(() => {
+    const seen = new Set<string>();
+    return products.filter((p) => {
+      const family = extractFamily(p.product_code);
+      if (seen.has(family)) return false;
+      seen.add(family);
+      return true;
+    });
+  }, [products]);
 
   useEffect(() => {
     if (!shipperOrgId) return;
@@ -68,6 +89,14 @@ export function UpsFreightEstimateSection({
       });
     return () => { cancelled = true; };
   }, [cargoType]);
+
+  useEffect(() => {
+    if (!selectedProductId) return;
+    const stillExists = products.some((p) => p.id === selectedProductId);
+    if (!stillExists && products.length > 0) {
+      onProductChange(products[0].id);
+    }
+  }, [products, selectedProductId, onProductChange]);
 
   useEffect(() => {
     const totalWeight = packages.reduce(
@@ -122,9 +151,9 @@ export function UpsFreightEstimateSection({
             className="w-full bg-white border border-slate-200 text-xs px-3 py-2 rounded-xl outline-none focus:ring-2 focus:ring-blue-50"
           >
             <option value="">{productsLoading ? '로딩 중...' : '서비스 티어 선택'}</option>
-            {products.map((p) => (
+            {productFamilies.map((p) => (
               <option key={p.id} value={p.id}>
-                {p.product_name} ({p.product_code})
+                {FAMILY_LABELS[extractFamily(p.product_code)] || p.product_code}
               </option>
             ))}
           </select>
