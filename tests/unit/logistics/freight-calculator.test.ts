@@ -24,6 +24,16 @@ describe('Freight Calculator Utility', () => {
       // 1 CBM, 1500kg -> 1.5 R.T
       expect(calculateChargeableWeight({ weight: 1500, volume: 1, mode: 'SEA' })).toBe(1.5);
     });
+
+    it('should use Volume Weight when greater than Actual Weight for UPS (same as AIR/EXP)', () => {
+      // 2 CBM * 167 = 334kg > 100kg
+      expect(calculateChargeableWeight({ weight: 100, volume: 2, mode: 'UPS' })).toBe(334);
+    });
+
+    it('should use Actual Weight when greater than Volume Weight for UPS', () => {
+      // 1 CBM * 167 = 167kg < 500kg
+      expect(calculateChargeableWeight({ weight: 500, volume: 1, mode: 'UPS' })).toBe(500);
+    });
   });
 
   describe('estimateFreightCost', () => {

@@ -812,8 +812,9 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
             {step === 1 && [ 
               { code: 'AIR', icon: Plane, label: '항공' },
               { code: 'SEA', icon: Ship, label: '해상' },
-              { code: 'EXP', icon: Zap, label: 'UPS Direct' },
-              { code: 'LAND', icon: Truck, label: '육상' }
+              { code: 'EXP', icon: Zap, label: '특송' },
+              { code: 'LAND', icon: Truck, label: '육상' },
+              { code: 'UPS', icon: PackageCheck, label: 'UPS Direct' }
             ].map((mode) => (
               <button
                 key={mode.code}
@@ -1237,7 +1238,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
 
                         {/* REQ-07/J: Row 2 — CONTENT(EXP only) + 치수 L/W/H + WEIGHT */}
                         <div className="grid grid-cols-12 gap-2 mt-2 items-end">
-                          {transportMode === 'EXP' && (
+                          {(transportMode === 'EXP' || transportMode === 'UPS') && (
                             <div className="col-span-2">
                               <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">CONTENT</label>
                               <select
@@ -1249,7 +1250,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                               </select>
                             </div>
                           )}
-                          <div className={transportMode === 'EXP' ? 'col-span-7' : 'col-span-9'}>
+                          <div className={(transportMode === 'EXP' || transportMode === 'UPS') ? 'col-span-7' : 'col-span-9'}>
                             <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Dimensions (L/W/H) <span className="text-[8px] text-slate-300 ml-1">cm</span></label>
                             <div className="grid grid-cols-3 gap-1 relative">
                               {(() => {

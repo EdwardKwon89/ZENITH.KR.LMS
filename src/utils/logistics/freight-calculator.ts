@@ -32,6 +32,7 @@ export function calculateChargeableWeight(input: FreightCalcInput): number {
   switch (mode) {
     case 'AIR':
     case 'EXP':
+    case 'UPS':
       const volWeight = volume * 167; // IATA Standard
       return Math.max(weight, volWeight);
     
