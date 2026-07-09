@@ -11,6 +11,7 @@ interface UpsProduct {
   id: string;
   product_code: string;
   product_name: string;
+  cargo_type: string;
 }
 
 interface UpsFreightEstimateSectionProps {
@@ -77,9 +78,14 @@ export function UpsFreightEstimateSection({
 
   useEffect(() => {
     let cancelled = false;
-    getUpsProducts(cargoType)
+    getUpsProducts()
       .then((data) => {
-        if (!cancelled) setProducts(data as UpsProduct[]);
+        if (!cancelled) {
+          const filtered = (data as UpsProduct[]).filter(
+            (p) => p.cargo_type === cargoType || p.cargo_type === 'BOTH'
+          );
+          setProducts(filtered);
+        }
       })
       .catch(() => {
         if (!cancelled) setEstimateError('UPS 서비스 티어 목록을 불러오지 못했습니다.');
