@@ -338,6 +338,7 @@
 | TASK-B-078 | 260708 | Issue #261 — REQ-06 아이템명 → HScode 자동 추출 (Claude Haiku 4.5) | P1 | 없음 | Baker (구현) | 🔔 | [TASK-B-078](tasks/TASK-B-078_260708_ISS261_REQ06_HScode자동추출_Baker.md) | Issue #261 · 코드 `0256484` · build PASS · 회귀 489/489 PASS · PR 대기 |
 | TASK-B-080 | 260708 | Issue #281 — REQ-A/B/C 주소 입력 보완 + 수하인 중복 필드 정리 | P1 | TASK-B-075 ✅ | Dave (구현) | 🔔 | [TASK-B-080](tasks/TASK-B-080_260708_ISS281_주소입력보완_Dave.md) | Issue #281 · 코드 `88753088`+`76204023` · 회귀 489/489 PASS · PR#283 |
 | TASK-B-081 | 260708 | Issue #285 — 탭 전환 시 화주/수하인 입력값 초기화 버그 | P2 | 없음 | Dave (구현) | 🔔 | [TASK-B-081](tasks/TASK-B-081_260708_ISS285_탭전환입력값초기화_Dave.md) | Issue #285 · 코드 `d58cb229` · build PASS · 회귀 489/489 PASS · PR#287 |
+| TASK-B-082 | 260709 | Issue #290 — REQ-07/08 오더등록폼 2줄배치·필수표시 (REQ-11 #294 이관) | P2 | 없음 | Baker (구현) | 🔔 | [TASK-B-082](tasks/TASK-B-082_260709_ISS290_오더등록폼보완2차_Baker.md) | Issue #290 (Baker 할당분 REQ-07/08) · REQ-11 #294 이관 · build ✅ · 489/489 PASS · PR#293 |
 | TASK-169 | 260630 | DEF-086/087 인보이스 PDF — DB 마이그레이션 + Server Action | P2 | 없음 | D_Kai (구현) | ✅ | [TASK-169](tasks/TASK-169_260630_DEF086087_InvoicePDF_DB+SA_DKai.md) | Issue #152 · PR#154 ✅ 머지 (`51eba6c`) · zen_invoice_files 마이그레이션+SA 완료 · DEF-086 해소 |
 | TASK-170 | 260630 | DEF-086/087 인보이스 PDF — 오더 상세 UI 버튼 구현 | P2 | TASK-169 ✅ | B_Kai (구현) | ✅ | [TASK-170](tasks/TASK-170_260630_DEF086087_InvoicePDF_UI버튼_BKai.md) | Issue #152 · PR#155 ✅ 머지 (`ad9d1d1` develop 반영 확인) · DoD 13/13 · Aiden ✅ 260701 |
 | **── Phase 7.1 ──** | | **UPS 특송 요금 "등록" 관리 (Admin/Agency 계산엔진+등록UI, Team A 범위)** | | | | | | **✅✅ develop 머지 완료(260705, PR#186 `55adff5`) — [An_14](../docs/02_Analysis/An_14_Phase7_UPS요금관리_설계보완.md) · GH#182(main 머지 시 클로즈 예정) · Team B 인계(오더연동+정산)는 GH#181 참조 · 회귀 424/424 PASS(develop 재검증 완료)** |
@@ -393,7 +394,7 @@
 | **JSJung** (팀 리더) | ✅ TASK-B-030 승인 완료 (260628) · ✅ TASK-B-033 승인 완료 (260701) | §1§2 확인 완료 · DEF-088 교정 완료 · PR#156 squash 머지 (e2bf48b) |
 | **Jaison** (AI Agent 총괄) | ✅ B-056 Aiden 머지 완료 (260705) | PR#183(`168c6d3f`) · B-056~068 전량 ✅ 완료 · 신규 Task 대기 |
 | **Dave** (AI Agent) | ✅ **B-069** Aiden 머지 완료 (260707) · 🔔 **B-080** PR#283 검토 대기 · 🔔 **B-081** PR#287 검토 대기 | PR#247(`73c35ddb`) · B-066/068/069 전량 완료 · B-080 PR#283 · B-081 코드 `d58cb229` · 회귀 489/489 · PR#287 |
-| **Baker** (AI Agent) | ✅ **B-070** Aiden 머지 완료 (260707) | PR#248(`4fe0a50c`) · B-067/070 전량 완료 · 신규 Task 대기 |
+| **Baker** (AI Agent) | 🔔 **B-082** PR#290 검토 대기 | REQ-07/08/11 구현 완료 · build ✅ · 489/489 PASS · PR#291 |
 | **Gale** (AI Agent) | 대기 | 추후 재배정 예정 |
 
 ---
