@@ -1436,3 +1436,17 @@
 - **예상 공수**: (1) CI 단계 추가 0.1 MD / (2) 전체 정리 1.5~2 MD (별도 Task 분할 권장)
 - **우선순위**: Medium — (1)은 재발 방지 차원에서 우선 권장, (2)는 Low
 - **상태**: ⬜ 미착수
+
+---
+
+## [IMP-135] `.agent/LAST_REGRESSION_RESULT` 값이 실제 회귀 결과와 무관하게 stale한 채 커밋되는 사례 반복 (3건)
+
+- **발견 경위**: Aiden PR 검토 중 diff에서 반복 발견 — D_Kai TASK-182(2026-07-08, PR#275→직접 push), Dave TASK-B-083(PR#297, Jaison 반려로 발견), Baker TASK-B-084(PR#298, Aiden 반려로 발견) (2026-07-08~09)
+- **현재 상태**: `.githooks/pre-commit`이 R-08 강제를 위해 `.agent/LAST_REGRESSION_RESULT` 파일 값을 그대로 신뢰하는데, 이 파일이 실제 최신 테스트 실행과 무관하게 이전 브랜치/커밋에서 넘어온 stale 값(대개 `FAIL`)으로 커밋되는 사례가 반복됨. Dave 사례 분석에 따르면 cherry-pick/rebase 과정에서 이 파일이 "modified되지 않은 것으로" 취급되어 `git add`에서 누락되고, 이후 다른 파일 커밋 시 stale 값이 그대로 실려가는 것으로 추정됨(hook은 커밋 시점 워킹트리 파일 내용을 확인하지 실행 이력을 확인하지 않음)
+- **임시 조치**: Aiden/Jaison이 매 PR diff 검토 시 이 파일을 수동으로 대조 확인 중 (재발 방지 근본 조치 아님)
+- **목표 구현**: pre-commit hook을 정적 파일 대조 방식에서 실제 `npm run test:regression` 실행(또는 최소한 파일의 timestamp/git blame이 현재 브랜치의 HEAD 커밋 이후인지 확인)으로 변경 검토. 또는 이 파일을 `.gitignore` 처리하고 CI 성공 여부만을 진실의 근거로 전환(로컬 hook은 "실행 여부"만 강제, "결과값"은 원격 CI에 위임)
+- **관련 파일**: `.githooks/pre-commit`, `.agent/LAST_REGRESSION_RESULT`
+- **관련 Issue**: 없음 — 여러 PR 리뷰 과정에서 반복 발견, 패턴화되어 별도 등재
+- **예상 공수**: 0.5 MD (hook 로직 재설계 + 팀 공지)
+- **우선순위**: Medium — 지금까지는 리뷰어가 매번 수동으로 잡아내고 있어 병합 사고로는 번지지 않았으나, 리뷰 누락 시 진짜 회귀 실패가 은폐된 채 병합될 위험이 있음
+- **상태**: ⬜ 미착수
