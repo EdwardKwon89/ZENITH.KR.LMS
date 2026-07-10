@@ -163,24 +163,25 @@ export async function deleteUpsOtherCharge(id: string) {
 
 // ─── Agency Pricing Policy ─────────────────────────
 
-export async function getAgencyPricingPolicy(agencyOrgId: string) {
+export async function getAgencyPricingPolicies(agencyOrgId?: string) {
   const { supabase } = await validateUserAction();
-  const { data, error } = await supabase
+  let query = supabase
     .from('zen_agency_pricing_policies')
-    .select('*, agency:agency_org_id(name)')
-    .eq('agency_org_id', agencyOrgId)
-    .maybeSingle();
+    .select('*, agency:agency_org_id(name), zone:zone_id(zone_code, zone_name)')
+    .eq('is_active', true);
+  if (agencyOrgId) query = query.eq('agency_org_id', agencyOrgId);
+  const { data, error } = await query.order('agency_org_id');
   if (error) throw new Error(error.message);
-  return data;
+  return data ?? [];
 }
 
 export async function upsertAgencyPricingPolicy(data: {
-  agency_org_id: string; discount_rate: number; is_active?: boolean;
+  agency_org_id: string; zone_id: string; discount_rate: number; is_active?: boolean;
 }) {
   const { supabase, profile } = await validateUserAction();
   requireAdminOrManager(profile?.role);
   const { error } = await supabase.from('zen_agency_pricing_policies').upsert(data, {
-    onConflict: 'agency_org_id',
+    onConflict: 'agency_org_id,zone_id',
   });
   if (error) throw new Error(error.message);
   revalidatePath('/admin/ups-rates');

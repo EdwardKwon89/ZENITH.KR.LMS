@@ -65,7 +65,6 @@
     "rate_cards_management": "料率カード管理",
     "corporate_mgmt": "法人管理",
     "member_management": "会員管理",
-    "agency_rate_overrides_nav": "レート上書き",
     "agency_other_charges_nav": "諸掛管理"
   },
   "Orders": {
@@ -253,10 +252,6 @@
     "submit_invite_sent": "{name}様の荷主アカウントが登録されました。{email}へ招待メールを送信しました。",
     "loading": "読み込み中..."
   },
-  "agency_rate_overrides_selling_hint": "マージンを含む最終販売価格を入力してください。",
-  "agency_rate_overrides_cost_label": "原価",
-  "agency_rate_overrides_cost_auto": "管理者が設定した割引率に基づき自動計算されます",
-  "agency_rate_overrides_cost_hint": "保存後、自動計算された原価が表示されます。",
   "agency_settlement_widget_title": "今月の精算状況",
   "agency_settlement_orders": "オーダ数",
   "agency_settlement_revenue": "売上",

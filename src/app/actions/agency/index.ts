@@ -5,12 +5,6 @@ export {
 } from './shippers';
 
 export {
-  getAgencyRateOverrides,
-  upsertAgencyRateOverride,
-  deactivateAgencyRateOverride,
-} from './rate-overrides';
-
-export {
   getAgencySettlementSummary,
   getAgencyShipperSettlements,
   getAgencyOrderSettlements,

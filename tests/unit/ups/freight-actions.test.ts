@@ -59,9 +59,8 @@ function buildMockSupabase(overrides: Record<string, any> = {}) {
     zen_ups_fuel_surcharges: createQueryMock({ data: [FUEL] }),
     zen_ups_other_charges: createQueryMock({ data: [] }),
     zen_agency_pricing_policies: createQueryMock({ data: null }),
-    zen_agency_rate_overrides: createQueryMock({ data: null }),
     zen_agency_other_charges: createQueryMock({ data: [] }),
-    zen_agency_shippers: createQueryMock({ data: null }),
+    zen_agency_shipper_zone_discounts: createQueryMock({ data: null }),
     ...overrides,
   };
   return { from: vi.fn((table: string) => tableMocks[table] ?? createQueryMock({ data: null })) };
@@ -82,7 +81,7 @@ describe('TC-UPS-FREIGHT-01: estimateUpsFreight', () => {
     expect(result.shipper).toBeNull();
   });
 
-  it('agencyOrgId 전달 시 Agency 단계 견적을 포함한다(override 없음 → 폴백)', async () => {
+  it('agencyOrgId 전달 시 Agency 단계 견적을 포함한다', async () => {
     (validateUserAction as any).mockResolvedValue({
       supabase: buildMockSupabase({
         zen_agency_pricing_policies: createQueryMock({ data: { discount_rate: 0.1 } }),
@@ -94,7 +93,7 @@ describe('TC-UPS-FREIGHT-01: estimateUpsFreight', () => {
     });
 
     expect(result.agency).not.toBeNull();
-    expect(result.agency!.source).toBe('platform_fallback');
+    expect(result.agency!.discountRate).toBe(0.1);
     expect(result.shipper).toBeNull();
   });
 
@@ -102,8 +101,7 @@ describe('TC-UPS-FREIGHT-01: estimateUpsFreight', () => {
     (validateUserAction as any).mockResolvedValue({
       supabase: buildMockSupabase({
         zen_agency_pricing_policies: createQueryMock({ data: { discount_rate: 0.1 } }),
-        zen_agency_rate_overrides: createQueryMock({ data: { selling_price: 90000, cost_price: 76500 } }),
-        zen_agency_shippers: createQueryMock({ data: { discount_rate: 0.05 } }),
+        zen_agency_shipper_zone_discounts: createQueryMock({ data: { discount_rate: 0.05 } }),
       }),
     });
 
@@ -112,10 +110,9 @@ describe('TC-UPS-FREIGHT-01: estimateUpsFreight', () => {
       agencyOrgId: 'agency-1', shipperOrgId: 'shipper-1',
     });
 
-    expect(result.agency!.source).toBe('override');
-    expect(result.agency!.agencySellingPrice).toBe(90000);
+    expect(result.agency).not.toBeNull();
     expect(result.shipper).not.toBeNull();
-    expect(result.shipper!.finalFreight).toBeCloseTo(90000 * 0.95, 2);
+    expect(result.shipper!.finalFreight).toBeCloseTo(100725 * 0.95, 2);
   });
 
   it('목적지 국가에 매핑된 Zone이 없으면 에러를 던진다', async () => {

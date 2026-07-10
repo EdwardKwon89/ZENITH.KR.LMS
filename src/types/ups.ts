@@ -185,19 +185,18 @@ export interface ZoneResolveResult {
   fallbackApplied: boolean;
 }
 
-// Agency 단계 (An-14 R3~R5)
+// Agency 단계 (Issue #310: Zone별 할인율, rate_overrides 폐기)
 export interface UpsAgencyFreightResult {
   platformSellingTotal: number;
   agencyCostPrice: number;
   agencySellingPrice: number;
   discountRate: number;
   agencyOtherChargesTotal: number;
-  source: 'override' | 'platform_fallback';
 }
 
-// Shipper 단계 (An-14 R6)
+// Shipper 단계 (Issue #310: Admin 판매가에서 직접 계산)
 export interface UpsShipperFreightResult {
-  agencySellingPrice: number;
+  platformSellingPrice: number;
   shipperDiscountRate: number;
   finalFreight: number;
 }
