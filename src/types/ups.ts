@@ -149,13 +149,6 @@ export interface UpsBreakdown {
   otherChargesCostTotal: number;
   oversizeApplied: boolean;
   fallbackApplied?: boolean;
-  dwbApplied?: boolean;
-  dwbOriginalWeightKg?: number;
-  dwbOriginalSellingPrice?: number;
-  dwbOriginalCostPrice?: number;
-  freightMinApplied?: boolean;
-  freightMinOriginalSelling?: number;
-  freightMinOriginalCost?: number;
 }
 
 export interface UpsFreightInput {
@@ -183,8 +176,6 @@ export interface UpsFreightResult {
   totalSellingPrice: number;
   totalCostPrice: number;
   currency: string;
-  dwbApplied?: boolean;
-  freightMinApplied?: boolean;
   breakdown: UpsBreakdown;
 }
 
