@@ -15,6 +15,7 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
+| [#305](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/305) | [feat] Agency 원가 조회 + 화주 UPS 운임조회 기능 — An-14 §11-5 인계분 구현 | b | p2 | open | jungjs | 2026-07-10 |
 | [#303](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/303) | [bug] UPS 운임 계산 로직 오류 — 20kg/70kg 초과 구간 계산식 전면 수정 필요 (Critical) | b | p1 | open | jungjs | 2026-07-10 |
 | [#300](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/300) | [feat] 오더 등록 폼 — UNIT/CONTENT 필드 통합 + UPS 견적 섹션 패키지 영역 이동 | b | p2 | open | jungjs | 2026-07-09 |
 | [#296](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/296) | [fix] UPS Direct 운송모드 노출 — 신규 버튼 추가 + EXP 라벨 복원 + 연쇄 게이팅 결함 수정 | b | p2 | open | jungjs | 2026-07-09 |
