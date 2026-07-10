@@ -1,18 +1,18 @@
 // UPS Shipper 단계 요금 계산 — 순수 함수 (DB 호출 없음)
-// Phase 7.1 TASK-173 IMP-145 · An-14 §2 R6
+// Issue #310: Admin 판매가에서 Zone별 할인율로 직접 계산 (Agency 원가 경유 안 함)
 //
-// finalFreight = agencySellingPrice x (1 - shipper_discount_rate)
-// shipper_discount_rate 출처: zen_agency_shippers.discount_rate (기존 컬럼, 계산 로직에서 최초로 소비됨)
+// finalFreight = platformSellingPrice x (1 - shipperZoneDiscountRate)
+// shipperZoneDiscountRate 출처: zen_agency_shipper_zone_discounts.discount_rate
 
 import type { UpsShipperFreightResult } from '@/types/ups';
 
 export function computeShipperFreight(
-  agencySellingPrice: number,
-  shipperDiscountRate: number
+  platformSellingPrice: number,
+  shipperZoneDiscountRate: number
 ): UpsShipperFreightResult {
   return {
-    agencySellingPrice,
-    shipperDiscountRate,
-    finalFreight: Math.round(agencySellingPrice * (1 - shipperDiscountRate) * 100) / 100,
+    platformSellingPrice,
+    shipperDiscountRate: shipperZoneDiscountRate,
+    finalFreight: Math.round(platformSellingPrice * (1 - shipperZoneDiscountRate) * 100) / 100,
   };
 }
