@@ -1,4 +1,1 @@
 PASS
-# 2026-07-10 15:33 — 81 files, 489/489 ALL PASS (feature/teamb-iss310-zone-discounts, 7eac1a38)
-# DB migration applied locally; integration test AGPOL-01/02/03/05 removed (rate_overrides), AGPOL-06 added (Zone discount)
-# CI run 29073340139: previous FAIL resolved
