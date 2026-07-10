@@ -25,7 +25,8 @@ import {
   Users,
   ClipboardList,
   Globe,
-  LockKeyhole
+  LockKeyhole,
+  DollarSign
 } from "lucide-react";
 import { Package } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -160,10 +161,12 @@ export default function NaviSidebar({
     { title: t("agency_management"), href: "/agency", icon: BuildingOffice2Icon,
       children: [
         { title: t("agency_shippers_nav"), href: "/agency/shippers" },
+        { title: t("agency_ups_rates_nav"), href: "/agency/ups-rates" },
         { title: t("agency_other_charges_nav"), href: "/agency/other-charges" },
         { title: t("agency_settlements_nav"), href: "/agency/settlements" },
       ]
     },
+    { title: t("shipper_ups_rates_nav"), href: "/shipper/ups-rates", icon: DollarSign },
     {
       title: t("mypage"),
       href: "/mypage",

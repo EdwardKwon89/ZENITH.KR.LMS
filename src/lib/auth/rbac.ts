@@ -48,7 +48,7 @@ export const STATIC_PERMISSIONS: Record<string, string[]> = {
   [USER_ROLES.CUSTOMS_BROKER]: ['/admin/customs-rates', '/orders/assigned', '/tracking', '/voc', '/mypage'],
   [USER_ROLES.DELIVERY_AGENT]: ['/admin/delivery-rates', '/orders/assigned', '/tracking', '/voc', '/mypage'],
   [USER_ROLES.AGENCY]: ['/orders', '/ups-rates', '/agency', '/tracking', '/settlement', '/voc', '/mypage'],
-  [USER_ROLES.AGENCY_SHIPPER]: ['/orders', '/ups-rates', '/tracking', '/voc', '/support', '/mypage'],
+  [USER_ROLES.AGENCY_SHIPPER]: ['/orders', '/shipper', '/ups-rates', '/tracking', '/voc', '/support', '/mypage'],
   [USER_ROLES.CORPORATE]: ['/orders', '/billing/invoice', '/tracking', '/finance', '/settlement', '/voc', '/support', '/mypage'],
   [USER_ROLES.INDIVIDUAL]: ['/orders', '/tracking', '/voc', '/support', '/mypage'],
   [USER_ROLES.USER]: ['/dashboard', '/mypage', '/support'],
