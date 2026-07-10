@@ -153,7 +153,7 @@ describe('TC-UPS-FREIGHT-02: resolveZoneByCountry 연동 (GH#202)', () => {
 
     await expect(
       estimateUpsFreight({ productId: 'p2', destCountryCode: 'JPN', actualWeightKg: 10, direction: 'IMPORT' })
-    ).rejects.toThrow(/기준요금/);
+    ).rejects.toThrow(/Freight.*최소운임/);
   });
 
   it('IMPORT 방향 Zone이 direction=IMPORT로 정확 매치된다', async () => {
@@ -169,7 +169,7 @@ describe('TC-UPS-FREIGHT-02: resolveZoneByCountry 연동 (GH#202)', () => {
       estimateUpsFreight({
         productId: 'p2', destCountryCode: 'JPN', actualWeightKg: 10, direction: 'IMPORT',
       })
-    ).rejects.toThrow(/기준요금/);
+    ).rejects.toThrow(/Freight.*최소운임/);
   });
 
   it('direction 미지정(EXPORT 기본값)으로 IMPORT 전용 Zone 조회 시 Zone 에러', async () => {

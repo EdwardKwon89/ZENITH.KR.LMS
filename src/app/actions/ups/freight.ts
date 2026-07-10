@@ -83,25 +83,26 @@ export async function estimateUpsFreight(input: EstimateUpsFreightInput): Promis
   const { chargeableKg } = calcChargeableWeight(input.actualWeightKg, dims, input.volumetricDivisor);
   const { billingKg } = applyOversizeRule(resolveBillingWeight(chargeableKg, product.product_code), dims);
 
-  // 2. 20kg 이하일 때만 기준 요금 조회
+  // 2. 기준 요금 조회 (Express/Saver/Expedited) — ≤20kg 정확매치, >20kg는 20kg 기준요금
   let baseRate = null;
-  if (billingKg <= 20.0) {
+  if (productFamily !== 'FREIGHT') {
+    const queryWeight = billingKg <= 20.0 ? billingKg : 20;
     const { data: rRow, error: baseRateError } = await supabase
       .from('zen_ups_base_rates')
       .select('*')
       .eq('product_id', input.productId)
       .eq('zone_id', zone.id)
-      .eq('weight_kg', billingKg)
+      .eq('weight_kg', queryWeight)
       .eq('is_active', true)
       .lte('valid_from', refDate)
       .or(`valid_until.is.null,valid_until.gte.${refDate}`)
       .maybeSingle();
     if (baseRateError) throw new Error(`기준요금 조회 실패: ${baseRateError.message}`);
-    if (!rRow) throw new Error(`해당 조건(제품·Zone·중량 ${billingKg}kg)의 기준요금이 등록되어 있지 않습니다.`);
+    if (!rRow) throw new Error(`해당 조건(제품·Zone·중량 ${queryWeight}kg)의 기준요금이 등록되어 있지 않습니다.`);
     baseRate = rRow;
   }
 
-  // 3. 20kg 초과 per-kg 요율 구간 조회 (DWB 비교를 위해 20kg 이하일 때도 조회 가능하도록 함)
+  // 3. per-kg 요율 구간 조회 (Express/Saver/Expedited >20kg, Freight >70kg)
   const { data: weightTierRates, error: tierError } = await supabase
     .from('zen_ups_weight_tier_rates')
     .select('*')
