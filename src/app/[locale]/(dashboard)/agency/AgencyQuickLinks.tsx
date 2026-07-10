@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Users, Percent } from "lucide-react";
+import { Users, DollarSign } from "lucide-react";
 
 interface QuickLinksProps {
   locale: string;
@@ -30,20 +30,25 @@ export function AgencyQuickLinks({ locale, t }: QuickLinksProps) {
           </div>
           <span className="text-slate-400 group-hover:translate-x-1 transition-transform">→</span>
         </Link>
-        <div className="flex items-center justify-between p-4 rounded-xl border border-slate-100 bg-slate-50/30 opacity-70">
+        <Link
+          href={`/${locale}/agency/ups-rates`}
+          className="flex items-center justify-between p-4 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-green-50/30 hover:border-green-200 transition-all group"
+        >
           <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-slate-100 text-slate-500 rounded-lg">
-              <Percent size={20} />
+            <div className="p-2.5 bg-green-50 text-green-600 rounded-lg group-hover:bg-green-100 transition-colors">
+              <DollarSign size={20} />
             </div>
             <div>
-              <span className="font-bold text-slate-700 block">요율 오버라이드</span>
-              <span className="text-xs text-slate-400 mt-0.5 block">
-                화주별 개별 요율 오버라이드 설정 (준비 중)
+              <span className="font-bold text-slate-900 block group-hover:text-green-600 transition-colors">
+                UPS 요율 조회
+              </span>
+              <span className="text-xs text-slate-500 mt-0.5 block">
+                Zone별 기준요금·유류할증·부가요금 정보 및 대리점 원가 조회
               </span>
             </div>
           </div>
-          <span className="text-slate-300">→</span>
-        </div>
+          <span className="text-slate-400 group-hover:translate-x-1 transition-transform">→</span>
+        </Link>
       </div>
     </div>
   );
