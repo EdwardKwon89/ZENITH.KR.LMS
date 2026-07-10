@@ -98,7 +98,9 @@
     "agency_dashboard": "대리점 대시보드",
     "agency_registered_shippers": "등록 화주",
     "agency_quick_links": "빠른 이동",
-    "agency_settlements_nav": "정산 조회"
+    "agency_settlements_nav": "정산 조회",
+    "agency_ups_rates_nav": "UPS 요율 조회",
+    "ups_rates_inquiry": "UPS 운임 조회"
   },
   "VOC": {
     "title": "VOC 관리",
@@ -142,7 +144,6 @@
     "feature_ai": "AI 기반 경로 최적화",
     "feature_system": "글로벌 표준 정산 시스템",
     "login_email_placeholder": "example@company.com",
-    "login_button": "로그인",
     "login_button": "로그인",
     "signup_button": "신규 계정 생성",
     "find_id_link": "아이디 찾기",
@@ -345,7 +346,6 @@
     "status": "상태",
     "date": "등록일"
   },
-
   "Claims": {
     "title": "클레임 관리",
     "reason_label": "사유",
@@ -526,19 +526,58 @@
     "error_process": "탈퇴 처리 중 오류가 발생했습니다."
   },
   "orderStatus": {
-    "REGISTERED": { "label": "접수", "description": "오더가 신규 등록됨" },
-    "SCHEDULED": { "label": "스케줄배정", "description": "운송 수단 배정 완료" },
-    "WAREHOUSED": { "label": "입고완료", "description": "창고 실물 입고 확인" },
-    "PACKED": { "label": "패킹완료", "description": "출고용 패킹/래핑 완료" },
-    "RELEASED": { "label": "출고완료", "description": "창고 출고 및 운송장 부착" },
-    "IN_TRANSIT": { "label": "운송중", "description": "최종 목적지로 이동 중" },
-    "DELIVERED": { "label": "배송완료", "description": "수하인에게 인도 완료" },
-    "CLAIMED": { "label": "클레임접수", "description": "화주 클레임이 정식 접수됨" },
-    "HELD": { "label": "보류", "description": "문제 발생으로 인한 일시 중단" },
-    "CANCELED": { "label": "취소", "description": "오더 취소됨" },
-    "RETURNED": { "label": "반송", "description": "화주에게 화물 반송됨" },
-    "DISPOSED": { "label": "폐기", "description": "화물 폐기 처리됨" },
-    "MASTERED": { "label": "마스터결합", "description": "마스터 오더에 바인딩되어 수정이 제한됨" }
+    "REGISTERED": {
+      "label": "접수",
+      "description": "오더가 신규 등록됨"
+    },
+    "SCHEDULED": {
+      "label": "스케줄배정",
+      "description": "운송 수단 배정 완료"
+    },
+    "WAREHOUSED": {
+      "label": "입고완료",
+      "description": "창고 실물 입고 확인"
+    },
+    "PACKED": {
+      "label": "패킹완료",
+      "description": "출고용 패킹/래핑 완료"
+    },
+    "RELEASED": {
+      "label": "출고완료",
+      "description": "창고 출고 및 운송장 부착"
+    },
+    "IN_TRANSIT": {
+      "label": "운송중",
+      "description": "최종 목적지로 이동 중"
+    },
+    "DELIVERED": {
+      "label": "배송완료",
+      "description": "수하인에게 인도 완료"
+    },
+    "CLAIMED": {
+      "label": "클레임접수",
+      "description": "화주 클레임이 정식 접수됨"
+    },
+    "HELD": {
+      "label": "보류",
+      "description": "문제 발생으로 인한 일시 중단"
+    },
+    "CANCELED": {
+      "label": "취소",
+      "description": "오더 취소됨"
+    },
+    "RETURNED": {
+      "label": "반송",
+      "description": "화주에게 화물 반송됨"
+    },
+    "DISPOSED": {
+      "label": "폐기",
+      "description": "화물 폐기 처리됨"
+    },
+    "MASTERED": {
+      "label": "마스터결합",
+      "description": "마스터 오더에 바인딩되어 수정이 제한됨"
+    }
   },
   "Maintenance": {
     "title": "점검 중",

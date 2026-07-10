@@ -126,6 +126,7 @@ export default function NaviSidebar({
       icon: Package,
       children: [
         { title: t("ups_daily_close"), href: "/ups/daily-close" },
+        { title: t("ups_rates_inquiry"), href: "/ups-rates" },
       ]
     },
     {
@@ -163,6 +164,7 @@ export default function NaviSidebar({
         { title: t("agency_rate_overrides_nav"), href: "/agency/rate-overrides" },
         { title: t("agency_other_charges_nav"), href: "/agency/other-charges" },
         { title: t("agency_settlements_nav"), href: "/agency/settlements" },
+        { title: t("agency_ups_rates_nav"), href: "/agency/ups-rates" },
       ]
     },
     {

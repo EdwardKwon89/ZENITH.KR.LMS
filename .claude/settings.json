@@ -13,7 +13,9 @@
       "AskUserQuestion",
       "TodoWrite",
       "EnterPlanMode",
-      "ExitPlanMode"
+      "ExitPlanMode",
+      "Bash(docker exec supabase_db_ZENITH_LMS_001 psql -U postgres -d postgres -c ' *)",
+      "Bash(docker exec *)"
     ]
   },
   "hooks": {
