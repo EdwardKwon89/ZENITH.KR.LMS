@@ -74,8 +74,25 @@ export default function UpsRatesClient({ zones, products, baseRates, fuelSurchar
     setIsModalOpen(true);
   }, [baseRates]);
 
-  const openNew = () => { resetForm(); setIsModalOpen(true); };
-  const openEdit = (item: any) => { setForm({ ...item }); setEditingItem(item); setIsModalOpen(true); };
+  const openNew = () => {
+    resetForm();
+    if (activeTab === 'agencyPolicies') setForm({ is_active: true });
+    setIsModalOpen(true);
+  };
+  const openEdit = (item: any) => {
+    if (activeTab === 'agencyPolicies') {
+      const zoneRates: Record<string, number> = {};
+      (agencyPolicies as any[])
+        .filter((p: any) => p.agency_org_id === item.agency_org_id)
+        .forEach((p: any) => { zoneRates[p.zone_id] = Number(p.discount_rate); });
+      setForm({ agency_org_id: item.agency_org_id, zone_rates: zoneRates, is_active: item.is_active });
+      setEditingItem({ ...item, _agencyPolicies: true });
+    } else {
+      setForm({ ...item });
+      setEditingItem(item);
+    }
+    setIsModalOpen(true);
+  };
 
   const handleSubmit = async () => {
     setLoading(true);
@@ -86,7 +103,6 @@ export default function UpsRatesClient({ zones, products, baseRates, fuelSurchar
         baseRates: upsertUpsBaseRate,
         fuelSurcharges: upsertUpsFuelSurcharge,
         otherCharges: createUpsOtherCharge,
-        agencyPolicies: upsertAgencyPricingPolicy,
         weightTierRates: upsertUpsWeightTierRate,
         freightMinimums: upsertUpsFreightMinimum,
       };
@@ -97,12 +113,16 @@ export default function UpsRatesClient({ zones, products, baseRates, fuelSurchar
         weightTierRates: (id: string, data: any) => upsertUpsWeightTierRate({ ...data, id }),
         freightMinimums: (id: string, data: any) => upsertUpsFreightMinimum({ ...data, id }),
       };
-      if (editingItem && update[activeTab]) {
-        const { error } = await update[activeTab](editingItem.id, form);
-        if (error) throw new Error(error);
+      if (activeTab === 'agencyPolicies') {
+        const { agency_org_id, zone_rates, is_active } = form;
+        if (!agency_org_id) throw new Error('대리점을 선택해주세요.');
+        for (const zoneId of Object.keys(zone_rates ?? {})) {
+          await upsertAgencyPricingPolicy({ agency_org_id, zone_id: zoneId, discount_rate: zone_rates[zoneId] ?? 0, is_active });
+        }
+      } else if (editingItem && update[activeTab]) {
+        await update[activeTab](editingItem.id, form);
       } else if (submit[activeTab]) {
-        const { error } = await submit[activeTab](form);
-        if (error) throw new Error(error);
+        await submit[activeTab](form);
       }
       window.location.reload();
     } catch (e) {
@@ -139,7 +159,7 @@ export default function UpsRatesClient({ zones, products, baseRates, fuelSurchar
       case 'baseRates': return <BaseRateForm form={form} setForm={setForm} products={products} zones={zones} />;
       case 'fuelSurcharges': return <FuelSurchargeForm form={form} setForm={setForm} products={products} />;
       case 'otherCharges': return <OtherChargeForm form={form} setForm={setForm} editingItem={editingItem} />;
-      case 'agencyPolicies': return <AgencyPolicyForm form={form} setForm={setForm} agencies={agencies} />;
+      case 'agencyPolicies': return <AgencyPolicyForm form={form} setForm={setForm} agencies={agencies} zones={zones} />;
       case 'weightTierRates': return <WeightTierRateForm form={form} setForm={setForm} products={products} zones={zones} />;
       case 'freightMinimums': return <FreightMinimumForm form={form} setForm={setForm} products={products} zones={zones} />;
       default: return null;
@@ -391,9 +411,9 @@ function OtherChargeForm({ form, setForm, editingItem }: any) {
   );
 }
 
-// ─── Agency Policy ───────────────────────────────────────────
+// ─── Agency Policy (Zone Matrix) ────────────────────────────
 
-function AgencyPolicyForm({ form, setForm, agencies }: any) {
+function AgencyPolicyForm({ form, setForm, agencies, zones }: any) {
   return (
     <>
       <div className="space-y-1">
@@ -404,7 +424,25 @@ function AgencyPolicyForm({ form, setForm, agencies }: any) {
           {(agencies as Agency[]).map((a: any) => <option key={a.id} value={a.id}>{a.name}</option>)}
         </select>
       </div>
-      <Field label="할인율 (%)" type="number" step="0.01" value={form.discount_rate != null ? Number(form.discount_rate) * 100 : ''} onChange={(v: any) => setForm({ ...form, discount_rate: v ? Number(v) / 100 : 0 })} />
+      <div className="space-y-3">
+        <label className="text-xs font-bold text-slate-500 uppercase">Zone별 할인율 (%)</label>
+        <div className="grid grid-cols-2 gap-2">
+          {(zones as UpsZoneWithCountries[]).filter((z: any) => z.is_active).sort((a: any, b: any) => a.sort_order - b.sort_order).map((zone: any) => (
+            <div key={zone.id} className="flex items-center gap-2">
+              <span className="w-10 text-xs font-mono font-bold text-slate-600 shrink-0">{zone.zone_code}</span>
+              <input type="number" step="0.01" min="0" max="99.99"
+                value={form.zone_rates?.[zone.id] != null ? Number(form.zone_rates[zone.id]) * 100 : ''}
+                onChange={(e) => setForm({
+                  ...form,
+                  zone_rates: { ...(form.zone_rates ?? {}), [zone.id]: e.target.value ? Number(e.target.value) / 100 : 0 }
+                })}
+                className="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-mono text-right"
+                placeholder="0.00" />
+              <span className="text-xs text-slate-400">%</span>
+            </div>
+          ))}
+        </div>
+      </div>
       <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.is_active ?? true} onChange={e => setForm({ ...form, is_active: e.target.checked })} /> 활성</label>
     </>
   );
@@ -463,8 +501,9 @@ function OtherChargeTable({ otherCharges, canEdit, onEdit, onDelete }: any) {
 
 function AgencyPolicyTable({ policies, canEdit, onEdit, agencies }: any) {
   const orgMap = Object.fromEntries((agencies as Agency[]).map((a: any) => [a.id, a.name]));
-  const columns: ColumnDef<AgencyPolicy>[] = [
+  const columns: ColumnDef<any>[] = [
     { id: 'agency', header: '대리점', cell: ({ row }) => <span className="font-medium">{row.original.agency?.name ?? orgMap[row.original.agency_org_id] ?? row.original.agency_org_id}</span> },
+    { id: 'zone', header: 'Zone', cell: ({ row }) => <ZenBadge variant="default" className="font-mono">{row.original.zone?.zone_code ?? '-'}</ZenBadge> },
     { accessorKey: 'discount_rate', header: '할인율', cell: ({ row }) => <span className="font-mono font-semibold text-brand-700">{(Number(row.original.discount_rate) * 100).toFixed(2)}%</span> },
     { id: 'status', header: '상태', cell: ({ row }) => <ZenBadge variant={row.original.is_active ? 'success' : 'default'}>{row.original.is_active ? '활성' : '비활성'}</ZenBadge> },
     ...(canEdit ? [{ id: 'actions' as const, header: '관리', cell: ({ row }: any) => <ActionsCell row={row} onEdit={onEdit} onDelete={() => {}} /> }] : []),

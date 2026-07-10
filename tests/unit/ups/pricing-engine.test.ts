@@ -166,29 +166,23 @@ describe('TC-UPS-EXPEDITED-ROUND: 상품별 중량 반올림 (DEF-095)', () => {
   });
 });
 
-describe('TC-UPS-ENGINE-04: Agency 단계 계산 (An-14 R3~R5)', () => {
-  it('override가 있으면 override 값을 그대로 사용한다(source=override)', () => {
+describe('TC-UPS-ENGINE-04: Agency 단계 계산 (An-14 R3~R5, Issue #310)', () => {
+  it('할인율을 platformSellingTotal에 적용해 Agency 가격을 산출한다', () => {
     const result = computeAgencyFreight({
       platformSellingTotal: 100000,
       discountRate: 0.1,
-      overrideSellingPrice: 95000,
-      overrideCostPrice: 90000,
       agencyOtherCharges: [{ sellingPrice: 3000, costPrice: 2000 }],
     });
-    expect(result.source).toBe('override');
     expect(result.agencyCostPrice).toBe(92000);
-    expect(result.agencySellingPrice).toBe(98000);
+    expect(result.agencySellingPrice).toBe(93000);
   });
 
-  it('override가 없으면 discount_rate로 폴백 계산한다(source=platform_fallback)', () => {
+  it('할인율 20%, 기타요금 없음', () => {
     const result = computeAgencyFreight({
       platformSellingTotal: 100000,
       discountRate: 0.2,
-      overrideSellingPrice: null,
-      overrideCostPrice: null,
       agencyOtherCharges: [],
     });
-    expect(result.source).toBe('platform_fallback');
     expect(result.agencyCostPrice).toBe(80000);
   });
 });

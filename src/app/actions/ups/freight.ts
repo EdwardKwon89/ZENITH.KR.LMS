@@ -175,21 +175,10 @@ export async function estimateUpsFreight(input: EstimateUpsFreightInput): Promis
     .from('zen_agency_pricing_policies')
     .select('discount_rate')
     .eq('agency_org_id', input.agencyOrgId)
+    .eq('zone_id', zone.id)
     .eq('is_active', true)
     .maybeSingle();
   const discountRate = Number(policy?.discount_rate ?? 0);
-
-  const { data: override } = await supabase
-    .from('zen_agency_rate_overrides')
-    .select('selling_price, cost_price')
-    .eq('agency_org_id', input.agencyOrgId)
-    .eq('base_rate_id', baseRate.id)
-    .eq('is_active', true)
-    .lte('valid_from', refDate)
-    .or(`valid_until.is.null,valid_until.gte.${refDate}`)
-    .order('valid_from', { ascending: false })
-    .limit(1)
-    .maybeSingle();
 
   const { data: agencyCharges } = await supabase
     .from('zen_agency_other_charges')
@@ -201,8 +190,6 @@ export async function estimateUpsFreight(input: EstimateUpsFreightInput): Promis
   const agency = computeAgencyFreight({
     platformSellingTotal: platform.totalSellingPrice,
     discountRate,
-    overrideSellingPrice: override ? Number(override.selling_price) : null,
-    overrideCostPrice: override ? Number(override.cost_price) : null,
     agencyOtherCharges: (agencyCharges ?? []).map((c) => ({
       sellingPrice: Number(c.selling_price),
       costPrice: Number(c.cost_price),
@@ -213,15 +200,16 @@ export async function estimateUpsFreight(input: EstimateUpsFreightInput): Promis
     return { platform, agency, shipper: null };
   }
 
-  const { data: shipperLink } = await supabase
-    .from('zen_agency_shippers')
+  const { data: shipperZoneDiscount } = await supabase
+    .from('zen_agency_shipper_zone_discounts')
     .select('discount_rate')
     .eq('agency_org_id', input.agencyOrgId)
     .eq('shipper_org_id', input.shipperOrgId)
+    .eq('zone_id', zone.id)
     .eq('is_active', true)
     .maybeSingle();
-  const shipperDiscountRate = Number(shipperLink?.discount_rate ?? 0);
-  const shipper = computeShipperFreight(agency.agencySellingPrice, shipperDiscountRate);
+  const shipperDiscountRate = Number(shipperZoneDiscount?.discount_rate ?? 0);
+  const shipper = computeShipperFreight(platform.totalSellingPrice, shipperDiscountRate);
 
   return { platform, agency, shipper };
 }

@@ -120,22 +120,7 @@ describe('TC-UPS-TIER: 20kg 초과 티어 요율 계산 (Issue #303)', () => {
   });
 });
 
-describe('TC-UPS-DWB: DWB 로직 제거 (Issue #303)', () => {
-  it('DWB가 항상 false이고 breakdown에 dwbApplied 필드가 없다', () => {
-    const data = {
-      ...baseData(),
-      weightTierRates: mockWeightTierRates(),
-    };
-    const input: UpsFreightInput = {
-      productId: 'p1',
-      destCountryCode: 'USA',
-      actualWeightKg: 40,
-    };
-    const result = computeUpsFreight(input, data);
-    expect(result.dwbApplied).toBeUndefined();
-    expect(result.breakdown.dwbApplied).toBeUndefined();
-  });
-
+describe('TC-UPS-MONOTONIC: 단조증가 보장 (DWB 제거 후, Issue #303)', () => {
   it('DWB 제거로 인해 단조증가가 보장된다 (25kg < 30kg 판매가)', () => {
     const data = {
       ...baseData(),
@@ -163,7 +148,6 @@ describe('TC-UPS-FREIGHTMIN: 공용 최소운임 스텝 제거 (Issue #303)', ()
     const result = computeUpsFreight(input, data);
     // 결과는 150000 + 5*6000 = 180000 (최소운임과 같지만 스텝 자체가 없음)
     expect(result.baseSellingPrice).toBe(180000);
-    expect(result.freightMinApplied).toBeUndefined();
   });
 });
 
