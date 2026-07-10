@@ -1,10 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { DollarSign, Fuel, FileText, Layers, Scale, Search } from 'lucide-react';
+import { DollarSign, Fuel, FileText, Layers, Scale } from 'lucide-react';
 import { ZenBadge } from '@/components/ui/ZenUI';
 import ZenDataGrid from '@/components/ui/ZenDataGrid';
-import type { UpsZoneWithCountries, UpsProduct, UpsBaseRateWithRefs, UpsOtherCharge, UpsWeightTierRateWithRefs, UpsFreightMinimumWithRefs } from '@/types/ups';
+import type { UpsZoneWithCountries, UpsProduct } from '@/types/ups';
+import type { PublicBaseRate, PublicFuelSurcharge, PublicOtherCharge, PublicWeightTierRate, PublicFreightMinimum } from '@/app/actions/ups/rates-public';
 import type { ColumnDef } from '@tanstack/react-table';
 
 interface PricingPolicy {
@@ -13,15 +14,6 @@ interface PricingPolicy {
   zone_id: string;
   discount_rate: number;
   is_active: boolean;
-}
-
-interface FuelSurchargeRow {
-  id: string;
-  product_id: string | null;
-  effective_week: string;
-  selling_rate: number;
-  cost_rate: number;
-  product: { product_code: string; product_name: string } | null;
 }
 
 type TabKey = 'baseRates' | 'fuelSurcharges' | 'otherCharges' | 'weightTierRates' | 'freightMinimums';
@@ -37,18 +29,17 @@ const TABS: { key: TabKey; label: string; icon: React.ElementType }[] = [
 interface Props {
   zones: UpsZoneWithCountries[];
   products: UpsProduct[];
-  baseRates: UpsBaseRateWithRefs[];
-  fuelSurcharges: FuelSurchargeRow[];
-  otherCharges: UpsOtherCharge[];
-  weightTierRates: UpsWeightTierRateWithRefs[];
-  freightMinimums: UpsFreightMinimumWithRefs[];
+  baseRates: PublicBaseRate[];
+  fuelSurcharges: PublicFuelSurcharge[];
+  otherCharges: PublicOtherCharge[];
+  weightTierRates: PublicWeightTierRate[];
+  freightMinimums: PublicFreightMinimum[];
   pricingPolicies: PricingPolicy[];
-  agencyOrgId: string;
 }
 
 export function AgencyUpsRatesClient({
   zones, products, baseRates, fuelSurcharges, otherCharges,
-  weightTierRates, freightMinimums, pricingPolicies, agencyOrgId,
+  weightTierRates, freightMinimums, pricingPolicies,
 }: Props) {
   const [activeTab, setActiveTab] = useState<TabKey>('baseRates');
 
@@ -98,8 +89,8 @@ export function AgencyUpsRatesClient({
   );
 }
 
-function BaseRateTable({ baseRates, calcAgencyCost }: { baseRates: UpsBaseRateWithRefs[]; calcAgencyCost: (price: number, zoneId: string) => number }) {
-  const columns: ColumnDef<UpsBaseRateWithRefs>[] = [
+function BaseRateTable({ baseRates, calcAgencyCost }: { baseRates: PublicBaseRate[]; calcAgencyCost: (price: number, zoneId: string) => number }) {
+  const columns: ColumnDef<PublicBaseRate>[] = [
     { id: 'product', header: '제품', cell: ({ row }) => <span className="text-sm font-medium">{row.original.product?.product_code}</span> },
     { id: 'zone', header: 'Zone', cell: ({ row }) => <ZenBadge variant="default" className="font-mono">{row.original.zone?.zone_code}</ZenBadge> },
     { accessorKey: 'weight_kg', header: '중량 (kg)', cell: ({ row }) => <span className="font-mono text-sm">{row.original.weight_kg}kg</span> },
@@ -113,30 +104,28 @@ function BaseRateTable({ baseRates, calcAgencyCost }: { baseRates: UpsBaseRateWi
   return <ZenDataGrid columns={columns} data={baseRates} />;
 }
 
-function FuelSurchargeTable({ rows }: { rows: FuelSurchargeRow[] }) {
-  const columns: ColumnDef<FuelSurchargeRow>[] = [
+function FuelSurchargeTable({ rows }: { rows: PublicFuelSurcharge[] }) {
+  const columns: ColumnDef<PublicFuelSurcharge>[] = [
     { id: 'product', header: '제품', cell: ({ row }) => <span className="text-sm">{row.original.product?.product_code ?? '전체'}</span> },
     { accessorKey: 'effective_week', header: '적용 주차', cell: ({ row }) => <span className="font-mono text-sm">{row.original.effective_week}</span> },
-    { accessorKey: 'selling_rate', header: '판매 할증률', cell: ({ row }) => <span className="font-mono text-sm">{(Number(row.original.selling_rate) * 100).toFixed(1)}%</span> },
-    { accessorKey: 'cost_rate', header: '원가 할증률', cell: ({ row }) => <span className="font-mono text-sm text-slate-500">{(Number(row.original.cost_rate) * 100).toFixed(1)}%</span> },
+    { accessorKey: 'selling_rate', header: '할증률', cell: ({ row }) => <span className="font-mono text-sm">{(Number(row.original.selling_rate) * 100).toFixed(1)}%</span> },
   ];
   return <ZenDataGrid columns={columns} data={rows} />;
 }
 
-function OtherChargeTable({ otherCharges }: { otherCharges: UpsOtherCharge[] }) {
-  const columns: ColumnDef<UpsOtherCharge>[] = [
+function OtherChargeTable({ otherCharges }: { otherCharges: PublicOtherCharge[] }) {
+  const columns: ColumnDef<PublicOtherCharge>[] = [
     { accessorKey: 'charge_code', header: '코드', cell: ({ row }) => <ZenBadge variant="default" className="font-mono">{row.original.charge_code}</ZenBadge> },
     { accessorKey: 'charge_name', header: '명칭' },
     { accessorKey: 'unit', header: '단위', cell: ({ row }) => <span className="text-xs font-mono">{row.original.unit}</span> },
     { accessorKey: 'selling_price', header: '플랫폼 판매가', cell: ({ row }) => <span className="font-mono text-sm">{row.original.selling_price?.toLocaleString() ?? '-'}원</span> },
-    { accessorKey: 'cost_price', header: '플랫폼 원가', cell: ({ row }) => <span className="font-mono text-sm text-slate-500">{row.original.cost_price?.toLocaleString() ?? '-'}원</span> },
     { id: 'fuel', header: '유류할증', cell: ({ row }) => <ZenBadge variant={row.original.fuel_surcharge_applicable ? 'success' : 'default'}>{row.original.fuel_surcharge_applicable ? '적용' : '미적용'}</ZenBadge> },
   ];
   return <ZenDataGrid columns={columns} data={otherCharges} />;
 }
 
-function WeightTierRateTable({ weightTierRates, calcAgencyCost }: { weightTierRates: UpsWeightTierRateWithRefs[]; calcAgencyCost: (price: number, zoneId: string) => number }) {
-  const columns: ColumnDef<UpsWeightTierRateWithRefs>[] = [
+function WeightTierRateTable({ weightTierRates, calcAgencyCost }: { weightTierRates: PublicWeightTierRate[]; calcAgencyCost: (price: number, zoneId: string) => number }) {
+  const columns: ColumnDef<PublicWeightTierRate>[] = [
     { id: 'product', header: '제품', cell: ({ row }) => <span className="text-sm font-medium">{row.original.product?.product_code}</span> },
     { id: 'zone', header: 'Zone', cell: ({ row }) => <ZenBadge variant="default" className="font-mono">{row.original.zone?.zone_code}</ZenBadge> },
     { id: 'tier', header: '중량 구간', cell: ({ row }) => <span className="font-mono text-sm">{row.original.tier_min_kg}kg ~ {row.original.tier_max_kg != null ? `${row.original.tier_max_kg}kg` : '∞'}</span> },
@@ -149,8 +138,8 @@ function WeightTierRateTable({ weightTierRates, calcAgencyCost }: { weightTierRa
   return <ZenDataGrid columns={columns} data={weightTierRates} />;
 }
 
-function FreightMinimumTable({ freightMinimums, calcAgencyCost }: { freightMinimums: UpsFreightMinimumWithRefs[]; calcAgencyCost: (price: number, zoneId: string) => number }) {
-  const columns: ColumnDef<UpsFreightMinimumWithRefs>[] = [
+function FreightMinimumTable({ freightMinimums, calcAgencyCost }: { freightMinimums: PublicFreightMinimum[]; calcAgencyCost: (price: number, zoneId: string) => number }) {
+  const columns: ColumnDef<PublicFreightMinimum>[] = [
     { id: 'product', header: '제품', cell: ({ row }) => <span className="text-sm font-medium">{row.original.product?.product_code}</span> },
     { id: 'zone', header: 'Zone', cell: ({ row }) => <ZenBadge variant="default" className="font-mono">{row.original.zone?.zone_code}</ZenBadge> },
     { accessorKey: 'min_charge_selling', header: '플랫폼 최소 판매가', cell: ({ row }) => <span className="font-mono text-sm">{row.original.min_charge_selling.toLocaleString()}원</span> },

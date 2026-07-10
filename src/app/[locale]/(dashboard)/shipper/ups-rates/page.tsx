@@ -2,7 +2,8 @@ import { requireAuth, checkPermission } from '@/lib/auth/guards';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/utils/supabase/server';
 import { getAgencyOrgIdByShipper } from '@/app/actions/agency/shipper-link';
-import { getUpsZones, getUpsProducts, getUpsBaseRates, getUpsOtherCharges, getUpsWeightTierRates, getUpsFreightMinimums } from '@/app/actions/ups/rates';
+import { getUpsZones, getUpsProducts } from '@/app/actions/ups/rates';
+import { getPublicBaseRates, getPublicFuelSurcharges, getPublicOtherCharges, getPublicWeightTierRates, getPublicFreightMinimums } from '@/app/actions/ups/rates-public';
 import { ShipperUpsRatesClient } from './shipper-ups-rates-client';
 
 export default async function ShipperUpsRatesPage() {
@@ -12,19 +13,15 @@ export default async function ShipperUpsRatesPage() {
 
   const agencyOrgId = await getAgencyOrgIdByShipper(profile.org_id);
 
-  const [zones, products, baseRates, otherCharges, weightTierRates, freightMinimums] = await Promise.all([
+  const [zones, products, baseRates, fuelSurcharges, otherCharges, weightTierRates, freightMinimums] = await Promise.all([
     getUpsZones(),
     getUpsProducts(),
-    getUpsBaseRates(),
-    getUpsOtherCharges(),
-    getUpsWeightTierRates(),
-    getUpsFreightMinimums(),
+    getPublicBaseRates(),
+    getPublicFuelSurcharges(),
+    getPublicOtherCharges(),
+    getPublicWeightTierRates(),
+    getPublicFreightMinimums(),
   ]);
-
-  const fuelSurchargesResult = await supabase
-    .from('zen_ups_fuel_surcharges')
-    .select('*, product:product_id(product_code, product_name)')
-    .order('effective_week', { ascending: false });
 
   let globalDiscountRate = 0;
   const zoneDiscountMap: Record<string, number> = {};
@@ -57,7 +54,7 @@ export default async function ShipperUpsRatesPage() {
         zones={zones}
         products={products}
         baseRates={baseRates}
-        fuelSurcharges={fuelSurchargesResult.data ?? []}
+        fuelSurcharges={fuelSurcharges}
         otherCharges={otherCharges}
         weightTierRates={weightTierRates}
         freightMinimums={freightMinimums}
