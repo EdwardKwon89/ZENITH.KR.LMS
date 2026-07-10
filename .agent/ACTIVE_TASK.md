@@ -15,6 +15,7 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
+| [#312](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/312) | [feat] UPS 부피중량 나누기값(Volumetric Divisor) Agency별 적용 — 기존 컬럼 미연동 상태 | b | p2 | open | jungjs | 2026-07-10 |
 | [#310](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/310) | [feat] UPS Agency 할인율 — Zone 단위 부여로 전환 (현재 Agency 단일값) | b | p2 | open | jungjs | 2026-07-10 |
 | [#305](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/305) | [feat] Agency 원가 조회 + 화주 UPS 운임조회 기능 — An-14 §11-5 인계분 구현 | b | p2 | open | jungjs | 2026-07-10 |
 | [#300](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/300) | [feat] 오더 등록 폼 — UNIT/CONTENT 필드 통합 + UPS 견적 섹션 패키지 영역 이동 | b | p2 | open | jungjs | 2026-07-09 |
