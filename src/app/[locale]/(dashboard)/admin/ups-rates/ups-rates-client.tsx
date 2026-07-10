@@ -15,6 +15,7 @@ import {
   upsertUpsFuelSurcharge,
   createUpsOtherCharge, updateUpsOtherCharge, deleteUpsOtherCharge,
   upsertAgencyPricingPolicy,
+  updateAgencyVolumetricDivisor,
   upsertUpsWeightTierRate, deleteUpsWeightTierRate,
   upsertUpsFreightMinimum, deleteUpsFreightMinimum,
 } from '@/app/actions/ups/rates-mutation';
@@ -22,7 +23,7 @@ import type { ColumnDef } from '@tanstack/react-table';
 import UpsBaseRateMatrix from '@/components/ups/UpsBaseRateMatrix';
 
 interface AgencyPolicy { id: string; agency_org_id: string; discount_rate: string; is_active: boolean; agency: { name: string } | null; }
-interface Agency { id: string; name: string; }
+interface Agency { id: string; name: string; volumetric_divisor?: number | null; }
 interface FuelSurchargeRow extends UpsFuelSurcharge { product: { product_code: string; product_name: string } | null; }
 
 interface Props {
@@ -76,7 +77,7 @@ export default function UpsRatesClient({ zones, products, baseRates, fuelSurchar
 
   const openNew = () => {
     resetForm();
-    if (activeTab === 'agencyPolicies') setForm({ is_active: true });
+    if (activeTab === 'agencyPolicies') setForm({ is_active: true, volumetric_divisor: 5000 });
     setIsModalOpen(true);
   };
   const openEdit = (item: any) => {
@@ -85,7 +86,8 @@ export default function UpsRatesClient({ zones, products, baseRates, fuelSurchar
       (agencyPolicies as any[])
         .filter((p: any) => p.agency_org_id === item.agency_org_id)
         .forEach((p: any) => { zoneRates[p.zone_id] = Number(p.discount_rate); });
-      setForm({ agency_org_id: item.agency_org_id, zone_rates: zoneRates, is_active: item.is_active });
+      const org = (agencies as Agency[]).find((a) => a.id === item.agency_org_id);
+      setForm({ agency_org_id: item.agency_org_id, zone_rates: zoneRates, is_active: item.is_active, volumetric_divisor: org?.volumetric_divisor ?? 5000 });
       setEditingItem({ ...item, _agencyPolicies: true });
     } else {
       setForm({ ...item });
@@ -114,10 +116,13 @@ export default function UpsRatesClient({ zones, products, baseRates, fuelSurchar
         freightMinimums: (id: string, data: any) => upsertUpsFreightMinimum({ ...data, id }),
       };
       if (activeTab === 'agencyPolicies') {
-        const { agency_org_id, zone_rates, is_active } = form;
+        const { agency_org_id, zone_rates, is_active, volumetric_divisor } = form;
         if (!agency_org_id) throw new Error('대리점을 선택해주세요.');
         for (const zoneId of Object.keys(zone_rates ?? {})) {
           await upsertAgencyPricingPolicy({ agency_org_id, zone_id: zoneId, discount_rate: zone_rates[zoneId] ?? 0, is_active });
+        }
+        if (volumetric_divisor) {
+          await updateAgencyVolumetricDivisor(agency_org_id, volumetric_divisor);
         }
       } else if (editingItem && update[activeTab]) {
         await update[activeTab](editingItem.id, form);
@@ -422,6 +427,15 @@ function AgencyPolicyForm({ form, setForm, agencies, zones }: any) {
           className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm">
           <option value="">선택</option>
           {(agencies as Agency[]).map((a: any) => <option key={a.id} value={a.id}>{a.name}</option>)}
+        </select>
+      </div>
+      <div className="space-y-1">
+        <label className="text-xs font-bold text-slate-500 uppercase">Volumetric Divisor</label>
+        <select value={form.volumetric_divisor ?? 5000} onChange={e => setForm({ ...form, volumetric_divisor: Number(e.target.value) as 5000 | 5500 | 6000 })}
+          className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm">
+          <option value={5000}>5000 (Standard)</option>
+          <option value={5500}>5500</option>
+          <option value={6000}>6000</option>
         </select>
       </div>
       <div className="space-y-3">
