@@ -161,7 +161,7 @@ describe('TC-P7-ORDER-SNAPSHOT-03: saveOrderRateSnapshot — DB 조회 + estimat
     expect(estimateUpsFreight).toHaveBeenCalledWith({
       productId: mockProduct.id,
       destCountryCode: mockPort.country_code,
-      actualWeightKg: 10,
+      actualWeightKg: 5,
       dimL: undefined,
       dimW: undefined,
       dimH: undefined,
