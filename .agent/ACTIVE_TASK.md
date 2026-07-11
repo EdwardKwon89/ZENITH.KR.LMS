@@ -15,7 +15,7 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
-| [#321](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/321) | [fix] 화주 UPS 운임조회 — 최종가 옆 할인율(%) 배지 노출 제거 | b | p3 | - | 미배정 | 2026-07-11 |
+| [#321](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/321) | [fix] 화주 UPS 운임조회 — 최종가 옆 할인율(%) 배지 노출 제거 | b | p1 | - | 미배정 | 2026-07-11 |
 | [#312](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/312) | [feat] UPS 부피중량 나누기값(Volumetric Divisor) Agency별 적용 — 기존 컬럼 미연동 상태 | b | p2 | open | jungjs | 2026-07-11 |
 | [#310](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/310) | [feat] UPS Agency 할인율 — Zone 단위 부여로 전환 (현재 Agency 단일값) | b | p2 | open | jungjs | 2026-07-10 |
 | [#305](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/305) | [feat] Agency 원가 조회 + 화주 UPS 운임조회 기능 — An-14 §11-5 인계분 구현 | b | p2 | open | jungjs | 2026-07-10 |
