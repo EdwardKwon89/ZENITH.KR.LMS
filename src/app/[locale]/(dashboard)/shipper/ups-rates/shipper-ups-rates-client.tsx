@@ -44,24 +44,18 @@ export function ShipperUpsRatesClient({
     return Math.round(price * (1 - rate));
   };
 
-  const formatDiscount = (zoneId: string): string => {
-    const rate = getDiscountRate(zoneId);
-    if (rate <= 0) return '';
-    return `(${(rate * 100).toFixed(1)}% 할인)`;
-  };
-
   const renderTable = () => {
     switch (activeTab) {
       case 'baseRates':
-        return <BaseRateTable baseRates={baseRates} calcShipperPrice={calcShipperPrice} formatDiscount={formatDiscount} />;
+        return <BaseRateTable baseRates={baseRates} calcShipperPrice={calcShipperPrice} />;
       case 'fuelSurcharges':
         return <FuelSurchargeTable rows={fuelSurcharges} />;
       case 'otherCharges':
         return <OtherChargeTable otherCharges={otherCharges} />;
       case 'weightTierRates':
-        return <WeightTierRateTable weightTierRates={weightTierRates} calcShipperPrice={calcShipperPrice} formatDiscount={formatDiscount} />;
+        return <WeightTierRateTable weightTierRates={weightTierRates} calcShipperPrice={calcShipperPrice} />;
       case 'freightMinimums':
-        return <FreightMinimumTable freightMinimums={freightMinimums} calcShipperPrice={calcShipperPrice} formatDiscount={formatDiscount} />;
+        return <FreightMinimumTable freightMinimums={freightMinimums} calcShipperPrice={calcShipperPrice} />;
       default:
         return null;
     }
@@ -86,15 +80,14 @@ export function ShipperUpsRatesClient({
   );
 }
 
-function BaseRateTable({ baseRates, calcShipperPrice, formatDiscount }: { baseRates: PublicBaseRate[]; calcShipperPrice: (price: number, zoneId: string) => number; formatDiscount: (zoneId: string) => string }) {
+function BaseRateTable({ baseRates, calcShipperPrice }: { baseRates: PublicBaseRate[]; calcShipperPrice: (price: number, zoneId: string) => number }) {
   const columns: ColumnDef<PublicBaseRate>[] = [
     { id: 'product', header: '제품', cell: ({ row }) => <span className="text-sm font-medium">{row.original.product?.product_code}</span> },
     { id: 'zone', header: 'Zone', cell: ({ row }) => <ZenBadge variant="default" className="font-mono">{row.original.zone?.zone_code}</ZenBadge> },
     { accessorKey: 'weight_kg', header: '중량 (kg)', cell: ({ row }) => <span className="font-mono text-sm">{row.original.weight_kg}kg</span> },
     { id: 'shipper_price', header: '적용 운임', cell: ({ row }) => {
       const price = calcShipperPrice(row.original.selling_price, row.original.zone_id);
-      const discount = formatDiscount(row.original.zone_id);
-      return <span className="font-mono text-sm font-semibold text-brand-700">{price.toLocaleString()}원 {discount && <span className="text-xs text-green-600 font-normal">{discount}</span>}</span>;
+      return <span className="font-mono text-sm font-semibold text-brand-700">{price.toLocaleString()}원</span>;
     }},
     { id: 'validity', header: '유효기간', cell: ({ row }) => <span className="text-xs font-mono text-slate-400">{row.original.valid_from}~{row.original.valid_until ?? '무기한'}</span> },
   ];
@@ -121,28 +114,26 @@ function OtherChargeTable({ otherCharges }: { otherCharges: PublicOtherCharge[] 
   return <ZenDataGrid columns={columns} data={otherCharges} />;
 }
 
-function WeightTierRateTable({ weightTierRates, calcShipperPrice, formatDiscount }: { weightTierRates: PublicWeightTierRate[]; calcShipperPrice: (price: number, zoneId: string) => number; formatDiscount: (zoneId: string) => string }) {
+function WeightTierRateTable({ weightTierRates, calcShipperPrice }: { weightTierRates: PublicWeightTierRate[]; calcShipperPrice: (price: number, zoneId: string) => number }) {
   const columns: ColumnDef<PublicWeightTierRate>[] = [
     { id: 'product', header: '제품', cell: ({ row }) => <span className="text-sm font-medium">{row.original.product?.product_code}</span> },
     { id: 'zone', header: 'Zone', cell: ({ row }) => <ZenBadge variant="default" className="font-mono">{row.original.zone?.zone_code}</ZenBadge> },
     { id: 'tier', header: '중량 구간', cell: ({ row }) => <span className="font-mono text-sm">{row.original.tier_min_kg}kg ~ {row.original.tier_max_kg != null ? `${row.original.tier_max_kg}kg` : '∞'}</span> },
     { id: 'shipper_price', header: '적용 운임/kg', cell: ({ row }) => {
       const price = calcShipperPrice(row.original.price_per_kg_selling, row.original.zone_id);
-      const discount = formatDiscount(row.original.zone_id);
-      return <span className="font-mono text-sm font-semibold text-brand-700">{price.toLocaleString()}원 {discount && <span className="text-xs text-green-600 font-normal">{discount}</span>}</span>;
+      return <span className="font-mono text-sm font-semibold text-brand-700">{price.toLocaleString()}원</span>;
     }},
   ];
   return <ZenDataGrid columns={columns} data={weightTierRates} />;
 }
 
-function FreightMinimumTable({ freightMinimums, calcShipperPrice, formatDiscount }: { freightMinimums: PublicFreightMinimum[]; calcShipperPrice: (price: number, zoneId: string) => number; formatDiscount: (zoneId: string) => string }) {
+function FreightMinimumTable({ freightMinimums, calcShipperPrice }: { freightMinimums: PublicFreightMinimum[]; calcShipperPrice: (price: number, zoneId: string) => number }) {
   const columns: ColumnDef<PublicFreightMinimum>[] = [
     { id: 'product', header: '제품', cell: ({ row }) => <span className="text-sm font-medium">{row.original.product?.product_code}</span> },
     { id: 'zone', header: 'Zone', cell: ({ row }) => <ZenBadge variant="default" className="font-mono">{row.original.zone?.zone_code}</ZenBadge> },
     { id: 'shipper_price', header: '적용 최소운임', cell: ({ row }) => {
       const price = calcShipperPrice(row.original.min_charge_selling, row.original.zone_id);
-      const discount = formatDiscount(row.original.zone_id);
-      return <span className="font-mono text-sm font-semibold text-brand-700">{price.toLocaleString()}원 {discount && <span className="text-xs text-green-600 font-normal">{discount}</span>}</span>;
+      return <span className="font-mono text-sm font-semibold text-brand-700">{price.toLocaleString()}원</span>;
     }},
   ];
   return <ZenDataGrid columns={columns} data={freightMinimums} />;
