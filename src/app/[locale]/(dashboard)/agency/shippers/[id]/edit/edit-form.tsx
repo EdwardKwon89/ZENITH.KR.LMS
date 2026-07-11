@@ -10,6 +10,8 @@ import { RequiredFields } from '../../new/required-fields';
 import { ContactFields } from '../../new/contact-fields';
 import { AddressInput } from '@/components/common/AddressInput';
 import { getCountryName } from '@/lib/utils/country';
+import { ZoneDiscountForm } from './zone-discount-form';
+import type { UpsZoneWithCountries } from '@/types/ups';
 
 interface EditShipperFormProps {
   shipper: {
@@ -34,12 +36,12 @@ interface EditShipperFormProps {
       zipcode: string | null;
     };
   };
+  zones: UpsZoneWithCountries[];
 }
 
 interface FormValues {
   name: string;
   shipper_type: 'INDIVIDUAL' | 'CORPORATE';
-  discount_rate: string;
   grade: string;
   biz_no: string;
   rep_name: string;
@@ -49,7 +51,7 @@ interface FormValues {
   is_active: boolean;
 }
 
-export function EditShipperForm({ shipper }: EditShipperFormProps) {
+export function EditShipperForm({ shipper, zones }: EditShipperFormProps) {
   const t = useTranslations('AgencyShippers');
   const router = useRouter();
   const params = useParams();
@@ -62,7 +64,6 @@ export function EditShipperForm({ shipper }: EditShipperFormProps) {
   const initialValues: Partial<FormValues> = {
     name: shipper.org.name,
     shipper_type: shipper.shipper_type as 'INDIVIDUAL' | 'CORPORATE',
-    discount_rate: (Math.round(shipper.discount_rate * 1000) / 10).toString(),
     grade: shipper.grade || '',
     biz_no: shipper.org.biz_no || '',
     rep_name: shipper.org.rep_name || '',
@@ -81,7 +82,7 @@ export function EditShipperForm({ shipper }: EditShipperFormProps) {
       const result = await updateAgencyShipper(shipper.id, {
         name: formData.get('name') as string,
         shipper_type: formData.get('shipper_type') as 'INDIVIDUAL' | 'CORPORATE',
-        discount_rate: Math.round(Number(formData.get('discount_rate')) * 10) / 1000,
+        discount_rate: 0,
         grade: (formData.get('grade') as string) || undefined,
         biz_no: (formData.get('biz_no') as string) || undefined,
         rep_name: (formData.get('rep_name') as string) || undefined,
@@ -184,6 +185,14 @@ export function EditShipperForm({ shipper }: EditShipperFormProps) {
             </button>
           </div>
         </form>
+
+        <div className="mt-6">
+          <ZoneDiscountForm
+            shipperOrgId={shipper.org.id}
+            shipperType={shipper.shipper_type}
+            zones={zones}
+          />
+        </div>
       </div>
     </div>
   );
