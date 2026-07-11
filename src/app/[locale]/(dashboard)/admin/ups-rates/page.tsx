@@ -20,7 +20,7 @@ export default async function UpsRatesPage() {
 
   const { data: agencyPolicies } = await supabase
     .from('zen_agency_pricing_policies')
-    .select('*, agency:agency_org_id(name)');
+    .select('*, agency:agency_org_id(name), zone:zone_id(zone_code)');
 
   const { data: orgs } = await supabase
     .from('zen_organizations')
