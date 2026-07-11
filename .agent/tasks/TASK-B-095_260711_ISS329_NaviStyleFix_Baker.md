@@ -1,4 +1,4 @@
-# TASK-B-093: Issue #329 Agency 기준요금 원가 표시 스타일 통일 + NAVI 메뉴명 오류 정정
+# TASK-B-095: Issue #329 Agency 기준요금 원가 표시 스타일 통일 + NAVI 메뉴명 오류 정정
 
 **담당:** Baker
 **생성일:** 2026-07-11
