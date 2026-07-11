@@ -20,7 +20,7 @@ export const orderPackageSchema = z.object({
   id: z.string().uuid().optional(),
   packing_unit: z.string().min(1, 'Packing unit is required'),
   packing_count: z.number().int().positive().default(1),
-  physical_box_count: z.number().int().positive().default(1),
+  physical_box_count: z.number().int().positive().optional().default(1),
   length: z.number().nonnegative().optional(),
   width: z.number().nonnegative().optional(),
   height: z.number().nonnegative().optional(),
@@ -86,6 +86,13 @@ export const orderRegistrationSchema = z.object({
   ups_product_code: z.string().optional(),
   incoterms: z.enum(['DDU', 'DDP']).optional(),
 }).superRefine((data, ctx) => {
+  if (data.transport_mode === 'UPS' && data.packages.length !== 1) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'UPS 서비스는 오더당 1개의 패키지만 등록 가능합니다.',
+      path: ['packages'],
+    });
+  }
   if (data.delivery_method === 'PICKUP') {
     if (!data.pickup_location || data.pickup_location.trim() === '') {
       ctx.addIssue({
