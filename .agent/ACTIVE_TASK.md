@@ -15,6 +15,7 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
+| [#358](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/358) | [Aiden] R-17 절차 오류 재발 방지 — 4단계 구조적 개선 (채번 자동화·회귀결과 신뢰 제거·CI 게이트·워크트리 격리) | a | p2 | - | 미배정 | 2026-07-11 |
 | [#351](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/351) | [feat] Agency → 화주(법인) 할인율 적용 기능 신설 (Zone별) + 화주 등록/수정 화면 개선 | b | p1 | - | 미배정 | 2026-07-11 |
 | [#350](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/350) | [fix] Agency 할인율 정책 조회 화면 결함 3종 (Zone 표시·대리점 조회·부피중량 기준값 미표출) | b | p2 | - | 미배정 | 2026-07-11 |
 | [#347](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/347) | [fix] 할인율/할증률 입력 시 부동소수점 오차 노출 (예: 7.400000000000001) | b | p3 | - | 미배정 | 2026-07-11 |
