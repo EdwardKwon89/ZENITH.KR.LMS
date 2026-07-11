@@ -15,6 +15,8 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
+| [#351](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/351) | [feat] Agency → 화주(법인) 할인율 적용 기능 신설 (Zone별) + 화주 등록/수정 화면 개선 | b | p1 | - | 미배정 | 2026-07-11 |
+| [#350](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/350) | [fix] Agency 할인율 정책 조회 화면 결함 3종 (Zone 표시·대리점 조회·부피중량 기준값 미표출) | b | p2 | - | 미배정 | 2026-07-11 |
 | [#347](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/347) | [fix] 할인율/할증률 입력 시 부동소수점 오차 노출 (예: 7.400000000000001) | b | p3 | - | 미배정 | 2026-07-11 |
 | [#340](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/340) | [fix] Critical — Supabase Auth app_metadata와 zen_profiles DB 불일치 (RLS 정책 오작동) | b | p1 | review | 미배정 | 2026-07-11 |
 | [#294](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/294) | [design] zen_order_packages.packing_count 의미 불일치 — 물리적 박스 수 vs 품목 개수 (실 배송라벨/인보이스 영향) | b | p1 | open | jungjs | 2026-07-11 |
