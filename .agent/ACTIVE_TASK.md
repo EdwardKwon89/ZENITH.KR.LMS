@@ -15,7 +15,7 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
-| [#294](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/294) | [design] zen_order_packages.packing_count 의미 불일치 — 물리적 박스 수 vs 품목 개수 (실 배송라벨/인보이스 영향) | b | p1 | review | jungjs | 2026-07-09 |
+| [#294](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/294) | [design] zen_order_packages.packing_count 의미 불일치 — 물리적 박스 수 vs 품목 개수 (실 배송라벨/인보이스 영향) | b | p1 | open | jungjs | 2026-07-11 |
 | [#285](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/285) | [fix] 신규운송요청 탭 전환 시 화주/수하인 입력값 초기화 버그 | b | p2 | rework | jungjs | 2026-07-08 |
 | [#164](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/164) | [UAT-Epic] UPS 특송 서비스 — Team B 인수 테스트 (UAT-15~19) | b | p1 | open | jungjs | 2026-07-07 |
 | [#163](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/163) | [UAT-19] UPS 인보이스 PDF — Team B 수동 브라우저 UAT | b | p1 | open | jungjs | 2026-07-01 |
