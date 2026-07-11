@@ -61,6 +61,7 @@ export function AgencyShipperForm({ agencyOrgId }: AgencyShipperFormProps) {
         shipper_type: currentValues.shipper_type!,
         discount_rate: 0,
         grade: currentValues.grade || undefined,
+        biz_no: currentValues.biz_no || undefined,
         rep_name: currentValues.rep_name || undefined,
         contact_name: currentValues.contact_name || undefined,
         contact_email: currentValues.contact_email || undefined,
