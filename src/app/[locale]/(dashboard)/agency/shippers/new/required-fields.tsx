@@ -7,7 +7,6 @@ interface RequiredFieldsProps {
   defaultValues?: Partial<{
     name: string;
     shipper_type: 'INDIVIDUAL' | 'CORPORATE';
-    discount_rate: string;
     grade: string;
     biz_no: string;
     rep_name: string;
@@ -58,27 +57,6 @@ export function RequiredFields({ t, defaultValues = {}, fieldErrors = {}, readOn
           </select>
           {fieldErrors.shipper_type && <p className="text-xs text-red-500 mt-1">{fieldErrors.shipper_type}</p>}
         </div>
-        {shipperType === 'CORPORATE' ? (
-          <div>
-            <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">{t('form_discount_rate')} *</label>
-            <div className="relative">
-              <input
-                name="discount_rate"
-                type="number"
-                step="0.1"
-                min="0"
-                max="99.99"
-                required
-                defaultValue={defaultValues.discount_rate}
-                className="w-full h-10 px-3 py-2 pr-7 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-              />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">%</span>
-            </div>
-            {fieldErrors.discount_rate && <p className="text-xs text-red-500 mt-1">{fieldErrors.discount_rate}</p>}
-          </div>
-        ) : (
-          <input type="hidden" name="discount_rate" value="0" />
-        )}
       </div>
 
       {shipperType === 'CORPORATE' && (

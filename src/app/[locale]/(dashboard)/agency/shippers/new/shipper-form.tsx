@@ -19,7 +19,6 @@ interface AgencyShipperFormProps {
 interface FormValues {
   name: string;
   shipper_type: 'INDIVIDUAL' | 'CORPORATE';
-  discount_rate: string;
   grade: string;
   biz_no: string;
   rep_name: string;
@@ -48,7 +47,6 @@ export function AgencyShipperForm({ agencyOrgId }: AgencyShipperFormProps) {
     const currentValues: Partial<FormValues> = {
       name: formData.get('name') as string,
       shipper_type: formData.get('shipper_type') as 'INDIVIDUAL' | 'CORPORATE',
-      discount_rate: formData.get('discount_rate') as string,
       grade: formData.get('grade') as string,
       biz_no: formData.get('biz_no') as string,
       rep_name: formData.get('rep_name') as string,
@@ -61,9 +59,8 @@ export function AgencyShipperForm({ agencyOrgId }: AgencyShipperFormProps) {
       const result = await createAgencyShipper(agencyOrgId, {
         name: currentValues.name!,
         shipper_type: currentValues.shipper_type!,
-        discount_rate: Math.round(Number(currentValues.discount_rate) * 10) / 1000,
+        discount_rate: 0,
         grade: currentValues.grade || undefined,
-        biz_no: currentValues.biz_no || undefined,
         rep_name: currentValues.rep_name || undefined,
         contact_name: currentValues.contact_name || undefined,
         contact_email: currentValues.contact_email || undefined,
