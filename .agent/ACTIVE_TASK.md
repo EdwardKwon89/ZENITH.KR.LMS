@@ -19,7 +19,6 @@
 | [#351](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/351) | [feat] Agency → 화주(법인) 할인율 적용 기능 신설 (Zone별) + 화주 등록/수정 화면 개선 | b | p1 | - | 미배정 | 2026-07-11 |
 | [#350](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/350) | [fix] Agency 할인율 정책 조회 화면 결함 3종 (Zone 표시·대리점 조회·부피중량 기준값 미표출) | b | p2 | - | 미배정 | 2026-07-11 |
 | [#340](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/340) | [fix] Critical — Supabase Auth app_metadata와 zen_profiles DB 불일치 (RLS 정책 오작동) | b | p1 | review | 미배정 | 2026-07-11 |
-| [#294](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/294) | [design] zen_order_packages.packing_count 의미 불일치 — 물리적 박스 수 vs 품목 개수 (실 배송라벨/인보이스 영향) | b | p1 | review | jungjs | 2026-07-11 |
 | [#285](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/285) | [fix] 신규운송요청 탭 전환 시 화주/수하인 입력값 초기화 버그 | b | p2 | rework | jungjs | 2026-07-08 |
 | [#164](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/164) | [UAT-Epic] UPS 특송 서비스 — Team B 인수 테스트 (UAT-15~19) | b | p1 | open | jungjs | 2026-07-07 |
 | [#163](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/163) | [UAT-19] UPS 인보이스 PDF — Team B 수동 브라우저 UAT | b | p1 | open | jungjs | 2026-07-01 |
