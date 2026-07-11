@@ -62,7 +62,7 @@ export function EditShipperForm({ shipper }: EditShipperFormProps) {
   const initialValues: Partial<FormValues> = {
     name: shipper.org.name,
     shipper_type: shipper.shipper_type as 'INDIVIDUAL' | 'CORPORATE',
-    discount_rate: (shipper.discount_rate * 100).toString(),
+    discount_rate: (Math.round(shipper.discount_rate * 10000) / 100).toString(),
     grade: shipper.grade || '',
     biz_no: shipper.org.biz_no || '',
     rep_name: shipper.org.rep_name || '',
@@ -81,7 +81,7 @@ export function EditShipperForm({ shipper }: EditShipperFormProps) {
       const result = await updateAgencyShipper(shipper.id, {
         name: formData.get('name') as string,
         shipper_type: formData.get('shipper_type') as 'INDIVIDUAL' | 'CORPORATE',
-        discount_rate: Number(formData.get('discount_rate')) / 100,
+        discount_rate: Math.round(Number(formData.get('discount_rate')) * 100) / 10000,
         grade: (formData.get('grade') as string) || undefined,
         biz_no: (formData.get('biz_no') as string) || undefined,
         rep_name: (formData.get('rep_name') as string) || undefined,

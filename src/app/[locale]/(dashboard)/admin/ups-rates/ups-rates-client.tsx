@@ -387,8 +387,8 @@ function FuelSurchargeForm({ form, setForm, products }: any) {
       </div>
       <Field label="적용 주차 (월요일 기준)" type="date" value={form.effective_week} onChange={(v: string) => setForm({ ...form, effective_week: v })} />
       <div className="grid grid-cols-2 gap-3">
-        <Field label="판매 할증률 (%)" type="number" step="0.001" value={form.selling_rate != null ? form.selling_rate * 100 : ''} onChange={(v: any) => setForm({ ...form, selling_rate: v ? Number(v) / 100 : 0 })} />
-        <Field label="원가 할증률 (%)" type="number" step="0.001" value={form.cost_rate != null ? form.cost_rate * 100 : ''} onChange={(v: any) => setForm({ ...form, cost_rate: v ? Number(v) / 100 : 0 })} />
+        <Field label="판매 할증률 (%)" type="number" step="0.01" value={form.selling_rate != null ? Math.round(form.selling_rate * 10000) / 100 : ''} onChange={(v: any) => setForm({ ...form, selling_rate: v ? Math.round(Number(v) * 100) / 10000 : 0 })} />
+        <Field label="원가 할증률 (%)" type="number" step="0.01" value={form.cost_rate != null ? Math.round(form.cost_rate * 10000) / 100 : ''} onChange={(v: any) => setForm({ ...form, cost_rate: v ? Math.round(Number(v) * 100) / 10000 : 0 })} />
       </div>
     </>
   );
@@ -445,10 +445,10 @@ function AgencyPolicyForm({ form, setForm, agencies, zones }: any) {
             <div key={zone.id} className="flex items-center gap-2">
               <span className="w-10 text-xs font-mono font-bold text-slate-600 shrink-0">{zone.zone_code}</span>
               <input type="number" step="0.01" min="0" max="99.99"
-                value={form.zone_rates?.[zone.id] != null ? Number(form.zone_rates[zone.id]) * 100 : ''}
+                value={form.zone_rates?.[zone.id] != null ? Math.round(Number(form.zone_rates[zone.id]) * 10000) / 100 : ''}
                 onChange={(e) => setForm({
                   ...form,
-                  zone_rates: { ...(form.zone_rates ?? {}), [zone.id]: e.target.value ? Number(e.target.value) / 100 : 0 }
+                  zone_rates: { ...(form.zone_rates ?? {}), [zone.id]: e.target.value ? Math.round(Number(e.target.value) * 100) / 10000 : 0 }
                 })}
                 className="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-mono text-right"
                 placeholder="0.00" />

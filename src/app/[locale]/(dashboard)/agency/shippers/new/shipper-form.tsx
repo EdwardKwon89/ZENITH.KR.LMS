@@ -61,7 +61,7 @@ export function AgencyShipperForm({ agencyOrgId }: AgencyShipperFormProps) {
       const result = await createAgencyShipper(agencyOrgId, {
         name: currentValues.name!,
         shipper_type: currentValues.shipper_type!,
-        discount_rate: Number(currentValues.discount_rate) / 100,
+        discount_rate: Math.round(Number(currentValues.discount_rate) * 100) / 10000,
         grade: currentValues.grade || undefined,
         biz_no: currentValues.biz_no || undefined,
         rep_name: currentValues.rep_name || undefined,
