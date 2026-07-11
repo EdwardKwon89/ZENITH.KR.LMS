@@ -7,6 +7,7 @@ import { createAdminClient } from '@/utils/supabase/server';
 import { CreateAgencyShipperSchema, UpdateAgencyShipperGradeSchema, UpdateAgencyShipperSchema } from '@/lib/validations/agency';
 import type { CreateAgencyShipperInput, UpdateAgencyShipperInput, AgencyShipperRow } from '@/types/agency';
 import { generateTempPassword, sendShipperWelcomeEmail } from '@/lib/notifications/email';
+import { syncAuthMetadata } from '@/lib/auth/sync';
 import { revalidatePath } from 'next/cache';
 
 async function _createShipperOrg(
@@ -252,6 +253,15 @@ export async function createAgencyShipper(
   }
 
   logger.info(`[createAgencyShipper] Shipper created: auth=${authUid}, org=${orgId}, link=${linkId}`);
+
+  // ⑦ Sync auth metadata so RLS policies and middleware see fresh role/org_id/org_type
+  await syncAuthMetadata(authUid, {
+    role: 'AGENCY_SHIPPER',
+    org_id: orgId,
+    org_type: 'SHIPPER',
+    status: 'ACTIVE',
+  });
+
   revalidatePath('/agency/shippers');
   return { success: true, shipperId: linkId, inviteEmailSent };
 }
