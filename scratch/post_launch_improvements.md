@@ -1446,7 +1446,7 @@
 - **임시 조치**: Aiden/Jaison이 매 PR diff·`gh run view --log-failed` 조회 시 이 파일을 수동으로 대조 확인 중 (재발 방지 근본 조치 아님)
 - **목표 구현**: pre-commit hook을 정적 파일 대조 방식에서 실제 `npm run test:regression` 실행(또는 최소한 파일의 timestamp/git blame이 현재 브랜치의 HEAD 커밋 이후인지 확인)으로 변경 검토. 또는 이 파일을 `.gitignore` 처리하고 CI 성공 여부만을 진실의 근거로 전환(로컬 hook은 "실행 여부"만 강제, "결과값"은 원격 CI에 위임)
 - **관련 파일**: `.githooks/pre-commit`, `.agent/LAST_REGRESSION_RESULT`
-- **관련 Issue**: 없음 — 여러 PR 리뷰 과정에서 반복 발견, 패턴화되어 별도 등재
+- **관련 Issue**: [#358](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/358) — 2026-07-11 절차 오류 재발 방지 계획에 편입
 - **예상 공수**: 0.5 MD (hook 로직 재설계 + 팀 공지)
 - **우선순위**: **High로 상향** — PASS 오기재 방향(PR#309·#313)이 실제로 발생함이 확인되어, 리뷰어가 매번 실제 CI를 직접 조회하지 않으면 회귀 실패가 은폐된 채 병합될 실질적 위험이 입증됨
-- **상태**: ⬜ 미착수
+- **상태**: 🔄 1단계 적용 완료(2026-07-11) — `.githooks/pre-commit`에서 이 파일 기반 하드 블록(exit 1) 제거, 경고만 출력하도록 완화. 병합 판단은 원격 CI(`gh pr checks`) 전용으로 전환. pre-commit이 실제 테스트를 재실행하는 강화안(3단계)은 로컬 환경 준비 후 별도 검토.
