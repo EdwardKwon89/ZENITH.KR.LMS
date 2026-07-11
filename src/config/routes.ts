@@ -3,7 +3,7 @@
  * Routing & Authorization Configuration
  */
 
-export type OrgType = 'PLATFORM' | 'SHIPPER' | 'CARRIER' | 'CUSTOMS' | 'DELIVERY' | 'GUEST';
+export type OrgType = 'PLATFORM' | 'SHIPPER' | 'CARRIER' | 'CUSTOMS' | 'DELIVERY' | 'AGENCY' | 'GUEST';
 
 /**
  * 1. ORG_ROUTE_MAP: 조직 타입별 최상위 매핑 경로
@@ -15,6 +15,7 @@ export const ORG_ROUTE_MAP: Record<OrgType, string> = {
   CARRIER: '/terminal',
   CUSTOMS: '/customs',
   DELIVERY: '/terminal',
+  AGENCY: '/agency',
   GUEST: '/register/pending', // 가입 심사 중인 사용자용 임시 경로
 };
 
