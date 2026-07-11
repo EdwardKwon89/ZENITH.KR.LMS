@@ -1,4 +1,4 @@
-# TASK-B-007: Issue #337 — proxy.ts 미들웨어 org_type 게이트가 /shipper·/agency 차단 (Critical)
+# TASK-B-097: Issue #337 — proxy.ts 미들웨어 org_type 게이트가 /shipper·/agency 차단 (Critical)
 
 | 메타 | 값 |
 |:----|:----|
