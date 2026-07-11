@@ -106,7 +106,7 @@ export function UpsFreightEstimateSection({
 
   useEffect(() => {
     const totalWeight = packages.reduce(
-      (sum, pkg) => sum + (pkg.gross_weight || 0) * (pkg.packing_count || 1),
+      (sum, pkg) => sum + (pkg.gross_weight || 0),
       0
     );
     const firstPkg = packages[0];
