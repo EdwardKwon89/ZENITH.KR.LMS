@@ -15,13 +15,8 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
-| [#300](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/300) | [feat] 오더 등록 폼 — UNIT/CONTENT 필드 통합 + UPS 견적 섹션 패키지 영역 이동 | b | p2 | open | jungjs | 2026-07-09 |
-| [#296](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/296) | [fix] UPS Direct 운송모드 노출 — 신규 버튼 추가 + EXP 라벨 복원 + 연쇄 게이팅 결함 수정 | b | p2 | open | jungjs | 2026-07-09 |
 | [#294](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/294) | [design] zen_order_packages.packing_count 의미 불일치 — 물리적 박스 수 vs 품목 개수 (실 배송라벨/인보이스 영향) | b | p1 | review | jungjs | 2026-07-09 |
-| [#290](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/290) | [feat] 오더 등록 폼 보완 2차 — 패킹UI 2줄배치·필수표시·HSCode확인UX·주소록저장버튼·COUNT자동계산 | b | p2 | review | jungjs | 2026-07-09 |
 | [#285](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/285) | [fix] 신규운송요청 탭 전환 시 화주/수하인 입력값 초기화 버그 | b | p2 | rework | jungjs | 2026-07-08 |
-| [#261](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/261) | [feat] TASK-B-078 REQ-06 아이템명 → HScode 자동 추출 (Claude Haiku 4.5 API) | b | p1 | review | jungjs | 2026-07-08 |
-| [#182](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/182) | [Phase 7.1] UPS 특송 요금 관리 보완 — Agency/Shipper 계산 파이프라인 (An-14) | a | p1 | open | 미배정 | 2026-07-05 |
 | [#164](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/164) | [UAT-Epic] UPS 특송 서비스 — Team B 인수 테스트 (UAT-15~19) | b | p1 | open | jungjs | 2026-07-07 |
 | [#163](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/163) | [UAT-19] UPS 인보이스 PDF — Team B 수동 브라우저 UAT | b | p1 | open | jungjs | 2026-07-01 |
 | [#162](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/162) | [UAT-18] 창고 출고 UPS 연계 — Team B 수동 브라우저 UAT | b | p1 | open | jungjs | 2026-07-01 |
