@@ -54,6 +54,9 @@ export async function upsertShipperZoneDiscounts(
   if (!agencyOrgId) {
     return { success: false, fieldErrors: { _form: '대리점 연결 정보를 찾을 수 없습니다.' } };
   }
+  if (agencyOrgId !== profile.org_id) {
+    return { success: false, fieldErrors: { _form: '본인 소속 화주가 아닙니다.' } };
+  }
 
   const errors: string[] = [];
   for (const [zoneId, rate] of Object.entries(zoneRates)) {
