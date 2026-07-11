@@ -23,17 +23,8 @@ export default async function ShipperUpsRatesPage() {
     getPublicFreightMinimums(),
   ]);
 
-  let globalDiscountRate = 0;
   const zoneDiscountMap: Record<string, number> = {};
   if (agencyOrgId) {
-    const { data: shipperInfo } = await supabase
-      .from('zen_agency_shippers')
-      .select('discount_rate')
-      .eq('shipper_org_id', profile.org_id)
-      .eq('is_active', true)
-      .maybeSingle();
-    globalDiscountRate = shipperInfo ? Number(shipperInfo.discount_rate) : 0;
-
     const { data: zoneDiscounts } = await supabase
       .from('zen_agency_shipper_zone_discounts')
       .select('zone_id, discount_rate')
@@ -58,7 +49,6 @@ export default async function ShipperUpsRatesPage() {
         otherCharges={otherCharges}
         weightTierRates={weightTierRates}
         freightMinimums={freightMinimums}
-        globalDiscountRate={globalDiscountRate}
         zoneDiscountMap={zoneDiscountMap}
       />
     </div>

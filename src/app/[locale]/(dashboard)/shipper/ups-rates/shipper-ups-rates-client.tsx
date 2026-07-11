@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { DollarSign, Fuel, FileText, Layers, Scale } from 'lucide-react';
 import { ZenBadge } from '@/components/ui/ZenUI';
 import ZenDataGrid from '@/components/ui/ZenDataGrid';
@@ -27,17 +27,16 @@ interface Props {
   otherCharges: PublicOtherCharge[];
   weightTierRates: PublicWeightTierRate[];
   freightMinimums: PublicFreightMinimum[];
-  globalDiscountRate: number;
   zoneDiscountMap: Record<string, number>;
 }
 
 export function ShipperUpsRatesClient({
   zones, products, baseRates, fuelSurcharges, otherCharges,
-  weightTierRates, freightMinimums, globalDiscountRate, zoneDiscountMap,
+  weightTierRates, freightMinimums, zoneDiscountMap,
 }: Props) {
   const [activeTab, setActiveTab] = useState<TabKey>('baseRates');
 
-  const getDiscountRate = (zoneId: string): number => zoneDiscountMap[zoneId] ?? globalDiscountRate;
+  const getDiscountRate = (zoneId: string): number => zoneDiscountMap[zoneId] ?? 0;
 
   const calcShipperPrice = (price: number, zoneId: string): number => {
     const rate = getDiscountRate(zoneId);
