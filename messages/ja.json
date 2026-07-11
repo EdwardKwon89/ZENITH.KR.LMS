@@ -65,7 +65,9 @@
     "rate_cards_management": "料率カード管理",
     "corporate_mgmt": "法人管理",
     "member_management": "会員管理",
-    "agency_other_charges_nav": "諸掛照会"
+    "agency_other_charges_nav": "諸掛照会",
+    "agency_ups_rates_nav": "UPS料金照会",
+    "shipper_ups_rates_nav": "UPS運賃照会"
   },
   "Orders": {
     "ups_invoice": {

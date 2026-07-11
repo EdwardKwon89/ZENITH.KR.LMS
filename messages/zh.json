@@ -56,7 +56,9 @@
     "org_management": "组织管理",
     "claims": "索赔管理",
     "orders_assigned": "分配订单",
-    "agency_other_charges_nav": "附加费查看"
+    "agency_other_charges_nav": "附加费查看",
+    "agency_ups_rates_nav": "UPS费率查询",
+    "shipper_ups_rates_nav": "UPS运费查询"
   },
   "Orders": {
     "ups_invoice": {
