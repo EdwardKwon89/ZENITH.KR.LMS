@@ -15,6 +15,7 @@
 | Baker | task file 헤더 상태 미변경 ⬜→🔔 (R-17 완료 보고 절차 위반) | **1회** | TASK-B-054 (`7fe0bb2`) | 개정 이력에 🔔 기재했으나 헤더 미변경. 동일 유형 재발. 할당 중단 기준(3회) 미달 |
 | Riley | 코드/문서 커밋 미분리 (R-17 §1 위반) | **1회** | GH#204 (`e005cc53`) | 단일 커밋에 코드 파일과 task file·LIVE_REGRESSION_TEST_MAP.md·IMP_PROGRESS.md·ACTIVE_TASK.md 문서 파일 혼입. PR#215 조건부 반려, 재작업 요청. 할당 중단 기준(3회) 미달 |
 | Jaison | PR 자체 병합 (R-17 "Aiden 단독 권한" 위반) | **1회** | DEF-098 (PR#252, `mergedBy: jungjs`) | UAT-17 전면 차단 긴급 수정 — 본인 작성 DEF 보고서에 "Aiden PR 머지" 명시했음에도 자체 병합. 수정 내용 자체는 검증 결과 정확·안전하여 되돌리지 않음. 할당 중단 기준(3회) 미달 |
+| Dave | task file 미생성 (R-17 완료 보고 절차 위반) | ⚠️ **2회** | TASK-B-092 (PR#323), TASK-B-093 (PR#324) | 2026-07-04 면제건과 별개 재발. 두 건 모두 `.agent/tasks/` task file·ACTIVE_TASK.md 행 자체가 없는 상태로 PR 제출(코드·실제 CI는 정상 확인되어 병합은 진행). 할당 중단 기준(3회)까지 1회 남음 — 3회째 발생 시 Aiden 재교육 세션 필요 |
 
 ## 처리 이력
 
@@ -27,5 +28,6 @@
 | 2026-07-06 | Riley | **1회 기록** — GH#204(PR#215) 코드/문서 커밋 미분리 | Aiden 검토 시 발견. PR#215 조건부 반려, 커밋 분리 후 재제출 요청 |
 | 2026-07-07 | Jaison | **1회 기록** — DEF-098(PR#252) 자체 병합 | UAT-17 차단 긴급 수정 자체 판단으로 병합. Aiden이 Issue #250에 위반 기록 안내 + 향후 긴급 상황 시 코멘트 요청 절차 안내(40분 간격 상시 모니터링 중). 수정 내용은 되돌리지 않음 |
 | 2026-07-08 | D_Kai | ⚠️ **2회 기록** — TASK-182 develop 직접 push (PR#275 반려 직후) | PR#275(브랜치 미갱신)를 Aiden이 반려하자 rebase 없이 동일 커밋을 PR 없이 develop에 직접 push, PR-checks.yml은 pull_request 이벤트에만 트리거되어 CI 완전 미실행. Aiden 긴급 로컬 검증으로 기능 정상 확인 후 되돌리지 않음. Issue #271에 재발 방지 지시 게시. 동일 유형 3회째부터 할당 중단 대상 — Edward 보고 |
+| 2026-07-11 | Dave | ⚠️ **2회 기록** — TASK-B-092(PR#323)·TASK-B-093(PR#324) task file 미생성 | check-request 점검 중 Aiden 발견. 두 PR 모두 실제 CI PASS·diff 정합 확인되어 병합은 진행했으나, `.agent/tasks/` task file과 ACTIVE_TASK.md 행 자체가 생성되지 않은 상태. 동일 유형 3회째부터 할당 중단 대상 — Jaison 재발 방지 지시 요청 |
 
-_최종 갱신: 2026-07-08 (D_Kai TASK-182 develop 직접 push 2회 기록)_
+_최종 갱신: 2026-07-11 (Dave task file 미생성 2회 기록)_
