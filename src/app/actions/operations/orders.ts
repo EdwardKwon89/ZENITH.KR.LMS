@@ -38,7 +38,7 @@ export async function saveOrderRateSnapshot({
     if (!product) return;
 
     const totalWeight = validated.packages.reduce(
-      (sum, pkg) => sum + (pkg.gross_weight || 0) * (pkg.packing_count || 1), 0
+      (sum, pkg) => sum + (pkg.gross_weight || 0), 0
     );
 
     const { data: port } = await supabase
@@ -196,6 +196,7 @@ export async function updateOrder(orderId: string, payload: OrderRegistrationInp
         order_id: orderId,
         packing_unit: pkg.packing_unit,
         packing_count: pkg.packing_count,
+        physical_box_count: pkg.physical_box_count ?? 1,
         length: pkg.length,
         width: pkg.width,
         height: pkg.height,
@@ -330,15 +331,13 @@ export async function getOrderDetails(orderId: string) {
   }));
 
   const totalGrossWeight = packagesWithItems.reduce((sum, pkg) => {
-    const cnt = pkg.packing_count || 1;
-    return sum + (pkg.gross_weight || 0) * cnt;
+    return sum + (pkg.gross_weight || 0);
   }, 0);
   const totalVolume = packagesWithItems.reduce((sum, pkg) => {
-    const cnt = pkg.packing_count || 1;
     const vol = pkg.volume ?? (pkg.length && pkg.width && pkg.height
       ? (pkg.length * pkg.width * pkg.height) / 1000000
       : 0);
-    return sum + vol * cnt;
+    return sum + vol;
   }, 0);
 
   return { ...order, packages: packagesWithItems, total_gross_weight: totalGrossWeight, total_volume: totalVolume };

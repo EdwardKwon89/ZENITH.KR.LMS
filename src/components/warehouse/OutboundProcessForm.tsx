@@ -241,7 +241,7 @@ export default function OutboundProcessForm({ locale }: { locale: string }) {
 
   const buildLabelData = (order: any) => {
     const pkgs = order.order_packages || [];
-    const totalPkgs = pkgs.reduce((s: number, p: any) => s + (p.packing_count || 1), 0);
+    const totalPkgs = pkgs.reduce((s: number, p: any) => s + (p.physical_box_count || 1), 0);
     const totalWeight = pkgs.reduce((s: number, p: any) => s + (p.gross_weight || 0), 0);
     return {
       order_no: order.order_no,
@@ -263,7 +263,7 @@ export default function OutboundProcessForm({ locale }: { locale: string }) {
               quantity: i.quantity || 0,
               weight: i.weight || 0,
             }))
-          : [{ description: `Package #${p.packing_count || "?"}`, quantity: 1, weight: p.gross_weight || 0 }];
+          : [{ description: `Package #${p.physical_box_count || p.packing_count || "?"}`, quantity: 1, weight: p.gross_weight || 0 }];
       }),
       total_pkgs: totalPkgs,
       total_weight: totalWeight,
