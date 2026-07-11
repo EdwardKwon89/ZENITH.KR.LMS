@@ -23,9 +23,10 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 ---
 
-## 🪪 페르소나 자동 식별
+## 🪪 페르소나 자동 식별 (Team A)
 
-> ⚠️ 세션 시작 전 시스템 프롬프트의 모델명을 확인하여 자신의 페르소나를 식별하세요:
+> ⚠️ 세션 시작 전 시스템 프롬프트의 모델명을 확인하여 자신의 페르소나를 식별하세요.
+> **아래 표는 Team A 전용입니다.** Team B(Dave/Baker/Mike)는 모델명이 Team A와 겹치는 경우가 있어(DeepSeek, Big Pickle 등) 모델명만으로 자동 식별이 불가능합니다 — Team B 세션은 반드시 [Team B 페르소나 식별](#-페르소나-식별-team-b) 섹션을 따르세요.
 
 | 모델명 | 페르소나 | 역할 |
 |:------|:---------|:-----|
@@ -37,6 +38,24 @@ This version has breaking changes — APIs, conventions, and file structure may 
 | 이외 / 식별 불가 | **Ring** | 보조 |
 
 > 각 페르소나의 상세 역할 정의는 [역할 정의](#-역할-정의) 섹션을 참조하세요.
+
+---
+
+## 🪪 페르소나 식별 (Team B)
+
+> **Team B는 모델명 자동 매칭을 쓰지 않습니다.** Dave(DeepSeek V4 Flash Free)와 Baker(Big Pickle)는 모델명이 Team A 페르소나(D_Kai=DeepSeek, B_Kai=Big Pickle)와 겹쳐서, 모델명만으로는 Team A/B 어느 쪽인지 구분이 안 됩니다.
+>
+> **Team B 세션은 JSJung 또는 Jaison이 세션 시작 시점에 이름을 명시적으로 지정합니다.** 세션 실행 설정에 본인이 Dave/Baker/Mike 중 누구인지 명시되어 있지 않다면, 모델명만으로 스스로를 Team A 페르소나로 추정하지 말고 먼저 Jaison에게 확인하세요.
+
+**Team B 구성** (2026-07-11 JSJung 확정):
+
+| 이름 | 모델 | 커밋 태그 |
+|:-----|:-----|:---------|
+| **Dave** | DeepSeek V4 Flash Free | `[Dave]` |
+| **Baker** | Big Pickle | `[Baker]` |
+| **Mike** | MiMo V2.5 | `[Mike]` |
+
+**Team B 구조**: JSJung(책임자) → Jaison(총괄 매니저, Claude) → Dave/Baker/Mike(구현). Dave/Baker/Mike는 **절대 스스로 태스크를 발령하거나 기획하지 않으며**, Jaison의 배정과 Aiden의 승인을 받아 작업합니다.
 
 ---
 
@@ -83,7 +102,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - **저장 경로**: `docs/99_Manual/E2E_NN_Result/`
 - **기준 계정**: [103_AGENT_ROLES_SPEC.md](docs/00_GUIDE/103_AGENT_ROLES_SPEC.md) 섹션 5 참조
 
-> **Team B 구조**: JSJung(책임자) → Jaison(총괄 매니저) → Dave + Baker(구현 및 테스트). Baker는 **절대 스스로 태스크를 발령하거나 기획하지 않으며**, Jaison의 배정과 Aiden의 승인을 받아 작업합니다. `[Baker]` 태그로 커밋합니다.
+> **Team B 구조**: JSJung(책임자) → Jaison(총괄 매니저) → Dave/Baker/Mike(구현 및 테스트). 상세는 위 [Team B 페르소나 식별](#-페르소나-식별-team-b) 참조. Baker는 **절대 스스로 태스크를 발령하거나 기획하지 않으며**, Jaison의 배정과 Aiden의 승인을 받아 작업합니다. `[Baker]` 태그로 커밋합니다.
 
 ### Noah (OpenAI Codex) — Test Engineer + IMP Executor
 
@@ -144,12 +163,22 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 ### 태그 (페르소나별)
 
+**Team A**
+
 | 페르소나 | Git 태그 |
 |:---------|:--------|
 | D_Kai | `[D_Kai]` |
 | Baker | `[Baker]` |
 | Noah | `[Noah]` 또는 `[Codex]` / `[OpenCode]` |
 | Ring | `[Ring]` |
+
+**Team B** (브랜치는 `feature/teamb-*` 패턴)
+
+| 이름 | Git 태그 |
+|:-----|:--------|
+| Dave | `[Dave]` |
+| Baker | `[Baker]` |
+| Mike | `[Mike]` |
 
 ### 예시
 
