@@ -95,7 +95,9 @@
     "agency_dashboard": "Agency Dashboard",
     "agency_registered_shippers": "Registered Shippers",
     "agency_quick_links": "Quick Links",
-    "agency_settlements_nav": "Settlements"
+    "agency_settlements_nav": "Settlements",
+    "agency_ups_rates_nav": "UPS Rate Inquiry",
+    "shipper_ups_rates_nav": "UPS Freight Inquiry"
   },
   "VOC": {
     "title": "VOC Management",
@@ -742,8 +744,6 @@
   "agency_quick_links": "Quick Links",
   "agency_console_badge": "Agency Console",
   "agency_console_desc": "Intelligent shipper management and rate optimization service.",
-  "agency_other_charges_nav": "Other Charges",
-  "agency_settlements_nav": "Settlements",
   "agency_settlement_widget_title": "Monthly Settlement",
   "agency_settlement_orders": "Orders",
   "agency_settlement_revenue": "Revenue",
