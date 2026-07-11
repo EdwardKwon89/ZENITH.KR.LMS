@@ -1,4 +1,4 @@
-# TASK-B-095: Issue #334 — Navigation i18n 키 누락 (전체 대시보드 네비게이션 파손)
+# TASK-B-096: Issue #334 — Navigation i18n 키 누락 (전체 대시보드 네비게이션 파손)
 
 | 메타 | 값 |
 |:----|:----|
@@ -16,7 +16,7 @@ ko.json/en.json top-level 중복 키 정리.
 
 ### 커밋
 
-- `4320d8d0` — `[Dave] fix: TASK-B-095 Issue #334 — Navigation i18n 키 누락 + top-level 중복 정리`
+- `4320d8d0` — `[Dave] fix: TASK-B-096 Issue #334 — Navigation i18n 키 누락 + top-level 중복 정리`
 
 ### 파일별 변경
 
