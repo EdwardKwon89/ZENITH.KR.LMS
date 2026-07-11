@@ -143,8 +143,8 @@ export default function UpsBaseRateMatrix({
               {Number(rate.selling_price).toLocaleString()}원
             </div>
             {agencyCost != null && (
-              <div className="font-mono text-xs font-medium text-slate-500">
-                {agencyCost.toLocaleString()}원
+              <div className="font-mono text-[10px] text-slate-400">
+                ({agencyCost.toLocaleString()}원)
               </div>
             )}
           </div>
