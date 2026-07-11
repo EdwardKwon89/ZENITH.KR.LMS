@@ -257,3 +257,20 @@ export async function deleteUpsFreightMinimum(id: string) {
   revalidatePath('/admin/ups-rates');
 }
 
+// ─── Issue #312: Agency Volumetric Divisor ───────────────
+
+export async function updateAgencyVolumetricDivisor(
+  agencyOrgId: string,
+  volumetricDivisor: 5000 | 5500 | 6000
+) {
+  const { supabase, profile } = await validateUserAction();
+  requireAdminOrManager(profile?.role);
+  const { error } = await supabase
+    .from('zen_organizations')
+    .update({ volumetric_divisor: volumetricDivisor })
+    .eq('id', agencyOrgId);
+  if (error) throw new Error(error.message);
+  revalidatePath('/admin/ups-rates');
+  return { success: true };
+}
+

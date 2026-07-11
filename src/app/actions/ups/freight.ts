@@ -77,10 +77,23 @@ export async function estimateUpsFreight(input: EstimateUpsFreightInput): Promis
   );
   if (!zone) throw new Error(`목적지 국가(${input.destCountryCode})에 매핑된 Zone이 없습니다.`);
 
+  // Issue #312: Agency org의 volumetric_divisor 조회
+  let effectiveDivisor = input.volumetricDivisor;
+  if (input.agencyOrgId && !input.volumetricDivisor) {
+    const { data: org } = await supabase
+      .from('zen_organizations')
+      .select('volumetric_divisor')
+      .eq('id', input.agencyOrgId)
+      .maybeSingle();
+    if (org?.volumetric_divisor) {
+      effectiveDivisor = org.volumetric_divisor as 5000 | 5500 | 6000;
+    }
+  }
+
   const dims = (input.dimL && input.dimW && input.dimH)
     ? { l: input.dimL, w: input.dimW, h: input.dimH }
     : undefined;
-  const { chargeableKg } = calcChargeableWeight(input.actualWeightKg, dims, input.volumetricDivisor);
+  const { chargeableKg } = calcChargeableWeight(input.actualWeightKg, dims, effectiveDivisor);
   const { billingKg } = applyOversizeRule(resolveBillingWeight(chargeableKg, product.product_code), dims);
 
   // 2. 기준 요금 조회 (Express/Saver/Expedited) — ≤20kg 정확매치, >20kg는 20kg 기준요금
@@ -151,7 +164,7 @@ export async function estimateUpsFreight(input: EstimateUpsFreightInput): Promis
       dimL: input.dimL,
       dimW: input.dimW,
       dimH: input.dimH,
-      volumetricDivisor: input.volumetricDivisor,
+      volumetricDivisor: effectiveDivisor,
       incoterms: input.incoterms,
     },
     {

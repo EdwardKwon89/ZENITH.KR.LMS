@@ -24,7 +24,7 @@ export default async function UpsRatesPage() {
 
   const { data: orgs } = await supabase
     .from('zen_organizations')
-    .select('id, name')
+    .select('id, name, volumetric_divisor')
     .eq('type', 'AGENCY')
     .eq('status', 'ACTIVE')
     .order('name');
