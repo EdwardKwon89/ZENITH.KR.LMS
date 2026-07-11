@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { DollarSign, Fuel, FileText, Layers, Scale } from 'lucide-react';
 import { ZenBadge } from '@/components/ui/ZenUI';
 import ZenDataGrid from '@/components/ui/ZenDataGrid';
+import UpsBaseRateMatrix from '@/components/ups/UpsBaseRateMatrix';
 import type { UpsZoneWithCountries, UpsProduct } from '@/types/ups';
 import type { PublicBaseRate, PublicFuelSurcharge, PublicOtherCharge, PublicWeightTierRate, PublicFreightMinimum } from '@/app/actions/ups/rates-public';
 import type { ColumnDef } from '@tanstack/react-table';
@@ -47,7 +48,16 @@ export function ShipperUpsRatesClient({
   const renderTable = () => {
     switch (activeTab) {
       case 'baseRates':
-        return <BaseRateTable baseRates={baseRates} calcShipperPrice={calcShipperPrice} />;
+        return (
+          <UpsBaseRateMatrix
+            products={products}
+            zones={zones}
+            readOnly
+            priceMode="shipper"
+            rates={baseRates}
+            discountRateMap={zoneDiscountMap}
+          />
+        );
       case 'fuelSurcharges':
         return <FuelSurchargeTable rows={fuelSurcharges} />;
       case 'otherCharges':
@@ -78,20 +88,6 @@ export function ShipperUpsRatesClient({
       {renderTable()}
     </div>
   );
-}
-
-function BaseRateTable({ baseRates, calcShipperPrice }: { baseRates: PublicBaseRate[]; calcShipperPrice: (price: number, zoneId: string) => number }) {
-  const columns: ColumnDef<PublicBaseRate>[] = [
-    { id: 'product', header: '제품', cell: ({ row }) => <span className="text-sm font-medium">{row.original.product?.product_code}</span> },
-    { id: 'zone', header: 'Zone', cell: ({ row }) => <ZenBadge variant="default" className="font-mono">{row.original.zone?.zone_code}</ZenBadge> },
-    { accessorKey: 'weight_kg', header: '중량 (kg)', cell: ({ row }) => <span className="font-mono text-sm">{row.original.weight_kg}kg</span> },
-    { id: 'shipper_price', header: '적용 운임', cell: ({ row }) => {
-      const price = calcShipperPrice(row.original.selling_price, row.original.zone_id);
-      return <span className="font-mono text-sm font-semibold text-brand-700">{price.toLocaleString()}원</span>;
-    }},
-    { id: 'validity', header: '유효기간', cell: ({ row }) => <span className="text-xs font-mono text-slate-400">{row.original.valid_from}~{row.original.valid_until ?? '무기한'}</span> },
-  ];
-  return <ZenDataGrid columns={columns} data={baseRates} />;
 }
 
 function FuelSurchargeTable({ rows }: { rows: PublicFuelSurcharge[] }) {
