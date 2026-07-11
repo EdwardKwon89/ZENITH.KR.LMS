@@ -153,11 +153,11 @@ export default async function OrderDetailPage({
     items: order.packages.map((pkg: any) => ({
       description: pkg.items.map((i: any) => i.item_name).join(', ') || 'General Cargo',
       quantity: pkg.items.reduce((sum: number, i: any) => sum + i.quantity, 0),
-      pkgs: pkg.packing_count,
+      pkgs: pkg.physical_box_count || 1,
       net_weight: pkg.gross_weight * 0.9, // Estimated net weight
       gross_weight: pkg.gross_weight
     })),
-    total_pkgs: order.packages.reduce((sum: number, pkg: any) => sum + pkg.packing_count, 0),
+    total_pkgs: order.packages.reduce((sum: number, pkg: any) => sum + (pkg.physical_box_count || 1), 0),
     total_net_weight: order.packages.reduce((sum: number, pkg: any) => sum + (pkg.gross_weight * 0.9), 0),
     total_gross_weight: order.packages.reduce((sum: number, pkg: any) => sum + pkg.gross_weight, 0)
   };
@@ -211,8 +211,7 @@ export default async function OrderDetailPage({
       contact: order.recipient_contact || order.recipient_phone || ''
     },
     packages: order.packages.map((pkg: any, idx: number) => {
-      const cnt = pkg.packing_count || 1;
-      const actualWeight = (pkg.gross_weight || 0) * cnt;
+      const actualWeight = (pkg.gross_weight || 0);
       const vol = pkg.volume ?? (pkg.length && pkg.width && pkg.height ? (pkg.length * pkg.width * pkg.height) / 1000000 : 0);
       const volumetricWeight = vol * 1000000 / 5000;
       return {
@@ -237,9 +236,8 @@ export default async function OrderDetailPage({
     },
     total_weight: order.total_gross_weight || 0,
     total_volumetric_weight: order.packages.reduce((sum: number, pkg: any) => {
-      const cnt = pkg.packing_count || 1;
       const vol = pkg.volume ?? (pkg.length && pkg.width && pkg.height ? (pkg.length * pkg.width * pkg.height) / 1000000 : 0);
-      return sum + (vol * cnt * 1000000 / 5000);
+      return sum + (vol * 1000000 / 5000);
     }, 0),
     total_declared_value: order.packages.reduce((sum: number, pkg: any) => 
       sum + pkg.items.reduce((pSum: number, item: any) => pSum + ((item.quantity || 0) * (item.unit_price || 0)), 0), 0),
@@ -400,13 +398,12 @@ export default async function OrderDetailPage({
                       Package Details
                     </h3>
                     {order.packages.map((pkg: any, idx: number) => {
-                      const cnt = pkg.packing_count || 1;
                       const unitWt = pkg.gross_weight || 0;
-                      const totalWt = unitWt * cnt;
+                      const totalWt = unitWt;
                       const vol = pkg.volume ?? (pkg.length && pkg.width && pkg.height
                         ? (pkg.length * pkg.width * pkg.height) / 1000000
                         : 0);
-                      const totalVol = vol * cnt;
+                      const totalVol = vol;
                       return (
                         <div key={pkg.id || idx} className="rounded-xl border border-slate-200 dark:border-neutral-700 overflow-hidden">
                           <table className="w-full text-sm">
@@ -423,7 +420,7 @@ export default async function OrderDetailPage({
                             <tbody>
                               <tr className="hover:bg-slate-50 dark:hover:bg-neutral-800/50">
                                 <td className="px-4 py-3 font-medium text-slate-700 dark:text-slate-200">{pkg.packing_unit}</td>
-                                <td className="px-4 py-3 text-right text-slate-600 dark:text-slate-300">{pkg.packing_count}</td>
+                                <td className="px-4 py-3 text-right text-slate-600 dark:text-slate-300">{pkg.physical_box_count || pkg.packing_count}</td>
                                 <td className="px-4 py-3 text-right text-slate-600 dark:text-slate-300">
                                   {pkg.length} × {pkg.width} × {pkg.height}
                                 </td>

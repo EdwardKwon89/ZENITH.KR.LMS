@@ -299,7 +299,7 @@ export async function getOrderDocumentData(orderNo: string) {
 
   const { data: packages, error: pkgError } = await supabase
     .from('zen_order_packages')
-    .select('id, order_id, packing_unit, packing_count, gross_weight, volume, length, width, height, remarks, created_at, updated_at')
+    .select('id, order_id, packing_unit, packing_count, physical_box_count, gross_weight, volume, length, width, height, remarks, created_at, updated_at')
     .eq('order_id', order.id)
     .order('created_at', { ascending: true });
 

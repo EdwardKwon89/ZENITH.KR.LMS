@@ -18,8 +18,9 @@ export const orderItemSchema = z.object({
  */
 export const orderPackageSchema = z.object({
   id: z.string().uuid().optional(),
-  packing_unit: z.string().min(1, 'Packing unit is required'), // BOX, PLT 등
+  packing_unit: z.string().min(1, 'Packing unit is required'),
   packing_count: z.number().int().positive().default(1),
+  physical_box_count: z.number().int().positive().default(1),
   length: z.number().nonnegative().optional(),
   width: z.number().nonnegative().optional(),
   height: z.number().nonnegative().optional(),

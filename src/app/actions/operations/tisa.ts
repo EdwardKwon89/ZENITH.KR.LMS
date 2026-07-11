@@ -27,7 +27,7 @@ async function getTotalWeight(supabase: any, orderId: string): Promise<number> {
     .select("gross_weight, packing_count")
     .eq("order_id", orderId);
   return (packages || []).reduce(
-    (sum: number, p: any) => sum + (Number(p.gross_weight) || 0) * (Number(p.packing_count) || 1),
+    (sum: number, p: any) => sum + (Number(p.gross_weight) || 0),
     0
   );
 }
