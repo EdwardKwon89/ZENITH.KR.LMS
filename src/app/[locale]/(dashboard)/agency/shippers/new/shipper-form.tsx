@@ -83,14 +83,21 @@ export function AgencyShipperForm({ agencyOrgId }: AgencyShipperFormProps) {
       }
 
       const sentEmail = formData.get('login_email') as string;
-      setSuccessMessage(t('submit_invite_sent', {
-        name: currentValues.name,
-        email: sentEmail,
-      }));
-      setTimeout(() => {
-        router.push(`/${locale}/agency/shippers`);
+      const shipperType = formData.get('shipper_type') as string;
+
+      if (shipperType === 'CORPORATE') {
+        router.push(`/${locale}/agency/shippers/${result.shipperId}/edit`);
         router.refresh();
-      }, 3000);
+      } else {
+        setSuccessMessage(t('submit_invite_sent', {
+          name: currentValues.name,
+          email: sentEmail,
+        }));
+        setTimeout(() => {
+          router.push(`/${locale}/agency/shippers`);
+          router.refresh();
+        }, 3000);
+      }
     } catch (err: any) {
       setSavedValues(currentValues);
       setGlobalError(err.message || t('submit_error'));
