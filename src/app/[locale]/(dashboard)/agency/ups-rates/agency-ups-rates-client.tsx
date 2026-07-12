@@ -40,11 +40,12 @@ interface Props {
   freightMinimums: PublicFreightMinimum[];
   pricingPolicies: PricingPolicy[];
   shippers: AgencyShipperRow[];
+  agencyOrgId?: string;
 }
 
 export function AgencyUpsRatesClient({
   zones, products, baseRates, fuelSurcharges, otherCharges,
-  weightTierRates, freightMinimums, pricingPolicies, shippers,
+  weightTierRates, freightMinimums, pricingPolicies, shippers, agencyOrgId,
 }: Props) {
   const [activeTab, setActiveTab] = useState<TabKey>('baseRates');
 
@@ -80,7 +81,7 @@ export function AgencyUpsRatesClient({
       case 'freightMinimums':
         return <FreightMinimumTable freightMinimums={freightMinimums} calcAgencyCost={calcAgencyCost} />;
       case 'shipperDiscounts':
-        return <ShipperDiscountsTab shippers={shippers} zones={zones} />;
+        return <ShipperDiscountsTab shippers={shippers} zones={zones} agencyOrgId={agencyOrgId} />;
       default:
         return null;
     }
@@ -152,7 +153,7 @@ function FreightMinimumTable({ freightMinimums, calcAgencyCost }: { freightMinim
   return <ZenDataGrid columns={columns} data={freightMinimums} />;
 }
 
-function ShipperDiscountsTab({ shippers, zones }: { shippers: AgencyShipperRow[]; zones: UpsZoneWithCountries[] }) {
+function ShipperDiscountsTab({ shippers, zones, agencyOrgId }: { shippers: AgencyShipperRow[]; zones: UpsZoneWithCountries[]; agencyOrgId?: string }) {
   const [selectedShipperOrgId, setSelectedShipperOrgId] = useState<string | null>(null);
   const corporateShippers = shippers.filter(s => s.shipper_type === 'CORPORATE');
 
@@ -189,6 +190,7 @@ function ShipperDiscountsTab({ shippers, zones }: { shippers: AgencyShipperRow[]
           shipperOrgId={selected.shipper_org_id}
           shipperType={selected.shipper_type}
           zones={zones}
+          agencyOrgId={agencyOrgId}
         />
       )}
       <ZenDataGrid columns={columns} data={corporateShippers} />

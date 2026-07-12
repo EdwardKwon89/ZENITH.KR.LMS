@@ -12,5 +12,5 @@ export default async function EditAgencyShipperPage(props: { params: Promise<{ l
   const { shipper } = await getAgencyShipperById(id);
   const zones = await getUpsZones();
 
-  return <EditShipperForm shipper={shipper as any} zones={zones as any} />;
+  return <EditShipperForm shipper={shipper as any} zones={zones as any} agencyOrgId={profile.org_id} />;
 }

@@ -30,6 +30,21 @@ function requireAdminOrManager(role: string | undefined) {
   }
 }
 
+function requireSchedulePermission(role: string | undefined, settingType: SettingType, targetRef: Record<string, string>, profileOrgId?: string) {
+  const isAdmin = role === USER_ROLES.ADMIN || role === USER_ROLES.MANAGER || role === USER_ROLES.ZENITH_SUPER_ADMIN;
+  const isAgency = role === USER_ROLES.AGENCY;
+
+  if (isAdmin) return;
+
+  if (isAgency && settingType === 'SHIPPER_DISCOUNT') {
+    if (!profileOrgId) throw new Error('조직 정보를 찾을 수 없습니다.');
+    if (targetRef.agency_org_id !== profileOrgId) throw new Error('본인 소속 대리점의 할인율만 관리할 수 있습니다.');
+    return;
+  }
+
+  throw new Error('UPS 요율 관리 권한이 없습니다.');
+}
+
 function validateScheduleDates(validFrom: string, validUntil?: string | null) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -113,7 +128,7 @@ async function insertAuditLog(
 
 export async function createPricingSchedule(input: CreatePricingScheduleInput) {
   const { supabase, profile } = await validateUserAction();
-  requireAdminOrManager(profile?.role);
+  requireSchedulePermission(profile?.role, input.setting_type, input.target_ref, profile?.org_id);
 
   validateScheduleDates(input.valid_from, input.valid_until);
 
@@ -161,7 +176,6 @@ export async function createPricingSchedule(input: CreatePricingScheduleInput) {
 
 export async function updatePricingSchedule(id: string, input: UpdatePricingScheduleInput) {
   const { supabase, profile } = await validateUserAction();
-  requireAdminOrManager(profile?.role);
 
   const admin = await createAdminClient();
 
@@ -173,6 +187,8 @@ export async function updatePricingSchedule(id: string, input: UpdatePricingSche
 
   if (fetchError || !existing) throw new Error('해당 예약을 찾을 수 없습니다.');
   if (existing.status !== 'SCHEDULED') throw new Error('SCHEDULED 상태인 예약만 수정 가능합니다.');
+
+  requireSchedulePermission(profile?.role, existing.setting_type, existing.target_ref, profile?.org_id);
 
   const newValidFrom = input.valid_from ?? existing.valid_from;
   const newValidUntil = input.valid_until !== undefined ? input.valid_until : existing.valid_until;
@@ -221,7 +237,6 @@ export async function updatePricingSchedule(id: string, input: UpdatePricingSche
 
 export async function cancelPricingSchedule(id: string) {
   const { supabase, profile } = await validateUserAction();
-  requireAdminOrManager(profile?.role);
 
   const admin = await createAdminClient();
 
@@ -233,6 +248,8 @@ export async function cancelPricingSchedule(id: string) {
 
   if (fetchError || !existing) throw new Error('해당 예약을 찾을 수 없습니다.');
   if (existing.status !== 'SCHEDULED') throw new Error('SCHEDULED 상태인 예약만 취소 가능합니다.');
+
+  requireSchedulePermission(profile?.role, existing.setting_type, existing.target_ref, profile?.org_id);
 
   const { error } = await admin
     .from('zen_ups_pricing_schedule')
@@ -256,7 +273,12 @@ export async function cancelPricingSchedule(id: string) {
 
 export async function getScheduledPricingChanges(settingType?: SettingType) {
   const { supabase, profile } = await validateUserAction();
-  requireAdminOrManager(profile?.role);
+  const isAdmin = profile?.role === USER_ROLES.ADMIN || profile?.role === USER_ROLES.MANAGER || profile?.role === USER_ROLES.ZENITH_SUPER_ADMIN;
+  const isAgency = profile?.role === USER_ROLES.AGENCY;
+
+  if (!isAdmin && !(isAgency && settingType === 'SHIPPER_DISCOUNT')) {
+    throw new Error('UPS 요율 관리 권한이 없습니다.');
+  }
 
   let query = supabase
     .from('zen_ups_pricing_schedule')
@@ -267,6 +289,10 @@ export async function getScheduledPricingChanges(settingType?: SettingType) {
     query = query.eq('setting_type', settingType);
   }
 
+  if (isAgency && profile?.org_id) {
+    query = query.eq('target_ref->>agency_org_id', profile.org_id);
+  }
+
   const { data, error } = await query;
   if (error) throw new Error(error.message);
   return data || [];
@@ -274,7 +300,12 @@ export async function getScheduledPricingChanges(settingType?: SettingType) {
 
 export async function getPricingAuditLog(settingType?: SettingType, targetRef?: Record<string, string>) {
   const { supabase, profile } = await validateUserAction();
-  requireAdminOrManager(profile?.role);
+  const isAdmin = profile?.role === USER_ROLES.ADMIN || profile?.role === USER_ROLES.MANAGER || profile?.role === USER_ROLES.ZENITH_SUPER_ADMIN;
+  const isAgency = profile?.role === USER_ROLES.AGENCY;
+
+  if (!isAdmin && !(isAgency && settingType === 'SHIPPER_DISCOUNT')) {
+    throw new Error('UPS 요율 관리 권한이 없습니다.');
+  }
 
   let query = supabase
     .from('zen_ups_pricing_setting_audit_log')
@@ -288,6 +319,10 @@ export async function getPricingAuditLog(settingType?: SettingType, targetRef?: 
 
   if (targetRef) {
     query = query.eq('target_ref', targetRef);
+  }
+
+  if (isAgency && profile?.org_id) {
+    query = query.eq('target_ref->>agency_org_id', profile.org_id);
   }
 
   const { data, error } = await query;

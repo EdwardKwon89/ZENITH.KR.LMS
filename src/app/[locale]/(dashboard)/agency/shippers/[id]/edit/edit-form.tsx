@@ -37,6 +37,7 @@ interface EditShipperFormProps {
     };
   };
   zones: UpsZoneWithCountries[];
+  agencyOrgId?: string;
 }
 
 interface FormValues {
@@ -51,7 +52,7 @@ interface FormValues {
   is_active: boolean;
 }
 
-export function EditShipperForm({ shipper, zones }: EditShipperFormProps) {
+export function EditShipperForm({ shipper, zones, agencyOrgId }: EditShipperFormProps) {
   const t = useTranslations('AgencyShippers');
   const router = useRouter();
   const params = useParams();
@@ -191,6 +192,7 @@ export function EditShipperForm({ shipper, zones }: EditShipperFormProps) {
             shipperOrgId={shipper.org.id}
             shipperType={shipper.shipper_type}
             zones={zones}
+            agencyOrgId={agencyOrgId}
           />
         </div>
       </div>

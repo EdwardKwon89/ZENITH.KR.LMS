@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Plus, Edit2, Trash2, XCircle, Globe, Package, DollarSign, Fuel, FileText, Building, Scale, Layers } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { USER_ROLES } from '@/lib/auth/rbac';
@@ -19,6 +19,7 @@ import {
   upsertUpsWeightTierRate, deleteUpsWeightTierRate,
   upsertUpsFreightMinimum, deleteUpsFreightMinimum,
 } from '@/app/actions/ups/rates-mutation';
+import { createPricingSchedule, getScheduledPricingChanges, cancelPricingSchedule, getPricingAuditLog } from '@/app/actions/ups/pricing-schedule';
 import type { ColumnDef } from '@tanstack/react-table';
 import UpsBaseRateMatrix from '@/components/ups/UpsBaseRateMatrix';
 
@@ -58,6 +59,29 @@ export default function UpsRatesClient({ zones, products, baseRates, fuelSurchar
   const [editingItem, setEditingItem] = useState<any>(null);
   const [form, setForm] = useState<any>({});
   const [loading, setLoading] = useState(false);
+  const [scheduledChanges, setScheduledChanges] = useState<any[]>([]);
+  const [auditLog, setAuditLog] = useState<any[]>([]);
+
+  const fetchScheduledChanges = useCallback(async () => {
+    try {
+      const data = await getScheduledPricingChanges('AGENCY_DISCOUNT');
+      setScheduledChanges(data);
+    } catch { }
+  }, []);
+
+  const fetchAuditLog = useCallback(async () => {
+    try {
+      const data = await getPricingAuditLog('AGENCY_DISCOUNT');
+      setAuditLog(data);
+    } catch { }
+  }, []);
+
+  useEffect(() => {
+    if (activeTab === 'agencyPolicies') {
+      fetchScheduledChanges();
+      fetchAuditLog();
+    }
+  }, [activeTab, fetchScheduledChanges, fetchAuditLog]);
 
   const canEdit = userRole === USER_ROLES.ADMIN || userRole === USER_ROLES.MANAGER || userRole === USER_ROLES.ZENITH_SUPER_ADMIN;
 
@@ -116,13 +140,27 @@ export default function UpsRatesClient({ zones, products, baseRates, fuelSurchar
         freightMinimums: (id: string, data: any) => upsertUpsFreightMinimum({ ...data, id }),
       };
       if (activeTab === 'agencyPolicies') {
-        const { agency_org_id, zone_rates, is_active, volumetric_divisor } = form;
+        const { agency_org_id, zone_rates, is_active, volumetric_divisor, valid_from, valid_until } = form;
         if (!agency_org_id) throw new Error('대리점을 선택해주세요.');
+        if (!valid_from) throw new Error('적용일자를 입력해주세요.');
+
         for (const zoneId of Object.keys(zone_rates ?? {})) {
-          await upsertAgencyPricingPolicy({ agency_org_id, zone_id: zoneId, discount_rate: zone_rates[zoneId] ?? 0, is_active });
+          await createPricingSchedule({
+            setting_type: 'AGENCY_DISCOUNT',
+            target_ref: { agency_org_id, zone_id: zoneId },
+            new_value: zone_rates[zoneId] ?? 0,
+            valid_from,
+            valid_until: valid_until || null,
+          });
         }
         if (volumetric_divisor) {
-          await updateAgencyVolumetricDivisor(agency_org_id, volumetric_divisor);
+          await createPricingSchedule({
+            setting_type: 'VOLUMETRIC_DIVISOR',
+            target_ref: { agency_org_id },
+            new_value: volumetric_divisor,
+            valid_from,
+            valid_until: valid_until || null,
+          });
         }
       } else if (editingItem && update[activeTab]) {
         await update[activeTab](editingItem.id, form);
@@ -187,7 +225,7 @@ export default function UpsRatesClient({ zones, products, baseRates, fuelSurchar
       );
       case 'fuelSurcharges': return <FuelSurchargeTable rows={fuelSurcharges} />;
       case 'otherCharges': return <OtherChargeTable otherCharges={otherCharges} canEdit={canEdit} onEdit={openEdit} onDelete={handleDelete} />;
-      case 'agencyPolicies': return <AgencyPolicyTable policies={agencyPolicies} canEdit={canEdit} onEdit={openEdit} agencies={agencies} />;
+      case 'agencyPolicies': return <AgencyPolicyTable policies={agencyPolicies} canEdit={canEdit} onEdit={openEdit} agencies={agencies} scheduledChanges={scheduledChanges} onRefreshScheduled={fetchScheduledChanges} auditLog={auditLog} />;
       case 'weightTierRates': return <WeightTierRateTable weightTierRates={weightTierRates} canEdit={canEdit} onEdit={openEdit} onDelete={handleDelete} />;
       case 'freightMinimums': return <FreightMinimumTable freightMinimums={freightMinimums} canEdit={canEdit} onEdit={openEdit} onDelete={handleDelete} />;
       default: return null;
@@ -419,6 +457,10 @@ function OtherChargeForm({ form, setForm, editingItem }: any) {
 // ─── Agency Policy (Zone Matrix) ────────────────────────────
 
 function AgencyPolicyForm({ form, setForm, agencies, zones }: any) {
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const minDate = tomorrow.toISOString().split('T')[0];
+
   return (
     <>
       <div className="space-y-1">
@@ -457,6 +499,21 @@ function AgencyPolicyForm({ form, setForm, agencies, zones }: any) {
           ))}
         </div>
       </div>
+      <div className="grid grid-cols-2 gap-3 p-3 bg-blue-50 rounded-xl border border-blue-100">
+        <div className="space-y-1">
+          <label className="text-xs font-bold text-blue-700 uppercase">적용일자 *</label>
+          <input type="date" value={form.valid_from || ''} min={minDate}
+            onChange={e => setForm({ ...form, valid_from: e.target.value })}
+            className="w-full px-2 py-1.5 bg-white border border-blue-200 rounded-lg text-sm" />
+        </div>
+        <div className="space-y-1">
+          <label className="text-xs font-bold text-blue-700 uppercase">종료일자</label>
+          <input type="date" value={form.valid_until || ''} min={form.valid_from || minDate}
+            onChange={e => setForm({ ...form, valid_until: e.target.value || null })}
+            className="w-full px-2 py-1.5 bg-white border border-blue-200 rounded-lg text-sm" />
+        </div>
+      </div>
+      <p className="text-[10px] text-blue-600">* 적용일자를 지정하면 즉시 적용 대신 예약 등록됩니다 (매일 자정 배치 적용).</p>
       <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.is_active ?? true} onChange={e => setForm({ ...form, is_active: e.target.checked })} /> 활성</label>
     </>
   );
@@ -513,8 +570,9 @@ function OtherChargeTable({ otherCharges, canEdit, onEdit, onDelete }: any) {
   return <ZenDataGrid columns={columns} data={otherCharges} />;
 }
 
-function AgencyPolicyTable({ policies, canEdit, onEdit, agencies }: any) {
+function AgencyPolicyTable({ policies, canEdit, onEdit, agencies, scheduledChanges, onRefreshScheduled, auditLog }: any) {
   const [search, setSearch] = useState('');
+  const [showAuditLog, setShowAuditLog] = useState(false);
   const orgMap = Object.fromEntries((agencies as Agency[]).map((a: any) => [a.id, a.name]));
   const divisorMap = Object.fromEntries((agencies as Agency[]).map((a: any) => [a.id, a.volumetric_divisor]));
   const filtered = search
@@ -541,6 +599,59 @@ function AgencyPolicyTable({ policies, canEdit, onEdit, agencies }: any) {
         className="w-full max-w-xs px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-500/10 focus:border-brand-500 transition-all"
       />
       <ZenDataGrid columns={columns} data={filtered} />
+      {scheduledChanges && scheduledChanges.length > 0 && (
+        <div className="mt-4 p-3 bg-amber-50 rounded-xl border border-amber-200">
+          <h4 className="text-xs font-bold text-amber-700 mb-2 uppercase">예정된 변경 ({scheduledChanges.length}건)</h4>
+          <div className="space-y-2">
+            {scheduledChanges.map((s: any) => (
+              <div key={s.id} className="flex items-center justify-between text-xs p-2 bg-white rounded-lg border border-amber-100">
+                <div>
+                  <span className="font-mono font-bold">{orgMap[s.target_ref?.agency_org_id] || s.target_ref?.agency_org_id}</span>
+                  <span className="text-slate-400 mx-1">|</span>
+                  <span className="text-slate-600">{s.setting_type}</span>
+                  <span className="text-slate-400 mx-1">|</span>
+                  <span className="font-mono">{typeof s.new_value === 'number' ? (s.setting_type === 'VOLUMETRIC_DIVISOR' ? s.new_value : `${(s.new_value * 100).toFixed(1)}%`) : s.new_value}</span>
+                  <span className="text-slate-400 mx-1">|</span>
+                  <span className="text-amber-600">{s.valid_from} ~ {s.valid_until || '무기한'}</span>
+                </div>
+                {canEdit && (
+                  <button onClick={async () => { if (confirm('이 예약을 취소하시겠습니까?')) { await cancelPricingSchedule(s.id); onRefreshScheduled?.(); } }} className="px-2 py-1 text-[10px] font-bold text-red-600 bg-red-50 rounded hover:bg-red-100">취소</button>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      {auditLog && auditLog.length > 0 && (
+        <div className="mt-4">
+          <button onClick={() => setShowAuditLog(!showAuditLog)} className="text-xs font-bold text-slate-600 hover:text-slate-800 flex items-center gap-1">
+            {showAuditLog ? '▾' : '▸'} 변경 이력 ({auditLog.length}건)
+          </button>
+          {showAuditLog && (
+            <div className="mt-2 p-3 bg-slate-50 rounded-xl border border-slate-200 max-h-64 overflow-y-auto">
+              <div className="space-y-1">
+                {auditLog.map((log: any) => (
+                  <div key={log.id} className="flex items-center justify-between text-[10px] p-1.5 bg-white rounded border border-slate-100">
+                    <div>
+                      <span className={`font-bold ${log.action === 'CREATE' ? 'text-green-600' : log.action === 'UPDATE' ? 'text-blue-600' : log.action === 'CANCEL' ? 'text-red-600' : log.action === 'APPLY' ? 'text-purple-600' : 'text-orange-600'}`}>{log.action}</span>
+                      <span className="text-slate-400 mx-1">|</span>
+                      <span className="font-mono">{log.setting_type}</span>
+                      {log.old_data && <span className="text-slate-400 mx-1">|</span>}
+                      {log.old_data?.discount_rate != null && <span className="text-slate-500">{(log.old_data.discount_rate * 100).toFixed(1)}%</span>}
+                      {log.old_data?.volumetric_divisor != null && <span className="text-slate-500">{log.old_data.volumetric_divisor}</span>}
+                      {log.new_data && <span className="text-slate-400 mx-1">→</span>}
+                      {log.new_data?.discount_rate != null && <span className="text-slate-700 font-bold">{(log.new_data.discount_rate * 100).toFixed(1)}%</span>}
+                      {log.new_data?.new_value != null && <span className="text-slate-700 font-bold">{log.setting_type === 'VOLUMETRIC_DIVISOR' ? log.new_data.new_value : `${(log.new_data.new_value * 100).toFixed(1)}%`}</span>}
+                      {log.new_data?.volumetric_divisor != null && <span className="text-slate-700 font-bold">{log.new_data.volumetric_divisor}</span>}
+                    </div>
+                    <span className="text-slate-400">{new Date(log.changed_at).toLocaleString('ko-KR')}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
