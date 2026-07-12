@@ -405,15 +405,14 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
     if (!watchedPackages) return { weight: 0, volume: 0, freight: 0 };
 
     watchedPackages.forEach(pkg => {
-      const count = Number(pkg.packing_count) || 0;
       const grossWeight = Number(pkg.gross_weight) || 0;
       
-      weight += grossWeight * count;
+      weight += grossWeight;
       
       const pkgVol = (pkg.length && pkg.width && pkg.height)
         ? (Number(pkg.length) * Number(pkg.width) * Number(pkg.height)) / 1000000 
         : (Number(pkg.volume) || 0);
-      volume += pkgVol * count;
+      volume += pkgVol;
     });
 
     const freight = estimateFreightCost({
