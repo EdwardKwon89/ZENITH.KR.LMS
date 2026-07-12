@@ -514,15 +514,35 @@ function OtherChargeTable({ otherCharges, canEdit, onEdit, onDelete }: any) {
 }
 
 function AgencyPolicyTable({ policies, canEdit, onEdit, agencies }: any) {
+  const [search, setSearch] = useState('');
   const orgMap = Object.fromEntries((agencies as Agency[]).map((a: any) => [a.id, a.name]));
+  const divisorMap = Object.fromEntries((agencies as Agency[]).map((a: any) => [a.id, a.volumetric_divisor]));
+  const filtered = search
+    ? policies.filter((p: any) => {
+        const name = p.agency?.name ?? orgMap[p.agency_org_id] ?? '';
+        return name.toLowerCase().includes(search.toLowerCase());
+      })
+    : policies;
   const columns: ColumnDef<any>[] = [
     { id: 'agency', header: '대리점', cell: ({ row }) => <span className="font-medium">{row.original.agency?.name ?? orgMap[row.original.agency_org_id] ?? row.original.agency_org_id}</span> },
     { id: 'zone', header: 'Zone', cell: ({ row }) => <ZenBadge variant="default" className="font-mono">{row.original.zone?.zone_code ?? '-'}</ZenBadge> },
-    { accessorKey: 'discount_rate', header: '할인율', cell: ({ row }) => <span className="font-mono font-semibold text-brand-700">{(Number(row.original.discount_rate) * 100).toFixed(2)}%</span> },
+    { accessorKey: 'discount_rate', header: '할인율', cell: ({ row }) => <span className="font-mono font-semibold text-brand-700">{(Number(row.original.discount_rate) * 100).toFixed(1)}%</span> },
+    { id: 'divisor', header: '부피중량', cell: ({ row }) => <span className="font-mono text-xs text-slate-500">{divisorMap[row.original.agency_org_id] ?? 5000}</span> },
     { id: 'status', header: '상태', cell: ({ row }) => <ZenBadge variant={row.original.is_active ? 'success' : 'default'}>{row.original.is_active ? '활성' : '비활성'}</ZenBadge> },
     ...(canEdit ? [{ id: 'actions' as const, header: '관리', cell: ({ row }: any) => <ActionsCell row={row} onEdit={onEdit} onDelete={() => {}} /> }] : []),
   ];
-  return <ZenDataGrid columns={columns} data={policies} />;
+  return (
+    <div className="space-y-3">
+      <input
+        type="text"
+        value={search}
+        onChange={e => setSearch(e.target.value)}
+        placeholder="대리점명으로 검색..."
+        className="w-full max-w-xs px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-500/10 focus:border-brand-500 transition-all"
+      />
+      <ZenDataGrid columns={columns} data={filtered} />
+    </div>
+  );
 }
 
 // ─── Shared ──────────────────────────────────────────────────
