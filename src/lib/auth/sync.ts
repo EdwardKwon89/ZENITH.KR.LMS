@@ -6,6 +6,7 @@ export type AuthMetadata = {
   org_id?: string;
   org_type?: string;
   status?: string;
+  grade_code?: string;
 };
 
 export async function syncAuthMetadata(userId: string, metadata: AuthMetadata): Promise<void> {

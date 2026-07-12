@@ -334,6 +334,9 @@ export async function changeMemberGrade(userId: string, gradeCode: string) {
     throw new Error("회원 등급 변경 중 오류가 발생했습니다.");
   }
 
+  // Sync grade to Supabase Auth app_metadata for consistency
+  await syncAuthMetadata(userId, { grade_code: gradeCode });
+
   revalidatePath("/admin/members");
   return { success: true };
 }
