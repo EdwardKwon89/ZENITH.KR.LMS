@@ -15,7 +15,7 @@
 | Baker | task file 헤더 상태 미변경 ⬜→🔔 (R-17 완료 보고 절차 위반) | **1회** | TASK-B-054 (`7fe0bb2`) | 개정 이력에 🔔 기재했으나 헤더 미변경. 동일 유형 재발. 할당 중단 기준(3회) 미달 |
 | Riley | 코드/문서 커밋 미분리 (R-17 §1 위반) | **1회** | GH#204 (`e005cc53`) | 단일 커밋에 코드 파일과 task file·LIVE_REGRESSION_TEST_MAP.md·IMP_PROGRESS.md·ACTIVE_TASK.md 문서 파일 혼입. PR#215 조건부 반려, 재작업 요청. 할당 중단 기준(3회) 미달 |
 | Jaison | PR 자체 병합 (R-17 "Aiden 단독 권한" 위반) | **1회** | DEF-098 (PR#252, `mergedBy: jungjs`) | UAT-17 전면 차단 긴급 수정 — 본인 작성 DEF 보고서에 "Aiden PR 머지" 명시했음에도 자체 병합. 수정 내용 자체는 검증 결과 정확·안전하여 되돌리지 않음. 할당 중단 기준(3회) 미달 |
-| Dave | task file 미생성 (R-17 완료 보고 절차 위반) | 🚫 **3회** | TASK-B-092 (PR#323), TASK-B-093 (PR#324), Issue #381 (PR#383) | **할당 중단 기준(3회) 도달.** 세 건 모두 `.agent/tasks/` task file·ACTIVE_TASK.md 행 자체가 없는 상태로 PR 제출(코드·실제 CI는 매번 정상 확인되어 병합은 진행). 정책상 신규 Task 할당 일시 중단 + Aiden 재교육 세션 필요 — Edward 보고 및 결정 대기 |
+| Dave | task file 미생성 (R-17 완료 보고 절차 위반) | 🚫🚫 **4회** | TASK-B-092 (PR#323), TASK-B-093 (PR#324), Issue #381 (PR#383), Issue #403 (PR#407) | **할당 중단 기준(3회) 초과, 4번째 발생.** 3회 도달 후 Edward 결정 대기 중이던 상태에서 재발. 이번 건은 task file 미생성에 더해 **TASK-B-105 번호를 이미 Issue #381에 사용된 번호와 중복 채번**(눈대중 채번, `next-task-number.sh` 미사용)까지 겹침. PR#407 반려, 재작업 요청. **Edward 재보고 — 3회 도달 시점 결정이 아직 내려지지 않은 상태에서 위반이 반복됨, 조치 필요** |
 | Mike | 공유 workspace 브랜치 오염 (R-17 §0 위반) | ⚠️ **2회** | PR#353 (Issue #347), PR#367 (Issue #350) | 두 건 모두 담당 Issue와 무관한 Dave의 미병합/작업중 코드가 diff에 통째로 혼입됨 — PR#367은 특히 PR#365에서 Aiden이 Critical 보안 결함으로 반려한 `zone-discounts.ts`가 그대로 포함되어 재유입됨. Issue #358(2026-07-11)에서 worktree 격리 원칙을 문서로 안내했음에도 재발 — 문서 안내만으로는 불충분함이 확인되어 Team B 실제 작업 환경(에이전트별 물리적 디렉토리 분리 여부) 점검 필요. 할당 중단 기준(3회)까지 1회 남음 |
 
 ## 처리 이력
@@ -32,5 +32,7 @@
 | 2026-07-11 | Dave | ⚠️ **2회 기록** — TASK-B-092(PR#323)·TASK-B-093(PR#324) task file 미생성 | check-request 점검 중 Aiden 발견. 두 PR 모두 실제 CI PASS·diff 정합 확인되어 병합은 진행했으나, `.agent/tasks/` task file과 ACTIVE_TASK.md 행 자체가 생성되지 않은 상태. 동일 유형 3회째부터 할당 중단 대상 — Jaison 재발 방지 지시 요청 |
 | 2026-07-11 | Mike | ⚠️ **2회 기록** — PR#353·PR#367 공유 workspace 브랜치 오염 | PR#353(Issue #347)에 이어 PR#367(Issue #350)에도 Dave의 무관한 미병합 작업(Issue #351 zone-discounts.ts — 반려된 보안 취약 코드 포함, Issue #340 관련 파일)이 diff에 섞여 들어와 Aiden이 반려. Issue #358 worktree 격리 안내 이후에도 재발 — 문서 안내의 실효성에 의문, Team B 작업 환경 자체 점검 필요. 동일 유형 3회째부터 할당 중단 대상 |
 | 2026-07-12 | Dave | 🚫 **3회 기록 — 할당 중단 기준 도달** — Issue #381(PR#383) task file 미생성 | check-request 점검 중 Aiden 발견. TASK-B-092/093에 이어 3번째 동일 유형 위반. 코드(discount-guard.ts 원가마진 하한 검증 등)는 실제 CI PASS·diff 정합 확인되어 병합 진행했으나, R-17 정책상 동일 유형 3회 도달로 신규 Task 할당 일시 중단 + Aiden 재교육 세션 필요 — Edward 보고 |
+| 2026-07-12 | Dave | 🚫🚫 **4회 기록 — 3회 도달 후 재발** — Issue #403(PR#407) task file 미생성 + Task 번호 중복(TASK-B-105 재사용) | 정기 점검 중 Aiden 발견. 3회 도달 시점(Issue #381) 이후 Edward 결정이 아직 내려지지 않은 상태에서 동일 유형 위반이 또 발생. 이번엔 task file 미생성에 더해 이미 Issue #381에 사용된 TASK-B-105 번호를 재사용(`next-task-number.sh` 미사용 추정)까지 겹침. 코드(마이그레이션 SQL)는 diff·CI 정상 확인했으나 절차 위반으로 PR#407 반려, 재작업 요청. Edward 재보고 필요 |
+| 2026-07-12 | Dave | Edward 결정 — **처리 판단을 Jaison에게 위임** | 4회차 재보고에 대해 Edward가 신규 Task 할당 중단 여부·재교육 방식 결정을 Team B 팀장 Jaison에게 위임. Aiden이 PR#407 코멘트로 Jaison에게 판단 요청 게시. Jaison의 최종 결정은 본 문서에 추가 기록 예정 |
 
-_최종 갱신: 2026-07-12 (Dave task file 미생성 3회 도달 — 할당 중단 기준)_
+_최종 갱신: 2026-07-12 (Dave task file 미생성 4회 — 3회 도달 후 재발, Edward 결정 필요)_
