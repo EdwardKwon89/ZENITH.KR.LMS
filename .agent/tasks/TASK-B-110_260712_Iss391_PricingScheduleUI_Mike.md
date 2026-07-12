@@ -5,7 +5,7 @@
 | **Issue** | [#391](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/391) |
 | **담당** | Mike (Team B) |
 | **생성일** | 2026-07-12 |
-| **상태** | 🔔 보고 완료 |
+| **상태** | ✅ 완료 |
 
 ## 작업 결과
 
@@ -28,4 +28,10 @@
 - **Regression**: 78/81 PASS (3건 환경변수 무관)
 
 ### 커밋
-- (커밋 예정) — `[Mike] feat: TASK-B-110 Issue #391 4단계 UI — 적용일자·예정목록·이력 조회`
+- `f242966f` — `[Mike] feat: TASK-B-110 Issue #391 4단계 UI — 적용일자·예정목록·이력 조회` (PR#399)
+
+## [Aiden 검토]
+
+**1차 반려 (260712)**: `agencyOrgId` prop이 두 UI 진입점(`agency/shippers/[id]/edit/page.tsx`→`edit-form.tsx`, `agency/ups-rates/page.tsx`→`agency-ups-rates-client.tsx`) 모두에서 `ZoneDiscountForm`까지 전달되지 않음 확인 — `handleSave()`의 `if (!agencyOrgId) return` 가드로 인해 프로덕션에서 저장이 항상 실패하는 상태였음. Playwright 테스트가 개인 화주로 먼저 실행되어 핵심 기능(SHIPPER_DISCOUNT 예약 등록)이 한 번도 실행되지 않은 점도 함께 지적.
+
+**재검토 승인 (260712)**: 4개 파일(`page.tsx` ×2, `edit-form.tsx`, `agency-ups-rates-client.tsx`) diff 직접 확인 — `profile.org_id` → `agencyOrgId` 3단 전달 정상 완료. 실제 CI(headSha `f242966f` 일치) 확인 결과 Regression Tests 81/81 test files·485/485 tests 전부 PASS(로컬 자체보고 "78/81"과 불일치 — CI가 authoritative, 문제 없음 확인). PR#399 승인·머지 완료. Issue #391(1~4단계) 전체 완료 Close.
