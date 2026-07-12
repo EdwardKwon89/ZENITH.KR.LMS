@@ -16,7 +16,7 @@
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
 | [#404](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/404) | [fix] Critical — 오더등록 Shipment Summary 중량/부피 계산에 packing_count 곱셈 잔존 (Issue #294 재발) | b | p1 | - | 미배정 | 2026-07-12 |
-| [#403](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/403) | [fix] Critical — UPS Zone 조회 시 국가코드 자릿수 불일치(2자리 vs 3자리)로 Zone 매칭 실패 | b | p1 | - | 미배정 | 2026-07-12 |
+| [#403](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/403) | [fix] Critical — UPS Zone 조회 시 국가코드 자릿수 불일치(2자리 vs 3자리)로 Zone 매칭 실패 | b | p1 | review | 미배정 | 2026-07-12 |
 | [#358](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/358) | [Aiden] R-17 절차 오류 재발 방지 — 4단계 구조적 개선 (채번 자동화·회귀결과 신뢰 제거·CI 게이트·워크트리 격리) | a | p2 | - | 미배정 | 2026-07-12 |
 | [#285](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/285) | [fix] 신규운송요청 탭 전환 시 화주/수하인 입력값 초기화 버그 | b | p2 | rework | jungjs | 2026-07-08 |
 | [#164](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/164) | [UAT-Epic] UPS 특송 서비스 — Team B 인수 테스트 (UAT-15~19) | b | p1 | open | jungjs | 2026-07-07 |
