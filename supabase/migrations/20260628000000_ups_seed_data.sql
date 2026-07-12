@@ -15,19 +15,19 @@ INSERT INTO public.zen_ups_zones (zone_code, zone_name, description, sort_order)
   ('Z10', 'Zone 10 - Africa',                '아프리카', 10)
 ON CONFLICT (zone_code) DO NOTHING;
 
--- 2. zen_ups_zone_countries (대표 국가 매핑) — ISO 3166-1 alpha-2
+-- 2. zen_ups_zone_countries (대표 국가 매핑)
 INSERT INTO public.zen_ups_zone_countries (zone_id, country_code)
 SELECT z.id, c.country_code
 FROM (VALUES
-  ('Z2', 'CN'), ('Z2', 'JP'), ('Z2', 'TW'), ('Z2', 'HK'),
-  ('Z3', 'SG'), ('Z3', 'MY'), ('Z3', 'TH'), ('Z3', 'VN'), ('Z3', 'PH'), ('Z3', 'ID'), ('Z3', 'BN'),
-  ('Z4', 'AU'), ('Z4', 'NZ'),
-  ('Z5', 'AE'), ('Z5', 'SA'), ('Z5', 'QA'), ('Z5', 'KW'), ('Z5', 'IL'), ('Z5', 'TR'), ('Z5', 'IN'),
-  ('Z6', 'DE'), ('Z6', 'GB'), ('Z6', 'FR'), ('Z6', 'IT'), ('Z6', 'ES'), ('Z6', 'NL'), ('Z6', 'BE'), ('Z6', 'CH'),
-  ('Z7', 'SE'), ('Z7', 'NO'), ('Z7', 'FI'), ('Z7', 'DK'), ('Z7', 'PL'), ('Z7', 'CZ'), ('Z7', 'AT'),
-  ('Z8', 'US'), ('Z8', 'CA'),
-  ('Z9', 'MX'), ('Z9', 'BR'), ('Z9', 'AR'), ('Z9', 'CL'), ('Z9', 'CO'),
-  ('Z10','ZA'), ('Z10','NG'), ('Z10','KE'), ('Z10','EG')
+  ('Z2', 'CHN'), ('Z2', 'JPN'), ('Z2', 'TWN'), ('Z2', 'HKG'),
+  ('Z3', 'SGP'), ('Z3', 'MYS'), ('Z3', 'THA'), ('Z3', 'VNM'), ('Z3', 'PHL'), ('Z3', 'IDN'), ('Z3', 'BRN'),
+  ('Z4', 'AUS'), ('Z4', 'NZL'),
+  ('Z5', 'ARE'), ('Z5', 'SAU'), ('Z5', 'QAT'), ('Z5', 'KWT'), ('Z5', 'ISR'), ('Z5', 'TUR'), ('Z5', 'IND'),
+  ('Z6', 'DEU'), ('Z6', 'GBR'), ('Z6', 'FRA'), ('Z6', 'ITA'), ('Z6', 'ESP'), ('Z6', 'NLD'), ('Z6', 'BEL'), ('Z6', 'CHE'),
+  ('Z7', 'SWE'), ('Z7', 'NOR'), ('Z7', 'FIN'), ('Z7', 'DNK'), ('Z7', 'POL'), ('Z7', 'CZE'), ('Z7', 'AUT'),
+  ('Z8', 'USA'), ('Z8', 'CAN'),
+  ('Z9', 'MEX'), ('Z9', 'BRA'), ('Z9', 'ARG'), ('Z9', 'CHL'), ('Z9', 'COL'),
+  ('Z10','ZAF'), ('Z10','NGA'), ('Z10','KEN'), ('Z10','EGY')
 ) AS c(zone_code, country_code)
 JOIN public.zen_ups_zones z ON z.zone_code = c.zone_code
 ON CONFLICT (country_code) DO NOTHING;

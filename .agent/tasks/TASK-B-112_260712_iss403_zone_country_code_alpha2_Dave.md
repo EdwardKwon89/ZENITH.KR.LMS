@@ -1,4 +1,4 @@
-# TASK-B-111: Issue #403 — UPS Zone 국가코드 alpha-3→alpha-2 마이그레이션
+# TASK-B-112: Issue #403 — UPS Zone 국가코드 alpha-3→alpha-2 마이그레이션
 
 **담당**: Dave (DeepSeek V4 Flash Free)  
 **생성일**: 2026-07-12  
