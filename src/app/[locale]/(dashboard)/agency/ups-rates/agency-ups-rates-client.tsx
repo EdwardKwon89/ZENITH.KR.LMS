@@ -1,12 +1,14 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { DollarSign, Fuel, FileText, Layers, Scale } from 'lucide-react';
+import { DollarSign, Fuel, FileText, Layers, Scale, Users } from 'lucide-react';
 import { ZenBadge } from '@/components/ui/ZenUI';
 import ZenDataGrid from '@/components/ui/ZenDataGrid';
 import UpsBaseRateMatrix from '@/components/ups/UpsBaseRateMatrix';
+import { ZoneDiscountForm } from '@/components/agency/ZoneDiscountForm';
 import type { UpsZoneWithCountries, UpsProduct } from '@/types/ups';
 import type { PublicBaseRate, PublicFuelSurcharge, PublicOtherCharge, PublicWeightTierRate, PublicFreightMinimum } from '@/app/actions/ups/rates-public';
+import type { AgencyShipperRow } from '@/types/agency';
 import type { ColumnDef } from '@tanstack/react-table';
 
 interface PricingPolicy {
@@ -17,7 +19,7 @@ interface PricingPolicy {
   is_active: boolean;
 }
 
-type TabKey = 'baseRates' | 'fuelSurcharges' | 'otherCharges' | 'weightTierRates' | 'freightMinimums';
+type TabKey = 'baseRates' | 'fuelSurcharges' | 'otherCharges' | 'weightTierRates' | 'freightMinimums' | 'shipperDiscounts';
 
 const TABS: { key: TabKey; label: string; icon: React.ElementType }[] = [
   { key: 'baseRates', label: '기준요금', icon: DollarSign },
@@ -25,6 +27,7 @@ const TABS: { key: TabKey; label: string; icon: React.ElementType }[] = [
   { key: 'otherCharges', label: '부가요금', icon: FileText },
   { key: 'weightTierRates', label: '20kg 초과 티어 요율', icon: Layers },
   { key: 'freightMinimums', label: 'Freight 최소운임', icon: Scale },
+  { key: 'shipperDiscounts', label: '화주 할인율 관리', icon: Users },
 ];
 
 interface Props {
@@ -36,11 +39,12 @@ interface Props {
   weightTierRates: PublicWeightTierRate[];
   freightMinimums: PublicFreightMinimum[];
   pricingPolicies: PricingPolicy[];
+  shippers: AgencyShipperRow[];
 }
 
 export function AgencyUpsRatesClient({
   zones, products, baseRates, fuelSurcharges, otherCharges,
-  weightTierRates, freightMinimums, pricingPolicies,
+  weightTierRates, freightMinimums, pricingPolicies, shippers,
 }: Props) {
   const [activeTab, setActiveTab] = useState<TabKey>('baseRates');
 
@@ -75,6 +79,8 @@ export function AgencyUpsRatesClient({
         return <WeightTierRateTable weightTierRates={weightTierRates} calcAgencyCost={calcAgencyCost} />;
       case 'freightMinimums':
         return <FreightMinimumTable freightMinimums={freightMinimums} calcAgencyCost={calcAgencyCost} />;
+      case 'shipperDiscounts':
+        return <ShipperDiscountsTab shippers={shippers} zones={zones} />;
       default:
         return null;
     }
@@ -144,4 +150,48 @@ function FreightMinimumTable({ freightMinimums, calcAgencyCost }: { freightMinim
     }},
   ];
   return <ZenDataGrid columns={columns} data={freightMinimums} />;
+}
+
+function ShipperDiscountsTab({ shippers, zones }: { shippers: AgencyShipperRow[]; zones: UpsZoneWithCountries[] }) {
+  const [selectedShipperOrgId, setSelectedShipperOrgId] = useState<string | null>(null);
+  const corporateShippers = shippers.filter(s => s.shipper_type === 'CORPORATE');
+
+  const selected = selectedShipperOrgId
+    ? corporateShippers.find(s => s.shipper_org_id === selectedShipperOrgId)
+    : null;
+
+  const columns: ColumnDef<AgencyShipperRow>[] = [
+    { id: 'name', header: '화주명', cell: ({ row }) => <span className="text-sm font-semibold text-slate-800">{row.original.shipper?.name ?? '-'}</span> },
+    { id: 'biz_no', header: '사업자번호', cell: ({ row }) => <span className="font-mono text-sm text-slate-500">{row.original.shipper?.biz_no ?? '-'}</span> },
+    { id: 'status', header: '상태', cell: ({ row }) => (
+      <ZenBadge variant={row.original.is_active ? 'success' : 'default'}>
+        {row.original.is_active ? '활성' : '비활성'}
+      </ZenBadge>
+    )},
+    {
+      id: 'actions', header: '설정',
+      cell: ({ row }) => (
+        <button
+          type="button"
+          onClick={() => setSelectedShipperOrgId(row.original.shipper_org_id)}
+          className={`px-3 py-1 text-xs font-bold rounded-lg transition-colors ${selectedShipperOrgId === row.original.shipper_org_id ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+        >
+          {selectedShipperOrgId === row.original.shipper_org_id ? '선택됨' : '선택'}
+        </button>
+      ),
+    },
+  ];
+
+  return (
+    <div className="space-y-4">
+      {selected && (
+        <ZoneDiscountForm
+          shipperOrgId={selected.shipper_org_id}
+          shipperType={selected.shipper_type}
+          zones={zones}
+        />
+      )}
+      <ZenDataGrid columns={columns} data={corporateShippers} />
+    </div>
+  );
 }

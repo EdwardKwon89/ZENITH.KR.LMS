@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { validateUserAction } from '@/lib/auth/guards';
 import { USER_ROLES } from '@/lib/auth/rbac';
+import { getMaxAllowedZoneDiscount } from '@/lib/ups/discount-guard';
 
 function requireAdminOrManager(role: string | undefined) {
   if (!role || (role !== USER_ROLES.ADMIN && role !== USER_ROLES.MANAGER && role !== USER_ROLES.ZENITH_SUPER_ADMIN)) {
@@ -180,6 +181,14 @@ export async function upsertAgencyPricingPolicy(data: {
 }) {
   const { supabase, profile } = await validateUserAction();
   requireAdminOrManager(profile?.role);
+
+  const maxAllowed = await getMaxAllowedZoneDiscount(supabase, data.zone_id);
+  if (maxAllowed != null && data.discount_rate > maxAllowed) {
+    throw new Error(
+      `할인율이 원가 마진을 초과합니다. 최대 허용: ${(maxAllowed * 100).toFixed(1)}% (Zone ID: ${data.zone_id})`
+    );
+  }
+
   const { error } = await supabase.from('zen_agency_pricing_policies').upsert(data, {
     onConflict: 'agency_org_id,zone_id',
   });

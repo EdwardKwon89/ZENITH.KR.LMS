@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/utils/supabase/server';
 import { getUpsZones, getUpsProducts } from '@/app/actions/ups/rates';
 import { getPublicBaseRates, getPublicFuelSurcharges, getPublicOtherCharges, getPublicWeightTierRates, getPublicFreightMinimums } from '@/app/actions/ups/rates-public';
+import { getAgencyShippers } from '@/app/actions/agency/shippers';
 import { AgencyUpsRatesClient } from './agency-ups-rates-client';
 
 export default async function AgencyUpsRatesPage() {
@@ -19,6 +20,8 @@ export default async function AgencyUpsRatesPage() {
     getPublicWeightTierRates(),
     getPublicFreightMinimums(),
   ]);
+
+  const { shippers } = await getAgencyShippers(profile.org_id);
 
   const { data: pricingPolicies } = await supabase
     .from('zen_agency_pricing_policies')
@@ -41,6 +44,7 @@ export default async function AgencyUpsRatesPage() {
         weightTierRates={weightTierRates}
         freightMinimums={freightMinimums}
         pricingPolicies={pricingPolicies ?? []}
+        shippers={shippers ?? []}
       />
     </div>
   );

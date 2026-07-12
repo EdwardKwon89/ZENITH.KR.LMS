@@ -10,7 +10,7 @@ import { RequiredFields } from '../../new/required-fields';
 import { ContactFields } from '../../new/contact-fields';
 import { AddressInput } from '@/components/common/AddressInput';
 import { getCountryName } from '@/lib/utils/country';
-import { ZoneDiscountForm } from './zone-discount-form';
+import { ZoneDiscountForm } from '@/components/agency/ZoneDiscountForm';
 import type { UpsZoneWithCountries } from '@/types/ups';
 
 interface EditShipperFormProps {
