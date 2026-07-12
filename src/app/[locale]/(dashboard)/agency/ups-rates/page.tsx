@@ -45,6 +45,7 @@ export default async function AgencyUpsRatesPage() {
         freightMinimums={freightMinimums}
         pricingPolicies={pricingPolicies ?? []}
         shippers={shippers ?? []}
+        agencyOrgId={profile.org_id}
       />
     </div>
   );
