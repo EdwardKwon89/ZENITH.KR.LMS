@@ -22,6 +22,7 @@ interface UpsFreightEstimateSectionProps {
   selectedIncoterms?: 'DDU' | 'DDP';
   onProductChange: (productId: string) => void;
   onIncotermsChange: (incoterms: 'DDU' | 'DDP') => void;
+  onEstimateChange?: (estimate: UpsFreightEstimate | null) => void;
 }
 
 const FAMILY_LABELS: Record<string, string> = {
@@ -43,6 +44,7 @@ export function UpsFreightEstimateSection({
   selectedIncoterms = 'DDP',
   onProductChange,
   onIncotermsChange,
+  onEstimateChange,
 }: UpsFreightEstimateSectionProps) {
   const [products, setProducts] = useState<UpsProduct[]>([]);
   const [productsLoading, setProductsLoading] = useState(true);
@@ -144,6 +146,10 @@ export function UpsFreightEstimateSection({
 
     return () => { cancelled = true; };
   }, [selectedProductId, destCountryCode, packages, selectedIncoterms, agencyOrgId, shipperOrgId]);
+
+  useEffect(() => {
+    onEstimateChange?.(estimate);
+  }, [estimate, onEstimateChange]);
 
   return (
     <div className="space-y-3">
