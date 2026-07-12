@@ -1,7 +1,7 @@
 "use client";
 import { logger } from '@/lib/logger';
 
-import React, { useMemo, useEffect, useCallback } from 'react';
+import React, { useMemo, useEffect, useCallback, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -17,6 +17,7 @@ import { createOrder } from '@/app/actions/orders';
 import { createAddressBookEntry } from '@/app/actions/operations/address-book';
 import { getCurrentUserAffiliation } from '@/app/actions/master';
 import { UpsFreightEstimateSection } from './UpsFreightEstimateSection';
+import { UpsFreightEstimate } from '@/app/actions/ups/freight';
 import { UpsServiceSelector } from './UpsServiceSelector';
 import { USER_ROLES } from '@/lib/auth/rbac';
 import { orderRegistrationSchema, OrderRegistrationInput } from '@/lib/validation/order';
@@ -258,6 +259,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
   const [refetchAddressBook, setRefetchAddressBook] = React.useState(0);
   const [showAddressBookInput, setShowAddressBookInput] = React.useState(false);
   const [addressBookDisplayName, setAddressBookDisplayName] = React.useState('');
+  const [upsEstimate, setUpsEstimate] = React.useState<UpsFreightEstimate | null>(null);
   const [hsLookupLoadingMap, setHsLookupLoadingMap] = React.useState<Record<string, boolean>>({});
   const [hsLookupResultMap, setHsLookupResultMap] = React.useState<Record<string, { hs_code: string; confidence: 'high' | 'medium' | 'low' } | null>>({});
 
@@ -280,7 +282,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
       const res = await fetch('/api/hs-lookup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ item_name: itemName.trim(), dest_country_code: destPort?.country_code }),
+        body: JSON.stringify({ item_name: itemName.trim(), dest_country_code: watch('recipient_country_code') || destPort?.country_code }),
       });
       if (!res.ok) return;
       const result = await res.json();
@@ -568,15 +570,10 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
   }, [selectedCombination]);
 
   const handleNextToStep2 = async () => {
-    const isStep1Valid = await trigger([
-      'shipper_id',
-      'origin_port_id',
-      'dest_port_id',
-      'transport_mode',
-      'recipient_name',
-      'recipient_address',
-      'recipient_phone',
-    ]);
+    const currentMode = watch('transport_mode');
+    const baseFields = ['shipper_id', 'transport_mode', 'recipient_name', 'recipient_address', 'recipient_phone'] as const;
+    const portFields = currentMode === 'UPS' ? [] as const : (['origin_port_id', 'dest_port_id'] as const);
+    const isStep1Valid = await trigger([...baseFields, ...portFields]);
     if (isStep1Valid) {
       setStep(2);
     } else {
@@ -1061,20 +1058,22 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                    </div>
                  </ZenCard>
 
-                 {/* 🚢 Port Selection */}
-                <ZenCard className="p-3 border-slate-200">
-                  <h4 className="text-[10px] font-bold text-slate-500 mb-2 uppercase tracking-wider">{t('origin_port')} / {t('dest_port')} <span className="text-rose-500">*</span></h4>
-                  <div className="grid grid-cols-2 gap-2">
-                    <select {...register('origin_port_id')} className="w-full bg-white border border-slate-200 text-xs px-2 py-2 rounded-xl outline-none focus:ring-2 focus:ring-blue-50">
-                      <option value="">{transportMode === 'AIR' || transportMode === 'EXP' || transportMode === 'UPS' ? 'Origin Airport' : 'Origin Port'}</option>
-                      {filteredPorts.map(p => <option key={p.id} value={p.id}>[{p.code}] {p.name}</option>)}
-                    </select>
-                    <select {...register('dest_port_id')} className="w-full bg-white border border-slate-200 text-xs px-2 py-2 rounded-xl outline-none focus:ring-2 focus:ring-blue-50">
-                      <option value="">{transportMode === 'AIR' || transportMode === 'EXP' || transportMode === 'UPS' ? 'Dest Airport' : 'Dest Port'}</option>
-                      {filteredPorts.map(p => <option key={p.id} value={p.id}>[{p.code}] {p.name}</option>)}
-                    </select>
-                  </div>
-                </ZenCard>
+                 {/* 🚢 Port Selection — UPS 모드에서는 숨김 */}
+                 {transportMode !== 'UPS' && (
+                 <ZenCard className="p-3 border-slate-200">
+                   <h4 className="text-[10px] font-bold text-slate-500 mb-2 uppercase tracking-wider">{t('origin_port')} / {t('dest_port')} <span className="text-rose-500">*</span></h4>
+                   <div className="grid grid-cols-2 gap-2">
+                     <select {...register('origin_port_id')} className="w-full bg-white border border-slate-200 text-xs px-2 py-2 rounded-xl outline-none focus:ring-2 focus:ring-blue-50">
+                       <option value="">{transportMode === 'AIR' || transportMode === 'EXP' ? 'Origin Airport' : 'Origin Port'}</option>
+                       {filteredPorts.map(p => <option key={p.id} value={p.id}>[{p.code}] {p.name}</option>)}
+                     </select>
+                     <select {...register('dest_port_id')} className="w-full bg-white border border-slate-200 text-xs px-2 py-2 rounded-xl outline-none focus:ring-2 focus:ring-blue-50">
+                       <option value="">{transportMode === 'AIR' || transportMode === 'EXP' ? 'Dest Airport' : 'Dest Port'}</option>
+                       {filteredPorts.map(p => <option key={p.id} value={p.id}>[{p.code}] {p.name}</option>)}
+                     </select>
+                   </div>
+                 </ZenCard>
+                 )}
 
                 {/* 🚚 Delivery Method & Pickup Details (IMP-118) */}
                 <ZenCard className="p-3 border-slate-200 mt-3">
@@ -1307,12 +1306,13 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                       </h4>
                       <UpsFreightEstimateSection
                         shipperOrgId={affiliation?.orgId ?? null}
-                        destCountryCode={destPort?.country_code}
+                        destCountryCode={watch('recipient_country_code') || undefined}
                         packages={watchedPackages || []}
                         selectedProductId={watch('ups_product_code')}
                         selectedIncoterms={watch('incoterms')}
                         onProductChange={(id) => setValue('ups_product_code', id)}
                         onIncotermsChange={(value) => setValue('incoterms', value)}
+                        onEstimateChange={setUpsEstimate}
                       />
                     </div>
                   )}
@@ -1329,6 +1329,12 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                         <p className="text-[9px] text-slate-500 font-bold tracking-tight mb-0.5">TOTAL VOLUME</p>
                         <p className="text-xl font-black">{totals.volume.toFixed(4)}<span className="text-[10px] text-slate-500 ml-1">CBM</span></p>
                       </div>
+                      {transportMode === 'UPS' && upsEstimate && (
+                        <div className="text-right">
+                          <p className="text-[9px] text-blue-400 font-bold tracking-tight mb-0.5">UPS 예상운임</p>
+                          <p className="text-xl font-black text-blue-300">{new Intl.NumberFormat('ko-KR', { style: 'currency', currency: upsEstimate.platform.currency || 'USD' }).format(upsEstimate.shipper?.finalFreight ?? upsEstimate.platform.totalSellingPrice)}</p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </ZenCard>

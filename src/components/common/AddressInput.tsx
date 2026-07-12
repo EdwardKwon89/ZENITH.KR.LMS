@@ -81,7 +81,10 @@ export function AddressInput({
         <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">{t('form_country')}</label>
         <select
           value={countryCode}
-          onChange={(e) => setCountryCode(e.target.value)}
+          onChange={(e) => {
+            setCountryCode(e.target.value);
+            if (setValue && prefix) setValue(`${prefix}_country_code`, e.target.value);
+          }}
           disabled={readOnly}
           className={`w-full h-10 px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${readOnly ? 'bg-slate-50' : ''}`}
         >

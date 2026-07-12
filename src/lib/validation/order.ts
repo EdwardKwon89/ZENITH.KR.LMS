@@ -38,8 +38,8 @@ export const orderPackageSchema = z.object({
 export const orderRegistrationSchema = z.object({
   order_type: z.enum(['B2B', 'B2C_ECOM', 'B2C_EXPRESS']),
   shipper_id: z.string().uuid('Please select a valid shipper'),
-  origin_port_id: z.string().uuid('Please select a valid origin port'),
-  dest_port_id: z.string().uuid('Please select a valid destination port'),
+  origin_port_id: z.string().uuid('Please select a valid origin port').optional(),
+  dest_port_id: z.string().uuid('Please select a valid destination port').optional(),
   
   // 송하인(화주) 담당자/연락처/이메일 (v2 스크린샷 피드백 반영)
   shipper_contact_name: z.string().optional(),
@@ -59,6 +59,7 @@ export const orderRegistrationSchema = z.object({
   recipient_address_local: z.string().optional(),
   recipient_phone: z.string().min(1, 'Recipient phone is required'),
   recipient_zipcode: z.string().optional(),
+  recipient_country_code: z.string().optional(),
   
   recipient_pccc: z.string().optional(),
   recipient_email: z.string().email('Invalid email format').optional().or(z.literal('')),
@@ -86,6 +87,22 @@ export const orderRegistrationSchema = z.object({
   ups_product_code: z.string().optional(),
   incoterms: z.enum(['DDU', 'DDP']).optional(),
 }).superRefine((data, ctx) => {
+  if (data.transport_mode !== 'UPS') {
+    if (!data.origin_port_id) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Please select a valid origin port',
+        path: ['origin_port_id'],
+      });
+    }
+    if (!data.dest_port_id) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Please select a valid destination port',
+        path: ['dest_port_id'],
+      });
+    }
+  }
   if (data.transport_mode === 'UPS' && data.packages.length !== 1) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
