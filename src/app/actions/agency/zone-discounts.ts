@@ -3,6 +3,7 @@
 import { logger } from '@/lib/logger';
 import { validateUserAction, checkPermission } from '@/lib/auth/guards';
 import { createAdminClient } from '@/utils/supabase/server';
+import { getMaxAllowedZoneDiscount } from '@/lib/ups/discount-guard';
 import { revalidatePath } from 'next/cache';
 
 export async function getShipperZoneDiscounts(shipperOrgId: string) {
@@ -60,6 +61,12 @@ export async function upsertShipperZoneDiscounts(
 
   const errors: string[] = [];
   for (const [zoneId, rate] of Object.entries(zoneRates)) {
+    const maxAllowed = await getMaxAllowedZoneDiscount(admin, zoneId);
+    if (maxAllowed != null && rate > maxAllowed) {
+      errors.push(`Zone ${zoneId}: 할인율(${(rate * 100).toFixed(1)}%)이(가) 원가 마진을 초과합니다. 최대 허용: ${(maxAllowed * 100).toFixed(1)}%`);
+      continue;
+    }
+
     const { error: upsertError } = await admin
       .from('zen_agency_shipper_zone_discounts')
       .upsert(
