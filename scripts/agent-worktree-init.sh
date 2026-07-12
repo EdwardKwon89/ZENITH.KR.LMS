@@ -58,6 +58,16 @@ else
   git -C "$REPO_ROOT" worktree add --detach "$WORKTREE_DIR" origin/develop
 fi
 
+# .env.local 등 gitignore된 로컬 설정 파일은 git worktree가 채워주지 않으므로
+# 메인 체크아웃에서 직접 복사한다(Supabase 연결 정보 등 — 없으면 dev 서버/e2e 테스트가
+# Supabase에 연결하지 못해 조용히 실패한다. 2026-07-12 Mike 세션에서 실제 발생 확인).
+for envfile in .env.local .env; do
+  if [ -f "$REPO_ROOT/$envfile" ]; then
+    cp "$REPO_ROOT/$envfile" "$WORKTREE_DIR/$envfile"
+    echo "[worktree-init] $envfile 복사 완료"
+  fi
+done
+
 echo ""
 echo "[worktree-init] 준비 완료. 아래 디렉토리로 이동해서 작업 시작:"
 echo ""
