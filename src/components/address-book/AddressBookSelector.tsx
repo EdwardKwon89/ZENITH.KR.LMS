@@ -9,6 +9,7 @@ interface AddressBookEntry {
   recipient_name: string;
   recipient_address: string;
   recipient_address_local?: string | null;
+  recipient_address_detail?: string | null;
   recipient_phone?: string | null;
   country_code?: string | null;
 }

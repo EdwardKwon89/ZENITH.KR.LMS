@@ -331,16 +331,20 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
     }
     const name = watch('recipient_name');
     const address = watch('recipient_address');
+    const addressDetail = watch('recipient_address_detail') || '';
     const addressLocal = watch('recipient_address_local') || '';
     const phone = watch('recipient_phone') || '';
+    const countryCode = watch('recipient_country_code') || undefined;
     setSavingToAddressBook(true);
     try {
       await createAddressBookEntry({
         display_name: displayName,
         recipient_name: name,
         recipient_address: address,
+        recipient_address_detail: addressDetail || undefined,
         recipient_address_local: addressLocal || undefined,
         recipient_phone: phone || undefined,
+        country_code: countryCode,
         display_mode: 'EN',
         is_default: false,
       });
@@ -1045,8 +1049,10 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                           onSelect={(entry) => {
                             setValue('recipient_name', entry.recipient_name);
                             setValue('recipient_address', entry.recipient_address);
+                            setValue('recipient_address_detail', entry.recipient_address_detail || '');
                             setValue('recipient_address_local', entry.recipient_address_local || '');
                             setValue('recipient_phone', entry.recipient_phone || '');
+                            setValue('recipient_country_code', entry.country_code || '');
                           }}
                         />
                       </div>
@@ -1067,6 +1073,12 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                             register={register}
                             setValue={setValue}
                             t={t}
+                            defaultValues={{
+                              country_code: watch('recipient_country_code') || 'KR',
+                              address: watch('recipient_address') || '',
+                              address_detail: watch('recipient_address_detail') || '',
+                              zipcode: watch('recipient_zipcode') || '',
+                            }}
                             required
                           />
                        </div>

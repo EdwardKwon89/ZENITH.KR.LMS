@@ -9,6 +9,7 @@ export const addressBookEntrySchema = z.object({
   recipient_name: z.string().min(1, 'Recipient name is required'),
   recipient_address: z.string().min(1, 'Recipient address is required'),
   recipient_address_local: z.string().optional(),
+  recipient_address_detail: z.string().optional(),
   recipient_phone: z.string().optional(),
   country_code: z.string().optional(),
   display_mode: z.enum(['EN', 'BILINGUAL']),
