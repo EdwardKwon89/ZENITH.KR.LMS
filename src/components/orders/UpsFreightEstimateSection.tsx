@@ -55,6 +55,16 @@ export function UpsFreightEstimateSection({
 
   const cargoType = packages[0]?.content_type === 'DOC' ? 'DOC' : 'NON_DOC';
 
+  const totalWeight = useMemo(
+    () => packages.reduce((sum, pkg) => sum + (pkg.gross_weight || 0), 0),
+    [packages]
+  );
+  const firstPkgDim = useMemo(() => ({
+    length: packages[0]?.length,
+    width: packages[0]?.width,
+    height: packages[0]?.height,
+  }), [packages[0]?.length, packages[0]?.width, packages[0]?.height]);
+
   const productFamilies = useMemo(() => {
     const seen = new Set<string>();
     return products.filter((p) => {
@@ -107,12 +117,6 @@ export function UpsFreightEstimateSection({
   }, [products, selectedProductId, onProductChange]);
 
   useEffect(() => {
-    const totalWeight = packages.reduce(
-      (sum, pkg) => sum + (pkg.gross_weight || 0),
-      0
-    );
-    const firstPkg = packages[0];
-
     if (!selectedProductId || !destCountryCode || totalWeight <= 0) {
       setEstimate(null);
       return;
@@ -126,9 +130,9 @@ export function UpsFreightEstimateSection({
       productId: selectedProductId,
       destCountryCode,
       actualWeightKg: totalWeight,
-      dimL: firstPkg?.length,
-      dimW: firstPkg?.width,
-      dimH: firstPkg?.height,
+      dimL: firstPkgDim.length,
+      dimW: firstPkgDim.width,
+      dimH: firstPkgDim.height,
       incoterms: selectedIncoterms,
       agencyOrgId,
       shipperOrgId,
@@ -145,7 +149,7 @@ export function UpsFreightEstimateSection({
       });
 
     return () => { cancelled = true; };
-  }, [selectedProductId, destCountryCode, packages, selectedIncoterms, agencyOrgId, shipperOrgId]);
+  }, [selectedProductId, destCountryCode, totalWeight, firstPkgDim.length, firstPkgDim.width, firstPkgDim.height, selectedIncoterms, agencyOrgId, shipperOrgId]);
 
   useEffect(() => {
     onEstimateChange?.(estimate);
