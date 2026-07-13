@@ -177,11 +177,11 @@ Supabase: Cloud 프로젝트 연결
 | UAT-16-01 | 대리점 요율 오버라이드 신규 등록 | AGENCY | [UAT_16](UAT_16_Agency요율오버라이드.md) | Riley | 🔄 | 필수 |
 | UAT-16-02 | 대리점 요율 오버라이드 목록 조회 및 RLS 검증 | AGENCY | [UAT_16](UAT_16_Agency요율오버라이드.md) | Riley | 🔄 | 필수 |
 | UAT-16-03 | 대리점 요율 오버라이드 비활성화 (Deactivate) | AGENCY | [UAT_16](UAT_16_Agency요율오버라이드.md) | Riley | 🔄 | 일반 |
-| UAT-17-01 | 직접배송(DIRECT) 선택 오더 등록 및 픽업 입력 차단 검증 | SHIPPER/ADMIN | [UAT_17](UAT_17_UPS특송오더발송.md) | Riley | 🔄 | 필수 |
-| UAT-17-02 | 픽업배송(PICKUP) 선택 오더 등록 및 픽업 필수값 유효성 검증 | SHIPPER/ADMIN | [UAT_17](UAT_17_UPS특송오더발송.md) | Riley | 🔄 | 필수 |
+| UAT-17-01 | 직접배송(DIRECT) 선택 오더 등록 및 픽업 입력 차단 검증 | SHIPPER/ADMIN | [UAT_17](UAT_17_UPS특송오더발송.md) | Riley | ✅ | 필수 |
+| UAT-17-02 | 픽업배송(PICKUP) 선택 오더 등록 및 픽업 필수값 유효성 검증 | SHIPPER/ADMIN | [UAT_17](UAT_17_UPS특송오더발송.md) | Riley | ✅ | 필수 |
 | UAT-17-03 | 대리점 화주 요율 오버라이드가 적용된 UPS 요금 계산 검증 | SHIPPER | [UAT_17](UAT_17_UPS특송오더발송.md) | Riley | 🔄 | 필수 |
-| UAT-18-01 | WAREHOUSED 오더 출고 완료 시 UPS 발송 연계 흐름 | MANAGER/ADMIN | [UAT_18](UAT_18_창고출고UPS연계.md) | Riley | 🔄 | 필수 |
-| UAT-18-02 | UPS 발송 정보 자동 매핑 및 RLS 격리 검증 | SHIPPER | [UAT_18](UAT_18_창고출고UPS연계.md) | Riley | 🔄 | 일반 |
+| UAT-18-01 | WAREHOUSED 오더 출고 완료 시 UPS 발송 연계 흐름 | MANAGER/ADMIN | [UAT_18](UAT_18_창고출고UPS연계.md) | Riley | ✅ | 필수 |
+| UAT-18-02 | UPS 발송 정보 자동 매핑 및 RLS 격리 검증 | SHIPPER | [UAT_18](UAT_18_창고출고UPS연계.md) | Riley | ✅ | 일반 |
 | UAT-19-01 | UPS 오더 상세 화면에서 간이 인보이스 PDF 출력(미리보기) 검증 | SHIPPER/ADMIN | [UAT_19](UAT_19_UPS인보이스PDF.md) | Riley | 🔄 | 일반 |
 | UAT-19-02 | 인보이스 PDF 다운로드 파일명 및 물류 상세 항목 무결성 검증 | SHIPPER/ADMIN | [UAT_19](UAT_19_UPS인보이스PDF.md) | Riley | 🔄 | 필수 |
 | UAT-20-01 | 대리점 정산 요약 정보 확인 | AGENCY | [UAT_20](UAT_20_Agency정산조회.md) | Riley | 🔄 | 필수 |
@@ -191,8 +191,14 @@ Supabase: Cloud 프로젝트 연결
 | UAT-20-05 | 대리점 정산 오더번호 검색 — 결과 없음 | AGENCY | [UAT_20](UAT_20_Agency정산조회.md) | Baker | 🔄 | 일반 |
 | UAT-20-06 | 대리점 정산 Reconciliation 알림 — 미가격 오더 존재 시 | AGENCY | [UAT_20](UAT_20_Agency정산조회.md) | Baker | 🔄 | 일반 |
 | UAT-20-07 | 대리점 정산 Reconciliation — 미가격 오더 미존재 시 알림 미표시 | AGENCY | [UAT_20](UAT_20_Agency정산조회.md) | Baker | 🔄 | 일반 |
+| UAT-22-01 | UPS Zone 등록 및 국가 매핑 | ADMIN | [UAT_22](UAT_22_UPS요율Admin등록.md) | D_Kai | ⬜ | 일반 |
+| UAT-22-02 | UPS 기준요금 조회 | ADMIN | [UAT_22](UAT_22_UPS요율Admin등록.md) | D_Kai | ⬜ | 일반 |
+| UAT-22-03 | UPS 유류할증 및 부가요금 조회 (신규 4종 포함) | ADMIN | [UAT_22](UAT_22_UPS요율Admin등록.md) | D_Kai | ⬜ | 일반 |
+| UAT-23-01 | Admin 대리점 할인율 정책 등록 | ADMIN | [UAT_23](UAT_23_UPS_Agency할인율정책.md) | D_Kai | ⬜ | 일반 |
+| UAT-23-02 | AGENCY 계정 cost_price 읽기전용 확인 및 자동계산 검증 | AGENCY | [UAT_23](UAT_23_UPS_Agency할인율정책.md) | D_Kai | ⬜ | 일반 |
+| UAT-23-03 | 할인율 정책 미등록 시 에러 메시지 확인 | AGENCY | [UAT_23](UAT_23_UPS_Agency할인율정책.md) | D_Kai | ⬜ | 일반 |
 
-**총 123개 시나리오** | 작성 완료: **123 / 123 ✅ 전량 완료** | 필수: **60개** | 일반: **63개**
+**총 129개 시나리오** | 작성 완료: **129 / 129 ✅ 전량 완료** | 필수: **60개** | 일반: **69개**
 
 ---
 
@@ -290,5 +296,6 @@ Supabase: Cloud 프로젝트 연결
 | 2026-06-18 | Riley (Gemini) | TASK-155 — 주소록(UAT-13-01~05) 및 일마감(UAT-14-01~05) 신규 10개 시나리오 추가, 총계 103개 갱신 |
 | 2026-06-19 | Riley (Gemini) | TASK-161 — Phase 7 UPS 특송 6개 기능 UAT 시나리오 신규 추가 (UAT-15 ~ 20), 총계 119개 갱신 |
 | 2026-06-21 | Baker (Big Pickle) | TASK-B-013 — SPR-06 시나리오 4건 추가 (UAT-20-04~07): 오더번호 검색 2건 + Reconciliation 알림 2건, 총계 123개 갱신 |
+| 2026-07-06 | Aiden (Claude) | GH#205 — 개별 UAT 파일 내부 실행 상태(UAT-17-01/02, 18-01/02 각 파일 전 단계 ☑ 확인)가 마스터 인덱스에 반영되지 않고 전체 🔄로 표기되어 있던 것을 ✅로 정정. UAT-17-03은 Team B #181(오더 연동) 완료 전 실행 불가 상태라 🔄 유지. |
 
 

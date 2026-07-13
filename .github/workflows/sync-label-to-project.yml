@@ -16,7 +16,7 @@ name: "[Sync] Issue Label → Project Status"
 
 on:
   issues:
-    types: [labeled, unlabeled, opened]
+    types: [labeled, unlabeled, opened, closed, reopened]
 
 permissions:
   issues: read
@@ -51,7 +51,9 @@ jobs:
           action  = os.environ['EVENT_ACTION']
 
           # 우선순위: done > review > rework > in-progress > blocked > open
-          if 'status:done'        in labels: print('done')
+          if   action == 'closed':            print('done')   # Issue close → Done 자동
+          elif action == 'reopened':          print('open')   # Issue reopen → Open 자동
+          elif 'status:done'        in labels: print('done')
           elif 'status:review'    in labels: print('review')
           elif 'status:rework'    in labels: print('rework')
           elif 'status:in-progress' in labels: print('in-progress')

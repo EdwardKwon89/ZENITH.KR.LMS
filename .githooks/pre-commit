@@ -5,18 +5,19 @@
 
 set -e
 
-# ── R-08: 회귀 테스트 결과 확인 ──────────────────────────────────
+# ── R-08: 회귀 테스트 결과 확인 (경고만, 병합 판단은 원격 CI 전용 — Issue #358) ──
+# 자체보고 파일(LAST_REGRESSION_RESULT)과 실제 회귀 결과 불일치(IMP-135)가 반복 확인되어
+# 이 파일을 커밋 차단 근거로 더 이상 사용하지 않는다. 실제 통과 여부는 반드시
+# GitHub Actions "PR Checks"(gh pr checks)로 확인한다 — 이 경고는 참고용일 뿐이다.
 REGRESSION_FILE=".agent/LAST_REGRESSION_RESULT"
 
 if [ -f "$REGRESSION_FILE" ]; then
   RESULT=$(cat "$REGRESSION_FILE" | tr -d '[:space:]')
   if [ "$RESULT" != "PASS" ]; then
     echo ""
-    echo "❌ BLOCKED: 회귀 테스트 미통과 (R-08 위반)"
-    echo "   마지막 결과: $RESULT"
-    echo "   실행: rtk npm run test:regression"
+    echo "⚠️  참고: LAST_REGRESSION_RESULT = $RESULT (커밋 차단 안 함)"
+    echo "   실제 통과 여부는 병합 전 'gh pr checks'로 반드시 확인하십시오."
     echo ""
-    exit 1
   fi
 fi
 

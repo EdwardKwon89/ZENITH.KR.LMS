@@ -196,12 +196,15 @@ export async function authGuard(
         purePath.startsWith('/tracking') ||
         purePath.startsWith('/mypage') ||
         purePath.startsWith('/support') ||
+        purePath.startsWith('/warehouse') ||
         purePath.startsWith('/inventory') ||
         purePath.startsWith('/admin/rates') ||
         purePath.startsWith('/admin/transport-costs') ||
         purePath.startsWith('/admin/customs-rates') ||
         purePath.startsWith('/admin/delivery-rates') ||
-        purePath.startsWith('/address-book');
+        purePath.startsWith('/address-book') ||
+        purePath.startsWith('/shipper') ||
+        purePath.startsWith('/agency');
 
       if (!isAllowedPath) {
         const url = request.nextUrl.clone();

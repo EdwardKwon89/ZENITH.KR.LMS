@@ -18,14 +18,17 @@ export const orderItemSchema = z.object({
  */
 export const orderPackageSchema = z.object({
   id: z.string().uuid().optional(),
-  packing_unit: z.string().min(1, 'Packing unit is required'), // BOX, PLT 등
+  packing_unit: z.string().min(1, 'Packing unit is required'),
   packing_count: z.number().int().positive().default(1),
+  physical_box_count: z.number().int().positive().optional().default(1),
   length: z.number().nonnegative().optional(),
   width: z.number().nonnegative().optional(),
   height: z.number().nonnegative().optional(),
   gross_weight: z.number().nonnegative('Weight is required'),
   volume: z.number().nonnegative().optional(),
   special_cargo_type: z.enum(['NONE', 'DANGEROUS', 'FROZEN', 'VALUABLE', 'USED']).default('NONE'),
+  content_type: z.enum(['GENERAL', 'DOC', 'NONDOC']).default('GENERAL'),
+  domestic_ref_no: z.string().optional(),
   items: z.array(orderItemSchema).min(1, 'At least one item per package is required'),
 });
 
@@ -35,14 +38,19 @@ export const orderPackageSchema = z.object({
 export const orderRegistrationSchema = z.object({
   order_type: z.enum(['B2B', 'B2C_ECOM', 'B2C_EXPRESS']),
   shipper_id: z.string().uuid('Please select a valid shipper'),
-  origin_port_id: z.string().uuid('Please select a valid origin port'),
-  dest_port_id: z.string().uuid('Please select a valid destination port'),
+  origin_port_id: z.string().uuid('Please select a valid origin port').optional(),
+  dest_port_id: z.string().uuid('Please select a valid destination port').optional(),
   
   // 송하인(화주) 담당자/연락처/이메일 (v2 스크린샷 피드백 반영)
   shipper_contact_name: z.string().optional(),
   shipper_contact_phone: z.string().optional(),
   shipper_contact_email: z.string().email('Invalid email format').optional().or(z.literal('')),
   shipper_address: z.string().optional(),
+  shipper_country_code: z.string().optional().default('KR'),
+  shipper_state_province: z.string().optional(),
+  shipper_city: z.string().optional(),
+  shipper_address_detail: z.string().optional(),
+  shipper_zipcode: z.string().optional(),
   shipper_biz_no: z.string().optional(),
   
   // 수취인 상세 정보 (v2 핵심 추가)
@@ -51,6 +59,7 @@ export const orderRegistrationSchema = z.object({
   recipient_address_local: z.string().optional(),
   recipient_phone: z.string().min(1, 'Recipient phone is required'),
   recipient_zipcode: z.string().optional(),
+  recipient_country_code: z.string().optional(),
   
   recipient_pccc: z.string().optional(),
   recipient_email: z.string().email('Invalid email format').optional().or(z.literal('')),
@@ -58,7 +67,9 @@ export const orderRegistrationSchema = z.object({
   delivery_notes: z.string().optional(),
   
   // 운송 수단 (v2.1)
-  transport_mode: z.enum(['AIR', 'SEA', 'EXP', 'LAND']).default('AIR'),
+  transport_mode: z.enum(['AIR', 'SEA', 'EXP', 'LAND', 'UPS']).default('AIR'),
+
+  ups_service_family: z.enum(['WW_EXPRESS', 'WW_SAVER', 'WW_EXPEDITED', 'WW_FLIGHT']).optional(),
   
   // 물류 요약 정보 (v2.2)
   estimated_cost: z.number().optional(),
@@ -71,7 +82,34 @@ export const orderRegistrationSchema = z.object({
   pickup_location: z.string().optional(),
   pickup_contact_name: z.string().optional(),
   pickup_contact_tel: z.string().optional(),
+
+  // UPS 특송 정보 (TASK-B-059)
+  ups_product_code: z.string().optional(),
+  incoterms: z.enum(['DDU', 'DDP']).optional(),
 }).superRefine((data, ctx) => {
+  if (data.transport_mode !== 'UPS') {
+    if (!data.origin_port_id) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Please select a valid origin port',
+        path: ['origin_port_id'],
+      });
+    }
+    if (!data.dest_port_id) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Please select a valid destination port',
+        path: ['dest_port_id'],
+      });
+    }
+  }
+  if (data.transport_mode === 'UPS' && data.packages.length !== 1) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'UPS 서비스는 오더당 1개의 패키지만 등록 가능합니다.',
+      path: ['packages'],
+    });
+  }
   if (data.delivery_method === 'PICKUP') {
     if (!data.pickup_location || data.pickup_location.trim() === '') {
       ctx.addIssue({

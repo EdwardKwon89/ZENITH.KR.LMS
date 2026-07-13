@@ -24,11 +24,10 @@ export async function getWarehousedOrders() {
     .select(`
       id, order_no, status, created_at,
       recipient_name, recipient_contact, recipient_address, recipient_phone,
-      packages,
-      shipper:profiles!zen_orders_shipper_id_fkey(name),
+      shipper:zen_organizations!zen_orders_shipper_id_fkey(name),
       origin_port:zen_ports!zen_orders_origin_port_id_fkey(name, code),
       dest_port:zen_ports!zen_orders_dest_port_id_fkey(name, code),
-      order_packages:zen_order_packages!zen_order_packages_order_id_fkey(id, intl_ref_no, packing_unit, packing_count)
+      order_packages:zen_order_packages!zen_order_packages_order_id_fkey(id, intl_ref_no, intl_ref_locked, packing_unit, packing_count, gross_weight)
     `)
     .eq("status", OrderStatus.WAREHOUSED)
     .order("created_at", { ascending: false });
@@ -59,7 +58,13 @@ export async function getTodayReleasedOrders() {
     .select(`
       id, created_at,
       order:zen_orders!order_status_history_order_id_fkey(
-        id, order_no, status, recipient_name, packages
+        id, order_no, status, recipient_name,
+        order_packages:zen_order_packages!zen_order_packages_order_id_fkey(
+          id, intl_ref_no, intl_ref_locked, packing_count,
+          ups_labels:zen_ups_labels!zen_ups_labels_package_id_fkey(
+            id, tracking_number, label_format, storage_path, is_voided, voided_at, reference_no
+          )
+        )
       )
     `)
     .eq("next_status", OrderStatus.RELEASED)

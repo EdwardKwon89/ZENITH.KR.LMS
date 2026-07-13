@@ -8,10 +8,12 @@ import {
   Loader2, 
   DollarSign, 
   AlertCircle,
-  ArrowRight
+  ArrowRight,
+  Download
 } from 'lucide-react';
-import { calculateSettlementAction, generateInvoiceAction } from '@/app/actions/finance';
+import { calculateSettlementAction, generateInvoiceAction, generateInvoicePdf } from '@/app/actions/finance';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 
 interface CostItem {
   id: string;
@@ -42,10 +44,12 @@ export default function OrderFinanceSummary({
   incidentFees = [],
   isAdmin 
 }: OrderFinanceSummaryProps) {
+  const t = useTranslations('Finance');
   const [costs, setCosts] = useState<CostItem[]>(initialCosts);
   const [invoice, setInvoice] = useState<Invoice | null>(initialInvoice);
   const [isCalculating, setIsCalculating] = useState(false);
   const [isInvoicing, setIsInvoicing] = useState(false);
+  const [isPdfLoading, setIsPdfLoading] = useState(false);
 
   const totalEst = costs.reduce((sum, item) => sum + Number(item.total_amount), 0);
 
@@ -84,6 +88,18 @@ export default function OrderFinanceSummary({
       toast.error('An unexpected error occurred');
     } finally {
       setIsInvoicing(false);
+    }
+  };
+
+  const handlePdfDownload = async () => {
+    setIsPdfLoading(true);
+    try {
+      const { fileUrl } = await generateInvoicePdf(orderId);
+      window.open(fileUrl, '_blank');
+    } catch {
+      toast.error(t('pdf_generate_error'));
+    } finally {
+      setIsPdfLoading(false);
     }
   };
 
@@ -185,11 +201,20 @@ export default function OrderFinanceSummary({
         {invoice && (
           <div className="mt-8 p-4 bg-white/5 rounded-2xl border border-white/10">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Active Invoice</span>
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{t('active_invoice')}</span>
               <span className="text-[10px] font-mono text-blue-400">#{invoice.invoice_no}</span>
             </div>
-            <button className="w-full py-2 text-xs font-bold text-blue-400 hover:text-blue-300 transition-colors flex items-center justify-center gap-1">
-               View Full Invoice <ArrowRight className="w-3 h-3" />
+            <button
+              onClick={handlePdfDownload}
+              disabled={isPdfLoading}
+              className="w-full py-2 text-xs font-bold text-blue-400 hover:text-blue-300 disabled:text-slate-600 transition-colors flex items-center justify-center gap-1"
+            >
+              {isPdfLoading ? (
+                <Loader2 className="w-3 h-3 animate-spin" />
+              ) : (
+                <Download className="w-3 h-3" />
+              )}
+              {isPdfLoading ? t('pdf_generating') : t('download_invoice_pdf')}
             </button>
           </div>
         )}

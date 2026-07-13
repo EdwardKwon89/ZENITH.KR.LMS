@@ -23,7 +23,10 @@ import {
   Building,
   Building2 as BuildingOffice2Icon,
   Users,
-  ClipboardList
+  ClipboardList,
+  Globe,
+  LockKeyhole,
+  DollarSign
 } from "lucide-react";
 import { Package } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -78,7 +81,10 @@ export default function NaviSidebar({
         { title: t("rates"), href: "/admin/rates" },
         { title: t("customs_rates"), href: "/admin/customs-rates" },
         { title: t("delivery_rates"), href: "/admin/delivery-rates" },
+        { title: t("ups_rates"), href: "/admin/ups-rates" },
         { title: t("transport_policies"), href: "/admin/settings/transport-policies" },
+        { title: t("master_geo"), href: "/master/geo" },
+        { title: t("master_orders"), href: "/master-orders" },
       ]
     },
     {
@@ -151,10 +157,16 @@ export default function NaviSidebar({
     { title: t("customs_management"), href: "/admin/customs", icon: FileText, isAdminOnly: true },
     { title: t("orders_assigned"), href: "/orders/assigned", icon: ClipboardList },
     { title: t("admin_error_logs"), href: "/admin/error-logs", icon: ShieldAlert, isAdminOnly: true },
-    { title: t("agency_management"), href: "/agency", icon: BuildingOffice2Icon },
-    { title: t("agency_shippers_nav"), href: "/agency/shippers", icon: Users },
-    { title: t("agency_rate_overrides_nav"), href: "/agency/rate-overrides", icon: TrendingUp },
-    { title: t("agency_settlements_nav"), href: "/agency/settlements", icon: Calculator },
+    { title: t("permissions"), href: "/admin/permissions", icon: LockKeyhole, isAdminOnly: true },
+    { title: t("agency_management"), href: "/agency", icon: BuildingOffice2Icon,
+      children: [
+        { title: t("agency_shippers_nav"), href: "/agency/shippers" },
+        { title: t("agency_ups_rates_nav"), href: "/agency/ups-rates" },
+        { title: t("agency_other_charges_nav"), href: "/agency/other-charges" },
+        { title: t("agency_settlements_nav"), href: "/agency/settlements" },
+      ]
+    },
+    { title: t("shipper_ups_rates_nav"), href: "/shipper/ups-rates", icon: DollarSign },
     {
       title: t("mypage"),
       href: "/mypage",

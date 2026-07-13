@@ -30,9 +30,9 @@ export async function getRouteOptions(orderId: string) {
     .eq('order_id', orderId);
 
   const weight = (packages || []).reduce((s, p) =>
-    s + (Number(p.gross_weight) || 0) * (Number(p.packing_count) || 1), 0);
+    s + (Number(p.gross_weight) || 0), 0);
   const volume = (packages || []).reduce((s, p) =>
-    s + (Number(p.volume) || 0) * (Number(p.packing_count) || 1), 0);
+    s + (Number(p.volume) || 0), 0);
 
   const engine = new RoutingEngine(new DatabaseRouteAdapter(supabase));
   const options = await engine.calculateOptions(originCode, destCode, order.transport_mode);

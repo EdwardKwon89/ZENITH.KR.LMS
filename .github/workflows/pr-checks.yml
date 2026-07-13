@@ -5,6 +5,31 @@ on:
     branches: [develop, main]
 
 jobs:
+  task-file-check:
+    name: Task File Check (advisory, non-blocking)
+    # Issue #358: task file/ACTIVE_TASK.md 행 누락이 반복 발생(Dave 2회, VIOLATION_TRACKER 기록)해
+    # 사전 경고용으로 신설. 1단계는 비차단(경고만) — 며칠 관찰 후 공지 거쳐 required 승격 검토.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check task file presence for code changes
+        run: |
+          BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          CHANGED=$(git diff --name-only "$BASE_SHA"...HEAD)
+
+          HAS_CODE_CHANGE=$(echo "$CHANGED" | grep -E '^(src/|supabase/migrations/)' || true)
+          HAS_TASK_FILE=$(echo "$CHANGED" | grep -E '^\.agent/tasks/TASK-.*\.md$' || true)
+
+          if [ -n "$HAS_CODE_CHANGE" ] && [ -z "$HAS_TASK_FILE" ]; then
+            echo "::warning::이 PR은 src/ 또는 supabase/migrations/ 변경을 포함하지만 .agent/tasks/TASK-*.md 신규·수정 파일이 diff에 없습니다 (R-17 절차 — Issue #358). task file 누락 여부를 확인해 주세요."
+          else
+            echo "OK — task file 존재 확인 또는 코드 변경 없음."
+          fi
+          exit 0
+
   regression:
     name: Regression Tests
     runs-on: ubuntu-latest

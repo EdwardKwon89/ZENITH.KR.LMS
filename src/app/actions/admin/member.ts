@@ -4,7 +4,7 @@ import { logger } from '@/lib/logger';
 import { withAction } from '@/lib/actions/wrapper';
 import { revalidatePath } from "next/cache";
 import { validateUserAction, validateAdminAction } from "@/lib/auth/guards";
-import { createAdminClient } from '@/utils/supabase/server';
+import { syncAuthMetadata } from '@/lib/auth/sync';
 import { sendInAppNotification } from "../notifications";
 import { USER_ROLES } from '@/lib/auth/rbac';
 import { AdminRepository } from '@/lib/repositories';
@@ -315,17 +315,7 @@ export async function changeMemberStatus(userId: string, status: string) {
   }
 
   // Sync status to Supabase Auth app_metadata so proxy middleware reads fresh status
-  try {
-    const admin = await createAdminClient();
-    const { data: currentUser } = await admin.auth.admin.getUserById(userId);
-    if (currentUser?.user?.app_metadata) {
-      await admin.auth.admin.updateUserById(userId, {
-        app_metadata: { ...currentUser.user.app_metadata, status },
-      });
-    }
-  } catch (e) {
-    logger.error("[MEMBER_ACTION] changeMemberStatus app_metadata sync error:", e);
-  }
+  await syncAuthMetadata(userId, { status });
 
   revalidatePath("/admin/members");
   return { success: true };
@@ -343,6 +333,9 @@ export async function changeMemberGrade(userId: string, gradeCode: string) {
     logger.error("[MEMBER_ACTION] changeMemberGrade Error:", error);
     throw new Error("회원 등급 변경 중 오류가 발생했습니다.");
   }
+
+  // Sync grade to Supabase Auth app_metadata for consistency
+  await syncAuthMetadata(userId, { grade_code: gradeCode });
 
   revalidatePath("/admin/members");
   return { success: true };

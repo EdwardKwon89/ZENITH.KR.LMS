@@ -7,8 +7,9 @@ import OutboundProcessForm from '@/components/warehouse/OutboundProcessForm';
 export default async function WarehouseOutboundPage({
   params,
 }: {
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
 }) {
+  const { locale } = await params;
   const { profile } = await requireAuth();
 
   const isAllowed = profile?.role === USER_ROLES.ADMIN ||
@@ -16,7 +17,7 @@ export default async function WarehouseOutboundPage({
     profile?.role === USER_ROLES.ZENITH_SUPER_ADMIN;
 
   if (!isAllowed) {
-    redirect(`/${params.locale}/dashboard`);
+    redirect(`/${locale}/dashboard`);
   }
 
   const t = await getTranslations('WarehouseOutbound');
@@ -39,7 +40,7 @@ export default async function WarehouseOutboundPage({
       </div>
 
       <div className="max-w-7xl mx-auto px-8">
-        <OutboundProcessForm locale={params.locale} />
+        <OutboundProcessForm locale={locale} />
       </div>
     </div>
   );

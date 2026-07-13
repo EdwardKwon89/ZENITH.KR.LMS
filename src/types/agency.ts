@@ -12,7 +12,16 @@ export interface AgencyShipper {
 }
 
 export interface AgencyShipperRow extends AgencyShipper {
-  shipper: { id: string; name: string; biz_no: string | null; status: string }[] | null;
+  shipper: {
+    id: string;
+    name: string;
+    biz_no: string | null;
+    status: string;
+    contact_name: string | null;
+    contact_email: string | null;
+    contact_phone: string | null;
+    country_code: string | null;
+  } | null;
 }
 
 export interface CreateAgencyShipperInput {
@@ -23,7 +32,19 @@ export interface CreateAgencyShipperInput {
   contact_name?: string;
   contact_email?: string;
   contact_phone?: string;
+  biz_no?: string;
+  rep_name?: string;
+  login_email: string;
+  country_code?: string;
+  state_province?: string;
+  city?: string;
+  address?: string;
+  address_detail?: string;
+  zipcode?: string;
+  is_active?: boolean;
 }
+
+export type UpdateAgencyShipperInput = Omit<CreateAgencyShipperInput, 'login_email'>;
 
 export interface AgencyRateOverride {
   id: string;
@@ -41,7 +62,7 @@ export interface AgencyRateOverride {
 export interface CreateAgencyRateOverrideInput {
   base_rate_id: string;
   selling_price: number;
-  cost_price: number;
+  cost_price?: number;
   valid_from: string;
   valid_until?: string;
 }

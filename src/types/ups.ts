@@ -20,6 +20,8 @@ export interface UpsZoneCountry {
   id: string;
   zone_id: string;
   country_code: string;    // ISO 3166-1 alpha-3
+  product_family: string;  // 'EXPRESS' | 'SAVER' | 'EXPEDITED' | 'FREIGHT'
+  direction: string;       // 'EXPORT' | 'IMPORT'
   created_at: string;
   created_by: string | null;
 }
@@ -38,6 +40,7 @@ export interface UpsProduct {
   ddp_available: boolean;
   is_active: boolean;
   sort_order: number;
+  max_weight_kg: number | null;
   created_at: string;
 }
 
@@ -101,6 +104,105 @@ export interface UpsFlightPlan {
   created_by: string | null;
 }
 
+// ─── 요금 계산 엔진 타입 (Phase 7.1 TASK-172·173, An-14 §4) ────────────────
+
+export interface UpsPricingData {
+  zone: UpsZone;
+  product: UpsProduct;
+  baseRate: UpsBaseRate | null;
+  weightTierRates?: UpsWeightTierRate[] | null;
+  freightMinimum?: UpsFreightMinimum | null;
+  fuelSurcharge: UpsFuelSurcharge | null;
+  otherCharges: UpsOtherCharge[];
+  fallbackApplied?: boolean;
+}
+
+export interface UpsOtherChargeItem {
+  chargeId: string;
+  chargeCode: string;
+  chargeName: string;
+  unit: string;
+  sellingBase: number;
+  costBase: number;
+  fuelSurchargeSelling: number;
+  fuelSurchargeCost: number;
+}
+
+export interface UpsBreakdown {
+  zone: Pick<UpsZone, 'zone_code' | 'zone_name'>;
+  product: Pick<UpsProduct, 'product_code' | 'product_name' | 'cargo_type'>;
+  actualWeightKg: number;
+  volumetricWeightKg: number;
+  chargeableWeightKg: number;
+  volumetricDivisor: UpsVolumeDivisor;
+  billingWeightKg: number;
+  baseRateId: string;
+  baseSellingPrice: number;
+  baseCostPrice: number;
+  costSurchargeRate: number;
+  fuelSurchargeId: string | null;
+  fuelSurchargeRate: number;
+  fuelSurchargeSellingAmount: number;
+  fuelSurchargeCostAmount: number;
+  otherChargeItems: UpsOtherChargeItem[];
+  otherChargesSellingTotal: number;
+  otherChargesCostTotal: number;
+  oversizeApplied: boolean;
+  fallbackApplied?: boolean;
+}
+
+export interface UpsFreightInput {
+  productId: string;
+  destCountryCode: string;
+  actualWeightKg: number;
+  dimL?: number;
+  dimW?: number;
+  dimH?: number;
+  volumetricDivisor?: UpsVolumeDivisor;
+  incoterms?: 'DDU' | 'DDP';
+  otherChargeIds?: string[];
+  effectiveDate?: string;
+}
+
+export interface UpsFreightResult {
+  chargeableWeightKg: number;
+  billingWeightKg: number;
+  baseSellingPrice: number;
+  baseCostPrice: number;
+  fuelSurchargeSellingAmount: number;
+  fuelSurchargeCostAmount: number;
+  otherChargesSellingTotal: number;
+  otherChargesCostTotal: number;
+  totalSellingPrice: number;
+  totalCostPrice: number;
+  currency: string;
+  breakdown: UpsBreakdown;
+}
+
+// Zone 해석 결과 (TASK-179: fallback 여부 추적)
+export interface ZoneResolveResult {
+  zone: UpsZone | null;
+  fallbackApplied: boolean;
+}
+
+// Agency 단계 (Issue #310: Zone별 할인율, rate_overrides 폐기)
+export interface UpsAgencyFreightResult {
+  platformSellingTotal: number;
+  agencyCostPrice: number;
+  agencySellingPrice: number;
+  discountRate: number;
+  agencyOtherChargesTotal: number;
+}
+
+// Shipper 단계 (Issue #310: Admin 판매가에서 직접 계산)
+export interface UpsShipperFreightResult {
+  platformSellingPrice: number;
+  shipperDiscountRate: number;
+  finalFreight: number;
+}
+
+// ─── 구 타입 (TASK-138 호환 유지 — 참조처 없음, 삭제는 별도 정리 시점에) ──────
+
 // 요금 계산 입력
 export interface UpsFreightCalcInput {
   product_id: string;
@@ -130,3 +232,51 @@ export interface UpsFreightCalcResult {
   applied_rate_id: string;
   applied_fuel_surcharge_id: string | null;
 }
+
+export interface UpsShxkCountryMap {
+  product_code: string;
+  country_code: string;
+  incoterms: 'DDU' | 'DDP';
+  shxk_code: string;
+}
+
+export interface UpsWeightTierRate {
+  id: string;
+  product_id: string;
+  zone_id: string;
+  tier_min_kg: number;
+  tier_max_kg: number | null;
+  price_per_kg_selling: number;
+  price_per_kg_cost: number;
+  currency: string;
+  valid_from: string;
+  valid_until: string | null;
+  is_active: boolean;
+  created_at: string;
+  created_by: string | null;
+  updated_at: string;
+}
+
+export interface UpsFreightMinimum {
+  id: string;
+  zone_id: string;
+  product_id: string;
+  min_charge_selling: number;
+  min_charge_cost: number;
+  currency: string;
+  is_active: boolean;
+  created_at: string;
+  created_by: string | null;
+  updated_at: string;
+}
+
+export interface UpsWeightTierRateWithRefs extends UpsWeightTierRate {
+  product?: { product_code: string; product_name: string } | null;
+  zone?: { zone_code: string; zone_name: string } | null;
+}
+
+export interface UpsFreightMinimumWithRefs extends UpsFreightMinimum {
+  product?: { product_code: string; product_name: string } | null;
+  zone?: { zone_code: string; zone_name: string } | null;
+}
+

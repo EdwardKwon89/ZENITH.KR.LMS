@@ -127,6 +127,37 @@ export async function changePassword(password: string) {
 }
 
 /**
+ * [AUDIT-S1-E] 현재 비밀번호 재인증 후 비밀번호 변경
+ */
+export async function changePasswordWithReauth(currentPassword: string, newPassword: string) {
+  try {
+    const { supabase, user } = await validateUserAction();
+    if (!user?.email) {
+      return { error: '사용자 이메일을 확인할 수 없습니다.' };
+    }
+
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: user.email,
+      password: currentPassword,
+    });
+    if (signInError) {
+      logger.error('[AUTH_ACTION] reauth Error:', signInError.message);
+      return { error: '현재 비밀번호가 올바르지 않습니다.' };
+    }
+
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    if (error) {
+      logger.error('[AUTH_ACTION] changePassword Error:', error.message);
+      return { error: error.message };
+    }
+
+    return { success: true };
+  } catch (err) {
+    return { error: '비밀번호 변경 중 오류가 발생했습니다.' };
+  }
+}
+
+/**
  * [BASE] 사용자 세션 및 프로필 조회
  */
 export async function getUserSession() {

@@ -6,7 +6,7 @@
 | 위치 | `docs/91_FinalTest/UAT/` |
 | 작성일 | 2026-05-27 |
 | 관리 주체 | Aiden (Claude) |
-| 최종 갱신 | 2026-06-10 (DEF-060 신규 등록 및 수정완료 — zen_carriers org_id 연결 누락 FK 위반) |
+| 최종 갱신 | 2026-07-06 (GH#205 — DEF-089~095 소급 등재, UAT-15/17 화주관리·UPS특송 결함 7건) |
 
 ---
 
@@ -38,9 +38,9 @@
 | 구분 | 미수정 | 수정중 | 수정완료 | 검증완료 | 시나리오수정 | 합계 |
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|
 | 시나리오 오류 | 1 | 0 | 0 | 0 | 5 | **6** |
-| 기능 보완/개선 | 6 | 0 | 12 | 2 | 1 | **21** |
-| 기능 오류 | 1 | 0 | 25 | 7 | 0 | **33** |
-| **합계** | **8** | **0** | **37** | **9** | **6** | **60** |
+| 기능 보완/개선 | 6 | 0 | 14 | 2 | 1 | **23** |
+| 기능 오류 | 1 | 0 | 29 | 8 | 0 | **38** |
+| **합계** | **8** | **0** | **43** | **10** | **6** | **67** |
 
 ---
 
@@ -104,6 +104,13 @@
 | DEF-058 | UAT-02-02 | 기능 개선 | N | 수정완료 | Noah (Codex) | `src/components/orders/OrderFilterBar.tsx` | **운송 요청 목록 "조회" 버튼 제거 → Debounce 자동 검색 전환**. rates 페이지와 UX 통일. `useEffect` + `setTimeout` 500ms debounce로 입력 시 자동 `router.push()`. 초기 마운트 중복 push 방지. | - | `.agent/defects/DEF-058_운송요청목록조회버튼제거Debounce전환.md` | - | - |
 | DEF-059 | UAT-02-01 | 기능 개선 | N | 검증완료 | D_Kai (§1~§3) / B_Kai (§4) | `ad22883` + `ec0fa5a` | **special_cargo_type Order 레벨 → Package 레벨 전환**. 한 오더 내 PKG별로 다른 화물 구분(위험물/냉동/귀중품/중고)을 가질 수 있도록 구조 변경. §1~§3(TASK-136) + §4 UI(TASK-137) 전체 완료. | `ad22883` + `ec0fa5a` | §1~§3: 마이그레이션 2건 + Zod + Action. §4: OrderRegistrationForm PKG카드 select + supabase.ts 타입 갱신. Aiden 직접보완(ZenDataGrid 타입오류 `dabde76`). | ✅ Aiden 승인 (TASK-136·137) | - |
 | DEF-060 | - | 기능 오류 | Y | 수정완료 | Aiden (Claude) | - | **zen_carriers.org_id 미설정으로 Order 등록 시 FK 위반**. 신규 운송 요청 Step 3 제출 시 `zen_order_services_provider_id_fkey` FK 위반 오류 발생. 13개 carrier 중 9개 org_id = null → provider_id로 zen_carriers.id가 전달되어 zen_organizations FK 위반. | 마이그레이션 `20260610000300` | FedEx Express: 동명 org 직접 연결. 나머지 8개: zen_organizations CARRIER 타입 신규 생성 후 연결. 13/13 전체 연결 완료. 빌드 ✅ · 회귀 316/316 ✅. | - | `.agent/defects/DEF-060_운송사조직연결누락FK위반.md` |
+| DEF-089 | UAT-15-01 | 기능 오류 | Y | 수정완료 | Dave / Baker | `84c103e`+`08dc986` | **법인(CORPORATE) 화주 등록 시 `biz_no`(사업자번호)·`rep_name`(대표자명) 필드가 백엔드에서 처리되지 않음**. UAT-15-01 Step 2·3 수행 중 발견. | - | Backend(Dave, TASK-B-043): 타입·Zod 검증·서버액션 3개 파일 수정. Frontend(Baker, TASK-B-044): required-fields·shipper-form·i18n 수정. 회귀 388/388 PASS. | ✅ Aiden 승인 260704 | ⚠️ 두 커밋 모두 develop 직접 커밋(R-17 위반) — JSJung 초회 특성 고려 면제 처리 |
+| DEF-090 | UAT-15-01 | 기능 오류 | Y | 수정완료 | Dave / Baker | PR#173`333b904`+PR#174`88370b5` | **화주 등록 폼 유효성 검사 UX 결함** — `/ko/agency/shippers/new`에서 할인율 `1` 입력 후 제출 시 오류 발생 + 입력한 전체 필드값 초기화 + 어느 필드가 문제인지 미표시. UAT-15-01 Step 3 실행 불가. | - | Backend(Dave, TASK-B-045): `fieldErrors` 반환 구조 + Zod 오류 메시지 한글화. Frontend(Baker, TASK-B-046): 할인율 값 변환 로직 수정·폼값 유지·필드별 오류 표시. 회귀 388/388 PASS. | ✅ Aiden 머지승인 260704 | 상세: `.agent/defects/DEF-090_화주등록폼_유효성검사_UX_결함.md` |
+| DEF-091 | UAT-15-01 | 기능 오류 | N | 수정완료 | Dave / Baker | PR#167`df83d89`+PR#168`8d5b497` | **화주 목록 등급 드롭다운 오류 및 상세 정보 편집 불가**. UAT-15-01 Step 3 화주 목록 확인 중 발견. | - | Backend(Dave, TASK-B-047): contact 컬럼 마이그레이션 + Server Actions 신규. Frontend(Baker, TASK-B-048): 등급 드롭다운 수정·상세 편집 버튼·`/edit` 편집 페이지 신규. 회귀 388/388 PASS. | ✅ Aiden 머지승인 260704 | 상세: `.agent/defects/DEF-091_화주목록_등급드롭다운오류_및_상세정보편집_불가.md` |
+| DEF-092 | UAT-15-01 | 기능 보완 | N | 수정완료 | Jaison | PR#168`8d5b497` | **`edit-form.tsx`의 `/agency/shippers` 하드코딩 링크에 locale prefix 누락**. TASK-B-048 리뷰 중 Jaison 발견. | - | Jaison이 DEF-091 프론트엔드 PR#168에 포함하여 직접 수정(locale 누락 링크 2곳). | ✅ Aiden 머지승인 260704 | DEF-091과 동일 PR(#168)에 포함 |
+| DEF-093 | UAT-15-01 | 기능 보완 | N | 수정완료 | Baker | PR#169`425bff1` | **화주목록 인라인 "수정" 버튼 잔존 및 Actions 컬럼 레이아웃 이슈** — TASK-B-048(상세편집 페이지 추가) 이후에도 기존 인라인 편집 버튼이 제거되지 않아 중복 기능 공존. | - | 인라인 편집 인프라(`editable-cell.tsx`·`shipper-table-row.tsx`·`shipper-table.tsx`·`shippers-client.tsx`) 전체 제거, "상세 편집" 버튼으로 단일화. 회귀 388/388 PASS. | ✅ Aiden 머지승인 260704 | 상세: `.agent/defects/DEF-093_화주목록_수정버튼잔존_컬럼레이아웃이슈.md` |
+| DEF-094 | UAT-15-01 | 기능 오류 | N | 수정완료 | Dave | PR#170`e8fd413` | **상세편집 화면 담당자 정보 미표출 및 Supabase 타입 불일치**. UAT 화주 상세편집 화면 확인 중 발견. | - | Supabase 타입 재생성(`supabase gen types`) + 담당자 정보 표출 E2E 검증. 회귀 388/388 PASS. | ✅ Aiden 머지승인 260704 | 상세: `.agent/defects/DEF-094_상세편집_담당자정보미표출_타입불일치.md` |
+| DEF-095 | - | 기능 오류 | N | 검증완료 | Aiden (Claude) | `b1d0725` | **WW_EXPEDITED 상품 중량 반올림 규칙 오류** — 전 상품에 0.5kg 단위 반올림을 일괄 적용하던 기존 로직이 WW_EXPEDITED(공식 Rate Guide 기준 항상 1kg 단위)에도 잘못 적용되어 저평가 청구 가능. TASK-180 Riley 설계의견 검토 중 공식 UPS Rate Guide 원문 대조로 Aiden이 발견. | - | `resolveBillingWeight()` 신규 함수로 `ceilToHalfKg()` 전체 호출부 교체 — WW_EXPEDITED 상시 1kg, 그 외 20kg 이하 0.5kg·초과 1kg 유지. TC-UPS-EXPEDITED-ROUND-01~05 신규. 회귀 429케이스 PASS. | ✅ Aiden 자체 처리·검증 | GH#194 등록(등록 즉시 종료 — 이미 해소된 결함 기록용) · 상세: `.agent/defects/DEF-095_WWEXPEDITED_중량반올림규칙_오류.md` |
 ---
 
 ## 처리 지침
@@ -120,6 +127,7 @@
 
 | 날짜 | 주체 | 내용 |
 |:-----|:----:|:-----|
+| 2026-07-06 | Aiden (Claude) | **GH#205 — DEF-089~095 소급 등재(7건)**. 2026-06-10 이후 미갱신 상태였던 대장을 UAT-15-01(화주관리, Team B 처리분 DEF-089~094)·UPS특송(DEF-095, Aiden 처리)까지 소급 반영. 각 Task file(TASK-B-043~050)·ACTIVE_TASK.md 교차 확인으로 커밋 해시·PR 번호·회귀 결과 전량 검증 후 기재. 현황 요약 갱신 — 기능오류 수정완료 25→29·검증완료 7→8, 기능보완 수정완료 12→14, 합계 60→67. |
 | 2026-06-09 | Aiden (Claude) | TASK-130 ✅ 승인 — DEF-053 수정완료(`2c30146`). 요율 UI 5종 개선 완료. 수정커밋 기재. |
 | 2026-06-09 | Aiden (Claude) | TASK-128 ✅ 승인 — DEF-048/049 수정완료(`830184c`). seed 재구현·미배정 배지. 현황 요약 갱신: 미수정 9→7, 수정완료 31→33. |
 | 2026-06-09 | Aiden (Claude) | TASK-127 ✅ 승인 — DEF-054 port 조건 수정(`0183c4e`). TASK-129 ✅ 승인 — DEF-018/009/010/055 일괄 수정(`dba695e`). 현황 요약 갱신: 미수정 14→9, 수정완료 26→31. |

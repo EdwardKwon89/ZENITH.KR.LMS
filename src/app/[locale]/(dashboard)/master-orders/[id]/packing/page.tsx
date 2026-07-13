@@ -26,7 +26,7 @@ export default async function MasterPackingPage({
   const sumWeight = allItems.reduce((s: number, i: any) => s + ((i.weight || 0) * (i.quantity || 1)), 0);
   const sumCbm = houses.reduce((s: number, h: any) => {
     const pkgs = h.packages || [];
-    return s + pkgs.reduce((sp: number, p: any) => sp + ((p.volume || 0) * (p.packing_count || 1)), 0);
+    return s + pkgs.reduce((sp: number, p: any) => sp + ((p.volume || 0)), 0);
   }, 0);
 
   const origin = master.origin_port as any;

@@ -1365,6 +1365,22 @@
 
 ---
 
+## [IMP-132] Phase 7 UPS 스키마 설계 갭 — zen_orders 인코텀즈·제품코드 누락
+
+- **발견 경위**: Phase 8 UPS 연동(shxk) 설계 중 Edward 지적 — 고객 주문 시 DDU/DDP 선택·요금 산정·정산 요건 확인 과정에서 발견 (2026-06-26)
+- **현재 상태**: ✅ 수정 완료 — `zen_orders.ups_product_code` + `zen_orders.incoterms` 컬럼 추가 (커밋 `2f57b73`)
+- **임시 조치**: 없음 (Phase 8 구현 착수 전 발견하여 즉시 수정)
+- **목표 구현**: 완료 — migration `20260626100000_phase8_ups_order_incoterms.sql`
+- **근본 원인**: Phase 7 TASK-138 설계 시 캐리어 제품 선택 및 인코텀즈를 오더 레코드에 영속화하는 구조 누락
+- **재발 방지**: SAR `SAR_2026-06-26_001` + DB 스키마 체크리스트에 캐리어 연동 항목 추가
+- **관련 파일**: `supabase/migrations/20260626100000_phase8_ups_order_incoterms.sql`, `src/types/supabase.ts`
+- **관련 SAR**: `SAR_2026-06-26_001_Design_UPS_IncotermsOrderModel_Gap.md`
+- **예상 공수**: 완료
+- **우선순위**: High
+- **상태**: ✅ 완료 (2026-06-26)
+
+---
+
 ## [IMP-131] CI pr-checks.yml .env.local 파싱 버그 수정
 
 - **발견 경위**: PR#66/#67 CI에서 `SUPABASE_SERVICE_ROLE_KEY is required` 반복 실패 — Aiden 근본 원인 분석 (Issue #72, 2026-06-22)
@@ -1392,3 +1408,45 @@
 - **예상 공수**: 0.1 MD
 - **우선순위**: P4
 - **상태**: ⬜ 미착수 — TASK-B-014 발령 260621
+
+---
+
+## [IMP-133] UPS Box 상품(`UPS_10KG_BOX`/`UPS_25KG_BOX`) max_weight_kg 상한 미검증
+
+- **발견 경위**: GH#203(API 명세서 Phase 7.2 갱신) 작업 중 Aiden이 소스코드 전수 확인 과정에서 발견 (2026-07-05)
+- **현재 상태**: `zen_ups_products.max_weight_kg` 컬럼(마이그레이션 `20260705120000_imp146_ups_products_box_max_weight.sql`)이 시딩만 되어 있고, `estimateUpsFreight()`/`computeUpsFreight()` 등 요금 계산 경로 어디에서도 참조되지 않음 — 화주가 Box 상품 상한(10kg/25kg)을 초과하는 실중량을 입력해도 서버가 차단하지 않고 그대로 계산을 진행함(단, 초과 중량에 대한 요율 자체가 시드되어 있지 않으므로 "기준요금 없음" 에러로 우회 차단되는 정도)
+- **임시 조치**: 없음 (요율 미시딩으로 인한 간접 차단에 의존 중 — 명시적 검증 아님)
+- **목표 구현**: `computeUpsFreight()` 또는 `estimateUpsFreight()`에 `actualWeightKg > product.max_weight_kg` 체크 추가, 명확한 사용자 메시지("Box 상품은 최대 N kg까지만 이용 가능합니다") 반환
+- **관련 파일**: `src/lib/ups/pricing-engine.ts`, `src/app/actions/ups/freight.ts`, `supabase/migrations/20260705120000_imp146_ups_products_box_max_weight.sql`
+- **관련 Issue**: GH#203 작업 중 발견 (범위 밖 — 별도 Task 필요)
+- **예상 공수**: 0.3 MD
+- **우선순위**: Low (요율 미시딩으로 인한 간접 차단이 사실상 동일한 효과를 내고 있어 실사용 영향 낮음)
+- **상태**: ⬜ 미착수
+
+---
+
+## [IMP-134] `tests/` 전역 TypeScript 오류 222건 — `test:regression`(vitest)이 못 잡는 타입 결함 누적
+
+- **발견 경위**: Edward "GitHub Action 오류 후속 조치 확인" 질의로 PR Checks 실패 이력 조사 중, `npx tsc --noEmit` 전체 프로젝트 실행 결과 `src/`(앱 코드) 1건(별도 DEF-097로 수정 완료) 외 `tests/` 하위에서 222건의 타입 오류 확인 (2026-07-07)
+- **현재 상태**: `test:regression` 스크립트가 `vitest run`만 실행하며 vitest는 esbuild/swc 기반 트랜스파일로 타입 체크를 강제하지 않으므로, 실제로는 깨진 타입에도 테스트가 PASS로 통과됨. 대표 사례: `tests/unit/monitoring/logger.test.ts`(NODE_ENV 읽기전용 할당), `tests/e2e/uat11-hub-routing-p0.spec.ts`(암묵적 any 5건), `tests/integration/p7-ups-schema.test.ts`(타입 불일치 4건) 등 다수 파일에 누적
+- **임시 조치**: 없음 — `next build`가 `src/`만 타입체크 대상으로 삼아 CI 빌드 자체는 통과하므로 당장 배포 블로킹은 아님
+- **목표 구현**: (1) CI `PR Checks`에 `npx tsc --noEmit` 단계 추가해 신규 타입 오류 유입 차단, (2) 기존 222건은 파일 단위로 점진 정리(테스트 로직 자체는 vitest 통과 중이므로 급하지 않음, Backlog)
+- **관련 파일**: `tests/**/*.{ts,tsx}` 다수, `package.json`(`test:regression` 스크립트), `.github/workflows/pr-checks.yml`
+- **관련 Issue**: 없음 — Edward 질의 계기 자체 발견
+- **예상 공수**: (1) CI 단계 추가 0.1 MD / (2) 전체 정리 1.5~2 MD (별도 Task 분할 권장)
+- **우선순위**: Medium — (1)은 재발 방지 차원에서 우선 권장, (2)는 Low
+- **상태**: ⬜ 미착수
+
+---
+
+## [IMP-135] `.agent/LAST_REGRESSION_RESULT` 값이 실제 회귀 결과와 무관하게 stale한 채 커밋되는 사례 반복 (5건)
+
+- **발견 경위**: Aiden PR 검토 중 diff/실제 CI 대조에서 반복 발견 — D_Kai TASK-182(2026-07-08, PR#275→직접 push), Dave TASK-B-083(PR#297, Jaison 반려로 발견), Baker TASK-B-084(PR#298, Aiden 반려로 발견) (2026-07-08~09), Baker TASK-B-086/PR#309(Issue #305, Aiden 반려로 발견, 2026-07-10), **Dave PR#313(Issue #310, Aiden이 `gh run view --log-failed`로 실제 CI 4 failed 확인 후 발견 — 파일엔 492/492 ALL PASS로 기재, 2026-07-10)**
+- **현재 상태**: `.githooks/pre-commit`이 R-08 강제를 위해 `.agent/LAST_REGRESSION_RESULT` 파일 값을 그대로 신뢰하는데, 이 파일이 실제 최신 테스트 실행과 무관하게 stale 값으로 커밋되는 사례가 반복됨. 초기 3건은 stale `FAIL`(실제는 PASS인데 오래된 FAIL 값이 남아 커밋을 불필요하게 막는 방향)이었으나, **PR#309·PR#313은 반대 방향** — 실제 CI는 FAIL인데 파일엔 `PASS`로 기재되어 있어 리뷰어가 실제 CI를 직접 조회하지 않으면 회귀 실패를 그대로 병합할 위험이 있는, 더 심각한 방향. Dave 사례 분석에 따르면 cherry-pick/rebase 과정에서 이 파일이 "modified되지 않은 것으로" 취급되어 `git add`에서 누락되고 stale 값이 그대로 실려가는 것으로 추정되나, PASS 방향 오기재는 별도로 "로컬에서 통과했다고 믿고 그대로 기재" 패턴(신선한 `supabase db reset` 없이 로컬 캐시 상태로 재실행)일 가능성도 있음 — DEF-096/097과 동일 근본원인 계열
+- **임시 조치**: Aiden/Jaison이 매 PR diff·`gh run view --log-failed` 조회 시 이 파일을 수동으로 대조 확인 중 (재발 방지 근본 조치 아님)
+- **목표 구현**: pre-commit hook을 정적 파일 대조 방식에서 실제 `npm run test:regression` 실행(또는 최소한 파일의 timestamp/git blame이 현재 브랜치의 HEAD 커밋 이후인지 확인)으로 변경 검토. 또는 이 파일을 `.gitignore` 처리하고 CI 성공 여부만을 진실의 근거로 전환(로컬 hook은 "실행 여부"만 강제, "결과값"은 원격 CI에 위임)
+- **관련 파일**: `.githooks/pre-commit`, `.agent/LAST_REGRESSION_RESULT`
+- **관련 Issue**: [#358](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/358) — 2026-07-11 절차 오류 재발 방지 계획에 편입
+- **예상 공수**: 0.5 MD (hook 로직 재설계 + 팀 공지)
+- **우선순위**: **High로 상향** — PASS 오기재 방향(PR#309·#313)이 실제로 발생함이 확인되어, 리뷰어가 매번 실제 CI를 직접 조회하지 않으면 회귀 실패가 은폐된 채 병합될 실질적 위험이 입증됨
+- **상태**: 🔄 1단계 적용 완료(2026-07-11) — `.githooks/pre-commit`에서 이 파일 기반 하드 블록(exit 1) 제거, 경고만 출력하도록 완화. 병합 판단은 원격 CI(`gh pr checks`) 전용으로 전환. pre-commit이 실제 테스트를 재실행하는 강화안(3단계)은 로컬 환경 준비 후 별도 검토.
