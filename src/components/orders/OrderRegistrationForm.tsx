@@ -426,8 +426,8 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
 
   // 🔄 Transport Mode 변경 시 항구 선택 초기화 (정합성 유지)
   useEffect(() => {
-    setValue('origin_port_id', '');
-    setValue('dest_port_id', '');
+    setValue('origin_port_id', undefined);
+    setValue('dest_port_id', undefined);
   }, [transportMode, setValue]);
 
   // 🔄 Transport Mode 변경 시 서비스 조합 선택 초기화
@@ -436,16 +436,20 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
   }, [transportMode]);
 
   // 🔄 DOC content_type 선택 시 치수 초기화 (TASK-B-076)
+  const contentTypesKey = useMemo(
+    () => (watchedPackages || []).map((p: any) => p.content_type).join(','),
+    [watchedPackages]
+  );
   useEffect(() => {
     if (!watchedPackages) return;
     watchedPackages.forEach((pkg, i) => {
-      if (pkg.content_type === 'DOC') {
+      if (pkg.content_type === 'DOC' && (pkg.length !== undefined || pkg.width !== undefined || pkg.height !== undefined)) {
         setValue(`packages.${i}.length`, undefined);
         setValue(`packages.${i}.width`, undefined);
         setValue(`packages.${i}.height`, undefined);
       }
     });
-  }, [watchedPackages, setValue]);
+  }, [contentTypesKey, setValue]);
 
   const filteredPorts = useMemo(() => {
     if (!transportMode) return ports;
