@@ -20,10 +20,10 @@
 - **Task File Check**: ✅ PASS
 
 ### 커밋
-- `TBD` — `[Dave] feat: TASK-B-114 Issue #421 — 주소록 org_id 기반 RLS E2E 테스트 보강`
+- `348b06b0` — `[Dave] feat: TASK-B-114 Issue #421 — 주소록 org_id 기반 RLS E2E 테스트 보강`
 
 ### PR
-- `TBD`
+- https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/423
 
 ---
 
