@@ -34,10 +34,10 @@ CREATE POLICY zen_address_book_org_member_access ON public.zen_address_book
 - **Task File Check**: ✅ PASS
 
 ### 커밋
-- `TBD` — `[Dave] feat: TASK-B-113 Issue #414 — 조직 소속 사용자 주소록 RLS 정책 재생성`
+- `d9df3938` — `[Dave] feat: TASK-B-113 Issue #414 — 조직 소속 사용자 주소록 RLS 정책 재생성`
 
 ### PR
-- `TBD`
+- https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/416
 
 ---
 
