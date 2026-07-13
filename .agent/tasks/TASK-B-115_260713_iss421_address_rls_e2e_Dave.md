@@ -21,6 +21,7 @@
 
 ### 커밋
 - `348b06b0` — `[Dave] feat: TASK-B-114 Issue #421 — 주소록 org_id 기반 RLS E2E 테스트 보강`
+- `7b09b801` — `[Dave] fix: TASK-B-115 반려 수정 — 채번 정정 B-114→B-115 + rebase`
 
 ### PR
 - https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/423
