@@ -15,7 +15,7 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
-| [#447](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/447) | [Aiden] UPS 특송 UAT 문서 5건 종합 검토·갱신 (UAT-15·18·19·20·22) | a | p3 | - | 미배정 | 2026-07-13 |
+| [#447](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/447) | [Aiden] UPS 특송 UAT 문서 5건 종합 검토·갱신 (UAT-15·18·19·20·22) | a | p3 | review | 미배정 | 2026-07-13 |
 | [#440](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/440) | [fix] 주소록 전체정보 저장/불러오기 매핑 오류 + UPS Direct 오더 등록 시 origin_port 유효성 오류 | b | p1 | - | 미배정 | 2026-07-13 |
 | [#358](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/358) | [Aiden] R-17 절차 오류 재발 방지 — 4단계 구조적 개선 (채번 자동화·회귀결과 신뢰 제거·CI 게이트·워크트리 격리) | a | p2 | - | 미배정 | 2026-07-12 |
 | [#285](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/285) | [fix] 신규운송요청 탭 전환 시 화주/수하인 입력값 초기화 버그 | b | p2 | rework | jungjs | 2026-07-08 |
