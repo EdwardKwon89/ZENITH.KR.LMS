@@ -57,6 +57,7 @@ export const orderRegistrationSchema = z.object({
   recipient_name: z.string().min(1, 'Recipient name is required'),
   recipient_address: z.string().min(1, 'Recipient address is required'),
   recipient_address_local: z.string().optional(),
+  recipient_address_detail: z.string().optional(),
   recipient_phone: z.string().min(1, 'Recipient phone is required'),
   recipient_zipcode: z.string().optional(),
   recipient_country_code: z.string().optional(),

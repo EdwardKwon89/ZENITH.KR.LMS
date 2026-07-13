@@ -7,7 +7,7 @@ import { revalidatePath } from "next/cache";
 
 const ADDRESS_BOOK_SELECT = `
   id, display_name, recipient_name, recipient_address, recipient_address_local,
-  recipient_phone, country_code, display_mode, is_default, created_at, updated_at
+  recipient_address_detail, recipient_phone, country_code, display_mode, is_default, created_at, updated_at
 `;
 
 export async function getAddressBookEntries() {

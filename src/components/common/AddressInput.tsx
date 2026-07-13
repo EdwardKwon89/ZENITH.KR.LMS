@@ -56,6 +56,18 @@ export function AddressInput({
   }, []);
 
   useEffect(() => {
+    if (defaultValues.country_code) setCountryCode(defaultValues.country_code);
+    if (defaultValues.state_province) setSelectedState(defaultValues.state_province);
+    if (defaultValues.city) setSelectedCity(defaultValues.city);
+    if (defaultValues.address !== undefined) {
+      setStreetAddress(defaultValues.address || '');
+      if (defaultValues.country_code === 'KR') setRoadAddress(defaultValues.address || '');
+    }
+    if (defaultValues.address_detail !== undefined) setDetailAddress(defaultValues.address_detail || '');
+    if (defaultValues.zipcode !== undefined) setPostalCode(defaultValues.zipcode || '');
+  }, [defaultValues.country_code, defaultValues.state_province, defaultValues.city, defaultValues.address, defaultValues.address_detail, defaultValues.zipcode]);
+
+  useEffect(() => {
     if (countryCode && countryCode !== 'KR') {
       setStates(State.getStatesOfCountry(countryCode) ?? []);
       setSelectedState('');
