@@ -580,6 +580,20 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
     }
   };
 
+  const handleUpsDirectSubmit = async () => {
+    const baseFields = ['shipper_id', 'transport_mode', 'recipient_name', 'recipient_address', 'recipient_phone'] as const;
+    const isStep1Valid = await trigger([...baseFields]);
+    if (!isStep1Valid) {
+      toast.error("필수 입력 값을 확인해주세요.");
+      return;
+    }
+    if (!watch('ups_product_code')) {
+      toast.error("UPS 서비스 티어를 선택해주세요.");
+      return;
+    }
+    handleSubmit(onSubmit, onError)();
+  };
+
   const handleGoToStep3 = async () => {
     const currentMode = watch('transport_mode');
 
@@ -678,21 +692,11 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
 
   const onSubmit = async (data: any) => {
     try {
-      // UPS: ups_product_code 자동 결정 + 서비스 조합 우회
+      // UPS: Step 1에서 이미 ups_product_code가 올바르게 설정됨
       if (data.transport_mode === 'UPS') {
-        if (data.ups_service_family) {
-          const hasNondoc = data.packages?.some((p: any) => p.content_type === 'NONDOC');
-          const map: Record<string, string> = {
-            WW_EXPRESS:   hasNondoc ? 'WW_EXPRESS_NONDOC' : 'WW_EXPRESS_DOC',
-            WW_SAVER:     hasNondoc ? 'WW_SAVER_NONDOC'   : 'WW_SAVER_DOC',
-            WW_EXPEDITED: 'WW_EXPEDITED',
-            WW_FLIGHT:    'WW_FLIGHT',
-          };
-          data.ups_product_code = map[data.ups_service_family];
-        }
         const finalData = {
           ...data,
-          estimated_cost: totals.freight,
+          estimated_cost: upsEstimate?.shipper?.finalFreight ?? upsEstimate?.platform?.totalSellingPrice ?? totals.freight,
           ups_product_code: data.ups_product_code,
         };
         const orderResult = await createOrder(finalData as OrderRegistrationInput);
@@ -834,7 +838,16 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
           </div>
 
           <div>
-            {step === 1 && (
+            {step === 1 && transportMode === 'UPS' && (
+              <ZenButton
+                type="button"
+                onClick={handleUpsDirectSubmit}
+                className="px-8 py-2 text-xs font-bold rounded-xl bg-blue-600 text-white hover:bg-blue-700"
+              >
+                <Save size={14} className="mr-1 inline" /> 오더 등록
+              </ZenButton>
+            )}
+            {step === 1 && transportMode !== 'UPS' && (
               <ZenButton
                 type="button"
                 onClick={handleNextToStep2}
@@ -1596,7 +1609,16 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
             )}
           </div>
           <div>
-            {step === 1 && (
+            {step === 1 && transportMode === 'UPS' && (
+              <ZenButton
+                type="button"
+                onClick={handleUpsDirectSubmit}
+                className="px-8 py-2 text-xs font-bold rounded-xl bg-blue-600 text-white hover:bg-blue-700 shadow-lg"
+              >
+                <Save size={14} className="mr-1 inline" /> 오더 등록
+              </ZenButton>
+            )}
+            {step === 1 && transportMode !== 'UPS' && (
               <ZenButton
                 type="button"
                 onClick={handleNextToStep2}
