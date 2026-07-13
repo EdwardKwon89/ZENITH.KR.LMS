@@ -42,18 +42,18 @@ function normalizePath(path: string): string {
  * Fallback: Static Permissions (DB 연동 전 또는 장애 시 대비)
  */
 export const STATIC_PERMISSIONS: Record<string, string[]> = {
-  [USER_ROLES.ADMIN]: ['/master', '/admin', '/orders', '/logistics', '/billing', '/tracking', '/inventory', '/finance', '/settlement', '/voc', '/support', '/mypage', '/warehouse'],
-  [USER_ROLES.MANAGER]: ['/orders', '/logistics', '/billing', '/reports', '/tracking', '/inventory', '/finance', '/settlement', '/voc', '/support', '/mypage', '/warehouse', '/admin/ups-rates'],
-  [USER_ROLES.OPERATOR]: ['/orders', '/logistics', '/tracking', '/voc', '/support', '/mypage'],
-  [USER_ROLES.CARRIER]: ['/logistics/delivery', '/orders/assigned', '/admin/transport-costs', '/admin/rates', '/voc', '/support', '/mypage'],
-  [USER_ROLES.CUSTOMS_BROKER]: ['/admin/customs-rates', '/orders/assigned', '/tracking', '/voc', '/mypage'],
-  [USER_ROLES.DELIVERY_AGENT]: ['/admin/delivery-rates', '/orders/assigned', '/tracking', '/voc', '/mypage'],
-  [USER_ROLES.AGENCY]: ['/orders', '/ups-rates', '/agency', '/tracking', '/settlement', '/voc', '/mypage'],
-  [USER_ROLES.AGENCY_SHIPPER]: ['/orders', '/shipper', '/ups-rates', '/tracking', '/voc', '/support', '/mypage'],
-  [USER_ROLES.SHIPPER]: ['/orders', '/shipper', '/ups-rates', '/tracking', '/voc', '/support', '/mypage'],
-  [USER_ROLES.CORPORATE]: ['/orders', '/billing/invoice', '/tracking', '/finance', '/settlement', '/voc', '/support', '/mypage'],
-  [USER_ROLES.INDIVIDUAL]: ['/orders', '/tracking', '/voc', '/support', '/mypage'],
-  [USER_ROLES.USER]: ['/dashboard', '/mypage', '/support'],
+  [USER_ROLES.ADMIN]: ['/master', '/admin', '/orders', '/logistics', '/billing', '/tracking', '/inventory', '/finance', '/settlement', '/voc', '/support', '/mypage', '/warehouse', '/address-book'],
+  [USER_ROLES.MANAGER]: ['/orders', '/logistics', '/billing', '/reports', '/tracking', '/inventory', '/finance', '/settlement', '/voc', '/support', '/mypage', '/warehouse', '/admin/ups-rates', '/address-book'],
+  [USER_ROLES.OPERATOR]: ['/orders', '/logistics', '/tracking', '/voc', '/support', '/mypage', '/address-book'],
+  [USER_ROLES.CARRIER]: ['/logistics/delivery', '/orders/assigned', '/admin/transport-costs', '/admin/rates', '/voc', '/support', '/mypage', '/address-book'],
+  [USER_ROLES.CUSTOMS_BROKER]: ['/admin/customs-rates', '/orders/assigned', '/tracking', '/voc', '/mypage', '/address-book'],
+  [USER_ROLES.DELIVERY_AGENT]: ['/admin/delivery-rates', '/orders/assigned', '/tracking', '/voc', '/mypage', '/address-book'],
+  [USER_ROLES.AGENCY]: ['/orders', '/ups-rates', '/agency', '/tracking', '/settlement', '/voc', '/mypage', '/address-book'],
+  [USER_ROLES.AGENCY_SHIPPER]: ['/orders', '/shipper', '/ups-rates', '/tracking', '/voc', '/support', '/mypage', '/address-book'],
+  [USER_ROLES.SHIPPER]: ['/orders', '/shipper', '/ups-rates', '/tracking', '/voc', '/support', '/mypage', '/address-book'],
+  [USER_ROLES.CORPORATE]: ['/orders', '/billing/invoice', '/tracking', '/finance', '/settlement', '/voc', '/support', '/mypage', '/address-book'],
+  [USER_ROLES.INDIVIDUAL]: ['/orders', '/tracking', '/voc', '/support', '/mypage', '/address-book'],
+  [USER_ROLES.USER]: ['/dashboard', '/mypage', '/support', '/address-book'],
 };
 
 /**
