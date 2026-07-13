@@ -1,6 +1,8 @@
 'use client';
 
+import { useParams } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { getCountryName } from '@/lib/utils/country';
 import type { AgencyShipperRow } from '@/types/agency';
 import { EditableGradeCell, EditableRateCell, ActionCell } from './editable-cell';
 
@@ -11,33 +13,38 @@ const TYPE_BADGE: Record<string, string> = {
 
 interface ShipperTableRowProps {
   shipper: AgencyShipperRow;
-  isEditing: boolean;
-  editGrade: string;
-  editRate: number;
-  onEdit: () => void;
-  onCancel: () => void;
-  onSave: () => void;
-  onGradeChange: (v: string) => void;
-  onRateChange: (v: number) => void;
   t: (key: string) => string;
 }
 
-export function ShipperTableRow(props: ShipperTableRowProps) {
-  const { shipper, isEditing, editGrade, editRate, onEdit, onCancel, onSave, onGradeChange, onRateChange, t } = props;
+export function ShipperTableRow({ shipper, t }: ShipperTableRowProps) {
+  const params = useParams();
+  const locale = (params?.locale as string) || 'ko';
 
   return (
     <tr className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
-      <td className="px-4 py-3 font-medium text-slate-900">{shipper.shipper?.[0]?.name || '-'}</td>
+      <td className="px-4 py-3 font-medium text-slate-900">{shipper.shipper?.name || '-'}</td>
       <td className="px-4 py-3">
         <span className={cn("px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider", TYPE_BADGE[shipper.shipper_type] || 'bg-slate-100 text-slate-600')}>
           {t(`type_${shipper.shipper_type}`)}
         </span>
       </td>
       <td className="px-4 py-3">
-        <EditableGradeCell isEditing={isEditing} value={editGrade} onChange={onGradeChange} displayValue={shipper.grade} placeholder={t('grade_placeholder')} />
+        <EditableGradeCell displayValue={shipper.grade} placeholder={t('grade_placeholder')} />
       </td>
       <td className="px-4 py-3">
-        <EditableRateCell isEditing={isEditing} value={editRate} onChange={onRateChange} displayRate={shipper.discount_rate} />
+        <EditableRateCell displayRate={shipper.discount_rate} />
+      </td>
+      <td className="px-4 py-3 text-center text-slate-600 text-xs">
+        {shipper.shipper?.contact_name || '-'}
+      </td>
+      <td className="px-4 py-3 text-center text-slate-600 text-xs">
+        {shipper.shipper?.contact_email || '-'}
+      </td>
+      <td className="px-4 py-3 text-center text-slate-600 text-xs">
+        {shipper.shipper?.contact_phone || '-'}
+      </td>
+      <td className="px-4 py-3 text-center text-slate-600 text-xs">
+        {shipper.shipper?.country_code ? getCountryName(shipper.shipper.country_code, locale) : '-'}
       </td>
       <td className="px-4 py-3">
         <span className={cn("px-2.5 py-1 rounded-full text-[10px] font-bold border",
@@ -49,7 +56,7 @@ export function ShipperTableRow(props: ShipperTableRowProps) {
         {shipper.created_at ? new Date(shipper.created_at).toLocaleDateString('ko-KR') : '-'}
       </td>
       <td className="px-4 py-3 text-right">
-        <ActionCell isEditing={isEditing} onEdit={onEdit} onCancel={onCancel} onSave={onSave} />
+        <ActionCell shipperId={shipper.id} />
       </td>
     </tr>
   );

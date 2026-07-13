@@ -16,7 +16,7 @@ export default async function AgencySettlementsPage() {
   const dropdownShippers = (shippers || []).map(s => ({
     id: s.id,
     shipper_org_id: s.shipper_org_id,
-    shipper: Array.isArray(s.shipper) ? (s.shipper[0] ?? null) : s.shipper,
+    shipper: s.shipper,
   }));
 
   return (

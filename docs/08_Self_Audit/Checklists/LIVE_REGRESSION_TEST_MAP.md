@@ -1,7 +1,7 @@
 # 🗺️ LIVE Regression Test Master Map
 
-> **총 테스트 케이스:** 384 Cases  
-> **최종 검증일:** 2026-06-20 (TASK-155 [P7-SPR-07] E2E·UAT 선행 스펙 작성 · TC-P7-ADDR-01~05, TC-P7-CLOSE-01~05 등재 · 374/374 PASS)  
+> **총 테스트 케이스:** 464 Cases (vitest 개별 테스트 기준, 77 test files)
+> **최종 검증일:** 2026-07-07 (TASK-B-060 UPS 견적 UI 연동 · TC-P7-UI-ESTIMATE-01/02 등재 · 485/485 PASS)  
 
 제니스 플랫폼의 비즈니스 영속성을 보장하는 회귀 테스트 케이스의 통합 명세서입니다. 모든 신규 개발 및 수정 시 이 맵에 케이스가 추가되어야 하며, 전체 테스트가 통과되어야 합니다.
 
@@ -99,8 +99,6 @@
 | **TC-F.8** | 세금계산서 메일 발송 | Resend 연동 및 SENT/FAILED 상태 전환 확인 | `tests/integration/fin-03.test.ts` |
 | **TC-F.9** | 세금계산서 이력 조회 | 화주/어드민별 발행 및 발송 히스토리 조회 검증 | `tests/integration/fin-03.test.ts` |
 
-<<<<<<< HEAD
-=======
 ### 9. UPS 요율 관리 (Phase 7 SPR-03)
 | ID | 테스트 항목 | 목적 | 파일 경로 |
 | :--- | :--- | :--- | :--- |
@@ -109,6 +107,10 @@
 | **TC-UPS-ADMIN-03** | 유류할증 UPSERT | 주별 유류할증료 등록·수정 | `tests/unit/ups/rates-admin-actions.test.ts` |
 | **TC-UPS-ADMIN-04** | Other Charge CRUD | 부가요금 등록 및 수정 | `tests/unit/ups/rates-admin-actions.test.ts` |
 | **TC-UPS-ADMIN-05** | 역할 인증 가드 | 비관리자의 요율 관리 액션 접근 차단 | `tests/unit/ups/rates-admin-actions.test.ts` |
+| **TC-UPS-ADMIN-08** | 20kg 초과 티어 요율 등록/수정 | `upsertUpsWeightTierRate` 정상 동작 | `tests/unit/ups/rates-admin-actions.test.ts` |
+| **TC-UPS-ADMIN-09** | 20kg 초과 티어 요율 삭제 | `deleteUpsWeightTierRate` (비활성화) 정상 동작 | `tests/unit/ups/rates-admin-actions.test.ts` |
+| **TC-UPS-ADMIN-10** | Freight 최소운임 등록/수정 | `upsertUpsFreightMinimum` 정상 동작 | `tests/unit/ups/rates-admin-actions.test.ts` |
+| **TC-UPS-ADMIN-11** | Freight 최소운임 삭제 | `deleteUpsFreightMinimum` (비활성화) 정상 동작 | `tests/unit/ups/rates-admin-actions.test.ts` |
 | **TC-UPS-WH-01** | 창고 출고 — intl_ref_no 있음 | 정상 출고 (pkgsWithoutIntlRef=0) | `tests/unit/warehouse/outbound-ups.test.ts` |
 | **TC-UPS-WH-02** | 창고 출고 — intl_ref_no 없음 | pkgsWithoutIntlRef > 0 반환 | `tests/unit/warehouse/outbound-ups.test.ts` |
 | **TC-UPS-WH-03** | 창고 출고 — 상태 전이 | WAREHOUSED→RELEASED 전이 유지 | `tests/unit/warehouse/outbound-ups.test.ts` |
@@ -433,6 +435,7 @@
 | **TC-P7-ADDR-03** | 주소록 항목 수정 | 기존 등록된 주소록 정보 수정 반영 확인 | `tests/unit/operations/address-book.test.ts` |
 | **TC-P7-ADDR-04** | 주소록 항목 삭제 | 주소록 항목 삭제 시 DB 제거 검증 | `tests/unit/operations/address-book.test.ts` |
 | **TC-P7-ADDR-05** | 기본 배송지 설정 및 자동 단일화 | 신규 지정 시 기존 기본배송지 자동 해제 검증 | `tests/unit/operations/address-book.test.ts` |
+| **TC-P7-ADDR-06** | org_id 기반 계정 주소록 CRUD (RLS) | AGENCY_SHIPPER 계정(org_id 있음) 주소록 등록·수정·삭제 — `zen_address_book_org_member_access` 정책 검증 | `tests/e2e/e2e-21-address-book.spec.ts` |
 
 ### 32. Agency 정산 내역 엑셀 다운로드 (IMP-124)
 | ID | 테스트 항목 | 목적 | 파일 경로 |
@@ -464,6 +467,102 @@
 | **TC-P7-CLOSE-03** | 기간별 마감 이력 조회 및 일자별 그룹핑 | 기간 내 일자별 그룹핑 및 정렬 정상 동작 확인 | `tests/unit/ups/daily-close.test.ts` |
 | **TC-P7-CLOSE-04** | 출고 데이터가 없는 날의 집계 처리 | 데이터 없는 일자 조회 시 안전한 0 반환 처리 | `tests/unit/ups/daily-close.test.ts` |
 | **TC-P7-CLOSE-05** | 일마감 데이터 권한 검증 | ADMIN/MANAGER 외 타 역할 접근 차단 검증 | `tests/unit/ups/daily-close.test.ts` |
+
+### 36. Phase 8 UPS E2E 레이블 발급 전체 흐름 (IMP-140)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-P8-UPS-01** | 창고 출고 화면 → UPS 레이블 미발급 상태 확인 | 출고 전 `UPS 미발급` 텍스트 표시 확인 | `tests/e2e/e2e-26-ups-label-flow.spec.ts` |
+| **TC-P8-UPS-02** | 출고 확정 → createorder → 운송장번호 발급 | UPS createorder 정상 호출 및 label_data 저장 | `tests/e2e/e2e-26-ups-label-flow.spec.ts` |
+| **TC-P8-UPS-03** | getnewlabel → 레이블 PDF URL 생성 | PDF URL 정상 반환 확인 | `tests/e2e/e2e-26-ups-label-flow.spec.ts` |
+| **TC-P8-UPS-04** | `zen_ups_labels` DB 레코드 삽입 확인 | 테이블 upsert 정상 동작 | `tests/e2e/e2e-26-ups-label-flow.spec.ts` |
+| **TC-P8-UPS-05** | Void 버튼 → confirm → 폐기 완료 | `markLabelVoided` UPDATE 성공 및 UI 반영 | `tests/e2e/e2e-26-ups-label-flow.spec.ts` |
+| **TC-P8-UPS-06** | 재발급 버튼 클릭 → 새 운송장 번호 갱신 | `issueUpsLabel` 정상 호출 및 DB `is_voided=false` 레코드 생성 확인 | `tests/e2e/e2e-26-ups-label-flow.spec.ts` |
+| **TC-P8-UPS-07** | gettrack polling → tracking_events 저장 | 폴링 첫 호출 후 `zen_ups_tracking_events` 삽입 확인 | `tests/e2e/e2e-26-ups-label-flow.spec.ts` |
+
+### 37. Agency 화주 계정 발급 기반 검증 (Issue #180 TASK-B-056)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-UPS-AGPOL-01** | 할인율 정책 없는 대리점 오버라이드 등록 차단 | `zen_agency_pricing_policies` 부재 시 INSERT 에러 발생 확인 | `tests/integration/p71-ups-agency-pricing.test.ts` |
+| **TC-UPS-AGPOL-02** | cost_price = 판매가×(1-할인율) 자동계산 | 트리거가 Agency 입력값을 무시하고 재계산하는지 확인 | `tests/integration/p71-ups-agency-pricing.test.ts` |
+| **TC-UPS-AGPOL-03** | UPDATE 시에도 cost_price 자동 재계산 유지 | Agency가 임의 값으로 갱신 시도해도 트리거값 유지 확인 | `tests/integration/p71-ups-agency-pricing.test.ts` |
+| **TC-UPS-AGPOL-04** | 현지통관/기타 부가수수료 4종 시드 확인 | DUTY_AMOUNT 등 4종, fuel_surcharge_applicable=false 확인 | `tests/integration/p71-ups-agency-pricing.test.ts` |
+| **TC-UPS-AGPOL-05** | `fn_get_ups_agency_selling_price` 반환값 검증 | Agency override selling_price 정상 반환 확인 | `tests/integration/p71-ups-agency-pricing.test.ts` |
+
+### 38. Phase 7.1 UPS 요금 계산 엔진 보강 — Platform/Agency/Shipper (IMP-145)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-UPS-ENGINE-01** | 청구중량 계산(0.5kg 올림·실중량/부피중량 비교) | 기존 로직 정합성 확인 | `tests/unit/ups/pricing-engine.test.ts` |
+| **TC-UPS-ENGINE-02** | 원가 ×1.07 반영 | SNTL 원자료 원가 할증 규칙 정확성 확인 | `tests/unit/ups/pricing-engine.test.ts` |
+| **TC-UPS-ENGINE-03** | 대형포장물(OVERSIZE) 특수 판정 6종 | 길이+둘레 300~400cm 조건·최소청구중량 40kg 강제 확인 | `tests/unit/ups/pricing-engine.test.ts` |
+| **TC-UPS-ENGINE-04** | Agency 단계 계산(override/폴백 분기) | R3~R5 공식 정확성 확인 | `tests/unit/ups/pricing-engine.test.ts` |
+| **TC-UPS-ENGINE-05** | Shipper 단계 계산(화주 할인 적용) | R6 공식 정확성 확인 | `tests/unit/ups/pricing-engine.test.ts` |
+
+### 39. Phase 7.1 estimateUpsFreight 통합 Action (IMP-145)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-UPS-FREIGHT-01** | Platform/Agency/Shipper 3단계 견적 조회(agencyOrgId·shipperOrgId 유무별 분기, Zone/기준요금 미존재 에러) | An-14 §4·§11 API 계약 검증 | `tests/unit/ups/freight-actions.test.ts` |
+
+### 39. Phase 7.1 Agency 부가요금 CRUD (IMP-145)
+
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-AG-OC-01** | 부가요금 목록 조회 | `getAgencyOtherCharges` 정상 동작 | `tests/unit/agency/other-charges-actions.test.ts` |
+| **TC-AG-OC-02** | 부가요금 등록 | `upsertAgencyOtherCharge` 정상 동작 (unique: agency_org_id + other_charge_id) | `tests/unit/agency/other-charges-actions.test.ts` |
+| **TC-AG-OC-03** | 부가요금 비활성화 | `deactivateAgencyOtherCharge` 정상 동작 | `tests/unit/agency/other-charges-actions.test.ts` |
+
+### 40. Phase 7.2 IMP-146 UPS Zone-Box 매핑 정밀화
+
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-UPS-ZONEMAP-01** | 정확 매치: service+direction 일치 → Zone 반환 | Fallback 없이 정확한 Zone 매핑 검증 | `tests/unit/ups/pricing-engine.test.ts` |
+| **TC-UPS-ZONEMAP-02** | 1단계 Fallback: direction 없음 → `null` 방향 폴백 | direction 미지정 시 자동 폴백 검증 | `tests/unit/ups/pricing-engine.test.ts` |
+| **TC-UPS-ZONEMAP-03** | 2단계 Fallback: service+direction 전부 불일치 → `null` 반환 | 완전 미매핑 국가의 null 반환 + `fallbackApplied` 필드 검증 | `tests/unit/ups/pricing-engine.test.ts` |
+
+### 41. Hotfix DEF-095 — WW_EXPEDITED 상품별 중량 반올림 규칙 (TASK-181)
+
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-UPS-EXPEDITED-ROUND-01** | WW_EXPEDITED 20kg 이하 1kg 단위 올림 | 공식 Rate Guide p.2 원문 규칙 준수 확인 | `tests/unit/ups/pricing-engine.test.ts` |
+| **TC-UPS-EXPEDITED-ROUND-02** | WW_EXPEDITED 20kg 초과 1kg 단위 올림 | 경계값 이후에도 규칙 유지 확인 | `tests/unit/ups/pricing-engine.test.ts` |
+| **TC-UPS-EXPEDITED-ROUND-03** | 그 외 상품 20kg 이하 0.5kg 단위 올림 | 기존 규칙 회귀 방지 | `tests/unit/ups/pricing-engine.test.ts` |
+| **TC-UPS-EXPEDITED-ROUND-04** | 그 외 상품 20kg 초과 1kg 단위 올림 | 경계 전환 정확성 확인 | `tests/unit/ups/pricing-engine.test.ts` |
+| **TC-UPS-EXPEDITED-ROUND-05** | `computeUpsFreight` 통합 — WW_EXPEDITED 청구중량 반영 | 실제 계산 흐름에 반올림 함수 정상 연결 확인 | `tests/unit/ups/pricing-engine.test.ts` |
+| **TC-UPS-TIER-01** | 20kg 초과 per-kg 요율 적용 | 20kg 초과 화물에 대해 구간별 kg당 단가 × 중량 계산 검증 | `tests/unit/ups/pricing-engine-tier-dwb.test.ts` |
+| **TC-UPS-TIER-02** | 20kg 초과 중량 올림 매칭 | 20kg 초과 시 서비스 무관 1.0kg 단위 올림 매칭 검증 | `tests/unit/ups/pricing-engine-tier-dwb.test.ts` |
+| **TC-UPS-DWB-01** | DWB 적용 대상 계산 | 다음 상위 중량 구간 최소중량가 적용 시 비용 절감 및 `dwbApplied: true` 확인 | `tests/unit/ups/pricing-engine-tier-dwb.test.ts` |
+| **TC-UPS-DWB-02** | DWB 미적용 대상 계산 | 다음 구간 적용 시 비용이 더 크면 기존 중량가 유지 및 `dwbApplied: false` 확인 | `tests/unit/ups/pricing-engine-tier-dwb.test.ts` |
+| **TC-UPS-DWB-03** | DWB 20kg 경계 전이 | 20.0kg 이하에서 21.0kg(per-kg 첫 티어 최소값)으로의 DWB 전이 및 단가 변경 검증 | `tests/unit/ups/pricing-engine-tier-dwb.test.ts` |
+| **TC-UPS-FREIGHTMIN-01** | Freight 최소운임 상향 적용 | 계산 요금이 Zone/Product 최소운임 미만일 때 최소운임 강제 상향 검증 | `tests/unit/ups/pricing-engine-tier-dwb.test.ts` |
+| **TC-UPS-FREIGHTMIN-02** | Freight 최소운임 이상 정상 적용 | 계산 요금이 최소운임 이상일 때 상향 조정 미적용 검증 | `tests/unit/ups/pricing-engine-tier-dwb.test.ts` |
+
+### 42. Agency 화주 계정 발급 기반 검증 (Issue #180 TASK-B-056)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-P7-SHIPPER-05a** | `login_email` 미입력 시 스키마 거부 | 필수 필드 누락 검증 | `tests/unit/agency/shipper-actions.test.ts` |
+| **TC-P7-SHIPPER-05b** | `login_email` 잘못된 이메일 형식 거부 | 이메일 형식 유효성 검증 | `tests/unit/agency/shipper-actions.test.ts` |
+| **TC-P7-SHIPPER-05c** | `login_email` + 주소 6필드 정상 통과 | 국외 화주 등록 전체 필드 통과 확인 | `tests/unit/agency/shipper-actions.test.ts` |
+
+### 43. 화주 등록 폼 UI (Issue #180 TASK-B-061)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-P7-UI-SHIPPER-01** | 화주 등록 폼 초기 로드 시 LoginAccountFields가 RequiredFields 앞에 위치 | 섹션 순서 검증 | `tests/unit/agency/shipper-form-ui.test.tsx` |
+| **TC-P7-UI-SHIPPER-02** | 잘못된 이메일 형식 입력 시 유효성 오류 메시지 표시 | 클라이언트 유효성 검사 | `tests/unit/agency/shipper-form-ui.test.tsx` |
+| **TC-P7-UI-SHIPPER-03** | 신규 등록 폼 초기 로드 시 grade 기본값 = BRONZE | 기본값 설정 | `tests/unit/agency/shipper-form-ui.test.tsx` |
+| **TC-P7-UI-ADDR-01** | 국가 KR/US/JP별 주소 검색 UI 분기 (popup→embed 전환) | 국가별 입력 필드 렌더링 + Kakao Postcode embed 모달 표시 검증 | `tests/unit/agency/address-input.test.tsx` |
+| **TC-P7-UI-ADDR-02** | 주소 검색 임베드 모달 내 주소 선택 시 roadAddress/zipcode 자동 반영 | DaumPostcodeEmbed onComplete 콜백 → roadAddress + zonecode 입력 + 모달 닫힘 검증 | `tests/unit/agency/address-input.test.tsx` |
+
+### 44. 화주 상세보기/편집 폼 UI (Issue #180 TASK-B-065)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-P7-UI-EDIT-01** | edit-form: name, shipper_type input disabled 확인 | 상세보기 모드에서 필수 항목 수정 불가 | `tests/unit/agency/edit-form.test.tsx` |
+| **TC-P7-UI-EDIT-02** | CORPORATE인 경우 biz_no disabled 확인 | 법인 사업자번호 수정 불가 | `tests/unit/agency/edit-form.test.tsx` |
+| **TC-P7-UI-EDIT-03** | 주소 섹션 표시 + `AddressInput` 렌더링 (B-070 편집 가능 전환) | `AddressInput`에 기본값 전달 및 주소 필드 렌더링 확인 | `tests/unit/agency/edit-form.test.tsx` |
+
+### 45. UPS 견적 UI 연동 (Issue #181 TASK-B-060)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-P7-UI-ESTIMATE-01** | AGENCY_SHIPPER 역할 + 필수 입력 완료 시 UPS 견적 패널 표시 | UI 조건 분기 검증 | `tests/unit/orders/ups-estimate-panel.test.tsx` |
+| **TC-P7-UI-ESTIMATE-02** | AGENCY_SHIPPER 아닌 역할에서 패널 미표시 | 역할 기반 표시 격리 | `tests/unit/orders/ups-estimate-panel.test.tsx` |
 
 ---
 

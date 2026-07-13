@@ -10,6 +10,7 @@
 
 | 날짜 | ID | 제목 (Title) | 카테고리 | 심각도 | 링크 (Link) |
 | :--- | :--- | :--- | :--- | :--- | :--- |
+| 2026-06-26 | **001** | Phase 7 UPS 스키마 설계 갭 — zen_orders 인코텀즈·제품코드 누락 | Design | HIGH | [상세보기](./SAR_2026-06-26_001_Design_UPS_IncotermsOrderModel_Gap.md) |
 | 2026-04-20 | **003** | 권한 가드-미들웨어 상충 및 참조 오류 | Auth/Middleware | HIGH | [상세보기](./SAR_2026-04-20_003_Auth_Middleware_Conflict.md) |
 | 2026-04-20 | **002** | Proxy-Middleware 설계 혼선 및 루프 장애 | Design | CRITICAL | [상세보기](./SAR_2026-04-20_002_Design_Proxy_Middleware_Conflict.md) |
 | 2026-04-20 | **001** | npm 명령어 미인식 및 PATH 누락 오류 | Environment | HIGH | [상세보기](./SAR_2026-04-20_001_Other_NPM_PATH_Error.md) |

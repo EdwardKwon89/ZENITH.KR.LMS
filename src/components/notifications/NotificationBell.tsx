@@ -2,8 +2,9 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Bell, Check, ChevronRight } from "lucide-react";
+import { Bell, Check, ChevronDown, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Link } from "@/i18n/routing";
 import { markNotificationRead, markAllNotificationsRead } from "@/app/actions/notifications";
 
 interface NotificationItem {
@@ -50,18 +51,27 @@ export default function NotificationBell({
 
   return (
     <div className="relative">
-      <button
-        onClick={() => setOpen((o) => !o)}
-        className="p-2 text-slate-500 hover:bg-slate-50 rounded-full relative transition-all"
-        aria-label="알림"
-      >
-        <Bell size={20} />
-        {unreadCount > 0 && (
-          <span className="absolute top-1 right-1 min-w-[16px] h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-0.5 border-2 border-white">
-            {unreadCount > 99 ? "99+" : unreadCount}
-          </span>
-        )}
-      </button>
+      <div className="flex items-center gap-0.5">
+        <Link
+          href="/notifications"
+          className="p-2 text-slate-500 hover:bg-slate-50 rounded-full relative transition-all"
+          aria-label="알림"
+        >
+          <Bell size={20} />
+          {unreadCount > 0 && (
+            <span className="absolute top-1 right-1 min-w-[16px] h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-0.5 border-2 border-white">
+              {unreadCount > 99 ? "99+" : unreadCount}
+            </span>
+          )}
+        </Link>
+        <button
+          onClick={() => setOpen((o) => !o)}
+          className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-md transition-all"
+          aria-label="알림 드롭다운"
+        >
+          <ChevronDown size={14} />
+        </button>
+      </div>
 
       {open && (
         <>

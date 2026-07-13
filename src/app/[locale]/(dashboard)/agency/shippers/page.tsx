@@ -1,4 +1,3 @@
-import { getTranslations } from 'next-intl/server';
 import { redirect } from 'next/navigation';
 import { requireAuth, checkPermission } from '@/lib/auth/guards';
 import { getAgencyShippers } from '@/app/actions/agency/shippers';
@@ -7,9 +6,8 @@ import { AgencyShippersClient } from './shippers-client';
 export default async function AgencyShippersPage() {
   const { profile } = await requireAuth();
   if (!profile || !profile.org_id || !checkPermission(profile.role, '/agency/shippers')) redirect('/');
-  const t = await getTranslations('AgencyShippers');
 
   const { shippers } = await getAgencyShippers(profile.org_id);
 
-  return <AgencyShippersClient shippers={shippers} t={t} />;
+  return <AgencyShippersClient shippers={shippers} />;
 }

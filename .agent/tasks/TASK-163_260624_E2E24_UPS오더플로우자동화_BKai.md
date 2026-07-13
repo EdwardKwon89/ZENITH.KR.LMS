@@ -8,7 +8,7 @@
 > **관련 Issue**: [#87](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/87)
 > **전제조건**: TASK-161 ✅ (UAT-17 시나리오 존재)
 > **브랜치**: `feature/teama-task-163-e2e24-ups-order-flow`
-> **상태**: 🔔
+> **상태**: ⬜
 
 ---
 
@@ -51,14 +51,14 @@ UAT-17 (UPS 오더 발송) 수동 시나리오 3종을 Playwright E2E 자동화 
 
 ## [DoD 체크리스트]
 
-- [x] `tests/e2e/e2e-24-ups-order-flow.spec.ts` 생성 완료
-- [x] UAT-17-01 (DIRECT) Playwright 전환 PASS
-- [x] UAT-17-02 (PICKUP) Playwright 전환 PASS
-- [x] UAT-17-03 (Rate Override) Playwright 전환 PASS
-- [x] Supabase admin fixture 구성 완료
-- [x] 로컬 실행 전 케이스 PASS (3/3)
-- [x] 회귀 테스트 전체 PASS (387/387)
-- [ ] ~~R-17 완료 보고 절차 준수~~ (코드→task file 🔔→문서→PR `Closes #87`) — **진행 중**
+- [ ] `playwright/e2e/e2e-24-ups-order-flow.spec.ts` 생성 완료
+- [ ] UAT-17-01 (DIRECT) Playwright 전환 PASS
+- [ ] UAT-17-02 (PICKUP) Playwright 전환 PASS
+- [ ] UAT-17-03 (Rate Override) Playwright 전환 PASS
+- [ ] Supabase admin fixture 구성 완료
+- [ ] 로컬 실행 전 케이스 PASS
+- [ ] 회귀 테스트 전체 PASS (`npm run test:regression`)
+- [ ] R-17 완료 보고 절차 준수 (코드→task file 🔔→문서→PR `Closes #87`)
 
 ---
 
@@ -70,31 +70,7 @@ _(없음 — 방향 확정)_
 
 ## [작업 결과]
 
-| 항목 | 상태 |
-|:----|:----:|
-| `tests/e2e/e2e-24-ups-order-flow.spec.ts` 생성 | ✅ 366줄 |
-| UAT-17-01 (DIRECT) | ✅ PASS |
-| UAT-17-02 (PICKUP) | ✅ PASS |
-| UAT-17-03 (Rate Override) | ✅ PASS |
-| 회귀 테스트 | ✅ 387/387 PASS |
-| 실행 시간 | 56s (E2E) |
-
-### 실행 요약
-
-```
-PASS (3) FAIL (0)
-Time: 56176ms
-```
-
-### 커밋
-
-- `[OpenCode] feat: TASK-163 E2E-24 UPS 오더 플로우 자동화 (UAT-17 3종) — 3/3 PASS`
-
-### 참고사항
-
-- Playwright config `testDir: './tests/e2e'`에 따라 spec 파일을 `tests/e2e/`에 배치
-- Supabase admin fixture + 동적 계정 생성 패턴 사용 (E2E-21/22/23 참조)
-- 스크린샷 저장 경로: `docs/99_Manual/E2E_24_Result/`
+_(미착수)_
 
 ---
 
@@ -109,4 +85,3 @@ Time: 56176ms
 | 날짜 | 작성자 | 내용 |
 |:-----|:------|:----|
 | 2026-06-24 | Aiden (Claude, ZEN_CEO) | Task 발령 — Issue #87 Edward 승인, SPR-09 E2E-24 |
-| 2026-06-24 | Noah (OpenCode) | 구현 완료 — 3/3 PASS, 회귀 387/387 |

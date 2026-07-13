@@ -6,9 +6,9 @@ import { requireAuth } from '@/lib/auth/guards';
 export default async function MyCustomsPage({
   params,
 }: {
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
 }) {
-  const { locale } = params;
+  const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'Customs' });
   const { profile } = await requireAuth();
 

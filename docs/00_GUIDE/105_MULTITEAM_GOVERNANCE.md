@@ -67,6 +67,8 @@ Team C: feature/teamc-*  ─┘
 - 채번 즉시 ACTIVE_TASK.md 팀 섹션에 등재 (번호 선점)
 - 기존 TASK-NNN으로 발령된 타팀 Task(TASK-139/140/142 등)는 그대로 유지 (소급 변경 없음)
 
+> **(Issue #86 Phase 4, 2026-07-07)** Task 발령 자체는 GitHub Issue 생성으로 전환됨(GOV_COMMON.md R-17 참조). 위 채번 절차는 담당 Agent가 Issue를 인지하고 **착수(🔄)하는 시점**에 수행한다 — 발령(Issue 생성) 시점에 미리 번호를 선점하지 않는다.
+
 ## ACTIVE_TASK.md 구조
 
 ```markdown
