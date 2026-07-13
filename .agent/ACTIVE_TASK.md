@@ -394,7 +394,7 @@
 | TASK-182 | 260708 | 기준요금 매트릭스 UI 개선 — Zone×중량 요율표 + 제품 콤보박스 + 할인율 표시 (Issue #271) | 없음 | D_Kai | ✅ | [TASK-182](tasks/TASK-182_260708_BaseRateMatrixUI_DKai.md) | ⚠️ R-17 위반(develop 직접 push, PR#275 반려 후 재작업 없이 우회) — VIOLATION_TRACKER 2회 기록. PR#275는 CONFLICTING으로 close. Aiden 긴급 로컬 검증(build ✅·tsc src/ 0 errors·vitest 475 PASS)으로 기능 정합성 확인 후 되돌리지 않음 |
 | GH#205 | 260706 | An-14 담당 불일치 정정 + UAT_DEFECT_LOG·UAT_MASTER 동기화 | 없음 | Aiden | ✅ | [Issue #205](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/205) (closed) | Aiden 완료(260706) — PR#219 · An-14 §4/§11 정정 · DEF-089~095 소급 등재(7건) · UAT_MASTER 실행상태 동기화(4건) · 회귀 454/454 PASS |
 | GH#206 | 260706 | UPS 문서 정리 백로그 (Medium 6 + Low 7건) | 없음 | B_Kai | ✅ | [Issue #206](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/206) (closed) | B_Kai 완료(260706) — PR#221 · #9~14 전항목 처리(#13 재조사 후 정정, docs/03_Design 17개 파일 아카이브) · Aiden 승인·머지 |
-| TASK-183 | 260713 | UPS 특송 UAT 문서 5건 종합 검토·갱신 (UAT-15·18·19·20·22) (Issue #447) | 없음 | Riley | 🔔 | [TASK-183](tasks/TASK-183_260713_UAT문서5건종합검토_Riley.md) | GH#447 완료 (2026-07-13) |
+| TASK-183 | 260713 | UPS 특송 UAT 문서 5건 종합 검토·갱신 (UAT-15·18·19·20·22) (Issue #447) | 없음 | Riley | ✅ | [TASK-183](tasks/TASK-183_260713_UAT문서5건종합검토_Riley.md) | Aiden 승인·머지 완료(260713) — PR#450(`a4dabddb`) · UAT_15/18/19/20/22 + UAT_MASTER.md 갱신 · Issue #447 Close |
 ---
 
 ## Agent 현황
@@ -406,7 +406,7 @@
 | **Aiden (Claude)** | ✅ TASK-167 전체 승인 (260626) | PR#117 §1 ✅ · PR#118 §2+§3 ✅ 전량 머지 완료 |
 | **D_Kai (OpenCode)** | ⚠️ TASK-182 ✅ 완료(R-17 위반 2회) | 기준요금 매트릭스 UI — Issue #271 · PR#275 반려 후 develop 직접 push로 위반(VIOLATION_TRACKER 2회) · Aiden 긴급 검증(build✅·tsc✅·vitest 475 PASS) 후 유지 · 3회 시 할당 중단 대상, 재발 방지 지시 완료(Issue #271) |
 | **B_Kai** | ✅ GH#206 승인·머지 완료 (260706) | PR#221 · #13 재조사 요청에 신속·정확 대응(docs/03_Design 17개 파일 아카이브), 신규 Task 대기 |
-| **Riley** | 🔔 TASK-183 검토 대기 | GH#447 UAT 문서 5건 종합 검토·갱신 완료 |
+| **Riley** | ✅ TASK-183 승인·머지 완료 (260713) | PR#450 · GH#447 UAT 문서 5건 종합 검토·갱신, 신규 Task 대기 |
 | N_Kai | ➖ 미재배정 확정 (260626 Edward) | TASK-087 폐기 — 신규 Task 발령 없음 |
 | Ring | 신규 할당 중단 유지 | 9차 위반 누적 |
 
