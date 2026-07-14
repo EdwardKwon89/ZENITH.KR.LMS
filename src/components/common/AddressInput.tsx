@@ -80,6 +80,7 @@ export function AddressInput({
     if (selectedState && countryCode !== 'KR') {
       setCities(City.getCitiesOfState(countryCode, selectedState) ?? []);
       setSelectedCity('');
+      if (setValue && prefix) setValue(`${prefix}_city`, '');
     }
   }, [selectedState, countryCode]);
 
@@ -167,7 +168,10 @@ export function AddressInput({
               <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">{t('form_state_province')}</label>
               <select
                 value={selectedState}
-                onChange={(e) => setSelectedState(e.target.value)}
+                onChange={(e) => {
+                  setSelectedState(e.target.value);
+                  if (setValue && prefix) setValue(`${prefix}_state_province`, e.target.value);
+                }}
                 disabled={readOnly || !countryCode}
                 className={`w-full h-10 px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${readOnly ? 'bg-slate-50' : ''}`}
               >
@@ -183,7 +187,10 @@ export function AddressInput({
               <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">{t('form_city')}</label>
               <select
                 value={selectedCity}
-                onChange={(e) => setSelectedCity(e.target.value)}
+                onChange={(e) => {
+                  setSelectedCity(e.target.value);
+                  if (setValue && prefix) setValue(`${prefix}_city`, e.target.value);
+                }}
                 disabled={readOnly || !selectedState}
                 className={`w-full h-10 px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 disabled:opacity-50 ${readOnly ? 'bg-slate-50' : ''}`}
               >
