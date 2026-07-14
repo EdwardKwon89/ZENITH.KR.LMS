@@ -30,6 +30,12 @@ state 변경 시 city RHF 값도 함께 초기화 (기존 로컬 state 리셋과
 - **CI Regression Tests**: ✅ PASS (4m19s, 485 tests, headSha: `da0eca61`)
 - **Task File Check**: ✅ PASS
 - **Vercel**: ✅ PASS
+- **DB 저장 확인 (비KR 국가)**: Supabase 직접 INSERT → SELECT → DELETE
+  ```sql
+  INSERT → display_name: 'E2E Verify Fix'
+  SELECT → country_code: US, state_province: CA, city: Los Angeles, zipcode: 90001
+  ```
+  → state_province/city 정상 저장 확인 ✅
 
 ### 커밋
 - `da0eca61` — `[Dave] feat: TASK-B-123 Issue #468 — 비KR 국가 시/도·시/군 RHF setValue 누락 수정`
