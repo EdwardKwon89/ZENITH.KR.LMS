@@ -1,18 +1,23 @@
 // UPS Shipper 단계 요금 계산 — 순수 함수 (DB 호출 없음)
 // Issue #310: Admin 판매가에서 Zone별 할인율로 직접 계산 (Agency 원가 경유 안 함)
+// Issue #457: 할인율은 기본운임에만 적용, 부가운임(유류할증+기타)은 정가 그대로
 //
-// finalFreight = platformSellingPrice x (1 - shipperZoneDiscountRate)
-// shipperZoneDiscountRate 출처: zen_agency_shipper_zone_discounts.discount_rate
+// finalFreight = baseSellingPrice × (1 - shipperZoneDiscountRate) + fuelSurcharge + otherCharges
 
 import type { UpsShipperFreightResult } from '@/types/ups';
 
 export function computeShipperFreight(
-  platformSellingPrice: number,
+  baseSellingPrice: number,
+  fuelSurchargeSellingAmount: number,
+  otherChargesSellingTotal: number,
   shipperZoneDiscountRate: number
 ): UpsShipperFreightResult {
+  const discountedBase = Math.round(baseSellingPrice * (1 - shipperZoneDiscountRate) * 100) / 100;
   return {
-    platformSellingPrice,
+    baseSellingPrice: discountedBase,
+    fuelSurchargeSellingAmount,
+    otherChargesSellingTotal,
     shipperDiscountRate: shipperZoneDiscountRate,
-    finalFreight: Math.round(platformSellingPrice * (1 - shipperZoneDiscountRate) * 100) / 100,
+    finalFreight: Math.round((discountedBase + fuelSurchargeSellingAmount + otherChargesSellingTotal) * 100) / 100,
   };
 }
