@@ -335,6 +335,10 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
     const addressLocal = watch('recipient_address_local') || '';
     const phone = watch('recipient_phone') || '';
     const countryCode = watch('recipient_country_code') || undefined;
+    const stateProvince = watch('recipient_state_province') || undefined;
+    const city = watch('recipient_city') || undefined;
+    const zipcode = watch('recipient_zipcode') || undefined;
+    const pccc = watch('recipient_pccc') || undefined;
     setSavingToAddressBook(true);
     try {
       await createAddressBookEntry({
@@ -345,6 +349,10 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
         recipient_address_local: addressLocal || undefined,
         recipient_phone: phone || undefined,
         country_code: countryCode,
+        state_province: stateProvince,
+        city: city,
+        zipcode: zipcode,
+        recipient_pccc: pccc,
         display_mode: 'EN',
         is_default: false,
       });
@@ -1053,6 +1061,10 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                             setValue('recipient_address_local', entry.recipient_address_local || '');
                             setValue('recipient_phone', entry.recipient_phone || '');
                             setValue('recipient_country_code', entry.country_code || '');
+                            setValue('recipient_state_province', entry.state_province || '');
+                            setValue('recipient_city', entry.city || '');
+                            setValue('recipient_zipcode', entry.zipcode || '');
+                            setValue('recipient_pccc', entry.recipient_pccc || '');
                           }}
                         />
                       </div>
@@ -1077,6 +1089,8 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                               country_code: watch('recipient_country_code') || 'KR',
                               address: watch('recipient_address') || '',
                               address_detail: watch('recipient_address_detail') || '',
+                              state_province: watch('recipient_state_province') || '',
+                              city: watch('recipient_city') || '',
                               zipcode: watch('recipient_zipcode') || '',
                             }}
                             required

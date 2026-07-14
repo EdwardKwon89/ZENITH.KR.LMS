@@ -12,6 +12,10 @@ interface AddressBookEntry {
   recipient_address_detail?: string | null;
   recipient_phone?: string | null;
   country_code?: string | null;
+  state_province?: string | null;
+  city?: string | null;
+  zipcode?: string | null;
+  recipient_pccc?: string | null;
 }
 
 interface AddressBookSelectorProps {

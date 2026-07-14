@@ -61,6 +61,8 @@ export const orderRegistrationSchema = z.object({
   recipient_phone: z.string().min(1, 'Recipient phone is required'),
   recipient_zipcode: z.string().optional(),
   recipient_country_code: z.string().optional(),
+  recipient_state_province: z.string().optional(),
+  recipient_city: z.string().optional(),
   
   recipient_pccc: z.string().optional(),
   recipient_email: z.string().email('Invalid email format').optional().or(z.literal('')),
