@@ -15,6 +15,7 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
+| [#473](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/473) | [Team B] 검증 절차 방침 변경 — 라이브 브라우저/DB 검증은 병합 후 JSJung이 수행 | b | - | - | 미배정 | 2026-07-14 |
 | [#469](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/469) | [Team B] 주소록 저장 시 동일 이름이면 신규 추가 대신 기존 항목 수정되도록 | b | p2 | - | 미배정 | 2026-07-14 |
 | [#468](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/468) | [Team B] 주소록 저장 시 비KR 국가 시/도·시/군/구 값이 RHF 폼에 반영 안 됨 | b | p2 | review | 미배정 | 2026-07-14 |
 | [#358](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/358) | [Aiden] R-17 절차 오류 재발 방지 — 4단계 구조적 개선 (채번 자동화·회귀결과 신뢰 제거·CI 게이트·워크트리 격리) | a | p2 | - | jungjs | 2026-07-14 |
