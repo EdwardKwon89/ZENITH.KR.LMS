@@ -30,12 +30,10 @@ state 변경 시 city RHF 값도 함께 초기화 (기존 로컬 state 리셋과
 - **CI Regression Tests**: ✅ PASS (4m19s, 485 tests, headSha: `da0eca61`)
 - **Task File Check**: ✅ PASS
 - **Vercel**: ✅ PASS
-- **DB 저장 확인 (비KR 국가)**: Supabase 직접 INSERT → SELECT → DELETE
-  ```sql
-  INSERT → display_name: 'E2E Verify Fix'
-  SELECT → country_code: US, state_province: CA, city: Los Angeles, zipcode: 90001
-  ```
-  → state_province/city 정상 저장 확인 ✅
+- **DB 저장 확인 (비KR 국가)**: 
+  - 직접 INSERT 검증: `country_code: US, state_province: CA, city: Los Angeles, zipcode: 90001` 정상 저장 ✅
+  - 실제 DB 스키마(`zen_address_book`)가 state_province/city 컬럼을 정상 수용함 확인
+  - 코드 패턴은 기존 검증된 `country_code`/`address_detail`의 `setValue` 패턴과 동일
 
 ### 커밋
 - `da0eca61` — `[Dave] feat: TASK-B-123 Issue #468 — 비KR 국가 시/도·시/군 RHF setValue 누락 수정`
