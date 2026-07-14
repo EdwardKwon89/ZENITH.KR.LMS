@@ -103,6 +103,35 @@ export function calcChargeableWeight(
   return { chargeableKg: Math.max(actualKg, volumetricKg), volumetricKg };
 }
 
+// Issue #476: 다중 패키지 정산중량 합산
+// 각 패키지별 개별 계산 후 합산 (옵션1 확정)
+export function calcMultiPackageChargeableWeight(
+  packages: Array<{ gross_weight_kg: number; dims?: { l: number; w: number; h: number }; divisor?: UpsVolumeDivisor }>
+): { totalChargeableKg: number; totalVolumetricKg: number; oversizeApplied: boolean } {
+  let totalChargeableKg = 0;
+  let totalVolumetricKg = 0;
+  let oversizeApplied = false;
+
+  for (const pkg of packages) {
+    const { chargeableKg, volumetricKg } = calcChargeableWeight(
+      pkg.gross_weight_kg,
+      pkg.dims,
+      pkg.divisor
+    );
+    totalVolumetricKg += volumetricKg;
+
+    // 패키지 단위 oversize 적용
+    let pkgChargeable = chargeableKg;
+    if (isOversizePackage(pkg.dims)) {
+      pkgChargeable = Math.max(pkgChargeable, OVERSIZE_MIN_BILLING_KG);
+      oversizeApplied = true;
+    }
+    totalChargeableKg += pkgChargeable;
+  }
+
+  return { totalChargeableKg, totalVolumetricKg, oversizeApplied };
+}
+
 // An-14 §0-1 C: 대형포장물 여부 판정. 길이 + 둘레(폭×2+높이×2) > 300cm이고 UPS 최대(400cm) 이하인 경우 적용.
 export function isOversizePackage(dims?: { l: number; w: number; h: number }): boolean {
   if (!dims) return false;
