@@ -496,6 +496,11 @@
 | **TC-UPS-ENGINE-03** | 대형포장물(OVERSIZE) 특수 판정 6종 | 길이+둘레 300~400cm 조건·최소청구중량 40kg 강제 확인 | `tests/unit/ups/pricing-engine.test.ts` |
 | **TC-UPS-ENGINE-04** | Agency 단계 계산(override/폴백 분기) | R3~R5 공식 정확성 확인 | `tests/unit/ups/pricing-engine.test.ts` |
 | **TC-UPS-ENGINE-05** | Shipper 단계 계산(화주 할인 적용) | R6 공식 정확성 확인 | `tests/unit/ups/pricing-engine.test.ts` |
+| **TC-UPS-ENGINE-06-01** | 다중패키지 단일 패키지 회귀 | 기존 동작과 동일한지 확인 | `tests/unit/ups/pricing-engine.test.ts` |
+| **TC-UPS-ENGINE-06-02** | 다중패키지 부피중량 초과 | 실중량<부피중량 시 정산중량=부피중량 확인 | `tests/unit/ups/pricing-engine.test.ts` |
+| **TC-UPS-ENGINE-06-03** | 다중패키지 정상 합산 | 패키지별 개별 계산 U+130A 합산 확인 | `tests/unit/ups/pricing-engine.test.ts` |
+| **TC-UPS-ENGINE-06-04** | 다중패키지 일부 oversize | 해당 패키지만 최소과금(40kg) 적용 후 합산 확인 | `tests/unit/ups/pricing-engine.test.ts` |
+| **TC-UPS-ENGINE-06-05** | 다중패키지 치수 없음 | 실중량만 사용, 합산 확인 | `tests/unit/ups/pricing-engine.test.ts` |
 
 ### 39. Phase 7.1 estimateUpsFreight 통합 Action (IMP-145)
 | ID | 테스트 항목 | 목적 | 파일 경로 |

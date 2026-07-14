@@ -106,13 +106,6 @@ export const orderRegistrationSchema = z.object({
       });
     }
   }
-  if (data.transport_mode === 'UPS' && data.packages.length !== 1) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: 'UPS 서비스는 오더당 1개의 패키지만 등록 가능합니다.',
-      path: ['packages'],
-    });
-  }
   if (data.delivery_method === 'PICKUP') {
     if (!data.pickup_location || data.pickup_location.trim() === '') {
       ctx.addIssue({

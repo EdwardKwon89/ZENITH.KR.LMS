@@ -268,3 +268,60 @@ describe('TC-UPS-ZONEMAP-03: resolveZoneByCountry — 미등록 국가 null', ()
     expect(result.fallbackApplied).toBe(false);
   });
 });
+
+// ─── Issue #476: 다중 패키지 정산중량 합산 ─────────────────────────────────────────
+
+import { calcMultiPackageChargeableWeight } from '@/lib/ups/pricing-engine';
+
+describe('TC-UPS-ENGINE-06: calcMultiPackageChargeableWeight (Issue #476)', () => {
+  it('단일 패키지 — 기존 동작과 동일', () => {
+    const result = calcMultiPackageChargeableWeight([
+      { gross_weight_kg: 5, dims: { l: 30, w: 20, h: 10 } },
+    ]);
+    expect(result.totalChargeableKg).toBe(5);
+    expect(result.totalVolumetricKg).toBeCloseTo(1.2, 1);
+    expect(result.oversizeApplied).toBe(false);
+  });
+
+  it('단일 패키지 — 부피중량이 더 큰 경우', () => {
+    const result = calcMultiPackageChargeableWeight([
+      { gross_weight_kg: 2, dims: { l: 50, w: 60, h: 100 } },
+    ]);
+    // volumetricKg = 50*60*100/5000 = 60
+    expect(result.totalChargeableKg).toBe(60);
+    expect(result.totalVolumetricKg).toBe(60);
+  });
+
+  it('다중 패키지 정상 합산', () => {
+    const result = calcMultiPackageChargeableWeight([
+      { gross_weight_kg: 3, dims: { l: 20, w: 15, h: 10 } },  // vol=0.6, chargeable=3
+      { gross_weight_kg: 5, dims: { l: 30, w: 20, h: 10 } },  // vol=1.2, chargeable=5
+    ]);
+    expect(result.totalChargeableKg).toBe(8);  // 3+5
+    expect(result.totalVolumetricKg).toBeCloseTo(1.8, 1);  // 0.6+1.2
+    expect(result.oversizeApplied).toBe(false);
+  });
+
+  it('다중 패키지 중 일부만 oversize — 해당 패키지만 최소과금 적용', () => {
+    // 패키지1: 30x20x10 → vol=0.6, chargeable=max(3,0.6)=3, oversize 아님
+    // 패키지2: 80x50x40 → vol=32, chargeable=max(5,32)=32, oversize 아님
+    // 패키지3: 100x60x50 → vol=60, chargeable=max(2,60)=60, oversize!(girth+length=320>300)
+    //   oversize 적용 → max(60,40)=60 (이미 40초과이므로 그대로)
+    const result = calcMultiPackageChargeableWeight([
+      { gross_weight_kg: 3, dims: { l: 30, w: 20, h: 10 } },   // 3kg
+      { gross_weight_kg: 5, dims: { l: 80, w: 50, h: 40 } },   // 5kg → vol=32
+      { gross_weight_kg: 2, dims: { l: 100, w: 60, h: 50 } },  // 2kg → vol=60 → oversize
+    ]);
+    expect(result.totalChargeableKg).toBe(95);  // 3+32+60
+    expect(result.oversizeApplied).toBe(true);
+  });
+
+  it('치수 없는 패키지 — 실중량만 사용', () => {
+    const result = calcMultiPackageChargeableWeight([
+      { gross_weight_kg: 10 },
+      { gross_weight_kg: 5, dims: { l: 20, w: 15, h: 10 } },
+    ]);
+    expect(result.totalChargeableKg).toBe(15);  // 10+5
+    expect(result.totalVolumetricKg).toBeCloseTo(0.6, 1);
+  });
+});
