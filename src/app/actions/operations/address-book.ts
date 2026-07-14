@@ -46,18 +46,65 @@ export async function createAddressBookEntry(input: AddressBookEntryInput) {
     ? { org_id: profile.org_id, user_id: null }
     : { user_id: profile.id, org_id: null };
 
-  const { data, error } = await supabase
+  // upsert-by-name: 동일 owner scope + display_name으로 기존 행 조회 (중복 대응: order+limit)
+  const { data: existingRows } = await supabase
     .from("zen_address_book")
-    .insert({
-      ...parsed,
-      ...owner,
-    })
-    .select(ADDRESS_BOOK_SELECT)
-    .single();
+    .select("id")
+    .eq("display_name", parsed.display_name)
+    .match(owner)
+    .order("updated_at", { ascending: false })
+    .limit(1);
 
-  if (error) {
-    logger.error("[ADDRESS_BOOK] createAddressBookEntry error:", error);
-    throw new Error("Failed to create address book entry");
+  const existing = existingRows && existingRows.length > 0 ? existingRows[0] : null;
+
+  let data: any;
+
+  if (existing) {
+    // 기존 행이 있으면 update 경로로 위임
+    const { error } = await supabase
+      .from("zen_address_book")
+      .update({
+        ...parsed,
+        ...owner,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", existing.id)
+      .select(ADDRESS_BOOK_SELECT)
+      .single();
+
+    if (error) {
+      logger.error("[ADDRESS_BOOK] createAddressBookEntry (update) error:", error);
+      throw new Error("Failed to update address book entry");
+    }
+
+    const { data: updated } = await supabase
+      .from("zen_address_book")
+      .select(ADDRESS_BOOK_SELECT)
+      .eq("id", existing.id)
+      .single();
+    data = updated;
+  } else {
+    // 기존 행이 없으면 insert
+    const { error } = await supabase
+      .from("zen_address_book")
+      .insert({
+        ...parsed,
+        ...owner,
+      });
+
+    if (error) {
+      logger.error("[ADDRESS_BOOK] createAddressBookEntry (insert) error:", error);
+      throw new Error("Failed to create address book entry");
+    }
+
+    const { data: insertedRows } = await supabase
+      .from("zen_address_book")
+      .select(ADDRESS_BOOK_SELECT)
+      .match(owner)
+      .eq("display_name", parsed.display_name)
+      .order("created_at", { ascending: false })
+      .limit(1);
+    data = insertedRows && insertedRows.length > 0 ? insertedRows[0] : null;
   }
 
   revalidatePath("/[locale]/address-book");
