@@ -12,6 +12,10 @@ export const addressBookEntrySchema = z.object({
   recipient_address_detail: z.string().optional(),
   recipient_phone: z.string().optional(),
   country_code: z.string().optional(),
+  state_province: z.string().optional(),
+  city: z.string().optional(),
+  zipcode: z.string().optional(),
+  recipient_pccc: z.string().optional(),
   display_mode: z.enum(['EN', 'BILINGUAL']),
   is_default: z.boolean(),
 });
