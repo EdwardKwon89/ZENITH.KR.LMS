@@ -188,14 +188,18 @@ describe('TC-UPS-ENGINE-04: Agency 단계 계산 (An-14 R3~R5, Issue #310)', () 
 });
 
 describe('TC-UPS-ENGINE-05: Shipper 단계 계산 (An-14 R6)', () => {
-  it('화주 할인율을 Agency 판매가에 적용해 최종 운송비를 산출한다', () => {
-    const result = computeShipperFreight(98000, 0.05);
-    expect(result.finalFreight).toBeCloseTo(93100, 2);
+  it('화주 할인율을 기본운임에만 적용해 최종 운송비를 산출한다', () => {
+    const result = computeShipperFreight(98000, 5000, 2000, 0.05);
+    expect(result.baseSellingPrice).toBeCloseTo(93100, 2);
+    expect(result.fuelSurchargeSellingAmount).toBe(5000);
+    expect(result.otherChargesSellingTotal).toBe(2000);
+    expect(result.finalFreight).toBeCloseTo(100100, 2);
   });
 
-  it('할인율 0이면 Agency 판매가와 동일하다', () => {
-    const result = computeShipperFreight(50000, 0);
-    expect(result.finalFreight).toBe(50000);
+  it('할인율 0이면 기본운임이 그대로이고 부가운임도 정가로 합산된다', () => {
+    const result = computeShipperFreight(50000, 3000, 1000, 0);
+    expect(result.baseSellingPrice).toBe(50000);
+    expect(result.finalFreight).toBe(54000);
   });
 });
 
