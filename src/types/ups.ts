@@ -195,8 +195,11 @@ export interface UpsAgencyFreightResult {
 }
 
 // Shipper 단계 (Issue #310: Admin 판매가에서 직접 계산)
+// Issue #457: 할인율은 기본운임에만 적용, 부가운임은 정가 그대로
 export interface UpsShipperFreightResult {
-  platformSellingPrice: number;
+  baseSellingPrice: number;
+  fuelSurchargeSellingAmount: number;
+  otherChargesSellingTotal: number;
   shipperDiscountRate: number;
   finalFreight: number;
 }

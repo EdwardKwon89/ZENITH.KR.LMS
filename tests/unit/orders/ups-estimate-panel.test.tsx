@@ -26,7 +26,9 @@ function makeEstimate(overrides?: Partial<UpsFreightEstimate>): UpsFreightEstima
     },
     agency: null,
     shipper: {
-      agencySellingPrice: 110,
+      baseSellingPrice: 100,
+      fuelSurchargeSellingAmount: 10,
+      otherChargesSellingTotal: 0,
       shipperDiscountRate: 0,
       finalFreight: 110,
     },

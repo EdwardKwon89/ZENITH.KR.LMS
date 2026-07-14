@@ -112,7 +112,7 @@ describe('TC-UPS-FREIGHT-01: estimateUpsFreight', () => {
 
     expect(result.agency).not.toBeNull();
     expect(result.shipper).not.toBeNull();
-    expect(result.shipper!.finalFreight).toBeCloseTo(100725 * 0.95, 2);
+    expect(result.shipper!.finalFreight).toBeCloseTo(96475, 0);
   });
 
   it('목적지 국가에 매핑된 Zone이 없으면 에러를 던진다', async () => {

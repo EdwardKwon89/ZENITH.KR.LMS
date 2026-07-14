@@ -222,7 +222,12 @@ export async function estimateUpsFreight(input: EstimateUpsFreightInput): Promis
     .eq('is_active', true)
     .maybeSingle();
   const shipperDiscountRate = Number(shipperZoneDiscount?.discount_rate ?? 0);
-  const shipper = computeShipperFreight(platform.totalSellingPrice, shipperDiscountRate);
+  const shipper = computeShipperFreight(
+    platform.baseSellingPrice,
+    platform.fuelSurchargeSellingAmount,
+    platform.otherChargesSellingTotal,
+    shipperDiscountRate
+  );
 
   return { platform, agency, shipper };
 }
