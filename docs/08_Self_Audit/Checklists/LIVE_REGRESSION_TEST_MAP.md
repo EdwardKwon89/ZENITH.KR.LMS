@@ -501,6 +501,11 @@
 | **TC-UPS-ENGINE-06-03** | 다중패키지 정상 합산 | 패키지별 개별 계산 U+130A 합산 확인 | `tests/unit/ups/pricing-engine.test.ts` |
 | **TC-UPS-ENGINE-06-04** | 다중패키지 일부 oversize | 해당 패키지만 최소과금(40kg) 적용 후 합산 확인 | `tests/unit/ups/pricing-engine.test.ts` |
 | **TC-UPS-ENGINE-06-05** | 다중패키지 치수 없음 | 실중량만 사용, 합산 확인 | `tests/unit/ups/pricing-engine.test.ts` |
+| **TC-UPS-ENGINE-07-01** | 급증 수수료 미지정 시 0원 처리 | 하위 호환(surgeFee 없어도 정상 동작) 확인 | `tests/unit/ups/pricing-engine.test.ts` |
+| **TC-UPS-ENGINE-07-02** | 급증 수수료 kg당 단가×청구중량 + 유류할증 추가부과 | Issue #491 계산식 정확성 확인 | `tests/unit/ups/pricing-engine.test.ts` |
+| **TC-UPS-ENGINE-07-03** | 급증 수수료 totalSellingPrice/totalCostPrice 합산 | 총액 반영 확인 | `tests/unit/ups/pricing-engine.test.ts` |
+| **TC-UPS-ENGINE-07-04** | Shipper 단계 급증 수수료 pass-through(할인 미적용) | Issue #491 Shipper 공식 확장 확인 | `tests/unit/ups/pricing-engine.test.ts` |
+| **TC-UPS-ENGINE-07-05** | Shipper 단계 급증 수수료 미지정 시 기존 동작과 동일 | 하위 호환 확인 | `tests/unit/ups/pricing-engine.test.ts` |
 
 ### 39. Phase 7.1 estimateUpsFreight 통합 Action (IMP-145)
 | ID | 테스트 항목 | 목적 | 파일 경로 |
