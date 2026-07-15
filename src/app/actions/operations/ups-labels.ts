@@ -5,7 +5,9 @@ import { validateUserAction } from '@/lib/auth/guards';
 import { USER_ROLES } from '@/lib/auth/rbac';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { createorder, getnewlabel, removeorder } from '@/lib/shxk/order';
-import { SHXK_SHIPPER_NAME } from '@/lib/shxk/config';
+import {
+  SHXK_SHIPPER_NAME, SHXK_SHIPPER_COUNTRY,
+} from '@/lib/shxk/config';
 import { revalidatePath } from 'next/cache';
 
 export interface IssueUpsLabelResult {
@@ -105,12 +107,10 @@ async function placeShxkOrder(
     order_status:    'P',
     shipper: {
       shipper_name:        (order.shipper_contact_name as string) || SHXK_SHIPPER_NAME,
-      shipper_company:     '',
-      shipper_countrycode: (order.shipper_country_code as string) || countryCode,
+      shipper_countrycode: (order.shipper_country_code as string) || SHXK_SHIPPER_COUNTRY,
       shipper_province:    (order.shipper_state_province as string) || '',
       shipper_city:        (order.shipper_city as string) || '',
       shipper_street:      (order.shipper_address as string) || '',
-      shipper_address:     (order.shipper_address as string) || '',
       shipper_postcode:    (order.shipper_zipcode as string) || '',
       shipper_telephone:   (order.shipper_contact_phone as string) || '',
     },
