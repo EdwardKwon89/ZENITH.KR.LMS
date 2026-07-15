@@ -162,6 +162,49 @@ export async function deleteUpsOtherCharge(id: string) {
   revalidatePath('/admin/ups-rates');
 }
 
+// ─── Surge Fee (Issue #491) ────────────────────────
+
+export async function createUpsSurgeFee(data: {
+  destination_country_code: string; selling_rate_per_kg: number; cost_rate_per_kg: number;
+  currency?: string; effective_from: string; effective_until?: string | null;
+}) {
+  const { supabase, profile } = await validateUserAction();
+  requireAdminOrManager(profile?.role);
+  const { error } = await supabase.from('zen_ups_surge_fees').insert({
+    ...data,
+    destination_country_code: data.destination_country_code.toUpperCase(),
+    currency: data.currency ?? 'KRW',
+    created_by: profile!.id,
+    updated_at: new Date().toISOString(),
+  });
+  if (error) throw new Error(error.message);
+  revalidatePath('/admin/ups-rates');
+}
+
+export async function updateUpsSurgeFee(id: string, data: {
+  destination_country_code?: string; selling_rate_per_kg?: number; cost_rate_per_kg?: number;
+  currency?: string; effective_from?: string; effective_until?: string | null; is_active?: boolean;
+}) {
+  const { supabase, profile } = await validateUserAction();
+  requireAdminOrManager(profile?.role);
+  const payload = {
+    ...data,
+    ...(data.destination_country_code ? { destination_country_code: data.destination_country_code.toUpperCase() } : {}),
+    updated_at: new Date().toISOString(),
+  };
+  const { error } = await supabase.from('zen_ups_surge_fees').update(payload).eq('id', id);
+  if (error) throw new Error(error.message);
+  revalidatePath('/admin/ups-rates');
+}
+
+export async function deleteUpsSurgeFee(id: string) {
+  const { supabase, profile } = await validateUserAction();
+  requireAdminOrManager(profile?.role);
+  const { error } = await supabase.from('zen_ups_surge_fees').update({ is_active: false, updated_at: new Date().toISOString() }).eq('id', id);
+  if (error) throw new Error(error.message);
+  revalidatePath('/admin/ups-rates');
+}
+
 // ─── Agency Pricing Policy ─────────────────────────
 
 export async function getAgencyPricingPolicies(agencyOrgId?: string) {

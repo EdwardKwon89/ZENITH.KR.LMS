@@ -23,6 +23,7 @@ export function UpsFreightEstimatePanel({ estimate, loading, error }: UpsFreight
   const baseFreight = shipper ? shipper.baseSellingPrice : platform.baseSellingPrice;
   const fuelSurcharge = shipper ? shipper.fuelSurchargeSellingAmount : platform.fuelSurchargeSellingAmount;
   const otherCharges = shipper ? shipper.otherChargesSellingTotal : platform.otherChargesSellingTotal;
+  const surgeFee = shipper ? shipper.surgeFeeSellingAmount : platform.surgeFeeSellingAmount;
   const finalFreight = shipper ? shipper.finalFreight : platform.totalSellingPrice;
   const otherChargeItems = platform.breakdown?.otherChargeItems ?? [];
 
@@ -57,6 +58,12 @@ export function UpsFreightEstimatePanel({ estimate, loading, error }: UpsFreight
           <div className="flex justify-between">
             <span className="text-slate-500">기타 부가요금</span>
             <span className="font-mono">{otherCharges.toLocaleString()} {platform.currency}</span>
+          </div>
+        )}
+        {surgeFee > 0 && (
+          <div className="flex justify-between">
+            <span className="text-slate-500">급증 긴급 수수료</span>
+            <span className="font-mono">{surgeFee.toLocaleString()} {platform.currency}</span>
           </div>
         )}
       </div>

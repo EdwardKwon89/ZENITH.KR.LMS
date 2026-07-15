@@ -11,6 +11,7 @@ import type {
   UpsCargoType,
   UpsWeightTierRateWithRefs,
   UpsFreightMinimumWithRefs,
+  UpsSurgeFee,
 } from '@/types/ups';
 
 export async function getUpsZones(): Promise<UpsZoneWithCountries[]> {
@@ -81,6 +82,18 @@ export async function getUpsOtherCharges(): Promise<UpsOtherCharge[]> {
     .select('*')
     .eq('is_active', true)
     .order('charge_code');
+  if (error) throw new Error(error.message);
+  return data ?? [];
+}
+
+// Issue #491: Admin 관리 화면용 — 도착국별 전체 이력(과거 기간 포함) 조회
+export async function getUpsSurgeFees(): Promise<UpsSurgeFee[]> {
+  const { supabase } = await validateUserAction();
+  const { data, error } = await supabase
+    .from('zen_ups_surge_fees')
+    .select('*')
+    .order('destination_country_code')
+    .order('effective_from', { ascending: false });
   if (error) throw new Error(error.message);
   return data ?? [];
 }

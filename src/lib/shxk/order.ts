@@ -7,6 +7,9 @@ export interface CreateOrderRequest {
   platform_id?: string
   buyer_id?: string
   order_status?: string
+  order_weight?: number
+  order_pieces?: number
+  cargotype?: string
   shipper?: Record<string, unknown>
   consignee?: Record<string, unknown>
   invoice?: Record<string, unknown>[]

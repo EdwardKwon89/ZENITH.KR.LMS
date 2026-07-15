@@ -325,3 +325,47 @@ describe('TC-UPS-ENGINE-06: calcMultiPackageChargeableWeight (Issue #476)', () =
     expect(result.totalVolumetricKg).toBeCloseTo(0.6, 1);
   });
 });
+
+describe('TC-UPS-ENGINE-07: 급증 긴급 수수료(Surge Emergency Fee) 계산 (Issue #491)', () => {
+  const surgeFee = {
+    id: 'sf1', destination_country_code: 'KOR', selling_rate_per_kg: 4722, cost_rate_per_kg: 3800,
+    currency: 'KRW', effective_from: '2026-05-24', effective_until: '2026-07-05', is_active: true,
+    created_at: '', created_by: null,
+  } as any;
+
+  it('surgeFee 미지정 시 급증 수수료가 0으로 계산된다', () => {
+    const result = computeUpsFreight(baseInput(), baseData());
+    expect(result.surgeFeeSellingAmount).toBe(0);
+    expect(result.breakdown.surgeFeeId).toBeNull();
+  });
+
+  it('kg당 단가 × 청구중량으로 급증 수수료를 계산하고 유류할증료를 추가 부과한다', () => {
+    const data = { ...baseData(), surgeFee };
+    // baseInput: actualWeightKg=5, dims 없음 → chargeableKg=5
+    // surge base = 4722 * 5 = 23610, fuelRate=0.185 → +23610*0.185=4367.85 → 27977.85
+    const result = computeUpsFreight(baseInput(), data);
+    expect(result.breakdown.surgeFeeSellingRatePerKg).toBe(4722);
+    expect(result.surgeFeeSellingAmount).toBeCloseTo(23610 + 23610 * 0.185, 2);
+  });
+
+  it('급증 수수료가 totalSellingPrice/totalCostPrice에 합산된다', () => {
+    const withSurge = computeUpsFreight(baseInput(), { ...baseData(), surgeFee });
+    const withoutSurge = computeUpsFreight(baseInput(), baseData());
+    expect(withSurge.totalSellingPrice).toBeCloseTo(withoutSurge.totalSellingPrice + withSurge.surgeFeeSellingAmount, 2);
+    expect(withSurge.totalCostPrice).toBeCloseTo(withoutSurge.totalCostPrice + withSurge.surgeFeeCostAmount, 2);
+  });
+});
+
+describe('TC-UPS-ENGINE-05: Shipper 단계 — 급증 수수료 pass-through (Issue #491)', () => {
+  it('급증 수수료는 할인 대상이 아니고 정가 그대로 최종 운송비에 합산된다', () => {
+    const result = computeShipperFreight(98000, 5000, 2000, 0.05, 3000);
+    expect(result.surgeFeeSellingAmount).toBe(3000);
+    expect(result.finalFreight).toBeCloseTo(93100 + 5000 + 2000 + 3000, 2);
+  });
+
+  it('급증 수수료 미지정 시 기본값 0으로 기존 동작과 동일하다', () => {
+    const result = computeShipperFreight(98000, 5000, 2000, 0.05);
+    expect(result.surgeFeeSellingAmount).toBe(0);
+    expect(result.finalFreight).toBeCloseTo(100100, 2);
+  });
+});
