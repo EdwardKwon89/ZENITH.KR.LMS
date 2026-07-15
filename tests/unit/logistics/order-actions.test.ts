@@ -344,6 +344,7 @@ describe('TC-SNAP-01: saveOrderRateSnapshot recipient_country_code 사용', () =
   const mockProfile = { id: 'user-123', org_id: 'org-456' };
 
   let mockSupabase: any;
+  let mockEstimateFn: any;
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -352,43 +353,52 @@ describe('TC-SNAP-01: saveOrderRateSnapshot recipient_country_code 사용', () =
       select: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
       maybeSingle: vi.fn(),
-      insert: vi.fn().mockReturnThis(),
-      single: vi.fn(),
     };
-    (validateUserAction as any).mockResolvedValue({
-      user: mockUser,
-      profile: mockProfile,
-      supabase: mockSupabase,
+    mockEstimateFn = vi.fn().mockResolvedValue({
+      platform: { totalSellingPrice: 100000, currency: 'USD' },
+      agency: null,
+      shipper: null,
     });
   });
 
   it('UPS 오더(dest_port_id 없음) → recipient_country_code로 스냅샷 저장', async () => {
-    mockSupabase.maybeSingle.mockResolvedValue({ data: null, error: null });
-    mockSupabase.insert.mockReturnThis();
-    mockSupabase.single.mockResolvedValue({ data: { id: 'snap-1' }, error: null });
+    mockSupabase.maybeSingle
+      .mockResolvedValueOnce({ data: { id: 'prod-1' }, error: null })
+      .mockResolvedValueOnce({ data: null, error: null });
 
     const validated = {
       transport_mode: 'UPS',
+      ups_product_code: 'WW_SAVER',
       dest_port_id: undefined,
       recipient_country_code: 'US',
-      packages: [{ gross_weight: 5, length: 30, width: 20, height: 10 }],
+      packages: [{ gross_weight: 5 }],
       incoterms: 'DDP',
     };
 
     const { saveOrderRateSnapshot } = await import('@/app/actions/operations/orders');
 
-    await expect(
-      saveOrderRateSnapshot('order-1', validated as any, 'prod-1', 'agency-1')
-    ).resolves.not.toThrow();
+    await saveOrderRateSnapshot({
+      supabase: mockSupabase,
+      orderId: 'order-1',
+      validated: validated as any,
+      profile: mockProfile,
+      agencyOrgId: 'agency-1',
+      estimateFn: mockEstimateFn,
+    });
+
+    expect(mockEstimateFn).toHaveBeenCalledWith(
+      expect.objectContaining({ destCountryCode: 'US' })
+    );
   });
 
   it('non-UPS 오더(dest_port_id 있음) → port.country_code 사용 (회귀 없음)', async () => {
-    mockSupabase.maybeSingle.mockResolvedValue({ data: { country_code: 'JP' }, error: null });
-    mockSupabase.insert.mockReturnThis();
-    mockSupabase.single.mockResolvedValue({ data: { id: 'snap-2' }, error: null });
+    mockSupabase.maybeSingle
+      .mockResolvedValueOnce({ data: { id: 'prod-1' }, error: null })
+      .mockResolvedValueOnce({ data: { country_code: 'JP' }, error: null });
 
     const validated = {
       transport_mode: 'AIR',
+      ups_product_code: 'WW_EXPRESS',
       dest_port_id: 'port-123',
       recipient_country_code: undefined,
       packages: [{ gross_weight: 10 }],
@@ -397,8 +407,17 @@ describe('TC-SNAP-01: saveOrderRateSnapshot recipient_country_code 사용', () =
 
     const { saveOrderRateSnapshot } = await import('@/app/actions/operations/orders');
 
-    await expect(
-      saveOrderRateSnapshot('order-2', validated as any, 'prod-1', 'agency-1')
-    ).resolves.not.toThrow();
+    await saveOrderRateSnapshot({
+      supabase: mockSupabase,
+      orderId: 'order-2',
+      validated: validated as any,
+      profile: mockProfile,
+      agencyOrgId: 'agency-1',
+      estimateFn: mockEstimateFn,
+    });
+
+    expect(mockEstimateFn).toHaveBeenCalledWith(
+      expect.objectContaining({ destCountryCode: 'JP' })
+    );
   });
 });
