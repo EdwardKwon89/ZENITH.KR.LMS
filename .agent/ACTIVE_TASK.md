@@ -15,6 +15,7 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
+| [#496](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/496) | [Team A] UPS 급증 긴급 수수료 반영 — UAT-17/19 시나리오 갱신 (Riley) | a | p3 | - | 미배정 | 2026-07-15 |
 | [#491](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/491) | [design] 급증 수수료(SURGE) 요금 산정 방식 검토 — kg당 vs 건당 고정 | b | p2 | - | jungjs | 2026-07-15 |
 | [#473](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/473) | [Team B] 검증 절차 방침 변경 — 라이브 브라우저/DB 검증은 병합 후 JSJung이 수행 | b | - | - | 미배정 | 2026-07-14 |
 | [#358](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/358) | [Aiden] R-17 절차 오류 재발 방지 — 4단계 구조적 개선 (채번 자동화·회귀결과 신뢰 제거·CI 게이트·워크트리 격리) | a | p2 | - | jungjs | 2026-07-14 |
