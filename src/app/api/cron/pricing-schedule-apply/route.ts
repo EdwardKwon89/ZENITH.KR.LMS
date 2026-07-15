@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/utils/supabase/server';
 import { logger } from '@/lib/logger';
+import { getKstToday } from '@/lib/utils/date-kst';
 
 /**
  * UPS 요금 스케줄링 배치 — 매일 자정 실행
@@ -22,7 +23,7 @@ export async function POST(req: Request) {
 
   try {
     const supabase = await createAdminClient();
-    const today = new Date().toISOString().split('T')[0];
+    const today = getKstToday();
     const results = { applied: 0, expired: 0, errors: [] as string[] };
 
     // ─── 1. 적용 (valid_from <= 오늘 AND status='SCHEDULED') ───
@@ -228,6 +229,6 @@ export async function GET() {
   return NextResponse.json({
     status: 'ok',
     message: 'Pricing schedule cron endpoint is active',
-    schedule: '0 0 * * * (daily at midnight UTC)',
+    schedule: '0 15 * * * (daily at KST 00:00 / UTC 15:00)',
   });
 }
