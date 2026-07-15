@@ -15,7 +15,8 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
-| [#504](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/504) | [defect] AgencyShippers.form_save 번역 키 누락 — Zone 할인율 저장 버튼 깨짐 | b | p2 | - | 미배정 | 2026-07-15 |
+| [#511](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/511) | [tooling] task file 커밋 해시 자동 삽입 스크립트 신설 — 손타이핑 오기재 근본 차단 | b | p2 | - | 미배정 | 2026-07-15 |
+| [#509](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/509) | [defect] createPricingSchedule 500 에러 — JSONB target_ref .eq() 직접 비교 실패 | b | p1 | - | 미배정 | 2026-07-15 |
 | [#503](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/503) | [Critical] UPS 운임 구성-최종청구서 파이프라인 단절 + 기타 부가운임(실부과분) 입력 기능 부재 | b | p1 | - | 미배정 | 2026-07-15 |
 | [#499](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/499) | [design] Agency 정산 화면 — 부과금 항목별(기본운임·유류할증·기타·급증수수료) breakdown 노출 검토 | b | p3 | - | jungjs | 2026-07-15 |
 | [#473](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/473) | [Team B] 검증 절차 방침 변경 — 라이브 브라우저/DB 검증은 병합 후 JSJung이 수행 | b | - | - | 미배정 | 2026-07-14 |
