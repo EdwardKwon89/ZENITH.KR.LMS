@@ -27,7 +27,7 @@ Expected failure: 1
 ✅ 성공/실패 케이스 모두 정상 동작 확인
 
 ### 커밋
-- `4057da1d1807e33c00b82de4214acc5885f14676` — `[Dave] feat: TASK-B-132 Issue #511 — 커밋 해시 자동 삽입 스크립트`
+- `6f7cd17b75910d84fa6ae48cf6715bbfe0d2c709` — `[Dave] feat: TASK-B-132 Issue #511 — 커밋 해시 자동 삽입 스크립트`
 
 ### PR
 - https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/512
