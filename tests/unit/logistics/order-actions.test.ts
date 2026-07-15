@@ -209,7 +209,7 @@ describe('ZENITH Logistics: Order Creation Logic', () => {
       shipper_zipcode: '04524',
       shipper_biz_no: '123-45-67890',
       ups_product_code: 'WW_EXPEDITED',
-      incoterms: 'DAP',
+      incoterms: 'DDP',
       packages: [
         {
           packing_unit: 'BOX',
@@ -240,7 +240,7 @@ describe('ZENITH Logistics: Order Creation Logic', () => {
     expect(pp.shipper_zipcode).toBe('04524');
     expect(pp.shipper_biz_no).toBe('123-45-67890');
     expect(pp.ups_product_code).toBe('WW_EXPEDITED');
-    expect(pp.incoterms).toBe('DAP');
+    expect(pp.incoterms).toBe('DDP');
   });
 
   it('TC-A.7: [Success] Issue #489 — ups_product_code/incoterms 조건부 UPDATE 제거 — RPC v5에서 직접 저장 확인', async () => {
@@ -254,7 +254,7 @@ describe('ZENITH Logistics: Order Creation Logic', () => {
       recipient_address: '789 Pine St',
       recipient_phone: '010-7777-8888',
       ups_product_code: 'WW_EXPEDITED',
-      incoterms: 'DDP',
+      incoterms: 'DDU',
       packages: [
         {
           packing_unit: 'BOX',
@@ -273,7 +273,7 @@ describe('ZENITH Logistics: Order Creation Logic', () => {
     // Then: RPC payload에 ups_product_code/incoterms 포함 확인
     const rpcCall = mockSupabase.rpc.mock.calls[0];
     expect(rpcCall[1].p_payload.ups_product_code).toBe('WW_EXPEDITED');
-    expect(rpcCall[1].p_payload.incoterms).toBe('DDP');
+    expect(rpcCall[1].p_payload.incoterms).toBe('DDU');
     // 조건부 UPDATE(.from('zen_orders').update(...))가 호출되지 않았는지 확인
     expect(mockSupabase.update).not.toHaveBeenCalled();
   });
