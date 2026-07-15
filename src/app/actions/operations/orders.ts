@@ -47,11 +47,13 @@ export async function saveOrderRateSnapshot({
       .eq('id', validated.dest_port_id)
       .maybeSingle();
 
-    if (!(totalWeight > 0 && port?.country_code)) return;
+    const destCountryCode = validated.recipient_country_code || port?.country_code;
+
+    if (!(totalWeight > 0 && destCountryCode)) return;
 
     const estimate = await estimateFn({
       productId: product.id,
-      destCountryCode: port.country_code,
+      destCountryCode,
       actualWeightKg: totalWeight,
       dimL: validated.packages[0]?.length,
       dimW: validated.packages[0]?.width,
