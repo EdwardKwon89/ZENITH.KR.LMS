@@ -336,3 +336,69 @@ describe('ZENITH Logistics: Order Creation Logic', () => {
     });
   });
 });
+
+// ─── Issue #514: order rate snapshot dest_country_code 수정 ─────────────────────────────────────────
+
+describe('TC-SNAP-01: saveOrderRateSnapshot recipient_country_code 사용', () => {
+  const mockUser = { id: 'user-123' };
+  const mockProfile = { id: 'user-123', org_id: 'org-456' };
+
+  let mockSupabase: any;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockSupabase = {
+      from: vi.fn().mockReturnThis(),
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      maybeSingle: vi.fn(),
+      insert: vi.fn().mockReturnThis(),
+      single: vi.fn(),
+    };
+    (validateUserAction as any).mockResolvedValue({
+      user: mockUser,
+      profile: mockProfile,
+      supabase: mockSupabase,
+    });
+  });
+
+  it('UPS 오더(dest_port_id 없음) → recipient_country_code로 스냅샷 저장', async () => {
+    mockSupabase.maybeSingle.mockResolvedValue({ data: null, error: null });
+    mockSupabase.insert.mockReturnThis();
+    mockSupabase.single.mockResolvedValue({ data: { id: 'snap-1' }, error: null });
+
+    const validated = {
+      transport_mode: 'UPS',
+      dest_port_id: undefined,
+      recipient_country_code: 'US',
+      packages: [{ gross_weight: 5, length: 30, width: 20, height: 10 }],
+      incoterms: 'DDP',
+    };
+
+    const { saveOrderRateSnapshot } = await import('@/app/actions/operations/orders');
+
+    await expect(
+      saveOrderRateSnapshot('order-1', validated as any, 'prod-1', 'agency-1')
+    ).resolves.not.toThrow();
+  });
+
+  it('non-UPS 오더(dest_port_id 있음) → port.country_code 사용 (회귀 없음)', async () => {
+    mockSupabase.maybeSingle.mockResolvedValue({ data: { country_code: 'JP' }, error: null });
+    mockSupabase.insert.mockReturnThis();
+    mockSupabase.single.mockResolvedValue({ data: { id: 'snap-2' }, error: null });
+
+    const validated = {
+      transport_mode: 'AIR',
+      dest_port_id: 'port-123',
+      recipient_country_code: undefined,
+      packages: [{ gross_weight: 10 }],
+      incoterms: 'DDP',
+    };
+
+    const { saveOrderRateSnapshot } = await import('@/app/actions/operations/orders');
+
+    await expect(
+      saveOrderRateSnapshot('order-2', validated as any, 'prod-1', 'agency-1')
+    ).resolves.not.toThrow();
+  });
+});
