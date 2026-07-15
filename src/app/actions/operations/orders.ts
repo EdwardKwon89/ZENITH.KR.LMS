@@ -118,14 +118,7 @@ export async function createOrder(payload: OrderRegistrationInput) {
     }
   }
 
-  if (validated.ups_product_code) {
-    updates.ups_product_code = validated.ups_product_code;
-  }
-
-  if (validated.incoterms) {
-    updates.incoterms = validated.incoterms;
-  }
-
+  // ups_product_code/incoterms는 RPC v5 INSERT에서 직접 저장 — 조건부 UPDATE 제거 (Issue #489)
   if (Object.keys(updates).length > 0) {
     const { error: updateError } = await supabase
       .from('zen_orders')
