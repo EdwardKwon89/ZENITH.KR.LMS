@@ -15,7 +15,6 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
-| [#480](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/480) | [Critical] 주소록 upsert-by-name이 org 계정에서 항상 실패 — .match()의 null 처리 버그 | b | p1 | - | 미배정 | 2026-07-14 |
 | [#473](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/473) | [Team B] 검증 절차 방침 변경 — 라이브 브라우저/DB 검증은 병합 후 JSJung이 수행 | b | - | - | 미배정 | 2026-07-14 |
 | [#358](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/358) | [Aiden] R-17 절차 오류 재발 방지 — 4단계 구조적 개선 (채번 자동화·회귀결과 신뢰 제거·CI 게이트·워크트리 격리) | a | p2 | - | jungjs | 2026-07-14 |
 | [#164](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/164) | [UAT-Epic] UPS 특송 서비스 — Team B 인수 테스트 (UAT-15~19) | b | p1 | open | jungjs | 2026-07-07 |
