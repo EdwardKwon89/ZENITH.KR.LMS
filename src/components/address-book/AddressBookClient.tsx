@@ -19,6 +19,7 @@ interface AddressBookEntry {
   recipient_address: string;
   recipient_address_local?: string | null;
   recipient_phone?: string | null;
+  recipient_email?: string | null;
   country_code?: string | null;
   display_mode: 'EN' | 'BILINGUAL';
   is_default: boolean;
@@ -75,6 +76,7 @@ export default function AddressBookClient({ initialEntries }: AddressBookClientP
       recipient_address: entry.recipient_address,
       recipient_address_local: entry.recipient_address_local || undefined,
       recipient_phone: entry.recipient_phone || undefined,
+      recipient_email: entry.recipient_email || undefined,
       country_code: entry.country_code || undefined,
       display_mode: entry.display_mode,
       is_default: entry.is_default,
@@ -125,6 +127,11 @@ export default function AddressBookClient({ initialEntries }: AddressBookClientP
           <ZenInput
             placeholder="연락처"
             {...register('recipient_phone')}
+          />
+          <ZenInput
+            placeholder="이메일 (선택)"
+            {...register('recipient_email')}
+            error={!!errors.recipient_email}
           />
           <ZenInput
             placeholder="국가 코드"

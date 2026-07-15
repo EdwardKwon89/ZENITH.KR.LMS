@@ -1065,6 +1065,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                             setValue('recipient_city', entry.city || '');
                             setValue('recipient_zipcode', entry.zipcode || '');
                             setValue('recipient_pccc', entry.recipient_pccc || '');
+                            setValue('recipient_email', entry.recipient_email || '');
                           }}
                         />
                       </div>
@@ -1095,6 +1096,10 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                             }}
                             required
                           />
+                       </div>
+                       <div>
+                        <label className="text-[10px] font-bold text-slate-500 mb-1 block">Email</label>
+                        <ZenInput placeholder="email@example.com" {...register('recipient_email')} error={!!errors.recipient_email} className="py-2 text-xs" />
                        </div>
                      </div>
                    </div>
