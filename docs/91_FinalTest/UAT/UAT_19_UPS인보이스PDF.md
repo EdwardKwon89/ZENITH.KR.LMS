@@ -1,17 +1,16 @@
 # UAT_19 — UPS 인보이스 PDF
 
 > **문서번호**: UAT-19
-> **작성일**: 2026-07-13
+> **작성일**: 2026-07-15
 > **작성자**: Riley (Gemini)
-> **버전**: v2.0
+> **버전**: v3.0
 > **담당 문서**: [UAT_MASTER.md](UAT_MASTER.md)
-> **관련 Task**: TASK-183 — UPS 특송 UAT 문서 5건 종합 검토·갱신 (UAT-15·18·19·20·22)
+> **관련 Task**: TASK-185 — [Team A] UPS 급증 긴급 수수료 반영 — UAT-17/19 시나리오 갱신 (Issue #496)
 
 > [!IMPORTANT]
-> **v2.0 개정 사항 (2026-07-13, Riley)**
-> - **파일명 형식 변경**: 다운로드 시의 실제 파일명 형식인 `UPS_INVOICE_[오더ID]_[날짜].pdf` (정규식 패턴 `/UPS_INVOICE_.+\.pdf/`)에 맞추어 시나리오 기대 결과 및 검증 조건 현행화.
-> - **클라이언트 사이드 PDF 다운로드 특성 반영**: 오더 상세화면의 [인보이스 (UPS)] 다운로드 버튼은 `@react-pdf/renderer` 라이브러리를 이용하여 브라우저 단(client-side)에서 동적으로 PDF를 렌더링하고 바로 다운로드하므로, 서버를 호출하여 `zen_invoice_files` 테이블에 레코드를 생성하지 않습니다. 따라서 `zen_invoice_files` 조회 DB 검증 절차를 제외 처리함.
-> - (참고: 서버 사이드 PDF 인보이스 생성 API인 `generateInvoicePdf` Server Action은 정산 및 재무 관련 대량 인보이스 처리 시에 사용됨.)
+> **v3.0 개정 사항 (2026-07-15, Riley)**
+> - **급증 긴급 수수료(Surge Emergency Fee) 표출 검증 반영**: 인보이스 PDF 출력 시 급증 긴급 수수료가 정상적으로 포함되어 표출되는지 검증하기 위한 시나리오 추가 검토 및 절차 기술. (UAT-19-02 시나리오 내에 다운로드된 PDF 문서 내 급증 긴급 수수료 라인 확인 절차 및 DB 정합성 대조 항목 보강)
+> - (참고: 기존 v2.0의 클라이언트 사이드 PDF 다운로드 특성 반영 및 파일명 정규식 패턴 `/UPS_INVOICE_.+\.pdf/` 기준도 함께 유지됩니다.)
 
 ---
 
@@ -53,9 +52,9 @@
 | 항목 | 내용 |
 |:----|:----|
 | 역할 | SHIPPER (화주) 또는 ADMIN |
-| 화면 URL | /ko/orders/[id] |
-| 예상 소요 시간 | 5분 |
-| 사전 조건 | UAT-19-01의 PDF 파일 다운로드가 정상 실행 가능할 것 |
+| 화면 URL | /ko/orders/[id] 또는 /ko/finance/invoices |
+| 예상 소요 시간 | 7분 |
+| 사전 조건 | UAT-19-01의 PDF 파일 다운로드가 정상 실행 가능하며, 정산 프로세스를 통해 금융 정산용 인보이스가 발행된 상태일 것 |
 
 ### 테스트 절차
 
@@ -63,12 +62,14 @@
 |:---:|:---------|:---------|:-----------|:---------|:----:|
 | 1 | /ko/orders/[id] | 상세 페이지에서 [인보이스 (UPS)] 다운로드 클릭 | — | 로컬 디바이스에 PDF 파일 다운로드 실행 | ☐ |
 | 2 | 로컬 다운로드 폴더 | 다운로드된 파일명 규칙 검증 | — | 파일명이 `UPS_INVOICE_[오더ID]_[날짜].pdf` 형태로 생성되어 매핑됨을 확인 (예: `UPS_INVOICE_7e12f3e8-8888-4444-9999-bbbbccccdddd_20260713.pdf` 등, 정규식 `/UPS_INVOICE_.+\.pdf/` 패스) | ☐ |
-| 3 | 로컬 PDF 리더 | PDF 문서 상세 내용 검증 | — | PDF 파일 내부의 표기 항목(송하인/수하인 정보, 패키지 상세 중량, 볼륨, 마크업된 최종 Selling Price 금액 등)이 DB 스냅샷 데이터와 완전히 일치하는지 검증 | ☐ |
+| 3 | 로컬 PDF 리더 | PDF 문서 상세 내용 검증 | — | PDF 파일 내부의 표기 항목(송하인/수하인 정보, 패키지 상세 중량, 볼륨, 통관용 신고가액 등)이 DB 스냅샷 데이터와 일치하는지 확인 | ☐ |
+| 4 | /ko/finance/invoices | 발행된 금융 정산용 인보이스 PDF를 다운로드하여 수수료 반영 여부 검증 | — | 다운로드된 금융 인보이스 PDF 내 비용 청구 테이블(Charges)에 **급증 긴급 수수료(SURGE_EMERGENCY)** 라인이 부가요금 항목으로 분리되어 정상적으로 표출되고 단가와 금액이 일치하는지 검증 | ☐ |
 
 ### 합격 기준
 - [ ] 전 단계 ☑ 완료
 - [ ] 다운로드된 파일명 형식이 `/UPS_INVOICE_.+\.pdf/` 정규식 규격에 맞게 생성됨
-- [ ] PDF 내 기재 금액 및 패키지 사양이 실제 오더 데이터와 정확히 1:1 일치함
+- [ ] 간이 통관 인보이스 PDF 내 기재 사양이 실제 오더 패키지와 정확히 1:1 일치함
+- [ ] 금융 정산 인보이스 PDF 내에 급증 긴급 수수료가 누락 없이 정상 반영되어 출력됨
 - [ ] 500 에러 없음
 
 ### 예상 DB 결과값 (UAT §4 체크리스트)
@@ -76,6 +77,7 @@
 | 검증 포인트 | SQL | 예상 결과 |
 |:-----------|:----|:---------|
 | 패키지 정보 정합성 | `SELECT packing_unit, packing_count, gross_weight, volume, intl_ref_no FROM zen_order_packages WHERE order_id = '[오더ID]' ORDER BY created_at` | PDF 내 패키지 목록과 1:1 일치 (개수·중량·체적·송장번호) |
-| Selling Price 정합성 | `SELECT applied_unit_price, applied_currency, applied_rule FROM zen_order_rate_snapshots WHERE order_id = '[오더ID]'` | `applied_unit_price` = PDF Selling Price 필드값과 일치 |
+| Selling Price 정합성 | `SELECT applied_unit_price, applied_currency, applied_rule FROM zen_order_rate_snapshots WHERE order_id = '[오더ID]'` | `applied_unit_price` = 간이 인보이스 PDF Selling Price 필드값과 일치 |
+| 급증 긴급 수수료 정산 데이터 정합성 | `SELECT cost_type, total_amount, currency FROM zen_order_costs WHERE order_id = '[오더ID]' AND cost_type = 'SURGE_EMERGENCY'` | `total_amount` = 금융 인보이스 PDF 내 급증 긴급 수수료 금액과 일치 |
 | 송하인/수하인 정합성 | `SELECT shipper_id, recipient_name, recipient_address, transport_mode, ups_product_code, incoterms FROM zen_orders WHERE id = '[오더ID]'` | PDF 내 송하인·수하인·출발지·도착지 정보와 일치 |
 | 통화 일치 | `SELECT currency FROM zen_orders WHERE id = '[오더ID]'` | PDF 금액 표기 통화와 일치 (예: `USD` 또는 `KRW`) |
