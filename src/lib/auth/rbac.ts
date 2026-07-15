@@ -48,7 +48,7 @@ export const STATIC_PERMISSIONS: Record<string, string[]> = {
   [USER_ROLES.CARRIER]: ['/logistics/delivery', '/orders/assigned', '/admin/transport-costs', '/admin/rates', '/voc', '/support', '/mypage', '/address-book'],
   [USER_ROLES.CUSTOMS_BROKER]: ['/admin/customs-rates', '/orders/assigned', '/tracking', '/voc', '/mypage', '/address-book'],
   [USER_ROLES.DELIVERY_AGENT]: ['/admin/delivery-rates', '/orders/assigned', '/tracking', '/voc', '/mypage', '/address-book'],
-  [USER_ROLES.AGENCY]: ['/orders', '/ups-rates', '/agency', '/tracking', '/settlement', '/voc', '/mypage', '/address-book'],
+  [USER_ROLES.AGENCY]: ['/orders', '/ups-rates', '/agency', '/tracking', '/settlement', '/voc', '/mypage', '/address-book', '/warehouse'],
   [USER_ROLES.AGENCY_SHIPPER]: ['/orders', '/shipper', '/ups-rates', '/tracking', '/voc', '/support', '/mypage', '/address-book'],
   [USER_ROLES.SHIPPER]: ['/orders', '/shipper', '/ups-rates', '/tracking', '/voc', '/support', '/mypage', '/address-book'],
   [USER_ROLES.CORPORATE]: ['/orders', '/billing/invoice', '/tracking', '/finance', '/settlement', '/voc', '/support', '/mypage', '/address-book'],
