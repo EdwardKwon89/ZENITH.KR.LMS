@@ -5,12 +5,7 @@ import { validateUserAction } from '@/lib/auth/guards';
 import { USER_ROLES } from '@/lib/auth/rbac';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { createorder, getnewlabel, removeorder } from '@/lib/shxk/order';
-import {
-  SHXK_SHIPPER_NAME, SHXK_SHIPPER_COUNTRY,
-  SHXK_SHIPPER_PROVINCE, SHXK_SHIPPER_CITY,
-  SHXK_SHIPPER_STREET, SHXK_SHIPPER_POSTCODE,
-  SHXK_SHIPPER_PHONE,
-} from '@/lib/shxk/config';
+import { SHXK_SHIPPER_NAME } from '@/lib/shxk/config';
 import { revalidatePath } from 'next/cache';
 
 export interface IssueUpsLabelResult {
@@ -109,20 +104,25 @@ async function placeShxkOrder(
     buyer_id:        '',
     order_status:    'P',
     shipper: {
-      shipper_name:        SHXK_SHIPPER_NAME,
-      shipper_countrycode: SHXK_SHIPPER_COUNTRY,
-      shipper_province:    SHXK_SHIPPER_PROVINCE,
-      shipper_city:        SHXK_SHIPPER_CITY,
-      shipper_street:      SHXK_SHIPPER_STREET,
-      shipper_postcode:    SHXK_SHIPPER_POSTCODE,
-      shipper_telephone:   SHXK_SHIPPER_PHONE,
+      shipper_name:        (order.shipper_contact_name as string) || SHXK_SHIPPER_NAME,
+      shipper_company:     '',
+      shipper_countrycode: (order.shipper_country_code as string) || countryCode,
+      shipper_province:    (order.shipper_state_province as string) || '',
+      shipper_city:        (order.shipper_city as string) || '',
+      shipper_street:      (order.shipper_address as string) || '',
+      shipper_address:     (order.shipper_address as string) || '',
+      shipper_postcode:    (order.shipper_zipcode as string) || '',
+      shipper_telephone:   (order.shipper_contact_phone as string) || '',
     },
     consignee: {
-      consignee_name:        (order.recipient_name    as string) || 'E2E Consignee',
-      consignee_countrycode: countryCode,
+      consignee_name:        (order.recipient_name as string) || 'E2E Consignee',
+      consignee_countrycode: (order.recipient_country_code as string) || countryCode,
+      consignee_province:    (order.recipient_state_province as string) || '',
+      consignee_city:        (order.recipient_city as string) || '',
       consignee_street:      (order.recipient_address as string) || 'Unknown Street',
       consignee_postcode:    (order.recipient_zipcode as string) || '',
-      consignee_telephone:   (order.recipient_phone   as string) || '',
+      consignee_telephone:   (order.recipient_phone as string) || '',
+      consignee_email:       (order.recipient_email as string) || '',
     },
     invoice,
   });
@@ -223,7 +223,9 @@ export async function issueUpsLabel(
     const { pkg, order, error: lookupErr } = await lookupPackage(supabase, packageId);
     if (lookupErr) return { success: false, error: lookupErr };
 
-    const countryCode = await resolveCountryCode(supabase, order!.dest_port_id as string);
+    const countryCode = (order!.recipient_country_code as string)
+      || await resolveCountryCode(supabase, order!.dest_port_id as string)
+      || '';
     if (!countryCode) return { success: false, error: 'Destination country code not found' };
 
     const iso3Code = toIso3(countryCode);
