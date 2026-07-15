@@ -12,8 +12,8 @@
 OrderRegistrationForm.tsx 수하인 정보 섹션에 recipient_email 입력창 추가 + 주소록(zen_address_book) email 스택 전체 추가
 
 ## 작업 결과
-- 코드 커밋: `594eb262` (UI 입력창), `cf3ff36e` (주소록 email 스택)
-- Build PASS · Regression 82/82 PASS (504 tests)
+- 코드 커밋: `594eb262` (UI 입력창), `cf3ff36e` (주소록 email 스택), `75040e02` (반려 대응)
+- Build PASS · Regression 83/83 PASS (508 tests)
 - PR#494
 
 ## 발견 이슈
