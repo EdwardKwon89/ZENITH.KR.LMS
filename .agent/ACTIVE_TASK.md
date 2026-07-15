@@ -15,7 +15,6 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
-| [#518](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/518) | [fix] UPS 요금 스케줄링 배치 UTC 기준 → KST 기준 변경 | b | p2 | - | 미배정 | 2026-07-15 |
 | [#503](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/503) | [Critical] UPS 운임 구성-최종청구서 파이프라인 단절 + 기타 부가운임(실부과분) 입력 기능 부재 | b | p1 | - | 미배정 | 2026-07-15 |
 | [#499](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/499) | [design] Agency 정산 화면 — 부과금 항목별(기본운임·유류할증·기타·급증수수료) breakdown 노출 검토 | b | p3 | - | jungjs | 2026-07-15 |
 | [#473](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/473) | [Team B] 검증 절차 방침 변경 — 라이브 브라우저/DB 검증은 병합 후 JSJung이 수행 | b | - | - | 미배정 | 2026-07-14 |
