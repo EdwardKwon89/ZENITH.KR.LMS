@@ -104,6 +104,19 @@ export interface UpsFlightPlan {
   created_by: string | null;
 }
 
+export interface UpsSurgeFee {
+  id: string;
+  destination_country_code: string;  // ISO 3166-1 alpha-3
+  selling_rate_per_kg: number;
+  cost_rate_per_kg: number;
+  currency: string;
+  effective_from: string;      // ISO date
+  effective_until: string | null;
+  is_active: boolean;
+  created_at: string;
+  created_by: string | null;
+}
+
 // ─── 요금 계산 엔진 타입 (Phase 7.1 TASK-172·173, An-14 §4) ────────────────
 
 export interface UpsPricingData {
@@ -114,6 +127,7 @@ export interface UpsPricingData {
   freightMinimum?: UpsFreightMinimum | null;
   fuelSurcharge: UpsFuelSurcharge | null;
   otherCharges: UpsOtherCharge[];
+  surgeFee?: UpsSurgeFee | null;
   fallbackApplied?: boolean;
 }
 
@@ -147,6 +161,10 @@ export interface UpsBreakdown {
   otherChargeItems: UpsOtherChargeItem[];
   otherChargesSellingTotal: number;
   otherChargesCostTotal: number;
+  surgeFeeId: string | null;
+  surgeFeeSellingRatePerKg: number;
+  surgeFeeSellingAmount: number;
+  surgeFeeCostAmount: number;
   oversizeApplied: boolean;
   fallbackApplied?: boolean;
 }
@@ -173,6 +191,8 @@ export interface UpsFreightResult {
   fuelSurchargeCostAmount: number;
   otherChargesSellingTotal: number;
   otherChargesCostTotal: number;
+  surgeFeeSellingAmount: number;
+  surgeFeeCostAmount: number;
   totalSellingPrice: number;
   totalCostPrice: number;
   currency: string;
@@ -200,6 +220,7 @@ export interface UpsShipperFreightResult {
   baseSellingPrice: number;
   fuelSurchargeSellingAmount: number;
   otherChargesSellingTotal: number;
+  surgeFeeSellingAmount: number;
   shipperDiscountRate: number;
   finalFreight: number;
 }

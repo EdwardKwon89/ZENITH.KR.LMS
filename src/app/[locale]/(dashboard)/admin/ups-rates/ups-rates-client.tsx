@@ -1,12 +1,12 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
-import { Plus, Edit2, Trash2, XCircle, Globe, Package, DollarSign, Fuel, FileText, Building, Scale, Layers } from 'lucide-react';
+import { Plus, Edit2, Trash2, XCircle, Globe, Package, DollarSign, Fuel, FileText, Building, Scale, Layers, TrendingUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { USER_ROLES } from '@/lib/auth/rbac';
 import { ZenBadge } from '@/components/ui/ZenUI';
 import ZenDataGrid from '@/components/ui/ZenDataGrid';
-import type { UpsZoneWithCountries, UpsProduct, UpsBaseRateWithRefs, UpsFuelSurcharge, UpsOtherCharge, UpsWeightTierRateWithRefs, UpsFreightMinimumWithRefs } from '@/types/ups';
+import type { UpsZoneWithCountries, UpsProduct, UpsBaseRateWithRefs, UpsFuelSurcharge, UpsOtherCharge, UpsWeightTierRateWithRefs, UpsFreightMinimumWithRefs, UpsSurgeFee } from '@/types/ups';
 import {
   createUpsZone, updateUpsZone, deleteUpsZone,
   addZoneCountry, removeZoneCountry,
@@ -18,6 +18,7 @@ import {
   updateAgencyVolumetricDivisor,
   upsertUpsWeightTierRate, deleteUpsWeightTierRate,
   upsertUpsFreightMinimum, deleteUpsFreightMinimum,
+  createUpsSurgeFee, updateUpsSurgeFee, deleteUpsSurgeFee,
 } from '@/app/actions/ups/rates-mutation';
 import { createPricingSchedule, getScheduledPricingChanges, cancelPricingSchedule, getPricingAuditLog } from '@/app/actions/ups/pricing-schedule';
 import type { ColumnDef } from '@tanstack/react-table';
@@ -37,10 +38,11 @@ interface Props {
   agencies: Agency[];
   weightTierRates: UpsWeightTierRateWithRefs[];
   freightMinimums: UpsFreightMinimumWithRefs[];
+  surgeFees: UpsSurgeFee[];
   userRole: string;
 }
 
-type TabKey = 'zones' | 'products' | 'baseRates' | 'fuelSurcharges' | 'otherCharges' | 'agencyPolicies' | 'weightTierRates' | 'freightMinimums';
+type TabKey = 'zones' | 'products' | 'baseRates' | 'fuelSurcharges' | 'otherCharges' | 'agencyPolicies' | 'weightTierRates' | 'freightMinimums' | 'surgeFees';
 
 const TABS: { key: TabKey; label: string; icon: React.ElementType }[] = [
   { key: 'zones', label: 'Zone 관리', icon: Globe },
@@ -48,12 +50,13 @@ const TABS: { key: TabKey; label: string; icon: React.ElementType }[] = [
   { key: 'baseRates', label: '기준요금', icon: DollarSign },
   { key: 'fuelSurcharges', label: '유류할증', icon: Fuel },
   { key: 'otherCharges', label: '부가요금', icon: FileText },
+  { key: 'surgeFees', label: '급증 수수료', icon: TrendingUp },
   { key: 'agencyPolicies', label: 'Agency 할인율 정책', icon: Building },
   { key: 'weightTierRates', label: '20kg 초과 티어 요율', icon: Layers },
   { key: 'freightMinimums', label: 'Freight 최소운임', icon: Scale },
 ];
 
-export default function UpsRatesClient({ zones, products, baseRates, fuelSurcharges, otherCharges, agencyPolicies, agencies, weightTierRates, freightMinimums, userRole }: Props) {
+export default function UpsRatesClient({ zones, products, baseRates, fuelSurcharges, otherCharges, agencyPolicies, agencies, weightTierRates, freightMinimums, surgeFees, userRole }: Props) {
   const [activeTab, setActiveTab] = useState<TabKey>('zones');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
@@ -131,6 +134,7 @@ export default function UpsRatesClient({ zones, products, baseRates, fuelSurchar
         otherCharges: createUpsOtherCharge,
         weightTierRates: upsertUpsWeightTierRate,
         freightMinimums: upsertUpsFreightMinimum,
+        surgeFees: createUpsSurgeFee,
       };
       const update: Record<string, any> = {
         zones: updateUpsZone,
@@ -138,6 +142,7 @@ export default function UpsRatesClient({ zones, products, baseRates, fuelSurchar
         otherCharges: updateUpsOtherCharge,
         weightTierRates: (id: string, data: any) => upsertUpsWeightTierRate({ ...data, id }),
         freightMinimums: (id: string, data: any) => upsertUpsFreightMinimum({ ...data, id }),
+        surgeFees: updateUpsSurgeFee,
       };
       if (activeTab === 'agencyPolicies') {
         const { agency_org_id, zone_rates, is_active, volumetric_divisor, valid_from, valid_until } = form;
@@ -185,6 +190,7 @@ export default function UpsRatesClient({ zones, products, baseRates, fuelSurchar
         otherCharges: deleteUpsOtherCharge,
         weightTierRates: deleteUpsWeightTierRate,
         freightMinimums: deleteUpsFreightMinimum,
+        surgeFees: deleteUpsSurgeFee,
       };
       await del[activeTab]?.(id);
       window.location.reload();
@@ -205,6 +211,7 @@ export default function UpsRatesClient({ zones, products, baseRates, fuelSurchar
       case 'agencyPolicies': return <AgencyPolicyForm form={form} setForm={setForm} agencies={agencies} zones={zones} />;
       case 'weightTierRates': return <WeightTierRateForm form={form} setForm={setForm} products={products} zones={zones} />;
       case 'freightMinimums': return <FreightMinimumForm form={form} setForm={setForm} products={products} zones={zones} />;
+      case 'surgeFees': return <SurgeFeeForm form={form} setForm={setForm} editingItem={editingItem} />;
       default: return null;
     }
   };
@@ -228,6 +235,7 @@ export default function UpsRatesClient({ zones, products, baseRates, fuelSurchar
       case 'agencyPolicies': return <AgencyPolicyTable policies={agencyPolicies} canEdit={canEdit} onEdit={openEdit} agencies={agencies} scheduledChanges={scheduledChanges} onRefreshScheduled={fetchScheduledChanges} auditLog={auditLog} />;
       case 'weightTierRates': return <WeightTierRateTable weightTierRates={weightTierRates} canEdit={canEdit} onEdit={openEdit} onDelete={handleDelete} />;
       case 'freightMinimums': return <FreightMinimumTable freightMinimums={freightMinimums} canEdit={canEdit} onEdit={openEdit} onDelete={handleDelete} />;
+      case 'surgeFees': return <SurgeFeeTable surgeFees={surgeFees} canEdit={canEdit} onEdit={openEdit} onDelete={handleDelete} />;
       default: return null;
     }
   };
@@ -251,7 +259,7 @@ export default function UpsRatesClient({ zones, products, baseRates, fuelSurchar
         {canEdit && activeTab !== 'baseRates' && activeTab !== 'fuelSurcharges' && (
           <button onClick={openNew} className="flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-xl hover:bg-brand-700 transition-all font-semibold shadow-sm hover:shadow-brand-500/20">
             <Plus size={18} />
-            {activeTab === 'zones' ? 'Zone 등록' : activeTab === 'products' ? '제품 등록' : activeTab === 'otherCharges' ? '부가요금 등록' : activeTab === 'agencyPolicies' ? '할인율 정책 등록' : activeTab === 'weightTierRates' ? '티어 요율 등록' : activeTab === 'freightMinimums' ? '최소운임 등록' : '등록'}
+            {activeTab === 'zones' ? 'Zone 등록' : activeTab === 'products' ? '제품 등록' : activeTab === 'otherCharges' ? '부가요금 등록' : activeTab === 'agencyPolicies' ? '할인율 정책 등록' : activeTab === 'weightTierRates' ? '티어 요율 등록' : activeTab === 'freightMinimums' ? '최소운임 등록' : activeTab === 'surgeFees' ? '급증 수수료 등록' : '등록'}
           </button>
         )}
       </div>
@@ -775,4 +783,38 @@ function FreightMinimumTable({ freightMinimums, canEdit, onEdit, onDelete }: any
     ...(canEdit ? [{ id: 'actions' as const, header: '관리', cell: ({ row }: any) => <ActionsCell row={row} onEdit={onEdit} onDelete={onDelete} /> }] : []),
   ];
   return <ZenDataGrid columns={columns} data={freightMinimums} />;
+}
+
+// ─── Surge Fee (Issue #491) — 급증 긴급 수수료, 도착국×적용기간별 kg당 단가 ────
+
+function SurgeFeeForm({ form, setForm, editingItem }: any) {
+  return (
+    <>
+      <Field label="도착국 코드 (ISO 3자리)" value={form.destination_country_code} onChange={(v: string) => setForm({ ...form, destination_country_code: v?.toUpperCase().slice(0, 3) })} placeholder="KOR" />
+      <div className="grid grid-cols-2 gap-3">
+        <Field label="판매 단가 (kg당)" type="number" value={form.selling_rate_per_kg ?? ''} onChange={(v: any) => setForm({ ...form, selling_rate_per_kg: v ? Number(v) : 0 })} />
+        <Field label="원가 단가 (kg당)" type="number" value={form.cost_rate_per_kg ?? ''} onChange={(v: any) => setForm({ ...form, cost_rate_per_kg: v ? Number(v) : 0 })} />
+      </div>
+      <p className="text-xs text-slate-400">※ UPS 공지 기준 도착국별 kg당 단가. 유류할증료가 항상 추가 부과됩니다.</p>
+      <div className="grid grid-cols-2 gap-3">
+        <Field label="적용 시작일" type="date" value={form.effective_from ?? ''} onChange={(v: string) => setForm({ ...form, effective_from: v })} />
+        <Field label="적용 종료일 (무기한이면 비워둠)" type="date" value={form.effective_until ?? ''} onChange={(v: string) => setForm({ ...form, effective_until: v || null })} />
+      </div>
+      {editingItem && (
+        <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.is_active ?? true} onChange={e => setForm({ ...form, is_active: e.target.checked })} /> 활성</label>
+      )}
+    </>
+  );
+}
+
+function SurgeFeeTable({ surgeFees, canEdit, onEdit, onDelete }: any) {
+  const columns: ColumnDef<UpsSurgeFee>[] = [
+    { accessorKey: 'destination_country_code', header: '도착국', cell: ({ row }) => <ZenBadge variant="default" className="font-mono">{row.original.destination_country_code}</ZenBadge> },
+    { accessorKey: 'selling_rate_per_kg', header: '판매 단가 / kg', cell: ({ row }) => <span className="font-mono text-sm">{Number(row.original.selling_rate_per_kg).toLocaleString()} {row.original.currency}</span> },
+    { accessorKey: 'cost_rate_per_kg', header: '원가 단가 / kg', cell: ({ row }) => <span className="font-mono text-sm text-slate-500">{Number(row.original.cost_rate_per_kg).toLocaleString()} {row.original.currency}</span> },
+    { id: 'validity', header: '적용기간', cell: ({ row }) => <span className="text-xs font-mono text-slate-500">{row.original.effective_from} ~ {row.original.effective_until ?? '무기한'}</span> },
+    { id: 'status', header: '상태', cell: ({ row }) => <ZenBadge variant={row.original.is_active ? 'success' : 'default'}>{row.original.is_active ? '활성' : '비활성'}</ZenBadge> },
+    ...(canEdit ? [{ id: 'actions' as const, header: '관리', cell: ({ row }: any) => <ActionsCell row={row} onEdit={onEdit} onDelete={onDelete} /> }] : []),
+  ];
+  return <ZenDataGrid columns={columns} data={surgeFees} />;
 }

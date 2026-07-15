@@ -156,6 +156,18 @@ export async function estimateUpsFreight(input: EstimateUpsFreightInput): Promis
     (c) => requestedCodes.has(c.charge_code) || (input.otherChargeIds ?? []).includes(c.id)
   ) as UpsOtherCharge[];
 
+  // Issue #491: 급증 긴급 수수료(Surge Emergency Fee) — 도착국·기준일 기준 유효 단가 1건 조회
+  const { data: surgeFeeRows } = await supabase
+    .from('zen_ups_surge_fees')
+    .select('*')
+    .eq('destination_country_code', input.destCountryCode)
+    .eq('is_active', true)
+    .lte('effective_from', refDate)
+    .or(`effective_until.is.null,effective_until.gte.${refDate}`)
+    .order('effective_from', { ascending: false })
+    .limit(1);
+  const surgeFee = surgeFeeRows?.[0] ?? null;
+
   const platform = computeUpsFreight(
     {
       productId: input.productId,
@@ -175,6 +187,7 @@ export async function estimateUpsFreight(input: EstimateUpsFreightInput): Promis
       freightMinimum: freightMinimum as any,
       fuelSurcharge,
       otherCharges: selectedOtherCharges,
+      surgeFee,
       oversizeCharge,
       fallbackApplied,
     }
@@ -226,7 +239,8 @@ export async function estimateUpsFreight(input: EstimateUpsFreightInput): Promis
     platform.baseSellingPrice,
     platform.fuelSurchargeSellingAmount,
     platform.otherChargesSellingTotal,
-    shipperDiscountRate
+    shipperDiscountRate,
+    platform.surgeFeeSellingAmount
   );
 
   return { platform, agency, shipper };
