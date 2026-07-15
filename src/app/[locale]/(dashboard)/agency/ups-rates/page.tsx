@@ -2,7 +2,7 @@ import { requireAuth, checkPermission } from '@/lib/auth/guards';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/utils/supabase/server';
 import { getUpsZones, getUpsProducts } from '@/app/actions/ups/rates';
-import { getPublicBaseRates, getPublicFuelSurcharges, getPublicOtherCharges, getPublicWeightTierRates, getPublicFreightMinimums } from '@/app/actions/ups/rates-public';
+import { getPublicBaseRates, getPublicFuelSurcharges, getPublicOtherCharges, getPublicWeightTierRates, getPublicFreightMinimums, getPublicSurgeFees } from '@/app/actions/ups/rates-public';
 import { getAgencyShippers } from '@/app/actions/agency/shippers';
 import { AgencyUpsRatesClient } from './agency-ups-rates-client';
 
@@ -11,7 +11,7 @@ export default async function AgencyUpsRatesPage() {
   if (!profile || !profile.org_id || !checkPermission(profile.role, '/agency')) redirect('/');
   const supabase = await createClient();
 
-  const [zones, products, baseRates, fuelSurcharges, otherCharges, weightTierRates, freightMinimums] = await Promise.all([
+  const [zones, products, baseRates, fuelSurcharges, otherCharges, weightTierRates, freightMinimums, surgeFees] = await Promise.all([
     getUpsZones(),
     getUpsProducts(),
     getPublicBaseRates(),
@@ -19,6 +19,7 @@ export default async function AgencyUpsRatesPage() {
     getPublicOtherCharges(),
     getPublicWeightTierRates(),
     getPublicFreightMinimums(),
+    getPublicSurgeFees(),
   ]);
 
   const { shippers } = await getAgencyShippers(profile.org_id);
@@ -41,6 +42,7 @@ export default async function AgencyUpsRatesPage() {
         baseRates={baseRates}
         fuelSurcharges={fuelSurcharges}
         otherCharges={otherCharges}
+        surgeFees={surgeFees}
         weightTierRates={weightTierRates}
         freightMinimums={freightMinimums}
         pricingPolicies={pricingPolicies ?? []}
