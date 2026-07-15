@@ -68,7 +68,7 @@
 
 | 항목 | 내용 |
 |:----|:----|
-| 코드 커밋 | `cafa91cf32a714c0758547d57c6f930e0b7d397c` |
+| 코드 커밋 | `cafa91cf32a714c0758547d57c6f930e0b7d397c` (1차), `e072bb7d7f27c8799aedbfea83356d81200d88a4` (2차 정정) |
 | 회귀 결과 | Vitest unit tests 353 PASS (`rtk npm run test tests/unit` 성공 확인) |
 | 빌드 | 빌드 성공 (Vitest checks passed) |
-| 특이사항 | 급증 수수료 도착국 US 요율 사전 등록 UAT 0c 단계 추가 및 요금 산식 합산 기대 결과 갱신, 금융 인보이스 PDF 내 SURGE_EMERGENCY 검증 로직 추가 |
+| 특이사항 | 급증 수수료 도착국 US 요율 사전 등록 UAT 0c 단계 추가 및 요금 산식 합산 기대 결과 갱신. UAT_19 인보이스 내의 미구현 SURGE_EMERGENCY 비용 항목 검증을 실제 구현된 FREIGHT 운임 합산 검증 및 rate_snapshots metadata 검증으로 정정 완료. |

@@ -63,13 +63,13 @@
 | 1 | /ko/orders/[id] | 상세 페이지에서 [인보이스 (UPS)] 다운로드 클릭 | — | 로컬 디바이스에 PDF 파일 다운로드 실행 | ☐ |
 | 2 | 로컬 다운로드 폴더 | 다운로드된 파일명 규칙 검증 | — | 파일명이 `UPS_INVOICE_[오더ID]_[날짜].pdf` 형태로 생성되어 매핑됨을 확인 (예: `UPS_INVOICE_7e12f3e8-8888-4444-9999-bbbbccccdddd_20260713.pdf` 등, 정규식 `/UPS_INVOICE_.+\.pdf/` 패스) | ☐ |
 | 3 | 로컬 PDF 리더 | PDF 문서 상세 내용 검증 | — | PDF 파일 내부의 표기 항목(송하인/수하인 정보, 패키지 상세 중량, 볼륨, 통관용 신고가액 등)이 DB 스냅샷 데이터와 일치하는지 확인 | ☐ |
-| 4 | /ko/finance/invoices | 발행된 금융 정산용 인보이스 PDF를 다운로드하여 수수료 반영 여부 검증 | — | 다운로드된 금융 인보이스 PDF 내 비용 청구 테이블(Charges)에 **급증 긴급 수수료(SURGE_EMERGENCY)** 라인이 부가요금 항목으로 분리되어 정상적으로 표출되고 단가와 금액이 일치하는지 검증 | ☐ |
+| 4 | /ko/finance/invoices | 발행된 금융 정산용 인보이스 PDF를 다운로드하여 운임 반영 여부 검증 | — | 다운로드된 금융 인보이스 PDF 내 비용 청구 테이블(Charges)의 **FREIGHT** 항목 총액이 [기본운임 × (1 - 0.10) + 유류할증료 + 급증 수수료]가 모두 올바르게 합산된 최종 Selling Price 금액과 일치하는지 검증 | ☐ |
 
 ### 합격 기준
 - [ ] 전 단계 ☑ 완료
 - [ ] 다운로드된 파일명 형식이 `/UPS_INVOICE_.+\.pdf/` 정규식 규격에 맞게 생성됨
 - [ ] 간이 통관 인보이스 PDF 내 기재 사양이 실제 오더 패키지와 정확히 1:1 일치함
-- [ ] 금융 정산 인보이스 PDF 내에 급증 긴급 수수료가 누락 없이 정상 반영되어 출력됨
+- [ ] 금융 정산 인보이스 PDF 내의 FREIGHT 운임 항목에 급증 긴급 수수료를 포함한 전체 최종 운임이 누락 없이 합산되어 정확히 출력됨
 - [ ] 500 에러 없음
 
 ### 예상 DB 결과값 (UAT §4 체크리스트)
@@ -78,6 +78,7 @@
 |:-----------|:----|:---------|
 | 패키지 정보 정합성 | `SELECT packing_unit, packing_count, gross_weight, volume, intl_ref_no FROM zen_order_packages WHERE order_id = '[오더ID]' ORDER BY created_at` | PDF 내 패키지 목록과 1:1 일치 (개수·중량·체적·송장번호) |
 | Selling Price 정합성 | `SELECT applied_unit_price, applied_currency, applied_rule FROM zen_order_rate_snapshots WHERE order_id = '[오더ID]'` | `applied_unit_price` = 간이 인보이스 PDF Selling Price 필드값과 일치 |
-| 급증 긴급 수수료 정산 데이터 정합성 | `SELECT cost_type, total_amount, currency FROM zen_order_costs WHERE order_id = '[오더ID]' AND cost_type = 'SURGE_EMERGENCY'` | `total_amount` = 금융 인보이스 PDF 내 급증 긴급 수수료 금액과 일치 |
+| 급증 긴급 수수료 정산 데이터 정합성 | `SELECT metadata->'shipper'->>'surgeFeeSellingAmount' FROM zen_order_rate_snapshots WHERE order_id = '[오더ID]'` | `10000.00` (또는 유류할증료가 적용된 경우 유류할증료 포함 계산값) |
+| FREIGHT 운임 정산 데이터 정합성 | `SELECT cost_type, total_amount, currency FROM zen_order_costs WHERE order_id = '[오더ID]' AND cost_type = 'FREIGHT'` | `total_amount` = 금융 인보이스 PDF 내 FREIGHT 항목 총액과 일치 |
 | 송하인/수하인 정합성 | `SELECT shipper_id, recipient_name, recipient_address, transport_mode, ups_product_code, incoterms FROM zen_orders WHERE id = '[오더ID]'` | PDF 내 송하인·수하인·출발지·도착지 정보와 일치 |
 | 통화 일치 | `SELECT currency FROM zen_orders WHERE id = '[오더ID]'` | PDF 금액 표기 통화와 일치 (예: `USD` 또는 `KRW`) |
