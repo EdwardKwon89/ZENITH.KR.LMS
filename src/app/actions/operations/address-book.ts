@@ -47,13 +47,25 @@ export async function createAddressBookEntry(input: AddressBookEntryInput) {
     : { user_id: profile.id, org_id: null };
 
   // upsert-by-name: 동일 owner scope + display_name으로 기존 행 조회 (중복 대응: order+limit)
-  const { data: existingRows } = await supabase
+  let existingQuery = supabase
     .from("zen_address_book")
     .select("id")
-    .eq("display_name", parsed.display_name)
-    .match(owner)
+    .eq("display_name", parsed.display_name);
+
+  if (profile.org_id) {
+    existingQuery = existingQuery.eq("org_id", profile.org_id).is("user_id", null);
+  } else {
+    existingQuery = existingQuery.eq("user_id", profile.id).is("org_id", null);
+  }
+
+  const { data: existingRows, error: lookupError } = await existingQuery
     .order("updated_at", { ascending: false })
     .limit(1);
+
+  if (lookupError) {
+    logger.error("[ADDRESS_BOOK] createAddressBookEntry (lookup) error:", lookupError);
+    throw new Error("Failed to check existing address book entry");
+  }
 
   const existing = existingRows && existingRows.length > 0 ? existingRows[0] : null;
 
@@ -97,13 +109,26 @@ export async function createAddressBookEntry(input: AddressBookEntryInput) {
       throw new Error("Failed to create address book entry");
     }
 
-    const { data: insertedRows } = await supabase
+    let insertQuery = supabase
       .from("zen_address_book")
       .select(ADDRESS_BOOK_SELECT)
-      .match(owner)
-      .eq("display_name", parsed.display_name)
+      .eq("display_name", parsed.display_name);
+
+    if (profile.org_id) {
+      insertQuery = insertQuery.eq("org_id", profile.org_id).is("user_id", null);
+    } else {
+      insertQuery = insertQuery.eq("user_id", profile.id).is("org_id", null);
+    }
+
+    const { data: insertedRows, error: insertLookupError } = await insertQuery
       .order("created_at", { ascending: false })
       .limit(1);
+
+    if (insertLookupError) {
+      logger.error("[ADDRESS_BOOK] createAddressBookEntry (insert lookup) error:", insertLookupError);
+      throw new Error("Failed to retrieve created address book entry");
+    }
+
     data = insertedRows && insertedRows.length > 0 ? insertedRows[0] : null;
   }
 
