@@ -29,4 +29,12 @@ describe('🏢 AGENCY 역할 RBAC 권한 검증 (TASK-139 / IMP-111)', () => {
   it('TC-P7-AGENCY-07: USER_ROLES에 AGENCY 키가 존재해야 함', () => {
     expect(USER_ROLES.AGENCY).toBe('AGENCY');
   });
+
+  it('TC-P7-AGENCY-08: AGENCY는 /warehouse에 접근 가능해야 함 (Issue #486)', () => {
+    expect(checkPermission(USER_ROLES.AGENCY, '/warehouse')).toBe(true);
+  });
+
+  it('TC-P7-AGENCY-09: AGENCY_SHIPPER는 /warehouse에 접근 불가', () => {
+    expect(checkPermission(USER_ROLES.AGENCY_SHIPPER, '/warehouse')).toBe(false);
+  });
 });
