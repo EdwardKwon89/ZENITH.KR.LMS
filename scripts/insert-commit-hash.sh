@@ -31,27 +31,34 @@ if [ -z "$HASH" ]; then
   exit 1
 fi
 
+# Cross-platform sed: write to temp file then rename (works on both BSD/macOS and GNU/Linux)
+do_sed() {
+  local expr="$1"
+  local file="$2"
+  sed "$expr" "$file" > "$file.tmp" && mv "$file.tmp" "$file"
+}
+
 # Try patterns in order
 if grep -qE '^- 코드 커밋: .*<PLACEHOLDER>' "$TASK_FILE"; then
-  sed -i '' "s/^- 코드 커밋: .*<PLACEHOLDER>.*/- 코드 커밋: \`$HASH\`/" "$TASK_FILE"
+  do_sed "s/^- 코드 커밋: .*<PLACEHOLDER>.*/- 코드 커밋: \`$HASH\`/" "$TASK_FILE"
   echo "Inserted $HASH into $TASK_FILE (pattern: 코드 커밋 <PLACEHOLDER>)"
   exit 0
 fi
 
 if grep -qE '^- 코드 커밋: .*TBD' "$TASK_FILE"; then
-  sed -i '' "s/^- 코드 커밋: .*TBD.*/- 코드 커밋: \`$HASH\`/" "$TASK_FILE"
+  do_sed "s/^- 코드 커밋: .*TBD.*/- 코드 커밋: \`$HASH\`/" "$TASK_FILE"
   echo "Inserted $HASH into $TASK_FILE (pattern: 코드 커밋 TBD)"
   exit 0
 fi
 
 if grep -qE '^- \`TBD\`' "$TASK_FILE"; then
-  sed -i '' "s/^- \`TBD\`/- \`$HASH\`/" "$TASK_FILE"
+  do_sed "s/^- \`TBD\`/- \`$HASH\`/" "$TASK_FILE"
   echo "Inserted $HASH into $TASK_FILE (pattern: \`TBD\`)"
   exit 0
 fi
 
 if grep -qE '^- .*<PLACEHOLDER>' "$TASK_FILE"; then
-  sed -i '' "s/<PLACEHOLDER>/$HASH/g" "$TASK_FILE"
+  do_sed "s/<PLACEHOLDER>/$HASH/g" "$TASK_FILE"
   echo "Inserted $HASH into $TASK_FILE (pattern: <PLACEHOLDER>)"
   exit 0
 fi
