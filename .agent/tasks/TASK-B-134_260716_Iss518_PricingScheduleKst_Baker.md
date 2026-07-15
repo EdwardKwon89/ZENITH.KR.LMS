@@ -12,9 +12,10 @@
 pricing-schedule-apply 배치의 날짜 계산을 UTC→KST로 변경 + Vercel Cron 스케줄 KST 자정에 맞춤
 
 ## 작업 결과
-- 코드 커밋: `cf801fdb`
+- 코드 커밋: `488ba4a6`
 - Build PASS · Regression 85/85 PASS (530 tests)
 - PR#519
+- 로컬 cron 트리거 검증: `{"success":true,"applied":1,"expired":0,"errors":[]}` (200 OK, 3.3s) — KST 기준 날짜 계산 정상 동작 확인
 
 ## 발견 이슈
 없음
