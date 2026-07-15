@@ -16,6 +16,7 @@ interface AddressBookEntry {
   city?: string | null;
   zipcode?: string | null;
   recipient_pccc?: string | null;
+  recipient_email?: string | null;
 }
 
 interface AddressBookSelectorProps {

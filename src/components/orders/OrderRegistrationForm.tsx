@@ -1065,6 +1065,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                             setValue('recipient_city', entry.city || '');
                             setValue('recipient_zipcode', entry.zipcode || '');
                             setValue('recipient_pccc', entry.recipient_pccc || '');
+                            setValue('recipient_email', entry.recipient_email || '');
                           }}
                         />
                       </div>

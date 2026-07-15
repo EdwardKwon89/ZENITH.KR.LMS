@@ -16,6 +16,7 @@ export const addressBookEntrySchema = z.object({
   city: z.string().optional(),
   zipcode: z.string().optional(),
   recipient_pccc: z.string().optional(),
+  recipient_email: z.string().email('Invalid email format').optional().or(z.literal('')),
   display_mode: z.enum(['EN', 'BILINGUAL']),
   is_default: z.boolean(),
 });
