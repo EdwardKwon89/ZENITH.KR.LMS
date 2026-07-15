@@ -8,6 +8,7 @@
 | B_Kai | task file 절차 미준수 | **2회** | TASK-018 재작업 | 할당 중단 기준(3회) 미달 |
 | Ring  | task file 절차 미준수 | **4회** | TASK-010 1·2차, TASK-012 1·2차 | ⚠️ 기준 초과 — 할당 중단 중 |
 | D_Kai | develop 직접 커밋 (R-17 브랜치 규칙 위반) | ⚠️ **2회** | TASK-169 (`8cfeda4`), TASK-182 (`ad6bf0c6`·`1b3edf5d`) | 2차 위반 — 할당 중단 기준(3회)까지 1회 남음. PR#275 반려(브랜치 미갱신) 직후 재작업 없이 동일 코드를 PR 없이 develop에 직접 push. `enforce_admins:false`로 branch protection 미적용, CI(PR Checks) 전혀 미실행 상태로 반영됨 — Aiden 긴급 로컬 검증(build ✅·tsc src/ 0 errors·vitest 475 PASS)으로 기능적 정합성만 사후 확인, 코드 자체는 되돌리지 않음 |
+| Riley | develop 직접 커밋 (R-17 §0 위반) + 공유 물리 디렉토리 교차오염 | **1회** | TASK-185 (`cafa91cf`·`81ec25f9`) | task file 자체는 `feature/teama-task-185-uat-surge-riley` 브랜치+PR 절차를 명시했으나, 실제로는 PR 없이 develop에 직접 커밋 2건 push. 또한 Aiden(Claude)이 동일 물리 디렉토리(`ZENITH_LMS_001`)에서 작업 중이던 미커밋 seed 마이그레이션 파일(`20260715140000_iss491_ups_surge_fees_seed.sql`)이 Riley의 첫 커밋(`cafa91cf`)에 그대로 혼입됨 — 내용 자체는 Aiden이 의도한 것과 완전히 동일해 기능적 피해는 없었으나, Team B에서 반복 지적된 "공유 workspace 브랜치/커밋 오염"(Issue #358, Mike PR#353·#367 사례)이 Team A·Gemini CLI 세션 간에도 동일하게 발생함을 확인. 원인 조사·재발 방지는 Edward 판단 필요 |
 | ~~Dave~~ | ~~develop 직접 커밋 (R-17 브랜치/PR 규칙 위반)~~ | ~~1회~~ | ~~TASK-B-043 (`84c103e`)~~ | **면제** (2026-07-04 JSJung 결정) — 초회 위반 특성 고려, 횟수 카운트 제외 |
 | ~~Dave~~ | ~~task file 미업데이트 (R-17 완료 보고 절차 위반)~~ | ~~1회~~ | ~~TASK-B-043 (`84c103e`)~~ | **면제** (2026-07-04 JSJung 결정) — 횟수 카운트 제외 |
 | ~~Baker~~ | ~~develop 직접 커밋 (R-17 브랜치/PR 규칙 위반)~~ | ~~1회~~ | ~~TASK-B-044 (`08dc986`)~~ | **면제** (2026-07-04 JSJung 결정) — 초회 위반 특성 고려, 횟수 카운트 제외 |

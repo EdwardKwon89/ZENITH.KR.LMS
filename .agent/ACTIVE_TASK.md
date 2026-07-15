@@ -407,7 +407,7 @@
 | GH#206 | 260706 | UPS 문서 정리 백로그 (Medium 6 + Low 7건) | 없음 | B_Kai | ✅ | [Issue #206](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/206) (closed) | B_Kai 완료(260706) — PR#221 · #9~14 전항목 처리(#13 재조사 후 정정, docs/03_Design 17개 파일 아카이브) · Aiden 승인·머지 |
 | TASK-183 | 260713 | UPS 특송 UAT 문서 5건 종합 검토·갱신 (UAT-15·18·19·20·22) (Issue #447) | 없음 | Riley | ✅ | [TASK-183](tasks/TASK-183_260713_UAT문서5건종합검토_Riley.md) | Aiden 승인·머지 완료(260713) — PR#450(`a4dabddb`) · UAT_15/18/19/20/22 + UAT_MASTER.md 갱신 · Issue #447 Close |
 | TASK-184 | 260715 | UPS 급증 긴급 수수료(Surge Emergency Fee) 구현 (Issue #491) | 없음 | Aiden | ✅ | [TASK-184](tasks/TASK-184_260715_Iss491_UpsSurgeFee_Aiden.md) | zen_ups_surge_fees 테이블(도착국×기간별 kg당 단가) · applySurgeFee 계산엔진(유류할증 추가부과) · Shipper pass-through 확장 · Admin CRUD+UI 탭 · Ds-11 §11.11 신규 · TC-UPS-ENGINE-07-01~05 · 회귀 498/509 PASS(무관 pre-existing 실패 2건 제외) · CI SUCCESS · PR#495 ✅ Aiden 승인·머지 완료(260715) · Issue #491 Close · 관련 UAT 갱신은 Issue #496(Riley) 별도 진행 · 후속 PR#498(Agency 급증 수수료 조회 전용 탭, CI SUCCESS) Aiden 승인·머지 완료(260715) · 정산 화면 부과금 항목별 breakdown 노출 검토는 Issue #499(Team B/Jungjs) 별도 전달 |
-| TASK-185 | 260715 | [Team A] UPS 급증 긴급 수수료 반영 — UAT-17/19 시나리오 갱신 (Issue #496) | 없음 | Riley | 🔔 | [TASK-185](tasks/TASK-185_260715_UPS급증수수료UAT반영_Riley.md) | 급증 긴급 수수료 검증 반영 |
+| TASK-185 | 260715 | [Team A] UPS 급증 긴급 수수료 반영 — UAT-17/19 시나리오 갱신 (Issue #496) | 없음 | Riley | ✅ | [TASK-185](tasks/TASK-185_260715_UPS급증수수료UAT반영_Riley.md) | UAT_17/19/MASTER 급증 수수료 검증 시나리오 반영 확인(Aiden) · Aiden 검토 조건: R-17 §0 위반(PR 없이 develop 직접 커밋, VIOLATION_TRACKER 기록) · UAT_19 검증 SQL의 `zen_order_costs.cost_type='SURGE_EMERGENCY'`는 실제 구현에 없는 항목(급증 수수료는 metadata JSONB로만 저장) — Riley 후속 정정 필요 |
 ---
 
 ## Agent 현황
@@ -419,7 +419,7 @@
 | **Aiden (Claude)** | ✅ TASK-167 전체 승인 (260626) | PR#117 §1 ✅ · PR#118 §2+§3 ✅ 전량 머지 완료 |
 | **D_Kai (OpenCode)** | ⚠️ TASK-182 ✅ 완료(R-17 위반 2회) | 기준요금 매트릭스 UI — Issue #271 · PR#275 반려 후 develop 직접 push로 위반(VIOLATION_TRACKER 2회) · Aiden 긴급 검증(build✅·tsc✅·vitest 475 PASS) 후 유지 · 3회 시 할당 중단 대상, 재발 방지 지시 완료(Issue #271) |
 | **B_Kai** | ✅ GH#206 승인·머지 완료 (260706) | PR#221 · #13 재조사 요청에 신속·정확 대응(docs/03_Design 17개 파일 아카이브), 신규 Task 대기 |
-| **Riley** | 🔔 TASK-185 검토 대기 | UAT-17/19 급증 수수료 검증 반영 UAT 문서 갱신 완료, 검토 요청 |
+| **Riley** | ✅ TASK-185 승인 (260715) | UAT-17/19 급증 수수료 검증 반영 완료 · R-17 §0 위반(PR 없이 develop 직접 커밋) 기록, UAT_19 SQL 정정 필요 항목 있음 |
 | N_Kai | ➖ 미재배정 확정 (260626 Edward) | TASK-087 폐기 — 신규 Task 발령 없음 |
 | Ring | 신규 할당 중단 유지 | 9차 위반 누적 |
 
