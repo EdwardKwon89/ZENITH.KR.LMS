@@ -1080,10 +1080,6 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                       <div>
                         <label className="text-[10px] font-bold text-slate-500 mb-1 block">PCCC</label>
                         <ZenInput placeholder="P1234..." {...register('recipient_pccc')} className="py-2 text-xs" />
-                      </div>
-                      <div>
-                        <label className="text-[10px] font-bold text-slate-500 mb-1 block">Email</label>
-                        <ZenInput placeholder="email@example.com" {...register('recipient_email')} error={!!errors.recipient_email} className="py-2 text-xs" />
                          <AddressInput
                             mode="rhf"
                             prefix="recipient"
@@ -1100,6 +1096,10 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                             }}
                             required
                           />
+                       </div>
+                       <div>
+                        <label className="text-[10px] font-bold text-slate-500 mb-1 block">Email</label>
+                        <ZenInput placeholder="email@example.com" {...register('recipient_email')} error={!!errors.recipient_email} className="py-2 text-xs" />
                        </div>
                      </div>
                    </div>
