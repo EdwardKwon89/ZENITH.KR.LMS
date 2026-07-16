@@ -67,20 +67,18 @@ export function AddressInput({
     if (defaultValues.zipcode !== undefined) setPostalCode(defaultValues.zipcode || '');
   }, [defaultValues.country_code, defaultValues.state_province, defaultValues.city, defaultValues.address, defaultValues.address_detail, defaultValues.zipcode]);
 
+  // 국가 변경 시 state 목록 갱신 (리셋은 onChange에서 처리 — Issue #530)
   useEffect(() => {
     if (countryCode && countryCode !== 'KR') {
       setStates(State.getStatesOfCountry(countryCode) ?? []);
-      setSelectedState('');
-      setSelectedCity('');
       setCities([]);
     }
   }, [countryCode]);
 
+  // 시/도 변경 시 city 목록 갱신 (리셋은 onChange에서 처리 — Issue #530)
   useEffect(() => {
     if (selectedState && countryCode !== 'KR') {
       setCities(City.getCitiesOfState(countryCode, selectedState) ?? []);
-      setSelectedCity('');
-      if (setValue && prefix) setValue(`${prefix}_city`, '');
     }
   }, [selectedState, countryCode]);
 
@@ -96,7 +94,13 @@ export function AddressInput({
           value={countryCode}
           onChange={(e) => {
             setCountryCode(e.target.value);
-            if (setValue && prefix) setValue(`${prefix}_country_code`, e.target.value);
+            setSelectedState('');
+            setSelectedCity('');
+            if (setValue && prefix) {
+              setValue(`${prefix}_country_code`, e.target.value);
+              setValue(`${prefix}_state_province`, '');
+              setValue(`${prefix}_city`, '');
+            }
           }}
           disabled={readOnly}
           className={`w-full h-10 px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${readOnly ? 'bg-slate-50' : ''}`}
@@ -170,7 +174,11 @@ export function AddressInput({
                 value={selectedState}
                 onChange={(e) => {
                   setSelectedState(e.target.value);
-                  if (setValue && prefix) setValue(`${prefix}_state_province`, e.target.value);
+                  setSelectedCity('');
+                  if (setValue && prefix) {
+                    setValue(`${prefix}_state_province`, e.target.value);
+                    setValue(`${prefix}_city`, '');
+                  }
                 }}
                 disabled={readOnly || !countryCode}
                 className={`w-full h-10 px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${readOnly ? 'bg-slate-50' : ''}`}
