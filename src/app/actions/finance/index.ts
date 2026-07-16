@@ -7,6 +7,7 @@ export {
   getRevenueReport,
   getCostReport,
   getOrganizations,
+  addManualOrderCost,
 } from './settlement';
 
 export {

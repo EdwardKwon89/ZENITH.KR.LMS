@@ -1,10 +1,17 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { SettlementEngine } from '@/lib/finance/settlement/settlement';
 import { createAdminClient } from '@/utils/supabase/server';
+import { validateUserAction } from '@/lib/auth/guards';
 
 // Mock Supabase Server Admin Client
 vi.mock('@/utils/supabase/server', () => ({
   createAdminClient: vi.fn(),
+  createClient: vi.fn(),
+}));
+
+vi.mock('@/lib/auth/guards', () => ({
+  validateUserAction: vi.fn(),
+  validateAdminAction: vi.fn(),
 }));
 
 // Mock logger
@@ -181,6 +188,153 @@ describe('SettlementEngine Route-Based Cost Integration (IMP-070)', () => {
       carrier: 'Zenith Ocean Line',
       segment_index: null
     }));
+  });
+
+  it('TC-UPS-1: [Success] UPS 오더 정산 시 cost_type별 4종 INSERT 확인 (BASE_FREIGHT/FUEL_SURCHARGE/SURGE_FEE/OTHER_CHARGE)', async () => {
+    const mockUpsOrder = {
+      id: mockOrderId,
+      order_no: 'UPS-2026-001',
+      shipper_id: 'shipper-uuid-222',
+      origin_port_id: null,
+      dest_port_id: null,
+      transport_mode: 'UPS',
+      packages: [{ gross_weight: 10, packing_count: 1 }]
+    };
+
+    const mockSnapshot = {
+      metadata: {
+        platform: {
+          baseSellingPrice: 50000,
+          fuelSurchargeSellingAmount: 5000,
+          surgeFeeSellingAmount: 3000,
+          otherChargesSellingTotal: 2000,
+          totalSellingPrice: 60000,
+          currency: 'KRW',
+        },
+        shipper: null,
+      },
+    };
+
+    const insertedCosts = [
+      { id: 'cost-1' }, { id: 'cost-2' }, { id: 'cost-3' }, { id: 'cost-4' },
+    ];
+
+    const snapshotChain = createQueryMock(mockSnapshot);
+    const orderCostsMock: any = {
+      select: vi.fn().mockReturnThis(),
+      insert: vi.fn().mockImplementation(() => ({ select: vi.fn().mockResolvedValue({ data: insertedCosts, error: null }) })),
+      delete: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      in: vi.fn().mockReturnThis(),
+    };
+
+    mockSupabase._tableMocks = {
+      zen_orders: createQueryMock(mockUpsOrder),
+      zen_order_rate_snapshots: snapshotChain,
+      zen_order_costs: orderCostsMock,
+    };
+
+    const engine = new SettlementEngine();
+    const result = await engine.calculateOrderCosts(mockOrderId);
+
+    expect(result.success).toBe(true);
+    expect(result.totalFreight).toBe(60000);
+    expect(orderCostsMock.insert).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({ cost_type: 'BASE_FREIGHT', unit_price: 50000 }),
+        expect.objectContaining({ cost_type: 'FUEL_SURCHARGE', unit_price: 5000 }),
+        expect.objectContaining({ cost_type: 'SURGE_FEE', unit_price: 3000 }),
+        expect.objectContaining({ cost_type: 'OTHER_CHARGE', unit_price: 2000 }),
+      ])
+    );
+  });
+
+  it('TC-UPS-2: [Fallback] non-UPS 오더는 기존 FREIGHT 단일 경로 유지 (회귀 없음)', async () => {
+    const existingCosts: any[] = [];
+    const insertedCost = { id: 'cost-freight', total_amount: 1500 };
+
+    const orderCostsMock: any = {
+      select: vi.fn().mockImplementation(() => {
+        if (orderCostsMock.insert.mock.calls.length > 0) {
+          return createQueryMock(insertedCost);
+        }
+        return createQueryMock(existingCosts);
+      }),
+      insert: vi.fn().mockReturnThis(),
+      delete: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      in: vi.fn().mockReturnThis(),
+    };
+    orderCostsMock.insert.mockReturnValue(orderCostsMock);
+    orderCostsMock.eq.mockReturnValue(orderCostsMock);
+
+    mockSupabase._tableMocks = {
+      zen_orders: createQueryMock(mockOrder),
+      zen_order_routes: createQueryMock(null),
+      zen_rate_cards: createQueryMock(mockRateCard),
+      zen_order_costs: orderCostsMock,
+      zen_system_params: createQueryMock(null, { code: 'PGRST116', message: 'Not found' }),
+      zen_transport_pricing_policies: createQueryMock(null),
+    };
+
+    const engine = new SettlementEngine();
+    const result = await engine.calculateOrderCosts(mockOrderId);
+
+    expect(result.success).toBe(true);
+    expect(orderCostsMock.insert).toHaveBeenCalledWith(expect.objectContaining({
+      cost_type: 'FREIGHT'
+    }));
+  });
+
+  it('TC-UPS-3: [Failure] 스냅샷 없는 UPS 오더는 명확한 에러 반환', async () => {
+    const mockUpsOrder = {
+      id: mockOrderId,
+      order_no: 'UPS-NO-SNAP',
+      shipper_id: 'shipper-uuid-222',
+      transport_mode: 'UPS',
+      packages: [{ gross_weight: 10, packing_count: 1 }]
+    };
+
+    const snapshotChain = createQueryMock(null);
+
+    mockSupabase._tableMocks = {
+      zen_orders: createQueryMock(mockUpsOrder),
+      zen_order_rate_snapshots: snapshotChain,
+    };
+
+    const engine = new SettlementEngine();
+    const result = await engine.calculateOrderCosts(mockOrderId);
+
+    expect(result.success).toBe(false);
+    expect(result.message).toContain('예상운임 스냅샷이 없습니다');
+  });
+
+  it('TC-UPS-4: [Failure] 확정된 인보이스가 있는 오더에 INSERT 시도 시 차단', async () => {
+    // Mock validateUserAction to return our control supabase + admin profile
+    const mockProfile = { role: 'ADMIN', org_id: 'admin-org-id' };
+    vi.mocked(validateUserAction).mockResolvedValue({
+      supabase: mockSupabase,
+      profile: mockProfile,
+      user: { id: 'admin-user-id' },
+    });
+
+    const { addManualOrderCost } = await import('@/app/actions/finance/settlement');
+
+    const orderCostsQuery: any = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      not: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockResolvedValue({ data: [{ id: 'invoiced-cost', invoice_id: 'inv-1' }], error: null }),
+      insert: vi.fn(),
+    };
+
+    mockSupabase._tableMocks = {
+      zen_order_costs: orderCostsQuery,
+      zen_orders: createQueryMock({ id: mockOrderId }),
+    };
+
+    await expect(addManualOrderCost(mockOrderId, 'Test Fee', 10000, 'KRW'))
+      .rejects.toThrow('이미 확정된 청구서가 있어');
   });
 
   it('TC-F-ROUTE-3: [Multi-Carrier] 다중 carrier 경로일 경우 세그먼트별 분할하여 복수의 비용 레코드가 생성되어야 함', async () => {
