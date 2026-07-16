@@ -15,6 +15,7 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
+| [#543](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/543) | [Critical] UPS 오더 등록 전면 실패 — ups_product_code에 UUID 저장 시도로 VARCHAR(20) 초과 | b | p1 | - | 미배정 | 2026-07-16 |
 | [#539](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/539) | [fix] AddressBookClient.tsx — 주소록 관리 화면에 state_province/city/zipcode/address_detail/pccc 필드 누락 | b | p2 | - | 미배정 | 2026-07-16 |
 | [#534](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/534) | [fix] UPS 급증 긴급 수수료(zen_ups_surge_fees) 국가코드 alpha-3/alpha-2 불일치로 전체 미적용 | b | p1 | - | 미배정 | 2026-07-16 |
 | [#532](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/532) | [fix] handleConfirmSaveAddressBook — recipient_email 누락으로 주소록 저장 시 이메일 유실 | b | p2 | - | 미배정 | 2026-07-16 |
