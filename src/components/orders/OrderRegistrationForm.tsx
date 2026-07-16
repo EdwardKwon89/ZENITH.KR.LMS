@@ -334,6 +334,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
     const addressDetail = watch('recipient_address_detail') || '';
     const addressLocal = watch('recipient_address_local') || '';
     const phone = watch('recipient_phone') || '';
+    const email = watch('recipient_email') || undefined;
     const countryCode = watch('recipient_country_code') || undefined;
     const stateProvince = watch('recipient_state_province') || undefined;
     const city = watch('recipient_city') || undefined;
@@ -348,6 +349,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
         recipient_address_detail: addressDetail || undefined,
         recipient_address_local: addressLocal || undefined,
         recipient_phone: phone || undefined,
+        recipient_email: email,
         country_code: countryCode,
         state_province: stateProvince,
         city: city,
