@@ -6,7 +6,7 @@ import { SettlementEngine, InvoiceGenerator } from '@/lib/finance/settlement';
 import { revalidatePath } from 'next/cache';
 import { validateUserAction, validateAdminAction } from '@/lib/auth/guards';
 import { FinanceRepository } from '@/lib/repositories';
-import { USER_ROLES } from '@/lib/auth/rbac';
+import { UserRole, USER_ROLES } from '@/lib/auth/rbac';
 
 export async function generateInvoicesForOrder(orderId: string) {
   await validateUserAction();
@@ -206,6 +206,83 @@ export async function getCostReport(filters: {
     items: data || [],
     summary: { totalCost }
   };
+}
+
+async function resolveAgencyShipperIds(supabase: any, agencyOrgId: string): Promise<string[]> {
+  const { data } = await supabase
+    .from('zen_agency_shippers')
+    .select('shipper_org_id')
+    .eq('agency_org_id', agencyOrgId)
+    .eq('is_active', true);
+  return (data || []).map((r: any) => r.shipper_org_id);
+}
+
+export async function addManualOrderCost(
+  orderId: string,
+  costName: string,
+  amount: number,
+  currency: string,
+) {
+  logger.info(`[addManualOrderCost] orderId=${orderId}, costName=${costName}, amount=${amount}, currency=${currency}`);
+  const { supabase, profile } = await validateUserAction();
+  if (!profile) throw new Error('User profile not found');
+
+  if (!costName.trim()) throw new Error('비용 항목명을 입력해주세요.');
+  if (amount <= 0) throw new Error('금액은 0보다 커야 합니다.');
+  if (!currency) throw new Error('통화를 지정해주세요.');
+
+  // 권한 확인: AGENCY는 소속 화주 오더만, ADMIN/MANAGER는 전체
+  const isAdmin = [USER_ROLES.ADMIN, USER_ROLES.MANAGER, USER_ROLES.ZENITH_SUPER_ADMIN].includes(profile.role as UserRole);
+  if (!isAdmin && profile.role !== USER_ROLES.AGENCY) {
+    throw new Error('기타 부가운임을 추가할 권한이 없습니다.');
+  }
+
+  if (profile.role === USER_ROLES.AGENCY) {
+    const agencyShipperIds = await resolveAgencyShipperIds(supabase, profile.org_id!);
+    if (!agencyShipperIds) throw new Error('소속 화주 정보를 조회할 수 없습니다.');
+
+    const { data: order } = await supabase
+      .from('zen_orders')
+      .select('shipper_id')
+      .eq('id', orderId)
+      .single();
+
+    if (!order || !agencyShipperIds.includes(order.shipper_id)) {
+      throw new Error('소속 화주의 오더만 수정할 수 있습니다.');
+    }
+  }
+
+  // 인보이스 확정 여부 확인 (확정 후 INSERT 차단)
+  const { data: existingInvoiced } = await supabase
+    .from('zen_order_costs')
+    .select('id')
+    .eq('order_id', orderId)
+    .not('invoice_id', 'is', null)
+    .limit(1);
+
+  if (existingInvoiced && existingInvoiced.length > 0) {
+    throw new Error('이미 확정된 청구서가 있어 정산 항목을 추가할 수 없습니다.');
+  }
+
+  // currency 일치 확인은 Aiden 권고사항 — 오더 기준 통화 컬럼이 없어 넘어온 값 그대로 사용
+
+  const { error: insertError } = await supabase
+    .from('zen_order_costs')
+    .insert({
+      order_id: orderId,
+      cost_type: 'OTHER_CHARGE',
+      unit_price: amount,
+      quantity: 1,
+      currency,
+      is_revenue: true,
+    });
+
+  if (insertError) throw new Error(`부가운임 추가 실패: ${insertError.message}`);
+
+  revalidatePath(`/orders/${orderId}`);
+  revalidatePath(`/(dashboard)/orders/${orderId}`);
+
+  return { success: true };
 }
 
 export async function getOrganizations() {

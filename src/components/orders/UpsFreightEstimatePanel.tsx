@@ -75,6 +75,10 @@ export function UpsFreightEstimatePanel({ estimate, loading, error }: UpsFreight
           <span className="text-sm font-bold">{platform.currency}</span>
         </p>
       </div>
+
+      <p className="text-[10px] text-amber-600 italic leading-relaxed">
+        * 실제 청구 금액은 운송 과정에서 발생하는 추가 부가수수료에 따라 달라질 수 있습니다.
+      </p>
     </div>
   );
 }

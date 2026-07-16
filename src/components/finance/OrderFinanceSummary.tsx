@@ -11,7 +11,8 @@ import {
   ArrowRight,
   Download
 } from 'lucide-react';
-import { calculateSettlementAction, generateInvoiceAction, generateInvoicePdf } from '@/app/actions/finance';
+import { calculateSettlementAction, generateInvoiceAction, generateInvoicePdf, addManualOrderCost } from '@/app/actions/finance';
+import { getCostTypeLabel } from '@/lib/finance/settlement';
 import { toast } from 'sonner';
 import { useTranslations } from 'next-intl';
 
@@ -50,6 +51,10 @@ export default function OrderFinanceSummary({
   const [isCalculating, setIsCalculating] = useState(false);
   const [isInvoicing, setIsInvoicing] = useState(false);
   const [isPdfLoading, setIsPdfLoading] = useState(false);
+  const [manualCostName, setManualCostName] = useState('');
+  const [manualCostAmount, setManualCostAmount] = useState('');
+  const [manualCostCurrency, setManualCostCurrency] = useState('');
+  const [isAddingCost, setIsAddingCost] = useState(false);
 
   const totalEst = costs.reduce((sum, item) => sum + Number(item.total_amount), 0);
 
@@ -134,7 +139,7 @@ export default function OrderFinanceSummary({
           {costs.length > 0 ? (
             costs.map((item) => (
               <div key={item.id} className="flex justify-between items-center text-slate-400 text-sm">
-                <span className="capitalize">{item.cost_type.replace(/_/g, ' ')}</span>
+                <span>{getCostTypeLabel(item.cost_type)}</span>
                 <span className="text-white font-mono">
                   {item.currency} {Number(item.total_amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                 </span>
@@ -161,6 +166,60 @@ export default function OrderFinanceSummary({
                   </span>
                 </div>
               ))}
+            </div>
+          )}
+
+          {/* Manual Cost Input (not invoiced only) */}
+          {isAdmin && !invoice && (
+            <div className="pt-4 mt-4 border-t border-slate-700/50 space-y-3">
+              <p className="text-[10px] text-blue-400 font-bold uppercase tracking-widest">Add Manual Charge</p>
+              <div className="grid grid-cols-3 gap-2">
+                <input
+                  value={manualCostName}
+                  onChange={(e) => setManualCostName(e.target.value)}
+                  placeholder="Charge name"
+                  className="col-span-1 px-2 py-1.5 text-xs bg-slate-700/50 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                />
+                <input
+                  type="number"
+                  value={manualCostAmount}
+                  onChange={(e) => setManualCostAmount(e.target.value)}
+                  placeholder="Amount"
+                  className="px-2 py-1.5 text-xs bg-slate-700/50 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                />
+                <input
+                  value={manualCostCurrency}
+                  onChange={(e) => setManualCostCurrency(e.target.value)}
+                  placeholder="KRW"
+                  className="px-2 py-1.5 text-xs bg-slate-700/50 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                />
+              </div>
+              <button
+                onClick={async () => {
+                  if (!manualCostName || !manualCostAmount || !manualCostCurrency) return;
+                  setIsAddingCost(true);
+                  try {
+                    const result = await addManualOrderCost(orderId, manualCostName, Number(manualCostAmount), manualCostCurrency);
+                    if (result.success) {
+                      toast.success('Manual charge added');
+                      setManualCostName('');
+                      setManualCostAmount('');
+                      setManualCostCurrency('');
+                      // Refresh costs
+                      const refreshed = await calculateSettlementAction(orderId) as any;
+                      if (refreshed.success) setCosts(refreshed.costs || []);
+                    }
+                  } catch (e: any) {
+                    toast.error(e.message || 'Failed to add charge');
+                  } finally {
+                    setIsAddingCost(false);
+                  }
+                }}
+                disabled={isAddingCost || !manualCostName || !manualCostAmount || !manualCostCurrency}
+                className="w-full py-2 text-xs font-bold text-blue-400 hover:text-blue-300 border border-blue-500/30 rounded-xl disabled:opacity-30 transition-colors"
+              >
+                {isAddingCost ? 'Adding...' : 'Add Charge'}
+              </button>
             </div>
           )}
 
