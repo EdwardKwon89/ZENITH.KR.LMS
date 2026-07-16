@@ -215,7 +215,7 @@ export const getAgencyOrderSettlements = withAction(async function (
       id, order_no, shipper_id, created_at,
       shipper:shipper_id(name),
       packages:zen_order_packages(gross_weight, packing_count),
-      snapshot:zen_order_rate_snapshots(rate_card_id, applied_unit_price, carrier_cost_amount)
+      snapshot:zen_order_rate_snapshots(rate_card_id, applied_unit_price, carrier_cost_amount, metadata)
     `)
     .in('shipper_id', shipperIds)
     .gte('created_at', `${from}T00:00:00Z`)
@@ -237,6 +237,9 @@ export const getAgencyOrderSettlements = withAction(async function (
     const totalWeight = order.packages?.reduce((sum: number, p: any) => sum + Number(pkgWeight(p)), 0) || 0;
     const packagesCount = order.packages?.reduce((sum: number, p: any) => sum + (p.packing_count || 1), 0) || 0;
 
+    const meta = order.snapshot?.metadata as Record<string, any> | null;
+    const bd = meta?.platform?.breakdown ?? null;
+
     return {
       orderId: order.id,
       orderNo: order.order_no,
@@ -248,7 +251,13 @@ export const getAgencyOrderSettlements = withAction(async function (
       revenue,
       cost,
       margin,
-      marginRate: revenue > 0 ? (margin / revenue) * 100 : 0
+      marginRate: revenue > 0 ? (margin / revenue) * 100 : 0,
+      breakdown: bd ? {
+        baseSellingPrice: Number(bd.baseSellingPrice ?? 0),
+        fuelSurchargeSellingAmount: Number(bd.fuelSurchargeSellingAmount ?? 0),
+        otherChargesSellingTotal: Number(bd.otherChargesSellingTotal ?? 0),
+        surgeFeeSellingAmount: Number(bd.surgeFeeSellingAmount ?? 0),
+      } : null,
     };
   });
 });
@@ -305,7 +314,7 @@ async function _fetchOrders(supabase: any, shipperIds: string[], from: string, t
       id, order_no, shipper_id, created_at,
       shipper:shipper_id(name),
       packages:zen_order_packages(gross_weight, packing_count),
-      snapshot:zen_order_rate_snapshots(rate_card_id, applied_unit_price, carrier_cost_amount)
+      snapshot:zen_order_rate_snapshots(rate_card_id, applied_unit_price, carrier_cost_amount, metadata)
     `)
     .in('shipper_id', shipperIds)
     .gte('created_at', `${from}T00:00:00Z`)
