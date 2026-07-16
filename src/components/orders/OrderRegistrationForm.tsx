@@ -232,6 +232,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
       order_type: 'B2B',
       transport_mode: 'AIR',
       delivery_method: 'DIRECT',
+      incoterms: 'DDP',
       packages: [{ 
         packing_unit: 'BOX', 
         packing_count: 1, 
