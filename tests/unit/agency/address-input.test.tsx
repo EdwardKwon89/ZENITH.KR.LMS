@@ -36,16 +36,35 @@ vi.mock('country-state-city', () => ({
     ],
   },
   State: {
-    getStatesOfCountry: () => [
-      { isoCode: 'CA', name: 'California', countryCode: 'US' },
-      { isoCode: 'NY', name: 'New York', countryCode: 'US' },
-    ],
+    getStatesOfCountry: (countryCode: string) => {
+      if (countryCode === 'US') {
+        return [
+          { isoCode: 'CA', name: 'California', countryCode: 'US' },
+          { isoCode: 'NY', name: 'New York', countryCode: 'US' },
+        ];
+      }
+      if (countryCode === 'JP') {
+        return [{ isoCode: '02', name: 'Aomori', countryCode: 'JP' }];
+      }
+      return [];
+    },
   },
   City: {
-    getCitiesOfState: () => [
-      { name: 'Los Angeles', stateCode: 'CA', countryCode: 'US' },
-      { name: 'San Francisco', stateCode: 'CA', countryCode: 'US' },
-    ],
+    getCitiesOfState: (countryCode: string, stateCode: string) => {
+      if (countryCode === 'US' && stateCode === 'CA') {
+        return [
+          { name: 'Los Angeles', stateCode: 'CA', countryCode: 'US' },
+          { name: 'San Francisco', stateCode: 'CA', countryCode: 'US' },
+        ];
+      }
+      if (countryCode === 'US' && stateCode === 'NY') {
+        return [
+          { name: 'New York', stateCode: 'NY', countryCode: 'US' },
+          { name: 'Buffalo', stateCode: 'NY', countryCode: 'US' },
+        ];
+      }
+      return [];
+    },
   },
 }));
 
@@ -166,7 +185,7 @@ describe('TC-P7-UI-ADDR-03: defaultValues 갱신 시 state/city 보존 (Issue #5
     );
 
     // 직접 국가 변경 → 리셋되어야 함
-    const countrySelect = screen.getByRole('combobox');
+    const countrySelect = screen.getAllByRole('combobox')[0];
     fireEvent.change(countrySelect, { target: { value: 'JP' } });
 
     await waitFor(() => {
