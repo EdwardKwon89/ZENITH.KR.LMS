@@ -61,7 +61,7 @@ function toIso3(code2: string): string {
   return map[code2] ?? code2;
 }
 
-async function resolveShxkCode(
+export async function resolveShxkCode(
   supabase: SupabaseClient,
   productCode: string,
   countryCode: string,
@@ -238,8 +238,8 @@ export async function issueUpsLabel(
     if (!countryCode) return { success: false, error: 'Destination country code not found' };
 
     const iso3Code = toIso3(countryCode);
-    const shxkCode = await resolveShxkCode(supabase, order!.ups_product_code as string, iso3Code, order!.incoterms as string);
-    if (!shxkCode) return { success: false, error: `shipping method not found for product=${order!.ups_product_code}, country=${iso3Code}, incoterms=${order!.incoterms}` };
+    const shxkCode = await resolveShxkCode(supabase, order!.ups_product_code as string, 'KOR', order!.incoterms as string);
+    if (!shxkCode) return { success: false, error: `shipping method not found for product=${order!.ups_product_code}, country=KOR, incoterms=${order!.incoterms}` };
 
     const orderResult = await placeShxkOrder(packageId, shxkCode, order!, countryCode, pkg!, supabase);
     if ('error' in orderResult) return { success: false, error: orderResult.error };
