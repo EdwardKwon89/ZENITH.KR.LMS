@@ -178,6 +178,79 @@ describe('Agency Settlement Integration Tests (TC-P7-SETTLE-01~04)', () => {
     expect(mockShippersQuery.eq).not.toHaveBeenCalledWith('agency_org_id', '22222222-2222-4222-8222-222222222222');
   });
 
+  it('TC-B-BREAKDOWN-01: metadata 있는 오더 — breakdown 필드가 올바르게 파싱됨', async () => {
+    const ordersWithMetadata = [
+      {
+        id: '99999999-9999-4999-8999-999999999991',
+        order_no: 'ZN-2026001',
+        shipper_id: mockShipperAId,
+        created_at: '2026-06-05T12:00:00Z',
+        shipper: { name: 'Shipper A' },
+        packages: [{ gross_weight: 2.5, packing_count: 1 }],
+        snapshot: {
+          rate_card_id: '11111111-2222-4333-8444-555555555551',
+          applied_unit_price: 35000,
+          carrier_cost_amount: 28000,
+          metadata: {
+            platform: {
+              breakdown: {
+                baseSellingPrice: 20000,
+                fuelSurchargeSellingAmount: 3000,
+                otherChargesSellingTotal: 2000,
+                surgeFeeSellingAmount: 500,
+              }
+            }
+          }
+        }
+      }
+    ];
+
+    mockSupabase._tableMocks.zen_orders = createQueryMock(ordersWithMetadata);
+    (validateUserAction as any).mockResolvedValue({
+      profile: { id: '33333333-3333-4333-8333-333333333333', role: 'AGENCY', org_id: mockAgencyOrgId }
+    });
+
+    const result = await getAgencyOrderSettlements(mockAgencyOrgId, mockShipperAId, '2026-06-01', '2026-06-15');
+
+    expect(result.data).not.toBeNull();
+    expect(result.data?.length).toBe(1);
+    expect(result.data?.[0].breakdown).toEqual({
+      baseSellingPrice: 20000,
+      fuelSurchargeSellingAmount: 3000,
+      otherChargesSellingTotal: 2000,
+      surgeFeeSellingAmount: 500,
+    });
+  });
+
+  it('TC-B-BREAKDOWN-02: metadata 없는 오더 — breakdown 필드가 null', async () => {
+    const ordersWithoutMetadata = [
+      {
+        id: '99999999-9999-4999-8999-999999999992',
+        order_no: 'ZN-2026002',
+        shipper_id: mockShipperBId,
+        created_at: '2026-06-10T12:00:00Z',
+        shipper: { name: 'Shipper B' },
+        packages: [{ gross_weight: 5.0, packing_count: 2 }],
+        snapshot: {
+          rate_card_id: '11111111-2222-4333-8444-555555555552',
+          applied_unit_price: 50000,
+          carrier_cost_amount: 40000,
+        }
+      }
+    ];
+
+    mockSupabase._tableMocks.zen_orders = createQueryMock(ordersWithoutMetadata);
+    (validateUserAction as any).mockResolvedValue({
+      profile: { id: '33333333-3333-4333-8333-333333333333', role: 'AGENCY', org_id: mockAgencyOrgId }
+    });
+
+    const result = await getAgencyOrderSettlements(mockAgencyOrgId, mockShipperBId, '2026-06-01', '2026-06-15');
+
+    expect(result.data).not.toBeNull();
+    expect(result.data?.length).toBe(1);
+    expect(result.data?.[0].breakdown).toBeNull();
+  });
+
   it('TC-B-SEARCH-01: 오더번호 ILIKE 검색 — "ZN-2026" 입력 시 일치 오더만 반환', async () => {
     (validateUserAction as any).mockResolvedValue({
       profile: { id: '33333333-3333-4333-8333-333333333333', role: 'AGENCY', org_id: mockAgencyOrgId }
