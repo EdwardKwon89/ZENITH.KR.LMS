@@ -12,7 +12,7 @@ import {
   Download
 } from 'lucide-react';
 import { calculateSettlementAction, generateInvoiceAction, generateInvoicePdf, addManualOrderCost } from '@/app/actions/finance';
-import { getCostTypeLabel } from '@/lib/finance/settlement';
+import { getCostTypeLabel } from '@/lib/finance/settlement/cost-type-labels';
 import { toast } from 'sonner';
 import { useTranslations } from 'next-intl';
 
