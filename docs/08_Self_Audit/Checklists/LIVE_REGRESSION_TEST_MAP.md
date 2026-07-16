@@ -508,6 +508,7 @@
 | **TC-UPS-ENGINE-07-03** | 급증 수수료 totalSellingPrice/totalCostPrice 합산 | 총액 반영 확인 | `tests/unit/ups/pricing-engine.test.ts` |
 | **TC-UPS-ENGINE-07-04** | Shipper 단계 급증 수수료 pass-through(할인 미적용) | Issue #491 Shipper 공식 확장 확인 | `tests/unit/ups/pricing-engine.test.ts` |
 | **TC-UPS-ENGINE-07-05** | Shipper 단계 급증 수수료 미지정 시 기존 동작과 동일 | 하위 호환 확인 | `tests/unit/ups/pricing-engine.test.ts` |
+| **TC-ISS543-01** | UPS 서비스 티어 선택 유지 + product_code 문자열 저장 | 선택 유지 + UUID→코드 분리 검증 | `tests/unit/orders/ups-product-code-select.test.tsx` |
 
 ### 39. Phase 7.1 estimateUpsFreight 통합 Action (IMP-145)
 | ID | 테스트 항목 | 목적 | 파일 경로 |
