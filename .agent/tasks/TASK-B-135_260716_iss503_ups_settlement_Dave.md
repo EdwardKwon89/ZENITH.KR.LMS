@@ -27,10 +27,10 @@ Aiden 승인 완료 (2026-07-16 01:38). Jaison 작업 분배 완료.
 - **Task File Check**: ✅ PASS
 
 ### 커밋
-- `https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/513` — `[Dave] feat: TASK-B-135 Issue #503 — UPS 정산 파이프라인 B~F`
+- `00bf2641` — `[Dave] feat: TASK-B-135 Issue #503 — UPS 정산 파이프라인 B~F`
 
 ### PR
-- `https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/513`
+- https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/520
 
 ---
 
