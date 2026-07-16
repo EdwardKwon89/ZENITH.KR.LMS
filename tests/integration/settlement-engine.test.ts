@@ -5,6 +5,7 @@ import { createAdminClient } from '@/utils/supabase/server';
 // Mock Supabase Server Admin Client
 vi.mock('@/utils/supabase/server', () => ({
   createAdminClient: vi.fn(),
+  createClient: vi.fn(),
 }));
 
 // Mock logger
@@ -247,14 +248,19 @@ describe('SettlementEngine Route-Based Cost Integration (IMP-070)', () => {
     const insertedCost = { id: 'cost-freight', total_amount: 1500 };
 
     const orderCostsMock: any = {
-      select: vi.fn().mockImplementation(() => createQueryMock(existingCosts)),
-      insert: vi.fn().mockImplementation(() => ({ select: vi.fn().mockResolvedValue({ data: [insertedCost], error: null }) })),
+      select: vi.fn().mockImplementation(() => {
+        if (orderCostsMock.insert.mock.calls.length > 0) {
+          return createQueryMock(insertedCost);
+        }
+        return createQueryMock(existingCosts);
+      }),
+      insert: vi.fn().mockReturnThis(),
       delete: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
       in: vi.fn().mockReturnThis(),
     };
-
-    const pricingChain = createQueryMock(null);
+    orderCostsMock.insert.mockReturnValue(orderCostsMock);
+    orderCostsMock.eq.mockReturnValue(orderCostsMock);
 
     mockSupabase._tableMocks = {
       zen_orders: createQueryMock(mockOrder),
@@ -262,16 +268,16 @@ describe('SettlementEngine Route-Based Cost Integration (IMP-070)', () => {
       zen_rate_cards: createQueryMock(mockRateCard),
       zen_order_costs: orderCostsMock,
       zen_system_params: createQueryMock(null, { code: 'PGRST116', message: 'Not found' }),
-      zen_transport_pricing_policies: pricingChain,
+      zen_transport_pricing_policies: createQueryMock(null),
     };
 
     const engine = new SettlementEngine();
     const result = await engine.calculateOrderCosts(mockOrderId);
 
     expect(result.success).toBe(true);
-    expect(orderCostsMock.insert).toHaveBeenCalledWith(
-      expect.objectContaining({ cost_type: 'FREIGHT' })
-    );
+    expect(orderCostsMock.insert).toHaveBeenCalledWith(expect.objectContaining({
+      cost_type: 'FREIGHT'
+    }));
   });
 
   it('TC-UPS-3: [Failure] 스냅샷 없는 UPS 오더는 명확한 에러 반환', async () => {
