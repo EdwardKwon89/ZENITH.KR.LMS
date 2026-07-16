@@ -83,14 +83,14 @@ export async function resolveShxkCode(
   return data?.shxk_code ?? null;
 }
 
-function determineOrderCargotype(packages: Record<string, unknown>[]): { cargotype: string; mailCargoType: string } {
+export function determineOrderCargotype(packages: Record<string, unknown>[]): { cargotype: string; mailCargoType: string } {
   const allDoc = packages.every(p => (p.content_type as string) === 'DOC');
   return allDoc
     ? { cargotype: 'D', mailCargoType: '3' }
     : { cargotype: 'W', mailCargoType: '4' };
 }
 
-function buildCargovolume(packages: Record<string, unknown>[]): Record<string, unknown>[] {
+export function buildCargovolume(packages: Record<string, unknown>[]): Record<string, unknown>[] {
   return packages.map((pkg, idx) => ({
     child_number:       String(idx + 1),
     involume_length:    Number(pkg.length ?? 0),
@@ -100,7 +100,7 @@ function buildCargovolume(packages: Record<string, unknown>[]): Record<string, u
   }));
 }
 
-function buildInvoiceFromItems(packages: Record<string, unknown>[]): Record<string, unknown>[] {
+export function buildInvoiceFromItems(packages: Record<string, unknown>[]): Record<string, unknown>[] {
   const items: Record<string, unknown>[] = [];
   for (const pkg of packages) {
     const pkgItems = (pkg.items as any[]) || [];
