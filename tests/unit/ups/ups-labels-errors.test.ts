@@ -21,6 +21,17 @@ vi.mock('@/utils/supabase/server', () => ({
   createClient: vi.fn(),
 }));
 
+vi.mock('@/lib/shxk/config', () => ({
+  SHXK_SHIPPER_NAME: 'Test Shipper',
+  SHXK_SHIPPER_COUNTRY: 'KR',
+}));
+
+vi.mock('@/lib/ups/label-mapping', () => ({
+  determineOrderCargotype: vi.fn().mockReturnValue({ cargotype: 'W', mailCargoType: '4' }),
+  buildCargovolume: vi.fn().mockReturnValue([]),
+  buildInvoiceFromItems: vi.fn().mockReturnValue([{ invoice_enname: 'Test', invoice_quantity: '1', invoice_unitcharge: '1.00' }]),
+}));
+
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }));
 
 describe('Issue #553: SHXK response message handling', () => {
