@@ -1334,7 +1334,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                         packages={watchedPackages || []}
                         selectedProductId={watch('ups_product_code')}
                         selectedIncoterms={watch('incoterms')}
-                        onProductChange={(id) => setValue('ups_product_code', id)}
+                        onProductChange={(id, code) => setValue('ups_product_code', code)}
                         onIncotermsChange={(value) => setValue('incoterms', value)}
                         onEstimateChange={setUpsEstimate}
                       />
