@@ -16,7 +16,7 @@
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
 | [#547](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/547) | [fix] Incoterms 기본값(DDP)이 화면엔 보이지만 폼 상태엔 저장 안 됨 → NULL 저장 (Issue #545 분할 2/3) | b | p1 | - | 미배정 | 2026-07-16 |
-| [#546](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/546) | [fix] resolveShxkCode 목적지코드 조회 → 'KOR' 고정 (Issue #545 분할 1/3) | b | p1 | - | 미배정 | 2026-07-16 |
+| [#546](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/546) | [fix] resolveShxkCode 목적지코드 조회 → 'KOR' 고정 (Issue #545 분할 1/3) | b | p1 | review | 미배정 | 2026-07-16 |
 | [#545](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/545) | [Critical] SHXK 라벨발급 — 목적지코드 조회 버그 + Incoterms 미저장 + createorder 필드 매핑 전면 재정비 | b | p1 | - | 미배정 | 2026-07-16 |
 | [#543](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/543) | [Critical] UPS 오더 등록 전면 실패 — ups_product_code에 UUID 저장 시도로 VARCHAR(20) 초과 | b | p1 | - | 미배정 | 2026-07-16 |
 | [#539](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/539) | [fix] AddressBookClient.tsx — 주소록 관리 화면에 state_province/city/zipcode/address_detail/pccc 필드 누락 | b | p2 | - | 미배정 | 2026-07-16 |
