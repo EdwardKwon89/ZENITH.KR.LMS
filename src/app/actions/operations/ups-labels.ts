@@ -84,12 +84,16 @@ export async function resolveShxkCode(
   return data?.shxk_code ?? null;
 }
 
+function getShxkResponseMessage(orderRes: { success: number; message: string; data?: any }): string {
+  return orderRes.message || '';
+}
+
 async function placeShxkOrder(
   shxkCode: string,
   order: Record<string, unknown>,
   countryCode: string,
   packages: Record<string, unknown>[],
-): Promise<{ orderId: string; trackingNo: string | null; refrenceNo: string } | { error: string }> {
+): Promise<{ orderId: string; trackingNo: string | null; refrenceNo: string; message: string } | { error: string; message?: string }> {
   const { cargotype, mailCargoType } = determineOrderCargotype(packages);
   const cargovolume = buildCargovolume(packages);
   const invoice = buildInvoiceFromItems(packages);
@@ -136,15 +140,16 @@ async function placeShxkOrder(
     invoice,
   });
 
-  if (orderRes.success === 0) return { error: `createorder failed: ${orderRes.message}` };
+  if (orderRes.success === 0) return { error: `createorder failed: ${orderRes.message}`, message: orderRes.message };
   if (orderRes.success === 2 && !orderRes.data?.order_id) {
-    return { error: 'duplicate order but no existing order_id returned' };
+    return { error: 'duplicate order but no existing order_id returned', message: orderRes.message };
   }
 
   return {
     orderId: orderRes.data!.order_id,
     trackingNo: orderRes.data!.shipping_method_no ?? null,
     refrenceNo: orderRes.data!.refrence_no,
+    message: orderRes.message,
   };
 }
 
@@ -154,6 +159,7 @@ async function saveInitialLabel(
   referenceNo: string,
   trackingNumber: string | null,
   profileId: string,
+  responseMessage?: string,
 ): Promise<string | null> {
   const { error } = await supabase.from('zen_ups_labels').insert({
     order_id: orderId,
@@ -163,6 +169,7 @@ async function saveInitialLabel(
     label_format: 'PDF',
     storage_path: '',
     generated_by: profileId,
+    shxk_response_message: responseMessage || null,
   });
   return error?.message ?? null;
 }
@@ -242,10 +249,18 @@ export async function issueUpsLabel(
     if (!shxkCode) return { success: false, error: `shipping method not found for product=${order.ups_product_code}, country=KOR, incoterms=${order.incoterms}` };
 
     const orderResult = await placeShxkOrder(shxkCode, order!, countryCode, packages);
-    if ('error' in orderResult) return { success: false, error: orderResult.error };
+    if ('error' in orderResult) {
+      await supabase.from('zen_ups_label_errors').insert({
+        order_id: order.id as string,
+        shxk_code: shxkCode,
+        error_message: orderResult.message || orderResult.error,
+        attempted_by: profile!.id,
+      });
+      return { success: false, error: orderResult.error };
+    }
 
     const orderNo = order.order_no as string;
-    const insertErr = await saveInitialLabel(supabase, order.id as string, orderNo, orderResult.trackingNo, profile!.id);
+    const insertErr = await saveInitialLabel(supabase, order.id as string, orderNo, orderResult.trackingNo, profile!.id, orderResult.message);
     if (insertErr) return { success: false, error: `Failed to save label record: ${insertErr}` };
 
     const labelUrl = await fetchAndSaveLabel(supabase, orderNo);
