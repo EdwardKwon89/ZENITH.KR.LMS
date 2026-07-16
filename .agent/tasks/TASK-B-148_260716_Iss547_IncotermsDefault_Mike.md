@@ -20,7 +20,7 @@
 - **Regression**: 90/90 ALL PASS (552 tests)
 
 ### 커밋
-- 코드 커밋: `0adb60608c2c70355f4e5efffa656b5e2cf330ef`
+- 코드 커밋: `825cfc766bb862bdaa7f45912d58f4de36a129a1`
 
 ### 발견 이슈
-없음
+- incoterms IS NULL 오더 건수: 1건 (로컬 dev DB 기준, Jaison 조회)
