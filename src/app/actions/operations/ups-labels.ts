@@ -84,10 +84,6 @@ export async function resolveShxkCode(
   return data?.shxk_code ?? null;
 }
 
-function getShxkResponseMessage(orderRes: { success: number; message: string; data?: any }): string {
-  return orderRes.message || '';
-}
-
 async function placeShxkOrder(
   shxkCode: string,
   order: Record<string, unknown>,
