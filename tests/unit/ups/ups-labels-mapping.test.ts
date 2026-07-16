@@ -3,7 +3,7 @@ import {
   determineOrderCargotype,
   buildCargovolume,
   buildInvoiceFromItems,
-} from '@/app/actions/operations/ups-labels';
+} from '@/lib/ups/label-mapping';
 
 describe('UPS Labels Mapping Functions', () => {
   describe('determineOrderCargotype', () => {
