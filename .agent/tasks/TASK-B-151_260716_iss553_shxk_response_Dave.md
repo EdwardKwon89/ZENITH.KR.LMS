@@ -1,4 +1,4 @@
-# TASK-B-149: Issue #553 — SHXK createorder 응답메시지 저장
+# TASK-B-151: Issue #553 — SHXK createorder 응답메시지 저장
 
 **담당**: Dave
 **생성일**: 2026-07-16
