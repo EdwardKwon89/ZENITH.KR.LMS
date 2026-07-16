@@ -1474,3 +1474,15 @@
 - **예상 공수**: 0.5 MD
 - **우선순위**: Medium — 지금 당장 회귀를 놓치는 상태는 아니나(fix 코드 자체는 검증됨), 향후 이 영역을 다시 손대는 사람이 있다면 이 테스트가 실제 방어력을 제공하지 못함
 - **상태**: ⬜ 미착수
+
+## [IMP-138] `resolveShxkCode` KOR 고정 수정 후 `iso3Code` 변수 미사용 잔존
+
+- **발견 경위**: PR#548(Baker, TASK-B-147, Issue #546 — `resolveShxkCode` 목적지코드 조회를 `'KOR'` 고정으로 수정) 검토 중 Jaison이 격리 워크트리에서 `eslint` 실행 — `src/app/actions/operations/ups-labels.ts:240`의 `iso3Code` 변수가 `resolveShxkCode` 호출부에서 더 이상 쓰이지 않게 되어 `@typescript-eslint/no-unused-vars` warning 발생 확인(빌드/CI는 warning이라 통과함, 머지는 승인).
+- **현재 상태**: 미사용 변수가 코드에 남아있음. `placeShxkOrder` 호출에는 여전히 2-letter `countryCode`가 쓰이고 `iso3Code`는 아무 데도 참조되지 않음.
+- **임시 조치**: 없음 — warning 상태로 병합, 기능 영향 없음
+- **목표 구현**: `issueUpsLabel` 내 `const iso3Code = toIso3(countryCode);` 라인 삭제(또는 `toIso3` 호출 자체가 더 이상 필요없는지 확인 후 정리)
+- **관련 파일**: `src/app/actions/operations/ups-labels.ts`
+- **관련 Issue/PR**: Issue #546, PR#548
+- **예상 공수**: 0.1 MD
+- **우선순위**: Low — 기능 영향 없는 순수 코드 정리
+- **상태**: ⬜ 미착수
