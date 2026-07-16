@@ -437,6 +437,7 @@
 | **TC-P7-ADDR-05** | 기본 배송지 설정 및 자동 단일화 | 신규 지정 시 기존 기본배송지 자동 해제 검증 | `tests/unit/operations/address-book.test.ts` |
 | **TC-P7-ADDR-06** | org_id 기반 계정 주소록 CRUD (RLS) | AGENCY_SHIPPER 계정(org_id 있음) 주소록 등록·수정·삭제 — `zen_address_book_org_member_access` 정책 검증 | `tests/e2e/e2e-21-address-book.spec.ts` |
 | **TC-P7-ADDR-07** | createAddressBookEntry recipient_email 포함 | 주소록 저장 시 recipient_email이 payload에 정상 포함 검증 | `tests/unit/address-book/addressbook-email-create.test.ts` |
+| **TC-P7-ADDR-08** | AddressBookClient 화면 5개 필드 표시 | state_province/city/zipcode/address_detail/pccc가 카드에 정상 표시되는지 검증 | `tests/unit/address-book/AddressBookClient.test.tsx` |
 
 ### 32. Agency 정산 내역 엑셀 다운로드 (IMP-124)
 | ID | 테스트 항목 | 목적 | 파일 경로 |
