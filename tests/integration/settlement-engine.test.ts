@@ -1,11 +1,17 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { SettlementEngine } from '@/lib/finance/settlement/settlement';
 import { createAdminClient } from '@/utils/supabase/server';
+import { validateUserAction } from '@/lib/auth/guards';
 
 // Mock Supabase Server Admin Client
 vi.mock('@/utils/supabase/server', () => ({
   createAdminClient: vi.fn(),
   createClient: vi.fn(),
+}));
+
+vi.mock('@/lib/auth/guards', () => ({
+  validateUserAction: vi.fn(),
+  validateAdminAction: vi.fn(),
 }));
 
 // Mock logger
@@ -304,10 +310,14 @@ describe('SettlementEngine Route-Based Cost Integration (IMP-070)', () => {
   });
 
   it('TC-UPS-4: [Failure] 확정된 인보이스가 있는 오더에 INSERT 시도 시 차단', async () => {
-    // TC-UPS-4 validates app-level lock logic, not the guard mock.
-    // The addManualOrderCost function requires validateUserAction which
-    // is already mocked at the top of the test file.
-    // We verify the invoice check by mocking zen_order_costs to return an invoiced row.
+    // Mock validateUserAction to return our control supabase + admin profile
+    const mockProfile = { role: 'ADMIN', org_id: 'admin-org-id' };
+    vi.mocked(validateUserAction).mockResolvedValue({
+      supabase: mockSupabase,
+      profile: mockProfile,
+      user: { id: 'admin-user-id' },
+    });
+
     const { addManualOrderCost } = await import('@/app/actions/finance/settlement');
 
     const orderCostsQuery: any = {
