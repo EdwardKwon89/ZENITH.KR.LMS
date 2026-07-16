@@ -261,6 +261,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
   const [showAddressBookInput, setShowAddressBookInput] = React.useState(false);
   const [addressBookDisplayName, setAddressBookDisplayName] = React.useState('');
   const [upsEstimate, setUpsEstimate] = React.useState<UpsFreightEstimate | null>(null);
+  const [upsProductId, setUpsProductId] = React.useState<string | undefined>();
   const [hsLookupLoadingMap, setHsLookupLoadingMap] = React.useState<Record<string, boolean>>({});
   const [hsLookupResultMap, setHsLookupResultMap] = React.useState<Record<string, { hs_code: string; confidence: 'high' | 'medium' | 'low' } | null>>({});
 
@@ -1332,9 +1333,9 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                         shipperOrgId={affiliation?.orgId ?? null}
                         destCountryCode={watch('recipient_country_code') || undefined}
                         packages={watchedPackages || []}
-                        selectedProductId={watch('ups_product_code')}
+                        selectedProductId={upsProductId}
                         selectedIncoterms={watch('incoterms')}
-                        onProductChange={(id, code) => setValue('ups_product_code', code)}
+                        onProductChange={(id, code) => { setUpsProductId(id); setValue('ups_product_code', code); }}
                         onIncotermsChange={(value) => setValue('incoterms', value)}
                         onEstimateChange={setUpsEstimate}
                       />
