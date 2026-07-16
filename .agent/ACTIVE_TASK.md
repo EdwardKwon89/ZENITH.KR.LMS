@@ -15,6 +15,7 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
+| [#528](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/528) | [Critical] zen_ups_base_rates/weight_tier_rates/freight_minimums RLS — SHIPPER/AGENCY_SHIPPER 조회 불가로 UPS 운임조회 전면 실패 | b | p1 | - | 미배정 | 2026-07-16 |
 | [#526](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/526) | [Critical] zen_agency_shippers RLS 정책 누락 — SHIPPER/AGENCY_SHIPPER 역할은 소속 Agency 조회 불가 | b | p1 | - | 미배정 | 2026-07-16 |
 | [#523](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/523) | [Critical] zen_agency_shipper_zone_discounts RLS 정책 누락 — 화주 본인 조회/오더등록 시 할인율 미반영 | b | p1 | - | 미배정 | 2026-07-16 |
 | [#521](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/521) | [Aiden] 2026-07-16 임시 운영 방침 — Team B develop 복사 브랜치(integration/teamb-260716) 자체 개발·병합 허용 | b | p1 | - | jungjs | 2026-07-16 |
