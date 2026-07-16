@@ -15,6 +15,7 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
+| [#539](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/539) | [fix] AddressBookClient.tsx — 주소록 관리 화면에 state_province/city/zipcode/address_detail/pccc 필드 누락 | b | p2 | - | 미배정 | 2026-07-16 |
 | [#534](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/534) | [fix] UPS 급증 긴급 수수료(zen_ups_surge_fees) 국가코드 alpha-3/alpha-2 불일치로 전체 미적용 | b | p1 | - | 미배정 | 2026-07-16 |
 | [#532](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/532) | [fix] handleConfirmSaveAddressBook — recipient_email 누락으로 주소록 저장 시 이메일 유실 | b | p2 | - | 미배정 | 2026-07-16 |
 | [#530](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/530) | [Critical] AddressInput 컴포넌트 — 국가 변경 시 자동 리셋 로직이 주소록 적용값을 덮어씀 | b | p1 | - | 미배정 | 2026-07-16 |
