@@ -1,6 +1,7 @@
 // Pure mapping functions — no server-only imports. Safe for client components and tests.
 
 export function determineOrderCargotype(packages: Record<string, unknown>[]): { cargotype: string; mailCargoType: string } {
+  if (packages.length === 0) return { cargotype: 'W', mailCargoType: '4' };
   const allDoc = packages.every(p => (p.content_type as string) === 'DOC');
   return allDoc
     ? { cargotype: 'D', mailCargoType: '3' }
