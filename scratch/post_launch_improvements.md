@@ -1462,3 +1462,15 @@
 - **예상 공수**: 0.5 MD (divergence 체크 스크립트) ~ 1 MD (구조 개선까지 포함 시)
 - **우선순위**: **High** — 병합 판단 근거(CI PASS·mergeable)만으로는 이런 유형의 데이터 유실을 잡아낼 수 없음이 실제로 확인됨. 이번엔 Jaison이 병합 직후 수동 pull로 우연히 발견했으나, 매번 그렇게 확인한다는 보장이 없음
 - **상태**: ⬜ 미착수 (임시 조치만 적용 — 이번 건 자체는 복구 완료)
+
+## [IMP-137] `ups-product-code-select.test.tsx`가 `OrderRegistrationForm.tsx`를 실제로 거치지 않음
+
+- **발견 경위**: PR#544(Mike, Issue #543 — UPS 오더 등록 시 `ups_product_code`에 UUID가 저장되어 `VARCHAR(20)` 초과로 전면 실패하던 Critical 버그 수정) 검토 중, Jaison이 검증용으로 제공한 예시 테스트 코드를 Mike가 그대로 채택 — negative-control로 재확인하는 과정에서 이 테스트의 `Wrapper` 컴포넌트가 `OrderRegistrationForm.tsx`를 import하지 않고 올바른 배선(`upsProductId` 로컬 state 분리)을 테스트 파일 내부에서 자체적으로 재구현하고 있음을 발견 — `OrderRegistrationForm.tsx`의 실제 prop 배선을 원래 버그 상태로 되돌려도 이 테스트는 계속 PASS함.
+- **현재 상태**: 테스트 자체는 `UpsFreightEstimateSection`이 올바르게 배선됐을 때 정상 동작한다는 것은 검증하지만, `OrderRegistrationForm.tsx`가 실제로 그 올바른 배선을 유지하는지는 검증하지 않음. 실제 fix 코드는 Jaison이 diff로 직접 2회 재확인해 정확함을 확인했고, Critical 이슈 긴급성 때문에 이 상태로 병합함.
+- **임시 조치**: 없음(테스트는 그대로 두고 코드 리뷰로만 보완된 상태)
+- **목표 구현**: `tests/unit/orders/ups-product-code-select.test.tsx`를 `OrderRegistrationForm`을 실제로 렌더링(무거우면 최소 props로)하거나, "UPS 제품 선택 state + 핸들러" 로직을 `useUpsProductSelection()` 같은 커스텀 훅으로 추출해 컴포넌트와 테스트가 동일 로직을 공유하도록 리팩터링 검토(PR#533에서 `buildAddressBookPayload` 순수 함수로 추출한 것과 동일 패턴)
+- **관련 파일**: `tests/unit/orders/ups-product-code-select.test.tsx`, `src/components/orders/OrderRegistrationForm.tsx`, `src/components/orders/UpsFreightEstimateSection.tsx`
+- **관련 Issue/PR**: Issue #543, PR#544 (`c7682dff`)
+- **예상 공수**: 0.5 MD
+- **우선순위**: Medium — 지금 당장 회귀를 놓치는 상태는 아니나(fix 코드 자체는 검증됨), 향후 이 영역을 다시 손대는 사람이 있다면 이 테스트가 실제 방어력을 제공하지 못함
+- **상태**: ⬜ 미착수
