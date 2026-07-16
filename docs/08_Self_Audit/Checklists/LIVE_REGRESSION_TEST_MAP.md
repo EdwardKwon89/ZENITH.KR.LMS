@@ -560,6 +560,7 @@
 | **TC-P7-UI-SHIPPER-03** | 신규 등록 폼 초기 로드 시 grade 기본값 = BRONZE | 기본값 설정 | `tests/unit/agency/shipper-form-ui.test.tsx` |
 | **TC-P7-UI-ADDR-01** | 국가 KR/US/JP별 주소 검색 UI 분기 (popup→embed 전환) | 국가별 입력 필드 렌더링 + Kakao Postcode embed 모달 표시 검증 | `tests/unit/agency/address-input.test.tsx` |
 | **TC-P7-UI-ADDR-02** | 주소 검색 임베드 모달 내 주소 선택 시 roadAddress/zipcode 자동 반영 | DaumPostcodeEmbed onComplete 콜백 → roadAddress + zonecode 입력 + 모달 닫힘 검증 | `tests/unit/agency/address-input.test.tsx` |
+| **TC-P7-UI-ADDR-03** | defaultValues 갱신 시 state/city 보존 (Issue #530) | 국가/시도 변경 useEffect 리셋이 외부 defaultValues 동기화를 덮어쓰지 않는지 검증 | `tests/unit/agency/address-input.test.tsx` |
 
 ### 44. 화주 상세보기/편집 폼 UI (Issue #180 TASK-B-065)
 | ID | 테스트 항목 | 목적 | 파일 경로 |
