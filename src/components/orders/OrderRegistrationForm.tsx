@@ -208,6 +208,24 @@ const NestedItems: React.FC<{
   );
 };
 
+export const ORDER_REGISTRATION_DEFAULT_VALUES = {
+  order_type: 'B2B' as const,
+  transport_mode: 'AIR' as const,
+  delivery_method: 'DIRECT' as const,
+  incoterms: 'DDP' as const,
+  packages: [
+    {
+      packing_unit: 'BOX',
+      packing_count: 1,
+      gross_weight: 0,
+      special_cargo_type: 'NONE',
+      content_type: 'GENERAL',
+      domestic_ref_no: '',
+      items: [{ item_name: '', quantity: 1, unit_price: 0, currency: 'USD', item_packing_unit: 'EA' }],
+    },
+  ],
+};
+
 export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
   shippers,
   ports,
@@ -228,21 +246,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
     formState: { errors, isSubmitting } 
   } = useForm<OrderRegistrationInput>({
     resolver: zodResolver(orderRegistrationSchema) as any,
-    defaultValues: {
-      order_type: 'B2B',
-      transport_mode: 'AIR',
-      delivery_method: 'DIRECT',
-      incoterms: 'DDP',
-      packages: [{ 
-        packing_unit: 'BOX', 
-        packing_count: 1, 
-        gross_weight: 0,
-        special_cargo_type: 'NONE',
-        content_type: 'GENERAL',
-        domestic_ref_no: '',
-        items: [{ item_name: '', quantity: 1, unit_price: 0, currency: 'USD', item_packing_unit: 'EA' }] 
-      }]
-    }
+    defaultValues: ORDER_REGISTRATION_DEFAULT_VALUES as any,
   });
 
   const isAgencyShipper = affiliation?.role === USER_ROLES.AGENCY_SHIPPER;

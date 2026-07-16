@@ -1,51 +1,24 @@
 import { describe, it, expect } from 'vitest';
-import { orderRegistrationSchema } from '@/lib/validation/order';
+import { ORDER_REGISTRATION_DEFAULT_VALUES } from '@/components/orders/OrderRegistrationForm';
 
 // Issue #547: incoterms 기본값 DDP 검증
-// useForm defaultValues에 incoterms: 'DDP' 추가 후, 폼 제출 시 incoterms가 undefined가 아닌 'DDP'로 설정되는지 확인
+// OrderRegistrationForm.tsx에서 추출한 ORDER_REGISTRATION_DEFAULT_VALUES 상수를 직접 import
+//컴포넌트가 사용하는 동일한 defaultValues 객체를 검증
 
-describe('TC-INC-01: incoterms 기본값 DDP 검증', () => {
-  it('incoterms가 DDP로 전달되면 DDP로 저장된다', () => {
-    const result = orderRegistrationSchema.safeParse({
-      order_type: 'B2B',
-      shipper_id: '550e8400-e29b-41d4-a716-446655440001',
-      recipient_name: '홍길동',
-      recipient_address: '서울시 강남구',
-      recipient_phone: '010-1234-5678',
-      transport_mode: 'UPS',
-      incoterms: 'DDP',
-      packages: [{
-        packing_unit: 'BOX',
-        packing_count: 1,
-        gross_weight: 10,
-        items: [{ item_name: '테스트', quantity: 1, unit_price: 100, currency: 'USD', item_packing_unit: 'EA' }],
-      }],
-    });
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.incoterms).toBe('DDP');
-    }
+describe('TC-INC-01: OrderRegistrationForm defaultValues.incoterms', () => {
+  it('폼 초기값에 incoterms가 DDP로 설정되어 있다', () => {
+    expect(ORDER_REGISTRATION_DEFAULT_VALUES.incoterms).toBe('DDP');
   });
 
-  it('incoterms가 DDU로 전달되면 DDU로 저장된다', () => {
-    const result = orderRegistrationSchema.safeParse({
-      order_type: 'B2B',
-      shipper_id: '550e8400-e29b-41d4-a716-446655440001',
-      recipient_name: '홍길동',
-      recipient_address: '서울시 강남구',
-      recipient_phone: '010-1234-5678',
-      transport_mode: 'UPS',
-      incoterms: 'DDU',
-      packages: [{
-        packing_unit: 'BOX',
-        packing_count: 1,
-        gross_weight: 10,
-        items: [{ item_name: '테스트', quantity: 1, unit_price: 100, currency: 'USD', item_packing_unit: 'EA' }],
-      }],
-    });
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.incoterms).toBe('DDU');
-    }
+  it('폼 초기값에 order_type이 B2B로 설정되어 있다', () => {
+    expect(ORDER_REGISTRATION_DEFAULT_VALUES.order_type).toBe('B2B');
+  });
+
+  it('폼 초기값에 transport_mode가 AIR로 설정되어 있다', () => {
+    expect(ORDER_REGISTRATION_DEFAULT_VALUES.transport_mode).toBe('AIR');
+  });
+
+  it('폼 초기값에 delivery_method가 DIRECT로 설정되어 있다', () => {
+    expect(ORDER_REGISTRATION_DEFAULT_VALUES.delivery_method).toBe('DIRECT');
   });
 });
