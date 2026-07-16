@@ -6,7 +6,7 @@ import { SettlementEngine, InvoiceGenerator } from '@/lib/finance/settlement';
 import { revalidatePath } from 'next/cache';
 import { validateUserAction, validateAdminAction } from '@/lib/auth/guards';
 import { FinanceRepository } from '@/lib/repositories';
-import { UserRole, USER_ROLES } from '@/lib/auth/rbac';
+import { USER_ROLES } from '@/lib/auth/rbac';
 
 export async function generateInvoicesForOrder(orderId: string) {
   await validateUserAction();
@@ -232,7 +232,8 @@ export async function addManualOrderCost(
   if (!currency) throw new Error('통화를 지정해주세요.');
 
   // 권한 확인: AGENCY는 소속 화주 오더만, ADMIN/MANAGER는 전체
-  const isAdmin = [USER_ROLES.ADMIN, USER_ROLES.MANAGER, USER_ROLES.ZENITH_SUPER_ADMIN].includes(profile.role as UserRole);
+  const adminRoles: string[] = [USER_ROLES.ADMIN, USER_ROLES.MANAGER, USER_ROLES.ZENITH_SUPER_ADMIN];
+  const isAdmin = adminRoles.includes(profile.role as string);
   if (!isAdmin && profile.role !== USER_ROLES.AGENCY) {
     throw new Error('기타 부가운임을 추가할 권한이 없습니다.');
   }
