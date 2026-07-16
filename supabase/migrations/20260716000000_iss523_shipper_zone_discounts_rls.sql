@@ -7,6 +7,6 @@
 CREATE POLICY "shipper_zone_discounts_shipper_select" ON public.zen_agency_shipper_zone_discounts
   FOR SELECT TO authenticated
   USING (
-    (auth.jwt() -> 'app_metadata' ->> 'role') IN ('SHIPPER', 'AGENCY_SHIPPER')
+    (auth.jwt() -> 'app_metadata' ->> 'role') IN ('SHIPPER', 'AGENCY_SHIPPER', 'CORPORATE', 'INDIVIDUAL')
     AND shipper_org_id = (auth.jwt() -> 'app_metadata' ->> 'org_id')::uuid
   );
