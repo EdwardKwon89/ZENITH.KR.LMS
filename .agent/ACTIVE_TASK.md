@@ -15,10 +15,11 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
+| [#526](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/526) | [Critical] zen_agency_shippers RLS 정책 누락 — SHIPPER/AGENCY_SHIPPER 역할은 소속 Agency 조회 불가 | b | p1 | - | 미배정 | 2026-07-16 |
 | [#523](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/523) | [Critical] zen_agency_shipper_zone_discounts RLS 정책 누락 — 화주 본인 조회/오더등록 시 할인율 미반영 | b | p1 | - | 미배정 | 2026-07-16 |
 | [#521](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/521) | [Aiden] 2026-07-16 임시 운영 방침 — Team B develop 복사 브랜치(integration/teamb-260716) 자체 개발·병합 허용 | b | p1 | - | jungjs | 2026-07-16 |
 | [#503](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/503) | [Critical] UPS 운임 구성-최종청구서 파이프라인 단절 + 기타 부가운임(실부과분) 입력 기능 부재 | b | p1 | - | 미배정 | 2026-07-16 |
-| [#499](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/499) | [design] Agency 정산 화면 — 부과금 항목별(기본운임·유류할증·기타·급증수수료) breakdown 노출 검토 | b | p3 | - | jungjs | 2026-07-15 |
+| [#499](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/499) | [design] Agency 정산 화면 — 부과금 항목별(기본운임·유류할증·기타·급증수수료) breakdown 노출 검토 | b | p3 | - | jungjs | 2026-07-16 |
 | [#473](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/473) | [Team B] 검증 절차 방침 변경 — 라이브 브라우저/DB 검증은 병합 후 JSJung이 수행 | b | - | - | 미배정 | 2026-07-14 |
 | [#358](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/358) | [Aiden] R-17 절차 오류 재발 방지 — 4단계 구조적 개선 (채번 자동화·회귀결과 신뢰 제거·CI 게이트·워크트리 격리) | a | p2 | - | jungjs | 2026-07-14 |
 | [#164](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/164) | [UAT-Epic] UPS 특송 서비스 — Team B 인수 테스트 (UAT-15~19) | b | p1 | open | jungjs | 2026-07-07 |
