@@ -20,6 +20,11 @@ interface AddressBookEntry {
   recipient_address_local?: string | null;
   recipient_phone?: string | null;
   recipient_email?: string | null;
+  recipient_address_detail?: string | null;
+  state_province?: string | null;
+  city?: string | null;
+  zipcode?: string | null;
+  recipient_pccc?: string | null;
   country_code?: string | null;
   display_mode: 'EN' | 'BILINGUAL';
   is_default: boolean;
@@ -75,6 +80,11 @@ export default function AddressBookClient({ initialEntries }: AddressBookClientP
       recipient_name: entry.recipient_name,
       recipient_address: entry.recipient_address,
       recipient_address_local: entry.recipient_address_local || undefined,
+      recipient_address_detail: entry.recipient_address_detail || undefined,
+      state_province: entry.state_province || undefined,
+      city: entry.city || undefined,
+      zipcode: entry.zipcode || undefined,
+      recipient_pccc: entry.recipient_pccc || undefined,
       recipient_phone: entry.recipient_phone || undefined,
       recipient_email: entry.recipient_email || undefined,
       country_code: entry.country_code || undefined,
@@ -137,6 +147,26 @@ export default function AddressBookClient({ initialEntries }: AddressBookClientP
             placeholder="국가 코드"
             {...register('country_code')}
           />
+          <ZenInput
+            placeholder="시/도"
+            {...register('state_province')}
+          />
+          <ZenInput
+            placeholder="시/군/구"
+            {...register('city')}
+          />
+          <ZenInput
+            placeholder="상세주소"
+            {...register('recipient_address_detail')}
+          />
+          <ZenInput
+            placeholder="우편번호"
+            {...register('zipcode')}
+          />
+          <ZenInput
+            placeholder="개인통관고유부호"
+            {...register('recipient_pccc')}
+          />
           <select
             {...register('display_mode')}
             className="h-10 px-3 rounded-lg border border-slate-200 text-sm"
@@ -180,6 +210,20 @@ export default function AddressBookClient({ initialEntries }: AddressBookClientP
                 {entry.recipient_name} | {entry.recipient_phone || '-'}
               </div>
               <div className="text-sm text-slate-600">{entry.recipient_address}</div>
+              {entry.recipient_address_detail && (
+                <div className="text-sm text-slate-500">{entry.recipient_address_detail}</div>
+              )}
+              {(entry.state_province || entry.city) && (
+                <div className="text-sm text-slate-500">
+                  {[entry.state_province, entry.city].filter(Boolean).join(', ')}
+                </div>
+              )}
+              {entry.zipcode && (
+                <div className="text-sm text-slate-500">우편번호: {entry.zipcode}</div>
+              )}
+              {entry.recipient_pccc && (
+                <div className="text-sm text-slate-500">PCCC: {entry.recipient_pccc}</div>
+              )}
               {entry.recipient_address_local && (
                 <div className="text-sm text-slate-500">{entry.recipient_address_local}</div>
               )}
