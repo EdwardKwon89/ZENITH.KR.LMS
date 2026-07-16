@@ -17,7 +17,7 @@
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
 | [#554](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/554) | [feat] Agency·Shipper 영문주소 관리 + createorder 화주주소 영문 매핑 (Issue #551 분할 C) | b | p2 | - | 미배정 | 2026-07-16 |
 | [#553](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/553) | [feat] SHXK createorder 응답메시지 저장 기능 (Issue #551 분할 B) | b | p2 | - | 미배정 | 2026-07-16 |
-| [#552](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/552) | [fix] cargovolume child_number → 패키지 PK 사용 + consignee_province → 영문 full name (Issue #551 분할 A) | b | p2 | - | 미배정 | 2026-07-16 |
+| [#552](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/552) | [fix] cargovolume child_number → 패키지 PK 사용 + consignee_province → 영문 full name (Issue #551 분할 A) | b | p2 | review | 미배정 | 2026-07-16 |
 | [#551](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/551) | [design] createorder 매핑 개선 — child_number/consignee_province/응답메시지저장 + Agency·Shipper 영문주소 관리 | b | p2 | - | 미배정 | 2026-07-16 |
 | [#547](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/547) | [fix] Incoterms 기본값(DDP)이 화면엔 보이지만 폼 상태엔 저장 안 됨 → NULL 저장 (Issue #545 분할 2/3) | b | p1 | review | 미배정 | 2026-07-16 |
 | [#546](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/546) | [fix] resolveShxkCode 목적지코드 조회 → 'KOR' 고정 (Issue #545 분할 1/3) | b | p1 | review | 미배정 | 2026-07-16 |
