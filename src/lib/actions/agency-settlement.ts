@@ -82,7 +82,7 @@ export const getAgencySettlementSummary = withAction(async function (
 
   const { data: orders, error } = await supabase
     .from('zen_orders')
-      .select('id, snapshot:zen_order_rate_snapshots(rate_card_id, applied_unit_price, carrier_cost_amount, metadata)')
+    .select('id, snapshot:zen_order_rate_snapshots(rate_card_id, applied_unit_price, carrier_cost_amount)')
     .in('shipper_id', shipperIds)
     .gte('created_at', `${from}T00:00:00Z`)
     .lte('created_at', `${to}T23:59:59Z`);
@@ -131,7 +131,7 @@ export const getAgencyShipperSettlements = withAction(async function (
   const [ordersRes, baseData] = await Promise.all([
     supabase
       .from('zen_orders')
-      .select('id, shipper_id, shipper:shipper_id(name), snapshot:zen_order_rate_snapshots(rate_card_id, applied_unit_price, carrier_cost_amount, metadata)')
+      .select('id, shipper_id, shipper:shipper_id(name), snapshot:zen_order_rate_snapshots(rate_card_id, applied_unit_price, carrier_cost_amount)')
       .in('shipper_id', shipperIds)
       .gte('created_at', `${from}T00:00:00Z`)
       .lte('created_at', `${to}T23:59:59Z`),
