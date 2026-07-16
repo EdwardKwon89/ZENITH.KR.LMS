@@ -270,6 +270,10 @@ export function AddressInput({
                   setValue(`${prefix}_address`, data.roadAddress);
                   setValue(`${prefix}_zipcode`, data.zonecode);
                   setValue(`${prefix}_address_detail`, '');
+                  // 영문 도로명주소 캡처 (다음/카카오 API 자동 제공)
+                  if ((data as any).roadAddressEnglish) {
+                    setValue(`${prefix}_address_english`, (data as any).roadAddressEnglish);
+                  }
                 }
                 setDetailAddress('');
               }}
