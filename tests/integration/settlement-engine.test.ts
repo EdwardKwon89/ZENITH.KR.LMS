@@ -212,6 +212,7 @@ describe('SettlementEngine Route-Based Cost Integration (IMP-070)', () => {
       { id: 'cost-1' }, { id: 'cost-2' }, { id: 'cost-3' }, { id: 'cost-4' },
     ];
 
+    const snapshotChain = createQueryMock(mockSnapshot);
     const orderCostsMock: any = {
       select: vi.fn().mockReturnThis(),
       insert: vi.fn().mockImplementation(() => ({ select: vi.fn().mockResolvedValue({ data: insertedCosts, error: null }) })),
@@ -222,7 +223,7 @@ describe('SettlementEngine Route-Based Cost Integration (IMP-070)', () => {
 
     mockSupabase._tableMocks = {
       zen_orders: createQueryMock(mockUpsOrder),
-      zen_order_rate_snapshots: { maybeSingle: vi.fn().mockResolvedValue({ data: mockSnapshot, error: null }) },
+      zen_order_rate_snapshots: snapshotChain,
       zen_order_costs: orderCostsMock,
     };
 
@@ -253,20 +254,21 @@ describe('SettlementEngine Route-Based Cost Integration (IMP-070)', () => {
       in: vi.fn().mockReturnThis(),
     };
 
+    const pricingChain = createQueryMock(null);
+
     mockSupabase._tableMocks = {
       zen_orders: createQueryMock(mockOrder),
       zen_order_routes: createQueryMock(null),
       zen_rate_cards: createQueryMock(mockRateCard),
       zen_order_costs: orderCostsMock,
       zen_system_params: createQueryMock(null, { code: 'PGRST116', message: 'Not found' }),
-      zen_transport_pricing_policies: { maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }) },
+      zen_transport_pricing_policies: pricingChain,
     };
 
     const engine = new SettlementEngine();
     const result = await engine.calculateOrderCosts(mockOrderId);
 
     expect(result.success).toBe(true);
-    // non-UPS 오더는 FREIGHT 타입으로 저장
     expect(orderCostsMock.insert).toHaveBeenCalledWith(
       expect.objectContaining({ cost_type: 'FREIGHT' })
     );
@@ -281,9 +283,11 @@ describe('SettlementEngine Route-Based Cost Integration (IMP-070)', () => {
       packages: [{ gross_weight: 10, packing_count: 1 }]
     };
 
+    const snapshotChain = createQueryMock(null);
+
     mockSupabase._tableMocks = {
       zen_orders: createQueryMock(mockUpsOrder),
-      zen_order_rate_snapshots: { maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }) },
+      zen_order_rate_snapshots: snapshotChain,
     };
 
     const engine = new SettlementEngine();
@@ -294,32 +298,23 @@ describe('SettlementEngine Route-Based Cost Integration (IMP-070)', () => {
   });
 
   it('TC-UPS-4: [Failure] 확정된 인보이스가 있는 오더에 INSERT 시도 시 차단', async () => {
+    // TC-UPS-4 validates app-level lock logic, not the guard mock.
+    // The addManualOrderCost function requires validateUserAction which
+    // is already mocked at the top of the test file.
+    // We verify the invoice check by mocking zen_order_costs to return an invoiced row.
     const { addManualOrderCost } = await import('@/app/actions/finance/settlement');
-    const mockProfile = { role: 'ADMIN', org_id: 'admin-org' };
 
-    const mockValidateUserAction = vi.fn().mockResolvedValue({
-      supabase: mockSupabase,
-      profile: mockProfile,
-      user: { id: 'admin-user' },
-    });
-
-    vi.doMock('@/lib/auth/guards', () => ({
-      validateUserAction: mockValidateUserAction,
-      validateAdminAction: vi.fn(),
-    }));
-
-    const orderCostsMock: any = {
-      select: vi.fn().mockImplementation(() => ({
-        eq: vi.fn().mockReturnThis(),
-        not: vi.fn().mockReturnThis(),
-        limit: vi.fn().mockResolvedValue({ data: [{ id: 'invoiced-cost', invoice_id: 'inv-1' }], error: null }),
-      })),
+    const orderCostsQuery: any = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      not: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockResolvedValue({ data: [{ id: 'invoiced-cost', invoice_id: 'inv-1' }], error: null }),
       insert: vi.fn(),
     };
 
     mockSupabase._tableMocks = {
-      zen_order_costs: orderCostsMock,
-      zen_orders: { select: vi.fn().mockReturnThis(), eq: vi.fn().mockReturnThis(), single: vi.fn().mockResolvedValue({ data: { id: mockOrderId }, error: null }) },
+      zen_order_costs: orderCostsQuery,
+      zen_orders: createQueryMock({ id: mockOrderId }),
     };
 
     await expect(addManualOrderCost(mockOrderId, 'Test Fee', 10000, 'KRW'))
