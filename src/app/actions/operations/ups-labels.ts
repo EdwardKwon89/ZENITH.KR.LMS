@@ -8,7 +8,7 @@ import { createorder, getnewlabel, removeorder } from '@/lib/shxk/order';
 import {
   SHXK_SHIPPER_NAME, SHXK_SHIPPER_COUNTRY,
 } from '@/lib/shxk/config';
-import { determineOrderCargotype, buildCargovolume, buildInvoiceFromItems } from '@/lib/ups/label-mapping';
+import { determineOrderCargotype, buildCargovolume, buildInvoiceFromItems, resolveProvinceEnglishName } from '@/lib/ups/label-mapping';
 import { revalidatePath } from 'next/cache';
 
 export interface IssueUpsLabelResult {
@@ -125,7 +125,7 @@ async function placeShxkOrder(
     consignee: {
       consignee_name:        (order.recipient_name as string) || 'E2E Consignee',
       consignee_countrycode: (order.recipient_country_code as string) || countryCode,
-      consignee_province:    (order.recipient_state_province as string) || '',
+      consignee_province:    resolveProvinceEnglishName((order.recipient_state_province as string) || '', (order.recipient_country_code as string) || countryCode),
       consignee_city:        (order.recipient_city as string) || '',
       consignee_street:      fullConsigneeStreet,
       consignee_postcode:    (order.recipient_zipcode as string) || '',

@@ -1,5 +1,7 @@
 // Pure mapping functions — no server-only imports. Safe for client components and tests.
 
+import { State } from 'country-state-city';
+
 export function determineOrderCargotype(packages: Record<string, unknown>[]): { cargotype: string; mailCargoType: string } {
   if (packages.length === 0) return { cargotype: 'W', mailCargoType: '4' };
   const allDoc = packages.every(p => (p.content_type as string) === 'DOC');
@@ -9,8 +11,8 @@ export function determineOrderCargotype(packages: Record<string, unknown>[]): { 
 }
 
 export function buildCargovolume(packages: Record<string, unknown>[]): Record<string, unknown>[] {
-  return packages.map((pkg, idx) => ({
-    child_number:       String(idx + 1),
+  return packages.map((pkg) => ({
+    child_number:       String(pkg.id ?? ''),
     involume_length:    Number(pkg.length ?? 0),
     involume_width:     Number(pkg.width ?? 0),
     involume_height:    Number(pkg.height ?? 0),
@@ -33,4 +35,10 @@ export function buildInvoiceFromItems(packages: Record<string, unknown>[]): Reco
     }
   }
   return items.length > 0 ? items : [{ invoice_enname: 'General Merchandise', invoice_quantity: '1', invoice_unitcharge: '1.00' }];
+}
+
+export function resolveProvinceEnglishName(stateCode: string, countryCode: string): string {
+  if (!stateCode || !countryCode) return stateCode || '';
+  const state = State.getStateByCodeAndCountry(stateCode, countryCode);
+  return state?.name || stateCode;
 }
