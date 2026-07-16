@@ -120,15 +120,17 @@ export default function OutboundProcessForm({ locale }: { locale: string }) {
   };
 
   const issueLabelsForPackages = async (ordersToProcess: any[]): Promise<boolean> => {
-    const pkgsToIssue = ordersToProcess.flatMap((o: any) =>
-      (o.order_packages || []).filter((p: any) => !p.intl_ref_locked)
-    );
-    if (pkgsToIssue.length === 0) return true;
+    const orderIds = [...new Set(ordersToProcess.map((o: any) => o.id))];
+    const ordersNeedingLabels = orderIds.filter((oid: string) => {
+      const order = ordersToProcess.find((o: any) => o.id === oid);
+      return (order?.order_packages || []).some((p: any) => !p.intl_ref_locked);
+    });
+    if (ordersNeedingLabels.length === 0) return true;
 
     setIssuingLabels(true);
     let allSucceeded = true;
-    for (const pkg of pkgsToIssue) {
-      const res = await issueUpsLabel(pkg.id);
+    for (const orderId of ordersNeedingLabels) {
+      const res = await issueUpsLabel(orderId);
       if (!res.success) {
         allSucceeded = false;
       }
@@ -166,10 +168,10 @@ export default function OutboundProcessForm({ locale }: { locale: string }) {
     }
   };
 
-  const handleReissue = async (packageId: string) => {
+  const handleReissue = async (orderId: string) => {
     setIssuingLabels(true);
     try {
-      const res = await issueUpsLabel(packageId);
+      const res = await issueUpsLabel(orderId);
       if (res.success) {
         toast.success(t("ups_label_issued"));
         await fetchData();
@@ -187,10 +189,10 @@ export default function OutboundProcessForm({ locale }: { locale: string }) {
     await executeConfirmOutbound(pendingOrders);
   };
 
-  const handleVoidLabel = async (packageId: string) => {
+  const handleVoidLabel = async (orderId: string) => {
     setVoidLoading(true);
     try {
-      const res = await voidUpsLabel(packageId);
+      const res = await voidUpsLabel(orderId);
       if (res.success) {
         toast.success(t("ups_label_voided"));
         setVoidTarget(null);
@@ -537,10 +539,7 @@ export default function OutboundProcessForm({ locale }: { locale: string }) {
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                const targetPkg = pkgs.find((p: any) =>
-                                  (p.ups_labels || []).some((l: any) => !l.is_voided)
-                                );
-                                if (targetPkg) setVoidTarget(targetPkg.id);
+                                setVoidTarget(order.id);
                               }}
                               className="inline-flex items-center gap-1 px-2 py-1 text-[10px] font-semibold text-red-700 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors"
                             >
@@ -556,10 +555,7 @@ export default function OutboundProcessForm({ locale }: { locale: string }) {
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                const targetPkg = pkgs.find((p: any) =>
-                                  (p.ups_labels || []).some((l: any) => l.is_voided)
-                                );
-                                if (targetPkg) handleReissue(targetPkg.id);
+                                handleReissue(order.id);
                               }}
                               disabled={issuingLabels}
                               className="inline-flex items-center gap-1 px-2 py-1 text-[10px] font-semibold text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors disabled:opacity-50"

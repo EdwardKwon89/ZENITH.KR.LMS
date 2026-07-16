@@ -118,6 +118,7 @@ function buildInvoiceFromItems(packages: Record<string, unknown>[]): Record<stri
 }
 
 async function placeShxkOrder(
+  shxkCode: string,
   order: Record<string, unknown>,
   countryCode: string,
   packages: Record<string, unknown>[],
@@ -136,7 +137,7 @@ async function placeShxkOrder(
 
   const orderRes = await createorder({
     reference_no:    order.order_no as string,
-    shipping_method: '',
+    shipping_method: shxkCode,
     platform_id:     '',
     buyer_id:        '',
     order_status:    'P',
@@ -273,7 +274,7 @@ export async function issueUpsLabel(
     const shxkCode = await resolveShxkCode(supabase, order.ups_product_code as string, 'KOR', order.incoterms as string);
     if (!shxkCode) return { success: false, error: `shipping method not found for product=${order.ups_product_code}, country=KOR, incoterms=${order.incoterms}` };
 
-    const orderResult = await placeShxkOrder(order!, countryCode, packages);
+    const orderResult = await placeShxkOrder(shxkCode, order!, countryCode, packages);
     if ('error' in orderResult) return { success: false, error: orderResult.error };
 
     const orderNo = order.order_no as string;
