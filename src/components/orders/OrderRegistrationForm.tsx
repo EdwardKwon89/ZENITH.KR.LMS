@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useForm, useFieldArray, Control, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast, Toaster } from 'sonner';
+import { buildAddressBookPayload } from '@/lib/orders/build-address-book-payload';
 import { 
   Package, Plus, Trash2, Save, 
   ChevronRight, AlertCircle, CheckCircle2, Box, Layers, Plane, Ship, Zap, Truck, PackageCheck
@@ -329,35 +330,9 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
       toast.error('저장할 이름을 입력해주세요.');
       return;
     }
-    const name = watch('recipient_name');
-    const address = watch('recipient_address');
-    const addressDetail = watch('recipient_address_detail') || '';
-    const addressLocal = watch('recipient_address_local') || '';
-    const phone = watch('recipient_phone') || '';
-    const email = watch('recipient_email') || undefined;
-    const countryCode = watch('recipient_country_code') || undefined;
-    const stateProvince = watch('recipient_state_province') || undefined;
-    const city = watch('recipient_city') || undefined;
-    const zipcode = watch('recipient_zipcode') || undefined;
-    const pccc = watch('recipient_pccc') || undefined;
     setSavingToAddressBook(true);
     try {
-      await createAddressBookEntry({
-        display_name: displayName,
-        recipient_name: name,
-        recipient_address: address,
-        recipient_address_detail: addressDetail || undefined,
-        recipient_address_local: addressLocal || undefined,
-        recipient_phone: phone || undefined,
-        recipient_email: email,
-        country_code: countryCode,
-        state_province: stateProvince,
-        city: city,
-        zipcode: zipcode,
-        recipient_pccc: pccc,
-        display_mode: 'EN',
-        is_default: false,
-      });
+      await createAddressBookEntry(buildAddressBookPayload(watch, displayName));
       toast.success('주소록에 저장되었습니다.');
       setRefetchAddressBook(prev => prev + 1);
       setShowAddressBookInput(false);
