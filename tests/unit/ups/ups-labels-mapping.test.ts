@@ -3,6 +3,7 @@ import {
   determineOrderCargotype,
   buildCargovolume,
   buildInvoiceFromItems,
+  resolveProvinceEnglishName,
 } from '@/lib/ups/label-mapping';
 
 describe('UPS Labels Mapping Functions', () => {
@@ -36,20 +37,20 @@ describe('UPS Labels Mapping Functions', () => {
   });
 
   describe('buildCargovolume', () => {
-    it('maps package dimensions correctly', () => {
+    it('maps package dimensions correctly with pkg.id as child_number', () => {
       const pkgs = [
-        { length: 30, width: 20, height: 10, gross_weight: 5 },
-        { length: 40, width: 30, height: 20, gross_weight: 8 },
+        { id: 'pkg-uuid-001', length: 30, width: 20, height: 10, gross_weight: 5 },
+        { id: 'pkg-uuid-002', length: 40, width: 30, height: 20, gross_weight: 8 },
       ];
       const result = buildCargovolume(pkgs as any);
 
       expect(result).toHaveLength(2);
       expect(result[0]).toEqual({
-        child_number: '1', involume_length: 30, involume_width: 20,
+        child_number: 'pkg-uuid-001', involume_length: 30, involume_width: 20,
         involume_height: 10, involume_grossweight: 5,
       });
       expect(result[1]).toEqual({
-        child_number: '2', involume_length: 40, involume_width: 30,
+        child_number: 'pkg-uuid-002', involume_length: 40, involume_width: 30,
         involume_height: 20, involume_grossweight: 8,
       });
     });
@@ -58,10 +59,10 @@ describe('UPS Labels Mapping Functions', () => {
       expect(buildCargovolume([])).toEqual([]);
     });
 
-    it('defaults missing dimensions to 0', () => {
+    it('defaults missing dimensions to 0 and uses empty string for missing id', () => {
       const result = buildCargovolume([{}] as any);
       expect(result[0]).toEqual({
-        child_number: '1', involume_length: 0, involume_width: 0,
+        child_number: '', involume_length: 0, involume_width: 0,
         involume_height: 0, involume_grossweight: 0,
       });
     });
@@ -88,6 +89,38 @@ describe('UPS Labels Mapping Functions', () => {
     it('handles packages with no items field', () => {
       const result = buildInvoiceFromItems([{}] as any);
       expect(result).toEqual([{ invoice_enname: 'General Merchandise', invoice_quantity: '1', invoice_unitcharge: '1.00' }]);
+    });
+  });
+
+  describe('resolveProvinceEnglishName', () => {
+    it('일본 "28" → Hyōgo Prefecture 변환', () => {
+      const result = resolveProvinceEnglishName('28', 'JP');
+      expect(result).toBe('Hyōgo Prefecture');
+    });
+
+    it('일본 "13" → Tokyo 변환', () => {
+      const result = resolveProvinceEnglishName('13', 'JP');
+      expect(result).toBe('Tokyo');
+    });
+
+    it('미국 "CA" → California 변환', () => {
+      const result = resolveProvinceEnglishName('CA', 'US');
+      expect(result).toBe('California');
+    });
+
+    it('존재하지 않는 코드는 원래 코드값 폴백', () => {
+      const result = resolveProvinceEnglishName('ZZ', 'JP');
+      expect(result).toBe('ZZ');
+    });
+
+    it('빈 stateCode는 빈 문자열 반환', () => {
+      const result = resolveProvinceEnglishName('', 'JP');
+      expect(result).toBe('');
+    });
+
+    it('빈 countryCode는 stateCode 그대로 반환', () => {
+      const result = resolveProvinceEnglishName('28', '');
+      expect(result).toBe('28');
     });
   });
 });
