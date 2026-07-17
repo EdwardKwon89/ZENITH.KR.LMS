@@ -10,6 +10,8 @@ export interface CreateOrderRequest {
   order_weight?: number
   order_pieces?: number
   cargotype?: string
+  mail_cargo_type?: string
+  cargovolume?: Record<string, unknown>[]
   shipper?: Record<string, unknown>
   consignee?: Record<string, unknown>
   invoice?: Record<string, unknown>[]

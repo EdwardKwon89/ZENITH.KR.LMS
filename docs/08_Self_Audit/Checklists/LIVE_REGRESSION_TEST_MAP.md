@@ -436,6 +436,8 @@
 | **TC-P7-ADDR-04** | 주소록 항목 삭제 | 주소록 항목 삭제 시 DB 제거 검증 | `tests/unit/operations/address-book.test.ts` |
 | **TC-P7-ADDR-05** | 기본 배송지 설정 및 자동 단일화 | 신규 지정 시 기존 기본배송지 자동 해제 검증 | `tests/unit/operations/address-book.test.ts` |
 | **TC-P7-ADDR-06** | org_id 기반 계정 주소록 CRUD (RLS) | AGENCY_SHIPPER 계정(org_id 있음) 주소록 등록·수정·삭제 — `zen_address_book_org_member_access` 정책 검증 | `tests/e2e/e2e-21-address-book.spec.ts` |
+| **TC-P7-ADDR-07** | createAddressBookEntry recipient_email 포함 | 주소록 저장 시 recipient_email이 payload에 정상 포함 검증 | `tests/unit/address-book/addressbook-email-create.test.ts` |
+| **TC-P7-ADDR-08** | AddressBookClient 화면 5개 필드 표시 | state_province/city/zipcode/address_detail/pccc가 카드에 정상 표시되는지 검증 | `tests/unit/address-book/AddressBookClient.test.tsx` |
 
 ### 32. Agency 정산 내역 엑셀 다운로드 (IMP-124)
 | ID | 테스트 항목 | 목적 | 파일 경로 |
@@ -506,6 +508,7 @@
 | **TC-UPS-ENGINE-07-03** | 급증 수수료 totalSellingPrice/totalCostPrice 합산 | 총액 반영 확인 | `tests/unit/ups/pricing-engine.test.ts` |
 | **TC-UPS-ENGINE-07-04** | Shipper 단계 급증 수수료 pass-through(할인 미적용) | Issue #491 Shipper 공식 확장 확인 | `tests/unit/ups/pricing-engine.test.ts` |
 | **TC-UPS-ENGINE-07-05** | Shipper 단계 급증 수수료 미지정 시 기존 동작과 동일 | 하위 호환 확인 | `tests/unit/ups/pricing-engine.test.ts` |
+| **TC-ISS543-01** | UPS 서비스 티어 선택 유지 + product_code 문자열 저장 | 선택 유지 + UUID→코드 분리 검증 | `tests/unit/orders/ups-product-code-select.test.tsx` |
 
 ### 39. Phase 7.1 estimateUpsFreight 통합 Action (IMP-145)
 | ID | 테스트 항목 | 목적 | 파일 경로 |
@@ -560,6 +563,7 @@
 | **TC-P7-UI-SHIPPER-03** | 신규 등록 폼 초기 로드 시 grade 기본값 = BRONZE | 기본값 설정 | `tests/unit/agency/shipper-form-ui.test.tsx` |
 | **TC-P7-UI-ADDR-01** | 국가 KR/US/JP별 주소 검색 UI 분기 (popup→embed 전환) | 국가별 입력 필드 렌더링 + Kakao Postcode embed 모달 표시 검증 | `tests/unit/agency/address-input.test.tsx` |
 | **TC-P7-UI-ADDR-02** | 주소 검색 임베드 모달 내 주소 선택 시 roadAddress/zipcode 자동 반영 | DaumPostcodeEmbed onComplete 콜백 → roadAddress + zonecode 입력 + 모달 닫힘 검증 | `tests/unit/agency/address-input.test.tsx` |
+| **TC-P7-UI-ADDR-03** | defaultValues 갱신 시 state/city 보존 (Issue #530) | 국가/시도 변경 useEffect 리셋이 외부 defaultValues 동기화를 덮어쓰지 않는지 검증 | `tests/unit/agency/address-input.test.tsx` |
 
 ### 44. 화주 상세보기/편집 폼 UI (Issue #180 TASK-B-065)
 | ID | 테스트 항목 | 목적 | 파일 경로 |

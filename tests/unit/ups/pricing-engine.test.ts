@@ -328,7 +328,7 @@ describe('TC-UPS-ENGINE-06: calcMultiPackageChargeableWeight (Issue #476)', () =
 
 describe('TC-UPS-ENGINE-07: 급증 긴급 수수료(Surge Emergency Fee) 계산 (Issue #491)', () => {
   const surgeFee = {
-    id: 'sf1', destination_country_code: 'KOR', selling_rate_per_kg: 4722, cost_rate_per_kg: 3800,
+    id: 'sf1', destination_country_code: 'KR', selling_rate_per_kg: 4722, cost_rate_per_kg: 3800,
     currency: 'KRW', effective_from: '2026-05-24', effective_until: '2026-07-05', is_active: true,
     created_at: '', created_by: null,
   } as any;

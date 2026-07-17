@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useForm, useFieldArray, Control, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast, Toaster } from 'sonner';
+import { buildAddressBookPayload } from '@/lib/orders/build-address-book-payload';
 import { 
   Package, Plus, Trash2, Save, 
   ChevronRight, AlertCircle, CheckCircle2, Box, Layers, Plane, Ship, Zap, Truck, PackageCheck
@@ -207,6 +208,24 @@ const NestedItems: React.FC<{
   );
 };
 
+export const ORDER_REGISTRATION_DEFAULT_VALUES = {
+  order_type: 'B2B' as const,
+  transport_mode: 'AIR' as const,
+  delivery_method: 'DIRECT' as const,
+  incoterms: 'DDP' as const,
+  packages: [
+    {
+      packing_unit: 'BOX',
+      packing_count: 1,
+      gross_weight: 0,
+      special_cargo_type: 'NONE',
+      content_type: 'GENERAL',
+      domestic_ref_no: '',
+      items: [{ item_name: '', quantity: 1, unit_price: 0, currency: 'USD', item_packing_unit: 'EA' }],
+    },
+  ],
+};
+
 export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
   shippers,
   ports,
@@ -227,20 +246,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
     formState: { errors, isSubmitting } 
   } = useForm<OrderRegistrationInput>({
     resolver: zodResolver(orderRegistrationSchema) as any,
-    defaultValues: {
-      order_type: 'B2B',
-      transport_mode: 'AIR',
-      delivery_method: 'DIRECT',
-      packages: [{ 
-        packing_unit: 'BOX', 
-        packing_count: 1, 
-        gross_weight: 0,
-        special_cargo_type: 'NONE',
-        content_type: 'GENERAL',
-        domestic_ref_no: '',
-        items: [{ item_name: '', quantity: 1, unit_price: 0, currency: 'USD', item_packing_unit: 'EA' }] 
-      }]
-    }
+    defaultValues: ORDER_REGISTRATION_DEFAULT_VALUES as any,
   });
 
   const isAgencyShipper = affiliation?.role === USER_ROLES.AGENCY_SHIPPER;
@@ -260,6 +266,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
   const [showAddressBookInput, setShowAddressBookInput] = React.useState(false);
   const [addressBookDisplayName, setAddressBookDisplayName] = React.useState('');
   const [upsEstimate, setUpsEstimate] = React.useState<UpsFreightEstimate | null>(null);
+  const [upsProductId, setUpsProductId] = React.useState<string | undefined>();
   const [hsLookupLoadingMap, setHsLookupLoadingMap] = React.useState<Record<string, boolean>>({});
   const [hsLookupResultMap, setHsLookupResultMap] = React.useState<Record<string, { hs_code: string; confidence: 'high' | 'medium' | 'low' } | null>>({});
 
@@ -329,33 +336,9 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
       toast.error('저장할 이름을 입력해주세요.');
       return;
     }
-    const name = watch('recipient_name');
-    const address = watch('recipient_address');
-    const addressDetail = watch('recipient_address_detail') || '';
-    const addressLocal = watch('recipient_address_local') || '';
-    const phone = watch('recipient_phone') || '';
-    const countryCode = watch('recipient_country_code') || undefined;
-    const stateProvince = watch('recipient_state_province') || undefined;
-    const city = watch('recipient_city') || undefined;
-    const zipcode = watch('recipient_zipcode') || undefined;
-    const pccc = watch('recipient_pccc') || undefined;
     setSavingToAddressBook(true);
     try {
-      await createAddressBookEntry({
-        display_name: displayName,
-        recipient_name: name,
-        recipient_address: address,
-        recipient_address_detail: addressDetail || undefined,
-        recipient_address_local: addressLocal || undefined,
-        recipient_phone: phone || undefined,
-        country_code: countryCode,
-        state_province: stateProvince,
-        city: city,
-        zipcode: zipcode,
-        recipient_pccc: pccc,
-        display_mode: 'EN',
-        is_default: false,
-      });
+      await createAddressBookEntry(buildAddressBookPayload(watch, displayName));
       toast.success('주소록에 저장되었습니다.');
       setRefetchAddressBook(prev => prev + 1);
       setShowAddressBookInput(false);
@@ -1355,9 +1338,9 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                         shipperOrgId={affiliation?.orgId ?? null}
                         destCountryCode={watch('recipient_country_code') || undefined}
                         packages={watchedPackages || []}
-                        selectedProductId={watch('ups_product_code')}
+                        selectedProductId={upsProductId}
                         selectedIncoterms={watch('incoterms')}
-                        onProductChange={(id) => setValue('ups_product_code', id)}
+                        onProductChange={(id, code) => { setUpsProductId(id); setValue('ups_product_code', code); }}
                         onIncotermsChange={(value) => setValue('incoterms', value)}
                         onEstimateChange={setUpsEstimate}
                       />

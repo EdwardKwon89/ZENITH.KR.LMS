@@ -21,7 +21,7 @@ interface UpsFreightEstimateSectionProps {
   packages: OrderPackageInput[];
   selectedProductId?: string;
   selectedIncoterms?: 'DDU' | 'DDP';
-  onProductChange: (productId: string) => void;
+  onProductChange: (productId: string, productCode: string) => void;
   onIncotermsChange: (incoterms: 'DDU' | 'DDP') => void;
   onEstimateChange?: (estimate: UpsFreightEstimate | null) => void;
 }
@@ -121,7 +121,8 @@ export function UpsFreightEstimateSection({
     const stillExists = selectedProductId && products.some((p) => p.id === selectedProductId);
     if (stillExists) return;
     const saver = products.find((p) => extractFamily(p.product_code) === 'WW_SAVER');
-    onProductChange(saver?.id || products[0].id);
+    const fallback = saver || products[0];
+    onProductChange(fallback.id, fallback.product_code);
   }, [products, selectedProductId, onProductChange]);
 
   useEffect(() => {
@@ -168,7 +169,10 @@ export function UpsFreightEstimateSection({
           <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">서비스 티어</label>
           <select
             value={selectedProductId || ''}
-            onChange={(e) => onProductChange(e.target.value)}
+            onChange={(e) => {
+              const selected = products.find(p => p.id === e.target.value);
+              if (selected) onProductChange(selected.id, selected.product_code);
+            }}
             disabled={productsLoading}
             className="w-full bg-white border border-slate-200 text-xs px-3 py-2 rounded-xl outline-none focus:ring-2 focus:ring-blue-50"
           >

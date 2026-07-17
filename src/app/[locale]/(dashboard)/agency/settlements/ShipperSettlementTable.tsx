@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 
@@ -26,6 +26,12 @@ export interface OrderSettlementRow {
   cost: number;
   margin: number;
   marginRate: number;
+  breakdown?: {
+    baseSellingPrice: number;
+    fuelSurchargeSellingAmount: number;
+    otherChargesSellingTotal: number;
+    surgeFeeSellingAmount: number;
+  } | null;
 }
 
 interface ShipperSettlementTableProps {
@@ -115,15 +121,36 @@ export function ShipperSettlementTable({ shippersData, ordersData }: ShipperSett
                                 </tr>
                               ) : (
                                 subOrders.map((sub) => (
-                                  <tr key={sub.orderId} className="border-b border-slate-100 last:border-0 hover:bg-slate-50/60 transition-colors">
-                                    <td className="px-4 py-2 text-xs font-bold text-blue-600">{sub.orderNo}</td>
-                                    <td className="px-4 py-2 text-xs text-slate-500">{new Date(sub.createdAt).toLocaleDateString()}</td>
-                                    <td className="px-4 py-2 text-xs text-right text-slate-600 font-semibold">{sub.packagesCount}</td>
-                                    <td className="px-4 py-2 text-xs text-right text-slate-600 font-semibold">{sub.totalWeight.toFixed(1)} kg</td>
-                                    <td className="px-4 py-2 text-xs text-right text-emerald-600 font-semibold">{formatCurrency(sub.revenue)}</td>
-                                    <td className="px-4 py-2 text-xs text-right text-rose-600 font-semibold">{formatCurrency(sub.cost)}</td>
-                                    <td className="px-4 py-2 text-xs text-right text-purple-600 font-bold">{formatCurrency(sub.margin)}</td>
-                                  </tr>
+                                  <Fragment key={sub.orderId}>
+                                    <tr className="border-b border-slate-100 last:border-0 hover:bg-slate-50/60 transition-colors">
+                                      <td className="px-4 py-2 text-xs font-bold text-blue-600">{sub.orderNo}</td>
+                                      <td className="px-4 py-2 text-xs text-slate-500">{new Date(sub.createdAt).toLocaleDateString()}</td>
+                                      <td className="px-4 py-2 text-xs text-right text-slate-600 font-semibold">{sub.packagesCount}</td>
+                                      <td className="px-4 py-2 text-xs text-right text-slate-600 font-semibold">{sub.totalWeight.toFixed(1)} kg</td>
+                                      <td className="px-4 py-2 text-xs text-right text-emerald-600 font-semibold">{formatCurrency(sub.revenue)}</td>
+                                      <td className="px-4 py-2 text-xs text-right text-rose-600 font-semibold">{formatCurrency(sub.cost)}</td>
+                                      <td className="px-4 py-2 text-xs text-right text-purple-600 font-bold">{formatCurrency(sub.margin)}</td>
+                                    </tr>
+                                    {sub.breakdown && (
+                                      <tr className="border-b border-slate-50">
+                                        <td colSpan={7} className="px-4 py-1.5 text-[10px] text-slate-400 font-mono">
+                                          <span className="inline-flex gap-3 flex-wrap">
+                                            <span>기본운임 {formatCurrency(sub.breakdown.baseSellingPrice)}</span>
+                                            <span>·</span>
+                                            <span>유류할증 {formatCurrency(sub.breakdown.fuelSurchargeSellingAmount)}</span>
+                                            <span>·</span>
+                                            <span>기타부가 {formatCurrency(sub.breakdown.otherChargesSellingTotal)}</span>
+                                            {sub.breakdown.surgeFeeSellingAmount > 0 && (
+                                              <>
+                                                <span>·</span>
+                                                <span className="text-amber-600">급증수수료 {formatCurrency(sub.breakdown.surgeFeeSellingAmount)}</span>
+                                              </>
+                                            )}
+                                          </span>
+                                        </td>
+                                      </tr>
+                                    )}
+                                  </Fragment>
                                 ))
                               )}
                             </tbody>

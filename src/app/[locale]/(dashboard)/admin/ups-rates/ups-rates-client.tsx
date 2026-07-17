@@ -790,7 +790,7 @@ function FreightMinimumTable({ freightMinimums, canEdit, onEdit, onDelete }: any
 function SurgeFeeForm({ form, setForm, editingItem }: any) {
   return (
     <>
-      <Field label="도착국 코드 (ISO 3자리)" value={form.destination_country_code} onChange={(v: string) => setForm({ ...form, destination_country_code: v?.toUpperCase().slice(0, 3) })} placeholder="KOR" />
+      <Field label="도착국 코드 (ISO 2자리)" value={form.destination_country_code} onChange={(v: string) => setForm({ ...form, destination_country_code: v?.toUpperCase().slice(0, 2) })} placeholder="JP" />
       <div className="grid grid-cols-2 gap-3">
         <Field label="판매 단가 (kg당)" type="number" value={form.selling_rate_per_kg ?? ''} onChange={(v: any) => setForm({ ...form, selling_rate_per_kg: v ? Number(v) : 0 })} />
         <Field label="원가 단가 (kg당)" type="number" value={form.cost_rate_per_kg ?? ''} onChange={(v: any) => setForm({ ...form, cost_rate_per_kg: v ? Number(v) : 0 })} />

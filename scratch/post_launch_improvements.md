@@ -1450,3 +1450,39 @@
 - **예상 공수**: 0.5 MD (hook 로직 재설계 + 팀 공지)
 - **우선순위**: **High로 상향** — PASS 오기재 방향(PR#309·#313)이 실제로 발생함이 확인되어, 리뷰어가 매번 실제 CI를 직접 조회하지 않으면 회귀 실패가 은폐된 채 병합될 실질적 위험이 입증됨
 - **상태**: 🔄 1단계 적용 완료(2026-07-11) — `.githooks/pre-commit`에서 이 파일 기반 하드 블록(exit 1) 제거, 경고만 출력하도록 완화. 병합 판단은 원격 CI(`gh pr checks`) 전용으로 전환. pre-commit이 실제 테스트를 재실행하는 강화안(3단계)은 로컬 환경 준비 후 별도 검토.
+
+## [IMP-136] `gh pr merge --squash`가 stale 브랜치의 ACTIVE_TASK.md 행 삭제를 그대로 반영(병합 후 데이터 유실)
+
+- **발견 경위**: PR#537(Baker, Issue #534) `mergeable: MERGEABLE` 확인 후 squash 병합·CI(headSha `3f34dc73`) 실제 PASS까지 확인하고 병합했으나, 병합 직후 `git pull`로 로컬 동기화하는 과정에서 `ACTIVE_TASK.md`의 Dave/Mike 완료 행 5개(TASK-B-135·136·138·139·140)가 통째로 사라지고 TASK-B-134가 구버전(🔔 미완료 상태)으로 되돌아간 것을 발견 — Jaison이 PR#535 반려 시 "브랜치가 최신 integration 브랜치로 rebase되지 않은 것 같다"고 이미 경고했음에도, PR#537 재제출본이 여전히 그 상태(마이그레이션/채번만 정정하고 `git pull origin integration/teamb-260716`은 누락)로 제출됐고, `mergeable: MERGEABLE`·CI PASS만으로는 이 문제가 드러나지 않아 그대로 병합됨.
+- **현재 상태**: 병합 직후 Jaison이 로컬 pull 과정에서 발견, 병합 전 상태(`6fa9b419`)를 기준으로 즉시 별도 커밋(`e5755ed7`)으로 복구 완료. 실제 데이터 유실은 짧게(병합~복구 사이) 존재했으나 원격 브랜치에 영구 반영되지는 않음.
+- **임시 조치**: PR 병합 판단 시 CI PASS·`mergeable` 상태뿐 아니라, 여러 팀원이 같은 문서(ACTIVE_TASK.md 등 공유 표)에 동시에 행을 추가 중인 상황에서는 병합 후 `git pull` 직후 diff를 직접 재확인하는 절차를 당분간 수동으로 병행
+- **목표 구현**: (1) PR 생성/재제출 시 `next-task-number.sh` 실행 여부만이 아니라 base 브랜치와의 divergence(뒤처진 커밋 수)도 함께 확인하는 스크립트 보강 — 예: `git rev-list --count HEAD..origin/integration/teamb-260716`이 0이 아니면 경고 (2) 또는 GitHub Actions에 "PR head가 base보다 N커밋 이상 뒤처지면 자동 코멘트 경고" 워크플로우 추가 (3) 근본적으로는 ACTIVE_TASK.md처럼 여러 에이전트가 동시에 말미에 행을 추가하는 표 형태 문서를 병합 충돌에 강하게 만들 구조 개선(예: 팀별/일자별 append-only 로그 파일로 분리하고 조회 시점에만 취합) 검토
+- **관련 파일**: `.agent/ACTIVE_TASK.md`, `scripts/next-task-number.sh`
+- **관련 PR/Issue**: PR#535→536→537 (Issue #534), 복구 커밋 `e5755ed7`
+- **예상 공수**: 0.5 MD (divergence 체크 스크립트) ~ 1 MD (구조 개선까지 포함 시)
+- **우선순위**: **High** — 병합 판단 근거(CI PASS·mergeable)만으로는 이런 유형의 데이터 유실을 잡아낼 수 없음이 실제로 확인됨. 이번엔 Jaison이 병합 직후 수동 pull로 우연히 발견했으나, 매번 그렇게 확인한다는 보장이 없음
+- **상태**: ⬜ 미착수 (임시 조치만 적용 — 이번 건 자체는 복구 완료)
+
+## [IMP-137] `ups-product-code-select.test.tsx`가 `OrderRegistrationForm.tsx`를 실제로 거치지 않음
+
+- **발견 경위**: PR#544(Mike, Issue #543 — UPS 오더 등록 시 `ups_product_code`에 UUID가 저장되어 `VARCHAR(20)` 초과로 전면 실패하던 Critical 버그 수정) 검토 중, Jaison이 검증용으로 제공한 예시 테스트 코드를 Mike가 그대로 채택 — negative-control로 재확인하는 과정에서 이 테스트의 `Wrapper` 컴포넌트가 `OrderRegistrationForm.tsx`를 import하지 않고 올바른 배선(`upsProductId` 로컬 state 분리)을 테스트 파일 내부에서 자체적으로 재구현하고 있음을 발견 — `OrderRegistrationForm.tsx`의 실제 prop 배선을 원래 버그 상태로 되돌려도 이 테스트는 계속 PASS함.
+- **현재 상태**: 테스트 자체는 `UpsFreightEstimateSection`이 올바르게 배선됐을 때 정상 동작한다는 것은 검증하지만, `OrderRegistrationForm.tsx`가 실제로 그 올바른 배선을 유지하는지는 검증하지 않음. 실제 fix 코드는 Jaison이 diff로 직접 2회 재확인해 정확함을 확인했고, Critical 이슈 긴급성 때문에 이 상태로 병합함.
+- **임시 조치**: 없음(테스트는 그대로 두고 코드 리뷰로만 보완된 상태)
+- **목표 구현**: `tests/unit/orders/ups-product-code-select.test.tsx`를 `OrderRegistrationForm`을 실제로 렌더링(무거우면 최소 props로)하거나, "UPS 제품 선택 state + 핸들러" 로직을 `useUpsProductSelection()` 같은 커스텀 훅으로 추출해 컴포넌트와 테스트가 동일 로직을 공유하도록 리팩터링 검토(PR#533에서 `buildAddressBookPayload` 순수 함수로 추출한 것과 동일 패턴)
+- **관련 파일**: `tests/unit/orders/ups-product-code-select.test.tsx`, `src/components/orders/OrderRegistrationForm.tsx`, `src/components/orders/UpsFreightEstimateSection.tsx`
+- **관련 Issue/PR**: Issue #543, PR#544 (`c7682dff`)
+- **예상 공수**: 0.5 MD
+- **우선순위**: Medium — 지금 당장 회귀를 놓치는 상태는 아니나(fix 코드 자체는 검증됨), 향후 이 영역을 다시 손대는 사람이 있다면 이 테스트가 실제 방어력을 제공하지 못함
+- **상태**: ⬜ 미착수
+
+## [IMP-138] `resolveShxkCode` KOR 고정 수정 후 `iso3Code` 변수 미사용 잔존
+
+- **발견 경위**: PR#548(Baker, TASK-B-147, Issue #546 — `resolveShxkCode` 목적지코드 조회를 `'KOR'` 고정으로 수정) 검토 중 Jaison이 격리 워크트리에서 `eslint` 실행 — `src/app/actions/operations/ups-labels.ts:240`의 `iso3Code` 변수가 `resolveShxkCode` 호출부에서 더 이상 쓰이지 않게 되어 `@typescript-eslint/no-unused-vars` warning 발생 확인(빌드/CI는 warning이라 통과함, 머지는 승인).
+- **현재 상태**: 미사용 변수가 코드에 남아있음. `placeShxkOrder` 호출에는 여전히 2-letter `countryCode`가 쓰이고 `iso3Code`는 아무 데도 참조되지 않음.
+- **임시 조치**: 없음 — warning 상태로 병합, 기능 영향 없음
+- **목표 구현**: `issueUpsLabel` 내 `const iso3Code = toIso3(countryCode);` 라인 삭제(또는 `toIso3` 호출 자체가 더 이상 필요없는지 확인 후 정리)
+- **관련 파일**: `src/app/actions/operations/ups-labels.ts`
+- **관련 Issue/PR**: Issue #546, PR#548
+- **예상 공수**: 0.1 MD
+- **우선순위**: Low — 기능 영향 없는 순수 코드 정리
+- **상태**: ⬜ 미착수
