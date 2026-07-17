@@ -3,7 +3,6 @@ import {
   determineOrderCargotype,
   buildCargovolume,
   buildInvoiceFromItems,
-  resolveProvinceEnglishName,
   resolveShipperStreet,
   resolveShxkUnitCode,
   buildCreateOrderPayload,
@@ -210,7 +209,7 @@ describe('UPS Labels Mapping Functions', () => {
 
       expect((result.consignee as any).consignee_name).toBe('John Doe');
       expect((result.consignee as any).consignee_countrycode).toBe('US');
-      expect((result.consignee as any).consignee_province).toBe('California');
+      expect((result.consignee as any).consignee_province).toBe('CA');
       expect((result.consignee as any).consignee_email).toBe('john@example.com');
       expect((result.consignee as any).consignee_tariff).toBe('123456');
 
@@ -252,45 +251,41 @@ describe('UPS Labels Mapping Functions', () => {
     });
   });
 
-  describe('resolveProvinceEnglishName', () => {
-    it('한국 "11" → Seoul 변환', () => {
-      const result = resolveProvinceEnglishName('11', 'KR');
-      expect(result).toBe('Seoul');
+  describe('DEF-106: province raw code value in buildCreateOrderPayload', () => {
+    it('shipper_province는 변환 없이 원본 코드값 그대로 전달', () => {
+      const order = {
+        order_no: 'ORD-DEF106',
+        shipper_country_code: 'JP',
+        shipper_state_province: '28',
+        recipient_country_code: 'US',
+        recipient_state_province: 'CA',
+        shipper_contact_name: 'Shipper',
+        shipper_city: 'Osaka',
+        recipient_name: 'John',
+        recipient_city: 'LA',
+      };
+      const defaults = { name: 'SNTL', country: 'KR' };
+      const result = buildCreateOrderPayload('SHP', order as any, 'US', [], defaults);
+
+      expect((result.shipper as any).shipper_province).toBe('28');
     });
 
-    it('한국 "41" → Gyeonggi Province 변환', () => {
-      const result = resolveProvinceEnglishName('41', 'KR');
-      expect(result).toBe('Gyeonggi Province');
-    });
+    it('consignee_province는 변환 없이 원본 코드값 그대로 전달', () => {
+      const order = {
+        order_no: 'ORD-DEF106',
+        shipper_country_code: 'KR',
+        shipper_state_province: '11',
+        recipient_country_code: 'JP',
+        recipient_state_province: '13',
+        shipper_contact_name: 'Shipper',
+        shipper_city: 'Seoul',
+        recipient_name: 'Taro',
+        recipient_city: 'Tokyo',
+      };
+      const defaults = { name: 'SNTL', country: 'KR' };
+      const result = buildCreateOrderPayload('SHP', order as any, 'JP', [], defaults);
 
-    it('일본 "28" → Hyōgo Prefecture 변환', () => {
-      const result = resolveProvinceEnglishName('28', 'JP');
-      expect(result).toBe('Hyōgo Prefecture');
-    });
-
-    it('일본 "13" → Tokyo 변환', () => {
-      const result = resolveProvinceEnglishName('13', 'JP');
-      expect(result).toBe('Tokyo');
-    });
-
-    it('미국 "CA" → California 변환', () => {
-      const result = resolveProvinceEnglishName('CA', 'US');
-      expect(result).toBe('California');
-    });
-
-    it('존재하지 않는 코드는 원래 코드값 폴백', () => {
-      const result = resolveProvinceEnglishName('ZZ', 'JP');
-      expect(result).toBe('ZZ');
-    });
-
-    it('빈 stateCode는 빈 문자열 반환', () => {
-      const result = resolveProvinceEnglishName('', 'JP');
-      expect(result).toBe('');
-    });
-
-    it('빈 countryCode는 stateCode 그대로 반환', () => {
-      const result = resolveProvinceEnglishName('28', '');
-      expect(result).toBe('28');
+      expect((result.consignee as any).consignee_province).toBe('13');
     });
   });
 });
