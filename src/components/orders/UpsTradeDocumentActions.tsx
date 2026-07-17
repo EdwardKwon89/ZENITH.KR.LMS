@@ -56,12 +56,42 @@ function PreviewPopup({ payload, action, onConfirm, onCancel }: {
   );
 }
 
+function ResultPopup({ result, action, onConfirm }: {
+  result: Record<string, unknown>;
+  action: PreviewAction;
+  onConfirm: () => void;
+}) {
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={onConfirm}>
+      <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full mx-4 max-h-[80vh] flex flex-col" onClick={e => e.stopPropagation()}>
+        <div className="px-5 py-3 border-b border-gray-200 font-bold text-sm text-gray-800">
+          SHXK Response — {action}
+        </div>
+        <div className="flex-1 overflow-auto p-4">
+          <pre className="text-xs font-mono bg-gray-50 p-3 rounded-lg border border-gray-200 whitespace-pre-wrap break-all">
+            {JSON.stringify(result, null, 2)}
+          </pre>
+        </div>
+        <div className="px-5 py-3 border-t border-gray-200 flex justify-end gap-2">
+          <button
+            onClick={onConfirm}
+            className="px-4 py-2 text-xs font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            확인
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function UpsTradeDocumentActions({ orderId, hasActiveLabel }: UpsTradeDocumentActionsProps) {
   const t = useTranslations('Documents');
   const [loadingDoc, setLoadingDoc] = useState<string | null>(null);
   const [cancelling, setCancelling] = useState(false);
   const [createLoading, setCreateLoading] = useState(false);
   const [previewState, setPreviewState] = useState<{ action: PreviewAction; payload: Record<string, unknown> } | null>(null);
+  const [resultState, setResultState] = useState<{ action: PreviewAction; result: Record<string, unknown> } | null>(null);
   const router = useRouter();
 
   const handlePreview = async (action: PreviewAction) => {
@@ -118,11 +148,7 @@ export default function UpsTradeDocumentActions({ orderId, hasActiveLabel }: Ups
     setLoadingDoc(docKey);
     try {
       const res = await fetchShxkTradeDocument(orderId, action as 'WAYBILL' | 'INVOICE' | 'CUSTOMS');
-      if (res.success && res.url) {
-        window.open(res.url, '_blank');
-      } else {
-        toast.error(res.error || '문서 조회에 실패했습니다.');
-      }
+      setResultState({ action, result: res as Record<string, unknown> });
     } catch (err: any) {
       toast.error(err.message || '문서 조회에 실패했습니다.');
     } finally {
@@ -138,6 +164,13 @@ export default function UpsTradeDocumentActions({ orderId, hasActiveLabel }: Ups
           action={previewState.action}
           onConfirm={handleConfirmPreview}
           onCancel={() => setPreviewState(null)}
+        />
+      )}
+      {resultState && (
+        <ResultPopup
+          result={resultState.result}
+          action={resultState.action}
+          onConfirm={() => setResultState(null)}
         />
       )}
       <div className="flex flex-wrap gap-2 mt-4">

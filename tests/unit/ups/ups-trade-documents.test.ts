@@ -70,3 +70,45 @@ describe('Issue #565/569: previewShxkPayload + issueUpsLabel', () => {
     expect(src).toContain('PreviewPopup');
   });
 });
+
+describe('Issue #582: fetchShxkTradeDocument 응답 결과 팝업', () => {
+  it('ResultPopup 컴포넌트가 소스에 존재한다', async () => {
+    const fs = await import('fs');
+    const src = fs.readFileSync('src/components/orders/UpsTradeDocumentActions.tsx', 'utf-8');
+
+    expect(src).toContain('function ResultPopup');
+    expect(src).toContain('SHXK Response');
+    expect(src).toContain('JSON.stringify(result, null, 2)');
+  });
+
+  it('resultState가 선언되어 있다', async () => {
+    const fs = await import('fs');
+    const src = fs.readFileSync('src/components/orders/UpsTradeDocumentActions.tsx', 'utf-8');
+
+    expect(src).toContain('resultState');
+    expect(src).toContain('setResultState');
+  });
+
+  it('fetchShxkTradeDocument 결과가 resultState에 저장된다', async () => {
+    const fs = await import('fs');
+    const src = fs.readFileSync('src/components/orders/UpsTradeDocumentActions.tsx', 'utf-8');
+
+    expect(src).toContain('setResultState({ action, result: res as Record<string, unknown> })');
+  });
+
+  it('ResultPopup이 렌더링된다', async () => {
+    const fs = await import('fs');
+    const src = fs.readFileSync('src/components/orders/UpsTradeDocumentActions.tsx', 'utf-8');
+
+    expect(src).toContain('{resultState && (');
+    expect(src).toContain('<ResultPopup');
+    expect(src).toContain('onConfirm={() => setResultState(null)}');
+  });
+
+  it('window.open이 제거되었다', async () => {
+    const fs = await import('fs');
+    const src = fs.readFileSync('src/components/orders/UpsTradeDocumentActions.tsx', 'utf-8');
+
+    expect(src).not.toContain('window.open(res.url');
+  });
+});
