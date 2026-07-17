@@ -8,9 +8,8 @@ import { createorder, getnewlabel, removeorder } from '@/lib/shxk/order';
 import {
   SHXK_SHIPPER_NAME, SHXK_SHIPPER_COUNTRY,
 } from '@/lib/shxk/config';
-import { determineOrderCargotype, buildCargovolume, buildInvoiceFromItems } from '@/lib/ups/label-mapping';
+import { determineOrderCargotype, buildCargovolume, buildInvoiceFromItems, resolveProvinceEnglishName } from '@/lib/ups/label-mapping';
 import { revalidatePath } from 'next/cache';
-import { getTranslations } from 'next-intl/server';
 
 export interface IssueUpsLabelResult {
   shxk_order_id: string;
