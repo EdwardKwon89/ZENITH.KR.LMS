@@ -15,7 +15,7 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
-| [#565](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/565) | [feat] 무역서류 관리 버튼 — createorder 테스트 버튼 추가 + 전 버튼 API 호출 전 JSON 확인 팝업 | b | p2 | - | 미배정 | 2026-07-17 |
+| [#565](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/565) | [feat] 무역서류 관리 버튼 — createorder 테스트 버튼 추가 + 전 버튼 API 호출 전 JSON 확인 팝업 | b | p2 | review | 미배정 | 2026-07-17 |
 | [#563](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/563) | [feat] createorder 매핑 — 화주(shipper) 주소를 영문 우선으로 매핑 (Issue #554 item 4 후속) | b | p2 | review | 미배정 | 2026-07-17 |
 | [#559](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/559) | [feat] 오더 상세 '무역서류 관리' — 운송장/Invoice/세관신고서 조회 + UPS등록취소 버튼 추가 | b | p2 | review | 미배정 | 2026-07-17 |
 | [#554](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/554) | [feat] Agency·Shipper 영문주소 관리 + createorder 화주주소 영문 매핑 (Issue #551 분할 C) | b | p2 | review | 미배정 | 2026-07-17 |
