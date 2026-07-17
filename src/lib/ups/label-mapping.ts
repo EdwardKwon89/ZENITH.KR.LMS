@@ -29,12 +29,24 @@ export function buildInvoiceFromItems(packages: Record<string, unknown>[]): Reco
         invoice_enname:    item.item_name || 'General Merchandise',
         invoice_quantity:  String(item.quantity ?? 1),
         invoice_unitcharge: String(item.unit_price ?? '1.00'),
+        unit_code:         resolveShxkUnitCode(item.item_packing_unit as string),
         ...(item.sku_code ? { sku: item.sku_code } : {}),
         ...(item.hs_code ? { hs_code: item.hs_code } : {}),
       });
     }
   }
-  return items.length > 0 ? items : [{ invoice_enname: 'General Merchandise', invoice_quantity: '1', invoice_unitcharge: '1.00' }];
+  return items.length > 0 ? items : [{ invoice_enname: 'General Merchandise', invoice_quantity: '1', invoice_unitcharge: '1.00', unit_code: 'PCE' }];
+}
+
+const SHXK_UNIT_CODE_MAP: Record<string, string> = {
+  EA: 'PCE',
+  PCS: 'PCE',
+  SET: 'SET',
+  MTR: 'MTR',
+};
+
+export function resolveShxkUnitCode(packingUnit: string): string {
+  return SHXK_UNIT_CODE_MAP[(packingUnit || '').toUpperCase()] || 'PCE';
 }
 
 export function resolveProvinceEnglishName(stateCode: string, countryCode: string): string {

@@ -161,9 +161,10 @@ const NestedItems: React.FC<{
                   {...register(`packages.${nestIndex}.items.${k}.item_packing_unit`)}
                   className="w-full text-xs h-9 bg-white border border-slate-200 rounded-lg focus:outline-none"
                 >
-                  <option value="EA">EA</option>
-                  <option value="SET">SET</option>
-                  <option value="PCS">PCS</option>
+                   <option value="EA">EA</option>
+                   <option value="SET">SET</option>
+                   <option value="PCS">PCS</option>
+                   <option value="MTR">MTR</option>
                 </select>
               </div>
               <div className="col-span-3">
