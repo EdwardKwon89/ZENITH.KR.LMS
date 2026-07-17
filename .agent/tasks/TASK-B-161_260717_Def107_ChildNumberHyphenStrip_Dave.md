@@ -24,5 +24,10 @@
 - **Regression**: 95/95 ALL PASS (610 tests)
 - **변경 범위**: `buildCargovolume()` 단 1줄만 수정, 다른 함수·파일 건드리지 않음
 
+### CI 결과 (PR#581)
+- Regression Tests ✅ PASS (5m33s)
+- Task File Check ✅ PASS
+- Vercel ⚠️ rate-limited (pro plan, non-blocking, 로컬 build로 대체 검증 완료)
+
 ### 발견 이슈
 없음
