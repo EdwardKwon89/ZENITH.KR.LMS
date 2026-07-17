@@ -1,4 +1,4 @@
-# TASK-B-152: Issue #563 — placeShxkOrder 화주 영문 주소 우선 매핑
+# TASK-B-153: Issue #563 — placeShxkOrder 화주 영문 주소 우선 매핑
 
 | 메타 | 값 |
 |:----|:----|
