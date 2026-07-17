@@ -15,6 +15,7 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
+| [#582](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/582) | [feat] fetchShxkTradeDocument 응답 결과를 별도 팝업으로 표시 | b | p3 | - | 미배정 | 2026-07-17 |
 | [#580](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/580) | [fix] SHXK createorder cargovolume child_number 하이픈 제거 (Package Reference 거부) (DEF-107) | b | p1 | - | 미배정 | 2026-07-17 |
 | [#577](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/577) | [fix] SHXK createorder shipper/consignee province 풀네임→코드값 되돌림 (Sold To 0-5자 제약) (DEF-106) | b | p1 | review | 미배정 | 2026-07-17 |
 | [#574](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/574) | [fix] 오더 품명(item_name) 영문 전용 입력 제한 (DEF-105) | b | p2 | review | 미배정 | 2026-07-17 |
