@@ -1522,3 +1522,16 @@
 - **예상 공수**: 0.1 MD
 - **우선순위**: Low — 기능 영향 없는 마크업 중복 정리
 - **상태**: ⬜ 미착수
+
+## [IMP-142] `buildInvoiceFromItems`가 SHXK 필수 필드 `invoice[].unit_code`를 payload에 전혀 포함하지 않음
+
+- **발견 경위**: JSJung이 `SHXK_TEST_MOCK=false`로 오더 ZEN-2026-000001 실제 createorder 재시도 중 발견(DEF-103 발신인 주/성 오류·품명 한글 오류를 순서대로 해결한 뒤 세 번째로 발생). 실제 SHXK 응답 오류: `API创建并预报订单失败：创建预报失败!Invalid or missing Product/Unit/UnitOfMeasurement/Code for product number 1. Valid length is 1 to 3 alphanumeric`.
+- **근본 원인**: `docs/80_RawData/Phase8_UPS_API_리서치_결과.md:153`에 명시된 SHXK API 스펙 — `invoice[].unit_code`: `단위: MTR(미터)/PCE(개)/SET(세트), 기본 PCE`. 문서상 "기본 PCE"라 생략 가능해 보이지만 실제 SHXK 서버는 누락 시 위 오류로 거부함. `src/lib/ups/label-mapping.ts:23~38`의 `buildInvoiceFromItems()`는 `invoice_enname`/`invoice_quantity`/`invoice_unitcharge`/`sku`/`hs_code`만 매핑하고 `unit_code`는 애초에 payload 객체에 키 자체가 없음. `zen_order_items.item_packing_unit` 컬럼에 값("EA")은 있으나 SHXK 허용값(MTR/PCE/SET)과 다른 코드 체계라 그대로 매핑 불가 — 별도 변환 테이블 필요.
+- **현재 상태**: 미조치 — JSJung 지시로 즉시 수정 대신 기록만 진행("지금은 보고만, 조치는 보류"). SHXK 연동 대상 오더 중 품목이 있는 모든 오더의 실제 createorder가 이 오류로 막힘.
+- **임시 조치**: 없음
+- **목표 구현**: `buildInvoiceFromItems()`에 `unit_code` 필드 추가. `item_packing_unit`(EA/BOX/SET 등 내부 포장단위) → SHXK `unit_code`(MTR/PCE/SET) 매핑 테이블 신규 설계 필요(예: EA→PCE, SET→SET, 미터 단위 품목→MTR, 매핑 불가 시 기본값 PCE). `zen_order_items.item_packing_unit`의 실제 사용 가능한 값 종류를 먼저 전수 확인해야 정확한 매핑 테이블 설계 가능.
+- **관련 파일**: `src/lib/ups/label-mapping.ts`, `src/app/actions/operations/ups-labels.ts`, `docs/80_RawData/Phase8_UPS_API_리서치_결과.md`
+- **관련 Issue/PR**: 없음(아직 미등록 — DEF/Issue 발령은 JSJung 보류 지시)
+- **예상 공수**: 0.3 MD (매핑 테이블 설계 + 코드 반영 + 테스트)
+- **우선순위**: High — SHXK 실연동 자체가 이 오류로 막히는 상태(오더 등록 자체는 정상, createorder만 실패)이나 JSJung이 즉시 조치는 보류하기로 결정
+- **상태**: ⬜ 미착수
