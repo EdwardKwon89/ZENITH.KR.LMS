@@ -22,6 +22,8 @@ import OrderCustomsSection from '@/components/customs/OrderCustomsSection';
 import OrderCustomsAdminControl from '@/components/customs/OrderCustomsAdminControl';
 import { getTranslations } from 'next-intl/server';
 import { OrderClaimTrigger } from '@/components/claims/OrderClaimTrigger';
+import { getUpsLabelStatus } from '@/app/actions/operations/ups-labels';
+import UpsTradeDocumentActions from '@/components/orders/UpsTradeDocumentActions';
 
 import { Package, MapPin, Truck, ShieldCheck, FileText } from 'lucide-react';
 
@@ -82,7 +84,7 @@ export default async function OrderDetailPage({
   const isShipper = order.shipper_id && (profile?.id === order.shipper_id || profile?.org_id === order.shipper_id);
   const isAgency = profile?.role === 'AGENCY';
   const canPrintUpsInvoice = isAdmin || profile?.role === 'MANAGER' || isShipper || isAgency;
-  const isUpsOrder = order.transport_mode === 'EXP';
+  const isUpsOrder = order.transport_mode === 'UPS';
 
   const rawLogsData = isAdmin ? await getTrackingRawLogs(orderId) : { logs: [] };
   const rawLogs = rawLogsData?.logs || [];
@@ -196,6 +198,8 @@ export default async function OrderDetailPage({
 
   // 7. UPS Invoice 데이터 준비 (TASK-148 IMP-117)
   const tOrders = await getTranslations('Orders');
+  const upsLabelStatus = isUpsOrder ? await getUpsLabelStatus(orderId) : { hasActiveLabel: false, trackingNumber: null };
+
   const upsInvoiceData = isUpsOrder ? {
     invoice_no: `UPS-${order.order_no}`,
     date: new Date().toISOString().split('T')[0],
@@ -552,6 +556,9 @@ export default async function OrderDetailPage({
                         label={`${tOrders('ups_invoice.download_button')} (UPS)`}
                         className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/30"
                       />
+                    )}
+                    {isUpsOrder && (
+                      <UpsTradeDocumentActions orderId={orderId} hasActiveLabel={upsLabelStatus.hasActiveLabel} />
                     )}
                  </div>
              </div>
