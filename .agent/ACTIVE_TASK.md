@@ -15,6 +15,7 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
+| [#574](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/574) | [fix] 오더 품명(item_name) 영문 전용 입력 제한 (DEF-105) | b | p2 | - | 미배정 | 2026-07-17 |
 | [#573](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/573) | [fix] SHXK createorder invoice[].unit_code 매핑 누락 + Packing Unit MTR 옵션 추가 (DEF-104) | b | p1 | - | 미배정 | 2026-07-17 |
 | [#571](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/571) | [fix] AddressInput KR분기 — 시/도·시/군/구 미캡처로 SHXK 화주 주/성 필수값 검증 실패 (DEF-103) | b | p1 | - | 미배정 | 2026-07-17 |
 | [#569](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/569) | [fix] 무역서류 관리 createorder 버튼을 issueUpsLabel로 연결 (실제 라벨 발급까지 수행) | b | p2 | review | 미배정 | 2026-07-17 |
