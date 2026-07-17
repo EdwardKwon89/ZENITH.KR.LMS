@@ -22,9 +22,11 @@
 ### 검증
 - **Build PASS** ✅
 - **Regression**: 92/92 ALL PASS (566 tests)
+- **회귀 테스트 추가**: address_english hidden input 캡처 검증 테스트 1건 추가
 
 ### 커밋
 - 코드 커밋: `3f71d94d30d11cf5a6c97183a2a33eb1ff505aa6`
+- 테스트 커밋: `3719a8fa` (회귀 테스트 추가)
 
 ### 발견 이슈
 없음
