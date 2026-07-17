@@ -19,7 +19,7 @@ vi.mock('react-daum-postcode', () => ({
   DaumPostcodeEmbed: ({ onComplete }: { onComplete: (data: any) => void }) => (
     <div data-testid="daum-postcode-embed">
       <button
-        onClick={() => onComplete({ roadAddress: '123 Teheran-ro', zonecode: '061234' })}
+        onClick={() => onComplete({ roadAddress: '123 Teheran-ro', zonecode: '061234', roadAddressEnglish: '123 Teheran-ro, Gangnam-gu, Seoul' })}
       >
         select-address
       </button>
@@ -132,6 +132,20 @@ describe('TC-P7-UI-ADDR-02: 주소 검색 완료 후 roadAddress + zipcode 상�
     expect(zipInput.value).toBe('061234');
 
     expect(screen.queryByTestId('daum-postcode-embed')).not.toBeInTheDocument();
+  });
+
+  it('KR 선택 → 검색 완료 시 address_english hidden input에 영문 주소가 채워진다', () => {
+    const { container } = render(<AddressInput t={mockT} />);
+
+    const searchButton = screen.getByRole('button', { name: 'Search' });
+    fireEvent.click(searchButton);
+
+    const selectAddressButton = screen.getByRole('button', { name: 'select-address' });
+    fireEvent.click(selectAddressButton);
+
+    const hiddenInput = container.querySelector('input[name="address_english"]') as HTMLInputElement;
+    expect(hiddenInput).toBeInTheDocument();
+    expect(hiddenInput.value).toBe('123 Teheran-ro, Gangnam-gu, Seoul');
   });
 });
 
