@@ -16,7 +16,7 @@
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
 | [#559](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/559) | [feat] 오더 상세 '무역서류 관리' — 운송장/Invoice/세관신고서 조회 + UPS등록취소 버튼 추가 | b | p2 | review | 미배정 | 2026-07-17 |
-| [#554](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/554) | [feat] Agency·Shipper 영문주소 관리 + createorder 화주주소 영문 매핑 (Issue #551 분할 C) | b | p2 | rework | 미배정 | 2026-07-16 |
+| [#554](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/554) | [feat] Agency·Shipper 영문주소 관리 + createorder 화주주소 영문 매핑 (Issue #551 분할 C) | b | p2 | review | 미배정 | 2026-07-17 |
 | [#551](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/551) | [design] createorder 매핑 개선 — child_number/consignee_province/응답메시지저장 + Agency·Shipper 영문주소 관리 | b | p2 | - | 미배정 | 2026-07-16 |
 | [#521](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/521) | [Aiden] 2026-07-16 임시 운영 방침 — Team B develop 복사 브랜치(integration/teamb-260716) 자체 개발·병합 허용 | b | p1 | - | jungjs | 2026-07-16 |
 | [#473](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/473) | [Team B] 검증 절차 방침 변경 — 라이브 브라우저/DB 검증은 병합 후 JSJung이 수행 | b | - | - | 미배정 | 2026-07-14 |
