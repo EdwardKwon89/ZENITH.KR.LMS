@@ -416,7 +416,11 @@
     "select_order": "오더 선택",
     "select_language": "언어 선택",
     "error_not_found": "해당 오더를 찾을 수 없습니다.",
-    "error_fetch": "데이터 조회 중 오류가 발생했습니다."
+    "error_fetch": "데이터 조회 중 오류가 발생했습니다.",
+    "waybill": "운송장",
+    "logistics_invoice": "Invoice (배송물류)",
+    "customs_declaration_shxk": "세관신고서",
+    "ups_cancel_registration": "UPS등록취소"
   },
   "UpsInvoice": {
     "title": "간이 인보이스",
