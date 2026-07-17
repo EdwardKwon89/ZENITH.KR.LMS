@@ -29,5 +29,11 @@
 - **Regression**: 95/95 ALL PASS (609 tests)
 - **잔여참조 없음**: `grep -rn "resolveProvinceEnglishName" src/ tests/` → empty
 
+### CI 결과 (PR#579)
+- Regression Tests ✅ PASS (5m25s)
+- Task File Check ✅ PASS
+- Vercel ✅ PASS
+- Vercel Preview Comments ✅ PASS
+
 ### 발견 이슈
 없음
