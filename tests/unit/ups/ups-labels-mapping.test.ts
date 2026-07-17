@@ -5,6 +5,7 @@ import {
   buildInvoiceFromItems,
   resolveProvinceEnglishName,
   resolveShipperStreet,
+  resolveShxkUnitCode,
   buildCreateOrderPayload,
 } from '@/lib/ups/label-mapping';
 
@@ -70,27 +71,69 @@ describe('UPS Labels Mapping Functions', () => {
     });
   });
 
+  describe('resolveShxkUnitCode', () => {
+    it('EA → PCE', () => {
+      expect(resolveShxkUnitCode('EA')).toBe('PCE');
+    });
+
+    it('PCS → PCE', () => {
+      expect(resolveShxkUnitCode('PCS')).toBe('PCE');
+    });
+
+    it('SET → SET', () => {
+      expect(resolveShxkUnitCode('SET')).toBe('SET');
+    });
+
+    it('MTR → MTR', () => {
+      expect(resolveShxkUnitCode('MTR')).toBe('MTR');
+    });
+
+    it('빈 문자열 → PCE (기본값)', () => {
+      expect(resolveShxkUnitCode('')).toBe('PCE');
+    });
+
+    it('미지값 XYZ → PCE (기본값 폴백)', () => {
+      expect(resolveShxkUnitCode('XYZ')).toBe('PCE');
+    });
+
+    it('소문자 ea → PCE (대소문자 무시)', () => {
+      expect(resolveShxkUnitCode('ea')).toBe('PCE');
+    });
+  });
+
   describe('buildInvoiceFromItems', () => {
     it('collects items from all packages', () => {
       const pkgs = [
-        { items: [{ item_name: 'Widget', quantity: 2, unit_price: 10, sku_code: 'W001' }] },
-        { items: [{ item_name: 'Gadget', quantity: 1, unit_price: 50, hs_code: '8471' }] },
+        { items: [{ item_name: 'Widget', quantity: 2, unit_price: 10, sku_code: 'W001', item_packing_unit: 'EA' }] },
+        { items: [{ item_name: 'Gadget', quantity: 1, unit_price: 50, hs_code: '8471', item_packing_unit: 'MTR' }] },
       ];
       const result = buildInvoiceFromItems(pkgs as any);
 
       expect(result).toHaveLength(2);
-      expect(result[0]).toMatchObject({ invoice_enname: 'Widget', invoice_quantity: '2', invoice_unitcharge: '10', sku: 'W001' });
-      expect(result[1]).toMatchObject({ invoice_enname: 'Gadget', invoice_quantity: '1', invoice_unitcharge: '50', hs_code: '8471' });
+      expect(result[0]).toMatchObject({ invoice_enname: 'Widget', invoice_quantity: '2', invoice_unitcharge: '10', sku: 'W001', unit_code: 'PCE' });
+      expect(result[1]).toMatchObject({ invoice_enname: 'Gadget', invoice_quantity: '1', invoice_unitcharge: '50', hs_code: '8471', unit_code: 'MTR' });
+    });
+
+    it('item_packing_unit을 unit_code로 변환해 반환한다', () => {
+      const packages = [{ items: [{ item_name: 'Jeans', quantity: 1, unit_price: 10, item_packing_unit: 'EA' }] }];
+      const result = buildInvoiceFromItems(packages);
+      expect(result[0].unit_code).toBe('PCE');
+    });
+
+    it('item_packing_unit 없으면 PCE 기본값', () => {
+      const packages = [{ items: [{ item_name: 'Shirt', quantity: 1, unit_price: 20 }] }];
+      const result = buildInvoiceFromItems(packages);
+      expect(result[0].unit_code).toBe('PCE');
     });
 
     it('returns fallback when no items', () => {
       const result = buildInvoiceFromItems([{ items: [] }] as any);
-      expect(result).toEqual([{ invoice_enname: 'General Merchandise', invoice_quantity: '1', invoice_unitcharge: '1.00' }]);
+      expect(result).toEqual([{ invoice_enname: 'General Merchandise', invoice_quantity: '1', invoice_unitcharge: '1.00', unit_code: 'PCE' }]);
     });
 
     it('handles packages with no items field', () => {
       const result = buildInvoiceFromItems([{}] as any);
-      expect(result).toEqual([{ invoice_enname: 'General Merchandise', invoice_quantity: '1', invoice_unitcharge: '1.00' }]);
+      expect(result).toEqual([{ invoice_enname: 'General Merchandise', invoice_quantity: '1', invoice_unitcharge: '1.00', unit_code: 'PCE' }]);
     });
   });
 
@@ -205,7 +248,7 @@ describe('UPS Labels Mapping Functions', () => {
       expect(result.cargotype).toBe('W');
       expect(result.order_pieces).toBe(0);
       expect(result.order_weight).toBe(0);
-      expect((result.invoice as any[])).toEqual([{ invoice_enname: 'General Merchandise', invoice_quantity: '1', invoice_unitcharge: '1.00' }]);
+      expect((result.invoice as any[])).toEqual([{ invoice_enname: 'General Merchandise', invoice_quantity: '1', invoice_unitcharge: '1.00', unit_code: 'PCE' }]);
     });
   });
 
