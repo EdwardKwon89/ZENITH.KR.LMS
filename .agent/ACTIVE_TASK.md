@@ -15,6 +15,7 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
+| [#569](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/569) | [fix] 무역서류 관리 createorder 버튼을 issueUpsLabel로 연결 (실제 라벨 발급까지 수행) | b | p2 | - | 미배정 | 2026-07-17 |
 | [#567](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/567) | [fix] PDF 다운로드 전체 차단 — CSP connect-src에 data: 추가 (DEF-102) | b | p1 | review | 미배정 | 2026-07-17 |
 | [#565](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/565) | [feat] 무역서류 관리 버튼 — createorder 테스트 버튼 추가 + 전 버튼 API 호출 전 JSON 확인 팝업 | b | p2 | review | 미배정 | 2026-07-17 |
 | [#563](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/563) | [feat] createorder 매핑 — 화주(shipper) 주소를 영문 우선으로 매핑 (Issue #554 item 4 후속) | b | p2 | review | 미배정 | 2026-07-17 |
