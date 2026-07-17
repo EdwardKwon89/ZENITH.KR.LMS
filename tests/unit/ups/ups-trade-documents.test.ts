@@ -39,15 +39,14 @@ describe('Issue #559: Trade document content_type mapping', () => {
   });
 });
 
-describe('Issue #565: previewShxkPayload + triggerCreateOrderTest', () => {
-  it('previewShxkPayload와 triggerCreateOrderTest가 소스에 존재하는지 검증', async () => {
+describe('Issue #565/569: previewShxkPayload + issueUpsLabel', () => {
+  it('previewShxkPayload와 issueUpsLabel이 소스에 존재하는지 검증', async () => {
     const fs = await import('fs');
     const src = fs.readFileSync('src/app/actions/operations/ups-labels.ts', 'utf-8');
 
     expect(src).toContain('export async function previewShxkPayload');
     expect(src).toContain("action: 'CREATEORDER' | 'WAYBILL' | 'INVOICE' | 'CUSTOMS' | 'VOID'");
-    expect(src).toContain('export async function triggerCreateOrderTest');
-    expect(src).toContain('placeShxkOrder');
+    expect(src).toContain('export async function issueUpsLabel');
   });
 
   it('buildCreateOrderPayload가 label-mapping.ts에 존재하고 placeShxkOrder에서 사용되는지 검증', async () => {
@@ -60,12 +59,13 @@ describe('Issue #565: previewShxkPayload + triggerCreateOrderTest', () => {
     expect(actionsSrc).toContain('buildCreateOrderPayload(shxkCode, order, countryCode, packages');
   });
 
-  it('UpsTradeDocumentActions.tsx에 previewShxkPayload와 triggerCreateOrderTest 임포트가 있는지 검증', async () => {
+  it('UpsTradeDocumentActions.tsx에 previewShxkPayload와 issueUpsLabel 임포트가 있는지 검증', async () => {
     const fs = await import('fs');
     const src = fs.readFileSync('src/components/orders/UpsTradeDocumentActions.tsx', 'utf-8');
 
     expect(src).toContain('previewShxkPayload');
-    expect(src).toContain('triggerCreateOrderTest');
+    expect(src).toContain('issueUpsLabel');
+    expect(src).not.toContain('triggerCreateOrderTest');
     expect(src).toContain('CREATEORDER');
     expect(src).toContain('PreviewPopup');
   });
