@@ -15,6 +15,7 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
+| [#563](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/563) | [feat] createorder 매핑 — 화주(shipper) 주소를 영문 우선으로 매핑 (Issue #554 item 4 후속) | b | p2 | - | 미배정 | 2026-07-17 |
 | [#559](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/559) | [feat] 오더 상세 '무역서류 관리' — 운송장/Invoice/세관신고서 조회 + UPS등록취소 버튼 추가 | b | p2 | review | 미배정 | 2026-07-17 |
 | [#554](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/554) | [feat] Agency·Shipper 영문주소 관리 + createorder 화주주소 영문 매핑 (Issue #551 분할 C) | b | p2 | review | 미배정 | 2026-07-17 |
 | [#551](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/551) | [design] createorder 매핑 개선 — child_number/consignee_province/응답메시지저장 + Agency·Shipper 영문주소 관리 | b | p2 | - | 미배정 | 2026-07-16 |
