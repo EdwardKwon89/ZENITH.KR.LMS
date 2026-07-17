@@ -422,7 +422,8 @@
     "waybill": "운송장",
     "logistics_invoice": "Invoice (배송물류)",
     "customs_declaration_shxk": "세관신고서",
-    "ups_cancel_registration": "UPS등록취소"
+    "ups_cancel_registration": "UPS등록취소",
+    "createorder_test": "CreateOrder 테스트"
   },
   "UpsInvoice": {
     "title": "간이 인보이스",

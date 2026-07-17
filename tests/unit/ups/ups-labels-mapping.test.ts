@@ -4,6 +4,8 @@ import {
   buildCargovolume,
   buildInvoiceFromItems,
   resolveProvinceEnglishName,
+  resolveShipperStreet,
+  buildCreateOrderPayload,
 } from '@/lib/ups/label-mapping';
 
 describe('UPS Labels Mapping Functions', () => {
@@ -89,6 +91,121 @@ describe('UPS Labels Mapping Functions', () => {
     it('handles packages with no items field', () => {
       const result = buildInvoiceFromItems([{}] as any);
       expect(result).toEqual([{ invoice_enname: 'General Merchandise', invoice_quantity: '1', invoice_unitcharge: '1.00' }]);
+    });
+  });
+
+  describe('resolveShipperStreet', () => {
+    it('우선순위: org address_english > org address > order shipper_address', () => {
+      const order = { shipper_address: 'Fallback Street' };
+      const org = { address_english: 'English Address', address: 'Korean Address' };
+      expect(resolveShipperStreet(order as any, org as any)).toBe('English Address');
+    });
+
+    it('org address_english 없으면 org address 사용', () => {
+      const order = { shipper_address: 'Fallback Street' };
+      const org = { address: 'Korean Address' };
+      expect(resolveShipperStreet(order as any, org as any)).toBe('Korean Address');
+    });
+
+    it('org 없으면 order.shipper_address 사용', () => {
+      const order = { shipper_address: 'Order Street' };
+      expect(resolveShipperStreet(order as any, undefined)).toBe('Order Street');
+    });
+
+    it('address + address_detail 조합', () => {
+      const org = { address_english: 'Main St', address_detail_english: 'Unit 101' };
+      expect(resolveShipperStreet({} as any, org as any)).toBe('Main St Unit 101');
+    });
+  });
+
+  describe('buildCreateOrderPayload', () => {
+    const sampleOrder = {
+      order_no: 'ORD-001',
+      shipper_contact_name: 'Shipper Kim',
+      shipper_country_code: 'KR',
+      shipper_state_province: 'Seoul',
+      shipper_city: 'Mapo-gu',
+      shipper_zipcode: '04515',
+      shipper_contact_phone: '02-1234-5678',
+      recipient_name: 'John Doe',
+      recipient_country_code: 'US',
+      recipient_state_province: 'CA',
+      recipient_city: 'Los Angeles',
+      recipient_address: '123 Main St',
+      recipient_address_local: '',
+      recipient_zipcode: '90001',
+      recipient_phone: '213-555-0100',
+      recipient_email: 'john@example.com',
+      recipient_pccc: '123456',
+      shipper_org: null,
+    };
+
+    const samplePackages = [
+      {
+        id: 'pkg-1',
+        length: 30, width: 20, height: 10,
+        gross_weight: 5,
+        physical_box_count: 2,
+        content_type: 'NONDOC',
+        items: [{ item_name: 'Widget', quantity: 1, unit_price: 100 }],
+      },
+    ];
+
+    const shipperDefaults = { name: 'SNTL Korea Co Ltd', country: 'KR' };
+
+    it('필수 필드가 올바르게 매핑되는지 검증', () => {
+      const result = buildCreateOrderPayload('SHP-CODE', sampleOrder as any, 'US', samplePackages as any, shipperDefaults);
+
+      expect(result.reference_no).toBe('ORD-001');
+      expect(result.shipping_method).toBe('SHP-CODE');
+      expect(result.order_status).toBe('P');
+      expect(result.order_pieces).toBe(2);
+      expect(result.order_weight).toBe(5);
+
+      expect((result.shipper as any).shipper_name).toBe('Shipper Kim');
+      expect((result.shipper as any).shipper_countrycode).toBe('KR');
+
+      expect((result.consignee as any).consignee_name).toBe('John Doe');
+      expect((result.consignee as any).consignee_countrycode).toBe('US');
+      expect((result.consignee as any).consignee_province).toBe('California');
+      expect((result.consignee as any).consignee_email).toBe('john@example.com');
+      expect((result.consignee as any).consignee_tariff).toBe('123456');
+
+      expect(result.cargotype).toBe('W');
+      expect(result.mail_cargo_type).toBe('4');
+      expect((result.cargovolume as any[])).toHaveLength(1);
+      expect((result.invoice as any[])).toHaveLength(1);
+    });
+
+    it('shipperDefaults 폴백 동작 검증 (shipper_contact_name/shipper_country_code 없을 때)', () => {
+      const orderNoContact = { ...sampleOrder, shipper_contact_name: '', shipper_country_code: '' };
+      const result = buildCreateOrderPayload('SHP-CODE', orderNoContact as any, 'US', samplePackages as any, shipperDefaults);
+
+      expect((result.shipper as any).shipper_name).toBe('SNTL Korea Co Ltd');
+      expect((result.shipper as any).shipper_countrycode).toBe('KR');
+    });
+
+    it('recipient_name 없으면 기본값 "E2E Consignee" 사용', () => {
+      const orderNoName = { ...sampleOrder, recipient_name: '' };
+      const result = buildCreateOrderPayload('SHP-CODE', orderNoName as any, 'US', samplePackages as any, shipperDefaults);
+
+      expect((result.consignee as any).consignee_name).toBe('E2E Consignee');
+    });
+
+    it('recipient_address_local 있으면 street에 괄호 추가', () => {
+      const orderWithLocal = { ...sampleOrder, recipient_address_local: '서울시 강남구' };
+      const result = buildCreateOrderPayload('SHP-CODE', orderWithLocal as any, 'US', samplePackages as any, shipperDefaults);
+
+      expect((result.consignee as any).consignee_street).toBe('123 Main St (서울시 강남구)');
+    });
+
+    it('빈 packages → cargotype=W, invoice fallback, pieces=0, weight=0', () => {
+      const result = buildCreateOrderPayload('SHP-CODE', sampleOrder as any, 'US', [], shipperDefaults);
+
+      expect(result.cargotype).toBe('W');
+      expect(result.order_pieces).toBe(0);
+      expect(result.order_weight).toBe(0);
+      expect((result.invoice as any[])).toEqual([{ invoice_enname: 'General Merchandise', invoice_quantity: '1', invoice_unitcharge: '1.00' }]);
     });
   });
 

@@ -578,6 +578,17 @@
 | **TC-P7-UI-ESTIMATE-01** | AGENCY_SHIPPER 역할 + 필수 입력 완료 시 UPS 견적 패널 표시 | UI 조건 분기 검증 | `tests/unit/orders/ups-estimate-panel.test.tsx` |
 | **TC-P7-UI-ESTIMATE-02** | AGENCY_SHIPPER 아닌 역할에서 패널 미표시 | 역할 기반 표시 격리 | `tests/unit/orders/ups-estimate-panel.test.tsx` |
 
+### 13. UPS 무역서류 관리 (Trade Document Actions)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-P8-TD-01** | previewShxkPayload + triggerCreateOrderTest 존재 | 새 서버 액션 2종 export 확인 | `tests/unit/ups/ups-trade-documents.test.ts` |
+| **TC-P8-TD-02** | buildCreateOrderPayload placeShxkOrder 연동 | payload 빌드 로직 추출 및 재사용 확인 | `tests/unit/ups/ups-trade-documents.test.ts` |
+| **TC-P8-TD-03** | UpsTradeDocumentActions preview popup 임포트 | 클라이언트에서 previewShxkPayload triggerCreateOrderTest import 확인 | `tests/unit/ups/ups-trade-documents.test.ts` |
+| **TC-P8-TD-04** | buildCreateOrderPayload 필수 필드 매핑 | reference_no/order_pieces/cargotype 등 올바른 매핑 | `tests/unit/ups/ups-labels-mapping.test.ts` |
+| **TC-P8-TD-05** | shipperDefaults 폴백 동작 | shipper_contact_name 없을 때 env 기본값 사용 | `tests/unit/ups/ups-labels-mapping.test.ts` |
+| **TC-P8-TD-06** | recipient_address_local → street 괄호 처리 | 수취인 현지주소 괄호 조합 | `tests/unit/ups/ups-labels-mapping.test.ts` |
+| **TC-P8-TD-07** | resolveShipperStreet 우선순위 3단계 | org English > org Korean > order snapshot | `tests/unit/ups/ups-labels-mapping.test.ts` |
+
 ---
 
 ## 📝 가이드라인 (R-09 Enforcement)

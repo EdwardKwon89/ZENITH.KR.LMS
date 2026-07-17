@@ -405,7 +405,8 @@
     "waybill": "Waybill",
     "logistics_invoice": "Invoice (Logistics)",
     "customs_declaration_shxk": "Customs Declaration",
-    "ups_cancel_registration": "Cancel UPS Registration"
+    "ups_cancel_registration": "Cancel UPS Registration",
+    "createorder_test": "CreateOrder Test"
   },
   "Finance": {
     "revenue_title": "Revenue Report",

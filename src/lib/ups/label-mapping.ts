@@ -51,3 +51,56 @@ export function resolveShipperStreet(
   const shipperAddrDetail = (shipperOrg?.address_detail_english as string) || (shipperOrg?.address_detail as string) || (order.shipper_address_detail as string) || '';
   return [shipperAddr, shipperAddrDetail].filter(Boolean).join(' ');
 }
+
+export function buildCreateOrderPayload(
+  shxkCode: string,
+  order: Record<string, unknown>,
+  countryCode: string,
+  packages: Record<string, unknown>[],
+  shipperDefaults: { name: string; country: string },
+): Record<string, unknown> {
+  const { cargotype, mailCargoType } = determineOrderCargotype(packages);
+  const cargovolume = buildCargovolume(packages);
+  const invoice = buildInvoiceFromItems(packages);
+  const totalPieces = packages.reduce((sum, p) => sum + Number(p.physical_box_count ?? p.packing_count ?? 1), 0);
+  const totalWeight = packages.reduce((sum, p) => sum + Number(p.gross_weight ?? 0), 0);
+
+  const shipperStreet = resolveShipperStreet(order, order.shipper_org as Record<string, unknown> | undefined);
+  const consigneeStreet = (order.recipient_address as string) || '';
+  const localAddr = (order.recipient_address_local as string) || '';
+  const fullConsigneeStreet = localAddr ? `${consigneeStreet} (${localAddr})` : consigneeStreet;
+
+  return {
+    reference_no: order.order_no as string,
+    shipping_method: shxkCode,
+    platform_id: '',
+    buyer_id: '',
+    order_status: 'P',
+    order_weight: totalWeight,
+    order_pieces: totalPieces,
+    cargotype,
+    mail_cargo_type: mailCargoType,
+    cargovolume,
+    shipper: {
+      shipper_name: (order.shipper_contact_name as string) || shipperDefaults.name,
+      shipper_countrycode: (order.shipper_country_code as string) || shipperDefaults.country,
+      shipper_province: (order.shipper_state_province as string) || '',
+      shipper_city: (order.shipper_city as string) || '',
+      shipper_street: shipperStreet,
+      shipper_postcode: (order.shipper_zipcode as string) || '',
+      shipper_telephone: (order.shipper_contact_phone as string) || '',
+    },
+    consignee: {
+      consignee_name: (order.recipient_name as string) || 'E2E Consignee',
+      consignee_countrycode: (order.recipient_country_code as string) || countryCode,
+      consignee_province: resolveProvinceEnglishName((order.recipient_state_province as string) || '', (order.recipient_country_code as string) || countryCode),
+      consignee_city: (order.recipient_city as string) || '',
+      consignee_street: fullConsigneeStreet,
+      consignee_postcode: (order.recipient_zipcode as string) || '',
+      consignee_telephone: (order.recipient_phone as string) || '',
+      consignee_email: (order.recipient_email as string) || '',
+      consignee_tariff: (order.recipient_pccc as string) || '',
+    },
+    invoice,
+  };
+}

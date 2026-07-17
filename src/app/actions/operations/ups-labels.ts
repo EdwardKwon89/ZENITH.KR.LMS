@@ -8,7 +8,7 @@ import { createorder, getnewlabel, removeorder } from '@/lib/shxk/order';
 import {
   SHXK_SHIPPER_NAME, SHXK_SHIPPER_COUNTRY,
 } from '@/lib/shxk/config';
-import { determineOrderCargotype, buildCargovolume, buildInvoiceFromItems, resolveProvinceEnglishName, resolveShipperStreet } from '@/lib/ups/label-mapping';
+import { buildCreateOrderPayload } from '@/lib/ups/label-mapping';
 import { revalidatePath } from 'next/cache';
 
 export interface IssueUpsLabelResult {
@@ -93,50 +93,12 @@ async function placeShxkOrder(
   countryCode: string,
   packages: Record<string, unknown>[],
 ): Promise<{ orderId: string; trackingNo: string | null; refrenceNo: string; message: string } | { error: string; message?: string }> {
-  const { cargotype, mailCargoType } = determineOrderCargotype(packages);
-  const cargovolume = buildCargovolume(packages);
-  const invoice = buildInvoiceFromItems(packages);
-  const totalPieces = packages.reduce((sum, p) => sum + Number(p.physical_box_count ?? p.packing_count ?? 1), 0);
-  const totalWeight = packages.reduce((sum, p) => sum + Number(p.gross_weight ?? 0), 0);
-
-  const shipperStreet = resolveShipperStreet(order, order.shipper_org as Record<string, unknown> | undefined);
-  const consigneeStreet = (order.recipient_address as string) || '';
-  const localAddr = (order.recipient_address_local as string) || '';
-  const fullConsigneeStreet = localAddr ? `${consigneeStreet} (${localAddr})` : consigneeStreet;
-
-  const orderRes = await createorder({
-    reference_no:    order.order_no as string,
-    shipping_method: shxkCode,
-    platform_id:     '',
-    buyer_id:        '',
-    order_status:    'P',
-    order_weight:    totalWeight,
-    order_pieces:    totalPieces,
-    cargotype,
-    mail_cargo_type: mailCargoType,
-    cargovolume,
-    shipper: {
-      shipper_name:        (order.shipper_contact_name as string) || SHXK_SHIPPER_NAME,
-      shipper_countrycode: (order.shipper_country_code as string) || SHXK_SHIPPER_COUNTRY,
-      shipper_province:    (order.shipper_state_province as string) || '',
-      shipper_city:        (order.shipper_city as string) || '',
-      shipper_street:      shipperStreet,
-      shipper_postcode:    (order.shipper_zipcode as string) || '',
-      shipper_telephone:   (order.shipper_contact_phone as string) || '',
-    },
-    consignee: {
-      consignee_name:        (order.recipient_name as string) || 'E2E Consignee',
-      consignee_countrycode: (order.recipient_country_code as string) || countryCode,
-      consignee_province:    resolveProvinceEnglishName((order.recipient_state_province as string) || '', (order.recipient_country_code as string) || countryCode),
-      consignee_city:        (order.recipient_city as string) || '',
-      consignee_street:      fullConsigneeStreet,
-      consignee_postcode:    (order.recipient_zipcode as string) || '',
-      consignee_telephone:   (order.recipient_phone as string) || '',
-      consignee_email:       (order.recipient_email as string) || '',
-      consignee_tariff:      (order.recipient_pccc as string) || '',
-    },
-    invoice,
+  const payload = buildCreateOrderPayload(shxkCode, order, countryCode, packages, {
+    name: SHXK_SHIPPER_NAME,
+    country: SHXK_SHIPPER_COUNTRY,
   });
+
+  const orderRes = await createorder(payload as unknown as Parameters<typeof createorder>[0]);
 
   if (orderRes.success === 0) return { error: `createorder failed: ${orderRes.message}`, message: orderRes.message };
   if (orderRes.success === 2 && !orderRes.data?.order_id) {
@@ -361,6 +323,101 @@ export async function getUpsLabelStatus(orderId: string): Promise<{ hasActiveLab
   const { supabase } = await validateUserAction();
   const label = await fetchActiveLabelByOrder(supabase, orderId);
   return { hasActiveLabel: !!label, trackingNumber: label?.tracking_number ?? null };
+}
+
+export async function previewShxkPayload(
+  orderId: string,
+  action: 'CREATEORDER' | 'WAYBILL' | 'INVOICE' | 'CUSTOMS' | 'VOID',
+): Promise<{ success: boolean; payload?: Record<string, unknown>; error?: string }> {
+  try {
+    const { supabase, profile } = await validateUserAction();
+    const permErr = await checkLabelPermission(profile);
+    if (permErr) return { success: false, error: permErr };
+
+    if (action === 'CREATEORDER') {
+      const { packages, order, error: lookupErr } = await lookupOrderPackages(supabase, orderId);
+      if (lookupErr) return { success: false, error: lookupErr };
+      if (!order) return { success: false, error: 'Order not found' };
+
+      const countryCode = (order.recipient_country_code as string)
+        || await resolveCountryCode(supabase, order.dest_port_id as string)
+        || '';
+      if (!countryCode) return { success: false, error: 'Destination country code not found' };
+
+      const shxkCode = await resolveShxkCode(supabase, order.ups_product_code as string, 'KOR', order.incoterms as string);
+      if (!shxkCode) return { success: false, error: `shipping method not found for product=${order.ups_product_code}, country=KOR, incoterms=${order.incoterms}` };
+
+      const payload = buildCreateOrderPayload(shxkCode, order, countryCode, packages, {
+        name: SHXK_SHIPPER_NAME,
+        country: SHXK_SHIPPER_COUNTRY,
+      });
+      return { success: true, payload: payload as Record<string, unknown> };
+    }
+
+    const label = await fetchActiveLabelByOrder(supabase, orderId);
+    if (!label) return { success: false, error: '발급된 라벨이 없습니다.' };
+
+    if (action === 'WAYBILL' || action === 'INVOICE' || action === 'CUSTOMS') {
+      const docTypeMap: Record<string, string> = { WAYBILL: '1', CUSTOMS: '2', INVOICE: '3' };
+      const configInfo = {
+        lable_file_type: '2',
+        lable_paper_type: '1',
+        lable_content_type: docTypeMap[action],
+        additional_info: { lable_print_datetime: 'Y' },
+      };
+      return { success: true, payload: { configInfo, listorder: [{ reference_no: label.reference_no }] } as Record<string, unknown> };
+    }
+
+    if (action === 'VOID') {
+      return { success: true, payload: { reference_no: label.reference_no } as Record<string, unknown> };
+    }
+
+    return { success: false, error: 'Unknown action' };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Unknown error';
+    logger.error('previewShxkPayload error:', err);
+    return { success: false, error: message };
+  }
+}
+
+export async function triggerCreateOrderTest(
+  orderId: string,
+): Promise<{ success: boolean; data?: { orderId: string; trackingNo: string | null; refrenceNo: string }; error?: string }> {
+  try {
+    const { supabase, profile } = await validateUserAction();
+    const permErr = await checkLabelPermission(profile);
+    if (permErr) return { success: false, error: permErr };
+
+    const { packages, order, error: lookupErr } = await lookupOrderPackages(supabase, orderId);
+    if (lookupErr) return { success: false, error: lookupErr };
+    if (!order) return { success: false, error: 'Order not found' };
+
+    const countryCode = (order.recipient_country_code as string)
+      || await resolveCountryCode(supabase, order.dest_port_id as string)
+      || '';
+    if (!countryCode) return { success: false, error: 'Destination country code not found' };
+
+    const shxkCode = await resolveShxkCode(supabase, order.ups_product_code as string, 'KOR', order.incoterms as string);
+    if (!shxkCode) return { success: false, error: `shipping method not found for product=${order.ups_product_code}, country=KOR, incoterms=${order.incoterms}` };
+
+    const orderResult = await placeShxkOrder(shxkCode, order!, countryCode, packages);
+    if ('error' in orderResult) {
+      return { success: false, error: orderResult.error };
+    }
+
+    return {
+      success: true,
+      data: {
+        orderId: orderResult.orderId,
+        trackingNo: orderResult.trackingNo,
+        refrenceNo: orderResult.refrenceNo,
+      },
+    };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Unknown error';
+    logger.error('triggerCreateOrderTest error:', err);
+    return { success: false, error: message };
+  }
 }
 
 const DOC_TYPE_CONTENT_MAP = { WAYBILL: '1', CUSTOMS: '2', INVOICE: '3' } as const;
