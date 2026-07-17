@@ -14,6 +14,8 @@ interface AddressInputProps {
     city?: string | null;
     address?: string | null;
     address_detail?: string | null;
+    address_english?: string | null;
+    address_detail_english?: string | null;
     zipcode?: string | null;
   };
   mode?: 'form-action' | 'rhf';
@@ -49,6 +51,8 @@ export function AddressInput({
   const [detailAddress, setDetailAddress] = useState(defaultValues.address_detail || '');
   const [postalCode, setPostalCode] = useState(defaultValues.zipcode || '');
   const [roadAddress, setRoadAddress] = useState(defaultValues.country_code === 'KR' ? (defaultValues.address || '') : '');
+  const [addressEnglish, setAddressEnglish] = useState(defaultValues.address_english || '');
+  const [addressDetailEnglish, setAddressDetailEnglish] = useState(defaultValues.address_detail_english || '');
   const [showPostcode, setShowPostcode] = useState(false);
 
   useEffect(() => {
@@ -164,8 +168,6 @@ export function AddressInput({
           </div>
           {mode === 'form-action' && <input name="state_province" type="hidden" value="" />}
           {mode === 'form-action' && <input name="city" type="hidden" value="" />}
-          {mode === 'form-action' && <input name="address_english" type="hidden" value="" />}
-          {mode === 'form-action' && <input name="address_detail_english" type="hidden" value="" />}
         </>
       ) : (
         <>
@@ -251,6 +253,32 @@ export function AddressInput({
               {fieldErrors.zipcode && <p className="text-xs text-red-500 mt-1">{fieldErrors.zipcode}</p>}
             </div>
           </div>
+          <div className="mb-4">
+            <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">{t('form_address_english')}</label>
+            <input
+              {...a('address_english')}
+              value={addressEnglish}
+              onChange={(e) => {
+                setAddressEnglish(e.target.value);
+                if (setValue && prefix) setValue(`${prefix}_address_english`, e.target.value);
+              }}
+              disabled={readOnly}
+              className="w-full h-10 px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">{t('form_address_detail_english')}</label>
+            <input
+              {...a('address_detail_english')}
+              value={addressDetailEnglish}
+              onChange={(e) => {
+                setAddressDetailEnglish(e.target.value);
+                if (setValue && prefix) setValue(`${prefix}_address_detail_english`, e.target.value);
+              }}
+              disabled={readOnly}
+              className="w-full h-10 px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+            />
+          </div>
         </>
       )}
 
@@ -268,14 +296,13 @@ export function AddressInput({
                 setRoadAddress(data.roadAddress);
                 setPostalCode(data.zonecode);
                 setShowPostcode(false);
+                const englishAddr = (data as any).roadAddressEnglish || '';
+                setAddressEnglish(englishAddr);
                 if (setValue && prefix) {
                   setValue(`${prefix}_address`, data.roadAddress);
                   setValue(`${prefix}_zipcode`, data.zonecode);
                   setValue(`${prefix}_address_detail`, '');
-                  // 영문 도로명주소 캡처 (다음/카카오 API 자동 제공)
-                  if ((data as any).roadAddressEnglish) {
-                    setValue(`${prefix}_address_english`, (data as any).roadAddressEnglish);
-                  }
+                  setValue(`${prefix}_address_english`, englishAddr);
                 }
                 setDetailAddress('');
               }}
