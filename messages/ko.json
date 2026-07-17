@@ -227,6 +227,8 @@
     "form_zipcode": "우편번호",
     "form_address": "주소",
     "form_address_detail": "상세주소",
+    "form_address_english": "영문 주소",
+    "form_address_detail_english": "영문 상세주소",
     "form_address_search": "주소 검색",
     "form_state_province": "시/도",
     "form_city": "시/군/구",

@@ -14,6 +14,8 @@ interface AddressInputProps {
     city?: string | null;
     address?: string | null;
     address_detail?: string | null;
+    address_english?: string | null;
+    address_detail_english?: string | null;
     zipcode?: string | null;
   };
   mode?: 'form-action' | 'rhf';
@@ -49,6 +51,8 @@ export function AddressInput({
   const [detailAddress, setDetailAddress] = useState(defaultValues.address_detail || '');
   const [postalCode, setPostalCode] = useState(defaultValues.zipcode || '');
   const [roadAddress, setRoadAddress] = useState(defaultValues.country_code === 'KR' ? (defaultValues.address || '') : '');
+  const [addressEnglish, setAddressEnglish] = useState(defaultValues.address_english || '');
+  const [addressDetailEnglish, setAddressDetailEnglish] = useState(defaultValues.address_detail_english || '');
   const [showPostcode, setShowPostcode] = useState(false);
 
   useEffect(() => {
@@ -164,6 +168,7 @@ export function AddressInput({
           </div>
           {mode === 'form-action' && <input name="state_province" type="hidden" value="" />}
           {mode === 'form-action' && <input name="city" type="hidden" value="" />}
+          {mode === 'form-action' && <input name="address_english" type="hidden" value={addressEnglish} />}
         </>
       ) : (
         <>
@@ -266,10 +271,13 @@ export function AddressInput({
                 setRoadAddress(data.roadAddress);
                 setPostalCode(data.zonecode);
                 setShowPostcode(false);
+                const englishAddr = (data as any).roadAddressEnglish || '';
+                setAddressEnglish(englishAddr);
                 if (setValue && prefix) {
                   setValue(`${prefix}_address`, data.roadAddress);
                   setValue(`${prefix}_zipcode`, data.zonecode);
                   setValue(`${prefix}_address_detail`, '');
+                  setValue(`${prefix}_address_english`, englishAddr);
                 }
                 setDetailAddress('');
               }}

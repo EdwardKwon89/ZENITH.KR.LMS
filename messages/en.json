@@ -188,6 +188,8 @@
     "form_zipcode": "Postal Code",
     "form_address": "Address",
     "form_address_detail": "Address Detail",
+    "form_address_english": "Address (English)",
+    "form_address_detail_english": "Address Detail (English)",
     "form_address_search": "Search Address",
     "form_state_province": "State/Province",
     "form_city": "City",

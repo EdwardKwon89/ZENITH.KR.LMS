@@ -24,6 +24,8 @@ async function _createShipperOrg(
     city?: string;
     address?: string;
     address_detail?: string;
+    address_english?: string;
+    address_detail_english?: string;
     zipcode?: string;
   },
 ): Promise<string> {
@@ -43,6 +45,8 @@ async function _createShipperOrg(
       city: addressFields?.city ?? null,
       address: addressFields?.address ?? null,
       address_detail: addressFields?.address_detail ?? null,
+      address_english: addressFields?.address_english ?? null,
+      address_detail_english: addressFields?.address_detail_english ?? null,
       zipcode: addressFields?.zipcode ?? null,
     })
     .select('id')
@@ -223,6 +227,8 @@ export async function createAgencyShipper(
         city: rest.city,
         address: rest.address,
         address_detail: rest.address_detail,
+        address_english: rest.address_english,
+        address_detail_english: rest.address_detail_english,
         zipcode: rest.zipcode,
       },
     );
@@ -329,7 +335,7 @@ export async function getAgencyShipperById(shipperId: string) {
         contact_email,
         contact_phone,
         country_code, state_province, city,
-        address, address_detail, zipcode
+        address, address_detail, address_english, address_detail_english, zipcode
       )
     `)
     .eq('id', shipperId)
@@ -393,6 +399,8 @@ export async function updateAgencyShipper(
       city: parsed.data.city ?? null,
       address: parsed.data.address ?? null,
       address_detail: parsed.data.address_detail ?? null,
+      address_english: parsed.data.address_english ?? null,
+      address_detail_english: parsed.data.address_detail_english ?? null,
       zipcode: parsed.data.zipcode ?? null,
     })
     .eq('id', link.shipper_org_id);
