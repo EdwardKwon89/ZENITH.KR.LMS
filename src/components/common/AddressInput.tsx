@@ -166,8 +166,8 @@ export function AddressInput({
             />
             {fieldErrors.address_detail && <p className="text-xs text-red-500 mt-1">{fieldErrors.address_detail}</p>}
           </div>
-          {mode === 'form-action' && <input name="state_province" type="hidden" value="" />}
-          {mode === 'form-action' && <input name="city" type="hidden" value="" />}
+          {mode === 'form-action' && <input name="state_province" type="hidden" value={selectedState} />}
+          {mode === 'form-action' && <input name="city" type="hidden" value={selectedCity} />}
           {mode === 'form-action' && <input name="address_english" type="hidden" value={addressEnglish} />}
         </>
       ) : (
@@ -273,11 +273,17 @@ export function AddressInput({
                 setShowPostcode(false);
                 const englishAddr = (data as any).roadAddressEnglish || '';
                 setAddressEnglish(englishAddr);
+                const sido = (data as any).sidoEnglish || (data as any).sido || '';
+                const sigungu = (data as any).sigunguEnglish || (data as any).sigungu || '';
+                setSelectedState(sido);
+                setSelectedCity(sigungu);
                 if (setValue && prefix) {
                   setValue(`${prefix}_address`, data.roadAddress);
                   setValue(`${prefix}_zipcode`, data.zonecode);
                   setValue(`${prefix}_address_detail`, '');
                   setValue(`${prefix}_address_english`, englishAddr);
+                  setValue(`${prefix}_state_province`, sido);
+                  setValue(`${prefix}_city`, sigungu);
                 }
                 setDetailAddress('');
               }}

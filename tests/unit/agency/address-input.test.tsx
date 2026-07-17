@@ -19,7 +19,15 @@ vi.mock('react-daum-postcode', () => ({
   DaumPostcodeEmbed: ({ onComplete }: { onComplete: (data: any) => void }) => (
     <div data-testid="daum-postcode-embed">
       <button
-        onClick={() => onComplete({ roadAddress: '123 Teheran-ro', zonecode: '061234', roadAddressEnglish: '123 Teheran-ro, Gangnam-gu, Seoul' })}
+        onClick={() => onComplete({
+          roadAddress: '123 Teheran-ro',
+          zonecode: '061234',
+          roadAddressEnglish: '123 Teheran-ro, Gangnam-gu, Seoul',
+          sido: '서울특별시',
+          sidoEnglish: 'Seoul',
+          sigungu: '강남구',
+          sigunguEnglish: 'Gangnam-gu',
+        })}
       >
         select-address
       </button>
@@ -146,6 +154,48 @@ describe('TC-P7-UI-ADDR-02: 주소 검색 완료 후 roadAddress + zipcode 상�
     const hiddenInput = container.querySelector('input[name="address_english"]') as HTMLInputElement;
     expect(hiddenInput).toBeInTheDocument();
     expect(hiddenInput.value).toBe('123 Teheran-ro, Gangnam-gu, Seoul');
+  });
+
+  it('KR 선택 → 검색 완료 시 state_province hidden input에 sidoEnglish가 채워진다', () => {
+    const { container } = render(<AddressInput t={mockT} />);
+
+    const searchButton = screen.getByRole('button', { name: 'Search' });
+    fireEvent.click(searchButton);
+
+    const selectAddressButton = screen.getByRole('button', { name: 'select-address' });
+    fireEvent.click(selectAddressButton);
+
+    const hiddenInput = container.querySelector('input[name="state_province"]') as HTMLInputElement;
+    expect(hiddenInput).toBeInTheDocument();
+    expect(hiddenInput.value).toBe('Seoul');
+  });
+
+  it('KR 선택 → 검색 완료 시 city hidden input에 sigunguEnglish가 채워진다', () => {
+    const { container } = render(<AddressInput t={mockT} />);
+
+    const searchButton = screen.getByRole('button', { name: 'Search' });
+    fireEvent.click(searchButton);
+
+    const selectAddressButton = screen.getByRole('button', { name: 'select-address' });
+    fireEvent.click(selectAddressButton);
+
+    const hiddenInput = container.querySelector('input[name="city"]') as HTMLInputElement;
+    expect(hiddenInput).toBeInTheDocument();
+    expect(hiddenInput.value).toBe('Gangnam-gu');
+  });
+
+  it('KR 선택 → 검색 완료 시 setValue가 sido/sigungu를 포함하여 호출된다', () => {
+    const setValue = vi.fn();
+    render(<AddressInput t={mockT} prefix="recipient" setValue={setValue} />);
+
+    const searchButton = screen.getByRole('button', { name: 'Search' });
+    fireEvent.click(searchButton);
+
+    const selectAddressButton = screen.getByRole('button', { name: 'select-address' });
+    fireEvent.click(selectAddressButton);
+
+    expect(setValue).toHaveBeenCalledWith('recipient_state_province', 'Seoul');
+    expect(setValue).toHaveBeenCalledWith('recipient_city', 'Gangnam-gu');
   });
 });
 
