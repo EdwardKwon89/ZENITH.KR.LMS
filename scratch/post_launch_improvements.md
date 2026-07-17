@@ -1535,3 +1535,15 @@
 - **예상 공수**: 0.3 MD (매핑 테이블 설계 + 코드 반영 + 테스트)
 - **우선순위**: High — SHXK 실연동 자체가 이 오류로 막히는 상태(오더 등록 자체는 정상, createorder만 실패)
 - **상태**: 🔄 Issue #573 발령(Mike 착수 대기)
+
+## [IMP-143] `UpsTradeDocumentActions.test.ts`(Issue #582 ResultPopup)의 신규 테스트 5건 전부 `fs.readFileSync` + `toContain` 소스 문자열 검사 — 실제 클릭 동작 미검증
+
+- **발견 경위**: PR#583(Mike, TASK-B-162, Issue #582 — fetchShxkTradeDocument 응답 결과 팝업) 검토 중 Jaison이 격리 워크트리에서 네거티브 컨트롤로 확인. `tests/unit/ups/ups-trade-documents.test.ts`에 추가된 5건이 전부 `fs.readFileSync('src/components/orders/UpsTradeDocumentActions.tsx')` 후 `expect(src).toContain('...')` 형태 — 컴포넌트를 실제로 렌더링(React Testing Library 등)하지 않고 소스 텍스트만 검사함. `ResultPopup`의 실제 "확인" 버튼 `onClick={onConfirm}`을 `onClick={() => {}}`(클릭해도 아무 동작 안 함)로 고의로 깨뜨린 뒤 재실행해도 10개 테스트 전부 그대로 PASS — 사용자가 명시적으로 요구한 핵심 동작("확인을 누르면 팝업을 닫는다")이 실제로 동작하는지 전혀 검증하지 못함. 실제 제출된 PR#583의 코드 자체는 diff로 직접 확인한 결과 `onClick={onConfirm}`이 정확히 연결되어 있어 기능적으로는 정상 — 병합은 승인. 동일 테스트 파일에서 이전에도 유사 문제(IMP-139, Issue #559/PR#561의 `getUpsLabelStatus` 테스트)가 지적된 바 있음 — 같은 파일에서 패턴이 반복되고 있음.
+- **현재 상태**: `ResultPopup` 컴포넌트의 렌더링·클릭 상호작용이 회귀 방지망 밖에 있음. 향후 리팩터링 중 "확인" 버튼 핸들러가 실수로 깨져도 어떤 테스트도 실패하지 않음.
+- **임시 조치**: 없음 — 코드 정확성은 Jaison이 diff로 직접 확인 완료
+- **목표 구현**: React Testing Library로 `UpsTradeDocumentActions`를 실제 렌더링 → 문서 조회 버튼 클릭 → 프리뷰 팝업 확인 클릭 → `fetchShxkTradeDocument` mock 응답이 화면(JSON pre 블록)에 실제로 표시되는지 확인 → 결과 팝업의 "확인" 버튼 클릭 → 팝업이 DOM에서 사라지는지(`queryByText`가 null 반환) 검증하는 형태로 교체. `tests/unit/agency/address-input.test.tsx`(이번 세션 DEF-103 관련 테스트)가 이미 이 패턴(실제 렌더링 + fireEvent)을 쓰고 있어 참고 가능.
+- **관련 파일**: `tests/unit/ups/ups-trade-documents.test.ts`, `src/components/orders/UpsTradeDocumentActions.tsx`
+- **관련 Issue/PR**: Issue #582, PR#583
+- **예상 공수**: 0.3 MD
+- **우선순위**: Low — 코드 자체는 정확함을 diff로 확인 완료, 회귀 방지망 보강만 필요. 다만 같은 파일에서 반복되는 패턴(IMP-139)이라 다음에 이 파일을 다시 손댈 때는 우선적으로 정리 권장
+- **상태**: ⬜ 미착수
