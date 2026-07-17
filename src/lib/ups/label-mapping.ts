@@ -10,7 +10,7 @@ export function determineOrderCargotype(packages: Record<string, unknown>[]): { 
 
 export function buildCargovolume(packages: Record<string, unknown>[]): Record<string, unknown>[] {
   return packages.map((pkg) => ({
-    child_number:       String(pkg.id ?? ''),
+    child_number:       String(pkg.id ?? '').replace(/-/g, ''),
     involume_length:    Number(pkg.length ?? 0),
     involume_width:     Number(pkg.width ?? 0),
     involume_height:    Number(pkg.height ?? 0),

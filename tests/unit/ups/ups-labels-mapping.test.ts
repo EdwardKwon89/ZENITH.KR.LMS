@@ -39,7 +39,7 @@ describe('UPS Labels Mapping Functions', () => {
   });
 
   describe('buildCargovolume', () => {
-    it('maps package dimensions correctly with pkg.id as child_number', () => {
+    it('maps package dimensions correctly with pkg.id as child_number (hyphens stripped)', () => {
       const pkgs = [
         { id: 'pkg-uuid-001', length: 30, width: 20, height: 10, gross_weight: 5 },
         { id: 'pkg-uuid-002', length: 40, width: 30, height: 20, gross_weight: 8 },
@@ -48,13 +48,19 @@ describe('UPS Labels Mapping Functions', () => {
 
       expect(result).toHaveLength(2);
       expect(result[0]).toEqual({
-        child_number: 'pkg-uuid-001', involume_length: 30, involume_width: 20,
+        child_number: 'pkguuid001', involume_length: 30, involume_width: 20,
         involume_height: 10, involume_grossweight: 5,
       });
       expect(result[1]).toEqual({
-        child_number: 'pkg-uuid-002', involume_length: 40, involume_width: 30,
+        child_number: 'pkguuid002', involume_length: 40, involume_width: 30,
         involume_height: 20, involume_grossweight: 8,
       });
+    });
+
+    it('strips hyphens from real UUID format', () => {
+      const pkgs = [{ id: '26d940f6-dcad-4579-b656-9b9982ca8feb', length: 10, width: 10, height: 10, gross_weight: 1 }];
+      const result = buildCargovolume(pkgs as any);
+      expect(result[0].child_number).toBe('26d940f6dcad4579b6569b9982ca8feb');
     });
 
     it('handles empty packages', () => {
