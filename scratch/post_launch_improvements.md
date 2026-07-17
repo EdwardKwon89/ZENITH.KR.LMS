@@ -1486,3 +1486,15 @@
 - **예상 공수**: 0.1 MD
 - **우선순위**: Low — 기능 영향 없는 순수 코드 정리
 - **상태**: ⬜ 미착수
+
+## [IMP-139] `ups-trade-documents.test.ts`의 `getUpsLabelStatus` 테스트가 실제 배선을 검증하지 못함
+
+- **발견 경위**: PR#561(Dave, TASK-B-152, Issue #559 — 무역서류 관리 UPS 문서조회/취소 버튼) 검토 중 Jaison이 네거티브 컨트롤로 확인. `tests/unit/ups/ups-trade-documents.test.ts`의 두 번째 테스트가 `src.toContain('export async function getUpsLabelStatus')`와 `src.toContain('fetchActiveLabelByOrder')`만 검사하는데, `fetchActiveLabelByOrder`는 같은 파일의 다른 함수(`fetchShxkTradeDocument`, `voidUpsLabel`)에서도 호출되므로 `getUpsLabelStatus`가 실제로 그 함수를 호출하는지와 무관하게 항상 참(true)입니다. `getUpsLabelStatus` 본문을 완전히 다른 로직(항상 `hasActiveLabel: false` 반환)으로 바꿔도 이 테스트는 2/2 PASS였습니다.
+- **현재 상태**: 첫 번째 테스트(`DOC_TYPE_CONTENT_MAP` 매핑값 검증)는 정규식으로 실제 값을 추출해 검증하므로 네거티브 컨트롤 통과(진짜 회귀 탐지 가능) — 두 번째 테스트만 형식적. 이번 PR은 Dave의 절차 위반(task file/테스트 누락) 10회 기록 이후 첫 보완 제출이라 기능적 정확성은 Jaison이 diff로 직접 재확인했고, severity가 낮아 반려 없이 병합.
+- **임시 조치**: 없음
+- **목표 구현**: `getUpsLabelStatus`를 실제로 호출해서 mock supabase 응답에 따라 `hasActiveLabel`/`trackingNumber`가 올바르게 매핑되는지 검증하는 테스트로 교체(Baker의 `resolveProvinceEnglishName` 테스트나 Dave의 `p7-shxk-kor-fixed.test.ts` 패턴 참고 — mock supabase 체인 구성)
+- **관련 파일**: `tests/unit/ups/ups-trade-documents.test.ts`, `src/app/actions/operations/ups-labels.ts`
+- **관련 Issue/PR**: Issue #559, PR#561
+- **예상 공수**: 0.2 MD
+- **우선순위**: Low — 기능 자체는 Jaison이 직접 코드 검토로 정확성 확인 완료, 테스트 보강만 필요
+- **상태**: ⬜ 미착수
