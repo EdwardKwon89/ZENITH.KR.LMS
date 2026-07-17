@@ -54,6 +54,12 @@ vi.mock('country-state-city', () => ({
       if (countryCode === 'JP') {
         return [{ isoCode: '02', name: 'Aomori', countryCode: 'JP' }];
       }
+      if (countryCode === 'KR') {
+        return [
+          { isoCode: '11', name: 'Seoul', countryCode: 'KR' },
+          { isoCode: '41', name: 'Gyeonggi Province', countryCode: 'KR' },
+        ];
+      }
       return [];
     },
   },
@@ -71,6 +77,12 @@ vi.mock('country-state-city', () => ({
           { name: 'Buffalo', stateCode: 'NY', countryCode: 'US' },
         ];
       }
+      if (countryCode === 'KR' && stateCode === '11') {
+        return [
+          { name: 'Gangnam-gu', stateCode: '11', countryCode: 'KR' },
+          { name: 'Jongno-gu', stateCode: '11', countryCode: 'KR' },
+        ];
+      }
       return [];
     },
   },
@@ -81,7 +93,7 @@ describe('TC-P7-UI-ADDR-01: 국가 KR 선택 시 주소 검색 버튼 표시 확
     render(<AddressInput t={mockT} />);
 
     const selects = screen.getAllByRole('combobox');
-    expect(selects).toHaveLength(1);
+    expect(selects.length).toBeGreaterThanOrEqual(3);
     expect((selects[0] as HTMLSelectElement).value).toBe('KR');
 
     expect(screen.getByPlaceholderText('Zip Code')).toBeInTheDocument();
@@ -91,7 +103,7 @@ describe('TC-P7-UI-ADDR-01: 국가 KR 선택 시 주소 검색 버튼 표시 확
   it('US 선택 시: 주소 검색 버튼 미표시, state/city select 표시', async () => {
     render(<AddressInput t={mockT} />);
 
-    const countrySelect = screen.getByRole('combobox');
+    const countrySelect = screen.getAllByRole('combobox')[0];
     fireEvent.change(countrySelect, { target: { value: 'US' } });
 
     await waitFor(() => {
@@ -102,10 +114,19 @@ describe('TC-P7-UI-ADDR-01: 국가 KR 선택 시 주소 검색 버튼 표시 확
     expect(selects.length).toBeGreaterThanOrEqual(2);
   });
 
+  it('KR 선택 시: 주소 검색 버튼 + state/city select 모두 표시', async () => {
+    render(<AddressInput t={mockT} />);
+
+    expect(screen.getByRole('button', { name: 'Search' })).toBeInTheDocument();
+
+    const selects = screen.getAllByRole('combobox');
+    expect(selects.length).toBeGreaterThanOrEqual(3);
+  });
+
   it('JP 선택 시: state/city select 표시', async () => {
     render(<AddressInput t={mockT} />);
 
-    const countrySelect = screen.getByRole('combobox');
+    const countrySelect = screen.getAllByRole('combobox')[0];
     fireEvent.change(countrySelect, { target: { value: 'JP' } });
 
     await waitFor(() => {
@@ -156,7 +177,7 @@ describe('TC-P7-UI-ADDR-02: 주소 검색 완료 후 roadAddress + zipcode 상�
     expect(hiddenInput.value).toBe('123 Teheran-ro, Gangnam-gu, Seoul');
   });
 
-  it('KR 선택 → 검색 완료 시 state_province hidden input에 sidoEnglish가 채워진다', () => {
+  it('KR 선택 → 검색 완료 시 state_province hidden input에 ISO코드(11=Seoul)가 채워진다', () => {
     const { container } = render(<AddressInput t={mockT} />);
 
     const searchButton = screen.getByRole('button', { name: 'Search' });
@@ -167,7 +188,7 @@ describe('TC-P7-UI-ADDR-02: 주소 검색 완료 후 roadAddress + zipcode 상�
 
     const hiddenInput = container.querySelector('input[name="state_province"]') as HTMLInputElement;
     expect(hiddenInput).toBeInTheDocument();
-    expect(hiddenInput.value).toBe('Seoul');
+    expect(hiddenInput.value).toBe('11');
   });
 
   it('KR 선택 → 검색 완료 시 city hidden input에 sigunguEnglish가 채워진다', () => {
@@ -184,7 +205,7 @@ describe('TC-P7-UI-ADDR-02: 주소 검색 완료 후 roadAddress + zipcode 상�
     expect(hiddenInput.value).toBe('Gangnam-gu');
   });
 
-  it('KR 선택 → 검색 완료 시 setValue가 sido/sigungu를 포함하여 호출된다', () => {
+  it('KR 선택 → 검색 완료 시 setValue가 ISO코드(11)와 city를 포함하여 호출된다', () => {
     const setValue = vi.fn();
     render(<AddressInput t={mockT} prefix="recipient" setValue={setValue} />);
 
@@ -194,8 +215,21 @@ describe('TC-P7-UI-ADDR-02: 주소 검색 완료 후 roadAddress + zipcode 상�
     const selectAddressButton = screen.getByRole('button', { name: 'select-address' });
     fireEvent.click(selectAddressButton);
 
-    expect(setValue).toHaveBeenCalledWith('recipient_state_province', 'Seoul');
+    expect(setValue).toHaveBeenCalledWith('recipient_state_province', '11');
     expect(setValue).toHaveBeenCalledWith('recipient_city', 'Gangnam-gu');
+  });
+
+  it('KR 선택 → 검색 시 sido 접미사(startsWith) 매칭 — "서울특별시" → ISO 11', () => {
+    const { container } = render(<AddressInput t={mockT} />);
+
+    const searchButton = screen.getByRole('button', { name: 'Search' });
+    fireEvent.click(searchButton);
+
+    const selectAddressButton = screen.getByRole('button', { name: 'select-address' });
+    fireEvent.click(selectAddressButton);
+
+    const hiddenInput = container.querySelector('input[name="state_province"]') as HTMLInputElement;
+    expect(hiddenInput.value).toBe('11');
   });
 });
 

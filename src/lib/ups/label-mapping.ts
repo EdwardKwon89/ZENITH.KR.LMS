@@ -84,7 +84,7 @@ export function buildCreateOrderPayload(
     shipper: {
       shipper_name: (order.shipper_contact_name as string) || shipperDefaults.name,
       shipper_countrycode: (order.shipper_country_code as string) || shipperDefaults.country,
-      shipper_province: (order.shipper_state_province as string) || '',
+      shipper_province: resolveProvinceEnglishName((order.shipper_state_province as string) || '', (order.shipper_country_code as string) || shipperDefaults.country),
       shipper_city: (order.shipper_city as string) || '',
       shipper_street: shipperStreet,
       shipper_postcode: (order.shipper_zipcode as string) || '',

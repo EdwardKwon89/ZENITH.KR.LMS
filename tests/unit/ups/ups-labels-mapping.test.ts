@@ -210,6 +210,16 @@ describe('UPS Labels Mapping Functions', () => {
   });
 
   describe('resolveProvinceEnglishName', () => {
+    it('한국 "11" → Seoul 변환', () => {
+      const result = resolveProvinceEnglishName('11', 'KR');
+      expect(result).toBe('Seoul');
+    });
+
+    it('한국 "41" → Gyeonggi Province 변환', () => {
+      const result = resolveProvinceEnglishName('41', 'KR');
+      expect(result).toBe('Gyeonggi Province');
+    });
+
     it('일본 "28" → Hyōgo Prefecture 변환', () => {
       const result = resolveProvinceEnglishName('28', 'JP');
       expect(result).toBe('Hyōgo Prefecture');
