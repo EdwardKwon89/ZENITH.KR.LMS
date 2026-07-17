@@ -15,6 +15,7 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
+| [#577](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/577) | [fix] SHXK createorder shipper/consignee province 풀네임→코드값 되돌림 (Sold To 0-5자 제약) (DEF-106) | b | p1 | - | 미배정 | 2026-07-17 |
 | [#574](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/574) | [fix] 오더 품명(item_name) 영문 전용 입력 제한 (DEF-105) | b | p2 | review | 미배정 | 2026-07-17 |
 | [#573](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/573) | [fix] SHXK createorder invoice[].unit_code 매핑 누락 + Packing Unit MTR 옵션 추가 (DEF-104) | b | p1 | - | 미배정 | 2026-07-17 |
 | [#571](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/571) | [fix] AddressInput KR분기 — 시/도·시/군/구 미캡처로 SHXK 화주 주/성 필수값 검증 실패 (DEF-103) | b | p1 | - | 미배정 | 2026-07-17 |
