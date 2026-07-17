@@ -8,7 +8,7 @@ import { createorder, getnewlabel, removeorder } from '@/lib/shxk/order';
 import {
   SHXK_SHIPPER_NAME, SHXK_SHIPPER_COUNTRY,
 } from '@/lib/shxk/config';
-import { determineOrderCargotype, buildCargovolume, buildInvoiceFromItems, resolveProvinceEnglishName } from '@/lib/ups/label-mapping';
+import { determineOrderCargotype, buildCargovolume, buildInvoiceFromItems, resolveProvinceEnglishName, resolveShipperStreet } from '@/lib/ups/label-mapping';
 import { revalidatePath } from 'next/cache';
 
 export interface IssueUpsLabelResult {
@@ -99,10 +99,7 @@ async function placeShxkOrder(
   const totalPieces = packages.reduce((sum, p) => sum + Number(p.physical_box_count ?? p.packing_count ?? 1), 0);
   const totalWeight = packages.reduce((sum, p) => sum + Number(p.gross_weight ?? 0), 0);
 
-  const shipperOrg = order.shipper_org as Record<string, unknown> | undefined;
-  const shipperAddr = (shipperOrg?.address_english as string) || (shipperOrg?.address as string) || (order.shipper_address as string) || '';
-  const shipperAddrDetail = (shipperOrg?.address_detail_english as string) || (shipperOrg?.address_detail as string) || (order.shipper_address_detail as string) || '';
-  const shipperStreet = [shipperAddr, shipperAddrDetail].filter(Boolean).join(' ');
+  const shipperStreet = resolveShipperStreet(order, order.shipper_org as Record<string, unknown> | undefined);
   const consigneeStreet = (order.recipient_address as string) || '';
   const localAddr = (order.recipient_address_local as string) || '';
   const fullConsigneeStreet = localAddr ? `${consigneeStreet} (${localAddr})` : consigneeStreet;

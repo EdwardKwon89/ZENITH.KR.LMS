@@ -42,3 +42,12 @@ export function resolveProvinceEnglishName(stateCode: string, countryCode: strin
   const state = State.getStateByCodeAndCountry(stateCode, countryCode);
   return state?.name || stateCode;
 }
+
+export function resolveShipperStreet(
+  order: Record<string, unknown>,
+  shipperOrg: Record<string, unknown> | undefined,
+): string {
+  const shipperAddr = (shipperOrg?.address_english as string) || (shipperOrg?.address as string) || (order.shipper_address as string) || '';
+  const shipperAddrDetail = (shipperOrg?.address_detail_english as string) || (shipperOrg?.address_detail as string) || (order.shipper_address_detail as string) || '';
+  return [shipperAddr, shipperAddrDetail].filter(Boolean).join(' ');
+}
