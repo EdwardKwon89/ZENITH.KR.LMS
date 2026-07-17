@@ -5,7 +5,9 @@ import { z } from 'zod';
  */
 export const orderItemSchema = z.object({
   sku_code: z.string().optional(), // 재고 연동을 위한 SKU 코드
-  item_name: z.string().min(1, 'Item name is required'),
+  item_name: z.string()
+    .min(1, 'Item name is required')
+    .regex(/^[A-Za-z0-9\s.,\-()&'"/#%+:]*$/, 'Item name must be in English (letters, numbers, and common symbols only)'),
   quantity: z.number().int().positive('Quantity must be at least 1'),
   unit_price: z.number().nonnegative('Unit price cannot be negative').default(0),
   currency: z.string().default('USD'),
