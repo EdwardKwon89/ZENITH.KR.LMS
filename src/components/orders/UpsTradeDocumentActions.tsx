@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { FileText, XCircle, Loader2, Send } from 'lucide-react';
-import { fetchShxkTradeDocument, voidUpsLabel, previewShxkPayload, triggerCreateOrderTest } from '@/app/actions/operations/ups-labels';
+import { fetchShxkTradeDocument, voidUpsLabel, previewShxkPayload, issueUpsLabel } from '@/app/actions/operations/ups-labels';
 import { toast } from 'sonner';
 
 type PreviewAction = 'CREATEORDER' | 'WAYBILL' | 'INVOICE' | 'CUSTOMS' | 'VOID';
@@ -81,14 +81,15 @@ export default function UpsTradeDocumentActions({ orderId, hasActiveLabel }: Ups
     if (action === 'CREATEORDER') {
       setCreateLoading(true);
       try {
-        const res = await triggerCreateOrderTest(orderId);
+        const res = await issueUpsLabel(orderId);
         if (res.success) {
-          toast.success(`createorder 성공: orderId=${res.data?.orderId}, trackingNo=${res.data?.trackingNo}`);
+          toast.success(`라벨 발급 성공: trackingNo=${res.data?.tracking_number}, referenceNo=${res.data?.reference_no}`);
+          router.refresh();
         } else {
-          toast.error(res.error || 'createorder 호출에 실패했습니다.');
+          toast.error(res.error || '라벨 발급에 실패했습니다.');
         }
       } catch (err: any) {
-        toast.error(err.message || 'createorder 호출에 실패했습니다.');
+        toast.error(err.message || '라벨 발급에 실패했습니다.');
       } finally {
         setCreateLoading(false);
       }
