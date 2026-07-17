@@ -3,7 +3,6 @@ import {
   determineOrderCargotype,
   buildCargovolume,
   buildInvoiceFromItems,
-  resolveProvinceEnglishName,
   resolveShipperStreet,
   resolveShxkUnitCode,
   buildCreateOrderPayload,
@@ -166,7 +165,7 @@ describe('UPS Labels Mapping Functions', () => {
       order_no: 'ORD-001',
       shipper_contact_name: 'Shipper Kim',
       shipper_country_code: 'KR',
-      shipper_state_province: 'Seoul',
+      shipper_state_province: '11',
       shipper_city: 'Mapo-gu',
       shipper_zipcode: '04515',
       shipper_contact_phone: '02-1234-5678',
@@ -207,10 +206,11 @@ describe('UPS Labels Mapping Functions', () => {
 
       expect((result.shipper as any).shipper_name).toBe('Shipper Kim');
       expect((result.shipper as any).shipper_countrycode).toBe('KR');
+      expect((result.shipper as any).shipper_province).toBe('11');
 
       expect((result.consignee as any).consignee_name).toBe('John Doe');
       expect((result.consignee as any).consignee_countrycode).toBe('US');
-      expect((result.consignee as any).consignee_province).toBe('California');
+      expect((result.consignee as any).consignee_province).toBe('CA');
       expect((result.consignee as any).consignee_email).toBe('john@example.com');
       expect((result.consignee as any).consignee_tariff).toBe('123456');
 
@@ -252,45 +252,4 @@ describe('UPS Labels Mapping Functions', () => {
     });
   });
 
-  describe('resolveProvinceEnglishName', () => {
-    it('한국 "11" → Seoul 변환', () => {
-      const result = resolveProvinceEnglishName('11', 'KR');
-      expect(result).toBe('Seoul');
-    });
-
-    it('한국 "41" → Gyeonggi Province 변환', () => {
-      const result = resolveProvinceEnglishName('41', 'KR');
-      expect(result).toBe('Gyeonggi Province');
-    });
-
-    it('일본 "28" → Hyōgo Prefecture 변환', () => {
-      const result = resolveProvinceEnglishName('28', 'JP');
-      expect(result).toBe('Hyōgo Prefecture');
-    });
-
-    it('일본 "13" → Tokyo 변환', () => {
-      const result = resolveProvinceEnglishName('13', 'JP');
-      expect(result).toBe('Tokyo');
-    });
-
-    it('미국 "CA" → California 변환', () => {
-      const result = resolveProvinceEnglishName('CA', 'US');
-      expect(result).toBe('California');
-    });
-
-    it('존재하지 않는 코드는 원래 코드값 폴백', () => {
-      const result = resolveProvinceEnglishName('ZZ', 'JP');
-      expect(result).toBe('ZZ');
-    });
-
-    it('빈 stateCode는 빈 문자열 반환', () => {
-      const result = resolveProvinceEnglishName('', 'JP');
-      expect(result).toBe('');
-    });
-
-    it('빈 countryCode는 stateCode 그대로 반환', () => {
-      const result = resolveProvinceEnglishName('28', '');
-      expect(result).toBe('28');
-    });
-  });
 });

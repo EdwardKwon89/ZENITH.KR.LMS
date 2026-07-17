@@ -1,7 +1,5 @@
 // Pure mapping functions — no server-only imports. Safe for client components and tests.
 
-import { State } from 'country-state-city';
-
 export function determineOrderCargotype(packages: Record<string, unknown>[]): { cargotype: string; mailCargoType: string } {
   if (packages.length === 0) return { cargotype: 'W', mailCargoType: '4' };
   const allDoc = packages.every(p => (p.content_type as string) === 'DOC');
@@ -49,12 +47,6 @@ export function resolveShxkUnitCode(packingUnit: string): string {
   return SHXK_UNIT_CODE_MAP[(packingUnit || '').toUpperCase()] || 'PCE';
 }
 
-export function resolveProvinceEnglishName(stateCode: string, countryCode: string): string {
-  if (!stateCode || !countryCode) return stateCode || '';
-  const state = State.getStateByCodeAndCountry(stateCode, countryCode);
-  return state?.name || stateCode;
-}
-
 export function resolveShipperStreet(
   order: Record<string, unknown>,
   shipperOrg: Record<string, unknown> | undefined,
@@ -96,7 +88,7 @@ export function buildCreateOrderPayload(
     shipper: {
       shipper_name: (order.shipper_contact_name as string) || shipperDefaults.name,
       shipper_countrycode: (order.shipper_country_code as string) || shipperDefaults.country,
-      shipper_province: resolveProvinceEnglishName((order.shipper_state_province as string) || '', (order.shipper_country_code as string) || shipperDefaults.country),
+      shipper_province: (order.shipper_state_province as string) || '',
       shipper_city: (order.shipper_city as string) || '',
       shipper_street: shipperStreet,
       shipper_postcode: (order.shipper_zipcode as string) || '',
@@ -105,7 +97,7 @@ export function buildCreateOrderPayload(
     consignee: {
       consignee_name: (order.recipient_name as string) || 'E2E Consignee',
       consignee_countrycode: (order.recipient_country_code as string) || countryCode,
-      consignee_province: resolveProvinceEnglishName((order.recipient_state_province as string) || '', (order.recipient_country_code as string) || countryCode),
+      consignee_province: (order.recipient_state_province as string) || '',
       consignee_city: (order.recipient_city as string) || '',
       consignee_street: fullConsigneeStreet,
       consignee_postcode: (order.recipient_zipcode as string) || '',
