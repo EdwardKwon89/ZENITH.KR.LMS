@@ -1498,3 +1498,27 @@
 - **예상 공수**: 0.2 MD
 - **우선순위**: Low — 기능 자체는 Jaison이 직접 코드 검토로 정확성 확인 완료, 테스트 보강만 필요
 - **상태**: ⬜ 미착수
+
+## [IMP-140] `buildCreateOrderPayload`의 `shipper_province` → `resolveProvinceEnglishName` 변환에 대한 테스트 부재
+
+- **발견 경위**: PR#572(Baker, TASK-B-157, Issue #571 — DEF-103 AddressInput KR분기 재설계 2차 제출) 검토 중 Jaison이 격리 워크트리에서 네거티브 컨트롤로 확인. `src/lib/ups/label-mapping.ts:87`의 수정(`shipper_province: resolveProvinceEnglishName(...)`)을 원래의 미변환 코드(`(order.shipper_state_province as string) || ''`)로 되돌린 뒤 `tests/unit/agency/address-input.test.tsx`·`tests/unit/ups/ups-labels-mapping.test.ts` 전체를 재실행해도 41개 테스트가 그대로 전부 PASS — 즉 이번 PR이 신규 추가한 `resolveProvinceEnglishName` 테스트 2건은 함수 자체(`resolveProvinceEnglishName('11','KR')` 등)만 순수 단위 테스트로 검증할 뿐, `buildCreateOrderPayload`가 실제로 `shipper_province` 필드에서 그 함수를 호출하는지는 전혀 검증하지 않음. 코드 자체는 diff로 직접 확인한 결과 정확함(Jaison 재설계 지시대로 구현됨) — 병합은 승인.
+- **현재 상태**: `shipper_province` 변환 로직이 회귀 방지망 밖에 있음. 향후 누군가 이 줄을 실수로 되돌리거나 리팩터링해도 어떤 테스트도 실패하지 않음.
+- **임시 조치**: 없음 — 코드 정확성은 Jaison이 직접 diff 검토로 확인 완료
+- **목표 구현**: `tests/unit/ups/ups-labels-mapping.test.ts`의 `buildCreateOrderPayload` 관련 describe 블록에 `order.shipper_state_province = '11'`, `order.shipper_country_code = 'KR'`인 order를 넣고 반환된 `payload.shipper.shipper_province === 'Seoul'`을 직접 검증하는 테스트 추가(기존 `consignee_province` 검증 테스트와 동일 패턴이 이미 파일에 있을 가능성 높음 — 있으면 그 옆에 shipper 버전 추가)
+- **관련 파일**: `tests/unit/ups/ups-labels-mapping.test.ts`, `src/lib/ups/label-mapping.ts`
+- **관련 Issue/PR**: Issue #571, PR#572
+- **예상 공수**: 0.1 MD
+- **우선순위**: Low — 코드 자체는 정확함을 별도 검증 완료, 회귀 방지망 보강만 필요
+- **상태**: ⬜ 미착수
+
+## [IMP-141] `AddressInput.tsx` KR 분기 — `form-action` 모드에서 `state_province`/`city` hidden input이 중복 렌더링됨
+
+- **발견 경위**: PR#572(Baker, TASK-B-157, Issue #571) 검토 중 Jaison이 diff 직접 확인. Issue #571 재설계 코멘트에서 "비KR 분기의 드롭다운 JSX를 그대로 복사해 KR 분기 안(우편번호 검색 UI와 hidden input 사이)에 추가"라고 지시했는데, 신규 드롭다운 블록(`AddressInput.tsx` 142~187행)이 자체적으로 `<input type="hidden" {...(mode === 'rhf' ? rhf(...) : { name: 'state_province' })} value={selectedState} />` 형태의 hidden input을 이미 포함하고 있음. 그런데 기존에 있던 `{mode === 'form-action' && <input name="state_province" type="hidden" value={selectedState} />}`(216행 부근, DEF-103 최초 수정분)도 그대로 남아있어, `mode === 'form-action'`(기본값)일 때 `name="state_province"`인 hidden input이 DOM에 **2개** 동시에 렌더링됨(`city`도 동일). 두 input의 `value`가 항상 같은 state(`selectedState`/`selectedCity`)를 참조하므로 현재는 값이 항상 일치해 `FormData.get()` 결과에 실질적 영향 없음 — 기능 결함 아님, 승인.
+- **현재 상태**: 중복 DOM 노드가 form-action 모드(예: Agency Shipper 등록/수정 폼)에서 항상 렌더링됨. `mode === 'rhf'`(예: `OrderRegistrationForm`)에서는 216행 블록이 `mode === 'form-action' &&`로 가드되어 렌더링 안 되므로 중복 없음.
+- **임시 조치**: 없음 — 값이 항상 동일해 현재 실사용에 문제 없음
+- **목표 구현**: 216~217행의 구 hidden input 2줄(`state_province`/`city`)을 삭제 — 142~187행 신규 드롭다운 블록의 hidden input이 이미 `mode` 분기를 자체 처리하므로 완전히 중복. `address_english` 줄(218행)은 드롭다운 블록에 대응 항목이 없으므로 그대로 유지.
+- **관련 파일**: `src/components/common/AddressInput.tsx`
+- **관련 Issue/PR**: Issue #571, PR#572
+- **예상 공수**: 0.1 MD
+- **우선순위**: Low — 기능 영향 없는 마크업 중복 정리
+- **상태**: ⬜ 미착수
