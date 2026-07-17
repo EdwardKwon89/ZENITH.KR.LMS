@@ -23,15 +23,8 @@
 | [#546](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/546) | [fix] resolveShxkCode 목적지코드 조회 → 'KOR' 고정 (Issue #545 분할 1/3) | b | p1 | review | 미배정 | 2026-07-16 |
 | [#545](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/545) | [Critical] SHXK 라벨발급 — 목적지코드 조회 버그 + Incoterms 미저장 + createorder 필드 매핑 전면 재정비 | b | p1 | review | 미배정 | 2026-07-16 |
 | [#543](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/543) | [Critical] UPS 오더 등록 전면 실패 — ups_product_code에 UUID 저장 시도로 VARCHAR(20) 초과 | b | p1 | - | 미배정 | 2026-07-16 |
-| [#539](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/539) | [fix] AddressBookClient.tsx — 주소록 관리 화면에 state_province/city/zipcode/address_detail/pccc 필드 누락 | b | p2 | - | 미배정 | 2026-07-16 |
-| [#534](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/534) | [fix] UPS 급증 긴급 수수료(zen_ups_surge_fees) 국가코드 alpha-3/alpha-2 불일치로 전체 미적용 | b | p1 | - | 미배정 | 2026-07-16 |
-| [#532](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/532) | [fix] handleConfirmSaveAddressBook — recipient_email 누락으로 주소록 저장 시 이메일 유실 | b | p2 | - | 미배정 | 2026-07-16 |
-| [#530](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/530) | [Critical] AddressInput 컴포넌트 — 국가 변경 시 자동 리셋 로직이 주소록 적용값을 덮어씀 | b | p1 | - | 미배정 | 2026-07-16 |
-| [#528](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/528) | [Critical] zen_ups_base_rates/weight_tier_rates/freight_minimums RLS — SHIPPER/AGENCY_SHIPPER 조회 불가로 UPS 운임조회 전면 실패 | b | p1 | - | 미배정 | 2026-07-16 |
-| [#526](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/526) | [Critical] zen_agency_shippers RLS 정책 누락 — SHIPPER/AGENCY_SHIPPER 역할은 소속 Agency 조회 불가 | b | p1 | - | 미배정 | 2026-07-16 |
-| [#523](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/523) | [Critical] zen_agency_shipper_zone_discounts RLS 정책 누락 — 화주 본인 조회/오더등록 시 할인율 미반영 | b | p1 | - | 미배정 | 2026-07-16 |
+| [#539](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/539) | [fix] AddressBookClient.tsx — 주소록 관리 화면에 state_province/city/zipcode/address_detail/pccc 필드 누락 | b | p2 | - | 미배정 | 2026-07-17 |
 | [#521](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/521) | [Aiden] 2026-07-16 임시 운영 방침 — Team B develop 복사 브랜치(integration/teamb-260716) 자체 개발·병합 허용 | b | p1 | - | jungjs | 2026-07-16 |
-| [#503](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/503) | [Critical] UPS 운임 구성-최종청구서 파이프라인 단절 + 기타 부가운임(실부과분) 입력 기능 부재 | b | p1 | - | 미배정 | 2026-07-16 |
 | [#499](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/499) | [design] Agency 정산 화면 — 부과금 항목별(기본운임·유류할증·기타·급증수수료) breakdown 노출 검토 | b | p3 | - | jungjs | 2026-07-16 |
 | [#473](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/473) | [Team B] 검증 절차 방침 변경 — 라이브 브라우저/DB 검증은 병합 후 JSJung이 수행 | b | - | - | 미배정 | 2026-07-14 |
 | [#358](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/358) | [Aiden] R-17 절차 오류 재발 방지 — 4단계 구조적 개선 (채번 자동화·회귀결과 신뢰 제거·CI 게이트·워크트리 격리) | a | p2 | - | jungjs | 2026-07-14 |
