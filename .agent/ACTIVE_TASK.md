@@ -16,16 +16,8 @@
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
 | [#554](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/554) | [feat] Agency·Shipper 영문주소 관리 + createorder 화주주소 영문 매핑 (Issue #551 분할 C) | b | p2 | rework | 미배정 | 2026-07-16 |
-| [#553](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/553) | [feat] SHXK createorder 응답메시지 저장 기능 (Issue #551 분할 B) | b | p2 | review | 미배정 | 2026-07-17 |
-| [#552](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/552) | [fix] cargovolume child_number → 패키지 PK 사용 + consignee_province → 영문 full name (Issue #551 분할 A) | b | p2 | review | 미배정 | 2026-07-16 |
 | [#551](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/551) | [design] createorder 매핑 개선 — child_number/consignee_province/응답메시지저장 + Agency·Shipper 영문주소 관리 | b | p2 | - | 미배정 | 2026-07-16 |
-| [#547](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/547) | [fix] Incoterms 기본값(DDP)이 화면엔 보이지만 폼 상태엔 저장 안 됨 → NULL 저장 (Issue #545 분할 2/3) | b | p1 | review | 미배정 | 2026-07-16 |
-| [#546](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/546) | [fix] resolveShxkCode 목적지코드 조회 → 'KOR' 고정 (Issue #545 분할 1/3) | b | p1 | review | 미배정 | 2026-07-16 |
-| [#545](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/545) | [Critical] SHXK 라벨발급 — 목적지코드 조회 버그 + Incoterms 미저장 + createorder 필드 매핑 전면 재정비 | b | p1 | review | 미배정 | 2026-07-16 |
-| [#543](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/543) | [Critical] UPS 오더 등록 전면 실패 — ups_product_code에 UUID 저장 시도로 VARCHAR(20) 초과 | b | p1 | - | 미배정 | 2026-07-16 |
-| [#539](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/539) | [fix] AddressBookClient.tsx — 주소록 관리 화면에 state_province/city/zipcode/address_detail/pccc 필드 누락 | b | p2 | - | 미배정 | 2026-07-17 |
 | [#521](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/521) | [Aiden] 2026-07-16 임시 운영 방침 — Team B develop 복사 브랜치(integration/teamb-260716) 자체 개발·병합 허용 | b | p1 | - | jungjs | 2026-07-16 |
-| [#499](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/499) | [design] Agency 정산 화면 — 부과금 항목별(기본운임·유류할증·기타·급증수수료) breakdown 노출 검토 | b | p3 | - | jungjs | 2026-07-16 |
 | [#473](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/473) | [Team B] 검증 절차 방침 변경 — 라이브 브라우저/DB 검증은 병합 후 JSJung이 수행 | b | - | - | 미배정 | 2026-07-14 |
 | [#358](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/358) | [Aiden] R-17 절차 오류 재발 방지 — 4단계 구조적 개선 (채번 자동화·회귀결과 신뢰 제거·CI 게이트·워크트리 격리) | a | p2 | - | jungjs | 2026-07-14 |
 | [#164](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/164) | [UAT-Epic] UPS 특송 서비스 — Team B 인수 테스트 (UAT-15~19) | b | p1 | open | jungjs | 2026-07-07 |
