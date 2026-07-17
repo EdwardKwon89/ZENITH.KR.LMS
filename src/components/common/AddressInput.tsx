@@ -164,6 +164,8 @@ export function AddressInput({
           </div>
           {mode === 'form-action' && <input name="state_province" type="hidden" value="" />}
           {mode === 'form-action' && <input name="city" type="hidden" value="" />}
+          {mode === 'form-action' && <input name="address_english" type="hidden" value="" />}
+          {mode === 'form-action' && <input name="address_detail_english" type="hidden" value="" />}
         </>
       ) : (
         <>
