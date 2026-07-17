@@ -399,7 +399,11 @@
     "select_order": "Select Order",
     "select_language": "Select Language",
     "error_not_found": "Order not found.",
-    "error_fetch": "An error occurred while fetching data."
+    "error_fetch": "An error occurred while fetching data.",
+    "waybill": "Waybill",
+    "logistics_invoice": "Invoice (Logistics)",
+    "customs_declaration_shxk": "Customs Declaration",
+    "ups_cancel_registration": "Cancel UPS Registration"
   },
   "Finance": {
     "revenue_title": "Revenue Report",

@@ -8,8 +8,9 @@ import { createorder, getnewlabel, removeorder } from '@/lib/shxk/order';
 import {
   SHXK_SHIPPER_NAME, SHXK_SHIPPER_COUNTRY,
 } from '@/lib/shxk/config';
-import { determineOrderCargotype, buildCargovolume, buildInvoiceFromItems, resolveProvinceEnglishName } from '@/lib/ups/label-mapping';
+import { determineOrderCargotype, buildCargovolume, buildInvoiceFromItems } from '@/lib/ups/label-mapping';
 import { revalidatePath } from 'next/cache';
+import { getTranslations } from 'next-intl/server';
 
 export interface IssueUpsLabelResult {
   shxk_order_id: string;
@@ -351,6 +352,45 @@ export async function voidUpsLabel(
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error';
     logger.error('voidUpsLabel error:', err);
+    return { success: false, error: message };
+  }
+}
+
+export async function getUpsLabelStatus(orderId: string): Promise<{ hasActiveLabel: boolean; trackingNumber: string | null }> {
+  const { supabase } = await validateUserAction();
+  const label = await fetchActiveLabelByOrder(supabase, orderId);
+  return { hasActiveLabel: !!label, trackingNumber: label?.tracking_number ?? null };
+}
+
+const DOC_TYPE_CONTENT_MAP = { WAYBILL: '1', CUSTOMS: '2', INVOICE: '3' } as const;
+
+export async function fetchShxkTradeDocument(
+  orderId: string,
+  docType: 'WAYBILL' | 'INVOICE' | 'CUSTOMS',
+): Promise<{ success: boolean; url?: string; error?: string }> {
+  try {
+    const { supabase, profile } = await validateUserAction();
+    const permErr = await checkLabelPermission(profile);
+    if (permErr) return { success: false, error: permErr };
+
+    const label = await fetchActiveLabelByOrder(supabase, orderId);
+    if (!label) return { success: false, error: '발급된 라벨이 없습니다.' };
+
+    const configInfo = {
+      lable_file_type: '2',
+      lable_paper_type: '1',
+      lable_content_type: DOC_TYPE_CONTENT_MAP[docType],
+      additional_info: { lable_print_datetime: 'Y' },
+    };
+    const res = await getnewlabel(configInfo, [{ reference_no: label.reference_no }]);
+
+    if (res.success !== 1 || !res.data?.label_url) {
+      return { success: false, error: res.message || '문서 조회 실패' };
+    }
+    return { success: true, url: res.data.label_url };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Unknown error';
+    logger.error('fetchShxkTradeDocument error:', err);
     return { success: false, error: message };
   }
 }
