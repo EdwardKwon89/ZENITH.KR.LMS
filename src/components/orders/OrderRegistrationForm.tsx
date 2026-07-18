@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { ZenCard, ZenButton, ZenInput, ZenBadge } from '@/components/ui/ZenUI';
 import { createOrder } from '@/app/actions/orders';
+import { updateOrder } from '@/app/actions/operations/orders';
 import { createAddressBookEntry } from '@/app/actions/operations/address-book';
 import { getCurrentUserAffiliation } from '@/app/actions/master';
 import { UpsFreightEstimateSection } from './UpsFreightEstimateSection';
@@ -32,6 +33,8 @@ interface OrderRegistrationFormProps {
   shippers: any[];
   ports: any[];
   onSuccess?: () => void;
+  orderId?: string;
+  defaultValues?: Partial<OrderRegistrationInput>;
 }
 
 type Affiliation = {
@@ -233,7 +236,9 @@ export const ORDER_REGISTRATION_DEFAULT_VALUES = {
 export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
   shippers,
   ports,
-  onSuccess
+  onSuccess,
+  orderId,
+  defaultValues: externalDefaults
 }) => {
   const t = useTranslations('Orders');
   const router = useRouter();
@@ -250,7 +255,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
     formState: { errors, isSubmitting } 
   } = useForm<OrderRegistrationInput>({
     resolver: zodResolver(orderRegistrationSchema) as any,
-    defaultValues: ORDER_REGISTRATION_DEFAULT_VALUES as any,
+    defaultValues: (externalDefaults ?? ORDER_REGISTRATION_DEFAULT_VALUES) as any,
   });
 
   const isAgencyShipper = affiliation?.role === USER_ROLES.AGENCY_SHIPPER;
@@ -695,6 +700,21 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
 
   const onSubmit = async (data: any) => {
     try {
+      if (orderId) {
+        const finalData = {
+          ...data,
+          estimated_cost: upsEstimate?.shipper?.finalFreight ?? upsEstimate?.platform?.totalSellingPrice ?? totals.freight,
+        };
+        await updateOrder(orderId, finalData as OrderRegistrationInput);
+        toast.success(t('success_update'), {
+          description: `Order #${orderId}`,
+          icon: <CheckCircle2 className="text-green-500" />
+        });
+        if (onSuccess) onSuccess();
+        setTimeout(() => router.push(`/orders/${orderId}`), 1000);
+        return;
+      }
+
       // UPS: Step 1에서 이미 ups_product_code가 올바르게 설정됨
       if (data.transport_mode === 'UPS') {
         const finalData = {
