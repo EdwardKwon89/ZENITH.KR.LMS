@@ -33,9 +33,14 @@
 
 ### 검증
 - **회귀 테스트**: 95개 파일, 620개 테스트 ALL PASS ✅
+- **CI**: Vercel PASS ✅ (PR#592)
 
 ### 커밋
 - 코드 커밋: `86b7dc1d`
+- 문서 커밋: `38a7ddfd`
+
+### PR
+- PR#592 · base: `integration/teamb-260718` · `Closes #586`
 
 ### 발견 이슈
 - 없음
