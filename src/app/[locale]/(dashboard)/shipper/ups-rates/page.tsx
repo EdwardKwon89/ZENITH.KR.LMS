@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/utils/supabase/server';
 import { getAgencyOrgIdByShipper } from '@/app/actions/agency/shipper-link';
 import { getUpsZones, getUpsProducts } from '@/app/actions/ups/rates';
-import { getPublicBaseRates, getPublicFuelSurcharges, getPublicOtherCharges, getPublicWeightTierRates, getPublicFreightMinimums } from '@/app/actions/ups/rates-public';
+import { getPublicBaseRates, getPublicFuelSurcharges, getPublicOtherCharges, getPublicWeightTierRates, getPublicFreightMinimums, getPublicSurgeFees } from '@/app/actions/ups/rates-public';
 import { ShipperUpsRatesClient } from './shipper-ups-rates-client';
 
 export default async function ShipperUpsRatesPage() {
@@ -13,7 +13,7 @@ export default async function ShipperUpsRatesPage() {
 
   const agencyOrgId = await getAgencyOrgIdByShipper(profile.org_id);
 
-  const [zones, products, baseRates, fuelSurcharges, otherCharges, weightTierRates, freightMinimums] = await Promise.all([
+  const [zones, products, baseRates, fuelSurcharges, otherCharges, weightTierRates, freightMinimums, surgeFees] = await Promise.all([
     getUpsZones(),
     getUpsProducts(),
     getPublicBaseRates(),
@@ -21,6 +21,7 @@ export default async function ShipperUpsRatesPage() {
     getPublicOtherCharges(),
     getPublicWeightTierRates(),
     getPublicFreightMinimums(),
+    getPublicSurgeFees(),
   ]);
 
   const zoneDiscountMap: Record<string, number> = {};
@@ -49,6 +50,7 @@ export default async function ShipperUpsRatesPage() {
         otherCharges={otherCharges}
         weightTierRates={weightTierRates}
         freightMinimums={freightMinimums}
+        surgeFees={surgeFees}
         zoneDiscountMap={zoneDiscountMap}
       />
     </div>
