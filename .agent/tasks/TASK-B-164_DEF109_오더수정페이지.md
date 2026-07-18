@@ -30,13 +30,13 @@
 
 ### 코드 커밋
 - 코드 커밋 해시: `187c67ff`
-- 문서 커밋 해시: (push 후 기재)
+- 문서 커밋 해시: `c520183c`
 
 ### 검증 결과
 - 빌드: `npm run build` ✅ PASS
 - 회귀 테스트: `npm run test:regression` ✅ 96 test files · 619 tests ALL PASS
 - 신규 테스트: 4/4 PASS (TC-UPDATE-01 · TC-EDIT-PAGE-01/02/03)
-- CI (PR #593): 아직 완료 전 - push 후 확인 예정
+- CI (PR #593): Regression Tests ✅ (4m57s) · Task File Check ✅ · Vercel ✅ (gh pr checks 593 직접 확인 완료)
 
 ### 설계 결정
 - `OrderRegistrationForm`은 기존 3-step wizard 구조를 유지, edit 모드에서는 `orderId` prop이 있을 때 `updateOrder` 호출로 분기
