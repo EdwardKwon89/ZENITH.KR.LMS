@@ -194,6 +194,7 @@
   "Orders": {
     "title_list": "오더 현황",
     "title_new": "신규 운송 요청",
+    "title_edit": "오더 수정",
     "type_b2b": "B2B 일반 화물",
     "type_b2c_ecom": "B2C 이커머스",
     "type_b2c_express": "B2C 특송",
@@ -218,6 +219,7 @@
     "submit": "오더 등록하기",
     "processing": "등록 중...",
     "success_create": "오더가 성공적으로 등록 되었습니다.",
+    "success_update": "오더가 성공적으로 수정 되었습니다.",
     "pccc_help": "해외 배송 시 필수 항목입니다.",
     "shipper_name": "송하인 성명/법인명",
     "shipper_contact": "화주 연락처",
