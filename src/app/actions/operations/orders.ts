@@ -180,6 +180,20 @@ export async function updateOrder(orderId: string, payload: OrderRegistrationInp
     pickup_location: validated.delivery_method === 'PICKUP' ? (validated.pickup_location ?? null) : null,
     pickup_contact_name: validated.delivery_method === 'PICKUP' ? (validated.pickup_contact_name ?? null) : null,
     pickup_contact_tel: validated.delivery_method === 'PICKUP' ? (validated.pickup_contact_tel ?? null) : null,
+    shipper_address: validated.shipper_address,
+    shipper_country_code: validated.shipper_country_code,
+    shipper_state_province: validated.shipper_state_province,
+    shipper_city: validated.shipper_city,
+    shipper_address_detail: validated.shipper_address_detail,
+    shipper_zipcode: validated.shipper_zipcode,
+    shipper_biz_no: validated.shipper_biz_no,
+    recipient_country_code: validated.recipient_country_code,
+    recipient_state_province: validated.recipient_state_province,
+    recipient_city: validated.recipient_city,
+    recipient_address_local: validated.recipient_address_local,
+    ups_product_code: validated.ups_product_code,
+    incoterms: validated.incoterms,
+    ups_service_family: validated.ups_service_family,
   });
 
   await orderRepo.deleteItemsByOrderId(orderId);
