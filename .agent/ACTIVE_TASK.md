@@ -15,6 +15,7 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
+| [#589](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/589) | [design] 예상운임 적용 로직 정리 + UPS 사후청구(실제 추가요금) 반영 설계 (An_16) | b | p2 | - | 미배정 | 2026-07-18 |
 | [#588](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/588) | [docs] UPS 오더 등록 후 처리 프로세스 현황 분석 (An_15) | b | p3 | - | 미배정 | 2026-07-18 |
 | [#587](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/587) | [feat] 오더 등록 후 수정 UI 신설 + updateOrder 필드 보완 (DEF-109) | b | p1 | - | 미배정 | 2026-07-18 |
 | [#586](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/586) | [fix] createorder 성공 후 운송장/세관신고서/인보이스 조회 실패 (DEF-108) | b | p1 | - | 미배정 | 2026-07-18 |
