@@ -28,9 +28,14 @@
 
 ### 검증
 - **회귀 테스트**: 97개 파일, 629개 테스트 ALL PASS ✅
+- **CI**: Regression Tests PASS ✅ · Task File Check PASS ✅ · Vercel PASS ✅ · Vercel Preview Comments PASS ✅ (PR#600, `gh pr checks` 실제 확인)
 
 ### 커밋
 - 코드 커밋: `e8b75ca6`
+- 문서 커밋: `352f64ed`
+
+### PR
+- PR#600 · base: `TeamB_Dev` · `Closes #597`
 
 ### 발견 이슈
 - 없음
