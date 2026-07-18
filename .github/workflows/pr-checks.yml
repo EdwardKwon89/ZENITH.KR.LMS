@@ -2,7 +2,7 @@ name: PR Checks
 
 on:
   pull_request:
-    branches: [develop, main, integration/teamb-260716]
+    branches: [develop, main, "integration/**"]
 
 jobs:
   task-file-check:
