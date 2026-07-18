@@ -188,6 +188,8 @@
     "form_zipcode": "Postal Code",
     "form_address": "Address",
     "form_address_detail": "Address Detail",
+    "form_address_english": "Address (English)",
+    "form_address_detail_english": "Address Detail (English)",
     "form_address_search": "Search Address",
     "form_state_province": "State/Province",
     "form_city": "City",
@@ -399,7 +401,12 @@
     "select_order": "Select Order",
     "select_language": "Select Language",
     "error_not_found": "Order not found.",
-    "error_fetch": "An error occurred while fetching data."
+    "error_fetch": "An error occurred while fetching data.",
+    "waybill": "Waybill",
+    "logistics_invoice": "Invoice (Logistics)",
+    "customs_declaration_shxk": "Customs Declaration",
+    "ups_cancel_registration": "Cancel UPS Registration",
+    "createorder_test": "CreateOrder Test"
   },
   "Finance": {
     "revenue_title": "Revenue Report",

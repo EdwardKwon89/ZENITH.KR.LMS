@@ -40,6 +40,8 @@ export interface CreateAgencyShipperInput {
   city?: string;
   address?: string;
   address_detail?: string;
+  address_english?: string;
+  address_detail_english?: string;
   zipcode?: string;
   is_active?: boolean;
 }

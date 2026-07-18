@@ -103,6 +103,9 @@ const NestedItems: React.FC<{
                   }}
                   className="bg-white py-2 text-xs"
                 />
+                {errors?.packages?.[nestIndex]?.items?.[k]?.item_name && (
+                  <p className="text-[9px] text-rose-500 mt-1">{errors.packages[nestIndex].items[k].item_name?.message}</p>
+                )}
               </div>
               <div className="col-span-4">
                 <label className="text-[9px] font-bold text-slate-400 mb-1 block">HS Code</label>
@@ -161,9 +164,10 @@ const NestedItems: React.FC<{
                   {...register(`packages.${nestIndex}.items.${k}.item_packing_unit`)}
                   className="w-full text-xs h-9 bg-white border border-slate-200 rounded-lg focus:outline-none"
                 >
-                  <option value="EA">EA</option>
-                  <option value="SET">SET</option>
-                  <option value="PCS">PCS</option>
+                   <option value="EA">EA</option>
+                   <option value="SET">SET</option>
+                   <option value="PCS">PCS</option>
+                   <option value="MTR">MTR</option>
                 </select>
               </div>
               <div className="col-span-3">

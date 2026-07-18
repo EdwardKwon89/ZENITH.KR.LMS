@@ -72,6 +72,8 @@ export function AgencyShipperForm({ agencyOrgId }: AgencyShipperFormProps) {
         city: (formData.get('city') as string) || undefined,
         address: (formData.get('address') as string) || undefined,
         address_detail: (formData.get('address_detail') as string) || undefined,
+        address_english: (formData.get('address_english') as string) || undefined,
+        address_detail_english: (formData.get('address_detail_english') as string) || undefined,
         zipcode: (formData.get('zipcode') as string) || undefined,
       });
 

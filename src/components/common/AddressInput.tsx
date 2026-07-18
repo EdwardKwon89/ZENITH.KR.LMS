@@ -14,6 +14,8 @@ interface AddressInputProps {
     city?: string | null;
     address?: string | null;
     address_detail?: string | null;
+    address_english?: string | null;
+    address_detail_english?: string | null;
     zipcode?: string | null;
   };
   mode?: 'form-action' | 'rhf';
@@ -49,6 +51,8 @@ export function AddressInput({
   const [detailAddress, setDetailAddress] = useState(defaultValues.address_detail || '');
   const [postalCode, setPostalCode] = useState(defaultValues.zipcode || '');
   const [roadAddress, setRoadAddress] = useState(defaultValues.country_code === 'KR' ? (defaultValues.address || '') : '');
+  const [addressEnglish, setAddressEnglish] = useState(defaultValues.address_english || '');
+  const [addressDetailEnglish, setAddressDetailEnglish] = useState(defaultValues.address_detail_english || '');
   const [showPostcode, setShowPostcode] = useState(false);
 
   useEffect(() => {
@@ -69,7 +73,7 @@ export function AddressInput({
 
   // 국가 변경 시 state 목록 갱신 (리셋은 onChange에서 처리 — Issue #530)
   useEffect(() => {
-    if (countryCode && countryCode !== 'KR') {
+    if (countryCode) {
       setStates(State.getStatesOfCountry(countryCode) ?? []);
       setCities([]);
     }
@@ -77,7 +81,7 @@ export function AddressInput({
 
   // 시/도 변경 시 city 목록 갱신 (리셋은 onChange에서 처리 — Issue #530)
   useEffect(() => {
-    if (selectedState && countryCode !== 'KR') {
+    if (selectedState && countryCode) {
       setCities(City.getCitiesOfState(countryCode, selectedState) ?? []);
     }
   }, [selectedState, countryCode]);
@@ -135,6 +139,53 @@ export function AddressInput({
         </div>
       ) : null}
 
+      {countryCode === 'KR' && (
+        <div className="grid grid-cols-2 gap-4 mb-4">
+          <div>
+            <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">{t('form_state_province')}</label>
+            <select
+              value={selectedState}
+              onChange={(e) => {
+                setSelectedState(e.target.value);
+                setSelectedCity('');
+                if (setValue && prefix) {
+                  setValue(`${prefix}_state_province`, e.target.value);
+                  setValue(`${prefix}_city`, '');
+                }
+              }}
+              disabled={readOnly || !countryCode}
+              className={`w-full h-10 px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${readOnly ? 'bg-slate-50' : ''}`}
+            >
+              <option value="">{t('form_state_province')}</option>
+              {states.map((s) => (
+                <option key={s.isoCode} value={s.isoCode}>{s.name}</option>
+              ))}
+            </select>
+            <input type="hidden" {...(mode === 'rhf' ? rhf(prefix, 'state_province', register) : { name: 'state_province' })} value={selectedState} />
+            {fieldErrors.state_province && <p className="text-xs text-red-500 mt-1">{fieldErrors.state_province}</p>}
+          </div>
+          <div>
+            <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">{t('form_city')}</label>
+            <select
+              value={selectedCity}
+              onChange={(e) => {
+                setSelectedCity(e.target.value);
+                if (setValue && prefix) setValue(`${prefix}_city`, e.target.value);
+              }}
+              disabled={readOnly || !selectedState}
+              className={`w-full h-10 px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 disabled:opacity-50 ${readOnly ? 'bg-slate-50' : ''}`}
+            >
+              <option value="">{t('form_city')}</option>
+              {cities.map((c) => (
+                <option key={`${c.name}-${c.stateCode}`} value={c.name}>{c.name}</option>
+              ))}
+            </select>
+            <input type="hidden" {...(mode === 'rhf' ? rhf(prefix, 'city', register) : { name: 'city' })} value={selectedCity} />
+            {fieldErrors.city && <p className="text-xs text-red-500 mt-1">{fieldErrors.city}</p>}
+          </div>
+        </div>
+      )}
+
       {countryCode === 'KR' ? (
         <>
           <div className="mb-4">
@@ -162,8 +213,9 @@ export function AddressInput({
             />
             {fieldErrors.address_detail && <p className="text-xs text-red-500 mt-1">{fieldErrors.address_detail}</p>}
           </div>
-          {mode === 'form-action' && <input name="state_province" type="hidden" value="" />}
-          {mode === 'form-action' && <input name="city" type="hidden" value="" />}
+          {mode === 'form-action' && <input name="state_province" type="hidden" value={selectedState} />}
+          {mode === 'form-action' && <input name="city" type="hidden" value={selectedCity} />}
+          {mode === 'form-action' && <input name="address_english" type="hidden" value={addressEnglish} />}
         </>
       ) : (
         <>
@@ -266,10 +318,25 @@ export function AddressInput({
                 setRoadAddress(data.roadAddress);
                 setPostalCode(data.zonecode);
                 setShowPostcode(false);
+                const englishAddr = (data as any).roadAddressEnglish || '';
+                setAddressEnglish(englishAddr);
+                const KR_SIDO_TO_ISOCODE: Record<string, string> = {
+                  '서울': '11', '부산': '26', '대구': '27', '인천': '28', '광주': '29',
+                  '대전': '30', '울산': '31', '세종': '50', '경기': '41', '강원': '42',
+                  '충북': '43', '충남': '44', '전북': '45', '전남': '46', '경북': '47',
+                  '경남': '48', '제주': '49',
+                };
+                const matchedIso = Object.entries(KR_SIDO_TO_ISOCODE).find(([key]) => (data as any).sido?.startsWith(key))?.[1] ?? '';
+                const matchedCity = City.getCitiesOfState('KR', matchedIso).find(c => c.name === (data as any).sigunguEnglish)?.name ?? (data as any).sigunguEnglish ?? '';
+                setSelectedState(matchedIso);
+                setSelectedCity(matchedCity);
                 if (setValue && prefix) {
                   setValue(`${prefix}_address`, data.roadAddress);
                   setValue(`${prefix}_zipcode`, data.zonecode);
                   setValue(`${prefix}_address_detail`, '');
+                  setValue(`${prefix}_address_english`, englishAddr);
+                  setValue(`${prefix}_state_province`, matchedIso);
+                  setValue(`${prefix}_city`, matchedCity);
                 }
                 setDetailAddress('');
               }}
