@@ -33,14 +33,16 @@
 
 ### 검증
 - **회귀 테스트**: 95개 파일, 620개 테스트 ALL PASS ✅
-- **CI**: Vercel PASS ✅ (PR#592)
+- **CI**: Regression Tests PASS ✅ · Task File Check PASS ✅ · Vercel PASS ✅ · Vercel Preview Comments PASS ✅ (PR#595)
 
 ### 커밋
 - 코드 커밋: `86b7dc1d`
 - 문서 커밋: `38a7ddfd`
+- Rebase: TeamB_Dev 기반 (`14cb97d4`)
 
 ### PR
-- PR#592 · base: `integration/teamb-260718` · `Closes #586`
+- ~~PR#592 (반려 — base: integration/teamb-260718)~~
+- PR#595 · base: `TeamB_Dev` · `Closes #586`
 
 ### 발견 이슈
 - 없음
