@@ -18,14 +18,6 @@
 | [#582](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/582) | [feat] fetchShxkTradeDocument 응답 결과를 별도 팝업으로 표시 | b | p3 | - | 미배정 | 2026-07-17 |
 | [#580](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/580) | [fix] SHXK createorder cargovolume child_number 하이픈 제거 (Package Reference 거부) (DEF-107) | b | p1 | - | 미배정 | 2026-07-17 |
 | [#577](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/577) | [fix] SHXK createorder shipper/consignee province 풀네임→코드값 되돌림 (Sold To 0-5자 제약) (DEF-106) | b | p1 | review | 미배정 | 2026-07-17 |
-| [#574](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/574) | [fix] 오더 품명(item_name) 영문 전용 입력 제한 (DEF-105) | b | p2 | review | 미배정 | 2026-07-17 |
-| [#573](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/573) | [fix] SHXK createorder invoice[].unit_code 매핑 누락 + Packing Unit MTR 옵션 추가 (DEF-104) | b | p1 | - | 미배정 | 2026-07-17 |
-| [#571](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/571) | [fix] AddressInput KR분기 — 시/도·시/군/구 미캡처로 SHXK 화주 주/성 필수값 검증 실패 (DEF-103) | b | p1 | - | 미배정 | 2026-07-17 |
-| [#569](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/569) | [fix] 무역서류 관리 createorder 버튼을 issueUpsLabel로 연결 (실제 라벨 발급까지 수행) | b | p2 | review | 미배정 | 2026-07-17 |
-| [#567](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/567) | [fix] PDF 다운로드 전체 차단 — CSP connect-src에 data: 추가 (DEF-102) | b | p1 | review | 미배정 | 2026-07-17 |
-| [#565](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/565) | [feat] 무역서류 관리 버튼 — createorder 테스트 버튼 추가 + 전 버튼 API 호출 전 JSON 확인 팝업 | b | p2 | review | 미배정 | 2026-07-17 |
-| [#563](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/563) | [feat] createorder 매핑 — 화주(shipper) 주소를 영문 우선으로 매핑 (Issue #554 item 4 후속) | b | p2 | review | 미배정 | 2026-07-17 |
-| [#559](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/559) | [feat] 오더 상세 '무역서류 관리' — 운송장/Invoice/세관신고서 조회 + UPS등록취소 버튼 추가 | b | p2 | review | 미배정 | 2026-07-17 |
 | [#554](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/554) | [feat] Agency·Shipper 영문주소 관리 + createorder 화주주소 영문 매핑 (Issue #551 분할 C) | b | p2 | review | 미배정 | 2026-07-17 |
 | [#551](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/551) | [design] createorder 매핑 개선 — child_number/consignee_province/응답메시지저장 + Agency·Shipper 영문주소 관리 | b | p2 | - | 미배정 | 2026-07-16 |
 | [#521](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/521) | [Aiden] 2026-07-16 임시 운영 방침 — Team B develop 복사 브랜치(integration/teamb-260716) 자체 개발·병합 허용 | b | p1 | - | jungjs | 2026-07-16 |
