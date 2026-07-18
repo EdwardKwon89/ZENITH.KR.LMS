@@ -33,6 +33,7 @@
 
 ### 검증
 - **회귀 테스트**: 95개 파일, 620개 테스트 ALL PASS ✅
+- **CI**: Regression Tests PASS ✅ · Task File Check PASS ✅ · Vercel PASS ✅ · Vercel Preview Comments PASS ✅ (PR#595, `gh pr checks` 실제 확인)
 
 ### 커밋
 - 코드 커밋: `86b7dc1d`
