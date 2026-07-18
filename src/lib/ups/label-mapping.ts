@@ -75,7 +75,7 @@ export function buildCreateOrderPayload(
   const fullConsigneeStreet = localAddr ? `${consigneeStreet} (${localAddr})` : consigneeStreet;
 
   return {
-    reference_no: order.order_no as string,
+    reference_no: (order.order_no as string).replace(/-/g, ''),
     shipping_method: shxkCode,
     platform_id: '',
     buyer_id: '',
