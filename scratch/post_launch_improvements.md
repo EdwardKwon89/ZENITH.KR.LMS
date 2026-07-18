@@ -1487,7 +1487,50 @@
 - **우선순위**: Low — 기능 영향 없는 순수 코드 정리
 - **상태**: ⬜ 미착수
 
-## [IMP-139] `ups-trade-documents.test.ts`의 `getUpsLabelStatus` 테스트가 실제 배선을 검증하지 못함
+---
+
+## [IMP-139] 정기 점검 Cron이 세션 종료와 함께 소실 — 무인 점검 공백 발생
+
+- **발견 경위**: Edward가 "Issue #503 마지막 코멘트(07-15 22:24 KST)가 12시간째 방치됐는데 그 사이 돈 `/check-request`에서 왜 안 걸렸는가"를 질의 (2026-07-16 10시경). `CronList` 조회 결과 오늘 세션 시작 시점에 등록된 Job이 0건이었음 — 07-15에 등록했던 Job(`d832e475`/`dabd6f6f`/`22c0f83e`)이 세션 종료와 함께 소실되어, 09:42 KST 재등록 전까지 정기 점검 자체가 발동하지 않는 공백이 있었음. **후속(2026-07-16 12시경)**: Team B에 `integration/teamb-260716` 자체 병합 위임 후 실시간 점검 가치가 낮아져 3개 Job 전량 의도적으로 취소 — 세션 종속성 자체는 미해결이나 오늘은 문제로 취급하지 않음
+- **현재 상태**: `CronCreate`로 등록하는 Job은 세션 전용(session-only)이라 디스크에 저장되지 않고, 호스트 세션이 종료되면 즉시 소실됨. 세션이 언제 끊겼는지 추적할 로그가 없어 공백 시작 시점을 특정할 수 없음 — 재등록할 때마다 매번 사람(Edward)이 "안 도는 것 같다"고 알아차려야 재등록되는 구조
+- **임시 조치**: 없음 — Edward가 이상 감지 시 요청하면 Aiden이 동일 스케줄로 재등록(`memory/project_periodic_check_cron_ids.md`에 최신 Job ID 기록)
+- **목표 구현**: 세션에 종속되지 않는 스케줄러로 이전 (`/schedule` 스킬의 클라우드 routine 등) — 검토 중(2026-07-16 Edward에게 "외부 이동 시 접근 불가" 대응책으로 별도 논의, 오후 설정 예정)
+- **관련 파일**: 없음 (도구 자체의 세션 종속 특성)
+- **관련 Issue**: 없음 — Edward 질의 계기 자체 발견
+- **예상 공수**: 0.2 MD (클라우드 routine 설정 자체는 간단, 다만 스킬 실행 시 필요한 `gh` 인증·MCP 연결이 클라우드 환경에서도 동일하게 동작하는지 검증 필요)
+- **우선순위**: Medium — 사람이 알아차려 재등록하면 복구되므로 치명적이진 않으나, 무인 운영 목적 자체를 무력화함
+- **상태**: ⬜ 미착수 (오후 클라우드 routine 전환 시 함께 해소 예정)
+
+---
+
+## [IMP-140] `/check-request`가 GitHub Issue의 "설계 의견 제출 → Aiden 확정 대기" 상태를 스캔하지 않음
+
+- **발견 경위**: IMP-139와 동일 계기(Issue #503 코멘트 방치 질의) — cron 공백과 별개로, `/check-request` 절차 자체를 재검토한 결과 발견 (2026-07-16)
+- **현재 상태**: `.claude/skills/check-request/SKILL.md`의 대상 파악 절차는 ①`gh pr list --state open`(열린 PR) ②`.agent/ACTIVE_TASK.md`의 🔔 상태 Task 행, 이 두 가지만 스캔함. Issue #503처럼 **PR도 없고 ACTIVE_TASK.md 행도 없는(Task file 미생성, 순수 Issue 코멘트 단계) "설계 의견(📝) 제출 → Aiden 확정(🔍) 대기"** 상태는 두 스캔 대상 어디에도 걸리지 않음 — cron이 정상 작동해 몇 번을 돌았어도 이번 건은 구조적으로 놓쳤을 것
+- **임시 조치**: 없음 — 현재는 사람이 직접 Issue를 열어봐야만 발견됨
+- **목표 구현**: `/check-request` 절차에 "Team A/B 라벨이 붙은 열린 Issue 중 마지막 코멘트 작성자가 Aiden(Claude)·Edward(`EdwardKwon89`)가 아닌 것"을 스캔하는 단계 추가 (`gh issue list --label team:a,team:b --state open --json number,comments` 후 마지막 코멘트 author 필터링). 설계 의견(📝)뿐 아니라 검토 요청성 코멘트 전반을 포괄하도록 설계
+- **관련 파일**: `.claude/skills/check-request/SKILL.md`
+- **관련 Issue**: #503 (이번 발견 계기)
+- **예상 공수**: 0.3 MD (스킬 절차 추가 + 오탐 필터링 로직 — 팀 내부 코멘트끼리 주고받는 경우 오탐 가능성 검토 필요)
+- **우선순위**: High — 검토 요청이 자동 점검망에서 완전히 벗어나는 구조적 사각지대로, 사람이 우연히 발견하지 못하면 무기한 방치될 수 있음
+- **상태**: ⬜ 미착수 (Edward 확인 후 즉시 착수 가능)
+
+---
+
+## [IMP-141] Team B "Jaison 사전 검토" 게이트가 실제로는 PR 오픈 후에만 작동 — 반려율의 근본 원인 후보
+
+- **발견 경위**: Edward가 "Jaison이 검토 후 요청하는 것으로 아는데 왜 오류가 나는가"를 질의(2026-07-16), TASK-B-135/PR#520의 실제 타임스탬프를 정밀 대조해 발견
+- **현재 상태**: 실제 타임라인 — 10:52 Jaison "작업 분배"(Dave 담당 지정, 코드 리뷰 없음) → 10:58 Dave 첫 커밋 → 11:03 PR#520 오픈(배정 11분 후) → 11:39 Aiden 정기점검이 문제 발견·반려 → **11:41 Jaison의 실제 심층 코드 리뷰(import chain 추적 등)가 처음 등장, Aiden 반려 2분 후**. 즉 이번 사례에서 "Jaison 사전 검토 후 Aiden에게 요청"이라는 전제와 달리, Jaison의 실질적 기술 리뷰는 PR 제출 이전이 아니라 Aiden(또는 누군가)이 문제를 먼저 지적한 뒤 반응적으로 이뤄짐. Team B 프로세스에 "PR 오픈 전 Jaison 리뷰 필수" 게이트가 명문화·강제되어 있지 않음
+- **임시 조치**: 없음 — 결과적으로 Aiden의 정기점검이 유일한 사전 검증 지점으로 기능 중
+- **목표 구현**: Team B 작업 흐름에 "구현 완료 → PR 오픈 **전** Jaison이 diff·CI를 직접 확인 → 통과 시에만 PR 오픈" 단계를 명문화(105_MULTITEAM_GOVERNANCE.md 또는 R-19에 반영), 가능하면 PR 템플릿에 "Jaison 사전 검토 완료 체크박스" 추가해 형식적으로도 강제
+- **관련 파일**: `docs/00_GUIDE/105_MULTITEAM_GOVERNANCE.md`, GOV_COMMON.md R-19
+- **관련 Issue**: #503/PR#520 (이번 발견 계기)
+- **예상 공수**: 0.2 MD (문서 반영) — 실효성은 Jaison의 실제 운영 습관 변화에 의존, 강제 도구화는 별도 검토
+- **우선순위**: High — 현재 구조에서는 Aiden의 사후 점검이 유일한 안전망이라, Aiden 점검 공백(IMP-139/140)이 곧 전체 품질 게이트 공백으로 직결됨
+- **상태**: 🔄 부분 적용 — 105_MULTITEAM_GOVERNANCE.md에 "팀 리더 사전 검토 의무" 조항 신설 + Issue #521에 Jaison 앞 직접 지적 코멘트 게시 완료(2026-07-16). 같은 날 이후 PR들(#536·#538·#555 등)에서 Jaison이 병합 **전** diff 단계 반려를 실제로 다수 수행한 것으로 확인(VIOLATION_TRACKER 07-16 기록 다수 참조) — 행동 변화 관측됨. PR 템플릿 체크박스 강제화(잔여 작업)는 미착수
+
+---
+## [IMP-142] `ups-trade-documents.test.ts`의 `getUpsLabelStatus` 테스트가 실제 배선을 검증하지 못함
 
 - **발견 경위**: PR#561(Dave, TASK-B-152, Issue #559 — 무역서류 관리 UPS 문서조회/취소 버튼) 검토 중 Jaison이 네거티브 컨트롤로 확인. `tests/unit/ups/ups-trade-documents.test.ts`의 두 번째 테스트가 `src.toContain('export async function getUpsLabelStatus')`와 `src.toContain('fetchActiveLabelByOrder')`만 검사하는데, `fetchActiveLabelByOrder`는 같은 파일의 다른 함수(`fetchShxkTradeDocument`, `voidUpsLabel`)에서도 호출되므로 `getUpsLabelStatus`가 실제로 그 함수를 호출하는지와 무관하게 항상 참(true)입니다. `getUpsLabelStatus` 본문을 완전히 다른 로직(항상 `hasActiveLabel: false` 반환)으로 바꿔도 이 테스트는 2/2 PASS였습니다.
 - **현재 상태**: 첫 번째 테스트(`DOC_TYPE_CONTENT_MAP` 매핑값 검증)는 정규식으로 실제 값을 추출해 검증하므로 네거티브 컨트롤 통과(진짜 회귀 탐지 가능) — 두 번째 테스트만 형식적. 이번 PR은 Dave의 절차 위반(task file/테스트 누락) 10회 기록 이후 첫 보완 제출이라 기능적 정확성은 Jaison이 diff로 직접 재확인했고, severity가 낮아 반려 없이 병합.
@@ -1499,7 +1542,7 @@
 - **우선순위**: Low — 기능 자체는 Jaison이 직접 코드 검토로 정확성 확인 완료, 테스트 보강만 필요
 - **상태**: ⬜ 미착수
 
-## [IMP-140] `buildCreateOrderPayload`의 `shipper_province` → `resolveProvinceEnglishName` 변환에 대한 테스트 부재
+## [IMP-143] `buildCreateOrderPayload`의 `shipper_province` → `resolveProvinceEnglishName` 변환에 대한 테스트 부재
 
 - **발견 경위**: PR#572(Baker, TASK-B-157, Issue #571 — DEF-103 AddressInput KR분기 재설계 2차 제출) 검토 중 Jaison이 격리 워크트리에서 네거티브 컨트롤로 확인. `src/lib/ups/label-mapping.ts:87`의 수정(`shipper_province: resolveProvinceEnglishName(...)`)을 원래의 미변환 코드(`(order.shipper_state_province as string) || ''`)로 되돌린 뒤 `tests/unit/agency/address-input.test.tsx`·`tests/unit/ups/ups-labels-mapping.test.ts` 전체를 재실행해도 41개 테스트가 그대로 전부 PASS — 즉 이번 PR이 신규 추가한 `resolveProvinceEnglishName` 테스트 2건은 함수 자체(`resolveProvinceEnglishName('11','KR')` 등)만 순수 단위 테스트로 검증할 뿐, `buildCreateOrderPayload`가 실제로 `shipper_province` 필드에서 그 함수를 호출하는지는 전혀 검증하지 않음. 코드 자체는 diff로 직접 확인한 결과 정확함(Jaison 재설계 지시대로 구현됨) — 병합은 승인.
 - **현재 상태**: `shipper_province` 변환 로직이 회귀 방지망 밖에 있음. 향후 누군가 이 줄을 실수로 되돌리거나 리팩터링해도 어떤 테스트도 실패하지 않음.
@@ -1511,7 +1554,7 @@
 - **우선순위**: Low — 코드 자체는 정확함을 별도 검증 완료, 회귀 방지망 보강만 필요
 - **상태**: ⬜ 미착수
 
-## [IMP-141] `AddressInput.tsx` KR 분기 — `form-action` 모드에서 `state_province`/`city` hidden input이 중복 렌더링됨
+## [IMP-144] `AddressInput.tsx` KR 분기 — `form-action` 모드에서 `state_province`/`city` hidden input이 중복 렌더링됨
 
 - **발견 경위**: PR#572(Baker, TASK-B-157, Issue #571) 검토 중 Jaison이 diff 직접 확인. Issue #571 재설계 코멘트에서 "비KR 분기의 드롭다운 JSX를 그대로 복사해 KR 분기 안(우편번호 검색 UI와 hidden input 사이)에 추가"라고 지시했는데, 신규 드롭다운 블록(`AddressInput.tsx` 142~187행)이 자체적으로 `<input type="hidden" {...(mode === 'rhf' ? rhf(...) : { name: 'state_province' })} value={selectedState} />` 형태의 hidden input을 이미 포함하고 있음. 그런데 기존에 있던 `{mode === 'form-action' && <input name="state_province" type="hidden" value={selectedState} />}`(216행 부근, DEF-103 최초 수정분)도 그대로 남아있어, `mode === 'form-action'`(기본값)일 때 `name="state_province"`인 hidden input이 DOM에 **2개** 동시에 렌더링됨(`city`도 동일). 두 input의 `value`가 항상 같은 state(`selectedState`/`selectedCity`)를 참조하므로 현재는 값이 항상 일치해 `FormData.get()` 결과에 실질적 영향 없음 — 기능 결함 아님, 승인.
 - **현재 상태**: 중복 DOM 노드가 form-action 모드(예: Agency Shipper 등록/수정 폼)에서 항상 렌더링됨. `mode === 'rhf'`(예: `OrderRegistrationForm`)에서는 216행 블록이 `mode === 'form-action' &&`로 가드되어 렌더링 안 되므로 중복 없음.
@@ -1523,7 +1566,7 @@
 - **우선순위**: Low — 기능 영향 없는 마크업 중복 정리
 - **상태**: ⬜ 미착수
 
-## [IMP-142] `buildInvoiceFromItems`가 SHXK 필수 필드 `invoice[].unit_code`를 payload에 전혀 포함하지 않음
+## [IMP-145] `buildInvoiceFromItems`가 SHXK 필수 필드 `invoice[].unit_code`를 payload에 전혀 포함하지 않음
 
 - **발견 경위**: JSJung이 `SHXK_TEST_MOCK=false`로 오더 ZEN-2026-000001 실제 createorder 재시도 중 발견(DEF-103 발신인 주/성 오류·품명 한글 오류를 순서대로 해결한 뒤 세 번째로 발생). 실제 SHXK 응답 오류: `API创建并预报订单失败：创建预报失败!Invalid or missing Product/Unit/UnitOfMeasurement/Code for product number 1. Valid length is 1 to 3 alphanumeric`.
 - **근본 원인**: `docs/80_RawData/Phase8_UPS_API_리서치_결과.md:153`에 명시된 SHXK API 스펙 — `invoice[].unit_code`: `단위: MTR(미터)/PCE(개)/SET(세트), 기본 PCE`. 문서상 "기본 PCE"라 생략 가능해 보이지만 실제 SHXK 서버는 누락 시 위 오류로 거부함. `src/lib/ups/label-mapping.ts:23~38`의 `buildInvoiceFromItems()`는 `invoice_enname`/`invoice_quantity`/`invoice_unitcharge`/`sku`/`hs_code`만 매핑하고 `unit_code`는 애초에 payload 객체에 키 자체가 없음. `zen_order_items.item_packing_unit` 컬럼에 값("EA")은 있으나 SHXK 허용값(MTR/PCE/SET)과 다른 코드 체계라 그대로 매핑 불가 — 별도 변환 테이블 필요.
@@ -1536,9 +1579,9 @@
 - **우선순위**: High — SHXK 실연동 자체가 이 오류로 막히는 상태(오더 등록 자체는 정상, createorder만 실패)
 - **상태**: 🔄 Issue #573 발령(Mike 착수 대기)
 
-## [IMP-143] `UpsTradeDocumentActions.test.ts`(Issue #582 ResultPopup)의 신규 테스트 5건 전부 `fs.readFileSync` + `toContain` 소스 문자열 검사 — 실제 클릭 동작 미검증
+## [IMP-146] `UpsTradeDocumentActions.test.ts`(Issue #582 ResultPopup)의 신규 테스트 5건 전부 `fs.readFileSync` + `toContain` 소스 문자열 검사 — 실제 클릭 동작 미검증
 
-- **발견 경위**: PR#583(Mike, TASK-B-162, Issue #582 — fetchShxkTradeDocument 응답 결과 팝업) 검토 중 Jaison이 격리 워크트리에서 네거티브 컨트롤로 확인. `tests/unit/ups/ups-trade-documents.test.ts`에 추가된 5건이 전부 `fs.readFileSync('src/components/orders/UpsTradeDocumentActions.tsx')` 후 `expect(src).toContain('...')` 형태 — 컴포넌트를 실제로 렌더링(React Testing Library 등)하지 않고 소스 텍스트만 검사함. `ResultPopup`의 실제 "확인" 버튼 `onClick={onConfirm}`을 `onClick={() => {}}`(클릭해도 아무 동작 안 함)로 고의로 깨뜨린 뒤 재실행해도 10개 테스트 전부 그대로 PASS — 사용자가 명시적으로 요구한 핵심 동작("확인을 누르면 팝업을 닫는다")이 실제로 동작하는지 전혀 검증하지 못함. 실제 제출된 PR#583의 코드 자체는 diff로 직접 확인한 결과 `onClick={onConfirm}`이 정확히 연결되어 있어 기능적으로는 정상 — 병합은 승인. 동일 테스트 파일에서 이전에도 유사 문제(IMP-139, Issue #559/PR#561의 `getUpsLabelStatus` 테스트)가 지적된 바 있음 — 같은 파일에서 패턴이 반복되고 있음.
+- **발견 경위**: PR#583(Mike, TASK-B-162, Issue #582 — fetchShxkTradeDocument 응답 결과 팝업) 검토 중 Jaison이 격리 워크트리에서 네거티브 컨트롤로 확인. `tests/unit/ups/ups-trade-documents.test.ts`에 추가된 5건이 전부 `fs.readFileSync('src/components/orders/UpsTradeDocumentActions.tsx')` 후 `expect(src).toContain('...')` 형태 — 컴포넌트를 실제로 렌더링(React Testing Library 등)하지 않고 소스 텍스트만 검사함. `ResultPopup`의 실제 "확인" 버튼 `onClick={onConfirm}`을 `onClick={() => {}}`(클릭해도 아무 동작 안 함)로 고의로 깨뜨린 뒤 재실행해도 10개 테스트 전부 그대로 PASS — 사용자가 명시적으로 요구한 핵심 동작("확인을 누르면 팝업을 닫는다")이 실제로 동작하는지 전혀 검증하지 못함. 실제 제출된 PR#583의 코드 자체는 diff로 직접 확인한 결과 `onClick={onConfirm}`이 정확히 연결되어 있어 기능적으로는 정상 — 병합은 승인. 동일 테스트 파일에서 이전에도 유사 문제(IMP-142, Issue #559/PR#561의 `getUpsLabelStatus` 테스트)가 지적된 바 있음 — 같은 파일에서 패턴이 반복되고 있음.
 - **현재 상태**: `ResultPopup` 컴포넌트의 렌더링·클릭 상호작용이 회귀 방지망 밖에 있음. 향후 리팩터링 중 "확인" 버튼 핸들러가 실수로 깨져도 어떤 테스트도 실패하지 않음.
 - **임시 조치**: 없음 — 코드 정확성은 Jaison이 diff로 직접 확인 완료
 - **목표 구현**: React Testing Library로 `UpsTradeDocumentActions`를 실제 렌더링 → 문서 조회 버튼 클릭 → 프리뷰 팝업 확인 클릭 → `fetchShxkTradeDocument` mock 응답이 화면(JSON pre 블록)에 실제로 표시되는지 확인 → 결과 팝업의 "확인" 버튼 클릭 → 팝업이 DOM에서 사라지는지(`queryByText`가 null 반환) 검증하는 형태로 교체. `tests/unit/agency/address-input.test.tsx`(이번 세션 DEF-103 관련 테스트)가 이미 이 패턴(실제 렌더링 + fireEvent)을 쓰고 있어 참고 가능.
