@@ -23,22 +23,22 @@
 
 > `createorder` 호출부(`buildCreateOrderPayload` 내부)는 하이픈 포함 상태로 정상 동작 중이므로 수정 없음.
 
-#### 2. 테스트 추가 (`tests/unit/ups/ups-trade-documents.test.ts`)
+#### 2. 테스트 재작성 (`tests/unit/ups/ups-trade-documents.test.ts`)
 
-- `fetchAndSaveLabel`이 `getnewlabel` 호출 시 하이픈 제거 검증
-- `voidUpsLabel`이 `removeorder` 호출 시 하이픈 제거 검증
-- `fetchShxkTradeDocument`이 `getnewlabel` 호출 시 하이픈 제거 검증
-- `previewShxkPayload` 미리보기도 하이픈 제거 검증
-- `placeShxkOrder` 호출부는 하이픈 제거하지 않는 검증
+반려 사유(vacuous test) 대응 — `fs.readFileSync` + `toContain` 소스 문자열 검사 방식 전부 제거, `vi.mock` + `toHaveBeenCalledWith` 동작 기반 검증으로 재작성:
+
+- `voidUpsLabel` → `removeorder('ZEN-2026-000001')` 호출 시 하이픈 제거 → `toHaveBeenCalledWith('ZEN2026000001')`
+- `fetchShxkTradeDocument` → `getnewlabel` 호출 시 하이픈 제거 (WAYBILL/INVOICE/CUSTOMS 3건)
+- `voidUpsLabel` 호출 시 `getnewlabel` 미호출 검증
 
 ### 검증
 - **회귀 테스트**: 95개 파일, 620개 테스트 ALL PASS ✅
-- **CI**: Regression Tests PASS ✅ · Task File Check PASS ✅ · Vercel PASS ✅ · Vercel Preview Comments PASS ✅ (PR#595)
 
 ### 커밋
 - 코드 커밋: `86b7dc1d`
 - 문서 커밋: `38a7ddfd`
 - Rebase: TeamB_Dev 기반 (`14cb97d4`)
+- 테스트 재작성: push 후 CI 확인 필요
 
 ### PR
 - ~~PR#592 (반려 — base: integration/teamb-260718)~~
