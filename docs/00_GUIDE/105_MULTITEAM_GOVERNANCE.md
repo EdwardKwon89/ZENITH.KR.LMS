@@ -39,10 +39,19 @@
 ## 브랜치 전략 (Multi-Team)
 
 ```
-Team A: feature/teama-*  ─┐
-Team B: feature/teamb-*  ─┼→ develop (Aiden PR 리뷰·머지) → main (Sprint 완료 시)
-Team C: feature/teamc-*  ─┘
+Team A: feature/teama-*  ────────────────────────────→ develop (Aiden PR 리뷰·머지) → main (Sprint 완료 시)
+Team B: feature/teamb-*  → TeamB_Dev (Jaison 자체 병합) ─┘
+Team C: feature/teamc-*  ────────────────────────────→ develop
 ```
+
+### Team B 고정 통합 브랜치 — `TeamB_Dev` (2026-07-18 Edward 지시)
+
+Team B는 개별 `feature/teamb-*` 브랜치를 **develop에 직접 PR 제출하지 않고**, 먼저 고정 브랜치 `TeamB_Dev`로 자체 병합해 최신 상태를 유지한다.
+
+- **개별 → TeamB_Dev**: Jaison 사전검토(diff·CI) 후 팀 자체 판단으로 병합 (Aiden 승인 불요)
+- **TeamB_Dev → develop**: Aiden이 정기적으로(1일 1~2회 권장) 배치 병합 — develop 병합은 여전히 Aiden 단독 권한(R-17 §0/R-19 불변)
+- 이전에는 `integration/teamb-YYMMDD` 형태로 매일 새 브랜치를 만들었으나(2026-07-16~18), 브랜치명이 바뀔 때마다 CI 트리거 목록을 갱신해야 하는 문제가 반복돼 **고정 브랜치로 전환**(과거 `integration/teamb-*` 브랜치는 이력 보존용으로 남겨두고 신규 작업 대상에서 제외)
+- Aiden의 배치 병합 시 develop→TeamB_Dev 역방향 병합도 함께 수행해 두 브랜치의 드리프트를 방지한다(충돌은 시간순으로 해소 — [107_MULTIAGENT_SCALING_PROPOSAL.md](107_MULTIAGENT_SCALING_PROPOSAL.md) 참조)
 
 - 각 팀은 `develop`을 베이스로 브랜치 생성
 - PR 대상: `develop` (팀 리더가 PR 생성 + Aiden 검토 요청)
