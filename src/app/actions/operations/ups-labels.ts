@@ -144,7 +144,7 @@ async function fetchAndSaveLabel(
     lable_content_type: '4',
     additional_info: { lable_print_datetime: 'Y' },
   }
-  const labelRes = await getnewlabel(configInfo, [{ reference_no: referenceNo }]);
+  const labelRes = await getnewlabel(configInfo, [{ reference_no: referenceNo.replace(/-/g, '') }]);
 
   if (labelRes.success !== 1 || !labelRes.data) {
     logger.warn(`getnewlabel failed for ${referenceNo}: ${labelRes.message}`);
@@ -299,7 +299,7 @@ export async function voidUpsLabel(
     const label = await fetchActiveLabelByOrder(supabase, orderId);
     if (!label) return { success: false, error: 'Void할 레이블이 없습니다.' };
 
-    const removeRes = await removeorder(label.reference_no);
+    const removeRes = await removeorder(label.reference_no.replace(/-/g, ''));
     if (removeRes.success === 0) {
       logger.warn(`removeorder API warning for order ${orderId}: ${removeRes.message}`);
     }
@@ -365,11 +365,11 @@ export async function previewShxkPayload(
         lable_content_type: docTypeMap[action],
         additional_info: { lable_print_datetime: 'Y' },
       };
-      return { success: true, payload: { configInfo, listorder: [{ reference_no: label.reference_no }] } as Record<string, unknown> };
+      return { success: true, payload: { configInfo, listorder: [{ reference_no: label.reference_no.replace(/-/g, '') }] } as Record<string, unknown> };
     }
 
     if (action === 'VOID') {
-      return { success: true, payload: { reference_no: label.reference_no } as Record<string, unknown> };
+      return { success: true, payload: { reference_no: label.reference_no.replace(/-/g, '') } as Record<string, unknown> };
     }
 
     return { success: false, error: 'Unknown action' };
@@ -440,7 +440,7 @@ export async function fetchShxkTradeDocument(
       lable_content_type: DOC_TYPE_CONTENT_MAP[docType],
       additional_info: { lable_print_datetime: 'Y' },
     };
-    const res = await getnewlabel(configInfo, [{ reference_no: label.reference_no }]);
+    const res = await getnewlabel(configInfo, [{ reference_no: label.reference_no.replace(/-/g, '') }]);
 
     if (res.success !== 1 || !res.data?.label_url) {
       return { success: false, error: res.message || '문서 조회 실패' };

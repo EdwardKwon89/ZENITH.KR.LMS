@@ -112,3 +112,60 @@ describe('Issue #582: fetchShxkTradeDocument 응답 결과 팝업', () => {
     expect(src).not.toContain('window.open(res.url');
   });
 });
+
+describe('DEF-108: reference_no 하이픈 제거 (getnewlabel/removeorder)', () => {
+  it('fetchAndSaveLabel이 getnewlabel 호출 시 reference_no에서 하이픈을 제거한다', async () => {
+    const fs = await import('fs');
+    const src = fs.readFileSync('src/app/actions/operations/ups-labels.ts', 'utf-8');
+
+    const fetchAndSaveLabelBody = src.substring(
+      src.indexOf('async function fetchAndSaveLabel'),
+      src.indexOf('async function markAllPackagesIssued'),
+    );
+    expect(fetchAndSaveLabelBody).toContain("reference_no: referenceNo.replace(/-/g, '')");
+  });
+
+  it('voidUpsLabel이 removeorder 호출 시 reference_no에서 하이픈을 제거한다', async () => {
+    const fs = await import('fs');
+    const src = fs.readFileSync('src/app/actions/operations/ups-labels.ts', 'utf-8');
+
+    const voidUpsLabelBody = src.substring(
+      src.indexOf('export async function voidUpsLabel'),
+      src.indexOf('export async function getUpsLabelStatus'),
+    );
+    expect(voidUpsLabelBody).toContain("removeorder(label.reference_no.replace(/-/g, ''))");
+  });
+
+  it('fetchShxkTradeDocument이 getnewlabel 호출 시 reference_no에서 하이픈을 제거한다', async () => {
+    const fs = await import('fs');
+    const src = fs.readFileSync('src/app/actions/operations/ups-labels.ts', 'utf-8');
+
+    const fetchTradeDocBody = src.substring(
+      src.indexOf('export async function fetchShxkTradeDocument'),
+      src.length,
+    );
+    expect(fetchTradeDocBody).toContain("reference_no: label.reference_no.replace(/-/g, '')");
+  });
+
+  it('previewShxkPayload 미리보기도 reference_no에서 하이픈을 제거한다', async () => {
+    const fs = await import('fs');
+    const src = fs.readFileSync('src/app/actions/operations/ups-labels.ts', 'utf-8');
+
+    const previewBody = src.substring(
+      src.indexOf('export async function previewShxkPayload'),
+      src.indexOf('export async function triggerCreateOrderTest'),
+    );
+    expect(previewBody).toContain("reference_no: label.reference_no.replace(/-/g, '')");
+  });
+
+  it('createorder 호출부의 reference_no는 하이픈 제거하지 않는다', async () => {
+    const fs = await import('fs');
+    const actionsSrc = fs.readFileSync('src/app/actions/operations/ups-labels.ts', 'utf-8');
+
+    const placeOrderBody = actionsSrc.substring(
+      actionsSrc.indexOf('async function placeShxkOrder'),
+      actionsSrc.indexOf('async function saveInitialLabel'),
+    );
+    expect(placeOrderBody).not.toContain('.replace(/-/g');
+  });
+});
