@@ -1613,24 +1613,24 @@
 - **우선순위**: Medium — WW_FLIGHT(Freight) 주문이 실제 운영되기 전까지는 영향 없음
 - **상태**: ⬜ 미착수
 
-## [IMP-149] UPS 원가(cost_price) 세분화 불일치 — NonDoc 상품 0.5kg 단위 세분값(5.5~19.5kg) 및 서류/WWEF tier 실측치 없음
+## [IMP-149] UPS 원가(cost_price) 세분화 불일치 — NonDoc 0.5kg 단위 세분값(5.5~19.5kg) 및 서류/WWEF tier 실측치 없음 — **일부 해결(SAVER)**
 
-- **발견 경위**: 원가표.xlsx(KR-P) 원가 적재(마이그레이션 20260719000100) 중 확인. `zen_ups_base_rates`는 현재 상품당 16개 이산 중량점(0.5~5kg 0.5단위, 이후 7/10/15/20/25/30kg)만 보유하나, 실제 KR-P 원가는 Non-Document 상품(SAVER_NONDOC/EXPRESS_NONDOC)에 대해 0.5~20kg 전 구간을 0.5kg 단위(40개 점)로 제공함 — 5.5/6/6.5/.../19.5kg 등 26개 중량점은 실제 원가 값이 있음에도 DB에 해당 행 자체가 없어 반영 못함(1200건의 UPDATE 시도 중 630건이 매칭 행 없어 no-op). 이 gap은 이번 작업 범위(원가 갱신)에서 신규 INSERT를 보류(같은 이유로 selling_price 정책 미정 — IMP-147과 연동)했기 때문에 남음. 또한 서류(Document) 2개 상품·WWEF는 실제 원가표에 21kg 이상 tier 구간 데이터 자체가 없어(문서는 5kg cap, WWEF는 71kg부터 시작) 해당 조합의 tier_rates는 기존 더미값 그대로임.
-- **현재 상태**: 위 26개 세분 중량점 및 서류/WWEF 일부 tier는 여전히 더미(placeholder) cost_price 사용 중.
+- **발견 경위**: 원가표.xlsx(KR-P) 원가 적재(마이그레이션 20260719000100) 중 확인. `zen_ups_base_rates`는 상품당 16개 이산 중량점(0.5~5kg 0.5단위, 이후 7/10/15/20/25/30kg)만 보유하나, 실제 KR-P 원가는 Non-Document 상품(SAVER_NONDOC/EXPRESS_NONDOC)에 대해 0.5~20kg 전 구간을 0.5kg 단위(40개 점)로 제공 — 5.5/6/.../19.5kg 등 26개 중량점은 실제 원가 값이 있음에도 DB에 행 자체가 없어 반영 못함.
+- **현재 상태**: **WW_SAVER_NONDOC은 해결 완료**(마이그레이션 20260719000200) — `docs/80_RawData/20260609 UPS 특송 요금 정보.xlsx`("수출_Express SAVER" 시트)에서 SNTL 실 판매가를 확보해, 26개 결측 중량점 전부를 원가+판매가 모두 실측치로 신규 생성(260건 INSERT). **WW_EXPRESS_NONDOC은 여전히 미해결**(SNTL 판매가 출처 미확보로 신규 행 생성 보류, 26개 중량점 그대로 결측). WW_EXPEDITED(정수 단위 11개 중량점: 6,8,9,11~14,16~19)도 동일 사유로 미해결. 서류(Document)·WWEF의 tier 구간 부재는 원본 자료 자체에 없어 변동 없음.
 - **임시 조치**: 없음
-- **목표 구현**: (1) NonDoc 상품의 5.5~19.5kg 신규 weight_kg 행을 실제 원가값으로 INSERT(단, selling_price 마크업 정책 결정 후 — IMP-150 참조), (2) 서류/WWEF의 부재 tier 구간은 실제 서비스 제공 여부 확인 후 더미값 유지 여부 결정
-- **관련 파일**: `supabase/migrations/20260719000100_sntl_cost_price_update.sql`, `docs/80_RawData/20260609 SNTL 자료/원가표.xlsx`
-- **예상 공수**: 0.5 MD
-- **우선순위**: Medium — 현재 20kg 이하 실제 발생 빈도가 높은 정수/반정수 중량(1,2,3...20kg)은 이미 커버되어 있어 즉시 장애는 아니나, 예: 6.5kg 화물의 원가 계산이 부정확할 수 있음
-- **상태**: ⬜ 미착수
+- **목표 구현**: WW_EXPRESS_NONDOC/WW_EXPEDITED의 SNTL 판매가 원본 자료 확보 후 동일 방식(원가+판매가 짝지어 INSERT)으로 마무리
+- **관련 파일**: `supabase/migrations/20260719000100_sntl_cost_price_update.sql`, `supabase/migrations/20260719000200_sntl_saver_selling_price.sql`
+- **예상 공수**: 0.3 MD (Express/Expedited 판매가 자료만 확보되면)
+- **우선순위**: Medium
+- **상태**: 🔄 부분 완료(SAVER_NONDOC만)
 
-## [IMP-150] SNTL 원가 적재 후 판매가(selling_price)/마크업 정책 미정
+## [IMP-150] SNTL 원가 적재 후 판매가(selling_price)/마크업 정책 — **SAVER는 실측치 확보, 나머지 상품 미정**
 
-- **발견 경위**: SNTL 원가표.xlsx 적재(2026-07-19) 시 Edward가 "원가만 우선 반영, 판매가는 별도 결정"으로 확정. `zen_ups_base_rates.selling_price`/`zen_ups_weight_tier_rates.price_per_kg_selling`/`zen_ups_freight_minimums.min_charge_selling`은 기존 더미값(원가×1.25 수준 추정) 그대로 방치됨.
-- **현재 상태**: cost_price는 실제 UPS 납부 원가(KR-P×1.07) 반영 완료, selling_price는 원가와 무관한 더미값 유지 — 현재 마진율이 실제와 전혀 다름(일부 조합은 원가가 더미 판매가보다 높아 역마진 상태일 가능성 있음, 미검증).
+- **발견 경위**: SNTL 원가표.xlsx 적재(2026-07-19) 시 처음엔 "원가만 우선 반영, 판매가는 별도 결정"으로 진행했으나, Edward 확인 결과 `docs/80_RawData/20260609 UPS 특송 요금 정보.xlsx`("수출_Express SAVER" 시트)에 **SNTL의 실제 판매가**가 이미 존재함을 확인(같은 파일에 "UPS 판매가"(공식 정가, PDF와 일치)도 별도 블록으로 같이 들어있어 처음엔 혼동 — 서류는 두 값이 우연히 같고, 비서류는 SNTL 판매가가 UPS 정가의 약 1/4 수준으로 크게 다름).
+- **현재 상태**: **WW_SAVER_DOC(0.5~1.5kg만)·WW_SAVER_NONDOC(전 구간)은 실측 판매가로 교체 완료**(마이그레이션 20260719000200, cost/selling 비율 약 70% = 마진 약 30%로 확인). 남은 gap: (1) WW_SAVER_DOC 2.0~5.0kg 판매가는 이 자료에 없어 더미값 유지, (2) tier 21-44~500-999는 실측 반영, >1000 구간은 원본 셀이 `#REF!` 오류라 더미값 유지, (3) WW_EXPRESS_DOC/NONDOC·WW_EXPEDITED·WW_FLIGHT는 SNTL 판매가 자료 자체를 못 찾아 전부 더미값 그대로.
 - **임시 조치**: 없음
-- **목표 구현**: 화주 대상 판매가 마크업 정책(고정 마진율 vs Zone/상품별 차등) Edward 결정 후 반영. 결정 전까지 실제 견적/정산에 이 데이터를 그대로 사용 금지 권고.
-- **관련 파일**: `supabase/migrations/20260719000100_sntl_cost_price_update.sql`
-- **예상 공수**: 미정 (정책 결정 선행 필요)
-- **우선순위**: High — 마크업 정책 없이 실제 견적에 사용 시 역마진 리스크
-- **상태**: ⬜ 미착수
+- **목표 구현**: (1) 서류 2~5kg 판매가·>1000kg tier 판매가는 원본 파일 재확인(엑셀 수식 오류 복구 또는 SNTL에 재문의) 후 반영, (2) Express/Expedited/Flight의 SNTL 판매가 자료 확보 후 동일 방식 반영. 남은 상품(위 항목들)은 여전히 더미값이므로 실제 견적/정산에 사용 금지.
+- **관련 파일**: `supabase/migrations/20260719000200_sntl_saver_selling_price.sql`, `docs/80_RawData/20260609 UPS 특송 요금 정보.xlsx`
+- **예상 공수**: 0.5 MD (자료 확보 시)
+- **우선순위**: High — Express/Expedited/Flight는 여전히 더미 판매가라 마크업 정책 확정 전 실사용 금지
+- **상태**: 🔄 부분 완료(SAVER만)
