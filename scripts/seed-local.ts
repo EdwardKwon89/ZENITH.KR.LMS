@@ -144,8 +144,23 @@ async function seedSntlAgency(supabase: any) {
     .is('parent_id', null);
   await createUser(supabase, 'sntl_sub1@zenith.kr', 'SNTL Sub-Agency Test Operator', 'AGENCY', subAgencyOrg.id, 'AGENCY');
 
-  // NOTE: zen_agency_pricing_policies(SNTL이 이 Sub-Agency에 설정할 할인율) 값은 미정 —
-  // SNTL이 하위 대리점에 실제 부여할 할인율이 정해지면 SNTL(SUB_ADMIN)이 /admin/ups-rates에서 직접 등록.
+  // Issue #605: SNTL → Sub-Agency 실제 공급가 정책 (docs/80_RawData/20260609 UPS 특송 요금 정보.xlsx 실측)
+  // "수출_Express SAVER" 시트 1블록(SNTL 공급가) vs 2블록(UPS 공식 판매가)을 전 Zone·전 중량 대조한 결과:
+  //   - 비서류(Non-Document, 21kg 초과 tier 포함): 전 Zone·전 중량 정확히 75.00% 할인(편차 0)
+  //   - 서류(Document): 전 Zone 0% 할인(UPS 공식가와 동일가로 공급)
+  // zen_agency_pricing_policies는 상품 구분이 없어(Issue #605 논의 중인 gap) 대표값으로 75%(비서류,
+  // 물량 비중이 큰 상품 기준)를 등록 — 서류 주문은 이 rate 적용 시 실제(0%)보다 유리하게 계산되는
+  // 오차가 있음(역마진 방향 아님, 과대할인 방향).
+  const { data: zones } = await supabase.from('zen_ups_zones').select('id');
+  for (const zone of zones ?? []) {
+    await supabase
+      .from('zen_agency_pricing_policies')
+      .upsert(
+        { agency_org_id: subAgencyOrg.id, zone_id: zone.id, discount_rate: 0.75, is_active: true },
+        { onConflict: 'agency_org_id,zone_id' },
+      );
+  }
+  console.log(`  - Registered SNTL->Sub-Agency zone discount policy (75%, ${zones?.length ?? 0} zones)`);
 }
 
 async function seedOrders(supabase: any, shipperOrgId: string) {
