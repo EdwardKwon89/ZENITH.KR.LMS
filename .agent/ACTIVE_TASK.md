@@ -19,7 +19,7 @@
 | [#606](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/606) | [design] Order별 매출/매입 구분 정산 — 실제 수익금 계산 및 리스트/집계 화면 필요 여부 검토 | b | p2 | - | jungjs | 2026-07-19 |
 | [#605](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/605) | [design] Agency 원가/판매가 Matrix 전환 검토 — 대리점 단위 Matrix + 화주 단위 하이브리드(Zone할인율+선택적 Matrix override) | b | p2 | - | jungjs | 2026-07-19 |
 | [#603](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/603) | [fix] Agency 정산 화면 권한 공백 — 부가운임/인보이스 발행 UI 미노출 + 입금확인 역할 불일치 | b | p2 | - | 미배정 | 2026-07-19 |
-| [#589](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/589) | [design] 예상운임 적용 로직 정리 + UPS 사후청구(실제 추가요금) 반영 설계 (An_16) | b | p2 | in-progress | 미배정 | 2026-07-19 |
+| [#589](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/589) | [design] 예상운임 적용 로직 정리 + UPS 사후청구(실제 추가요금) 반영 설계 (An_16) | a | p2 | in-progress | 미배정 | 2026-07-19 |
 | [#588](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/588) | [docs] UPS 오더 등록 후 처리 프로세스 현황 분석 (An_15) | b | p3 | - | 미배정 | 2026-07-18 |
 | [#521](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/521) | [Aiden] 2026-07-16 임시 운영 방침 — Team B develop 복사 브랜치(integration/teamb-260716) 자체 개발·병합 허용 | b | p1 | - | jungjs | 2026-07-18 |
 | [#473](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/473) | [Team B] 검증 절차 방침 변경 — 라이브 브라우저/DB 검증은 병합 후 JSJung이 수행 | b | - | - | 미배정 | 2026-07-14 |
