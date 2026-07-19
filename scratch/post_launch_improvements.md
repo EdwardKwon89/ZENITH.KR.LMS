@@ -1591,16 +1591,16 @@
 - **우선순위**: Low — 코드 자체는 정확함을 diff로 확인 완료, 회귀 방지망 보강만 필요. 다만 같은 파일에서 반복되는 패턴(IMP-139)이라 다음에 이 파일을 다시 손댈 때는 우선적으로 정리 권장
 - **상태**: ⬜ 미착수
 
-## [IMP-147] SNTL Agency 대리점 원가는 "단일 할인율(%)" 모델만 지원 — 상품×Zone×중량별 실제 원가 등록 불가
+## [IMP-147] SNTL Agency 대리점 원가 모델 — **최초 분석 오류(정정), 실제 남은 gap은 상품(Product)별 세분화만**
 
-- **발견 경위**: SNTL Agency 등록 + 원가표.xlsx(KR-P) 원가 데이터 적재 작업(2026-07-19) 중 확인. `zen_agency_pricing_policies`(대리점별 단일 discount_rate)와 `zen_agency_rate_overrides`(cost_price를 `base_selling_price × (1-discount_rate)`로 트리거가 강제 재계산)는 대리점마다 서로 다른 상품×Zone×중량별 실제 원가를 그대로 등록하는 것을 지원하지 않음. Edward 확인 결과 이번 건은 "플랫폼 공통 원가로 교체"(zen_ups_base_rates.cost_price 직접 갱신)로 해결했으나, 향후 대리점별로 서로 다른 UPS 계약(원가) 관계가 생기면 이 방식으로는 처리 불가.
-- **현재 상태**: 커밋 44f11850으로 SNTL 건은 플랫폼 공통 원가로 처리 완료. 대리점별 개별 원가 지원 기능 자체는 미구현.
-- **임시 조치**: 없음
-- **목표 구현**: `zen_agency_rate_overrides`에 "직접입력 모드"(discount_rate 계산 트리거 우회 옵션) 추가 또는 대리점별 원가표 업로드(엑셀 파싱 → bulk upsert) 기능 검토
-- **관련 파일**: `supabase/migrations/20260614100100_agency_002_agency_tables.sql`(trg_agency_rate_override_calc_cost), `supabase/migrations/20260705100000_imp145_ups_agency_pricing_policy.sql`
-- **예상 공수**: 1~2 MD (설계 필요)
-- **우선순위**: Medium — 현재는 대리점이 SNTL 1곳뿐이라 급하지 않으나, 2번째 대리점 온보딩 시 선행 필요
-- **상태**: ⬜ 미착수
+- **발견 경위**: 2026-07-19 처음엔 `zen_agency_rate_overrides`(대리점별 단일 discount_rate + 강제 재계산 트리거)를 근거로 "대리점 원가는 단일 할인율만 지원"이라고 분석했으나, **이는 오래된(2026-06-14) 마이그레이션 파일만 읽고 이후 변경 이력을 확인하지 않은 착오였음**. 실제로는 Issue #310(2026-07-10, JSJung 설계 확정, 커밋 f741df59)에서 `zen_agency_rate_overrides` 자체를 **완전히 DROP**하고, `zen_agency_pricing_policies`에 `zone_id` 컬럼을 추가해 **Zone별 할인율**(대리점당 10개 Zone 각각 다른 %)로 이미 전환되어 있었음. `zen_agency_shipper_zone_discounts`(화주별 Zone 할인율, Admin 판매가에서 직접 계산, Agency 원가 경유 안 함)도 이미 존재. Edward의 "이건 전체 요금 계산에 영향 주는가" 질의에 GitNexus로 실제 코드(`src/lib/ups/agency-pricing.ts`, `shipper-pricing.ts`, `src/app/actions/ups/freight.ts`)를 재확인하며 정정됨.
+- **현재 상태**: Zone별 할인율은 이미 구현·라이브 상태(스키마 변경 불필요). **다만 상품(Product, 서류/비서류/Express/Saver/Expedited 등)별 세분화는 여전히 미지원** — `zen_agency_pricing_policies`/`zen_agency_shipper_zone_discounts` 둘 다 `product_id` 컬럼이 없어 Zone 안에서는 상품 구분 없이 동일 할인율 적용. 실측 확인 결과(SNTL 원가표 vs UPS 판매가 비율) 서류는 Zone별 편차가 작지만(39.8~41.0%), 비서류는 Zone은 물론 **같은 Zone 안에서도 중량에 따라 원가 비율이 8%p 이상 매끄럽게 변화**해 Zone 단일 할인율로도 완전히 정확하진 않음(2안-Full Matrix 대비 근사치).
+- **임시 조치**: 없음. 지금 시스템 구조(Zone별 할인율)로 충분히 실용적 — 상품/중량별 완전 정밀 매칭은 2안(zen_ups_base_rates와 동일한 Matrix를 대리점별로 관리)이 필요하나 데이터 관리 부담이 커서 우선순위 낮음.
+- **목표 구현**: (선택) `zen_agency_pricing_policies`/`zen_agency_shipper_zone_discounts`에 `product_id`(nullable, 미지정 시 전체 상품 공통) 컬럼 추가해 상품별 override를 선택적으로 허용
+- **관련 파일**: `supabase/migrations/20260710000000_iss310_zone_discounts.sql`, `src/lib/ups/agency-pricing.ts`, `src/lib/ups/shipper-pricing.ts`, `src/app/actions/ups/freight.ts`
+- **예상 공수**: 0.5~1 MD (필요시)
+- **우선순위**: Low — Zone별 할인율로 이미 실용적 수준 확보, 상품별 정밀화는 필요성 재확인 후 진행
+- **상태**: ⬜ 미착수 (Low, 선택적)
 
 ## [IMP-148] UPS Zone 매핑에 FREIGHT 상품군(WW_FLIGHT) 데이터 없음
 
