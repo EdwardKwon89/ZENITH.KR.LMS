@@ -126,12 +126,26 @@ async function seedAgencyRelationship(supabase: any) {
 async function seedSntlAgency(supabase: any) {
   console.log('\nSeeding SNTL agency account (2026-07-19 원가표.xlsx 연동)...');
 
-  // SNTL: 실제 UPS 원가표(KR-P) 기준 데이터가 연결되는 Agency 조직
+  // SNTL: 실제 UPS 원가표(KR-P) 기준 데이터가 연결되는 Master Agency 조직
   const sntlOrg = await getOrCreateOrg(supabase, 'SNTL', 'AGENCY');
-  await createUser(supabase, 'sntl@zenith.kr', 'SNTL Agency', 'AGENCY', sntlOrg.id, 'AGENCY');
 
-  // NOTE: zen_agency_pricing_policies(할인율) 미설정 — SNTL은 플랫폼 공통 원가(zen_ups_base_rates)를
-  // 그대로 사용하는 것으로 결정됨(2026-07-19, Edward). 대리점 자체 할인율 override가 필요해지면 별도 설정.
+  // Issue #605: SNTL은 Master Agency — UPS 특별할인을 받아 하위 대리점(Sub-Agency)에 재공급하는
+  // 사업을 계획 중(Edward, 2026-07-19). 이를 위해 SNTL 계정을 SUB_ADMIN으로 전환.
+  // (기존 AGENCY 역할이 아니라, 본인 관리 Sub-Agency의 zen_agency_pricing_policies만
+  //  RLS로 제한된 범위에서 CRUD 가능한 역할 — is_managing_agency(), 20260719000400 참조)
+  await createUser(supabase, 'sntl@zenith.kr', 'SNTL Master Agency Admin', 'SUB_ADMIN', sntlOrg.id, 'AGENCY');
+
+  // 검증/데모용 Sub-Agency 1곳 — parent_id로 SNTL을 Master로 지정
+  const subAgencyOrg = await getOrCreateOrg(supabase, 'SNTL Sub-Agency Test', 'AGENCY');
+  await supabase
+    .from('zen_organizations')
+    .update({ parent_id: sntlOrg.id })
+    .eq('id', subAgencyOrg.id)
+    .is('parent_id', null);
+  await createUser(supabase, 'sntl_sub1@zenith.kr', 'SNTL Sub-Agency Test Operator', 'AGENCY', subAgencyOrg.id, 'AGENCY');
+
+  // NOTE: zen_agency_pricing_policies(SNTL이 이 Sub-Agency에 설정할 할인율) 값은 미정 —
+  // SNTL이 하위 대리점에 실제 부여할 할인율이 정해지면 SNTL(SUB_ADMIN)이 /admin/ups-rates에서 직접 등록.
 }
 
 async function seedOrders(supabase: any, shipperOrgId: string) {

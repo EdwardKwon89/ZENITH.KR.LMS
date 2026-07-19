@@ -11,6 +11,14 @@ function requireAdminOrManager(role: string | undefined) {
   }
 }
 
+// Issue #605: Master Agency(SUB_ADMIN)는 본인 관리 Sub-Agency의 원가 할인율만 다룰 수 있음
+// (실제 범위 제한은 RLS agency_pricing_policies_sub_admin_scoped가 담당 — 여기서는 역할만 통과시킴)
+function requireAdminManagerOrSubAdmin(role: string | undefined) {
+  if (!role || (role !== USER_ROLES.ADMIN && role !== USER_ROLES.MANAGER && role !== USER_ROLES.ZENITH_SUPER_ADMIN && role !== USER_ROLES.SUB_ADMIN)) {
+    throw new Error('Agency 원가 할인율 관리 권한이 없습니다.');
+  }
+}
+
 // ─── Zone ──────────────────────────────────────────
 
 export async function createUpsZone(data: {
@@ -223,7 +231,7 @@ export async function upsertAgencyPricingPolicy(data: {
   agency_org_id: string; zone_id: string; discount_rate: number; is_active?: boolean;
 }) {
   const { supabase, profile } = await validateUserAction();
-  requireAdminOrManager(profile?.role);
+  requireAdminManagerOrSubAdmin(profile?.role);
 
   const maxAllowed = await getMaxAllowedZoneDiscount(supabase, data.zone_id);
   if (maxAllowed != null && data.discount_rate > maxAllowed) {

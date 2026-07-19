@@ -8,6 +8,7 @@ import { cache } from 'react';
 export const USER_ROLES = {
   ZENITH_SUPER_ADMIN: 'ZENITH_SUPER_ADMIN',
   ADMIN: 'ADMIN',
+  SUB_ADMIN: 'SUB_ADMIN',
   MANAGER: 'MANAGER',
   OPERATOR: 'OPERATOR',
   CARRIER: 'CARRIER',
@@ -43,6 +44,8 @@ function normalizePath(path: string): string {
  */
 export const STATIC_PERMISSIONS: Record<string, string[]> = {
   [USER_ROLES.ADMIN]: ['/master', '/admin', '/orders', '/logistics', '/billing', '/tracking', '/inventory', '/finance', '/settlement', '/voc', '/support', '/mypage', '/warehouse', '/address-book'],
+  // Issue #605: Master Agency(SNTL) 전용 — 본인 관리 Sub-Agency의 원가 할인율만 RLS로 제한(zen_agency_pricing_policies_sub_admin_scoped). 플랫폼 공용 데이터(요율/조직 승인 등)는 서버 액션 가드에서 별도 차단.
+  [USER_ROLES.SUB_ADMIN]: ['/admin/ups-rates', '/voc', '/support', '/mypage', '/address-book'],
   [USER_ROLES.MANAGER]: ['/orders', '/logistics', '/billing', '/reports', '/tracking', '/inventory', '/finance', '/settlement', '/voc', '/support', '/mypage', '/warehouse', '/admin/ups-rates', '/address-book'],
   [USER_ROLES.OPERATOR]: ['/orders', '/logistics', '/tracking', '/voc', '/support', '/mypage', '/address-book'],
   [USER_ROLES.CARRIER]: ['/logistics/delivery', '/orders/assigned', '/admin/transport-costs', '/admin/rates', '/voc', '/support', '/mypage', '/address-book'],
