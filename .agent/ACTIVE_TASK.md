@@ -15,6 +15,7 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
+| [#606](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/606) | [design] Order별 매출/매입 구분 정산 — 실제 수익금 계산 및 리스트/집계 화면 필요 여부 검토 | b | p2 | - | jungjs | 2026-07-19 |
 | [#605](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/605) | [design] Agency 원가/판매가 Matrix 전환 검토 — 대리점 단위 Matrix + 화주 단위 하이브리드(Zone할인율+선택적 Matrix override) | b | p2 | - | jungjs | 2026-07-19 |
 | [#603](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/603) | [fix] Agency 정산 화면 권한 공백 — 부가운임/인보이스 발행 UI 미노출 + 입금확인 역할 불일치 | b | p2 | - | 미배정 | 2026-07-19 |
 | [#589](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/589) | [design] 예상운임 적용 로직 정리 + UPS 사후청구(실제 추가요금) 반영 설계 (An_16) | b | p2 | in-progress | 미배정 | 2026-07-19 |
