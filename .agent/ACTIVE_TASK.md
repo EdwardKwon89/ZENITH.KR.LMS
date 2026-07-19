@@ -15,12 +15,8 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
-| [#597](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/597) | [fix] createorder reference_no 하이픈 미제거 — SHXK 운송장 생성 실패 원인 추정 (DEF-110) | b | p1 | - | 미배정 | 2026-07-18 |
-| [#590](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/590) | [feat] 화주(Shipper)도 급증 수수료(Surge Fee) 정보 조회 가능하도록 추가 | b | p2 | - | 미배정 | 2026-07-18 |
 | [#589](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/589) | [design] 예상운임 적용 로직 정리 + UPS 사후청구(실제 추가요금) 반영 설계 (An_16) | b | p2 | - | 미배정 | 2026-07-18 |
 | [#588](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/588) | [docs] UPS 오더 등록 후 처리 프로세스 현황 분석 (An_15) | b | p3 | - | 미배정 | 2026-07-18 |
-| [#587](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/587) | [feat] 오더 등록 후 수정 UI 신설 + updateOrder 필드 보완 (DEF-109) | b | p1 | - | 미배정 | 2026-07-18 |
-| [#586](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/586) | [fix] createorder 성공 후 운송장/세관신고서/인보이스 조회 실패 (DEF-108) | b | p1 | - | 미배정 | 2026-07-18 |
 | [#521](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/521) | [Aiden] 2026-07-16 임시 운영 방침 — Team B develop 복사 브랜치(integration/teamb-260716) 자체 개발·병합 허용 | b | p1 | - | jungjs | 2026-07-18 |
 | [#473](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/473) | [Team B] 검증 절차 방침 변경 — 라이브 브라우저/DB 검증은 병합 후 JSJung이 수행 | b | - | - | 미배정 | 2026-07-14 |
 | [#358](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/358) | [Aiden] R-17 절차 오류 재발 방지 — 4단계 구조적 개선 (채번 자동화·회귀결과 신뢰 제거·CI 게이트·워크트리 격리) | a | p2 | - | jungjs | 2026-07-14 |
