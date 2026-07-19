@@ -29,9 +29,9 @@ async function createUser(supabase: any, email: string, fullName: string, role: 
     console.log(`  - User already exists: ${user.id}`);
   }
 
-  // 2. App Metadata 업데이트 (JWT 권한 반영용)
+  // 2. App Metadata 업데이트 (JWT 권한 반영용 — org_id 누락 시 RLS가 조용히 실패함, 2026-07-19 확인)
   await supabase.auth.admin.updateUserById(user.id, {
-    app_metadata: { role, status: 'ACTIVE', org_type: orgType }
+    app_metadata: { role, status: 'ACTIVE', org_type: orgType, org_id: orgId }
   });
 
   // 3. zen_profiles 동기화
