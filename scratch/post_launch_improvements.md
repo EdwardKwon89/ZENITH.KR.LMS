@@ -1590,3 +1590,47 @@
 - **예상 공수**: 0.3 MD
 - **우선순위**: Low — 코드 자체는 정확함을 diff로 확인 완료, 회귀 방지망 보강만 필요. 다만 같은 파일에서 반복되는 패턴(IMP-139)이라 다음에 이 파일을 다시 손댈 때는 우선적으로 정리 권장
 - **상태**: ⬜ 미착수
+
+## [IMP-147] SNTL Agency 대리점 원가는 "단일 할인율(%)" 모델만 지원 — 상품×Zone×중량별 실제 원가 등록 불가
+
+- **발견 경위**: SNTL Agency 등록 + 원가표.xlsx(KR-P) 원가 데이터 적재 작업(2026-07-19) 중 확인. `zen_agency_pricing_policies`(대리점별 단일 discount_rate)와 `zen_agency_rate_overrides`(cost_price를 `base_selling_price × (1-discount_rate)`로 트리거가 강제 재계산)는 대리점마다 서로 다른 상품×Zone×중량별 실제 원가를 그대로 등록하는 것을 지원하지 않음. Edward 확인 결과 이번 건은 "플랫폼 공통 원가로 교체"(zen_ups_base_rates.cost_price 직접 갱신)로 해결했으나, 향후 대리점별로 서로 다른 UPS 계약(원가) 관계가 생기면 이 방식으로는 처리 불가.
+- **현재 상태**: 커밋 44f11850으로 SNTL 건은 플랫폼 공통 원가로 처리 완료. 대리점별 개별 원가 지원 기능 자체는 미구현.
+- **임시 조치**: 없음
+- **목표 구현**: `zen_agency_rate_overrides`에 "직접입력 모드"(discount_rate 계산 트리거 우회 옵션) 추가 또는 대리점별 원가표 업로드(엑셀 파싱 → bulk upsert) 기능 검토
+- **관련 파일**: `supabase/migrations/20260614100100_agency_002_agency_tables.sql`(trg_agency_rate_override_calc_cost), `supabase/migrations/20260705100000_imp145_ups_agency_pricing_policy.sql`
+- **예상 공수**: 1~2 MD (설계 필요)
+- **우선순위**: Medium — 현재는 대리점이 SNTL 1곳뿐이라 급하지 않으나, 2번째 대리점 온보딩 시 선행 필요
+- **상태**: ⬜ 미착수
+
+## [IMP-148] UPS Zone 매핑에 FREIGHT 상품군(WW_FLIGHT) 데이터 없음
+
+- **발견 경위**: KR ZONE 시트(원가표.xlsx) 재구축(2026-07-19, 마이그레이션 20260719000000) 중 확인. 시트에는 WXS(Saver)/XPR(Express)/XPD(Expedited) 3개 상품군만 있고 FREIGHT(WW_FLIGHT)에 대한 국가별 Zone 배정 데이터가 없음 — 기존에도 이 조합은 매핑이 없었음(신규 발생 아님, 재확인만 됨).
+- **현재 상태**: `zen_ups_zone_countries`에 `product_family='FREIGHT'` 행이 0건. WW_FLIGHT 주문의 Zone 조회 로직(`resolveZoneByCountry`, `src/app/actions/ups/freight.ts`)이 FREIGHT 상품에 대해 어떻게 동작하는지(폴백 여부) 미확인.
+- **임시 조치**: 없음
+- **목표 구현**: SNTL 측에 FREIGHT(WWEF) 전용 Zone 차트 원본 자료 요청 후 반영, 또는 EXPRESS 매핑을 잠정 폴백으로 사용할지 설계 결정 필요
+- **관련 파일**: `supabase/migrations/20260705130000_imp146_ups_zone_countries_product_family_direction.sql`, `src/app/actions/ups/freight.ts`
+- **예상 공수**: 0.5 MD
+- **우선순위**: Medium — WW_FLIGHT(Freight) 주문이 실제 운영되기 전까지는 영향 없음
+- **상태**: ⬜ 미착수
+
+## [IMP-149] UPS 원가(cost_price) 세분화 불일치 — NonDoc 상품 0.5kg 단위 세분값(5.5~19.5kg) 및 서류/WWEF tier 실측치 없음
+
+- **발견 경위**: 원가표.xlsx(KR-P) 원가 적재(마이그레이션 20260719000100) 중 확인. `zen_ups_base_rates`는 현재 상품당 16개 이산 중량점(0.5~5kg 0.5단위, 이후 7/10/15/20/25/30kg)만 보유하나, 실제 KR-P 원가는 Non-Document 상품(SAVER_NONDOC/EXPRESS_NONDOC)에 대해 0.5~20kg 전 구간을 0.5kg 단위(40개 점)로 제공함 — 5.5/6/6.5/.../19.5kg 등 26개 중량점은 실제 원가 값이 있음에도 DB에 해당 행 자체가 없어 반영 못함(1200건의 UPDATE 시도 중 630건이 매칭 행 없어 no-op). 이 gap은 이번 작업 범위(원가 갱신)에서 신규 INSERT를 보류(같은 이유로 selling_price 정책 미정 — IMP-147과 연동)했기 때문에 남음. 또한 서류(Document) 2개 상품·WWEF는 실제 원가표에 21kg 이상 tier 구간 데이터 자체가 없어(문서는 5kg cap, WWEF는 71kg부터 시작) 해당 조합의 tier_rates는 기존 더미값 그대로임.
+- **현재 상태**: 위 26개 세분 중량점 및 서류/WWEF 일부 tier는 여전히 더미(placeholder) cost_price 사용 중.
+- **임시 조치**: 없음
+- **목표 구현**: (1) NonDoc 상품의 5.5~19.5kg 신규 weight_kg 행을 실제 원가값으로 INSERT(단, selling_price 마크업 정책 결정 후 — IMP-150 참조), (2) 서류/WWEF의 부재 tier 구간은 실제 서비스 제공 여부 확인 후 더미값 유지 여부 결정
+- **관련 파일**: `supabase/migrations/20260719000100_sntl_cost_price_update.sql`, `docs/80_RawData/20260609 SNTL 자료/원가표.xlsx`
+- **예상 공수**: 0.5 MD
+- **우선순위**: Medium — 현재 20kg 이하 실제 발생 빈도가 높은 정수/반정수 중량(1,2,3...20kg)은 이미 커버되어 있어 즉시 장애는 아니나, 예: 6.5kg 화물의 원가 계산이 부정확할 수 있음
+- **상태**: ⬜ 미착수
+
+## [IMP-150] SNTL 원가 적재 후 판매가(selling_price)/마크업 정책 미정
+
+- **발견 경위**: SNTL 원가표.xlsx 적재(2026-07-19) 시 Edward가 "원가만 우선 반영, 판매가는 별도 결정"으로 확정. `zen_ups_base_rates.selling_price`/`zen_ups_weight_tier_rates.price_per_kg_selling`/`zen_ups_freight_minimums.min_charge_selling`은 기존 더미값(원가×1.25 수준 추정) 그대로 방치됨.
+- **현재 상태**: cost_price는 실제 UPS 납부 원가(KR-P×1.07) 반영 완료, selling_price는 원가와 무관한 더미값 유지 — 현재 마진율이 실제와 전혀 다름(일부 조합은 원가가 더미 판매가보다 높아 역마진 상태일 가능성 있음, 미검증).
+- **임시 조치**: 없음
+- **목표 구현**: 화주 대상 판매가 마크업 정책(고정 마진율 vs Zone/상품별 차등) Edward 결정 후 반영. 결정 전까지 실제 견적/정산에 이 데이터를 그대로 사용 금지 권고.
+- **관련 파일**: `supabase/migrations/20260719000100_sntl_cost_price_update.sql`
+- **예상 공수**: 미정 (정책 결정 선행 필요)
+- **우선순위**: High — 마크업 정책 없이 실제 견적에 사용 시 역마진 리스크
+- **상태**: ⬜ 미착수
