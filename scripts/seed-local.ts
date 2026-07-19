@@ -84,6 +84,45 @@ async function getOrCreateOrg(supabase: any, name: string, type: string) {
   return newOrg;
 }
 
+async function seedAgencyRelationship(supabase: any) {
+  console.log('\nSeeding Agency/Agency_Shipper test accounts...');
+
+  // 1. Agency 조직 및 계정 생성
+  const agencyOrg = await getOrCreateOrg(supabase, 'Zenith Agency Partners', 'AGENCY');
+  await createUser(supabase, 'agency@zenith.kr', 'Agency Operator', 'AGENCY', agencyOrg.id, 'AGENCY');
+
+  // 2. Agency 소속 Shipper 조직 및 계정 생성 (AGENCY_SHIPPER)
+  const agencyShipperOrg = await getOrCreateOrg(supabase, 'Agency Shipper Co', 'SHIPPER');
+  await createUser(supabase, 'agency_shipper@zenith.kr', 'Agency Shipper', 'AGENCY_SHIPPER', agencyShipperOrg.id, 'SHIPPER');
+
+  // 3. zen_agency_shippers 연결 (createAgencyShipper의 _linkShipperToAgency와 동일 구조)
+  const { data: existingLink } = await supabase
+    .from('zen_agency_shippers')
+    .select('id')
+    .eq('agency_org_id', agencyOrg.id)
+    .eq('shipper_org_id', agencyShipperOrg.id)
+    .maybeSingle();
+
+  if (!existingLink) {
+    const { error: linkError } = await supabase
+      .from('zen_agency_shippers')
+      .insert({
+        agency_org_id: agencyOrg.id,
+        shipper_org_id: agencyShipperOrg.id,
+        shipper_type: 'CORPORATE',
+        discount_rate: 0.05,
+        is_active: true,
+      });
+    if (linkError) {
+      console.error('  - Failed to link agency shipper:', linkError.message);
+    } else {
+      console.log('  - Linked agency_shipper to agency');
+    }
+  } else {
+    console.log('  - Agency shipper link already exists');
+  }
+}
+
 async function seedOrders(supabase: any, shipperOrgId: string) {
   console.log('\nSeeding E2E test orders...');
 
@@ -581,6 +620,9 @@ async function seed() {
     await createUser(supabase, 'shipper@zenith.kr', 'Main Shipper', 'CORPORATE', shipperOrg.id, 'CUSTOMER');
     await createUser(supabase, 'carrier@zenith.kr', 'Main Carrier', 'CARRIER', carrierOrg.id, 'PARTNER');
     await createUser(supabase, 'individual@zenith.kr', 'Individual User', 'INDIVIDUAL', null, 'CUSTOMER');
+
+    // 3-1. Agency/Agency_Shipper 테스트 계정 (UPS 특송 UAT 필수 — 2026-07-19 보완)
+    await seedAgencyRelationship(supabase);
 
     // 4. E2E 테스트용 오더 시드 데이터 생성
     await seedOrders(supabase, shipperOrg.id);
