@@ -1634,3 +1634,25 @@
 - **예상 공수**: 0.5 MD (자료 확보 시)
 - **우선순위**: High — Express/Expedited/Flight는 여전히 더미 판매가라 마크업 정책 확정 전 실사용 금지
 - **상태**: 🔄 부분 완료(SAVER만)
+
+## [IMP-151] `getMaxAllowedZoneDiscount`가 Zone 내 전 상품(더미 포함)을 함께 검사 — 현재 모든 Zone에서 허용 할인율 0%로 계산됨
+
+- **발견 경위**: SNTL→Sub-Agency 실 할인율(75%) 등록(2026-07-19) 전, 실제 `upsertAgencyPricingPolicy` 서버 액션으로 등록 가능한지 확인하는 과정에서 `src/lib/ups/discount-guard.ts:getMaxAllowedZoneDiscount()`를 직접 재현해봄. 이 함수는 대상 Zone에 속한 **모든 상품**(`zen_ups_base_rates`/`zen_ups_weight_tier_rates`/`zen_ups_freight_minimums`)의 `1 - cost/selling` 비율 중 **최솟값**을 최대 허용 할인율로 반환하는데, WW_SAVER_*는 오늘 실측 원가/판매가로 교체됐지만 WW_EXPRESS_*/WW_EXPEDITED/WW_FLIGHT는 아직 더미 판매가 그대로라 두 값의 스케일이 맞지 않아(예: 실측 원가 20만원대 vs 더미 판매가 5천원대) `1-cost/selling`이 -4~-5(=-400%~-500%) 수준으로 나옴. 그 결과 전 Zone에서 `Math.max(0, minRatio)`가 **0%**로 계산됨.
+- **현재 상태**: 지금 이 상태로 Admin/SUB_ADMIN이 실제 화면(`/admin/ups-rates`)에서 `zen_agency_pricing_policies`에 **어떤 할인율을 입력해도 "할인율이 원가 마진을 초과합니다. 최대 허용: 0.0%"로 전부 거부**됨. SNTL→Sub-Agency 75% 정책은 이 가드를 우회해 DB에 직접 등록함(seed-local.ts, 커밋 a352b5bc) — 실제 UI로는 지금 등록 불가능한 상태.
+- **임시 조치**: 없음(DB 직접 등록으로 회피)
+- **목표 구현**: `getMaxAllowedZoneDiscount`가 Zone 전체가 아니라 **호출 시 지정된 특정 상품(들)만** 검사하도록 수정하거나(예: agency가 실제 취급하는 product_id 목록을 파라미터로 받음), 최소한 WW_EXPRESS_*/WW_EXPEDITED/WW_FLIGHT의 실측 판매가가 채워질 때까지(IMP-150)는 이 이슈가 자동 해소되지 않으므로 임시 방편으로 로직을 조정할지 결정 필요
+- **관련 파일**: `src/lib/ups/discount-guard.ts`, `src/app/actions/ups/rates-mutation.ts:upsertAgencyPricingPolicy`
+- **예상 공수**: 0.3 MD
+- **우선순위**: High — 지금 이 상태로는 SUB_ADMIN 기능(Issue #605) 자체를 실제 화면에서 쓸 수 없음
+- **상태**: ⬜ 미착수
+
+## [IMP-152] SNTL→Sub-Agency 할인율(75%)은 비서류 기준 대표값 — 서류(0%)와 구분 안 됨
+
+- **발견 경위**: `UPS 특송 요금 정보.xlsx`("수출_Express SAVER" 시트) 1블록(SNTL 공급가) vs 2블록(UPS 공식가) 전 Zone·전 중량 대조 결과, 비서류는 정확히 75.00%(편차 0), 서류는 정확히 0% 할인으로 확인(2026-07-19). `zen_agency_pricing_policies`는 상품 구분이 없어(Issue #605에서 이미 논의 중인 gap과 동일 원인) 물량 비중이 큰 비서류 기준 75%만 등록함.
+- **현재 상태**: SNTL Sub-Agency Test의 서류 주문은 실제로는 0% 할인이어야 하는데 시스템상 75% 할인이 적용되어, Sub-Agency 원가가 실제보다 낮게(유리하게) 계산됨 — 역마진 방향은 아니나 실제 정산액과 차이가 남.
+- **임시 조치**: 없음
+- **목표 구현**: Issue #605(product_id 세분화 논의)의 해결책 적용 시 함께 반영
+- **관련 파일**: `scripts/seed-local.ts:seedSntlAgency`, Issue #605
+- **예상 공수**: Issue #605에 포함
+- **우선순위**: Medium — 현재는 SNTL Sub-Agency Test가 데모 조직이라 실거래 영향 없음
+- **상태**: ⬜ 미착수 (Issue #605 해결에 종속)
