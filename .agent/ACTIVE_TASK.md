@@ -15,6 +15,7 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
+| [#603](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/603) | [fix] Agency 정산 화면 권한 공백 — 부가운임/인보이스 발행 UI 미노출 + 입금확인 역할 불일치 | b | p2 | - | 미배정 | 2026-07-19 |
 | [#589](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/589) | [design] 예상운임 적용 로직 정리 + UPS 사후청구(실제 추가요금) 반영 설계 (An_16) | b | p2 | - | 미배정 | 2026-07-18 |
 | [#588](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/588) | [docs] UPS 오더 등록 후 처리 프로세스 현황 분석 (An_15) | b | p3 | - | 미배정 | 2026-07-18 |
 | [#521](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/521) | [Aiden] 2026-07-16 임시 운영 방침 — Team B develop 복사 브랜치(integration/teamb-260716) 자체 개발·병합 허용 | b | p1 | - | jungjs | 2026-07-18 |
