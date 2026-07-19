@@ -178,6 +178,7 @@
   "Orders": {
     "title_list": "Order Status",
     "title_new": "Register New House Order",
+    "title_edit": "Edit Order",
     "type_b2b": "B2B General Cargo",
     "type_b2c_ecom": "B2C E-Commerce",
     "type_b2c_express": "B2C Express",
@@ -211,6 +212,7 @@
     "submit": "Register Order",
     "processing": "Processing...",
     "success_create": "Order registered successfully.",
+    "success_update": "Order updated successfully.",
     "pccc_help": "Mandatory for international shipping.",
     "special_cargo_label": "Special Cargo Type",
     "special_cargo_none": "General",

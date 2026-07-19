@@ -204,7 +204,7 @@ describe('UPS Labels Mapping Functions', () => {
     it('필수 필드가 올바르게 매핑되는지 검증', () => {
       const result = buildCreateOrderPayload('SHP-CODE', sampleOrder as any, 'US', samplePackages as any, shipperDefaults);
 
-      expect(result.reference_no).toBe('ORD-001');
+      expect(result.reference_no).toBe('ORD001');
       expect(result.shipping_method).toBe('SHP-CODE');
       expect(result.order_status).toBe('P');
       expect(result.order_pieces).toBe(2);
@@ -254,6 +254,46 @@ describe('UPS Labels Mapping Functions', () => {
       expect(result.order_pieces).toBe(0);
       expect(result.order_weight).toBe(0);
       expect((result.invoice as any[])).toEqual([{ invoice_enname: 'General Merchandise', invoice_quantity: '1', invoice_unitcharge: '1.00', unit_code: 'PCE' }]);
+    });
+  });
+
+  describe('DEF-110: createorder reference_no 하이픈 제거', () => {
+    const baseOrder = {
+      shipper_contact_name: 'Shipper Kim',
+      shipper_country_code: 'KR',
+      shipper_state_province: 'Seoul',
+      shipper_city: 'Mapo-gu',
+      shipper_zipcode: '04515',
+      shipper_contact_phone: '02-1234-5678',
+      recipient_name: 'John Doe',
+      recipient_country_code: 'US',
+      recipient_state_province: 'CA',
+      recipient_city: 'Los Angeles',
+      recipient_address: '123 Main St',
+      recipient_address_local: '',
+      recipient_zipcode: '90001',
+      recipient_phone: '213-555-0100',
+      recipient_email: 'john@example.com',
+      shipper_org: null,
+    };
+    const defaults = { name: 'SNTL', country: 'KR' };
+
+    it('order_no의 하이픈이 제거되어 reference_no에 전달된다', () => {
+      const order = { ...baseOrder, order_no: 'ZEN-2026-000001' };
+      const result = buildCreateOrderPayload('SHP', order as any, 'US', [], defaults);
+      expect(result.reference_no).toBe('ZEN2026000001');
+    });
+
+    it('하이픈 없는 order_no는 그대로 전달된다', () => {
+      const order = { ...baseOrder, order_no: 'ZEN2026000001' };
+      const result = buildCreateOrderPayload('SHP', order as any, 'US', [], defaults);
+      expect(result.reference_no).toBe('ZEN2026000001');
+    });
+
+    it('실제 ZENITH 주문번호 패턴으로 검증', () => {
+      const order = { ...baseOrder, order_no: 'ZEN-2026-000123' };
+      const result = buildCreateOrderPayload('SHP', order as any, 'US', [], defaults);
+      expect(result.reference_no).toBe('ZEN2026000123');
     });
   });
 

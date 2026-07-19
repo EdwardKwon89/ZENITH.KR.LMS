@@ -1,4 +1,6 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { getnewlabel, removeorder } from '@/lib/shxk/order';
+import { validateUserAction } from '@/lib/auth/guards';
 
 vi.mock('server-only', () => ({}));
 vi.mock('@/lib/shxk/order', () => ({ createorder: vi.fn(), getnewlabel: vi.fn(), removeorder: vi.fn() }));
@@ -110,5 +112,116 @@ describe('Issue #582: fetchShxkTradeDocument 응답 결과 팝업', () => {
     const src = fs.readFileSync('src/components/orders/UpsTradeDocumentActions.tsx', 'utf-8');
 
     expect(src).not.toContain('window.open(res.url');
+  });
+});
+
+describe('DEF-108: reference_no 하이픈 제거 (getnewlabel/removeorder)', () => {
+  const HYPHENATED_REF = 'ZEN-2026-000001';
+  const STRIPPED_REF = 'ZEN2026000001';
+  const ORDER_ID = 'order-uuid-001';
+
+  function setupSupabaseMock(labelData: { id: string; reference_no: string; tracking_number: string | null } | null) {
+    const eqChain = {
+      eq: vi.fn().mockReturnThis(),
+      order: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockReturnThis(),
+      maybeSingle: vi.fn().mockResolvedValue({ data: labelData }),
+    };
+    const selectChain = {
+      select: vi.fn().mockReturnValue(eqChain),
+      eq: vi.fn().mockReturnValue(eqChain),
+    };
+    const updateChain = {
+      update: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      select: vi.fn().mockResolvedValue({ data: null, error: null }),
+    };
+    const supabase = {
+      from: vi.fn().mockReturnValue({
+        select: vi.fn().mockReturnValue(selectChain),
+        update: vi.fn().mockReturnValue(updateChain),
+      }),
+    };
+    return supabase;
+  }
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(getnewlabel).mockResolvedValue({ success: 1, data: { label_url: 'https://test.example.com/doc' }, message: 'OK' });
+    vi.mocked(removeorder).mockResolvedValue({ success: 1, message: 'OK' });
+  });
+
+  it('voidUpsLabel이 removeorder 호출 시 reference_no에서 하이픈을 제거한다', async () => {
+    const { voidUpsLabel } = await import('@/app/actions/operations/ups-labels');
+    const label = { id: 'lbl-1', reference_no: HYPHENATED_REF, tracking_number: 'TK123' };
+    vi.mocked(validateUserAction).mockResolvedValue({
+      supabase: setupSupabaseMock(label) as any,
+      profile: { id: 'test', role: 'ADMIN' },
+    } as any);
+
+    await voidUpsLabel(ORDER_ID);
+
+    expect(removeorder).toHaveBeenCalledWith(STRIPPED_REF);
+  });
+
+  it('fetchShxkTradeDocument이 getnewlabel 호출 시 reference_no에서 하이픈을 제거한다', async () => {
+    const { fetchShxkTradeDocument } = await import('@/app/actions/operations/ups-labels');
+    const label = { id: 'lbl-2', reference_no: HYPHENATED_REF, tracking_number: 'TK123' };
+    vi.mocked(validateUserAction).mockResolvedValue({
+      supabase: setupSupabaseMock(label) as any,
+      profile: { id: 'test', role: 'ADMIN' },
+    } as any);
+
+    await fetchShxkTradeDocument(ORDER_ID, 'WAYBILL');
+
+    expect(getnewlabel).toHaveBeenCalledWith(
+      expect.objectContaining({ lable_content_type: '1' }),
+      [{ reference_no: STRIPPED_REF }],
+    );
+  });
+
+  it('fetchShxkTradeDocument에서 INVOICE 호출 시에도 하이픈을 제거한다', async () => {
+    const { fetchShxkTradeDocument } = await import('@/app/actions/operations/ups-labels');
+    const label = { id: 'lbl-3', reference_no: HYPHENATED_REF, tracking_number: 'TK123' };
+    vi.mocked(validateUserAction).mockResolvedValue({
+      supabase: setupSupabaseMock(label) as any,
+      profile: { id: 'test', role: 'ADMIN' },
+    } as any);
+
+    await fetchShxkTradeDocument(ORDER_ID, 'INVOICE');
+
+    expect(getnewlabel).toHaveBeenCalledWith(
+      expect.objectContaining({ lable_content_type: '3' }),
+      [{ reference_no: STRIPPED_REF }],
+    );
+  });
+
+  it('fetchShxkTradeDocument에서 CUSTOMS 호출 시에도 하이픈을 제거한다', async () => {
+    const { fetchShxkTradeDocument } = await import('@/app/actions/operations/ups-labels');
+    const label = { id: 'lbl-4', reference_no: HYPHENATED_REF, tracking_number: 'TK123' };
+    vi.mocked(validateUserAction).mockResolvedValue({
+      supabase: setupSupabaseMock(label) as any,
+      profile: { id: 'test', role: 'ADMIN' },
+    } as any);
+
+    await fetchShxkTradeDocument(ORDER_ID, 'CUSTOMS');
+
+    expect(getnewlabel).toHaveBeenCalledWith(
+      expect.objectContaining({ lable_content_type: '2' }),
+      [{ reference_no: STRIPPED_REF }],
+    );
+  });
+
+  it('voidUpsLabel 호출 시 getnewlabel은 호출되지 않는다', async () => {
+    const { voidUpsLabel } = await import('@/app/actions/operations/ups-labels');
+    const label = { id: 'lbl-5', reference_no: HYPHENATED_REF, tracking_number: 'TK123' };
+    vi.mocked(validateUserAction).mockResolvedValue({
+      supabase: setupSupabaseMock(label) as any,
+      profile: { id: 'test', role: 'ADMIN' },
+    } as any);
+
+    await voidUpsLabel(ORDER_ID);
+
+    expect(getnewlabel).not.toHaveBeenCalled();
   });
 });
