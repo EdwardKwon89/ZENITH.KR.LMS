@@ -429,7 +429,8 @@ async function seedVesselSchedules(supabase: any, _carrierOrgId: string) {
   const seen = new Set<string>();
 
   for (const route of routeNetwork) {
-    if (route.transport_mode === 'LAND') continue;
+    // LAND/EXP(UPS 특송)는 vessel schedule(선박/항공편 스케줄) 개념 자체가 없음
+    if (route.transport_mode === 'LAND' || route.transport_mode === 'EXP') continue;
 
     const key = `${route.carrier_id}:${route.from_port_id}:${route.to_port_id}:${route.transport_mode}`;
     if (seen.has(key)) continue;
