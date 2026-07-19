@@ -123,6 +123,17 @@ async function seedAgencyRelationship(supabase: any) {
   }
 }
 
+async function seedSntlAgency(supabase: any) {
+  console.log('\nSeeding SNTL agency account (2026-07-19 원가표.xlsx 연동)...');
+
+  // SNTL: 실제 UPS 원가표(KR-P) 기준 데이터가 연결되는 Agency 조직
+  const sntlOrg = await getOrCreateOrg(supabase, 'SNTL', 'AGENCY');
+  await createUser(supabase, 'sntl@zenith.kr', 'SNTL Agency', 'AGENCY', sntlOrg.id, 'AGENCY');
+
+  // NOTE: zen_agency_pricing_policies(할인율) 미설정 — SNTL은 플랫폼 공통 원가(zen_ups_base_rates)를
+  // 그대로 사용하는 것으로 결정됨(2026-07-19, Edward). 대리점 자체 할인율 override가 필요해지면 별도 설정.
+}
+
 async function seedOrders(supabase: any, shipperOrgId: string) {
   console.log('\nSeeding E2E test orders...');
 
@@ -623,6 +634,9 @@ async function seed() {
 
     // 3-1. Agency/Agency_Shipper 테스트 계정 (UPS 특송 UAT 필수 — 2026-07-19 보완)
     await seedAgencyRelationship(supabase);
+
+    // 3-2. SNTL 실 Agency 계정 (원가표.xlsx 연동 — 2026-07-19)
+    await seedSntlAgency(supabase);
 
     // 4. E2E 테스트용 오더 시드 데이터 생성
     await seedOrders(supabase, shipperOrg.id);
