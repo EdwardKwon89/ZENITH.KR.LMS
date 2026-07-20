@@ -247,6 +247,7 @@
 | TASK-100 | 260529 | DEF-030 경로 최적화 전면 수정 (전체 운송사 비교·가드) | P1 | 없음 | D_Kai | ✅ | [TASK-100](tasks/TASK-100_260529_DEF030경로최적화수정_DKai.md) | 5b63421+f1c3f74 · 229/229 PASS · Aiden ✅ 승인 |
 | TASK-101 | 260529 | B_Kai 재교육 세션 2차 (R-17 위반 3회 누적) | P4 | 없음 | B_Kai | ✅ | [TASK-101](tasks/TASK-101_260529_BKai재교육세션2차_BKai.md) | §1~§3 전항목 우수 · c60196f · Aiden ✅ 승인 · B_Kai 신규 할당 중단 해제 |
 | TASK-102 | 260529 | UAT-02·10 시나리오 수정 — TASK-100 경로 최적화 반영 | P3 | TASK-100 ✅ | D_Kai | ✅ | [TASK-102](tasks/TASK-102_260529_UAT수정_TASK100반영_DKai.md) | fe04df4+4390bad · 229/229 PASS · Advisory 2건(Riley 위반 3회·IMP-090 기존마이그 수정) |
+| TASK-194 | 260720 | UPS 사후청구 조정 건 인보이스 자동 생성 | P1 | 없음 | D_Kai | 🔔 | — | Issue #622 · PR #625 · `InvoiceGenerator.generateInvoice()` 호출 추가 · 656/656 PASS ✅ |
 
 ---
 
