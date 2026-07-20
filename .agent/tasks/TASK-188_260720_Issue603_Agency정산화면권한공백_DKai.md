@@ -4,13 +4,13 @@
 |:----|:----|
 | **Task-ID** | TASK-188 |
 | **생성일** | 2026-07-20 |
-| **할당 Agent** | D_Kai |
+| **할당 Agent** | ~~D_Kai~~ → **Riley** (재배정, 260720 — D_Kai/OpenCode 무응답) |
 | **우선순위** | P2 |
 | **전제조건** | 없음 |
 | **관련 IMP** | 없음 |
-| **브랜치** | `feature/teama-task-188-agency-finance-ui-fix-dkai` |
-| **커밋 태그** | `[D_Kai]` |
-| **상태** | ❌ |
+| **브랜치** | `feature/teama-task-188-agency-finance-ui-fix-dkai` (기존 브랜치 유지, 신규 커밋은 `[Riley]` 태그) |
+| **커밋 태그** | `[D_Kai]`(기존 커밋) / `[Riley]`(재작업 커밋) |
+| **상태** | 🔄 (재배정, Riley 재작업 대기) |
 
 ---
 
@@ -108,3 +108,14 @@ diff 직접 확인 결과, `OrderFinanceSummary.tsx`의 `OrderFinanceSummaryProp
 1. `OrderFinanceSummaryProps`에 `canAddManualCost: boolean` 추가
 2. 부가운임 추가 섹션(122·173·242행 등 관련 조건 전체)을 `isAdmin` → `isAdmin || canAddManualCost` 또는 과제 취지에 맞게 정정
 3. 로컬 `npm run build`(tsc 포함) 통과를 재작업 완료 보고 전 반드시 직접 확인 후 재제출
+
+---
+
+## [재배정 — Aiden, 2026-07-20]
+
+D_Kai(OpenCode)가 현재 정상 응답을 하지 못하는 상태로 확인되어(Edward 보고), 위 반려에 따른 재작업을 **Riley**에게 재배정한다.
+
+- 기존 브랜치(`feature/teama-task-188-agency-finance-ui-fix-dkai`)·PR#611을 그대로 유지 — 신규 브랜치/PR 생성 불필요
+- Riley는 위 `[Aiden 검토]` 반려 사유·재작업 요청 3가지만 반영해 기존 커밋(`895a76f5`, `5d3aa56e`) 위에 재작업 커밋 추가(태그 `[Riley]`)
+- §B(`updatePaymentStatus` AGENCY 허용, A안)는 Edward 직접 지시로 이미 확인된 사항이므로 유지, 재작업 대상 아님(§A 렌더링 게이트 수정만 대상)
+- D_Kai가 추후 응답을 재개할 경우를 대비해 D_Kai의 기존 커밋·작업 결과 서술은 삭제하지 않고 보존
