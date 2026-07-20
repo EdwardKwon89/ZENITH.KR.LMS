@@ -1,15 +1,15 @@
-# TASK-189 — [Team A] UPS 특송 전용 Order Detail 신규 화면 — Issue #607 (D_Kai)
+# TASK-189 — [Team A] UPS 특송 전용 Order Detail 신규 화면 — Issue #607 (Riley)
 
 | 항목 | 내용 |
 |:----|:----|
 | **Task-ID** | TASK-189 |
 | **생성일** | 2026-07-20 |
-| **할당 Agent** | D_Kai |
+| **할당 Agent** | ~~D_Kai~~ → **Riley** (재배정, 260720 — D_Kai/OpenCode 지속 무응답, 착수 전이라 인수 아닌 신규 착수) |
 | **우선순위** | P2 |
-| **전제조건** | 없음 (TASK-188과 파일 겹침 없음 — 병행 가능, TASK-188 우선 권장) |
+| **전제조건** | 없음 (TASK-188 완료 — `OrderFinanceSummary`의 `canManageFinance` prop 반영된 최신 버전 재사용 가능) |
 | **관련 IMP** | 없음 |
-| **브랜치** | `feature/teama-task-189-ups-order-detail-screen-dkai` |
-| **커밋 태그** | `[D_Kai]` |
+| **브랜치** | `feature/teama-task-189-ups-order-detail-screen-riley` |
+| **커밋 태그** | `[Riley]` (또는 세션 표기에 따라 `[Gemini]`) |
 | **상태** | 🔄 |
 
 ---
@@ -62,13 +62,13 @@
 
 ## [R-17 완료 보고 절차]
 
-1. **[코드 커밋]** `[D_Kai] feat: TASK-189 UPS 전용 Order Detail 신규 화면 — Issue #607`
+1. **[코드 커밋]** `[Riley] feat: TASK-189 UPS 전용 Order Detail 신규 화면 — Issue #607`
 2. 상세 파일 `[작업 결과]` 섹션 작성(커밋 해시 포함) + 상태 🔔 변경
 3. `.agent/ACTIVE_TASK.md` 상태 🔄→🔔 변경
 4. `gh issue edit 607 --add-label status:review --remove-label status:in-progress`
 5. `check-R17-DoD` 실행 통과 확인
-6. **[문서 커밋]** `[D_Kai] docs: TASK-189 완료 보고 — task file 🔔`
-7. **[PR 생성]** `feature/teama-task-189-ups-order-detail-screen-dkai → develop`, `Closes #607`
+6. **[문서 커밋]** `[Riley] docs: TASK-189 완료 보고 — task file 🔔`
+7. **[PR 생성]** `feature/teama-task-189-ups-order-detail-screen-riley → develop`, `Closes #607`
 
 ---
 
