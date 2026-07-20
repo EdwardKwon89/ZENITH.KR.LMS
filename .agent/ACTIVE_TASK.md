@@ -16,7 +16,7 @@
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
 | [#618](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/618) | [feat] SNTL(SUB_ADMIN) 전용 UPS 원가(cost_price) Matrix 편집 기능 | a | p2 | in-progress | EdwardKwon89 | 2026-07-20 |
-| [#617](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/617) | [fix] 요금 계산 엔진이 화주 세션으로 Agency 원가 정책을 조회 — RLS로 조용히 0% 할인 처리됨 | a | p1 | in-progress | EdwardKwon89 | 2026-07-20 |
+| [#617](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/617) | [fix] 요금 계산 엔진이 화주 세션으로 Agency 원가 정책을 조회 — RLS로 조용히 0% 할인 처리됨 | a | p1 | review | EdwardKwon89 | 2026-07-20 |
 | [#616](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/616) | [GOV] 예약 요금(pricing-schedule) 시스템에 Agency/Shipper 할인율 마진 검증 부재 — Team B 검토 요청 | b | p2 | - | 미배정 | 2026-07-20 |
 | [#609](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/609) | [Aiden] CI 지연 원인 조사 결과 + 조치 — 큐 혼잡 완화 + TeamB_Dev 병합 CI 대기 불요로 개정 | b | p1 | - | jungjs | 2026-07-20 |
 | [#605](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/605) | [design] Agency 원가/판매가 Matrix 전환 검토 — 대리점 단위 Matrix + 화주 단위 하이브리드(Zone할인율+선택적 Matrix override) | b | p2 | - | jungjs | 2026-07-19 |
