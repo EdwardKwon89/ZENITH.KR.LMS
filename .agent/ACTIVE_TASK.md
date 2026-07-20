@@ -447,7 +447,7 @@
 | TASK-186 | 260720 | [Team A] UPS 사후청구(실제 추가요금) 반영 — Issue #589 An_16 구현 | 없음 | Riley | ✅ | [TASK-186](tasks/TASK-186_260720_Issue589_UPS사후청구반영_Riley.md) | An_16 설계 사양 준수 구현 완료 — 신규 테이블 `zen_ups_actual_charges` + `zen_order_costs.UPS_ACTUAL_ADJUSTMENT` + 서버 액션 3종 + 배치 처리 화면·Order Detail 표시. PR#608 ✅ Aiden 승인·머지 완료(`af63e953`, 260720) — CI 40분+ pending·API 503으로 R-08-1 로컬 대체 검증(build✅·회귀 98/98·634/634 PASS) 적용. Issue #589 Close. |
 | TASK-187 | 260720 | [Team A] Order별 매출/매입 구분 + SNTL 수익금 집계 — Issue #606 구현 | 없음 | Riley | ✅ | [TASK-187](tasks/TASK-187_260720_Issue606_매출매입SNTL수익금집계_Riley.md) | 기존 정산 파이프라인(SettlementEngine 등) 100% 무수정 확인 — 스냅샷 metadata·zen_order_costs 읽기 전용 서버 액션 3종 + 매출/매입 List 화면(`/finance/order-revenue-cost`) + SNTL 수익금 집계 화면(`/admin/sub-agency-profit`) 구현. PR#610 ✅ Aiden 승인·머지 완료(`0f1f3d3b`, 260720) — CI 20분+ queued 정체(큐 16건 적체)로 R-08-1 로컬 대체 검증(build✅·회귀 99/99·637/637 PASS) 적용, diff 직접 확인 완료. Issue #606 Close. |
 | TASK-188 | 260720 | [Team A] Agency 정산 화면 권한 공백 보완 — Issue #603 §A+§B 구현 | 없음 | Riley | 🔔 | [TASK-188](tasks/TASK-188_260720_Issue603_Agency정산화면권한공백_Riley.md) | D_Kai 미응답으로 Edward 직접 인수 지시 — §A `OrderFinanceSummary.tsx` 소유권 기반 `canManageFinance` prop 추가 + §B `updatePaymentStatus()`, `calculateSettlementAction()`, `generateInvoicesForOrder()` AGENCY 소유권 가드 구현. 코드 `15e9f2a5`. 회귀 PASS (검토 대기) |
-| TASK-189 | 260720 | [Team A] UPS 특송 전용 Order Detail 신규 화면 — Issue #607 구현 | 없음 | Riley | 🔔 | [TASK-189](tasks/TASK-189_260720_Issue607_UPS전용OrderDetail신규화면_Riley.md) | Strangler Fig 방식 준수 — 기존 `orders/[orderId]/page.tsx` 100% 무수정(0 diff). 신규 경로(`/orders/[orderId]/ups-detail/page.tsx`) 및 Breakdown 카드(`UpsOrderBreakdownCard.tsx`) 구현. 코드 `1794c4fb`. 회귀 PASS (검토 대기) |
+| TASK-189 | 260720 | [Team A] UPS 특송 전용 Order Detail 신규 화면 — Issue #607 구현 | 없음 | Riley | ❌ | [TASK-189](tasks/TASK-189_260720_Issue607_UPS전용OrderDetail신규화면_Riley.md) | Aiden 반려(260720) — 격리 워크트리 `npm run build` 직접 실행 결과 Turbopack 4개 오류(Module not found ×3, export 불일치 ×1) 확인. "빌드 성공" 자가 보고와 불일치. 재작업 요청 완료 |
 ---
 
 ## Agent 현황
@@ -459,7 +459,7 @@
 | **Aiden (Claude)** | ✅ TASK-167 전체 승인 (260626) | PR#117 §1 ✅ · PR#118 §2+§3 ✅ 전량 머지 완료 |
 | **D_Kai (OpenCode)** | ➖ Task 재배정 완료 (260720) | TASK-188·189 모두 Edward 지시로 Riley가 인수 완수 |
 | **B_Kai** | ✅ GH#206 승인·머지 완료 (260706) | PR#221 · #13 재조사 요청에 신속·정확 대응(docs/03_Design 17개 파일 아카이브), 신규 Task 대기 |
-| **Riley** | 🔔 TASK-189 검토 대기 (260720) | UPS 전용 Order Detail 신규 화면(Issue #607) 구현 완료, PR 생성 준비 완료. 이전: TASK-188 🔔 완료 |
+| **Riley** | ❌ TASK-189 반려·재작업 대기 (260720) | PR#613 — 격리 워크트리 빌드 직접 실행 결과 Turbopack 4개 오류 확인(자가 보고 "빌드 성공"과 불일치). import 경로 4건 정정 요청. 이전: TASK-188 ✅·TASK-187 ✅ 완료 |
 | N_Kai | ➖ 미재배정 확정 (260626 Edward) | TASK-087 폐기 — 신규 Task 발령 없음 |
 | Ring | 신규 할당 중단 유지 | 9차 위반 누적 |
 
