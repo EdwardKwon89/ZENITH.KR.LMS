@@ -247,9 +247,6 @@
 | TASK-100 | 260529 | DEF-030 경로 최적화 전면 수정 (전체 운송사 비교·가드) | P1 | 없음 | D_Kai | ✅ | [TASK-100](tasks/TASK-100_260529_DEF030경로최적화수정_DKai.md) | 5b63421+f1c3f74 · 229/229 PASS · Aiden ✅ 승인 |
 | TASK-101 | 260529 | B_Kai 재교육 세션 2차 (R-17 위반 3회 누적) | P4 | 없음 | B_Kai | ✅ | [TASK-101](tasks/TASK-101_260529_BKai재교육세션2차_BKai.md) | §1~§3 전항목 우수 · c60196f · Aiden ✅ 승인 · B_Kai 신규 할당 중단 해제 |
 | TASK-102 | 260529 | UAT-02·10 시나리오 수정 — TASK-100 경로 최적화 반영 | P3 | TASK-100 ✅ | D_Kai | ✅ | [TASK-102](tasks/TASK-102_260529_UAT수정_TASK100반영_DKai.md) | fe04df4+4390bad · 229/229 PASS · Advisory 2건(Riley 위반 3회·IMP-090 기존마이그 수정) |
-| TASK-167 | 260720 | IMP-151 getMaxAllowedZoneDiscount productIds 필터 추가 (Issue #614) | P2 | 없음 | D_Kai | ✅ | [TASK-167](tasks/TASK-167_260720_IMP151_DiscountGuardProductFilter_DKai.md) | 코드 f0b4629e · PR #615 → develop 머지 · 644/644 PASS · Aiden ✅ |
-| TASK-168 | 260720 | [#617] estimateUpsFreight adminClient로 RLS 우회 (P1) | P1 | 없음 | D_Kai | 🔔 | [TASK-168](tasks/TASK-168_260720_ISS617_PricingRLSAdminClient_DKai.md) | freight.ts adminClient 전환 · freight-actions.test.ts mock 보강 · 648/648 PASS |
-| TASK-192 | 260720 | [#618] SNTL(SUB_ADMIN) 전용 UPS 원가(cost_price) Matrix 편집 | P2 | 없음 | D_Kai | 🔔 | [TASK-192](tasks/TASK-192_260720_Issue618_SNTL원가Matrix편집기능_DKai.md) | upsertAgencyCostRate + UpsBaseRateMatrix SUB_ADMIN 모드 · 4 TC · 653/653 PASS |
 
 ---
 
@@ -453,7 +450,7 @@
 | TASK-189 | 260720 | [Team A] UPS 특송 전용 Order Detail 신규 화면 — Issue #607 구현 | TASK-188 ✅ | Riley (D_Kai에서 재배정) | ✅ | [TASK-189](tasks/TASK-189_260720_Issue607_UPS전용OrderDetail신규화면_Riley.md) | Strangler Fig 방식 100% 준수(기존 화면 0 diff) + 기존 컴포넌트 재사용. 1차 제출 빌드 실패(잘못된 import 4건) Aiden 반려 후, 재작업 커밋(`32715c24`)에서 정정 확인 — 격리 워크트리 재검증 build✅·회귀 101/101·644/644 PASS. PR#613 ✅ Aiden 승인·머지 완료. Issue #607 Close. |
 | TASK-190 | 260720 | [Team A] `getMaxAllowedZoneDiscount` Zone 전체 상품 검사 버그 수정 — Issue #614 (IMP-151) | 없음 | D_Kai | ✅ | [TASK-190](tasks/TASK-190_260720_Issue614_ZoneDiscountGuard버그수정_DKai.md) | 가드 함수 상품 스코프 버그 수정 완료 — PR#615 ✅ Aiden 승인·머지(`f0b4629e`), 실제 CI PASS(644/644), Issue #614 Close. **범위 재정의**: 수정 대상 함수(`upsertAgencyPricingPolicy`·`upsertShipperZoneDiscounts`)가 실제 화면에서 호출되지 않는 죽은 코드였음 확인 — 실제 예약 요금 시스템(Issue #391)엔 마진 검증 자체가 없어 Team B에 Issue #616으로 이관. 최초 제출 시 TASK-167 번호 충돌 발생, Aiden이 TASK-190으로 정정(파일명 변경) |
 | TASK-191 | 260720 | [Team A] 요금 계산 엔진 RLS 버그 — 화주 세션으로 Agency 원가 조회 시 조용히 0% 처리 — Issue #617 | 없음 | D_Kai | ✅ | [TASK-191](tasks/TASK-191_260720_Issue617_요금계산엔진RLS버그수정_DKai.md) | `estimateUpsFreight`의 agency 정책 조회를 서비스 롤 클라이언트로 교체 완료. PR#619 ✅ Aiden 승인·머지(`7530417b`) — 실제 CI PASS + Aiden이 실제 오더 재현(ZEN-2026-000003)으로 fix 재검증(discountRate 0→0.2 정상화 확인). Issue #617 Close. 착수 시 TASK-168 번호 충돌 발생(2회째), Aiden이 TASK-191로 정정 |
-| TASK-192 | 260720 | [Team A] SNTL(SUB_ADMIN) 전용 UPS 원가(cost_price) Matrix 편집 기능 — Issue #618 | TASK-191 권장(병행 가능) | D_Kai | 🔄 | [TASK-192](tasks/TASK-192_260720_Issue618_SNTL원가Matrix편집기능_DKai.md) | `zen_ups_base_rates` 스키마 무변경, 신규 액션 `upsertAgencyCostRate`(cost_price만) + 기존 `UpsBaseRateMatrix` 재사용. 영향도 사전 확인 완료(하부 Agency·화주 요금 계산에 cost_price 미사용, SNTL 자기 수익 집계에만 영향) |
+| TASK-192 | 260720 | [Team A] SNTL(SUB_ADMIN) 전용 UPS 원가(cost_price) Matrix 편집 기능 — Issue #618 | TASK-191 ✅ | D_Kai | ✅ | [TASK-192](tasks/TASK-192_260720_Issue618_SNTL원가Matrix편집기능_DKai.md) | `upsertAgencyCostRate`(selling_price 미포함, cost_price만) + `UpsBaseRateMatrix` SUB_ADMIN 모드 재사용 완료. PR#620 ✅ Aiden 승인·머지(`ce0a3ade`) — 실제 CI는 인프라 이슈(Supabase CLI rate limit)로 FAILURE였으나 코드 무관 확인, R-08-1 로컬 대체 검증(build✅·회귀 102/102·653/653 PASS) 적용. TC-UPS-ADMIN-12d(SUB_ADMIN의 기존 upsertUpsBaseRate 차단 확인) 포함. Issue #618 Close. |
 ---
 
 ## Agent 현황
@@ -463,7 +460,7 @@
 | Agent | 상태 | 비고 |
 |:------|:----:|:----|
 | **Aiden (Claude)** | ✅ TASK-167 전체 승인 (260626) | PR#117 §1 ✅ · PR#118 §2+§3 ✅ 전량 머지 완료 |
-| **D_Kai (OpenCode)** | ✅ TASK-191 승인·머지 완료, TASK-192 진행 중 (260720) | TASK-191(Issue #617) PR#619 ✅ Aiden 승인·머지. ⚠️ 채번 절차 미준수 2회째(TASK-168 번호 충돌, TASK-190 때 TASK-167에 이은 재발) — 할당 중단 기준(3회)까지 1회 남음, VIOLATION_TRACKER.md 기록. TASK-192(Issue #618, SNTL 원가 Matrix 편집) 진행 중 |
+| **D_Kai (OpenCode)** | ✅ TASK-191·192 전량 승인·머지 완료 (260720) | TASK-191(PR#619)·TASK-192(PR#620) 모두 완료 — 코드 품질 우수(TC-UPS-ADMIN-12d 등 회귀 방지 테스트 포함). ⚠️ 채번 절차 미준수 2회째(TASK-167·TASK-168 번호 충돌) — 할당 중단 기준(3회)까지 1회 남음, VIOLATION_TRACKER.md 기록. 신규 Task 대기 |
 | **B_Kai** | ✅ GH#206 승인·머지 완료 (260706) | PR#221 · #13 재조사 요청에 신속·정확 대응(docs/03_Design 17개 파일 아카이브), 신규 Task 대기 |
 | **Riley** | ✅ TASK-189 승인·머지 완료 (260720) | UPS 특송 전용 Order Detail 신규 화면(Issue #607), PR#613 머지 완료 — 1차 빌드 실패 반려 후 재작업 정정 확인. 이전: TASK-188 ✅(PR#612)·TASK-187 ✅(PR#610) 완료. 신규 Task 대기 |
 | N_Kai | ➖ 미재배정 확정 (260626 Edward) | TASK-087 폐기 — 신규 Task 발령 없음 |
