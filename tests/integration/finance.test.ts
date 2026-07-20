@@ -47,7 +47,10 @@ describe('ZENITH Finance Integration: WBS 3.2 Integrity Test', () => {
       select: vi.fn().mockReturnThis(),
       rpc: vi.fn().mockResolvedValue({ data: null, error: null }),
       single: vi.fn(),
-      maybeSingle: vi.fn(),
+      maybeSingle: vi.fn().mockResolvedValue({ data: null }),
+      filter: vi.fn().mockReturnThis(),
+      neq: vi.fn().mockReturnThis(),
+      is: vi.fn().mockReturnThis(),
     };
 
     (validateUserAction as any).mockResolvedValue({ 
