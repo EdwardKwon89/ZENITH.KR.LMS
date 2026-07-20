@@ -20,6 +20,14 @@ vi.mock('@/lib/auth/guards', () => ({
   validateUserAction: vi.fn(),
 }));
 
+vi.mock('@/lib/finance/settlement', () => ({
+  InvoiceGenerator: vi.fn().mockImplementation(function () {
+    return {
+      generateInvoice: vi.fn().mockResolvedValue({ success: true, invoice: { id: 'inv-adj-1' } }),
+    };
+  }),
+}));
+
 import { validateAdminAction, validateUserAction } from '@/lib/auth/guards';
 import { recordUpsActualCharges, getUpsActualCharges, getUpsChargeReconciliation, searchDeliveredUpsOrders } from '@/app/actions/finance/ups-actual-charges';
 

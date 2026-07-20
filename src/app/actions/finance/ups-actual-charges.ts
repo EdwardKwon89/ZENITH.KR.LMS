@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { validateAdminAction, validateUserAction } from '@/lib/auth/guards';
 import { logger } from '@/lib/logger';
+import { InvoiceGenerator } from '@/lib/finance/settlement';
 
 export interface UpsActualChargeInput {
   chargeType: string;
@@ -159,6 +160,14 @@ export async function recordUpsActualCharges(
         if (insertCostError) {
           return { success: false, error: `조정 비용 생성 실패: ${insertCostError.message}` };
         }
+      }
+
+      // 6. 조정 금액에 대한 인보이스 자동 생성
+      const generator = new InvoiceGenerator();
+      const invResult = await generator.generateInvoice(orderId);
+      if (!invResult.success) {
+        logger.error(`[UPS_ACTUAL] Failed to generate adjustment invoice: ${invResult.message}`);
+        return { success: false, error: `조정 인보이스 생성 실패: ${invResult.message}` };
       }
     }
 
