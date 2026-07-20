@@ -10,7 +10,7 @@
 | **관련 IMP** | 없음 |
 | **브랜치** | `feature/teama-task-186-ups-actual-charges-riley` |
 | **커밋 태그** | `[Gemini]` |
-| **상태** | 🔄 |
+| **상태** | 🔔 |
 
 ---
 
@@ -81,27 +81,27 @@ getUpsChargeReconciliation(orderId: string): Promise<{ estimated: number; actual
 
 ## [DoD]
 
-- [ ] `zen_ups_actual_charges` 테이블 + RLS 정책 마이그레이션 작성 및 적용
-- [ ] `zen_order_costs`에 `UPS_ACTUAL_ADJUSTMENT` cost_type 정상 동작(차액 계산 정확성 단위 테스트 포함)
-- [ ] 서버 액션 3종 구현 + 단위 테스트
-- [ ] 배치 처리 화면 구현(DELIVERED 오더 검색 → 항목 입력 → 예상/실제/차액 표시)
-- [ ] Order Detail 화면에 읽기 섹션(+ 단건 입력) 추가
-- [ ] 인보이스 발행 후 잠금 로직 검증(테스트 포함)
-- [ ] 전체 회귀 테스트 PASS (`npm run test:regression`)
-- [ ] `check-R17-DoD` 자가 검증 통과
-- [ ] 문서 커밋 해시 기재
+- [x] `zen_ups_actual_charges` 테이블 + RLS 정책 마이그레이션 작성 및 적용
+- [x] `zen_order_costs`에 `UPS_ACTUAL_ADJUSTMENT` cost_type 정상 동작(차액 계산 정확성 단위 테스트 포함)
+- [x] 서버 액션 3종 구현 + 단위 테스트
+- [x] 배치 처리 화면 구현(DELIVERED 오더 검색 → 항목 입력 → 예상/실제/차액 표시)
+- [x] Order Detail 화면에 읽기 섹션(+ 단건 입력) 추가
+- [x] 인보이스 발행 후 잠금 로직 검증(테스트 포함)
+- [x] 전체 회귀 테스트 PASS (`npm run test:regression`)
+- [x] `check-R17-DoD` 자가 검증 통과
+- [x] 문서 커밋 해시 기재
 
 ---
 
 ## [R-17 완료 보고 절차]
 
-1. **[코드 커밋]** `[Riley] feat: TASK-186 UPS 사후청구 반영 — Issue #589 An_16 구현`
+1. **[코드 커밋]** `[Gemini] feat: TASK-186 UPS 사후청구 반영 — Issue #589 An_16 구현`
 2. 상세 파일 `[작업 결과]` 섹션 작성(커밋 해시 포함) + 상태 🔔 변경
 3. `.agent/ACTIVE_TASK.md` 상태 🔄→🔔 변경
 4. `gh issue edit 589 --add-label status:review --remove-label status:in-progress`
 5. `scratch/IMP_PROGRESS.md` 해당 없음(IMP 미연동 Task)
 6. `check-R17-DoD` 실행 통과 확인
-7. **[문서 커밋]** `[Riley] docs: TASK-186 완료 보고 — task file 🔔`
+7. **[문서 커밋]** `[Gemini] docs: TASK-186 완료 보고 — task file 🔔`
 8. **[PR 생성]** `feature/teama-task-186-ups-actual-charges-riley → develop`, `Closes #589`
 
 ---
@@ -114,4 +114,9 @@ getUpsChargeReconciliation(orderId: string): Promise<{ estimated: number; actual
 
 ## [작업 결과]
 
-_(착수 시 작성)_
+| 항목 | 내용 |
+|:----|:----|
+| 코드 커밋 | `4da4935bf24cad264aa952313d96b30420501e11` |
+| 회귀 결과 | Vitest unit & regression tests 100% PASS (`rtk npm run test:regression` 검증 완수) |
+| 빌드 | 빌드 성공 (TypeScript `tsc --noEmit` 검증 완수) |
+| 특이사항 | An_16 설계 사양 준수. 신규 테이블 `zen_ups_actual_charges` + RLS 정책 + `UPS_ACTUAL_ADJUSTMENT` 차액 계산 서버 액션 3종 + 배치 처리 화면 (`/admin/ups-actual-charges`) + Order Detail 통합 화면 연동 완수. |
