@@ -445,7 +445,7 @@
 | TASK-184 | 260715 | UPS 급증 긴급 수수료(Surge Emergency Fee) 구현 (Issue #491) | 없음 | Aiden | ✅ | [TASK-184](tasks/TASK-184_260715_Iss491_UpsSurgeFee_Aiden.md) | zen_ups_surge_fees 테이블(도착국×기간별 kg당 단가) · applySurgeFee 계산엔진(유류할증 추가부과) · Shipper pass-through 확장 · Admin CRUD+UI 탭 · Ds-11 §11.11 신규 · TC-UPS-ENGINE-07-01~05 · 회귀 498/509 PASS(무관 pre-existing 실패 2건 제외) · CI SUCCESS · PR#495 ✅ Aiden 승인·머지 완료(260715) · Issue #491 Close · 관련 UAT 갱신은 Issue #496(Riley) 별도 진행 · 후속 PR#498(Agency 급증 수수료 조회 전용 탭, CI SUCCESS) Aiden 승인·머지 완료(260715) · 정산 화면 부과금 항목별 breakdown 노출 검토는 Issue #499(Team B/Jungjs) 별도 전달 |
 | TASK-185 | 260715 | [Team A] UPS 급증 긴급 수수료 반영 — UAT-17/19 시나리오 갱신 (Issue #496) | 없음 | Riley | ✅ | [TASK-185](tasks/TASK-185_260715_UPS급증수수료UAT반영_Riley.md) | UAT_17/19/MASTER 급증 수수료 검증 시나리오 반영 · UAT_19의 미구현 `zen_order_costs.SURGE_EMERGENCY` 참조를 실제 구현된 FREIGHT 합산+`rate_snapshots.metadata` 검증으로 정정 완료(PR#501 ✅ Aiden 승인·머지, Issue #496 Close, 260715) · R-17 §0 위반(1차 direct-push) VIOLATION_TRACKER 기록 |
 | TASK-186 | 260720 | [Team A] UPS 사후청구(실제 추가요금) 반영 — Issue #589 An_16 구현 | 없음 | Riley | ✅ | [TASK-186](tasks/TASK-186_260720_Issue589_UPS사후청구반영_Riley.md) | An_16 설계 사양 준수 구현 완료 — 신규 테이블 `zen_ups_actual_charges` + `zen_order_costs.UPS_ACTUAL_ADJUSTMENT` + 서버 액션 3종 + 배치 처리 화면·Order Detail 표시. PR#608 ✅ Aiden 승인·머지 완료(`af63e953`, 260720) — CI 40분+ pending·API 503으로 R-08-1 로컬 대체 검증(build✅·회귀 98/98·634/634 PASS) 적용. Issue #589 Close. |
-| TASK-187 | 260720 | [Team A] Order별 매출/매입 구분 + SNTL 수익금 집계 — Issue #606 구현 | 없음 | Riley | 🔔 | [TASK-187](tasks/TASK-187_260720_Issue606_매출매입SNTL수익금집계_Riley.md) | 기존 정산 파이프라인 무수정 준수 — 스냅샷 metadata 기반 조회 전용 서버 액션 3종 + 매출/매입 List 화면(`/finance/order-revenue-cost`) + SNTL 수익금 집계 화면(`/admin/sub-agency-profit`) 구현 완수 (검토 대기) |
+| TASK-187 | 260720 | [Team A] Order별 매출/매입 구분 + SNTL 수익금 집계 — Issue #606 구현 | 없음 | Riley | ✅ | [TASK-187](tasks/TASK-187_260720_Issue606_매출매입SNTL수익금집계_Riley.md) | 기존 정산 파이프라인(SettlementEngine 등) 100% 무수정 확인 — 스냅샷 metadata·zen_order_costs 읽기 전용 서버 액션 3종 + 매출/매입 List 화면(`/finance/order-revenue-cost`) + SNTL 수익금 집계 화면(`/admin/sub-agency-profit`) 구현. PR#610 ✅ Aiden 승인·머지 완료(`0f1f3d3b`, 260720) — 실제 CI PASS·diff 직접 확인 완료. Issue #606 Close. |
 | TASK-188 | 260720 | [Team A] Agency 정산 화면 권한 공백 수정 — Issue #603 §A | 없음 | D_Kai | 🔄 | [TASK-188](tasks/TASK-188_260720_Issue603_Agency정산화면권한공백_DKai.md) | `OrderFinanceSummary.tsx`에 소유권 체크 기반 `isAgency` prop 추가 — 단순 role 체크 아닌 `resolveAgencyShipperIds` 재사용. §B(입금확인 권한)는 Edward/JSJung 결정 대기로 이번 범위 제외 |
 | TASK-189 | 260720 | [Team A] UPS 특송 전용 Order Detail 신규 화면 — Issue #607 | TASK-188 권장(병행 가능) | D_Kai | 🔄 | [TASK-189](tasks/TASK-189_260720_Issue607_UPS전용OrderDetail신규화면_DKai.md) | Strangler Fig 방식 — 기존 통합 Order Detail 화면 무수정, 신규 경로에 Zone·티어·운임breakdown+기존 컴포넌트(사후부가금·정산요약·트래킹) 재조합 |
 ---
@@ -459,7 +459,7 @@
 | **Aiden (Claude)** | ✅ TASK-167 전체 승인 (260626) | PR#117 §1 ✅ · PR#118 §2+§3 ✅ 전량 머지 완료 |
 | **D_Kai (OpenCode)** | 🔄 TASK-188·189 착수 (260720) | Issue #603 §A(Agency 정산 화면 권한 공백) + Issue #607(UPS 전용 Order Detail 신규 화면) 병행 배정 — TASK-188 우선 권장. 이전: TASK-182 ✅ 완료(R-17 위반 2회) — 기준요금 매트릭스 UI, 3회 시 할당 중단 대상 유의 |
 | **B_Kai** | ✅ GH#206 승인·머지 완료 (260706) | PR#221 · #13 재조사 요청에 신속·정확 대응(docs/03_Design 17개 파일 아카이브), 신규 Task 대기 |
-| **Riley** | 🔔 TASK-187 검토 대기 (260720) | Order 매출/매입+SNTL 수익금 집계(Issue #606) 구현 및 검증 완료, PR 생성 준비 완료 |
+| **Riley** | ✅ TASK-187 승인·머지 완료 (260720) | Order 매출/매입+SNTL 수익금 집계(Issue #606), PR#610 머지 완료. 신규 Task 대기 |
 | N_Kai | ➖ 미재배정 확정 (260626 Edward) | TASK-087 폐기 — 신규 Task 발령 없음 |
 | Ring | 신규 할당 중단 유지 | 9차 위반 누적 |
 
