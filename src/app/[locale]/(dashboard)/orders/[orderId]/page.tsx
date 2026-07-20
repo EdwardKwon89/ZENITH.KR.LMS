@@ -27,6 +27,7 @@ import { getTranslations } from 'next-intl/server';
 import { OrderClaimTrigger } from '@/components/claims/OrderClaimTrigger';
 import { getUpsLabelStatus } from '@/app/actions/operations/ups-labels';
 import UpsTradeDocumentActions from '@/components/orders/UpsTradeDocumentActions';
+import { UpsActualAdjustmentForm } from '@/components/orders/UpsActualAdjustmentForm';
 
 import { Package, MapPin, Truck, ShieldCheck, FileText, Pencil } from 'lucide-react';
 
@@ -526,6 +527,14 @@ export default async function OrderDetailPage({
             <OrderVocTrigger orderId={orderId} orderNo={order.order_no} />
             <OrderClaimTrigger orderId={orderId} orderNo={order.order_no} />
           </div>
+
+          {isUpsOrder && (
+            <UpsActualAdjustmentForm
+              orderId={orderId}
+              orderStatus={order.status || ''}
+              isPlatformAdmin={isAdmin || profile?.role === 'MANAGER'}
+            />
+          )}
 
           {/* 4. Finance Summary */}
           <OrderFinanceSummary 
