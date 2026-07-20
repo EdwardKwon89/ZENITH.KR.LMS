@@ -15,6 +15,7 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
+| [#614](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/614) | [fix] getMaxAllowedZoneDiscount Zone 전체 상품 검사로 모든 Zone 허용 할인율 0% (IMP-151) | a | p2 | in-progress | EdwardKwon89 | 2026-07-20 |
 | [#609](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/609) | [Aiden] CI 지연 원인 조사 결과 + 조치 — 큐 혼잡 완화 + TeamB_Dev 병합 CI 대기 불요로 개정 | b | p1 | - | jungjs | 2026-07-20 |
 | [#605](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/605) | [design] Agency 원가/판매가 Matrix 전환 검토 — 대리점 단위 Matrix + 화주 단위 하이브리드(Zone할인율+선택적 Matrix override) | b | p2 | - | jungjs | 2026-07-19 |
 | [#588](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/588) | [docs] UPS 오더 등록 후 처리 프로세스 현황 분석 (An_15) | b | p3 | - | 미배정 | 2026-07-18 |
