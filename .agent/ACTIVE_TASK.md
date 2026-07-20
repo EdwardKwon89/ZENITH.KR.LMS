@@ -15,7 +15,7 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
-| [#622](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/622) | [GOV] UPS 사후청구 조정 건이 '2차 인보이스로 추가 청구됨'이라 안내하지만 실제 인보이스 미생성 — Team B 커버 범위 확인 요청 | a | p1 | - | 미배정 | 2026-07-20 |
+| [#622](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/622) | [GOV] UPS 사후청구 조정 건이 '2차 인보이스로 추가 청구됨'이라 안내하지만 실제 인보이스 미생성 — Team B 커버 범위 확인 요청 | a | p1 | in-progress | 미배정 | 2026-07-20 |
 | [#621](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/621) | [GOV] 수동 트래킹 이벤트로 DELIVERED 입력해도 오더 상태 미반영 — Team B 커버 범위 확인 요청 | a | p2 | rework | 미배정 | 2026-07-20 |
 | [#616](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/616) | [GOV] 예약 요금(pricing-schedule) 시스템에 Agency/Shipper 할인율 마진 검증 부재 — Team B 검토 요청 | b | p2 | - | 미배정 | 2026-07-20 |
 | [#609](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/609) | [Aiden] CI 지연 원인 조사 결과 + 조치 — 큐 혼잡 완화 + TeamB_Dev 병합 CI 대기 불요로 개정 | b | p1 | - | jungjs | 2026-07-20 |
