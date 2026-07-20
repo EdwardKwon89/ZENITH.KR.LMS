@@ -6,7 +6,7 @@
 // zen_order_rate_snapshots 기록은 Team B 인계 범위(GH #181, An-14 §11) — 이 파일은
 // 계산 결과를 반환하는 조회 전용 Action이며 오더 생성 로직을 포함하지 않는다.
 
-import { createClient } from '@/utils/supabase/server';
+import { createClient, createAdminClient } from '@/utils/supabase/server';
 import { validateUserAction } from '@/lib/auth/guards';
 import {
   resolveBillingWeight,
@@ -197,7 +197,10 @@ export async function estimateUpsFreight(input: EstimateUpsFreightInput): Promis
     return { platform, agency: null, shipper: null };
   }
 
-  const { data: policy } = await supabase
+  // Issue #617: 내부 원가 계산 목적 조회는 서비스 롤(admin) 클라이언트 사용 — RLS 우회
+  const admin = await createAdminClient();
+
+  const { data: policy } = await admin
     .from('zen_agency_pricing_policies')
     .select('discount_rate')
     .eq('agency_org_id', input.agencyOrgId)
@@ -206,7 +209,7 @@ export async function estimateUpsFreight(input: EstimateUpsFreightInput): Promis
     .maybeSingle();
   const discountRate = Number(policy?.discount_rate ?? 0);
 
-  const { data: agencyCharges } = await supabase
+  const { data: agencyCharges } = await admin
     .from('zen_agency_other_charges')
     .select('selling_price, cost_price')
     .eq('agency_org_id', input.agencyOrgId)

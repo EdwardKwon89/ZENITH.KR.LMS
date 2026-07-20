@@ -7,6 +7,13 @@ vi.mock('@/lib/auth/guards', () => ({
   validateUserAction: vi.fn(),
 }));
 
+vi.mock('@/utils/supabase/server', () => ({
+  createClient: vi.fn(),
+  createAdminClient: vi.fn(),
+}));
+
+import { createAdminClient } from '@/utils/supabase/server';
+
 const createQueryMock = (resolved: { data: any; error?: any }) => {
   const chain: any = {
     select: vi.fn().mockReturnThis(),
@@ -83,10 +90,13 @@ describe('TC-UPS-FREIGHT-01: estimateUpsFreight', () => {
 
   it('agencyOrgId 전달 시 Agency 단계 견적을 포함한다', async () => {
     (validateUserAction as any).mockResolvedValue({
-      supabase: buildMockSupabase({
-        zen_agency_pricing_policies: createQueryMock({ data: { discount_rate: 0.1 } }),
-      }),
+      supabase: buildMockSupabase(),
     });
+    (createAdminClient as any).mockResolvedValue(
+      buildMockSupabase({
+        zen_agency_pricing_policies: createQueryMock({ data: { discount_rate: 0.1 } }),
+      })
+    );
 
     const result = await estimateUpsFreight({
       productId: 'p1', destCountryCode: 'USA', actualWeightKg: 5, agencyOrgId: 'agency-1',
@@ -100,10 +110,14 @@ describe('TC-UPS-FREIGHT-01: estimateUpsFreight', () => {
   it('agencyOrgId + shipperOrgId 전달 시 Shipper 최종 운송비까지 계산한다', async () => {
     (validateUserAction as any).mockResolvedValue({
       supabase: buildMockSupabase({
-        zen_agency_pricing_policies: createQueryMock({ data: { discount_rate: 0.1 } }),
         zen_agency_shipper_zone_discounts: createQueryMock({ data: { discount_rate: 0.05 } }),
       }),
     });
+    (createAdminClient as any).mockResolvedValue(
+      buildMockSupabase({
+        zen_agency_pricing_policies: createQueryMock({ data: { discount_rate: 0.1 } }),
+      })
+    );
 
     const result = await estimateUpsFreight({
       productId: 'p1', destCountryCode: 'USA', actualWeightKg: 5,
@@ -192,5 +206,24 @@ describe('TC-UPS-FREIGHT-02: resolveZoneByCountry 연동 (GH#202)', () => {
     });
 
     expect(result.platform.breakdown.fallbackApplied).toBe(false);
+  });
+
+  it('agencyOrgId 전달 시 zen_agency_pricing_policies를 adminClient로 조회한다', async () => {
+    (validateUserAction as any).mockResolvedValue({
+      supabase: buildMockSupabase(),
+    });
+    (createAdminClient as any).mockResolvedValue(
+      buildMockSupabase({
+        zen_agency_pricing_policies: createQueryMock({ data: { discount_rate: 0.15 } }),
+        zen_agency_other_charges: createQueryMock({ data: [] }),
+      })
+    );
+
+    const result = await estimateUpsFreight({
+      productId: 'p1', destCountryCode: 'USA', actualWeightKg: 5, agencyOrgId: 'agency-1',
+    });
+
+    expect(createAdminClient).toHaveBeenCalledTimes(1);
+    expect(result.agency?.discountRate).toBe(0.15);
   });
 });
