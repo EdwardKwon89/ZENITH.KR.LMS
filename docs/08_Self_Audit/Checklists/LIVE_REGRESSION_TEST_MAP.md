@@ -232,6 +232,9 @@
 | **TC-OPS-02** | 파라미터 부재 시 Fallback | DB에 값이 없을 경우 코드 내 기본값(Default) 반환 보장 | `tests/unit/params/service.test.ts` |
 | **TC-OPS-03** | NULL 값 안전 처리 | DB 값이 NULL일 경우 예외 없이 기본값으로 대체 확인 | `tests/unit/params/service.test.ts` |
 | **TC-OPS-04** | 트래킹 지연 자동 감지 | 마지막 이벤트 48시간 초과 시 자동으로 `DELAYED` 스텝 추가 및 오더 `HELD` 상태 전환 | `tests/unit/logistics/tracking.test.ts` |
+| **TC-OPS-TRK-01** | 수동 DELIVERED 이벤트 → `updateOrderStatus(DELIVERED)` | 관리자 수동 DELIVERED 입력 시 `canChangeStatus` 가드 경로로 오더 상태 전환 | `tests/unit/operations/tracking-actions.test.ts` |
+| **TC-OPS-TRK-02** | 매핑 없는 이벤트 코드는 상태 미전환 | 등록되지 않은 이벤트 코드로 수동 추가 시 `updateOrderStatus` 호출 안 함 | `tests/unit/operations/tracking-actions.test.ts` |
+| **TC-OPS-TRK-03** | INSERT 실패 시 에러 처리 | DB INSERT 실패 시 적절한 에러 throw | `tests/unit/operations/tracking-actions.test.ts` |
 
 ### 14. 선불 지갑 연동 (Wallet Integration)
 | ID | 테스트 항목 | 목적 | 파일 경로 |

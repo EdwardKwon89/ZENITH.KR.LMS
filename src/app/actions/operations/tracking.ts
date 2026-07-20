@@ -4,7 +4,8 @@ import { logger } from '@/lib/logger';
 
 import { validateUserAction, validateAdminAction } from "@/lib/auth/guards";
 import { revalidatePath } from "next/cache";
-import { TrackingStep, trackingManager } from "@/lib/logistics/tracking";
+import { trackingManager, EVENT_TO_ORDER_STATUS } from "@/lib/logistics/tracking";
+import { updateOrderStatus } from './orders';
 
 /**
  * 특정 오더의 트래킹 데이터 및 마일스톤 정보를 조회합니다.
@@ -94,6 +95,11 @@ export async function addTrackingEvent(
     });
 
   if (error) throw new Error(`Failed to add tracking event: ${error.message}`);
+
+  const nextStatus = EVENT_TO_ORDER_STATUS[payload.event_code as keyof typeof EVENT_TO_ORDER_STATUS];
+  if (nextStatus) {
+    await updateOrderStatus(orderId, nextStatus, `수동 트래킹 이벤트(${payload.event_code})에 의한 상태 전환`);
+  }
 
   revalidatePath(`/(dashboard)/orders/${orderId}`, "page");
   return { success: true };
