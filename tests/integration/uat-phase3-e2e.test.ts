@@ -169,8 +169,14 @@ describe('ZENITH Phase 3 UAT: E2E + Routing Integrated Validation', () => {
 
     // Step 8: Admin pays invoice fully -> PAID (signature: invoiceId, status, amount)
     mockResultQueue.push(
-      { data: { metadata: null }, error: null }, // update + select metadata
+      { data: { id: 'invoice-1', shipper_id: 'sh-1', status: 'UNPAID', metadata: null }, error: null }, // findByIdBasic single
+      { data: { metadata: { source_order_id: mockOrderId } }, error: null }, // update + select metadata
     );
+    (validateUserAction as any).mockResolvedValueOnce({
+      user: mockAdminUser,
+      profile: mockAdminProfile,
+      supabase: mockSupabase,
+    });
     const payRes = await updatePaymentStatus('invoice-1', 'PAID', 1000);
     expect(payRes.success).toBe(true);
 

@@ -30,11 +30,27 @@ export async function updatePaymentStatus(
   amount: number,
   paymentMethod: string = 'BANK_TRANSFER'
 ) {
-  const { supabase, user } = await validateAdminAction();
+  const { supabase, user, profile } = await validateUserAction();
+  if (!profile) throw new Error('User profile not found');
   const financeRepo = new FinanceRepository(supabase);
 
+  // 권한 확인: AGENCY는 소속 화주 인보이스만, ADMIN/MANAGER는 전체
+  const adminRoles: string[] = [USER_ROLES.ADMIN, USER_ROLES.MANAGER, USER_ROLES.ZENITH_SUPER_ADMIN];
+  const isAdmin = adminRoles.includes(profile.role as string);
+  if (!isAdmin && profile.role !== USER_ROLES.AGENCY) {
+    throw new Error('결제 상태를 변경할 권한이 없습니다.');
+  }
+
   const { data: existingInvoice } = await financeRepo.findByIdBasic(invoiceId);
+  if (!existingInvoice) throw new Error('Invoice not found');
   const prevStatus = existingInvoice?.status ?? null;
+
+  if (profile.role === USER_ROLES.AGENCY) {
+    const agencyShipperIds = await resolveAgencyShipperIds(supabase, profile.org_id!);
+    if (!agencyShipperIds || !agencyShipperIds.includes(existingInvoice.shipper_id)) {
+      throw new Error('소속 화주의 인보이스만 처리할 수 있습니다.');
+    }
+  }
 
   const { data: invoice, error: invError } = await financeRepo.updatePaymentStatus(invoiceId, {
     status,
@@ -267,7 +283,7 @@ export async function addManualOrderCost(
 
   // currency 일치 확인은 Aiden 권고사항 — 오더 기준 통화 컬럼이 없어 넘어온 값 그대로 사용
 
-  const { error: insertError } = await supabase
+  const { data: newCost, error: insertError } = await supabase
     .from('zen_order_costs')
     .insert({
       order_id: orderId,
@@ -276,14 +292,16 @@ export async function addManualOrderCost(
       quantity: 1,
       currency,
       is_revenue: true,
-    });
+    })
+    .select('id, cost_type, total_amount, currency')
+    .single();
 
   if (insertError) throw new Error(`부가운임 추가 실패: ${insertError.message}`);
 
   revalidatePath(`/orders/${orderId}`);
   revalidatePath(`/(dashboard)/orders/${orderId}`);
 
-  return { success: true };
+  return { success: true, cost: newCost };
 }
 
 export async function getOrganizations() {

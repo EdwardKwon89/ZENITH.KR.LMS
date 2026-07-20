@@ -132,10 +132,14 @@ describe('ZENITH Finance Integration: WBS 3.2 Integrity Test', () => {
     });
 
     it('TC-F.5: [Failure] 일반 화주(CORPORATE)는 결제 상태를 변경할 수 없어야 함 (보안 가드)', async () => {
-      (validateAdminAction as any).mockRejectedValueOnce(new Error("Unauthorized: ADMIN role required"));
+      (validateUserAction as any).mockResolvedValueOnce({
+        user: mockUser,
+        profile: { id: 'corp-123', org_id: 'corp-org', role: 'CORPORATE' },
+        supabase: mockSupabase,
+      });
 
       await expect(updatePaymentStatus('inv-101', 'PAID', 1000))
-        .rejects.toThrow("Unauthorized: ADMIN role required");
+        .rejects.toThrow("결제 상태를 변경할 권한이 없습니다.");
     });
 
     it('TC-F.6: [Policy] 인보이스가 생성된 오더는 상태 변경이 제한되어야 함 (Data Integrity)', async () => {

@@ -205,9 +205,9 @@ export default function OrderFinanceSummary({
                       setManualCostName('');
                       setManualCostAmount('');
                       setManualCostCurrency('');
-                      // Refresh costs
-                      const refreshed = await calculateSettlementAction(orderId) as any;
-                      if (refreshed.success) setCosts(refreshed.costs || []);
+                      if (result.cost) {
+                        setCosts(prev => [...prev, { ...result.cost, total_amount: Number(result.cost.total_amount) }]);
+                      }
                     }
                   } catch (e: any) {
                     toast.error(e.message || 'Failed to add charge');

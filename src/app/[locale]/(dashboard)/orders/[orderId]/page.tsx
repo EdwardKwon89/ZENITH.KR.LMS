@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { getOrderDetails } from '@/app/actions/orders';
 import { getTrackingEvents, getTrackingRawLogs } from '@/app/actions/tracking';
 import { requireAuth, checkPermission } from '@/lib/auth/guards';
+import { USER_ROLES } from '@/lib/auth/rbac';
 import { OrderTisaDashboard } from '@/components/orders/OrderTisaDashboard';
 import { OrderQnaSection } from '@/components/orders/OrderQnaSection';
 import { OrderMainTabs } from '@/components/orders/OrderMainTabs';
@@ -86,8 +87,20 @@ export default async function OrderDetailPage({
 
   // UPS Invoice 출력 권한 (TASK-148 IMP-117)
   const isShipper = order.shipper_id && (profile?.id === order.shipper_id || profile?.org_id === order.shipper_id);
-  const isAgency = profile?.role === 'AGENCY';
+  const isAgency = profile?.role === USER_ROLES.AGENCY;
   const canPrintUpsInvoice = isAdmin || profile?.role === 'MANAGER' || isShipper || isAgency;
+
+  // AGENCY 소속 화주 오더 소유권 확인 (부가운임 추가 버튼 노출용)
+  let canAddManualCost = isAdmin || profile?.role === USER_ROLES.MANAGER || profile?.role === USER_ROLES.ZENITH_SUPER_ADMIN;
+  if (isAgency && profile?.org_id && order.shipper_id) {
+    const { data: agencyShippers } = await supabase
+      .from('zen_agency_shippers')
+      .select('shipper_org_id')
+      .eq('agency_org_id', profile.org_id)
+      .eq('is_active', true);
+    const shipperIds = (agencyShippers || []).map((r: any) => r.shipper_org_id);
+    canAddManualCost = shipperIds.includes(order.shipper_id) || canAddManualCost;
+  }
   const isUpsOrder = order.transport_mode === 'UPS';
 
   const rawLogsData = isAdmin ? await getTrackingRawLogs(orderId) : { logs: [] };
@@ -543,6 +556,7 @@ export default async function OrderDetailPage({
             initialInvoice={invoice || null}
             incidentFees={incidentFees || []}
             isAdmin={isAdmin}
+            canAddManualCost={canAddManualCost}
           />
 
           {/* 5. Trade Documents Section (Sprint 8) */}
