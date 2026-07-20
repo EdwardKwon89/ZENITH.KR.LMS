@@ -29,3 +29,10 @@ export {
 export {
   generateInvoicePdf,
 } from './invoice-files';
+
+export {
+  recordUpsActualCharges,
+  getUpsActualCharges,
+  getUpsChargeReconciliation,
+  searchDeliveredUpsOrders,
+} from './ups-actual-charges';
