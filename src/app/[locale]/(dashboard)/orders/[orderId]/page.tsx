@@ -90,6 +90,18 @@ export default async function OrderDetailPage({
   const canPrintUpsInvoice = isAdmin || profile?.role === 'MANAGER' || isShipper || isAgency;
   const isUpsOrder = order.transport_mode === 'UPS';
 
+  let canManageFinance = isAdmin || profile?.role === 'MANAGER';
+  if (!canManageFinance && isAgency && profile?.org_id) {
+    const { data: agencyLink } = await supabase
+      .from('zen_agency_shippers')
+      .select('shipper_org_id')
+      .eq('agency_org_id', profile.org_id)
+      .eq('shipper_org_id', order.shipper_id)
+      .eq('is_active', true)
+      .maybeSingle();
+    canManageFinance = !!agencyLink;
+  }
+
   const rawLogsData = isAdmin ? await getTrackingRawLogs(orderId) : { logs: [] };
   const rawLogs = rawLogsData?.logs || [];
 
@@ -543,6 +555,7 @@ export default async function OrderDetailPage({
             initialInvoice={invoice || null}
             incidentFees={incidentFees || []}
             isAdmin={isAdmin}
+            canManageFinance={canManageFinance}
           />
 
           {/* 5. Trade Documents Section (Sprint 8) */}

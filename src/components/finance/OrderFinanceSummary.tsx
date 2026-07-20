@@ -36,6 +36,7 @@ interface OrderFinanceSummaryProps {
   initialInvoice: Invoice | null;
   incidentFees?: any[];
   isAdmin: boolean;
+  canManageFinance?: boolean;
 }
 
 export default function OrderFinanceSummary({ 
@@ -43,8 +44,10 @@ export default function OrderFinanceSummary({
   initialCosts, 
   initialInvoice,
   incidentFees = [],
-  isAdmin 
+  isAdmin,
+  canManageFinance
 }: OrderFinanceSummaryProps) {
+  const canManage = canManageFinance !== undefined ? canManageFinance : isAdmin;
   const t = useTranslations('Finance');
   const [costs, setCosts] = useState<CostItem[]>(initialCosts);
   const [invoice, setInvoice] = useState<Invoice | null>(initialInvoice);
@@ -119,7 +122,7 @@ export default function OrderFinanceSummary({
             <DollarSign className="w-5 h-5 text-blue-400" />
             Settlement Preview
           </h3>
-          {isAdmin && (
+          {canManage && (
             <button 
               onClick={handleRecalculate}
               disabled={isCalculating || !!invoice}
@@ -170,7 +173,7 @@ export default function OrderFinanceSummary({
           )}
 
           {/* Manual Cost Input (not invoiced only) */}
-          {isAdmin && !invoice && (
+          {canManage && !invoice && (
             <div className="pt-4 mt-4 border-t border-slate-700/50 space-y-3">
               <p className="text-[10px] text-blue-400 font-bold uppercase tracking-widest">Add Manual Charge</p>
               <div className="grid grid-cols-3 gap-2">
@@ -239,7 +242,7 @@ export default function OrderFinanceSummary({
           </div>
         </div>
 
-        {isAdmin && !invoice && (
+        {canManage && !invoice && (
           <button 
             onClick={handleGenerateInvoice}
             disabled={isInvoicing || costs.length === 0}
