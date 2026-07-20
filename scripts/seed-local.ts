@@ -144,23 +144,46 @@ async function seedSntlAgency(supabase: any) {
     .is('parent_id', null);
   await createUser(supabase, 'sntl_sub1@zenith.kr', 'SNTL Sub-Agency Test Operator', 'AGENCY', subAgencyOrg.id, 'AGENCY');
 
-  // Issue #605: SNTL → Sub-Agency 실제 공급가 정책 (docs/80_RawData/20260609 UPS 특송 요금 정보.xlsx 실측)
-  // "수출_Express SAVER" 시트 1블록(SNTL 공급가) vs 2블록(UPS 공식 판매가)을 전 Zone·전 중량 대조한 결과:
-  //   - 비서류(Non-Document, 21kg 초과 tier 포함): 전 Zone·전 중량 정확히 75.00% 할인(편차 0)
-  //   - 서류(Document): 전 Zone 0% 할인(UPS 공식가와 동일가로 공급)
-  // zen_agency_pricing_policies는 상품 구분이 없어(Issue #605 논의 중인 gap) 대표값으로 75%(비서류,
-  // 물량 비중이 큰 상품 기준)를 등록 — 서류 주문은 이 rate 적용 시 실제(0%)보다 유리하게 계산되는
-  // 오차가 있음(역마진 방향 아님, 과대할인 방향).
+  // Edward 지시(2026-07-20) 정책 시나리오: SNTL → SNTL Agency 공급가 = UPS 공식 판매가의 80%
+  // (= discount_rate 0.20). 이전에 등록했던 75%(20260719 실측 대표값)는 이번 시나리오 검증을 위해
+  // 0.20으로 대체 — 실측값이 아닌 Edward 지정 테스트 정책이므로 실측 근거 주석은 제거하지 않고
+  // 이 시나리오가 임시 검증용임을 명시.
   const { data: zones } = await supabase.from('zen_ups_zones').select('id');
   for (const zone of zones ?? []) {
     await supabase
       .from('zen_agency_pricing_policies')
       .upsert(
-        { agency_org_id: subAgencyOrg.id, zone_id: zone.id, discount_rate: 0.75, is_active: true },
+        { agency_org_id: subAgencyOrg.id, zone_id: zone.id, discount_rate: 0.20, is_active: true },
         { onConflict: 'agency_org_id,zone_id' },
       );
   }
-  console.log(`  - Registered SNTL->Sub-Agency zone discount policy (75%, ${zones?.length ?? 0} zones)`);
+  console.log(`  - Registered SNTL->Sub-Agency zone discount policy (20% = 80% 공급가, ${zones?.length ?? 0} zones)`);
+
+  // TestShipper: SNTL Agency 소속 화주 — Edward 지시 정책: 공급가 = UPS 공식 판매가의 88%
+  // (= discount_rate 0.12). Agency→Shipper 판매가는 Agency 원가를 경유하지 않고 UPS 판매가에서
+  // 직접 계산(Issue #310, shipper-pricing.ts 참조).
+  // 역할은 AGENCY_SHIPPER이어야 함 — createOrder()가 agency_org_id 자동 연결(zen_agency_shippers
+  // 조회)을 profile.role === AGENCY_SHIPPER인 경우에만 수행함(operations/orders.ts:110). CORPORATE로
+  // 만들면 오더에 agency_org_id가 비어 rate snapshot/원가가 전혀 생성되지 않음(직접 확인, 2026-07-20).
+  const testShipperOrg = await getOrCreateOrg(supabase, 'TestShipper', 'SHIPPER');
+  await createUser(supabase, 'test_shipper@zenith.kr', 'TestShipper Operator', 'AGENCY_SHIPPER', testShipperOrg.id, 'SHIPPER');
+
+  await supabase
+    .from('zen_agency_shippers')
+    .upsert(
+      { agency_org_id: subAgencyOrg.id, shipper_org_id: testShipperOrg.id, shipper_type: 'CORPORATE', is_active: true },
+      { onConflict: 'agency_org_id,shipper_org_id' },
+    );
+
+  for (const zone of zones ?? []) {
+    await supabase
+      .from('zen_agency_shipper_zone_discounts')
+      .upsert(
+        { agency_org_id: subAgencyOrg.id, shipper_org_id: testShipperOrg.id, zone_id: zone.id, discount_rate: 0.12, is_active: true },
+        { onConflict: 'agency_org_id,shipper_org_id,zone_id' },
+      );
+  }
+  console.log(`  - Registered SNTL Agency->TestShipper zone discount policy (12% = 88% 공급가, ${zones?.length ?? 0} zones)`);
 }
 
 async function seedOrders(supabase: any, shipperOrgId: string) {
