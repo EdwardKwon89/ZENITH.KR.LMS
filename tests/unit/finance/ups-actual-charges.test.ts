@@ -1,9 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { USER_ROLES } from '@/lib/auth/rbac';
 
-const createChainableMock = (data: any = null, error: any = null) => {
-  const mockObj: any = {};
-  const methods = ['select', 'insert', 'update', 'delete', 'eq', 'in', 'not', 'limit', 'order', 'single', 'maybeSingle', 'ilike'];
+interface ChainableMock {
+  [key: string]: any;
+  then: (resolve: any) => void;
+}
+
+const createChainableMock = (data: any = null, error: any = null): ChainableMock => {
+  const mockObj: ChainableMock = {} as any;
+  const methods = ['select', 'insert', 'update', 'delete', 'eq', 'in', 'not', 'limit', 'order', 'single', 'maybeSingle', 'ilike', 'is', 'filter', 'neq'];
   methods.forEach(method => {
     mockObj[method] = vi.fn().mockImplementation(() => mockObj);
   });
@@ -66,7 +71,7 @@ describe('UPS 사후 청구 반영 Server Actions', () => {
     expect(result.error).toContain('배송 완료(DELIVERED) 상태일 때만');
   });
 
-  it('recordUpsActualCharges - 이미 인보이스 발행 확정된 조정비용이 있으면 에러 반환', async () => {
+  it('recordUpsActualCharges - 정산이 마감된 오더면 에러 반환', async () => {
     (validateAdminAction as any).mockResolvedValue({
       supabase: mockSupabase,
       user: { id: 'admin-user-id' },
@@ -77,15 +82,15 @@ describe('UPS 사후 청구 반영 Server Actions', () => {
       if (table === 'zen_orders') {
         return createChainableMock({ status: 'DELIVERED', transport_mode: 'UPS' });
       }
-      if (table === 'zen_order_costs') {
-        return createChainableMock([{ invoice_id: 'invoice-123' }]);
+      if (table === 'zen_invoices') {
+        return createChainableMock({ id: 'inv-1', is_finalized: true });
       }
       return createChainableMock();
     });
 
     const result = await recordUpsActualCharges('order-1', []);
     expect(result.success).toBe(false);
-    expect(result.error).toContain('이미 해당 조정 비용에 대한 청구서(인보이스)가 발행');
+    expect(result.error).toContain('이미 정산이 마감된 오더');
   });
 
   it('recordUpsActualCharges - 성공적으로 등록 및 차액 계산 (예상 200 vs 실제 250 -> 차액 50)', async () => {
@@ -101,15 +106,15 @@ describe('UPS 사후 청구 반영 Server Actions', () => {
       if (table === 'zen_orders') {
         return createChainableMock({ status: 'DELIVERED', transport_mode: 'UPS' });
       }
+      if (table === 'zen_invoices') {
+        return createChainableMock({ id: 'inv-1', is_finalized: false });
+      }
       if (table === 'zen_order_costs') {
         const mockObj = createChainableMock();
         mockObj.then = (resolve: any) => {
           orderCostsCallCount++;
           if (orderCostsCallCount === 1) {
-            // First call: existing adjustments check (invoice_id check)
-            return resolve({ data: [], error: null });
-          } else if (orderCostsCallCount === 2) {
-            // Second call: estimated costs list
+            // First call: estimated costs list
             return resolve({
               data: [
                 { cost_type: 'BASE_FREIGHT', unit_price: 150, quantity: 1 },
@@ -117,12 +122,30 @@ describe('UPS 사후 청구 반영 Server Actions', () => {
               ],
               error: null,
             });
-          } else {
-            // Check for existing adjustment row before insert/update
+          } else if (orderCostsCallCount === 2) {
+            // Second call: existing adjustment ID check
             return resolve({ data: null, error: null });
+          } else if (orderCostsCallCount === 3) {
+            // Third call: link adjustment to invoice (UPDATE SET invoice_id)
+            return resolve({ data: null, error: null });
+          } else if (orderCostsCallCount === 4) {
+            // Fourth call: select linked costs for recalculation
+            return resolve({
+              data: [
+                { unit_price: 150, quantity: 1 },
+                { unit_price: 50, quantity: 1 },
+                { unit_price: 50, quantity: 1 },
+              ],
+              error: null,
+            });
+          } else {
+            return resolve({ data: [], error: null });
           }
         };
         return mockObj;
+      }
+      if (table === 'zen_ups_actual_charges') {
+        return createChainableMock(null, null);
       }
       return createChainableMock();
     });

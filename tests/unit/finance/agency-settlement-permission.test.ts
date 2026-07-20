@@ -3,7 +3,7 @@ import { USER_ROLES } from '@/lib/auth/rbac';
 
 const createChainableMock = (data: any = null, error: any = null) => {
   const mockObj: any = {};
-  const methods = ['select', 'insert', 'update', 'delete', 'eq', 'in', 'not', 'limit', 'order', 'single', 'maybeSingle'];
+  const methods = ['select', 'insert', 'update', 'delete', 'eq', 'in', 'not', 'limit', 'order', 'single', 'maybeSingle', 'filter', 'neq', 'is'];
   methods.forEach((method) => {
     mockObj[method] = vi.fn().mockImplementation(() => mockObj);
   });

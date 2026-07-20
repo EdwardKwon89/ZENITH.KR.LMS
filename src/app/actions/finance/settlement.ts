@@ -32,6 +32,20 @@ export async function generateInvoicesForOrder(orderId: string) {
   }
 
   const generator = new InvoiceGenerator();
+
+  // 정산 마감 여부 확인 — 마감 후 새 인보이스 생성 차단
+  const { data: finalizedCheck } = await supabase
+    .from('zen_invoices')
+    .select('id')
+    .eq('is_finalized', true)
+    .filter('metadata->>source_order_id', 'eq', orderId)
+    .neq('status', 'CANCELED')
+    .maybeSingle();
+
+  if (finalizedCheck) {
+    throw new Error('이미 정산이 마감된 오더입니다. 인보이스를 생성할 수 없습니다.');
+  }
+
   const result = await generator.generateInvoice(orderId);
 
   if (!result.success) {
