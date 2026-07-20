@@ -449,7 +449,7 @@
 | TASK-187 | 260720 | [Team A] Order별 매출/매입 구분 + SNTL 수익금 집계 — Issue #606 구현 | 없음 | Riley | ✅ | [TASK-187](tasks/TASK-187_260720_Issue606_매출매입SNTL수익금집계_Riley.md) | 기존 정산 파이프라인(SettlementEngine 등) 100% 무수정 확인 — 스냅샷 metadata·zen_order_costs 읽기 전용 서버 액션 3종 + 매출/매입 List 화면(`/finance/order-revenue-cost`) + SNTL 수익금 집계 화면(`/admin/sub-agency-profit`) 구현. PR#610 ✅ Aiden 승인·머지 완료(`0f1f3d3b`, 260720) — CI 20분+ queued 정체(큐 16건 적체)로 R-08-1 로컬 대체 검증(build✅·회귀 99/99·637/637 PASS) 적용, diff 직접 확인 완료. Issue #606 Close. |
 | TASK-188 | 260720 | [Team A] Agency 정산 화면 권한 공백 보완 — Issue #603 §A+§B 구현 | 없음 | Riley | ✅ | [TASK-188](tasks/TASK-188_260720_Issue603_Agency정산화면권한공백_Riley.md) | D_Kai 미응답으로 Edward 직접 인수 지시 — §A `OrderFinanceSummary.tsx` 소유권 기반 `canManageFinance` prop 추가(D_Kai 반려분의 게이트 누락 문제 정정) + §B `updatePaymentStatus()`·`calculateSettlementAction()`·`generateInvoicesForOrder()` AGENCY 소유권 가드 구현. PR#612 ✅ Aiden 승인·머지 완료(`15e9f2a5`, 260720) — 실제 CI 전체 PASS. 중복 PR#611(D_Kai)은 close. Issue #603 Close. |
 | TASK-189 | 260720 | [Team A] UPS 특송 전용 Order Detail 신규 화면 — Issue #607 구현 | TASK-188 ✅ | Riley (D_Kai에서 재배정) | ✅ | [TASK-189](tasks/TASK-189_260720_Issue607_UPS전용OrderDetail신규화면_Riley.md) | Strangler Fig 방식 100% 준수(기존 화면 0 diff) + 기존 컴포넌트 재사용. 1차 제출 빌드 실패(잘못된 import 4건) Aiden 반려 후, 재작업 커밋(`32715c24`)에서 정정 확인 — 격리 워크트리 재검증 build✅·회귀 101/101·644/644 PASS. PR#613 ✅ Aiden 승인·머지 완료. Issue #607 Close. |
-| TASK-190 | 260720 | [Team A] `getMaxAllowedZoneDiscount` Zone 전체 상품 검사 버그 수정 — Issue #614 (IMP-151) | 없음 | D_Kai | 🔄 | [TASK-190](tasks/TASK-190_260720_Issue614_ZoneDiscountGuard버그수정_DKai.md) | 가드 함수가 Zone 내 더미 상품까지 함께 검사해 전 Zone 허용 할인율이 0%로 계산되는 버그 — 지정 상품만 검사하도록 스코프 축소. 실제 할인율 적용 방식(Matrix, Issue #605)은 범위 아님. D_Kai 응답 재개 후 신규 배정 |
+| TASK-190 | 260720 | [Team A] `getMaxAllowedZoneDiscount` Zone 전체 상품 검사 버그 수정 — Issue #614 (IMP-151) | 없음 | D_Kai | ✅ | [TASK-190](tasks/TASK-190_260720_Issue614_ZoneDiscountGuard버그수정_DKai.md) | 가드 함수 상품 스코프 버그 수정 완료 — PR#615 ✅ Aiden 승인·머지(`f0b4629e`), 실제 CI PASS(644/644), Issue #614 Close. **범위 재정의**: 수정 대상 함수(`upsertAgencyPricingPolicy`·`upsertShipperZoneDiscounts`)가 실제 화면에서 호출되지 않는 죽은 코드였음 확인 — 실제 예약 요금 시스템(Issue #391)엔 마진 검증 자체가 없어 Team B에 Issue #616으로 이관. 최초 제출 시 TASK-167 번호 충돌 발생, Aiden이 TASK-190으로 정정(파일명 변경) |
 ---
 
 ## Agent 현황
@@ -459,7 +459,7 @@
 | Agent | 상태 | 비고 |
 |:------|:----:|:----|
 | **Aiden (Claude)** | ✅ TASK-167 전체 승인 (260626) | PR#117 §1 ✅ · PR#118 §2+§3 ✅ 전량 머지 완료 |
-| **D_Kai (OpenCode)** | 🔄 TASK-190 착수 (260720) | `getMaxAllowedZoneDiscount` Zone 전체 상품 검사 버그 수정(IMP-151, Issue #614). TASK-188·189는 무응답 기간 중 Riley가 인수·완료(Issue #603·#607 모두 Close) |
+| **D_Kai (OpenCode)** | ✅ TASK-190 승인·머지 완료 (260720) | PR#615, 함수 단위 버그 수정. 채번 절차 미준수(TASK-167 번호 충돌 — 착수 전 `next-task-number.sh` 확인 필요, Aiden이 TASK-190으로 정정) — 반복 시 R-17 위반 누적 유의. 신규 Task 대기 |
 | **B_Kai** | ✅ GH#206 승인·머지 완료 (260706) | PR#221 · #13 재조사 요청에 신속·정확 대응(docs/03_Design 17개 파일 아카이브), 신규 Task 대기 |
 | **Riley** | ✅ TASK-189 승인·머지 완료 (260720) | UPS 특송 전용 Order Detail 신규 화면(Issue #607), PR#613 머지 완료 — 1차 빌드 실패 반려 후 재작업 정정 확인. 이전: TASK-188 ✅(PR#612)·TASK-187 ✅(PR#610) 완료. 신규 Task 대기 |
 | N_Kai | ➖ 미재배정 확정 (260626 Edward) | TASK-087 폐기 — 신규 Task 발령 없음 |
