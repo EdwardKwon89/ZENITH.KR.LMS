@@ -29,9 +29,12 @@ permissions:
   issues: read
   pull-requests: write
 
+# 2026-07-20 개정 (Aiden — Team B CI 지연 원인 조사): 라벨 변경이 몰릴 때 이전 실행이
+# 끝날 때까지 순차 대기(false)하면 러너를 계속 점유해 다른 PR의 CI를 밀어냄. 이 워크플로우는
+# "최신 이슈 상태 반영"만 목적이라 중간 실행 결과는 의미 없음 — 취소 후 최신 트리거만 실행.
 concurrency:
   group: sync-active-task-md
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   sync:

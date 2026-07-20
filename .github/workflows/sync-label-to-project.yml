@@ -21,6 +21,14 @@ on:
 permissions:
   issues: read
 
+# 2026-07-20 개정 (Aiden — Team B CI 지연 원인 조사): concurrency 그룹이 없어 라벨 변경마다
+# 완전 병렬로 실행되어 Actions 러너를 다수 점유, 다른 PR의 CI가 큐에서 밀리는 원인이 됨.
+# 이슈 번호별로 그룹화 — 같은 이슈에 대한 이전 실행은 취소(최신 상태만 의미 있음), 다른
+# 이슈끼리는 서로 영향 없음.
+concurrency:
+  group: sync-label-to-project-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
 env:
   PROJECT_ID:      PVT_kwHOD7GZQs4BbEyd
   STATUS_FIELD_ID: PVTSSF_lAHOD7GZQs4BbEydzhV35VU

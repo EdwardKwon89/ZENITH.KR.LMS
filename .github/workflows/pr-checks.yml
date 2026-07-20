@@ -33,6 +33,9 @@ jobs:
   regression:
     name: Regression Tests
     runs-on: ubuntu-latest
+    # bot/sync-active-task는 ACTIVE_TASK.md 문서 동기화 전용 브랜치(코드 변경 없음) —
+    # 매 Issue 라벨 변경마다 전체 회귀 스위트가 도는 걸 방지 (Actions 러너 큐 혼잡 완화)
+    if: github.head_ref != 'bot/sync-active-task'
     steps:
       - uses: actions/checkout@v4
 
