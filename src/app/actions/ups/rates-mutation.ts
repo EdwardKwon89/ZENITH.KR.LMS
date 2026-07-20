@@ -229,11 +229,12 @@ export async function getAgencyPricingPolicies(agencyOrgId?: string) {
 
 export async function upsertAgencyPricingPolicy(data: {
   agency_org_id: string; zone_id: string; discount_rate: number; is_active?: boolean;
+  product_ids?: string[];
 }) {
   const { supabase, profile } = await validateUserAction();
   requireAdminManagerOrSubAdmin(profile?.role);
 
-  const maxAllowed = await getMaxAllowedZoneDiscount(supabase, data.zone_id);
+  const maxAllowed = await getMaxAllowedZoneDiscount(supabase, data.zone_id, data.product_ids);
   if (maxAllowed != null && data.discount_rate > maxAllowed) {
     throw new Error(
       `할인율이 원가 마진을 초과합니다. 최대 허용: ${(maxAllowed * 100).toFixed(1)}% (Zone ID: ${data.zone_id})`
