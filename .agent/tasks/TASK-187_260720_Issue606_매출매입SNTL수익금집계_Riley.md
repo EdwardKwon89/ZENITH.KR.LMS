@@ -10,7 +10,7 @@
 | **관련 IMP** | 없음 |
 | **브랜치** | `feature/teama-task-187-order-revenue-cost-riley` |
 | **커밋 태그** | `[Gemini]` |
-| **상태** | 🔄 |
+| **상태** | 🔔 |
 
 ---
 
@@ -60,24 +60,24 @@ getSubAgencyProfitSummary(masterAgencyOrgId: string, filters: { dateFrom?: strin
 
 ## [DoD]
 
-- [ ] `getOrderRevenueCost`/`getOrderRevenueCostList`/`getSubAgencyProfitSummary` 구현 + 단위 테스트
-- [ ] Order별 매출/매입 List 화면 구현
-- [ ] SNTL 수익금 집계 화면 구현(SUB_ADMIN 전용)
-- [ ] 기존 정산 파이프라인 파일(`settlement.ts`, `orders.ts`의 `updateOrderStatus` 등) **무수정 확인**(diff에 해당 파일 변경 없어야 함)
-- [ ] 전체 회귀 테스트 PASS (`npm run test:regression`)
-- [ ] `check-R17-DoD` 자가 검증 통과
-- [ ] 문서 커밋 해시 기재
+- [x] `getOrderRevenueCost`/`getOrderRevenueCostList`/`getSubAgencyProfitSummary` 구현 + 단위 테스트
+- [x] Order별 매출/매입 List 화면 구현 (`/finance/order-revenue-cost`)
+- [x] SNTL 수익금 집계 화면 구현(SUB_ADMIN 전용, `/admin/sub-agency-profit`)
+- [x] 기존 정산 파이프라인 파일(`settlement.ts`, `orders.ts`의 `updateOrderStatus` 등) **무수정 확인**(diff에 해당 파일 변경 없어야 함)
+- [x] 전체 회귀 테스트 PASS (`npm run test:regression`)
+- [x] `check-R17-DoD` 자가 검증 통과
+- [x] 문서 커밋 해시 기재
 
 ---
 
 ## [R-17 완료 보고 절차]
 
-1. **[코드 커밋]** `[Riley] feat: TASK-187 Order 매출/매입 + SNTL 수익금 집계 — Issue #606 구현`
+1. **[코드 커밋]** `[Gemini] feat: TASK-187 Order 매출/매입 + SNTL 수익금 집계 — Issue #606 구현`
 2. 상세 파일 `[작업 결과]` 섹션 작성(커밋 해시 포함) + 상태 🔔 변경
 3. `.agent/ACTIVE_TASK.md` 상태 🔄→🔔 변경
 4. `gh issue edit 606 --add-label status:review --remove-label status:in-progress`
 5. `check-R17-DoD` 실행 통과 확인
-6. **[문서 커밋]** `[Riley] docs: TASK-187 완료 보고 — task file 🔔`
+6. **[문서 커밋]** `[Gemini] docs: TASK-187 완료 보고 — task file 🔔`
 7. **[PR 생성]** `feature/teama-task-187-order-revenue-cost-riley → develop`, `Closes #606`
 
 ---
@@ -90,4 +90,9 @@ getSubAgencyProfitSummary(masterAgencyOrgId: string, filters: { dateFrom?: strin
 
 ## [작업 결과]
 
-_(착수 시 작성)_
+| 항목 | 내용 |
+|:----|:----|
+| 코드 커밋 | `0f1f3d3bf25171cb2216fc6e6716f5ef80031f8c` |
+| 회귀 결과 | Vitest unit & regression tests 100% PASS (`rtk npm run test:regression` 검증 완수) |
+| 빌드 | 빌드 성공 (TypeScript `tsc --noEmit` 검증 완수) |
+| 특이사항 | 기존 정산/주문 파이프라인 파일(`settlement.ts`, `orders.ts` 등) 100% 무수정 준수. 기존 스냅샷 metadata 및 zen_order_costs 기반 읽기 전용 서버 액션 3종 + 오더별 매출/매입 List 화면(`/finance/order-revenue-cost`) + SNTL 수익금 집계 화면(`/admin/sub-agency-profit`) 구현 완수 |
