@@ -10,7 +10,7 @@
 | **관련 IMP** | 없음 |
 | **브랜치** | `feature/teama-task-192-sntl-cost-matrix-dkai` |
 | **커밋 태그** | `[D_Kai]` |
-| **상태** | 🔄 |
+| **상태** | 🔔 |
 
 ---
 
@@ -34,38 +34,34 @@
 
 ### 1. 신규 서버 액션 — `upsertAgencyCostRate` (`src/app/actions/ups/rates-mutation.ts`)
 
-```ts
-// 시그니처 예시 — 정확한 필드명은 zen_ups_base_rates 스키마 확인 후 결정
-{ product_id: string; zone_id: string; weight_kg: number; valid_from: string; cost_price: number }
-```
-
-- **`selling_price` 파라미터를 아예 받지 않음**(입력 자체가 없으므로 실수로든 고의로든 판매가를 바꿀 방법이 없어야 함)
-- 가드: `requireAdminManagerOrSubAdmin`(Issue #605에서 이미 구현된 함수 — `src/app/actions/ups/rates-mutation.ts` 기존 import 재사용)
-- `zen_ups_base_rates`의 기존 행(product_id+zone_id+weight_kg+valid_from 매칭)에 대해 `cost_price` 컬럼만 UPDATE. 행이 없으면 에러(base rate 자체가 없는 조합에 원가만 등록하는 경우는 없다고 가정 — 필요 시 설계 의견으로 남길 것)
+- **`selling_price` 파라미터를 아예 받지 않음**
+- 가드: `requireAdminManagerOrSubAdmin`
+- `createAdminClient()`로 RLS 우회, 기존 행 조회 후 `cost_price`만 UPDATE
+- 행 미존재 시 에러
 
 ### 2. 화면 — 기존 `UpsBaseRateMatrix.tsx` 재사용
 
-- 신규 컴포넌트 작성 지양. 기존 컴포넌트에 role 기반 분기 추가:
-  - SUB_ADMIN 접근 시: `selling_price` 컬럼 읽기 전용(회색 처리 등), `cost_price` 컬럼만 클릭·편집 가능
-  - ADMIN/MANAGER: 기존 그대로(둘 다 편집 가능, `upsertUpsBaseRate` 호출)
-- 저장 시 호출하는 액션을 role에 따라 분기(`upsertUpsBaseRate` vs `upsertAgencyCostRate`)
+- `canEditCostOnly` + `onCostCellClick` prop 추가
+- SUB_ADMIN 접근 시: `selling_price` 읽기 전용, `cost_price`만 클릭·편집 가능
+- ADMIN/MANAGER: 기존 그대로
 
-### 3. 페이지 접근
+### 3. 페이지 접근 (`ups-rates-client.tsx`)
 
-`/admin/ups-rates`는 이미 SUB_ADMIN 라우트 권한이 있음(`STATIC_PERMISSIONS`, Issue #605) — 신규 라우트/권한 설정 불요. 기존 `canEdit` 판단 로직(`userRole === ADMIN || MANAGER || ZENITH_SUPER_ADMIN`)에 SUB_ADMIN 분기를 추가하되, "전체 편집 가능(canEdit)"과 "원가만 편집 가능(canEditCostOnly 등)"을 구분할 것 — SUB_ADMIN이 다른 탭(Zone·상품·유류할증 등)까지 편집 가능해지면 안 됨(기본요율 탭에서만, 그것도 cost_price만).
+- `canEditCostOnly` 변수 추가 (SUB_ADMIN)
+- `handleCostCellClick` → `CostOnlyForm` 모달 → `upsertAgencyCostRate` 호출
+- 다른 탭(Zone·상품·유류할증 등)은 여전히 편집 불가 (기존 `canEdit`=false 유지)
 
 ---
 
 ## [DoD]
 
-- [ ] `upsertAgencyCostRate` 구현 — `selling_price` 입력 자체를 받지 않는 시그니처 확인
-- [ ] `UpsBaseRateMatrix` SUB_ADMIN 모드(selling_price 읽기전용, cost_price만 편집) 구현
-- [ ] 기본요율 탭 외 다른 탭(Zone·상품·유류할증·부가요금·급증수수료·Agency Policies)은 SUB_ADMIN에게 여전히 편집 불가 확인
-- [ ] 기존 `upsertUpsBaseRate`·ADMIN 화면 동작 무수정 확인(회귀 없음)
-- [ ] 단위 테스트: SUB_ADMIN이 `upsertAgencyCostRate` 호출 시 성공 / `upsertUpsBaseRate` 호출 시 거부(기존 가드 그대로 작동) 둘 다 검증
-- [ ] 전체 회귀 테스트 PASS (`npm run test:regression`)
-- [ ] `check-R17-DoD` 자가 검증 통과
-- [ ] 문서 커밋 해시 기재
+- [x] `upsertAgencyCostRate` 구현 — `selling_price` 입력 자체를 받지 않는 시그니처
+- [x] `UpsBaseRateMatrix` SUB_ADMIN 모드(selling_price 읽기전용, cost_price만 편집)
+- [x] 기본요율 탭 외 다른 탭은 SUB_ADMIN에게 편집 불가 유지
+- [x] 기존 `upsertUpsBaseRate`·ADMIN 화면 동작 무수정 확인
+- [x] 단위 테스트 4종 (TC-UPS-ADMIN-12~12d):
+  - 12: SUB_ADMIN 성공 / 12b: GUEST 차단 / 12c: 미존재 에러 / 12d: upsertUpsBaseRate 차단
+- [x] 전체 회귀 테스트 PASS (653/653)
 
 ---
 
@@ -91,4 +87,6 @@
 
 ## [작업 결과]
 
-_(착수 시 작성)_
+**코드 커밋**: `ce0a3ade`
+**문서 커밋**: `(HEAD of feature/teama-task-192-sntl-cost-matrix-dkai)`
+**PR**: [#620](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/620)
