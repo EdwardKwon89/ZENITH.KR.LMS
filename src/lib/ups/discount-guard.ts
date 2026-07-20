@@ -3,20 +3,31 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 export async function getMaxAllowedZoneDiscount(
   supabase: SupabaseClient,
   zoneId: string,
+  productIds?: string[],
 ): Promise<number | null> {
+  const baseQuery = supabase
+    .from('zen_ups_base_rates')
+    .select('cost_price, selling_price')
+    .eq('zone_id', zoneId);
+  const tierQuery = supabase
+    .from('zen_ups_weight_tier_rates')
+    .select('price_per_kg_cost, price_per_kg_selling')
+    .eq('zone_id', zoneId);
+  const freightQuery = supabase
+    .from('zen_ups_freight_minimums')
+    .select('min_charge_cost, min_charge_selling')
+    .eq('zone_id', zoneId);
+
+  if (productIds && productIds.length > 0) {
+    baseQuery.in('product_id', productIds);
+    tierQuery.in('product_id', productIds);
+    freightQuery.in('product_id', productIds);
+  }
+
   const [baseRates, tierRates, freightMinimums] = await Promise.all([
-    supabase
-      .from('zen_ups_base_rates')
-      .select('cost_price, selling_price')
-      .eq('zone_id', zoneId),
-    supabase
-      .from('zen_ups_weight_tier_rates')
-      .select('price_per_kg_cost, price_per_kg_selling')
-      .eq('zone_id', zoneId),
-    supabase
-      .from('zen_ups_freight_minimums')
-      .select('min_charge_cost, min_charge_selling')
-      .eq('zone_id', zoneId),
+    baseQuery,
+    tierQuery,
+    freightQuery,
   ]);
 
   const ratios: number[] = [];
