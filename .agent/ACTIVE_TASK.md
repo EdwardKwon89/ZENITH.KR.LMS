@@ -446,6 +446,8 @@
 | TASK-185 | 260715 | [Team A] UPS 급증 긴급 수수료 반영 — UAT-17/19 시나리오 갱신 (Issue #496) | 없음 | Riley | ✅ | [TASK-185](tasks/TASK-185_260715_UPS급증수수료UAT반영_Riley.md) | UAT_17/19/MASTER 급증 수수료 검증 시나리오 반영 · UAT_19의 미구현 `zen_order_costs.SURGE_EMERGENCY` 참조를 실제 구현된 FREIGHT 합산+`rate_snapshots.metadata` 검증으로 정정 완료(PR#501 ✅ Aiden 승인·머지, Issue #496 Close, 260715) · R-17 §0 위반(1차 direct-push) VIOLATION_TRACKER 기록 |
 | TASK-186 | 260720 | [Team A] UPS 사후청구(실제 추가요금) 반영 — Issue #589 An_16 구현 | 없음 | Riley | ✅ | [TASK-186](tasks/TASK-186_260720_Issue589_UPS사후청구반영_Riley.md) | An_16 설계 사양 준수 구현 완료 — 신규 테이블 `zen_ups_actual_charges` + `zen_order_costs.UPS_ACTUAL_ADJUSTMENT` + 서버 액션 3종 + 배치 처리 화면·Order Detail 표시. PR#608 ✅ Aiden 승인·머지 완료(`af63e953`, 260720) — CI 40분+ pending·API 503으로 R-08-1 로컬 대체 검증(build✅·회귀 98/98·634/634 PASS) 적용. Issue #589 Close. |
 | TASK-187 | 260720 | [Team A] Order별 매출/매입 구분 + SNTL 수익금 집계 — Issue #606 구현 | 없음 | Riley | 🔄 | [TASK-187](tasks/TASK-187_260720_Issue606_매출매입SNTL수익금집계_Riley.md) | 기존 정산 파이프라인(SettlementEngine 등) 무수정 — 기존 스냅샷·매출 데이터 읽기 전용 조회 액션 + 신규 화면(매출/매입 List, SNTL 수익금 집계)만 추가. Team B 작업과 무관해 즉시 착수(260720) |
+| TASK-188 | 260720 | [Team A] Agency 정산 화면 권한 공백 수정 — Issue #603 §A | 없음 | D_Kai | 🔄 | [TASK-188](tasks/TASK-188_260720_Issue603_Agency정산화면권한공백_DKai.md) | `OrderFinanceSummary.tsx`에 소유권 체크 기반 `isAgency` prop 추가 — 단순 role 체크 아닌 `resolveAgencyShipperIds` 재사용. §B(입금확인 권한)는 Edward/JSJung 결정 대기로 이번 범위 제외 |
+| TASK-189 | 260720 | [Team A] UPS 특송 전용 Order Detail 신규 화면 — Issue #607 | TASK-188 권장(병행 가능) | D_Kai | 🔄 | [TASK-189](tasks/TASK-189_260720_Issue607_UPS전용OrderDetail신규화면_DKai.md) | Strangler Fig 방식 — 기존 통합 Order Detail 화면 무수정, 신규 경로에 Zone·티어·운임breakdown+기존 컴포넌트(사후부가금·정산요약·트래킹) 재조합 |
 ---
 
 ## Agent 현황
@@ -455,7 +457,7 @@
 | Agent | 상태 | 비고 |
 |:------|:----:|:----|
 | **Aiden (Claude)** | ✅ TASK-167 전체 승인 (260626) | PR#117 §1 ✅ · PR#118 §2+§3 ✅ 전량 머지 완료 |
-| **D_Kai (OpenCode)** | ⚠️ TASK-182 ✅ 완료(R-17 위반 2회) | 기준요금 매트릭스 UI — Issue #271 · PR#275 반려 후 develop 직접 push로 위반(VIOLATION_TRACKER 2회) · Aiden 긴급 검증(build✅·tsc✅·vitest 475 PASS) 후 유지 · 3회 시 할당 중단 대상, 재발 방지 지시 완료(Issue #271) |
+| **D_Kai (OpenCode)** | 🔄 TASK-188·189 착수 (260720) | Issue #603 §A(Agency 정산 화면 권한 공백) + Issue #607(UPS 전용 Order Detail 신규 화면) 병행 배정 — TASK-188 우선 권장. 이전: TASK-182 ✅ 완료(R-17 위반 2회) — 기준요금 매트릭스 UI, 3회 시 할당 중단 대상 유의 |
 | **B_Kai** | ✅ GH#206 승인·머지 완료 (260706) | PR#221 · #13 재조사 요청에 신속·정확 대응(docs/03_Design 17개 파일 아카이브), 신규 Task 대기 |
 | **Riley** | 🔄 TASK-187 착수 (260720) | Order 매출/매입+SNTL 수익금 집계(Issue #606) — 기존 정산 파이프라인 무수정 방식. 이전: TASK-186 승인·머지 완료(PR#608, 260720), 이전 R-17 §0 위반(TASK-185) 이후 절차 준수 확인 |
 | N_Kai | ➖ 미재배정 확정 (260626 Edward) | TASK-087 폐기 — 신규 Task 발령 없음 |
