@@ -14,8 +14,10 @@ interface Props {
   zones: UpsZoneWithCountries[];
   agencies?: { id: string; name: string }[];
   onCellClick?: (rate: { productId: string; zoneId: string; weightKg: number }) => void;
+  onCostCellClick?: (rate: { productId: string; zoneId: string; weightKg: number; validFrom: string; costPrice: number }) => void;
   onNewClick?: () => void;
   canEdit?: boolean;
+  canEditCostOnly?: boolean;
   readOnly?: boolean;
   rates?: MatrixRate[];
   priceMode?: 'full' | 'agency' | 'shipper';
@@ -45,8 +47,8 @@ const PRICE_LABEL: Record<string, string> = {
 };
 
 export default function UpsBaseRateMatrix({
-  products, zones, agencies = [], onCellClick, onNewClick, canEdit,
-  readOnly = false, rates: propRates, priceMode = 'full', discountRateMap = {},
+  products, zones, agencies = [], onCellClick, onCostCellClick, onNewClick, canEdit,
+  canEditCostOnly = false, readOnly = false, rates: propRates, priceMode = 'full', discountRateMap = {},
 }: Props) {
   const [selectedProductId, setSelectedProductId] = useState<string>('');
   const [previewAgencyId, setPreviewAgencyId] = useState<string>('');
@@ -118,7 +120,7 @@ export default function UpsBaseRateMatrix({
   }, [filteredRates, zones]);
 
   const handleCellClick = (zoneId: string, weightKg: number) => {
-    if (isReadOnly || !selectedProductId) return;
+    if (isReadOnly || canEditCostOnly || !selectedProductId) return;
     onCellClick?.({ productId: selectedProductId, zoneId, weightKg });
   };
 
@@ -128,7 +130,7 @@ export default function UpsBaseRateMatrix({
     return discountRateMap[zoneId] ?? 0;
   };
 
-  const renderCellPrice = (rate: MatrixRate, zoneId: string) => {
+  const renderCellPrice = (rate: MatrixRate, zoneId: string, weightKg: number) => {
     const discountRate = getDiscountRate(zoneId);
     const hasCost = 'cost_price' in rate;
 
@@ -175,8 +177,22 @@ export default function UpsBaseRateMatrix({
               </div>
             )}
             {hasCost && (
-              <div className="font-mono text-[10px] text-slate-400">
-                ({(rate as UpsBaseRateWithRefs).cost_price.toLocaleString()})
+              <div
+        className={`font-mono text-[10px] ${canEditCostOnly ? 'cursor-pointer text-brand-600 hover:text-brand-800 hover:underline' : 'text-slate-400'}`}
+        onClick={(e) => {
+          if (canEditCostOnly) {
+            e.stopPropagation();
+            onCostCellClick?.({
+              productId: selectedProductId,
+              zoneId,
+              weightKg,
+              validFrom: 'valid_from' in rate ? rate.valid_from : '',
+              costPrice: (rate as UpsBaseRateWithRefs).cost_price,
+            });
+          }
+        }}
+              >
+                ({canEditCostOnly ? '원가 편집' : (rate as UpsBaseRateWithRefs).cost_price.toLocaleString()})
               </div>
             )}
           </div>
@@ -207,7 +223,7 @@ export default function UpsBaseRateMatrix({
           {loading && <RefreshCw size={14} className="animate-spin text-slate-400" />}
         </div>
 
-        {!isReadOnly && (
+        {(!isReadOnly || canEditCostOnly) && (
           <>
             <div className="flex items-center gap-2">
               <Calendar size={14} className="text-slate-400" />
@@ -294,7 +310,7 @@ export default function UpsBaseRateMatrix({
                       >
                         {rate ? (
                           <div className="space-y-0.5">
-                            {renderCellPrice(rate, z.id)}
+                            {renderCellPrice(rate, z.id, w)}
                             <div className="font-mono text-[8px] text-slate-400 leading-tight">
                               {rate.valid_from}~{rate.valid_until || '∞'}
                             </div>

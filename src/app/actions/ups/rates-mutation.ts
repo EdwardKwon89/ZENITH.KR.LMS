@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { validateUserAction } from '@/lib/auth/guards';
 import { USER_ROLES } from '@/lib/auth/rbac';
 import { getMaxAllowedZoneDiscount } from '@/lib/ups/discount-guard';
+import { createAdminClient } from '@/utils/supabase/server';
 
 function requireAdminOrManager(role: string | undefined) {
   if (!role || (role !== USER_ROLES.ADMIN && role !== USER_ROLES.MANAGER && role !== USER_ROLES.ZENITH_SUPER_ADMIN)) {
@@ -115,6 +116,42 @@ export async function upsertUpsBaseRate(data: {
     ...data, currency: data.currency ?? 'KRW', updated_at: new Date().toISOString(),
   }, { onConflict: 'product_id,zone_id,weight_kg,valid_from' });
   if (error) throw new Error(error.message);
+  revalidatePath('/admin/ups-rates');
+}
+
+// ─── Issue #618: SUB_ADMIN 전용 원가 업데이트 ─────
+
+export async function upsertAgencyCostRate(data: {
+  product_id: string;
+  zone_id: string;
+  weight_kg: number;
+  valid_from: string;
+  cost_price: number;
+}) {
+  const { profile } = await validateUserAction();
+  requireAdminManagerOrSubAdmin(profile?.role);
+
+  const admin = await createAdminClient();
+
+  const { data: existing, error: findError } = await admin
+    .from('zen_ups_base_rates')
+    .select('id')
+    .eq('product_id', data.product_id)
+    .eq('zone_id', data.zone_id)
+    .eq('weight_kg', data.weight_kg)
+    .eq('valid_from', data.valid_from)
+    .maybeSingle();
+
+  if (findError || !existing) {
+    throw new Error('해당 기준요금을 찾을 수 없습니다. 기준요금이 먼저 등록되어야 합니다.');
+  }
+
+  const { error: updateError } = await admin
+    .from('zen_ups_base_rates')
+    .update({ cost_price: data.cost_price, updated_at: new Date().toISOString() })
+    .eq('id', existing.id);
+
+  if (updateError) throw new Error(updateError.message);
   revalidatePath('/admin/ups-rates');
 }
 

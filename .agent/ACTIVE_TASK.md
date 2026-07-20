@@ -249,6 +249,7 @@
 | TASK-102 | 260529 | UAT-02·10 시나리오 수정 — TASK-100 경로 최적화 반영 | P3 | TASK-100 ✅ | D_Kai | ✅ | [TASK-102](tasks/TASK-102_260529_UAT수정_TASK100반영_DKai.md) | fe04df4+4390bad · 229/229 PASS · Advisory 2건(Riley 위반 3회·IMP-090 기존마이그 수정) |
 | TASK-167 | 260720 | IMP-151 getMaxAllowedZoneDiscount productIds 필터 추가 (Issue #614) | P2 | 없음 | D_Kai | ✅ | [TASK-167](tasks/TASK-167_260720_IMP151_DiscountGuardProductFilter_DKai.md) | 코드 f0b4629e · PR #615 → develop 머지 · 644/644 PASS · Aiden ✅ |
 | TASK-168 | 260720 | [#617] estimateUpsFreight adminClient로 RLS 우회 (P1) | P1 | 없음 | D_Kai | 🔔 | [TASK-168](tasks/TASK-168_260720_ISS617_PricingRLSAdminClient_DKai.md) | freight.ts adminClient 전환 · freight-actions.test.ts mock 보강 · 648/648 PASS |
+| TASK-192 | 260720 | [#618] SNTL(SUB_ADMIN) 전용 UPS 원가(cost_price) Matrix 편집 | P2 | 없음 | D_Kai | 🔔 | [TASK-192](tasks/TASK-192_260720_Issue618_SNTL원가Matrix편집기능_DKai.md) | upsertAgencyCostRate + UpsBaseRateMatrix SUB_ADMIN 모드 · 4 TC · 653/653 PASS |
 
 ---
 

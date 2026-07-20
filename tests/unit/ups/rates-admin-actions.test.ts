@@ -4,6 +4,7 @@ import {
   updateUpsZone,
   createUpsProduct,
   upsertUpsBaseRate,
+  upsertAgencyCostRate,
   upsertUpsFuelSurcharge,
   createUpsOtherCharge,
   upsertAgencyPricingPolicy,
@@ -15,7 +16,10 @@ import {
 import { validateUserAction } from '@/lib/auth/guards';
 
 vi.mock('@/lib/auth/guards', () => ({ validateUserAction: vi.fn() }));
+vi.mock('@/utils/supabase/server', () => ({ createAdminClient: vi.fn() }));
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }));
+
+import { createAdminClient } from '@/utils/supabase/server';
 
 function makeFilter() {
   const fb: any = {};
@@ -41,6 +45,8 @@ function makeFrom(filter: any) {
 describe('TC-UPS-ADMIN: UPS Admin Rate CRUD Actions', () => {
   let mockFilter: any;
   let mockSupabase: any;
+  let mockAdminFilter: any;
+  let mockAdminSupabase: any;
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -48,6 +54,12 @@ describe('TC-UPS-ADMIN: UPS Admin Rate CRUD Actions', () => {
     mockSupabase = {
       from: makeFrom(mockFilter),
     };
+    mockAdminFilter = makeFilter();
+    mockAdminSupabase = {
+      from: makeFrom(mockAdminFilter),
+    };
+
+    (createAdminClient as any).mockResolvedValue(mockAdminSupabase);
 
     (validateUserAction as any).mockResolvedValue({
       user: { id: 'user-001' },
@@ -138,5 +150,60 @@ describe('TC-UPS-ADMIN: UPS Admin Rate CRUD Actions', () => {
   it('TC-UPS-ADMIN-11: deleteUpsFreightMinimum — Freight 최소운임 삭제/비활성화', async () => {
     await deleteUpsFreightMinimum('freight-min-001');
     expect(mockSupabase.from).toHaveBeenCalledWith('zen_ups_freight_minimums');
+  });
+
+  it('TC-UPS-ADMIN-12: upsertAgencyCostRate — SUB_ADMIN이 원가(cost_price)만 수정', async () => {
+    (validateUserAction as any).mockResolvedValue({
+      user: { id: 'user-004' },
+      profile: { id: 'user-004', role: 'SUB_ADMIN', org_id: 'org-004' },
+      supabase: mockSupabase,
+    });
+    mockAdminFilter.maybeSingle = vi.fn().mockResolvedValue({ data: { id: 'rate-001' }, error: null });
+
+    await expect(upsertAgencyCostRate({
+      product_id: 'prod-001', zone_id: 'zone-001', weight_kg: 5,
+      valid_from: '2026-07-01', cost_price: 42000,
+    })).resolves.not.toThrow();
+
+    expect(createAdminClient).toHaveBeenCalledTimes(1);
+    expect(mockAdminSupabase.from).toHaveBeenCalledWith('zen_ups_base_rates');
+  });
+
+  it('TC-UPS-ADMIN-12b: upsertAgencyCostRate — GUEST role 차단', async () => {
+    (validateUserAction as any).mockResolvedValue({
+      user: { id: 'user-005' },
+      profile: { id: 'user-005', role: 'GUEST', org_id: 'org-005' },
+      supabase: mockSupabase,
+    });
+    await expect(upsertAgencyCostRate({
+      product_id: 'prod-001', zone_id: 'zone-001', weight_kg: 5,
+      valid_from: '2026-07-01', cost_price: 42000,
+    })).rejects.toThrow('Agency 원가 할인율 관리 권한이 없습니다.');
+  });
+
+  it('TC-UPS-ADMIN-12c: upsertAgencyCostRate — 존재하지 않는 기준요금은 에러', async () => {
+    (validateUserAction as any).mockResolvedValue({
+      user: { id: 'user-006' },
+      profile: { id: 'user-006', role: 'SUB_ADMIN', org_id: 'org-006' },
+      supabase: mockSupabase,
+    });
+    mockAdminFilter.maybeSingle = vi.fn().mockResolvedValue({ data: null, error: null });
+
+    await expect(upsertAgencyCostRate({
+      product_id: 'prod-001', zone_id: 'zone-001', weight_kg: 99,
+      valid_from: '2026-07-01', cost_price: 42000,
+    })).rejects.toThrow('해당 기준요금을 찾을 수 없습니다');
+  });
+
+  it('TC-UPS-ADMIN-12d: SUB_ADMIN은 upsertUpsBaseRate(selling_price+원가) 차단', async () => {
+    (validateUserAction as any).mockResolvedValue({
+      user: { id: 'user-007' },
+      profile: { id: 'user-007', role: 'SUB_ADMIN', org_id: 'org-007' },
+      supabase: mockSupabase,
+    });
+    await expect(upsertUpsBaseRate({
+      product_id: 'prod-001', zone_id: 'zone-001', weight_kg: 5,
+      selling_price: 50000, cost_price: 40000, valid_from: '2026-07-01',
+    })).rejects.toThrow('UPS 요율 관리 권한이 없습니다.');
   });
 });

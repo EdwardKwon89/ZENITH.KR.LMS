@@ -14,6 +14,7 @@ import {
   upsertUpsBaseRate,
   upsertUpsFuelSurcharge,
   createUpsOtherCharge, updateUpsOtherCharge, deleteUpsOtherCharge,
+  upsertAgencyCostRate,
   upsertAgencyPricingPolicy,
   updateAgencyVolumetricDivisor,
   upsertUpsWeightTierRate, deleteUpsWeightTierRate,
@@ -87,6 +88,8 @@ export default function UpsRatesClient({ zones, products, baseRates, fuelSurchar
   }, [activeTab, fetchScheduledChanges, fetchAuditLog]);
 
   const canEdit = userRole === USER_ROLES.ADMIN || userRole === USER_ROLES.MANAGER || userRole === USER_ROLES.ZENITH_SUPER_ADMIN;
+  const canEditCostOnly = userRole === USER_ROLES.SUB_ADMIN;
+  const isSubAdmin = userRole === USER_ROLES.SUB_ADMIN;
 
   const resetForm = useCallback(() => { setForm({}); setEditingItem(null); }, []);
 
@@ -101,6 +104,37 @@ export default function UpsRatesClient({ zones, products, baseRates, fuelSurchar
     }
     setIsModalOpen(true);
   }, [baseRates]);
+
+  const handleCostCellClick = useCallback((params: { productId: string; zoneId: string; weightKg: number; validFrom: string; costPrice: number }) => {
+    setForm({
+      product_id: params.productId,
+      zone_id: params.zoneId,
+      weight_kg: params.weightKg,
+      valid_from: params.validFrom,
+      cost_price: params.costPrice,
+      _costOnly: true,
+    });
+    setEditingItem({ _costOnly: true });
+    setIsModalOpen(true);
+  }, []);
+
+  const handleCostSubmit = async () => {
+    setLoading(true);
+    try {
+      await upsertAgencyCostRate({
+        product_id: form.product_id,
+        zone_id: form.zone_id,
+        weight_kg: form.weight_kg,
+        valid_from: form.valid_from,
+        cost_price: Number(form.cost_price),
+      });
+      window.location.reload();
+    } catch (e) {
+      alert(e instanceof Error ? e.message : '처리 중 오류가 발생했습니다.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const openNew = () => {
     resetForm();
@@ -124,6 +158,9 @@ export default function UpsRatesClient({ zones, products, baseRates, fuelSurchar
   };
 
   const handleSubmit = async () => {
+    if (form._costOnly || editingItem?._costOnly) {
+      return handleCostSubmit();
+    }
     setLoading(true);
     try {
       const submit: Record<string, any> = {
@@ -202,6 +239,9 @@ export default function UpsRatesClient({ zones, products, baseRates, fuelSurchar
   };
 
   const renderForm = () => {
+    if (form._costOnly) {
+      return <CostOnlyForm form={form} setForm={setForm} products={products} zones={zones} />;
+    }
     switch (activeTab) {
       case 'zones': return <ZoneForm form={form} setForm={setForm} editingItem={editingItem} zones={zones} addZoneCountry={addZoneCountry} removeZoneCountry={removeZoneCountry} />;
       case 'products': return <ProductForm form={form} setForm={setForm} editingItem={editingItem} />;
@@ -226,7 +266,9 @@ export default function UpsRatesClient({ zones, products, baseRates, fuelSurchar
           zones={zones}
           agencies={agencies}
           canEdit={canEdit}
+          canEditCostOnly={canEditCostOnly}
           onCellClick={handleBaseRateCellClick}
+          onCostCellClick={handleCostCellClick}
           onNewClick={openNew}
         />
       );
@@ -272,7 +314,7 @@ export default function UpsRatesClient({ zones, products, baseRates, fuelSurchar
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsModalOpen(false)} className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" />
             <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl overflow-hidden">
               <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-                <h3 className="text-lg font-bold text-slate-900">{editingItem ? '수정' : '등록'}</h3>
+                <h3 className="text-lg font-bold text-slate-900">{form._costOnly ? '원가 수정' : editingItem ? '수정' : '등록'}</h3>
                 <button onClick={() => setIsModalOpen(false)} className="p-1 hover:bg-slate-200 rounded-full transition-colors"><XCircle size={20} className="text-slate-400" /></button>
               </div>
               <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
@@ -415,6 +457,27 @@ function BaseRateForm({ form, setForm, products, zones }: any) {
         <Field label="종료일" type="date" value={form.valid_until || ''} onChange={(v: string) => setForm({ ...form, valid_until: v || null })} />
       </div>
     </>
+  );
+}
+
+// ─── Issue #618: SUB_ADMIN 전용 원가 수정 폼 ──────────
+
+function CostOnlyForm({ form, setForm, products, zones }: any) {
+  const product = (products as UpsProduct[]).find((p: any) => p.id === form.product_id);
+  const zone = (zones as UpsZoneWithCountries[]).find((z: any) => z.id === form.zone_id);
+  return (
+    <div className="space-y-4">
+      <div className="p-4 bg-amber-50 rounded-xl border border-amber-200">
+        <p className="text-xs font-semibold text-amber-700">원가(cost_price)만 수정합니다. 판매가(selling_price)는 변경할 수 없습니다.</p>
+      </div>
+      <div className="grid grid-cols-2 gap-3 text-sm">
+        <div><span className="text-xs font-bold text-slate-500">제품</span><p className="font-mono font-medium">{product?.product_code ?? form.product_id}</p></div>
+        <div><span className="text-xs font-bold text-slate-500">Zone</span><p className="font-mono font-medium">{zone?.zone_code ?? form.zone_id}</p></div>
+        <div><span className="text-xs font-bold text-slate-500">중량</span><p className="font-mono font-medium">{form.weight_kg}kg</p></div>
+        <div><span className="text-xs font-bold text-slate-500">적용일</span><p className="font-mono font-medium">{form.valid_from}</p></div>
+      </div>
+      <Field label="원가 (KRW)" type="number" value={form.cost_price} onChange={(v: any) => setForm({ ...form, cost_price: v ? Number(v) : '' })} />
+    </div>
   );
 }
 
