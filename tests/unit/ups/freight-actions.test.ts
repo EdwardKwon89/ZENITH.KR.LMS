@@ -207,4 +207,23 @@ describe('TC-UPS-FREIGHT-02: resolveZoneByCountry 연동 (GH#202)', () => {
 
     expect(result.platform.breakdown.fallbackApplied).toBe(false);
   });
+
+  it('agencyOrgId 전달 시 zen_agency_pricing_policies를 adminClient로 조회한다', async () => {
+    (validateUserAction as any).mockResolvedValue({
+      supabase: buildMockSupabase(),
+    });
+    (createAdminClient as any).mockResolvedValue(
+      buildMockSupabase({
+        zen_agency_pricing_policies: createQueryMock({ data: { discount_rate: 0.15 } }),
+        zen_agency_other_charges: createQueryMock({ data: [] }),
+      })
+    );
+
+    const result = await estimateUpsFreight({
+      productId: 'p1', destCountryCode: 'USA', actualWeightKg: 5, agencyOrgId: 'agency-1',
+    });
+
+    expect(createAdminClient).toHaveBeenCalledTimes(1);
+    expect(result.agency?.discountRate).toBe(0.15);
+  });
 });
