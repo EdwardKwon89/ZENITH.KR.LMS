@@ -247,7 +247,6 @@
 | TASK-100 | 260529 | DEF-030 경로 최적화 전면 수정 (전체 운송사 비교·가드) | P1 | 없음 | D_Kai | ✅ | [TASK-100](tasks/TASK-100_260529_DEF030경로최적화수정_DKai.md) | 5b63421+f1c3f74 · 229/229 PASS · Aiden ✅ 승인 |
 | TASK-101 | 260529 | B_Kai 재교육 세션 2차 (R-17 위반 3회 누적) | P4 | 없음 | B_Kai | ✅ | [TASK-101](tasks/TASK-101_260529_BKai재교육세션2차_BKai.md) | §1~§3 전항목 우수 · c60196f · Aiden ✅ 승인 · B_Kai 신규 할당 중단 해제 |
 | TASK-102 | 260529 | UAT-02·10 시나리오 수정 — TASK-100 경로 최적화 반영 | P3 | TASK-100 ✅ | D_Kai | ✅ | [TASK-102](tasks/TASK-102_260529_UAT수정_TASK100반영_DKai.md) | fe04df4+4390bad · 229/229 PASS · Advisory 2건(Riley 위반 3회·IMP-090 기존마이그 수정) |
-| TASK-194 | 260720 | UPS 사후청구 조정 건 인보이스 자동 생성 | P1 | 없음 | D_Kai | 🔔 | — | Issue #622 · PR #625 · `InvoiceGenerator.generateInvoice()` 호출 추가 · 656/656 PASS ✅ |
 
 ---
 
@@ -453,7 +452,7 @@
 | TASK-191 | 260720 | [Team A] 요금 계산 엔진 RLS 버그 — 화주 세션으로 Agency 원가 조회 시 조용히 0% 처리 — Issue #617 | 없음 | D_Kai | ✅ | [TASK-191](tasks/TASK-191_260720_Issue617_요금계산엔진RLS버그수정_DKai.md) | `estimateUpsFreight`의 agency 정책 조회를 서비스 롤 클라이언트로 교체 완료. PR#619 ✅ Aiden 승인·머지(`7530417b`) — 실제 CI PASS + Aiden이 실제 오더 재현(ZEN-2026-000003)으로 fix 재검증(discountRate 0→0.2 정상화 확인). Issue #617 Close. 착수 시 TASK-168 번호 충돌 발생(2회째), Aiden이 TASK-191로 정정 |
 | TASK-192 | 260720 | [Team A] SNTL(SUB_ADMIN) 전용 UPS 원가(cost_price) Matrix 편집 기능 — Issue #618 | TASK-191 ✅ | D_Kai | ✅ | [TASK-192](tasks/TASK-192_260720_Issue618_SNTL원가Matrix편집기능_DKai.md) | `upsertAgencyCostRate`(selling_price 미포함, cost_price만) + `UpsBaseRateMatrix` SUB_ADMIN 모드 재사용 완료. PR#620 ✅ Aiden 승인·머지(`ce0a3ade`) — 실제 CI는 인프라 이슈(Supabase CLI rate limit)로 FAILURE였으나 코드 무관 확인, R-08-1 로컬 대체 검증(build✅·회귀 102/102·653/653 PASS) 적용. TC-UPS-ADMIN-12d(SUB_ADMIN의 기존 upsertUpsBaseRate 차단 확인) 포함. Issue #618 Close. |
 | TASK-193 | 260720 | [Team A] 수동 트래킹 이벤트 DELIVERED 입력 시 오더 상태 미반영 수정 — Issue #621 (DEF-111) | 없음 | D_Kai | ✅ | [TASK-193](tasks/TASK-193_260720_Issue621_트래킹이벤트상태동기화_DKai.md) | 재작업(`501421d0`+`555ee069`)으로 커밋 분리·LIVE_REGRESSION_TEST_MAP 갱신 완료 확인 — Aiden ✅ 승인 (260721) |
-| TASK-194 | 260720 | [Team A] UPS 사후청구 조정건 정산완료(2차 청구) 설계 — Issue #622 (DEF-112) | 없음 | D_Kai | 🔄 | [TASK-194](tasks/TASK-194_260720_Issue622_사후청구2차청구설계_DKai.md) | Edward 설계 확정(260720) — "정산 마감" 전 1차 인보이스(예상 배송료) 갱신 허용, 마감 후 불변+거부 시 CANCELED·재발행. 마감 트리거: Agency 담당자(본인 소속 화주 한정)/Admin(예외). `is_finalized` 컬럼 신설. `settlement.ts`는 Team B(TASK-B-135) 활성 공유 파일 — 착수 시 격리 워크트리 필수 |
+| TASK-194 | 260720 | [Team A] UPS 사후청구 조정건 정산완료(2차 청구) 설계 — Issue #622 (DEF-112) | 없음 | D_Kai | ❌ | [TASK-194](tasks/TASK-194_260720_Issue622_사후청구2차청구설계_DKai.md) | PR#625 Aiden 반려 — 확정 설계(is_finalized 마감 전/후 분기) 미구현, 매 사후청구마다 신규 인보이스 발행(설계 위반). DoD 9개 중 미이행. ACTIVE_TASK 중복행 삭제. 재작업 요청 |
 ---
 
 ## Agent 현황
