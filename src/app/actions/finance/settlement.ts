@@ -9,7 +9,27 @@ import { FinanceRepository } from '@/lib/repositories';
 import { USER_ROLES } from '@/lib/auth/rbac';
 
 export async function generateInvoicesForOrder(orderId: string) {
-  await validateUserAction();
+  const { supabase, profile } = await validateUserAction();
+  if (!profile) throw new Error('User profile not found');
+
+  const adminRoles: string[] = [USER_ROLES.ADMIN, USER_ROLES.MANAGER, USER_ROLES.ZENITH_SUPER_ADMIN];
+  const isAdmin = adminRoles.includes(profile.role as string);
+  if (!isAdmin && profile.role !== USER_ROLES.AGENCY) {
+    throw new Error('정산서를 생성할 권한이 없습니다.');
+  }
+
+  if (profile.role === USER_ROLES.AGENCY) {
+    const agencyShipperIds = await resolveAgencyShipperIds(supabase, profile.org_id!);
+    const { data: order } = await supabase
+      .from('zen_orders')
+      .select('shipper_id')
+      .eq('id', orderId)
+      .single();
+
+    if (!order || !agencyShipperIds.includes(order.shipper_id)) {
+      throw new Error('본인 소속 화주의 오더에 대해서만 인보이스를 생성할 수 있습니다.');
+    }
+  }
 
   const generator = new InvoiceGenerator();
   const result = await generator.generateInvoice(orderId);
@@ -30,10 +50,34 @@ export async function updatePaymentStatus(
   amount: number,
   paymentMethod: string = 'BANK_TRANSFER'
 ) {
-  const { supabase, user } = await validateAdminAction();
-  const financeRepo = new FinanceRepository(supabase);
+  const { supabase, profile, user } = await validateUserAction();
+  if (!profile) throw new Error('User profile not found');
 
+  const adminRoles: string[] = [USER_ROLES.ADMIN, USER_ROLES.MANAGER, USER_ROLES.ZENITH_SUPER_ADMIN];
+  const isAdmin = adminRoles.includes(profile.role as string);
+  if (!isAdmin && profile.role !== USER_ROLES.AGENCY) {
+    throw new Error('결제 상태를 수정할 권한이 없습니다.');
+  }
+
+  const financeRepo = new FinanceRepository(supabase);
   const { data: existingInvoice } = await financeRepo.findByIdBasic(invoiceId);
+  if (!existingInvoice) throw new Error('인보이스를 찾을 수 없습니다.');
+
+  if (profile.role === USER_ROLES.AGENCY) {
+    const agencyShipperIds = await resolveAgencyShipperIds(supabase, profile.org_id!);
+    const orderId = (existingInvoice?.metadata as any)?.source_order_id;
+    if (orderId) {
+      const { data: order } = await supabase
+        .from('zen_orders')
+        .select('shipper_id')
+        .eq('id', orderId)
+        .single();
+      if (!order || !agencyShipperIds.includes(order.shipper_id)) {
+        throw new Error('본인 소속 화주의 인보이스 결제 상태만 변경할 수 있습니다.');
+      }
+    }
+  }
+
   const prevStatus = existingInvoice?.status ?? null;
 
   const { data: invoice, error: invError } = await financeRepo.updatePaymentStatus(invoiceId, {
@@ -68,7 +112,28 @@ export async function updatePaymentStatus(
 
 export async function calculateSettlementAction(orderId: string) {
   logger.info(`[Action] calculateSettlementAction started for order: ${orderId}`);
-  const { supabase, profile } = await validateAdminAction();
+  const { supabase, profile } = await validateUserAction();
+  if (!profile) throw new Error('User profile not found');
+
+  const adminRoles: string[] = [USER_ROLES.ADMIN, USER_ROLES.MANAGER, USER_ROLES.ZENITH_SUPER_ADMIN];
+  const isAdmin = adminRoles.includes(profile.role as string);
+  if (!isAdmin && profile.role !== USER_ROLES.AGENCY) {
+    throw new Error('정산 재계산을 실행할 권한이 없습니다.');
+  }
+
+  if (profile.role === USER_ROLES.AGENCY) {
+    const agencyShipperIds = await resolveAgencyShipperIds(supabase, profile.org_id!);
+    const { data: order } = await supabase
+      .from('zen_orders')
+      .select('shipper_id')
+      .eq('id', orderId)
+      .single();
+
+    if (!order || !agencyShipperIds.includes(order.shipper_id)) {
+      throw new Error('본인 소속 화주의 오더에 대해서만 정산을 계산할 수 있습니다.');
+    }
+  }
+
   const financeRepo = new FinanceRepository(supabase);
   logger.info(`[Action] User Profile: ${profile.email}, Role: ${profile.role}`);
 
