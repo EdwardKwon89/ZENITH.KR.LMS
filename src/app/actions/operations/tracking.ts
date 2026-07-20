@@ -95,6 +95,8 @@ export async function addTrackingEvent(
 
   if (error) throw new Error(`Failed to add tracking event: ${error.message}`);
 
+  await trackingManager.syncOrderStatus(supabase, orderId, payload.event_code as any);
+
   revalidatePath(`/(dashboard)/orders/${orderId}`, "page");
   return { success: true };
 }
