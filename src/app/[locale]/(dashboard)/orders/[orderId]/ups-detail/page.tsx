@@ -1,7 +1,8 @@
 import React from 'react';
 import { requireAuth } from '@/lib/auth/guards';
-import { getOrderDetails, getOrderRateSnapshot } from '@/app/actions/operations/orders';
-import { getUpsLabelStatus } from '@/app/actions/ups/label';
+import { getOrderDetails } from '@/app/actions/operations/orders';
+import { getOrderRateSnapshot } from '@/app/actions/operations/tisa';
+import { getUpsLabelStatus } from '@/app/actions/operations/ups-labels';
 import { getTrackingEvents } from '@/app/actions/operations/tracking';
 import { checkPermission } from '@/lib/auth/rbac';
 import { notFound, redirect } from 'next/navigation';
@@ -10,14 +11,14 @@ import { ArrowLeft, Package, Truck, ShieldCheck, FileText, Globe, Calendar, User
 import { getTranslations } from 'next-intl/server';
 
 import UpsOrderBreakdownCard from '@/components/ups/UpsOrderBreakdownCard';
-import UpsActualAdjustmentForm from '@/components/ups/UpsActualAdjustmentForm';
+import { UpsActualAdjustmentForm } from '@/components/orders/UpsActualAdjustmentForm';
 import OrderFinanceSummary from '@/components/finance/OrderFinanceSummary';
 import TrackingTimeline from '@/components/tracking/TrackingTimeline';
 import DocumentDownloadButton from '@/components/documents/DocumentDownloadButton';
 import CommercialInvoicePDF from '@/components/documents/CommercialInvoicePDF';
 import PackingListPDF from '@/components/documents/PackingListPDF';
 import UpsInvoicePDF from '@/components/documents/UpsInvoicePDF';
-import UpsTradeDocumentActions from '@/components/ups/UpsTradeDocumentActions';
+import UpsTradeDocumentActions from '@/components/orders/UpsTradeDocumentActions';
 
 interface UpsOrderDetailPageProps {
   params: Promise<{
@@ -244,9 +245,9 @@ export default async function UpsOrderDetailPage({ params }: UpsOrderDetailPageP
           {/* UPS Specific Breakdown & Zone Card */}
           <UpsOrderBreakdownCard
             orderNo={order.order_no}
-            destCountryCode={order.dest_country_code || 'US'}
+            destCountryCode={(order as any).dest_country_code || (order.dest_port as any)?.country_code || 'US'}
             transportMode={order.transport_mode}
-            snapshotMeta={snapshot?.metadata}
+            snapshotMeta={(snapshot as any)?.metadata}
             cargoDetails={order.cargo_details as any}
             packages={order.packages || []}
           />
@@ -277,17 +278,17 @@ export default async function UpsOrderDetailPage({ params }: UpsOrderDetailPageP
             </div>
             <div className="flex flex-col gap-3">
               <DocumentDownloadButton
-                document={<CommercialInvoicePDF data={ciData} labels={docLabels} />}
+                document={<CommercialInvoicePDF data={ciData as any} labels={docLabels as any} />}
                 fileName={`CI_${order.order_no}.pdf`}
                 label={`${tDoc('ci')} (CI)`}
               />
               <DocumentDownloadButton
-                document={<PackingListPDF data={plData} labels={docLabels} />}
+                document={<PackingListPDF data={plData as any} labels={docLabels as any} />}
                 fileName={`PL_${order.order_no}.pdf`}
                 label={`${tDoc('pl')} (PL)`}
               />
               <DocumentDownloadButton
-                document={<UpsInvoicePDF data={upsInvoiceData} labels={upsInvoiceLabels as any} />}
+                document={<UpsInvoicePDF data={upsInvoiceData as any} labels={upsInvoiceLabels as any} />}
                 fileName={`UPS_INVOICE_${orderId}_${new Date().toISOString().split('T')[0].replace(/-/g, '')}.pdf`}
                 label={`${tOrders('ups_invoice.download_button')} (UPS)`}
                 className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/30"
