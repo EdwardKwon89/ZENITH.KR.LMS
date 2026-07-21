@@ -1,5 +1,4 @@
 import { test, expect } from '@playwright/test';
-import type { SupabaseClient } from '@supabase/supabase-js';
 import { getServiceClient } from './test-utils';
 import dotenv from 'dotenv';
 import fs from 'fs';
@@ -12,7 +11,7 @@ const SCREENSHOT_DIR = 'tests/e2e/screenshots';
 const SHIPPER_EMAIL = 'shipper_e2e20b@zenith.kr';
 const SHIPPER_PASSWORD = 'password1234';
 
-let supabase: any;
+let supabase: ReturnType<typeof getServiceClient>;
 
 test.describe('E2E-20: Order Registration Service Combination Selection', () => {
 

@@ -1,17 +1,16 @@
 import { test, expect } from '@playwright/test';
-import { createClient } from '@supabase/supabase-js';
+import { getServiceClient } from './test-utils';
 import fs from 'fs';
 import path from 'path';
 
 const SCREENSHOT_DIR = 'docs/99_Manual/E2E_16_Result';
-const SUPABASE_URL = 'http://127.0.0.1:54321';
 const SHIPPER_EMAIL = 'shipper@zenith.kr';
 const SHIPPER_PASSWORD = 'password1234';
 const MANAGER_EMAIL = 'manager@zenith.kr';
 const MANAGER_PASSWORD = 'password1234';
 
 test.describe('E2E-16: 창고 통합 플로우 (입고·출고·특수화물)', () => {
-  let supabase: any;
+  let supabase: ReturnType<typeof getServiceClient>;
   let shipperUserId: string | null = null;
   let managerUserId: string | null = null;
 
@@ -22,9 +21,7 @@ test.describe('E2E-16: 창고 통합 플로우 (입고·출고·특수화물)', 
     }
 
     // Initialize Supabase admin client
-    const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    if (!key) throw new Error('SUPABASE_SERVICE_ROLE_KEY is required');
-    supabase = createClient(SUPABASE_URL, key);
+    supabase = getServiceClient();
 
     // Ensure test shipper account exists (CORPORATE role for order creation)
     const { data: existingShipper } = await supabase

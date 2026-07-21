@@ -22,7 +22,7 @@ const SHXK_ENDPOINT =
 // UPS 오더 생성 후 정리 대상 reference_no 목록 (= packageId)
 const pendingCleanup: string[] = [];
 
-let supabase: any;
+let supabase: ReturnType<typeof getServiceClient>;
 let testOrderId: string;
 let testPackageId: string;
 let testOrderNo: string;

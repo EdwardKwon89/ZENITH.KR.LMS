@@ -1,5 +1,4 @@
 import { test, expect } from '@playwright/test';
-import type { SupabaseClient } from '@supabase/supabase-js';
 import { getServiceClient } from './test-utils';
 import dotenv from 'dotenv';
 import fs from 'fs';
@@ -15,7 +14,7 @@ const ADMIN_PASSWORD = 'password1234';
 const SHIPPER_EMAIL = 'shipper_e2e26@zenith.kr';
 const SHIPPER_PASSWORD = 'password1234';
 
-let supabase: any;
+let supabase: ReturnType<typeof getServiceClient>;
 let fixtureOrderId: string;
 let fixtureShipperUserId: string;
 let fixtureShipperOrgId: string;
@@ -75,7 +74,7 @@ test.describe('E2E-26: UPS Invoice PDF 미리보기/다운로드 검증 (UAT-19)
         user_metadata: { role: 'ADMIN', org_type: 'PLATFORM', status: 'ACTIVE' },
       });
       if (adminErr) console.error('Admin create error:', adminErr);
-      adminUser = created?.user || null as any;
+      adminUser = created?.user ?? undefined;
     }
     // Ensure admin profile has ADMIN role (fixes RLS — get_my_role() must return 'ADMIN')
     if (adminUser) {

@@ -1,5 +1,4 @@
 import { test, expect } from '@playwright/test';
-import type { SupabaseClient } from '@supabase/supabase-js';
 import { getServiceClient } from './test-utils';
 import dotenv from 'dotenv';
 import fs from 'fs';
@@ -15,7 +14,8 @@ const ADMIN_PASSWORD = 'password1234';
 const SHIPPER_EMAIL = 'shipper_e2e22@zenith.kr';
 const SHIPPER_PASSWORD = 'password1234';
 
-let supabase: any;
+let supabase: ReturnType<typeof getServiceClient>;
+let fixtureOrderId: string | undefined;
 
 test.describe('E2E-22: Daily Close (UPS 일마감) 시나리오', () => {
 
@@ -136,17 +136,13 @@ test.describe('E2E-22: Daily Close (UPS 일마감) 시나리오', () => {
           width: 20,
           height: 15,
         }).select('id').single();
-
-        // Store fixture order IDs for cleanup
-        (globalThis as any).__e2e22_fixture_order_id = order.id;
-        (globalThis as any).__e2e22_fixture_pkg_id = pkg?.id;
+        fixtureOrderId = order.id;
       }
     }
   });
 
   test.afterAll(async () => {
     // Cleanup fixture orders
-    const fixtureOrderId = (globalThis as any).__e2e22_fixture_order_id;
     if (fixtureOrderId) {
       await supabase.from('zen_order_rate_snapshots').delete().eq('order_id', fixtureOrderId);
       await supabase.from('order_status_history').delete().eq('order_id', fixtureOrderId);

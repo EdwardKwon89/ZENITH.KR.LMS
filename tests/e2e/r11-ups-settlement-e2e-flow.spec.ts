@@ -22,7 +22,7 @@ const ADMIN_PASSWORD = 'password1234';
 const AGENCY_EMAIL = 'r11-agency@zenith.kr';
 const AGENCY_PASSWORD = 'password1234';
 
-const sb: any = getServiceClient();
+const sb = getServiceClient();
 
 /* ── seed constants ─────────────────────────────────────── */
 const ORG_ID = 'a0000000-0000-0000-0000-000000000001';
@@ -631,7 +631,7 @@ test.describe('R-11: UPS 오더 E2E 정산 흐름 세밀 검증', () => {
     const { data: targetInv } = await sb
       .from('zen_invoices')
       .select('id, status, metadata')
-      .eq('metadata->>source_order_id', orderId)
+      .filter('metadata->>source_order_id', 'eq', orderId)
       .neq('status', 'CANCELED')
       .eq('is_finalized', true)
       .maybeSingle();
@@ -665,7 +665,7 @@ test.describe('R-11: UPS 오더 E2E 정산 흐름 세밀 검증', () => {
 
       // 원 인보이스에 superseded_by 설정
       await sb.from('zen_invoices').update({
-        metadata: { ...(targetInv?.metadata || {}), superseded_by: renewInv!.id },
+        superseded_by: renewInv!.id,
       }).eq('id', invoiceId);
 
       // 재발행 인보이스에 비용 연결
