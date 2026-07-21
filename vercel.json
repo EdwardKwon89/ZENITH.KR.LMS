@@ -6,7 +6,7 @@
     },
     {
       "path": "/api/cron/ups-tracking-poll",
-      "schedule": "0 * * * *"
+      "schedule": "30 15 * * *"
     }
   ]
 }

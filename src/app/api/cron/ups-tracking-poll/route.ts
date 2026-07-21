@@ -5,7 +5,7 @@ import { pollTracking, storeTrackingEvents, isDelivered } from '@/lib/shxk/track
 import { OrderStatus } from '@/types/orders';
 
 /**
- * UPS 트래킹 폴링 배치 — 1시간 주기 실행
+ * UPS 트래킹 폴링 배치 — 매일 실행
  * POST /api/cron/ups-tracking-poll
  *
  * IN_TRANSIT 상태 UPS 오더의 트래킹 정보를 조회하고,
@@ -73,19 +73,44 @@ export async function POST(req: Request) {
 
         // 3. 배송완료 시 오더 상태 DELIVERED로 전환
         if (isDelivered(trackData.track_status)) {
+          // 3-1. 오더 상태 업데이트
           const { error: updateError } = await supabase
             .from('zen_orders')
             .update({ status: OrderStatus.DELIVERED })
             .eq('id', order.id)
-            .eq('status', OrderStatus.IN_TRANSIT); // 조건부 업데이트
+            .eq('status', OrderStatus.IN_TRANSIT);
 
           if (updateError) {
             results.errors.push(`DELIVERED update failed for ${order.id}: ${updateError.message}`);
             logger.error(`[ups-tracking-poll] DELIVERED update failed for ${order.id}:`, updateError);
-          } else {
-            results.delivered++;
-            logger.info(`[ups-tracking-poll] Order ${order.id} marked as DELIVERED`);
+            continue;
           }
+
+          // 3-2. order_status_history 기록 (changed_by: 시스템 크론)
+          const { error: historyError } = await supabase
+            .from('order_status_history')
+            .insert({
+              order_id: order.id,
+              prev_status: OrderStatus.IN_TRANSIT,
+              next_status: OrderStatus.DELIVERED,
+              reason: 'UPS tracking poll: DL status detected',
+              changed_by: null,
+            });
+
+          if (historyError) {
+            logger.error(`[ups-tracking-poll] History insert failed for ${order.id}:`, historyError);
+          }
+
+          // 3-3. 상태변경 알림 발송
+          try {
+            const { triggerStatusChangeNotification } = await import('@/app/actions/misc/notifications');
+            await triggerStatusChangeNotification(order.id, OrderStatus.DELIVERED, supabase);
+          } catch (notifError) {
+            logger.error(`[ups-tracking-poll] Notification failed for ${order.id}:`, notifError);
+          }
+
+          results.delivered++;
+          logger.info(`[ups-tracking-poll] Order ${order.id} marked as DELIVERED`);
         }
       } catch (err: any) {
         results.errors.push(`Poll failed for ${order.id}: ${err.message}`);
@@ -106,6 +131,6 @@ export async function GET() {
   return NextResponse.json({
     status: 'ok',
     message: 'UPS tracking poll cron endpoint is active',
-    schedule: '0 * * * * (every hour)',
+    schedule: '30 15 * * * (daily at KST 00:30 / UTC 15:30)',
   });
 }
