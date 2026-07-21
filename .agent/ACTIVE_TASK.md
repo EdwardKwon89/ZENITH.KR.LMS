@@ -454,7 +454,7 @@
 | TASK-193 | 260720 | [Team A] 수동 트래킹 이벤트 DELIVERED 입력 시 오더 상태 미반영 수정 — Issue #621 (DEF-111) | 없음 | D_Kai | ✅ | [TASK-193](tasks/TASK-193_260720_Issue621_트래킹이벤트상태동기화_DKai.md) | 재작업(`501421d0`+`555ee069`)으로 커밋 분리·LIVE_REGRESSION_TEST_MAP 갱신 완료 확인 — Aiden ✅ 승인 (260721) |
 | TASK-194 | 260720 | [Team A] UPS 사후청구 조정건 정산완료(2차 청구) — Issue #622 (DEF-112) | TASK-194-A ✅ TASK-194-B ✅ TASK-194-C ✅ | D_Kai | 🔄 | [TASK-194](tasks/TASK-194_260720_Issue622_사후청구2차청구설계_DKai.md) | A·B·C 승인·병합 완료(C: `6c3776da`+`5820e991`, 회귀 669/669 — PR#629 CI 미트리거로 Aiden R-08-1 로컬 대체 검증). **D는 D_Kai 재교육 세션 완료 전까지 보류**(develop 직접 커밋 3회 누적 — `268a8018`) |
 | TASK-195 | 260721 | [Team A] CI에 tsc --noEmit advisory 단계 추가 — Issue #627 (IMP-134 §1) | 없음 | Riley | ✅ | [TASK-195](tasks/TASK-195_260721_Issue627_CI_tsc_advisory게이트_Riley.md) | `.github/workflows/pr-checks.yml`에 `tsc-advisory` 게이트 추가 — `npx tsc --noEmit || true` & `exit 0`으로 non-blocking 경고 게이트 구현. 네거티브 컨트롤 검증 완수. 코드 `70b3ddbe` — Aiden ✅ 승인·PR#628 병합 (260721) |
-| TASK-196 | 260721 | [Team A] D_Kai 재교육 세션 6차 (develop 직접 커밋 3회 누적) | 없음 | D_Kai | 🔄 | [TASK-196](tasks/TASK-196_260721_DKai재교육세션6차_DKai.md) | TASK-169·182·194-C(`268a8018`) 3회 누적 — R-17 할당 중단 기준 도달. 5차(TASK-178)에서 이미 예고된 "다음 위반". 완료 전까지 TASK-194-D 포함 신규 배정 전면 보류 |
+| TASK-196 | 260721 | [Team A] D_Kai 재교육 세션 6차 (develop 직접 커밋 3회 누적) | 없음 | D_Kai | ✅ | [TASK-196](tasks/TASK-196_260721_DKai재교육세션6차_DKai.md) | Aiden 승인(2026-07-21, 커밋 `5f3f1544`) — 보완 요청 2건(워크트리 도구 §2 반영·DoD 체크) 모두 반영 확인, 실CI 전항목 PASS. TASK-194-D 등 신규 배정 재개 여부 및 "장기 중단" 적용 여부는 Edward 최종 결정 대기 |
 ---
 
 ## Agent 현황
