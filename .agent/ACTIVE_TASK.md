@@ -459,6 +459,7 @@
 | TASK-192 | 260720 | [Team A] SNTL(SUB_ADMIN) 전용 UPS 원가(cost_price) Matrix 편집 기능 — Issue #618 | TASK-191 ✅ | D_Kai | ✅ | [TASK-192](tasks/TASK-192_260720_Issue618_SNTL원가Matrix편집기능_DKai.md) | `upsertAgencyCostRate`(selling_price 미포함, cost_price만) + `UpsBaseRateMatrix` SUB_ADMIN 모드 재사용 완료. PR#620 ✅ Aiden 승인·머지(`ce0a3ade`) — 실제 CI는 인프라 이슈(Supabase CLI rate limit)로 FAILURE였으나 코드 무관 확인, R-08-1 로컬 대체 검증(build✅·회귀 102/102·653/653 PASS) 적용. TC-UPS-ADMIN-12d(SUB_ADMIN의 기존 upsertUpsBaseRate 차단 확인) 포함. Issue #618 Close. |
 | TASK-193 | 260720 | [Team A] 수동 트래킹 이벤트 DELIVERED 입력 시 오더 상태 미반영 수정 — Issue #621 (DEF-111) | 없음 | D_Kai | ✅ | [TASK-193](tasks/TASK-193_260720_Issue621_트래킹이벤트상태동기화_DKai.md) | 재작업(`501421d0`+`555ee069`)으로 커밋 분리·LIVE_REGRESSION_TEST_MAP 갱신 완료 확인 — Aiden ✅ 승인 (260721) |
 | TASK-194 | 260720 | [Team A] UPS 사후청구 조정건 정산완료(2차 청구) — Issue #622 (DEF-112) | TASK-194-A ✅ | D_Kai | 🔄 | [TASK-194](tasks/TASK-194_260720_Issue622_사후청구2차청구설계_DKai.md) | A(마이그레이션+마감전갱신+guard) `cbbe3b2e` ✅ 승인·PR#625 병합(656/656 PASS). **TASK-194-B(정산 마감 액션+RLS) 착수 지시 발령** — 브랜치 `feature/teama-iss622-b-settlement-finalize`, DoD는 task file 참조. C/D는 B 완료 후 순차 발령 |
+| TASK-B-173 | 260722 | Issue #655 — DEF-114 ROLE_PERMISSIONS에 AGENCY 누락, 창고관리 전체 500 에러 | P1 | 없음 | Dave (구현) | 🔔 | [TASK-B-173](tasks/TASK-B-173_260722_Def114_AgencyRolePermissions.md) | AGENCY → WAREHOUSED/RELEASED/SCHEDULED/REGISTERED/PACKED/IN_TRANSIT 권한 추가 · TC-AG-T1~T9 9종 · status-machine 31/31 + warehouse 14/14 PASS · tsc 0 error · PR#??? (base TeamB_Dev) |
 ---
 
 ## Agent 현황
