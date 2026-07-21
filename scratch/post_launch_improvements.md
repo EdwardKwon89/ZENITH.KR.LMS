@@ -1435,7 +1435,7 @@
 - **관련 Issue**: 없음 — Edward 질의 계기 자체 발견
 - **예상 공수**: (1) CI 단계 추가 0.1 MD / (2) 전체 정리 1.5~2 MD (별도 Task 분할 권장)
 - **우선순위**: Medium — (1)은 재발 방지 차원에서 우선 권장, (2)는 Low
-- **상태**: ⬜ 미착수
+- **상태**: 🔄 §1 착수 — **TASK-195(Issue #627), Riley 배정 (2026-07-21)**, D_Kai TASK-194-C와 병행 진행. `npx tsc --noEmit` 재확인 결과 오류 237건으로 증가(발견 당시 222건). §2(222→237건 정리)는 여전히 Backlog
 
 ---
 
@@ -1635,7 +1635,7 @@
 - **우선순위**: High — Express/Expedited/Flight는 여전히 더미 판매가라 마크업 정책 확정 전 실사용 금지
 - **상태**: 🔄 부분 완료(SAVER만)
 
-## [IMP-151] `getMaxAllowedZoneDiscount`가 Zone 내 전 상품(더미 포함)을 함께 검사 — 현재 모든 Zone에서 허용 할인율 0%로 계산됨
+## [IMP-151] `getMaxAllowedZoneDiscount`가 Zone 내 전 상품(더미 포함)을 함께 검사 — 현재 모든 Zone에서 허용 할인율 0%로 계산됨 — ✅ 해결 완료
 
 - **발견 경위**: SNTL→Sub-Agency 실 할인율(75%) 등록(2026-07-19) 전, 실제 `upsertAgencyPricingPolicy` 서버 액션으로 등록 가능한지 확인하는 과정에서 `src/lib/ups/discount-guard.ts:getMaxAllowedZoneDiscount()`를 직접 재현해봄. 이 함수는 대상 Zone에 속한 **모든 상품**(`zen_ups_base_rates`/`zen_ups_weight_tier_rates`/`zen_ups_freight_minimums`)의 `1 - cost/selling` 비율 중 **최솟값**을 최대 허용 할인율로 반환하는데, WW_SAVER_*는 오늘 실측 원가/판매가로 교체됐지만 WW_EXPRESS_*/WW_EXPEDITED/WW_FLIGHT는 아직 더미 판매가 그대로라 두 값의 스케일이 맞지 않아(예: 실측 원가 20만원대 vs 더미 판매가 5천원대) `1-cost/selling`이 -4~-5(=-400%~-500%) 수준으로 나옴. 그 결과 전 Zone에서 `Math.max(0, minRatio)`가 **0%**로 계산됨.
 - **현재 상태**: 지금 이 상태로 Admin/SUB_ADMIN이 실제 화면(`/admin/ups-rates`)에서 `zen_agency_pricing_policies`에 **어떤 할인율을 입력해도 "할인율이 원가 마진을 초과합니다. 최대 허용: 0.0%"로 전부 거부**됨. SNTL→Sub-Agency 75% 정책은 이 가드를 우회해 DB에 직접 등록함(seed-local.ts, 커밋 a352b5bc) — 실제 UI로는 지금 등록 불가능한 상태.
@@ -1644,7 +1644,7 @@
 - **관련 파일**: `src/lib/ups/discount-guard.ts`, `src/app/actions/ups/rates-mutation.ts:upsertAgencyPricingPolicy`
 - **예상 공수**: 0.3 MD
 - **우선순위**: High — 지금 이 상태로는 SUB_ADMIN 기능(Issue #605) 자체를 실제 화면에서 쓸 수 없음
-- **상태**: ⬜ 미착수
+- **상태**: ✅ 해결 완료 — **TASK-190(Issue #614), 2026-07-20.** PR#615 Aiden 승인·머지(`f0b4629e`), 실제 CI PASS(644/644), Issue #614 Close. 단, 수정 대상이었던 `upsertAgencyPricingPolicy`/`upsertShipperZoneDiscounts`가 실제 화면에서 호출되지 않는 죽은 코드였음이 밝혀져, 진짜 문제(예약 요금 시스템에 마진 검증 자체가 없음)는 Team B에 Issue #616으로 별도 이관됨. (2026-07-21 Aiden 정정 — 이 문서가 갱신 안 된 채 남아있어 Riley에게 중복 배정할 뻔함, 재발 방지 위해 기록)
 
 ## [IMP-152] SNTL→Sub-Agency 할인율(75%)은 비서류 기준 대표값 — 서류(0%)와 구분 안 됨
 

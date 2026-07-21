@@ -453,6 +453,7 @@
 | TASK-192 | 260720 | [Team A] SNTL(SUB_ADMIN) 전용 UPS 원가(cost_price) Matrix 편집 기능 — Issue #618 | TASK-191 ✅ | D_Kai | ✅ | [TASK-192](tasks/TASK-192_260720_Issue618_SNTL원가Matrix편집기능_DKai.md) | `upsertAgencyCostRate`(selling_price 미포함, cost_price만) + `UpsBaseRateMatrix` SUB_ADMIN 모드 재사용 완료. PR#620 ✅ Aiden 승인·머지(`ce0a3ade`) — 실제 CI는 인프라 이슈(Supabase CLI rate limit)로 FAILURE였으나 코드 무관 확인, R-08-1 로컬 대체 검증(build✅·회귀 102/102·653/653 PASS) 적용. TC-UPS-ADMIN-12d(SUB_ADMIN의 기존 upsertUpsBaseRate 차단 확인) 포함. Issue #618 Close. |
 | TASK-193 | 260720 | [Team A] 수동 트래킹 이벤트 DELIVERED 입력 시 오더 상태 미반영 수정 — Issue #621 (DEF-111) | 없음 | D_Kai | ✅ | [TASK-193](tasks/TASK-193_260720_Issue621_트래킹이벤트상태동기화_DKai.md) | 재작업(`501421d0`+`555ee069`)으로 커밋 분리·LIVE_REGRESSION_TEST_MAP 갱신 완료 확인 — Aiden ✅ 승인 (260721) |
 | TASK-194 | 260720 | [Team A] UPS 사후청구 조정건 정산완료(2차 청구) — Issue #622 (DEF-112) | TASK-194-A ✅ TASK-194-B ✅ | D_Kai | 🔄 | [TASK-194](tasks/TASK-194_260720_Issue622_사후청구2차청구설계_DKai.md) | A·B 승인·병합 완료. **TASK-194-C 착수 지시 발령** — 마감 후 추가 인보이스(`adjustment_of`)·화주 거부 CANCELED+재발행 플로우. R-09 LIVE_REGRESSION_TEST_MAP 갱신 필수 포함. D는 C 완료 후 발령 |
+| TASK-195 | 260721 | [Team A] CI에 tsc --noEmit advisory 단계 추가 — Issue #627 (IMP-134 §1) | 없음 | Riley | 🔄 | [TASK-195](tasks/TASK-195_260721_Issue627_CI_tsc_advisory게이트_Riley.md) | D_Kai TASK-194-C와 병행 진행. pr-checks.yml이 TeamB_Dev/integration/**에도 트리거되므로 반드시 advisory(non-blocking)로만 추가 — 기존 237건 오류로 인한 전체 PR 차단 위험 명시 |
 ---
 
 ## Agent 현황
