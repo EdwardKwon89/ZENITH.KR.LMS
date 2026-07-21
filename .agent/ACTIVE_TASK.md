@@ -455,6 +455,7 @@
 | TASK-194 | 260720 | [Team A] UPS 사후청구 조정건 정산완료(2차 청구) — Issue #622 (DEF-112) | TASK-194-A ✅ TASK-194-B ✅ TASK-194-C ✅ TASK-194-D ✅ | D_Kai | ✅ | [TASK-194](tasks/TASK-194_260720_Issue622_사후청구2차청구설계_DKai.md) | A·B·C·D 전항목 승인·병합 완료(D: `1bbcf0fa`+`bd69def6`, PR#634, 실CI 전항목 PASS, R-10 스크린샷 직접 확인). Issue #622 Close. Advisory: 보완 커밋 코드/문서 혼입 1건(VIOLATION_TRACKER 참고 기록, 비차단) |
 | TASK-195 | 260721 | [Team A] CI에 tsc --noEmit advisory 단계 추가 — Issue #627 (IMP-134 §1) | 없음 | Riley | ✅ | [TASK-195](tasks/TASK-195_260721_Issue627_CI_tsc_advisory게이트_Riley.md) | `.github/workflows/pr-checks.yml`에 `tsc-advisory` 게이트 추가 — `npx tsc --noEmit || true` & `exit 0`으로 non-blocking 경고 게이트 구현. 네거티브 컨트롤 검증 완수. 코드 `70b3ddbe` — Aiden ✅ 승인·PR#628 병합 (260721) |
 | TASK-196 | 260721 | [Team A] D_Kai 재교육 세션 6차 (develop 직접 커밋 3회 누적) | 없음 | D_Kai | ✅ | [TASK-196](tasks/TASK-196_260721_DKai재교육세션6차_DKai.md) | Aiden 승인(2026-07-21, 커밋 `5f3f1544`) — 보완 요청 2건(워크트리 도구 §2 반영·DoD 체크) 모두 반영 확인, 실CI 전항목 PASS. TASK-194-D 등 신규 배정 재개 여부 및 "장기 중단" 적용 여부는 Edward 최종 결정 대기 |
+| TASK-197 | 260721 | [Team A] UPS 오더 E2E 정산 흐름 세밀 검증 (Phase 1) — Issue #637 | 없음 | B_Kai | ❌ | [TASK-197](tasks/TASK-197_260721_Issue637_UPS오더E2E정산흐름세밀검증_BKai.md) | Aiden 반려 — ①커밋 5건 브랜치·PR 없이 develop 직접 커밋(`c71ab81b`~`6883e420`) ②엣지케이스 3건이 실제 UI/서버액션 미경유 DB전용 확인(스크린샷 3건 전부 공백) + Step3·4 스크린샷 중복 ③본 표 대신 Team B "Baker" 행에 잘못 기재(정정 완료). VIOLATION_TRACKER 기록. 재작업(정식 브랜치+PR) 요청 |
 ---
 
 ## Agent 현황
@@ -486,7 +487,7 @@
 | **JSJung** (팀 리더) | ✅ TASK-B-030 승인 완료 (260628) · ✅ TASK-B-033 승인 완료 (260701) | §1§2 확인 완료 · DEF-088 교정 완료 · PR#156 squash 머지 (e2bf48b) |
 | **Jaison** (AI Agent 총괄) | ✅ B-056 Aiden 머지 완료 (260705) | PR#183(`168c6d3f`) · B-056~068 전량 ✅ 완료 · 신규 Task 대기 |
 | **Dave** (AI Agent) | ✅ **B-090** Aiden 승인·머지 완료 (260711, PR#316) | VIOLATION_TRACKER 5회 누적 — 할당 중단 여부 Jaison/Edward 최종 판단 대기(신규 Task 배정 보류) — Aiden 정정(260713, 잔존 🔔 발견) |
-| **Baker** (AI Agent) | ✅ **B-082** Aiden 머지 완료 (260709, PR#293) | ✅ TASK-197 완료 (260721, Issue #637) — R11 UPS E2E 11/11 PASS |
+| **Baker** (AI Agent) | ✅ **B-082** Aiden 머지 완료 (260709, PR#293) | 신규 Task 대기 — Aiden 정정(260713, 잔존 🔔 발견) |
 | **Gale** (AI Agent) | 대기 | 추후 재배정 예정 |
 
 ---
