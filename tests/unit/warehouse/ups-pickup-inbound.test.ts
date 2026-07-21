@@ -8,7 +8,10 @@ const mockRepoFindById = vi.hoisted(() => vi.fn());
 const mockRepoGetStatus = vi.hoisted(() => vi.fn());
 
 vi.mock('@/lib/auth/guards', () => ({ validateUserAction: mockValidate }));
-vi.mock('@/app/actions/operations/orders', () => ({ updateOrderStatus: mockUpdateStatus }));
+vi.mock('@/app/actions/operations/orders', () => ({
+  updateOrderStatus: mockUpdateStatus,
+  attachOperatorNames: (_supabase: any, rows: any[]) => Promise.resolve(rows.map((r: any) => ({ ...r, operator: { full_name: 'Test Operator' } }))),
+}));
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }));
 vi.mock('@/lib/logger', () => ({ logger: { error: vi.fn() } }));
 vi.mock('@/lib/repositories', () => ({
@@ -28,6 +31,7 @@ import {
   getTodayPickupHistory,
   cancelInbound,
 } from '@/app/actions/operations/warehouse';
+
 
 function makeChainable(rows: any[]) {
   const chain: any = {};
@@ -230,6 +234,55 @@ describe('TC-DEF-112: UPS 오더픽업 + 입고취소', () => {
     expect(result.success).toBe(true);
     expect(result.restoredStatus).toBe(OrderStatus.REGISTERED);
     expect(mockUpdateStatus).toHaveBeenCalledWith('order-2', OrderStatus.REGISTERED, '[입고취소]');
+  });
+
+  // ─────────────────────────────
+  // AGENCY 통합 검증 (DEF-114)
+  // ─────────────────────────────
+
+  it('TC-AG-INT-01: AGENCY confirmPickup → 정상 처리 (500 에러 없음)', async () => {
+    mockUpdateStatus.mockResolvedValue({ success: true });
+    mockValidate.mockResolvedValue({
+      user: { id: 'agency-u' },
+      profile: { id: 'agency-u', role: USER_ROLES.AGENCY, org_id: 'org-a' },
+      supabase: makeDbMock({}),
+    });
+    const result = await confirmPickup('order-pickup');
+    expect(result.success).toBe(true);
+    expect(mockUpdateStatus).toHaveBeenCalledWith('order-pickup', OrderStatus.SCHEDULED, '[픽업완료]');
+  });
+
+  it('TC-AG-INT-02: AGENCY cancelPickup → 정상 처리 (500 에러 없음)', async () => {
+    mockUpdateStatus.mockResolvedValue({ success: true });
+    mockValidate.mockResolvedValue({
+      user: { id: 'agency-u' },
+      profile: { id: 'agency-u', role: USER_ROLES.AGENCY, org_id: 'org-a' },
+      supabase: makeDbMock({}),
+    });
+    const result = await cancelPickup('order-cancel');
+    expect(result.success).toBe(true);
+    expect(mockUpdateStatus).toHaveBeenCalledWith('order-cancel', OrderStatus.REGISTERED, '[픽업취소]');
+  });
+
+  it('TC-AG-INT-03: AGENCY cancelInbound → WAREHOUSED → SCHEDULED 복구', async () => {
+    mockRepoGetStatus.mockResolvedValue({
+      data: { id: 'order-wh', status: OrderStatus.WAREHOUSED },
+      error: null,
+    });
+    mockUpdateStatus.mockResolvedValue({ success: true });
+    mockValidate.mockResolvedValue({
+      user: { id: 'agency-u' },
+      profile: { id: 'agency-u', role: USER_ROLES.AGENCY, org_id: 'org-a' },
+      supabase: {
+        from(table: string) {
+          if (table === 'order_status_history') return makeChainable([{ prev_status: OrderStatus.SCHEDULED }]);
+          return makeChainable([]);
+        },
+      },
+    });
+    const result = await cancelInbound('order-wh');
+    expect(result.success).toBe(true);
+    expect(mockUpdateStatus).toHaveBeenCalledWith('order-wh', OrderStatus.SCHEDULED, '[입고취소]');
   });
 
   // ─────────────────────────────

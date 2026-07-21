@@ -1,80 +1,126 @@
-# DEF-114: `ROLE_PERMISSIONS`에 AGENCY 항목 누락 — 창고관리 기능 전체가 AGENCY 역할에서 500 에러
+# DEF-114: ROLE_PERMISSIONS에 AGENCY 누락 — 창고관리 기능 전체 500 에러
 
 | 항목 | 내용 |
-|:----|:----|
-| **발견 경위** | 사용자(JSJung, agency@zenith.kr 세션)가 "입고확정 처리" 시 500 에러 실사용 보고 |
-| **긴급도** | **즉시(Critical)** |
-| **발견자** | Jaison |
+|:-----|:------|
 | **발견일** | 2026-07-22 |
+| **보고자** | jungjs (Jaison) |
+| **긴급도** | Critical |
+| **우선순위** | P1 |
+| **연결 이슈** | [#655](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/655) |
 
 ## 현상
 
-`agency@zenith.kr`(AGENCY 역할)로 로그인한 상태에서 "입고확정" 버튼 클릭 시 500 에러 발생. 로컬 dev 서버 로그:
+`agency@zenith.kr`(AGENCY 역할)로 창고관리 기능(입고확정, 출고확정, 픽업완료 등) 실행 시 500 에러 발생.
 
 ```
-⨯ Error: AGENCY 역할은 WAREHOUSED 상태로 변경할 권한이 없습니다.
+Error: AGENCY 역할은 WAREHOUSED 상태로 변경할 권한이 없습니다.
     at updateOrderStatus (src/app/actions/operations/orders.ts:395:11)
-  ...
- POST /ko/warehouse/inbound 500 in 587ms
-  └─ ƒ confirmInbound("303f3ee1-74b9-4828-8f76-4106bde4fd01", "NORMAL", "") ...
 ```
 
 ## 근본 원인
 
-`src/lib/logistics/status-machine.ts`의 `canChangeStatus()`는 2단계 검증을 수행한다:
-1. `TRANSITION_RULES` — 상태 전이 자체가 유효한지 (여기는 통과)
-2. `ROLE_PERMISSIONS[role]` — 해당 역할이 그 target 상태로 변경할 권한이 있는지
+`src/lib/logistics/status-machine.ts`의 `ROLE_PERMISSIONS`에 `USER_ROLES.AGENCY` 항목이 없음.
 
-`ROLE_PERMISSIONS`(`status-machine.ts:35-40`)에는 `OPERATOR`/`CARRIER`/`CORPORATE`/`INDIVIDUAL` 항목만 있고 **`USER_ROLES.AGENCY` 항목이 아예 없다.** `Partial<Record<UserRole, OrderStatus[]>>`이므로 없는 키는 `undefined` → `allowedByRole = []` → `allowedByRole.includes(target)`이 항상 `false` → **AGENCY 역할은 `updateOrderStatus()`를 통한 모든 상태 변경이 무조건 실패한다**(ADMIN/MANAGER/ZENITH_SUPER_ADMIN은 1번 검증에서 전부 우회하므로 이 버그의 영향을 받지 않음 — `canChangeStatus():50-53`).
+- `canChangeStatus()`는 `ROLE_PERMISSIONS[role]` 조회 → AGENCY 미등록 → `undefined` → `[]` (빈 배열)
+- 모든 상태 변경이 `!allowedByRole.includes(target)` 통과 실패 → 권한 없음 오류
 
-## 영향 범위 (전부 재현 확인 가능한 코드 경로, `WAREHOUSE_ROLES`에 AGENCY 포함되어 있어 UI 접근 자체는 되지만 실행 시 전부 500):
+## 영향 범위
 
-| 액션 | 파일:라인 | target 상태 |
-|:-----|:---------|:-----------|
-| `confirmInbound` (입고확정) | `orders.ts:655` | WAREHOUSED |
-| `confirmOutbound` (출고확정) | `warehouse.ts:158` | RELEASED |
-| `confirmPickup` (픽업완료) | `warehouse.ts:228` | SCHEDULED |
-| `cancelPickup` (픽업취소) | `warehouse.ts:242` | REGISTERED |
-| `confirmUpsRegistration` (UPS접수) | `warehouse.ts:382` | PACKED |
-| `undoUpsRegistration` (UPS등록취소) | `warehouse.ts:418` | WAREHOUSED |
-| `confirmDeparture` (출고확정처리) | `warehouse.ts:485` | IN_TRANSIT |
-| `undoOutbound` (출고취소) | `warehouse.ts:513` | PACKED |
-| `cancelInbound` (입고취소) | `orders.ts` 내 `getHeldPreviousStatus` 패턴 | REGISTERED 또는 SCHEDULED |
+AGENCY 역할에서 다음 전액션 차단:
 
-**즉 Issue #635(Task A~D)로 이번 스프린트에 구현한 창고관리 기능 전체가, 정작 그 기능의 주 사용 대상인 AGENCY 역할에서는 UI는 뜨지만 액션 실행 시 전부 500으로 막혀있는 상태.** `WAREHOUSE_ROLES` 상수 자체엔 AGENCY가 명시적으로 포함되어 있어(기능을 쓰게 하려는 의도가 명확함) 설계 의도와 실제 동작이 불일치한다.
+| 기능 | target 상태 |
+|:-----|:-----------|
+| confirmInbound (입고확정) | WAREHOUSED |
+| confirmOutbound (출고확정) | RELEASED |
+| confirmPickup (픽업완료) | SCHEDULED |
+| cancelPickup (픽업취소) | REGISTERED |
+| confirmUpsRegistration (UPS접수) | PACKED |
+| undoUpsRegistration (UPS등록취소) | WAREHOUSED |
+| confirmDeparture (출고확정처리) | IN_TRANSIT |
+| undoOutbound (출고취소) | PACKED |
+| cancelInbound (입고취소) | REGISTERED/SCHEDULED |
 
-## 참고 — PR#646(Task C) 리뷰 시 발견했던 관련 정황
+## 조치
 
-PR#646 검토 당시 Baker가 `ROLE_PERMISSIONS[OPERATOR]`에 `WAREHOUSED/PACKED/RELEASED/IN_TRANSIT`를 추가한 것을 발견했으나, `OPERATOR`는애초 `WAREHOUSE_ROLES`에 포함되지 않아 실질적 효과가 없는 변경이라 "블로커 아님, 의도 확인 차 남겨둠" 정도로만 코멘트했었다(승인 코멘트 참조). 지금 보면 **원래 필요했던 건 `AGENCY` 항목 추가였는데 `OPERATOR`로 잘못 넣은 것으로 추정** — 이번 수정 시 그 부분도 함께 정리 필요.
+`ROLE_PERMISSIONS`에 AGENCY 항목 추가 (6개 상태 권한):
 
-## 임시 조치
+```typescript
+[USER_ROLES.AGENCY]: [
+  OrderStatus.REGISTERED,
+  OrderStatus.SCHEDULED,
+  OrderStatus.WAREHOUSED,
+  OrderStatus.PACKED,
+  OrderStatus.RELEASED,
+  OrderStatus.IN_TRANSIT,
+],
+```
 
-없음 (AGENCY 역할 사용자는 창고관리 기능 전체를 사용할 수 없는 상태로 방치 중 — 즉시 수정 필요).
+DELIVERED, CANCELED, CLAIMED 등은 AGENCY 권한 범위 밖으로 제외.
 
-## 목표 구현
+## OPERATOR 권한 관련 검토
 
-`ROLE_PERMISSIONS`에 `[USER_ROLES.AGENCY]` 항목 추가. 위 표의 9개 target 상태(`REGISTERED, SCHEDULED, WAREHOUSED, PACKED, RELEASED, IN_TRANSIT`)를 포함해야 함. `WAREHOUSE_ROLES` 게이트가 이미 조직 스코프(AGENCY는 본인 소속 화주만)를 각 액션 내부에서 별도로 검증하고 있으므로, `ROLE_PERMISSIONS[AGENCY]`는 "상태값 화이트리스트" 역할만 하면 됨(추가 조직 스코프 로직 불필요, 이미 각 액션에 있음).
+**판단: 현행 유지 (추가 권한 부여하지 않음)**
 
-PR#646에서 잘못 추가된 `ROLE_PERMISSIONS[OPERATOR]`의 확장분(`WAREHOUSED/PACKED/RELEASED/IN_TRANSIT`)을 유지할지 원복할지는 담당자 판단 — OPERATOR가 실제로 이 기능을 써야 할 의도가 있었는지 불명확하므로 배정 시 함께 확인 요청.
+### 배경
+PR#646(Baker, TASK-B-170)에서 `ROLE_PERMISSIONS[OPERATOR]`에 WAREHOUSED/PACKED/RELEASED/IN_TRANSIT를 추가했었음.
 
-## 관련 파일
+### 분석
+1. **OPERATOR는 `WAREHOUSE_ROLES`에 포함되지 않음** — `src/app/actions/operations/warehouse.ts:12`에서 `WAREHOUSE_ROLES = [ADMIN, MANAGER, ZENITH_SUPER_ADMIN, AGENCY]`로 정의되어 있으며 OPERATOR는 제외됨
+2. **실효성 없음**: OPERATOR에 아무리 많은 전이 권한을 부여해도 `WAREHOUSE_ROLES.includes(profile.role)` 게이트에서 차단되어 warehouse 서버 액션에 접근할 수 없음
+3. **현행 유지 사유**: OPERATOR의 기존 권한(SCHEDULED/HELD/CANCELED/CLAIMED)은 운영/지원 업무에 적합하며, 창고 업무(WAREHOUSED/PACKED/RELEASED/IN_TRANSIT)는 warehouse 역할(ADMIN/MANAGER/AGENCY)의 책임이므로 분리 유지
 
-- `src/lib/logistics/status-machine.ts` (35-40행 `ROLE_PERMISSIONS`)
-- `src/app/actions/operations/warehouse.ts`
-- `src/app/actions/operations/orders.ts`
-- `tests/unit/logistics/status-machine.test.ts` (AGENCY 케이스 회귀 테스트 추가 필요)
+### 결론
+- PR#646의 OPERATOR 확장은 미병합 상태(PR 반려)로 현재 코드에 반영되지 않음
+- AGENCY에 창고 상태 권한을 추가하는 것으로 충분 — OPERATOR는 현행 유지
 
-## 예상 공수
+## 테스트
 
-Low (0.5일 이내 — 권한 목록 추가 + 회귀 테스트 + AGENCY 역할로 9개 액션 전부 실제 동작 확인)
+### 단위 테스트 (status-machine)
+- TC-AG-T1~TC-AG-T9: AGENCY 역할 권한 검증 9개 케이스 추가
+  - T1~T6: 허용 검증 (REGISTERED/SCHEDULED/WAREHOUSED/PACKED/RELEASED/IN_TRANSIT)
+  - T7~T9: 거부 검증 (DELIVERED/CANCELED/CLAIMED)
+- status-machine: 31/31 PASS
 
-## 우선순위
+### 통합 테스트 (server action chain)
+- TC-AG-INT-01: AGENCY confirmPickup → updateOrderStatus(SCHEDULED) 정상 호출 ✅
+- TC-AG-INT-02: AGENCY cancelPickup → updateOrderStatus(REGISTERED) 정상 호출 ✅
+- TC-AG-INT-03: AGENCY cancelInbound → WAREHOUSED→SCHEDULED 복구 정상 ✅
+- warehouse (ups-pickup-inbound): 17/17 PASS
 
-**P1 — 즉시**: 최근 스프린트(Issue #635 A~D) 전체 기능이 실사용 역할(AGENCY)에서 동작 불능 상태
+### TypeScript
+- 0 error (e2e pre-existing errors만 존재)
+
+### DB RLS 레이어 추가 발견 (2차)
+Application 레벨(ROLE_PERMISSIONS) 수정만으로는 `update_order_status_atomic` RPC
+(SECURITY INVOKER)의 `SELECT ... FOR UPDATE` 락이 DB RLS에서 차단되어,
+AGENCY가 창고 액션을 실행할 수 없었음.
+
+#### 추가 조치: DB 마이그레이션
+- **`zen_orders`**: AGENCY UPDATE RLS 정책 신규 (`Agency can update shipper orders`)
+  - 조건: `get_my_role() = 'AGENCY' AND agency_org_id = profile.org_id`
+- **`zen_inventory_history`**: INSERT 정책에 AGENCY 역할 추가
+  - 기존 `ADMIN/ZENITH_SUPER_ADMIN/MANAGER/MEMBER/PARTNER`에 `AGENCY` 추가
+
+### 실사용 RPC 검증 결과
+- `agency@zenith.kr` 로그인 → `update_order_status_atomic` RPC 직접 호출 → **204 성공** ✅
+- 테스트 오더 `303f3ee1-...`(`ZEN-2026-000001`) → REGISTERED → WAREHOUSED 전이 성공 후 REGISTERED로 복구 완료
+- 더 이상 "Order not found" 또는 500 에러 발생하지 않음
+
+## 변경 파일
+
+| 파일 | 변경 내용 |
+|:-----|:---------|
+| `src/lib/logistics/status-machine.ts` | ROLE_PERMISSIONS에 AGENCY 추가 |
+| `tests/unit/logistics/status-machine.test.ts` | TC-AG-T1~T9 9종 추가 |
+| `tests/unit/warehouse/ups-pickup-inbound.test.ts` | TC-AG-INT-01~03 3종 추가 (mock에 attachOperatorNames 보강) |
+| `tests/setup.ts` | server-only mock 추가 |
+| `tests/__mocks__/server-only.ts` | vitest alias용 빈 모듈 |
+| `vitest.config.ts` | server-only alias 추가 |
+| `supabase/migrations/20260722000000_def114_agency_warehouse_rls.sql` | AGENCY UPDATE RLS + inventory_history INSERT 확장 |
 
 ---
 
-## 추가 발견 (2026-07-22, Jaison) — PR#656만으로는 불충분, 별도 RLS 레벨 결함 확인
+## 추가 발견 경위 (2026-07-22, Jaison) — 위 DB RLS 결함을 처음 특정한 진단 기록
 
 PR#656(`ROLE_PERMISSIONS[AGENCY]` 추가)이 TeamB_Dev에 병합되지 않은 상태에서 JSJung이 해당 브랜치로 실사용 검증 중 **여전히 500 에러 재현**을 보고. 로컬에서 직접 원인을 추적한 결과, **애플리케이션 레벨(`ROLE_PERMISSIONS`) 수정과는 별개로 DB RLS 레벨의 두 번째 결함**이 있음을 확인.
 
@@ -117,4 +163,6 @@ WITH CHECK (
 
 또한 `order_status_history` INSERT, `zen_inventory_history` INSERT 등 같은 RPC 내에서 함께 쓰는 다른 테이블들도 AGENCY 역할의 INSERT 정책이 있는지 함께 점검 필요(이번 재현에서는 SELECT FOR UPDATE 단계에서 이미 막혀 그 이후 단계까지 도달 못했으므로 미확인 상태).
 
-**테스트 데이터 상태**: 진단 과정에서 `303f3ee1-...` 오더를 service_role로 WAREHOUSED까지 전이시켰다가 REGISTERED로 되돌려놓음 — 재검증 시 그대로 사용 가능.
+**테스트 데이터 상태**: 진단 과정에서 `303f3ee1-...` 오더를 service_role로 WAREHOUSED까지 전이시켰다가 REGISTERED로 되돌려놓음.
+
+**(해결됨)** 위 진단을 바탕으로 Dave가 마이그레이션 `20260722000000_def114_agency_warehouse_rls.sql`을 추가해 해결 — 상세는 위 "DB RLS 레이어 추가 발견 (2차)" 섹션 참조.

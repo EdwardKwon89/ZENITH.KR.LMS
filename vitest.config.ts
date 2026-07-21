@@ -20,6 +20,7 @@ export default defineConfig({
     ],
     alias: {
       '@': path.resolve(__dirname, './src'),
+      'server-only': path.resolve(__dirname, './tests/__mocks__/server-only.ts'),
     },
     // Integration tests share remote DB state — sequential to prevent data races
     fileParallelism: false,
