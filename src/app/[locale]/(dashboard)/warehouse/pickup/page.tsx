@@ -1,0 +1,48 @@
+import { getTranslations } from 'next-intl/server';
+import { requireAuth } from '@/lib/auth/guards';
+import { USER_ROLES } from '@/lib/auth/rbac';
+import { redirect } from 'next/navigation';
+import PickupProcessForm from '@/components/warehouse/PickupProcessForm';
+
+export default async function WarehousePickupPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const { profile } = await requireAuth();
+
+  const isAllowed = profile?.role === USER_ROLES.ADMIN ||
+    profile?.role === USER_ROLES.MANAGER ||
+    profile?.role === USER_ROLES.ZENITH_SUPER_ADMIN ||
+    profile?.role === USER_ROLES.AGENCY;
+
+  if (!isAllowed) {
+    redirect(`/${locale}/dashboard`);
+  }
+
+  const t = await getTranslations('WarehousePickup');
+  const navT = await getTranslations('Navigation');
+
+  return (
+    <div className="relative min-h-screen animate-in fade-in duration-500 bg-slate-50/50 pb-12">
+      <div className="sticky top-0 z-20 bg-white/60 backdrop-blur-md border-b border-slate-100 px-8 py-3 mb-6">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <div>
+            <h1 className="text-xl font-black text-slate-950 tracking-tight flex items-center gap-2">
+              <span className="w-1.5 h-6 bg-brand-600 rounded-full"></span>
+              {t('title')}
+            </h1>
+            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest opacity-70 ml-3.5">
+              {navT('logistics_group')} — {navT('logistics_pickup')}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-8">
+        <PickupProcessForm locale={locale} />
+      </div>
+    </div>
+  );
+}
