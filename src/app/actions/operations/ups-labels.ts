@@ -152,8 +152,8 @@ async function fetchAndSaveLabel(
     return null;
   }
 
-  const labelUrl = labelRes.data.label_url ?? null;
-  const labelFormat = labelRes.data.label_type === 'PDF' ? 'PDF' : 'PNG';
+  const labelUrl = labelRes.data.lable_file || null;
+  const labelFormat = labelUrl?.endsWith('.pdf') ? 'PDF' : 'PNG';
 
   const { error } = await supabase
     .from('zen_ups_labels')
@@ -270,10 +270,10 @@ export async function fetchAndIssueUpsLabel(
         additional_info: { lable_print_datetime: 'Y' },
       };
       const res = await getnewlabel(configInfo, [{ reference_no: label.reference_no.replace(/-/g, '') }]);
-      if (res.success !== 1 || !res.data?.label_url) {
+      if (res.success !== 1 || !res.data?.lable_file) {
         return { success: false, error: res.message || '문서 조회 실패' };
       }
-      labelUrl = res.data.label_url;
+      labelUrl = res.data.lable_file;
     } else {
       labelUrl = await fetchAndSaveLabel(supabase, label.reference_no);
       if (!labelUrl) return { success: false, error: '라벨 발급 실패 (getnewlabel)' };
@@ -572,10 +572,10 @@ export async function fetchShxkTradeDocument(
     };
     const res = await getnewlabel(configInfo, [{ reference_no: label.reference_no.replace(/-/g, '') }]);
 
-    if (res.success !== 1 || !res.data?.label_url) {
+    if (res.success !== 1 || !res.data?.lable_file) {
       return { success: false, error: res.message || '문서 조회 실패' };
     }
-    return { success: true, url: res.data.label_url };
+    return { success: true, url: res.data.lable_file };
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error';
     logger.error('fetchShxkTradeDocument error:', err);
