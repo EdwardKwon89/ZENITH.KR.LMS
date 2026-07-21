@@ -251,7 +251,7 @@ export async function registerUpsOrder(
  */
 export async function fetchAndIssueUpsLabel(
   orderId: string,
-  docType?: 'WAYBILL' | 'INVOICE' | 'CUSTOMS',
+  docType?: 'WAYBILL' | 'INVOICE' | 'CUSTOMS' | 'COMBINED',
 ): Promise<{ success: boolean; url?: string; error?: string }> {
   try {
     const { supabase, profile } = await validateUserAction();
@@ -550,7 +550,7 @@ export async function triggerCreateOrderTest(
   }
 }
 
-const DOC_TYPE_CONTENT_MAP = { WAYBILL: '1', CUSTOMS: '2', INVOICE: '3' } as const;
+const DOC_TYPE_CONTENT_MAP = { WAYBILL: '1', CUSTOMS: '2', INVOICE: '3', COMBINED: '6' } as const;
 
 export async function fetchShxkTradeDocument(
   orderId: string,
