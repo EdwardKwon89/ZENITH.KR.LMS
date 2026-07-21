@@ -137,6 +137,11 @@ export async function finalizeInvoice(
     const permError = await assertFinalizePermission(supabase, profile, invoice);
     if (permError) return { success: false, error: permError };
 
+    const isAdminAction = profile.role !== USER_ROLES.AGENCY;
+    if (isAdminAction && !reason?.trim()) {
+      return { success: false, error: 'Admin 예외 마감 시 사유를 입력해야 합니다.' };
+    }
+
     const totalAmount = await computeInvoiceTotal(supabase, invoiceId);
     await markInvoiceFinalized(supabase, invoiceId, totalAmount, user.id, invoice.status, reason);
 

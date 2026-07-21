@@ -21,6 +21,7 @@ export const InvoiceTable: React.FC<InvoiceTableProps> = ({ invoices, isAdmin })
   const [historyInvoice, setHistoryInvoice] = useState<any | null>(null);
   const [finalizeInvoiceData, setFinalizeInvoiceData] = useState<any | null>(null);
   const [finalizeReason, setFinalizeReason] = useState('');
+  const [finalizeReasonError, setFinalizeReasonError] = useState('');
   const [finalizing, setFinalizing] = useState(false);
   const [issuingId, setIssuingId] = useState<string | null>(null);
   const router = useRouter();
@@ -46,6 +47,11 @@ export const InvoiceTable: React.FC<InvoiceTableProps> = ({ invoices, isAdmin })
 
   const handleFinalize = async () => {
     if (!finalizeInvoiceData) return;
+    if (isAdmin && !finalizeReason.trim()) {
+      setFinalizeReasonError('예외 처리 시 사유를 입력해야 합니다.');
+      return;
+    }
+    setFinalizeReasonError('');
     setFinalizing(true);
     try {
       const result = await finalizeInvoice(finalizeInvoiceData.id, finalizeReason || undefined);
@@ -184,20 +190,24 @@ export const InvoiceTable: React.FC<InvoiceTableProps> = ({ invoices, isAdmin })
               {isAdmin && (
                 <div className="mb-4">
                   <label className="block text-xs font-bold text-slate-500 mb-1">
-                    사유 (예외 처리 시 필수)
+                    사유 (예외 처리 시 필수) <span className="text-red-500">*</span>
                   </label>
                   <textarea
                     value={finalizeReason}
-                    onChange={e => setFinalizeReason(e.target.value)}
-                    className="w-full border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
+                    onChange={e => { setFinalizeReason(e.target.value); setFinalizeReasonError(''); }}
+                    className={`w-full border rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none ${finalizeReasonError ? 'border-red-400' : 'border-slate-200'}`}
                     rows={3}
                     placeholder="예외 처리 사유를 입력하세요..."
+                    required
                   />
+                  {finalizeReasonError && (
+                    <p className="text-xs text-red-500 mt-1">{finalizeReasonError}</p>
+                  )}
                 </div>
               )}
               <div className="flex gap-3 justify-end">
                 <ZenButton
-                  onClick={() => { setFinalizeInvoiceData(null); setFinalizeReason(''); }}
+                  onClick={() => { setFinalizeInvoiceData(null); setFinalizeReason(''); setFinalizeReasonError(''); }}
                   className="px-5 py-2 bg-slate-100 text-slate-700 text-sm font-bold rounded-xl hover:bg-slate-200"
                 >
                   취소

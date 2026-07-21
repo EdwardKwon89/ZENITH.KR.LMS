@@ -98,6 +98,28 @@ describe('Agency 정산 권한 검증 단위 테스트 (Issue #603)', () => {
 
       await expect(generateInvoicesForOrder('ord-1')).rejects.toThrow('본인 소속 화주의 오더에 대해서만 인보이스를 생성할 수 있습니다.');
     });
+
+    it('마감된 오더의 인보이스 생성 차단 가드 정상 동작', async () => {
+      (validateUserAction as any).mockResolvedValue({
+        supabase: mockSupabase,
+        profile: { id: 'agency-usr-1', role: USER_ROLES.AGENCY, org_id: 'agency-org-1' },
+      });
+
+      mockSupabase.from.mockImplementation((table: string) => {
+        if (table === 'zen_agency_shippers') {
+          return createChainableMock([{ shipper_org_id: 'shipper-1' }]);
+        }
+        if (table === 'zen_orders') {
+          return createChainableMock({ shipper_id: 'shipper-1' });
+        }
+        if (table === 'zen_invoices') {
+          return createChainableMock({ id: 'inv-1' });
+        }
+        return createChainableMock();
+      });
+
+      await expect(generateInvoicesForOrder('ord-1')).rejects.toThrow('이미 정산이 마감된 오더');
+    });
   });
 
   describe('updatePaymentStatus', () => {
@@ -159,7 +181,7 @@ describe('Agency 정산 권한 검증 단위 테스트 (Issue #603)', () => {
   });
 
   describe('finalizeInvoice', () => {
-    it('Admin이 인보이스 마감 시 성공', async () => {
+    it('Admin이 사유 없이 마감 시 실패', async () => {
       (validateUserAction as any).mockResolvedValue({
         supabase: mockSupabase,
         user: { id: 'admin-usr-1' },
@@ -175,20 +197,12 @@ describe('Agency 정산 권한 검증 단위 테스트 (Issue #603)', () => {
             metadata: { source_order_id: 'ord-1' },
           });
         }
-        if (table === 'zen_order_costs') {
-          return createChainableMock([
-            { unit_price: 500, quantity: 2 },
-            { unit_price: 200, quantity: 1 },
-          ]);
-        }
-        if (table === 'zen_invoice_history') {
-          return createChainableMock();
-        }
         return createChainableMock();
       });
 
       const res = await finalizeInvoice('inv-1');
-      expect(res.success).toBe(true);
+      expect(res.success).toBe(false);
+      expect(res.error).toContain('사유를 입력');
     });
 
     it('Admin이 이유와 함께 인보이스 마감 시 성공', async () => {
