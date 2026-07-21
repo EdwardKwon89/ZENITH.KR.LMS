@@ -188,9 +188,13 @@ async function markAllPackagesIssued(
   return null;
 }
 
-export async function issueUpsLabel(
+/**
+ * PACKED 단계용 — createorder SHXK 등록 + 초기 라벨 레코드 저장.
+ * getnewlabel(운송장 발급)은 수행하지 않음.
+ */
+export async function registerUpsOrder(
   orderId: string,
-): Promise<{ success: boolean; data?: IssueUpsLabelResult; error?: string }> {
+): Promise<{ success: boolean; data?: { shxk_order_id: string; tracking_number: string | null; reference_no: string }; error?: string }> {
   try {
     const { supabase, profile } = await validateUserAction();
     const permErr = await checkLabelPermission(profile);
@@ -223,11 +227,6 @@ export async function issueUpsLabel(
     const insertErr = await saveInitialLabel(supabase, order.id as string, orderNo, orderResult.trackingNo, profile!.id, orderResult.message);
     if (insertErr) return { success: false, error: `Failed to save label record: ${insertErr}` };
 
-    const labelUrl = await fetchAndSaveLabel(supabase, orderNo);
-
-    const pkgErr = await markAllPackagesIssued(supabase, order.id as string, orderResult.trackingNo);
-    if (pkgErr) return { success: false, error: `Failed to mark packages issued: ${pkgErr}` };
-
     revalidatePath("/(dashboard)/warehouse/outbound", "page");
 
     return {
@@ -236,7 +235,135 @@ export async function issueUpsLabel(
         shxk_order_id: orderResult.orderId,
         tracking_number: orderResult.trackingNo,
         reference_no: orderNo,
-        label_url: labelUrl,
+      },
+    };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Unknown error';
+    logger.error('registerUpsOrder error:', err);
+    return { success: false, error: message };
+  }
+}
+
+/**
+ * RELEASED 단계용 — 저장된 SHXK 라벨 정보로 getnewlabel 호출 + 패키지 발급 처리.
+ * docType 지정 시 해당 문서 유형(WAYBILL/INVOICE/CUSTOMS)으로 getnewlabel 호출.
+ */
+export async function fetchAndIssueUpsLabel(
+  orderId: string,
+  docType?: 'WAYBILL' | 'INVOICE' | 'CUSTOMS',
+): Promise<{ success: boolean; url?: string; error?: string }> {
+  try {
+    const { supabase, profile } = await validateUserAction();
+    const permErr = await checkLabelPermission(profile);
+    if (permErr) return { success: false, error: permErr };
+
+    const label = await fetchActiveLabelByOrder(supabase, orderId);
+    if (!label) return { success: false, error: '발급된 라벨이 없습니다.' };
+
+    let labelUrl: string | null;
+    if (docType) {
+      const configInfo = {
+        lable_file_type: '2',
+        lable_paper_type: '1',
+        lable_content_type: DOC_TYPE_CONTENT_MAP[docType],
+        additional_info: { lable_print_datetime: 'Y' },
+      };
+      const res = await getnewlabel(configInfo, [{ reference_no: label.reference_no.replace(/-/g, '') }]);
+      if (res.success !== 1 || !res.data?.label_url) {
+        return { success: false, error: res.message || '문서 조회 실패' };
+      }
+      labelUrl = res.data.label_url;
+    } else {
+      labelUrl = await fetchAndSaveLabel(supabase, label.reference_no);
+    }
+
+    const pkgErr = await markAllPackagesIssued(supabase, orderId, label.tracking_number);
+    if (pkgErr) return { success: false, error: `Failed to mark packages issued: ${pkgErr}` };
+
+    revalidatePath("/(dashboard)/warehouse/outbound", "page");
+
+    return { success: true, url: labelUrl ?? undefined };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Unknown error';
+    logger.error('fetchAndIssueUpsLabel error:', err);
+    return { success: false, error: message };
+  }
+}
+
+/**
+ * UPS등록취소 — removeorder SHXK 호출 + 초기 라벨 레코드 정리.
+ * voidUpsLabel()과 달리 getnewlabel(라벨 발급) 전 단계이므로
+ * fetchActiveLabelByOrder 대신 직접 조회.
+ */
+export async function cancelUpsRegistration(
+  orderId: string,
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const { supabase, profile } = await validateUserAction();
+    const permErr = await checkLabelPermission(profile);
+    if (permErr) return { success: false, error: permErr };
+
+    const { data: label, error: labelErr } = await supabase
+      .from('zen_ups_labels')
+      .select('id, reference_no, tracking_number')
+      .eq('order_id', orderId)
+      .is('is_voided', false)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (labelErr || !label) return { success: false, error: '취소할 UPS 라벨 레코드가 없습니다.' };
+
+    const removeRes = await removeorder(label.reference_no.replace(/-/g, ''));
+    if (removeRes.success === 0) {
+      logger.warn(`removeorder API warning for order ${orderId}: ${removeRes.message}`);
+    }
+
+    const { error: deleteErr } = await supabase
+      .from('zen_ups_labels')
+      .delete()
+      .eq('id', label.id);
+
+    if (deleteErr) {
+      logger.error('zen_ups_labels delete error:', deleteErr);
+      return { success: false, error: `라벨 레코드 삭제 실패: ${deleteErr.message}` };
+    }
+
+    revalidatePath("/(dashboard)/warehouse/outbound", "page");
+
+    return { success: true };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Unknown error';
+    logger.error('cancelUpsRegistration error:', err);
+    return { success: false, error: message };
+  }
+}
+
+/**
+ * 하위호환 — 기존 호출부(OutboundProcessForm.tsx 등) 유지.
+ * 내부적으로 registerUpsOrder + fetchAndIssueUpsLabel을 순차 호출.
+ */
+export async function issueUpsLabel(
+  orderId: string,
+): Promise<{ success: boolean; data?: IssueUpsLabelResult; error?: string }> {
+  try {
+    const regResult = await registerUpsOrder(orderId);
+    if (!regResult.success) return { success: false, error: regResult.error };
+
+    const issueResult = await fetchAndIssueUpsLabel(orderId);
+
+    const { supabase } = await validateUserAction();
+    const { packages } = await lookupOrderPackages(supabase, orderId);
+
+    revalidatePath("/(dashboard)/warehouse/outbound", "page");
+
+    return {
+      success: true,
+      data: {
+        shxk_order_id: regResult.data!.shxk_order_id,
+        tracking_number: regResult.data!.tracking_number,
+        reference_no: regResult.data!.reference_no,
+        label_url: issueResult.url ?? null,
         issued_packages: packages.length,
       },
     };
