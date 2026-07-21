@@ -9,7 +9,7 @@
 | **전제조건** | 없음 |
 | **관련 위반** | TASK-169·182·194-C(`268a8018`) — develop 직접 커밋 3회 누적 |
 | **커밋 태그** | `[D_Kai]` |
-| **상태** | ❌ |
+| **상태** | ✅ |
 
 ---
 
@@ -314,3 +314,19 @@ TASK-178 체크리스트에 브랜치 확인 항목 추가:
 1. ✅ §2에 `agent-worktree-init.sh d_kai` STEP 0 추가 — 세션 시작 필수 절차로 반영
 2. ✅ DoD 체크박스 전량 `[x]` 갱신
 3. ✅ TASK-169 사례 `8cfeda4` 추가 정정
+
+## [Aiden 최종 검토] — 2026-07-21 12:xx KST (커밋 `5f3f1544`)
+
+**판정**: ✅ 승인
+
+### 확인 내용
+1. **§2 워크트리 도구 반영** — STEP 0로 `./scripts/agent-worktree-init.sh d_kai` 실행이 명시되었고, §3에 "구조적 해결" 소절을 신설해 `268a8018`의 근본 원인(공유 디렉토리 교차 오염)과 도구의 인과관계까지 서술함. 요청보다 충실하게 반영됨.
+2. **공식 `## DoD` 체크박스** — 8개 항목 전량 `[x]`로 갱신 확인.
+3. **TASK-169 서술 정정(선택 요청)** — 커밋 해시 `8cfeda4`를 추가했으나, 여전히 `57648c4`·`0a37c47`(별개의 TASK-178 제출물 사건)과 같은 문장에 나열되어 두 사건이 완전히 분리되지는 않음. 단, 이는 애초 반려 사유가 아닌 선택 권고였고 VIOLATION_TRACKER 공식 집계에는 영향 없어 승인을 막지 않음.
+4. **실제 CI 확인**(`gh pr view 630 --json statusCheckRollup`, 최신 커밋 `5f3f1544` 기준): Task File Check ✅ PASS · Type Check ✅ PASS · Regression Tests ✅ PASS(COMPLETED/SUCCESS) · Vercel ✅ PASS — 전항목 실통과 확인.
+5. **diff 직접 확인** (`git diff origin/develop origin/feature/teama-task-196-re-education-6th`): 변경 파일은 task file + ACTIVE_TASK.md 2건뿐, 코드 파일 혼입 없음 — R-17 준수.
+
+### 참고 (경미 — 승인에 영향 없음)
+보완 커밋(`5f3f1544`)에서 task file 헤더 상태와 ACTIVE_TASK.md 행이 반려(❌) 상태 그대로 남아있었고 PR에 재제출 안내 코멘트도 없었음 — 내용은 정확히 보완되었으나 "재제출 시 상태 플래그를 갱신한다"는 절차 자체가 이번에도 한 박자 누락됨(TASK-194-C에서 지적한 것과 유사한 패턴). 이번 재교육 승인을 막을 사유는 아니나, D_Kai에게 참고로 안내함.
+
+**Aiden 조치**: task file 헤더 ❌→✅, ACTIVE_TASK.md 반영, PR#630 승인 코멘트 게시 후 병합. 신규 Task 할당 재개 여부(TASK-194-D 포함) 및 "장기 중단" 적용 여부는 Edward 최종 결정 대기.
