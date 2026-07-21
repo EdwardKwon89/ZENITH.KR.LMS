@@ -177,3 +177,139 @@ export async function confirmOutbound(orderId: string) {
 
   return { success: true, pkgsWithoutIntlRef };
 }
+
+// ─────────────────────────────────────────────
+// B-1: 오더픽업 (Pickup) — UPS REGISTERED + PICKUP → SCHEDULED
+// ─────────────────────────────────────────────
+
+export async function getPickupOrders() {
+  const { supabase, profile } = await validateUserAction();
+  if (!profile) throw new Error("User profile not found");
+  const isAllowed = WAREHOUSE_ROLES.includes(profile.role as any);
+  if (!isAllowed) throw new Error("권한이 없습니다.");
+
+  let query = supabase
+    .from("zen_orders")
+    .select(`
+      id, order_no, status, created_at,
+      recipient_name, recipient_contact, recipient_address,
+      delivery_method, pickup_location, pickup_contact_name, pickup_contact_tel,
+      transport_mode,
+      shipper:zen_organizations!zen_orders_shipper_id_fkey(name),
+      origin_port:zen_ports!zen_orders_origin_port_id_fkey(name, code),
+      dest_port:zen_ports!zen_orders_dest_port_id_fkey(name, code),
+      order_packages:zen_order_packages!zen_order_packages_order_id_fkey(id, intl_ref_no, packing_unit, packing_count, gross_weight)
+    `)
+    .eq("transport_mode", "UPS")
+    .eq("status", OrderStatus.REGISTERED)
+    .eq("delivery_method", "PICKUP");
+
+  if (profile.role === USER_ROLES.AGENCY) {
+    const shipperIds = await getAgencyShipperIds(supabase, profile.org_id);
+    if (!shipperIds || shipperIds.length === 0) return { success: true, orders: [] };
+    query = query.in("shipper_id", shipperIds);
+  }
+
+  const { data, error } = await query.order("created_at", { ascending: false });
+  if (error) {
+    logger.error("getPickupOrders error:", error);
+    throw new Error("Failed to fetch pickup orders");
+  }
+  return { success: true, orders: data || [] };
+}
+
+export async function confirmPickup(orderId: string) {
+  const { profile } = await validateUserAction();
+  if (!profile) throw new Error("User profile not found");
+  const isAllowed = WAREHOUSE_ROLES.includes(profile.role as any);
+  if (!isAllowed) throw new Error("권한이 없습니다.");
+
+  await updateOrderStatus(orderId, OrderStatus.SCHEDULED, "[픽업완료]");
+
+  revalidatePath("/(dashboard)/warehouse/pickup", "page");
+  revalidatePath("/(dashboard)/orders", "page");
+
+  return { success: true };
+}
+
+export async function cancelPickup(orderId: string) {
+  const { profile } = await validateUserAction();
+  if (!profile) throw new Error("User profile not found");
+  const isAllowed = WAREHOUSE_ROLES.includes(profile.role as any);
+  if (!isAllowed) throw new Error("권한이 없습니다.");
+
+  await updateOrderStatus(orderId, OrderStatus.REGISTERED, "[픽업취소]");
+
+  revalidatePath("/(dashboard)/warehouse/pickup", "page");
+  revalidatePath("/(dashboard)/orders", "page");
+
+  return { success: true };
+}
+
+export async function getTodayPickupHistory() {
+  const { supabase } = await validateUserAction();
+
+  const now = new Date();
+  const todayKst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+  todayKst.setUTCHours(0, 0, 0, 0);
+  const startUtc = new Date(todayKst.getTime() - 9 * 60 * 60 * 1000).toISOString();
+  todayKst.setUTCHours(23, 59, 59, 999);
+  const endUtc = new Date(todayKst.getTime() - 9 * 60 * 60 * 1000).toISOString();
+
+  const { data, error } = await supabase
+    .from("order_status_history")
+    .select(`
+      id, order_id, prev_status, next_status, reason, created_at, changed_by,
+      order:zen_orders!order_id(
+        order_no,
+        shipper:zen_organizations!shipper_id(name)
+      ),
+      operator:zen_profiles!changed_by(full_name)
+    `)
+    .eq("next_status", "SCHEDULED")
+    .contains("reason", "[픽업완료]")
+    .gte("created_at", startUtc)
+    .lte("created_at", endUtc)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    logger.error("getTodayPickupHistory error:", error);
+    throw new Error("Failed to fetch today pickup history");
+  }
+  return data || [];
+}
+
+// ─────────────────────────────────────────────
+// B-2: 입고취소 (Cancel Inbound) — WAREHOUSED → 직전 상태 복구
+// ─────────────────────────────────────────────
+
+export async function cancelInbound(orderId: string) {
+  const { supabase, profile } = await validateUserAction();
+  if (!profile) throw new Error("User profile not found");
+  const isAllowed = WAREHOUSE_ROLES.includes(profile.role as any);
+  if (!isAllowed) throw new Error("권한이 없습니다.");
+
+  const orderRepo = new OrderRepository(supabase);
+  const { data: current } = await orderRepo.getStatus(orderId);
+  if (!current || current.status !== OrderStatus.WAREHOUSED) {
+    throw new Error("WAREHOUSED 상태의 오더만 입고취소할 수 있습니다.");
+  }
+
+  const { data: prevData } = await supabase
+    .from("order_status_history")
+    .select("prev_status")
+    .eq("order_id", orderId)
+    .eq("next_status", OrderStatus.WAREHOUSED)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  const prevStatus = (prevData?.prev_status as OrderStatus) || OrderStatus.REGISTERED;
+
+  await updateOrderStatus(orderId, prevStatus, "[입고취소]");
+
+  revalidatePath("/(dashboard)/warehouse/inbound", "page");
+  revalidatePath("/(dashboard)/orders", "page");
+
+  return { success: true, restoredStatus: prevStatus };
+}

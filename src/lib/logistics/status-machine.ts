@@ -8,9 +8,9 @@ import { UserRole, USER_ROLES } from "../auth/rbac";
 
 // 상태 전이 규칙 정의 (Current -> Allowed Next States)
 const TRANSITION_RULES: Record<OrderStatus, OrderStatus[]> = {
-  [OrderStatus.REGISTERED]: [OrderStatus.SCHEDULED, OrderStatus.CANCELED, OrderStatus.HELD],
-  [OrderStatus.SCHEDULED]: [OrderStatus.WAREHOUSED, OrderStatus.CANCELED, OrderStatus.HELD],
-  [OrderStatus.WAREHOUSED]: [OrderStatus.PACKED, OrderStatus.RELEASED, OrderStatus.HELD, OrderStatus.RETURNED], // IMP-074: WAREHOUSED→RELEASED 출고 확정
+  [OrderStatus.REGISTERED]: [OrderStatus.SCHEDULED, OrderStatus.WAREHOUSED, OrderStatus.CANCELED, OrderStatus.HELD],
+  [OrderStatus.SCHEDULED]: [OrderStatus.REGISTERED, OrderStatus.WAREHOUSED, OrderStatus.CANCELED, OrderStatus.HELD],
+  [OrderStatus.WAREHOUSED]: [OrderStatus.REGISTERED, OrderStatus.SCHEDULED, OrderStatus.PACKED, OrderStatus.RELEASED, OrderStatus.HELD, OrderStatus.RETURNED], // 입고취소(→REGISTERED/SCHEDULED) 허용
   [OrderStatus.PACKED]: [OrderStatus.RELEASED, OrderStatus.HELD],
   [OrderStatus.RELEASED]: [OrderStatus.IN_TRANSIT, OrderStatus.HELD],
   [OrderStatus.IN_TRANSIT]: [OrderStatus.DELIVERED, OrderStatus.HELD, OrderStatus.RETURNED, OrderStatus.CLAIMED],
