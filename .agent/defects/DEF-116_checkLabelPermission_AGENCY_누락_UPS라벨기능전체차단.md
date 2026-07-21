@@ -34,10 +34,12 @@ async function checkLabelPermission(profile: { role: string } | null): Promise<s
 - `registerUpsOrder`(200) — UPS접수
 - `fetchAndIssueUpsLabel`(257) — 출고처리 라벨발급
 - `cancelUpsRegistration`(304) — UPS등록취소
-- `voidUpsLabel`(425 부근) — 출고취소
-- `previewShxkPayload`(463 부근)
-- `fetchShxkTradeDocument`(517 부근)
-- `getUpsLabelStatus`(560 부근)
+- `voidUpsLabel`(425) — 출고취소
+- `previewShxkPayload`(463)
+- `triggerCreateOrderTest`(517)
+- `fetchShxkTradeDocument`(560)
+
+**정정(2026-07-22, PR#668 리뷰 중 발견)**: 최초 작성 시 7번째 함수를 `getUpsLabelStatus`로 잘못 기재했음 — 실제로는 `triggerCreateOrderTest`(517행)이며, `getUpsLabelStatus`(451행)는 `checkLabelPermission()`을 전혀 호출하지 않는 별개 함수(권한 게이트 없음). PR#668의 신규 테스트 5건 중 4건이 이 착오를 그대로 이어받아 `getUpsLabelStatus`를 대상으로 작성되어 실제로는 이번 수정을 전혀 검증하지 못하는 문제로 이어짐 — 반려 사유 참조.
 
 이 체크가 실패하면 `{success:false, error: '권한이 없습니다...'}`를 **조용히 반환** — 예외 throw 없음, `zen_ups_label_errors` insert 없음(그건 `placeShxkOrder` 실패 분기 전용), `zen_shxk_api_logs`도 SHXK 호출 자체가 없어 기록 안 됨, `logger.error` 호출도 없음. 그 결과 UI에는 "실패" 토스트만(사유 텍스트 미표시 — `UpsReceiveProcessForm.tsx`의 `handleConfirmRegistration`이 `res.error`를 사용자에게 노출하지 않고 단순 카운트만 집계), 서버 로그에도 아무 흔적이 안 남는 "침묵 실패"가 발생.
 
