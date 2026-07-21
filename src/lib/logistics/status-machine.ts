@@ -10,7 +10,7 @@ import { UserRole, USER_ROLES } from "../auth/rbac";
 const TRANSITION_RULES: Record<OrderStatus, OrderStatus[]> = {
   [OrderStatus.REGISTERED]: [OrderStatus.SCHEDULED, OrderStatus.WAREHOUSED, OrderStatus.CANCELED, OrderStatus.HELD],
   [OrderStatus.SCHEDULED]: [OrderStatus.REGISTERED, OrderStatus.WAREHOUSED, OrderStatus.CANCELED, OrderStatus.HELD],
-  [OrderStatus.WAREHOUSED]: [OrderStatus.SCHEDULED, OrderStatus.PACKED, OrderStatus.RELEASED, OrderStatus.HELD, OrderStatus.RETURNED], // DEF-112: 입고취소(→SCHEDULED) 허용
+  [OrderStatus.WAREHOUSED]: [OrderStatus.REGISTERED, OrderStatus.SCHEDULED, OrderStatus.PACKED, OrderStatus.RELEASED, OrderStatus.HELD, OrderStatus.RETURNED], // 입고취소(→REGISTERED/SCHEDULED) 허용
   [OrderStatus.PACKED]: [OrderStatus.RELEASED, OrderStatus.HELD],
   [OrderStatus.RELEASED]: [OrderStatus.IN_TRANSIT, OrderStatus.HELD],
   [OrderStatus.IN_TRANSIT]: [OrderStatus.DELIVERED, OrderStatus.HELD, OrderStatus.RETURNED, OrderStatus.CLAIMED],
