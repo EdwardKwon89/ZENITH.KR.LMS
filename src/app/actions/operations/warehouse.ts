@@ -7,7 +7,7 @@ import { USER_ROLES } from "@/lib/auth/rbac";
 import { revalidatePath } from "next/cache";
 import { OrderRepository } from "@/lib/repositories";
 import { OrderStatus } from "@/types/orders";
-import { updateOrderStatus } from "./orders";
+import { updateOrderStatus, attachOperatorNames } from "./orders";
 import { registerUpsOrder, cancelUpsRegistration, fetchAndIssueUpsLabel, voidUpsLabel } from "./ups-labels";
 
 const WAREHOUSE_ROLES = [
@@ -264,8 +264,7 @@ export async function getTodayPickupHistory() {
       order:zen_orders!order_id(
         order_no,
         shipper:zen_organizations!shipper_id(name)
-      ),
-      operator:zen_profiles!changed_by(full_name)
+      )
     `)
     .eq("next_status", "SCHEDULED")
     .contains("reason", "[픽업완료]")
@@ -277,7 +276,7 @@ export async function getTodayPickupHistory() {
     logger.error("getTodayPickupHistory error:", error);
     throw new Error("Failed to fetch today pickup history");
   }
-  return data || [];
+  return attachOperatorNames(supabase, data || []);
 }
 
 // ─────────────────────────────────────────────

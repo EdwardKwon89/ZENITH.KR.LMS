@@ -656,6 +656,34 @@ export async function confirmInbound(
 }
 
 /**
+ * order_status_history.changed_by는 auth.users FK라 PostgREST가 zen_profiles를
+ * 자동으로 embed하지 못한다(PGRST200) — 별도 조회 후 병합.
+ */
+export async function attachOperatorNames<T extends { changed_by: string | null }>(
+  supabase: any,
+  rows: T[]
+): Promise<(T & { operator: { full_name: string } | null })[]> {
+  const ids = [...new Set(rows.map((r) => r.changed_by).filter(Boolean))];
+  if (ids.length === 0) {
+    return rows.map((r) => ({ ...r, operator: null }));
+  }
+
+  const { data: profiles } = await supabase
+    .from('zen_profiles')
+    .select('id, full_name')
+    .in('id', ids);
+
+  const nameById = new Map((profiles || []).map((p: any) => [p.id, p.full_name]));
+
+  return rows.map((r) => ({
+    ...r,
+    operator: r.changed_by && nameById.has(r.changed_by)
+      ? { full_name: nameById.get(r.changed_by) as string }
+      : null,
+  }));
+}
+
+/**
  * 오늘 하루 동안의 입고(WAREHOUSED) 처리 이력을 조회합니다. (KST 기준)
  */
 export async function getTodayInboundHistory() {
@@ -682,8 +710,7 @@ export async function getTodayInboundHistory() {
       order:zen_orders!order_id(
         order_no,
         shipper:zen_organizations!shipper_id(name)
-      ),
-      operator:zen_profiles!changed_by(full_name)
+      )
     `)
     .eq('next_status', 'WAREHOUSED')
     .gte('created_at', startUtc)
@@ -695,5 +722,5 @@ export async function getTodayInboundHistory() {
     throw new Error(`오늘의 입고 이력 조회 실패: ${error.message}`);
   }
 
-  return data || [];
+  return attachOperatorNames(supabase, data || []);
 }
