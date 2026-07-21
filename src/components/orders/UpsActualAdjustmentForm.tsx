@@ -32,6 +32,7 @@ export function UpsActualAdjustmentForm({
     actual: number;
     variance: number;
     currency: string;
+    isFinalized: boolean;
   } | null>(null);
 
   const [charges, setCharges] = useState<ChargeRow[]>([]);
@@ -237,9 +238,13 @@ export function UpsActualAdjustmentForm({
           </div>
           <p className="text-[10px] text-gray-400 dark:text-zinc-500 mt-1">
             {variance > 0
-              ? '2차 인보이스로 추가 청구됨'
+              ? (reconciliation?.isFinalized
+                  ? '추가 인보이스가 신규 발행되었습니다'
+                  : '인보이스 금액이 자동 갱신됩니다')
               : variance < 0
-                ? '화주 정산 차감 / 크레딧 발행'
+                ? (reconciliation?.isFinalized
+                    ? '크레딧 노트가 발행되었습니다'
+                    : '인보이스 금액이 차감 조정됩니다')
                 : '차액 없음 (조정 비용 불필요)'}
           </p>
         </div>
