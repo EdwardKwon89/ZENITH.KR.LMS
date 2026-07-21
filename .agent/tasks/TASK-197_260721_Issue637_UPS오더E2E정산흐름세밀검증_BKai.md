@@ -53,10 +53,13 @@ TASK-186~194로 완성된 UPS 오더 상태 전이 + 정산/마감 로직이 처
 |:-----|:-----|
 | 테스트 파일 | `tests/e2e/r11-ups-settlement-e2e-flow.spec.ts` |
 | TC 등록 | `LIVE_REGRESSION_TEST_MAP.md` §47 (TC-R11-01~08, TC-R11-E1~E3) |
-| 스크린샷 | `tests/e2e/screenshots/r11_*.png` |
+| 스크린샷 | `tests/e2e/screenshots/r11_*.png` (12건) |
+| 테스트 결과 | **11/11 ALL PASSED** (소요시간 ~1분) |
+| 커밋 | `c71ab81b` (초안) → `073e9aed` (시드 수정) → `f2161463` (ACTIVE_TASK) → 스크린샷 |
 
 ## 개정 이력
 
 | 버전 | 날짜 | 작성자 | 설명 |
 |:-----|:-----|:-------|:-----|
 | v1.0 | 2026-07-21 | B_Kai (Baker) | 초안 작성 — 8단계 + 엣지 케이스 3건 |
+| v1.1 | 2026-07-21 | B_Kai (Baker) | DB 스키마 전면 수정 (zen_company→zen_organizations, 컬럼명 교정) + beforeAll 에러 핸들링 + 11/11 ALL PASSED |
