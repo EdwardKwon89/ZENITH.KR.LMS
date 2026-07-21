@@ -30,6 +30,27 @@ jobs:
           fi
           exit 0
 
+  tsc-advisory:
+    name: Type Check (advisory, non-blocking)
+    # IMP-134 §1: tests/ 하위 타입 오류 신규 유입 감지용 advisory 게이트 (Issue #627)
+    # npx tsc --noEmit 실행 후 기존 237건 오류가 있어도 PR을 차단하지 않고 경고만 출력하며 exit 0으로 종료.
+    runs-on: ubuntu-latest
+    if: github.head_ref != 'bot/sync-active-task'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - run: npm ci
+
+      - name: Run tsc --noEmit (advisory)
+        run: |
+          npx tsc --noEmit || true
+          exit 0
+
   regression:
     name: Regression Tests
     runs-on: ubuntu-latest
