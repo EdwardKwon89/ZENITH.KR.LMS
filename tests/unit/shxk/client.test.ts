@@ -147,9 +147,11 @@ describe('SHXK API 로깅 (Issue #661)', () => {
 
     const result = await callShxk('getnewlabel', { reference_no: 'FAIL-LOG' });
 
-    // callShxk는 정상 응답 반환
+    // callShxk는 정상 응답 반환 (배열, lable_file)
     expect(result.success).toBe(1);
-    expect((result.data as Record<string, unknown>)?.label_url).toContain('FAIL-LOG');
+    const items = result.data as Array<Record<string, unknown>>
+    expect(Array.isArray(items)).toBe(true);
+    expect(items[0]?.lable_file).toContain('FAIL-LOG');
 
     // logger.error가 호출되었는지 확인
     expect(mockLoggerError).toHaveBeenCalledOnce();

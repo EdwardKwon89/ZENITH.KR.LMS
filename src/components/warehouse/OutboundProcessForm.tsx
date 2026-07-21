@@ -139,7 +139,7 @@ export default function OutboundProcessForm({ locale }: { locale: string }) {
     await executeConfirmOutbound(selectedOrders);
   };
 
-  const handleDocTypeConfirm = async (docType: 'WAYBILL' | 'INVOICE' | 'CUSTOMS') => {
+  const handleDocTypeConfirm = async (docType: 'WAYBILL' | 'INVOICE' | 'CUSTOMS' | 'COMBINED') => {
     if (!docTypePopup) return;
 
     const selectedOrders = orders.filter((o) => selected.has(o.id));
@@ -147,13 +147,17 @@ export default function OutboundProcessForm({ locale }: { locale: string }) {
     setSubmitLoading(true);
     setDocTypePopup(null);
     try {
-      const packedOrders = selectedOrders.filter((o: any) => o.status === OrderStatus.PACKED);
-      for (const order of packedOrders) {
+      for (const order of selectedOrders.filter((o: any) => o.status === OrderStatus.PACKED)) {
         const issueRes = await fetchAndIssueUpsLabel(order.id, docType);
         if (!issueRes.success) {
           toast.error(issueRes.error || t("ups_label_issue_failed"));
           setSubmitLoading(false);
           return;
+        }
+        if (docType === 'COMBINED' && issueRes.urls) {
+          issueRes.urls.forEach((url) => window.open(url, '_blank'));
+        } else if (issueRes.url) {
+          window.open(issueRes.url, '_blank');
         }
       }
 
@@ -845,12 +849,17 @@ export default function OutboundProcessForm({ locale }: { locale: string }) {
               {t("doc_type_desc", { orderNo: docTypePopup.orderNo })}
             </p>
             <div className="flex gap-2 mt-6">
-              {(['WAYBILL', 'INVOICE', 'CUSTOMS'] as const).map((dt) => (
+              {(['COMBINED', 'WAYBILL', 'INVOICE', 'CUSTOMS'] as const).map((dt) => (
                 <button
                   key={dt}
                   onClick={() => handleDocTypeConfirm(dt)}
                   disabled={submitLoading}
-                  className="flex-1 px-3 py-3 text-sm font-semibold text-white bg-purple-600 hover:bg-purple-700 rounded-xl transition-all disabled:opacity-50"
+                  className={cn(
+                    "flex-1 px-3 py-3 text-sm font-semibold rounded-xl transition-all disabled:opacity-50",
+                    dt === 'COMBINED'
+                      ? "text-white bg-emerald-600 hover:bg-emerald-700"
+                      : "text-white bg-purple-600 hover:bg-purple-700"
+                  )}
                 >
                   {t(`doc_type_${dt.toLowerCase()}`)}
                 </button>

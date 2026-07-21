@@ -27,7 +27,7 @@ export interface GetTrackingNumberResponse {
   tracking_number: string
 }
 
-export interface GetNewLabelResponse {
+export interface GetNewLabelItem {
   lable_file: string
   lable_file_type?: string
   lable_content_type?: string
@@ -69,23 +69,20 @@ export interface GetNewLabelParams {
 export async function getnewlabel(
   configInfo: Record<string, unknown>,
   listorder: GetNewLabelParams[],
-): Promise<{ success: number; data: GetNewLabelResponse | null; message: string }> {
+): Promise<{ success: number; data: GetNewLabelItem[] | null; message: string }> {
   const res = await callShxk('getnewlabel', { configInfo, listorder })
-  let labelData: GetNewLabelResponse | null = null
+  let items: GetNewLabelItem[] | null = null
   if (res.data) {
-    const items = Array.isArray(res.data) ? res.data : [res.data]
-    const first = items[0] as Record<string, unknown> | undefined
-    if (first) {
-      labelData = {
-        lable_file: String(first.lable_file ?? ''),
-        lable_file_type: first.lable_file_type ? String(first.lable_file_type) : undefined,
-        lable_content_type: first.lable_content_type ? String(first.lable_content_type) : undefined,
-      }
-    }
+    const rawItems = Array.isArray(res.data) ? res.data : [res.data]
+    items = rawItems.map((item: any) => ({
+      lable_file: String(item.lable_file ?? ''),
+      lable_file_type: item.lable_file_type ? String(item.lable_file_type) : undefined,
+      lable_content_type: item.lable_content_type ? String(item.lable_content_type) : undefined,
+    }))
   }
   return {
     success: res.success,
-    data: labelData,
+    data: items,
     message: res.enmessage || res.cnmessage || '',
   }
 }

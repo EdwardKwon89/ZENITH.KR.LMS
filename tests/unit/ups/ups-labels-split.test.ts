@@ -52,7 +52,7 @@ function makeSupabase(tableResults: Record<string, any>) {
 beforeEach(() => {
   vi.clearAllMocks();
   vi.mocked(createorder).mockResolvedValue({ success: 1, data: { order_id: 'shxk-order-1', shipping_method_no: 'TK123', refrence_no: REF_NO }, message: 'OK' });
-  vi.mocked(getnewlabel).mockResolvedValue({ success: 1, data: { lable_file: 'https://test.example.com/label' }, message: 'OK' });
+  vi.mocked(getnewlabel).mockResolvedValue({ success: 1, data: [{ lable_file: 'https://test.example.com/label' }], message: 'OK' });
   vi.mocked(removeorder).mockResolvedValue({ success: 1, message: 'OK' });
 });
 
