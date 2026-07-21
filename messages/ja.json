@@ -158,6 +158,8 @@
     "undo_ups_confirm": "取消確定",
     "undo_ups_success": "UPS登録取消が完了しました。",
     "undo_ups_failed": "UPS登録取消に失敗しました。",
+    "undo_ups_partial": "UPS登録取消完了: {success}件成功、{fail}件失敗",
+    "error_no_packed_selected": "UPS登録取消対象のPACKEDオーダが選択されていません。",
     "print_waybill": "配送ラベル印刷",
     "print_combined": "配送ラベル+関税申告書+INVOICE印刷",
     "label_printed": "ラベルが印刷されました。",

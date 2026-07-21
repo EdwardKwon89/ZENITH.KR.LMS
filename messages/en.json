@@ -673,6 +673,8 @@
     "undo_ups_confirm": "Confirm Cancellation",
     "undo_ups_success": "UPS registration cancelled successfully.",
     "undo_ups_failed": "Failed to cancel UPS registration.",
+    "undo_ups_partial": "UPS cancellation complete: {success} succeeded, {fail} failed",
+    "error_no_packed_selected": "No PACKED orders selected for UPS cancellation.",
     "print_waybill": "Print Waybill",
     "print_combined": "Print Waybill + Customs + Invoice",
     "label_printed": "Label printed successfully.",

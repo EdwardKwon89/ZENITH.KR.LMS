@@ -300,6 +300,51 @@ export default function OutboundProcessForm({ locale }: { locale: string }) {
     }
   };
 
+  const handleBatchUndoUpsRegistration = async () => {
+    const packedIds = [...selected].filter(id => {
+      const order = orders.find(o => o.id === id);
+      return order?.status === OrderStatus.PACKED;
+    });
+
+    if (packedIds.length === 0) {
+      toast.error(t("error_no_packed_selected"));
+      return;
+    }
+
+    if (packedIds.length === 1) {
+      setUndoUpsTarget(packedIds[0]);
+      return;
+    }
+
+    setUndoUpsLoading(true);
+    try {
+      let successCount = 0;
+      let failCount = 0;
+
+      for (const orderId of packedIds) {
+        const res = await undoUpsRegistration(orderId);
+        if (res.success) {
+          successCount++;
+        } else {
+          failCount++;
+        }
+      }
+
+      if (failCount === 0) {
+        toast.success(t("undo_ups_success"));
+        setSelected(new Set());
+        await fetchData();
+      } else {
+        toast.warning(t("undo_ups_partial", { success: successCount, fail: failCount }));
+        await fetchData();
+      }
+    } catch (err: any) {
+      toast.error(err.message || t("undo_ups_failed"));
+    } finally {
+      setUndoUpsLoading(false);
+    }
+  };
+
   const handlePrintLabel = async (orderId: string, docType: 'WAYBILL' | 'COMBINED') => {
     setPrintingLabels(prev => new Set(prev).add(orderId));
     try {
@@ -607,15 +652,7 @@ export default function OutboundProcessForm({ locale }: { locale: string }) {
               </ZenButton>
               {hasPackedSelected() && (
                 <ZenButton
-                  onClick={() => {
-                    const packedIds = [...selected].filter(id => {
-                      const order = orders.find(o => o.id === id);
-                      return order?.status === OrderStatus.PACKED;
-                    });
-                    if (packedIds.length === 1) {
-                      setUndoUpsTarget(packedIds[0]);
-                    }
-                  }}
+                  onClick={handleBatchUndoUpsRegistration}
                   loading={undoUpsLoading}
                   disabled={undoUpsLoading || !hasPackedSelected()}
                   className="py-4 px-6 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-2xl shadow-md transition-all active:scale-[0.98]"

@@ -668,6 +668,8 @@
     "undo_ups_confirm": "접수취소 확정",
     "undo_ups_success": "UPS접수취소가 완료되었습니다.",
     "undo_ups_failed": "UPS접수취소에 실패했습니다.",
+    "undo_ups_partial": "UPS접수취소 완료: {success}건 성공, {fail}건 실패",
+    "error_no_packed_selected": "UPS접수취소할 PACKED 오더가 선택되지 않았습니다.",
     "print_waybill": "운송장 출력",
     "print_combined": "운송장+세관신고서+INVOICE 출력",
     "label_printed": "라벨이 출력되었습니다.",

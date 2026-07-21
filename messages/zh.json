@@ -171,6 +171,8 @@
     "undo_ups_confirm": "确认取消",
     "undo_ups_success": "UPS注册取消完成。",
     "undo_ups_failed": "UPS注册取消失败。",
+    "undo_ups_partial": "UPS注册取消完成：{success}件成功，{fail}件失败",
+    "error_no_packed_selected": "未选择要取消UPS注册的PACKED订单。",
     "print_waybill": "打印运单",
     "print_combined": "打印运单+关税申报+发票",
     "label_printed": "标签打印成功。",
