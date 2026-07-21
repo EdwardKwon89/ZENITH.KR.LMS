@@ -592,6 +592,16 @@
 | **TC-P8-TD-06** | recipient_address_local → street 괄호 처리 | 수취인 현지주소 괄호 조합 | `tests/unit/ups/ups-labels-mapping.test.ts` |
 | **TC-P8-TD-07** | resolveShipperStreet 우선순위 3단계 | org English > org Korean > order snapshot | `tests/unit/ups/ups-labels-mapping.test.ts` |
 
+### 46. UPS 사후청구 마감 후 조정 + 화주 거부 (TASK-194-C / Issue #622 DEF-112)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-UPS-FINALADJ-01** | 마감 후 사후청구 시 신규 추가 인보이스 발행 (`adjustment_of`) | 원 인보이스 불변 + 신규 인보이스 `metadata.adjustment_of` 연결 확인 | `tests/unit/finance/agency-settlement-permission.test.ts` |
+| **TC-UPS-FINALADJ-02** | 마감 후 조정 금액 0일 때 인보이스 미생성 | 조정 없으면 추가 인보이스 생성 안 함 | `tests/unit/finance/agency-settlement-permission.test.ts` |
+| **TC-UPS-REJECT-01** | 화주 거부 시 인보이스 CANCELED 전환 + 재발행 | `status='CANCELED'` + `superseded_by` 메타데이터 + 신규 인보이스 생성 확인 | `tests/unit/finance/agency-settlement-permission.test.ts` |
+| **TC-UPS-REJECT-02** | 이미 취소된 인보이스 거부 시 에러 | 중복 거부 차단 | `tests/unit/finance/agency-settlement-permission.test.ts` |
+| **TC-UPS-REJECT-03** | 권한 없는 사용자 거부 시 에러 | Agency/ADMIN 외 역할 차단 | `tests/unit/finance/agency-settlement-permission.test.ts` |
+| **TC-UPS-CHARGES-01** | 마감 후 사후청구 시 `createPostFinalizationAdjustment` 위임 | `recordUpsActualCharges`가 마감 후 경로로 정확히 위임하는지 확인 | `tests/unit/finance/ups-actual-charges.test.ts` |
+
 ---
 
 ## 📝 가이드라인 (R-09 Enforcement)
