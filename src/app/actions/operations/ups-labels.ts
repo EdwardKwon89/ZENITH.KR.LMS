@@ -275,6 +275,7 @@ export async function fetchAndIssueUpsLabel(
       labelUrl = res.data.label_url;
     } else {
       labelUrl = await fetchAndSaveLabel(supabase, label.reference_no);
+      if (!labelUrl) return { success: false, error: '라벨 발급 실패 (getnewlabel)' };
     }
 
     const pkgErr = await markAllPackagesIssued(supabase, orderId, label.tracking_number);
@@ -351,6 +352,7 @@ export async function issueUpsLabel(
     if (!regResult.success) return { success: false, error: regResult.error };
 
     const issueResult = await fetchAndIssueUpsLabel(orderId);
+    if (!issueResult.success) return { success: false, error: issueResult.error };
 
     const { supabase } = await validateUserAction();
     const { packages } = await lookupOrderPackages(supabase, orderId);

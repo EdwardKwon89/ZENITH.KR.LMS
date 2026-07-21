@@ -35,8 +35,8 @@
 - **CI**: 회귀 대상 (TeamB_Dev PR)
 
 ### 커밋
-- 코드 커밋: `f2665082`
-- 문서 커밋: `3d9cddf9`
+- 코드 커밋: `fbbad470`
+- 문서 커밋: `34f16cca`
 
 ### PR
 - PR 대기 · base: `TeamB_Dev` · `Closes #635`

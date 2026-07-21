@@ -198,3 +198,24 @@ describe('TASK-B-167: cancelUpsRegistration', () => {
     expect(removeorder).toHaveBeenCalled();
   });
 });
+
+describe('TASK-B-167: issueUpsLabel() wrapper', () => {
+  it('fetchAndIssueUpsLabel 실패 시 success: false를 반환한다', async () => {
+    const { issueUpsLabel } = await import('@/app/actions/operations/ups-labels');
+    const order = { id: ORDER_ID, order_no: REF_NO, recipient_country_code: 'US', ups_product_code: 'WPX', incoterms: 'DDP', dest_port_id: null };
+    const supabase = makeSupabase({
+      zen_orders: { data: order, error: null },
+      zen_order_packages: { data: [{ id: 'pkg-1', items: [] }], error: null },
+      zen_ups_labels: { data: { id: 'lbl-1', reference_no: REF_NO, tracking_number: 'TK123' }, error: null },
+      zen_ups_shxk_country_map: { data: { shxk_code: 'SHP-CODE' }, error: null },
+    });
+    vi.mocked(validateUserAction).mockResolvedValue({ supabase: supabase as any, profile: { id: 'test', role: 'ADMIN' } } as any);
+    vi.mocked(createorder).mockResolvedValue({ success: 1, data: { order_id: 'shxk-order-1', shipping_method_no: 'TK123', refrence_no: REF_NO }, message: 'OK' });
+    vi.mocked(getnewlabel).mockResolvedValue({ success: 0, message: 'getnewlabel API error' });
+
+    const result = await issueUpsLabel(ORDER_ID);
+
+    expect(result.success).toBe(false);
+    expect(result.error).toContain('라벨 발급 실패');
+  });
+});
