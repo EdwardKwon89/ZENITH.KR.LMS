@@ -462,6 +462,7 @@
 | TASK-194 | 260720 | [Team A] UPS 사후청구 조정건 정산완료(2차 청구) — Issue #622 (DEF-112) | TASK-194-A ✅ | D_Kai | 🔄 | [TASK-194](tasks/TASK-194_260720_Issue622_사후청구2차청구설계_DKai.md) | A(마이그레이션+마감전갱신+guard) `cbbe3b2e` ✅ 승인·PR#625 병합(656/656 PASS). **TASK-194-B(정산 마감 액션+RLS) 착수 지시 발령** — 브랜치 `feature/teama-iss622-b-settlement-finalize`, DoD는 task file 참조. C/D는 B 완료 후 순차 발령 |
 | TASK-B-173 | 260722 | Issue #655 — DEF-114 ROLE_PERMISSIONS에 AGENCY 누락, 창고관리 전체 500 에러 | P1 | 없음 | Dave (구현) | 🔔 | [TASK-B-173](tasks/TASK-B-173_260722_Def114_AgencyRolePermissions.md) | AGENCY → WAREHOUSED/RELEASED/SCHEDULED/REGISTERED/PACKED/IN_TRANSIT 권한 추가 · TC-AG-T1~T9 9종 · status-machine 31/31 + warehouse 14/14 PASS · tsc 0 error · [PR#656](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/656) (base TeamB_Dev) |
 | TASK-B-175 | 260722 | Issue #661 — SHXK API 호출 통합 감사 로그 테이블 | P3 | 없음 | Dave (구현) | 🔔 | [TASK-B-175](tasks/TASK-B-175_260722_Iss661_ShxkApiLogs.md) | zen_shxk_api_logs 테이블 + callShxk() 로깅 훅 · TC-SHXK-01~09 9종 (로깅 실패 시나리오 3종 포함) · 9/9 PASS · [PR#662](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/662) (base TeamB_Dev) |
+| TASK-B-176 | 260722 | Issue #664 — zen_shxk_api_logs RLS 정책 확대 (SELECT 전체 + AGENCY INSERT) | P3 | 없음 | Dave (구현) | 🔔 | [TASK-B-176](tasks/TASK-B-176_260722_Iss664_ShxkLogsRlsExpand.md) | SELECT: 전체 인증 사용자 · INSERT: AGENCY 명시 허용 · AGENCY INSERT ✅ · OPERATOR SELECT ✅ · PR#??? (base TeamB_Dev) |
 ---
 
 ## Agent 현황
