@@ -21,9 +21,10 @@ export interface IssueUpsLabelResult {
 
 async function checkLabelPermission(profile: { role: string } | null): Promise<string | null> {
   if (!profile) return 'User profile not found';
-  const allowed: string[] = [USER_ROLES.ADMIN, USER_ROLES.MANAGER, USER_ROLES.ZENITH_SUPER_ADMIN];
+  const allowed: string[] = [USER_ROLES.ADMIN, USER_ROLES.MANAGER, USER_ROLES.ZENITH_SUPER_ADMIN, USER_ROLES.AGENCY];
   if (!allowed.includes(profile.role as string)) {
-    return '권한이 없습니다. ADMIN, MANAGER, ZENITH_SUPER_ADMIN만 가능합니다.';
+    logger.warn(`[checkLabelPermission] Denied for role: ${profile.role}`);
+    return '권한이 없습니다. ADMIN, MANAGER, ZENITH_SUPER_ADMIN, AGENCY만 가능합니다.';
   }
   return null;
 }
