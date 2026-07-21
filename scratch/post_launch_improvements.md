@@ -1435,7 +1435,7 @@
 - **관련 Issue**: 없음 — Edward 질의 계기 자체 발견
 - **예상 공수**: (1) CI 단계 추가 0.1 MD / (2) 전체 정리 1.5~2 MD (별도 Task 분할 권장)
 - **우선순위**: Medium — (1)은 재발 방지 차원에서 우선 권장, (2)는 Low
-- **상태**: 🔄 §1 착수 — **TASK-195(Issue #627), Riley 배정 (2026-07-21)**, D_Kai TASK-194-C와 병행 진행. `npx tsc --noEmit` 재확인 결과 오류 237건으로 증가(발견 당시 222건). §2(222→237건 정리)는 여전히 Backlog
+- **상태**: 🔄 §1 완료, §2 Backlog — **TASK-195(Issue #627), Riley, PR#628 병합 완료 (2026-07-21)**. `pr-checks.yml`에 `tsc-advisory`(Type Check, advisory/non-blocking) 게이트 추가, 네거티브 컨트롤 검증 완료. §2(기존 237건 오류 정리)는 여전히 Backlog, 별도 Task 필요
 
 ---
 

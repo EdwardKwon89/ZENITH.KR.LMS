@@ -465,7 +465,7 @@
 | **Aiden (Claude)** | ✅ TASK-167 전체 승인 (260626) | PR#117 §1 ✅ · PR#118 §2+§3 ✅ 전량 머지 완료 |
 | **D_Kai (OpenCode)** | 🔄 TASK-194-C 착수 (260721) | 마감 후 추가 인보이스(`adjustment_of`)·화주 거부 CANCELED+재발행 플로우 구현 중 |
 | **B_Kai** | ✅ GH#206 승인·머지 완료 (260706) | PR#221 · #13 재조사 요청에 신속·정확 대응(docs/03_Design 17개 파일 아카이브), 신규 Task 대기 |
-| **Riley** | 🔔 TASK-195 검토 대기 (260721) | CI tsc --noEmit advisory 게이트 신규 추가(Issue #627, IMP-134 §1) 구현 완료. 이전: TASK-189 ✅(PR#613) 승인·머지 완료 |
+| **Riley** | ✅ TASK-195 승인·머지 완료 (260721) | CI tsc --noEmit advisory 게이트 신규 추가(Issue #627, IMP-134 §1) — PR#628 병합. 신규 Task 대기 |
 | N_Kai | ➖ 미재배정 확정 (260626 Edward) | TASK-087 폐기 — 신규 Task 발령 없음 |
 | Ring | 신규 할당 중단 유지 | 9차 위반 누적 |
 
