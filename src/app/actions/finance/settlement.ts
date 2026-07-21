@@ -58,6 +58,102 @@ export async function generateInvoicesForOrder(orderId: string) {
   return result;
 }
 
+export async function finalizeInvoice(
+  invoiceId: string,
+  reason?: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const { supabase, profile, user } = await validateUserAction();
+    if (!profile) throw new Error('User profile not found');
+
+    const { data: invoice, error: invError } = await supabase
+      .from('zen_invoices')
+      .select('*, metadata')
+      .eq('id', invoiceId)
+      .single();
+
+    if (invError || !invoice) {
+      return { success: false, error: '인보이스를 찾을 수 없습니다.' };
+    }
+
+    if (invoice.is_finalized) {
+      return { success: false, error: '이미 정산이 마감된 인보이스입니다.' };
+    }
+
+    const adminRoles: string[] = [USER_ROLES.ADMIN, USER_ROLES.MANAGER, USER_ROLES.ZENITH_SUPER_ADMIN];
+    const isAdmin = adminRoles.includes(profile.role as string);
+
+    if (profile.role === USER_ROLES.AGENCY) {
+      const orderId = invoice.metadata?.source_order_id;
+      if (!orderId) {
+        return { success: false, error: '인보이스에 연결된 오더를 찾을 수 없습니다.' };
+      }
+
+      const agencyShipperIds = await resolveAgencyShipperIds(supabase, profile.org_id!);
+      const { data: order } = await supabase
+        .from('zen_orders')
+        .select('shipper_id')
+        .eq('id', orderId)
+        .single();
+
+      if (!order || !agencyShipperIds.includes(order.shipper_id)) {
+        return { success: false, error: '본인 소속 화주의 인보이스만 마감할 수 있습니다.' };
+      }
+    } else if (!isAdmin) {
+      return { success: false, error: '정산 마감 권한이 없습니다.' };
+    }
+
+    const { data: linkedCosts, error: costsError } = await supabase
+      .from('zen_order_costs')
+      .select('unit_price, quantity')
+      .eq('invoice_id', invoiceId);
+
+    if (costsError) {
+      return { success: false, error: '비용 정보를 조회할 수 없습니다.' };
+    }
+
+    const totalAmount = (linkedCosts || []).reduce((sum, c) => {
+      return sum + (Number(c.unit_price) * Number(c.quantity || 1));
+    }, 0);
+
+    const updateData: Record<string, any> = {
+      total_amount: totalAmount,
+      is_finalized: true,
+      finalized_at: new Date().toISOString(),
+      finalized_by: user.id,
+    };
+
+    if (reason) {
+      updateData.finalized_reason = reason;
+    }
+
+    const { error: updateError } = await supabase
+      .from('zen_invoices')
+      .update(updateData)
+      .eq('id', invoiceId);
+
+    if (updateError) {
+      return { success: false, error: `정산 마감 실패: ${updateError.message}` };
+    }
+
+    await supabase.from('zen_invoice_history').insert({
+      invoice_id: invoiceId,
+      prev_status: invoice.status,
+      next_status: invoice.status,
+      changed_by: user.id,
+      notes: `정산 마감${reason ? ` (사유: ${reason})` : ''}`,
+    });
+
+    revalidatePath('/finance/invoices');
+    revalidatePath('/(dashboard)/settlement');
+
+    return { success: true };
+  } catch (err: any) {
+    logger.error('Finalize invoice error:', err);
+    return { success: false, error: err.message || '알 수 없는 서버 오류' };
+  }
+}
+
 export async function updatePaymentStatus(
   invoiceId: string,
   status: string,

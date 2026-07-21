@@ -1992,6 +1992,10 @@ export type Database = {
           due_date: string
           id: string
           invoice_no: string
+          is_finalized: boolean | null
+          finalized_at: string | null
+          finalized_by: string | null
+          finalized_reason: string | null
           metadata: Json | null
           paid_amount: number
           paid_at: string | null
@@ -2009,6 +2013,10 @@ export type Database = {
           due_date: string
           id?: string
           invoice_no: string
+          is_finalized?: boolean | null
+          finalized_at?: string | null
+          finalized_by?: string | null
+          finalized_reason?: string | null
           metadata?: Json | null
           paid_amount?: number
           paid_at?: string | null
@@ -2026,6 +2034,10 @@ export type Database = {
           due_date?: string
           id?: string
           invoice_no?: string
+          is_finalized?: boolean | null
+          finalized_at?: string | null
+          finalized_by?: string | null
+          finalized_reason?: string | null
           metadata?: Json | null
           paid_amount?: number
           paid_at?: string | null

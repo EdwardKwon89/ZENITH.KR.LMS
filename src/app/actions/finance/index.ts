@@ -8,6 +8,7 @@ export {
   getCostReport,
   getOrganizations,
   addManualOrderCost,
+  finalizeInvoice,
 } from './settlement';
 
 export {

@@ -52,7 +52,7 @@ vi.mock('next/cache', () => ({
 }));
 
 import { validateUserAction } from '@/lib/auth/guards';
-import { generateInvoicesForOrder, updatePaymentStatus, calculateSettlementAction } from '@/app/actions/finance/settlement';
+import { generateInvoicesForOrder, finalizeInvoice, updatePaymentStatus, calculateSettlementAction } from '@/app/actions/finance/settlement';
 
 describe('Agency 정산 권한 검증 단위 테스트 (Issue #603)', () => {
   beforeEach(() => {
@@ -155,6 +155,201 @@ describe('Agency 정산 권한 검증 단위 테스트 (Issue #603)', () => {
 
       const res = await calculateSettlementAction('ord-1');
       expect(res.success).toBe(true);
+    });
+  });
+
+  describe('finalizeInvoice', () => {
+    it('Admin이 인보이스 마감 시 성공', async () => {
+      (validateUserAction as any).mockResolvedValue({
+        supabase: mockSupabase,
+        user: { id: 'admin-usr-1' },
+        profile: { id: 'admin-usr-1', role: USER_ROLES.ADMIN },
+      });
+
+      mockSupabase.from.mockImplementation((table: string) => {
+        if (table === 'zen_invoices') {
+          return createChainableMock({
+            id: 'inv-1',
+            status: 'UNPAID',
+            is_finalized: false,
+            metadata: { source_order_id: 'ord-1' },
+          });
+        }
+        if (table === 'zen_order_costs') {
+          return createChainableMock([
+            { unit_price: 500, quantity: 2 },
+            { unit_price: 200, quantity: 1 },
+          ]);
+        }
+        if (table === 'zen_invoice_history') {
+          return createChainableMock();
+        }
+        return createChainableMock();
+      });
+
+      const res = await finalizeInvoice('inv-1');
+      expect(res.success).toBe(true);
+    });
+
+    it('Admin이 이유와 함께 인보이스 마감 시 성공', async () => {
+      (validateUserAction as any).mockResolvedValue({
+        supabase: mockSupabase,
+        user: { id: 'admin-usr-1' },
+        profile: { id: 'admin-usr-1', role: USER_ROLES.ADMIN },
+      });
+
+      mockSupabase.from.mockImplementation((table: string) => {
+        if (table === 'zen_invoices') {
+          return createChainableMock({
+            id: 'inv-1',
+            status: 'UNPAID',
+            is_finalized: false,
+            metadata: { source_order_id: 'ord-1' },
+          });
+        }
+        if (table === 'zen_order_costs') {
+          return createChainableMock([{ unit_price: 500, quantity: 2 }]);
+        }
+        if (table === 'zen_invoice_history') {
+          return createChainableMock();
+        }
+        return createChainableMock();
+      });
+
+      const res = await finalizeInvoice('inv-1', '긴급 업데이트');
+      expect(res.success).toBe(true);
+    });
+
+    it('Agency가 본인 소속 화주 인보이스 마감 시 성공', async () => {
+      (validateUserAction as any).mockResolvedValue({
+        supabase: mockSupabase,
+        user: { id: 'agency-usr-1' },
+        profile: { id: 'agency-usr-1', role: USER_ROLES.AGENCY, org_id: 'agency-org-1' },
+      });
+
+      mockSupabase.from.mockImplementation((table: string) => {
+        if (table === 'zen_invoices') {
+          return createChainableMock({
+            id: 'inv-1',
+            status: 'UNPAID',
+            is_finalized: false,
+            metadata: { source_order_id: 'ord-1' },
+          });
+        }
+        if (table === 'zen_agency_shippers') {
+          return createChainableMock([{ shipper_org_id: 'shipper-1' }]);
+        }
+        if (table === 'zen_orders') {
+          return createChainableMock({ shipper_id: 'shipper-1' });
+        }
+        if (table === 'zen_order_costs') {
+          return createChainableMock([{ unit_price: 1000, quantity: 1 }]);
+        }
+        if (table === 'zen_invoice_history') {
+          return createChainableMock();
+        }
+        return createChainableMock();
+      });
+
+      const res = await finalizeInvoice('inv-1');
+      expect(res.success).toBe(true);
+    });
+
+    it('이미 마감된 인보이스 재마감 시 에러 반환', async () => {
+      (validateUserAction as any).mockResolvedValue({
+        supabase: mockSupabase,
+        user: { id: 'admin-usr-1' },
+        profile: { id: 'admin-usr-1', role: USER_ROLES.ADMIN },
+      });
+
+      mockSupabase.from.mockImplementation((table: string) => {
+        if (table === 'zen_invoices') {
+          return createChainableMock({
+            id: 'inv-1',
+            status: 'UNPAID',
+            is_finalized: true,
+            metadata: { source_order_id: 'ord-1' },
+          });
+        }
+        return createChainableMock();
+      });
+
+      const res = await finalizeInvoice('inv-1');
+      expect(res.success).toBe(false);
+      expect(res.error).toContain('이미 정산이 마감된 인보이스');
+    });
+
+    it('Agency가 타 소속 화주 인보이스 마감 시 에러 반환', async () => {
+      (validateUserAction as any).mockResolvedValue({
+        supabase: mockSupabase,
+        user: { id: 'agency-usr-1' },
+        profile: { id: 'agency-usr-1', role: USER_ROLES.AGENCY, org_id: 'agency-org-1' },
+      });
+
+      mockSupabase.from.mockImplementation((table: string) => {
+        if (table === 'zen_invoices') {
+          return createChainableMock({
+            id: 'inv-1',
+            status: 'UNPAID',
+            is_finalized: false,
+            metadata: { source_order_id: 'ord-1' },
+          });
+        }
+        if (table === 'zen_agency_shippers') {
+          return createChainableMock([{ shipper_org_id: 'shipper-other' }]);
+        }
+        if (table === 'zen_orders') {
+          return createChainableMock({ shipper_id: 'shipper-1' });
+        }
+        return createChainableMock();
+      });
+
+      const res = await finalizeInvoice('inv-1');
+      expect(res.success).toBe(false);
+      expect(res.error).toContain('본인 소속 화주의 인보이스만 마감할 수 있습니다.');
+    });
+
+    it('권한 없는 역할(CORPORATE) 마감 시 에러 반환', async () => {
+      (validateUserAction as any).mockResolvedValue({
+        supabase: mockSupabase,
+        user: { id: 'corp-usr-1' },
+        profile: { id: 'corp-usr-1', role: USER_ROLES.CORPORATE, org_id: 'corp-org-1' },
+      });
+
+      mockSupabase.from.mockImplementation((table: string) => {
+        if (table === 'zen_invoices') {
+          return createChainableMock({
+            id: 'inv-1',
+            status: 'UNPAID',
+            is_finalized: false,
+            metadata: { source_order_id: 'ord-1' },
+          });
+        }
+        return createChainableMock();
+      });
+
+      const res = await finalizeInvoice('inv-1');
+      expect(res.success).toBe(false);
+      expect(res.error).toContain('정산 마감 권한이 없습니다.');
+    });
+
+    it('인보이스 미조회 시 에러 반환', async () => {
+      (validateUserAction as any).mockResolvedValue({
+        supabase: mockSupabase,
+        user: { id: 'admin-usr-1' },
+        profile: { id: 'admin-usr-1', role: USER_ROLES.ADMIN },
+      });
+
+      mockSupabase.from.mockImplementation((table: string) => {
+        if (table === 'zen_invoices') {
+          return createChainableMock(null, { message: 'Not found' });
+        }
+        return createChainableMock();
+      });
+
+      const res = await finalizeInvoice('inv-nonexistent');
+      expect(res.success).toBe(false);
+      expect(res.error).toContain('인보이스를 찾을 수 없습니다.');
     });
   });
 });
