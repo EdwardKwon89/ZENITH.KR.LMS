@@ -170,7 +170,8 @@
     "undo_success": "UPS登録取消が完了しました。",
     "undo_failed": "UPS登録取消に失敗しました。",
     "today_history": "本日のUPS受取履歴",
-    "empty_history": "本日のUPS受取履歴はありません。"
+    "empty_history": "本日のUPS受取履歴はありません。",
+    "partial_success": "UPS登録完了: {success}件成功、{fail}件失敗"
   },
   "WarehouseDeparture": {
     "title": "出荷確定",

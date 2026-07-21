@@ -680,7 +680,8 @@
     "undo_success": "UPS 등록취소가 완료되었습니다.",
     "undo_failed": "UPS 등록취소에 실패했습니다.",
     "today_history": "오늘의 UPS 접수 이력",
-    "empty_history": "오늘 UPS 접수된 내역이 없습니다."
+    "empty_history": "오늘 UPS 접수된 내역이 없습니다.",
+    "partial_success": "UPS 등록 완료: {success}건 성공, {fail}건 실패"
   },
   "WarehouseDeparture": {
     "title": "출고확정",
