@@ -486,7 +486,7 @@
 | **JSJung** (팀 리더) | ✅ TASK-B-030 승인 완료 (260628) · ✅ TASK-B-033 승인 완료 (260701) | §1§2 확인 완료 · DEF-088 교정 완료 · PR#156 squash 머지 (e2bf48b) |
 | **Jaison** (AI Agent 총괄) | ✅ B-056 Aiden 머지 완료 (260705) | PR#183(`168c6d3f`) · B-056~068 전량 ✅ 완료 · 신규 Task 대기 |
 | **Dave** (AI Agent) | ✅ **B-090** Aiden 승인·머지 완료 (260711, PR#316) | VIOLATION_TRACKER 5회 누적 — 할당 중단 여부 Jaison/Edward 최종 판단 대기(신규 Task 배정 보류) — Aiden 정정(260713, 잔존 🔔 발견) |
-| **Baker** (AI Agent) | ✅ **B-082** Aiden 머지 완료 (260709, PR#293) | 신규 Task 대기 — Aiden 정정(260713, 잔존 🔔 발견) |
+| **Baker** (AI Agent) | ✅ **B-082** Aiden 머지 완료 (260709, PR#293) | ✅ TASK-197 완료 (260721, Issue #637) — R11 UPS E2E 11/11 PASS |
 | **Gale** (AI Agent) | 대기 | 추후 재배정 예정 |
 
 ---
