@@ -601,6 +601,8 @@
 | **TC-UPS-REJECT-02** | 이미 취소된 인보이스 거부 시 에러 | 중복 거부 차단 | `tests/unit/finance/agency-settlement-permission.test.ts` |
 | **TC-UPS-REJECT-03** | 권한 없는 사용자 거부 시 에러 | Agency/ADMIN 외 역할 차단 | `tests/unit/finance/agency-settlement-permission.test.ts` |
 | **TC-UPS-CHARGES-01** | 마감 후 사후청구 시 `createPostFinalizationAdjustment` 위임 | `recordUpsActualCharges`가 마감 후 경로로 정확히 위임하는지 확인 | `tests/unit/finance/ups-actual-charges.test.ts` |
+| **TC-UPS-UITEXT-01** | 마감 전 variance>0시 "인보이스 금액이 자동 갱신됩니다" 문구 노출 | UI 조건 분기 정확성 | `src/components/orders/UpsActualAdjustmentForm.tsx` (R-10 스크린샷 검증) |
+| **TC-UPS-UITEXT-02** | 마감 후 variance>0시 "추가 인보이스가 신규 발행되었습니다" 문구 노출 | UI 조건 분기 정확성 | `src/components/orders/UpsActualAdjustmentForm.tsx` (R-10 스크린샷 검증) |
 
 ---
 
