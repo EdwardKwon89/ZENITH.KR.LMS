@@ -56,4 +56,5 @@
 - **테스트**: 3/3 PASS (confirmDeparture guard 2건 + getReleasedOrders 1건)
 - **빌드**: ✅ PASS (`/warehouse/departure` 라우트 정상 포함)
 - **회귀**: 105 passed, 3 failed (기존 `server-only` 이슈, 무관)
-- **커밋 해시**: (커밋 후 갱신)
+- **커밋 해시**: `8ea3574f`
+- **PR**: [#650](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/650)
