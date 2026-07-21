@@ -177,17 +177,17 @@ test.describe('E2E-20: Phase 6 New Service Roles and Multi-Service Assignment', 
     }
   });
 
-  async function loginAs(page, email, password) {
+  async function loginAs(page: any, email: string, password: string) {
     console.log(`Logging in as: ${email}`);
-    page.on('console', msg => { console.log(`[PAGE ${msg.type().toUpperCase()}]: ${msg.text()}`); });
+    page.on('console', (msg: any) => { console.log(`[PAGE ${msg.type().toUpperCase()}]: ${msg.text()}`); });
     await page.context().clearCookies();
     await page.goto('/ko/login');
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000);
     // Use native DOM setter to bypass React controlled input re-render races
-    await page.evaluate(({ email, password }) => {
-      const setNativeValue = (el, val) => {
-        const nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+    await page.evaluate(({ email, password }: { email: string; password: string }) => {
+      const setNativeValue = (el: any, val: string) => {
+        const nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')!.set!;
         nativeSetter.call(el, val);
         el.dispatchEvent(new Event('input', { bubbles: true }));
       };
@@ -198,13 +198,13 @@ test.describe('E2E-20: Phase 6 New Service Roles and Multi-Service Assignment', 
     }, { email, password });
     await page.waitForTimeout(300);
     await Promise.all([
-      page.waitForURL(url => url.pathname !== '/ko/login', { timeout: 30000 }),
+      page.waitForURL((url: URL) => url.pathname !== '/ko/login', { timeout: 30000 }),
       page.click('button[data-action="login"]'),
     ]);
     console.log(`✅ Logged in as: ${email}`);
   }
 
-  async function selectPort(page, portCode) {
+  async function selectPort(page: any, portCode: string) {
     const selects = page.locator('select');
     const count = await selects.count();
     for (let i = 0; i < count; i++) {
@@ -237,10 +237,10 @@ test.describe('E2E-20: Phase 6 New Service Roles and Multi-Service Assignment', 
 
     // Register active rate card via direct DB insert for robust setup
     await supabase.from('zen_rate_cards').insert({
-      carrier_id: carrierRec.id,
+      carrier_id: carrierRec!.id,
       transport_mode: 'AIR',
-      origin_port_id: icnPort.id,
-      dest_port_id: sinPort.id,
+      origin_port_id: icnPort!.id,
+      dest_port_id: sinPort!.id,
       tiers: [{ weight_min: 0, unit_price: 3.5, min_total_price: 50 }],
       carrier_cost: 2.0,
       margin_rate: 10.0,
@@ -252,7 +252,7 @@ test.describe('E2E-20: Phase 6 New Service Roles and Multi-Service Assignment', 
 
     // Auto-create Route Network row
     await supabase.from('zen_route_network').upsert({
-      carrier_id: carrierRec.id,
+      carrier_id: carrierRec!.id,
       from_port_id: 'ICN',
       to_port_id: 'SIN',
       transport_mode: 'AIR',
@@ -338,7 +338,7 @@ test.describe('E2E-20: Phase 6 New Service Roles and Multi-Service Assignment', 
     // 1. Insert customs rate directly for the broker's org
     const { data: brokerOrg } = await supabase.from('zen_organizations').select('id').eq('name', 'E2E20 Customs Broker').single();
     await supabase.from('zen_customs_rates').insert({
-      org_id: brokerOrg.id,
+      org_id: brokerOrg!.id,
       country_code: 'SG',
       currency: 'USD',
       cost_per_kg: 1.5,
@@ -408,7 +408,7 @@ test.describe('E2E-20: Phase 6 New Service Roles and Multi-Service Assignment', 
     const { data: deliveryOrg } = await supabase.from('zen_organizations').select('id').eq('name', 'E2E20 Delivery Agent').single();
     // Local delivery rate (SG)
     await supabase.from('zen_delivery_rates').insert({
-      org_id: deliveryOrg.id,
+      org_id: deliveryOrg!.id,
       service_type: 'LOCAL',
       country_code: 'SG',
       currency: 'USD',
@@ -420,7 +420,7 @@ test.describe('E2E-20: Phase 6 New Service Roles and Multi-Service Assignment', 
     });
     // Total delivery rate (ICN→SIN)
     await supabase.from('zen_delivery_rates').insert({
-      org_id: deliveryOrg.id,
+      org_id: deliveryOrg!.id,
       service_type: 'TOTAL',
       origin_code: 'ICN',
       dest_code: 'SIN',
@@ -488,13 +488,13 @@ test.describe('E2E-20: Phase 6 New Service Roles and Multi-Service Assignment', 
     
     // Use existing rate card (created by P6-01) or insert a fresh one
     const { data: carrierRec } = await supabase.from('zen_carriers').select('id').eq('code', 'E2E20_CARRIER').single();
-    let { data: rateCard } = await supabase.from('zen_rate_cards').select('id').eq('carrier_id', carrierRec.id).limit(1).maybeSingle();
+    let { data: rateCard } = await supabase.from('zen_rate_cards').select('id').eq('carrier_id', carrierRec!.id).limit(1).maybeSingle();
     if (!rateCard) {
       const { data: icnPort } = await supabase.from('zen_ports').select('id').eq('code', 'ICN').single();
       const { data: sinPort } = await supabase.from('zen_ports').select('id').eq('code', 'SIN').single();
       const { data: rc } = await supabase.from('zen_rate_cards').insert({
-        carrier_id: carrierRec.id, transport_mode: 'AIR', origin_port_id: icnPort.id,
-        dest_port_id: sinPort.id, tiers: [{ weight_min: 0, unit_price: 3.5, min_total_price: 50 }],
+        carrier_id: carrierRec!.id, transport_mode: 'AIR', origin_port_id: icnPort!.id,
+        dest_port_id: sinPort!.id, tiers: [{ weight_min: 0, unit_price: 3.5, min_total_price: 50 }],
         carrier_cost: 2.0, margin_rate: 10.0, platform_fee_rate: 5.0,
         valid_from: '2026-06-01', valid_until: '2026-12-31', is_active: true
       }).select().single();
@@ -516,8 +516,8 @@ test.describe('E2E-20: Phase 6 New Service Roles and Multi-Service Assignment', 
       carrier_id: carrierOrgId,
       status: 'REGISTERED',
       transport_mode: 'AIR',
-      origin_port_id: (await supabase.from('zen_ports').select('id').eq('code', 'ICN').single()).data.id,
-      dest_port_id: (await supabase.from('zen_ports').select('id').eq('code', 'SIN').single()).data.id,
+      origin_port_id: (await supabase.from('zen_ports').select('id').eq('code', 'ICN').single()).data!.id,
+      dest_port_id: (await supabase.from('zen_ports').select('id').eq('code', 'SIN').single()).data!.id,
       recipient_name: 'Visibility Test',
       recipient_address: '123 Test St',
       recipient_phone: '1234'
@@ -526,7 +526,7 @@ test.describe('E2E-20: Phase 6 New Service Roles and Multi-Service Assignment', 
 
     // Insert order services
     await supabase.from('zen_order_services').insert([
-      { order_id: order.id, service_type: 'TRANSPORT', provider_id: carrierOrgId, rate_card_id: rateCard.id, quoted_cost: 350, currency: 'USD' },
+      { order_id: order.id, service_type: 'TRANSPORT', provider_id: carrierOrgId, rate_card_id: rateCard!.id, quoted_cost: 350, currency: 'USD' },
       { order_id: order.id, service_type: 'CUSTOMS', provider_id: brokerOrgId, customs_rate_id: brokerRate.id, quoted_cost: 100, currency: 'USD' },
       { order_id: order.id, service_type: 'DELIVERY_LOCAL', provider_id: deliveryOrgId, delivery_rate_id: deliveryRate.id, quoted_cost: 50, currency: 'USD' }
     ]);

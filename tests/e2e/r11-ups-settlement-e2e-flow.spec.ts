@@ -12,7 +12,7 @@
  * - Step3/4 스크린샷 중복 제거
  */
 import { test, expect } from '@playwright/test';
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { getServiceClient } from './test-utils';
 import * as path from 'path';
 
 /* ── config ─────────────────────────────────────────────── */
@@ -22,14 +22,7 @@ const ADMIN_PASSWORD = 'password1234';
 const AGENCY_EMAIL = 'r11-agency@zenith.kr';
 const AGENCY_PASSWORD = 'password1234';
 
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-if (!supabaseServiceKey) throw new Error('SUPABASE_SERVICE_ROLE_KEY env var required');
-
-const sb: SupabaseClient = createClient(
-  'http://127.0.0.1:54321',
-  supabaseServiceKey,
-  { auth: { autoRefreshToken: false, persistSession: false } },
-);
+const sb: any = getServiceClient();
 
 /* ── seed constants ─────────────────────────────────────── */
 const ORG_ID = 'a0000000-0000-0000-0000-000000000001';
@@ -198,7 +191,7 @@ test.describe('R-11: UPS 오더 E2E 정산 흐름 세밀 검증', () => {
     await page.waitForTimeout(2000);
 
     // 상태 배지 확인
-    const bodyText = await page.textContent('body');
+    const bodyText = (await page.textContent('body'))!;
     expect(bodyText).toContain('WAREHOUSED');
 
     // 패키지 정보 표시 확인
@@ -272,7 +265,7 @@ test.describe('R-11: UPS 오더 E2E 정산 흐름 세밀 검증', () => {
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
 
-    const bodyText = await page.textContent('body');
+    const bodyText = (await page.textContent('body'))!;
     expect(bodyText).toContain('RELEASED');
 
     await screenshot(page, 'step2_outbound_complete');
@@ -345,7 +338,7 @@ test.describe('R-11: UPS 오더 E2E 정산 흐름 세밀 검증', () => {
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
 
-    const bodyText = await page.textContent('body');
+    const bodyText = (await page.textContent('body'))!;
     expect(bodyText).toContain('DELIVERED');
     // 트래킹 이벤트 위치는 타임라인 섹션에 표시될 수 있음
 
@@ -362,7 +355,7 @@ test.describe('R-11: UPS 오더 E2E 정산 흐름 세밀 검증', () => {
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(3000);
 
-    const bodyText = await page.textContent('body');
+    const bodyText = (await page.textContent('body'))!;
 
     // UPS 주문임을 확인
     expect(bodyText).toContain('UPS');
@@ -455,7 +448,7 @@ test.describe('R-11: UPS 오더 E2E 정산 흐름 세밀 검증', () => {
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(3000);
 
-    const bodyText = await page.textContent('body');
+    const bodyText = (await page.textContent('body'))!;
 
     // 조정 관련 텍스트 확인
     const hasAdjustmentSection = bodyText.includes('사후청구') || bodyText.includes('Actual') || bodyText.includes('Variance');
@@ -483,7 +476,7 @@ test.describe('R-11: UPS 오더 E2E 정산 흐름 세밀 검증', () => {
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(3000);
 
-    const bodyText = await page.textContent('body');
+    const bodyText = (await page.textContent('body'))!;
     // 인보이스 테이블에 해당 인보이스가 있는지 확인
     const { data: invData } = await sb.from('zen_invoices').select('invoice_no').eq('id', invoiceId).single();
     const hasInvoiceInTable = bodyText.includes(invData!.invoice_no) || bodyText.includes('UNPAID');
@@ -529,7 +522,7 @@ test.describe('R-11: UPS 오더 E2E 정산 흐름 세밀 검증', () => {
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
 
-    const bodyAfterFinalize = await page.textContent('body');
+    const bodyAfterFinalize = (await page.textContent('body'))!;
     const hasPostFinalMsg = bodyAfterFinalize.includes('마감') || bodyAfterFinalize.includes('finalized');
     expect(hasPostFinalMsg).toBe(true);
 
@@ -622,7 +615,7 @@ test.describe('R-11: UPS 오더 E2E 정산 흐름 세밀 검증', () => {
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(3000);
 
-    const bodyText = await page.textContent('body');
+    const bodyText = (await page.textContent('body'))!;
     const hasPostFinalAdj = bodyText.includes('추가 인보이스') || bodyText.includes('신규 발행');
     expect(hasPostFinalAdj).toBe(true);
 
@@ -699,7 +692,7 @@ test.describe('R-11: UPS 오더 E2E 정산 흐름 세밀 검증', () => {
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
 
-    const bodyText = await page.textContent('body');
+    const bodyText = (await page.textContent('body'))!;
     const hasCanceledIndicator = bodyText.includes('CANCELED') || bodyText.includes('취소') || bodyText.includes('UNPAID');
     expect(hasCanceledIndicator).toBe(true);
 
@@ -839,7 +832,7 @@ test.describe('R-11: UPS 오더 E2E 정산 흐름 세밀 검증', () => {
     await page.waitForTimeout(3000);
 
     // 인보이스 테이블에서 해당 인보이스 확인
-    const bodyText = await page.textContent('body');
+    const bodyText = (await page.textContent('body'))!;
     expect(bodyText).toContain(edgeInv!.invoice_no);
 
     // ── Finalize 버튼 클릭 → 모달 열림 ──
@@ -976,7 +969,7 @@ test.describe('R-11: UPS 오더 E2E 정산 흐름 세밀 검증', () => {
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(3000);
 
-    const bodyText = await page.textContent('body');
+    const bodyText = (await page.textContent('body'))!;
 
     // 원 인보이스 번호 또는 마감 상태 확인
     const { data: e3InvData } = await sb.from('zen_invoices').select('invoice_no').eq('id', e3InvId).single();

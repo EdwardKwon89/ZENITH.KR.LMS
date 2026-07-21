@@ -70,7 +70,7 @@ describe('TC-R-09: Rate Card Port-Based Matching', () => {
     const result = await matcher.matchRateCard('carrier-1', 'AIR' as any, 'port-icn');
 
     expect(result).not.toBeNull();
-    expect(result!.id).toBe('rate-1');
+    expect((result as any)!.id).toBe('rate-1');
   });
 
   it('TC-R-09-06: should return null when no rate card matches', async () => {

@@ -73,7 +73,7 @@ describe('IMP-118: Order Delivery Method Selection and Validation (TC-UPS-ORDER)
       delivery_method: 'DIRECT',
     };
 
-    const result = await createOrder(payload as any);
+    const result = await createOrder(payload as any) as any;
     expect(result.order_no).toBe(mockOrderNo);
 
     // Verify RPC payload contains delivery_method: 'DIRECT'
@@ -91,7 +91,7 @@ describe('IMP-118: Order Delivery Method Selection and Validation (TC-UPS-ORDER)
       pickup_contact_tel: 'Hidden Phone',
     };
 
-    const result = await createOrder(payload as any);
+    const result = await createOrder(payload as any) as any;
     expect(result.order_no).toBe(mockOrderNo);
 
     // Verify RPC payload contains delivery_method: 'DIRECT' and no pickup_* fields
@@ -112,7 +112,7 @@ describe('IMP-118: Order Delivery Method Selection and Validation (TC-UPS-ORDER)
       pickup_contact_tel: '010-9999-8888',
     };
 
-    const result = await createOrder(payload as any);
+    const result = await createOrder(payload as any) as any;
     expect(result.order_no).toBe(mockOrderNo);
 
     // Verify RPC payload contains pickup info
