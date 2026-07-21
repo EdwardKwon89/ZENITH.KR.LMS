@@ -15,6 +15,7 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
+| [#651](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/651) | [Team A] IMP-134 §2 — tests/ 전역 TypeScript 오류 258건 정리 | a | p3 | - | EdwardKwon89 | 2026-07-21 |
 | [#635](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/635) | [design] UPS 오더 물류관리 기능 정의 — 상태별 하위메뉴/처리 흐름 (JSJung 설계, Edward 검토 요청) | b | p2 | in-progress | 미배정 | 2026-07-21 |
 | [#616](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/616) | [GOV] 예약 요금(pricing-schedule) 시스템에 Agency/Shipper 할인율 마진 검증 부재 — Team B 검토 요청 | b | p2 | - | 미배정 | 2026-07-20 |
 | [#609](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/609) | [Aiden] CI 지연 원인 조사 결과 + 조치 — 큐 혼잡 완화 + TeamB_Dev 병합 CI 대기 불요로 개정 | b | p1 | - | jungjs | 2026-07-20 |
