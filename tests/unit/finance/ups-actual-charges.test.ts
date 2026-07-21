@@ -71,7 +71,7 @@ describe('UPS 사후 청구 반영 Server Actions', () => {
     expect(result.error).toContain('배송 완료(DELIVERED) 상태일 때만');
   });
 
-  it('recordUpsActualCharges - 정산이 마감된 오더면 에러 반환', async () => {
+  it('recordUpsActualCharges - 정산이 마감된 오더면 마감 후 조정 경로로 위임', async () => {
     (validateAdminAction as any).mockResolvedValue({
       supabase: mockSupabase,
       user: { id: 'admin-user-id' },
@@ -88,9 +88,14 @@ describe('UPS 사후 청구 반영 Server Actions', () => {
       return createChainableMock();
     });
 
+    const mockCreateAdjustment = vi.fn().mockResolvedValue({ success: true, adjustmentAmount: 0 });
+    vi.doMock('@/app/actions/finance/settlement', () => ({
+      createPostFinalizationAdjustment: mockCreateAdjustment,
+    }));
+
     const result = await recordUpsActualCharges('order-1', []);
-    expect(result.success).toBe(false);
-    expect(result.error).toContain('이미 정산이 마감된 오더');
+    expect(result.success).toBe(true);
+    expect(mockCreateAdjustment).toHaveBeenCalled();
   });
 
   it('recordUpsActualCharges - 성공적으로 등록 및 차액 계산 (예상 200 vs 실제 250 -> 차액 50)', async () => {
