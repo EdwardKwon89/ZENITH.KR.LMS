@@ -573,7 +573,7 @@ export async function rejectInvoice(
       if (result.success && result.invoice) {
         newInvoiceId = result.invoice.id;
         await supabase.from('zen_invoices')
-          .update({ metadata: { ...result.invoice.metadata, superseded_by: newInvoiceId } })
+          .update({ metadata: { ...invoice.metadata, superseded_by: newInvoiceId } })
           .eq('id', invoiceId);
         await supabase.from('zen_invoice_history').insert({
           invoice_id: newInvoiceId, prev_status: null, next_status: 'UNPAID',
