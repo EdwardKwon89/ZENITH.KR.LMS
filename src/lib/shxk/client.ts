@@ -8,7 +8,9 @@ import type {
   ShxkServiceMethod,
 } from '@/types/ups-api'
 
-const IS_MOCK = process.env.SHXK_TEST_MOCK === 'true'
+function isMock(): boolean {
+  return process.env.SHXK_TEST_MOCK === 'true'
+}
 
 function buildMockResponse(
   method: ShxkServiceMethod,
@@ -147,9 +149,7 @@ export async function callShxk(
   method: ShxkServiceMethod,
   params?: Record<string, unknown>,
 ): Promise<ShxkBaseResponse> {
-  const isMock = IS_MOCK
-
-  if (isMock) {
+  if (isMock()) {
     const mockResponse = buildMockResponse(method, params)
     await logShxkCall({ method, params, response: mockResponse, isMock: true })
     return mockResponse
