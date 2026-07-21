@@ -52,7 +52,7 @@ function makeSupabase(tableResults: Record<string, any>) {
 beforeEach(() => {
   vi.clearAllMocks();
   vi.mocked(createorder).mockResolvedValue({ success: 1, data: { order_id: 'shxk-order-1', shipping_method_no: 'TK123', refrence_no: REF_NO }, message: 'OK' });
-  vi.mocked(getnewlabel).mockResolvedValue({ success: 1, data: { label_url: 'https://test.example.com/label' }, message: 'OK' });
+  vi.mocked(getnewlabel).mockResolvedValue({ success: 1, data: [{ lable_file: 'https://test.example.com/label' }], message: 'OK' });
   vi.mocked(removeorder).mockResolvedValue({ success: 1, message: 'OK' });
 });
 
@@ -77,7 +77,7 @@ describe('TASK-B-167: registerUpsOrder', () => {
 
   it('createorder 실패 시 zen_ups_label_errors에 기록한다', async () => {
     const { registerUpsOrder } = await import('@/app/actions/operations/ups-labels');
-    vi.mocked(createorder).mockResolvedValue({ success: 0, message: 'duplicate' });
+    vi.mocked(createorder).mockResolvedValue({ success: 0, data: null, message: 'duplicate' });
     const order = { id: ORDER_ID, order_no: REF_NO, recipient_country_code: 'US', ups_product_code: 'WPX', incoterms: 'DDP', dest_port_id: null };
     const supabase = makeSupabase({
       zen_orders: { data: order, error: null },
@@ -211,7 +211,7 @@ describe('TASK-B-167: issueUpsLabel() wrapper', () => {
     });
     vi.mocked(validateUserAction).mockResolvedValue({ supabase: supabase as any, profile: { id: 'test', role: 'ADMIN' } } as any);
     vi.mocked(createorder).mockResolvedValue({ success: 1, data: { order_id: 'shxk-order-1', shipping_method_no: 'TK123', refrence_no: REF_NO }, message: 'OK' });
-    vi.mocked(getnewlabel).mockResolvedValue({ success: 0, message: 'getnewlabel API error' });
+    vi.mocked(getnewlabel).mockResolvedValue({ success: 0, data: null, message: 'getnewlabel API error' });
 
     const result = await issueUpsLabel(ORDER_ID);
 

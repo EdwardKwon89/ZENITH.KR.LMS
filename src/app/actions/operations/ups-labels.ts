@@ -147,13 +147,13 @@ async function fetchAndSaveLabel(
   }
   const labelRes = await getnewlabel(configInfo, [{ reference_no: referenceNo.replace(/-/g, '') }]);
 
-  if (labelRes.success !== 1 || !labelRes.data) {
+  if (labelRes.success !== 1 || !labelRes.data?.length) {
     logger.warn(`getnewlabel failed for ${referenceNo}: ${labelRes.message}`);
     return null;
   }
 
-  const labelUrl = labelRes.data.label_url ?? null;
-  const labelFormat = labelRes.data.label_type === 'PDF' ? 'PDF' : 'PNG';
+  const labelUrl = labelRes.data[0].lable_file || null;
+  const labelFormat = labelUrl?.endsWith('.pdf') ? 'PDF' : 'PNG';
 
   const { error } = await supabase
     .from('zen_ups_labels')
@@ -249,10 +249,17 @@ export async function registerUpsOrder(
  * RELEASED 단계용 — 저장된 SHXK 라벨 정보로 getnewlabel 호출 + 패키지 발급 처리.
  * docType 지정 시 해당 문서 유형(WAYBILL/INVOICE/CUSTOMS)으로 getnewlabel 호출.
  */
+export interface FetchLabelResult {
+  success: boolean
+  url?: string
+  urls?: string[]
+  error?: string
+}
+
 export async function fetchAndIssueUpsLabel(
   orderId: string,
   docType?: 'WAYBILL' | 'INVOICE' | 'CUSTOMS' | 'COMBINED',
-): Promise<{ success: boolean; url?: string; error?: string }> {
+): Promise<FetchLabelResult> {
   try {
     const { supabase, profile } = await validateUserAction();
     const permErr = await checkLabelPermission(profile);
@@ -261,7 +268,6 @@ export async function fetchAndIssueUpsLabel(
     const label = await fetchActiveLabelByOrder(supabase, orderId);
     if (!label) return { success: false, error: '발급된 라벨이 없습니다.' };
 
-    let labelUrl: string | null;
     if (docType) {
       const configInfo = {
         lable_file_type: '2',
@@ -270,14 +276,27 @@ export async function fetchAndIssueUpsLabel(
         additional_info: { lable_print_datetime: 'Y' },
       };
       const res = await getnewlabel(configInfo, [{ reference_no: label.reference_no.replace(/-/g, '') }]);
-      if (res.success !== 1 || !res.data?.label_url) {
+      if (res.success !== 1 || !res.data?.length) {
         return { success: false, error: res.message || '문서 조회 실패' };
       }
-      labelUrl = res.data.label_url;
-    } else {
-      labelUrl = await fetchAndSaveLabel(supabase, label.reference_no);
-      if (!labelUrl) return { success: false, error: '라벨 발급 실패 (getnewlabel)' };
+      if (docType === 'COMBINED') {
+        const urls = res.data.map((item) => item.lable_file).filter(Boolean) as string[];
+        if (!urls.length) return { success: false, error: '발급된 문서 URL이 없습니다.' };
+        const pkgErr = await markAllPackagesIssued(supabase, orderId, label.tracking_number);
+        if (pkgErr) return { success: false, error: `Failed to mark packages issued: ${pkgErr}` };
+        revalidatePath("/(dashboard)/warehouse/outbound", "page");
+        return { success: true, urls };
+      }
+      // 단일 문서
+      const pkgErr = await markAllPackagesIssued(supabase, orderId, label.tracking_number);
+      if (pkgErr) return { success: false, error: `Failed to mark packages issued: ${pkgErr}` };
+      revalidatePath("/(dashboard)/warehouse/outbound", "page");
+      return { success: true, url: res.data[0].lable_file };
     }
+
+    // docType 없음 → 기본 라벨 발급 (fetchAndSaveLabel)
+    const labelUrl = await fetchAndSaveLabel(supabase, label.reference_no);
+    if (!labelUrl) return { success: false, error: '라벨 발급 실패 (getnewlabel)' };
 
     const pkgErr = await markAllPackagesIssued(supabase, orderId, label.tracking_number);
     if (pkgErr) return { success: false, error: `Failed to mark packages issued: ${pkgErr}` };
@@ -572,10 +591,10 @@ export async function fetchShxkTradeDocument(
     };
     const res = await getnewlabel(configInfo, [{ reference_no: label.reference_no.replace(/-/g, '') }]);
 
-    if (res.success !== 1 || !res.data?.label_url) {
+    if (res.success !== 1 || !res.data?.length) {
       return { success: false, error: res.message || '문서 조회 실패' };
     }
-    return { success: true, url: res.data.label_url };
+    return { success: true, url: res.data[0].lable_file };
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error';
     logger.error('fetchShxkTradeDocument error:', err);

@@ -39,10 +39,11 @@ function buildMockResponse(
         success: 1,
         cnmessage: '标签生成成功',
         enmessage: 'Label generated successfully',
-        data: {
-          label_url: `https://mock-shxk.test/labels/${refNo}.pdf`,
-          label_type: 'PDF',
-        },
+        data: [{
+          lable_file: `https://mock-shxk.test/labels/${refNo}.pdf`,
+          lable_file_type: '2',
+          lable_content_type: '4',
+        }],
       }
     case 'gettrackingnumber':
       return {

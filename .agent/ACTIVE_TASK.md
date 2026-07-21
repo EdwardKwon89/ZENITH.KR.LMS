@@ -466,6 +466,7 @@
 | TASK-B-173 | 260722 | Issue #655 — DEF-114 ROLE_PERMISSIONS에 AGENCY 누락, 창고관리 전체 500 에러 | P1 | 없음 | Dave (구현) | 🔔 | [TASK-B-173](tasks/TASK-B-173_260722_Def114_AgencyRolePermissions.md) | AGENCY → WAREHOUSED/RELEASED/SCHEDULED/REGISTERED/PACKED/IN_TRANSIT 권한 추가 · TC-AG-T1~T9 9종 · status-machine 31/31 + warehouse 14/14 PASS · tsc 0 error · [PR#656](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/656) (base TeamB_Dev) |
 | TASK-B-175 | 260722 | Issue #661 — SHXK API 호출 통합 감사 로그 테이블 | P3 | 없음 | Dave (구현) | 🔔 | [TASK-B-175](tasks/TASK-B-175_260722_Iss661_ShxkApiLogs.md) | zen_shxk_api_logs 테이블 + callShxk() 로깅 훅 · TC-SHXK-01~09 9종 (로깅 실패 시나리오 3종 포함) · 9/9 PASS · [PR#662](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/662) (base TeamB_Dev) |
 | TASK-B-176 | 260722 | Issue #664 — zen_shxk_api_logs RLS 정책 확대 (SELECT 전체 + AGENCY INSERT) | P3 | 없음 | Dave (구현) | 🔔 | [TASK-B-176](tasks/TASK-B-176_260722_Iss664_ShxkLogsRlsExpand.md) | SELECT: 전체 인증 사용자 · INSERT: AGENCY 명시 허용 · AGENCY INSERT ✅ · OPERATOR SELECT ✅ · [PR#665](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/665) (base TeamB_Dev) |
+| TASK-B-180 | 260722 | Issue #680 — DEF-118 getnewlabel 응답구조 불일치 (lable_file + array + COMBINED) | P1 | 없음 | Dave (구현) | 🔔 | [TASK-B-180](tasks/TASK-B-180_260722_Def118_Getnewlabel_응답구조.md) | GetNewLabelItem 전 array 반환 · fetchAndIssueUpsLabel COMBINED 다중 URL · OutboundProcessForm COMBINED 버튼+window.open · ups-labels 10/10 + shxk 9/9 · build ✅ · [PR#681](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/681) (base TeamB_Dev) |
 ---
 
 ## Agent 현황
