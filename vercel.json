@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/pricing-schedule-apply",
       "schedule": "0 15 * * *"
+    },
+    {
+      "path": "/api/cron/ups-tracking-poll",
+      "schedule": "30 15 * * *"
     }
   ]
 }
