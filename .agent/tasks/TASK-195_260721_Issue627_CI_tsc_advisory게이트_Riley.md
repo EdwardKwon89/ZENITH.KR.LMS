@@ -3,7 +3,7 @@
 **담당**: Riley
 **생성일**: 2026-07-21
 **우선순위**: P3
-**상태**: 🔔
+**상태**: ✅
 
 ---
 
@@ -59,3 +59,15 @@
 | 코드 커밋 | `70b3ddbe3cacc7fd339336ec6db32d2de783c6a1` |
 | 회귀 결과 | Vitest unit & integration & regression tests 100% PASS (`rtk npm run test:regression` 검증 완수) |
 | 특이사항 | `.github/workflows/pr-checks.yml`에 `tsc-advisory` (Name: `Type Check (advisory, non-blocking)`) 신규 잡 추가. `npx tsc --noEmit || true` 후 `exit 0` 보장하여 Team A/B 전체 PR 차단 없는 안전한 advisory 게이트 구현. 네거티브 컨트롤 검증 완수. |
+
+## [Aiden 검토] — 2026-07-21 10:52 KST
+
+**판정**: ✅ 승인
+
+**diff 직접 확인**(`70b3ddbe`): `pr-checks.yml`에 `tsc-advisory` 잡 추가 — `npx tsc --noEmit || true` + `exit 0`으로 advisory 보장, `bot/sync-active-task` 예외 처리도 기존 `regression` 잡과 동일 패턴으로 반영. task file 서술과 정확히 일치.
+
+**실제 CI**(`gh pr checks 628`): Task File Check ✅ · **Type Check(advisory, non-blocking) ✅**(신규 게이트 자체가 실제로 정상 동작) · Regression Tests ✅ · Vercel ✅.
+
+**R-17 준수**: 커밋 순서(feat→docs) 정확히 분리, 커밋 해시(`70b3ddbe3cacc7fd339336ec6db32d2de783c6a1`) 실재 확인. PR body `Closes #627` 정상.
+
+**Aiden 조치**: PR#628 develop 병합.
