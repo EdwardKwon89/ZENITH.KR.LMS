@@ -24,6 +24,7 @@ export {
   syncExternalTracking,
   getTrackingRawLogs,
   getGlobalTrackingOverview,
+  getUpsTrackingEvents,
 } from './tracking';
 
 export {
@@ -63,4 +64,6 @@ export {
   confirmUpsRegistration,
   undoUpsRegistration,
   undoOutbound,
+  getReleasedOrders,
+  confirmDeparture,
 } from './warehouse';

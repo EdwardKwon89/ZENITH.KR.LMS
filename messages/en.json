@@ -50,6 +50,7 @@
     "logistics_inbound": "Inbound Process",
     "logistics_ups_receiving": "UPS Receiving",
     "logistics_outbound": "Outbound Process",
+    "logistics_departure": "Departure Confirm",
     "finance_group": "Finance & Settlement",
     "finance": "Finance Status",
     "finance_revenue": "Revenue Status",
@@ -685,6 +686,17 @@
     "undo_failed": "Failed to cancel UPS registration.",
     "today_history": "Today's UPS Receiving History",
     "empty_history": "No UPS receiving records processed today."
+  },
+  "WarehouseDeparture": {
+    "title": "Departure Confirm",
+    "select_orders": "Select orders for departure confirmation",
+    "search_placeholder": "Search by order number",
+    "select_all": "Select All",
+    "deselect_all": "Deselect All",
+    "confirm_btn": "Confirm Departure",
+    "success_msg": "Departure confirmation completed.",
+    "partial_success": "Departure completed: {success} success, {fail} failed",
+    "error_none_selected": "Please select orders for departure confirmation."
   },
   "ShippingLabel": {
     "title": "Shipping Label",

@@ -426,6 +426,72 @@ export async function undoUpsRegistration(orderId: string) {
 }
 
 // ─────────────────────────────────────────────
+// D-1: 출고확정처리 — RELEASED → IN_TRANSIT
+// ─────────────────────────────────────────────
+
+export async function getReleasedOrders() {
+  const { supabase, profile } = await validateUserAction();
+  if (!profile) throw new Error("User profile not found");
+  const isAllowed = WAREHOUSE_ROLES.includes(profile.role as any);
+  if (!isAllowed) throw new Error("권한이 없습니다.");
+
+  let query = supabase
+    .from("zen_orders")
+    .select(`
+      id, order_no, status, created_at,
+      recipient_name, recipient_contact, recipient_address, recipient_phone,
+      transport_mode,
+      shipper:zen_organizations!zen_orders_shipper_id_fkey(name),
+      origin_port:zen_ports!zen_orders_origin_port_id_fkey(name, code),
+      dest_port:zen_ports!zen_orders_dest_port_id_fkey(name, code),
+      order_packages:zen_order_packages!zen_order_packages_order_id_fkey(id, intl_ref_no, intl_ref_locked, packing_unit, packing_count, gross_weight)
+    `)
+    .eq("transport_mode", "UPS")
+    .eq("status", OrderStatus.RELEASED);
+
+  if (profile.role === USER_ROLES.AGENCY) {
+    const shipperIds = await getAgencyShipperIds(supabase, profile.org_id);
+    if (!shipperIds || shipperIds.length === 0) return { success: true, orders: [] };
+    query = query.in("shipper_id", shipperIds);
+  }
+
+  const { data, error } = await query.order("created_at", { ascending: false });
+  if (error) {
+    logger.error("getReleasedOrders error:", error);
+    throw new Error("Failed to fetch released orders");
+  }
+  return { success: true, orders: data || [] };
+}
+
+export async function confirmDeparture(orderId: string) {
+  const { supabase, profile } = await validateUserAction();
+  if (!profile) throw new Error("User profile not found");
+  const isAllowed = WAREHOUSE_ROLES.includes(profile.role as any);
+  if (!isAllowed) throw new Error("권한이 없습니다.");
+
+  const orderRepo = new OrderRepository(supabase);
+  const { data: order } = await orderRepo.findById(orderId);
+  if (!order) throw new Error("Order not found");
+  if (order.status !== OrderStatus.RELEASED) {
+    throw new Error("RELEASED 상태의 오더만 출고확정할 수 있습니다.");
+  }
+
+  if (profile.role === USER_ROLES.AGENCY) {
+    const shipperIds = await getAgencyShipperIds(supabase, profile.org_id);
+    if (!shipperIds || !shipperIds.includes((order as any).shipper_id)) {
+      throw new Error("본인 소속 화주의 오더만 처리할 수 있습니다.");
+    }
+  }
+
+  await updateOrderStatus(orderId, OrderStatus.IN_TRANSIT, "[출고확정처리]");
+
+  revalidatePath("/(dashboard)/warehouse/departure", "page");
+  revalidatePath("/(dashboard)/orders", "page");
+
+  return { success: true };
+}
+
+// ─────────────────────────────────────────────
 // C-4: 출고취소 — RELEASED → PACKED
 // ─────────────────────────────────────────────
 

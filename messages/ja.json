@@ -27,6 +27,7 @@
     "logistics_inbound": "入庫処理",
     "logistics_ups_receiving": "UPS受取",
     "logistics_outbound": "出庫処理",
+    "logistics_departure": "出荷確定",
     "inventory": "在庫管理",
     "finance_group": "精算・財務",
     "finance": "財務状況",
@@ -170,6 +171,17 @@
     "undo_failed": "UPS登録取消に失敗しました。",
     "today_history": "本日のUPS受取履歴",
     "empty_history": "本日のUPS受取履歴はありません。"
+  },
+  "WarehouseDeparture": {
+    "title": "出荷確定",
+    "select_orders": "出荷確定するオーダを選択",
+    "search_placeholder": "オーダ番号で検索",
+    "select_all": "すべて選択",
+    "deselect_all": "すべて解除",
+    "confirm_btn": "出荷確定処理",
+    "success_msg": "出荷確定が完了しました。",
+    "partial_success": "出荷確定完了: {success}件成功、{fail}件失敗",
+    "error_none_selected": "出荷確定するオーダを選択してください。"
   },
   "ShippingLabel": {
     "title": "配送ラベル",

@@ -3,7 +3,7 @@ import { requireAuth } from '@/lib/auth/guards';
 import { getOrderDetails } from '@/app/actions/operations/orders';
 import { getOrderRateSnapshot } from '@/app/actions/operations/tisa';
 import { getUpsLabelStatus } from '@/app/actions/operations/ups-labels';
-import { getTrackingEvents } from '@/app/actions/operations/tracking';
+import { getTrackingEvents, getUpsTrackingEvents } from '@/app/actions/operations/tracking';
 import { checkPermission } from '@/lib/auth/rbac';
 import { notFound, redirect } from 'next/navigation';
 import Link from 'next/link';
@@ -14,6 +14,7 @@ import UpsOrderBreakdownCard from '@/components/ups/UpsOrderBreakdownCard';
 import { UpsActualAdjustmentForm } from '@/components/orders/UpsActualAdjustmentForm';
 import OrderFinanceSummary from '@/components/finance/OrderFinanceSummary';
 import TrackingTimeline from '@/components/tracking/TrackingTimeline';
+import UpsTrackingEventsList from '@/components/tracking/UpsTrackingEventsList';
 import DocumentDownloadButton from '@/components/documents/DocumentDownloadButton';
 import CommercialInvoicePDF from '@/components/documents/CommercialInvoicePDF';
 import PackingListPDF from '@/components/documents/PackingListPDF';
@@ -93,6 +94,10 @@ export default async function UpsOrderDetailPage({ params }: UpsOrderDetailPageP
   // Fetch Tracking Events
   const trackingData = await getTrackingEvents(orderId);
   const trackingEvents = trackingData?.events || [];
+
+  // Fetch UPS Tracking Events (zen_ups_tracking_events)
+  const upsTrackingData = await getUpsTrackingEvents(orderId);
+  const upsTrackingEvents = upsTrackingData?.events || [];
 
   // Label & Trade Doc Status
   const upsLabelStatus = await getUpsLabelStatus(orderId);
@@ -266,6 +271,15 @@ export default async function UpsOrderDetailPage({ params }: UpsOrderDetailPageP
               UPS 배송 실시간 트래킹 타임라인
             </h3>
             <TrackingTimeline events={trackingEvents} />
+          </section>
+
+          {/* UPS SHXK Tracking Events (zen_ups_tracking_events) */}
+          <section className="bg-white dark:bg-zinc-950 rounded-3xl border border-slate-100 dark:border-zinc-800 p-6 shadow-sm">
+            <h3 className="text-lg font-bold text-slate-900 dark:text-gray-100 mb-4 flex items-center gap-2">
+              <Truck className="w-5 h-5 text-indigo-500" />
+              UPS 트래킹 이벤트 (SHXK)
+            </h3>
+            <UpsTrackingEventsList events={upsTrackingEvents} />
           </section>
 
           {/* Trade Documents Section */}

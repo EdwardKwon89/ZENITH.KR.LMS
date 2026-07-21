@@ -29,6 +29,7 @@
     "logistics_inbound": "入库处理",
     "logistics_ups_receiving": "UPS收货",
     "logistics_outbound": "出库处理",
+    "logistics_departure": "出库确认",
     "inventory": "库存管理",
     "finance_group": "财务结算",
     "settlement": "结算管理",
@@ -183,6 +184,17 @@
     "undo_failed": "UPS注册取消失败。",
     "today_history": "今日UPS收货记录",
     "empty_history": "今日没有UPS收货记录。"
+  },
+  "WarehouseDeparture": {
+    "title": "出库确认",
+    "select_orders": "选择要确认出库的订单",
+    "search_placeholder": "按订单号搜索",
+    "select_all": "全选",
+    "deselect_all": "取消全选",
+    "confirm_btn": "确认出库",
+    "success_msg": "出库确认已完成。",
+    "partial_success": "出库确认完成：{success}件成功，{fail}件失败",
+    "error_none_selected": "请选择要确认出库的订单。"
   },
   "ShippingLabel": {
     "title": "运单",
