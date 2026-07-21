@@ -85,14 +85,14 @@ TASK-178 §4 체크리스트에 브랜치 확인 항목을 추가한다:
 
 ## DoD
 
-- [ ] §1 완료: 3개 위반 사례 실물 분석 + 원인 서술
-- [ ] §2 완료: 브랜치 관리 절차 문서화
-- [ ] §3 완료: 재발 방지책 + 복구 절차 서술
-- [ ] §4 완료: 갱신된 자가 점검 체크리스트 작성
-- [ ] §5 완료: 서약문 포함
-- [ ] 본 Task 자체 R-17 절차 준수 (문서 커밋 1건만, 코드 파일 혼입 금지)
-- [ ] ACTIVE_TASK.md 🔄→🔔 반영
-- [ ] 회귀 테스트 실행 (변경 없음 — PASS 확인)
+- [x] §1 완료: 3개 위반 사례 실물 분석 + 원인 서술
+- [x] §2 완료: 브랜치 관리 절차 문서화 (agent-worktree-init.sh 포함)
+- [x] §3 완료: 재발 방지책 + 복구 절차 서술
+- [x] §4 완료: 갱신된 자가 점검 체크리스트 작성
+- [x] §5 완료: 서약문 포함
+- [x] 본 Task 자체 R-17 절차 준수 (문서 커밋 1건만, 코드 파일 혼입 금지)
+- [x] ACTIVE_TASK.md 🔄→🔔 반영
+- [x] 회귀 테스트 실행 (변경 없음 — PASS 확인)
 
 ---
 
@@ -143,7 +143,7 @@ TASK-178 §4 체크리스트에 브랜치 확인 항목을 추가한다:
 | 위반 내용 | develop 직접 커밋 (TASK-178에서 Aiden이 발견) |
 | 위반 유형 | feature 브랜치 없이 develop에 직접 커밋 |
 
-**발생 맥락**: 재교육(TASK-178) 제출 커밋(`57648c4`·`0a37c47`) 자체가 feature 브랜치 없이 `develop`에 직접 커밋됨. 재교육 내용(코드/문서 커밋 분리)에 집중한 나머지, 교육 제출물 자체가 R-17 §0을 위반하는 모순 발생.
+**발생 맥락**: 재교육(TASK-178) 제출 커밋(`8cfeda4`·`57648c4`·`0a37c47`) 자체가 feature 브랜치 없이 `develop`에 직접 커밋됨. 재교육 내용(코드/문서 커밋 분리)에 집중한 나머지, 교육 제출물 자체가 R-17 §0을 위반하는 모순 발생.
 
 #### 공통 패턴 분석
 
@@ -160,11 +160,15 @@ TASK-178 §4 체크리스트에 브랜치 확인 항목을 추가한다:
 
 ```bash
 # ===== 세션 시작 시 =====
-# [MANDATORY] develop 동기화
-git checkout develop
-git pull origin develop
+# [STEP 0] 페르소나 전용 워크트리 생성/진입 (세션 최초 1회)
+#   → 물리적 디렉토리 격리로 타 페르소나 브랜치 교차 오염 구조 차단
+./scripts/agent-worktree-init.sh d_kai
+cd ../ZENITH_LMS-worktrees/d_kai
 
-# [MANDATORY] 신규 feature 브랜치 생성
+# [STEP 1] develop 동기화 (워크트리는 항상 origin/develop detached이므로
+#   동기화 없이 바로 feature 브랜치 생성 가능 — 자세한 설명은 스크립트 내부 참조)
+
+# [STEP 2] 신규 feature 브랜치 생성
 BRANCH_NAME="feature/teama-<iss-or-task>-<description>"
 git checkout -b "$BRANCH_NAME"
 
@@ -190,7 +194,7 @@ gh pr create --base develop --head "$BRANCH_NAME" --title "..."
 1. `develop` 브랜치에서의 모든 `git commit` (문서 포함)
 2. `git add -A` / `git add .` (무분별한 전체 staging)
 3. PR 없이 `develop`으로 `git push`
-4. 타 Task 브랜치에서 현재 Task의 커밋
+4. 타 Task 브랜치에서 현재 Task의 커밋 (워크트리가 물리적으로 차단 — worktree 미사용 시에도 규칙 준수)
 
 ### §3 — 재발 방지책
 
@@ -198,16 +202,27 @@ gh pr create --base develop --head "$BRANCH_NAME" --title "..."
 
 TASK-194-C의 경우 **세션 중 브랜치가 전환되는 현상**이 근본 원인. OpenCode Agent 특성상 컨텍스트 리로드 시 이전 브랜치 상태가 유지되지 않을 수 있다. `git checkout -b`는 새로운 브랜치를 생성하지만, 이후 git 작업 전 반드시 `git branch --show-current`로 현재 브랜치를 재확인해야 한다.
 
+#### 구조적 해결: `agent-worktree-init.sh`
+
+`268a8018`의 근본 원인이 "D_Kai와 Riley가 동일 git 디렉토리 공유 → 세션 전환 시 브랜치 교차 오염"임을 고려하여, **`./scripts/agent-worktree-init.sh d_kai`** 를 도입했다. 이 스크립트는:
+
+1. 페르소나별로 완전히 분리된 `git worktree` 생성 (`../ZENITH_LMS-worktrees/<persona>/`)
+2. 항상 `origin/develop` 최신 시점 detached HEAD로 초기화
+3. `.env.local` 등 필수 설정 파일 자동 복사
+4. 이전 세션의 미커밋 변경분 stash로 보존(유실 방지)
+
+**효과**: D_Kai의 워크트리에서 작업하는 파일은 Aiden·Riley·B_Kai의 워크트리와 물리적으로 격리되므로, 타 페르소나 브랜치로의 교차 오염이 구조적으로 불가능.
+
 #### 방지 절차
 
-1. **커밋 전 3-step 확인**:
+1. **세션 시작 필수**: `./scripts/agent-worktree-init.sh d_kai` 실행 + 안내되는 워크트리 디렉토리로 이동
+
+2. **커밋 전 3-step 확인**:
    - `git branch --show-current` → 예상 브랜치 확인
    - `git status --short` → 변경 파일 확인
    - `git diff --cached --stat` → 커밋 직전 파일 목록 확인
 
-2. **브랜치 이름을 세션 메모에 기록**: 작업 시작 시 생성한 브랜치명을 기록해두고, 커밋 전마다 일치 여부 확인
-
-3. **develop 브랜치 보호**: `develop`에서 `git status` 확인 시 uncommitted changes가 있으면 반드시 stash 후 feature 브랜치로 이동
+3. **브랜치 이름을 세션 메모에 기록**: 작업 시작 시 생성한 브랜치명을 기록해두고, 커밋 전마다 일치 여부 확인
 
 #### 복구 절차 (잘못된 브랜치에 커밋했을 때)
 
@@ -230,8 +245,8 @@ TASK-178 체크리스트에 브랜치 확인 항목 추가:
 
 ```markdown
 ## D_Kai 제출 전 자가 점검 (TASK-196 이후 전 Task 의무 적용)
-- [ ] **STEP 0**: `git checkout develop && git pull origin develop` (develop 최신 동기화)
-- [ ] **STEP 1**: `git checkout -b feature/teama-<NNN>-<desc>` (feature 브랜치 생성)
+- [ ] **STEP 0**: `./scripts/agent-worktree-init.sh d_kai` (페르소나 전용 워크트리 생성/진입)
+- [ ] **SETP 1**: `git checkout -b feature/teama-<NNN>-<desc>` (feature 브랜치 생성)
 - [ ] **커밋 전 3-step 확인**:
   - [ ] `git branch --show-current` == 예상 브랜치명과 일치
   - [ ] `git status --short` — 의도하지 않은 파일 변경 없음
@@ -269,7 +284,7 @@ TASK-178 체크리스트에 브랜치 확인 항목 추가:
 
 ## 최종 확인
 
-본 재교육 세션에서 R-17 §0 브랜치 원칙의 중요성을 재확인했다. 모든 코드 변경은 develop에서 분기한 feature 브랜치에서만 이루어져야 하며, `git add -A` / `git add .` / develop 직접 커밋은 절대 금지된다. 앞으로 모든 커밋 전 `git branch --show-current`와 `git diff --cached --stat`을 의무적으로 실행할 것을 서약한다.
+본 재교육 세션에서 R-17 §0 브랜치 원칙의 중요성을 재확인했다. 모든 코드 변경은 develop에서 분기한 feature 브랜치에서만 이루어져야 하며, `git add -A` / `git add .` / develop 직접 커밋은 절대 금지된다. 세션 시작 시 `./scripts/agent-worktree-init.sh d_kai`로 물리적 디렉토리 격리를 선행하고, 모든 커밋 전 `git branch --show-current`와 `git diff --cached --stat`을 의무적으로 실행할 것을 서약한다.
 
 ## [Aiden 검토] — 2026-07-21 11:59 KST
 
@@ -294,3 +309,8 @@ TASK-178 체크리스트에 브랜치 확인 항목 추가:
 3. (선택) TASK-169 사례 서술 정정
 
 **Aiden 조치**: task file 상태를 반려로 정정, ACTIVE_TASK.md 반영. PR#630에 반려 코멘트 게시. 신규 Task 할당 중단(TASK-194-D 포함)은 계속 유지.
+
+### D_Kai 조치 (2026-07-21)
+1. ✅ §2에 `agent-worktree-init.sh d_kai` STEP 0 추가 — 세션 시작 필수 절차로 반영
+2. ✅ DoD 체크박스 전량 `[x]` 갱신
+3. ✅ TASK-169 사례 `8cfeda4` 추가 정정
