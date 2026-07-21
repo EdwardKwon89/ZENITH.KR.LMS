@@ -11,8 +11,8 @@ const TRANSITION_RULES: Record<OrderStatus, OrderStatus[]> = {
   [OrderStatus.REGISTERED]: [OrderStatus.SCHEDULED, OrderStatus.WAREHOUSED, OrderStatus.CANCELED, OrderStatus.HELD],
   [OrderStatus.SCHEDULED]: [OrderStatus.REGISTERED, OrderStatus.WAREHOUSED, OrderStatus.CANCELED, OrderStatus.HELD],
   [OrderStatus.WAREHOUSED]: [OrderStatus.REGISTERED, OrderStatus.SCHEDULED, OrderStatus.PACKED, OrderStatus.RELEASED, OrderStatus.HELD, OrderStatus.RETURNED], // 입고취소(→REGISTERED/SCHEDULED) 허용
-  [OrderStatus.PACKED]: [OrderStatus.RELEASED, OrderStatus.HELD],
-  [OrderStatus.RELEASED]: [OrderStatus.IN_TRANSIT, OrderStatus.HELD],
+  [OrderStatus.PACKED]: [OrderStatus.WAREHOUSED, OrderStatus.RELEASED, OrderStatus.HELD], // WAREHOUSED: UPS등록취소, RELEASED: 출고처리
+  [OrderStatus.RELEASED]: [OrderStatus.PACKED, OrderStatus.IN_TRANSIT, OrderStatus.HELD], // PACKED: 출고취소
   [OrderStatus.IN_TRANSIT]: [OrderStatus.DELIVERED, OrderStatus.HELD, OrderStatus.RETURNED, OrderStatus.CLAIMED],
   [OrderStatus.DELIVERED]: [OrderStatus.RETURNED, OrderStatus.CLAIMED], // 배송 완료 후 반송 또는 클레임 접수 가능
   [OrderStatus.CLAIMED]: [OrderStatus.DELIVERED, OrderStatus.HELD, OrderStatus.CANCELED],
@@ -33,7 +33,7 @@ const TRANSITION_RULES: Record<OrderStatus, OrderStatus[]> = {
 
 // 역할별 상태 변경 권한 정의
 const ROLE_PERMISSIONS: Partial<Record<UserRole, OrderStatus[]>> = {
-  [USER_ROLES.OPERATOR]: [OrderStatus.SCHEDULED, OrderStatus.HELD, OrderStatus.CANCELED, OrderStatus.CLAIMED],
+  [USER_ROLES.OPERATOR]: [OrderStatus.SCHEDULED, OrderStatus.WAREHOUSED, OrderStatus.PACKED, OrderStatus.RELEASED, OrderStatus.IN_TRANSIT, OrderStatus.HELD, OrderStatus.CANCELED, OrderStatus.CLAIMED],
   [USER_ROLES.CARRIER]: [OrderStatus.IN_TRANSIT, OrderStatus.DELIVERED],
   [USER_ROLES.CORPORATE]: [OrderStatus.REGISTERED, OrderStatus.CANCELED, OrderStatus.CLAIMED], // 고객은 스케줄 전까지만 가능, 클레임 접수 가능
   [USER_ROLES.INDIVIDUAL]: [OrderStatus.REGISTERED, OrderStatus.CANCELED, OrderStatus.CLAIMED],

@@ -122,4 +122,70 @@ describe('ZENITH Status Machine: CLAIMED 전이 규칙 (R-09)', () => {
       expect(isOrderEditable(OrderStatus.MASTERED)).toBe(false);
     });
   });
+
+  describe('PACKED 전이 규칙 (ISSUE-635 Task-C)', () => {
+    it('TC-PCK-T1: PACKED → WAREHOUSED 허용 (UPS등록취소)', () => {
+      const result = canChangeStatus(OrderStatus.PACKED, OrderStatus.WAREHOUSED, USER_ROLES.OPERATOR);
+      expect(result.allowed).toBe(true);
+    });
+
+    it('TC-PCK-T2: PACKED → RELEASED 허용 (출고처리)', () => {
+      const result = canChangeStatus(OrderStatus.PACKED, OrderStatus.RELEASED, USER_ROLES.OPERATOR);
+      expect(result.allowed).toBe(true);
+    });
+
+    it('TC-PCK-T3: PACKED → HELD 허용', () => {
+      const result = canChangeStatus(OrderStatus.PACKED, OrderStatus.HELD, USER_ROLES.OPERATOR);
+      expect(result.allowed).toBe(true);
+    });
+
+    it('TC-PCK-T4: PACKED → IN_TRANSIT 불가 (허용되지 않은 전이)', () => {
+      const result = canChangeStatus(OrderStatus.PACKED, OrderStatus.IN_TRANSIT, USER_ROLES.OPERATOR);
+      expect(result.allowed).toBe(false);
+    });
+  });
+
+  describe('RELEASED 전이 규칙 (ISSUE-635 Task-C)', () => {
+    it('TC-RLS-T1: RELEASED → PACKED 허용 (출고취소)', () => {
+      const result = canChangeStatus(OrderStatus.RELEASED, OrderStatus.PACKED, USER_ROLES.OPERATOR);
+      expect(result.allowed).toBe(true);
+    });
+
+    it('TC-RLS-T2: RELEASED → IN_TRANSIT 허용', () => {
+      const result = canChangeStatus(OrderStatus.RELEASED, OrderStatus.IN_TRANSIT, USER_ROLES.OPERATOR);
+      expect(result.allowed).toBe(true);
+    });
+
+    it('TC-RLS-T3: RELEASED → HELD 허용', () => {
+      const result = canChangeStatus(OrderStatus.RELEASED, OrderStatus.HELD, USER_ROLES.OPERATOR);
+      expect(result.allowed).toBe(true);
+    });
+
+    it('TC-RLS-T4: RELEASED → WAREHOUSED 불가 (허용되지 않은 전이)', () => {
+      const result = canChangeStatus(OrderStatus.RELEASED, OrderStatus.WAREHOUSED, USER_ROLES.OPERATOR);
+      expect(result.allowed).toBe(false);
+    });
+  });
+
+  describe('Dave 입고취소 전이 규칙 보존 (TASK-B-168)', () => {
+    it('TC-DV-T1: WAREHOUSED → REGISTERED 허용 (ADMIN bypass, 입고취소)', () => {
+      const result = canChangeStatus(OrderStatus.WAREHOUSED, OrderStatus.REGISTERED, USER_ROLES.ADMIN);
+      expect(result.allowed).toBe(true);
+    });
+
+    it('TC-DV-T2: WAREHOUSED → SCHEDULED 허용 (ADMIN bypass, 입고취소)', () => {
+      const result = canChangeStatus(OrderStatus.WAREHOUSED, OrderStatus.SCHEDULED, USER_ROLES.ADMIN);
+      expect(result.allowed).toBe(true);
+    });
+
+    it('TC-DV-T3: REGISTERED → WAREHOUSED 허용 (OPERATOR)', () => {
+      const result = canChangeStatus(OrderStatus.REGISTERED, OrderStatus.WAREHOUSED, USER_ROLES.OPERATOR);
+      expect(result.allowed).toBe(true);
+    });
+
+    it('TC-DV-T4: SCHEDULED → WAREHOUSED 허용 (OPERATOR)', () => {
+      const result = canChangeStatus(OrderStatus.SCHEDULED, OrderStatus.WAREHOUSED, USER_ROLES.OPERATOR);
+      expect(result.allowed).toBe(true);
+    });
+  });
 });

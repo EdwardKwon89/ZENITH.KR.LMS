@@ -52,6 +52,7 @@ export {
 
 export {
   getWarehousedOrders,
+  getPackedOrders,
   confirmOutbound,
   getTodayReleasedOrders,
   getPickupOrders,
@@ -59,4 +60,7 @@ export {
   cancelPickup,
   getTodayPickupHistory,
   cancelInbound,
+  confirmUpsRegistration,
+  undoUpsRegistration,
+  undoOutbound,
 } from './warehouse';
