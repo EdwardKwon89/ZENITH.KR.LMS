@@ -1,12 +1,16 @@
 import 'server-only'
 import { SHXK_ENDPOINT, SHXK_APP_KEY, SHXK_APP_TOKEN } from './config'
+import { createAdminClient } from '@/utils/supabase/server'
+import { logger } from '@/lib/logger'
 import type {
   ShxkBaseResponse,
   ShxkBaseRequest,
   ShxkServiceMethod,
 } from '@/types/ups-api'
 
-const IS_MOCK = process.env.SHXK_TEST_MOCK === 'true'
+function isMock(): boolean {
+  return process.env.SHXK_TEST_MOCK === 'true'
+}
 
 function buildMockResponse(
   method: ShxkServiceMethod,
@@ -106,15 +110,55 @@ function parseShxkResponse(raw: string): ShxkBaseResponse {
   }
 }
 
+function extractReferenceNo(params?: Record<string, unknown>): string | null {
+  if (!params) return null
+  if (typeof params.reference_no === 'string') return params.reference_no
+  const listorder = params.listorder as Array<{ reference_no: string }> | undefined
+  if (listorder?.[0]?.reference_no) return listorder[0].reference_no
+  return null
+}
+
+async function logShxkCall(opts: {
+  method: ShxkServiceMethod
+  params?: Record<string, unknown>
+  response?: ShxkBaseResponse
+  httpStatus?: number
+  error?: Error
+  isMock: boolean
+}): Promise<void> {
+  try {
+    const supabase = await createAdminClient()
+    await supabase.from('zen_shxk_api_logs').insert({
+      method: opts.method,
+      reference_no: extractReferenceNo(opts.params),
+      request_params: opts.params ?? null,
+      response_body: opts.response
+        ? (opts.response as unknown as Record<string, unknown>)
+        : (opts.error ? { error: opts.error.message } : null),
+      success: opts.response?.success === 1,
+      http_status: opts.httpStatus ?? null,
+      error_message: opts.error?.message ?? null,
+      is_mock: opts.isMock,
+    })
+  } catch (logErr) {
+    logger.error(`shxk_api_logs insert 실패 (${opts.method}):`, logErr)
+  }
+}
+
 export async function callShxk(
   method: ShxkServiceMethod,
   params?: Record<string, unknown>,
 ): Promise<ShxkBaseResponse> {
-  if (IS_MOCK) {
-    return buildMockResponse(method, params)
+  if (isMock()) {
+    const mockResponse = buildMockResponse(method, params)
+    await logShxkCall({ method, params, response: mockResponse, isMock: true })
+    return mockResponse
   }
+
   const body = buildShxkBody(method, params)
   let res: Response
+  let httpStatus: number | undefined
+
   try {
     res = await fetch(SHXK_ENDPOINT, {
       method: 'POST',
@@ -122,16 +166,21 @@ export async function callShxk(
       body,
       cache: 'no-store',
     })
+    httpStatus = res.status
   } catch (err) {
-    throw new Error(
-      `shxk API 호출 실패 (${method}): ${err instanceof Error ? err.message : String(err)}`,
-    )
+    const error = err instanceof Error ? err : new Error(String(err))
+    await logShxkCall({ method, params, error, httpStatus, isMock: false })
+    throw new Error(`shxk API 호출 실패 (${method}): ${error.message}`)
   }
+
   if (!res.ok) {
-    throw new Error(
-      `shxk API HTTP ${res.status} (${method}): ${res.statusText}`,
-    )
+    const error = new Error(res.statusText)
+    await logShxkCall({ method, params, error, httpStatus: res.status, isMock: false })
+    throw new Error(`shxk API HTTP ${res.status} (${method}): ${res.statusText}`)
   }
+
   const text = await res.text()
-  return parseShxkResponse(text)
+  const parsed = parseShxkResponse(text)
+  await logShxkCall({ method, params, response: parsed, httpStatus, isMock: false })
+  return parsed
 }
