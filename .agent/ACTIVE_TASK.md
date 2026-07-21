@@ -15,6 +15,7 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
+| [#661](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/661) | [feat] IMP — SHXK UPS API 호출 통합 이력(감사 로그) 테이블 신설 | b | p3 | - | 미배정 | 2026-07-21 |
 | [#659](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/659) | [defect] DEF-115 — WarehouseUpsReceiving.partial_success i18n 키 누락 | b | p4 | - | 미배정 | 2026-07-21 |
 | [#655](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/655) | [defect] DEF-114 — ROLE_PERMISSIONS에 AGENCY 누락, 창고관리 기능 전체 500 에러 | b | p1 | - | 미배정 | 2026-07-21 |
 | [#651](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/651) | [Team A] IMP-134 §2 — tests/ 전역 TypeScript 오류 258건 정리 | a | p3 | - | EdwardKwon89 | 2026-07-21 |
