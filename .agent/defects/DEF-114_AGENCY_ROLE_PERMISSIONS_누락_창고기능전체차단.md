@@ -90,11 +90,21 @@ PR#646(Baker, TASK-B-170)에서 `ROLE_PERMISSIONS[OPERATOR]`에 WAREHOUSED/PACKE
 ### TypeScript
 - 0 error (e2e pre-existing errors만 존재)
 
-### 테스트 계정 실사용 확인
-- 로컬 Supabase(`http://127.0.0.1:54321`) + dev server(`:3001`) 구동 확인
-- `agency@zenith.kr` 계정 로그인 성공 확인 (Supabase Auth)
-- `warehouse/inbound` 페이지 정상 로드 확인 (Playwright page snapshot에서 sidebar "입고 처리" 메뉴 가시적 확인)
-- Playwright E2E 테스트는 로컬 DB에 테스트 시드 데이터 부재로 전체 플로우(버튼 클릭까지) 실행 불가 — 대신 단위/통합 테스트로 서버 액션 체인 전체 검증 완료
+### DB RLS 레이어 추가 발견 (2차)
+Application 레벨(ROLE_PERMISSIONS) 수정만으로는 `update_order_status_atomic` RPC
+(SECURITY INVOKER)의 `SELECT ... FOR UPDATE` 락이 DB RLS에서 차단되어,
+AGENCY가 창고 액션을 실행할 수 없었음.
+
+#### 추가 조치: DB 마이그레이션
+- **`zen_orders`**: AGENCY UPDATE RLS 정책 신규 (`Agency can update shipper orders`)
+  - 조건: `get_my_role() = 'AGENCY' AND agency_org_id = profile.org_id`
+- **`zen_inventory_history`**: INSERT 정책에 AGENCY 역할 추가
+  - 기존 `ADMIN/ZENITH_SUPER_ADMIN/MANAGER/MEMBER/PARTNER`에 `AGENCY` 추가
+
+### 실사용 RPC 검증 결과
+- `agency@zenith.kr` 로그인 → `update_order_status_atomic` RPC 직접 호출 → **204 성공** ✅
+- 테스트 오더 `303f3ee1-...`(`ZEN-2026-000001`) → REGISTERED → WAREHOUSED 전이 성공 후 REGISTERED로 복구 완료
+- 더 이상 "Order not found" 또는 500 에러 발생하지 않음
 
 ## 변경 파일
 
@@ -106,3 +116,4 @@ PR#646(Baker, TASK-B-170)에서 `ROLE_PERMISSIONS[OPERATOR]`에 WAREHOUSED/PACKE
 | `tests/setup.ts` | server-only mock 추가 |
 | `tests/__mocks__/server-only.ts` | vitest alias용 빈 모듈 |
 | `vitest.config.ts` | server-only alias 추가 |
+| `supabase/migrations/20260722000000_def114_agency_warehouse_rls.sql` | AGENCY UPDATE RLS + inventory_history INSERT 확장 |
