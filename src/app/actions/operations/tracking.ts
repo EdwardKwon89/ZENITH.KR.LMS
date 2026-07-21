@@ -233,3 +233,24 @@ export async function getGlobalTrackingOverview(page = 1, pageSize = 50) {
 
   return { configs: configsWithEvents, total: count || 0 };
 }
+
+/**
+ * UPS 트래킹 이벤트 조회 (zen_ups_tracking_events 테이블)
+ */
+export async function getUpsTrackingEvents(orderId: string) {
+  const { supabase } = await validateUserAction();
+
+  const { data, error } = await supabase
+    .from("zen_ups_tracking_events")
+    .select("id, tracking_number, order_id, event_date, event_time, event_code, event_desc, location_city, location_country")
+    .eq("order_id", orderId)
+    .order("event_date", { ascending: false })
+    .order("event_time", { ascending: false });
+
+  if (error) {
+    logger.error("getUpsTrackingEvents error:", error);
+    return { events: [] };
+  }
+
+  return { events: data || [] };
+}

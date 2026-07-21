@@ -52,6 +52,7 @@
     "logistics_inbound": "입고 처리",
     "logistics_ups_receiving": "UPS접수",
     "logistics_outbound": "출고 처리",
+    "logistics_departure": "출고확정",
     "finance_group": "정산/재무",
     "finance": "재무 현황",
     "finance_revenue": "수입 현황",
@@ -680,6 +681,17 @@
     "undo_failed": "UPS 등록취소에 실패했습니다.",
     "today_history": "오늘의 UPS 접수 이력",
     "empty_history": "오늘 UPS 접수된 내역이 없습니다."
+  },
+  "WarehouseDeparture": {
+    "title": "출고확정",
+    "select_orders": "출고확정할 오더 선택",
+    "search_placeholder": "오더번호로 검색",
+    "select_all": "전체 선택",
+    "deselect_all": "전체 해제",
+    "confirm_btn": "출고확정 처리",
+    "success_msg": "출고확정이 완료되었습니다.",
+    "partial_success": "출고확정 완료: {success}건 성공, {fail}건 실패",
+    "error_none_selected": "출고확정할 오더를 선택해주세요."
   },
   "ShippingLabel": {
     "title": "운송장",
