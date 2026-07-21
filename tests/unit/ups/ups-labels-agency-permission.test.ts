@@ -19,9 +19,14 @@ vi.mock('@/lib/ups/label-mapping', () => ({
 }));
 
 const mockValidateUserAction = vi.fn();
+const mockCallShxk = vi.fn();
 
 vi.mock('@/lib/auth/guards', () => ({
   validateUserAction: (...args: any[]) => mockValidateUserAction(...args),
+}));
+
+vi.mock('@/lib/shxk/client', () => ({
+  callShxk: (...args: any[]) => mockCallShxk(...args),
 }));
 
 function mockSupabase() {
@@ -43,62 +48,24 @@ function mockSupabase() {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  mockValidateUserAction.mockResolvedValue({
-    supabase: mockSupabase(),
-    profile: { id: 'user-1', role: 'ADMIN', org_id: 'org-1' },
-  });
+  mockCallShxk.mockResolvedValue({ success: 0, message: 'mock error' });
 });
 
 describe('DEF-116: checkLabelPermission AGENCY 추가', () => {
-  it('AGENCY 역할이 checkLabelPermission을 통과한다', async () => {
+  it('AGENCY 역할이 registerUpsOrder에서 checkLabelPermission을 통과한다', async () => {
     mockValidateUserAction.mockResolvedValue({
       supabase: mockSupabase(),
       profile: { id: 'agency-user', role: 'AGENCY', org_id: 'org-1' },
     });
 
-    const { getUpsLabelStatus } = await import('@/app/actions/operations/ups-labels');
-    const result = await getUpsLabelStatus('order-1');
+    const { registerUpsOrder } = await import('@/app/actions/operations/ups-labels');
+    const result = await registerUpsOrder('order-1');
 
-    expect(result).toBeDefined();
+    expect(result.success).toBe(false);
+    expect(result.error).not.toContain('권한이 없습니다');
   });
 
-  it('ADMIN 역할이 checkLabelPermission을 통과한다', async () => {
-    mockValidateUserAction.mockResolvedValue({
-      supabase: mockSupabase(),
-      profile: { id: 'admin-user', role: 'ADMIN', org_id: 'org-1' },
-    });
-
-    const { getUpsLabelStatus } = await import('@/app/actions/operations/ups-labels');
-    const result = await getUpsLabelStatus('order-1');
-
-    expect(result).toBeDefined();
-  });
-
-  it('MANAGER 역할이 checkLabelPermission을 통과한다', async () => {
-    mockValidateUserAction.mockResolvedValue({
-      supabase: mockSupabase(),
-      profile: { id: 'manager-user', role: 'MANAGER', org_id: 'org-1' },
-    });
-
-    const { getUpsLabelStatus } = await import('@/app/actions/operations/ups-labels');
-    const result = await getUpsLabelStatus('order-1');
-
-    expect(result).toBeDefined();
-  });
-
-  it('권한 없는 역할(CORPORATE)은 checkLabelPermission에서 거부된다', async () => {
-    mockValidateUserAction.mockResolvedValue({
-      supabase: mockSupabase(),
-      profile: { id: 'corp-user', role: 'CORPORATE', org_id: 'org-1' },
-    });
-
-    const { getUpsLabelStatus } = await import('@/app/actions/operations/ups-labels');
-    const result = await getUpsLabelStatus('order-1');
-
-    expect(result.hasActiveLabel).toBe(false);
-  });
-
-  it('AGENCY 역할로 fetchAndIssueUpsLabel이 동작한다', async () => {
+  it('AGENCY 역할이 fetchAndIssueUpsLabel에서 checkLabelPermission을 통과한다', async () => {
     mockValidateUserAction.mockResolvedValue({
       supabase: mockSupabase(),
       profile: { id: 'agency-user', role: 'AGENCY', org_id: 'org-1' },
@@ -107,7 +74,46 @@ describe('DEF-116: checkLabelPermission AGENCY 추가', () => {
     const { fetchAndIssueUpsLabel } = await import('@/app/actions/operations/ups-labels');
     const result = await fetchAndIssueUpsLabel('order-1');
 
-    expect(result).toBeDefined();
     expect(result.success).toBe(false);
+    expect(result.error).not.toContain('권한이 없습니다');
+  });
+
+  it('AGENCY 역할이 cancelUpsRegistration에서 checkLabelPermission을 통과한다', async () => {
+    mockValidateUserAction.mockResolvedValue({
+      supabase: mockSupabase(),
+      profile: { id: 'agency-user', role: 'AGENCY', org_id: 'org-1' },
+    });
+
+    const { cancelUpsRegistration } = await import('@/app/actions/operations/ups-labels');
+    const result = await cancelUpsRegistration('order-1');
+
+    expect(result.success).toBe(false);
+    expect(result.error).not.toContain('권한이 없습니다');
+  });
+
+  it('권한 없는 역할(CORPORATE)은 registerUpsOrder에서 checkLabelPermission에 거부된다', async () => {
+    mockValidateUserAction.mockResolvedValue({
+      supabase: mockSupabase(),
+      profile: { id: 'corp-user', role: 'CORPORATE', org_id: 'org-1' },
+    });
+
+    const { registerUpsOrder } = await import('@/app/actions/operations/ups-labels');
+    const result = await registerUpsOrder('order-1');
+
+    expect(result.success).toBe(false);
+    expect(result.error).toContain('권한이 없습니다');
+  });
+
+  it('권한 없는 역할(CORPORATE)은 fetchAndIssueUpsLabel에서 checkLabelPermission에 거부된다', async () => {
+    mockValidateUserAction.mockResolvedValue({
+      supabase: mockSupabase(),
+      profile: { id: 'corp-user', role: 'CORPORATE', org_id: 'org-1' },
+    });
+
+    const { fetchAndIssueUpsLabel } = await import('@/app/actions/operations/ups-labels');
+    const result = await fetchAndIssueUpsLabel('order-1');
+
+    expect(result.success).toBe(false);
+    expect(result.error).toContain('권한이 없습니다');
   });
 });
