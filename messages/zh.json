@@ -183,7 +183,8 @@
     "undo_success": "UPS注册已取消。",
     "undo_failed": "UPS注册取消失败。",
     "today_history": "今日UPS收货记录",
-    "empty_history": "今日没有UPS收货记录。"
+    "empty_history": "今日没有UPS收货记录。",
+    "partial_success": "UPS注册完成：{success}件成功，{fail}件失败"
   },
   "WarehouseDeparture": {
     "title": "出库确认",

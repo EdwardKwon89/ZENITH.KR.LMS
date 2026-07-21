@@ -685,7 +685,8 @@
     "undo_success": "UPS registration cancelled successfully.",
     "undo_failed": "Failed to cancel UPS registration.",
     "today_history": "Today's UPS Receiving History",
-    "empty_history": "No UPS receiving records processed today."
+    "empty_history": "No UPS receiving records processed today.",
+    "partial_success": "UPS registration complete: {success} succeeded, {fail} failed"
   },
   "WarehouseDeparture": {
     "title": "Departure Confirm",
