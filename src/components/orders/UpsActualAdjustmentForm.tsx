@@ -243,7 +243,7 @@ export function UpsActualAdjustmentForm({
                   : '인보이스 금액이 자동 갱신됩니다')
               : variance < 0
                 ? (reconciliation?.isFinalized
-                    ? '크레딧 노트가 발행되었습니다'
+                    ? '차감 인보이스가 발행되었습니다'
                     : '인보이스 금액이 차감 조정됩니다')
                 : '차액 없음 (조정 비용 불필요)'}
           </p>
