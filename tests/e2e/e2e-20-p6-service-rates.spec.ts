@@ -1,12 +1,11 @@
 import { test, expect } from '@playwright/test';
-import { createClient } from '@supabase/supabase-js';
+import { getServiceClient } from './test-utils';
 import fs from 'fs';
 import path from 'path';
 import dotenv from 'dotenv';
 
 dotenv.config({ path: '.env.local' });
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'http://127.0.0.1:54321';
 const SCREENSHOT_DIR = 'docs/99_Manual/E2E_20_Result';
 
 const ADMIN_EMAIL = 'admin@zenith.kr';
@@ -44,9 +43,7 @@ test.describe('E2E-20: Phase 6 New Service Roles and Multi-Service Assignment', 
       fs.mkdirSync(SCREENSHOT_DIR, { recursive: true });
     }
 
-    const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    if (!key) throw new Error('SUPABASE_SERVICE_ROLE_KEY is required');
-    const supabase = createClient(SUPABASE_URL, key);
+    const supabase = getServiceClient();
 
     // 1. Clean up existing test users/profiles & organizations
     const emails = [
@@ -116,11 +113,11 @@ test.describe('E2E-20: Phase 6 New Service Roles and Multi-Service Assignment', 
     const { data: dOrg } = await supabase.from('zen_organizations').insert({ name: 'E2E20 Delivery Agent', type: 'DELIVERY', status: 'ACTIVE' }).select().single();
     const { data: obOrg } = await supabase.from('zen_organizations').insert({ name: 'E2E20 Another Customs Broker', type: 'CUSTOMS', status: 'ACTIVE' }).select().single();
 
-    shipperOrgId = sOrg.id;
-    carrierOrgId = cOrg.id;
-    brokerOrgId = bOrg.id;
-    deliveryOrgId = dOrg.id;
-    otherBrokerOrgId = obOrg.id;
+    shipperOrgId = sOrg!.id;
+    carrierOrgId = cOrg!.id;
+    brokerOrgId = bOrg!.id;
+    deliveryOrgId = dOrg!.id;
+    otherBrokerOrgId = obOrg!.id;
 
     // Create Carrier Record
     await supabase.from('zen_carriers').insert({
@@ -177,17 +174,17 @@ test.describe('E2E-20: Phase 6 New Service Roles and Multi-Service Assignment', 
     }
   });
 
-  async function loginAs(page, email, password) {
+  async function loginAs(page: any, email: string, password: string) {
     console.log(`Logging in as: ${email}`);
-    page.on('console', msg => { console.log(`[PAGE ${msg.type().toUpperCase()}]: ${msg.text()}`); });
+    page.on('console', (msg: any) => { console.log(`[PAGE ${msg.type().toUpperCase()}]: ${msg.text()}`); });
     await page.context().clearCookies();
     await page.goto('/ko/login');
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000);
     // Use native DOM setter to bypass React controlled input re-render races
-    await page.evaluate(({ email, password }) => {
-      const setNativeValue = (el, val) => {
-        const nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+    await page.evaluate(({ email, password }: { email: string; password: string }) => {
+      const setNativeValue = (el: any, val: string) => {
+        const nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')!.set!;
         nativeSetter.call(el, val);
         el.dispatchEvent(new Event('input', { bubbles: true }));
       };
@@ -198,13 +195,13 @@ test.describe('E2E-20: Phase 6 New Service Roles and Multi-Service Assignment', 
     }, { email, password });
     await page.waitForTimeout(300);
     await Promise.all([
-      page.waitForURL(url => url.pathname !== '/ko/login', { timeout: 30000 }),
+      page.waitForURL((url: URL) => url.pathname !== '/ko/login', { timeout: 30000 }),
       page.click('button[data-action="login"]'),
     ]);
     console.log(`✅ Logged in as: ${email}`);
   }
 
-  async function selectPort(page, portCode) {
+  async function selectPort(page: any, portCode: string) {
     const selects = page.locator('select');
     const count = await selects.count();
     for (let i = 0; i < count; i++) {
@@ -220,9 +217,7 @@ test.describe('E2E-20: Phase 6 New Service Roles and Multi-Service Assignment', 
 
   test('E2E-P6-01: CARRIER rate registration and Shipper order creation', async ({ page }) => {
     test.setTimeout(120000);
-    const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    if (!key) throw new Error('SUPABASE_SERVICE_ROLE_KEY is required');
-    const supabase = createClient(SUPABASE_URL, key);
+    const supabase = getServiceClient();
 
     // 1. CARRIER registers rate card using admin role (since admin/rates inputs are disabled for Carrier on UI)
     console.log('Step 1: Admin registers rate card for Carrier');
@@ -237,10 +232,10 @@ test.describe('E2E-20: Phase 6 New Service Roles and Multi-Service Assignment', 
 
     // Register active rate card via direct DB insert for robust setup
     await supabase.from('zen_rate_cards').insert({
-      carrier_id: carrierRec.id,
+      carrier_id: carrierRec!.id,
       transport_mode: 'AIR',
-      origin_port_id: icnPort.id,
-      dest_port_id: sinPort.id,
+      origin_port_id: icnPort!.id,
+      dest_port_id: sinPort!.id,
       tiers: [{ weight_min: 0, unit_price: 3.5, min_total_price: 50 }],
       carrier_cost: 2.0,
       margin_rate: 10.0,
@@ -252,7 +247,7 @@ test.describe('E2E-20: Phase 6 New Service Roles and Multi-Service Assignment', 
 
     // Auto-create Route Network row
     await supabase.from('zen_route_network').upsert({
-      carrier_id: carrierRec.id,
+      carrier_id: carrierRec!.id,
       from_port_id: 'ICN',
       to_port_id: 'SIN',
       transport_mode: 'AIR',
@@ -331,14 +326,12 @@ test.describe('E2E-20: Phase 6 New Service Roles and Multi-Service Assignment', 
 
   test('E2E-P6-02: CUSTOMS_BROKER rate registration and Shipper order customs selection', async ({ page }) => {
     test.setTimeout(120000);
-    const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    if (!key) throw new Error('SUPABASE_SERVICE_ROLE_KEY is required');
-    const supabase = createClient(SUPABASE_URL, key);
+    const supabase = getServiceClient();
 
     // 1. Insert customs rate directly for the broker's org
     const { data: brokerOrg } = await supabase.from('zen_organizations').select('id').eq('name', 'E2E20 Customs Broker').single();
     await supabase.from('zen_customs_rates').insert({
-      org_id: brokerOrg.id,
+      org_id: brokerOrg!.id,
       country_code: 'SG',
       currency: 'USD',
       cost_per_kg: 1.5,
@@ -400,15 +393,13 @@ test.describe('E2E-20: Phase 6 New Service Roles and Multi-Service Assignment', 
 
   test('E2E-P6-03: DELIVERY_AGENT rate registration and Shipper order delivery selection', async ({ page }) => {
     test.setTimeout(120000);
-    const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    if (!key) throw new Error('SUPABASE_SERVICE_ROLE_KEY is required');
-    const supabase = createClient(SUPABASE_URL, key);
+    const supabase = getServiceClient();
 
     // 1. Insert delivery rates directly for the delivery org
     const { data: deliveryOrg } = await supabase.from('zen_organizations').select('id').eq('name', 'E2E20 Delivery Agent').single();
     // Local delivery rate (SG)
     await supabase.from('zen_delivery_rates').insert({
-      org_id: deliveryOrg.id,
+      org_id: deliveryOrg!.id,
       service_type: 'LOCAL',
       country_code: 'SG',
       currency: 'USD',
@@ -420,7 +411,7 @@ test.describe('E2E-20: Phase 6 New Service Roles and Multi-Service Assignment', 
     });
     // Total delivery rate (ICN→SIN)
     await supabase.from('zen_delivery_rates').insert({
-      org_id: deliveryOrg.id,
+      org_id: deliveryOrg!.id,
       service_type: 'TOTAL',
       origin_code: 'ICN',
       dest_code: 'SIN',
@@ -479,22 +470,20 @@ test.describe('E2E-20: Phase 6 New Service Roles and Multi-Service Assignment', 
 
   test('E2E-P6-04: Role-based order visibility isolation', async ({ page }) => {
     test.setTimeout(120000);
-    const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    if (!key) throw new Error('SUPABASE_SERVICE_ROLE_KEY is required');
-    const supabase = createClient(SUPABASE_URL, key);
+    const supabase = getServiceClient();
 
     // 1. Create a specific order with sOrg, cOrg, bOrg, dOrg assigned
     console.log('Step 1: Create an order with Carrier, Broker, and Delivery assigned');
     
     // Use existing rate card (created by P6-01) or insert a fresh one
     const { data: carrierRec } = await supabase.from('zen_carriers').select('id').eq('code', 'E2E20_CARRIER').single();
-    let { data: rateCard } = await supabase.from('zen_rate_cards').select('id').eq('carrier_id', carrierRec.id).limit(1).maybeSingle();
+    let rateCard: Record<string, any> | null = (await supabase.from('zen_rate_cards').select('id').eq('carrier_id', carrierRec!.id).limit(1).maybeSingle()).data;
     if (!rateCard) {
       const { data: icnPort } = await supabase.from('zen_ports').select('id').eq('code', 'ICN').single();
       const { data: sinPort } = await supabase.from('zen_ports').select('id').eq('code', 'SIN').single();
       const { data: rc } = await supabase.from('zen_rate_cards').insert({
-        carrier_id: carrierRec.id, transport_mode: 'AIR', origin_port_id: icnPort.id,
-        dest_port_id: sinPort.id, tiers: [{ weight_min: 0, unit_price: 3.5, min_total_price: 50 }],
+        carrier_id: carrierRec!.id, transport_mode: 'AIR', origin_port_id: icnPort!.id,
+        dest_port_id: sinPort!.id, tiers: [{ weight_min: 0, unit_price: 3.5, min_total_price: 50 }],
         carrier_cost: 2.0, margin_rate: 10.0, platform_fee_rate: 5.0,
         valid_from: '2026-06-01', valid_until: '2026-12-31', is_active: true
       }).select().single();
@@ -504,10 +493,12 @@ test.describe('E2E-20: Phase 6 New Service Roles and Multi-Service Assignment', 
       org_id: brokerOrgId, country_code: 'SG', cost_per_kg: 1.5, cost_per_cbm: 15.0,
       fixed_fee: 25.0, transit_days: 1, valid_from: '2026-06-01', is_active: true
     }, { onConflict: 'org_id,country_code,valid_from' }).select().single();
+    const brokerRateId = brokerRate?.id;
     const { data: deliveryRate } = await supabase.from('zen_delivery_rates').insert({
       org_id: deliveryOrgId, service_type: 'LOCAL', country_code: 'SG',
       cost_per_kg: 0.8, cost_per_cbm: 8.0, transit_days: 1, valid_from: '2026-06-01', is_active: true
     }).select().single();
+    const deliveryRateId = deliveryRate?.id;
     
     const { data: order, error: orderErr } = await supabase.from('zen_orders').insert({
       order_no: 'E2E20-P6-04-' + Date.now(),
@@ -516,8 +507,8 @@ test.describe('E2E-20: Phase 6 New Service Roles and Multi-Service Assignment', 
       carrier_id: carrierOrgId,
       status: 'REGISTERED',
       transport_mode: 'AIR',
-      origin_port_id: (await supabase.from('zen_ports').select('id').eq('code', 'ICN').single()).data.id,
-      dest_port_id: (await supabase.from('zen_ports').select('id').eq('code', 'SIN').single()).data.id,
+      origin_port_id: (await supabase.from('zen_ports').select('id').eq('code', 'ICN').single()).data!.id,
+      dest_port_id: (await supabase.from('zen_ports').select('id').eq('code', 'SIN').single()).data!.id,
       recipient_name: 'Visibility Test',
       recipient_address: '123 Test St',
       recipient_phone: '1234'
@@ -526,37 +517,37 @@ test.describe('E2E-20: Phase 6 New Service Roles and Multi-Service Assignment', 
 
     // Insert order services
     await supabase.from('zen_order_services').insert([
-      { order_id: order.id, service_type: 'TRANSPORT', provider_id: carrierOrgId, rate_card_id: rateCard.id, quoted_cost: 350, currency: 'USD' },
-      { order_id: order.id, service_type: 'CUSTOMS', provider_id: brokerOrgId, customs_rate_id: brokerRate.id, quoted_cost: 100, currency: 'USD' },
-      { order_id: order.id, service_type: 'DELIVERY_LOCAL', provider_id: deliveryOrgId, delivery_rate_id: deliveryRate.id, quoted_cost: 50, currency: 'USD' }
+      { order_id: order!.id, service_type: 'TRANSPORT', provider_id: carrierOrgId, rate_card_id: rateCard!.id, quoted_cost: 350, currency: 'USD' },
+      { order_id: order!.id, service_type: 'CUSTOMS', provider_id: brokerOrgId, customs_rate_id: brokerRateId!, quoted_cost: 100, currency: 'USD' },
+      { order_id: order!.id, service_type: 'DELIVERY_LOCAL', provider_id: deliveryOrgId, delivery_rate_id: deliveryRateId!, quoted_cost: 50, currency: 'USD' }
     ]);
 
     // 2. Log in as test_broker_e2e20@zenith.kr (Assigned Broker) -> should see it
     await loginAs(page, BROKER_EMAIL, BROKER_PASSWORD);
     await page.goto('/ko/orders/assigned');
     await page.waitForLoadState('networkidle');
-    await expect(page.locator(`text=${order.order_no}`)).toBeVisible({ timeout: 15000 });
+    await expect(page.locator(`text=${order!.order_no}`)).toBeVisible({ timeout: 15000 });
     await page.screenshot({ path: `${SCREENSHOT_DIR}/p6-04-01-assigned-broker-visible.png`, fullPage: true });
 
     // 3. Log in as another_broker_e2e20@zenith.kr (Unassigned Broker) -> should NOT see it
     await loginAs(page, OTHER_BROKER_EMAIL, OTHER_BROKER_PASSWORD);
     await page.goto('/ko/orders/assigned');
     await page.waitForLoadState('networkidle');
-    await expect(page.locator(`text=${order.order_no}`)).not.toBeVisible({ timeout: 5000 });
+    await expect(page.locator(`text=${order!.order_no}`)).not.toBeVisible({ timeout: 5000 });
     await page.screenshot({ path: `${SCREENSHOT_DIR}/p6-04-02-unassigned-broker-hidden.png`, fullPage: true });
 
     // 4. Log in as test_shipper_e2e20@zenith.kr (Shipper) -> should see it in /orders
     await loginAs(page, SHIPPER_EMAIL, SHIPPER_PASSWORD);
     await page.goto('/ko/orders');
     await page.waitForLoadState('networkidle');
-    await expect(page.locator(`text=${order.order_no}`)).toBeVisible({ timeout: 15000 });
+    await expect(page.locator(`text=${order!.order_no}`)).toBeVisible({ timeout: 15000 });
     await page.screenshot({ path: `${SCREENSHOT_DIR}/p6-04-03-shipper-visible.png`, fullPage: true });
 
     // 5. Log in as admin@zenith.kr (Admin) -> should see it in /orders
     await loginAs(page, ADMIN_EMAIL, ADMIN_PASSWORD);
     await page.goto('/ko/orders');
     await page.waitForLoadState('networkidle');
-    await expect(page.locator(`text=${order.order_no}`)).toBeVisible({ timeout: 15000 });
+    await expect(page.locator(`text=${order!.order_no}`)).toBeVisible({ timeout: 15000 });
     await page.screenshot({ path: `${SCREENSHOT_DIR}/p6-04-04-admin-visible.png`, fullPage: true });
 
     console.log('✅ E2E-P6-04 RLS visibility isolation verified.');

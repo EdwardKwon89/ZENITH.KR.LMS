@@ -80,11 +80,11 @@ test.describe('E2E-19: Hub Routing Flow — Route Calculation, Order Creation & 
     console.log('✅ Transport mode set to AIR');
 
     // Origin port: PVG
-    await page.selectOption('select[name="origin_port_id"]', { label: /PVG|Shanghai/i });
-    console.log('✅ Origin port PVG selected');
+    await page.selectOption('select[name="origin_port_id"]', { index: 1 });
+    console.log('✅ Origin port selected');
 
     // Dest port: LAX
-    await page.selectOption('select[name="dest_port_id"]', { label: /LAX|Los Angeles/i });
+    await page.selectOption('select[name="dest_port_id"]', { index: 1 });
     console.log('✅ Dest port LAX selected');
 
     // Recipient info

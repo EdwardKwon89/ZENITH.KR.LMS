@@ -311,11 +311,11 @@ describe('SettlementEngine Route-Based Cost Integration (IMP-070)', () => {
 
   it('TC-UPS-4: [Failure] 확정된 인보이스가 있는 오더에 INSERT 시도 시 차단', async () => {
     // Mock validateUserAction to return our control supabase + admin profile
-    const mockProfile = { role: 'ADMIN', org_id: 'admin-org-id' };
+    const mockProfile = { id: 'admin-user-id', email: 'admin@test.com', role: 'ADMIN', org_id: 'admin-org-id', status: 'ACTIVE', full_name: 'Admin', phone_number: null };
     vi.mocked(validateUserAction).mockResolvedValue({
       supabase: mockSupabase,
       profile: mockProfile,
-      user: { id: 'admin-user-id' },
+      user: { id: 'admin-user-id', app_metadata: {}, user_metadata: {}, aud: '', created_at: '', email: '' },
     });
 
     const { addManualOrderCost } = await import('@/app/actions/finance/settlement');

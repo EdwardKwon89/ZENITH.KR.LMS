@@ -21,7 +21,7 @@ vi.mock('next/cache', () => ({ unstable_cache: (fn: any) => fn,
 
 describe('ZENITH Logistics: Order Creation Logic', () => {
   const mockUser = { id: 'user-123' };
-  const mockProfile = { id: 'user-123', org_id: 'org-456' };
+  const mockProfile = { id: 'user-123', org_id: 'org-456', role: 'CORPORATE' };
   const mockOrderNo = 'ZEN-2026-000001';
 
   let mockSupabase: any;
@@ -81,7 +81,7 @@ describe('ZENITH Logistics: Order Creation Logic', () => {
     mockSupabase.rpc.mockResolvedValue({ data: { id: 'new-order-id', order_no: mockOrderNo }, error: null });
 
     // When
-    const result = await createOrder(payload as any);
+    const result = await createOrder(payload as any) as any;
 
     // Then
     expect(result.order_no).toBe(mockOrderNo);
@@ -341,7 +341,7 @@ describe('ZENITH Logistics: Order Creation Logic', () => {
 
 describe('TC-SNAP-01: saveOrderRateSnapshot recipient_country_code 사용', () => {
   const mockUser = { id: 'user-123' };
-  const mockProfile = { id: 'user-123', org_id: 'org-456' };
+  const mockProfile = { id: 'user-123', org_id: 'org-456', role: 'CORPORATE' };
 
   let mockSupabase: any;
   let mockEstimateFn: any;

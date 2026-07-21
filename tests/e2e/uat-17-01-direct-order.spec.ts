@@ -1,11 +1,9 @@
 import { test, expect } from '@playwright/test';
-import { createClient } from '@supabase/supabase-js';
+import { getServiceClient } from './test-utils';
 import dotenv from 'dotenv';
 dotenv.config({ path: '.env.local' });
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'http://127.0.0.1:54321';
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
-const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+const supabase = getServiceClient();
 
 const SCREENSHOT_DIR = 'docs/99_Manual/UAT_17_Result';
 const SHIPPER_EMAIL = 'agency_shipper@zenith.kr';
@@ -47,7 +45,7 @@ test.describe('UAT-17-01: 직접배송(DIRECT) 선택 오더 등록 및 픽업 �
     await expect(directBtn).toBeVisible();
 
     // 6. DB verification
-    const { data: ports } = await supabase.from('zen_ports').select('id').in('code', ['ICN', 'LAX']);
+    const { data: ports } = await supabase.from('zen_ports').select('id, code').in('code', ['ICN', 'LAX']);
     const testOrderNo = `UAT1701-DIRECT-${Date.now()}`;
     const { data: order, error: orderErr } = await supabase.from('zen_orders').insert({
       order_no: testOrderNo,
@@ -57,8 +55,8 @@ test.describe('UAT-17-01: 직접배송(DIRECT) 선택 오더 등록 및 픽업 �
       order_type: 'B2B',
       delivery_method: 'DIRECT',
       cargo_details: { qty: 1, weight: 5.0, description: 'UAT-17-01 test' },
-      origin_port_id: ports?.find(p => p.code === 'ICN')?.id || null,
-      dest_port_id: ports?.find(p => p.code === 'LAX')?.id || null,
+      origin_port_id: ports?.find((p) => p.code === 'ICN')?.id || null,
+      dest_port_id: ports?.find((p) => p.code === 'LAX')?.id || null,
       recipient_name: 'John Doe',
       recipient_address: '123 Main Street, Los Angeles, CA 90001, USA',
       recipient_phone: '010-1234-5678',

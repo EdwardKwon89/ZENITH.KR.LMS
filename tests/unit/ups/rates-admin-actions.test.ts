@@ -104,7 +104,7 @@ describe('TC-UPS-ADMIN: UPS Admin Rate CRUD Actions', () => {
   });
 
   it('TC-UPS-ADMIN-06: upsertAgencyPricingPolicy — 대리점 할인율 정책 등록', async () => {
-    await upsertAgencyPricingPolicy({ agency_org_id: 'agency-001', discount_rate: 0.15 });
+    await upsertAgencyPricingPolicy({ agency_org_id: 'agency-001', discount_rate: 0.15, zone_id: 'zone-001' });
     expect(mockSupabase.from).toHaveBeenCalledWith('zen_agency_pricing_policies');
   });
 

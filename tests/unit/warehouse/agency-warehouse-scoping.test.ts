@@ -13,7 +13,7 @@ vi.mock('@/lib/logger', () => ({ logger: { error: vi.fn() } }));
 const mockRepo = vi.hoisted(() => ({ findById: vi.fn() }));
 vi.mock('@/lib/repositories', () => ({
   BaseRepository: class {},
-  OrderRepository: class { constructor() { this.findById = mockRepo.findById; } },
+  OrderRepository: class { constructor() { (this as any).findById = mockRepo.findById; } },
   FinanceRepository: class {},
   AdminRepository: class {},
 }));
@@ -204,7 +204,7 @@ describe('TC-WH-AGENCY: AGENCY 창고 권한 + 조직 스코핑', () => {
     const result = await getTodayReleasedOrders();
     expect(result.success).toBe(true);
     expect(result.items.length).toBe(1);
-    expect(result.items[0].order.shipper_id).toBe('shipper-A');
+    expect((result.items[0].order as any).shipper_id).toBe('shipper-A');
   });
 
   it('TC-WH-AGENCY-10: AGENCY_SHIPPER角色 → 403 (창고 접근 불가)', async () => {

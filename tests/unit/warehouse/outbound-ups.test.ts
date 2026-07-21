@@ -11,7 +11,7 @@ vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }));
 const mockRepo = vi.hoisted(() => ({ findById: vi.fn() }));
 vi.mock('@/lib/repositories', () => ({
   BaseRepository: class {},
-  OrderRepository: class { constructor() { this.findById = mockRepo.findById; } },
+  OrderRepository: class { constructor() { (this as any).findById = mockRepo.findById; } },
   FinanceRepository: class {},
   AdminRepository: class {},
 }));
