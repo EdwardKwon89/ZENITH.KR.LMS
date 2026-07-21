@@ -105,6 +105,7 @@ export default function NaviSidebar({
         { title: t("inventory"), href: "/inventory" },
         { title: t("logistics_pickup"), href: "/warehouse/pickup" },
         { title: t("logistics_inbound"), href: "/warehouse/inbound" },
+        { title: t("logistics_ups_receiving"), href: "/warehouse/ups-receive" },
         { title: t("logistics_outbound"), href: "/warehouse/outbound" },
       ]
     },

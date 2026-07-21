@@ -11,9 +11,11 @@ import {
 } from "@/components/ui/ZenUI";
 import {
   getWarehousedOrders,
+  getPackedOrders,
   confirmOutbound,
+  undoOutbound,
   getTodayReleasedOrders,
-} from "@/app/actions/warehouse";
+} from "@/app/actions/operations";
 import { OrderStatus, ORDER_STATUS_META } from "@/types/orders";
 import {
   CheckCircle,
@@ -28,7 +30,7 @@ import {
   RotateCcw,
   XCircle,
 } from "lucide-react";
-import { issueUpsLabel, voidUpsLabel } from "@/app/actions/operations/ups-labels";
+import { issueUpsLabel, voidUpsLabel, fetchAndIssueUpsLabel } from "@/app/actions/operations/ups-labels";
 import { cn } from "@/lib/utils";
 import dynamic from "next/dynamic";
 import type { OrderListItem } from "@/types/orders";
@@ -57,6 +59,9 @@ export default function OutboundProcessForm({ locale }: { locale: string }) {
   const [issuingLabels, setIssuingLabels] = useState(false);
   const [voidTarget, setVoidTarget] = useState<string | null>(null);
   const [voidLoading, setVoidLoading] = useState(false);
+  const [docTypePopup, setDocTypePopup] = useState<{ orderId: string; orderNo: string } | null>(null);
+  const [undoOutboundTarget, setUndoOutboundTarget] = useState<string | null>(null);
+  const [undoOutboundLoading, setUndoOutboundLoading] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -65,11 +70,15 @@ export default function OutboundProcessForm({ locale }: { locale: string }) {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [orderRes, historyRes] = await Promise.all([
+      const [warehousedRes, packedRes, historyRes] = await Promise.all([
         getWarehousedOrders(),
+        getPackedOrders(),
         getTodayReleasedOrders(),
       ]);
-      if (orderRes.success) setOrders(orderRes.orders);
+      const allOrders: any[] = [];
+      if (warehousedRes.success) allOrders.push(...warehousedRes.orders);
+      if (packedRes.success) allOrders.push(...packedRes.orders);
+      setOrders(allOrders);
       if (historyRes.success) setHistory(historyRes.items);
     } catch (err: any) {
       toast.error(err.message || "데이터 로드 실패");
@@ -106,6 +115,13 @@ export default function OutboundProcessForm({ locale }: { locale: string }) {
     }
 
     const selectedOrders = orders.filter((o) => selected.has(o.id));
+    const packedOrders = selectedOrders.filter((o: any) => o.status === OrderStatus.PACKED);
+
+    if (packedOrders.length > 0) {
+      setDocTypePopup({ orderId: packedOrders[0].id, orderNo: packedOrders[0].order_no });
+      return;
+    }
+
     const packagesNeedingLabels = selectedOrders.flatMap((o: any) =>
       (o.order_packages || []).filter((p: any) => !p.intl_ref_locked)
     );
@@ -117,6 +133,61 @@ export default function OutboundProcessForm({ locale }: { locale: string }) {
     }
 
     await executeConfirmOutbound(selectedOrders);
+  };
+
+  const handleDocTypeConfirm = async (docType: 'WAYBILL' | 'INVOICE' | 'CUSTOMS') => {
+    if (!docTypePopup) return;
+
+    const selectedOrders = orders.filter((o) => selected.has(o.id));
+
+    setSubmitLoading(true);
+    setDocTypePopup(null);
+    try {
+      const packedOrders = selectedOrders.filter((o: any) => o.status === OrderStatus.PACKED);
+      for (const order of packedOrders) {
+        const issueRes = await fetchAndIssueUpsLabel(order.id, docType);
+        if (!issueRes.success) {
+          toast.error(issueRes.error || t("ups_label_issue_failed"));
+          setSubmitLoading(false);
+          return;
+        }
+      }
+
+      const warehousedOrders = selectedOrders.filter((o: any) => o.status === OrderStatus.WAREHOUSED);
+      const packagesNeedingLabels = warehousedOrders.flatMap((o: any) =>
+        (o.order_packages || []).filter((p: any) => !p.intl_ref_locked)
+      );
+
+      if (packagesNeedingLabels.length > 0) {
+        setPendingOrders(warehousedOrders);
+        setShowIntlWarning(true);
+        setSubmitLoading(false);
+        return;
+      }
+
+      await executeConfirmOutbound(selectedOrders);
+    } catch (err: any) {
+      toast.error(err.message || "출고 확정 실패");
+      setSubmitLoading(false);
+    }
+  };
+
+  const handleUndoOutbound = async (orderId: string) => {
+    setUndoOutboundLoading(true);
+    try {
+      const res = await undoOutbound(orderId);
+      if (res.success) {
+        toast.success(t("undo_outbound_success"));
+        setUndoOutboundTarget(null);
+        await fetchData();
+      } else {
+        toast.error(res.error || t("undo_outbound_failed"));
+      }
+    } catch (err: any) {
+      toast.error(err.message || t("undo_outbound_failed"));
+    } finally {
+      setUndoOutboundLoading(false);
+    }
   };
 
   const issueLabelsForPackages = async (ordersToProcess: any[]): Promise<boolean> => {
@@ -368,8 +439,15 @@ export default function OutboundProcessForm({ locale }: { locale: string }) {
                         <span className="font-mono text-sm font-bold text-slate-900">
                           {order.order_no}
                         </span>
-                        <ZenBadge className="bg-yellow-50 text-yellow-700 border-yellow-200 text-[10px]">
-                          {orderStatusT(`${OrderStatus.WAREHOUSED}.label`)}
+                        <ZenBadge className={cn(
+                          order.status === OrderStatus.PACKED
+                            ? "bg-blue-50 text-blue-700 border-blue-200"
+                            : "bg-yellow-50 text-yellow-700 border-yellow-200",
+                          "text-[10px]"
+                        )}>
+                          {order.status === OrderStatus.PACKED
+                            ? orderStatusT(`${OrderStatus.PACKED}.label`)
+                            : orderStatusT(`${OrderStatus.WAREHOUSED}.label`)}
                         </ZenBadge>
                         {pkgs.some((p: any) => p.intl_ref_locked) && (
                           <ZenBadge className="bg-green-50 text-green-700 border-green-200 text-[10px]">
@@ -459,7 +537,7 @@ export default function OutboundProcessForm({ locale }: { locale: string }) {
                 <p className="text-xs font-semibold">
                   {search.trim()
                     ? "검색 결과가 없습니다."
-                    : "출고 대기 중인 WAREHOUSED 오더가 없습니다."}
+                    : "출고 대기 중인 오더가 없습니다."}
                 </p>
               </div>
             )}
@@ -546,6 +624,16 @@ export default function OutboundProcessForm({ locale }: { locale: string }) {
                               <XCircle size={12} />
                               {t("ups_label_void")}
                             </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setUndoOutboundTarget(order.id);
+                              }}
+                              className="inline-flex items-center gap-1 px-2 py-1 text-[10px] font-semibold text-orange-700 bg-orange-50 border border-orange-200 rounded-lg hover:bg-orange-100 transition-colors"
+                            >
+                              <RotateCcw size={12} />
+                              {t("undo_outbound_btn")}
+                            </button>
                           </>
                         ) : (
                           <>
@@ -631,6 +719,69 @@ export default function OutboundProcessForm({ locale }: { locale: string }) {
                 className="px-5 py-2.5 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 rounded-xl transition-all disabled:opacity-50"
               >
                 {voidLoading ? "처리 중..." : t("ups_label_void_confirm")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {docTypePopup && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-bold text-slate-900 mb-2">
+              {t("doc_type_title")}
+            </h3>
+            <p className="text-sm text-slate-600 mb-1">
+              {t("doc_type_desc", { orderNo: docTypePopup.orderNo })}
+            </p>
+            <div className="flex gap-2 mt-6">
+              {(['WAYBILL', 'INVOICE', 'CUSTOMS'] as const).map((dt) => (
+                <button
+                  key={dt}
+                  onClick={() => handleDocTypeConfirm(dt)}
+                  disabled={submitLoading}
+                  className="flex-1 px-3 py-3 text-sm font-semibold text-white bg-purple-600 hover:bg-purple-700 rounded-xl transition-all disabled:opacity-50"
+                >
+                  {t(`doc_type_${dt.toLowerCase()}`)}
+                </button>
+              ))}
+            </div>
+            <div className="flex justify-end mt-4">
+              <button
+                onClick={() => setDocTypePopup(null)}
+                className="px-5 py-2.5 text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all"
+                disabled={submitLoading}
+              >
+                취소
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {undoOutboundTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-bold text-slate-900 mb-2">
+              {t("undo_outbound_title")}
+            </h3>
+            <p className="text-sm text-slate-600 mb-6">
+              {t("undo_outbound_desc")}
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setUndoOutboundTarget(null)}
+                className="px-5 py-2.5 text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all"
+                disabled={undoOutboundLoading}
+              >
+                취소
+              </button>
+              <button
+                onClick={() => handleUndoOutbound(undoOutboundTarget)}
+                disabled={undoOutboundLoading}
+                className="px-5 py-2.5 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 rounded-xl transition-all disabled:opacity-50"
+              >
+                {undoOutboundLoading ? "처리 중..." : t("undo_outbound_confirm")}
               </button>
             </div>
           </div>

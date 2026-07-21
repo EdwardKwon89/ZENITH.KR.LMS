@@ -8,6 +8,7 @@ import { revalidatePath } from "next/cache";
 import { OrderRepository } from "@/lib/repositories";
 import { OrderStatus } from "@/types/orders";
 import { updateOrderStatus } from "./orders";
+import { registerUpsOrder, cancelUpsRegistration, fetchAndIssueUpsLabel, voidUpsLabel } from "./ups-labels";
 
 const WAREHOUSE_ROLES = [
   USER_ROLES.ADMIN,
@@ -312,4 +313,142 @@ export async function cancelInbound(orderId: string) {
   revalidatePath("/(dashboard)/orders", "page");
 
   return { success: true, restoredStatus: prevStatus };
+}
+
+// ─────────────────────────────────────────────
+// C-1: UPS접수 — PACKED 대상 오더 조회
+// ─────────────────────────────────────────────
+
+export async function getPackedOrders() {
+  const { supabase, profile } = await validateUserAction();
+  if (!profile) throw new Error("User profile not found");
+  const isAllowed = WAREHOUSE_ROLES.includes(profile.role as any);
+  if (!isAllowed) throw new Error("권한이 없습니다.");
+
+  let query = supabase
+    .from("zen_orders")
+    .select(`
+      id, order_no, status, created_at,
+      recipient_name, recipient_contact, recipient_address, recipient_phone,
+      shipper:zen_organizations!zen_orders_shipper_id_fkey(name),
+      origin_port:zen_ports!zen_orders_origin_port_id_fkey(name, code),
+      dest_port:zen_ports!zen_orders_dest_port_id_fkey(name, code),
+      order_packages:zen_order_packages!zen_order_packages_order_id_fkey(id, intl_ref_no, intl_ref_locked, packing_unit, packing_count, gross_weight)
+    `)
+    .eq("status", OrderStatus.PACKED);
+
+  if (profile.role === USER_ROLES.AGENCY) {
+    const shipperIds = await getAgencyShipperIds(supabase, profile.org_id);
+    if (!shipperIds || shipperIds.length === 0) {
+      return { success: true, orders: [] };
+    }
+    query = query.in("shipper_id", shipperIds);
+  }
+
+  const { data, error } = await query.order("created_at", { ascending: false });
+  if (error) {
+    logger.error("getPackedOrders error:", error);
+    throw new Error("Failed to fetch packed orders");
+  }
+  return { success: true, orders: data || [] };
+}
+
+// ─────────────────────────────────────────────
+// C-2: UPS등록 확정 — WAREHOUSED → PACKED
+// ─────────────────────────────────────────────
+
+export async function confirmUpsRegistration(orderId: string) {
+  const { supabase, profile } = await validateUserAction();
+  if (!profile) throw new Error("User profile not found");
+  const isAllowed = WAREHOUSE_ROLES.includes(profile.role as any);
+  if (!isAllowed) throw new Error("권한이 없습니다.");
+
+  const orderRepo = new OrderRepository(supabase);
+  const { data: order } = await orderRepo.findById(orderId);
+  if (!order) throw new Error("Order not found");
+  if (order.status !== OrderStatus.WAREHOUSED) {
+    throw new Error("WAREHOUSED 상태의 오더만 UPS 등록할 수 있습니다.");
+  }
+
+  if (profile.role === USER_ROLES.AGENCY) {
+    const shipperIds = await getAgencyShipperIds(supabase, profile.org_id);
+    if (!shipperIds || !shipperIds.includes((order as any).shipper_id)) {
+      throw new Error("본인 소속 화주의 오더만 처리할 수 있습니다.");
+    }
+  }
+
+  const result = await registerUpsOrder(orderId);
+  if (!result.success) return { success: false, error: result.error };
+
+  await updateOrderStatus(orderId, OrderStatus.PACKED, "[UPS등록]");
+
+  revalidatePath("/(dashboard)/warehouse/ups-receive", "page");
+  revalidatePath("/(dashboard)/warehouse/outbound", "page");
+  revalidatePath("/(dashboard)/orders", "page");
+
+  return {
+    success: true,
+    data: {
+      shxk_order_id: result.data!.shxk_order_id,
+      tracking_number: result.data!.tracking_number,
+      reference_no: result.data!.reference_no,
+    },
+  };
+}
+
+// ─────────────────────────────────────────────
+// C-3: UPS등록취소 — PACKED → WAREHOUSED
+// ─────────────────────────────────────────────
+
+export async function undoUpsRegistration(orderId: string) {
+  const { supabase, profile } = await validateUserAction();
+  if (!profile) throw new Error("User profile not found");
+  const isAllowed = WAREHOUSE_ROLES.includes(profile.role as any);
+  if (!isAllowed) throw new Error("권한이 없습니다.");
+
+  const orderRepo = new OrderRepository(supabase);
+  const { data: order } = await orderRepo.findById(orderId);
+  if (!order) throw new Error("Order not found");
+  if (order.status !== OrderStatus.PACKED) {
+    throw new Error("PACKED 상태의 오더만 UPS등록취소할 수 있습니다.");
+  }
+
+  const result = await cancelUpsRegistration(orderId);
+  if (!result.success) return { success: false, error: result.error };
+
+  await updateOrderStatus(orderId, OrderStatus.WAREHOUSED, "[UPS등록취소]");
+
+  revalidatePath("/(dashboard)/warehouse/ups-receive", "page");
+  revalidatePath("/(dashboard)/warehouse/outbound", "page");
+  revalidatePath("/(dashboard)/orders", "page");
+
+  return { success: true };
+}
+
+// ─────────────────────────────────────────────
+// C-4: 출고취소 — RELEASED → PACKED
+// ─────────────────────────────────────────────
+
+export async function undoOutbound(orderId: string) {
+  const { supabase, profile } = await validateUserAction();
+  if (!profile) throw new Error("User profile not found");
+  const isAllowed = WAREHOUSE_ROLES.includes(profile.role as any);
+  if (!isAllowed) throw new Error("권한이 없습니다.");
+
+  const orderRepo = new OrderRepository(supabase);
+  const { data: order } = await orderRepo.findById(orderId);
+  if (!order) throw new Error("Order not found");
+  if (order.status !== OrderStatus.RELEASED) {
+    throw new Error("RELEASED 상태의 오더만 출고취소할 수 있습니다.");
+  }
+
+  const result = await voidUpsLabel(orderId);
+  if (!result.success) return { success: false, error: result.error };
+
+  await updateOrderStatus(orderId, OrderStatus.PACKED, "[출고취소]");
+
+  revalidatePath("/(dashboard)/warehouse/outbound", "page");
+  revalidatePath("/(dashboard)/orders", "page");
+
+  return { success: true };
 }
