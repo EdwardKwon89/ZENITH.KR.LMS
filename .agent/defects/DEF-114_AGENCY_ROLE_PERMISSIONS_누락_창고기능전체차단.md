@@ -117,3 +117,52 @@ AGENCY가 창고 액션을 실행할 수 없었음.
 | `tests/__mocks__/server-only.ts` | vitest alias용 빈 모듈 |
 | `vitest.config.ts` | server-only alias 추가 |
 | `supabase/migrations/20260722000000_def114_agency_warehouse_rls.sql` | AGENCY UPDATE RLS + inventory_history INSERT 확장 |
+
+---
+
+## 추가 발견 경위 (2026-07-22, Jaison) — 위 DB RLS 결함을 처음 특정한 진단 기록
+
+PR#656(`ROLE_PERMISSIONS[AGENCY]` 추가)이 TeamB_Dev에 병합되지 않은 상태에서 JSJung이 해당 브랜치로 실사용 검증 중 **여전히 500 에러 재현**을 보고. 로컬에서 직접 원인을 추적한 결과, **애플리케이션 레벨(`ROLE_PERMISSIONS`) 수정과는 별개로 DB RLS 레벨의 두 번째 결함**이 있음을 확인.
+
+### 재현 절차 및 근거
+
+테스트 오더 `303f3ee1-74b9-4828-8f76-4106bde4fd01`(`ZEN-2026-000001`, `shipper_id=7e4068a7...`, `agency_org_id=48bfa40d...`, `status=REGISTERED`)로 검증:
+
+1. **agency@zenith.kr 세션으로 plain SELECT** (`GET /rest/v1/zen_orders?id=eq...`) → **성공**, 오더 정상 조회됨
+2. **agency@zenith.kr 세션으로 `update_order_status_atomic` RPC 직접 호출** (`p_prev_status=REGISTERED, p_next_status=WAREHOUSED`) → **`{"code":"P0001","message":"Order not found"}`** (HTTP 400)
+3. **동일 RPC를 service_role로 호출** → **204 성공** (RPC 함수 로직 자체는 정상)
+
+### 근본 원인 (추정, 확정은 담당자가 `pg_policies`로 재확인 필요)
+
+`update_order_status_atomic()`(`supabase/migrations/20260520224100_imp047_atomic_transactions.sql`)은 `SECURITY INVOKER`이며 첫 문장이 `SELECT ... FROM zen_orders WHERE id = p_order_id FOR UPDATE`. PostgreSQL RLS 사양상 **`FOR UPDATE`/`FOR SHARE` 락은 SELECT 정책뿐 아니라, 해당 테이블에 UPDATE 정책이 하나라도 정의되어 있으면 그 UPDATE 정책도 함께 만족해야 함**(잠금 자체를 변경의 전조로 간주).
+
+`zen_orders`의 현재 UPDATE 계열 정책(마이그레이션 히스토리 기준 재구성, DROP/CREATE 반복으로 실제 최신 상태는 `pg_policies` 직접 조회 권장):
+- `"Admins can manage all orders"` (FOR ALL) — `role IN (ZENITH_SUPER_ADMIN, ADMIN, MANAGER)`만 허용, AGENCY 미포함
+- `"Org members can update order route"` 등 일부 특수 목적 정책 존재하나 AGENCY 범위 커버 안 됨
+
+반면 **SELECT는 성공**하는 이유: `"agency_shipper_select_own_orders"`(`20260705000002_agency_005_orders_agency_org_id.sql`) 정책이 `USING (agency_org_id = (SELECT org_id FROM zen_profiles WHERE id = auth.uid()))`로 **역할 제한 없이** 정의되어 있어(이름은 AGENCY_SHIPPER용이지만 실제로는 role 체크가 없어 AGENCY도 매치) plain SELECT는 통과함.
+
+**즉: SELECT 정책은 (우연히) AGENCY를 커버하지만, UPDATE 정책은 AGENCY를 전혀 커버하지 않아 `FOR UPDATE` 락 단계에서 막힘.**
+
+### 필요 조치 (PR#656에 추가 또는 후속 마이그레이션)
+
+`zen_orders`에 AGENCY 역할용 UPDATE(또는 FOR ALL) RLS 정책 신규 추가 필요 — 기존 SELECT 정책과 동일하게 `agency_org_id = profile.org_id` 스코프로:
+```sql
+CREATE POLICY "agency_can_update_own_orders" ON zen_orders
+FOR UPDATE
+USING (
+  agency_org_id = (SELECT org_id FROM zen_profiles WHERE id = auth.uid())
+  AND (SELECT role FROM zen_profiles WHERE id = auth.uid()) = 'AGENCY'
+)
+WITH CHECK (
+  agency_org_id = (SELECT org_id FROM zen_profiles WHERE id = auth.uid())
+  AND (SELECT role FROM zen_profiles WHERE id = auth.uid()) = 'AGENCY'
+);
+```
+(정확한 조건/컬럼명은 담당자가 `pg_policies`로 현재 실제 정책 목록을 먼저 확인한 뒤 설계할 것 — 위는 방향성 제시용 예시이며 그대로 적용 금지.)
+
+또한 `order_status_history` INSERT, `zen_inventory_history` INSERT 등 같은 RPC 내에서 함께 쓰는 다른 테이블들도 AGENCY 역할의 INSERT 정책이 있는지 함께 점검 필요(이번 재현에서는 SELECT FOR UPDATE 단계에서 이미 막혀 그 이후 단계까지 도달 못했으므로 미확인 상태).
+
+**테스트 데이터 상태**: 진단 과정에서 `303f3ee1-...` 오더를 service_role로 WAREHOUSED까지 전이시켰다가 REGISTERED로 되돌려놓음.
+
+**(해결됨)** 위 진단을 바탕으로 Dave가 마이그레이션 `20260722000000_def114_agency_warehouse_rls.sql`을 추가해 해결 — 상세는 위 "DB RLS 레이어 추가 발견 (2차)" 섹션 참조.
