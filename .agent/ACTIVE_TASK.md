@@ -15,6 +15,7 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
+| [#671](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/671) | [defect] DEF-117 — zen_order_packages RLS에 AGENCY SELECT 커버리지 없음, UPS접수 여전히 침묵 실패 | b | p1 | - | 미배정 | 2026-07-21 |
 | [#667](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/667) | [defect] DEF-116 — checkLabelPermission()에 AGENCY 누락, UPS 라벨 기능 7종 침묵 실패 | b | p1 | - | 미배정 | 2026-07-21 |
 | [#664](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/664) | [fix] zen_shxk_api_logs 조회 권한을 전체 인증 사용자로 확대 | b | p3 | - | 미배정 | 2026-07-21 |
 | [#661](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/661) | [feat] IMP — SHXK UPS API 호출 통합 이력(감사 로그) 테이블 신설 | b | p3 | - | 미배정 | 2026-07-21 |
