@@ -453,7 +453,7 @@
 | TASK-192 | 260720 | [Team A] SNTL(SUB_ADMIN) 전용 UPS 원가(cost_price) Matrix 편집 기능 — Issue #618 | TASK-191 ✅ | D_Kai | ✅ | [TASK-192](tasks/TASK-192_260720_Issue618_SNTL원가Matrix편집기능_DKai.md) | `upsertAgencyCostRate`(selling_price 미포함, cost_price만) + `UpsBaseRateMatrix` SUB_ADMIN 모드 재사용 완료. PR#620 ✅ Aiden 승인·머지(`ce0a3ade`) — 실제 CI는 인프라 이슈(Supabase CLI rate limit)로 FAILURE였으나 코드 무관 확인, R-08-1 로컬 대체 검증(build✅·회귀 102/102·653/653 PASS) 적용. TC-UPS-ADMIN-12d(SUB_ADMIN의 기존 upsertUpsBaseRate 차단 확인) 포함. Issue #618 Close. |
 | TASK-193 | 260720 | [Team A] 수동 트래킹 이벤트 DELIVERED 입력 시 오더 상태 미반영 수정 — Issue #621 (DEF-111) | 없음 | D_Kai | ✅ | [TASK-193](tasks/TASK-193_260720_Issue621_트래킹이벤트상태동기화_DKai.md) | 재작업(`501421d0`+`555ee069`)으로 커밋 분리·LIVE_REGRESSION_TEST_MAP 갱신 완료 확인 — Aiden ✅ 승인 (260721) |
 | TASK-194 | 260720 | [Team A] UPS 사후청구 조정건 정산완료(2차 청구) — Issue #622 (DEF-112) | TASK-194-A ✅ TASK-194-B ✅ | D_Kai | 🔄 | [TASK-194](tasks/TASK-194_260720_Issue622_사후청구2차청구설계_DKai.md) | A·B 승인·병합 완료. **TASK-194-C 착수 지시 발령** — 마감 후 추가 인보이스(`adjustment_of`)·화주 거부 CANCELED+재발행 플로우. R-09 LIVE_REGRESSION_TEST_MAP 갱신 필수 포함. D는 C 완료 후 발령 |
-| TASK-195 | 260721 | [Team A] CI에 tsc --noEmit advisory 단계 추가 — Issue #627 (IMP-134 §1) | 없음 | Riley | 🔄 | [TASK-195](tasks/TASK-195_260721_Issue627_CI_tsc_advisory게이트_Riley.md) | D_Kai TASK-194-C와 병행 진행. pr-checks.yml이 TeamB_Dev/integration/**에도 트리거되므로 반드시 advisory(non-blocking)로만 추가 — 기존 237건 오류로 인한 전체 PR 차단 위험 명시 |
+| TASK-195 | 260721 | [Team A] CI에 tsc --noEmit advisory 단계 추가 — Issue #627 (IMP-134 §1) | 없음 | Riley | 🔔 | [TASK-195](tasks/TASK-195_260721_Issue627_CI_tsc_advisory게이트_Riley.md) | `.github/workflows/pr-checks.yml`에 `tsc-advisory` 게이트 추가 — `npx tsc --noEmit || true` & `exit 0`으로 non-blocking 경고 게이트 구현. 네거티브 컨트롤 검증 완수. 코드 `70b3ddbe`. 회귀 PASS (검토 대기) |
 ---
 
 ## Agent 현황
@@ -463,9 +463,9 @@
 | Agent | 상태 | 비고 |
 |:------|:----:|:----|
 | **Aiden (Claude)** | ✅ TASK-167 전체 승인 (260626) | PR#117 §1 ✅ · PR#118 §2+§3 ✅ 전량 머지 완료 |
-| **D_Kai (OpenCode)** | ✅ TASK-191·192 전량 승인·머지 완료 (260720) | TASK-191(PR#619)·TASK-192(PR#620) 모두 완료 — 코드 품질 우수(TC-UPS-ADMIN-12d 등 회귀 방지 테스트 포함). ⚠️ 채번 절차 미준수 2회째(TASK-167·TASK-168 번호 충돌) — 할당 중단 기준(3회)까지 1회 남음, VIOLATION_TRACKER.md 기록. 신규 Task 대기 |
+| **D_Kai (OpenCode)** | 🔄 TASK-194-C 착수 (260721) | 마감 후 추가 인보이스(`adjustment_of`)·화주 거부 CANCELED+재발행 플로우 구현 중 |
 | **B_Kai** | ✅ GH#206 승인·머지 완료 (260706) | PR#221 · #13 재조사 요청에 신속·정확 대응(docs/03_Design 17개 파일 아카이브), 신규 Task 대기 |
-| **Riley** | ✅ TASK-189 승인·머지 완료 (260720) | UPS 특송 전용 Order Detail 신규 화면(Issue #607), PR#613 머지 완료 — 1차 빌드 실패 반려 후 재작업 정정 확인. 이전: TASK-188 ✅(PR#612)·TASK-187 ✅(PR#610) 완료. 신규 Task 대기 |
+| **Riley** | 🔔 TASK-195 검토 대기 (260721) | CI tsc --noEmit advisory 게이트 신규 추가(Issue #627, IMP-134 §1) 구현 완료. 이전: TASK-189 ✅(PR#613) 승인·머지 완료 |
 | N_Kai | ➖ 미재배정 확정 (260626 Edward) | TASK-087 폐기 — 신규 Task 발령 없음 |
 | Ring | 신규 할당 중단 유지 | 9차 위반 누적 |
 
