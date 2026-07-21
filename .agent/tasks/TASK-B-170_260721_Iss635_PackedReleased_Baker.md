@@ -60,3 +60,11 @@
 - `tests/unit/logistics/status-machine.test.ts`: +12건 (PACKED 4건 + RELEASED 4건 + Dave 보존 4건) → 34건
 - `tests/unit/warehouse/warehouse-actions.test.ts`: 5건 (confirmOutbound guard + confirmUpsRegistration + undoUpsRegistration 실제 동작 검증)
 - **회귀: 19 files, 206 tests ALL PASS**
+
+## 재검증 (260721 Mike 대행)
+- 브랜치: TeamB_Dev 최신 기준 (`MERGEABLE` 확인)
+- 문서유형 팝업: WAYBILL/INVOICE/CUSTOMS 3종 정상 (`OutboundProcessForm.tsx:738`)
+- 테스트: 5/5 PASS, 회귀 672/672 PASS
+- 빌드: ✅ PASS
+- 3건 `server-only` 테스트 실패는 기존 이슈 (Baker 변경 무관)
+- **추가 수정 불필요 — 검토 요청**
