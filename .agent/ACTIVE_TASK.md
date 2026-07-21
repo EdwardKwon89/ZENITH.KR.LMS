@@ -456,6 +456,7 @@
 | TASK-195 | 260721 | [Team A] CI에 tsc --noEmit advisory 단계 추가 — Issue #627 (IMP-134 §1) | 없음 | Riley | ✅ | [TASK-195](tasks/TASK-195_260721_Issue627_CI_tsc_advisory게이트_Riley.md) | `.github/workflows/pr-checks.yml`에 `tsc-advisory` 게이트 추가 — `npx tsc --noEmit || true` & `exit 0`으로 non-blocking 경고 게이트 구현. 네거티브 컨트롤 검증 완수. 코드 `70b3ddbe` — Aiden ✅ 승인·PR#628 병합 (260721) |
 | TASK-196 | 260721 | [Team A] D_Kai 재교육 세션 6차 (develop 직접 커밋 3회 누적) | 없음 | D_Kai | ✅ | [TASK-196](tasks/TASK-196_260721_DKai재교육세션6차_DKai.md) | Aiden 승인(2026-07-21, 커밋 `5f3f1544`) — 보완 요청 2건(워크트리 도구 §2 반영·DoD 체크) 모두 반영 확인, 실CI 전항목 PASS. TASK-194-D 등 신규 배정 재개 여부 및 "장기 중단" 적용 여부는 Edward 최종 결정 대기 |
 | TASK-197 | 260721 | [Team A] UPS 오더 E2E 정산 흐름 세밀 검증 (Phase 1) — Issue #637 | 없음 | B_Kai | ✅ | [TASK-197](tasks/TASK-197_260721_Issue637_UPS오더E2E정산흐름세밀검증_BKai.md) | 1차 반려(PR#640: develop 직접커밋·엣지케이스 미검증) → 2차 반려(PR#644: 브랜치 stale, 병합 시 대량 롤백 위험) → 재작업(PR#645) Aiden 승인·병합. Edge-1 3중 검증(리다이렉트+버튼부재+DB조건), Edge-2 실제 UI클릭, Edge-3 스크린샷 실증. 실CI 전항목 PASS. Issue #637 Close. Advisory: Step3/4 스크린샷 중복 잔존(비차단) |
+| TASK-198 | 260721 | [Team A] IMP-134 §2: tests/ 전역 TypeScript 오류 정리 — Issue #651 | 없음 | D_Kai | 🔔 | [TASK-198](tasks/TASK-198_260721_Issue651_IMP134_2_TS오류정리_DKai.md) | TASK-198 발령 후 25개 파일 236건 TS 오류 0건 정리. 1차 `supabase: any` → 재작업(AnySchema 제네릭 타입). 회귀 103/669 ALL PASS. PR#676 생성. |
 ---
 
 ## Agent 현황
@@ -465,7 +466,7 @@
 | Agent | 상태 | 비고 |
 |:------|:----:|:----|
 | **Aiden (Claude)** | ✅ TASK-167 전체 승인 (260626) | PR#117 §1 ✅ · PR#118 §2+§3 ✅ 전량 머지 완료 |
-| **D_Kai (OpenCode)** | 🔄 TASK-194-C 착수 (260721) | 마감 후 추가 인보이스(`adjustment_of`)·화주 거부 CANCELED+재발행 플로우 구현 중 |
+| **D_Kai (OpenCode)** | 🔔 TASK-198 제출 (260721) | IMP-134 §2 tests/ TypeScript 오류 236건→0건 정리. PR#676. 재작업(`supabase: any`→AnySchema 타입) 수정 완료. |
 | **B_Kai** | ✅ GH#206 승인·머지 완료 (260706) | PR#221 · #13 재조사 요청에 신속·정확 대응(docs/03_Design 17개 파일 아카이브), 신규 Task 대기 |
 | **Riley** | ✅ TASK-195 승인·머지 완료 (260721) | CI tsc --noEmit advisory 게이트 신규 추가(Issue #627, IMP-134 §1) — PR#628 병합. 신규 Task 대기 |
 | N_Kai | ➖ 미재배정 확정 (260626 Edward) | TASK-087 폐기 — 신규 Task 발령 없음 |
