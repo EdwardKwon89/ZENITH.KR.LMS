@@ -606,6 +606,23 @@
 
 ---
 
+### 47. UPS 오더 E2E 정산 흐름 세밀 검증 (Issue #637 / Phase 1)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-R11-01** | Step 1: 오더 등록 상태 확인 (WAREHOUSED) | DB 상태 + UI 상태 배지 검증 | `tests/e2e/r11-ups-settlement-e2e-flow.spec.ts` |
+| **TC-R11-02** | Step 2: 창고 출고확정 + UPS 레이블 발급 | WAREHOUSED→RELEASED 전이 + 인보이스 자동 생성 + 레이블 발급 | `tests/e2e/r11-ups-settlement-e2e-flow.spec.ts` |
+| **TC-R11-03** | Step 3: 트래킹 이벤트 삽입 + 상태 동기화 | DELIVERED 이벤트 삽입 + zen_tracking_events 저장 + 상태 전이 | `tests/e2e/r11-ups-settlement-e2e-flow.spec.ts` |
+| **TC-R11-04** | Step 4: DELIVERED - 사후청구 폼 활성화 | UpsActualAdjustmentForm 활성화 + UPS 주문 표시 | `tests/e2e/r11-ups-settlement-e2e-flow.spec.ts` |
+| **TC-R11-05** | Step 5: 사후청구 등록 (마감 전) - 인보이스 금액 갱신 | UPS_ACTUAL_ADJUSTMENT 비용 + 인보이스 total_amount 재계산 | `tests/e2e/r11-ups-settlement-e2e-flow.spec.ts` |
+| **TC-R11-06** | Step 6: 정산 마감 (finalize) + 이유 검증 | is_finalized=true + finalized_reason + 히스토리 기록 | `tests/e2e/r11-ups-settlement-e2e-flow.spec.ts` |
+| **TC-R11-07** | Step 7: 마감 후 사후청구 - 추가 인보이스 발행 | metadata.adjustment_of 신규 인보이스 + 원 인보이스 불변 | `tests/e2e/r11-ups-settlement-e2e-flow.spec.ts` |
+| **TC-R11-08** | Step 8: 화주 거부 - 인보이스 CANCELED + 재발행 | superseded_by 메타데이터 + 새 인보이스 UNPAID 생성 | `tests/e2e/r11-ups-settlement-e2e-flow.spec.ts` |
+| **TC-R11-E1** | Edge-1: Agency 타 화주 마감 시도 → RLS 차단 | agency_shippers 연결 없으면 마감 권한 거부 + proxy.ts 경로 차단 | `tests/e2e/r11-ups-settlement-e2e-flow.spec.ts` |
+| **TC-R11-E2** | Edge-2: Admin 마감 시 사유 미입력 → 차단 | finalized_reason 미입력 시 마감 거부 | `tests/e2e/r11-ups-settlement-e2e-flow.spec.ts` |
+| **TC-R11-E3** | Edge-3: 마감 후 사후청구 → 신규 인보이스 경로 분기 | 자동갱신이 아닌 별도 인보이스 경로 정확 분기 확인 | `tests/e2e/r11-ups-settlement-e2e-flow.spec.ts` |
+
+---
+
 ## 📝 가이드라인 (R-09 Enforcement)
 1. **추가 의무**: 신규 기능 개발 시 위 카테고리에 맞는 테스트를 반드시 추가하십시오.
 2. **실행 의무**: 모든 커밋 전 `npm run test:regression`을 실행하여 위 명세 전원이 초록색인지 확인하십시오.
