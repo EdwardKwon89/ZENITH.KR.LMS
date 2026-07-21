@@ -55,7 +55,7 @@ export class FinanceRepository extends BaseRepository {
   async findRecentInvoices(limit = 5, shipperId?: string) {
     let query = this.db
       .from('zen_invoices')
-      .select('id, invoice_no, total_amount, currency, status, created_at, shipper_id')
+      .select('id, invoice_no, total_amount, currency, status, is_finalized, finalized_at, created_at, due_date, shipper_id')
       .order('created_at', { ascending: false })
       .limit(limit);
 
