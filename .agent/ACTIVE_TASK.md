@@ -458,7 +458,7 @@
 | TASK-197 | 260721 | [Team A] UPS 오더 E2E 정산 흐름 세밀 검증 (Phase 1) — Issue #637 | 없음 | B_Kai | ✅ | [TASK-197](tasks/TASK-197_260721_Issue637_UPS오더E2E정산흐름세밀검증_BKai.md) | 1차 반려(PR#640: develop 직접커밋·엣지케이스 미검증) → 2차 반려(PR#644: 브랜치 stale, 병합 시 대량 롤백 위험) → 재작업(PR#645) Aiden 승인·병합. Edge-1 3중 검증(리다이렉트+버튼부재+DB조건), Edge-2 실제 UI클릭, Edge-3 스크린샷 실증. 실CI 전항목 PASS. Issue #637 Close. Advisory: Step3/4 스크린샷 중복 잔존(비차단) |
 | TASK-198 | 260721 | [Team A] IMP-134 §2: tests/ 전역 TypeScript 오류 정리 — Issue #651 | 없음 | D_Kai | ✅ | [TASK-198](tasks/TASK-198_260721_Issue651_IMP134_2_TS오류정리_DKai.md) | 25개 파일 236건 TS 오류 0건 정리. `supabase: any` → `SupabaseClient<Database>` 제네릭 자체 재작업. 회귀 103/669 ALL PASS. Aiden 독립 재검증(tsc 0 errors 확인) 후 PR#676 승인·병합 완료. Issue #651 Close. |
 | TASK-199 | 260722 | [Team A] 정산/재무 화면 ZenUI 디자인 시스템 미적용 정정 — Issue #685 | 없음 | D_Kai | ✅ | [TASK-199](tasks/TASK-199_260722_Issue685_ZenUI디자인시스템정정_DKai.md) | 2회 반려(build 허위보고·R-10 생략사유 허위) 후 재작업 승인. 7개 파일 ZenUI 전환·ZenSelect API 수정 확인, R-10 스크린샷 5장 실증(에러 배너 은폐 없이 정직 제출), 실CI 전항목 PASS. PR#690 병합, Issue #685 Close. 커밋해시 오기재 1건 Aiden 직접 정정. 부수 발견 DEF-113(별건)→Issue #693 별도 등록·병합 완료 |
-| TASK-200 | 260722 | [Team A] SUB_ADMIN proxy.ts 화이트리스트 누락 — Issue #688 | 없음 | D_Kai | 🔔 | [TASK-200](tasks/TASK-200_260722_Issue688_SUBADMIN라우팅버그수정_DKai.md) | 1차 반려(`/support` 404·`03_` 잔재) → `/support/page.tsx` 리다이렉트 추가·스크린샷 정리·e2e 수정. 재작업 완료 후 PR#697 재검토 요청 |
+| TASK-200 | 260722 | [Team A] SUB_ADMIN proxy.ts 화이트리스트 누락 — Issue #688 | 없음 | D_Kai | ✅ | [TASK-200](tasks/TASK-200_260722_Issue688_SUBADMIN라우팅버그수정_DKai.md) | 1차 반려(`/support` 404·`03_` 잔재) → `/support/page.tsx` 리다이렉트 추가로 재작업. 재검토 중 잔여 불일치 2건(테스트 개선 미반영·stale 스크린샷) 추가 발견 — Edward 승인 하에 Aiden이 직접 body 컨텐츠 검증 추가+스크린샷 교체 후 승인. PR#697 병합, Issue #688 Close |
 ---
 
 ## Agent 현황
