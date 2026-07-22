@@ -15,6 +15,7 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
+| [#693](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/693) | [결함] 매출/매입 현황 화면 dest_country_code 컬럼 부재로 500 오류 | a | p2 | - | 미배정 | 2026-07-22 |
 | [#688](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/688) | [Team A] DEF: SUB_ADMIN 역할 /admin/ups-rates·/voc 접근 시 이중 리다이렉트로 로그아웃처럼 보임 | a | p2 | - | EdwardKwon89 | 2026-07-22 |
 | [#685](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/685) | [Team A] 정산/재무 화면 디자인 시스템(ZenUI) 미적용 5건 정정 | a | p3 | - | EdwardKwon89 | 2026-07-22 |
 | [#684](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/684) | [feat] UPS 라벨/무역서류 실제 다운로드 후 자체 스토리지 저장 (다중 문서 지원) | b | p2 | done | 미배정 | 2026-07-22 |
