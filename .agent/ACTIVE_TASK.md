@@ -467,6 +467,7 @@
 | TASK-B-175 | 260722 | Issue #661 — SHXK API 호출 통합 감사 로그 테이블 | P3 | 없음 | Dave (구현) | 🔔 | [TASK-B-175](tasks/TASK-B-175_260722_Iss661_ShxkApiLogs.md) | zen_shxk_api_logs 테이블 + callShxk() 로깅 훅 · TC-SHXK-01~09 9종 (로깅 실패 시나리오 3종 포함) · 9/9 PASS · [PR#662](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/662) (base TeamB_Dev) |
 | TASK-B-176 | 260722 | Issue #664 — zen_shxk_api_logs RLS 정책 확대 (SELECT 전체 + AGENCY INSERT) | P3 | 없음 | Dave (구현) | 🔔 | [TASK-B-176](tasks/TASK-B-176_260722_Iss664_ShxkLogsRlsExpand.md) | SELECT: 전체 인증 사용자 · INSERT: AGENCY 명시 허용 · AGENCY INSERT ✅ · OPERATOR SELECT ✅ · [PR#665](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/665) (base TeamB_Dev) |
 | TASK-B-180 | 260722 | Issue #680 — DEF-118 getnewlabel 응답구조 불일치 (lable_file + array + COMBINED) | P1 | 없음 | Dave (구현) | 🔔 | [TASK-B-180](tasks/TASK-B-180_260722_Def118_Getnewlabel_응답구조.md) | GetNewLabelItem 전 array 반환 · fetchAndIssueUpsLabel COMBINED 다중 URL · OutboundProcessForm COMBINED 버튼+window.open · ups-labels 10/10 + shxk 9/9 · build ✅ · [PR#681](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/681) (base TeamB_Dev) |
+| TASK-B-181 | 260722 | Issue #684 — UPS 라벨/무역서류 실제 다운로드 후 자체 스토리지 저장 (다중 문서 지원) | P2 | 없음 | Baker (구현) | 🔔 | [TASK-B-181](tasks/TASK-B-181_260722_Iss684_UpsLabelDocDownload_Baker.md) | PR#687 반려 재작업 완료 · Storage RLS agency_org_id 스코프 + SHXK 폴백 제거 + 테스트 한글화 · 회귀 742/742 ALL PASS · CI PASS (260722) |
 ---
 
 ## Agent 현황
