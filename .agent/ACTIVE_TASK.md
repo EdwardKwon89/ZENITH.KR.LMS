@@ -15,6 +15,7 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
+| [#717](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/717) | [design] SNTL 원가 Matrix — 전역 공용값+정산 미반영 구조, 의도된 설계인지 Team B 협의 필요 | a | p2 | - | 미배정 | 2026-07-22 |
 | [#713](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/713) | [feat] 출고확정처리(/warehouse/departure) 화면에 오늘의 이력 패널 신설 | b | p3 | done | 미배정 | 2026-07-22 |
 | [#711](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/711) | [Team A] Phase 2 — 신규 UPS 물류관리 메뉴 흐름 전체 E2E 검증 (오더픽업→...→DELIVERED) | a | p1 | - | EdwardKwon89 | 2026-07-22 |
 | [#708](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/708) | [fix] getTodayUpsHistory 500 에러 — .contains() 연산자가 text 컬럼에 적용 불가 (getTodayPickupHistory도 동일 결함) | b | p1 | done | 미배정 | 2026-07-22 |
