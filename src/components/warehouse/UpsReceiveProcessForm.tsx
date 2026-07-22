@@ -13,6 +13,7 @@ import {
   getWarehousedOrders,
   confirmUpsRegistration,
   undoUpsRegistration,
+  getTodayUpsHistory,
 } from "@/app/actions/operations";
 import { OrderStatus, ORDER_STATUS_META } from "@/types/orders";
 import {
@@ -38,6 +39,7 @@ export default function UpsReceiveProcessForm({ locale }: { locale: string }) {
   const [search, setSearch] = useState("");
   const [undoTarget, setUndoTarget] = useState<string | null>(null);
   const [undoLoading, setUndoLoading] = useState(false);
+  const [history, setHistory] = useState<any[]>([]);
 
   useEffect(() => {
     fetchData();
@@ -46,8 +48,12 @@ export default function UpsReceiveProcessForm({ locale }: { locale: string }) {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const res = await getWarehousedOrders();
-      if (res.success) setOrders(res.orders);
+      const [ordersRes, historyRes] = await Promise.all([
+        getWarehousedOrders(),
+        getTodayUpsHistory(),
+      ]);
+      if (ordersRes.success) setOrders(ordersRes.orders);
+      if (historyRes.success) setHistory(historyRes.items);
     } catch (err: any) {
       toast.error(err.message || "데이터 로드 실패");
     } finally {
@@ -295,10 +301,52 @@ export default function UpsReceiveProcessForm({ locale }: { locale: string }) {
           </div>
 
           <div className="flex-1 overflow-y-auto max-h-[600px] scrollbar-hide pr-1 space-y-3">
-            <div className="h-full flex flex-col items-center justify-center py-20 text-center text-slate-400">
-              <Package size={36} className="text-slate-300 mb-3" />
-              <p className="text-xs font-semibold">{t("empty_history")}</p>
-            </div>
+            {history.length > 0 ? (
+              history.map((item: any) => {
+                const order = item.order || {};
+                const pkgs = order.order_packages || [];
+                const allLabels = pkgs.flatMap((p: any) => p.ups_labels || []);
+                const latestLabel = allLabels.length > 0 ? allLabels[allLabels.length - 1] : null;
+                return (
+                  <div
+                    key={item.id}
+                    className="p-4 bg-white border border-slate-100 rounded-2xl hover:border-slate-200 transition-all shadow-sm hover:shadow-md"
+                  >
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="space-y-1.5">
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono text-xs font-bold text-slate-900">
+                            {order.order_no || "-"}
+                          </span>
+                          <ZenBadge className="bg-blue-50 text-blue-700 border-blue-200 text-[10px]">
+                            {orderStatusT(`${OrderStatus.PACKED}.label`)}
+                          </ZenBadge>
+                        </div>
+                        {order.recipient_name && (
+                          <p className="text-[11px] text-slate-500 font-medium">{order.recipient_name}</p>
+                        )}
+                      </div>
+                      <span className="text-[10px] text-slate-400 font-mono font-semibold flex items-center gap-1 shrink-0">
+                        <Clock size={10} />
+                        {formatKstTime(item.created_at)}
+                      </span>
+                    </div>
+                    {latestLabel && (
+                      <div className="flex items-center gap-2 mt-2 flex-wrap">
+                        <ZenBadge className="bg-green-50 text-green-700 border-green-200 text-[10px]">
+                          UPS · {latestLabel.tracking_number || latestLabel.reference_no || "-"}
+                        </ZenBadge>
+                      </div>
+                    )}
+                  </div>
+                );
+              })
+            ) : (
+              <div className="h-full flex flex-col items-center justify-center py-20 text-center text-slate-400">
+                <Package size={36} className="text-slate-300 mb-3" />
+                <p className="text-xs font-semibold">{t("empty_history")}</p>
+              </div>
+            )}
           </div>
         </ZenCard>
       </div>
