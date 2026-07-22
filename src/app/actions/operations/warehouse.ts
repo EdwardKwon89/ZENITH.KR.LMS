@@ -297,7 +297,7 @@ export async function getTodayUpsHistory() {
   let query = supabase
     .from("order_status_history")
     .select(`
-      id, created_at,
+      id, created_at, changed_by,
       order:zen_orders!order_status_history_order_id_fkey(
         id, order_no, status, recipient_name, shipper_id,
         order_packages:zen_order_packages!zen_order_packages_order_id_fkey(
