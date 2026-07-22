@@ -25,14 +25,14 @@
 | [#698](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/698) | [fix] 출고확정 시 문서(운송장 등) 선택 팝업 삭제 — 라벨 발급 생략하고 바로 출고확정 | b | p3 | done | 미배정 | 2026-07-22 |
 | [#695](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/695) | [fix] UPS접수취소(removeorder) 시 zen_ups_labels/zen_ups_label_documents/Storage 파일 정리 누락 | b | p2 | done | 미배정 | 2026-07-22 |
 | [#684](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/684) | [feat] UPS 라벨/무역서류 실제 다운로드 후 자체 스토리지 저장 (다중 문서 지원) | b | p2 | done | 미배정 | 2026-07-22 |
-| [#680](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/680) | [defect] DEF-118 — getnewlabel 응답구조 불일치, 실제 환경에서 라벨 URL 추출 상시 실패 | b | p1 | - | 미배정 | 2026-07-21 |
-| [#674](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/674) | [feat] 출고처리 화면 UI 개선 — 배지 문구/UPS접수취소 버튼/문서 출력 기능 | b | p2 | - | 미배정 | 2026-07-21 |
+| [#680](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/680) | [defect] DEF-118 — getnewlabel 응답구조 불일치, 실제 환경에서 라벨 URL 추출 상시 실패 | b | p1 | done | 미배정 | 2026-07-22 |
+| [#674](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/674) | [feat] 출고처리 화면 UI 개선 — 배지 문구/UPS접수취소 버튼/문서 출력 기능 | b | p2 | done | 미배정 | 2026-07-22 |
 | [#671](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/671) | [defect] DEF-117 — zen_order_packages RLS에 AGENCY SELECT 커버리지 없음, UPS접수 여전히 침묵 실패 | b | p1 | in-progress | 미배정 | 2026-07-22 |
-| [#667](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/667) | [defect] DEF-116 — checkLabelPermission()에 AGENCY 누락, UPS 라벨 기능 7종 침묵 실패 | b | p1 | - | 미배정 | 2026-07-21 |
-| [#664](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/664) | [fix] zen_shxk_api_logs 조회 권한을 전체 인증 사용자로 확대 | b | p3 | - | 미배정 | 2026-07-21 |
-| [#661](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/661) | [feat] IMP — SHXK UPS API 호출 통합 이력(감사 로그) 테이블 신설 | b | p3 | - | 미배정 | 2026-07-21 |
+| [#667](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/667) | [defect] DEF-116 — checkLabelPermission()에 AGENCY 누락, UPS 라벨 기능 7종 침묵 실패 | b | p1 | done | 미배정 | 2026-07-22 |
+| [#664](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/664) | [fix] zen_shxk_api_logs 조회 권한을 전체 인증 사용자로 확대 | b | p3 | done | 미배정 | 2026-07-22 |
+| [#661](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/661) | [feat] IMP — SHXK UPS API 호출 통합 이력(감사 로그) 테이블 신설 | b | p3 | done | 미배정 | 2026-07-22 |
 | [#659](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/659) | [defect] DEF-115 — WarehouseUpsReceiving.partial_success i18n 키 누락 | b | p4 | - | 미배정 | 2026-07-21 |
-| [#655](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/655) | [defect] DEF-114 — ROLE_PERMISSIONS에 AGENCY 누락, 창고관리 기능 전체 500 에러 | b | p1 | - | 미배정 | 2026-07-21 |
+| [#655](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/655) | [defect] DEF-114 — ROLE_PERMISSIONS에 AGENCY 누락, 창고관리 기능 전체 500 에러 | b | p1 | done | 미배정 | 2026-07-22 |
 | [#616](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/616) | [GOV] 예약 요금(pricing-schedule) 시스템에 Agency/Shipper 할인율 마진 검증 부재 — Team B 검토 요청 | b | p2 | - | 미배정 | 2026-07-20 |
 | [#609](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/609) | [Aiden] CI 지연 원인 조사 결과 + 조치 — 큐 혼잡 완화 + TeamB_Dev 병합 CI 대기 불요로 개정 | b | p1 | - | jungjs | 2026-07-20 |
 | [#605](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/605) | [design] Agency 원가/판매가 Matrix 전환 검토 — 대리점 단위 Matrix + 화주 단위 하이브리드(Zone할인율+선택적 Matrix override) | b | p2 | - | jungjs | 2026-07-19 |
