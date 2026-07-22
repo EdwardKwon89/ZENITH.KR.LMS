@@ -44,6 +44,11 @@ test.describe('TASK-200: SUB_ADMIN 5개 경로 접근 회귀 테스트 — proxy
           console.log(`[TASK-200] ❌ ${route.path} → 리다이렉트 감지: ${currentUrl}`);
         }
         expect(currentUrl).toContain(route.path);
+
+        // URL만으로는 Next.js 404 바운더리(URL 불변)를 못 잡아내므로 페이지 본문도 검증
+        const bodyText = await page.locator('body').innerText();
+        expect(bodyText).not.toContain('This page could not be found');
+
         console.log(`[TASK-200] ✅ ${route.path} — 정상 접속: ${currentUrl}`);
       });
     }
