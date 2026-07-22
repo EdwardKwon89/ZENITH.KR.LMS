@@ -60,7 +60,6 @@ export default function OutboundProcessForm({ locale }: { locale: string }) {
   const [issuingLabels, setIssuingLabels] = useState(false);
   const [voidTarget, setVoidTarget] = useState<string | null>(null);
   const [voidLoading, setVoidLoading] = useState(false);
-  const [docTypePopup, setDocTypePopup] = useState<{ orderId: string; orderNo: string } | null>(null);
   const [undoOutboundTarget, setUndoOutboundTarget] = useState<string | null>(null);
   const [undoOutboundLoading, setUndoOutboundLoading] = useState(false);
   const [undoUpsTarget, setUndoUpsTarget] = useState<string | null>(null);
@@ -119,12 +118,6 @@ export default function OutboundProcessForm({ locale }: { locale: string }) {
     }
 
     const selectedOrders = orders.filter((o) => selected.has(o.id));
-    const packedOrders = selectedOrders.filter((o: any) => o.status === OrderStatus.PACKED);
-
-    if (packedOrders.length > 0) {
-      setDocTypePopup({ orderId: packedOrders[0].id, orderNo: packedOrders[0].order_no });
-      return;
-    }
 
     const packagesNeedingLabels = selectedOrders.flatMap((o: any) =>
       (o.order_packages || []).filter((p: any) => !p.intl_ref_locked)
@@ -137,47 +130,6 @@ export default function OutboundProcessForm({ locale }: { locale: string }) {
     }
 
     await executeConfirmOutbound(selectedOrders);
-  };
-
-  const handleDocTypeConfirm = async (docType: 'WAYBILL' | 'INVOICE' | 'CUSTOMS' | 'COMBINED') => {
-    if (!docTypePopup) return;
-
-    const selectedOrders = orders.filter((o) => selected.has(o.id));
-
-    setSubmitLoading(true);
-    setDocTypePopup(null);
-    try {
-      for (const order of selectedOrders.filter((o: any) => o.status === OrderStatus.PACKED)) {
-        const issueRes = await fetchAndIssueUpsLabel(order.id, docType);
-        if (!issueRes.success) {
-          toast.error(issueRes.error || t("ups_label_issue_failed"));
-          setSubmitLoading(false);
-          return;
-        }
-        if (docType === 'COMBINED' && issueRes.urls) {
-          issueRes.urls.forEach((url) => window.open(url, '_blank'));
-        } else if (issueRes.url) {
-          window.open(issueRes.url, '_blank');
-        }
-      }
-
-      const warehousedOrders = selectedOrders.filter((o: any) => o.status === OrderStatus.WAREHOUSED);
-      const packagesNeedingLabels = warehousedOrders.flatMap((o: any) =>
-        (o.order_packages || []).filter((p: any) => !p.intl_ref_locked)
-      );
-
-      if (packagesNeedingLabels.length > 0) {
-        setPendingOrders(warehousedOrders);
-        setShowIntlWarning(true);
-        setSubmitLoading(false);
-        return;
-      }
-
-      await executeConfirmOutbound(selectedOrders);
-    } catch (err: any) {
-      toast.error(err.message || "출고 확정 실패");
-      setSubmitLoading(false);
-    }
   };
 
   const handleUndoOutbound = async (orderId: string) => {
@@ -837,45 +789,6 @@ export default function OutboundProcessForm({ locale }: { locale: string }) {
                 className="px-5 py-2.5 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 rounded-xl transition-all disabled:opacity-50"
               >
                 {voidLoading ? "처리 중..." : t("ups_label_void_confirm")}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {docTypePopup && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full mx-4">
-            <h3 className="text-lg font-bold text-slate-900 mb-2">
-              {t("doc_type_title")}
-            </h3>
-            <p className="text-sm text-slate-600 mb-1">
-              {t("doc_type_desc", { orderNo: docTypePopup.orderNo })}
-            </p>
-            <div className="flex gap-2 mt-6">
-              {(['COMBINED', 'WAYBILL', 'INVOICE', 'CUSTOMS'] as const).map((dt) => (
-                <button
-                  key={dt}
-                  onClick={() => handleDocTypeConfirm(dt)}
-                  disabled={submitLoading}
-                  className={cn(
-                    "flex-1 px-3 py-3 text-sm font-semibold rounded-xl transition-all disabled:opacity-50",
-                    dt === 'COMBINED'
-                      ? "text-white bg-emerald-600 hover:bg-emerald-700"
-                      : "text-white bg-purple-600 hover:bg-purple-700"
-                  )}
-                >
-                  {t(`doc_type_${dt.toLowerCase()}`)}
-                </button>
-              ))}
-            </div>
-            <div className="flex justify-end mt-4">
-              <button
-                onClick={() => setDocTypePopup(null)}
-                className="px-5 py-2.5 text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all"
-                disabled={submitLoading}
-              >
-                취소
               </button>
             </div>
           </div>
