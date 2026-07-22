@@ -338,6 +338,64 @@ export async function getTodayUpsHistory() {
 }
 
 // ─────────────────────────────────────────────
+// 오늘의 출고확정 이력 조회 (Issue #713)
+// ─────────────────────────────────────────────
+
+export async function getTodayDepartureHistory() {
+  const { supabase, profile } = await validateUserAction();
+  if (!profile) throw new Error("User profile not found");
+
+  const now = new Date();
+  const todayKst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+  todayKst.setUTCHours(0, 0, 0, 0);
+  const startUtc = new Date(todayKst.getTime() - 9 * 60 * 60 * 1000).toISOString();
+  todayKst.setUTCHours(23, 59, 59, 999);
+  const endUtc = new Date(todayKst.getTime() - 9 * 60 * 60 * 1000).toISOString();
+
+  let query = supabase
+    .from("order_status_history")
+    .select(`
+      id, created_at, changed_by,
+      order:zen_orders!order_status_history_order_id_fkey(
+        id, order_no, status, recipient_name, shipper_id,
+        order_packages:zen_order_packages!zen_order_packages_order_id_fkey(
+          id, intl_ref_no, intl_ref_locked, packing_count,
+          ups_labels:zen_ups_labels!zen_ups_labels_package_id_fkey(
+            id, tracking_number, label_format, storage_path, is_voided, voided_at, reference_no
+          )
+        )
+      )
+    `)
+    .eq("next_status", OrderStatus.IN_TRANSIT)
+    .like("reason", "%[출고확정처리]%")
+    .gte("created_at", startUtc)
+    .lte("created_at", endUtc)
+    .order("created_at", { ascending: false });
+
+  const { data: historyData, error: historyError } = await query;
+
+  if (historyError) {
+    logger.error("getTodayDepartureHistory error:", historyError);
+    throw new Error("Failed to fetch today departure history");
+  }
+
+  let items = historyData || [];
+
+  if (profile.role === USER_ROLES.AGENCY) {
+    const shipperIds = await getAgencyShipperIds(supabase, profile.org_id);
+    if (!shipperIds || shipperIds.length === 0) {
+      return { success: true, items: [] };
+    }
+    items = items.filter((item: any) => {
+      const shipperId = item.order?.shipper_id;
+      return shipperId && shipperIds.includes(shipperId);
+    });
+  }
+
+  return { success: true, items: await attachOperatorNames(supabase, items) };
+}
+
+// ─────────────────────────────────────────────
 // B-2: 입고취소 (Cancel Inbound) — WAREHOUSED → 직전 상태 복구
 // ─────────────────────────────────────────────
 

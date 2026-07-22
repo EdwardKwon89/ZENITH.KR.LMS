@@ -704,7 +704,9 @@
     "confirm_btn": "Confirm Departure",
     "success_msg": "Departure confirmation completed.",
     "partial_success": "Departure completed: {success} success, {fail} failed",
-    "error_none_selected": "Please select orders for departure confirmation."
+    "error_none_selected": "Please select orders for departure confirmation.",
+    "today_history": "Today's Departure History",
+    "empty_history": "No departure history processed today."
   },
   "ShippingLabel": {
     "title": "Shipping Label",

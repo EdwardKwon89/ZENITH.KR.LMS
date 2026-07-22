@@ -202,7 +202,9 @@
     "confirm_btn": "确认出库",
     "success_msg": "出库确认已完成。",
     "partial_success": "出库确认完成：{success}件成功，{fail}件失败",
-    "error_none_selected": "请选择要确认出库的订单。"
+    "error_none_selected": "请选择要确认出库的订单。",
+    "today_history": "今日出库确认历史",
+    "empty_history": "今日没有已处理的出库确认记录。"
   },
   "ShippingLabel": {
     "title": "运单",
