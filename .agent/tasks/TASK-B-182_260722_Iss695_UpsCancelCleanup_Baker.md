@@ -36,3 +36,9 @@
 - `ups-labels-split.test.ts`: 기존 3건 + 신규 4건 = 7건 (다중라벨 삭제, 문서존재시 Storage삭제, 문서미존재시 건너뜀, Storage삭제실패 시나리오)
 - **회귀: 112 files, 746 tests ALL PASS**
 - **CI: PASS** (Regression Tests + Task File Check + Vercel · [PR#696](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/696))
+
+## PR#696 반려 재작업 (260722)
+
+jungjs 리뷰 반영 — 1건 수정:
+
+1. **[Required] zen_ups_labels AGENCY DELETE 정책 누락**: `cancelUpsRegistration()`의 최종 삭제 대상인 `zen_ups_labels` 테이블에 AGENCY DELETE 정책이 없어 AGENCY 사용자에게는 `success: true`가 반환되지만 실제 삭제 0건 (Supabase PostgREST RLS로 인해 에러 없이 빈 배열 반환). `ups_labels_agency_delete` 정책 추가 (agency_org_id 스코프)
