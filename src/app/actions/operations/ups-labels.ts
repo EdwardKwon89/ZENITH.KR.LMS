@@ -10,6 +10,82 @@ import {
 } from '@/lib/shxk/config';
 import { buildCreateOrderPayload } from '@/lib/ups/label-mapping';
 import { revalidatePath } from 'next/cache';
+import type { GetNewLabelItem } from '@/lib/shxk/order';
+
+const DOC_TYPE_CONTENT_MAP = { WAYBILL: '1', CUSTOMS: '2', INVOICE: '3', COMBINED: '6' } as const;
+
+type DocType = keyof typeof DOC_TYPE_CONTENT_MAP;
+
+function resolveContentType(docType: DocType): string {
+  return DOC_TYPE_CONTENT_MAP[docType];
+}
+
+function resolveDocTypeLabel(contentType: string): string {
+  const reverseMap: Record<string, string> = { '1': 'WAYBILL', '2': 'CUSTOMS', '3': 'INVOICE', '4': 'COMBINED', '6': 'COMBINED' };
+  return reverseMap[contentType] || 'COMBINED';
+}
+
+/**
+ * SHXK 외부 URL에서 PDF를 다운로드하여 Supabase Storage에 업로드하고,
+ * zen_ups_label_documents 테이블에 메타데이터를 기록한 뒤 signed URL을 반환한다.
+ * invoice-files.ts의 generateInvoicePdf 패턴을 재사용.
+ */
+export async function downloadAndStoreLabelDoc(
+  supabase: SupabaseClient,
+  orderId: string,
+  referenceNo: string,
+  labelId: string | null,
+  contentType: string,
+  originalUrl: string,
+): Promise<{ signedUrl: string | null; storagePath: string; docType: string }> {
+  const docType = resolveDocTypeLabel(contentType);
+
+  const response = await fetch(originalUrl);
+  if (!response.ok) {
+    throw new Error(`PDF 다운로드 실패 (${response.status}): ${originalUrl}`);
+  }
+  const buffer = Buffer.from(await response.arrayBuffer());
+
+  const uuid = crypto.randomUUID();
+  const storagePath = `ups-labels/${orderId}/${docType.toLowerCase()}-${uuid.slice(0, 8)}.pdf`;
+
+  const { error: uploadError } = await supabase.storage
+    .from('invoices')
+    .upload(storagePath, buffer, {
+      contentType: 'application/pdf',
+      upsert: false,
+      metadata: { order_id: orderId, reference_no: referenceNo, doc_type: docType },
+    });
+
+  if (uploadError) {
+    logger.error('[downloadAndStoreLabelDoc] Storage upload failed:', uploadError);
+    throw new Error(`PDF 업로드 실패: ${uploadError.message}`);
+  }
+
+  const { error: insertError } = await supabase
+    .from('zen_ups_label_documents')
+    .insert({
+      order_id: orderId,
+      label_id: labelId,
+      reference_no: referenceNo,
+      content_type: contentType,
+      doc_type: docType,
+      storage_path: storagePath,
+      original_url: originalUrl,
+      file_size_bytes: buffer.length,
+    });
+
+  if (insertError) {
+    logger.error('[downloadAndStoreLabelDoc] DB insert failed:', insertError);
+    throw new Error(`문서 메타데이터 저장 실패: ${insertError.message}`);
+  }
+
+  const { data: signed } = await supabase.storage
+    .from('invoices')
+    .createSignedUrl(storagePath, 3600);
+
+  return { signedUrl: signed?.signedUrl ?? null, storagePath, docType };
+}
 
 export interface IssueUpsLabelResult {
   shxk_order_id: string;
@@ -27,6 +103,10 @@ async function checkLabelPermission(profile: { role: string } | null): Promise<s
     return '권한이 없습니다. ADMIN, MANAGER, ZENITH_SUPER_ADMIN, AGENCY만 가능합니다.';
   }
   return null;
+}
+
+function reference_no_clean(refNo: string): string {
+  return refNo.replace(/-/g, '');
 }
 
 async function lookupOrderPackages(
@@ -138,6 +218,8 @@ async function saveInitialLabel(
 async function fetchAndSaveLabel(
   supabase: SupabaseClient,
   referenceNo: string,
+  orderId: string,
+  labelId: string | null,
 ): Promise<string | null> {
   const configInfo = {
     lable_file_type: '2',
@@ -145,26 +227,42 @@ async function fetchAndSaveLabel(
     lable_content_type: '4',
     additional_info: { lable_print_datetime: 'Y' },
   }
-  const labelRes = await getnewlabel(configInfo, [{ reference_no: referenceNo.replace(/-/g, '') }]);
+  const labelRes = await getnewlabel(configInfo, [{ reference_no: reference_no_clean(referenceNo) }]);
 
   if (labelRes.success !== 1 || !labelRes.data?.length) {
     logger.warn(`getnewlabel failed for ${referenceNo}: ${labelRes.message}`);
     return null;
   }
 
-  const labelUrl = labelRes.data[0].lable_file || null;
-  const labelFormat = labelUrl?.endsWith('.pdf') ? 'PDF' : 'PNG';
+  const items = labelRes.data;
+  let lastSignedUrl: string | null = null;
+
+  for (const item of items) {
+    if (!item.lable_file) continue;
+    try {
+      const result = await downloadAndStoreLabelDoc(
+        supabase, orderId, referenceNo, labelId,
+        item.lable_content_type || '4', item.lable_file,
+      );
+      lastSignedUrl = result.signedUrl;
+    } catch (err) {
+      logger.error(`[fetchAndSaveLabel] document download/store failed for ${referenceNo}:`, err);
+    }
+  }
+
+  const labelFormat = items[0]?.lable_file?.endsWith('.pdf') ? 'PDF' : 'PNG';
+  const storagePath = lastSignedUrl || items[0]?.lable_file || '';
 
   const { error } = await supabase
     .from('zen_ups_labels')
     .update({
       label_format: labelFormat,
-      storage_path: labelUrl ?? '',
+      storage_path: storagePath,
     })
     .eq('reference_no', referenceNo);
 
   if (error) logger.error('zen_ups_labels label update error:', error);
-  return labelUrl;
+  return lastSignedUrl ?? items[0]?.lable_file ?? null;
 }
 
 async function markAllPackagesIssued(
@@ -275,27 +373,39 @@ export async function fetchAndIssueUpsLabel(
         lable_content_type: DOC_TYPE_CONTENT_MAP[docType],
         additional_info: { lable_print_datetime: 'Y' },
       };
-      const res = await getnewlabel(configInfo, [{ reference_no: label.reference_no.replace(/-/g, '') }]);
+      const res = await getnewlabel(configInfo, [{ reference_no: reference_no_clean(label.reference_no) }]);
       if (res.success !== 1 || !res.data?.length) {
         return { success: false, error: res.message || '문서 조회 실패' };
       }
-      if (docType === 'COMBINED') {
-        const urls = res.data.map((item) => item.lable_file).filter(Boolean) as string[];
-        if (!urls.length) return { success: false, error: '발급된 문서 URL이 없습니다.' };
-        const pkgErr = await markAllPackagesIssued(supabase, orderId, label.tracking_number);
-        if (pkgErr) return { success: false, error: `Failed to mark packages issued: ${pkgErr}` };
-        revalidatePath("/(dashboard)/warehouse/outbound", "page");
-        return { success: true, urls };
+
+      const storedUrls: string[] = [];
+      for (const item of res.data) {
+        if (!item.lable_file) continue;
+        try {
+          const result = await downloadAndStoreLabelDoc(
+            supabase, orderId, label.reference_no, label.id,
+            item.lable_content_type || DOC_TYPE_CONTENT_MAP[docType], item.lable_file,
+          );
+          if (result.signedUrl) storedUrls.push(result.signedUrl);
+        } catch (err) {
+          logger.error(`[fetchAndIssueUpsLabel] document download/store failed for ${label.reference_no}:`, err);
+        }
       }
-      // 단일 문서
+
+      if (!storedUrls.length) return { success: false, error: '발급된 문서 저장 실패' };
+
       const pkgErr = await markAllPackagesIssued(supabase, orderId, label.tracking_number);
       if (pkgErr) return { success: false, error: `Failed to mark packages issued: ${pkgErr}` };
       revalidatePath("/(dashboard)/warehouse/outbound", "page");
-      return { success: true, url: res.data[0].lable_file };
+
+      if (docType === 'COMBINED') {
+        return { success: true, urls: storedUrls };
+      }
+      return { success: true, url: storedUrls[0] };
     }
 
     // docType 없음 → 기본 라벨 발급 (fetchAndSaveLabel)
-    const labelUrl = await fetchAndSaveLabel(supabase, label.reference_no);
+    const labelUrl = await fetchAndSaveLabel(supabase, label.reference_no, orderId, label.id);
     if (!labelUrl) return { success: false, error: '라벨 발급 실패 (getnewlabel)' };
 
     const pkgErr = await markAllPackagesIssued(supabase, orderId, label.tracking_number);
@@ -569,8 +679,6 @@ export async function triggerCreateOrderTest(
   }
 }
 
-const DOC_TYPE_CONTENT_MAP = { WAYBILL: '1', CUSTOMS: '2', INVOICE: '3', COMBINED: '6' } as const;
-
 export async function fetchShxkTradeDocument(
   orderId: string,
   docType: 'WAYBILL' | 'INVOICE' | 'CUSTOMS',
@@ -589,12 +697,30 @@ export async function fetchShxkTradeDocument(
       lable_content_type: DOC_TYPE_CONTENT_MAP[docType],
       additional_info: { lable_print_datetime: 'Y' },
     };
-    const res = await getnewlabel(configInfo, [{ reference_no: label.reference_no.replace(/-/g, '') }]);
+    const res = await getnewlabel(configInfo, [{ reference_no: reference_no_clean(label.reference_no) }]);
 
     if (res.success !== 1 || !res.data?.length) {
       return { success: false, error: res.message || '문서 조회 실패' };
     }
-    return { success: true, url: res.data[0].lable_file };
+
+    const storedUrls: string[] = [];
+    for (const item of res.data) {
+      if (!item.lable_file) continue;
+      try {
+        const result = await downloadAndStoreLabelDoc(
+          supabase, orderId, label.reference_no, label.id,
+          item.lable_content_type || DOC_TYPE_CONTENT_MAP[docType], item.lable_file,
+        );
+        if (result.signedUrl) storedUrls.push(result.signedUrl);
+      } catch (err) {
+        logger.error(`[fetchShxkTradeDocument] document download/store failed for ${label.reference_no}:`, err);
+      }
+    }
+
+    if (!storedUrls.length) {
+      return { success: false, error: '문서 다운로드/저장 실패' };
+    }
+    return { success: true, url: storedUrls[0] };
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error';
     logger.error('fetchShxkTradeDocument error:', err);

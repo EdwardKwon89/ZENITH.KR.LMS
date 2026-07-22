@@ -353,8 +353,12 @@ export default function OutboundProcessForm({ locale }: { locale: string }) {
     setPrintingLabels(prev => new Set(prev).add(orderId));
     try {
       const res = await fetchAndIssueUpsLabel(orderId, docType);
-      if (res.success && res.url) {
-        window.open(res.url, '_blank');
+      if (res.success) {
+        if (docType === 'COMBINED' && res.urls) {
+          res.urls.forEach((url) => window.open(url, '_blank'));
+        } else if (res.url) {
+          window.open(res.url, '_blank');
+        }
         toast.success(t("label_printed"));
       } else {
         toast.error(res.error || t("label_print_failed"));
