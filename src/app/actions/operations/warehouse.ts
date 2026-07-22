@@ -267,7 +267,7 @@ export async function getTodayPickupHistory() {
       )
     `)
     .eq("next_status", "SCHEDULED")
-    .contains("reason", "[픽업완료]")
+    .like("reason", "%[픽업완료]%")
     .gte("created_at", startUtc)
     .lte("created_at", endUtc)
     .order("created_at", { ascending: false });
