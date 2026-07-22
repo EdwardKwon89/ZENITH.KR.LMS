@@ -222,8 +222,8 @@ describe('TASK-B-185: getTodayUpsHistory', () => {
   });
 
   it('AGENCY 역할일 때 소속 화주 오더만 반환한다', async () => {
-    const { validateUserAction } = await import('@/lib/auth/guards');
-    vi.mocked(validateUserAction).mockResolvedValue({
+    const { validateUserAction: vua } = await import('@/lib/auth/guards');
+    vi.mocked(vua).mockResolvedValue({
       supabase: {
         auth: { getUser: vi.fn().mockResolvedValue({ data: { user: { id: 'user-agency' } } }) },
         from: mockSupabaseFrom,
@@ -288,6 +288,122 @@ describe('TASK-B-185: getTodayUpsHistory', () => {
     expect(result.items).toHaveLength(1);
     expect(result.items[0].order.order_no).toBe('ORD-001');
 
-    vi.mocked(validateUserAction).mockReset();
+    vi.mocked(vua).mockReset();
+  });
+});
+
+describe('TASK-B-187: getTodayDepartureHistory', () => {
+  beforeEach(async () => {
+    mockOrderQueryResult.data = [];
+    mockOrderQueryResult.error = null;
+    const { validateUserAction: vua } = await import('@/lib/auth/guards');
+    vi.mocked(vua).mockResolvedValue({
+      supabase: {
+        auth: { getUser: vi.fn().mockResolvedValue({ data: { user: { id: 'user-1' } } }) },
+        from: mockSupabaseFrom,
+      },
+      user: { id: 'user-1' },
+      profile: { id: 'user-1', role: 'ADMIN', org_id: 'org-1' },
+    } as any);
+  });
+
+  it('오늘의 출고확정 이력을 조회하여 반환한다', async () => {
+    mockOrderQueryResult.data = [
+      {
+        id: 'hist-d1',
+        created_at: new Date().toISOString(),
+        order: {
+          id: 'order-d1',
+          order_no: 'ORD-D001',
+          status: 'IN_TRANSIT',
+          recipient_name: '이영희',
+          shipper_id: 'org-1',
+          order_packages: [],
+        },
+      },
+    ];
+
+    const { getTodayDepartureHistory } = await import('@/app/actions/operations/warehouse');
+    const result = await getTodayDepartureHistory();
+
+    expect(result.success).toBe(true);
+    expect(result.items).toHaveLength(1);
+    expect(result.items[0].order.order_no).toBe('ORD-D001');
+  });
+
+  it('결과가 없으면 빈 배열을 반환한다', async () => {
+    mockOrderQueryResult.data = [];
+
+    const { getTodayDepartureHistory } = await import('@/app/actions/operations/warehouse');
+    const result = await getTodayDepartureHistory();
+
+    expect(result.success).toBe(true);
+    expect(result.items).toHaveLength(0);
+  });
+
+  it('AGENCY 역할일 때 소속 화주 오더만 반환한다', async () => {
+    const { validateUserAction: vua } = await import('@/lib/auth/guards');
+    vi.mocked(vua).mockResolvedValue({
+      supabase: {
+        auth: { getUser: vi.fn().mockResolvedValue({ data: { user: { id: 'user-agency' } } }) },
+        from: mockSupabaseFrom,
+      },
+      user: { id: 'user-agency' },
+      profile: { id: 'user-agency', role: 'AGENCY', org_id: 'agency-org' },
+    } as any);
+
+    mockOrderQueryResult.data = [
+      {
+        id: 'hist-d1',
+        created_at: new Date().toISOString(),
+        order: { id: 'order-d1', order_no: 'ORD-D001', status: 'IN_TRANSIT', shipper_id: 'shipper-in-scope', order_packages: [] },
+      },
+      {
+        id: 'hist-d2',
+        created_at: new Date().toISOString(),
+        order: { id: 'order-d2', order_no: 'ORD-D002', status: 'IN_TRANSIT', shipper_id: 'shipper-out-of-scope', order_packages: [] },
+      },
+    ];
+
+    const mockSingle = vi.fn().mockResolvedValue({
+      data: { org_id: 'agency-org', role: 'AGENCY' },
+      error: null,
+    });
+    const mockEq = vi.fn().mockReturnThis();
+    const mockSelect = vi.fn().mockReturnThis();
+
+    mockSupabaseFrom.mockImplementation((table: string) => {
+      if (table === 'zen_profiles') {
+        return { select: mockSelect, eq: mockEq, single: mockSingle };
+      }
+      if (table === 'zen_agency_shippers') {
+        const mockEq2 = vi.fn().mockResolvedValue({ data: [{ shipper_org_id: 'shipper-in-scope' }], error: null });
+        const mockEq1 = vi.fn().mockReturnValue({ eq: mockEq2 });
+        return { select: vi.fn().mockReturnValue({ eq: mockEq1 }) };
+      }
+      return {
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        in: vi.fn().mockReturnThis(),
+        contains: vi.fn().mockReturnThis(),
+        like: vi.fn().mockReturnThis(),
+        gte: vi.fn().mockReturnThis(),
+        lte: vi.fn().mockReturnThis(),
+        order: vi.fn().mockResolvedValue(mockOrderQueryResult),
+        insert: vi.fn().mockResolvedValue({ error: null }),
+        single: vi.fn().mockResolvedValue({ data: null, error: null }),
+        maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+        then: (resolve: any, reject: any) => Promise.resolve(mockOrderQueryResult).then(resolve, reject),
+      };
+    });
+
+    const { getTodayDepartureHistory } = await import('@/app/actions/operations/warehouse');
+    const result = await getTodayDepartureHistory();
+
+    expect(result.success).toBe(true);
+    expect(result.items).toHaveLength(1);
+    expect(result.items[0].order.order_no).toBe('ORD-D001');
+
+    vi.mocked(vua).mockReset();
   });
 });
