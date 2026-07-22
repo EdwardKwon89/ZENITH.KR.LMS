@@ -35,3 +35,4 @@
 ## Tests
 - `ups-labels-split.test.ts`: 기존 3건 + 신규 4건 = 7건 (다중라벨 삭제, 문서존재시 Storage삭제, 문서미존재시 건너뜀, Storage삭제실패 시나리오)
 - **회귀: 112 files, 746 tests ALL PASS**
+- **CI: PASS** (Regression Tests + Task File Check + Vercel · [PR#696](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/696))
