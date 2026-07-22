@@ -41,3 +41,4 @@
 ## Tests
 - `ups-labels-download-store.test.ts`: 8건 (다운로드+업로드, 메타데이터 저장, content_type별 doc_type 매핑, fetch/upload/insert 실패 시나리오)
 - **회귀: 112 files, 742 tests ALL PASS**
+- **CI: PASS** (Regression Tests + Task File Check · [PR#687](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/687))
