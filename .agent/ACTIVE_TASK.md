@@ -15,6 +15,7 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
+| [#698](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/698) | [fix] 출고확정 시 문서(운송장 등) 선택 팝업 삭제 — 라벨 발급 생략하고 바로 출고확정 | b | p3 | - | 미배정 | 2026-07-22 |
 | [#695](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/695) | [fix] UPS접수취소(removeorder) 시 zen_ups_labels/zen_ups_label_documents/Storage 파일 정리 누락 | b | p2 | done | 미배정 | 2026-07-22 |
 | [#693](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/693) | [결함] 매출/매입 현황 화면 dest_country_code 컬럼 부재로 500 오류 | a | p2 | - | 미배정 | 2026-07-22 |
 | [#684](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/684) | [feat] UPS 라벨/무역서류 실제 다운로드 후 자체 스토리지 저장 (다중 문서 지원) | b | p2 | done | 미배정 | 2026-07-22 |
