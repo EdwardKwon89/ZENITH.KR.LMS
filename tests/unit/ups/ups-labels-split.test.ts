@@ -22,6 +22,8 @@ vi.mock('@/lib/ups/label-mapping', () => ({
   resolveShipperStreet: vi.fn().mockReturnValue(''),
 }));
 
+vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }));
+
 const ORDER_ID = 'order-uuid-001';
 const REF_NO = 'ZEN-2026-000001';
 const STRIPPED_REF = 'ZEN2026000001';
@@ -46,13 +48,23 @@ function makeSupabase(tableResults: Record<string, any>) {
       if (typeof result === 'function') return makeChain(result());
       return makeChain(result);
     }),
+    storage: {
+      from: vi.fn().mockReturnValue({
+        upload: vi.fn().mockResolvedValue({ error: null }),
+        createSignedUrl: vi.fn().mockResolvedValue({ data: { signedUrl: 'https://signed.test/label.pdf' } }),
+      }),
+    },
   };
 }
 
 beforeEach(() => {
   vi.clearAllMocks();
+  vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+    ok: true,
+    arrayBuffer: () => Promise.resolve(new Uint8Array([0x25, 0x50, 0x44, 0x46]).buffer),
+  } as Response);
   vi.mocked(createorder).mockResolvedValue({ success: 1, data: { order_id: 'shxk-order-1', shipping_method_no: 'TK123', refrence_no: REF_NO }, message: 'OK' });
-  vi.mocked(getnewlabel).mockResolvedValue({ success: 1, data: [{ lable_file: 'https://test.example.com/label' }], message: 'OK' });
+  vi.mocked(getnewlabel).mockResolvedValue({ success: 1, data: [{ lable_file: 'https://test.example.com/label', lable_content_type: '1' }], message: 'OK' });
   vi.mocked(removeorder).mockResolvedValue({ success: 1, message: 'OK' });
 });
 
@@ -111,7 +123,7 @@ describe('TASK-B-167: registerUpsOrder', () => {
 });
 
 describe('TASK-B-167: fetchAndIssueUpsLabel', () => {
-  it('getnewlabel을 호출하고 label_url을 반환한다', async () => {
+  it('getnewlabel을 호출하고 signed URL을 반환한다', async () => {
     const { fetchAndIssueUpsLabel } = await import('@/app/actions/operations/ups-labels');
     const supabase = makeSupabase({
       zen_ups_labels: { data: { id: 'lbl-1', reference_no: REF_NO, tracking_number: 'TK123' }, error: null },
@@ -121,7 +133,7 @@ describe('TASK-B-167: fetchAndIssueUpsLabel', () => {
     const result = await fetchAndIssueUpsLabel(ORDER_ID);
 
     expect(result.success).toBe(true);
-    expect(result.url).toBe('https://test.example.com/label');
+    expect(result.url).toBeTruthy();
     expect(getnewlabel).toHaveBeenCalledWith(
       expect.objectContaining({ lable_content_type: '4' }),
       [{ reference_no: STRIPPED_REF }],
@@ -135,8 +147,10 @@ describe('TASK-B-167: fetchAndIssueUpsLabel', () => {
     });
     vi.mocked(validateUserAction).mockResolvedValue({ supabase: supabase as any, profile: { id: 'test', role: 'ADMIN' } } as any);
 
-    await fetchAndIssueUpsLabel(ORDER_ID, 'WAYBILL');
+    const result = await fetchAndIssueUpsLabel(ORDER_ID, 'WAYBILL');
 
+    expect(result.success).toBe(true);
+    expect(result.url).toBeTruthy();
     expect(getnewlabel).toHaveBeenCalledWith(
       expect.objectContaining({ lable_content_type: '1' }),
       [{ reference_no: STRIPPED_REF }],

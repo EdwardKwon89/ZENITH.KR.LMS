@@ -251,7 +251,7 @@ async function fetchAndSaveLabel(
   }
 
   const labelFormat = items[0]?.lable_file?.endsWith('.pdf') ? 'PDF' : 'PNG';
-  const storagePath = lastSignedUrl || items[0]?.lable_file || '';
+  const storagePath = lastSignedUrl || '';
 
   const { error } = await supabase
     .from('zen_ups_labels')
@@ -262,7 +262,7 @@ async function fetchAndSaveLabel(
     .eq('reference_no', referenceNo);
 
   if (error) logger.error('zen_ups_labels label update error:', error);
-  return lastSignedUrl ?? items[0]?.lable_file ?? null;
+  return lastSignedUrl;
 }
 
 async function markAllPackagesIssued(

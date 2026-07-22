@@ -80,7 +80,7 @@ describe('downloadAndStoreLabelDoc', () => {
     expect(result.docType).toBe('WAYBILL');
   });
 
-  it('zen_ups_label_documents에正确的メタデータを挿入する', async () => {
+  it('zen_ups_label_documents에 올바른 메타데이터를 삽입한다', async () => {
     const supabase = makeSupabase();
     await downloadAndStoreLabelDoc(
       supabase, ORDER_ID, REF_NO, LABEL_ID, '2', MOCK_URL,
@@ -96,7 +96,7 @@ describe('downloadAndStoreLabelDoc', () => {
     });
   });
 
-  it('content_type "1"はWAYBILLとして保存される', async () => {
+  it('content_type "1"은 WAYBILL로 저장된다', async () => {
     const supabase = makeSupabase();
     const result = await downloadAndStoreLabelDoc(
       supabase, ORDER_ID, REF_NO, LABEL_ID, '1', MOCK_URL,
@@ -104,7 +104,7 @@ describe('downloadAndStoreLabelDoc', () => {
     expect(result.docType).toBe('WAYBILL');
   });
 
-  it('content_type "3"はINVOICEとして保存される', async () => {
+  it('content_type "3"은 INVOICE로 저장된다', async () => {
     const supabase = makeSupabase();
     const result = await downloadAndStoreLabelDoc(
       supabase, ORDER_ID, REF_NO, LABEL_ID, '3', MOCK_URL,
@@ -112,7 +112,7 @@ describe('downloadAndStoreLabelDoc', () => {
     expect(result.docType).toBe('INVOICE');
   });
 
-  it('content_type "6"はCOMBINEDとして保存される', async () => {
+  it('content_type "6"은 COMBINED로 저장된다', async () => {
     const supabase = makeSupabase();
     const result = await downloadAndStoreLabelDoc(
       supabase, ORDER_ID, REF_NO, LABEL_ID, '6', MOCK_URL,
