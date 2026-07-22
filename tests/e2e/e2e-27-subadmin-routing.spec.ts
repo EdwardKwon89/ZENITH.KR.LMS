@@ -5,7 +5,7 @@ const SCREENSHOT_DIR = 'docs/99_Manual/E2E_27_Result';
 const SUB_ADMIN_ROUTES = [
   { path: '/ko/admin/ups-rates', label: 'admin/ups-rates' },
   { path: '/ko/voc', label: 'voc' },
-  { path: '/ko/support', label: 'support' },
+  { path: '/ko/support', label: 'support', redirectTo: '/ko/support/qna' },
   { path: '/ko/mypage', label: 'mypage' },
   { path: '/ko/address-book', label: 'address-book' },
 ];
