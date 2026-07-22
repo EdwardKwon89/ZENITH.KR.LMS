@@ -13,10 +13,11 @@ import {
 import { 
   getOrderByBarcodeOrNo, 
   confirmInbound, 
-  getTodayInboundHistory 
+  getTodayInboundHistory,
+  cancelInbound,
 } from "@/app/actions/operations";
 import { OrderStatus } from "@/types/orders";
-import { Search, Barcode, CheckCircle, AlertTriangle, Clock, User, Package, ArrowRight } from "lucide-react";
+import { Search, Barcode, CheckCircle, AlertTriangle, Clock, User, Package, ArrowRight, XCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export default function InboundProcessForm({ locale }: { locale: string }) {
@@ -31,6 +32,8 @@ export default function InboundProcessForm({ locale }: { locale: string }) {
   const [note, setNote] = useState("");
   const [history, setHistory] = useState<any[]>([]);
   const [errorMsg, setErrorMsg] = useState("");
+  const [cancelTarget, setCancelTarget] = useState<any | null>(null);
+  const [cancelLoading, setCancelLoading] = useState(false);
 
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -104,6 +107,30 @@ export default function InboundProcessForm({ locale }: { locale: string }) {
       toast.error(err.message || "입고 확정 실패");
     } finally {
       setSubmitLoading(false);
+      focusInput();
+    }
+  };
+
+  // 4. 입고 취소 처리
+  const handleCancelInbound = async () => {
+    if (!cancelTarget) return;
+
+    setCancelLoading(true);
+    try {
+      const result = await cancelInbound(cancelTarget.id);
+      if (result && result.success) {
+        toast.success(t("cancel_success"));
+        setCancelTarget(null);
+        setOrder(null);
+        setBarcode("");
+        await fetchHistory();
+      } else {
+        throw new Error("입고 취소 처리에 실패했습니다.");
+      }
+    } catch (err: any) {
+      toast.error(err.message || "입고 취소 실패");
+    } finally {
+      setCancelLoading(false);
       focusInput();
     }
   };
@@ -318,8 +345,60 @@ export default function InboundProcessForm({ locale }: { locale: string }) {
                 >
                   {t("confirm_btn")}
                 </ZenButton>
+
+                {order.status === OrderStatus.WAREHOUSED && (
+                  <ZenButton
+                    onClick={() => setCancelTarget(order)}
+                    disabled={submitLoading}
+                    variant="ghost"
+                    className="w-full py-3 rounded-2xl text-rose-600 hover:bg-rose-50"
+                  >
+                    <XCircle size={16} className="mr-2" />
+                    {t("cancel_btn")}
+                  </ZenButton>
+                )}
               </div>
             </ZenCard>
+          </div>
+        )}
+
+        {/* 입고 취소 확인 모달 */}
+        {cancelTarget && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+            <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full mx-4 animate-in zoom-in-95 duration-200">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2.5 bg-rose-50 rounded-xl text-rose-600">
+                  <AlertTriangle size={24} />
+                </div>
+                <div>
+                  <h3 className="font-bold text-slate-900">{t("cancel_btn")}</h3>
+                  <p className="text-xs text-slate-500">{t("cancel_confirm")}</p>
+                </div>
+              </div>
+
+              <div className="bg-slate-50 rounded-xl p-3 mb-6 text-sm space-y-1">
+                <p><span className="text-slate-500">오더번호:</span> <span className="font-bold">{cancelTarget.order_no}</span></p>
+              </div>
+
+              <div className="flex gap-3 justify-end">
+                <ZenButton
+                  variant="ghost"
+                  onClick={() => setCancelTarget(null)}
+                  disabled={cancelLoading}
+                  className="rounded-xl"
+                >
+                  닫기
+                </ZenButton>
+                <ZenButton
+                  onClick={handleCancelInbound}
+                  loading={cancelLoading}
+                  disabled={cancelLoading}
+                  className="bg-rose-600 text-white hover:bg-rose-700 rounded-xl"
+                >
+                  {t("cancel_btn")}
+                </ZenButton>
+              </div>
+            </div>
           </div>
         )}
       </div>
