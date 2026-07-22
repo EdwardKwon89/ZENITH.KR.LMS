@@ -38,6 +38,7 @@ Edward가 로컬에서 `sntl@zenith.kr`(role=`SUB_ADMIN`, org_type=`AGENCY`, TAS
 - `src/lib/auth/proxy.ts`의 non-PLATFORM 화이트리스트에 `/admin/ups-rates`·`/voc` 추가
 - **추가 점검**: `SUB_ADMIN` 역할이 이 두 곳 외에 다른 org_type 전용 페이지 자체 권한 체크(`agency/page.tsx`처럼 `checkPermission(profile.role, "/특정경로")` 패턴을 쓰는 다른 페이지)에 걸릴 가능성이 있는지 확인 — `STATIC_PERMISSIONS['SUB_ADMIN']`에 명시된 5개 경로(`/admin/ups-rates`, `/voc`, `/support`, `/mypage`, `/address-book`) 전부 실제 접속 가능한지 재검증
 - 수정 후 Playwright로 실제 재현 검증(위 표의 ❌ 항목이 ✅로 바뀌는지) — R-10 스크린샷 첨부
+- **신규 Playwright e2e 테스트 작성(필수)** — `sntl@zenith.kr`(SUB_ADMIN)로 실제 로그인 후 `STATIC_PERMISSIONS['SUB_ADMIN']`의 5개 경로 전부를 `page.goto()`로 이동해 정상 도달(리다이렉트 없음)을 단언하는 회귀 테스트. `tests/e2e/r11-ups-settlement-e2e-flow.spec.ts`의 Edge-1(`loginAs` → `page.goto` → 리다이렉트 확인) 패턴 재사용. `docs/08_Self_Audit/Checklists/LIVE_REGRESSION_TEST_MAP.md`에 신규 TC 등록(R-09) — 이번 버그처럼 `rbac.ts`(앱 레벨 권한표)와 `proxy.ts`(미들웨어 라우팅표)가 서로 어긋나는 것을 향후 자동으로 잡아내는 것이 목적
 - 회귀 테스트(`npm run test:regression`) 전체 PASS 유지
 - 절차: `agent-worktree-init.sh d_kai` 세션 시작 시 실행, feature 브랜치 생성, 코드/문서 커밋 분리
 
@@ -52,6 +53,7 @@ Edward가 로컬에서 `sntl@zenith.kr`(role=`SUB_ADMIN`, org_type=`AGENCY`, TAS
 - [ ] `proxy.ts` 화이트리스트에 `/admin/ups-rates`·`/voc` 추가
 - [ ] SUB_ADMIN 5개 허용 경로 전부 실제 접속 재검증(Playwright)
 - [ ] 다른 org_type 전용 페이지 자체 권한 체크 충돌 여부 점검 결과 명시
+- [ ] **신규 Playwright e2e 테스트 작성** — SUB_ADMIN 5개 경로 접근 회귀 테스트, `LIVE_REGRESSION_TEST_MAP.md` 등록(R-09)
 - [ ] R-10 스크린샷(수정 전/후) 첨부
 - [ ] 회귀 테스트 전체 PASS 확인
 - [ ] task file `[작업 결과]` 작성 + 커밋 해시 기재
