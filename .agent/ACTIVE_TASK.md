@@ -15,7 +15,7 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
-| [#704](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/704) | [feat] 오늘의 UPS 접수 이력 패널 미구현 — 백엔드 조회 함수 신설 필요 | b | p3 | - | 미배정 | 2026-07-22 |
+| [#704](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/704) | [feat] 오늘의 UPS 접수 이력 패널 미구현 — 백엔드 조회 함수 신설 필요 | b | p3 | in-progress | 미배정 | 2026-07-22 |
 | [#700](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/700) | [fix] confirmOutbound WAREHOUSED 전용 가드 버그(PACKED 출고 불가) + 출고확정 버튼 텍스트 변경 | b | p1 | done | 미배정 | 2026-07-22 |
 | [#698](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/698) | [fix] 출고확정 시 문서(운송장 등) 선택 팝업 삭제 — 라벨 발급 생략하고 바로 출고확정 | b | p3 | done | 미배정 | 2026-07-22 |
 | [#695](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/695) | [fix] UPS접수취소(removeorder) 시 zen_ups_labels/zen_ups_label_documents/Storage 파일 정리 누락 | b | p2 | done | 미배정 | 2026-07-22 |
