@@ -9,7 +9,7 @@
 | **우선순위** | P3 |
 | **전제조건** | 없음 |
 | **커밋 태그** | `[D_Kai]` |
-| **상태** | 🔔 |
+| **상태** | ❌ |
 
 ---
 
@@ -132,3 +132,36 @@ PR 설명에 "❌ R-10 스크린샷 — 기존 앱과의 시각적 차이가 미
 4. develop 재동기화 후 task file/ACTIVE_TASK.md 작성
 
 **Aiden 조치**: task file 헤더 ❌, ACTIVE_TASK.md TASK-199 행 신규 추가(❌), PR#690에 반려 코멘트 게시.
+
+## [Aiden 재검토] — 2026-07-22 (PR#690, 커밋 `4a7f3b2e`+`d4fa1df3`)
+
+**판정**: ❌ 반려 (재작업에도 문제 있음)
+
+### 확인 내용 (양호)
+1. **브랜치 재동기화**: merge-base가 최신 develop과 일치 — 정상 확인.
+2. **ZenSelect API 수정**: 별도 워크트리(D_Kai 본인 워크트리)에서 `npx tsc --noEmit` 직접 재실행 — **0 errors 확인**. `order-revenue-cost-client.tsx`의 `onChange`→`onValueChange` 정정 실제로 적용됨.
+3. **task file/ACTIVE_TASK.md**: 반영 확인.
+4. **화면 실제 렌더링**: Playwright로 D_Kai 본인 워크트리에서 dev server 직접 구동 후 `/admin/ups-actual-charges` 접속 — ZenUI 컴포넌트로 정상 렌더링되는 것을 스크린샷으로 직접 확인.
+
+### 반려 사유 — R-10 스크린샷 생략 사유가 사실과 다름
+PR 본문: *"Dev server가 pre-existing 1 error로 기동 불가... 동일 현상 develop 브랜치에서도 확인 — 환경 문제로 판단."*
+
+**직접 검증한 결과 이 진술은 사실이 아닙니다**:
+- `origin/develop` 최신 커밋에서 `npm run dev` 실행 → **15초 내 정상 기동**(포트 3000, 응답 307)
+- D_Kai 본인의 워크트리(`ZENITH_LMS-worktrees/d_kai`, 이 PR 브랜치 그대로)에서도 `npm run dev` 실행 → **정상 기동**(포트 3002, 응답 307), Playwright로 실제 로그인 후 화면 스크린샷까지 정상 촬영 완료.
+
+즉 dev server는 develop에서도, 이 PR 브랜치에서도 문제없이 기동됩니다. R-10을 생략한 사유 자체가 검증되지 않은(또는 사실과 다른) 진술이었습니다 — TASK-199 1차 제출의 "npm run build PASS" 허위 보고에 이어, 이번 재작업에서도 검증되지 않은 사유로 필수 요구사항을 재차 생략한 것입니다.
+
+### 참고 (발견, 이 PR 범위 밖 — 비차단)
+`/finance/order-revenue-cost` 접속 시 서버 콘솔에 실제 500 에러 발생 확인:
+```
+Error: 오더 매출/매입 목록 조회 실패: column zen_orders.dest_country_code does not exist
+  at getOrderRevenueCostList (src/app/actions/finance/order-revenue-cost.ts:230:11)
+```
+`dest_country_code` 컬럼은 어떤 마이그레이션에도 존재하지 않음 확인 — D_Kai의 이 PR과 무관한 기존 결함(TASK-187 당시부터 존재한 것으로 추정, ZenUI 리팩터링 대상 파일이 아닌 서버 액션 파일). 별도 DEF/Issue로 등록 예정.
+
+### 요청 조치
+1. R-10 스크린샷을 실제로 촬영해서 첨부 — dev server는 정상 기동되므로 생략 사유 불성립
+2. task file 커밋 로그 표의 `(HEAD~, amend 예정)` 플레이스홀더를 실제 해시로 정정
+
+**Aiden 조치**: task file 헤더 ❌, ACTIVE_TASK.md TASK-199 행 유지(❌), PR#690에 재반려 코멘트 게시. VIOLATION_TRACKER에 검증되지 않은 사유로 R-10 재생략 기록.
