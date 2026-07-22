@@ -27,7 +27,7 @@
 | [#684](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/684) | [feat] UPS 라벨/무역서류 실제 다운로드 후 자체 스토리지 저장 (다중 문서 지원) | b | p2 | done | 미배정 | 2026-07-22 |
 | [#680](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/680) | [defect] DEF-118 — getnewlabel 응답구조 불일치, 실제 환경에서 라벨 URL 추출 상시 실패 | b | p1 | done | 미배정 | 2026-07-22 |
 | [#674](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/674) | [feat] 출고처리 화면 UI 개선 — 배지 문구/UPS접수취소 버튼/문서 출력 기능 | b | p2 | done | 미배정 | 2026-07-22 |
-| [#671](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/671) | [defect] DEF-117 — zen_order_packages RLS에 AGENCY SELECT 커버리지 없음, UPS접수 여전히 침묵 실패 | b | p1 | in-progress | 미배정 | 2026-07-22 |
+| [#671](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/671) | [defect] DEF-117 — zen_order_packages RLS에 AGENCY SELECT 커버리지 없음, UPS접수 여전히 침묵 실패 | b | p1 | done | 미배정 | 2026-07-22 |
 | [#667](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/667) | [defect] DEF-116 — checkLabelPermission()에 AGENCY 누락, UPS 라벨 기능 7종 침묵 실패 | b | p1 | done | 미배정 | 2026-07-22 |
 | [#664](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/664) | [fix] zen_shxk_api_logs 조회 권한을 전체 인증 사용자로 확대 | b | p3 | done | 미배정 | 2026-07-22 |
 | [#661](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/661) | [feat] IMP — SHXK UPS API 호출 통합 이력(감사 로그) 테이블 신설 | b | p3 | done | 미배정 | 2026-07-22 |
