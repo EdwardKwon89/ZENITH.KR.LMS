@@ -267,7 +267,7 @@ export async function getTodayPickupHistory() {
       )
     `)
     .eq("next_status", "SCHEDULED")
-    .contains("reason", "[픽업완료]")
+    .like("reason", "%[픽업완료]%")
     .gte("created_at", startUtc)
     .lte("created_at", endUtc)
     .order("created_at", { ascending: false });
@@ -309,7 +309,7 @@ export async function getTodayUpsHistory() {
       )
     `)
     .eq("next_status", OrderStatus.PACKED)
-    .contains("reason", "[UPS등록]")
+    .like("reason", "%[UPS등록]%")
     .gte("created_at", startUtc)
     .lte("created_at", endUtc)
     .order("created_at", { ascending: false });
