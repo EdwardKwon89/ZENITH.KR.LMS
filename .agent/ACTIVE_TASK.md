@@ -15,7 +15,7 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
-| [#684](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/684) | [feat] UPS 라벨/무역서류 실제 다운로드 후 자체 스토리지 저장 (다중 문서 지원) | b | p2 | - | 미배정 | 2026-07-22 |
+| [#684](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/684) | [feat] UPS 라벨/무역서류 실제 다운로드 후 자체 스토리지 저장 (다중 문서 지원) | b | p2 | in-progress | 미배정 | 2026-07-22 |
 | [#680](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/680) | [defect] DEF-118 — getnewlabel 응답구조 불일치, 실제 환경에서 라벨 URL 추출 상시 실패 | b | p1 | - | 미배정 | 2026-07-21 |
 | [#674](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/674) | [feat] 출고처리 화면 UI 개선 — 배지 문구/UPS접수취소 버튼/문서 출력 기능 | b | p2 | - | 미배정 | 2026-07-21 |
 | [#671](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/671) | [defect] DEF-117 — zen_order_packages RLS에 AGENCY SELECT 커버리지 없음, UPS접수 여전히 침묵 실패 | b | p1 | - | 미배정 | 2026-07-21 |
