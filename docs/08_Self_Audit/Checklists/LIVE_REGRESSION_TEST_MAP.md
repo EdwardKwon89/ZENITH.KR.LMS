@@ -623,6 +623,17 @@
 
 ---
 
+### 48. SUB_ADMIN 라우팅 회귀 (Issue #688 / TASK-200)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-SUBADMIN-01** | SUB_ADMIN /admin/ups-rates 접속 | proxy.ts 화이트리스트에 누락된 경로가 정상 접속되는지 확인 | `tests/e2e/e2e-27-subadmin-routing.spec.ts` |
+| **TC-SUBADMIN-02** | SUB_ADMIN /voc 접속 | proxy.ts 화이트리스트에 누락된 경로가 정상 접속되는지 확인 | `tests/e2e/e2e-27-subadmin-routing.spec.ts` |
+| **TC-SUBADMIN-03** | SUB_ADMIN /support 접속 | 기존 정상 경로 회귀 확인 | `tests/e2e/e2e-27-subadmin-routing.spec.ts` |
+| **TC-SUBADMIN-04** | SUB_ADMIN /mypage 접속 | 기존 정상 경로 회귀 확인 | `tests/e2e/e2e-27-subadmin-routing.spec.ts` |
+| **TC-SUBADMIN-05** | SUB_ADMIN /address-book 접속 | 기존 정상 경로 회귀 확인 | `tests/e2e/e2e-27-subadmin-routing.spec.ts` |
+
+---
+
 ## 📝 가이드라인 (R-09 Enforcement)
 1. **추가 의무**: 신규 기능 개발 시 위 카테고리에 맞는 테스트를 반드시 추가하십시오.
 2. **실행 의무**: 모든 커밋 전 `npm run test:regression`을 실행하여 위 명세 전원이 초록색인지 확인하십시오.

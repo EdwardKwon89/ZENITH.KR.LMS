@@ -202,6 +202,8 @@ export async function authGuard(
         purePath.startsWith('/admin/transport-costs') ||
         purePath.startsWith('/admin/customs-rates') ||
         purePath.startsWith('/admin/delivery-rates') ||
+        purePath.startsWith('/admin/ups-rates') ||
+        purePath.startsWith('/voc') ||
         purePath.startsWith('/address-book') ||
         purePath.startsWith('/shipper') ||
         purePath.startsWith('/agency');
