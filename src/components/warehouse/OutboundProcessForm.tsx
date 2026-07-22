@@ -11,9 +11,12 @@ import {
 } from "@/components/ui/ZenUI";
 import {
   getWarehousedOrders,
+  getPackedOrders,
   confirmOutbound,
+  undoOutbound,
   getTodayReleasedOrders,
-} from "@/app/actions/warehouse";
+  undoUpsRegistration,
+} from "@/app/actions/operations";
 import { OrderStatus, ORDER_STATUS_META } from "@/types/orders";
 import {
   CheckCircle,
@@ -28,7 +31,7 @@ import {
   RotateCcw,
   XCircle,
 } from "lucide-react";
-import { issueUpsLabel, voidUpsLabel } from "@/app/actions/operations/ups-labels";
+import { issueUpsLabel, voidUpsLabel, fetchAndIssueUpsLabel } from "@/app/actions/operations/ups-labels";
 import { cn } from "@/lib/utils";
 import dynamic from "next/dynamic";
 import type { OrderListItem } from "@/types/orders";
@@ -57,6 +60,11 @@ export default function OutboundProcessForm({ locale }: { locale: string }) {
   const [issuingLabels, setIssuingLabels] = useState(false);
   const [voidTarget, setVoidTarget] = useState<string | null>(null);
   const [voidLoading, setVoidLoading] = useState(false);
+  const [undoOutboundTarget, setUndoOutboundTarget] = useState<string | null>(null);
+  const [undoOutboundLoading, setUndoOutboundLoading] = useState(false);
+  const [undoUpsTarget, setUndoUpsTarget] = useState<string | null>(null);
+  const [undoUpsLoading, setUndoUpsLoading] = useState(false);
+  const [printingLabels, setPrintingLabels] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     fetchData();
@@ -65,11 +73,15 @@ export default function OutboundProcessForm({ locale }: { locale: string }) {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [orderRes, historyRes] = await Promise.all([
+      const [warehousedRes, packedRes, historyRes] = await Promise.all([
         getWarehousedOrders(),
+        getPackedOrders(),
         getTodayReleasedOrders(),
       ]);
-      if (orderRes.success) setOrders(orderRes.orders);
+      const allOrders: any[] = [];
+      if (warehousedRes.success) allOrders.push(...warehousedRes.orders);
+      if (packedRes.success) allOrders.push(...packedRes.orders);
+      setOrders(allOrders);
       if (historyRes.success) setHistory(historyRes.items);
     } catch (err: any) {
       toast.error(err.message || "데이터 로드 실패");
@@ -106,6 +118,7 @@ export default function OutboundProcessForm({ locale }: { locale: string }) {
     }
 
     const selectedOrders = orders.filter((o) => selected.has(o.id));
+
     const packagesNeedingLabels = selectedOrders.flatMap((o: any) =>
       (o.order_packages || []).filter((p: any) => !p.intl_ref_locked)
     );
@@ -117,6 +130,24 @@ export default function OutboundProcessForm({ locale }: { locale: string }) {
     }
 
     await executeConfirmOutbound(selectedOrders);
+  };
+
+  const handleUndoOutbound = async (orderId: string) => {
+    setUndoOutboundLoading(true);
+    try {
+      const res = await undoOutbound(orderId);
+      if (res.success) {
+        toast.success(t("undo_outbound_success"));
+        setUndoOutboundTarget(null);
+        await fetchData();
+      } else {
+        toast.error(res.error || t("undo_outbound_failed"));
+      }
+    } catch (err: any) {
+      toast.error(err.message || t("undo_outbound_failed"));
+    } finally {
+      setUndoOutboundLoading(false);
+    }
   };
 
   const issueLabelsForPackages = async (ordersToProcess: any[]): Promise<boolean> => {
@@ -205,6 +236,101 @@ export default function OutboundProcessForm({ locale }: { locale: string }) {
     } finally {
       setVoidLoading(false);
     }
+  };
+
+  const handleUndoUpsRegistration = async (orderId: string) => {
+    setUndoUpsLoading(true);
+    try {
+      const res = await undoUpsRegistration(orderId);
+      if (res.success) {
+        toast.success(t("undo_ups_success"));
+        setUndoUpsTarget(null);
+        await fetchData();
+      } else {
+        toast.error(res.error || t("undo_ups_failed"));
+      }
+    } catch (err: any) {
+      toast.error(err.message || t("undo_ups_failed"));
+    } finally {
+      setUndoUpsLoading(false);
+    }
+  };
+
+  const handleBatchUndoUpsRegistration = async () => {
+    const packedIds = [...selected].filter(id => {
+      const order = orders.find(o => o.id === id);
+      return order?.status === OrderStatus.PACKED;
+    });
+
+    if (packedIds.length === 0) {
+      toast.error(t("error_no_packed_selected"));
+      return;
+    }
+
+    if (packedIds.length === 1) {
+      setUndoUpsTarget(packedIds[0]);
+      return;
+    }
+
+    setUndoUpsLoading(true);
+    try {
+      let successCount = 0;
+      let failCount = 0;
+
+      for (const orderId of packedIds) {
+        const res = await undoUpsRegistration(orderId);
+        if (res.success) {
+          successCount++;
+        } else {
+          failCount++;
+        }
+      }
+
+      if (failCount === 0) {
+        toast.success(t("undo_ups_success"));
+        setSelected(new Set());
+        await fetchData();
+      } else {
+        toast.warning(t("undo_ups_partial", { success: successCount, fail: failCount }));
+        await fetchData();
+      }
+    } catch (err: any) {
+      toast.error(err.message || t("undo_ups_failed"));
+    } finally {
+      setUndoUpsLoading(false);
+    }
+  };
+
+  const handlePrintLabel = async (orderId: string, docType: 'WAYBILL' | 'COMBINED') => {
+    setPrintingLabels(prev => new Set(prev).add(orderId));
+    try {
+      const res = await fetchAndIssueUpsLabel(orderId, docType);
+      if (res.success) {
+        if (docType === 'COMBINED' && res.urls) {
+          res.urls.forEach((url) => window.open(url, '_blank'));
+        } else if (res.url) {
+          window.open(res.url, '_blank');
+        }
+        toast.success(t("label_printed"));
+      } else {
+        toast.error(res.error || t("label_print_failed"));
+      }
+    } catch (err: any) {
+      toast.error(err.message || t("label_print_failed"));
+    } finally {
+      setPrintingLabels(prev => {
+        const next = new Set(prev);
+        next.delete(orderId);
+        return next;
+      });
+    }
+  };
+
+  const hasPackedSelected = () => {
+    return [...selected].some(id => {
+      const order = orders.find(o => o.id === id);
+      return order?.status === OrderStatus.PACKED;
+    });
   };
 
   const getLatestLabel = (pkgs: any[]): { trackingNumber: string | null; storagePath: string | null; isVoided: boolean } | null => {
@@ -368,8 +494,15 @@ export default function OutboundProcessForm({ locale }: { locale: string }) {
                         <span className="font-mono text-sm font-bold text-slate-900">
                           {order.order_no}
                         </span>
-                        <ZenBadge className="bg-yellow-50 text-yellow-700 border-yellow-200 text-[10px]">
-                          {orderStatusT(`${OrderStatus.WAREHOUSED}.label`)}
+                        <ZenBadge className={cn(
+                          order.status === OrderStatus.PACKED
+                            ? "bg-blue-50 text-blue-700 border-blue-200"
+                            : "bg-yellow-50 text-yellow-700 border-yellow-200",
+                          "text-[10px]"
+                        )}>
+                          {order.status === OrderStatus.PACKED
+                            ? orderStatusT(`${OrderStatus.PACKED}.label`)
+                            : orderStatusT(`${OrderStatus.WAREHOUSED}.label`)}
                         </ZenBadge>
                         {pkgs.some((p: any) => p.intl_ref_locked) && (
                           <ZenBadge className="bg-green-50 text-green-700 border-green-200 text-[10px]">
@@ -394,24 +527,6 @@ export default function OutboundProcessForm({ locale }: { locale: string }) {
                         <p className="text-[11px] text-slate-400">
                           {pkgCount} 패키지 · {totalQty}개 품목
                         </p>
-                        <div className="flex flex-wrap gap-1 mt-1.5">
-                          {(order.order_packages || []).map((pkg: any, idx: number) => (
-                            <span
-                              key={pkg.id || idx}
-                              className={cn(
-                                "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border",
-                                pkg.intl_ref_locked
-                                  ? "bg-green-50 text-green-700 border-green-200"
-                                  : "bg-orange-50 text-orange-700 border-orange-200"
-                              )}
-                            >
-                              <span className="font-mono">#{idx + 1}</span>
-                              {pkg.intl_ref_locked && pkg.intl_ref_no
-                                ? pkg.intl_ref_no
-                                : t("intl_ref_missing")}
-                            </span>
-                          ))}
-                        </div>
                       </div>
                     </div>
 
@@ -449,6 +564,26 @@ export default function OutboundProcessForm({ locale }: { locale: string }) {
                           </button>
                         )}
                       </PDFDownloadLinkDynamic>
+                      {order.status === OrderStatus.PACKED && (
+                        <>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handlePrintLabel(order.id, 'WAYBILL'); }}
+                            disabled={printingLabels.has(order.id)}
+                            className="p-2.5 bg-blue-50 hover:bg-blue-100 rounded-xl border border-blue-200 text-blue-600 hover:text-blue-700 transition-all disabled:opacity-50"
+                            title={t("print_waybill")}
+                          >
+                            <FileText size={16} />
+                          </button>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handlePrintLabel(order.id, 'COMBINED'); }}
+                            disabled={printingLabels.has(order.id)}
+                            className="p-2.5 bg-indigo-50 hover:bg-indigo-100 rounded-xl border border-indigo-200 text-indigo-600 hover:text-indigo-700 transition-all disabled:opacity-50"
+                            title={t("print_combined")}
+                          >
+                            <Download size={16} />
+                          </button>
+                        </>
+                      )}
                     </div>
                   </div>
                 );
@@ -459,21 +594,34 @@ export default function OutboundProcessForm({ locale }: { locale: string }) {
                 <p className="text-xs font-semibold">
                   {search.trim()
                     ? "검색 결과가 없습니다."
-                    : "출고 대기 중인 WAREHOUSED 오더가 없습니다."}
+                    : "출고 대기 중인 오더가 없습니다."}
                 </p>
               </div>
             )}
           </div>
 
           {selected.size > 0 && (
-            <ZenButton
-              onClick={handleConfirmOutbound}
-              loading={issuingLabels || submitLoading}
-              disabled={issuingLabels || submitLoading}
-              className="w-full mt-6 py-4 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-2xl shadow-md transition-all active:scale-[0.98]"
-            >
-              {issuingLabels ? t("ups_label_issuing") : t("confirm_btn")} ({selected.size})
-            </ZenButton>
+            <div className="flex gap-3 mt-6">
+              <ZenButton
+                onClick={handleConfirmOutbound}
+                loading={issuingLabels || submitLoading}
+                disabled={issuingLabels || submitLoading}
+                className="flex-1 py-4 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-2xl shadow-md transition-all active:scale-[0.98]"
+              >
+                {issuingLabels ? t("ups_label_issuing") : t("confirm_btn")} ({selected.size})
+              </ZenButton>
+              {hasPackedSelected() && (
+                <ZenButton
+                  onClick={handleBatchUndoUpsRegistration}
+                  loading={undoUpsLoading}
+                  disabled={undoUpsLoading || !hasPackedSelected()}
+                  className="py-4 px-6 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-2xl shadow-md transition-all active:scale-[0.98]"
+                >
+                  <RotateCcw size={16} className="inline mr-1" />
+                  {t("undo_ups_btn")}
+                </ZenButton>
+              )}
+            </div>
           )}
         </ZenCard>
       </div>
@@ -545,6 +693,16 @@ export default function OutboundProcessForm({ locale }: { locale: string }) {
                             >
                               <XCircle size={12} />
                               {t("ups_label_void")}
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setUndoOutboundTarget(order.id);
+                              }}
+                              className="inline-flex items-center gap-1 px-2 py-1 text-[10px] font-semibold text-orange-700 bg-orange-50 border border-orange-200 rounded-lg hover:bg-orange-100 transition-colors"
+                            >
+                              <RotateCcw size={12} />
+                              {t("undo_outbound_btn")}
                             </button>
                           </>
                         ) : (
@@ -631,6 +789,64 @@ export default function OutboundProcessForm({ locale }: { locale: string }) {
                 className="px-5 py-2.5 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 rounded-xl transition-all disabled:opacity-50"
               >
                 {voidLoading ? "처리 중..." : t("ups_label_void_confirm")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {undoOutboundTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-bold text-slate-900 mb-2">
+              {t("undo_outbound_title")}
+            </h3>
+            <p className="text-sm text-slate-600 mb-6">
+              {t("undo_outbound_desc")}
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setUndoOutboundTarget(null)}
+                className="px-5 py-2.5 text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all"
+                disabled={undoOutboundLoading}
+              >
+                취소
+              </button>
+              <button
+                onClick={() => handleUndoOutbound(undoOutboundTarget)}
+                disabled={undoOutboundLoading}
+                className="px-5 py-2.5 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 rounded-xl transition-all disabled:opacity-50"
+              >
+                {undoOutboundLoading ? "처리 중..." : t("undo_outbound_confirm")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {undoUpsTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-bold text-slate-900 mb-2">
+              {t("undo_ups_title")}
+            </h3>
+            <p className="text-sm text-slate-600 mb-6">
+              {t("undo_ups_desc")}
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setUndoUpsTarget(null)}
+                className="px-5 py-2.5 text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all"
+                disabled={undoUpsLoading}
+              >
+                취소
+              </button>
+              <button
+                onClick={() => handleUndoUpsRegistration(undoUpsTarget)}
+                disabled={undoUpsLoading}
+                className="px-5 py-2.5 text-sm font-semibold text-white bg-orange-600 hover:bg-orange-700 rounded-xl transition-all disabled:opacity-50"
+              >
+                {undoUpsLoading ? "처리 중..." : t("undo_ups_confirm")}
               </button>
             </div>
           </div>

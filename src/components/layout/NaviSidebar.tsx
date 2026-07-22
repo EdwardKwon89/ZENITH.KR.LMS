@@ -103,8 +103,11 @@ export default function NaviSidebar({
       children: [
         { title: t("logistics_tracking"), href: "/tracking" },
         { title: t("inventory"), href: "/inventory" },
+        { title: t("logistics_pickup"), href: "/warehouse/pickup" },
         { title: t("logistics_inbound"), href: "/warehouse/inbound" },
+        { title: t("logistics_ups_receiving"), href: "/warehouse/ups-receive" },
         { title: t("logistics_outbound"), href: "/warehouse/outbound" },
+        { title: t("logistics_departure"), href: "/warehouse/departure" },
       ]
     },
     {

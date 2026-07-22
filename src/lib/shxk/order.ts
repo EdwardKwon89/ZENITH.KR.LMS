@@ -27,10 +27,10 @@ export interface GetTrackingNumberResponse {
   tracking_number: string
 }
 
-export interface GetNewLabelResponse {
-  label_url?: string
-  label_data?: string
-  label_type?: string
+export interface GetNewLabelItem {
+  lable_file: string
+  lable_file_type?: string
+  lable_content_type?: string
 }
 
 function assertData<T>(raw: unknown): T {
@@ -69,11 +69,20 @@ export interface GetNewLabelParams {
 export async function getnewlabel(
   configInfo: Record<string, unknown>,
   listorder: GetNewLabelParams[],
-): Promise<{ success: number; data: GetNewLabelResponse | null; message: string }> {
+): Promise<{ success: number; data: GetNewLabelItem[] | null; message: string }> {
   const res = await callShxk('getnewlabel', { configInfo, listorder })
+  let items: GetNewLabelItem[] | null = null
+  if (res.data) {
+    const rawItems = Array.isArray(res.data) ? res.data : [res.data]
+    items = rawItems.map((item: any) => ({
+      lable_file: String(item.lable_file ?? ''),
+      lable_file_type: item.lable_file_type ? String(item.lable_file_type) : undefined,
+      lable_content_type: item.lable_content_type ? String(item.lable_content_type) : undefined,
+    }))
+  }
   return {
     success: res.success,
-    data: res.data ? assertData<GetNewLabelResponse>(res.data) : null,
+    data: items,
     message: res.enmessage || res.cnmessage || '',
   }
 }

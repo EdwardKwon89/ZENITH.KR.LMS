@@ -24,6 +24,7 @@ export {
   syncExternalTracking,
   getTrackingRawLogs,
   getGlobalTrackingOverview,
+  getUpsTrackingEvents,
 } from './tracking';
 
 export {
@@ -49,3 +50,20 @@ export {
   adjustInventory,
   syncInventoryFromOrder,
 } from './inventory';
+
+export {
+  getWarehousedOrders,
+  getPackedOrders,
+  confirmOutbound,
+  getTodayReleasedOrders,
+  getPickupOrders,
+  confirmPickup,
+  cancelPickup,
+  getTodayPickupHistory,
+  cancelInbound,
+  confirmUpsRegistration,
+  undoUpsRegistration,
+  undoOutbound,
+  getReleasedOrders,
+  confirmDeparture,
+} from './warehouse';
