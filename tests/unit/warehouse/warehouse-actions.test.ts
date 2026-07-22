@@ -44,11 +44,13 @@ vi.mock('@/lib/auth/guards', () => ({
         select: vi.fn().mockReturnThis(),
         eq: vi.fn().mockReturnThis(),
         in: vi.fn().mockReturnThis(),
+        insert: vi.fn().mockResolvedValue({ error: null }),
         single: vi.fn().mockResolvedValue({ data: null, error: null }),
         maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
         then: (resolve: any, reject: any) => Promise.resolve({ data: null, error: null }).then(resolve, reject),
       })),
     },
+    user: { id: 'user-1' },
     profile: { id: 'user-1', role: 'ADMIN', org_id: 'org-1' },
   }),
 }));
@@ -84,6 +86,18 @@ describe('TASK-B-170: confirmOutbound guard (non-UPS 흐름 보존)', () => {
     const { confirmOutbound } = await import('@/app/actions/operations/warehouse');
     await expect(confirmOutbound('order-x')).rejects.toThrow();
     expect(mockUpdateOrderStatus).not.toHaveBeenCalled();
+  });
+
+  it('PACKED 상태 오더도 출고 확정이 가능하다', async () => {
+    mockFindById.mockResolvedValue({
+      data: { id: 'order-packed', status: 'PACKED', shipper_id: 'org-1', order_packages: [], order_no: 'ORD-PACKED' },
+    });
+    mockUpdateOrderStatus.mockResolvedValue({ success: true });
+
+    const mod = await import('@/app/actions/operations/warehouse');
+    const result = await mod.confirmOutbound('order-packed');
+    expect(result.success).toBe(true);
+    expect(mockUpdateOrderStatus).toHaveBeenCalledWith('order-packed', 'RELEASED', expect.any(String));
   });
 });
 

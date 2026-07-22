@@ -132,8 +132,8 @@ export async function confirmOutbound(orderId: string) {
 
   const { data: order } = await orderRepo.findById(orderId);
   if (!order) throw new Error("Order not found");
-  if (order.status !== OrderStatus.WAREHOUSED) {
-    throw new Error("WAREHOUSED 상태의 오더만 출고 확정할 수 있습니다.");
+  if (order.status !== OrderStatus.WAREHOUSED && order.status !== OrderStatus.PACKED) {
+    throw new Error("WAREHOUSED 또는 PACKED 상태의 오더만 출고 확정할 수 있습니다.");
   }
 
   if (profile.role === USER_ROLES.AGENCY) {
