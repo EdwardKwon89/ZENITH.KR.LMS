@@ -471,6 +471,7 @@
 | TASK-B-182 | 260722 | Issue #695 — UPS접수취소 시 zen_ups_labels/zen_ups_label_documents/Storage 파일 정리 누락 | P2 | 없음 | Baker (구현) | 🔔 | [TASK-B-182](tasks/TASK-B-182_260722_Iss695_UpsCancelCleanup_Baker.md) | PR#696 반려 재작업 완료 · zen_ups_labels AGENCY DELETE 정책 추가 · 회귀 746/746 ALL PASS · CI PASS (260722) |
 | TASK-B-183 | 260722 | Issue #698 — 출고확정 시 docTypePopup 제거 — 라벨 발급 생략하고 바로 출고확정 | P3 | 없음 | Baker (구현) | 🔔 | [TASK-B-183](tasks/TASK-B-183_260722_Iss698_RemoveDocTypePopup_Baker.md) | docTypePopup state+함수+JSX 삭제 · PACKED 필터 블록 제거 · i18n 키 5건×4언어 정리 · 회귀 746/746 ALL PASS · [PR#699](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/699) (base TeamB_Dev) |
 | TASK-B-184 | 260722 | Issue #700 — confirmOutbound PACKED 가드 허용 + 출고처리 텍스트 변경 | P2 | 없음 | Baker (구현) | 🔔 | [TASK-B-184](tasks/TASK-B-184_260722_Iss700_ConfirmOutboundPackedGuard_Baker.md) | warehouse.ts 가드 WAREHOUSED+PACKED 허용 · ko.json confirm_btn "출고처리" · 회귀 747/747 ALL PASS · [PR#701](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/701) (base TeamB_Dev) |
+| TASK-B-185 | 260722 | Issue #704 — 오늘의 UPS 접수 이력 패널 구현 (getTodayUpsHistory + 프론트 연결) | P3 | 없음 | Baker (구현) | 🔔 | [TASK-B-185](tasks/TASK-B-185_260722_Iss704_TodayUpsHistory_Baker.md) | warehouse.ts getTodayUpsHistory() 신설 · UpsReceiveProcessForm history 연결 · 테스트 3건 추가 · 회귀 750/750 ALL PASS |
 ---
 
 ## Agent 현황
