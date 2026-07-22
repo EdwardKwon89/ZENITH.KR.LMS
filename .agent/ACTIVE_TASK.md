@@ -15,6 +15,7 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
+| [#718](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/718) | 2026.07.22 SNTL 회의록 | - | - | - | 미배정 | 2026-07-22 |
 | [#717](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/717) | [design] SNTL 원가 Matrix — 전역 공용값+정산 미반영 구조, 의도된 설계인지 Team B 협의 필요 | a | p2 | - | 미배정 | 2026-07-22 |
 | [#713](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/713) | [feat] 출고확정처리(/warehouse/departure) 화면에 오늘의 이력 패널 신설 | b | p3 | done | 미배정 | 2026-07-22 |
 | [#711](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/711) | [Team A] Phase 2 — 신규 UPS 물류관리 메뉴 흐름 전체 E2E 검증 (오더픽업→...→DELIVERED) | a | p1 | - | EdwardKwon89 | 2026-07-22 |
