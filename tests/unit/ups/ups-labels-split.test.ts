@@ -30,7 +30,7 @@ const STRIPPED_REF = 'ZEN2026000001';
 
 function makeChain(result: any) {
   const chain: any = {};
-  const methods = ['select', 'eq', 'order', 'limit', 'insert', 'update', 'delete', 'is'];
+  const methods = ['select', 'eq', 'order', 'limit', 'insert', 'update', 'delete', 'is', 'in'];
   for (const m of methods) {
     chain[m] = vi.fn().mockReturnValue(chain);
   }
@@ -52,6 +52,7 @@ function makeSupabase(tableResults: Record<string, any>) {
       from: vi.fn().mockReturnValue({
         upload: vi.fn().mockResolvedValue({ error: null }),
         createSignedUrl: vi.fn().mockResolvedValue({ data: { signedUrl: 'https://signed.test/label.pdf' } }),
+        remove: vi.fn().mockResolvedValue({ error: null }),
       }),
     },
   };
@@ -172,10 +173,10 @@ describe('TASK-B-167: fetchAndIssueUpsLabel', () => {
 });
 
 describe('TASK-B-167: cancelUpsRegistration', () => {
-  it('removeorder를 호출하고 라벨 레코드를 삭제한다', async () => {
+  it('removeorder를 호출하고 해당 오더의 전체 라벨을 삭제한다', async () => {
     const { cancelUpsRegistration } = await import('@/app/actions/operations/ups-labels');
     const supabase = makeSupabase({
-      zen_ups_labels: { data: { id: 'lbl-cancel-1', reference_no: REF_NO, tracking_number: 'TK123' }, error: null },
+      zen_ups_labels: { data: [{ id: 'lbl-cancel-1', reference_no: REF_NO, tracking_number: 'TK123' }], error: null },
     });
     vi.mocked(validateUserAction).mockResolvedValue({ supabase: supabase as any, profile: { id: 'test', role: 'ADMIN' } } as any);
 
@@ -188,7 +189,7 @@ describe('TASK-B-167: cancelUpsRegistration', () => {
   it('라벨 레코드가 없으면 에러를 반환한다', async () => {
     const { cancelUpsRegistration } = await import('@/app/actions/operations/ups-labels');
     const supabase = makeSupabase({
-      zen_ups_labels: { data: null, error: null },
+      zen_ups_labels: { data: [], error: null },
     });
     vi.mocked(validateUserAction).mockResolvedValue({ supabase: supabase as any, profile: { id: 'test', role: 'ADMIN' } } as any);
 
@@ -202,7 +203,7 @@ describe('TASK-B-167: cancelUpsRegistration', () => {
     const { cancelUpsRegistration } = await import('@/app/actions/operations/ups-labels');
     vi.mocked(removeorder).mockResolvedValue({ success: 0, message: 'API error' });
     const supabase = makeSupabase({
-      zen_ups_labels: { data: { id: 'lbl-cancel-2', reference_no: REF_NO, tracking_number: 'TK123' }, error: null },
+      zen_ups_labels: { data: [{ id: 'lbl-cancel-2', reference_no: REF_NO, tracking_number: 'TK123' }], error: null },
     });
     vi.mocked(validateUserAction).mockResolvedValue({ supabase: supabase as any, profile: { id: 'test', role: 'ADMIN' } } as any);
 
@@ -210,6 +211,76 @@ describe('TASK-B-167: cancelUpsRegistration', () => {
 
     expect(result.success).toBe(true);
     expect(removeorder).toHaveBeenCalled();
+  });
+
+  it('다중 라벨(패키지 3건) 시 오더의 전체 라벨을 삭제한다', async () => {
+    const { cancelUpsRegistration } = await import('@/app/actions/operations/ups-labels');
+    const labels = [
+      { id: 'lbl-1', reference_no: REF_NO, tracking_number: 'TK001' },
+      { id: 'lbl-2', reference_no: REF_NO, tracking_number: 'TK002' },
+      { id: 'lbl-3', reference_no: REF_NO, tracking_number: 'TK003' },
+    ];
+    const supabase = makeSupabase({
+      zen_ups_labels: { data: labels, error: null },
+      zen_ups_label_documents: { data: [{ id: 'doc-1', storage_path: 'ups-labels/test/order-1/waybill.pdf' }], error: null },
+    });
+    vi.mocked(validateUserAction).mockResolvedValue({ supabase: supabase as any, profile: { id: 'test', role: 'ADMIN' } } as any);
+
+    const result = await cancelUpsRegistration(ORDER_ID);
+
+    expect(result.success).toBe(true);
+    expect(removeorder).toHaveBeenCalledWith(STRIPPED_REF);
+    expect(supabase.from).toHaveBeenCalledWith('zen_ups_labels');
+  });
+
+  it('문서가 존재하면 Storage 파일과 label_documents를 삭제한다', async () => {
+    const { cancelUpsRegistration } = await import('@/app/actions/operations/ups-labels');
+    const supabase = makeSupabase({
+      zen_ups_labels: { data: [{ id: 'lbl-1', reference_no: REF_NO, tracking_number: 'TK001' }], error: null },
+      zen_ups_label_documents: { data: [{ id: 'doc-1', storage_path: 'ups-labels/test/doc.pdf' }, { id: 'doc-2', storage_path: 'ups-labels/test/doc2.pdf' }], error: null },
+    });
+    vi.mocked(validateUserAction).mockResolvedValue({ supabase: supabase as any, profile: { id: 'test', role: 'ADMIN' } } as any);
+
+    const result = await cancelUpsRegistration(ORDER_ID);
+
+    expect(result.success).toBe(true);
+    expect(supabase.storage.from).toHaveBeenCalledWith('invoices');
+    const storageMock = supabase.storage.from('invoices');
+    expect(storageMock.remove).toHaveBeenCalledWith(['ups-labels/test/doc.pdf', 'ups-labels/test/doc2.pdf']);
+  });
+
+  it('문서가 없으면 Storage 삭제를 건너뛴다', async () => {
+    const { cancelUpsRegistration } = await import('@/app/actions/operations/ups-labels');
+    const supabase = makeSupabase({
+      zen_ups_labels: { data: [{ id: 'lbl-1', reference_no: REF_NO, tracking_number: 'TK001' }], error: null },
+      zen_ups_label_documents: { data: [], error: null },
+    });
+    vi.mocked(validateUserAction).mockResolvedValue({ supabase: supabase as any, profile: { id: 'test', role: 'ADMIN' } } as any);
+
+    const result = await cancelUpsRegistration(ORDER_ID);
+
+    expect(result.success).toBe(true);
+    expect(supabase.storage.from('invoices').remove).not.toHaveBeenCalled();
+  });
+
+  it('Storage 삭제 실패 시 로깅 후 계속 진행한다', async () => {
+    const { cancelUpsRegistration } = await import('@/app/actions/operations/ups-labels');
+    const storageRemoveMock = vi.fn().mockResolvedValue({ error: { message: 'Storage error' } });
+    const supabase = makeSupabase({
+      zen_ups_labels: { data: [{ id: 'lbl-1', reference_no: REF_NO, tracking_number: 'TK001' }], error: null },
+      zen_ups_label_documents: { data: [{ id: 'doc-1', storage_path: 'ups-labels/test/doc.pdf' }], error: null },
+    });
+    supabase.storage.from = vi.fn().mockReturnValue({
+      upload: vi.fn().mockResolvedValue({ error: null }),
+      createSignedUrl: vi.fn().mockResolvedValue({ data: { signedUrl: 'https://signed.test/label.pdf' } }),
+      remove: storageRemoveMock,
+    });
+    vi.mocked(validateUserAction).mockResolvedValue({ supabase: supabase as any, profile: { id: 'test', role: 'ADMIN' } } as any);
+
+    const result = await cancelUpsRegistration(ORDER_ID);
+
+    expect(result.success).toBe(true);
+    expect(storageRemoveMock).toHaveBeenCalled();
   });
 });
 

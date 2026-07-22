@@ -434,26 +434,57 @@ export async function cancelUpsRegistration(
     const permErr = await checkLabelPermission(profile);
     if (permErr) return { success: false, error: permErr };
 
-    const { data: label, error: labelErr } = await supabase
+    const { data: labels, error: labelsErr } = await supabase
       .from('zen_ups_labels')
       .select('id, reference_no, tracking_number')
       .eq('order_id', orderId)
       .is('is_voided', false)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle();
+      .order('created_at', { ascending: false });
 
-    if (labelErr || !label) return { success: false, error: '취소할 UPS 라벨 레코드가 없습니다.' };
+    if (labelsErr) {
+      logger.error('zen_ups_labels select error:', labelsErr);
+      return { success: false, error: `라벨 조회 실패: ${labelsErr.message}` };
+    }
+    if (!labels || labels.length === 0) {
+      return { success: false, error: '취소할 UPS 라벨 레코드가 없습니다.' };
+    }
 
-    const removeRes = await removeorder(label.reference_no.replace(/-/g, ''));
+    const referenceNo = labels[0].reference_no;
+    const removeRes = await removeorder(referenceNo.replace(/-/g, ''));
     if (removeRes.success === 0) {
       logger.warn(`removeorder API warning for order ${orderId}: ${removeRes.message}`);
+    }
+
+    const labelIds = labels.map((l) => l.id);
+
+    const { data: docs } = await supabase
+      .from('zen_ups_label_documents')
+      .select('id, storage_path')
+      .in('label_id', labelIds);
+
+    if (docs && docs.length > 0) {
+      const storagePaths = docs.map((d) => d.storage_path);
+      const { error: storageErr } = await supabase.storage
+        .from('invoices')
+        .remove(storagePaths);
+      if (storageErr) {
+        logger.warn(`storage remove warning for order ${orderId}: ${storageErr.message}`);
+      }
+
+      const { error: docsDelErr } = await supabase
+        .from('zen_ups_label_documents')
+        .delete()
+        .in('id', docs.map((d) => d.id));
+      if (docsDelErr) {
+        logger.warn(`zen_ups_label_documents delete warning for order ${orderId}: ${docsDelErr.message}`);
+      }
     }
 
     const { error: deleteErr } = await supabase
       .from('zen_ups_labels')
       .delete()
-      .eq('id', label.id);
+      .eq('order_id', orderId)
+      .eq('is_voided', false);
 
     if (deleteErr) {
       logger.error('zen_ups_labels delete error:', deleteErr);
