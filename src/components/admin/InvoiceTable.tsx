@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { format } from "date-fns";
 import { ConfirmPaymentModal } from "@/components/admin/ConfirmPaymentModal";
-import { ZenButton } from "@/components/ui/ZenUI";
+import { ZenButton, ZenTextarea } from "@/components/ui/ZenUI";
 import { useRouter } from "next/navigation";
 import { AnimatePresence } from 'framer-motion';
 import { FileText, History, Download, Loader2, Lock } from 'lucide-react';
@@ -155,13 +155,13 @@ export const InvoiceTable: React.FC<InvoiceTableProps> = ({ invoices, isAdmin })
                           Issue PDF
                         </ZenButton>
                       )}
-                      <button 
+                      <ZenButton 
                         onClick={() => setHistoryInvoice(inv)}
-                        className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all"
+                        className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl"
                         title="History"
                       >
                         <History className="w-4 h-4" />
-                      </button>
+                      </ZenButton>
                     </td>
                   </tr>
                 ))
@@ -192,10 +192,10 @@ export const InvoiceTable: React.FC<InvoiceTableProps> = ({ invoices, isAdmin })
                   <label className="block text-xs font-bold text-slate-500 mb-1">
                     사유 (예외 처리 시 필수) <span className="text-red-500">*</span>
                   </label>
-                  <textarea
+                  <ZenTextarea
                     value={finalizeReason}
                     onChange={e => { setFinalizeReason(e.target.value); setFinalizeReasonError(''); }}
-                    className={`w-full border rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none ${finalizeReasonError ? 'border-red-400' : 'border-slate-200'}`}
+                    className={`w-full${finalizeReasonError ? ' border-red-400' : ''}`}
                     rows={3}
                     placeholder="예외 처리 사유를 입력하세요..."
                     required

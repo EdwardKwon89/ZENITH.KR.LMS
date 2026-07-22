@@ -10,6 +10,7 @@ import Link from 'next/link';
 import { ArrowLeft, Package, Truck, ShieldCheck, FileText, Globe, Calendar, User, MapPin } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
 
+import { ZenCard, ZenBadge } from '@/components/ui/ZenUI';
 import UpsOrderBreakdownCard from '@/components/ups/UpsOrderBreakdownCard';
 import { UpsActualAdjustmentForm } from '@/components/orders/UpsActualAdjustmentForm';
 import OrderFinanceSummary from '@/components/finance/OrderFinanceSummary';
@@ -233,9 +234,7 @@ export default async function UpsOrderDetailPage({ params }: UpsOrderDetailPageP
           <ArrowLeft className="w-4 h-4" />
           일반 오더 상세 보기로 이동
         </Link>
-        <span className="text-xs font-mono font-semibold px-3 py-1 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-full border border-amber-500/20">
-          UPS Special Delivery Detail
-        </span>
+        <ZenBadge className="text-xs font-mono font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">UPS Special Delivery Detail</ZenBadge>
       </div>
 
       {/* Main Grid Layout */}
@@ -260,16 +259,16 @@ export default async function UpsOrderDetailPage({ params }: UpsOrderDetailPageP
           />
 
           {/* Tracking Timeline (UPS events) */}
-          <section className="bg-white dark:bg-zinc-950 rounded-3xl border border-slate-100 dark:border-zinc-800 p-6 shadow-sm">
+          <ZenCard className="p-6">
             <h3 className="text-lg font-bold text-slate-900 dark:text-gray-100 mb-4 flex items-center gap-2">
               <Truck className="w-5 h-5 text-amber-500" />
               UPS 배송 실시간 트래킹 타임라인
             </h3>
             <TrackingTimeline events={trackingEvents} />
-          </section>
+          </ZenCard>
 
           {/* Trade Documents Section */}
-          <section className="bg-white dark:bg-zinc-950 rounded-3xl border border-slate-100 dark:border-zinc-800 p-6 shadow-sm flex flex-col gap-4">
+          <ZenCard className="p-6 flex flex-col gap-4">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-bold text-slate-900 dark:text-gray-100 flex items-center gap-2">
                 <FileText className="w-5 h-5 text-blue-500" />
@@ -295,13 +294,13 @@ export default async function UpsOrderDetailPage({ params }: UpsOrderDetailPageP
               />
               <UpsTradeDocumentActions orderId={orderId} hasActiveLabel={upsLabelStatus.hasActiveLabel} />
             </div>
-          </section>
+          </ZenCard>
         </div>
 
         {/* Right Column: Order Summary & Finance Summary */}
         <div className="flex flex-col gap-6">
           {/* Shipper & Consignee Info Card */}
-          <div className="bg-white dark:bg-zinc-950 rounded-3xl border border-slate-100 dark:border-zinc-800 p-6 shadow-sm flex flex-col gap-4">
+          <ZenCard className="p-6 flex flex-col gap-4">
             <h3 className="font-bold text-slate-900 dark:text-gray-100 text-base flex items-center gap-2 border-b border-slate-100 dark:border-zinc-800 pb-3">
               <User className="w-4 h-4 text-primary" />
               배송 기본 정보 (Shipper / Consignee)
@@ -319,12 +318,10 @@ export default async function UpsOrderDetailPage({ params }: UpsOrderDetailPageP
               </div>
               <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-zinc-800">
                 <span className="text-slate-400">주문 상태</span>
-                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300">
-                  {order.status}
-                </span>
+                <ZenBadge className="text-[11px] font-bold bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300">{order.status}</ZenBadge>
               </div>
             </div>
-          </div>
+          </ZenCard>
 
           {/* Finance Summary Component */}
           <OrderFinanceSummary
