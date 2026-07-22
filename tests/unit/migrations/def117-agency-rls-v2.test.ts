@@ -55,6 +55,7 @@ describe('TASK-B-188: DEF-117 RLS AGENCY 검증', () => {
 
     it('CI 환경 GRANT 문 포함 (authenticated 롤)', () => {
       expect(migration).toContain('GRANT SELECT ON public.zen_orders TO authenticated');
+      expect(migration).toContain('GRANT SELECT ON public.zen_profiles TO authenticated');
       expect(migration).toContain('GRANT SELECT ON public.zen_order_packages TO authenticated');
       expect(migration).toContain('GRANT SELECT ON public.zen_ups_labels TO authenticated');
       expect(migration).toContain('GRANT SELECT ON public.zen_ups_label_errors TO authenticated');

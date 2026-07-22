@@ -9,6 +9,7 @@
 -- =====================================================
 
 GRANT SELECT ON public.zen_orders TO authenticated;
+GRANT SELECT ON public.zen_profiles TO authenticated;
 GRANT SELECT ON public.zen_order_packages TO authenticated;
 GRANT SELECT ON public.zen_ups_labels TO authenticated;
 GRANT SELECT ON public.zen_ups_label_errors TO authenticated;
