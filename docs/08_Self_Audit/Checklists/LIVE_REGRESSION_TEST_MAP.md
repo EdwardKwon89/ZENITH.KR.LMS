@@ -641,6 +641,23 @@
 
 ---
 
+### 50. UPS 물류관리 메뉴 전체 E2E 검증 (Issue #711 / TASK-201 / Phase 2)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-E28-HP-01~05** | Happy Path 5단계: REGISTERED→SCHEDULED→WAREHOUSED→PACKED→RELEASED→IN_TRANSIT | UPS 오더 전체 라이프사이클 흐름 검증 | `tests/e2e/e2e-28-ups-logistics-flow.spec.ts` |
+| **TC-E28-CANCEL-01~04** | Cancel 시나리오 4건: 픽업취소, 입고취소, UPS등록취소, 출고취소 | 상태 전이 롤백 정상 동작 검증 | `tests/e2e/e2e-28-ups-logistics-flow.spec.ts` |
+| **TC-E28-RBAC-01~20** | 역할별 접근 권한 전수 검증 (ADMIN/MANAGER/AGENCY/SUB_ADMIN/SHIPPER × 4메뉴) | RBAC 정책 E2E 검증 | `tests/e2e/e2e-28-ups-logistics-flow.spec.ts` |
+| **TC-E28-ZENUI-01~04** | ZenUI 컴포넌트 적용 가독성 검증 | UI 일관성 검증 | `tests/e2e/e2e-28-ups-logistics-flow.spec.ts` |
+
+### 51. UPS 운임 파이프라인 E2E 검증 — 중량 변경 검증 (Issue #747 / TASK-205 / W3)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-WF-01** | 중량 변경→운임 견적 차이 검증 (computeUpsFreight 직접 호출) | 중량이 운임에 실제 영향을 미치는지(캐시 미사용) 증명 | `tests/e2e/e2e-29-ups-freight-pipeline.spec.ts` |
+| **TC-WF-02** | 스냅샷 갱신 후 정산 비용 재생성 검증 | SettlementEngine 로직과 일치하는 비용 생성 확인 | `tests/e2e/e2e-29-ups-freight-pipeline.spec.ts` |
+| **TC-WF-03** | 실제 오더 상세 UI 탐색 검증 | page.goto() 브라우저 네비게이션 + DB-UI 일관성 확인 | `tests/e2e/e2e-29-ups-freight-pipeline.spec.ts` |
+
+---
+
 ## 📝 가이드라인 (R-09 Enforcement)
 1. **추가 의무**: 신규 기능 개발 시 위 카테고리에 맞는 테스트를 반드시 추가하십시오.
 2. **실행 의무**: 모든 커밋 전 `npm run test:regression`을 실행하여 위 명세 전원이 초록색인지 확인하십시오.
