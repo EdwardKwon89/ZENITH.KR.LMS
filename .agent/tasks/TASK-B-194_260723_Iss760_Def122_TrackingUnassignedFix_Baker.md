@@ -63,7 +63,7 @@ _(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
 - **수정 방식**: `Array.isArray(config.order) ? config.order[0] : config.order` 방어 (Supabase 타입 생성기가 배열 타입 추론 → 런타임 객체와 타입 모두 만족)
 - **변경 파일**: `src/app/actions/operations/tracking.ts` (1줄)
 - **테스트**: `tests/unit/operations/tracking-actions.test.ts` 회귀 2건 추가 (객체 shipper_id 존재/널)
-- **전체 회귀**: 115 files / 773 tests ALL PASS
-- **빌드**: PASS (타입 검증 포함)
-- **커밋**: (커밋 해시 기입)
-- **PR**: (PR URL 기입)
+- **전체 회귀**: 115 files / 773 tests ALL PASS (Jaison이 Baker worktree에서 직접 재실행 확인 — PR 본문 기재값 771은 오기)
+- **빌드**: PASS (Jaison이 직접 `npm run build` 재실행 확인)
+- **커밋**: `85b64a84`(1차) → `d552c213`(Array.isArray 방어) → `cd2c1818`(ACTIVE_TASK 정정)
+- **PR**: [PR#762](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/762) (base TeamB_Dev, MERGED)
