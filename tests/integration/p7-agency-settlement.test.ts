@@ -18,7 +18,6 @@ vi.mock('@/lib/auth/guards', () => ({
   checkPermission: vi.fn().mockReturnValue(true),
 }));
 
-// Helper to create query mock
 const createQueryMock = (data: any, error: any = null) => {
   const queryChain: any = {
     select: vi.fn().mockReturnThis(),
@@ -28,6 +27,7 @@ const createQueryMock = (data: any, error: any = null) => {
     lte: vi.fn().mockReturnThis(),
     ilike: vi.fn().mockReturnThis(),
     single: vi.fn().mockResolvedValue({ data, error }),
+    maybeSingle: vi.fn().mockResolvedValue({ data: data?.[0] || null, error }),
     then: vi.fn().mockImplementation((onFulfilled: any) => {
       return Promise.resolve({ data, error }).then(onFulfilled);
     })
@@ -54,47 +54,66 @@ const createMockSupabase = () => {
 
 let mockSupabase = createMockSupabase();
 
-describe('Agency Settlement Integration Tests (TC-P7-SETTLE-01~04)', () => {
-  // Strict v4 UUID format: xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx where y is [8, 9, a, b]
-  const mockAgencyOrgId = '11111111-1111-4111-8111-111111111111';
-  const mockShipperAId = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
-  const mockShipperBId = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
+const mockAgencyOrgId = '11111111-1111-4111-8111-111111111111';
+const mockShipperAId = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+const mockShipperBId = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
 
-  const mockShippersLink = [
-    { shipper_org_id: mockShipperAId },
-    { shipper_org_id: mockShipperBId }
-  ];
+const mockShippersLink = [
+  { shipper_org_id: mockShipperAId },
+  { shipper_org_id: mockShipperBId }
+];
 
-  const mockBaseRates = [
-    { id: '11111111-2222-4333-8444-555555555551', selling_price: 35000, cost_price: 28000 },
-    { id: '11111111-2222-4333-8444-555555555552', selling_price: 50000, cost_price: 40000 }
-  ];
+const mockZoneUSA = 'zone-usa-aaaa-4111-8111-111111111111';
+const mockZoneJPN = 'zone-jpn-bbbb-4111-8111-111111111112';
 
-  const mockOverrides = [
-    { base_rate_id: '11111111-2222-4333-8444-555555555551', selling_price: 33000, cost_price: 25000 }
-  ];
+const mockPricingPolicies = [
+  { agency_org_id: mockAgencyOrgId, zone_id: mockZoneUSA, discount_rate: 0.05 },
+  { agency_org_id: mockAgencyOrgId, zone_id: mockZoneJPN, discount_rate: 0.10 },
+];
 
-  const mockOrders = [
-    {
-      id: '99999999-9999-4999-8999-999999999991',
-      order_no: 'ZN-2026001',
-      shipper_id: mockShipperAId,
-      created_at: '2026-06-05T12:00:00Z',
-      shipper: { name: 'Shipper A' },
-      packages: [{ gross_weight: 2.5, packing_count: 1 }],
-      snapshot: { rate_card_id: '11111111-2222-4333-8444-555555555551', applied_unit_price: 35000, carrier_cost_amount: 28000 }
-    },
-    {
-      id: '99999999-9999-4999-8999-999999999992',
-      order_no: 'ZN-2026002',
-      shipper_id: mockShipperBId,
-      created_at: '2026-06-10T12:00:00Z',
-      shipper: { name: 'Shipper B' },
-      packages: [{ gross_weight: 5.0, packing_count: 2 }],
-      snapshot: { rate_card_id: '11111111-2222-4333-8444-555555555552', applied_unit_price: 50000, carrier_cost_amount: 40000 }
+const mockZoneCountries = [
+  { country_code: 'USA', zone_id: mockZoneUSA },
+  { country_code: 'JPN', zone_id: mockZoneJPN },
+];
+
+const mockOrders = [
+  {
+    id: '99999999-9999-4999-8999-999999999991',
+    order_no: 'ZN-2026001',
+    shipper_id: mockShipperAId,
+    dest_country_code: 'USA',
+    created_at: '2026-06-05T12:00:00Z',
+    shipper: { name: 'Shipper A' },
+    packages: [{ gross_weight: 2.5, packing_count: 1 }],
+    snapshot: {
+      rate_card_id: 'rate-card-1',
+      applied_unit_price: 35000,
+      carrier_cost_amount: 28000,
+      metadata: { platform: { breakdown: { baseSellingPrice: 30000, fuelSurchargeSellingAmount: 3000, otherChargesSellingTotal: 2000, surgeFeeSellingAmount: 0 } } }
     }
-  ];
+  },
+  {
+    id: '99999999-9999-4999-8999-999999999992',
+    order_no: 'ZN-2026002',
+    shipper_id: mockShipperBId,
+    dest_country_code: 'JPN',
+    created_at: '2026-06-10T12:00:00Z',
+    shipper: { name: 'Shipper B' },
+    packages: [{ gross_weight: 5.0, packing_count: 2 }],
+    snapshot: {
+      rate_card_id: 'rate-card-2',
+      applied_unit_price: 50000,
+      carrier_cost_amount: 40000,
+      metadata: { platform: { breakdown: { baseSellingPrice: 45000, fuelSurchargeSellingAmount: 3000, otherChargesSellingTotal: 2000, surgeFeeSellingAmount: 0 } } }
+    }
+  }
+];
 
+// Order 1 (USA): platformSellingTotal = 30000+3000+2000+0 = 35000, discount=0.05 => cost = 35000*0.95 = 33250
+// Order 2 (JPN): platformSellingTotal = 45000+3000+2000+0 = 50000, discount=0.10 => cost = 50000*0.90 = 45000
+// Total: revenue=85000, cost=78250, margin=6750, marginRate=6750/85000*100=7.94%
+
+describe('Agency Settlement Integration Tests (TC-P7-SETTLE-01~04)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockSupabase = createMockSupabase();
@@ -102,13 +121,13 @@ describe('Agency Settlement Integration Tests (TC-P7-SETTLE-01~04)', () => {
 
     mockSupabase._tableMocks = {
       zen_agency_shippers: createQueryMock(mockShippersLink),
-      zen_ups_base_rates: createQueryMock(mockBaseRates),
-      zen_agency_rate_overrides: createQueryMock(mockOverrides),
+      zen_agency_pricing_policies: createQueryMock(mockPricingPolicies),
+      zen_ups_zone_countries: createQueryMock(mockZoneCountries),
       zen_orders: createQueryMock(mockOrders)
     };
   });
 
-  it('TC-P7-SETTLE-01: Agency 정산 요약 — 하위 화주 2개 오더 합산 정확', async () => {
+  it('TC-P7-SETTLE-01: Agency 정산 요약 — 하위 화주 2개 오더 zone별 할인율 적용 합산 정확', async () => {
     (validateUserAction as any).mockResolvedValue({
       profile: { id: '33333333-3333-4333-8333-333333333333', role: 'AGENCY', org_id: mockAgencyOrgId }
     });
@@ -116,17 +135,17 @@ describe('Agency Settlement Integration Tests (TC-P7-SETTLE-01~04)', () => {
     const result = await getAgencySettlementSummary(mockAgencyOrgId, '2026-06-01', '2026-06-15');
 
     expect(result.data).not.toBeNull();
-    // Order 1 (overridden): revenue = 33000, cost = 25000
-    // Order 2 (no override, uses base rate): revenue = 50000, cost = 40000
-    // Total: revenue = 83000, cost = 65000, margin = 18000
+    // Order 1 (USA, discount 5%): revenue=35000, cost=33250
+    // Order 2 (JPN, discount 10%): revenue=50000, cost=45000
+    // Total: revenue=85000, cost=78250, margin=6750
     expect(result.data?.orderCount).toBe(2);
-    expect(result.data?.totalRevenue).toBe(83000);
-    expect(result.data?.totalCost).toBe(65000);
-    expect(result.data?.totalMargin).toBe(18000);
-    expect(result.data?.marginRate).toBeCloseTo((18000 / 83000) * 100, 2);
+    expect(result.data?.totalRevenue).toBe(85000);
+    expect(result.data?.totalCost).toBe(78250);
+    expect(result.data?.totalMargin).toBe(6750);
+    expect(result.data?.marginRate).toBeCloseTo((6750 / 85000) * 100, 2);
   });
 
-  it('TC-P7-SETTLE-02: 화주별 정산 — 화주A vs 화주B 분리 집계 정확', async () => {
+  it('TC-P7-SETTLE-02: 화주별 정산 — 화주A vs 화주B zone별 할인율 분리 집계 정확', async () => {
     (validateUserAction as any).mockResolvedValue({
       profile: { id: '33333333-3333-4333-8333-333333333333', role: 'AGENCY', org_id: mockAgencyOrgId }
     });
@@ -139,16 +158,18 @@ describe('Agency Settlement Integration Tests (TC-P7-SETTLE-01~04)', () => {
     const shipperA = result.data?.find((s: any) => s.shipperId === mockShipperAId);
     const shipperB = result.data?.find((s: any) => s.shipperId === mockShipperBId);
 
-    expect(shipperA?.revenue).toBe(33000);
-    expect(shipperA?.cost).toBe(25000);
-    expect(shipperA?.margin).toBe(8000);
+    // Shipper A (USA, discount 5%): revenue=35000, cost=33250, margin=1750
+    expect(shipperA?.revenue).toBe(35000);
+    expect(shipperA?.cost).toBe(33250);
+    expect(shipperA?.margin).toBe(1750);
 
+    // Shipper B (JPN, discount 10%): revenue=50000, cost=45000, margin=5000
     expect(shipperB?.revenue).toBe(50000);
-    expect(shipperB?.cost).toBe(40000);
-    expect(shipperB?.margin).toBe(10000);
+    expect(shipperB?.cost).toBe(45000);
+    expect(shipperB?.margin).toBe(5000);
   });
 
-  it('TC-P7-SETTLE-03: Agency 요율 오버라이드 반영 — override 있는 경우 override 금액 사용', async () => {
+  it('TC-P7-SETTLE-03: Zone별 할인율 적용 — USA 5%, JPN 10% 각각 정확', async () => {
     (validateUserAction as any).mockResolvedValue({
       profile: { id: '33333333-3333-4333-8333-333333333333', role: 'AGENCY', org_id: mockAgencyOrgId }
     });
@@ -158,22 +179,21 @@ describe('Agency Settlement Integration Tests (TC-P7-SETTLE-01~04)', () => {
     const filteredResult = await getAgencyOrderSettlements(mockAgencyOrgId, mockShipperAId, '2026-06-01', '2026-06-15');
     expect(filteredResult.data).not.toBeNull();
     expect(filteredResult.data?.length).toBe(1);
-    expect(filteredResult.data?.[0].revenue).toBe(33000); // Overridden price
-    expect(filteredResult.data?.[0].cost).toBe(25000);    // Overridden price
+    // USA order: platformSellingTotal=35000, discount=5% => cost=33250, revenue=35000
+    expect(filteredResult.data?.[0].revenue).toBe(35000);
+    expect(filteredResult.data?.[0].cost).toBe(33250);
   });
 
   it('TC-P7-SETTLE-04: RLS — Agency A 사용자가 Agency B 데이터 조회 불가', async () => {
-    // If a user with role 'AGENCY' has org_id = '11111111-1111-4111-8111-111111111111' but requests '22222222-2222-4222-8222-222222222222'
     (validateUserAction as any).mockResolvedValue({
-      profile: { id: '33333333-3333-4333-8333-333333333333', role: 'AGENCY', org_id: mockAgencyOrgId } // Logged in agency is 111
+      profile: { id: '33333333-3333-4333-8333-333333333333', role: 'AGENCY', org_id: mockAgencyOrgId }
     });
 
     const mockShippersQuery = createQueryMock([]);
     mockSupabase._tableMocks.zen_agency_shippers = mockShippersQuery;
 
     await getAgencySettlementSummary('22222222-2222-4222-8222-222222222222', '2026-06-01', '2026-06-15');
-    
-    // Check that zen_agency_shippers was queried with mockAgencyOrgId (11111111-1111-4111-8111-111111111111) instead of 222
+
     expect(mockShippersQuery.eq).toHaveBeenCalledWith('agency_org_id', mockAgencyOrgId);
     expect(mockShippersQuery.eq).not.toHaveBeenCalledWith('agency_org_id', '22222222-2222-4222-8222-222222222222');
   });
@@ -184,11 +204,12 @@ describe('Agency Settlement Integration Tests (TC-P7-SETTLE-01~04)', () => {
         id: '99999999-9999-4999-8999-999999999991',
         order_no: 'ZN-2026001',
         shipper_id: mockShipperAId,
+        dest_country_code: 'USA',
         created_at: '2026-06-05T12:00:00Z',
         shipper: { name: 'Shipper A' },
         packages: [{ gross_weight: 2.5, packing_count: 1 }],
         snapshot: {
-          rate_card_id: '11111111-2222-4333-8444-555555555551',
+          rate_card_id: 'rate-card-1',
           applied_unit_price: 35000,
           carrier_cost_amount: 28000,
           metadata: {
@@ -222,17 +243,18 @@ describe('Agency Settlement Integration Tests (TC-P7-SETTLE-01~04)', () => {
     });
   });
 
-  it('TC-B-BREAKDOWN-02: metadata 없는 오더 — breakdown 필드가 null', async () => {
+  it('TC-B-BREAKDOWN-02: metadata 없는 오더 — breakdown 필드가 null, cost는 carrier_cost_amount fallback', async () => {
     const ordersWithoutMetadata = [
       {
         id: '99999999-9999-4999-8999-999999999992',
         order_no: 'ZN-2026002',
         shipper_id: mockShipperBId,
+        dest_country_code: 'JPN',
         created_at: '2026-06-10T12:00:00Z',
         shipper: { name: 'Shipper B' },
         packages: [{ gross_weight: 5.0, packing_count: 2 }],
         snapshot: {
-          rate_card_id: '11111111-2222-4333-8444-555555555552',
+          rate_card_id: 'rate-card-2',
           applied_unit_price: 50000,
           carrier_cost_amount: 40000,
         }
@@ -249,6 +271,8 @@ describe('Agency Settlement Integration Tests (TC-P7-SETTLE-01~04)', () => {
     expect(result.data).not.toBeNull();
     expect(result.data?.length).toBe(1);
     expect(result.data?.[0].breakdown).toBeNull();
+    // No metadata breakdown → fallback to carrier_cost_amount
+    expect(result.data?.[0].cost).toBe(40000);
   });
 
   it('TC-B-SEARCH-01: 오더번호 ILIKE 검색 — "ZN-2026" 입력 시 일치 오더만 반환', async () => {
@@ -293,45 +317,6 @@ describe('Agency Settlement Integration Tests (TC-P7-SETTLE-01~04)', () => {
 });
 
 describe('TC-B-EXCEL-01~03: Agency 정산 엑셀 다운로드', () => {
-  const mockAgencyOrgId = '11111111-1111-4111-8111-111111111111';
-  const mockShipperAId = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
-  const mockShipperBId = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
-
-  const mockShippersLink = [
-    { shipper_org_id: mockShipperAId },
-    { shipper_org_id: mockShipperBId }
-  ];
-
-  const mockBaseRates = [
-    { id: '11111111-2222-4333-8444-555555555551', selling_price: 35000, cost_price: 28000 },
-    { id: '11111111-2222-4333-8444-555555555552', selling_price: 50000, cost_price: 40000 }
-  ];
-
-  const mockOverrides = [
-    { base_rate_id: '11111111-2222-4333-8444-555555555551', selling_price: 33000, cost_price: 25000 }
-  ];
-
-  const mockOrders = [
-    {
-      id: '99999999-9999-4999-8999-999999999991',
-      order_no: 'ZN-2026001',
-      shipper_id: mockShipperAId,
-      created_at: '2026-06-05T12:00:00Z',
-      shipper: { name: 'Shipper A' },
-      packages: [{ gross_weight: 2.5, packing_count: 1 }],
-      snapshot: { rate_card_id: '11111111-2222-4333-8444-555555555551', applied_unit_price: 35000, carrier_cost_amount: 28000 }
-    },
-    {
-      id: '99999999-9999-4999-8999-999999999992',
-      order_no: 'ZN-2026002',
-      shipper_id: mockShipperBId,
-      created_at: '2026-06-10T12:00:00Z',
-      shipper: { name: 'Shipper B' },
-      packages: [{ gross_weight: 5.0, packing_count: 2 }],
-      snapshot: { rate_card_id: '11111111-2222-4333-8444-555555555552', applied_unit_price: 50000, carrier_cost_amount: 40000 }
-    }
-  ];
-
   beforeEach(() => {
     vi.clearAllMocks();
     mockSupabase = createMockSupabase();
@@ -342,8 +327,8 @@ describe('TC-B-EXCEL-01~03: Agency 정산 엑셀 다운로드', () => {
 
     mockSupabase._tableMocks = {
       zen_agency_shippers: createQueryMock(mockShippersLink),
-      zen_ups_base_rates: createQueryMock(mockBaseRates),
-      zen_agency_rate_overrides: createQueryMock(mockOverrides),
+      zen_agency_pricing_policies: createQueryMock(mockPricingPolicies),
+      zen_ups_zone_countries: createQueryMock(mockZoneCountries),
       zen_orders: createQueryMock(mockOrders)
     };
   });

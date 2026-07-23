@@ -19,43 +19,62 @@ async function _getAgencyShipperIds(supabase: any, agencyOrgId: string): Promise
 }
 
 async function _fetchBaseData(supabase: any, agencyOrgId: string) {
-  const [ratesRes, overridesRes] = await Promise.all([
-    supabase.from('zen_ups_base_rates').select('id, selling_price, cost_price'),
-    supabase.from('zen_agency_rate_overrides').select('base_rate_id, selling_price, cost_price').eq('agency_org_id', agencyOrgId).eq('is_active', true)
+  const [policiesRes, zonesRes] = await Promise.all([
+    supabase
+      .from('zen_agency_pricing_policies')
+      .select('zone_id, discount_rate')
+      .eq('agency_org_id', agencyOrgId)
+      .eq('is_active', true),
+    supabase
+      .from('zen_ups_zone_countries')
+      .select('country_code, zone_id'),
   ]);
-  if (ratesRes.error) throw ratesRes.error;
-  if (overridesRes.error) throw overridesRes.error;
-  return { baseRates: ratesRes.data || [], overrides: overridesRes.data || [] };
+  if (policiesRes.error) throw policiesRes.error;
+  if (zonesRes.error) throw zonesRes.error;
+  const policies: Record<string, number> = {};
+  for (const p of (policiesRes.data || [])) {
+    policies[p.zone_id] = Number(p.discount_rate);
+  }
+  const zoneMap: Record<string, string> = {};
+  for (const z of (zonesRes.data || [])) {
+    zoneMap[z.country_code] = z.zone_id;
+  }
+  return { policies, zoneMap };
 }
 
 function _calculateOrderSettle(
   order: any,
-  baseRates: any[],
-  overrides: any[]
+  policies: Record<string, number>,
+  zoneMap: Record<string, string>
 ): { revenue: number; cost: number; margin: number } {
   const snapshot = order.snapshot;
-  if (!snapshot || !snapshot.rate_card_id) {
+  if (!snapshot) {
     return { revenue: 0, cost: 0, margin: 0 };
   }
-  const rateId = snapshot.rate_card_id;
-  const override = overrides.find((o: any) => o.base_rate_id === rateId);
-  const baseRate = baseRates.find((r: any) => r.id === rateId);
 
-  let revenue = 0;
-  let cost = 0;
+  const revenue = Number(snapshot.applied_unit_price || 0);
+  const meta = snapshot.metadata as Record<string, any> | null;
+  const breakdown = meta?.platform?.breakdown;
+  const destCode = order.dest_country_code as string | undefined;
 
-  if (override) {
-    revenue = Number(override.selling_price || 0);
-    cost = Number(override.cost_price || 0);
-  } else if (baseRate) {
-    revenue = Number(baseRate.selling_price || 0);
-    cost = Number(baseRate.cost_price || 0);
+  let cost: number;
+  if (breakdown && destCode) {
+    const platformSellingTotal =
+      Number(breakdown.baseSellingPrice || 0) +
+      Number(breakdown.fuelSurchargeSellingAmount || 0) +
+      Number(breakdown.otherChargesSellingTotal || 0) +
+      Number(breakdown.surgeFeeSellingAmount || 0);
+    const zoneId = zoneMap[destCode];
+    const discountRate = zoneId ? policies[zoneId] : undefined;
+    if (discountRate !== undefined) {
+      cost = Math.round(platformSellingTotal * (1 - discountRate) * 100) / 100;
+    } else {
+      cost = Number(snapshot.carrier_cost_amount || 0);
+    }
   } else {
-    revenue = Number(snapshot.applied_unit_price || 0);
     cost = Number(snapshot.carrier_cost_amount || 0);
   }
-
-  return { revenue, cost, margin: revenue - cost };
+  return { revenue, cost, margin: Math.round((revenue - cost) * 100) / 100 };
 }
 
 function pkgWeight(pkg: any): number {
@@ -80,22 +99,23 @@ export const getAgencySettlementSummary = withAction(async function (
     return { orderCount: 0, totalRevenue: 0, totalCost: 0, totalMargin: 0, marginRate: 0 };
   }
 
-  const { data: orders, error } = await supabase
-    .from('zen_orders')
-    .select('id, snapshot:zen_order_rate_snapshots(rate_card_id, applied_unit_price, carrier_cost_amount)')
-    .in('shipper_id', shipperIds)
-    .gte('created_at', `${from}T00:00:00Z`)
-    .lte('created_at', `${to}T23:59:59Z`);
+  const [ordersRes, { policies, zoneMap }] = await Promise.all([
+    supabase
+      .from('zen_orders')
+      .select('id, dest_country_code, snapshot:zen_order_rate_snapshots(rate_card_id, applied_unit_price, carrier_cost_amount, metadata)')
+      .in('shipper_id', shipperIds)
+      .gte('created_at', `${from}T00:00:00Z`)
+      .lte('created_at', `${to}T23:59:59Z`),
+    _fetchBaseData(supabase, targetAgencyId),
+  ]);
 
-  if (error) throw error;
-
-  const { baseRates, overrides } = await _fetchBaseData(supabase, targetAgencyId);
+  if (ordersRes.error) throw ordersRes.error;
 
   let totalRevenue = 0;
   let totalCost = 0;
 
-  for (const order of (orders || [])) {
-    const { revenue, cost } = _calculateOrderSettle(order, baseRates, overrides);
+  for (const order of (ordersRes.data || [])) {
+    const { revenue, cost } = _calculateOrderSettle(order, policies, zoneMap);
     totalRevenue += revenue;
     totalCost += cost;
   }
@@ -104,7 +124,7 @@ export const getAgencySettlementSummary = withAction(async function (
   const marginRate = totalRevenue > 0 ? (totalMargin / totalRevenue) * 100 : 0;
 
   return {
-    orderCount: orders?.length || 0,
+    orderCount: ordersRes.data?.length || 0,
     totalRevenue,
     totalCost,
     totalMargin,
@@ -128,14 +148,14 @@ export const getAgencyShipperSettlements = withAction(async function (
   const shipperIds = await _getAgencyShipperIds(supabase, targetAgencyId);
   if (shipperIds.length === 0) return [];
 
-  const [ordersRes, baseData] = await Promise.all([
+  const [ordersRes, { policies, zoneMap }] = await Promise.all([
     supabase
       .from('zen_orders')
-      .select('id, shipper_id, shipper:shipper_id(name), snapshot:zen_order_rate_snapshots(rate_card_id, applied_unit_price, carrier_cost_amount)')
+      .select('id, shipper_id, dest_country_code, shipper:shipper_id(name), snapshot:zen_order_rate_snapshots(rate_card_id, applied_unit_price, carrier_cost_amount, metadata)')
       .in('shipper_id', shipperIds)
       .gte('created_at', `${from}T00:00:00Z`)
       .lte('created_at', `${to}T23:59:59Z`),
-    _fetchBaseData(supabase, targetAgencyId)
+    _fetchBaseData(supabase, targetAgencyId),
   ]);
 
   if (ordersRes.error) throw ordersRes.error;
@@ -149,7 +169,7 @@ export const getAgencyShipperSettlements = withAction(async function (
     if (!shipperMap[shipperId]) {
       shipperMap[shipperId] = { shipperName, orderCount: 0, revenue: 0, cost: 0 };
     }
-    const { revenue, cost } = _calculateOrderSettle(order, baseData.baseRates, baseData.overrides);
+    const { revenue, cost } = _calculateOrderSettle(order, policies, zoneMap);
     shipperMap[shipperId].orderCount += 1;
     shipperMap[shipperId].revenue += revenue;
     shipperMap[shipperId].cost += cost;
@@ -199,7 +219,7 @@ export const getAgencyOrderSettlements = withAction(async function (
     throw new Error('Unauthorized access');
   }
   const targetAgencyId = profile.role === 'AGENCY' ? profile.org_id : agencyOrgId;
-  
+
   const queryParams = { agency_org_id: targetAgencyId, shipper_org_id: shipperId || undefined, from, to, order_no_search: orderNoSearch };
   AgencySettlementQuerySchema.parse(queryParams);
 
@@ -212,7 +232,7 @@ export const getAgencyOrderSettlements = withAction(async function (
   let query = supabase
     .from('zen_orders')
     .select(`
-      id, order_no, shipper_id, created_at,
+      id, order_no, shipper_id, dest_country_code, created_at,
       shipper:shipper_id(name),
       packages:zen_order_packages(gross_weight, packing_count),
       snapshot:zen_order_rate_snapshots(rate_card_id, applied_unit_price, carrier_cost_amount, metadata)
@@ -225,7 +245,7 @@ export const getAgencyOrderSettlements = withAction(async function (
     query = query.ilike('order_no', `%${orderNoSearch}%`);
   }
 
-  const [ordersRes, baseData] = await Promise.all([
+  const [ordersRes, { policies, zoneMap }] = await Promise.all([
     query,
     _fetchBaseData(supabase, targetAgencyId)
   ]);
@@ -233,7 +253,7 @@ export const getAgencyOrderSettlements = withAction(async function (
   if (ordersRes.error) throw ordersRes.error;
 
   return (ordersRes.data || []).map((order: any) => {
-    const { revenue, cost, margin } = _calculateOrderSettle(order, baseData.baseRates, baseData.overrides);
+    const { revenue, cost, margin } = _calculateOrderSettle(order, policies, zoneMap);
     const totalWeight = order.packages?.reduce((sum: number, p: any) => sum + Number(pkgWeight(p)), 0) || 0;
     const packagesCount = order.packages?.reduce((sum: number, p: any) => sum + (p.packing_count || 1), 0) || 0;
 
@@ -311,7 +331,7 @@ async function _fetchOrders(supabase: any, shipperIds: string[], from: string, t
   let query = supabase
     .from('zen_orders')
     .select(`
-      id, order_no, shipper_id, created_at,
+      id, order_no, shipper_id, dest_country_code, created_at,
       shipper:shipper_id(name),
       packages:zen_order_packages(gross_weight, packing_count),
       snapshot:zen_order_rate_snapshots(rate_card_id, applied_unit_price, carrier_cost_amount, metadata)
@@ -325,8 +345,8 @@ async function _fetchOrders(supabase: any, shipperIds: string[], from: string, t
   return query;
 }
 
-function _mapToExcelRow(order: any, baseRates: any[], overrides: any[]): _ExcelRow {
-  const { revenue, cost, margin } = _calculateOrderSettle(order, baseRates, overrides);
+function _mapToExcelRow(order: any, policies: Record<string, number>, zoneMap: Record<string, string>): _ExcelRow {
+  const { revenue, cost, margin } = _calculateOrderSettle(order, policies, zoneMap);
   const totalWeight = order.packages?.reduce((sum: number, p: any) => sum + Number(pkgWeight(p)), 0) || 0;
   const packagesCount = order.packages?.reduce((sum: number, p: any) => sum + (p.packing_count || 1), 0) || 0;
   return {
@@ -371,7 +391,7 @@ export const exportAgencySettlementExcel = withAction(async function (
     return { base64: _generateXlsxBase64([]), filename: `agency_settlement_${_todayStr()}.xlsx` };
   }
 
-  const [ordersRes, baseData] = await Promise.all([
+  const [ordersRes, { policies, zoneMap }] = await Promise.all([
     _fetchOrders(supabase, shipperIds, from, to, orderNoSearch),
     _fetchBaseData(supabase, targetAgencyId),
   ]);
@@ -379,7 +399,7 @@ export const exportAgencySettlementExcel = withAction(async function (
   if (ordersRes.error) throw ordersRes.error;
 
   const rows = (ordersRes.data || []).map((order: any) =>
-    _mapToExcelRow(order, baseData.baseRates, baseData.overrides)
+    _mapToExcelRow(order, policies, zoneMap)
   );
 
   return {
