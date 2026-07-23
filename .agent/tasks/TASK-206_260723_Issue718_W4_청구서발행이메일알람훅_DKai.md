@@ -9,7 +9,7 @@
 | **우선순위** | P2 |
 | **전제조건** | 없음 |
 | **커밋 태그** | `[D_Kai]` |
-| **상태** | ⬜ |
+| **상태** | ❌ |
 
 ---
 
@@ -44,17 +44,65 @@ SNTL 회의록 W4: 청구서(인보이스) 발행 시 화주에게 이메일 알
 
 ## DoD
 
-- [ ] `sendInvoiceIssuedEmail()`(또는 유사) 신규 함수 추가 — 기존 Resend 인스턴스/FROM 재사용
-- [ ] `finalizeInvoice()`/`finalizeDailyShipperInvoices()` 완료 후크에 연동
-- [ ] best-effort 처리(발송 실패가 정산 확정을 막지 않음) 확인
-- [ ] escapeHtml 적용 확인
-- [ ] 신규 회귀 테스트 추가 + `LIVE_REGRESSION_TEST_MAP.md` 등록(R-09)
-- [ ] 회귀 테스트(`npm run test:regression`) 전체 PASS 확인
-- [ ] task file `[작업 결과]` 작성 + 커밋 해시 기재
-- [ ] ACTIVE_TASK.md 상태 반영
+- [x] `sendInvoiceFinalizedEmail()` 신규 함수 추가 — 기존 Resend 인스턴스/FROM 재사용
+- [x] `finalizeInvoice()` 완료 후크에 연동 (`finalizeDailyShipperInvoices()`는 내부 위임으로 자동 커버)
+- [x] best-effort 처리(발송 실패가 정산 확정을 막지 않음) — fire-and-forget + try/catch
+- [x] escapeHtml 적용 확인
+- [x] 신규 회귀 테스트 추가 (TC-F.10, 2 cases)
+- [ ] `LIVE_REGRESSION_TEST_MAP.md` 등록(R-09) — 예정
+- [x] 회귀 테스트(`npm run test:regression`) 전체 PASS 확인 (788/788)
+- [x] task file `[작업 결과]` 작성 + 커밋 해시 기재
+- [ ] ACTIVE_TASK.md 상태 반영 — 예정
 
 ---
 
 ## [작업 결과]
 
-_(D_Kai 작성 예정)_
+### 구현 내역
+
+1. **`src/lib/notifications/email.ts`**: `sendInvoiceFinalizedEmail()` 신규 함수 추가
+   - 기존 `resend`/`FROM` 인스턴스 재사용 (중복 초기화 없음)
+   - `escapeHtml` 적용 (HTML 인젝션 방지)
+   - Resend 미설정 시 `logger.warn` 후 스킵 (best-effort)
+   - Intl.NumberFormat으로 통화 포맷 적용
+
+2. **`src/app/actions/finance/settlement.ts`**: `finalizeInvoice()` 완료 후 fire-and-forget 이메일 발송 훅 추가
+   - `invoice.shipper_id` → `zen_organizations.name` (회사명)
+   - `invoice.shipper_id` → `zen_profiles` (`role='SHIPPER'`, `status='ACTIVE'`) (수신자 이메일)
+   - `finalizeDailyShipperInvoices()`는 내부에서 `finalizeInvoice()` 호출하므로 자동 커버
+   - try/catch 감싸기로 발송 실패가 정산 확정을 차단하지 않음
+
+3. **`tests/unit/finance/invoice-finalized-email.test.ts`**: TC-F.10 신규 단위 테스트 (2 Cases)
+   - TC-F.10-1: 정상 파라미터 전달 + Resend 호출 검증
+   - TC-F.10-2: HTML escape 검증 (`escapeHtml` 미적용 시 XSS 방어 확인)
+
+### 커밋
+
+| 순서 | 해시 | 메시지 |
+|:----:|:-----|:-------|
+| 1 | `204ca589` | `[D_Kai] feat: TASK-206 인보이스 발행 시 화주 이메일 알림 훅 추가` |
+| 2 | `5656c9c6` | `[D_Kai] test: TASK-206 sendInvoiceFinalizedEmail 단위 테스트 TC-F.10 추가` |
+
+### 검증
+
+- `npm run test:regression`: **788/788 PASS** (기존 786 + TC-F.10 2 케이스)
+- `npx next build`: Errors 0 (pre-existing test TS errors only)
+
+### PR
+
+- **PR**: [#752](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/752) `feature/teama-task-206-invoice-finalized-email-notification → develop`
+- **Branch**: `feature/teama-task-206-invoice-finalized-email-notification` (clean worktree 기반, R-17 §0 준수)
+
+## [Aiden 검토]
+
+### 1차 검토 (2026-07-23) — 수정 요청 1건
+
+**판정**: ⚠️ 반려(경미) — 나머지는 우수
+
+**양호한 점**: 격리 워크트리 재현 단위테스트 2/2 + 전체 회귀 116/788 PASS, **실제 CI 3항목 전부 SUCCESS**(이번 세션 최초로 CI 정상 트리거 확인), 워크트리 격리 정상 준수, `escapeHtml` 실제 XSS 방어 검증하는 진짜 단위 테스트.
+
+**수정 요청**: `settlement.ts`의 이메일 발송 훅이 `void (async () => {...})()`로 await 없이 실행됨 — 기존 `sendStatusChangeEmail()` 호출부(`notifications.ts`)는 동일 요구사항(발송 실패가 메인 로직을 막지 않음)을 `await`+`try/catch`로 처리하는 것과 불일치. Vercel 서버리스 환경에서 응답 반환 후 프로세스가 종료되면 await 없는 백그라운드 Promise가 완료 전 강제 종료되어 이메일이 조용히 누락될 위험 — 기존 패턴대로 `await`로 변경 요청.
+
+**비차단 참고**: DoD 체크박스 2건("LIVE_REGRESSION_TEST_MAP 등록"·"ACTIVE_TASK.md 반영")이 `[ ]`로 남아있으나 실제로는 해당 커밋에 이미 반영되어 있었음(과소 보고, 문제되는 방향 아님) — 다음 제출 시 체크박스만 정정.
+
+상세: PR#752·Issue#748 코멘트 참고.
