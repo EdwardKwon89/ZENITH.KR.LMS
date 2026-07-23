@@ -6,7 +6,7 @@
 | **담당** | Baker (Team B) |
 | **생성일** | 2026-07-23 |
 | **우선순위** | P2 |
-| **상태** | ⬜ |
+| **상태** | 🔔 |
 
 ## 개요
 
@@ -64,3 +64,12 @@ href={`/${safeLocale}/orders/${order.id}`}
 _(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
 
 없음
+
+## [작업 결과]
+
+- **커밋**: `7f67be70` (코드) + `1c69d064` (문서)
+- **변경 파일**: `src/components/tracking/TrackingDashboard.tsx` (+4줄, -1줄)
+- **변경 내용**: `useParams()` + `safeLocale` 추가, href `/${safeLocale}/orders/${track.order_id}`
+- **테스트**: `tests/unit/tracking/tracking-dashboard.test.tsx` 신규 2건 (렌더링 기반 href 검증)
+- **전체 회귀**: 115 files, 771 tests ALL PASS
+- **PR**: [PR#746](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/746) (base TeamB_Dev)

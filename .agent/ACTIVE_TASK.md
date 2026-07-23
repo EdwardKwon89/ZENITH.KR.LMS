@@ -476,6 +476,7 @@
 | TASK-B-185 | 260722 | Issue #704 — 오늘의 UPS 접수 이력 패널 구현 (getTodayUpsHistory + 프론트 연결) | P3 | 없음 | Baker (구현) | 🔔 | [TASK-B-185](tasks/TASK-B-185_260722_Iss704_TodayUpsHistory_Baker.md) | warehouse.ts getTodayUpsHistory() 신설 · UpsReceiveProcessForm history 연결 · 테스트 3건 추가 · 회귀 750/750 ALL PASS |
 | TASK-B-186 | 260722 | Issue #708 — .contains() → .like() 수정 (text 컬럼 SQL 타입 불일치 해결) | P1 | 없음 | Baker (구현) | 🔔 | [TASK-B-186](tasks/TASK-B-186_260722_Iss708_ContainsOperatorFix_Baker.md) | warehouse.ts 2곳 수정 · 로컬 DB 검증 완료 · 테스트 mock 보강 · 회귀 750/750 ALL PASS · Build PASS |
 | TASK-B-187 | 260722 | Issue #713 — 출고확정처리 화면 오늘의 이력 패널 신설 | P3 | 없음 | Baker (구현) | 🔔 | [TASK-B-187](tasks/TASK-B-187_260722_Iss713_DepartureHistory_Baker.md) | warehouse.ts getTodayDepartureHistory() 신설 · DepartureConfirmForm 2컬럼+history · i18n 4개 언어 · 테스트 3건 · 로컬 DB 검증 · 회귀 753/753 ALL PASS · Build PASS |
+| TASK-B-193 | 260723 | Issue #741 (DEF-121) TrackingDashboard Detail 링크 로케일 프리픽스 누락 404 | P2 | 없음 | Baker (구현) | 🔔 | [TASK-B-193](tasks/TASK-B-193_260723_Iss741_Def121_TrackingDetailLink404_Baker.md) | TrackingDashboard.tsx useParams()+safeLocale · 렌더링 기반 회귀 테스트 2건 추가 · 회귀 115files/771tests ALL PASS · [PR#746](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/746) |
 ---
 
 ## Agent 현황
