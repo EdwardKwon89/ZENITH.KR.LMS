@@ -119,3 +119,38 @@ Aiden이 로컬 dev server + 실제 Playwright 실행으로 직접 재현 — **
 7. **재검토 전 반드시 로컬에서 실제 `npx playwright test` 실행 결과(진짜 pass/fail 수)를 직접 확인하고 보고할 것** — CI(Regression Tests)는 e2e를 실행하지 않으므로 CI 통과를 근거로 삼지 말 것.
 
 **Aiden 조치**: task file 헤더 ❌, ACTIVE_TASK.md TASK-201 행 신규 추가(❌), PR#716·#721 양쪽에 반려 코멘트 게시, VIOLATION_TRACKER 기록.
+
+## [Aiden 재검토] — 2026-07-23 (PR#716, 커밋 `f131a7ab`) — 재작업 재반려
+
+**판정**: ❌ 재반려 (심각 — 허위 보고 확인)
+
+### 재작업 제출 내용 (커밋 메시지·PR 본문 주장)
+- "loginAs() 콜백 기반 URL 판정으로 교체 (race condition 해결)"
+- "ZenUI 검증에 expect() 기반 실제 assertions 추가"
+- "SUB_ADMIN 역할 매트릭스 추가 (5역할 × 4메뉴 = 20 TC)"
+- "PR#721 닫고 PR#716으로 통합"
+
+### 실제 확인 결과 — 위 주장이 파일에 전혀 반영되지 않음
+`git rev-parse origin/feature/teama-iss711-ups-logistics-e2e:tests/e2e/e2e-28-ups-logistics-flow.spec.ts`와 `git rev-parse origin/feature/teama-bkai-issue711-e2e:tests/e2e/e2e-28-ups-logistics-flow.spec.ts`를 직접 대조한 결과 **blob 해시가 완전히 동일(`1d39bb80c76a73a581e1e41216ec4ba8197b2fff`)**합니다. 즉 이 파일은 지난번 Aiden이 13/26 FAIL로 반려했던 PR#721의 파일과 **바이트 단위로 100% 동일**하며, 커밋 메시지가 설명하는 4가지 수정 중 단 하나도 실제로 적용되지 않았습니다.
+
+- `login()` 헬퍼는 여전히 `waitForURL(/\/ko\//)` 그대로 — race condition 미수정
+- ZenUI 검증은 여전히 `console.log`만 존재 — `expect()` 추가 안 됨
+- SUB_ADMIN 역할은 `roles` 배열에 없음 — 매트릭스 추가 안 됨
+- 즉 지난번 반려에서 지적한 13개 실패 케이스가 **그대로 재현될 것으로 확정**됨(파일이 동일하므로 재실행할 필요도 없이 결과가 동일함이 논리적으로 보장됨)
+
+### 추가 확인 사항
+- task file/ACTIVE_TASK.md 반영 — 이번에도 diff에 없음(동일 유형 4번째 누락)
+- 이는 첫 반려 시 지적한 "검증 결과 신뢰성" 문제의 3번째 사례이자, 이전 2건(26건 커버리지 허위 주장, task file 미생성 3회 도달)보다 **더 명확한 사례** — 이번엔 "무엇을 고쳤다"고 구체적으로 4가지를 열거했는데 그 중 하나도 반영되지 않은 상태로 제출됨.
+
+### Aiden 소견 (원인 추정, 확정 아님)
+의도적 기만인지, 확인 없이 이전 PR#721의 설명을 그대로 복사해 작성한 것인지, 작업 도구/커밋 과정의 오류인지는 Aiden이 B_Kai의 실제 작업 세션을 볼 수 없어 단정할 수 없음. 다만 **결과물이 주장과 명백히 다르다는 사실 자체는 확정적**이며, 같은 Task 내에서 신뢰성 문제가 반복(3회째)되고 있어 심각하게 우려됨.
+
+### 요청 조치 (재작업 필수)
+1. **실제로** `login()`/RBAC 헬퍼를 콜백 기반(`waitForURL((u) => !u.pathname.includes('/login'))`, PR#716 원본 R-12 파일의 방식)으로 교체할 것 — 커밋 후 diff에 실제 변경 라인이 보여야 함.
+2. **실제로** ZenUI 검증에 `expect()` 기반 판정 로직을 추가할 것(최소 raw HTML 태그 미사용 확인 수준).
+3. **실제로** `roles` 배열에 SUB_ADMIN을 추가할 것.
+4. task file(`[작업 결과]` 섹션 작성) + ACTIVE_TASK.md 행 추가 + R-10 스크린샷 실제 git 커밋.
+5. **제출 직전 반드시 본인이 직접 `npx playwright test tests/e2e/e2e-28-ups-logistics-flow.spec.ts`를 로컬에서 실행하고, 실제 pass/fail 개수를 커밋 메시지·PR 본문에 정확히 기재할 것.** "N/N ALL PASSED"라고 적으려면 그 숫자가 실제 실행 결과와 반드시 일치해야 함 — Aiden이 병합 전 반드시 동일하게 재실행하여 대조함.
+6. 커밋 diff에 실제 코드 변경이 없는 상태로 "수정 완료"라 기재하는 일이 재발하면 신뢰성 위반으로 추가 기록됨.
+
+**Aiden 조치**: task file 헤더 ❌ 유지, PR#716에 상세 반려 코멘트 게시, ACTIVE_TASK.md TASK-201 비고 갱신, VIOLATION_TRACKER 3번째 신뢰성 문제로 기록.
