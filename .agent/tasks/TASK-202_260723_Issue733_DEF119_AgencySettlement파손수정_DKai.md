@@ -73,4 +73,52 @@ Issue #718(SNTL 회의록) 검토 중 Aiden이 코드로 직접 확인. `src/lib
 
 ## [작업 결과]
 
-_(D_Kai 작성 예정)_
+### 1차 구현 (2026-07-22, 브랜치: feature/teama-def119-agency-settlement) → Aiden 반려 (브랜치 오염·채번 오류)
+
+### 2차 제출 (2026-07-22, 브랜치: feature/teama-def119-agency-settlement-v2)
+
+**코드 커밋**: `(하단 커밋 해시 참조)`
+
+#### 변경 파일
+
+| 파일 | 변경 | 설명 |
+|:-----|:-----|:------|
+| `src/lib/actions/agency-settlement.ts` | 재작성 | `_fetchBaseData()`: `zen_agency_pricing_policies` + `zen_ups_zone_countries` 기반으로 전환. `_calculateOrderSettle()`: zone 기반 할인율 모델 적용. 모든 SELECT에 `dest_country_code` 추가 |
+| `tests/integration/p7-agency-settlement.test.ts` | 갱신 | Mock 데이터 old override 모델 → zone 기반 할인율 모델로 전환. 기대값 및 테스트 설명 갱신 |
+
+#### 수정 상세
+
+**이전 모델 (BROKEN)**:
+- `_fetchBaseData`: `zen_ups_base_rates` + `zen_agency_rate_overrides` (DROP됨)
+- `_calculateOrderSettle`: override → baseRate → snapshot fallback
+
+**새 모델**:
+- `_fetchBaseData`: `zen_agency_pricing_policies`(agency_org_id 기준 zone별 discount_rate) + `zen_ups_zone_countries`(country_code→zone_id)
+- `_calculateOrderSettle`:
+  1. `revenue` = `snapshot.applied_unit_price`
+  2. `platformSellingTotal` = breakdown 합계 (baseSellingPrice + fuelSurchargeSellingAmount + otherChargesSellingTotal + surgeFeeSellingAmount)
+  3. zone 해석: `order.dest_country_code` → `zoneMap[country_code]`
+  4. `discountRate` = `policies[zone_id]`
+  5. `cost` = `platformSellingTotal × (1 - discountRate)`
+  6. Fallback: metadata/zone 없으면 `carrier_cost_amount`
+
+#### 검증
+
+| 항목 | 결과 |
+|:-----|:----:|
+| TC-P7-SETTLE-01~04 + TC-B-* 15개 통합 테스트 | ✅ PASS |
+| `tests/unit/finance/agency-settlement-permission.test.ts` 18개 | ✅ PASS |
+| `npm run test:regression` | ✅ **782/782** PASS |
+| `npx next build` — Errors: 0 | ✅ |
+| R-10 스크린샷 | ➖ (Agency 계정 로그인·정산 화면 접속 — 실제 DB 필요, local seed DB 미구축. Integration test로 대체 검증 완료) |
+
+#### R-17/DoD 자가 점검
+
+| 항목 | 상태 | 비고 |
+|:-----|:----:|:------|
+| §0 워크트리 격리 | ⚠️ | 1차: 위반(메인 repo 사용). 2차: develop 기반 fresh 브랜치 재작성으로 해소 |
+| 코드 커밋 | ✅ | |
+| 문서 커밋 | ✅ | |
+| Issue 라벨 `status:review` | ✅ | |
+| DoD 전항목 | ✅ | R-10 제외 (DB 의존, Integration test로 대체) |
+| ZEN_A4 함수 ≤50줄 | ⚠️ Advisory | 3개 함수 pre-existing 초과, 본 PR 증가 없음 |
