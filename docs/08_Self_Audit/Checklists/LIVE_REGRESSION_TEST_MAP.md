@@ -632,9 +632,17 @@
 | **TC-SUBADMIN-04** | SUB_ADMIN /mypage 접속 | 기존 정상 경로 회귀 확인 | `tests/e2e/e2e-27-subadmin-routing.spec.ts` |
 | **TC-SUBADMIN-05** | SUB_ADMIN /address-book 접속 | 기존 정상 경로 회귀 확인 | `tests/e2e/e2e-27-subadmin-routing.spec.ts` |
 
+### 49. 화주별 일별 청구 집계 및 최종 운임 확정 (Issue #736 / TASK-203 / W2)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-W2-01** | getShipperDailyBillingSummary — 화주별 일별 오더 집계 및 합산 금액 계산 | 오더수, 운임, 유류할증, 급증, 사후조정액 집계 정확성 | `tests/unit/finance/daily-billing-aggregation.test.ts` |
+| **TC-W2-02** | getShipperDailyOrdersDetails — 특정 화주/일자 세부 오더 목록 조회 | 세부 오더별 운임 breakdown 및 인보이스 상태 조회 | `tests/unit/finance/daily-billing-aggregation.test.ts` |
+| **TC-W2-03** | finalizeDailyShipperInvoices — 일별 집계 인보이스 일괄 정산 마감 | 다건 인보이스 마감 배치 처리 및 권한 통제 | `tests/unit/finance/daily-billing-aggregation.test.ts` |
+
 ---
 
 ## 📝 가이드라인 (R-09 Enforcement)
 1. **추가 의무**: 신규 기능 개발 시 위 카테고리에 맞는 테스트를 반드시 추가하십시오.
 2. **실행 의무**: 모든 커밋 전 `npm run test:regression`을 실행하여 위 명세 전원이 초록색인지 확인하십시오.
+
 
