@@ -9,7 +9,7 @@
 | **우선순위** | P2 |
 | **전제조건** | 없음 |
 | **커밋 태그** | `[D_Kai]` |
-| **상태** | 🔔 |
+| **상태** | ❌ |
 
 ---
 
@@ -49,10 +49,10 @@ SNTL 회의록 W4: 청구서(인보이스) 발행 시 화주에게 이메일 알
 - [x] best-effort 처리(발송 실패가 정산 확정을 막지 않음) — fire-and-forget + try/catch
 - [x] escapeHtml 적용 확인
 - [x] 신규 회귀 테스트 추가 (TC-F.10, 2 cases)
-- [ ] `LIVE_REGRESSION_TEST_MAP.md` 등록(R-09) — 예정
+- [x] `LIVE_REGRESSION_TEST_MAP.md` 등록(R-09)
 - [x] 회귀 테스트(`npm run test:regression`) 전체 PASS 확인 (788/788)
 - [x] task file `[작업 결과]` 작성 + 커밋 해시 기재
-- [ ] ACTIVE_TASK.md 상태 반영 — 예정
+- [x] ACTIVE_TASK.md 상태 반영
 
 ---
 
@@ -92,3 +92,17 @@ SNTL 회의록 W4: 청구서(인보이스) 발행 시 화주에게 이메일 알
 
 - **PR**: [#752](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/752) `feature/teama-task-206-invoice-finalized-email-notification → develop`
 - **Branch**: `feature/teama-task-206-invoice-finalized-email-notification` (clean worktree 기반, R-17 §0 준수)
+
+## [Aiden 검토]
+
+### 1차 검토 (2026-07-23) — 수정 요청 1건
+
+**판정**: ⚠️ 반려(경미) — 나머지는 우수
+
+**양호한 점**: 격리 워크트리 재현 단위테스트 2/2 + 전체 회귀 116/788 PASS, **실제 CI 3항목 전부 SUCCESS**(이번 세션 최초로 CI 정상 트리거 확인), 워크트리 격리 정상 준수, `escapeHtml` 실제 XSS 방어 검증하는 진짜 단위 테스트.
+
+**수정 요청**: `settlement.ts`의 이메일 발송 훅이 `void (async () => {...})()`로 await 없이 실행됨 — 기존 `sendStatusChangeEmail()` 호출부(`notifications.ts`)는 동일 요구사항(발송 실패가 메인 로직을 막지 않음)을 `await`+`try/catch`로 처리하는 것과 불일치. Vercel 서버리스 환경에서 응답 반환 후 프로세스가 종료되면 await 없는 백그라운드 Promise가 완료 전 강제 종료되어 이메일이 조용히 누락될 위험 — 기존 패턴대로 `await`로 변경 요청.
+
+**비차단 참고**: DoD 체크박스 2건("LIVE_REGRESSION_TEST_MAP 등록"·"ACTIVE_TASK.md 반영")이 `[ ]`로 남아있으나 실제로는 해당 커밋에 이미 반영되어 있었음(과소 보고, 문제되는 방향 아님) — 다음 제출 시 체크박스만 정정.
+
+상세: PR#752·Issue#748 코멘트 참고.

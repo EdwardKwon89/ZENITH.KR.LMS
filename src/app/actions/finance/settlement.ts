@@ -147,39 +147,37 @@ export async function finalizeInvoice(
     const totalAmount = await computeInvoiceTotal(supabase, invoiceId);
     await markInvoiceFinalized(supabase, invoiceId, totalAmount, user.id, invoice.status, reason);
 
-    // TASK-206: 인보이스 발행 이메일 알림 (fire-and-forget)
-    void (async () => {
-      try {
-        const { data: org } = await supabase
-          .from('zen_organizations')
-          .select('name')
-          .eq('id', invoice.shipper_id)
-          .single();
+    // TASK-206: 인보이스 발행 이메일 알림 (best-effort, await + try/catch)
+    try {
+      const { data: org } = await supabase
+        .from('zen_organizations')
+        .select('name')
+        .eq('id', invoice.shipper_id)
+        .single();
 
-        const { data: shipperProfile } = await supabase
-          .from('zen_profiles')
-          .select('email')
-          .eq('org_id', invoice.shipper_id)
-          .eq('role', USER_ROLES.SHIPPER)
-          .eq('status', 'ACTIVE')
-          .limit(1)
-          .maybeSingle();
+      const { data: shipperProfile } = await supabase
+        .from('zen_profiles')
+        .select('email')
+        .eq('org_id', invoice.shipper_id)
+        .eq('role', USER_ROLES.SHIPPER)
+        .eq('status', 'ACTIVE')
+        .limit(1)
+        .maybeSingle();
 
-        if (shipperProfile?.email) {
-          sendInvoiceFinalizedEmail({
-            email: shipperProfile.email,
-            shipperName: org?.name || '화주',
-            invoiceNo: invoice.invoice_no,
-            totalAmount,
-            currency: invoice.currency,
-            dueDate: invoice.due_date,
-            orderNo: invoice.metadata?.order_no,
-          });
-        }
-      } catch (e) {
-        logger.error('[TASK-206] Failed to send invoice finalized email:', e);
+      if (shipperProfile?.email) {
+        await sendInvoiceFinalizedEmail({
+          email: shipperProfile.email,
+          shipperName: org?.name || '화주',
+          invoiceNo: invoice.invoice_no,
+          totalAmount,
+          currency: invoice.currency,
+          dueDate: invoice.due_date,
+          orderNo: invoice.metadata?.order_no,
+        });
       }
-    })();
+    } catch (e) {
+      logger.error('[TASK-206] Failed to send invoice finalized email:', e);
+    }
 
     revalidatePath('/finance/invoices');
     revalidatePath('/(dashboard)/settlement');
