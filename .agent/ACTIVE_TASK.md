@@ -15,6 +15,7 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
+| [#741](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/741) | DEF-121: TrackingDashboard Detail 링크 로케일 프리픽스 누락 — 404 발생 | b | p2 | - | 미배정 | 2026-07-23 |
 | [#736](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/736) | [feat] W2 — 최종 운임 확정 UI(UPS 발송 기준) + 화주별 일별 청구 집계 | a | p1 | review | EdwardKwon89 | 2026-07-23 |
 | [#733](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/733) | [defect] DEF-119 — agency-settlement.ts 전체 파손 (폐기된 zen_agency_rate_overrides 참조) — P0 최우선 | a | p1 | review | EdwardKwon89 | 2026-07-23 |
 | [#728](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/728) | [defect] DEF-120 — zen_tracking_configs RLS에 AGENCY SELECT 커버리지 없음, 통합 트래킹 침묵 실패 | b | p2 | done | 미배정 | 2026-07-23 |
@@ -24,7 +25,7 @@
 | [#718](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/718) | 2026.07.22 SNTL 회의록 | - | - | - | 미배정 | 2026-07-23 |
 | [#717](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/717) | [design] SNTL 원가 Matrix — 전역 공용값+정산 미반영 구조, 의도된 설계인지 Team B 협의 필요 | a | p2 | - | 미배정 | 2026-07-23 |
 | [#713](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/713) | [feat] 출고확정처리(/warehouse/departure) 화면에 오늘의 이력 패널 신설 | b | p3 | done | 미배정 | 2026-07-22 |
-| [#711](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/711) | [Team A] Phase 2 — 신규 UPS 물류관리 메뉴 흐름 전체 E2E 검증 (오더픽업→...→DELIVERED) | a | p1 | - | EdwardKwon89 | 2026-07-22 |
+| [#711](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/711) | [Team A] Phase 2 — 신규 UPS 물류관리 메뉴 흐름 전체 E2E 검증 (오더픽업→...→DELIVERED) | a | p1 | - | EdwardKwon89 | 2026-07-23 |
 | [#708](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/708) | [fix] getTodayUpsHistory 500 에러 — .contains() 연산자가 text 컬럼에 적용 불가 (getTodayPickupHistory도 동일 결함) | b | p1 | done | 미배정 | 2026-07-22 |
 | [#704](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/704) | [feat] 오늘의 UPS 접수 이력 패널 미구현 — 백엔드 조회 함수 신설 필요 | b | p3 | done | 미배정 | 2026-07-22 |
 | [#700](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/700) | [fix] confirmOutbound WAREHOUSED 전용 가드 버그(PACKED 출고 불가) + 출고확정 버튼 텍스트 변경 | b | p1 | done | 미배정 | 2026-07-22 |
