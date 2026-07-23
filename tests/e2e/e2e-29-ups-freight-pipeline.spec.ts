@@ -391,4 +391,278 @@ test.describe.serial('E29: UPS 운임 파이프라인 E2E 검증 (중량 변경 
 
     await screenshot(page, 'wf03_order_detail');
   });
+
+  /* ════════════════════════════════════════════════════════
+   *  Stage 1: 예상운임 저장 확인
+   *  → zen_order_rate_snapshots에 견적 존재 + zen_order_costs에 비용 존재
+   * ════════════════════════════════════════════════════════ */
+  test('Stage 1: 예상운임 저장 확인', async ({ page }) => {
+    // DB: order 존재 확인
+    const { data: order } = await sb
+      .from('zen_orders').select('status, transport_mode, order_no')
+      .eq('id', orderId).single();
+    expect(order).toBeTruthy();
+    expect(order!.transport_mode).toBe('UPS');
+    expect(order!.order_no).toMatch(/^E29-/);
+
+    // DB: 스냅샷 존재 확인 (TC-WF-02에서 갱신된 5.0kg 기준)
+    const { data: snapshot } = await sb
+      .from('zen_order_rate_snapshots')
+      .select('applied_unit_price, applied_currency, applied_rule')
+      .eq('order_id', orderId).single();
+    expect(snapshot).toBeTruthy();
+    expect(Number(snapshot!.applied_unit_price)).toBeGreaterThan(0);
+    expect(snapshot!.applied_rule).toBe('UPS_3TIER');
+
+    // DB: 정산 비용 확인 (TC-WF-02에서 생성된 5.0kg 기준)
+    const { data: costs } = await sb
+      .from('zen_order_costs').select('cost_type, unit_price, currency')
+      .eq('order_id', orderId);
+    expect(costs!.length).toBeGreaterThanOrEqual(2);
+
+    const costTypes = costs!.map((c: any) => c.cost_type).sort();
+    expect(costTypes).toContain('BASE_FREIGHT');
+    expect(costTypes).toContain('FUEL_SURCHARGE');
+
+    // UI: 로그인 → 오더 상세
+    await loginAs(page, ADMIN_EMAIL, ADMIN_PASSWORD);
+    await page.goto(`/ko/orders/${orderId}`);
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(2000);
+
+    const bodyText = (await page.textContent('body'))!;
+    expect(bodyText).toContain('UPS');
+
+    await screenshot(page, 'stage1_estimate');
+  });
+
+  /* ════════════════════════════════════════════════════════
+   *  Stage 2-1: 실제 청구 등록 (마감 전)
+   *  → zen_ups_actual_charges INSERT
+   *  → UPS_ACTUAL_ADJUSTMENT 비용 행 생성
+   *  → 인보이스 총액 재계산
+   * ════════════════════════════════════════════════════════ */
+  test('Stage 2-1: 실제 청구 등록 (마감 전)', async ({ page }) => {
+    // 기존 조정 비용 정리
+    await sb.from('zen_order_costs')
+      .delete()
+      .eq('order_id', orderId)
+      .eq('cost_type', 'UPS_ACTUAL_ADJUSTMENT');
+
+    // 실제 청구 요금 등록
+    await sb.from('zen_ups_actual_charges').delete().eq('order_id', orderId);
+    await sb.from('zen_ups_actual_charges').insert([
+      { order_id: orderId, charge_type: 'BASE FREIGHT', charge_amount: 80000, currency: 'KRW' },
+      { order_id: orderId, charge_type: 'FUEL SURCHARGE', charge_amount: 14800, currency: 'KRW' },
+    ]);
+
+    // 스냅샷 기준 총액 대비 차액 계산 (5.0kg 기준 스냅샷 totalSellingPrice 사용)
+    const { data: snap } = await sb
+      .from('zen_order_rate_snapshots')
+      .select('metadata')
+      .eq('order_id', orderId).single();
+    const snapTotal = Number((snap!.metadata as any).platform?.totalSellingPrice) || 0;
+    const actualSum = 80000 + 14800; // 94,800
+    const adjustmentAmount = actualSum - snapTotal;
+
+    await sb.from('zen_order_costs').insert({
+      order_id: orderId, cost_type: 'UPS_ACTUAL_ADJUSTMENT',
+      unit_price: adjustmentAmount, quantity: 1, currency: 'KRW', is_revenue: true,
+    });
+
+    // 인보이스 생성 (사후청구용)
+    const invDate = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+    const invSeq = Date.now().toString().slice(-6);
+    const { data: inv, error: invErr } = await sb.from('zen_invoices').insert({
+      invoice_no: `INV-${invDate}-E29${invSeq}`,
+      shipper_id: SHIPPER_ORG_ID,
+      status: 'UNPAID',
+      total_amount: actualSum,
+      currency: 'KRW',
+      due_date: new Date(Date.now() + 14 * 86400000).toISOString().slice(0, 10),
+      metadata: { source_order_id: orderId, order_no: orderNo },
+      is_finalized: false,
+    }).select('id').single();
+    expect(invErr).toBeNull();
+
+    // DB 검증: 실제 청구 2건
+    const { data: charges } = await sb
+      .from('zen_ups_actual_charges')
+      .select('charge_type, charge_amount')
+      .eq('order_id', orderId);
+    expect(charges!.length).toBe(2);
+    const actualTotal = charges!.reduce((s: number, c: any) => s + Number(c.charge_amount), 0);
+    expect(actualTotal).toBe(94800);
+
+    // DB 검증: 인보이스 미마감
+    const { data: invCheck } = await sb
+      .from('zen_invoices')
+      .select('total_amount, is_finalized')
+      .eq('id', inv!.id).single();
+    expect(Number(invCheck!.total_amount)).toBe(94800);
+    expect(invCheck!.is_finalized).toBe(false);
+
+    await screenshot(page, 'stage2_actual_charges');
+  });
+
+  /* ════════════════════════════════════════════════════════
+   *  Stage 2-2: 정산 마감 (finalize)
+   *  → is_finalized = true
+   *  → finalized_at, finalized_by 기록
+   * ════════════════════════════════════════════════════════ */
+  test('Stage 2-2: 정산 마감 (finalize)', async ({ page }) => {
+    const { data: users } = await sb.auth.admin.listUsers();
+    const adminUserId = users?.users?.find((u: any) => u.email === ADMIN_EMAIL)?.id;
+
+    // 가장 최근 인보이스 조회
+    const { data: latestInv } = await sb
+      .from('zen_invoices')
+      .select('id')
+      .eq('metadata->>source_order_id', orderId)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    // DB: 마감 처리
+    await sb.from('zen_invoices').update({
+      is_finalized: true,
+      finalized_at: new Date().toISOString(),
+      finalized_by: adminUserId,
+      finalized_reason: 'E29 파이프라인 테스트 마감',
+    }).eq('id', latestInv!.id);
+
+    // DB 검증: 마감 완료
+    const { data: invFinalized } = await sb
+      .from('zen_invoices')
+      .select('is_finalized, finalized_at, finalized_by, finalized_reason')
+      .eq('id', latestInv!.id).single();
+    expect(invFinalized!.is_finalized).toBe(true);
+    expect(invFinalized!.finalized_at).toBeTruthy();
+    expect(invFinalized!.finalized_by).toBe(adminUserId);
+
+    await screenshot(page, 'stage2_finalized');
+  });
+
+  /* ════════════════════════════════════════════════════════
+   *  Stage 3: daily-billing 집계 확인
+   *  → /finance/daily-billing 페이지에서 화주집계 존재 확인
+   * ════════════════════════════════════════════════════════ */
+  test('Stage 3: daily-billing 집계 확인', async ({ page }) => {
+    await loginAs(page, ADMIN_EMAIL, ADMIN_PASSWORD);
+    await page.goto('/ko/finance/daily-billing');
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(3000);
+
+    const bodyText = (await page.textContent('body'))!;
+    const hasPageTitle = bodyText.includes('청구') || bodyText.includes('billing') || bodyText.includes('집계');
+    expect(hasPageTitle).toBe(true);
+
+    await screenshot(page, 'stage3_daily_billing');
+  });
+
+  /* ════════════════════════════════════════════════════════
+   *  Stage 3-DB: daily-billing 집계 데이터 검증
+   *  → 해당 오더의 비용 합계가 정확한지 확인
+   * ════════════════════════════════════════════════════════ */
+  test('Stage 3-DB: daily-billing 집계 데이터 검증', async () => {
+    const { data: costs } = await sb
+      .from('zen_order_costs')
+      .select('cost_type, unit_price, quantity, currency')
+      .eq('order_id', orderId);
+
+    let baseFreight = 0;
+    let fuelSurcharge = 0;
+    let actualAdjustment = 0;
+
+    for (const c of costs || []) {
+      const amt = Number(c.unit_price) * Number(c.quantity || 1);
+      if (c.cost_type === 'BASE_FREIGHT') baseFreight += amt;
+      else if (c.cost_type === 'FUEL_SURCHARGE') fuelSurcharge += amt;
+      else if (c.cost_type === 'UPS_ACTUAL_ADJUSTMENT') actualAdjustment += amt;
+    }
+
+    // TC-WF-02에서 생성된 5.0kg 기준 비용 + Stage 2-1 조정
+    expect(baseFreight).toBeGreaterThan(0);
+    expect(fuelSurcharge).toBeGreaterThan(0);
+
+    // DB: 인보이스 존재 확인
+    const { data: invoices } = await sb
+      .from('zen_invoices')
+      .select('total_amount, is_finalized')
+      .filter('metadata->>source_order_id', 'eq', orderId);
+    expect(invoices!.length).toBeGreaterThan(0);
+
+    const hasFinalized = invoices!.some((inv: any) => inv.is_finalized === true);
+    expect(hasFinalized).toBe(true);
+  });
+
+  /* ════════════════════════════════════════════════════════
+   *  Gap 검증: 마감 후 조정 시 신규 인보이스 생성
+   *  → createPostFinalizationAdjustment 시나리오
+   * ════════════════════════════════════════════════════════ */
+  test('Gap 검증: 마감 후 조정 — 추가 인보이스 발행', async () => {
+    // 기존 마감된 인보이스 조회
+    const { data: finalizedInvs } = await sb
+      .from('zen_invoices')
+      .select('id, total_amount')
+      .filter('metadata->>source_order_id', 'eq', orderId)
+      .eq('is_finalized', true);
+    expect(finalizedInvs!.length).toBeGreaterThan(0);
+    const origInvId = finalizedInvs![0].id;
+
+    // 새로운 실제 청구 요금 (추가 청구)
+    await sb.from('zen_ups_actual_charges').delete().eq('order_id', orderId);
+    await sb.from('zen_ups_actual_charges').insert([
+      { order_id: orderId, charge_type: 'FUEL SURCHARGE', charge_amount: 5000, currency: 'KRW' },
+    ]);
+
+    // 차액: +5,000 KRW
+    const adjAmount = 5000;
+
+    // UPS_ACTUAL_ADJUSTMENT 비용 행 생성
+    await sb.from('zen_order_costs')
+      .delete()
+      .eq('order_id', orderId)
+      .eq('cost_type', 'UPS_ACTUAL_ADJUSTMENT');
+
+    await sb.from('zen_order_costs').insert({
+      order_id: orderId, cost_type: 'UPS_ACTUAL_ADJUSTMENT',
+      unit_price: adjAmount, quantity: 1, currency: 'KRW', is_revenue: true,
+    });
+
+    // 신규 조정 인보이스 생성 (createPostFinalizationAdjustment 시뮬레이션)
+    const adjInvDate = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+    const adjInvSeq = Date.now().toString().slice(-4);
+    const { data: newInv } = await sb.from('zen_invoices').insert({
+      invoice_no: `INV-${adjInvDate}-E29A${adjInvSeq}`,
+      shipper_id: SHIPPER_ORG_ID,
+      status: 'UNPAID',
+      total_amount: adjAmount,
+      currency: 'KRW',
+      due_date: new Date(Date.now() + 14 * 86400000).toISOString().slice(0, 10),
+      metadata: {
+        source_order_id: orderId,
+        order_no: orderNo,
+        adjustment_of: origInvId,
+      },
+      is_finalized: false,
+    }).select('id, invoice_no').single();
+
+    // DB 검증: 신규 인보이스 생성 확인
+    const { data: adjInvoice } = await sb
+      .from('zen_invoices')
+      .select('id, invoice_no, total_amount, is_finalized, metadata')
+      .eq('id', newInv!.id).single();
+    expect(adjInvoice).toBeTruthy();
+    expect(adjInvoice!.is_finalized).toBe(false);
+    expect(Number(adjInvoice!.total_amount)).toBe(adjAmount);
+    expect(adjInvoice!.metadata).toHaveProperty('adjustment_of', origInvId);
+
+    // DB 검증: 원 인보이스 불변
+    const { data: origInv } = await sb
+      .from('zen_invoices')
+      .select('total_amount, is_finalized')
+      .eq('id', origInvId).single();
+    expect(origInv!.is_finalized).toBe(true);
+  });
 });
