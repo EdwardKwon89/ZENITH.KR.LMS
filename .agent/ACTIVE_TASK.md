@@ -16,7 +16,7 @@
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
 | [#773](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/773) | [defect] DEF-121 — UPS 스냅샷 캐시, 중량 변경 시 정산 자동 재계산 누락 | a | p1 | - | EdwardKwon89 | 2026-07-23 |
-| [#771](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/771) | DEF-123: zen_tracking_configs.tracking_no가 실제 UPS 운송장번호로 갱신되지 않음 | b | p3 | rework | 미배정 | 2026-07-23 |
+| [#771](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/771) | DEF-123: zen_tracking_configs.tracking_no가 실제 UPS 운송장번호로 갱신되지 않음 | b | p3 | done | 미배정 | 2026-07-23 |
 | [#770](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/770) | [설계 협의 필요] zen_tracking_configs provider_type/provider_name — transport_mode 반영 방식 (Edward 협의 필요) | - | - | blocked | EdwardKwon89 | 2026-07-23 |
 | [#760](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/760) | DEF-122: getGlobalTrackingOverview is_unassigned 배열 인덱싱 오류 — 정상 오더도 Unassigned 오분류 | b | p3 | done | 미배정 | 2026-07-23 |
 | [#750](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/750) | [feat] W2 후속 — 화주별 주별/월별 청구 집계 (2순위) | a | p3 | review | EdwardKwon89 | 2026-07-23 |
