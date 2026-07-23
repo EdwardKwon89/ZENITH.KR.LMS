@@ -15,6 +15,7 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
+| [#778](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/778) | [UI] 배송방식 픽업수령 선택 시 픽업 장소/담당자 연락처 입력 방식을 기존 주소/전화번호 입력 방식으로 준용 | b | p3 | - | 미배정 | 2026-07-23 |
 | [#777](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/777) | [UI] 배송방식 픽업수령 선택 시 Local Tracking No 필드 비활성화 | b | p3 | - | 미배정 | 2026-07-23 |
 | [#773](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/773) | [defect] DEF-121 — UPS 스냅샷 캐시, 중량 변경 시 정산 자동 재계산 누락 | a | p1 | - | EdwardKwon89 | 2026-07-23 |
 | [#771](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/771) | DEF-123: zen_tracking_configs.tracking_no가 실제 UPS 운송장번호로 갱신되지 않음 | b | p3 | done | 미배정 | 2026-07-23 |
