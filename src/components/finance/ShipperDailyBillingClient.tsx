@@ -4,6 +4,7 @@ import React, { useState, useTransition } from 'react';
 import {
   ShipperDailyBillingGroup,
   ShipperDailyOrderRow,
+  getShipperDailyBillingSummary,
   getShipperDailyOrdersDetails,
   finalizeDailyShipperInvoices,
 } from '@/app/actions/finance/daily-billing';
@@ -35,6 +36,7 @@ export default function ShipperDailyBillingClient({
   exchangeRate,
 }: ShipperDailyBillingClientProps) {
   const [groups, setGroups] = useState<ShipperDailyBillingGroup[]>(initialGroups);
+  const [periodType, setPeriodType] = useState<'daily' | 'weekly' | 'monthly'>('daily');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [shipperFilter, setShipperFilter] = useState('');
@@ -45,10 +47,51 @@ export default function ShipperDailyBillingClient({
   const [isPending, startTransition] = useTransition();
   const [finalizingGroupKey, setFinalizingGroupKey] = useState<string | null>(null);
 
-  // Filter groups
+  // Fetch summary from server action with current filters
+  const fetchSummary = (targetPeriodType?: 'daily' | 'weekly' | 'monthly', sDate?: string, eDate?: string, sFilter?: string) => {
+    const targetType = targetPeriodType || periodType;
+    const start = sDate !== undefined ? sDate : startDate;
+    const end = eDate !== undefined ? eDate : endDate;
+    const shipper = sFilter !== undefined ? sFilter : shipperFilter;
+
+    setExpandedKey(null);
+
+    startTransition(async () => {
+      const res = await getShipperDailyBillingSummary({
+        startDate: start || undefined,
+        endDate: end || undefined,
+        shipperId: shipper || undefined,
+        periodType: targetType,
+      });
+
+      if (res.success && res.groups) {
+        setGroups(res.groups);
+      } else {
+        toast.error('집계 데이터 조회 실패');
+      }
+    });
+  };
+
+  // Switch period type and fetch updated summary
+  const handlePeriodTypeChange = async (newType: 'daily' | 'weekly' | 'monthly') => {
+    setPeriodType(newType);
+    fetchSummary(newType);
+  };
+
+  // Reset filters
+  const handleReset = () => {
+    setStartDate('');
+    setEndDate('');
+    setShipperFilter('');
+    fetchSummary(periodType, '', '', '');
+  };
+
+  // Filter groups locally as fallback
   const filteredGroups = groups.filter((g) => {
-    if (startDate && g.date < startDate) return false;
-    if (endDate && g.date > endDate) return false;
+    if (periodType === 'daily') {
+      if (startDate && g.date < startDate) return false;
+      if (endDate && g.date > endDate) return false;
+    }
     if (shipperFilter && !g.shipperName.toLowerCase().includes(shipperFilter.toLowerCase())) return false;
     return true;
   });
@@ -70,7 +113,7 @@ export default function ShipperDailyBillingClient({
     setExpandedKey(key);
     if (!expandedOrders[key]) {
       setLoadingOrders((prev) => ({ ...prev, [key]: true }));
-      const res = await getShipperDailyOrdersDetails(group.shipperId, group.date);
+      const res = await getShipperDailyOrdersDetails(group.shipperId, group.date, periodType);
       setLoadingOrders((prev) => ({ ...prev, [key]: false }));
 
       if (res.success && res.orders) {
@@ -89,10 +132,10 @@ export default function ShipperDailyBillingClient({
 
     const reason = window.prompt(
       `[${group.shipperName} / ${group.date}] 총 ${group.invoiceIds.length}건의 인보이스를 최종 정산 마감 처리하시겠습니까?\n\nAdmin 예외 마감 사유를 입력하세요 (선택 사항):`,
-      '일별 집계 최종 운임 마감'
+      '청구 집계 최종 운임 마감'
     );
 
-    if (reason === null) return; // User cancelled
+    if (reason === null) return;
 
     const key = `${group.shipperId}_${group.date}`;
     setFinalizingGroupKey(key);
@@ -103,7 +146,6 @@ export default function ShipperDailyBillingClient({
 
       if (res.success) {
         toast.success(`${group.shipperName} (${group.date}) ${res.finalizedCount}건 정산 마감 완료!`);
-        // Update local state
         setGroups((prev) =>
           prev.map((g) => {
             if (g.shipperId === group.shipperId && g.date === group.date) {
@@ -124,9 +166,43 @@ export default function ShipperDailyBillingClient({
 
   return (
     <div className="flex flex-col gap-6 w-full">
-      {/* Search & Filter Bar */}
+      {/* Search & Filter Bar with Period Selector */}
       <div className="bg-white dark:bg-zinc-950 p-5 rounded-2xl border border-slate-200 dark:border-zinc-800 shadow-sm flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-wrap items-center gap-3 text-xs">
+          {/* Period Toggle */}
+          <div className="flex items-center p-1 bg-slate-100 dark:bg-zinc-900 rounded-xl border border-slate-200 dark:border-zinc-800">
+            <button
+              onClick={() => handlePeriodTypeChange('daily')}
+              className={`px-3 py-1.5 rounded-lg font-bold text-xs transition-colors ${
+                periodType === 'daily'
+                  ? 'bg-amber-500 text-slate-950 shadow-xs'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+              }`}
+            >
+              일별 (Daily)
+            </button>
+            <button
+              onClick={() => handlePeriodTypeChange('weekly')}
+              className={`px-3 py-1.5 rounded-lg font-bold text-xs transition-colors ${
+                periodType === 'weekly'
+                  ? 'bg-amber-500 text-slate-950 shadow-xs'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+              }`}
+            >
+              주별 (Weekly)
+            </button>
+            <button
+              onClick={() => handlePeriodTypeChange('monthly')}
+              className={`px-3 py-1.5 rounded-lg font-bold text-xs transition-colors ${
+                periodType === 'monthly'
+                  ? 'bg-amber-500 text-slate-950 shadow-xs'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+              }`}
+            >
+              월별 (Monthly)
+            </button>
+          </div>
+
           <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-zinc-900 px-3 py-2 rounded-xl border border-slate-200 dark:border-zinc-800">
             <Calendar className="w-4 h-4 text-slate-400" />
             <span className="font-semibold text-slate-600 dark:text-slate-300">시작일:</span>
@@ -160,13 +236,18 @@ export default function ShipperDailyBillingClient({
             />
           </div>
 
+          <button
+            onClick={() => fetchSummary()}
+            disabled={isPending}
+            className="px-3 py-2 bg-slate-900 hover:bg-slate-800 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-white font-bold text-xs rounded-xl flex items-center gap-1.5 shadow-xs transition-colors disabled:opacity-50"
+          >
+            {isPending ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Filter className="w-3.5 h-3.5" />}
+            <span>조회</span>
+          </button>
+
           {(startDate || endDate || shipperFilter) && (
             <button
-              onClick={() => {
-                setStartDate('');
-                setEndDate('');
-                setShipperFilter('');
-              }}
+              onClick={handleReset}
               className="text-xs text-rose-500 font-semibold hover:underline"
             >
               초기화
@@ -211,26 +292,28 @@ export default function ShipperDailyBillingClient({
         </div>
       </div>
 
-      {/* Daily Aggregation Table */}
+      {/* Aggregation Table */}
       <div className="bg-white dark:bg-zinc-950 rounded-2xl border border-slate-200 dark:border-zinc-800 shadow-sm overflow-hidden">
         <div className="p-5 border-b border-slate-100 dark:border-zinc-800 flex items-center justify-between">
           <h3 className="font-bold text-slate-900 dark:text-white text-base flex items-center gap-2">
             <FileText className="w-5 h-5 text-amber-500" />
-            화주별 일별 청구 집계 내역
+            화주별 {periodType === 'daily' ? '일별' : periodType === 'weekly' ? '주별' : '월별'} 청구 집계 내역
           </h3>
-          <span className="text-xs text-slate-400">총 {filteredGroups.length}개 일별 그룹</span>
+          <span className="text-xs text-slate-400">총 {filteredGroups.length}개 집계 그룹</span>
         </div>
 
         {filteredGroups.length === 0 ? (
           <div className="p-12 text-center text-slate-400 text-xs">
-            조회된 화주별 일별 청구 집계 데이터가 없습니다.
+            조회된 화주별 {periodType === 'daily' ? '일별' : periodType === 'weekly' ? '주별' : '월별'} 청구 집계 데이터가 없습니다.
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead className="bg-slate-50 dark:bg-zinc-900/50 text-slate-500 font-semibold border-b border-slate-100 dark:border-zinc-800">
                 <tr>
-                  <th className="py-3 px-4">일자 (Date)</th>
+                  <th className="py-3 px-4">
+                    {periodType === 'daily' ? '일자 (Date)' : periodType === 'weekly' ? '주차 (Week)' : '월 (Month)'}
+                  </th>
                   <th className="py-3 px-4">화주명 (Shipper)</th>
                   <th className="py-3 px-4 text-center">오더수</th>
                   <th className="py-3 px-4 text-right">기본운임</th>
