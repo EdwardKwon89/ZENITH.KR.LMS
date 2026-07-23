@@ -98,6 +98,7 @@
 | **TC-F.7** | 세금계산서 데이터 발행 | 인보이스 기반 표준 세금계산서 DB 생성 검증 | `tests/integration/fin-03.test.ts` |
 | **TC-F.8** | 세금계산서 메일 발송 | Resend 연동 및 SENT/FAILED 상태 전환 확인 | `tests/integration/fin-03.test.ts` |
 | **TC-F.9** | 세금계산서 이력 조회 | 화주/어드민별 발행 및 발송 히스토리 조회 검증 | `tests/integration/fin-03.test.ts` |
+| **TC-F.10** | 인보이스 발행 이메일 알림 | `sendInvoiceFinalizedEmail()` 정상 발송 + HTML escape 검증 | `tests/unit/finance/invoice-finalized-email.test.ts` |
 
 ### 9. UPS 요율 관리 (Phase 7 SPR-03)
 | ID | 테스트 항목 | 목적 | 파일 경로 |
