@@ -55,7 +55,7 @@ Issue #718 (SNTL 회의록 W2). 현재 청구서 생성은 오더 1건 단위만
 
 | 항목 | 내용 |
 |:----|:----|
-| 코드 커밋 | `686dab21` (초안) / `(재작업 커밋 반영 예정)` |
+| 코드 커밋 | `686dab21` (1차) / `dea14f25` (2차 재작업) |
 | 회귀 결과 | Vitest unit & regression tests 100% PASS (`rtk npm run test:regression` 검증 완수) |
 | 빌드 | 빌드 성공 (`npx tsc --noEmit` 0 error) |
 | 특이사항 | SNTL 회의록 W2 P0 요구사항 완수 — 기존 사후청구 및 마감 메커니즘 재사용, 일별/화주별 집계 및 일괄 마감 구축, OTHER_CHARGE 포함. |
