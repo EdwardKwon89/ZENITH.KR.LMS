@@ -9,7 +9,7 @@
 | **우선순위** | P2 |
 | **전제조건** | 없음 |
 | **커밋 태그** | `[D_Kai]` |
-| **상태** | ❌ |
+| **상태** | ✅ |
 
 ---
 
@@ -49,10 +49,10 @@ SNTL 회의록 W4: 청구서(인보이스) 발행 시 화주에게 이메일 알
 - [x] best-effort 처리(발송 실패가 정산 확정을 막지 않음) — fire-and-forget + try/catch
 - [x] escapeHtml 적용 확인
 - [x] 신규 회귀 테스트 추가 (TC-F.10, 2 cases)
-- [ ] `LIVE_REGRESSION_TEST_MAP.md` 등록(R-09) — 예정
+- [x] `LIVE_REGRESSION_TEST_MAP.md` 등록(R-09)
 - [x] 회귀 테스트(`npm run test:regression`) 전체 PASS 확인 (788/788)
 - [x] task file `[작업 결과]` 작성 + 커밋 해시 기재
-- [ ] ACTIVE_TASK.md 상태 반영 — 예정
+- [x] ACTIVE_TASK.md 상태 반영
 
 ---
 
@@ -66,7 +66,7 @@ SNTL 회의록 W4: 청구서(인보이스) 발행 시 화주에게 이메일 알
    - Resend 미설정 시 `logger.warn` 후 스킵 (best-effort)
    - Intl.NumberFormat으로 통화 포맷 적용
 
-2. **`src/app/actions/finance/settlement.ts`**: `finalizeInvoice()` 완료 후 fire-and-forget 이메일 발송 훅 추가
+2. **`src/app/actions/finance/settlement.ts`**: `finalizeInvoice()` 완료 후 이메일 발송 훅 추가(1차 반려 후 await+try/catch 방식으로 수정)
    - `invoice.shipper_id` → `zen_organizations.name` (회사명)
    - `invoice.shipper_id` → `zen_profiles` (`role='SHIPPER'`, `status='ACTIVE'`) (수신자 이메일)
    - `finalizeDailyShipperInvoices()`는 내부에서 `finalizeInvoice()` 호출하므로 자동 커버
@@ -106,3 +106,7 @@ SNTL 회의록 W4: 청구서(인보이스) 발행 시 화주에게 이메일 알
 **비차단 참고**: DoD 체크박스 2건("LIVE_REGRESSION_TEST_MAP 등록"·"ACTIVE_TASK.md 반영")이 `[ ]`로 남아있으나 실제로는 해당 커밋에 이미 반영되어 있었음(과소 보고, 문제되는 방향 아님) — 다음 제출 시 체크박스만 정정.
 
 상세: PR#752·Issue#748 코멘트 참고.
+
+### 최종 승인 (2026-07-23, 커밋 `95726293`)
+
+**판정**: ✅ 승인 — fire-and-forget→await+try/catch 수정 diff 직접 확인, 격리 워크트리 재검증(회귀 116/788 PASS, tsc 신규 에러 없음). develop 병합 진행.
