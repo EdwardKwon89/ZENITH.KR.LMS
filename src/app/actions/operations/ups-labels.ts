@@ -326,6 +326,17 @@ export async function registerUpsOrder(
     const insertErr = await saveInitialLabel(supabase, order.id as string, orderNo, orderResult.trackingNo, profile!.id, orderResult.message);
     if (insertErr) return { success: false, error: `Failed to save label record: ${insertErr}` };
 
+    // DEF-123: zen_tracking_configs.tracking_no를 실제 UPS 운송장번호로 갱신
+    if (orderResult.trackingNo) {
+      const { error: updateErr } = await supabase
+        .from('zen_tracking_configs')
+        .update({ tracking_no: orderResult.trackingNo, updated_at: new Date().toISOString() })
+        .eq('order_id', order.id as string);
+      if (updateErr) {
+        logger.error('registerUpsOrder: tracking_configs update failed', updateErr);
+      }
+    }
+
     revalidatePath("/(dashboard)/warehouse/outbound", "page");
 
     return {
