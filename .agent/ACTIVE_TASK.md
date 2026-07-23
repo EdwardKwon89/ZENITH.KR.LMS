@@ -15,9 +15,9 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
-| [#727](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/727) | [fix] 창고 화면 전반 일괄처리 지원 여부 점검·보완 (SNTL 회의 W7) | b | p3 | - | 미배정 | 2026-07-23 |
-| [#726](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/726) | [fix] 급증수수료 등록 데이터 화폐단위(KRW) 감사 (SNTL 회의 W6) | b | p3 | - | 미배정 | 2026-07-23 |
-| [#725](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/725) | [feat] 입고 처리 시 부피중량/중량 수정 기능 추가 (SNTL 회의 W5) | b | p1 | - | 미배정 | 2026-07-23 |
+| [#727](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/727) | [fix] 창고 화면 전반 일괄처리 지원 여부 점검·보완 (SNTL 회의 W7) | b | p3 | in-progress | 미배정 | 2026-07-23 |
+| [#726](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/726) | [fix] 급증수수료 등록 데이터 화폐단위(KRW) 감사 (SNTL 회의 W6) | b | p3 | in-progress | 미배정 | 2026-07-23 |
+| [#725](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/725) | [feat] 입고 처리 시 부피중량/중량 수정 기능 추가 (SNTL 회의 W5) | b | p1 | blocked | 미배정 | 2026-07-23 |
 | [#718](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/718) | 2026.07.22 SNTL 회의록 | - | - | - | 미배정 | 2026-07-23 |
 | [#717](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/717) | [design] SNTL 원가 Matrix — 전역 공용값+정산 미반영 구조, 의도된 설계인지 Team B 협의 필요 | a | p2 | - | 미배정 | 2026-07-23 |
 | [#713](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/713) | [feat] 출고확정처리(/warehouse/departure) 화면에 오늘의 이력 패널 신설 | b | p3 | done | 미배정 | 2026-07-22 |
