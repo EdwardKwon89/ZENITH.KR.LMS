@@ -18,7 +18,7 @@
 | [#750](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/750) | [feat] W2 후속 — 화주별 주별/월별 청구 집계 (2순위) | a | p3 | review | EdwardKwon89 | 2026-07-23 |
 | [#748](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/748) | [feat] W4 — 청구서 발행 시 이메일 알람 훅 추가 | a | p2 | review | EdwardKwon89 | 2026-07-23 |
 | [#747](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/747) | [feat] W3 — 예상운임표→최종운임 확정 2단계 플로우 검증/보완 | a | p1 | in-progress | EdwardKwon89 | 2026-07-23 |
-| [#741](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/741) | DEF-121: TrackingDashboard Detail 링크 로케일 프리픽스 누락 — 404 발생 | b | p2 | - | 미배정 | 2026-07-23 |
+| [#741](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/741) | DEF-121: TrackingDashboard Detail 링크 로케일 프리픽스 누락 — 404 발생 | b | p2 | rework | 미배정 | 2026-07-23 |
 | [#728](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/728) | [defect] DEF-120 — zen_tracking_configs RLS에 AGENCY SELECT 커버리지 없음, 통합 트래킹 침묵 실패 | b | p2 | done | 미배정 | 2026-07-23 |
 | [#727](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/727) | [fix] 창고 화면 전반 일괄처리 지원 여부 점검·보완 (SNTL 회의 W7) | b | p3 | in-progress | 미배정 | 2026-07-23 |
 | [#726](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/726) | [fix] 급증수수료 등록 데이터 화폐단위(KRW) 감사 (SNTL 회의 W6) | b | p3 | in-progress | 미배정 | 2026-07-23 |
