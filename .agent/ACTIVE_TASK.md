@@ -15,7 +15,7 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
-| [#760](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/760) | DEF-122: getGlobalTrackingOverview is_unassigned 배열 인덱싱 오류 — 정상 오더도 Unassigned 오분류 | b | p3 | rework | 미배정 | 2026-07-23 |
+| [#760](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/760) | DEF-122: getGlobalTrackingOverview is_unassigned 배열 인덱싱 오류 — 정상 오더도 Unassigned 오분류 | b | p3 | done | 미배정 | 2026-07-23 |
 | [#750](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/750) | [feat] W2 후속 — 화주별 주별/월별 청구 집계 (2순위) | a | p3 | review | EdwardKwon89 | 2026-07-23 |
 | [#748](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/748) | [feat] W4 — 청구서 발행 시 이메일 알람 훅 추가 | a | p2 | review | EdwardKwon89 | 2026-07-23 |
 | [#747](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/747) | [feat] W3 — 예상운임표→최종운임 확정 2단계 플로우 검증/보완 | a | p1 | in-progress | EdwardKwon89 | 2026-07-23 |
