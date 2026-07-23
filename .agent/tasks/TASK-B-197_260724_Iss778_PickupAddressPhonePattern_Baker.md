@@ -33,12 +33,44 @@
 
 ## [설계 의견]
 
-_(Baker 작성 — 착수 전 필수)_
+### 1. 픽업 장소: 구조화 컬럼 추가 + AddressInput 전환 (권장)
 
-아래 항목 포함해 작성:
-1. 픽업 장소: 신규 컬럼 추가(마이그레이션) 후 `AddressInput prefix="pickup"` 방식으로 갈지, 혹은 단일 TEXT 컬럼을 유지하면서 다른 방식으로 "준용"할지 — 대안별 장단점·예상 공수
-2. 담당자 연락처: 정확히 어떤 수준의 "준용"이 필요한지에 대한 해석(placeholder 통일만 할지, 검증 로직 추가할지) 및 제안
-3. 마이그레이션이 필요하다고 판단될 경우 컬럼명·타입 초안
+**대안 A — 구조화 컬럼 추가 + AddressInput (권장)**
+- `zen_orders`에 `pickup_country_code`/`pickup_state_province`/`pickup_city`/`pickup_address`/`pickup_address_detail`/`pickup_zipcode` 6개 컬럼 추가
+- `AddressInput prefix="pickup"` 컴포넌트 전환 (recipient_address 패턴과 동일)
+- 기존 `pickup_location` 컬럼은 유지 (기존 데이터 보존 + 하위 호환)
+- 장점: 수하인 주소와 동일한 입력 UX, 주소 검증/카카오 API 연동 자동 적용, 데이터 구조 정합성
+- 단점: DB 마이그레이션 필요 (비가역적), 컬럼 6개 추가로 테이블 확장
+
+**대안 B — 단일 TEXT 유지 + textarea 전환**
+- `pickup_location`을 textarea로 교체 (자유 텍스트 유지, 입력 면적 확대)
+- 장점: 마이그레이션 불필요, 간단한 변경
+- 단점: 주소 검증 없음, 수하인 주소와 UX 불일치, 구조화된 데이터 수집 불가
+
+**제안**: 대안 A 채택. 이미 수하인 주소가 AddressInput으로 구조화되어 있으므로, 픽업 장소도 동일 패턴을 적용하는 것이 UX/데이터 정합성 측면에서 적절. 컬럼 초안:
+
+```sql
+pickup_country_code   TEXT DEFAULT 'KR',
+pickup_state_province TEXT,
+pickup_city           TEXT,
+pickup_address        TEXT,
+pickup_address_detail TEXT,
+pickup_zipcode        TEXT
+```
+
+### 2. 담당자 연락처: placeholder 문구 통일 수준으로 해석
+
+현재 `pickup_contact_tel`과 `recipient_phone`은 모두 동일한 `ZenInput` 컴포넌트 사용. 프로젝트 내 PhoneInput 컴포넌트 없음. "준용"은 **placeholder 문구를 `"010-XXXX-XXXX"`로 통일**하는 수준으로 해석.
+
+검증 로직은 현재 `order.ts`에서 `pickup_contact_tel`과 `recipient_phone` 모두 별도 정규식 없이 필수값만 체크하고 있으므로, 동일 수준 유지.
+
+### 3. 예상 공수
+
+- DB 마이그레이션: 1 파일
+- 프론트엔드: AddressInput 전환 + placeholder 변경 (OrderRegistrationForm.tsx)
+- 밸리데이션: order.ts에 pickup 주소 필드 추가 + PICKUP 시 pickup_address 필수
+- 서버 액션: orders.ts에 신규 pickup 주소 필드 INSERT
+- 테스트: 기존 회귀 테스트만 통과 확인
 
 ## [설계 확정]
 
