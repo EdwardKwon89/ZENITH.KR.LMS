@@ -632,12 +632,14 @@
 | **TC-SUBADMIN-04** | SUB_ADMIN /mypage 접속 | 기존 정상 경로 회귀 확인 | `tests/e2e/e2e-27-subadmin-routing.spec.ts` |
 | **TC-SUBADMIN-05** | SUB_ADMIN /address-book 접속 | 기존 정상 경로 회귀 확인 | `tests/e2e/e2e-27-subadmin-routing.spec.ts` |
 
-### 49. 화주별 일별 청구 집계 및 최종 운임 확정 (Issue #736 / TASK-204 / W2)
+### 49. 화주별 일별/주별/월별 청구 집계 및 최종 운임 확정 (Issue #736/#750 / TASK-204/207 / W2)
 | ID | 테스트 항목 | 목적 | 파일 경로 |
 | :--- | :--- | :--- | :--- |
-| **TC-W2-01** | getShipperDailyBillingSummary — 화주별 일별 오더 집계 및 합산 금액 계산 | 오더수, 운임, 유류할증, 급증, 사후조정액 집계 정확성 | `tests/unit/finance/daily-billing-aggregation.test.ts` |
+| **TC-W2-01** | getShipperDailyBillingSummary — 화주별 일별 오더 집계 및 합산 금액 계산 | 오더수, 운임, 유류할증, 급증, 기타부과금, 사후조정액 집계 정확성 | `tests/unit/finance/daily-billing-aggregation.test.ts` |
 | **TC-W2-02** | getShipperDailyOrdersDetails — 특정 화주/일자 세부 오더 목록 조회 | 세부 오더별 운임 breakdown 및 인보이스 상태 조회 | `tests/unit/finance/daily-billing-aggregation.test.ts` |
 | **TC-W2-03** | finalizeDailyShipperInvoices — 일별 집계 인보이스 일괄 정산 마감 | 다건 인보이스 마감 배치 처리 및 권한 통제 | `tests/unit/finance/daily-billing-aggregation.test.ts` |
+| **TC-W2-04** | getShipperDailyBillingSummary (weekly/monthly) — 주별/월별 청구 집계 | 주차(YYYY-WNN) 및 월(YYYY-MM) 단위 그룹핑 합산 집계 검증 | `tests/unit/finance/daily-billing-aggregation.test.ts` |
+| **TC-W2-05** | getShipperDailyOrdersDetails (monthly) — 월별/주별 세부 오더 목록 조회 | 상위 기간 단위 소속 개별 오더 세부 내역 조회 검증 | `tests/unit/finance/daily-billing-aggregation.test.ts` |
 
 ---
 
