@@ -189,7 +189,9 @@
     "confirm_btn": "出荷確定処理",
     "success_msg": "出荷確定が完了しました。",
     "partial_success": "出荷確定完了: {success}件成功、{fail}件失敗",
-    "error_none_selected": "出荷確定するオーダを選択してください。"
+    "error_none_selected": "出荷確定するオーダを選択してください。",
+    "today_history": "本日の出荷確定履歴",
+    "empty_history": "本日処理された出荷確定履歴はありません。"
   },
   "ShippingLabel": {
     "title": "配送ラベル",

@@ -60,6 +60,8 @@ export {
   confirmPickup,
   cancelPickup,
   getTodayPickupHistory,
+  getTodayUpsHistory,
+  getTodayDepartureHistory,
   cancelInbound,
   confirmUpsRegistration,
   undoUpsRegistration,

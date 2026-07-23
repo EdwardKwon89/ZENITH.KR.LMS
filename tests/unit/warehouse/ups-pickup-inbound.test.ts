@@ -42,6 +42,7 @@ function makeChainable(rows: any[]) {
   chain.gte = () => chain;
   chain.lte = () => chain;
   chain.contains = () => chain;
+  chain.like = () => chain;
   chain.limit = () => chain;
   chain.order = () => chain;
   chain.then = (resolve: any) => resolve({ data: chain._rows, error: null });
