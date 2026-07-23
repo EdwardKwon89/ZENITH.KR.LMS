@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { addTrackingEvent } from '@/app/actions/operations/tracking';
-import { validateAdminAction } from '@/lib/auth/guards';
+import { addTrackingEvent, getGlobalTrackingOverview } from '@/app/actions/operations/tracking';
+import { validateAdminAction, validateUserAction } from '@/lib/auth/guards';
 
 vi.mock('@/lib/auth/guards', () => ({ validateUserAction: vi.fn(), validateAdminAction: vi.fn() }));
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn(), unstable_cache: (fn: any) => fn }));
@@ -62,5 +62,53 @@ describe('TC-OPS-TRK-01: addTrackingEvent', () => {
       location: 'Seoul',
       description: 'Fail test',
     })).rejects.toThrow('Failed to add tracking event');
+  });
+});
+
+describe('DEF-122: getGlobalTrackingOverview isUnassigned', () => {
+  let mockSupabase: any;
+
+  function makeChain(data: any[], error: any = null, count = 1) {
+    const chain = {
+      select: vi.fn().mockReturnThis(),
+      order: vi.fn().mockReturnThis(),
+      range: vi.fn().mockResolvedValue({ data, error, count }),
+    };
+    return chain;
+  }
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockSupabase = { from: vi.fn() };
+    (validateUserAction as any).mockResolvedValue({
+      user: { id: 'user-001' },
+      supabase: mockSupabase,
+    });
+  });
+
+  it('order가 객체일 때 shipper_id 존재 → is_unassigned=false', async () => {
+    const chain = makeChain([
+      { order_id: 'order-001', order: { id: 'order-001', shipper_id: 'ship-001', recipient_name: 'James' } },
+    ]);
+    mockSupabase.from.mockReturnValueOnce(chain);
+    mockSupabase.from.mockReturnValueOnce({
+      select: vi.fn().mockReturnValue({ in: vi.fn().mockReturnValue({ order: vi.fn().mockResolvedValue({ data: [], error: null }) }) }),
+    });
+
+    const result = await getGlobalTrackingOverview();
+    expect(result.configs[0].is_unassigned).toBe(false);
+  });
+
+  it('order가 객체일 때 shipper_id+recipient_name 모두 없으면 is_unassigned=true', async () => {
+    const chain = makeChain([
+      { order_id: 'order-002', order: { id: 'order-002', shipper_id: null, recipient_name: null } },
+    ]);
+    mockSupabase.from.mockReturnValueOnce(chain);
+    mockSupabase.from.mockReturnValueOnce({
+      select: vi.fn().mockReturnValue({ in: vi.fn().mockReturnValue({ order: vi.fn().mockResolvedValue({ data: [], error: null }) }) }),
+    });
+
+    const result = await getGlobalTrackingOverview();
+    expect(result.configs[0].is_unassigned).toBe(true);
   });
 });
