@@ -514,7 +514,7 @@
 | Agent | 상태 | 비고 |
 |:------|:----:|:----|
 | **Aiden (Claude)** | ✅ TASK-167 전체 승인 (260626) | PR#117 §1 ✅ · PR#118 §2+§3 ✅ 전량 머지 완료 |
-| **D_Kai (OpenCode)** | 🔔 TASK-198 제출 (260721) | IMP-134 §2 tests/ TypeScript 오류 236건→0건 정리. PR#676. 재작업(`supabase: any`→AnySchema 타입) 수정 완료. |
+| **D_Kai (OpenCode)** | ❌ TASK-202 재작업 지시 (260723) | DEF-119(Issue #733) 원가계산 로직은 검증 완료(15/15+782/782 PASS)이나 절차 위반 2건 재작업 요청: ①브랜치가 B_Kai WIP 브랜치 위에 오염(R-17 §0) — develop 기준 재분기 필요 ②TASK-203→202 번호 정정 필요. PR#735 |
 | **B_Kai** | ✅ TASK-201 승인·머지 완료 (260723) | Issue #711 Phase2 UPS물류메뉴 E2E검증. PR#732. 32/33 PASS(1건 플래키). RBAC audit: departure isAllowed 체크 추가(보안버그 수정), SUB_ADMIN 테스트 기대값 교정. 신규 Task 대기 |
 | **Riley** | ✅ TASK-204 승인·머지 완료 (260723) | W2 — 최종 운임 확정 UI + 화주별 일별 청구 집계(Issue #736). OTHER_CHARGE 집계 추가 및 Task 번호 정정(TASK-203→204) 재작업 반영 확인 후 최종 승인. 신규 Task 대기 |
 | N_Kai | ➖ 미재배정 확정 (260626 Edward) | TASK-087 폐기 — 신규 Task 발령 없음 |
