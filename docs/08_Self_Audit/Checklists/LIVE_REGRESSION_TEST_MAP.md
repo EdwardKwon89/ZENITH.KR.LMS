@@ -634,19 +634,27 @@
 
 ---
 
-### 49. UPS 물류관리 메뉴 E2E 검증 (Issue #711)
+### 49. UPS 물류관리 메뉴 E2E 검증 (Issue #711, 병합 버전)
 | ID | 테스트 항목 | 목적 | 파일 경로 |
 | :--- | :--- | :--- | :--- |
-| **TC-R12-HP1** | HP-Step1: 픽업 완료 (REGISTERED → SCHEDULED) | 픽업 페이지 UI + 카드·모달 존재 검증 | `tests/e2e/r12-ups-logistics-flow-e2e.spec.ts` |
-| **TC-R12-HP2** | HP-Step2: 입고 처리 (SCHEDULED → WAREHOUSED) | 바코드 스캔 + 입고 확정 서버 액션 검증 | `tests/e2e/r12-ups-logistics-flow-e2e.spec.ts` |
-| **TC-R12-HP3** | HP-Step3: UPS 등록 (WAREHOUSED → PACKED) | SHXK 우회 DB 시딩 + outbound 페이지 오더 노출 확인 | `tests/e2e/r12-ups-logistics-flow-e2e.spec.ts` |
-| **TC-R12-HP4** | HP-Step4: 출고 처리 (PACKED → RELEASED) | DB 상태 전이 + departure 페이지 오더 노출 확인 | `tests/e2e/r12-ups-logistics-flow-e2e.spec.ts` |
-| **TC-R12-HP5** | HP-Step5: 출고확정 (RELEASED → IN_TRANSIT) | 카드 선택 + 출고확정 처리 UI 동작 검증 | `tests/e2e/r12-ups-logistics-flow-e2e.spec.ts` |
-| **TC-R12-C1** | Cancel-1: 픽업 취소 UI 검증 | 픽업 페이지 "픽업 취소" 버튼·모달 존재 확인 | `tests/e2e/r12-ups-logistics-flow-e2e.spec.ts` |
-| **TC-R12-C2** | Cancel-2: 입고 취소 UI 검증 | 바코드 조회 + "입고 취소" 버튼 존재 확인 | `tests/e2e/r12-ups-logistics-flow-e2e.spec.ts` |
-| **TC-R12-C3** | Cancel-3: UPS 등록취소 DB 시뮬레이션 | PACKED → WAREHOUSED 상태 전이 + 레코드 정리 확인 | `tests/e2e/r12-ups-logistics-flow-e2e.spec.ts` |
-| **TC-R12-C4** | Cancel-4: 출고취소 (RELEASED → PACKED) | outbound 히스토리 패널 "출고취소" 버튼·모달 검증 | `tests/e2e/r12-ups-logistics-flow-e2e.spec.ts` |
-| **TC-R12-AG1** | AGENCY-1: /warehouse 라우트 접근 | proxy.ts 화이트리스트 + rbac.ts STATIC_PERMISSIONS AGENCY 접근 일관성 | `tests/e2e/r12-ups-logistics-flow-e2e.spec.ts` |
+| **TC-E28-HP1** | HP-Step1: 픽업 완료 (REGISTERED → SCHEDULED) | 픽업 페이지 UI + 카드·모달 존재 검증 | `tests/e2e/e2e-28-ups-logistics-flow.spec.ts` |
+| **TC-E28-HP2** | HP-Step2: 입고 처리 (SCHEDULED → WAREHOUSED) | 바코드 스캔 + 입고 확정 서버 액션 검증 | `tests/e2e/e2e-28-ups-logistics-flow.spec.ts` |
+| **TC-E28-HP3** | HP-Step3: UPS 등록 (WAREHOUSED → PACKED) | SHXK 우회 DB 시딩 + outbound 페이지 오더 노출 확인 | `tests/e2e/e2e-28-ups-logistics-flow.spec.ts` |
+| **TC-E28-HP4** | HP-Step4: 출고 처리 (PACKED → RELEASED) | DB 상태 전이 + departure 페이지 오더 노출 확인 | `tests/e2e/e2e-28-ups-logistics-flow.spec.ts` |
+| **TC-E28-HP5** | HP-Step5: 출고확정 (RELEASED → IN_TRANSIT) | 카드 선택 + 출고확정 처리 UI 동작 검증 | `tests/e2e/e2e-28-ups-logistics-flow.spec.ts` |
+| **TC-E28-C1** | Cancel-1: 픽업 취소 UI 검증 | 픽업 페이지 "픽업 취소" 버튼·모달 존재 확인 | `tests/e2e/e2e-28-ups-logistics-flow.spec.ts` |
+| **TC-E28-C2** | Cancel-2: 입고 취소 UI 검증 | 바코드 조회 + "입고 취소" 버튼 존재 확인 | `tests/e2e/e2e-28-ups-logistics-flow.spec.ts` |
+| **TC-E28-C3** | Cancel-3: UPS 등록취소 DB 시뮬레이션 | PACKED → WAREHOUSED 상태 전이 + 레코드 정리 확인 | `tests/e2e/e2e-28-ups-logistics-flow.spec.ts` |
+| **TC-E28-C4** | Cancel-4: 출고취소 (RELEASED → PACKED) | outbound 히스토리 패널 "출고취소" 버튼·모달 검증 | `tests/e2e/e2e-28-ups-logistics-flow.spec.ts` |
+| **TC-E28-RBAC-01** | ADMIN → 창고 메뉴 4종 접근 | ADMIN 역할의 전체 창고 메뉴 접근 가능 확인 | `tests/e2e/e2e-28-ups-logistics-flow.spec.ts` |
+| **TC-E28-RBAC-02** | MANAGER → 창고 메뉴 4종 접근 | MANAGER 역할의 전체 창고 메뉴 접근 가능 확인 | `tests/e2e/e2e-28-ups-logistics-flow.spec.ts` |
+| **TC-E28-RBAC-03** | AGENCY → 창고 메뉴 4종 접근 | AGENCY 역할의 전체 창고 메뉴 접근 가능 확인 | `tests/e2e/e2e-28-ups-logistics-flow.spec.ts` |
+| **TC-E28-RBAC-04** | SUB_ADMIN → 창고 메뉴 4종 접근 | SUB_ADMIN 역할의 전체 창고 메뉴 접근 가능 확인 | `tests/e2e/e2e-28-ups-logistics-flow.spec.ts` |
+| **TC-E28-RBAC-05** | SHIPPER → 창고 메뉴 4종 차단 | SHIPPER 역할의 창고 메뉴 접근 차단 확인 | `tests/e2e/e2e-28-ups-logistics-flow.spec.ts` |
+| **TC-E28-ZENUI-01** | 오더픽업 화면 ZenUI 적용 | ZenButton/ZenCard 컴포넌트 적용 확인 | `tests/e2e/e2e-28-ups-logistics-flow.spec.ts` |
+| **TC-E28-ZENUI-02** | 입고처리 화면 ZenUI 적용 | ZenButton/ZenCard 컴포넌트 적용 확인 | `tests/e2e/e2e-28-ups-logistics-flow.spec.ts` |
+| **TC-E28-ZENUI-03** | 출고처리 화면 ZenUI 적용 | ZenButton/ZenCard 컴포넌트 적용 확인 | `tests/e2e/e2e-28-ups-logistics-flow.spec.ts` |
+| **TC-E28-ZENUI-04** | 출고확정 화면 ZenUI 적용 | ZenButton/ZenCard 컴포넌트 적용 확인 | `tests/e2e/e2e-28-ups-logistics-flow.spec.ts` |
 
 ---
 
