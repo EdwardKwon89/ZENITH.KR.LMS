@@ -15,7 +15,7 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
-| [#728](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/728) | [defect] DEF-120 — zen_tracking_configs RLS에 AGENCY SELECT 커버리지 없음, 통합 트래킹 침묵 실패 | b | p2 | in-progress | 미배정 | 2026-07-23 |
+| [#728](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/728) | [defect] DEF-120 — zen_tracking_configs RLS에 AGENCY SELECT 커버리지 없음, 통합 트래킹 침묵 실패 | b | p2 | done | 미배정 | 2026-07-23 |
 | [#727](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/727) | [fix] 창고 화면 전반 일괄처리 지원 여부 점검·보완 (SNTL 회의 W7) | b | p3 | in-progress | 미배정 | 2026-07-23 |
 | [#726](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/726) | [fix] 급증수수료 등록 데이터 화폐단위(KRW) 감사 (SNTL 회의 W6) | b | p3 | in-progress | 미배정 | 2026-07-23 |
 | [#725](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/725) | [feat] 입고 처리 시 부피중량/중량 수정 기능 추가 (SNTL 회의 W5) | b | p1 | blocked | 미배정 | 2026-07-23 |
