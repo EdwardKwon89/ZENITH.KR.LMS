@@ -15,7 +15,27 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
-| [#589](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/589) | [design] 예상운임 적용 로직 정리 + UPS 사후청구(실제 추가요금) 반영 설계 (An_16) | b | p2 | - | 미배정 | 2026-07-18 |
+| [#718](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/718) | 2026.07.22 SNTL 회의록 | - | - | - | 미배정 | 2026-07-22 |
+| [#717](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/717) | [design] SNTL 원가 Matrix — 전역 공용값+정산 미반영 구조, 의도된 설계인지 Team B 협의 필요 | a | p2 | - | 미배정 | 2026-07-22 |
+| [#713](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/713) | [feat] 출고확정처리(/warehouse/departure) 화면에 오늘의 이력 패널 신설 | b | p3 | done | 미배정 | 2026-07-22 |
+| [#711](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/711) | [Team A] Phase 2 — 신규 UPS 물류관리 메뉴 흐름 전체 E2E 검증 (오더픽업→...→DELIVERED) | a | p1 | - | EdwardKwon89 | 2026-07-22 |
+| [#708](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/708) | [fix] getTodayUpsHistory 500 에러 — .contains() 연산자가 text 컬럼에 적용 불가 (getTodayPickupHistory도 동일 결함) | b | p1 | done | 미배정 | 2026-07-22 |
+| [#704](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/704) | [feat] 오늘의 UPS 접수 이력 패널 미구현 — 백엔드 조회 함수 신설 필요 | b | p3 | done | 미배정 | 2026-07-22 |
+| [#700](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/700) | [fix] confirmOutbound WAREHOUSED 전용 가드 버그(PACKED 출고 불가) + 출고확정 버튼 텍스트 변경 | b | p1 | done | 미배정 | 2026-07-22 |
+| [#698](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/698) | [fix] 출고확정 시 문서(운송장 등) 선택 팝업 삭제 — 라벨 발급 생략하고 바로 출고확정 | b | p3 | done | 미배정 | 2026-07-22 |
+| [#695](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/695) | [fix] UPS접수취소(removeorder) 시 zen_ups_labels/zen_ups_label_documents/Storage 파일 정리 누락 | b | p2 | done | 미배정 | 2026-07-22 |
+| [#684](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/684) | [feat] UPS 라벨/무역서류 실제 다운로드 후 자체 스토리지 저장 (다중 문서 지원) | b | p2 | done | 미배정 | 2026-07-22 |
+| [#680](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/680) | [defect] DEF-118 — getnewlabel 응답구조 불일치, 실제 환경에서 라벨 URL 추출 상시 실패 | b | p1 | done | 미배정 | 2026-07-22 |
+| [#674](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/674) | [feat] 출고처리 화면 UI 개선 — 배지 문구/UPS접수취소 버튼/문서 출력 기능 | b | p2 | done | 미배정 | 2026-07-22 |
+| [#671](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/671) | [defect] DEF-117 — zen_order_packages RLS에 AGENCY SELECT 커버리지 없음, UPS접수 여전히 침묵 실패 | b | p1 | done | 미배정 | 2026-07-22 |
+| [#667](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/667) | [defect] DEF-116 — checkLabelPermission()에 AGENCY 누락, UPS 라벨 기능 7종 침묵 실패 | b | p1 | done | 미배정 | 2026-07-22 |
+| [#664](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/664) | [fix] zen_shxk_api_logs 조회 권한을 전체 인증 사용자로 확대 | b | p3 | done | 미배정 | 2026-07-22 |
+| [#661](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/661) | [feat] IMP — SHXK UPS API 호출 통합 이력(감사 로그) 테이블 신설 | b | p3 | done | 미배정 | 2026-07-22 |
+| [#659](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/659) | [defect] DEF-115 — WarehouseUpsReceiving.partial_success i18n 키 누락 | b | p4 | - | 미배정 | 2026-07-21 |
+| [#655](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/655) | [defect] DEF-114 — ROLE_PERMISSIONS에 AGENCY 누락, 창고관리 기능 전체 500 에러 | b | p1 | done | 미배정 | 2026-07-22 |
+| [#616](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/616) | [GOV] 예약 요금(pricing-schedule) 시스템에 Agency/Shipper 할인율 마진 검증 부재 — Team B 검토 요청 | b | p2 | - | 미배정 | 2026-07-20 |
+| [#609](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/609) | [Aiden] CI 지연 원인 조사 결과 + 조치 — 큐 혼잡 완화 + TeamB_Dev 병합 CI 대기 불요로 개정 | b | p1 | - | jungjs | 2026-07-20 |
+| [#605](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/605) | [design] Agency 원가/판매가 Matrix 전환 검토 — 대리점 단위 Matrix + 화주 단위 하이브리드(Zone할인율+선택적 Matrix override) | b | p2 | - | jungjs | 2026-07-19 |
 | [#588](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/588) | [docs] UPS 오더 등록 후 처리 프로세스 현황 분석 (An_15) | b | p3 | - | 미배정 | 2026-07-18 |
 | [#521](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/521) | [Aiden] 2026-07-16 임시 운영 방침 — Team B develop 복사 브랜치(integration/teamb-260716) 자체 개발·병합 허용 | b | p1 | - | jungjs | 2026-07-18 |
 | [#473](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/473) | [Team B] 검증 절차 방침 변경 — 라이브 브라우저/DB 검증은 병합 후 JSJung이 수행 | b | - | - | 미배정 | 2026-07-14 |
