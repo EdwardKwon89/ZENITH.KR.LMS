@@ -496,6 +496,7 @@
 | TASK-204 | 260723 | [Team A] W2 — 최종 운임 확정 UI(UPS 발송 기준) + 화주별 일별 청구 집계 — Issue #736 구현 | 없음 | Riley | ✅ | [TASK-204](tasks/TASK-204_260723_Issue736_W2최종운임확정UI_Riley.md) | SNTL 회의 W2 P0 — 서버액션 3종(`getShipperDailyBillingSummary` 등, OTHER_CHARGE 포함) + 화주별 일별 집계 UI(`/finance/daily-billing`) + 일괄 정산 마감 구축. 1차 정정 요청(OTHER_CHARGE 누락·Task번호 충돌) → 재작업(커밋 `dea14f25`) 반영 확인 후 최종 승인. 전체 회귀 115/786 PASS |
 | TASK-205 | 260723 | [Team A] W3 — 예상운임표→최종운임 확정 2단계 플로우 검증/보완 — Issue #747 | TASK-202 ✅ · TASK-204 ✅ | B_Kai | ⬜ | [TASK-205](tasks/TASK-205_260723_Issue718_W3_예상운임확정2단계플로우검증_BKai.md) | SNTL 회의 W3 P1 — 기존 3단계 파이프라인(예상운임 estimateUpsFreight → 실제청구입력/확정 recordUpsActualCharges·is_finalized → 화주별 집계 daily-billing) E2E 검증 및 갭 보완. 트리거 방식은 이미 확정(실시간 조회, 별도 트리거 불필요) |
 | TASK-206 | 260723 | [Team A] W4 — 청구서 발행 시 이메일 알람 훅 추가 — Issue #748 | 없음 | D_Kai | ⬜ | [TASK-206](tasks/TASK-206_260723_Issue718_W4_청구서발행이메일알람훅_DKai.md) | SNTL 회의 W4 P2 — `finalizeInvoice`/`finalizeDailyShipperInvoices` 완료 후크에 이메일 발송 추가. Team B 재사용 가능성 조사 결과 Team A 배정이 더 수월하다고 판단(후크 지점·재사용 패턴 `sendTaxInvoiceEmail` 모두 Team A 소유 파일) |
+| TASK-207 | 260723 | [Team A] W2 후속 — 화주별 주별/월별 청구 집계 — Issue #750 | TASK-204 ✅ | Riley | ⬜ | [TASK-207](tasks/TASK-207_260723_Issue750_W2후속_주별월별청구집계_Riley.md) | SNTL 회의 W2 2순위 — 기존 일별 집계(daily-billing.ts) 로직 재사용, 주/월 단위로 확장. B_Kai TASK-205(W3, 동일 파이프라인 E2E검증) 병행 중 — 병합 순서 주의 |
 | TASK-B-173 | 260722 | Issue #655 — DEF-114 ROLE_PERMISSIONS에 AGENCY 누락, 창고관리 전체 500 에러 | P1 | 없음 | Dave (구현) | 🔔 | [TASK-B-173](tasks/TASK-B-173_260722_Def114_AgencyRolePermissions.md) | AGENCY → WAREHOUSED/RELEASED/SCHEDULED/REGISTERED/PACKED/IN_TRANSIT 권한 추가 · TC-AG-T1~T9 9종 · status-machine 31/31 + warehouse 14/14 PASS · tsc 0 error · [PR#656](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/656) (base TeamB_Dev) |
 | TASK-B-175 | 260722 | Issue #661 — SHXK API 호출 통합 감사 로그 테이블 | P3 | 없음 | Dave (구현) | 🔔 | [TASK-B-175](tasks/TASK-B-175_260722_Iss661_ShxkApiLogs.md) | zen_shxk_api_logs 테이블 + callShxk() 로깅 훅 · TC-SHXK-01~09 9종 (로깅 실패 시나리오 3종 포함) · 9/9 PASS · [PR#662](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/662) (base TeamB_Dev) |
 | TASK-B-176 | 260722 | Issue #664 — zen_shxk_api_logs RLS 정책 확대 (SELECT 전체 + AGENCY INSERT) | P3 | 없음 | Dave (구현) | 🔔 | [TASK-B-176](tasks/TASK-B-176_260722_Iss664_ShxkLogsRlsExpand.md) | SELECT: 전체 인증 사용자 · INSERT: AGENCY 명시 허용 · AGENCY INSERT ✅ · OPERATOR SELECT ✅ · [PR#665](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/665) (base TeamB_Dev) |
@@ -518,7 +519,7 @@
 | **Aiden (Claude)** | ✅ TASK-167 전체 승인 (260626) | PR#117 §1 ✅ · PR#118 §2+§3 ✅ 전량 머지 완료 |
 | **D_Kai (OpenCode)** | ⬜ TASK-206 배정 (260723) | W4 — 청구서 발행 이메일 알람 훅(Issue #748). 직전 TASK-202(DEF-119) 승인·머지 완료(PR#742, 회귀 782/782 PASS) |
 | **B_Kai** | ⬜ TASK-205 배정 (260723) | W3 — 예상운임→최종운임 확정 2단계 플로우 검증/보완(Issue #747). 직전 TASK-201(Issue #711 E2E검증) 승인·머지 완료(PR#732) |
-| **Riley** | ✅ TASK-204 승인·머지 완료 (260723) | W2 — 최종 운임 확정 UI + 화주별 일별 청구 집계(Issue #736). OTHER_CHARGE 집계 추가 및 Task 번호 정정(TASK-203→204) 재작업 반영 확인 후 최종 승인. 신규 Task 대기 |
+| **Riley** | ⬜ TASK-207 배정 (260723) | W2 후속 — 화주별 주별/월별 청구 집계(Issue #750). 직전 TASK-204(W2 일별집계) 승인·머지 완료(PR#738/#740) |
 | N_Kai | ➖ 미재배정 확정 (260626 Edward) | TASK-087 폐기 — 신규 Task 발령 없음 |
 | Ring | 신규 할당 중단 유지 | 9차 위반 누적 |
 
