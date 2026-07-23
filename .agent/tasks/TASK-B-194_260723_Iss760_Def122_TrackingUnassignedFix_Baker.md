@@ -6,7 +6,7 @@
 | **담당** | Baker (Team B) |
 | **생성일** | 2026-07-23 |
 | **우선순위** | P3 |
-| **상태** | ⬜ |
+| **상태** | 🔔 |
 
 ## 개요
 
@@ -57,3 +57,13 @@ const isUnassigned = !config.order?.shipper_id && !config.order?.recipient_name;
 _(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
 
 없음
+
+## [작업 결과]
+
+- **수정 방식**: `Array.isArray(config.order) ? config.order[0] : config.order` 방어 (Supabase 타입 생성기가 배열 타입 추론 → 런타임 객체와 타입 모두 만족)
+- **변경 파일**: `src/app/actions/operations/tracking.ts` (1줄)
+- **테스트**: `tests/unit/operations/tracking-actions.test.ts` 회귀 2건 추가 (객체 shipper_id 존재/널)
+- **전체 회귀**: 115 files / 773 tests ALL PASS
+- **빌드**: PASS (타입 검증 포함)
+- **커밋**: (커밋 해시 기입)
+- **PR**: (PR URL 기입)
