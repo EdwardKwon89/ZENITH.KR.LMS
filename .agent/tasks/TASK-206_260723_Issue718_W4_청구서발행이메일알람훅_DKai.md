@@ -9,7 +9,7 @@
 | **우선순위** | P2 |
 | **전제조건** | 없음 |
 | **커밋 태그** | `[D_Kai]` |
-| **상태** | ⬜ |
+| **상태** | 🔔 |
 
 ---
 
@@ -44,17 +44,51 @@ SNTL 회의록 W4: 청구서(인보이스) 발행 시 화주에게 이메일 알
 
 ## DoD
 
-- [ ] `sendInvoiceIssuedEmail()`(또는 유사) 신규 함수 추가 — 기존 Resend 인스턴스/FROM 재사용
-- [ ] `finalizeInvoice()`/`finalizeDailyShipperInvoices()` 완료 후크에 연동
-- [ ] best-effort 처리(발송 실패가 정산 확정을 막지 않음) 확인
-- [ ] escapeHtml 적용 확인
-- [ ] 신규 회귀 테스트 추가 + `LIVE_REGRESSION_TEST_MAP.md` 등록(R-09)
-- [ ] 회귀 테스트(`npm run test:regression`) 전체 PASS 확인
-- [ ] task file `[작업 결과]` 작성 + 커밋 해시 기재
-- [ ] ACTIVE_TASK.md 상태 반영
+- [x] `sendInvoiceFinalizedEmail()` 신규 함수 추가 — 기존 Resend 인스턴스/FROM 재사용
+- [x] `finalizeInvoice()` 완료 후크에 연동 (`finalizeDailyShipperInvoices()`는 내부 위임으로 자동 커버)
+- [x] best-effort 처리(발송 실패가 정산 확정을 막지 않음) — fire-and-forget + try/catch
+- [x] escapeHtml 적용 확인
+- [x] 신규 회귀 테스트 추가 (TC-F.10, 2 cases)
+- [ ] `LIVE_REGRESSION_TEST_MAP.md` 등록(R-09) — 예정
+- [x] 회귀 테스트(`npm run test:regression`) 전체 PASS 확인 (788/788)
+- [x] task file `[작업 결과]` 작성 + 커밋 해시 기재
+- [ ] ACTIVE_TASK.md 상태 반영 — 예정
 
 ---
 
 ## [작업 결과]
 
-_(D_Kai 작성 예정)_
+### 구현 내역
+
+1. **`src/lib/notifications/email.ts`**: `sendInvoiceFinalizedEmail()` 신규 함수 추가
+   - 기존 `resend`/`FROM` 인스턴스 재사용 (중복 초기화 없음)
+   - `escapeHtml` 적용 (HTML 인젝션 방지)
+   - Resend 미설정 시 `logger.warn` 후 스킵 (best-effort)
+   - Intl.NumberFormat으로 통화 포맷 적용
+
+2. **`src/app/actions/finance/settlement.ts`**: `finalizeInvoice()` 완료 후 fire-and-forget 이메일 발송 훅 추가
+   - `invoice.shipper_id` → `zen_organizations.name` (회사명)
+   - `invoice.shipper_id` → `zen_profiles` (`role='SHIPPER'`, `status='ACTIVE'`) (수신자 이메일)
+   - `finalizeDailyShipperInvoices()`는 내부에서 `finalizeInvoice()` 호출하므로 자동 커버
+   - try/catch 감싸기로 발송 실패가 정산 확정을 차단하지 않음
+
+3. **`tests/unit/finance/invoice-finalized-email.test.ts`**: TC-F.10 신규 단위 테스트 (2 Cases)
+   - TC-F.10-1: 정상 파라미터 전달 + Resend 호출 검증
+   - TC-F.10-2: HTML escape 검증 (`escapeHtml` 미적용 시 XSS 방어 확인)
+
+### 커밋
+
+| 순서 | 해시 | 메시지 |
+|:----:|:-----|:-------|
+| 1 | `204ca589` | `[D_Kai] feat: TASK-206 인보이스 발행 시 화주 이메일 알림 훅 추가` |
+| 2 | `5656c9c6` | `[D_Kai] test: TASK-206 sendInvoiceFinalizedEmail 단위 테스트 TC-F.10 추가` |
+
+### 검증
+
+- `npm run test:regression`: **788/788 PASS** (기존 786 + TC-F.10 2 케이스)
+- `npx next build`: Errors 0 (pre-existing test TS errors only)
+
+### PR
+
+- **PR**: [#752](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/752) `feature/teama-task-206-invoice-finalized-email-notification → develop`
+- **Branch**: `feature/teama-task-206-invoice-finalized-email-notification` (clean worktree 기반, R-17 §0 준수)
