@@ -47,18 +47,21 @@ export default function ShipperDailyBillingClient({
   const [isPending, startTransition] = useTransition();
   const [finalizingGroupKey, setFinalizingGroupKey] = useState<string | null>(null);
 
-  // Switch period type and fetch updated summary
-  const handlePeriodTypeChange = async (newType: 'daily' | 'weekly' | 'monthly') => {
-    if (newType === periodType) return;
-    setPeriodType(newType);
+  // Fetch summary from server action with current filters
+  const fetchSummary = (targetPeriodType?: 'daily' | 'weekly' | 'monthly', sDate?: string, eDate?: string, sFilter?: string) => {
+    const targetType = targetPeriodType || periodType;
+    const start = sDate !== undefined ? sDate : startDate;
+    const end = eDate !== undefined ? eDate : endDate;
+    const shipper = sFilter !== undefined ? sFilter : shipperFilter;
+
     setExpandedKey(null);
 
     startTransition(async () => {
       const res = await getShipperDailyBillingSummary({
-        startDate: startDate || undefined,
-        endDate: endDate || undefined,
-        shipperId: shipperFilter || undefined,
-        periodType: newType,
+        startDate: start || undefined,
+        endDate: end || undefined,
+        shipperId: shipper || undefined,
+        periodType: targetType,
       });
 
       if (res.success && res.groups) {
@@ -69,8 +72,26 @@ export default function ShipperDailyBillingClient({
     });
   };
 
-  // Filter groups locally
+  // Switch period type and fetch updated summary
+  const handlePeriodTypeChange = async (newType: 'daily' | 'weekly' | 'monthly') => {
+    setPeriodType(newType);
+    fetchSummary(newType);
+  };
+
+  // Reset filters
+  const handleReset = () => {
+    setStartDate('');
+    setEndDate('');
+    setShipperFilter('');
+    fetchSummary(periodType, '', '', '');
+  };
+
+  // Filter groups locally as fallback
   const filteredGroups = groups.filter((g) => {
+    if (periodType === 'daily') {
+      if (startDate && g.date < startDate) return false;
+      if (endDate && g.date > endDate) return false;
+    }
     if (shipperFilter && !g.shipperName.toLowerCase().includes(shipperFilter.toLowerCase())) return false;
     return true;
   });
@@ -215,14 +236,18 @@ export default function ShipperDailyBillingClient({
             />
           </div>
 
+          <button
+            onClick={() => fetchSummary()}
+            disabled={isPending}
+            className="px-3 py-2 bg-slate-900 hover:bg-slate-800 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-white font-bold text-xs rounded-xl flex items-center gap-1.5 shadow-xs transition-colors disabled:opacity-50"
+          >
+            {isPending ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Filter className="w-3.5 h-3.5" />}
+            <span>조회</span>
+          </button>
+
           {(startDate || endDate || shipperFilter) && (
             <button
-              onClick={() => {
-                setStartDate('');
-                setEndDate('');
-                setShipperFilter('');
-                handlePeriodTypeChange(periodType);
-              }}
+              onClick={handleReset}
               className="text-xs text-rose-500 font-semibold hover:underline"
             >
               초기화
