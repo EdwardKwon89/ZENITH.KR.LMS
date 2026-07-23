@@ -487,7 +487,7 @@
 |:------|:----:|:----|
 | **Aiden (Claude)** | ✅ TASK-167 전체 승인 (260626) | PR#117 §1 ✅ · PR#118 §2+§3 ✅ 전량 머지 완료 |
 | **D_Kai (OpenCode)** | 🔔 TASK-198 제출 (260721) | IMP-134 §2 tests/ TypeScript 오류 236건→0건 정리. PR#676. 재작업(`supabase: any`→AnySchema 타입) 수정 완료. |
-| **B_Kai** | ✅ GH#206 승인·머지 완료 (260706) | PR#221 · #13 재조사 요청에 신속·정확 대응(docs/03_Design 17개 파일 아카이브), 신규 Task 대기 |
+| **B_Kai** | 🔔 TASK-201 재작업3 제출 (260723) | Issue #711 Phase2 UPS물류메뉴 E2E검증. PR#716. loginAs()콜백·ZenUI expect·SUB_ADMIN 추가. Aiden 재검토 대기. |
 | **Riley** | ✅ TASK-195 승인·머지 완료 (260721) | CI tsc --noEmit advisory 게이트 신규 추가(Issue #627, IMP-134 §1) — PR#628 병합. 신규 Task 대기 |
 | N_Kai | ➖ 미재배정 확정 (260626 Edward) | TASK-087 폐기 — 신규 Task 발령 없음 |
 | Ring | 신규 할당 중단 유지 | 9차 위반 누적 |
