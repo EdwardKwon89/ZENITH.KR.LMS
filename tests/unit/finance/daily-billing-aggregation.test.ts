@@ -35,13 +35,13 @@ import {
   finalizeDailyShipperInvoices,
 } from '@/app/actions/finance/daily-billing';
 
-describe('화주별 일별 청구 집계 및 최종 운임 확정 단위 테스트 (Issue #736 / W2)', () => {
+describe('화주별 일별 청구 집계 및 최종 운임 확정 단위 테스트 (Issue #736 / W2 / TASK-204)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   describe('getShipperDailyBillingSummary', () => {
-    it('화주별 일별 오더 집계 및 합산 금액 정확히 계산', async () => {
+    it('화주별 일별 오더 집계 및 OTHER_CHARGE 포함 합산 금액 정확히 계산', async () => {
       (validateUserAction as any).mockResolvedValue({
         supabase: mockSupabase,
         profile: { id: 'admin-usr-1', role: USER_ROLES.ADMIN },
@@ -74,6 +74,7 @@ describe('화주별 일별 청구 집계 및 최종 운임 확정 단위 테스�
           return createChainableMock([
             { order_id: 'ord-1', cost_type: 'BASE_FREIGHT', unit_price: 100, quantity: 1, total_amount: 100 },
             { order_id: 'ord-1', cost_type: 'FUEL_SURCHARGE', unit_price: 20, quantity: 1, total_amount: 20 },
+            { order_id: 'ord-1', cost_type: 'OTHER_CHARGE', unit_price: 15, quantity: 1, total_amount: 15 },
             { order_id: 'ord-2', cost_type: 'BASE_FREIGHT', unit_price: 200, quantity: 1, total_amount: 200 },
             { order_id: 'ord-2', cost_type: 'SURGE_FEE', unit_price: 30, quantity: 1, total_amount: 30 },
           ]);
@@ -97,7 +98,8 @@ describe('화주별 일별 청구 집계 및 최종 운임 확정 단위 테스�
       expect(group.totalBaseFreight).toBe(300);
       expect(group.totalFuelSurcharge).toBe(20);
       expect(group.totalSurgeFee).toBe(30);
-      expect(group.totalBillingAmountUsd).toBe(350);
+      expect(group.totalOtherCharge).toBe(15);
+      expect(group.totalBillingAmountUsd).toBe(365); // 300 + 20 + 30 + 15
       expect(group.finalizedCount).toBe(1);
       expect(group.unfinalizedCount).toBe(1);
     });
@@ -117,7 +119,7 @@ describe('화주별 일별 청구 집계 및 최종 운임 확정 단위 테스�
   });
 
   describe('getShipperDailyOrdersDetails', () => {
-    it('특정 화주 및 날짜의 세부 오더 목록 정상 반환', async () => {
+    it('특정 화주 및 날짜의 세부 오더 목록(OTHER_CHARGE 포함) 정상 반환', async () => {
       (validateUserAction as any).mockResolvedValue({
         supabase: mockSupabase,
         profile: { id: 'admin-usr-1', role: USER_ROLES.ADMIN },
@@ -141,6 +143,7 @@ describe('화주별 일별 청구 집계 및 최종 운임 확정 단위 테스�
         if (table === 'zen_order_costs') {
           return createChainableMock([
             { order_id: 'ord-1', cost_type: 'BASE_FREIGHT', unit_price: 150, quantity: 1, total_amount: 150 },
+            { order_id: 'ord-1', cost_type: 'OTHER_CHARGE', unit_price: 25, quantity: 1, total_amount: 25 },
           ]);
         }
         if (table === 'zen_invoices') {
@@ -155,7 +158,8 @@ describe('화주별 일별 청구 집계 및 최종 운임 확정 단위 테스�
       expect(res.success).toBe(true);
       expect(res.orders?.length).toBe(1);
       expect(res.orders?.[0].orderNo).toBe('ORD-001');
-      expect(res.orders?.[0].totalAmountUsd).toBe(150);
+      expect(res.orders?.[0].otherCharge).toBe(25);
+      expect(res.orders?.[0].totalAmountUsd).toBe(175);
       expect(res.orders?.[0].invoiceNo).toBe('INV-001');
     });
   });

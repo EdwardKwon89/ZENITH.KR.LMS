@@ -19,6 +19,7 @@ export interface ShipperDailyBillingGroup {
   totalBaseFreight: number;
   totalFuelSurcharge: number;
   totalSurgeFee: number;
+  totalOtherCharge: number;
   totalActualAdjustment: number;
   totalBillingAmountUsd: number;
   estimatedBillingAmountKrw: number;
@@ -41,6 +42,7 @@ export interface ShipperDailyOrderRow {
   baseFreight: number;
   fuelSurcharge: number;
   surgeFee: number;
+  otherCharge: number;
   actualAdjustment: number;
   totalAmountUsd: number;
   invoiceId?: string;
@@ -139,6 +141,7 @@ export async function getShipperDailyBillingSummary(params?: {
           totalBaseFreight: 0,
           totalFuelSurcharge: 0,
           totalSurgeFee: 0,
+          totalOtherCharge: 0,
           totalActualAdjustment: 0,
           totalBillingAmountUsd: 0,
           estimatedBillingAmountKrw: 0,
@@ -158,6 +161,7 @@ export async function getShipperDailyBillingSummary(params?: {
       let baseFreight = 0;
       let fuelSurcharge = 0;
       let surgeFee = 0;
+      let otherCharge = 0;
       let actualAdj = 0;
 
       for (const c of costs) {
@@ -165,12 +169,14 @@ export async function getShipperDailyBillingSummary(params?: {
         if (c.cost_type === 'FREIGHT' || c.cost_type === 'BASE_FREIGHT') baseFreight += amt;
         else if (c.cost_type === 'FUEL_SURCHARGE') fuelSurcharge += amt;
         else if (c.cost_type === 'SURGE_EMERGENCY' || c.cost_type === 'SURGE_FEE') surgeFee += amt;
+        else if (c.cost_type === 'OTHER_CHARGE') otherCharge += amt;
         else if (c.cost_type === 'UPS_ACTUAL_ADJUSTMENT') actualAdj += amt;
       }
 
       group.totalBaseFreight += baseFreight;
       group.totalFuelSurcharge += fuelSurcharge;
       group.totalSurgeFee += surgeFee;
+      group.totalOtherCharge += otherCharge;
       group.totalActualAdjustment += actualAdj;
 
       // Find matching invoice
@@ -191,7 +197,7 @@ export async function getShipperDailyBillingSummary(params?: {
         group.unfinalizedCount += 1;
       }
 
-      const orderTotalUsd = baseFreight + fuelSurcharge + surgeFee + actualAdj;
+      const orderTotalUsd = baseFreight + fuelSurcharge + surgeFee + otherCharge + actualAdj;
       group.totalBillingAmountUsd += orderTotalUsd;
     }
 
@@ -262,6 +268,7 @@ export async function getShipperDailyOrdersDetails(shipperId: string, date: stri
       let baseFreight = 0;
       let fuelSurcharge = 0;
       let surgeFee = 0;
+      let otherCharge = 0;
       let actualAdj = 0;
 
       for (const c of oCosts) {
@@ -269,6 +276,7 @@ export async function getShipperDailyOrdersDetails(shipperId: string, date: stri
         if (c.cost_type === 'FREIGHT' || c.cost_type === 'BASE_FREIGHT') baseFreight += amt;
         else if (c.cost_type === 'FUEL_SURCHARGE') fuelSurcharge += amt;
         else if (c.cost_type === 'SURGE_EMERGENCY' || c.cost_type === 'SURGE_FEE') surgeFee += amt;
+        else if (c.cost_type === 'OTHER_CHARGE') otherCharge += amt;
         else if (c.cost_type === 'UPS_ACTUAL_ADJUSTMENT') actualAdj += amt;
       }
 
@@ -287,8 +295,9 @@ export async function getShipperDailyOrdersDetails(shipperId: string, date: stri
         baseFreight,
         fuelSurcharge,
         surgeFee,
+        otherCharge,
         actualAdjustment: actualAdj,
-        totalAmountUsd: baseFreight + fuelSurcharge + surgeFee + actualAdj,
+        totalAmountUsd: baseFreight + fuelSurcharge + surgeFee + otherCharge + actualAdj,
         invoiceId: matchingInv?.id,
         invoiceNo: matchingInv?.invoice_no,
         invoiceStatus: matchingInv?.status,

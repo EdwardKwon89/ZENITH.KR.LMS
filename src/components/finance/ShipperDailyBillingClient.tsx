@@ -236,6 +236,7 @@ export default function ShipperDailyBillingClient({
                   <th className="py-3 px-4 text-right">기본운임</th>
                   <th className="py-3 px-4 text-right">유류할증료</th>
                   <th className="py-3 px-4 text-right">급증수수료</th>
+                  <th className="py-3 px-4 text-right">기타부과금</th>
                   <th className="py-3 px-4 text-right">사후조정액</th>
                   <th className="py-3 px-4 text-right">총 합계 (USD / KRW)</th>
                   <th className="py-3 px-4 text-center">마감 상태</th>
@@ -269,6 +270,9 @@ export default function ShipperDailyBillingClient({
                         </td>
                         <td className="py-3.5 px-4 text-right font-mono text-amber-600 dark:text-amber-400 font-semibold">
                           ${g.totalSurgeFee.toFixed(2)}
+                        </td>
+                        <td className="py-3.5 px-4 text-right font-mono text-purple-600 dark:text-purple-400 font-semibold">
+                          ${(g.totalOtherCharge || 0).toFixed(2)}
                         </td>
                         <td className="py-3.5 px-4 text-right font-mono text-blue-600 dark:text-blue-400 font-semibold">
                           ${g.totalActualAdjustment.toFixed(2)}
@@ -325,7 +329,7 @@ export default function ShipperDailyBillingClient({
                       {/* Expanded Subtable Rows */}
                       {isExpanded && (
                         <tr>
-                          <td colSpan={10} className="bg-slate-50/90 dark:bg-zinc-900/80 p-4 border-t border-b border-slate-200 dark:border-zinc-800">
+                          <td colSpan={11} className="bg-slate-50/90 dark:bg-zinc-900/80 p-4 border-t border-b border-slate-200 dark:border-zinc-800">
                             <div className="flex flex-col gap-3">
                               <div className="flex items-center justify-between text-xs">
                                 <span className="font-bold text-slate-700 dark:text-slate-300">
@@ -352,6 +356,7 @@ export default function ShipperDailyBillingClient({
                                         <th className="py-2 px-3 text-right">기본운임</th>
                                         <th className="py-2 px-3 text-right">유류할증</th>
                                         <th className="py-2 px-3 text-right">급증수수료</th>
+                                        <th className="py-2 px-3 text-right">기타부과금</th>
                                         <th className="py-2 px-3 text-right">사후조정</th>
                                         <th className="py-2 px-3 text-right">합계(USD)</th>
                                         <th className="py-2 px-3 text-center">인보이스</th>
@@ -375,6 +380,7 @@ export default function ShipperDailyBillingClient({
                                           <td className="py-2 px-3 text-right font-mono">${ord.baseFreight.toFixed(2)}</td>
                                           <td className="py-2 px-3 text-right font-mono">${ord.fuelSurcharge.toFixed(2)}</td>
                                           <td className="py-2 px-3 text-right font-mono text-amber-600">${ord.surgeFee.toFixed(2)}</td>
+                                          <td className="py-2 px-3 text-right font-mono text-purple-600">${(ord.otherCharge || 0).toFixed(2)}</td>
                                           <td className="py-2 px-3 text-right font-mono text-blue-600">${ord.actualAdjustment.toFixed(2)}</td>
                                           <td className="py-2 px-3 text-right font-mono font-bold text-amber-600">
                                             ${ord.totalAmountUsd.toFixed(2)}

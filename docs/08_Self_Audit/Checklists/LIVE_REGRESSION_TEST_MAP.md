@@ -632,7 +632,7 @@
 | **TC-SUBADMIN-04** | SUB_ADMIN /mypage 접속 | 기존 정상 경로 회귀 확인 | `tests/e2e/e2e-27-subadmin-routing.spec.ts` |
 | **TC-SUBADMIN-05** | SUB_ADMIN /address-book 접속 | 기존 정상 경로 회귀 확인 | `tests/e2e/e2e-27-subadmin-routing.spec.ts` |
 
-### 49. 화주별 일별 청구 집계 및 최종 운임 확정 (Issue #736 / TASK-203 / W2)
+### 49. 화주별 일별 청구 집계 및 최종 운임 확정 (Issue #736 / TASK-204 / W2)
 | ID | 테스트 항목 | 목적 | 파일 경로 |
 | :--- | :--- | :--- | :--- |
 | **TC-W2-01** | getShipperDailyBillingSummary — 화주별 일별 오더 집계 및 합산 금액 계산 | 오더수, 운임, 유류할증, 급증, 사후조정액 집계 정확성 | `tests/unit/finance/daily-billing-aggregation.test.ts` |
