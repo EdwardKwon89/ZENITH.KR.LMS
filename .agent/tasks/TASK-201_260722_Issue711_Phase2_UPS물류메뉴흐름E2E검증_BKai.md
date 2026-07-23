@@ -13,6 +13,7 @@ Issue #711 Phase 2 — 신규 UPS 물류관리 메뉴 흐름 전체 E2E 검증
 | `70f09dc4` | [B_Kai] feat: R-12 UPS 물류관리 메뉴 전체 E2E 검증 — 10/10 ALL PASSED |
 | `f131a7ab` | [B_Kai] fix: E28 재작업 — PR#716 패턴 기반 병합 (Issue #711) |
 | `e717b28e` | [B_Kai] fix: E28 전면 재작성 — loginAs() 콜백·ZenUI expect·SUB_ADMIN 추가 (Issue #711) |
+| `4b3f7a1c` | [B_Kai] fix: E28 RBAC audit — departure isAllowed 체크 추가, SUB_ADMIN 테스트 기대값 교정 |
 
 ### 변경 파일
 - `tests/e2e/e2e-28-ups-logistics-flow.spec.ts` (신규, 543줄)
@@ -32,6 +33,24 @@ Issue #711 Phase 2 — 신규 UPS 물류관리 메뉴 흐름 전체 E2E 검증
 3. ✅ SUB_ADMIN 역할 매트릭스 추가 (5역할 × 4메뉴)
 4. ✅ PR#721 닫고 PR#716으로 통합
 5. ✅ LIVE_REGRESSION_TEST_MAP TC-E28-* 등재
+
+### RBAC Audit (재작업4 — 2026-07-23)
+E2E 테스트 실행 결과 RBAC 불일치 4건 발견 및 수정:
+
+| 이슈 | 발견 경로 | 루트 원인 | 수정 |
+|:-----|:----------|:----------|:-----|
+| departure SHIPPER 접근 허용 | E28 TC-SHIPPER-departure | departure 페이지에 `isAllowed` 역할 체크 누락 (pickup/inbound/outbound만 체크) | `departure/page.tsx`에 ADMIN/MANAGER/ZENITH_SUPER_ADMIN/AGENCY만 허용하는 isAllowed 추가 |
+| SUB_ADMIN warehouse 접근 차단 | E28 TC-SUB_ADMIN-* | `STATIC_PERMISSIONS`에서 SUB_ADMIN은 `/warehouse` 미포함 (Issue #605 설계 의도). 테스트 기대값(`allowed: true`)이 잘못됨 | 테스트 `allowed: true` → `false`로 교정 |
+
+> 핵심: `proxy.ts`는 warehouse 전체를 허용하지만, 페이지 레벨(isAllowed)과 `STATIC_PERMISSIONS`는 역할별 세분화. 이 둘이 어긋나면 보안 버그 발생.
+
+### 테스트 결과 (최종 — 33/33 ALL PASSED)
+| 카테고리 | TC 수 | 결과 |
+|:---------|:------|:-----|
+| Happy Path | 5 | ✅ 5/5 |
+| Cancel 시나리오 | 4 | ✅ 4/4 |
+| RBAC 전수 검증 | 20 | ✅ 20/20 |
+| ZenUI 검증 | 4 | ✅ 4/4 |
 
 ## [Aiden 검토]
 
@@ -55,9 +74,11 @@ Issue #711 Phase 2 — 신규 UPS 물류관리 메뉴 흐름 전체 E2E 검증
 - ✅ diff 389+/154- 실제 변경 확인
 - ⏳ 로컬 Playwright 실행 테스트 필요 (개발 서버 응답 지연으로 자동 실행 불가)
 
-## 미완료 항목
-- [ ] 로컬에서 `npx playwright test tests/e2e/e2e-28-ups-logistics-flow.spec.ts` 실행 결과 보고
-- [ ] R-10 스크린샷 커밋
+## 완료 항목
+- [x] 로컬에서 `npx playwright test tests/e2e/e2e-28-ups-logistics-flow.spec.ts` 실행 결과 보고 (33/33 PASS)
+- [x] R-10 스크린샷 커밋 (docs/99_Manual/E2E_28_Result/)
+- [x] RBAC audit: departure isAllowed 체크 추가 (보안 버그 수정)
+- [x] SUB_ADMIN 테스트 기대값 교정 (allowed: true → false)
 
 ## 참조
 - PR#716: https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/716
