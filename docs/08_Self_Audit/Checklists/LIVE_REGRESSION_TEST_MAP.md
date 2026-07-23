@@ -634,6 +634,27 @@
 
 ---
 
+### 49. UPS 물류관리 메뉴 흐름 전체 검증 (Issue #711 / Phase 2)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-LOGISTICS-01** | Step 1: 오더픽업 — SCHEDULED→WAREHOUSED 전이 | confirmPickup 동작 + DB 상태 전이 검증 | `tests/e2e/e2e-28-ups-logistics-flow.spec.ts` |
+| **TC-LOGISTICS-02** | Step 2: 입고처리 — WAREHOUSED 상태 확인 | 입고 화면에서 테스트 오더 존재 확인 | `tests/e2e/e2e-28-ups-logistics-flow.spec.ts` |
+| **TC-LOGISTICS-03** | Step 3: UPS접수 — PACKED 상태 전이 | registerUpsOrder 동작 + UPS 등록 검증 | `tests/e2e/e2e-28-ups-logistics-flow.spec.ts` |
+| **TC-LOGISTICS-04** | Step 4: 출고처리 — RELEASED 상태 전이 | confirmOutbound 동작 + 출고 처리 검증 | `tests/e2e/e2e-28-ups-logistics-flow.spec.ts` |
+| **TC-LOGISTICS-05** | Step 5: 출고확정 — IN_TRANSIT 상태 전이 | confirmDeparture 동작 + 출고확정 검증 | `tests/e2e/e2e-28-ups-logistics-flow.spec.ts` |
+| **TC-LOGISTICS-06** | Step 6: DELIVERED 자동전환 — 트래킹 이벤트 | pollTracking 배치 로직 + DELIVERED 상태 동기화 | `tests/e2e/e2e-28-ups-logistics-flow.spec.ts` |
+| **TC-LOGISTICS-RBAC-01** | ADMIN → 창고 메뉴 4종 접근 | ADMIN 역할의 전체 창고 메뉴 접근 가능 확인 | `tests/e2e/e2e-28-ups-logistics-flow.spec.ts` |
+| **TC-LOGISTICS-RBAC-02** | MANAGER → 창고 메뉴 4종 접근 | MANAGER 역할의 전체 창고 메뉴 접근 가능 확인 | `tests/e2e/e2e-28-ups-logistics-flow.spec.ts` |
+| **TC-LOGISTICS-RBAC-03** | AGENCY → 창고 메뉴 4종 접근 | AGENCY 역할의 전체 창고 메뉴 접근 가능 확인 | `tests/e2e/e2e-28-ups-logistics-flow.spec.ts` |
+| **TC-LOGISTICS-RBAC-04** | SUB_ADMIN → 창고 메뉴 4종 접근 | SUB_ADMIN 역할의 전체 창고 메뉴 접근 가능 확인 | `tests/e2e/e2e-28-ups-logistics-flow.spec.ts` |
+| **TC-LOGISTICS-RBAC-05** | SHIPPER → 창고 메뉴 4종 차단 | SHIPPER 역할의 창고 메뉴 접근 차단 확인 | `tests/e2e/e2e-28-ups-logistics-flow.spec.ts` |
+| **TC-LOGISTICS-ZENUI-01** | 오더픽업 화면 ZenUI 적용 | ZenButton/ZenCard/ZenBadge 컴포넌트 적용 확인 | `tests/e2e/e2e-28-ups-logistics-flow.spec.ts` |
+| **TC-LOGISTICS-ZENUI-02** | 입고처리 화면 ZenUI 적용 | ZenButton/ZenCard/ZenBadge 컴포넌트 적용 확인 | `tests/e2e/e2e-28-ups-logistics-flow.spec.ts` |
+| **TC-LOGISTICS-ZENUI-03** | 출고처리 화면 ZenUI 적용 | ZenButton/ZenCard/ZenBadge 컴포넌트 적용 확인 | `tests/e2e/e2e-28-ups-logistics-flow.spec.ts` |
+| **TC-LOGISTICS-ZENUI-04** | 출고확정 화면 ZenUI 적용 | ZenButton/ZenCard/ZenBadge 컴포넌트 적용 확인 | `tests/e2e/e2e-28-ups-logistics-flow.spec.ts` |
+
+---
+
 ## 📝 가이드라인 (R-09 Enforcement)
 1. **추가 의무**: 신규 기능 개발 시 위 카테고리에 맞는 테스트를 반드시 추가하십시오.
 2. **실행 의무**: 모든 커밋 전 `npm run test:regression`을 실행하여 위 명세 전원이 초록색인지 확인하십시오.
