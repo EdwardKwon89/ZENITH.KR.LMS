@@ -1295,8 +1295,9 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                             </label>
                             <ZenInput
                               placeholder="지역 택배 운송장번호 입력 (선택)"
+                              disabled={watch('delivery_method') === 'PICKUP'}
                               {...register(`packages.${i}.domestic_ref_no`)}
-                              className="py-2 text-xs"
+                              className={`py-2 text-xs ${watch('delivery_method') === 'PICKUP' ? 'opacity-40 bg-slate-100' : ''}`}
                             />
                           </div>
                         </div>
