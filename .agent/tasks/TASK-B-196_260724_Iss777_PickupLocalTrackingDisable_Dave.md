@@ -6,7 +6,7 @@
 | **담당** | Dave (Team B) |
 | **생성일** | 2026-07-24 |
 | **우선순위** | P3 |
-| **상태** | ⬜ |
+| **상태** | 🔔 |
 
 ## 개요
 
@@ -52,8 +52,18 @@ const isPickup = watch('delivery_method') === 'PICKUP';
 6. 문서 커밋
 7. PR 생성 (`feature/teamb-196-... → TeamB_Dev`, `Closes #777`)
 
-## [발견 이슈]
+## [작업 결과]
 
-_(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
+| 항목 | 내용 |
+|:-----|:------|
+| **커밋** | `4f023b82` (코드) + `c1d9543c` (문서) |
+| **변경 파일** | `src/components/orders/OrderRegistrationForm.tsx` (2행) |
+| **수정 내용** | `delivery_method === 'PICKUP'` 조건으로 `domestic_ref_no` input에 `disabled` + `opacity-40 bg-slate-100` |
+| **신규 테스트** | `tests/unit/orders/pickup-domestic-ref-no-disabled.test.tsx` — PICKUP 시 disabled+스타일 / DIRECT 시 활성화 2건 |
+| **회귀 테스트** | 776/776 PASS |
+| **빌드** | ✅ |
+| **PR** | [#780](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/780) · `fix/teamb-iss777-pickup-domestic-ref-no` → `TeamB_Dev` |
+
+## [발견 이슈]
 
 없음
