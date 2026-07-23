@@ -1656,3 +1656,16 @@
 - **예상 공수**: Issue #605에 포함
 - **우선순위**: Medium — 현재는 SNTL Sub-Agency Test가 데모 조직이라 실거래 영향 없음
 - **상태**: ⬜ 미착수 (Issue #605 해결에 종속)
+
+---
+
+## [IMP-153] CI `supabase db reset` 시 `authenticated`/`anon` 롤 기본 테이블 GRANT 누락
+
+- **발견 경위**: Issue #671(DEF-117) 재작업(PR#719, TASK-B-188) 중 로컬 DB 기반 실제 검증 테스트가 CI에서 3라운드 연속으로 다른 테이블(`zen_orders`→`zen_ups_labels`→`zen_profiles`)에서 `permission denied for table ...` 에러로 실패. 로컬(누적된 개발 DB)에는 `authenticated` 롤에 대한 전체 GRANT가 이미 존재해 문제가 드러나지 않았음.
+- **현재 상태**: `zen_orders`/`zen_order_packages`/`zen_ups_labels`/`zen_ups_label_errors`/`zen_profiles` 5개 테이블은 이번에 명시적 `GRANT` 문을 추가해 해결(`supabase/migrations/20260722130000_def117_order_packages_agency_rls_v2.sql`). 하지만 이 5개는 우연히 이번 작업에서 걸린 테이블일 뿐 — 같은 이유로 GRANT가 누락된 다른 테이블이 더 있을 가능성이 높음. 이미 `20260622000000_fix_service_role_grants.sql`(TASK-B-017)에서 `service_role`에 대해 동일한 유형의 문제를 겪고 여러 테이블에 걸쳐 고친 전례가 있음 — 이번엔 `authenticated`가 빠진 케이스.
+- **근본 원인 추정**: 이 프로젝트의 로컬/실 Supabase 인스턴스는 프로젝트 최초 생성 시점에 플랫폼이 스키마 단위로 `anon`/`authenticated`/`service_role`에 기본 권한을 부여했을 가능성이 높음(마이그레이션 파일이 아니라 프로젝트 부트스트랩 단계). CI의 `supabase db reset`(마이그레이션만 순서대로 재생함)은 이 부트스트랩 단계를 재현하지 못해, 명시적으로 GRANT를 문서화하지 않은 테이블은 전부 CI에서만 누락됨.
+- **목표 구현**: 테이블 하나씩 발견될 때마다 땜질하는 대신, `ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO authenticated;`(및 필요 시 `anon`) 류의 스키마 단위 일괄 마이그레이션을 신설해 근본 해결. 단, INSERT/UPDATE/DELETE는 테이블별 필요 여부가 다르므로 SELECT만 일괄 적용하고 나머지는 기존처럼 개별 GRANT 유지 검토 필요.
+- **관련 파일**: `supabase/migrations/20260622000000_fix_service_role_grants.sql`(선례), `supabase/migrations/20260722130000_def117_order_packages_agency_rls_v2.sql`(이번 임시 대응)
+- **예상 공수**: 0.5 MD (원인 조사는 이미 완료, 일괄 마이그레이션 작성 + 전체 회귀만 필요)
+- **우선순위**: Medium — 매번 실 DB 검증 테스트를 추가할 때마다 반복적으로 재발할 가능성이 높아 선제 조치 가치가 있으나, 당장 기능 장애는 아님
+- **상태**: ⬜ 미착수

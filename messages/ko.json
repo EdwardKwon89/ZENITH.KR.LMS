@@ -699,7 +699,9 @@
     "confirm_btn": "출고확정 처리",
     "success_msg": "출고확정이 완료되었습니다.",
     "partial_success": "출고확정 완료: {success}건 성공, {fail}건 실패",
-    "error_none_selected": "출고확정할 오더를 선택해주세요."
+    "error_none_selected": "출고확정할 오더를 선택해주세요.",
+    "today_history": "오늘의 출고확정 이력",
+    "empty_history": "오늘 처리된 출고확정 이력이 없습니다."
   },
   "ShippingLabel": {
     "title": "운송장",

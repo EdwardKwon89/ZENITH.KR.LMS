@@ -12,6 +12,7 @@ import {
 import {
   getReleasedOrders,
   confirmDeparture,
+  getTodayDepartureHistory,
 } from "@/app/actions/operations";
 import { OrderStatus, ORDER_STATUS_META } from "@/types/orders";
 import {
@@ -34,6 +35,7 @@ export default function DepartureConfirmForm({ locale }: { locale: string }) {
   const [loading, setLoading] = useState(true);
   const [submitLoading, setSubmitLoading] = useState(false);
   const [search, setSearch] = useState("");
+  const [history, setHistory] = useState<any[]>([]);
 
   useEffect(() => {
     fetchData();
@@ -42,8 +44,12 @@ export default function DepartureConfirmForm({ locale }: { locale: string }) {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const res = await getReleasedOrders();
-      if (res.success) setOrders(res.orders);
+      const [ordersRes, historyRes] = await Promise.all([
+        getReleasedOrders(),
+        getTodayDepartureHistory(),
+      ]);
+      if (ordersRes.success) setOrders(ordersRes.orders);
+      if (historyRes.success) setHistory(historyRes.items);
     } catch (err: any) {
       toast.error(err.message || "데이터 로드 실패");
     } finally {
@@ -116,9 +122,20 @@ export default function DepartureConfirmForm({ locale }: { locale: string }) {
     return { pkgCount: pkgs.length, totalQty };
   };
 
+  const formatKstTime = (dateStr: string) => {
+    const d = new Date(dateStr);
+    return d.toLocaleTimeString("ko-KR", {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+    });
+  };
+
   return (
-    <div className="grid grid-cols-1 gap-8">
-      <ZenCard className="zen-glass relative overflow-hidden p-6 border-white/40">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="lg:col-span-7 space-y-6">
+        <ZenCard className="zen-glass relative overflow-hidden p-6 border-white/40">
         <div className="flex items-center gap-3 mb-6">
           <div className="p-2.5 bg-indigo-50 rounded-xl text-indigo-600">
             <Truck size={24} />
@@ -256,6 +273,70 @@ export default function DepartureConfirmForm({ locale }: { locale: string }) {
           </ZenButton>
         )}
       </ZenCard>
+      </div>
+
+      <div className="lg:col-span-5">
+        <ZenCard className="p-6 bg-white/70 backdrop-blur-md border-slate-100 shadow-md h-full flex flex-col min-h-[500px]">
+          <div className="flex items-center justify-between mb-5">
+            <h3 className="text-md font-black text-slate-900 flex items-center gap-2">
+              <Clock size={18} className="text-slate-500" />
+              {t("today_history")}
+            </h3>
+            <span className="text-[10px] bg-slate-100 text-slate-600 font-bold px-2.5 py-1 rounded-full border border-slate-200/50">
+              오늘
+            </span>
+          </div>
+
+          <div className="flex-1 overflow-y-auto max-h-[600px] scrollbar-hide pr-1 space-y-3">
+            {history.length > 0 ? (
+              history.map((item: any) => {
+                const order = item.order || {};
+                const pkgs = order.order_packages || [];
+                const allLabels = pkgs.flatMap((p: any) => p.ups_labels || []);
+                const latestLabel = allLabels.length > 0 ? allLabels[allLabels.length - 1] : null;
+                return (
+                  <div
+                    key={item.id}
+                    className="p-4 bg-white border border-slate-100 rounded-2xl hover:border-slate-200 transition-all shadow-sm hover:shadow-md"
+                  >
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="space-y-1.5">
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono text-xs font-bold text-slate-900">
+                            {order.order_no || "-"}
+                          </span>
+                          <ZenBadge className="bg-indigo-50 text-indigo-700 border-indigo-200 text-[10px]">
+                            {orderStatusT(`${OrderStatus.IN_TRANSIT}.label`)}
+                          </ZenBadge>
+                        </div>
+                        {order.recipient_name && (
+                          <p className="text-[11px] text-slate-500 font-medium">{order.recipient_name}</p>
+                        )}
+                      </div>
+                      <span className="text-[10px] text-slate-400 font-mono font-semibold flex items-center gap-1 shrink-0">
+                        <Clock size={10} />
+                        {formatKstTime(item.created_at)}
+                      </span>
+                    </div>
+                    {latestLabel && (
+                      <div className="flex items-center gap-2 mt-2 flex-wrap">
+                        <ZenBadge className="bg-green-50 text-green-700 border-green-200 text-[10px]">
+                          UPS · {latestLabel.tracking_number || latestLabel.reference_no || "-"}
+                        </ZenBadge>
+                      </div>
+                    )}
+                  </div>
+                );
+              })
+            ) : (
+              <div className="h-full flex flex-col items-center justify-center py-20 text-center text-slate-400">
+                <Package size={36} className="text-slate-300 mb-3" />
+                <p className="text-xs font-semibold">{t("empty_history")}</p>
+              </div>
+            )}
+          </div>
+        </ZenCard>
+      </div>
     </div>
   );
 }
