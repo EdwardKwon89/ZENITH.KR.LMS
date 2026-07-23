@@ -502,6 +502,12 @@ test.describe.serial('E29: UPS 운임 파이프라인 E2E 검증 (중량 변경 
     expect(Number(invCheck!.total_amount)).toBe(94800);
     expect(invCheck!.is_finalized).toBe(false);
 
+    // UI: 오더 상세 페이지에서 스크린샷
+    await loginAs(page, ADMIN_EMAIL, ADMIN_PASSWORD);
+    await page.goto(`/ko/orders/${orderId}`);
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(2000);
+
     await screenshot(page, 'stage2_actual_charges');
   });
 
@@ -539,6 +545,12 @@ test.describe.serial('E29: UPS 운임 파이프라인 E2E 검증 (중량 변경 
     expect(invFinalized!.is_finalized).toBe(true);
     expect(invFinalized!.finalized_at).toBeTruthy();
     expect(invFinalized!.finalized_by).toBe(adminUserId);
+
+    // UI: 마감 후 상태 확인
+    await loginAs(page, ADMIN_EMAIL, ADMIN_PASSWORD);
+    await page.goto(`/ko/orders/${orderId}`);
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(2000);
 
     await screenshot(page, 'stage2_finalized');
   });
