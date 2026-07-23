@@ -227,7 +227,8 @@ export async function getGlobalTrackingOverview(page = 1, pageSize = 50) {
 
   const configsWithEvents = (data ?? []).map((config) => {
     const latestEvent = latestEventMap.get(config.order_id) ?? null;
-    const isUnassigned = !config.order?.shipper_id && !config.order?.recipient_name;
+    const orderData = Array.isArray(config.order) ? config.order[0] : config.order;
+    const isUnassigned = !orderData?.shipper_id && !orderData?.recipient_name;
     return { ...config, latest_event: latestEvent, is_unassigned: isUnassigned };
   });
 
