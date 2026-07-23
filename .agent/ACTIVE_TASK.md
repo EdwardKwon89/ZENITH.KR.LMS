@@ -15,7 +15,7 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
-| [#750](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/750) | [feat] W2 후속 — 화주별 주별/월별 청구 집계 (2순위) | a | p3 | in-progress | EdwardKwon89 | 2026-07-23 |
+| [#750](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/750) | [feat] W2 후속 — 화주별 주별/월별 청구 집계 (2순위) | a | p3 | review | EdwardKwon89 | 2026-07-23 |
 | [#748](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/748) | [feat] W4 — 청구서 발행 시 이메일 알람 훅 추가 | a | p2 | in-progress | EdwardKwon89 | 2026-07-23 |
 | [#747](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/747) | [feat] W3 — 예상운임표→최종운임 확정 2단계 플로우 검증/보완 | a | p1 | in-progress | EdwardKwon89 | 2026-07-23 |
 | [#741](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/741) | DEF-121: TrackingDashboard Detail 링크 로케일 프리픽스 누락 — 404 발생 | b | p2 | - | 미배정 | 2026-07-23 |
