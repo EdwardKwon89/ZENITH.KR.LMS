@@ -8,7 +8,7 @@ import { generateInvoicesForOrder, finalizeInvoice } from './settlement';
 import { revalidatePath } from 'next/cache';
 
 export interface ShipperDailyBillingGroup {
-  date: string; // YYYY-MM-DD
+  date: string; // Period Key (YYYY-MM-DD | YYYY년 WNN주 | YYYY-MM)
   shipperId: string;
   shipperName: string;
   agencyOrgId?: string;
@@ -27,6 +27,7 @@ export interface ShipperDailyBillingGroup {
   currency: string;
   invoiceIds: string[];
   orderIds: string[];
+  periodType?: 'daily' | 'weekly' | 'monthly';
 }
 
 export interface ShipperDailyOrderRow {
@@ -50,18 +51,61 @@ export interface ShipperDailyOrderRow {
   invoiceStatus?: string;
 }
 
+function getWeekNumber(d: Date): number {
+  const target = new Date(d.valueOf());
+  const dayNr = (d.getDay() + 6) % 7;
+  target.setDate(target.getDate() - dayNr + 3);
+  const firstThursday = target.valueOf();
+  target.setMonth(0, 1);
+  if (target.getDay() !== 4) {
+    target.setMonth(0, 1 + ((4 - target.getDay() + 7) % 7));
+  }
+  return 1 + Math.ceil((firstThursday - target.valueOf()) / 604800000);
+}
+
+function formatPeriodKey(createdAtStr: string, periodType: 'daily' | 'weekly' | 'monthly' = 'daily'): string {
+  const d = new Date(createdAtStr);
+  if (isNaN(d.getTime())) return createdAtStr.split('T')[0];
+
+  if (periodType === 'monthly') {
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    return `${year}-${month}`;
+  }
+
+  if (periodType === 'weekly') {
+    const day = d.getDay();
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+    const monday = new Date(d.setDate(diff));
+    const year = monday.getFullYear();
+    const m = String(monday.getMonth() + 1).padStart(2, '0');
+    const date = String(monday.getDate()).padStart(2, '0');
+    
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+    const sm = String(sunday.getMonth() + 1).padStart(2, '0');
+    const sdate = String(sunday.getDate()).padStart(2, '0');
+
+    return `${year}년 W${getWeekNumber(monday)}주 (${m}.${date}~${sm}.${sdate})`;
+  }
+
+  return createdAtStr.split('T')[0];
+}
+
 /**
- * 화주별 일별 청구 집계 목록 조회
+ * 화주별 일별/주별/월별 청구 집계 목록 조회
  */
 export async function getShipperDailyBillingSummary(params?: {
   startDate?: string;
   endDate?: string;
   shipperId?: string;
+  periodType?: 'daily' | 'weekly' | 'monthly';
 }) {
   try {
     const { supabase, profile } = await validateUserAction();
     if (!profile) throw new Error('User profile not found');
 
+    const periodType = params?.periodType || 'daily';
     const exchangeRate = await getNumericParam('EXCHANGE_RATE_USD_KRW', 1350);
 
     // Build base orders query
@@ -121,18 +165,18 @@ export async function getShipperDailyBillingSummary(params?: {
       logger.error('Error fetching invoices for daily billing:', invErr);
     }
 
-    // Group by Shipper + Date (YYYY-MM-DD)
+    // Group by Shipper + Period Key
     const groupsMap = new Map<string, ShipperDailyBillingGroup>();
 
     for (const order of orders) {
-      const dateStr = new Date(order.created_at).toISOString().split('T')[0];
+      const periodKey = formatPeriodKey(order.created_at, periodType);
       const shipperName = (order.shipper as any)?.name || '기본 화주';
-      const key = `${order.shipper_id}_${dateStr}`;
+      const key = `${order.shipper_id}_${periodKey}`;
 
       let group = groupsMap.get(key);
       if (!group) {
         group = {
-          date: dateStr,
+          date: periodKey,
           shipperId: order.shipper_id,
           shipperName,
           orderCount: 0,
@@ -149,6 +193,7 @@ export async function getShipperDailyBillingSummary(params?: {
           currency: 'USD',
           invoiceIds: [],
           orderIds: [],
+          periodType,
         };
         groupsMap.set(key, group);
       }
@@ -213,14 +258,18 @@ export async function getShipperDailyBillingSummary(params?: {
     return { success: true, groups, exchangeRate };
   } catch (err: any) {
     logger.error('getShipperDailyBillingSummary failed:', err);
-    return { success: false, error: err.message || '일별 집계 조회 중 오류 발생', groups: [] };
+    return { success: false, error: err.message || '일별/주별/월별 집계 조회 중 오류 발생', groups: [] };
   }
 }
 
 /**
- * 특정 화주 및 일자의 오더 세부 내역 조회
+ * 특정 화주 및 일자/주/월 소속 오더 세부 내역 조회
  */
-export async function getShipperDailyOrdersDetails(shipperId: string, date: string): Promise<{
+export async function getShipperDailyOrdersDetails(
+  shipperId: string,
+  dateOrPeriod: string,
+  periodType: 'daily' | 'weekly' | 'monthly' = 'daily'
+): Promise<{
   success: boolean;
   orders?: ShipperDailyOrderRow[];
   error?: string;
@@ -228,10 +277,7 @@ export async function getShipperDailyOrdersDetails(shipperId: string, date: stri
   try {
     const { supabase } = await validateUserAction();
 
-    const startDate = `${date}T00:00:00Z`;
-    const endDate = `${date}T23:59:59Z`;
-
-    const { data: orders, error: ordersErr } = await supabase
+    let ordersQuery = supabase
       .from('zen_orders')
       .select(`
         id,
@@ -244,14 +290,34 @@ export async function getShipperDailyOrdersDetails(shipperId: string, date: stri
         shipper:shipper_id ( name )
       `)
       .eq('shipper_id', shipperId)
-      .eq('transport_mode', 'UPS')
-      .gte('created_at', startDate)
-      .lte('created_at', endDate);
+      .eq('transport_mode', 'UPS');
+
+    if (periodType === 'daily') {
+      ordersQuery = ordersQuery.gte('created_at', `${dateOrPeriod}T00:00:00Z`).lte('created_at', `${dateOrPeriod}T23:59:59Z`);
+    } else if (periodType === 'monthly') {
+      const [y, m] = dateOrPeriod.split('-');
+      const start = `${dateOrPeriod}-01T00:00:00Z`;
+      const lastDay = new Date(Number(y), Number(m), 0).getDate();
+      const end = `${dateOrPeriod}-${String(lastDay).padStart(2, '0')}T23:59:59Z`;
+      ordersQuery = ordersQuery.gte('created_at', start).lte('created_at', end);
+    }
+
+    const { data: orders, error: ordersErr } = await ordersQuery;
 
     if (ordersErr) throw new Error(`오더 상세 목록 조회 실패: ${ordersErr.message}`);
     if (!orders || orders.length === 0) return { success: true, orders: [] };
 
-    const orderIds = orders.map((o) => o.id);
+    // Filter by periodType if weekly
+    const filteredOrders = orders.filter((o) => {
+      if (periodType === 'weekly') {
+        return formatPeriodKey(o.created_at, 'weekly') === dateOrPeriod;
+      }
+      return true;
+    });
+
+    if (filteredOrders.length === 0) return { success: true, orders: [] };
+
+    const orderIds = filteredOrders.map((o) => o.id);
 
     const { data: costs } = await supabase
       .from('zen_order_costs')
@@ -263,7 +329,7 @@ export async function getShipperDailyOrdersDetails(shipperId: string, date: stri
       .select('id, invoice_no, status, is_finalized, metadata')
       .neq('status', 'CANCELED');
 
-    const resultRows: ShipperDailyOrderRow[] = orders.map((o) => {
+    const resultRows: ShipperDailyOrderRow[] = filteredOrders.map((o) => {
       const oCosts = (costs || []).filter((c) => c.order_id === o.id);
       let baseFreight = 0;
       let fuelSurcharge = 0;
@@ -312,7 +378,7 @@ export async function getShipperDailyOrdersDetails(shipperId: string, date: stri
 }
 
 /**
- * 일별 집계 단위 인보이스 일괄 마감 처리
+ * 일별/주별/월별 집계 단위 인보이스 일괄 마감 처리
  */
 export async function finalizeDailyShipperInvoices(
   invoiceIds: string[],
@@ -333,7 +399,7 @@ export async function finalizeDailyShipperInvoices(
     const errors: string[] = [];
 
     for (const invId of invoiceIds) {
-      const res = await finalizeInvoice(invId, reason || '일별 집계 일괄 마감');
+      const res = await finalizeInvoice(invId, reason || '집계 단위 일괄 마감');
       if (res.success) {
         finalizedCount += 1;
       } else {
