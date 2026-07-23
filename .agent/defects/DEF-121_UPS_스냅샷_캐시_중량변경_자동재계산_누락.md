@@ -1,4 +1,6 @@
-# DEF-121: UPS 스냅샷 캐시 — 중량 변경 시 자동 재계산 메커니즘 누락
+# DEF-121: UPS 스냅샷 캐시 — 중량/부피 변경 시 자동 재계산 메커니즘 누락
+
+> **2026-07-24 Aiden 범위 확대**: 최초 보고는 중량(gross_weight)만 다뤘으나, Edward 지적으로 **부피(치수 L×W×H)도 동일하게 영향받음**을 코드로 확인 — 아래 "부피 영향 확인" 섹션 참조. 제목·조치 방향 모두 중량+부피로 범위 확대.
 
 | 항목 | 내용 |
 |:-----|:------|
@@ -10,8 +12,17 @@
 
 ## 현상
 
-입고 시 중량 수정(gross_weight 변경)이 최종 정산 원가/운임에 반영되지 않음.
+입고 시 중량·부피(치수) 수정이 최종 정산 원가/운임에 반영되지 않음.
 화주에게 청구되는 금액이 오더 등록 시점의 예상운임(스냅샷) 기준으로 고정됨.
+
+## 부피 영향 확인 (2026-07-24 추가)
+
+`calcChargeableWeight()`(`src/lib/ups/pricing-engine.ts:97-105`)는 **실중량과 부피중량(`l×w×h÷divisor`, 기본 divisor=5000) 중 더 큰 값**을 청구중량으로 사용합니다:
+```ts
+const volumetricKg = (dims.l * dims.w * dims.h) / divisor;
+return { chargeableKg: Math.max(actualKg, volumetricKg), volumetricKg };
+```
+추가로 `isOversizePackage(dims)`(같은 파일 `calcMultiPackageChargeableWeight` 내부)로 치수 기준 OVERSIZE 할증도 별도 트리거됩니다. 즉 **부피(치수)만 바뀌어도 중량과 완전히 동일한 경로로 요금이 달라지며, 이 값도 `computeUpsFreight()` 결과 전체와 함께 스냅샷에 한 번만 고정됩니다** — 중량 변경과 별개 문제가 아니라 같은 버그의 또 다른 입력값입니다. 입고 시 재측정 대상은 중량뿐 아니라 치수(L×W×H)도 포함되므로, 조치 방향(아래) 결정 시 두 필드를 함께 다뤄야 합니다.
 
 ## 근본 원인
 
@@ -61,17 +72,18 @@ UPS 등록 (confirmUpsRegistration → registerUpsOrder)
 
 ## 영향
 
-- 화주에게 청구되는 정산 금액이 실제 중량과 다를 수 있음
-- 특히 소액 화물(10kg 미만)에서 중량 차이에 따른 운임 차이가 클 수 있음
+- 화주에게 청구되는 정산 금액이 실제 중량·부피와 다를 수 있음
+- 특히 소액 화물(10kg 미만)에서 중량/부피 차이에 따른 운임 차이가 클 수 있음
+- 부피가 커서 OVERSIZE 할증 대상이 됐는데도 스냅샷에는 반영 안 될 수 있음
 - registerUpsOrder가 SHXK에는 정확한 중량을 전송하므로, UPS사 실제 청구와 플랫폼 화주 청구가 불일치 가능
 
 ## 조치 방향 (설계 결정 필요)
 
 | 안 | 설명 | 장단점 |
 |:---|:-----|:-------|
-| A. 스냅샷 재생성 트리거 추가 | `confirmInbound` 또는 별도 "운임 재계산" 버튼에서 `saveOrderRateSnapshot` 재호출 | 명시적, 기존 구조 유지 |
+| A. 스냅샷 재생성 트리거 추가 | `confirmInbound` 또는 별도 "운임 재계산" 버튼에서 중량+치수 갱신 후 `saveOrderRateSnapshot` 재호출 | 명시적, 기존 구조 유지 |
 | B. 정산 시 라이브 재계산 | `SettlementEngine`이 스냅샷 대신 `estimateUpsFreight`를 직접 호출 | 항상 최신값, 성능 고려 필요 |
-| C. 중량 변경 감지 → 자동 갱신 | `zen_order_packages` UPDATE 트리거로 스냅샷 재생성 | 자동화, 복잡도 증가 |
+| C. 중량/치수 변경 감지 → 자동 갱신 | `zen_order_packages`(gross_weight·length·width·height) UPDATE 트리거로 스냅샷 재생성 | 자동화, 복잡도 증가 |
 
 **현재 상태**: 발견만 되어 있으며, 수정은 별도 Task에서 설계 결정 후 진행해야 함.
 
