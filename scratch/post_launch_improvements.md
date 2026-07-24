@@ -1683,3 +1683,18 @@
 - **예상 공수**: 0.5~1 MD (에러 전파 수정은 작으나, gettrack 검증 추가 시 커짐)
 - **우선순위**: High — DEF-121 배송정보 재생성 설계가 이 기능에 의존하므로, 그 설계를 실제 구현하기 전에 반드시 해결 필요
 - **상태**: ⬜ 미착수 (Edward 지시로 기능 개선 사항 등록, 2026-07-24)
+
+---
+
+## [IMP-155] Agency→Shipper 할인율 역전으로 인한 역마진 — 시스템적 방지 장치 없음 (Issue #717 후속)
+
+- **발견 경위**: Issue #717(SNTL 원가 Matrix 구조 논의, 2026-07-23) 결론에서 "역마진 방지는 시스템적 조치 아닌 운영 측면으로 관리, 시스템적 방지는 추후 별도 기능 개선 건으로 진행"으로 종결했으나, 실제로 `scratch/post_launch_improvements.md`에는 등록이 누락되어 있었음(Edward 확인, 2026-07-24).
+- **문제 구조**: SNTL 가격 체계는 비계층적 — `zen_agency_pricing_policies`(Admin→Agency 할인율)와 `zen_agency_shipper_zone_discounts`(Agency→Shipper 할인율)가 각각 독립적으로 같은 루트 `selling_price`를 기준으로 계산됨(`margin = selling_price × (agency_discount_rate − shipper_discount_rate)`). Agency 자신이 Admin으로부터 받는 할인율보다 **Shipper에게 더 높은 할인율을 실수로 등록하면 마진이 음수(역마진)가 됨**.
+- **현재 코드 상태**: `upsertShipperZoneDiscounts()`(`src/app/actions/agency/zone-discounts.ts:65`)가 `getMaxAllowedZoneDiscount()`(`src/lib/ups/discount-guard.ts`)로 상한 검사를 하긴 하나, 이 함수는 **Zone 전체의 절대 원가/판매가 비율**(플랫폼 cost_price 기준 최솟값)만 검사할 뿐, **해당 Agency 자신의 할인율 대비** 초과 여부는 전혀 확인하지 않음 — 즉 지금 코드는 "역마진 방지"가 아니라 "플랫폼 원가 이하로는 못 팔게"라는 다른 목적의 가드임. 실제 예약 요금 시스템(`src/app/actions/ups/pricing-schedule.ts`, Issue #391/#616)에는 할인율/마진 검증 로직 자체가 전혀 없음(grep 결과 0건).
+- **현재 상태**: 시스템적 방지 없이 운영자가 등록 시점에 주의하는 것으로만 관리 중(Edward 승인, Issue #717 종결 코멘트 참고).
+- **임시 조치**: 없음
+- **목표 구현**: `upsertShipperZoneDiscounts()`(및 필요 시 Agency↔Sub-Agency 계층에도 동일 로직 확장)에 "등록하려는 shipper_discount_rate가 해당 agency_org_id의 현재 agency_discount_rate를 초과하면 저장 거부" 검증을 추가. `getMaxAllowedZoneDiscount`와는 별개의 신규 가드 함수로 구현 권장(기존 함수의 책임과 섞지 않음).
+- **관련 파일**: `src/app/actions/agency/zone-discounts.ts`, `src/lib/ups/discount-guard.ts`, `src/app/actions/ups/pricing-schedule.ts`, Issue #717
+- **예상 공수**: 0.5 MD
+- **우선순위**: Medium — 현재는 운영자 인지로 관리 중이라 당장 장애는 아니나, Agency 수·Shipper 수가 늘어날수록 수작업 관리 리스크 증가
+- **상태**: ⬜ 미착수 (Issue #717 결론 반영 등록, 2026-07-24)
