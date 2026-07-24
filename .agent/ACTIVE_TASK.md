@@ -516,6 +516,7 @@
 | TASK-B-193 | 260723 | Issue #741 (DEF-121) TrackingDashboard Detail 링크 로케일 프리픽스 누락 404 | P2 | 없음 | Baker (구현) | 🔔 | [TASK-B-193](tasks/TASK-B-193_260723_Iss741_Def121_TrackingDetailLink404_Baker.md) | TrackingDashboard.tsx useParams()+safeLocale · 렌더링 기반 회귀 테스트 2건 추가 · 회귀 115files/771tests ALL PASS · [PR#746](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/746) |
 | TASK-B-194 | 260723 | Issue #760 (DEF-122) getGlobalTrackingOverview isUnassigned 배열 인덱싱 오류 | P3 | 없음 | Baker (구현) | 🔔 | [TASK-B-194](tasks/TASK-B-194_260723_Iss760_Def122_TrackingUnassignedFix_Baker.md) | tracking.ts Array.isArray() 방어 수정 · 테스트 2건 · 회귀 115files/773tests ALL PASS · 빌드 PASS · [PR#762](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/762) |
 | TASK-B-197 | 260724 | Issue #778 DEF-124 픽업 주소 구조화 + 담당자 연락처 | P2 | 없음 | Baker (구현) | 🔔 | [TASK-B-197](tasks/TASK-B-197_260724_Iss778_PickupAddressPhonePattern_Baker.md) | AddressInput 전환 · DB 컬럼 6개 · placeholder 통일 · 회귀 116files/775tests ALL PASS · [PR#782](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/782) |
+| TASK-B-198 | 260724 | Issue #811 DEF-B-001 /finance/daily-billing 사이드바 메뉴 누락 | P3 | 없음 | Dave (구현) | 🔔 | [TASK-B-198](tasks/TASK-B-198_260724_Iss811_DefB001_FinanceDailyBillingNavLink_Dave.md) | NaviSidebar + messages 4개 언어 + 렌더링 테스트 3건 · 회귀 813/813 PASS · build ✅ · [PR#817](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/817) |
 ---
 
 ## Agent 현황

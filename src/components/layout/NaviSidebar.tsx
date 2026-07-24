@@ -117,6 +117,7 @@ export default function NaviSidebar({
       children: [
         { title: t("finance_revenue"), href: "/finance/revenue" },
         { title: t("finance_costs"), href: "/finance/costs" },
+        { title: t("finance_daily_billing"), href: "/finance/daily-billing" },
         { title: t("finance_transport_costs"), href: "/admin/transport-costs" },
         { title: t("finance_documents"), href: "/finance/documents" },
         { title: t("settlement"), href: "/settlement" },

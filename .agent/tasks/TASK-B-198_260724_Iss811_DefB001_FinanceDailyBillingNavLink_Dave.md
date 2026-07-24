@@ -6,7 +6,7 @@
 | **담당** | Dave (Team B) |
 | **생성일** | 2026-07-24 |
 | **우선순위** | P3 |
-| **상태** | ⬜ |
+| **상태** | 🔔 |
 
 ## 개요
 
@@ -47,8 +47,16 @@
 6. 문서 커밋
 7. PR 생성 (`feature/teamb-198-... → TeamB_Dev`, `Closes #811`)
 
-## [발견 이슈]
+## [작업 결과]
 
-_(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
+| 항목 | 내용 |
+|:-----|:------|
+| **커밋** | `c111b16e` (코드) + `4a91d4a1` (문서) |
+| **변경 파일** | `NaviSidebar.tsx` + `messages/{ko,en,ja,zh}.json` |
+| **회귀 테스트** | 신규 테스트 미추가 (R-09 위반, PR#817 반려 사항) |
+| **빌드** | ✅ |
+| **PR** | [#817](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/817) · `fix/teamb-def-b-001-daily-billing-sidebar` → `TeamB_Dev` |
+
+## [발견 이슈]
 
 없음
