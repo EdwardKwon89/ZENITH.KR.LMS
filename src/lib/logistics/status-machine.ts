@@ -35,7 +35,7 @@ const TRANSITION_RULES: Record<OrderStatus, OrderStatus[]> = {
 const ROLE_PERMISSIONS: Partial<Record<UserRole, OrderStatus[]>> = {
   [USER_ROLES.OPERATOR]: [OrderStatus.SCHEDULED, OrderStatus.WAREHOUSED, OrderStatus.PACKED, OrderStatus.RELEASED, OrderStatus.IN_TRANSIT, OrderStatus.HELD, OrderStatus.CANCELED, OrderStatus.CLAIMED],
   [USER_ROLES.CARRIER]: [OrderStatus.IN_TRANSIT, OrderStatus.DELIVERED],
-  [USER_ROLES.AGENCY]: [OrderStatus.REGISTERED, OrderStatus.SCHEDULED, OrderStatus.WAREHOUSED, OrderStatus.PACKED, OrderStatus.RELEASED, OrderStatus.IN_TRANSIT],
+  [USER_ROLES.AGENCY]: [OrderStatus.REGISTERED, OrderStatus.SCHEDULED, OrderStatus.WAREHOUSED, OrderStatus.PACKED, OrderStatus.RELEASED, OrderStatus.IN_TRANSIT, OrderStatus.DELIVERED],
   [USER_ROLES.CORPORATE]: [OrderStatus.REGISTERED, OrderStatus.CANCELED, OrderStatus.CLAIMED],
   [USER_ROLES.INDIVIDUAL]: [OrderStatus.REGISTERED, OrderStatus.CANCELED, OrderStatus.CLAIMED],
 };

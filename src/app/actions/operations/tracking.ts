@@ -254,3 +254,174 @@ export async function getUpsTrackingEvents(orderId: string) {
 
   return { events: data || [] };
 }
+
+/**
+ * [TASK-209] 실시간 UPS 배송 정보 확인 버튼 호출 액션
+ * SHXK API polling -> zen_ups_tracking_events 저장 -> DL 시 DELIVERED 상태 자동 전환
+ */
+export async function checkRealtimeUpsTrackingAction(orderId: string) {
+  const { supabase, profile, user } = await validateUserAction();
+
+  // 1. 오더 정보 및 활성 라벨 조회
+  const { data: order, error: orderError } = await supabase
+    .from('zen_orders')
+    .select('id, order_no, status, transport_mode')
+    .eq('id', orderId)
+    .single();
+
+  if (orderError || !order) {
+    return { success: false, error: '오더를 찾을 수 없습니다.' };
+  }
+
+  const { data: label } = await supabase
+    .from('zen_ups_labels')
+    .select('id, tracking_number')
+    .eq('order_id', orderId)
+    .eq('is_voided', false)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (!label?.tracking_number) {
+    return { success: false, error: '발급된 활성 UPS 운송장 번호가 없습니다.' };
+  }
+
+  // 2. SHXK API 폴링
+  const { pollTracking, storeTrackingEvents, isDelivered } = await import('@/lib/shxk/tracking');
+  const trackData = await pollTracking(label.tracking_number);
+
+  if (!trackData) {
+    return { success: false, error: 'UPS 실시간 트래킹 데이터를 가져오지 못했습니다. (SHXK API)' };
+  }
+
+  // 3. 트래킹 이벤트 저장
+  await storeTrackingEvents(label.tracking_number, orderId, label.id, trackData);
+
+  let statusUpdated = false;
+  // 4. 배송완료(DL) 시 DELIVERED 상태로 자동 전환
+  if (isDelivered(trackData.track_status) && order.status !== 'DELIVERED') {
+    const { OrderStatus } = await import('@/types/orders');
+    const { error: updateError } = await supabase
+      .from('zen_orders')
+      .update({ status: OrderStatus.DELIVERED })
+      .eq('id', orderId);
+
+    if (!updateError) {
+      await supabase.from('order_status_history').insert({
+        order_id: orderId,
+        prev_status: order.status,
+        next_status: OrderStatus.DELIVERED,
+        reason: `실시간 UPS 배송 확인 (DL 이벤트 감지: ${trackData.track_status_name || 'DELIVERED'})`,
+        changed_by: user.id,
+      });
+      statusUpdated = true;
+
+      // 배송완료 알림 발송 (Point 4 보완)
+      try {
+        const { triggerStatusChangeNotification } = await import('@/app/actions/misc/notifications');
+        await triggerStatusChangeNotification(orderId, OrderStatus.DELIVERED, supabase);
+      } catch (notifErr) {
+        logger.error(`[checkRealtimeUpsTrackingAction] Notification trigger error:`, notifErr);
+      }
+    }
+  }
+
+  revalidatePath(`/(dashboard)/orders/${orderId}`, 'page');
+  revalidatePath(`/(dashboard)/orders/${orderId}/ups-detail`, 'page');
+
+  return {
+    success: true,
+    trackStatus: trackData.track_status,
+    trackStatusName: trackData.track_status_name,
+    eventsCount: trackData.details?.length || 0,
+    statusUpdated,
+  };
+}
+
+/**
+ * [TASK-209] Agency 및 권한자에 의한 오더 수동 DELIVERED 상태 전환 액션
+ * Agency 스코프 검증 및 사유 필드를 필수로 요구합니다.
+ */
+export async function manuallySetOrderDeliveredAction(orderId: string, reason: string) {
+  const { supabase, profile, user } = await validateUserAction();
+
+  if (!reason || !reason.trim()) {
+    return { success: false, error: '수동 배송 완료 전환 사유 입력은 필수입니다.' };
+  }
+
+  // 1. 오더 정보 조회
+  const { data: order, error: orderError } = await supabase
+    .from('zen_orders')
+    .select('id, order_no, status, shipper_id')
+    .eq('id', orderId)
+    .single();
+
+  if (orderError || !order) {
+    return { success: false, error: '오더를 찾을 수 없습니다.' };
+  }
+
+  if (order.status === 'DELIVERED') {
+    return { success: false, error: '이미 배송 완료 상태입니다.' };
+  }
+
+  // 2. Agency 스코프 권한 검증
+  const isAgency = profile?.role === 'AGENCY';
+  if (isAgency) {
+    if (!profile?.org_id) {
+      return { success: false, error: 'Agency 소속 조직 정보가 없습니다.' };
+    }
+
+    const { data: agencyLink } = await supabase
+      .from('zen_agency_shippers')
+      .select('id')
+      .eq('agency_org_id', profile.org_id)
+      .eq('shipper_org_id', order.shipper_id)
+      .eq('is_active', true)
+      .maybeSingle();
+
+    if (!agencyLink) {
+      return { success: false, error: '소속 대리점이 관리하는 화주의 오더만 상태를 전환할 수 있습니다.' };
+    }
+  }
+
+  // 3. 상태전이 엔진 검증
+  const { canChangeStatus } = await import('@/lib/logistics/status-machine');
+  const { OrderStatus } = await import('@/types/orders');
+
+  const check = canChangeStatus(order.status as any, OrderStatus.DELIVERED, profile?.role);
+  if (!check.allowed) {
+    return { success: false, error: check.message || '상태를 변경할 권한이 없습니다.' };
+  }
+
+  // 4. 상태 변경 및 이력 기록
+  const { error: updateError } = await supabase
+    .from('zen_orders')
+    .update({ status: OrderStatus.DELIVERED })
+    .eq('id', orderId);
+
+  if (updateError) {
+    return { success: false, error: `상태 업데이트 실패: ${updateError.message}` };
+  }
+
+  await supabase.from('order_status_history').insert({
+    order_id: orderId,
+    prev_status: order.status,
+    next_status: OrderStatus.DELIVERED,
+    reason: `[수동 배송완료 전환] ${reason.trim()}`,
+    changed_by: user.id,
+  });
+
+  // 배송완료 알림 발송 (Point 4 보완)
+  try {
+    const { triggerStatusChangeNotification } = await import('@/app/actions/misc/notifications');
+    await triggerStatusChangeNotification(orderId, OrderStatus.DELIVERED, supabase);
+  } catch (notifErr) {
+    logger.error(`[manuallySetOrderDeliveredAction] Notification trigger error:`, notifErr);
+  }
+
+  revalidatePath(`/(dashboard)/orders/${orderId}`, 'page');
+  revalidatePath(`/(dashboard)/orders/${orderId}/ups-detail`, 'page');
+
+  return { success: true };
+}
+

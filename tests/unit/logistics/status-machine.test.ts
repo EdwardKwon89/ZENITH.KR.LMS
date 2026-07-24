@@ -130,9 +130,9 @@ describe('ZENITH Status Machine: CLAIMED 전이 규칙 (R-09)', () => {
       expect(result.allowed).toBe(true);
     });
 
-    it('TC-AG-T7: AGENCY → DELIVERED 불가 (배송은 CARRIER 전용)', () => {
+    it('TC-AG-T7: AGENCY → DELIVERED 허용 (TASK-209 수동 배송완료 전환 권한 부여)', () => {
       const result = canChangeStatus(OrderStatus.IN_TRANSIT, OrderStatus.DELIVERED, USER_ROLES.AGENCY);
-      expect(result.allowed).toBe(false);
+      expect(result.allowed).toBe(true);
     });
 
     it('TC-AG-T8: AGENCY → CANCELED 불가 (취소 권한 없음)', () => {

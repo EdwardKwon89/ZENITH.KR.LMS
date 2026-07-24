@@ -668,6 +668,16 @@
 | **TC-UPS-DISCOUNT-08** | agency 정책 없음 (data=null) — null 반환 | 정책 미등록 Agency의 경우 다른 가드에 위임 | `tests/unit/ups/discount-guard.test.ts` |
 | **TC-UPS-DISCOUNT-09** | .eq() 호출 인자 검증 | 올바른 파라미터(agency_org_id, zone_id, is_active)로 조회하는지 확인 | `tests/unit/ups/discount-guard.test.ts` |
 
+### 53. UPS Order Detail order.status 중심 상태 표시 재구성 (Issue #794 / TASK-209)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-UPS-STATUS-01** | canChangeStatus (AGENCY → DELIVERED) | Status Machine에서 AGENCY 역할의 DELIVERED 수동 전환 권한 허용 검증 | `tests/unit/ups/ups-order-detail-status.test.ts` |
+| **TC-UPS-STATUS-02** | checkRealtimeUpsTrackingAction | SHXK API 폴링 후 DL 상태 감지 시 DELIVERED 상태 자동 전환 검증 | `tests/unit/ups/ups-order-detail-status.test.ts` |
+| **TC-UPS-STATUS-03** | checkRealtimeUpsTrackingAction (라벨 누락) | 활성 UPS 라벨이 없을 경우 에러 메시지 반환 검증 | `tests/unit/ups/ups-order-detail-status.test.ts` |
+| **TC-UPS-STATUS-04** | manuallySetOrderDeliveredAction (사유 필수) | 수동 전환 사유 누락 시 차단 검증 | `tests/unit/ups/ups-order-detail-status.test.ts` |
+| **TC-UPS-STATUS-05** | manuallySetOrderDeliveredAction (Agency 소속 화주) | Agency 사용자가 소속 화주 오더 수동 DELIVERED 전환 성공 검증 | `tests/unit/ups/ups-order-detail-status.test.ts` |
+| **TC-UPS-STATUS-06** | manuallySetOrderDeliveredAction (타사 오더 차단) | Agency 사용자가 타인 화주 오더 전환 시도 시 IDOR 차단 검증 | `tests/unit/ups/ups-order-detail-status.test.ts` |
+
 ---
 ## 📝 가이드라인 (R-09 Enforcement)
 1. **추가 의무**: 신규 기능 개발 시 위 카테고리에 맞는 테스트를 반드시 추가하십시오.
