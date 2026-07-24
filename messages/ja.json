@@ -34,6 +34,7 @@
     "finance_revenue": "収入状況",
     "finance_costs": "コスト状況",
     "finance_transport_costs": "運送原価管理",
+    "finance_daily_billing": "荷主別日次請求",
     "finance_documents": "貿易書類管理",
     "settlement": "精算管理",
     "voc": "VOC管理",

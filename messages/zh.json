@@ -32,6 +32,7 @@
     "logistics_departure": "出库确认",
     "inventory": "库存管理",
     "finance_group": "财务结算",
+    "finance_daily_billing": "按货主每日结算",
     "settlement": "结算管理",
     "voc": "VOC管理",
     "support_group": "客户支持中心",

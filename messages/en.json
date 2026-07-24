@@ -56,6 +56,7 @@
     "finance_revenue": "Revenue Status",
     "finance_costs": "Cost Status",
     "finance_transport_costs": "Transport Costs",
+    "finance_daily_billing": "Daily Billing by Shipper",
     "finance_documents": "Trade Documents",
     "settlement": "Settlement",
     "voc": "VOC Management",

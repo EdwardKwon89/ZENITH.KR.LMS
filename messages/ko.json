@@ -58,6 +58,7 @@
     "finance_revenue": "수입 현황",
     "finance_costs": "비용 현황",
     "finance_transport_costs": "운송원가 관리",
+    "finance_daily_billing": "화주별 일별 청구",
     "finance_documents": "무역서류 관리",
     "settlement": "정산 관리",
     "voc": "VOC 관리",
