@@ -1712,7 +1712,7 @@
 - **관련 파일**: `src/app/api/cron/ups-tracking-poll/route.ts`, `vercel.json`, `src/lib/shxk/tracking.ts`, `src/app/actions/finance/ups-actual-charges.ts:37`, `src/lib/notifications/email.ts`
 - **예상 공수**: 폴링 주기 단축은 0.2 MD(단순 스케줄 변경), 온디맨드 새로고침 추가는 0.5 MD, 정산서 연동 방향은 선행 설계 결정 필요로 별도 산정
 - **우선순위**: Medium — 현재도 자동 전환은 동작하나(최대 24시간 지연), 정산/청구 트리거 지연에 영향
-- **상태**: 🔄 부분 진행 — (2) 온디맨드 새로고침 버튼 + Agency 소속 오더 한정 수동 DELIVERED 권한(사유 필수) 조합으로 **TASK-209(Issue #794, Riley)에 편입해 처리 중** (2026-07-24). (1) 폴링 주기 단축은 이번 Task 범위 밖, 별도 검토 필요. (3) 정산서 연동안은 순환의존으로 기각(위 내용 참고)
+- **상태**: ✅ 부분 완료 — (2) 온디맨드 새로고침 버튼(`checkRealtimeUpsTrackingAction`) + Agency 소속 오더 한정 수동 DELIVERED 권한(ZenUI 모달, 사유 필수, `manuallySetOrderDeliveredAction`) 조합으로 **TASK-209(Issue #794, Riley, PR#802) develop 병합 완료** (2026-07-24). (1) 폴링 주기 단축은 범위 밖, 별도 검토 필요. (3) 정산서 연동안은 순환의존으로 기각(위 내용 참고)
 
 ### 예외 코드 처리 — 조치 불가, 별도 기록만 유지
 
