@@ -87,6 +87,12 @@ export const orderRegistrationSchema = z.object({
   pickup_location: z.string().optional(),
   pickup_contact_name: z.string().optional(),
   pickup_contact_tel: z.string().optional(),
+  pickup_country_code: z.string().optional(),
+  pickup_state_province: z.string().optional(),
+  pickup_city: z.string().optional(),
+  pickup_address: z.string().optional(),
+  pickup_address_detail: z.string().optional(),
+  pickup_zipcode: z.string().optional(),
 
   // UPS 특송 정보 (TASK-B-059)
   ups_product_code: z.string().optional(),
@@ -109,11 +115,11 @@ export const orderRegistrationSchema = z.object({
     }
   }
   if (data.delivery_method === 'PICKUP') {
-    if (!data.pickup_location || data.pickup_location.trim() === '') {
+    if (!data.pickup_address || data.pickup_address.trim() === '') {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: 'Pickup location is required when delivery method is PICKUP',
-        path: ['pickup_location'],
+        message: 'Pickup address is required when delivery method is PICKUP',
+        path: ['pickup_address'],
       });
     }
     if (!data.pickup_contact_name || data.pickup_contact_name.trim() === '') {

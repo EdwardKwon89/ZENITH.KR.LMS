@@ -16,6 +16,7 @@ import {
 import { getGlobalTrackingOverview, syncExternalTracking } from "@/app/actions/tracking";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { useParams } from "next/navigation";
 import { format } from "date-fns";
 
 const statCardVariants = {
@@ -37,6 +38,8 @@ function StatCardSkeleton() {
 }
 
 export default function TrackingDashboard() {
+  const params = useParams();
+  const safeLocale = (params?.locale as string) || 'ko';
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [tracks, setTracks] = useState<any[]>([]);
@@ -255,7 +258,7 @@ export default function TrackingDashboard() {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <Link
-                        href={`/orders/${track.order_id}`}
+                        href={`/${safeLocale}/orders/${track.order_id}`}
                         className="p-2 inline-flex items-center gap-1 text-brand-600 hover:bg-brand-50 rounded-lg transition-colors text-sm font-medium whitespace-nowrap"
                       >
                         Detail
