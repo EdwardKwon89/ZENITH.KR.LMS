@@ -659,6 +659,16 @@
 | **TC-WF-02** | 스냅샷 갱신 후 정산 비용 재생성 검증 | SettlementEngine 로직과 일치하는 비용 생성 확인 | `tests/e2e/e2e-29-ups-freight-pipeline.spec.ts` |
 | **TC-WF-03** | 실제 오더 상세 UI 탐색 검증 | page.goto() 브라우저 네비게이션 + DB-UI 일관성 확인 | `tests/e2e/e2e-29-ups-freight-pipeline.spec.ts` |
 
+### 52. UPS Order Detail order.status 중심 상태 표시 재구성 (Issue #794 / TASK-209)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-UPS-STATUS-01** | canChangeStatus (AGENCY → DELIVERED) | Status Machine에서 AGENCY 역할의 DELIVERED 수동 전환 권한 허용 검증 | `tests/unit/ups/ups-order-detail-status.test.ts` |
+| **TC-UPS-STATUS-02** | checkRealtimeUpsTrackingAction | SHXK API 폴링 후 DL 상태 감지 시 DELIVERED 상태 자동 전환 검증 | `tests/unit/ups/ups-order-detail-status.test.ts` |
+| **TC-UPS-STATUS-03** | checkRealtimeUpsTrackingAction (라벨 누락) | 활성 UPS 라벨이 없을 경우 에러 메시지 반환 검증 | `tests/unit/ups/ups-order-detail-status.test.ts` |
+| **TC-UPS-STATUS-04** | manuallySetOrderDeliveredAction (사유 필수) | 수동 전환 사유 누락 시 차단 검증 | `tests/unit/ups/ups-order-detail-status.test.ts` |
+| **TC-UPS-STATUS-05** | manuallySetOrderDeliveredAction (Agency 소속 화주) | Agency 사용자가 소속 화주 오더 수동 DELIVERED 전환 성공 검증 | `tests/unit/ups/ups-order-detail-status.test.ts` |
+| **TC-UPS-STATUS-06** | manuallySetOrderDeliveredAction (타사 오더 차단) | Agency 사용자가 타인 화주 오더 전환 시도 시 IDOR 차단 검증 | `tests/unit/ups/ups-order-detail-status.test.ts` |
+
 ---
 
 ## 📝 가이드라인 (R-09 Enforcement)
