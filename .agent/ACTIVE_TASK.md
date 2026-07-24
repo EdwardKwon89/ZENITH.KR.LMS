@@ -15,6 +15,7 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
+| [#794](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/794) | [feat] UPS Order Detail — order.status 중심 상태 표시로 재구성 | a | p2 | - | EdwardKwon89 | 2026-07-24 |
 | [#791](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/791) | [feat] IMP-155 — Agency→Shipper 할인율 역전 역마진 방지 검증 추가 | a | p2 | in-progress | EdwardKwon89 | 2026-07-24 |
 | [#790](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/790) | [feat] IMP-153 — CI supabase db reset 시 authenticated/anon 롤 기본 테이블 GRANT 누락 | b | p3 | - | 미배정 | 2026-07-24 |
 | [#788](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/788) | [feat] IMP-154 — UPS 라벨 회수(removeorder) 실패가 조용히 삼켜짐, 회수 성공 여부 신뢰 불가 | b | p1 | - | 미배정 | 2026-07-24 |
@@ -22,7 +23,7 @@
 | [#777](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/777) | [UI] 배송방식 픽업수령 선택 시 Local Tracking No 필드 비활성화 | b | p3 | done | 미배정 | 2026-07-23 |
 | [#773](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/773) | [defect] DEF-121 — UPS 스냅샷 캐시, 중량 변경 시 정산 자동 재계산 누락 | a | p1 | - | EdwardKwon89 | 2026-07-24 |
 | [#771](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/771) | DEF-123: zen_tracking_configs.tracking_no가 실제 UPS 운송장번호로 갱신되지 않음 | b | p3 | done | 미배정 | 2026-07-23 |
-| [#770](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/770) | [설계 협의 필요] zen_tracking_configs provider_type/provider_name — transport_mode 반영 방식 (Edward 협의 필요) | - | - | blocked | EdwardKwon89 | 2026-07-23 |
+| [#770](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/770) | [설계 협의 필요] zen_tracking_configs provider_type/provider_name — transport_mode 반영 방식 (Edward 협의 필요) | - | - | blocked | EdwardKwon89 | 2026-07-24 |
 | [#760](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/760) | DEF-122: getGlobalTrackingOverview is_unassigned 배열 인덱싱 오류 — 정상 오더도 Unassigned 오분류 | b | p3 | done | 미배정 | 2026-07-23 |
 | [#741](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/741) | DEF-121: TrackingDashboard Detail 링크 로케일 프리픽스 누락 — 404 발생 | b | p2 | done | 미배정 | 2026-07-23 |
 | [#728](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/728) | [defect] DEF-120 — zen_tracking_configs RLS에 AGENCY SELECT 커버리지 없음, 통합 트래킹 침묵 실패 | b | p2 | done | 미배정 | 2026-07-23 |
