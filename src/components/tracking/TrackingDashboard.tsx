@@ -258,7 +258,7 @@ export default function TrackingDashboard() {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <Link
-                        href={`/${safeLocale}/orders/${track.order_id}`}
+                        href={`/${safeLocale}/orders/${track.order_id}${track.order?.transport_mode === 'UPS' ? '/ups-detail' : ''}`}
                         className="p-2 inline-flex items-center gap-1 text-brand-600 hover:bg-brand-50 rounded-lg transition-colors text-sm font-medium whitespace-nowrap"
                       >
                         Detail
