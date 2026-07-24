@@ -15,10 +15,23 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
-| [#718](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/718) | 2026.07.22 SNTL 회의록 | - | - | - | 미배정 | 2026-07-22 |
-| [#717](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/717) | [design] SNTL 원가 Matrix — 전역 공용값+정산 미반영 구조, 의도된 설계인지 Team B 협의 필요 | a | p2 | - | 미배정 | 2026-07-22 |
+| [#812](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/812) | [defect] DEF-126 — 신규 UPS Order Detail 화면 연결 누락 (OrderDataTable 링크 미분기) | b | p1 | review | 미배정 | 2026-07-24 |
+| [#811](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/811) | [UI] /finance/daily-billing 페이지가 사이드바 메뉴에 연결되지 않음 (DEF-B-001) | b | p3 | done | 미배정 | 2026-07-24 |
+| [#790](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/790) | [feat] IMP-153 — CI supabase db reset 시 authenticated/anon 롤 기본 테이블 GRANT 누락 | b | p3 | - | 미배정 | 2026-07-24 |
+| [#788](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/788) | [feat] IMP-154 — UPS 라벨 회수(removeorder) 실패가 조용히 삼켜짐, 회수 성공 여부 신뢰 불가 | b | p1 | - | 미배정 | 2026-07-24 |
+| [#778](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/778) | [UI] 배송방식 픽업수령 선택 시 픽업 장소/담당자 연락처 입력 방식을 기존 주소/전화번호 입력 방식으로 준용 | b | p3 | done | 미배정 | 2026-07-24 |
+| [#777](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/777) | [UI] 배송방식 픽업수령 선택 시 Local Tracking No 필드 비활성화 | b | p3 | done | 미배정 | 2026-07-23 |
+| [#773](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/773) | [defect] DEF-125 — UPS 스냅샷 캐시, 중량 변경 시 정산 자동 재계산 누락 | a | p1 | - | EdwardKwon89 | 2026-07-24 |
+| [#771](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/771) | DEF-123: zen_tracking_configs.tracking_no가 실제 UPS 운송장번호로 갱신되지 않음 | b | p3 | done | 미배정 | 2026-07-23 |
+| [#770](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/770) | [설계 협의 필요] zen_tracking_configs provider_type/provider_name — transport_mode 반영 방식 (Edward 협의 필요) | - | - | blocked | EdwardKwon89 | 2026-07-24 |
+| [#760](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/760) | DEF-122: getGlobalTrackingOverview is_unassigned 배열 인덱싱 오류 — 정상 오더도 Unassigned 오분류 | b | p3 | done | 미배정 | 2026-07-23 |
+| [#741](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/741) | DEF-121: TrackingDashboard Detail 링크 로케일 프리픽스 누락 — 404 발생 | b | p2 | done | 미배정 | 2026-07-23 |
+| [#728](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/728) | [defect] DEF-120 — zen_tracking_configs RLS에 AGENCY SELECT 커버리지 없음, 통합 트래킹 침묵 실패 | b | p2 | done | 미배정 | 2026-07-23 |
+| [#727](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/727) | [fix] 창고 화면 전반 일괄처리 지원 여부 점검·보완 (SNTL 회의 W7) | b | p3 | in-progress | 미배정 | 2026-07-23 |
+| [#726](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/726) | [fix] 급증수수료 등록 데이터 화폐단위(KRW) 감사 (SNTL 회의 W6) | b | p3 | in-progress | 미배정 | 2026-07-23 |
+| [#725](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/725) | [feat] 입고 처리 시 부피중량/중량 수정 기능 추가 (SNTL 회의 W5) | b | p1 | blocked | 미배정 | 2026-07-24 |
+| [#718](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/718) | 2026.07.22 SNTL 회의록 | - | - | - | 미배정 | 2026-07-23 |
 | [#713](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/713) | [feat] 출고확정처리(/warehouse/departure) 화면에 오늘의 이력 패널 신설 | b | p3 | done | 미배정 | 2026-07-22 |
-| [#711](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/711) | [Team A] Phase 2 — 신규 UPS 물류관리 메뉴 흐름 전체 E2E 검증 (오더픽업→...→DELIVERED) | a | p1 | - | EdwardKwon89 | 2026-07-22 |
 | [#708](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/708) | [fix] getTodayUpsHistory 500 에러 — .contains() 연산자가 text 컬럼에 적용 불가 (getTodayPickupHistory도 동일 결함) | b | p1 | done | 미배정 | 2026-07-22 |
 | [#704](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/704) | [feat] 오늘의 UPS 접수 이력 패널 미구현 — 백엔드 조회 함수 신설 필요 | b | p3 | done | 미배정 | 2026-07-22 |
 | [#700](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/700) | [fix] confirmOutbound WAREHOUSED 전용 가드 버그(PACKED 출고 불가) + 출고확정 버튼 텍스트 변경 | b | p1 | done | 미배정 | 2026-07-22 |
@@ -31,7 +44,7 @@
 | [#667](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/667) | [defect] DEF-116 — checkLabelPermission()에 AGENCY 누락, UPS 라벨 기능 7종 침묵 실패 | b | p1 | done | 미배정 | 2026-07-22 |
 | [#664](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/664) | [fix] zen_shxk_api_logs 조회 권한을 전체 인증 사용자로 확대 | b | p3 | done | 미배정 | 2026-07-22 |
 | [#661](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/661) | [feat] IMP — SHXK UPS API 호출 통합 이력(감사 로그) 테이블 신설 | b | p3 | done | 미배정 | 2026-07-22 |
-| [#659](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/659) | [defect] DEF-115 — WarehouseUpsReceiving.partial_success i18n 키 누락 | b | p4 | - | 미배정 | 2026-07-21 |
+| [#659](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/659) | [defect] DEF-115 — WarehouseUpsReceiving.partial_success i18n 키 누락 | b | p4 | done | 미배정 | 2026-07-23 |
 | [#655](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/655) | [defect] DEF-114 — ROLE_PERMISSIONS에 AGENCY 누락, 창고관리 기능 전체 500 에러 | b | p1 | done | 미배정 | 2026-07-22 |
 | [#616](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/616) | [GOV] 예약 요금(pricing-schedule) 시스템에 Agency/Shipper 할인율 마진 검증 부재 — Team B 검토 요청 | b | p2 | - | 미배정 | 2026-07-20 |
 | [#609](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/609) | [Aiden] CI 지연 원인 조사 결과 + 조치 — 큐 혼잡 완화 + TeamB_Dev 병합 CI 대기 불요로 개정 | b | p1 | - | jungjs | 2026-07-20 |
