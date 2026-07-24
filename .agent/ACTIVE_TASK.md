@@ -16,7 +16,6 @@
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
 | [#794](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/794) | [feat] UPS Order Detail — order.status 중심 상태 표시로 재구성 | a | p2 | in-progress | EdwardKwon89 | 2026-07-24 |
-| [#791](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/791) | [feat] IMP-155 — Agency→Shipper 할인율 역전 역마진 방지 검증 추가 | a | p2 | review | EdwardKwon89 | 2026-07-24 |
 | [#790](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/790) | [feat] IMP-153 — CI supabase db reset 시 authenticated/anon 롤 기본 테이블 GRANT 누락 | b | p3 | - | 미배정 | 2026-07-24 |
 | [#788](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/788) | [feat] IMP-154 — UPS 라벨 회수(removeorder) 실패가 조용히 삼켜짐, 회수 성공 여부 신뢰 불가 | b | p1 | - | 미배정 | 2026-07-24 |
 | [#778](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/778) | [UI] 배송방식 픽업수령 선택 시 픽업 장소/담당자 연락처 입력 방식을 기존 주소/전화번호 입력 방식으로 준용 | b | p3 | done | 미배정 | 2026-07-24 |
