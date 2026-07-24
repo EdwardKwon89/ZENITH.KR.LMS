@@ -1,5 +1,14 @@
 import { describe, it, expect, vi } from 'vitest';
-import { getMaxAllowedZoneDiscount } from '@/lib/ups/discount-guard';
+import { getMaxAllowedZoneDiscount, validateAgencyReverseMargin } from '@/lib/ups/discount-guard';
+
+function makeSingleQuery(resolved: { data: any; error?: any }) {
+  const chain: any = {
+    select: vi.fn().mockReturnThis(),
+    eq: vi.fn().mockReturnThis(),
+    single: vi.fn().mockResolvedValue({ data: resolved.data, error: resolved.error ?? null }),
+  };
+  return chain;
+}
 
 function makeQuery(resolved: { data: any; error?: any }) {
   const chain: any = {
@@ -67,5 +76,54 @@ describe('TC-UPS-DISCOUNT: getMaxAllowedZoneDiscount', () => {
     expect(q1.in).toHaveBeenCalledWith('product_id', ['prod-a', 'prod-b']);
     expect(q2.in).toHaveBeenCalledWith('product_id', ['prod-a', 'prod-b']);
     expect(q3.in).toHaveBeenCalledWith('product_id', ['prod-a', 'prod-b']);
+  });
+});
+
+describe('TC-UPS-DISCOUNT: validateAgencyReverseMargin', () => {
+  it('TC-UPS-DISCOUNT-05: shipper_rate <= agency_rate — 정상 통과 (null 반환)', async () => {
+    const supabase = { from: vi.fn() } as any;
+    supabase.from.mockReturnValueOnce(makeSingleQuery({ data: { discount_rate: 0.15 } }));
+
+    const result = await validateAgencyReverseMargin(supabase, 'agency-001', 'zone-001', 0.1);
+    expect(result).toBeNull();
+  });
+
+  it('TC-UPS-DISCOUNT-06: shipper_rate === agency_rate — 정상 통과 (null 반환)', async () => {
+    const supabase = { from: vi.fn() } as any;
+    supabase.from.mockReturnValueOnce(makeSingleQuery({ data: { discount_rate: 0.15 } }));
+
+    const result = await validateAgencyReverseMargin(supabase, 'agency-001', 'zone-001', 0.15);
+    expect(result).toBeNull();
+  });
+
+  it('TC-UPS-DISCOUNT-07: shipper_rate > agency_rate — 역마진 감지 (에러 메시지 반환)', async () => {
+    const supabase = { from: vi.fn() } as any;
+    supabase.from.mockReturnValueOnce(makeSingleQuery({ data: { discount_rate: 0.1 } }));
+
+    const result = await validateAgencyReverseMargin(supabase, 'agency-001', 'zone-001', 0.2);
+    expect(result).not.toBeNull();
+    expect(result).toContain('초과');
+    expect(result).toContain('20.0%');
+    expect(result).toContain('10.0%');
+  });
+
+  it('TC-UPS-DISCOUNT-08: agency 정책 없음 (data=null) — null 반환 (통과)', async () => {
+    const supabase = { from: vi.fn() } as any;
+    supabase.from.mockReturnValueOnce(makeSingleQuery({ data: null }));
+
+    const result = await validateAgencyReverseMargin(supabase, 'agency-001', 'zone-001', 0.5);
+    expect(result).toBeNull();
+  });
+
+  it('TC-UPS-DISCOUNT-09: .eq() 호출 인자 검증 — agency_org_id, zone_id, is_active 순서 확인', async () => {
+    const supabase = { from: vi.fn() } as any;
+    const q = makeSingleQuery({ data: { discount_rate: 0.15 } });
+    supabase.from.mockReturnValueOnce(q);
+
+    await validateAgencyReverseMargin(supabase, 'agency-001', 'zone-001', 0.1);
+    expect(supabase.from).toHaveBeenCalledWith('zen_agency_pricing_policies');
+    expect(q.eq).toHaveBeenNthCalledWith(1, 'agency_org_id', 'agency-001');
+    expect(q.eq).toHaveBeenNthCalledWith(2, 'zone_id', 'zone-001');
+    expect(q.eq).toHaveBeenNthCalledWith(3, 'is_active', true);
   });
 });

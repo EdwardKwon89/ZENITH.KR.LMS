@@ -9,7 +9,7 @@
 | **우선순위** | P2 |
 | **전제조건** | 없음 |
 | **커밋 태그** | `[D_Kai]` |
-| **상태** | ⬜ |
+| **상태** | 🔔 |
 
 ---
 
@@ -47,17 +47,28 @@ D_Kai가 TASK-190/191/192(Issue #614/#617/#618)에서 이 영역(SNTL 할인율 
 
 ## DoD
 
-- [ ] 신규 역마진 방지 가드 함수 구현
-- [ ] `upsertShipperZoneDiscounts()` 연동 확인
-- [ ] Sub-Agency 계층 적용 여부 확인(적용 시 반영)
-- [ ] 기존 `getMaxAllowedZoneDiscount()` 로직/책임 변경 없음 확인(별개 가드로 구현)
-- [ ] 신규 회귀 테스트 추가 + `LIVE_REGRESSION_TEST_MAP.md` 등록(R-09)
-- [ ] 회귀 테스트(`npm run test:regression`) 전체 PASS 확인
-- [ ] task file `[작업 결과]` 작성 + 커밋 해시 기재
-- [ ] ACTIVE_TASK.md 상태 반영
+- [x] 신규 역마진 방지 가드 함수 구현
+- [x] `upsertShipperZoneDiscounts()` 연동 확인
+- [x] Sub-Agency 계층 적용 여부 확인(적용 시 반영) — Sub-Agency는 `zen_agency_pricing_policies`에 별도 policy를 가지므로 동일 로직이 자동 적용됨
+- [x] 기존 `getMaxAllowedZoneDiscount()` 로직/책임 변경 없음 확인(별개 가드로 구현)
+- [x] 신규 회귀 테스트 추가 + `LIVE_REGRESSION_TEST_MAP.md` 등록(R-09)
+- [x] 회귀 테스트(`npm test`) 전체 PASS 확인 — 785 passed, 3 pre-existing failures(env config)
+- [x] task file `[작업 결과]` 작성 + 커밋 해시 기재
+- [x] ACTIVE_TASK.md 상태 반영
 
 ---
 
 ## [작업 결과]
 
-_(D_Kai 작성 예정)_
+### 구현 요약
+- `src/lib/ups/discount-guard.ts`: 신규 `validateAgencyReverseMargin()` 추가 — zone별 `zen_agency_pricing_policies.discount_rate` 조회 후 shipper_rate 초과 시 에러 문자열 반환(초과 안 하면 null)
+- `src/app/actions/agency/zone-discounts.ts`: `upsertShipperZoneDiscounts()` 루프 내 `getMaxAllowedZoneDiscount`보다 먼저 역마진 검증 수행
+
+### 테스트
+- `tests/unit/ups/discount-guard.test.ts`: TC-UPS-DISCOUNT-05~09 신규 4건 추가
+- `LIVE_REGRESSION_TEST_MAP.md`: 섹션 52 등록
+- 회귀 테스트: 785 passed, 3 pre-existing failures (env config)
+
+### 적용 범위
+- Sub-Agency 계층: `zen_agency_pricing_policies`는 org_id 기준으로 조회되므로 Sub-Agency가 자신의 policy를 가지고 있으면 자동 적용됨. 별도 확장 불필요.
+- 기존 `getMaxAllowedZoneDiscount()`: 변경 없음 — `validateAgencyReverseMargin`은 별개의 독립 가드로 추가됨.

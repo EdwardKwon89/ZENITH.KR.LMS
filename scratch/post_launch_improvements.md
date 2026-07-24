@@ -1698,7 +1698,7 @@
 - **관련 파일**: `src/app/actions/agency/zone-discounts.ts`, `src/lib/ups/discount-guard.ts`, `src/app/actions/ups/pricing-schedule.ts`, Issue #717
 - **예상 공수**: 0.5 MD
 - **우선순위**: Medium — 현재는 운영자 인지로 관리 중이라 당장 장애는 아니나, Agency 수·Shipper 수가 늘어날수록 수작업 관리 리스크 증가
-- **상태**: 🔄 진행 중 — TASK-208(D_Kai) 배정, GitHub Issue #791 등록 완료 (2026-07-24)
+- **상태**: 🔔 검토 대기 — TASK-208(D_Kai) 구현 완료, PR #791 검토 대기 (2026-07-24)
 
 ---
 
