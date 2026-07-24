@@ -3,18 +3,19 @@ import { requireAuth } from '@/lib/auth/guards';
 import { getOrderDetails } from '@/app/actions/operations/orders';
 import { getOrderRateSnapshot } from '@/app/actions/operations/tisa';
 import { getUpsLabelStatus } from '@/app/actions/operations/ups-labels';
-import { getTrackingEvents, getUpsTrackingEvents } from '@/app/actions/operations/tracking';
+import { getUpsTrackingEvents } from '@/app/actions/operations/tracking';
 import { checkPermission } from '@/lib/auth/rbac';
 import { notFound, redirect } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Package, Truck, ShieldCheck, FileText, Globe, Calendar, User, MapPin } from 'lucide-react';
+import { ArrowLeft, Truck, FileText, User } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
 
 import { ZenCard, ZenBadge } from '@/components/ui/ZenUI';
+import UpsOrderStatusStepper from '@/components/ups/UpsOrderStatusStepper';
+import UpsPackageItemsModal from '@/components/ups/UpsPackageItemsModal';
 import UpsOrderBreakdownCard from '@/components/ups/UpsOrderBreakdownCard';
 import { UpsActualAdjustmentForm } from '@/components/orders/UpsActualAdjustmentForm';
 import OrderFinanceSummary from '@/components/finance/OrderFinanceSummary';
-import TrackingTimeline from '@/components/tracking/TrackingTimeline';
 import UpsTrackingEventsList from '@/components/tracking/UpsTrackingEventsList';
 import DocumentDownloadButton from '@/components/documents/DocumentDownloadButton';
 import CommercialInvoicePDF from '@/components/documents/CommercialInvoicePDF';
@@ -91,10 +92,6 @@ export default async function UpsOrderDetailPage({ params }: UpsOrderDetailPageP
   const { data: incidentFees } = linkedInvoiceId
     ? await supabase.from('zen_incident_fees').select('id, description, currency, fee_amount').eq('invoice_id', linkedInvoiceId)
     : { data: [] };
-
-  // Fetch Tracking Events
-  const trackingData = await getTrackingEvents(orderId);
-  const trackingEvents = trackingData?.events || [];
 
   // Fetch UPS Tracking Events (zen_ups_tracking_events)
   const upsTrackingData = await getUpsTrackingEvents(orderId);
@@ -239,49 +236,58 @@ export default async function UpsOrderDetailPage({ params }: UpsOrderDetailPageP
           <ArrowLeft className="w-4 h-4" />
           일반 오더 상세 보기로 이동
         </Link>
-        <ZenBadge className="text-xs font-mono font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">UPS Special Delivery Detail</ZenBadge>
+        <ZenBadge className="text-xs font-mono font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+          UPS Special Delivery Detail
+        </ZenBadge>
       </div>
 
       {/* Main Grid Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column: UPS Breakdown, Adjustment Form, Documents */}
+        {/* Left Column: Main Stepper, Breakdown, Adjustment Form, SHXK Events, Documents */}
         <div className="lg:col-span-2 flex flex-col gap-6">
-          {/* UPS Specific Breakdown & Zone Card */}
-          <UpsOrderBreakdownCard
-            orderNo={order.order_no}
-            destCountryCode={(order as any).dest_country_code || (order.dest_port as any)?.country_code || 'US'}
-            transportMode={order.transport_mode}
-            snapshotMeta={(snapshot as any)?.metadata}
-            cargoDetails={order.cargo_details as any}
-            packages={order.packages || []}
+          {/* 1. Primary Stepper: order.status Progress Bar & Real-time Poll Button */}
+          <UpsOrderStatusStepper
+            orderId={orderId}
+            currentStatus={order.status || ''}
+            trackingNumber={upsLabelStatus.trackingNumber}
+            canManuallySetDelivered={isAdmin || isAgency || profile?.role === 'OPERATOR'}
           />
 
-          {/* Actual Charges Adjustment Form (Issue #589) */}
+          {/* 2. UPS Breakdown & Cargo Details (with Items Modal trigger) */}
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                운임 및 화물 구성 (Breakdown & Packages)
+              </span>
+              <UpsPackageItemsModal packages={order.packages || []} />
+            </div>
+            <UpsOrderBreakdownCard
+              orderNo={order.order_no}
+              destCountryCode={(order as any).dest_country_code || (order.dest_port as any)?.country_code || 'US'}
+              transportMode={order.transport_mode}
+              snapshotMeta={(snapshot as any)?.metadata}
+              cargoDetails={order.cargo_details as any}
+              packages={order.packages || []}
+            />
+          </div>
+
+          {/* 3. Actual Charges Adjustment Form (Issue #589) */}
           <UpsActualAdjustmentForm
             orderId={orderId}
             orderStatus={order.status || ''}
             isPlatformAdmin={canManageFinance}
           />
 
-          {/* Tracking Timeline (UPS events) */}
-          <ZenCard className="p-6">
-            <h3 className="text-lg font-bold text-slate-900 dark:text-gray-100 mb-4 flex items-center gap-2">
-              <Truck className="w-5 h-5 text-amber-500" />
-              UPS 배송 실시간 트래킹 타임라인
-            </h3>
-            <TrackingTimeline events={trackingEvents} />
-          </ZenCard>
-
-          {/* UPS SHXK Tracking Events (zen_ups_tracking_events) */}
+          {/* 4. UPS SHXK Tracking Events (zen_ups_tracking_events) - Auxiliary detail */}
           <section className="bg-white dark:bg-zinc-950 rounded-3xl border border-slate-100 dark:border-zinc-800 p-6 shadow-sm">
             <h3 className="text-lg font-bold text-slate-900 dark:text-gray-100 mb-4 flex items-center gap-2">
               <Truck className="w-5 h-5 text-indigo-500" />
-              UPS 트래킹 이벤트 (SHXK)
+              UPS 트래킹 이벤트 상세 (SHXK API)
             </h3>
             <UpsTrackingEventsList events={upsTrackingEvents} />
           </section>
 
-          {/* Trade Documents Section */}
+          {/* 5. Trade Documents Section */}
           <ZenCard className="p-6 flex flex-col gap-4">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-bold text-slate-900 dark:text-gray-100 flex items-center gap-2">
