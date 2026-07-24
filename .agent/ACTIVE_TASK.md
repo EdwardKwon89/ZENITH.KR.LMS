@@ -518,6 +518,7 @@
 | TASK-B-197 | 260724 | Issue #778 DEF-124 픽업 주소 구조화 + 담당자 연락처 | P2 | 없음 | Baker (구현) | 🔔 | [TASK-B-197](tasks/TASK-B-197_260724_Iss778_PickupAddressPhonePattern_Baker.md) | AddressInput 전환 · DB 컬럼 6개 · placeholder 통일 · 회귀 116files/775tests ALL PASS · [PR#782](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/782) |
 | TASK-B-198 | 260724 | Issue #811 DEF-B-001 /finance/daily-billing 사이드바 메뉴 누락 | P3 | 없음 | Dave (구현) | 🔔 | [TASK-B-198](tasks/TASK-B-198_260724_Iss811_DefB001_FinanceDailyBillingNavLink_Dave.md) | NaviSidebar + messages 4개 언어 + 렌더링 테스트 3건 · 회귀 813/813 PASS · build ✅ · [PR#817](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/817) |
 | TASK-B-199 | 260724 | Issue #812 DEF-126 OrderDataTable UPS View Details 링크 분기 | P1 | 없음 | Baker (구현) | 🔔 | [TASK-B-199](tasks/TASK-B-199_260724_Iss812_DefB126_UpsOrderDetailNavFix_Baker.md) | UPS 주문 /ups-detail 링크 분기 · 테스트 2건 · 회귀 117files/777tests ALL PASS · [PR#821](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/821) |
+| TASK-B-200 | 260724 | Issue #812 DEF-126 통합트랙킹 Detail 링크 UPS 분기 | P2 | 없음 | Baker (구현) | 🔔 | [TASK-B-200](tasks/TASK-B-200_260724_Iss812_TrackingDashboardUpsDetailLink_Baker.md) | tracking.ts select +transport_mode · TrackingDashboard 링크 분기 · 테스트 2건 · 회귀 122files/817tests ALL PASS · [PR#823](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/823) |
 ---
 
 ## Agent 현황
