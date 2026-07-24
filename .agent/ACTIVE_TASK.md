@@ -15,9 +15,10 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
+| [#788](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/788) | [feat] IMP-154 — UPS 라벨 회수(removeorder) 실패가 조용히 삼켜짐, 회수 성공 여부 신뢰 불가 | b | p1 | - | 미배정 | 2026-07-24 |
 | [#778](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/778) | [UI] 배송방식 픽업수령 선택 시 픽업 장소/담당자 연락처 입력 방식을 기존 주소/전화번호 입력 방식으로 준용 | b | p3 | - | 미배정 | 2026-07-23 |
 | [#777](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/777) | [UI] 배송방식 픽업수령 선택 시 Local Tracking No 필드 비활성화 | b | p3 | done | 미배정 | 2026-07-23 |
-| [#773](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/773) | [defect] DEF-121 — UPS 스냅샷 캐시, 중량 변경 시 정산 자동 재계산 누락 | a | p1 | - | EdwardKwon89 | 2026-07-23 |
+| [#773](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/773) | [defect] DEF-121 — UPS 스냅샷 캐시, 중량 변경 시 정산 자동 재계산 누락 | a | p1 | - | EdwardKwon89 | 2026-07-24 |
 | [#771](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/771) | DEF-123: zen_tracking_configs.tracking_no가 실제 UPS 운송장번호로 갱신되지 않음 | b | p3 | done | 미배정 | 2026-07-23 |
 | [#770](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/770) | [설계 협의 필요] zen_tracking_configs provider_type/provider_name — transport_mode 반영 방식 (Edward 협의 필요) | - | - | blocked | EdwardKwon89 | 2026-07-23 |
 | [#760](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/760) | DEF-122: getGlobalTrackingOverview is_unassigned 배열 인덱싱 오류 — 정상 오더도 Unassigned 오분류 | b | p3 | done | 미배정 | 2026-07-23 |
@@ -28,7 +29,7 @@
 | [#728](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/728) | [defect] DEF-120 — zen_tracking_configs RLS에 AGENCY SELECT 커버리지 없음, 통합 트래킹 침묵 실패 | b | p2 | done | 미배정 | 2026-07-23 |
 | [#727](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/727) | [fix] 창고 화면 전반 일괄처리 지원 여부 점검·보완 (SNTL 회의 W7) | b | p3 | in-progress | 미배정 | 2026-07-23 |
 | [#726](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/726) | [fix] 급증수수료 등록 데이터 화폐단위(KRW) 감사 (SNTL 회의 W6) | b | p3 | in-progress | 미배정 | 2026-07-23 |
-| [#725](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/725) | [feat] 입고 처리 시 부피중량/중량 수정 기능 추가 (SNTL 회의 W5) | b | p1 | blocked | 미배정 | 2026-07-23 |
+| [#725](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/725) | [feat] 입고 처리 시 부피중량/중량 수정 기능 추가 (SNTL 회의 W5) | b | p1 | blocked | 미배정 | 2026-07-24 |
 | [#718](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/718) | 2026.07.22 SNTL 회의록 | - | - | - | 미배정 | 2026-07-23 |
 | [#713](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/713) | [feat] 출고확정처리(/warehouse/departure) 화면에 오늘의 이력 패널 신설 | b | p3 | done | 미배정 | 2026-07-22 |
 | [#708](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/708) | [fix] getTodayUpsHistory 500 에러 — .contains() 연산자가 text 컬럼에 적용 불가 (getTodayPickupHistory도 동일 결함) | b | p1 | done | 미배정 | 2026-07-22 |
