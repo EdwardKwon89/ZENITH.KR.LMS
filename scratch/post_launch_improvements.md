@@ -1674,14 +1674,14 @@
 
 ## [IMP-154] UPS 라벨 회수(`removeorder`) — SHXK 실패가 조용히 삼켜짐, 회수 성공 여부를 신뢰할 수 없음
 
-- **발견 경위**: DEF-121(스냅샷 캐시) 논의 중 "배송정보(Zone/국가) 변경 시 오더 재생성" 설계안이 나오면서, "재생성 전 UPS 라벨 회수 절차·인터페이스가 실제로 존재하는가"를 Edward 지시로 확인. `cancelUpsRegistration()`(`src/app/actions/operations/ups-labels.ts:429-502`)이 SHXK API `removeorder(referenceNo)`(`src/lib/shxk/order.ts:90-98`)를 실제로 호출하는 것은 확인됨(mock 전용 아님, 진짜 carrier 연동). 다만 코드를 직접 읽어보니 `removeRes.success === 0`(SHXK 측 회수 실패)일 때 `logger.warn()`으로 **로그만 남기고** 이후 로직을 그대로 진행 — 내부 `zen_ups_label_documents`/Storage 파일/`zen_ups_labels` 행을 전부 지우고 무조건 `{ success: true }`를 반환함. 즉 **UPS가 실제로 회수를 거부해도 화면에는 항상 "성공"으로 표시됨.**
+- **발견 경위**: DEF-124(스냅샷 캐시) 논의 중 "배송정보(Zone/국가) 변경 시 오더 재생성" 설계안이 나오면서, "재생성 전 UPS 라벨 회수 절차·인터페이스가 실제로 존재하는가"를 Edward 지시로 확인. `cancelUpsRegistration()`(`src/app/actions/operations/ups-labels.ts:429-502`)이 SHXK API `removeorder(referenceNo)`(`src/lib/shxk/order.ts:90-98`)를 실제로 호출하는 것은 확인됨(mock 전용 아님, 진짜 carrier 연동). 다만 코드를 직접 읽어보니 `removeRes.success === 0`(SHXK 측 회수 실패)일 때 `logger.warn()`으로 **로그만 남기고** 이후 로직을 그대로 진행 — 내부 `zen_ups_label_documents`/Storage 파일/`zen_ups_labels` 행을 전부 지우고 무조건 `{ success: true }`를 반환함. 즉 **UPS가 실제로 회수를 거부해도 화면에는 항상 "성공"으로 표시됨.**
 - **현재 상태**: 회수 가능 여부는 호출부(`undoUpsRegistration()`, `warehouse.ts:518-541`)에서 오더 상태가 `PACKED`일 때만 허용하도록 막혀있으나, 이건 내부 DB 상태 체크일 뿐 UPS/SHXK 측 실제 배송 진행 상태(`gettrack`)는 전혀 조회하지 않음 — UPS가 이미 픽업/스캔한 이후에도 내부적으로는 `PACKED` 상태로 남아있으면 취소 버튼이 그대로 노출되고, 실패해도 성공으로 보고됨. TASK-B-182(Issue #695)에서 이 함수 주변 정리(다중 라벨 삭제·FK CASCADE·Storage 정리·AGENCY RLS DELETE 정책)를 이미 했지만, `removeorder` 실패를 삼키는 부분 자체는 손대지 않고 그대로 남아있음(범위 밖으로 처리됨, 별도 인지된 리스크로 문서화되어 있지도 않음).
-- **왜 지금 중요한가**: "배송정보 변경 시 라벨 회수 후 기존 오더 폐기·재오더 처리"라는 새 설계(DEF-121/Issue #725 연계)가 이 함수의 성공 신호를를 그대로 믿고 진행하면, **UPS 쪽에서 실제로는 회수가 안 된 상태에서 내부적으로만 폐기 처리되어, 이미 배차된 UPS 화물이 그대로 나가는데 시스템상으로는 신규 오더만 잡히는 불일치(중복/유령 배송)가 생길 수 있음.**
+- **왜 지금 중요한가**: "배송정보 변경 시 라벨 회수 후 기존 오더 폐기·재오더 처리"라는 새 설계(DEF-124/Issue #725 연계)가 이 함수의 성공 신호를를 그대로 믿고 진행하면, **UPS 쪽에서 실제로는 회수가 안 된 상태에서 내부적으로만 폐기 처리되어, 이미 배차된 UPS 화물이 그대로 나가는데 시스템상으로는 신규 오더만 잡히는 불일치(중복/유령 배송)가 생길 수 있음.**
 - **임시 조치**: 없음 — 현재 로직 그대로 사용 중
 - **목표 구현**: (1) `removeRes.success === 0`일 때 예외를 던지거나 명확한 실패 응답을 반환해 호출부가 실제로 실패를 인지하도록 수정, (2) 가능하면 회수 전/후 `gettrack`으로 UPS 측 실제 처리 상태를 확인하는 검증 단계 추가, (3) 배송정보 변경→재오더 설계를 실제 구현할 때는 이 함수의 반환값을 신뢰하지 말고 별도 확인 로직을 두거나, 이 IMP 해결을 선행 조건으로 삼을 것
 - **관련 파일**: `src/app/actions/operations/ups-labels.ts` (`cancelUpsRegistration`, `voidUpsLabel`), `src/lib/shxk/order.ts` (`removeorder`), `src/app/actions/operations/warehouse.ts` (`undoUpsRegistration`)
 - **예상 공수**: 0.5~1 MD (에러 전파 수정은 작으나, gettrack 검증 추가 시 커짐)
-- **우선순위**: High — DEF-121 배송정보 재생성 설계가 이 기능에 의존하므로, 그 설계를 실제 구현하기 전에 반드시 해결 필요
+- **우선순위**: High — DEF-124 배송정보 재생성 설계가 이 기능에 의존하므로, 그 설계를 실제 구현하기 전에 반드시 해결 필요
 - **담당**: **Team B** — `git log`로 확인 결과 `ups-labels.ts`/`shxk/order.ts` 전체 커밋 이력(27건)이 Team B(Baker/Dave/Mike)이며, 이 취소 로직 주변을 이미 다룬 TASK-B-182(Issue #695)도 Baker 작업. Team A 파일 소유권 범위 밖으로 판단(Edward 지적, 2026-07-24) — GitHub Issue #788로 Team B에 정식 이관
 - **상태**: ⬜ 미착수 — Issue #788 등록 완료, Team B 배정 대기 (2026-07-24)
 
