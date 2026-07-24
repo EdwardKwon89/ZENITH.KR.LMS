@@ -44,6 +44,7 @@ describe('TC-UPS-01: UPS 타입 인터페이스 필수 필드', () => {
       cargo_type: ct,
       ddu_available: false,
       ddp_available: true,
+      max_weight_kg: null,
       is_active: true,
       sort_order: i,
       created_at: '2026-06-14T00:00:00Z',
@@ -100,9 +101,9 @@ describe('TC-UPS-02: 스키마 설계 규칙 검증', () => {
 
   it('UpsZoneCountry 는 국가 코드가 단 하나의 Zone에만 속해야 한다 (UNIQUE 제약)', () => {
     const countries: UpsZoneCountry[] = [
-      { id: 'c1', zone_id: 'z1', country_code: 'KOR', created_at: '2026-06-14', created_by: null },
-      { id: 'c2', zone_id: 'z1', country_code: 'JPN', created_at: '2026-06-14', created_by: null },
-      { id: 'c3', zone_id: 'z2', country_code: 'CHN', created_at: '2026-06-14', created_by: null },
+      { id: 'c1', zone_id: 'z1', country_code: 'KOR', product_family: 'EXPRESS', direction: 'EXPORT', created_at: '2026-06-14', created_by: null },
+      { id: 'c2', zone_id: 'z1', country_code: 'JPN', product_family: 'EXPRESS', direction: 'EXPORT', created_at: '2026-06-14', created_by: null },
+      { id: 'c3', zone_id: 'z2', country_code: 'CHN', product_family: 'EXPRESS', direction: 'EXPORT', created_at: '2026-06-14', created_by: null },
     ];
     const codes = countries.map(c => c.country_code);
     const uniqueCodes = new Set(codes);

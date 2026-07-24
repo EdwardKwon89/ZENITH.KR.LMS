@@ -98,6 +98,7 @@
 | **TC-F.7** | 세금계산서 데이터 발행 | 인보이스 기반 표준 세금계산서 DB 생성 검증 | `tests/integration/fin-03.test.ts` |
 | **TC-F.8** | 세금계산서 메일 발송 | Resend 연동 및 SENT/FAILED 상태 전환 확인 | `tests/integration/fin-03.test.ts` |
 | **TC-F.9** | 세금계산서 이력 조회 | 화주/어드민별 발행 및 발송 히스토리 조회 검증 | `tests/integration/fin-03.test.ts` |
+| **TC-F.10** | 인보이스 발행 이메일 알림 | `sendInvoiceFinalizedEmail()` 정상 발송 + HTML escape 검증 | `tests/unit/finance/invoice-finalized-email.test.ts` |
 
 ### 9. UPS 요율 관리 (Phase 7 SPR-03)
 | ID | 테스트 항목 | 목적 | 파일 경로 |
@@ -592,9 +593,94 @@
 | **TC-P8-TD-06** | recipient_address_local → street 괄호 처리 | 수취인 현지주소 괄호 조합 | `tests/unit/ups/ups-labels-mapping.test.ts` |
 | **TC-P8-TD-07** | resolveShipperStreet 우선순위 3단계 | org English > org Korean > order snapshot | `tests/unit/ups/ups-labels-mapping.test.ts` |
 
+### 46. UPS 사후청구 마감 후 조정 + 화주 거부 (TASK-194-C / Issue #622 DEF-112)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-UPS-FINALADJ-01** | 마감 후 사후청구 시 신규 추가 인보이스 발행 (`adjustment_of`) | 원 인보이스 불변 + 신규 인보이스 `metadata.adjustment_of` 연결 확인 | `tests/unit/finance/agency-settlement-permission.test.ts` |
+| **TC-UPS-FINALADJ-02** | 마감 후 조정 금액 0일 때 인보이스 미생성 | 조정 없으면 추가 인보이스 생성 안 함 | `tests/unit/finance/agency-settlement-permission.test.ts` |
+| **TC-UPS-REJECT-01** | 화주 거부 시 인보이스 CANCELED 전환 + 재발행 | `status='CANCELED'` + `superseded_by` 메타데이터 + 신규 인보이스 생성 확인 | `tests/unit/finance/agency-settlement-permission.test.ts` |
+| **TC-UPS-REJECT-02** | 이미 취소된 인보이스 거부 시 에러 | 중복 거부 차단 | `tests/unit/finance/agency-settlement-permission.test.ts` |
+| **TC-UPS-REJECT-03** | 권한 없는 사용자 거부 시 에러 | Agency/ADMIN 외 역할 차단 | `tests/unit/finance/agency-settlement-permission.test.ts` |
+| **TC-UPS-CHARGES-01** | 마감 후 사후청구 시 `createPostFinalizationAdjustment` 위임 | `recordUpsActualCharges`가 마감 후 경로로 정확히 위임하는지 확인 | `tests/unit/finance/ups-actual-charges.test.ts` |
+| **TC-UPS-UITEXT-01** | 마감 전 variance>0시 "인보이스 금액이 자동 갱신됩니다" 문구 노출 | UI 조건 분기 정확성 | `src/components/orders/UpsActualAdjustmentForm.tsx` (R-10 스크린샷 검증) |
+| **TC-UPS-UITEXT-02** | 마감 후 variance>0시 "추가 인보이스가 신규 발행되었습니다" 문구 노출 | UI 조건 분기 정확성 | `src/components/orders/UpsActualAdjustmentForm.tsx` (R-10 스크린샷 검증) |
+
 ---
 
+### 47. UPS 오더 E2E 정산 흐름 세밀 검증 (Issue #637 / Phase 1)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-R11-01** | Step 1: 오더 등록 상태 확인 (WAREHOUSED) | DB 상태 + UI 상태 배지 검증 | `tests/e2e/r11-ups-settlement-e2e-flow.spec.ts` |
+| **TC-R11-02** | Step 2: 창고 출고확정 + UPS 레이블 발급 | WAREHOUSED→RELEASED 전이 + 인보이스 자동 생성 + 레이블 발급 | `tests/e2e/r11-ups-settlement-e2e-flow.spec.ts` |
+| **TC-R11-03** | Step 3: 트래킹 이벤트 삽입 + 상태 동기화 | DELIVERED 이벤트 삽입 + zen_tracking_events 저장 + 상태 전이 | `tests/e2e/r11-ups-settlement-e2e-flow.spec.ts` |
+| **TC-R11-04** | Step 4: DELIVERED - 사후청구 폼 활성화 | UpsActualAdjustmentForm 활성화 + UPS 주문 표시 | `tests/e2e/r11-ups-settlement-e2e-flow.spec.ts` |
+| **TC-R11-05** | Step 5: 사후청구 등록 (마감 전) - 인보이스 금액 갱신 | UPS_ACTUAL_ADJUSTMENT 비용 + 인보이스 total_amount 재계산 | `tests/e2e/r11-ups-settlement-e2e-flow.spec.ts` |
+| **TC-R11-06** | Step 6: 정산 마감 (finalize) + 이유 검증 | is_finalized=true + finalized_reason + 히스토리 기록 | `tests/e2e/r11-ups-settlement-e2e-flow.spec.ts` |
+| **TC-R11-07** | Step 7: 마감 후 사후청구 - 추가 인보이스 발행 | metadata.adjustment_of 신규 인보이스 + 원 인보이스 불변 | `tests/e2e/r11-ups-settlement-e2e-flow.spec.ts` |
+| **TC-R11-08** | Step 8: 화주 거부 - 인보이스 CANCELED + 재발행 | superseded_by 메타데이터 + 새 인보이스 UNPAID 생성 | `tests/e2e/r11-ups-settlement-e2e-flow.spec.ts` |
+| **TC-R11-E1** | Edge-1: Agency 타 화주 마감 시도 → RLS 차단 | agency_shippers 연결 없으면 마감 권한 거부 + proxy.ts 경로 차단 | `tests/e2e/r11-ups-settlement-e2e-flow.spec.ts` |
+| **TC-R11-E2** | Edge-2: Admin 마감 시 사유 미입력 → 차단 | finalized_reason 미입력 시 마감 거부 | `tests/e2e/r11-ups-settlement-e2e-flow.spec.ts` |
+| **TC-R11-E3** | Edge-3: 마감 후 사후청구 → 신규 인보이스 경로 분기 | 자동갱신이 아닌 별도 인보이스 경로 정확 분기 확인 | `tests/e2e/r11-ups-settlement-e2e-flow.spec.ts` |
+
+---
+
+### 48. SUB_ADMIN 라우팅 회귀 (Issue #688 / TASK-200)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-SUBADMIN-01** | SUB_ADMIN /admin/ups-rates 접속 | proxy.ts 화이트리스트에 누락된 경로가 정상 접속되는지 확인 | `tests/e2e/e2e-27-subadmin-routing.spec.ts` |
+| **TC-SUBADMIN-02** | SUB_ADMIN /voc 접속 | proxy.ts 화이트리스트에 누락된 경로가 정상 접속되는지 확인 | `tests/e2e/e2e-27-subadmin-routing.spec.ts` |
+| **TC-SUBADMIN-03** | SUB_ADMIN /support 접속 | 기존 정상 경로 회귀 확인 | `tests/e2e/e2e-27-subadmin-routing.spec.ts` |
+| **TC-SUBADMIN-04** | SUB_ADMIN /mypage 접속 | 기존 정상 경로 회귀 확인 | `tests/e2e/e2e-27-subadmin-routing.spec.ts` |
+| **TC-SUBADMIN-05** | SUB_ADMIN /address-book 접속 | 기존 정상 경로 회귀 확인 | `tests/e2e/e2e-27-subadmin-routing.spec.ts` |
+
+### 49. 화주별 일별/주별/월별 청구 집계 및 최종 운임 확정 (Issue #736/#750 / TASK-204/207 / W2)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-W2-01** | getShipperDailyBillingSummary — 화주별 일별 오더 집계 및 합산 금액 계산 | 오더수, 운임, 유류할증, 급증, 기타부과금, 사후조정액 집계 정확성 | `tests/unit/finance/daily-billing-aggregation.test.ts` |
+| **TC-W2-02** | getShipperDailyOrdersDetails — 특정 화주/일자 세부 오더 목록 조회 | 세부 오더별 운임 breakdown 및 인보이스 상태 조회 | `tests/unit/finance/daily-billing-aggregation.test.ts` |
+| **TC-W2-03** | finalizeDailyShipperInvoices — 일별 집계 인보이스 일괄 정산 마감 | 다건 인보이스 마감 배치 처리 및 권한 통제 | `tests/unit/finance/daily-billing-aggregation.test.ts` |
+| **TC-W2-04** | getShipperDailyBillingSummary (weekly/monthly) — 주별/월별 청구 집계 | 주차(YYYY-WNN) 및 월(YYYY-MM) 단위 그룹핑 합산 집계 검증 | `tests/unit/finance/daily-billing-aggregation.test.ts` |
+| **TC-W2-05** | getShipperDailyOrdersDetails (monthly) — 월별/주별 세부 오더 목록 조회 | 상위 기간 단위 소속 개별 오더 세부 내역 조회 검증 | `tests/unit/finance/daily-billing-aggregation.test.ts` |
+
+---
+
+### 50. UPS 물류관리 메뉴 전체 E2E 검증 (Issue #711 / TASK-201 / Phase 2)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-E28-HP-01~05** | Happy Path 5단계: REGISTERED→SCHEDULED→WAREHOUSED→PACKED→RELEASED→IN_TRANSIT | UPS 오더 전체 라이프사이클 흐름 검증 | `tests/e2e/e2e-28-ups-logistics-flow.spec.ts` |
+| **TC-E28-CANCEL-01~04** | Cancel 시나리오 4건: 픽업취소, 입고취소, UPS등록취소, 출고취소 | 상태 전이 롤백 정상 동작 검증 | `tests/e2e/e2e-28-ups-logistics-flow.spec.ts` |
+| **TC-E28-RBAC-01~20** | 역할별 접근 권한 전수 검증 (ADMIN/MANAGER/AGENCY/SUB_ADMIN/SHIPPER × 4메뉴) | RBAC 정책 E2E 검증 | `tests/e2e/e2e-28-ups-logistics-flow.spec.ts` |
+| **TC-E28-ZENUI-01~04** | ZenUI 컴포넌트 적용 가독성 검증 | UI 일관성 검증 | `tests/e2e/e2e-28-ups-logistics-flow.spec.ts` |
+
+### 51. UPS 운임 파이프라인 E2E 검증 — 중량 변경 검증 (Issue #747 / TASK-205 / W3)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-WF-01** | 중량 변경→운임 견적 차이 검증 (computeUpsFreight 직접 호출) | 중량이 운임에 실제 영향을 미치는지(캐시 미사용) 증명 | `tests/e2e/e2e-29-ups-freight-pipeline.spec.ts` |
+| **TC-WF-02** | 스냅샷 갱신 후 정산 비용 재생성 검증 | SettlementEngine 로직과 일치하는 비용 생성 확인 | `tests/e2e/e2e-29-ups-freight-pipeline.spec.ts` |
+| **TC-WF-03** | 실제 오더 상세 UI 탐색 검증 | page.goto() 브라우저 네비게이션 + DB-UI 일관성 확인 | `tests/e2e/e2e-29-ups-freight-pipeline.spec.ts` |
+
+### 52. Agency→Shipper 역마진 방지 검증 (IMP-155 / Issue #791 / TASK-208)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-UPS-DISCOUNT-05** | shipper_rate <= agency_rate — 정상 통과 | 할인율이 Agency 자체 할인율 이하일 때 통과 검증 | `tests/unit/ups/discount-guard.test.ts` |
+| **TC-UPS-DISCOUNT-06** | shipper_rate === agency_rate — 정상 통과 | 동일 할인율도 허용(역마진 아님) | `tests/unit/ups/discount-guard.test.ts` |
+| **TC-UPS-DISCOUNT-07** | shipper_rate > agency_rate — 역마진 감지 | 초과 시 에러 메시지 반환 및 저장 거부 | `tests/unit/ups/discount-guard.test.ts` |
+| **TC-UPS-DISCOUNT-08** | agency 정책 없음 (data=null) — null 반환 | 정책 미등록 Agency의 경우 다른 가드에 위임 | `tests/unit/ups/discount-guard.test.ts` |
+| **TC-UPS-DISCOUNT-09** | .eq() 호출 인자 검증 | 올바른 파라미터(agency_org_id, zone_id, is_active)로 조회하는지 확인 | `tests/unit/ups/discount-guard.test.ts` |
+
+### 53. UPS Order Detail order.status 중심 상태 표시 재구성 (Issue #794 / TASK-209)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-UPS-STATUS-01** | canChangeStatus (AGENCY → DELIVERED) | Status Machine에서 AGENCY 역할의 DELIVERED 수동 전환 권한 허용 검증 | `tests/unit/ups/ups-order-detail-status.test.ts` |
+| **TC-UPS-STATUS-02** | checkRealtimeUpsTrackingAction | SHXK API 폴링 후 DL 상태 감지 시 DELIVERED 상태 자동 전환 검증 | `tests/unit/ups/ups-order-detail-status.test.ts` |
+| **TC-UPS-STATUS-03** | checkRealtimeUpsTrackingAction (라벨 누락) | 활성 UPS 라벨이 없을 경우 에러 메시지 반환 검증 | `tests/unit/ups/ups-order-detail-status.test.ts` |
+| **TC-UPS-STATUS-04** | manuallySetOrderDeliveredAction (사유 필수) | 수동 전환 사유 누락 시 차단 검증 | `tests/unit/ups/ups-order-detail-status.test.ts` |
+| **TC-UPS-STATUS-05** | manuallySetOrderDeliveredAction (Agency 소속 화주) | Agency 사용자가 소속 화주 오더 수동 DELIVERED 전환 성공 검증 | `tests/unit/ups/ups-order-detail-status.test.ts` |
+| **TC-UPS-STATUS-06** | manuallySetOrderDeliveredAction (타사 오더 차단) | Agency 사용자가 타인 화주 오더 전환 시도 시 IDOR 차단 검증 | `tests/unit/ups/ups-order-detail-status.test.ts` |
+
+---
 ## 📝 가이드라인 (R-09 Enforcement)
 1. **추가 의무**: 신규 기능 개발 시 위 카테고리에 맞는 테스트를 반드시 추가하십시오.
 2. **실행 의무**: 모든 커밋 전 `npm run test:regression`을 실행하여 위 명세 전원이 초록색인지 확인하십시오.
+
 

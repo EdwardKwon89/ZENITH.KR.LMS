@@ -8,7 +8,7 @@
  * 실행 전제: TASK-B-024 (OutboundProcessForm UPS UI) 머지 완료
  */
 import { test, expect } from '@playwright/test';
-import { createClient } from '@supabase/supabase-js';
+import { getServiceClient } from './test-utils';
 import fs from 'fs';
 import path from 'path';
 
@@ -22,7 +22,7 @@ const SHXK_ENDPOINT =
 // UPS 오더 생성 후 정리 대상 reference_no 목록 (= packageId)
 const pendingCleanup: string[] = [];
 
-let supabase: ReturnType<typeof createClient>;
+let supabase: ReturnType<typeof getServiceClient>;
 let testOrderId: string;
 let testPackageId: string;
 let testOrderNo: string;
@@ -127,9 +127,7 @@ test.describe('E2E-26: UPS 레이블 발급 전체 흐름', () => {
   test.beforeAll(async () => {
     if (!fs.existsSync(SCREENSHOT_DIR)) fs.mkdirSync(SCREENSHOT_DIR, { recursive: true });
 
-    const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    if (!key) throw new Error('SUPABASE_SERVICE_ROLE_KEY is required');
-    supabase = createClient(SUPABASE_URL, key);
+    supabase = getServiceClient();
 
     await setupTestFixtures();
   });
@@ -318,7 +316,7 @@ test.describe('E2E-26: UPS 레이블 발급 전체 흐름', () => {
         .select('id, tracking_number, is_voided, created_at')
         .eq('package_id', testPackageId)
         .order('created_at', { ascending: false });
-      if (labels && labels.length >= 2 && labels.some(l => !l.is_voided)) {
+      if (labels && labels.length >= 2 && labels.some((l: any) => !l.is_voided)) {
         newLabelCount = labels.length;
         await page.screenshot({ path: path.join(SCREENSHOT_DIR, '06_reissue_completed.png') });
         break;

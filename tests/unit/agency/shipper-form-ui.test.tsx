@@ -52,8 +52,7 @@ const mockT = (key: string) => {
     form_contact_name: 'Contact',
     form_contact_email: 'Email',
     form_contact_phone: 'Phone',
-    form_grade: 'Grade',
-    grade_placeholder: '등급 없음',
+    no_grade_text: 'No Grade',
   };
   return fallback[key] ?? key;
 };

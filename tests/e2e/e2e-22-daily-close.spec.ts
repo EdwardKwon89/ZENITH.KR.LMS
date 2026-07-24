@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { createClient } from '@supabase/supabase-js';
+import { getServiceClient } from './test-utils';
 import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
@@ -14,7 +14,8 @@ const ADMIN_PASSWORD = 'password1234';
 const SHIPPER_EMAIL = 'shipper_e2e22@zenith.kr';
 const SHIPPER_PASSWORD = 'password1234';
 
-let supabase: ReturnType<typeof createClient>;
+let supabase: ReturnType<typeof getServiceClient>;
+let fixtureOrderId: string | undefined;
 
 test.describe('E2E-22: Daily Close (UPS 일마감) 시나리오', () => {
 
@@ -23,15 +24,13 @@ test.describe('E2E-22: Daily Close (UPS 일마감) 시나리오', () => {
       fs.mkdirSync(SCREENSHOT_DIR, { recursive: true });
     }
 
-    const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    if (!key) throw new Error('SUPABASE_SERVICE_ROLE_KEY is required');
-    supabase = createClient(SUPABASE_URL, key);
+    supabase = getServiceClient();
 
     const { data: authUsersRes } = await supabase.auth.admin.listUsers();
     const existingUsers = authUsersRes?.users || [];
 
     // 1. Ensure admin user exists with correct PLATFORM metadata
-    const adminUser = existingUsers.find(u => u.email === ADMIN_EMAIL);
+    const adminUser = existingUsers.find((u: any) => u.email === ADMIN_EMAIL);
     if (!adminUser) {
       const { data: created } = await supabase.auth.admin.createUser({
         email: ADMIN_EMAIL,
@@ -69,7 +68,7 @@ test.describe('E2E-22: Daily Close (UPS 일마감) 시나리오', () => {
     }
 
     // 2. Create shipper test user
-    const existingShipper = existingUsers.find(u => u.email === SHIPPER_EMAIL);
+    const existingShipper = existingUsers.find((u: any) => u.email === SHIPPER_EMAIL);
     if (existingShipper) {
       await supabase.from('zen_profiles').delete().eq('email', SHIPPER_EMAIL);
       await supabase.auth.admin.deleteUser(existingShipper.id);
@@ -137,17 +136,13 @@ test.describe('E2E-22: Daily Close (UPS 일마감) 시나리오', () => {
           width: 20,
           height: 15,
         }).select('id').single();
-
-        // Store fixture order IDs for cleanup
-        (globalThis as any).__e2e22_fixture_order_id = order.id;
-        (globalThis as any).__e2e22_fixture_pkg_id = pkg?.id;
+        fixtureOrderId = order.id;
       }
     }
   });
 
   test.afterAll(async () => {
     // Cleanup fixture orders
-    const fixtureOrderId = (globalThis as any).__e2e22_fixture_order_id;
     if (fixtureOrderId) {
       await supabase.from('zen_order_rate_snapshots').delete().eq('order_id', fixtureOrderId);
       await supabase.from('order_status_history').delete().eq('order_id', fixtureOrderId);
@@ -157,7 +152,7 @@ test.describe('E2E-22: Daily Close (UPS 일마감) 시나리오', () => {
 
     // Cleanup shipper user
     const { data: authUsersRes } = await supabase.auth.admin.listUsers();
-    const shipperUser = (authUsersRes?.users || []).find(u => u.email === SHIPPER_EMAIL);
+    const shipperUser = (authUsersRes?.users || []).find((u: any) => u.email === SHIPPER_EMAIL);
     if (shipperUser) {
       await supabase.from('zen_profiles').delete().eq('email', SHIPPER_EMAIL);
       await supabase.auth.admin.deleteUser(shipperUser.id);

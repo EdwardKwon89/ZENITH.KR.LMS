@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Package, ShieldCheck, Scale, Zap, Globe, DollarSign } from 'lucide-react';
+import { ZenBadge } from '@/components/ui/ZenUI';
 
 interface UpsOrderBreakdownCardProps {
   orderNo: string;
@@ -53,9 +54,9 @@ export default function UpsOrderBreakdownCard({
           <div>
             <div className="flex items-center gap-2">
               <span className="font-bold text-lg text-amber-200">UPS 특송 전용 상세 정보</span>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/30">
+              <ZenBadge className="text-[10px] font-black uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/30">
                 {productCode}
-              </span>
+              </ZenBadge>
             </div>
             <p className="text-xs text-slate-400 font-mono">Order No: {orderNo}</p>
           </div>

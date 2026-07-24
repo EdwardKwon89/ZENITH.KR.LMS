@@ -1435,7 +1435,7 @@
 - **관련 Issue**: 없음 — Edward 질의 계기 자체 발견
 - **예상 공수**: (1) CI 단계 추가 0.1 MD / (2) 전체 정리 1.5~2 MD (별도 Task 분할 권장)
 - **우선순위**: Medium — (1)은 재발 방지 차원에서 우선 권장, (2)는 Low
-- **상태**: ⬜ 미착수
+- **상태**: ✅ §1·§2 전항목 완료 — **TASK-195(Issue #627), Riley, PR#628 병합 완료 (2026-07-21)**. `pr-checks.yml`에 `tsc-advisory`(Type Check, advisory/non-blocking) 게이트 추가, 네거티브 컨트롤 검증 완료. **§2(Issue #651, TASK-198, D_Kai, PR#676)로 기존 236건 전량 정리 완료(2026-07-22)** — `tests/` 하위 `npx tsc --noEmit` 0 errors 달성, Aiden 독립 재검증 완료
 
 ---
 
@@ -1635,7 +1635,7 @@
 - **우선순위**: High — Express/Expedited/Flight는 여전히 더미 판매가라 마크업 정책 확정 전 실사용 금지
 - **상태**: 🔄 부분 완료(SAVER만)
 
-## [IMP-151] `getMaxAllowedZoneDiscount`가 Zone 내 전 상품(더미 포함)을 함께 검사 — 현재 모든 Zone에서 허용 할인율 0%로 계산됨
+## [IMP-151] `getMaxAllowedZoneDiscount`가 Zone 내 전 상품(더미 포함)을 함께 검사 — 현재 모든 Zone에서 허용 할인율 0%로 계산됨 — ✅ 해결 완료
 
 - **발견 경위**: SNTL→Sub-Agency 실 할인율(75%) 등록(2026-07-19) 전, 실제 `upsertAgencyPricingPolicy` 서버 액션으로 등록 가능한지 확인하는 과정에서 `src/lib/ups/discount-guard.ts:getMaxAllowedZoneDiscount()`를 직접 재현해봄. 이 함수는 대상 Zone에 속한 **모든 상품**(`zen_ups_base_rates`/`zen_ups_weight_tier_rates`/`zen_ups_freight_minimums`)의 `1 - cost/selling` 비율 중 **최솟값**을 최대 허용 할인율로 반환하는데, WW_SAVER_*는 오늘 실측 원가/판매가로 교체됐지만 WW_EXPRESS_*/WW_EXPEDITED/WW_FLIGHT는 아직 더미 판매가 그대로라 두 값의 스케일이 맞지 않아(예: 실측 원가 20만원대 vs 더미 판매가 5천원대) `1-cost/selling`이 -4~-5(=-400%~-500%) 수준으로 나옴. 그 결과 전 Zone에서 `Math.max(0, minRatio)`가 **0%**로 계산됨.
 - **현재 상태**: 지금 이 상태로 Admin/SUB_ADMIN이 실제 화면(`/admin/ups-rates`)에서 `zen_agency_pricing_policies`에 **어떤 할인율을 입력해도 "할인율이 원가 마진을 초과합니다. 최대 허용: 0.0%"로 전부 거부**됨. SNTL→Sub-Agency 75% 정책은 이 가드를 우회해 DB에 직접 등록함(seed-local.ts, 커밋 a352b5bc) — 실제 UI로는 지금 등록 불가능한 상태.
@@ -1644,7 +1644,7 @@
 - **관련 파일**: `src/lib/ups/discount-guard.ts`, `src/app/actions/ups/rates-mutation.ts:upsertAgencyPricingPolicy`
 - **예상 공수**: 0.3 MD
 - **우선순위**: High — 지금 이 상태로는 SUB_ADMIN 기능(Issue #605) 자체를 실제 화면에서 쓸 수 없음
-- **상태**: ⬜ 미착수
+- **상태**: ✅ 해결 완료 — **TASK-190(Issue #614), 2026-07-20.** PR#615 Aiden 승인·머지(`f0b4629e`), 실제 CI PASS(644/644), Issue #614 Close. 단, 수정 대상이었던 `upsertAgencyPricingPolicy`/`upsertShipperZoneDiscounts`가 실제 화면에서 호출되지 않는 죽은 코드였음이 밝혀져, 진짜 문제(예약 요금 시스템에 마진 검증 자체가 없음)는 Team B에 Issue #616으로 별도 이관됨. (2026-07-21 Aiden 정정 — 이 문서가 갱신 안 된 채 남아있어 Riley에게 중복 배정할 뻔함, 재발 방지 위해 기록)
 
 ## [IMP-152] SNTL→Sub-Agency 할인율(75%)은 비서류 기준 대표값 — 서류(0%)와 구분 안 됨
 
@@ -1668,4 +1668,52 @@
 - **관련 파일**: `supabase/migrations/20260622000000_fix_service_role_grants.sql`(선례), `supabase/migrations/20260722130000_def117_order_packages_agency_rls_v2.sql`(이번 임시 대응)
 - **예상 공수**: 0.5 MD (원인 조사는 이미 완료, 일괄 마이그레이션 작성 + 전체 회귀만 필요)
 - **우선순위**: Medium — 매번 실 DB 검증 테스트를 추가할 때마다 반복적으로 재발할 가능성이 높아 선제 조치 가치가 있으나, 당장 기능 장애는 아님
-- **상태**: ⬜ 미착수
+- **상태**: ⬜ 미착수 — Issue #790 등록 완료, Team B 배정 대기 (2026-07-24)
+
+---
+
+## [IMP-154] UPS 라벨 회수(`removeorder`) — SHXK 실패가 조용히 삼켜짐, 회수 성공 여부를 신뢰할 수 없음
+
+- **발견 경위**: DEF-124(스냅샷 캐시) 논의 중 "배송정보(Zone/국가) 변경 시 오더 재생성" 설계안이 나오면서, "재생성 전 UPS 라벨 회수 절차·인터페이스가 실제로 존재하는가"를 Edward 지시로 확인. `cancelUpsRegistration()`(`src/app/actions/operations/ups-labels.ts:429-502`)이 SHXK API `removeorder(referenceNo)`(`src/lib/shxk/order.ts:90-98`)를 실제로 호출하는 것은 확인됨(mock 전용 아님, 진짜 carrier 연동). 다만 코드를 직접 읽어보니 `removeRes.success === 0`(SHXK 측 회수 실패)일 때 `logger.warn()`으로 **로그만 남기고** 이후 로직을 그대로 진행 — 내부 `zen_ups_label_documents`/Storage 파일/`zen_ups_labels` 행을 전부 지우고 무조건 `{ success: true }`를 반환함. 즉 **UPS가 실제로 회수를 거부해도 화면에는 항상 "성공"으로 표시됨.**
+- **현재 상태**: 회수 가능 여부는 호출부(`undoUpsRegistration()`, `warehouse.ts:518-541`)에서 오더 상태가 `PACKED`일 때만 허용하도록 막혀있으나, 이건 내부 DB 상태 체크일 뿐 UPS/SHXK 측 실제 배송 진행 상태(`gettrack`)는 전혀 조회하지 않음 — UPS가 이미 픽업/스캔한 이후에도 내부적으로는 `PACKED` 상태로 남아있으면 취소 버튼이 그대로 노출되고, 실패해도 성공으로 보고됨. TASK-B-182(Issue #695)에서 이 함수 주변 정리(다중 라벨 삭제·FK CASCADE·Storage 정리·AGENCY RLS DELETE 정책)를 이미 했지만, `removeorder` 실패를 삼키는 부분 자체는 손대지 않고 그대로 남아있음(범위 밖으로 처리됨, 별도 인지된 리스크로 문서화되어 있지도 않음).
+- **왜 지금 중요한가**: "배송정보 변경 시 라벨 회수 후 기존 오더 폐기·재오더 처리"라는 새 설계(DEF-124/Issue #725 연계)가 이 함수의 성공 신호를를 그대로 믿고 진행하면, **UPS 쪽에서 실제로는 회수가 안 된 상태에서 내부적으로만 폐기 처리되어, 이미 배차된 UPS 화물이 그대로 나가는데 시스템상으로는 신규 오더만 잡히는 불일치(중복/유령 배송)가 생길 수 있음.**
+- **임시 조치**: 없음 — 현재 로직 그대로 사용 중
+- **목표 구현**: (1) `removeRes.success === 0`일 때 예외를 던지거나 명확한 실패 응답을 반환해 호출부가 실제로 실패를 인지하도록 수정, (2) 가능하면 회수 전/후 `gettrack`으로 UPS 측 실제 처리 상태를 확인하는 검증 단계 추가, (3) 배송정보 변경→재오더 설계를 실제 구현할 때는 이 함수의 반환값을 신뢰하지 말고 별도 확인 로직을 두거나, 이 IMP 해결을 선행 조건으로 삼을 것
+- **관련 파일**: `src/app/actions/operations/ups-labels.ts` (`cancelUpsRegistration`, `voidUpsLabel`), `src/lib/shxk/order.ts` (`removeorder`), `src/app/actions/operations/warehouse.ts` (`undoUpsRegistration`)
+- **예상 공수**: 0.5~1 MD (에러 전파 수정은 작으나, gettrack 검증 추가 시 커짐)
+- **우선순위**: High — DEF-124 배송정보 재생성 설계가 이 기능에 의존하므로, 그 설계를 실제 구현하기 전에 반드시 해결 필요
+- **담당**: **Team B** — `git log`로 확인 결과 `ups-labels.ts`/`shxk/order.ts` 전체 커밋 이력(27건)이 Team B(Baker/Dave/Mike)이며, 이 취소 로직 주변을 이미 다룬 TASK-B-182(Issue #695)도 Baker 작업. Team A 파일 소유권 범위 밖으로 판단(Edward 지적, 2026-07-24) — GitHub Issue #788로 Team B에 정식 이관
+- **상태**: ⬜ 미착수 — Issue #788 등록 완료, Team B 배정 대기 (2026-07-24)
+
+---
+
+## [IMP-155] Agency→Shipper 할인율 역전으로 인한 역마진 — 시스템적 방지 장치 없음 (Issue #717 후속)
+
+- **발견 경위**: Issue #717(SNTL 원가 Matrix 구조 논의, 2026-07-23) 결론에서 "역마진 방지는 시스템적 조치 아닌 운영 측면으로 관리, 시스템적 방지는 추후 별도 기능 개선 건으로 진행"으로 종결했으나, 실제로 `scratch/post_launch_improvements.md`에는 등록이 누락되어 있었음(Edward 확인, 2026-07-24).
+- **문제 구조**: SNTL 가격 체계는 비계층적 — `zen_agency_pricing_policies`(Admin→Agency 할인율)와 `zen_agency_shipper_zone_discounts`(Agency→Shipper 할인율)가 각각 독립적으로 같은 루트 `selling_price`를 기준으로 계산됨(`margin = selling_price × (agency_discount_rate − shipper_discount_rate)`). Agency 자신이 Admin으로부터 받는 할인율보다 **Shipper에게 더 높은 할인율을 실수로 등록하면 마진이 음수(역마진)가 됨**.
+- **현재 코드 상태**: `upsertShipperZoneDiscounts()`(`src/app/actions/agency/zone-discounts.ts:65`)가 `getMaxAllowedZoneDiscount()`(`src/lib/ups/discount-guard.ts`)로 상한 검사를 하긴 하나, 이 함수는 **Zone 전체의 절대 원가/판매가 비율**(플랫폼 cost_price 기준 최솟값)만 검사할 뿐, **해당 Agency 자신의 할인율 대비** 초과 여부는 전혀 확인하지 않음 — 즉 지금 코드는 "역마진 방지"가 아니라 "플랫폼 원가 이하로는 못 팔게"라는 다른 목적의 가드임. 실제 예약 요금 시스템(`src/app/actions/ups/pricing-schedule.ts`, Issue #391/#616)에는 할인율/마진 검증 로직 자체가 전혀 없음(grep 결과 0건).
+- **현재 상태**: 시스템적 방지 없이 운영자가 등록 시점에 주의하는 것으로만 관리 중(Edward 승인, Issue #717 종결 코멘트 참고).
+- **임시 조치**: 없음
+- **목표 구현**: `upsertShipperZoneDiscounts()`(및 필요 시 Agency↔Sub-Agency 계층에도 동일 로직 확장)에 "등록하려는 shipper_discount_rate가 해당 agency_org_id의 현재 agency_discount_rate를 초과하면 저장 거부" 검증을 추가. `getMaxAllowedZoneDiscount`와는 별개의 신규 가드 함수로 구현 권장(기존 함수의 책임과 섞지 않음).
+- **관련 파일**: `src/app/actions/agency/zone-discounts.ts`, `src/lib/ups/discount-guard.ts`, `src/app/actions/ups/pricing-schedule.ts`, Issue #717
+- **예상 공수**: 0.5 MD
+- **우선순위**: Medium — 현재는 운영자 인지로 관리 중이라 당장 장애는 아니나, Agency 수·Shipper 수가 늘어날수록 수작업 관리 리스크 증가
+- **상태**: ✅ 완료 — TASK-208(D_Kai) Aiden 승인·develop 병합 완료(PR#797), Issue #791 Close (2026-07-24)
+
+---
+
+## [IMP-156] IN_TRANSIT→DELIVERED 자동전환이 하루 1번 폴링에만 의존 — 정산서 확정 연동안은 순환의존으로 불가
+
+- **발견 경위**: Issue #607 UPS 전용 Order Detail 화면(TASK-189) 트래킹 구조 검토(Edward 지시, 2026-07-24) 중 확인. 내부 오더 상태(`REGISTERED→...→IN_TRANSIT`)는 전부 직원 수동 액션으로 전환되며(예: `IN_TRANSIT`은 `warehouse.ts:601` "출고확정처리"), **`DELIVERED`로의 전환만 유일하게 UPS 신호(SHXK `gettrack`)에 의존**함. 그런데 이 신호가 `vercel.json` 확인 결과 **하루 1번**(`ups-tracking-poll`, 매일 15:30 UTC) 크론에만 의존하고, 온디맨드 새로고침 UI/버튼이 코드베이스 전체에 전무함(`pollTracking` 참조 컴포넌트 0건).
+- **검토된 대안과 기각 사유**: Edward가 "UPS 정산서(사후청구) 확정 시점에 DELIVERED로 전환"하는 방식을 제안했으나, 코드 확인 결과 **순환 의존 발견** — `recordUpsActualCharges()`(`src/app/actions/finance/ups-actual-charges.ts:37`)가 이미 `order.status === 'DELIVERED'`를 **선행 조건**으로 강제함("오더가 배송 완료(DELIVERED) 상태일 때만 실제 청구 요금을 입력할 수 있습니다"). 검색 화면(같은 파일 295·329행)도 DELIVERED 오더만 조회 대상. 즉 "정산서 확정→DELIVERED 전환"을 그대로 적용하면 정산 처리에 DELIVERED가 먼저 필요한데 DELIVERED는 정산 처리가 끝나야 되는 데드락 발생. 추가로 배송완료 알림 이메일(`src/lib/notifications/email.ts`/`notifications.ts`)도 이 전환 시점에 걸려있어, 전환이 정산서 도착 시점(통상 배송 후 수일~수주, "사후청구"라는 명칭 자체가 이를 반영)까지 밀리면 화주 알림도 그만큼 늦어져 현재(하루 1회 폴링)보다 오히려 더 나빠질 수 있음.
+- **현재 상태**: 하루 1회 폴링 그대로 유지 중. 정산서 연동안은 채택하지 않음(순환의존 미해결).
+- **임시 조치**: 없음
+- **목표 구현**: (1) 폴링 주기를 하루 1회보다 단축(예: 몇 시간 간격) 검토, (2) 온디맨드 새로고침 버튼(단건 오더 대상 `pollTracking` 직접 호출) 추가 검토, (3) 만약 정산서 연동 방향을 계속 고려한다면 `recordUpsActualCharges()`의 DELIVERED 선행조건을 먼저 완화(예: IN_TRANSIT에서도 입력 허용)하는 별도 설계 결정이 선행되어야 함 — 이 경우 "정산서가 배송완료를 증명한다"는 전제 자체의 타당성(배송 안 됐는데 청구서만 먼저 오는 경우 가능성)도 함께 검토 필요
+- **관련 파일**: `src/app/api/cron/ups-tracking-poll/route.ts`, `vercel.json`, `src/lib/shxk/tracking.ts`, `src/app/actions/finance/ups-actual-charges.ts:37`, `src/lib/notifications/email.ts`
+- **예상 공수**: 폴링 주기 단축은 0.2 MD(단순 스케줄 변경), 온디맨드 새로고침 추가는 0.5 MD, 정산서 연동 방향은 선행 설계 결정 필요로 별도 산정
+- **우선순위**: Medium — 현재도 자동 전환은 동작하나(최대 24시간 지연), 정산/청구 트리거 지연에 영향
+- **상태**: ✅ 부분 완료 — (2) 온디맨드 새로고침 버튼(`checkRealtimeUpsTrackingAction`) + Agency 소속 오더 한정 수동 DELIVERED 권한(ZenUI 모달, 사유 필수, `manuallySetOrderDeliveredAction`) 조합으로 **TASK-209(Issue #794, Riley, PR#802) develop 병합 완료** (2026-07-24). (1) 폴링 주기 단축은 범위 밖, 별도 검토 필요. (3) 정산서 연동안은 순환의존으로 기각(위 내용 참고)
+
+### 예외 코드 처리 — 조치 불가, 별도 기록만 유지
+
+UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류 등) 처리는 SHXK 측 전체 상태 코드표가 문서화되어 있지 않아(코드베이스·문서 전체에서 실제 다뤄지는 코드는 `NT`/`DL` 2개뿐, `docs/80_RawData/Phase8_UPS_API_리서치_결과.md` 확인) **현재로선 조치 불가능**(Edward 확인, 2026-07-24). SHXK 측에 전체 코드표를 확인받기 전까지는 착수 대상에서 제외 — TASK-209 범위에도 포함하지 않음.

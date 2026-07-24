@@ -5,7 +5,7 @@ import { buildAddressBookPayload } from '@/lib/orders/build-address-book-payload
 // OrderRegistrationForm.tsx에서 추출한 buildAddressBookPayload 함수를 직접 import
 
 describe('TC-ADDR-01: buildAddressBookPayload recipient_email 포함 검증', () => {
-  const formValues: Record<string, any> = {
+  const formValues: Record<string, string | undefined> = {
     recipient_name: '홍길동',
     recipient_address: '서울시 강남구',
     recipient_address_detail: '101동',
@@ -19,7 +19,7 @@ describe('TC-ADDR-01: buildAddressBookPayload recipient_email 포함 검증', ()
     recipient_pccc: 'P1234567',
   };
 
-  const watch = (key: string) => formValues[key];
+  const watch = (key: string): string | undefined => formValues[key];
 
   it('recipient_email이 payload에 포함된다', () => {
     const payload = buildAddressBookPayload(watch, '테스트 주소');
@@ -27,15 +27,15 @@ describe('TC-ADDR-01: buildAddressBookPayload recipient_email 포함 검증', ()
   });
 
   it('recipient_email이 없으면 undefined가 payload에 포함된다', () => {
-    const noEmailValues = { ...formValues, recipient_email: undefined };
-    const noEmailWatch = (key: string) => noEmailValues[key];
+    const noEmailValues: Record<string, string | undefined> = { ...formValues, recipient_email: undefined };
+    const noEmailWatch = (key: string): string | undefined => noEmailValues[key];
     const payload = buildAddressBookPayload(noEmailWatch, '테스트 주소');
     expect(payload.recipient_email).toBeUndefined();
   });
 
   it('recipient_email이 빈 문자열이면 undefined가 payload에 포함된다', () => {
-    const emptyEmailValues = { ...formValues, recipient_email: '' };
-    const emptyEmailWatch = (key: string) => emptyEmailValues[key];
+    const emptyEmailValues: Record<string, string | undefined> = { ...formValues, recipient_email: '' };
+    const emptyEmailWatch = (key: string): string | undefined => emptyEmailValues[key];
     const payload = buildAddressBookPayload(emptyEmailWatch, '테스트 주소');
     expect(payload.recipient_email).toBeUndefined();
   });

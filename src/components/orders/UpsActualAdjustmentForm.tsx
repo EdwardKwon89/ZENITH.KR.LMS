@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { recordUpsActualCharges, getUpsActualCharges, getUpsChargeReconciliation } from '@/app/actions/finance/ups-actual-charges';
 import { toast } from 'sonner';
 import { Loader2, Plus, Trash2, HelpCircle } from 'lucide-react';
+import { ZenCard, ZenButton, ZenInput, ZenSelect, ZenBadge } from '@/components/ui/ZenUI';
 
 interface UpsActualAdjustmentFormProps {
   orderId: string;
@@ -32,6 +33,7 @@ export function UpsActualAdjustmentForm({
     actual: number;
     variance: number;
     currency: string;
+    isFinalized: boolean;
   } | null>(null);
 
   const [charges, setCharges] = useState<ChargeRow[]>([]);
@@ -164,10 +166,12 @@ export function UpsActualAdjustmentForm({
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center p-8 bg-gray-50 dark:bg-zinc-900 border rounded-lg">
-        <Loader2 className="w-6 h-6 animate-spin text-primary" />
-        <span className="ml-2 text-sm text-gray-500 dark:text-zinc-400">UPS 정산 정보를 불러오는 중...</span>
-      </div>
+      <ZenCard className="p-8">
+        <div className="flex items-center justify-center">
+          <Loader2 className="w-6 h-6 animate-spin text-primary" />
+          <span className="ml-2 text-sm text-gray-500 dark:text-zinc-400">UPS 정산 정보를 불러오는 중...</span>
+        </div>
+      </ZenCard>
     );
   }
 
@@ -177,7 +181,7 @@ export function UpsActualAdjustmentForm({
   const currency = reconciliation?.currency || 'USD';
 
   return (
-    <div className="border rounded-lg bg-white dark:bg-zinc-950 p-6 shadow-sm">
+    <ZenCard className="p-6">
       <div className="flex items-center justify-between mb-6 border-b pb-4">
         <div>
           <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 flex items-center">
@@ -187,37 +191,37 @@ export function UpsActualAdjustmentForm({
             배송 완료(`DELIVERED`) 이후 UPS 실제 청구서를 바탕으로 예상 운임과의 차액을 조정합니다.
           </p>
         </div>
-        <div className="flex items-center space-x-2 text-xs bg-gray-50 dark:bg-zinc-900 border px-3 py-1.5 rounded">
+        <div className="flex items-center space-x-2 text-xs">
           <span className="font-semibold text-gray-600 dark:text-zinc-400">주문 상태:</span>
-          <span className={`px-2 py-0.5 rounded-full font-bold ${
+          <ZenBadge className={`font-bold ${
             orderStatus === 'DELIVERED'
               ? 'bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-200'
               : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-950 dark:text-yellow-200'
           }`}>
             {orderStatus}
-          </span>
+          </ZenBadge>
         </div>
       </div>
 
       {/* Reconciliation Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div className="border rounded-lg p-4 bg-gray-50 dark:bg-zinc-900">
+        <ZenCard className="p-4 bg-gray-50 dark:bg-zinc-900">
           <div className="text-xs text-gray-500 dark:text-zinc-400">예상 청구액 (Estimated)</div>
           <div className="text-2xl font-bold text-gray-800 dark:text-gray-200 mt-1">
             {estimatedTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {currency}
           </div>
           <p className="text-[10px] text-gray-400 dark:text-zinc-500 mt-1">최초 예상 운임 스냅샷 합산액</p>
-        </div>
+        </ZenCard>
 
-        <div className="border rounded-lg p-4 bg-gray-50 dark:bg-zinc-900">
+        <ZenCard className="p-4 bg-gray-50 dark:bg-zinc-900">
           <div className="text-xs text-gray-500 dark:text-zinc-400">실제 청구액 (Actual)</div>
           <div className="text-2xl font-bold text-primary mt-1">
             {actualTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {currency}
           </div>
           <p className="text-[10px] text-gray-400 dark:text-zinc-500 mt-1">아래 입력된 실제 항목의 합산액</p>
-        </div>
+        </ZenCard>
 
-        <div className={`border rounded-lg p-4 ${
+        <ZenCard className={`p-4 ${
           variance > 0
             ? 'bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-900/50'
             : variance < 0
@@ -237,16 +241,20 @@ export function UpsActualAdjustmentForm({
           </div>
           <p className="text-[10px] text-gray-400 dark:text-zinc-500 mt-1">
             {variance > 0
-              ? '2차 인보이스로 추가 청구됨'
+              ? (reconciliation?.isFinalized
+                  ? '추가 인보이스가 신규 발행되었습니다'
+                  : '인보이스 금액이 자동 갱신됩니다')
               : variance < 0
-                ? '화주 정산 차감 / 크레딧 발행'
+                ? (reconciliation?.isFinalized
+                    ? '차감 인보이스가 발행되었습니다'
+                    : '인보이스 금액이 차감 조정됩니다')
                 : '차액 없음 (조정 비용 불필요)'}
           </p>
-        </div>
+        </ZenCard>
       </div>
 
       {/* Charge Row Editor Table */}
-      <div className="overflow-x-auto mb-6 border rounded-lg">
+      <ZenCard className="p-0 overflow-hidden mb-6">
         <table className="w-full text-left border-collapse text-sm">
           <thead>
             <tr className="bg-gray-50 dark:bg-zinc-900 border-b text-gray-700 dark:text-zinc-300">
@@ -265,13 +273,13 @@ export function UpsActualAdjustmentForm({
                 <td className="p-3">
                   {isEditable ? (
                     <>
-                      <input
-                        list="ups-charge-types"
+                      <ZenInput
                         type="text"
+                        list="ups-charge-types"
                         value={row.chargeType}
                         onChange={(e) => handleChangeRow(index, 'chargeType', e.target.value)}
                         placeholder="예: FUEL SURCHARGE"
-                        className="w-full px-2 py-1.5 border rounded dark:bg-zinc-900 dark:border-zinc-700 text-sm"
+                        className="w-full"
                       />
                       <datalist id="ups-charge-types">
                         <option value="BASE FREIGHT" />
@@ -290,14 +298,14 @@ export function UpsActualAdjustmentForm({
                 </td>
                 <td className="p-3">
                   {isEditable ? (
-                    <input
+                    <ZenInput
                       type="number"
                       value={row.amount || ''}
                       onChange={(e) => handleChangeRow(index, 'amount', e.target.value)}
                       placeholder="0.00"
                       step="0.01"
                       min="0"
-                      className="w-full px-2 py-1.5 border rounded dark:bg-zinc-900 dark:border-zinc-700 text-sm font-mono text-right"
+                      className="w-full font-mono text-right"
                     />
                   ) : (
                     <span className="font-mono text-right block">
@@ -307,29 +315,30 @@ export function UpsActualAdjustmentForm({
                 </td>
                 <td className="p-3">
                   {isEditable ? (
-                    <select
+                    <ZenSelect
                       value={row.currency}
-                      onChange={(e) => handleChangeRow(index, 'currency', e.target.value)}
-                      className="w-full px-1 py-1.5 border rounded dark:bg-zinc-900 dark:border-zinc-700 text-sm"
-                    >
-                      <option value="USD">USD</option>
-                      <option value="KRW">KRW</option>
-                      <option value="TWD">TWD</option>
-                      <option value="RMB">RMB</option>
-                      <option value="JPY">JPY</option>
-                    </select>
+                      onValueChange={(value) => handleChangeRow(index, 'currency', value)}
+                      options={[
+                        { value: 'USD', label: 'USD' },
+                        { value: 'KRW', label: 'KRW' },
+                        { value: 'TWD', label: 'TWD' },
+                        { value: 'RMB', label: 'RMB' },
+                        { value: 'JPY', label: 'JPY' },
+                      ]}
+                      className="w-full"
+                    />
                   ) : (
                     <span>{row.currency}</span>
                   )}
                 </td>
                 <td className="p-3">
                   {isEditable ? (
-                    <input
+                    <ZenInput
                       type="text"
                       value={row.upsInvoiceNo}
                       onChange={(e) => handleChangeRow(index, 'upsInvoiceNo', e.target.value)}
                       placeholder="참고용 청구서번호"
-                      className="w-full px-2 py-1.5 border rounded dark:bg-zinc-900 dark:border-zinc-700 text-sm"
+                      className="w-full"
                     />
                   ) : (
                     <span>{row.upsInvoiceNo || '—'}</span>
@@ -337,11 +346,11 @@ export function UpsActualAdjustmentForm({
                 </td>
                 <td className="p-3">
                   {isEditable ? (
-                    <input
+                    <ZenInput
                       type="date"
                       value={row.upsInvoiceDate}
                       onChange={(e) => handleChangeRow(index, 'upsInvoiceDate', e.target.value)}
-                      className="w-full px-2 py-1.5 border rounded dark:bg-zinc-900 dark:border-zinc-700 text-sm"
+                      className="w-full"
                     />
                   ) : (
                     <span>{row.upsInvoiceDate || '—'}</span>
@@ -349,12 +358,12 @@ export function UpsActualAdjustmentForm({
                 </td>
                 <td className="p-3">
                   {isEditable ? (
-                    <input
+                    <ZenInput
                       type="text"
                       value={row.notes}
                       onChange={(e) => handleChangeRow(index, 'notes', e.target.value)}
                       placeholder="비고 입력"
-                      className="w-full px-2 py-1.5 border rounded dark:bg-zinc-900 dark:border-zinc-700 text-sm"
+                      className="w-full"
                     />
                   ) : (
                     <span className="text-gray-500 dark:text-zinc-400 text-xs">{row.notes || '—'}</span>
@@ -362,44 +371,45 @@ export function UpsActualAdjustmentForm({
                 </td>
                 {isEditable && (
                   <td className="p-3 text-center">
-                    <button
+                    <ZenButton
                       type="button"
                       onClick={() => handleRemoveRow(index)}
-                      className="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50 dark:hover:bg-red-950/20"
+                      className="text-red-500 hover:text-red-700 p-1"
                     >
                       <Trash2 className="w-4 h-4" />
-                    </button>
+                    </ZenButton>
                   </td>
                 )}
               </tr>
             ))}
           </tbody>
         </table>
-      </div>
+      </ZenCard>
 
       {isEditable ? (
         <div className="flex items-center justify-between">
-          <button
+          <ZenButton
             type="button"
             onClick={handleAddRow}
-            className="flex items-center text-xs font-semibold text-primary hover:text-primary/80 border border-primary/20 px-3 py-1.5 rounded hover:bg-primary/5 transition-colors"
+            className="flex items-center text-xs font-semibold text-primary border border-primary/20 px-3 py-1.5"
           >
             <Plus className="w-3.5 h-3.5 mr-1" />
             청구 항목 추가
-          </button>
+          </ZenButton>
           <div className="flex items-center space-x-3">
-            <button
+            <ZenButton
               type="button"
               onClick={loadData}
-              className="text-xs text-gray-500 hover:text-gray-700 px-3 py-1.5 rounded border"
+              className="text-xs text-gray-500 px-3 py-1.5 border rounded"
             >
               초기화
-            </button>
-            <button
+            </ZenButton>
+            <ZenButton
               type="button"
-              disabled={saving}
               onClick={handleSave}
-              className="flex items-center text-xs font-bold text-white bg-primary hover:bg-primary/95 px-4 py-2 rounded shadow-sm disabled:opacity-50"
+              disabled={saving}
+              loading={saving}
+              className="flex items-center text-xs font-bold text-white bg-primary px-4 py-2"
             >
               {saving ? (
                 <>
@@ -409,7 +419,7 @@ export function UpsActualAdjustmentForm({
               ) : (
                 '실제 청구 및 차액 정산 반영'
               )}
-            </button>
+            </ZenButton>
           </div>
         </div>
       ) : (
@@ -422,6 +432,6 @@ export function UpsActualAdjustmentForm({
           </span>
         </div>
       )}
-    </div>
+    </ZenCard>
   );
 }

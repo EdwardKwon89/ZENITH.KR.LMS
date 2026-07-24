@@ -20,7 +20,6 @@ export async function recordUpsActualCharges(
   try {
     const { supabase, user } = await validateAdminAction();
 
-    // 1. 오더가 존재하는지 및 DELIVERED 상태인지 확인
     const { data: order, error: orderError } = await supabase
       .from('zen_orders')
       .select('status, transport_mode')
@@ -39,7 +38,6 @@ export async function recordUpsActualCharges(
       return { success: false, error: '오더가 배송 완료(DELIVERED) 상태일 때만 실제 청구 요금을 입력할 수 있습니다.' };
     }
 
-    // 2. 정산 마감 여부 확인 — 마감 후 조정 차단 (Edward 원칙 ②)
     const { data: existingInvoice } = await supabase
       .from('zen_invoices')
       .select('id, is_finalized')
@@ -47,11 +45,6 @@ export async function recordUpsActualCharges(
       .neq('status', 'CANCELED')
       .maybeSingle();
 
-    if (existingInvoice?.is_finalized) {
-      return { success: false, error: '이미 정산이 마감된 오더입니다. 마감 해제 후 수정해 주세요.' };
-    }
-
-    // 3. 실제 청구서 항목 등록 (삭제 후 신규 입력)
     const { error: deleteError } = await supabase
       .from('zen_ups_actual_charges')
       .delete()
@@ -86,7 +79,6 @@ export async function recordUpsActualCharges(
       }
     }
 
-    // 4. 예상 운임 항목(BASE_FREIGHT, FUEL_SURCHARGE, SURGE_FEE, OTHER_CHARGE)의 총합 조회
     const { data: estimatedCosts, error: estError } = await supabase
       .from('zen_order_costs')
       .select('cost_type, unit_price, quantity')
@@ -103,7 +95,13 @@ export async function recordUpsActualCharges(
 
     const adjustmentAmount = actualSum - estimatedSum;
 
-    // 5. zen_order_costs에 cost_type: 'UPS_ACTUAL_ADJUSTMENT'로 단가(adjustmentAmount) upsert
+    // 마감 후 조정: 신규 추가 인보이스 발행 경로 (TASK-194-C)
+    if (existingInvoice?.is_finalized) {
+      const { createPostFinalizationAdjustment } = await import('@/app/actions/finance/settlement');
+      return createPostFinalizationAdjustment(orderId, adjustmentAmount, charges[0]?.currency || 'USD', user.id, existingInvoice.id);
+    }
+
+    // zen_order_costs에 UPS_ACTUAL_ADJUSTMENT upsert
     if (adjustmentAmount === 0) {
       const { error: deleteCostError } = await supabase
         .from('zen_order_costs')
@@ -131,10 +129,7 @@ export async function recordUpsActualCharges(
       if (existingAdjustId) {
         const { error: updateCostError } = await supabase
           .from('zen_order_costs')
-          .update({
-            unit_price: adjustmentAmount,
-            currency: defaultCurrency,
-          })
+          .update({ unit_price: adjustmentAmount, currency: defaultCurrency })
           .eq('id', existingAdjustId.id);
 
         if (updateCostError) {
@@ -158,8 +153,7 @@ export async function recordUpsActualCharges(
       }
     }
 
-    // 6. 연결된 인보이스가 있다면 total_amount 재계산·갱신 (마감 전 갱신-only)
-    //    adjustmentAmount === 0인 경우 cost row가 삭제되었으므로 link는 생략, total_amount만 재계산
+    // 마감 전 갱신: 연결된 인보이스 total_amount 재계산
     if (existingInvoice) {
       if (adjustmentAmount !== 0) {
         const { error: linkError } = await supabase
@@ -260,11 +254,21 @@ export async function getUpsChargeReconciliation(orderId: string) {
 
   const variance = actual - estimated;
 
+  // 3. 정산 마감 여부 확인
+  const { data: finalizedInvoice } = await supabase
+    .from('zen_invoices')
+    .select('id')
+    .eq('is_finalized', true)
+    .filter('metadata->>source_order_id', 'eq', orderId)
+    .neq('status', 'CANCELED')
+    .maybeSingle();
+
   return {
     estimated,
     actual,
     variance,
     currency,
+    isFinalized: !!finalizedInvoice,
   };
 }
 

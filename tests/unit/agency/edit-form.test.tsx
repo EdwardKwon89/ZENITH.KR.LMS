@@ -64,6 +64,7 @@ const baseShipper = {
   discount_rate: 0,
   grade: 'BRONZE',
   is_active: true,
+  zones: [],
   org: {
     id: 'org-1',
     name: 'Test Shipper',
@@ -83,14 +84,14 @@ const baseShipper = {
 
 describe('TC-P7-UI-EDIT-01: edit-form name and shipper_type disabled', () => {
   it('should disable name input', () => {
-    const { container } = render(<EditShipperForm shipper={baseShipper} />);
+    const { container } = render(<EditShipperForm shipper={baseShipper} zones={[] as any} />);
     const nameInput = container.querySelector('input[name="name"]') as HTMLInputElement;
     expect(nameInput).not.toBeNull();
     expect(nameInput.disabled).toBe(true);
   });
 
   it('should disable shipper_type select', () => {
-    const { container } = render(<EditShipperForm shipper={baseShipper} />);
+    const { container } = render(<EditShipperForm shipper={baseShipper} zones={[] as any} />);
     const typeSelect = container.querySelector('select[name="shipper_type"]') as HTMLSelectElement;
     expect(typeSelect).not.toBeNull();
     expect(typeSelect.disabled).toBe(true);
@@ -105,7 +106,7 @@ describe('TC-P7-UI-EDIT-02: CORPORATE biz_no disabled', () => {
       discount_rate: 0.05,
       org: { ...baseShipper.org, biz_no: '123-45-67890' },
     };
-    const { container } = render(<EditShipperForm shipper={corporateShipper} />);
+    const { container } = render(<EditShipperForm shipper={corporateShipper} zones={[] as any} />);
     const bizNoInput = container.querySelector('input[name="biz_no"]') as HTMLInputElement;
     expect(bizNoInput).not.toBeNull();
     expect(bizNoInput.disabled).toBe(true);
@@ -114,7 +115,7 @@ describe('TC-P7-UI-EDIT-02: CORPORATE biz_no disabled', () => {
 
 describe('TC-P7-UI-EDIT-03: address section rendered via AddressInput', () => {
   it('should render AddressInput with default address values', () => {
-    const { container } = render(<EditShipperForm shipper={baseShipper} />);
+    const { container } = render(<EditShipperForm shipper={baseShipper} zones={[] as any} />);
 
     expect(container.querySelector('[data-testid="address-input"]')).not.toBeNull();
     expect(container.querySelector('input[name="address"]')).not.toBeNull();
@@ -132,7 +133,7 @@ describe('TC-P7-UI-EDIT-03: address section rendered via AddressInput', () => {
         city: 'Los Angeles',
       },
     };
-    const { container } = render(<EditShipperForm shipper={nonKrShipper} />);
+    const { container } = render(<EditShipperForm shipper={nonKrShipper} zones={[] as any} />);
     const stateInput = container.querySelector('input[name="state_province"]') as HTMLInputElement;
     const cityInput = container.querySelector('input[name="city"]') as HTMLInputElement;
     expect(stateInput).not.toBeNull();

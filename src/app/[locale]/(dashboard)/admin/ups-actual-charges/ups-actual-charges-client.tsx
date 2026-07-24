@@ -5,6 +5,7 @@ import { searchDeliveredUpsOrders } from '@/app/actions/finance';
 import { UpsActualAdjustmentForm } from '@/components/orders/UpsActualAdjustmentForm';
 import { Search, ChevronDown, ChevronUp, Package, Calendar, MapPin, Tag } from 'lucide-react';
 import { toast } from 'sonner';
+import { ZenCard, ZenButton, ZenInput, ZenBadge } from '@/components/ui/ZenUI';
 
 interface OrderSearchResult {
   id: string;
@@ -57,30 +58,20 @@ export default function UpsActualChargesClient() {
   return (
     <div className="flex flex-col gap-6">
       {/* Search Panel */}
-      <div className="bg-white dark:bg-zinc-950 p-6 rounded-xl border border-slate-100 dark:border-zinc-800 shadow-sm">
+      <ZenCard className="p-6">
         <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-3">
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <input
-              type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="오더 번호 또는 운송장(Tracking) 번호 입력..."
-              className="w-full pl-10 pr-4 py-2.5 border rounded-lg dark:bg-zinc-900 dark:border-zinc-700 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
-            />
+            <ZenInput type="text" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="오더 번호 또는 운송장(Tracking) 번호 입력..." className="w-full pl-10" />
           </div>
-          <button
-            type="submit"
-            disabled={loading}
-            className="bg-primary text-white hover:bg-primary/95 px-6 py-2.5 rounded-lg font-bold text-sm shadow-sm transition-colors flex items-center justify-center disabled:opacity-50"
-          >
+          <ZenButton type="submit" disabled={loading} className="px-6 py-2.5 text-sm font-bold">
             {loading ? '검색 중...' : '오더 검색'}
-          </button>
+          </ZenButton>
         </form>
         <p className="text-[11px] text-slate-400 dark:text-zinc-500 mt-2">
           ※ 실제 청구 등록은 배송 완료(`DELIVERED`)된 UPS 오더만 가능합니다.
         </p>
-      </div>
+      </ZenCard>
 
       {/* Results List */}
       <div className="flex flex-col gap-4">
@@ -90,9 +81,9 @@ export default function UpsActualChargesClient() {
           const createdDate = new Date(order.created_at).toLocaleDateString();
 
           return (
-            <div
+            <ZenCard
               key={order.id}
-              className="bg-white dark:bg-zinc-950 border border-slate-100 dark:border-zinc-800 rounded-xl overflow-hidden shadow-sm"
+              className="overflow-hidden"
             >
               {/* Order Row Header */}
               <div
@@ -119,15 +110,10 @@ export default function UpsActualChargesClient() {
                 </div>
 
                 <div className="flex items-center justify-between md:justify-end space-x-4">
-                  <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-200">
-                    {order.status}
-                  </span>
-                  <button
-                    type="button"
-                    className="text-slate-500 dark:text-zinc-400 hover:text-slate-800 p-1 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded"
-                  >
+                  <ZenBadge className="text-xs font-bold bg-green-100 text-green-800">{order.status}</ZenBadge>
+                  <ZenButton type="button" className="text-slate-500 p-1">
                     {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                  </button>
+                  </ZenButton>
                 </div>
               </div>
 
@@ -141,10 +127,10 @@ export default function UpsActualChargesClient() {
                   />
                 </div>
               )}
-            </div>
-          );
-        })}
+              </ZenCard>
+            );
+          })}
+        </div>
       </div>
-    </div>
   );
 }
