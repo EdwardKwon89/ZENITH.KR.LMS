@@ -85,6 +85,22 @@ Team B는 개별 `feature/teamb-*` 브랜치를 **develop에 직접 PR 제출하
 
 > **(Issue #86 Phase 4, 2026-07-07)** Task 발령 자체는 GitHub Issue 생성으로 전환됨(GOV_COMMON.md R-17 참조). 위 채번 절차는 담당 Agent가 Issue를 인지하고 **착수(🔄)하는 시점**에 수행한다 — 발령(Issue 생성) 시점에 미리 번호를 선점하지 않는다.
 
+## DEF 번호 채번 규칙 (v1.0 — 팀 접두사 체계, 2026-07-24 Edward 지시)
+
+TASK 번호와 달리 DEF(결함) 번호는 팀 간 공유 채번 체계 없이 전역으로 운영되어 왔고, 같은 날 Team A와 Team B가 각자 "다음 번호"를 독립적으로 계산하면서 **하루에 세 차례 연속 충돌**이 발생했다(DEF-121: Team A vs TASK-B-192/Issue #728, DEF-121: Team A vs TASK-B-193/Issue #741, DEF-124: Team A vs TASK-B-197/Issue #778 — 상세 경위는 Issue #773 코멘트 이력 참조). TASK 번호와 동일한 팀 접두사 체계를 DEF 번호에도 적용해 구조적으로 충돌을 방지한다(Edward 지시, 2026-07-24).
+
+| 팀 | 채번 형식 | 예시 | 비고 |
+|:---|:--------:|:-----|:-----|
+| Team A (Aiden 관할) | `DEF-NNN` | DEF-126 | 기존 DEF-001~125 연속(팀 구분 없이 전역 채번되던 이력 그대로 유지) |
+| Team B (JSJung 관할) | `DEF-B-NNN` | DEF-B-001 | 001부터 독립 순번, 신규 등록분부터 적용 |
+| Team C+ (향후) | `DEF-C-NNN` 등 | DEF-C-001 | 팀 투입 시 Aiden이 접두사 지정 |
+
+**채번 절차**:
+- 채번 전 `./scripts/next-def-number.sh [B]` 실행(TASK 번호와 동일 스크립트 패턴) — `.agent/defects/` 파일명뿐 아니라 `.agent/ACTIVE_TASK.md`·`.agent/VIOLATION_TRACKER.md`·`supabase/migrations/*.sql` 파일명까지 함께 스캔(정식 defect 리포트 파일 없이 마이그레이션 파일명에만 번호를 쓴 경우도 있었음 — DEF-124/TASK-B-197 사례 참고)
+- 채번 즉시 `.agent/defects/DEF-(B-)NNN_*.md` 파일 생성 또는 참조 문서에 등재해 번호 선점
+- **기존 DEF-001~125(팀 구분 없이 전역 채번되던 시절 번호)는 그대로 유지 (소급 변경 없음)** — TASK-139/140/142 선례와 동일 원칙
+- Team B는 이번 결정 시점 이후 신규 등록하는 결함부터 `DEF-B-NNN`을 사용한다. 기존에 이미 `DEF-121`~`DEF-124`로 통용 중인 Team B 결함(Issue #741/TASK-B-193, #771/TASK-B-195, #778/TASK-B-197 등)은 소급 변경하지 않는다.
+
 ## ACTIVE_TASK.md 구조
 
 ```markdown
