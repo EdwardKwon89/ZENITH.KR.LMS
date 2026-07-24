@@ -1165,15 +1165,25 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                         <label className="text-[10px] font-bold text-slate-500 mb-1 block">
                           {t('pickup_location')} <span className="text-rose-500">*</span>
                         </label>
-                        <ZenInput
-                          placeholder="픽업 장소 입력"
-                          {...register('pickup_location')}
-                          error={!!errors.pickup_location}
-                          className="py-2 text-xs"
+                        <AddressInput
+                          mode="rhf"
+                          prefix="pickup"
+                          register={register}
+                          setValue={setValue}
+                          t={t}
+                          defaultValues={{
+                            country_code: watch('pickup_country_code') || 'KR',
+                            address: watch('pickup_address') || '',
+                            address_detail: watch('pickup_address_detail') || '',
+                            state_province: watch('pickup_state_province') || '',
+                            city: watch('pickup_city') || '',
+                            zipcode: watch('pickup_zipcode') || '',
+                          }}
+                          required
                         />
-                        {errors.pickup_location && (
+                        {errors.pickup_address && (
                           <p className="text-[9px] text-rose-500 mt-1">
-                            {errors.pickup_location.message}
+                            {errors.pickup_address.message}
                           </p>
                         )}
                       </div>
@@ -1198,7 +1208,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                           {t('pickup_contact_tel')} <span className="text-rose-500">*</span>
                         </label>
                         <ZenInput
-                          placeholder="연락처 입력 (010-XXXX-XXXX)"
+                          placeholder="010-XXXX-XXXX"
                           {...register('pickup_contact_tel')}
                           error={!!errors.pickup_contact_tel}
                           className="py-2 text-xs"

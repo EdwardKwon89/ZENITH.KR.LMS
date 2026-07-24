@@ -103,11 +103,12 @@ describe('IMP-118: Order Delivery Method Selection and Validation (TC-UPS-ORDER)
     expect(rpcCall[1].p_payload.pickup_contact_tel).toBeUndefined();
   });
 
-  it('TC-UPS-ORDER-02: PICKUP 선택 + pickup_location 입력 — 정상 저장', async () => {
+  it('TC-UPS-ORDER-02: PICKUP 선택 + pickup_address 입력 — 정상 저장', async () => {
     const payload = {
       ...basePayload,
       delivery_method: 'PICKUP',
-      pickup_location: 'Zenith Warehouse A',
+      pickup_address: '123 Pickup St',
+      pickup_country_code: 'KR',
       pickup_contact_name: 'Lee Min-su',
       pickup_contact_tel: '010-9999-8888',
     };
@@ -119,12 +120,12 @@ describe('IMP-118: Order Delivery Method Selection and Validation (TC-UPS-ORDER)
     const rpcCall = mockSupabase.rpc.mock.calls[0];
     expect(rpcCall[0]).toBe('create_order_atomic');
     expect(rpcCall[1].p_payload.delivery_method).toBe('PICKUP');
-    expect(rpcCall[1].p_payload.pickup_location).toBe('Zenith Warehouse A');
+    expect(rpcCall[1].p_payload.pickup_address).toBe('123 Pickup St');
     expect(rpcCall[1].p_payload.pickup_contact_name).toBe('Lee Min-su');
     expect(rpcCall[1].p_payload.pickup_contact_tel).toBe('010-9999-8888');
   });
 
-  it('TC-UPS-ORDER-03: PICKUP 선택 + pickup_location 누락 — Zod 검증 에러 반환', async () => {
+  it('TC-UPS-ORDER-03: PICKUP 선택 + pickup_address 누락 — Zod 검증 에러 반환', async () => {
     const payload = {
       ...basePayload,
       delivery_method: 'PICKUP',
@@ -135,14 +136,14 @@ describe('IMP-118: Order Delivery Method Selection and Validation (TC-UPS-ORDER)
     // Zod validation should fail directly
     await expect(createOrder(payload as any)).rejects.toThrow();
 
-    // Verify direct Zod schema validation result has error on pickup_location
+    // Verify direct Zod schema validation result has error on pickup_address
     const validationResult = orderRegistrationSchema.safeParse(payload);
     expect(validationResult.success).toBe(false);
     if (!validationResult.success) {
       const issues = validationResult.error.issues;
-      const pickupLocIssue = issues.find(issue => issue.path.includes('pickup_location'));
-      expect(pickupLocIssue).toBeDefined();
-      expect(pickupLocIssue?.message).toContain('Pickup location is required');
+      const pickupAddrIssue = issues.find(issue => issue.path.includes('pickup_address'));
+      expect(pickupAddrIssue).toBeDefined();
+      expect(pickupAddrIssue?.message).toContain('Pickup address is required');
     }
   });
 });

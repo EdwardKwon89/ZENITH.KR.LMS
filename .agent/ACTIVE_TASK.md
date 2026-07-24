@@ -480,6 +480,7 @@
 | TASK-B-187 | 260722 | Issue #713 — 출고확정처리 화면 오늘의 이력 패널 신설 | P3 | 없음 | Baker (구현) | 🔔 | [TASK-B-187](tasks/TASK-B-187_260722_Iss713_DepartureHistory_Baker.md) | warehouse.ts getTodayDepartureHistory() 신설 · DepartureConfirmForm 2컬럼+history · i18n 4개 언어 · 테스트 3건 · 로컬 DB 검증 · 회귀 753/753 ALL PASS · Build PASS |
 | TASK-B-193 | 260723 | Issue #741 (DEF-121) TrackingDashboard Detail 링크 로케일 프리픽스 누락 404 | P2 | 없음 | Baker (구현) | 🔔 | [TASK-B-193](tasks/TASK-B-193_260723_Iss741_Def121_TrackingDetailLink404_Baker.md) | TrackingDashboard.tsx useParams()+safeLocale · 렌더링 기반 회귀 테스트 2건 추가 · 회귀 115files/771tests ALL PASS · [PR#746](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/746) |
 | TASK-B-194 | 260723 | Issue #760 (DEF-122) getGlobalTrackingOverview isUnassigned 배열 인덱싱 오류 | P3 | 없음 | Baker (구현) | 🔔 | [TASK-B-194](tasks/TASK-B-194_260723_Iss760_Def122_TrackingUnassignedFix_Baker.md) | tracking.ts Array.isArray() 방어 수정 · 테스트 2건 · 회귀 115files/773tests ALL PASS · 빌드 PASS · [PR#762](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/762) |
+| TASK-B-197 | 260724 | Issue #778 DEF-124 픽업 주소 구조화 + 담당자 연락처 | P2 | 없음 | Baker (구현) | 🔔 | [TASK-B-197](tasks/TASK-B-197_260724_Iss778_PickupAddressPhonePattern_Baker.md) | AddressInput 전환 · DB 컬럼 6개 · placeholder 통일 · 회귀 116files/775tests ALL PASS · [PR#782](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/782) |
 ---
 
 ## Agent 현황
