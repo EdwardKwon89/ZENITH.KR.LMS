@@ -213,6 +213,8 @@ export async function getGlobalTrackingOverview(page = 1, pageSize = 50) {
   if (error) throw new Error(`Failed to fetch tracking overview: ${error.message}`);
 
   const orderIds = (data ?? []).map(c => c.order_id).filter(Boolean);
+
+  // 기존 zen_tracking_events 조회
   const { data: allEvents } = orderIds.length > 0 ? await supabase
     .from("zen_tracking_events")
     .select("order_id, event_time, location, description")
@@ -223,6 +225,33 @@ export async function getGlobalTrackingOverview(page = 1, pageSize = 50) {
   for (const evt of allEvents ?? []) {
     if (!latestEventMap.has(evt.order_id)) {
       latestEventMap.set(evt.order_id, evt);
+    }
+  }
+
+  // DEF-770: UPS 오더는 zen_ups_tracking_events에서도 최신 이벤트 조회
+  const upsOrderIds = orderIds.filter(oid => {
+    const config = (data ?? []).find(c => c.order_id === oid);
+    const orderData = Array.isArray(config?.order) ? config?.order[0] : config?.order;
+    return orderData?.transport_mode === 'UPS';
+  });
+
+  if (upsOrderIds.length > 0) {
+    const { data: upsEvents } = await supabase
+      .from("zen_ups_tracking_events")
+      .select("order_id, event_time, event_desc, event_code, location_city")
+      .in("order_id", upsOrderIds)
+      .order("event_time", { ascending: false });
+
+    for (const evt of upsEvents ?? []) {
+      if (!latestEventMap.has(evt.order_id)) {
+        latestEventMap.set(evt.order_id, {
+          event_time: evt.event_time,
+          description: evt.event_desc,
+          location: evt.location_city,
+          event_code: evt.event_code,
+          source: 'ups',
+        });
+      }
     }
   }
 
