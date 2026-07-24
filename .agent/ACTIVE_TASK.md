@@ -15,6 +15,7 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
+| [#812](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/812) | [defect] DEF-126 — 신규 UPS Order Detail 화면 연결 누락 (OrderDataTable 링크 미분기) | a | p1 | - | 미배정 | 2026-07-24 |
 | [#811](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/811) | [UI] /finance/daily-billing 페이지가 사이드바 메뉴에 연결되지 않음 (DEF-B-001) | b | p3 | - | 미배정 | 2026-07-24 |
 | [#790](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/790) | [feat] IMP-153 — CI supabase db reset 시 authenticated/anon 롤 기본 테이블 GRANT 누락 | b | p3 | - | 미배정 | 2026-07-24 |
 | [#788](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/788) | [feat] IMP-154 — UPS 라벨 회수(removeorder) 실패가 조용히 삼켜짐, 회수 성공 여부 신뢰 불가 | b | p1 | - | 미배정 | 2026-07-24 |
