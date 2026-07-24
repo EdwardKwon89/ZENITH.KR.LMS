@@ -1699,3 +1699,17 @@
 - **예상 공수**: 0.5 MD
 - **우선순위**: Medium — 현재는 운영자 인지로 관리 중이라 당장 장애는 아니나, Agency 수·Shipper 수가 늘어날수록 수작업 관리 리스크 증가
 - **상태**: 🔄 진행 중 — TASK-208(D_Kai) 배정, GitHub Issue #791 등록 완료 (2026-07-24)
+
+---
+
+## [IMP-156] IN_TRANSIT→DELIVERED 자동전환이 하루 1번 폴링에만 의존 — 정산서 확정 연동안은 순환의존으로 불가
+
+- **발견 경위**: Issue #607 UPS 전용 Order Detail 화면(TASK-189) 트래킹 구조 검토(Edward 지시, 2026-07-24) 중 확인. 내부 오더 상태(`REGISTERED→...→IN_TRANSIT`)는 전부 직원 수동 액션으로 전환되며(예: `IN_TRANSIT`은 `warehouse.ts:601` "출고확정처리"), **`DELIVERED`로의 전환만 유일하게 UPS 신호(SHXK `gettrack`)에 의존**함. 그런데 이 신호가 `vercel.json` 확인 결과 **하루 1번**(`ups-tracking-poll`, 매일 15:30 UTC) 크론에만 의존하고, 온디맨드 새로고침 UI/버튼이 코드베이스 전체에 전무함(`pollTracking` 참조 컴포넌트 0건).
+- **검토된 대안과 기각 사유**: Edward가 "UPS 정산서(사후청구) 확정 시점에 DELIVERED로 전환"하는 방식을 제안했으나, 코드 확인 결과 **순환 의존 발견** — `recordUpsActualCharges()`(`src/app/actions/finance/ups-actual-charges.ts:37`)가 이미 `order.status === 'DELIVERED'`를 **선행 조건**으로 강제함("오더가 배송 완료(DELIVERED) 상태일 때만 실제 청구 요금을 입력할 수 있습니다"). 검색 화면(같은 파일 295·329행)도 DELIVERED 오더만 조회 대상. 즉 "정산서 확정→DELIVERED 전환"을 그대로 적용하면 정산 처리에 DELIVERED가 먼저 필요한데 DELIVERED는 정산 처리가 끝나야 되는 데드락 발생. 추가로 배송완료 알림 이메일(`src/lib/notifications/email.ts`/`notifications.ts`)도 이 전환 시점에 걸려있어, 전환이 정산서 도착 시점(통상 배송 후 수일~수주, "사후청구"라는 명칭 자체가 이를 반영)까지 밀리면 화주 알림도 그만큼 늦어져 현재(하루 1회 폴링)보다 오히려 더 나빠질 수 있음.
+- **현재 상태**: 하루 1회 폴링 그대로 유지 중. 정산서 연동안은 채택하지 않음(순환의존 미해결).
+- **임시 조치**: 없음
+- **목표 구현**: (1) 폴링 주기를 하루 1회보다 단축(예: 몇 시간 간격) 검토, (2) 온디맨드 새로고침 버튼(단건 오더 대상 `pollTracking` 직접 호출) 추가 검토, (3) 만약 정산서 연동 방향을 계속 고려한다면 `recordUpsActualCharges()`의 DELIVERED 선행조건을 먼저 완화(예: IN_TRANSIT에서도 입력 허용)하는 별도 설계 결정이 선행되어야 함 — 이 경우 "정산서가 배송완료를 증명한다"는 전제 자체의 타당성(배송 안 됐는데 청구서만 먼저 오는 경우 가능성)도 함께 검토 필요
+- **관련 파일**: `src/app/api/cron/ups-tracking-poll/route.ts`, `vercel.json`, `src/lib/shxk/tracking.ts`, `src/app/actions/finance/ups-actual-charges.ts:37`, `src/lib/notifications/email.ts`
+- **예상 공수**: 폴링 주기 단축은 0.2 MD(단순 스케줄 변경), 온디맨드 새로고침 추가는 0.5 MD, 정산서 연동 방향은 선행 설계 결정 필요로 별도 산정
+- **우선순위**: Medium — 현재도 자동 전환은 동작하나(최대 24시간 지연), 정산/청구 트리거 지연에 영향
+- **상태**: ⬜ 미착수 (Edward 확인, 2026-07-24)
