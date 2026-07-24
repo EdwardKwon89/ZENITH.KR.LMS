@@ -315,6 +315,14 @@ export async function checkRealtimeUpsTrackingAction(orderId: string) {
         changed_by: user.id,
       });
       statusUpdated = true;
+
+      // 배송완료 알림 발송 (Point 4 보완)
+      try {
+        const { triggerStatusChangeNotification } = await import('@/app/actions/misc/notifications');
+        await triggerStatusChangeNotification(orderId, OrderStatus.DELIVERED, supabase);
+      } catch (notifErr) {
+        logger.error(`[checkRealtimeUpsTrackingAction] Notification trigger error:`, notifErr);
+      }
     }
   }
 
@@ -402,6 +410,14 @@ export async function manuallySetOrderDeliveredAction(orderId: string, reason: s
     reason: `[수동 배송완료 전환] ${reason.trim()}`,
     changed_by: user.id,
   });
+
+  // 배송완료 알림 발송 (Point 4 보완)
+  try {
+    const { triggerStatusChangeNotification } = await import('@/app/actions/misc/notifications');
+    await triggerStatusChangeNotification(orderId, OrderStatus.DELIVERED, supabase);
+  } catch (notifErr) {
+    logger.error(`[manuallySetOrderDeliveredAction] Notification trigger error:`, notifErr);
+  }
 
   revalidatePath(`/(dashboard)/orders/${orderId}`, 'page');
   revalidatePath(`/(dashboard)/orders/${orderId}/ups-detail`, 'page');

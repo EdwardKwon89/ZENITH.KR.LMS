@@ -250,7 +250,7 @@ export default async function UpsOrderDetailPage({ params }: UpsOrderDetailPageP
             orderId={orderId}
             currentStatus={order.status || ''}
             trackingNumber={upsLabelStatus.trackingNumber}
-            canManuallySetDelivered={isAdmin || isAgency || profile?.role === 'OPERATOR'}
+            canManuallySetDelivered={isAdmin || isAgency}
           />
 
           {/* 2. UPS Breakdown & Cargo Details (with Items Modal trigger) */}
