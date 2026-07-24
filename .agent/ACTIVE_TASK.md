@@ -497,8 +497,8 @@
 | TASK-205 | 260723 | [Team A] W3 — 예상운임표→최종운임 확정 2단계 플로우 검증/보완 — Issue #747 | TASK-202 ✅ · TASK-204 ✅ | B_Kai | ✅ | [TASK-205](tasks/TASK-205_260723_Issue718_W3_예상운임확정2단계플로우검증_BKai.md) | 1차 반려: 동어반복 구조. 2차: computeUpsFreight 실제 계산엔진 검증 확보. 3차: 6개 테스트 복원·DEF작성이나 DEF번호충돌+스크린샷공백 발견. **4차 재작업(커밋 f01810ef) 최종 승인**: 스크린샷 공백 수정 확인(실제 오더상세 화면 캡처). 격리 워크트리 재검증 9/9+회귀 115/786 PASS. develop 병합 완료, DEF-121(SettlementEngine 스냅샷 캐시 재계산 누락, Issue #773)로 등록 — 최초 DEF-120 재사용은 병합 후 Team B TASK-B-192/Issue #728과 재충돌 발견되어 Aiden이 DEF-121로 정정(팀간 DEF 채번 공유 체계 부재가 원인, 별도 개선 필요) |
 | TASK-206 | 260723 | [Team A] W4 — 청구서 발행 시 이메일 알람 훅 추가 — Issue #748 | 없음 | D_Kai | ✅ | [TASK-206](tasks/TASK-206_260723_Issue718_W4_청구서발행이메일알람훅_DKai.md) | 1차 반려(경미, PR#752): await 없는 fire-and-forget 방식이 기존 sendStatusChangeEmail 패턴과 불일치 — Vercel 서버리스 발송 누락 위험. **재작업(커밋 95726293) 최종 승인**: await+try/catch로 정정 확인, 격리 워크트리 재검증 회귀 116/788 PASS·tsc 신규 에러 없음. develop 병합 완료 |
 | TASK-207 | 260723 | [Team A] W2 후속 — 화주별 주별/월별 청구 집계 — Issue #750 | TASK-204 ✅ | Riley | ✅ | [TASK-207](tasks/TASK-207_260723_Issue750_W2후속_주별월별청구집계_Riley.md) | 1차 반려(PR#755): 날짜필터 UI 회귀 + 기존 daily 테스트 커버리지 축소. **재작업(커밋 e35a6b96) 최종 승인**: '조회' 버튼 신설로 필터 회귀 해소, 삭제됐던 기존 테스트 4건 전부 복원 확인(주별/월별 신규 케이스 포함 총 7개). 격리 워크트리 재검증 7/7+115/789 PASS. develop 병합 완료 |
-| TASK-208 | 260724 | [Team A] IMP-155 — Agency→Shipper 할인율 역전 역마진 방지 검증 추가 — Issue #791 | 없음 | D_Kai | ⬜ | [TASK-208](tasks/TASK-208_260724_Issue791_IMP155_역마진방지검증_DKai.md) | Issue #717 후속 — `upsertShipperZoneDiscounts()`에 Agency 자신의 할인율 대비 초과 여부 검증하는 신규 가드 추가(기존 `getMaxAllowedZoneDiscount`는 별개 목적, 건드리지 않음) |
-| TASK-209 | 260724 | [Team A] UPS Order Detail — order.status 중심 상태 표시 재구성 — Issue #794 | 없음 | Riley | 🔔 | [TASK-209](tasks/TASK-209_260724_Issue794_UPS주문상세상태표시재구성_Riley.md) | Issue #770 트래킹 구조 검토 후속 — order.status 7단계 스텝퍼 UI, 구식 빈 TrackingTimeline 제거, 실시간 UPS 배송확인 버튼(`checkRealtimeUpsTrackingAction`), Agency 소속오더 수동 DELIVERED 전환(`manuallySetOrderDeliveredAction`, 사유필수), 화물 품목 정보 팝업(`UpsPackageItemsModal`) 구축. 코드 `dbff7641`. 회귀 116/795 PASS (검토 대기) |
+| TASK-208 | 260724 | [Team A] IMP-155 — Agency→Shipper 할인율 역전 역마진 방지 검증 추가 — Issue #791 | 없음 | D_Kai | ✅ | [TASK-208](tasks/TASK-208_260724_Issue791_IMP155_역마진방지검증_DKai.md) | `validateAgencyReverseMargin()` 신규 가드 구현 + `upsertShipperZoneDiscounts()` 연동 + TC-UPS-DISCOUNT-05~09 신규 5건 + 회귀 785 PASS(Aiden 로컬 재검증, CI 미트리거 R-08-1 대체). develop 병합 완료(PR#797), Issue #791 Close |
+| TASK-209 | 260724 | [Team A] UPS Order Detail — order.status 중심 상태 표시 재구성 — Issue #794 | 없음 | Riley | 🔄 | [TASK-209](tasks/TASK-209_260724_Issue794_UPS주문상세상태표시재구성_Riley.md) | Issue #770 트래킹 구조 검토 후속. 1차 반려 6건 보완 진행 중 (알림 발송 추가, ZenUI 사유입력 모달, R-10 스크린샷, task file 원상복구, Section 53 번호조정) |
 | TASK-B-173 | 260722 | Issue #655 — DEF-114 ROLE_PERMISSIONS에 AGENCY 누락, 창고관리 전체 500 에러 | P1 | 없음 | Dave (구현) | 🔔 | [TASK-B-173](tasks/TASK-B-173_260722_Def114_AgencyRolePermissions.md) | AGENCY → WAREHOUSED/RELEASED/SCHEDULED/REGISTERED/PACKED/IN_TRANSIT 권한 추가 · TC-AG-T1~T9 9종 · status-machine 31/31 + warehouse 14/14 PASS · tsc 0 error · [PR#656](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/656) (base TeamB_Dev) |
 | TASK-B-175 | 260722 | Issue #661 — SHXK API 호출 통합 감사 로그 테이블 | P3 | 없음 | Dave (구현) | 🔔 | [TASK-B-175](tasks/TASK-B-175_260722_Iss661_ShxkApiLogs.md) | zen_shxk_api_logs 테이블 + callShxk() 로깅 훅 · TC-SHXK-01~09 9종 (로깅 실패 시나리오 3종 포함) · 9/9 PASS · [PR#662](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/662) (base TeamB_Dev) |
 | TASK-B-176 | 260722 | Issue #664 — zen_shxk_api_logs RLS 정책 확대 (SELECT 전체 + AGENCY INSERT) | P3 | 없음 | Dave (구현) | 🔔 | [TASK-B-176](tasks/TASK-B-176_260722_Iss664_ShxkLogsRlsExpand.md) | SELECT: 전체 인증 사용자 · INSERT: AGENCY 명시 허용 · AGENCY INSERT ✅ · OPERATOR SELECT ✅ · [PR#665](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/665) (base TeamB_Dev) |
@@ -519,9 +519,13 @@
 | Agent | 상태 | 비고 |
 |:------|:----:|:----|
 | **Aiden (Claude)** | ✅ TASK-167 전체 승인 (260626) | PR#117 §1 ✅ · PR#118 §2+§3 ✅ 전량 머지 완료 |
-| **D_Kai (OpenCode)** | ⬜ TASK-208 배정 (260724) | IMP-155 — Agency→Shipper 할인율 역전 역마진 방지 검증 추가(Issue #791). 직전 TASK-206(W4) 승인·머지 완료(PR#752) |
+| **D_Kai (OpenCode)** | ✅ TASK-208 승인·머지 완료 (260724) | IMP-155 — `validateAgencyReverseMargin()` 신규 가드 + `upsertShipperZoneDiscounts()` 연동 + TC-UPS-DISCOUNT-05~09 5건 + 회귀 785 PASS(Aiden 로컬 재검증). develop 병합 완료(PR#797), Issue #791 Close. 신규 Task 대기 |
 | **B_Kai** | ✅ TASK-205 승인·머지 완료 (260723) | W3 — 예상운임→최종운임 확정 2단계 플로우 검증/보완(Issue #747, PR#753). 4차례 재작업(computeUpsFreight 실제검증→테스트복원→DEF채번+스크린샷수정) 끝에 최종 승인. 신규 Task 대기 |
+<<<<<<< HEAD
 | **Riley** | 🔔 TASK-209 검토 대기 (260724) | UPS Order Detail order.status 중심 재구성(Issue #794) 구현 완료. 이전: TASK-207 ✅(PR#755) 승인·머지 완료 |
+=======
+| **Riley** | 🔄 TASK-209 1차 반려, 재작업 대기 (260724) | UPS Order Detail order.status 중심 재구성(Issue #794, PR#802). R-10 스크린샷·task file 섹션 삭제·회귀맵 번호충돌·알림누락·OPERATOR 노출·window.prompt 등 6건 보완 요청 |
+>>>>>>> origin/develop
 | N_Kai | ➖ 미재배정 확정 (260626 Edward) | TASK-087 폐기 — 신규 Task 발령 없음 |
 | Ring | 신규 할당 중단 유지 | 9차 위반 누적 |
 

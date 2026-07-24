@@ -659,7 +659,16 @@
 | **TC-WF-02** | 스냅샷 갱신 후 정산 비용 재생성 검증 | SettlementEngine 로직과 일치하는 비용 생성 확인 | `tests/e2e/e2e-29-ups-freight-pipeline.spec.ts` |
 | **TC-WF-03** | 실제 오더 상세 UI 탐색 검증 | page.goto() 브라우저 네비게이션 + DB-UI 일관성 확인 | `tests/e2e/e2e-29-ups-freight-pipeline.spec.ts` |
 
-### 52. UPS Order Detail order.status 중심 상태 표시 재구성 (Issue #794 / TASK-209)
+### 52. Agency→Shipper 역마진 방지 검증 (IMP-155 / Issue #791 / TASK-208)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-UPS-DISCOUNT-05** | shipper_rate <= agency_rate — 정상 통과 | 할인율이 Agency 자체 할인율 이하일 때 통과 검증 | `tests/unit/ups/discount-guard.test.ts` |
+| **TC-UPS-DISCOUNT-06** | shipper_rate === agency_rate — 정상 통과 | 동일 할인율도 허용(역마진 아님) | `tests/unit/ups/discount-guard.test.ts` |
+| **TC-UPS-DISCOUNT-07** | shipper_rate > agency_rate — 역마진 감지 | 초과 시 에러 메시지 반환 및 저장 거부 | `tests/unit/ups/discount-guard.test.ts` |
+| **TC-UPS-DISCOUNT-08** | agency 정책 없음 (data=null) — null 반환 | 정책 미등록 Agency의 경우 다른 가드에 위임 | `tests/unit/ups/discount-guard.test.ts` |
+| **TC-UPS-DISCOUNT-09** | .eq() 호출 인자 검증 | 올바른 파라미터(agency_org_id, zone_id, is_active)로 조회하는지 확인 | `tests/unit/ups/discount-guard.test.ts` |
+
+### 53. UPS Order Detail order.status 중심 상태 표시 재구성 (Issue #794 / TASK-209)
 | ID | 테스트 항목 | 목적 | 파일 경로 |
 | :--- | :--- | :--- | :--- |
 | **TC-UPS-STATUS-01** | canChangeStatus (AGENCY → DELIVERED) | Status Machine에서 AGENCY 역할의 DELIVERED 수동 전환 권한 허용 검증 | `tests/unit/ups/ups-order-detail-status.test.ts` |
@@ -670,7 +679,6 @@
 | **TC-UPS-STATUS-06** | manuallySetOrderDeliveredAction (타사 오더 차단) | Agency 사용자가 타인 화주 오더 전환 시도 시 IDOR 차단 검증 | `tests/unit/ups/ups-order-detail-status.test.ts` |
 
 ---
-
 ## 📝 가이드라인 (R-09 Enforcement)
 1. **추가 의무**: 신규 기능 개발 시 위 카테고리에 맞는 테스트를 반드시 추가하십시오.
 2. **실행 의무**: 모든 커밋 전 `npm run test:regression`을 실행하여 위 명세 전원이 초록색인지 확인하십시오.

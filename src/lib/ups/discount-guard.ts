@@ -1,5 +1,29 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 
+export async function validateAgencyReverseMargin(
+  supabase: SupabaseClient,
+  agencyOrgId: string,
+  zoneId: string,
+  shipperDiscountRate: number,
+): Promise<string | null> {
+  const { data } = await supabase
+    .from('zen_agency_pricing_policies')
+    .select('discount_rate')
+    .eq('agency_org_id', agencyOrgId)
+    .eq('zone_id', zoneId)
+    .eq('is_active', true)
+    .single();
+
+  if (!data) return null;
+
+  const agencyRate = Number(data.discount_rate);
+  if (shipperDiscountRate > agencyRate) {
+    return `등록하려는 화주 할인율(${(shipperDiscountRate * 100).toFixed(1)}%)이(가) 귀사의 대리점 할인율(${(agencyRate * 100).toFixed(1)}%)을 초과합니다.`;
+  }
+
+  return null;
+}
+
 export async function getMaxAllowedZoneDiscount(
   supabase: SupabaseClient,
   zoneId: string,
