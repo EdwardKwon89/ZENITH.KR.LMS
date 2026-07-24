@@ -89,3 +89,14 @@ _(Jaison 검토 후 기재 — Baker 수정 금지)_
 _(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
 
 없음
+
+## [작업 결과]
+
+- **DB 마이그레이션**: `20260724000000_def124_pickup_address_structured.sql` (컬럼 6개)
+- **프론트엔드**: `OrderRegistrationForm.tsx` — AddressInput 전환 + placeholder 통일
+- **밸리데이션**: `order.ts` — pickup 주소 필드 추가 + pickup_address 필수
+- **서버 액션**: `orders.ts` — pickup 주소 필드 INSERT
+- **테스트**: TC-UPS-ORDER-02/03 수정 (pickup_address 반영)
+- **전체 회귀**: 116 files / 775 tests ALL PASS (직접 재실행)
+- **커밋**: `72e75121` (코드) + `09f221ce` (테스트) + `7d0668c2` (문서)
+- **PR**: [PR#782](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/782) (base TeamB_Dev)
