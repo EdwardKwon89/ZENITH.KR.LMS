@@ -76,7 +76,7 @@ Aiden이 사전 제작한 미리보기: https://claude.ai/code/artifact/db347c94
 
 | 항목 | 내용 |
 |:----|:----|
-| 코드 커밋 | `dbff7641` (1차) / `4b16ecb8` (2차 재작업) |
+| 코드 커밋 | `dbff7641` (1차) / `4b16ecb8` (2차) / `338abd06` (3차 캡처교체) |
 | 회귀 결과 | Vitest unit & regression tests 100% PASS (`rtk npm run test:regression` 검증 완수) |
 | 빌드 | 빌드 성공 (`npx tsc --noEmit` 0 error in src/) |
 | 특이사항 | Issue #794 요구사항 및 1차 반려 6개 항목(R-10 증적, task file 원상복구, Section 53 채번, 알림 트리거 연동, OPERATOR 제외, ZenUI 사유입력 모달) 완전 완수. |
