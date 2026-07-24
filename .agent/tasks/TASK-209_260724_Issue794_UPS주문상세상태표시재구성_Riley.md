@@ -25,6 +25,15 @@ Issue #607(TASK-189, Riley 원 구현)로 만든 UPS 전용 Order Detail 화면 
 2. **(범위 확대, 2026-07-24) "실시간 UPS 배송 확인" 버튼 + Agency 수동 DELIVERED 상태변경 권한** — IN_TRANSIT→DELIVERED 자동전환 신뢰성 문제(IMP-156, 하루 1회 폴링에만 의존)에 대한 대응책으로 이번 Task에 포함
 3. **예외 코드 처리는 범위 제외** — UPS 배송 에러/예외 상태 코드 전체 목록이 문서화되어 있지 않아(코드베이스 전체에서 실제 다뤄지는 코드는 `NT`/`DL` 2개뿐) 조치 불가. IMP-156에 남겨두고 이번 Task에서 처리하지 않음
 
+## [디자인 참고] (Edward 승인, 2026-07-24)
+
+Aiden이 사전 제작한 미리보기: https://claude.ai/code/artifact/db347c94-6b26-4d26-a661-b9d387ef44e6
+- 7단계 스텝퍼(등록→픽업→입고→포장/라벨→출고→배송중→배송완료), 완료=초록 체크/현재=amber 펄스/예정=흐림
+- "실시간 UPS 배송 확인" 버튼 + 로딩 상태 표현
+- Agency 수동 전환 링크는 배송완료 전까지만 노출
+- 기존 트래킹 이벤트는 보조 섹션으로 축소, 발송 전 빈 상태는 안내 문구로 처리
+- 색상은 기존 ZenUI 토큰(amber=트래킹 포인트, indigo=라이브 액션) 그대로 사용 — 신규 컬러 도입 금지, 위 미리보기 참고해 실제 ZenCard/ZenBadge 컴포넌트로 구현할 것
+
 ## [작업 범위]
 
 1. `order.status`의 7단계(REGISTERED→SCHEDULED→WAREHOUSED→PACKED→RELEASED→IN_TRANSIT→DELIVERED)를 시각적으로 보여주는 상태 표시 UI 신설 — 스텝퍼/프로그레스바 형태 권장, 현재 상태를 명확히 강조. ZenUI 컴포넌트 재사용(신규 디자인 시스템 도입 금지)
