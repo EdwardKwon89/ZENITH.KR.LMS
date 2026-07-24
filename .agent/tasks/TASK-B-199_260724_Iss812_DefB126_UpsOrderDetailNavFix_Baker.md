@@ -6,7 +6,27 @@
 | **담당** | Baker (Team B) |
 | **생성일** | 2026-07-24 |
 | **우선순위** | P1 |
-| **상태** | ⬜ |
+| **상태** | 🔔 |
+
+## 변경 내용
+
+### 코드
+- `src/components/orders/OrderDataTable.tsx:130`: `transport_mode === 'UPS'`일 때 `/ups-detail`로 분기
+
+### 테스트
+- `tests/unit/orders/order-datatable-link.test.tsx` 신규 추가 (2건)
+
+## 검증 결과
+
+| 항목 | 결과 |
+|:-----|:-----|
+| 전체 회귀 | ✅ 117 files / 777 tests ALL PASS |
+| 신규 테스트 | ✅ 2건 PASS |
+| 빌드 | ✅ PASS |
+| 커밋 | `0bd81c01` (코드+테스트) |
+| PR | [PR#821](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/821) |
+
+## [작업 결과]
 
 ## 배경
 
