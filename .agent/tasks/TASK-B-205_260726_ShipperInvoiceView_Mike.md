@@ -6,7 +6,44 @@
 | **담당** | Mike (Team B) |
 | **생성일** | 2026-07-26 |
 | **우선순위** | P2 |
-| **상태** | ⬜ |
+| **상태** | 🔔 |
+
+## [작업 결과]
+
+### 변경 내용
+
+#### 서버액션 (`src/app/actions/finance/shipper-invoices.ts`)
+- `getShipperInvoices()`: SHIPPER는 본인 것만, AGENCY는 자소 화주 것만, ADMIN은 전체 조회
+- 기간 필터 지원
+- CANCELED 상태 제외
+
+#### 페이지 (`src/app/[locale]/(dashboard)/shipper/invoices/page.tsx`)
+- 청구서 목록 + 검색 + 기간 필터
+- 상태별 배지 (대기/발송됨/결제완료/연체)
+
+#### 마이그레이션 (`20260726000000_defb002_invoices_agency_rls.sql`)
+- `zen_invoices`에 AGENCY SELECT 정책 추가 (DEF-B-002)
+
+#### i18n (4 로케일)
+- `ShipperInvoices` 블록 추가
+
+### 파일 목록
+- `src/app/actions/finance/shipper-invoices.ts` — 신규
+- `src/app/[locale]/(dashboard)/shipper/invoices/page.tsx` — 신규
+- `supabase/migrations/20260726000000_defb002_invoices_agency_rls.sql` — 신규
+- `messages/{ko,en,ja,zh}.json` — i18n 추가
+- `tests/unit/finance/shipper-invoices.test.ts` — 신규 (3건)
+- `tests/unit/finance/shipper-invoices-agency-rls.test.ts` — 신규 (5건)
+
+### 검증
+- 테스트: **8/8 PASS** (코드 검증 3건 + DB 검증 5건)
+- 빌드: ✅ PASS
+- 회귀: **127/127 파일 PASS, 833/833 테스트 PASS**
+- 커밋 해시: `344997ee`
+- PR: [#840](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/840) 갱신
+
+### [발견 이슈]
+없음
 | **선행 참고** | TASK-B-204(부가요금 등록)와 함께 진행되나 독립적으로 착수 가능. 화면에는 TASK-B-204를 거쳐 발행된 인보이스도 함께 노출되어야 함 |
 
 ## 개요

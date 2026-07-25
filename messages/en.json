@@ -696,6 +696,12 @@
     "empty_history": "No UPS receiving records processed today.",
     "partial_success": "UPS registration complete: {success} succeeded, {fail} failed"
   },
+  "ShipperInvoices": {
+    "title": "Invoice View",
+    "search_placeholder": "Search by invoice number",
+    "search_btn": "Search",
+    "empty": "No invoices found."
+  },
   "WarehouseDeparture": {
     "title": "Departure Confirm",
     "select_orders": "Select orders for departure confirmation",

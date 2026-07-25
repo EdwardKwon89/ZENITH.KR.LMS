@@ -194,6 +194,12 @@
     "empty_history": "今日没有UPS收货记录。",
     "partial_success": "UPS注册完成：{success}件成功，{fail}件失败"
   },
+  "ShipperInvoices": {
+    "title": "账单查询",
+    "search_placeholder": "按账单号搜索",
+    "search_btn": "查询",
+    "empty": "没有账单。"
+  },
   "WarehouseDeparture": {
     "title": "出库确认",
     "select_orders": "选择要确认出库的订单",
