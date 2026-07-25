@@ -588,7 +588,9 @@
     "empty_history": "오늘 입고 처리된 내역이 없습니다.",
     "cancel_btn": "입고 취소",
     "cancel_success": "입고가 취소되고 이전 상태로 복구되었습니다.",
-    "cancel_confirm": "이 오더의 입고를 취소하시겠습니까?"
+    "cancel_confirm": "이 오더의 입고를 취소하시겠습니까?",
+    "weight_volume_edit": "부피/중량 실측 입력",
+    "weight_volume_desc": "입고 시 실측한 값을 입력하세요. 변경 시 예상 운임이 재계산됩니다."
   },
   "WarehousePickup": {
     "title": "오더 픽업",

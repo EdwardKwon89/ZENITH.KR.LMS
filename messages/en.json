@@ -593,7 +593,9 @@
     "empty_history": "No inbound records processed today.",
     "cancel_btn": "Cancel Inbound",
     "cancel_success": "Inbound cancelled and restored to previous status.",
-    "cancel_confirm": "Are you sure you want to cancel this inbound?"
+    "cancel_confirm": "Are you sure you want to cancel this inbound?",
+    "weight_volume_edit": "Volume/Weight Measurement",
+    "weight_volume_desc": "Enter the measured values during inbound. Expected freight will be recalculated when changed."
   },
   "WarehousePickup": {
     "title": "Order Pickup",
