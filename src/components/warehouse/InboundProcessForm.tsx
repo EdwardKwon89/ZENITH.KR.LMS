@@ -34,6 +34,7 @@ export default function InboundProcessForm({ locale }: { locale: string }) {
   const [errorMsg, setErrorMsg] = useState("");
   const [cancelTarget, setCancelTarget] = useState<any | null>(null);
   const [cancelLoading, setCancelLoading] = useState(false);
+  const [packageEdits, setPackageEdits] = useState<Record<string, { gross_weight?: string; length?: string; width?: string; height?: string }>>({});
 
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -73,6 +74,7 @@ export default function InboundProcessForm({ locale }: { locale: string }) {
         setOrder(result);
         setInspectStatus("NORMAL");
         setNote("");
+        setPackageEdits({});
         toast.success("화물을 찾았습니다.");
       } else {
         setErrorMsg(t("error_not_found"));
@@ -93,12 +95,24 @@ export default function InboundProcessForm({ locale }: { locale: string }) {
 
     setSubmitLoading(true);
     try {
-      const result = await confirmInbound(order.id, inspectStatus, note.trim());
+      // 패키지 수정 데이터 구성
+      const updates = Object.entries(packageEdits)
+        .filter(([_, edits]) => Object.keys(edits).length > 0)
+        .map(([packageId, edits]) => ({
+          packageId,
+          ...(edits.gross_weight !== undefined && { gross_weight: parseFloat(edits.gross_weight) || 0 }),
+          ...(edits.length !== undefined && { length: parseFloat(edits.length) || 0 }),
+          ...(edits.width !== undefined && { width: parseFloat(edits.width) || 0 }),
+          ...(edits.height !== undefined && { height: parseFloat(edits.height) || 0 }),
+        }));
+
+      const result = await confirmInbound(order.id, inspectStatus, note.trim(), updates.length > 0 ? updates : undefined);
       if (result && result.success) {
         toast.success(t("success_msg"));
         setOrder(null);
         setBarcode("");
         setNote("");
+        setPackageEdits({});
         await fetchHistory();
       } else {
         throw new Error("입고 처리에 실패했습니다.");
@@ -271,6 +285,89 @@ export default function InboundProcessForm({ locale }: { locale: string }) {
                 </table>
               </div>
             </ZenCard>
+
+            {/* 부피/중량 수정 카드 */}
+            {order.packages && order.packages.length > 0 && (
+              <ZenCard className="p-6 bg-white/80 border-slate-100/50 shadow-md">
+                <h3 className="text-md font-black text-slate-900 mb-4 flex items-center gap-2">
+                  <span className="w-1 h-4 bg-amber-500 rounded-full"></span>
+                  {t("weight_volume_edit")}
+                </h3>
+                <p className="text-xs text-slate-500 mb-4">{t("weight_volume_desc")}</p>
+                
+                <div className="space-y-4">
+                  {order.packages.map((pkg: any) => {
+                    const edits = packageEdits[pkg.id] || {};
+                    return (
+                      <div key={pkg.id} className="p-4 bg-slate-50/70 rounded-xl border border-slate-100">
+                        <div className="flex items-center gap-2 mb-3">
+                          <Package size={14} className="text-slate-500" />
+                          <span className="text-xs font-bold text-slate-700">{pkg.packing_unit || "패키지"} #{pkg.id.substring(0, 8)}</span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label className="block text-[10px] font-bold text-slate-500 mb-1">중량 (kg)</label>
+                            <input
+                              type="number"
+                              step="0.1"
+                              defaultValue={pkg.gross_weight || ''}
+                              onChange={(e) => setPackageEdits(prev => ({
+                                ...prev,
+                                [pkg.id]: { ...prev[pkg.id], gross_weight: e.target.value }
+                              }))}
+                              className="w-full px-3 py-2 text-sm bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-brand-400/30 focus:border-brand-400 transition-all"
+                              placeholder={pkg.gross_weight ? `${pkg.gross_weight}` : '0'}
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-bold text-slate-500 mb-1">길이 (cm)</label>
+                            <input
+                              type="number"
+                              step="0.1"
+                              defaultValue={pkg.length || ''}
+                              onChange={(e) => setPackageEdits(prev => ({
+                                ...prev,
+                                [pkg.id]: { ...prev[pkg.id], length: e.target.value }
+                              }))}
+                              className="w-full px-3 py-2 text-sm bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-brand-400/30 focus:border-brand-400 transition-all"
+                              placeholder={pkg.length ? `${pkg.length}` : '0'}
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-bold text-slate-500 mb-1">너비 (cm)</label>
+                            <input
+                              type="number"
+                              step="0.1"
+                              defaultValue={pkg.width || ''}
+                              onChange={(e) => setPackageEdits(prev => ({
+                                ...prev,
+                                [pkg.id]: { ...prev[pkg.id], width: e.target.value }
+                              }))}
+                              className="w-full px-3 py-2 text-sm bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-brand-400/30 focus:border-brand-400 transition-all"
+                              placeholder={pkg.width ? `${pkg.width}` : '0'}
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-bold text-slate-500 mb-1">높이 (cm)</label>
+                            <input
+                              type="number"
+                              step="0.1"
+                              defaultValue={pkg.height || ''}
+                              onChange={(e) => setPackageEdits(prev => ({
+                                ...prev,
+                                [pkg.id]: { ...prev[pkg.id], height: e.target.value }
+                              }))}
+                              className="w-full px-3 py-2 text-sm bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-brand-400/30 focus:border-brand-400 transition-all"
+                              placeholder={pkg.height ? `${pkg.height}` : '0'}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </ZenCard>
+            )}
 
             {/* 검수 및 확정 카드 */}
             <ZenCard className="p-6 bg-white/80 border-slate-100/50 shadow-lg relative overflow-hidden">
