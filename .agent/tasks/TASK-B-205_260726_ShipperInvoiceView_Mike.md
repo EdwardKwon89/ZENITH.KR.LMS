@@ -2,6 +2,7 @@
 
 | 항목 | 내용 |
 |:-----|:------|
+| **Issue** | [#831](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/831) |
 | **담당** | Mike (Team B) |
 | **생성일** | 2026-07-26 |
 | **우선순위** | P2 |
@@ -87,7 +88,7 @@ admin은 `/settlement`, agency는 `/agency/settlements`로 이미 조회 가능 
 3. `.agent/ACTIVE_TASK.md` 상태 동시 반영
 4. `check-R17-DoD` 실행 후 통과 확인
 5. 문서 커밋
-6. PR 생성 (`feature/teamb-205-... → TeamB_Dev`)
+6. PR 생성 (`feature/teamb-205-... → TeamB_Dev`, `Closes #831`)
 
 ## [발견 이슈]
 

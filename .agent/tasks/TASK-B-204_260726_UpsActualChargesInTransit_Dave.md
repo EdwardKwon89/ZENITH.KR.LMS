@@ -2,6 +2,7 @@
 
 | 항목 | 내용 |
 |:-----|:------|
+| **Issue** | [#830](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/830) |
 | **담당** | Dave (Team B) |
 | **생성일** | 2026-07-26 |
 | **우선순위** | P2 |
@@ -84,7 +85,7 @@ if (!isAdmin && profile.role !== USER_ROLES.AGENCY) {
 3. `.agent/ACTIVE_TASK.md` 상태 동시 반영
 4. `check-R17-DoD` 실행 후 통과 확인
 5. 문서 커밋
-6. PR 생성 (`feature/teamb-204-... → TeamB_Dev`)
+6. PR 생성 (`feature/teamb-204-... → TeamB_Dev`, `Closes #830`)
 
 ## [발견 이슈]
 
