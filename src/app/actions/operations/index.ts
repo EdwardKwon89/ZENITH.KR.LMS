@@ -68,4 +68,5 @@ export {
   undoOutbound,
   getReleasedOrders,
   confirmDeparture,
+  undoDeparture,
 } from './warehouse';

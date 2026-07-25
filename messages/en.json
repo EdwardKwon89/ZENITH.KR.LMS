@@ -707,7 +707,13 @@
     "partial_success": "Departure completed: {success} success, {fail} failed",
     "error_none_selected": "Please select orders for departure confirmation.",
     "today_history": "Today's Departure History",
-    "empty_history": "No departure history processed today."
+    "empty_history": "No departure history processed today.",
+    "undo_btn": "Undo Departure",
+    "undo_title": "Undo Departure Confirmation",
+    "undo_desc": "Cancel departure confirmation and revert to RELEASED status?",
+    "undo_confirm": "Confirm Undo",
+    "undo_success": "Departure confirmation undone successfully.",
+    "undo_failed": "Failed to undo departure confirmation."
   },
   "ShippingLabel": {
     "title": "Shipping Label",

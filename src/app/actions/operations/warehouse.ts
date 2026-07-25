@@ -607,6 +607,38 @@ export async function confirmDeparture(orderId: string) {
 }
 
 // ─────────────────────────────────────────────
+// D-2: 출고확정취소 — IN_TRANSIT → RELEASED
+// ─────────────────────────────────────────────
+
+export async function undoDeparture(orderId: string) {
+  const { supabase, profile } = await validateUserAction();
+  if (!profile) throw new Error("User profile not found");
+  const isAllowed = WAREHOUSE_ROLES.includes(profile.role as any);
+  if (!isAllowed) throw new Error("권한이 없습니다.");
+
+  const orderRepo = new OrderRepository(supabase);
+  const { data: order } = await orderRepo.findById(orderId);
+  if (!order) return { success: false, error: "Order not found" };
+  if (order.status !== OrderStatus.IN_TRANSIT) {
+    return { success: false, error: "IN_TRANSIT 상태의 오더만 출고확정취소할 수 있습니다." };
+  }
+
+  if (profile.role === USER_ROLES.AGENCY) {
+    const shipperIds = await getAgencyShipperIds(supabase, profile.org_id);
+    if (!shipperIds || !shipperIds.includes((order as any).shipper_id)) {
+      return { success: false, error: "본인 소속 화주의 오더만 처리할 수 있습니다." };
+    }
+  }
+
+  await updateOrderStatus(orderId, OrderStatus.RELEASED, "[출고확정취소]");
+
+  revalidatePath("/(dashboard)/warehouse/departure", "page");
+  revalidatePath("/(dashboard)/orders", "page");
+
+  return { success: true };
+}
+
+// ─────────────────────────────────────────────
 // C-4: 출고취소 — RELEASED → PACKED
 // ─────────────────────────────────────────────
 

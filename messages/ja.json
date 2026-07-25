@@ -192,7 +192,13 @@
     "partial_success": "出荷確定完了: {success}件成功、{fail}件失敗",
     "error_none_selected": "出荷確定するオーダを選択してください。",
     "today_history": "本日の出荷確定履歴",
-    "empty_history": "本日処理された出荷確定履歴はありません。"
+    "empty_history": "本日処理された出荷確定履歴はありません。",
+    "undo_btn": "出荷確定取消",
+    "undo_title": "出荷確定取消",
+    "undo_desc": "このオーダの出荷確定を取消してRELEASED状態に戻しますか？",
+    "undo_confirm": "取消確定",
+    "undo_success": "出荷確定取消が完了しました。",
+    "undo_failed": "出荷確定取消に失敗しました。"
   },
   "ShippingLabel": {
     "title": "配送ラベル",
