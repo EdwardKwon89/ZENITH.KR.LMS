@@ -94,7 +94,7 @@ if (!isAdmin && profile.role !== USER_ROLES.AGENCY) {
 | **커밋** | (코드 + 문서, 별도 커밋) |
 | **변경 파일** | `ups-actual-charges.ts` (상태/권한 게이트 + AGENCY shipper 필터) · `page.tsx` (AGENCY 접근 + 문구) · `ups-actual-charges-client.tsx` (문구) |
 | **신규 테스트** | `tests/unit/finance/ups-actual-charges.test.ts` — TC-B204-01~06 (IN_TRANSIT 성공/REGISTERED 차단/SHIPPER 거부/AGENCY 허용/DELIVERED 회귀/타화주 차단) |
-| **회귀 테스트** | 6/6 PASS |
+| **회귀 테스트** | 6/6 PASS (124 files/824 tests ALL PASS) |
 | **빌드** | ✅ |
 | **브랜치** | `feature/teamb-204-ups-actual-charges-in-transit` |
 | **변경 함수** | `recordUpsActualCharges()` — `validateUserAction()` + `assertAdminOrAgency()` + status gate IN_TRANSIT/DELIVERED + AGENCY shipper scope · `searchDeliveredUpsOrders()` — `validateUserAction()` + AGENCY scope + status IN_TRANSIT/DELIVERED |
