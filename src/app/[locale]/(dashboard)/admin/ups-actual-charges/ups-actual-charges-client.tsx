@@ -37,7 +37,7 @@ export default function UpsActualChargesClient() {
       const orders = await searchDeliveredUpsOrders(trimmed);
       setResults(orders as any[]);
       if (orders.length === 0) {
-        toast.info('검색 결과가 없습니다. (배송 완료된 UPS 오더만 조회 가능합니다)');
+        toast.info('검색 결과가 없습니다. (IN_TRANSIT 또는 배송 완료된 UPS 오더만 조회 가능합니다)');
       } else if (orders.length === 1) {
         // Auto-expand if only 1 result is found
         setExpandedOrderId(orders[0].id);

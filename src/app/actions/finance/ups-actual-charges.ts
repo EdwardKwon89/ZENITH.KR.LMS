@@ -13,16 +13,25 @@ export interface UpsActualChargeInput {
   notes?: string;
 }
 
+const ADMIN_ROLES = ['ZENITH_SUPER_ADMIN', 'ADMIN', 'MANAGER'] as const;
+
+async function assertAdminOrAgency(profile: { role: string; org_id?: string }) {
+  if (ADMIN_ROLES.includes(profile.role as any)) return;
+  if (profile.role === 'AGENCY') return;
+  throw new Error('부가요금 등록 권한이 없습니다.');
+}
+
 export async function recordUpsActualCharges(
   orderId: string,
   charges: UpsActualChargeInput[]
 ): Promise<{ success: boolean; adjustmentAmount?: number; error?: string }> {
   try {
-    const { supabase, user } = await validateAdminAction();
+    const { supabase, user, profile } = await validateUserAction();
+    await assertAdminOrAgency(profile);
 
     const { data: order, error: orderError } = await supabase
       .from('zen_orders')
-      .select('status, transport_mode')
+      .select('status, transport_mode, shipper_id')
       .eq('id', orderId)
       .single();
 
@@ -34,8 +43,21 @@ export async function recordUpsActualCharges(
       return { success: false, error: 'UPS 오더가 아닙니다.' };
     }
 
-    if (order.status !== 'DELIVERED') {
-      return { success: false, error: '오더가 배송 완료(DELIVERED) 상태일 때만 실제 청구 요금을 입력할 수 있습니다.' };
+    // AGENCY: 본인 소속 화주 오더만 허용
+    if (profile.role === 'AGENCY') {
+      const { data: links } = await supabase
+        .from('zen_agency_shippers')
+        .select('shipper_org_id')
+        .eq('agency_org_id', profile.org_id)
+        .eq('is_active', true);
+      const shipperIds = (links || []).map((l: any) => l.shipper_org_id);
+      if (!shipperIds.includes(order.shipper_id)) {
+        return { success: false, error: '본인 소속 화주의 오더만 처리할 수 있습니다.' };
+      }
+    }
+
+    if (order.status !== 'IN_TRANSIT' && order.status !== 'DELIVERED') {
+      return { success: false, error: '오더가 IN_TRANSIT 또는 DELIVERED 상태일 때만 실제 청구 요금을 입력할 수 있습니다.' };
     }
 
     const { data: existingInvoice } = await supabase
@@ -273,7 +295,8 @@ export async function getUpsChargeReconciliation(orderId: string) {
 }
 
 export async function searchDeliveredUpsOrders(query: string) {
-  const { supabase } = await validateAdminAction();
+  const { supabase, profile } = await validateUserAction();
+  await assertAdminOrAgency(profile);
 
   const trimmed = query.trim();
   if (!trimmed) return [];
@@ -292,14 +315,25 @@ export async function searchDeliveredUpsOrders(query: string) {
       tracking_config:zen_tracking_configs(tracking_no)
     `)
     .eq('transport_mode', 'UPS')
-    .eq('status', 'DELIVERED')
+    .in('status', ['IN_TRANSIT', 'DELIVERED'])
     .ilike('order_no', `%${trimmed}%`);
 
   if (error) {
     throw new Error(`오더 검색 실패: ${error.message}`);
   }
 
-  const resultList = orders || [];
+  // AGENCY: 본인 소속 화주 오더만 필터링
+  let resultList = orders || [];
+  if (profile.role === 'AGENCY') {
+    const { data: links } = await supabase
+      .from('zen_agency_shippers')
+      .select('shipper_org_id')
+      .eq('agency_org_id', profile.org_id)
+      .eq('is_active', true);
+    const shipperIds = new Set((links || []).map((l: any) => l.shipper_org_id));
+    resultList = resultList.filter((o) => shipperIds.has(o.shipper_id));
+  }
+
   const orderIds = new Set<string>(resultList.map((o) => o.id));
 
   // 2. tracking_no 로 검색
@@ -313,7 +347,7 @@ export async function searchDeliveredUpsOrders(query: string) {
     const idsToFetch = matchedIds.filter(id => !orderIds.has(id));
 
     if (idsToFetch.length > 0) {
-      const { data: moreOrders } = await supabase
+      let moreOrdersQuery = supabase
         .from('zen_orders')
         .select(`
           id,
@@ -326,8 +360,10 @@ export async function searchDeliveredUpsOrders(query: string) {
           tracking_config:zen_tracking_configs(tracking_no)
         `)
         .eq('transport_mode', 'UPS')
-        .eq('status', 'DELIVERED')
+        .in('status', ['IN_TRANSIT', 'DELIVERED'])
         .in('id', idsToFetch);
+
+      const { data: moreOrders } = await moreOrdersQuery;
 
       if (moreOrders) {
         moreOrders.forEach((o) => {
