@@ -17,7 +17,7 @@
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
 | [#831](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/831) | [feat] 화주(Shipper)용 청구서 조회 화면 신설 | b | p2 | - | 미배정 | 2026-07-25 |
 | [#830](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/830) | [feat] IN_TRANSIT 오더 부가요금 등록 기능 (recordUpsActualCharges 확장) | b | p2 | - | 미배정 | 2026-07-25 |
-| [#829](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/829) | [feat] IN_TRANSIT → RELEASED 되돌리기 기능 (출고확정처리 취소) | b | p2 | - | 미배정 | 2026-07-25 |
+| [#829](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/829) | [feat] IN_TRANSIT → RELEASED 되돌리기 기능 (출고확정처리 취소) | b | p2 | done | 미배정 | 2026-07-25 |
 | [#812](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/812) | [defect] DEF-126 — 신규 UPS Order Detail 화면 연결 누락 (OrderDataTable 링크 미분기) | b | p1 | review | 미배정 | 2026-07-24 |
 | [#811](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/811) | [UI] /finance/daily-billing 페이지가 사이드바 메뉴에 연결되지 않음 (DEF-B-001) | b | p3 | done | 미배정 | 2026-07-24 |
 | [#790](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/790) | [feat] IMP-153 — CI supabase db reset 시 authenticated/anon 롤 기본 테이블 GRANT 누락 | b | p3 | - | 미배정 | 2026-07-24 |
