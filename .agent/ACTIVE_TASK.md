@@ -522,6 +522,7 @@
 | TASK-B-200 | 260724 | Issue #812 DEF-126 통합트랙킹 Detail 링크 UPS 분기 | P2 | 없음 | Baker (구현) | 🔔 | [TASK-B-200](tasks/TASK-B-200_260724_Iss812_TrackingDashboardUpsDetailLink_Baker.md) | tracking.ts select +transport_mode · TrackingDashboard 링크 분기 · 테스트 2건 · 회귀 122files/817tests ALL PASS · [PR#823](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/823) |
 | TASK-B-204 | 260726 | Issue #830 — IN_TRANSIT 오더 부가요금 등록 (recordUpsActualCharges 확장) | P2 | 없음 | Dave (구현) | 🔔 | [TASK-B-204](tasks/TASK-B-204_260726_UpsActualChargesInTransit_Dave.md) | 상태/권한 게이트 확장 + AGENCY 샤드 · TC-B204-01~06 6종 · 6/6 PASS · build ✅ · [PR#835](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/835) |
 | TASK-B-203 | 260726 | Issue #829 출고확정취소 — 원구현 Mike(#833) / 버그수정 Baker(#837) | P2 | 없음 | Mike(1차)/Baker(후속) | 🔔 | [TASK-B-203](tasks/TASK-B-203_260726_UndoDeparture_Baker.md) | Mike: undoDeparture + UI + i18n · Baker: undo 버튼 조건 해제 · 회귀 125files/825tests ALL PASS · [PR#833](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/833) + [PR#837](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/837) |
+| DEF-126 | 260726 | DEF-126 — zen_invoices RLS AGENCY SELECT 추가 (Issue #831 관련) | P2 | 없음 | Mike (구현) | 🔔 | [DEF-126](tasks/TASK-B-205_260726_Def126_InvoicesAgencyRLS_Mike.md) | zen_invoices AGENCY SELECT 정책 + GRANT · 테스트 4/4 PASS · 빌드 PASS · 회귀 829/829 PASS · PR#842 |
 ---
 
 ## Agent 현황
