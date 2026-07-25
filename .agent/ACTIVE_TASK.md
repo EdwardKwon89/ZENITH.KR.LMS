@@ -522,6 +522,7 @@
 | TASK-B-199 | 260724 | Issue #812 DEF-126 OrderDataTable UPS View Details 링크 분기 | P1 | 없음 | Baker (구현) | 🔔 | [TASK-B-199](tasks/TASK-B-199_260724_Iss812_DefB126_UpsOrderDetailNavFix_Baker.md) | UPS 주문 /ups-detail 링크 분기 · 테스트 2건 · 회귀 117files/777tests ALL PASS · [PR#821](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/821) |
 | TASK-B-200 | 260724 | Issue #812 DEF-126 통합트랙킹 Detail 링크 UPS 분기 | P2 | 없음 | Baker (구현) | 🔔 | [TASK-B-200](tasks/TASK-B-200_260724_Iss812_TrackingDashboardUpsDetailLink_Baker.md) | tracking.ts select +transport_mode · TrackingDashboard 링크 분기 · 테스트 2건 · 회귀 122files/817tests ALL PASS · [PR#823](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/823) |
 | TASK-B-204 | 260726 | Issue #830 — IN_TRANSIT 오더 부가요금 등록 (recordUpsActualCharges 확장) | P2 | 없음 | Dave (구현) | 🔔 | [TASK-B-204](tasks/TASK-B-204_260726_UpsActualChargesInTransit_Dave.md) | 상태/권한 게이트 확장 + AGENCY 샤드 · TC-B204-01~06 6종 · 6/6 PASS · build ✅ · [PR#835](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/835) |
+| TASK-B-203 | 260726 | Issue #829 출고확정취소 버튼 UPS 라벨 무관 노출 | P2 | 없음 | Baker (구현) | 🔔 | [TASK-B-203](tasks/TASK-B-203_260726_UndoDeparture_Baker.md) | DepartureConfirmForm undo 버튼 조건 해제 · 테스트 1건 · 회귀 125files/825tests ALL PASS · [PR#837](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/837) |
 ---
 
 ## Agent 현황
