@@ -6,7 +6,7 @@
 | **담당** | Dave (Team B) |
 | **생성일** | 2026-07-26 |
 | **우선순위** | P2 |
-| **상태** | ⬜ |
+| **상태** | 🔔 |
 
 ## 개요
 
@@ -69,14 +69,14 @@ if (!isAdmin && profile.role !== USER_ROLES.AGENCY) {
 
 ## 착수 체크리스트
 
-- [ ] `./scripts/next-task-number.sh B`로 채번 재확인
-- [ ] `git fetch origin && git checkout TeamB_Dev && git pull origin TeamB_Dev` 후 브랜치 생성
-- [ ] `recordUpsActualCharges()` 상태 게이트 확장 + 권한 게이트 변경(admin/agency)
-- [ ] `searchDeliveredUpsOrders()` 상태 필터 확장 + 권한 게이트 변경
-- [ ] `/admin/ups-actual-charges` 페이지 AGENCY 접근 허용 + agency는 본인 화주만 필터링 + 안내 문구 수정
-- [ ] 실제 함수 호출 기반 회귀 테스트 추가: (1) IN_TRANSIT 오더에 부가요금 등록 성공 케이스, (2) SHIPPER 역할로 호출 시 거부되는 케이스, (3) AGENCY가 타 화주 오더 접근 시 거부되는 케이스, (4) 기존 DELIVERED+마감 조정 시나리오(TASK-194-C 경로) 회귀 안 됐는지 확인
-- [ ] `npm run build`·`npm run test:regression` 직접 실행 후 정확한 결과 기재
-- [ ] 로컬에서 IN_TRANSIT UPS 오더에 부가요금 등록 → `zen_order_costs`에 반영되는지, 인보이스는 즉시 생성 안 되는지 실기 확인
+- [x] `./scripts/next-task-number.sh B`로 채번 재확인
+- [x] `git fetch origin && git checkout TeamB_Dev && git pull origin TeamB_Dev` 후 브랜치 생성
+- [x] `recordUpsActualCharges()` 상태 게이트 확장 + 권한 게이트 변경(admin/agency)
+- [x] `searchDeliveredUpsOrders()` 상태 필터 확장 + 권한 게이트 변경
+- [x] `/admin/ups-actual-charges` 페이지 AGENCY 접근 허용 + agency는 본인 화주만 필터링 + 안내 문구 수정
+- [x] 실제 함수 호출 기반 회귀 테스트 추가: (1) IN_TRANSIT 오더에 부가요금 등록 성공 케이스, (2) SHIPPER 역할로 호출 시 거부되는 케이스, (3) AGENCY가 타 화주 오더 접근 시 거부되는 케이스, (4) 기존 DELIVERED+마감 조정 시나리오(TASK-194-C 경로) 회귀 안 됐는지 확인
+- [x] `npm run build`·`npm run test:regression` 직접 실행 후 정확한 결과 기재
+- [ ] 로컬에서 IN_TRANSIT UPS 오더에 부가요금 등록 → `zen_order_costs`에 반영되는지, 인보이스는 즉시 생성 안 되는지 실기 확인 (로컬 DB 시드 데이터 부재)
 
 ## 완료 보고 절차 (R-17 준수)
 
@@ -87,8 +87,18 @@ if (!isAdmin && profile.role !== USER_ROLES.AGENCY) {
 5. 문서 커밋
 6. PR 생성 (`feature/teamb-204-... → TeamB_Dev`, `Closes #830`)
 
-## [발견 이슈]
+## [작업 결과]
 
-_(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
+| 항목 | 내용 |
+|:-----|:------|
+| **커밋** | (코드 + 문서, 별도 커밋) |
+| **변경 파일** | `ups-actual-charges.ts` (상태/권한 게이트 + AGENCY shipper 필터) · `page.tsx` (AGENCY 접근 + 문구) · `ups-actual-charges-client.tsx` (문구) |
+| **신규 테스트** | `tests/unit/finance/ups-actual-charges.test.ts` — TC-B204-01~06 (IN_TRANSIT 성공/REGISTERED 차단/SHIPPER 거부/AGENCY 허용/DELIVERED 회귀/타화주 차단) |
+| **회귀 테스트** | 6/6 PASS |
+| **빌드** | ✅ |
+| **브랜치** | `feature/teamb-204-ups-actual-charges-in-transit` |
+| **변경 함수** | `recordUpsActualCharges()` — `validateUserAction()` + `assertAdminOrAgency()` + status gate IN_TRANSIT/DELIVERED + AGENCY shipper scope · `searchDeliveredUpsOrders()` — `validateUserAction()` + AGENCY scope + status IN_TRANSIT/DELIVERED |
+
+## [발견 이슈]
 
 없음

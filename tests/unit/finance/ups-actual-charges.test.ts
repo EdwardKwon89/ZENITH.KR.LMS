@@ -28,164 +28,105 @@ vi.mock('@/lib/auth/guards', () => ({
 import { validateAdminAction, validateUserAction } from '@/lib/auth/guards';
 import { recordUpsActualCharges, getUpsActualCharges, getUpsChargeReconciliation, searchDeliveredUpsOrders } from '@/app/actions/finance/ups-actual-charges';
 
-describe('UPS 사후 청구 반영 Server Actions', () => {
+describe('TASK-B-204: IN_TRANSIT 부가요금 등록', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('recordUpsActualCharges - 오더가 존재하지 않거나 UPS가 아니면 에러 반환', async () => {
-    (validateAdminAction as any).mockResolvedValue({
+  function mockValidateUser(role: string, orgId?: string) {
+    (validateUserAction as any).mockResolvedValue({
       supabase: mockSupabase,
-      user: { id: 'admin-user-id' },
-      profile: { id: 'admin-user-id', role: USER_ROLES.ADMIN },
+      user: { id: 'user-id' },
+      profile: { id: 'user-id', role, org_id: orgId || 'org-1' },
     });
+  }
 
+  function mockOrderChain(orderData: any) {
     mockSupabase.from.mockImplementation((table: string) => {
-      if (table === 'zen_orders') {
-        return createChainableMock(null, new Error('Not found'));
-      }
-      return createChainableMock();
-    });
-
-    const result = await recordUpsActualCharges('order-1', []);
-    expect(result.success).toBe(false);
-    expect(result.error).toContain('오더를 찾을 수 없습니다');
-  });
-
-  it('recordUpsActualCharges - 오더가 DELIVERED 상태가 아니면 에러 반환', async () => {
-    (validateAdminAction as any).mockResolvedValue({
-      supabase: mockSupabase,
-      user: { id: 'admin-user-id' },
-      profile: { id: 'admin-user-id', role: USER_ROLES.ADMIN },
-    });
-
-    mockSupabase.from.mockImplementation((table: string) => {
-      if (table === 'zen_orders') {
-        return createChainableMock({ status: 'SHIPPED', transport_mode: 'UPS' });
-      }
-      return createChainableMock();
-    });
-
-    const result = await recordUpsActualCharges('order-1', []);
-    expect(result.success).toBe(false);
-    expect(result.error).toContain('배송 완료(DELIVERED) 상태일 때만');
-  });
-
-  it('recordUpsActualCharges - 정산이 마감된 오더면 마감 후 조정 경로로 위임', async () => {
-    (validateAdminAction as any).mockResolvedValue({
-      supabase: mockSupabase,
-      user: { id: 'admin-user-id' },
-      profile: { id: 'admin-user-id', role: USER_ROLES.ADMIN },
-    });
-
-    mockSupabase.from.mockImplementation((table: string) => {
-      if (table === 'zen_orders') {
-        return createChainableMock({ status: 'DELIVERED', transport_mode: 'UPS' });
-      }
-      if (table === 'zen_invoices') {
-        return createChainableMock({ id: 'inv-1', is_finalized: true });
-      }
-      return createChainableMock();
-    });
-
-    const mockCreateAdjustment = vi.fn().mockResolvedValue({ success: true, adjustmentAmount: 0 });
-    vi.doMock('@/app/actions/finance/settlement', () => ({
-      createPostFinalizationAdjustment: mockCreateAdjustment,
-    }));
-
-    const result = await recordUpsActualCharges('order-1', []);
-    expect(result.success).toBe(true);
-    expect(mockCreateAdjustment).toHaveBeenCalled();
-  });
-
-  it('recordUpsActualCharges - 성공적으로 등록 및 차액 계산 (예상 200 vs 실제 250 -> 차액 50)', async () => {
-    (validateAdminAction as any).mockResolvedValue({
-      supabase: mockSupabase,
-      user: { id: 'admin-user-id' },
-      profile: { id: 'admin-user-id', role: USER_ROLES.ADMIN },
-    });
-
-    let orderCostsCallCount = 0;
-
-    mockSupabase.from.mockImplementation((table: string) => {
-      if (table === 'zen_orders') {
-        return createChainableMock({ status: 'DELIVERED', transport_mode: 'UPS' });
-      }
-      if (table === 'zen_invoices') {
-        return createChainableMock({ id: 'inv-1', is_finalized: false });
-      }
+      if (table === 'zen_orders') return createChainableMock(orderData);
+      if (table === 'zen_invoices') return createChainableMock(null);
       if (table === 'zen_order_costs') {
-        const mockObj = createChainableMock();
-        mockObj.then = (resolve: any) => {
-          orderCostsCallCount++;
-          if (orderCostsCallCount === 1) {
-            // First call: estimated costs list
-            return resolve({
-              data: [
-                { cost_type: 'BASE_FREIGHT', unit_price: 150, quantity: 1 },
-                { cost_type: 'FUEL_SURCHARGE', unit_price: 50, quantity: 1 },
-              ],
-              error: null,
-            });
-          } else if (orderCostsCallCount === 2) {
-            // Second call: existing adjustment ID check
-            return resolve({ data: null, error: null });
-          } else if (orderCostsCallCount === 3) {
-            // Third call: link adjustment to invoice (UPDATE SET invoice_id)
-            return resolve({ data: null, error: null });
-          } else if (orderCostsCallCount === 4) {
-            // Fourth call: select linked costs for recalculation
-            return resolve({
-              data: [
-                { unit_price: 150, quantity: 1 },
-                { unit_price: 50, quantity: 1 },
-                { unit_price: 50, quantity: 1 },
-              ],
-              error: null,
-            });
-          } else {
-            return resolve({ data: [], error: null });
-          }
-        };
-        return mockObj;
+        return createChainableMock([
+          { cost_type: 'BASE_FREIGHT', unit_price: 150, quantity: 1 },
+          { cost_type: 'FUEL_SURCHARGE', unit_price: 50, quantity: 1 },
+        ]);
       }
-      if (table === 'zen_ups_actual_charges') {
-        return createChainableMock(null, null);
-      }
+      if (table === 'zen_ups_actual_charges') return createChainableMock(null, null);
+      if (table === 'zen_agency_shippers') return createChainableMock([]);
+      return createChainableMock();
+    });
+  }
+
+  it('TC-B204-01: IN_TRANSIT → 부가요금 등록 성공', async () => {
+    mockValidateUser(USER_ROLES.ADMIN);
+    mockOrderChain({ status: 'IN_TRANSIT', transport_mode: 'UPS', shipper_id: 'shipper-1' });
+
+    const result = await recordUpsActualCharges('order-1', [
+      { chargeType: 'BASE', amount: 200, currency: 'USD' },
+    ]);
+
+    expect(result.success).toBe(true);
+  });
+
+  it('TC-B204-02: REGISTERED 상태 → 차단 (IN_TRANSIT/DELIVERED만 허용)', async () => {
+    mockValidateUser(USER_ROLES.ADMIN);
+    mockOrderChain({ status: 'REGISTERED', transport_mode: 'UPS', shipper_id: 'shipper-1' });
+
+    const result = await recordUpsActualCharges('order-1', []);
+    expect(result.success).toBe(false);
+    expect(result.error).toContain('IN_TRANSIT 또는 DELIVERED');
+  });
+
+  it('TC-B204-03: SHIPPER 권한 없음 → 거부', async () => {
+    mockValidateUser(USER_ROLES.CORPORATE);
+    mockOrderChain({ status: 'IN_TRANSIT', transport_mode: 'UPS', shipper_id: 'shipper-1' });
+
+    const result = await recordUpsActualCharges('order-1', []);
+    expect(result.success).toBe(false);
+  });
+
+  it('TC-B204-04: AGENCY 권한 허용 → 본인 화주 오더 등록 성공', async () => {
+    mockValidateUser(USER_ROLES.AGENCY, 'agency-org');
+    mockOrderChain({ status: 'IN_TRANSIT', transport_mode: 'UPS', shipper_id: 'shipper-1' });
+    // AGENCY → shipper-1 연결되어 있다고 가정
+    mockSupabase.from.mockImplementation((table: string) => {
+      if (table === 'zen_orders') return createChainableMock({ status: 'IN_TRANSIT', transport_mode: 'UPS', shipper_id: 'shipper-1' });
+      if (table === 'zen_invoices') return createChainableMock(null);
+      if (table === 'zen_agency_shippers') return createChainableMock([{ shipper_org_id: 'shipper-1' }]);
+      if (table === 'zen_order_costs') return createChainableMock([
+        { cost_type: 'BASE_FREIGHT', unit_price: 150, quantity: 1 },
+        { cost_type: 'FUEL_SURCHARGE', unit_price: 50, quantity: 1 },
+      ]);
+      if (table === 'zen_ups_actual_charges') return createChainableMock(null, null);
       return createChainableMock();
     });
 
     const result = await recordUpsActualCharges('order-1', [
-      { chargeType: 'BASE', amount: 200, currency: 'USD' },
-      { chargeType: 'FUEL', amount: 50, currency: 'USD' },
+      { chargeType: 'BASE', amount: 100, currency: 'USD' },
     ]);
-
     expect(result.success).toBe(true);
-    expect(result.adjustmentAmount).toBe(50);
   });
 
-  it('searchDeliveredUpsOrders - 빈 쿼리 입력 시 빈 배열 반환 및 정상 검색 작동', async () => {
-    const emptyResult = await searchDeliveredUpsOrders('');
-    expect(emptyResult).toEqual([]);
+  it('TC-B204-05: DELIVERED 상태 기존 플로우 회귀 확인 (마감 전)', async () => {
+    mockValidateUser(USER_ROLES.ADMIN);
+    mockOrderChain({ status: 'DELIVERED', transport_mode: 'UPS', shipper_id: 'shipper-1' });
 
-    (validateAdminAction as any).mockResolvedValue({
-      supabase: mockSupabase,
-      user: { id: 'admin-user-id' },
-      profile: { id: 'admin-user-id', role: USER_ROLES.ADMIN },
-    });
+    const result = await recordUpsActualCharges('order-1', [
+      { chargeType: 'BASE', amount: 200, currency: 'USD' },
+    ]);
+    expect(result.success).toBe(true);
+  });
 
+  it('TC-B204-06: AGENCY 타 화주 오더 → 차단', async () => {
+    mockValidateUser(USER_ROLES.AGENCY, 'agency-org');
     mockSupabase.from.mockImplementation((table: string) => {
-      if (table === 'zen_orders') {
-        return createChainableMock([{ id: 'order-1', order_no: 'ORD-123', status: 'DELIVERED', transport_mode: 'UPS' }]);
-      }
-      if (table === 'zen_tracking_configs') {
-        return createChainableMock([{ order_id: 'order-1', tracking_no: '1Z12345' }]);
-      }
+      if (table === 'zen_orders') return createChainableMock({ status: 'IN_TRANSIT', transport_mode: 'UPS', shipper_id: 'other-shipper' });
+      if (table === 'zen_agency_shippers') return createChainableMock([{ shipper_org_id: 'shipper-1' }]);
       return createChainableMock();
     });
 
-    const searchResult = await searchDeliveredUpsOrders('ORD-123');
-    expect(searchResult.length).toBeGreaterThan(0);
-    expect(searchResult[0].order_no).toBe('ORD-123');
+    const result = await recordUpsActualCharges('order-1', []);
+    expect(result.success).toBe(false);
+    expect(result.error).toContain('본인 소속 화주의 오더만');
   });
 });

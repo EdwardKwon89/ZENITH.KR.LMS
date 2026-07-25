@@ -1,9 +1,9 @@
-# TASK-B-164: DEF-109 오더 수정 페이지 신설 + updateOrder 필드 보완
+# TASK-B-163: DEF-109 오더 수정 페이지 신설 + updateOrder 필드 보완
 
 ## 메타 정보
 | 항목 | 내용 |
 |:-----|:------|
-| **Task ID** | TASK-B-164 |
+| **Task ID** | TASK-B-163 |
 | **생성일** | 2026-07-18 |
 | **담당 Agent** | Dave |
 | **GitHub Issue** | [#587](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/587) |
@@ -29,14 +29,13 @@
 ## [작업 결과]
 
 ### 코드 커밋
-- 코드 커밋 해시: `187c67ff`
-- 문서 커밋 해시: `c520183c`
+- 커밋 해시: `405e3a3a`
 
 ### 검증 결과
 - 빌드: `npm run build` ✅ PASS
 - 회귀 테스트: `npm run test:regression` ✅ 96 test files · 619 tests ALL PASS
 - 신규 테스트: 4/4 PASS (TC-UPDATE-01 · TC-EDIT-PAGE-01/02/03)
-- CI (PR #593): Regression Tests ✅ (4m57s) · Task File Check ✅ · Vercel ✅ (gh pr checks 593 직접 확인 완료)
+- CI (PR #593, head `a8c5edb`): Task File Check ✅ · Regression Tests 🔄 (진행 중)
 
 ### 설계 결정
 - `OrderRegistrationForm`은 기존 3-step wizard 구조를 유지, edit 모드에서는 `orderId` prop이 있을 때 `updateOrder` 호출로 분기

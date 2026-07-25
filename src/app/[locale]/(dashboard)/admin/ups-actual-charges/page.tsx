@@ -4,13 +4,13 @@ import { redirect } from 'next/navigation';
 import UpsActualChargesClient from './ups-actual-charges-client';
 
 export default async function UpsActualChargesPage() {
-  // 1. 플랫폼 관리자 권한 확인 (ADMIN, MANAGER, ZENITH_SUPER_ADMIN)
   const { profile } = await requireAuth();
   
   const isAllowed = 
     profile?.role === 'ZENITH_SUPER_ADMIN' || 
     profile?.role === 'ADMIN' || 
-    profile?.role === 'MANAGER';
+    profile?.role === 'MANAGER' ||
+    profile?.role === 'AGENCY';
 
   if (!isAllowed) {
     redirect('/');
@@ -23,7 +23,7 @@ export default async function UpsActualChargesPage() {
           UPS 사후 청구 및 차액 정산 관리
         </h1>
         <p className="text-slate-500 dark:text-zinc-400">
-          UPS 배송 완료 건에 대하여 실제 청구 금액을 입력하고 예상 운임과의 차액(조정비용)을 계산하여 정산 파이프라인에 반영합니다.
+          UPS IN_TRANSIT 또는 배송 완료 건에 대하여 실제 청구 금액을 입력하고 예상 운임과의 차액(조정비용)을 계산하여 정산 파이프라인에 반영합니다.
         </p>
       </div>
 
