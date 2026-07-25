@@ -702,7 +702,13 @@
     "partial_success": "출고확정 완료: {success}건 성공, {fail}건 실패",
     "error_none_selected": "출고확정할 오더를 선택해주세요.",
     "today_history": "오늘의 출고확정 이력",
-    "empty_history": "오늘 처리된 출고확정 이력이 없습니다."
+    "empty_history": "오늘 처리된 출고확정 이력이 없습니다.",
+    "undo_btn": "출고확정취소",
+    "undo_title": "출고확정취소",
+    "undo_desc": "이 오더의 출고확정을 취소하고 RELEASED 상태로 되돌리시겠습니까?",
+    "undo_confirm": "취소 확정",
+    "undo_success": "출고확정취소가 완료되었습니다.",
+    "undo_failed": "출고확정취소에 실패했습니다."
   },
   "ShippingLabel": {
     "title": "운송장",

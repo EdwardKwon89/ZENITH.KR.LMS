@@ -205,7 +205,13 @@
     "partial_success": "出库确认完成：{success}件成功，{fail}件失败",
     "error_none_selected": "请选择要确认出库的订单。",
     "today_history": "今日出库确认历史",
-    "empty_history": "今日没有已处理的出库确认记录。"
+    "empty_history": "今日没有已处理的出库确认记录。",
+    "undo_btn": "取消出库确认",
+    "undo_title": "取消出库确认",
+    "undo_desc": "取消此订单的出库确认并恢复到RELEASED状态？",
+    "undo_confirm": "确认取消",
+    "undo_success": "出库确认取消完成。",
+    "undo_failed": "出库确认取消失败。"
   },
   "ShippingLabel": {
     "title": "运单",
