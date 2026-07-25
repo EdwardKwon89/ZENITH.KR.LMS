@@ -181,6 +181,12 @@
     "empty_history": "本日のUPS受取履歴はありません。",
     "partial_success": "UPS登録完了: {success}件成功、{fail}件失敗"
   },
+  "ShipperInvoices": {
+    "title": "請求書照会",
+    "search_placeholder": "請求書番号で検索",
+    "search_btn": "検索",
+    "empty": "請求書がありません。"
+  },
   "WarehouseDeparture": {
     "title": "出荷確定",
     "select_orders": "出荷確定するオーダを選択",

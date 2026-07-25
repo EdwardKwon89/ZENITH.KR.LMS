@@ -691,6 +691,12 @@
     "empty_history": "오늘 UPS 접수된 내역이 없습니다.",
     "partial_success": "UPS 등록 완료: {success}건 성공, {fail}건 실패"
   },
+  "ShipperInvoices": {
+    "title": "청구서 조회",
+    "search_placeholder": "청구서 번호로 검색",
+    "search_btn": "조회",
+    "empty": "청구서가 없습니다."
+  },
   "WarehouseDeparture": {
     "title": "출고확정",
     "select_orders": "출고확정할 오더 선택",
