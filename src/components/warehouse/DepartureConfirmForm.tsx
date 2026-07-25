@@ -339,19 +339,19 @@ export default function DepartureConfirmForm({ locale }: { locale: string }) {
                         {formatKstTime(item.created_at)}
                       </span>
                     </div>
-                    {latestLabel && (
-                      <div className="flex items-center gap-2 mt-2 flex-wrap">
+                    <div className="flex items-center gap-2 mt-2 flex-wrap">
+                      {latestLabel && (
                         <ZenBadge className="bg-green-50 text-green-700 border-green-200 text-[10px]">
                           UPS · {latestLabel.tracking_number || latestLabel.reference_no || "-"}
                         </ZenBadge>
-                        <button
-                          onClick={() => setUndoTarget(order.id)}
-                          className="inline-flex items-center gap-1 px-2 py-1 text-[10px] font-semibold text-orange-700 bg-orange-50 border border-orange-200 rounded-lg hover:bg-orange-100 transition-colors"
-                        >
-                          {t("undo_btn")}
-                        </button>
-                      </div>
-                    )}
+                      )}
+                      <button
+                        onClick={() => setUndoTarget(order.id)}
+                        className="inline-flex items-center gap-1 px-2 py-1 text-[10px] font-semibold text-orange-700 bg-orange-50 border border-orange-200 rounded-lg hover:bg-orange-100 transition-colors"
+                      >
+                        {t("undo_btn")}
+                      </button>
+                    </div>
                   </div>
                 );
               })
