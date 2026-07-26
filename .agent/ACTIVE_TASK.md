@@ -15,7 +15,7 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
-| [#851](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/851) | [feat] 통합트래킹(물류관리) UPS 오더 연동 정합화 — provider_type/상태 기준 통일 | b | p2 | - | 미배정 | 2026-07-26 |
+| [#851](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/851) | [feat] 통합트래킹(물류관리) UPS 오더 연동 정합화 — provider_type/상태 기준 통일 | b | p2 | in-progress | 미배정 | 2026-07-26 |
 | [#831](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/831) | [feat] 화주(Shipper)용 청구서 조회 화면 신설 | b | p2 | done | 미배정 | 2026-07-25 |
 | [#830](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/830) | [feat] IN_TRANSIT 오더 부가요금 등록 기능 (recordUpsActualCharges 확장) | b | p2 | done | 미배정 | 2026-07-25 |
 | [#829](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/829) | [feat] IN_TRANSIT → RELEASED 되돌리기 기능 (출고확정처리 취소) | b | p2 | done | 미배정 | 2026-07-25 |
