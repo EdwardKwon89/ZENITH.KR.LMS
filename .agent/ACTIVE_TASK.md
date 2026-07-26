@@ -15,6 +15,7 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
+| [#881](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/881) | [fix] zen_order_rate_snapshots AGENCY UPDATE/INSERT RLS 누락 — 입고처리 중량변경 시 예상운임 재계산 조용히 실패 | b | p1 | - | 미배정 | 2026-07-26 |
 | [#879](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/879) | [fix] zen_order_rate_snapshots AGENCY SELECT RLS 누락 — 예상운임 AGENCY 계정에 항상 미표시 | b | p1 | review | 미배정 | 2026-07-26 |
 | [#877](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/877) | [feat] 입고처리 화면 — 예상운임 상시 표시(변경 전) + 저장 시 갱신(변경 후) | b | p2 | review | 미배정 | 2026-07-26 |
 | [#874](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/874) | [fix] DEF-B-012 — 입고처리 화면 운송경로가 UPS 오더에 항상 공백 표시 | b | p3 | review | 미배정 | 2026-07-26 |
