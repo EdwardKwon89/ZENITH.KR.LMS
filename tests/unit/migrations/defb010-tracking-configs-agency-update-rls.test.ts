@@ -1,5 +1,24 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { readFileSync } from 'fs';
+import { execSync } from 'child_process';
+
+function psql(sql: string): string {
+  const result = execSync(
+    `docker exec -i supabase_db_ZENITH_LMS_001 psql -U postgres -d postgres -t -A -c "${sql.replace(/"/g, '\\"')}"`,
+    { encoding: 'utf-8' }
+  );
+  return result.trim().split('\n')[0];
+}
+
+function psqlMulti(sql: string): string[] {
+  const result = execSync(
+    `docker exec -i supabase_db_ZENITH_LMS_001 psql -U postgres -d postgres -t -A -c "${sql.replace(/"/g, '\\"')}"`,
+    { encoding: 'utf-8' }
+  );
+  return result.trim().split('\n').filter(
+    (l) => l !== '' && l !== 'SET' && !/^UPDATE \d+$/.test(l)
+  );
+}
 
 describe('TASK-B-216: DEF-B-010 AGENCY UPDATE RLS 검증', () => {
   let migration: string;
@@ -35,18 +54,24 @@ describe('TASK-B-216: DEF-B-010 AGENCY UPDATE RLS 검증', () => {
     });
   });
 
-  describe('실제 DB 검증 (로컬 Supabase)', () => {
-    // 아래 테스트는 로컬 Supabase가 실행 중일 때만 유효
-    // CI에서는 migration 파일 구조 검증만으로 충분
-    it('AGENCY UPDATE 정책이 DEF-120 SELECT 정책과 동일한 agency_org_id 조건 사용', () => {
-      const selectMigration = readFileSync(
-        'supabase/migrations/20260723060000_def120_tracking_configs_agency_rls.sql',
-        'utf-8'
-      );
-      // SELECT 정책의 agency_org_id 조건이 UPDATE에도 동일하게 사용되는지 확인
-      const selectCondition = 'zen_orders.agency_org_id = (SELECT org_id FROM public.zen_profiles WHERE id = auth.uid())';
-      expect(selectMigration).toContain(selectCondition);
-      expect(migration).toContain(selectCondition);
+  describe('실제 DB 검증 (AGENCY 세션 시뮬레이션)', () => {
+    it('AGENCY 세션 — 소속 오더 UPDATE 성공', () => {
+      const rows = psqlMulti(`
+        SET LOCAL role TO authenticated;
+        SET LOCAL request.jwt.claims TO '{"sub": "ae4e6325-7dbd-4736-9901-2c8622633ba2"}';
+        UPDATE zen_tracking_configs SET tracking_no = 'TEST-AGENCY-UPDATE' WHERE order_id = '2ae0abae-a365-4a5f-a18b-92736fe9340f' RETURNING order_id;
+      `);
+      expect(rows.length).toBeGreaterThan(0);
+      expect(rows[0]).toContain('2ae0abae');
+    });
+
+    it('AGENCY 세션 — 비소속 오더 UPDATE 차단(0행)', () => {
+      const rows = psqlMulti(`
+        SET LOCAL role TO authenticated;
+        SET LOCAL request.jwt.claims TO '{"sub": "ae4e6325-7dbd-4736-9901-2c8622633ba2"}';
+        UPDATE zen_tracking_configs SET tracking_no = 'TEST-SHOULD-FAIL' WHERE order_id = '3ff5b116-29cd-4d90-8dd0-0e99c36a2155' RETURNING order_id;
+      `);
+      expect(rows.length).toBe(0);
     });
   });
 });
