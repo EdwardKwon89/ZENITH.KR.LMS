@@ -279,9 +279,9 @@ export default function InboundProcessForm({ locale }: { locale: string }) {
                 <div>
                   <span className="text-slate-500 block text-xs">{t("route")}</span>
                   <span className="font-semibold text-slate-900 flex items-center gap-1.5">
-                    {order.origin_port?.code || "-"}
+                    {order.origin_port?.code || order.shipper_country_code || "-"}
                     <ArrowRight size={12} className="text-slate-400" />
-                    {order.dest_port?.code || "-"}
+                    {order.dest_port?.code || order.recipient_country_code || "-"}
                   </span>
                 </div>
               </div>
