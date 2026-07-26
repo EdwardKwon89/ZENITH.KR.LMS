@@ -16,6 +16,16 @@
 
 **Jaison이 설계를 확정했으므로 설계 판단 없이 아래 스펙대로 구현**하면 됩니다.
 
+## 접근 규칙 명세 (jungjs 확정, 2026-07-27)
+
+`zen_order_rate_snapshots`(예상운임/rate snapshot)는 **오더 등록 시 생성**되며, 조회 가능 대상은 다음 3가지로 한정된다:
+
+1. **ADMIN**: 모든 오더의 rate snapshot 조회 가능 (기존 `Super admins have full access` 정책으로 이미 충족)
+2. **등록한 사용자가 소속된 조직(화주/SHIPPER)**: 오더의 `shipper_id`와 프로필 `org_id`가 일치하는 사용자 (기존 `order_members_can_view_rate_snapshots` 정책으로 이미 충족 — `is_org_member(auth.uid(), o.shipper_id)`)
+3. **등록한 사용자가 소속된 AGENCY**: 오더의 `agency_org_id`와 프로필 `org_id`가 일치하는 사용자 (**이번 Task에서 신규 추가하는 정책** — 지금까지 이 부분만 누락돼 있었음)
+
+이 3가지 외 다른 조직(예: 무관한 AGENCY, 무관한 SHIPPER)은 조회 불가해야 함 — 회귀 테스트에 반드시 negative case(권한 없는 조직은 0건) 포함.
+
 ## 조치안 (Jaison 확정 설계 — 그대로 구현)
 
 ### 신규 마이그레이션: `supabase/migrations/20260727HHMMSS_defb014_rate_snapshots_agency_select_rls.sql`
@@ -45,6 +55,7 @@ USING (
 - [ ] `git fetch origin && git checkout TeamB_Dev && git pull origin TeamB_Dev` 후 `feature/teamb-221-...` 브랜치 생성 (`./scripts/next-task-number.sh B` 직접 재확인 — 221 나와야 정상)
 - [ ] 마이그레이션 파일 작성 (위 스펙대로)
 - [ ] 로컬 DB 실측 검증 **필수** — `def117-agency-rls-v2.test.ts` 골드 스탠다드 패턴(execSync + psql, `SET LOCAL role/request.jwt.claims`) 참고해 실제 RLS 세션 시뮬레이션 기반 테스트 작성. **소스 문자열 검사(`toContain`)만으로 대체 금지** — Baker 본인도 PR#870에서 이 위반 이력이 있음(`.agent/VIOLATION_TRACKER.md` 참조).
+  - **[2차 반려 사유 — 필수 수정]** PR#880 1차 재작업본은 실제 존재하는 값(`count >= 1`)까지 검증하려 한 시도는 좋았으나, 로컬 DB에만 우연히 존재하는(Jaison이 오늘 수기 테스트로 만든) `ZEN-2026-000001`/`agency@zenith.kr` 실데이터의 ID를 하드코딩해 CI(fresh DB)에서 재현 불가 상태로 실패했음. **`beforeAll`에서 테스트 전용 fixture를 직접 INSERT**할 것 — 최소 구성: (a) SHIPPER 조직 1개, (b) AGENCY 조직 1개, (c) 그 AGENCY 소속 테스트 프로필 1개(`auth.users`+`zen_profiles`, 또는 기존 seed에 있는 AGENCY 프로필 재사용 가능하면 그것도 무방), (d) `agency_org_id`가 (b)로 설정된 테스트 오더 1건, (e) 그 오더의 `zen_order_rate_snapshots` 1건. `afterAll`에서 생성한 fixture 정리(DELETE). 위 접근 규칙 명세의 3가지 케이스(ADMIN 전체조회/SHIPPER 소속조회/AGENCY 소속조회) + negative case(무관 조직 0건)를 fixture 기반으로 각각 검증.
 - [ ] `npm run build` · `npm run test:regression` 직접 실행 후 정확한 결과 기재
 - [ ] 실제 UI에서 `agency@zenith.kr`로 로그인 → `/ko/warehouse/inbound` → `ZEN-2026-000001` 조회 → 예상운임 `KRW` 값이 실제로 표시되는지 스크린샷 확인(R-10)
 
