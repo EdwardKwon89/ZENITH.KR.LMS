@@ -115,8 +115,13 @@ export default function InboundProcessForm({ locale }: { locale: string }) {
       const updates = buildPackageUpdates();
       const result = await confirmInbound(order.id, inspectStatus, note.trim(), updates.length > 0 ? updates : undefined);
       if (result && result.success) {
-        toast.success(t("success_msg"));
-        setFreightEstimate(result.freightEstimate ?? null);
+        const fe = result.freightEstimate;
+        if (fe?.changed && fe.oldFreight !== fe.newFreight) {
+          toast.success(`${t("success_msg")} (운임: ${fe.currency} ${fe.oldFreight?.toLocaleString()} → ${fe.currency} ${fe.newFreight?.toLocaleString()})`);
+        } else {
+          toast.success(t("success_msg"));
+        }
+        setFreightEstimate(fe ?? null);
         setOrder(null);
         setBarcode("");
         setNote("");
