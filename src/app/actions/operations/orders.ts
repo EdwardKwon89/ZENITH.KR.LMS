@@ -683,7 +683,7 @@ export async function getOrderByBarcodeOrNo(barcodeOrNo: string) {
     .from('zen_order_rate_snapshots')
     .select('applied_unit_price, applied_currency')
     .eq('order_id', order.id)
-    .order('created_at', { ascending: false })
+    .order('snapshot_at', { ascending: false })
     .limit(1)
     .maybeSingle();
 
@@ -727,7 +727,7 @@ async function applyPackageMeasurements(
     .from('zen_order_rate_snapshots')
     .select('metadata, applied_unit_price')
     .eq('order_id', orderId)
-    .order('created_at', { ascending: false })
+    .order('snapshot_at', { ascending: false })
     .limit(1)
     .maybeSingle();
   const previousSnapshot = existingSnapshot;
