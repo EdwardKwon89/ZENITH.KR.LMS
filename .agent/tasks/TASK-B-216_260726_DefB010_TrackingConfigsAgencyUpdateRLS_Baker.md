@@ -6,7 +6,7 @@
 | **담당** | Baker (Team B) |
 | **생성일** | 2026-07-26 |
 | **우선순위** | P1 |
-| **상태** | ⬜ |
+| **상태** | 🔔 |
 
 ## 개요
 
@@ -57,6 +57,18 @@ WITH CHECK (
 ## 담당자 위반 이력 사전 경고
 
 - Baker: `.agent/VIOLATION_TRACKER.md` 참조 후 착수. 최근 이력: PR#844(🔍 설계확정 무시 착수), PR#837(타인 작업 기록 덮어쓰기). 이번 Task는 RLS 정책 추가라 **실측 검증(로컬 DB + 실제 AGENCY 세션 REST 호출)이 반드시 필요**합니다 — mock/toContain만 제출 시 반려됩니다.
+
+## [작업 결과]
+
+- **커밋 해시**: `9e7af783`
+- **브랜치**: `feature/teamb-216-defb010-agency-update-rls` (base: TeamB_Dev)
+- **변경 파일**: 마이그레이션 1건 + 테스트 1건
+- **로컬 DB 적용**: `npx supabase migration up` 완료
+- **실제 REST 검증**:
+  - ✅ 양성: AGENCY 세션(`agency@zenith.kr`, org `dc0f1c0c`)으로 소속 오더 UPDATE → **1건 갱신 성공** (`tracking_no` 변경 확인)
+  - ✅ 음성: AGENCY 세션으로 비소속 오더 UPDATE 시도 → **빈 배열 반환 (RLS 차단)**
+- **빌드**: PASS
+- **회귀 테스트**: 130 files / 857 tests ALL PASS
 
 ## [발견 이슈]
 
