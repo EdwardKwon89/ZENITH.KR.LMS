@@ -204,7 +204,8 @@ export async function getGlobalTrackingOverview(page = 1, pageSize = 50) {
         order_no,
         shipper_id,
         recipient_name,
-        transport_mode
+        transport_mode,
+        status
       )
     `, { count: "exact" })
     .order("updated_at", { ascending: false })
