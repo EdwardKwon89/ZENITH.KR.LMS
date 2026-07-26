@@ -104,6 +104,16 @@ export async function createOrder(payload: OrderRegistrationInput) {
   const orderId = (order as any)?.id;
   if (!orderId) throw new Error("Order creation returned no ID");
 
+  if (validated.transport_mode === 'UPS') {
+    const { error: trackingConfigError } = await supabase
+      .from('zen_tracking_configs')
+      .update({ provider_type: 'UPS', provider_name: 'UPS Express' })
+      .eq('order_id', orderId);
+    if (trackingConfigError) {
+      logger.error('[TRACKING_CONFIG] Failed to set UPS provider_type:', trackingConfigError);
+    }
+  }
+
   const updates: Record<string, unknown> = {};
 
   let resolvedAgencyOrgId: string | null = null;
