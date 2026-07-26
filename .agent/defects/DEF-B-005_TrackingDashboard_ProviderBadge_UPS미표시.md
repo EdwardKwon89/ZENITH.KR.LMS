@@ -57,6 +57,15 @@ DB 제약(`provider_type` CHECK `VIRTUAL/MANUAL/API`)은 건드리지 않습니�
   - UPS 오더(mock `order.transport_mode: 'UPS'`) → Provider 컬럼에 "UPS" 텍스트 + 파란 배지 렌더링 확인
   - 비UPS 오더(AIR 등, 기존 `provider_type='VIRTUAL'`) → 기존 로직대로 보라 배지 유지되는지 회귀 확인(기존 동작 깨지지 않았는지)
 
+## 검증 결과 (2026-07-26 Baker 완료)
+
+- **커밋**: `cedd3e68`
+- **PR**: [PR#859](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/859) → TeamB_Dev
+- **테스트**: TC-DASH-UPS-01 (UPS 배지 검증) + TC-DASH-UPS-02 (VIRTUAL 회귀 검증) 신규 2건
+- **빌드**: PASS
+- **회귀**: 129 files / 839 tests ALL PASS
+- **Jaison 코드/테스트 검토**: ✅ 승인 ("코드/테스트 정확" 확인, R-17 문서 커밋 보완 중)
+
 ## 관련 Task
 - `TASK-B-210` (배정 예정) — 이 DEF의 수정 담당
 

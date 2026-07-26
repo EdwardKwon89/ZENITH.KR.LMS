@@ -99,4 +99,60 @@ describe('DEF-121: TrackingDashboard Detail locale prefix', () => {
       expect(link?.getAttribute('href')).toBe('/ko/orders/order-789');
     });
   });
+
+  it('DEF-B-005: UPS order shows "UPS" text with blue badge in Provider column', async () => {
+    const { getGlobalTrackingOverview } = await import('@/app/actions/tracking');
+    vi.mocked(getGlobalTrackingOverview).mockResolvedValueOnce({
+      configs: [
+        {
+          order_id: 'order-ups-badge',
+          tracking_no: 'TRACK-BADGE-001',
+          provider_type: 'MANUAL',
+          provider_name: 'MANUAL',
+          latest_event: { event_code: 'PICKED_UP', location: 'Incheon' },
+          updated_at: '2026-07-26T10:00:00Z',
+          order: { order_no: 'ZEN-BADGE-001', transport_mode: 'UPS' },
+        },
+      ],
+    } as any);
+
+    const { default: TrackingDashboard } = await import('@/components/tracking/TrackingDashboard');
+    render(<TrackingDashboard />);
+
+    await waitFor(() => {
+      const upsElements = screen.getAllByText('UPS');
+      expect(upsElements.length).toBeGreaterThanOrEqual(2);
+      const badge = upsElements.find(el => el.className.includes('text-[10px]'));
+      expect(badge).toBeTruthy();
+      expect(badge!.className).toContain('bg-blue-50');
+      expect(badge!.className).toContain('text-blue-600');
+    });
+  });
+
+  it('DEF-B-005: non-UPS order preserves provider_type badge (VIRTUAL=purple)', async () => {
+    const { getGlobalTrackingOverview } = await import('@/app/actions/tracking');
+    vi.mocked(getGlobalTrackingOverview).mockResolvedValueOnce({
+      configs: [
+        {
+          order_id: 'order-virtual',
+          tracking_no: 'TRACK-VIRT-001',
+          provider_type: 'VIRTUAL',
+          provider_name: 'Virtual',
+          latest_event: { event_code: 'IN_TRANSIT', location: 'Seoul' },
+          updated_at: '2026-07-26T10:00:00Z',
+          order: { order_no: 'ZEN-VIRT-001', transport_mode: 'AIR' },
+        },
+      ],
+    } as any);
+
+    const { default: TrackingDashboard } = await import('@/components/tracking/TrackingDashboard');
+    render(<TrackingDashboard />);
+
+    await waitFor(() => {
+      expect(screen.getByText('VIRTUAL')).toBeTruthy();
+      const badge = screen.getByText('VIRTUAL');
+      expect(badge.className).toContain('bg-purple-50');
+      expect(badge.className).toContain('text-purple-600');
+    });
+  });
 });

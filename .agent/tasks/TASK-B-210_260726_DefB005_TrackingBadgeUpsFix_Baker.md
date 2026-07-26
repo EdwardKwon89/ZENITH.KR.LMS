@@ -6,7 +6,7 @@
 | **담당** | Baker (Team B) |
 | **생성일** | 2026-07-26 |
 | **우선순위** | P3 |
-| **상태** | ⬜ |
+| **상태** | 🔔 |
 
 ## 개요
 
@@ -52,6 +52,15 @@ DB 제약(`provider_type` CHECK)은 건드리지 않습니다. 이미 같은 컴
 ## 담당자 위반 이력 사전 경고
 
 - Baker: `.agent/VIOLATION_TRACKER.md` 참조 후 착수. 최근 이력: PR#844(🔍 설계확정 무시 착수), PR#837(타인 작업 기록 덮어쓰기). 이번 Task는 Jaison이 설계를 이미 확정해뒀으므로 별도 설계 의견 없이 스펙대로 구현하되, task file `[작업 결과]` 섹션 작성 시 기존 기록을 삭제하지 말 것.
+
+## [작업 결과]
+
+- **커밋 해시**: `cedd3e68`
+- **브랜치**: `feature/teamb-defb005-tracking-badge-ups` (base: TeamB_Dev)
+- **변경 파일**: `TrackingDashboard.tsx` + `tracking-dashboard.test.tsx` (신규 2건)
+- **빌드**: PASS
+- **회귀 테스트**: 129 files / 839 tests ALL PASS
+- **PR**: [PR#859](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/859) → TeamB_Dev
 
 ## [발견 이슈]
 
