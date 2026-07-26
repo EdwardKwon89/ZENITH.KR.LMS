@@ -59,11 +59,12 @@ WHERE tc.order_id = o.id
 
 ## [작업 결과]
 
-- **커밋 해시**: `7879bda3`
+- **커밋 해시**: `caaf122e` (재작업, Jaison 반려 대응)
 - **브랜치**: `feature/teamb-b209-defb004-provider-type-fix` (base: TeamB_Dev)
-- **변경 파일**: `orders.ts` + 신규 마이그레이션 + 테스트 설명
+- **변경 파일**: `orders.ts` + 신규 마이그레이션 + 테스트 payload 검증
 - **빌드**: PASS
 - **회귀 테스트**: 129 files / 837 tests ALL PASS
+- **반려 대응**: `provider_type='API'` → `'MANUAL'`로 재정정 (MockCarrierProvider 트리거 차단)
 - **PR**: TeamB_Dev 머지 대기
 
 ## [발견 이슈]
