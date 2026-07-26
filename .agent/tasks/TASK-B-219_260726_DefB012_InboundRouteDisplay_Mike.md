@@ -6,7 +6,30 @@
 | **담당** | Mike (Team B) |
 | **생성일** | 2026-07-26 |
 | **우선순위** | P3 |
-| **상태** | ⬜ |
+| **상태** | 🔔 |
+
+## 작업 결과
+
+### 변경 내용
+
+#### `src/components/warehouse/InboundProcessForm.tsx:245-247`
+- 운송경로 표시에 country_code 폴백 추가
+- 기존: `order.origin_port?.code || "-"`
+- 변경: `order.origin_port?.code || order.shipper_country_code || "-"`
+-(dest_port 동일)
+
+### 테스트 (behavioral 렌더링)
+| 케이스 | 검증 내용 |
+|:-------|:----------|
+| UPS 오더 (포트 없음) | shipper_country_code(KR), recipient_country_code(US) 표시 |
+| AIR 오더 (포트 있음) | port 코드(ICN, LAX)가 country_code보다 우선 표시 |
+| 둘 다 없음 | "-" 표시 |
+
+### 검증
+- **테스트**: 3/3 PASS
+- **빌드**: ✅ PASS
+- **회귀**: 131/131 파일, 862/862 테스트 ALL PASS
+- **커밋 해시**: `11ea96e9`
 
 ## 개요
 
