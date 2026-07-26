@@ -26,8 +26,7 @@ function createMockSupabase(options: {
       if (table === 'zen_tracking_configs') {
         return {
           select: vi.fn().mockReturnThis(),
-          order: vi.fn().mockReturnThis(),
-          range: vi.fn().mockResolvedValue({
+          order: vi.fn().mockResolvedValue({
             data: trackingConfigs,
             error: null,
             count: trackingConfigs.length,
