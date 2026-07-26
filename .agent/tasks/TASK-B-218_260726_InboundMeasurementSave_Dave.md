@@ -6,7 +6,7 @@
 | **담당** | Dave (Team B) |
 | **생성일** | 2026-07-26 |
 | **우선순위** | P2 |
-| **상태** | ⬜ |
+| **상태** | 🔔 |
 
 ## 개요
 
@@ -319,8 +319,26 @@ export async function saveInboundMeasurements(
 
 - Dave: `.agent/VIOLATION_TRACKER.md` 참조 후 착수. 최근 이력: PR#780(채번 절차 누락 계열 — 이미 완료된 번호 재사용 + 회귀 테스트 0건), PR#780 재작업(그림자 컴포넌트 테스트 — 실제 컴포넌트 미경유). 이번 Task는 실제 UI 스크린샷(R-10)과 실제 함수 호출 기반 테스트가 필수입니다.
 
-## [발견 이슈]
+## [작업 결과]
 
-_(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
+| 항목 | 내용 |
+|:-----|:------|
+| **담당 실행자** | D_Kai (Dave 대리, 사용자 직접 지시) |
+| **커밋 해시** | `9fdd3995` |
+| **변경 파일** | `src/app/actions/operations/orders.ts` · `src/app/actions/operations/index.ts` · `src/components/warehouse/InboundProcessForm.tsx` · `tests/unit/logistics/inbound.test.ts` |
+| **테스트 결과** | `vitest run` — 130 files · 859 tests **ALL PASS** |
+| **빌드 결과** | `npm run build` — **SUCCESS** |
+
+### 체크리스트 완료 현황
+
+- [x] `git fetch origin && git checkout TeamB_Dev && git pull origin TeamB_Dev` 후 `feature/teamb-218-...` 브랜치 생성
+- [x] `orders.ts` 헬퍼 추출 + `confirmInbound()` 리팩터링 + `saveInboundMeasurements()` 신규
+- [x] `operations/index.ts`에 신규 액션 export 추가
+- [x] `InboundProcessForm.tsx` 저장 버튼 + 예상운임 표시 UI 추가
+- [x] 회귀 테스트 추가 — TC-INB.7(saveInboundMeasurements 성공), TC-INB.8(빈 updates 검증)
+- [x] `npm run build` · `npm run test:regression` — Build SUCCESS, 859/859 PASS
+- [ ] 실제 UI에서 측정값 저장 및 예상운임 변경 표시 스크린샷(R-10) — 로컬 DB 미가동
+
+## [발견 이슈]
 
 없음
