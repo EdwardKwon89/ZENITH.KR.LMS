@@ -463,7 +463,8 @@ export async function cancelUpsRegistration(
     const referenceNo = labels[0].reference_no;
     const removeRes = await removeorder(referenceNo.replace(/-/g, ''));
     if (removeRes.success === 0) {
-      logger.warn(`removeorder API warning for order ${orderId}: ${removeRes.message}`);
+      logger.error(`removeorder failed for order ${orderId}: ${removeRes.message}`);
+      return { success: false, error: `UPS 라벨 회수 실패(SHXK): ${removeRes.message}` };
     }
 
     const labelIds = labels.map((l) => l.id);
@@ -602,7 +603,8 @@ export async function voidUpsLabel(
 
     const removeRes = await removeorder(label.reference_no.replace(/-/g, ''));
     if (removeRes.success === 0) {
-      logger.warn(`removeorder API warning for order ${orderId}: ${removeRes.message}`);
+      logger.error(`removeorder failed for order ${orderId}: ${removeRes.message}`);
+      return { success: false, error: `UPS 라벨 회수 실패(SHXK): ${removeRes.message}` };
     }
 
     const updateErr = await markLabelVoidedByOrder(supabase, orderId);

@@ -6,7 +6,7 @@
 | **담당** | Baker (Team B) |
 | **생성일** | 2026-07-26 |
 | **우선순위** | P1 |
-| **상태** | ⬜ |
+| **상태** | 🔔 |
 
 ## 개요
 
@@ -73,6 +73,18 @@ Issue 요청 #2(회수 전/후 `gettrack`으로 실제 처리 상태 확인)는 
 ## 담당자 위반 이력 사전 경고
 
 - Baker: `.agent/VIOLATION_TRACKER.md` 참조 후 착수. 최근 이력: PR#844(🔍 설계확정 무시 착수), PR#837(타인 작업 기록 덮어쓰기). 이번 Task는 Jaison이 SHXK 전체 조사·설계를 이미 확정해뒀으므로 추가 조사·설계 판단 없이 스펙대로 구현.
+
+## [작업 결과]
+
+- **커밋 해시**: `0aa54be8`
+- **브랜치**: `feature/teamb-211-shxk-removeorder-failure` (base: TeamB_Dev)
+- **변경 파일**: `ups-labels.ts` (cancelUpsRegistration + voidUpsLabel) + `ups-labels-removeorder-failure.test.ts` (신규 3건) + `ups-labels-split.test.ts` (기존 테스트 갱신)
+- **수정 내용**:
+  - `cancelUpsRegistration()`: `removeRes.success === 0` 시 `logger.warn`→`logger.error` 격상 + 즉시 `return {success:false, error:...}`
+  - `voidUpsLabel()`: 동일 패턴 — removeorder 실패 시 `markLabelVoidedByOrder`/`unlockAllPackagesIntlRef` 미실행
+- **빌드**: PASS
+- **회귀 테스트**: 130 files / 846 tests ALL PASS
+- **SHXK 전체 점검 결과**: `removeorder` 2개 호출부만 실패 처리 미흡, 나머지 4개 함수(`createorder`/`getnewlabel`/`gettrackingnumber`/`gettrack`)는 정상 (Jaison 조사 완료)
 
 ## [발견 이슈]
 
