@@ -15,6 +15,7 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
+| [#851](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/851) | [feat] 통합트래킹(물류관리) UPS 오더 연동 정합화 — provider_type/상태 기준 통일 | b | p2 | - | 미배정 | 2026-07-26 |
 | [#831](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/831) | [feat] 화주(Shipper)용 청구서 조회 화면 신설 | b | p2 | done | 미배정 | 2026-07-25 |
 | [#830](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/830) | [feat] IN_TRANSIT 오더 부가요금 등록 기능 (recordUpsActualCharges 확장) | b | p2 | done | 미배정 | 2026-07-25 |
 | [#829](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/829) | [feat] IN_TRANSIT → RELEASED 되돌리기 기능 (출고확정처리 취소) | b | p2 | done | 미배정 | 2026-07-25 |
@@ -31,7 +32,7 @@
 | [#741](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/741) | DEF-121: TrackingDashboard Detail 링크 로케일 프리픽스 누락 — 404 발생 | b | p2 | done | 미배정 | 2026-07-23 |
 | [#728](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/728) | [defect] DEF-120 — zen_tracking_configs RLS에 AGENCY SELECT 커버리지 없음, 통합 트래킹 침묵 실패 | b | p2 | done | 미배정 | 2026-07-23 |
 | [#727](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/727) | [fix] 창고 화면 전반 일괄처리 지원 여부 점검·보완 (SNTL 회의 W7) | b | p3 | in-progress | 미배정 | 2026-07-23 |
-| [#726](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/726) | [fix] 급증수수료 등록 데이터 화폐단위(KRW) 감사 (SNTL 회의 W6) | b | p3 | in-progress | 미배정 | 2026-07-23 |
+| [#726](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/726) | [fix] 급증수수료 등록 데이터 화폐단위(KRW) 감사 (SNTL 회의 W6) | b | p3 | in-progress | 미배정 | 2026-07-26 |
 | [#725](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/725) | [feat] 입고 처리 시 부피중량/중량 수정 기능 추가 (SNTL 회의 W5) | b | p1 | done | 미배정 | 2026-07-25 |
 | [#718](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/718) | 2026.07.22 SNTL 회의록 | - | - | - | 미배정 | 2026-07-23 |
 | [#713](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/713) | [feat] 출고확정처리(/warehouse/departure) 화면에 오늘의 이력 패널 신설 | b | p3 | done | 미배정 | 2026-07-22 |
