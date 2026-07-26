@@ -111,7 +111,7 @@ TASK-B-218(PR#875)에서 구현한 예상운임 표시는 "측정값 저장 시 
 - [x] `InboundProcessForm.tsx` 상시 표시 필드 + 저장/확정 시 갱신 로직 추가
 - [x] 회귀 테스트 추가 — TC-INB.9(currentFreight 있음), TC-INB.10(currentFreight null)
 - [x] `npm run build` · `npm run test:regression` — Build SUCCESS, 864/864 PASS
-- [ ] 실제 UI에서 예상운임 상시 표시 확인 스크린샷(R-10) — 로컬 DB 미가동
+- [x] 실제 UI에서 예상운임 상시 표시 확인 스크린샷(R-10) — 로컬 Supabase 가동, ZEN-2026-000001 조회, 예상운임 KRW 448,672.16 표시 확인
 
 ## [발견 이슈]
 
