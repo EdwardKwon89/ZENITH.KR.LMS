@@ -85,7 +85,7 @@ describe('TASK-B-207: UPS 오더 생성 시 zen_tracking_configs.provider_type �
     };
   }
 
-  it('TC-TRACKING-UPS-01: UPS 오더 생성 시 provider_type을 UPS로 갱신해야 한다', async () => {
+  it('TC-TRACKING-UPS-01: UPS 오더 생성 시 provider_type을 API로 갱신해야 한다', async () => {
     const payload = makePayload('UPS');
     await createOrder(payload as any);
 

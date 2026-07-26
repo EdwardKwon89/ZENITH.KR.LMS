@@ -107,7 +107,7 @@ export async function createOrder(payload: OrderRegistrationInput) {
   if (validated.transport_mode === 'UPS') {
     const { error: trackingConfigError } = await supabase
       .from('zen_tracking_configs')
-      .update({ provider_type: 'UPS', provider_name: 'UPS Express' })
+      .update({ provider_type: 'API', provider_name: 'SHXK_UPS' })
       .eq('order_id', orderId);
     if (trackingConfigError) {
       logger.error('[TRACKING_CONFIG] Failed to set UPS provider_type:', trackingConfigError);
