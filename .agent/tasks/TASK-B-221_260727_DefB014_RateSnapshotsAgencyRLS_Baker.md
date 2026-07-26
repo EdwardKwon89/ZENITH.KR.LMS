@@ -66,12 +66,12 @@ _(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
 
 | 항목 | 내용 |
 |:-----|:-----|
-| **커밋 해시** | `af8be8db` |
+| **커밋 해시** | `a8c866a1` |
 | **코드 커밋** | `supabase/migrations/20260727004025_defb014_rate_snapshots_agency_select_rls.sql` + `tests/unit/migrations/defb014-rate-snapshots-agency-rls.test.ts` |
 | **빌드** | PASS |
-| **회귀 테스트** | 132 files / 870 tests ALL PASS |
-| **로컬 DB 실검증** | AGENCY 세션에서 rate snapshot SELECT 성공 (1건 조회) |
-| **PR** | PR#874 생성 완료 |
+| **회귀 테스트** | 132 files / 871 tests ALL PASS |
+| **로컬 DB 실검증** | AGENCY 세션에서 rate snapshot SELECT 성공 (1건 조회) + GRANT 검증 통과 |
+| **PR** | PR#880 반려 후 재작업 완료 (GRANT 추가) |
 
 ### 작업 내용
 1. `zen_order_rate_snapshots` 테이블에 AGENCY SELECT RLS 정책 추가
