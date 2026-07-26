@@ -3,10 +3,33 @@
 | 항목 | 내용 |
 |:-----|:------|
 | **Issue** | [#863](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/863) |
-| **담당** | Baker (Team B) |
+| **담당** | Mike (Team B) — Baker 대리 |
 | **생성일** | 2026-07-26 |
 | **우선순위** | P2 |
-| **상태** | ⬜ |
+| **상태** | 🔔 |
+
+## 작업 결과
+
+### 변경 내용
+
+#### `src/app/actions/operations/orders.ts:110`
+- UPS 분기 `.update()` 호출에 `tracking_no: null` 필드 추가
+- 기존: `{ provider_type: 'MANUAL', provider_name: 'MANUAL' }`
+- 변경: `{ provider_type: 'MANUAL', provider_name: 'MANUAL', tracking_no: null }`
+
+#### `supabase/migrations/20260726130000_defb007_ups_tracking_no_backfill.sql`
+- 기존 UPS 오더 중 `tracking_no LIKE 'ZN-%'`인 행을 NULL로 백필
+- AIR/SEA/LAND 오더 및 이미 실등록된 UPS 오더는 영향 없음
+
+### 테스트
+- `TC-TRACKING-UPS-01`: UPS 생성 시 `tracking_no: null` 포함 검증 (기존 테스트 보강)
+- `TC-TRACKING-UPS-04`: UPS 생성 시 `tracking_no` null 갱신 별도 검증 (신규)
+
+### 검증
+- **테스트**: 4/4 PASS (tracking-configs-provider-type)
+- **빌드**: ✅ PASS
+- **회귀**: 129/129 파일, 844/844 테스트 ALL PASS
+- **커밋 해시**: `f3c8c4ec`
 
 ## 개요
 
