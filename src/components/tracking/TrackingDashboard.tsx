@@ -80,17 +80,19 @@ export default function TrackingDashboard() {
 
   const stats = [
     { label: "Total Tracks", value: tracks.length, color: "text-slate-900" },
-    { label: "In Transit", value: tracks.filter(t => t.latest_event?.event_code === "IN_TRANSIT").length, color: "text-blue-600" },
-    { label: "Delivered", value: tracks.filter(t => t.latest_event?.event_code === "DELIVERED").length, color: "text-green-600" },
-    { label: "Issues", value: tracks.filter(t => t.latest_event?.event_code === "EXCEPTION").length, color: "text-red-600" },
+    { label: "In Transit", value: tracks.filter(t => t.order?.status === "IN_TRANSIT").length, color: "text-blue-600" },
+    { label: "Delivered", value: tracks.filter(t => t.order?.status === "DELIVERED").length, color: "text-green-600" },
+    { label: "Claimed", value: tracks.filter(t => t.order?.status === "CLAIMED").length, color: "text-amber-600" },
+    { label: "Held", value: tracks.filter(t => t.order?.status === "HELD").length, color: "text-red-600" },
+    { label: "Returned", value: tracks.filter(t => t.order?.status === "RETURNED").length, color: "text-rose-600" },
   ];
 
   return (
     <div className="space-y-6">
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         {loading ? (
-          Array.from({ length: 4 }).map((_, i) => <StatCardSkeleton key={i} />)
+          Array.from({ length: 6 }).map((_, i) => <StatCardSkeleton key={i} />)
         ) : (
           stats.map((stat, i) => (
             <motion.div
@@ -229,10 +231,14 @@ export default function TrackingDashboard() {
                       {track.latest_event ? (
                         <div className="flex flex-col gap-1">
                           <div className="flex items-center gap-1.5">
-                            {track.latest_event.event_code === "DELIVERED" ? (
+                            {track.order?.status === "DELIVERED" ? (
                               <CheckCircle2 size={14} className="text-green-500 shrink-0" />
-                            ) : track.latest_event.event_code === "EXCEPTION" ? (
+                            ) : track.order?.status === "HELD" ? (
                               <AlertCircle size={14} className="text-red-500 shrink-0" />
+                            ) : track.order?.status === "CLAIMED" ? (
+                              <AlertCircle size={14} className="text-amber-500 shrink-0" />
+                            ) : track.order?.status === "RETURNED" ? (
+                              <AlertCircle size={14} className="text-rose-500 shrink-0" />
                             ) : (
                               <RefreshCw size={14} className="text-blue-500 animate-spin-slow shrink-0" />
                             )}

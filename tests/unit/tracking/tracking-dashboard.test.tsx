@@ -156,3 +156,51 @@ describe('DEF-121: TrackingDashboard Detail locale prefix', () => {
     });
   });
 });
+
+describe('TASK-B-208: 통계 카드 order.status 기준', () => {
+  it('DELIVERED 오더가 "Delivered" 카드에 카운트됨', async () => {
+    const { getGlobalTrackingOverview } = await import('@/app/actions/tracking');
+    vi.mocked(getGlobalTrackingOverview).mockResolvedValueOnce({
+      configs: [
+        { order_id: '1', order: { status: 'DELIVERED', order_no: 'O1' }, latest_event: null, updated_at: '' },
+        { order_id: '2', order: { status: 'IN_TRANSIT', order_no: 'O2' }, latest_event: null, updated_at: '' },
+      ],
+    } as any);
+
+    const { default: TrackingDashboard } = await import('@/components/tracking/TrackingDashboard');
+    render(<TrackingDashboard />);
+
+    await waitFor(() => {
+      const deliveredCard = screen.getByText('Delivered').closest('div')?.parentElement;
+      expect(deliveredCard?.textContent).toContain('1');
+    });
+  });
+
+  it('CLAIMED/HELD/RETURNED가 각각 별도 카드에 카운트됨', async () => {
+    const { getGlobalTrackingOverview } = await import('@/app/actions/tracking');
+    vi.mocked(getGlobalTrackingOverview).mockResolvedValueOnce({
+      configs: [
+        { order_id: '1', order: { status: 'CLAIMED', order_no: 'O1' }, latest_event: null, updated_at: '' },
+        { order_id: '2', order: { status: 'HELD', order_no: 'O2' }, latest_event: null, updated_at: '' },
+        { order_id: '3', order: { status: 'RETURNED', order_no: 'O3' }, latest_event: null, updated_at: '' },
+        { order_id: '4', order: { status: 'DELIVERED', order_no: 'O4' }, latest_event: null, updated_at: '' },
+      ],
+    } as any);
+
+    const { default: TrackingDashboard } = await import('@/components/tracking/TrackingDashboard');
+    render(<TrackingDashboard />);
+
+    await waitFor(() => {
+      const getCardCount = (label: string) => {
+        const labelEl = screen.getByText(label);
+        const card = labelEl.closest('div')?.parentElement;
+        return card?.textContent ?? '';
+      };
+      expect(getCardCount('Claimed')).toContain('1');
+      expect(getCardCount('Held')).toContain('1');
+      expect(getCardCount('Returned')).toContain('1');
+      expect(getCardCount('Delivered')).toContain('1');
+      expect(getCardCount('Total Tracks')).toContain('4');
+    });
+  });
+});
