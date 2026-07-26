@@ -66,7 +66,7 @@ _(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
 
 | 항목 | 내용 |
 |:-----|:-----|
-| **커밋 해시** | `b4b44d69` |
+| **커밋 해시** | `af8be8db` |
 | **코드 커밋** | `supabase/migrations/20260727004025_defb014_rate_snapshots_agency_select_rls.sql` + `tests/unit/migrations/defb014-rate-snapshots-agency-rls.test.ts` |
 | **빌드** | PASS |
 | **회귀 테스트** | 132 files / 870 tests ALL PASS |
