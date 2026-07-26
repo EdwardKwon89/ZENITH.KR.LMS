@@ -212,15 +212,16 @@ export default function TrackingDashboard() {
                     <td className="px-6 py-4">
                       <div className="flex flex-col">
                         <span className="text-sm text-slate-900 font-medium">
-                          {track.provider_name || "—"}
+                          {track.order?.transport_mode === 'UPS' ? 'UPS' : (track.provider_name || "—")}
                         </span>
                         <span className={cn(
                           "text-[10px] px-1.5 py-0.5 rounded-full w-fit mt-1 border",
+                          track.order?.transport_mode === 'UPS' ? "bg-blue-50 text-blue-600 border-blue-100" :
                           track.provider_type === "API" ? "bg-blue-50 text-blue-600 border-blue-100" :
                           track.provider_type === "VIRTUAL" ? "bg-purple-50 text-purple-600 border-purple-100" :
                           "bg-slate-50 text-slate-600 border-slate-200"
                         )}>
-                          {track.provider_type}
+                          {track.order?.transport_mode === 'UPS' ? 'UPS' : track.provider_type}
                         </span>
                       </div>
                     </td>
