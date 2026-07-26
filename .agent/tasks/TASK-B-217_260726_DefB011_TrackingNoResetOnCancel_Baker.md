@@ -7,7 +7,7 @@
 | **생성일** | 2026-07-26 |
 | **우선순위** | P2 |
 | **전제조건** | TASK-B-216(DEF-B-010, PR#870) 병합 완료 후 착수 — AGENCY UPDATE RLS 정책 선행 필요 |
-| **상태** | ⬜ |
+| **상태** | 🔔 |
 
 ## 개요
 
@@ -53,6 +53,19 @@
 ## 담당자 위반 이력 사전 경고
 
 - Baker: `.agent/VIOLATION_TRACKER.md` 참조 후 착수. 최근 이력: PR#870(toContain 유형, 재작업으로 해소), PR#844(🔍 설계확정 무시 착수), PR#837(타인 작업 기록 덮어쓰기). 이번 Task는 실제 로컬 DB 재현 검증이 필수입니다.
+
+## [작업 결과]
+
+- **커밋 해시**: `b63a5dad`
+- **브랜치**: `feature/teamb-217-defb011-tracking-no-reset` (base: TeamB_Dev)
+- **변경 파일**: `ups-labels.ts` (cancelUpsRegistration + voidUpsLabel) + `ups-labels-removeorder-failure.test.ts` (신규 2건)
+- **수정 내용**:
+  - `cancelUpsRegistration()`: 성공 경로에 `zen_tracking_configs.tracking_no = null` UPDATE 추가 (logger.warn, 논블로킹)
+  - `voidUpsLabel()`: 동일 패턴
+- **로컬 DB 실검증**: AGENCY 세션으로 `tracking_no = NULL` UPDATE → 1행 갱신 성공 (DEF-B-010 RLS 정책 선행 적용 확인)
+- **빌드**: PASS
+- **회귀 테스트**: 130 files / 857 tests ALL PASS
+- **테스트**: behavioral 2건 신규 (cancelUpsRegistration + voidUpsLabel 각각 tracking_no 리셋 검증)
 
 ## [발견 이슈]
 
