@@ -503,6 +503,14 @@ export async function cancelUpsRegistration(
       return { success: false, error: `라벨 레코드 삭제 실패: ${deleteErr.message}` };
     }
 
+    const { error: trackingResetErr } = await supabase
+      .from('zen_tracking_configs')
+      .update({ tracking_no: null })
+      .eq('order_id', orderId);
+    if (trackingResetErr) {
+      logger.warn(`zen_tracking_configs tracking_no reset warning for order ${orderId}: ${trackingResetErr.message}`);
+    }
+
     revalidatePath("/(dashboard)/warehouse/outbound", "page");
 
     return { success: true };
@@ -612,6 +620,15 @@ export async function voidUpsLabel(
 
     const unlockErr = await unlockAllPackagesIntlRef(supabase, orderId);
     if (unlockErr) return { success: false, error: `intl_ref 복원 실패: ${unlockErr}` };
+
+    const { error: trackingResetErr } = await supabase
+      .from('zen_tracking_configs')
+      .update({ tracking_no: null })
+      .eq('order_id', orderId);
+    if (trackingResetErr) {
+      logger.warn(`zen_tracking_configs tracking_no reset warning for order ${orderId}: ${trackingResetErr.message}`);
+    }
+
     revalidatePath("/(dashboard)/warehouse/outbound", "page");
 
     return { success: true };
