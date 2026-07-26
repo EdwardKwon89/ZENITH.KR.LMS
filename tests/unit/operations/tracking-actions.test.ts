@@ -71,8 +71,7 @@ describe('DEF-122: getGlobalTrackingOverview isUnassigned', () => {
   function makeChain(data: any[], error: any = null, count = 1) {
     const chain = {
       select: vi.fn().mockReturnThis(),
-      order: vi.fn().mockReturnThis(),
-      range: vi.fn().mockResolvedValue({ data, error, count }),
+      order: vi.fn().mockResolvedValue({ data, error, count }),
     };
     return chain;
   }
@@ -119,8 +118,7 @@ describe('TASK-B-208: getGlobalTrackingOverview order.status 포함 (behavioral)
   function makeChain(data: any[], error: any = null, count = 1) {
     return {
       select: vi.fn().mockReturnThis(),
-      order: vi.fn().mockReturnThis(),
-      range: vi.fn().mockResolvedValue({ data, error, count }),
+      order: vi.fn().mockResolvedValue({ data, error, count }),
     };
   }
 
@@ -178,5 +176,43 @@ describe('TASK-B-208: getGlobalTrackingOverview order.status 포함 (behavioral)
       return o.status;
     });
     expect(statuses).toEqual(['IN_TRANSIT', 'HELD', 'CLAIMED']);
+  });
+});
+
+describe('TASK-B-212: getGlobalTrackingOverview 페이지네이션 캡 해제 (behavioral)', () => {
+  let mockSupabase: any;
+
+  function makeChain(data: any[], error: any = null, count?: number) {
+    return {
+      select: vi.fn().mockReturnThis(),
+      order: vi.fn().mockResolvedValue({ data, error, count: count ?? data.length }),
+    };
+  }
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockSupabase = { from: vi.fn() };
+    (validateUserAction as any).mockResolvedValue({
+      user: { id: 'user-001' },
+      supabase: mockSupabase,
+    });
+  });
+
+  it('60건 이상 반환 시 전량 조회됨 (50건으로 잘리지 않음)', async () => {
+    const items = Array.from({ length: 60 }, (_, i) => ({
+      order_id: `order-${i}`,
+      order: { id: `order-${i}`, order_no: `ZEN-${i}`, shipper_id: 's1', recipient_name: `User${i}`, transport_mode: 'AIR', status: 'IN_TRANSIT' },
+    }));
+    const chain = makeChain(items);
+    mockSupabase.from.mockReturnValueOnce(chain);
+    mockSupabase.from.mockReturnValueOnce({
+      select: vi.fn().mockReturnValue({ in: vi.fn().mockReturnValue({ order: vi.fn().mockResolvedValue({ data: [], error: null }) }) }),
+    });
+    mockSupabase.from.mockReturnValueOnce({
+      select: vi.fn().mockReturnValue({ in: vi.fn().mockReturnValue({ order: vi.fn().mockResolvedValue({ data: [], error: null }) }) }),
+    });
+
+    const result = await getGlobalTrackingOverview();
+    expect(result.configs).toHaveLength(60);
   });
 });

@@ -6,7 +6,42 @@
 | **담당** | Mike (Team B) |
 | **생성일** | 2026-07-26 |
 | **우선순위** | P2 |
-| **상태** | ⬜ |
+| **상태** | 🔔 |
+
+## 작업 결과
+
+### 변경 내용
+
+#### `src/app/actions/operations/tracking.ts`
+- `getGlobalTrackingOverview()`에서 `.range(from, to)` 제거 — 50건 캡 해제
+- `from`/`to` 계산 라인 제거
+- 시그니처 유지 (기존 테스트 호출부 호환)
+
+#### `src/components/tracking/TrackingDashboard.tsx`
+- **import 추가**: `useTranslations`, `OrderStatus`, `ORDER_STATUS_META`, `ZenStatusBadge`
+- **import 제거**: `CheckCircle2`, `AlertCircle` (더 이상 미사용)
+- **통계 카드**: 6개 → 14개 (Total + 13종 전체)
+  - `STATUS_ORDER` 배열로 13종 순서 고정
+  - `STATUS_TEXT_COLOR` 매핑으로 상태별 색상
+  - Total Tracks = `statusStats.reduce()` 합계 (tracks.length 미사용)
+- **그리드**: `lg:grid-cols-6` → `xl:grid-cols-7` (14개 카드 대응)
+- **스켈레톤**: 6개 → 14개
+- **Latest Status 셀**: 아이콘 분기 → `ZenStatusBadge` 컴포넌트로 전환
+- **tracking_no NULL**: `"—"` → `""` (공백)
+
+### 테스트 (behavioral/렌더링 기반)
+| 파일 | 케이스 | 검증 내용 |
+|:-----|:-------|:----------|
+| `tracking-dashboard.test.tsx` | 13종 카드 카운트 | REGISTERED(2)/SCHEDULED(1)/WAREHOUSED(1)/IN_TRANSIT(1)/DELIVERED(1)/CANCELED(1)/MASTERED(1) + Total(8) |
+| `tracking-dashboard.test.tsx` | ZenStatusBadge 렌더링 | `bg-green-100` 클래스로 상태 배지 표시 확인 |
+| `tracking-dashboard.test.tsx` | tracking_no null | "—" 텍스트 없음 확인 |
+| `tracking-actions.test.ts` | 페이지네이션 캡 해제 | 60건 mock → `configs.length === 60` |
+
+### 검증
+- **테스트**: 22/22 PASS (tracking 관련 전체)
+- **빌드**: ✅ PASS
+- **회귀**: 129/129 파일, 847/847 테스트 ALL PASS
+- **커밋 해시**: `0b145f2b`
 
 ## 개요
 

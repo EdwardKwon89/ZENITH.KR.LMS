@@ -188,8 +188,6 @@ export async function getTrackingRawLogs(orderId: string, page = 1, pageSize = 5
 export async function getGlobalTrackingOverview(page = 1, pageSize = 50) {
   const { supabase } = await validateUserAction();
 
-  const from = (page - 1) * pageSize;
-  const to = from + pageSize - 1;
   const { data, error, count } = await supabase
     .from("zen_tracking_configs")
     .select(`
@@ -208,8 +206,7 @@ export async function getGlobalTrackingOverview(page = 1, pageSize = 50) {
         status
       )
     `, { count: "exact" })
-    .order("updated_at", { ascending: false })
-    .range(from, to);
+    .order("updated_at", { ascending: false });
 
   if (error) throw new Error(`Failed to fetch tracking overview: ${error.message}`);
 
