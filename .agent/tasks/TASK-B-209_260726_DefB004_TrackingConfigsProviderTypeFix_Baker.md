@@ -6,7 +6,7 @@
 | **담당** | Baker (Team B) |
 | **생성일** | 2026-07-26 |
 | **우선순위** | P1 |
-| **상태** | 🔄 |
+| **상태** | 🔔 |
 
 ## 개요
 
@@ -56,6 +56,15 @@ WHERE tc.order_id = o.id
 ## 완료 보고 절차 (R-17 준수)
 
 1. 코드 커밋 → 2. task file `[작업 결과]`(**커밋 해시 실제 값 기재 — TBD 금지**)+🔔 → 3. ACTIVE_TASK.md 반영 → 4. `check-R17-DoD` 통과 → 5. 문서 커밋 → 6. PR (`→ TeamB_Dev`)
+
+## [작업 결과]
+
+- **커밋 해시**: `7879bda3`
+- **브랜치**: `feature/teamb-b209-defb004-provider-type-fix` (base: TeamB_Dev)
+- **변경 파일**: `orders.ts` + 신규 마이그레이션 + 테스트 설명
+- **빌드**: PASS
+- **회귀 테스트**: 129 files / 837 tests ALL PASS
+- **PR**: TeamB_Dev 머지 대기
 
 ## [발견 이슈]
 
