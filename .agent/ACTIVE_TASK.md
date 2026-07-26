@@ -527,6 +527,7 @@
 | TASK-B-204 | 260726 | Issue #830 — IN_TRANSIT 오더 부가요금 등록 (recordUpsActualCharges 확장) | P2 | 없음 | Dave (구현) | 🔔 | [TASK-B-204](tasks/TASK-B-204_260726_UpsActualChargesInTransit_Dave.md) | 상태/권한 게이트 확장 + AGENCY 샤드 · TC-B204-01~06 6종 · 6/6 PASS · build ✅ · [PR#835](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/835) |
 | TASK-B-203 | 260726 | Issue #829 출고확정취소 — 원구현 Mike(#833) / 버그수정 Baker(#837) | P2 | 없음 | Mike(1차)/Baker(후속) | 🔔 | [TASK-B-203](tasks/TASK-B-203_260726_UndoDeparture_Baker.md) | Mike: undoDeparture + UI + i18n · Baker: undo 버튼 조건 해제 · 회귀 125files/825tests ALL PASS · [PR#833](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/833) + [PR#837](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/837) |
 | TASK-B-206 | 260726 | DEF-B-003 — zen_agency_shippers authenticated GRANT 추가 | P1 | 없음 | Mike (구현) | 🔔 | [TASK-B-206](tasks/TASK-B-206_260726_DefB003_AgencyShippersGrant_Mike.md) | GRANT SELECT TO authenticated · 테스트 1/1 PASS · 빌드 PASS · 회귀 834/834 PASS · PR#849 |
+| TASK-B-208 | 260726 | Issue #851 — 통합트래킹 통계/상태 판정 order.status 기준 통일 | P2 | 없음 | Mike (구현) | 🔔 | [TASK-B-208](tasks/TASK-B-208_260726_Iss851_TrackingDashboardOrderStatusUnify_Mike.md) | tracking.ts status select + TrackingDashboard 6개 카드 + 아이콘 변경 · 테스트 4/4 PASS · 빌드 PASS · 회귀 841/841 PASS · PR#855 |
 ---
 
 ## Agent 현황
