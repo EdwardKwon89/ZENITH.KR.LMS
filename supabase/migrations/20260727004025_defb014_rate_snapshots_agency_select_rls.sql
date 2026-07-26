@@ -19,3 +19,7 @@ USING (
       AND zen_orders.agency_org_id = (SELECT org_id FROM public.zen_profiles WHERE id = auth.uid())
   )
 );
+
+-- GRANT: authenticated 역할에 기본 권한 부여 (CI/신규 배포 환경 대응)
+-- 기존 org_members insert/update 정책이 있으므로 INSERT/UPDATE도 필요
+GRANT SELECT, INSERT, UPDATE ON public.zen_order_rate_snapshots TO authenticated;

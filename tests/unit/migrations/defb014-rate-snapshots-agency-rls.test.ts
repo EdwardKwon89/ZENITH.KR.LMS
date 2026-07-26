@@ -50,6 +50,17 @@ describe('TASK-B-221: DEF-B-014 zen_order_rate_snapshots AGENCY SELECT RLS', () 
   });
 
   describe('실제 DB 검증 (AGENCY 세션 시뮬레이션)', () => {
+    it('authenticated 역할에 SELECT/INSERT/UPDATE GRANT 존재', () => {
+      const result = psql(`
+        SELECT COUNT(*) FROM information_schema.role_table_grants 
+        WHERE table_name = 'zen_order_rate_snapshots' 
+        AND grantee = 'authenticated' 
+        AND privilege_type IN ('SELECT', 'INSERT', 'UPDATE')
+      `);
+      const count = parseInt(result, 10);
+      expect(count).toBe(3);
+    });
+
     it('AGENCY 세션에서 rate snapshot SELECT 성공', () => {
       const result = psql(`
         SET LOCAL role TO authenticated;
