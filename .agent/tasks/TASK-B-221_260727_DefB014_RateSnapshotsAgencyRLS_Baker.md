@@ -6,7 +6,7 @@
 | **담당** | Baker (Team B) |
 | **생성일** | 2026-07-27 |
 | **우선순위** | P1 |
-| **상태** | ⬜ |
+| **상태** | 🔔 |
 
 ## 개요
 
@@ -61,3 +61,20 @@ USING (
 _(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
 
 없음
+
+## [작업 결과]
+
+| 항목 | 내용 |
+|:-----|:-----|
+| **커밋 해시** | `b4b44d69` |
+| **코드 커밋** | `supabase/migrations/20260727004025_defb014_rate_snapshots_agency_select_rls.sql` + `tests/unit/migrations/defb014-rate-snapshots-agency-rls.test.ts` |
+| **빌드** | PASS |
+| **회귀 테스트** | 132 files / 870 tests ALL PASS |
+| **로컬 DB 실검증** | AGENCY 세션에서 rate snapshot SELECT 성공 (1건 조회) |
+| **PR** | PR#874 생성 완료 |
+
+### 작업 내용
+1. `zen_order_rate_snapshots` 테이블에 AGENCY SELECT RLS 정책 추가
+2. 기존 `zen_order_packages` AGENCY SELECT 정책과 동일 패턴 (agency_org_id 기반)
+3. 기존 정책(ADMIN, order_members)은 건드리지 않음 (OR 결합)
+4. psql 기반 behavioral 테스트 6건 추가 (구조 3건 + 실제 DB 검증 3건)
