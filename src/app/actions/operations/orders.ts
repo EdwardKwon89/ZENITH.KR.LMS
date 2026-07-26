@@ -734,7 +734,7 @@ async function applyPackageMeasurements(
 
   const { data: orderMeta } = await supabase
     .from('zen_orders')
-    .select('status, transport_mode, ups_product_code, dest_port_id, recipient_country_code, incoterms, shipper_id, order_no')
+    .select('status, transport_mode, ups_product_code, dest_port_id, recipient_country_code, incoterms, shipper_id, order_no, agency_org_id')
     .eq('id', orderId)
     .maybeSingle();
 
@@ -808,6 +808,7 @@ async function applyPackageMeasurements(
             dimW: packages[0]?.width,
             dimH: packages[0]?.height,
             incoterms: orderMeta.incoterms,
+            agencyOrgId: orderMeta.agency_org_id,
             shipperOrgId: orderMeta.shipper_id,
           });
 

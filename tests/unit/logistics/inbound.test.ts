@@ -13,6 +13,14 @@ vi.mock('next/cache', () => ({
   revalidatePath: vi.fn(),
 }));
 
+vi.mock('@/app/actions/ups/freight', () => ({
+  estimateUpsFreight: vi.fn().mockResolvedValue({
+    platform: { totalSellingPrice: 150, currency: 'USD', baseSellingPrice: 100, fuelSurchargeSellingAmount: 20, otherChargesSellingTotal: 10, surgeFeeSellingAmount: 20 },
+    agency: null,
+    shipper: null,
+  }),
+}));
+
 describe('ZENITH Logistics: Inbound Process Unit Tests', () => {
   const mockUser = { id: 'user-123' };
   const mockProfile = { id: 'user-123', org_id: 'org-456', role: 'ADMIN' };
@@ -301,6 +309,75 @@ describe('ZENITH Logistics: Inbound Process Unit Tests', () => {
       expect(mockSupabase.from).toHaveBeenCalledWith('order_status_history');
       expect(mockSupabase.gte).toHaveBeenCalled();
       expect(mockSupabase.lte).toHaveBeenCalled();
+    });
+  });
+
+  describe('DEF-B-016: applyPackageMeasurements agencyOrgId 전달 검증', () => {
+    it('TC-DEF-B-016: UPS 오더 측정값 저장 시 estimateUpsFreightFn에 agencyOrgId가 전달되어야 함', async () => {
+      const { estimateUpsFreight } = await import('@/app/actions/ups/freight');
+      const mockEstimate = vi.mocked(estimateUpsFreight);
+      mockEstimate.mockClear();
+      mockEstimate.mockResolvedValue({
+        platform: { totalSellingPrice: 150, currency: 'USD', baseSellingPrice: 100, fuelSurchargeSellingAmount: 20, otherChargesSellingTotal: 10, surgeFeeSellingAmount: 20 } as any,
+        agency: null,
+        shipper: null,
+      });
+
+      const orderId = 'order-agency-test';
+      const agencyOrgId = 'org-agency-123';
+      const packageUpdates = [
+        { packageId: 'pkg-001', gross_weight: 15, length: 30, width: 25, height: 20 },
+      ];
+
+      const agencyProfile = { id: 'user-agency', org_id: 'org-other', role: 'AGENCY' };
+      (validateUserAction as any).mockResolvedValue({
+        user: { id: 'user-agency' },
+        profile: agencyProfile,
+        supabase: mockSupabase,
+      });
+
+      // 1. existingSnapshot
+      mockSupabase.maybeSingle
+        .mockResolvedValueOnce({ data: { metadata: {}, applied_unit_price: 100 }, error: null })
+        // 2. orderMeta
+        .mockResolvedValueOnce({ data: { status: OrderStatus.WAREHOUSED, transport_mode: 'UPS', ups_product_code: 'UPS-EXPRESS', agency_org_id: agencyOrgId, dest_port_id: null, recipient_country_code: 'US', incoterms: 'DDU', shipper_id: 'shipper-1', order_no: 'ORD-AGENCY-001' }, error: null })
+        // 3. currentPkg
+        .mockResolvedValueOnce({ data: { gross_weight: 10, length: 20, width: 15, height: 10 }, error: null })
+        // 4. UPS product
+        .mockResolvedValueOnce({ data: { id: 'product-1' }, error: null });
+
+      // from() chaining: order_packages select → returns packages data
+      let fromCallCount = 0;
+      mockSupabase.from.mockImplementation((table: string) => {
+        fromCallCount++;
+        const chain: any = {
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(),
+          order: vi.fn().mockReturnThis(),
+          limit: vi.fn().mockReturnThis(),
+          update: vi.fn().mockReturnThis(),
+          insert: vi.fn().mockReturnThis(),
+          maybeSingle: mockSupabase.maybeSingle,
+        };
+
+        if (table === 'zen_order_packages' && fromCallCount >= 5) {
+          // packages query inside the freight calculation block
+          chain.select.mockReturnValue({
+            ...chain,
+            eq: vi.fn().mockResolvedValue({ data: [{ gross_weight: 15, length: 30, width: 25, height: 20 }], error: null }),
+          });
+        }
+
+        return chain;
+      });
+
+      await saveInboundMeasurements(orderId, packageUpdates);
+
+      expect(mockEstimate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          agencyOrgId: agencyOrgId,
+        })
+      );
     });
   });
 });
