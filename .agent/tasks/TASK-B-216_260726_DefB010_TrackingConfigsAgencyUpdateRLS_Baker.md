@@ -70,6 +70,18 @@ WITH CHECK (
 - **빌드**: PASS
 - **회귀 테스트**: 130 files / 857 tests ALL PASS
 
+### 재작업 1 (`toContain` → 실제 DB 세션 기반, 2026-07-26)
+- **커밋 해시**: `78d761ee`
+- Jaison PR#870 리뷰에서 `toContain` 소스 문자열 검사만으로 제출된 것을 확인 → 실제 DB 세션 시뮬레이션(`SET LOCAL role/request.jwt.claims`) 기반 테스트로 전면 교체
+
+### 재작업 2 (GRANT 누락 + 테스트 fixture 자기완결화, 2026-07-27 — Jaison 진행)
+PR#870 리뷰/머지 처리 중 Jaison이 아래 2가지 결함을 추가 발견해 직접 수정:
+- **커밋 해시**: `3a9dbd35`
+- `zen_tracking_configs`에 `authenticated` 역할 UPDATE GRANT가 없어(기존 GRANT는 SELECT만 존재) fresh CI DB에서 permission denied 예상 → `GRANT UPDATE ON public.zen_tracking_configs TO authenticated;` 추가
+- 재작업 1의 테스트가 하드코딩한 `agency@zenith.kr`/`ZEN-2026-000001`(로컬 전용 실데이터)로 CI(fresh DB)에서 재현 불가 → `beforeAll`/`afterAll`에서 자체 fixture(조직 3개+프로필 1개+오더 2건+tracking_config 2건) 생성/정리하는 방식으로 교체
+- 격리 워크트리 재검증: `tests/unit/migrations/defb010-tracking-configs-agency-update-rls.test.ts` 8/8 PASS, 전체 회귀 133 files/879 tests ALL PASS(로컬)
+- (참고: DEF-B-014/PR#880에서 동일 유형의 2개 결함이 먼저 발견됐고, 이 Task에도 동일 패턴이 있었음을 뒤늦게 확인해 함께 정정함)
+
 ## [발견 이슈]
 
 _(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
