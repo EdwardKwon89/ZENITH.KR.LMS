@@ -40,7 +40,7 @@ order_packages:zen_order_packages(id, order_id, packing_unit, packing_count, len
 한 단어(`id,`) 추가가 전부입니다. 프론트엔드(`InboundProcessForm.tsx`)는 이미 `pkg.id`를 참조하고 있어 변경 불필요.
 
 ## 관련 Task
-- `TASK-B-215` (배정 예정)
+- `TASK-B-215` — 수정 완료 (`d57c0140`, D_Kai 대리 구현)
 
 ## 관련 파일
 - `src/app/actions/operations/orders.ts:660` (`getOrderByBarcodeOrNo`)
