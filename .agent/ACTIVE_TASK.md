@@ -15,6 +15,7 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
+| [#867](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/867) | [defect] DEF-B-009 — 입고처리 화면 크래시(package.id undefined, PR#866 후속) | b | p1 | open | 미배정 | 2026-07-26 |
 | [#865](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/865) | [fix] DEF-B-008 — 입고처리 오더검색 잘못된 테이블명(order_packages)으로 항상 실패 + Local Tracking No 조회 미지원 | b | p1 | review | 미배정 | 2026-07-26 |
 | [#863](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/863) | [fix] DEF-B-007 — UPS 오더 tracking_no에 가짜 값(ZN- 접두사) 노출 | b | p2 | review | 미배정 | 2026-07-26 |
 | [#861](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/861) | [fix] DEF-B-006 — /tracking 대시보드 집계 캡(50건)·상태13종 미집계·Latest Status 텍스트 불일치·tracking_number 표기 | b | p2 | review | 미배정 | 2026-07-26 |
