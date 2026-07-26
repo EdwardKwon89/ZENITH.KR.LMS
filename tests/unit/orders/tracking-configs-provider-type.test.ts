@@ -85,7 +85,7 @@ describe('TASK-B-207: UPS 오더 생성 시 zen_tracking_configs.provider_type �
     };
   }
 
-  it('TC-TRACKING-UPS-01: UPS 오더 생성 시 provider_type을 UPS로 갱신해야 한다', async () => {
+  it('TC-TRACKING-UPS-01: UPS 오더 생성 시 provider_type을 MANUAL로 갱신해야 한다', async () => {
     const payload = makePayload('UPS');
     await createOrder(payload as any);
 
@@ -93,6 +93,9 @@ describe('TASK-B-207: UPS 오더 생성 시 zen_tracking_configs.provider_type �
       (call: any[]) => call[0] === 'zen_tracking_configs'
     );
     expect(trackingConfigUpdateCall).toBeDefined();
+    expect(mockSupabase.update).toHaveBeenCalledWith(
+      expect.objectContaining({ provider_type: 'MANUAL', provider_name: 'MANUAL' })
+    );
   });
 
   it('TC-TRACKING-UPS-02: AIR 오더 생성 시 provider_type 갱신을 호출하지 않아야 한다', async () => {
