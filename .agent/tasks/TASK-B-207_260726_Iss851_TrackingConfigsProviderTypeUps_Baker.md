@@ -76,3 +76,14 @@ WHERE tc.order_id = o.id
 _(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
 
 없음
+
+## [작업 결과] 🔔
+
+| 항목 | 내용 |
+|:-----|:------|
+| **커밋** | `fix/teamb-207-ups-provider-type` 브랜치, 커밋 해시 TBD |
+| **PR** | TBD (→ TeamB_Dev, Part of #851) |
+| **변경 파일** | `src/app/actions/operations/orders.ts`, `supabase/migrations/20260726110000_iss851_tracking_configs_ups_provider_backfill.sql`, `tests/unit/orders/tracking-configs-provider-type.test.ts` |
+| **테스트** | 3건 (UPS 오더 provider_type UPS 확인, AIR/SEA/VIRTUAL 미갱신 확인) |
+| **전체 회귀** | 129 files / 837 tests ALL PASS |
+| **빌드** | ✅ PASS |
