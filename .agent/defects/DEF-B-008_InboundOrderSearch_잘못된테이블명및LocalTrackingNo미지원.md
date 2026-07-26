@@ -40,7 +40,7 @@
 2. `order_no`로 못 찾을 경우 `zen_order_packages.domestic_ref_no`로 2차 조회 → 매칭되는 패키지의 `order_id`로 오더 반환
 
 ## 관련 Task
-- `TASK-B-214` (배정 예정)
+- `TASK-B-214` — 수정 완료 (`10aea5e2`, D_Kai 대리 구현)
 
 ## 관련 파일
 - `src/app/actions/operations/orders.ts:614-660` (`getOrderByBarcodeOrNo`)

@@ -609,32 +609,58 @@ export async function getHeldPreviousStatus(orderId: string) {
 }
 
 /**
- * 바코드(오더 번호) 또는 ID로 오더를 검색하고 상세 품목 정보를 함께 조회합니다.
+ * 바코드(오더 번호) 또는 ID, 또는 Local Tracking No(패키지 domestic_ref_no)로 오더를 검색하고
+ * 상세 품목 정보를 함께 조회합니다.
  */
 export async function getOrderByBarcodeOrNo(barcodeOrNo: string) {
   const { supabase } = await validateUserAction();
   const orderRepo = new OrderRepository(supabase);
 
-  // 1. UUID 형식인지 검사하여 ID 또는 order_no로 조회
+  // 1. UUID 형식인지 검사
   const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(barcodeOrNo);
 
-  let query = supabase
+  let orderId: string | null = null;
+
+  if (isUuid) {
+    orderId = barcodeOrNo;
+  } else {
+    const { data: byOrderNo } = await supabase
+      .from('zen_orders')
+      .select('id')
+      .eq('order_no', barcodeOrNo)
+      .maybeSingle();
+
+    if (byOrderNo) {
+      orderId = byOrderNo.id;
+    } else {
+      // 2차: Local Tracking No(domestic_ref_no)로 조회 — 패키지 단위 필드라 zen_order_packages에서 조회
+      const { data: byLocalTracking } = await supabase
+        .from('zen_order_packages')
+        .select('order_id')
+        .eq('domestic_ref_no', barcodeOrNo)
+        .maybeSingle();
+
+      if (byLocalTracking) {
+        orderId = byLocalTracking.order_id;
+      }
+    }
+  }
+
+  if (!orderId) {
+    return null;
+  }
+
+  const { data: order, error } = await supabase
     .from('zen_orders')
     .select(`
       *,
       shipper:zen_organizations!shipper_id(name),
       origin_port:zen_ports!origin_port_id(name, code),
       dest_port:zen_ports!dest_port_id(name, code),
-      order_packages(order_id, packing_unit, packing_count, length, width, height, gross_weight, volume)
-    `);
-
-  if (isUuid) {
-    query = query.eq('id', barcodeOrNo);
-  } else {
-    query = query.eq('order_no', barcodeOrNo);
-  }
-
-  const { data: order, error } = await query.maybeSingle();
+      order_packages:zen_order_packages(order_id, packing_unit, packing_count, length, width, height, gross_weight, volume)
+    `)
+    .eq('id', orderId)
+    .maybeSingle();
 
   if (error) {
     logger.error('Failed to fetch order by barcode:', error);
