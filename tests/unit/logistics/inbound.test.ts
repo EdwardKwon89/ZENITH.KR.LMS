@@ -132,6 +132,37 @@ describe('ZENITH Logistics: Inbound Process Unit Tests', () => {
       // When & Then
       await expect(getOrderByBarcodeOrNo(orderNo)).rejects.toThrow('오더 조회 실패');
     });
+
+    it('TC-INB.6: [Success] 조회 시 packages[].id가 정상 포함되어야 함 (DEF-B-009 재발 방지)', async () => {
+      // Given
+      const orderNo = 'ORD-PKG-001';
+      const mockOrder = {
+        id: 'order-pkg-001',
+        order_no: orderNo,
+        status: OrderStatus.SCHEDULED,
+        order_packages: [
+          { id: 'pkg-001', order_id: 'order-pkg-001', packing_unit: 'BOX', packing_count: 2, length: 10, width: 10, height: 10, gross_weight: 5, volume: 0.001 },
+          { id: 'pkg-002', order_id: 'order-pkg-001', packing_unit: 'PAL', packing_count: 1, length: 100, width: 80, height: 60, gross_weight: 50, volume: 0.48 },
+        ],
+      };
+      const mockItems = [
+        { id: 'item-1', item_name: 'Box D', quantity: 2, sku_code: 'SKU-004' },
+      ];
+
+      mockSupabase.maybeSingle
+        .mockResolvedValueOnce({ data: { id: 'order-pkg-001' }, error: null })
+        .mockResolvedValueOnce({ data: mockOrder, error: null });
+      mockSupabase.order.mockResolvedValue({ data: mockItems, error: null });
+
+      // When
+      const result = await getOrderByBarcodeOrNo(orderNo);
+
+      // Then
+      expect(result).not.toBeNull();
+      expect(result?.packages).toHaveLength(2);
+      expect(result?.packages[0].id).toBe('pkg-001');
+      expect(result?.packages[1].id).toBe('pkg-002');
+    });
   });
 
   describe('confirmInbound', () => {
