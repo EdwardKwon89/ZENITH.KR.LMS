@@ -285,7 +285,7 @@ describe('TASK-B-212: DEF-B-006 — 13종 전체 집계 + ZenStatusBadge + track
     });
   });
 
-  it('tracking_no가 null일 때 빈 문자열로 렌더링됨 ("—" 없음)', async () => {
+  it('tracking_no가 null일 때 해당 셀이 빈 문자열로 렌더링됨', async () => {
     const { getGlobalTrackingOverview } = await import('@/app/actions/tracking');
     vi.mocked(getGlobalTrackingOverview).mockResolvedValueOnce({
       configs: [
@@ -297,7 +297,12 @@ describe('TASK-B-212: DEF-B-006 — 13종 전체 집계 + ZenStatusBadge + track
     render(<TrackingDashboard />);
 
     await waitFor(() => {
-      expect(screen.queryByText('—')).toBeNull();
+      expect(screen.getByText('O1')).toBeTruthy();
     });
+
+    const row = screen.getByText('O1').closest('tr');
+    const cells = row!.querySelectorAll('td');
+    const trackingNoCell = cells[1];
+    expect(trackingNoCell.textContent).toBe('');
   });
 });
