@@ -678,10 +678,22 @@ export async function getOrderByBarcodeOrNo(barcodeOrNo: string) {
     throw new Error(`오더 품목 조회 실패: ${itemsError.message}`);
   }
 
+  // 3. 현재 운임 스냅샷 조회 (예상운임 상시 표시용)
+  const { data: rateSnapshot } = await supabase
+    .from('zen_order_rate_snapshots')
+    .select('applied_unit_price, applied_currency')
+    .eq('order_id', order.id)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
   return {
     ...order,
     items: items || [],
     packages: (order as any).order_packages || [],
+    currentFreight: rateSnapshot
+      ? { amount: rateSnapshot.applied_unit_price, currency: rateSnapshot.applied_currency }
+      : null,
   };
 }
 

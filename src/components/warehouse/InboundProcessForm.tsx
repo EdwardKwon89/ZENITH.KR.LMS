@@ -38,6 +38,7 @@ export default function InboundProcessForm({ locale }: { locale: string }) {
   const [packageEdits, setPackageEdits] = useState<Record<string, { gross_weight?: string; length?: string; width?: string; height?: string }>>({});
   const [savingMeasurements, setSavingMeasurements] = useState(false);
   const [freightEstimate, setFreightEstimate] = useState<{ changed: boolean; oldFreight?: number; newFreight?: number; currency?: string } | null>(null);
+  const [displayFreight, setDisplayFreight] = useState<{ amount: number; currency: string } | null>(null);
 
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -75,9 +76,11 @@ export default function InboundProcessForm({ locale }: { locale: string }) {
       const result = await getOrderByBarcodeOrNo(barcode.trim());
       if (result) {
         setOrder(result);
+        setDisplayFreight((result as any).currentFreight ?? null);
         setInspectStatus("NORMAL");
         setNote("");
         setPackageEdits({});
+        setFreightEstimate(null);
         toast.success("화물을 찾았습니다.");
       } else {
         setErrorMsg(t("error_not_found"));
@@ -122,6 +125,9 @@ export default function InboundProcessForm({ locale }: { locale: string }) {
           toast.success(t("success_msg"));
         }
         setFreightEstimate(fe ?? null);
+        if (fe?.newFreight != null) {
+          setDisplayFreight({ amount: fe.newFreight, currency: fe.currency ?? displayFreight?.currency ?? 'USD' });
+        }
         setOrder(null);
         setBarcode("");
         setNote("");
@@ -152,6 +158,12 @@ export default function InboundProcessForm({ locale }: { locale: string }) {
       if (result.success) {
         toast.success("측정값이 저장되었습니다.");
         setFreightEstimate(result.freightEstimate ?? null);
+        if (result.freightEstimate?.newFreight != null) {
+          setDisplayFreight({
+            amount: result.freightEstimate.newFreight,
+            currency: result.freightEstimate.currency ?? displayFreight?.currency ?? 'USD',
+          });
+        }
       } else {
         throw new Error(result.error || "저장 실패");
       }
@@ -331,6 +343,13 @@ export default function InboundProcessForm({ locale }: { locale: string }) {
                   {t("weight_volume_edit")}
                 </h3>
                 <p className="text-xs text-slate-500 mb-4">{t("weight_volume_desc")}</p>
+
+                <div className="mb-3 p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 flex items-center justify-between">
+                  <span className="font-medium">예상 운임</span>
+                  <span className="font-bold text-slate-900">
+                    {displayFreight ? `${displayFreight.currency} ${displayFreight.amount.toLocaleString()}` : '-'}
+                  </span>
+                </div>
                 
                 <div className="space-y-4">
                   {order.packages.map((pkg: any) => {

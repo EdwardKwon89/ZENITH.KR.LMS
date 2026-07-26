@@ -17,9 +17,13 @@ describe('ZENITH Logistics: Inbound Process Unit Tests', () => {
   const mockUser = { id: 'user-123' };
   const mockProfile = { id: 'user-123', org_id: 'org-456', role: 'ADMIN' };
   let mockSupabase: any;
+  let orderResolve: (col: string, asc: boolean) => any;
+
+  const defaultOrderResolve = (_col: string, asc: boolean) => asc ? { data: [], error: null } : undefined;
 
   beforeEach(() => {
     vi.clearAllMocks();
+    orderResolve = defaultOrderResolve;
 
     mockSupabase = {
       from: vi.fn().mockReturnThis(),
@@ -27,7 +31,11 @@ describe('ZENITH Logistics: Inbound Process Unit Tests', () => {
       eq: vi.fn().mockReturnThis(),
       gte: vi.fn().mockReturnThis(),
       lte: vi.fn().mockReturnThis(),
-      order: vi.fn().mockReturnThis(),
+      order: vi.fn().mockImplementation(function(this: any, column: string, opts?: any) {
+        const result = orderResolve(column, opts?.ascending ?? true);
+        if (result) return { then: (resolve: any) => resolve(result) };
+        return this;
+      }),
       limit: vi.fn().mockReturnThis(),
       insert: vi.fn().mockReturnThis(),
       update: vi.fn().mockReturnThis(),
@@ -52,10 +60,11 @@ describe('ZENITH Logistics: Inbound Process Unit Tests', () => {
         { id: 'item-1', item_name: 'Box A', quantity: 10, sku_code: 'SKU-001' },
       ];
 
+      orderResolve = (col, asc) => asc ? { data: mockItems, error: null } : undefined;
       mockSupabase.maybeSingle
         .mockResolvedValueOnce({ data: { id: 'order-123' }, error: null })
-        .mockResolvedValueOnce({ data: mockOrder, error: null });
-      mockSupabase.order.mockResolvedValue({ data: mockItems, error: null });
+        .mockResolvedValueOnce({ data: mockOrder, error: null })
+        .mockResolvedValueOnce({ data: null, error: null });
 
       // When
       const result = await getOrderByBarcodeOrNo(orderNo);
@@ -89,8 +98,10 @@ describe('ZENITH Logistics: Inbound Process Unit Tests', () => {
         { id: 'item-1', item_name: 'Box B', quantity: 5, sku_code: 'SKU-002' },
       ];
 
-      mockSupabase.maybeSingle.mockResolvedValue({ data: mockOrder, error: null });
-      mockSupabase.order.mockResolvedValue({ data: mockItems, error: null });
+      orderResolve = (col, asc) => asc ? { data: mockItems, error: null } : undefined;
+      mockSupabase.maybeSingle
+        .mockResolvedValueOnce({ data: mockOrder, error: null })
+        .mockResolvedValueOnce({ data: null, error: null });
 
       // When
       const result = await getOrderByBarcodeOrNo(uuid);
@@ -109,11 +120,12 @@ describe('ZENITH Logistics: Inbound Process Unit Tests', () => {
         { id: 'item-2', item_name: 'Box C', quantity: 3, sku_code: 'SKU-003' },
       ];
 
+      orderResolve = (col, asc) => asc ? { data: mockItems, error: null } : undefined;
       mockSupabase.maybeSingle
         .mockResolvedValueOnce({ data: null, error: null })
         .mockResolvedValueOnce({ data: { order_id: 'order-456' }, error: null })
-        .mockResolvedValueOnce({ data: mockOrder, error: null });
-      mockSupabase.order.mockResolvedValue({ data: mockItems, error: null });
+        .mockResolvedValueOnce({ data: mockOrder, error: null })
+        .mockResolvedValueOnce({ data: null, error: null });
 
       // When
       const result = await getOrderByBarcodeOrNo(localTrackingNo);
@@ -151,10 +163,11 @@ describe('ZENITH Logistics: Inbound Process Unit Tests', () => {
         { id: 'item-1', item_name: 'Box D', quantity: 2, sku_code: 'SKU-004' },
       ];
 
+      orderResolve = (col, asc) => asc ? { data: mockItems, error: null } : undefined;
       mockSupabase.maybeSingle
         .mockResolvedValueOnce({ data: { id: 'order-pkg-001' }, error: null })
-        .mockResolvedValueOnce({ data: mockOrder, error: null });
-      mockSupabase.order.mockResolvedValue({ data: mockItems, error: null });
+        .mockResolvedValueOnce({ data: mockOrder, error: null })
+        .mockResolvedValueOnce({ data: null, error: null });
 
       // When
       const result = await getOrderByBarcodeOrNo(orderNo);
@@ -164,6 +177,42 @@ describe('ZENITH Logistics: Inbound Process Unit Tests', () => {
       expect(result?.packages).toHaveLength(2);
       expect(result?.packages[0].id).toBe('pkg-001');
       expect(result?.packages[1].id).toBe('pkg-002');
+    });
+
+    it('TC-INB.9: [Success] 조회 시 currentFreight가 rateSnapshot 있으면 포함되어야 함', async () => {
+      // Given
+      const orderNo = 'ORD-FREIGHT-001';
+      const mockOrder = { id: 'order-frt-001', order_no: orderNo, status: OrderStatus.SCHEDULED };
+
+      mockSupabase.maybeSingle
+        .mockResolvedValueOnce({ data: { id: 'order-frt-001' }, error: null })
+        .mockResolvedValueOnce({ data: mockOrder, error: null })
+        .mockResolvedValueOnce({ data: { applied_unit_price: 1250, applied_currency: 'USD' }, error: null });
+
+      // When
+      const result = await getOrderByBarcodeOrNo(orderNo);
+
+      // Then
+      expect(result).not.toBeNull();
+      expect(result?.currentFreight).toEqual({ amount: 1250, currency: 'USD' });
+    });
+
+    it('TC-INB.10: [Success] rateSnapshot 없으면 currentFreight가 null이어야 함', async () => {
+      // Given
+      const orderNo = 'ORD-NO-FREIGHT';
+      const mockOrder = { id: 'order-no-frt', order_no: orderNo, status: OrderStatus.SCHEDULED };
+
+      mockSupabase.maybeSingle
+        .mockResolvedValueOnce({ data: { id: 'order-no-frt' }, error: null })
+        .mockResolvedValueOnce({ data: mockOrder, error: null })
+        .mockResolvedValueOnce({ data: null, error: null });
+
+      // When
+      const result = await getOrderByBarcodeOrNo(orderNo);
+
+      // Then
+      expect(result).not.toBeNull();
+      expect(result?.currentFreight).toBeNull();
     });
   });
 
