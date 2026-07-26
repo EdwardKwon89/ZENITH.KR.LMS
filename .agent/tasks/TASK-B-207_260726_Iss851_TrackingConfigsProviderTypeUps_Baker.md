@@ -81,9 +81,13 @@ _(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
 
 | 항목 | 내용 |
 |:-----|:------|
-| **커밋** | `fix/teamb-207-ups-provider-type` 브랜치, 커밋 해시 TBD |
-| **PR** | TBD (→ TeamB_Dev, Part of #851) |
+| **커밋** | `8455e060` |
+| **PR** | [#853](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/853) (→ TeamB_Dev, Part of #851) — 2026-07-26 병합 완료 |
 | **변경 파일** | `src/app/actions/operations/orders.ts`, `supabase/migrations/20260726110000_iss851_tracking_configs_ups_provider_backfill.sql`, `tests/unit/orders/tracking-configs-provider-type.test.ts` |
 | **테스트** | 3건 (UPS 오더 provider_type UPS 확인, AIR/SEA/VIRTUAL 미갱신 확인) |
 | **전체 회귀** | 129 files / 837 tests ALL PASS |
 | **빌드** | ✅ PASS |
+
+### ⚠️ 후속 정정 필요 (DEF-B-004)
+
+병합 후 Jaison이 로컬 DB에 마이그레이션 적용 중 발견: `provider_type='UPS'`는 `zen_tracking_configs_provider_type_check` CHECK 제약(`VIRTUAL`/`MANUAL`/`API`만 허용) 위반으로 **실제로는 항상 실패**(트랜잭션 롤백, 신규 오더 생성 시에도 조용히 실패 후 로깅만 됨) — **Jaison의 설계 스펙 오류**(Baker 귀책 아님). `provider_type='API', provider_name='SHXK_UPS'`로 정정 필요. 상세: `.agent/defects/DEF-B-004_...md`, 수정 담당: `TASK-B-209`(Baker).
