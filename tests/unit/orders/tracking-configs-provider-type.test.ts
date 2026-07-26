@@ -94,7 +94,16 @@ describe('TASK-B-207: UPS 오더 생성 시 zen_tracking_configs.provider_type �
     );
     expect(trackingConfigUpdateCall).toBeDefined();
     expect(mockSupabase.update).toHaveBeenCalledWith(
-      expect.objectContaining({ provider_type: 'MANUAL', provider_name: 'MANUAL' })
+      expect.objectContaining({ provider_type: 'MANUAL', provider_name: 'MANUAL', tracking_no: null })
+    );
+  });
+
+  it('TC-TRACKING-UPS-04: UPS 오더 생성 시 tracking_no를 null로 갱신해야 한다 (DEF-B-007)', async () => {
+    const payload = makePayload('UPS');
+    await createOrder(payload as any);
+
+    expect(mockSupabase.update).toHaveBeenCalledWith(
+      expect.objectContaining({ tracking_no: null })
     );
   });
 
