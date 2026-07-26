@@ -19,14 +19,25 @@
 - 그리드 클래스: `lg:grid-cols-6` 변경
 - 상태 아이콘: `event_code` → `order.status` 기준 전환
 
+### 테스트 (behavioral/렌더링 기반 — toContain 소스 문자열 검사 없음)
+
+#### `tests/unit/tracking/tracking-dashboard.test.tsx`
+- DELIVERED 오더가 "Delivered" 카드에 카운트되는지 실제 렌더링 검증
+- CLAIMED/HELD/_RETURNED가 각각 별도 카드에 분리 카운트되는지 검증
+
+#### `tests/unit/operations/tracking-actions.test.ts`
+- `getGlobalTrackingOverview()` 반환값에 `order.status` 필드 포함 검증
+- 여러 오더의 order.status가 각각 정확히 반환되는지 검증
+
 ### 파일 목록
 - `src/app/actions/operations/tracking.ts` — status select 추가
 - `src/components/tracking/TrackingDashboard.tsx` — 통계/아이콘 변경
-- `tests/unit/tracking/tracking-order-status.test.ts` — 신규 (4건)
+- `tests/unit/tracking/tracking-dashboard.test.tsx` — behavioral 테스트 2건 추가
+- `tests/unit/operations/tracking-actions.test.ts` — behavioral 테스트 2건 추가
 
 ### 검증
-- 테스트: **4/4 PASS**
+- 테스트: **14/14 PASS** (tracking 관련 전체)
 - 빌드: ✅ PASS
-- 회귀: **130/130 파일 PASS, 841/841 테스트 PASS**
-- 커밋 해시: `e9eda260`
-- PR: [#855](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/855)
+- 회귀: **129/129 파일 PASS, 841/841 테스트 PASS**
+- 커밋 해시: `3ad9c6f0`
+- PR: [#855](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/855) (반려 후 재작업)
