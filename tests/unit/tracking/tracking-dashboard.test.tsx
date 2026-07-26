@@ -135,9 +135,16 @@ describe('TASK-B-208: 통계 카드 order.status 기준', () => {
     render(<TrackingDashboard />);
 
     await waitFor(() => {
-      expect(screen.getByText('Claimed')).toBeTruthy();
-      expect(screen.getByText('Held')).toBeTruthy();
-      expect(screen.getByText('Returned')).toBeTruthy();
+      const getCardCount = (label: string) => {
+        const labelEl = screen.getByText(label);
+        const card = labelEl.closest('div')?.parentElement;
+        return card?.textContent ?? '';
+      };
+      expect(getCardCount('Claimed')).toContain('1');
+      expect(getCardCount('Held')).toContain('1');
+      expect(getCardCount('Returned')).toContain('1');
+      expect(getCardCount('Delivered')).toContain('1');
+      expect(getCardCount('Total Tracks')).toContain('4');
     });
   });
 });
