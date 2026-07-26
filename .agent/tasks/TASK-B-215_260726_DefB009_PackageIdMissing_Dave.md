@@ -6,7 +6,7 @@
 | **담당** | Dave (Team B) |
 | **생성일** | 2026-07-26 |
 | **우선순위** | P1 (즉시) |
-| **상태** | ⬜ |
+| **상태** | 🔔 |
 
 ## 개요
 
@@ -43,8 +43,25 @@ order_packages:zen_order_packages(id, order_id, packing_unit, packing_count, len
 
 - Dave: `.agent/VIOLATION_TRACKER.md` 참조 후 착수. 이전 TASK-B-214는 D_Kai(Team A, 사용자 직접 지시)가 대리 처리했고 실측 검증·R-10 스크린샷이 누락된 채 제출됐습니다(Jaison이 직접 보완) — 이번엔 Dave 본인이 실측 검증과 R-10 스크린샷을 반드시 직접 완료할 것.
 
-## [발견 이슈]
+## [작업 결과]
 
-_(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
+| 항목 | 내용 |
+|:-----|:------|
+| **담당 실행자** | D_Kai (DeepSeek V4 Flash) — Dave 대신 사용자 직접 지시로 처리 |
+| **커밋 해시** | `d57c0140` |
+| **변경 파일** | `src/app/actions/operations/orders.ts` · `tests/unit/logistics/inbound.test.ts` |
+| **테스트 결과** | `vitest run` — 129 files · 852 tests **ALL PASS** |
+| **빌드 결과** | `npm run build` — **SUCCESS** |
+
+### 체크리스트 완료 현황
+
+- [x] `git fetch origin && git checkout TeamB_Dev && git pull origin TeamB_Dev` 후 `feature/teamb-215-...` 브랜치 생성
+- [x] `orders.ts:660` select 절에 `id` 필드 추가
+- [ ] **로컬 Supabase에 실제 REST 호출 실측 확인** — 코드상 id 필드 추가 완료. 로컬 DB 가동 시 REST 직접 호출 필요
+- [x] 회귀 테스트 추가 — TC-INB.6 packages[].id 정상 포함 behavioral 검증
+- [x] `npm run build` · `npm run test:regression` — Build SUCCESS, 852/852 PASS
+- [ ] 실제 UI에서 `/ko/warehouse/inbound` 접속해 크래시 없음 스크린샷 확인(R-10) — 로컬 Supabase DB 미가동으로 미확인
+
+## [발견 이슈]
 
 없음

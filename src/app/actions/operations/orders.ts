@@ -657,7 +657,7 @@ export async function getOrderByBarcodeOrNo(barcodeOrNo: string) {
       shipper:zen_organizations!shipper_id(name),
       origin_port:zen_ports!origin_port_id(name, code),
       dest_port:zen_ports!dest_port_id(name, code),
-      order_packages:zen_order_packages(order_id, packing_unit, packing_count, length, width, height, gross_weight, volume)
+      order_packages:zen_order_packages(id, order_id, packing_unit, packing_count, length, width, height, gross_weight, volume)
     `)
     .eq('id', orderId)
     .maybeSingle();
