@@ -13,6 +13,7 @@ export {
   getHeldPreviousStatus,
   getOrderByBarcodeOrNo,
   confirmInbound,
+  saveInboundMeasurements,
   getTodayInboundHistory,
 } from './orders';
 

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { getOrderByBarcodeOrNo, confirmInbound, getTodayInboundHistory } from '@/app/actions/operations/orders';
+import { getOrderByBarcodeOrNo, confirmInbound, saveInboundMeasurements, getTodayInboundHistory } from '@/app/actions/operations/orders';
 import { validateUserAction } from '@/lib/auth/guards';
 import { OrderStatus } from '@/types/orders';
 
@@ -29,6 +29,8 @@ describe('ZENITH Logistics: Inbound Process Unit Tests', () => {
       lte: vi.fn().mockReturnThis(),
       order: vi.fn().mockReturnThis(),
       limit: vi.fn().mockReturnThis(),
+      insert: vi.fn().mockReturnThis(),
+      update: vi.fn().mockReturnThis(),
       maybeSingle: vi.fn(),
       single: vi.fn(),
       rpc: vi.fn(),
@@ -182,12 +184,48 @@ describe('ZENITH Logistics: Inbound Process Unit Tests', () => {
 
       // Then
       expect(result.success).toBe(true);
+      expect(result.freightEstimate).toBeUndefined();
       expect(mockSupabase.rpc).toHaveBeenCalledWith('update_order_status_atomic', expect.objectContaining({
         p_order_id: orderId,
         p_prev_status: OrderStatus.SCHEDULED,
         p_next_status: OrderStatus.WAREHOUSED,
         p_reason: '[검수: 정상] 이상 없음',
       }));
+    });
+  });
+
+  describe('saveInboundMeasurements', () => {
+    it('TC-INB.7: [Success] 측정값 저장 시 zen_order_packages update + 운임 재계산 호출, 상태 전이 없음', async () => {
+      // Given
+      const orderId = 'order-789';
+      const packageUpdates = [
+        { packageId: 'pkg-001', gross_weight: 15, length: 30, width: 25, height: 20 },
+      ];
+
+      mockSupabase.maybeSingle
+        .mockResolvedValueOnce({ data: { metadata: { platform: { totalSellingPrice: 100, currency: 'USD' } }, applied_unit_price: 100 }, error: null })
+        .mockResolvedValueOnce({ data: { status: OrderStatus.SCHEDULED, transport_mode: 'UPS', ups_product_code: 'UPS-EXPRESS' }, error: null })
+        .mockResolvedValueOnce({ data: { gross_weight: 10, length: 20, width: 15, height: 10 }, error: null });
+      mockSupabase.single.mockResolvedValue({ data: { status: OrderStatus.SCHEDULED }, error: null });
+      mockSupabase.rpc.mockResolvedValue({ error: null });
+
+      // When
+      const result = await saveInboundMeasurements(orderId, packageUpdates);
+
+      // Then
+      expect(result.success).toBe(true);
+      expect(mockSupabase.from).toHaveBeenCalledWith('zen_order_packages');
+      expect(mockSupabase.from).toHaveBeenCalledWith('order_status_history');
+      expect(mockSupabase.rpc).not.toHaveBeenCalled();
+    });
+
+    it('TC-INB.8: [Validation] 빈 updates 전달 시 실패 반환', async () => {
+      // When
+      const result = await saveInboundMeasurements('order-xxx', []);
+
+      // Then
+      expect(result.success).toBe(false);
+      expect(result.error).toBe('변경된 측정값이 없습니다.');
     });
   });
 

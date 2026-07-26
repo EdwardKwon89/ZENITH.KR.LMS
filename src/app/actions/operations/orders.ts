@@ -685,6 +685,179 @@ export async function getOrderByBarcodeOrNo(barcodeOrNo: string) {
   };
 }
 
+export interface PackageMeasurementUpdate {
+  packageId: string;
+  gross_weight?: number;
+  length?: number;
+  width?: number;
+  height?: number;
+}
+
+export interface FreightEstimateResult {
+  changed: boolean;
+  oldFreight?: number;
+  newFreight?: number;
+  currency?: string;
+}
+
+async function applyPackageMeasurements(
+  supabase: any,
+  profile: { id: string; email?: string | null },
+  orderId: string,
+  packageUpdates: PackageMeasurementUpdate[],
+): Promise<FreightEstimateResult> {
+  let weightVolumeChanged = false;
+  let oldFreight: number | undefined;
+  let newFreight: number | undefined;
+  let currency: string | undefined;
+
+  const { data: existingSnapshot } = await supabase
+    .from('zen_order_rate_snapshots')
+    .select('metadata, applied_unit_price')
+    .eq('order_id', orderId)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  const previousSnapshot = existingSnapshot;
+
+  const { data: orderMeta } = await supabase
+    .from('zen_orders')
+    .select('status, transport_mode, ups_product_code, dest_port_id, recipient_country_code, incoterms, shipper_id, order_no')
+    .eq('id', orderId)
+    .maybeSingle();
+
+  for (const pkg of packageUpdates) {
+    const { data: currentPkg } = await supabase
+      .from('zen_order_packages')
+      .select('gross_weight, length, width, height')
+      .eq('id', pkg.packageId)
+      .maybeSingle();
+
+    if (!currentPkg) continue;
+
+    const changed =
+      (pkg.gross_weight !== undefined && pkg.gross_weight !== currentPkg.gross_weight) ||
+      (pkg.length !== undefined && pkg.length !== currentPkg.length) ||
+      (pkg.width !== undefined && pkg.width !== currentPkg.width) ||
+      (pkg.height !== undefined && pkg.height !== currentPkg.height);
+
+    if (changed) {
+      weightVolumeChanged = true;
+
+      const updateData: Record<string, any> = { updated_at: new Date().toISOString() };
+      if (pkg.gross_weight !== undefined) updateData.gross_weight = pkg.gross_weight;
+      if (pkg.length !== undefined) updateData.length = pkg.length;
+      if (pkg.width !== undefined) updateData.width = pkg.width;
+      if (pkg.height !== undefined) updateData.height = pkg.height;
+
+      await supabase.from('zen_order_packages').update(updateData).eq('id', pkg.packageId);
+
+      await supabase.from('order_status_history').insert({
+        order_id: orderId,
+        new_status: orderMeta?.status ?? null,
+        changed_by: profile.id,
+        reason: `[입고 측정 변경] ${pkg.packageId.substring(0, 8)}: 중량 ${currentPkg.gross_weight}kg→${pkg.gross_weight ?? currentPkg.gross_weight}kg, 크기 ${currentPkg.length}x${currentPkg.width}x${currentPkg.height}cm→${pkg.length ?? currentPkg.length}x${pkg.width ?? currentPkg.width}x${pkg.height ?? currentPkg.height}cm`,
+      });
+    }
+  }
+
+  if (weightVolumeChanged && orderMeta?.transport_mode === 'UPS' && orderMeta.ups_product_code) {
+    try {
+      const { data: packages } = await supabase
+        .from('zen_order_packages')
+        .select('gross_weight, length, width, height')
+        .eq('order_id', orderId);
+
+      if (packages && packages.length > 0) {
+        const totalWeight = packages.reduce((sum: number, p: any) => sum + (p.gross_weight || 0), 0);
+
+        const { data: product } = await supabase
+          .from('zen_ups_products')
+          .select('id')
+          .eq('product_code', orderMeta.ups_product_code)
+          .maybeSingle();
+
+        let destCountryCode = orderMeta.recipient_country_code;
+        if (!destCountryCode && orderMeta.dest_port_id) {
+          const { data: port } = await supabase
+            .from('zen_ports')
+            .select('country_code')
+            .eq('id', orderMeta.dest_port_id)
+            .maybeSingle();
+          destCountryCode = port?.country_code;
+        }
+
+        if (product && destCountryCode && totalWeight > 0) {
+          const newEstimate = await estimateUpsFreightFn({
+            productId: product.id,
+            destCountryCode,
+            actualWeightKg: totalWeight,
+            dimL: packages[0]?.length,
+            dimW: packages[0]?.width,
+            dimH: packages[0]?.height,
+            incoterms: orderMeta.incoterms,
+            shipperOrgId: orderMeta.shipper_id,
+          });
+
+          if (previousSnapshot) {
+            await supabase
+              .from('zen_order_rate_snapshots')
+              .update({
+                applied_unit_price: newEstimate.platform.totalSellingPrice,
+                metadata: newEstimate as unknown as Record<string, unknown>,
+              })
+              .eq('order_id', orderId);
+          } else {
+            await supabase
+              .from('zen_order_rate_snapshots')
+              .insert({
+                order_id: orderId,
+                applied_unit_price: newEstimate.platform.totalSellingPrice,
+                applied_currency: newEstimate.platform.currency ?? 'USD',
+                applied_rule: 'UPS_3TIER',
+                metadata: newEstimate as unknown as Record<string, unknown>,
+              });
+          }
+
+          oldFreight = previousSnapshot?.metadata?.platform?.totalSellingPrice || 0;
+          newFreight = newEstimate.platform.totalSellingPrice;
+          currency = newEstimate.platform.currency ?? 'USD';
+
+          if (oldFreight !== newFreight) {
+            try {
+              const { data: shipper } = await supabase
+                .from('zen_organizations')
+                .select('name')
+                .eq('id', orderMeta.shipper_id)
+                .maybeSingle();
+
+              if (shipper) {
+                await import('@/lib/notifications/email').then(mod =>
+                  mod.sendFreightChangeEmail({
+                    email: profile.email || '',
+                    shipperName: shipper.name || '화주',
+                    orderNo: orderMeta.order_no || orderId.substring(0, 8),
+                    oldFreight: oldFreight!,
+                    newFreight: newFreight!,
+                    currency: currency ?? 'USD',
+                    reason: `입고 시 부피/중량 재측정 (중량: ${totalWeight}kg)`,
+                  })
+                );
+              }
+            } catch (emailErr) {
+              logger.warn('[INBOUND] Failed to send freight change email:', emailErr);
+            }
+          }
+        }
+      }
+    } catch (snapErr) {
+      logger.error('[INBOUND] Failed to recalculate rate snapshot:', snapErr);
+    }
+  }
+
+  return { changed: weightVolumeChanged, oldFreight, newFreight, currency };
+}
+
 /**
  * 오더를 입고 확정 처리(WAREHOUSED 상태로 변경)하고 검수 결과를 기록합니다.
  * 입고 시 부피/중량을 수정할 수 있으며, 변경 시 운임 스냅샷이 재계산됩니다.
@@ -693,13 +866,7 @@ export async function confirmInbound(
   orderId: string,
   inspectStatus: 'NORMAL' | 'DAMAGED',
   note?: string,
-  packageUpdates?: {
-    packageId: string;
-    gross_weight?: number;
-    length?: number;
-    width?: number;
-    height?: number;
-  }[]
+  packageUpdates?: PackageMeasurementUpdate[]
 ) {
   const { supabase, profile } = await validateUserAction();
   if (!profile) throw new Error("User profile not found");
@@ -707,182 +874,32 @@ export async function confirmInbound(
   const statusLabel = inspectStatus === 'NORMAL' ? '정상' : '손상';
   const formattedReason = `[검수: ${statusLabel}]${note ? ` ${note}` : ''}`;
 
-  // 1. 패키지 중량/부피 수정 (입고 시 실측값 반영)
-  let weightVolumeChanged = false;
-  let previousSnapshot: any = null;
-
+  let freightEstimate: FreightEstimateResult | undefined;
   if (packageUpdates && packageUpdates.length > 0) {
-    // 기존 스냅샷 조회 (변경 전 운임 저장)
-    const { data: existingSnapshot } = await supabase
-      .from('zen_order_rate_snapshots')
-      .select('metadata, applied_unit_price')
-      .eq('order_id', orderId)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle();
-    previousSnapshot = existingSnapshot;
-
-    for (const pkg of packageUpdates) {
-      // 변경 전 값 조회
-      const { data: currentPkg } = await supabase
-        .from('zen_order_packages')
-        .select('gross_weight, length, width, height')
-        .eq('id', pkg.packageId)
-        .maybeSingle();
-
-      if (!currentPkg) continue;
-
-      // 변경 여부 확인
-      const changed =
-        (pkg.gross_weight !== undefined && pkg.gross_weight !== currentPkg.gross_weight) ||
-        (pkg.length !== undefined && pkg.length !== currentPkg.length) ||
-        (pkg.width !== undefined && pkg.width !== currentPkg.width) ||
-        (pkg.height !== undefined && pkg.height !== currentPkg.height);
-
-      if (changed) {
-        weightVolumeChanged = true;
-
-        // 패키지 업데이트
-        const updateData: Record<string, any> = { updated_at: new Date().toISOString() };
-        if (pkg.gross_weight !== undefined) updateData.gross_weight = pkg.gross_weight;
-        if (pkg.length !== undefined) updateData.length = pkg.length;
-        if (pkg.width !== undefined) updateData.width = pkg.width;
-        if (pkg.height !== undefined) updateData.height = pkg.height;
-
-        await supabase
-          .from('zen_order_packages')
-          .update(updateData)
-          .eq('id', pkg.packageId);
-
-        // 변경 이력 기록 (status_history 테이블 활용)
-        await supabase.from('order_status_history').insert({
-          order_id: orderId,
-          new_status: 'WAREHOUSED',
-          changed_by: profile.id,
-          reason: `[입고 측정 변경] ${pkg.packageId.substring(0, 8)}: 중량 ${currentPkg.gross_weight}kg→${pkg.gross_weight ?? currentPkg.gross_weight}kg, 크기 ${currentPkg.length}x${currentPkg.width}x${currentPkg.height}cm→${pkg.length ?? currentPkg.length}x${pkg.width ?? currentPkg.width}x${pkg.height ?? currentPkg.height}cm`,
-        });
-      }
-    }
-
-    // 2. UPS 오더인 경우 운임 스냅샷 재계산
-    if (weightVolumeChanged) {
-      try {
-        // 오더 조회 (UPS 정보 포함)
-        const { data: order } = await supabase
-          .from('zen_orders')
-          .select('transport_mode, ups_product_code, dest_port_id, recipient_country_code, incoterms, shipper_id')
-          .eq('id', orderId)
-          .maybeSingle();
-
-        if (order?.transport_mode === 'UPS' && order.ups_product_code) {
-          // 모든 패키지 재조회
-          const { data: packages } = await supabase
-            .from('zen_order_packages')
-            .select('gross_weight, length, width, height')
-            .eq('order_id', orderId);
-
-          if (packages && packages.length > 0) {
-            const totalWeight = packages.reduce((sum, p) => sum + (p.gross_weight || 0), 0);
-
-            // UPS 제품 조회
-            const { data: product } = await supabase
-              .from('zen_ups_products')
-              .select('id')
-              .eq('product_code', order.ups_product_code)
-              .maybeSingle();
-
-            // 목적지 국가 코드 조회
-            let destCountryCode = order.recipient_country_code;
-            if (!destCountryCode && order.dest_port_id) {
-              const { data: port } = await supabase
-                .from('zen_ports')
-                .select('country_code')
-                .eq('id', order.dest_port_id)
-                .maybeSingle();
-              destCountryCode = port?.country_code;
-            }
-
-            if (product && destCountryCode && totalWeight > 0) {
-              // 운임 재계산
-              const newEstimate = await estimateUpsFreightFn({
-                productId: product.id,
-                destCountryCode,
-                actualWeightKg: totalWeight,
-                dimL: packages[0]?.length,
-                dimW: packages[0]?.width,
-                dimH: packages[0]?.height,
-                incoterms: order.incoterms,
-                shipperOrgId: order.shipper_id,
-              });
-
-              // 기존 스냅샷 업데이트 (없으면 생성)
-              if (previousSnapshot) {
-                await supabase
-                  .from('zen_order_rate_snapshots')
-                  .update({
-                    applied_unit_price: newEstimate.platform.totalSellingPrice,
-                    metadata: newEstimate as unknown as Record<string, unknown>,
-                  })
-                  .eq('order_id', orderId);
-              } else {
-                await supabase
-                  .from('zen_order_rate_snapshots')
-                  .insert({
-                    order_id: orderId,
-                    applied_unit_price: newEstimate.platform.totalSellingPrice,
-                    applied_currency: newEstimate.platform.currency ?? 'USD',
-                    applied_rule: 'UPS_3TIER',
-                    metadata: newEstimate as unknown as Record<string, unknown>,
-                  });
-              }
-
-              // 화주에게 운임 변경 이메일 발송
-              const oldFreight = previousSnapshot?.metadata?.platform?.totalSellingPrice || 0;
-              const newFreight = newEstimate.platform.totalSellingPrice;
-
-              if (oldFreight !== newFreight) {
-                try {
-                  const { data: shipper } = await supabase
-                    .from('zen_organizations')
-                    .select('name')
-                    .eq('id', order.shipper_id)
-                    .maybeSingle();
-
-                  const { data: orderInfo } = await supabase
-                    .from('zen_orders')
-                    .select('order_no')
-                    .eq('id', orderId)
-                    .maybeSingle();
-
-                  if (shipper) {
-                    await import('@/lib/notifications/email').then(mod =>
-                      mod.sendFreightChangeEmail({
-                        email: profile.email || '',
-                        shipperName: shipper.name || '화주',
-                        orderNo: orderInfo?.order_no || orderId.substring(0, 8),
-                        oldFreight,
-                        newFreight,
-                        currency: newEstimate.platform.currency ?? 'USD',
-                        reason: `입고 시 부피/중량 재측정 (중량: ${totalWeight}kg)`,
-                      })
-                    );
-                  }
-                } catch (emailErr) {
-                  logger.warn('[INBOUND] Failed to send freight change email:', emailErr);
-                }
-              }
-            }
-          }
-        }
-      } catch (snapErr) {
-        logger.error('[INBOUND] Failed to recalculate rate snapshot:', snapErr);
-        // 스냅샷 재계산 실패 시에도 입고 처리는 계속 진행
-      }
-    }
+    freightEstimate = await applyPackageMeasurements(supabase, profile, orderId, packageUpdates);
   }
 
-  // 3. 상태 전이 실행
-  return updateOrderStatus(orderId, OrderStatus.WAREHOUSED, formattedReason);
+  const result = await updateOrderStatus(orderId, OrderStatus.WAREHOUSED, formattedReason);
+  return { ...result, freightEstimate };
+}
+
+/**
+ * 입고 시 부피/중량 실측값만 별도로 저장합니다(상태 전이 없음).
+ * UPS 오더의 경우 운임 스냅샷이 재계산됩니다.
+ */
+export async function saveInboundMeasurements(
+  orderId: string,
+  packageUpdates: PackageMeasurementUpdate[]
+) {
+  const { supabase, profile } = await validateUserAction();
+  if (!profile) throw new Error("User profile not found");
+  if (!packageUpdates || packageUpdates.length === 0) {
+    return { success: false, error: '변경된 측정값이 없습니다.' };
+  }
+
+  const freightEstimate = await applyPackageMeasurements(supabase, profile, orderId, packageUpdates);
+  revalidatePath("/(dashboard)/warehouse/inbound", "page");
+  return { success: true, freightEstimate };
 }
 
 /**
