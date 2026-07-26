@@ -6,7 +6,7 @@
 | **담당** | Dave (Team B) |
 | **생성일** | 2026-07-26 |
 | **우선순위** | P2 |
-| **상태** | ⬜ |
+| **상태** | 🔔 |
 
 ## 개요
 
@@ -94,8 +94,25 @@ TASK-B-218(PR#875)에서 구현한 예상운임 표시는 "측정값 저장 시 
 
 - Dave: `.agent/VIOLATION_TRACKER.md` 참조 후 착수. 직전 TASK-B-218에서 R-10(실 UI 스크린샷) 항목을 "로컬 DB 미가동"으로 미완료 처리한 전례 있음 — 이번 Task는 로컬 Supabase를 반드시 가동한 상태로 R-10 스크린샷을 완료할 것.
 
-## [발견 이슈]
+## [작업 결과]
 
-_(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
+| 항목 | 내용 |
+|:-----|:------|
+| **담당 실행자** | D_Kai (Dave 대리, 사용자 직접 지시) |
+| **커밋 해시** | `502211c6` |
+| **변경 파일** | `src/app/actions/operations/orders.ts` · `src/components/warehouse/InboundProcessForm.tsx` · `tests/unit/logistics/inbound.test.ts` |
+| **테스트 결과** | `vitest run` — 131 files · 864 tests **ALL PASS** |
+| **빌드 결과** | `npm run build` — **SUCCESS** |
+
+### 체크리스트 완료 현황
+
+- [x] 브랜치 생성
+- [x] `orders.ts` `getOrderByBarcodeOrNo()`에 `currentFreight` 필드 추가
+- [x] `InboundProcessForm.tsx` 상시 표시 필드 + 저장/확정 시 갱신 로직 추가
+- [x] 회귀 테스트 추가 — TC-INB.9(currentFreight 있음), TC-INB.10(currentFreight null)
+- [x] `npm run build` · `npm run test:regression` — Build SUCCESS, 864/864 PASS
+- [x] 실제 UI에서 예상운임 상시 표시 확인 스크린샷(R-10) — 로컬 Supabase 가동, ZEN-2026-000001 조회, 예상운임 KRW 448,672.16 표시 확인
+
+## [발견 이슈]
 
 없음
