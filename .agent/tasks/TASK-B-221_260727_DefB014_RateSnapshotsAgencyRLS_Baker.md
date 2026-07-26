@@ -89,3 +89,25 @@ _(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
 2. 기존 `zen_order_packages` AGENCY SELECT 정책과 동일 패턴 (agency_org_id 기반)
 3. 기존 정책(ADMIN, order_members)은 건드리지 않음 (OR 결합)
 4. psql 기반 behavioral 테스트 6건 추가 (구조 3건 + 실제 DB 검증 3건)
+
+## [운영 사고 — Jaison 실수로 조기 병합됨, 2026-07-27]
+
+PR#880 리뷰 도중 Jaison의 실수(`git push origin HEAD:TeamB_Dev` 실행 시점에 공유 디렉토리 HEAD가 Baker의 feature 브랜치에 체크아웃돼 있었음)로 **PR#880의 커밋들이 정식 리뷰 승인 없이 `TeamB_Dev`에 그대로 반영**됐습니다(GitHub이 PR#880을 자동으로 `MERGED`로 표시함). 코드 내용(GRANT + RLS 정책) 자체는 유효하나, **CI 마지막 실행에서 테스트 1건이 fail 상태**였고 그 상태 그대로 병합됐습니다:
+
+```
+FAIL tests/unit/migrations/defb014-rate-snapshots-agency-rls.test.ts
+  > AGENCY 세션이 자신의 오더 rate snapshot을 실제로 조회 가능
+AssertionError: expected 0 to be greater than or equal to 1
+```
+
+원인: 테스트가 하드코딩한 `AGENCY_USER_ID`/`AGENCY_ORG_ID`가 커밋된 seed 데이터에 없는 로컬 전용 값이라 CI(fresh DB)에서 재현 불가.
+
+### 후속 조치 지시 (Baker, 신규 브랜치로 진행)
+
+이미 병합된 상태이므로 처음부터 다시 만들 필요는 없고, **`TeamB_Dev`에서 새 브랜치를 따서 테스트 파일 하나만 고치는 소규모 PR**로 마무리해주세요:
+
+1. `git fetch origin && git checkout TeamB_Dev && git pull origin TeamB_Dev` 후 `feature/teamb-221-fix-...` 신규 브랜치 생성
+2. `tests/unit/migrations/defb014-rate-snapshots-agency-rls.test.ts`의 "실제 DB 검증" describe 블록을 `beforeAll`/`afterAll`에서 자체 fixture를 생성/정리하도록 수정 (위 "접근 규칙 명세" 섹션 및 착수 체크리스트의 2차 반려 사유 항목 참고 — 하드코딩된 로컬 전용 ID 제거, 테스트 자체 INSERT한 조직/오더/스냅샷으로 검증)
+3. `npm run build` · `npm run test:regression` 로컬 실행 후 결과 기재, 격리 워크트리 불필요(이미 TeamB_Dev 기반)
+4. PR 생성(`feature/* → TeamB_Dev`) — 이번엔 정상적으로 CI 통과 확인 후 Jaison이 직접 `gh pr merge`로 병합
+5. task file 이 섹션 아래에 결과 추가 기재
