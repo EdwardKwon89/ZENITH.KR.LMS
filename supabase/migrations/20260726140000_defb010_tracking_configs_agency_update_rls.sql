@@ -23,3 +23,6 @@ WITH CHECK (
       AND zen_orders.agency_org_id = (SELECT org_id FROM public.zen_profiles WHERE id = auth.uid())
   )
 );
+
+-- GRANT: authenticated 역할에 UPDATE 기본 권한 부여 (기존 GRANT는 SELECT만 있었음 — CI/신규 배포 환경 대응)
+GRANT UPDATE ON public.zen_tracking_configs TO authenticated;
