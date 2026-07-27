@@ -176,21 +176,6 @@ export function UpsActualAdjustmentForm({
         </div>
       </div>
 
-      {/* 예상 청구액 상세 (Estimated Breakdown) */}
-      {reconciliation?.estimatedBreakdown && reconciliation.estimatedBreakdown.length > 0 && (
-        <ZenCard className="p-4 mb-4 bg-gray-50 dark:bg-zinc-900">
-          <div className="text-xs font-semibold text-gray-600 dark:text-zinc-400 mb-2">예상 청구액 상세 (Estimated Breakdown)</div>
-          <div className="space-y-1">
-            {reconciliation.estimatedBreakdown.map((item, i) => (
-              <div key={i} className="flex justify-between text-sm">
-                <span className="text-gray-600 dark:text-zinc-400">{getCostTypeLabel(item.costType)}</span>
-                <span className="font-mono">{item.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {item.currency}</span>
-              </div>
-            ))}
-          </div>
-        </ZenCard>
-      )}
-
       {/* Reconciliation Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <ZenCard className="p-4 bg-gray-50 dark:bg-zinc-900">
@@ -252,6 +237,7 @@ export function UpsActualAdjustmentForm({
         <table className="w-full text-left border-collapse text-sm">
           <thead>
             <tr className="bg-gray-50 dark:bg-zinc-900 border-b text-gray-700 dark:text-zinc-300">
+              <th className="p-3 w-20">구분</th>
               <th className="p-3 w-1/3">청구 유형 (Charge Type)</th>
               <th className="p-3 w-1/6">금액 (Amount)</th>
               <th className="p-3 w-1/12">통화</th>
@@ -260,8 +246,19 @@ export function UpsActualAdjustmentForm({
             </tr>
           </thead>
           <tbody>
+            {reconciliation?.estimatedBreakdown?.map((item, i) => (
+              <tr key={`est-${i}`} className="border-b bg-gray-50/50 dark:bg-zinc-900/50">
+                <td className="p-3"><ZenBadge className="bg-gray-200 text-gray-700 dark:bg-zinc-700 dark:text-zinc-300">예상</ZenBadge></td>
+                <td className="p-3 font-semibold">{getCostTypeLabel(item.costType)}</td>
+                <td className="p-3"><span className="font-mono text-right block">{item.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></td>
+                <td className="p-3">{item.currency}</td>
+                <td className="p-3 text-gray-400 text-xs">—</td>
+                {isEditable && <td className="p-3"></td>}
+              </tr>
+            ))}
             {charges.map((row, index) => (
               <tr key={index} className="border-b hover:bg-gray-50/50 dark:hover:bg-zinc-900/50">
+                <td className="p-3"><ZenBadge className="bg-primary/10 text-primary">추가</ZenBadge></td>
                 <td className="p-3">
                   {isEditable ? (
                     <>
