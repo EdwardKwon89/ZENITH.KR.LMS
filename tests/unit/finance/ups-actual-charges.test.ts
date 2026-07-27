@@ -145,4 +145,68 @@ describe('TASK-B-204: IN_TRANSIT 부가요금 등록', () => {
     expect(result).toHaveLength(1);
     expect(result[0].dest_country_code).toBe('KR');
   });
+
+  it('TC-B204-08: getUpsChargeReconciliation이 estimatedBreakdown을 반환한다', async () => {
+    mockValidateUser(USER_ROLES.ADMIN);
+    mockSupabase.from.mockImplementation((table: string) => {
+      if (table === 'zen_order_costs') return createChainableMock([
+        { cost_type: 'BASE_FREIGHT', unit_price: 100, quantity: 1, currency: 'USD' },
+        { cost_type: 'FUEL_SURCHARGE', unit_price: 30, quantity: 1, currency: 'USD' },
+        { cost_type: 'SURGE_FEE', unit_price: 20, quantity: 1, currency: 'USD' },
+      ]);
+      if (table === 'zen_ups_actual_charges') return createChainableMock([]);
+      if (table === 'zen_invoices') return createChainableMock(null);
+      return createChainableMock();
+    });
+
+    const { getUpsChargeReconciliation } = await import('@/app/actions/finance/ups-actual-charges');
+    const result = await getUpsChargeReconciliation('order-1');
+
+    expect(result.estimated).toBe(150);
+    expect(result.estimatedBreakdown).toHaveLength(3);
+    expect(result.estimatedBreakdown[0].costType).toBe('BASE_FREIGHT');
+    expect(result.estimatedBreakdown[0].amount).toBe(100);
+    expect(result.actual).toBe(150);
+    expect(result.variance).toBe(0);
+  });
+
+  it('TC-B204-09: getUpsChargeReconciliation에서 actual = estimated + additionalSum', async () => {
+    mockValidateUser(USER_ROLES.ADMIN);
+    mockSupabase.from.mockImplementation((table: string) => {
+      if (table === 'zen_order_costs') return createChainableMock([
+        { cost_type: 'BASE_FREIGHT', unit_price: 100, quantity: 1, currency: 'USD' },
+      ]);
+      if (table === 'zen_ups_actual_charges') return createChainableMock([
+        { charge_amount: 50 },
+        { charge_amount: 25 },
+      ]);
+      if (table === 'zen_invoices') return createChainableMock(null);
+      return createChainableMock();
+    });
+
+    const { getUpsChargeReconciliation } = await import('@/app/actions/finance/ups-actual-charges');
+    const result = await getUpsChargeReconciliation('order-1');
+
+    expect(result.estimated).toBe(100);
+    expect(result.actual).toBe(175);
+    expect(result.variance).toBe(75);
+  });
+
+  it('TC-B204-10: recordUpsActualCharges에서 adjustmentAmount = actualSum - estimatedSum 수식 유지', async () => {
+    mockValidateUser(USER_ROLES.ADMIN);
+    mockSupabase.from.mockImplementation((table: string) => {
+      if (table === 'zen_orders') return createChainableMock({ status: 'DELIVERED', transport_mode: 'UPS', shipper_id: 'shipper-1' });
+      if (table === 'zen_invoices') return createChainableMock(null);
+      if (table === 'zen_order_costs') return createChainableMock([
+        { cost_type: 'BASE_FREIGHT', unit_price: 100, quantity: 1, currency: 'USD' },
+      ]);
+      if (table === 'zen_ups_actual_charges') return createChainableMock(null, null);
+      return createChainableMock();
+    });
+
+    const result = await recordUpsActualCharges('order-1', [
+      { chargeType: 'ADDITIONAL', amount: 50, currency: 'USD' },
+    ]);
+    expect(result.success).toBe(true);
+  });
 });

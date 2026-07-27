@@ -76,9 +76,9 @@ export async function recordUpsActualCharges(
       return { success: false, error: `기존 실제 요금 삭제 실패: ${deleteError.message}` };
     }
 
-    let actualSum = 0;
+    let additionalSum = 0;
     const actualChargesToInsert = charges.map((c) => {
-      actualSum += c.amount;
+      additionalSum += c.amount;
       return {
         order_id: orderId,
         charge_type: c.chargeType,
@@ -115,6 +115,7 @@ export async function recordUpsActualCharges(
       return sum + (Number(cost.unit_price) * Number(cost.quantity || 1));
     }, 0);
 
+    const actualSum = estimatedSum + additionalSum;
     const adjustmentAmount = actualSum - estimatedSum;
 
     // 마감 후 조정: 신규 추가 인보이스 발행 경로 (TASK-194-C)
@@ -262,6 +263,12 @@ export async function getUpsChargeReconciliation(orderId: string) {
     return sum + (Number(cost.unit_price) * Number(cost.quantity || 1));
   }, 0);
 
+  const estimatedBreakdown = (estimatedCosts || []).map((cost) => ({
+    costType: cost.cost_type,
+    amount: Number(cost.unit_price) * Number(cost.quantity || 1),
+    currency: cost.currency,
+  }));
+
   // 2. 실제청구 합산
   const { data: actualCharges, error: actError } = await supabase
     .from('zen_ups_actual_charges')
@@ -270,9 +277,11 @@ export async function getUpsChargeReconciliation(orderId: string) {
 
   if (actError) throw new Error(`실제 청구 조회 실패: ${actError.message}`);
 
-  const actual = (actualCharges || []).reduce((sum, charge) => {
+  const additionalSum = (actualCharges || []).reduce((sum, charge) => {
     return sum + Number(charge.charge_amount);
   }, 0);
+
+  const actual = estimated + additionalSum;
 
   const variance = actual - estimated;
 
@@ -287,6 +296,7 @@ export async function getUpsChargeReconciliation(orderId: string) {
 
   return {
     estimated,
+    estimatedBreakdown,
     actual,
     variance,
     currency,
