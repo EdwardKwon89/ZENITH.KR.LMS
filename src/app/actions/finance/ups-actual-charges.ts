@@ -285,11 +285,10 @@ export async function getUpsChargeReconciliation(orderId: string) {
 
   const variance = actual - estimated;
 
-  // 3. 정산 마감 여부 확인
-  const { data: finalizedInvoice } = await supabase
+  // 3. 정산 마감 여부 확인 + 청구서 정보 조회
+  const { data: existingInvoice } = await supabase
     .from('zen_invoices')
-    .select('id')
-    .eq('is_finalized', true)
+    .select('id, invoice_no, created_at, is_finalized')
     .filter('metadata->>source_order_id', 'eq', orderId)
     .neq('status', 'CANCELED')
     .maybeSingle();
@@ -300,7 +299,9 @@ export async function getUpsChargeReconciliation(orderId: string) {
     actual,
     variance,
     currency,
-    isFinalized: !!finalizedInvoice,
+    isFinalized: !!existingInvoice?.is_finalized,
+    invoiceNo: existingInvoice?.invoice_no ?? null,
+    invoiceDate: existingInvoice?.created_at ?? null,
   };
 }
 

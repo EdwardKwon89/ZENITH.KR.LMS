@@ -17,8 +17,6 @@ interface ChargeRow {
   chargeType: string;
   amount: number;
   currency: string;
-  upsInvoiceNo: string;
-  upsInvoiceDate: string;
   notes: string;
 }
 
@@ -36,6 +34,8 @@ export function UpsActualAdjustmentForm({
     variance: number;
     currency: string;
     isFinalized: boolean;
+    invoiceNo: string | null;
+    invoiceDate: string | null;
   } | null>(null);
 
   const [charges, setCharges] = useState<ChargeRow[]>([]);
@@ -54,8 +54,6 @@ export function UpsActualAdjustmentForm({
             chargeType: c.charge_type,
             amount: Number(c.charge_amount),
             currency: c.currency,
-            upsInvoiceNo: c.ups_invoice_no || '',
-            upsInvoiceDate: c.ups_invoice_date || '',
             notes: c.notes || '',
           }))
         );
@@ -87,8 +85,6 @@ export function UpsActualAdjustmentForm({
         chargeType: '',
         amount: 0,
         currency: defaultCurrency,
-        upsInvoiceNo: '',
-        upsInvoiceDate: '',
         notes: '',
       },
     ]);
@@ -122,8 +118,6 @@ export function UpsActualAdjustmentForm({
         chargeType: c.chargeType.trim(),
         amount: c.amount,
         currency: c.currency,
-        upsInvoiceNo: c.upsInvoiceNo.trim() || undefined,
-        upsInvoiceDate: c.upsInvoiceDate || undefined,
         notes: c.notes.trim() || undefined,
       }));
 
@@ -213,6 +207,12 @@ export function UpsActualAdjustmentForm({
             {actualTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {currency}
           </div>
           <p className="text-[10px] text-gray-400 dark:text-zinc-500 mt-1">예상 청구액 + 아래 추가 등록된 부가요금의 합산액</p>
+          {reconciliation?.invoiceNo && (
+            <div className="mt-2 pt-2 border-t border-gray-200 dark:border-zinc-700 text-[11px] text-gray-500 dark:text-zinc-400 space-y-0.5">
+              <div>청구서 번호: <span className="font-mono">{reconciliation.invoiceNo}</span></div>
+              <div>청구 날짜: {new Date(reconciliation.invoiceDate!).toLocaleDateString('ko-KR')}</div>
+            </div>
+          )}
         </ZenCard>
 
         <ZenCard className={`p-4 ${
@@ -252,12 +252,10 @@ export function UpsActualAdjustmentForm({
         <table className="w-full text-left border-collapse text-sm">
           <thead>
             <tr className="bg-gray-50 dark:bg-zinc-900 border-b text-gray-700 dark:text-zinc-300">
-              <th className="p-3 w-1/4">청구 유형 (Charge Type)</th>
+              <th className="p-3 w-1/3">청구 유형 (Charge Type)</th>
               <th className="p-3 w-1/6">금액 (Amount)</th>
               <th className="p-3 w-1/12">통화</th>
-              <th className="p-3 w-1/6">청구서 번호</th>
-              <th className="p-3 w-1/6">청구 날짜</th>
-              <th className="p-3 w-1/4">메모</th>
+              <th className="p-3 w-1/3">메모</th>
               {isEditable && <th className="p-3 w-10"></th>}
             </tr>
           </thead>
@@ -323,31 +321,6 @@ export function UpsActualAdjustmentForm({
                     />
                   ) : (
                     <span>{row.currency}</span>
-                  )}
-                </td>
-                <td className="p-3">
-                  {isEditable ? (
-                    <ZenInput
-                      type="text"
-                      value={row.upsInvoiceNo}
-                      onChange={(e) => handleChangeRow(index, 'upsInvoiceNo', e.target.value)}
-                      placeholder="참고용 청구서번호"
-                      className="w-full"
-                    />
-                  ) : (
-                    <span>{row.upsInvoiceNo || '—'}</span>
-                  )}
-                </td>
-                <td className="p-3">
-                  {isEditable ? (
-                    <ZenInput
-                      type="date"
-                      value={row.upsInvoiceDate}
-                      onChange={(e) => handleChangeRow(index, 'upsInvoiceDate', e.target.value)}
-                      className="w-full"
-                    />
-                  ) : (
-                    <span>{row.upsInvoiceDate || '—'}</span>
                   )}
                 </td>
                 <td className="p-3">
