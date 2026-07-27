@@ -14,6 +14,7 @@
   --color-brand-900: #1e1b4b; /* Indigo-950 for Max Contrast */
 
   --color-accent: #f59e0b; /* Logistics Amber */
+  --color-primary: var(--color-brand-600);
   
   /* Layout Variables for Hybrid Sidebar */
   --sidebar-width: 280px;
