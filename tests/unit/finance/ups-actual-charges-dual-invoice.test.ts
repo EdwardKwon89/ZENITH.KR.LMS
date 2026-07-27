@@ -162,4 +162,28 @@ describe('TASK-B-236: recordUpsActualCharges 두 인보이스 동시 갱신 (Iss
       ORDER_ID, 20, 'USD', 'admin-1', INVOICE_AGENCY
     );
   });
+
+  // TC-4: 마감 후 조정 실패 시 실패 전파 확인
+  it('TC-919-04: 마감 후 조정 실패 → success:false + error 전파', async () => {
+    const finalizedShipper = { ...SHIPPER_INVOICE, is_finalized: true };
+    const finalizedAgency = { ...AGENCY_INVOICE, is_finalized: true };
+
+    mockSupabase.from.mockImplementation((table: string) => {
+      if (table === 'zen_orders') return createChainableMock(UPS_ORDER);
+      if (table === 'zen_invoices') return createChainableMock([finalizedShipper, finalizedAgency]);
+      if (table === 'zen_ups_actual_charges') return createChainableMock(null);
+      if (table === 'zen_order_costs') return createChainableMock(ORDER_COSTS);
+      return createChainableMock(null);
+    });
+
+    const { createPostFinalizationAdjustment } = await import('@/app/actions/finance/settlement');
+    (createPostFinalizationAdjustment as any)
+      .mockResolvedValueOnce({ success: true, adjustmentAmount: 10 })
+      .mockResolvedValueOnce({ success: false, error: '추가 인보이스 생성 실패' });
+
+    const result = await recordUpsActualCharges(ORDER_ID, CHARGES);
+
+    expect(result.success).toBe(false);
+    expect(result.error).toBe('추가 인보이스 생성 실패');
+  });
 });

@@ -121,8 +121,14 @@ export async function recordUpsActualCharges(
     const finalizedInvoices = (existingInvoices || []).filter((inv: any) => inv.is_finalized);
     if (finalizedInvoices.length > 0) {
       const { createPostFinalizationAdjustment } = await import('@/app/actions/finance/settlement');
-      for (const inv of finalizedInvoices) {
-        await createPostFinalizationAdjustment(orderId, adjustmentAmount, charges[0]?.currency || 'USD', user.id, inv.id);
+      const results = await Promise.all(
+        finalizedInvoices.map((inv: any) =>
+          createPostFinalizationAdjustment(orderId, adjustmentAmount, charges[0]?.currency || 'USD', user.id, inv.id)
+        )
+      );
+      const failed = results.find((r: any) => !r.success);
+      if (failed) {
+        return { success: false, error: failed.error || '마감 후 조정 실패' };
       }
       return { success: true, adjustmentAmount };
     }
