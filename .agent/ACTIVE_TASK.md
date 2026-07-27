@@ -15,6 +15,8 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
+| [#920](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/920) | [feat] (4/4) /finance/daily-billing 역할별 뷰 재설계 (전제: #917, #918, #919) | b | p1 | - | 미배정 | 2026-07-27 |
+| [#919](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/919) | [feat] (3/4) recordUpsActualCharges() 두 인보이스 동시 갱신 (전제: #917, #918) | b | p1 | - | 미배정 | 2026-07-27 |
 | [#918](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/918) | [feat] (2/4) admin→agency 인보이스 신규 생성 로직 (전제: #917) | b | p1 | - | 미배정 | 2026-07-27 |
 | [#917](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/917) | [feat] (1/4) 2단계 인보이스 스키마 마이그레이션 — zen_invoices billed_org_id/invoice_tier | b | p1 | - | 미배정 | 2026-07-27 |
 | [#916](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/916) | [design] admin-agency-shipper 2단계 인보이스 체계 도입 — 설계 및 작업 분할 (부모 이슈) | b | p1 | - | 미배정 | 2026-07-27 |
