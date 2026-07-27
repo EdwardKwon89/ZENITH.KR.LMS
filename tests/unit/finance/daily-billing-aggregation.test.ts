@@ -540,6 +540,9 @@ describe('화주별 일별/주별/월별 청구 집계 및 최종 운임 확정 
 
       mockSupabase.from.mockImplementation((table: string) => {
         if (table === 'zen_agency_shippers') return createChainableMock([{ shipper_org_id: 'shipper-allowed' }]);
+        if (table === 'zen_orders') return createChainableMock([
+          { id: 'o1', order_no: 'ZEN-001', status: 'DELIVERED', transport_mode: 'UPS', recipient_country_code: 'KR', created_at: '2026-07-27T10:00:00Z', shipper_id: 'shipper-other', shipper: { name: 'OTHER' } },
+        ]);
         return createChainableMock([]);
       });
 
