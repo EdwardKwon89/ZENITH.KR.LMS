@@ -199,7 +199,7 @@ describe('TASK-B-167: cancelUpsRegistration', () => {
     expect(result.error).toContain('라벨 레코드가 없습니다');
   });
 
-  it('removeorder 실패 시에도 로깅 후 계속 진행한다', async () => {
+  it('removeorder 실패 시 즉시 failure를 반환하고 내부 삭제를 실행하지 않는다', async () => {
     const { cancelUpsRegistration } = await import('@/app/actions/operations/ups-labels');
     vi.mocked(removeorder).mockResolvedValue({ success: 0, message: 'API error' });
     const supabase = makeSupabase({
@@ -209,7 +209,8 @@ describe('TASK-B-167: cancelUpsRegistration', () => {
 
     const result = await cancelUpsRegistration(ORDER_ID);
 
-    expect(result.success).toBe(true);
+    expect(result.success).toBe(false);
+    expect(result.error).toContain('UPS 라벨 회수 실패(SHXK)');
     expect(removeorder).toHaveBeenCalled();
   });
 

@@ -58,6 +58,7 @@
     "finance_revenue": "수입 현황",
     "finance_costs": "비용 현황",
     "finance_transport_costs": "운송원가 관리",
+    "finance_daily_billing": "화주별 일별 청구",
     "finance_documents": "무역서류 관리",
     "settlement": "정산 관리",
     "voc": "VOC 관리",
@@ -587,7 +588,9 @@
     "empty_history": "오늘 입고 처리된 내역이 없습니다.",
     "cancel_btn": "입고 취소",
     "cancel_success": "입고가 취소되고 이전 상태로 복구되었습니다.",
-    "cancel_confirm": "이 오더의 입고를 취소하시겠습니까?"
+    "cancel_confirm": "이 오더의 입고를 취소하시겠습니까?",
+    "weight_volume_edit": "부피/중량 실측 입력",
+    "weight_volume_desc": "입고 시 실측한 값을 입력하세요. 변경 시 예상 운임이 재계산됩니다."
   },
   "WarehousePickup": {
     "title": "오더 픽업",
@@ -690,6 +693,12 @@
     "empty_history": "오늘 UPS 접수된 내역이 없습니다.",
     "partial_success": "UPS 등록 완료: {success}건 성공, {fail}건 실패"
   },
+  "ShipperInvoices": {
+    "title": "청구서 조회",
+    "search_placeholder": "청구서 번호로 검색",
+    "search_btn": "조회",
+    "empty": "청구서가 없습니다."
+  },
   "WarehouseDeparture": {
     "title": "출고확정",
     "select_orders": "출고확정할 오더 선택",
@@ -701,7 +710,13 @@
     "partial_success": "출고확정 완료: {success}건 성공, {fail}건 실패",
     "error_none_selected": "출고확정할 오더를 선택해주세요.",
     "today_history": "오늘의 출고확정 이력",
-    "empty_history": "오늘 처리된 출고확정 이력이 없습니다."
+    "empty_history": "오늘 처리된 출고확정 이력이 없습니다.",
+    "undo_btn": "출고확정취소",
+    "undo_title": "출고확정취소",
+    "undo_desc": "이 오더의 출고확정을 취소하고 RELEASED 상태로 되돌리시겠습니까?",
+    "undo_confirm": "취소 확정",
+    "undo_success": "출고확정취소가 완료되었습니다.",
+    "undo_failed": "출고확정취소에 실패했습니다."
   },
   "ShippingLabel": {
     "title": "운송장",

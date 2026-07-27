@@ -463,7 +463,8 @@ export async function cancelUpsRegistration(
     const referenceNo = labels[0].reference_no;
     const removeRes = await removeorder(referenceNo.replace(/-/g, ''));
     if (removeRes.success === 0) {
-      logger.warn(`removeorder API warning for order ${orderId}: ${removeRes.message}`);
+      logger.error(`removeorder failed for order ${orderId}: ${removeRes.message}`);
+      return { success: false, error: `UPS 라벨 회수 실패(SHXK): ${removeRes.message}` };
     }
 
     const labelIds = labels.map((l) => l.id);
@@ -500,6 +501,14 @@ export async function cancelUpsRegistration(
     if (deleteErr) {
       logger.error('zen_ups_labels delete error:', deleteErr);
       return { success: false, error: `라벨 레코드 삭제 실패: ${deleteErr.message}` };
+    }
+
+    const { error: trackingResetErr } = await supabase
+      .from('zen_tracking_configs')
+      .update({ tracking_no: null })
+      .eq('order_id', orderId);
+    if (trackingResetErr) {
+      logger.warn(`zen_tracking_configs tracking_no reset warning for order ${orderId}: ${trackingResetErr.message}`);
     }
 
     revalidatePath("/(dashboard)/warehouse/outbound", "page");
@@ -602,7 +611,8 @@ export async function voidUpsLabel(
 
     const removeRes = await removeorder(label.reference_no.replace(/-/g, ''));
     if (removeRes.success === 0) {
-      logger.warn(`removeorder API warning for order ${orderId}: ${removeRes.message}`);
+      logger.error(`removeorder failed for order ${orderId}: ${removeRes.message}`);
+      return { success: false, error: `UPS 라벨 회수 실패(SHXK): ${removeRes.message}` };
     }
 
     const updateErr = await markLabelVoidedByOrder(supabase, orderId);
@@ -610,6 +620,15 @@ export async function voidUpsLabel(
 
     const unlockErr = await unlockAllPackagesIntlRef(supabase, orderId);
     if (unlockErr) return { success: false, error: `intl_ref 복원 실패: ${unlockErr}` };
+
+    const { error: trackingResetErr } = await supabase
+      .from('zen_tracking_configs')
+      .update({ tracking_no: null })
+      .eq('order_id', orderId);
+    if (trackingResetErr) {
+      logger.warn(`zen_tracking_configs tracking_no reset warning for order ${orderId}: ${trackingResetErr.message}`);
+    }
+
     revalidatePath("/(dashboard)/warehouse/outbound", "page");
 
     return { success: true };

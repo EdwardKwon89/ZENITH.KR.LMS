@@ -13,6 +13,7 @@ export {
   getHeldPreviousStatus,
   getOrderByBarcodeOrNo,
   confirmInbound,
+  saveInboundMeasurements,
   getTodayInboundHistory,
 } from './orders';
 
@@ -68,4 +69,5 @@ export {
   undoOutbound,
   getReleasedOrders,
   confirmDeparture,
+  undoDeparture,
 } from './warehouse';

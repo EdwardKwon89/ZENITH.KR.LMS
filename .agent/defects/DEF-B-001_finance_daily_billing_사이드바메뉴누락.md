@@ -29,3 +29,14 @@
 - `src/components/layout/NaviSidebar.tsx` (114-124행)
 - `messages/ko.json`, `messages/en.json`, `messages/ja.json`, `messages/zh.json`
 - 참고(정상 동작 페이지, 수정 불필요): `src/app/[locale]/(dashboard)/finance/daily-billing/page.tsx`
+
+## 작업 결과
+
+| 항목 | 내용 |
+|:-----|:------|
+| **담당자** | Dave |
+| **완료일** | 2026-07-24 |
+| **커밋** | `c111b16e` (코드) + `4a91d4a1` (문서) |
+| **변경 파일** | `NaviSidebar.tsx` + messages 4개 언어 |
+| **회귀 테스트** | 810/810 PASS (신규 테스트 없음, R-09 위반 보고됨) |
+| **PR** | [#817](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/817) |

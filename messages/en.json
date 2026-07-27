@@ -56,6 +56,7 @@
     "finance_revenue": "Revenue Status",
     "finance_costs": "Cost Status",
     "finance_transport_costs": "Transport Costs",
+    "finance_daily_billing": "Daily Billing by Shipper",
     "finance_documents": "Trade Documents",
     "settlement": "Settlement",
     "voc": "VOC Management",
@@ -592,7 +593,9 @@
     "empty_history": "No inbound records processed today.",
     "cancel_btn": "Cancel Inbound",
     "cancel_success": "Inbound cancelled and restored to previous status.",
-    "cancel_confirm": "Are you sure you want to cancel this inbound?"
+    "cancel_confirm": "Are you sure you want to cancel this inbound?",
+    "weight_volume_edit": "Volume/Weight Measurement",
+    "weight_volume_desc": "Enter the measured values during inbound. Expected freight will be recalculated when changed."
   },
   "WarehousePickup": {
     "title": "Order Pickup",
@@ -695,6 +698,12 @@
     "empty_history": "No UPS receiving records processed today.",
     "partial_success": "UPS registration complete: {success} succeeded, {fail} failed"
   },
+  "ShipperInvoices": {
+    "title": "Invoice View",
+    "search_placeholder": "Search by invoice number",
+    "search_btn": "Search",
+    "empty": "No invoices found."
+  },
   "WarehouseDeparture": {
     "title": "Departure Confirm",
     "select_orders": "Select orders for departure confirmation",
@@ -706,7 +715,13 @@
     "partial_success": "Departure completed: {success} success, {fail} failed",
     "error_none_selected": "Please select orders for departure confirmation.",
     "today_history": "Today's Departure History",
-    "empty_history": "No departure history processed today."
+    "empty_history": "No departure history processed today.",
+    "undo_btn": "Undo Departure",
+    "undo_title": "Undo Departure Confirmation",
+    "undo_desc": "Cancel departure confirmation and revert to RELEASED status?",
+    "undo_confirm": "Confirm Undo",
+    "undo_success": "Departure confirmation undone successfully.",
+    "undo_failed": "Failed to undo departure confirmation."
   },
   "ShippingLabel": {
     "title": "Shipping Label",

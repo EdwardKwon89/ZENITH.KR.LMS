@@ -34,6 +34,7 @@
     "finance_revenue": "収入状況",
     "finance_costs": "コスト状況",
     "finance_transport_costs": "運送原価管理",
+    "finance_daily_billing": "荷主別日次請求",
     "finance_documents": "貿易書類管理",
     "settlement": "精算管理",
     "voc": "VOC管理",
@@ -180,6 +181,12 @@
     "empty_history": "本日のUPS受取履歴はありません。",
     "partial_success": "UPS登録完了: {success}件成功、{fail}件失敗"
   },
+  "ShipperInvoices": {
+    "title": "請求書照会",
+    "search_placeholder": "請求書番号で検索",
+    "search_btn": "検索",
+    "empty": "請求書がありません。"
+  },
   "WarehouseDeparture": {
     "title": "出荷確定",
     "select_orders": "出荷確定するオーダを選択",
@@ -191,7 +198,13 @@
     "partial_success": "出荷確定完了: {success}件成功、{fail}件失敗",
     "error_none_selected": "出荷確定するオーダを選択してください。",
     "today_history": "本日の出荷確定履歴",
-    "empty_history": "本日処理された出荷確定履歴はありません。"
+    "empty_history": "本日処理された出荷確定履歴はありません。",
+    "undo_btn": "出荷確定取消",
+    "undo_title": "出荷確定取消",
+    "undo_desc": "このオーダの出荷確定を取消してRELEASED状態に戻しますか？",
+    "undo_confirm": "取消確定",
+    "undo_success": "出荷確定取消が完了しました。",
+    "undo_failed": "出荷確定取消に失敗しました。"
   },
   "ShippingLabel": {
     "title": "配送ラベル",

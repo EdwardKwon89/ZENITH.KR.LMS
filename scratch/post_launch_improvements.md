@@ -1683,7 +1683,7 @@
 - **예상 공수**: 0.5~1 MD (에러 전파 수정은 작으나, gettrack 검증 추가 시 커짐)
 - **우선순위**: High — DEF-125 배송정보 재생성 설계가 이 기능에 의존하므로, 그 설계를 실제 구현하기 전에 반드시 해결 필요
 - **담당**: **Team B** — `git log`로 확인 결과 `ups-labels.ts`/`shxk/order.ts` 전체 커밋 이력(27건)이 Team B(Baker/Dave/Mike)이며, 이 취소 로직 주변을 이미 다룬 TASK-B-182(Issue #695)도 Baker 작업. Team A 파일 소유권 범위 밖으로 판단(Edward 지적, 2026-07-24) — GitHub Issue #788로 Team B에 정식 이관
-- **상태**: ⬜ 미착수 — Issue #788 등록 완료, Team B 배정 대기 (2026-07-24)
+- **상태**: ⬜ 배정 완료 — TASK-B-211(Baker), Jaison이 SHXK 5개 함수 전체 실패처리 조사 완료(removeorder 2곳만 결함, 나머지는 정상) 후 착수 지시 (2026-07-26)
 
 ---
 

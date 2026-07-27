@@ -32,6 +32,7 @@
     "logistics_departure": "出库确认",
     "inventory": "库存管理",
     "finance_group": "财务结算",
+    "finance_daily_billing": "按货主每日结算",
     "settlement": "结算管理",
     "voc": "VOC管理",
     "support_group": "客户支持中心",
@@ -193,6 +194,12 @@
     "empty_history": "今日没有UPS收货记录。",
     "partial_success": "UPS注册完成：{success}件成功，{fail}件失败"
   },
+  "ShipperInvoices": {
+    "title": "账单查询",
+    "search_placeholder": "按账单号搜索",
+    "search_btn": "查询",
+    "empty": "没有账单。"
+  },
   "WarehouseDeparture": {
     "title": "出库确认",
     "select_orders": "选择要确认出库的订单",
@@ -204,7 +211,13 @@
     "partial_success": "出库确认完成：{success}件成功，{fail}件失败",
     "error_none_selected": "请选择要确认出库的订单。",
     "today_history": "今日出库确认历史",
-    "empty_history": "今日没有已处理的出库确认记录。"
+    "empty_history": "今日没有已处理的出库确认记录。",
+    "undo_btn": "取消出库确认",
+    "undo_title": "取消出库确认",
+    "undo_desc": "取消此订单的出库确认并恢复到RELEASED状态？",
+    "undo_confirm": "确认取消",
+    "undo_success": "出库确认取消完成。",
+    "undo_failed": "出库确认取消失败。"
   },
   "ShippingLabel": {
     "title": "运单",

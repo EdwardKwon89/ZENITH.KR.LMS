@@ -12,6 +12,7 @@ import {
 import {
   getReleasedOrders,
   confirmDeparture,
+  undoDeparture,
   getTodayDepartureHistory,
 } from "@/app/actions/operations";
 import { OrderStatus, ORDER_STATUS_META } from "@/types/orders";
@@ -36,6 +37,8 @@ export default function DepartureConfirmForm({ locale }: { locale: string }) {
   const [submitLoading, setSubmitLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [history, setHistory] = useState<any[]>([]);
+  const [undoTarget, setUndoTarget] = useState<string | null>(null);
+  const [undoLoading, setUndoLoading] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -111,6 +114,24 @@ export default function DepartureConfirmForm({ locale }: { locale: string }) {
       toast.error(err.message || "출고확정 처리 실패");
     } finally {
       setSubmitLoading(false);
+    }
+  };
+
+  const handleUndoDeparture = async (orderId: string) => {
+    setUndoLoading(true);
+    try {
+      const res = await undoDeparture(orderId);
+      if (res.success) {
+        toast.success(t("undo_success"));
+        setUndoTarget(null);
+        await fetchData();
+      } else {
+        toast.error(res.error || t("undo_failed"));
+      }
+    } catch (err: any) {
+      toast.error(err.message || t("undo_failed"));
+    } finally {
+      setUndoLoading(false);
     }
   };
 
@@ -318,13 +339,19 @@ export default function DepartureConfirmForm({ locale }: { locale: string }) {
                         {formatKstTime(item.created_at)}
                       </span>
                     </div>
-                    {latestLabel && (
-                      <div className="flex items-center gap-2 mt-2 flex-wrap">
+                    <div className="flex items-center gap-2 mt-2 flex-wrap">
+                      {latestLabel && (
                         <ZenBadge className="bg-green-50 text-green-700 border-green-200 text-[10px]">
                           UPS · {latestLabel.tracking_number || latestLabel.reference_no || "-"}
                         </ZenBadge>
-                      </div>
-                    )}
+                      )}
+                      <button
+                        onClick={() => setUndoTarget(order.id)}
+                        className="inline-flex items-center gap-1 px-2 py-1 text-[10px] font-semibold text-orange-700 bg-orange-50 border border-orange-200 rounded-lg hover:bg-orange-100 transition-colors"
+                      >
+                        {t("undo_btn")}
+                      </button>
+                    </div>
                   </div>
                 );
               })
@@ -337,6 +364,35 @@ export default function DepartureConfirmForm({ locale }: { locale: string }) {
           </div>
         </ZenCard>
       </div>
+
+      {undoTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-bold text-slate-900 mb-2">
+              {t("undo_title")}
+            </h3>
+            <p className="text-sm text-slate-600 mb-6">
+              {t("undo_desc")}
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setUndoTarget(null)}
+                className="px-5 py-2.5 text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all"
+                disabled={undoLoading}
+              >
+                취소
+              </button>
+              <button
+                onClick={() => handleUndoDeparture(undoTarget)}
+                disabled={undoLoading}
+                className="px-5 py-2.5 text-sm font-semibold text-white bg-orange-600 hover:bg-orange-700 rounded-xl transition-all disabled:opacity-50"
+              >
+                {undoLoading ? "처리 중..." : t("undo_confirm")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
