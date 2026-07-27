@@ -6,7 +6,7 @@
 | **담당** | Dave (Team B) |
 | **생성일** | 2026-07-27 |
 | **우선순위** | P2 |
-| **상태** | ⬜ |
+| **상태** | 🔔 |
 
 ## 개요
 
@@ -66,8 +66,32 @@ ON CONFLICT (role_code, path) DO NOTHING;
 
 - Dave: `.agent/VIOLATION_TRACKER.md` 참조 후 착수. i18n 관련 작업(NaviSidebar 등)은 4개 언어(ko/en/zh/ja) 누락 이력이 과거 있었음 — 단, 이번 Task는 명시적으로 zh.json은 건드리지 말라고 지시했으니 ko/en/ja 3개만 정확히 챙길 것.
 
+## [작업 결과]
+
+| 항목 | 내용 |
+|:-----|:------|
+| **담당 실행자** | D_Kai (Dave 대리) |
+| **커밋 해시** | `de603e60` |
+| **변경 파일** | `supabase/migrations/20260727120000_defb017_ups_actual_charges_rbac.sql` · `NaviSidebar.tsx` · `proxy.ts` · `messages/{ko,en,ja}.json` |
+| **테스트 결과** | `vitest run` — 134 files · 886 tests **ALL PASS** |
+| **빌드 결과** | `npm run build` — **SUCCESS** |
+
+### 발견: proxy.ts 화이트리스트 추가 필요
+조사 과정에서 `/admin/ups-actual-charges`가 `proxy.ts`의 `isAllowedPath` 화이트리스트에 없어 MANAGER/AGENCY가 미들웨어에서 차단되는 현상을 발견. 함께 수정.
+
+### 체크리스트 완료 현황
+
+- [x] 브랜치 생성
+- [x] 마이그레이션 파일 작성 (ON CONFLICT DO NOTHING)
+- [x] `NaviSidebar.tsx` 메뉴 항목 추가
+- [x] i18n 3개 파일(ko/en/ja) 키 추가
+- [x] `proxy.ts` 화이트리스트에 `/admin/ups-actual-charges` 추가
+- [x] 회귀 테스트 886/886 ALL PASS
+- [x] `npm run build` — SUCCESS
+- [x] behavioral 회귀 테스트 추가 — TC-P7-MGR-01~03(MANAGER checkPermission), TC-P7-AGENCY-10(AGENCY checkPermission) — 4건
+- [x] R-10: ADMIN/MANAGER/AGENCY 3개 계정 사이드바(정산/재무 확장) + 페이지 진입 확인 스크린샷 (AGENCY 비밀번호: `Password1234` — GoTrue 정책으로 대문자 P 필요)
+
 ## [발견 이슈]
 
-_(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
-
-없음
+- `agency@zenith.kr` 로컬 비밀번호는 `Password1234`(대문자 P) — GoTrue 정책으로 재설정됨
+- `proxy.ts` 화이트리스트 누락을 발견해 함께 수정 (스펙 외 추가 조치사항)
