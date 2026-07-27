@@ -162,12 +162,13 @@ describe('TASK-B-204: IN_TRANSIT 부가요금 등록', () => {
     const { getUpsChargeReconciliation } = await import('@/app/actions/finance/ups-actual-charges');
     const result = await getUpsChargeReconciliation('order-1');
 
-    expect(result.estimated).toBe(150);
-    expect(result.estimatedBreakdown).toHaveLength(3);
-    expect(result.estimatedBreakdown[0].costType).toBe('BASE_FREIGHT');
-    expect(result.estimatedBreakdown[0].amount).toBe(100);
-    expect(result.actual).toBe(150);
-    expect(result.variance).toBe(0);
+    expect(result).not.toBeNull();
+    expect(result!.estimated).toBe(150);
+    expect(result!.estimatedBreakdown).toHaveLength(3);
+    expect(result!.estimatedBreakdown[0].costType).toBe('BASE_FREIGHT');
+    expect(result!.estimatedBreakdown[0].amount).toBe(100);
+    expect(result!.actual).toBe(150);
+    expect(result!.variance).toBe(0);
   });
 
   it('TC-B204-09: getUpsChargeReconciliation에서 actual = estimated + additionalSum', async () => {
@@ -187,9 +188,10 @@ describe('TASK-B-204: IN_TRANSIT 부가요금 등록', () => {
     const { getUpsChargeReconciliation } = await import('@/app/actions/finance/ups-actual-charges');
     const result = await getUpsChargeReconciliation('order-1');
 
-    expect(result.estimated).toBe(100);
-    expect(result.actual).toBe(175);
-    expect(result.variance).toBe(75);
+    expect(result).not.toBeNull();
+    expect(result!.estimated).toBe(100);
+    expect(result!.actual).toBe(175);
+    expect(result!.variance).toBe(75);
   });
 
   it('TC-B204-10: recordUpsActualCharges에서 adjustmentAmount = actualSum - estimatedSum 수식 유지', async () => {
@@ -208,5 +210,6 @@ describe('TASK-B-204: IN_TRANSIT 부가요금 등록', () => {
       { chargeType: 'ADDITIONAL', amount: 50, currency: 'USD' },
     ]);
     expect(result.success).toBe(true);
+    expect(result.adjustmentAmount).toBe(50);
   });
 });
