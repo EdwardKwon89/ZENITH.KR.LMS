@@ -15,6 +15,7 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
+| [#918](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/918) | [feat] (2/4) admin→agency 인보이스 신규 생성 로직 (전제: #917) | b | p1 | - | 미배정 | 2026-07-27 |
 | [#917](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/917) | [feat] (1/4) 2단계 인보이스 스키마 마이그레이션 — zen_invoices billed_org_id/invoice_tier | b | p1 | - | 미배정 | 2026-07-27 |
 | [#916](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/916) | [design] admin-agency-shipper 2단계 인보이스 체계 도입 — 설계 및 작업 분할 (부모 이슈) | b | p1 | - | 미배정 | 2026-07-27 |
 | [#913](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/913) | [fix] /finance/daily-billing — AGENCY 앱 레벨 필터 보강 + 일괄마감 사유입력 UI 모달 전환 | b | p3 | review | 미배정 | 2026-07-27 |
