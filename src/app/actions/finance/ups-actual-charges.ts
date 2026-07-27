@@ -310,7 +310,7 @@ export async function searchDeliveredUpsOrders(query: string) {
       status,
       transport_mode,
       shipper_id,
-      recipient_country_code,
+      dest_country_code:recipient_country_code,
       created_at,
       tracking_config:zen_tracking_configs(tracking_no)
     `)
@@ -355,7 +355,7 @@ export async function searchDeliveredUpsOrders(query: string) {
           status,
           transport_mode,
           shipper_id,
-          recipient_country_code,
+          dest_country_code:recipient_country_code,
           created_at,
           tracking_config:zen_tracking_configs(tracking_no)
         `)
