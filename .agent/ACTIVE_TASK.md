@@ -15,6 +15,7 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
+| [#912](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/912) | [fix] /finance/daily-billing 통화 혼재로 청구액 오류(KRW를 USD로 오표시 후 환율 이중 적용) | b | p1 | - | 미배정 | 2026-07-27 |
 | [#895](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/895) | [fix] DEF-130 — SNTL(SUB_ADMIN) 역할이 UPS 기준요금(zen_ups_base_rates) 조회 불가 | a | p1 | - | 미배정 | 2026-07-27 |
 | [#894](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/894) | [fix] DEF-129 — Agency 정산 조회 전체가 존재하지 않는 컬럼(dest_country_code) 참조로 항상 실패 | a | p1 | - | 미배정 | 2026-07-27 |
 | [#888](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/888) | [chore] 시드 데이터 보완 — AGENCY RLS/입고재계산/volumetric_divisor/트래킹/화주인보이스 검증용 데이터 누락 | a | p2 | - | 미배정 | 2026-07-27 |
