@@ -47,6 +47,12 @@ export default function ShipperDailyBillingClient({
   const [isPending, startTransition] = useTransition();
   const [finalizingGroupKey, setFinalizingGroupKey] = useState<string | null>(null);
 
+  const [finalizeModal, setFinalizeModal] = useState<{
+    open: boolean;
+    group: ShipperDailyBillingGroup | null;
+    reason: string;
+  }>({ open: false, group: null, reason: '청구 집계 최종 운임 마감' });
+
   // Fetch summary from server action with current filters
   const fetchSummary = (targetPeriodType?: 'daily' | 'weekly' | 'monthly', sDate?: string, eDate?: string, sFilter?: string) => {
     const targetType = targetPeriodType || periodType;
@@ -129,16 +135,16 @@ export default function ShipperDailyBillingClient({
       toast.error('마감할 인보이스가 없습니다.');
       return;
     }
+    setFinalizeModal({ open: true, group, reason: '청구 집계 최종 운임 마감' });
+  };
 
-    const reason = window.prompt(
-      `[${group.shipperName} / ${group.date}] 총 ${group.invoiceIds.length}건의 인보이스를 최종 정산 마감 처리하시겠습니까?\n\nAdmin 예외 마감 사유를 입력하세요 (선택 사항):`,
-      '청구 집계 최종 운임 마감'
-    );
-
-    if (reason === null) return;
+  const handleConfirmFinalize = async () => {
+    const { group, reason } = finalizeModal;
+    if (!group) return;
 
     const key = `${group.shipperId}_${group.date}`;
     setFinalizingGroupKey(key);
+    setFinalizeModal({ open: false, group: null, reason: '청구 집계 최종 운임 마감' });
 
     startTransition(async () => {
       const res = await finalizeDailyShipperInvoices(group.invoiceIds, reason);
@@ -507,6 +513,46 @@ export default function ShipperDailyBillingClient({
           </div>
         )}
       </div>
+
+      {/* Finalize Confirmation Modal */}
+      {finalizeModal.open && finalizeModal.group && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-white dark:bg-zinc-950 rounded-2xl border border-slate-200 dark:border-zinc-800 shadow-xl p-6 w-full max-w-md mx-4">
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
+              일괄 마감 확인
+            </h3>
+            <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+              [{finalizeModal.group.shipperName} / {finalizeModal.group.date}] 총{' '}
+              {finalizeModal.group.invoiceIds.length}건의 인보이스를 최종 정산 마감
+              처리하시겠습니까?
+            </p>
+            <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">
+              마감 사유 (선택)
+            </label>
+            <input
+              type="text"
+              value={finalizeModal.reason}
+              onChange={(e) => setFinalizeModal((prev) => ({ ...prev, reason: e.target.value }))}
+              className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-zinc-700 rounded-lg bg-slate-50 dark:bg-zinc-900 text-slate-900 dark:text-white mb-4"
+              placeholder="마감 사유를 입력하세요"
+            />
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setFinalizeModal({ open: false, group: null, reason: '청구 집계 최종 운임 마감' })}
+                className="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-lg transition-colors"
+              >
+                취소
+              </button>
+              <button
+                onClick={handleConfirmFinalize}
+                className="px-4 py-2 text-sm font-medium text-white bg-amber-500 hover:bg-amber-600 rounded-lg transition-colors"
+              >
+                마감 처리
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -133,6 +133,19 @@ export async function getShipperDailyBillingSummary(params?: {
     if (params?.shipperId) {
       ordersQuery = ordersQuery.eq('shipper_id', params.shipperId);
     }
+    if (profile.role === USER_ROLES.AGENCY) {
+      const { data: links } = await supabase
+        .from('zen_agency_shippers')
+        .select('shipper_org_id')
+        .eq('agency_org_id', profile.org_id)
+        .eq('is_active', true);
+      const shipperIds = (links || []).map((l: any) => l.shipper_org_id);
+      if (shipperIds.length > 0) {
+        ordersQuery = ordersQuery.in('shipper_id', shipperIds);
+      } else {
+        return { success: true, groups: [], exchangeRate };
+      }
+    }
     if (params?.startDate) {
       ordersQuery = ordersQuery.gte('created_at', `${params.startDate}T00:00:00Z`);
     }
@@ -289,8 +302,20 @@ export async function getShipperDailyOrdersDetails(
   error?: string;
 }> {
   try {
-    const { supabase } = await validateUserAction();
+    const { supabase, profile } = await validateUserAction();
     const rate = exchangeRate || await getNumericParam('EXCHANGE_RATE_USD_KRW', 1350);
+
+    if (profile.role === USER_ROLES.AGENCY) {
+      const { data: links } = await supabase
+        .from('zen_agency_shippers')
+        .select('shipper_org_id')
+        .eq('agency_org_id', profile.org_id)
+        .eq('is_active', true);
+      const allowedIds = (links || []).map((l: any) => l.shipper_org_id);
+      if (!allowedIds.includes(shipperId)) {
+        return { success: true, orders: [] };
+      }
+    }
 
     let ordersQuery = supabase
       .from('zen_orders')
