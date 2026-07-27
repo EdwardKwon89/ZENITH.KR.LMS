@@ -98,8 +98,8 @@ export default function ShipperDailyBillingClient({
 
   // Calculate totals
   const totalOrders = filteredGroups.reduce((sum, g) => sum + g.orderCount, 0);
-  const totalUsd = filteredGroups.reduce((sum, g) => sum + g.totalBillingAmountUsd, 0);
-  const totalKrw = Math.round(totalUsd * exchangeRate);
+  const totalKrw = filteredGroups.reduce((sum, g) => sum + g.totalBillingAmountKrw, 0);
+  const totalUsd = Math.round(totalKrw / exchangeRate * 100) / 100;
   const totalFinalized = filteredGroups.reduce((sum, g) => sum + g.finalizedCount, 0);
   const totalUnfinalized = filteredGroups.reduce((sum, g) => sum + g.unfinalizedCount, 0);
 
@@ -268,13 +268,13 @@ export default function ShipperDailyBillingClient({
         </div>
 
         <div className="bg-gradient-to-br from-amber-950 via-zinc-900 to-slate-900 text-white p-5 rounded-2xl border border-amber-500/20 shadow-md">
-          <span className="text-xs text-amber-400 font-semibold block mb-1">총 청구 집계액 (USD)</span>
-          <span className="text-2xl font-black font-mono text-amber-300">${totalUsd.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+          <span className="text-xs text-amber-400 font-semibold block mb-1">총 청구 집계액 (KRW)</span>
+          <span className="text-2xl font-black font-mono text-amber-300">₩{totalKrw.toLocaleString()}</span>
         </div>
 
         <div className="bg-gradient-to-br from-blue-950 via-zinc-900 to-slate-900 text-white p-5 rounded-2xl border border-blue-500/20 shadow-md">
-          <span className="text-xs text-blue-400 font-semibold block mb-1">추정 청구액 (KRW)</span>
-          <span className="text-2xl font-black font-mono text-blue-300">₩{totalKrw.toLocaleString()}</span>
+          <span className="text-xs text-blue-400 font-semibold block mb-1">추정 청구액 (USD)</span>
+          <span className="text-2xl font-black font-mono text-blue-300">${totalUsd.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
         </div>
 
         <div className="bg-white dark:bg-zinc-950 p-5 rounded-2xl border border-slate-200 dark:border-zinc-800 shadow-md flex items-center justify-between">
@@ -321,7 +321,7 @@ export default function ShipperDailyBillingClient({
                   <th className="py-3 px-4 text-right">급증수수료</th>
                   <th className="py-3 px-4 text-right">기타부과금</th>
                   <th className="py-3 px-4 text-right">사후조정액</th>
-                  <th className="py-3 px-4 text-right">총 합계 (USD / KRW)</th>
+                   <th className="py-3 px-4 text-right">총 합계 (KRW / USD)</th>
                   <th className="py-3 px-4 text-center">마감 상태</th>
                   <th className="py-3 px-4 text-center">관리 / 액션</th>
                 </tr>
@@ -346,26 +346,26 @@ export default function ShipperDailyBillingClient({
                           {g.orderCount}건
                         </td>
                         <td className="py-3.5 px-4 text-right font-mono text-slate-700 dark:text-slate-300">
-                          ${g.totalBaseFreight.toFixed(2)}
+                          ₩{g.totalBaseFreight.toLocaleString()}
                         </td>
                         <td className="py-3.5 px-4 text-right font-mono text-slate-700 dark:text-slate-300">
-                          ${g.totalFuelSurcharge.toFixed(2)}
+                          ₩{g.totalFuelSurcharge.toLocaleString()}
                         </td>
                         <td className="py-3.5 px-4 text-right font-mono text-amber-600 dark:text-amber-400 font-semibold">
-                          ${g.totalSurgeFee.toFixed(2)}
+                          ₩{g.totalSurgeFee.toLocaleString()}
                         </td>
                         <td className="py-3.5 px-4 text-right font-mono text-purple-600 dark:text-purple-400 font-semibold">
-                          ${(g.totalOtherCharge || 0).toFixed(2)}
+                          ₩{(g.totalOtherCharge || 0).toLocaleString()}
                         </td>
                         <td className="py-3.5 px-4 text-right font-mono text-blue-600 dark:text-blue-400 font-semibold">
-                          ${g.totalActualAdjustment.toFixed(2)}
+                          ₩{g.totalActualAdjustment.toLocaleString()}
                         </td>
                         <td className="py-3.5 px-4 text-right">
                           <span className="block font-extrabold font-mono text-amber-600 dark:text-amber-400">
-                            ${g.totalBillingAmountUsd.toFixed(2)} USD
+                            ₩{g.totalBillingAmountKrw.toLocaleString()} KRW
                           </span>
                           <span className="block text-[11px] font-mono text-slate-400">
-                            ₩{g.estimatedBillingAmountKrw.toLocaleString()}
+                            ${g.estimatedBillingAmountUsd.toLocaleString('en-US', { minimumFractionDigits: 2 })} USD
                           </span>
                         </td>
                         <td className="py-3.5 px-4 text-center">
@@ -441,7 +441,7 @@ export default function ShipperDailyBillingClient({
                                         <th className="py-2 px-3 text-right">급증수수료</th>
                                         <th className="py-2 px-3 text-right">기타부과금</th>
                                         <th className="py-2 px-3 text-right">사후조정</th>
-                                        <th className="py-2 px-3 text-right">합계(USD)</th>
+                                         <th className="py-2 px-3 text-right">합계(KRW)</th>
                                         <th className="py-2 px-3 text-center">인보이스</th>
                                         <th className="py-2 px-3 text-center">바로가기</th>
                                       </tr>
@@ -460,13 +460,16 @@ export default function ShipperDailyBillingClient({
                                           <td className="py-2 px-3 font-bold text-slate-700 dark:text-slate-300">
                                             {ord.destCountryCode}
                                           </td>
-                                          <td className="py-2 px-3 text-right font-mono">${ord.baseFreight.toFixed(2)}</td>
-                                          <td className="py-2 px-3 text-right font-mono">${ord.fuelSurcharge.toFixed(2)}</td>
-                                          <td className="py-2 px-3 text-right font-mono text-amber-600">${ord.surgeFee.toFixed(2)}</td>
-                                          <td className="py-2 px-3 text-right font-mono text-purple-600">${(ord.otherCharge || 0).toFixed(2)}</td>
-                                          <td className="py-2 px-3 text-right font-mono text-blue-600">${ord.actualAdjustment.toFixed(2)}</td>
+                                          <td className="py-2 px-3 text-right font-mono">₩{ord.baseFreight.toLocaleString()}</td>
+                                          <td className="py-2 px-3 text-right font-mono">₩{ord.fuelSurcharge.toLocaleString()}</td>
+                                          <td className="py-2 px-3 text-right font-mono text-amber-600">₩{ord.surgeFee.toLocaleString()}</td>
+                                          <td className="py-2 px-3 text-right font-mono text-purple-600">₩{(ord.otherCharge || 0).toLocaleString()}</td>
+                                          <td className="py-2 px-3 text-right font-mono text-blue-600">₩{ord.actualAdjustment.toLocaleString()}</td>
                                           <td className="py-2 px-3 text-right font-mono font-bold text-amber-600">
-                                            ${ord.totalAmountUsd.toFixed(2)}
+                                            ₩{ord.totalAmountKrw.toLocaleString()}
+                                            {ord.hasUnsupportedCurrency && (
+                                              <span className="ml-1 text-[9px] text-red-500 font-normal">⚠ 혼합통화</span>
+                                            )}
                                           </td>
                                           <td className="py-2 px-3 text-center font-mono">
                                             {ord.invoiceNo ? (
