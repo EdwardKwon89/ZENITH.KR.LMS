@@ -13,10 +13,12 @@ import {
 import { 
   getOrderByBarcodeOrNo, 
   confirmInbound, 
-  getTodayInboundHistory 
+  saveInboundMeasurements,
+  getTodayInboundHistory,
+  cancelInbound,
 } from "@/app/actions/operations";
 import { OrderStatus } from "@/types/orders";
-import { Search, Barcode, CheckCircle, AlertTriangle, Clock, User, Package, ArrowRight } from "lucide-react";
+import { Search, Barcode, CheckCircle, AlertTriangle, Clock, User, Package, ArrowRight, XCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export default function InboundProcessForm({ locale }: { locale: string }) {
@@ -31,6 +33,12 @@ export default function InboundProcessForm({ locale }: { locale: string }) {
   const [note, setNote] = useState("");
   const [history, setHistory] = useState<any[]>([]);
   const [errorMsg, setErrorMsg] = useState("");
+  const [cancelTarget, setCancelTarget] = useState<any | null>(null);
+  const [cancelLoading, setCancelLoading] = useState(false);
+  const [packageEdits, setPackageEdits] = useState<Record<string, { gross_weight?: string; length?: string; width?: string; height?: string }>>({});
+  const [savingMeasurements, setSavingMeasurements] = useState(false);
+  const [freightEstimate, setFreightEstimate] = useState<{ changed: boolean; oldFreight?: number; newFreight?: number; currency?: string } | null>(null);
+  const [displayFreight, setDisplayFreight] = useState<{ amount: number; currency: string } | null>(null);
 
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -68,8 +76,11 @@ export default function InboundProcessForm({ locale }: { locale: string }) {
       const result = await getOrderByBarcodeOrNo(barcode.trim());
       if (result) {
         setOrder(result);
+        setDisplayFreight((result as any).currentFreight ?? null);
         setInspectStatus("NORMAL");
         setNote("");
+        setPackageEdits({});
+        setFreightEstimate(null);
         toast.success("화물을 찾았습니다.");
       } else {
         setErrorMsg(t("error_not_found"));
@@ -84,18 +95,43 @@ export default function InboundProcessForm({ locale }: { locale: string }) {
     }
   };
 
+  // 공용: 패키지 수정 데이터 구성
+  const buildPackageUpdates = () => {
+    if (!order) return [];
+    return Object.entries(packageEdits)
+      .filter(([_, edits]) => Object.keys(edits).length > 0)
+      .map(([packageId, edits]) => ({
+        packageId,
+        ...(edits.gross_weight !== undefined && { gross_weight: parseFloat(edits.gross_weight) || 0 }),
+        ...(edits.length !== undefined && { length: parseFloat(edits.length) || 0 }),
+        ...(edits.width !== undefined && { width: parseFloat(edits.width) || 0 }),
+        ...(edits.height !== undefined && { height: parseFloat(edits.height) || 0 }),
+      }));
+  };
+
   // 3. 입고 확정 처리
   const handleConfirmInbound = async () => {
     if (!order) return;
 
     setSubmitLoading(true);
     try {
-      const result = await confirmInbound(order.id, inspectStatus, note.trim());
+      const updates = buildPackageUpdates();
+      const result = await confirmInbound(order.id, inspectStatus, note.trim(), updates.length > 0 ? updates : undefined);
       if (result && result.success) {
-        toast.success(t("success_msg"));
+        const fe = result.freightEstimate;
+        if (fe?.changed && fe.oldFreight !== fe.newFreight) {
+          toast.success(`${t("success_msg")} (운임: ${fe.currency} ${fe.oldFreight?.toLocaleString()} → ${fe.currency} ${fe.newFreight?.toLocaleString()})`);
+        } else {
+          toast.success(t("success_msg"));
+        }
+        setFreightEstimate(fe ?? null);
+        if (fe?.newFreight != null) {
+          setDisplayFreight({ amount: fe.newFreight, currency: fe.currency ?? displayFreight?.currency ?? 'USD' });
+        }
         setOrder(null);
         setBarcode("");
         setNote("");
+        setPackageEdits({});
         await fetchHistory();
       } else {
         throw new Error("입고 처리에 실패했습니다.");
@@ -104,6 +140,60 @@ export default function InboundProcessForm({ locale }: { locale: string }) {
       toast.error(err.message || "입고 확정 실패");
     } finally {
       setSubmitLoading(false);
+      focusInput();
+    }
+  };
+
+  // 3b. 측정값만 별도 저장
+  const handleSaveMeasurements = async () => {
+    if (!order) return;
+    const updates = buildPackageUpdates();
+    if (updates.length === 0) {
+      toast.info("변경된 측정값이 없습니다.");
+      return;
+    }
+    setSavingMeasurements(true);
+    try {
+      const result = await saveInboundMeasurements(order.id, updates);
+      if (result.success) {
+        toast.success("측정값이 저장되었습니다.");
+        setFreightEstimate(result.freightEstimate ?? null);
+        if (result.freightEstimate?.newFreight != null) {
+          setDisplayFreight({
+            amount: result.freightEstimate.newFreight,
+            currency: result.freightEstimate.currency ?? displayFreight?.currency ?? 'USD',
+          });
+        }
+      } else {
+        throw new Error(result.error || "저장 실패");
+      }
+    } catch (err: any) {
+      toast.error(err.message || "측정값 저장 실패");
+    } finally {
+      setSavingMeasurements(false);
+    }
+  };
+
+  // 4. 입고 취소 처리
+  const handleCancelInbound = async () => {
+    if (!cancelTarget) return;
+
+    setCancelLoading(true);
+    try {
+      const result = await cancelInbound(cancelTarget.id);
+      if (result && result.success) {
+        toast.success(t("cancel_success"));
+        setCancelTarget(null);
+        setOrder(null);
+        setBarcode("");
+        await fetchHistory();
+      } else {
+        throw new Error("입고 취소 처리에 실패했습니다.");
+      }
+    } catch (err: any) {
+      toast.error(err.message || "입고 취소 실패");
+    } finally {
+      setCancelLoading(false);
       focusInput();
     }
   };
@@ -201,9 +291,9 @@ export default function InboundProcessForm({ locale }: { locale: string }) {
                 <div>
                   <span className="text-slate-500 block text-xs">{t("route")}</span>
                   <span className="font-semibold text-slate-900 flex items-center gap-1.5">
-                    {order.origin_port?.code || "-"}
+                    {order.origin_port?.code || order.shipper_country_code || "-"}
                     <ArrowRight size={12} className="text-slate-400" />
-                    {order.dest_port?.code || "-"}
+                    {order.dest_port?.code || order.recipient_country_code || "-"}
                   </span>
                 </div>
               </div>
@@ -244,6 +334,112 @@ export default function InboundProcessForm({ locale }: { locale: string }) {
                 </table>
               </div>
             </ZenCard>
+
+            {/* 부피/중량 수정 카드 */}
+            {order.packages && order.packages.length > 0 && (
+              <ZenCard className="p-6 bg-white/80 border-slate-100/50 shadow-md">
+                <h3 className="text-md font-black text-slate-900 mb-4 flex items-center gap-2">
+                  <span className="w-1 h-4 bg-amber-500 rounded-full"></span>
+                  {t("weight_volume_edit")}
+                </h3>
+                <p className="text-xs text-slate-500 mb-4">{t("weight_volume_desc")}</p>
+
+                <div className="mb-3 p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 flex items-center justify-between">
+                  <span className="font-medium">예상 운임</span>
+                  <span className="font-bold text-slate-900">
+                    {displayFreight ? `${displayFreight.currency} ${displayFreight.amount.toLocaleString()}` : '-'}
+                  </span>
+                </div>
+                
+                <div className="space-y-4">
+                  {order.packages.map((pkg: any) => {
+                    const edits = packageEdits[pkg.id] || {};
+                    return (
+                      <div key={pkg.id} className="p-4 bg-slate-50/70 rounded-xl border border-slate-100">
+                        <div className="flex items-center gap-2 mb-3">
+                          <Package size={14} className="text-slate-500" />
+                          <span className="text-xs font-bold text-slate-700">{pkg.packing_unit || "패키지"} #{pkg.id.substring(0, 8)}</span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label className="block text-[10px] font-bold text-slate-500 mb-1">중량 (kg)</label>
+                            <input
+                              type="number"
+                              step="0.1"
+                              defaultValue={pkg.gross_weight || ''}
+                              onChange={(e) => setPackageEdits(prev => ({
+                                ...prev,
+                                [pkg.id]: { ...prev[pkg.id], gross_weight: e.target.value }
+                              }))}
+                              className="w-full px-3 py-2 text-sm bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-brand-400/30 focus:border-brand-400 transition-all"
+                              placeholder={pkg.gross_weight ? `${pkg.gross_weight}` : '0'}
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-bold text-slate-500 mb-1">길이 (cm)</label>
+                            <input
+                              type="number"
+                              step="0.1"
+                              defaultValue={pkg.length || ''}
+                              onChange={(e) => setPackageEdits(prev => ({
+                                ...prev,
+                                [pkg.id]: { ...prev[pkg.id], length: e.target.value }
+                              }))}
+                              className="w-full px-3 py-2 text-sm bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-brand-400/30 focus:border-brand-400 transition-all"
+                              placeholder={pkg.length ? `${pkg.length}` : '0'}
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-bold text-slate-500 mb-1">너비 (cm)</label>
+                            <input
+                              type="number"
+                              step="0.1"
+                              defaultValue={pkg.width || ''}
+                              onChange={(e) => setPackageEdits(prev => ({
+                                ...prev,
+                                [pkg.id]: { ...prev[pkg.id], width: e.target.value }
+                              }))}
+                              className="w-full px-3 py-2 text-sm bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-brand-400/30 focus:border-brand-400 transition-all"
+                              placeholder={pkg.width ? `${pkg.width}` : '0'}
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-bold text-slate-500 mb-1">높이 (cm)</label>
+                            <input
+                              type="number"
+                              step="0.1"
+                              defaultValue={pkg.height || ''}
+                              onChange={(e) => setPackageEdits(prev => ({
+                                ...prev,
+                                [pkg.id]: { ...prev[pkg.id], height: e.target.value }
+                              }))}
+                              className="w-full px-3 py-2 text-sm bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-brand-400/30 focus:border-brand-400 transition-all"
+                              placeholder={pkg.height ? `${pkg.height}` : '0'}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <ZenButton
+                  onClick={handleSaveMeasurements}
+                  loading={savingMeasurements}
+                  disabled={savingMeasurements}
+                  variant="tactile"
+                  className="w-full mt-2 bg-slate-700 text-white hover:bg-slate-800 rounded-xl"
+                >
+                  측정값 저장
+                </ZenButton>
+
+                {freightEstimate?.changed && freightEstimate.oldFreight !== freightEstimate.newFreight && (
+                  <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-800">
+                    예상 운임 변경: {freightEstimate.currency} {freightEstimate.oldFreight?.toLocaleString()} → {freightEstimate.currency} {freightEstimate.newFreight?.toLocaleString()}
+                  </div>
+                )}
+              </ZenCard>
+            )}
 
             {/* 검수 및 확정 카드 */}
             <ZenCard className="p-6 bg-white/80 border-slate-100/50 shadow-lg relative overflow-hidden">
@@ -318,8 +514,60 @@ export default function InboundProcessForm({ locale }: { locale: string }) {
                 >
                   {t("confirm_btn")}
                 </ZenButton>
+
+                {order.status === OrderStatus.WAREHOUSED && (
+                  <ZenButton
+                    onClick={() => setCancelTarget(order)}
+                    disabled={submitLoading}
+                    variant="ghost"
+                    className="w-full py-3 rounded-2xl text-rose-600 hover:bg-rose-50"
+                  >
+                    <XCircle size={16} className="mr-2" />
+                    {t("cancel_btn")}
+                  </ZenButton>
+                )}
               </div>
             </ZenCard>
+          </div>
+        )}
+
+        {/* 입고 취소 확인 모달 */}
+        {cancelTarget && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+            <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full mx-4 animate-in zoom-in-95 duration-200">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2.5 bg-rose-50 rounded-xl text-rose-600">
+                  <AlertTriangle size={24} />
+                </div>
+                <div>
+                  <h3 className="font-bold text-slate-900">{t("cancel_btn")}</h3>
+                  <p className="text-xs text-slate-500">{t("cancel_confirm")}</p>
+                </div>
+              </div>
+
+              <div className="bg-slate-50 rounded-xl p-3 mb-6 text-sm space-y-1">
+                <p><span className="text-slate-500">오더번호:</span> <span className="font-bold">{cancelTarget.order_no}</span></p>
+              </div>
+
+              <div className="flex gap-3 justify-end">
+                <ZenButton
+                  variant="ghost"
+                  onClick={() => setCancelTarget(null)}
+                  disabled={cancelLoading}
+                  className="rounded-xl"
+                >
+                  닫기
+                </ZenButton>
+                <ZenButton
+                  onClick={handleCancelInbound}
+                  loading={cancelLoading}
+                  disabled={cancelLoading}
+                  className="bg-rose-600 text-white hover:bg-rose-700 rounded-xl"
+                >
+                  {t("cancel_btn")}
+                </ZenButton>
+              </div>
+            </div>
           </div>
         )}
       </div>

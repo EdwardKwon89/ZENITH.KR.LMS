@@ -3,7 +3,7 @@
 import { logger } from '@/lib/logger';
 import { validateUserAction, checkPermission } from '@/lib/auth/guards';
 import { createAdminClient } from '@/utils/supabase/server';
-import { getMaxAllowedZoneDiscount } from '@/lib/ups/discount-guard';
+import { getMaxAllowedZoneDiscount, validateAgencyReverseMargin } from '@/lib/ups/discount-guard';
 import { revalidatePath } from 'next/cache';
 
 export async function getShipperZoneDiscounts(shipperOrgId: string) {
@@ -28,6 +28,7 @@ export async function getShipperZoneDiscounts(shipperOrgId: string) {
 export async function upsertShipperZoneDiscounts(
   shipperOrgId: string,
   zoneRates: Record<string, number>,
+  productIds?: string[],
 ) {
   const { profile } = await validateUserAction();
   if (!checkPermission(profile.role, '/agency')) {
@@ -61,7 +62,13 @@ export async function upsertShipperZoneDiscounts(
 
   const errors: string[] = [];
   for (const [zoneId, rate] of Object.entries(zoneRates)) {
-    const maxAllowed = await getMaxAllowedZoneDiscount(admin, zoneId);
+    const reverseMarginError = await validateAgencyReverseMargin(admin, agencyOrgId, zoneId, rate);
+    if (reverseMarginError) {
+      errors.push(`Zone ${zoneId}: ${reverseMarginError}`);
+      continue;
+    }
+
+    const maxAllowed = await getMaxAllowedZoneDiscount(admin, zoneId, productIds);
     if (maxAllowed != null && rate > maxAllowed) {
       errors.push(`Zone ${zoneId}: 할인율(${(rate * 100).toFixed(1)}%)이(가) 원가 마진을 초과합니다. 최대 허용: ${(maxAllowed * 100).toFixed(1)}%`);
       continue;

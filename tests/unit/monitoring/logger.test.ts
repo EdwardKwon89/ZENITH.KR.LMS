@@ -35,7 +35,7 @@ describe('Logger Utility', () => {
     const originalEnv = process.env.NODE_ENV;
     
     // Test development env
-    process.env.NODE_ENV = 'development';
+    (process.env as any).NODE_ENV = 'development';
     logger.debug('Debug message');
     expect(logSpy).toHaveBeenCalledWith('[DEBUG]', 'Debug message');
 
@@ -43,11 +43,11 @@ describe('Logger Utility', () => {
     logSpy.mockClear();
 
     // Test production env
-    process.env.NODE_ENV = 'production';
+    (process.env as any).NODE_ENV = 'production';
     logger.debug('Production debug message');
     expect(logSpy).not.toHaveBeenCalled();
 
     // Restore env
-    process.env.NODE_ENV = originalEnv;
+    (process.env as any).NODE_ENV = originalEnv;
   });
 });

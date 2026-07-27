@@ -5,7 +5,9 @@ import { z } from 'zod';
  */
 export const orderItemSchema = z.object({
   sku_code: z.string().optional(), // 재고 연동을 위한 SKU 코드
-  item_name: z.string().min(1, 'Item name is required'),
+  item_name: z.string()
+    .min(1, 'Item name is required')
+    .regex(/^[A-Za-z0-9\s.,\-()&'"/#%+:]*$/, 'Item name must be in English (letters, numbers, and common symbols only)'),
   quantity: z.number().int().positive('Quantity must be at least 1'),
   unit_price: z.number().nonnegative('Unit price cannot be negative').default(0),
   currency: z.string().default('USD'),
@@ -57,9 +59,12 @@ export const orderRegistrationSchema = z.object({
   recipient_name: z.string().min(1, 'Recipient name is required'),
   recipient_address: z.string().min(1, 'Recipient address is required'),
   recipient_address_local: z.string().optional(),
+  recipient_address_detail: z.string().optional(),
   recipient_phone: z.string().min(1, 'Recipient phone is required'),
   recipient_zipcode: z.string().optional(),
   recipient_country_code: z.string().optional(),
+  recipient_state_province: z.string().optional(),
+  recipient_city: z.string().optional(),
   
   recipient_pccc: z.string().optional(),
   recipient_email: z.string().email('Invalid email format').optional().or(z.literal('')),
@@ -82,6 +87,12 @@ export const orderRegistrationSchema = z.object({
   pickup_location: z.string().optional(),
   pickup_contact_name: z.string().optional(),
   pickup_contact_tel: z.string().optional(),
+  pickup_country_code: z.string().optional(),
+  pickup_state_province: z.string().optional(),
+  pickup_city: z.string().optional(),
+  pickup_address: z.string().optional(),
+  pickup_address_detail: z.string().optional(),
+  pickup_zipcode: z.string().optional(),
 
   // UPS 특송 정보 (TASK-B-059)
   ups_product_code: z.string().optional(),
@@ -103,19 +114,12 @@ export const orderRegistrationSchema = z.object({
       });
     }
   }
-  if (data.transport_mode === 'UPS' && data.packages.length !== 1) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: 'UPS 서비스는 오더당 1개의 패키지만 등록 가능합니다.',
-      path: ['packages'],
-    });
-  }
   if (data.delivery_method === 'PICKUP') {
-    if (!data.pickup_location || data.pickup_location.trim() === '') {
+    if (!data.pickup_address || data.pickup_address.trim() === '') {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: 'Pickup location is required when delivery method is PICKUP',
-        path: ['pickup_location'],
+        message: 'Pickup address is required when delivery method is PICKUP',
+        path: ['pickup_address'],
       });
     }
     if (!data.pickup_contact_name || data.pickup_contact_name.trim() === '') {

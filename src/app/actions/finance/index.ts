@@ -7,6 +7,8 @@ export {
   getRevenueReport,
   getCostReport,
   getOrganizations,
+  addManualOrderCost,
+  finalizeInvoice,
 } from './settlement';
 
 export {
@@ -28,3 +30,18 @@ export {
 export {
   generateInvoicePdf,
 } from './invoice-files';
+
+export {
+  recordUpsActualCharges,
+  getUpsActualCharges,
+  getUpsChargeReconciliation,
+  searchDeliveredUpsOrders,
+} from './ups-actual-charges';
+
+export {
+  getOrderRevenueCost,
+  getOrderRevenueCostList,
+  getSubAgencyProfitSummary,
+} from './order-revenue-cost';
+
+export type { OrderRevenueCostRow, SubAgencyProfitRow } from './order-revenue-cost';

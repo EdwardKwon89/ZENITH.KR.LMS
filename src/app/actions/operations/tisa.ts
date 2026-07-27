@@ -19,6 +19,7 @@ export interface TisaSnapshotResult {
   platformFeeAmount?: number;
   totalWeight: number;
   totalFreight: number;
+  metadata?: Record<string, unknown>;
 }
 
 async function getTotalWeight(supabase: any, orderId: string): Promise<number> {
@@ -44,7 +45,7 @@ export async function getOrderRateSnapshot(orderId: string): Promise<TisaSnapsho
     .select(`
       id, rate_card_id, applied_unit_price, applied_currency,
       applied_rule, snapshot_at, is_manual, override_reason,
-      carrier_cost_amount, platform_fee_amount
+      carrier_cost_amount, platform_fee_amount, metadata
     `)
     .eq("order_id", orderId)
     .maybeSingle();
@@ -84,6 +85,7 @@ export async function getOrderRateSnapshot(orderId: string): Promise<TisaSnapsho
       validTo: rateCard?.valid_until || "9999-12-31T23:59:59Z",
       totalWeight,
       totalFreight: totalWeight * Number(snapshot.applied_unit_price || 0),
+      metadata: snapshot.metadata ?? undefined,
     };
 
     // 4. Role-based shape: only add admin fields for admin/manager users
@@ -158,7 +160,7 @@ export async function getOrderRateSnapshot(orderId: string): Promise<TisaSnapsho
             snapshot_at: new Date().toISOString(),
             carrier_cost_amount: match.carrier_cost,
           })
-          .select("id, applied_unit_price, applied_currency, carrier_cost_amount, platform_fee_amount, override_reason, is_manual")
+          .select("id, applied_unit_price, applied_currency, carrier_cost_amount, platform_fee_amount, override_reason, is_manual, metadata")
           .single();
 
         if (inserted) {
@@ -177,6 +179,7 @@ export async function getOrderRateSnapshot(orderId: string): Promise<TisaSnapsho
             validTo: "9999-12-31T23:59:59Z",
             totalWeight,
             totalFreight: totalWeight * Number(inserted.applied_unit_price || 0),
+            metadata: inserted.metadata ?? undefined,
           };
           if (isAdmin) {
             result.carrierCostAmount = inserted.carrier_cost_amount

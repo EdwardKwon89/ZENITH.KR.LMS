@@ -12,10 +12,11 @@ export default async function WarehouseInboundPage({
   const { locale } = await params;
   const { profile } = await requireAuth();
 
-  // 권한 체크: ADMIN or MANAGER or SUPER_ADMIN
+  // 권한 체크: ADMIN, MANAGER, SUPER_ADMIN, AGENCY
   const isAllowed = profile?.role === USER_ROLES.ADMIN ||
     profile?.role === USER_ROLES.MANAGER ||
-    profile?.role === USER_ROLES.ZENITH_SUPER_ADMIN;
+    profile?.role === USER_ROLES.ZENITH_SUPER_ADMIN ||
+    profile?.role === USER_ROLES.AGENCY;
 
   if (!isAllowed) {
     redirect(`/${locale}/dashboard`);

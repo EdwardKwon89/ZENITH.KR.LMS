@@ -63,4 +63,4 @@ _tmp_*.py
 test-results/
 
 # ─── Temporary Log Files ────────────────────────────────
-scratch/*.log
+scratch/

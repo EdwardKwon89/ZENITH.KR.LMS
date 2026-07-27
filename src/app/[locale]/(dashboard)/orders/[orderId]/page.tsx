@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link';
 import { getOrderDetails } from '@/app/actions/orders';
 import { getTrackingEvents, getTrackingRawLogs } from '@/app/actions/tracking';
 import { requireAuth, checkPermission } from '@/lib/auth/guards';
@@ -18,12 +19,17 @@ import PackingListPDF from '@/components/documents/PackingListPDF';
 import UpsInvoicePDF from '@/components/documents/UpsInvoicePDF';
 import { getDeclarations } from '@/app/actions/customs';
 import { getOrderRateSnapshot } from '@/app/actions/operations';
+import { isOrderEditable } from '@/lib/logistics/status-machine';
+import type { OrderStatus } from '@/types/orders';
 import OrderCustomsSection from '@/components/customs/OrderCustomsSection';
 import OrderCustomsAdminControl from '@/components/customs/OrderCustomsAdminControl';
 import { getTranslations } from 'next-intl/server';
 import { OrderClaimTrigger } from '@/components/claims/OrderClaimTrigger';
+import { getUpsLabelStatus } from '@/app/actions/operations/ups-labels';
+import UpsTradeDocumentActions from '@/components/orders/UpsTradeDocumentActions';
+import { UpsActualAdjustmentForm } from '@/components/orders/UpsActualAdjustmentForm';
 
-import { Package, MapPin, Truck, ShieldCheck, FileText } from 'lucide-react';
+import { Package, MapPin, Truck, ShieldCheck, FileText, Pencil } from 'lucide-react';
 
 export default async function OrderDetailPage({ 
   params 
@@ -82,7 +88,19 @@ export default async function OrderDetailPage({
   const isShipper = order.shipper_id && (profile?.id === order.shipper_id || profile?.org_id === order.shipper_id);
   const isAgency = profile?.role === 'AGENCY';
   const canPrintUpsInvoice = isAdmin || profile?.role === 'MANAGER' || isShipper || isAgency;
-  const isUpsOrder = order.transport_mode === 'EXP';
+  const isUpsOrder = order.transport_mode === 'UPS';
+
+  let canManageFinance = isAdmin || profile?.role === 'MANAGER';
+  if (!canManageFinance && isAgency && profile?.org_id) {
+    const { data: agencyLink } = await supabase
+      .from('zen_agency_shippers')
+      .select('shipper_org_id')
+      .eq('agency_org_id', profile.org_id)
+      .eq('shipper_org_id', order.shipper_id)
+      .eq('is_active', true)
+      .maybeSingle();
+    canManageFinance = !!agencyLink;
+  }
 
   const rawLogsData = isAdmin ? await getTrackingRawLogs(orderId) : { logs: [] };
   const rawLogs = rawLogsData?.logs || [];
@@ -196,6 +214,8 @@ export default async function OrderDetailPage({
 
   // 7. UPS Invoice 데이터 준비 (TASK-148 IMP-117)
   const tOrders = await getTranslations('Orders');
+  const upsLabelStatus = isUpsOrder ? await getUpsLabelStatus(orderId) : { hasActiveLabel: false, trackingNumber: null };
+
   const upsInvoiceData = isUpsOrder ? {
     invoice_no: `UPS-${order.order_no}`,
     date: new Date().toISOString().split('T')[0],
@@ -293,15 +313,26 @@ export default async function OrderDetailPage({
           </p>
         </div>
         
-        <div className="flex items-center gap-3 bg-slate-50 dark:bg-neutral-900 p-2 rounded-2xl border border-slate-100 dark:border-neutral-800">
-            <div className="px-4 py-2 border-r border-slate-200 dark:border-neutral-800">
-                <p className="text-[10px] text-slate-400 uppercase font-bold">Origin</p>
-                <p className="text-sm font-bold">{order.origin_port?.code}</p>
+        <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 bg-slate-50 dark:bg-neutral-900 p-2 rounded-2xl border border-slate-100 dark:border-neutral-800">
+                <div className="px-4 py-2 border-r border-slate-200 dark:border-neutral-800">
+                    <p className="text-[10px] text-slate-400 uppercase font-bold">Origin</p>
+                    <p className="text-sm font-bold">{order.origin_port?.code}</p>
+                </div>
+                <div className="px-4 py-2">
+                    <p className="text-[10px] text-slate-400 uppercase font-bold">Destination</p>
+                    <p className="text-sm font-bold">{order.dest_port?.code}</p>
+                </div>
             </div>
-            <div className="px-4 py-2">
-                <p className="text-[10px] text-slate-400 uppercase font-bold">Destination</p>
-                <p className="text-sm font-bold">{order.dest_port?.code}</p>
-            </div>
+            {isOrderEditable(order.status as OrderStatus) && (
+                <Link
+                    href={`/orders/${orderId}/edit`}
+                    className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors text-xs font-bold shadow-sm"
+                >
+                    <Pencil size={14} />
+                    Edit
+                </Link>
+            )}
         </div>
       </div>
 
@@ -509,6 +540,14 @@ export default async function OrderDetailPage({
             <OrderClaimTrigger orderId={orderId} orderNo={order.order_no} />
           </div>
 
+          {isUpsOrder && (
+            <UpsActualAdjustmentForm
+              orderId={orderId}
+              orderStatus={order.status || ''}
+              isPlatformAdmin={isAdmin || profile?.role === 'MANAGER'}
+            />
+          )}
+
           {/* 4. Finance Summary */}
           <OrderFinanceSummary 
             orderId={orderId}
@@ -516,6 +555,7 @@ export default async function OrderDetailPage({
             initialInvoice={invoice || null}
             incidentFees={incidentFees || []}
             isAdmin={isAdmin}
+            canManageFinance={canManageFinance}
           />
 
           {/* 5. Trade Documents Section (Sprint 8) */}
@@ -552,6 +592,9 @@ export default async function OrderDetailPage({
                         label={`${tOrders('ups_invoice.download_button')} (UPS)`}
                         className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/30"
                       />
+                    )}
+                    {isUpsOrder && (
+                      <UpsTradeDocumentActions orderId={orderId} hasActiveLabel={upsLabelStatus.hasActiveLabel} />
                     )}
                  </div>
              </div>

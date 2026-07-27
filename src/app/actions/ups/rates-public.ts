@@ -113,3 +113,27 @@ export async function getPublicFreightMinimums(): Promise<PublicFreightMinimum[]
   if (error) throw new Error(error.message);
   return (data ?? []) as unknown as PublicFreightMinimum[];
 }
+
+// Issue #491: 급증 긴급 수수료 — Agency 조회 전용(원가 필드 제외), 현재 유효 구간만 노출
+export interface PublicSurgeFee {
+  id: string;
+  destination_country_code: string;
+  selling_rate_per_kg: number;
+  currency: string;
+  effective_from: string;
+  effective_until: string | null;
+}
+
+export async function getPublicSurgeFees(): Promise<PublicSurgeFee[]> {
+  const { supabase } = await validateUserAction();
+  const refDate = new Date().toISOString().split('T')[0];
+  const { data, error } = await supabase
+    .from('zen_ups_surge_fees')
+    .select('id, destination_country_code, selling_rate_per_kg, currency, effective_from, effective_until')
+    .eq('is_active', true)
+    .lte('effective_from', refDate)
+    .or(`effective_until.is.null,effective_until.gte.${refDate}`)
+    .order('destination_country_code');
+  if (error) throw new Error(error.message);
+  return (data ?? []) as unknown as PublicSurgeFee[];
+}

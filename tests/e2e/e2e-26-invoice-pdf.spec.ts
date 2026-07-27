@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { createClient } from '@supabase/supabase-js';
+import { getServiceClient } from './test-utils';
 import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
@@ -14,7 +14,7 @@ const ADMIN_PASSWORD = 'password1234';
 const SHIPPER_EMAIL = 'shipper_e2e26@zenith.kr';
 const SHIPPER_PASSWORD = 'password1234';
 
-let supabase: ReturnType<typeof createClient>;
+let supabase: ReturnType<typeof getServiceClient>;
 let fixtureOrderId: string;
 let fixtureShipperUserId: string;
 let fixtureShipperOrgId: string;
@@ -26,9 +26,7 @@ test.describe('E2E-26: UPS Invoice PDF 미리보기/다운로드 검증 (UAT-19)
       fs.mkdirSync(SCREENSHOT_DIR, { recursive: true });
     }
 
-    const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    if (!key) throw new Error('SUPABASE_SERVICE_ROLE_KEY is required');
-    supabase = createClient(SUPABASE_URL, key);
+    supabase = getServiceClient();
 
     // 1. Create shipper organization (CORPORATE) — shipper_id FK references zen_organizations
     console.log('Creating shipper org...');
@@ -49,8 +47,8 @@ test.describe('E2E-26: UPS Invoice PDF 미리보기/다운로드 검증 (UAT-19)
     let destPortId: string | null = null;
     const { data: existingPorts } = await supabase.from('zen_ports').select('id,code').in('code', ['ICN', 'LAX']);
     if (existingPorts && existingPorts.length === 2) {
-      originPortId = existingPorts.find(p => p.code === 'ICN')?.id || null;
-      destPortId = existingPorts.find(p => p.code === 'LAX')?.id || null;
+      originPortId = existingPorts.find((p: any) => p.code === 'ICN')?.id || null;
+      destPortId = existingPorts.find((p: any) => p.code === 'LAX')?.id || null;
     } else {
       for (const port of [
         { code: 'ICN', name: 'Incheon', country: 'KR', type: 'AIRPORT' },
@@ -66,7 +64,7 @@ test.describe('E2E-26: UPS Invoice PDF 미리보기/다운로드 검증 (UAT-19)
     // 2. Ensure admin user exists with ADMIN role in zen_profiles
     const { data: authUsersRes } = await supabase.auth.admin.listUsers();
     const existingUsers = authUsersRes?.users || [];
-    let adminUser = existingUsers.find(u => u.email === ADMIN_EMAIL);
+    let adminUser = existingUsers.find((u: any) => u.email === ADMIN_EMAIL);
     if (!adminUser) {
       console.log('Creating admin user...');
       const { data: created, error: adminErr } = await supabase.auth.admin.createUser({
@@ -76,7 +74,7 @@ test.describe('E2E-26: UPS Invoice PDF 미리보기/다운로드 검증 (UAT-19)
         user_metadata: { role: 'ADMIN', org_type: 'PLATFORM', status: 'ACTIVE' },
       });
       if (adminErr) console.error('Admin create error:', adminErr);
-      adminUser = created?.user || null;
+      adminUser = created?.user ?? undefined;
     }
     // Ensure admin profile has ADMIN role (fixes RLS — get_my_role() must return 'ADMIN')
     if (adminUser) {
@@ -93,7 +91,7 @@ test.describe('E2E-26: UPS Invoice PDF 미리보기/다운로드 검증 (UAT-19)
 
     // 3. Create shipper test user and link to org
     console.log('Creating shipper user...');
-    let shipperUser = existingUsers.find(u => u.email === SHIPPER_EMAIL);
+    let shipperUser = existingUsers.find((u: any) => u.email === SHIPPER_EMAIL);
     if (shipperUser) {
       await supabase.from('zen_profiles').delete().eq('email', SHIPPER_EMAIL);
       await supabase.auth.admin.deleteUser(shipperUser.id);
@@ -235,7 +233,7 @@ test.describe('E2E-26: UPS Invoice PDF 미리보기/다운로드 검증 (UAT-19)
     }
 
     const { data: authUsersRes } = await supabase.auth.admin.listUsers();
-    const shipperUser = (authUsersRes?.users || []).find(u => u.email === SHIPPER_EMAIL);
+    const shipperUser = (authUsersRes?.users || []).find((u: any) => u.email === SHIPPER_EMAIL);
     if (shipperUser) {
       await supabase.from('zen_profiles').delete().eq('email', SHIPPER_EMAIL);
       await supabase.auth.admin.deleteUser(shipperUser.id);
@@ -315,7 +313,7 @@ test.describe('E2E-26: UPS Invoice PDF 미리보기/다운로드 검증 (UAT-19)
         await page.waitForFunction(
           (locator) => {
             const el = document.querySelector(locator);
-            return el && el.tagName === 'A' && el.getAttribute('href') && el.getAttribute('href').startsWith('blob:');
+            return el && el.tagName === 'A' && el!.getAttribute('href') && el!.getAttribute('href')!.startsWith('blob:');
           },
           'a[download*="UPS_INVOICE"]',
           { timeout: 60000 }
@@ -402,7 +400,7 @@ test.describe('E2E-26: UPS Invoice PDF 미리보기/다운로드 검증 (UAT-19)
         await page.waitForFunction(
           (locator) => {
             const el = document.querySelector(locator);
-            return el && el.tagName === 'A' && el.getAttribute('href') && el.getAttribute('href').startsWith('blob:');
+            return el && el.tagName === 'A' && el!.getAttribute('href') && el!.getAttribute('href')!.startsWith('blob:');
           },
           'a[download*="UPS_INVOICE"]',
           { timeout: 60000 }
@@ -425,7 +423,7 @@ test.describe('E2E-26: UPS Invoice PDF 미리보기/다운로드 검증 (UAT-19)
       const pdfBuffer = fs.readFileSync(tempPdfPath);
       const pdfParser = new PDFParse({ data: new Uint8Array(pdfBuffer) });
       const pdfData = await pdfParser.getText();
-      const text = pdfData.text;
+      const text = pdfData!.text;
       console.log('PDF text extracted. Length:', text.length);
       console.log('--- PDF Content ---');
       console.log(text);

@@ -8,12 +8,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useForm, useFieldArray, Control, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast, Toaster } from 'sonner';
+import { buildAddressBookPayload } from '@/lib/orders/build-address-book-payload';
 import { 
   Package, Plus, Trash2, Save, 
   ChevronRight, AlertCircle, CheckCircle2, Box, Layers, Plane, Ship, Zap, Truck, PackageCheck
 } from 'lucide-react';
 import { ZenCard, ZenButton, ZenInput, ZenBadge } from '@/components/ui/ZenUI';
 import { createOrder } from '@/app/actions/orders';
+import { updateOrder } from '@/app/actions/operations/orders';
 import { createAddressBookEntry } from '@/app/actions/operations/address-book';
 import { getCurrentUserAffiliation } from '@/app/actions/master';
 import { UpsFreightEstimateSection } from './UpsFreightEstimateSection';
@@ -31,6 +33,8 @@ interface OrderRegistrationFormProps {
   shippers: any[];
   ports: any[];
   onSuccess?: () => void;
+  orderId?: string;
+  defaultValues?: Partial<OrderRegistrationInput>;
 }
 
 type Affiliation = {
@@ -102,6 +106,9 @@ const NestedItems: React.FC<{
                   }}
                   className="bg-white py-2 text-xs"
                 />
+                {errors?.packages?.[nestIndex]?.items?.[k]?.item_name && (
+                  <p className="text-[9px] text-rose-500 mt-1">{errors.packages[nestIndex].items[k].item_name?.message}</p>
+                )}
               </div>
               <div className="col-span-4">
                 <label className="text-[9px] font-bold text-slate-400 mb-1 block">HS Code</label>
@@ -160,9 +167,10 @@ const NestedItems: React.FC<{
                   {...register(`packages.${nestIndex}.items.${k}.item_packing_unit`)}
                   className="w-full text-xs h-9 bg-white border border-slate-200 rounded-lg focus:outline-none"
                 >
-                  <option value="EA">EA</option>
-                  <option value="SET">SET</option>
-                  <option value="PCS">PCS</option>
+                   <option value="EA">EA</option>
+                   <option value="SET">SET</option>
+                   <option value="PCS">PCS</option>
+                   <option value="MTR">MTR</option>
                 </select>
               </div>
               <div className="col-span-3">
@@ -207,10 +215,30 @@ const NestedItems: React.FC<{
   );
 };
 
+export const ORDER_REGISTRATION_DEFAULT_VALUES = {
+  order_type: 'B2B' as const,
+  transport_mode: 'AIR' as const,
+  delivery_method: 'DIRECT' as const,
+  incoterms: 'DDP' as const,
+  packages: [
+    {
+      packing_unit: 'BOX',
+      packing_count: 1,
+      gross_weight: 0,
+      special_cargo_type: 'NONE',
+      content_type: 'GENERAL',
+      domestic_ref_no: '',
+      items: [{ item_name: '', quantity: 1, unit_price: 0, currency: 'USD', item_packing_unit: 'EA' }],
+    },
+  ],
+};
+
 export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
   shippers,
   ports,
-  onSuccess
+  onSuccess,
+  orderId,
+  defaultValues: externalDefaults
 }) => {
   const t = useTranslations('Orders');
   const router = useRouter();
@@ -227,20 +255,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
     formState: { errors, isSubmitting } 
   } = useForm<OrderRegistrationInput>({
     resolver: zodResolver(orderRegistrationSchema) as any,
-    defaultValues: {
-      order_type: 'B2B',
-      transport_mode: 'AIR',
-      delivery_method: 'DIRECT',
-      packages: [{ 
-        packing_unit: 'BOX', 
-        packing_count: 1, 
-        gross_weight: 0,
-        special_cargo_type: 'NONE',
-        content_type: 'GENERAL',
-        domestic_ref_no: '',
-        items: [{ item_name: '', quantity: 1, unit_price: 0, currency: 'USD', item_packing_unit: 'EA' }] 
-      }]
-    }
+    defaultValues: (externalDefaults ?? ORDER_REGISTRATION_DEFAULT_VALUES) as any,
   });
 
   const isAgencyShipper = affiliation?.role === USER_ROLES.AGENCY_SHIPPER;
@@ -260,6 +275,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
   const [showAddressBookInput, setShowAddressBookInput] = React.useState(false);
   const [addressBookDisplayName, setAddressBookDisplayName] = React.useState('');
   const [upsEstimate, setUpsEstimate] = React.useState<UpsFreightEstimate | null>(null);
+  const [upsProductId, setUpsProductId] = React.useState<string | undefined>();
   const [hsLookupLoadingMap, setHsLookupLoadingMap] = React.useState<Record<string, boolean>>({});
   const [hsLookupResultMap, setHsLookupResultMap] = React.useState<Record<string, { hs_code: string; confidence: 'high' | 'medium' | 'low' } | null>>({});
 
@@ -329,21 +345,9 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
       toast.error('저장할 이름을 입력해주세요.');
       return;
     }
-    const name = watch('recipient_name');
-    const address = watch('recipient_address');
-    const addressLocal = watch('recipient_address_local') || '';
-    const phone = watch('recipient_phone') || '';
     setSavingToAddressBook(true);
     try {
-      await createAddressBookEntry({
-        display_name: displayName,
-        recipient_name: name,
-        recipient_address: address,
-        recipient_address_local: addressLocal || undefined,
-        recipient_phone: phone || undefined,
-        display_mode: 'EN',
-        is_default: false,
-      });
+      await createAddressBookEntry(buildAddressBookPayload(watch, displayName));
       toast.success('주소록에 저장되었습니다.');
       setRefetchAddressBook(prev => prev + 1);
       setShowAddressBookInput(false);
@@ -426,8 +430,8 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
 
   // 🔄 Transport Mode 변경 시 항구 선택 초기화 (정합성 유지)
   useEffect(() => {
-    setValue('origin_port_id', '');
-    setValue('dest_port_id', '');
+    setValue('origin_port_id', undefined);
+    setValue('dest_port_id', undefined);
   }, [transportMode, setValue]);
 
   // 🔄 Transport Mode 변경 시 서비스 조합 선택 초기화
@@ -436,16 +440,20 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
   }, [transportMode]);
 
   // 🔄 DOC content_type 선택 시 치수 초기화 (TASK-B-076)
+  const contentTypesKey = useMemo(
+    () => (watchedPackages || []).map((p: any) => p.content_type).join(','),
+    [watchedPackages]
+  );
   useEffect(() => {
     if (!watchedPackages) return;
     watchedPackages.forEach((pkg, i) => {
-      if (pkg.content_type === 'DOC') {
+      if (pkg.content_type === 'DOC' && (pkg.length !== undefined || pkg.width !== undefined || pkg.height !== undefined)) {
         setValue(`packages.${i}.length`, undefined);
         setValue(`packages.${i}.width`, undefined);
         setValue(`packages.${i}.height`, undefined);
       }
     });
-  }, [watchedPackages, setValue]);
+  }, [contentTypesKey, setValue]);
 
   const filteredPorts = useMemo(() => {
     if (!transportMode) return ports;
@@ -692,6 +700,21 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
 
   const onSubmit = async (data: any) => {
     try {
+      if (orderId) {
+        const finalData = {
+          ...data,
+          estimated_cost: upsEstimate?.shipper?.finalFreight ?? upsEstimate?.platform?.totalSellingPrice ?? totals.freight,
+        };
+        await updateOrder(orderId, finalData as OrderRegistrationInput);
+        toast.success(t('success_update'), {
+          description: `Order #${orderId}`,
+          icon: <CheckCircle2 className="text-green-500" />
+        });
+        if (onSuccess) onSuccess();
+        setTimeout(() => router.push(`/orders/${orderId}`), 1000);
+        return;
+      }
+
       // UPS: Step 1에서 이미 ups_product_code가 올바르게 설정됨
       if (data.transport_mode === 'UPS') {
         const finalData = {
@@ -1041,8 +1064,15 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                           onSelect={(entry) => {
                             setValue('recipient_name', entry.recipient_name);
                             setValue('recipient_address', entry.recipient_address);
+                            setValue('recipient_address_detail', entry.recipient_address_detail || '');
                             setValue('recipient_address_local', entry.recipient_address_local || '');
                             setValue('recipient_phone', entry.recipient_phone || '');
+                            setValue('recipient_country_code', entry.country_code || '');
+                            setValue('recipient_state_province', entry.state_province || '');
+                            setValue('recipient_city', entry.city || '');
+                            setValue('recipient_zipcode', entry.zipcode || '');
+                            setValue('recipient_pccc', entry.recipient_pccc || '');
+                            setValue('recipient_email', entry.recipient_email || '');
                           }}
                         />
                       </div>
@@ -1063,8 +1093,20 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                             register={register}
                             setValue={setValue}
                             t={t}
+                            defaultValues={{
+                              country_code: watch('recipient_country_code') || 'KR',
+                              address: watch('recipient_address') || '',
+                              address_detail: watch('recipient_address_detail') || '',
+                              state_province: watch('recipient_state_province') || '',
+                              city: watch('recipient_city') || '',
+                              zipcode: watch('recipient_zipcode') || '',
+                            }}
                             required
                           />
+                       </div>
+                       <div>
+                        <label className="text-[10px] font-bold text-slate-500 mb-1 block">Email</label>
+                        <ZenInput placeholder="email@example.com" {...register('recipient_email')} error={!!errors.recipient_email} className="py-2 text-xs" />
                        </div>
                      </div>
                    </div>
@@ -1123,15 +1165,25 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                         <label className="text-[10px] font-bold text-slate-500 mb-1 block">
                           {t('pickup_location')} <span className="text-rose-500">*</span>
                         </label>
-                        <ZenInput
-                          placeholder="픽업 장소 입력"
-                          {...register('pickup_location')}
-                          error={!!errors.pickup_location}
-                          className="py-2 text-xs"
+                        <AddressInput
+                          mode="rhf"
+                          prefix="pickup"
+                          register={register}
+                          setValue={setValue}
+                          t={t}
+                          defaultValues={{
+                            country_code: watch('pickup_country_code') || 'KR',
+                            address: watch('pickup_address') || '',
+                            address_detail: watch('pickup_address_detail') || '',
+                            state_province: watch('pickup_state_province') || '',
+                            city: watch('pickup_city') || '',
+                            zipcode: watch('pickup_zipcode') || '',
+                          }}
+                          required
                         />
-                        {errors.pickup_location && (
+                        {errors.pickup_address && (
                           <p className="text-[9px] text-rose-500 mt-1">
-                            {errors.pickup_location.message}
+                            {errors.pickup_address.message}
                           </p>
                         )}
                       </div>
@@ -1156,7 +1208,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                           {t('pickup_contact_tel')} <span className="text-rose-500">*</span>
                         </label>
                         <ZenInput
-                          placeholder="연락처 입력 (010-XXXX-XXXX)"
+                          placeholder="010-XXXX-XXXX"
                           {...register('pickup_contact_tel')}
                           error={!!errors.pickup_contact_tel}
                           className="py-2 text-xs"
@@ -1253,8 +1305,9 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                             </label>
                             <ZenInput
                               placeholder="지역 택배 운송장번호 입력 (선택)"
+                              disabled={watch('delivery_method') === 'PICKUP'}
                               {...register(`packages.${i}.domestic_ref_no`)}
-                              className="py-2 text-xs"
+                              className={`py-2 text-xs ${watch('delivery_method') === 'PICKUP' ? 'opacity-40 bg-slate-100' : ''}`}
                             />
                           </div>
                         </div>
@@ -1320,9 +1373,9 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                         shipperOrgId={affiliation?.orgId ?? null}
                         destCountryCode={watch('recipient_country_code') || undefined}
                         packages={watchedPackages || []}
-                        selectedProductId={watch('ups_product_code')}
+                        selectedProductId={upsProductId}
                         selectedIncoterms={watch('incoterms')}
-                        onProductChange={(id) => setValue('ups_product_code', id)}
+                        onProductChange={(id, code) => { setUpsProductId(id); setValue('ups_product_code', code); }}
                         onIncotermsChange={(value) => setValue('incoterms', value)}
                         onEstimateChange={setUpsEstimate}
                       />

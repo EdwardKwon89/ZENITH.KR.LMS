@@ -20,6 +20,8 @@ export const CreateAgencyShipperSchema = z.object({
   city: z.string().max(100).optional(),
   address: z.string().max(200).optional(),
   address_detail: z.string().max(100).optional(),
+  address_english: z.string().max(200).optional(),
+  address_detail_english: z.string().max(100).optional(),
   zipcode: z.string().max(20).optional().or(z.literal('')),
 }).superRefine((data, ctx) => {
   if (data.shipper_type === 'CORPORATE' && !data.biz_no) {
@@ -54,6 +56,8 @@ export const UpdateAgencyShipperSchema = z.object({
   city: z.string().max(100).optional(),
   address: z.string().max(200).optional(),
   address_detail: z.string().max(100).optional(),
+  address_english: z.string().max(200).optional(),
+  address_detail_english: z.string().max(100).optional(),
   zipcode: z.string().max(20).optional().or(z.literal('')),
 }).superRefine((data, ctx) => {
   if (data.shipper_type === 'CORPORATE' && !data.biz_no) {

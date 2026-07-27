@@ -127,7 +127,7 @@ export default function OrderDataTable({
                   </td>
                   <td className="px-6 py-2.5 text-right">
                     <Link 
-                      href={`/${safeLocale}/orders/${order.id}`}
+                      href={`/${safeLocale}/orders/${order.id}${order.transport_mode === 'UPS' ? '/ups-detail' : ''}`}
                       className="inline-flex items-center gap-1 text-[12px] font-bold text-blue-600 hover:text-blue-700 transition-colors border-b border-transparent hover:border-blue-600"
                     >
                       View Details

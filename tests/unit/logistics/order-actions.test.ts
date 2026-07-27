@@ -21,7 +21,7 @@ vi.mock('next/cache', () => ({ unstable_cache: (fn: any) => fn,
 
 describe('ZENITH Logistics: Order Creation Logic', () => {
   const mockUser = { id: 'user-123' };
-  const mockProfile = { id: 'user-123', org_id: 'org-456' };
+  const mockProfile = { id: 'user-123', org_id: 'org-456', role: 'CORPORATE' };
   const mockOrderNo = 'ZEN-2026-000001';
 
   let mockSupabase: any;
@@ -81,7 +81,7 @@ describe('ZENITH Logistics: Order Creation Logic', () => {
     mockSupabase.rpc.mockResolvedValue({ data: { id: 'new-order-id', order_no: mockOrderNo }, error: null });
 
     // When
-    const result = await createOrder(payload as any);
+    const result = await createOrder(payload as any) as any;
 
     // Then
     expect(result.order_no).toBe(mockOrderNo);
@@ -188,6 +188,96 @@ describe('ZENITH Logistics: Order Creation Logic', () => {
     expect(pkg?.special_cargo_type).toBe('DANGEROUS');
   });
 
+  it('TC-A.6: [Success] Issue #489 신규 컬럼(recipient_country_code, shipper_address 등)이 RPC payload에 포함되어야 함', async () => {
+    // Given
+    const payload = {
+      order_type: 'B2C_ECOM',
+      shipper_id: '4bd7d15a-9042-4b72-8822-68c13000b001',
+      origin_port_id: '550e8400-e29b-41d4-a716-446655440001',
+      dest_port_id: '550e8400-e29b-41d4-a716-446655440002',
+      recipient_name: 'John Doe',
+      recipient_address: '456 Oak St',
+      recipient_phone: '010-5555-6666',
+      recipient_country_code: 'US',
+      recipient_state_province: 'CA',
+      recipient_city: 'Los Angeles',
+      shipper_address: '100 Seoul St',
+      shipper_country_code: 'KR',
+      shipper_state_province: 'Seoul',
+      shipper_city: 'Jung-gu',
+      shipper_address_detail: 'Bldg 5',
+      shipper_zipcode: '04524',
+      shipper_biz_no: '123-45-67890',
+      ups_product_code: 'WW_EXPEDITED',
+      incoterms: 'DDP',
+      packages: [
+        {
+          packing_unit: 'BOX',
+          packing_count: 2,
+          gross_weight: 20,
+          items: [{ item_name: 'Test', quantity: 2, unit_price: 100, item_packing_unit: 'UNIT' }]
+        }
+      ]
+    };
+
+    mockSupabase.rpc.mockResolvedValue({ data: { id: 'order-489-id', order_no: mockOrderNo }, error: null });
+
+    // When
+    await createOrder(payload as any);
+
+    // Then
+    const rpcCall = mockSupabase.rpc.mock.calls[0];
+    expect(rpcCall[0]).toBe('create_order_atomic');
+    const pp = rpcCall[1].p_payload;
+    expect(pp.recipient_country_code).toBe('US');
+    expect(pp.recipient_state_province).toBe('CA');
+    expect(pp.recipient_city).toBe('Los Angeles');
+    expect(pp.shipper_address).toBe('100 Seoul St');
+    expect(pp.shipper_country_code).toBe('KR');
+    expect(pp.shipper_state_province).toBe('Seoul');
+    expect(pp.shipper_city).toBe('Jung-gu');
+    expect(pp.shipper_address_detail).toBe('Bldg 5');
+    expect(pp.shipper_zipcode).toBe('04524');
+    expect(pp.shipper_biz_no).toBe('123-45-67890');
+    expect(pp.ups_product_code).toBe('WW_EXPEDITED');
+    expect(pp.incoterms).toBe('DDP');
+  });
+
+  it('TC-A.7: [Success] Issue #489 — ups_product_code/incoterms 조건부 UPDATE 제거 — RPC v5에서 직접 저장 확인', async () => {
+    // Given: ups_product_code가 있는 payload
+    const payload = {
+      order_type: 'B2C_ECOM',
+      shipper_id: '4bd7d15a-9042-4b72-8822-68c13000b001',
+      origin_port_id: '550e8400-e29b-41d4-a716-446655440001',
+      dest_port_id: '550e8400-e29b-41d4-a716-446655440002',
+      recipient_name: 'Jane',
+      recipient_address: '789 Pine St',
+      recipient_phone: '010-7777-8888',
+      ups_product_code: 'WW_EXPEDITED',
+      incoterms: 'DDU',
+      packages: [
+        {
+          packing_unit: 'BOX',
+          packing_count: 1,
+          gross_weight: 5,
+          items: [{ item_name: 'Widget', quantity: 1, unit_price: 50, item_packing_unit: 'UNIT' }]
+        }
+      ]
+    };
+
+    mockSupabase.rpc.mockResolvedValue({ data: { id: 'order-v5-id', order_no: mockOrderNo }, error: null });
+
+    // When
+    await createOrder(payload as any);
+
+    // Then: RPC payload에 ups_product_code/incoterms 포함 확인
+    const rpcCall = mockSupabase.rpc.mock.calls[0];
+    expect(rpcCall[1].p_payload.ups_product_code).toBe('WW_EXPEDITED');
+    expect(rpcCall[1].p_payload.incoterms).toBe('DDU');
+    // 조건부 UPDATE(.from('zen_orders').update(...))가 호출되지 않았는지 확인
+    expect(mockSupabase.update).not.toHaveBeenCalled();
+  });
+
   describe('Order Status Update: Exception Resilience', () => {
 
     it('TC-A.4: [Failure] 마스터에 결합된 오더의 상태 변경 시도 시 예외를 발생시켜야 함', async () => {
@@ -244,5 +334,90 @@ describe('ZENITH Logistics: Order Creation Logic', () => {
       expect(result).toBe('REGISTERED');
       expect(mockSupabase.from).toHaveBeenCalledWith('order_status_history');
     });
+  });
+});
+
+// ─── Issue #514: order rate snapshot dest_country_code 수정 ─────────────────────────────────────────
+
+describe('TC-SNAP-01: saveOrderRateSnapshot recipient_country_code 사용', () => {
+  const mockUser = { id: 'user-123' };
+  const mockProfile = { id: 'user-123', org_id: 'org-456', role: 'CORPORATE' };
+
+  let mockSupabase: any;
+  let mockEstimateFn: any;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockSupabase = {
+      from: vi.fn().mockReturnThis(),
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      maybeSingle: vi.fn(),
+    };
+    mockEstimateFn = vi.fn().mockResolvedValue({
+      platform: { totalSellingPrice: 100000, currency: 'USD' },
+      agency: null,
+      shipper: null,
+    });
+  });
+
+  it('UPS 오더(dest_port_id 없음) → recipient_country_code로 스냅샷 저장', async () => {
+    mockSupabase.maybeSingle
+      .mockResolvedValueOnce({ data: { id: 'prod-1' }, error: null })
+      .mockResolvedValueOnce({ data: null, error: null });
+
+    const validated = {
+      transport_mode: 'UPS',
+      ups_product_code: 'WW_SAVER',
+      dest_port_id: undefined,
+      recipient_country_code: 'US',
+      packages: [{ gross_weight: 5 }],
+      incoterms: 'DDP',
+    };
+
+    const { saveOrderRateSnapshot } = await import('@/app/actions/operations/orders');
+
+    await saveOrderRateSnapshot({
+      supabase: mockSupabase,
+      orderId: 'order-1',
+      validated: validated as any,
+      profile: mockProfile,
+      agencyOrgId: 'agency-1',
+      estimateFn: mockEstimateFn,
+    });
+
+    expect(mockEstimateFn).toHaveBeenCalledWith(
+      expect.objectContaining({ destCountryCode: 'US' })
+    );
+  });
+
+  it('non-UPS 오더(dest_port_id 있음) → port.country_code 사용 (회귀 없음)', async () => {
+    mockSupabase.maybeSingle
+      .mockResolvedValueOnce({ data: { id: 'prod-1' }, error: null })
+      .mockResolvedValueOnce({ data: { country_code: 'JP' }, error: null });
+
+    const validated = {
+      transport_mode: 'AIR',
+      ups_product_code: 'WW_EXPRESS',
+      dest_port_id: 'port-123',
+      recipient_country_code: undefined,
+      packages: [{ gross_weight: 10 }],
+      incoterms: 'DDP',
+    };
+
+    const { saveOrderRateSnapshot } = await import('@/app/actions/operations/orders');
+
+    await saveOrderRateSnapshot({
+      supabase: mockSupabase,
+      orderId: 'order-2',
+      validated: validated as any,
+      profile: mockProfile,
+      agencyOrgId: 'agency-1',
+      estimateFn: mockEstimateFn,
+    });
+
+    expect(mockEstimateFn).toHaveBeenCalledWith(
+      expect.objectContaining({ destCountryCode: 'JP' })
+    );
   });
 });

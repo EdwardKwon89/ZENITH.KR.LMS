@@ -31,7 +31,7 @@ function createMockSupabase() {
     return Promise.resolve(chain._listResult || { data: [], error: null }).then(resolve);
   };
 
-  chain.select.mockImplementation((columns?: string) => {
+  (chain.select as any).mockImplementation((columns?: string) => {
     if (columns) {
       return chain;
     }
@@ -62,7 +62,7 @@ describe('TC-P6-DB-01: Phase 6 DB 스키마 연동 통합 테스트', () => {
 
   it('createCustomsRate — 기본값으로 zen_customs_rates INSERT 성공', async () => {
     const supabase = createMockSupabase();
-    supabase._singleResult = {
+    (supabase as any)._singleResult = {
       data: { id: 'rate-1', org_id: 'org-customs', country_code: 'KR', currency: 'USD', is_active: true, version_no: 1, created_at: '2026-06-01', created_by: 'admin-1' },
       error: null,
     };
@@ -78,7 +78,7 @@ describe('TC-P6-DB-01: Phase 6 DB 스키마 연동 통합 테스트', () => {
 
   it('createDeliveryRate — LOCAL 타입 INSERT 검증', async () => {
     const supabase = createMockSupabase();
-    supabase._singleResult = {
+    (supabase as any)._singleResult = {
       data: { id: 'del-1', org_id: 'org-del', service_type: 'LOCAL', country_code: 'KR', is_active: true },
       error: null,
     };
@@ -94,13 +94,13 @@ describe('TC-P6-DB-01: Phase 6 DB 스키마 연동 통합 테스트', () => {
 
   it('createOrderServices — 요율 유효성 검증 후 zen_order_services INSERT', async () => {
     const supabase = createMockSupabase();
-    supabase._singleResult = { data: { shipper_id: 'shipper-1' }, error: null };
+    (supabase as any)._singleResult = { data: { shipper_id: 'shipper-1' }, error: null };
 
     (validateUserAction as any).mockResolvedValue({ supabase, profile: { id: 'user-1', role: USER_ROLES.CORPORATE, org_id: 'shipper-1' } });
 
     const { createOrderServices } = await import('@/app/actions/operations/order-services');
 
-    supabase._listResult = {
+    (supabase as any)._listResult = {
       data: [{ id: 'os-1', service_type: 'TRANSPORT', status: 'REQUESTED' }],
       error: null,
     };
@@ -118,9 +118,9 @@ describe('TC-P6-DB-01: Phase 6 DB 스키마 연동 통합 테스트', () => {
 
     (validateUserAction as any).mockResolvedValue({ supabase, profile: { id: 'user-1', role: USER_ROLES.CORPORATE, org_id: 'org-1' } });
 
-    supabase._maybeSingleResult = { data: { id: 'port-icn-uuid' }, error: null };
+    (supabase as any)._maybeSingleResult = { data: { id: 'port-icn-uuid' }, error: null };
 
-    supabase._listResult = {
+    (supabase as any)._listResult = {
       data: [
         { id: 'rate-1', carrier_id: 'carrier-1', transport_mode: 'AIR', tiers: { weight_slabs: [{ weight_min: 0, unit_price: 5 }], cbm_slabs: [{ cbm_min: 0, cbm_price: 0, min_charge: 0 }] }, currency: 'USD', carrier: { name: 'Test Air' } },
       ],
@@ -143,10 +143,10 @@ describe('TC-P6-DB-01: Phase 6 DB 스키마 연동 통합 테스트', () => {
 
     (validateUserAction as any).mockResolvedValue({ supabase, profile: { id: 'user-1', role: USER_ROLES.CORPORATE, org_id: 'shipper-1' } });
 
-    supabase.single
+    (supabase.single as any)
       .mockResolvedValueOnce({ data: { shipper_id: 'shipper-1' }, error: null })
       .mockResolvedValueOnce({ data: { id: 'rate-active', is_active: true, valid_from: '2026-01-01', valid_until: '2026-12-31' }, error: null });
-    supabase._listResult = { data: [{ id: 'os-1' }], error: null };
+    (supabase as any)._listResult = { data: [{ id: 'os-1' }], error: null };
 
     const { createOrderServices } = await import('@/app/actions/operations/order-services');
 

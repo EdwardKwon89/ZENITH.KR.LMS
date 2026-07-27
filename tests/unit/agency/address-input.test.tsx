@@ -19,7 +19,15 @@ vi.mock('react-daum-postcode', () => ({
   DaumPostcodeEmbed: ({ onComplete }: { onComplete: (data: any) => void }) => (
     <div data-testid="daum-postcode-embed">
       <button
-        onClick={() => onComplete({ roadAddress: '123 Teheran-ro', zonecode: '061234' })}
+        onClick={() => onComplete({
+          roadAddress: '123 Teheran-ro',
+          zonecode: '061234',
+          roadAddressEnglish: '123 Teheran-ro, Gangnam-gu, Seoul',
+          sido: '서울특별시',
+          sidoEnglish: 'Seoul',
+          sigungu: '강남구',
+          sigunguEnglish: 'Gangnam-gu',
+        })}
       >
         select-address
       </button>
@@ -36,16 +44,47 @@ vi.mock('country-state-city', () => ({
     ],
   },
   State: {
-    getStatesOfCountry: () => [
-      { isoCode: 'CA', name: 'California', countryCode: 'US' },
-      { isoCode: 'NY', name: 'New York', countryCode: 'US' },
-    ],
+    getStatesOfCountry: (countryCode: string) => {
+      if (countryCode === 'US') {
+        return [
+          { isoCode: 'CA', name: 'California', countryCode: 'US' },
+          { isoCode: 'NY', name: 'New York', countryCode: 'US' },
+        ];
+      }
+      if (countryCode === 'JP') {
+        return [{ isoCode: '02', name: 'Aomori', countryCode: 'JP' }];
+      }
+      if (countryCode === 'KR') {
+        return [
+          { isoCode: '11', name: 'Seoul', countryCode: 'KR' },
+          { isoCode: '41', name: 'Gyeonggi Province', countryCode: 'KR' },
+        ];
+      }
+      return [];
+    },
   },
   City: {
-    getCitiesOfState: () => [
-      { name: 'Los Angeles', stateCode: 'CA', countryCode: 'US' },
-      { name: 'San Francisco', stateCode: 'CA', countryCode: 'US' },
-    ],
+    getCitiesOfState: (countryCode: string, stateCode: string) => {
+      if (countryCode === 'US' && stateCode === 'CA') {
+        return [
+          { name: 'Los Angeles', stateCode: 'CA', countryCode: 'US' },
+          { name: 'San Francisco', stateCode: 'CA', countryCode: 'US' },
+        ];
+      }
+      if (countryCode === 'US' && stateCode === 'NY') {
+        return [
+          { name: 'New York', stateCode: 'NY', countryCode: 'US' },
+          { name: 'Buffalo', stateCode: 'NY', countryCode: 'US' },
+        ];
+      }
+      if (countryCode === 'KR' && stateCode === '11') {
+        return [
+          { name: 'Gangnam-gu', stateCode: '11', countryCode: 'KR' },
+          { name: 'Jongno-gu', stateCode: '11', countryCode: 'KR' },
+        ];
+      }
+      return [];
+    },
   },
 }));
 
@@ -54,7 +93,7 @@ describe('TC-P7-UI-ADDR-01: 국가 KR 선택 시 주소 검색 버튼 표시 확
     render(<AddressInput t={mockT} />);
 
     const selects = screen.getAllByRole('combobox');
-    expect(selects).toHaveLength(1);
+    expect(selects.length).toBeGreaterThanOrEqual(3);
     expect((selects[0] as HTMLSelectElement).value).toBe('KR');
 
     expect(screen.getByPlaceholderText('Zip Code')).toBeInTheDocument();
@@ -64,7 +103,7 @@ describe('TC-P7-UI-ADDR-01: 국가 KR 선택 시 주소 검색 버튼 표시 확
   it('US 선택 시: 주소 검색 버튼 미표시, state/city select 표시', async () => {
     render(<AddressInput t={mockT} />);
 
-    const countrySelect = screen.getByRole('combobox');
+    const countrySelect = screen.getAllByRole('combobox')[0];
     fireEvent.change(countrySelect, { target: { value: 'US' } });
 
     await waitFor(() => {
@@ -75,10 +114,19 @@ describe('TC-P7-UI-ADDR-01: 국가 KR 선택 시 주소 검색 버튼 표시 확
     expect(selects.length).toBeGreaterThanOrEqual(2);
   });
 
+  it('KR 선택 시: 주소 검색 버튼 + state/city select 모두 표시', async () => {
+    render(<AddressInput t={mockT} />);
+
+    expect(screen.getByRole('button', { name: 'Search' })).toBeInTheDocument();
+
+    const selects = screen.getAllByRole('combobox');
+    expect(selects.length).toBeGreaterThanOrEqual(3);
+  });
+
   it('JP 선택 시: state/city select 표시', async () => {
     render(<AddressInput t={mockT} />);
 
-    const countrySelect = screen.getByRole('combobox');
+    const countrySelect = screen.getAllByRole('combobox')[0];
     fireEvent.change(countrySelect, { target: { value: 'JP' } });
 
     await waitFor(() => {
@@ -113,5 +161,159 @@ describe('TC-P7-UI-ADDR-02: 주소 검색 완료 후 roadAddress + zipcode 상�
     expect(zipInput.value).toBe('061234');
 
     expect(screen.queryByTestId('daum-postcode-embed')).not.toBeInTheDocument();
+  });
+
+  it('KR 선택 → 검색 완료 시 address_english hidden input에 영문 주소가 채워진다', () => {
+    const { container } = render(<AddressInput t={mockT} />);
+
+    const searchButton = screen.getByRole('button', { name: 'Search' });
+    fireEvent.click(searchButton);
+
+    const selectAddressButton = screen.getByRole('button', { name: 'select-address' });
+    fireEvent.click(selectAddressButton);
+
+    const hiddenInput = container.querySelector('input[name="address_english"]') as HTMLInputElement;
+    expect(hiddenInput).toBeInTheDocument();
+    expect(hiddenInput.value).toBe('123 Teheran-ro, Gangnam-gu, Seoul');
+  });
+
+  it('KR 선택 → 검색 완료 시 state_province hidden input에 ISO코드(11=Seoul)가 채워진다', () => {
+    const { container } = render(<AddressInput t={mockT} />);
+
+    const searchButton = screen.getByRole('button', { name: 'Search' });
+    fireEvent.click(searchButton);
+
+    const selectAddressButton = screen.getByRole('button', { name: 'select-address' });
+    fireEvent.click(selectAddressButton);
+
+    const hiddenInput = container.querySelector('input[name="state_province"]') as HTMLInputElement;
+    expect(hiddenInput).toBeInTheDocument();
+    expect(hiddenInput.value).toBe('11');
+  });
+
+  it('KR 선택 → 검색 완료 시 city hidden input에 sigunguEnglish가 채워진다', () => {
+    const { container } = render(<AddressInput t={mockT} />);
+
+    const searchButton = screen.getByRole('button', { name: 'Search' });
+    fireEvent.click(searchButton);
+
+    const selectAddressButton = screen.getByRole('button', { name: 'select-address' });
+    fireEvent.click(selectAddressButton);
+
+    const hiddenInput = container.querySelector('input[name="city"]') as HTMLInputElement;
+    expect(hiddenInput).toBeInTheDocument();
+    expect(hiddenInput.value).toBe('Gangnam-gu');
+  });
+
+  it('KR 선택 → 검색 완료 시 setValue가 ISO코드(11)와 city를 포함하여 호출된다', () => {
+    const setValue = vi.fn();
+    render(<AddressInput t={mockT} prefix="recipient" setValue={setValue} />);
+
+    const searchButton = screen.getByRole('button', { name: 'Search' });
+    fireEvent.click(searchButton);
+
+    const selectAddressButton = screen.getByRole('button', { name: 'select-address' });
+    fireEvent.click(selectAddressButton);
+
+    expect(setValue).toHaveBeenCalledWith('recipient_state_province', '11');
+    expect(setValue).toHaveBeenCalledWith('recipient_city', 'Gangnam-gu');
+  });
+
+  it('KR 선택 → 검색 시 sido 접미사(startsWith) 매칭 — "서울특별시" → ISO 11', () => {
+    const { container } = render(<AddressInput t={mockT} />);
+
+    const searchButton = screen.getByRole('button', { name: 'Search' });
+    fireEvent.click(searchButton);
+
+    const selectAddressButton = screen.getByRole('button', { name: 'select-address' });
+    fireEvent.click(selectAddressButton);
+
+    const hiddenInput = container.querySelector('input[name="state_province"]') as HTMLInputElement;
+    expect(hiddenInput.value).toBe('11');
+  });
+});
+
+describe('TC-P7-UI-ADDR-03: defaultValues 갱신 시 state/city 보존 (Issue #530)', () => {
+  it('비KR defaultValues로 렌더링 후 다른 defaultValues로 rerender 시 state/city 값 유지', () => {
+    const setValue = vi.fn();
+    const { rerender } = render(
+      <AddressInput
+        t={mockT}
+        mode="rhf"
+        prefix="recipient"
+        setValue={setValue}
+        defaultValues={{ country_code: 'US', state_province: 'CA', city: 'Los Angeles' }}
+      />
+    );
+
+    // 초기 렌더링: state/city 값이 반영됨
+    const selects = screen.getAllByRole('combobox');
+    const stateSelect = selects[1] as HTMLSelectElement;
+    const citySelect = selects[2] as HTMLSelectElement;
+    expect(stateSelect.value).toBe('CA');
+    expect(citySelect.value).toBe('Los Angeles');
+
+    // 주소록 적용 모의: 다른 defaultValues로 rerender (동일 국가, state만 변경)
+    rerender(
+      <AddressInput
+        t={mockT}
+        mode="rhf"
+        prefix="recipient"
+        setValue={setValue}
+        defaultValues={{ country_code: 'US', state_province: 'NY', city: 'New York' }}
+      />
+    );
+
+    // state/city 값이 의도대로 반영되고 리셋되지 않음
+    const selectsAfter = screen.getAllByRole('combobox');
+    expect((selectsAfter[1] as HTMLSelectElement).value).toBe('NY');
+    expect((selectsAfter[2] as HTMLSelectElement).value).toBe('New York');
+  });
+
+  it('사용자가 국가 select를 직접 변경하면 state/city가 리셋됨 (기존 동작 보존)', async () => {
+    const setValue = vi.fn();
+    render(
+      <AddressInput
+        t={mockT}
+        mode="rhf"
+        prefix="recipient"
+        setValue={setValue}
+        defaultValues={{ country_code: 'US', state_province: 'CA', city: 'Los Angeles' }}
+      />
+    );
+
+    // 직접 국가 변경 → 리셋되어야 함
+    const countrySelect = screen.getAllByRole('combobox')[0];
+    fireEvent.change(countrySelect, { target: { value: 'JP' } });
+
+    await waitFor(() => {
+      const selects = screen.getAllByRole('combobox');
+      expect((selects[1] as HTMLSelectElement).value).toBe('');
+      expect((selects[2] as HTMLSelectElement).value).toBe('');
+    });
+  });
+
+  it('사용자가 state select를 직접 변경하면 city가 리셋됨 (기존 동작 보존)', async () => {
+    const setValue = vi.fn();
+    render(
+      <AddressInput
+        t={mockT}
+        mode="rhf"
+        prefix="recipient"
+        setValue={setValue}
+        defaultValues={{ country_code: 'US', state_province: 'CA', city: 'Los Angeles' }}
+      />
+    );
+
+    // 직접 state 변경 → city 리셋
+    const selects = screen.getAllByRole('combobox');
+    const stateSelect = selects[1];
+    fireEvent.change(stateSelect, { target: { value: 'NY' } });
+
+    await waitFor(() => {
+      const selectsAfter = screen.getAllByRole('combobox');
+      expect((selectsAfter[1] as HTMLSelectElement).value).toBe('NY');
+      expect((selectsAfter[2] as HTMLSelectElement).value).toBe('');
+    });
   });
 });

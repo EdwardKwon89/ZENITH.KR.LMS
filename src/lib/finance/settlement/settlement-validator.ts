@@ -1,8 +1,12 @@
 export class SettlementValidator {
   /**
    * 오더의 필수 정산 데이터 존재 여부를 검증합니다.
+   * UPS 오더는 origin_port/dest_port가 없으므로 예외 처리 (Issue #489/#514/#503)
    */
   validateOrder(order: any): { isValid: boolean; message?: string } {
+    if (order.transport_mode === 'UPS') {
+      return { isValid: true };
+    }
     if (!order.origin_port || !order.dest_port || !order.transport_mode) {
       return { 
         isValid: false, 

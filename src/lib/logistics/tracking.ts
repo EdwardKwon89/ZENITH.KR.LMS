@@ -11,6 +11,23 @@ import { triggerStatusChangeNotification } from '@/app/actions/notifications';
 
 export type TrackingEventCode = 'BOOKED' | 'PICKED_UP' | 'TERMINAL_IN' | 'DEPARTED' | 'IN_TRANSIT' | 'ARRIVED' | 'OUT_FOR_DELIVERY' | 'DELIVERED' | 'DELAYED' | 'EXCEPTION' | 'TRANSIT_DEPARTED' | 'TRANSIT_ARRIVED_HUB' | 'TRANSIT_DEPARTED_HUB' | 'TRANSIT_ARRIVED_DEST';
 
+export const EVENT_TO_ORDER_STATUS: Record<TrackingEventCode, OrderStatus> = {
+  'BOOKED': OrderStatus.SCHEDULED,
+  'PICKED_UP': OrderStatus.RELEASED,
+  'TERMINAL_IN': OrderStatus.WAREHOUSED,
+  'DEPARTED': OrderStatus.IN_TRANSIT,
+  'IN_TRANSIT': OrderStatus.IN_TRANSIT,
+  'ARRIVED': OrderStatus.IN_TRANSIT,
+  'OUT_FOR_DELIVERY': OrderStatus.IN_TRANSIT,
+  'DELIVERED': OrderStatus.DELIVERED,
+  'DELAYED': OrderStatus.HELD,
+  'EXCEPTION': OrderStatus.HELD,
+  'TRANSIT_DEPARTED': OrderStatus.IN_TRANSIT,
+  'TRANSIT_ARRIVED_HUB': OrderStatus.IN_TRANSIT,
+  'TRANSIT_DEPARTED_HUB': OrderStatus.IN_TRANSIT,
+  'TRANSIT_ARRIVED_DEST': OrderStatus.DELIVERED,
+};
+
 export interface TrackingStep {
   event_code: TrackingEventCode;
   event_time: Date;
@@ -59,22 +76,7 @@ export class TrackingManager {
   /**
    * 트래킹 이벤트 코드와 오더 상태 매핑 테이블
    */
-  private statusMapping: Record<TrackingEventCode, OrderStatus> = {
-    'BOOKED': OrderStatus.SCHEDULED,
-    'PICKED_UP': OrderStatus.RELEASED,
-    'TERMINAL_IN': OrderStatus.WAREHOUSED,
-    'DEPARTED': OrderStatus.IN_TRANSIT,
-    'IN_TRANSIT': OrderStatus.IN_TRANSIT,
-    'ARRIVED': OrderStatus.IN_TRANSIT,
-    'OUT_FOR_DELIVERY': OrderStatus.IN_TRANSIT,
-    'DELIVERED': OrderStatus.DELIVERED,
-    'DELAYED': OrderStatus.HELD,
-    'EXCEPTION': OrderStatus.HELD,
-    'TRANSIT_DEPARTED': OrderStatus.IN_TRANSIT,
-    'TRANSIT_ARRIVED_HUB': OrderStatus.IN_TRANSIT,
-    'TRANSIT_DEPARTED_HUB': OrderStatus.IN_TRANSIT,
-    'TRANSIT_ARRIVED_DEST': OrderStatus.DELIVERED,
-  };
+  private statusMapping: Record<TrackingEventCode, OrderStatus> = EVENT_TO_ORDER_STATUS;
 
   constructor() {
     this.providers.set('VIRTUAL', new VirtualTrackingProvider());

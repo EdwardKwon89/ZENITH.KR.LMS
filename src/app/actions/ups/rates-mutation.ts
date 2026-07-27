@@ -4,10 +4,19 @@ import { revalidatePath } from 'next/cache';
 import { validateUserAction } from '@/lib/auth/guards';
 import { USER_ROLES } from '@/lib/auth/rbac';
 import { getMaxAllowedZoneDiscount } from '@/lib/ups/discount-guard';
+import { createAdminClient } from '@/utils/supabase/server';
 
 function requireAdminOrManager(role: string | undefined) {
   if (!role || (role !== USER_ROLES.ADMIN && role !== USER_ROLES.MANAGER && role !== USER_ROLES.ZENITH_SUPER_ADMIN)) {
     throw new Error('UPS 요율 관리 권한이 없습니다.');
+  }
+}
+
+// Issue #605: Master Agency(SUB_ADMIN)는 본인 관리 Sub-Agency의 원가 할인율만 다룰 수 있음
+// (실제 범위 제한은 RLS agency_pricing_policies_sub_admin_scoped가 담당 — 여기서는 역할만 통과시킴)
+function requireAdminManagerOrSubAdmin(role: string | undefined) {
+  if (!role || (role !== USER_ROLES.ADMIN && role !== USER_ROLES.MANAGER && role !== USER_ROLES.ZENITH_SUPER_ADMIN && role !== USER_ROLES.SUB_ADMIN)) {
+    throw new Error('Agency 원가 할인율 관리 권한이 없습니다.');
   }
 }
 
@@ -110,6 +119,42 @@ export async function upsertUpsBaseRate(data: {
   revalidatePath('/admin/ups-rates');
 }
 
+// ─── Issue #618: SUB_ADMIN 전용 원가 업데이트 ─────
+
+export async function upsertAgencyCostRate(data: {
+  product_id: string;
+  zone_id: string;
+  weight_kg: number;
+  valid_from: string;
+  cost_price: number;
+}) {
+  const { profile } = await validateUserAction();
+  requireAdminManagerOrSubAdmin(profile?.role);
+
+  const admin = await createAdminClient();
+
+  const { data: existing, error: findError } = await admin
+    .from('zen_ups_base_rates')
+    .select('id')
+    .eq('product_id', data.product_id)
+    .eq('zone_id', data.zone_id)
+    .eq('weight_kg', data.weight_kg)
+    .eq('valid_from', data.valid_from)
+    .maybeSingle();
+
+  if (findError || !existing) {
+    throw new Error('해당 기준요금을 찾을 수 없습니다. 기준요금이 먼저 등록되어야 합니다.');
+  }
+
+  const { error: updateError } = await admin
+    .from('zen_ups_base_rates')
+    .update({ cost_price: data.cost_price, updated_at: new Date().toISOString() })
+    .eq('id', existing.id);
+
+  if (updateError) throw new Error(updateError.message);
+  revalidatePath('/admin/ups-rates');
+}
+
 // ─── Fuel Surcharge ────────────────────────────────
 
 export async function upsertUpsFuelSurcharge(data: {
@@ -162,6 +207,49 @@ export async function deleteUpsOtherCharge(id: string) {
   revalidatePath('/admin/ups-rates');
 }
 
+// ─── Surge Fee (Issue #491) ────────────────────────
+
+export async function createUpsSurgeFee(data: {
+  destination_country_code: string; selling_rate_per_kg: number; cost_rate_per_kg: number;
+  currency?: string; effective_from: string; effective_until?: string | null;
+}) {
+  const { supabase, profile } = await validateUserAction();
+  requireAdminOrManager(profile?.role);
+  const { error } = await supabase.from('zen_ups_surge_fees').insert({
+    ...data,
+    destination_country_code: data.destination_country_code.toUpperCase(),
+    currency: data.currency ?? 'KRW',
+    created_by: profile!.id,
+    updated_at: new Date().toISOString(),
+  });
+  if (error) throw new Error(error.message);
+  revalidatePath('/admin/ups-rates');
+}
+
+export async function updateUpsSurgeFee(id: string, data: {
+  destination_country_code?: string; selling_rate_per_kg?: number; cost_rate_per_kg?: number;
+  currency?: string; effective_from?: string; effective_until?: string | null; is_active?: boolean;
+}) {
+  const { supabase, profile } = await validateUserAction();
+  requireAdminOrManager(profile?.role);
+  const payload = {
+    ...data,
+    ...(data.destination_country_code ? { destination_country_code: data.destination_country_code.toUpperCase() } : {}),
+    updated_at: new Date().toISOString(),
+  };
+  const { error } = await supabase.from('zen_ups_surge_fees').update(payload).eq('id', id);
+  if (error) throw new Error(error.message);
+  revalidatePath('/admin/ups-rates');
+}
+
+export async function deleteUpsSurgeFee(id: string) {
+  const { supabase, profile } = await validateUserAction();
+  requireAdminOrManager(profile?.role);
+  const { error } = await supabase.from('zen_ups_surge_fees').update({ is_active: false, updated_at: new Date().toISOString() }).eq('id', id);
+  if (error) throw new Error(error.message);
+  revalidatePath('/admin/ups-rates');
+}
+
 // ─── Agency Pricing Policy ─────────────────────────
 
 export async function getAgencyPricingPolicies(agencyOrgId?: string) {
@@ -178,11 +266,12 @@ export async function getAgencyPricingPolicies(agencyOrgId?: string) {
 
 export async function upsertAgencyPricingPolicy(data: {
   agency_org_id: string; zone_id: string; discount_rate: number; is_active?: boolean;
+  product_ids?: string[];
 }) {
   const { supabase, profile } = await validateUserAction();
-  requireAdminOrManager(profile?.role);
+  requireAdminManagerOrSubAdmin(profile?.role);
 
-  const maxAllowed = await getMaxAllowedZoneDiscount(supabase, data.zone_id);
+  const maxAllowed = await getMaxAllowedZoneDiscount(supabase, data.zone_id, data.product_ids);
   if (maxAllowed != null && data.discount_rate > maxAllowed) {
     throw new Error(
       `할인율이 원가 마진을 초과합니다. 최대 허용: ${(maxAllowed * 100).toFixed(1)}% (Zone ID: ${data.zone_id})`

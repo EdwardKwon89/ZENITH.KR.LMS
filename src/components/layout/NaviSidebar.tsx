@@ -103,8 +103,11 @@ export default function NaviSidebar({
       children: [
         { title: t("logistics_tracking"), href: "/tracking" },
         { title: t("inventory"), href: "/inventory" },
+        { title: t("logistics_pickup"), href: "/warehouse/pickup" },
         { title: t("logistics_inbound"), href: "/warehouse/inbound" },
+        { title: t("logistics_ups_receiving"), href: "/warehouse/ups-receive" },
         { title: t("logistics_outbound"), href: "/warehouse/outbound" },
+        { title: t("logistics_departure"), href: "/warehouse/departure" },
       ]
     },
     {
@@ -114,7 +117,9 @@ export default function NaviSidebar({
       children: [
         { title: t("finance_revenue"), href: "/finance/revenue" },
         { title: t("finance_costs"), href: "/finance/costs" },
+        { title: t("finance_daily_billing"), href: "/finance/daily-billing" },
         { title: t("finance_transport_costs"), href: "/admin/transport-costs" },
+        { title: t("finance_ups_actual_charges"), href: "/admin/ups-actual-charges" },
         { title: t("finance_documents"), href: "/finance/documents" },
         { title: t("settlement"), href: "/settlement" },
       ]
