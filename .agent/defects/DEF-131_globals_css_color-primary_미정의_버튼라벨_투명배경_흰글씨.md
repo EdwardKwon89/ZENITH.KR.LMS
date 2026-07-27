@@ -51,3 +51,7 @@ src/components/orders/UpsActualAdjustmentForm.tsx                               
 ## 관련 파일
 - `src/app/globals.css` (`@theme` 블록, `--color-primary` 부재)
 - `src/components/ui/ZenButton.tsx` (참고 — 이 파일 자체는 정상, twMerge 동작도 정상)
+
+## 해소 확인
+
+PR#911(TASK-B-230, 커밋 `5b69178e`)에서 조치안대로 `globals.css`에 1줄 추가, TeamB_Dev 병합 완료(`a93557a2`). `.tsx` 파일은 전혀 수정하지 않음(Team A 소유 2개 포함). R-10 스크린샷 6개 화면 확인 결과 저장 버튼 텍스트 정상 표시 확인, Team A 소유 화면(`ups-detail`, 라우팅) 시각적 회귀 없음. 전체 회귀 137 files/913 tests ALL PASS(Jaison 격리 워크트리 재검증 일치).
