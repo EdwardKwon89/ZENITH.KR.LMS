@@ -62,6 +62,7 @@ tags: ["governance"]
 | **206** | **문서 구조 및 스크립트 관리 거버넌스** | [206_DOCS_AND_SCRIPT_GOVERNANCE.md](./206_DOCS_AND_SCRIPT_GOVERNANCE.md) | docs/ 문서 유형 분류 체계, 번호 충돌 해소, SQL/py 관리 규칙, Obsidian Vault 적용 방안 |
 | **207** | **공통 코드 거버넌스** | [207_COMMON_CODE_GOVERNANCE.md](./207_COMMON_CODE_GOVERNANCE.md) | 공통 코드 정의 및 관리 규칙 |
 | **208** | **Supabase 원격 SOP** | [208_SUPABASE_REMOTE_SOP.md](./208_SUPABASE_REMOTE_SOP.md) | Supabase 원격 접속 및 운영 절차 |
+| **209** | **Vercel 원격 배포 SOP** | [209_VERCEL_DEPLOYMENT_SOP.md](./209_VERCEL_DEPLOYMENT_SOP.md) | 고객 시연용 develop→Vercel/Supabase 원격 배포 절차 (Edward 지시 시에만 실행) |
 
 ---
 
