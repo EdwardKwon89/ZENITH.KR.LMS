@@ -5,6 +5,7 @@ import { recordUpsActualCharges, getUpsActualCharges, getUpsChargeReconciliation
 import { toast } from 'sonner';
 import { Loader2, Plus, Trash2, HelpCircle } from 'lucide-react';
 import { ZenCard, ZenButton, ZenInput, ZenSelect, ZenBadge } from '@/components/ui/ZenUI';
+import { getCostTypeLabel } from '@/lib/finance/settlement/cost-type-labels';
 
 interface UpsActualAdjustmentFormProps {
   orderId: string;
@@ -30,6 +31,7 @@ export function UpsActualAdjustmentForm({
   const [saving, setSaving] = useState(false);
   const [reconciliation, setReconciliation] = useState<{
     estimated: number;
+    estimatedBreakdown: Array<{ costType: string; amount: number; currency: string }>;
     actual: number;
     variance: number;
     currency: string;
@@ -58,17 +60,7 @@ export function UpsActualAdjustmentForm({
           }))
         );
       } else {
-        // Default row
-        setCharges([
-          {
-            chargeType: 'BASE FREIGHT',
-            amount: recon.estimated > 0 ? recon.estimated : 0,
-            currency: recon.currency || 'USD',
-            upsInvoiceNo: '',
-            upsInvoiceDate: '',
-            notes: '',
-          },
-        ]);
+        setCharges([]);
       }
 
       // Check if there is already an invoiced adjustment
@@ -103,19 +95,6 @@ export function UpsActualAdjustmentForm({
   };
 
   const handleRemoveRow = (index: number) => {
-    if (charges.length === 1) {
-      setCharges([
-        {
-          chargeType: '',
-          amount: 0,
-          currency: reconciliation?.currency || 'USD',
-          upsInvoiceNo: '',
-          upsInvoiceDate: '',
-          notes: '',
-        },
-      ]);
-      return;
-    }
     setCharges(charges.filter((_, i) => i !== index));
   };
 
@@ -203,6 +182,21 @@ export function UpsActualAdjustmentForm({
         </div>
       </div>
 
+      {/* 예상 청구액 상세 (Estimated Breakdown) */}
+      {reconciliation?.estimatedBreakdown && reconciliation.estimatedBreakdown.length > 0 && (
+        <ZenCard className="p-4 mb-4 bg-gray-50 dark:bg-zinc-900">
+          <div className="text-xs font-semibold text-gray-600 dark:text-zinc-400 mb-2">예상 청구액 상세 (Estimated Breakdown)</div>
+          <div className="space-y-1">
+            {reconciliation.estimatedBreakdown.map((item, i) => (
+              <div key={i} className="flex justify-between text-sm">
+                <span className="text-gray-600 dark:text-zinc-400">{getCostTypeLabel(item.costType)}</span>
+                <span className="font-mono">{item.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {item.currency}</span>
+              </div>
+            ))}
+          </div>
+        </ZenCard>
+      )}
+
       {/* Reconciliation Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <ZenCard className="p-4 bg-gray-50 dark:bg-zinc-900">
@@ -218,7 +212,7 @@ export function UpsActualAdjustmentForm({
           <div className="text-2xl font-bold text-primary mt-1">
             {actualTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {currency}
           </div>
-          <p className="text-[10px] text-gray-400 dark:text-zinc-500 mt-1">아래 입력된 실제 항목의 합산액</p>
+          <p className="text-[10px] text-gray-400 dark:text-zinc-500 mt-1">예상 청구액 + 아래 추가 등록된 부가요금의 합산액</p>
         </ZenCard>
 
         <ZenCard className={`p-4 ${
