@@ -15,6 +15,7 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
+| [#886](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/886) | [verify] DEF-125 재검증 요청 — TASK-B-218/220으로 이미 해소된 것으로 추정됨 | b | p2 | - | 미배정 | 2026-07-27 |
 | [#882](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/882) | [fix] /admin/ups-actual-charges 페이지 네비게이션 진입점 누락 | b | p2 | review | 미배정 | 2026-07-27 |
 | [#881](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/881) | [fix] zen_order_rate_snapshots AGENCY UPDATE/INSERT RLS 누락 — 입고처리 중량변경 시 예상운임 재계산 조용히 실패 | b | p1 | review | 미배정 | 2026-07-26 |
 | [#879](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/879) | [fix] zen_order_rate_snapshots AGENCY SELECT RLS 누락 — 예상운임 AGENCY 계정에 항상 미표시 | b | p1 | review | 미배정 | 2026-07-26 |
