@@ -7,7 +7,7 @@
 | **담당** | Baker (Team B) |
 | **생성일** | 2026-07-28 |
 | **우선순위** | P1 |
-| **상태** | ⬜ |
+| **상태** | 🔔 |
 
 ## 전제조건
 
@@ -82,3 +82,30 @@ const platformTotal = baseFreight + fuelSurcharge + surgeFee + otherCharges;
 _(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
 
 없음
+
+## [작업 결과]
+
+| 항목 | 결과 |
+|:-----|:-----|
+| **커밋 (코드)** | TBD |
+| **커밋 (문서)** | TBD |
+| **회귀 테스트** | **139/139 files · 937/937 tests ALL PASS** |
+| **PR** | TBD |
+
+### 코드 변경 요약
+
+**`src/lib/finance/settlement/invoice-generator.ts`**
+
+| 변경 | 내용 |
+|:-----|:-----|
+| 기존 인보이스 | `invoice_tier` + `billed_org_id` 추가 (`AGENCY_TO_SHIPPER` / `ADMIN_TO_SHIPPER` 분기) |
+| admin→agency 인보이스 | `order.agency_org_id` 존재 시 `zen_order_rate_snapshots.metadata.platform.*` 기반 `total_amount` 계산 후 별도 인보이스 생성 (`invoice_tier: 'ADMIN_TO_AGENCY'`) |
+| return 구조 | `{ success, invoice, agencyInvoice }` (agency 없으면 `agencyInvoice: null`) |
+
+### 테스트 결과
+
+| TC | 설명 | 결과 |
+|:---|:-----|:-----|
+| TC-918-01 | agency_org_id 있는 오더 → 인보이스 2건 (AGENCY_TO_SHIPPER + ADMIN_TO_AGENCY) | ✅ |
+| TC-918-02 | agency_org_id 없는 오더 → 인보이스 1건 (ADMIN_TO_SHIPPER), agencyInvoice null | ✅ |
+| TC-918-03 | admin→agency 금액 = platform 4항목 합산 (80+20+10+5=115) | ✅ |
