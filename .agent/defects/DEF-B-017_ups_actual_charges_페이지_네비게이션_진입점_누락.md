@@ -17,14 +17,44 @@
 - `src/app/[locale]/(dashboard)/agency/AgencyQuickLinks.tsx`(AGENCY용 퀵링크)에도 없음
 - 참고로 오더 단위 실제 청구 조정(`UpsActualAdjustmentForm` 컴포넌트)은 오더 상세 페이지(`/orders/[orderId]`, `/orders/[orderId]/ups-detail`)에 내장되어 있어 "오더 목록 → 오더 클릭"으로 정상 진입 가능 — 이건 문제 없음. **문제는 오더 단위가 아닌 관리자용 일괄 조회/등록 페이지(`/admin/ups-actual-charges`) 쪽임.**
 
-## 조치안 (설계 필요 — 배정 전 확정 대기)
+## 조치안 (Jaison 확정 설계, 2026-07-27)
 
-`NaviSidebar.tsx`에 메뉴 항목 추가 필요. ADMIN/MANAGER 전용 메뉴 그룹(예: "정산/재무" 하위)과 AGENCY 대시보드(퀵링크 또는 사이드바) 양쪽에 노출 필요 — 페이지 자체가 AGENCY 접근을 이미 허용하므로 AGENCY 쪽 진입점도 함께 추가해야 함. 정확한 메뉴 위치·라벨은 배정 시 확정.
+### 추가 발견: 나비게이션 노출 여부는 `NaviSidebar.tsx` 배열 편집만으로 해결되지 않음
+
+`NaviSidebar.tsx`의 메뉴 항목 노출은 `checkPermission(profile.role, href, allowedPaths)` 결과에 좌우되며, `allowedPaths`는 **DB 테이블 `zen_role_permissions`가 우선**(비어있을 때만 `STATIC_PERMISSIONS` 폴백 — `src/lib/auth/rbac.ts` `getPermissionsByRole()`). 실측 확인 결과:
+
+- `ADMIN`: DB에 `/admin`(블랭킷 prefix) 행이 이미 있어 **추가 조치 없이 노출됨**
+- `MANAGER`: DB 행에 `/admin`류 경로가 전혀 없음(`billing/finance/inventory/logistics/mypage/orders/reports/settlement/support/tracking/voc`만 존재) → **DB 권한 행 추가 필요**
+- `AGENCY`: DB 행이 `/orders, /agency, /tracking, /settlement, /voc, /mypage, /warehouse`뿐 → **DB 권한 행 추가 필요**
+
+즉 `page.tsx`의 자체 역할 가드(ADMIN/MANAGER/AGENCY 허용)와 실제 RBAC DB 권한 테이블이 이미 어긋나 있었음(MANAGER·AGENCY는 지금도 URL 직접 입력으로는 접근되지만 — page.tsx 가드만 통과하면 되므로 — 메뉴에 노출은 안 됨). 이번 수정은 메뉴 노출뿐 아니라 이 불일치 자체를 해소.
+
+### 조치 1: `zen_role_permissions`에 권한 행 추가 (마이그레이션)
+```sql
+INSERT INTO zen_role_permissions (role_code, menu_id, path, is_allowed) VALUES
+  ('MANAGER', 'ups_actual_charges', '/admin/ups-actual-charges', true),
+  ('AGENCY', 'ups_actual_charges', '/admin/ups-actual-charges', true)
+ON CONFLICT (role_code, path) DO NOTHING;
+```
+(ADMIN은 기존 `/admin` 블랭킷 행으로 이미 커버되어 추가 불요)
+
+### 조치 2: `NaviSidebar.tsx` — `finance_group.children` 배열에 항목 추가
+`src/components/layout/NaviSidebar.tsx`의 `finance_group` 하위(기존 `finance_transport_costs` 행 근처)에:
+```ts
+{ title: t("finance_ups_actual_charges"), href: "/admin/ups-actual-charges" },
+```
+
+### 조치 3: i18n 키 추가 (`messages/ko.json`, `en.json`, `ja.json` — `Navigation` 섹션, `finance_transport_costs` 키 근처)
+- ko: `"finance_ups_actual_charges": "UPS 사후 청구 관리"`
+- en: `"finance_ups_actual_charges": "UPS Actual Charges"`
+- ja: `"finance_ups_actual_charges": "UPS事後請求管理"`
+(`zh.json`은 `finance_*` 계열 키 자체가 기존에 없는 상태라 이번 Task 범위 밖 — 손대지 않음)
 
 ## 관련 파일
+- `supabase/migrations/` 신규 (zen_role_permissions INSERT)
 - `src/components/layout/NaviSidebar.tsx`
-- `src/app/[locale]/(dashboard)/agency/AgencyQuickLinks.tsx`
+- `messages/ko.json`, `messages/en.json`, `messages/ja.json`
 - `src/app/[locale]/(dashboard)/admin/ups-actual-charges/page.tsx` (대상 페이지, 수정 불필요)
 
 ## 관련 Task
-- 미배정 (이슈만 등록, 배정 대기)
+- `TASK-B-223` (배정 완료)
