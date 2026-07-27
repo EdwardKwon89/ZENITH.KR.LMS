@@ -98,7 +98,7 @@ return {
 - [x] 백엔드: `getUpsChargeReconciliation()`에 invoiceNo/invoiceDate 반환 추가 (기존 is_finalized 쿼리 통합)
 - [x] 프론트엔드: ChargeRow upsInvoiceNo/upsInvoiceDate 제거 + 테이블 컬럼 삭제 + Actual 카드 조건부 표시
 - [x] 회귀 테스트 3건 추가 (TC-B227-01~03)
-- [x] R-10: 청구서 미생성 화면 + 청구서 생성 화면 스크린샷
+- [x] R-10: 청구서 미생성 화면(TASK-B227-NO-INV-54805) + 청구서 생성 화면(ZEN-2026-000001) 스크린샷 — MD5 서로 다름 확인
 
 ## [발견 이슈]
 
