@@ -29,11 +29,241 @@ import Link from 'next/link';
 interface ShipperDailyBillingClientProps {
   initialGroups: ShipperDailyBillingGroup[];
   exchangeRate: number;
+  role: string;
+  agencyOrgId: string;
+}
+
+function BillingGroupTable({
+  groups,
+  expandedKey,
+  expandedOrders,
+  loadingOrders,
+  finalizingGroupKey,
+  isPending,
+  periodType,
+  onToggleExpand,
+  onBatchFinalize,
+  canFinalize,
+}: {
+  groups: ShipperDailyBillingGroup[];
+  expandedKey: string | null;
+  expandedOrders: Record<string, ShipperDailyOrderRow[]>;
+  loadingOrders: Record<string, boolean>;
+  finalizingGroupKey: string | null;
+  isPending: boolean;
+  periodType: 'daily' | 'weekly' | 'monthly';
+  onToggleExpand: (g: ShipperDailyBillingGroup) => void;
+  onBatchFinalize: (g: ShipperDailyBillingGroup) => void;
+  canFinalize: boolean;
+}) {
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full text-left text-xs">
+        <thead className="bg-slate-50 dark:bg-zinc-900/50 text-slate-500 font-semibold border-b border-slate-100 dark:border-zinc-800">
+          <tr>
+            <th className="py-3 px-4">
+              {periodType === 'daily' ? '일자 (Date)' : periodType === 'weekly' ? '주차 (Week)' : '월 (Month)'}
+            </th>
+            <th className="py-3 px-4">조직명</th>
+            <th className="py-3 px-4 text-center">인보이스 수</th>
+            <th className="py-3 px-4 text-right">기본운임</th>
+            <th className="py-3 px-4 text-right">유류할증료</th>
+            <th className="py-3 px-4 text-right">급증수수료</th>
+            <th className="py-3 px-4 text-right">기타부과금</th>
+            <th className="py-3 px-4 text-right">사후조정액</th>
+            <th className="py-3 px-4 text-right">총 합계 (KRW / USD)</th>
+            <th className="py-3 px-4 text-center">마감 상태</th>
+            {canFinalize && <th className="py-3 px-4 text-center">관리 / 액션</th>}
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-slate-100 dark:divide-zinc-800">
+          {groups.map((g) => {
+            const key = `${g.shipperId}_${g.date}`;
+            const isExpanded = expandedKey === key;
+            const isAllFinalized = g.unfinalizedCount === 0 && g.orderCount > 0;
+            const isFinalizingThis = finalizingGroupKey === key;
+
+            return (
+              <React.Fragment key={key}>
+                <tr className="hover:bg-slate-50/80 dark:hover:bg-zinc-900/40 transition-colors">
+                  <td className="py-3.5 px-4 font-mono font-bold text-slate-800 dark:text-slate-200">
+                    {g.date}
+                  </td>
+                  <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-white">
+                    {g.shipperName}
+                  </td>
+                  <td className="py-3.5 px-4 text-center font-mono font-semibold">
+                    {g.orderCount}건
+                  </td>
+                  <td className="py-3.5 px-4 text-right font-mono text-slate-700 dark:text-slate-300">
+                    ₩{g.totalBaseFreight.toLocaleString()}
+                  </td>
+                  <td className="py-3.5 px-4 text-right font-mono text-slate-700 dark:text-slate-300">
+                    ₩{g.totalFuelSurcharge.toLocaleString()}
+                  </td>
+                  <td className="py-3.5 px-4 text-right font-mono text-amber-600 dark:text-amber-400 font-semibold">
+                    ₩{g.totalSurgeFee.toLocaleString()}
+                  </td>
+                  <td className="py-3.5 px-4 text-right font-mono text-purple-600 dark:text-purple-400 font-semibold">
+                    ₩{(g.totalOtherCharge || 0).toLocaleString()}
+                  </td>
+                  <td className="py-3.5 px-4 text-right font-mono text-blue-600 dark:text-blue-400 font-semibold">
+                    ₩{g.totalActualAdjustment.toLocaleString()}
+                  </td>
+                  <td className="py-3.5 px-4 text-right">
+                    <span className="block font-extrabold font-mono text-amber-600 dark:text-amber-400">
+                      ₩{g.totalBillingAmountKrw.toLocaleString()} KRW
+                    </span>
+                    <span className="block text-[11px] font-mono text-slate-400">
+                      ${g.estimatedBillingAmountUsd.toLocaleString('en-US', { minimumFractionDigits: 2 })} USD
+                    </span>
+                  </td>
+                  <td className="py-3.5 px-4 text-center">
+                    {isAllFinalized ? (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+                        <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                        정산 마감 완료
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300">
+                        <AlertCircle className="w-3 h-3 text-amber-600" />
+                        미마감 ({g.unfinalizedCount}건)
+                      </span>
+                    )}
+                  </td>
+                  {canFinalize && (
+                    <td className="py-3.5 px-4 text-center">
+                      <div className="flex items-center justify-center gap-2">
+                        <button
+                          onClick={() => onToggleExpand(g)}
+                          className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-slate-700 dark:text-slate-200 text-xs font-semibold flex items-center gap-1 transition-colors"
+                        >
+                          <span>상세</span>
+                          {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                        </button>
+
+                        {!isAllFinalized && (
+                          <button
+                            onClick={() => onBatchFinalize(g)}
+                            disabled={isPending || isFinalizingThis}
+                            className="px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs flex items-center gap-1 shadow-xs transition-colors disabled:opacity-50"
+                          >
+                            {isFinalizingThis ? (
+                              <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                            ) : (
+                              <ShieldCheck className="w-3.5 h-3.5" />
+                            )}
+                            <span>일괄 마감</span>
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  )}
+                </tr>
+
+                {isExpanded && (
+                  <tr>
+                    <td colSpan={canFinalize ? 11 : 10} className="bg-slate-50/90 dark:bg-zinc-900/80 p-4 border-t border-b border-slate-200 dark:border-zinc-800">
+                      <div className="flex flex-col gap-3">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="font-bold text-slate-700 dark:text-slate-300">
+                            {g.shipperName} ({g.date}) 소속 개별 오더 목록 ({g.orderCount}건)
+                          </span>
+                          <span className="text-slate-400">
+                            UPS 전용 화면으로 이동하여 사후 부가금 또는 정산 내역을 개별 관리할 수 있습니다.
+                          </span>
+                        </div>
+
+                        {loadingOrders[key] ? (
+                          <div className="p-4 text-center text-xs text-slate-400 flex items-center justify-center gap-2">
+                            <RefreshCw className="w-4 h-4 animate-spin text-amber-500" />
+                            <span>개별 오더 정보 불러오는 중...</span>
+                          </div>
+                        ) : (
+                          <div className="overflow-x-auto bg-white dark:bg-zinc-950 rounded-xl border border-slate-200 dark:border-zinc-800">
+                            <table className="w-full text-left text-xs">
+                              <thead className="bg-slate-100 dark:bg-zinc-900 text-slate-500 font-semibold border-b border-slate-200 dark:border-zinc-800">
+                                <tr>
+                                  <th className="py-2 px-3">오더 번호</th>
+                                  <th className="py-2 px-3">상태</th>
+                                  <th className="py-2 px-3">도착국</th>
+                                  <th className="py-2 px-3 text-right">기본운임</th>
+                                  <th className="py-2 px-3 text-right">유류할증</th>
+                                  <th className="py-2 px-3 text-right">급증수수료</th>
+                                  <th className="py-2 px-3 text-right">기타부과금</th>
+                                  <th className="py-2 px-3 text-right">사후조정</th>
+                                  <th className="py-2 px-3 text-right">합계(KRW)</th>
+                                  <th className="py-2 px-3 text-center">인보이스</th>
+                                  <th className="py-2 px-3 text-center">바로가기</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-slate-100 dark:divide-zinc-800">
+                                {(expandedOrders[key] || []).map((ord) => (
+                                  <tr key={ord.orderId} className="hover:bg-slate-50 dark:hover:bg-zinc-900/40">
+                                    <td className="py-2 px-3 font-mono font-bold text-slate-800 dark:text-slate-200">
+                                      {ord.orderNo}
+                                    </td>
+                                    <td className="py-2 px-3">
+                                      <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-700 dark:bg-zinc-800 dark:text-slate-300">
+                                        {ord.status}
+                                      </span>
+                                    </td>
+                                    <td className="py-2 px-3 font-bold text-slate-700 dark:text-slate-300">
+                                      {ord.destCountryCode}
+                                    </td>
+                                    <td className="py-2 px-3 text-right font-mono">₩{ord.baseFreight.toLocaleString()}</td>
+                                    <td className="py-2 px-3 text-right font-mono">₩{ord.fuelSurcharge.toLocaleString()}</td>
+                                    <td className="py-2 px-3 text-right font-mono text-amber-600">₩{ord.surgeFee.toLocaleString()}</td>
+                                    <td className="py-2 px-3 text-right font-mono text-purple-600">₩{(ord.otherCharge || 0).toLocaleString()}</td>
+                                    <td className="py-2 px-3 text-right font-mono text-blue-600">₩{ord.actualAdjustment.toLocaleString()}</td>
+                                    <td className="py-2 px-3 text-right font-mono font-bold text-amber-600">
+                                      ₩{ord.totalAmountKrw.toLocaleString()}
+                                      {ord.hasUnsupportedCurrency && (
+                                        <span className="ml-1 text-[9px] text-red-500 font-normal">⚠ 혼합통화</span>
+                                      )}
+                                    </td>
+                                    <td className="py-2 px-3 text-center font-mono">
+                                      {ord.invoiceNo ? (
+                                        <span className="text-[11px] text-slate-600 dark:text-slate-400">
+                                          {ord.invoiceNo} ({ord.isFinalized ? '마감' : '진행중'})
+                                        </span>
+                                      ) : (
+                                        <span className="text-[11px] text-slate-400">미발행</span>
+                                      )}
+                                    </td>
+                                    <td className="py-2 px-3 text-center">
+                                      <Link
+                                        href={`/orders/${ord.orderId}/ups-detail`}
+                                        className="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-600 dark:text-blue-400 hover:underline"
+                                      >
+                                        <span>UPS 상세</span>
+                                        <ExternalLink className="w-3 h-3" />
+                                      </Link>
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </React.Fragment>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
 }
 
 export default function ShipperDailyBillingClient({
   initialGroups,
   exchangeRate,
+  role,
+  agencyOrgId,
 }: ShipperDailyBillingClientProps) {
   const [groups, setGroups] = useState<ShipperDailyBillingGroup[]>(initialGroups);
   const [periodType, setPeriodType] = useState<'daily' | 'weekly' | 'monthly'>('daily');
@@ -52,6 +282,9 @@ export default function ShipperDailyBillingClient({
     group: ShipperDailyBillingGroup | null;
     reason: string;
   }>({ open: false, group: null, reason: '청구 집계 최종 운임 마감' });
+
+  const isAgencyView = role === 'AGENCY';
+  const isShipperView = role === 'SHIPPER';
 
   // Fetch summary from server action with current filters
   const fetchSummary = (targetPeriodType?: 'daily' | 'weekly' | 'monthly', sDate?: string, eDate?: string, sFilter?: string) => {
@@ -102,12 +335,22 @@ export default function ShipperDailyBillingClient({
     return true;
   });
 
-  // Calculate totals
-  const totalOrders = filteredGroups.reduce((sum, g) => sum + g.orderCount, 0);
-  const totalKrw = filteredGroups.reduce((sum, g) => sum + g.totalBillingAmountKrw, 0);
+  // AGENCY dual view: split into purchased (billed_org = agency) and sold (billed_org = shipper)
+  const purchasedGroups = isAgencyView
+    ? filteredGroups.filter((g) => g.shipperId === agencyOrgId)
+    : [];
+  const soldGroups = isAgencyView
+    ? filteredGroups.filter((g) => g.shipperId !== agencyOrgId)
+    : [];
+
+  const activeGroups = isAgencyView ? [] : filteredGroups;
+
+  // Calculate totals (combined for non-AGENCY, separate for AGENCY)
+  const totalOrders = (isAgencyView ? [...purchasedGroups, ...soldGroups] : filteredGroups).reduce((sum, g) => sum + g.orderCount, 0);
+  const totalKrw = (isAgencyView ? [...purchasedGroups, ...soldGroups] : filteredGroups).reduce((sum, g) => sum + g.totalBillingAmountKrw, 0);
   const totalUsd = Math.round(totalKrw / exchangeRate * 100) / 100;
-  const totalFinalized = filteredGroups.reduce((sum, g) => sum + g.finalizedCount, 0);
-  const totalUnfinalized = filteredGroups.reduce((sum, g) => sum + g.unfinalizedCount, 0);
+  const totalFinalized = (isAgencyView ? [...purchasedGroups, ...soldGroups] : filteredGroups).reduce((sum, g) => sum + g.finalizedCount, 0);
+  const totalUnfinalized = (isAgencyView ? [...purchasedGroups, ...soldGroups] : filteredGroups).reduce((sum, g) => sum + g.unfinalizedCount, 0);
 
   const toggleExpand = async (group: ShipperDailyBillingGroup) => {
     const key = `${group.shipperId}_${group.date}`;
@@ -298,221 +541,93 @@ export default function ShipperDailyBillingClient({
         </div>
       </div>
 
-      {/* Aggregation Table */}
-      <div className="bg-white dark:bg-zinc-950 rounded-2xl border border-slate-200 dark:border-zinc-800 shadow-sm overflow-hidden">
-        <div className="p-5 border-b border-slate-100 dark:border-zinc-800 flex items-center justify-between">
-          <h3 className="font-bold text-slate-900 dark:text-white text-base flex items-center gap-2">
-            <FileText className="w-5 h-5 text-amber-500" />
-            화주별 {periodType === 'daily' ? '일별' : periodType === 'weekly' ? '주별' : '월별'} 청구 집계 내역
-          </h3>
-          <span className="text-xs text-slate-400">총 {filteredGroups.length}개 집계 그룹</span>
+      {/* Aggregation Table — role-based rendering */}
+      {isAgencyView ? (
+        <>
+          {/* AGENCY: 매입 섹션 */}
+          <div className="bg-white dark:bg-zinc-950 rounded-2xl border border-slate-200 dark:border-zinc-800 shadow-sm overflow-hidden">
+            <div className="p-5 border-b border-slate-100 dark:border-zinc-800 flex items-center justify-between">
+              <h3 className="font-bold text-slate-900 dark:text-white text-base flex items-center gap-2">
+                <FileText className="w-5 h-5 text-blue-500" />
+                매입 (ADMIN → Agency) — {periodType === 'daily' ? '일별' : periodType === 'weekly' ? '주별' : '월별'} 청구 집계
+              </h3>
+              <span className="text-xs text-slate-400">{purchasedGroups.length}개 집계 그룹</span>
+            </div>
+            {purchasedGroups.length === 0 ? (
+              <div className="p-8 text-center text-slate-400 text-xs">매입 인보이스 집계 데이터가 없습니다.</div>
+            ) : (
+              <BillingGroupTable
+                groups={purchasedGroups}
+                expandedKey={expandedKey}
+                expandedOrders={expandedOrders}
+                loadingOrders={loadingOrders}
+                finalizingGroupKey={finalizingGroupKey}
+                isPending={isPending}
+                periodType={periodType}
+                onToggleExpand={toggleExpand}
+                onBatchFinalize={handleBatchFinalize}
+                canFinalize={!isShipperView}
+              />
+            )}
+          </div>
+
+          {/* AGENCY: 매출 섹션 */}
+          <div className="bg-white dark:bg-zinc-950 rounded-2xl border border-slate-200 dark:border-zinc-800 shadow-sm overflow-hidden">
+            <div className="p-5 border-b border-slate-100 dark:border-zinc-800 flex items-center justify-between">
+              <h3 className="font-bold text-slate-900 dark:text-white text-base flex items-center gap-2">
+                <FileText className="w-5 h-5 text-amber-500" />
+                매출 (Agency → Shipper) — {periodType === 'daily' ? '일별' : periodType === 'weekly' ? '주별' : '월별'} 청구 집계
+              </h3>
+              <span className="text-xs text-slate-400">{soldGroups.length}개 집계 그룹</span>
+            </div>
+            {soldGroups.length === 0 ? (
+              <div className="p-8 text-center text-slate-400 text-xs">매출 인보이스 집계 데이터가 없습니다.</div>
+            ) : (
+              <BillingGroupTable
+                groups={soldGroups}
+                expandedKey={expandedKey}
+                expandedOrders={expandedOrders}
+                loadingOrders={loadingOrders}
+                finalizingGroupKey={finalizingGroupKey}
+                isPending={isPending}
+                periodType={periodType}
+                onToggleExpand={toggleExpand}
+                onBatchFinalize={handleBatchFinalize}
+                canFinalize={!isShipperView}
+              />
+            )}
+          </div>
+        </>
+      ) : (
+        /* ADMIN / SHIPPER: 단일 테이블 */
+        <div className="bg-white dark:bg-zinc-950 rounded-2xl border border-slate-200 dark:border-zinc-800 shadow-sm overflow-hidden">
+          <div className="p-5 border-b border-slate-100 dark:border-zinc-800 flex items-center justify-between">
+            <h3 className="font-bold text-slate-900 dark:text-white text-base flex items-center gap-2">
+              <FileText className="w-5 h-5 text-amber-500" />
+              {isShipperView ? '내 청구' : '화주별'} {periodType === 'daily' ? '일별' : periodType === 'weekly' ? '주별' : '월별'} 청구 집계 내역
+            </h3>
+            <span className="text-xs text-slate-400">총 {filteredGroups.length}개 집계 그룹</span>
+          </div>
+          {filteredGroups.length === 0 ? (
+            <div className="p-12 text-center text-slate-400 text-xs">
+              조회된 청구 집계 데이터가 없습니다.
+            </div>
+          ) : (
+            <BillingGroupTable
+              groups={filteredGroups}
+              expandedKey={expandedKey}
+              expandedOrders={expandedOrders}
+              loadingOrders={loadingOrders}
+              finalizingGroupKey={finalizingGroupKey}
+              isPending={isPending}
+              periodType={periodType}
+              onToggleExpand={toggleExpand}
+              onBatchFinalize={handleBatchFinalize}
+              canFinalize={!isShipperView}
+            />
+          )}
         </div>
-
-        {filteredGroups.length === 0 ? (
-          <div className="p-12 text-center text-slate-400 text-xs">
-            조회된 화주별 {periodType === 'daily' ? '일별' : periodType === 'weekly' ? '주별' : '월별'} 청구 집계 데이터가 없습니다.
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50 dark:bg-zinc-900/50 text-slate-500 font-semibold border-b border-slate-100 dark:border-zinc-800">
-                <tr>
-                  <th className="py-3 px-4">
-                    {periodType === 'daily' ? '일자 (Date)' : periodType === 'weekly' ? '주차 (Week)' : '월 (Month)'}
-                  </th>
-                  <th className="py-3 px-4">화주명 (Shipper)</th>
-                  <th className="py-3 px-4 text-center">오더수</th>
-                  <th className="py-3 px-4 text-right">기본운임</th>
-                  <th className="py-3 px-4 text-right">유류할증료</th>
-                  <th className="py-3 px-4 text-right">급증수수료</th>
-                  <th className="py-3 px-4 text-right">기타부과금</th>
-                  <th className="py-3 px-4 text-right">사후조정액</th>
-                   <th className="py-3 px-4 text-right">총 합계 (KRW / USD)</th>
-                  <th className="py-3 px-4 text-center">마감 상태</th>
-                  <th className="py-3 px-4 text-center">관리 / 액션</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-zinc-800">
-                {filteredGroups.map((g) => {
-                  const key = `${g.shipperId}_${g.date}`;
-                  const isExpanded = expandedKey === key;
-                  const isAllFinalized = g.unfinalizedCount === 0 && g.orderCount > 0;
-                  const isFinalizingThis = finalizingGroupKey === key;
-
-                  return (
-                    <React.Fragment key={key}>
-                      <tr className="hover:bg-slate-50/80 dark:hover:bg-zinc-900/40 transition-colors">
-                        <td className="py-3.5 px-4 font-mono font-bold text-slate-800 dark:text-slate-200">
-                          {g.date}
-                        </td>
-                        <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-white">
-                          {g.shipperName}
-                        </td>
-                        <td className="py-3.5 px-4 text-center font-mono font-semibold">
-                          {g.orderCount}건
-                        </td>
-                        <td className="py-3.5 px-4 text-right font-mono text-slate-700 dark:text-slate-300">
-                          ₩{g.totalBaseFreight.toLocaleString()}
-                        </td>
-                        <td className="py-3.5 px-4 text-right font-mono text-slate-700 dark:text-slate-300">
-                          ₩{g.totalFuelSurcharge.toLocaleString()}
-                        </td>
-                        <td className="py-3.5 px-4 text-right font-mono text-amber-600 dark:text-amber-400 font-semibold">
-                          ₩{g.totalSurgeFee.toLocaleString()}
-                        </td>
-                        <td className="py-3.5 px-4 text-right font-mono text-purple-600 dark:text-purple-400 font-semibold">
-                          ₩{(g.totalOtherCharge || 0).toLocaleString()}
-                        </td>
-                        <td className="py-3.5 px-4 text-right font-mono text-blue-600 dark:text-blue-400 font-semibold">
-                          ₩{g.totalActualAdjustment.toLocaleString()}
-                        </td>
-                        <td className="py-3.5 px-4 text-right">
-                          <span className="block font-extrabold font-mono text-amber-600 dark:text-amber-400">
-                            ₩{g.totalBillingAmountKrw.toLocaleString()} KRW
-                          </span>
-                          <span className="block text-[11px] font-mono text-slate-400">
-                            ${g.estimatedBillingAmountUsd.toLocaleString('en-US', { minimumFractionDigits: 2 })} USD
-                          </span>
-                        </td>
-                        <td className="py-3.5 px-4 text-center">
-                          {isAllFinalized ? (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
-                              <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                              정산 마감 완료
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300">
-                              <AlertCircle className="w-3 h-3 text-amber-600" />
-                              미마감 ({g.unfinalizedCount}건)
-                            </span>
-                          )}
-                        </td>
-                        <td className="py-3.5 px-4 text-center">
-                          <div className="flex items-center justify-center gap-2">
-                            <button
-                              onClick={() => toggleExpand(g)}
-                              className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-slate-700 dark:text-slate-200 text-xs font-semibold flex items-center gap-1 transition-colors"
-                            >
-                              <span>상세</span>
-                              {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-                            </button>
-
-                            {!isAllFinalized && (
-                              <button
-                                onClick={() => handleBatchFinalize(g)}
-                                disabled={isPending || isFinalizingThis}
-                                className="px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs flex items-center gap-1 shadow-xs transition-colors disabled:opacity-50"
-                              >
-                                {isFinalizingThis ? (
-                                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                                ) : (
-                                  <ShieldCheck className="w-3.5 h-3.5" />
-                                )}
-                                <span>일괄 마감</span>
-                              </button>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-
-                      {/* Expanded Subtable Rows */}
-                      {isExpanded && (
-                        <tr>
-                          <td colSpan={11} className="bg-slate-50/90 dark:bg-zinc-900/80 p-4 border-t border-b border-slate-200 dark:border-zinc-800">
-                            <div className="flex flex-col gap-3">
-                              <div className="flex items-center justify-between text-xs">
-                                <span className="font-bold text-slate-700 dark:text-slate-300">
-                                  {g.shipperName} ({g.date}) 소속 개별 오더 목록 ({g.orderCount}건)
-                                </span>
-                                <span className="text-slate-400">
-                                  UPS 전용 화면으로 이동하여 사후 부가금 또는 정산 내역을 개별 관리할 수 있습니다.
-                                </span>
-                              </div>
-
-                              {loadingOrders[key] ? (
-                                <div className="p-4 text-center text-xs text-slate-400 flex items-center justify-center gap-2">
-                                  <RefreshCw className="w-4 h-4 animate-spin text-amber-500" />
-                                  <span>개별 오더 정보 불러오는 중...</span>
-                                </div>
-                              ) : (
-                                <div className="overflow-x-auto bg-white dark:bg-zinc-950 rounded-xl border border-slate-200 dark:border-zinc-800">
-                                  <table className="w-full text-left text-xs">
-                                    <thead className="bg-slate-100 dark:bg-zinc-900 text-slate-500 font-semibold border-b border-slate-200 dark:border-zinc-800">
-                                      <tr>
-                                        <th className="py-2 px-3">오더 번호</th>
-                                        <th className="py-2 px-3">상태</th>
-                                        <th className="py-2 px-3">도착국</th>
-                                        <th className="py-2 px-3 text-right">기본운임</th>
-                                        <th className="py-2 px-3 text-right">유류할증</th>
-                                        <th className="py-2 px-3 text-right">급증수수료</th>
-                                        <th className="py-2 px-3 text-right">기타부과금</th>
-                                        <th className="py-2 px-3 text-right">사후조정</th>
-                                         <th className="py-2 px-3 text-right">합계(KRW)</th>
-                                        <th className="py-2 px-3 text-center">인보이스</th>
-                                        <th className="py-2 px-3 text-center">바로가기</th>
-                                      </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-slate-100 dark:divide-zinc-800">
-                                      {(expandedOrders[key] || []).map((ord) => (
-                                        <tr key={ord.orderId} className="hover:bg-slate-50 dark:hover:bg-zinc-900/40">
-                                          <td className="py-2 px-3 font-mono font-bold text-slate-800 dark:text-slate-200">
-                                            {ord.orderNo}
-                                          </td>
-                                          <td className="py-2 px-3">
-                                            <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-700 dark:bg-zinc-800 dark:text-slate-300">
-                                              {ord.status}
-                                            </span>
-                                          </td>
-                                          <td className="py-2 px-3 font-bold text-slate-700 dark:text-slate-300">
-                                            {ord.destCountryCode}
-                                          </td>
-                                          <td className="py-2 px-3 text-right font-mono">₩{ord.baseFreight.toLocaleString()}</td>
-                                          <td className="py-2 px-3 text-right font-mono">₩{ord.fuelSurcharge.toLocaleString()}</td>
-                                          <td className="py-2 px-3 text-right font-mono text-amber-600">₩{ord.surgeFee.toLocaleString()}</td>
-                                          <td className="py-2 px-3 text-right font-mono text-purple-600">₩{(ord.otherCharge || 0).toLocaleString()}</td>
-                                          <td className="py-2 px-3 text-right font-mono text-blue-600">₩{ord.actualAdjustment.toLocaleString()}</td>
-                                          <td className="py-2 px-3 text-right font-mono font-bold text-amber-600">
-                                            ₩{ord.totalAmountKrw.toLocaleString()}
-                                            {ord.hasUnsupportedCurrency && (
-                                              <span className="ml-1 text-[9px] text-red-500 font-normal">⚠ 혼합통화</span>
-                                            )}
-                                          </td>
-                                          <td className="py-2 px-3 text-center font-mono">
-                                            {ord.invoiceNo ? (
-                                              <span className="text-[11px] text-slate-600 dark:text-slate-400">
-                                                {ord.invoiceNo} ({ord.isFinalized ? '마감' : '진행중'})
-                                              </span>
-                                            ) : (
-                                              <span className="text-[11px] text-slate-400">미발행</span>
-                                            )}
-                                          </td>
-                                          <td className="py-2 px-3 text-center">
-                                            <Link
-                                              href={`/orders/${ord.orderId}/ups-detail`}
-                                              className="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-600 dark:text-blue-400 hover:underline"
-                                            >
-                                              <span>UPS 상세</span>
-                                              <ExternalLink className="w-3 h-3" />
-                                            </Link>
-                                          </td>
-                                        </tr>
-                                      ))}
-                                    </tbody>
-                                  </table>
-                                </div>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                      )}
-                    </React.Fragment>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+      )}
 
       {/* Finalize Confirmation Modal */}
       {finalizeModal.open && finalizeModal.group && (
