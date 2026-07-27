@@ -19,38 +19,12 @@
 | [#894](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/894) | [fix] DEF-129 — Agency 정산 조회 전체가 존재하지 않는 컬럼(dest_country_code) 참조로 항상 실패 | a | p1 | - | 미배정 | 2026-07-27 |
 | [#888](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/888) | [chore] 시드 데이터 보완 — AGENCY RLS/입고재계산/volumetric_divisor/트래킹/화주인보이스 검증용 데이터 누락 | a | p2 | - | 미배정 | 2026-07-27 |
 | [#886](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/886) | [verify] DEF-125 재검증 요청 — TASK-B-218/220으로 이미 해소된 것으로 추정됨 | b | p2 | - | 미배정 | 2026-07-27 |
-| [#882](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/882) | [fix] /admin/ups-actual-charges 페이지 네비게이션 진입점 누락 | b | p2 | review | 미배정 | 2026-07-27 |
-| [#881](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/881) | [fix] zen_order_rate_snapshots AGENCY UPDATE/INSERT RLS 누락 — 입고처리 중량변경 시 예상운임 재계산 조용히 실패 | b | p1 | review | 미배정 | 2026-07-26 |
-| [#879](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/879) | [fix] zen_order_rate_snapshots AGENCY SELECT RLS 누락 — 예상운임 AGENCY 계정에 항상 미표시 | b | p1 | review | 미배정 | 2026-07-26 |
-| [#877](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/877) | [feat] 입고처리 화면 — 예상운임 상시 표시(변경 전) + 저장 시 갱신(변경 후) | b | p2 | review | 미배정 | 2026-07-26 |
-| [#874](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/874) | [fix] DEF-B-012 — 입고처리 화면 운송경로가 UPS 오더에 항상 공백 표시 | b | p3 | review | 미배정 | 2026-07-26 |
-| [#871](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/871) | [fix] DEF-B-011 — UPS 접수취소/라벨폐기 성공 시 tracking_no 리셋 누락 | b | p2 | review | 미배정 | 2026-07-26 |
-| [#869](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/869) | [defect] DEF-B-010 — zen_tracking_configs AGENCY UPDATE RLS 누락, DEF-123 tracking_no 동기화 침묵 실패 (6번째 재발) | b | p1 | review | 미배정 | 2026-07-26 |
-| [#863](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/863) | [fix] DEF-B-007 — UPS 오더 tracking_no에 가짜 값(ZN- 접두사) 노출 | b | p2 | review | 미배정 | 2026-07-26 |
-| [#861](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/861) | [fix] DEF-B-006 — /tracking 대시보드 집계 캡(50건)·상태13종 미집계·Latest Status 텍스트 불일치·tracking_number 표기 | b | p2 | review | 미배정 | 2026-07-26 |
-| [#858](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/858) | [defect] DEF-B-005 — TrackingDashboard Provider 배지 UPS 오더 미표시(MANUAL로 오표시) | b | p3 | done | 미배정 | 2026-07-26 |
-| [#851](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/851) | [feat] 통합트래킹(물류관리) UPS 오더 연동 정합화 — provider_type/상태 기준 통일 | b | p2 | done | 미배정 | 2026-07-26 |
-| [#831](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/831) | [feat] 화주(Shipper)용 청구서 조회 화면 신설 | b | p2 | done | 미배정 | 2026-07-25 |
-| [#830](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/830) | [feat] IN_TRANSIT 오더 부가요금 등록 기능 (recordUpsActualCharges 확장) | b | p2 | done | 미배정 | 2026-07-25 |
-| [#829](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/829) | [feat] IN_TRANSIT → RELEASED 되돌리기 기능 (출고확정처리 취소) | b | p2 | done | 미배정 | 2026-07-25 |
-| [#812](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/812) | [defect] DEF-126 — 신규 UPS Order Detail 화면 연결 누락 (OrderDataTable 링크 미분기) | b | p1 | done | 미배정 | 2026-07-26 |
-| [#811](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/811) | [UI] /finance/daily-billing 페이지가 사이드바 메뉴에 연결되지 않음 (DEF-B-001) | b | p3 | done | 미배정 | 2026-07-24 |
 | [#790](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/790) | [feat] IMP-153 — CI supabase db reset 시 authenticated/anon 롤 기본 테이블 GRANT 누락 | b | p3 | - | 미배정 | 2026-07-24 |
-| [#788](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/788) | [feat] IMP-154 — UPS 라벨 회수(removeorder) 실패가 조용히 삼켜짐, 회수 성공 여부 신뢰 불가 | b | p1 | review | 미배정 | 2026-07-26 |
-| [#778](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/778) | [UI] 배송방식 픽업수령 선택 시 픽업 장소/담당자 연락처 입력 방식을 기존 주소/전화번호 입력 방식으로 준용 | b | p3 | done | 미배정 | 2026-07-24 |
-| [#777](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/777) | [UI] 배송방식 픽업수령 선택 시 Local Tracking No 필드 비활성화 | b | p3 | done | 미배정 | 2026-07-23 |
 | [#773](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/773) | [defect] DEF-125 — UPS 스냅샷 캐시, 중량 변경 시 정산 자동 재계산 누락 | a | p1 | - | EdwardKwon89 | 2026-07-24 |
-| [#771](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/771) | DEF-123: zen_tracking_configs.tracking_no가 실제 UPS 운송장번호로 갱신되지 않음 | b | p3 | done | 미배정 | 2026-07-23 |
 | [#770](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/770) | [설계 협의 필요] zen_tracking_configs provider_type/provider_name — transport_mode 반영 방식 (Edward 협의 필요) | - | - | blocked | EdwardKwon89 | 2026-07-24 |
-| [#760](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/760) | DEF-122: getGlobalTrackingOverview is_unassigned 배열 인덱싱 오류 — 정상 오더도 Unassigned 오분류 | b | p3 | done | 미배정 | 2026-07-23 |
-| [#741](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/741) | DEF-121: TrackingDashboard Detail 링크 로케일 프리픽스 누락 — 404 발생 | b | p2 | done | 미배정 | 2026-07-23 |
-| [#728](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/728) | [defect] DEF-120 — zen_tracking_configs RLS에 AGENCY SELECT 커버리지 없음, 통합 트래킹 침묵 실패 | b | p2 | done | 미배정 | 2026-07-23 |
 | [#727](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/727) | [fix] 창고 화면 전반 일괄처리 지원 여부 점검·보완 (SNTL 회의 W7) | b | p3 | in-progress | 미배정 | 2026-07-23 |
 | [#726](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/726) | [fix] 급증수수료 등록 데이터 화폐단위(KRW) 감사 (SNTL 회의 W6) | b | p3 | in-progress | 미배정 | 2026-07-26 |
-| [#725](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/725) | [feat] 입고 처리 시 부피중량/중량 수정 기능 추가 (SNTL 회의 W5) | b | p1 | done | 미배정 | 2026-07-25 |
 | [#718](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/718) | 2026.07.22 SNTL 회의록 | - | - | - | 미배정 | 2026-07-23 |
-| [#713](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/713) | [feat] 출고확정처리(/warehouse/departure) 화면에 오늘의 이력 패널 신설 | b | p3 | done | 미배정 | 2026-07-22 |
-| [#708](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/708) | [fix] getTodayUpsHistory 500 에러 — .contains() 연산자가 text 컬럼에 적용 불가 (getTodayPickupHistory도 동일 결함) | b | p1 | done | 미배정 | 2026-07-22 |
 | [#704](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/704) | [feat] 오늘의 UPS 접수 이력 패널 미구현 — 백엔드 조회 함수 신설 필요 | b | p3 | done | 미배정 | 2026-07-22 |
 | [#700](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/700) | [fix] confirmOutbound WAREHOUSED 전용 가드 버그(PACKED 출고 불가) + 출고확정 버튼 텍스트 변경 | b | p1 | done | 미배정 | 2026-07-22 |
 | [#698](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/698) | [fix] 출고확정 시 문서(운송장 등) 선택 팝업 삭제 — 라벨 발급 생략하고 바로 출고확정 | b | p3 | done | 미배정 | 2026-07-22 |
