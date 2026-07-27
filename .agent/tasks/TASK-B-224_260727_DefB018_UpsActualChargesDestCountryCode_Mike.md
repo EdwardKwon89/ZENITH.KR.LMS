@@ -6,7 +6,7 @@
 | **담당** | Mike (Team B) |
 | **생성일** | 2026-07-27 |
 | **우선순위** | P1 |
-| **상태** | ⬜ |
+| **상태** | 🔔 |
 
 ## 개요
 
@@ -64,6 +64,26 @@
 ## 담당자 위반 이력 사전 경고
 
 - Mike: `.agent/VIOLATION_TRACKER.md` 참조 후 착수 — `toContain` 소스 문자열 검사 누적 이력 있음. 이번 Task는 실제 DB 쿼리 실행 기반 검증이 필수입니다(소스 문자열 검사로 대체 금지).
+
+## [작업 결과]
+
+### 변경 내용
+
+#### `src/app/actions/finance/ups-actual-charges.ts`
+- `searchDeliveredUpsOrders`(313행) 및 하위 `getMoreOrdersForSearch`(358행) select문에서
+  `dest_country_code` → `dest_country_code:recipient_country_code` PostgREST 별칭 적용
+- 서버는 실제 컬럼 `recipient_country_code`를 읽되, 응답 필드명은 `dest_country_code`로
+  유지되어 클라이언트(`ups-actual-charges-client.tsx`) 변경 불필요
+
+### 테스트
+- `TC-B204-07`: `searchDeliveredUpsOrders` 결과가 `dest_country_code` 필드로 정상 반환되는지 검증(behavioral)
+
+### 검증
+- **빌드**: ✅ PASS
+- **테스트**: `ups-actual-charges.test.ts` 7/7 PASS
+- **회귀**: 135 files / 895 tests ALL PASS
+- **커밋 해시**: `a382a549`
+- **R-10**: 아래 3번 항목 완료 후 스크린샷 경로 기재
 
 ## [발견 이슈]
 
