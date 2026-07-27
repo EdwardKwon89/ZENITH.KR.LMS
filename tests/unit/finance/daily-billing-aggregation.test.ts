@@ -490,4 +490,62 @@ describe('화주별 일별/주별/월별 청구 집계 및 최종 운임 확정 
       expect(group.totalBaseFreight).toBe(0);
     });
   });
+
+  describe('AGENCY 앱 레벨 필터 (DEF-B-021)', () => {
+    it('getShipperDailyBillingSummary: AGENCY 역할은 zen_agency_shippers를 조회하여 shipper_ids를 필터링한다', async () => {
+      (validateUserAction as any).mockResolvedValue({
+        supabase: mockSupabase,
+        profile: { id: 'agency-usr', role: USER_ROLES.AGENCY, org_id: 'agency-org' },
+      });
+
+      const mockAgencyChain = createChainableMock([{ shipper_org_id: 'shipper-allowed' }]);
+      const mockOrdersChain = createChainableMock([]);
+
+      mockSupabase.from.mockImplementation((table: string) => {
+        if (table === 'zen_agency_shippers') return mockAgencyChain;
+        return mockOrdersChain;
+      });
+
+      await getShipperDailyBillingSummary({ periodType: 'daily', startDate: '2026-07-27', endDate: '2026-07-27' });
+
+      expect(mockAgencyChain.eq).toHaveBeenCalledWith('agency_org_id', 'agency-org');
+      expect(mockAgencyChain.eq).toHaveBeenCalledWith('is_active', true);
+      expect(mockOrdersChain.in).toHaveBeenCalledWith('shipper_id', ['shipper-allowed']);
+    });
+
+    it('getShipperDailyOrdersDetails: AGENCY 역할은 zen_agency_shippers를 조회하여 shipperId 검증', async () => {
+      (validateUserAction as any).mockResolvedValue({
+        supabase: mockSupabase,
+        profile: { id: 'agency-usr', role: USER_ROLES.AGENCY, org_id: 'agency-org' },
+      });
+
+      const mockAgencyChain = createChainableMock([{ shipper_org_id: 'shipper-allowed' }]);
+      const mockOrdersChain = createChainableMock([]);
+
+      mockSupabase.from.mockImplementation((table: string) => {
+        if (table === 'zen_agency_shippers') return mockAgencyChain;
+        return mockOrdersChain;
+      });
+
+      const res = await getShipperDailyOrdersDetails('shipper-allowed', '2026-07-27', 'daily');
+      expect(mockAgencyChain.eq).toHaveBeenCalledWith('agency_org_id', 'agency-org');
+      expect(res.success).toBe(true);
+    });
+
+    it('getShipperDailyOrdersDetails: AGENCY 역할은 허용되지 않은 shipperId는 빈 결과 반환', async () => {
+      (validateUserAction as any).mockResolvedValue({
+        supabase: mockSupabase,
+        profile: { id: 'agency-usr', role: USER_ROLES.AGENCY, org_id: 'agency-org' },
+      });
+
+      mockSupabase.from.mockImplementation((table: string) => {
+        if (table === 'zen_agency_shippers') return createChainableMock([{ shipper_org_id: 'shipper-allowed' }]);
+        return createChainableMock([]);
+      });
+
+      const res = await getShipperDailyOrdersDetails('shipper-other', '2026-07-27', 'daily');
+      expect(res.success).toBe(true);
+      expect(res.orders).toHaveLength(0);
+    });
+  });
 });
