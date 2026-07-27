@@ -9,7 +9,7 @@
 | **우선순위** | P1 |
 | **전제조건** | 없음 |
 | **커밋 태그** | `[OpenCode]` |
-| **상태** | 🔔 |
+| **상태** | ✅ |
 
 ---
 
@@ -58,7 +58,7 @@ Jaison(Team B)이 `/ko/orders/[orderId]/ups-detail` 실사용 중 발견 후 R-1
 - [x] UPS 외 캐리어(AIR/SEA/LAND 등 기존 TISA 소비처)에서 회귀 없는지 확인 — metadata는 Record<string,unknown>으로 UPS 외 캐리어는 undefined/normal 통과
 - [x] `npm run build` PASS
 - [x] `npm run test:regression` 전체 PASS — 885 PASS, 5 pre-existing failures(env/docker)
-- [ ] 실제 UI에서 UPS 오더로 `/ups-detail` 진입 → 예상운임이 0이 아닌 실제 값으로 표시되는지 확인 → R-10 스크린샷
+- [x] 실제 UI에서 UPS 오더로 `/ups-detail` 진입 → 예상운임이 0이 아닌 실제 값으로 표시되는지 확인 → R-10 스크린샷 (Aiden 직접 검증, 아래 [Aiden 검토] 참조)
 - [x] task file `[작업 결과]` 작성 + 커밋 해시 기재
 - [x] ACTIVE_TASK.md 상태 반영
 
@@ -80,3 +80,19 @@ Jaison(Team B)이 `/ko/orders/[orderId]/ups-detail` 실사용 중 발견 후 R-1
 
 ### 코드 커밋 해시
 - `[D_Kai] fix: TASK-211 DEF-127 getOrderRateSnapshot metadata 누락 수정 — Issue #887`
+
+---
+
+## [Aiden 검토]
+
+**판정**: ✅ 승인, PR#889 병합 완료 (2026-07-27)
+
+diff 확인 결과 스펙대로 정확히 수정됨, 실CI 전체 PASS 확인. DoD 중 R-10(UI 검증) 항목만 미체크 상태로 제출되어 있어 Aiden이 직접 보완:
+
+- TASK-212(시드 보완)로 만든 검증용 오더 `UPS-SEED-AGENCY-001`(agency_org_id 채워짐, rate_snapshot.metadata.platform.totalSellingPrice=249577) 사용
+- D_Kai 워크트리(`~/WorkSpace/ZENITH_LMS-worktrees/d_kai`)에서 dev server 기동 후 Playwright로 실제 UI 확인
+- `sntl_sub1@zenith.kr`(해당 오더 소속 AGENCY 계정)로 로그인 → `/ups-detail` 진입 → **"추정 총 청구액 (Total Estimate): $249577.00 USD"** 정상 표시 확인(수정 전에는 $0.00로 재현되던 증상)
+- 스크린샷: `scratch/TASK-211_R10_ups-detail_agency_totalFreight_verified.png`
+- 참고(비차단): `manager@zenith.kr`(MANAGER 역할)로 최초 테스트 시 $0.00로 보였는데, 이는 `zen_order_rate_snapshots` SELECT RLS가 ADMIN/AGENCY(소속)/화주(소속)만 커버하고 MANAGER는 대상이 아니기 때문 — DEF-127과 무관한 별건, 필요 시 별도 검토
+
+PR#889 코멘트에 동일 내용 게시 후 머지 완료.
