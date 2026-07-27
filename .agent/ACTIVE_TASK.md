@@ -15,8 +15,6 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
-| [#902](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/902) | [feat] /admin/ups-actual-charges — 예상청구액 세부 항목 표출 + 추가 부가요금 등록 방식으로 재설계 | b | p2 | review | 미배정 | 2026-07-27 |
-| [#901](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/901) | [fix] zen_order_costs AGENCY SELECT RLS 누락 — /admin/ups-actual-charges 예상청구액 AGENCY 계정에 0으로 표출 | b | p1 | review | 미배정 | 2026-07-27 |
 | [#899](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/899) | [fix] /admin/ups-actual-charges 오더 검색 500 에러 — zen_orders.dest_country_code 컬럼 부재 | b | p1 | review | 미배정 | 2026-07-27 |
 | [#895](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/895) | [fix] DEF-130 — SNTL(SUB_ADMIN) 역할이 UPS 기준요금(zen_ups_base_rates) 조회 불가 | a | p1 | - | 미배정 | 2026-07-27 |
 | [#894](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/894) | [fix] DEF-129 — Agency 정산 조회 전체가 존재하지 않는 컬럼(dest_country_code) 참조로 항상 실패 | a | p1 | - | 미배정 | 2026-07-27 |
