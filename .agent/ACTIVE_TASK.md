@@ -15,7 +15,6 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
-| [#905](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/905) | [feat] /admin/ups-actual-charges — 청구서번호/청구날짜를 항목 리스트에서 제거하고 실제청구액 카드로 이동 | b | p2 | review | 미배정 | 2026-07-27 |
 | [#895](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/895) | [fix] DEF-130 — SNTL(SUB_ADMIN) 역할이 UPS 기준요금(zen_ups_base_rates) 조회 불가 | a | p1 | - | 미배정 | 2026-07-27 |
 | [#894](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/894) | [fix] DEF-129 — Agency 정산 조회 전체가 존재하지 않는 컬럼(dest_country_code) 참조로 항상 실패 | a | p1 | - | 미배정 | 2026-07-27 |
 | [#888](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/888) | [chore] 시드 데이터 보완 — AGENCY RLS/입고재계산/volumetric_divisor/트래킹/화주인보이스 검증용 데이터 누락 | a | p2 | - | 미배정 | 2026-07-27 |
