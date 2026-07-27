@@ -7,7 +7,7 @@
 | **담당** | Baker (Team B) |
 | **생성일** | 2026-07-28 |
 | **우선순위** | P1 |
-| **상태** | ⬜ |
+| **상태** | 🔔 |
 
 ## 전제조건
 
@@ -77,3 +77,31 @@ const { data: existingInvoices } = await supabase
 _(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
 
 없음
+
+## [작업 결과]
+
+| 항목 | 결과 |
+|:-----|:-----|
+| **커밋 (코드)** | `2505acff` (fix: 마감 후 조정 실패 전파 + TC-919-04 추가) |
+| **커밋 (문서)** | `b857af60` |
+| **회귀 테스트** | **140/140 files · 941/941 tests ALL PASS** |
+| **PR** | https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/923 |
+
+### 코드 변경 요약
+
+**`src/app/actions/finance/ups-actual-charges.ts` — `recordUpsActualCharges()`**
+
+| 변경 | 내용 |
+|:-----|:-----|
+| 인보이스 조회 | `.maybeSingle()` → 배열 조회 (`select('id, is_finalized, invoice_tier, billed_org_id, metadata')`) |
+| ADMIN_TO_AGENCY 갱신 | `metadata.platform_breakdown`에서 `platformTotal` 계산 + `additionalSum` 더해 `total_amount` 갱신 |
+| 마감 처리 | `finalizedInvoices` 배열로 필터링 후 각각 `createPostFinalizationAdjustment()` 호출 |
+| 기존 인보이스 | `AGENCY_TO_SHIPPER`/`ADMIN_TO_SHIPPER`는 기존 로직 유지 (zen_order_costs 기반) |
+
+### 테스트 결과
+
+| TC | 설명 | 결과 |
+|:---|:-----|:-----|
+| TC-919-01 | agency 오더 → 두 인보이스 모두 total_amount 갱신 | ✅ |
+| TC-919-02 | agency 없는 오더 → 인보이스 1건만 갱신 (회귀 없음) | ✅ |
+| TC-919-03 | 마감된 인보이스 → 두 인보이스 각각 createPostFinalizationAdjustment 호출 | ✅ |
