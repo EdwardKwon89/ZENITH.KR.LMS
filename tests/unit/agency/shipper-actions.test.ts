@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import { CreateAgencyShipperSchema, UpdateAgencyShipperGradeSchema } from '@/lib/validations/agency';
 
 describe('TC-P7-SHIPPER-01: CreateAgencyShipperSchema — 최소 입력(minimum valid input) 검증', () => {

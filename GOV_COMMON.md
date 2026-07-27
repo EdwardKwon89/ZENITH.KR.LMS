@@ -79,6 +79,23 @@ PM 역할 수행 시, 작업 완료 보고 전 반드시 전체 상태 문서(`W
 rtk npm run test:regression
 ```
 
+**R-08-1 | CI 미트리거 시 대체 검증 절차** (2026-07-17 신설 — PR#520·PR#541·PR#558에서 반복 확인된 GitHub Actions `pull_request` 트리거 실패 대응)
+
+`.github/workflows/pr-checks.yml`의 `branches` 필터 설정이 정확함에도 GitHub 쪽 트리거 자체가 발동하지 않는 현상이 이 프로젝트에서 반복 관측되었다(원인: 사용량 한도 아님 — 본 저장소는 Public이라 Actions 무제한. GitHub 측 일시적 dispatch 지연으로 추정, 통상 10~50분 내 자연 해소).
+
+- **판단 기준**: 커밋 푸시 후 **15분** 경과해도 `gh pr checks <PR번호>`에 "Regression Tests"·"Task File Check" 항목 자체가 나타나지 않으면(Vercel 체크만 존재) CI 미트리거로 간주한다.
+- **대체 절차**: 로컬에서 pr-checks.yml과 동일한 절차를 직접 실행해 증거로 대체한다.
+  ```bash
+  npm ci
+  npm run build
+  supabase db reset --yes
+  # .env.local 생성 (supabase status --output env 참고)
+  npm run test:regression
+  ```
+- **증적 기재**: task file·PR 코멘트에 **"로컬 검증 대체(CI 미트리거)"**임을 명시하고, `npm run build` 성공 여부·`Test Files`/`Tests` PASS 카운트를 그대로 인용한다. CI 링크 대신 로컬 실행임을 숨기지 않는다.
+- **주의**: 공유 물리 디렉토리에서 직접 체크아웃하지 않고 `git worktree add`로 격리된 디렉토리에서 실행한다(R-17 §0 워크트리 격리 원칙과 동일한 이유 — 타 Agent 미커밋 변경분 혼입 방지).
+- 반복 재발 시 원인 자체(GitHub Actions 인프라)를 문제 삼기보다, 이 대체 절차를 표준 대응으로 계속 적용한다 — 상시 모니터링으로 예방 가능한 종류의 문제가 아님이 확인됨.
+
 ### R-09 | 회귀 테스트 확장 의무
 신규 기능 개발 및 수정 작업 이후에는 반드시 관련 **회귀 테스트 케이스를 신규 추가**하고, `docs/08_Self_Audit/Checklists/LIVE_REGRESSION_TEST_MAP.md`를 업데이트해야 합니다.
 
@@ -142,16 +159,15 @@ API 사양 변경 시 반드시 `Ds-11_API_상세_명세서.md`를 선제적으�
    > **근거**: 공유 workspace에서 타 Agent 브랜치가 checkout된 상태로 커밋하는 교차 오염 방지.  
    > (SAR — Issue #31, 2026-06-18)
 
-   **[Git worktree 격리 — 필수, 2026-07-12 재강화]** 위 순서만으로는 부족하다 — 여러 에이전트가 **동일한 물리 디렉토리**를 공유하면 브랜치를 정확히 갈아탔더라도 한 에이전트의 미커밋 변경분이 다른 에이전트의 다음 커밋에 섞여 들어갈 수 있다(Issue #358 — Mike의 첫 PR#353에 Dave의 로컬 Issue #294 미반영 커밋이 혼입된 사례). **2026-07-11에 수기 `/tmp/wt-*` 명령을 문서화했으나 강제력이 없어 곧바로 재발했다(PR#367·#368·#370, 2026-07-12) — 따라서 스크립트로 강제한다.**
+   **[Git worktree 격리 — 필수, 2026-07-21 Team A까지 확대]** 위 순서만으로는 부족하다 — 여러 에이전트가 **동일한 물리 디렉토리**를 공유하면 브랜치를 정확히 갈아탔더라도 한 에이전트의 미커밋 변경분이 다른 에이전트의 다음 커밋에 섞여 들어갈 수 있다(Issue #358 — Mike의 첫 PR#353에 Dave의 로컬 Issue #294 미반영 커밋이 혼입된 사례). **2026-07-11에 수기 `/tmp/wt-*` 명령을 문서화했으나 강제력이 없어 곧바로 재발했다(PR#367·#368·#370, 2026-07-12) — 따라서 스크립트로 강제한다.** 2026-07-21, Team A 공유 디렉토리에서도 D_Kai(TASK-194-C 작업 중)와 Aiden(TASK-195 문서 커밋)이 동시에 파일을 건드릴 뻔한 동일 위험이 확인되어, 스크립트 적용 범위를 Team A(D_Kai/Riley/B_Kai)까지 확대함.
 
-   Team B 에이전트(Dave/Baker/Mike)는 반드시 세션 시작 시 최초 1회 아래를 실행한다:
+   Team A(D_Kai/Riley/B_Kai)·Team B(Dave/Baker/Mike) 에이전트는 반드시 세션 시작 시 최초 1회 아래를 실행한다:
    ```bash
-   ./scripts/agent-worktree-init.sh <dave|baker|mike>
-   cd /Users/am/Documents/workspace/SNTL_LMS/ZENITH_LMS-worktrees/<본인이름>
+   ./scripts/agent-worktree-init.sh <dave|baker|mike|d_kai|riley|b_kai>
    ```
-   페르소나별로 **영속적인 전용 워크트리**를 자동 생성/재사용한다(최초 1회 생성, 이후 세션은 재사용). 재사용 시 이전 세션의 미커밋 변경분은 삭제하지 않고 `git stash`로 자동 보존한 뒤 `origin/develop` 최신 시점으로 복귀시킨다. 이 디렉토리 안에서 `next-task-number.sh`로 채번 후 새 브랜치를 만들어 작업한다.
-   같은 공유 디렉토리(`ZENITH.KR.LMS/` 메인 체크아웃)에서 `git checkout`만으로 브랜치를 전환하며 작업하지 않는다.
-   > **근거**: 공유 물리 디렉토리 사용 시 브랜치 전환 규율을 지켜도 교차 오염 가능. 수기 안내만으로는 재발 방지 안 됨. (Issue #358, 2026-07-11 최초 발생 / 2026-07-12 스크립트화)
+   스크립트가 안내하는 경로(리포지토리 상위 `ZENITH_LMS-worktrees/<페르소나>` — 실제 절대경로는 실행 환경마다 다르므로 출력된 경로를 그대로 사용)로 이동해 작업한다. 페르소나별로 **영속적인 전용 워크트리**를 자동 생성/재사용한다(최초 1회 생성, 이후 세션은 재사용). 재사용 시 이전 세션의 미커밋 변경분은 삭제하지 않고 `git stash`로 자동 보존한 뒤 `origin/develop` 최신 시점으로 복귀시킨다. 이 디렉토리 안에서 `next-task-number.sh`로 채번 후 새 브랜치를 만들어 작업한다.
+   같은 공유 디렉토리(메인 체크아웃)에서 `git checkout`만으로 브랜치를 전환하며 작업하지 않는다.
+   > **근거**: 공유 물리 디렉토리 사용 시 브랜치 전환 규율을 지켜도 교차 오염 가능. 수기 안내만으로는 재발 방지 안 됨. (Issue #358, 2026-07-11 최초 발생 / 2026-07-12 스크립트화 / 2026-07-21 Team A 확대)
 1. **(Phase 4)** 본인이 담당(assignee)인 GitHub Issue 확인 — `.agent/ACTIVE_TASK.md` 상단 `GitHub Issues 현황(자동 동기화)` 섹션 또는 `gh issue list --assignee <본인>` 으로 조회. 신규 Task는 여기서 발령되며, 팀별 상세 표에 사전 ⬜ 행이 없는 것이 정상이다.
 2. 상세 파일 존재 여부 확인 — 존재 시 타 Agent 착수 중, 건드리지 않음
 3. 상세 파일을 읽고(또는 신규 Task는 Issue 본문을 기반으로 상세 파일 신규 생성) 복잡도 판단 후 진행 방식 결정:
@@ -183,6 +199,7 @@ API 사양 변경 시 반드시 `Ds-11_API_상세_명세서.md`를 선제적으�
 - 로컬 격리 worktree에서의 자체 검증(vitest 재실행 등)은 CI 확인을 **대체하지 않는다** — 로컬 검증과 실제 CI 환경(신선한 `supabase db reset`, symlink 없는 실제 `npm install`)은 결과가 다를 수 있음이 확인된 바 있다(DEF-096/097).
 - CI가 `pending` 상태면 완료까지 대기한다. `fail` 상태면 원인을 파악하기 전까지 머지하지 않는다 — 로컬 검증이 PASS라도 예외 없음.
 - 현재 branch protection이 관리자 계정(Aiden 사용 계정)에는 적용되지 않으므로(`enforce_admins: false`), 이 규칙은 기술적으로 강제되지 않는 **Aiden 개인 준수 의무**다. 위반 시 R-15에 따라 즉시 IMP/DEF로 기록한다.
+- **[v2.3 명확화, 2026-07-17 — PR#558 사례]** 위 "로컬 검증은 CI를 대체하지 않는다"는 **CI가 실행되어 결과가 다른 경우(DEF-096/097 유형)**에 적용된다. **CI 자체가 트리거되지 않는 경우(R-08-1 참조 — 체크 항목이 아예 없음, Vercel만 존재)**는 다른 실패 모드이며, R-08-1 대체 검증 절차(15분 대기 후 로컬 build+`test:regression` 실행)로 머지 판단해도 된다. 두 경우를 혼동하지 않는다 — "fail"과 "미실행(no check)"은 다르다.
 
 **반복 위반 페널티** (R-17 v1.4 신설, v2.1에서 위반 유형 추가):
 - 동일 Agent가 **동일 유형 위반(task file 미업데이트·커밋 해시 미기재·상태 미변경·DoD 미체크·자가 검증 미실행·GitHub Issue 라벨 미갱신)** 누적 **3회 이상** 시:
@@ -220,7 +237,7 @@ API 사양 변경 시 반드시 `Ds-11_API_상세_명세서.md`를 선제적으�
 
 **보고 절차**:
 1. 상세 파일의 `[발견 이슈]` 섹션에 요약 기재 (1~2줄)
-2. 상세 내용은 `.agent/defects/DEF-NNN_제목.md` 별도 보고서 작성 (NNN: 자동 증가 일련번호, 001부터 시작)
+2. 상세 내용은 `.agent/defects/DEF-NNN_제목.md` 별도 보고서 작성 — 다중팀 운영 시 채번 형식은 [105_MULTITEAM_GOVERNANCE.md §DEF 번호 채번 규칙](docs/00_GUIDE/105_MULTITEAM_GOVERNANCE.md) 참조(Team A: `DEF-NNN`, Team B: `DEF-B-NNN`). 채번 전 `./scripts/next-def-number.sh [B]` 실행.
 3. 🔔 제출 시 Aiden이 `[발견 이슈]` 섹션과 별도 보고서를 함께 확인
 4. **긴급도 `즉시`·`High` DEF**: Aiden이 Edward에게 보고 후 TASK 발령 (Aiden 단독 발령 금지)
 
@@ -350,4 +367,4 @@ PreToolUse GitNexus Hook에서 `Bash`가 제외되었습니다. 아래 경우는
 
 ## 📝 개정 이력
 
-> 최신 버전: **v2.5** (2026-07-07) | 전체 이력: [docs/00_GUIDE/GOV_CHANGELOG.md](docs/00_GUIDE/GOV_CHANGELOG.md)
+> 최신 버전: **v2.6** (2026-07-24) | 전체 이력: [docs/00_GUIDE/GOV_CHANGELOG.md](docs/00_GUIDE/GOV_CHANGELOG.md)

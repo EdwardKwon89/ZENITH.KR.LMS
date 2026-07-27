@@ -55,6 +55,44 @@ export async function sendStatusChangeEmail(
   await resend.emails.send({ from: FROM, to: target.email, subject, html });
 }
 
+export async function sendFreightChangeEmail(params: {
+  email: string;
+  shipperName: string;
+  orderNo: string;
+  oldFreight: number;
+  newFreight: number;
+  currency: string;
+  reason: string;
+}): Promise<void> {
+  if (!resend) {
+    logger.warn(`[NOTIF] Resend API Key is missing. Skipping freight change email for ${params.email}`);
+    return;
+  }
+
+  const formatAmount = (amount: number) => new Intl.NumberFormat('ko-KR', {
+    style: 'currency',
+    currency: params.currency,
+  }).format(amount);
+
+  const subject = `[ZENITH] 오더 ${params.orderNo} 운임 변경 안내`;
+  const html = `
+    <div style="font-family:sans-serif;max-width:560px;margin:0 auto">
+      <h2 style="color:#1e293b">운임이 변경되었습니다</h2>
+      <p style="color:#475569">안녕하세요, ${escapeHtml(params.shipperName)}님</p>
+      <p style="color:#475569">입고 시 부피/중량 재측정 결과, 예상 운임이 변경되었습니다.</p>
+      <table style="width:100%;border-collapse:collapse;margin:16px 0">
+        <tr><td style="padding:8px;color:#64748b">오더 번호</td><td style="padding:8px;font-weight:bold">${escapeHtml(params.orderNo)}</td></tr>
+        <tr><td style="padding:8px;color:#64748b">기존 운임</td><td style="padding:8px;font-weight:bold">${formatAmount(params.oldFreight)}</td></tr>
+        <tr><td style="padding:8px;color:#64748b">변경 운임</td><td style="padding:8px;font-weight:bold;color:#dc2626">${formatAmount(params.newFreight)}</td></tr>
+        <tr><td style="padding:8px;color:#64748b">변경 사유</td><td style="padding:8px">${escapeHtml(params.reason)}</td></tr>
+      </table>
+      <p style="color:#94a3b8;font-size:12px;margin-top:24px">본 메일은 ZENITH LMS에서 자동 발송된 알림입니다.</p>
+    </div>
+  `;
+
+  await resend.emails.send({ from: FROM, to: params.email, subject, html });
+}
+
 export async function sendShipperWelcomeEmail(params: {
   email: string;
   shipperName: string;
@@ -93,6 +131,44 @@ export async function sendShipperWelcomeEmail(params: {
           문의처: ${escapeHtml(params.agencyContactEmail)}
         </p>
       ` : ''}
+      <p style="color:#94a3b8;font-size:12px;margin-top:24px">본 메일은 ZENITH LMS에서 자동 발송된 알림입니다.</p>
+    </div>
+  `;
+
+  await resend.emails.send({ from: FROM, to: params.email, subject, html });
+}
+
+export async function sendInvoiceFinalizedEmail(params: {
+  email: string;
+  shipperName: string;
+  invoiceNo: string;
+  totalAmount: number;
+  currency: string;
+  dueDate: string;
+  orderNo?: string;
+}): Promise<void> {
+  if (!resend) {
+    logger.warn(`[NOTIF] Resend API Key is missing. Skipping invoice finalized email for ${params.email}`);
+    return;
+  }
+
+  const formattedAmount = new Intl.NumberFormat('ko-KR', {
+    style: 'currency',
+    currency: params.currency,
+  }).format(params.totalAmount);
+
+  const subject = `[ZENITH] 인보이스 ${params.invoiceNo} 발행 완료`;
+  const html = `
+    <div style="font-family:sans-serif;max-width:560px;margin:0 auto">
+      <h2 style="color:#1e293b">인보이스가 발행되었습니다</h2>
+      <p style="color:#475569">안녕하세요, ${escapeHtml(params.shipperName)}님</p>
+      <p style="color:#475569">인보이스가 정산 마감되어 발행되었습니다. 아래 내용을 확인해주세요.</p>
+      <table style="width:100%;border-collapse:collapse;margin:16px 0">
+        <tr><td style="padding:8px;color:#64748b">인보이스 번호</td><td style="padding:8px;font-weight:bold">${escapeHtml(params.invoiceNo)}</td></tr>
+        ${params.orderNo ? `<tr><td style="padding:8px;color:#64748b">오더 번호</td><td style="padding:8px;font-weight:bold">${escapeHtml(params.orderNo)}</td></tr>` : ''}
+        <tr><td style="padding:8px;color:#64748b">총 금액</td><td style="padding:8px;font-weight:bold">${formattedAmount}</td></tr>
+        <tr><td style="padding:8px;color:#64748b">납부 기한</td><td style="padding:8px;font-weight:bold">${escapeHtml(params.dueDate)}</td></tr>
+      </table>
       <p style="color:#94a3b8;font-size:12px;margin-top:24px">본 메일은 ZENITH LMS에서 자동 발송된 알림입니다.</p>
     </div>
   `;

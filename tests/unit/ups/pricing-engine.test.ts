@@ -188,14 +188,18 @@ describe('TC-UPS-ENGINE-04: Agency 단계 계산 (An-14 R3~R5, Issue #310)', () 
 });
 
 describe('TC-UPS-ENGINE-05: Shipper 단계 계산 (An-14 R6)', () => {
-  it('화주 할인율을 Agency 판매가에 적용해 최종 운송비를 산출한다', () => {
-    const result = computeShipperFreight(98000, 0.05);
-    expect(result.finalFreight).toBeCloseTo(93100, 2);
+  it('화주 할인율을 기본운임에만 적용해 최종 운송비를 산출한다', () => {
+    const result = computeShipperFreight(98000, 5000, 2000, 0.05);
+    expect(result.baseSellingPrice).toBeCloseTo(93100, 2);
+    expect(result.fuelSurchargeSellingAmount).toBe(5000);
+    expect(result.otherChargesSellingTotal).toBe(2000);
+    expect(result.finalFreight).toBeCloseTo(100100, 2);
   });
 
-  it('할인율 0이면 Agency 판매가와 동일하다', () => {
-    const result = computeShipperFreight(50000, 0);
-    expect(result.finalFreight).toBe(50000);
+  it('할인율 0이면 기본운임이 그대로이고 부가운임도 정가로 합산된다', () => {
+    const result = computeShipperFreight(50000, 3000, 1000, 0);
+    expect(result.baseSellingPrice).toBe(50000);
+    expect(result.finalFreight).toBe(54000);
   });
 });
 
@@ -262,5 +266,106 @@ describe('TC-UPS-ZONEMAP-03: resolveZoneByCountry — 미등록 국가 null', ()
     const result = resolveZoneByCountry('JPN', []);
     expect(result.zone).toBeNull();
     expect(result.fallbackApplied).toBe(false);
+  });
+});
+
+// ─── Issue #476: 다중 패키지 정산중량 합산 ─────────────────────────────────────────
+
+import { calcMultiPackageChargeableWeight } from '@/lib/ups/pricing-engine';
+
+describe('TC-UPS-ENGINE-06: calcMultiPackageChargeableWeight (Issue #476)', () => {
+  it('단일 패키지 — 기존 동작과 동일', () => {
+    const result = calcMultiPackageChargeableWeight([
+      { gross_weight_kg: 5, dims: { l: 30, w: 20, h: 10 } },
+    ]);
+    expect(result.totalChargeableKg).toBe(5);
+    expect(result.totalVolumetricKg).toBeCloseTo(1.2, 1);
+    expect(result.oversizeApplied).toBe(false);
+  });
+
+  it('단일 패키지 — 부피중량이 더 큰 경우', () => {
+    const result = calcMultiPackageChargeableWeight([
+      { gross_weight_kg: 2, dims: { l: 50, w: 60, h: 100 } },
+    ]);
+    // volumetricKg = 50*60*100/5000 = 60
+    expect(result.totalChargeableKg).toBe(60);
+    expect(result.totalVolumetricKg).toBe(60);
+  });
+
+  it('다중 패키지 정상 합산', () => {
+    const result = calcMultiPackageChargeableWeight([
+      { gross_weight_kg: 3, dims: { l: 20, w: 15, h: 10 } },  // vol=0.6, chargeable=3
+      { gross_weight_kg: 5, dims: { l: 30, w: 20, h: 10 } },  // vol=1.2, chargeable=5
+    ]);
+    expect(result.totalChargeableKg).toBe(8);  // 3+5
+    expect(result.totalVolumetricKg).toBeCloseTo(1.8, 1);  // 0.6+1.2
+    expect(result.oversizeApplied).toBe(false);
+  });
+
+  it('다중 패키지 중 일부만 oversize — 해당 패키지만 최소과금 적용', () => {
+    // 패키지1: 30x20x10 → vol=0.6, chargeable=max(3,0.6)=3, oversize 아님
+    // 패키지2: 80x50x40 → vol=32, chargeable=max(5,32)=32, oversize 아님
+    // 패키지3: 100x60x50 → vol=60, chargeable=max(2,60)=60, oversize!(girth+length=320>300)
+    //   oversize 적용 → max(60,40)=60 (이미 40초과이므로 그대로)
+    const result = calcMultiPackageChargeableWeight([
+      { gross_weight_kg: 3, dims: { l: 30, w: 20, h: 10 } },   // 3kg
+      { gross_weight_kg: 5, dims: { l: 80, w: 50, h: 40 } },   // 5kg → vol=32
+      { gross_weight_kg: 2, dims: { l: 100, w: 60, h: 50 } },  // 2kg → vol=60 → oversize
+    ]);
+    expect(result.totalChargeableKg).toBe(95);  // 3+32+60
+    expect(result.oversizeApplied).toBe(true);
+  });
+
+  it('치수 없는 패키지 — 실중량만 사용', () => {
+    const result = calcMultiPackageChargeableWeight([
+      { gross_weight_kg: 10 },
+      { gross_weight_kg: 5, dims: { l: 20, w: 15, h: 10 } },
+    ]);
+    expect(result.totalChargeableKg).toBe(15);  // 10+5
+    expect(result.totalVolumetricKg).toBeCloseTo(0.6, 1);
+  });
+});
+
+describe('TC-UPS-ENGINE-07: 급증 긴급 수수료(Surge Emergency Fee) 계산 (Issue #491)', () => {
+  const surgeFee = {
+    id: 'sf1', destination_country_code: 'KR', selling_rate_per_kg: 4722, cost_rate_per_kg: 3800,
+    currency: 'KRW', effective_from: '2026-05-24', effective_until: '2026-07-05', is_active: true,
+    created_at: '', created_by: null,
+  } as any;
+
+  it('surgeFee 미지정 시 급증 수수료가 0으로 계산된다', () => {
+    const result = computeUpsFreight(baseInput(), baseData());
+    expect(result.surgeFeeSellingAmount).toBe(0);
+    expect(result.breakdown.surgeFeeId).toBeNull();
+  });
+
+  it('kg당 단가 × 청구중량으로 급증 수수료를 계산하고 유류할증료를 추가 부과한다', () => {
+    const data = { ...baseData(), surgeFee };
+    // baseInput: actualWeightKg=5, dims 없음 → chargeableKg=5
+    // surge base = 4722 * 5 = 23610, fuelRate=0.185 → +23610*0.185=4367.85 → 27977.85
+    const result = computeUpsFreight(baseInput(), data);
+    expect(result.breakdown.surgeFeeSellingRatePerKg).toBe(4722);
+    expect(result.surgeFeeSellingAmount).toBeCloseTo(23610 + 23610 * 0.185, 2);
+  });
+
+  it('급증 수수료가 totalSellingPrice/totalCostPrice에 합산된다', () => {
+    const withSurge = computeUpsFreight(baseInput(), { ...baseData(), surgeFee });
+    const withoutSurge = computeUpsFreight(baseInput(), baseData());
+    expect(withSurge.totalSellingPrice).toBeCloseTo(withoutSurge.totalSellingPrice + withSurge.surgeFeeSellingAmount, 2);
+    expect(withSurge.totalCostPrice).toBeCloseTo(withoutSurge.totalCostPrice + withSurge.surgeFeeCostAmount, 2);
+  });
+});
+
+describe('TC-UPS-ENGINE-05: Shipper 단계 — 급증 수수료 pass-through (Issue #491)', () => {
+  it('급증 수수료는 할인 대상이 아니고 정가 그대로 최종 운송비에 합산된다', () => {
+    const result = computeShipperFreight(98000, 5000, 2000, 0.05, 3000);
+    expect(result.surgeFeeSellingAmount).toBe(3000);
+    expect(result.finalFreight).toBeCloseTo(93100 + 5000 + 2000 + 3000, 2);
+  });
+
+  it('급증 수수료 미지정 시 기본값 0으로 기존 동작과 동일하다', () => {
+    const result = computeShipperFreight(98000, 5000, 2000, 0.05);
+    expect(result.surgeFeeSellingAmount).toBe(0);
+    expect(result.finalFreight).toBeCloseTo(100100, 2);
   });
 });

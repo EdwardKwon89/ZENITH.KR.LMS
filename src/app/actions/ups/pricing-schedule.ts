@@ -74,8 +74,11 @@ async function checkOverlap(
     .from('zen_ups_pricing_schedule')
     .select('id, valid_from, valid_until, new_value')
     .eq('setting_type', settingType)
-    .eq('status', 'SCHEDULED')
-    .eq('target_ref', targetRef);
+    .eq('status', 'SCHEDULED');
+
+  for (const [key, value] of Object.entries(targetRef)) {
+    query = query.eq(`target_ref->>${key}`, value);
+  }
 
   if (excludeId) {
     query = query.neq('id', excludeId);
@@ -318,7 +321,9 @@ export async function getPricingAuditLog(settingType?: SettingType, targetRef?: 
   }
 
   if (targetRef) {
-    query = query.eq('target_ref', targetRef);
+    for (const [key, value] of Object.entries(targetRef)) {
+      query = query.eq(`target_ref->>${key}`, value);
+    }
   }
 
   if (isAgency && profile?.org_id) {

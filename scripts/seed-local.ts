@@ -29,9 +29,9 @@ async function createUser(supabase: any, email: string, fullName: string, role: 
     console.log(`  - User already exists: ${user.id}`);
   }
 
-  // 2. App Metadata 업데이트 (JWT 권한 반영용)
+  // 2. App Metadata 업데이트 (JWT 권한 반영용 — org_id 누락 시 RLS가 조용히 실패함, 2026-07-19 확인)
   await supabase.auth.admin.updateUserById(user.id, {
-    app_metadata: { role, status: 'ACTIVE', org_type: orgType }
+    app_metadata: { role, status: 'ACTIVE', org_type: orgType, org_id: orgId }
   });
 
   // 3. zen_profiles 동기화
@@ -82,6 +82,301 @@ async function getOrCreateOrg(supabase: any, name: string, type: string) {
 
   console.log(`  - Created new organization: ${newOrg.id}`);
   return newOrg;
+}
+
+async function seedAgencyRelationship(supabase: any) {
+  console.log('\nSeeding Agency/Agency_Shipper test accounts...');
+
+  // 1. Agency 조직 및 계정 생성
+  const agencyOrg = await getOrCreateOrg(supabase, 'Zenith Agency Partners', 'AGENCY');
+  await createUser(supabase, 'agency@zenith.kr', 'Agency Operator', 'AGENCY', agencyOrg.id, 'AGENCY');
+
+  // 2. Agency 소속 Shipper 조직 및 계정 생성 (AGENCY_SHIPPER)
+  const agencyShipperOrg = await getOrCreateOrg(supabase, 'Agency Shipper Co', 'SHIPPER');
+  await createUser(supabase, 'agency_shipper@zenith.kr', 'Agency Shipper', 'AGENCY_SHIPPER', agencyShipperOrg.id, 'SHIPPER');
+
+  // 3. zen_agency_shippers 연결 (createAgencyShipper의 _linkShipperToAgency와 동일 구조)
+  const { data: existingLink } = await supabase
+    .from('zen_agency_shippers')
+    .select('id')
+    .eq('agency_org_id', agencyOrg.id)
+    .eq('shipper_org_id', agencyShipperOrg.id)
+    .maybeSingle();
+
+  if (!existingLink) {
+    const { error: linkError } = await supabase
+      .from('zen_agency_shippers')
+      .insert({
+        agency_org_id: agencyOrg.id,
+        shipper_org_id: agencyShipperOrg.id,
+        shipper_type: 'CORPORATE',
+        discount_rate: 0.05,
+        is_active: true,
+      });
+    if (linkError) {
+      console.error('  - Failed to link agency shipper:', linkError.message);
+    } else {
+      console.log('  - Linked agency_shipper to agency');
+    }
+  } else {
+    console.log('  - Agency shipper link already exists');
+  }
+}
+
+async function seedSntlAgency(supabase: any) {
+  console.log('\nSeeding SNTL agency account (2026-07-19 원가표.xlsx 연동)...');
+
+  // SNTL: 실제 UPS 원가표(KR-P) 기준 데이터가 연결되는 Master Agency 조직
+  const sntlOrg = await getOrCreateOrg(supabase, 'SNTL', 'AGENCY');
+
+  // Issue #605: SNTL은 Master Agency — UPS 특별할인을 받아 하위 대리점(Sub-Agency)에 재공급하는
+  // 사업을 계획 중(Edward, 2026-07-19). 이를 위해 SNTL 계정을 SUB_ADMIN으로 전환.
+  // (기존 AGENCY 역할이 아니라, 본인 관리 Sub-Agency의 zen_agency_pricing_policies만
+  //  RLS로 제한된 범위에서 CRUD 가능한 역할 — is_managing_agency(), 20260719000400 참조)
+  await createUser(supabase, 'sntl@zenith.kr', 'SNTL Master Agency Admin', 'SUB_ADMIN', sntlOrg.id, 'AGENCY');
+
+  // 검증/데모용 Sub-Agency 1곳 — parent_id로 SNTL을 Master로 지정
+  const subAgencyOrg = await getOrCreateOrg(supabase, 'SNTL Sub-Agency Test', 'AGENCY');
+  await supabase
+    .from('zen_organizations')
+    .update({ parent_id: sntlOrg.id })
+    .eq('id', subAgencyOrg.id)
+    .is('parent_id', null);
+  await createUser(supabase, 'sntl_sub1@zenith.kr', 'SNTL Sub-Agency Test Operator', 'AGENCY', subAgencyOrg.id, 'AGENCY');
+
+  // Edward 지시(2026-07-20) 정책 시나리오: SNTL → SNTL Agency 공급가 = UPS 공식 판매가의 80%
+  // (= discount_rate 0.20). 이전에 등록했던 75%(20260719 실측 대표값)는 이번 시나리오 검증을 위해
+  // 0.20으로 대체 — 실측값이 아닌 Edward 지정 테스트 정책이므로 실측 근거 주석은 제거하지 않고
+  // 이 시나리오가 임시 검증용임을 명시.
+  const { data: zones } = await supabase.from('zen_ups_zones').select('id');
+  for (const zone of zones ?? []) {
+    await supabase
+      .from('zen_agency_pricing_policies')
+      .upsert(
+        { agency_org_id: subAgencyOrg.id, zone_id: zone.id, discount_rate: 0.20, is_active: true },
+        { onConflict: 'agency_org_id,zone_id' },
+      );
+  }
+  console.log(`  - Registered SNTL->Sub-Agency zone discount policy (20% = 80% 공급가, ${zones?.length ?? 0} zones)`);
+
+  // TestShipper: SNTL Agency 소속 화주 — Edward 지시 정책: 공급가 = UPS 공식 판매가의 88%
+  // (= discount_rate 0.12). Agency→Shipper 판매가는 Agency 원가를 경유하지 않고 UPS 판매가에서
+  // 직접 계산(Issue #310, shipper-pricing.ts 참조).
+  // 역할은 AGENCY_SHIPPER이어야 함 — createOrder()가 agency_org_id 자동 연결(zen_agency_shippers
+  // 조회)을 profile.role === AGENCY_SHIPPER인 경우에만 수행함(operations/orders.ts:110). CORPORATE로
+  // 만들면 오더에 agency_org_id가 비어 rate snapshot/원가가 전혀 생성되지 않음(직접 확인, 2026-07-20).
+  const testShipperOrg = await getOrCreateOrg(supabase, 'TestShipper', 'SHIPPER');
+  await createUser(supabase, 'test_shipper@zenith.kr', 'TestShipper Operator', 'AGENCY_SHIPPER', testShipperOrg.id, 'SHIPPER');
+
+  await supabase
+    .from('zen_agency_shippers')
+    .upsert(
+      { agency_org_id: subAgencyOrg.id, shipper_org_id: testShipperOrg.id, shipper_type: 'CORPORATE', is_active: true },
+      { onConflict: 'agency_org_id,shipper_org_id' },
+    );
+
+  for (const zone of zones ?? []) {
+    await supabase
+      .from('zen_agency_shipper_zone_discounts')
+      .upsert(
+        { agency_org_id: subAgencyOrg.id, shipper_org_id: testShipperOrg.id, zone_id: zone.id, discount_rate: 0.12, is_active: true },
+        { onConflict: 'agency_org_id,shipper_org_id,zone_id' },
+      );
+  }
+  console.log(`  - Registered SNTL Agency->TestShipper zone discount policy (12% = 88% 공급가, ${zones?.length ?? 0} zones)`);
+}
+
+/**
+ * TASK-212: DEF-B-014/015/016(AGENCY RLS) + DEF-B-013(입고 재계산) + DEF-127(tisa.ts metadata)
+ * 검증용 UPS 오더 픽스처 — 기존 시드에는 agency_org_id가 채워진 UPS 오더가 전혀 없어
+ * 위 결함들을 실제 UI/RLS로 재현 확인할 방법이 없었음(2026-07-27 완성도 점검에서 발견).
+ *
+ * SNTL Sub-Agency Test(sntl_sub1@zenith.kr) 소속, TestShipper(test_shipper@zenith.kr) 화주로
+ * agency_org_id가 정상 채워진 UPS 오더 1건 + 실측 가능한 치수(volumetric > actual weight로
+ * 설정해 OVERSIZE/부피중량 로직도 함께 검증 가능) + rate snapshot(platform.totalSellingPrice
+ * 포함) + UPS tracking config를 생성한다. SNTL Sub-Agency Test의 volumetric_divisor는
+ * 기본값(5000)이 아닌 5500으로 설정해 DEF-B-016(대행사별 기준값 반영) 재현도 가능하게 한다.
+ */
+async function seedUpsAgencyOrder(supabase: any) {
+  console.log('\nSeeding UPS agency order fixture (TASK-212, DEF-127/DEF-B-013~016 검증용)...');
+
+  const { data: subAgencyOrg } = await supabase
+    .from('zen_organizations')
+    .select('id')
+    .eq('name', 'SNTL Sub-Agency Test')
+    .maybeSingle();
+  const { data: testShipperOrg } = await supabase
+    .from('zen_organizations')
+    .select('id')
+    .eq('name', 'TestShipper')
+    .maybeSingle();
+
+  if (!subAgencyOrg || !testShipperOrg) {
+    console.error('  - SKIP: SNTL Sub-Agency Test 또는 TestShipper 조직을 찾을 수 없음 (seedSntlAgency 선행 필요)');
+    return;
+  }
+
+  // 대행사별 부피중량 기준값 변형 — 기본값(5000)만 있으면 DEF-B-016 재현 불가
+  await supabase
+    .from('zen_organizations')
+    .update({ volumetric_divisor: 5500 })
+    .eq('id', subAgencyOrg.id);
+  console.log('  - SNTL Sub-Agency Test volumetric_divisor = 5500 설정(기본값 변형 검증용)');
+
+  const { data: destPort } = await supabase
+    .from('zen_ports')
+    .select('id')
+    .eq('code', 'LAX')
+    .maybeSingle();
+
+  const orderNo = 'UPS-SEED-AGENCY-001';
+  const { data: existingOrder } = await supabase
+    .from('zen_orders')
+    .select('id')
+    .eq('order_no', orderNo)
+    .maybeSingle();
+
+  let orderId: string;
+  if (existingOrder) {
+    console.log(`  - Order exists: ${orderNo}`);
+    orderId = existingOrder.id;
+  } else {
+    const { data: inserted, error } = await supabase
+      .from('zen_orders')
+      .insert({
+        order_no: orderNo,
+        shipper_id: testShipperOrg.id,
+        agency_org_id: subAgencyOrg.id,
+        status: 'WAREHOUSED',
+        transport_mode: 'UPS',
+        ups_product_code: 'WW_EXPEDITED',
+        recipient_country_code: 'US',
+        dest_port_id: destPort?.id ?? null,
+        incoterms: 'DDU',
+        delivery_method: 'DIRECT',
+        recipient_name: 'DEF-B Verification Recipient',
+        recipient_phone: '010-9999-0212',
+        cargo_details: { description: 'TASK-212 seed fixture — AGENCY RLS/입고재계산 검증용' },
+      })
+      .select('id')
+      .single();
+
+    if (error) {
+      console.error(`  - Failed: ${orderNo}`, error.message);
+      return;
+    }
+    orderId = inserted.id;
+    console.log(`  - Created: ${orderNo}`);
+  }
+
+  // 패키지: 실중량(3kg) < 부피중량(divisor 5500 기준 40x30x25/5500=5.45kg) — OVERSIZE/부피중량 로직 검증용
+  const { data: existingPkg } = await supabase
+    .from('zen_order_packages')
+    .select('id')
+    .eq('order_id', orderId)
+    .limit(1);
+  if (!existingPkg || existingPkg.length === 0) {
+    await supabase.from('zen_order_packages').insert({
+      order_id: orderId,
+      packing_unit: 'BOX',
+      packing_count: 1,
+      gross_weight: 3,
+      length: 40,
+      width: 30,
+      height: 25,
+      content_type: 'GENERAL',
+    });
+    console.log('  - Seeded package (3kg, 40x30x25cm — volumetric > actual)');
+  }
+
+  // rate snapshot: DEF-127(tisa.ts metadata) + AGENCY RLS(SELECT/UPDATE/INSERT) 검증용
+  const { data: existingSnapshot } = await supabase
+    .from('zen_order_rate_snapshots')
+    .select('id')
+    .eq('order_id', orderId)
+    .maybeSingle();
+  if (!existingSnapshot) {
+    await supabase.from('zen_order_rate_snapshots').insert({
+      order_id: orderId,
+      applied_unit_price: 249577,
+      applied_currency: 'KRW',
+      applied_rule: 'UPS_3TIER',
+      metadata: {
+        platform: {
+          chargeableWeightKg: 5.45,
+          billingWeightKg: 3,
+          totalSellingPrice: 249577,
+          totalCostPrice: 189577,
+          currency: 'KRW',
+          breakdown: { baseFreight: 200000, fuelSurcharge: 30000, surgeFee: 10000, extraCharges: 9577 },
+        },
+        agency: null,
+        shipper: null,
+      },
+    });
+    console.log('  - Seeded rate snapshot (platform.totalSellingPrice=249577 KRW)');
+  }
+
+  // tracking config: TrackingDashboard UPS provider 검증용(기존 유일 표본은 API/MockCarrier뿐)
+  const { data: existingTracking } = await supabase
+    .from('zen_tracking_configs')
+    .select('id')
+    .eq('order_id', orderId)
+    .maybeSingle();
+  if (!existingTracking) {
+    await supabase.from('zen_tracking_configs').insert({
+      order_id: orderId,
+      provider_type: 'API',
+      provider_name: 'UPS',
+      tracking_no: '1Z-SEED-UPS-001',
+      is_active: true,
+    });
+    console.log('  - Seeded UPS tracking config (1Z-SEED-UPS-001)');
+  }
+}
+
+/**
+ * 화주 인보이스 조회 화면(TASK-B-205) 검증용 — 로그인 가능한 화주 계정(shipper@zenith.kr,
+ * test_shipper@zenith.kr)에 인보이스가 0건이라 화면은 뜨나 실데이터 확인이 불가했음(2026-07-27 발견).
+ */
+async function seedShipperInvoices(supabase: any, shipperOrgId: string) {
+  console.log('\nSeeding shipper invoice fixtures (TASK-212, TASK-B-205 검증용)...');
+
+  const { data: testShipperOrg } = await supabase
+    .from('zen_organizations')
+    .select('id')
+    .eq('name', 'TestShipper')
+    .maybeSingle();
+
+  const invoiceTargets: Array<[string, string]> = [
+    ['INV-SEED-SHIPPER-001', shipperOrgId],
+    ...(testShipperOrg ? [['INV-SEED-TESTSHIPPER-001', testShipperOrg.id] as [string, string]] : []),
+  ];
+
+  for (const [invoiceNo, orgId] of invoiceTargets) {
+    const { data: existing } = await supabase
+      .from('zen_invoices')
+      .select('id')
+      .eq('invoice_no', invoiceNo)
+      .maybeSingle();
+    if (existing) {
+      console.log(`  - Invoice exists: ${invoiceNo}`);
+      continue;
+    }
+    const { error } = await supabase.from('zen_invoices').insert({
+      invoice_no: invoiceNo,
+      shipper_id: orgId,
+      total_amount: 249577,
+      currency: 'KRW',
+      due_date: new Date(new Date().setDate(new Date().getDate() + 14)).toISOString().slice(0, 10),
+      status: 'UNPAID',
+    });
+    if (error) {
+      console.error(`  - Failed: ${invoiceNo}`, error.message);
+    } else {
+      console.log(`  - Created: ${invoiceNo}`);
+    }
+  }
 }
 
 async function seedOrders(supabase: any, shipperOrgId: string) {
@@ -350,7 +645,8 @@ async function seedVesselSchedules(supabase: any, _carrierOrgId: string) {
   const seen = new Set<string>();
 
   for (const route of routeNetwork) {
-    if (route.transport_mode === 'LAND') continue;
+    // LAND/EXP(UPS 특송)는 vessel schedule(선박/항공편 스케줄) 개념 자체가 없음
+    if (route.transport_mode === 'LAND' || route.transport_mode === 'EXP') continue;
 
     const key = `${route.carrier_id}:${route.from_port_id}:${route.to_port_id}:${route.transport_mode}`;
     if (seen.has(key)) continue;
@@ -582,8 +878,20 @@ async function seed() {
     await createUser(supabase, 'carrier@zenith.kr', 'Main Carrier', 'CARRIER', carrierOrg.id, 'PARTNER');
     await createUser(supabase, 'individual@zenith.kr', 'Individual User', 'INDIVIDUAL', null, 'CUSTOMER');
 
+    // 3-1. Agency/Agency_Shipper 테스트 계정 (UPS 특송 UAT 필수 — 2026-07-19 보완)
+    await seedAgencyRelationship(supabase);
+
+    // 3-2. SNTL 실 Agency 계정 (원가표.xlsx 연동 — 2026-07-19)
+    await seedSntlAgency(supabase);
+
     // 4. E2E 테스트용 오더 시드 데이터 생성
     await seedOrders(supabase, shipperOrg.id);
+
+    // 4-1. TASK-212: AGENCY RLS/입고재계산/DEF-127 검증용 UPS 오더 픽스처
+    await seedUpsAgencyOrder(supabase);
+
+    // 4-2. TASK-212: 화주 인보이스 조회 화면 검증용 픽스처
+    await seedShipperInvoices(supabase, shipperOrg.id);
 
     // 5. 정산 요율 카드 시드 데이터 생성
     await seedRateCards(supabase, carrierOrg.id);

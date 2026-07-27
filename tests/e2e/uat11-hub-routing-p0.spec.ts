@@ -19,16 +19,16 @@ test.describe('UAT-11: Hub Routing & P0', () => {
     }
   });
 
-  async function loginAs(page, creds) {
+  async function loginAs(page: any, creds: { email: string; password: string }) {
     await page.goto('/ko/login');
     await page.waitForLoadState('domcontentloaded');
     await page.fill('input#email', creds.email);
     await page.fill('input#password', creds.password);
     await page.click('button:has-text("로그인")');
-    await page.waitForURL(function(url) { return !url.pathname.includes('/login'); }, { timeout: 30000 });
+    await page.waitForURL(function(url: any) { return !url.pathname.includes('/login'); }, { timeout: 30000 });
   }
 
-  async function selectPort(page, portCode) {
+  async function selectPort(page: any, portCode: string) {
     var selects = page.locator('select');
     var count = await selects.count();
     for (var i = 0; i < count; i++) {

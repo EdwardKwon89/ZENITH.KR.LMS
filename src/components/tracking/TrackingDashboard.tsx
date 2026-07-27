@@ -10,13 +10,15 @@ import {
   Package,
   MapPin,
   Clock,
-  CheckCircle2,
-  AlertCircle
 } from "lucide-react";
 import { getGlobalTrackingOverview, syncExternalTracking } from "@/app/actions/tracking";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { useParams } from "next/navigation";
 import { format } from "date-fns";
+import { useTranslations } from 'next-intl';
+import { OrderStatus, ORDER_STATUS_META } from '@/types/orders';
+import { ZenStatusBadge } from '@/components/domain/ZenStatusBadge';
 
 const statCardVariants = {
   hidden: { opacity: 0, y: 12 },
@@ -37,6 +39,8 @@ function StatCardSkeleton() {
 }
 
 export default function TrackingDashboard() {
+  const params = useParams();
+  const safeLocale = (params?.locale as string) || 'ko';
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [tracks, setTracks] = useState<any[]>([]);
@@ -75,19 +79,49 @@ export default function TrackingDashboard() {
     track.tracking_no?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const t = useTranslations('orderStatus');
+
+  const STATUS_ORDER: OrderStatus[] = [
+    OrderStatus.REGISTERED, OrderStatus.SCHEDULED, OrderStatus.WAREHOUSED,
+    OrderStatus.PACKED, OrderStatus.RELEASED, OrderStatus.IN_TRANSIT,
+    OrderStatus.DELIVERED, OrderStatus.CLAIMED, OrderStatus.HELD,
+    OrderStatus.CANCELED, OrderStatus.RETURNED, OrderStatus.DISPOSED,
+    OrderStatus.MASTERED,
+  ];
+
+  const STATUS_TEXT_COLOR: Record<OrderStatus, string> = {
+    [OrderStatus.REGISTERED]: 'text-blue-600',
+    [OrderStatus.SCHEDULED]: 'text-indigo-600',
+    [OrderStatus.WAREHOUSED]: 'text-yellow-600',
+    [OrderStatus.PACKED]: 'text-orange-600',
+    [OrderStatus.RELEASED]: 'text-purple-600',
+    [OrderStatus.IN_TRANSIT]: 'text-cyan-600',
+    [OrderStatus.DELIVERED]: 'text-green-600',
+    [OrderStatus.CLAIMED]: 'text-amber-600',
+    [OrderStatus.HELD]: 'text-red-600',
+    [OrderStatus.CANCELED]: 'text-gray-600',
+    [OrderStatus.RETURNED]: 'text-rose-600',
+    [OrderStatus.DISPOSED]: 'text-stone-600',
+    [OrderStatus.MASTERED]: 'text-slate-700',
+  };
+
+  const statusStats = STATUS_ORDER.map(status => ({
+    label: t(ORDER_STATUS_META[status].labelKey),
+    value: tracks.filter(tr => tr.order?.status === status).length,
+    color: STATUS_TEXT_COLOR[status],
+  }));
+
   const stats = [
-    { label: "Total Tracks", value: tracks.length, color: "text-slate-900" },
-    { label: "In Transit", value: tracks.filter(t => t.latest_event?.event_code === "IN_TRANSIT").length, color: "text-blue-600" },
-    { label: "Delivered", value: tracks.filter(t => t.latest_event?.event_code === "DELIVERED").length, color: "text-green-600" },
-    { label: "Issues", value: tracks.filter(t => t.latest_event?.event_code === "EXCEPTION").length, color: "text-red-600" },
+    { label: "Total Tracks", value: statusStats.reduce((sum, s) => sum + s.value, 0), color: "text-slate-900" },
+    ...statusStats,
   ];
 
   return (
     <div className="space-y-6">
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 xl:grid-cols-7 gap-4">
         {loading ? (
-          Array.from({ length: 4 }).map((_, i) => <StatCardSkeleton key={i} />)
+          Array.from({ length: 14 }).map((_, i) => <StatCardSkeleton key={i} />)
         ) : (
           stats.map((stat, i) => (
             <motion.div
@@ -204,46 +238,40 @@ export default function TrackingDashboard() {
                       </div>
                     </td>
                     <td className="px-6 py-4 text-sm font-medium text-slate-700">
-                      {track.tracking_no || "—"}
+                      {track.tracking_no || ""}
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex flex-col">
                         <span className="text-sm text-slate-900 font-medium">
-                          {track.provider_name || "—"}
+                          {track.order?.transport_mode === 'UPS' ? 'UPS' : (track.provider_name || "—")}
                         </span>
                         <span className={cn(
                           "text-[10px] px-1.5 py-0.5 rounded-full w-fit mt-1 border",
+                          track.order?.transport_mode === 'UPS' ? "bg-blue-50 text-blue-600 border-blue-100" :
                           track.provider_type === "API" ? "bg-blue-50 text-blue-600 border-blue-100" :
                           track.provider_type === "VIRTUAL" ? "bg-purple-50 text-purple-600 border-purple-100" :
                           "bg-slate-50 text-slate-600 border-slate-200"
                         )}>
-                          {track.provider_type}
+                          {track.order?.transport_mode === 'UPS' ? 'UPS' : track.provider_type}
                         </span>
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      {track.latest_event ? (
-                        <div className="flex flex-col gap-1">
-                          <div className="flex items-center gap-1.5">
-                            {track.latest_event.event_code === "DELIVERED" ? (
-                              <CheckCircle2 size={14} className="text-green-500 shrink-0" />
-                            ) : track.latest_event.event_code === "EXCEPTION" ? (
-                              <AlertCircle size={14} className="text-red-500 shrink-0" />
-                            ) : (
-                              <RefreshCw size={14} className="text-blue-500 animate-spin-slow shrink-0" />
-                            )}
-                            <span className="text-sm font-semibold text-slate-800 truncate">
-                              {track.latest_event.description}
+                      <div className="flex flex-col gap-1">
+                        {track.order?.status && (
+                          <ZenStatusBadge status={track.order.status as OrderStatus} size="sm" />
+                        )}
+                        {track.latest_event ? (
+                          <div className="flex items-center gap-1 text-xs text-slate-500 mt-1">
+                            <MapPin size={12} className="shrink-0" />
+                            <span className="truncate">
+                              {track.latest_event.description}{track.latest_event.location ? ` · ${track.latest_event.location}` : ''}
                             </span>
                           </div>
-                          <div className="flex items-center gap-1 text-xs text-slate-500">
-                            <MapPin size={12} className="shrink-0" />
-                            <span className="truncate">{track.latest_event.location}</span>
-                          </div>
-                        </div>
-                      ) : (
-                        <span className="text-xs text-slate-400">No events yet</span>
-                      )}
+                        ) : (
+                          !track.order?.status && <span className="text-xs text-slate-400">No events yet</span>
+                        )}
+                      </div>
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-1.5 text-xs text-slate-500">
@@ -255,7 +283,7 @@ export default function TrackingDashboard() {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <Link
-                        href={`/orders/${track.order_id}`}
+                        href={`/${safeLocale}/orders/${track.order_id}${track.order?.transport_mode === 'UPS' ? '/ups-detail' : ''}`}
                         className="p-2 inline-flex items-center gap-1 text-brand-600 hover:bg-brand-50 rounded-lg transition-colors text-sm font-medium whitespace-nowrap"
                       >
                         Detail

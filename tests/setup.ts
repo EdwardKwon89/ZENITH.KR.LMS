@@ -17,6 +17,9 @@ Object.defineProperty(window, 'matchMedia', {
   })),
 });
 
+// server-only 모듈 Mock (vitest 환경에서 사용 불가)
+vi.mock('server-only', () => ({}));
+
 // Next.js Cache & Navigation Mocks
 vi.mock('next/cache', () => ({
   revalidatePath: vi.fn(),

@@ -14,6 +14,7 @@ import type {
   UpsZone,
   UpsVolumeDivisor,
   UpsOtherCharge,
+  UpsSurgeFee,
   ZoneResolveResult,
 } from '@/types/ups';
 
@@ -103,6 +104,35 @@ export function calcChargeableWeight(
   return { chargeableKg: Math.max(actualKg, volumetricKg), volumetricKg };
 }
 
+// Issue #476: 다중 패키지 정산중량 합산
+// 각 패키지별 개별 계산 후 합산 (옵션1 확정)
+export function calcMultiPackageChargeableWeight(
+  packages: Array<{ gross_weight_kg: number; dims?: { l: number; w: number; h: number }; divisor?: UpsVolumeDivisor }>
+): { totalChargeableKg: number; totalVolumetricKg: number; oversizeApplied: boolean } {
+  let totalChargeableKg = 0;
+  let totalVolumetricKg = 0;
+  let oversizeApplied = false;
+
+  for (const pkg of packages) {
+    const { chargeableKg, volumetricKg } = calcChargeableWeight(
+      pkg.gross_weight_kg,
+      pkg.dims,
+      pkg.divisor
+    );
+    totalVolumetricKg += volumetricKg;
+
+    // 패키지 단위 oversize 적용
+    let pkgChargeable = chargeableKg;
+    if (isOversizePackage(pkg.dims)) {
+      pkgChargeable = Math.max(pkgChargeable, OVERSIZE_MIN_BILLING_KG);
+      oversizeApplied = true;
+    }
+    totalChargeableKg += pkgChargeable;
+  }
+
+  return { totalChargeableKg, totalVolumetricKg, oversizeApplied };
+}
+
 // An-14 §0-1 C: 대형포장물 여부 판정. 길이 + 둘레(폭×2+높이×2) > 300cm이고 UPS 최대(400cm) 이하인 경우 적용.
 export function isOversizePackage(dims?: { l: number; w: number; h: number }): boolean {
   if (!dims) return false;
@@ -155,6 +185,7 @@ function buildBreakdown(
   baseRateId: string,
   baseSellingPrice: number,
   baseCostPrice: number,
+  surge: ReturnType<typeof applySurgeFee>,
 ): UpsBreakdown {
   const fuelRate = Number(data.fuelSurcharge?.selling_rate ?? 0);
   const fuelCostRate = Number(data.fuelSurcharge?.cost_rate ?? 0);
@@ -176,8 +207,33 @@ function buildBreakdown(
     otherChargeItems: oc.items,
     otherChargesSellingTotal: oc.sellingTotal,
     otherChargesCostTotal: oc.costTotal,
+    surgeFeeId: surge.id,
+    surgeFeeSellingRatePerKg: surge.sellingRatePerKg,
+    surgeFeeSellingAmount: surge.sellingAmount,
+    surgeFeeCostAmount: surge.costAmount,
     oversizeApplied,
     fallbackApplied: data.fallbackApplied ?? false,
+  };
+}
+
+// 급증 긴급 수수료(Surge Emergency Fee) 계산 — kg당 단가 × 청구중량, 유류할증료 부과 대상 (Issue #491)
+// 도착국·기준일(effectiveDate, 미지정 시 오늘) 기준으로 유효한 단가 1건을 호출자가 미리 조회해 data.surgeFee로 전달한다.
+function applySurgeFee(
+  surgeFee: UpsSurgeFee | null | undefined,
+  chargeableKg: number,
+  fuelRate: number,
+  fuelCostRate: number,
+): { id: string | null; sellingRatePerKg: number; sellingAmount: number; costAmount: number } {
+  if (!surgeFee) {
+    return { id: null, sellingRatePerKg: 0, sellingAmount: 0, costAmount: 0 };
+  }
+  const baseSelling = Number(surgeFee.selling_rate_per_kg) * chargeableKg;
+  const baseCost = Number(surgeFee.cost_rate_per_kg) * chargeableKg;
+  return {
+    id: surgeFee.id,
+    sellingRatePerKg: Number(surgeFee.selling_rate_per_kg),
+    sellingAmount: baseSelling + baseSelling * fuelRate,
+    costAmount: baseCost + baseCost * fuelCostRate,
   };
 }
 
@@ -275,6 +331,7 @@ export function computeUpsFreight(
     effectiveOtherCharges.push(data.oversizeCharge);
   }
   const oc = applyOtherCharges(effectiveOtherCharges, fuelRate);
+  const surge = applySurgeFee(data.surgeFee, chargeableKg, fuelRate, fuelCostRate);
 
   return {
     chargeableWeightKg: chargeableKg,
@@ -285,11 +342,13 @@ export function computeUpsFreight(
     fuelSurchargeCostAmount: fuelCostAmt,
     otherChargesSellingTotal: oc.sellingTotal,
     otherChargesCostTotal: oc.costTotal,
-    totalSellingPrice: baseSellingPrice + fuelSellAmt + oc.sellingTotal,
-    totalCostPrice: baseCostPrice + fuelCostAmt + oc.costTotal,
+    surgeFeeSellingAmount: surge.sellingAmount,
+    surgeFeeCostAmount: surge.costAmount,
+    totalSellingPrice: baseSellingPrice + fuelSellAmt + oc.sellingTotal + surge.sellingAmount,
+    totalCostPrice: baseCostPrice + fuelCostAmt + oc.costTotal + surge.costAmount,
     currency: data.baseRate?.currency || data.weightTierRates?.[0]?.currency || data.freightMinimum?.currency || 'KRW',
     breakdown: buildBreakdown(
-      input, data, chargeableKg, volumetricKg, actualWeight, oc, oversizeApplied, baseRateId, baseSellingPrice, baseCostPrice
+      input, data, chargeableKg, volumetricKg, actualWeight, oc, oversizeApplied, baseRateId, baseSellingPrice, baseCostPrice, surge
     ),
   };
 }

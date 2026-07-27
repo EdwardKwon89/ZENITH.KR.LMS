@@ -358,7 +358,7 @@
 ## 11. UPS 특송 요금 관리 (Phase 7.1 — IMP-145 · Phase 7.2 — IMP-146)
 
 > **설계 문서**: An-14_Phase7_UPS요금관리_설계보완.md
-> **마지막 갱신**: 2026-07-05 (TASK-171~180, GH#202)
+> **마지막 갱신**: 2026-07-15 (TASK-184, Issue #491 — 급증 긴급 수수료 §11.11 신규)
 > **Team B 인계 범위**: GH #181 (오더 등록 연동 + 정산)
 >
 > **핵심 계약**: `zen_agency_rate_overrides.cost_price`는 DB 트리거(`trg_agency_rate_override_calc_cost`)가 `base_rate.selling_price × (1 - policy.discount_rate)`로 **서버에서 자동 계산**한다. 클라이언트가 `cost_price` 값을 보내도 **무시**된다. Agency는 `selling_price`(마진 포함)만 입력할 수 있다.
@@ -388,6 +388,7 @@
   - `fallbackApplied: boolean` — Zone이 정확매치가 아닌 EXPRESS/EXPORT fallback으로 결정됐는지 여부 (11.6 참조)
   - `dwbApplied: boolean`, `dwbOriginalWeightKg?`, `dwbOriginalSellingPrice?`, `dwbOriginalCostPrice?` — DWB 적용 여부 및 적용 전 원본값 (11.7 참조)
   - `freightMinApplied: boolean`, `freightMinOriginalSelling?`, `freightMinOriginalCost?` — Freight 최소운임 적용 여부 및 적용 전 원본값 (11.8 참조)
+  - `surgeFeeId: string | null`, `surgeFeeSellingRatePerKg: number`, `surgeFeeSellingAmount: number`, `surgeFeeCostAmount: number` — 급증 긴급 수수료 적용 내역 (11.11 참조)
 
 **동작 분기**:
 - `agencyOrgId` 미전달 → Platform 단계만 계산, agency/shipper는 null
@@ -415,6 +416,9 @@
 | `deleteUpsOtherCharge(id)` | 부가요금 비활성화 |
 | `upsertAgencyPricingPolicy(data)` | 대리점 할인율 정책 등록/수정 (unique: agency_org_id) |
 | `getAgencyPricingPolicy(agencyOrgId)` | 대리점 할인율 정책 조회 |
+| `createUpsSurgeFee(data)` | 급증 긴급 수수료 신규 등록 (11.11 참조) |
+| `updateUpsSurgeFee(id, data)` | 급증 긴급 수수료 수정 |
+| `deleteUpsSurgeFee(id)` | 급증 긴급 수수료 비활성화 |
 
 ### 11.3 Agency 요율 Actions
 
@@ -515,6 +519,22 @@ Team A가 제공하는 API 계약 — Team B가 오더 등록 화면 연동 시 
 | 최소운임 | Freight Minimum | WW_FLIGHT 상품에만 적용되는 최소 청구 금액. `zen_ups_freight_minimums` 테이블 참조. | `freight.ts` |
 | SHXK 국가매핑 | SHXK Country Map | UPS 라벨 발급용 SHXK 코드 매핑 테이블(`zen_ups_shxk_country_map`). 요율 계산과 무관. | `ups-labels.ts` |
 | Zone 국가매핑 | Zone Country Map | Zone 기반 요율 계산용 국가 매핑 테이블(`zen_ups_zone_countries`). SHXK 매핑과 목적 및 관리 주체가 다름. | `freight.ts`, `rates.ts` |
+
+### 11.11 급증 긴급 수수료 (Surge Emergency Fee, Issue #491, TASK-184)
+
+> **근거 자료**: `docs/80_RawData/UPS 급증 수수료.pdf`(UPS 공식 안내), `docs/80_RawData/20260609 SNTL 자료/sntl_ups.txt`(13행). Jungjs(Team B) 검토 확인(Issue #491).
+
+- **DB**: `zen_ups_surge_fees` — 출발지는 한국 고정(ZENITH는 한국 발송 전용)이므로 출발지 컬럼 없음. 도착국(`destination_country_code`, ISO alpha-3) × 적용기간(`effective_from`~`effective_until`)별로 **kg당 단가**(`selling_rate_per_kg`/`cost_rate_per_kg`)를 관리.
+- **계산식** (`pricing-engine.ts` `applySurgeFee()`):
+  ```
+  surgeFeeSellingAmount = selling_rate_per_kg × chargeableKg × (1 + fuelSurchargeRate)
+  surgeFeeCostAmount    = cost_rate_per_kg × chargeableKg × (1 + fuelSurchargeCostRate)
+  ```
+  유류할증료가 항상 추가 부과되는 항목(SNTL 자료·UPS 공식 PDF 확인).
+- **조회**: `freight.ts`가 `destCountryCode`+기준일(`referenceDate`) 기준 유효한 단가 1건을 조회해 `UpsPricingData.surgeFee`로 전달. 조회 결과 없으면 0원 처리(하위 호환).
+- **총액 반영**: `UpsFreightResult.totalSellingPrice`/`totalCostPrice`에 자동 합산. Agency 단계는 `platformSellingTotal` 그대로 상속. Shipper 단계는 기타 부가요금과 동일하게 **할인 미적용 pass-through**(`computeShipperFreight` 5번째 인자).
+- **Admin CRUD**: `rates-mutation.ts`의 `createUpsSurgeFee`/`updateUpsSurgeFee`/`deleteUpsSurgeFee` (11.2 참조), `/admin/ups-rates` "급증 수수료" 탭.
+- **운영 프로세스**: UPS 공지(PDF/URL) 수신 시 관리자가 Admin UI에서 직접 등록. URL 기반 AI 자동 파싱은 Jungjs 제안 — 후속 개선 과제로 분리(이번 스코프 아님).
 
 ---
 

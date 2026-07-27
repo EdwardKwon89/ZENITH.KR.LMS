@@ -64,7 +64,7 @@ Supabase: Cloud 프로젝트 연결
 
 ## 4. 시나리오 인덱스
 
-> **구분 기준** — `필수`: 핵심 비즈니스 플로우·보안·데이터 정합성·Phase K 신규 (38개, 추후 UAT 매 사이클 실행) | `일반`: 부가 기능·엣지케이스 (41개, Full UAT 시에만)
+> **구분 기준** — `필수`: 핵심 비즈니스 플로우·보안·데이터 정합성·Phase K 신규 (38개, 추후 UAT 매 사이클 실행) | `일반`: 부가 기능·엣지케이스 (44개, Full UAT 시에만)
 
 | UAT-ID | 시나리오명 | 주요 역할 | 담당 문서 | 작성 Agent | 상태 | 구분 |
 |:------:|:---------|:--------:|:---------|:----------:|:----:|:----:|
@@ -179,26 +179,29 @@ Supabase: Cloud 프로젝트 연결
 | UAT-16-03 | 대리점 요율 오버라이드 비활성화 (Deactivate) | AGENCY | [UAT_16](UAT_16_Agency요율오버라이드.md) | Riley | 🔄 | 일반 |
 | UAT-17-01 | 직접배송(DIRECT) 선택 오더 등록 및 픽업 입력 차단 검증 | SHIPPER/ADMIN | [UAT_17](UAT_17_UPS특송오더발송.md) | Riley | ✅ | 필수 |
 | UAT-17-02 | 픽업배송(PICKUP) 선택 오더 등록 및 픽업 필수값 유효성 검증 | SHIPPER/ADMIN | [UAT_17](UAT_17_UPS특송오더발송.md) | Riley | ✅ | 필수 |
-| UAT-17-03 | 대리점 화주 요율 오버라이드가 적용된 UPS 요금 계산 검증 | SHIPPER | [UAT_17](UAT_17_UPS특송오더발송.md) | Riley | 🔄 | 필수 |
-| UAT-18-01 | WAREHOUSED 오더 출고 완료 시 UPS 발송 연계 흐름 | MANAGER/ADMIN | [UAT_18](UAT_18_창고출고UPS연계.md) | Riley | ✅ | 필수 |
-| UAT-18-02 | UPS 발송 정보 자동 매핑 및 RLS 격리 검증 | SHIPPER | [UAT_18](UAT_18_창고출고UPS연계.md) | Riley | ✅ | 일반 |
+| UAT-17-03 | 대리점 화주 Zone 할인율 및 급증 긴급 수수료가 적용된 UPS 요금 계산 검증 | SHIPPER | [UAT_17](UAT_17_UPS특송오더발송.md) | Riley | 🔄 | 필수 |
+| UAT-18-01 | WAREHOUSED 오더 출고 완료 시 UPS 실물 레이블 발급 및 PDF 다운로드 검증 | MANAGER/ADMIN | [UAT_18](UAT_18_창고출고UPS연계.md) | Riley | ✅ | 필수 |
+| UAT-18-02 | UPS 레이블 폐기(Void) 및 재발급(Reissue) 검증 | MANAGER/ADMIN | [UAT_18](UAT_18_창고출고UPS연계.md) | Riley | ✅ | 일반 |
+| UAT-18-03 | UPS 발송 정보 자동 매핑 및 RLS 격리 검증 | SHIPPER | [UAT_18](UAT_18_창고출고UPS연계.md) | Riley | ✅ | 일반 |
 | UAT-19-01 | UPS 오더 상세 화면에서 간이 인보이스 PDF 출력(미리보기) 검증 | SHIPPER/ADMIN | [UAT_19](UAT_19_UPS인보이스PDF.md) | Riley | 🔄 | 일반 |
 | UAT-19-02 | 인보이스 PDF 다운로드 파일명 및 물류 상세 항목 무결성 검증 | SHIPPER/ADMIN | [UAT_19](UAT_19_UPS인보이스PDF.md) | Riley | 🔄 | 필수 |
 | UAT-20-01 | 대리점 정산 요약 정보 확인 | AGENCY | [UAT_20](UAT_20_Agency정산조회.md) | Riley | 🔄 | 필수 |
 | UAT-20-02 | 대리점 하위 화주별 정산 목록 조회 및 필터링 | AGENCY | [UAT_20](UAT_20_Agency정산조회.md) | Riley | 🔄 | 필수 |
-| UAT-20-03 | 대리점 정산 데이터 CSV 내보내기 (Export) | AGENCY | [UAT_20](UAT_20_Agency정산조회.md) | Riley | 🔄 | 일반 |
+| UAT-20-03 | 대리점 정산 데이터 Excel 내보내기 (Export) | AGENCY | [UAT_20](UAT_20_Agency정산조회.md) | Riley | 🔄 | 일반 |
 | UAT-20-04 | 대리점 정산 오더번호 검색 — 일치 결과 표시 | AGENCY | [UAT_20](UAT_20_Agency정산조회.md) | Baker | 🔄 | 일반 |
 | UAT-20-05 | 대리점 정산 오더번호 검색 — 결과 없음 | AGENCY | [UAT_20](UAT_20_Agency정산조회.md) | Baker | 🔄 | 일반 |
 | UAT-20-06 | 대리점 정산 Reconciliation 알림 — 미가격 오더 존재 시 | AGENCY | [UAT_20](UAT_20_Agency정산조회.md) | Baker | 🔄 | 일반 |
 | UAT-20-07 | 대리점 정산 Reconciliation — 미가격 오더 미존재 시 알림 미표시 | AGENCY | [UAT_20](UAT_20_Agency정산조회.md) | Baker | 🔄 | 일반 |
 | UAT-22-01 | UPS Zone 등록 및 국가 매핑 | ADMIN | [UAT_22](UAT_22_UPS요율Admin등록.md) | D_Kai | ⬜ | 일반 |
-| UAT-22-02 | UPS 기준요금 조회 | ADMIN | [UAT_22](UAT_22_UPS요율Admin등록.md) | D_Kai | ⬜ | 일반 |
-| UAT-22-03 | UPS 유류할증 및 부가요금 조회 (신규 4종 포함) | ADMIN | [UAT_22](UAT_22_UPS요율Admin등록.md) | D_Kai | ⬜ | 일반 |
+| UAT-22-02 | 기준요금 등록 | ADMIN | [UAT_22](UAT_22_UPS요율Admin등록.md) | D_Kai | ⬜ | 일반 |
+| UAT-22-03 | 유류할증 및 부가요금 조회 | ADMIN | [UAT_22](UAT_22_UPS요율Admin등록.md) | D_Kai | ⬜ | 일반 |
+| UAT-22-04 | 20kg 초과 티어 요율 등록 및 수정 | ADMIN | [UAT_22](UAT_22_UPS요율Admin등록.md) | Riley | ⬜ | 일반 |
+| UAT-22-05 | Freight 최소운임 등록 및 수정 | ADMIN | [UAT_22](UAT_22_UPS요율Admin등록.md) | Riley | ⬜ | 일반 |
 | UAT-23-01 | Admin 대리점 할인율 정책 등록 | ADMIN | [UAT_23](UAT_23_UPS_Agency할인율정책.md) | D_Kai | ⬜ | 일반 |
 | UAT-23-02 | AGENCY 계정 cost_price 읽기전용 확인 및 자동계산 검증 | AGENCY | [UAT_23](UAT_23_UPS_Agency할인율정책.md) | D_Kai | ⬜ | 일반 |
 | UAT-23-03 | 할인율 정책 미등록 시 에러 메시지 확인 | AGENCY | [UAT_23](UAT_23_UPS_Agency할인율정책.md) | D_Kai | ⬜ | 일반 |
 
-**총 129개 시나리오** | 작성 완료: **129 / 129 ✅ 전량 완료** | 필수: **60개** | 일반: **69개**
+**총 132개 시나리오** | 작성 완료: **132 / 132 ✅ 전량 완료** | 필수: **60개** | 일반: **72개**
 
 ---
 
@@ -297,5 +300,7 @@ Supabase: Cloud 프로젝트 연결
 | 2026-06-19 | Riley (Gemini) | TASK-161 — Phase 7 UPS 특송 6개 기능 UAT 시나리오 신규 추가 (UAT-15 ~ 20), 총계 119개 갱신 |
 | 2026-06-21 | Baker (Big Pickle) | TASK-B-013 — SPR-06 시나리오 4건 추가 (UAT-20-04~07): 오더번호 검색 2건 + Reconciliation 알림 2건, 총계 123개 갱신 |
 | 2026-07-06 | Aiden (Claude) | GH#205 — 개별 UAT 파일 내부 실행 상태(UAT-17-01/02, 18-01/02 각 파일 전 단계 ☑ 확인)가 마스터 인덱스에 반영되지 않고 전체 🔄로 표기되어 있던 것을 ✅로 정정. UAT-17-03은 Team B #181(오더 연동) 완료 전 실행 불가 상태라 🔄 유지. |
+| 2026-07-13 | Riley (Gemini) | TASK-183 — UPS 특송 UAT 문서 5건 종합 검토·갱신 (UAT-15·18·19·20·22) 및 Excel 내보내기 확장자 등 변경사항 마스터 반영 |
+| 2026-07-15 | Riley (Gemini) | TASK-185 — UAT-17-03, UAT-19-02 내 급증 긴급 수수료(Surge Emergency Fee) 반영 검증 시나리오 개정 및 UAT_MASTER.md 동기화 (Issue #496) |
 
 

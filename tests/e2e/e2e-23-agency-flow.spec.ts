@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { createClient } from '@supabase/supabase-js';
+import { getServiceClient } from './test-utils';
 import fs from 'fs';
 import path from 'path';
 
@@ -10,7 +10,7 @@ const AGENCY_PASSWORD = 'password1234';
 const SHIPPER_EMAIL = 'shipper_e2e23@zenith.kr';
 const SHIPPER_PASSWORD = 'password1234';
 
-let supabase: ReturnType<typeof createClient>;
+let supabase: ReturnType<typeof getServiceClient>;
 let agencyOrgId: string;
 let shipperOrgId: string;
 let baseRateId: string;
@@ -151,9 +151,7 @@ test.describe('E2E-23: Agency 전체 흐름 시나리오', () => {
       fs.mkdirSync(SCREENSHOT_DIR, { recursive: true });
     }
 
-    const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    if (!key) throw new Error('SUPABASE_SERVICE_ROLE_KEY is required');
-    supabase = createClient(SUPABASE_URL, key);
+    supabase = getServiceClient();
 
     await supabase.from('zen_agency_rate_overrides').delete().neq('id', '00000000-0000-0000-0000-000000000000');
     await supabase.from('zen_agency_shippers').delete().neq('id', '00000000-0000-0000-0000-000000000000');

@@ -6,6 +6,7 @@ import { getUpsProducts } from '@/app/actions/ups/rates';
 import { getAgencyOrgIdByShipper } from '@/app/actions/agency/shipper-link';
 import { UpsFreightEstimatePanel } from './UpsFreightEstimatePanel';
 import { OrderPackageInput } from '@/lib/validation/order';
+import { calcMultiPackageChargeableWeight } from '@/lib/ups/pricing-engine';
 
 interface UpsProduct {
   id: string;
@@ -20,7 +21,7 @@ interface UpsFreightEstimateSectionProps {
   packages: OrderPackageInput[];
   selectedProductId?: string;
   selectedIncoterms?: 'DDU' | 'DDP';
-  onProductChange: (productId: string) => void;
+  onProductChange: (productId: string, productCode: string) => void;
   onIncotermsChange: (incoterms: 'DDU' | 'DDP') => void;
   onEstimateChange?: (estimate: UpsFreightEstimate | null) => void;
 }
@@ -59,11 +60,18 @@ export function UpsFreightEstimateSection({
     () => packages.reduce((sum, pkg) => sum + (pkg.gross_weight || 0), 0),
     [packages]
   );
-  const firstPkgDim = useMemo(() => ({
-    length: packages[0]?.length,
-    width: packages[0]?.width,
-    height: packages[0]?.height,
-  }), [packages[0]?.length, packages[0]?.width, packages[0]?.height]);
+
+  // Issue #476: 전체 패키지 배열 기반 총 정산중량 계산
+  const multiPkgResult = useMemo(() => {
+    const pkgData = packages.map(pkg => ({
+      gross_weight_kg: pkg.gross_weight || 0,
+      dims: (pkg.length && pkg.width && pkg.height)
+        ? { l: pkg.length, w: pkg.width, h: pkg.height }
+        : undefined,
+      divisor: (pkg.volume ? 5000 : undefined) as 5000 | 5500 | 6000 | undefined,
+    }));
+    return calcMultiPackageChargeableWeight(pkgData);
+  }, [packages]);
 
   const productFamilies = useMemo(() => {
     const seen = new Set<string>();
@@ -113,7 +121,8 @@ export function UpsFreightEstimateSection({
     const stillExists = selectedProductId && products.some((p) => p.id === selectedProductId);
     if (stillExists) return;
     const saver = products.find((p) => extractFamily(p.product_code) === 'WW_SAVER');
-    onProductChange(saver?.id || products[0].id);
+    const fallback = saver || products[0];
+    onProductChange(fallback.id, fallback.product_code);
   }, [products, selectedProductId, onProductChange]);
 
   useEffect(() => {
@@ -126,13 +135,11 @@ export function UpsFreightEstimateSection({
     setEstimateLoading(true);
     setEstimateError(null);
 
+    // Issue #476: 다중 패키지 정산중량 사용
     estimateUpsFreight({
       productId: selectedProductId,
       destCountryCode,
-      actualWeightKg: totalWeight,
-      dimL: firstPkgDim.length,
-      dimW: firstPkgDim.width,
-      dimH: firstPkgDim.height,
+      actualWeightKg: multiPkgResult.totalChargeableKg,
       incoterms: selectedIncoterms,
       agencyOrgId,
       shipperOrgId,
@@ -149,7 +156,7 @@ export function UpsFreightEstimateSection({
       });
 
     return () => { cancelled = true; };
-  }, [selectedProductId, destCountryCode, totalWeight, firstPkgDim.length, firstPkgDim.width, firstPkgDim.height, selectedIncoterms, agencyOrgId, shipperOrgId]);
+  }, [selectedProductId, destCountryCode, multiPkgResult.totalChargeableKg, selectedIncoterms, agencyOrgId, shipperOrgId]);
 
   useEffect(() => {
     onEstimateChange?.(estimate);
@@ -162,7 +169,10 @@ export function UpsFreightEstimateSection({
           <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">서비스 티어</label>
           <select
             value={selectedProductId || ''}
-            onChange={(e) => onProductChange(e.target.value)}
+            onChange={(e) => {
+              const selected = products.find(p => p.id === e.target.value);
+              if (selected) onProductChange(selected.id, selected.product_code);
+            }}
             disabled={productsLoading}
             className="w-full bg-white border border-slate-200 text-xs px-3 py-2 rounded-xl outline-none focus:ring-2 focus:ring-blue-50"
           >

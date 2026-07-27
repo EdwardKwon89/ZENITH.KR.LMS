@@ -1,13 +1,16 @@
 #!/bin/bash
-# ZENITH_LMS — Team B 에이전트별 물리적 워크트리 격리
+# ZENITH_LMS — 에이전트별 물리적 워크트리 격리 (Team A/B 공통)
 #
 # Issue #358 3단계: Dave/Baker/Mike가 동일 로컬 디렉토리를 공유하면서
 # 서로의 uncommitted 변경분이 뒤섞이는 사고가 반복됨(PR#353/#367/#368/#370).
+# 2026-07-21: D_Kai(TASK-194-C 작업 중) ↔ Aiden(TASK-195 문서 커밋) 간
+# 동일 사고 위험이 Team A 공유 디렉토리에서도 실제로 확인되어 Team A
+# 페르소나(D_Kai/Riley/B_Kai)까지 적용 범위 확장.
 # 페르소나별로 완전히 분리된 워킹 디렉토리(git worktree)를 만들어
 # 구조적으로 혼입이 불가능하게 만든다.
 #
 # 매 세션 시작 시 반드시 최초 1회 실행:
-#   ./scripts/agent-worktree-init.sh <dave|baker|mike>
+#   ./scripts/agent-worktree-init.sh <dave|baker|mike|d_kai|riley|b_kai>
 #
 # 실행 후 안내되는 경로로 cd 해서 작업 시작. 그 디렉토리 안에서
 # next-task-number.sh로 채번하고 새 브랜치를 만든다.
@@ -16,17 +19,26 @@ set -euo pipefail
 
 PERSONA="${1:-}"
 if [ -z "$PERSONA" ]; then
-  echo "사용법: $0 <dave|baker|mike>" >&2
+  echo "사용법: $0 <dave|baker|mike|d_kai|riley|b_kai>" >&2
   exit 1
 fi
 
 case "$PERSONA" in
-  dave|baker|mike) ;;
+  dave|baker|mike) TEAM="B" ;;
+  d_kai|riley|b_kai) TEAM="A" ;;
   *)
-    echo "오류: PERSONA는 dave, baker, mike 중 하나여야 합니다 (입력값: $PERSONA)" >&2
+    echo "오류: PERSONA는 dave, baker, mike, d_kai, riley, b_kai 중 하나여야 합니다 (입력값: $PERSONA)" >&2
     exit 1
     ;;
 esac
+
+if [ "$TEAM" = "A" ]; then
+  TASK_PREFIX="A"
+  BRANCH_PREFIX="teama"
+else
+  TASK_PREFIX="B"
+  BRANCH_PREFIX="teamb"
+fi
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PARENT_DIR="$(cd "$REPO_ROOT/.." && pwd)"
@@ -74,5 +86,5 @@ echo ""
 echo "  cd $WORKTREE_DIR"
 echo ""
 echo "브랜치 생성 예시:"
-echo "  TASK_NO=\$(./scripts/next-task-number.sh B)"
-echo "  git checkout -b feature/teamb-\${TASK_NO}-<slug>-${PERSONA}"
+echo "  TASK_NO=\$(./scripts/next-task-number.sh $TASK_PREFIX)"
+echo "  git checkout -b feature/${BRANCH_PREFIX}-\${TASK_NO}-<slug>-${PERSONA}"

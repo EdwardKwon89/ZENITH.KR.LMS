@@ -154,6 +154,11 @@ describe('ZENITH Phase 3 UAT: E2E + Routing Integrated Validation', () => {
     expect(trkRes.success).toBe(true);
 
     // Step 6: calculateSettlementAction — SettlementEngine이 모킹되어 mock queue 불필요
+    (validateUserAction as any).mockResolvedValueOnce({
+      user: mockAdminUser,
+      profile: mockAdminProfile,
+      supabase: mockSupabase,
+    });
     const costRes = await calculateSettlementAction(mockOrderId);
     expect(costRes.success).toBe(true);
 
@@ -168,6 +173,11 @@ describe('ZENITH Phase 3 UAT: E2E + Routing Integrated Validation', () => {
     expect(invPdfRes.success).toBe(true);
 
     // Step 8: Admin pays invoice fully -> PAID (signature: invoiceId, status, amount)
+    (validateUserAction as any).mockResolvedValueOnce({
+      user: mockAdminUser,
+      profile: mockAdminProfile,
+      supabase: mockSupabase,
+    });
     mockResultQueue.push(
       { data: { metadata: null }, error: null }, // update + select metadata
     );

@@ -14,7 +14,8 @@ export default async function WarehouseOutboundPage({
 
   const isAllowed = profile?.role === USER_ROLES.ADMIN ||
     profile?.role === USER_ROLES.MANAGER ||
-    profile?.role === USER_ROLES.ZENITH_SUPER_ADMIN;
+    profile?.role === USER_ROLES.ZENITH_SUPER_ADMIN ||
+    profile?.role === USER_ROLES.AGENCY;
 
   if (!isAllowed) {
     redirect(`/${locale}/dashboard`);

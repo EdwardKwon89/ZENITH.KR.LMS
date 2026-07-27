@@ -57,7 +57,7 @@ describe('Rates Actions Unit Tests', () => {
     };
 
     const result = await createRateCard(payload);
-    expect(result.data.id).toBe('new-card');
+    expect((result as any).data.id).toBe('new-card');
     expect(result.error).toBeNull();
   });
 
@@ -84,7 +84,7 @@ describe('Rates Actions Unit Tests', () => {
     };
 
     const result = await createRateCard(payload);
-    expect(result.data.id).toBe('carrier-card');
+    expect((result as any).data.id).toBe('carrier-card');
     expect(result.error).toBeNull();
   });
 
@@ -233,7 +233,7 @@ describe('Rates Actions Unit Tests', () => {
       margin_rate: 15.0,
       platform_fee_rate: 5.0,
     }));
-    expect(result.data.id).toBe('new-1');
+    expect((result as any).data.id).toBe('new-1');
   });
 
   it('TC-RATES-07: should auto-create route network when origin_port_id and dest_port_id are provided', async () => {
@@ -285,7 +285,7 @@ describe('Rates Actions Unit Tests', () => {
     };
 
     const result = await createRateCard(payload);
-    expect(result.data.id).toBe('new-card-1');
+    expect((result as any).data.id).toBe('new-card-1');
     
     // Verify zen_ports were queried for UUID->CODE mapping
     expect(mockSupabase.from).toHaveBeenCalledWith('zen_ports');
@@ -336,7 +336,7 @@ describe('Rates Actions Unit Tests', () => {
     };
 
     const result = await createRateCard(payload);
-    expect(result.data.id).toBe('new-card-2');
+    expect((result as any).data.id).toBe('new-card-2');
     // Should NOT query zen_ports or zen_route_network
     expect(mockSupabase.from).not.toHaveBeenCalledWith('zen_ports');
     expect(mockSupabase.from).not.toHaveBeenCalledWith('zen_route_network');
@@ -392,7 +392,7 @@ describe('Rates Actions Unit Tests', () => {
 
     // Rate card creation should still succeed despite route network failure
     const result = await createRateCard(payload);
-    expect(result.data.id).toBe('new-card-3');
+    expect((result as any).data.id).toBe('new-card-3');
     expect(result.error).toBeNull();
   });
 });

@@ -9,8 +9,14 @@ interface AddressBookEntry {
   recipient_name: string;
   recipient_address: string;
   recipient_address_local?: string | null;
+  recipient_address_detail?: string | null;
   recipient_phone?: string | null;
   country_code?: string | null;
+  state_province?: string | null;
+  city?: string | null;
+  zipcode?: string | null;
+  recipient_pccc?: string | null;
+  recipient_email?: string | null;
 }
 
 interface AddressBookSelectorProps {

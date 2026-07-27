@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { createClient } from '@supabase/supabase-js';
+import { getServiceClient } from './test-utils';
 import dotenv from 'dotenv';
 import fs from 'fs';
 
@@ -11,7 +11,7 @@ const SCREENSHOT_DIR = 'tests/e2e/screenshots';
 const SHIPPER_EMAIL = 'shipper_e2e20b@zenith.kr';
 const SHIPPER_PASSWORD = 'password1234';
 
-let supabase: ReturnType<typeof createClient>;
+let supabase: ReturnType<typeof getServiceClient>;
 
 test.describe('E2E-20: Order Registration Service Combination Selection', () => {
 
@@ -20,9 +20,7 @@ test.describe('E2E-20: Order Registration Service Combination Selection', () => 
       fs.mkdirSync(SCREENSHOT_DIR, { recursive: true });
     }
 
-    const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    if (!key) throw new Error('SUPABASE_SERVICE_ROLE_KEY is required');
-    supabase = createClient(SUPABASE_URL, key);
+    supabase = getServiceClient();
 
     const orgNames = [
       'E2E20B Shipper Corp',
@@ -37,13 +35,13 @@ test.describe('E2E-20: Order Registration Service Combination Selection', () => 
     const { data: authUsersRes } = await supabase.auth.admin.listUsers();
     const authUsers = authUsersRes?.users || [];
     for (const email of emails) {
-      const u = authUsers.find(au => au.email === email);
+      const u = authUsers.find((au: any) => au.email === email);
       if (u) await supabase.auth.admin.deleteUser(u.id);
     }
 
     const { data: existingOrgs } = await supabase.from('zen_organizations').select('id').in('name', orgNames);
     if (existingOrgs && existingOrgs.length > 0) {
-      const ids = existingOrgs.map(o => o.id);
+      const ids = existingOrgs.map((o: any) => o.id);
       await supabase.from('zen_order_services').delete().in('provider_id', ids);
       await supabase.from('zen_orders').delete().in('shipper_id', ids);
       await supabase.from('zen_customs_rates').delete().in('org_id', ids);
@@ -51,7 +49,7 @@ test.describe('E2E-20: Order Registration Service Combination Selection', () => 
       await supabase.from('zen_transport_costs').delete().in('carrier_id', ids);
       const { data: carriers } = await supabase.from('zen_carriers').select('id').in('org_id', ids);
       if (carriers && carriers.length > 0) {
-        const cids = carriers.map(c => c.id);
+        const cids = carriers.map((c: any) => c.id);
         await supabase.from('zen_rate_cards').delete().in('carrier_id', cids);
         await supabase.from('zen_route_network').delete().in('carrier_id', cids);
         await supabase.from('zen_carriers').delete().in('id', cids);
@@ -64,10 +62,10 @@ test.describe('E2E-20: Order Registration Service Combination Selection', () => 
     const { data: bOrg } = await supabase.from('zen_organizations').insert({ name: 'E2E20B Customs Broker', type: 'CUSTOMS', status: 'ACTIVE' }).select().single();
     const { data: dOrg } = await supabase.from('zen_organizations').insert({ name: 'E2E20B Delivery Agent', type: 'DELIVERY', status: 'ACTIVE' }).select().single();
 
-    const shipperOrgId = sOrg.id;
-    const carrierOrgId = cOrg.id;
-    const brokerOrgId = bOrg.id;
-    const deliveryOrgId = dOrg.id;
+    const shipperOrgId = sOrg!.id;
+    const carrierOrgId = cOrg!.id;
+    const brokerOrgId = bOrg!.id;
+    const deliveryOrgId = dOrg!.id;
 
     const { data: carrierRec } = await supabase.from('zen_carriers').insert({
       code: 'E2E20B_CARRIER', name: 'E2E20B Carrier Corp', transport_mode: 'AIR', org_id: carrierOrgId, is_active: true
@@ -77,14 +75,14 @@ test.describe('E2E-20: Order Registration Service Combination Selection', () => 
     const { data: sin } = await supabase.from('zen_ports').select('id').eq('code', 'SIN').single();
 
     await supabase.from('zen_rate_cards').insert({
-      carrier_id: carrierRec.id, transport_mode: 'AIR', origin_port_id: icn.id, dest_port_id: sin.id,
+      carrier_id: carrierRec!.id, transport_mode: 'AIR', origin_port_id: icn!.id, dest_port_id: sin!.id,
       tiers: [{ weight_min: 0, unit_price: 3.5, min_total_price: 50 }],
       carrier_cost: 2.0, margin_rate: 10.0, platform_fee_rate: 5.0,
       valid_from: '2026-06-01', valid_until: '2026-12-31', is_active: true
     });
 
     await supabase.from('zen_route_network').upsert({
-      carrier_id: carrierRec.id, from_port_id: 'ICN', to_port_id: 'SIN', transport_mode: 'AIR', transit_days: 1, is_active: true
+      carrier_id: carrierRec!.id, from_port_id: 'ICN', to_port_id: 'SIN', transport_mode: 'AIR', transit_days: 1, is_active: true
     }, { onConflict: 'carrier_id,from_port_id,to_port_id,transport_mode' });
 
     await supabase.from('zen_customs_rates').insert({
@@ -111,7 +109,7 @@ test.describe('E2E-20: Order Registration Service Combination Selection', () => 
     } else {
       // User may already exist (auth delete failed in cleanup)
       const { data: existingUsers } = await supabase.auth.admin.listUsers();
-      const existing = existingUsers?.users.find(u => u.email === SHIPPER_EMAIL);
+      const existing = existingUsers?.users.find((u: any) => u.email === SHIPPER_EMAIL);
       if (existing) authUserId = existing.id;
     }
 
@@ -133,7 +131,7 @@ test.describe('E2E-20: Order Registration Service Combination Selection', () => 
     await page.goto('/ko/login');
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000);
-    await page.evaluate(({ email, password }) => {
+    await page.evaluate(({ email, password }: { email: string; password: string }) => {
       const setNativeValue = (el: HTMLInputElement, val: string) => {
         const nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')!.set!;
         nativeSetter.call(el, val);
@@ -146,7 +144,7 @@ test.describe('E2E-20: Order Registration Service Combination Selection', () => 
     }, { email, password });
     await page.waitForTimeout(300);
     await Promise.all([
-      page.waitForURL(url => url.pathname !== '/ko/login', { timeout: 30000 }),
+      page.waitForURL((url: URL) => url.pathname !== '/ko/login', { timeout: 30000 }),
       page.click('button[data-action="login"]'),
     ]);
     console.log(`Logged in as: ${email}`);
@@ -205,7 +203,7 @@ test.describe('E2E-20: Order Registration Service Combination Selection', () => 
     } catch (e) {
       await page.screenshot({ path: `${SCREENSHOT_DIR}/e2e20-a-after-submit.png`, fullPage: true });
       const pageText = await page.textContent('body');
-      const errorText = pageText.match(/error|Error|오류|실패|등록|failed|Failed|not found/);
+      const errorText = pageText!.match(/error|Error|오류|실패|등록|failed|Failed|not found/);
       if (errorText) console.log(`Page contains error text: ${errorText[0]}`);
       throw e;
     }
@@ -225,11 +223,11 @@ test.describe('E2E-20: Order Registration Service Combination Selection', () => 
       expect(error).toBeNull();
       expect(services).toBeTruthy();
 
-      const types = (services || []).map(s => s.service_type).sort();
+      const types = (services || []).map((s: any) => s.service_type).sort();
       expect(types).toContain('TRANSPORT');
       expect(types).toContain('CUSTOMS');
       expect(types).toContain('DELIVERY_LOCAL');
-      expect(services!.every(s => s.status === 'REQUESTED')).toBe(true);
+      expect(services!.every((s: any) => s.status === 'REQUESTED')).toBe(true);
       console.log(`Verified ${services!.length} zen_order_services records.`);
     }
   });
@@ -278,7 +276,7 @@ test.describe('E2E-20: Order Registration Service Combination Selection', () => 
     if (isDisabled) {
       console.log('Submit button is DISABLED - checking rates...');
       const pageText = await page.textContent('body');
-      const errorSection = pageText.match(/사용 가능 요율 없음|이용 불가|등록된 비용 정보가|오류/g);
+      const errorSection = pageText!.match(/사용 가능 요율 없음|이용 불가|등록된 비용 정보가|오류/g);
       console.log('Error indicators found:', errorSection);
     }
     await expect(submitBtnB).toBeEnabled({ timeout: 10000 });
@@ -290,7 +288,7 @@ test.describe('E2E-20: Order Registration Service Combination Selection', () => 
     } catch (e) {
       await page.screenshot({ path: `${SCREENSHOT_DIR}/e2e20-b-after-submit.png`, fullPage: true });
       const pageText = await page.textContent('body');
-      const errorText = pageText.match(/error|Error|오류|실패|등록|failed|Failed|not found|허용|필수|입력|확인/);
+      const errorText = pageText!.match(/error|Error|오류|실패|등록|failed|Failed|not found|허용|필수|입력|확인/);
       if (errorText) console.log(`Page contains error text: ${errorText[0]}`);
       throw e;
     }
@@ -310,9 +308,9 @@ test.describe('E2E-20: Order Registration Service Combination Selection', () => 
       expect(error).toBeNull();
       expect(services).toBeTruthy();
 
-      const types = (services || []).map(s => s.service_type);
-      expect(types.filter(t => t === 'CUSTOMS').length).toBe(0);
-      expect(types.filter(t => t === 'DELIVERY_LOCAL').length).toBe(0);
+      const types = (services || []).map((s: any) => s.service_type);
+      expect(types.filter((t: any) => t === 'CUSTOMS').length).toBe(0);
+      expect(types.filter((t: any) => t === 'DELIVERY_LOCAL').length).toBe(0);
       expect(types).toContain('TRANSPORT');
       console.log(`Verified transport-only: ${services!.length} zen_order_services records (no CUSTOMS/DELIVERY).`);
     }

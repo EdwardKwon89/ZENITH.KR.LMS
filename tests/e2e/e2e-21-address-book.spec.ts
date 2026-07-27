@@ -1,10 +1,9 @@
 import { test, expect } from '@playwright/test';
-import { createClient } from '@supabase/supabase-js';
+import { getServiceClient } from './test-utils';
 import fs from 'fs';
 import path from 'path';
 
 const SCREENSHOT_DIR = 'docs/99_Manual/E2E_21_Result';
-const SUPABASE_URL = 'http://127.0.0.1:54321';
 const SHIPPER_EMAIL = 'shipper@zenith.kr';
 const SHIPPER_PASSWORD = 'password1234';
 
@@ -21,16 +20,14 @@ const ADDR = {
 };
 
 test.describe('E2E-21: 주소록 관리 시나리오', () => {
-  let supabase: any;
+  let supabase: ReturnType<typeof getServiceClient>;
 
   test.beforeAll(async () => {
     if (!fs.existsSync(SCREENSHOT_DIR)) {
       fs.mkdirSync(SCREENSHOT_DIR, { recursive: true });
     }
 
-    const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    if (!key) throw new Error('SUPABASE_SERVICE_ROLE_KEY is required');
-    supabase = createClient(SUPABASE_URL, key);
+    supabase = getServiceClient();
 
     const { data: existing } = await supabase
       .from('zen_profiles')
@@ -58,14 +55,12 @@ test.describe('E2E-21: 주소록 관리 시나리오', () => {
   });
 
   test.describe('org_id 기반 계정 시나리오', () => {
-    let orgSupabase: any;
+    let orgSupabase: ReturnType<typeof getServiceClient>;
     let agencyOrgId: string;
     let shipperOrgId: string;
 
     test.beforeAll(async () => {
-      const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-      if (!key) throw new Error('SUPABASE_SERVICE_ROLE_KEY is required');
-      orgSupabase = createClient(SUPABASE_URL, key);
+      orgSupabase = getServiceClient();
 
       const emailClean = ORG_USER_EMAIL.replace(/[^a-zA-Z0-9@]/g, '');
 
@@ -82,7 +77,7 @@ test.describe('E2E-21: 주소록 관리 시나리오', () => {
         type: 'AGENCY',
         status: 'ACTIVE',
       }).select('id').single();
-      agencyOrgId = agencyOrg.id;
+      agencyOrgId = agencyOrg!.id;
 
       // Create shipper org
       const { data: shipperOrg } = await orgSupabase.from('zen_organizations').insert({
@@ -90,7 +85,7 @@ test.describe('E2E-21: 주소록 관리 시나리오', () => {
         type: 'SHIPPER',
         status: 'ACTIVE',
       }).select('id').single();
-      shipperOrgId = shipperOrg.id;
+      shipperOrgId = shipperOrg!.id;
 
       // Create link
       await orgSupabase.from('zen_agency_shippers').insert({

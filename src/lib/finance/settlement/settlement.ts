@@ -60,6 +60,102 @@ export class SettlementEngine {
         return { success: false, message: validation.message };
       }
 
+      // UPS 전용 분기: zen_order_rate_snapshots.metadata(estimate)에서 항목별 cost 생성
+      if (order.transport_mode === 'UPS') {
+        const { data: snapshot } = await supabase
+          .from('zen_order_rate_snapshots')
+          .select('metadata')
+          .eq('order_id', orderId)
+          .maybeSingle();
+
+        if (!snapshot?.metadata) {
+          return { success: false, message: '예상운임 스냅샷이 없습니다 — UPS 오더 등록 시 저장 실패 또는 결함 A(recipient_country_code) 미수정 오더입니다.' };
+        }
+
+        const meta = snapshot.metadata as Record<string, any>;
+        const platform = meta.platform || {};
+        const breakdown = platform.breakdown || {};
+        const currency = platform.currency || 'USD';
+        const totalSellingPrice = Number(platform.totalSellingPrice) || 0;
+
+        // 기존 미청구 UPS cost 항목 삭제 (멱등성)
+        const { error: deleteError } = await supabase
+          .from('zen_order_costs')
+          .delete()
+          .eq('order_id', orderId)
+          .in('cost_type', ['BASE_FREIGHT', 'FUEL_SURCHARGE', 'SURGE_FEE', 'OTHER_CHARGE']);
+
+        if (deleteError) throw deleteError;
+
+        const upsCosts: any[] = [];
+
+        // BASE_FREIGHT — shipper 할인 적용가 or platform baseSellingPrice
+        const shipper = meta.shipper;
+        const baseFreight = shipper ? Number(shipper.baseSellingPrice) : Number(platform.baseSellingPrice) || 0;
+        if (baseFreight > 0) {
+          upsCosts.push({
+            order_id: orderId, cost_type: 'BASE_FREIGHT',
+            unit_price: baseFreight, quantity: 1, currency, is_revenue: true,
+          });
+        }
+
+        // FUEL_SURCHARGE
+        const fuelSurcharge = shipper ? Number(shipper.fuelSurchargeSellingAmount) : Number(platform.fuelSurchargeSellingAmount) || 0;
+        if (fuelSurcharge > 0) {
+          upsCosts.push({
+            order_id: orderId, cost_type: 'FUEL_SURCHARGE',
+            unit_price: fuelSurcharge, quantity: 1, currency, is_revenue: true,
+          });
+        }
+
+        // SURGE_FEE
+        const surgeFee = shipper ? Number(shipper.surgeFeeSellingAmount) : Number(platform.surgeFeeSellingAmount) || 0;
+        if (surgeFee > 0) {
+          upsCosts.push({
+            order_id: orderId, cost_type: 'SURGE_FEE',
+            unit_price: surgeFee, quantity: 1, currency, is_revenue: true,
+          });
+        }
+
+        // OTHER_CHARGE from estimate snapshot (auto-applied other charges)
+        const otherCharges = shipper ? Number(shipper.otherChargesSellingTotal) : Number(platform.otherChargesSellingTotal) || 0;
+        const otherChargeItems = breakdown.otherChargeItems as Array<any> | undefined;
+        if (otherChargeItems && otherChargeItems.length > 0) {
+          for (const item of otherChargeItems) {
+            const amount = Number(item.sellingBase || 0) + Number(item.fuelSurchargeSelling || 0);
+            if (amount > 0) {
+              upsCosts.push({
+                order_id: orderId, cost_type: 'OTHER_CHARGE',
+                unit_price: amount, quantity: 1, currency, is_revenue: true,
+              });
+            }
+          }
+        } else if (otherCharges > 0) {
+          upsCosts.push({
+            order_id: orderId, cost_type: 'OTHER_CHARGE',
+            unit_price: otherCharges, quantity: 1, currency, is_revenue: true,
+          });
+        }
+
+        if (upsCosts.length > 0) {
+          const { data: inserted, error: insertError } = await supabase
+            .from('zen_order_costs')
+            .insert(upsCosts)
+            .select();
+
+          if (insertError) throw insertError;
+
+          return {
+            success: true,
+            totalFreight: totalSellingPrice,
+            currency,
+            costId: inserted?.[0]?.id,
+          };
+        }
+
+        return { success: false, message: 'UPS 예상운임 데이터에서 산출 가능한 cost 항목이 없습니다.' };
+      }
+
       // 2a. 운송수단별 요금 산정 정책 조회 (IMP-105)
       const { data: pricingPolicy } = await supabase
         .from('zen_transport_pricing_policies')

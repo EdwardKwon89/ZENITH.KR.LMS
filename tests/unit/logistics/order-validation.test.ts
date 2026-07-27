@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { orderRegistrationSchema } from '@/lib/validation/order';
+import { orderRegistrationSchema, orderItemSchema } from '@/lib/validation/order';
 
 describe('ZENITH Order Integrity: Registration Schema Validation', () => {
   const validUUID = '550e8400-e29b-41d4-a716-446655440000';
@@ -88,6 +88,36 @@ describe('ZENITH Order Integrity: Registration Schema Validation', () => {
   it('TC-O.5: [Negative] 필수 수취인 정보(name, address) 누락 시 실패해야 함', () => {
     const invalidPayload = { ...validPayload, recipient_name: '', recipient_address: undefined };
     const result = orderRegistrationSchema.safeParse(invalidPayload);
+    expect(result.success).toBe(false);
+  });
+});
+
+describe('DEF-105: Item name English-only validation', () => {
+  it('한글 품명(청바지) → safeParse 실패, item_name 경로 에러', () => {
+    const result = orderItemSchema.safeParse({ item_name: '청바지', quantity: 1, unit_price: 100 });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues[0].path).toContain('item_name');
+    }
+  });
+
+  it('영문 품명(Jeans) → success: true', () => {
+    const result = orderItemSchema.safeParse({ item_name: 'Jeans', quantity: 1, unit_price: 100 });
+    expect(result.success).toBe(true);
+  });
+
+  it('영문+숫자+일반기호 혼합 → success: true', () => {
+    const result = orderItemSchema.safeParse({ item_name: "Men's T-Shirt (Size L) #123", quantity: 1, unit_price: 100 });
+    expect(result.success).toBe(true);
+  });
+
+  it('빈 문자열 → min(1) 검증 실패', () => {
+    const result = orderItemSchema.safeParse({ item_name: '', quantity: 1, unit_price: 100 });
+    expect(result.success).toBe(false);
+  });
+
+  it('한글+영문 혼합 → 실패', () => {
+    const result = orderItemSchema.safeParse({ item_name: 'Jean청바지', quantity: 1, unit_price: 100 });
     expect(result.success).toBe(false);
   });
 });

@@ -1435,7 +1435,7 @@
 - **관련 Issue**: 없음 — Edward 질의 계기 자체 발견
 - **예상 공수**: (1) CI 단계 추가 0.1 MD / (2) 전체 정리 1.5~2 MD (별도 Task 분할 권장)
 - **우선순위**: Medium — (1)은 재발 방지 차원에서 우선 권장, (2)는 Low
-- **상태**: ⬜ 미착수
+- **상태**: ✅ §1·§2 전항목 완료 — **TASK-195(Issue #627), Riley, PR#628 병합 완료 (2026-07-21)**. `pr-checks.yml`에 `tsc-advisory`(Type Check, advisory/non-blocking) 게이트 추가, 네거티브 컨트롤 검증 완료. **§2(Issue #651, TASK-198, D_Kai, PR#676)로 기존 236건 전량 정리 완료(2026-07-22)** — `tests/` 하위 `npx tsc --noEmit` 0 errors 달성, Aiden 독립 재검증 완료
 
 ---
 
@@ -1450,3 +1450,270 @@
 - **예상 공수**: 0.5 MD (hook 로직 재설계 + 팀 공지)
 - **우선순위**: **High로 상향** — PASS 오기재 방향(PR#309·#313)이 실제로 발생함이 확인되어, 리뷰어가 매번 실제 CI를 직접 조회하지 않으면 회귀 실패가 은폐된 채 병합될 실질적 위험이 입증됨
 - **상태**: 🔄 1단계 적용 완료(2026-07-11) — `.githooks/pre-commit`에서 이 파일 기반 하드 블록(exit 1) 제거, 경고만 출력하도록 완화. 병합 판단은 원격 CI(`gh pr checks`) 전용으로 전환. pre-commit이 실제 테스트를 재실행하는 강화안(3단계)은 로컬 환경 준비 후 별도 검토.
+
+## [IMP-136] `gh pr merge --squash`가 stale 브랜치의 ACTIVE_TASK.md 행 삭제를 그대로 반영(병합 후 데이터 유실)
+
+- **발견 경위**: PR#537(Baker, Issue #534) `mergeable: MERGEABLE` 확인 후 squash 병합·CI(headSha `3f34dc73`) 실제 PASS까지 확인하고 병합했으나, 병합 직후 `git pull`로 로컬 동기화하는 과정에서 `ACTIVE_TASK.md`의 Dave/Mike 완료 행 5개(TASK-B-135·136·138·139·140)가 통째로 사라지고 TASK-B-134가 구버전(🔔 미완료 상태)으로 되돌아간 것을 발견 — Jaison이 PR#535 반려 시 "브랜치가 최신 integration 브랜치로 rebase되지 않은 것 같다"고 이미 경고했음에도, PR#537 재제출본이 여전히 그 상태(마이그레이션/채번만 정정하고 `git pull origin integration/teamb-260716`은 누락)로 제출됐고, `mergeable: MERGEABLE`·CI PASS만으로는 이 문제가 드러나지 않아 그대로 병합됨.
+- **현재 상태**: 병합 직후 Jaison이 로컬 pull 과정에서 발견, 병합 전 상태(`6fa9b419`)를 기준으로 즉시 별도 커밋(`e5755ed7`)으로 복구 완료. 실제 데이터 유실은 짧게(병합~복구 사이) 존재했으나 원격 브랜치에 영구 반영되지는 않음.
+- **임시 조치**: PR 병합 판단 시 CI PASS·`mergeable` 상태뿐 아니라, 여러 팀원이 같은 문서(ACTIVE_TASK.md 등 공유 표)에 동시에 행을 추가 중인 상황에서는 병합 후 `git pull` 직후 diff를 직접 재확인하는 절차를 당분간 수동으로 병행
+- **목표 구현**: (1) PR 생성/재제출 시 `next-task-number.sh` 실행 여부만이 아니라 base 브랜치와의 divergence(뒤처진 커밋 수)도 함께 확인하는 스크립트 보강 — 예: `git rev-list --count HEAD..origin/integration/teamb-260716`이 0이 아니면 경고 (2) 또는 GitHub Actions에 "PR head가 base보다 N커밋 이상 뒤처지면 자동 코멘트 경고" 워크플로우 추가 (3) 근본적으로는 ACTIVE_TASK.md처럼 여러 에이전트가 동시에 말미에 행을 추가하는 표 형태 문서를 병합 충돌에 강하게 만들 구조 개선(예: 팀별/일자별 append-only 로그 파일로 분리하고 조회 시점에만 취합) 검토
+- **관련 파일**: `.agent/ACTIVE_TASK.md`, `scripts/next-task-number.sh`
+- **관련 PR/Issue**: PR#535→536→537 (Issue #534), 복구 커밋 `e5755ed7`
+- **예상 공수**: 0.5 MD (divergence 체크 스크립트) ~ 1 MD (구조 개선까지 포함 시)
+- **우선순위**: **High** — 병합 판단 근거(CI PASS·mergeable)만으로는 이런 유형의 데이터 유실을 잡아낼 수 없음이 실제로 확인됨. 이번엔 Jaison이 병합 직후 수동 pull로 우연히 발견했으나, 매번 그렇게 확인한다는 보장이 없음
+- **상태**: ⬜ 미착수 (임시 조치만 적용 — 이번 건 자체는 복구 완료)
+
+## [IMP-137] `ups-product-code-select.test.tsx`가 `OrderRegistrationForm.tsx`를 실제로 거치지 않음
+
+- **발견 경위**: PR#544(Mike, Issue #543 — UPS 오더 등록 시 `ups_product_code`에 UUID가 저장되어 `VARCHAR(20)` 초과로 전면 실패하던 Critical 버그 수정) 검토 중, Jaison이 검증용으로 제공한 예시 테스트 코드를 Mike가 그대로 채택 — negative-control로 재확인하는 과정에서 이 테스트의 `Wrapper` 컴포넌트가 `OrderRegistrationForm.tsx`를 import하지 않고 올바른 배선(`upsProductId` 로컬 state 분리)을 테스트 파일 내부에서 자체적으로 재구현하고 있음을 발견 — `OrderRegistrationForm.tsx`의 실제 prop 배선을 원래 버그 상태로 되돌려도 이 테스트는 계속 PASS함.
+- **현재 상태**: 테스트 자체는 `UpsFreightEstimateSection`이 올바르게 배선됐을 때 정상 동작한다는 것은 검증하지만, `OrderRegistrationForm.tsx`가 실제로 그 올바른 배선을 유지하는지는 검증하지 않음. 실제 fix 코드는 Jaison이 diff로 직접 2회 재확인해 정확함을 확인했고, Critical 이슈 긴급성 때문에 이 상태로 병합함.
+- **임시 조치**: 없음(테스트는 그대로 두고 코드 리뷰로만 보완된 상태)
+- **목표 구현**: `tests/unit/orders/ups-product-code-select.test.tsx`를 `OrderRegistrationForm`을 실제로 렌더링(무거우면 최소 props로)하거나, "UPS 제품 선택 state + 핸들러" 로직을 `useUpsProductSelection()` 같은 커스텀 훅으로 추출해 컴포넌트와 테스트가 동일 로직을 공유하도록 리팩터링 검토(PR#533에서 `buildAddressBookPayload` 순수 함수로 추출한 것과 동일 패턴)
+- **관련 파일**: `tests/unit/orders/ups-product-code-select.test.tsx`, `src/components/orders/OrderRegistrationForm.tsx`, `src/components/orders/UpsFreightEstimateSection.tsx`
+- **관련 Issue/PR**: Issue #543, PR#544 (`c7682dff`)
+- **예상 공수**: 0.5 MD
+- **우선순위**: Medium — 지금 당장 회귀를 놓치는 상태는 아니나(fix 코드 자체는 검증됨), 향후 이 영역을 다시 손대는 사람이 있다면 이 테스트가 실제 방어력을 제공하지 못함
+- **상태**: ⬜ 미착수
+
+## [IMP-138] `resolveShxkCode` KOR 고정 수정 후 `iso3Code` 변수 미사용 잔존
+
+- **발견 경위**: PR#548(Baker, TASK-B-147, Issue #546 — `resolveShxkCode` 목적지코드 조회를 `'KOR'` 고정으로 수정) 검토 중 Jaison이 격리 워크트리에서 `eslint` 실행 — `src/app/actions/operations/ups-labels.ts:240`의 `iso3Code` 변수가 `resolveShxkCode` 호출부에서 더 이상 쓰이지 않게 되어 `@typescript-eslint/no-unused-vars` warning 발생 확인(빌드/CI는 warning이라 통과함, 머지는 승인).
+- **현재 상태**: 미사용 변수가 코드에 남아있음. `placeShxkOrder` 호출에는 여전히 2-letter `countryCode`가 쓰이고 `iso3Code`는 아무 데도 참조되지 않음.
+- **임시 조치**: 없음 — warning 상태로 병합, 기능 영향 없음
+- **목표 구현**: `issueUpsLabel` 내 `const iso3Code = toIso3(countryCode);` 라인 삭제(또는 `toIso3` 호출 자체가 더 이상 필요없는지 확인 후 정리)
+- **관련 파일**: `src/app/actions/operations/ups-labels.ts`
+- **관련 Issue/PR**: Issue #546, PR#548
+- **예상 공수**: 0.1 MD
+- **우선순위**: Low — 기능 영향 없는 순수 코드 정리
+- **상태**: ⬜ 미착수
+
+---
+
+## [IMP-139] 정기 점검 Cron이 세션 종료와 함께 소실 — 무인 점검 공백 발생
+
+- **발견 경위**: Edward가 "Issue #503 마지막 코멘트(07-15 22:24 KST)가 12시간째 방치됐는데 그 사이 돈 `/check-request`에서 왜 안 걸렸는가"를 질의 (2026-07-16 10시경). `CronList` 조회 결과 오늘 세션 시작 시점에 등록된 Job이 0건이었음 — 07-15에 등록했던 Job(`d832e475`/`dabd6f6f`/`22c0f83e`)이 세션 종료와 함께 소실되어, 09:42 KST 재등록 전까지 정기 점검 자체가 발동하지 않는 공백이 있었음. **후속(2026-07-16 12시경)**: Team B에 `integration/teamb-260716` 자체 병합 위임 후 실시간 점검 가치가 낮아져 3개 Job 전량 의도적으로 취소 — 세션 종속성 자체는 미해결이나 오늘은 문제로 취급하지 않음
+- **현재 상태**: `CronCreate`로 등록하는 Job은 세션 전용(session-only)이라 디스크에 저장되지 않고, 호스트 세션이 종료되면 즉시 소실됨. 세션이 언제 끊겼는지 추적할 로그가 없어 공백 시작 시점을 특정할 수 없음 — 재등록할 때마다 매번 사람(Edward)이 "안 도는 것 같다"고 알아차려야 재등록되는 구조
+- **임시 조치**: 없음 — Edward가 이상 감지 시 요청하면 Aiden이 동일 스케줄로 재등록(`memory/project_periodic_check_cron_ids.md`에 최신 Job ID 기록)
+- **목표 구현**: 세션에 종속되지 않는 스케줄러로 이전 (`/schedule` 스킬의 클라우드 routine 등) — 검토 중(2026-07-16 Edward에게 "외부 이동 시 접근 불가" 대응책으로 별도 논의, 오후 설정 예정)
+- **관련 파일**: 없음 (도구 자체의 세션 종속 특성)
+- **관련 Issue**: 없음 — Edward 질의 계기 자체 발견
+- **예상 공수**: 0.2 MD (클라우드 routine 설정 자체는 간단, 다만 스킬 실행 시 필요한 `gh` 인증·MCP 연결이 클라우드 환경에서도 동일하게 동작하는지 검증 필요)
+- **우선순위**: Medium — 사람이 알아차려 재등록하면 복구되므로 치명적이진 않으나, 무인 운영 목적 자체를 무력화함
+- **상태**: ⬜ 미착수 (오후 클라우드 routine 전환 시 함께 해소 예정)
+
+---
+
+## [IMP-140] `/check-request`가 GitHub Issue의 "설계 의견 제출 → Aiden 확정 대기" 상태를 스캔하지 않음
+
+- **발견 경위**: IMP-139와 동일 계기(Issue #503 코멘트 방치 질의) — cron 공백과 별개로, `/check-request` 절차 자체를 재검토한 결과 발견 (2026-07-16)
+- **현재 상태**: `.claude/skills/check-request/SKILL.md`의 대상 파악 절차는 ①`gh pr list --state open`(열린 PR) ②`.agent/ACTIVE_TASK.md`의 🔔 상태 Task 행, 이 두 가지만 스캔함. Issue #503처럼 **PR도 없고 ACTIVE_TASK.md 행도 없는(Task file 미생성, 순수 Issue 코멘트 단계) "설계 의견(📝) 제출 → Aiden 확정(🔍) 대기"** 상태는 두 스캔 대상 어디에도 걸리지 않음 — cron이 정상 작동해 몇 번을 돌았어도 이번 건은 구조적으로 놓쳤을 것
+- **임시 조치**: 없음 — 현재는 사람이 직접 Issue를 열어봐야만 발견됨
+- **목표 구현**: `/check-request` 절차에 "Team A/B 라벨이 붙은 열린 Issue 중 마지막 코멘트 작성자가 Aiden(Claude)·Edward(`EdwardKwon89`)가 아닌 것"을 스캔하는 단계 추가 (`gh issue list --label team:a,team:b --state open --json number,comments` 후 마지막 코멘트 author 필터링). 설계 의견(📝)뿐 아니라 검토 요청성 코멘트 전반을 포괄하도록 설계
+- **관련 파일**: `.claude/skills/check-request/SKILL.md`
+- **관련 Issue**: #503 (이번 발견 계기)
+- **예상 공수**: 0.3 MD (스킬 절차 추가 + 오탐 필터링 로직 — 팀 내부 코멘트끼리 주고받는 경우 오탐 가능성 검토 필요)
+- **우선순위**: High — 검토 요청이 자동 점검망에서 완전히 벗어나는 구조적 사각지대로, 사람이 우연히 발견하지 못하면 무기한 방치될 수 있음
+- **상태**: ⬜ 미착수 (Edward 확인 후 즉시 착수 가능)
+
+---
+
+## [IMP-141] Team B "Jaison 사전 검토" 게이트가 실제로는 PR 오픈 후에만 작동 — 반려율의 근본 원인 후보
+
+- **발견 경위**: Edward가 "Jaison이 검토 후 요청하는 것으로 아는데 왜 오류가 나는가"를 질의(2026-07-16), TASK-B-135/PR#520의 실제 타임스탬프를 정밀 대조해 발견
+- **현재 상태**: 실제 타임라인 — 10:52 Jaison "작업 분배"(Dave 담당 지정, 코드 리뷰 없음) → 10:58 Dave 첫 커밋 → 11:03 PR#520 오픈(배정 11분 후) → 11:39 Aiden 정기점검이 문제 발견·반려 → **11:41 Jaison의 실제 심층 코드 리뷰(import chain 추적 등)가 처음 등장, Aiden 반려 2분 후**. 즉 이번 사례에서 "Jaison 사전 검토 후 Aiden에게 요청"이라는 전제와 달리, Jaison의 실질적 기술 리뷰는 PR 제출 이전이 아니라 Aiden(또는 누군가)이 문제를 먼저 지적한 뒤 반응적으로 이뤄짐. Team B 프로세스에 "PR 오픈 전 Jaison 리뷰 필수" 게이트가 명문화·강제되어 있지 않음
+- **임시 조치**: 없음 — 결과적으로 Aiden의 정기점검이 유일한 사전 검증 지점으로 기능 중
+- **목표 구현**: Team B 작업 흐름에 "구현 완료 → PR 오픈 **전** Jaison이 diff·CI를 직접 확인 → 통과 시에만 PR 오픈" 단계를 명문화(105_MULTITEAM_GOVERNANCE.md 또는 R-19에 반영), 가능하면 PR 템플릿에 "Jaison 사전 검토 완료 체크박스" 추가해 형식적으로도 강제
+- **관련 파일**: `docs/00_GUIDE/105_MULTITEAM_GOVERNANCE.md`, GOV_COMMON.md R-19
+- **관련 Issue**: #503/PR#520 (이번 발견 계기)
+- **예상 공수**: 0.2 MD (문서 반영) — 실효성은 Jaison의 실제 운영 습관 변화에 의존, 강제 도구화는 별도 검토
+- **우선순위**: High — 현재 구조에서는 Aiden의 사후 점검이 유일한 안전망이라, Aiden 점검 공백(IMP-139/140)이 곧 전체 품질 게이트 공백으로 직결됨
+- **상태**: 🔄 부분 적용 — 105_MULTITEAM_GOVERNANCE.md에 "팀 리더 사전 검토 의무" 조항 신설 + Issue #521에 Jaison 앞 직접 지적 코멘트 게시 완료(2026-07-16). 같은 날 이후 PR들(#536·#538·#555 등)에서 Jaison이 병합 **전** diff 단계 반려를 실제로 다수 수행한 것으로 확인(VIOLATION_TRACKER 07-16 기록 다수 참조) — 행동 변화 관측됨. PR 템플릿 체크박스 강제화(잔여 작업)는 미착수
+
+---
+## [IMP-142] `ups-trade-documents.test.ts`의 `getUpsLabelStatus` 테스트가 실제 배선을 검증하지 못함
+
+- **발견 경위**: PR#561(Dave, TASK-B-152, Issue #559 — 무역서류 관리 UPS 문서조회/취소 버튼) 검토 중 Jaison이 네거티브 컨트롤로 확인. `tests/unit/ups/ups-trade-documents.test.ts`의 두 번째 테스트가 `src.toContain('export async function getUpsLabelStatus')`와 `src.toContain('fetchActiveLabelByOrder')`만 검사하는데, `fetchActiveLabelByOrder`는 같은 파일의 다른 함수(`fetchShxkTradeDocument`, `voidUpsLabel`)에서도 호출되므로 `getUpsLabelStatus`가 실제로 그 함수를 호출하는지와 무관하게 항상 참(true)입니다. `getUpsLabelStatus` 본문을 완전히 다른 로직(항상 `hasActiveLabel: false` 반환)으로 바꿔도 이 테스트는 2/2 PASS였습니다.
+- **현재 상태**: 첫 번째 테스트(`DOC_TYPE_CONTENT_MAP` 매핑값 검증)는 정규식으로 실제 값을 추출해 검증하므로 네거티브 컨트롤 통과(진짜 회귀 탐지 가능) — 두 번째 테스트만 형식적. 이번 PR은 Dave의 절차 위반(task file/테스트 누락) 10회 기록 이후 첫 보완 제출이라 기능적 정확성은 Jaison이 diff로 직접 재확인했고, severity가 낮아 반려 없이 병합.
+- **임시 조치**: 없음
+- **목표 구현**: `getUpsLabelStatus`를 실제로 호출해서 mock supabase 응답에 따라 `hasActiveLabel`/`trackingNumber`가 올바르게 매핑되는지 검증하는 테스트로 교체(Baker의 `resolveProvinceEnglishName` 테스트나 Dave의 `p7-shxk-kor-fixed.test.ts` 패턴 참고 — mock supabase 체인 구성)
+- **관련 파일**: `tests/unit/ups/ups-trade-documents.test.ts`, `src/app/actions/operations/ups-labels.ts`
+- **관련 Issue/PR**: Issue #559, PR#561
+- **예상 공수**: 0.2 MD
+- **우선순위**: Low — 기능 자체는 Jaison이 직접 코드 검토로 정확성 확인 완료, 테스트 보강만 필요
+- **상태**: ⬜ 미착수
+
+## [IMP-143] `buildCreateOrderPayload`의 `shipper_province` → `resolveProvinceEnglishName` 변환에 대한 테스트 부재
+
+- **발견 경위**: PR#572(Baker, TASK-B-157, Issue #571 — DEF-103 AddressInput KR분기 재설계 2차 제출) 검토 중 Jaison이 격리 워크트리에서 네거티브 컨트롤로 확인. `src/lib/ups/label-mapping.ts:87`의 수정(`shipper_province: resolveProvinceEnglishName(...)`)을 원래의 미변환 코드(`(order.shipper_state_province as string) || ''`)로 되돌린 뒤 `tests/unit/agency/address-input.test.tsx`·`tests/unit/ups/ups-labels-mapping.test.ts` 전체를 재실행해도 41개 테스트가 그대로 전부 PASS — 즉 이번 PR이 신규 추가한 `resolveProvinceEnglishName` 테스트 2건은 함수 자체(`resolveProvinceEnglishName('11','KR')` 등)만 순수 단위 테스트로 검증할 뿐, `buildCreateOrderPayload`가 실제로 `shipper_province` 필드에서 그 함수를 호출하는지는 전혀 검증하지 않음. 코드 자체는 diff로 직접 확인한 결과 정확함(Jaison 재설계 지시대로 구현됨) — 병합은 승인.
+- **현재 상태**: `shipper_province` 변환 로직이 회귀 방지망 밖에 있음. 향후 누군가 이 줄을 실수로 되돌리거나 리팩터링해도 어떤 테스트도 실패하지 않음.
+- **임시 조치**: 없음 — 코드 정확성은 Jaison이 직접 diff 검토로 확인 완료
+- **목표 구현**: `tests/unit/ups/ups-labels-mapping.test.ts`의 `buildCreateOrderPayload` 관련 describe 블록에 `order.shipper_state_province = '11'`, `order.shipper_country_code = 'KR'`인 order를 넣고 반환된 `payload.shipper.shipper_province === 'Seoul'`을 직접 검증하는 테스트 추가(기존 `consignee_province` 검증 테스트와 동일 패턴이 이미 파일에 있을 가능성 높음 — 있으면 그 옆에 shipper 버전 추가)
+- **관련 파일**: `tests/unit/ups/ups-labels-mapping.test.ts`, `src/lib/ups/label-mapping.ts`
+- **관련 Issue/PR**: Issue #571, PR#572
+- **예상 공수**: 0.1 MD
+- **우선순위**: Low — 코드 자체는 정확함을 별도 검증 완료, 회귀 방지망 보강만 필요
+- **상태**: ⬜ 미착수
+
+## [IMP-144] `AddressInput.tsx` KR 분기 — `form-action` 모드에서 `state_province`/`city` hidden input이 중복 렌더링됨
+
+- **발견 경위**: PR#572(Baker, TASK-B-157, Issue #571) 검토 중 Jaison이 diff 직접 확인. Issue #571 재설계 코멘트에서 "비KR 분기의 드롭다운 JSX를 그대로 복사해 KR 분기 안(우편번호 검색 UI와 hidden input 사이)에 추가"라고 지시했는데, 신규 드롭다운 블록(`AddressInput.tsx` 142~187행)이 자체적으로 `<input type="hidden" {...(mode === 'rhf' ? rhf(...) : { name: 'state_province' })} value={selectedState} />` 형태의 hidden input을 이미 포함하고 있음. 그런데 기존에 있던 `{mode === 'form-action' && <input name="state_province" type="hidden" value={selectedState} />}`(216행 부근, DEF-103 최초 수정분)도 그대로 남아있어, `mode === 'form-action'`(기본값)일 때 `name="state_province"`인 hidden input이 DOM에 **2개** 동시에 렌더링됨(`city`도 동일). 두 input의 `value`가 항상 같은 state(`selectedState`/`selectedCity`)를 참조하므로 현재는 값이 항상 일치해 `FormData.get()` 결과에 실질적 영향 없음 — 기능 결함 아님, 승인.
+- **현재 상태**: 중복 DOM 노드가 form-action 모드(예: Agency Shipper 등록/수정 폼)에서 항상 렌더링됨. `mode === 'rhf'`(예: `OrderRegistrationForm`)에서는 216행 블록이 `mode === 'form-action' &&`로 가드되어 렌더링 안 되므로 중복 없음.
+- **임시 조치**: 없음 — 값이 항상 동일해 현재 실사용에 문제 없음
+- **목표 구현**: 216~217행의 구 hidden input 2줄(`state_province`/`city`)을 삭제 — 142~187행 신규 드롭다운 블록의 hidden input이 이미 `mode` 분기를 자체 처리하므로 완전히 중복. `address_english` 줄(218행)은 드롭다운 블록에 대응 항목이 없으므로 그대로 유지.
+- **관련 파일**: `src/components/common/AddressInput.tsx`
+- **관련 Issue/PR**: Issue #571, PR#572
+- **예상 공수**: 0.1 MD
+- **우선순위**: Low — 기능 영향 없는 마크업 중복 정리
+- **상태**: ⬜ 미착수
+
+## [IMP-145] `buildInvoiceFromItems`가 SHXK 필수 필드 `invoice[].unit_code`를 payload에 전혀 포함하지 않음
+
+- **발견 경위**: JSJung이 `SHXK_TEST_MOCK=false`로 오더 ZEN-2026-000001 실제 createorder 재시도 중 발견(DEF-103 발신인 주/성 오류·품명 한글 오류를 순서대로 해결한 뒤 세 번째로 발생). 실제 SHXK 응답 오류: `API创建并预报订单失败：创建预报失败!Invalid or missing Product/Unit/UnitOfMeasurement/Code for product number 1. Valid length is 1 to 3 alphanumeric`.
+- **근본 원인**: `docs/80_RawData/Phase8_UPS_API_리서치_결과.md:153`에 명시된 SHXK API 스펙 — `invoice[].unit_code`: `단위: MTR(미터)/PCE(개)/SET(세트), 기본 PCE`. 문서상 "기본 PCE"라 생략 가능해 보이지만 실제 SHXK 서버는 누락 시 위 오류로 거부함. `src/lib/ups/label-mapping.ts:23~38`의 `buildInvoiceFromItems()`는 `invoice_enname`/`invoice_quantity`/`invoice_unitcharge`/`sku`/`hs_code`만 매핑하고 `unit_code`는 애초에 payload 객체에 키 자체가 없음. `zen_order_items.item_packing_unit` 컬럼에 값("EA")은 있으나 SHXK 허용값(MTR/PCE/SET)과 다른 코드 체계라 그대로 매핑 불가 — 별도 변환 테이블 필요.
+- **현재 상태**: **착수됨** — JSJung 지시로 DEF-104 정식 등록 + Issue #573(Mike 담당) 발령 완료(2026-07-17). 폼 실측 결과 `item_packing_unit`은 `EA`/`SET`/`PCS` 3종 고정(자유입력 아님, `OrderRegistrationForm.tsx:164~166`) — 매핑 설계 확정: `EA`→`PCE`, `PCS`→`PCE`, `SET`→`SET`, 신규 추가할 `MTR`→`MTR`, 미매핑/공란→`PCE`(SHXK 기본값).
+- **임시 조치**: 없음
+- **목표 구현**: (Issue #573 상세 설계 참조) `label-mapping.ts`에 `resolveShxkUnitCode()` 순수 함수 추가 + `buildInvoiceFromItems()`에 `unit_code` 필드 추가 + Packing Unit 드롭다운에 MTR 옵션 추가 + `buildInvoiceFromItems()` 통합 테스트(순수 함수만이 아니라 실제 호출 지점 검증 — IMP-140 재발 방지 조건 명시).
+- **관련 파일**: `src/lib/ups/label-mapping.ts`, `src/components/orders/OrderRegistrationForm.tsx`
+- **관련 Issue/PR**: Issue #573, DEF-104(`.agent/defects/DEF-104_SHXK_invoice_unit_code_매핑누락.md`)
+- **예상 공수**: 0.3 MD (매핑 테이블 설계 + 코드 반영 + 테스트)
+- **우선순위**: High — SHXK 실연동 자체가 이 오류로 막히는 상태(오더 등록 자체는 정상, createorder만 실패)
+- **상태**: 🔄 Issue #573 발령(Mike 착수 대기)
+
+## [IMP-146] `UpsTradeDocumentActions.test.ts`(Issue #582 ResultPopup)의 신규 테스트 5건 전부 `fs.readFileSync` + `toContain` 소스 문자열 검사 — 실제 클릭 동작 미검증
+
+- **발견 경위**: PR#583(Mike, TASK-B-162, Issue #582 — fetchShxkTradeDocument 응답 결과 팝업) 검토 중 Jaison이 격리 워크트리에서 네거티브 컨트롤로 확인. `tests/unit/ups/ups-trade-documents.test.ts`에 추가된 5건이 전부 `fs.readFileSync('src/components/orders/UpsTradeDocumentActions.tsx')` 후 `expect(src).toContain('...')` 형태 — 컴포넌트를 실제로 렌더링(React Testing Library 등)하지 않고 소스 텍스트만 검사함. `ResultPopup`의 실제 "확인" 버튼 `onClick={onConfirm}`을 `onClick={() => {}}`(클릭해도 아무 동작 안 함)로 고의로 깨뜨린 뒤 재실행해도 10개 테스트 전부 그대로 PASS — 사용자가 명시적으로 요구한 핵심 동작("확인을 누르면 팝업을 닫는다")이 실제로 동작하는지 전혀 검증하지 못함. 실제 제출된 PR#583의 코드 자체는 diff로 직접 확인한 결과 `onClick={onConfirm}`이 정확히 연결되어 있어 기능적으로는 정상 — 병합은 승인. 동일 테스트 파일에서 이전에도 유사 문제(IMP-142, Issue #559/PR#561의 `getUpsLabelStatus` 테스트)가 지적된 바 있음 — 같은 파일에서 패턴이 반복되고 있음.
+- **현재 상태**: `ResultPopup` 컴포넌트의 렌더링·클릭 상호작용이 회귀 방지망 밖에 있음. 향후 리팩터링 중 "확인" 버튼 핸들러가 실수로 깨져도 어떤 테스트도 실패하지 않음.
+- **임시 조치**: 없음 — 코드 정확성은 Jaison이 diff로 직접 확인 완료
+- **목표 구현**: React Testing Library로 `UpsTradeDocumentActions`를 실제 렌더링 → 문서 조회 버튼 클릭 → 프리뷰 팝업 확인 클릭 → `fetchShxkTradeDocument` mock 응답이 화면(JSON pre 블록)에 실제로 표시되는지 확인 → 결과 팝업의 "확인" 버튼 클릭 → 팝업이 DOM에서 사라지는지(`queryByText`가 null 반환) 검증하는 형태로 교체. `tests/unit/agency/address-input.test.tsx`(이번 세션 DEF-103 관련 테스트)가 이미 이 패턴(실제 렌더링 + fireEvent)을 쓰고 있어 참고 가능.
+- **관련 파일**: `tests/unit/ups/ups-trade-documents.test.ts`, `src/components/orders/UpsTradeDocumentActions.tsx`
+- **관련 Issue/PR**: Issue #582, PR#583
+- **예상 공수**: 0.3 MD
+- **우선순위**: Low — 코드 자체는 정확함을 diff로 확인 완료, 회귀 방지망 보강만 필요. 다만 같은 파일에서 반복되는 패턴(IMP-139)이라 다음에 이 파일을 다시 손댈 때는 우선적으로 정리 권장
+- **상태**: ⬜ 미착수
+
+## [IMP-147] SNTL Agency 대리점 원가 모델 — **최초 분석 오류(정정), 실제 남은 gap은 상품(Product)별 세분화만**
+
+- **발견 경위**: 2026-07-19 처음엔 `zen_agency_rate_overrides`(대리점별 단일 discount_rate + 강제 재계산 트리거)를 근거로 "대리점 원가는 단일 할인율만 지원"이라고 분석했으나, **이는 오래된(2026-06-14) 마이그레이션 파일만 읽고 이후 변경 이력을 확인하지 않은 착오였음**. 실제로는 Issue #310(2026-07-10, JSJung 설계 확정, 커밋 f741df59)에서 `zen_agency_rate_overrides` 자체를 **완전히 DROP**하고, `zen_agency_pricing_policies`에 `zone_id` 컬럼을 추가해 **Zone별 할인율**(대리점당 10개 Zone 각각 다른 %)로 이미 전환되어 있었음. `zen_agency_shipper_zone_discounts`(화주별 Zone 할인율, Admin 판매가에서 직접 계산, Agency 원가 경유 안 함)도 이미 존재. Edward의 "이건 전체 요금 계산에 영향 주는가" 질의에 GitNexus로 실제 코드(`src/lib/ups/agency-pricing.ts`, `shipper-pricing.ts`, `src/app/actions/ups/freight.ts`)를 재확인하며 정정됨.
+- **현재 상태**: Zone별 할인율은 이미 구현·라이브 상태(스키마 변경 불필요). **다만 상품(Product, 서류/비서류/Express/Saver/Expedited 등)별 세분화는 여전히 미지원** — `zen_agency_pricing_policies`/`zen_agency_shipper_zone_discounts` 둘 다 `product_id` 컬럼이 없어 Zone 안에서는 상품 구분 없이 동일 할인율 적용. 실측 확인 결과(SNTL 원가표 vs UPS 판매가 비율) 서류는 Zone별 편차가 작지만(39.8~41.0%), 비서류는 Zone은 물론 **같은 Zone 안에서도 중량에 따라 원가 비율이 8%p 이상 매끄럽게 변화**해 Zone 단일 할인율로도 완전히 정확하진 않음(2안-Full Matrix 대비 근사치).
+- **임시 조치**: 없음. 지금 시스템 구조(Zone별 할인율)로 충분히 실용적 — 상품/중량별 완전 정밀 매칭은 2안(zen_ups_base_rates와 동일한 Matrix를 대리점별로 관리)이 필요하나 데이터 관리 부담이 커서 우선순위 낮음.
+- **목표 구현**: (선택) `zen_agency_pricing_policies`/`zen_agency_shipper_zone_discounts`에 `product_id`(nullable, 미지정 시 전체 상품 공통) 컬럼 추가해 상품별 override를 선택적으로 허용
+- **관련 파일**: `supabase/migrations/20260710000000_iss310_zone_discounts.sql`, `src/lib/ups/agency-pricing.ts`, `src/lib/ups/shipper-pricing.ts`, `src/app/actions/ups/freight.ts`
+- **예상 공수**: 0.5~1 MD (필요시)
+- **우선순위**: Low — Zone별 할인율로 이미 실용적 수준 확보, 상품별 정밀화는 필요성 재확인 후 진행
+- **상태**: ⬜ 미착수 (Low, 선택적)
+
+## [IMP-148] UPS Zone 매핑에 FREIGHT 상품군(WW_FLIGHT) 데이터 없음
+
+- **발견 경위**: KR ZONE 시트(원가표.xlsx) 재구축(2026-07-19, 마이그레이션 20260719000000) 중 확인. 시트에는 WXS(Saver)/XPR(Express)/XPD(Expedited) 3개 상품군만 있고 FREIGHT(WW_FLIGHT)에 대한 국가별 Zone 배정 데이터가 없음 — 기존에도 이 조합은 매핑이 없었음(신규 발생 아님, 재확인만 됨).
+- **현재 상태**: `zen_ups_zone_countries`에 `product_family='FREIGHT'` 행이 0건. WW_FLIGHT 주문의 Zone 조회 로직(`resolveZoneByCountry`, `src/app/actions/ups/freight.ts`)이 FREIGHT 상품에 대해 어떻게 동작하는지(폴백 여부) 미확인.
+- **임시 조치**: 없음
+- **목표 구현**: SNTL 측에 FREIGHT(WWEF) 전용 Zone 차트 원본 자료 요청 후 반영, 또는 EXPRESS 매핑을 잠정 폴백으로 사용할지 설계 결정 필요
+- **관련 파일**: `supabase/migrations/20260705130000_imp146_ups_zone_countries_product_family_direction.sql`, `src/app/actions/ups/freight.ts`
+- **예상 공수**: 0.5 MD
+- **우선순위**: Medium — WW_FLIGHT(Freight) 주문이 실제 운영되기 전까지는 영향 없음
+- **상태**: ⬜ 미착수
+
+## [IMP-149] UPS 원가(cost_price) 세분화 불일치 — NonDoc 0.5kg 단위 세분값(5.5~19.5kg) 및 서류/WWEF tier 실측치 없음 — **일부 해결(SAVER)**
+
+- **발견 경위**: 원가표.xlsx(KR-P) 원가 적재(마이그레이션 20260719000100) 중 확인. `zen_ups_base_rates`는 상품당 16개 이산 중량점(0.5~5kg 0.5단위, 이후 7/10/15/20/25/30kg)만 보유하나, 실제 KR-P 원가는 Non-Document 상품(SAVER_NONDOC/EXPRESS_NONDOC)에 대해 0.5~20kg 전 구간을 0.5kg 단위(40개 점)로 제공 — 5.5/6/.../19.5kg 등 26개 중량점은 실제 원가 값이 있음에도 DB에 행 자체가 없어 반영 못함.
+- **현재 상태**: **WW_SAVER_NONDOC은 해결 완료**(마이그레이션 20260719000200) — `docs/80_RawData/20260609 UPS 특송 요금 정보.xlsx`("수출_Express SAVER" 시트)에서 SNTL 실 판매가를 확보해, 26개 결측 중량점 전부를 원가+판매가 모두 실측치로 신규 생성(260건 INSERT). **WW_EXPRESS_NONDOC은 여전히 미해결**(SNTL 판매가 출처 미확보로 신규 행 생성 보류, 26개 중량점 그대로 결측). WW_EXPEDITED(정수 단위 11개 중량점: 6,8,9,11~14,16~19)도 동일 사유로 미해결. 서류(Document)·WWEF의 tier 구간 부재는 원본 자료 자체에 없어 변동 없음.
+- **임시 조치**: 없음
+- **목표 구현**: WW_EXPRESS_NONDOC/WW_EXPEDITED의 SNTL 판매가 원본 자료 확보 후 동일 방식(원가+판매가 짝지어 INSERT)으로 마무리
+- **관련 파일**: `supabase/migrations/20260719000100_sntl_cost_price_update.sql`, `supabase/migrations/20260719000200_sntl_saver_selling_price.sql`
+- **예상 공수**: 0.3 MD (Express/Expedited 판매가 자료만 확보되면)
+- **우선순위**: Medium
+- **상태**: 🔄 부분 완료(SAVER_NONDOC만)
+
+## [IMP-150] SNTL 원가 적재 후 판매가(selling_price)/마크업 정책 — **SAVER는 실측치 확보, 나머지 상품 미정**
+
+- **발견 경위**: SNTL 원가표.xlsx 적재(2026-07-19) 시 처음엔 "원가만 우선 반영, 판매가는 별도 결정"으로 진행했으나, Edward 확인 결과 `docs/80_RawData/20260609 UPS 특송 요금 정보.xlsx`("수출_Express SAVER" 시트)에 **SNTL의 실제 판매가**가 이미 존재함을 확인(같은 파일에 "UPS 판매가"(공식 정가, PDF와 일치)도 별도 블록으로 같이 들어있어 처음엔 혼동 — 서류는 두 값이 우연히 같고, 비서류는 SNTL 판매가가 UPS 정가의 약 1/4 수준으로 크게 다름).
+- **현재 상태**: **WW_SAVER_DOC(0.5~1.5kg만)·WW_SAVER_NONDOC(전 구간)은 실측 판매가로 교체 완료**(마이그레이션 20260719000200, cost/selling 비율 약 70% = 마진 약 30%로 확인). 남은 gap: (1) WW_SAVER_DOC 2.0~5.0kg 판매가는 이 자료에 없어 더미값 유지, (2) tier 21-44~500-999는 실측 반영, >1000 구간은 원본 셀이 `#REF!` 오류라 더미값 유지, (3) WW_EXPRESS_DOC/NONDOC·WW_EXPEDITED·WW_FLIGHT는 SNTL 판매가 자료 자체를 못 찾아 전부 더미값 그대로.
+- **임시 조치**: 없음
+- **목표 구현**: (1) 서류 2~5kg 판매가·>1000kg tier 판매가는 원본 파일 재확인(엑셀 수식 오류 복구 또는 SNTL에 재문의) 후 반영, (2) Express/Expedited/Flight의 SNTL 판매가 자료 확보 후 동일 방식 반영. 남은 상품(위 항목들)은 여전히 더미값이므로 실제 견적/정산에 사용 금지.
+- **관련 파일**: `supabase/migrations/20260719000200_sntl_saver_selling_price.sql`, `docs/80_RawData/20260609 UPS 특송 요금 정보.xlsx`
+- **예상 공수**: 0.5 MD (자료 확보 시)
+- **우선순위**: High — Express/Expedited/Flight는 여전히 더미 판매가라 마크업 정책 확정 전 실사용 금지
+- **상태**: 🔄 부분 완료(SAVER만)
+
+## [IMP-151] `getMaxAllowedZoneDiscount`가 Zone 내 전 상품(더미 포함)을 함께 검사 — 현재 모든 Zone에서 허용 할인율 0%로 계산됨 — ✅ 해결 완료
+
+- **발견 경위**: SNTL→Sub-Agency 실 할인율(75%) 등록(2026-07-19) 전, 실제 `upsertAgencyPricingPolicy` 서버 액션으로 등록 가능한지 확인하는 과정에서 `src/lib/ups/discount-guard.ts:getMaxAllowedZoneDiscount()`를 직접 재현해봄. 이 함수는 대상 Zone에 속한 **모든 상품**(`zen_ups_base_rates`/`zen_ups_weight_tier_rates`/`zen_ups_freight_minimums`)의 `1 - cost/selling` 비율 중 **최솟값**을 최대 허용 할인율로 반환하는데, WW_SAVER_*는 오늘 실측 원가/판매가로 교체됐지만 WW_EXPRESS_*/WW_EXPEDITED/WW_FLIGHT는 아직 더미 판매가 그대로라 두 값의 스케일이 맞지 않아(예: 실측 원가 20만원대 vs 더미 판매가 5천원대) `1-cost/selling`이 -4~-5(=-400%~-500%) 수준으로 나옴. 그 결과 전 Zone에서 `Math.max(0, minRatio)`가 **0%**로 계산됨.
+- **현재 상태**: 지금 이 상태로 Admin/SUB_ADMIN이 실제 화면(`/admin/ups-rates`)에서 `zen_agency_pricing_policies`에 **어떤 할인율을 입력해도 "할인율이 원가 마진을 초과합니다. 최대 허용: 0.0%"로 전부 거부**됨. SNTL→Sub-Agency 75% 정책은 이 가드를 우회해 DB에 직접 등록함(seed-local.ts, 커밋 a352b5bc) — 실제 UI로는 지금 등록 불가능한 상태.
+- **임시 조치**: 없음(DB 직접 등록으로 회피)
+- **목표 구현**: `getMaxAllowedZoneDiscount`가 Zone 전체가 아니라 **호출 시 지정된 특정 상품(들)만** 검사하도록 수정하거나(예: agency가 실제 취급하는 product_id 목록을 파라미터로 받음), 최소한 WW_EXPRESS_*/WW_EXPEDITED/WW_FLIGHT의 실측 판매가가 채워질 때까지(IMP-150)는 이 이슈가 자동 해소되지 않으므로 임시 방편으로 로직을 조정할지 결정 필요
+- **관련 파일**: `src/lib/ups/discount-guard.ts`, `src/app/actions/ups/rates-mutation.ts:upsertAgencyPricingPolicy`
+- **예상 공수**: 0.3 MD
+- **우선순위**: High — 지금 이 상태로는 SUB_ADMIN 기능(Issue #605) 자체를 실제 화면에서 쓸 수 없음
+- **상태**: ✅ 해결 완료 — **TASK-190(Issue #614), 2026-07-20.** PR#615 Aiden 승인·머지(`f0b4629e`), 실제 CI PASS(644/644), Issue #614 Close. 단, 수정 대상이었던 `upsertAgencyPricingPolicy`/`upsertShipperZoneDiscounts`가 실제 화면에서 호출되지 않는 죽은 코드였음이 밝혀져, 진짜 문제(예약 요금 시스템에 마진 검증 자체가 없음)는 Team B에 Issue #616으로 별도 이관됨. (2026-07-21 Aiden 정정 — 이 문서가 갱신 안 된 채 남아있어 Riley에게 중복 배정할 뻔함, 재발 방지 위해 기록)
+
+## [IMP-152] SNTL→Sub-Agency 할인율(75%)은 비서류 기준 대표값 — 서류(0%)와 구분 안 됨
+
+- **발견 경위**: `UPS 특송 요금 정보.xlsx`("수출_Express SAVER" 시트) 1블록(SNTL 공급가) vs 2블록(UPS 공식가) 전 Zone·전 중량 대조 결과, 비서류는 정확히 75.00%(편차 0), 서류는 정확히 0% 할인으로 확인(2026-07-19). `zen_agency_pricing_policies`는 상품 구분이 없어(Issue #605에서 이미 논의 중인 gap과 동일 원인) 물량 비중이 큰 비서류 기준 75%만 등록함.
+- **현재 상태**: SNTL Sub-Agency Test의 서류 주문은 실제로는 0% 할인이어야 하는데 시스템상 75% 할인이 적용되어, Sub-Agency 원가가 실제보다 낮게(유리하게) 계산됨 — 역마진 방향은 아니나 실제 정산액과 차이가 남.
+- **임시 조치**: 없음
+- **목표 구현**: Issue #605(product_id 세분화 논의)의 해결책 적용 시 함께 반영
+- **관련 파일**: `scripts/seed-local.ts:seedSntlAgency`, Issue #605
+- **예상 공수**: Issue #605에 포함
+- **우선순위**: Medium — 현재는 SNTL Sub-Agency Test가 데모 조직이라 실거래 영향 없음
+- **상태**: ⬜ 미착수 (Issue #605 해결에 종속)
+
+---
+
+## [IMP-153] CI `supabase db reset` 시 `authenticated`/`anon` 롤 기본 테이블 GRANT 누락
+
+- **발견 경위**: Issue #671(DEF-117) 재작업(PR#719, TASK-B-188) 중 로컬 DB 기반 실제 검증 테스트가 CI에서 3라운드 연속으로 다른 테이블(`zen_orders`→`zen_ups_labels`→`zen_profiles`)에서 `permission denied for table ...` 에러로 실패. 로컬(누적된 개발 DB)에는 `authenticated` 롤에 대한 전체 GRANT가 이미 존재해 문제가 드러나지 않았음.
+- **현재 상태**: `zen_orders`/`zen_order_packages`/`zen_ups_labels`/`zen_ups_label_errors`/`zen_profiles` 5개 테이블은 이번에 명시적 `GRANT` 문을 추가해 해결(`supabase/migrations/20260722130000_def117_order_packages_agency_rls_v2.sql`). 하지만 이 5개는 우연히 이번 작업에서 걸린 테이블일 뿐 — 같은 이유로 GRANT가 누락된 다른 테이블이 더 있을 가능성이 높음. 이미 `20260622000000_fix_service_role_grants.sql`(TASK-B-017)에서 `service_role`에 대해 동일한 유형의 문제를 겪고 여러 테이블에 걸쳐 고친 전례가 있음 — 이번엔 `authenticated`가 빠진 케이스.
+- **근본 원인 추정**: 이 프로젝트의 로컬/실 Supabase 인스턴스는 프로젝트 최초 생성 시점에 플랫폼이 스키마 단위로 `anon`/`authenticated`/`service_role`에 기본 권한을 부여했을 가능성이 높음(마이그레이션 파일이 아니라 프로젝트 부트스트랩 단계). CI의 `supabase db reset`(마이그레이션만 순서대로 재생함)은 이 부트스트랩 단계를 재현하지 못해, 명시적으로 GRANT를 문서화하지 않은 테이블은 전부 CI에서만 누락됨.
+- **목표 구현**: 테이블 하나씩 발견될 때마다 땜질하는 대신, `ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO authenticated;`(및 필요 시 `anon`) 류의 스키마 단위 일괄 마이그레이션을 신설해 근본 해결. 단, INSERT/UPDATE/DELETE는 테이블별 필요 여부가 다르므로 SELECT만 일괄 적용하고 나머지는 기존처럼 개별 GRANT 유지 검토 필요.
+- **관련 파일**: `supabase/migrations/20260622000000_fix_service_role_grants.sql`(선례), `supabase/migrations/20260722130000_def117_order_packages_agency_rls_v2.sql`(이번 임시 대응)
+- **예상 공수**: 0.5 MD (원인 조사는 이미 완료, 일괄 마이그레이션 작성 + 전체 회귀만 필요)
+- **우선순위**: Medium — 매번 실 DB 검증 테스트를 추가할 때마다 반복적으로 재발할 가능성이 높아 선제 조치 가치가 있으나, 당장 기능 장애는 아님
+- **상태**: ⬜ 미착수 — Issue #790 등록 완료, Team B 배정 대기 (2026-07-24)
+
+---
+
+## [IMP-154] UPS 라벨 회수(`removeorder`) — SHXK 실패가 조용히 삼켜짐, 회수 성공 여부를 신뢰할 수 없음
+
+- **발견 경위**: DEF-125(스냅샷 캐시) 논의 중 "배송정보(Zone/국가) 변경 시 오더 재생성" 설계안이 나오면서, "재생성 전 UPS 라벨 회수 절차·인터페이스가 실제로 존재하는가"를 Edward 지시로 확인. `cancelUpsRegistration()`(`src/app/actions/operations/ups-labels.ts:429-502`)이 SHXK API `removeorder(referenceNo)`(`src/lib/shxk/order.ts:90-98`)를 실제로 호출하는 것은 확인됨(mock 전용 아님, 진짜 carrier 연동). 다만 코드를 직접 읽어보니 `removeRes.success === 0`(SHXK 측 회수 실패)일 때 `logger.warn()`으로 **로그만 남기고** 이후 로직을 그대로 진행 — 내부 `zen_ups_label_documents`/Storage 파일/`zen_ups_labels` 행을 전부 지우고 무조건 `{ success: true }`를 반환함. 즉 **UPS가 실제로 회수를 거부해도 화면에는 항상 "성공"으로 표시됨.**
+- **현재 상태**: 회수 가능 여부는 호출부(`undoUpsRegistration()`, `warehouse.ts:518-541`)에서 오더 상태가 `PACKED`일 때만 허용하도록 막혀있으나, 이건 내부 DB 상태 체크일 뿐 UPS/SHXK 측 실제 배송 진행 상태(`gettrack`)는 전혀 조회하지 않음 — UPS가 이미 픽업/스캔한 이후에도 내부적으로는 `PACKED` 상태로 남아있으면 취소 버튼이 그대로 노출되고, 실패해도 성공으로 보고됨. TASK-B-182(Issue #695)에서 이 함수 주변 정리(다중 라벨 삭제·FK CASCADE·Storage 정리·AGENCY RLS DELETE 정책)를 이미 했지만, `removeorder` 실패를 삼키는 부분 자체는 손대지 않고 그대로 남아있음(범위 밖으로 처리됨, 별도 인지된 리스크로 문서화되어 있지도 않음).
+- **왜 지금 중요한가**: "배송정보 변경 시 라벨 회수 후 기존 오더 폐기·재오더 처리"라는 새 설계(DEF-125/Issue #725 연계)가 이 함수의 성공 신호를를 그대로 믿고 진행하면, **UPS 쪽에서 실제로는 회수가 안 된 상태에서 내부적으로만 폐기 처리되어, 이미 배차된 UPS 화물이 그대로 나가는데 시스템상으로는 신규 오더만 잡히는 불일치(중복/유령 배송)가 생길 수 있음.**
+- **임시 조치**: 없음 — 현재 로직 그대로 사용 중
+- **목표 구현**: (1) `removeRes.success === 0`일 때 예외를 던지거나 명확한 실패 응답을 반환해 호출부가 실제로 실패를 인지하도록 수정, (2) 가능하면 회수 전/후 `gettrack`으로 UPS 측 실제 처리 상태를 확인하는 검증 단계 추가, (3) 배송정보 변경→재오더 설계를 실제 구현할 때는 이 함수의 반환값을 신뢰하지 말고 별도 확인 로직을 두거나, 이 IMP 해결을 선행 조건으로 삼을 것
+- **관련 파일**: `src/app/actions/operations/ups-labels.ts` (`cancelUpsRegistration`, `voidUpsLabel`), `src/lib/shxk/order.ts` (`removeorder`), `src/app/actions/operations/warehouse.ts` (`undoUpsRegistration`)
+- **예상 공수**: 0.5~1 MD (에러 전파 수정은 작으나, gettrack 검증 추가 시 커짐)
+- **우선순위**: High — DEF-125 배송정보 재생성 설계가 이 기능에 의존하므로, 그 설계를 실제 구현하기 전에 반드시 해결 필요
+- **담당**: **Team B** — `git log`로 확인 결과 `ups-labels.ts`/`shxk/order.ts` 전체 커밋 이력(27건)이 Team B(Baker/Dave/Mike)이며, 이 취소 로직 주변을 이미 다룬 TASK-B-182(Issue #695)도 Baker 작업. Team A 파일 소유권 범위 밖으로 판단(Edward 지적, 2026-07-24) — GitHub Issue #788로 Team B에 정식 이관
+- **상태**: ⬜ 배정 완료 — TASK-B-211(Baker), Jaison이 SHXK 5개 함수 전체 실패처리 조사 완료(removeorder 2곳만 결함, 나머지는 정상) 후 착수 지시 (2026-07-26)
+
+---
+
+## [IMP-155] Agency→Shipper 할인율 역전으로 인한 역마진 — 시스템적 방지 장치 없음 (Issue #717 후속)
+
+- **발견 경위**: Issue #717(SNTL 원가 Matrix 구조 논의, 2026-07-23) 결론에서 "역마진 방지는 시스템적 조치 아닌 운영 측면으로 관리, 시스템적 방지는 추후 별도 기능 개선 건으로 진행"으로 종결했으나, 실제로 `scratch/post_launch_improvements.md`에는 등록이 누락되어 있었음(Edward 확인, 2026-07-24).
+- **문제 구조**: SNTL 가격 체계는 비계층적 — `zen_agency_pricing_policies`(Admin→Agency 할인율)와 `zen_agency_shipper_zone_discounts`(Agency→Shipper 할인율)가 각각 독립적으로 같은 루트 `selling_price`를 기준으로 계산됨(`margin = selling_price × (agency_discount_rate − shipper_discount_rate)`). Agency 자신이 Admin으로부터 받는 할인율보다 **Shipper에게 더 높은 할인율을 실수로 등록하면 마진이 음수(역마진)가 됨**.
+- **현재 코드 상태**: `upsertShipperZoneDiscounts()`(`src/app/actions/agency/zone-discounts.ts:65`)가 `getMaxAllowedZoneDiscount()`(`src/lib/ups/discount-guard.ts`)로 상한 검사를 하긴 하나, 이 함수는 **Zone 전체의 절대 원가/판매가 비율**(플랫폼 cost_price 기준 최솟값)만 검사할 뿐, **해당 Agency 자신의 할인율 대비** 초과 여부는 전혀 확인하지 않음 — 즉 지금 코드는 "역마진 방지"가 아니라 "플랫폼 원가 이하로는 못 팔게"라는 다른 목적의 가드임. 실제 예약 요금 시스템(`src/app/actions/ups/pricing-schedule.ts`, Issue #391/#616)에는 할인율/마진 검증 로직 자체가 전혀 없음(grep 결과 0건).
+- **현재 상태**: 시스템적 방지 없이 운영자가 등록 시점에 주의하는 것으로만 관리 중(Edward 승인, Issue #717 종결 코멘트 참고).
+- **임시 조치**: 없음
+- **목표 구현**: `upsertShipperZoneDiscounts()`(및 필요 시 Agency↔Sub-Agency 계층에도 동일 로직 확장)에 "등록하려는 shipper_discount_rate가 해당 agency_org_id의 현재 agency_discount_rate를 초과하면 저장 거부" 검증을 추가. `getMaxAllowedZoneDiscount`와는 별개의 신규 가드 함수로 구현 권장(기존 함수의 책임과 섞지 않음).
+- **관련 파일**: `src/app/actions/agency/zone-discounts.ts`, `src/lib/ups/discount-guard.ts`, `src/app/actions/ups/pricing-schedule.ts`, Issue #717
+- **예상 공수**: 0.5 MD
+- **우선순위**: Medium — 현재는 운영자 인지로 관리 중이라 당장 장애는 아니나, Agency 수·Shipper 수가 늘어날수록 수작업 관리 리스크 증가
+- **상태**: ✅ 완료 — TASK-208(D_Kai) Aiden 승인·develop 병합 완료(PR#797), Issue #791 Close (2026-07-24)
+
+---
+
+## [IMP-156] IN_TRANSIT→DELIVERED 자동전환이 하루 1번 폴링에만 의존 — 정산서 확정 연동안은 순환의존으로 불가
+
+- **발견 경위**: Issue #607 UPS 전용 Order Detail 화면(TASK-189) 트래킹 구조 검토(Edward 지시, 2026-07-24) 중 확인. 내부 오더 상태(`REGISTERED→...→IN_TRANSIT`)는 전부 직원 수동 액션으로 전환되며(예: `IN_TRANSIT`은 `warehouse.ts:601` "출고확정처리"), **`DELIVERED`로의 전환만 유일하게 UPS 신호(SHXK `gettrack`)에 의존**함. 그런데 이 신호가 `vercel.json` 확인 결과 **하루 1번**(`ups-tracking-poll`, 매일 15:30 UTC) 크론에만 의존하고, 온디맨드 새로고침 UI/버튼이 코드베이스 전체에 전무함(`pollTracking` 참조 컴포넌트 0건).
+- **검토된 대안과 기각 사유**: Edward가 "UPS 정산서(사후청구) 확정 시점에 DELIVERED로 전환"하는 방식을 제안했으나, 코드 확인 결과 **순환 의존 발견** — `recordUpsActualCharges()`(`src/app/actions/finance/ups-actual-charges.ts:37`)가 이미 `order.status === 'DELIVERED'`를 **선행 조건**으로 강제함("오더가 배송 완료(DELIVERED) 상태일 때만 실제 청구 요금을 입력할 수 있습니다"). 검색 화면(같은 파일 295·329행)도 DELIVERED 오더만 조회 대상. 즉 "정산서 확정→DELIVERED 전환"을 그대로 적용하면 정산 처리에 DELIVERED가 먼저 필요한데 DELIVERED는 정산 처리가 끝나야 되는 데드락 발생. 추가로 배송완료 알림 이메일(`src/lib/notifications/email.ts`/`notifications.ts`)도 이 전환 시점에 걸려있어, 전환이 정산서 도착 시점(통상 배송 후 수일~수주, "사후청구"라는 명칭 자체가 이를 반영)까지 밀리면 화주 알림도 그만큼 늦어져 현재(하루 1회 폴링)보다 오히려 더 나빠질 수 있음.
+- **현재 상태**: 하루 1회 폴링 그대로 유지 중. 정산서 연동안은 채택하지 않음(순환의존 미해결).
+- **임시 조치**: 없음
+- **목표 구현**: (1) 폴링 주기를 하루 1회보다 단축(예: 몇 시간 간격) 검토, (2) 온디맨드 새로고침 버튼(단건 오더 대상 `pollTracking` 직접 호출) 추가 검토, (3) 만약 정산서 연동 방향을 계속 고려한다면 `recordUpsActualCharges()`의 DELIVERED 선행조건을 먼저 완화(예: IN_TRANSIT에서도 입력 허용)하는 별도 설계 결정이 선행되어야 함 — 이 경우 "정산서가 배송완료를 증명한다"는 전제 자체의 타당성(배송 안 됐는데 청구서만 먼저 오는 경우 가능성)도 함께 검토 필요
+- **관련 파일**: `src/app/api/cron/ups-tracking-poll/route.ts`, `vercel.json`, `src/lib/shxk/tracking.ts`, `src/app/actions/finance/ups-actual-charges.ts:37`, `src/lib/notifications/email.ts`
+- **예상 공수**: 폴링 주기 단축은 0.2 MD(단순 스케줄 변경), 온디맨드 새로고침 추가는 0.5 MD, 정산서 연동 방향은 선행 설계 결정 필요로 별도 산정
+- **우선순위**: Medium — 현재도 자동 전환은 동작하나(최대 24시간 지연), 정산/청구 트리거 지연에 영향
+- **상태**: ✅ 부분 완료 — (2) 온디맨드 새로고침 버튼(`checkRealtimeUpsTrackingAction`) + Agency 소속 오더 한정 수동 DELIVERED 권한(ZenUI 모달, 사유 필수, `manuallySetOrderDeliveredAction`) 조합으로 **TASK-209(Issue #794, Riley, PR#802) develop 병합 완료** (2026-07-24). (1) 폴링 주기 단축은 범위 밖, 별도 검토 필요. (3) 정산서 연동안은 순환의존으로 기각(위 내용 참고)
+
+### 예외 코드 처리 — 조치 불가, 별도 기록만 유지
+
+UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류 등) 처리는 SHXK 측 전체 상태 코드표가 문서화되어 있지 않아(코드베이스·문서 전체에서 실제 다뤄지는 코드는 `NT`/`DL` 2개뿐, `docs/80_RawData/Phase8_UPS_API_리서치_결과.md` 확인) **현재로선 조치 불가능**(Edward 확인, 2026-07-24). SHXK 측에 전체 코드표를 확인받기 전까지는 착수 대상에서 제외 — TASK-209 범위에도 포함하지 않음.

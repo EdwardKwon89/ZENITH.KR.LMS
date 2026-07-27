@@ -63,3 +63,10 @@
 ## 🟧 프로세스 준수 (Process Compliance) [SAR-2026-04-29-001]
 - [ ] **[R-03-V1]** `PASS` 태스크 완료 처리 전, 채팅 로그에 검증 주체의 "FINAL PASS" 또는 "승인" 키워드가 존재하는가?
 - [ ] **[R-03-V2]** WBS/ROADMAP 업데이트는 반드시 최종 승인 확정 후에만 수행하는가?
+
+## 🔐 다중 역할 RLS 커버리지 (Multi-Role RLS Coverage) [SAR-2026-07-27-001]
+> AGENCY 역할 RLS 커버리지 누락이 2026-07 한 달간 8회 반복(DEF-114/116/117/120/126/B-002/B-010/B-014) 발생 — Team B 신규/수정 TASK 배정 시 이 섹션을 task file에 그대로 포함할 것.
+- [ ] **4대 역할 매트릭스**: 신규 테이블 또는 신규 RLS 정책 추가 시 ADMIN(전체) / SHIPPER(화주, 자기 소속) / AGENCY(대행, `agency_org_id` 매칭) / OPERATOR(운영) 4개 역할 각각에 대해 "이 역할이 이 데이터를 봐야 하는가?"를 명시적으로 판단하고 결과를 커밋 메시지 또는 task file에 기재했는가? AGENCY는 특히 주의(반복 최다 발생).
+- [ ] **정책-GRANT 페어링**: `CREATE POLICY`를 추가하는 모든 마이그레이션에 대해, 대상 역할(`authenticated` 등)이 해당 테이블에 대한 기본 GRANT(정책이 다루는 DML과 동일한 SELECT/INSERT/UPDATE 등)를 이미 보유하고 있는지 `information_schema.role_table_grants`로 확인했는가? 없다면 같은 마이그레이션에 `GRANT ... TO authenticated;`를 함께 추가했는가? RLS 정책은 GRANT의 대체재가 아니다.
+- [ ] **RLS 테스트 자기완결성**: RLS 회귀 테스트(`SET LOCAL role/request.jwt.claims` 패턴)가 실행 환경에 이미 존재하는 실데이터(하드코딩된 UUID)에 의존하지 않고, `beforeAll`에서 테스트 전용 fixture(조직/프로필/오더 등)를 직접 생성하고 `afterAll`에서 정리하는가?
+- [ ] **fresh DB 기준 검증**: 로컬 장기운영 DB에서의 통과가 아니라, CI(매 실행마다 `supabase db reset`으로 재구성)에서의 통과를 최종 근거로 삼았는가? 로컬 DB는 과거 수기 작업으로 권한/데이터가 오염되어 있을 수 있어 오탐(false positive)의 원인이 된다.

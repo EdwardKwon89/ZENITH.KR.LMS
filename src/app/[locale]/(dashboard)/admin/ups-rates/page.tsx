@@ -1,6 +1,6 @@
 import { requireAuth } from '@/lib/auth/guards';
 import { createClient } from '@/utils/supabase/server';
-import { getUpsZones, getUpsProducts, getUpsBaseRates, getUpsFuelSurcharge, getUpsOtherCharges, getUpsWeightTierRates, getUpsFreightMinimums } from '@/app/actions/ups/rates';
+import { getUpsZones, getUpsProducts, getUpsBaseRates, getUpsFuelSurcharge, getUpsOtherCharges, getUpsWeightTierRates, getUpsFreightMinimums, getUpsSurgeFees } from '@/app/actions/ups/rates';
 import UpsRatesClient from './ups-rates-client';
 
 export default async function UpsRatesPage() {
@@ -17,6 +17,7 @@ export default async function UpsRatesPage() {
   const otherCharges = await getUpsOtherCharges();
   const weightTierRates = await getUpsWeightTierRates();
   const freightMinimums = await getUpsFreightMinimums();
+  const surgeFees = await getUpsSurgeFees();
 
   const { data: agencyPolicies } = await supabase
     .from('zen_agency_pricing_policies')
@@ -50,6 +51,7 @@ export default async function UpsRatesPage() {
         agencies={orgs ?? []}
         weightTierRates={weightTierRates}
         freightMinimums={freightMinimums}
+        surgeFees={surgeFees}
         userRole={profile?.role || 'GUEST'}
       />
     </div>
