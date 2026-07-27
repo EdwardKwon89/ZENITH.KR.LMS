@@ -60,12 +60,11 @@ export async function recordUpsActualCharges(
       return { success: false, error: '오더가 IN_TRANSIT 또는 DELIVERED 상태일 때만 실제 청구 요금을 입력할 수 있습니다.' };
     }
 
-    const { data: existingInvoice } = await supabase
+    const { data: existingInvoices } = await supabase
       .from('zen_invoices')
-      .select('id, is_finalized')
+      .select('id, is_finalized, invoice_tier, billed_org_id, metadata')
       .filter('metadata->>source_order_id', 'eq', orderId)
-      .neq('status', 'CANCELED')
-      .maybeSingle();
+      .neq('status', 'CANCELED');
 
     const { error: deleteError } = await supabase
       .from('zen_ups_actual_charges')
@@ -119,9 +118,13 @@ export async function recordUpsActualCharges(
     const adjustmentAmount = actualSum - estimatedSum;
 
     // 마감 후 조정: 신규 추가 인보이스 발행 경로 (TASK-194-C)
-    if (existingInvoice?.is_finalized) {
+    const finalizedInvoices = (existingInvoices || []).filter((inv: any) => inv.is_finalized);
+    if (finalizedInvoices.length > 0) {
       const { createPostFinalizationAdjustment } = await import('@/app/actions/finance/settlement');
-      return createPostFinalizationAdjustment(orderId, adjustmentAmount, charges[0]?.currency || 'USD', user.id, existingInvoice.id);
+      for (const inv of finalizedInvoices) {
+        await createPostFinalizationAdjustment(orderId, adjustmentAmount, charges[0]?.currency || 'USD', user.id, inv.id);
+      }
+      return { success: true, adjustmentAmount };
     }
 
     // zen_order_costs에 UPS_ACTUAL_ADJUSTMENT upsert
@@ -177,40 +180,61 @@ export async function recordUpsActualCharges(
     }
 
     // 마감 전 갱신: 연결된 인보이스 total_amount 재계산
-    if (existingInvoice) {
-      if (adjustmentAmount !== 0) {
-        const { error: linkError } = await supabase
-          .from('zen_order_costs')
-          .update({ invoice_id: existingInvoice.id })
-          .eq('order_id', orderId)
-          .eq('cost_type', 'UPS_ACTUAL_ADJUSTMENT')
-          .is('invoice_id', null);
+    for (const inv of (existingInvoices || [])) {
+      if (inv.invoice_tier === 'ADMIN_TO_AGENCY') {
+        // ADMIN_TO_AGENCY: metadata.platform_breakdown에서 platformTotal 계산 + additionalSum
+        const meta = (inv.metadata || {}) as Record<string, any>;
+        const breakdown = meta.platform_breakdown || {};
+        const platformTotal = Number(breakdown.baseFreight || 0)
+          + Number(breakdown.fuelSurcharge || 0)
+          + Number(breakdown.surgeFee || 0)
+          + Number(breakdown.otherCharges || 0);
+        const newTotal = platformTotal + additionalSum;
 
-        if (linkError) {
-          return { success: false, error: `조정 비용 인보이스 연결 실패: ${linkError.message}` };
+        const { error: updateInvError } = await supabase
+          .from('zen_invoices')
+          .update({ total_amount: newTotal })
+          .eq('id', inv.id);
+
+        if (updateInvError) {
+          return { success: false, error: `ADMIN_TO_AGENCY 인보이스 금액 갱신 실패: ${updateInvError.message}` };
         }
-      }
+      } else {
+        // AGENCY_TO_SHIPPER / ADMIN_TO_SHIPPER: 기존 로직 (zen_order_costs 기반)
+        if (adjustmentAmount !== 0) {
+          const { error: linkError } = await supabase
+            .from('zen_order_costs')
+            .update({ invoice_id: inv.id })
+            .eq('order_id', orderId)
+            .eq('cost_type', 'UPS_ACTUAL_ADJUSTMENT')
+            .is('invoice_id', null);
 
-      const { data: linkedCosts, error: costsError } = await supabase
-        .from('zen_order_costs')
-        .select('unit_price, quantity')
-        .eq('invoice_id', existingInvoice.id);
+          if (linkError) {
+            return { success: false, error: `조정 비용 인보이스 연결 실패: ${linkError.message}` };
+          }
+        }
 
-      if (costsError) {
-        return { success: false, error: `연결 비용 조회 실패: ${costsError.message}` };
-      }
+        const { data: linkedCosts, error: costsError } = await supabase
+          .from('zen_order_costs')
+          .select('unit_price, quantity')
+          .eq('invoice_id', inv.id);
 
-      const newTotal = (linkedCosts || []).reduce((sum, c) => {
-        return sum + (Number(c.unit_price) * Number(c.quantity || 1));
-      }, 0);
+        if (costsError) {
+          return { success: false, error: `연결 비용 조회 실패: ${costsError.message}` };
+        }
 
-      const { error: updateInvError } = await supabase
-        .from('zen_invoices')
-        .update({ total_amount: newTotal })
-        .eq('id', existingInvoice.id);
+        const newTotal = (linkedCosts || []).reduce((sum, c) => {
+          return sum + (Number(c.unit_price) * Number(c.quantity || 1));
+        }, 0);
 
-      if (updateInvError) {
-        return { success: false, error: `인보이스 금액 갱신 실패: ${updateInvError.message}` };
+        const { error: updateInvError } = await supabase
+          .from('zen_invoices')
+          .update({ total_amount: newTotal })
+          .eq('id', inv.id);
+
+        if (updateInvError) {
+          return { success: false, error: `인보이스 금액 갱신 실패: ${updateInvError.message}` };
+        }
       }
     }
 
