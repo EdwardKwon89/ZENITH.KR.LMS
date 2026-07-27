@@ -40,9 +40,9 @@ USING (
 DO $$
 BEGIN
   IF NOT EXISTS (
-    SELECT 1 FROM pg_grant
+    SELECT 1 FROM information_schema.role_table_grants
     WHERE grantee = 'authenticated'
-      AND tablename = 'zen_invoices'
+      AND table_name = 'zen_invoices'
       AND privilege_type = 'SELECT'
   ) THEN
     GRANT SELECT ON public.zen_invoices TO authenticated;

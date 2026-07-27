@@ -7,7 +7,7 @@
 | **담당** | Baker (Team B) |
 | **생성일** | 2026-07-28 |
 | **우선순위** | P1 |
-| **상태** | ⬜ |
+| **상태** | 🔔 |
 
 ## 개요
 
@@ -75,3 +75,44 @@ WHERE billed_org_id IS NULL;
 _(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
 
 없음
+
+## [작업 결과]
+
+| 항목 | 결과 |
+|:-----|:-----|
+| **커밋 (코드)** | `a7a24161` (GRANT 수정 후 `db reset --yes` 검증 추가 반영) |
+| **커밋 ( 문서)** | `a08b79ce` |
+| **회귀 테스트** | **138/138 files · 934/934 tests ALL PASS** |
+| **psql 실측 (fresh DB)** | `supabase db reset --yes` 기반 — 컬럼 2개 ✅ · 인덱스 2개 ✅ · GRANT 7건 ✅ · 백필 0건(빈 fresh DB) ✅ · RLS 정책 5개(기존 4 + 신규 1) ✅ |
+| **PR** | https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/921 |
+| **R-10 해당사항** | 없음 (스키마 변경 — psql 실측으로 대체) |
+
+### psql 실측 증적 (fresh DB — `supabase db reset --yes` 직후)
+
+```sql
+-- 컬럼 확인
+ column_name  | data_type | is_nullable 
+--------------+-----------+-------------
+ billed_org_id | uuid      | YES
+ invoice_tier  | text | YES
+
+-- 인덱스 확인
+            indexname            
+---------------------------------
+ idx_zen_invoices_billed_org
+ idx_zen_invoices_tier
+
+-- GRANT 확인 (information_schema.role_table_grants 사용)
+    grantee    | privilege_type 
+---------------+----------------
+ authenticated | SELECT
+
+-- RLS 정책 확인
+ policy_name                       
+------------------------------------
+ Admins can manage all invoices     
+ Shippers can view their own invoices
+ Agency can view invoices for shipper orders
+ Agency can view billed invoices    
+ service_role_all
+```
