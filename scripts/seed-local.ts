@@ -1,9 +1,9 @@
 
 import { createClient } from '@supabase/supabase-js';
 
-// 로컬 Supabase 환경 설정
-const supabaseUrl = 'http://127.0.0.1:54321';
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || ''; // 로컬 실행 시 환경변수 확인 필요
+// 기본값은 로컬 Supabase — SUPABASE_URL 환경변수 지정 시 그 대상으로 시드(예: 원격 데모 환경)
+const supabaseUrl = process.env.SUPABASE_URL || 'http://127.0.0.1:54321';
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || ''; // 실행 시 환경변수 확인 필요
 
 async function createUser(supabase: any, email: string, fullName: string, role: string, orgId: string | null = null, orgType: string = 'CUSTOMER') {
   console.log(`Creating/Updating user: ${email} (${role})...`);

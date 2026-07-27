@@ -1,0 +1,9 @@
+.next
+.gitnexus
+node_modules
+scratch
+docs
+.playwright-mcp
+tests
+supabase/migrations
+*.log
