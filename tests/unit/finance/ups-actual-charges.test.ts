@@ -129,4 +129,20 @@ describe('TASK-B-204: IN_TRANSIT 부가요금 등록', () => {
     expect(result.success).toBe(false);
     expect(result.error).toContain('본인 소속 화주의 오더만');
   });
+
+  it('TC-B204-07: searchDeliveredUpsOrders가 recipient_country_code를 사용한다 (DEF-B-018)', async () => {
+    mockValidateUser(USER_ROLES.ADMIN);
+    const mockOrders = [
+      { id: 'o1', order_no: 'ZEN-UPS-001', status: 'DELIVERED', transport_mode: 'UPS', shipper_id: 's1', recipient_country_code: 'KR', created_at: '2026-07-26', tracking_config: { tracking_no: 'TRACK-001' } },
+    ];
+    mockSupabase.from.mockImplementation((table: string) => {
+      if (table === 'zen_orders') return createChainableMock(mockOrders);
+      return createChainableMock([]);
+    });
+
+    const result = await searchDeliveredUpsOrders('UPS-001');
+    expect(Array.isArray(result)).toBe(true);
+    expect(result).toHaveLength(1);
+    expect(result[0].recipient_country_code).toBe('KR');
+  });
 });
