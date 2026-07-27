@@ -148,9 +148,9 @@ export function UpsActualAdjustmentForm({
     );
   }
 
-  const actualTotal = charges.reduce((sum, c) => sum + c.amount, 0);
+  const actualTotal = reconciliation?.actual ?? 0;
   const estimatedTotal = reconciliation?.estimated || 0;
-  const variance = actualTotal - estimatedTotal;
+  const variance = reconciliation?.variance ?? 0;
   const currency = reconciliation?.currency || 'USD';
 
   return (
