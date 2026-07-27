@@ -33,19 +33,18 @@ describe('DEF-B-020: UpsActualAdjustmentForm 실제 청구액 카드', () => {
 
   it('charges가 비어있어도 reconciliation.actual 값을 "실제 청구액" 카드에 표시', async () => {
     mockGetUpsChargeReconciliation.mockResolvedValue({
-      estimated: 150,
+      estimated: 100,
       estimatedBreakdown: [
         { costType: 'BASE_FREIGHT', amount: 100, currency: 'USD' },
-        { costType: 'FUEL_SURCHARGE', amount: 50, currency: 'USD' },
       ],
       actual: 150,
-      variance: 0,
+      variance: 50,
       currency: 'USD',
       isFinalized: false,
     });
 
     const { UpsActualAdjustmentForm } = await import('@/components/orders/UpsActualAdjustmentForm');
-    const { container } = render(
+    render(
       <UpsActualAdjustmentForm
         orderId="order-1"
         orderStatus="DELIVERED"
@@ -54,7 +53,9 @@ describe('DEF-B-020: UpsActualAdjustmentForm 실제 청구액 카드', () => {
     );
 
     await waitFor(() => {
-      expect(container.textContent).toContain('150.00');
+      const actualLabel = screen.getByText('실제 청구액 (Actual)');
+      const actualCard = actualLabel.closest('.bg-gray-50')?.parentElement;
+      expect(actualCard?.textContent).toContain('150.00');
     });
   });
 
