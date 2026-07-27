@@ -55,7 +55,7 @@ function _calculateOrderSettle(
   const revenue = Number(snapshot.applied_unit_price || 0);
   const meta = snapshot.metadata as Record<string, any> | null;
   const breakdown = meta?.platform?.breakdown;
-  const destCode = order.dest_country_code as string | undefined;
+  const destCode = order.recipient_country_code as string | undefined;
 
   let cost: number;
   if (breakdown && destCode) {
@@ -102,7 +102,7 @@ export const getAgencySettlementSummary = withAction(async function (
   const [ordersRes, { policies, zoneMap }] = await Promise.all([
     supabase
       .from('zen_orders')
-      .select('id, dest_country_code, snapshot:zen_order_rate_snapshots(rate_card_id, applied_unit_price, carrier_cost_amount, metadata)')
+      .select('id, recipient_country_code, snapshot:zen_order_rate_snapshots(rate_card_id, applied_unit_price, carrier_cost_amount, metadata)')
       .in('shipper_id', shipperIds)
       .gte('created_at', `${from}T00:00:00Z`)
       .lte('created_at', `${to}T23:59:59Z`),
@@ -151,7 +151,7 @@ export const getAgencyShipperSettlements = withAction(async function (
   const [ordersRes, { policies, zoneMap }] = await Promise.all([
     supabase
       .from('zen_orders')
-      .select('id, shipper_id, dest_country_code, shipper:shipper_id(name), snapshot:zen_order_rate_snapshots(rate_card_id, applied_unit_price, carrier_cost_amount, metadata)')
+      .select('id, shipper_id, recipient_country_code, shipper:shipper_id(name), snapshot:zen_order_rate_snapshots(rate_card_id, applied_unit_price, carrier_cost_amount, metadata)')
       .in('shipper_id', shipperIds)
       .gte('created_at', `${from}T00:00:00Z`)
       .lte('created_at', `${to}T23:59:59Z`),
@@ -232,7 +232,7 @@ export const getAgencyOrderSettlements = withAction(async function (
   let query = supabase
     .from('zen_orders')
     .select(`
-      id, order_no, shipper_id, dest_country_code, created_at,
+      id, order_no, shipper_id, recipient_country_code, created_at,
       shipper:shipper_id(name),
       packages:zen_order_packages(gross_weight, packing_count),
       snapshot:zen_order_rate_snapshots(rate_card_id, applied_unit_price, carrier_cost_amount, metadata)
@@ -331,7 +331,7 @@ async function _fetchOrders(supabase: any, shipperIds: string[], from: string, t
   let query = supabase
     .from('zen_orders')
     .select(`
-      id, order_no, shipper_id, dest_country_code, created_at,
+      id, order_no, shipper_id, recipient_country_code, created_at,
       shipper:shipper_id(name),
       packages:zen_order_packages(gross_weight, packing_count),
       snapshot:zen_order_rate_snapshots(rate_card_id, applied_unit_price, carrier_cost_amount, metadata)
