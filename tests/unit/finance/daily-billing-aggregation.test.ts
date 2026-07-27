@@ -72,11 +72,11 @@ describe('화주별 일별/주별/월별 청구 집계 및 최종 운임 확정 
         }
         if (table === 'zen_order_costs') {
           return createChainableMock([
-            { order_id: 'ord-1', cost_type: 'BASE_FREIGHT', unit_price: 100, quantity: 1, total_amount: 100 },
-            { order_id: 'ord-1', cost_type: 'FUEL_SURCHARGE', unit_price: 20, quantity: 1, total_amount: 20 },
-            { order_id: 'ord-1', cost_type: 'OTHER_CHARGE', unit_price: 15, quantity: 1, total_amount: 15 },
-            { order_id: 'ord-2', cost_type: 'BASE_FREIGHT', unit_price: 200, quantity: 1, total_amount: 200 },
-            { order_id: 'ord-2', cost_type: 'SURGE_FEE', unit_price: 30, quantity: 1, total_amount: 30 },
+            { order_id: 'ord-1', cost_type: 'BASE_FREIGHT', unit_price: 100, quantity: 1, total_amount: 100, currency: 'USD' },
+            { order_id: 'ord-1', cost_type: 'FUEL_SURCHARGE', unit_price: 20, quantity: 1, total_amount: 20, currency: 'USD' },
+            { order_id: 'ord-1', cost_type: 'OTHER_CHARGE', unit_price: 15, quantity: 1, total_amount: 15, currency: 'USD' },
+            { order_id: 'ord-2', cost_type: 'BASE_FREIGHT', unit_price: 200, quantity: 1, total_amount: 200, currency: 'USD' },
+            { order_id: 'ord-2', cost_type: 'SURGE_FEE', unit_price: 30, quantity: 1, total_amount: 30, currency: 'USD' },
           ]);
         }
         if (table === 'zen_invoices') {
@@ -95,11 +95,11 @@ describe('화주별 일별/주별/월별 청구 집계 및 최종 운임 확정 
       const group = res.groups[0];
       expect(group.shipperName).toBe('ABC 상사');
       expect(group.orderCount).toBe(2);
-      expect(group.totalBaseFreight).toBe(300);
-      expect(group.totalFuelSurcharge).toBe(20);
-      expect(group.totalSurgeFee).toBe(30);
-      expect(group.totalOtherCharge).toBe(15);
-      expect(group.totalBillingAmountUsd).toBe(365);
+      expect(group.totalBaseFreight).toBe(300 * 1350);
+      expect(group.totalFuelSurcharge).toBe(20 * 1350);
+      expect(group.totalSurgeFee).toBe(30 * 1350);
+      expect(group.totalOtherCharge).toBe(15 * 1350);
+      expect(group.totalBillingAmountKrw).toBe(365 * 1350);
       expect(group.finalizedCount).toBe(1);
       expect(group.unfinalizedCount).toBe(1);
     });
@@ -148,8 +148,8 @@ describe('화주별 일별/주별/월별 청구 집계 및 최종 운임 확정 
         }
         if (table === 'zen_order_costs') {
           return createChainableMock([
-            { order_id: 'ord-1', cost_type: 'BASE_FREIGHT', unit_price: 100, quantity: 1, total_amount: 100 },
-            { order_id: 'ord-2', cost_type: 'BASE_FREIGHT', unit_price: 200, quantity: 1, total_amount: 200 },
+            { order_id: 'ord-1', cost_type: 'BASE_FREIGHT', unit_price: 100, quantity: 1, total_amount: 100, currency: 'USD' },
+            { order_id: 'ord-2', cost_type: 'BASE_FREIGHT', unit_price: 200, quantity: 1, total_amount: 200, currency: 'USD' },
           ]);
         }
         if (table === 'zen_invoices') {
@@ -162,7 +162,7 @@ describe('화주별 일별/주별/월별 청구 집계 및 최종 운임 확정 
       expect(res.success).toBe(true);
       expect(res.groups.length).toBe(1);
       expect(res.groups[0].orderCount).toBe(2);
-      expect(res.groups[0].totalBillingAmountUsd).toBe(300);
+      expect(res.groups[0].totalBillingAmountKrw).toBe(300 * 1350);
       expect(res.groups[0].date).toContain('W');
     });
 
@@ -197,8 +197,8 @@ describe('화주별 일별/주별/월별 청구 집계 및 최종 운임 확정 
         }
         if (table === 'zen_order_costs') {
           return createChainableMock([
-            { order_id: 'ord-1', cost_type: 'BASE_FREIGHT', unit_price: 150, quantity: 1, total_amount: 150 },
-            { order_id: 'ord-2', cost_type: 'BASE_FREIGHT', unit_price: 250, quantity: 1, total_amount: 250 },
+            { order_id: 'ord-1', cost_type: 'BASE_FREIGHT', unit_price: 150, quantity: 1, total_amount: 150, currency: 'USD' },
+            { order_id: 'ord-2', cost_type: 'BASE_FREIGHT', unit_price: 250, quantity: 1, total_amount: 250, currency: 'USD' },
           ]);
         }
         if (table === 'zen_invoices') {
@@ -212,7 +212,7 @@ describe('화주별 일별/주별/월별 청구 집계 및 최종 운임 확정 
       expect(res.groups.length).toBe(1);
       expect(res.groups[0].date).toBe('2026-07');
       expect(res.groups[0].orderCount).toBe(2);
-      expect(res.groups[0].totalBillingAmountUsd).toBe(400);
+      expect(res.groups[0].totalBillingAmountKrw).toBe(400 * 1350);
     });
   });
 
@@ -240,8 +240,8 @@ describe('화주별 일별/주별/월별 청구 집계 및 최종 운임 확정 
         }
         if (table === 'zen_order_costs') {
           return createChainableMock([
-            { order_id: 'ord-1', cost_type: 'BASE_FREIGHT', unit_price: 150, quantity: 1, total_amount: 150 },
-            { order_id: 'ord-1', cost_type: 'OTHER_CHARGE', unit_price: 25, quantity: 1, total_amount: 25 },
+            { order_id: 'ord-1', cost_type: 'BASE_FREIGHT', unit_price: 150, quantity: 1, total_amount: 150, currency: 'USD' },
+            { order_id: 'ord-1', cost_type: 'OTHER_CHARGE', unit_price: 25, quantity: 1, total_amount: 25, currency: 'USD' },
           ]);
         }
         if (table === 'zen_invoices') {
@@ -256,8 +256,8 @@ describe('화주별 일별/주별/월별 청구 집계 및 최종 운임 확정 
       expect(res.success).toBe(true);
       expect(res.orders?.length).toBe(1);
       expect(res.orders?.[0].orderNo).toBe('ORD-001');
-      expect(res.orders?.[0].otherCharge).toBe(25);
-      expect(res.orders?.[0].totalAmountUsd).toBe(175);
+      expect(res.orders?.[0].otherCharge).toBe(25 * 1350);
+      expect(res.orders?.[0].totalAmountKrw).toBe(175 * 1350);
       expect(res.orders?.[0].invoiceNo).toBe('INV-001');
     });
 
@@ -310,6 +310,184 @@ describe('화주별 일별/주별/월별 청구 집계 및 최종 운임 확정 
       const res = await finalizeDailyShipperInvoices(['inv-1']);
       expect(res.success).toBe(false);
       expect(res.errors?.[0]).toContain('권한이 없습니다');
+    });
+  });
+
+  describe('Issue #912: 통화 혼재 청구액 오류 수정', () => {
+    it('KRW 통화 비용 행만 있는 오더 → totalBillingAmountKrw가 정확히 원화 합계', async () => {
+      (validateUserAction as any).mockResolvedValue({
+        supabase: mockSupabase,
+        profile: { id: 'admin-usr-1', role: USER_ROLES.ADMIN },
+      });
+
+      mockSupabase.from.mockImplementation((table: string) => {
+        if (table === 'zen_orders') {
+          return createChainableMock([
+            {
+              id: 'ord-krw-1',
+              order_no: 'ORD-KRW-001',
+              status: 'DELIVERED',
+              transport_mode: 'UPS',
+              created_at: '2026-07-28T10:00:00Z',
+              shipper_id: 'shipper-1',
+              shipper: { id: 'shipper-1', name: '테스트 화주' },
+            },
+          ]);
+        }
+        if (table === 'zen_order_costs') {
+          return createChainableMock([
+            { order_id: 'ord-krw-1', cost_type: 'BASE_FREIGHT', unit_price: 50000, quantity: 1, total_amount: 50000, currency: 'KRW' },
+            { order_id: 'ord-krw-1', cost_type: 'FUEL_SURCHARGE', unit_price: 10000, quantity: 1, total_amount: 10000, currency: 'KRW' },
+          ]);
+        }
+        if (table === 'zen_invoices') {
+          return createChainableMock([]);
+        }
+        return createChainableMock();
+      });
+
+      const res = await getShipperDailyBillingSummary({ periodType: 'daily' });
+      expect(res.success).toBe(true);
+      expect(res.groups).toBeDefined();
+      expect(res.groups.length).toBe(1);
+
+      const group = res.groups[0];
+      expect(group.totalBillingAmountKrw).toBe(60000);
+      expect(group.totalBaseFreight).toBe(50000);
+      expect(group.totalFuelSurcharge).toBe(10000);
+      expect(group.estimatedBillingAmountUsd).toBe(Math.round(60000 / 1350 * 100) / 100);
+      expect(group.hasUnsupportedCurrency).toBe(false);
+    });
+
+    it('USD 통화 비용 행만 있는 오더 → totalBillingAmountKrw가 USD합계 × 환율과 일치', async () => {
+      (validateUserAction as any).mockResolvedValue({
+        supabase: mockSupabase,
+        profile: { id: 'admin-usr-1', role: USER_ROLES.ADMIN },
+      });
+
+      mockSupabase.from.mockImplementation((table: string) => {
+        if (table === 'zen_orders') {
+          return createChainableMock([
+            {
+              id: 'ord-usd-1',
+              order_no: 'ORD-USD-001',
+              status: 'DELIVERED',
+              transport_mode: 'UPS',
+              created_at: '2026-07-28T10:00:00Z',
+              shipper_id: 'shipper-1',
+              shipper: { id: 'shipper-1', name: '테스트 화주' },
+            },
+          ]);
+        }
+        if (table === 'zen_order_costs') {
+          return createChainableMock([
+            { order_id: 'ord-usd-1', cost_type: 'BASE_FREIGHT', unit_price: 100, quantity: 1, total_amount: 100, currency: 'USD' },
+            { order_id: 'ord-usd-1', cost_type: 'FUEL_SURCHARGE', unit_price: 20, quantity: 1, total_amount: 20, currency: 'USD' },
+          ]);
+        }
+        if (table === 'zen_invoices') {
+          return createChainableMock([]);
+        }
+        return createChainableMock();
+      });
+
+      const res = await getShipperDailyBillingSummary({ periodType: 'daily' });
+      expect(res.success).toBe(true);
+      expect(res.groups).toBeDefined();
+      expect(res.groups.length).toBe(1);
+
+      const group = res.groups[0];
+      expect(group.totalBillingAmountKrw).toBe(120 * 1350);
+      expect(group.totalBaseFreight).toBe(100 * 1350);
+      expect(group.totalFuelSurcharge).toBe(20 * 1350);
+      expect(group.hasUnsupportedCurrency).toBe(false);
+    });
+
+    it('KRW+USD 혼합 오더 → 각각 올바르게 환산되어 합산', async () => {
+      (validateUserAction as any).mockResolvedValue({
+        supabase: mockSupabase,
+        profile: { id: 'admin-usr-1', role: USER_ROLES.ADMIN },
+      });
+
+      mockSupabase.from.mockImplementation((table: string) => {
+        if (table === 'zen_orders') {
+          return createChainableMock([
+            {
+              id: 'ord-mix-1',
+              order_no: 'ORD-MIX-001',
+              status: 'DELIVERED',
+              transport_mode: 'UPS',
+              created_at: '2026-07-28T10:00:00Z',
+              shipper_id: 'shipper-1',
+              shipper: { id: 'shipper-1', name: '테스트 화주' },
+            },
+          ]);
+        }
+        if (table === 'zen_order_costs') {
+          return createChainableMock([
+            { order_id: 'ord-mix-1', cost_type: 'BASE_FREIGHT', unit_price: 100, quantity: 1, total_amount: 100, currency: 'USD' },
+            { order_id: 'ord-mix-1', cost_type: 'FUEL_SURCHARGE', unit_price: 50000, quantity: 1, total_amount: 50000, currency: 'KRW' },
+          ]);
+        }
+        if (table === 'zen_invoices') {
+          return createChainableMock([]);
+        }
+        return createChainableMock();
+      });
+
+      const res = await getShipperDailyBillingSummary({ periodType: 'daily' });
+      expect(res.success).toBe(true);
+      expect(res.groups).toBeDefined();
+      expect(res.groups.length).toBe(1);
+
+      const group = res.groups[0];
+      expect(group.totalBaseFreight).toBe(100 * 1350);
+      expect(group.totalFuelSurcharge).toBe(50000);
+      expect(group.totalBillingAmountKrw).toBe(100 * 1350 + 50000);
+      expect(group.hasUnsupportedCurrency).toBe(false);
+    });
+
+    it('미지원 통화(TWD) 포함 오더 → hasUnsupportedCurrency=true 확인', async () => {
+      (validateUserAction as any).mockResolvedValue({
+        supabase: mockSupabase,
+        profile: { id: 'admin-usr-1', role: USER_ROLES.ADMIN },
+      });
+
+      mockSupabase.from.mockImplementation((table: string) => {
+        if (table === 'zen_orders') {
+          return createChainableMock([
+            {
+              id: 'ord-unsup-1',
+              order_no: 'ORD-UNSUP-001',
+              status: 'DELIVERED',
+              transport_mode: 'UPS',
+              created_at: '2026-07-28T10:00:00Z',
+              shipper_id: 'shipper-1',
+              shipper: { id: 'shipper-1', name: '테스트 화주' },
+            },
+          ]);
+        }
+        if (table === 'zen_order_costs') {
+          return createChainableMock([
+            { order_id: 'ord-unsup-1', cost_type: 'BASE_FREIGHT', unit_price: 3000, quantity: 1, total_amount: 3000, currency: 'TWD' },
+            { order_id: 'ord-unsup-1', cost_type: 'FUEL_SURCHARGE', unit_price: 50000, quantity: 1, total_amount: 50000, currency: 'KRW' },
+          ]);
+        }
+        if (table === 'zen_invoices') {
+          return createChainableMock([]);
+        }
+        return createChainableMock();
+      });
+
+      const res = await getShipperDailyBillingSummary({ periodType: 'daily' });
+      expect(res.success).toBe(true);
+      expect(res.groups).toBeDefined();
+      expect(res.groups.length).toBe(1);
+
+      const group = res.groups[0];
+      expect(group.hasUnsupportedCurrency).toBe(true);
+      expect(group.totalBillingAmountKrw).toBe(50000);
+      expect(group.totalBaseFreight).toBe(0);
     });
   });
 });
