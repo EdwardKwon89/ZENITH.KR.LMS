@@ -7,7 +7,7 @@
 | **긴급도** | High |
 | **우선순위** | P1 |
 | **범위** | Team A/B 공용 — `src/app/globals.css`(핵심 테마 파일), 영향 파일 9개 중 Team A 소유 화면 포함(`ups-detail/page.tsx`, `RouteOptimizationSection.tsx` 등) |
-| **Team B 배정 대상 아님** | 공용 테마 파일 수정이라 Aiden/Team A 판단 필요 (R-19) |
+| **관련 Task** | `TASK-B-230` (JSJung 직접 지시로 Team B 처리 결정, Dave 배정 — Team A 소유 파일은 코드 수정 없이 화면 확인만) |
 
 ## 현상
 
