@@ -22,11 +22,8 @@
 | [#879](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/879) | [fix] zen_order_rate_snapshots AGENCY SELECT RLS 누락 — 예상운임 AGENCY 계정에 항상 미표시 | b | p1 | review | 미배정 | 2026-07-26 |
 | [#877](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/877) | [feat] 입고처리 화면 — 예상운임 상시 표시(변경 전) + 저장 시 갱신(변경 후) | b | p2 | review | 미배정 | 2026-07-26 |
 | [#874](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/874) | [fix] DEF-B-012 — 입고처리 화면 운송경로가 UPS 오더에 항상 공백 표시 | b | p3 | review | 미배정 | 2026-07-26 |
-| [#872](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/872) | [feat] 입고처리 화면 — 부피/중량 실측값 별도 저장 버튼 + 예상운임 변경 표시 | b | p2 | review | 미배정 | 2026-07-26 |
 | [#871](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/871) | [fix] DEF-B-011 — UPS 접수취소/라벨폐기 성공 시 tracking_no 리셋 누락 | b | p2 | review | 미배정 | 2026-07-26 |
 | [#869](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/869) | [defect] DEF-B-010 — zen_tracking_configs AGENCY UPDATE RLS 누락, DEF-123 tracking_no 동기화 침묵 실패 (6번째 재발) | b | p1 | review | 미배정 | 2026-07-26 |
-| [#867](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/867) | [defect] DEF-B-009 — 입고처리 화면 크래시(package.id undefined, PR#866 후속) | b | p1 | review | 미배정 | 2026-07-26 |
-| [#865](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/865) | [fix] DEF-B-008 — 입고처리 오더검색 잘못된 테이블명(order_packages)으로 항상 실패 + Local Tracking No 조회 미지원 | b | p1 | review | 미배정 | 2026-07-26 |
 | [#863](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/863) | [fix] DEF-B-007 — UPS 오더 tracking_no에 가짜 값(ZN- 접두사) 노출 | b | p2 | review | 미배정 | 2026-07-26 |
 | [#861](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/861) | [fix] DEF-B-006 — /tracking 대시보드 집계 캡(50건)·상태13종 미집계·Latest Status 텍스트 불일치·tracking_number 표기 | b | p2 | review | 미배정 | 2026-07-26 |
 | [#858](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/858) | [defect] DEF-B-005 — TrackingDashboard Provider 배지 UPS 오더 미표시(MANUAL로 오표시) | b | p3 | done | 미배정 | 2026-07-26 |
