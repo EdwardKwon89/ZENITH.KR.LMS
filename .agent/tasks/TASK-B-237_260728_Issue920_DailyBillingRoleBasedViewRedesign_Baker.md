@@ -7,7 +7,7 @@
 | **담당** | Baker (Team B) |
 | **생성일** | 2026-07-28 |
 | **우선순위** | P1 |
-| **상태** | ⬜ |
+| **상태** | 🔔 |
 
 ## 전제조건
 
@@ -61,8 +61,24 @@
 
 - Baker: `.agent/VIOLATION_TRACKER.md` 참조 후 착수. 배정 파일(이 파일, TASK-B-237)을 반드시 그대로 사용할 것 — 새 번호로 재채번하지 말 것. 이 Task는 4개 중 가장 UI 영향이 크므로 R-10 스크린샷을 특히 꼼꼼히 남길 것(역할 3개 전부, 서로 다른 화면임을 확인 가능하게).
 
-## [발견 이슈]
+## [작업 결과]
 
-_(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
+| 항목 | 내용 |
+|:-----|:-----|
+| **커밋 해시** | `db0b2570` |
+| **브랜치** | `feature/teamb-237-iss920-daily-billing-role-based-view` |
+| **변경 파일** | `page.tsx`, `daily-billing.ts`, `ShipperDailyBillingClient.tsx`, `daily-billing-aggregation.test.ts` |
+| **Regression** | 140/140 files · 943/943 tests ALL PASS |
+
+### 변경 요약
+1. **page.tsx**: `allowedRoles`에 `SHIPPER` 추가, `role`/`agencyOrgId` prop 전달
+2. **daily-billing.ts**: `getShipperDailyBillingSummary()` zen_invoices 기반 역할별 분기 재설계
+   - ADMIN/MANAGER/ZENITH_SUPER_ADMIN: `invoice_tier IN ('ADMIN_TO_AGENCY','ADMIN_TO_SHIPPER')` 조회
+   - AGENCY: 매입(ADMIN_TO_AGENCY, 본인 billed) + 매출(AGENCY_TO_SHIPPER, 소속 화주 billed) 분리 조회
+   - SHIPPER: `billed_org_id = 본인 org_id` 인보이스만 조회
+3. **ShipperDailyBillingClient.tsx**: `BillingGroupTable` 컴포넌트 추출 + AGENCY 듀얼 섹션(매입/매출) 분리 렌더링 + SHIPPER 접근 허용(일괄 마감 버튼 숨김)
+4. **테스트**: 3건 신규 (ADMIN/AGENCY/SHIPPER 역할별 behavioral 테스트) + 기존 테스트 zen_invoices 기반으로 업데이트
+
+## [발견 이슈]
 
 없음
