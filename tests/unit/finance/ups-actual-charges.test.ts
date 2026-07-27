@@ -194,6 +194,74 @@ describe('TASK-B-204: IN_TRANSIT 부가요금 등록', () => {
     expect(result!.variance).toBe(75);
   });
 
+  describe('TASK-B-227: getUpsChargeReconciliation invoiceNo/invoiceDate', () => {
+    it('TC-B227-01: zen_invoices 없는 오더 → invoiceNo/invoiceDate가 null', async () => {
+      mockValidateUser(USER_ROLES.ADMIN);
+      mockSupabase.from.mockImplementation((table: string) => {
+        if (table === 'zen_order_costs') return createChainableMock([
+          { cost_type: 'BASE_FREIGHT', unit_price: 100, quantity: 1, currency: 'USD' },
+        ]);
+        if (table === 'zen_ups_actual_charges') return createChainableMock([]);
+        if (table === 'zen_invoices') return createChainableMock(null);
+        return createChainableMock();
+      });
+
+      const result = await getUpsChargeReconciliation('order-no-invoice');
+      expect(result.invoiceNo).toBeNull();
+      expect(result.invoiceDate).toBeNull();
+      // isFinalized는 기존 동작 유지 (변경 금지)
+      expect(result.isFinalized).toBe(false);
+    });
+
+    it('TC-B227-02: zen_invoices 연결된 오더 → invoiceNo/invoiceDate가 fixture 값과 일치', async () => {
+      const mockInvoice = {
+        id: 'inv-test-001',
+        invoice_no: 'INV-TASK-B227-TEST',
+        created_at: '2026-07-27T10:00:00.000Z',
+        is_finalized: true,
+      };
+
+      mockValidateUser(USER_ROLES.ADMIN);
+      mockSupabase.from.mockImplementation((table: string) => {
+        if (table === 'zen_order_costs') return createChainableMock([
+          { cost_type: 'BASE_FREIGHT', unit_price: 100, quantity: 1, currency: 'USD' },
+        ]);
+        if (table === 'zen_ups_actual_charges') return createChainableMock([]);
+        if (table === 'zen_invoices') return createChainableMock(mockInvoice);
+        return createChainableMock();
+      });
+
+      const result = await getUpsChargeReconciliation('order-with-invoice');
+      expect(result.invoiceNo).toBe('INV-TASK-B227-TEST');
+      expect(result.invoiceDate).toBe('2026-07-27T10:00:00.000Z');
+      // isFinalized는 기존 동작 그대로 — finalized invoice이면 true
+      expect(result.isFinalized).toBe(true);
+    });
+
+    it('TC-B227-03: isFinalized가 CANCELED 아닌 invoice의 is_finalized 값을 반영한다', async () => {
+      const mockInvoice = {
+        id: 'inv-test-002',
+        invoice_no: 'INV-NOT-FINALIZED',
+        created_at: '2026-07-27T11:00:00.000Z',
+        is_finalized: false,
+      };
+
+      mockValidateUser(USER_ROLES.ADMIN);
+      mockSupabase.from.mockImplementation((table: string) => {
+        if (table === 'zen_order_costs') return createChainableMock([
+          { cost_type: 'BASE_FREIGHT', unit_price: 100, quantity: 1, currency: 'USD' },
+        ]);
+        if (table === 'zen_ups_actual_charges') return createChainableMock([]);
+        if (table === 'zen_invoices') return createChainableMock(mockInvoice);
+        return createChainableMock();
+      });
+
+      const result = await getUpsChargeReconciliation('order-with-invoice-2');
+      expect(result.invoiceNo).toBe('INV-NOT-FINALIZED');
+      expect(result.isFinalized).toBe(false);
+    });
+  });
+
   it('TC-B204-10: recordUpsActualCharges에서 adjustmentAmount = actualSum - estimatedSum 수식 유지', async () => {
     mockValidateUser(USER_ROLES.ADMIN);
     mockSupabase.from.mockImplementation((table: string) => {
