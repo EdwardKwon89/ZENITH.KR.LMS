@@ -677,8 +677,16 @@
 | **TC-UPS-STATUS-04** | manuallySetOrderDeliveredAction (사유 필수) | 수동 전환 사유 누락 시 차단 검증 | `tests/unit/ups/ups-order-detail-status.test.ts` |
 | **TC-UPS-STATUS-05** | manuallySetOrderDeliveredAction (Agency 소속 화주) | Agency 사용자가 소속 화주 오더 수동 DELIVERED 전환 성공 검증 | `tests/unit/ups/ups-order-detail-status.test.ts` |
 | **TC-UPS-STATUS-06** | manuallySetOrderDeliveredAction (타사 오더 차단) | Agency 사용자가 타인 화주 오더 전환 시도 시 IDOR 차단 검증 | `tests/unit/ups/ups-order-detail-status.test.ts` |
+### 54. UPS Order Detail 예상운임 0표시 수정 (DEF-127 / Issue #887 / TASK-211)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-TISA-01** | metadata 포함 스냅샷 — metadata 필드 반환 | metadata가 정상적으로 반환 객체에 포함되는지 검증 | `tests/unit/operations/tisa.test.ts` |
+| **TC-TISA-02** | metadata null 스냅샷 — undefined 처리 | JSONB null이 undefined로 정규화되는지 검증 | `tests/unit/operations/tisa.test.ts` |
+| **TC-TISA-03** | 스냅샷 없음 — null 반환 | 스냅샷 미존재 시 null 반환 (회귀) | `tests/unit/operations/tisa.test.ts` |
+| **TC-TISA-04** | select 쿼리 metadata 컬럼 포함 확인 | 실제 DB 조회 시 metadata 컬럼이 select에 포함되는지 검증 | `tests/unit/operations/tisa.test.ts` |
 
 ---
+
 ## 📝 가이드라인 (R-09 Enforcement)
 1. **추가 의무**: 신규 기능 개발 시 위 카테고리에 맞는 테스트를 반드시 추가하십시오.
 2. **실행 의무**: 모든 커밋 전 `npm run test:regression`을 실행하여 위 명세 전원이 초록색인지 확인하십시오.
