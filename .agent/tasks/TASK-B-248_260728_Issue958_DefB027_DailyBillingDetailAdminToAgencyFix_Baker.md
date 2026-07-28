@@ -153,7 +153,7 @@ const res = await getShipperDailyOrdersDetails(group.invoiceIds);
   1. ADMIN_TO_AGENCY 티어 인보이스(billed_org_id=대리점 org_id, metadata.source_order_id=실제 오더 id)로 `getShipperDailyOrdersDetails(invoiceIds)`를 호출했을 때 실제로 그 오더가 결과에 포함되는지 실측(원래 코드로 되돌리면 빈 배열이 되는 걸 재현 확인)
   2. AGENCY_TO_SHIPPER 티어 케이스도 정상 동작하는지 확인(회귀 없음)
 - [ ] `npm run build` · `npm run test:regression` 직접 실행 후 정확한 결과 기재
-- [ ] **R-10 필수**: 로컬에서 ADMIN 계정으로 `/finance/daily-billing`에 접속 → 대리점 그룹(ADMIN_TO_AGENCY)의 "상세" 클릭 → 실제 오더 목록이 표시되는지 스크린샷으로 확인. AGENCY 계정으로도 "매입"/"매출" 양쪽 상세가 정상 표시되는지 함께 확인.
+- [ ] **R-10 검증 주체 변경 (2026-07-28 Jaison 공지)**: 이번 Task의 R-10 스크린샷 검증은 **Baker가 아니라 JSJung이 직접 수행**합니다. Baker는 스크린샷 촬영/첨부를 생략하고, `[작업 결과]`에 "R-10 검증은 JSJung이 직접 수행 예정"이라고만 기재하면 됩니다.
 
 ## 완료 보고 절차 (R-17 준수)
 
