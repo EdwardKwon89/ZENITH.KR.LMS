@@ -157,6 +157,14 @@ export async function signup(formData: FormData, locale: string = 'ko') {
     return { error: error.message };
   }
 
+  // 회원가입 성공 시 확인 메일 발송 (non-fatal)
+  try {
+    const { sendSignupWelcomeEmail } = await import('@/lib/notifications/email');
+    await sendSignupWelcomeEmail({ email, password, fullName });
+  } catch (emailError) {
+    logger.error('[SIGNUP_ACTION] Welcome email failed (non-fatal):', emailError);
+  }
+
   // IMP-088: 개인정보 활용동의 시각 저장
   const privacyConsentAt = formData.get('privacy_consent_at') as string | null;
   const termsConsentAt = formData.get('terms_consent_at') as string | null;
