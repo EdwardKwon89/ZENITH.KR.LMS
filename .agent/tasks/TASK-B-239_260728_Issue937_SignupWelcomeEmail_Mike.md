@@ -6,7 +6,7 @@
 | **담당** | Mike (Team B) |
 | **생성일** | 2026-07-28 |
 | **우선순위** | P1 |
-| **상태** | ⬜ |
+| **상태** | 🔔 |
 
 ## 개요
 
@@ -115,7 +115,28 @@ try {
 
 - Mike: `.agent/VIOLATION_TRACKER.md` 참조 후 착수. **toContain 소스 문자열 검사 유형 누적 9회 + vacuous test 2회(다른 메커니즘 각각)** — 이번에도 재발 시 심각한 반복입니다. 반드시 실제 `sendSignupWelcomeEmail`/`signup` 함수 호출 기반으로, mock의 실제 호출 인자(`to`, `html` 내 비밀번호 포함 여부, non-fatal 케이스)를 검증할 것. 이번 Task는 기존 4개 이메일 함수의 리팩터링도 포함하므로, 기존 테스트가 깨지지 않는지 특히 꼼꼼히 확인할 것.
 
-## [발견 이슈]
+## [작업 결과]
+
+### 변경 내용
+
+#### `src/lib/notifications/email.ts`
+- `sendViaResend()` 공통 발송 헬퍼 추가 (error 체크 포함 — Resend API 오류 시 throw)
+- 기존 4개 함수(`sendStatusChangeEmail`/`sendFreightChangeEmail`/`sendShipperWelcomeEmail`/`sendInvoiceFinalizedEmail`) 리팩터링
+- `sendSignupWelcomeEmail()` 신규 추가 (회원가입 확인 메일, 비밀번호 포함)
+
+#### `src/app/[locale]/(auth)/login/actions.ts`
+- `signup()` 가입 성공 시 `sendSignupWelcomeEmail` 호출 (non-fatal, try/catch)
+
+### 테스트 (behavioral)
+- `sendViaResend()` error 체크: Resend API 오류 시 예외 throw 검증
+- `sendSignupWelcomeEmail()` 발송 인자 검증 (to/subject/html)
+- 기존 4개 함수 리팩터링 회귀 검증
+
+### 검증
+- **빌드**: ✅ PASS
+- **테스트**: `email.test.ts` 8/8 PASS
+- **회귀**: 141/141 파일, 951/951 테스트 ALL PASS
+- **커밋 해시**: `3131ec6e`
 
 _(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
 
