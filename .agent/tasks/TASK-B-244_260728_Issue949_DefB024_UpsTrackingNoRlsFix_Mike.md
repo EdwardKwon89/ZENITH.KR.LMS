@@ -7,7 +7,7 @@
 | **담당** | Mike (Team B) |
 | **생성일** | 2026-07-28 |
 | **우선순위** | P1 |
-| **상태** | ⬜ |
+| **상태** | 🔔 |
 
 ## 개요
 
@@ -93,7 +93,24 @@ WHERE tc.order_id = o.id
 
 - Mike: `.agent/VIOLATION_TRACKER.md` 참조 후 착수. **R-10 증적누락 4회 누적(PR#909·PR#915·PR#939·PR#947) — 이번에 다시 생략 시 Jaison이 별도 조치 검토합니다.** 코드/테스트 품질 자체는 매번 양호했으니 이번엔 R-10만 놓치지 않으면 됩니다. 화주 role 세션으로 반드시 실측할 것 — ADMIN/AGENCY 세션 테스트는 이 버그를 재현하지 못합니다.
 
-## [발견 이슈]
+## [작업 결과]
+
+### 변경 내용
+
+#### `src/app/actions/operations/orders.ts`
+- UPS tracking config UPDATE를 `supabase` → `createAdminClient()` 서비스 롤 클라이언트로 변경
+
+#### `supabase/migrations/20260728120000_defb024_ups_tracking_no_backfill_v2.sql`
+- 기존 UPS+`ZN-%` 행을 NULL + MANUAL로 백필
+
+### 테스트
+- `createAdminClient()` 사용 검증 추가 (DEF-B-024)
+
+### 검증
+- **빌드**: ✅ PASS
+- **테스트**: `tracking-configs-provider-type.test.ts` 5/5 PASS
+- **회귀**: 144/144 파일, 965/965 테스트 ALL PASS
+- **커밋 해시**: `32a31437`
 
 _(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
 
