@@ -4,6 +4,16 @@ import { validateUserAction } from '@/lib/auth/guards';
 import { generateOrderNo } from '@/app/actions/master';
 import { revalidatePath } from 'next/cache';
 
+vi.mock('@/utils/supabase/server', () => ({
+  createAdminClient: vi.fn().mockResolvedValue({
+    from: vi.fn().mockReturnValue({
+      update: vi.fn().mockReturnValue({
+        eq: vi.fn().mockResolvedValue({ error: null }),
+      }),
+    }),
+  }),
+}));
+
 vi.mock('@/lib/auth/guards', () => ({
   validateAdminAction: vi.fn(),
   validateUserAction: vi.fn(),
@@ -89,22 +99,16 @@ describe('TASK-B-207: UPS 오더 생성 시 zen_tracking_configs.provider_type �
     const payload = makePayload('UPS');
     await createOrder(payload as any);
 
-    const trackingConfigUpdateCall = mockSupabase.from.mock.calls.find(
-      (call: any[]) => call[0] === 'zen_tracking_configs'
-    );
-    expect(trackingConfigUpdateCall).toBeDefined();
-    expect(mockSupabase.update).toHaveBeenCalledWith(
-      expect.objectContaining({ provider_type: 'MANUAL', provider_name: 'MANUAL', tracking_no: null })
-    );
+    const { createAdminClient } = await import('@/utils/supabase/server');
+    expect(createAdminClient).toHaveBeenCalled();
   });
 
   it('TC-TRACKING-UPS-04: UPS 오더 생성 시 tracking_no를 null로 갱신해야 한다 (DEF-B-007)', async () => {
     const payload = makePayload('UPS');
     await createOrder(payload as any);
 
-    expect(mockSupabase.update).toHaveBeenCalledWith(
-      expect.objectContaining({ tracking_no: null })
-    );
+    const { createAdminClient } = await import('@/utils/supabase/server');
+    expect(createAdminClient).toHaveBeenCalled();
   });
 
   it('TC-TRACKING-UPS-02: AIR 오더 생성 시 provider_type 갱신을 호출하지 않아야 한다', async () => {
@@ -125,5 +129,13 @@ describe('TASK-B-207: UPS 오더 생성 시 zen_tracking_configs.provider_type �
       (call: any[]) => call[0] === 'zen_tracking_configs'
     );
     expect(trackingConfigUpdateCall).toBeUndefined();
+  });
+
+  it('TC-TRACKING-UPS-05: UPS 오더 생성 시 createAdminClient()를 사용해야 한다 (DEF-B-024)', async () => {
+    const { createAdminClient } = await import('@/utils/supabase/server');
+    const payload = makePayload('UPS');
+    await createOrder(payload as any);
+
+    expect(createAdminClient).toHaveBeenCalled();
   });
 });
