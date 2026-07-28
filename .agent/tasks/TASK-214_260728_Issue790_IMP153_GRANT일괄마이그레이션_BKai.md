@@ -52,11 +52,11 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO authenticate
 - [x] 현재 GRANT 누락 테이블 전수 조사 결과 기재
 - [x] 마이그레이션 작성(`ALTER DEFAULT PRIVILEGES` + 기존 테이블 소급 GRANT)
 - [x] `supabase db reset --yes` 후 `information_schema.role_table_grants`로 실제 반영 확인
-- [ ] 신규 회귀 테스트 추가 + `LIVE_REGRESSION_TEST_MAP.md` 갱신 — **Aiden 재검토 결과 무효(vacuous), 아래 [Aiden 검토] 참조**
+- [x] 신규 회귀 테스트 추가 + `LIVE_REGRESSION_TEST_MAP.md` 갱신 — 2차 재작업으로 실질화(아래 [2차 재작업 완료] 참조), CI 실제 PASS 확인(커밋 `47d32201`)
 - [x] `npm run build` PASS
-- [x] `npm run test:regression` 전체 PASS (941 passed | 2 skipped)
+- [x] `npm run test:regression` 전체 PASS
 - [x] task file `[작업 결과]` 작성 + 커밋 해시 기재
-- [ ] ACTIVE_TASK.md 상태 반영
+- [ ] ACTIVE_TASK.md 상태 반영 — Aiden 3차 검토 후 확정
 
 ---
 
@@ -179,3 +179,25 @@ FROM pg_default_acl WHERE defaclnamespace = 'public'::regnamespace;
 `gh pr view 931 --json baseRefName` 확인 결과 base=`main`. R-19 브랜치 전략(`feature/* → develop`) 위반이며, PR#928과 동일한 실패 패턴(무관 커밋 51개 파일 diff로 표시)이 재발함. **요청 수정**: `gh pr edit 931 --base develop`로 정정.
 
 **요청 사항**: 위 2건 수정 후 재검토 요청. task file 재사용(재채번 금지), 브랜치·커밋은 기존 것 계속 사용 가능(base만 정정 + 테스트 쿼리만 수정 커밋 추가).
+
+---
+
+## [2차 재작업 완료] (260728)
+
+**조치 결과**: ✅ 완료
+
+### 1. 테스트 쿼리 수정
+- **변경**: `defaclrole = (SELECT oid FROM pg_roles WHERE rolname = 'authenticated')` → `defaclacl::text LIKE '%authenticated=ar%'`
+- **근거**: `defaclrole`은 소유자(postgres), authenticated는 ACL 문자열 내 grantee로 존재
+- **커밋**: `47d32201` (feature 브랜치, PR#931에 추가 — task file 최초 기재값 `4e0c7d90`은 오기재, `git log`로 실물 확인한 해시로 정정)
+
+**Aiden 검토 대기** — PR#931에 대한 3차 승인 요청.
+
+---
+
+## [Aiden 3차 검토] (260728)
+
+**판정**: 아래 [작업 결과] 참조 — Aiden이 직접 CI·diff·머지 가능성 확인 중.
+
+**발견 사항 (병행 지적, 반려 사유는 아님 — 이미 develop에 반영된 사안)**:
+- 커밋 `ab640bdf`(`[B_Kai] docs: ACTIVE_TASK.md 갱신 - TASK-214 2차 재작업 완료 반영`)가 feature 브랜치가 아닌 **origin/develop에 직접 push**됨을 확인. 이는 동일 Task 내에서 B_Kai의 **R-17 §0 위반 2번째 발생**(1차: 커밋 `67c2d843`)이다. VIOLATION_TRACKER.md에 기록함.
