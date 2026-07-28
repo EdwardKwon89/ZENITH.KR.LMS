@@ -63,6 +63,7 @@ tags: ["governance"]
 | **207** | **공통 코드 거버넌스** | [207_COMMON_CODE_GOVERNANCE.md](./207_COMMON_CODE_GOVERNANCE.md) | 공통 코드 정의 및 관리 규칙 |
 | **208** | **Supabase 원격 SOP** | [208_SUPABASE_REMOTE_SOP.md](./208_SUPABASE_REMOTE_SOP.md) | Supabase 원격 접속 및 운영 절차 |
 | **209** | **Vercel 원격 배포 SOP** | [209_VERCEL_DEPLOYMENT_SOP.md](./209_VERCEL_DEPLOYMENT_SOP.md) | 고객 시연용 develop→Vercel/Supabase 원격 배포 절차 (Edward 지시 시에만 실행) |
+| **210** | **AI 에이전트 개발 재작업 방지 가이드** | [210_AI_AGENT_REWORK_PREVENTION_GUIDE.md](./210_AI_AGENT_REWORK_PREVENTION_GUIDE.md) | VIOLATION_TRACKER·DEF·SAR·IMP 전수(309건) 분석 기반 반복 실패 패턴 정량화 + 타 프로젝트 이식 가능한 재작업 방지 체크리스트 |
 
 ---
 
@@ -221,9 +222,11 @@ tags: ["governance"]
 ### ✅ 완료 (2026-04-20)
 - ✅ 120_MCP_SKILL_GUIDE.md
 
+### ✅ 완료 (2026-07-28)
+- ✅ 210_AI_AGENT_REWORK_PREVENTION_GUIDE.md
+
 ### 🔜 계획 중 (추가 예정)
 - 101_Development_Methodology_Overview.md
-- 210_Code_Review_Rule.md
 - 220_Test_Writing_Rule.md
 - 230_Commit_and_PR_Rule.md
 - 301_Team_Operation_Guide.md
