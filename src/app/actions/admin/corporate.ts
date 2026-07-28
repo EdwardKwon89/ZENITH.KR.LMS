@@ -18,7 +18,7 @@ export async function getOrganizationInfo() {
 
   const { data, error } = await supabase
     .from("zen_organizations")
-    .select('id, name, metadata')
+    .select('id, name, rep_name, biz_no, contact_phone, contact_email, address, address_detail, city, state_province, zipcode, country_code')
     .eq("id", profile.org_id)
     .single();
 
@@ -31,7 +31,7 @@ export async function getOrganizationInfo() {
 }
 
 /**
- * 2. 법인 조직 정보(metadata) 수정
+ * 2. 법인 조직 정보 실제 컬럼 수정
  */
 export const updateOrganizationInfo = withAction(async function (payload: {
   representative?: string;
@@ -50,21 +50,17 @@ export const updateOrganizationInfo = withAction(async function (payload: {
     throw new Error("소속된 조직 정보가 없습니다.");
   }
 
-  // 기존 metadata 가져오기
-  const { data: org } = await supabase
-    .from("zen_organizations")
-    .select("metadata")
-    .eq("id", profile.org_id)
-    .single();
-
-  const newMetadata = {
-    ...(org?.metadata || {}),
-    ...payload
-  };
+  // payload 필드 → 실제 컬럼 매핑
+  const updateData: Record<string, string> = {};
+  if (payload.representative !== undefined) updateData.rep_name = payload.representative;
+  if (payload.bizNo !== undefined) updateData.biz_no = payload.bizNo;
+  if (payload.address !== undefined) updateData.address = payload.address;
+  if (payload.contact !== undefined) updateData.contact_phone = payload.contact;
+  if (payload.email !== undefined) updateData.contact_email = payload.email;
 
   const { error } = await supabase
     .from("zen_organizations")
-    .update({ metadata: newMetadata })
+    .update(updateData)
     .eq("id", profile.org_id);
 
   if (error) {

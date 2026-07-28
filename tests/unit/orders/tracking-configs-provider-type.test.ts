@@ -4,6 +4,15 @@ import { validateUserAction } from '@/lib/auth/guards';
 import { generateOrderNo } from '@/app/actions/master';
 import { revalidatePath } from 'next/cache';
 
+const mockAdminEq = vi.fn().mockResolvedValue({ error: null });
+const mockAdminUpdate = vi.fn().mockReturnValue({ eq: mockAdminEq });
+const mockAdminFrom = vi.fn().mockReturnValue({ update: mockAdminUpdate });
+const mockCreateAdminClient = vi.fn().mockResolvedValue({ from: mockAdminFrom });
+
+vi.mock('@/utils/supabase/server', () => ({
+  createAdminClient: (...args: any[]) => mockCreateAdminClient(...args),
+}));
+
 vi.mock('@/lib/auth/guards', () => ({
   validateAdminAction: vi.fn(),
   validateUserAction: vi.fn(),
@@ -85,45 +94,41 @@ describe('TASK-B-207: UPS 오더 생성 시 zen_tracking_configs.provider_type �
     };
   }
 
-  it('TC-TRACKING-UPS-01: UPS 오더 생성 시 provider_type을 MANUAL로 갱신해야 한다', async () => {
+  it('TC-TRACKING-UPS-01: UPS 오더 생성 시 createAdminClient가 호출된다', async () => {
     const payload = makePayload('UPS');
     await createOrder(payload as any);
 
-    const trackingConfigUpdateCall = mockSupabase.from.mock.calls.find(
-      (call: any[]) => call[0] === 'zen_tracking_configs'
-    );
-    expect(trackingConfigUpdateCall).toBeDefined();
-    expect(mockSupabase.update).toHaveBeenCalledWith(
-      expect.objectContaining({ provider_type: 'MANUAL', provider_name: 'MANUAL', tracking_no: null })
-    );
+    expect(mockCreateAdminClient).toHaveBeenCalled();
   });
 
-  it('TC-TRACKING-UPS-04: UPS 오더 생성 시 tracking_no를 null로 갱신해야 한다 (DEF-B-007)', async () => {
-    const payload = makePayload('UPS');
-    await createOrder(payload as any);
-
-    expect(mockSupabase.update).toHaveBeenCalledWith(
-      expect.objectContaining({ tracking_no: null })
-    );
-  });
-
-  it('TC-TRACKING-UPS-02: AIR 오더 생성 시 provider_type 갱신을 호출하지 않아야 한다', async () => {
+  it('TC-TRACKING-UPS-02: AIR 오더 생성 시 createAdminClient를 호출하지 않는다', async () => {
     const payload = makePayload('AIR');
     await createOrder(payload as any);
 
-    const trackingConfigUpdateCall = mockSupabase.from.mock.calls.find(
-      (call: any[]) => call[0] === 'zen_tracking_configs'
-    );
-    expect(trackingConfigUpdateCall).toBeUndefined();
+    expect(mockCreateAdminClient).not.toHaveBeenCalled();
   });
 
-  it('TC-TRACKING-UPS-03: SEA 오더 생성 시 provider_type 갱신을 호출하지 않아야 한다', async () => {
+  it('TC-TRACKING-UPS-03: SEA 오더 생성 시 createAdminClient를 호출하지 않는다', async () => {
     const payload = makePayload('SEA');
     await createOrder(payload as any);
 
-    const trackingConfigUpdateCall = mockSupabase.from.mock.calls.find(
-      (call: any[]) => call[0] === 'zen_tracking_configs'
+    expect(mockCreateAdminClient).not.toHaveBeenCalled();
+  });
+
+  it('TC-TRACKING-UPS-04: UPS 오더 생성 시 adminClient.from("zen_tracking_configs")를 호출한다', async () => {
+    const payload = makePayload('UPS');
+    await createOrder(payload as any);
+
+    expect(mockAdminFrom).toHaveBeenCalledWith('zen_tracking_configs');
+  });
+
+  it('TC-TRACKING-UPS-05: UPS 오더 생성 시 update payload에 provider_type=MANUAL, tracking_no=null이 포함된다 (DEF-B-024)', async () => {
+    const payload = makePayload('UPS');
+    await createOrder(payload as any);
+
+    expect(mockAdminUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({ provider_type: 'MANUAL', provider_name: 'MANUAL', tracking_no: null })
     );
-    expect(trackingConfigUpdateCall).toBeUndefined();
+    expect(mockAdminEq).toHaveBeenCalledWith('order_id', 'new-order-id');
   });
 });

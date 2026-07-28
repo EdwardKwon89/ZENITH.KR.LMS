@@ -1,0 +1,61 @@
+# DEF-B-021: 운임 스냅샷(오더등록·입고재계산) 멀티패키지 치수 — 첫 번째 패키지만 반영, 이미 존재하는 다중패키지 계산함수 미사용
+
+| 항목 | 내용 |
+|:-----|:------|
+| **발견일** | 2026-07-28 |
+| **보고자** | Aiden — Issue #773(DEF-125, 입고 시 중량/부피 변경 재계산 누락) 해소 여부 검증 중 발견 |
+| **긴급도** | Medium |
+| **우선순위** | P2 (제안 — 멀티패키지 오더 실제 비중 확인 후 조정 권장) |
+| **관련 Issue** | [#773](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/773) (DEF-125, 해소 확인됨 — 본 건은 그 잔여 갭) |
+| **관련 선행 작업** | TASK-B-059(2026-07-05, Dave) — `saveOrderRateSnapshot()` 최초 분리 · TASK-B-218(PR#875, 2026-07-26) — `applyPackageMeasurements()` 최초 구현 · TASK-B-125(Issue #476, 2026-07-15, Mike) — `calcMultiPackageChargeableWeight()` 구현 |
+| **관련 선행 결함** | DEF-B-016(같은 함수 `applyPackageMeasurements()`의 `agencyOrgId` 미전달 — TASK-B-222/PR#883로 해소됨. 본 건은 그때 함께 고쳐지지 않은 별개 잔여 결함) |
+
+## 현상
+
+오더 등록 시 최초 저장되는 운임 스냅샷(`saveOrderRateSnapshot`)과 입고 시 재계산되는 운임(`applyPackageMeasurements`) 양쪽 모두, 오더에 패키지가 2개 이상일 때 **첫 번째 패키지의 치수(L×W×H)만 사용**하여 부피중량·OVERSIZE(대형포장물) 판정을 계산합니다. 중량은 전 패키지 합산(정상)이지만 치수는 그렇지 않습니다 — 두 번째 이후 패키지가 더 크거나 OVERSIZE 대상이어도 요금에 전혀 반영되지 않습니다.
+
+## 근본 원인
+
+`estimateUpsFreight()`(`src/app/actions/ups/freight.ts`, Team A 원 작성)가 단일 dims 파라미터(`dimL/dimW/dimH` 각 1개)만 받도록 설계되어 있고, 두 호출부가 모두 `packages[0]`의 치수만 전달합니다:
+
+```ts
+// orders.ts:58-60 (saveOrderRateSnapshot, 오더 등록 시점)
+dimL: validated.packages[0]?.length,
+dimW: validated.packages[0]?.width,
+dimH: validated.packages[0]?.height,
+
+// orders.ts:807-809 (applyPackageMeasurements, 입고 재계산 시점)
+dimL: packages[0]?.length,
+dimW: packages[0]?.width,
+dimH: packages[0]?.height,
+```
+
+반면 이미 존재하는 `calcMultiPackageChargeableWeight()`(`src/lib/ups/pricing-engine.ts:109`, **Team B 자체 작성** — Mike, TASK-B-125/Issue #476, 2026-07-15)는 패키지 배열을 받아 각 패키지별로 부피중량·OVERSIZE를 계산한 뒤 합산하도록 정확히 이 문제를 해결하기 위해 만들어져 있습니다. 그러나 현재 이 함수는 `UpsFreightEstimateSection.tsx`(오더등록 화면의 견적 표시 UI, 클라이언트 측 참고용 계산)에만 연결돼 있고, 실제 스냅샷을 DB에 저장하는 두 서버 액션(`saveOrderRateSnapshot`, `applyPackageMeasurements`) 어디에도 연결돼 있지 않습니다.
+
+## 발견 경위
+
+DEF-125(Issue #773)가 실제로 해소됐는지 코드로 검증하던 중 발견. DEF-125(입고 시 중량/부피 변경이 정산에 반영 안 됨) 자체는 2026-07-26 별개 작업(Issue #725/PR#844, TASK-B-218/220)으로 이미 해소됐으나, 그 구현이 `saveOrderRateSnapshot`의 기존 단일패키지 한계(2026-07-05부터 존재)를 그대로 답습하면서 남은 잔여 갭입니다. DEF-B-016(같은 함수의 `agencyOrgId` 누락) 수정(TASK-B-222) 때도 함께 다뤄지지 않았습니다.
+
+## 영향 범위
+
+| 함수/컴포넌트 | 파일 | 증상 |
+|:-------------|:-----|:-----|
+| `saveOrderRateSnapshot` | `orders.ts:54-64` | 오더 등록 시 스냅샷 저장, packages[0] 치수만 사용 |
+| `applyPackageMeasurements` | `orders.ts:802-813` | 입고 재계산, 동일 문제 |
+| `estimateUpsFreight` | `freight.ts` | 단일 dims 파라미터만 지원 — 계약 확장 필요 |
+| `calcMultiPackageChargeableWeight` | `pricing-engine.ts:109` | 이미 정확히 이 문제를 풀도록 구현돼 있으나 두 저장 지점 모두 미사용, `UpsFreightEstimateSection.tsx`에만 연결 |
+
+## 영향
+
+- 2개 이상 패키지로 등록된 UPS 오더에서, 첫 번째가 아닌 다른 패키지의 부피/치수가 청구 운임에 반영되지 않음
+- 해당 패키지가 OVERSIZE(대형포장물) 기준을 충족해도 할증이 누락될 수 있음
+- 단일 패키지 오더에는 영향 없음 — **실제 영향 규모는 멀티패키지 오더 비중 확인 필요**
+
+## 조치 방향 (제안)
+
+`estimateUpsFreight` 입력을 단일 dims에서 패키지 배열(`{gross_weight_kg, dims}[]`)로 확장하거나, 두 호출부에서 사전에 `calcMultiPackageChargeableWeight()`로 전체 패키지의 청구중량·OVERSIZE 여부를 계산한 뒤 그 결과를 `estimateUpsFreight`에 전달하는 방식(기존 함수 재사용, 신규 로직 최소화)을 권장. 두 호출부(오더등록·입고재계산) 모두 동일 수정 필요.
+
+## 검증 (제안)
+
+- 패키지 3개(첫 번째는 소형, 세 번째는 OVERSIZE 기준 충족)로 오더 생성 → 저장된 스냅샷의 `metadata`에 OVERSIZE 할증이 반영됐는지 확인
+- 입고 시 세 번째 패키지 치수만 변경 → 재계산된 운임이 변경 전후 달라지는지 확인(현재는 안 달라짐 — 회귀 방지 테스트로 등록)

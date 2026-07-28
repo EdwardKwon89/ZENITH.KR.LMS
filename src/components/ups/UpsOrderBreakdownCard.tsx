@@ -37,11 +37,13 @@ export default function UpsOrderBreakdownCard({
   const platformMeta = snapshotMeta?.platform;
   const breakdown = platformMeta?.breakdown || {};
 
-  const baseFreight = Number(breakdown.baseFreight || breakdown.freight || platformMeta?.freightCostPrice || 0);
-  const fuelSurcharge = Number(breakdown.fuelSurcharge || 0);
-  const surgeFee = Number(breakdown.surgeFee || breakdown.surgeEmergencyFee || 0);
-  const extraCharges = Number(breakdown.extraCharges || breakdown.additionalCharges || 0);
-  const totalFreight = Number(platformMeta?.totalSellingPrice || (baseFreight + fuelSurcharge + surgeFee + extraCharges));
+  const baseFreight = Number(breakdown.baseSellingPrice ?? breakdown.baseFreight ?? breakdown.freight ?? platformMeta?.freightCostPrice ?? 0);
+  const fuelSurcharge = Number(breakdown.fuelSurchargeSellingAmount ?? breakdown.fuelSurcharge ?? 0);
+  const surgeFee = Number(breakdown.surgeFeeSellingAmount ?? breakdown.surgeFee ?? breakdown.surgeEmergencyFee ?? 0);
+  const extraCharges = Number(breakdown.otherChargesSellingTotal ?? breakdown.extraCharges ?? breakdown.additionalCharges ?? 0);
+  const totalFreight = Number(platformMeta?.totalSellingPrice ?? (baseFreight + fuelSurcharge + surgeFee + extraCharges));
+  const currencyCode = String(platformMeta?.currency || 'USD');
+  const currencySymbol = currencyCode === 'KRW' ? '₩' : currencyCode === 'USD' ? '$' : '';
 
   return (
     <div className="bg-gradient-to-br from-slate-900 via-zinc-900 to-amber-950 text-white rounded-3xl p-6 shadow-xl border border-amber-500/20 flex flex-col gap-6">
@@ -102,27 +104,27 @@ export default function UpsOrderBreakdownCard({
         <div className="space-y-2 text-xs">
           <div className="flex justify-between items-center text-slate-300 py-1 border-b border-white/5">
             <span>기본 운임 (Base Freight)</span>
-            <span className="font-mono text-white font-semibold">${baseFreight.toFixed(2)}</span>
+            <span className="font-mono text-white font-semibold">{currencySymbol}{baseFreight.toFixed(2)}</span>
           </div>
           <div className="flex justify-between items-center text-slate-300 py-1 border-b border-white/5">
             <span>유류 할증료 (Fuel Surcharge)</span>
-            <span className="font-mono text-white font-semibold">${fuelSurcharge.toFixed(2)}</span>
+            <span className="font-mono text-white font-semibold">{currencySymbol}{fuelSurcharge.toFixed(2)}</span>
           </div>
           {surgeFee > 0 && (
             <div className="flex justify-between items-center text-amber-300 py-1 border-b border-white/5 font-semibold">
               <span>UPS 급증 긴급 수수료 (Surge Fee)</span>
-              <span className="font-mono">${surgeFee.toFixed(2)}</span>
+              <span className="font-mono">{currencySymbol}{surgeFee.toFixed(2)}</span>
             </div>
           )}
           {extraCharges > 0 && (
             <div className="flex justify-between items-center text-slate-300 py-1 border-b border-white/5">
               <span>기타 부가 수수료 (Surcharges)</span>
-              <span className="font-mono text-white font-semibold">${extraCharges.toFixed(2)}</span>
+              <span className="font-mono text-white font-semibold">{currencySymbol}{extraCharges.toFixed(2)}</span>
             </div>
           )}
           <div className="flex justify-between items-center pt-2 text-sm font-extrabold">
             <span className="text-amber-200">추정 총 청구액 (Total Estimate)</span>
-            <span className="font-mono text-amber-400 text-base font-black">${totalFreight.toFixed(2)} USD</span>
+            <span className="font-mono text-amber-400 text-base font-black">{currencySymbol}{totalFreight.toFixed(2)} {currencyCode}</span>
           </div>
         </div>
       </div>
