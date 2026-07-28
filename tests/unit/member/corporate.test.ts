@@ -34,14 +34,12 @@ describe('Corporate Actions Unit Tests', () => {
   });
 
   it('TC-MEM-01: should update organization info successfully', async () => {
-    mockSupabase.single.mockResolvedValueOnce({ data: { metadata: { old: 'data' } }, error: null });
-    
     const result = await updateOrganizationInfo({ representative: 'New CEO' });
     
     expect(result.data).toBe(true);
     expect(result.error).toBeNull();
     expect(mockSupabase.update).toHaveBeenCalledWith({
-      metadata: { old: 'data', representative: 'New CEO' }
+      rep_name: 'New CEO'
     });
   });
 
