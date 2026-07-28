@@ -104,4 +104,46 @@ describe('ZENITH Logistics: Order Status Machine Action', () => {
     await expect(updateOrderStatus('order-1', OrderStatus.DELIVERED))
       .rejects.toThrow(/상태에서 DELIVERED으로 변경할 수 없습니다/);
   });
+
+  it('TC-S.3: UPS 오더는 route_option_id 없이도 REGISTERED→SCHEDULED 전이 성공 (DEF-B-025)', async () => {
+    const supabase = createMockSupabase();
+
+    (validateUserAction as any).mockResolvedValue({
+      user: mockUser,
+      profile: { role: USER_ROLES.OPERATOR },
+      supabase
+    });
+
+    // 1. 마스터 결합 여부 확인
+    supabase.maybeSingle.mockResolvedValueOnce({ data: null, error: null });
+    // 2. 현재 상태 + transport_mode 조회
+    supabase.single.mockResolvedValueOnce({ data: { status: OrderStatus.REGISTERED, transport_mode: 'UPS' } });
+    // 3. RPC 호출용
+    supabase.rpc.mockResolvedValueOnce({ error: null });
+
+    const result = await updateOrderStatus('order-1', OrderStatus.SCHEDULED, '픽업 완료');
+
+    expect(result.success).toBe(true);
+    expect(supabase.rpc).toHaveBeenCalledWith('update_order_status_atomic', expect.anything());
+  });
+
+  it('TC-S.4: AIR 오더는 route_option_id 없으면 REGISTERED→SCHEDULED 전이 실패 (회귀 확인)', async () => {
+    const supabase = createMockSupabase();
+
+    (validateUserAction as any).mockResolvedValue({
+      user: mockUser,
+      profile: { role: USER_ROLES.OPERATOR },
+      supabase
+    });
+
+    // 1. 마스터 결합 여부 확인
+    supabase.maybeSingle.mockResolvedValueOnce({ data: null, error: null });
+    // 2. 현재 상태 + transport_mode 조회
+    supabase.single.mockResolvedValueOnce({ data: { status: OrderStatus.REGISTERED, transport_mode: 'AIR' } });
+    // 3. route_option_id 조회 — NULL 반환
+    supabase.maybeSingle.mockResolvedValueOnce({ data: { route_option_id: null }, error: null });
+
+    await expect(updateOrderStatus('order-1', OrderStatus.SCHEDULED))
+      .rejects.toThrow('경로를 먼저 선택해야');
+  });
 });

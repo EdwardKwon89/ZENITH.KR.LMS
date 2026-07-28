@@ -391,7 +391,7 @@ export async function updateOrderStatus(
   const { data: currentOrder, error: fetchError } = await orderRepo.getStatus(orderId);
   if (fetchError || !currentOrder) throw new Error("Order not found");
 
-  if (currentOrder.status === OrderStatus.REGISTERED && nextStatus === OrderStatus.SCHEDULED) {
+  if (currentOrder.status === OrderStatus.REGISTERED && nextStatus === OrderStatus.SCHEDULED && currentOrder.transport_mode !== 'UPS') {
     const orderCheck = await supabase
       .from('zen_orders')
       .select('route_option_id')
