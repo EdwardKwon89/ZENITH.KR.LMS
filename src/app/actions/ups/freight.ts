@@ -145,16 +145,11 @@ export async function estimateUpsFreight(input: EstimateUpsFreightInput): Promis
     .limit(1);
   const fuelSurcharge = fuelRows?.[0] ?? null;
 
-  const requestedCodes = new Set<string>();
-  if (input.incoterms) requestedCodes.add(input.incoterms);
   const { data: allOtherCharges } = await supabase
     .from('zen_ups_other_charges')
     .select('*')
     .eq('is_active', true);
   const oversizeCharge = (allOtherCharges ?? []).find((c) => c.charge_code === 'OVERSIZE') as UpsOtherCharge | undefined;
-  const selectedOtherCharges = (allOtherCharges ?? []).filter(
-    (c) => requestedCodes.has(c.charge_code) || (input.otherChargeIds ?? []).includes(c.id)
-  ) as UpsOtherCharge[];
 
   // Issue #491: 급증 긴급 수수료(Surge Emergency Fee) — 도착국·기준일 기준 유효 단가 1건 조회
   const { data: surgeFeeRows } = await supabase
@@ -186,7 +181,7 @@ export async function estimateUpsFreight(input: EstimateUpsFreightInput): Promis
       weightTierRates: weightTierRates as any,
       freightMinimum: freightMinimum as any,
       fuelSurcharge,
-      otherCharges: selectedOtherCharges,
+      otherCharges: [],
       surgeFee,
       oversizeCharge,
       fallbackApplied,
@@ -209,12 +204,7 @@ export async function estimateUpsFreight(input: EstimateUpsFreightInput): Promis
     .maybeSingle();
   const discountRate = Number(policy?.discount_rate ?? 0);
 
-  const { data: agencyCharges } = await admin
-    .from('zen_agency_other_charges')
-    .select('selling_price, cost_price')
-    .eq('agency_org_id', input.agencyOrgId)
-    .in('other_charge_id', selectedOtherCharges.map((c) => c.id))
-    .eq('is_active', true);
+  const agencyCharges: any[] = [];
 
   const agency = computeAgencyFreight({
     platformSellingTotal: platform.totalSellingPrice,

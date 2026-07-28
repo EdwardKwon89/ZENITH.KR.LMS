@@ -6,7 +6,7 @@
 | **담당** | Mike (Team B) |
 | **생성일** | 2026-07-28 |
 | **우선순위** | P1 |
-| **상태** | ⬜ |
+| **상태** | 🔔 |
 
 ## 개요
 
@@ -97,7 +97,24 @@ const platform = computeUpsFreight(
 
 - Mike: `.agent/VIOLATION_TRACKER.md` 참조 후 착수. **R-10 증적누락 6회 누적** — 이번 Task는 재무 계산에 직접 영향을 주는 변경이라 특히 중요합니다. R-10 스크린샷 반드시 첨부할 것.
 
-## [발견 이슈]
+## [작업 결과]
+
+### 변경 내용
+
+#### `src/app/actions/ups/freight.ts`
+- `requestedCodes`/`selectedOtherCharges` 계산 블록 제거
+- `computeUpsFreight()` 호출부 `otherCharges: []`로 변경
+- agency charges 쿼리도 빈 배열로 변경 (incoterms 기반 부가요금 제외)
+
+### 테스트 (behavioral)
+- DDP incoterms 전달 시 `otherChargesSellingTotal`/`otherChargesCostTotal`이 0인지 검증
+- OVERSIZE other_charge는 `zen_ups_other_charges`에서 조회되는지 확인 (회귀)
+
+### 검증
+- **빌드**: ✅ PASS
+- **테스트**: `freight-actions.test.ts` 12/12 PASS
+- **회귀**: 144/144 파일, 969/969 테스트 ALL PASS
+- **커밋 해시**: `68fe8e08`
 
 _(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
 
