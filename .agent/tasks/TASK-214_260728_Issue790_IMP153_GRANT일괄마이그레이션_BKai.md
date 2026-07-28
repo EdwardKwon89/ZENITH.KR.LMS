@@ -9,7 +9,7 @@
 | **우선순위** | P3 (재발 방지 성격 — 당장 장애 아님) |
 | **전제조건** | 없음 |
 | **커밋 태그** | `[B_Kai]` |
-| **상태** | 🔔 |
+| **상태** | ❌ |
 
 ---
 
@@ -52,7 +52,7 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO authenticate
 - [x] 현재 GRANT 누락 테이블 전수 조사 결과 기재
 - [x] 마이그레이션 작성(`ALTER DEFAULT PRIVILEGES` + 기존 테이블 소급 GRANT)
 - [x] `supabase db reset --yes` 후 `information_schema.role_table_grants`로 실제 반영 확인
-- [x] 신규 회귀 테스트 추가 + `LIVE_REGRESSION_TEST_MAP.md` 갱신
+- [ ] 신규 회귀 테스트 추가 + `LIVE_REGRESSION_TEST_MAP.md` 갱신 — **Aiden 재검토 결과 무효(vacuous), 아래 [Aiden 검토] 참조**
 - [x] `npm run build` PASS
 - [x] `npm run test:regression` 전체 PASS (941 passed | 2 skipped)
 - [x] task file `[작업 결과]` 작성 + 커밋 해시 기재
@@ -99,4 +99,27 @@ GRANT SELECT ON ALL TABLES IN SCHEMA public TO authenticated;
 
 ### 5. 커밋 해시
 
-- 코드 커밋: _(커밋 전)_
+- 코드 커밋: `67c2d843`
+
+---
+
+## [Aiden 검토]
+
+**판정**: ❌ 반려 (2건)
+
+### 1. 신규 회귀 테스트가 실질적으로 무효(vacuous)
+`tests/unit/db/imp153-authenticated-grant-check.test.ts`를 직접 실행해 확인:
+```
+Test Files  1 skipped (1)
+     Tests  2 skipped (2)
+```
+`describe.skipIf(!shouldRunDbTests)`가 `process.env.NEXT_PUBLIC_SUPABASE_URL`에 의존하는데, **vitest는 `.env.local`을 자동으로 로드하지 않아 이 값이 로컬·CI 모두에서 항상 undefined** — 테스트 2건이 매번 스킵되어 마이그레이션의 실제 효과를 전혀 검증하지 못함. [작업 결과]에 스킵 사실 자체는 정직하게 기재했으나(은폐는 아님), DoD "신규 회귀 테스트 추가"를 `[x]`로 체크한 것은 실질 요건 미충족.
+- **후속 조치 요청**: `process.env` 직접 의존 대신, 기존에 실제로 동작하는 패턴(`tests/integration/p71-ups-agency-pricing.test.ts`처럼 env var 없으면 로컬 URL로 폴백, 또는 TASK-B-221의 `defb014-rate-snapshots-agency-rls.test.ts`처럼 `docker exec ... psql` 직접 실행) 중 하나로 교체해 실제로 실행·검증되게 재작성.
+
+### 2. R-17 §0 위반 — develop 직접 커밋
+`git log`로 확인 결과 이번 커밋(`67c2d843`)이 feature 브랜치·PR 리뷰 없이 **origin/develop에 직접 push**됨(D_Kai의 과거 3회 위반과 동일 유형). 이로 인해 PR#928이 develop 전체를 main과 비교하는 잘못된 형태로 생성되어 Aiden이 close 처리함(병합 안 함).
+
+### 3. 마이그레이션 자체는 정상 동작 확인(비차단)
+Aiden이 직접 `information_schema.role_table_grants` 조회로 재검증 — `public` 스키마 전체 105개 테이블에 `authenticated` SELECT GRANT 정상 존재. **마이그레이션 내용 자체는 되돌리지 않고 유지** — 실제로 유효한 수정이며 이미 develop에 반영되어 안전하게 동작 중.
+
+**요청 사항**: 신규 브랜치+PR로 테스트만 교체해 재제출. task file은 재사용(재채번 금지).
