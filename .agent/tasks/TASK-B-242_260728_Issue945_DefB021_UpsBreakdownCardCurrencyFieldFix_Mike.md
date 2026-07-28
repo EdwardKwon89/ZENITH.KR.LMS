@@ -7,7 +7,7 @@
 | **담당** | Mike (Team B) |
 | **생성일** | 2026-07-28 |
 | **우선순위** | P1 |
-| **상태** | ⬜ |
+| **상태** | 🔔 |
 
 ## 개요
 
@@ -82,7 +82,25 @@ const currencySymbol = currencyCode === 'KRW' ? '₩' : currencyCode === 'USD' ?
 
 - Mike: `.agent/VIOLATION_TRACKER.md` 참조 후 착수. **toContain 소스 문자열 검사 유형 누적 9회 + vacuous test 3회 + R-10 증적누락 3회** — 이번에도 재발 시 심각한 반복입니다. 반드시 실제 렌더링된 화면 텍스트(금액·통화 기호)를 확인하는 assertion으로 작성하고, R-10 스크린샷을 실제로 열어서 값이 맞는지 본인이 먼저 확인할 것.
 
-## [발견 이슈]
+## [작업 결과]
+
+### 변경 내용
+
+#### `src/components/ups/UpsOrderBreakdownCard.tsx`
+- 필드명: `baseSellingPrice`/`fuelSurchargeSellingAmount`/`surgeFeeSellingAmount`/`otherChargesSellingTotal`로 전환 (구 필드명 `??` 폴백 유지)
+- 통화: `$`/`USD` 하드코딩 → `currencySymbol`/`currencyCode` 동적 표시 (KRW₩/USD$)
+- 총액: `USD` 하드코딩 제거 → 실제 통화 코드 표시
+
+### 테스트 (behavioral 렌더링)
+- KRW 통화: `baseSellingPrice` 필드 + `₩` 기호 표시 검증
+- USD 통화: `baseSellingPrice` 필드 + `$` 기호 표시 검증
+- 구 필드명(`baseFreight` 등) 폴백 동작 검증
+
+### 검증
+- **빌드**: ✅ PASS
+- **테스트**: `ups-order-breakdown-card.test.tsx` 3/3 PASS
+- **회귀**: 144/144 파일, 964/964 테스트 ALL PASS
+- **커밋 해시**: `e1fa943a`
 
 _(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
 
