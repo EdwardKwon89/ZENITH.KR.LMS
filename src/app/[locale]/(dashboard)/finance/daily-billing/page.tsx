@@ -9,8 +9,8 @@ import { redirect } from 'next/navigation';
 export default async function DailyBillingPage() {
   const { profile } = await requireAuth();
 
-  // Access check: Admin, Manager, Zenith Super Admin, or Agency
-  const allowedRoles = ['ZENITH_SUPER_ADMIN', 'ADMIN', 'MANAGER', 'AGENCY'];
+  // Access check: Admin, Manager, Zenith Super Admin, Agency, or Shipper
+  const allowedRoles = ['ZENITH_SUPER_ADMIN', 'ADMIN', 'MANAGER', 'AGENCY', 'AGENCY_SHIPPER', 'SHIPPER'];
   if (!allowedRoles.includes(profile?.role || '')) {
     redirect('/dashboard');
   }
@@ -39,7 +39,7 @@ export default async function DailyBillingPage() {
       </div>
 
       {/* Main Client UI */}
-      <ShipperDailyBillingClient initialGroups={groups} exchangeRate={exchangeRate} />
+      <ShipperDailyBillingClient initialGroups={groups} exchangeRate={exchangeRate} role={profile?.role || ''} agencyOrgId={profile?.org_id || ''} />
     </div>
   );
 }

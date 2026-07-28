@@ -79,6 +79,14 @@ PM 역할 수행 시, 작업 완료 보고 전 반드시 전체 상태 문서(`W
 rtk npm run test:regression
 ```
 
+**R-08-2 | 로컬 DB 스키마/시드 최신화 확인 의무** (2026-07-28 신설 — DEF-128 재발 방지: 로컬 Supabase 인스턴스를 세션 간 재사용하며 develop에 병합된 신규 마이그레이션이 반영 안 된 채 방치되어, "로컬 검증 PASS" 보고가 실제 CI(매번 fresh DB) 기준과 달랐던 사고 대응)
+
+CI는 매 실행마다 `supabase db reset`으로 스키마+SQL 시드를 완전히 새로 만들어 Team A/B 구분 없이 동일한 환경을 보장하지만, **로컬 개발 DB는 에이전트가 마지막으로 언제 reset했는지에 따라 개인별로 제각각 stale해질 수 있다.** 이 상태의 로컬 검증 결과는 신뢰할 수 없다.
+
+- **착수 전 필수 확인**: `./scripts/check-db-freshness.sh` 실행 — pending 마이그레이션이 있으면 경고 후 exit 1. `agent-worktree-init.sh` 실행 시 자동으로 함께 확인된다.
+- **해소 방법**: `./scripts/check-db-freshness.sh --fix` — `supabase db reset --yes`(스키마+SQL 시드 재생성) + `scripts/seed-local.ts`(계정·오더 등 데모/수동테스트 픽스처, 멱등이라 반복 실행 안전)를 함께 실행한다.
+- **참고**: `scripts/seed-local.ts`는 CI에서 실행되지 않는 로컬 전용 도구이므로 자동 회귀 테스트의 정확성 자체에는 영향이 없다(RLS 등 테스트는 자기완결형 fixture 원칙, SAR-2026-07-27-001 참조) — 이 확인 의무는 **R-10 스크린샷·수동 UI 확인 등 사람이 직접 로컬로 검증하는 작업**의 신뢰성을 위한 것이다.
+
 **R-08-1 | CI 미트리거 시 대체 검증 절차** (2026-07-17 신설 — PR#520·PR#541·PR#558에서 반복 확인된 GitHub Actions `pull_request` 트리거 실패 대응)
 
 `.github/workflows/pr-checks.yml`의 `branches` 필터 설정이 정확함에도 GitHub 쪽 트리거 자체가 발동하지 않는 현상이 이 프로젝트에서 반복 관측되었다(원인: 사용량 한도 아님 — 본 저장소는 Public이라 Actions 무제한. GitHub 측 일시적 dispatch 지연으로 추정, 통상 10~50분 내 자연 해소).
@@ -367,4 +375,4 @@ PreToolUse GitNexus Hook에서 `Bash`가 제외되었습니다. 아래 경우는
 
 ## 📝 개정 이력
 
-> 최신 버전: **v2.6** (2026-07-24) | 전체 이력: [docs/00_GUIDE/GOV_CHANGELOG.md](docs/00_GUIDE/GOV_CHANGELOG.md)
+> 최신 버전: **v2.7** (2026-07-28) | 전체 이력: [docs/00_GUIDE/GOV_CHANGELOG.md](docs/00_GUIDE/GOV_CHANGELOG.md)

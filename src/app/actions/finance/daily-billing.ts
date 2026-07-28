@@ -21,13 +21,14 @@ export interface ShipperDailyBillingGroup {
   totalSurgeFee: number;
   totalOtherCharge: number;
   totalActualAdjustment: number;
-  totalBillingAmountUsd: number;
-  estimatedBillingAmountKrw: number;
+  totalBillingAmountKrw: number;
+  estimatedBillingAmountUsd: number;
   appliedExchangeRate: number;
   currency: string;
   invoiceIds: string[];
   orderIds: string[];
   periodType?: 'daily' | 'weekly' | 'monthly';
+  hasUnsupportedCurrency: boolean;
 }
 
 export interface ShipperDailyOrderRow {
@@ -45,10 +46,17 @@ export interface ShipperDailyOrderRow {
   surgeFee: number;
   otherCharge: number;
   actualAdjustment: number;
-  totalAmountUsd: number;
+  totalAmountKrw: number;
   invoiceId?: string;
   invoiceNo?: string;
   invoiceStatus?: string;
+  hasUnsupportedCurrency: boolean;
+}
+
+function convertToKrw(amount: number, currency: string, exchangeRate: number): { amountKrw: number; unsupported: boolean } {
+  if (currency === 'KRW') return { amountKrw: amount, unsupported: false };
+  if (currency === 'USD') return { amountKrw: amount * exchangeRate, unsupported: false };
+  return { amountKrw: 0, unsupported: true };
 }
 
 function getWeekNumber(d: Date): number {
@@ -93,7 +101,10 @@ function formatPeriodKey(createdAtStr: string, periodType: 'daily' | 'weekly' | 
 }
 
 /**
- * 화주별 일별/주별/월별 청구 집계 목록 조회
+ * zen_invoices 기반 역할별 청구 집계 목록 조회
+ * - ADMIN/MANAGER/ZENITH_SUPER_ADMIN: 본인 발행 인보이스 (invoice_tier IN ('ADMIN_TO_AGENCY','ADMIN_TO_SHIPPER'))
+ * - AGENCY: 매입(본인 billed) + 매출(소속 화주 billed, AGENCY_TO_SHIPPER)
+ * - SHIPPER: 본인 billed 인보이스만
  */
 export async function getShipperDailyBillingSummary(params?: {
   startDate?: string;
@@ -108,77 +119,89 @@ export async function getShipperDailyBillingSummary(params?: {
     const periodType = params?.periodType || 'daily';
     const exchangeRate = await getNumericParam('EXCHANGE_RATE_USD_KRW', 1350);
 
-    // Build base orders query
-    let ordersQuery = supabase
-      .from('zen_orders')
-      .select(`
-        id,
-        order_no,
-        status,
-        transport_mode,
-        created_at,
-        shipper_id,
-        shipper:shipper_id ( id, name )
-      `)
-      .eq('transport_mode', 'UPS');
+    const invoiceSelect = `
+      id, invoice_no, total_amount, currency, status, is_finalized,
+      billed_org_id, invoice_tier, created_at,
+      org:billed_org_id ( id, name )
+    `;
 
-    if (params?.shipperId) {
-      ordersQuery = ordersQuery.eq('shipper_id', params.shipperId);
-    }
-    if (params?.startDate) {
-      ordersQuery = ordersQuery.gte('created_at', `${params.startDate}T00:00:00Z`);
-    }
-    if (params?.endDate) {
-      ordersQuery = ordersQuery.lte('created_at', `${params.endDate}T23:59:59Z`);
+    const adminRoles = [USER_ROLES.ADMIN, USER_ROLES.MANAGER, USER_ROLES.ZENITH_SUPER_ADMIN] as string[];
+    let invoices: any[] = [];
+
+    if (adminRoles.includes(profile.role)) {
+      const query = supabase
+        .from('zen_invoices')
+        .select(invoiceSelect)
+        .in('invoice_tier', ['ADMIN_TO_AGENCY', 'ADMIN_TO_SHIPPER'])
+        .neq('status', 'CANCELED');
+
+      if (params?.startDate) query.gte('created_at', `${params.startDate}T00:00:00Z`);
+      if (params?.endDate) query.lte('created_at', `${params.endDate}T23:59:59Z`);
+
+      const { data, error } = await query;
+      if (error) throw new Error(`인보이스 조회 실패: ${error.message}`);
+      invoices = data || [];
+    } else if (profile.role === USER_ROLES.AGENCY) {
+      const { data: links } = await supabase
+        .from('zen_agency_shippers')
+        .select('shipper_org_id')
+        .eq('agency_org_id', profile.org_id)
+        .eq('is_active', true);
+      const shipperOrgIds = (links || []).map((l: any) => l.shipper_org_id);
+
+      const purchasedQuery = supabase
+        .from('zen_invoices')
+        .select(invoiceSelect)
+        .eq('billed_org_id', profile.org_id)
+        .eq('invoice_tier', 'ADMIN_TO_AGENCY')
+        .neq('status', 'CANCELED');
+      if (params?.startDate) purchasedQuery.gte('created_at', `${params.startDate}T00:00:00Z`);
+      if (params?.endDate) purchasedQuery.lte('created_at', `${params.endDate}T23:59:59Z`);
+      const { data: purchased } = await purchasedQuery;
+      invoices = purchased || [];
+
+      if (shipperOrgIds.length > 0) {
+        const soldQuery = supabase
+          .from('zen_invoices')
+          .select(invoiceSelect)
+          .eq('invoice_tier', 'AGENCY_TO_SHIPPER')
+          .in('billed_org_id', shipperOrgIds)
+          .neq('status', 'CANCELED');
+        if (params?.startDate) soldQuery.gte('created_at', `${params.startDate}T00:00:00Z`);
+        if (params?.endDate) soldQuery.lte('created_at', `${params.endDate}T23:59:59Z`);
+        const { data: sold } = await soldQuery;
+        invoices = [...invoices, ...(sold || [])];
+      }
+    } else {
+      const query = supabase
+        .from('zen_invoices')
+        .select(invoiceSelect)
+        .eq('billed_org_id', profile.org_id)
+        .neq('status', 'CANCELED');
+      if (params?.startDate) query.gte('created_at', `${params.startDate}T00:00:00Z`);
+      if (params?.endDate) query.lte('created_at', `${params.endDate}T23:59:59Z`);
+      const { data, error } = await query;
+      if (error) throw new Error(`인보이스 조회 실패: ${error.message}`);
+      invoices = data || [];
     }
 
-    const { data: orders, error: ordersErr } = await ordersQuery;
-    if (ordersErr) {
-      logger.error('Error fetching orders for daily billing summary:', ordersErr);
-      throw new Error(`오더 목록 조회 실패: ${ordersErr.message}`);
-    }
-
-    if (!orders || orders.length === 0) {
+    if (invoices.length === 0) {
       return { success: true, groups: [], exchangeRate };
     }
 
-    const orderIds = orders.map((o) => o.id);
-
-    // Fetch order costs
-    const { data: orderCosts, error: costsErr } = await supabase
-      .from('zen_order_costs')
-      .select('order_id, cost_type, unit_price, quantity, total_amount, currency, invoice_id')
-      .in('order_id', orderIds);
-
-    if (costsErr) {
-      logger.error('Error fetching order costs for daily billing:', costsErr);
-      throw new Error(`비용 정보 조회 실패: ${costsErr.message}`);
-    }
-
-    // Fetch invoices for these orders
-    const { data: invoices, error: invErr } = await supabase
-      .from('zen_invoices')
-      .select('id, invoice_no, total_amount, currency, status, is_finalized, metadata')
-      .neq('status', 'CANCELED');
-
-    if (invErr) {
-      logger.error('Error fetching invoices for daily billing:', invErr);
-    }
-
-    // Group by Shipper + Period Key
     const groupsMap = new Map<string, ShipperDailyBillingGroup>();
 
-    for (const order of orders) {
-      const periodKey = formatPeriodKey(order.created_at, periodType);
-      const shipperName = (order.shipper as any)?.name || '기본 화주';
-      const key = `${order.shipper_id}_${periodKey}`;
+    for (const inv of invoices) {
+      const periodKey = formatPeriodKey(inv.created_at, periodType);
+      const orgName = (inv.org as any)?.name || '알 수 없는 조직';
+      const key = `${inv.billed_org_id}_${periodKey}`;
 
       let group = groupsMap.get(key);
       if (!group) {
         group = {
           date: periodKey,
-          shipperId: order.shipper_id,
-          shipperName,
+          shipperId: inv.billed_org_id,
+          shipperName: orgName,
           orderCount: 0,
           finalizedCount: 0,
           unfinalizedCount: 0,
@@ -187,72 +210,42 @@ export async function getShipperDailyBillingSummary(params?: {
           totalSurgeFee: 0,
           totalOtherCharge: 0,
           totalActualAdjustment: 0,
-          totalBillingAmountUsd: 0,
-          estimatedBillingAmountKrw: 0,
+          totalBillingAmountKrw: 0,
+          estimatedBillingAmountUsd: 0,
           appliedExchangeRate: exchangeRate,
-          currency: 'USD',
+          currency: inv.currency || 'USD',
           invoiceIds: [],
           orderIds: [],
           periodType,
+          hasUnsupportedCurrency: false,
         };
         groupsMap.set(key, group);
       }
 
       group.orderCount += 1;
-      group.orderIds.push(order.id);
+      group.invoiceIds.push(inv.id);
+      group.orderIds.push(inv.id);
 
-      // Find costs for this order
-      const costs = (orderCosts || []).filter((c) => c.order_id === order.id);
-      let baseFreight = 0;
-      let fuelSurcharge = 0;
-      let surgeFee = 0;
-      let otherCharge = 0;
-      let actualAdj = 0;
-
-      for (const c of costs) {
-        const amt = Number(c.total_amount || c.unit_price * (c.quantity || 1) || 0);
-        if (c.cost_type === 'FREIGHT' || c.cost_type === 'BASE_FREIGHT') baseFreight += amt;
-        else if (c.cost_type === 'FUEL_SURCHARGE') fuelSurcharge += amt;
-        else if (c.cost_type === 'SURGE_EMERGENCY' || c.cost_type === 'SURGE_FEE') surgeFee += amt;
-        else if (c.cost_type === 'OTHER_CHARGE') otherCharge += amt;
-        else if (c.cost_type === 'UPS_ACTUAL_ADJUSTMENT') actualAdj += amt;
-      }
-
-      group.totalBaseFreight += baseFreight;
-      group.totalFuelSurcharge += fuelSurcharge;
-      group.totalSurgeFee += surgeFee;
-      group.totalOtherCharge += otherCharge;
-      group.totalActualAdjustment += actualAdj;
-
-      // Find matching invoice
-      const matchingInv = (invoices || []).find(
-        (inv) => inv.metadata?.source_order_id === order.id
+      const { amountKrw, unsupported } = convertToKrw(
+        Number(inv.total_amount || 0), inv.currency || 'USD', exchangeRate
       );
+      if (unsupported) group.hasUnsupportedCurrency = true;
+      group.totalBillingAmountKrw += amountKrw;
 
-      if (matchingInv) {
-        if (!group.invoiceIds.includes(matchingInv.id)) {
-          group.invoiceIds.push(matchingInv.id);
-        }
-        if (matchingInv.is_finalized) {
-          group.finalizedCount += 1;
-        } else {
-          group.unfinalizedCount += 1;
-        }
+      if (inv.is_finalized) {
+        group.finalizedCount += 1;
       } else {
         group.unfinalizedCount += 1;
       }
-
-      const orderTotalUsd = baseFreight + fuelSurcharge + surgeFee + otherCharge + actualAdj;
-      group.totalBillingAmountUsd += orderTotalUsd;
     }
 
-    // Compute KRW totals
     const groups = Array.from(groupsMap.values()).map((g) => {
-      g.estimatedBillingAmountKrw = Math.round(g.totalBillingAmountUsd * g.appliedExchangeRate);
+      g.estimatedBillingAmountUsd = g.appliedExchangeRate > 0
+        ? Math.round(g.totalBillingAmountKrw / g.appliedExchangeRate * 100) / 100
+        : 0;
       return g;
     });
 
-    // Sort by date DESC, shipperName ASC
     groups.sort((a, b) => b.date.localeCompare(a.date) || a.shipperName.localeCompare(b.shipperName));
 
     return { success: true, groups, exchangeRate };
@@ -268,14 +261,28 @@ export async function getShipperDailyBillingSummary(params?: {
 export async function getShipperDailyOrdersDetails(
   shipperId: string,
   dateOrPeriod: string,
-  periodType: 'daily' | 'weekly' | 'monthly' = 'daily'
+  periodType: 'daily' | 'weekly' | 'monthly' = 'daily',
+  exchangeRate?: number
 ): Promise<{
   success: boolean;
   orders?: ShipperDailyOrderRow[];
   error?: string;
 }> {
   try {
-    const { supabase } = await validateUserAction();
+    const { supabase, profile } = await validateUserAction();
+    const rate = exchangeRate || await getNumericParam('EXCHANGE_RATE_USD_KRW', 1350);
+
+    if (profile.role === USER_ROLES.AGENCY) {
+      const { data: links } = await supabase
+        .from('zen_agency_shippers')
+        .select('shipper_org_id')
+        .eq('agency_org_id', profile.org_id)
+        .eq('is_active', true);
+      const allowedIds = (links || []).map((l: any) => l.shipper_org_id);
+      if (!allowedIds.includes(shipperId)) {
+        return { success: true, orders: [] };
+      }
+    }
 
     let ordersQuery = supabase
       .from('zen_orders')
@@ -321,7 +328,7 @@ export async function getShipperDailyOrdersDetails(
 
     const { data: costs } = await supabase
       .from('zen_order_costs')
-      .select('order_id, cost_type, unit_price, quantity, total_amount')
+      .select('order_id, cost_type, unit_price, quantity, total_amount, currency')
       .in('order_id', orderIds);
 
     const { data: invoices } = await supabase
@@ -336,14 +343,17 @@ export async function getShipperDailyOrdersDetails(
       let surgeFee = 0;
       let otherCharge = 0;
       let actualAdj = 0;
+      let orderUnsupported = false;
 
       for (const c of oCosts) {
-        const amt = Number(c.total_amount || c.unit_price * (c.quantity || 1) || 0);
-        if (c.cost_type === 'FREIGHT' || c.cost_type === 'BASE_FREIGHT') baseFreight += amt;
-        else if (c.cost_type === 'FUEL_SURCHARGE') fuelSurcharge += amt;
-        else if (c.cost_type === 'SURGE_EMERGENCY' || c.cost_type === 'SURGE_FEE') surgeFee += amt;
-        else if (c.cost_type === 'OTHER_CHARGE') otherCharge += amt;
-        else if (c.cost_type === 'UPS_ACTUAL_ADJUSTMENT') actualAdj += amt;
+        const rawAmt = Number(c.total_amount || c.unit_price * (c.quantity || 1) || 0);
+        const { amountKrw, unsupported } = convertToKrw(rawAmt, c.currency, rate);
+        if (unsupported) orderUnsupported = true;
+        if (c.cost_type === 'FREIGHT' || c.cost_type === 'BASE_FREIGHT') baseFreight += amountKrw;
+        else if (c.cost_type === 'FUEL_SURCHARGE') fuelSurcharge += amountKrw;
+        else if (c.cost_type === 'SURGE_EMERGENCY' || c.cost_type === 'SURGE_FEE') surgeFee += amountKrw;
+        else if (c.cost_type === 'OTHER_CHARGE') otherCharge += amountKrw;
+        else if (c.cost_type === 'UPS_ACTUAL_ADJUSTMENT') actualAdj += amountKrw;
       }
 
       const matchingInv = (invoices || []).find((inv) => inv.metadata?.source_order_id === o.id);
@@ -363,10 +373,11 @@ export async function getShipperDailyOrdersDetails(
         surgeFee,
         otherCharge,
         actualAdjustment: actualAdj,
-        totalAmountUsd: baseFreight + fuelSurcharge + surgeFee + otherCharge + actualAdj,
+        totalAmountKrw: baseFreight + fuelSurcharge + surgeFee + otherCharge + actualAdj,
         invoiceId: matchingInv?.id,
         invoiceNo: matchingInv?.invoice_no,
         invoiceStatus: matchingInv?.status,
+        hasUnsupportedCurrency: orderUnsupported,
       };
     });
 

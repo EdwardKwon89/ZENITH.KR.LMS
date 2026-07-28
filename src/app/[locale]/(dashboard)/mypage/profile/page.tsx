@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { getMyProfile, updateMyProfile } from '@/app/actions/member';
+import { getAddressBookEntries } from '@/app/actions/operations/address-book';
+import AddressBookClient from '@/components/address-book/AddressBookClient';
 import { ZenCard, ZenButton, ZenInput } from '@/components/ui/ZenUI';
-import { User, Mail, Building, ShieldCheck, Save, Loader2, UserMinus } from 'lucide-react';
+import { User, Mail, Building, ShieldCheck, Save, Loader2, UserMinus, MapPin } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useParams, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
@@ -21,13 +23,18 @@ export default function ProfilePage() {
   const [isPending, setIsPending] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [profile, setProfile] = useState<any>(null);
+  const [addressEntries, setAddressEntries] = useState<any[]>([]);
   const [showWithdrawalModal, setShowWithdrawalModal] = useState(false);
 
   useEffect(() => {
     async function loadProfile() {
       try {
-        const data = await getMyProfile();
-        setProfile(data);
+        const [profileData, addressResult] = await Promise.all([
+          getMyProfile(),
+          getAddressBookEntries(),
+        ]);
+        setProfile(profileData);
+        setAddressEntries(addressResult.entries || []);
       } catch (err) {
         toast.error('프로필 정보를 불러오는 데 실패했습니다.');
       } finally {
@@ -189,6 +196,15 @@ export default function ProfilePage() {
           </ZenCard>
         </div>
       </div>
+
+      {/* Address Book Section */}
+      <ZenCard className="p-8 bg-white border-slate-200">
+        <h3 className="text-sm font-bold text-slate-900 mb-6 flex items-center gap-2">
+          <MapPin className="text-brand-600 w-4 h-4" />
+          주소 정보 관리
+        </h3>
+        <AddressBookClient initialEntries={addressEntries} />
+      </ZenCard>
 
       {/* Withdrawal Section */}
       <ZenCard className="p-8 bg-rose-50 border-rose-100 border-dashed">
