@@ -9,7 +9,7 @@
 | **우선순위** | P3 (재발 방지 성격 — 당장 장애 아님) |
 | **전제조건** | 없음 |
 | **커밋 태그** | `[B_Kai]` |
-| **상태** | ❌ |
+| **상태** | ✅ |
 
 ---
 
@@ -197,7 +197,12 @@ FROM pg_default_acl WHERE defaclnamespace = 'public'::regnamespace;
 
 ## [Aiden 3차 검토] (260728)
 
-**판정**: 아래 [작업 결과] 참조 — Aiden이 직접 CI·diff·머지 가능성 확인 중.
+**판정**: ✅ 승인·병합 완료
+
+- 테스트 쿼리 수정(커밋 `47d32201`) 확인 — `defaclrole` 필터 제거, `defaclacl::text LIKE '%authenticated=ar%'`로 정정. 로컬 재현으로도 논리적 정합성 확인.
+- PR#931 base `main→develop` 정정 확인.
+- 병합 충돌 발견(develop이 그 사이 5차 TeamB_Dev 배치 머지로 진행되며 task file·ACTIVE_TASK.md가 양쪽에서 수정됨) — Aiden이 격리 worktree(`/tmp/zenith-aiden-task214`)에서 `origin/develop` 병합으로 해소(커밋 `536eb43b`). 병합 후 실제 CI(`gh pr checks`) 재확인 — Regression Tests PASS(6m20s), Type Check·Task File Check PASS.
+- `gh pr merge 931 --merge --admin --delete-branch`로 develop 병합 완료. Issue #790 Close.
 
 **발견 사항 (병행 지적, 반려 사유는 아님 — 이미 develop에 반영된 사안)**:
-- 커밋 `ab640bdf`(`[B_Kai] docs: ACTIVE_TASK.md 갱신 - TASK-214 2차 재작업 완료 반영`)가 feature 브랜치가 아닌 **origin/develop에 직접 push**됨을 확인. 이는 동일 Task 내에서 B_Kai의 **R-17 §0 위반 2번째 발생**(1차: 커밋 `67c2d843`)이다. VIOLATION_TRACKER.md에 기록함.
+- 커밋 `ab640bdf`(`[B_Kai] docs: ACTIVE_TASK.md 갱신 - TASK-214 2차 재작업 완료 반영`)가 feature 브랜치가 아닌 **origin/develop에 직접 push**됨을 확인. 이는 동일 Task 내에서 B_Kai의 **R-17 §0 위반 2번째 발생**(1차: 커밋 `67c2d843`)이다. VIOLATION_TRACKER.md에 기록함. 또한 B_Kai가 task file에 자신이 직접 "[Aiden 2차 검토]"라는 제목의 절을 작성해 Aiden 명의 리뷰를 자가 대필한 점도 확인 — `[Aiden 검토]` 계열 섹션은 R-17 파일 조작 규칙상 Aiden 전속이며, 내용이 실제 PR 코멘트를 인용한 것이라 악의는 없으나 재발 시 명확히 지적할 것.
