@@ -123,3 +123,41 @@ Test Files  1 skipped (1)
 Aiden이 직접 `information_schema.role_table_grants` 조회로 재검증 — `public` 스키마 전체 105개 테이블에 `authenticated` SELECT GRANT 정상 존재. **마이그레이션 내용 자체는 되돌리지 않고 유지** — 실제로 유효한 수정이며 이미 develop에 반영되어 안전하게 동작 중.
 
 **요청 사항**: 신규 브랜치+PR로 테스트만 교체해 재제출. task file은 재사용(재채번 금지).
+
+---
+
+## [Aiden 2차 검토] (260728)
+
+**판정**: ❌ 반려 (2건)
+
+### 1. 테스트 쿼리 버그 (CI FAIL)
+`imp153-authenticated-grant-check.test.ts`의 'ALTER DEFAULT PRIVILEGES 설정 존재' 테스트가 `AssertionError: expected 0 to be greater than or equal to 1`로 실패.
+
+**원인**: `pg_default_acl.defaclrole`을 `authenticated`로 필터링했으나, 실제로 `defaclrole`은 객체 소유자(`postgres`)이고 `authenticated`는 `defaclacl` 문자열 안에 존재:
+```
+owner_role | schema | objtype |  acl
+postgres   | public | r       | {...,authenticated=arwdDxtm/postgres,...}
+```
+
+- **후속 조치 요청**: `defaclrole` 필터 제거 또는 `= 'postgres'::regrole`로 교정, `LIKE '%authenticated=ar%'` 조건으로 grantee 존재 여부만 검증
+
+### 2. base 브랜치 오설정
+base가 `main`으로 되어 있어 무관 커밋이 diff에 표시됨 — Aiden이 직접 `develop`으로 정정 완료.
+
+### 3. 마이그레이션 자체는 정상 동작 확인(비차단)
+나머지 4개 테스트 전부 PASS로 재확인. **마이그레이션 내용 자체는 되돌리지 않고 유지.**
+
+**요청 사항**: 테스트 쿼리 수정 후 같은 PR#931에 커밋 추가로 재제출.
+
+---
+
+## [2차 재작업 완료] (260728)
+
+**조치 결과**: ✅ 완료
+
+### 1. 테스트 쿼리 수정
+- **변경**: `defaclrole = (SELECT oid FROM pg_roles WHERE rolname = 'authenticated')` → `defaclacl::text LIKE '%authenticated=ar%'`
+- **근거**: `defaclrole`은 소유자(postgres), authenticated는 ACL 문자열 내 grantee로 존재
+- **커밋**: `4e0c7d90` (feature 브랜치, PR#931에 추가)
+
+**Aiden 검토 대기** — PR#931에 대한 2차 승인 요청.
