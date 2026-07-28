@@ -13,6 +13,7 @@ import { generateInvoicesForOrder } from "../finance";
 
 import { OrderRegistrationInput, orderRegistrationSchema } from "@/lib/validation/order";
 import { generateTrackingHistory } from "@/lib/logistics/tracking";
+import { createAdminClient } from '@/utils/supabase/server';
 import { syncInventoryFromOrder } from "./inventory";
 import { estimateUpsFreight as estimateUpsFreightFn } from "@/app/actions/ups/freight";
 
@@ -105,7 +106,8 @@ export async function createOrder(payload: OrderRegistrationInput) {
   if (!orderId) throw new Error("Order creation returned no ID");
 
   if (validated.transport_mode === 'UPS') {
-    const { error: trackingConfigError } = await supabase
+    const adminClient = await createAdminClient();
+    const { error: trackingConfigError } = await adminClient
       .from('zen_tracking_configs')
       .update({ provider_type: 'MANUAL', provider_name: 'MANUAL', tracking_no: null })
       .eq('order_id', orderId);
