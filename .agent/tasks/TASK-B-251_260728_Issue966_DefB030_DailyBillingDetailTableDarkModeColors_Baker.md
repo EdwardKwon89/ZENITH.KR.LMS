@@ -7,7 +7,7 @@
 | **담당** | Baker (Team B) |
 | **생성일** | 2026-07-28 |
 | **우선순위** | P3 |
-| **상태** | ⬜ |
+| **상태** | 🔔 |
 
 ## 개요
 
@@ -70,3 +70,23 @@ JSJung 요청으로 `/finance/daily-billing` 상세 리스트 색상 표출을 J
 _(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
 
 없음
+
+## [작업 결과]
+
+| 항목 | 결과 |
+|:-----|:-----|
+| **커밋 해시** | `4aa4b524` |
+| **브랜치** | `feature/teamb-251-daily-billing-dark-mode-colors` |
+| **변경 파일** | `ShipperDailyBillingClient.tsx` (1 파일, 6줄 변경) |
+| **npm run test:regression** | 144/144 files · 978/978 tests ALL PASS |
+| **R-10 스크린샷** | 라이트/다크 모드 각 1장 촬영 필요 |
+
+### 변경 요약
+
+요약 테이블(69-113행)과 동일한 색상 체계로 상세 테이블(214-219행) 6개 컬럼 통일:
+- 기본운임: `text-slate-700 dark:text-slate-300` 추가
+- 유류할증: `text-slate-700 dark:text-slate-300` 추가
+- 급증수수료: `dark:text-amber-400` 추가
+- 기타부과금: `dark:text-purple-400` 추가
+- 사후조정: `dark:text-blue-400` 추가
+- 합계(KRW): `dark:text-amber-400` 추가
