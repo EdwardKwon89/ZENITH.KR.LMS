@@ -201,13 +201,18 @@ describe('화주별 일별/주별/월별 청구 집계 및 최종 운임 확정 
   });
 
   describe('getShipperDailyOrdersDetails', () => {
-    it('특정 화주 및 날짜의 세부 오더 목록(OTHER_CHARGE 포함) 정상 반환', async () => {
+    it('ADMIN_TO_AGENCY 티어 인보이스로 invoiceIds 전달 시 metadata.source_order_id 기반 오더 역추적', async () => {
       (validateUserAction as any).mockResolvedValue({
         supabase: mockSupabase,
         profile: { id: 'admin-usr-1', role: USER_ROLES.ADMIN },
       });
 
       mockSupabase.from.mockImplementation((table: string) => {
+        if (table === 'zen_invoices') {
+          return createChainableMock([
+            { id: 'inv-1', invoice_no: 'INV-001', status: 'UNPAID', is_finalized: false, metadata: { source_order_id: 'ord-1' } },
+          ]);
+        }
         if (table === 'zen_orders') {
           return createChainableMock([
             {
@@ -228,15 +233,10 @@ describe('화주별 일별/주별/월별 청구 집계 및 최종 운임 확정 
             { order_id: 'ord-1', cost_type: 'OTHER_CHARGE', unit_price: 25, quantity: 1, total_amount: 25, currency: 'USD' },
           ]);
         }
-        if (table === 'zen_invoices') {
-          return createChainableMock([
-            { id: 'inv-1', invoice_no: 'INV-001', status: 'UNPAID', is_finalized: false, metadata: { source_order_id: 'ord-1' } },
-          ]);
-        }
         return createChainableMock();
       });
 
-      const res = await getShipperDailyOrdersDetails('shipper-1', '2026-07-23');
+      const res = await getShipperDailyOrdersDetails(['inv-1']);
       expect(res.success).toBe(true);
       expect(res.orders?.length).toBe(1);
       expect(res.orders?.[0].orderNo).toBe('ORD-001');
@@ -245,42 +245,74 @@ describe('화주별 일별/주별/월별 청구 집계 및 최종 운임 확정 
       expect(res.orders?.[0].invoiceNo).toBe('INV-001');
     });
 
-    it('특정 화주 및 월별 기간 세부 오더 목록 정상 반환', async () => {
+    it('AGENCY_TO_SHIPPER 티어 인보이스도 동일하게 오더 역추적 정상 동작', async () => {
       (validateUserAction as any).mockResolvedValue({
         supabase: mockSupabase,
         profile: { id: 'admin-usr-1', role: USER_ROLES.ADMIN },
       });
 
       mockSupabase.from.mockImplementation((table: string) => {
+        if (table === 'zen_invoices') {
+          return createChainableMock([
+            { id: 'inv-2', invoice_no: 'INV-002', status: 'UNPAID', is_finalized: false, metadata: { source_order_id: 'ord-2' } },
+          ]);
+        }
         if (table === 'zen_orders') {
           return createChainableMock([
             {
-              id: 'ord-1',
-              order_no: 'ORD-001',
-              status: 'DELIVERED',
+              id: 'ord-2',
+              order_no: 'ORD-002',
+              status: 'SHIPPED',
               transport_mode: 'UPS',
-              recipient_country_code: 'US',
-              created_at: '2026-07-15T10:00:00Z',
-              shipper_id: 'shipper-1',
-              shipper: { name: 'ABC 상사' },
+              recipient_country_code: 'KR',
+              created_at: '2026-07-25T14:00:00Z',
+              shipper_id: 'shipper-2',
+              shipper: { name: 'XYZ 무역' },
             },
           ]);
         }
         if (table === 'zen_order_costs') {
           return createChainableMock([
-            { order_id: 'ord-1', cost_type: 'BASE_FREIGHT', unit_price: 150, quantity: 1, total_amount: 150 },
+            { order_id: 'ord-2', cost_type: 'FREIGHT', unit_price: 200, quantity: 1, total_amount: 200, currency: 'USD' },
           ]);
         }
+        return createChainableMock();
+      });
+
+      const res = await getShipperDailyOrdersDetails(['inv-2']);
+      expect(res.success).toBe(true);
+      expect(res.orders?.length).toBe(1);
+      expect(res.orders?.[0].orderNo).toBe('ORD-002');
+      expect(res.orders?.[0].baseFreight).toBe(200 * 1350);
+    });
+
+    it('invoiceIds가 빈 배열이면 빈 결과 반환', async () => {
+      (validateUserAction as any).mockResolvedValue({
+        supabase: mockSupabase,
+        profile: { id: 'admin-usr-1', role: USER_ROLES.ADMIN },
+      });
+
+      const res = await getShipperDailyOrdersDetails([]);
+      expect(res.success).toBe(true);
+      expect(res.orders).toHaveLength(0);
+    });
+
+    it('CANCELED 인보이스는 제외됨', async () => {
+      (validateUserAction as any).mockResolvedValue({
+        supabase: mockSupabase,
+        profile: { id: 'admin-usr-1', role: USER_ROLES.ADMIN },
+      });
+
+      mockSupabase.from.mockImplementation((table: string) => {
         if (table === 'zen_invoices') {
           return createChainableMock([]);
         }
         return createChainableMock();
       });
 
-      const res = await getShipperDailyOrdersDetails('shipper-1', '2026-07', 'monthly');
+      const res = await getShipperDailyOrdersDetails(['inv-canceled']);
       expect(res.success).toBe(true);
-      expect(res.orders?.length).toBe(1);
-      expect(res.orders?.[0].orderNo).toBe('ORD-001');
+      expect(res.orders).toHaveLength(0);
     });
   });
 
@@ -431,40 +463,44 @@ describe('화주별 일별/주별/월별 청구 집계 및 최종 운임 확정 
       expect(mockInvoicesChain.eq).toHaveBeenCalledWith('billed_org_id', 'agency-org');
     });
 
-    it('getShipperDailyOrdersDetails: AGENCY 역할은 zen_agency_shippers를 조회하여 shipperId 검증', async () => {
+    it('getShipperDailyOrdersDetails: AGENCY 역할은 invoiceIds로 인보이스 조회 시 오더 역추적 정상 동작', async () => {
       (validateUserAction as any).mockResolvedValue({
         supabase: mockSupabase,
         profile: { id: 'agency-usr', role: USER_ROLES.AGENCY, org_id: 'agency-org' },
       });
 
-      const mockAgencyChain = createChainableMock([{ shipper_org_id: 'shipper-allowed' }]);
-      const mockOrdersChain = createChainableMock([]);
-
       mockSupabase.from.mockImplementation((table: string) => {
-        if (table === 'zen_agency_shippers') return mockAgencyChain;
-        return mockOrdersChain;
+        if (table === 'zen_invoices') {
+          return createChainableMock([
+            { id: 'inv-agency-1', invoice_no: 'INV-AGENCY-001', status: 'UNPAID', is_finalized: false, metadata: { source_order_id: 'ord-agency-1' } },
+          ]);
+        }
+        if (table === 'zen_orders') {
+          return createChainableMock([
+            { id: 'ord-agency-1', order_no: 'ORD-AGENCY-001', status: 'DELIVERED', transport_mode: 'UPS', recipient_country_code: 'US', created_at: '2026-07-27T10:00:00Z', shipper_id: 'shipper-1', shipper: { name: '화주A' } },
+          ]);
+        }
+        if (table === 'zen_order_costs') {
+          return createChainableMock([
+            { order_id: 'ord-agency-1', cost_type: 'FREIGHT', unit_price: 100, quantity: 1, total_amount: 100, currency: 'USD' },
+          ]);
+        }
+        return createChainableMock();
       });
 
-      const res = await getShipperDailyOrdersDetails('shipper-allowed', '2026-07-27', 'daily');
-      expect(mockAgencyChain.eq).toHaveBeenCalledWith('agency_org_id', 'agency-org');
+      const res = await getShipperDailyOrdersDetails(['inv-agency-1']);
       expect(res.success).toBe(true);
+      expect(res.orders?.length).toBe(1);
+      expect(res.orders?.[0].orderNo).toBe('ORD-AGENCY-001');
     });
 
-    it('getShipperDailyOrdersDetails: AGENCY 역할은 허용되지 않은 shipperId는 빈 결과 반환', async () => {
+    it('getShipperDailyOrdersDetails: AGENCY 역할은 빈 invoiceIds로 호출 시 빈 결과 반환', async () => {
       (validateUserAction as any).mockResolvedValue({
         supabase: mockSupabase,
         profile: { id: 'agency-usr', role: USER_ROLES.AGENCY, org_id: 'agency-org' },
       });
 
-      mockSupabase.from.mockImplementation((table: string) => {
-        if (table === 'zen_agency_shippers') return createChainableMock([{ shipper_org_id: 'shipper-allowed' }]);
-        if (table === 'zen_orders') return createChainableMock([
-          { id: 'o1', order_no: 'ZEN-001', status: 'DELIVERED', transport_mode: 'UPS', recipient_country_code: 'KR', created_at: '2026-07-27T10:00:00Z', shipper_id: 'shipper-other', shipper: { name: 'OTHER' } },
-        ]);
-        return createChainableMock([]);
-      });
-
-      const res = await getShipperDailyOrdersDetails('shipper-other', '2026-07-27', 'daily');
+      const res = await getShipperDailyOrdersDetails([]);
       expect(res.success).toBe(true);
       expect(res.orders).toHaveLength(0);
     });
