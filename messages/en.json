@@ -102,7 +102,8 @@
     "agency_quick_links": "Quick Links",
     "agency_settlements_nav": "Settlements",
     "agency_ups_rates_nav": "UPS Rate Inquiry",
-    "shipper_ups_rates_nav": "UPS Freight Inquiry"
+    "shipper_ups_rates_nav": "UPS Freight Inquiry",
+    "shipper_invoices_nav": "Invoices"
   },
   "VOC": {
     "title": "VOC Management",

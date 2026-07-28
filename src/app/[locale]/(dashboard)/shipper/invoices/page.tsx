@@ -43,14 +43,16 @@ export default function ShipperInvoicesPage({ locale }: { locale: string }) {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case "PENDING":
-        return <ZenBadge className="bg-yellow-50 text-yellow-700 border-yellow-200 text-[10px]">대기</ZenBadge>;
-      case "SENT":
-        return <ZenBadge className="bg-blue-50 text-blue-700 border-blue-200 text-[10px]">발송됨</ZenBadge>;
+      case "UNPAID":
+        return <ZenBadge className="bg-yellow-50 text-yellow-700 border-yellow-200 text-[10px]">미결제</ZenBadge>;
+      case "PARTIAL":
+        return <ZenBadge className="bg-blue-50 text-blue-700 border-blue-200 text-[10px]">부분결제</ZenBadge>;
       case "PAID":
         return <ZenBadge className="bg-green-50 text-green-700 border-green-200 text-[10px]">결제완료</ZenBadge>;
       case "OVERDUE":
         return <ZenBadge className="bg-red-50 text-red-700 border-red-200 text-[10px]">연체</ZenBadge>;
+      case "CANCELED":
+        return <ZenBadge className="bg-slate-50 text-slate-400 border-slate-200 text-[10px]">취소</ZenBadge>;
       default:
         return <ZenBadge className="bg-slate-50 text-slate-700 border-slate-200 text-[10px]">{status}</ZenBadge>;
     }
