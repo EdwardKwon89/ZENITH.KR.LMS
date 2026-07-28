@@ -87,9 +87,20 @@ UPS 등록 (confirmUpsRegistration → registerUpsOrder)
 | B. 정산 시 라이브 재계산 | `SettlementEngine`이 스냅샷 대신 `estimateUpsFreight`를 직접 호출 | 항상 최신값, 성능 고려 필요 |
 | C. 중량/치수 변경 감지 → 자동 갱신 | `zen_order_packages`(gross_weight·length·width·height) UPDATE 트리거로 스냅샷 재생성 | 자동화, 복잡도 증가 |
 
-**현재 상태**: 발견만 되어 있으며, 수정은 별도 Task에서 설계 결정 후 진행해야 함.
+**현재 상태**: ✅ **해소 확인 (2026-07-28, Aiden)** — A안과 사실상 동일한 방식으로 이미 해소되어 있음을 코드로 확인. 다만 완전한 해소는 아니며 잔여 갭 1건 발견(아래 참조).
+
+## 해소 확인 (2026-07-28)
+
+본 결함은 2026-07-26 별개 작업(Issue #725/PR#844, TASK-B-218/220)으로 **이미 해소**되어 있음을 확인했다. 당시 이 작업은 DEF-125와 연결짓지 않고 별도 요구사항("입고처리 화면 부피/중량 실측값 별도 저장")으로 진행됐다.
+
+- `orders.ts`의 `applyPackageMeasurements()` 헬퍼가 중량/치수 변경 감지 → `zen_order_packages` 갱신 → `estimateUpsFreight()` 재호출 → `zen_order_rate_snapshots` 갱신(재계산) → 운임 변경 시 화주 이메일 통보까지 수행
+- `confirmInbound()`(입고확정 버튼)와 `saveInboundMeasurements()`(측정값만 저장하는 별도 버튼) 양쪽에서 호출
+- `InboundProcessForm.tsx`(입고처리 화면)에 실제로 배선되어 있음을 코드로 확인(단순 백엔드 로직이 아님)
+
+**잔여 갭**: 재계산 시 중량은 전 패키지 합산(정상)이지만 **치수(L×W×H)는 첫 번째 패키지만 사용** — 멀티패키지 오더에서 2번째 이후 패키지의 치수 변경이 반영되지 않음. 이 갭은 입고재계산뿐 아니라 오더 등록 시점(`saveOrderRateSnapshot`)에도 동일하게 존재하는, 더 오래된(2026-07-05부터) 근본 갭이다. 별도 결함으로 등록: **[DEF-B-021](DEF-B-021_운임스냅샷_멀티패키지_치수_첫번째만_반영.md)**.
 
 ## 검증
 
 - E29 TC-WF-01: `computeUpsFreight` 직접 호출로 2.0kg vs 5.0kg 차이 증명 (189,142 vs 249,577 KRW)
 - E29 TC-WF-02: 스냅샷 수동 갱신 후 정산 비용이 정확히 반영되는지 검증
+- 2026-07-28 Aiden: `applyPackageMeasurements()`/`confirmInbound()`/`saveInboundMeasurements()` 코드 직접 확인 + `InboundProcessForm.tsx` 배선 확인으로 실행 경로 검증 완료(멀티패키지 치수 제외)
