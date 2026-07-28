@@ -84,6 +84,28 @@ async function getOrCreateOrg(supabase: any, name: string, type: string) {
   return newOrg;
 }
 
+async function seedRolePermissions(supabase: any) {
+  console.log('\nSeeding zen_role_permissions (RBAC, DEF-B-017 등)...');
+
+  const permissions = [
+    { role_code: 'MANAGER', menu_id: 'ups_actual_charges', path: '/admin/ups-actual-charges', is_allowed: true },
+    { role_code: 'AGENCY', menu_id: 'ups_actual_charges', path: '/admin/ups-actual-charges', is_allowed: true },
+  ];
+
+  for (const p of permissions) {
+    const { data: existing } = await supabase
+      .from('zen_role_permissions')
+      .select('id')
+      .eq('role_code', p.role_code)
+      .eq('path', p.path)
+      .maybeSingle();
+    if (existing) { console.log(`  - Exists: ${p.role_code} → ${p.path}`); continue; }
+    const { error } = await supabase.from('zen_role_permissions').insert(p);
+    if (error) console.error(`  - Failed: ${p.role_code} → ${p.path}`, error.message);
+    else console.log(`  - Created: ${p.role_code} → ${p.path}`);
+  }
+}
+
 async function seedAgencyRelationship(supabase: any) {
   console.log('\nSeeding Agency/Agency_Shipper test accounts...');
 
@@ -875,11 +897,13 @@ async function seed() {
     await createUser(supabase, 'admin@zenith.kr', 'Tenant Admin', 'ADMIN', platformOrg.id, 'PLATFORM');
     await createUser(supabase, 'uat02_corp_shipper@zenith.kr', 'UAT02 Corporate Shipper', 'CORPORATE', shipperOrg.id, 'CUSTOMER');
     await createUser(supabase, 'shipper@zenith.kr', 'Main Shipper', 'CORPORATE', shipperOrg.id, 'CUSTOMER');
+    await createUser(supabase, 'jungjs72@gmail.com', 'JSJung Shipper Test', 'CORPORATE', shipperOrg.id, 'CUSTOMER');
     await createUser(supabase, 'carrier@zenith.kr', 'Main Carrier', 'CARRIER', carrierOrg.id, 'PARTNER');
     await createUser(supabase, 'individual@zenith.kr', 'Individual User', 'INDIVIDUAL', null, 'CUSTOMER');
 
     // 3-1. Agency/Agency_Shipper 테스트 계정 (UPS 특송 UAT 필수 — 2026-07-19 보완)
     await seedAgencyRelationship(supabase);
+    await seedRolePermissions(supabase);
 
     // 3-2. SNTL 실 Agency 계정 (원가표.xlsx 연동 — 2026-07-19)
     await seedSntlAgency(supabase);

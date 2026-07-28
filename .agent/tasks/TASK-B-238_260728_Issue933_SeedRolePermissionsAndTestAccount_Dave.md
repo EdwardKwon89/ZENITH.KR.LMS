@@ -6,7 +6,7 @@
 | **담당** | Dave (Team B) |
 | **생성일** | 2026-07-28 |
 | **우선순위** | P2 |
-| **상태** | ⬜ |
+| **상태** | 🔔 |
 
 ## 개요
 
@@ -76,8 +76,22 @@ async function seedRolePermissions(supabase: any) {
 
 - Dave: `.agent/VIOLATION_TRACKER.md` 참조 후 착수. 배정 파일을 반드시 그대로 사용할 것 — 새 번호로 재채번하지 말 것. 무관한 과거 task file을 건드리지 않도록 주의(과거 TASK-B-164 오염 사례 참고).
 
-## [발견 이슈]
+## [작업 결과]
 
-_(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
+| 항목 | 내용 |
+|:-----|:------|
+| **담당 실행자** | D_Kai (Dave 대리) |
+| **커밋 해시** | `41a39d69` |
+| **변경 파일** | `scripts/seed-local.ts` |
+| **테스트 결과** | `vitest run` — 140 files · 943 tests **ALL PASS** (회귀 영향 없음) |
+| **실측 검증** | `npm run db:seed` — jungjs72@gmail.com 생성 확인 · 로그인 OK · RBAC 중복 없음(멱등) |
 
-없음
+### 체크리스트 완료 현황
+
+- [x] 브랜치 생성
+- [x] `scripts/seed-local.ts` 수정 — test account + seedRolePermissions 함수 + main() 호출
+- [x] `npm run db:seed` 실행 후 실측:
+  - `auth.users`에 `jungjs72@gmail.com` 존재 확인 ✅
+  - `jungjs72@gmail.com` / `password1234` 로그인 성공 ✅
+  - `zen_role_permissions`에 MANAGER/AGENCY 2행 존재 (재실행 중복 없음, 멱등) ✅
+- [x] `npm run test:regression` — 943/943 ALL PASS (기존 테스트 영향 없음)
