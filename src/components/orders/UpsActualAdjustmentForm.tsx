@@ -5,6 +5,7 @@ import { recordUpsActualCharges, getUpsActualCharges, getUpsChargeReconciliation
 import { toast } from 'sonner';
 import { Loader2, Plus, Trash2, HelpCircle } from 'lucide-react';
 import { ZenCard, ZenButton, ZenInput, ZenSelect, ZenBadge } from '@/components/ui/ZenUI';
+import { getCostTypeLabel } from '@/lib/finance/settlement/cost-type-labels';
 
 interface UpsActualAdjustmentFormProps {
   orderId: string;
@@ -16,8 +17,6 @@ interface ChargeRow {
   chargeType: string;
   amount: number;
   currency: string;
-  upsInvoiceNo: string;
-  upsInvoiceDate: string;
   notes: string;
 }
 
@@ -30,10 +29,13 @@ export function UpsActualAdjustmentForm({
   const [saving, setSaving] = useState(false);
   const [reconciliation, setReconciliation] = useState<{
     estimated: number;
+    estimatedBreakdown: Array<{ costType: string; amount: number; currency: string }>;
     actual: number;
     variance: number;
     currency: string;
     isFinalized: boolean;
+    invoiceNo: string | null;
+    invoiceDate: string | null;
   } | null>(null);
 
   const [charges, setCharges] = useState<ChargeRow[]>([]);
@@ -52,23 +54,11 @@ export function UpsActualAdjustmentForm({
             chargeType: c.charge_type,
             amount: Number(c.charge_amount),
             currency: c.currency,
-            upsInvoiceNo: c.ups_invoice_no || '',
-            upsInvoiceDate: c.ups_invoice_date || '',
             notes: c.notes || '',
           }))
         );
       } else {
-        // Default row
-        setCharges([
-          {
-            chargeType: 'BASE FREIGHT',
-            amount: recon.estimated > 0 ? recon.estimated : 0,
-            currency: recon.currency || 'USD',
-            upsInvoiceNo: '',
-            upsInvoiceDate: '',
-            notes: '',
-          },
-        ]);
+        setCharges([]);
       }
 
       // Check if there is already an invoiced adjustment
@@ -95,27 +85,12 @@ export function UpsActualAdjustmentForm({
         chargeType: '',
         amount: 0,
         currency: defaultCurrency,
-        upsInvoiceNo: '',
-        upsInvoiceDate: '',
         notes: '',
       },
     ]);
   };
 
   const handleRemoveRow = (index: number) => {
-    if (charges.length === 1) {
-      setCharges([
-        {
-          chargeType: '',
-          amount: 0,
-          currency: reconciliation?.currency || 'USD',
-          upsInvoiceNo: '',
-          upsInvoiceDate: '',
-          notes: '',
-        },
-      ]);
-      return;
-    }
     setCharges(charges.filter((_, i) => i !== index));
   };
 
@@ -143,8 +118,6 @@ export function UpsActualAdjustmentForm({
         chargeType: c.chargeType.trim(),
         amount: c.amount,
         currency: c.currency,
-        upsInvoiceNo: c.upsInvoiceNo.trim() || undefined,
-        upsInvoiceDate: c.upsInvoiceDate || undefined,
         notes: c.notes.trim() || undefined,
       }));
 
@@ -175,9 +148,9 @@ export function UpsActualAdjustmentForm({
     );
   }
 
-  const actualTotal = charges.reduce((sum, c) => sum + c.amount, 0);
+  const actualTotal = reconciliation?.actual ?? 0;
   const estimatedTotal = reconciliation?.estimated || 0;
-  const variance = actualTotal - estimatedTotal;
+  const variance = reconciliation?.variance ?? 0;
   const currency = reconciliation?.currency || 'USD';
 
   return (
@@ -218,7 +191,13 @@ export function UpsActualAdjustmentForm({
           <div className="text-2xl font-bold text-primary mt-1">
             {actualTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {currency}
           </div>
-          <p className="text-[10px] text-gray-400 dark:text-zinc-500 mt-1">아래 입력된 실제 항목의 합산액</p>
+          <p className="text-[10px] text-gray-400 dark:text-zinc-500 mt-1">예상 청구액 + 아래 추가 등록된 부가요금의 합산액</p>
+          {reconciliation?.invoiceNo && (
+            <div className="mt-2 pt-2 border-t border-gray-200 dark:border-zinc-700 text-[11px] text-gray-500 dark:text-zinc-400 space-y-0.5">
+              <div>청구서 번호: <span className="font-mono">{reconciliation.invoiceNo}</span></div>
+              <div>청구 날짜: {new Date(reconciliation.invoiceDate!).toLocaleDateString('ko-KR')}</div>
+            </div>
+          )}
         </ZenCard>
 
         <ZenCard className={`p-4 ${
@@ -258,18 +237,28 @@ export function UpsActualAdjustmentForm({
         <table className="w-full text-left border-collapse text-sm">
           <thead>
             <tr className="bg-gray-50 dark:bg-zinc-900 border-b text-gray-700 dark:text-zinc-300">
-              <th className="p-3 w-1/4">청구 유형 (Charge Type)</th>
+              <th className="p-3 w-20">구분</th>
+              <th className="p-3 w-1/3">청구 유형 (Charge Type)</th>
               <th className="p-3 w-1/6">금액 (Amount)</th>
               <th className="p-3 w-1/12">통화</th>
-              <th className="p-3 w-1/6">청구서 번호</th>
-              <th className="p-3 w-1/6">청구 날짜</th>
-              <th className="p-3 w-1/4">메모</th>
+              <th className="p-3 w-1/3">메모</th>
               {isEditable && <th className="p-3 w-10"></th>}
             </tr>
           </thead>
           <tbody>
+            {reconciliation?.estimatedBreakdown?.map((item, i) => (
+              <tr key={`est-${i}`} className="border-b bg-gray-50/50 dark:bg-zinc-900/50">
+                <td className="p-3"><ZenBadge className="bg-gray-200 text-gray-700 dark:bg-zinc-700 dark:text-zinc-300">예상</ZenBadge></td>
+                <td className="p-3 font-semibold">{getCostTypeLabel(item.costType)}</td>
+                <td className="p-3"><span className="font-mono text-right block">{item.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></td>
+                <td className="p-3">{item.currency}</td>
+                <td className="p-3 text-gray-400 text-xs">—</td>
+                {isEditable && <td className="p-3"></td>}
+              </tr>
+            ))}
             {charges.map((row, index) => (
               <tr key={index} className="border-b hover:bg-gray-50/50 dark:hover:bg-zinc-900/50">
+                <td className="p-3"><ZenBadge className="bg-primary/10 text-primary">추가</ZenBadge></td>
                 <td className="p-3">
                   {isEditable ? (
                     <>
@@ -329,31 +318,6 @@ export function UpsActualAdjustmentForm({
                     />
                   ) : (
                     <span>{row.currency}</span>
-                  )}
-                </td>
-                <td className="p-3">
-                  {isEditable ? (
-                    <ZenInput
-                      type="text"
-                      value={row.upsInvoiceNo}
-                      onChange={(e) => handleChangeRow(index, 'upsInvoiceNo', e.target.value)}
-                      placeholder="참고용 청구서번호"
-                      className="w-full"
-                    />
-                  ) : (
-                    <span>{row.upsInvoiceNo || '—'}</span>
-                  )}
-                </td>
-                <td className="p-3">
-                  {isEditable ? (
-                    <ZenInput
-                      type="date"
-                      value={row.upsInvoiceDate}
-                      onChange={(e) => handleChangeRow(index, 'upsInvoiceDate', e.target.value)}
-                      className="w-full"
-                    />
-                  ) : (
-                    <span>{row.upsInvoiceDate || '—'}</span>
                   )}
                 </td>
                 <td className="p-3">

@@ -47,6 +47,12 @@ export default function ShipperDailyBillingClient({
   const [isPending, startTransition] = useTransition();
   const [finalizingGroupKey, setFinalizingGroupKey] = useState<string | null>(null);
 
+  const [finalizeModal, setFinalizeModal] = useState<{
+    open: boolean;
+    group: ShipperDailyBillingGroup | null;
+    reason: string;
+  }>({ open: false, group: null, reason: '청구 집계 최종 운임 마감' });
+
   // Fetch summary from server action with current filters
   const fetchSummary = (targetPeriodType?: 'daily' | 'weekly' | 'monthly', sDate?: string, eDate?: string, sFilter?: string) => {
     const targetType = targetPeriodType || periodType;
@@ -98,8 +104,8 @@ export default function ShipperDailyBillingClient({
 
   // Calculate totals
   const totalOrders = filteredGroups.reduce((sum, g) => sum + g.orderCount, 0);
-  const totalUsd = filteredGroups.reduce((sum, g) => sum + g.totalBillingAmountUsd, 0);
-  const totalKrw = Math.round(totalUsd * exchangeRate);
+  const totalKrw = filteredGroups.reduce((sum, g) => sum + g.totalBillingAmountKrw, 0);
+  const totalUsd = Math.round(totalKrw / exchangeRate * 100) / 100;
   const totalFinalized = filteredGroups.reduce((sum, g) => sum + g.finalizedCount, 0);
   const totalUnfinalized = filteredGroups.reduce((sum, g) => sum + g.unfinalizedCount, 0);
 
@@ -129,16 +135,16 @@ export default function ShipperDailyBillingClient({
       toast.error('마감할 인보이스가 없습니다.');
       return;
     }
+    setFinalizeModal({ open: true, group, reason: '청구 집계 최종 운임 마감' });
+  };
 
-    const reason = window.prompt(
-      `[${group.shipperName} / ${group.date}] 총 ${group.invoiceIds.length}건의 인보이스를 최종 정산 마감 처리하시겠습니까?\n\nAdmin 예외 마감 사유를 입력하세요 (선택 사항):`,
-      '청구 집계 최종 운임 마감'
-    );
-
-    if (reason === null) return;
+  const handleConfirmFinalize = async () => {
+    const { group, reason } = finalizeModal;
+    if (!group) return;
 
     const key = `${group.shipperId}_${group.date}`;
     setFinalizingGroupKey(key);
+    setFinalizeModal({ open: false, group: null, reason: '청구 집계 최종 운임 마감' });
 
     startTransition(async () => {
       const res = await finalizeDailyShipperInvoices(group.invoiceIds, reason);
@@ -268,13 +274,13 @@ export default function ShipperDailyBillingClient({
         </div>
 
         <div className="bg-gradient-to-br from-amber-950 via-zinc-900 to-slate-900 text-white p-5 rounded-2xl border border-amber-500/20 shadow-md">
-          <span className="text-xs text-amber-400 font-semibold block mb-1">총 청구 집계액 (USD)</span>
-          <span className="text-2xl font-black font-mono text-amber-300">${totalUsd.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+          <span className="text-xs text-amber-400 font-semibold block mb-1">총 청구 집계액 (KRW)</span>
+          <span className="text-2xl font-black font-mono text-amber-300">₩{totalKrw.toLocaleString()}</span>
         </div>
 
         <div className="bg-gradient-to-br from-blue-950 via-zinc-900 to-slate-900 text-white p-5 rounded-2xl border border-blue-500/20 shadow-md">
-          <span className="text-xs text-blue-400 font-semibold block mb-1">추정 청구액 (KRW)</span>
-          <span className="text-2xl font-black font-mono text-blue-300">₩{totalKrw.toLocaleString()}</span>
+          <span className="text-xs text-blue-400 font-semibold block mb-1">추정 청구액 (USD)</span>
+          <span className="text-2xl font-black font-mono text-blue-300">${totalUsd.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
         </div>
 
         <div className="bg-white dark:bg-zinc-950 p-5 rounded-2xl border border-slate-200 dark:border-zinc-800 shadow-md flex items-center justify-between">
@@ -321,7 +327,7 @@ export default function ShipperDailyBillingClient({
                   <th className="py-3 px-4 text-right">급증수수료</th>
                   <th className="py-3 px-4 text-right">기타부과금</th>
                   <th className="py-3 px-4 text-right">사후조정액</th>
-                  <th className="py-3 px-4 text-right">총 합계 (USD / KRW)</th>
+                   <th className="py-3 px-4 text-right">총 합계 (KRW / USD)</th>
                   <th className="py-3 px-4 text-center">마감 상태</th>
                   <th className="py-3 px-4 text-center">관리 / 액션</th>
                 </tr>
@@ -346,26 +352,26 @@ export default function ShipperDailyBillingClient({
                           {g.orderCount}건
                         </td>
                         <td className="py-3.5 px-4 text-right font-mono text-slate-700 dark:text-slate-300">
-                          ${g.totalBaseFreight.toFixed(2)}
+                          ₩{g.totalBaseFreight.toLocaleString()}
                         </td>
                         <td className="py-3.5 px-4 text-right font-mono text-slate-700 dark:text-slate-300">
-                          ${g.totalFuelSurcharge.toFixed(2)}
+                          ₩{g.totalFuelSurcharge.toLocaleString()}
                         </td>
                         <td className="py-3.5 px-4 text-right font-mono text-amber-600 dark:text-amber-400 font-semibold">
-                          ${g.totalSurgeFee.toFixed(2)}
+                          ₩{g.totalSurgeFee.toLocaleString()}
                         </td>
                         <td className="py-3.5 px-4 text-right font-mono text-purple-600 dark:text-purple-400 font-semibold">
-                          ${(g.totalOtherCharge || 0).toFixed(2)}
+                          ₩{(g.totalOtherCharge || 0).toLocaleString()}
                         </td>
                         <td className="py-3.5 px-4 text-right font-mono text-blue-600 dark:text-blue-400 font-semibold">
-                          ${g.totalActualAdjustment.toFixed(2)}
+                          ₩{g.totalActualAdjustment.toLocaleString()}
                         </td>
                         <td className="py-3.5 px-4 text-right">
                           <span className="block font-extrabold font-mono text-amber-600 dark:text-amber-400">
-                            ${g.totalBillingAmountUsd.toFixed(2)} USD
+                            ₩{g.totalBillingAmountKrw.toLocaleString()} KRW
                           </span>
                           <span className="block text-[11px] font-mono text-slate-400">
-                            ₩{g.estimatedBillingAmountKrw.toLocaleString()}
+                            ${g.estimatedBillingAmountUsd.toLocaleString('en-US', { minimumFractionDigits: 2 })} USD
                           </span>
                         </td>
                         <td className="py-3.5 px-4 text-center">
@@ -441,7 +447,7 @@ export default function ShipperDailyBillingClient({
                                         <th className="py-2 px-3 text-right">급증수수료</th>
                                         <th className="py-2 px-3 text-right">기타부과금</th>
                                         <th className="py-2 px-3 text-right">사후조정</th>
-                                        <th className="py-2 px-3 text-right">합계(USD)</th>
+                                         <th className="py-2 px-3 text-right">합계(KRW)</th>
                                         <th className="py-2 px-3 text-center">인보이스</th>
                                         <th className="py-2 px-3 text-center">바로가기</th>
                                       </tr>
@@ -460,13 +466,16 @@ export default function ShipperDailyBillingClient({
                                           <td className="py-2 px-3 font-bold text-slate-700 dark:text-slate-300">
                                             {ord.destCountryCode}
                                           </td>
-                                          <td className="py-2 px-3 text-right font-mono">${ord.baseFreight.toFixed(2)}</td>
-                                          <td className="py-2 px-3 text-right font-mono">${ord.fuelSurcharge.toFixed(2)}</td>
-                                          <td className="py-2 px-3 text-right font-mono text-amber-600">${ord.surgeFee.toFixed(2)}</td>
-                                          <td className="py-2 px-3 text-right font-mono text-purple-600">${(ord.otherCharge || 0).toFixed(2)}</td>
-                                          <td className="py-2 px-3 text-right font-mono text-blue-600">${ord.actualAdjustment.toFixed(2)}</td>
+                                          <td className="py-2 px-3 text-right font-mono">₩{ord.baseFreight.toLocaleString()}</td>
+                                          <td className="py-2 px-3 text-right font-mono">₩{ord.fuelSurcharge.toLocaleString()}</td>
+                                          <td className="py-2 px-3 text-right font-mono text-amber-600">₩{ord.surgeFee.toLocaleString()}</td>
+                                          <td className="py-2 px-3 text-right font-mono text-purple-600">₩{(ord.otherCharge || 0).toLocaleString()}</td>
+                                          <td className="py-2 px-3 text-right font-mono text-blue-600">₩{ord.actualAdjustment.toLocaleString()}</td>
                                           <td className="py-2 px-3 text-right font-mono font-bold text-amber-600">
-                                            ${ord.totalAmountUsd.toFixed(2)}
+                                            ₩{ord.totalAmountKrw.toLocaleString()}
+                                            {ord.hasUnsupportedCurrency && (
+                                              <span className="ml-1 text-[9px] text-red-500 font-normal">⚠ 혼합통화</span>
+                                            )}
                                           </td>
                                           <td className="py-2 px-3 text-center font-mono">
                                             {ord.invoiceNo ? (
@@ -504,6 +513,46 @@ export default function ShipperDailyBillingClient({
           </div>
         )}
       </div>
+
+      {/* Finalize Confirmation Modal */}
+      {finalizeModal.open && finalizeModal.group && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-white dark:bg-zinc-950 rounded-2xl border border-slate-200 dark:border-zinc-800 shadow-xl p-6 w-full max-w-md mx-4">
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
+              일괄 마감 확인
+            </h3>
+            <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+              [{finalizeModal.group.shipperName} / {finalizeModal.group.date}] 총{' '}
+              {finalizeModal.group.invoiceIds.length}건의 인보이스를 최종 정산 마감
+              처리하시겠습니까?
+            </p>
+            <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">
+              마감 사유 (선택)
+            </label>
+            <input
+              type="text"
+              value={finalizeModal.reason}
+              onChange={(e) => setFinalizeModal((prev) => ({ ...prev, reason: e.target.value }))}
+              className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-zinc-700 rounded-lg bg-slate-50 dark:bg-zinc-900 text-slate-900 dark:text-white mb-4"
+              placeholder="마감 사유를 입력하세요"
+            />
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setFinalizeModal({ open: false, group: null, reason: '청구 집계 최종 운임 마감' })}
+                className="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-lg transition-colors"
+              >
+                취소
+              </button>
+              <button
+                onClick={handleConfirmFinalize}
+                className="px-4 py-2 text-sm font-medium text-white bg-amber-500 hover:bg-amber-600 rounded-lg transition-colors"
+              >
+                마감 처리
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

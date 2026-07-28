@@ -72,17 +72,19 @@ export class InvoiceGenerator {
 
       // 3. 인보이스 번호 생성 (규칙: INV-YYYYMMDD-Random)
       const today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-      const randomSuffix = Math.floor(1000 + Math.random() * 9000);
-      const invoiceNo = `INV-${today}-${randomSuffix}`;
-      
-      // 4. 인보이스 레코드 생성
+      const randomSuffix = () => Math.floor(1000 + Math.random() * 9000);
+
+      // 4. 기존 인보이스 (shipper 대상) — invoice_tier / billed_org_id 추가
       const exchangeRate = await getNumericParam('EXCHANGE_RATE_USD_KRW', 1350);
-      
+      const invoiceTier = order.agency_org_id ? 'AGENCY_TO_SHIPPER' : 'ADMIN_TO_SHIPPER';
+
       const { data: invoice, error: invError } = await supabase
         .from('zen_invoices')
         .insert({
-          invoice_no: invoiceNo,
+          invoice_no: `INV-${today}-${randomSuffix()}`,
           shipper_id: shipperIdStr,
+          billed_org_id: shipperIdStr,
+          invoice_tier: invoiceTier,
           total_amount: totalAmount,
           currency: currency,
           applied_exchange_rate: exchangeRate,
@@ -108,13 +110,58 @@ export class InvoiceGenerator {
         .update({ invoice_id: invoice.id })
         .in('id', unbilledCosts.map((c: any) => c.id));
 
-      // 6. 오더 상태 업데이트 (정산 상태)
+      // 6. admin→agency 인보이스 생성 (agency_org_id가 있는 경우에만)
+      let agencyInvoice: any = null;
+      if (order.agency_org_id) {
+        const { data: rateSnapshot } = await supabase
+          .from('zen_order_rate_snapshots')
+          .select('metadata')
+          .eq('order_id', orderId)
+          .maybeSingle();
+
+        if (rateSnapshot?.metadata) {
+          const meta = rateSnapshot.metadata as Record<string, any>;
+          const platform = meta.platform || {};
+          const agencyCurrency = platform.currency || 'USD';
+          const baseFreight = Number(platform.baseSellingPrice) || 0;
+          const fuelSurcharge = Number(platform.fuelSurchargeSellingAmount) || 0;
+          const surgeFee = Number(platform.surgeFeeSellingAmount) || 0;
+          const otherCharges = Number(platform.otherChargesSellingTotal) || 0;
+          const platformTotal = baseFreight + fuelSurcharge + surgeFee + otherCharges;
+
+          const { data: agencyInv, error: agencyInvError } = await supabase
+            .from('zen_invoices')
+            .insert({
+              invoice_no: `INV-${today}-${randomSuffix()}`,
+              shipper_id: shipperIdStr,
+              billed_org_id: order.agency_org_id,
+              invoice_tier: 'ADMIN_TO_AGENCY',
+              total_amount: platformTotal,
+              currency: agencyCurrency,
+              applied_exchange_rate: exchangeRate,
+              status: 'UNPAID',
+              due_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
+              metadata: {
+                source_order_id: orderId,
+                order_no: order.order_no,
+                platform_breakdown: { baseFreight, fuelSurcharge, surgeFee, otherCharges },
+              },
+            })
+            .select()
+            .single();
+
+          if (agencyInvError) throw agencyInvError;
+          agencyInvoice = agencyInv;
+        }
+      }
+
+      // 7. 오더 상태 업데이트 (정산 상태)
       await supabase
         .from('zen_orders')
         .update({ billing_status: 'INVOICED' })
         .eq('id', orderId);
 
-      return { success: true, invoice };
+      return { success: true, invoice, agencyInvoice };
     } catch (err: any) {
       logger.error('InvoiceGenerator Error:', err);
       return { success: false, message: err.message };

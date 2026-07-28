@@ -21,13 +21,14 @@ export interface ShipperDailyBillingGroup {
   totalSurgeFee: number;
   totalOtherCharge: number;
   totalActualAdjustment: number;
-  totalBillingAmountUsd: number;
-  estimatedBillingAmountKrw: number;
+  totalBillingAmountKrw: number;
+  estimatedBillingAmountUsd: number;
   appliedExchangeRate: number;
   currency: string;
   invoiceIds: string[];
   orderIds: string[];
   periodType?: 'daily' | 'weekly' | 'monthly';
+  hasUnsupportedCurrency: boolean;
 }
 
 export interface ShipperDailyOrderRow {
@@ -45,10 +46,17 @@ export interface ShipperDailyOrderRow {
   surgeFee: number;
   otherCharge: number;
   actualAdjustment: number;
-  totalAmountUsd: number;
+  totalAmountKrw: number;
   invoiceId?: string;
   invoiceNo?: string;
   invoiceStatus?: string;
+  hasUnsupportedCurrency: boolean;
+}
+
+function convertToKrw(amount: number, currency: string, exchangeRate: number): { amountKrw: number; unsupported: boolean } {
+  if (currency === 'KRW') return { amountKrw: amount, unsupported: false };
+  if (currency === 'USD') return { amountKrw: amount * exchangeRate, unsupported: false };
+  return { amountKrw: 0, unsupported: true };
 }
 
 function getWeekNumber(d: Date): number {
@@ -125,6 +133,19 @@ export async function getShipperDailyBillingSummary(params?: {
     if (params?.shipperId) {
       ordersQuery = ordersQuery.eq('shipper_id', params.shipperId);
     }
+    if (profile.role === USER_ROLES.AGENCY) {
+      const { data: links } = await supabase
+        .from('zen_agency_shippers')
+        .select('shipper_org_id')
+        .eq('agency_org_id', profile.org_id)
+        .eq('is_active', true);
+      const shipperIds = (links || []).map((l: any) => l.shipper_org_id);
+      if (shipperIds.length > 0) {
+        ordersQuery = ordersQuery.in('shipper_id', shipperIds);
+      } else {
+        return { success: true, groups: [], exchangeRate };
+      }
+    }
     if (params?.startDate) {
       ordersQuery = ordersQuery.gte('created_at', `${params.startDate}T00:00:00Z`);
     }
@@ -187,13 +208,14 @@ export async function getShipperDailyBillingSummary(params?: {
           totalSurgeFee: 0,
           totalOtherCharge: 0,
           totalActualAdjustment: 0,
-          totalBillingAmountUsd: 0,
-          estimatedBillingAmountKrw: 0,
+          totalBillingAmountKrw: 0,
+          estimatedBillingAmountUsd: 0,
           appliedExchangeRate: exchangeRate,
-          currency: 'USD',
+          currency: 'KRW',
           invoiceIds: [],
           orderIds: [],
           periodType,
+          hasUnsupportedCurrency: false,
         };
         groupsMap.set(key, group);
       }
@@ -210,12 +232,14 @@ export async function getShipperDailyBillingSummary(params?: {
       let actualAdj = 0;
 
       for (const c of costs) {
-        const amt = Number(c.total_amount || c.unit_price * (c.quantity || 1) || 0);
-        if (c.cost_type === 'FREIGHT' || c.cost_type === 'BASE_FREIGHT') baseFreight += amt;
-        else if (c.cost_type === 'FUEL_SURCHARGE') fuelSurcharge += amt;
-        else if (c.cost_type === 'SURGE_EMERGENCY' || c.cost_type === 'SURGE_FEE') surgeFee += amt;
-        else if (c.cost_type === 'OTHER_CHARGE') otherCharge += amt;
-        else if (c.cost_type === 'UPS_ACTUAL_ADJUSTMENT') actualAdj += amt;
+        const rawAmt = Number(c.total_amount || c.unit_price * (c.quantity || 1) || 0);
+        const { amountKrw, unsupported } = convertToKrw(rawAmt, c.currency, exchangeRate);
+        if (unsupported) group.hasUnsupportedCurrency = true;
+        if (c.cost_type === 'FREIGHT' || c.cost_type === 'BASE_FREIGHT') baseFreight += amountKrw;
+        else if (c.cost_type === 'FUEL_SURCHARGE') fuelSurcharge += amountKrw;
+        else if (c.cost_type === 'SURGE_EMERGENCY' || c.cost_type === 'SURGE_FEE') surgeFee += amountKrw;
+        else if (c.cost_type === 'OTHER_CHARGE') otherCharge += amountKrw;
+        else if (c.cost_type === 'UPS_ACTUAL_ADJUSTMENT') actualAdj += amountKrw;
       }
 
       group.totalBaseFreight += baseFreight;
@@ -242,13 +266,15 @@ export async function getShipperDailyBillingSummary(params?: {
         group.unfinalizedCount += 1;
       }
 
-      const orderTotalUsd = baseFreight + fuelSurcharge + surgeFee + otherCharge + actualAdj;
-      group.totalBillingAmountUsd += orderTotalUsd;
+      const orderTotalKrw = baseFreight + fuelSurcharge + surgeFee + otherCharge + actualAdj;
+      group.totalBillingAmountKrw += orderTotalKrw;
     }
 
-    // Compute KRW totals
+    // Compute estimated USD from KRW total
     const groups = Array.from(groupsMap.values()).map((g) => {
-      g.estimatedBillingAmountKrw = Math.round(g.totalBillingAmountUsd * g.appliedExchangeRate);
+      g.estimatedBillingAmountUsd = g.appliedExchangeRate > 0
+        ? Math.round(g.totalBillingAmountKrw / g.appliedExchangeRate * 100) / 100
+        : 0;
       return g;
     });
 
@@ -268,14 +294,28 @@ export async function getShipperDailyBillingSummary(params?: {
 export async function getShipperDailyOrdersDetails(
   shipperId: string,
   dateOrPeriod: string,
-  periodType: 'daily' | 'weekly' | 'monthly' = 'daily'
+  periodType: 'daily' | 'weekly' | 'monthly' = 'daily',
+  exchangeRate?: number
 ): Promise<{
   success: boolean;
   orders?: ShipperDailyOrderRow[];
   error?: string;
 }> {
   try {
-    const { supabase } = await validateUserAction();
+    const { supabase, profile } = await validateUserAction();
+    const rate = exchangeRate || await getNumericParam('EXCHANGE_RATE_USD_KRW', 1350);
+
+    if (profile.role === USER_ROLES.AGENCY) {
+      const { data: links } = await supabase
+        .from('zen_agency_shippers')
+        .select('shipper_org_id')
+        .eq('agency_org_id', profile.org_id)
+        .eq('is_active', true);
+      const allowedIds = (links || []).map((l: any) => l.shipper_org_id);
+      if (!allowedIds.includes(shipperId)) {
+        return { success: true, orders: [] };
+      }
+    }
 
     let ordersQuery = supabase
       .from('zen_orders')
@@ -321,7 +361,7 @@ export async function getShipperDailyOrdersDetails(
 
     const { data: costs } = await supabase
       .from('zen_order_costs')
-      .select('order_id, cost_type, unit_price, quantity, total_amount')
+      .select('order_id, cost_type, unit_price, quantity, total_amount, currency')
       .in('order_id', orderIds);
 
     const { data: invoices } = await supabase
@@ -336,14 +376,17 @@ export async function getShipperDailyOrdersDetails(
       let surgeFee = 0;
       let otherCharge = 0;
       let actualAdj = 0;
+      let orderUnsupported = false;
 
       for (const c of oCosts) {
-        const amt = Number(c.total_amount || c.unit_price * (c.quantity || 1) || 0);
-        if (c.cost_type === 'FREIGHT' || c.cost_type === 'BASE_FREIGHT') baseFreight += amt;
-        else if (c.cost_type === 'FUEL_SURCHARGE') fuelSurcharge += amt;
-        else if (c.cost_type === 'SURGE_EMERGENCY' || c.cost_type === 'SURGE_FEE') surgeFee += amt;
-        else if (c.cost_type === 'OTHER_CHARGE') otherCharge += amt;
-        else if (c.cost_type === 'UPS_ACTUAL_ADJUSTMENT') actualAdj += amt;
+        const rawAmt = Number(c.total_amount || c.unit_price * (c.quantity || 1) || 0);
+        const { amountKrw, unsupported } = convertToKrw(rawAmt, c.currency, rate);
+        if (unsupported) orderUnsupported = true;
+        if (c.cost_type === 'FREIGHT' || c.cost_type === 'BASE_FREIGHT') baseFreight += amountKrw;
+        else if (c.cost_type === 'FUEL_SURCHARGE') fuelSurcharge += amountKrw;
+        else if (c.cost_type === 'SURGE_EMERGENCY' || c.cost_type === 'SURGE_FEE') surgeFee += amountKrw;
+        else if (c.cost_type === 'OTHER_CHARGE') otherCharge += amountKrw;
+        else if (c.cost_type === 'UPS_ACTUAL_ADJUSTMENT') actualAdj += amountKrw;
       }
 
       const matchingInv = (invoices || []).find((inv) => inv.metadata?.source_order_id === o.id);
@@ -363,10 +406,11 @@ export async function getShipperDailyOrdersDetails(
         surgeFee,
         otherCharge,
         actualAdjustment: actualAdj,
-        totalAmountUsd: baseFreight + fuelSurcharge + surgeFee + otherCharge + actualAdj,
+        totalAmountKrw: baseFreight + fuelSurcharge + surgeFee + otherCharge + actualAdj,
         invoiceId: matchingInv?.id,
         invoiceNo: matchingInv?.invoice_no,
         invoiceStatus: matchingInv?.status,
+        hasUnsupportedCurrency: orderUnsupported,
       };
     });
 
