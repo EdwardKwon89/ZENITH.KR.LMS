@@ -147,3 +147,35 @@ Aiden이 직접 `information_schema.role_table_grants` 조회로 재검증 — `
 4. authenticated 세션으로 실제 SELECT 쿼리 성공 확인
 
 **Aiden 검토 대기** — PR#931에 대한 승인 요청.
+
+---
+
+## [Aiden 재검토] (260728)
+
+**판정**: ❌ 반려 (2건)
+
+### 1. 실제 CI(`gh pr checks`) FAIL — Regression Tests
+`gh run view 30320383188 --log-failed`로 확인:
+```
+FAIL tests/unit/db/imp153-authenticated-grant-check.test.ts > ALTER DEFAULT PRIVILEGES 검증 > ALTER DEFAULT PRIVILEGES 설정 존재
+AssertionError: expected 0 to be greater than or equal to 1
+ ❯ tests/unit/db/imp153-authenticated-grant-check.test.ts:38:21
+Test Files  1 failed | 140 passed (141)
+     Tests  1 failed | 948 passed (949)
+```
+**원인(로컬 재현으로 확인)**: 테스트 쿼리가 `pg_default_acl.defaclrole`을 "grantee(authenticated)"로 잘못 해석함.
+```
+SELECT defaclrole::regrole::text AS owner_role, defaclnamespace::regnamespace::text, defaclobjtype, defaclacl
+FROM pg_default_acl WHERE defaclnamespace = 'public'::regnamespace;
+
+ owner_role | schema | objtype |                          acl
+------------+--------+---------+-------------------------------------------------------------
+ postgres   | public | r       | {postgres=arwdDxtm/postgres,...,authenticated=arwdDxtm/postgres,...}
+```
+`defaclrole`은 "이 기본 권한 규칙이 적용되는 객체의 소유자 역할"이지 grantee가 아니다(실제로는 `postgres`). 테스트가 `defaclrole = (select oid from pg_roles where rolname='authenticated')`로 필터링하므로 항상 0건 매칭 — 즉 테스트 자체의 쿼리 로직 버그다. 마이그레이션(`ALTER DEFAULT PRIVILEGES`)은 정상 동작 중(위 결과에서 `authenticated=arwdDxtm/postgres`로 이미 반영 확인) — **CI가 오히려 마이그레이션이 아니라 테스트 자체의 버그를 잡아낸 것**. 나머지 4건(전 테이블 GRANT 존재·zen_orders 등 개별 GRANT·실제 SELECT 쿼리 성공)은 CI에서 전부 PASS — 마이그레이션의 실질 효과는 이 CI 결과로도 재확인됨.
+- **요청 수정**: `defaclrole` 필터를 제거하거나 `defaclrole = 'postgres'::regrole`로 교정하고, `defaclacl::text LIKE '%authenticated=%r%'`(또는 동등 조건)로 authenticated grantee 존재 여부만 검증하도록 수정.
+
+### 2. PR#931 base 브랜치 오설정 — `main` (develop이어야 함)
+`gh pr view 931 --json baseRefName` 확인 결과 base=`main`. R-19 브랜치 전략(`feature/* → develop`) 위반이며, PR#928과 동일한 실패 패턴(무관 커밋 51개 파일 diff로 표시)이 재발함. **요청 수정**: `gh pr edit 931 --base develop`로 정정.
+
+**요청 사항**: 위 2건 수정 후 재검토 요청. task file 재사용(재채번 금지), 브랜치·커밋은 기존 것 계속 사용 가능(base만 정정 + 테스트 쿼리만 수정 커밋 추가).
