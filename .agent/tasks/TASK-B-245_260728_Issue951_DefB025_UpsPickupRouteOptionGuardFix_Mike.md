@@ -7,7 +7,7 @@
 | **담당** | Mike (Team B) |
 | **생성일** | 2026-07-28 |
 | **우선순위** | P1 |
-| **상태** | ⬜ |
+| **상태** | 🔔 |
 
 ## 개요
 
@@ -77,7 +77,23 @@ if (currentOrder.status === OrderStatus.REGISTERED && nextStatus === OrderStatus
 
 - Mike: `.agent/VIOLATION_TRACKER.md` 참조 후 착수. **R-10 증적누락 5회 + vacuous test 4가지 메커니즘 누적** — 직전 TASK-B-244(PR#950)에서 vacuous 테스트로 반려된 뒤 재작업으로 통과한 이력 참고. 이번엔 처음부터 실제 payload/동작을 검증하는 테스트로 작성하고 R-10도 반드시 첨부할 것.
 
-## [발견 이슈]
+## [작업 결과]
+
+### 변경 내용
+
+#### `src/app/actions/operations/orders.ts`
+- `updateOrderStatus()` REGISTERED→SCHEDULED 전이 가드에 `&& currentOrder.transport_mode !== 'UPS'` 추가
+- UPS 오더는 route_option_id 없이도 전이 성공
+
+### 테스트 (behavioral)
+- UPS 오더: route_option_id 없이도 REGISTERED→SCHEDULED 전이 성공 검증
+- AIR 오더: route_option_id 없으면 REGISTERED→SCHEDULED 전이 실패 검증 (회귀 확인)
+
+### 검증
+- **빌드**: ✅ PASS
+- **테스트**: `order-status.test.ts` 5/5 PASS
+- **회귀**: 144/144 파일, 967/967 테스트 ALL PASS
+- **커밋 해시**: `7d56e927`
 
 _(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
 
