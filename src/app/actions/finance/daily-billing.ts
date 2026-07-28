@@ -26,7 +26,6 @@ export interface ShipperDailyBillingGroup {
   appliedExchangeRate: number;
   currency: string;
   invoiceIds: string[];
-  orderIds: string[];
   periodType?: 'daily' | 'weekly' | 'monthly';
   hasUnsupportedCurrency: boolean;
 }
@@ -215,7 +214,6 @@ export async function getShipperDailyBillingSummary(params?: {
           appliedExchangeRate: exchangeRate,
           currency: inv.currency || 'USD',
           invoiceIds: [],
-          orderIds: [],
           periodType,
           hasUnsupportedCurrency: false,
         };
@@ -224,7 +222,6 @@ export async function getShipperDailyBillingSummary(params?: {
 
       group.orderCount += 1;
       group.invoiceIds.push(inv.id);
-      group.orderIds.push(inv.id);
 
       const { amountKrw, unsupported } = convertToKrw(
         Number(inv.total_amount || 0), inv.currency || 'USD', exchangeRate
@@ -256,203 +253,56 @@ export async function getShipperDailyBillingSummary(params?: {
 }
 
 /**
- * 특정 화주 및 일자/주/월 소속 오더 세부 내역 조회
- * - SHIPPER tier: shipper_id로 직접 오더 조회
- * - ADMIN_TO_AGENCY/AGENCY_TO_SHIPPER tier: invoiceIds → metadata.source_order_id로 오더 역추적
+ * 인보이스 기반 오더 세부 내역 조회
+ * invoiceIds → metadata.source_order_id로 실제 오더를 역추적 (전 티어 공통)
  */
 export async function getShipperDailyOrdersDetails(
-  shipperId: string,
-  dateOrPeriod: string,
-  periodType: 'daily' | 'weekly' | 'monthly' = 'daily',
-  exchangeRate?: number,
-  invoiceIds?: string[]
+  invoiceIds: string[],
+  exchangeRate?: number
 ): Promise<{
   success: boolean;
   orders?: ShipperDailyOrderRow[];
   error?: string;
 }> {
   try {
-    const { supabase, profile } = await validateUserAction();
+    const { supabase } = await validateUserAction();
     const rate = exchangeRate || await getNumericParam('EXCHANGE_RATE_USD_KRW', 1350);
 
-    if (profile.role === USER_ROLES.AGENCY) {
-      const { data: links } = await supabase
-        .from('zen_agency_shippers')
-        .select('shipper_org_id')
-        .eq('agency_org_id', profile.org_id)
-        .eq('is_active', true);
-      const allowedIds = (links || []).map((l: any) => l.shipper_org_id);
-      if (!allowedIds.includes(shipperId) && shipperId !== profile.org_id) {
-        return { success: true, orders: [] };
-      }
-    }
+    if (!invoiceIds || invoiceIds.length === 0) return { success: true, orders: [] };
 
-    let orders: any[] = [];
-    let orderCosts: any[] = [];
+    const { data: invoices, error: invErr } = await supabase
+      .from('zen_invoices')
+      .select('id, invoice_no, status, is_finalized, metadata')
+      .in('id', invoiceIds)
+      .neq('status', 'CANCELED');
 
-    if (invoiceIds && invoiceIds.length > 0) {
-      // 인보이스 기반 역추적: invoice → metadata.source_order_id → order
-      const { data: invoices } = await supabase
-        .from('zen_invoices')
-        .select('id, invoice_no, status, is_finalized, metadata')
-        .in('id', invoiceIds)
-        .neq('status', 'CANCELED');
+    if (invErr) throw new Error(`인보이스 조회 실패: ${invErr.message}`);
+    if (!invoices || invoices.length === 0) return { success: true, orders: [] };
 
-      const sourceOrderIds = (invoices || [])
-        .map((inv: any) => inv.metadata?.source_order_id)
-        .filter(Boolean);
+    const orderIds = [...new Set(
+      invoices.map((inv: any) => inv.metadata?.source_order_id).filter(Boolean)
+    )] as string[];
 
-      if (sourceOrderIds.length === 0) return { success: true, orders: [] };
+    if (orderIds.length === 0) return { success: true, orders: [] };
 
-      const ordersQuery = supabase
-        .from('zen_orders')
-        .select(`
-          id,
-          order_no,
-          status,
-          transport_mode,
-          recipient_country_code,
-          created_at,
-          shipper_id,
-          shipper:shipper_id ( name )
-        `)
-        .in('id', sourceOrderIds)
-        .eq('transport_mode', 'UPS');
-
-      const { data: rawOrders, error: ordersErr } = await ordersQuery;
-      if (ordersErr) throw new Error(`오더 상세 목록 조회 실패: ${ordersErr.message}`);
-      orders = rawOrders || [];
-
-      // 기간 필터
-      if (periodType === 'daily') {
-        orders = orders.filter((o: any) => {
-          const d = o.created_at.split('T')[0];
-          return d === dateOrPeriod;
-        });
-      } else if (periodType === 'weekly') {
-        orders = orders.filter((o: any) => formatPeriodKey(o.created_at, 'weekly') === dateOrPeriod);
-      } else if (periodType === 'monthly') {
-        const [y, m] = dateOrPeriod.split('-');
-        orders = orders.filter((o: any) => {
-          const d = new Date(o.created_at);
-          return d.getUTCFullYear() === Number(y) && d.getUTCMonth() + 1 === Number(m);
-        });
-      }
-
-      if (orders.length === 0) return { success: true, orders: [] };
-
-      const orderIds = orders.map((o: any) => o.id);
-      const { data: costs } = await supabase
-        .from('zen_order_costs')
-        .select('order_id, cost_type, unit_price, quantity, total_amount, currency')
-        .in('order_id', orderIds);
-      orderCosts = costs || [];
-
-      // 인보이스-오더 매핑 결과 반환
-      const resultRows: ShipperDailyOrderRow[] = orders.map((o: any) => {
-        const oCosts = orderCosts.filter((c: any) => c.order_id === o.id);
-        let baseFreight = 0;
-        let fuelSurcharge = 0;
-        let surgeFee = 0;
-        let otherCharge = 0;
-        let actualAdj = 0;
-        let orderUnsupported = false;
-
-        for (const c of oCosts) {
-          const rawAmt = Number(c.total_amount || c.unit_price * (c.quantity || 1) || 0);
-          const { amountKrw, unsupported } = convertToKrw(rawAmt, c.currency, rate);
-          if (unsupported) orderUnsupported = true;
-          if (c.cost_type === 'FREIGHT' || c.cost_type === 'BASE_FREIGHT') baseFreight += amountKrw;
-          else if (c.cost_type === 'FUEL_SURCHARGE') fuelSurcharge += amountKrw;
-          else if (c.cost_type === 'SURGE_EMERGENCY' || c.cost_type === 'SURGE_FEE') surgeFee += amountKrw;
-          else if (c.cost_type === 'OTHER_CHARGE') otherCharge += amountKrw;
-          else if (c.cost_type === 'UPS_ACTUAL_ADJUSTMENT') actualAdj += amountKrw;
-        }
-
-        const matchingInv = (invoices || []).find((inv: any) => inv.metadata?.source_order_id === o.id);
-
-        return {
-          orderId: o.id,
-          orderNo: o.order_no,
-          status: o.status,
-          shippingDate: new Date(o.created_at).toISOString().split('T')[0],
-          shipperId: o.shipper_id,
-          shipperName: (o.shipper as any)?.name || '화주',
-          destCountryCode: o.recipient_country_code || 'US',
-          transportMode: o.transport_mode,
-          isFinalized: !!matchingInv?.is_finalized,
-          baseFreight,
-          fuelSurcharge,
-          surgeFee,
-          otherCharge,
-          actualAdjustment: actualAdj,
-          totalAmountKrw: baseFreight + fuelSurcharge + surgeFee + otherCharge + actualAdj,
-          invoiceId: matchingInv?.id,
-          invoiceNo: matchingInv?.invoice_no,
-          invoiceStatus: matchingInv?.status,
-          hasUnsupportedCurrency: orderUnsupported,
-        };
-      });
-
-      return { success: true, orders: resultRows };
-    }
-
-    // 기존 방식: shipper_id로 직접 오더 조회 (SHIPPER tier 또는 invoiceIds 미전달 시)
-    let ordersQuery = supabase
+    const { data: orders, error: ordersErr } = await supabase
       .from('zen_orders')
       .select(`
-        id,
-        order_no,
-        status,
-        transport_mode,
-        recipient_country_code,
-        created_at,
-        shipper_id,
-        shipper:shipper_id ( name )
+        id, order_no, status, transport_mode, recipient_country_code, created_at,
+        shipper_id, shipper:shipper_id ( name )
       `)
-      .eq('shipper_id', shipperId)
-      .eq('transport_mode', 'UPS');
+      .in('id', orderIds);
 
-    if (periodType === 'daily') {
-      ordersQuery = ordersQuery.gte('created_at', `${dateOrPeriod}T00:00:00Z`).lte('created_at', `${dateOrPeriod}T23:59:59Z`);
-    } else if (periodType === 'monthly') {
-      const [y, m] = dateOrPeriod.split('-');
-      const start = `${dateOrPeriod}-01T00:00:00Z`;
-      const lastDay = new Date(Number(y), Number(m), 0).getDate();
-      const end = `${dateOrPeriod}-${String(lastDay).padStart(2, '0')}T23:59:59Z`;
-      ordersQuery = ordersQuery.gte('created_at', start).lte('created_at', end);
-    }
-
-    const { data: directOrders, error: ordersErr } = await ordersQuery;
     if (ordersErr) throw new Error(`오더 상세 목록 조회 실패: ${ordersErr.message}`);
-    orders = directOrders || [];
-
-    if (orders.length === 0) return { success: true, orders: [] };
-
-    const filteredOrders = orders.filter((o: any) => {
-      if (periodType === 'weekly') {
-        return formatPeriodKey(o.created_at, 'weekly') === dateOrPeriod;
-      }
-      return true;
-    });
-
-    if (filteredOrders.length === 0) return { success: true, orders: [] };
-
-    const orderIds = filteredOrders.map((o: any) => o.id);
+    if (!orders || orders.length === 0) return { success: true, orders: [] };
 
     const { data: costs } = await supabase
       .from('zen_order_costs')
       .select('order_id, cost_type, unit_price, quantity, total_amount, currency')
       .in('order_id', orderIds);
-    orderCosts = costs || [];
 
-    const { data: invoices } = await supabase
-      .from('zen_invoices')
-      .select('id, invoice_no, status, is_finalized, metadata')
-      .neq('status', 'CANCELED');
-
-    const resultRows: ShipperDailyOrderRow[] = filteredOrders.map((o: any) => {
-      const oCosts = orderCosts.filter((c: any) => c.order_id === o.id);
+    const resultRows: ShipperDailyOrderRow[] = orders.map((o: any) => {
+      const oCosts = (costs || []).filter((c: any) => c.order_id === o.id);
       let baseFreight = 0;
       let fuelSurcharge = 0;
       let surgeFee = 0;
@@ -471,7 +321,7 @@ export async function getShipperDailyOrdersDetails(
         else if (c.cost_type === 'UPS_ACTUAL_ADJUSTMENT') actualAdj += amountKrw;
       }
 
-      const matchingInv = (invoices || []).find((inv: any) => inv.metadata?.source_order_id === o.id);
+      const matchingInv = invoices.find((inv: any) => inv.metadata?.source_order_id === o.id);
 
       return {
         orderId: o.id,
