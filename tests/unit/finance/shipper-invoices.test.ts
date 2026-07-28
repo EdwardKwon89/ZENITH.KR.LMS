@@ -54,25 +54,25 @@ describe('getShipperInvoices behavioral tests', () => {
   ];
 
   shipperRoles.forEach(({ role, label }) => {
-    it(`TC-INV-${label}: ${label} → 에러 없이 성공하고 shipper_id 필터가 걸린다`, async () => {
+    it(`TC-INV-${label}: ${label} → 에러 없이 성공하고 billed_org_id 필터가 걸린다`, async () => {
       const supabase = mockValidate(role, 'my-org');
       setupQueryMock(supabase, [{ id: 'inv-1', invoice_no: 'INV-001' }]);
 
       const result = await getShipperInvoices();
       expect(Array.isArray(result)).toBe(true);
 
-      expect(invoiceChain.eq).toHaveBeenCalledWith('shipper_id', 'my-org');
+      expect(invoiceChain.eq).toHaveBeenCalledWith('billed_org_id', 'my-org');
     });
   });
 
-  it('TC-INV-ADMIN: ADMIN → 전체 조회, shipper_id 필터 없음', async () => {
+  it('TC-INV-ADMIN: ADMIN → 전체 조회, billed_org_id 필터 없음', async () => {
     const supabase = mockValidate(USER_ROLES.ADMIN);
     setupQueryMock(supabase, [{ id: 'inv-1' }, { id: 'inv-2' }]);
 
     const result = await getShipperInvoices();
     expect(Array.isArray(result)).toBe(true);
 
-    expect(invoiceChain.eq).not.toHaveBeenCalledWith('shipper_id', expect.anything());
+    expect(invoiceChain.eq).not.toHaveBeenCalledWith('billed_org_id', expect.anything());
   });
 
   it('TC-INV-AGENCY: AGENCY → agency_shippers 조회 후 in 필터', async () => {

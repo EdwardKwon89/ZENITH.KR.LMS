@@ -30,7 +30,7 @@ export async function getShipperInvoices(params?: { startDate?: string; endDate?
   // 4개 화주 계열 role은 본인 것만, ADMIN은 전체, AGENCY는 자소 화주 것만
   const shipperRoles = [USER_ROLES.SHIPPER, USER_ROLES.CORPORATE, USER_ROLES.AGENCY_SHIPPER, USER_ROLES.INDIVIDUAL];
   if (shipperRoles.includes(profile.role as any)) {
-    query = query.eq('shipper_id', profile.org_id);
+    query = query.eq('billed_org_id', profile.org_id);
   } else if (profile.role === USER_ROLES.AGENCY) {
     const { data: agencyLinks } = await supabase
       .from('zen_agency_shippers')
