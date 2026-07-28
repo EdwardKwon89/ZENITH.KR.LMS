@@ -18,8 +18,6 @@
 | [#920](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/920) | [feat] (4/4) /finance/daily-billing 역할별 뷰 재설계 (전제: #917, #918, #919) | b | p1 | - | 미배정 | 2026-07-27 |
 | [#916](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/916) | [design] admin-agency-shipper 2단계 인보이스 체계 도입 — 설계 및 작업 분할 (부모 이슈) | b | p1 | - | 미배정 | 2026-07-27 |
 | [#895](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/895) | [fix] DEF-130 — SNTL(SUB_ADMIN) 역할이 UPS 기준요금(zen_ups_base_rates) 조회 불가 | a | p1 | - | 미배정 | 2026-07-27 |
-| [#894](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/894) | [fix] DEF-129 — Agency 정산 조회 전체가 존재하지 않는 컬럼(dest_country_code) 참조로 항상 실패 | a | p1 | - | 미배정 | 2026-07-27 |
-| [#888](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/888) | [chore] 시드 데이터 보완 — AGENCY RLS/입고재계산/volumetric_divisor/트래킹/화주인보이스 검증용 데이터 누락 | a | p2 | - | 미배정 | 2026-07-27 |
 | [#886](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/886) | [verify] DEF-125 재검증 요청 — TASK-B-218/220으로 이미 해소된 것으로 추정됨 | b | p2 | - | 미배정 | 2026-07-27 |
 | [#790](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/790) | [feat] IMP-153 — CI supabase db reset 시 authenticated/anon 롤 기본 테이블 GRANT 누락 | b | p3 | - | 미배정 | 2026-07-24 |
 | [#773](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/773) | [defect] DEF-125 — UPS 스냅샷 캐시, 중량 변경 시 정산 자동 재계산 누락 | a | p1 | - | EdwardKwon89 | 2026-07-24 |
