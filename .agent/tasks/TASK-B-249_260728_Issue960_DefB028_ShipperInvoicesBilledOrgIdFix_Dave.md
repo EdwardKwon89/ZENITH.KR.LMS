@@ -7,7 +7,7 @@
 | **담당** | Dave (Team B) |
 | **생성일** | 2026-07-28 |
 | **우선순위** | P1 |
-| **상태** | ⬜ |
+| **상태** | 🔔 |
 
 ## 개요
 
@@ -62,8 +62,13 @@ if (shipperRoles.includes(profile.role as any)) {
 
 - Dave: `.agent/VIOLATION_TRACKER.md` 참조 후 착수. 배정 파일을 반드시 그대로 사용할 것 — 새 번호로 재채번하지 말 것. 직전 TASK-B-247과 같은 파일이라 조건 실수로 되돌리지 않도록 주의.
 
-## [발견 이슈]
+## [작업 결과]
 
-_(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
-
-없음
+| 항목 | 내용 |
+|:-----|:------|
+| **담당 실행자** | D_Kai (Dave 대리) |
+| **커밋 해시** | `b09b1d4f` |
+| **변경 파일** | `shipper-invoices.ts` (1줄) · `shipper-invoices.test.ts` |
+| **테스트 결과** | `vitest run` — 144 files · 976 tests **ALL PASS** |
+| **빌드 결과** | `npm run build` — **SUCCESS** |
+| **R-10** | jungjs72@gmail.com 화주 + agency@zenith.kr 대리점 스크린샷 |
