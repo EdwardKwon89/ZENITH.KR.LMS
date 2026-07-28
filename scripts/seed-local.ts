@@ -401,6 +401,328 @@ async function seedShipperInvoices(supabase: any, shipperOrgId: string) {
   }
 }
 
+/**
+ * DEF-B-026~030 (Issue #957/958/960/964/966) 재검증용 — daily-billing/청구서 조회 화면의
+ * 2단계 인보이스(ADMIN_TO_AGENCY 원가 / AGENCY_TO_SHIPPER 판매가) 티어 구분 버그들을 검증하려면
+ * "대리점 소속 화주가 낸 UPS 오더 + 양쪽 티어 인보이스가 모두 존재"하는 시나리오가 필요한데,
+ * 기존 시드에는 이런 조합이 없어 2026-07-28 세션에서 실제 UI/수동 SQL로 임시로 만들어 검증했음.
+ * 리셋 시 사라지므로(CI/check-db-freshness.sh --fix) 동일 시나리오를 여기 이식한다.
+ *
+ * - Zenith Agency Partners(대리점) 소속 화주 2곳: jungjs72@gmail.com(shipperOrgId 재사용,
+ *   role을 CORPORATE→AGENCY_SHIPPER로 전환 — 위 3-1 createUser 참조) + 신규 "Jongseok Jeong"
+ *   개인 화주(jungjs@aventusm.com, 정상 자가등록 시나리오 재현용 실제 주소/사업자번호 포함)
+ * - 오더 7건(ZEN-2026-000001~007), 각각 AGENCY_TO_SHIPPER(화주 판매가) + ADMIN_TO_AGENCY(대리점 원가)
+ *   양쪽 티어 인보이스 보유 — DEF-B-027(상세 펼침 빈 목록)·DEF-B-028(화주에 원가 노출)·
+ *   DEF-B-029(요약 breakdown 0)·DEF-B-030(색상) 전부 이 데이터로 재현/재검증 가능
+ */
+async function seedDailyBillingMultiTierFixtures(supabase: any, shipperOrgId: string) {
+  console.log('\nSeeding daily-billing multi-tier invoice fixtures (DEF-B-026~030 검증용)...');
+
+  const agencyOrg = await getOrCreateOrg(supabase, 'Zenith Agency Partners', 'AGENCY');
+  await createUser(supabase, 'agency@zenith.kr', 'Zenith Agency Partners Operator', 'AGENCY', agencyOrg.id, 'AGENCY');
+
+  const aventusmOrg = await getOrCreateOrg(supabase, 'Jongseok Jeong', 'SHIPPER');
+  await supabase
+    .from('zen_organizations')
+    .update({
+      biz_no: '215-46-56633',
+      rep_name: '정대표',
+      contact_name: 'Jongseok Jeong',
+      contact_email: 'jungjs@aventusm.com',
+      contact_phone: '010-4282-4027',
+      country_code: 'KR',
+      state_province: '11',
+      city: 'Seongbuk-gu',
+      address: '서울 성북구 동소문로 290-1',
+      address_detail: 'bio venture tower 203',
+      zipcode: '02734',
+      address_english: '290-1 Dongsomun-ro, Seongbuk-gu, Seoul, Republic of Korea',
+    })
+    .eq('id', aventusmOrg.id);
+  await createUser(supabase, 'jungjs@aventusm.com', 'Jongseok Jeong', 'AGENCY_SHIPPER', aventusmOrg.id, 'CUSTOMER');
+
+  // jungjs72@gmail.com은 3-1 createUser에서 이미 AGENCY_SHIPPER로 생성됨(shipperOrgId 재사용) —
+  // 여기서는 두 화주 org를 대리점에 연결만 한다(실측 discount_rate=0 그대로 반영).
+  for (const linkedShipperOrgId of [shipperOrgId, aventusmOrg.id]) {
+    await supabase
+      .from('zen_agency_shippers')
+      .upsert(
+        { agency_org_id: agencyOrg.id, shipper_org_id: linkedShipperOrgId, shipper_type: 'CORPORATE', discount_rate: 0, is_active: true },
+        { onConflict: 'agency_org_id,shipper_org_id' },
+      );
+  }
+  console.log(`  - Linked Global Shipper Corp + Jongseok Jeong -> Zenith Agency Partners (discount_rate=0)`);
+
+  // IMP-157 조사 중 실측 반영된 Zone별 할인율(대리점 20%/화주 25%) — 화주 할인율이 대리점 자체 할인율보다
+  // 높아 역마진이 발생하는 시나리오(IMP-155 검증용)를 그대로 재현. 아래 오더 4~7번 픽스처의
+  // adminToAgencyBreakdown 수치가 바로 이 할인율로 계산된 실측값(seedSntlAgency()와 동일 패턴).
+  const { data: zonesForAgency } = await supabase.from('zen_ups_zones').select('id');
+  for (const zone of zonesForAgency ?? []) {
+    await supabase
+      .from('zen_agency_pricing_policies')
+      .upsert(
+        { agency_org_id: agencyOrg.id, zone_id: zone.id, discount_rate: 0.20, is_active: true },
+        { onConflict: 'agency_org_id,zone_id' },
+      );
+    for (const linkedShipperOrgId of [shipperOrgId, aventusmOrg.id]) {
+      await supabase
+        .from('zen_agency_shipper_zone_discounts')
+        .upsert(
+          { agency_org_id: agencyOrg.id, shipper_org_id: linkedShipperOrgId, zone_id: zone.id, discount_rate: 0.25, is_active: true },
+          { onConflict: 'agency_org_id,shipper_org_id,zone_id' },
+        );
+    }
+  }
+  console.log(`  - Registered Admin->Zenith Agency Partners 20% + Agency->Shipper 25% zone discount policy (역마진 시나리오, ${zonesForAgency?.length ?? 0} zones)`);
+
+  type CostRow = { cost_type: string; amount: number };
+  type OrderFixture = {
+    orderNo: string;
+    shipperKey: 'global' | 'aventusm';
+    status: string;
+    upsProduct: string;
+    recipientCountry: string;
+    recipientState: string;
+    recipientCity: string;
+    recipientName: string;
+    deliveryMethod: 'DIRECT' | 'PICKUP';
+    packageDims: { l: number; w: number; h: number; kg: number };
+    costs: CostRow[];
+    adminToAgencyBreakdown: { baseFreight: number; fuelSurcharge: number; surgeFee: number; otherCharges: number };
+  };
+
+  const orderFixtures: OrderFixture[] = [
+    {
+      orderNo: 'ZEN-2026-000001', shipperKey: 'aventusm', status: 'DELIVERED', upsProduct: 'WW_SAVER_NONDOC',
+      recipientCountry: 'JP', recipientState: '40', recipientCity: 'Buzen-shi', recipientName: 'brook shields',
+      deliveryMethod: 'DIRECT', packageDims: { l: 60, w: 30, h: 30, kg: 8.63 },
+      costs: [
+        { cost_type: 'BASE_FREIGHT', amount: 337600 }, { cost_type: 'FUEL_SURCHARGE', amount: 62456 },
+        { cost_type: 'SURGE_FEE', amount: 191.97 }, { cost_type: 'OTHER_CHARGE', amount: 30000 },
+      ],
+      adminToAgencyBreakdown: { baseFreight: 337600, fuelSurcharge: 62456, surgeFee: 191.97, otherCharges: 30000 },
+    },
+    {
+      orderNo: 'ZEN-2026-000002', shipperKey: 'aventusm', status: 'DELIVERED', upsProduct: 'WW_SAVER_NONDOC',
+      recipientCountry: 'US', recipientState: 'FL', recipientCity: 'Apopka', recipientName: 'james bonds',
+      deliveryMethod: 'DIRECT', packageDims: { l: 35, w: 20, h: 10, kg: 2.69 },
+      costs: [
+        { cost_type: 'BASE_FREIGHT', amount: 384800 }, { cost_type: 'FUEL_SURCHARGE', amount: 71188 },
+        { cost_type: 'SURGE_FEE', amount: 6397.3884 }, { cost_type: 'OTHER_CHARGE', amount: 30000 },
+      ],
+      adminToAgencyBreakdown: { baseFreight: 384800, fuelSurcharge: 71188, surgeFee: 6397.3884, otherCharges: 30000 },
+    },
+    {
+      orderNo: 'ZEN-2026-000003', shipperKey: 'aventusm', status: 'DELIVERED', upsProduct: 'WW_SAVER_DOC',
+      recipientCountry: 'AU', recipientState: 'NSW', recipientCity: 'Adamstown Heights', recipientName: 'bon jovi',
+      deliveryMethod: 'PICKUP', packageDims: { l: 20, w: 15, h: 5, kg: 0.5 },
+      costs: [
+        { cost_type: 'BASE_FREIGHT', amount: 122100 }, { cost_type: 'FUEL_SURCHARGE', amount: 22588.5 },
+        { cost_type: 'SURGE_FEE', amount: 0.2577 }, { cost_type: 'OTHER_CHARGE', amount: 30000 },
+      ],
+      adminToAgencyBreakdown: { baseFreight: 122100, fuelSurcharge: 22588.5, surgeFee: 0.2577, otherCharges: 30000 },
+    },
+    {
+      orderNo: 'ZEN-2026-000004', shipperKey: 'global', status: 'IN_TRANSIT', upsProduct: 'WW_SAVER_NONDOC',
+      recipientCountry: 'PH', recipientState: 'ALB', recipientCity: 'Abuyog', recipientName: 'james bonds',
+      deliveryMethod: 'DIRECT', packageDims: { l: 45, w: 30, h: 20, kg: 6 },
+      costs: [
+        { cost_type: 'BASE_FREIGHT', amount: 166500 }, { cost_type: 'FUEL_SURCHARGE', amount: 41070 },
+        { cost_type: 'SURGE_FEE', amount: 0.4716 },
+      ],
+      adminToAgencyBreakdown: { baseFreight: 222000, fuelSurcharge: 41070, surgeFee: 0.47163, otherCharges: 0 },
+    },
+    {
+      orderNo: 'ZEN-2026-000005', shipperKey: 'global', status: 'IN_TRANSIT', upsProduct: 'WW_SAVER_DOC',
+      recipientCountry: 'PH', recipientState: 'ALB', recipientCity: 'Abuyog', recipientName: 'james bonds',
+      deliveryMethod: 'DIRECT', packageDims: { l: 20, w: 15, h: 5, kg: 0.5 },
+      costs: [
+        { cost_type: 'BASE_FREIGHT', amount: 60225 }, { cost_type: 'FUEL_SURCHARGE', amount: 14855.5 },
+        { cost_type: 'SURGE_FEE', amount: 0.0806 },
+      ],
+      adminToAgencyBreakdown: { baseFreight: 80300, fuelSurcharge: 14855.5, surgeFee: 0.08058, otherCharges: 0 },
+    },
+    {
+      orderNo: 'ZEN-2026-000006', shipperKey: 'global', status: 'IN_TRANSIT', upsProduct: 'WW_SAVER_NONDOC',
+      recipientCountry: 'PH', recipientState: 'ALB', recipientCity: 'Abuyog', recipientName: 'james bonds',
+      deliveryMethod: 'PICKUP', packageDims: { l: 40, w: 30, h: 20, kg: 5 },
+      costs: [
+        { cost_type: 'BASE_FREIGHT', amount: 208200 }, { cost_type: 'FUEL_SURCHARGE', amount: 51356 },
+        { cost_type: 'SURGE_FEE', amount: 0.7418 },
+      ],
+      adminToAgencyBreakdown: { baseFreight: 277600, fuelSurcharge: 51356, surgeFee: 0.74181, otherCharges: 0 },
+    },
+    {
+      orderNo: 'ZEN-2026-000007', shipperKey: 'aventusm', status: 'IN_TRANSIT', upsProduct: 'WW_SAVER_NONDOC',
+      recipientCountry: 'FR', recipientState: '09', recipientCity: 'Paris', recipientName: 'brook shields',
+      deliveryMethod: 'DIRECT', packageDims: { l: 50, w: 35, h: 25, kg: 10 },
+      costs: [
+        { cost_type: 'BASE_FREIGHT', amount: 317205 }, { cost_type: 'FUEL_SURCHARGE', amount: 61771.5 },
+        { cost_type: 'SURGE_FEE', amount: 23903.346 },
+      ],
+      adminToAgencyBreakdown: { baseFreight: 333900, fuelSurcharge: 61771.5, surgeFee: 23903.346, otherCharges: 0 },
+    },
+  ];
+
+  // createOrder()가 실제로 org 등록정보를 오더에 스냅샷 저장하는 shipper_contact_*/shipper_* 필드 —
+  // 화주 계정별 실제 등록정보(위 aventusmOrg.update()/기존 base seed 3-1의 Global Shipper Corp 등록정보와 동일)
+  const shipperSnapshots = {
+    global: {
+      contactName: 'JSJung Shipper Test', contactPhone: '010-1234-5678', contactEmail: 'jungjs72@gmail.com',
+      address: '경기 김포시 하성면 마곡로 19', addressDetail: 'samsung electric', countryCode: 'KR',
+      stateProvince: '41', city: 'Gimpo-si', zipcode: '10012', bizNo: '123-45-67890',
+    },
+    aventusm: {
+      contactName: 'Jongseok Jeong', contactPhone: '010-4282-4027', contactEmail: 'jungjs@aventusm.com',
+      address: '서울 성북구 동소문로 290-1', addressDetail: 'bio venture tower 203', countryCode: 'KR',
+      stateProvince: '11', city: 'Seongbuk-gu', zipcode: '02734', bizNo: '215-46-56633',
+    },
+  } as const;
+
+  for (const fx of orderFixtures) {
+    const shipperOrgIdForOrder = fx.shipperKey === 'global' ? shipperOrgId : aventusmOrg.id;
+    const snap = shipperSnapshots[fx.shipperKey];
+
+    const { data: existingOrder } = await supabase
+      .from('zen_orders')
+      .select('id')
+      .eq('order_no', fx.orderNo)
+      .maybeSingle();
+
+    let orderId: string;
+    if (existingOrder) {
+      console.log(`  - Order exists: ${fx.orderNo}`);
+      orderId = existingOrder.id;
+    } else {
+      const { data: inserted, error } = await supabase
+        .from('zen_orders')
+        .insert({
+          order_no: fx.orderNo,
+          shipper_id: shipperOrgIdForOrder,
+          agency_org_id: agencyOrg.id,
+          status: fx.status,
+          transport_mode: 'UPS',
+          ups_product_code: fx.upsProduct,
+          incoterms: 'DDP',
+          delivery_method: fx.deliveryMethod,
+          recipient_name: fx.recipientName,
+          recipient_phone: '+8639383020288',
+          recipient_address: 'sunshine st. 889-89',
+          recipient_zipcode: '02750',
+          recipient_country_code: fx.recipientCountry,
+          recipient_state_province: fx.recipientState,
+          recipient_city: fx.recipientCity,
+          pickup_contact_name: fx.deliveryMethod === 'PICKUP' ? '정종석' : null,
+          pickup_contact_tel: fx.deliveryMethod === 'PICKUP' ? '01042824027' : null,
+          billing_status: 'INVOICED',
+          shipper_contact_name: snap.contactName,
+          shipper_contact_phone: snap.contactPhone,
+          shipper_contact_email: snap.contactEmail,
+          shipper_address: snap.address,
+          shipper_address_detail: snap.addressDetail,
+          shipper_country_code: snap.countryCode,
+          shipper_state_province: snap.stateProvince,
+          shipper_city: snap.city,
+          shipper_zipcode: snap.zipcode,
+          shipper_biz_no: snap.bizNo,
+          pickup_country_code: snap.countryCode,
+          cargo_details: { description: 'DEF-B-026~030 seed fixture — daily-billing/청구서 조회 다단계 인보이스 검증용' },
+        })
+        .select('id')
+        .single();
+
+      if (error) {
+        console.error(`  - Failed: ${fx.orderNo}`, error.message);
+        continue;
+      }
+      orderId = inserted.id;
+      console.log(`  - Created: ${fx.orderNo}`);
+    }
+
+    const { data: existingPkg } = await supabase
+      .from('zen_order_packages')
+      .select('id')
+      .eq('order_id', orderId)
+      .limit(1);
+    if (!existingPkg || existingPkg.length === 0) {
+      await supabase.from('zen_order_packages').insert({
+        order_id: orderId,
+        packing_unit: 'BOX',
+        packing_count: 1,
+        gross_weight: fx.packageDims.kg,
+        length: fx.packageDims.l,
+        width: fx.packageDims.w,
+        height: fx.packageDims.h,
+        content_type: fx.upsProduct.endsWith('_DOC') ? 'DOC' : 'NONDOC',
+      });
+    }
+
+    // 비용 항목은 인보이스 존재 여부와 무관하게 독립적으로 확인 — 인보이스 insert 성공 후 비용 insert가
+    // 별도 이유로 실패해도(예: generated column 오insert) 재실행 시 인보이스만 있고 비용이 없는 상태로
+    // 영구히 막히지 않도록 함(최초 구현 시 이 커플링으로 인해 실제로 발생했던 문제, 2026-07-28)
+    const { data: existingCosts } = await supabase.from('zen_order_costs').select('id').eq('order_id', orderId).limit(1);
+    if (!existingCosts || existingCosts.length === 0) {
+      for (const c of fx.costs) {
+        // 주의: total_amount는 generated column(unit_price*quantity) — insert에 넣으면 428C9 에러
+        const { error: costErr } = await supabase.from('zen_order_costs').insert({
+          order_id: orderId, cost_type: c.cost_type, unit_price: c.amount, quantity: 1,
+          currency: 'KRW', is_revenue: true,
+        });
+        if (costErr) console.error(`  - Failed cost(${c.cost_type}) for ${fx.orderNo}:`, costErr.message);
+      }
+    }
+
+    const agencyToShipperTotal = fx.costs.reduce((sum, c) => sum + c.amount, 0);
+    const agencyInvoiceNo = `INV-SEED-${fx.orderNo.slice(-6)}-A2S`;
+    const { data: existingA2S } = await supabase
+      .from('zen_invoices')
+      .select('id')
+      .eq('invoice_no', agencyInvoiceNo)
+      .maybeSingle();
+    if (!existingA2S) {
+      const { error: invErr } = await supabase.from('zen_invoices').insert({
+        invoice_no: agencyInvoiceNo,
+        shipper_id: shipperOrgIdForOrder,
+        billed_org_id: shipperOrgIdForOrder,
+        invoice_tier: 'AGENCY_TO_SHIPPER',
+        total_amount: agencyToShipperTotal,
+        currency: 'KRW',
+        applied_exchange_rate: 1350,
+        status: 'UNPAID',
+        due_date: new Date(new Date().setDate(new Date().getDate() + 14)).toISOString().slice(0, 10),
+        metadata: { order_no: fx.orderNo, source_order_id: orderId },
+      });
+      if (invErr) console.error(`  - Failed A2S invoice for ${fx.orderNo}:`, invErr.message);
+    }
+
+    const b = fx.adminToAgencyBreakdown;
+    const adminToAgencyTotal = b.baseFreight + b.fuelSurcharge + b.surgeFee + b.otherCharges;
+    const agencyCostInvoiceNo = `INV-SEED-${fx.orderNo.slice(-6)}-AD2A`;
+    const { data: existingAd2A } = await supabase
+      .from('zen_invoices')
+      .select('id')
+      .eq('invoice_no', agencyCostInvoiceNo)
+      .maybeSingle();
+    if (!existingAd2A) {
+      const { error: invErr2 } = await supabase.from('zen_invoices').insert({
+        invoice_no: agencyCostInvoiceNo,
+        shipper_id: shipperOrgIdForOrder,
+        billed_org_id: agencyOrg.id,
+        invoice_tier: 'ADMIN_TO_AGENCY',
+        total_amount: adminToAgencyTotal,
+        currency: 'KRW',
+        applied_exchange_rate: 1350,
+        status: 'UNPAID',
+        due_date: new Date(new Date().setDate(new Date().getDate() + 14)).toISOString().slice(0, 10),
+        metadata: { order_no: fx.orderNo, source_order_id: orderId, platform_breakdown: b },
+      });
+      if (invErr2) console.error(`  - Failed ADMIN_TO_AGENCY invoice for ${fx.orderNo}:`, invErr2.message);
+    }
+  }
+
+  console.log(`  - Seeded ${orderFixtures.length} UPS orders with dual-tier invoices (AGENCY_TO_SHIPPER + ADMIN_TO_AGENCY)`);
+}
+
 async function seedOrders(supabase: any, shipperOrgId: string) {
   console.log('\nSeeding E2E test orders...');
 
@@ -897,7 +1219,9 @@ async function seed() {
     await createUser(supabase, 'admin@zenith.kr', 'Tenant Admin', 'ADMIN', platformOrg.id, 'PLATFORM');
     await createUser(supabase, 'uat02_corp_shipper@zenith.kr', 'UAT02 Corporate Shipper', 'CORPORATE', shipperOrg.id, 'CUSTOMER');
     await createUser(supabase, 'shipper@zenith.kr', 'Main Shipper', 'CORPORATE', shipperOrg.id, 'CUSTOMER');
-    await createUser(supabase, 'jungjs72@gmail.com', 'JSJung Shipper Test', 'CORPORATE', shipperOrg.id, 'CUSTOMER');
+    // DEF-B-026~030 검증 과정에서 CORPORATE→AGENCY_SHIPPER로 정정됨(2026-07-28) — createAgencyShipper()가
+    // 실제로 신규 화주에게 항상 부여하는 role과 일치시켜 정상 등록 시나리오로 유지(seedDailyBillingMultiTierFixtures 참조)
+    await createUser(supabase, 'jungjs72@gmail.com', 'JSJung Shipper Test', 'AGENCY_SHIPPER', shipperOrg.id, 'CUSTOMER');
     await createUser(supabase, 'carrier@zenith.kr', 'Main Carrier', 'CARRIER', carrierOrg.id, 'PARTNER');
     await createUser(supabase, 'individual@zenith.kr', 'Individual User', 'INDIVIDUAL', null, 'CUSTOMER');
 
@@ -916,6 +1240,9 @@ async function seed() {
 
     // 4-2. TASK-212: 화주 인보이스 조회 화면 검증용 픽스처
     await seedShipperInvoices(supabase, shipperOrg.id);
+
+    // 4-3. DEF-B-026~030: daily-billing/청구서 조회 다단계 인보이스 검증용 픽스처
+    await seedDailyBillingMultiTierFixtures(supabase, shipperOrg.id);
 
     // 5. 정산 요율 카드 시드 데이터 생성
     await seedRateCards(supabase, carrierOrg.id);

@@ -172,6 +172,7 @@ export default function NaviSidebar({
       ]
     },
     { title: t("shipper_ups_rates_nav"), href: "/shipper/ups-rates", icon: DollarSign },
+    { title: t("shipper_invoices_nav"), href: "/shipper/invoices", icon: FileText },
     {
       title: t("mypage"),
       href: "/mypage",

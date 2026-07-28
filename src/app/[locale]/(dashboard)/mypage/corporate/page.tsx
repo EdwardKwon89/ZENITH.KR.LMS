@@ -206,7 +206,7 @@ export default function CorporatePage() {
                   <label className="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">{t('label_representative')}</label>
                   <div className="relative group">
                     <Users className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4 transition-colors group-focus-within:text-brand-500" />
-                    <ZenInput name="representative" defaultValue={org?.metadata?.representative || ''} className="pl-11 h-12 border-slate-200 rounded-xl focus:ring-brand-500/20" />
+                    <ZenInput name="representative" defaultValue={org?.rep_name || ''} className="pl-11 h-12 border-slate-200 rounded-xl focus:ring-brand-500/20" />
                   </div>
                 </div>
 
@@ -214,7 +214,7 @@ export default function CorporatePage() {
                   <label className="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">{t('label_biz_no')}</label>
                   <div className="relative group">
                     <FileText className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4 transition-colors group-focus-within:text-brand-500" />
-                    <ZenInput name="bizNo" defaultValue={org?.metadata?.bizNo || ''} className="pl-11 h-12 border-slate-200 rounded-xl focus:ring-brand-500/20" />
+                    <ZenInput name="bizNo" defaultValue={org?.biz_no || ''} className="pl-11 h-12 border-slate-200 rounded-xl focus:ring-brand-500/20" />
                   </div>
                 </div>
 
@@ -222,7 +222,7 @@ export default function CorporatePage() {
                   <label className="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">{t('label_contact')}</label>
                   <div className="relative group">
                     <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4 transition-colors group-focus-within:text-brand-500" />
-                    <ZenInput name="contact" defaultValue={org?.metadata?.contact || ''} className="pl-11 h-12 border-slate-200 rounded-xl focus:ring-brand-500/20" />
+                    <ZenInput name="contact" defaultValue={org?.contact_phone || ''} className="pl-11 h-12 border-slate-200 rounded-xl focus:ring-brand-500/20" />
                   </div>
                 </div>
 
@@ -230,7 +230,7 @@ export default function CorporatePage() {
                   <label className="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">{t('label_email')}</label>
                   <div className="relative group">
                     <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4 transition-colors group-focus-within:text-brand-500" />
-                    <ZenInput name="email" defaultValue={org?.metadata?.email || ''} className="pl-11 h-12 border-slate-200 rounded-xl focus:ring-brand-500/20" />
+                    <ZenInput name="email" defaultValue={org?.contact_email || ''} className="pl-11 h-12 border-slate-200 rounded-xl focus:ring-brand-500/20" />
                   </div>
                 </div>
 
@@ -238,7 +238,7 @@ export default function CorporatePage() {
                   <label className="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">{t('label_address')}</label>
                   <div className="relative group">
                     <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4 transition-colors group-focus-within:text-brand-500" />
-                    <ZenInput name="address" defaultValue={org?.metadata?.address || ''} className="pl-11 h-12 border-slate-200 rounded-xl focus:ring-brand-500/20" />
+                    <ZenInput name="address" defaultValue={org?.address || ''} className="pl-11 h-12 border-slate-200 rounded-xl focus:ring-brand-500/20" />
                   </div>
                 </div>
               </div>

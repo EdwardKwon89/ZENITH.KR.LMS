@@ -226,4 +226,35 @@ describe('TC-UPS-FREIGHT-02: resolveZoneByCountry 연동 (GH#202)', () => {
     expect(createAdminClient).toHaveBeenCalledTimes(1);
     expect(result.agency?.discountRate).toBe(0.15);
   });
+
+  it('DDP incoterms 전달 시 otherCharges가 0으로 계산됨 (DEF-B-026)', async () => {
+    (validateUserAction as any).mockResolvedValue({
+      supabase: buildMockSupabase({
+        zen_ups_other_charges: createQueryMock({ data: [{ id: 'oc1', charge_code: 'DDP', charge_name: 'Delivery Duty Paid', selling_price: 30000, cost_price: 25000, is_active: true }] }),
+      }),
+    });
+
+    const result = await estimateUpsFreight({
+      productId: 'p1', destCountryCode: 'USA', actualWeightKg: 5, incoterms: 'DDP',
+    });
+
+    expect(result.platform.otherChargesSellingTotal).toBe(0);
+    expect(result.platform.otherChargesCostTotal).toBe(0);
+  });
+
+  it('OVERSIZE other_charge는 zen_ups_other_charges에서 조회됨 (회귀 확인)', async () => {
+    const oversizeChargeData = { id: 'oc2', charge_code: 'OVERSIZE', charge_name: '대형포장물', selling_price: 20000, cost_price: 15000, is_active: true };
+    (validateUserAction as any).mockResolvedValue({
+      supabase: buildMockSupabase({
+        zen_ups_other_charges: createQueryMock({ data: [oversizeChargeData] }),
+      }),
+    });
+
+    const result = await estimateUpsFreight({
+      productId: 'p1', destCountryCode: 'USA', actualWeightKg: 5,
+    });
+
+    expect(result.platform.otherChargesSellingTotal).toBe(0);
+    expect(result.platform.otherChargesCostTotal).toBe(0);
+  });
 });
