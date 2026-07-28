@@ -133,6 +133,7 @@ export async function createAddressBookEntry(input: AddressBookEntryInput) {
   }
 
   revalidatePath("/[locale]/address-book");
+  revalidatePath("/[locale]/mypage/profile");
   return { success: true, entry: data };
 }
 
@@ -166,6 +167,7 @@ export async function updateAddressBookEntry(id: string, input: AddressBookEntry
   }
 
   revalidatePath("/[locale]/address-book");
+  revalidatePath("/[locale]/mypage/profile");
   return { success: true, entry: data };
 }
 
@@ -192,5 +194,6 @@ export async function deleteAddressBookEntry(id: string) {
   }
 
   revalidatePath("/[locale]/address-book");
+  revalidatePath("/[locale]/mypage/profile");
   return { success: true };
 }

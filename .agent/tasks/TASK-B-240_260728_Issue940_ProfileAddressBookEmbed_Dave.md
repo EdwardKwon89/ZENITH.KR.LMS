@@ -6,7 +6,7 @@
 | **담당** | Dave (Team B) |
 | **생성일** | 2026-07-28 |
 | **우선순위** | P3 |
-| **상태** | ⬜ |
+| **상태** | 🔔 |
 
 ## 개요
 
@@ -102,8 +102,21 @@ revalidatePath("/[locale]/mypage/profile");
 
 - Dave: `.agent/VIOLATION_TRACKER.md` 참조 후 착수. 배정 파일을 반드시 그대로 사용할 것 — 새 번호로 재채번하지 말 것.
 
-## [발견 이슈]
+## [작업 결과]
 
-_(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
+| 항목 | 내용 |
+|:-----|:------|
+| **담당 실행자** | D_Kai (Dave 대리) |
+| **커밋 해시** | (커밋 후 기재) |
+| **변경 파일** | `mypage/profile/page.tsx` · `address-book.ts` · `tests/unit/member/profile-page.test.tsx` |
+| **테스트 결과** | `vitest run` — 143 files · 961 tests **ALL PASS** |
+| **빌드 결과** | `npm run build` — **SUCCESS** |
 
-없음
+### 체크리스트 완료 현황
+
+- [x] 브랜치 생성
+- [x] `mypage/profile/page.tsx` 수정 — 주소록 섹션 임베드 (AddressBookClient + MapPin 아이콘)
+- [x] `address-book.ts` revalidatePath 보강 (3개소에 `/mypage/profile` 추가)
+- [x] 회귀 테스트 2건 신규 (TC-PROFILE-AB-01~02)
+- [x] `npm run build` · `npm run test:regression` — SUCCESS, 961/961 PASS
+- [x] R-10: admin + shipper 프로필 화면 + /address-book 독립 페이지 스크린샷
