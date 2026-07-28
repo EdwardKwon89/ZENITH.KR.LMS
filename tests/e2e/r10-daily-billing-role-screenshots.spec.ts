@@ -25,6 +25,7 @@ test.describe('R-10: /finance/daily-billing 역할별 스크린샷 (Issue #920)'
 
   test('ADMIN — 전체 인보이스 집계 화면', async ({ page }) => {
     await loginAndGoto(page, ADMIN_EMAIL, ADMIN_PASSWORD, '/ko/finance/daily-billing');
+    expect(page.url()).toContain('/finance/daily-billing');
     await page.screenshot({
       path: path.join(SCREENSHOT_DIR, 'r10_daily-billing_admin.png'),
       fullPage: true,
@@ -35,6 +36,7 @@ test.describe('R-10: /finance/daily-billing 역할별 스크린샷 (Issue #920)'
 
   test('AGENCY — 매입/매출 듀얼 섹션 화면', async ({ page }) => {
     await loginAndGoto(page, AGENCY_EMAIL, AGENCY_PASSWORD, '/ko/finance/daily-billing');
+    expect(page.url()).toContain('/finance/daily-billing');
     await page.screenshot({
       path: path.join(SCREENSHOT_DIR, 'r10_daily-billing_agency.png'),
       fullPage: true,
@@ -45,6 +47,7 @@ test.describe('R-10: /finance/daily-billing 역할별 스크린샷 (Issue #920)'
 
   test('SHIPPER — 본인 인보이스 집계 화면', async ({ page }) => {
     await loginAndGoto(page, SHIPPER_EMAIL, SHIPPER_PASSWORD, '/ko/finance/daily-billing');
+    expect(page.url()).toContain('/finance/daily-billing');
     await page.screenshot({
       path: path.join(SCREENSHOT_DIR, 'r10_daily-billing_shipper.png'),
       fullPage: true,

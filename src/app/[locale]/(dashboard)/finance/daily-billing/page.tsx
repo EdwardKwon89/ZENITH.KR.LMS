@@ -10,7 +10,7 @@ export default async function DailyBillingPage() {
   const { profile } = await requireAuth();
 
   // Access check: Admin, Manager, Zenith Super Admin, Agency, or Shipper
-  const allowedRoles = ['ZENITH_SUPER_ADMIN', 'ADMIN', 'MANAGER', 'AGENCY', 'SHIPPER'];
+  const allowedRoles = ['ZENITH_SUPER_ADMIN', 'ADMIN', 'MANAGER', 'AGENCY', 'AGENCY_SHIPPER', 'SHIPPER'];
   if (!allowedRoles.includes(profile?.role || '')) {
     redirect('/dashboard');
   }
