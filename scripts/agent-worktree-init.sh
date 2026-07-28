@@ -81,6 +81,10 @@ for envfile in .env.local .env; do
 done
 
 echo ""
+echo "[worktree-init] 로컬 DB 스키마/시드 최신화 확인 중..."
+"$REPO_ROOT/scripts/check-db-freshness.sh" || echo "[worktree-init] ⚠️  위 pending 마이그레이션을 해소하지 않으면 로컬 검증 결과가 CI와 다를 수 있습니다 — 착수 전 '$REPO_ROOT/scripts/check-db-freshness.sh --fix' 실행 권장."
+
+echo ""
 echo "[worktree-init] 준비 완료. 아래 디렉토리로 이동해서 작업 시작:"
 echo ""
 echo "  cd $WORKTREE_DIR"
