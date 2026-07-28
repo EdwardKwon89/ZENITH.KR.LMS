@@ -7,7 +7,7 @@
 | **담당** | Dave (Team B) |
 | **생성일** | 2026-07-28 |
 | **우선순위** | P1 |
-| **상태** | ⬜ |
+| **상태** | 🔔 |
 
 ## 개요
 
@@ -108,8 +108,22 @@ const getStatusBadge = (status: string) => {
 
 - Dave: `.agent/VIOLATION_TRACKER.md` 참조 후 착수. 배정 파일을 반드시 그대로 사용할 것 — 새 번호로 재채번하지 말 것.
 
-## [발견 이슈]
+## [작업 결과]
 
-_(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
+| 항목 | 내용 |
+|:-----|:------|
+| **담당 실행자** | D_Kai (Dave 대리) |
+| **커밋 해시** | `6b9f930e` |
+| **변경 파일** | 6개 파일 (shipper-invoices.ts · NaviSidebar.tsx · i18n 2개 · invoices/page.tsx · tests) |
+| **테스트 결과** | `vitest run` — 144 files · 974 tests **ALL PASS** |
+| **빌드 결과** | `npm run build` — **SUCCESS** |
+| **R-10** | jungjs72@gmail.com(CORPORATE) → /shipper/invoices 정상 접속 확인 ✅ |
 
-없음
+### 기존 테스트 개선
+- `shipper-invoices.test.ts`: `toContain`/`readFileSync` 소스 문자열 검사(3건) → 실제 함수 호출 기반 behavioral 테스트(8건)로 전면 교체
+- 기존 `shipper-invoices-agency-rls.test.ts`는 건드리지 않음(회귀 유지)
+
+### 체크리스트 완료 현황
+
+- [x] 4개 파일 수정 완료
+- [x] behavioral 테스트 8건 (CORPORATE/AGENCY_SHIPPER/INDIVIDUAL/SHIPPER/ADMIN/AGENCY/BLOCKED/날짜필터)

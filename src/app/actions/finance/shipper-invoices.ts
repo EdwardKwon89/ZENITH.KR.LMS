@@ -8,7 +8,15 @@ export async function getShipperInvoices(params?: { startDate?: string; endDate?
   const { supabase, profile } = await validateUserAction();
   if (!profile) throw new Error('User profile not found');
 
-  const allowedRoles = [USER_ROLES.SHIPPER, USER_ROLES.ADMIN, USER_ROLES.ZENITH_SUPER_ADMIN, USER_ROLES.AGENCY];
+  const allowedRoles = [
+    USER_ROLES.SHIPPER,
+    USER_ROLES.CORPORATE,
+    USER_ROLES.AGENCY_SHIPPER,
+    USER_ROLES.INDIVIDUAL,
+    USER_ROLES.ADMIN,
+    USER_ROLES.ZENITH_SUPER_ADMIN,
+    USER_ROLES.AGENCY,
+  ];
   if (!allowedRoles.includes(profile.role as any)) {
     throw new Error('조회 권한이 없습니다.');
   }
@@ -19,8 +27,9 @@ export async function getShipperInvoices(params?: { startDate?: string; endDate?
     .neq('status', 'CANCELED')
     .order('created_at', { ascending: false });
 
-  // SHIPPER는 본인 것만, ADMIN은 전체, AGENCY는 자소 화주 것만
-  if (profile.role === USER_ROLES.SHIPPER) {
+  // 4개 화주 계열 role은 본인 것만, ADMIN은 전체, AGENCY는 자소 화주 것만
+  const shipperRoles = [USER_ROLES.SHIPPER, USER_ROLES.CORPORATE, USER_ROLES.AGENCY_SHIPPER, USER_ROLES.INDIVIDUAL];
+  if (shipperRoles.includes(profile.role as any)) {
     query = query.eq('shipper_id', profile.org_id);
   } else if (profile.role === USER_ROLES.AGENCY) {
     const { data: agencyLinks } = await supabase
