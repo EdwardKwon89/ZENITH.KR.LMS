@@ -120,7 +120,7 @@ export async function getShipperDailyBillingSummary(params?: {
 
     const invoiceSelect = `
       id, invoice_no, total_amount, currency, status, is_finalized,
-      billed_org_id, invoice_tier, created_at,
+      billed_org_id, invoice_tier, created_at, metadata,
       org:billed_org_id ( id, name )
     `;
 
@@ -188,6 +188,24 @@ export async function getShipperDailyBillingSummary(params?: {
       return { success: true, groups: [], exchangeRate };
     }
 
+    const sourceOrderIds = [...new Set(
+      invoices.map((inv: any) => inv.metadata?.source_order_id).filter(Boolean)
+    )] as string[];
+
+    const costsByOrderId = new Map<string, any[]>();
+    if (sourceOrderIds.length > 0) {
+      const { data: allCosts } = await supabase
+        .from('zen_order_costs')
+        .select('order_id, cost_type, unit_price, quantity, total_amount, currency')
+        .in('order_id', sourceOrderIds);
+
+      for (const c of allCosts || []) {
+        const list = costsByOrderId.get(c.order_id) || [];
+        list.push(c);
+        costsByOrderId.set(c.order_id, list);
+      }
+    }
+
     const groupsMap = new Map<string, ShipperDailyBillingGroup>();
 
     for (const inv of invoices) {
@@ -228,6 +246,19 @@ export async function getShipperDailyBillingSummary(params?: {
       );
       if (unsupported) group.hasUnsupportedCurrency = true;
       group.totalBillingAmountKrw += amountKrw;
+
+      const orderId = inv.metadata?.source_order_id;
+      const orderCosts = orderId ? (costsByOrderId.get(orderId) || []) : [];
+      for (const c of orderCosts) {
+        const rawAmt = Number(c.total_amount || c.unit_price * (c.quantity || 1) || 0);
+        const { amountKrw: costKrw, unsupported: costUnsupported } = convertToKrw(rawAmt, c.currency, exchangeRate);
+        if (costUnsupported) group.hasUnsupportedCurrency = true;
+        if (c.cost_type === 'FREIGHT' || c.cost_type === 'BASE_FREIGHT') group.totalBaseFreight += costKrw;
+        else if (c.cost_type === 'FUEL_SURCHARGE') group.totalFuelSurcharge += costKrw;
+        else if (c.cost_type === 'SURGE_EMERGENCY' || c.cost_type === 'SURGE_FEE') group.totalSurgeFee += costKrw;
+        else if (c.cost_type === 'OTHER_CHARGE') group.totalOtherCharge += costKrw;
+        else if (c.cost_type === 'UPS_ACTUAL_ADJUSTMENT') group.totalActualAdjustment += costKrw;
+      }
 
       if (inv.is_finalized) {
         group.finalizedCount += 1;
