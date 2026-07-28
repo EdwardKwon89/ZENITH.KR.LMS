@@ -27,12 +27,12 @@ describe('IMP-153: authenticated 롤 SELECT GRANT 검증', () => {
   });
 
   describe('ALTER DEFAULT PRIVILEGES 검증', () => {
-    it('ALTER DEFAULT PRIVILEGES 설정 존재', () => {
+    it('ALTER DEFAULT PRIVILEGES 설정 존재 — authenticated가 public 스키마에 SELECT 권한 포함', () => {
+      // defaclrole은 객체 소유자(postgres)이고, authenticated는 ACL 문자열 안에 있음
       const result = psql(`
         SELECT COUNT(*) FROM pg_default_acl
         WHERE defaclnamespace = (SELECT oid FROM pg_namespace WHERE nspname = 'public')
-        AND defaclrole = (SELECT oid FROM pg_roles WHERE rolname = 'authenticated')
-        AND defaclacl::text LIKE '%SELECT%'
+        AND defaclacl::text LIKE '%authenticated=ar%'
       `);
       const count = parseInt(result, 10);
       expect(count).toBeGreaterThanOrEqual(1);
