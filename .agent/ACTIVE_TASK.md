@@ -16,7 +16,7 @@
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
 | [#952](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/952) | [fix] DEF-B-021 — 운임 스냅샷 멀티패키지 치수 첫 번째만 반영 (오더등록·입고재계산 양쪽) | b | p2 | - | 미배정 | 2026-07-28 |
-| [#951](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/951) | [fix] DEF-B-025 — UPS 오더 픽업완료가 route_option_id 가드에 막혀 항상 실패 | b | p1 | - | 미배정 | 2026-07-28 |
+| [#951](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/951) | [fix] DEF-B-025 — UPS 오더 픽업완료가 route_option_id 가드에 막혀 항상 실패 | b | p1 | review | 미배정 | 2026-07-28 |
 | [#946](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/946) | [fix] DEF-B-023 — UPS 오더 상세 무역서류(CI/PL/UPS Invoice) PDF 라벨 번역키 대량 누락 | b | p2 | - | 미배정 | 2026-07-28 |
 | [#943](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/943) | [fix] 법인정보(마이페이지) 주소·사업자정보가 zen_organizations 실제 컬럼과 연결 안 됨 | b | p2 | - | 미배정 | 2026-07-28 |
 | [#895](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/895) | [fix] DEF-130 — SNTL(SUB_ADMIN) 역할이 UPS 기준요금(zen_ups_base_rates) 조회 불가 | a | p1 | - | 미배정 | 2026-07-27 |
