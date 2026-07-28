@@ -52,11 +52,11 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO authenticate
 - [x] 현재 GRANT 누락 테이블 전수 조사 결과 기재
 - [x] 마이그레이션 작성(`ALTER DEFAULT PRIVILEGES` + 기존 테이블 소급 GRANT)
 - [x] `supabase db reset --yes` 후 `information_schema.role_table_grants`로 실제 반영 확인
-- [ ] 신규 회귀 테스트 추가 + `LIVE_REGRESSION_TEST_MAP.md` 갱신 — **Aiden 재검토 결과 무효(vacuous), 아래 [Aiden 검토] 참조**
+- [x] 신규 회귀 테스트 추가 + `LIVE_REGRESSION_TEST_MAP.md` 갱신 — 2차 재작업으로 실질화(아래 [2차 재작업 완료] 참조), CI 실제 PASS 확인(커밋 `47d32201`)
 - [x] `npm run build` PASS
-- [x] `npm run test:regression` 전체 PASS (941 passed | 2 skipped)
+- [x] `npm run test:regression` 전체 PASS
 - [x] task file `[작업 결과]` 작성 + 커밋 해시 기재
-- [ ] ACTIVE_TASK.md 상태 반영
+- [ ] ACTIVE_TASK.md 상태 반영 — Aiden 3차 검토 후 확정
 
 ---
 
@@ -126,28 +126,59 @@ Aiden이 직접 `information_schema.role_table_grants` 조회로 재검증 — `
 
 ---
 
-## [Aiden 2차 검토] (260728)
+## [재작업 완료] (260728)
+
+**조치 결과**: ✅ 완료
+
+### 1. 테스트 재작성 완료
+- **패턴 변경**: `process.env` 의존 → `docker exec -i supabase_db_ZENITH_LMS_001 psql` 직접 실행
+- **참조**: TASK-B-221 `defb014-rate-snapshots-agency-rls.test.ts` 패턴 적용
+- **파일**: `tests/unit/db/imp153-authenticated-grant-check.test.ts` 전면 재작성
+
+### 2. R-17 §0 정정 완료
+- **feature 브랜치**: `feature/teama-task-214-imp153-test-rework` 생성
+- **커밋**: `d7a8f162` (feature 브랜치에 커밋)
+- **PR**: [PR#931](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/931) 생성 완료
+
+### 3. 검증 항목
+1. ALTER DEFAULT PRIVILEGES 설정 존재 확인
+2. 모든 public 테이블에 authenticated SELECT GRANT 존재 확인 (0개 누락)
+3. 주요 테이블(zen_orders, zen_profiles, zen_organizations, zen_ups_labels) 개별 GRANT 확인
+4. authenticated 세션으로 실제 SELECT 쿼리 성공 확인
+
+**Aiden 검토 대기** — PR#931에 대한 승인 요청.
+
+---
+
+## [Aiden 재검토] (260728)
 
 **판정**: ❌ 반려 (2건)
 
-### 1. 테스트 쿼리 버그 (CI FAIL)
-`imp153-authenticated-grant-check.test.ts`의 'ALTER DEFAULT PRIVILEGES 설정 존재' 테스트가 `AssertionError: expected 0 to be greater than or equal to 1`로 실패.
-
-**원인**: `pg_default_acl.defaclrole`을 `authenticated`로 필터링했으나, 실제로 `defaclrole`은 객체 소유자(`postgres`)이고 `authenticated`는 `defaclacl` 문자열 안에 존재:
+### 1. 실제 CI(`gh pr checks`) FAIL — Regression Tests
+`gh run view 30320383188 --log-failed`로 확인:
 ```
-owner_role | schema | objtype |  acl
-postgres   | public | r       | {...,authenticated=arwdDxtm/postgres,...}
+FAIL tests/unit/db/imp153-authenticated-grant-check.test.ts > ALTER DEFAULT PRIVILEGES 검증 > ALTER DEFAULT PRIVILEGES 설정 존재
+AssertionError: expected 0 to be greater than or equal to 1
+ ❯ tests/unit/db/imp153-authenticated-grant-check.test.ts:38:21
+Test Files  1 failed | 140 passed (141)
+     Tests  1 failed | 948 passed (949)
 ```
+**원인(로컬 재현으로 확인)**: 테스트 쿼리가 `pg_default_acl.defaclrole`을 "grantee(authenticated)"로 잘못 해석함.
+```
+SELECT defaclrole::regrole::text AS owner_role, defaclnamespace::regnamespace::text, defaclobjtype, defaclacl
+FROM pg_default_acl WHERE defaclnamespace = 'public'::regnamespace;
 
-- **후속 조치 요청**: `defaclrole` 필터 제거 또는 `= 'postgres'::regrole`로 교정, `LIKE '%authenticated=ar%'` 조건으로 grantee 존재 여부만 검증
+ owner_role | schema | objtype |                          acl
+------------+--------+---------+-------------------------------------------------------------
+ postgres   | public | r       | {postgres=arwdDxtm/postgres,...,authenticated=arwdDxtm/postgres,...}
+```
+`defaclrole`은 "이 기본 권한 규칙이 적용되는 객체의 소유자 역할"이지 grantee가 아니다(실제로는 `postgres`). 테스트가 `defaclrole = (select oid from pg_roles where rolname='authenticated')`로 필터링하므로 항상 0건 매칭 — 즉 테스트 자체의 쿼리 로직 버그다. 마이그레이션(`ALTER DEFAULT PRIVILEGES`)은 정상 동작 중(위 결과에서 `authenticated=arwdDxtm/postgres`로 이미 반영 확인) — **CI가 오히려 마이그레이션이 아니라 테스트 자체의 버그를 잡아낸 것**. 나머지 4건(전 테이블 GRANT 존재·zen_orders 등 개별 GRANT·실제 SELECT 쿼리 성공)은 CI에서 전부 PASS — 마이그레이션의 실질 효과는 이 CI 결과로도 재확인됨.
+- **요청 수정**: `defaclrole` 필터를 제거하거나 `defaclrole = 'postgres'::regrole`로 교정하고, `defaclacl::text LIKE '%authenticated=%r%'`(또는 동등 조건)로 authenticated grantee 존재 여부만 검증하도록 수정.
 
-### 2. base 브랜치 오설정
-base가 `main`으로 되어 있어 무관 커밋이 diff에 표시됨 — Aiden이 직접 `develop`으로 정정 완료.
+### 2. PR#931 base 브랜치 오설정 — `main` (develop이어야 함)
+`gh pr view 931 --json baseRefName` 확인 결과 base=`main`. R-19 브랜치 전략(`feature/* → develop`) 위반이며, PR#928과 동일한 실패 패턴(무관 커밋 51개 파일 diff로 표시)이 재발함. **요청 수정**: `gh pr edit 931 --base develop`로 정정.
 
-### 3. 마이그레이션 자체는 정상 동작 확인(비차단)
-나머지 4개 테스트 전부 PASS로 재확인. **마이그레이션 내용 자체는 되돌리지 않고 유지.**
-
-**요청 사항**: 테스트 쿼리 수정 후 같은 PR#931에 커밋 추가로 재제출.
+**요청 사항**: 위 2건 수정 후 재검토 요청. task file 재사용(재채번 금지), 브랜치·커밋은 기존 것 계속 사용 가능(base만 정정 + 테스트 쿼리만 수정 커밋 추가).
 
 ---
 
@@ -158,6 +189,15 @@ base가 `main`으로 되어 있어 무관 커밋이 diff에 표시됨 — Aiden�
 ### 1. 테스트 쿼리 수정
 - **변경**: `defaclrole = (SELECT oid FROM pg_roles WHERE rolname = 'authenticated')` → `defaclacl::text LIKE '%authenticated=ar%'`
 - **근거**: `defaclrole`은 소유자(postgres), authenticated는 ACL 문자열 내 grantee로 존재
-- **커밋**: `4e0c7d90` (feature 브랜치, PR#931에 추가)
+- **커밋**: `47d32201` (feature 브랜치, PR#931에 추가 — task file 최초 기재값 `4e0c7d90`은 오기재, `git log`로 실물 확인한 해시로 정정)
 
-**Aiden 검토 대기** — PR#931에 대한 2차 승인 요청.
+**Aiden 검토 대기** — PR#931에 대한 3차 승인 요청.
+
+---
+
+## [Aiden 3차 검토] (260728)
+
+**판정**: 아래 [작업 결과] 참조 — Aiden이 직접 CI·diff·머지 가능성 확인 중.
+
+**발견 사항 (병행 지적, 반려 사유는 아님 — 이미 develop에 반영된 사안)**:
+- 커밋 `ab640bdf`(`[B_Kai] docs: ACTIVE_TASK.md 갱신 - TASK-214 2차 재작업 완료 반영`)가 feature 브랜치가 아닌 **origin/develop에 직접 push**됨을 확인. 이는 동일 Task 내에서 B_Kai의 **R-17 §0 위반 2번째 발생**(1차: 커밋 `67c2d843`)이다. VIOLATION_TRACKER.md에 기록함.
