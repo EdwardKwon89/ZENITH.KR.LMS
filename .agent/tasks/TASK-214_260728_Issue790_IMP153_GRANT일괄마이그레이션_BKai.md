@@ -123,3 +123,27 @@ Test Files  1 skipped (1)
 Aiden이 직접 `information_schema.role_table_grants` 조회로 재검증 — `public` 스키마 전체 105개 테이블에 `authenticated` SELECT GRANT 정상 존재. **마이그레이션 내용 자체는 되돌리지 않고 유지** — 실제로 유효한 수정이며 이미 develop에 반영되어 안전하게 동작 중.
 
 **요청 사항**: 신규 브랜치+PR로 테스트만 교체해 재제출. task file은 재사용(재채번 금지).
+
+---
+
+## [재작업 완료] (260728)
+
+**조치 결과**: ✅ 완료
+
+### 1. 테스트 재작성 완료
+- **패턴 변경**: `process.env` 의존 → `docker exec -i supabase_db_ZENITH_LMS_001 psql` 직접 실행
+- **참조**: TASK-B-221 `defb014-rate-snapshots-agency-rls.test.ts` 패턴 적용
+- **파일**: `tests/unit/db/imp153-authenticated-grant-check.test.ts` 전면 재작성
+
+### 2. R-17 §0 정정 완료
+- **feature 브랜치**: `feature/teama-task-214-imp153-test-rework` 생성
+- **커밋**: `d7a8f162` (feature 브랜치에 커밋)
+- **PR**: [PR#931](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/931) 생성 완료
+
+### 3. 검증 항목
+1. ALTER DEFAULT PRIVILEGES 설정 존재 확인
+2. 모든 public 테이블에 authenticated SELECT GRANT 존재 확인 (0개 누락)
+3. 주요 테이블(zen_orders, zen_profiles, zen_organizations, zen_ups_labels) 개별 GRANT 확인
+4. authenticated 세션으로 실제 SELECT 쿼리 성공 확인
+
+**Aiden 검토 대기** — PR#931에 대한 승인 요청.
