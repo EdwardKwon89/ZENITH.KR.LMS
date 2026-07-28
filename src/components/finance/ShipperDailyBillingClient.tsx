@@ -211,12 +211,12 @@ function BillingGroupTable({
                                     <td className="py-2 px-3 font-bold text-slate-700 dark:text-slate-300">
                                       {ord.destCountryCode}
                                     </td>
-                                    <td className="py-2 px-3 text-right font-mono">₩{ord.baseFreight.toLocaleString()}</td>
-                                    <td className="py-2 px-3 text-right font-mono">₩{ord.fuelSurcharge.toLocaleString()}</td>
-                                    <td className="py-2 px-3 text-right font-mono text-amber-600">₩{ord.surgeFee.toLocaleString()}</td>
-                                    <td className="py-2 px-3 text-right font-mono text-purple-600">₩{(ord.otherCharge || 0).toLocaleString()}</td>
-                                    <td className="py-2 px-3 text-right font-mono text-blue-600">₩{ord.actualAdjustment.toLocaleString()}</td>
-                                    <td className="py-2 px-3 text-right font-mono font-bold text-amber-600">
+                                    <td className="py-2 px-3 text-right font-mono text-slate-700 dark:text-slate-300">₩{ord.baseFreight.toLocaleString()}</td>
+                                    <td className="py-2 px-3 text-right font-mono text-slate-700 dark:text-slate-300">₩{ord.fuelSurcharge.toLocaleString()}</td>
+                                    <td className="py-2 px-3 text-right font-mono text-amber-600 dark:text-amber-400">₩{ord.surgeFee.toLocaleString()}</td>
+                                    <td className="py-2 px-3 text-right font-mono text-purple-600 dark:text-purple-400">₩{(ord.otherCharge || 0).toLocaleString()}</td>
+                                    <td className="py-2 px-3 text-right font-mono text-blue-600 dark:text-blue-400">₩{ord.actualAdjustment.toLocaleString()}</td>
+                                    <td className="py-2 px-3 text-right font-mono font-bold text-amber-600 dark:text-amber-400">
                                       ₩{ord.totalAmountKrw.toLocaleString()}
                                       {ord.hasUnsupportedCurrency && (
                                         <span className="ml-1 text-[9px] text-red-500 font-normal">⚠ 혼합통화</span>
