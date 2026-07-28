@@ -471,47 +471,50 @@ describe('화주별 일별/주별/월별 청구 집계 및 최종 운임 확정 
   });
 
   describe('Issue #920: zen_invoices 기반 역할별 청구 집계 (getShipperDailyBillingSummary)', () => {
-    it('ADMIN 세션 → invoice_tier IN (ADMIN_TO_AGENCY, ADMIN_TO_SHIPPER) 인보이스만 집계', async () => {
+    it('ADMIN 세션 → .in("invoice_tier", ["ADMIN_TO_AGENCY","ADMIN_TO_SHIPPER"]) 필터가 실제로 적용된다', async () => {
       (validateUserAction as any).mockResolvedValue({
         supabase: mockSupabase,
         profile: { id: 'admin-usr-1', role: USER_ROLES.ADMIN, org_id: 'platform-org' },
       });
 
-      // Mock returns pre-filtered data (simulating server-side .in('invoice_tier', [...]))
+      const invoiceChain = createChainableMock([
+        {
+          id: 'inv-admin-1',
+          invoice_no: 'INV-ADMIN-001',
+          total_amount: 500,
+          currency: 'USD',
+          status: 'UNPAID',
+          is_finalized: false,
+          billed_org_id: 'agency-org',
+          invoice_tier: 'ADMIN_TO_AGENCY',
+          created_at: '2026-07-25T10:00:00Z',
+          org: { id: 'agency-org', name: '대리점A' },
+        },
+        {
+          id: 'inv-admin-2',
+          invoice_no: 'INV-ADMIN-002',
+          total_amount: 300,
+          currency: 'USD',
+          status: 'UNPAID',
+          is_finalized: true,
+          billed_org_id: 'shipper-org',
+          invoice_tier: 'ADMIN_TO_SHIPPER',
+          created_at: '2026-07-25T11:00:00Z',
+          org: { id: 'shipper-org', name: '화주B' },
+        },
+      ]);
+
       mockSupabase.from.mockImplementation((table: string) => {
-        if (table === 'zen_invoices') {
-          return createChainableMock([
-            {
-              id: 'inv-admin-1',
-              invoice_no: 'INV-ADMIN-001',
-              total_amount: 500,
-              currency: 'USD',
-              status: 'UNPAID',
-              is_finalized: false,
-              billed_org_id: 'agency-org',
-              invoice_tier: 'ADMIN_TO_AGENCY',
-              created_at: '2026-07-25T10:00:00Z',
-              org: { id: 'agency-org', name: '대리점A' },
-            },
-            {
-              id: 'inv-admin-2',
-              invoice_no: 'INV-ADMIN-002',
-              total_amount: 300,
-              currency: 'USD',
-              status: 'UNPAID',
-              is_finalized: true,
-              billed_org_id: 'shipper-org',
-              invoice_tier: 'ADMIN_TO_SHIPPER',
-              created_at: '2026-07-25T11:00:00Z',
-              org: { id: 'shipper-org', name: '화주B' },
-            },
-          ]);
-        }
+        if (table === 'zen_invoices') return invoiceChain;
         return createChainableMock();
       });
 
       const res = await getShipperDailyBillingSummary({ periodType: 'daily' });
       expect(res.success).toBe(true);
+
+      // Verify the .in() filter was actually called on zen_invoices query chain
+      expect(invoiceChain.in).toHaveBeenCalledWith('invoice_tier', ['ADMIN_TO_AGENCY', 'ADMIN_TO_SHIPPER']);
+      expect(invoiceChain.neq).toHaveBeenCalledWith('status', 'CANCELED');
 
       const groups = res.groups || [];
       expect(groups.length).toBe(2);
@@ -528,58 +531,72 @@ describe('화주별 일별/주별/월별 청구 집계 및 최종 운임 확정 
       expect(shipperGroup!.finalizedCount).toBe(1);
     });
 
-    it('AGENCY 세션 → 매입(ADMIN_TO_AGENCY, 본인 billed) + 매출(AGENCY_TO_SHIPPER, 소속 화주 billed) 분리 반환', async () => {
+    it('AGENCY 세션 → 매입(.eq("billed_org_id",agency).eq("invoice_tier",ADMIN_TO_AGENCY)) + 매출(.eq("invoice_tier",AGENCY_TO_SHIPPER).in("billed_org_id",shippers)) 필터가 실제로 적용된다', async () => {
       (validateUserAction as any).mockResolvedValue({
         supabase: mockSupabase,
         profile: { id: 'agency-usr', role: USER_ROLES.AGENCY, org_id: 'agency-org' },
       });
 
+      const agencyShippersChain = createChainableMock([{ shipper_org_id: 'shipper-x' }]);
+
+      // 1st zen_invoices call: purchased (ADMIN_TO_AGENCY)
+      const purchasedChain = createChainableMock([
+        {
+          id: 'inv-purchase',
+          invoice_no: 'INV-PURCHASE-001',
+          total_amount: 1000,
+          currency: 'USD',
+          status: 'UNPAID',
+          is_finalized: false,
+          billed_org_id: 'agency-org',
+          invoice_tier: 'ADMIN_TO_AGENCY',
+          created_at: '2026-07-26T09:00:00Z',
+          org: { id: 'agency-org', name: '대리점A' },
+        },
+      ]);
+
+      // 2nd zen_invoices call: sold (AGENCY_TO_SHIPPER)
+      const soldChain = createChainableMock([
+        {
+          id: 'inv-sold',
+          invoice_no: 'INV-SOLD-001',
+          total_amount: 600,
+          currency: 'USD',
+          status: 'UNPAID',
+          is_finalized: false,
+          billed_org_id: 'shipper-x',
+          invoice_tier: 'AGENCY_TO_SHIPPER',
+          created_at: '2026-07-26T10:00:00Z',
+          org: { id: 'shipper-x', name: '화주X' },
+        },
+      ]);
+
       let invoiceCallIdx = 0;
       mockSupabase.from.mockImplementation((table: string) => {
-        if (table === 'zen_agency_shippers') {
-          return createChainableMock([{ shipper_org_id: 'shipper-x' }]);
-        }
+        if (table === 'zen_agency_shippers') return agencyShippersChain;
         if (table === 'zen_invoices') {
           invoiceCallIdx++;
-          if (invoiceCallIdx === 1) {
-            // 1st call: purchased (ADMIN_TO_AGENCY, billed_org_id=agency-org)
-            return createChainableMock([
-              {
-                id: 'inv-purchase',
-                invoice_no: 'INV-PURCHASE-001',
-                total_amount: 1000,
-                currency: 'USD',
-                status: 'UNPAID',
-                is_finalized: false,
-                billed_org_id: 'agency-org',
-                invoice_tier: 'ADMIN_TO_AGENCY',
-                created_at: '2026-07-26T09:00:00Z',
-                org: { id: 'agency-org', name: '대리점A' },
-              },
-            ]);
-          } else {
-            // 2nd call: sold (AGENCY_TO_SHIPPER, billed_org_id IN [shipper-x])
-            return createChainableMock([
-              {
-                id: 'inv-sold',
-                invoice_no: 'INV-SOLD-001',
-                total_amount: 600,
-                currency: 'USD',
-                status: 'UNPAID',
-                is_finalized: false,
-                billed_org_id: 'shipper-x',
-                invoice_tier: 'AGENCY_TO_SHIPPER',
-                created_at: '2026-07-26T10:00:00Z',
-                org: { id: 'shipper-x', name: '화주X' },
-              },
-            ]);
-          }
+          return invoiceCallIdx === 1 ? purchasedChain : soldChain;
         }
         return createChainableMock();
       });
 
       const res = await getShipperDailyBillingSummary({ periodType: 'daily' });
       expect(res.success).toBe(true);
+
+      // Verify agency_shippers query filters
+      expect(agencyShippersChain.eq).toHaveBeenCalledWith('agency_org_id', 'agency-org');
+      expect(agencyShippersChain.eq).toHaveBeenCalledWith('is_active', true);
+
+      // Verify purchased query filters
+      expect(purchasedChain.eq).toHaveBeenCalledWith('billed_org_id', 'agency-org');
+      expect(purchasedChain.eq).toHaveBeenCalledWith('invoice_tier', 'ADMIN_TO_AGENCY');
+      expect(purchasedChain.neq).toHaveBeenCalledWith('status', 'CANCELED');
+
+      // Verify sold query filters
+      expect(soldChain.eq).toHaveBeenCalledWith('invoice_tier', 'AGENCY_TO_SHIPPER');
+      expect(soldChain.in).toHaveBeenCalledWith('billed_org_id', ['shipper-x']);
+      expect(soldChain.neq).toHaveBeenCalledWith('status', 'CANCELED');
 
       const groups = res.groups || [];
       expect(groups.length).toBe(2);
@@ -597,35 +614,38 @@ describe('화주별 일별/주별/월별 청구 집계 및 최종 운임 확정 
       expect(sold!.invoiceIds).toContain('inv-sold');
     });
 
-    it('SHIPPER 세션 → billed_org_id = 본인 org_id인 인보이스만 집계, 접근 허용', async () => {
+    it('SHIPPER 세션 → .eq("billed_org_id", 본인 org_id) 필터가 실제로 적용된다', async () => {
       (validateUserAction as any).mockResolvedValue({
         supabase: mockSupabase,
         profile: { id: 'shipper-usr', role: USER_ROLES.SHIPPER, org_id: 'shipper-my' },
       });
 
-      // Mock returns only the shipper's own invoice (server-side .eq('billed_org_id', ...))
+      const invoiceChain = createChainableMock([
+        {
+          id: 'inv-mine',
+          invoice_no: 'INV-MINE-001',
+          total_amount: 800,
+          currency: 'USD',
+          status: 'UNPAID',
+          is_finalized: false,
+          billed_org_id: 'shipper-my',
+          invoice_tier: 'ADMIN_TO_SHIPPER',
+          created_at: '2026-07-27T10:00:00Z',
+          org: { id: 'shipper-my', name: '나의 화주' },
+        },
+      ]);
+
       mockSupabase.from.mockImplementation((table: string) => {
-        if (table === 'zen_invoices') {
-          return createChainableMock([
-            {
-              id: 'inv-mine',
-              invoice_no: 'INV-MINE-001',
-              total_amount: 800,
-              currency: 'USD',
-              status: 'UNPAID',
-              is_finalized: false,
-              billed_org_id: 'shipper-my',
-              invoice_tier: 'ADMIN_TO_SHIPPER',
-              created_at: '2026-07-27T10:00:00Z',
-              org: { id: 'shipper-my', name: '나의 화주' },
-            },
-          ]);
-        }
+        if (table === 'zen_invoices') return invoiceChain;
         return createChainableMock();
       });
 
       const res = await getShipperDailyBillingSummary({ periodType: 'daily' });
       expect(res.success).toBe(true);
+
+      // Verify the .eq() filter was actually called on zen_invoices query chain
+      expect(invoiceChain.eq).toHaveBeenCalledWith('billed_org_id', 'shipper-my');
+      expect(invoiceChain.neq).toHaveBeenCalledWith('status', 'CANCELED');
 
       const groups = res.groups || [];
       expect(groups.length).toBe(1);
