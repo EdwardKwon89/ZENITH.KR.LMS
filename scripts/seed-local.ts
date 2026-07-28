@@ -453,6 +453,28 @@ async function seedDailyBillingMultiTierFixtures(supabase: any, shipperOrgId: st
   }
   console.log(`  - Linked Global Shipper Corp + Jongseok Jeong -> Zenith Agency Partners (discount_rate=0)`);
 
+  // IMP-157 조사 중 실측 반영된 Zone별 할인율(대리점 20%/화주 25%) — 화주 할인율이 대리점 자체 할인율보다
+  // 높아 역마진이 발생하는 시나리오(IMP-155 검증용)를 그대로 재현. 아래 오더 4~7번 픽스처의
+  // adminToAgencyBreakdown 수치가 바로 이 할인율로 계산된 실측값(seedSntlAgency()와 동일 패턴).
+  const { data: zonesForAgency } = await supabase.from('zen_ups_zones').select('id');
+  for (const zone of zonesForAgency ?? []) {
+    await supabase
+      .from('zen_agency_pricing_policies')
+      .upsert(
+        { agency_org_id: agencyOrg.id, zone_id: zone.id, discount_rate: 0.20, is_active: true },
+        { onConflict: 'agency_org_id,zone_id' },
+      );
+    for (const linkedShipperOrgId of [shipperOrgId, aventusmOrg.id]) {
+      await supabase
+        .from('zen_agency_shipper_zone_discounts')
+        .upsert(
+          { agency_org_id: agencyOrg.id, shipper_org_id: linkedShipperOrgId, zone_id: zone.id, discount_rate: 0.25, is_active: true },
+          { onConflict: 'agency_org_id,shipper_org_id,zone_id' },
+        );
+    }
+  }
+  console.log(`  - Registered Admin->Zenith Agency Partners 20% + Agency->Shipper 25% zone discount policy (역마진 시나리오, ${zonesForAgency?.length ?? 0} zones)`);
+
   type CostRow = { cost_type: string; amount: number };
   type OrderFixture = {
     orderNo: string;
