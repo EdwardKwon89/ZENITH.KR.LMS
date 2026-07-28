@@ -65,10 +65,11 @@
 
 | 항목 | 내용 |
 |:-----|:-----|
-| **커밋 해시** | `db0b2570` |
+| **커밋 해시** | `db0b2570` (구현) → `05016950` (vacuous test 반려 대응) |
 | **브랜치** | `feature/teamb-237-iss920-daily-billing-role-based-view` |
 | **변경 파일** | `page.tsx`, `daily-billing.ts`, `ShipperDailyBillingClient.tsx`, `daily-billing-aggregation.test.ts` |
 | **Regression** | 140/140 files · 943/943 tests ALL PASS |
+| **PR** | [#924](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/924) |
 
 ### 변경 요약
 1. **page.tsx**: `allowedRoles`에 `SHIPPER` 추가, `role`/`agencyOrgId` prop 전달
@@ -77,7 +78,7 @@
    - AGENCY: 매입(ADMIN_TO_AGENCY, 본인 billed) + 매출(AGENCY_TO_SHIPPER, 소속 화주 billed) 분리 조회
    - SHIPPER: `billed_org_id = 본인 org_id` 인보이스만 조회
 3. **ShipperDailyBillingClient.tsx**: `BillingGroupTable` 컴포넌트 추출 + AGENCY 듀얼 섹션(매입/매출) 분리 렌더링 + SHIPPER 접근 허용(일괄 마감 버튼 숨김)
-4. **테스트**: 3건 신규 (ADMIN/AGENCY/SHIPPER 역할별 behavioral 테스트) + 기존 테스트 zen_invoices 기반으로 업데이트
+4. **테스트** (`05016950`): vacuous test 반려 대응 — 3건 신규 테스트에서 mock 하드코딩 제거, `.in()`/`.eq()` 호출 spy 검증으로 대체 (ADMIN `.in('invoice_tier',...)` / AGENCY 3 chain 분리 검증 / SHIPPER `.eq('billed_org_id',...)` 검증)
 
 ## [발견 이슈]
 
