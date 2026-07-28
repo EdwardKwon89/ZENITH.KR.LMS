@@ -542,8 +542,24 @@ async function seedDailyBillingMultiTierFixtures(supabase: any, shipperOrgId: st
     },
   ];
 
+  // createOrder()가 실제로 org 등록정보를 오더에 스냅샷 저장하는 shipper_contact_*/shipper_* 필드 —
+  // 화주 계정별 실제 등록정보(위 aventusmOrg.update()/기존 base seed 3-1의 Global Shipper Corp 등록정보와 동일)
+  const shipperSnapshots = {
+    global: {
+      contactName: 'JSJung Shipper Test', contactPhone: '010-1234-5678', contactEmail: 'jungjs72@gmail.com',
+      address: '경기 김포시 하성면 마곡로 19', addressDetail: 'samsung electric', countryCode: 'KR',
+      stateProvince: '41', city: 'Gimpo-si', zipcode: '10012', bizNo: '123-45-67890',
+    },
+    aventusm: {
+      contactName: 'Jongseok Jeong', contactPhone: '010-4282-4027', contactEmail: 'jungjs@aventusm.com',
+      address: '서울 성북구 동소문로 290-1', addressDetail: 'bio venture tower 203', countryCode: 'KR',
+      stateProvince: '11', city: 'Seongbuk-gu', zipcode: '02734', bizNo: '215-46-56633',
+    },
+  } as const;
+
   for (const fx of orderFixtures) {
     const shipperOrgIdForOrder = fx.shipperKey === 'global' ? shipperOrgId : aventusmOrg.id;
+    const snap = shipperSnapshots[fx.shipperKey];
 
     const { data: existingOrder } = await supabase
       .from('zen_orders')
@@ -577,6 +593,17 @@ async function seedDailyBillingMultiTierFixtures(supabase: any, shipperOrgId: st
           pickup_contact_name: fx.deliveryMethod === 'PICKUP' ? '정종석' : null,
           pickup_contact_tel: fx.deliveryMethod === 'PICKUP' ? '01042824027' : null,
           billing_status: 'INVOICED',
+          shipper_contact_name: snap.contactName,
+          shipper_contact_phone: snap.contactPhone,
+          shipper_contact_email: snap.contactEmail,
+          shipper_address: snap.address,
+          shipper_address_detail: snap.addressDetail,
+          shipper_country_code: snap.countryCode,
+          shipper_state_province: snap.stateProvince,
+          shipper_city: snap.city,
+          shipper_zipcode: snap.zipcode,
+          shipper_biz_no: snap.bizNo,
+          pickup_country_code: snap.countryCode,
           cargo_details: { description: 'DEF-B-026~030 seed fixture — daily-billing/청구서 조회 다단계 인보이스 검증용' },
         })
         .select('id')
