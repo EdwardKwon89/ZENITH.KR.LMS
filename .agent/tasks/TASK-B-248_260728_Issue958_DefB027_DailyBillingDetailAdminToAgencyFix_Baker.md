@@ -7,7 +7,7 @@
 | **담당** | Baker (Team B) |
 | **생성일** | 2026-07-28 |
 | **우선순위** | P1 |
-| **상태** | ⬜ |
+| **상태** | 🔔 |
 
 ## 개요
 
@@ -168,3 +168,21 @@ const res = await getShipperDailyOrdersDetails(group.invoiceIds);
 _(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
 
 없음
+
+## [작업 결과]
+
+| 항목 | 결과 |
+|:-----|:-----|
+| **커밋 해시** | `5652de25` |
+| **브랜치** | `feature/teamb-248-daily-billing-admin-to-agency-fix` |
+| **변경 파일** | `daily-billing.ts` · `ShipperDailyBillingClient.tsx` · `daily-billing-aggregation.test.ts` |
+| **npm run test:regression** | 144/144 files · 976/976 tests ALL PASS |
+| **R-10 스크린샷** | R-10 검증은 JSJung이 직접 수행 예정 |
+
+### 변경 요약
+
+1. **`getShipperDailyOrdersDetails()` 시그니처 단순화**: `(shipperId, dateOrPeriod, periodType, exchangeRate?, invoiceIds?)` → `(invoiceIds: string[], exchangeRate?)`. 기존 shipper_id 직접 조회 분기 완전 제거.
+2. **AGENCY role 수동 검증 제거**: `zen_agency_shippers` 조회 + `allowedIds.includes()` 블록 삭제. RLS 정책이 이미 동일한 접근 범위를 강제.
+3. **`orderIds` 죽은 필드 제거**: `ShipperDailyBillingGroup` 인터페이스에서 `orderIds: string[]` 삭제, summary에서 `orderIds: []` 초기화 + `group.orderIds.push(inv.id)` 삭제 (invoice ID를 order ID로 넣는 버그였음).
+4. **클라이언트 호출부 갱신**: `toggleExpand()`에서 `getShipperDailyOrdersDetails(group.invoiceIds)` 호출.
+5. **테스트 4건 갱신**: 시그니처 변경에 맞춰 테스트 전면 재작성. ADMIN_TO_AGENCY/AGENCY_TO_SHIPPER 티어 오더 역추적 behavioral 테스트 포함.
