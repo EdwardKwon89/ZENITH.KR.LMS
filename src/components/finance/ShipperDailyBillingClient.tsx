@@ -362,7 +362,7 @@ export default function ShipperDailyBillingClient({
     setExpandedKey(key);
     if (!expandedOrders[key]) {
       setLoadingOrders((prev) => ({ ...prev, [key]: true }));
-      const res = await getShipperDailyOrdersDetails(group.shipperId, group.date, periodType);
+      const res = await getShipperDailyOrdersDetails(group.shipperId, group.date, periodType, undefined, group.invoiceIds);
       setLoadingOrders((prev) => ({ ...prev, [key]: false }));
 
       if (res.success && res.orders) {
