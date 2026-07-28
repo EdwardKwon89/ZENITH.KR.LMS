@@ -15,6 +15,7 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
+| [#937](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/937) | [feat] 회원가입(자가등록) 시 확인 메일에 로그인 정보(이메일+비밀번호) 발송 | b | p1 | - | 미배정 | 2026-07-28 |
 | [#933](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/933) | [chore] seed-local.ts에 RBAC 데이터(zen_role_permissions) + 테스트 계정(jungjs72@gmail.com) 추가 | b | p2 | review | 미배정 | 2026-07-28 |
 | [#895](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/895) | [fix] DEF-130 — SNTL(SUB_ADMIN) 역할이 UPS 기준요금(zen_ups_base_rates) 조회 불가 | a | p1 | - | 미배정 | 2026-07-27 |
 | [#886](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/886) | [verify] DEF-125 재검증 요청 — TASK-B-218/220으로 이미 해소된 것으로 추정됨 | b | p2 | - | 미배정 | 2026-07-27 |
