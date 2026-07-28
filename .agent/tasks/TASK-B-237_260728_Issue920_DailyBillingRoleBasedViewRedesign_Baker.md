@@ -65,7 +65,7 @@
 
 | 항목 | 내용 |
 |:-----|:-----|
-| **커밋 해시** | `db0b2570` (구현) → `05016950` (vacuous test 반려 대응) |
+| **커밋 해시** | `db0b2570` (구현) → `05016950` (vacuous test 반려 대응) → `1e0ebb11` (R-10 스크린샷) |
 | **브랜치** | `feature/teamb-237-iss920-daily-billing-role-based-view` |
 | **변경 파일** | `page.tsx`, `daily-billing.ts`, `ShipperDailyBillingClient.tsx`, `daily-billing-aggregation.test.ts` |
 | **Regression** | 140/140 files · 943/943 tests ALL PASS |
