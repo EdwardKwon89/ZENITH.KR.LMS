@@ -15,7 +15,8 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
-| [#957](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/957) | [fix] DEF-B-026 — 청구서 조회 화면이 실제 화주 role 대부분을 차단 + 메뉴 누락 | b | p1 | - | 미배정 | 2026-07-28 |
+| [#958](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/958) | [fix] DEF-B-027 — 화주별 일별 청구 상세 펼침이 ADMIN_TO_AGENCY 티어에서 항상 빈 목록 | b | p1 | - | 미배정 | 2026-07-28 |
+| [#957](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/957) | [fix] DEF-B-026 — 청구서 조회 화면이 실제 화주 role 대부분을 차단 + 메뉴 누락 | b | p1 | review | 미배정 | 2026-07-28 |
 | [#952](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/952) | [fix] DEF-B-021 — 운임 스냅샷 멀티패키지 치수 첫 번째만 반영 (오더등록·입고재계산 양쪽) | b | p2 | - | 미배정 | 2026-07-28 |
 | [#946](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/946) | [fix] DEF-B-023 — UPS 오더 상세 무역서류(CI/PL/UPS Invoice) PDF 라벨 번역키 대량 누락 | b | p2 | - | 미배정 | 2026-07-28 |
 | [#943](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/943) | [fix] 법인정보(마이페이지) 주소·사업자정보가 zen_organizations 실제 컬럼과 연결 안 됨 | b | p2 | - | 미배정 | 2026-07-28 |
