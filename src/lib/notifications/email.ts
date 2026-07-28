@@ -8,6 +8,18 @@ const resendApiKey = process.env.RESEND_API_KEY;
 const resend = resendApiKey ? new Resend(resendApiKey) : null;
 const FROM = process.env.RESEND_FROM ?? "ZENITH LMS <noreply@zenith-lms.com>";
 
+async function sendViaResend(params: { to: string; subject: string; html: string }): Promise<void> {
+  if (!resend) {
+    logger.warn(`[NOTIF] Resend API Key is missing. Skipping email to ${params.to} (${params.subject})`);
+    return;
+  }
+  const { error } = await resend.emails.send({ from: FROM, to: params.to, subject: params.subject, html: params.html });
+  if (error) {
+    logger.error(`[NOTIF] Resend send failed for ${params.to} (${params.subject}):`, error);
+    throw new Error(error.message || 'Resend 이메일 발송 실패');
+  }
+}
+
 export function generateTempPassword(): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
   const bytes = crypto.randomBytes(12);
@@ -35,11 +47,6 @@ export async function sendStatusChangeEmail(
   const label = STATUS_LABELS[newStatus];
   if (!label || !target.email) return;
 
-  if (!resend) {
-    logger.warn(`[NOTIF] Resend API Key is missing. Skipping email for order ${orderNo} (Status: ${label})`);
-    return;
-  }
-
   const subject = `[ZENITH] 오더 ${escapeHtml(orderNo)} 상태 변경: ${label}`;
   const html = `
     <div style="font-family:sans-serif;max-width:560px;margin:0 auto">
@@ -52,7 +59,41 @@ export async function sendStatusChangeEmail(
     </div>
   `;
 
-  await resend.emails.send({ from: FROM, to: target.email, subject, html });
+  await sendViaResend({ to: target.email, subject, html });
+}
+
+export async function sendSignupWelcomeEmail(params: {
+  email: string;
+  fullName: string;
+  password: string;
+}): Promise<void> {
+  const subject = '[ZENITH LMS] 회원가입이 완료되었습니다 — 로그인 정보 안내';
+  const loginUrl = process.env.NEXT_PUBLIC_SITE_URL
+    ? `${process.env.NEXT_PUBLIC_SITE_URL}/ko/login`
+    : '/ko/login';
+
+  const html = `
+    <div style="font-family:sans-serif;max-width:560px;margin:0 auto">
+      <h2 style="color:#1e293b">회원가입이 완료되었습니다</h2>
+      <p style="color:#475569">안녕하세요, ${escapeHtml(params.fullName)}님</p>
+      <p style="color:#475569">ZENITH LMS 계정이 생성되었습니다. 아래 정보로 로그인해주세요.</p>
+      <table style="width:100%;border-collapse:collapse;margin:16px 0">
+        <tr><td style="padding:8px;color:#64748b">로그인 ID</td><td style="padding:8px;font-weight:bold">${escapeHtml(params.email)}</td></tr>
+        <tr><td style="padding:8px;color:#64748b">비밀번호</td><td style="padding:8px;font-weight:bold;font-family:monospace">${escapeHtml(params.password)}</td></tr>
+        <tr><td style="padding:8px;color:#64748b">로그인 URL</td><td style="padding:8px"><a href="${loginUrl}" style="color:#0ea5e9">${loginUrl}</a></td></tr>
+      </table>
+      <div style="background:#fef3c7;border:1px solid #f59e0b;border-radius:6px;padding:12px;margin:16px 0">
+        <p style="color:#92400e;margin:0;font-size:13px">
+          <strong>🔒 보안 안내</strong><br>
+          본인이 가입하지 않았다면 즉시 관리자에게 문의해주세요.<br>
+          비밀번호는 타인과 공유하지 마세요.
+        </p>
+      </div>
+      <p style="color:#94a3b8;font-size:12px;margin-top:24px">본 메일은 ZENITH LMS에서 자동 발송된 알림입니다.</p>
+    </div>
+  `;
+
+  await sendViaResend({ to: params.email, subject, html });
 }
 
 export async function sendFreightChangeEmail(params: {
@@ -64,11 +105,6 @@ export async function sendFreightChangeEmail(params: {
   currency: string;
   reason: string;
 }): Promise<void> {
-  if (!resend) {
-    logger.warn(`[NOTIF] Resend API Key is missing. Skipping freight change email for ${params.email}`);
-    return;
-  }
-
   const formatAmount = (amount: number) => new Intl.NumberFormat('ko-KR', {
     style: 'currency',
     currency: params.currency,
@@ -90,7 +126,7 @@ export async function sendFreightChangeEmail(params: {
     </div>
   `;
 
-  await resend.emails.send({ from: FROM, to: params.email, subject, html });
+  await sendViaResend({ to: params.email, subject, html });
 }
 
 export async function sendShipperWelcomeEmail(params: {
@@ -99,11 +135,6 @@ export async function sendShipperWelcomeEmail(params: {
   tempPassword: string;
   agencyContactEmail?: string;
 }): Promise<void> {
-  if (!resend) {
-    logger.warn(`[NOTIF] Resend API Key is missing. Skipping welcome email for ${params.email}`);
-    return;
-  }
-
   const subject = '[ZENITH LMS] 화주 계정이 등록되었습니다 — 초기 로그인 정보 안내';
   const loginUrl = process.env.NEXT_PUBLIC_SITE_URL
     ? `${process.env.NEXT_PUBLIC_SITE_URL}/ko/login`
@@ -135,7 +166,7 @@ export async function sendShipperWelcomeEmail(params: {
     </div>
   `;
 
-  await resend.emails.send({ from: FROM, to: params.email, subject, html });
+  await sendViaResend({ to: params.email, subject, html });
 }
 
 export async function sendInvoiceFinalizedEmail(params: {
@@ -147,11 +178,6 @@ export async function sendInvoiceFinalizedEmail(params: {
   dueDate: string;
   orderNo?: string;
 }): Promise<void> {
-  if (!resend) {
-    logger.warn(`[NOTIF] Resend API Key is missing. Skipping invoice finalized email for ${params.email}`);
-    return;
-  }
-
   const formattedAmount = new Intl.NumberFormat('ko-KR', {
     style: 'currency',
     currency: params.currency,
@@ -173,5 +199,5 @@ export async function sendInvoiceFinalizedEmail(params: {
     </div>
   `;
 
-  await resend.emails.send({ from: FROM, to: params.email, subject, html });
+  await sendViaResend({ to: params.email, subject, html });
 }
