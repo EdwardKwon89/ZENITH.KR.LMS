@@ -16,7 +16,6 @@
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
 | [#946](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/946) | [fix] DEF-B-023 — UPS 오더 상세 무역서류(CI/PL/UPS Invoice) PDF 라벨 번역키 대량 누락 | b | p2 | - | 미배정 | 2026-07-28 |
-| [#945](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/945) | [fix] DEF-B-021 — UPS 오더 상세 운임 카드 통화 오표기(KRW→USD) + 필드명 불일치로 $0.00 표시 | b | p1 | review | 미배정 | 2026-07-28 |
 | [#943](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/943) | [fix] 법인정보(마이페이지) 주소·사업자정보가 zen_organizations 실제 컬럼과 연결 안 됨 | b | p2 | - | 미배정 | 2026-07-28 |
 | [#895](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/895) | [fix] DEF-130 — SNTL(SUB_ADMIN) 역할이 UPS 기준요금(zen_ups_base_rates) 조회 불가 | a | p1 | - | 미배정 | 2026-07-27 |
 | [#886](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/886) | [verify] DEF-125 재검증 요청 — TASK-B-218/220으로 이미 해소된 것으로 추정됨 | b | p2 | - | 미배정 | 2026-07-27 |
