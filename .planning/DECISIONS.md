@@ -584,3 +584,24 @@ playwright.config.ts
 
 **상태:** 설계 확정 (Riley 구현 대기)
 
+---
+
+### 13. UPS 특송 시스템 — 통합 강화 vs 독립 분리 (2026-07-29, 결정 보류)
+
+**컨텍스트:**
+- ZENITH_LMS는 초기 범용 물류 플랫폼(AIR/SEA)으로 설계됐으나, 고객 검토 과정에서 UPS 특송 업무가 후행 편입되었고 현재는 UPS가 사실상 주력 프로세스로 운영 중(Edward 확인).
+- DEF-B-031/032/033(Agency 정산·할인율 연쇄 결함) 분석 중 GitNexus로 확인한 사실: `src/lib/logistics/status-machine.ts:canChangeStatus()`(역할×상태 전이 중앙 게이트)에 transport_mode 축이 없음. 또한 UPS 전용 가격/정산 엔진(`agency-pricing.ts`/`invoice-generator.ts`)과 일반 물류(AIR/SEA)용 가격엔진(`composite-pricing.ts`/`rate-engine.ts`/`settlement.ts`)이 이미 코드 레벨에서 분리되어 있음.
+- Edward 의견: "사용자 관리만 공유된다면 UPS 특송은 독립 시스템으로 운영되어도 된다."
+
+**검토 대상 옵션:**
+- **(A) 통합 강화**: `canChangeStatus` 등 공유 엔진에 transport_mode(변형) 축을 추가해 UPS까지 하나의 워크플로우 엔진으로 포괄 (docs/00_GUIDE/304_RBAC_CUSTOMFIELD_WORKFLOW_ENGINE_REVIEW.md의 원 제안 방향)
+- **(B) 분리**: UPS를 독립 서브시스템으로 공식 분리하고, 사용자/조직 인증(zen_profiles/zen_organizations)만 공유
+
+**결정:** 보류 — 특정 시점에 Edward·Aiden이 별도로 결정. 지금은 판단에 필요한 근거(비즈니스 방향성 확정 여부, 유지보수 비용 비교, 기존 코드 분리 정도의 실제 범위)가 충분히 축적되지 않아 성급히 결론내지 않음.
+
+**영향범위:** `status-machine.ts`(canChangeStatus), UPS 가격/정산 엔진 vs 일반 물류 가격엔진 전체, 304 가이드의 워크플로우 엔진 제안 전제 자체(옵션 B 채택 시 304의 전제가 바뀜)
+
+**상태:** 검토중 (보류)
+
+**참고:** [304_RBAC_CUSTOMFIELD_WORKFLOW_ENGINE_REVIEW.md](../docs/00_GUIDE/304_RBAC_CUSTOMFIELD_WORKFLOW_ENGINE_REVIEW.md), DEF-B-031/032/033, GitHub Issue #978
+

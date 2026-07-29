@@ -227,6 +227,21 @@ API 사양 변경 시 반드시 `Ds-11_API_상세_명세서.md`를 선제적으�
 
 **구 파일 참조 금지**: `TASK_BOARD.md` · `ACTIVE_AGENT.md` · `HANDOFF_BOX.md`는 폐기됨. `.agent/ACTIVE_TASK.md`와 `.agent/tasks/` 디렉토리를 단일 출처로 사용.
 
+### R-20 | 영향도 분석 GitNexus 우선 원칙 (2026-07-29 신설)
+
+> 상세 도구·CLI 사용법: 본 문서 하단 "GitNexus — Code Intelligence" 섹션 참조
+
+**적용 대상**: 심볼(함수·클래스·메서드) 수정 전 영향도 분석, 낯선 코드 탐색·개념 검색, 버그 원인 추적.
+
+- 심볼 수정 전 반드시 `gitnexus_impact({target, direction})`으로 blast radius를 먼저 확인한다. grep/직접 읽기만으로 판단하고 넘어가지 않는다.
+- 개념 탐색("이 기능이 어떻게 동작하나")은 grep보다 `gitnexus_query`를 우선 사용한다.
+- **인덱스 최신성 확인 필수**: `gitnexus://repo/{name}/context` 리소스의 `staleness` 값을 확인하고, HEAD 대비 크게 뒤처져 있으면(수백~수천 커밋) 결과를 그대로 신뢰하지 않는다 — 반드시 실제 파일(`grep`/`Read`)로 재검증한 뒤 결론에 반영한다.
+- **면제 조건 없음**: "간단한 조회라 생략" 판단은 R-15/R-18 계열과 동일하게, 생략 여부를 스스로 판단하는 주체가 곧 그 판단이 틀렸을 때 못 걸러내는 사각지대가 된다(210 가이드 §3 메타 원칙과 동일).
+
+**근거**: 2026-07-29 Aiden이 DEF-B-031/032/033 분석 및 304 가이드 작성 전 과정에서 GitNexus를 전혀 사용하지 않고 grep/직접 읽기로만 진행 — CLAUDE.md에 이미 명시된 원칙을 어긴 실제 사례. 뒤늦게 GitNexus를 사용하자 즉시 이전에 놓친 사실(`canChangeStatus()`가 이미 역할×상태 전이 중앙 게이트로 존재, UPS 전용 가격엔진과 일반 물류 가격엔진이 코드 레벨에서 이미 분리됨)이 드러남 — grep만으로는 놓쳤을 정보. 다만 이 세션에서 확인된 인덱스가 HEAD 대비 1813 커밋 뒤처져 있었던 사실도 함께 기록 — 사용 자체는 원칙으로 강제하되, 결과를 맹신하지 않고 재검증하는 절차를 병행해야 함을 R-20에 함께 명시.
+
+**재인덱싱**: 야간 cron으로 자동 재인덱싱(`npx gitnexus analyze`)을 등록해 staleness를 상시 관리한다. 현재 활성 Job ID는 세션마다 갱신되므로 프로젝트 메모리(`project_gitnexus_reindex_cron.md` 등)에서 최신 상태를 확인한다.
+
 ### R-19 | 다중팀 거버넌스 (Multi-Team Governance)
 
 > 상세 규정: [docs/00_GUIDE/105_MULTITEAM_GOVERNANCE.md](docs/00_GUIDE/105_MULTITEAM_GOVERNANCE.md)
@@ -375,4 +390,4 @@ PreToolUse GitNexus Hook에서 `Bash`가 제외되었습니다. 아래 경우는
 
 ## 📝 개정 이력
 
-> 최신 버전: **v2.7** (2026-07-28) | 전체 이력: [docs/00_GUIDE/GOV_CHANGELOG.md](docs/00_GUIDE/GOV_CHANGELOG.md)
+> 최신 버전: **v2.8** (2026-07-29) | 전체 이력: [docs/00_GUIDE/GOV_CHANGELOG.md](docs/00_GUIDE/GOV_CHANGELOG.md)
