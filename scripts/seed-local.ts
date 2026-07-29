@@ -846,6 +846,24 @@ async function seedDailyBillingMultiTierFixtures(supabase: any, shipperOrgId: st
   }
 
   console.log(`  - Seeded ${orderFixtures.length} UPS orders with dual-tier invoices (AGENCY_TO_SHIPPER + ADMIN_TO_AGENCY)`);
+
+  // 위 orderFixtures는 order_no(ZEN-2026-000001~007)를 get_next_order_sequence() RPC를 거치지 않고
+  // 직접 INSERT하므로, db reset 후 UI에서 신규 오더를 등록하면 zen_sequences가 비어있어(last_value 없음)
+  // RPC가 001부터 다시 반환 → 이미 seed된 번호와 충돌(zen_orders_order_no_key 위반). 시퀀스 카운터를
+  // seed 최대값 이상으로 맞춰 충돌 방지(실사용으로 이미 더 진행된 경우 되돌리지 않도록 GREATEST 적용).
+  const seedYear = orderFixtures[0].orderNo.split('-')[1];
+  const maxSeedSeq = Math.max(...orderFixtures.map(fx => parseInt(fx.orderNo.split('-').pop()!, 10)));
+  const { data: existingSeq } = await supabase
+    .from('zen_sequences')
+    .select('last_value')
+    .eq('prefix', 'ZEN')
+    .eq('year', seedYear)
+    .maybeSingle();
+  const syncedLastValue = Math.max(existingSeq?.last_value || 0, maxSeedSeq);
+  await supabase
+    .from('zen_sequences')
+    .upsert({ prefix: 'ZEN', year: seedYear, last_value: syncedLastValue }, { onConflict: 'prefix,year' });
+  console.log(`  - Synced zen_sequences(ZEN, ${seedYear}) last_value=${syncedLastValue} to avoid order_no collisions`);
 }
 
 async function seedOrders(supabase: any, shipperOrgId: string) {
