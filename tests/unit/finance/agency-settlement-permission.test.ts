@@ -18,6 +18,7 @@ const mockSupabase: any = {
 vi.mock('@/lib/auth/guards', () => ({
   validateUserAction: vi.fn(),
   validateAdminAction: vi.fn(),
+  checkPermission: vi.fn().mockReturnValue(true),
 }));
 
 vi.mock('@/lib/repositories', () => {
