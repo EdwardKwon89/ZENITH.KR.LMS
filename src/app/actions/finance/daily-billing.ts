@@ -303,7 +303,7 @@ export async function getShipperDailyOrdersDetails(
 
     const { data: invoices, error: invErr } = await supabase
       .from('zen_invoices')
-      .select('id, invoice_no, status, is_finalized, metadata')
+      .select('id, invoice_no, status, is_finalized, metadata, total_amount, currency, invoice_tier')
       .in('id', invoiceIds)
       .neq('status', 'CANCELED');
 
@@ -334,6 +334,9 @@ export async function getShipperDailyOrdersDetails(
 
     const resultRows: ShipperDailyOrderRow[] = orders.map((o: any) => {
       const oCosts = (costs || []).filter((c: any) => c.order_id === o.id);
+
+      const matchingInv = invoices.find((inv: any) => inv.metadata?.source_order_id === o.id);
+
       let baseFreight = 0;
       let fuelSurcharge = 0;
       let surgeFee = 0;
@@ -341,18 +344,28 @@ export async function getShipperDailyOrdersDetails(
       let actualAdj = 0;
       let orderUnsupported = false;
 
-      for (const c of oCosts) {
-        const rawAmt = Number(c.total_amount || c.unit_price * (c.quantity || 1) || 0);
-        const { amountKrw, unsupported } = convertToKrw(rawAmt, c.currency, rate);
-        if (unsupported) orderUnsupported = true;
-        if (c.cost_type === 'FREIGHT' || c.cost_type === 'BASE_FREIGHT') baseFreight += amountKrw;
-        else if (c.cost_type === 'FUEL_SURCHARGE') fuelSurcharge += amountKrw;
-        else if (c.cost_type === 'SURGE_EMERGENCY' || c.cost_type === 'SURGE_FEE') surgeFee += amountKrw;
-        else if (c.cost_type === 'OTHER_CHARGE') otherCharge += amountKrw;
-        else if (c.cost_type === 'UPS_ACTUAL_ADJUSTMENT') actualAdj += amountKrw;
+      if (matchingInv?.invoice_tier === 'ADMIN_TO_AGENCY' && matchingInv.metadata?.platform_breakdown) {
+        const bd = matchingInv.metadata.platform_breakdown;
+        baseFreight = Number(bd.baseFreight || 0);
+        fuelSurcharge = Number(bd.fuelSurcharge || 0);
+        surgeFee = Number(bd.surgeFee || 0);
+        otherCharge = Number(bd.otherCharges || 0);
+      } else {
+        for (const c of oCosts) {
+          const rawAmt = Number(c.total_amount || c.unit_price * (c.quantity || 1) || 0);
+          const { amountKrw, unsupported } = convertToKrw(rawAmt, c.currency, rate);
+          if (unsupported) orderUnsupported = true;
+          if (c.cost_type === 'FREIGHT' || c.cost_type === 'BASE_FREIGHT') baseFreight += amountKrw;
+          else if (c.cost_type === 'FUEL_SURCHARGE') fuelSurcharge += amountKrw;
+          else if (c.cost_type === 'SURGE_EMERGENCY' || c.cost_type === 'SURGE_FEE') surgeFee += amountKrw;
+          else if (c.cost_type === 'OTHER_CHARGE') otherCharge += amountKrw;
+          else if (c.cost_type === 'UPS_ACTUAL_ADJUSTMENT') actualAdj += amountKrw;
+        }
       }
 
-      const matchingInv = invoices.find((inv: any) => inv.metadata?.source_order_id === o.id);
+      const invoiceAmountKrw = matchingInv
+        ? convertToKrw(Number(matchingInv.total_amount || 0), matchingInv.currency || 'USD', rate).amountKrw
+        : baseFreight + fuelSurcharge + surgeFee + otherCharge + actualAdj;
 
       return {
         orderId: o.id,
@@ -369,7 +382,7 @@ export async function getShipperDailyOrdersDetails(
         surgeFee,
         otherCharge,
         actualAdjustment: actualAdj,
-        totalAmountKrw: baseFreight + fuelSurcharge + surgeFee + otherCharge + actualAdj,
+        totalAmountKrw: invoiceAmountKrw,
         invoiceId: matchingInv?.id,
         invoiceNo: matchingInv?.invoice_no,
         invoiceStatus: matchingInv?.status,
