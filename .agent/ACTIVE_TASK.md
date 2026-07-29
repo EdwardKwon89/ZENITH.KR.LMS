@@ -15,6 +15,7 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
+| [#979](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/979) | [fix] DEF-B-034 — ADMIN_TO_AGENCY 인보이스 platform_breakdown이 할인 미반영 상태로 저장됨 | b | p2 | - | 미배정 | 2026-07-29 |
 | [#978](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/978) | [Aiden] 개선제안 — 계층형 비즈니스 규칙(가격/정산) 일관성 재발방지 4개 조치 (DEF-B-031/032/033 근본원인 기반) | b | p2 | - | jungjs | 2026-07-29 |
 | [#952](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/952) | [fix] DEF-132 — 운임 스냅샷 멀티패키지 치수 첫 번째만 반영 (오더등록·입고재계산 양쪽) | b | p2 | - | 미배정 | 2026-07-29 |
 | [#946](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/946) | [fix] DEF-B-023 — UPS 오더 상세 무역서류(CI/PL/UPS Invoice) PDF 라벨 번역키 대량 누락 | b | p2 | - | 미배정 | 2026-07-28 |
