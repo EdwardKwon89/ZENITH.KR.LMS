@@ -424,7 +424,7 @@ const rateSnapshotFixtures: Record<string, { applied_unit_price: number; metadat
   'ZEN-2026-000001': {
     applied_unit_price: 430247.97,
     metadata: {
-      agency: { discountRate: 0.4, agencyCostPrice: 295207.97, agencySellingPrice: 295207.97, platformSellingTotal: 430247.97, agencyOtherChargesTotal: 0 },
+      agency: { discountRate: 0.4, agencyCostPrice: 295207.97, agencySellingPrice: 295207.97, platformSellingTotal: 430247.97, agencyOtherChargesTotal: 0, baseSellingPrice: 202560, fuelSurchargeSellingAmount: 62456, surgeFeeSellingAmount: 191.97, otherChargesSellingTotal: 30000 },
       shipper: { finalFreight: 430247.97, baseSellingPrice: 337600, shipperDiscountRate: 0, surgeFeeSellingAmount: 191.97, otherChargesSellingTotal: 30000, fuelSurchargeSellingAmount: 62456 },
       platform: {
         currency: 'KRW',
@@ -436,7 +436,7 @@ const rateSnapshotFixtures: Record<string, { applied_unit_price: number; metadat
   'ZEN-2026-000002': {
     applied_unit_price: 492385.39,
     metadata: {
-      agency: { discountRate: 0.4, agencyCostPrice: 338465.39, agencySellingPrice: 338465.39, platformSellingTotal: 492385.3884, agencyOtherChargesTotal: 0 },
+      agency: { discountRate: 0.4, agencyCostPrice: 338465.39, agencySellingPrice: 338465.39, platformSellingTotal: 492385.3884, agencyOtherChargesTotal: 0, baseSellingPrice: 230880, fuelSurchargeSellingAmount: 71188, surgeFeeSellingAmount: 6397.3884, otherChargesSellingTotal: 30000 },
       shipper: { finalFreight: 492385.39, baseSellingPrice: 384800, shipperDiscountRate: 0, surgeFeeSellingAmount: 6397.3884, otherChargesSellingTotal: 30000, fuelSurchargeSellingAmount: 71188 },
       platform: {
         currency: 'KRW',
@@ -448,7 +448,7 @@ const rateSnapshotFixtures: Record<string, { applied_unit_price: number; metadat
   'ZEN-2026-000003': {
     applied_unit_price: 174688.76,
     metadata: {
-      agency: { discountRate: 0.4, agencyCostPrice: 125848.76, agencySellingPrice: 125848.76, platformSellingTotal: 174688.7577375, agencyOtherChargesTotal: 0 },
+      agency: { discountRate: 0.4, agencyCostPrice: 125848.76, agencySellingPrice: 125848.76, platformSellingTotal: 174688.7577375, agencyOtherChargesTotal: 0, baseSellingPrice: 73260, fuelSurchargeSellingAmount: 22588.5, surgeFeeSellingAmount: 0.2577375, otherChargesSellingTotal: 30000 },
       shipper: { finalFreight: 174688.76, baseSellingPrice: 122100, shipperDiscountRate: 0, surgeFeeSellingAmount: 0.2577375, otherChargesSellingTotal: 30000, fuelSurchargeSellingAmount: 22588.5 },
       platform: {
         currency: 'KRW',
@@ -460,7 +460,7 @@ const rateSnapshotFixtures: Record<string, { applied_unit_price: number; metadat
   'ZEN-2026-000004': {
     applied_unit_price: 263070.47,
     metadata: {
-      agency: { discountRate: 0.4, agencyCostPrice: 174270.47, agencySellingPrice: 174270.47, platformSellingTotal: 263070.47163, agencyOtherChargesTotal: 0 },
+      agency: { discountRate: 0.4, agencyCostPrice: 174270.47, agencySellingPrice: 174270.47, platformSellingTotal: 263070.47163, agencyOtherChargesTotal: 0, baseSellingPrice: 133200, fuelSurchargeSellingAmount: 41070, surgeFeeSellingAmount: 0.47163, otherChargesSellingTotal: 0 },
       shipper: { finalFreight: 207570.47, baseSellingPrice: 166500, shipperDiscountRate: 0.25, surgeFeeSellingAmount: 0.47163, otherChargesSellingTotal: 0, fuelSurchargeSellingAmount: 41070 },
       platform: {
         currency: 'KRW',
@@ -472,7 +472,7 @@ const rateSnapshotFixtures: Record<string, { applied_unit_price: number; metadat
   'ZEN-2026-000005': {
     applied_unit_price: 95155.58,
     metadata: {
-      agency: { discountRate: 0.4, agencyCostPrice: 63035.58, agencySellingPrice: 63035.58, platformSellingTotal: 95155.58058, agencyOtherChargesTotal: 0 },
+      agency: { discountRate: 0.4, agencyCostPrice: 63035.58, agencySellingPrice: 63035.58, platformSellingTotal: 95155.58058, agencyOtherChargesTotal: 0, baseSellingPrice: 48180, fuelSurchargeSellingAmount: 14855.5, surgeFeeSellingAmount: 0.08058, otherChargesSellingTotal: 0 },
       shipper: { finalFreight: 75080.58, baseSellingPrice: 60225, shipperDiscountRate: 0.25, surgeFeeSellingAmount: 0.08058, otherChargesSellingTotal: 0, fuelSurchargeSellingAmount: 14855.5 },
       platform: {
         currency: 'KRW',
@@ -484,7 +484,7 @@ const rateSnapshotFixtures: Record<string, { applied_unit_price: number; metadat
   'ZEN-2026-000006': {
     applied_unit_price: 328956.74,
     metadata: {
-      agency: { discountRate: 0.4, agencyCostPrice: 217916.74, agencySellingPrice: 217916.74, platformSellingTotal: 328956.74181, agencyOtherChargesTotal: 0 },
+      agency: { discountRate: 0.4, agencyCostPrice: 217916.74, agencySellingPrice: 217916.74, platformSellingTotal: 328956.74181, agencyOtherChargesTotal: 0, baseSellingPrice: 166560, fuelSurchargeSellingAmount: 51356, surgeFeeSellingAmount: 0.74181, otherChargesSellingTotal: 0 },
       shipper: { finalFreight: 259556.74, baseSellingPrice: 208200, shipperDiscountRate: 0.25, surgeFeeSellingAmount: 0.74181, otherChargesSellingTotal: 0, fuelSurchargeSellingAmount: 51356 },
       platform: {
         currency: 'KRW',
@@ -496,7 +496,7 @@ const rateSnapshotFixtures: Record<string, { applied_unit_price: number; metadat
   'ZEN-2026-000007': {
     applied_unit_price: 419574.85,
     metadata: {
-      agency: { discountRate: 0.4, agencyCostPrice: 286014.85, agencySellingPrice: 286014.85, platformSellingTotal: 419574.846, agencyOtherChargesTotal: 0 },
+      agency: { discountRate: 0.4, agencyCostPrice: 286014.85, agencySellingPrice: 286014.85, platformSellingTotal: 419574.846, agencyOtherChargesTotal: 0, baseSellingPrice: 200340, fuelSurchargeSellingAmount: 61771.5, surgeFeeSellingAmount: 23903.346, otherChargesSellingTotal: 0 },
       shipper: { finalFreight: 402879.85, baseSellingPrice: 317205, shipperDiscountRate: 0.05, surgeFeeSellingAmount: 23903.346, otherChargesSellingTotal: 0, fuelSurchargeSellingAmount: 61771.5 },
       platform: {
         currency: 'KRW',
@@ -596,7 +596,7 @@ async function seedDailyBillingMultiTierFixtures(supabase: any, shipperOrgId: st
         { cost_type: 'BASE_FREIGHT', amount: 337600 }, { cost_type: 'FUEL_SURCHARGE', amount: 62456 },
         { cost_type: 'SURGE_FEE', amount: 191.97 }, { cost_type: 'OTHER_CHARGE', amount: 30000 },
       ],
-      adminToAgencyBreakdown: { baseFreight: 337600, fuelSurcharge: 62456, surgeFee: 191.97, otherCharges: 30000 },
+      adminToAgencyBreakdown: { baseFreight: 202560, fuelSurcharge: 62456, surgeFee: 191.97, otherCharges: 30000 },
     },
     {
       orderNo: 'ZEN-2026-000002', shipperKey: 'aventusm', status: 'DELIVERED', upsProduct: 'WW_SAVER_NONDOC',
@@ -606,7 +606,7 @@ async function seedDailyBillingMultiTierFixtures(supabase: any, shipperOrgId: st
         { cost_type: 'BASE_FREIGHT', amount: 384800 }, { cost_type: 'FUEL_SURCHARGE', amount: 71188 },
         { cost_type: 'SURGE_FEE', amount: 6397.3884 }, { cost_type: 'OTHER_CHARGE', amount: 30000 },
       ],
-      adminToAgencyBreakdown: { baseFreight: 384800, fuelSurcharge: 71188, surgeFee: 6397.3884, otherCharges: 30000 },
+      adminToAgencyBreakdown: { baseFreight: 230880, fuelSurcharge: 71188, surgeFee: 6397.3884, otherCharges: 30000 },
     },
     {
       orderNo: 'ZEN-2026-000003', shipperKey: 'aventusm', status: 'DELIVERED', upsProduct: 'WW_SAVER_DOC',
@@ -616,7 +616,7 @@ async function seedDailyBillingMultiTierFixtures(supabase: any, shipperOrgId: st
         { cost_type: 'BASE_FREIGHT', amount: 122100 }, { cost_type: 'FUEL_SURCHARGE', amount: 22588.5 },
         { cost_type: 'SURGE_FEE', amount: 0.2577 }, { cost_type: 'OTHER_CHARGE', amount: 30000 },
       ],
-      adminToAgencyBreakdown: { baseFreight: 122100, fuelSurcharge: 22588.5, surgeFee: 0.2577, otherCharges: 30000 },
+      adminToAgencyBreakdown: { baseFreight: 73260, fuelSurcharge: 22588.5, surgeFee: 0.2577, otherCharges: 30000 },
     },
     {
       orderNo: 'ZEN-2026-000004', shipperKey: 'global', status: 'IN_TRANSIT', upsProduct: 'WW_SAVER_NONDOC',
@@ -626,7 +626,7 @@ async function seedDailyBillingMultiTierFixtures(supabase: any, shipperOrgId: st
         { cost_type: 'BASE_FREIGHT', amount: 166500 }, { cost_type: 'FUEL_SURCHARGE', amount: 41070 },
         { cost_type: 'SURGE_FEE', amount: 0.4716 },
       ],
-      adminToAgencyBreakdown: { baseFreight: 222000, fuelSurcharge: 41070, surgeFee: 0.47163, otherCharges: 0 },
+      adminToAgencyBreakdown: { baseFreight: 133200, fuelSurcharge: 41070, surgeFee: 0.47163, otherCharges: 0 },
     },
     {
       orderNo: 'ZEN-2026-000005', shipperKey: 'global', status: 'IN_TRANSIT', upsProduct: 'WW_SAVER_DOC',
@@ -636,7 +636,7 @@ async function seedDailyBillingMultiTierFixtures(supabase: any, shipperOrgId: st
         { cost_type: 'BASE_FREIGHT', amount: 60225 }, { cost_type: 'FUEL_SURCHARGE', amount: 14855.5 },
         { cost_type: 'SURGE_FEE', amount: 0.0806 },
       ],
-      adminToAgencyBreakdown: { baseFreight: 80300, fuelSurcharge: 14855.5, surgeFee: 0.08058, otherCharges: 0 },
+      adminToAgencyBreakdown: { baseFreight: 48180, fuelSurcharge: 14855.5, surgeFee: 0.08058, otherCharges: 0 },
     },
     {
       orderNo: 'ZEN-2026-000006', shipperKey: 'global', status: 'IN_TRANSIT', upsProduct: 'WW_SAVER_NONDOC',
@@ -646,7 +646,7 @@ async function seedDailyBillingMultiTierFixtures(supabase: any, shipperOrgId: st
         { cost_type: 'BASE_FREIGHT', amount: 208200 }, { cost_type: 'FUEL_SURCHARGE', amount: 51356 },
         { cost_type: 'SURGE_FEE', amount: 0.7418 },
       ],
-      adminToAgencyBreakdown: { baseFreight: 277600, fuelSurcharge: 51356, surgeFee: 0.74181, otherCharges: 0 },
+      adminToAgencyBreakdown: { baseFreight: 166560, fuelSurcharge: 51356, surgeFee: 0.74181, otherCharges: 0 },
     },
     {
       orderNo: 'ZEN-2026-000007', shipperKey: 'aventusm', status: 'IN_TRANSIT', upsProduct: 'WW_SAVER_NONDOC',
@@ -656,7 +656,7 @@ async function seedDailyBillingMultiTierFixtures(supabase: any, shipperOrgId: st
         { cost_type: 'BASE_FREIGHT', amount: 317205 }, { cost_type: 'FUEL_SURCHARGE', amount: 61771.5 },
         { cost_type: 'SURGE_FEE', amount: 23903.346 },
       ],
-      adminToAgencyBreakdown: { baseFreight: 333900, fuelSurcharge: 61771.5, surgeFee: 23903.346, otherCharges: 0 },
+      adminToAgencyBreakdown: { baseFreight: 200340, fuelSurcharge: 61771.5, surgeFee: 23903.346, otherCharges: 0 },
     },
   ];
 
@@ -792,8 +792,8 @@ async function seedDailyBillingMultiTierFixtures(supabase: any, shipperOrgId: st
     }
 
     const b = fx.adminToAgencyBreakdown;
-    // DEF-B-031 수정 후 invoice-generator.ts와 동일하게 agencyCostPrice(할인 적용값)를 우선 사용 —
-    // platform_breakdown 원본(무할인 합계)은 참고용 metadata로만 남기고 청구 금액과는 분리
+    // DEF-B-034 수정 후 invoice-generator.ts와 동일하게 platform_breakdown 자체를 할인 반영값(기본운임만
+    // 40% 할인, 유류할증/급증수수료/기타부과금은 pass-through)으로 저장 — 합계와 상세 항목 합이 일치
     const agencyCostPriceFromSnapshot = rateSnapshotFixtures[fx.orderNo]?.metadata?.agency?.agencyCostPrice;
     const adminToAgencyTotal = typeof agencyCostPriceFromSnapshot === 'number'
       ? agencyCostPriceFromSnapshot
