@@ -129,6 +129,11 @@ export class InvoiceGenerator {
           const otherCharges = Number(platform.otherChargesSellingTotal) || 0;
           const platformTotal = baseFreight + fuelSurcharge + surgeFee + otherCharges;
 
+          const agencyCostPrice = Number(meta.agency?.agencyCostPrice);
+          const agencyBilledTotal = Number.isFinite(agencyCostPrice) && agencyCostPrice > 0
+            ? agencyCostPrice
+            : platformTotal;
+
           const { data: agencyInv, error: agencyInvError } = await supabase
             .from('zen_invoices')
             .insert({
@@ -136,7 +141,7 @@ export class InvoiceGenerator {
               shipper_id: shipperIdStr,
               billed_org_id: order.agency_org_id,
               invoice_tier: 'ADMIN_TO_AGENCY',
-              total_amount: platformTotal,
+              total_amount: agencyBilledTotal,
               currency: agencyCurrency,
               applied_exchange_rate: exchangeRate,
               status: 'UNPAID',
