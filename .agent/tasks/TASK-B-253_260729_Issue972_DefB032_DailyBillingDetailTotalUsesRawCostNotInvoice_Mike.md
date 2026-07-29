@@ -7,7 +7,7 @@
 | **담당** | Mike (Team B) |
 | **생성일** | 2026-07-29 |
 | **우선순위** | P2 |
-| **상태** | ⬜ |
+| **상태** | 🔔 |
 
 ## 개요
 
@@ -117,7 +117,24 @@ const invoiceAmountKrw = matchingInv
 
 - Mike: `.agent/VIOLATION_TRACKER.md` 참조 후 착수. 배정 파일을 반드시 그대로 사용할 것 — 새 번호로 재채번하지 말 것. 직전 TASK-B-252(PR#971)에서 핵심 fix 부분(invoice-generator.ts)에 대한 테스트가 누락된 이력이 있음 — 이번엔 위 회귀 테스트 항목(특히 되돌리기 검증)을 반드시 실제로 수행할 것.
 
-## [발견 이슈]
+## [작업 결과]
+
+### 변경 내용
+
+#### `src/app/actions/finance/daily-billing.ts`
+- `invoiceSelect`에 `total_amount, currency, invoice_tier` 추가
+- ADMIN_TO_AGENCY 인보이스는 `metadata.platform_breakdown` 기반으로 breakdown 표시
+- `totalAmountKrw`를 인보이스 `total_amount` 기반으로 계산 (AGENCY_TO_SHIPPER는 기존 zen_order_costs 방식 유지)
+
+### 테스트 (behavioral)
+- ADMIN_TO_AGENCY 인보이스: platform_breakdown 기반 breakdown 검증
+- AGENCY_TO_SHIPPER 인보이스: zen_order_costs 기반 계산 (회귀 확인)
+- 인보이스 없는 오더: breakdown 0 유지 검증
+
+### 검증
+- **빌드**: ✅ PASS
+- **테스트**: 144/144 파일, 981/981 테스트 ALL PASS
+- **커밋 해시**: `de5583dc`
 
 _(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
 
