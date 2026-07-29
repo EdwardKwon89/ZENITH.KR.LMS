@@ -206,7 +206,12 @@ export interface ZoneResolveResult {
 }
 
 // Agency 단계 (Issue #310: Zone별 할인율, rate_overrides 폐기)
+// DEF-B-033: 할인율은 기본운임에만 적용, 부가운임은 정가 그대로
 export interface UpsAgencyFreightResult {
+  baseSellingPrice: number;
+  fuelSurchargeSellingAmount: number;
+  otherChargesSellingTotal: number;
+  surgeFeeSellingAmount: number;
   platformSellingTotal: number;
   agencyCostPrice: number;
   agencySellingPrice: number;
