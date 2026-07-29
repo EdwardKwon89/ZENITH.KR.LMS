@@ -7,7 +7,7 @@
 | **담당** | Mike (Team B) |
 | **생성일** | 2026-07-29 |
 | **우선순위** | P1 |
-| **상태** | ⬜ |
+| **상태** | 🔔 |
 
 ## 개요
 
@@ -140,7 +140,25 @@ function _calculateOrderSettle(
 
 - Mike: `.agent/VIOLATION_TRACKER.md` 참조 후 착수. 배정 파일을 반드시 그대로 사용할 것 — 새 번호로 재채번하지 말 것. R-10 실구동 증적 누락 이력이 있음(직전 TASK-B-250에서는 JSJung 직접 검증으로 대체됐으나, 이번엔 명시적으로 필수 — 재무 계산의 핵심 수정이라 실제 화면 확인이 특히 중요합니다) — 반드시 스크린샷 첨부할 것.
 
-## [발견 이슈]
+## [작업 결과]
+
+### 변경 내용
+
+#### `src/lib/finance/settlement/invoice-generator.ts`
+- ADMIN_TO_AGENCY 인보이스에 `meta.agency?.agencyCostPrice` 폴백으로 할인율 반영
+
+#### `src/lib/actions/agency-settlement.ts`
+- `_fetchOrderInvoiceTotals()` 헬퍼 추가 (인보이스 기반 revenue/cost 매핑)
+- `_calculateOrderSettle()` 교체 (policies/zoneMap 제거, invoiceTotals 사용)
+- 4곳 호출부 snapshot select 제거 + invoiceTotals 사용
+
+### 테스트
+- integration 테스트: 인보이스 기반 데이터로 업데이트 (15/15 PASS)
+
+### 검증
+- **빌드**: ✅ PASS
+- **테스트**: 144/144 파일, 978/978 테스트 ALL PASS
+- **커밋 해시**: `b220978c`
 
 _(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
 

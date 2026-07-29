@@ -26,6 +26,7 @@ const createQueryMock = (data: any, error: any = null) => {
     gte: vi.fn().mockReturnThis(),
     lte: vi.fn().mockReturnThis(),
     ilike: vi.fn().mockReturnThis(),
+    neq: vi.fn().mockReturnThis(),
     single: vi.fn().mockResolvedValue({ data, error }),
     maybeSingle: vi.fn().mockResolvedValue({ data: data?.[0] || null, error }),
     then: vi.fn().mockImplementation((onFulfilled: any) => {
@@ -38,6 +39,7 @@ const createQueryMock = (data: any, error: any = null) => {
   queryChain.gte.mockReturnValue(queryChain);
   queryChain.lte.mockReturnValue(queryChain);
   queryChain.ilike.mockReturnValue(queryChain);
+  queryChain.neq.mockReturnValue(queryChain);
   return queryChain;
 };
 
@@ -85,12 +87,6 @@ const mockOrders = [
     created_at: '2026-06-05T12:00:00Z',
     shipper: { name: 'Shipper A' },
     packages: [{ gross_weight: 2.5, packing_count: 1 }],
-    snapshot: {
-      rate_card_id: 'rate-card-1',
-      applied_unit_price: 35000,
-      carrier_cost_amount: 28000,
-      metadata: { platform: { breakdown: { baseSellingPrice: 30000, fuelSurchargeSellingAmount: 3000, otherChargesSellingTotal: 2000, surgeFeeSellingAmount: 0 } } }
-    }
   },
   {
     id: '99999999-9999-4999-8999-999999999992',
@@ -100,17 +96,19 @@ const mockOrders = [
     created_at: '2026-06-10T12:00:00Z',
     shipper: { name: 'Shipper B' },
     packages: [{ gross_weight: 5.0, packing_count: 2 }],
-    snapshot: {
-      rate_card_id: 'rate-card-2',
-      applied_unit_price: 50000,
-      carrier_cost_amount: 40000,
-      metadata: { platform: { breakdown: { baseSellingPrice: 45000, fuelSurchargeSellingAmount: 3000, otherChargesSellingTotal: 2000, surgeFeeSellingAmount: 0 } } }
-    }
   }
 ];
 
-// Order 1 (USA): platformSellingTotal = 30000+3000+2000+0 = 35000, discount=0.05 => cost = 35000*0.95 = 33250
-// Order 2 (JPN): platformSellingTotal = 45000+3000+2000+0 = 50000, discount=0.10 => cost = 50000*0.90 = 45000
+// 인보이스 기반: AGENCY_TO_SHIPPER=revenue, ADMIN_TO_AGENCY=cost
+const mockInvoices = [
+  // Shipper A: revenue=35000, cost=33250
+  { invoice_tier: 'AGENCY_TO_SHIPPER', total_amount: 35000, metadata: { source_order_id: '99999999-9999-4999-8999-999999999991' } },
+  { invoice_tier: 'ADMIN_TO_AGENCY', total_amount: 33250, metadata: { source_order_id: '99999999-9999-4999-8999-999999999991' } },
+  // Shipper B: revenue=50000, cost=45000
+  { invoice_tier: 'AGENCY_TO_SHIPPER', total_amount: 50000, metadata: { source_order_id: '99999999-9999-4999-8999-999999999992' } },
+  { invoice_tier: 'ADMIN_TO_AGENCY', total_amount: 45000, metadata: { source_order_id: '99999999-9999-4999-8999-999999999992' } },
+];
+
 // Total: revenue=85000, cost=78250, margin=6750, marginRate=6750/85000*100=7.94%
 
 describe('Agency Settlement Integration Tests (TC-P7-SETTLE-01~04)', () => {
@@ -123,7 +121,8 @@ describe('Agency Settlement Integration Tests (TC-P7-SETTLE-01~04)', () => {
       zen_agency_shippers: createQueryMock(mockShippersLink),
       zen_agency_pricing_policies: createQueryMock(mockPricingPolicies),
       zen_ups_zone_countries: createQueryMock(mockZoneCountries),
-      zen_orders: createQueryMock(mockOrders)
+      zen_orders: createQueryMock(mockOrders),
+      zen_invoices: createQueryMock(mockInvoices),
     };
   });
 
@@ -235,16 +234,13 @@ describe('Agency Settlement Integration Tests (TC-P7-SETTLE-01~04)', () => {
 
     expect(result.data).not.toBeNull();
     expect(result.data?.length).toBe(1);
-    expect(result.data?.[0].breakdown).toEqual({
-      baseSellingPrice: 20000,
-      fuelSurchargeSellingAmount: 3000,
-      otherChargesSellingTotal: 2000,
-      surgeFeeSellingAmount: 500,
-    });
+    expect(result.data?.[0].revenue).toBe(35000);
+    expect(result.data?.[0].cost).toBe(33250);
+    expect(result.data?.[0].breakdown).toBeNull();
   });
 
-  it('TC-B-BREAKDOWN-02: metadata 없는 오더 — breakdown 필드가 null, cost는 carrier_cost_amount fallback', async () => {
-    const ordersWithoutMetadata = [
+  it('TC-B-BREAKDOWN-02: 인보이스가 없는 오더 — breakdown null, revenue/cost 0', async () => {
+    const ordersWithoutInvoices = [
       {
         id: '99999999-9999-4999-8999-999999999992',
         order_no: 'ZN-2026002',
@@ -253,15 +249,11 @@ describe('Agency Settlement Integration Tests (TC-P7-SETTLE-01~04)', () => {
         created_at: '2026-06-10T12:00:00Z',
         shipper: { name: 'Shipper B' },
         packages: [{ gross_weight: 5.0, packing_count: 2 }],
-        snapshot: {
-          rate_card_id: 'rate-card-2',
-          applied_unit_price: 50000,
-          carrier_cost_amount: 40000,
-        }
       }
     ];
 
-    mockSupabase._tableMocks.zen_orders = createQueryMock(ordersWithoutMetadata);
+    mockSupabase._tableMocks.zen_orders = createQueryMock(ordersWithoutInvoices);
+    mockSupabase._tableMocks.zen_invoices = createQueryMock([]);
     (validateUserAction as any).mockResolvedValue({
       profile: { id: '33333333-3333-4333-8333-333333333333', role: 'AGENCY', org_id: mockAgencyOrgId }
     });
@@ -271,8 +263,8 @@ describe('Agency Settlement Integration Tests (TC-P7-SETTLE-01~04)', () => {
     expect(result.data).not.toBeNull();
     expect(result.data?.length).toBe(1);
     expect(result.data?.[0].breakdown).toBeNull();
-    // No metadata breakdown → fallback to carrier_cost_amount
-    expect(result.data?.[0].cost).toBe(40000);
+    expect(result.data?.[0].revenue).toBe(0);
+    expect(result.data?.[0].cost).toBe(0);
   });
 
   it('TC-B-SEARCH-01: 오더번호 ILIKE 검색 — "ZN-2026" 입력 시 일치 오더만 반환', async () => {

@@ -18,62 +18,36 @@ async function _getAgencyShipperIds(supabase: any, agencyOrgId: string): Promise
   return data?.map((s: any) => s.shipper_org_id) || [];
 }
 
-async function _fetchBaseData(supabase: any, agencyOrgId: string) {
-  const [policiesRes, zonesRes] = await Promise.all([
-    supabase
-      .from('zen_agency_pricing_policies')
-      .select('zone_id, discount_rate')
-      .eq('agency_org_id', agencyOrgId)
-      .eq('is_active', true),
-    supabase
-      .from('zen_ups_zone_countries')
-      .select('country_code, zone_id'),
-  ]);
-  if (policiesRes.error) throw policiesRes.error;
-  if (zonesRes.error) throw zonesRes.error;
-  const policies: Record<string, number> = {};
-  for (const p of (policiesRes.data || [])) {
-    policies[p.zone_id] = Number(p.discount_rate);
+async function _fetchOrderInvoiceTotals(
+  supabase: any,
+  orderIds: string[]
+): Promise<Record<string, { revenue: number; cost: number }>> {
+  if (orderIds.length === 0) return {};
+  const { data, error } = await supabase
+    .from('zen_invoices')
+    .select('invoice_tier, total_amount, metadata')
+    .in('invoice_tier', ['AGENCY_TO_SHIPPER', 'ADMIN_TO_AGENCY'])
+    .neq('status', 'CANCELED');
+  if (error) throw error;
+
+  const result: Record<string, { revenue: number; cost: number }> = {};
+  for (const inv of (data || [])) {
+    const orderId = inv.metadata?.source_order_id;
+    if (!orderId || !orderIds.includes(orderId)) continue;
+    if (!result[orderId]) result[orderId] = { revenue: 0, cost: 0 };
+    if (inv.invoice_tier === 'AGENCY_TO_SHIPPER') result[orderId].revenue += Number(inv.total_amount || 0);
+    else if (inv.invoice_tier === 'ADMIN_TO_AGENCY') result[orderId].cost += Number(inv.total_amount || 0);
   }
-  const zoneMap: Record<string, string> = {};
-  for (const z of (zonesRes.data || [])) {
-    zoneMap[z.country_code] = z.zone_id;
-  }
-  return { policies, zoneMap };
+  return result;
 }
 
 function _calculateOrderSettle(
   order: any,
-  policies: Record<string, number>,
-  zoneMap: Record<string, string>
+  invoiceTotals: Record<string, { revenue: number; cost: number }>
 ): { revenue: number; cost: number; margin: number } {
-  const snapshot = order.snapshot;
-  if (!snapshot) {
-    return { revenue: 0, cost: 0, margin: 0 };
-  }
-
-  const revenue = Number(snapshot.applied_unit_price || 0);
-  const meta = snapshot.metadata as Record<string, any> | null;
-  const breakdown = meta?.platform?.breakdown;
-  const destCode = order.recipient_country_code as string | undefined;
-
-  let cost: number;
-  if (breakdown && destCode) {
-    const platformSellingTotal =
-      Number(breakdown.baseSellingPrice || 0) +
-      Number(breakdown.fuelSurchargeSellingAmount || 0) +
-      Number(breakdown.otherChargesSellingTotal || 0) +
-      Number(breakdown.surgeFeeSellingAmount || 0);
-    const zoneId = zoneMap[destCode];
-    const discountRate = zoneId ? policies[zoneId] : undefined;
-    if (discountRate !== undefined) {
-      cost = Math.round(platformSellingTotal * (1 - discountRate) * 100) / 100;
-    } else {
-      cost = Number(snapshot.carrier_cost_amount || 0);
-    }
-  } else {
-    cost = Number(snapshot.carrier_cost_amount || 0);
-  }
+  const totals = invoiceTotals[order.id];
+  if (!totals) return { revenue: 0, cost: 0, margin: 0 };
+  const { revenue, cost } = totals;
   return { revenue, cost, margin: Math.round((revenue - cost) * 100) / 100 };
 }
 
@@ -99,23 +73,23 @@ export const getAgencySettlementSummary = withAction(async function (
     return { orderCount: 0, totalRevenue: 0, totalCost: 0, totalMargin: 0, marginRate: 0 };
   }
 
-  const [ordersRes, { policies, zoneMap }] = await Promise.all([
-    supabase
-      .from('zen_orders')
-      .select('id, recipient_country_code, snapshot:zen_order_rate_snapshots(rate_card_id, applied_unit_price, carrier_cost_amount, metadata)')
-      .in('shipper_id', shipperIds)
-      .gte('created_at', `${from}T00:00:00Z`)
-      .lte('created_at', `${to}T23:59:59Z`),
-    _fetchBaseData(supabase, targetAgencyId),
-  ]);
+  const ordersRes = await supabase
+    .from('zen_orders')
+    .select('id, recipient_country_code')
+    .in('shipper_id', shipperIds)
+    .gte('created_at', `${from}T00:00:00Z`)
+    .lte('created_at', `${to}T23:59:59Z`);
 
   if (ordersRes.error) throw ordersRes.error;
+
+  const orderIds = (ordersRes.data || []).map((o: any) => o.id);
+  const invoiceTotals = await _fetchOrderInvoiceTotals(supabase, orderIds);
 
   let totalRevenue = 0;
   let totalCost = 0;
 
   for (const order of (ordersRes.data || [])) {
-    const { revenue, cost } = _calculateOrderSettle(order, policies, zoneMap);
+    const { revenue, cost } = _calculateOrderSettle(order, invoiceTotals);
     totalRevenue += revenue;
     totalCost += cost;
   }
@@ -148,17 +122,17 @@ export const getAgencyShipperSettlements = withAction(async function (
   const shipperIds = await _getAgencyShipperIds(supabase, targetAgencyId);
   if (shipperIds.length === 0) return [];
 
-  const [ordersRes, { policies, zoneMap }] = await Promise.all([
-    supabase
-      .from('zen_orders')
-      .select('id, shipper_id, recipient_country_code, shipper:shipper_id(name), snapshot:zen_order_rate_snapshots(rate_card_id, applied_unit_price, carrier_cost_amount, metadata)')
-      .in('shipper_id', shipperIds)
-      .gte('created_at', `${from}T00:00:00Z`)
-      .lte('created_at', `${to}T23:59:59Z`),
-    _fetchBaseData(supabase, targetAgencyId),
-  ]);
+  const ordersRes = await supabase
+    .from('zen_orders')
+    .select('id, shipper_id, recipient_country_code, shipper:shipper_id(name)')
+    .in('shipper_id', shipperIds)
+    .gte('created_at', `${from}T00:00:00Z`)
+    .lte('created_at', `${to}T23:59:59Z`);
 
   if (ordersRes.error) throw ordersRes.error;
+
+  const orderIds = (ordersRes.data || []).map((o: any) => o.id);
+  const invoiceTotals = await _fetchOrderInvoiceTotals(supabase, orderIds);
 
   const shipperMap: Record<string, { shipperName: string; orderCount: number; revenue: number; cost: number }> = {};
 
@@ -169,7 +143,7 @@ export const getAgencyShipperSettlements = withAction(async function (
     if (!shipperMap[shipperId]) {
       shipperMap[shipperId] = { shipperName, orderCount: 0, revenue: 0, cost: 0 };
     }
-    const { revenue, cost } = _calculateOrderSettle(order, policies, zoneMap);
+    const { revenue, cost } = _calculateOrderSettle(order, invoiceTotals);
     shipperMap[shipperId].orderCount += 1;
     shipperMap[shipperId].revenue += revenue;
     shipperMap[shipperId].cost += cost;
@@ -234,8 +208,7 @@ export const getAgencyOrderSettlements = withAction(async function (
     .select(`
       id, order_no, shipper_id, recipient_country_code, created_at,
       shipper:shipper_id(name),
-      packages:zen_order_packages(gross_weight, packing_count),
-      snapshot:zen_order_rate_snapshots(rate_card_id, applied_unit_price, carrier_cost_amount, metadata)
+      packages:zen_order_packages(gross_weight, packing_count)
     `)
     .in('shipper_id', shipperIds)
     .gte('created_at', `${from}T00:00:00Z`)
@@ -245,20 +218,17 @@ export const getAgencyOrderSettlements = withAction(async function (
     query = query.ilike('order_no', `%${orderNoSearch}%`);
   }
 
-  const [ordersRes, { policies, zoneMap }] = await Promise.all([
-    query,
-    _fetchBaseData(supabase, targetAgencyId)
-  ]);
+  const ordersRes = await query;
 
   if (ordersRes.error) throw ordersRes.error;
 
+  const orderIds = (ordersRes.data || []).map((o: any) => o.id);
+  const invoiceTotals = await _fetchOrderInvoiceTotals(supabase, orderIds);
+
   return (ordersRes.data || []).map((order: any) => {
-    const { revenue, cost, margin } = _calculateOrderSettle(order, policies, zoneMap);
+    const { revenue, cost, margin } = _calculateOrderSettle(order, invoiceTotals);
     const totalWeight = order.packages?.reduce((sum: number, p: any) => sum + Number(pkgWeight(p)), 0) || 0;
     const packagesCount = order.packages?.reduce((sum: number, p: any) => sum + (p.packing_count || 1), 0) || 0;
-
-    const meta = order.snapshot?.metadata as Record<string, any> | null;
-    const bd = meta?.platform?.breakdown ?? null;
 
     return {
       orderId: order.id,
@@ -272,12 +242,7 @@ export const getAgencyOrderSettlements = withAction(async function (
       cost,
       margin,
       marginRate: revenue > 0 ? (margin / revenue) * 100 : 0,
-      breakdown: bd ? {
-        baseSellingPrice: Number(bd.baseSellingPrice ?? 0),
-        fuelSurchargeSellingAmount: Number(bd.fuelSurchargeSellingAmount ?? 0),
-        otherChargesSellingTotal: Number(bd.otherChargesSellingTotal ?? 0),
-        surgeFeeSellingAmount: Number(bd.surgeFeeSellingAmount ?? 0),
-      } : null,
+      breakdown: null,
     };
   });
 });
@@ -333,8 +298,7 @@ async function _fetchOrders(supabase: any, shipperIds: string[], from: string, t
     .select(`
       id, order_no, shipper_id, recipient_country_code, created_at,
       shipper:shipper_id(name),
-      packages:zen_order_packages(gross_weight, packing_count),
-      snapshot:zen_order_rate_snapshots(rate_card_id, applied_unit_price, carrier_cost_amount, metadata)
+      packages:zen_order_packages(gross_weight, packing_count)
     `)
     .in('shipper_id', shipperIds)
     .gte('created_at', `${from}T00:00:00Z`)
@@ -345,8 +309,8 @@ async function _fetchOrders(supabase: any, shipperIds: string[], from: string, t
   return query;
 }
 
-function _mapToExcelRow(order: any, policies: Record<string, number>, zoneMap: Record<string, string>): _ExcelRow {
-  const { revenue, cost, margin } = _calculateOrderSettle(order, policies, zoneMap);
+function _mapToExcelRow(order: any, invoiceTotals: Record<string, { revenue: number; cost: number }>): _ExcelRow {
+  const { revenue, cost, margin } = _calculateOrderSettle(order, invoiceTotals);
   const totalWeight = order.packages?.reduce((sum: number, p: any) => sum + Number(pkgWeight(p)), 0) || 0;
   const packagesCount = order.packages?.reduce((sum: number, p: any) => sum + (p.packing_count || 1), 0) || 0;
   return {
@@ -391,15 +355,15 @@ export const exportAgencySettlementExcel = withAction(async function (
     return { base64: _generateXlsxBase64([]), filename: `agency_settlement_${_todayStr()}.xlsx` };
   }
 
-  const [ordersRes, { policies, zoneMap }] = await Promise.all([
-    _fetchOrders(supabase, shipperIds, from, to, orderNoSearch),
-    _fetchBaseData(supabase, targetAgencyId),
-  ]);
+  const ordersRes = await _fetchOrders(supabase, shipperIds, from, to, orderNoSearch);
 
   if (ordersRes.error) throw ordersRes.error;
 
+  const orderIds = (ordersRes.data || []).map((o: any) => o.id);
+  const invoiceTotals = await _fetchOrderInvoiceTotals(supabase, orderIds);
+
   const rows = (ordersRes.data || []).map((order: any) =>
-    _mapToExcelRow(order, policies, zoneMap)
+    _mapToExcelRow(order, invoiceTotals)
   );
 
   return {
