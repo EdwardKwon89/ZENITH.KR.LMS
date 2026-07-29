@@ -210,7 +210,7 @@ describe('화주별 일별/주별/월별 청구 집계 및 최종 운임 확정 
       mockSupabase.from.mockImplementation((table: string) => {
         if (table === 'zen_invoices') {
           return createChainableMock([
-            { id: 'inv-1', invoice_no: 'INV-001', status: 'UNPAID', is_finalized: false, metadata: { source_order_id: 'ord-1' } },
+            { id: 'inv-1', invoice_no: 'INV-001', status: 'UNPAID', is_finalized: false, metadata: { source_order_id: 'ord-1' }, total_amount: 175, currency: 'USD', invoice_tier: 'ADMIN_TO_AGENCY' },
           ]);
         }
         if (table === 'zen_orders') {
@@ -776,6 +776,158 @@ describe('화주별 일별/주별/월별 청구 집계 및 최종 운임 확정 
       expect(group.totalSurgeFee).toBe(0);
       expect(group.totalOtherCharge).toBe(0);
       expect(group.totalBillingAmountKrw).toBe(200 * 1350);
+    });
+  });
+
+  describe('DEF-B-032: getShipperDailyOrdersDetails 인보이스 기반 계산 (Issue #972)', () => {
+    it('ADMIN_TO_AGENCY 인보이스는 platform_breakdown 기반으로 breakdown 표시', async () => {
+      (validateUserAction as any).mockResolvedValue({
+        supabase: mockSupabase,
+        profile: { id: 'admin-usr', role: USER_ROLES.ADMIN, org_id: 'org-1' },
+      });
+
+      const ordersChain = createChainableMock([
+        { id: 'order-1', order_no: 'ZEN-001', status: 'DELIVERED', transport_mode: 'UPS', recipient_country_code: 'USA', created_at: '2026-07-29T10:00:00Z', shipper_id: 'shipper-1', shipper: { name: '화주A' } },
+      ]);
+      const invoicesChain = createChainableMock([
+        {
+          id: 'inv-1', invoice_no: 'INV-001', status: 'UNPAID', is_finalized: false,
+          metadata: { source_order_id: 'order-1', platform_breakdown: { baseFreight: 100000, fuelSurcharge: 20000, surgeFee: 5000, otherCharges: 3000 } },
+          total_amount: 128000, currency: 'KRW', invoice_tier: 'ADMIN_TO_AGENCY',
+        },
+      ]);
+      const costsChain = createChainableMock([
+        { order_id: 'order-1', cost_type: 'BASE_FREIGHT', unit_price: 50000, quantity: 1, total_amount: 50000, currency: 'KRW' },
+      ]);
+
+      mockSupabase.from.mockImplementation((table: string) => {
+        if (table === 'zen_invoices') return invoicesChain;
+        if (table === 'zen_orders') return ordersChain;
+        if (table === 'zen_order_costs') return costsChain;
+        return createChainableMock([]);
+      });
+
+      const { getShipperDailyOrdersDetails } = await import('@/app/actions/finance/daily-billing');
+      const result = await getShipperDailyOrdersDetails(['inv-1'], 1350);
+
+      expect(result.success).toBe(true);
+      expect(result.orders).toHaveLength(1);
+      expect(result.orders![0].baseFreight).toBe(100000);
+      expect(result.orders![0].fuelSurcharge).toBe(20000);
+      expect(result.orders![0].surgeFee).toBe(5000);
+      expect(result.orders![0].otherCharge).toBe(3000);
+    });
+
+    it('AGENCY_TO_SHIPPER 인보이스는 zen_order_costs 기반으로 계산 (회귀 확인)', async () => {
+      (validateUserAction as any).mockResolvedValue({
+        supabase: mockSupabase,
+        profile: { id: 'admin-usr', role: USER_ROLES.ADMIN, org_id: 'org-1' },
+      });
+
+      const ordersChain = createChainableMock([
+        { id: 'order-2', order_no: 'ZEN-002', status: 'DELIVERED', transport_mode: 'UPS', recipient_country_code: 'USA', created_at: '2026-07-29T10:00:00Z', shipper_id: 'shipper-1', shipper: { name: '화주B' } },
+      ]);
+      const invoicesChain = createChainableMock([
+        {
+          id: 'inv-2', invoice_no: 'INV-002', status: 'UNPAID', is_finalized: false,
+          metadata: { source_order_id: 'order-2' },
+          total_amount: 80000, currency: 'KRW', invoice_tier: 'AGENCY_TO_SHIPPER',
+        },
+      ]);
+      const costsChain = createChainableMock([
+        { order_id: 'order-2', cost_type: 'BASE_FREIGHT', unit_price: 60000, quantity: 1, total_amount: 60000, currency: 'KRW' },
+        { order_id: 'order-2', cost_type: 'FUEL_SURCHARGE', unit_price: 15000, quantity: 1, total_amount: 15000, currency: 'KRW' },
+      ]);
+
+      mockSupabase.from.mockImplementation((table: string) => {
+        if (table === 'zen_invoices') return invoicesChain;
+        if (table === 'zen_orders') return ordersChain;
+        if (table === 'zen_order_costs') return costsChain;
+        return createChainableMock([]);
+      });
+
+      const { getShipperDailyOrdersDetails } = await import('@/app/actions/finance/daily-billing');
+      const result = await getShipperDailyOrdersDetails(['inv-2'], 1350);
+
+      expect(result.success).toBe(true);
+      expect(result.orders).toHaveLength(1);
+      expect(result.orders![0].baseFreight).toBe(60000);
+      expect(result.orders![0].fuelSurcharge).toBe(15000);
+      expect(result.orders![0].totalAmountKrw).toBe(80000);
+    });
+
+    it('인보이스가 없는 오더는 breakdown이 0으로 유지됨', async () => {
+      (validateUserAction as any).mockResolvedValue({
+        supabase: mockSupabase,
+        profile: { id: 'admin-usr', role: USER_ROLES.ADMIN, org_id: 'org-1' },
+      });
+
+      const ordersChain = createChainableMock([
+        { id: 'order-3', order_no: 'ZEN-003', status: 'DELIVERED', transport_mode: 'UPS', recipient_country_code: 'USA', created_at: '2026-07-29T10:00:00Z', shipper_id: 'shipper-1', shipper: { name: '화주C' } },
+      ]);
+      const invoicesChain = createChainableMock([
+        {
+          id: 'inv-3', invoice_no: 'INV-003', status: 'UNPAID', is_finalized: false,
+          metadata: { source_order_id: 'order-3' },
+          total_amount: 0, currency: 'KRW', invoice_tier: 'AGENCY_TO_SHIPPER',
+        },
+      ]);
+      const costsChain = createChainableMock([]);
+
+      mockSupabase.from.mockImplementation((table: string) => {
+        if (table === 'zen_invoices') return invoicesChain;
+        if (table === 'zen_orders') return ordersChain;
+        if (table === 'zen_order_costs') return costsChain;
+        return createChainableMock([]);
+      });
+
+      const { getShipperDailyOrdersDetails } = await import('@/app/actions/finance/daily-billing');
+      const result = await getShipperDailyOrdersDetails(['inv-3'], 1350);
+
+      expect(result.success).toBe(true);
+      expect(result.orders).toHaveLength(1);
+      expect(result.orders![0].baseFreight).toBe(0);
+      expect(result.orders![0].totalAmountKrw).toBe(0);
+    });
+  });
+
+  describe('DEF-B-034: platform_breakdown 할인 반영값 저장 (Issue #979)', () => {
+    it('ADMIN_TO_AGENCY 인보이스는 platform_breakdown 기반으로 breakdown 표시', async () => {
+      (validateUserAction as any).mockResolvedValue({
+        supabase: mockSupabase,
+        profile: { id: 'admin-usr', role: USER_ROLES.ADMIN, org_id: 'org-1' },
+      });
+
+      const ordersChain = createChainableMock([
+        { id: 'order-1', order_no: 'ZEN-001', status: 'DELIVERED', transport_mode: 'UPS', recipient_country_code: 'USA', created_at: '2026-07-29T10:00:00Z', shipper_id: 'shipper-1', shipper: { name: '화주A' } },
+      ]);
+      const invoicesChain = createChainableMock([
+        {
+          id: 'inv-1', invoice_no: 'INV-001', status: 'UNPAID', is_finalized: false, created_at: '2026-07-29T10:00:00Z',
+          metadata: { source_order_id: 'order-1', platform_breakdown: { baseFreight: 72000, fuelSurcharge: 15000, surgeFee: 5000, otherCharges: 3000 } },
+          total_amount: 95000, currency: 'KRW', invoice_tier: 'ADMIN_TO_AGENCY',
+        },
+      ]);
+      const costsChain = createChainableMock([
+        { order_id: 'order-1', cost_type: 'BASE_FREIGHT', unit_price: 100000, quantity: 1, total_amount: 100000, currency: 'KRW' },
+      ]);
+
+      mockSupabase.from.mockImplementation((table: string) => {
+        if (table === 'zen_invoices') return invoicesChain;
+        if (table === 'zen_orders') return ordersChain;
+        if (table === 'zen_order_costs') return costsChain;
+        return createChainableMock([]);
+      });
+
+      const { getShipperDailyBillingSummary } = await import('@/app/actions/finance/daily-billing');
+      const result = await getShipperDailyBillingSummary({ periodType: 'daily', startDate: '2026-07-29', endDate: '2026-07-29' });
+
+      expect(result.success).toBe(true);
+      const group = result.groups![0];
+      expect(group.totalBaseFreight).toBe(72000);
+      expect(group.totalFuelSurcharge).toBe(15000);
+      expect(group.totalSurgeFee).toBe(5000);
+      expect(group.totalOtherCharge).toBe(3000);
     });
   });
 });

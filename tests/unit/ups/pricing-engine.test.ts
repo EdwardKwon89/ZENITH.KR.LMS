@@ -166,24 +166,33 @@ describe('TC-UPS-EXPEDITED-ROUND: 상품별 중량 반올림 (DEF-095)', () => {
   });
 });
 
-describe('TC-UPS-ENGINE-04: Agency 단계 계산 (An-14 R3~R5, Issue #310)', () => {
-  it('할인율을 platformSellingTotal에 적용해 Agency 가격을 산출한다', () => {
+describe('TC-UPS-ENGINE-04: Agency 단계 계산 (DEF-B-033: 기본운임에만 할인 적용)', () => {
+  it('할인율을 기본운임에만 적용, 부가운임은 정가 그대로 합산', () => {
     const result = computeAgencyFreight({
-      platformSellingTotal: 100000,
+      baseSellingPrice: 80000,
+      fuelSurchargeSellingAmount: 15000,
+      otherChargesSellingTotal: 5000,
+      surgeFeeSellingAmount: 0,
       discountRate: 0.1,
       agencyOtherCharges: [{ sellingPrice: 3000, costPrice: 2000 }],
     });
-    expect(result.agencyCostPrice).toBe(92000);
-    expect(result.agencySellingPrice).toBe(93000);
+    // discountedBase = 80000 * 0.9 = 72000, passthrough = 15000+5000+0 = 20000
+    expect(result.baseSellingPrice).toBe(72000);
+    expect(result.agencyCostPrice).toBe(94000); // 72000+20000+2000
+    expect(result.agencySellingPrice).toBe(95000); // 72000+20000+3000
   });
 
-  it('할인율 20%, 기타요금 없음', () => {
+  it('할인율 20%, 기타요금 없음 — 부가운임 전액 정가 pass-through 확인', () => {
     const result = computeAgencyFreight({
-      platformSellingTotal: 100000,
+      baseSellingPrice: 80000,
+      fuelSurchargeSellingAmount: 15000,
+      otherChargesSellingTotal: 5000,
+      surgeFeeSellingAmount: 0,
       discountRate: 0.2,
       agencyOtherCharges: [],
     });
-    expect(result.agencyCostPrice).toBe(80000);
+    // discountedBase = 80000*0.8=64000, cost = 64000+15000+5000 = 84000 (fuel/other 무할인 그대로 포함됨을 확인)
+    expect(result.agencyCostPrice).toBe(84000);
   });
 });
 
