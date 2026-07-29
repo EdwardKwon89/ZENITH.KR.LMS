@@ -207,7 +207,10 @@ export async function estimateUpsFreight(input: EstimateUpsFreightInput): Promis
   const agencyCharges: any[] = [];
 
   const agency = computeAgencyFreight({
-    platformSellingTotal: platform.totalSellingPrice,
+    baseSellingPrice: platform.baseSellingPrice,
+    fuelSurchargeSellingAmount: platform.fuelSurchargeSellingAmount,
+    otherChargesSellingTotal: platform.otherChargesSellingTotal,
+    surgeFeeSellingAmount: platform.surgeFeeSellingAmount,
     discountRate,
     agencyOtherCharges: (agencyCharges ?? []).map((c) => ({
       sellingPrice: Number(c.selling_price),

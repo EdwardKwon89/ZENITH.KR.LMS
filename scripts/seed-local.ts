@@ -415,6 +415,98 @@ async function seedShipperInvoices(supabase: any, shipperOrgId: string) {
  *   양쪽 티어 인보이스 보유 — DEF-B-027(상세 펼침 빈 목록)·DEF-B-028(화주에 원가 노출)·
  *   DEF-B-029(요약 breakdown 0)·DEF-B-030(색상) 전부 이 데이터로 재현/재검증 가능
  */
+
+// /agency/settlements(getAgencyOrderSettlements)의 매출/매입/마진 계산은 zen_order_rate_snapshots가
+// 없으면 전부 0을 반환한다(_calculateOrderSettle: `if (!snapshot) return { revenue: 0, cost: 0, margin: 0 }`) —
+// 2026-07-29 JSJung 확인 질문("왜 매출/매입/마진이 0이지")으로 발견된 누락. 리셋 전 실제 계산 결과(원가/판매가
+// breakdown 전체)를 그대로 보존 — 추정치가 아니라 실측 스냅샷 원본.
+const rateSnapshotFixtures: Record<string, { applied_unit_price: number; metadata: Record<string, any> }> = {
+  'ZEN-2026-000001': {
+    applied_unit_price: 430247.97,
+    metadata: {
+      agency: { discountRate: 0.4, agencyCostPrice: 295207.97, agencySellingPrice: 295207.97, platformSellingTotal: 430247.97, agencyOtherChargesTotal: 0, baseSellingPrice: 202560, fuelSurchargeSellingAmount: 62456, surgeFeeSellingAmount: 191.97, otherChargesSellingTotal: 30000 },
+      shipper: { finalFreight: 430247.97, baseSellingPrice: 337600, shipperDiscountRate: 0, surgeFeeSellingAmount: 191.97, otherChargesSellingTotal: 30000, fuelSurchargeSellingAmount: 62456 },
+      platform: {
+        currency: 'KRW',
+        breakdown: { zone: { zone_code: 'Z2', zone_name: 'Zone 2 - East Asia (China/Japan)' }, product: { cargo_type: 'NON_DOC', product_code: 'WW_SAVER_NONDOC', product_name: 'UPS WorldWide Express Saver (비서류)' }, baseSellingPrice: 337600, otherChargeItems: [{ unit: 'LOT', costBase: 25000, chargeCode: 'DDP', chargeName: 'Delivery Duty Paid', sellingBase: 30000 }], billingWeightKg: 11, chargeableWeightKg: 10.8, surgeFeeSellingAmount: 191.97, otherChargesSellingTotal: 30000, fuelSurchargeSellingAmount: 62456 },
+        baseSellingPrice: 337600, totalSellingPrice: 430247.97, billingWeightKg: 11, chargeableWeightKg: 10.8, surgeFeeSellingAmount: 191.97, otherChargesSellingTotal: 30000, fuelSurchargeSellingAmount: 62456,
+      },
+    },
+  },
+  'ZEN-2026-000002': {
+    applied_unit_price: 492385.39,
+    metadata: {
+      agency: { discountRate: 0.4, agencyCostPrice: 338465.39, agencySellingPrice: 338465.39, platformSellingTotal: 492385.3884, agencyOtherChargesTotal: 0, baseSellingPrice: 230880, fuelSurchargeSellingAmount: 71188, surgeFeeSellingAmount: 6397.3884, otherChargesSellingTotal: 30000 },
+      shipper: { finalFreight: 492385.39, baseSellingPrice: 384800, shipperDiscountRate: 0, surgeFeeSellingAmount: 6397.3884, otherChargesSellingTotal: 30000, fuelSurchargeSellingAmount: 71188 },
+      platform: {
+        currency: 'KRW',
+        breakdown: { zone: { zone_code: 'Z5', zone_name: 'Zone 5 - West Asia / Middle East' }, product: { cargo_type: 'NON_DOC', product_code: 'WW_SAVER_NONDOC', product_name: 'UPS WorldWide Express Saver (비서류)' }, baseSellingPrice: 384800, otherChargeItems: [{ unit: 'LOT', costBase: 25000, chargeCode: 'DDP', chargeName: 'Delivery Duty Paid', sellingBase: 30000 }], billingWeightKg: 8, chargeableWeightKg: 7.54, surgeFeeSellingAmount: 6397.3884, otherChargesSellingTotal: 30000, fuelSurchargeSellingAmount: 71188 },
+        baseSellingPrice: 384800, totalSellingPrice: 492385.3884, billingWeightKg: 8, chargeableWeightKg: 7.54, surgeFeeSellingAmount: 6397.3884, otherChargesSellingTotal: 30000, fuelSurchargeSellingAmount: 71188,
+      },
+    },
+  },
+  'ZEN-2026-000003': {
+    applied_unit_price: 174688.76,
+    metadata: {
+      agency: { discountRate: 0.4, agencyCostPrice: 125848.76, agencySellingPrice: 125848.76, platformSellingTotal: 174688.7577375, agencyOtherChargesTotal: 0, baseSellingPrice: 73260, fuelSurchargeSellingAmount: 22588.5, surgeFeeSellingAmount: 0.2577375, otherChargesSellingTotal: 30000 },
+      shipper: { finalFreight: 174688.76, baseSellingPrice: 122100, shipperDiscountRate: 0, surgeFeeSellingAmount: 0.2577375, otherChargesSellingTotal: 30000, fuelSurchargeSellingAmount: 22588.5 },
+      platform: {
+        currency: 'KRW',
+        breakdown: { zone: { zone_code: 'Z4', zone_name: 'Zone 4 - Oceania' }, product: { cargo_type: 'DOC', product_code: 'WW_SAVER_DOC', product_name: 'UPS WorldWide Express Saver (서류)' }, baseSellingPrice: 122100, otherChargeItems: [{ unit: 'LOT', costBase: 25000, chargeCode: 'DDP', chargeName: 'Delivery Duty Paid', sellingBase: 30000 }], billingWeightKg: 1.5, chargeableWeightKg: 1.45, surgeFeeSellingAmount: 0.2577375, otherChargesSellingTotal: 30000, fuelSurchargeSellingAmount: 22588.5 },
+        baseSellingPrice: 122100, totalSellingPrice: 174688.7577375, billingWeightKg: 1.5, chargeableWeightKg: 1.45, surgeFeeSellingAmount: 0.2577375, otherChargesSellingTotal: 30000, fuelSurchargeSellingAmount: 22588.5,
+      },
+    },
+  },
+  'ZEN-2026-000004': {
+    applied_unit_price: 263070.47,
+    metadata: {
+      agency: { discountRate: 0.4, agencyCostPrice: 174270.47, agencySellingPrice: 174270.47, platformSellingTotal: 263070.47163, agencyOtherChargesTotal: 0, baseSellingPrice: 133200, fuelSurchargeSellingAmount: 41070, surgeFeeSellingAmount: 0.47163, otherChargesSellingTotal: 0 },
+      shipper: { finalFreight: 207570.47, baseSellingPrice: 166500, shipperDiscountRate: 0.25, surgeFeeSellingAmount: 0.47163, otherChargesSellingTotal: 0, fuelSurchargeSellingAmount: 41070 },
+      platform: {
+        currency: 'KRW',
+        breakdown: { zone: { zone_code: 'Z3', zone_name: 'Zone 3 - SE Asia' }, product: { cargo_type: 'NON_DOC', product_code: 'WW_SAVER_NONDOC', product_name: 'UPS WorldWide Express Saver (비서류)' }, baseSellingPrice: 222000, otherChargeItems: [], billingWeightKg: 4, chargeableWeightKg: 3.98, surgeFeeSellingAmount: 0.47163, otherChargesSellingTotal: 0, fuelSurchargeSellingAmount: 41070 },
+        baseSellingPrice: 222000, totalSellingPrice: 263070.47163, billingWeightKg: 4, chargeableWeightKg: 3.98, surgeFeeSellingAmount: 0.47163, otherChargesSellingTotal: 0, fuelSurchargeSellingAmount: 41070,
+      },
+    },
+  },
+  'ZEN-2026-000005': {
+    applied_unit_price: 95155.58,
+    metadata: {
+      agency: { discountRate: 0.4, agencyCostPrice: 63035.58, agencySellingPrice: 63035.58, platformSellingTotal: 95155.58058, agencyOtherChargesTotal: 0, baseSellingPrice: 48180, fuelSurchargeSellingAmount: 14855.5, surgeFeeSellingAmount: 0.08058, otherChargesSellingTotal: 0 },
+      shipper: { finalFreight: 75080.58, baseSellingPrice: 60225, shipperDiscountRate: 0.25, surgeFeeSellingAmount: 0.08058, otherChargesSellingTotal: 0, fuelSurchargeSellingAmount: 14855.5 },
+      platform: {
+        currency: 'KRW',
+        breakdown: { zone: { zone_code: 'Z3', zone_name: 'Zone 3 - SE Asia' }, product: { cargo_type: 'DOC', product_code: 'WW_SAVER_DOC', product_name: 'UPS WorldWide Express Saver (서류)' }, baseSellingPrice: 80300, otherChargeItems: [], billingWeightKg: 1, chargeableWeightKg: 0.68, surgeFeeSellingAmount: 0.08058, otherChargesSellingTotal: 0, fuelSurchargeSellingAmount: 14855.5 },
+        baseSellingPrice: 80300, totalSellingPrice: 95155.58058, billingWeightKg: 1, chargeableWeightKg: 0.68, surgeFeeSellingAmount: 0.08058, otherChargesSellingTotal: 0, fuelSurchargeSellingAmount: 14855.5,
+      },
+    },
+  },
+  'ZEN-2026-000006': {
+    applied_unit_price: 328956.74,
+    metadata: {
+      agency: { discountRate: 0.4, agencyCostPrice: 217916.74, agencySellingPrice: 217916.74, platformSellingTotal: 328956.74181, agencyOtherChargesTotal: 0, baseSellingPrice: 166560, fuelSurchargeSellingAmount: 51356, surgeFeeSellingAmount: 0.74181, otherChargesSellingTotal: 0 },
+      shipper: { finalFreight: 259556.74, baseSellingPrice: 208200, shipperDiscountRate: 0.25, surgeFeeSellingAmount: 0.74181, otherChargesSellingTotal: 0, fuelSurchargeSellingAmount: 51356 },
+      platform: {
+        currency: 'KRW',
+        breakdown: { zone: { zone_code: 'Z3', zone_name: 'Zone 3 - SE Asia' }, product: { cargo_type: 'NON_DOC', product_code: 'WW_SAVER_NONDOC', product_name: 'UPS WorldWide Express Saver (비서류)' }, baseSellingPrice: 277600, otherChargeItems: [], billingWeightKg: 6.5, chargeableWeightKg: 6.26, surgeFeeSellingAmount: 0.74181, otherChargesSellingTotal: 0, fuelSurchargeSellingAmount: 51356 },
+        baseSellingPrice: 277600, totalSellingPrice: 328956.74181, billingWeightKg: 6.5, chargeableWeightKg: 6.26, surgeFeeSellingAmount: 0.74181, otherChargesSellingTotal: 0, fuelSurchargeSellingAmount: 51356,
+      },
+    },
+  },
+  'ZEN-2026-000007': {
+    applied_unit_price: 419574.85,
+    metadata: {
+      agency: { discountRate: 0.4, agencyCostPrice: 286014.85, agencySellingPrice: 286014.85, platformSellingTotal: 419574.846, agencyOtherChargesTotal: 0, baseSellingPrice: 200340, fuelSurchargeSellingAmount: 61771.5, surgeFeeSellingAmount: 23903.346, otherChargesSellingTotal: 0 },
+      shipper: { finalFreight: 402879.85, baseSellingPrice: 317205, shipperDiscountRate: 0.05, surgeFeeSellingAmount: 23903.346, otherChargesSellingTotal: 0, fuelSurchargeSellingAmount: 61771.5 },
+      platform: {
+        currency: 'KRW',
+        breakdown: { zone: { zone_code: 'Z6', zone_name: 'Zone 6 - Europe Core' }, product: { cargo_type: 'NON_DOC', product_code: 'WW_SAVER_NONDOC', product_name: 'UPS WorldWide Express Saver (비서류)' }, baseSellingPrice: 333900, otherChargeItems: [], billingWeightKg: 5, chargeableWeightKg: 4.78, surgeFeeSellingAmount: 23903.346, otherChargesSellingTotal: 0, fuelSurchargeSellingAmount: 61771.5 },
+        baseSellingPrice: 333900, totalSellingPrice: 419574.846, billingWeightKg: 5, chargeableWeightKg: 4.78, surgeFeeSellingAmount: 23903.346, otherChargesSellingTotal: 0, fuelSurchargeSellingAmount: 61771.5,
+      },
+    },
+  },
+};
+
 async function seedDailyBillingMultiTierFixtures(supabase: any, shipperOrgId: string) {
   console.log('\nSeeding daily-billing multi-tier invoice fixtures (DEF-B-026~030 검증용)...');
 
@@ -453,15 +545,19 @@ async function seedDailyBillingMultiTierFixtures(supabase: any, shipperOrgId: st
   }
   console.log(`  - Linked Global Shipper Corp + Jongseok Jeong -> Zenith Agency Partners (discount_rate=0)`);
 
-  // IMP-157 조사 중 실측 반영된 Zone별 할인율(대리점 20%/화주 25%) — 화주 할인율이 대리점 자체 할인율보다
-  // 높아 역마진이 발생하는 시나리오(IMP-155 검증용)를 그대로 재현. 아래 오더 4~7번 픽스처의
-  // adminToAgencyBreakdown 수치가 바로 이 할인율로 계산된 실측값(seedSntlAgency()와 동일 패턴).
+  // IMP-157 조사 중 실측 반영된 Zone별 할인율 — 최초 20%/25% 조합은 화주 할인율이 대리점 자체
+  // 할인율보다 높아 역마진이 발생하는 시나리오였음(IMP-155 검증용). DEF-B-031(2026-07-29,
+  // invoice-generator.ts가 대리점 할인율을 전혀 반영 안 하던 버그) 수정 후 JSJung 지시로
+  // admin→agency 할인율을 20%→40%로 조정. 이후 DEF-B-033(2026-07-29, computeAgencyFreight()가
+  // 전체 판매가에 할인 적용하던 것을 기본운임에만 적용하도록 재설계) 수정에 맞춰 아래 오더 1~7번
+  // rateSnapshotFixtures의 agency.agencyCostPrice도 "기본운임만 40% 할인 + 부가운임 정가 pass-through"
+  // 공식으로 재계산됨 — 유류할증/급증수수료/기타부과금은 할인 미적용.
   const { data: zonesForAgency } = await supabase.from('zen_ups_zones').select('id');
   for (const zone of zonesForAgency ?? []) {
     await supabase
       .from('zen_agency_pricing_policies')
       .upsert(
-        { agency_org_id: agencyOrg.id, zone_id: zone.id, discount_rate: 0.20, is_active: true },
+        { agency_org_id: agencyOrg.id, zone_id: zone.id, discount_rate: 0.40, is_active: true },
         { onConflict: 'agency_org_id,zone_id' },
       );
     for (const linkedShipperOrgId of [shipperOrgId, aventusmOrg.id]) {
@@ -473,7 +569,7 @@ async function seedDailyBillingMultiTierFixtures(supabase: any, shipperOrgId: st
         );
     }
   }
-  console.log(`  - Registered Admin->Zenith Agency Partners 20% + Agency->Shipper 25% zone discount policy (역마진 시나리오, ${zonesForAgency?.length ?? 0} zones)`);
+  console.log(`  - Registered Admin->Zenith Agency Partners 40% + Agency->Shipper 25% zone discount policy (정상 마진 시나리오, ${zonesForAgency?.length ?? 0} zones)`);
 
   type CostRow = { cost_type: string; amount: number };
   type OrderFixture = {
@@ -500,7 +596,7 @@ async function seedDailyBillingMultiTierFixtures(supabase: any, shipperOrgId: st
         { cost_type: 'BASE_FREIGHT', amount: 337600 }, { cost_type: 'FUEL_SURCHARGE', amount: 62456 },
         { cost_type: 'SURGE_FEE', amount: 191.97 }, { cost_type: 'OTHER_CHARGE', amount: 30000 },
       ],
-      adminToAgencyBreakdown: { baseFreight: 337600, fuelSurcharge: 62456, surgeFee: 191.97, otherCharges: 30000 },
+      adminToAgencyBreakdown: { baseFreight: 202560, fuelSurcharge: 62456, surgeFee: 191.97, otherCharges: 30000 },
     },
     {
       orderNo: 'ZEN-2026-000002', shipperKey: 'aventusm', status: 'DELIVERED', upsProduct: 'WW_SAVER_NONDOC',
@@ -510,7 +606,7 @@ async function seedDailyBillingMultiTierFixtures(supabase: any, shipperOrgId: st
         { cost_type: 'BASE_FREIGHT', amount: 384800 }, { cost_type: 'FUEL_SURCHARGE', amount: 71188 },
         { cost_type: 'SURGE_FEE', amount: 6397.3884 }, { cost_type: 'OTHER_CHARGE', amount: 30000 },
       ],
-      adminToAgencyBreakdown: { baseFreight: 384800, fuelSurcharge: 71188, surgeFee: 6397.3884, otherCharges: 30000 },
+      adminToAgencyBreakdown: { baseFreight: 230880, fuelSurcharge: 71188, surgeFee: 6397.3884, otherCharges: 30000 },
     },
     {
       orderNo: 'ZEN-2026-000003', shipperKey: 'aventusm', status: 'DELIVERED', upsProduct: 'WW_SAVER_DOC',
@@ -520,7 +616,7 @@ async function seedDailyBillingMultiTierFixtures(supabase: any, shipperOrgId: st
         { cost_type: 'BASE_FREIGHT', amount: 122100 }, { cost_type: 'FUEL_SURCHARGE', amount: 22588.5 },
         { cost_type: 'SURGE_FEE', amount: 0.2577 }, { cost_type: 'OTHER_CHARGE', amount: 30000 },
       ],
-      adminToAgencyBreakdown: { baseFreight: 122100, fuelSurcharge: 22588.5, surgeFee: 0.2577, otherCharges: 30000 },
+      adminToAgencyBreakdown: { baseFreight: 73260, fuelSurcharge: 22588.5, surgeFee: 0.2577, otherCharges: 30000 },
     },
     {
       orderNo: 'ZEN-2026-000004', shipperKey: 'global', status: 'IN_TRANSIT', upsProduct: 'WW_SAVER_NONDOC',
@@ -530,7 +626,7 @@ async function seedDailyBillingMultiTierFixtures(supabase: any, shipperOrgId: st
         { cost_type: 'BASE_FREIGHT', amount: 166500 }, { cost_type: 'FUEL_SURCHARGE', amount: 41070 },
         { cost_type: 'SURGE_FEE', amount: 0.4716 },
       ],
-      adminToAgencyBreakdown: { baseFreight: 222000, fuelSurcharge: 41070, surgeFee: 0.47163, otherCharges: 0 },
+      adminToAgencyBreakdown: { baseFreight: 133200, fuelSurcharge: 41070, surgeFee: 0.47163, otherCharges: 0 },
     },
     {
       orderNo: 'ZEN-2026-000005', shipperKey: 'global', status: 'IN_TRANSIT', upsProduct: 'WW_SAVER_DOC',
@@ -540,7 +636,7 @@ async function seedDailyBillingMultiTierFixtures(supabase: any, shipperOrgId: st
         { cost_type: 'BASE_FREIGHT', amount: 60225 }, { cost_type: 'FUEL_SURCHARGE', amount: 14855.5 },
         { cost_type: 'SURGE_FEE', amount: 0.0806 },
       ],
-      adminToAgencyBreakdown: { baseFreight: 80300, fuelSurcharge: 14855.5, surgeFee: 0.08058, otherCharges: 0 },
+      adminToAgencyBreakdown: { baseFreight: 48180, fuelSurcharge: 14855.5, surgeFee: 0.08058, otherCharges: 0 },
     },
     {
       orderNo: 'ZEN-2026-000006', shipperKey: 'global', status: 'IN_TRANSIT', upsProduct: 'WW_SAVER_NONDOC',
@@ -550,7 +646,7 @@ async function seedDailyBillingMultiTierFixtures(supabase: any, shipperOrgId: st
         { cost_type: 'BASE_FREIGHT', amount: 208200 }, { cost_type: 'FUEL_SURCHARGE', amount: 51356 },
         { cost_type: 'SURGE_FEE', amount: 0.7418 },
       ],
-      adminToAgencyBreakdown: { baseFreight: 277600, fuelSurcharge: 51356, surgeFee: 0.74181, otherCharges: 0 },
+      adminToAgencyBreakdown: { baseFreight: 166560, fuelSurcharge: 51356, surgeFee: 0.74181, otherCharges: 0 },
     },
     {
       orderNo: 'ZEN-2026-000007', shipperKey: 'aventusm', status: 'IN_TRANSIT', upsProduct: 'WW_SAVER_NONDOC',
@@ -560,7 +656,7 @@ async function seedDailyBillingMultiTierFixtures(supabase: any, shipperOrgId: st
         { cost_type: 'BASE_FREIGHT', amount: 317205 }, { cost_type: 'FUEL_SURCHARGE', amount: 61771.5 },
         { cost_type: 'SURGE_FEE', amount: 23903.346 },
       ],
-      adminToAgencyBreakdown: { baseFreight: 333900, fuelSurcharge: 61771.5, surgeFee: 23903.346, otherCharges: 0 },
+      adminToAgencyBreakdown: { baseFreight: 200340, fuelSurcharge: 61771.5, surgeFee: 23903.346, otherCharges: 0 },
     },
   ];
 
@@ -696,7 +792,12 @@ async function seedDailyBillingMultiTierFixtures(supabase: any, shipperOrgId: st
     }
 
     const b = fx.adminToAgencyBreakdown;
-    const adminToAgencyTotal = b.baseFreight + b.fuelSurcharge + b.surgeFee + b.otherCharges;
+    // DEF-B-034 수정 후 invoice-generator.ts와 동일하게 platform_breakdown 자체를 할인 반영값(기본운임만
+    // 40% 할인, 유류할증/급증수수료/기타부과금은 pass-through)으로 저장 — 합계와 상세 항목 합이 일치
+    const agencyCostPriceFromSnapshot = rateSnapshotFixtures[fx.orderNo]?.metadata?.agency?.agencyCostPrice;
+    const adminToAgencyTotal = typeof agencyCostPriceFromSnapshot === 'number'
+      ? agencyCostPriceFromSnapshot
+      : b.baseFreight + b.fuelSurcharge + b.surgeFee + b.otherCharges;
     const agencyCostInvoiceNo = `INV-SEED-${fx.orderNo.slice(-6)}-AD2A`;
     const { data: existingAd2A } = await supabase
       .from('zen_invoices')
@@ -718,9 +819,51 @@ async function seedDailyBillingMultiTierFixtures(supabase: any, shipperOrgId: st
       });
       if (invErr2) console.error(`  - Failed ADMIN_TO_AGENCY invoice for ${fx.orderNo}:`, invErr2.message);
     }
+
+    // /agency/settlements(getAgencyOrderSettlements)가 매출/매입/마진 계산에 필요로 하는
+    // zen_order_rate_snapshots — 리셋 전 실제 값을 그대로 보존(재현/추정이 아닌 원본 그대로)
+    const rs = rateSnapshotFixtures[fx.orderNo];
+    if (rs) {
+      const { data: existingSnapshot } = await supabase
+        .from('zen_order_rate_snapshots')
+        .select('id')
+        .eq('order_id', orderId)
+        .maybeSingle();
+      if (!existingSnapshot) {
+        const { error: snapErr } = await supabase.from('zen_order_rate_snapshots').insert({
+          order_id: orderId,
+          applied_unit_price: rs.applied_unit_price,
+          applied_currency: 'KRW',
+          applied_rule: 'UPS_3TIER',
+          is_manual: false,
+          version_no: 1,
+          priority: 0,
+          metadata: rs.metadata,
+        });
+        if (snapErr) console.error(`  - Failed rate snapshot for ${fx.orderNo}:`, snapErr.message);
+      }
+    }
   }
 
   console.log(`  - Seeded ${orderFixtures.length} UPS orders with dual-tier invoices (AGENCY_TO_SHIPPER + ADMIN_TO_AGENCY)`);
+
+  // 위 orderFixtures는 order_no(ZEN-2026-000001~007)를 get_next_order_sequence() RPC를 거치지 않고
+  // 직접 INSERT하므로, db reset 후 UI에서 신규 오더를 등록하면 zen_sequences가 비어있어(last_value 없음)
+  // RPC가 001부터 다시 반환 → 이미 seed된 번호와 충돌(zen_orders_order_no_key 위반). 시퀀스 카운터를
+  // seed 최대값 이상으로 맞춰 충돌 방지(실사용으로 이미 더 진행된 경우 되돌리지 않도록 GREATEST 적용).
+  const seedYear = orderFixtures[0].orderNo.split('-')[1];
+  const maxSeedSeq = Math.max(...orderFixtures.map(fx => parseInt(fx.orderNo.split('-').pop()!, 10)));
+  const { data: existingSeq } = await supabase
+    .from('zen_sequences')
+    .select('last_value')
+    .eq('prefix', 'ZEN')
+    .eq('year', seedYear)
+    .maybeSingle();
+  const syncedLastValue = Math.max(existingSeq?.last_value || 0, maxSeedSeq);
+  await supabase
+    .from('zen_sequences')
+    .upsert({ prefix: 'ZEN', year: seedYear, last_value: syncedLastValue }, { onConflict: 'prefix,year' });
+  console.log(`  - Synced zen_sequences(ZEN, ${seedYear}) last_value=${syncedLastValue} to avoid order_no collisions`);
 }
 
 async function seedOrders(supabase: any, shipperOrgId: string) {
