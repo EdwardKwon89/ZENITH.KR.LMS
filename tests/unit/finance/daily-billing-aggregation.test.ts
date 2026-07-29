@@ -890,4 +890,44 @@ describe('화주별 일별/주별/월별 청구 집계 및 최종 운임 확정 
       expect(result.orders![0].totalAmountKrw).toBe(0);
     });
   });
+
+  describe('DEF-B-034: platform_breakdown 할인 반영값 저장 (Issue #979)', () => {
+    it('ADMIN_TO_AGENCY 인보이스는 platform_breakdown 기반으로 breakdown 표시', async () => {
+      (validateUserAction as any).mockResolvedValue({
+        supabase: mockSupabase,
+        profile: { id: 'admin-usr', role: USER_ROLES.ADMIN, org_id: 'org-1' },
+      });
+
+      const ordersChain = createChainableMock([
+        { id: 'order-1', order_no: 'ZEN-001', status: 'DELIVERED', transport_mode: 'UPS', recipient_country_code: 'USA', created_at: '2026-07-29T10:00:00Z', shipper_id: 'shipper-1', shipper: { name: '화주A' } },
+      ]);
+      const invoicesChain = createChainableMock([
+        {
+          id: 'inv-1', invoice_no: 'INV-001', status: 'UNPAID', is_finalized: false, created_at: '2026-07-29T10:00:00Z',
+          metadata: { source_order_id: 'order-1', platform_breakdown: { baseFreight: 72000, fuelSurcharge: 15000, surgeFee: 5000, otherCharges: 3000 } },
+          total_amount: 95000, currency: 'KRW', invoice_tier: 'ADMIN_TO_AGENCY',
+        },
+      ]);
+      const costsChain = createChainableMock([
+        { order_id: 'order-1', cost_type: 'BASE_FREIGHT', unit_price: 100000, quantity: 1, total_amount: 100000, currency: 'KRW' },
+      ]);
+
+      mockSupabase.from.mockImplementation((table: string) => {
+        if (table === 'zen_invoices') return invoicesChain;
+        if (table === 'zen_orders') return ordersChain;
+        if (table === 'zen_order_costs') return costsChain;
+        return createChainableMock([]);
+      });
+
+      const { getShipperDailyBillingSummary } = await import('@/app/actions/finance/daily-billing');
+      const result = await getShipperDailyBillingSummary({ periodType: 'daily', startDate: '2026-07-29', endDate: '2026-07-29' });
+
+      expect(result.success).toBe(true);
+      const group = result.groups![0];
+      expect(group.totalBaseFreight).toBe(72000);
+      expect(group.totalFuelSurcharge).toBe(15000);
+      expect(group.totalSurgeFee).toBe(5000);
+      expect(group.totalOtherCharge).toBe(3000);
+    });
+  });
 });

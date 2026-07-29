@@ -247,17 +247,29 @@ export async function getShipperDailyBillingSummary(params?: {
       if (unsupported) group.hasUnsupportedCurrency = true;
       group.totalBillingAmountKrw += amountKrw;
 
-      const orderId = inv.metadata?.source_order_id;
-      const orderCosts = orderId ? (costsByOrderId.get(orderId) || []) : [];
-      for (const c of orderCosts) {
-        const rawAmt = Number(c.total_amount || c.unit_price * (c.quantity || 1) || 0);
-        const { amountKrw: costKrw, unsupported: costUnsupported } = convertToKrw(rawAmt, c.currency, exchangeRate);
-        if (costUnsupported) group.hasUnsupportedCurrency = true;
-        if (c.cost_type === 'FREIGHT' || c.cost_type === 'BASE_FREIGHT') group.totalBaseFreight += costKrw;
-        else if (c.cost_type === 'FUEL_SURCHARGE') group.totalFuelSurcharge += costKrw;
-        else if (c.cost_type === 'SURGE_EMERGENCY' || c.cost_type === 'SURGE_FEE') group.totalSurgeFee += costKrw;
-        else if (c.cost_type === 'OTHER_CHARGE') group.totalOtherCharge += costKrw;
-        else if (c.cost_type === 'UPS_ACTUAL_ADJUSTMENT') group.totalActualAdjustment += costKrw;
+      if (inv.invoice_tier === 'ADMIN_TO_AGENCY' && inv.metadata?.platform_breakdown) {
+        const bd = inv.metadata.platform_breakdown;
+        const { amountKrw: baseKrw } = convertToKrw(Number(bd.baseFreight || 0), inv.currency || 'USD', exchangeRate);
+        const { amountKrw: fuelKrw } = convertToKrw(Number(bd.fuelSurcharge || 0), inv.currency || 'USD', exchangeRate);
+        const { amountKrw: surgeKrw } = convertToKrw(Number(bd.surgeFee || 0), inv.currency || 'USD', exchangeRate);
+        const { amountKrw: otherKrw } = convertToKrw(Number(bd.otherCharges || 0), inv.currency || 'USD', exchangeRate);
+        group.totalBaseFreight += baseKrw;
+        group.totalFuelSurcharge += fuelKrw;
+        group.totalSurgeFee += surgeKrw;
+        group.totalOtherCharge += otherKrw;
+      } else {
+        const orderId = inv.metadata?.source_order_id;
+        const orderCosts = orderId ? (costsByOrderId.get(orderId) || []) : [];
+        for (const c of orderCosts) {
+          const rawAmt = Number(c.total_amount || c.unit_price * (c.quantity || 1) || 0);
+          const { amountKrw: costKrw, unsupported: costUnsupported } = convertToKrw(rawAmt, c.currency, exchangeRate);
+          if (costUnsupported) group.hasUnsupportedCurrency = true;
+          if (c.cost_type === 'FREIGHT' || c.cost_type === 'BASE_FREIGHT') group.totalBaseFreight += costKrw;
+          else if (c.cost_type === 'FUEL_SURCHARGE') group.totalFuelSurcharge += costKrw;
+          else if (c.cost_type === 'SURGE_EMERGENCY' || c.cost_type === 'SURGE_FEE') group.totalSurgeFee += costKrw;
+          else if (c.cost_type === 'OTHER_CHARGE') group.totalOtherCharge += costKrw;
+          else if (c.cost_type === 'UPS_ACTUAL_ADJUSTMENT') group.totalActualAdjustment += costKrw;
+        }
       }
 
       if (inv.is_finalized) {
