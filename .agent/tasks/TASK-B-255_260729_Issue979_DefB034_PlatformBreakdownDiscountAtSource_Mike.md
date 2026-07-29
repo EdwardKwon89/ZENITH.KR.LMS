@@ -7,7 +7,7 @@
 | **담당** | Mike (Team B) |
 | **생성일** | 2026-07-29 |
 | **우선순위** | P2 |
-| **상태** | ⬜ |
+| **상태** | 🔔 |
 
 ## 개요
 
@@ -154,7 +154,24 @@ if (inv.invoice_tier === 'ADMIN_TO_AGENCY' && inv.metadata?.platform_breakdown) 
 
 - Mike: `.agent/VIOLATION_TRACKER.md` 참조 후 착수. 배정 파일을 반드시 그대로 사용할 것 — 새 번호로 재채번하지 말 것. 직전 TASK-B-252(PR#971)에서 핵심 fix 부분 테스트가 누락된 이력이 있음(PR#974/#976에서는 정상 수행) — 이번에도 되돌리기 검증을 반드시 실제로 수행할 것.
 
-## [발견 이슈]
+## [작업 결과]
+
+### 변경 내용
+
+#### `src/lib/finance/settlement/invoice-generator.ts`
+- `platform_breakdown`을 `meta.agency`에 할인 반영된 breakdown이 있으면 사용, 없으면 기존 `platform.*` 무할인 값으로 폴백
+
+#### `src/app/actions/finance/daily-billing.ts`
+- `getShipperDailyBillingSummary()`에 ADMIN_TO_AGENCY 분기 추가
+- ADMIN_TO_AGENCY 인보이스는 `metadata.platform_breakdown` 기반으로 breakdown 표시
+
+### 테스트 (behavioral)
+- ADMIN_TO_AGENCY 인보이스: platform_breakdown 기반 breakdown 검증
+
+### 검증
+- **빌드**: ✅ PASS
+- **테스트**: 144/144 파일, 982/982 테스트 ALL PASS
+- **커밋 해시**: `0398be45`
 
 _(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
 

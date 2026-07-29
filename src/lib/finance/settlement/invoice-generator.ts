@@ -123,13 +123,21 @@ export class InvoiceGenerator {
           const meta = rateSnapshot.metadata as Record<string, any>;
           const platform = meta.platform || {};
           const agencyCurrency = platform.currency || 'USD';
-          const baseFreight = Number(platform.baseSellingPrice) || 0;
-          const fuelSurcharge = Number(platform.fuelSurchargeSellingAmount) || 0;
-          const surgeFee = Number(platform.surgeFeeSellingAmount) || 0;
-          const otherCharges = Number(platform.otherChargesSellingTotal) || 0;
-          const platformTotal = baseFreight + fuelSurcharge + surgeFee + otherCharges;
+          const platformBaseFreight = Number(platform.baseSellingPrice) || 0;
+          const platformFuelSurcharge = Number(platform.fuelSurchargeSellingAmount) || 0;
+          const platformSurgeFee = Number(platform.surgeFeeSellingAmount) || 0;
+          const platformOtherCharges = Number(platform.otherChargesSellingTotal) || 0;
+          const platformTotal = platformBaseFreight + platformFuelSurcharge + platformSurgeFee + platformOtherCharges;
 
-          const agencyCostPrice = Number(meta.agency?.agencyCostPrice);
+          const agencyMeta = meta.agency || {};
+          const agencyCostPrice = Number(agencyMeta.agencyCostPrice);
+          const hasDiscountedBreakdown = typeof agencyMeta.baseSellingPrice === 'number';
+
+          const baseFreight = hasDiscountedBreakdown ? Number(agencyMeta.baseSellingPrice) || 0 : platformBaseFreight;
+          const fuelSurcharge = hasDiscountedBreakdown ? Number(agencyMeta.fuelSurchargeSellingAmount) || 0 : platformFuelSurcharge;
+          const surgeFee = hasDiscountedBreakdown ? Number(agencyMeta.surgeFeeSellingAmount) || 0 : platformSurgeFee;
+          const otherCharges = hasDiscountedBreakdown ? Number(agencyMeta.otherChargesSellingTotal) || 0 : platformOtherCharges;
+
           const agencyBilledTotal = Number.isFinite(agencyCostPrice) && agencyCostPrice > 0
             ? agencyCostPrice
             : platformTotal;

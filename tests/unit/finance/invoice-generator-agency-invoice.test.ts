@@ -186,7 +186,7 @@ describe('TASK-B-235: admin→agency 인보이스 생성 로직 (Issue #918)', (
     expect(invoice.billed_org_id).toBe(SHIPPER_ID);
   });
 
-  it('TC-918-03: admin→agency 금액 = platform.baseSellingPrice + fuel + surge + other', async () => {
+  it('TC-918-03: admin→agency 금액 = platform.baseSellingPrice + fuel + surge + other (구버전 fallback)', async () => {
     const order = mockOrderWithAgency();
     const snapshot = mockRateSnapshot();
     const invoiceMockFactory = createTrackingInvoiceMock();
@@ -211,6 +211,52 @@ describe('TASK-B-235: admin→agency 인보이스 생성 로직 (Issue #918)', (
     expect(agencyInv.metadata.platform_breakdown).toEqual({
       baseFreight: 80,
       fuelSurcharge: 20,
+      surgeFee: 10,
+      otherCharges: 5,
+    });
+  });
+
+  it('TC-918-04: meta.agency에 할인 반영 breakdown 있으면 platform_breakdown에 할인된 값 저장 (DEF-B-034)', async () => {
+    const order = mockOrderWithAgency();
+    const snapshot = {
+      metadata: {
+        applied_rule: 'UPS_3TIER',
+        platform: {
+          currency: 'USD',
+          baseSellingPrice: 100,
+          fuelSurchargeSellingAmount: 20,
+          surgeFeeSellingAmount: 10,
+          otherChargesSellingTotal: 5,
+        },
+        agency: {
+          agencyCostPrice: 90,
+          baseSellingPrice: 72,
+          fuelSurchargeSellingAmount: 15,
+          surgeFeeSellingAmount: 10,
+          otherChargesSellingTotal: 5,
+        },
+      },
+    };
+    const invoiceMockFactory = createTrackingInvoiceMock();
+
+    mockSupabase.from.mockImplementation((table: string) => {
+      if (table === 'zen_invoices') return invoiceMockFactory();
+      if (table === 'zen_orders') return createChainableMock(order);
+      if (table === 'zen_order_costs') return createChainableMock(null);
+      if (table === 'zen_order_rate_snapshots') return createChainableMock(snapshot);
+      return createChainableMock(null);
+    });
+
+    const result = await generator.generateInvoice(ORDER_ID);
+
+    expect(result.success).toBe(true);
+    expect(insertedInvoices.length).toBe(2);
+
+    const agencyInv = insertedInvoices[1];
+    expect(agencyInv.total_amount).toBe(90);
+    expect(agencyInv.metadata.platform_breakdown).toEqual({
+      baseFreight: 72,
+      fuelSurcharge: 15,
       surgeFee: 10,
       otherCharges: 5,
     });
