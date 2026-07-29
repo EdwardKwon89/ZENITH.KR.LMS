@@ -15,6 +15,7 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
+| [#987](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/987) | [Aiden] Team B R-17 위반 대응 체계 재검토 요청 — 3회 기준 미집행 장기화 | b | p1 | - | jungjs | 2026-07-29 |
 | [#982](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/982) | [feat] 오더 일괄 등록 기능 — 엑셀 업로드 (Issue #718 회의록 요구사항) | b | p2 | review | 미배정 | 2026-07-29 |
 | [#979](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/979) | [fix] DEF-B-034 — ADMIN_TO_AGENCY 인보이스 platform_breakdown이 할인 미반영 상태로 저장됨 | b | p2 | done | 미배정 | 2026-07-29 |
 | [#978](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/978) | [Aiden] 개선제안 — 계층형 비즈니스 규칙(가격/정산) 일관성 재발방지 4개 조치 (DEF-B-031/032/033 근본원인 기반) | b | p2 | - | jungjs | 2026-07-29 |
