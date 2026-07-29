@@ -424,7 +424,7 @@ const rateSnapshotFixtures: Record<string, { applied_unit_price: number; metadat
   'ZEN-2026-000001': {
     applied_unit_price: 430247.97,
     metadata: {
-      agency: { discountRate: 0, agencyCostPrice: 430247.97, agencySellingPrice: 430247.97, platformSellingTotal: 430247.97, agencyOtherChargesTotal: 0 },
+      agency: { discountRate: 0.4, agencyCostPrice: 258148.78, agencySellingPrice: 258148.78, platformSellingTotal: 430247.97, agencyOtherChargesTotal: 0 },
       shipper: { finalFreight: 430247.97, baseSellingPrice: 337600, shipperDiscountRate: 0, surgeFeeSellingAmount: 191.97, otherChargesSellingTotal: 30000, fuelSurchargeSellingAmount: 62456 },
       platform: {
         currency: 'KRW',
@@ -436,7 +436,7 @@ const rateSnapshotFixtures: Record<string, { applied_unit_price: number; metadat
   'ZEN-2026-000002': {
     applied_unit_price: 492385.39,
     metadata: {
-      agency: { discountRate: 0, agencyCostPrice: 492385.39, agencySellingPrice: 492385.39, platformSellingTotal: 492385.3884, agencyOtherChargesTotal: 0 },
+      agency: { discountRate: 0.4, agencyCostPrice: 295431.23, agencySellingPrice: 295431.23, platformSellingTotal: 492385.3884, agencyOtherChargesTotal: 0 },
       shipper: { finalFreight: 492385.39, baseSellingPrice: 384800, shipperDiscountRate: 0, surgeFeeSellingAmount: 6397.3884, otherChargesSellingTotal: 30000, fuelSurchargeSellingAmount: 71188 },
       platform: {
         currency: 'KRW',
@@ -448,7 +448,7 @@ const rateSnapshotFixtures: Record<string, { applied_unit_price: number; metadat
   'ZEN-2026-000003': {
     applied_unit_price: 174688.76,
     metadata: {
-      agency: { discountRate: 0, agencyCostPrice: 174688.76, agencySellingPrice: 174688.76, platformSellingTotal: 174688.7577375, agencyOtherChargesTotal: 0 },
+      agency: { discountRate: 0.4, agencyCostPrice: 104813.25, agencySellingPrice: 104813.25, platformSellingTotal: 174688.7577375, agencyOtherChargesTotal: 0 },
       shipper: { finalFreight: 174688.76, baseSellingPrice: 122100, shipperDiscountRate: 0, surgeFeeSellingAmount: 0.2577375, otherChargesSellingTotal: 30000, fuelSurchargeSellingAmount: 22588.5 },
       platform: {
         currency: 'KRW',
@@ -460,7 +460,7 @@ const rateSnapshotFixtures: Record<string, { applied_unit_price: number; metadat
   'ZEN-2026-000004': {
     applied_unit_price: 263070.47,
     metadata: {
-      agency: { discountRate: 0.2, agencyCostPrice: 210456.38, agencySellingPrice: 210456.38, platformSellingTotal: 263070.47163, agencyOtherChargesTotal: 0 },
+      agency: { discountRate: 0.4, agencyCostPrice: 157842.28, agencySellingPrice: 157842.28, platformSellingTotal: 263070.47163, agencyOtherChargesTotal: 0 },
       shipper: { finalFreight: 207570.47, baseSellingPrice: 166500, shipperDiscountRate: 0.25, surgeFeeSellingAmount: 0.47163, otherChargesSellingTotal: 0, fuelSurchargeSellingAmount: 41070 },
       platform: {
         currency: 'KRW',
@@ -472,7 +472,7 @@ const rateSnapshotFixtures: Record<string, { applied_unit_price: number; metadat
   'ZEN-2026-000005': {
     applied_unit_price: 95155.58,
     metadata: {
-      agency: { discountRate: 0.2, agencyCostPrice: 76124.46, agencySellingPrice: 76124.46, platformSellingTotal: 95155.58058, agencyOtherChargesTotal: 0 },
+      agency: { discountRate: 0.4, agencyCostPrice: 57093.35, agencySellingPrice: 57093.35, platformSellingTotal: 95155.58058, agencyOtherChargesTotal: 0 },
       shipper: { finalFreight: 75080.58, baseSellingPrice: 60225, shipperDiscountRate: 0.25, surgeFeeSellingAmount: 0.08058, otherChargesSellingTotal: 0, fuelSurchargeSellingAmount: 14855.5 },
       platform: {
         currency: 'KRW',
@@ -484,7 +484,7 @@ const rateSnapshotFixtures: Record<string, { applied_unit_price: number; metadat
   'ZEN-2026-000006': {
     applied_unit_price: 328956.74,
     metadata: {
-      agency: { discountRate: 0.2, agencyCostPrice: 263165.39, agencySellingPrice: 263165.39, platformSellingTotal: 328956.74181, agencyOtherChargesTotal: 0 },
+      agency: { discountRate: 0.4, agencyCostPrice: 197374.05, agencySellingPrice: 197374.05, platformSellingTotal: 328956.74181, agencyOtherChargesTotal: 0 },
       shipper: { finalFreight: 259556.74, baseSellingPrice: 208200, shipperDiscountRate: 0.25, surgeFeeSellingAmount: 0.74181, otherChargesSellingTotal: 0, fuelSurchargeSellingAmount: 51356 },
       platform: {
         currency: 'KRW',
@@ -496,7 +496,7 @@ const rateSnapshotFixtures: Record<string, { applied_unit_price: number; metadat
   'ZEN-2026-000007': {
     applied_unit_price: 419574.85,
     metadata: {
-      agency: { discountRate: 0.2, agencyCostPrice: 335659.88, agencySellingPrice: 335659.88, platformSellingTotal: 419574.846, agencyOtherChargesTotal: 0 },
+      agency: { discountRate: 0.4, agencyCostPrice: 251744.91, agencySellingPrice: 251744.91, platformSellingTotal: 419574.846, agencyOtherChargesTotal: 0 },
       shipper: { finalFreight: 402879.85, baseSellingPrice: 317205, shipperDiscountRate: 0.05, surgeFeeSellingAmount: 23903.346, otherChargesSellingTotal: 0, fuelSurchargeSellingAmount: 61771.5 },
       platform: {
         currency: 'KRW',
@@ -545,15 +545,17 @@ async function seedDailyBillingMultiTierFixtures(supabase: any, shipperOrgId: st
   }
   console.log(`  - Linked Global Shipper Corp + Jongseok Jeong -> Zenith Agency Partners (discount_rate=0)`);
 
-  // IMP-157 조사 중 실측 반영된 Zone별 할인율(대리점 20%/화주 25%) — 화주 할인율이 대리점 자체 할인율보다
-  // 높아 역마진이 발생하는 시나리오(IMP-155 검증용)를 그대로 재현. 아래 오더 4~7번 픽스처의
-  // adminToAgencyBreakdown 수치가 바로 이 할인율로 계산된 실측값(seedSntlAgency()와 동일 패턴).
+  // IMP-157 조사 중 실측 반영된 Zone별 할인율 — 최초 20%/25% 조합은 화주 할인율이 대리점 자체
+  // 할인율보다 높아 역마진이 발생하는 시나리오였음(IMP-155 검증용). DEF-B-031(2026-07-29,
+  // invoice-generator.ts가 대리점 할인율을 전혀 반영 안 하던 버그) 수정 후 JSJung 지시로
+  // admin→agency 할인율을 20%→40%로 조정해 역마진을 정상 마진으로 전환함 — 아래 오더 1~7번
+  // rateSnapshotFixtures의 agency.agencyCostPrice/discountRate도 40% 기준으로 함께 갱신됨.
   const { data: zonesForAgency } = await supabase.from('zen_ups_zones').select('id');
   for (const zone of zonesForAgency ?? []) {
     await supabase
       .from('zen_agency_pricing_policies')
       .upsert(
-        { agency_org_id: agencyOrg.id, zone_id: zone.id, discount_rate: 0.20, is_active: true },
+        { agency_org_id: agencyOrg.id, zone_id: zone.id, discount_rate: 0.40, is_active: true },
         { onConflict: 'agency_org_id,zone_id' },
       );
     for (const linkedShipperOrgId of [shipperOrgId, aventusmOrg.id]) {
@@ -565,7 +567,7 @@ async function seedDailyBillingMultiTierFixtures(supabase: any, shipperOrgId: st
         );
     }
   }
-  console.log(`  - Registered Admin->Zenith Agency Partners 20% + Agency->Shipper 25% zone discount policy (역마진 시나리오, ${zonesForAgency?.length ?? 0} zones)`);
+  console.log(`  - Registered Admin->Zenith Agency Partners 40% + Agency->Shipper 25% zone discount policy (정상 마진 시나리오, ${zonesForAgency?.length ?? 0} zones)`);
 
   type CostRow = { cost_type: string; amount: number };
   type OrderFixture = {
@@ -788,7 +790,12 @@ async function seedDailyBillingMultiTierFixtures(supabase: any, shipperOrgId: st
     }
 
     const b = fx.adminToAgencyBreakdown;
-    const adminToAgencyTotal = b.baseFreight + b.fuelSurcharge + b.surgeFee + b.otherCharges;
+    // DEF-B-031 수정 후 invoice-generator.ts와 동일하게 agencyCostPrice(할인 적용값)를 우선 사용 —
+    // platform_breakdown 원본(무할인 합계)은 참고용 metadata로만 남기고 청구 금액과는 분리
+    const agencyCostPriceFromSnapshot = rateSnapshotFixtures[fx.orderNo]?.metadata?.agency?.agencyCostPrice;
+    const adminToAgencyTotal = typeof agencyCostPriceFromSnapshot === 'number'
+      ? agencyCostPriceFromSnapshot
+      : b.baseFreight + b.fuelSurcharge + b.surgeFee + b.otherCharges;
     const agencyCostInvoiceNo = `INV-SEED-${fx.orderNo.slice(-6)}-AD2A`;
     const { data: existingAd2A } = await supabase
       .from('zen_invoices')
