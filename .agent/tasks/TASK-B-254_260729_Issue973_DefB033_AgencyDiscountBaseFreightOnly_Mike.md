@@ -7,7 +7,7 @@
 | **담당** | Mike (Team B) |
 | **생성일** | 2026-07-29 |
 | **우선순위** | P1 |
-| **상태** | ⬜ |
+| **상태** | 🔔 |
 
 ## 개요
 
@@ -208,7 +208,27 @@ describe('TC-UPS-ENGINE-04: Agency 단계 계산 (DEF-B-033: 기본운임에만 
 
 - Mike: `.agent/VIOLATION_TRACKER.md` 참조 후 착수. 배정 파일을 반드시 그대로 사용할 것 — 새 번호로 재채번하지 말 것. 직전 TASK-B-252(PR#971)에서 핵심 fix(invoice-generator.ts) 부분 테스트가 누락된 이력이 있음 — 이번엔 `computeAgencyFreight()` 자체에 대한 되돌리기 검증을 반드시 실제로 수행할 것. TASK-B-120(Issue #457, 본인이 직접 작업한 Shipper 단계 기본운임-only 할인 수정 이력)과 정확히 동일한 패턴이므로 그 코드를 참고해도 좋음.
 
-## [발견 이슈]
+## [작업 결과]
+
+### 변경 내용
+
+#### `src/types/ups.ts`
+- `UpsAgencyFreightResult`에 breakdown 필드 추가 (baseSellingPrice/fuelSurchargeSellingAmount/otherChargesSellingTotal/surgeFeeSellingAmount)
+
+#### `src/lib/ups/agency-pricing.ts`
+- `computeAgencyFreight()` 전면 재작성: 할인율을 기본운임에만 적용, 부가운임은 정가 그대로 pass-through
+
+#### `src/app/actions/ups/freight.ts`
+- 호출부를 `platformSellingTotal` 대신 개별 필드(`baseSellingPrice`/`fuelSurchargeSellingAmount` 등)로 변경
+
+### 테스트
+- `TC-UPS-ENGINE-04` 재작성: 기본운임 할인 검증 + 부가운임 pass-through 확인
+
+### 검증
+- **빌드**: ✅ PASS
+- **테스트**: `pricing-engine.test.ts` 36/36 PASS
+- **회귀**: 144/144 파일, 978/978 테스트 ALL PASS
+- **커밋 해시**: `48ed5229`
 
 _(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
 
