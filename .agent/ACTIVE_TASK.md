@@ -15,6 +15,7 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
+| [#972](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/972) | [fix] DEF-B-032 — daily-billing 상세 '합계(KRW)'가 실제 인보이스 금액 대신 무할인 원가 합계를 표시 | b | p2 | - | 미배정 | 2026-07-29 |
 | [#952](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/952) | [fix] DEF-132 — 운임 스냅샷 멀티패키지 치수 첫 번째만 반영 (오더등록·입고재계산 양쪽) | b | p2 | - | 미배정 | 2026-07-29 |
 | [#946](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/946) | [fix] DEF-B-023 — UPS 오더 상세 무역서류(CI/PL/UPS Invoice) PDF 라벨 번역키 대량 누락 | b | p2 | - | 미배정 | 2026-07-28 |
 | [#943](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/943) | [fix] 법인정보(마이페이지) 주소·사업자정보가 zen_organizations 실제 컬럼과 연결 안 됨 | b | p2 | - | 미배정 | 2026-07-28 |
