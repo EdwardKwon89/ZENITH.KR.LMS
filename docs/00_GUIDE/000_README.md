@@ -73,6 +73,8 @@ tags: ["governance"]
 |---|--------|------|------|
 | **304** | **RBAC·커스텀필드·워크플로우 엔진 아키텍처 검토** | [304_RBAC_CUSTOMFIELD_WORKFLOW_ENGINE_REVIEW.md](./304_RBAC_CUSTOMFIELD_WORKFLOW_ENGINE_REVIEW.md) | 사용자·권한·Role·메뉴·커스텀필드 관리 + 워크플로우 엔진을 Redmine 실구현과 비교분석 — 검토 문서(2026-07-29 미반영 지시, 향후 참조용) |
 | **305** | **신규 프로젝트 BaseLine 가이드** | [305_NEW_PROJECT_BASELINE_GUIDE.md](./305_NEW_PROJECT_BASELINE_GUIDE.md) | 거버넌스/방법론(R-00~R-20 이식표)·RBAC 스캐폴드·디자인 시스템(Zen UI) 재사용 가이드 — 신규 저장소 착수 시 참조용, 실제 이식 작업은 미수행 |
+| **306** | **신규 프로젝트 재활용 검토 의견 (QA)** | [306_NEW_PROJECT_REUSE_REVIEW.md](./306_NEW_PROJECT_REUSE_REVIEW.md) | 305 보완·추가 검토 — 이식 후 운영·검증 방식과 신규 도메인 테스트 자산 시작점(A 테스트/검증, B 관리 자동화, C 규모 조정, D 오픈 이슈). B·D는 305 §7과 정합됨 |
+| **307** | **신규 프로젝트 재활용 검토 의견 (CPO)** | [307_NEW_PROJECT_CPO_REVIEW.md](./307_NEW_PROJECT_CPO_REVIEW.md) | 305·306 보완 CPO 검토 의견 — Task 체계 절충안, 4대 실전 자산(Server Action 표준응답, i18n 에러코드 분리, 상태머신 엔진, 아티팩트 워크플로우) 등록 |
 | (예정) | (예정) | - | 팀 운영, 회의, 리포팅 등 |
 
 ---
@@ -232,6 +234,10 @@ tags: ["governance"]
 
 ### ✅ 완료 (2026-07-31)
 - ✅ 305_NEW_PROJECT_BASELINE_GUIDE.md (신규 저장소 이식 가이드)
+
+### ✅ 완료 (2026-08-04)
+- ✅ 306_NEW_PROJECT_REUSE_REVIEW.md (305 보완·추가 검토 의견 - QA)
+- ✅ 307_NEW_PROJECT_CPO_REVIEW.md (305·306 보완 검토 의견 - CPO)
 
 ### 🔜 계획 중 (추가 예정)
 - 101_Development_Methodology_Overview.md
