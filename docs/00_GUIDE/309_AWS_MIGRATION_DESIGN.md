@@ -1,8 +1,9 @@
 # 309. AWS 이관(Migration) 설계 초안
 
-> **문서번호:** Ds-11 계열 (R-11 API/설계 우선 원칙 적용) | **버전:** v0.1 (초안 — 미승인)
+> **문서번호:** Ds-11 계열 (R-11 API/설계 우선 원칙 적용) | **버전:** v0.2 (초안 — 미승인)
 > **작성일:** 2026-08-07 | **작성자:** Aiden (Claude, ZEN_CEO)
 > **상태:** 🔍 검토 대기 — 핵심 방향(Supabase 처리 방안) 미정, Edward 승인 전 구현 착수 금지
+> **v0.2 변경**: Edward 피드백("실제 배포 준비가 빠져 있다") 반영 — §6 실제 배포 준비 체크리스트 신설, Dockerfile/next.config.ts(`output: 'standalone'`)/package.json(`engines`) 실물 산출물 완료
 
 ---
 
@@ -81,9 +82,11 @@
 - [x] Vercel/Supabase 결합도 인벤토리 (§2)
 - [x] 환경변수 인벤토리 (§2.3)
 - [x] Supabase 처리 방안 비교자료 작성 (§4)
-- [ ] ECS Fargate 배포용 Dockerfile 작성 (multi-stage build)
+- [x] ECS Fargate 배포용 Dockerfile 작성 (multi-stage build, `/Dockerfile`) — `next.config.ts`에 `output: 'standalone'`, `package.json`에 `engines.node` 추가 완료
 - [ ] GitHub Actions → ECR/ECS 배포 파이프라인 초안 작성 (계정 정보 없이 워크플로우 골격만)
 - [ ] VPC/네트워크 구성 설계 초안 (자체호스팅 Supabase와 ECS Fargate 동일 VPC 배치 가정)
+
+> 상세 갭 분석 및 나머지 항목은 §6 참조.
 
 ### 5.2 AWS 자격증명 도착 **후** 착수
 
@@ -95,7 +98,47 @@
 
 ---
 
-## 6. 거버넌스 절차
+## 6. 실제 배포 준비 체크리스트 (구체화, v0.2 — Edward 피드백 반영)
+
+§4~5는 "무엇으로 이관할지"에 대한 전략 비교였고, 아래는 **실제로 배포하려면 무엇이 더 필요한지** 코드/설정 재점검을 통해 도출한 구체 항목이다.
+
+### 6.1 이번 점검에서 완료한 것
+
+| 항목 | 내용 |
+|---|---|
+| `Dockerfile` | multi-stage build (`deps` → `builder` → `runner`), `next start` 대신 standalone 서버(`server.js`) 실행 방식 |
+| `.dockerignore` | 빌드 컨텍스트에서 `node_modules`/`.next`/`docs`/시크릿 파일 제외 |
+| `next.config.ts` | `output: 'standalone'` 추가 — Docker 이미지 경량화(불필요한 `node_modules` 전체 복사 방지). Vercel 배포에는 영향 없음(Vercel은 자체 빌드 파이프라인 사용) |
+| `package.json` | `engines.node` 명시(`>=22.0.0`) — 그동안 Node 버전이 고정되어 있지 않아 컨테이너 베이스 이미지 버전 선택 근거가 없었음 |
+
+### 6.2 이번 점검에서 확인된 사실 (긍정적)
+
+| 항목 | 확인 내용 |
+|---|---|
+| 하드코딩된 도메인 | 코드 전체에 `zenith-lms-hazel.vercel.app` 등 하드코딩 참조 **없음** — URL 전환 시 코드 수정 불필요 |
+| 웹훅/콜백 | UPS(SHXK) 연동은 **폴링 방식**(`ups-tracking-poll` cron)만 확인됨, 외부 시스템이 우리 URL로 콜백하는 웹훅 엔드포인트 없음 — 이관 시 외부 업체에 URL 변경을 통보할 필요 없음 |
+| CORS 특수 설정 | 별도 CORS 미들웨어 없음 — 이관 시 추가 고려사항 없음 |
+| 커스텀 도메인 | Vercel 프로젝트에 등록된 커스텀 도메인 **0건** (현재 `zenith-lms-hazel.vercel.app` 별칭만 사용 중) |
+
+### 6.3 아직 빠져 있는 것 — 결정/작업 필요 (자격증명 도착 전 설계만 가능, 실행은 이후)
+
+| 영역 | 현재 상태 | 필요 조치 |
+|---|---|---|
+| **프로덕션 도메인** | 커스텀 도메인 없음(§6.2) | AWS 환경에서 고객이 접속할 도메인을 신규 확보할지, 기존 `vercel.app` 유사 별칭(ALB/CloudFront 기본 도메인)으로 임시 운영할지 **Edward 결정 필요**. 확정 시 Route 53 + ACM 인증서 발급 필요 |
+| **네트워크/보안 설계** | 미작성 | VPC/서브넷(Public/Private 분리), ALB, 보안그룹, ECS 태스크용 IAM 역할(최소권한) 설계 — 자격증명 도착 전 골격 설계는 가능, 리전/계정ID 확정은 자격증명 필요 |
+| **CI/CD 파이프라인** | 미작성 (§5.1 미완료 항목) | GitHub Actions → ECR push → ECS 서비스 업데이트 워크플로우 yaml. 빌드 시점 `NEXT_PUBLIC_*` 값 주입 방식(Dockerfile ARG, 위 참조)도 여기 포함 |
+| **Secrets 관리** | 매핑표(§2.3)만 존재 | AWS Secrets Manager 실제 등록 절차, ECS 태스크 정의의 `secrets` 필드 연결 방식 문서화 필요 |
+| **Supabase Auth 대시보드 설정** | **코드/로컬설정에 없음 — 미확인 리스크** | `supabase/config.toml`의 `site_url`은 로컬 전용(`127.0.0.1`)이며, 실제 원격 Supabase Cloud 프로젝트의 Site URL·Redirect URLs·이메일 템플릿·SMTP 설정은 **Supabase 대시보드에만 존재**하여 코드 조사로 파악 불가 — 원격 대시보드 직접 확인 필요(자체호스팅 전환 시 이 설정 전체를 새 환경에 재구성해야 함) |
+| **DB 마이그레이션 실행계획** | 미작성 | 현재 Supabase Postgres → 신규 환경으로 데이터 이관 방법(`pg_dump`/논리 복제), 다운타임 창, RLS 정책 포함 스키마 이관 후 정합성 검증 절차 |
+| **모니터링/로깅** | Sentry(애플리케이션 에러)만 유지 확정 | Vercel의 기본 배포/함수 로그·Analytics를 대체할 CloudWatch Logs/Alarm 설계 필요 |
+| **비용 산정** | 미작성 | ECS Fargate + (자체호스팅 Postgres 또는 RDS) + ALB + 데이터 전송 등 개략 월 비용 추정 — 고객 요청 배경상 예산 승인 라인 확인 필요 |
+| **롤백 계획** | 미작성 | 1차 AWS 배포 후 문제 발생 시 기존 Vercel/Supabase로 되돌리는 절차(DNS TTL 사전 단축, 구 환경 유지 기간 등) |
+
+> **요약**: §4의 Supabase 처리 방안 결정과 무관하게 위 6.3 항목 대부분(도메인 결정, 네트워크 설계 골격, CI/CD 워크플로우 골격, Secrets 매핑 구체화, 비용 개략 산정)은 **지금 바로 착수 가능**하다. 단, Supabase Auth 대시보드 설정 확인은 원격 Supabase 프로젝트 접근 권한이 필요하고, 실제 리소스 프로비저닝은 AWS 자격증명 도착 후에만 가능하다.
+
+---
+
+## 7. 거버넌스 절차
 
 - 본 건은 **Tech Stack 근본 변경**이므로, §4 방향 확정 후 `docs/01_WBS`에 신규 Phase로 정식 등재 필요 (기존 Phase 5/7 등재 사례와 동일 절차).
 - Team A/Team B 역할 분담은 R-19에 따라 별도 확정 — 인프라/이관 자체는 Team A, 기존 기능 회귀 검증은 Team B 협조 예상(잠정, 미확정).
@@ -108,3 +151,4 @@
 | 버전 | 날짜 | 작성자 | 설명 |
 | :--- | :--- | :--- | :--- |
 | v0.1 | 2026-08-07 | Aiden (Claude) | 초안 작성 — Supabase 처리 방안 비교자료(§4) 포함, Edward 결정 대기 |
+| v0.2 | 2026-08-07 | Aiden (Claude) | Edward 피드백 반영 — §6 실제 배포 준비 체크리스트 신설(도메인·네트워크·CI/CD·Secrets·Auth 대시보드 설정·DB 마이그레이션·모니터링·비용·롤백), Dockerfile/`.dockerignore`/`next.config.ts`/`package.json` 실물 산출물 추가 |
