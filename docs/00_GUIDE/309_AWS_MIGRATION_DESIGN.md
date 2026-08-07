@@ -1,10 +1,11 @@
 # 309. AWS 이관(Migration) 설계 초안
 
-> **문서번호:** Ds-11 계열 (R-11 API/설계 우선 원칙 적용) | **버전:** v0.3 (초안 — 미승인)
+> **문서번호:** Ds-11 계열 (R-11 API/설계 우선 원칙 적용) | **버전:** v0.4 (초안 — 미승인)
 > **작성일:** 2026-08-07 | **작성자:** Aiden (Claude, ZEN_CEO)
 > **상태:** 🔍 검토 대기 — 핵심 방향(Supabase 처리 방안) 미정, Edward 승인 전 구현 착수 금지
 > **v0.2 변경**: Edward 피드백("실제 배포 준비가 빠져 있다") 반영 — §6 실제 배포 준비 체크리스트 신설, Dockerfile/next.config.ts(`output: 'standalone'`)/package.json(`engines`) 실물 산출물 완료
 > **v0.3 변경**: §4에 ③ 하이브리드(Supabase OSS 컴포넌트 + RDS/Aurora) 옵션 추가, 성능 비교표(§4.1) 및 하이브리드 코드영향 분석(§4.2) 신설 — Edward 요청("DB 환경 구성이 핵심 리스크 아닌가", "하이브리드도 코드 재작성 필요한가") 반영
+> **v0.4 변경**: §7 AWS 자격증명 요청 사항 신설(필요 정보·IAM 권한 범위·안전한 전달 방법·Aiden이 할 수 없는 것) — Edward 요청("어떤 정보가 필요한지, 어떻게 전달해야 하는지 등록해줘") 반영
 
 ---
 
@@ -171,7 +172,42 @@
 
 ---
 
-## 7. 거버넌스 절차
+## 7. AWS 자격증명 요청 사항 — 필요한 정보와 안전한 전달 방법 (2026-08-07)
+
+> Edward 질의("직접 설정·확인해 줄 수 있는가")에 대한 답변으로 작성. Aiden(Claude)이 AWS CLI/Docker로 직접 작업하려면 아래 정보가 필요하다.
+
+### 8.1 필요한 정보
+
+| 항목 | 필요 이유 | 비고 |
+|---|---|---|
+| **Access Key ID / Secret Access Key** (프로그래매틱 액세스) | AWS CLI로 ECR/ECS/RDS/VPC 등을 직접 조작하기 위함 | **콘솔 로그인용 ID/Password는 불필요** — CLI는 Access Key 쌍만 사용 |
+| AWS 계정 ID (12자리) | 리소스 ARN 구성, 대상 계정 확인 | |
+| 대상 리전 | 이 서비스는 국내(한국) 고객 대상이므로 `ap-northeast-2`(서울) 권장 — 확정 필요 | |
+| 신규 계정 여부 | 기존에 다른 프로젝트가 이미 올라가 있는 계정이면 리소스 네이밍/VPC 충돌 방지 필요 | |
+| 예산/비용 알람 임계치 | 고객 요청 배경상 비용 통제 필요 — CloudWatch Billing Alarm 설정용 | 확정 안 되면 임시로 낮은 기본값 설정 후 조정 |
+| (선택) 프로덕션 도메인 | §6.3에서 미확정으로 남겨둔 항목 — 확정 시 Route 53/ACM 설정에 사용 | 미정이면 AWS 기본 도메인(ALB DNS 등)으로 임시 운영 |
+
+### 8.2 IAM 권한 범위 (권장)
+
+- **1차 구축 단계(PoC~초기 배포)**: 신속한 진행을 위해 `AdministratorAccess`를 임시 부여하고, 안정화 후 아래 서비스로 범위를 좁힌 별도 정책으로 교체하는 방식을 권장 — ECR / ECS / RDS / VPC·EC2(보안그룹·ALB) / IAM(역할 생성, 제한된 prefix) / Secrets Manager / Route 53 / ACM / CloudWatch(Logs·Alarm) / S3
+- **MFA 필수** 권장 (IAM 사용자에 MFA 디바이스 등록)
+- **root 계정 자격증명은 어떤 경우에도 전달하지 않을 것** — 반드시 별도 IAM 사용자 발급
+
+### 8.3 안전한 전달 방법 — 대화창에 직접 붙여넣지 말 것
+
+이 대화(Claude Code 세션)에 Access Key/Secret Key를 텍스트로 붙여넣으면 **대화 기록에 그대로 남는다.** 아래 방법 중 하나를 사용한다.
+
+1. **(권장) Edward가 로컬 터미널에서 직접 `aws configure` 실행** — 키 입력이 터미널 자체에서만 이루어지고 대화 기록에 남지 않음. 이후 Aiden(Claude)이 `~/.aws/credentials`의 로컬 프로파일을 사용해 작업.
+2. **(대안) `.env.aws.local` 같은 별도 파일을 Edward가 직접 에디터로 작성** (`.gitignore` 대상, 커밋 금지) — Aiden은 해당 파일을 source하여 사용하되, 키 값을 대화 응답에 다시 노출하지 않음.
+3. **(장기적으로 이상적)** AWS SSO/임시 STS 토큰 사용 — 발급 시 자동 만료되어 장기 노출 위험이 낮음. 조직에 SSO 구성이 없다면 1차는 방법 1로 진행.
+
+### 8.4 Aiden(Claude)이 직접 할 수 없는 것
+
+AWS 콘솔에서만 가능한 일부 단계(Organization 최초 설정, 결제 수단 등록, 일부 서비스 약관 동의, MFA 디바이스 최초 등록)는 Edward가 웹 콘솔에서 직접 처리해야 한다. 이 지점에 도달하면 사전에 안내한다.
+
+---
+
+## 8. 거버넌스 절차
 
 - 본 건은 **Tech Stack 근본 변경**이므로, §4 방향 확정 후 `docs/01_WBS`에 신규 Phase로 정식 등재 필요 (기존 Phase 5/7 등재 사례와 동일 절차).
 - Team A/Team B 역할 분담은 R-19에 따라 별도 확정 — 인프라/이관 자체는 Team A, 기존 기능 회귀 검증은 Team B 협조 예상(잠정, 미확정).
@@ -186,3 +222,4 @@
 | v0.1 | 2026-08-07 | Aiden (Claude) | 초안 작성 — Supabase 처리 방안 비교자료(§4) 포함, Edward 결정 대기 |
 | v0.2 | 2026-08-07 | Aiden (Claude) | Edward 피드백 반영 — §6 실제 배포 준비 체크리스트 신설(도메인·네트워크·CI/CD·Secrets·Auth 대시보드 설정·DB 마이그레이션·모니터링·비용·롤백), Dockerfile/`.dockerignore`/`next.config.ts`/`package.json` 실물 산출물 추가 |
 | v0.3 | 2026-08-07 | Aiden (Claude) | §4에 ③ 하이브리드(Supabase OSS Auth/PostgREST/Storage + RDS/Aurora) 옵션 추가, §4.1 성능 비교표, §4.2 하이브리드 코드영향 분석(코드 재작성 불필요 결론 + PoC 필요성) 신설 |
+| v0.4 | 2026-08-07 | Aiden (Claude) | §7 AWS 자격증명 요청 사항 신설 — 필요 정보(Access Key/계정ID/리전/예산 등), IAM 권한 범위 권고, 안전한 전달 방법(대화창 직접 붙여넣기 금지 — `aws configure`/로컬 env 파일/SSO 권장), Aiden이 직접 할 수 없는 콘솔 전용 작업 명시 |
