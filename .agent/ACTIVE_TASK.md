@@ -15,7 +15,8 @@
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
-| [#994](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/994) | 2026.08.04 SNTL 업무협의 회의록 | - | - | - | 미배정 | 2026-08-05 |
+| [#995](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/995) | [Aiden] AWS 이관(Migration) 검토 — 고객요청, Supabase 처리 방안 결정 필요 | a | p1 | open | jungjs | 2026-08-07 |
+| [#994](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/994) | 2026.08.04 SNTL 업무협의 회의록 | - | - | - | 미배정 | 2026-08-06 |
 | [#988](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/988) | [Aiden] 세션 타임아웃 미적용 — 실 서비스 전환 전 필수 조치 | - | p2 | - | 미배정 | 2026-07-31 |
 | [#987](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/987) | [Aiden] Team B R-17 위반 대응 체계 재검토 요청 — 3회 기준 미집행 장기화 | b | p1 | - | jungjs | 2026-07-29 |
 | [#982](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/982) | [feat] 오더 일괄 등록 기능 — 엑셀 업로드 (Issue #718 회의록 요구사항) | b | p2 | review | 미배정 | 2026-07-29 |
