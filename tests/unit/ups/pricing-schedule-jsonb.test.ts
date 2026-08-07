@@ -11,6 +11,16 @@ vi.mock('@/lib/logger', () => ({ logger: { error: vi.fn() } }));
 import { createPricingSchedule, getPricingAuditLog } from '@/app/actions/ups/pricing-schedule';
 import { USER_ROLES } from '@/lib/auth/rbac';
 
+function kstDateOffset(days: number): string {
+  const kstToday = new Date(
+    new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Seoul' })
+  );
+  kstToday.setUTCDate(kstToday.getUTCDate() + days);
+  return kstToday.toISOString().slice(0, 10);
+}
+
+const TOMORROW = kstDateOffset(1);
+
 function makeAdminMock(opts: { overlapRows?: any[] }) {
   const chain: any = {};
   chain._rows = opts.overlapRows || [];
@@ -45,8 +55,8 @@ describe('TC-PRICING-509: pricing-schedule JSONB target_ref 비교 수정 (Issue
       setting_type: 'AGENCY_DISCOUNT',
       target_ref: { agency_org_id: 'agency-1', zone_id: 'zone-1' },
       new_value: 0.20,
-      valid_from: '2026-08-01',
-      valid_until: '2026-12-31',
+      valid_from: TOMORROW,
+      valid_until: kstDateOffset(150),
     });
 
     expect(result).toBeDefined();
@@ -60,8 +70,8 @@ describe('TC-PRICING-509: pricing-schedule JSONB target_ref 비교 수정 (Issue
     const adminMock = makeAdminMock({
       overlapRows: [{
         id: 'existing-1',
-        valid_from: '2026-07-01',
-        valid_until: '2026-09-30',
+        valid_from: kstDateOffset(-30),
+        valid_until: kstDateOffset(60),
         new_value: 0.15,
       }],
     });
@@ -71,8 +81,8 @@ describe('TC-PRICING-509: pricing-schedule JSONB target_ref 비교 수정 (Issue
       setting_type: 'AGENCY_DISCOUNT',
       target_ref: { agency_org_id: 'agency-1', zone_id: 'zone-1' },
       new_value: 0.25,
-      valid_from: '2026-08-01',
-      valid_until: '2026-10-31',
+      valid_from: TOMORROW,
+      valid_until: kstDateOffset(90),
     })).rejects.toThrow('기간이 겹치는 예약이 이미 존재합니다');
   });
 
@@ -84,8 +94,8 @@ describe('TC-PRICING-509: pricing-schedule JSONB target_ref 비교 수정 (Issue
     const adminMock = makeAdminMock({
       overlapRows: [{
         id: 'existing-1',
-        valid_from: '2026-07-01',
-        valid_until: '2026-07-31',
+        valid_from: kstDateOffset(-30),
+        valid_until: kstDateOffset(-1),
         new_value: 0.15,
       }],
     });
@@ -95,8 +105,8 @@ describe('TC-PRICING-509: pricing-schedule JSONB target_ref 비교 수정 (Issue
       setting_type: 'AGENCY_DISCOUNT',
       target_ref: { agency_org_id: 'agency-1', zone_id: 'zone-1' },
       new_value: 0.25,
-      valid_from: '2026-08-01',
-      valid_until: '2026-10-31',
+      valid_from: TOMORROW,
+      valid_until: kstDateOffset(90),
     });
 
     expect(result).toBeDefined();
@@ -146,7 +156,7 @@ describe('TC-PRICING-509: pricing-schedule JSONB target_ref 비교 수정 (Issue
       setting_type: 'SHIPPER_DISCOUNT',
       target_ref: { agency_org_id: 'agency-1', shipper_org_id: 'shipper-1' },
       new_value: 0.10,
-      valid_from: '2026-08-01',
+      valid_from: TOMORROW,
     });
 
     expect(result).toBeDefined();
