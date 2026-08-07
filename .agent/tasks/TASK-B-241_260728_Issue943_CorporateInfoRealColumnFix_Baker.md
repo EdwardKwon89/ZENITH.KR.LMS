@@ -136,9 +136,10 @@ export const updateOrganizationInfo = withAction(async function (payload: {
 | 커밋 | 내용 |
 |:-----|:-----|
 | `a88edac1` | fix: zen_organizations 소속 조직원 UPDATE RLS 추가 (실제 컬럼 저장 차단 해결) |
+| `56ee49f9` | fix: **PR#996 리뷰 반영** — UPDATE 정책 컬럼 단위 GRANT 제한 + CORPORATE/ADMIN role 조건 (보안 강화) |
 | `45295ad2` | test: R-10 실측 로그인 검증 스크립트 + 스크린샷 3장 |
 | `7427fc6a` | test: 법인정보 실제 컬럼 단위 테스트 (TC-MEM-05~09) |
-| `19693dc5` | test: pricing-schedule-jsonb 하드코딩 날짜 → KST 동적 날짜 (회귀 결함 수정) |
+| `19693dc5` | test: pricing-schedule-jsonb 하드코딩 날짜 → KST 동적 날짜 (회귀 결함 수정, TASK-B-131 소관 — R-18 사유: 발견 3 참조) |
 
 > 참고: `admin/corporate.ts`·`mypage/corporate/page.tsx` 코드는 이전 커밋 `71a16679`에 이미 반영되어 있었으며, 본 Task에서 추가 코드 수정은 없었음(RLS migration 신설 + 테스트/검증만 수행).
 
@@ -149,13 +150,31 @@ export const updateOrganizationInfo = withAction(async function (payload: {
 - **증상**: `updateOrganizationInfo()`(사용자 스코프 `createClient()`)로 실제 컬럼 UPDATE 시 **에러 없이 0행 처리** → 저장 성공 토스트만 표시되고 DB 미반영.
 - **원인**: `zen_organizations`에는 `SELECT` RLS만 존재(`20260506160000_fix_auth_tokens_and_rls_hardening.sql`)하고 UPDATE 정책이 없어, PostgreSQL 기본 거부로 UPDATE 대상 행이 보이지 않음(조용한 0행).
 - **검증 방법**: R-10 실측 로그인(`shipper@zenith.kr`) 저장 후 psql로 DB 조회 → 미반영 확인. PostgREST 사용자 토큰 PATCH `return=representation` → `[]`(0행) 확인.
-- **해결**: `supabase/migrations/20260807100000_iss943_zen_organizations_member_update_rls.sql` 신규 작성 — "소속 조직원(본인 org)만 본인 조직 행 UPDATE" 정책(`USING`/`WITH CHECK` 동일 org id 강제). `authenticated`에 UPDATE GRANT는 기존에 존재하여 추가 GRANT 불요. 로컬 DB 직접 적용 + `supabase_migrations.schema_migrations` 기록 완료.
-- **정책 검증**:
-  - 정상: 사용자 토큰 PATCH로 본인 org `rep_name` 변경 → DB 반영 성공.
-  - 부정: 타 조직(id=agency) PATCH → `[]`(0행) 차단 확인.
-- **커밋**: `a88edac1`
+- **1차 해결** (커밋 `a88edac1`): `supabase/migrations/20260807100000_iss943_zen_organizations_member_update_rls.sql` 신규 작성 — "소속 조직원(본인 org)만 본인 조직 행 UPDATE" 정책.
+- **Jaison PR#996 리뷰 반려(차단) → 2차 보완 (PR 재제출)**:
+  - 지적: RLS는 행 단위만 제어 — "본인 org 소속이면 **전 컬럼** 수정 가능" 보안 결함. `volumetric_divisor`(정산 직결)·`type`·`status` 등 민감 컬럼을 PostgREST 직접 호출로 우회 가능.
+  - 보완: ① 정책에 **CORPORATE/ADMIN role 조건** 추가(defense-in-depth, `updateOrganizationInfo()` 역할 검증과 동일 기준) ② **컬럼 단위 GRANT** — `imp153_authenticated_grant_일괄`이 부여한 전체 컬럼 UPDATE(테이블 레벨 + 컬럼 레벨)를 REVOKE로 철회 후 **법인정보 5개 컬럼만 재부여**.
+  - 재검증 결과:
+    - 정상: CORPORATE 본인 org `rep_name` 변경 → 반영 성공
+    - 부정 ①: CORPORATE `volumetric_divisor` 변경 → **HTTP 403 permission denied**
+    - 부정 ②: AGENCY(비 CORPORATE/ADMIN) 본인 org `rep_name` 변경 → `[]`(0행) 차단
+    - 부정 ③: CORPORATE 타 org `rep_name` 변경 → `[]`(0행) 차단
+    - R-10 실측 재실행 → **PASS** (저장→새로고침 유지→오더 폼 자동입력, 원본 복원 완료)
+- **GRANT 최종 상태**: `authenticated` UPDATE = `rep_name, biz_no, contact_phone, contact_email, address` 5개 컬럼만.
+- **커밋**: `a88edac1`(1차) + `56ee49f9`(2차 보완)
 
 ### 발견 2 — `updateAgencyVolumetricDivisor` 동일 RLS 차단 (기존 잠재 결함, 범위 밖)
 
 - `src/app/actions/ups/rates-mutation.ts:367` — `validateUserAction()`(사용자 스코프)로 **타 조직** `volumetric_divisor`를 UPDATE. org UPDATE 정책이 전무했던 기간 동안 동일하게 조용히 0행 처리되었을 것. "본인 org" 정책(발견 1)으로는 해소 불가(타 조직 대상).
 - **권고**: 별도 이슈 등록 후 조치 필요 — ① 해당 액션을 admin 클라이언트 전환(`agency/shippers.ts` 패턴) 또는 ② ADMIN/MANAGER 전용 org UPDATE 정책/검증 함수 추가. (본 Task 범위 아님)
+- **Jaison 리뷰 부수 확인**: 본 PR의 컬럼 단위 GRANT(`authenticated` UPDATE 5개 컬럼 제한) 적용 후에도 동일하게 타 org 대상이라 RLS USING에서 걸러져 0행(잠재 결함 지속) — 정책 변경과 무관하게 별도 이슈 필요.
+
+### 발견 3 — 범위 밖 커밋 혼입 `19693dc5` (TASK-B-131 회귀 결함 수정, R-18 사유 기록)
+
+- `tests/unit/ups/pricing-schedule-jsonb.test.ts` 하드코딩 날짜(`2026-08-01` 등) → KST 동적 날짜(`kstDateOffset`/`TOMORROW`) 전환. TASK-B-131(Issue #509)의 기존 회귀 결함으로, 오늘(2026-08-07) 기준 날짜 경과로 4건 실패 중이었음. 전체 회귀 통과를 위해 본 PR에 포함했으나, Jaison 확인처럼 별개 Task 사유임 — 되돌리지 않고 유지하며, 향후 유사 케이스는 task file 사유 기재 선행.
+- **Jaison 의견**: 수정 방향 타당, 되돌릴 필요 없음. 다음부터 task file에 사유 명시.
+
+### 발견 4 — R-10 스크린샷 주소 "잘림" 확인 (차단 아님, 확인 요청 대응)
+
+- Jaison: `r10-order-shipper-auto-fill.png`에 주소가 "…R1"로 보임 → 법인정보에 저장한 "…R10호"와 다름.
+- **확인 결과**: 시각적 잘림(입력란 폭 overflow)일 뿐, DOM 값은 정확 — R-10 재실행 로그 `ORDER_SHIPPER_ADDRESS: 서울 강남구 테헤란로 100길 R10호` = 저장 값과 정확히 일치, 테스트 assertion(`expect(orderAddress).toBe(MARKER.address)`)도 통과.
