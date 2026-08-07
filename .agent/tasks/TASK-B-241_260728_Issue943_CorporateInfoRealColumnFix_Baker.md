@@ -6,7 +6,7 @@
 | **담당** | Baker (Team B) |
 | **생성일** | 2026-07-28 |
 | **우선순위** | P2 |
-| **상태** | ⬜ |
+| **상태** | 🔔 |
 
 ## 개요
 
@@ -92,14 +92,16 @@ export const updateOrganizationInfo = withAction(async function (payload: {
 
 ## 착수 체크리스트
 
-- [ ] `git fetch origin && git checkout TeamB_Dev && git pull origin TeamB_Dev` 후 `feature/teamb-241-...` 브랜치 생성 (`./scripts/next-task-number.sh B` 직접 재확인 — 241 나와야 정상)
-- [ ] 위 스펙대로 `admin/corporate.ts` + `mypage/corporate/page.tsx` 수정
-- [ ] 회귀 테스트 추가 — **반드시 실제 DB 왕복(또는 최소 실제 payload 캡처) 기반 behavioral 테스트**(toContain/그림자 컴포넌트 금지):
-  1. `updateOrganizationInfo()` 호출 시 `.update()`에 전달되는 실제 payload가 `rep_name`/`biz_no`/`contact_phone`/`contact_email`/`address` 키를 포함하고 `metadata` 키는 포함하지 않는지 mock 호출 인자로 직접 검증
-  2. `getOrganizationInfo()`의 `.select()` 인자에 위 실제 컬럼명들이 포함되는지 확인
-  3. `CorporatePage` 컴포넌트를 실제 렌더링해 `getOrganizationInfo` mock이 반환한 `rep_name`/`address` 등 값이 폼 입력란에 실제로 나타나는지 확인(RTL)
-- [ ] `npm run build` · `npm run test:regression` 직접 실행 후 정확한 결과 기재
-- [ ] **R-10 필수**: 로컬에서 CORPORATE 역할 계정으로 로그인 → `/mypage/corporate`에서 주소·사업자번호·대표자·연락처·이메일 수정 후 저장 → 페이지 새로고침 후에도 값이 유지되는지 확인 → 이어서 신규 오더 등록 화면(`/orders/new`)의 "화주 정보" 탭에서 방금 수정한 주소가 실제로 자동입력되는지까지 확인(연결 자체가 고쳐졌는지 최종 증명) → 스크린샷 첨부
+- [x] `git fetch origin && git checkout TeamB_Dev && git pull origin TeamB_Dev` 후 `feature/teamb-241-...` 브랜치 생성 (`./scripts/next-task-number.sh B` 직접 재확인 — 241 나와야 정상)
+- [x] 위 스펙대로 `admin/corporate.ts` + `mypage/corporate/page.tsx` 수정 (코드는 기존 커밋 `71a16679`에 이미 반영 — 본 Task에서 최종본 확인)
+- [x] 회귀 테스트 추가 — **반드시 실제 DB 왕복(또는 최소 실제 payload 캡처) 기반 behavioral 테스트**(toContain/그림자 컴포넌트 금지):
+  1. `updateOrganizationInfo()` 호출 시 `.update()`에 전달되는 실제 payload가 `rep_name`/`biz_no`/`contact_phone`/`contact_email`/`address` 키를 포함하고 `metadata` 키는 포함하지 않는지 mock 호출 인자로 직접 검증 ✅ (TC-MEM-05)
+  2. `getOrganizationInfo()`의 `.select()` 인자에 위 실제 컬럼명들이 포함되는지 확인 ✅ (TC-MEM-06)
+  3. `CorporatePage` 컴포넌트를 실제 렌더링해 `getOrganizationInfo` mock이 반환한 `rep_name`/`address` 등 값이 폼 입력란에 실제로 나타나는지 확인(RTL) ✅ (TC-MEM-07~09)
+- [x] `npm run build` · `npm run test:regression` 직접 실행 후 정확한 결과 기재 → build PASS · 회귀 **988/988 PASS**
+- [x] **R-10 필수**: 로컬에서 CORPORATE 역할 계정으로 로그인 → `/mypage/corporate`에서 주소·사업자번호·대표자·연락처·이메일 수정 후 저장 → 페이지 새로고침 후에도 값이 유지되는지 확인 → 이어서 신규 오더 등록 화면(`/orders/new`)의 "화주 정보" 탭에서 방금 수정한 주소가 실제로 자동입력되는지까지 확인(연결 자체가 고쳐졌는지 최종 증명) → 스크린샷 첨부 ✅ (상세는 [작업 결과] 참조)
+
+> ⚠️ **스펙 이탈 1건 (Jaison 검토 필요)**: Jaison 확정 설계에는 "스키마/마이그레이션 변경 없음"이 명시되어 있었으나, R-10 실측 검증에서 **`zen_organizations` UPDATE RLS 정책 부재로 실제 컬럼 저장이 0행 처리되는 차단 버그**를 발견하여 `20260807100000_iss943_zen_organizations_member_update_rls.sql` 신규 migration을 추가했습니다(상세: [발견 이슈] 발견 1). 코드(액션·페이지)는 설계 그대로이며 추가 코드 변경은 없습니다.
 
 ## 완료 보고 절차 (R-17 준수)
 
@@ -109,8 +111,51 @@ export const updateOrganizationInfo = withAction(async function (payload: {
 
 - Baker: `.agent/VIOLATION_TRACKER.md` 참조 후 착수. 배정 파일을 반드시 그대로 사용할 것 — 새 번호로 재채번하지 말 것. 과거 pg_grant 오류(TASK-B-234) 사례 참고 — DB 관련 코드는 실제 실행/조회로 재검증할 것(이번 건은 마이그레이션 없음이지만 실제 컬럼명 오타 여부는 반드시 psql로 직접 확인).
 
+## [작업 결과]
+
+### 검증 결과 요약
+
+| 검증 항목 | 결과 |
+|:----------|:-----|
+| 단위 테스트 (TC-MEM-05~09, corporate/corporate-page) | PASS (9/9) |
+| 전체 회귀 테스트 `npm run test:regression` | **988/988 PASS** (145 files, 187s) |
+| `npm run build` | PASS |
+| R-10 실측 (로그인→저장→새로고침→오더 폼 자동입력) | **PASS** (아래 상세) |
+
+### R-10 실측 로그인 검증 (커밋 `45295ad2` 스크린샷 포함)
+
+- 계정: `shipper@zenith.kr`(CORPORATE) / 로그인 → `/ko/mypage/corporate`
+- 5개 필드(대표자·사업자번호·연락처·이메일·주소) 마커 값 저장 → 성공 토스트 → 페이지 새로고침 후 **값 유지 확인** (`AFTER_RELOAD` = 마커 값 전부 일치)
+- `/ko/orders/new` "화주 정보" 탭 주소 자동입력 = 방금 수정한 주소와 일치 확인 (`ORDER_SHIPPER_ADDRESS`)
+- 검증 후 원본 값 복원 완료 (DB 상태: `biz_no=123-45-67890`, 나머지 빈값 — 원본과 동일)
+- 스크린샷: `tests/e2e/screenshots/r10-corporate-form-filled.png`, `r10-corporate-after-reload.png`, `r10-order-shipper-auto-fill.png`
+- 자동화 스크립트: `tests/e2e/r10-corporate-info-real-column.spec.ts` (Playwright, CI 이전 실측 재현용)
+
+### 커밋 목록 (브랜치 `feature/teamb-241-corporate-info-real-column-fix`)
+
+| 커밋 | 내용 |
+|:-----|:-----|
+| `a88edac1` | fix: zen_organizations 소속 조직원 UPDATE RLS 추가 (실제 컬럼 저장 차단 해결) |
+| `45295ad2` | test: R-10 실측 로그인 검증 스크립트 + 스크린샷 3장 |
+| `7427fc6a` | test: 법인정보 실제 컬럼 단위 테스트 (TC-MEM-05~09) |
+| `19693dc5` | test: pricing-schedule-jsonb 하드코딩 날짜 → KST 동적 날짜 (회귀 결함 수정) |
+
+> 참고: `admin/corporate.ts`·`mypage/corporate/page.tsx` 코드는 이전 커밋 `71a16679`에 이미 반영되어 있었으며, 본 Task에서 추가 코드 수정은 없었음(RLS migration 신설 + 테스트/검증만 수행).
+
 ## [발견 이슈]
 
-_(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
+### 발견 1 — zen_organizations UPDATE RLS 정책 부재 (TASK-B-241 직접 차단 → 본 Task에서 해결)
 
-없음
+- **증상**: `updateOrganizationInfo()`(사용자 스코프 `createClient()`)로 실제 컬럼 UPDATE 시 **에러 없이 0행 처리** → 저장 성공 토스트만 표시되고 DB 미반영.
+- **원인**: `zen_organizations`에는 `SELECT` RLS만 존재(`20260506160000_fix_auth_tokens_and_rls_hardening.sql`)하고 UPDATE 정책이 없어, PostgreSQL 기본 거부로 UPDATE 대상 행이 보이지 않음(조용한 0행).
+- **검증 방법**: R-10 실측 로그인(`shipper@zenith.kr`) 저장 후 psql로 DB 조회 → 미반영 확인. PostgREST 사용자 토큰 PATCH `return=representation` → `[]`(0행) 확인.
+- **해결**: `supabase/migrations/20260807100000_iss943_zen_organizations_member_update_rls.sql` 신규 작성 — "소속 조직원(본인 org)만 본인 조직 행 UPDATE" 정책(`USING`/`WITH CHECK` 동일 org id 강제). `authenticated`에 UPDATE GRANT는 기존에 존재하여 추가 GRANT 불요. 로컬 DB 직접 적용 + `supabase_migrations.schema_migrations` 기록 완료.
+- **정책 검증**:
+  - 정상: 사용자 토큰 PATCH로 본인 org `rep_name` 변경 → DB 반영 성공.
+  - 부정: 타 조직(id=agency) PATCH → `[]`(0행) 차단 확인.
+- **커밋**: `a88edac1`
+
+### 발견 2 — `updateAgencyVolumetricDivisor` 동일 RLS 차단 (기존 잠재 결함, 범위 밖)
+
+- `src/app/actions/ups/rates-mutation.ts:367` — `validateUserAction()`(사용자 스코프)로 **타 조직** `volumetric_divisor`를 UPDATE. org UPDATE 정책이 전무했던 기간 동안 동일하게 조용히 0행 처리되었을 것. "본인 org" 정책(발견 1)으로는 해소 불가(타 조직 대상).
+- **권고**: 별도 이슈 등록 후 조치 필요 — ① 해당 액션을 admin 클라이언트 전환(`agency/shippers.ts` 패턴) 또는 ② ADMIN/MANAGER 전용 org UPDATE 정책/검증 함수 추가. (본 Task 범위 아님)
