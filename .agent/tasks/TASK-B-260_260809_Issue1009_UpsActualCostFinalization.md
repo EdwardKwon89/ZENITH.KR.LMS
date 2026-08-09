@@ -7,7 +7,7 @@
 | **담당** | Baker (Team B) — TASK-B-257(환율 관리 기능)에서 KoreaExim Cron/`getExchangeRate`/`/admin/exchange-rates` 인프라를 직접 구축해 이번 Task의 HKD/KRW 확장과 가장 맞닿아 있음 |
 | **생성일** | 2026-08-09 |
 | **우선순위** | P1 |
-| **상태** | 🔄 (착수 배정 — JSJung 원 요구사항 기반 Jaison 설계, 착수 승인됨) |
+| **상태** | 🔔 (구현 완료 → 리뷰) |
 
 ## 개요
 
@@ -40,20 +40,20 @@ Issue #1009 본문의 CREATE TABLE 문 그대로 사용. 기존 `zen_ups_actual_
 
 ## 착수 체크리스트
 
-- [ ] `git fetch origin && git pull origin TeamB_Dev` 후 `feature/teamb-260-ups-actual-cost` 브랜치 생성(worktree)
-- [ ] `./scripts/next-task-number.sh B`로 TASK-B-260 확인
-- [ ] 마이그레이션: `zen_ups_actual_cost` 테이블(RLS는 기존 `zen_ups_actual_charges` 패턴 — ADMIN/MANAGER `ALL`, 소속 agency/shipper `SELECT`만)
-- [ ] `exchange-rate-sync/route.ts` HKD 확장 + `/admin/exchange-rates` UI 통화쌍 확장
-- [ ] `recordUpsActualCost()` 신규 서버 액션 (위 스펙 4단계)
-- [ ] `order-revenue-cost.ts` ADMIN 매입 로직에 `zen_ups_actual_cost` 우선순위 반영
-- [ ] `UpsActualAdjustmentForm.tsx` UI 확장
-- [ ] **회귀 테스트 신설 (필수, R-09)**:
-  - `recordUpsActualCost()`: HKD 4항목 저장 + RELEASED일 환율 조회 + KRW 환산 정확성(단위 테스트, mock exchange rate)
-  - `order-revenue-cost.ts`: `zen_ups_actual_cost` 존재 시 우선 사용, 없을 시 기존 스냅샷 폴백 — 양쪽 케이스
-  - 실측 중량 변경 시 agency/shipper 인보이스 금액이 실제로 재계산되는지(behavioral, 마감 전/후 양쪽 케이스)
-  - **되돌리기 검증 필수** — 최근 Team B에서 재무 계산 fix가 되돌려도 테스트가 FAIL하지 않는 사례가 반복됐음(TASK-B-252/255). 이번 Task는 특히 "매입 우선순위 폴백"과 "매출 재계산 트리거" 두 핵심 로직 각각에 대해 되돌리기 검증을 수행하고 결과를 기재할 것.
-- [ ] `npm run test:regression` 직접 실행, 정확한 PASS 수치 기재
-- [ ] `npm run build` SUCCESS 확인
+- [X] `git fetch origin && git pull origin TeamB_Dev` 후 `feature/teamb-260-ups-actual-cost` 브랜치 생성(worktree)
+- [X] `./scripts/next-task-number.sh B`로 TASK-B-260 확인
+- [X] 마이그레이션: `zen_ups_actual_cost` 테이블(RLS는 기존 `zen_ups_actual_charges` 패턴 — ADMIN/MANAGER `ALL`, 소속 agency/shipper `SELECT`만)
+- [X] `exchange-rate-sync/route.ts` HKD 확장 + `/admin/exchange-rates` UI 통화쌍 확장
+- [X] `recordUpsActualCost()` 신규 서버 액션 (위 스펙 4단계)
+- [X] `order-revenue-cost.ts` ADMIN 매입 로직에 `zen_ups_actual_cost` 우선순위 반영
+- [X] `UpsActualAdjustmentForm.tsx` UI 확장
+- [X] **회귀 테스트 신설 (필수, R-09)**:
+  - [X] `recordUpsActualCost()`: HKD 4항목 저장 + RELEASED일 환율 조회 + KRW 환산 정확성(단위 테스트, mock exchange rate)
+  - [X] `order-revenue-cost.ts`: `zen_ups_actual_cost` 존재 시 우선 사용, 없을 시 기존 스냅샷 폴백 — 양쪽 케이스
+  - [X] 실측 중량 변경 시 agency/shipper 인보이스 금액이 실제로 재계산되는지(behavioral, 마감 전/후 양쪽 케이스)
+  - [X] **되돌리기 검증 필수** — 매입 우선순위 폴백 + 매출 재계산 트리거 각각 되돌리기 시 테스트 FAIL 확인(결과 기재)
+- [X] `npm run test:regression` 직접 실행, 정확한 PASS 수치 기재
+- [X] `npm run build` SUCCESS 확인
 - [ ] (R-10) 실제 브라우저로 DELIVERED 상태 UPS 오더 1건에 HKD 원가 입력 → DB에서 `zen_ups_actual_cost.total_cost_krw` 확인 + 연동된 agency/shipper 인보이스 금액 변경 확인. 스크린샷/로그 첨부.
 
 ## 완료 보고 절차 (R-17 준수)
@@ -66,8 +66,56 @@ Issue #1009 본문의 CREATE TABLE 문 그대로 사용. 기존 `zen_ups_actual_
 
 ## [작업 결과]
 
-_(착수 시 Baker가 작성)_
+### 구현 완료 (2026-08-09, Baker)
+
+**커밋**: `4204f6cf` — `[Baker] feat: TASK-B-260 Issue #1009 UPS 사후 원가 확정 ...` (신규 테스트 13건 포함 — ups-actual-cost 10 + order-revenue-cost 되돌리기 3)
+
+### 구현 내역
+
+| 파일 | 설명 |
+|:-----|:------|
+| `supabase/migrations/20260809080000_ups_actual_cost.sql` | `zen_ups_actual_cost` 테이블(오더당 1행 UNIQUE + ON DELETE CASCADE) + RLS — 관리자 4종(ADMIN/MANAGER/ZENITH_SUPER_ADMIN/SUB_ADMIN) ALL, 소속 shipper/agency SELECT |
+| `src/app/actions/finance/ups-actual-cost.ts` | `recordUpsActualCost`/`previewUpsActualCost`/`getUpsActualCost`/`getOrderReleasedDate` + 비공개 `recomputeRevenue`(estimateUpsFreight 재호출) |
+| `src/app/actions/finance/order-revenue-cost.ts` | `getOrderRevenueCost`/`getOrderRevenueCostList`/`getSubAgencyProfitSummary` 3함수에 `actual_cost:zen_ups_actual_cost(total_cost_krw)` 조인 + 관리자 매입 = 확정 원가 우선 → 스냅샷 폴백 |
+| `src/components/orders/UpsActualAdjustmentForm.tsx` | "UPS 실제 원가 확정(매입)" 섹션 — 청구서번호/발행일/실측 중량·부피(L·W·H)/HKD 4종/메모 + 미리보기(환율·원가·매출 재계산) + 확정/재확정 + 기존 확정값 로드 |
+| `src/app/api/cron/exchange-rate-sync/route.ts` | `fetchKoreaEximRates` — USD/HKD 쌍 upsert(기존 `fetchKoreaEximRate`는 USD wrapper로 유지) |
+| `src/app/[locale]/(dashboard)/admin/exchange-rates/exchange-rates-client.tsx` | 수동 보정 통화쌍 select(USD/KRW \| HKD/KRW) |
+| `tests/unit/finance/ups-actual-cost.test.ts` | 신규 10건 — 상태/권한/UPS 전용 차단, HKD 4항목 합산+환율+KRW 환산, 부피·중량 변경 매출 재계산(마감 전/후), preview, 조회, RELEASED일 |
+| `tests/unit/finance/order-revenue-cost.test.ts` | 신규 3건 — 확정 원가 우선(TC-1009-R1)/폴백(R2)/서브에이전시 집계(R3) |
+
+### 구현 방식 (설계 스펙 §3-4 반영)
+
+1. **원가 upsert** → `order_status_history.next_status='RELEASED'` 최신 시각(없으면 created_at fallback) → `getExchangeRate('HKD','KRW', releasedDate)` → `total_cost_krw` 산출·저장.
+2. **부피/최종중량 입력 시 매출 연동 재계산**: `estimateUpsFreight({productId, destCountryCode, actualWeightKg, dimL/W/H, incoterms, agencyOrgId, shipperOrgId})` 재호출 → agency `agencyCostPrice`/shipper `finalFreight` 기준:
+   - 미마감 `ADMIN_TO_AGENCY`: `total_amount` 직접 갱신 + `metadata.platform_breakdown` 갱신
+   - 미마감 `AGENCY_TO_SHIPPER`/`ADMIN_TO_SHIPPER`: `UPS_ACTUAL_COST_ADJ` 델타(멱등: 기존 삭제 후 재생성) + `total_amount` 재계산
+   - 마감 인보이스: `createPostFinalizationAdjustment(orderId, delta, currency, user.id, invoiceId)` 재사용(기존 `recordUpsActualCharges` 패턴)
+3. **관리자 매입 조회**: `zen_ups_actual_cost.total_cost_krw` 최우선 → `snapshotMeta.platform.totalCostPrice/freightCostPrice` 폴백(기존). Agency 관점 `agencyCostPrice`는 변경 없음.
+4. **RLS**: 기존 `zen_ups_actual_charges` 패턴 준수 — 관리자 ALL + 소속 agency/shipper SELECT(매출·원가 조회 가능, 편집 불가).
+5. **권한**: `assertAdmin` — ZENITH_SUPER_ADMIN/ADMIN/MANAGER만 record/preview 가능. SUB_ADMIN은 SELECT만(RLS).
+
+### 테스트 결과
+
+```
+npx vitest run tests/unit/finance/ups-actual-cost.test.ts      → 10/10 PASS
+npx vitest run tests/unit/finance/order-revenue-cost.test.ts   → 5/5 PASS (기존 2 + 신규 되돌리기 3)
+npx vitest run tests/unit/finance/exchange-rate-cron.test.ts   → 7/7 PASS (기존 호환)
+최종 회귀: npm run test:regression → 150/150 files · 1033/1033 tests ALL PASS
+npm run build → SUCCESS (Next.js, TypeScript 통과)
+```
+
+### 되돌리기 검증 결과 (스펙 §필수)
+
+| 핵심 로직 | 되돌리기 조작 | 기대 | 실제 |
+|:---|:---|:---|:---|
+| 매입 우선순위 폴백 (order-revenue-cost) | `cost = actualCost \|\| ...` → `cost = snapshot...` (확정 원가 무시) | TC-1009-R1 FAIL | ✅ **1 failed (TC-1009-R1)** — 확정 원가 우선 로직 제거 시 테스트가 잡음 |
+| 매출 재계산 트리거 (ups-actual-cost) | `estimateUpsFreight` 호출부에서 `actualWeightKg`를 실측값 대신 스냅샷 fallback 사용 | TC-1009-05 FAIL | ✅ **1 failed (TC-1009-05)** — 실측값 전달 제거 시 `toHaveBeenCalledWith(actualWeightKg: 20, dimL:60...)` 불일치로 잡음 |
+
+> 두 로직 모두 원복 후 재검증 완료 — 15/15 PASS 복귀 확인.
 
 ## [발견 이슈]
 
-_(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
+- **스냅샷 metadata 타입** — `zen_order_rate_snapshots.metadata`는 전체 `UpsFreightEstimate`(platform/agency/shipper)를 저장하므로 `recomputeRevenue`의 중량 미입력 fallback은 `snapshot.platform.chargeableWeightKg`에서 읽도록 구현(초기 착안의 `snapshot.chargeableWeightKg`는 정의상 존재하지 않는 경로).
+- **스냅샷 응답 형태** — PostgREST가 to-one(UNIQUE FK)/one-to-many 응답을 배열/객체로 달리 주므로 `Array.isArray` 분기로 양쪽 대응.
+- **미마감 shipper 인보이스 멱등성** — `UPS_ACTUAL_COST_ADJ` 델타 재생성 전 동일 order/cost_type 기존 행 삭제 후 insert(중복 누적 방지, 재확정 시에도 동일).
+- **(R-10) 수동 화면 검증은 JSJung 요청 필요** — 로컬 DB 미연결 상태. 검증 항목: DELIVERED UPS 오더 상세의 "실제 원가 확정" 섹션 입력 → 미리보기 환율/원가 → 확정 → DB `zen_ups_actual_cost.total_cost_krw` + agency/shipper 인보이스 금액 변경 확인.
