@@ -1623,6 +1623,7 @@
 - **예상 공수**: 0.3 MD (Express/Expedited 판매가 자료만 확보되면)
 - **우선순위**: Medium
 - **상태**: 🔄 부분 완료(SAVER_NONDOC만)
+- **[2026-08-09 정정]**: "WW_SAVER_NONDOC 해결 완료" 표현은 `zen_ups_base_rates`(0.5~20kg 260건)에만 해당. `zen_ups_weight_tier_rates`(20kg 초과 구간)는 이 migration이 건드리지 않았고 별도 결함이 있음 — [IMP-158] 참조.
 
 ## [IMP-150] SNTL 원가 적재 후 판매가(selling_price)/마크업 정책 — **SAVER는 실측치 확보, 나머지 상품 미정**
 
@@ -1634,6 +1635,20 @@
 - **예상 공수**: 0.5 MD (자료 확보 시)
 - **우선순위**: High — Express/Expedited/Flight는 여전히 더미 판매가라 마크업 정책 확정 전 실사용 금지
 - **상태**: 🔄 부분 완료(SAVER만)
+- **[2026-08-09 정정]**: "tier 21-44~500-999는 실측 반영"은 부정확 — 실제로는 `20260719000200` migration이 `weight_tier_rates`를 전혀 건드리지 않았고, 21-44~300-499는 원래(TASK-141 원본 시드) 값이 우연히 공식 UPS Rate Guide와 일치, 500-999·1000+는 원본 시드 자체가 손상값(300-499 대비 1/60 수준). [IMP-158] 참조.
+
+## [IMP-158] WW_SAVER_NONDOC weight_tier_rates 500kg+ 구간 판매가 손상값 + WW_EXPEDITED Z5 자체 오기 1건
+
+- **발견 경위**: 사용자 요청으로 "비서류 20kg 초과 화물 처리 로직이 원본 문서(UPS 운임 및 부가서비스.pdf)와 부합하는지" 전수 검증 중 발견. `zen_ups_weight_tier_rates`를 Zone×상품별로 PDF의 "20 kg 초과 화물(kg당 가격)" 5구간(21-44/45-70/71-99/100-299/300 and above) 표와 직접 대조.
+  1. **WW_SAVER_NONDOC, Zone 2~10, tier_min_kg IN (500, 1000)**: `price_per_kg_selling`이 같은 Zone의 300-499 구간 대비 약 1/60 수준(예: Z6 300-499=42,000원/kg인데 500-999=673.20원/kg, 1000+=650.25원/kg). PDF는 300kg 이상을 단일 구간("300 and above")으로 취급하므로 300-499=500-999=1000+ 여야 정상. Zone 1만 정상(20260809000000에서 이미 재작성됨). `price_per_kg_cost`는 전 구간 정상 — selling만 손상. IMP-149/150이 "실측 반영"으로 오기재했던 부분의 정정.
+  2. **WW_EXPEDITED, Zone 5, tier_min_kg=45(45-70kg)**: `price_per_kg_selling`=28,500원/kg으로 저장되어 있으나 PDF 원본은 28,200원/kg(21-44 구간과 동일 값을 45-70에도 실수로 복사). 이번 세션 본인이 작성한 `20260809020000` migration 858/867행의 자체 오기 — 다른 Zone은 전부 21-44=45-70 값이 동일해서 복붙해도 맞았는데, Zone5만 UPS 카드상 두 구간 값이 다름(28,500 vs 28,200)을 놓침.
+- **현재 상태**: 두 건 모두 수정 전. ①은 500kg 이상 단일 SAVER_NONDOC(비서류) 발송물 견적 시 판매가가 정상가의 약 1.6%로 계산되는 심각한 과소청구 위험(원가는 정상이라 역마진 확정). ②는 Zone5·45~70kg 구간에서만 kg당 300원 과다청구(경미).
+- **임시 조치**: 없음 — WW_SAVER_NONDOC 500kg 이상 단일 발송 견적/주문 등록은 수기로 우회 검증 필요.
+- **목표 구현**: DELETE+INSERT 또는 UPDATE migration으로 (1) WW_SAVER_NONDOC Zone2~10의 tier_min_kg 500/1000 `price_per_kg_selling`을 해당 Zone의 300-499 값과 동일하게 정정, (2) WW_EXPEDITED Zone5 tier_min_kg=45 `price_per_kg_selling`을 28,200으로 정정. 수정 후 `zen_ups_weight_tier_rates` 전체에 대해 "300-499 = 500-999 = 1000+" 불변식을 DO-block으로 검증.
+- **관련 파일**: `supabase/migrations/20260719000200_sntl_saver_selling_price.sql`(①원인 추정), `supabase/migrations/20260809020000_ups_export_selling_price_and_missing_cost_rows.sql:858,867`(②원인), `docs/80_RawData/20260609 SNTL 자료/UPS 운임 및 부가서비스.pdf`(p.19,20 대조 근거)
+- **예상 공수**: 0.2 MD
+- **우선순위**: High — ①은 실제 주문 발생 시 즉시 매출 손실로 이어지는 데이터 결함
+- **상태**: ⬜ 미착수 (분석·보고만 완료, 수정은 사용자 지시 대기)
 
 ## [IMP-151] `getMaxAllowedZoneDiscount`가 Zone 내 전 상품(더미 포함)을 함께 검사 — 현재 모든 Zone에서 허용 할인율 0%로 계산됨 — ✅ 해결 완료
 
