@@ -129,6 +129,8 @@ export interface UpsPricingData {
   otherCharges: UpsOtherCharge[];
   surgeFee?: UpsSurgeFee | null;
   fallbackApplied?: boolean;
+  /** 서류(DOC) 상품이 max_weight_kg를 초과해 비서류(NONDOC) 요금으로 자동 전환됐는지 여부 */
+  nonDocRateApplied?: boolean;
 }
 
 export interface UpsOtherChargeItem {
@@ -167,6 +169,7 @@ export interface UpsBreakdown {
   surgeFeeCostAmount: number;
   oversizeApplied: boolean;
   fallbackApplied?: boolean;
+  nonDocRateApplied?: boolean;
 }
 
 export interface UpsFreightInput {

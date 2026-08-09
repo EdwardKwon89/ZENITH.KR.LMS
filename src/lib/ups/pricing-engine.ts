@@ -213,6 +213,7 @@ function buildBreakdown(
     surgeFeeCostAmount: surge.costAmount,
     oversizeApplied,
     fallbackApplied: data.fallbackApplied ?? false,
+    nonDocRateApplied: data.nonDocRateApplied ?? false,
   };
 }
 
