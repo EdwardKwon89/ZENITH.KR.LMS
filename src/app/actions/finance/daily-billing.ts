@@ -3,7 +3,8 @@
 import { validateUserAction, validateAdminAction } from '@/lib/auth/guards';
 import { USER_ROLES } from '@/lib/auth/rbac';
 import { logger } from '@/lib/logger';
-import { getNumericParam } from '@/lib/params/service';
+import { getExchangeRate } from '@/lib/finance/exchange-rate';
+import { getKstToday } from '@/lib/utils/date-kst';
 import { generateInvoicesForOrder, finalizeInvoice } from './settlement';
 import { revalidatePath } from 'next/cache';
 
@@ -116,11 +117,13 @@ export async function getShipperDailyBillingSummary(params?: {
     if (!profile) throw new Error('User profile not found');
 
     const periodType = params?.periodType || 'daily';
-    const exchangeRate = await getNumericParam('EXCHANGE_RATE_USD_KRW', 1350);
+    // 스냅샷(applied_exchange_rate) 없는 극단 케이스의 최후 fallback
+    const fallbackRate = await getExchangeRate('USD', 'KRW', getKstToday(), supabase);
 
     const invoiceSelect = `
       id, invoice_no, total_amount, currency, status, is_finalized,
       billed_org_id, invoice_tier, created_at, metadata,
+      applied_exchange_rate,
       org:billed_org_id ( id, name )
     `;
 
@@ -185,7 +188,7 @@ export async function getShipperDailyBillingSummary(params?: {
     }
 
     if (invoices.length === 0) {
-      return { success: true, groups: [], exchangeRate };
+      return { success: true, groups: [], exchangeRate: fallbackRate };
     }
 
     const sourceOrderIds = [...new Set(
@@ -212,6 +215,8 @@ export async function getShipperDailyBillingSummary(params?: {
       const periodKey = formatPeriodKey(inv.created_at, periodType);
       const orgName = (inv.org as any)?.name || '알 수 없는 조직';
       const key = `${inv.billed_org_id}_${periodKey}`;
+      // 확정 규칙(출고확정일 환율): 인보이스 생성 시점 스냅샷 우선, 결측 시에만 fallback
+      const effectiveRate = Number(inv.applied_exchange_rate) || fallbackRate;
 
       let group = groupsMap.get(key);
       if (!group) {
@@ -229,7 +234,7 @@ export async function getShipperDailyBillingSummary(params?: {
           totalActualAdjustment: 0,
           totalBillingAmountKrw: 0,
           estimatedBillingAmountUsd: 0,
-          appliedExchangeRate: exchangeRate,
+          appliedExchangeRate: effectiveRate,
           currency: inv.currency || 'USD',
           invoiceIds: [],
           periodType,
@@ -237,22 +242,23 @@ export async function getShipperDailyBillingSummary(params?: {
         };
         groupsMap.set(key, group);
       }
+      group.appliedExchangeRate = effectiveRate;
 
       group.orderCount += 1;
       group.invoiceIds.push(inv.id);
 
       const { amountKrw, unsupported } = convertToKrw(
-        Number(inv.total_amount || 0), inv.currency || 'USD', exchangeRate
+        Number(inv.total_amount || 0), inv.currency || 'USD', effectiveRate
       );
       if (unsupported) group.hasUnsupportedCurrency = true;
       group.totalBillingAmountKrw += amountKrw;
 
       if (inv.invoice_tier === 'ADMIN_TO_AGENCY' && inv.metadata?.platform_breakdown) {
         const bd = inv.metadata.platform_breakdown;
-        const { amountKrw: baseKrw } = convertToKrw(Number(bd.baseFreight || 0), inv.currency || 'USD', exchangeRate);
-        const { amountKrw: fuelKrw } = convertToKrw(Number(bd.fuelSurcharge || 0), inv.currency || 'USD', exchangeRate);
-        const { amountKrw: surgeKrw } = convertToKrw(Number(bd.surgeFee || 0), inv.currency || 'USD', exchangeRate);
-        const { amountKrw: otherKrw } = convertToKrw(Number(bd.otherCharges || 0), inv.currency || 'USD', exchangeRate);
+        const { amountKrw: baseKrw } = convertToKrw(Number(bd.baseFreight || 0), inv.currency || 'USD', effectiveRate);
+        const { amountKrw: fuelKrw } = convertToKrw(Number(bd.fuelSurcharge || 0), inv.currency || 'USD', effectiveRate);
+        const { amountKrw: surgeKrw } = convertToKrw(Number(bd.surgeFee || 0), inv.currency || 'USD', effectiveRate);
+        const { amountKrw: otherKrw } = convertToKrw(Number(bd.otherCharges || 0), inv.currency || 'USD', effectiveRate);
         group.totalBaseFreight += baseKrw;
         group.totalFuelSurcharge += fuelKrw;
         group.totalSurgeFee += surgeKrw;
@@ -262,7 +268,7 @@ export async function getShipperDailyBillingSummary(params?: {
         const orderCosts = orderId ? (costsByOrderId.get(orderId) || []) : [];
         for (const c of orderCosts) {
           const rawAmt = Number(c.total_amount || c.unit_price * (c.quantity || 1) || 0);
-          const { amountKrw: costKrw, unsupported: costUnsupported } = convertToKrw(rawAmt, c.currency, exchangeRate);
+          const { amountKrw: costKrw, unsupported: costUnsupported } = convertToKrw(rawAmt, c.currency, effectiveRate);
           if (costUnsupported) group.hasUnsupportedCurrency = true;
           if (c.cost_type === 'FREIGHT' || c.cost_type === 'BASE_FREIGHT') group.totalBaseFreight += costKrw;
           else if (c.cost_type === 'FUEL_SURCHARGE') group.totalFuelSurcharge += costKrw;
@@ -288,7 +294,7 @@ export async function getShipperDailyBillingSummary(params?: {
 
     groups.sort((a, b) => b.date.localeCompare(a.date) || a.shipperName.localeCompare(b.shipperName));
 
-    return { success: true, groups, exchangeRate };
+    return { success: true, groups, exchangeRate: fallbackRate };
   } catch (err: any) {
     logger.error('getShipperDailyBillingSummary failed:', err);
     return { success: false, error: err.message || '일별/주별/월별 집계 조회 중 오류 발생', groups: [] };
@@ -309,7 +315,7 @@ export async function getShipperDailyOrdersDetails(
 }> {
   try {
     const { supabase } = await validateUserAction();
-    const rate = exchangeRate || await getNumericParam('EXCHANGE_RATE_USD_KRW', 1350);
+    const rate = exchangeRate || await getExchangeRate('USD', 'KRW', getKstToday(), supabase);
 
     if (!invoiceIds || invoiceIds.length === 0) return { success: true, orders: [] };
 

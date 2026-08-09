@@ -8,6 +8,8 @@ import { validateUserAction, validateAdminAction } from '@/lib/auth/guards';
 import { FinanceRepository } from '@/lib/repositories';
 import { escapeHtml } from '@/lib/utils/escape-html';
 import { getNumericParam } from "@/lib/params/service";
+import { getExchangeRate } from '@/lib/finance/exchange-rate';
+import { getKstToday } from '@/lib/utils/date-kst';
 import { generateInvoicePdfBuffer } from '@/lib/finance/pdf';
 import { Resend } from 'resend';
 
@@ -139,7 +141,7 @@ export async function issueTaxInvoice(invoiceId: string) {
   const taxInvoiceNo = `TX-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${Math.floor(1000 + Math.random() * 9000)}`;
 
   const vatRate = await getNumericParam('VAT_RATE', 0.1);
-  const exchangeRate = invoice.applied_exchange_rate || await getNumericParam('EXCHANGE_RATE_USD_KRW', 1350);
+  const exchangeRate = invoice.applied_exchange_rate || await getExchangeRate('USD', 'KRW', getKstToday(), supabase);
 
   const supplierInfo = {
     business_number: "123-45-67890",

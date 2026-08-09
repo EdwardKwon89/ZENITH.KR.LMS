@@ -60,6 +60,13 @@ export const upsertVesselScheduleSchema = z.object({
   status: z.string().optional(),
 });
 
+export const setManualExchangeRateSchema = z.object({
+  base_currency: z.string().length(3, "통화 코드는 3자리입니다 (예: USD)").default("USD"),
+  quote_currency: z.string().length(3, "통화 코드는 3자리입니다 (예: KRW)").default("KRW"),
+  rate: z.number().positive("환율은 0보다 커야 합니다"),
+  rate_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "일자는 YYYY-MM-DD 형식이어야 합니다"),
+});
+
 /**
  * 공통 검증 헬퍼 — safeParse 실패 시 표준 에러 반환
  */
