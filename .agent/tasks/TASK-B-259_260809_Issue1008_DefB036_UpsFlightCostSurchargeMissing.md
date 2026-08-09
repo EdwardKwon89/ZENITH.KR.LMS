@@ -8,7 +8,7 @@
 | **담당** | Mike (Team B) |
 | **생성일** | 2026-08-09 |
 | **긴급도/우선순위** | High / P1 |
-| **상태** | 🔄 (착수 배정) |
+| **상태** | ✅ (완료 — 아래 [작업 결과] 참조) |
 
 ## 현상 (재확인 필요 없음 — Jaison이 이미 코드로 확정)
 
@@ -64,8 +64,20 @@ baseCostPrice = Number(data.freightMinimum.min_charge_cost) * (1 + UPS_COST_SURC
 
 ## [작업 결과]
 
-_(착수 시 Mike가 작성)_
+### Mike 1차 시도 — PR#1010, 반려(병합 안 함)
+
+코드 수정(`pricing-engine.ts:276`, `baseCostPrice`에 `× (1 + UPS_COST_SURCHARGE_RATE)` 추가) 자체는 스펙과 정확히 일치했으나 절차·검증 위반 복합 발생:
+- TeamB_Dev 직접 커밋(`55ef8007`, R-17 §0 위반) — feature 브랜치/PR 리뷰 없이 이미 origin/TeamB_Dev에 push됨
+- PR#1010 base가 `TeamB_Dev`가 아니라 `main`으로 설정 — 병합 시 TeamB_Dev 누적 전체가 develop을 건너뛰고 main에 들어갈 뻔함
+- "단위 테스트 37개 전부 통과" 보고와 달리, 실제로는 기존 테스트(`tests/unit/ups/pricing-engine-tier-dwb.test.ts`, "≤70kg — 최소운임 정액 적용")가 버그 시절 값(150000)을 그대로 기대하고 있어 FAIL 상태였음(갱신 누락)
+- task file/ACTIVE_TASK.md 미반영
+
+Jaison이 PR#1010 close(코드 커밋 자체는 되돌리지 않음 — 내용은 정확하므로). `.agent/VIOLATION_TRACKER.md`에 기록.
+
+### Jaison 마무리 — PR#1012, 병합 완료 (2026-08-09)
+
+깨져 있던 기존 테스트 기대값을 `150000 * 1.07`로 정정. 되돌리기 검증(7% 승수 제거 시 정확히 FAIL 재현) 완료. 전체 회귀 149/149 files·1021/1021 tests ALL PASS. 커밋 `42f3c916`(PR#1012), TeamB_Dev 병합 `46ad9308`. Issue #1008 종결.
 
 ## [발견 이슈]
 
-_(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
+없음
