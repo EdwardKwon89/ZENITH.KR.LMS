@@ -1,11 +1,12 @@
 # 309. AWS 이관(Migration) 설계 초안
 
-> **문서번호:** Ds-11 계열 (R-11 API/설계 우선 원칙 적용) | **버전:** v0.4 (초안 — 미승인)
+> **문서번호:** Ds-11 계열 (R-11 API/설계 우선 원칙 적용) | **버전:** v0.5 (초안 — 미승인)
 > **작성일:** 2026-08-07 | **작성자:** Aiden (Claude, ZEN_CEO)
-> **상태:** 🔍 검토 대기 — 핵심 방향(Supabase 처리 방안) 미정, Edward 승인 전 구현 착수 금지
+> **상태:** ⏸️ **보류** (2026-08-09, Edward 지시) — AWS 접속 정보를 받을 수 없어 이관 작업 보류. 자격증명 확보되면 §7 기준으로 재개
 > **v0.2 변경**: Edward 피드백("실제 배포 준비가 빠져 있다") 반영 — §6 실제 배포 준비 체크리스트 신설, Dockerfile/next.config.ts(`output: 'standalone'`)/package.json(`engines`) 실물 산출물 완료
 > **v0.3 변경**: §4에 ③ 하이브리드(Supabase OSS 컴포넌트 + RDS/Aurora) 옵션 추가, 성능 비교표(§4.1) 및 하이브리드 코드영향 분석(§4.2) 신설 — Edward 요청("DB 환경 구성이 핵심 리스크 아닌가", "하이브리드도 코드 재작성 필요한가") 반영
 > **v0.4 변경**: §7 AWS 자격증명 요청 사항 신설(필요 정보·IAM 권한 범위·안전한 전달 방법·Aiden이 할 수 없는 것) — Edward 요청("어떤 정보가 필요한지, 어떻게 전달해야 하는지 등록해줘") 반영
+> **v0.5 변경**: **이관 작업 보류 처리** — AWS 접속 정보 수령 불가로 Edward가 보류 지시(2026-08-09). §5.2/§7의 "자격증명 도착 후" 항목은 재개 시점까지 미착수 유지
 
 ---
 
@@ -223,3 +224,4 @@ AWS 콘솔에서만 가능한 일부 단계(Organization 최초 설정, 결제 �
 | v0.2 | 2026-08-07 | Aiden (Claude) | Edward 피드백 반영 — §6 실제 배포 준비 체크리스트 신설(도메인·네트워크·CI/CD·Secrets·Auth 대시보드 설정·DB 마이그레이션·모니터링·비용·롤백), Dockerfile/`.dockerignore`/`next.config.ts`/`package.json` 실물 산출물 추가 |
 | v0.3 | 2026-08-07 | Aiden (Claude) | §4에 ③ 하이브리드(Supabase OSS Auth/PostgREST/Storage + RDS/Aurora) 옵션 추가, §4.1 성능 비교표, §4.2 하이브리드 코드영향 분석(코드 재작성 불필요 결론 + PoC 필요성) 신설 |
 | v0.4 | 2026-08-07 | Aiden (Claude) | §7 AWS 자격증명 요청 사항 신설 — 필요 정보(Access Key/계정ID/리전/예산 등), IAM 권한 범위 권고, 안전한 전달 방법(대화창 직접 붙여넣기 금지 — `aws configure`/로컬 env 파일/SSO 권장), Aiden이 직접 할 수 없는 콘솔 전용 작업 명시 |
+| v0.5 | 2026-08-09 | Aiden (Claude) | **보류 처리** — AWS 접속 정보 수령 불가로 Edward 지시에 따라 이관 작업 전체 보류. Issue #995에 `status:blocked` 반영 |
