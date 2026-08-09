@@ -7,7 +7,7 @@
 | **담당** | Baker (Team B) |
 | **생성일** | 2026-07-29 |
 | **우선순위** | P2 |
-| **상태** | 🔔 (구현 완료 — PR 대기, R-10 스크린샷 미수행) |
+| **상태** | 🔔 (재작업 완료 — PR#986 재제출 대기, R-10 스크린샷 미수행) |
 
 ## 개요
 
@@ -221,3 +221,39 @@ export async function bulkCreateOrders(sheets: BulkOrderSheets): Promise<{ resul
 ## [발견 이슈]
 
 - `vi.clearAllMocks()` vs `vi.resetAllMocks()` 차이: `clearAllMocks`는 `mockResolvedValueOnce`/`mockRejectedValueOnce` 큐를 비우지 않음 → mock이 특정 테스트에서 소비되지 않은 경우 후속 테스트의 mock 결과가 잘못 소비되거나 예상치 못한 값이 반환될 수 있음. 이 저장소의 `beforeEach` 패턴은 `resetAllMocks`가 안전함. _(이미 Team A 태스크에도 동일 이슈 존재 가능 — 일괄 점검 필요)_
+
+## [재작업: PR#986 Jaison 반려 사유 해결] (2026-08-09, Baker)
+
+**커밋**: `256391b4` — `[Baker] fix: TASK-B-256 PR#986 반려 사유 해결 — AGENCY 소속 화주 검증 + 동기 함수 서버액션 임포트 빌드 오류 수정`
+
+### 반려 사유 및 근거
+
+Jaison 리뷰 — `bulk-orders.ts`의 `mapExcelRowToOrderInput()`에서 AGENCY가 `else` 분기로 빠져 엑셀 `shipper_id`를 소속 검증 없이 `createOrder()`에 전달 → 임의 화주 명의 대량 등록(스푸핑) 가능. `isAdminRole` 변수는 선언만 있고 미사용(dead code). 확정 설계 §2("AGENCY는 본인 소속 화주만 지정 가능 — 서버에서 `zen_agency_shippers` 대조 검증") 구현 누락 확인.
+
+### 보완 구현 (Jaison 지시 스펙 그대로)
+
+1. **루프 밖 1회 쿼리**: `bulkCreateOrders()`의 orders 루프 진입 전 `agencyShipperIds` 계산 — AGENCY 역할일 때만 `supabase.from('zen_agency_shippers').select('shipper_org_id').eq('agency_org_id', profile.org_id).eq('is_active', true)` 실행, `Set`으로 변환. AGENCY가 아니면 `null` (N+1 방지, 200건 제한 고려).
+2. **`mapExcelRowToOrderInput` 시그니처**: 4번째 파라미터 `agencyShipperIds: Set<string> | null` 추가. else 분기에서 AGENCY일 때 `!agencyShipperIds?.has(shipperId)`면 `throw new Error('소속 화주가 아닙니다.')`. 기존 `isAdminRole` 변수 줄 삭제.
+3. **호출부**: `mapExcelRowToOrderInput(orderRow, packages, profile, agencyShipperIds)`로 교체.
+4. 에러 메시지는 `bulkCreateOrders()` try/catch가 자동으로 잡아 `{ orderSeq, success: false, error: '소속 화주가 아닙니다.' }`로 리포트됨.
+
+### 회귀 테스트 추가 (기존 6건 → 8건)
+
+| # | 케이스 | 검증 내용 |
+|:-:|:------|:---------|
+| 7 | AGENCY + `zen_agency_shippers` **소속** 화주 | `from('zen_agency_shippers')` 실제 호출 확인 + `createOrder` 정확 호출(`shipper_id` = 소속 화주) + 성공 리포트 |
+| 8 | AGENCY + **미소속** 화주 | `success: false` + `error: '소속 화주가 아닙니다.'` + `createOrder` **미호출** (되돌리기 검증) |
+
+### 발견 이슈 (신규) — 사전 빌드 실패 수정
+
+- **동기 함수를 `'use server'` 파일에서 클라이언트 컴포넌트로 임포트하면 빌드 실패**: `generateBulkOrderTemplate()`이 동기 함수인데 `bulk-orders.ts`(`'use server'`)에서 export → `BulkOrderUploadModal.tsx`(`'use client'`)가 import. Next.js는 서버 액션 경계에서 동기 함수를 클라이언트로 노출하지 않아 `npm run build` 실패(`Export generateBulkOrderTemplate doesn't exist in target module`). **원인**: 서버 액션은 async여야 하며, 순수 XLSX 템플릿 생성은 서버 실행이 불필요. **해결**: `generateBulkOrderTemplate()`을 `'use server'` 밖의 순수 유틸 모듈 `src/lib/excel/bulk-order-template.ts`로 이동, modal·테스트 import 경로 갱신. (모달은 이미 `xlsx`를 클라이언트에서 직접 사용 중이라 서버 왕복 불필요)
+
+### 재작업 테스트/빌드 결과
+
+```
+npx vitest run tests/unit/operations/bulk-orders.test.ts → 8/8 PASS
+npx vitest run (회귀 전체) → 146/146 files · 996/996 tests ALL PASS
+npm run build → SUCCESS
+```
+
+- R-10 스크린샷(AGENCY 로그인 → 엑셀 업로드)은 JSJung이 직접 수행 예정 — 코드·테스트·빌드만 확인.
