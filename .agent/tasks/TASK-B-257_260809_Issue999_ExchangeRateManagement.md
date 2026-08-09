@@ -147,7 +147,7 @@ npm run build → SUCCESS (Next.js 16.2.4, TypeScript 통과)
 
 - USD/KRW 외 통화쌍 추가 지원(§6 범위 밖)
 - 장중 실시간 환율 반영(§6 범위 밖)
-- `KOREAEXIM_API_KEY` 실제 발급·등록 — JSJung 액션 대기(키 수령 후 환경변수 등록 + 수동 크론 트리거 검증 필요)
+- `KOREAEXIM_API_KEY` 실제 발급·등록 — **JSJung으로부터 키 수령(2026-08-09)**, `.env.local` 등록 완료. 키 실검증 시 `www.koreaexim.go.kr`는 WAF 302로 응답 불가 → **`oapi.koreaexim.go.kr` 호스트로 전환**(커밋 `5172ace4`) → `fetchKoreaEximRate` 실호출 검증 완료(20260807 → 1418.8, 미고시 미래일 → null). **Vercel Production env 등록은 사용자 대시보드 액션 대기** — 등록 후 다음 크론(KST 11:30) 또는 수동 트리거(`x-api-key: CRON_SECRET`)로 최종 확인.
 - (R-10) 수동 화면 검증 — 로컬 DB 미연결 시 JSJung 수행 요청. **검증 항목**: `/admin/exchange-rates` 화면(이력/수동 보정/수집 상태), NaviSidebar `기본 정보 > 환율 관리` 네비게이션, 환율 적용 규칙(출고확정일 환율) 반영 여부. (proxy/rbac 이중 등록은 단위·통합 테스트로 검증됨 — 실제 브라우저 네비게이션 확인은 R-10 대상)
 
 ## [발견 이슈]
