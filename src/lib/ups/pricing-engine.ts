@@ -273,7 +273,7 @@ export function computeUpsFreight(
     }
     if (actualWeight <= 70.0) {
       baseSellingPrice = Number(data.freightMinimum.min_charge_selling);
-      baseCostPrice = Number(data.freightMinimum.min_charge_cost);
+      baseCostPrice = Number(data.freightMinimum.min_charge_cost) * (1 + UPS_COST_SURCHARGE_RATE);
       baseRateId = data.freightMinimum.id;
     } else {
       if (!data.weightTierRates || data.weightTierRates.length === 0) {
