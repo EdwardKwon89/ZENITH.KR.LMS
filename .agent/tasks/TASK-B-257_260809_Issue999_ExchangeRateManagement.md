@@ -138,6 +138,8 @@ npx vitest run tests/unit/finance/daily-billing-aggregation.test.ts → 25/25 PA
 npm run build → SUCCESS (Next.js 16.2.4, TypeScript 통과)
 ```
 
+> **PR #1001 반려(Jaison 2026-08-09) 후 재검증** — blocking은 마이그레이션 타임스탬프 충돌(PR#1003 IMP-158과 `20260809060000` 중복 → `schema_migrations` PK 충돌)로 코드 결함 아님. 조치: ① `git rebase origin/TeamB_Dev`(PR#1003 포함) ② `20260809060000_exchange_rates.sql` → `20260809070000_exchange_rates.sql` rename ③ `npx supabase db reset` 재적용 성공(IMP-158 060000 + exchange_rates 070000 모두 적용) ④ 회귀 재실행 **149/149·1020/1020 ALL PASS** ⑤ `npm run build` SUCCESS. 비차단 참고 사항(daily-billing 주간/월간 그룹 다중환율)은 **IMP-159**로 `scratch/post_launch_improvements.md` 등록(R-15).
+
 ### 발견 이슈 및 해결
 
 - **통합 테스트 큐 소모 순서 변화** (`tests/integration/uat-phase3-e2e.test.ts`) — `issueTaxInvoice`의 환율 조회가 `getNumericParam` → `getExchangeRate`로 바뀌며 `zen_exchange_rates` 쿼리 1회가 result-queue를 추가 소모. TC-UAT-E2E.1이 `taxInvoice.id` null로 실패 → 큐에 `{ data: null }` 항목 추가(zen_exchange_rates 조회용)로 수정. 코드 버그 아님, 테스트 픽스처 갱신.
