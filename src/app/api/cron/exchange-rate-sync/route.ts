@@ -9,7 +9,7 @@ import { getKstToday } from '@/lib/utils/date-kst';
  *
  * 소스: 한국수출입은행(Korea Eximbank) Open API 고시환율 (data=AP01)
  * - 매매기준율(`deal_bas_r`)을 USD/KRW로 zen_exchange_rates에 upsert
- * - 키 미설정(KOREAEXIM_API_KEY) 시 스킵(200 + 로그) — JSJung 발급 대기 항목
+ * - 키 미설정(KOREAEXIM_API_KEY) 시 스킵(200 + 로그)
  * - 당일 고시 없음(공휴일 등)·API 장애는 에러를 삼키지 않고 로깅(쿼리 시점 `rate_date <= date` fallback으로 공백 보완)
  *
  * Vercel Cron 인증: x-vercel-cron 헤더 검증 (수동 트리거: x-api-key = CRON_SECRET)
@@ -66,7 +66,7 @@ export async function POST(req: Request) {
 
 /** 한국수출입은행 Open API 고시환율 조회 (USD 매매기준율, 실패 시 null) */
 export async function fetchKoreaEximRate(authKey: string, searchDate: string): Promise<number | null> {
-  const url = new URL('https://www.koreaexim.go.kr/site/program/financial/exchangeJSON');
+  const url = new URL('https://oapi.koreaexim.go.kr/site/program/financial/exchangeJSON');
   url.searchParams.set('authkey', authKey);
   url.searchParams.set('searchdate', searchDate.replace(/-/g, ''));
   url.searchParams.set('data', 'AP01');
