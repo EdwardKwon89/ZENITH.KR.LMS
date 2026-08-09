@@ -30,6 +30,7 @@ export default function ExchangeRatesClient({ initialRates, initialTotal, syncSt
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   });
+  const [pair, setPair] = useState<'USD/KRW' | 'HKD/KRW'>('USD/KRW');
   const [rate, setRate] = useState('');
   const [error, setError] = useState<string | null>(null);
 
@@ -41,11 +42,13 @@ export default function ExchangeRatesClient({ initialRates, initialTotal, syncSt
       return;
     }
 
+    const [baseCurrency, quoteCurrency] = pair.split('/');
+
     startTransition(async () => {
       try {
         await setManualExchangeRate({
-          base_currency: 'USD',
-          quote_currency: 'KRW',
+          base_currency: baseCurrency,
+          quote_currency: quoteCurrency,
           rate: numericRate,
           rate_date: rateDate,
         });
@@ -110,11 +113,19 @@ export default function ExchangeRatesClient({ initialRates, initialTotal, syncSt
                 onChange={(e) => setRateDate(e.target.value)}
                 className="flex-1 rounded-xl border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
               />
+              <select
+                value={pair}
+                onChange={(e) => setPair(e.target.value as 'USD/KRW' | 'HKD/KRW')}
+                className="rounded-xl border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 bg-white dark:bg-slate-900"
+              >
+                <option value="USD/KRW">USD/KRW</option>
+                <option value="HKD/KRW">HKD/KRW</option>
+              </select>
               <input
                 type="number"
                 step="0.0001"
                 min="0"
-                placeholder="USD/KRW 환율"
+                placeholder={`${pair} 환율`}
                 value={rate}
                 onChange={(e) => setRate(e.target.value)}
                 className="flex-1 rounded-xl border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"

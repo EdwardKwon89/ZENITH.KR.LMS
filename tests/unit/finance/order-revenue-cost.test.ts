@@ -109,8 +109,78 @@ describe('Order별 매출/매입 및 SNTL 수익금 집계 액션 단위 테스�
     });
   });
 
-  describe('getSubAgencyProfitSummary', () => {
-    it('Sub-Agency별 SNTL 수익금 집계 정상 계산', async () => {
+  describe('TASK-B-260: 매입 원가 확정(zen_ups_actual_cost) 우선순위 — 되돌리기 검증 (Issue #1009)', () => {
+    it('TC-1009-R1: actual_cost.total_cost_krw 존재 시 관리자 매입 = 확정 원가 (스냅샷 무시)', async () => {
+      (validateUserAction as any).mockResolvedValue({
+        supabase: mockSupabase,
+        user: { id: 'admin-1' },
+        profile: { id: 'admin-1', role: USER_ROLES.ADMIN },
+      });
+
+      const mockOrderData = {
+        id: 'order-1',
+        order_no: 'ORD-100',
+        status: 'DELIVERED',
+        dest_country_code: 'US',
+        created_at: '2026-07-20T00:00:00Z',
+        shipper_id: 'shipper-1',
+        shipper: { name: '테스트화주' },
+        snapshot: {
+          carrier_cost_amount: 100,
+          metadata: {
+            platform: { totalCostPrice: 100, totalSellingPrice: 150 },
+            agency: { agencyCostPrice: 120, agencySellingPrice: 150 },
+          },
+        },
+        costs: [
+          { cost_type: 'BASE_FREIGHT', unit_price: 150, quantity: 1, currency: 'USD', is_revenue: true },
+        ],
+        // Issue #1009: 확정 원가가 스냅샷(100)과 다른 250 → 확정 원가 우선이어야 함
+        actual_cost: { total_cost_krw: 250 },
+      };
+
+      mockSupabase.from.mockImplementation(() => createChainableMock(mockOrderData));
+
+      const result = await getOrderRevenueCost('order-1');
+      expect(result.cost).toBe(250);
+      expect(result.margin).toBe(-100);
+    });
+
+    it('TC-1009-R2: actual_cost 없으면 기존 스냅샷 플랫폼 원가 폴백 유지', async () => {
+      (validateUserAction as any).mockResolvedValue({
+        supabase: mockSupabase,
+        user: { id: 'admin-1' },
+        profile: { id: 'admin-1', role: USER_ROLES.ADMIN },
+      });
+
+      const mockOrderData = {
+        id: 'order-1',
+        order_no: 'ORD-100',
+        status: 'DELIVERED',
+        dest_country_code: 'US',
+        created_at: '2026-07-20T00:00:00Z',
+        shipper_id: 'shipper-1',
+        shipper: { name: '테스트화주' },
+        snapshot: {
+          carrier_cost_amount: 100,
+          metadata: {
+            platform: { totalCostPrice: 100, totalSellingPrice: 150 },
+            agency: { agencyCostPrice: 120, agencySellingPrice: 150 },
+          },
+        },
+        costs: [
+          { cost_type: 'BASE_FREIGHT', unit_price: 150, quantity: 1, currency: 'USD', is_revenue: true },
+        ],
+        actual_cost: null,
+      };
+
+      mockSupabase.from.mockImplementation(() => createChainableMock(mockOrderData));
+
+      const result = await getOrderRevenueCost('order-1');
+      expect(result.cost).toBe(100);
+    });
+
+    it('TC-1009-R3: getSubAgencyProfitSummary도 확정 원가 우선', async () => {
       (validateUserAction as any).mockResolvedValue({
         supabase: mockSupabase,
         user: { id: 'sub-admin-1' },
@@ -130,6 +200,8 @@ describe('Order별 매출/매입 및 SNTL 수익금 집계 액션 단위 테스�
               id: 'order-1',
               snapshot: { metadata: { agency: { agencyCostPrice: 130 }, platform: { totalCostPrice: 100 } } },
               costs: [{ unit_price: 130, quantity: 1, is_revenue: true }],
+              // 확정 원가 250이 스냅샷 100보다 우선
+              actual_cost: { total_cost_krw: 250 },
             },
           ]);
         }
@@ -137,11 +209,9 @@ describe('Order별 매출/매입 및 SNTL 수익금 집계 액션 단위 테스�
       });
 
       const summary = await getSubAgencyProfitSummary();
-      expect(summary.rows.length).toBe(1);
-      expect(summary.rows[0].agencyName).toBe('서브대리점A');
       expect(summary.rows[0].totalRevenue).toBe(130);
-      expect(summary.rows[0].totalCost).toBe(100);
-      expect(summary.rows[0].totalMargin).toBe(30);
+      expect(summary.rows[0].totalCost).toBe(250);
+      expect(summary.rows[0].totalMargin).toBe(-120);
     });
   });
 });

@@ -59,7 +59,8 @@ export async function getOrderRevenueCost(orderId: string) {
         quantity,
         currency,
         is_revenue
-      )
+      ),
+      actual_cost:zen_ups_actual_cost ( total_cost_krw )
     `)
     .eq('id', orderId)
     .single();
@@ -92,14 +93,13 @@ export async function getOrderRevenueCost(orderId: string) {
   ).includes(profile.role as any);
 
   let cost = 0;
-  if (snapshotMeta) {
-    if (isAdminOrManager) {
-      // SNTL 관점: 플랫폼 실제 UPS 원가
-      cost = Number(snapshotMeta.platform?.totalCostPrice || snapshotMeta.platform?.freightCostPrice || 0);
-    } else {
-      // Agency 관점: Agency 매입 원가
-      cost = Number(snapshotMeta.agency?.agencyCostPrice || 0);
-    }
+  if (isAdminOrManager) {
+    // SNTL 관점: 실제 원가 확정(zen_ups_actual_cost.total_cost_krw, Issue #1009) 최우선 → 플랫폼 예상 원가 폴백
+    const actualCost = Number((order.actual_cost as any)?.total_cost_krw || 0);
+    cost = actualCost || Number(snapshotMeta?.platform?.totalCostPrice || snapshotMeta?.platform?.freightCostPrice || 0);
+  } else {
+    // Agency 관점: Agency 매입 원가
+    cost = Number(snapshotMeta?.agency?.agencyCostPrice || 0);
   }
 
   if (cost === 0 && (order.snapshot as any)?.carrier_cost_amount) {
@@ -165,7 +165,8 @@ export async function getOrderRevenueCostList(filters?: {
         quantity,
         currency,
         is_revenue
-      )
+      ),
+      actual_cost:zen_ups_actual_cost ( total_cost_krw )
     `)
     .order('created_at', { ascending: false });
 
@@ -247,12 +248,12 @@ export async function getOrderRevenueCostList(filters?: {
     }
 
     let cost = 0;
-    if (snapshotMeta) {
-      if (isAdminOrManager) {
-        cost = Number(snapshotMeta.platform?.totalCostPrice || snapshotMeta.platform?.freightCostPrice || 0);
-      } else {
-        cost = Number(snapshotMeta.agency?.agencyCostPrice || 0);
-      }
+    if (isAdminOrManager) {
+      // SNTL 관점: 실제 원가 확정(zen_ups_actual_cost.total_cost_krw, Issue #1009) 최우선 → 플랫폼 예상 원가 폴백
+      const actualCost = Number((order.actual_cost as any)?.total_cost_krw || 0);
+      cost = actualCost || Number(snapshotMeta?.platform?.totalCostPrice || snapshotMeta?.platform?.freightCostPrice || 0);
+    } else {
+      cost = Number(snapshotMeta?.agency?.agencyCostPrice || 0);
     }
 
     if (cost === 0 && order.snapshot?.carrier_cost_amount) {
@@ -345,7 +346,8 @@ export async function getSubAgencyProfitSummary(filters?: {
       .select(`
         id,
         snapshot:zen_order_rate_snapshots ( metadata, carrier_cost_amount ),
-        costs:zen_order_costs ( unit_price, quantity, is_revenue )
+        costs:zen_order_costs ( unit_price, quantity, is_revenue ),
+        actual_cost:zen_ups_actual_cost ( total_cost_krw )
       `)
       .in('shipper_id', shipperIds);
 
@@ -372,8 +374,11 @@ export async function getSubAgencyProfitSummary(filters?: {
         orderRevenue = revs.reduce((sum: number, c: any) => sum + Number(c.unit_price || 0) * Number(c.quantity || 1), 0);
       }
 
-      // SNTL이 UPS에 납부하는 실제 원가
-      let orderCost = Number(snapshotMeta?.platform?.totalCostPrice || snapshotMeta?.platform?.freightCostPrice || 0);
+      // SNTL이 UPS에 납부하는 실제 원가 — 확정 원가(zen_ups_actual_cost.total_cost_krw, Issue #1009) 최우선
+      let orderCost = Number(order.actual_cost?.total_cost_krw || 0);
+      if (orderCost === 0) {
+        orderCost = Number(snapshotMeta?.platform?.totalCostPrice || snapshotMeta?.platform?.freightCostPrice || 0);
+      }
       if (orderCost === 0 && order.snapshot?.carrier_cost_amount) {
         orderCost = Number(order.snapshot.carrier_cost_amount);
       }

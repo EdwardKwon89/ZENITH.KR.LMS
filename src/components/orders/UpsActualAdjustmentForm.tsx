@@ -2,10 +2,20 @@
 
 import React, { useEffect, useState } from 'react';
 import { recordUpsActualCharges, getUpsActualCharges, getUpsChargeReconciliation } from '@/app/actions/finance/ups-actual-charges';
+import { recordUpsActualCost, previewUpsActualCost, getUpsActualCost } from '@/app/actions/finance/ups-actual-cost';
 import { toast } from 'sonner';
-import { Loader2, Plus, Trash2, HelpCircle } from 'lucide-react';
+import { Loader2, Plus, Trash2, HelpCircle, Calculator } from 'lucide-react';
 import { ZenCard, ZenButton, ZenInput, ZenSelect, ZenBadge } from '@/components/ui/ZenUI';
 import { getCostTypeLabel } from '@/lib/finance/settlement/cost-type-labels';
+
+function AcInput({ label, ...props }: { label: string } & React.InputHTMLAttributes<HTMLInputElement>) {
+  return (
+    <label className="block">
+      <span className="block text-xs font-semibold text-gray-600 dark:text-zinc-300 mb-1">{label}</span>
+      <ZenInput {...props} />
+    </label>
+  );
+}
 
 interface UpsActualAdjustmentFormProps {
   orderId: string;
@@ -41,6 +51,111 @@ export function UpsActualAdjustmentForm({
   const [charges, setCharges] = useState<ChargeRow[]>([]);
   const [isInvoiced, setIsInvoiced] = useState(false);
 
+  // ─── 실제 원가 확정 (Issue #1009) ──────────────────────────────
+  const [acForm, setAcForm] = useState({
+    upsInvoiceNo: '',
+    upsInvoiceDate: '',
+    actualWeightKg: '',
+    actualLengthCm: '',
+    actualWidthCm: '',
+    actualHeightCm: '',
+    baseFreightHkd: '',
+    fuelSurchargeHkd: '',
+    surgeFeeHkd: '',
+    otherChargesHkd: '',
+    notes: '',
+  });
+  const [acSaved, setAcSaved] = useState<Record<string, any> | null>(null);
+  const [acPreview, setAcPreview] = useState<Record<string, any> | null>(null);
+  const [acSaving, setAcSaving] = useState(false);
+  const [acError, setAcError] = useState<string | null>(null);
+
+  const acEditable = isPlatformAdmin && (orderStatus === 'DELIVERED' || orderStatus === 'IN_TRANSIT');
+
+  const loadActualCost = async () => {
+    try {
+      const rec = await getUpsActualCost(orderId);
+      if (rec) {
+        setAcForm({
+          upsInvoiceNo: rec.ups_invoice_no || '',
+          upsInvoiceDate: rec.ups_invoice_date || '',
+          actualWeightKg: rec.actual_weight_kg != null ? String(rec.actual_weight_kg) : '',
+          actualLengthCm: rec.actual_length_cm != null ? String(rec.actual_length_cm) : '',
+          actualWidthCm: rec.actual_width_cm != null ? String(rec.actual_width_cm) : '',
+          actualHeightCm: rec.actual_height_cm != null ? String(rec.actual_height_cm) : '',
+          baseFreightHkd: rec.base_freight_hkd != null ? String(rec.base_freight_hkd) : '',
+          fuelSurchargeHkd: rec.fuel_surcharge_hkd != null ? String(rec.fuel_surcharge_hkd) : '',
+          surgeFeeHkd: rec.surge_fee_hkd != null ? String(rec.surge_fee_hkd) : '',
+          otherChargesHkd: rec.other_charges_hkd != null ? String(rec.other_charges_hkd) : '',
+          notes: rec.notes || '',
+        });
+        setAcSaved(rec);
+      }
+    } catch (err: any) {
+      console.error('Error loading UPS actual cost:', err);
+    }
+  };
+
+  const handleAcField = (field: keyof typeof acForm, value: string) => {
+    setAcForm((prev) => ({ ...prev, [field]: value }));
+    setAcError(null);
+    setAcPreview(null);
+  };
+
+  const buildAcInput = () => ({
+    upsInvoiceNo: acForm.upsInvoiceNo.trim() || undefined,
+    upsInvoiceDate: acForm.upsInvoiceDate || undefined,
+    actualWeightKg: acForm.actualWeightKg !== '' ? Number(acForm.actualWeightKg) : undefined,
+    actualLengthCm: acForm.actualLengthCm !== '' ? Number(acForm.actualLengthCm) : undefined,
+    actualWidthCm: acForm.actualWidthCm !== '' ? Number(acForm.actualWidthCm) : undefined,
+    actualHeightCm: acForm.actualHeightCm !== '' ? Number(acForm.actualHeightCm) : undefined,
+    baseFreightHkd: Number(acForm.baseFreightHkd) || 0,
+    fuelSurchargeHkd: Number(acForm.fuelSurchargeHkd) || 0,
+    surgeFeeHkd: Number(acForm.surgeFeeHkd) || 0,
+    otherChargesHkd: Number(acForm.otherChargesHkd) || 0,
+    notes: acForm.notes.trim() || undefined,
+  });
+
+  const handleAcPreview = async () => {
+    try {
+      setAcError(null);
+      setAcPreview(null);
+      const res = await previewUpsActualCost(orderId, buildAcInput());
+      if (res.success) setAcPreview(res);
+      else setAcError(res.error || '미리보기 실패');
+    } catch (err: any) {
+      setAcError(err.message || '미리보기 실패');
+    }
+  };
+
+  const handleAcSave = async () => {
+    const hkdTotal = Number(acForm.baseFreightHkd) + Number(acForm.fuelSurchargeHkd) + Number(acForm.surgeFeeHkd) + Number(acForm.otherChargesHkd);
+    if (!(hkdTotal > 0)) {
+      toast.error('HKD 금액(기본운임·유류할증·급증긴급수수료·기타) 중 최소 1개는 0보다 커야 합니다.');
+      return;
+    }
+
+    try {
+      setAcSaving(true);
+      setAcError(null);
+      const res = await recordUpsActualCost(orderId, buildAcInput());
+      if (res.success) {
+        setAcSaved(res);
+        setAcPreview(res);
+        toast.success('UPS 실제 원가가 확정·반영되었습니다.');
+        loadData();
+      } else {
+        setAcError(res.error || '저장 실패');
+        toast.error(res.error || '저장 실패');
+      }
+    } catch (err: any) {
+      setAcError(err.message || '저장 실패');
+      toast.error(err.message || '저장 실패');
+    } finally {
+      setAcSaving(false);
+    }
+  };
+
   const loadData = async () => {
     try {
       setLoading(true);
@@ -75,6 +190,7 @@ export function UpsActualAdjustmentForm({
 
   useEffect(() => {
     loadData();
+    loadActualCost();
   }, [orderId]);
 
   const handleAddRow = () => {
@@ -396,6 +512,194 @@ export function UpsActualAdjustmentForm({
           </span>
         </div>
       )}
+
+      <div className="border-t border-gray-200 dark:border-zinc-800 pt-6 mt-6">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h3 className="text-sm font-bold text-gray-800 dark:text-zinc-100">UPS 실제 원가 확정 (매입)</h3>
+            <p className="text-xs text-gray-500 dark:text-zinc-400 mt-0.5">
+              UPS 청구서 기준으로 부피·최종중량·요금을 확정하고, RELEASED일 환율로 KRW 환산된 매입 원가를 반영합니다.
+            </p>
+          </div>
+          {acSaved && (
+            <ZenBadge variant="success" className="text-xs">
+              확정 완료
+            </ZenBadge>
+          )}
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+          <AcInput
+            label="UPS 청구서 번호"
+            value={acForm.upsInvoiceNo}
+            onChange={(e) => handleAcField('upsInvoiceNo', e.target.value)}
+            disabled={!acEditable}
+            placeholder="예: 1Z…"
+          />
+          <AcInput
+            label="청구서 발행일"
+            type="date"
+            value={acForm.upsInvoiceDate}
+            onChange={(e) => handleAcField('upsInvoiceDate', e.target.value)}
+            disabled={!acEditable}
+          />
+          <AcInput
+            label="실측 중량 (kg)"
+            type="number"
+            value={acForm.actualWeightKg}
+            onChange={(e) => handleAcField('actualWeightKg', e.target.value)}
+            disabled={!acEditable}
+            placeholder="예: 18.5"
+          />
+          <div className="grid grid-cols-3 gap-2">
+            <AcInput
+              label="L (cm)"
+              type="number"
+              value={acForm.actualLengthCm}
+              onChange={(e) => handleAcField('actualLengthCm', e.target.value)}
+              disabled={!acEditable}
+            />
+            <AcInput
+              label="W (cm)"
+              type="number"
+              value={acForm.actualWidthCm}
+              onChange={(e) => handleAcField('actualWidthCm', e.target.value)}
+              disabled={!acEditable}
+            />
+            <AcInput
+              label="H (cm)"
+              type="number"
+              value={acForm.actualHeightCm}
+              onChange={(e) => handleAcField('actualHeightCm', e.target.value)}
+              disabled={!acEditable}
+            />
+          </div>
+          <AcInput
+            label="기본운임 (HKD)"
+            type="number"
+            value={acForm.baseFreightHkd}
+            onChange={(e) => handleAcField('baseFreightHkd', e.target.value)}
+            disabled={!acEditable}
+            placeholder="0"
+          />
+          <AcInput
+            label="유류할증 (HKD)"
+            type="number"
+            value={acForm.fuelSurchargeHkd}
+            onChange={(e) => handleAcField('fuelSurchargeHkd', e.target.value)}
+            disabled={!acEditable}
+            placeholder="0"
+          />
+          <AcInput
+            label="급증긴급수수료 (HKD)"
+            type="number"
+            value={acForm.surgeFeeHkd}
+            onChange={(e) => handleAcField('surgeFeeHkd', e.target.value)}
+            disabled={!acEditable}
+            placeholder="0"
+          />
+          <AcInput
+            label="기타 (HKD)"
+            type="number"
+            value={acForm.otherChargesHkd}
+            onChange={(e) => handleAcField('otherChargesHkd', e.target.value)}
+            disabled={!acEditable}
+            placeholder="0"
+          />
+        </div>
+
+        <AcInput
+          label="메모"
+          value={acForm.notes}
+          onChange={(e) => handleAcField('notes', e.target.value)}
+          disabled={!acEditable}
+          className="mb-4"
+          placeholder="청구서 특이사항 등"
+        />
+
+        {acPreview && (
+          <div className="bg-gray-50 dark:bg-zinc-900 border border-primary/20 p-4 rounded-lg mb-4 space-y-2 text-sm">
+            <div className="flex items-center text-xs font-bold text-primary">
+              <Calculator className="w-4 h-4 mr-1.5" />
+              원가 계산 결과
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+              <div>
+                <div className="text-gray-500 dark:text-zinc-400">HKD 합계</div>
+                <div className="font-bold text-gray-800 dark:text-zinc-100">HKD {acPreview.hkdTotal?.toLocaleString('ko-KR')}</div>
+              </div>
+              <div>
+                <div className="text-gray-500 dark:text-zinc-400">적용 환율 (RELEASED일)</div>
+                <div className="font-bold text-gray-800 dark:text-zinc-100">{acPreview.appliedExchangeRate?.toLocaleString('ko-KR', { maximumFractionDigits: 4 })} KRW/HKD</div>
+              </div>
+              <div>
+                <div className="text-gray-500 dark:text-zinc-400">원가 (KRW)</div>
+                <div className="font-bold text-primary">{acPreview.totalCostKrw?.toLocaleString('ko-KR')} 원</div>
+              </div>
+              <div>
+                <div className="text-gray-500 dark:text-zinc-400">RELEASED일</div>
+                <div className="font-bold text-gray-800 dark:text-zinc-100">{acPreview.releasedDate || '—'}</div>
+              </div>
+            </div>
+            {acPreview.recalc?.weightOrDimsChanged && (
+              <div className="text-xs text-gray-600 dark:text-zinc-300 border-t border-gray-200 dark:border-zinc-800 pt-2">
+                부피·중량 변경 감지 — 매출(최종운임)이 재계산됩니다.
+                {acPreview.recalc.newAgencyTotal != null && (
+                  <div>· Agency 최종운임 재계산: <b>{acPreview.recalc.newAgencyTotal.toLocaleString('ko-KR')} KRW</b></div>
+                )}
+                {acPreview.recalc.newShipperTotal != null && (
+                  <div>· Shipper 최종운임 재계산: <b>{acPreview.recalc.newShipperTotal.toLocaleString('ko-KR')} KRW</b></div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {acError && (
+          <div className="text-xs text-red-500 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 p-3 rounded mb-4">
+            {acError}
+          </div>
+        )}
+
+        {acEditable ? (
+          <div className="flex items-center justify-end space-x-3">
+            <ZenButton
+              type="button"
+              onClick={handleAcPreview}
+              className="text-xs text-gray-600 px-3 py-1.5 border rounded"
+            >
+              미리보기
+            </ZenButton>
+            <ZenButton
+              type="button"
+              onClick={handleAcSave}
+              disabled={acSaving}
+              loading={acSaving}
+              className="flex items-center text-xs font-bold text-white bg-primary px-4 py-2"
+            >
+              {acSaving ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" />
+                  확정 중...
+                </>
+              ) : acSaved ? (
+                '원가 재확정'
+              ) : (
+                '실제 원가 확정'
+              )}
+            </ZenButton>
+          </div>
+        ) : (
+          <div className="text-xs text-gray-500 dark:text-zinc-400 flex items-center bg-gray-50 dark:bg-zinc-900 border p-3 rounded">
+            <HelpCircle className="w-4 h-4 text-gray-400 mr-2 flex-shrink-0" />
+            <span>
+              {orderStatus !== 'DELIVERED'
+                ? '오더가 배송 완료(`DELIVERED`) 상태가 되어야 실제 원가를 확정할 수 있습니다.'
+                : '현재 로그인한 계정은 관리자 권한이 없으므로 UPS 실제 원가를 조회만 할 수 있습니다.'}
+            </span>
+          </div>
+        )}
+      </div>
     </ZenCard>
   );
 }
