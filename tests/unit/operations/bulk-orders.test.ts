@@ -10,11 +10,13 @@ vi.mock('@/app/actions/operations/orders', () => ({
 
 import { validateUserAction } from '@/lib/auth/guards';
 import { createOrder } from '@/app/actions/operations/orders';
-import { bulkCreateOrders, generateBulkOrderTemplate } from '@/app/actions/operations/bulk-orders';
+import { bulkCreateOrders } from '@/app/actions/operations/bulk-orders';
+import { generateBulkOrderTemplate } from '@/lib/excel/bulk-order-template';
 
 const UUID_ADMIN = 'f47ac10b-58cc-4372-a567-0e02b2c3d479';
 const UUID_SHIPPER = 'a1b2c3d4-e5f6-4789-abcd-ef0123456789';
 const UUID_EVIL = '00000000-0000-0000-0000-000000000099';
+const UUID_AGENCY = '11111111-2222-4333-8444-555555555555';
 
 function makeOrderSeq(n: number) { return { order_seq: n }; }
 function makePackageSeq(n: number, orderSeq: number) {
@@ -22,6 +24,38 @@ function makePackageSeq(n: number, orderSeq: number) {
 }
 function makeItemSeq(n: number, packageSeq: number) {
   return { item_seq: n, package_seq: packageSeq, item_name: 'Item' + n, quantity: 1 };
+}
+function makeValidOrderRow(overrides: Record<string, unknown> = {}) {
+  return {
+    order_seq: 1,
+    order_type: 'B2B',
+    transport_mode: 'UPS',
+    ups_product_code: 'WWE',
+    incoterms: 'DDU',
+    recipient_name: 'A',
+    recipient_address: 'Addr1',
+    recipient_phone: '010-1',
+    ...overrides,
+  };
+}
+
+function mockAgencyShipperQuery(shipperOrgIds: string[]) {
+  const query: any = {
+    data: shipperOrgIds.map((id) => ({ shipper_org_id: id })),
+    eq: function () { return this; },
+  };
+  const select = vi.fn(() => query);
+  const from = vi.fn(() => ({ select }));
+  return { supabase: { from }, from };
+}
+
+function mockAgencyProfile() {
+  const { supabase, from } = mockAgencyShipperQuery([UUID_SHIPPER]);
+  (validateUserAction as any).mockResolvedValue({
+    profile: { id: 'agency-usr', org_id: UUID_AGENCY, role: 'AGENCY' },
+    supabase,
+  });
+  return { from };
 }
 
 describe('bulkCreateOrders', () => {
@@ -128,6 +162,43 @@ describe('bulkCreateOrders', () => {
     const callArg = (createOrder as any).mock.calls[0][0];
     expect(callArg.shipper_id).toBe(UUID_SHIPPER);
     expect(callArg.shipper_id).not.toBe(UUID_EVIL);
+  });
+
+  it('AGENCY 역할 → zen_agency_shippers 소속 화주 지정 시 createOrder 정상 호출·성공', async () => {
+    const { from } = mockAgencyProfile();
+    (createOrder as any).mockResolvedValueOnce({ id: 'ord-1', order_no: 'ORD-001' });
+
+    const sheets = {
+      orders: [makeValidOrderRow({ shipper_id: UUID_SHIPPER })],
+      packages: [makePackageSeq(1, 1)] as any[],
+      items: [makeItemSeq(1, 1)] as any[],
+    };
+
+    const { results } = await bulkCreateOrders(sheets as any);
+
+    if (results[0].error) console.error('ERROR[0]:', results[0].error);
+    expect(from).toHaveBeenCalledWith('zen_agency_shippers');
+    expect(results[0]).toMatchObject({ orderSeq: 1, success: true, orderId: 'ord-1', orderNo: 'ORD-001' });
+    const callArg = (createOrder as any).mock.calls[0][0];
+    expect(callArg.shipper_id).toBe(UUID_SHIPPER);
+  });
+
+  it('AGENCY 역할 → zen_agency_shippers 미소속 화주 지정 시 실패 리포트 + createOrder 미호출', async () => {
+    const { from } = mockAgencyProfile();
+    (createOrder as any).mockResolvedValueOnce({ id: 'ord-1', order_no: 'ORD-001' });
+
+    const sheets = {
+      orders: [makeValidOrderRow({ shipper_id: UUID_EVIL })],
+      packages: [makePackageSeq(1, 1)] as any[],
+      items: [makeItemSeq(1, 1)] as any[],
+    };
+
+    const { results } = await bulkCreateOrders(sheets as any);
+
+    expect(from).toHaveBeenCalledWith('zen_agency_shippers');
+    expect(results[0]).toMatchObject({ orderSeq: 1, success: false });
+    expect(results[0].error).toBe('소속 화주가 아닙니다.');
+    expect(createOrder).not.toHaveBeenCalled();
   });
 });
 

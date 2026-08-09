@@ -6,7 +6,8 @@ import { X, Upload, Download, AlertCircle, CheckCircle2, FileSpreadsheet, Extern
 import { ZenButton } from '@/components/ui/ZenUI';
 import { toast } from 'sonner';
 import * as XLSX from 'xlsx';
-import { bulkCreateOrders, generateBulkOrderTemplate, BulkOrderResult } from '@/app/actions/operations/bulk-orders';
+import { bulkCreateOrders, type BulkOrderResult } from '@/app/actions/operations/bulk-orders';
+import { generateBulkOrderTemplate } from '@/lib/excel/bulk-order-template';
 import { logger } from '@/lib/logger';
 
 interface BulkOrderUploadModalProps {

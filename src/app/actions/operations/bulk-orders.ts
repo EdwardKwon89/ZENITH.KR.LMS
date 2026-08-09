@@ -5,8 +5,6 @@ import { USER_ROLES } from '@/lib/auth/rbac';
 import { orderRegistrationSchema, orderPackageSchema, orderItemSchema } from '@/lib/validation/order';
 import type { OrderRegistrationInput, OrderPackageInput } from '@/lib/validation/order';
 import { createOrder } from './orders';
-import * as XLSX from 'xlsx';
-import { logger } from '@/lib/logger';
 
 export interface BulkOrderResult {
   orderSeq: string | number;
@@ -82,16 +80,19 @@ function mapExcelRowToPackageInput(pkgRow: Record<string, unknown>, itemRows: Re
 function mapExcelRowToOrderInput(
   orderRow: Record<string, unknown>,
   packages: OrderPackageInput[],
-  profile: { id: string; org_id?: string; role: string }
+  profile: { id: string; org_id?: string; role: string },
+  agencyShipperIds: Set<string> | null
 ): OrderRegistrationInput {
   const isShipperRole = [USER_ROLES.SHIPPER, USER_ROLES.AGENCY_SHIPPER, USER_ROLES.CORPORATE, USER_ROLES.INDIVIDUAL].includes(profile.role as any);
-  const isAdminRole = [USER_ROLES.ADMIN, USER_ROLES.MANAGER].includes(profile.role as any);
 
   let shipperId: string;
   if (isShipperRole) {
     shipperId = profile.org_id as string;
   } else {
     shipperId = toStr(orderRow.shipper_id) || profile.org_id as string;
+    if (profile.role === USER_ROLES.AGENCY && !agencyShipperIds?.has(shipperId)) {
+      throw new Error('소속 화주가 아닙니다.');
+    }
   }
 
   const orderType = toStr(orderRow.order_type) || 'B2B';
@@ -145,7 +146,7 @@ function validateSheets(sheets: BulkOrderSheets): string[] {
 }
 
 export async function bulkCreateOrders(sheets: BulkOrderSheets): Promise<{ results: BulkOrderResult[] }> {
-  const { profile } = await validateUserAction();
+  const { supabase, profile } = await validateUserAction();
   if (!profile) throw new Error('User profile not found');
 
   if (sheets.orders.length > 200) {
@@ -155,6 +156,16 @@ export async function bulkCreateOrders(sheets: BulkOrderSheets): Promise<{ resul
   const refErrors = validateSheets(sheets);
   if (refErrors.length > 0) {
     return { results: refErrors.map((err) => ({ orderSeq: '(참조무결성)', success: false, error: err })) };
+  }
+
+  let agencyShipperIds: Set<string> | null = null;
+  if (profile.role === USER_ROLES.AGENCY) {
+    const { data: agencyShippers } = await supabase
+      .from('zen_agency_shippers')
+      .select('shipper_org_id')
+      .eq('agency_org_id', profile.org_id as string)
+      .eq('is_active', true);
+    agencyShipperIds = new Set((agencyShippers ?? []).map((s: any) => s.shipper_org_id));
   }
 
   const results: BulkOrderResult[] = [];
@@ -175,7 +186,7 @@ export async function bulkCreateOrders(sheets: BulkOrderSheets): Promise<{ resul
         return mapExcelRowToPackageInput(pkgRow, itemRows);
       });
 
-      const payload = mapExcelRowToOrderInput(orderRow, packages, profile);
+      const payload = mapExcelRowToOrderInput(orderRow, packages, profile, agencyShipperIds);
 
       const order = await createOrder(payload);
       results.push({
@@ -190,26 +201,4 @@ export async function bulkCreateOrders(sheets: BulkOrderSheets): Promise<{ resul
   }
 
   return { results };
-}
-
-export function generateBulkOrderTemplate(): string {
-  const orderSheet = XLSX.utils.aoa_to_sheet([
-    ['order_seq', 'order_type', 'shipper_id', 'transport_mode', 'ups_product_code', 'incoterms', 'recipient_name', 'recipient_address', 'recipient_phone', 'recipient_address_local', 'recipient_address_detail', 'recipient_zipcode', 'recipient_country_code', 'recipient_state_province', 'recipient_city', 'recipient_pccc', 'recipient_email', 'description', 'delivery_notes', 'delivery_method', 'pickup_location', 'pickup_contact_name', 'pickup_contact_tel', 'pickup_country_code', 'pickup_state_province', 'pickup_city', 'pickup_address', 'pickup_address_detail', 'pickup_zipcode'],
-    ['1', 'B2B', '', 'AIR', '', '', 'Recipient Name', '123 Main St', '010-1234-5678'],
-  ]);
-  const packageSheet = XLSX.utils.aoa_to_sheet([
-    ['package_seq', 'order_seq', 'packing_unit', 'gross_weight', 'packing_count', 'physical_box_count', 'length', 'width', 'height', 'special_cargo_type', 'content_type', 'domestic_ref_no'],
-    ['1', '1', 'BOX', '10.5', '1', '1', '30', '20', '15', 'NONE', 'GENERAL', ''],
-  ]);
-  const itemSheet = XLSX.utils.aoa_to_sheet([
-    ['item_seq', 'package_seq', 'item_name', 'quantity', 'unit_price', 'currency', 'hs_code', 'item_packing_unit', 'sku_code'],
-    ['1', '1', 'Sample Item', '2', '50', 'USD', '', 'EA', ''],
-  ]);
-
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, orderSheet, '오더(Order)');
-  XLSX.utils.book_append_sheet(wb, packageSheet, '패키지(Package)');
-  XLSX.utils.book_append_sheet(wb, itemSheet, '아이템(Item)');
-
-  return XLSX.write(wb, { type: 'base64', bookType: 'xlsx' });
 }
