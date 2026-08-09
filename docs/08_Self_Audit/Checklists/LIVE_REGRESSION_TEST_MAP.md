@@ -355,6 +355,10 @@
 | **TC-POLICY-05** | Admin 정책 VOLUMETRIC->WM 변경 후 오더 산정 | 변경된 방식 즉시 반영 여부 통합 검증 | `tests/integration/p6-transport-policy.test.ts` |
 | **TC-POLICY-06** | WM max_charge cap 적용 (상한선 발동) | max_charge 초과 시 total_freight = max_charge + applied_pricing_basis = MAX_CHARGE 검증 | `tests/integration/p6-transport-policy.test.ts` |
 | **TC-POLICY-07** | WM 계산 후 snapshot slab 이력 + pricing_basis 저장 | zen_order_rate_snapshots 신규 8개 컬럼 정상 저장 검증 | `tests/integration/p6-transport-policy.test.ts` |
+| **TC-TB258-SNAP-01** | 비대리점 직접 화주(role=SHIPPER/CORPORATE, zen_agency_shippers 미소속) UPS 오더 → saveOrderRateSnapshot 호출 | DEF-B-035/Issue #1007 — role 게이트 제거 후 직접 화주 UPS 오더에도 예상운임 스냅샷 생성 | `tests/unit/orders/direct-shipper-ups-snapshot.test.ts` |
+| **TC-TB258-SNAP-02** | 대리점 소속 직접 화주(role=CORPORATE, zen_agency_shippers 활성 행) UPS 오더 → agency_org_id 설정 + 스냅샷 생성 | role 무관 agency_org_id 해석 + 스냅샷 생성 동시 검증 | `tests/unit/orders/direct-shipper-ups-snapshot.test.ts` |
+| **TC-TB258-SNAP-03** | 기존 AGENCY_SHIPPER 케이스 회귀 방지 | role 게이트 제거 후에도 AGENCY_SHIPPER 동작 불변 | `tests/unit/orders/direct-shipper-ups-snapshot.test.ts` |
+| **TC-TB258-SNAP-04** | 비-UPS(AIR) 오더는 스냅샷 미생성 | UPS 전용 조건 유지 회귀 방지 | `tests/unit/orders/direct-shipper-ups-snapshot.test.ts` |
 
 ---
 
