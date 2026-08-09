@@ -71,6 +71,7 @@ tags: ["governance"]
 
 | # | 문서명 | Link | 개요 |
 |---|--------|------|------|
+| **304** | **RBAC·커스텀필드·워크플로우 엔진 아키텍처 검토** | [304_RBAC_CUSTOMFIELD_WORKFLOW_ENGINE_REVIEW.md](./304_RBAC_CUSTOMFIELD_WORKFLOW_ENGINE_REVIEW.md) | 사용자·권한·Role·메뉴·커스텀필드 관리 + 워크플로우 엔진을 Redmine 실구현과 비교분석 — 검토 문서(2026-07-29 미반영 지시, 향후 참조용) |
 | (예정) | (예정) | - | 팀 운영, 회의, 리포팅 등 |
 
 ---
@@ -224,6 +225,9 @@ tags: ["governance"]
 
 ### ✅ 완료 (2026-07-28)
 - ✅ 210_AI_AGENT_REWORK_PREVENTION_GUIDE.md
+
+### ✅ 완료 (2026-07-29)
+- ✅ 304_RBAC_CUSTOMFIELD_WORKFLOW_ENGINE_REVIEW.md (검토 문서, 미반영)
 
 ### 🔜 계획 중 (추가 예정)
 - 101_Development_Methodology_Overview.md
