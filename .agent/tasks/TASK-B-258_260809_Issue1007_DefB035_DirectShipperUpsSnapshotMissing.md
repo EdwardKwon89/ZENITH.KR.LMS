@@ -8,7 +8,7 @@
 | **담당** | Dave (Team B) |
 | **생성일** | 2026-08-09 |
 | **긴급도/우선순위** | Critical / P1 |
-| **상태** | 🔄 (착수 배정) |
+| **상태** | 🔔 (완료 보고 — 검토 요청) |
 
 ## 현상 (재확인 필요 없음 — Jaison이 이미 코드 추적으로 확정)
 
@@ -72,7 +72,58 @@ if (profile.role === USER_ROLES.AGENCY_SHIPPER && validated.ups_product_code) {
 
 ## [작업 결과]
 
-_(착수 시 Dave가 작성)_
+**작성자**: Dave | **작성일**: 2026-08-09 | **상태**: 🔔 (검토 요청)
+
+### 구현 (코드 커밋 `1b2bd3c7`)
+
+`src/app/actions/operations/orders.ts` `createOrder()` 두 조건문 수정:
+
+1. **`agency_org_id` 설정** (`orders.ts:121-133`): `if (profile.role === USER_ROLES.AGENCY_SHIPPER)` 게이트 제거 → `if (profile.org_id)`로 변경, `zen_agency_shippers`에 `shipper_org_id = profile.org_id AND is_active = true`인 행 존재 여부로 판단. 대리점 미소속이면 `resolvedAgencyOrgId` 유지(`null`).
+2. **예상운임 스냅샷 생성** (`orders.ts:146-148`): `if (profile.role === USER_ROLES.AGENCY_SHIPPER && validated.ups_product_code)` → `if (validated.transport_mode === 'UPS' && validated.ups_product_code)`로 변경. role/대리점 소속 여부와 무관하게 UPS 오더면 항상 `saveOrderRateSnapshot` 호출. `agencyOrgId`는 1번에서 해석한 값 그대로 전달(미소속 시 `null` → `estimateUpsFreight`가 `{platform, agency:null, shipper:null}` 정상 반환, 별도 분기 불필요 — freight.ts:217-219 확인).
+
+### 회귀 테스트 (코드 커밋 `1b2bd3c7` — `tests/unit/orders/direct-shipper-ups-snapshot.test.ts`)
+
+실제 `createOrder()` 서버 액션 호출 기반, `estimateUpsFreight` mock(`saveOrderRateSnapshot` 내부에서만 호출되는 함수)으로 스냅샷 생성 경로 실행 여부를 직접 assert:
+
+| TC | 시나리오 | 검증 내용 |
+|:---|:---------|:---------|
+| TC-258-01 | role=SHIPPER, 미소속 → UPS 오더 | `estimateUpsFreight` 호출 + `zen_order_rate_snapshots` insert |
+| TC-258-02 | role=CORPORATE, 미소속 → UPS 오더 | 스냅샷 생성 + `agency_org_id` 미설정(zen_orders update 없음) |
+| TC-258-03 | role=CORPORATE, 활성 agency 행 → UPS 오더 | `estimateUpsFreight`에 `agencyOrgId` 전달 + 스냅샷 생성 + zen_orders update |
+| TC-258-04 | role=AGENCY_SHIPPER(기존 케이스) → UPS 오더 | 회귀 방지 — agency_org_id + 스냅샷 동작 불변 |
+| TC-258-05 | role=CORPORATE → AIR 오더 | 비-UPS는 스냅샷 미생성 (UPS 전용 조건 유지) |
+
+**되돌리기 검증 (vacuous test 방지, R-09)**: 수정 전 코드로 되돌린 뒤 신규 테스트 실행 결과 **TC-258-01/02/03 3건 FAIL** 확인, TC-258-04(AGENCY_SHIPPER 회귀)·TC-258-05(non-UPS)는 정상 PASS 유지 → 테스트가 수정 내용을 실제로 검증함을 확인. 이후 수정 복원 시 5/5 PASS 재확인.
+
+기존 테스트 3파일(`order-actions.test.ts`·`delivery-method.test.ts`·`tracking-configs-provider-type.test.ts`)은 `agency_org_id` 조회가 모든 프로필에 적용됨에 따라 `mockSupabase.maybeSingle` 기본 해석(`{data:null,error:null}`) 추가로 보정.
+
+### 검증 수치
+
+- **회귀 테스트**: `npm run test:regression` — **1026/1026 PASS** (150 파일)
+- **빌드**: `npm run build` — **Compiled successfully** (14.6s)
+- **R-10 실브라우저 검증**: 아래 참조
+
+### R-10 실브라우저 검증 (문서 커밋, 스크린샷 `docs/99_Manual/E2E_258_Result/`)
+
+- 신규 비대리점 직접 화주 계정 `r10_direct_shipper_258@zenith.kr`(role=CORPORATE, 신규 SHIPPER 조직 생성, `zen_agency_shippers` 링크 없음)을 서비스롤로 생성
+- 실제 브라우저(Playwright Chromium) 로그인 → `/ko/orders/new` → **UPS Direct** 모드 선택 → 수취인 정보(US) + 패키지 + UPS 서비스 티어(Saver) 입력 → "오더 등록" 제출
+- 생성된 오더: **ZEN-2026-000012** (`transport_mode=UPS`, `agency_org_id=null`, `ups_product_code=WW_SAVER_NONDOC`, `recipient_country_code=US`)
+- **DB 직접 확인**: `zen_order_rate_snapshots`에 해당 오더 행 존재 — `applied_rule=UPS_3TIER`, `applied_unit_price=304800`, `applied_currency=KRW` ✅
+- 스크린샷: `01_ups_direct_form_filled.png`(폼 입력), `02_order_detail.png`(오더 상세) — 2026-08-09 실행
+
+### R-17 DoD 체크리스트
+
+- [x] 코드 커밋 (`1b2bd3c7`) — role 게이트 제거 + 신규 테스트 5건
+- [x] 문서 커밋 (R-10 증적 + LIVE_REGRESSION_TEST_MAP 갱신 TC-TB258-SNAP-01~04)
+- [x] 회귀 테스트 직접 실행 1026/1026 PASS
+- [x] `npm run build` SUCCESS
+- [x] R-10 실브라우저 검증 (ZEN-2026-000012 스냅샷 생성 DB 확인 + 스크린샷)
+- [x] 되돌리기 검증 — 수정 전 코드에서 신규 테스트 3건 FAIL 확인
+
+## [발견 이슈]
+
+1. **`get_next_order_sequence` RPC는 role `SHIPPER`를 허용하지 않음** (`get_my_role() NOT IN (... 'CORPORATE', 'INDIVIDUAL', 'AGENCY', 'AGENCY_SHIPPER')` → `Access Denied`). DEF-B-035가 언급하는 "SHIPPER/CORPORATE/INDIVIDUAL" 중 순수 `SHIPPER` role 계정은 이 RPC 제한 때문에 UPS 오더 등록 자체가 불가 — R-10에서는 `CORPORATE` role로 검증함. `SHIPPER` role 오더 등록 허용 여부는 별도 정책 결정 필요(관련: USER_ROLES에 SHIPPER/CORPORATE가 별개 role로 존재, rbac.ts:18-20).
+
 
 ## [발견 이슈]
 
