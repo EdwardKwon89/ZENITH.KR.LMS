@@ -1733,17 +1733,23 @@
 
 UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류 등) 처리는 SHXK 측 전체 상태 코드표가 문서화되어 있지 않아(코드베이스·문서 전체에서 실제 다뤄지는 코드는 `NT`/`DL` 2개뿐, `docs/80_RawData/Phase8_UPS_API_리서치_결과.md` 확인) **현재로선 조치 불가능**(Edward 확인, 2026-07-24). SHXK 측에 전체 코드표를 확인받기 전까지는 착수 대상에서 제외 — TASK-209 범위에도 포함하지 않음.
 
-## [IMP-157] createOrder()의 agency_org_id/예상운임 스냅샷 생성이 role==='AGENCY_SHIPPER' 문자열에만 의존 — CORPORATE 등 다른 role의 대리점 소속 화주는 누락됨
+## [IMP-157] createOrder()의 agency_org_id/예상운임 스냅샷 생성이 role==='AGENCY_SHIPPER' 문자열에만 의존 — **[2026-08-09 정정] 대리점 소속 화주뿐 아니라 비대리점 직접 화주 전체가 동일하게 누락됨(Critical), DEF-B-035/Issue 등록·TASK-B-258 배정**
 
 - **발견 경위**: JSJung 요청으로 "jungjs72@gmail.com 계정으로 입력된 오더가 agency@zenith.kr에서 검색이 안 됨" 재현·근본원인 분석 중 발견. `jungjs72@gmail.com`(role: `CORPORATE`)을 `agency@zenith.kr` 소속으로 `zen_agency_shippers`에 연결한 뒤 UPS 오더 3건(`ZEN-2026-000004/5/6`)을 등록했으나, 전부 `agency_org_id`가 NULL로 남아 대리점 세션(RLS 정책 `agency_shipper_select_own_orders`: `agency_org_id = 자기 org_id`)에서 조회 자체가 안 됨.
 - **근본 원인**: `createOrder()`(`src/app/actions/operations/orders.ts:121-146`)가 `agency_org_id` 조회(121행)와 UPS 예상운임 스냅샷 생성(`saveOrderRateSnapshot()` 호출, 146행) 둘 다 `profile.role === USER_ROLES.AGENCY_SHIPPER`(문자열 완전일치)로만 게이트됨. 그러나 대리점 소속 여부는 role이 아니라 `zen_agency_shippers` 테이블(role 무관)로 관리되는 별개의 관계 — role이 `CORPORATE`/`INDIVIDUAL` 등이어도 실제로는 대리점에 소속될 수 있는데, 이 코드는 그 케이스를 전혀 감지하지 못함.
 - **부수 피해(더 심각)**: 같은 조건문 때문에 **UPS 예상운임 스냅샷(`zen_order_rate_snapshots`) 생성 자체가 통째로 스킵**됨 — role이 AGENCY_SHIPPER가 아닌 대리점 소속 화주가 등록한 UPS 오더는 예상운임이 전혀 계산되지 않은 채로 남음(ups-detail 화면 전체 공란, agency/shipper 인보이스용 platform breakdown 데이터 부재).
-- **현재 상태**: JSJung 요청으로 코드 수정(DEF 등록) 대신 **기존 3건 오더의 데이터만 직접 백필**함 — `agency_org_id` 3건 모두 실제 컬럼에 설정 완료, `zen_order_rate_snapshots`도 실제 계산 함수(`computeUpsFreight`/`computeAgencyFreight`/`computeShipperFreight`) 로직을 그대로 재현해 3건 모두 생성 완료(대리점 20%/화주 25% 할인율 반영). 대리점 RLS 세션으로 직접 재현해 3건 모두 조회됨을 확인.
-- **임시 조치**: 위 백필로 기존 3건은 해결됐으나, **코드 자체는 수정되지 않음** — 앞으로 CORPORATE/INDIVIDUAL 등 AGENCY_SHIPPER가 아닌 role의 대리점 소속 화주가 UPS 오더를 등록할 때마다 동일 문제가 재발함.
-- **목표 구현**: `createOrder()`의 두 조건문을 `profile.role === 'AGENCY_SHIPPER'` 대신 **`zen_agency_shippers`에 `shipper_org_id = profile.org_id`인 활성 행이 있는지** 기준으로 변경(role 무관하게 실제 소속 관계로 판단). 두 로직(agency_org_id 설정 + rate snapshot 생성) 모두 동일하게 수정 필요.
-- **관련 파일**: `src/app/actions/operations/orders.ts:121-146`
-- **예상 공수**: 0.3 MD (조건 로직 변경 + 회귀 테스트)
-- **우선순위**: High — 재무 데이터(예상운임) 누락으로 이어지는 구조적 결함이나, 당장 급한 3건은 데이터 백필로 해소됨
+- **[2026-08-09 정정 — 범위 확대, Critical로 재분류]**: JSJung의 "admin 매입/매출이 산정되고 있나요?" 질문에 답하며 재검토한 결과, 위 서술은 문제를 "대리점 소속인데 role이 다른 케이스"로만 좁게 기술하고 있었으나 **실제로는 훨씬 넓은 범위**를 덮는 문제임을 확인:
+  - 146행 조건은 `role === AGENCY_SHIPPER`가 **아니면 무조건** 스킵 — 대리점 소속 여부와 무관하게, **대리점과 전혀 관계없는 순수 직접 화주(SHIPPER/CORPORATE/INDIVIDUAL)가 등록한 UPS 오더도 전부 스냅샷이 생성되지 않음.**
+  - `zen_order_rate_snapshots`가 없으면 `SettlementEngine.calculateOrderCosts()`(UPS 분기, `settlement.ts:71-73`)가 `"예상운임 스냅샷이 없습니다"` 에러로 즉시 실패 → `zen_order_costs`(매출 원장) 생성 불가 → `InvoiceGenerator.generateInvoice()`도 연쇄 실패 → **해당 오더는 인보이스 생성 자체가 불가능**.
+  - `order-revenue-cost.ts`의 ADMIN 매입(`platform.totalCostPrice`)·매출 폴백(`platform.totalSellingPrice`) 모두 이 스냅샷에서 읽으므로, 스냅샷이 없으면 매입/매출 화면에서도 완전히 0으로 표시됨.
+  - 이 경로가 살아나는 유일한 우회로는 창고 입고 시 실측 수정(`applyPackageMeasurements`, role 무관하게 동작)뿐인데, 이는 담당자가 실제로 치수를 재입력했을 때만 발동하는 조건부 경로라 보장되지 않음.
+  - 현재 DB의 UPS 오더 8건 전부 대리점 소속이라(비대리점 직접 오더 0건) 이 경로가 실제로 한 번도 검증된 적이 없었음.
+- **현재 상태**: 과거(대리점 소속 3건) — JSJung 요청으로 코드 수정 대신 **데이터 백필**만 처리(`agency_org_id`·`zen_order_rate_snapshots` 3건 모두 직접 재현해 생성). **비대리점 직접 화주 케이스는 백필 대상도 아니었고 여전히 미해결.**
+- **임시 조치**: 없음 — 비대리점 직접 화주의 UPS 오더는 지금도 등록 시점에 스냅샷이 생성되지 않음.
+- **목표 구현**: `createOrder()`의 두 조건문에서 `profile.role === 'AGENCY_SHIPPER'` 게이트를 제거. `agency_org_id` 설정은 `zen_agency_shippers`에 `shipper_org_id = profile.org_id`인 활성 행이 있는지로 판단(대리점 소속이면 설정, 없으면 null 유지 — `estimateUpsFreight`가 `agencyOrgId` 미전달 시 `{agency:null, shipper:null}`을 정상 반환하므로 안전). 예상운임 스냅샷 생성(`saveOrderRateSnapshot`)은 **role/대리점 소속 여부와 무관하게 UPS 오더면 항상 호출**하도록 변경.
+- **관련 파일**: `src/app/actions/operations/orders.ts:121-148`, `src/lib/finance/settlement/settlement.ts:71-73`, `src/app/actions/finance/order-revenue-cost.ts`
+- **예상 공수**: 0.5 MD (조건 로직 변경 + 비대리점 직접화주 회귀 테스트 신설 + 기존 대리점 케이스 되돌리기 검증)
+- **우선순위**: **Critical** — 대리점을 거치지 않는 모든 직접 UPS 화주 오더가 예상운임 산정·매입/매출 집계·인보이스 발행까지 전부 불가능한 상태. DEF-B-035로 별도 등록, GitHub Issue + TASK-B-258 배정 완료(아래 참조).
 
 ## [IMP-159] UPS 기타 부가요금(otherChargeIds) 배선 누락 — SATURDAY 유류할증 적용 플래그 확인 필요
 
