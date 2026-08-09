@@ -96,16 +96,29 @@ export async function estimateUpsFreight(input: EstimateUpsFreightInput): Promis
   const { chargeableKg } = calcChargeableWeight(input.actualWeightKg, dims, effectiveDivisor);
   const { billingKg } = applyOversizeRule(resolveBillingWeight(chargeableKg, product.product_code), dims);
 
-  // Issue #(UPS 서류 5kg 초과) product.max_weight_kg 초과 시 명확히 차단 — 서류(DOC) 상품은
-  // UPS 공식 요율표상 5kg까지만 존재("5.0 kg을 초과하는 서류에 대해서는 비서류 요금표를 참조").
-  // 이 체크 없이는 zen_ups_base_rates에 해당 중량 행이 없어 아래 조회가 실패하거나(정상),
-  // 과거 남아있던 더미 시드 행이 있으면 근거 없는 가짜 요금이 조용히 반환될 수 있었음.
+  // Issue #(UPS 서류 5kg 초과) product.max_weight_kg 초과 시 비서류(NONDOC) 요금으로 자동 전환 —
+  // 서류(DOC) 상품은 UPS 공식 요율표상 5kg까지만 존재("5.0 kg을 초과하는 서류에 대해서는 비서류
+  // 요금표를 참조"). 통관상 서류 여부(product/cargo_type)는 그대로 유지하되, 요금 조회에 쓰이는
+  // product_id만 짝지어진 NONDOC 상품으로 바꿔치기한다 — 근거 없는 더미값이 조용히 반환되거나
+  // 조회 자체가 실패하는 대신, UPS 가이드대로 실제 계산이 이뤄지도록 함(2026-08-09, JSJung 확정).
+  let rateProductId = input.productId;
+  let nonDocRateApplied = false;
   if (product.max_weight_kg && billingKg > product.max_weight_kg) {
     const nonDocCode = product.product_code.replace(/_DOC$/, '_NONDOC');
-    throw new Error(
-      `${product.product_name}은(는) 최대 ${product.max_weight_kg}kg까지만 가능합니다(청구중량 ${billingKg}kg). ` +
-      `${product.max_weight_kg}kg 초과 시 비서류 상품(${nonDocCode})으로 등록해주세요.`
-    );
+    const { data: nonDocProduct, error: nonDocError } = await supabase
+      .from('zen_ups_products')
+      .select('id')
+      .eq('product_code', nonDocCode)
+      .eq('is_active', true)
+      .maybeSingle();
+    if (nonDocError || !nonDocProduct) {
+      throw new Error(
+        `${product.product_name}은(는) 최대 ${product.max_weight_kg}kg까지만 가능하며(청구중량 ${billingKg}kg), ` +
+        `비서류 요금(${nonDocCode})으로 자동 전환을 시도했으나 해당 상품을 찾을 수 없습니다.`
+      );
+    }
+    rateProductId = nonDocProduct.id;
+    nonDocRateApplied = true;
   }
 
   // 2. 기준 요금 조회 (Express/Saver/Expedited) — ≤20kg 정확매치, >20kg는 20kg 기준요금
@@ -115,7 +128,7 @@ export async function estimateUpsFreight(input: EstimateUpsFreightInput): Promis
     const { data: rRow, error: baseRateError } = await supabase
       .from('zen_ups_base_rates')
       .select('*')
-      .eq('product_id', input.productId)
+      .eq('product_id', rateProductId)
       .eq('zone_id', zone.id)
       .eq('weight_kg', queryWeight)
       .eq('is_active', true)
@@ -131,7 +144,7 @@ export async function estimateUpsFreight(input: EstimateUpsFreightInput): Promis
   const { data: weightTierRates, error: tierError } = await supabase
     .from('zen_ups_weight_tier_rates')
     .select('*')
-    .eq('product_id', input.productId)
+    .eq('product_id', rateProductId)
     .eq('zone_id', zone.id)
     .eq('is_active', true)
     .lte('valid_from', refDate)
@@ -142,7 +155,7 @@ export async function estimateUpsFreight(input: EstimateUpsFreightInput): Promis
   const { data: freightMinimum, error: minError } = await supabase
     .from('zen_ups_freight_minimums')
     .select('*')
-    .eq('product_id', input.productId)
+    .eq('product_id', rateProductId)
     .eq('zone_id', zone.id)
     .eq('is_active', true)
     .maybeSingle();
@@ -151,7 +164,7 @@ export async function estimateUpsFreight(input: EstimateUpsFreightInput): Promis
   const { data: fuelRows } = await supabase
     .from('zen_ups_fuel_surcharges')
     .select('*')
-    .or(`product_id.eq.${input.productId},product_id.is.null`)
+    .or(`product_id.eq.${rateProductId},product_id.is.null`)
     .lte('effective_week', refDate)
     .order('effective_week', { ascending: false })
     .limit(1);
@@ -197,6 +210,7 @@ export async function estimateUpsFreight(input: EstimateUpsFreightInput): Promis
       surgeFee,
       oversizeCharge,
       fallbackApplied,
+      nonDocRateApplied,
     }
   );
 

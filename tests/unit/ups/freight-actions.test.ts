@@ -258,24 +258,86 @@ describe('TC-UPS-FREIGHT-02: resolveZoneByCountry 연동 (GH#202)', () => {
     expect(result.platform.otherChargesCostTotal).toBe(0);
   });
 
-  describe('서류(DOC) 상품 max_weight_kg 상한 (2026-08-09, UPS 요율표상 서류는 5kg까지만 존재)', () => {
+  describe('서류(DOC) 상품 max_weight_kg 상한 — 5kg 초과 시 비서류(NONDOC) 요금 자동 전환 (2026-08-09)', () => {
     const DOC_PRODUCT = {
       id: 'p-doc', product_code: 'WW_EXPRESS_DOC', sub_code: null, product_name: 'UPS Worldwide Express (서류)',
       cargo_type: 'DOC', ddu_available: false, ddp_available: true, is_active: true, sort_order: 1, created_at: '',
       max_weight_kg: 5,
     };
+    const NONDOC_RATE = { ...BASE_RATE, id: 'r-nondoc', product_id: 'p-nondoc', selling_price: 246900, cost_price: 40366 };
 
-    it('서류 상품 + 5kg 초과 중량 → 비서류 전환 안내와 함께 명확히 차단', async () => {
+    // zen_ups_products는 이 시나리오에서 두 번 다른 조건으로 조회됨(① id로 DOC 상품 조회
+    // ② product_code='WW_EXPRESS_NONDOC'로 전환 대상 조회) — 공용 createQueryMock은 호출 인자를
+    // 구분하지 못해 첫 조회에 사용한 값을 그대로 반환하므로, 이 테스트만 인자를 추적하는 전용 mock 사용.
+    function makeProductsSwitchMock() {
+      let eqCalls: Array<{ field: string; value: any }> = [];
+      const chain: any = {
+        select: () => chain,
+        eq: (field: string, value: any) => { eqCalls.push({ field, value }); return chain; },
+        single: () => { eqCalls = []; return Promise.resolve({ data: DOC_PRODUCT, error: null }); },
+        maybeSingle: () => {
+          const isNonDocLookup = eqCalls.some((c) => c.field === 'product_code' && c.value === 'WW_EXPRESS_NONDOC');
+          eqCalls = [];
+          return isNonDocLookup
+            ? Promise.resolve({ data: { id: 'p-nondoc' }, error: null })
+            : Promise.resolve({ data: null, error: null });
+        },
+      };
+      return chain;
+    }
+
+    function makeBaseRatesRecordingMock(returnRow: any) {
+      const calls: Array<{ field: string; value: any }> = [];
+      const chain: any = {
+        select: () => chain,
+        eq: (field: string, value: any) => { calls.push({ field, value }); return chain; },
+        lte: () => chain,
+        or: () => chain,
+        maybeSingle: () => Promise.resolve({ data: returnRow, error: null }),
+      };
+      return { chain, calls };
+    }
+
+    it('서류 상품 + 5kg 초과 중량 → 에러 대신 비서류(NONDOC) 요금으로 자동 계산됨', async () => {
+      const { chain: baseRatesChain, calls: baseRatesCalls } = makeBaseRatesRecordingMock(NONDOC_RATE);
       (validateUserAction as any).mockResolvedValue({
-        supabase: buildMockSupabase({ zen_ups_products: createQueryMock({ data: DOC_PRODUCT }) }),
+        supabase: buildMockSupabase({
+          zen_ups_products: makeProductsSwitchMock(),
+          zen_ups_base_rates: baseRatesChain,
+        }),
+      });
+
+      const result = await estimateUpsFreight({ productId: 'p-doc', destCountryCode: 'USA', actualWeightKg: 7 });
+
+      // 실제 base_rates 조회가 DOC('p-doc')가 아니라 전환된 NONDOC('p-nondoc')의 product_id로 나갔는지 확인
+      expect(baseRatesCalls).toContainEqual({ field: 'product_id', value: 'p-nondoc' });
+      expect(baseRatesCalls).not.toContainEqual({ field: 'product_id', value: 'p-doc' });
+      // 표시상 상품 정보(cargo_type 등)는 원래 DOC 상품 그대로 유지(통관상 서류 성격은 안 바뀜)
+      expect(result.platform.breakdown.product.cargo_type).toBe('DOC');
+      expect(result.platform.breakdown.product.product_code).toBe('WW_EXPRESS_DOC');
+      expect(result.platform.breakdown.nonDocRateApplied).toBe(true);
+      expect(result.platform.totalSellingPrice).toBeGreaterThan(0);
+    });
+
+    it('전환 대상 비서류 상품이 없으면(비활성 등) 명확한 에러', async () => {
+      // 첫 조회(.single(), id로 DOC 조회)와 두 번째 조회(.maybeSingle(), product_code로 NONDOC
+      // 조회)를 메서드별로 분기하는 전용 mock — "전환 대상 없음"만 재현하면 되므로 인자 추적은 불필요.
+      const notFoundChain: any = {
+        select: () => notFoundChain,
+        eq: () => notFoundChain,
+        single: () => Promise.resolve({ data: DOC_PRODUCT, error: null }),
+        maybeSingle: () => Promise.resolve({ data: null, error: null }),
+      };
+      (validateUserAction as any).mockResolvedValue({
+        supabase: buildMockSupabase({ zen_ups_products: notFoundChain }),
       });
 
       await expect(
         estimateUpsFreight({ productId: 'p-doc', destCountryCode: 'USA', actualWeightKg: 7 })
-      ).rejects.toThrow(/5kg|WW_EXPRESS_NONDOC/);
+      ).rejects.toThrow(/WW_EXPRESS_NONDOC/);
     });
 
-    it('서류 상품 + 정확히 5kg(상한) → 정상 견적 계산됨(차단 아님)', async () => {
+    it('서류 상품 + 정확히 5kg(상한) → DOC 요금 그대로 정상 계산됨(전환 아님)', async () => {
       (validateUserAction as any).mockResolvedValue({
         supabase: buildMockSupabase({
           zen_ups_products: createQueryMock({ data: DOC_PRODUCT }),
@@ -288,6 +350,7 @@ describe('TC-UPS-FREIGHT-02: resolveZoneByCountry 연동 (GH#202)', () => {
       });
 
       expect(result.platform.totalSellingPrice).toBeGreaterThan(0);
+      expect(result.platform.breakdown.nonDocRateApplied).toBe(false);
     });
 
     it('max_weight_kg이 없는 상품(NON_DOC 등)은 중량과 무관하게 차단되지 않음', async () => {
