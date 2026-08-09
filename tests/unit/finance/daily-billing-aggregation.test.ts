@@ -94,6 +94,58 @@ describe('화주별 일별/주별/월별 청구 집계 및 최종 운임 확정 
       expect(group.invoiceIds).toContain('inv-2');
     });
 
+    it('출고확정일 환율 스냅샷(applied_exchange_rate) 우선 적용 (Issue #999 규칙)', async () => {
+      (validateUserAction as any).mockResolvedValue({
+        supabase: mockSupabase,
+        profile: { id: 'admin-usr-1', role: USER_ROLES.ADMIN, org_id: 'platform-org' },
+      });
+
+      mockSupabase.from.mockImplementation((table: string) => {
+        if (table === 'zen_invoices') {
+          return createChainableMock([
+            {
+              id: 'inv-1',
+              invoice_no: 'INV-SNP-001',
+              total_amount: 10000,
+              currency: 'USD',
+              status: 'UNPAID',
+              is_finalized: true,
+              billed_org_id: 'shipper-1',
+              invoice_tier: 'ADMIN_TO_SHIPPER',
+              created_at: '2026-08-05T10:00:00Z',
+              applied_exchange_rate: 1400,
+              org: { id: 'shipper-1', name: 'ABC 상사' },
+            },
+            {
+              id: 'inv-2',
+              invoice_no: 'INV-SNP-002',
+              total_amount: 5000,
+              currency: 'USD',
+              status: 'UNPAID',
+              is_finalized: false,
+              billed_org_id: 'shipper-1',
+              invoice_tier: 'ADMIN_TO_SHIPPER',
+              created_at: '2026-08-05T11:00:00Z',
+              applied_exchange_rate: 1380,
+              org: { id: 'shipper-1', name: 'ABC 상사' },
+            },
+          ]);
+        }
+        return createChainableMock();
+      });
+
+      const res = await getShipperDailyBillingSummary({ periodType: 'daily' });
+      expect(res.success).toBe(true);
+      expect(res.groups.length).toBe(1);
+
+      const group = res.groups[0];
+      expect(group.appliedExchangeRate).toBe(1380);
+      expect(group.totalBillingAmountKrw).toBe(10000 * 1400 + 5000 * 1380);
+      expect(group.estimatedBillingAmountUsd).toBe(
+        Math.round((10000 * 1400 + 5000 * 1380) / 1380 * 100) / 100
+      );
+    });
+
     it('인보이스가 없을 때 빈 집계 그룹 반환', async () => {
       (validateUserAction as any).mockResolvedValue({
         supabase: mockSupabase,

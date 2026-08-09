@@ -1755,3 +1755,14 @@ UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류
 - **관련 파일**: `src/app/actions/ups/freight.ts:38,167-176,209`, `src/types/ups.ts:184`
 - **예상 공수**: 0.5 MD (배선 추가 시) / 0.1 MD (SATURDAY 플래그만 정정 시)
 - **우선순위**: Medium — 현재 DDP/DDU 등 부가요금이 주문 화면에서 선택되는 흐름 자체가 없다면 당장 영향 없으나, 향후 해당 UI가 추가되면 바로 매출 누락으로 이어짐
+
+## [IMP-160] `getShipperDailyBillingSummary` 주간/월간 그룹 다중환율 섞임 — 그룹 적용환율이 "마지막 인보이스 값"으로 덮어써짐 (PR #1001 리뷰 발견)
+
+- **발견 경위**: PR #1001(TASK-B-257 환율 관리 기능) Jaison 리뷰(비차단 참고)로 발견. `daily-billing.ts`가 인보이스별 `applied_exchange_rate` 스냅샷을 우선 적용하도록 변경되면서, 같은 그룹(`billed_org_id_periodKey`) 안에 인보이스가 여러 건이고 `periodType='weekly'`/`'monthly'`인 경우 서로 다른 스냅샷 환율이 섞일 수 있음.
+- **근본 원인**: `group.appliedExchangeRate`가 매 인보이스 반복마다 덮어써져 **그룹의 마지막으로 처리된 인보이스의 환율값만 남음**(가중평균 아님). 이후 `estimatedBillingAmountUsd = totalBillingAmountKrw / appliedExchangeRate`(`daily-billing.ts:289-290`, PR 미수정 기존 로직)도 그 값 하나로 역산되어 표시되는 "적용환율"·"예상 USD 청구액"이 왜곡될 수 있음.
+- **영향 범위**: `daily` 그룹은 같은 날 출고 오더끼리라 영향 작음. `weekly`/`monthly`는 서로 다른 출고확정일 환율이 섞이는 게 정상 시나리오라 왜곡 발생 가능.
+- **현재 상태**: PR #1001 범위는 아님(막지는 않음). 신규 테스트(`daily-billing-aggregation.test.ts`)는 "마지막 값 유지" 동작 자체만 검증할 뿐 정합성은 미검증.
+- **목표 구현**: 그룹 레벨 적용환율을 (a) 개별 인보이스별 `applied_exchange_rate`를 금액 가중평균하거나 (b) 그룹 대표 1건(예: 가장 큰 금액 인보이스) 기준으로 계산한 뒤 `estimatedBillingAmountUsd`도 동일 기준으로 역산하도록 변경. 그룹 내 환율 불일치 시 가시화(경고 표시)도 검토.
+- **관련 파일**: `src/app/actions/finance/daily-billing.ts:289-290` (`getShipperDailyBillingSummary`)
+- **예상 공수**: 0.5 MD (집계 로직 변경 + behavioral 테스트 보강)
+- **우선순위**: Medium — 표시용(estimated) 왜곡이며 실제 청구액 산정은 인보이스별 스냅샷을 따름

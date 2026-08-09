@@ -191,6 +191,7 @@ describe('ZENITH Phase 3 UAT: E2E + Routing Integrated Validation', () => {
     mockResultQueue.push(
       { data: { id: 'invoice-1', total_amount: 1000, currency: 'USD', shipper_id: 'sh-1', shipper: { name: 'A', address: 'Seoul', business_number: '111', email: 'shipper@test.com' }, costs: [] }, error: null },
       { data: { value_numeric: 0.1 }, error: null }, // getParam('VAT_RATE')
+      { data: null, error: null }, // getExchangeRate → zen_exchange_rates 조회(값 없음 → 파라미터 fallback)
       { data: { value_numeric: 1350 }, error: null }, // getParam('EXCHANGE_RATE_USD_KRW')
       { data: { id: 'tax-inv-uuid-1', tax_invoice_no: 'TX-20260424-0001' }, error: null },
     );
