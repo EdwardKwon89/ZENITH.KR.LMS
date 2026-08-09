@@ -357,6 +357,15 @@ describe('TC-UPS-ENGINE-07: 급증 긴급 수수료(Surge Emergency Fee) 계산 
     expect(result.surgeFeeSellingAmount).toBeCloseTo(23610 + 23610 * 0.185, 2);
   });
 
+  it('급증 수수료는 원시 청구중량이 아니라 올림/반올림이 적용된 최종 청구중량을 기준으로 계산한다 (2026-08-10 JSJung 확정)', () => {
+    const data = { ...baseData(), surgeFee };
+    // actualWeightKg=4.2, dims 없음 → 원시 chargeableKg=4.2, 0.5kg 단위 올림 → 최종 청구중량 4.5
+    // surge base = 4722 * 4.5 = 21249 (4722*4.2=19832.4가 아님), fuelRate=0.185 → 21249*1.185
+    const result = computeUpsFreight({ ...baseInput(), actualWeightKg: 4.2 }, data);
+    const expectedBase = 4722 * 4.5;
+    expect(result.surgeFeeSellingAmount).toBeCloseTo(expectedBase + expectedBase * 0.185, 2);
+  });
+
   it('급증 수수료가 totalSellingPrice/totalCostPrice에 합산된다', () => {
     const withSurge = computeUpsFreight(baseInput(), { ...baseData(), surgeFee });
     const withoutSurge = computeUpsFreight(baseInput(), baseData());

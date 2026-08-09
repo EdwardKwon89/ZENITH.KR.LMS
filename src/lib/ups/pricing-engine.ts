@@ -217,19 +217,20 @@ function buildBreakdown(
   };
 }
 
-// 급증 긴급 수수료(Surge Emergency Fee) 계산 — kg당 단가 × 청구중량, 유류할증료 부과 대상 (Issue #491)
+// 급증 긴급 수수료(Surge Emergency Fee) 계산 — kg당 단가 × 청구중량(billingKg, 올림/반올림 및 대형포장물 최소중량까지
+// 반영된 최종 청구중량 — 기본운임 산정에 쓰이는 것과 동일한 값), 유류할증료 부과 대상 (Issue #491, 2026-08-10 JSJung 확정)
 // 도착국·기준일(effectiveDate, 미지정 시 오늘) 기준으로 유효한 단가 1건을 호출자가 미리 조회해 data.surgeFee로 전달한다.
 function applySurgeFee(
   surgeFee: UpsSurgeFee | null | undefined,
-  chargeableKg: number,
+  billingKg: number,
   fuelRate: number,
   fuelCostRate: number,
 ): { id: string | null; sellingRatePerKg: number; sellingAmount: number; costAmount: number } {
   if (!surgeFee) {
     return { id: null, sellingRatePerKg: 0, sellingAmount: 0, costAmount: 0 };
   }
-  const baseSelling = Number(surgeFee.selling_rate_per_kg) * chargeableKg;
-  const baseCost = Number(surgeFee.cost_rate_per_kg) * chargeableKg;
+  const baseSelling = Number(surgeFee.selling_rate_per_kg) * billingKg;
+  const baseCost = Number(surgeFee.cost_rate_per_kg) * billingKg;
   return {
     id: surgeFee.id,
     sellingRatePerKg: Number(surgeFee.selling_rate_per_kg),
@@ -332,7 +333,7 @@ export function computeUpsFreight(
     effectiveOtherCharges.push(data.oversizeCharge);
   }
   const oc = applyOtherCharges(effectiveOtherCharges, fuelRate);
-  const surge = applySurgeFee(data.surgeFee, chargeableKg, fuelRate, fuelCostRate);
+  const surge = applySurgeFee(data.surgeFee, actualWeight, fuelRate, fuelCostRate);
 
   return {
     chargeableWeightKg: chargeableKg,
