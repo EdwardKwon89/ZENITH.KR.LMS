@@ -257,4 +257,47 @@ describe('TC-UPS-FREIGHT-02: resolveZoneByCountry 연동 (GH#202)', () => {
     expect(result.platform.otherChargesSellingTotal).toBe(0);
     expect(result.platform.otherChargesCostTotal).toBe(0);
   });
+
+  describe('서류(DOC) 상품 max_weight_kg 상한 (2026-08-09, UPS 요율표상 서류는 5kg까지만 존재)', () => {
+    const DOC_PRODUCT = {
+      id: 'p-doc', product_code: 'WW_EXPRESS_DOC', sub_code: null, product_name: 'UPS Worldwide Express (서류)',
+      cargo_type: 'DOC', ddu_available: false, ddp_available: true, is_active: true, sort_order: 1, created_at: '',
+      max_weight_kg: 5,
+    };
+
+    it('서류 상품 + 5kg 초과 중량 → 비서류 전환 안내와 함께 명확히 차단', async () => {
+      (validateUserAction as any).mockResolvedValue({
+        supabase: buildMockSupabase({ zen_ups_products: createQueryMock({ data: DOC_PRODUCT }) }),
+      });
+
+      await expect(
+        estimateUpsFreight({ productId: 'p-doc', destCountryCode: 'USA', actualWeightKg: 7 })
+      ).rejects.toThrow(/5kg|WW_EXPRESS_NONDOC/);
+    });
+
+    it('서류 상품 + 정확히 5kg(상한) → 정상 견적 계산됨(차단 아님)', async () => {
+      (validateUserAction as any).mockResolvedValue({
+        supabase: buildMockSupabase({
+          zen_ups_products: createQueryMock({ data: DOC_PRODUCT }),
+          zen_ups_base_rates: createQueryMock({ data: { ...BASE_RATE, product_id: 'p-doc' } }),
+        }),
+      });
+
+      const result = await estimateUpsFreight({
+        productId: 'p-doc', destCountryCode: 'USA', actualWeightKg: 5,
+      });
+
+      expect(result.platform.totalSellingPrice).toBeGreaterThan(0);
+    });
+
+    it('max_weight_kg이 없는 상품(NON_DOC 등)은 중량과 무관하게 차단되지 않음', async () => {
+      (validateUserAction as any).mockResolvedValue({ supabase: buildMockSupabase() });
+
+      const result = await estimateUpsFreight({
+        productId: 'p1', destCountryCode: 'USA', actualWeightKg: 20,
+      });
+
+      expect(result.platform.totalSellingPrice).toBeGreaterThan(0);
+    });
+  });
 });
