@@ -2,6 +2,7 @@ import { getOrders } from '@/app/actions/orders';
 import { requireAuth } from '@/lib/auth/guards';
 import OrderFilterBar from '@/components/orders/OrderFilterBar';
 import OrderDataTable from '@/components/orders/OrderDataTable';
+import BulkOrderUploadButton from '@/components/orders/BulkOrderUploadButton';
 import { ClipboardList, Sparkles } from 'lucide-react';
 import { isFeatureEnabled } from '@/lib/params/feature-flags';
 
@@ -44,12 +45,15 @@ export default async function OrdersPage({
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight">운송 요청 목록</h1>
           <p className="text-xs font-medium text-slate-500">등록된 운송 요청을 조회하고 관리합니다.</p>
         </div>
-        {isAiEnabled && (
-          <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500/10 to-blue-500/10 border border-purple-500/20 rounded-xl text-purple-600 font-bold text-[10px] animate-pulse">
-            <Sparkles size={14} />
-            AI OPTIMIZER ACTIVE
-          </div>
-        )}
+        <div className="flex items-center gap-3">
+          <BulkOrderUploadButton />
+          {isAiEnabled && (
+            <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500/10 to-blue-500/10 border border-purple-500/20 rounded-xl text-purple-600 font-bold text-[10px] animate-pulse">
+              <Sparkles size={14} />
+              AI OPTIMIZER ACTIVE
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Intelligent Filter Bar */}
