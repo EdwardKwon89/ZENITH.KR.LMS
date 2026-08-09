@@ -1744,3 +1744,14 @@ UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류
 - **관련 파일**: `src/app/actions/operations/orders.ts:121-146`
 - **예상 공수**: 0.3 MD (조건 로직 변경 + 회귀 테스트)
 - **우선순위**: High — 재무 데이터(예상운임) 누락으로 이어지는 구조적 결함이나, 당장 급한 3건은 데이터 백필로 해소됨
+
+## [IMP-159] UPS 기타 부가요금(otherChargeIds) 배선 누락 — SATURDAY 유류할증 적용 플래그 확인 필요
+
+- **발견 경위**: 사용자 요청으로 "유류할증료·급증 수수료 적용 로직" 검증 중 `src/app/actions/ups/freight.ts`에서 `EstimateUpsFreightInput.otherChargeIds`가 인터페이스에는 정의돼 있으나 실제로는 어디서도 읽히지 않고, `computeUpsFreight()` 호출부(freight.ts:209)에 `otherCharges: []`가 항상 하드코딩되어 있음을 확인. `grep -rn otherChargeIds src`로 전수 확인한 결과 이 필드를 실제로 채워서 호출하는 caller가 **코드베이스 전체에 0건**(타입 선언 2곳 외 전무).
+- **현재 상태**: `zen_ups_other_charges`에 등록된 DDP/DDU/RESI/SATURDAY/SURGE(Peak Season)/INSURANCE 등은 incoterms나 사용자 선택과 무관하게 **어떤 오더에도 실제로 계산에 포함된 적이 없음**(전부 죽은 경로). 유일한 예외는 `OVERSIZE`— 이건 `computeUpsFreight()` 내부에서 치수 기반 `oversizeApplied` 판정 시 별도 경로로 강제 포함되므로 정상 동작.
+  - 부수 확인: PDF("UPS 운임 및 부가서비스.pdf" p.6~7)의 "토요일 처리 수수료/토요일 배송 서비스" 문단 바로 아래 "*유류 할증료가 부과됩니다." 각주가 있어 SATURDAY도 유류할증 대상으로 보이는데, DB `zen_ups_other_charges.SATURDAY.fuel_surcharge_applicable = false`로 저장돼 있음. 다만 이 PDF는 2단 레이아웃이라 각주가 정확히 어느 항목까지 걸리는지 텍스트 추출만으로는 100% 단정하기 어려워 **재확인 필요**(원본 PDF 육안 확인 권장)로 표시.
+- **임시 조치**: 없음 — 현재 어차피 otherChargeIds 배선이 죽어있어 이 플래그 값 자체가 실사용에 영향 없음(SATURDAY가 선택돼도 반영 자체가 안 됨).
+- **목표 구현**: (1) 오더/견적 화면에서 DDP/DDU/RESI/SATURDAY 등 부가요금을 실제로 선택 가능하게 할 계획이 있다면 `estimateUpsFreight`가 `input.otherChargeIds`로 `zen_ups_other_charges`를 필터링해 `otherCharges`에 채워 넣도록 배선 추가, (2) SATURDAY의 `fuel_surcharge_applicable` 값은 원본 PDF 육안 재확인 후 정정.
+- **관련 파일**: `src/app/actions/ups/freight.ts:38,167-176,209`, `src/types/ups.ts:184`
+- **예상 공수**: 0.5 MD (배선 추가 시) / 0.1 MD (SATURDAY 플래그만 정정 시)
+- **우선순위**: Medium — 현재 DDP/DDU 등 부가요금이 주문 화면에서 선택되는 흐름 자체가 없다면 당장 영향 없으나, 향후 해당 UI가 추가되면 바로 매출 누락으로 이어짐
