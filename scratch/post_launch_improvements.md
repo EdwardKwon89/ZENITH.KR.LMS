@@ -1784,3 +1784,19 @@ UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류
 - **관련 파일**: `supabase/migrations/20260810140000_ups_fuel_surcharge_real_data.sql`, `supabase/migrations/20260628000000_ups_seed_data.sql`, `tests/unit/migrations/defb042-fuel-surcharge-real-data.test.ts`
 - **예상 공수**: 0.5 MD (테스트 기법 조사 및 재작성)
 - **우선순위**: Low — 현재 코드는 정확, 실제 위험은 미래의 실수(회귀)에 대한 탐지 공백일 뿐
+
+## [IMP-162] `zen_agency_shippers` 기반 권한/필터 로직이 "대리점 자가화주" 케이스를 놓치는 패턴이 12개 파일에 산재 (DEF-B-046 발견 중 확인)
+
+- **발견 경위**: DEF-B-046(TASK-B-274) 분석 중 — `warehouse.ts`의 `getAgencyShipperIds()`가 대리점 자기 자신의 org_id를 반환값에서 누락하는 버그를 확인하면서, 동일하게 `zen_agency_shippers` 테이블을 조회해 권한/필터를 구성하는 패턴을 `grep`으로 전수 확인한 결과 아래 12개 파일에도 각각 독립적으로 존재함을 발견:
+  ```
+  agency/zone-discounts.ts, agency/shipper-link.ts, agency/shippers.ts,
+  operations/bulk-orders.ts, operations/orders.ts, operations/tracking.ts,
+  finance/shipper-invoices.ts, finance/daily-billing.ts, finance/settlement.ts,
+  finance/ups-actual-charges.ts, finance/order-revenue-cost.ts
+  ```
+- **현재 상태**: 개별 파일 조사 미실시(DEF-B-046은 `warehouse.ts`만 범위로 한정해 수정). 위 12개 파일 각각이 동일한 "대리점 자가화주 오더 누락" 버그를 가지고 있는지, 아니면 애초에 하위 화주 전용 로직이라 자기 자신 포함이 불필요/부적절한 경우인지 파일별로 성격이 다를 수 있어 **일괄 판단 불가** — 개별 검토 필요.
+- **임시 조치**: 없음 — `warehouse.ts`만 DEF-B-046으로 수정, 나머지는 미조치.
+- **목표 구현**: 12개 파일을 개별 조사해 각각 (a) 대리점 자가화주 오더/케이스를 실제로 다뤄야 하는 컨텍스트인지, (b) 다뤄야 한다면 동일하게 자기 org_id 누락 버그가 있는지 판별 후 필요한 곳만 `warehouse.ts`와 동일한 패턴(`[...downstreamIds, orgId]`)으로 수정. 파일이 많아 1개 Task로 묶기보다 도메인별(agency/*, operations/*, finance/*)로 나눠 별도 Task 채번 권장.
+- **관련 파일**: 위 12개 파일 전체(`src/app/actions/agency/`, `src/app/actions/operations/`, `src/app/actions/finance/` 하위)
+- **예상 공수**: 1.5~2 MD (파일당 조사 15~20분 + 필요 시 수정·테스트 포함, 파일 수 감안)
+- **우선순위**: **High** — `warehouse.ts` 사례처럼 액션 자체를 하드 차단하는 패턴이 다른 파일(특히 finance 정산 관련)에도 있다면 대리점 자가화주 오더의 정산·인보이스 처리 자체가 막혀있을 가능성 있음, 조속한 개별 조사 권장
