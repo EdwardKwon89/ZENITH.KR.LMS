@@ -263,7 +263,7 @@ export default async function UpsOrderDetailPage({ params }: UpsOrderDetailPageP
             </div>
             <UpsOrderBreakdownCard
               orderNo={order.order_no}
-              destCountryCode={(order as any).dest_country_code || (order.dest_port as any)?.country_code || 'US'}
+              destCountryCode={order.recipient_country_code || (order.dest_port as any)?.country_code || 'US'}
               transportMode={order.transport_mode}
               snapshotMeta={(snapshot as any)?.metadata}
               cargoDetails={order.cargo_details as any}
