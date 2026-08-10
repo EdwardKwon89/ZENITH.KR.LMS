@@ -51,8 +51,20 @@ destCountryCode={order.recipient_country_code || (order.dest_port as any)?.count
 
 ## [작업 결과]
 
-_(담당자 작성 예정)_
+**커밋**: `23ab4677` — `[Mike] fix: DEF-B-047 UPS 오더 상세 도착국 표시 US 하드코딩 수정 (Issue #1050)`
+
+**PR**: #1053 (TeamB_Dev base)
+
+**변경 파일**:
+- `src/app/[locale]/(dashboard)/orders/[orderId]/ups-detail/page.tsx:266`: `dest_country_code` → `recipient_country_code`로 변경
+
+**회귀 테스트 3건**:
+- UPS+CN 오더 → destCountryCode='CN' 확인
+- 포트/국가 모두 없을 때 'US' 폴백 유지 확인
+- 되돌리기 검증: dest_country_code로 되돌리면 'US'로 폴백됨을 확인
+
+**검증**: TypeScript 타입 체크 통과, 회귀 테스트 3개 전부 통과
 
 ## [발견 이슈]
 
-_(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
+없음
