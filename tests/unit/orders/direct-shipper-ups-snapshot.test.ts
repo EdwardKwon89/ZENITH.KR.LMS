@@ -109,6 +109,8 @@ function makeUpsPayload() {
     recipient_address: '456 Oak St',
     recipient_phone: '010-5555-6666',
     recipient_country_code: 'US',
+    recipient_zipcode: '90001',
+    shipper_contact_phone: '010-0000-0000',
     transport_mode: 'UPS',
     ups_product_code: 'WW_EXPEDITED',
     incoterms: 'DDP',
