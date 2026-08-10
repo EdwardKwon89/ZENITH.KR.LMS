@@ -2,9 +2,15 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 const mockValidate = vi.hoisted(() => vi.fn());
 const mockAdminClient = vi.hoisted(() => vi.fn());
+const mockApplySchedule = vi.hoisted(() => vi.fn());
+const mockExpireSchedule = vi.hoisted(() => vi.fn());
 
 vi.mock('@/lib/auth/guards', () => ({ validateUserAction: mockValidate }));
 vi.mock('@/utils/supabase/server', () => ({ createAdminClient: mockAdminClient }));
+vi.mock('@/lib/ups/pricing-schedule-apply', () => ({
+  applySchedule: mockApplySchedule,
+  expireSchedule: mockExpireSchedule,
+}));
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }));
 vi.mock('@/lib/logger', () => ({ logger: { error: vi.fn() } }));
 
@@ -20,17 +26,20 @@ function kstDateOffset(days: number): string {
 }
 
 const TOMORROW = kstDateOffset(1);
+const TODAY = kstDateOffset(0);
+const YESTERDAY = kstDateOffset(-1);
 
 function makeAdminMock(opts: { overlapRows?: any[] }) {
   const chain: any = {};
   chain._rows = opts.overlapRows || [];
+  chain._inserted = null;
   chain.select = () => chain;
-  chain.insert = () => chain;
+  chain.insert = (data: any) => { chain._inserted = data; return chain; };
   chain.eq = () => chain;
   chain.neq = () => chain;
   chain.order = () => chain;
   chain.limit = () => chain;
-  chain.single = () => Promise.resolve({ data: { id: 'schedule-1' }, error: null });
+  chain.single = () => Promise.resolve({ data: { ...(chain._inserted ?? {}), id: 'schedule-1' }, error: null });
   chain.then = (resolve: any) => resolve({ data: chain._rows, error: null });
 
   const client: any = {};
@@ -160,5 +169,68 @@ describe('TC-PRICING-509: pricing-schedule JSONB target_ref 비교 수정 (Issue
     });
 
     expect(result).toBeDefined();
+  });
+
+  // ─── Issue #1021: 오늘 허용 + 즉시 적용 ──────────────────────────────
+
+  it('TC-1021-01: 어제(KST 과거) valid_from → 거부 (오늘 이후만 가능)', async () => {
+    mockValidate.mockResolvedValue({
+      user: { id: 'admin-1' },
+      profile: { id: 'admin-1', role: USER_ROLES.ADMIN, org_id: 'org-1' },
+    });
+    const adminMock = makeAdminMock({ overlapRows: [] });
+    mockAdminClient.mockResolvedValue(adminMock);
+
+    await expect(createPricingSchedule({
+      setting_type: 'AGENCY_DISCOUNT',
+      target_ref: { agency_org_id: 'agency-1', zone_id: 'zone-1' },
+      new_value: 0.20,
+      valid_from: YESTERDAY,
+    })).rejects.toThrow('적용일자는 오늘 이후만 가능합니다.');
+
+    expect(mockApplySchedule).not.toHaveBeenCalled();
+  });
+
+  it('TC-1021-02: 오늘(KST) 등록 → 즉시 APPLIED 전환 + applySchedule 호출', async () => {
+    mockValidate.mockResolvedValue({
+      user: { id: 'admin-1' },
+      profile: { id: 'admin-1', role: USER_ROLES.ADMIN, org_id: 'org-1' },
+    });
+    const adminMock = makeAdminMock({ overlapRows: [] });
+    mockAdminClient.mockResolvedValue(adminMock);
+    mockApplySchedule.mockResolvedValue(undefined);
+
+    const result = await createPricingSchedule({
+      setting_type: 'AGENCY_DISCOUNT',
+      target_ref: { agency_org_id: 'agency-1', zone_id: 'zone-1' },
+      new_value: 0.20,
+      valid_from: TODAY,
+    });
+
+    expect(mockApplySchedule).toHaveBeenCalledTimes(1);
+    const [calledAdmin, calledRow] = mockApplySchedule.mock.calls[0];
+    expect(calledAdmin).toBe(adminMock);
+    expect(calledRow).toMatchObject({ id: 'schedule-1', setting_type: 'AGENCY_DISCOUNT', new_value: 0.20, valid_from: TODAY });
+    expect(result).toMatchObject({ id: 'schedule-1', status: 'APPLIED' });
+  });
+
+  it('TC-1021-03: 내일 등록 → SCHEDULED 유지 + applySchedule 미호출 (하위 호환)', async () => {
+    mockValidate.mockResolvedValue({
+      user: { id: 'admin-1' },
+      profile: { id: 'admin-1', role: USER_ROLES.ADMIN, org_id: 'org-1' },
+    });
+    const adminMock = makeAdminMock({ overlapRows: [] });
+    mockAdminClient.mockResolvedValue(adminMock);
+    mockApplySchedule.mockClear();
+
+    const result = await createPricingSchedule({
+      setting_type: 'AGENCY_DISCOUNT',
+      target_ref: { agency_org_id: 'agency-1', zone_id: 'zone-1' },
+      new_value: 0.20,
+      valid_from: TOMORROW,
+    });
+
+    expect(mockApplySchedule).not.toHaveBeenCalled();
+    expect(result).toMatchObject({ id: 'schedule-1', status: 'SCHEDULED' });
   });
 });
