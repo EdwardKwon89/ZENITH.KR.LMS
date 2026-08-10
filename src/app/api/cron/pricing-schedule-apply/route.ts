@@ -84,12 +84,16 @@ async function applySchedule(supabase: any, schedule: any) {
   // 기존 설정값 조회 (old_data용)
   let oldData: any = null;
 
+  // Issue #1018: cargo_type은 target_ref에서 읽음 (없으면 'ALL' 기본값)
+  const cargoType = target_ref.cargo_type || 'ALL';
+
   if (setting_type === 'AGENCY_DISCOUNT') {
     const { data: existing } = await supabase
       .from('zen_agency_pricing_policies')
       .select('discount_rate')
       .eq('agency_org_id', target_ref.agency_org_id)
       .eq('zone_id', target_ref.zone_id)
+      .eq('cargo_type', cargoType)
       .single();
     oldData = existing ? { discount_rate: existing.discount_rate } : null;
 
@@ -98,10 +102,11 @@ async function applySchedule(supabase: any, schedule: any) {
       .upsert({
         agency_org_id: target_ref.agency_org_id,
         zone_id: target_ref.zone_id,
+        cargo_type: cargoType,
         discount_rate: new_value,
         is_active: true,
         updated_at: new Date().toISOString(),
-      }, { onConflict: 'agency_org_id,zone_id' });
+      }, { onConflict: 'agency_org_id,zone_id,cargo_type' });
     if (error) throw new Error(error.message);
 
   } else if (setting_type === 'SHIPPER_DISCOUNT') {
@@ -111,6 +116,7 @@ async function applySchedule(supabase: any, schedule: any) {
       .eq('agency_org_id', target_ref.agency_org_id)
       .eq('shipper_org_id', target_ref.shipper_org_id)
       .eq('zone_id', target_ref.zone_id)
+      .eq('cargo_type', cargoType)
       .single();
     oldData = existing ? { discount_rate: existing.discount_rate } : null;
 
@@ -120,10 +126,11 @@ async function applySchedule(supabase: any, schedule: any) {
         agency_org_id: target_ref.agency_org_id,
         shipper_org_id: target_ref.shipper_org_id,
         zone_id: target_ref.zone_id,
+        cargo_type: cargoType,
         discount_rate: new_value,
         is_active: true,
         created_at: new Date().toISOString(),
-      }, { onConflict: 'agency_org_id,shipper_org_id,zone_id' });
+      }, { onConflict: 'agency_org_id,shipper_org_id,zone_id,cargo_type' });
     if (error) throw new Error(error.message);
 
   } else if (setting_type === 'VOLUMETRIC_DIVISOR') {
@@ -161,6 +168,9 @@ async function applySchedule(supabase: any, schedule: any) {
 async function expireSchedule(supabase: any, schedule: any) {
   const { setting_type, target_ref, id, valid_until } = schedule;
 
+  // Issue #1018: cargo_type은 target_ref에서 읽음 (없으면 'ALL' 기본값)
+  const cargoType = target_ref.cargo_type || 'ALL';
+
   let oldData: any = null;
 
   if (setting_type === 'AGENCY_DISCOUNT') {
@@ -169,6 +179,7 @@ async function expireSchedule(supabase: any, schedule: any) {
       .select('discount_rate')
       .eq('agency_org_id', target_ref.agency_org_id)
       .eq('zone_id', target_ref.zone_id)
+      .eq('cargo_type', cargoType)
       .single();
     oldData = existing ? { discount_rate: existing.discount_rate } : null;
 
@@ -176,7 +187,8 @@ async function expireSchedule(supabase: any, schedule: any) {
       .from('zen_agency_pricing_policies')
       .delete()
       .eq('agency_org_id', target_ref.agency_org_id)
-      .eq('zone_id', target_ref.zone_id);
+      .eq('zone_id', target_ref.zone_id)
+      .eq('cargo_type', cargoType);
 
   } else if (setting_type === 'SHIPPER_DISCOUNT') {
     const { data: existing } = await supabase
@@ -185,6 +197,7 @@ async function expireSchedule(supabase: any, schedule: any) {
       .eq('agency_org_id', target_ref.agency_org_id)
       .eq('shipper_org_id', target_ref.shipper_org_id)
       .eq('zone_id', target_ref.zone_id)
+      .eq('cargo_type', cargoType)
       .single();
     oldData = existing ? { discount_rate: existing.discount_rate } : null;
 
@@ -193,7 +206,8 @@ async function expireSchedule(supabase: any, schedule: any) {
       .delete()
       .eq('agency_org_id', target_ref.agency_org_id)
       .eq('shipper_org_id', target_ref.shipper_org_id)
-      .eq('zone_id', target_ref.zone_id);
+      .eq('zone_id', target_ref.zone_id)
+      .eq('cargo_type', cargoType);
 
   } else if (setting_type === 'VOLUMETRIC_DIVISOR') {
     const { data: existing } = await supabase

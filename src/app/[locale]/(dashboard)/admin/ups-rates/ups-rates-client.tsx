@@ -182,14 +182,17 @@ export default function UpsRatesClient({ zones, products, baseRates, fuelSurchar
         surgeFees: updateUpsSurgeFee,
       };
       if (activeTab === 'agencyPolicies') {
-        const { agency_org_id, zone_rates, is_active, volumetric_divisor, valid_from, valid_until } = form;
+        const { agency_org_id, zone_rates, is_active, volumetric_divisor, valid_from, valid_until, cargo_type } = form;
         if (!agency_org_id) throw new Error('대리점을 선택해주세요.');
         if (!valid_from) throw new Error('적용일자를 입력해주세요.');
+
+        // Issue #1018: cargo_type은 target_ref에 포함 (없으면 'ALL' 기본값)
+        const cargoType = cargo_type || 'ALL';
 
         for (const zoneId of Object.keys(zone_rates ?? {})) {
           await createPricingSchedule({
             setting_type: 'AGENCY_DISCOUNT',
-            target_ref: { agency_org_id, zone_id: zoneId },
+            target_ref: { agency_org_id, zone_id: zoneId, cargo_type: cargoType },
             new_value: zone_rates[zoneId] ?? 0,
             valid_from,
             valid_until: valid_until || null,
@@ -550,6 +553,18 @@ function AgencyPolicyForm({ form, setForm, agencies, zones }: any) {
           <option value={5500}>5500</option>
           <option value={6000}>6000</option>
         </select>
+      </div>
+      <div className="space-y-1">
+        <label className="text-xs font-bold text-slate-500 uppercase">화물 유형 (Issue #1018)</label>
+        <select value={form.cargo_type || 'ALL'} onChange={e => setForm({ ...form, cargo_type: e.target.value })}
+          className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm">
+          <option value="ALL">전체 (Expedited/Flight 포함)</option>
+          <option value="DOC">서류 (Express/Saver 한정)</option>
+          <option value="NON_DOC">비서류 (Express/Saver 한정)</option>
+        </select>
+        {form.cargo_type && form.cargo_type !== 'ALL' && (
+          <p className="text-[10px] text-amber-600 mt-1">※ DOC/NONDOC 선택 시 Express/Saver 상품에만 적용됩니다.</p>
+        )}
       </div>
       <div className="space-y-3">
         <label className="text-xs font-bold text-slate-500 uppercase">Zone별 할인율 (%)</label>

@@ -221,11 +221,15 @@ export async function estimateUpsFreight(input: EstimateUpsFreightInput): Promis
   // Issue #617: 내부 원가 계산 목적 조회는 서비스 롤(admin) 클라이언트 사용 — RLS 우회
   const admin = await createAdminClient();
 
+  // Issue #1018: cargo_type 매핑 — Expedited/Flight는 'ALL', Express/Saver는 DOC/NONDOC
+  const policyCargoType = product.cargo_type === 'BOTH' ? 'ALL' : product.cargo_type;
+
   const { data: policy } = await admin
     .from('zen_agency_pricing_policies')
     .select('discount_rate')
     .eq('agency_org_id', input.agencyOrgId)
     .eq('zone_id', zone.id)
+    .eq('cargo_type', policyCargoType)
     .eq('is_active', true)
     .maybeSingle();
   const discountRate = Number(policy?.discount_rate ?? 0);
@@ -254,6 +258,7 @@ export async function estimateUpsFreight(input: EstimateUpsFreightInput): Promis
     .eq('agency_org_id', input.agencyOrgId)
     .eq('shipper_org_id', input.shipperOrgId)
     .eq('zone_id', zone.id)
+    .eq('cargo_type', policyCargoType)
     .eq('is_active', true)
     .maybeSingle();
   const shipperDiscountRate = Number(shipperZoneDiscount?.discount_rate ?? 0);
