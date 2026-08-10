@@ -32,6 +32,10 @@ describe('IMP-118: Order Delivery Method Selection and Validation (TC-UPS-ORDER)
 
     mockSupabase = {
       rpc: vi.fn().mockResolvedValue({ data: { id: 'new-order-id', order_no: mockOrderNo }, error: null }),
+      from: vi.fn().mockReturnThis(),
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
     };
 
     (validateUserAction as any).mockResolvedValue({ 

@@ -50,6 +50,7 @@
     "transport_policies": "运费计算政策",
     "rates": "费率",
     "ups_rates": "UPS费率管理",
+    "exchange_rates": "汇率管理",
     "rate_cards_management": "费率卡管理",
     "member_management": "会员管理",
     "permissions": "权限管理",
