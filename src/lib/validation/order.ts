@@ -137,6 +137,15 @@ export const orderRegistrationSchema = z.object({
       });
     }
   }
+  // DEF-B-044 (Issue #1044): 중국(CN) 목적지는 UPS Zone이 지역(CNN/CNS)에 따라 달라
+  // 성/직할시(recipient_state_province)를 필수로 강제 — 미입력 시 조용히 추정하지 않는다.
+  if (data.recipient_country_code === 'CN' && (!data.recipient_state_province || data.recipient_state_province.trim() === '')) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: '중국 배송은 지역(성/직할시) 선택이 필수입니다 — UPS Zone이 지역에 따라 달라집니다',
+      path: ['recipient_state_province'],
+    });
+  }
 });
 
 export type OrderItemInput = z.infer<typeof orderItemSchema>;

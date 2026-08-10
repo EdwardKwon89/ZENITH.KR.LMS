@@ -121,3 +121,50 @@ describe('DEF-105: Item name English-only validation', () => {
     expect(result.success).toBe(false);
   });
 });
+
+// ─── TASK-B-272 (Issue #1044 / DEF-B-044): 중국(CN) recipient_state_province 조건부 필수 ─────
+
+describe('DEF-B-044: CN 목적지 성/직할시 조건부 필수 검증', () => {
+  const validUUID = '550e8400-e29b-41d4-a716-446655440000';
+  const base = {
+    order_type: 'B2B',
+    shipper_id: validUUID,
+    origin_port_id: validUUID,
+    dest_port_id: validUUID,
+    recipient_name: 'Li Wei',
+    recipient_address: '123 Shanghai Rd',
+    recipient_phone: '010-1234-5678',
+    recipient_country_code: 'CN',
+    packages: [
+      { packing_unit: 'BOX', packing_count: 1, gross_weight: 5, items: [{ item_name: 'Widget', quantity: 1, unit_price: 10 }] }
+    ],
+  };
+
+  it('CN + recipient_state_province 미입력 → 검증 실패 (수정 전엔 통과됐음)', () => {
+    const result = orderRegistrationSchema.safeParse(base);
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues.some((i) => i.path.includes('recipient_state_province'))).toBe(true);
+    }
+  });
+
+  it('CN + recipient_state_province 입력(GD) → 검증 통과', () => {
+    const result = orderRegistrationSchema.safeParse({ ...base, recipient_state_province: 'GD' });
+    expect(result.success).toBe(true);
+  });
+
+  it('CN + recipient_state_province 공백 문자열 → 검증 실패', () => {
+    const result = orderRegistrationSchema.safeParse({ ...base, recipient_state_province: '  ' });
+    expect(result.success).toBe(false);
+  });
+
+  it('CN 외 국가(US)는 recipient_state_province 미입력이어도 통과 (회귀 방지)', () => {
+    const result = orderRegistrationSchema.safeParse({ ...base, recipient_country_code: 'US' });
+    expect(result.success).toBe(true);
+  });
+
+  it('CN 외 국가(JP)는 recipient_state_province 미입력이어도 통과 (회귀 방지)', () => {
+    const result = orderRegistrationSchema.safeParse({ ...base, recipient_country_code: 'JP' });
+    expect(result.success).toBe(true);
+  });
+});
