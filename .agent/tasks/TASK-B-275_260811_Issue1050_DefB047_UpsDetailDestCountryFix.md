@@ -49,21 +49,26 @@ destCountryCode={order.recipient_country_code || (order.dest_port as any)?.count
 
 - **Mike**: `.agent/VIOLATION_TRACKER.md` 참조 후 착수. JSJung 2026-07-15 결정에 따라 누적 이력과 무관하게 할당 지속(재론 금지). 직전 TASK-B-271(v2)은 절차 정확히 준수 완료 — 동일 수준 기대. 이번 Task는 TASK-B-276(DEF-B-048)과 동시 배정됨 — 두 Task를 혼동해 파일을 섞지 않도록 주의(각 task file/브랜치 분리 유지).
 
-## [작업 결과]
+## [작업 결과] (Jaison 병합 시 최종본으로 정리 — v1~v3 경과는 ACTIVE_TASK.md 참조)
 
-**커밋**: `23ab4677` — `[Mike] fix: DEF-B-047 UPS 오더 상세 도착국 표시 US 하드코딩 수정 (Issue #1050)`
+**최종 커밋**: `5ce8dea8` — `[Mike] fix: DEF-B-047 회귀 테스트 재작성 — 실제 프로덕션 함수 import 검증 (Issue #1050)`
 
-**PR**: #1053 (TeamB_Dev base)
+**PR**: #1053 (TeamB_Dev base) — Jaison 승인·머지 완료
 
 **변경 파일**:
-- `src/app/[locale]/(dashboard)/orders/[orderId]/ups-detail/page.tsx:266`: `dest_country_code` → `recipient_country_code`로 변경
+- `src/lib/ups/order-helpers.ts`(신규): `resolveDestCountryCode(order)` — `recipient_country_code > dest_port.country_code > 'US'` 우선순위로 도착국 결정
+- `src/app/[locale]/(dashboard)/orders/[orderId]/ups-detail/page.tsx:267`: 인라인 `(order as any).dest_country_code || ...` → `resolveDestCountryCode(order)` 호출로 교체(존재하지 않는 컬럼 참조 제거)
 
-**회귀 테스트 3건**:
-- UPS+CN 오더 → destCountryCode='CN' 확인
-- 포트/국가 모두 없을 때 'US' 폴백 유지 확인
-- 되돌리기 검증: dest_country_code로 되돌리면 'US'로 폴백됨을 확인
+**회귀 테스트 7건** (`tests/unit/orders/ups-detail-dest-country.test.tsx`, 실제 함수 import):
+- recipient_country_code 우선 사용 / dest_port 폴백 / 둘 다 없을 때 US 폴백 / 빈 문자열 처리 2건
+- 되돌리기 검증 2건(버그 패턴 재현 + 수정 후 정상값 확인)
 
-**검증**: TypeScript 타입 체크 통과, 회귀 테스트 3개 전부 통과
+**Jaison 검증**: v1(`23ab4677`)·v2(`d76f11aa`) 2차례 반려 후 v3에서 승인.
+- 되돌리기 검증(Jaison 직접 재현) — `resolveDestCountryCode()` 본문을 버그 패턴으로 되돌리면 7건 중 2건 FAIL, 복원 후 7/7 PASS
+- 회귀 161/161·1142/1142 ALL PASS(신선 DB, Jaison 재검증 일치)
+- `npm run build` SUCCESS
+- CI 3개 체크(Regression/Task File/Type Check) 전부 pass
+- R-10 화면 스크린샷은 JSJung이 직접 수행 예정(코드·테스트 검증 완료로 승인 처리)
 
 ## [발견 이슈]
 
