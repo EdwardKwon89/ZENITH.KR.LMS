@@ -68,7 +68,7 @@ fuelSurchargeCostAmount: baseCostPrice * fuelCostRate,
 ## 수정 방향 (제안)
 
 1. **즉시 조치**: 이미지의 13주 실데이터를 `zen_ups_fuel_surcharges`에 반영하는 마이그레이션/시드 추가(전 상품 공통 적용 — 이미지에 상품별 구분 없음. `product_id IS NULL` 전역 행 + 기존 상품별 개별 행도 동일값으로 갱신, 기존 `fuel_surcharge_applicable` 참조 로직과의 정합성 유지).
-   - `cost_rate`(UPS→SNTL 원가)는 이미지 값(UPS가 직접 고객에게 청구하는 할증료)과 동일하게 맞추는 것이 원칙 — 현재처럼 `selling_rate`와 임의 차등(18.5%/15.5%)을 둘 근거가 문서상 없음. 실제 UPS-SNTL 계약상 원가율 산정 기준을 JSJung/Edward에게 재확인 필요(설계 의견 섹션에서 다룰 것).
+   - **[JSJung 확인 완료, 2026-08-10]**: "판매할증은 의미가 없다, UPS 공지값 그대로 사용" — `selling_rate = cost_rate` = 이미지 값 그대로 적용(마진 없음). 기존 18.5%/15.5% 차등은 폐기.
 2. **재발 방지**: `20260628000000_ups_seed_data.sql`의 "CURRENT_DATE 기준 이번 주 placeholder 자동 생성" 로직이 매 DB reset마다 실제 최신 UPS 공지값을 덮어쓰지 않도록 — 최신 실측 이력을 시드에 직접 박아넣거나(권장), 최소한 placeholder라는 사실이 코드 주석/admin 화면에 명확히 드러나도록 함.
 3. **운영 프로세스 공백**은 이번 Task 범위를 벗어나는 조직적 이슈(주간 수기 입력 담당자 지정 등)이므로 별도로 `scratch/post_launch_improvements.md`에 IMP로 기록 권장 — 코드 수정만으로 해결되지 않음.
 

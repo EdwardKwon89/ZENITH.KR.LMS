@@ -36,10 +36,12 @@
 
 ## 수정 방향 (설계 확정 — 착수 승인)
 
+**[JSJung 확인 완료, 2026-08-10]**: "판매할증은 의미가 없다, UPS 공지값 그대로 사용" — `selling_rate = cost_rate = UPS 공지값`으로 마진 없이 동일 적용 확정. 기존 placeholder의 selling/cost 차등(18.5%/15.5%)은 이번 수정으로 폐기.
+
 1. **신규 마이그레이션 추가**(seed 스크립트 직접 수정 금지 — 이미 병합된 시드 스크립트는 과거 재현성을 위해 그대로 두고, 후속 마이그레이션으로 실데이터를 upsert):
    - `zen_ups_products` 전체 상품(현재 7종) × 13주 각각에 대해 `INSERT ... ON CONFLICT (product_id, effective_week) DO UPDATE SET selling_rate = EXCLUDED.selling_rate, cost_rate = EXCLUDED.cost_rate`로 값을 덮어씀.
    - `product_id IS NULL`(전체 적용) 행도 동일하게 13주 upsert.
-   - **`selling_rate`와 `cost_rate` 값**: 이미지는 UPS가 직접 청구하는 단일 할증률만 제공(상품별/판매·원가 구분 없음). 원칙적으로 `cost_rate`(SNTL이 UPS에 지불하는 원가 할증)는 이미지 값과 동일하게 맞춘다. `selling_rate`(SNTL이 대리점/화주에게 청구하는 판매 할증)는 기존처럼 원가 대비 마진을 둘지, 아니면 UPS 공지값을 그대로 쓸지 **JSJung 확인 필요 — 착수 전 반드시 질문할 것** (기존 placeholder는 selling 18.5% vs cost 15.5%로 selling이 3%p 높았음 — 동일한 마진 정책을 유지할지, 실데이터 그대로 selling=cost로 둘지 확정 필요).
+   - **`selling_rate`와 `cost_rate` 값**: 위 확정에 따라 두 컬럼 모두 이미지의 UPS 공지값과 동일하게 삽입(예: 2026-08-10 → selling_rate=0.4675, cost_rate=0.4675). 상품별/판매·원가 구분 없이 13주 전부 동일 로직 적용.
    - `effective_week` 값은 실제 날짜(2026-05-18 ~ 2026-08-10)로 고정 삽입 — seed처럼 `CURRENT_DATE` 기반 동적 계산 사용 금지(과거 이력이므로 고정일이 맞음).
 2. **재발 방지**: 이번 마이그레이션이 추후 DB reset 시에도 유지되도록(기존 seed 스크립트는 `ON CONFLICT DO NOTHING`이라 이번 마이그레이션이 나중에 실행되면 값이 정확히 덮어써지는지 마이그레이션 실행 순서/타임스탬프 확인 — 파일명 타임스탬프가 seed 스크립트(`20260628...`)보다 뒤여야 함).
 3. **화면 구조 변경 없음** — 데이터 교정 + 재발방지용 마이그레이션 추가가 전부. `pricing-engine.ts` 로직 자체는 변경하지 않음(주차 선택 로직은 정상 동작 확인만).
@@ -48,8 +50,7 @@
 
 - [ ] `git fetch origin && git pull origin TeamB_Dev` 후 `feature/teamb-269-fuel-surcharge-real-data` 브랜치 생성(본인 전용 워크트리 `ZENITH_LMS-worktrees/baker` 안에서 — 공유 메인 체크아웃 금지, R-17 §0)
 - [ ] `./scripts/next-task-number.sh B`로 TASK-B-269 확인
-- [ ] **착수 전 JSJung에게 `selling_rate` 정책 확인**(위 "수정 방향" 1번 하위 항목) — 답변 받기 전 마이그레이션 값 확정 착수 금지
-- [ ] 신규 마이그레이션 작성 — 13주 × 전 상품(개별 7종 + NULL 전체) upsert
+- [ ] 신규 마이그레이션 작성 — 13주 × 전 상품(개별 7종 + NULL 전체) upsert, `selling_rate = cost_rate = UPS 공지값`(JSJung 확정, 위 "수정 방향" 참조)
 - [ ] **회귀 테스트 신설 (필수, R-09)**:
   - DB reset 후 `zen_ups_fuel_surcharges`에 13주 이력이 정확한 날짜·값으로 존재하는지 검증(실 DB 쿼리 기반 통합 테스트)
   - `pricing-engine.ts`가 특정 조회일 기준 올바른 주차(effective_week ≤ 조회일 중 최신)를 선택하는지 기존 테스트(`pricing-engine.test.ts`) 통과 확인 — 로직 미변경이므로 회귀 확인 위주
@@ -64,7 +65,7 @@
 
 ## 담당자 위반 이력 사전 경고
 
-- **Baker**: `.agent/VIOLATION_TRACKER.md` 참조 후 착수. JSJung 2026-07-15 결정에 따라 누적 이력과 무관하게 할당 지속(재론 금지). 직전 TASK-B-265는 3중 결함(로직+DB트리거+RPC)을 단일 시도로 절차 정확히 준수하며 완료 — 동일 수준 기대. 이번 Task는 **착수 전 JSJung 확인 필요 항목(selling_rate 정책)**이 있으므로, 확인 없이 임의로 마이그레이션 값을 확정해 착수하지 않도록 주의(과거 유사 유형 — 확인 절차 생략 위반 반복 시 VIOLATION_TRACKER 기록 대상).
+- **Baker**: `.agent/VIOLATION_TRACKER.md` 참조 후 착수. JSJung 2026-07-15 결정에 따라 누적 이력과 무관하게 할당 지속(재론 금지). 직전 TASK-B-265는 3중 결함(로직+DB트리거+RPC)을 단일 시도로 절차 정확히 준수하며 완료 — 동일 수준 기대. `selling_rate` 정책은 위 확정대로 진행하면 됨(추가 확인 불필요).
 
 ## [작업 결과]
 
