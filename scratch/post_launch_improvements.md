@@ -1772,3 +1772,15 @@ UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류
 - **관련 파일**: `src/app/actions/finance/daily-billing.ts:289-290` (`getShipperDailyBillingSummary`)
 - **예상 공수**: 0.5 MD (집계 로직 변경 + behavioral 테스트 보강)
 - **우선순위**: Medium — 표시용(estimated) 왜곡이며 실제 청구액 산정은 인보이스별 스냅샷을 따름
+
+## [IMP-161] `zen_ups_fuel_surcharges` 값 기반 placeholder 제거 로직(DEF-B-042 v2)이 실제 마이그레이션 파일을 검증하지 않고 SQL을 테스트 코드에 복제 — 향후 회귀 미탐지 위험
+
+- **발견 경위**: PR#1038(TASK-B-269 v2, Baker) 리뷰 중 Jaison이 되돌리기 검증으로 발견. `supabase/migrations/20260810140000_ups_fuel_surcharge_real_data.sql` 상단의 `DELETE FROM zen_ups_fuel_surcharges WHERE selling_rate=0.185 AND cost_rate=0.155`(seed placeholder를 주차와 무관하게 값 기준으로 제거하는 핵심 방어선) 한 줄을 실제 파일에서 제거하고 `supabase db reset` → `tests/unit/migrations/defb042-fuel-surcharge-real-data.test.ts` 재실행 → **7/7 그대로 PASS**(직접 재현 확인).
+- **근본 원인**: 이 테스트 스위트의 TC-269-01~06은 실제 마이그레이션이 적용된 DB 상태를 조회해 검증하지만(정상), 오늘 날짜(2026-08-10)가 우연히 13주 실데이터 범위의 마지막 주와 일치해서 `ON CONFLICT DO UPDATE`/NULL DELETE+INSERT 로직이 어차피 placeholder를 덮어써 버려 이 방어선의 존재 여부를 구분하지 못함. TC-269-07(신설, 미래주차 시뮬레이션)은 실제 파일을 실행하는 대신 동일 SQL을 테스트 코드 안에 손으로 복제해서 검증 — SQL 마이그레이션은 TS 함수처럼 import해 재사용할 수 없어 나온 불가피한 타협으로 보이나, 결과적으로 실제 파일의 회귀를 탐지하지 못함(PR#1030 Mike의 그림자 테스트와 유사한 유형이나, 이번은 SQL 마이그레이션의 구조적 한계에서 비롯된 경미한 사례).
+- **영향 범위**: 현재 PR#1038의 실제 코드는 정확히 구현되어 있음을 직접 확인(머지 차단 사유 아님). 다만 향후 누군가 이 DELETE 줄을 실수로 삭제·수정해도 CI가 못 잡음 — 특히 CI는 매 실행마다 fresh reset이라(R-08-2) 사실상 "최초 부트스트랩" 상황이 매번 재현되는데, 그 시점의 실제 wall-clock 날짜가 13주 범위(2026-05-18~08-10) 밖이면(2026-08-17부터 해당) 즉시 DEF-B-042 원본 버그가 재현됨.
+- **현재 상태**: 미수정 — PR#1038은 머지됨(코드 자체는 정확).
+- **임시 조치**: 없음(현재 코드가 맞으므로 즉시 위험 없음). 단, 2026-08-17 이후 최초로 이 저장소에서 fresh reset을 수행하는 시점(신규 개발자 온보딩, CI 최초 실행 등)에 `zen_ups_fuel_surcharges`에 placeholder 잔존 여부를 수동 확인 권장.
+- **목표 구현**: 시스템 시각을 세션 로컬로 조작 가능한 테스트 기법(예: DB 트랜잭션 내 `SET LOCAL` 트릭 조사, 또는 마이그레이션 파일을 별도 스크립트로 감싸 `psql -f <실제파일>`로 직접 실행 후 상태만 검증하는 방식으로 전환해 "실제 파일 실행" 보장) 도입 검토. 최소한 TC-269-07의 인라인 SQL과 실제 마이그레이션 파일의 해당 구문이 동일한지 diff/hash 비교하는 안전장치라도 추가.
+- **관련 파일**: `supabase/migrations/20260810140000_ups_fuel_surcharge_real_data.sql`, `supabase/migrations/20260628000000_ups_seed_data.sql`, `tests/unit/migrations/defb042-fuel-surcharge-real-data.test.ts`
+- **예상 공수**: 0.5 MD (테스트 기법 조사 및 재작성)
+- **우선순위**: Low — 현재 코드는 정확, 실제 위험은 미래의 실수(회귀)에 대한 탐지 공백일 뿐
