@@ -86,3 +86,41 @@ describe('TC-UPS-R-PUBLIC-PAG: getPublicBaseRates 페이지네이션 (DEF-B-041)
     expect(mockSupabase.or).toHaveBeenCalledWith(expect.stringContaining('valid_until'));
   });
 });
+
+// ─── TASK-B-270 (Issue #1039 / DEF-B-043): 페이지네이션 tiebreaker 2차 정렬 ─────
+
+describe('TC-UPS-R-PUBLIC-TIE: getPublicBaseRates weight_kg/id 2차 정렬 (DEF-B-043)', () => {
+  let mockSupabase: any;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockSupabase = {
+      from: vi.fn().mockReturnThis(),
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      lte: vi.fn().mockReturnThis(),
+      gte: vi.fn().mockReturnThis(),
+      or: vi.fn().mockReturnThis(),
+      order: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockReturnThis(),
+      range: vi.fn().mockResolvedValue({ data: [], error: null }),
+    };
+    (validateUserAction as any).mockResolvedValue({
+      user: { id: 'user-001' },
+      profile: { id: 'user-001', role: 'AGENCY', org_id: 'org-001' },
+      supabase: mockSupabase,
+    });
+  });
+
+  it('TC-UPS-R-PUBLIC-TIE-01: getPublicBaseRates가 weight_kg 정렬 후 id 2차 정렬을 호출한다 (behavioral)', async () => {
+    await getPublicBaseRates();
+
+    expect(mockSupabase.order).toHaveBeenCalledWith('weight_kg');
+    expect(mockSupabase.order).toHaveBeenCalledWith('id');
+    const orderCalls = mockSupabase.order.mock.calls.map((c: any[]) => c[0]);
+    const wIdx = orderCalls.indexOf('weight_kg');
+    const idIdx = orderCalls.indexOf('id');
+    expect(wIdx).toBeGreaterThanOrEqual(0);
+    expect(idIdx).toBeGreaterThan(wIdx);
+  });
+});
