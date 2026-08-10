@@ -2,6 +2,7 @@
 
 import { createClient } from '@/utils/supabase/server';
 import { validateUserAction } from '@/lib/auth/guards';
+import { fetchAllRows } from '@/lib/ups/paginate-all';
 import type {
   UpsZoneWithCountries,
   UpsProduct,
@@ -44,17 +45,21 @@ export async function getUpsBaseRates(filters?: {
 }): Promise<UpsBaseRateWithRefs[]> {
   const { supabase } = await validateUserAction();
   const refDate = filters?.referenceDate ?? new Date().toISOString().split('T')[0];
-  let base = supabase
-    .from('zen_ups_base_rates')
-    .select('*, product:product_id(product_code, product_name, cargo_type), zone:zone_id(zone_code, zone_name)')
-    .eq('is_active', true)
-    .lte('valid_from', refDate)
-    .or(`valid_until.is.null,valid_until.gte.${refDate}`);
-  if (filters?.productId) base = base.eq('product_id', filters.productId);
-  if (filters?.zoneId) base = base.eq('zone_id', filters.zoneId);
-  const { data, error } = await base.order('weight_kg');
-  if (error) throw new Error(error.message);
-  return data ?? [];
+  // DEF-B-041: 상품 필터 없이 전체 조회 시 zen_ups_base_rates 1,000행 초과로 잘림 —
+  // 페이지네이션으로 전체 병합. productId 필터가 있으면 결과가 1,000행 미만이라 1회 호출로 끝난다.
+  const data = await fetchAllRows<UpsBaseRateWithRefs>(async (from, to) => {
+    let base = supabase
+      .from('zen_ups_base_rates')
+      .select('*, product:product_id(product_code, product_name, cargo_type), zone:zone_id(zone_code, zone_name)')
+      .eq('is_active', true)
+      .lte('valid_from', refDate)
+      .or(`valid_until.is.null,valid_until.gte.${refDate}`);
+    if (filters?.productId) base = base.eq('product_id', filters.productId);
+    if (filters?.zoneId) base = base.eq('zone_id', filters.zoneId);
+    const { data, error } = await base.order('weight_kg').range(from, to);
+    return { data, error };
+  });
+  return data as unknown as UpsBaseRateWithRefs[];
 }
 
 export async function getUpsFuelSurcharge(

@@ -2,6 +2,7 @@
 
 import { createClient } from '@/utils/supabase/server';
 import { validateUserAction } from '@/lib/auth/guards';
+import { fetchAllRows } from '@/lib/ups/paginate-all';
 
 export interface PublicBaseRate {
   id: string;
@@ -19,15 +20,19 @@ export interface PublicBaseRate {
 export async function getPublicBaseRates(): Promise<PublicBaseRate[]> {
   const { supabase } = await validateUserAction();
   const refDate = new Date().toISOString().split('T')[0];
-  const { data, error } = await supabase
-    .from('zen_ups_base_rates')
-    .select('id, product_id, zone_id, weight_kg, selling_price, currency, valid_from, valid_until, product:product_id(product_code, product_name, cargo_type), zone:zone_id(zone_code, zone_name)')
-    .eq('is_active', true)
-    .lte('valid_from', refDate)
-    .or(`valid_until.is.null,valid_until.gte.${refDate}`)
-    .order('weight_kg');
-  if (error) throw new Error(error.message);
-  return (data ?? []) as unknown as PublicBaseRate[];
+  // DEF-B-041: zen_ups_base_rates가 1,000행 초과 — PostgREST 기본 제한에 걸리지 않도록 페이지네이션
+  const data = await fetchAllRows<PublicBaseRate>(async (from, to) => {
+    const { data, error } = await supabase
+      .from('zen_ups_base_rates')
+      .select('id, product_id, zone_id, weight_kg, selling_price, currency, valid_from, valid_until, product:product_id(product_code, product_name, cargo_type), zone:zone_id(zone_code, zone_name)')
+      .eq('is_active', true)
+      .lte('valid_from', refDate)
+      .or(`valid_until.is.null,valid_until.gte.${refDate}`)
+      .order('weight_kg')
+      .range(from, to);
+    return { data, error };
+  });
+  return data as unknown as PublicBaseRate[];
 }
 
 export interface PublicFuelSurcharge {

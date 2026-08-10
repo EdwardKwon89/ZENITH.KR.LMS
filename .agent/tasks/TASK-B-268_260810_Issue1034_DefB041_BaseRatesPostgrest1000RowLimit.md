@@ -8,7 +8,7 @@
 | **담당** | Dave (Team B) |
 | **생성일** | 2026-08-10 |
 | **우선순위** | P2 |
-| **상태** | ⬜ |
+| **상태** | 🔔 (완료 보고 — 검토 요청) |
 
 ## 근본 원인 (Issue #1034 본문 전체 참조 — 재현 완료)
 
@@ -70,7 +70,46 @@ async function fetchAllRows(buildQuery: (from: number, to: number) => PromiseLik
 
 ## [작업 결과]
 
-_(담당자 작성 예정)_
+**작성자**: Dave | **작성일**: 2026-08-10 | **상태**: 🔔 (검토 요청)
+
+### 구현 (코드 커밋)
+
+- `src/lib/ups/paginate-all.ts` — `fetchAllRows<T>()` 공용 페이지네이션 헬퍼 신설: `.range(from, to)` 1,000행 단위 반복 호출(동일 필터 조건 유지) 후 전체 병합. 마지막 페이지가 1,000행 미만이거나 빈 배열이면 종료.
+- `src/app/actions/ups/rates-public.ts` — `getPublicBaseRates()`에 적용 (→ agency/shipper 화면)
+- `src/app/actions/ups/rates.ts` — `getUpsBaseRates()`에 적용 (productId 미지정 시 admin 화면이 필터 없이 호출 → 페이지네이션, productId 지정 시 결과가 1,000행 미만이라 루프 1회 종료)
+
+### 회귀 테스트 (코드 커밋 — 9건 신설)
+
+- `tests/unit/ups/rates-actions.test.ts` — TC-UPS-R-03 `.range()` 기반으로 갱신 + **TC-UPS-R-PAG-01~05 신설**: 1,200행 2회 병합(`.range` 인자 0-999/1000-1999 캡처), 1,000행 이하 1회 호출, 정확히 1,000행(빈 응답으로 종료), productId/zoneId 필터 유지, 에러 전파
+- `tests/unit/ups/rates-public-pagination.test.ts` (신규) — **TC-UPS-R-PUBLIC-PAG-01~04**: 1,560행 2회 병합, 1,000행 이하 1회, 에러 전파, 필터 유지
+
+**되돌리기 검증 (vacuous test 방지)**: 페이지네이션 로직 제거(수정 전 코드) 후 실행 → **8건 FAIL**(TC-UPS-R-PAG-01 포함, 1,560행 mock에서 `[]` 반환으로 잘림 재현) 확인 후 복원 → 14/14 PASS 재확인.
+
+### 검증 수치
+
+- 전체 회귀: `npm run test:regression` — **1096/1096 PASS** (157 파일)
+- `npm run build` — Compiled successfully (타입 이슈 2회 — Supabase thenable 타입 → `fetchAllRows` 제네릭을 `unknown[]`/`error: unknown`으로 완화 후 해소)
+- DB 실측: `zen_ups_base_rates` 활성 행 **1,560건** (수정 전 1,000행 제한으로 12kg에서 전 상품 공통 잘림)
+
+### R-10 실브라우저 검증 (문서 커밋, 스크린샷 `docs/99_Manual/E2E_268_Result/`)
+
+- AGENCY 역할 계정(`r10_agency_268@zenith.kr`) 실제 로그인 → `/ko/agency/ups-rates` 진입
+- 기준요금 탭에서 "UPS WorldWide Express (비서류)"(WW_EXPRESS_NONDOC) 제품 선택
+- **20kg 행 헤더 렌더링 확인** (`02_express_nondoc_selected.png`) — 수정 전엔 12kg에서 끊겼음
+- 매트릭스 요약: **"총 1560건 기준요금"** — 1,000행 제한 없이 전체 행 반환 확인
+
+### R-17 DoD 체크리스트
+
+- [x] 코드 커밋 (paginate-all 헬퍼 + 두 함수 + 테스트 9건)
+- [x] 문서 커밋 (R-10 증적)
+- [x] 회귀 1096/1096 PASS / build SUCCESS
+- [x] R-10 실브라우저 (Express NON_DOC 20kg 행 + 총 1,560건 표시 확인)
+- [x] 되돌리기 검증 (페이지네이션 제거 시 8건 FAIL 재현)
+
+## [발견 이슈]
+
+1. **지연 로딩 미적용**: 기준요금 조회가 여전히 화면 진입 시 전체 상품 데이터를 한 번에 로드하는 구조. 상품 선택 시에만 해당 상품을 조회하도록 전환하면 페이지네이션 자체가 대부분 불필요해짐(1,000행 미만) — 후속 IMP로 권장(task 수정 방향 참조). 현재는 페이지네이션으로 해소.
+
 
 ## [발견 이슈]
 
