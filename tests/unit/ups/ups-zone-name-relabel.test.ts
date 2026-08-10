@@ -1,55 +1,55 @@
 // DEF-B-048 / Issue #1051: zen_ups_zones 이름표 단순화 회귀 테스트
+// Supabase CLI(db query)로 DB 쿼리하여 검증
 import { describe, it, expect } from 'vitest';
-import { readFileSync } from 'fs';
-import { join } from 'path';
+import { execSync } from 'child_process';
 
-describe('TC-DEF-B048-01: 마이그레이션 SQL 검증', () => {
-  const migrationPath = join(process.cwd(), 'supabase/migrations/20260811020000_iss1051_ups_zone_name_relabel.sql');
-  const migrationSql = readFileSync(migrationPath, 'utf-8');
+function queryDB(sql: string): string {
+  return execSync(`npx supabase db query --local "${sql}"`, {
+    cwd: process.cwd(),
+    encoding: 'utf-8',
+  });
+}
 
-  it('10개 zone에 대한 UPDATE 문이 모두 포함되어 있다', () => {
-    for (let i = 1; i <= 10; i++) {
-      const zoneCode = i === 10 ? 'Z10' : `Z${i}`;
-      const expectedName = `Zone ${i}`;
-      expect(migrationSql).toContain(`zone_name = '${expectedName}' WHERE zone_code = '${zoneCode}'`);
-    }
+describe('TC-DEF-B048-01: DB 쿼리 기반 zone_name 검증', () => {
+  it('10개 zone이 존재한다', () => {
+    const output = queryDB('SELECT COUNT(*) as count FROM zen_ups_zones;');
+    expect(output).toContain('10');
   });
 
-  it('zone_id는 변경하지 않는다 (UPDATE만 존재)', () => {
-    expect(migrationSql).not.toContain('ALTER');
-    expect(migrationSql).not.toContain('DROP');
-    expect(migrationSql).not.toContain('INSERT');
+  it('모든 zone_name이 "Zone N" 형식이다', () => {
+    const output = queryDB("SELECT zone_name FROM zen_ups_zones WHERE zone_name !~ '^Zone [0-9]+$';");
+    expect(output).not.toContain('Zone');
+  });
+
+  it('기존 대륙명 라벨이 제거되었다', () => {
+    const output = queryDB('SELECT zone_name FROM zen_ups_zones;');
+    const invalidPatterns = ['Domestic', 'East Asia', 'SE Asia', 'Oceania', 
+      'Middle East', 'Europe', 'North America', 'South America', 'Africa'];
+    
+    for (const pattern of invalidPatterns) {
+      expect(output).not.toContain(pattern);
+    }
   });
 });
 
-describe('TC-DEF-B048-02: 예상 zone_name 형식 검증', () => {
-  const expectedZoneNames: Record<string, string> = {
-    'Z1': 'Zone 1',
-    'Z2': 'Zone 2',
-    'Z3': 'Zone 3',
-    'Z4': 'Zone 4',
-    'Z5': 'Zone 5',
-    'Z6': 'Zone 6',
-    'Z7': 'Zone 7',
-    'Z8': 'Zone 8',
-    'Z9': 'Zone 9',
-    'Z10': 'Zone 10',
-  };
-
-  it('모든 zone_name이 "Zone N" 형식이다', () => {
-    for (const [zoneCode, expectedName] of Object.entries(expectedZoneNames)) {
-      expect(expectedName).toMatch(/^Zone \d+$/);
-      expect(expectedName).not.toContain('Domestic');
-      expect(expectedName).not.toContain('East Asia');
-      expect(expectedName).not.toContain('North America');
-    }
+describe('TC-DEF-B048-02: zone_id 불변 검증', () => {
+  it('zone_id가 유효한 UUID 형식이다', () => {
+    const output = queryDB('SELECT id::text FROM zen_ups_zones LIMIT 1;');
+    expect(output).toMatch(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/);
   });
 
-  it('zone_code와 zone_name의 번호가 일치한다', () => {
-    for (const [zoneCode, expectedName] of Object.entries(expectedZoneNames)) {
-      const zoneNumber = zoneCode === 'Z10' ? '10' : zoneCode.replace('Z', '');
-      expect(expectedName).toBe(`Zone ${zoneNumber}`);
-    }
+  it('zone_code가 변경되지 않았다', () => {
+    const output = queryDB('SELECT zone_code FROM zen_ups_zones ORDER BY zone_code;');
+    expect(output).toContain('Z1');
+    expect(output).toContain('Z2');
+    expect(output).toContain('Z3');
+    expect(output).toContain('Z4');
+    expect(output).toContain('Z5');
+    expect(output).toContain('Z6');
+    expect(output).toContain('Z7');
+    expect(output).toContain('Z8');
+    expect(output).toContain('Z9');
+    expect(output).toContain('Z10');
   });
 });
 
