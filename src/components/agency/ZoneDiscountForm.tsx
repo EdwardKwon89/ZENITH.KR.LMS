@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { AlertCircle, Save } from 'lucide-react';
 import { getShipperZoneDiscounts, upsertShipperZoneDiscounts } from '@/app/actions/agency/zone-discounts';
 import { createPricingSchedule, getScheduledPricingChanges, cancelPricingSchedule, getPricingAuditLog } from '@/app/actions/ups/pricing-schedule';
+import { getKstToday } from '@/lib/utils/date-kst';
 import type { UpsZoneWithCountries } from '@/types/ups';
 
 interface ZoneDiscountFormProps {
@@ -28,9 +29,7 @@ export function ZoneDiscountForm({ shipperOrgId, shipperType, zones, agencyOrgId
   // Issue #1018: cargo_type 상태 추가
   const [cargoType, setCargoType] = useState('ALL');
 
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  const minDate = tomorrow.toISOString().split('T')[0];
+  const minDate = getKstToday();
 
   useEffect(() => {
     async function load() {
@@ -64,6 +63,10 @@ export function ZoneDiscountForm({ shipperOrgId, shipperType, zones, agencyOrgId
       }
       if (!agencyOrgId) {
         setError('대리점 정보를 찾을 수 없습니다.');
+        return;
+      }
+      // Issue #1021: 적용일자가 오늘이면 저장 즉시 실제 요금에 반영됨 — 사용자 확인
+      if (validFrom === getKstToday() && !window.confirm('적용일자가 오늘입니다. 저장 즉시 실제 요금에 반영됩니다. 계속하시겠습니까?')) {
         return;
       }
       for (const [zoneId, rate] of Object.entries(zoneRates)) {
@@ -169,7 +172,7 @@ export function ZoneDiscountForm({ shipperOrgId, shipperType, zones, agencyOrgId
               className="w-full px-2 py-1.5 bg-white border border-blue-200 rounded-lg text-sm" />
           </div>
         </div>
-        <p className="text-[10px] text-blue-600">* 적용일자는 필수입니다. 예약 등록 후 매일 자정 배치로 적용됩니다.</p>
+        <p className="text-[10px] text-blue-600">* 적용일자를 오늘로 지정하면 저장 즉시 실제 요금에 반영되고, 미래 날짜는 예약 등록 후 매일 자정 배치로 적용됩니다.</p>
 
         {scheduledChanges.length > 0 && (
           <div className="p-3 bg-amber-50 rounded-xl border border-amber-200">

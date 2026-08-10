@@ -5,6 +5,8 @@ import { validateUserAction } from '@/lib/auth/guards';
 import { USER_ROLES } from '@/lib/auth/rbac';
 import { createAdminClient } from '@/utils/supabase/server';
 import { logger } from '@/lib/logger';
+import { getKstToday } from '@/lib/utils/date-kst';
+import { applySchedule } from '@/lib/ups/pricing-schedule-apply';
 
 type SettingType = 'AGENCY_DISCOUNT' | 'SHIPPER_DISCOUNT' | 'VOLUMETRIC_DIVISOR';
 
@@ -46,16 +48,17 @@ function requireSchedulePermission(role: string | undefined, settingType: Settin
 }
 
 function validateScheduleDates(validFrom: string, validUntil?: string | null) {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const fromDate = new Date(validFrom);
+  // Issue #1021: '오늘' 허용 (KST 기준). 기존 new Date() 로컬/UTC 기준은
+  // 자정 근처 KST/UTC 경계 오차가 있어 getKstToday()(Asia/Seoul)로 정정.
+  const today = getKstToday();
+  const fromDate = validFrom.slice(0, 10);
 
-  if (fromDate <= today) {
-    throw new Error('적용일자는 내일 이후만 가능합니다.');
+  if (fromDate < today) {
+    throw new Error('적용일자는 오늘 이후만 가능합니다.');
   }
 
   if (validUntil) {
-    const untilDate = new Date(validUntil);
+    const untilDate = validUntil.slice(0, 10);
     if (untilDate <= fromDate) {
       throw new Error('종료일자는 적용일자 이후여야 합니다.');
     }
@@ -171,6 +174,13 @@ export async function createPricingSchedule(input: CreatePricingScheduleInput) {
     changed_by: profile.id,
   });
 
+  // Issue #1021: 적용일자가 오늘(KST)이면 익일 자정 cron을 기다리지 않고 즉시 반영.
+  // 미래 날짜면 SCHEDULED 유지 → cron이 기존대로 처리.
+  if (input.valid_from.slice(0, 10) <= getKstToday()) {
+    await applySchedule(admin, data);
+    data.status = 'APPLIED';
+  }
+
   revalidatePath('/admin/ups-rates');
   return data;
 }
@@ -232,6 +242,17 @@ export async function updatePricingSchedule(id: string, input: UpdatePricingSche
     new_data: { new_value: newValue, valid_from: newValidFrom, valid_until: newValidUntil },
     changed_by: profile.id,
   });
+
+  // Issue #1021: 수정 후 적용일자가 오늘(KST)이면 즉시 반영(기존 SCHEDULED 게이트로
+  // 이 함수는 항상 SCHEDULED 상태에서만 진입하므로 안전).
+  if (newValidFrom.slice(0, 10) <= getKstToday()) {
+    await applySchedule(admin, {
+      ...existing,
+      new_value: newValue,
+      valid_from: newValidFrom,
+      valid_until: newValidUntil,
+    });
+  }
 
   revalidatePath('/admin/ups-rates');
 }

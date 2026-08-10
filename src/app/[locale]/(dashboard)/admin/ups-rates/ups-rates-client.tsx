@@ -22,6 +22,7 @@ import {
   createUpsSurgeFee, updateUpsSurgeFee, deleteUpsSurgeFee,
 } from '@/app/actions/ups/rates-mutation';
 import { createPricingSchedule, getScheduledPricingChanges, cancelPricingSchedule, getPricingAuditLog } from '@/app/actions/ups/pricing-schedule';
+import { getKstToday } from '@/lib/utils/date-kst';
 import type { ColumnDef } from '@tanstack/react-table';
 import UpsBaseRateMatrix from '@/components/ups/UpsBaseRateMatrix';
 
@@ -185,6 +186,11 @@ export default function UpsRatesClient({ zones, products, baseRates, fuelSurchar
         const { agency_org_id, zone_rates, is_active, volumetric_divisor, valid_from, valid_until, cargo_type } = form;
         if (!agency_org_id) throw new Error('대리점을 선택해주세요.');
         if (!valid_from) throw new Error('적용일자를 입력해주세요.');
+
+        // Issue #1021: 적용일자가 오늘이면 저장 즉시 실제 요금에 반영됨 — 사용자 확인
+        if (valid_from === getKstToday() && !window.confirm('적용일자가 오늘입니다. 저장 즉시 실제 요금에 반영됩니다. 계속하시겠습니까?')) {
+          return;
+        }
 
         // Issue #1018: cargo_type은 target_ref에 포함 (없으면 'ALL' 기본값)
         const cargoType = cargo_type || 'ALL';
@@ -531,9 +537,7 @@ function OtherChargeForm({ form, setForm, editingItem }: any) {
 // ─── Agency Policy (Zone Matrix) ────────────────────────────
 
 function AgencyPolicyForm({ form, setForm, agencies, zones }: any) {
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  const minDate = tomorrow.toISOString().split('T')[0];
+  const minDate = getKstToday();
 
   return (
     <>
@@ -599,7 +603,7 @@ function AgencyPolicyForm({ form, setForm, agencies, zones }: any) {
             className="w-full px-2 py-1.5 bg-white border border-blue-200 rounded-lg text-sm" />
         </div>
       </div>
-      <p className="text-[10px] text-blue-600">* 적용일자를 지정하면 즉시 적용 대신 예약 등록됩니다 (매일 자정 배치 적용).</p>
+      <p className="text-[10px] text-blue-600">* 적용일자를 오늘로 지정하면 저장 즉시 실제 요금에 반영되고, 미래 날짜는 예약 등록 후 매일 자정 배치로 적용됩니다.</p>
       <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.is_active ?? true} onChange={e => setForm({ ...form, is_active: e.target.checked })} /> 활성</label>
     </>
   );
