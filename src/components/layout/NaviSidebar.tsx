@@ -82,6 +82,7 @@ export default function NaviSidebar({
         { title: t("customs_rates"), href: "/admin/customs-rates" },
         { title: t("delivery_rates"), href: "/admin/delivery-rates" },
         { title: t("ups_rates"), href: "/admin/ups-rates" },
+        { title: t("exchange_rates"), href: "/admin/exchange-rates" },
         { title: t("transport_policies"), href: "/admin/settings/transport-policies" },
         { title: t("master_geo"), href: "/master/geo" },
         { title: t("master_orders"), href: "/master-orders" },

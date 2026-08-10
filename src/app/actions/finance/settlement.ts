@@ -7,7 +7,8 @@ import { revalidatePath } from 'next/cache';
 import { validateUserAction, validateAdminAction } from '@/lib/auth/guards';
 import { FinanceRepository } from '@/lib/repositories';
 import { USER_ROLES } from '@/lib/auth/rbac';
-import { getNumericParam } from '@/lib/params/service';
+import { getExchangeRate } from '@/lib/finance/exchange-rate';
+import { getKstToday } from '@/lib/utils/date-kst';
 import { sendInvoiceFinalizedEmail } from '@/lib/notifications/email';
 
 export async function generateInvoicesForOrder(orderId: string) {
@@ -538,7 +539,7 @@ async function createAdjustmentInvoice(
 ) {
   const today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
   const invNo = `INV-${today}-${Math.floor(1000 + Math.random() * 9000)}`;
-  const exchangeRate = await getNumericParam('EXCHANGE_RATE_USD_KRW', 1350);
+  const exchangeRate = await getExchangeRate('USD', 'KRW', getKstToday(), supabase);
   const { data, error } = await supabase.from('zen_invoices').insert({
     invoice_no: invNo, shipper_id: origInv.shipper_id, total_amount: adjustmentAmount,
     currency, applied_exchange_rate: exchangeRate, status: 'UNPAID',

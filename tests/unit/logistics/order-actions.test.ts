@@ -40,7 +40,7 @@ describe('ZENITH Logistics: Order Creation Logic', () => {
       order: vi.fn().mockReturnThis(),
       limit: vi.fn().mockReturnThis(),
       single: vi.fn(),
-      maybeSingle: vi.fn(),
+      maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
     };
 
     (validateUserAction as any).mockResolvedValue({ 

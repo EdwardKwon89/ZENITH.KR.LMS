@@ -163,7 +163,7 @@ describe('TC-UPS-FREIGHT: Freight 제품군 70kg 기준 계산 (Issue #303)', ()
     ],
   });
 
-  it('≤70kg — 최소운임 정액 적용 (baseRate 미조회)', () => {
+  it('≤70kg — 최소운임 정액 적용 (baseRate 미조회), 원가에 UPS 7% 할증 적용 (Issue #1008/DEF-B-036)', () => {
     const data = freightData();
     const input: UpsFreightInput = {
       productId: 'p1',
@@ -172,7 +172,7 @@ describe('TC-UPS-FREIGHT: Freight 제품군 70kg 기준 계산 (Issue #303)', ()
     };
     const result = computeUpsFreight(input, data);
     expect(result.baseSellingPrice).toBe(180000);
-    expect(result.baseCostPrice).toBe(150000);
+    expect(result.baseCostPrice).toBeCloseTo(150000 * 1.07, 2);
     expect(result.breakdown.baseRateId).toBe('fm1');
   });
 

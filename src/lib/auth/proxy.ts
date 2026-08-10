@@ -203,6 +203,7 @@ export async function authGuard(
         purePath.startsWith('/admin/customs-rates') ||
         purePath.startsWith('/admin/delivery-rates') ||
         purePath.startsWith('/admin/ups-rates') ||
+        purePath.startsWith('/admin/exchange-rates') ||
         purePath.startsWith('/admin/ups-actual-charges') ||
         purePath.startsWith('/finance/daily-billing') ||
         purePath.startsWith('/voc') ||

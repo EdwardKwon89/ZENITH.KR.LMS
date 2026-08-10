@@ -119,11 +119,11 @@ export async function createOrder(payload: OrderRegistrationInput) {
   const updates: Record<string, unknown> = {};
 
   let resolvedAgencyOrgId: string | null = null;
-  if (profile.role === USER_ROLES.AGENCY_SHIPPER) {
+  if (profile.org_id) {
     const { data: agencyLink } = await supabase
       .from('zen_agency_shippers')
       .select('agency_org_id')
-      .eq('shipper_org_id', profile.org_id as string)
+      .eq('shipper_org_id', profile.org_id)
       .eq('is_active', true)
       .maybeSingle();
     resolvedAgencyOrgId = agencyLink?.agency_org_id ?? null;
@@ -143,7 +143,7 @@ export async function createOrder(payload: OrderRegistrationInput) {
     }
   }
 
-  if (profile.role === USER_ROLES.AGENCY_SHIPPER && validated.ups_product_code) {
+  if (validated.transport_mode === 'UPS' && validated.ups_product_code) {
     await saveOrderRateSnapshot({ supabase, orderId, validated, profile, agencyOrgId: resolvedAgencyOrgId, estimateFn: estimateUpsFreightFn });
   }
 

@@ -3,10 +3,11 @@
 import { logger } from '@/lib/logger';
 import { withAction } from '@/lib/actions/wrapper';
 import { validateUserAction } from "@/lib/auth/guards";
-import { getNumericParam, getParam } from "@/lib/params/service";
+import { getParam } from "@/lib/params/service";
+import { getExchangeRate } from '@/lib/finance/exchange-rate';
 
 export async function getUsdKrwRate(): Promise<number> {
-  return getNumericParam('EXCHANGE_RATE_USD_KRW', 1350);
+  return getExchangeRate('USD', 'KRW');
 }
 
 export async function getBaseCurrency(): Promise<string> {
