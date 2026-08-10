@@ -51,6 +51,20 @@ export interface UpsFreightEstimate {
   shipper: UpsShipperFreightResult | null;
 }
 
+/**
+ * Issue #1023 (DEF-B-038): 상품 cargo_type에 대한 할인율 정책 후보 순서(구체적 값 우선 → ALL 폴백).
+ * JSJung 확정 규칙:
+ *   - DOC 상품     → ['DOC', 'ALL']
+ *   - NON_DOC 상품 → ['NON_DOC', 'ALL']
+ *   - BOTH(Expedited/Flight) → ['NON_DOC', 'ALL'] (DOC 정책은 적용 대상 아님)
+ * 반환 배열 앞쪽일수록 우선순위가 높으며, 배열 순서로 "구체적 값 우선, 없으면 ALL" 폴백을 보장한다.
+ */
+function candidateCargoTypes(productCargoType: string): string[] {
+  if (productCargoType === 'DOC') return ['DOC', 'ALL'];
+  if (productCargoType === 'NON_DOC') return ['NON_DOC', 'ALL'];
+  return ['NON_DOC', 'ALL']; // BOTH (Expedited/Flight) — DOC는 후보에 없음
+}
+
 export async function estimateUpsFreight(input: EstimateUpsFreightInput): Promise<UpsFreightEstimate> {
   const { supabase } = await validateUserAction();
   const refDate = input.referenceDate ?? new Date().toISOString().split('T')[0];
@@ -221,17 +235,22 @@ export async function estimateUpsFreight(input: EstimateUpsFreightInput): Promis
   // Issue #617: 내부 원가 계산 목적 조회는 서비스 롤(admin) 클라이언트 사용 — RLS 우회
   const admin = await createAdminClient();
 
-  // Issue #1018: cargo_type 매핑 — Expedited/Flight는 'ALL', Express/Saver는 DOC/NONDOC
-  const policyCargoType = product.cargo_type === 'BOTH' ? 'ALL' : product.cargo_type;
+  // Issue #1023 (DEF-B-038): cargo_type 폴백 — JSJung 확정 규칙
+  //   - DOC 상품  : ['DOC', 'ALL']  → DOC 없으면 ALL로 폴백
+  //   - NON_DOC 상품: ['NON_DOC', 'ALL'] → NON_DOC 없으면 ALL로 폴백
+  //   - BOTH(Expedited/Flight): ['NON_DOC', 'ALL'] → NON_DOC 우선, ALL 폴백 (DOC는 후보 아님)
+  const candidates = candidateCargoTypes(product.cargo_type);
 
-  const { data: policy } = await admin
+  const { data: policies } = await admin
     .from('zen_agency_pricing_policies')
-    .select('discount_rate')
+    .select('discount_rate, cargo_type')
     .eq('agency_org_id', input.agencyOrgId)
     .eq('zone_id', zone.id)
-    .eq('cargo_type', policyCargoType)
-    .eq('is_active', true)
-    .maybeSingle();
+    .in('cargo_type', candidates)
+    .eq('is_active', true);
+  const policy = candidates
+    .map((ct) => (policies as Array<{ discount_rate: string | number; cargo_type: string }> | null)?.find((p) => p.cargo_type === ct))
+    .find(Boolean);
   const discountRate = Number(policy?.discount_rate ?? 0);
 
   const agencyCharges: any[] = [];
@@ -252,16 +271,18 @@ export async function estimateUpsFreight(input: EstimateUpsFreightInput): Promis
     return { platform, agency, shipper: null };
   }
 
-  const { data: shipperZoneDiscount } = await supabase
+  const { data: shipperZoneDiscounts } = await supabase
     .from('zen_agency_shipper_zone_discounts')
-    .select('discount_rate')
+    .select('discount_rate, cargo_type')
     .eq('agency_org_id', input.agencyOrgId)
     .eq('shipper_org_id', input.shipperOrgId)
     .eq('zone_id', zone.id)
-    .eq('cargo_type', policyCargoType)
-    .eq('is_active', true)
-    .maybeSingle();
-  const shipperDiscountRate = Number(shipperZoneDiscount?.discount_rate ?? 0);
+    .in('cargo_type', candidates)
+    .eq('is_active', true);
+  const shipperPolicy = candidates
+    .map((ct) => (shipperZoneDiscounts as Array<{ discount_rate: string | number; cargo_type: string }> | null)?.find((p) => p.cargo_type === ct))
+    .find(Boolean);
+  const shipperDiscountRate = Number(shipperPolicy?.discount_rate ?? 0);
   const shipper = computeShipperFreight(
     platform.baseSellingPrice,
     platform.fuelSurchargeSellingAmount,
