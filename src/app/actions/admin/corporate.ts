@@ -7,6 +7,21 @@ import { validateUserAction } from "@/lib/auth/guards";
 import { USER_ROLES } from "@/lib/auth/rbac";
 
 /**
+ * TASK-B-267 (Issue #1028): 법인정보/부서 관리 허용 역할 — CORPORATE·ADMIN + AGENCY·SHIPPER.
+ * NaviSidebar 메뉴 노출 조건·zen_organizations/zen_departments RLS 정책과 반드시 동일해야 한다.
+ */
+const CORPORATE_MGMT_ROLES = [
+  USER_ROLES.CORPORATE,
+  USER_ROLES.ADMIN,
+  USER_ROLES.AGENCY,
+  USER_ROLES.SHIPPER,
+];
+
+function canManageCorporateInfo(profile: { role: string } | null): boolean {
+  return !!profile && CORPORATE_MGMT_ROLES.includes(profile.role as any);
+}
+
+/**
  * 1. 법인 조직 정보 조회
  */
 export async function getOrganizationInfo() {
@@ -42,7 +57,7 @@ export const updateOrganizationInfo = withAction(async function (payload: {
 }) {
   const { profile, supabase } = await validateUserAction();
 
-  if (!profile || (profile.role !== USER_ROLES.CORPORATE && profile.role !== USER_ROLES.ADMIN)) {
+  if (!canManageCorporateInfo(profile)) {
     throw new Error("조직 정보를 수정할 권한이 없습니다.");
   }
 
@@ -105,7 +120,7 @@ export async function getDepartments(page = 1, pageSize = 50) {
 export const createDepartment = withAction(async function (name: string) {
   const { profile, supabase } = await validateUserAction();
 
-  if (!profile || (profile.role !== USER_ROLES.CORPORATE && profile.role !== USER_ROLES.ADMIN)) {
+  if (!canManageCorporateInfo(profile)) {
     throw new Error("부서 관리 권한이 없습니다.");
   }
 
@@ -135,7 +150,7 @@ export const createDepartment = withAction(async function (name: string) {
 export const updateDepartment = withAction(async function (id: string, name: string) {
   const { profile, supabase } = await validateUserAction();
 
-  if (!profile || (profile.role !== USER_ROLES.CORPORATE && profile.role !== USER_ROLES.ADMIN)) {
+  if (!canManageCorporateInfo(profile)) {
     throw new Error("부서 관리 권한이 없습니다.");
   }
 
@@ -164,7 +179,7 @@ export const updateDepartment = withAction(async function (id: string, name: str
 export const deleteDepartment = withAction(async function (id: string) {
   const { profile, supabase } = await validateUserAction();
 
-  if (!profile || (profile.role !== USER_ROLES.CORPORATE && profile.role !== USER_ROLES.ADMIN)) {
+  if (!canManageCorporateInfo(profile)) {
     throw new Error("부서 관리 권한이 없습니다.");
   }
 
