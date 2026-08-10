@@ -43,6 +43,8 @@ export interface EstimateUpsFreightInput {
   referenceDate?: string;
   /** Zone 조회 방향 (EXPORT | IMPORT). 기본값 EXPORT. */
   direction?: string;
+  /** DEF-B-044: 목적지 성/직할시 ISO 코드 — 중국(CN) 목적지 Zone(CNS/CNN) 판정용. */
+  destStateProvince?: string;
 }
 
 export interface UpsFreightEstimate {
@@ -87,7 +89,8 @@ export async function estimateUpsFreight(input: EstimateUpsFreightInput): Promis
     input.destCountryCode,
     zonesRaw as UpsZoneWithCountries[],
     productFamily,
-    direction
+    direction,
+    input.destStateProvince
   );
   if (!zone) throw new Error(`목적지 국가(${input.destCountryCode})에 매핑된 Zone이 없습니다.`);
 

@@ -8,7 +8,7 @@
 | **담당** | Dave (Team B) |
 | **생성일** | 2026-08-11 |
 | **우선순위** | **P1 (Critical)** |
-| **상태** | ⬜ |
+| **상태** | 🔔 (완료 보고 — 검토 요청) |
 
 ## 근본 원인 (Issue #1044 / DEF-B-044 참조 — 원인 확정 완료)
 
@@ -71,7 +71,49 @@ DB에는 CNN/CNS 데이터가 정확히 존재(확인 완료)하지만, 앱 어�
 
 ## [작업 결과]
 
-_(담당자 작성 예정)_
+**작성자**: Dave | **작성일**: 2026-08-11 | **상태**: 🔔 (검토 요청)
+
+### 구현 (코드 커밋 `fca623e7`)
+
+1. **`src/lib/ups/pricing-engine.ts`** — `resolveZoneByCountry()` 5번째 파라미터 `destStateProvince?: string` 추가. `CHINA_SOUTH_STATE_CODES = ['FJ','HI','HN','YN','JX','GX','GD','CQ']`(UPS 공식 PDF 8개 남부 지역) + `resolveChinaSubCode()` 헬퍼. 함수 시작부에서 `code === 'CN'`이면 `resolveChinaSubCode(destStateProvince)`로 `CNS`/`CNN` 정규화 후 기존 로직 그대로 진행. `destStateProvince` 미전달 시 `CNN` 기본 처리.
+2. **`src/app/actions/ups/freight.ts`** — `EstimateUpsFreightInput.destStateProvince?: string` 추가, `resolveZoneByCountry` 호출에 전달.
+3. **`src/components/orders/UpsFreightEstimateSection.tsx`** — `destStateProvince` prop 추가, `estimateUpsFreight` 호출부 + effect dependency에 포함.
+4. **`src/components/orders/OrderRegistrationForm.tsx`** — `destStateProvince={watch('recipient_state_province') || undefined}` 배선 + CN 선택 시 안내 문구(조건부 렌더링, AddressInput 공용 컴포넌트 미변경).
+5. **`src/lib/validation/order.ts`** — `recipient_country_code === 'CN'`이면 `recipient_state_province` 조건부 필수(zod superRefine) — 미입력/공백 시 명시적 에러 "중국 배송은 지역(성/직할시) 선택이 필수입니다 — UPS Zone이 지역에 따라 달라집니다". (JSJung 확정: 조용히 추정하지 않음)
+
+### 회귀 테스트 (코드 커밋 — 12건 신설)
+
+- `pricing-engine.test.ts` — **TC-UPS-CHINA-01 (7건)**: GD→Z10, 남부 8개 지역(FJ/HI/HN/YN/JX/GX/GD/CQ) 전부→Z10, BJ→Z1, 주 미전달→Z1(방어), 소문자 `gd`→Z10, SAVER 동일 적용, CN 외 국가(US/JP) 회귀 무영향
+- `order-validation.test.ts` — **DEF-B-044 CN 필수 (5건)**: CN+성 미입력→실패, CN+GD→통과, CN+공백→실패, US/JP 성 미입력→통과(회귀 방지)
+
+**되돌리기 검증**: `resolveZoneByCountry` 정규화 제거 시 **TC-UPS-CHINA 6건 FAIL**(중국 전체 실패 재현) 확인 후 복원 → 62/62 PASS 재확인.
+
+### 검증 수치
+
+- 전체 회귀: `npm run test:regression` — **1124/1124 PASS** (159 파일)
+- `npm run build` — Compiled successfully (14.3s)
+- 기존 CN 오더 데이터: **0건** (recipient_state_province 미입력 레거시 레코드 없음 — 레거시 처리 불필요)
+
+### R-10 실브라우저 검증 (문서 커밋, 스크린샷 `docs/99_Manual/E2E_272_Result/`)
+
+- SHIPPER 계정(`r10_shipper_272@zenith.kr`) 실제 로그인 → 오더 등록 UPS Direct → 수하인 국가=중국
+- **성=Guangdong(GD, 남부)** → 예상운임 정상 계산, **Zone10 요율 (296,875원)** — 에러 없음 (`01_china_guangdong_estimate.png`)
+- **성=Beijing(BJ, 목록 외)** → 예상운임 정상 계산, **Zone1 요율 (307,295원)** — Zone10과 다른 요율로 상이 확인 (`02_china_beijing_estimate.png`)
+- **성 미선택** 상태로 "오더 등록" 제출 → "중국 배송은 UPS Zone이 지역(성/직할시)에 따라 달라지므로..." 안내 + 제출 차단(`03_china_no_state_blocked.png`)
+- 중국만 국가 선택(성 미선택) 시에도 CNN 기본으로 조회 에러 없음 확인 (안내 문구만 표시)
+
+### R-17 DoD 체크리스트
+
+- [x] 코드 커밋 (`fca623e7`) — pricing-engine/freight/UpsFreightEstimateSection/OrderRegistrationForm/order.ts + 테스트 12건
+- [x] 문서 커밋 — R-10 증적
+- [x] 회귀 1124/1124 PASS / build SUCCESS
+- [x] R-10 실브라우저 (GD→Zone10, BJ→Zone1, 성 미선택 차단)
+- [x] 되돌리기 검증 (정규화 제거 시 중국 6건 FAIL 재현)
+
+## [발견 이슈]
+
+없음
+
 
 ## [발견 이슈]
 
