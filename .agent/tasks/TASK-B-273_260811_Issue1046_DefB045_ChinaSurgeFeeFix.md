@@ -8,7 +8,7 @@
 | **담당** | Dave (Team B) |
 | **생성일** | 2026-08-11 |
 | **우선순위** | P2 |
-| **상태** | ⬜ |
+| **상태** | 🔔 (완료 보고 — 검토 요청) |
 
 ## 근본 원인 (Issue #1046 / DEF-B-045 참조 — 확정 완료)
 
@@ -71,7 +71,55 @@ const { data: surgeFeeRows } = await supabase
 
 ## [작업 결과]
 
-_(담당자 작성 예정)_
+**작성자**: Dave | **작성일**: 2026-08-11 | **상태**: 🔔 (검토 요청)
+
+### 구현 (코드 커밋 `b1d0ceba`)
+
+`src/app/actions/ups/freight.ts`의 급증 수수료 조회에 `resolveChinaSubCode()`(TASK-B-272에서 export된 기존 헬퍼) 재사용:
+
+```ts
+const surgeFeeCountryCode = input.destCountryCode.toUpperCase() === 'CN'
+  ? resolveChinaSubCode(input.destStateProvince)
+  : input.destCountryCode;
+```
+
+`input.destStateProvince`는 TASK-B-272에서 이미 `EstimateUpsFreightInput`에 추가되어 있어 추가 배선 불필요 — `freight.ts` 내부 로직만 수정. DB 확인: `zen_ups_surge_fees`에 `CNN`/`CNS`(각 143.00원/kg) 존재, `CN`은 0건.
+
+**범위 확인**: `freight.ts` 내 `destination_country_code` 조회는 이 한 곳뿐. `rates.ts`/`rates-mutation.ts`/`rates-public.ts`의 사용처는 전부 관리자 CRUD/목록조회용이라 원본 코드 그대로 노출이 맞음 — 정규화 대상 아님 재확인.
+
+### 회귀 테스트 (코드 커밋 — 4건 신설, `tests/unit/ups/freight-actions.test.ts`)
+
+| TC | 시나리오 | 결과 |
+|:---|:---------|:-----|
+| TC-UPS-FREIGHT-SURGE-CN-01 | CN+GD → `destination_country_code='CNS'` 조회 + surgeFeeSellingAmount > 0 | ✅ |
+| TC-UPS-FREIGHT-SURGE-CN-02 | CN+BJ → `'CNN'` 조회 + > 0 | ✅ |
+| TC-UPS-FREIGHT-SURGE-CN-03 | CN+주 정보 없음 → `'CNN'` 기본 정규화 + > 0 (방어적 동작) | ✅ |
+| TC-UPS-FREIGHT-SURGE-CN-04 | CN 외(USA) → 원본 코드 조회, CNN/CNS 미호출 (회귀 방지) | ✅ |
+
+**되돌리기 검증**: 정규화 제거(수정 전 코드) 후 실행 → **중국 급증 수수료 테스트 3건 FAIL**(surgeFee 0 재현) 확인 후 복원 → freight 32/32 PASS 재확인.
+
+### 검증 수치
+
+- 전체 회귀: `npm run test:regression` — **1128/1128 PASS** (159 파일)
+- `npm run build` — Compiled successfully (15.5s)
+
+### R-10 실브라우저 검증 (문서 커밋, 스크린샷 `docs/99_Manual/E2E_273_Result/`)
+
+- SHIPPER 계정 실제 로그인 → 오더 등록 UPS Direct → 수하인 국가=중국 + 성=Guangdong(GD)
+- **UPS 예상 운임 패널에 "급증 긴급 수수료 1,049.263 KRW" 표시 확인** — 수정 전엔 `CN` 코드 조회 실패로 항목이 통째로 누락되었음 (`01_china_gd_surge_fee.png`)
+
+### R-17 DoD 체크리스트
+
+- [x] 코드 커밋 (`b1d0ceba`) — freight.ts surge 조회 정규화 + 테스트 4건
+- [x] 문서 커밋 — R-10 증적
+- [x] 회귀 1128/1128 PASS / build SUCCESS
+- [x] R-10 실브라우저 (중국 GD 급증 수수료 표시)
+- [x] 되돌리기 검증 (정규화 제거 시 3건 FAIL 재현)
+
+## [발견 이슈]
+
+없음
+
 
 ## [발견 이슈]
 
