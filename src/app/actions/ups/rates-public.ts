@@ -29,6 +29,8 @@ export async function getPublicBaseRates(): Promise<PublicBaseRate[]> {
       .lte('valid_from', refDate)
       .or(`valid_until.is.null,valid_until.gte.${refDate}`)
       .order('weight_kg')
+      // DEF-B-043: 페이지네이션 두 요청 간 동률(weight_kg 동일) 행 순서 보장 — id(UUID PK) 2차 정렬로 결정적 순서 확보
+      .order('id')
       .range(from, to);
     return { data, error };
   });

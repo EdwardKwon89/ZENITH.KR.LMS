@@ -56,7 +56,11 @@ export async function getUpsBaseRates(filters?: {
       .or(`valid_until.is.null,valid_until.gte.${refDate}`);
     if (filters?.productId) base = base.eq('product_id', filters.productId);
     if (filters?.zoneId) base = base.eq('zone_id', filters.zoneId);
-    const { data, error } = await base.order('weight_kg').range(from, to);
+    const { data, error } = await base
+      .order('weight_kg')
+      // DEF-B-043: 페이지네이션 두 요청 간 동률(weight_kg 동일) 행 순서 보장 — id(UUID PK) 2차 정렬로 결정적 순서 확보
+      .order('id')
+      .range(from, to);
     return { data, error };
   });
   return data as unknown as UpsBaseRateWithRefs[];
