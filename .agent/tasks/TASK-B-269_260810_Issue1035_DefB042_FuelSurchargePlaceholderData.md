@@ -7,8 +7,9 @@
 | **배경** | JSJung이 UPS 공식 "90일 유류 할증료 이력" 캡처 제공 → Jaison이 구현 DB와 대조, 값이 약 3배 낮은 placeholder임을 확정 |
 | **담당** | Baker (Team B) |
 | **생성일** | 2026-08-10 |
+| **완료일** | 2026-08-10 |
 | **우선순위** | P1 |
-| **상태** | ⬜ |
+| **상태** | 🔔 |
 
 ## 근본 원인 (Issue #1035 / DEF-B-042 참조)
 
@@ -69,8 +70,27 @@
 
 ## [작업 결과]
 
-_(담당자 작성 예정)_
+- **커밋**: `f7abfbff` `[Baker] fix: TASK-B-269 Issue #1035/DEF-B-042 UPS 유류할증료 placeholder(18.5%/15.5%) → UPS 공지 실데이터 13주 반영 (2026-05-18~08-10, 최신 46.75%)` — `supabase/migrations/20260810140000_ups_fuel_surcharge_real_data.sql` + `tests/unit/migrations/defb042-fuel-surcharge-real-data.test.ts` (2 files, +141)
+- **마이그레이션** `20260810140000_ups_fuel_surcharge_real_data.sql`:
+  - `CREATE TEMP TABLE fuel_weeks (effective_week date, rate numeric) ON COMMIT DROP` — 13주 실데이터(2026-05-18~2026-08-10) 정의
+  - Postgres UNIQUE는 NULL을 서로 다른 값으로 취급 → `ON CONFLICT`로 기존 `product_id IS NULL` 행을 덮어쓸 수 없음 → **13주 해당 기존 NULL 행을 먼저 DELETE** 후 재삽입(placeholder 제거)
+  - `selling_rate = cost_rate = UPS 공지값`(JSJung 확정) — NULL(전체) 1행 + zen_ups_products 8종, 총 117행 = 13주 × 9
+  - 실제 상품은 **8종**(DB 실측, task 문서의 7종과 상이 — `CROSS JOIN zen_ups_products`로 동적 커버)
+  - 파일명 타임스탬프(`20260810140000`)가 시드(`20260628...`)보다 뒤 → DB reset 시 시드 placeholder 삽입 후 이 마이그레이션이 덮어씀(재발 방지 확인)
+- **테스트** `tests/unit/migrations/defb042-fuel-surcharge-real-data.test.ts` — **TC-269-01~06 6건 ALL PASS**:
+  - TC-269-01: 13주 NULL 행 값 정합(2026-08-10=0.4675 ... 2026-05-18=0.4950)
+  - TC-269-02: 상품 행(WW_EXPRESS_NONDOC @ 2026-08-10 = 0.4675/0.4675)
+  - TC-269-03: 총 행 수 117 = 13주 × (상품 8종 + NULL 1)
+  - TC-269-04: 전 행 selling_rate = cost_rate
+  - TC-269-05: placeholder 잔존 0건(0.185/0.155 없음)
+  - TC-269-06: 조회 로직 — 최신 유효 주차 2026-08-10, 0.4675/0.4675 (pricing-engine의 `.lte(effective_week, refDate)` 선택 재현)
+- **회귀**: `npm run test:regression` → **157/157 files · 1093/1093 tests ALL PASS** / `npm run build` **SUCCESS** (24.3s)
+- **되돌리기 검증**: 신규 마이그레이션 제거 후 `db reset` → 2026-08-10 단일 placeholder(0.185/0.155, 7행) 복귀 확인 → 복원 후 117행/13주 확인
+- **tsc**: 57 errors 전부 pre-existing(베이스와 동일 확인), 신규 파일 0건
+- **(R-10) 브라우저 검증**: admin@zenith.kr 로그인 → `/ko/admin/ups-rates` 유류할증 탭 — **13주 전체(2026-05-18~2026-08-10), 117행 표시, 2026-08-10 46.8%** (표시 반올림), placeholder(18.5%/15.5%) 미표시 확인. 스크린샷 `/tmp/r10-269-1-login.png`, `/tmp/r10-269-3-fuel-tab.png`, `/tmp/r10-269-4-final.png`
+  - 참고: 로그인 실패 1회는 `db reset` 후 `scripts/seed-local.ts` 미실행으로 admin 계정 부재가 원인 — 시드 실행 후 해결 (테스트 DB 관리 이슈, 코드 결함 아님)
 
 ## [발견 이슈]
 
-_(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
+- 없음 (Task 범위 내)
+- 참고: task 문서에 zen_ups_products 7종이라 기재되어 있으나 실제 DB는 8종(UPX_DOC 미존재, WW_SAVER_DOC/WW_SAVER_NONDOC 포함) — migration은 `CROSS JOIN`으로 동적 대응하여 영향 없음
