@@ -10,6 +10,7 @@ import {
   updateDepartment, 
   deleteDepartment 
 } from '@/app/actions/corporate';
+import { AddressInput } from '@/components/common/AddressInput';
 import { ZenCard, ZenButton, ZenInput } from '@/components/ui/ZenUI';
 import { 
   Building2, 
@@ -62,7 +63,14 @@ export default function CorporatePage() {
     const payload = {
       representative: formData.get('representative') as string,
       bizNo: formData.get('bizNo') as string,
+      country_code: formData.get('country_code') as string,
+      state_province: formData.get('state_province') as string,
+      city: formData.get('city') as string,
       address: formData.get('address') as string,
+      address_detail: formData.get('address_detail') as string,
+      zipcode: formData.get('zipcode') as string,
+      address_english: formData.get('address_english') as string,
+      address_detail_english: formData.get('address_detail_english') as string,
       contact: formData.get('contact') as string,
       email: formData.get('email') as string,
     };
@@ -236,10 +244,19 @@ export default function CorporatePage() {
 
                 <div className="md:col-span-2 space-y-2.5">
                   <label className="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">{t('label_address')}</label>
-                  <div className="relative group">
-                    <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4 transition-colors group-focus-within:text-brand-500" />
-                    <ZenInput name="address" defaultValue={org?.address || ''} className="pl-11 h-12 border-slate-200 rounded-xl focus:ring-brand-500/20" />
-                  </div>
+                  <AddressInput
+                    t={t}
+                    defaultValues={{
+                      country_code: org?.country_code || 'KR',
+                      state_province: org?.state_province || '',
+                      city: org?.city || '',
+                      address: org?.address || '',
+                      address_detail: org?.address_detail || '',
+                      address_english: org?.address_english || '',
+                      address_detail_english: org?.address_detail_english || '',
+                      zipcode: org?.zipcode || '',
+                    }}
+                  />
                 </div>
               </div>
 

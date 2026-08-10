@@ -216,6 +216,7 @@ export function AddressInput({
           {mode === 'form-action' && <input name="state_province" type="hidden" value={selectedState} />}
           {mode === 'form-action' && <input name="city" type="hidden" value={selectedCity} />}
           {mode === 'form-action' && <input name="address_english" type="hidden" value={addressEnglish} />}
+          {mode === 'form-action' && <input name="address_detail_english" type="hidden" value={addressDetailEnglish} />}
         </>
       ) : (
         <>
@@ -301,6 +302,8 @@ export function AddressInput({
               {fieldErrors.zipcode && <p className="text-xs text-red-500 mt-1">{fieldErrors.zipcode}</p>}
             </div>
           </div>
+          {mode === 'form-action' && <input name="address_english" type="hidden" value={addressEnglish} />}
+          {mode === 'form-action' && <input name="address_detail_english" type="hidden" value={addressDetailEnglish} />}
         </>
       )}
 
