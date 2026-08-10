@@ -18,6 +18,8 @@ const WAREHOUSE_ROLES = [
 ];
 
 async function getAgencyShipperIds(supabase: any, orgId: string): Promise<string[] | null> {
+  // TASK-B-274 (DEF-B-046): 대리점이 자기 자신을 화주로 등록한 오더(shipper_id = 본인 org_id)도
+  // 관리 가능한 대상에 포함한다. 하위 화주(zen_agency_shippers) 목록에 본인 org_id를 함께 반환.
   const { data, error } = await supabase
     .from("zen_agency_shippers")
     .select("shipper_org_id")
@@ -28,7 +30,8 @@ async function getAgencyShipperIds(supabase: any, orgId: string): Promise<string
     logger.error("getAgencyShipperIds error:", error);
     return null;
   }
-  return (data || []).map((r: any) => r.shipper_org_id);
+  const downstreamIds = (data || []).map((r: any) => r.shipper_org_id);
+  return [...downstreamIds, orgId];
 }
 
 export async function getWarehousedOrders() {
