@@ -141,3 +141,33 @@ describe('TC-UPS-RATES-PIVOT-02: openEdit() cargo_type 필터 (Issue #1023 연�
     expect(modalNumberInputs[1].value).toBe('');
   });
 });
+
+describe('TC-UPS-RATES-PIVOT-03: 신규 등록 폼 — Zone 할인율 spinner step + Volumetric Divisor 기본값', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it('Zone 할인율 입력의 step이 0.1이라 화살표 클릭이 표시값에 반영된다 (0.01이면 반올림에 의해 무시됨)', async () => {
+    render(<UpsRatesClient {...makeProps([])} />);
+    fireEvent.click(screen.getByRole('button', { name: /Agency 할인율 정책/i }));
+    fireEvent.click(screen.getByRole('button', { name: /할인율 정책 등록/i }));
+
+    await waitFor(() => expect(screen.getByText('Volumetric Divisor')).toBeInTheDocument());
+    const zoneRateInputs = Array.from(document.querySelectorAll('input[type="number"]')) as HTMLInputElement[];
+    expect(zoneRateInputs.length).toBeGreaterThan(0);
+    for (const input of zoneRateInputs) {
+      expect(input.step).toBe('0.1');
+    }
+  });
+
+  it('신규 등록 시 Volumetric Divisor 기본값이 6000이다', async () => {
+    render(<UpsRatesClient {...makeProps([])} />);
+    fireEvent.click(screen.getByRole('button', { name: /Agency 할인율 정책/i }));
+    fireEvent.click(screen.getByRole('button', { name: /할인율 정책 등록/i }));
+
+    await waitFor(() => expect(screen.getByText('Volumetric Divisor')).toBeInTheDocument());
+    const divisorSelect = Array.from(document.querySelectorAll('select')).find(
+      (sel) => Array.from(sel.options).some((o) => o.value === '6000')
+    ) as HTMLSelectElement | undefined;
+    expect(divisorSelect).toBeDefined();
+    expect(divisorSelect!.value).toBe('6000');
+  });
+});

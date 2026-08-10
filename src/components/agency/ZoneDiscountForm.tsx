@@ -142,7 +142,7 @@ export function ZoneDiscountForm({ shipperOrgId, shipperType, zones, agencyOrgId
               <span className="w-10 text-xs font-mono font-bold text-slate-600 shrink-0">{zone.zone_code}</span>
               <input
                 type="number"
-                step="0.01"
+                step="0.1"
                 min="0"
                 max="99.99"
                 value={zoneRates[zone.id] != null ? Math.round(Number(zoneRates[zone.id]) * 1000) / 10 : ''}

@@ -139,7 +139,7 @@ export default function UpsRatesClient({ zones, products, baseRates, fuelSurchar
 
   const openNew = () => {
     resetForm();
-    if (activeTab === 'agencyPolicies') setForm({ is_active: true, volumetric_divisor: 5000 });
+    if (activeTab === 'agencyPolicies') setForm({ is_active: true, volumetric_divisor: 6000 });
     setIsModalOpen(true);
   };
   const openEdit = (item: any) => {
@@ -150,7 +150,7 @@ export default function UpsRatesClient({ zones, products, baseRates, fuelSurchar
         .filter((p: any) => p.agency_org_id === item.agency_org_id && (p.cargo_type ?? 'ALL') === (item.cargo_type ?? 'ALL'))
         .forEach((p: any) => { zoneRates[p.zone_id] = Number(p.discount_rate); });
       const org = (agencies as Agency[]).find((a) => a.id === item.agency_org_id);
-      setForm({ agency_org_id: item.agency_org_id, cargo_type: item.cargo_type ?? 'ALL', zone_rates: zoneRates, is_active: item.is_active, volumetric_divisor: org?.volumetric_divisor ?? 5000 });
+      setForm({ agency_org_id: item.agency_org_id, cargo_type: item.cargo_type ?? 'ALL', zone_rates: zoneRates, is_active: item.is_active, volumetric_divisor: org?.volumetric_divisor ?? 6000 });
       setEditingItem({ ...item, _agencyPolicies: true });
     } else {
       setForm({ ...item });
@@ -552,7 +552,7 @@ function AgencyPolicyForm({ form, setForm, agencies, zones }: any) {
       </div>
       <div className="space-y-1">
         <label className="text-xs font-bold text-slate-500 uppercase">Volumetric Divisor</label>
-        <select value={form.volumetric_divisor ?? 5000} onChange={e => setForm({ ...form, volumetric_divisor: Number(e.target.value) as 5000 | 5500 | 6000 })}
+        <select value={form.volumetric_divisor ?? 6000} onChange={e => setForm({ ...form, volumetric_divisor: Number(e.target.value) as 5000 | 5500 | 6000 })}
           className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm">
           <option value={5000}>5000 (Standard)</option>
           <option value={5500}>5500</option>
@@ -577,7 +577,7 @@ function AgencyPolicyForm({ form, setForm, agencies, zones }: any) {
           {(zones as UpsZoneWithCountries[]).filter((z: any) => z.is_active).sort((a: any, b: any) => a.sort_order - b.sort_order).map((zone: any) => (
             <div key={zone.id} className="flex items-center gap-2">
               <span className="w-10 text-xs font-mono font-bold text-slate-600 shrink-0">{zone.zone_code}</span>
-              <input type="number" step="0.01" min="0" max="99.99"
+              <input type="number" step="0.1" min="0" max="99.99"
                 value={form.zone_rates?.[zone.id] != null ? Math.round(Number(form.zone_rates[zone.id]) * 1000) / 10 : ''}
                 onChange={(e) => setForm({
                   ...form,
