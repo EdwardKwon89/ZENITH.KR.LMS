@@ -14,6 +14,7 @@ import {
   applyOversizeRule,
   computeUpsFreight,
   resolveZoneByCountry,
+  resolveChinaSubCode,
   productFamilyFromCode,
 } from '@/lib/ups/pricing-engine';
 import { computeAgencyFreight } from '@/lib/ups/agency-pricing';
@@ -194,10 +195,14 @@ export async function estimateUpsFreight(input: EstimateUpsFreightInput): Promis
   const oversizeCharge = (allOtherCharges ?? []).find((c) => c.charge_code === 'OVERSIZE') as UpsOtherCharge | undefined;
 
   // Issue #491: 급증 긴급 수수료(Surge Emergency Fee) — 도착국·기준일 기준 유효 단가 1건 조회
+  // DEF-B-045: zen_ups_surge_fees도 중국을 CNN/CNS로 분리 관리 — CN이면 resolveChinaSubCode로 정규화
+  const surgeFeeCountryCode = input.destCountryCode.toUpperCase() === 'CN'
+    ? resolveChinaSubCode(input.destStateProvince)
+    : input.destCountryCode;
   const { data: surgeFeeRows } = await supabase
     .from('zen_ups_surge_fees')
     .select('*')
-    .eq('destination_country_code', input.destCountryCode)
+    .eq('destination_country_code', surgeFeeCountryCode)
     .eq('is_active', true)
     .lte('effective_from', refDate)
     .or(`effective_until.is.null,effective_until.gte.${refDate}`)
