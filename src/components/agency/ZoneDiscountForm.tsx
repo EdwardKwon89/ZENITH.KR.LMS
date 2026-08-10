@@ -25,6 +25,8 @@ export function ZoneDiscountForm({ shipperOrgId, shipperType, zones, agencyOrgId
   const [scheduledChanges, setScheduledChanges] = useState<any[]>([]);
   const [auditLog, setAuditLog] = useState<any[]>([]);
   const [showAuditLog, setShowAuditLog] = useState(false);
+  // Issue #1018: cargo_type 상태 추가
+  const [cargoType, setCargoType] = useState('ALL');
 
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
@@ -67,7 +69,8 @@ export function ZoneDiscountForm({ shipperOrgId, shipperType, zones, agencyOrgId
       for (const [zoneId, rate] of Object.entries(zoneRates)) {
         await createPricingSchedule({
           setting_type: 'SHIPPER_DISCOUNT',
-          target_ref: { agency_org_id: agencyOrgId, shipper_org_id: shipperOrgId, zone_id: zoneId },
+          // Issue #1018: cargo_type을 target_ref에 포함
+          target_ref: { agency_org_id: agencyOrgId, shipper_org_id: shipperOrgId, zone_id: zoneId, cargo_type: cargoType },
           new_value: rate,
           valid_from: validFrom,
           valid_until: validUntil || null,
@@ -115,6 +118,20 @@ export function ZoneDiscountForm({ shipperOrgId, shipperType, zones, agencyOrgId
             <AlertCircle size={14} /> {error}
           </div>
         )}
+
+        {/* Issue #1018: 화물 유형 선택 */}
+        <div className="space-y-1">
+          <label className="text-xs font-bold text-slate-500 uppercase">화물 유형</label>
+          <select value={cargoType} onChange={e => setCargoType(e.target.value)}
+            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm">
+            <option value="ALL">전체 (Expedited/Flight 포함)</option>
+            <option value="DOC">서류 (Express/Saver 한정)</option>
+            <option value="NON_DOC">비서류 (Express/Saver 한정)</option>
+          </select>
+          {cargoType !== 'ALL' && (
+            <p className="text-[10px] text-amber-600">※ DOC/NONDOC 선택 시 Express/Saver 상품에만 적용됩니다.</p>
+          )}
+        </div>
 
         <div className="grid grid-cols-2 gap-2">
           {activeZones.map(zone => (
