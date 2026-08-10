@@ -41,6 +41,10 @@ const BOX_PRODUCT = {
   id: 'p2', product_code: 'WW_FLIGHT', sub_code: null, product_name: 'Flight',
   cargo_type: 'BOX', ddu_available: false, ddp_available: true, is_active: true, sort_order: 2, created_at: '',
 };
+const EXPEDITED_PRODUCT = {
+  id: 'p3', product_code: 'WW_EXPEDITED', sub_code: null, product_name: 'Expedited',
+  cargo_type: 'BOTH', ddu_available: false, ddp_available: true, is_active: true, sort_order: 3, created_at: '',
+};
 const ZONE = {
   id: 'z1', zone_code: 'Z8', zone_name: 'North America', description: null, is_active: true, sort_order: 8,
   created_at: '', created_by: null, countries: [{ id: 'c1', zone_id: 'z1', country_code: 'USA', created_at: '', created_by: null }],
@@ -147,6 +151,59 @@ describe('TC-UPS-FREIGHT-01: estimateUpsFreight', () => {
     await expect(
       estimateUpsFreight({ productId: 'p1', destCountryCode: 'USA', actualWeightKg: 5 })
     ).rejects.toThrow(/기준요금/);
+  });
+});
+
+describe('TC-UPS-FREIGHT-03: 할인율 cargo_type 축 (Issue #1018)', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it('Express/Saver(cargo_type=NON_DOC) 상품은 Admin→Agency 할인율 조회 시 cargo_type=NON_DOC로 필터한다', async () => {
+    const policyMock = createQueryMock({ data: { discount_rate: 0.1 } });
+    (validateUserAction as any).mockResolvedValue({ supabase: buildMockSupabase() });
+    (createAdminClient as any).mockResolvedValue(
+      buildMockSupabase({ zen_agency_pricing_policies: policyMock })
+    );
+
+    await estimateUpsFreight({
+      productId: 'p1', destCountryCode: 'USA', actualWeightKg: 5, agencyOrgId: 'agency-1',
+    });
+
+    expect(policyMock.eq).toHaveBeenCalledWith('cargo_type', 'NON_DOC');
+  });
+
+  it('Expedited(cargo_type=BOTH) 상품은 cargo_type=ALL로 필터한다 — DOC/NONDOC 전용 정책의 영향을 받지 않음', async () => {
+    const policyMock = createQueryMock({ data: { discount_rate: 0.2 } });
+    (validateUserAction as any).mockResolvedValue({
+      supabase: buildMockSupabase({ zen_ups_products: createQueryMock({ data: EXPEDITED_PRODUCT }) }),
+    });
+    (createAdminClient as any).mockResolvedValue(
+      buildMockSupabase({ zen_agency_pricing_policies: policyMock })
+    );
+
+    await estimateUpsFreight({
+      productId: 'p3', destCountryCode: 'USA', actualWeightKg: 5, agencyOrgId: 'agency-1',
+    });
+
+    expect(policyMock.eq).toHaveBeenCalledWith('cargo_type', 'ALL');
+    expect(policyMock.eq).not.toHaveBeenCalledWith('cargo_type', 'DOC');
+    expect(policyMock.eq).not.toHaveBeenCalledWith('cargo_type', 'NON_DOC');
+  });
+
+  it('Agency→Shipper 할인율 조회에도 동일한 cargo_type 필터가 적용된다', async () => {
+    const shipperPolicyMock = createQueryMock({ data: { discount_rate: 0.05 } });
+    (validateUserAction as any).mockResolvedValue({
+      supabase: buildMockSupabase({ zen_agency_shipper_zone_discounts: shipperPolicyMock }),
+    });
+    (createAdminClient as any).mockResolvedValue(
+      buildMockSupabase({ zen_agency_pricing_policies: createQueryMock({ data: { discount_rate: 0.1 } }) })
+    );
+
+    await estimateUpsFreight({
+      productId: 'p1', destCountryCode: 'USA', actualWeightKg: 5,
+      agencyOrgId: 'agency-1', shipperOrgId: 'shipper-1',
+    });
+
+    expect(shipperPolicyMock.eq).toHaveBeenCalledWith('cargo_type', 'NON_DOC');
   });
 });
 
