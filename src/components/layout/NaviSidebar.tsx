@@ -185,6 +185,7 @@ export default function NaviSidebar({
         { title: t("my_customs"), href: "/mypage/customs" },
         { title: t("address_book"), href: "/address-book" },
         ...(profile?.role === USER_ROLES.CORPORATE || profile?.role === USER_ROLES.ADMIN
+          || profile?.role === USER_ROLES.AGENCY || profile?.role === USER_ROLES.SHIPPER
           ? [{ title: t("corporate_mgmt"), href: "/mypage/corporate" }]
           : []),
       ]
