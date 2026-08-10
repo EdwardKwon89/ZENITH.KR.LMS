@@ -5,7 +5,7 @@
 | **Issue** | [#1056](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1056) |
 | **DEF** | [DEF-B-049](../defects/DEF-B-049_AGENCY_자가화주_zen_ups_labels_RLS_agency_org_id_체크로_INSERT_차단.md) |
 | **배경** | JSJung 실사용 중 "shxk ups api 호출이 실패했어" 보고 → Jaison 원인 확정 |
-| **담당** | Baker (Team B) |
+| **담당** | Dave (Team B) — 2026-08-11 Baker → Dave 재배정(JSJung 지시) |
 | **생성일** | 2026-08-11 |
 | **우선순위** | **P1 (Critical)** |
 | **상태** | ⬜ |
@@ -45,7 +45,7 @@ AND (
 
 ## 착수 체크리스트
 
-- [ ] `git fetch origin && git pull origin TeamB_Dev` 후 `feature/teamb-278-ups-labels-agency-rls` 브랜치 생성(`ZENITH_LMS-worktrees/baker` 전용 워크트리, R-17 §0)
+- [ ] `git fetch origin && git pull origin TeamB_Dev` 후 `feature/teamb-278-ups-labels-agency-rls` 브랜치 생성(`ZENITH_LMS-worktrees/dave` 전용 워크트리, R-17 §0)
 - [ ] `./scripts/next-task-number.sh B`로 TASK-B-278 확인
 - [ ] `zen_ups_labels` RLS 정책 4개(SELECT/INSERT/UPDATE/DELETE) 자가화주 조건 추가 마이그레이션
 - [ ] 동일 패턴 다른 테이블 존재 여부 grep 전수 조사 — 발견 시 이번 Task 범위 포함 여부 판단(단순하면 함께 수정, 복잡하면 `[발견 이슈]`로 별도 보고)
@@ -59,11 +59,11 @@ AND (
 
 ## 완료 보고 절차 (R-17 준수)
 
-1. **[코드 커밋]** `[Baker] fix: TASK-B-278 ...` → 2. task file `[작업 결과]` 작성(커밋 해시 실제 값 기재) + 상태 🔔 → 3. `.agent/ACTIVE_TASK.md` 반영 → 4. `gh issue edit 1056 --add-label status:review --remove-label status:in-progress` → 5. `check-R17-DoD` 통과 → 6. 문서 커밋 → 7. PR 생성(`feature/* → TeamB_Dev`, `Closes #1056`)
+1. **[코드 커밋]** `[Dave] fix: TASK-B-278 ...` → 2. task file `[작업 결과]` 작성(커밋 해시 실제 값 기재) + 상태 🔔 → 3. `.agent/ACTIVE_TASK.md` 반영 → 4. `gh issue edit 1056 --add-label status:review --remove-label status:in-progress` → 5. `check-R17-DoD` 통과 → 6. 문서 커밋 → 7. PR 생성(`feature/* → TeamB_Dev`, `Closes #1056`)
 
 ## 담당자 위반 이력 사전 경고
 
-- **Baker**: `.agent/VIOLATION_TRACKER.md` 참조 후 착수. JSJung 2026-07-15 결정에 따라 누적 이력과 무관하게 할당 지속(재론 금지). 직전 TASK-B-274(DEF-B-046, 동일 근본원인 계열)는 절차 정확히 준수 완료(단일 지점 수정 + TC-274-04 보안 회귀 테스트 포함) — 이번에도 동일 수준 기대. 특히 **"무관한 AGENCY는 여전히 차단"되는 보안 회귀 테스트를 반드시 포함**할 것 — RLS 조건을 느슨하게 고치다 보안 구멍을 만드는 실수가 이 계열에서 가장 위험함.
+- **Dave**: `.agent/VIOLATION_TRACKER.md` 참조 후 착수 — 채번 절차 누락·상태전환 누락 등 다수 유형 누적(할당 중단 기준 초과 이력 있음), JSJung 2026-07-15 결정에 따라 누적 이력과 무관하게 할당 지속(재론 금지). **가장 반복됐던 위반 유형이 "채번 절차 누락"(눈대중 채번으로 타 Agent와 번호 중복)이므로, 착수 전 반드시 `./scripts/next-task-number.sh B`로 TASK-B-278 재확인**. 직전 TASK-B-272/273/277(UPS/SHXK 영역, 모두 이번 세션)은 절차 정확히 준수 완료(회귀 테스트·되돌리기 검증·R-10 전부 충족) — 최근 흐름은 양호하므로 동일 수준 기대. 이번 건은 RLS 정책 수정이라 **"무관한 AGENCY는 여전히 차단"되는 보안 회귀 테스트를 반드시 포함**할 것 — 조건을 느슨하게 고치다 보안 구멍을 만드는 실수가 이 계열에서 가장 위험함(DEF-B-046 TC-274-04 참고).
 
 ## [작업 결과]
 
