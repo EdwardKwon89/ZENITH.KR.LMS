@@ -21,7 +21,8 @@ interface Props {
   readOnly?: boolean;
   rates?: MatrixRate[];
   priceMode?: 'full' | 'agency' | 'shipper';
-  discountRateMap?: Record<string, number>;
+  // Issue #1027: discountRateMap을 중첩 구조로 변경 (zoneId -> cargoType -> rate)
+  discountRateMap?: Record<string, Record<string, number>>;
 }
 
 type ProductGroup = { label: string; items: UpsProduct[] };
@@ -45,6 +46,14 @@ const PRICE_LABEL: Record<string, string> = {
   agency: '플랫폼 판매가',
   shipper: '적용 운임',
 };
+
+// Issue #1027: freight.ts의 candidateCargoTypes와 동일한 패턴
+function candidateCargoTypes(productCargoType?: string): string[] {
+  if (productCargoType === 'DOC') return ['DOC', 'ALL'];
+  if (productCargoType === 'NON_DOC') return ['NON_DOC', 'ALL'];
+  // BOTH(Expedited/Flight): NON_DOC 우선, ALL 폴백 (DOC는 후보 아님)
+  return ['NON_DOC', 'ALL'];
+}
 
 export default function UpsBaseRateMatrix({
   products, zones, agencies = [], onCellClick, onCostCellClick, onNewClick, canEdit,
@@ -126,12 +135,19 @@ export default function UpsBaseRateMatrix({
 
   const selectedProduct = products.find(p => p.id === selectedProductId);
 
-  const getDiscountRate = (zoneId: string): number => {
-    return discountRateMap[zoneId] ?? 0;
+  // Issue #1027: candidateCargoTypes 우선순위 폴백 로직 적용
+  const getDiscountRate = (zoneId: string, productCargoType?: string): number => {
+    const zoneRates = discountRateMap[zoneId];
+    if (!zoneRates) return 0;
+
+    const candidates = candidateCargoTypes(productCargoType);
+    return candidates.map(ct => zoneRates[ct]).find(r => r !== undefined) ?? 0;
   };
 
   const renderCellPrice = (rate: MatrixRate, zoneId: string, weightKg: number) => {
-    const discountRate = getDiscountRate(zoneId);
+    // Issue #1027: rate에서 product_id를 찾아 cargo_type 획득
+    const rateProduct = products.find(p => p.id === rate.product_id);
+    const discountRate = getDiscountRate(zoneId, rateProduct?.cargo_type);
     const hasCost = 'cost_price' in rate;
 
     switch (priceMode) {

@@ -15,6 +15,7 @@ interface PricingPolicy {
   id: string;
   agency_org_id: string;
   zone_id: string;
+  cargo_type: string; // Issue #1027: cargo_type 추가
   discount_rate: number;
   is_active: boolean;
 }
@@ -30,6 +31,14 @@ const TABS: { key: TabKey; label: string; icon: React.ElementType }[] = [
   { key: 'freightMinimums', label: 'Freight 최소운임', icon: Scale },
   { key: 'shipperDiscounts', label: '화주 할인율 관리', icon: Users },
 ];
+
+// Issue #1027: freight.ts의 candidateCargoTypes와 동일한 패턴
+function candidateCargoTypes(productCargoType?: string): string[] {
+  if (productCargoType === 'DOC') return ['DOC', 'ALL'];
+  if (productCargoType === 'NON_DOC') return ['NON_DOC', 'ALL'];
+  // BOTH(Expedited/Flight): NON_DOC 우선, ALL 폴백 (DOC는 후보 아님)
+  return ['NON_DOC', 'ALL'];
+}
 
 interface Props {
   zones: UpsZoneWithCountries[];
@@ -51,15 +60,35 @@ export function AgencyUpsRatesClient({
 }: Props) {
   const [activeTab, setActiveTab] = useState<TabKey>('baseRates');
 
-  const policyByZone = Object.fromEntries(
-    pricingPolicies.map(p => [p.zone_id, Number(p.discount_rate)])
-  );
+  // Issue #1027: policyByZone을 중첩 구조로 변경 (zoneId -> cargoType -> rate)
+  const policyByZone = useMemo(() => {
+    const map: Record<string, Record<string, number>> = {};
+    for (const p of pricingPolicies) {
+      if (!map[p.zone_id]) map[p.zone_id] = {};
+      map[p.zone_id][p.cargo_type] = Number(p.discount_rate);
+    }
+    return map;
+  }, [pricingPolicies]);
 
-  const calcAgencyCost = (sellingPrice: number, zoneId: string): number => {
-    const rate = policyByZone[zoneId];
+  // Issue #1027: candidateCargoTypes 우선순위 폴백 로직 적용
+  const calcAgencyCost = (sellingPrice: number, zoneId: string, productCargoType?: string): number => {
+    const zoneRates = policyByZone[zoneId];
+    if (!zoneRates) return sellingPrice;
+
+    const candidates = candidateCargoTypes(productCargoType);
+    const rate = candidates.map(ct => zoneRates[ct]).find(r => r !== undefined);
     if (rate == null) return sellingPrice;
     return Math.round(sellingPrice * (1 - rate));
   };
+
+  // Issue #1027: UpsBaseRateMatrix에 전달할 discountRateMap 변환
+  const discountRateMap = useMemo(() => {
+    const map: Record<string, Record<string, number>> = {};
+    for (const [zoneId, cargoRates] of Object.entries(policyByZone)) {
+      map[zoneId] = { ...cargoRates };
+    }
+    return map;
+  }, [policyByZone]);
 
   const renderTable = () => {
     switch (activeTab) {
@@ -71,7 +100,7 @@ export function AgencyUpsRatesClient({
             readOnly
             priceMode="agency"
             rates={baseRates}
-            discountRateMap={policyByZone}
+            discountRateMap={discountRateMap}
           />
         );
       case 'fuelSurcharges':
@@ -139,27 +168,27 @@ function SurgeFeeTable({ rows }: { rows: PublicSurgeFee[] }) {
   return <ZenDataGrid columns={columns} data={rows} />;
 }
 
-function WeightTierRateTable({ weightTierRates, calcAgencyCost }: { weightTierRates: PublicWeightTierRate[]; calcAgencyCost: (price: number, zoneId: string) => number }) {
+function WeightTierRateTable({ weightTierRates, calcAgencyCost }: { weightTierRates: PublicWeightTierRate[]; calcAgencyCost: (price: number, zoneId: string, productCargoType?: string) => number }) {
   const columns: ColumnDef<PublicWeightTierRate>[] = [
     { id: 'product', header: '제품', cell: ({ row }) => <span className="text-sm font-medium">{row.original.product?.product_code}</span> },
     { id: 'zone', header: 'Zone', cell: ({ row }) => <ZenBadge variant="default" className="font-mono">{row.original.zone?.zone_code}</ZenBadge> },
     { id: 'tier', header: '중량 구간', cell: ({ row }) => <span className="font-mono text-sm">{row.original.tier_min_kg}kg ~ {row.original.tier_max_kg != null ? `${row.original.tier_max_kg}kg` : '∞'}</span> },
     { accessorKey: 'price_per_kg_selling', header: '플랫폼 판매가/kg', cell: ({ row }) => <span className="font-mono text-sm">{row.original.price_per_kg_selling.toLocaleString()}원</span> },
     { id: 'agency_cost', header: '대리점 원가/kg', cell: ({ row }) => {
-      const cost = calcAgencyCost(row.original.price_per_kg_selling, row.original.zone_id);
+      const cost = calcAgencyCost(row.original.price_per_kg_selling, row.original.zone_id, row.original.product?.cargo_type);
       return <span className="font-mono text-sm text-slate-500">{cost.toLocaleString()}원</span>;
     }},
   ];
   return <ZenDataGrid columns={columns} data={weightTierRates} />;
 }
 
-function FreightMinimumTable({ freightMinimums, calcAgencyCost }: { freightMinimums: PublicFreightMinimum[]; calcAgencyCost: (price: number, zoneId: string) => number }) {
+function FreightMinimumTable({ freightMinimums, calcAgencyCost }: { freightMinimums: PublicFreightMinimum[]; calcAgencyCost: (price: number, zoneId: string, productCargoType?: string) => number }) {
   const columns: ColumnDef<PublicFreightMinimum>[] = [
     { id: 'product', header: '제품', cell: ({ row }) => <span className="text-sm font-medium">{row.original.product?.product_code}</span> },
     { id: 'zone', header: 'Zone', cell: ({ row }) => <ZenBadge variant="default" className="font-mono">{row.original.zone?.zone_code}</ZenBadge> },
     { accessorKey: 'min_charge_selling', header: '플랫폼 최소 판매가', cell: ({ row }) => <span className="font-mono text-sm">{row.original.min_charge_selling.toLocaleString()}원</span> },
     { id: 'agency_cost', header: '대리점 원가', cell: ({ row }) => {
-      const cost = calcAgencyCost(row.original.min_charge_selling, row.original.zone_id);
+      const cost = calcAgencyCost(row.original.min_charge_selling, row.original.zone_id, row.original.product?.cargo_type);
       return <span className="font-mono text-sm text-slate-500">{cost.toLocaleString()}원</span>;
     }},
   ];
