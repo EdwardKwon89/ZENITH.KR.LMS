@@ -8,7 +8,7 @@
 | **담당** | Dave (Team B) |
 | **생성일** | 2026-08-11 |
 | **우선순위** | **P1** |
-| **상태** | ⬜ |
+| **상태** | 🔔 (완료 보고 — 검토 요청) |
 
 ## 근본 원인 (Issue #1039 / DEF-B-043 참조 — 재현 완료)
 
@@ -54,7 +54,50 @@
 
 ## [작업 결과]
 
-_(담당자 작성 예정)_
+**작성자**: Dave | **작성일**: 2026-08-11 | **상태**: 🔔 (검토 요청)
+
+### 구현 (코드 커밋 `841b7e04`)
+
+- `src/app/actions/ups/rates-public.ts` — `getPublicBaseRates()`의 `.order('weight_kg')`에 `.order('id')` 2차 정렬 추가
+- `src/app/actions/ups/rates.ts` — `getUpsBaseRates()` 동일 적용 (productId/zoneId 필터 분기 후 공통 체인)
+- `id`는 UUID PK로 유일성 보장 → 동일 `weight_kg` 그룹(중량당 최대 10 Zone) 내 결정적 순서 확보
+- 화면 구조·타입 변경 없음 — 정렬 조건 1줄 추가만 하는 최소 침습 수정
+
+### 회귀 테스트 (코드 커밋 — 3건 신설)
+
+- `rates-actions.test.ts` — **TC-UPS-R-TIE-01/02**: `getUpsBaseRates`가 `weight_kg` 정렬 후 `id` 정렬을 순서대로 호출하는지(behavioral, `.order` 호출 인자 캡처) + productId 필터 시에도 유지
+- `rates-public-pagination.test.ts` — **TC-UPS-R-PUBLIC-TIE-01**: `getPublicBaseRates` 동일 정렬 순서 검증
+
+**되돌리기 검증 (2건)**
+1. **단위**: `id` tiebreaker 제거 시 TC-UPS-R-TIE-01/02 + TC-UPS-R-PUBLIC-TIE-01 **3건 FAIL** 확인 후 복원
+2. **실 REST API 반복 (psql 세션 아님, 체크리스트 요구 준수)**: Supabase REST 엔드포인트로 `.range(0,999)`+`.range(1000,1999)` 별도 HTTP 요청 반복
+   - tiebreaker **없이** 30회 실행 → **16 dup + 16 miss 재현** (브라우저 실측과 동일 수치 16/16) — 비결정적 버그 확인
+   - tiebreaker **적용 후** 30회 실행 → 전부 **0 dup / 0 miss** PASS
+
+### 검증 수치
+
+- 전체 회귀: `npm run test:regression` — **1106/1106 PASS** (158 파일)
+- `npm run build` — Compiled successfully (14.1s)
+
+### R-10 실브라우저 검증 (문서 커밋, 스크린샷 `docs/99_Manual/E2E_270_Result/`)
+
+- AGENCY 역할 계정(`r10_agency_270@zenith.kr`) 실제 로그인 → `/ko/agency/ups-rates`
+- "UPS WorldWide Express Expedited"(WW_EXPEDITED) 선택 → **12kg 행에서 Zone 셀 10개(Zone1~10) 전부 표시**
+- **새로고침 5회 반복 모두 10개 확인** (간헐적 버그 특성 고려) — 각 run 스크린샷 5장
+- 매트릭스 요약: "총 1560건 기준요금" 정상
+
+### R-17 DoD 체크리스트
+
+- [x] 코드 커밋 (`841b7e04`) — 두 함수 `.order('id')` + 테스트 3건
+- [x] 문서 커밋 — R-10 증적
+- [x] 회귀 1106/1106 PASS / build SUCCESS
+- [x] R-10 실브라우저 (Expedited 12kg Zone1~10 × 5회)
+- [x] 되돌리기 검증 2건 (단위 3건 FAIL + 실 REST 16dup/16miss 재현 → 적용 시 30회 0건)
+
+## [발견 이슈]
+
+없음
+
 
 ## [발견 이슈]
 
