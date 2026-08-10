@@ -7,8 +7,9 @@
 | **배경** | JSJung이 UPS 공식 "90일 유류 할증료 이력" 캡처 제공 → Jaison이 구현 DB와 대조, 값이 약 3배 낮은 placeholder임을 확정 |
 | **담당** | Baker (Team B) |
 | **생성일** | 2026-08-10 |
+| **완료일** | 2026-08-10 |
 | **우선순위** | P1 |
-| **상태** | 🔄 (v1 반려, v2 대기) |
+| **상태** | 🔔 |
 
 ## 근본 원인 (Issue #1035 / DEF-B-042 참조)
 
@@ -76,8 +77,43 @@
 
 ## [작업 결과]
 
-_(v2 담당자 작성 예정)_
+### v1 (PR#1037 — Jaison 반려: 매주 자동 원복 시한폭탄)
+
+- **커밋**: `f7abfbff` `[Baker] fix: TASK-B-269 Issue #1035/DEF-B-042 UPS 유류할증료 placeholder(18.5%/15.5%) → UPS 공지 실데이터 13주 반영 (2026-05-18~08-10, 최신 46.75%)` — `supabase/migrations/20260810140000_ups_fuel_surcharge_real_data.sql` + `tests/unit/migrations/defb042-fuel-surcharge-real-data.test.ts` (2 files, +141)
+- **마이그레이션** `20260810140000_ups_fuel_surcharge_real_data.sql`:
+  - `CREATE TEMP TABLE fuel_weeks (effective_week date, rate numeric) ON COMMIT DROP` — 13주 실데이터(2026-05-18~2026-08-10) 정의
+  - Postgres UNIQUE는 NULL을 서로 다른 값으로 취급 → `ON CONFLICT`로 기존 `product_id IS NULL` 행을 덮어쓸 수 없음 → **13주 해당 기존 NULL 행을 먼저 DELETE** 후 재삽입(placeholder 제거)
+  - `selling_rate = cost_rate = UPS 공지값`(JSJung 확정) — NULL(전체) 1행 + zen_ups_products 8종, 총 117행 = 13주 × 9
+  - 실제 상품은 **8종**(DB 실측, task 문서의 7종과 상이 — `CROSS JOIN zen_ups_products`로 동적 커버)
+  - 파일명 타임스탬프(`20260810140000`)가 시드(`20260628...`)보다 뒤 → DB reset 시 시드 placeholder 삽입 후 이 마이그레이션이 덮어씀(재발 방지 확인)
+- **테스트** `tests/unit/migrations/defb042-fuel-surcharge-real-data.test.ts` — TC-269-01~06 6건 PASS:
+  - TC-269-01: 13주 NULL 행 값 정합(2026-08-10=0.4675 ... 2026-05-18=0.4950)
+  - TC-269-02: 상품 행(WW_EXPRESS_NONDOC @ 2026-08-10 = 0.4675/0.4675)
+  - TC-269-03: 총 행 수 117 = 13주 × (상품 8종 + NULL 1)
+  - TC-269-04: 전 행 selling_rate = cost_rate
+  - TC-269-05: placeholder 잔존 0건(0.185/0.155 없음)
+  - TC-269-06: 조회 로직 — 최신 유효 주차 2026-08-10, 0.4675/0.4675 (pricing-engine의 `.lte(effective_week, refDate)` 선택 재현)
+- **회귀**: `npm run test:regression` → **157/157 files · 1093/1093 tests ALL PASS** / `npm run build` **SUCCESS** (24.3s)
+- **되돌리기 검증**: 신규 마이그레이션 제거 후 `db reset` → 2026-08-10 단일 placeholder(0.185/0.155, 7행) 복귀 확인 → 복원 후 117행/13주 확인
+- **tsc**: 57 errors 전부 pre-existing(베이스와 동일 확인), 신규 파일 0건
+- **(R-10) 브라우저 검증**: admin@zenith.kr 로그인 → `/ko/admin/ups-rates` 유류할증 탭 — **13주 전체(2026-05-18~2026-08-10), 117행 표시, 2026-08-10 46.8%** (표시 반올림), placeholder(18.5%/15.5%) 미표시 확인
+
+### v2 (Jaison 반려 대응 — PR#1037 → 반려 → 재작업)
+
+- **반려 사유** (Jaison 2026-08-10, Critical): seed `20260628000000_ups_seed_data.sql`이 `CURRENT_DATE` 기반 "이번 주" placeholder를 매 `db reset`마다 재삽입 → PR#1037 마이그레이션의 13주 범위(≤2026-08-10)를 벗어난 **2026-08-17부터 placeholder가 살아남아 매주 자동 원복**되고, `getUpsFuelSurcharge()`(`rates.ts:73`)가 `effective_week ≤ 오늘` 중 최신을 선택하므로 placeholder가 실제 데이터보다 항상 최신으로 선택되는 결함.
+- **커밋**: `cc38b85b` `[Baker] fix: TASK-B-269 v2 — seed placeholder 매주 자동 원복 결함 차단` (3 files, +95/-19)
+- **수정 3건** (Jaison 요청 v2 + 실질 차단 보강):
+  1. **seed 가드** (Jaison 요청 v2-1): `20260628000000_ups_seed_data.sql`의 fuel_surcharges 두 INSERT를 `DO ... IF NOT EXISTS (SELECT 1 FROM zen_ups_fuel_surcharges)` 블록으로 래핑 — 테이블에 이미 데이터가 있으면 placeholder 삽입 차단. (개별 `WHERE NOT EXISTS`는 첫 INSERT 실행 후 두 번째가 스킵되는 순차 함정이 있어 DO 블록으로 단일 검사)
+  2. **값 기반 DELETE** (실질 원복 차단 보강): `20260810140000_ups_fuel_surcharge_real_data.sql` 상단에 `DELETE FROM zen_ups_fuel_surcharges WHERE selling_rate = 0.185 AND cost_rate = 0.155` 추가 — **fresh reset에서 seed는 빈 테이블에 먼저 실행되어(20260628 < 20260810) seed 가드만으론 placeholder가 여전히 삽입되므로, 주차와 무관하게 placeholder 값을 값으로 즉시 제거**해 절대 살아남지 못하게 함.
+  3. **테스트 보강**:
+     - TC-269-03/04/05: Jaison 요청대로 **13주 범위 필터**(`BETWEEN '2026-05-18' AND '2026-08-10'`)로 미래 주차 추가에 견고하게 재작성
+     - **TC-269-07 (신설)**: 시간흐름 시뮬레이션 — (a) 실데이터 존재 시 seed fuel INSERT 재실행 → NOT EXISTS 가드로 placeholder 미생성 (행수 불변) (b) 미래 주차(2026-08-17) placeholder 강제 삽입 → 재현 확인(1행) (c) 값 기반 DELETE 로직 적용 → 제거 확인(0행, 행수 불변)
+- **회귀**: `npm run test:regression` → **157/157 files · 1094/1094 tests ALL PASS** (v1 대비 +1 = TC-269-07) / `npm run build` **SUCCESS** (28.9s)
+- **tsc**: 57 errors 전부 pre-existing, 신규/변경 파일 0건
+- **DB 검증**: fresh `db reset` 후 `117행 · 13주 · placeholder 0건` (seed placeholder 삽입 → 값 기반 DELETE 제거 → 실데이터 13주 확인)
+- **(R-10) 브라우저 검증**: 유류할증 탭 — **13주 전체·117행·2026-08-10 46.8% 표시, placeholder(18.5%/15.5%) 미표시** 재확인 (스크린샷 `/tmp/r10-269-4-final.png`)
 
 ## [발견 이슈]
 
-_(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
+- 없음 (Task 범위 내)
+- 참고: task 문서에 zen_ups_products 7종이라 기재되어 있으나 실제 DB는 8종(UPX_DOC 미존재, WW_SAVER_DOC/WW_SAVER_NONDOC 포함) — migration은 `CROSS JOIN`으로 동적 대응하여 영향 없음
