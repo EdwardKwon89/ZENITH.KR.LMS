@@ -20,6 +20,18 @@ async function getClientIp() {
   return headerStore.get('x-real-ip') || '127.0.0.1';
 }
 
+// DEF-B-039 (Issue #1026): 신규 조직 생성 가입자의 org_type → role 명시적 매핑.
+// ADMIN/CARRIER 전용 분기 제거 — ADMIN 폴백은 절대 금지.
+// 미매핑/누락 org_type은 안전 기본값 CORPORATE로 폴백.
+const ORG_TYPE_TO_ROLE: Record<string, string> = {
+  CARRIER: USER_ROLES.CARRIER,
+  AGENCY: USER_ROLES.AGENCY,
+  SHIPPER: USER_ROLES.SHIPPER,
+  CORPORATE: USER_ROLES.CORPORATE,
+  CUSTOMS: USER_ROLES.CUSTOMS_BROKER,
+  DELIVERY: USER_ROLES.DELIVERY_AGENT,
+};
+
 async function verifyDbRateLimit(action: string, maxRequests: number, windowSeconds: number) {
   const ip = await getClientIp();
   const key = `${ip}:${action}`;
@@ -147,8 +159,11 @@ export async function signup(formData: FormData, locale: string = 'ko') {
         phone_number: phoneNumber,
         // Individual users are ACTIVE immediately; Corporate/New Org users are PENDING.
         status: (orgId === null && !isNewOrg) ? 'ACTIVE' : 'PENDING',
-        // New Org creators: CARRIER org → CARRIER, others → ADMIN; Joinees → MEMBER; Individuals → USER.
-        role: isNewOrg ? (orgType === 'CARRIER' ? USER_ROLES.CARRIER : USER_ROLES.ADMIN) : (orgId === null ? USER_ROLES.INDIVIDUAL : USER_ROLES.USER),
+        // New Org creators: org_type → role 명시적 매핑(DEF-B-039). 알 수 없는 org_type은 CORPORATE 안전 폴백.
+        // Joinees → USER; Individuals → INDIVIDUAL. ADMIN 자동 부여 절대 금지.
+        role: isNewOrg
+          ? (ORG_TYPE_TO_ROLE[orgType ?? ''] ?? USER_ROLES.CORPORATE)
+          : (orgId === null ? USER_ROLES.INDIVIDUAL : USER_ROLES.USER),
       }
     }
   });
