@@ -7,6 +7,15 @@
 
 BEGIN;
 
+-- [TASK-B-269 v2] 값 기반 placeholder 완전 제거 (Jaison 2026-08-10 반려 대응)
+-- seed 마이그레이션(20260628000000)은 db reset 시 빈 테이블에 먼저 실행되어
+-- CURRENT_DATE 기준 "이번 주" placeholder(0.185/0.155)를 매번 재삽입한다.
+-- 이 마이그레이션은 2026-08-10까지의 13주만 덮어쓰므로, 2026-08-17 이후부터는
+-- 해당 주차가 13주 범위 밖에 있어 placeholder가 살아남아 매주 자동 원복되는 결함이 있었다.
+-- → 주차와 무관하게 placeholder 값을 값으로 즉시 삭제하여 절대 살아남지 못하게 한다.
+DELETE FROM public.zen_ups_fuel_surcharges
+WHERE selling_rate = 0.185 AND cost_rate = 0.155;
+
 CREATE TEMP TABLE fuel_weeks (
   effective_week DATE PRIMARY KEY,
   rate NUMERIC(8,4) NOT NULL

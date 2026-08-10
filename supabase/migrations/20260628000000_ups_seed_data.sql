@@ -77,19 +77,30 @@ CROSS JOIN wts w
 ON CONFLICT (product_id, zone_id, weight_kg, valid_from) DO NOTHING;
 
 -- 4. zen_ups_fuel_surcharges (2026년 6월 마지막 주 기준)
-INSERT INTO public.zen_ups_fuel_surcharges (product_id, effective_week, selling_rate, cost_rate)
-SELECT
-  p.id,
-  DATE_TRUNC('week', CURRENT_DATE + INTERVAL '1 day')::DATE AS effective_week,
-  0.185 AS selling_rate,
-  0.155 AS cost_rate
-FROM public.zen_ups_products p
-ON CONFLICT (product_id, effective_week) DO NOTHING;
+-- [TASK-B-269 v2] 테이블에 이미 데이터(실데이터 마이그레이션 20260810140000 적용 등)가 있으면
+-- placeholder를 삽입하지 않는다. 기존 구조는 매 db reset마다 CURRENT_DATE 기반 "이번 주"
+-- placeholder(0.185/0.155)를 재삽입하여, 실데이터 마이그레이션의 13주 범위를 벗어난 다음 주부터
+-- 다시 placeholder가 활성화되는 매주 자동 원복 결함을 유발했다 (Jaison 2026-08-10 반려 사유).
+-- (단, fresh reset에서는 이 마이그레이션이 빈 테이블에 먼저 실행되므로 placeholder가 삽입될 수 있고,
+--  이는 20260810140000의 값 기반 DELETE가 주차와 무관하게 전량 제거한다.)
+DO $ups_seed_fuel$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM public.zen_ups_fuel_surcharges) THEN
+    INSERT INTO public.zen_ups_fuel_surcharges (product_id, effective_week, selling_rate, cost_rate)
+    SELECT
+      p.id,
+      DATE_TRUNC('week', CURRENT_DATE + INTERVAL '1 day')::DATE AS effective_week,
+      0.185 AS selling_rate,
+      0.155 AS cost_rate
+    FROM public.zen_ups_products p
+    ON CONFLICT (product_id, effective_week) DO NOTHING;
 
--- Global fuel surcharge (product_id = NULL, all products)
-INSERT INTO public.zen_ups_fuel_surcharges (product_id, effective_week, selling_rate, cost_rate)
-VALUES (NULL, DATE_TRUNC('week', CURRENT_DATE + INTERVAL '1 day')::DATE, 0.185, 0.155)
-ON CONFLICT (product_id, effective_week) DO NOTHING;
+    -- Global fuel surcharge (product_id = NULL, all products)
+    INSERT INTO public.zen_ups_fuel_surcharges (product_id, effective_week, selling_rate, cost_rate)
+    VALUES (NULL, DATE_TRUNC('week', CURRENT_DATE + INTERVAL '1 day')::DATE, 0.185, 0.155)
+    ON CONFLICT (product_id, effective_week) DO NOTHING;
+  END IF;
+END $ups_seed_fuel$;
 
 -- 5. zen_ups_other_charges — 공통 부가 요금 코드
 INSERT INTO public.zen_ups_other_charges (charge_code, charge_name, unit, fuel_surcharge_applicable, selling_price, cost_price) VALUES
