@@ -568,3 +568,71 @@ describe('TC-UPS-FREIGHT-02: resolveZoneByCountry 연동 (GH#202)', () => {
     });
   });
 });
+
+// ─── TASK-B-273 (Issue #1046 / DEF-B-045): 중국 급증 수수료 CNN/CNS 정규화 ─────────
+
+describe('TC-UPS-FREIGHT-SURGE-CN: 중국 급증 긴급 수수료 조회 (DEF-B-045)', () => {
+  const CN_ZONE = {
+    id: 'z-cn', zone_code: 'Z1', zone_name: 'China North', description: null, is_active: true, sort_order: 1,
+    created_at: '', created_by: null, countries: [{ id: 'ccn1', zone_id: 'z-cn', country_code: 'CNN', product_family: 'EXPRESS', direction: 'EXPORT', created_at: '', created_by: null }],
+  };
+  const CN_SOUTH_ZONE = {
+    id: 'z-cns', zone_code: 'Z10', zone_name: 'China South', description: null, is_active: true, sort_order: 10,
+    created_at: '', created_by: null, countries: [{ id: 'ccns1', zone_id: 'z-cns', country_code: 'CNS', product_family: 'EXPRESS', direction: 'EXPORT', created_at: '', created_by: null }],
+  };
+  const SURGE = {
+    id: 'sf-cn', destination_country_code: 'CNS', selling_rate_per_kg: 143, cost_rate_per_kg: 143,
+    currency: 'KRW', effective_from: '2026-01-01', effective_until: null, is_active: true, created_at: '', created_by: null,
+  };
+
+  beforeEach(() => vi.clearAllMocks());
+
+  function runCnEstimate(destCountryCode: string, destStateProvince?: string) {
+    const surgeMock = createQueryMock({ data: [SURGE] });
+    (validateUserAction as any).mockResolvedValue({
+      supabase: buildMockSupabase({
+        zen_ups_zones: createQueryMock({ data: [CN_ZONE, CN_SOUTH_ZONE] }),
+        zen_ups_surge_fees: surgeMock,
+      }),
+    });
+    (createAdminClient as any).mockResolvedValue(buildMockSupabase());
+    return { estimate: estimateUpsFreight({
+      productId: 'p1', destCountryCode, destStateProvince, actualWeightKg: 5,
+    }), surgeMock };
+  }
+
+  it('destCountryCode=CN + destStateProvince=GD(남부) → CNS로 정규화되어 급증 수수료 정상 계산', async () => {
+    const { estimate, surgeMock } = runCnEstimate('CN', 'GD');
+    const result = await estimate;
+    expect(surgeMock.eq).toHaveBeenCalledWith('destination_country_code', 'CNS');
+    expect(result.platform.surgeFeeSellingAmount).toBeGreaterThan(0);
+  });
+
+  it('destCountryCode=CN + destStateProvince=BJ(목록 외) → CNN으로 정규화되어 정상 계산', async () => {
+    const { estimate, surgeMock } = runCnEstimate('CN', 'BJ');
+    const result = await estimate;
+    expect(surgeMock.eq).toHaveBeenCalledWith('destination_country_code', 'CNN');
+    expect(result.platform.surgeFeeSellingAmount).toBeGreaterThan(0);
+  });
+
+  it('destCountryCode=CN + 주 정보 없음 → CNN 기본으로 정규화되어 정상 계산 (방어적 동작)', async () => {
+    const { estimate, surgeMock } = runCnEstimate('CN');
+    const result = await estimate;
+    expect(surgeMock.eq).toHaveBeenCalledWith('destination_country_code', 'CNN');
+    expect(result.platform.surgeFeeSellingAmount).toBeGreaterThan(0);
+  });
+
+  it('CN 외 국가는 기존 동작 그대로 (회귀 방지)', async () => {
+    const surgeMock = createQueryMock({ data: [SURGE] });
+    (validateUserAction as any).mockResolvedValue({
+      supabase: buildMockSupabase({ zen_ups_surge_fees: surgeMock }),
+    });
+    (createAdminClient as any).mockResolvedValue(buildMockSupabase());
+
+    await estimateUpsFreight({ productId: 'p1', destCountryCode: 'USA', actualWeightKg: 5 });
+
+    expect(surgeMock.eq).toHaveBeenCalledWith('destination_country_code', 'USA');
+    expect(surgeMock.eq).not.toHaveBeenCalledWith('destination_country_code', 'CNN');
+    expect(surgeMock.eq).not.toHaveBeenCalledWith('destination_country_code', 'CNS');
+  });
+});
