@@ -1800,3 +1800,4 @@ UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류
 - **관련 파일**: 위 12개 파일 전체(`src/app/actions/agency/`, `src/app/actions/operations/`, `src/app/actions/finance/` 하위)
 - **예상 공수**: 1.5~2 MD (파일당 조사 15~20분 + 필요 시 수정·테스트 포함, 파일 수 감안)
 - **우선순위**: **High** — `warehouse.ts` 사례처럼 액션 자체를 하드 차단하는 패턴이 다른 파일(특히 finance 정산 관련)에도 있다면 대리점 자가화주 오더의 정산·인보이스 처리 자체가 막혀있을 가능성 있음, 조속한 개별 조사 권장
+- **[추가 확인, 2026-08-11]** 이 패턴의 "형제" 사례가 실제 프로덕션 실패로 확인됨 — `zen_ups_labels`의 RLS 정책(SELECT/INSERT/UPDATE/DELETE 4개)이 `zen_agency_shippers` 테이블이 아니라 `zen_orders.agency_org_id` 컬럼을 직접 체크하는 방식으로 동일한 자가화주 누락 버그를 가지고 있었고, JSJung의 실제 UPS 오더 등록 시도(MASTER AIR 계정)가 SHXK API 성공 후 라벨 저장 단계에서 막히는 실패로 나타남 → **DEF-B-049 / TASK-B-278**로 별도 등록·Baker 배정. 이 발견으로 "자가화주 케이스 누락"이 앱 레벨(`zen_agency_shippers` 조회, 이 IMP)뿐 아니라 **DB RLS 정책 레벨**에도 동일 계열로 존재할 수 있음이 확인됨 — 향후 12개 파일 개별 조사 시 관련 RLS 정책까지 함께 점검 권장.
