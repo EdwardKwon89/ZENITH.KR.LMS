@@ -8,7 +8,7 @@
 | **담당** | Baker (Team B) |
 | **생성일** | 2026-08-11 |
 | **우선순위** | **P1 (Critical)** |
-| **상태** | ⬜ |
+| **상태** | 🔔 |
 
 ## 근본 원인 (Issue #1048 / DEF-B-046 참조 — 확정 완료)
 
@@ -67,8 +67,26 @@ async function getAgencyShipperIds(supabase: any, orgId: string): Promise<string
 
 ## [작업 결과]
 
-_(담당자 작성 예정)_
+**Baker — 2026-08-11 완료 (R-17 절차 준수)**
+
+- **코드 커밋**: `ae93d753` `[Baker] fix: TASK-B-274 AGENCY 자가화주 오더 창고 전체 누락+액션차단 수정 (Issue #1048, DEF-B-046)`
+- **수정**: `src/app/actions/operations/warehouse.ts:20-33` `getAgencyShipperIds()` 반환부를 `[...downstreamIds, orgId]`로 변경(단일 지점). 11개 호출부 코드 변경 없음. 함수명 유지 + 상단 주석 추가("대리점 본인 org_id도 포함됨"). `getWarehousedOrders` 등 조기반환 분기(`!shipperIds || length===0`)는 무해하므로 그대로 둠.
+- **단위 테스트 신설**: `tests/unit/warehouse/defb046-agency-self-shipper.test.ts` — **TC-274-01~07** (모두 PASS):
+  - TC-274-01: `getWarehousedOrders` `.in("shipper_id")` 캡처에 하위화주+본인 org_id 포함
+  - TC-274-02: `zen_agency_shippers` 0건이어도 본인 org_id 필터로 조회 진행(빈 목록 조기반환 없음), 본인 오더 결과 포함
+  - TC-274-03: `confirmOutbound` 자가화주 → 성공(`('order-self', RELEASED, '[출고확정]')` 전이)
+  - TC-274-04: **보안 회귀** — 무관 타 org shipper_id는 여전히 "본인 소속 화주의 오더만 출고 처리할 수 있습니다." 차단
+  - TC-274-05: `getTodayUpsHistory` 자가화주 이력 결과 포함(메모리 filter 방식 — 결과 기반 검증)
+  - TC-274-06: `confirmUpsRegistration` 자가화주 → 성공
+  - TC-274-07: `getTodayReleasedOrders` 하위화주+자가화주 모두 결과 포함(결과 기반)
+- **되돌리기 검증 완료**: 수정 제거(stash) 후 신규 테스트 실행 → 자가화주 관련 6건(TC-274-01/02/03/05/06/07) 전부 FAIL 재현, TC-274-04(보안차단)만 PASS → 수정 복원 후 재실행 7건 ALL PASS
+- **회귀 테스트**: `npm run test:regression` → **160파일 / 1135건 ALL PASS** (기존 157→160파일, 1094→1135건으로 +3파일/+41건)
+- **빌드**: `npm run build` → `✓ Compiled successfully in 17.0s`
+- **TypeScript**: 신규 파일 0건(기존 pre-existing 57건과 동일, 신규 추가 없음)
+- **(R-10) 실기기 브라우저 검증**: `tests/e2e/r10-defb046-agency-self-shipper.spec.ts` — `agency@zenith.kr`(Zenith Agency Partners, password1234) 실기기 로그인 → `/ko/warehouse/ups-receive` 이동 → **자가화주 WAREHOUSED 오더 `UPS-SELF-AGENCY-274`(shipper_id = agency 본인 org) 노출 확인** (1 passed, 18.7s). 스크린샷: `docs/99_Manual/E2E_NN_Result/TASK-B-274/r10_ups_receive_self_shipper.png`(창고 화면), `r10_agency_dashboard.png`(대시보드).
+  - 참고: MASTER AIR 계정(`james@sntl.co.kr`)은 시드 미포함이라 비밀번호 불명 — task 문구 "MASTER AIR(또는 동등 AGENCY 계정)"의 동등 계정(agency@zenith.kr)으로 검증함. 실측 오더 `ZEN-2026-000008`(MASTER AIR 자가화주)은 DB에서 WAREHOUSED 상태로 존재 확인 완료.
+  - 검증용 자가화주 오더 `UPS-SELF-AGENCY-274` + order_status_history 2건 + package 1건을 로컬 DB에 INSERT(실측 오더 수정 없음).
 
 ## [발견 이슈]
 
-_(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
+- (없음 — 범위 밖 `zen_agency_shippers` 패턴 12개 파일은 IMP-162로 이미 기록됨, 이번 Task에서 미접촉)
