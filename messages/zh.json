@@ -383,5 +383,16 @@
     "agency_col": "代理商",
     "shipper_revenue_col": "货主支付额",
     "agency_revenue_col": "代理商支付额"
+  },
+  "Dashboard": {
+    "form_country": "国家",
+    "form_zipcode": "邮政编码",
+    "form_address": "地址",
+    "form_address_detail": "详细地址",
+    "form_address_english": "地址（英文）",
+    "form_address_detail_english": "详细地址（英文）",
+    "form_address_search": "搜索地址",
+    "form_state_province": "州/省",
+    "form_city": "城市"
   }
 }

@@ -371,5 +371,16 @@
     "agency_col": "代理店",
     "shipper_revenue_col": "荷主支払額",
     "agency_revenue_col": "代理店支払額"
+  },
+  "Dashboard": {
+    "form_country": "国",
+    "form_zipcode": "郵便番号",
+    "form_address": "住所",
+    "form_address_detail": "詳細住所",
+    "form_address_english": "住所（英語）",
+    "form_address_detail_english": "詳細住所（英語）",
+    "form_address_search": "住所検索",
+    "form_state_province": "州/省",
+    "form_city": "市/区"
   }
 }
