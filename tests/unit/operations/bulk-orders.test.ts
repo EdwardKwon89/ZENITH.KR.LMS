@@ -35,6 +35,9 @@ function makeValidOrderRow(overrides: Record<string, unknown> = {}) {
     recipient_name: 'A',
     recipient_address: 'Addr1',
     recipient_phone: '010-1',
+    recipient_country_code: 'US',
+    recipient_zipcode: '90001',
+    shipper_contact_phone: '010-0000-0000',
     ...overrides,
   };
 }
@@ -72,8 +75,8 @@ describe('bulkCreateOrders', () => {
 
     const sheets = {
       orders: [
-        { ...makeOrderSeq(1), order_type: 'B2B', transport_mode: 'UPS', ups_product_code: 'WWE', incoterms: 'DDU', recipient_name: 'A', recipient_address: 'Addr1', recipient_phone: '010-1' },
-        { ...makeOrderSeq(2), order_type: 'B2C_ECOM', transport_mode: 'UPS', ups_product_code: 'WWE', incoterms: 'DDU', recipient_name: 'B', recipient_address: 'Addr2', recipient_phone: '010-2' },
+        { ...makeOrderSeq(1), order_type: 'B2B', transport_mode: 'UPS', ups_product_code: 'WWE', incoterms: 'DDU', recipient_name: 'A', recipient_address: 'Addr1', recipient_phone: '010-1', recipient_country_code: 'US', recipient_zipcode: '90001', shipper_contact_phone: '010-0000-0000' },
+        { ...makeOrderSeq(2), order_type: 'B2C_ECOM', transport_mode: 'UPS', ups_product_code: 'WWE', incoterms: 'DDU', recipient_name: 'B', recipient_address: 'Addr2', recipient_phone: '010-2', recipient_country_code: 'US', recipient_zipcode: '90002', shipper_contact_phone: '010-0000-0000' },
       ],
       packages: [
         makePackageSeq(1, 1),
@@ -113,8 +116,8 @@ describe('bulkCreateOrders', () => {
 
     const sheets = {
       orders: [
-        { ...makeOrderSeq(1), order_type: 'B2B', transport_mode: 'UPS', ups_product_code: 'WWE', incoterms: 'DDU', recipient_name: 'A', recipient_address: 'Addr1', recipient_phone: '010-1' },
-        { ...makeOrderSeq(2), order_type: 'B2B', transport_mode: 'UPS', ups_product_code: 'WWE', incoterms: 'DDU', recipient_name: 'B', recipient_address: 'Addr2', recipient_phone: '010-2' },
+        { ...makeOrderSeq(1), order_type: 'B2B', transport_mode: 'UPS', ups_product_code: 'WWE', incoterms: 'DDU', recipient_name: 'A', recipient_address: 'Addr1', recipient_phone: '010-1', recipient_country_code: 'US', recipient_zipcode: '90001', shipper_contact_phone: '010-0000-0000' },
+        { ...makeOrderSeq(2), order_type: 'B2B', transport_mode: 'UPS', ups_product_code: 'WWE', incoterms: 'DDU', recipient_name: 'B', recipient_address: 'Addr2', recipient_phone: '010-2', recipient_country_code: 'US', recipient_zipcode: '90002', shipper_contact_phone: '010-0000-0000' },
       ],
       packages: [
         makePackageSeq(1, 1), makePackageSeq(2, 2),
@@ -148,7 +151,7 @@ describe('bulkCreateOrders', () => {
 
     const sheets = {
       orders: [
-        { ...makeOrderSeq(1), shipper_id: UUID_EVIL, order_type: 'B2B', transport_mode: 'UPS', ups_product_code: 'WWE', incoterms: 'DDU', recipient_name: 'A', recipient_address: 'Addr1', recipient_phone: '010-1' },
+        { ...makeOrderSeq(1), shipper_id: UUID_EVIL, order_type: 'B2B', transport_mode: 'UPS', ups_product_code: 'WWE', incoterms: 'DDU', recipient_name: 'A', recipient_address: 'Addr1', recipient_phone: '010-1', recipient_country_code: 'US', recipient_zipcode: '90001', shipper_contact_phone: '010-0000-0000' },
       ],
       packages: [makePackageSeq(1, 1)] as any[],
       items: [makeItemSeq(1, 1)] as any[],

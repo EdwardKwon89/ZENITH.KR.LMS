@@ -168,3 +168,69 @@ describe('DEF-B-044: CN 목적지 성/직할시 조건부 필수 검증', () => 
     expect(result.success).toBe(true);
   });
 });
+
+// ─── TASK-B-277 (Issue #1052): UPS 배송 SHXK 필수 항목 조건부 검증 ─────────
+
+describe('TASK-B-277: UPS 배송 SHXK 필수 항목 검증', () => {
+  const validUUID = '550e8400-e29b-41d4-a716-446655440000';
+  const validUpsPayload = {
+    order_type: 'B2B',
+    shipper_id: validUUID,
+    recipient_name: 'John Doe',
+    recipient_address: '123 Oak St',
+    recipient_phone: '010-1234-5678',
+    shipper_contact_phone: '010-0000-0000',
+    recipient_country_code: 'US',
+    recipient_zipcode: '90001',
+    transport_mode: 'UPS',
+    ups_product_code: 'WW_EXPEDITED',
+    incoterms: 'DDP',
+    packages: [
+      { packing_unit: 'BOX', packing_count: 1, gross_weight: 5, items: [{ item_name: 'Widget', quantity: 1, unit_price: 10 }] }
+    ],
+  };
+
+  it('UPS + 모든 필수 항목 입력 → 검증 통과', () => {
+    const result = orderRegistrationSchema.safeParse(validUpsPayload);
+    expect(result.success).toBe(true);
+  });
+
+  it('UPS + recipient_country_code 누락 → 검증 실패', () => {
+    const { recipient_country_code, ...rest } = validUpsPayload;
+    const result = orderRegistrationSchema.safeParse(rest);
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues.some((i) => i.path.includes('recipient_country_code'))).toBe(true);
+    }
+  });
+
+  it('UPS + recipient_zipcode 누락 → 검증 실패', () => {
+    const { recipient_zipcode, ...rest } = validUpsPayload;
+    const result = orderRegistrationSchema.safeParse(rest);
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues.some((i) => i.path.includes('recipient_zipcode'))).toBe(true);
+    }
+  });
+
+  it('UPS + shipper_contact_phone 누락 → 검증 실패', () => {
+    const { shipper_contact_phone, ...rest } = validUpsPayload;
+    const result = orderRegistrationSchema.safeParse(rest);
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues.some((i) => i.path.includes('shipper_contact_phone'))).toBe(true);
+    }
+  });
+
+  it('비UPS(AIR) 오더는 위 3개 필드 없이도 정상 제출 가능 (회귀 방지)', () => {
+    const { recipient_country_code, recipient_zipcode, shipper_contact_phone, ups_product_code, incoterms, ...airRest } = validUpsPayload;
+    const air = {
+      ...airRest,
+      transport_mode: 'AIR',
+      origin_port_id: validUUID,
+      dest_port_id: validUUID,
+    };
+    const result = orderRegistrationSchema.safeParse(air);
+    expect(result.success).toBe(true);
+  });
+});

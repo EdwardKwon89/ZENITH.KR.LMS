@@ -111,6 +111,7 @@ function mapExcelRowToOrderInput(
     recipient_name: toStr(orderRow.recipient_name),
     recipient_address: toStr(orderRow.recipient_address),
     recipient_phone: toStr(orderRow.recipient_phone),
+    shipper_contact_phone: toStr(orderRow.shipper_contact_phone) || undefined,
     recipient_address_local: toStr(orderRow.recipient_address_local) || undefined,
     recipient_address_detail: toStr(orderRow.recipient_address_detail) || undefined,
     recipient_zipcode: toStr(orderRow.recipient_zipcode) || undefined,

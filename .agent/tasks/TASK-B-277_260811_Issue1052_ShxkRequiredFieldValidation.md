@@ -7,7 +7,7 @@
 | **담당** | Dave (Team B) |
 | **생성일** | 2026-08-11 |
 | **우선순위** | P1 |
-| **상태** | ⬜ |
+| **상태** | 🔔 (완료 보고 — 검토 요청) |
 
 ## 현황 분석 (Jaison, 코드+스펙 대조 완료)
 
@@ -131,7 +131,57 @@ export function validateShxkPayload(payload: Record<string, unknown>): string[] 
 
 ## [작업 결과]
 
-_(담당자 작성 예정)_
+**작성자**: Dave | **작성일**: 2026-08-11 | **상태**: 🔔 (검토 요청)
+
+### 구현 (코드 커밋 `143b4819`)
+
+**2단계 방어(defense-in-depth) 구조 설계 확정대로 구현:**
+
+**1. 폼 레벨 검증 (`src/lib/validation/order.ts`)**
+`orderRegistrationSchema`의 `superRefine`에 `transport_mode === 'UPS'`일 때 조건부 필수 3건 추가 (기존 CN state_province 검증과 병렬 유지):
+- `recipient_country_code` 누락 → "UPS 배송은 수하인 국가 선택이 필수입니다"
+- `recipient_zipcode` 누락 → "UPS 배송은 수하인 우편번호가 필수입니다(SHXK API 요구사항)"
+- `shipper_contact_phone` 누락 → "UPS 배송은 화주 연락처가 필수입니다(SHXK API 요구사항)"
+
+**2. payload 레벨 사전 점검 (`src/lib/shxk/validate-payload.ts` 신규)**
+`validateShxkPayload()` — buildCreateOrderPayload 결과물을 SHXK `createorder` 호출 직전(`placeShxkOrder`)에 검증. 필수 필드(shipper_name/countrycode/street/telephone, consignee_name/countrycode/street/postcode/telephone, invoice 품목 3종) 누락 시 **API 호출 스킵 + 명확한 한글 에러 즉시 반환** (폼 우회 경로 — 벌크 임포트 등 — 방어).
+
+**추가 수정 (bulk-orders.ts)**: `mapExcelRowToOrderInput`에 `shipper_contact_phone` 매핑이 누락된 갭 발견 → 추가 (벌크 임포트 UPS 오더도 화주 연락처가 payload에 전달되도록).
+
+### 회귀 테스트 (코드 커밋 `143b4819`)
+
+- `order-validation.test.ts` — **TASK-B-277 UPS 필수 5건**: 정상 입력 통과, country_code/zipcode/shipper_contact_phone 각각 누락 시 실패, **비UPS(AIR)는 3개 필드 없이도 통과**(회귀 방지)
+- `shxk-payload-validation.test.ts` (신규) — **validateShxkPayload 단위 5건**(정상 0건 + shipper/consignee/invoice 필수 누락별 메시지) + **placeShxkOrder 검증 1건**(payload 검증이 createorder 호출보다 앞에 위치함을 소스로 검증)
+
+**되돌리기 검증 2건**:
+1. **폼 검증 제거** → UPS 필수 3건 테스트 FAIL(누락 필드로 통과) 확인 후 복원
+2. **payload 배선 제거** → ups-labels.ts에 `validateShxkPayload` 부재로 소스 위치 테스트 FAIL 확인 후 복원
+
+**기존 테스트 보정**: 신규 UPS 필수 검증으로 기존 UPS 오더 테스트 8개 파일(`tracking-configs-provider-type`·`bulk-orders`·`direct-shipper-ups-snapshot`·`def123-tracking-no-sync`·`ups-labels-split`·`ups-labels-agency-permission`·`ups-labels-combined-doctype`·`warehouse-actions`)의 payload에 필수 필드를 추가/보정.
+
+### 검증 수치
+
+- 전체 회귀: `npm run test:regression` — **1146/1146 PASS** (161 파일)
+- `npm run build` — Compiled successfully (16.6s)
+
+### R-10 실브라우저 검증 (문서 커밋, 스크린샷 `docs/99_Manual/E2E_277_Result/`)
+
+- SHIPPER 계정 실제 로그인 → UPS Direct 오더 등록
+- **우편번호 미입력 상태로 "오더 등록" 제출 → "UPS 배송은 수하인 우편번호가 필수입니다(SHXK API 요구사항)" 에러로 차단, `/orders/new` 유지** (`01/02_no_zipcode_*.png`)
+- **우편번호 포함 정상 입력 → 예상운임 정상 계산** (`03_valid_form.png`)
+
+### R-17 DoD 체크리스트
+
+- [x] 코드 커밋 (order.ts + validate-payload.ts + ups-labels.ts 배선 + bulk-orders mapper + 테스트)
+- [x] 문서 커밋 — R-10 증적
+- [x] 회귀 1146/1146 PASS / build SUCCESS
+- [x] R-10 실브라우저 (우편번호 미입력 차단 + 정상 계산)
+- [x] 되돌리기 검증 2건 (폼 검증 제거 3건 FAIL + payload 배선 제거 FAIL)
+
+## [발견 이슈]
+
+없음
+
 
 ## [발견 이슈]
 
