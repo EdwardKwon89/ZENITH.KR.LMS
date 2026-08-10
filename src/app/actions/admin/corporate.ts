@@ -33,7 +33,7 @@ export async function getOrganizationInfo() {
 
   const { data, error } = await supabase
     .from("zen_organizations")
-    .select('id, name, rep_name, biz_no, contact_phone, contact_email, address, address_detail, city, state_province, zipcode, country_code')
+    .select('id, name, rep_name, biz_no, contact_phone, contact_email, address, address_detail, address_english, address_detail_english, city, state_province, zipcode, country_code')
     .eq("id", profile.org_id)
     .single();
 
@@ -52,6 +52,13 @@ export const updateOrganizationInfo = withAction(async function (payload: {
   representative?: string;
   bizNo?: string;
   address?: string;
+  address_detail?: string;
+  city?: string;
+  state_province?: string;
+  zipcode?: string;
+  country_code?: string;
+  address_english?: string;
+  address_detail_english?: string;
   contact?: string;
   email?: string;
 }) {
@@ -70,6 +77,13 @@ export const updateOrganizationInfo = withAction(async function (payload: {
   if (payload.representative !== undefined) updateData.rep_name = payload.representative;
   if (payload.bizNo !== undefined) updateData.biz_no = payload.bizNo;
   if (payload.address !== undefined) updateData.address = payload.address;
+  if (payload.address_detail !== undefined) updateData.address_detail = payload.address_detail;
+  if (payload.city !== undefined) updateData.city = payload.city;
+  if (payload.state_province !== undefined) updateData.state_province = payload.state_province;
+  if (payload.zipcode !== undefined) updateData.zipcode = payload.zipcode;
+  if (payload.country_code !== undefined) updateData.country_code = payload.country_code;
+  if (payload.address_english !== undefined) updateData.address_english = payload.address_english;
+  if (payload.address_detail_english !== undefined) updateData.address_detail_english = payload.address_detail_english;
   if (payload.contact !== undefined) updateData.contact_phone = payload.contact;
   if (payload.email !== undefined) updateData.contact_email = payload.email;
 
