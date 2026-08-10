@@ -7,7 +7,7 @@
 | 생성일 | 2026-08-10 |
 | 담당 Agent | Mike (MiMo V2.5) |
 | 우선순위 | P1 (defect:high) |
-| 상태 | 🔄 진행 중 |
+| 상태 | ✅ 완료 |
 
 ---
 
@@ -21,12 +21,13 @@ JSJung이 "master air" 계정으로 `/agency/ups-rates` 확인 중, 등록한 �
 
 | 파일 | 변경 내용 |
 |:-----|:----------|
+| `src/lib/ups/cargo-type-utils.ts` | 신규: candidateCargoTypes/resolveDiscountRate 분리 |
 | `src/app/actions/ups/rates-public.ts` | getPublicWeightTierRates/getPublicFreightMinimums product join에 cargo_type 추가 |
-| `src/app/[locale]/(dashboard)/agency/ups-rates/agency-ups-rates-client.tsx` | policyByZone 중첩 구조 + candidateCargoTypes 패턴 적용 |
-| `src/components/ups/UpsBaseRateMatrix.tsx` | discountRateMap 중첩 구조 + candidateCargoTypes 패턴 적용 |
+| `src/app/[locale]/(dashboard)/agency/ups-rates/agency-ups-rates-client.tsx` | policyByZone 중첩 구조 + cargo-type-utils.ts import |
+| `src/components/ups/UpsBaseRateMatrix.tsx` | discountRateMap 중첩 구조 + cargo-type-utils.ts import |
 | `src/app/[locale]/(dashboard)/shipper/ups-rates/page.tsx` | zoneDiscountMap 중첩 구조로 변경 |
-| `src/app/[locale]/(dashboard)/shipper/ups-rates/shipper-ups-rates-client.tsx` | candidateCargoTypes 패턴 적용 |
-| `tests/unit/ups/def-b040-cargo-type-display.test.ts` | 회귀 테스트 10개 추가 |
+| `src/app/[locale]/(dashboard)/shipper/ups-rates/shipper-ups-rates-client.tsx` | cargo-type-utils.ts import |
+| `tests/unit/ups/def-b040-cargo-type-display.test.ts` | 회귀 테스트 10개 추가 (실제 함수 import 기반) |
 
 ---
 
@@ -53,8 +54,28 @@ function candidateCargoTypes(productCargoType?: string): string[] {
 
 ---
 
-## 완료 보고
+## [작업 결과]
 
-- 코드 수정 완료
-- 회귀 테스트 10개 추가 완료
-- feature 브랜치: `feature/teamb-266-def-b040-cargo-type-display-v2`
+**커밋**: `4ecbac03` — `[Mike] fix: DEF-B-040 그림자 테스트 제거, 실제 함수 import로 교체 (Issue #1027)`
+
+**PR**: #1030 (TeamB_Dev base) — https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1030
+
+**변경 파일 7개**:
+1. `src/lib/ups/cargo-type-utils.ts` (신규)
+2. `src/app/actions/ups/rates-public.ts`
+3. `src/app/[locale]/(dashboard)/agency/ups-rates/agency-ups-rates-client.tsx`
+4. `src/components/ups/UpsBaseRateMatrix.tsx`
+5. `src/app/[locale]/(dashboard)/shipper/ups-rates/page.tsx`
+6. `src/app/[locale]/(dashboard)/shipper/ups-rates/shipper-ups-rates-client.tsx`
+7. `tests/unit/ups/def-b040-cargo-type-display.test.ts` (신규)
+
+**회귀 테스트 10개**: 실제 `candidateCargoTypes`/`resolveDiscountRate` 함수 import 기반
+- TC-DEF-B040-01: DOC/NONDOC별 할인율 조회 (3건)
+- TC-DEF-B040-02: Expedited/Flight 안전장치 (2건)
+- TC-DEF-B040-03: 기존 ALL 정책 하위호환 (3건)
+- TC-DEF-B040-04: candidateCargoTypes 함수 검증 (1건)
+- TC-DEF-B040-05: 되돌리기 검증 (1건)
+
+**v1 반려 사유 해결**:
+- 그림자(shadow) 테스트 제거 → `src/lib/ups/cargo-type-utils.ts` 분리 후 실제 import
+- 되돌리기 검증: 실제 `resolveDiscountRate` 함수 사용
