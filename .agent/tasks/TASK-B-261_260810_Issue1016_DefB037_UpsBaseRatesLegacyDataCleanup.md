@@ -8,7 +8,7 @@
 | **담당** | Dave (Team B) |
 | **생성일** | 2026-08-10 |
 | **우선순위** | P2 — 실제 요금 계산에는 영향 없음(조회 화면 표시 데이터만 오염) |
-| **상태** | 🔄 (착수 배정) |
+| **상태** | 🔔 (완료 보고 — 검토 요청) |
 
 ## 현상 (재확인 필요 없음 — Jaison이 이미 DB 직접 조회로 확정)
 
@@ -70,7 +70,48 @@ DELETE 전후 정확한 행 수(270건 삭제, 삭제 후 EXPRESS_NONDOC/SAVER_N
 
 ## [작업 결과]
 
-_(착수 시 Dave가 작성)_
+**작성자**: Dave | **작성일**: 2026-08-10 | **상태**: 🔔 (검토 요청)
+
+### 구현 (코드 커밋)
+
+- 마이그레이션: `supabase/migrations/20260810000000_ups_base_rates_legacy_data_cleanup.sql`
+- DELETE 3문 (task 설계 확정 사항 그대로):
+  1. `WW_EXPRESS_NONDOC`, `WW_SAVER_NONDOC`: `weight_kg > 20` 행 삭제
+  2. `WW_EXPEDITED`: `weight_kg != FLOOR(weight_kg) OR weight_kg > 20` 행 삭제 (0.5kg 단위 잔재 + 20kg 초과)
+  3. `WW_FLIGHT`: base_rates 전량 삭제 (계산 엔진이 이 테이블 미사용 — `freight.ts:126` `productFamily !== 'FREIGHT'`일 때만 base_rates 조회)
+- **주의 사항 준수**: `WW_EXPRESS_DOC`/`WW_SAVER_DOC`(이미 정상) 및 `UPS_10KG_BOX`/`UPS_25KG_BOX`는 건드리지 않음
+- DO-block 검증: 삭제 후 기대값(`EXPRESS_NONDOC=400`, `SAVER_NONDOC=400`, `EXPEDITED=200`, `FLIGHT=0`) 및 총 삭제 수 270건 확인, 불일치 시 `RAISE EXCEPTION`
+
+### DB 적용 및 실측 확인 (R-10 대체)
+
+`npx supabase db reset` 실제 적용 후 로컬 DB 직접 조회 결과:
+
+| 상품 | 삭제 전 | 삭제 후 | 남은 이상 행 |
+|:---|:---:|:---:|:---:|
+| WW_EXPRESS_NONDOC | 420 | **400** | 0 |
+| WW_SAVER_NONDOC | 420 | **400** | 0 |
+| WW_EXPEDITED | 270 | **200** | 0 |
+| WW_FLIGHT | 160 | **0** | 0 |
+
+- DO-block NOTICE: `base_rates 정리 완료 — 삭제 270건. EXPRESS_NONDOC=400 SAVER_NONDOC=400 EXPEDITED=200 FLIGHT=0`
+- weight_kg 범위 실측: `WW_EXPEDITED 1.0~20.0`(정수 20개), `WW_EXPRESS_NONDOC/SAVER_NONDOC 0.5~20.0`(각 40개) — 전부 정상 비즈니스 범위 내로 확인
+- `db reset` 후 `seed_data.sql` 시딩에도 잔재 재생성 없음(잔재는 시드가 아닌 구버전 더미 데이터였음을 확인)
+
+### 회귀 테스트
+
+- UPS 관련 유닛 테스트(`tests/unit/ups` + ups-invoice/estimate-panel/product-code-select): **227/227 PASS** (26 파일)
+- 전체 회귀: `npm run test:regression` — **1038/1038 PASS** (151 파일)
+- `npm run build` — **Compiled successfully** (16.8s)
+
+### 재발 방지(권장·선택) — 미적용 사유
+
+- `max_weight_kg` 20 설정: `freight.ts:106`의 DOC→NONDOC 자동 전환 로직(`product.max_weight_kg` 초과 시 `_DOC`→`_NONDOC` 코드로 대체 조회)과 상호작용할 위험이 있어 선택 사항으로 미적용 — 별도 검토 필요 시 후속 task로 분리 권장
+- `getPublicBaseRates()` 방어 필터: 선택 사항. 데이터 정리만으로도 화면 표시 정상화가 확인되어 코드 변경은 하지 않음
+
+## [발견 이슈]
+
+1. `db reset` 후에도 `WW_EXPRESS_DOC`/`WW_SAVER_DOC`는 `max_weight_kg=5`, NONDOC/EXPEDITED는 `max_weight_kg=NULL`로 혼재 상태 — 관리자 UI 상한 검증 일관성 이슈 소지. (권장·선택 항목, DEF-B-037 §35 참조 — 이번 범위 밖)
+
 
 ## [발견 이슈]
 
