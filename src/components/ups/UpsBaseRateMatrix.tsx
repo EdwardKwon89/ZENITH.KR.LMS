@@ -6,6 +6,7 @@ import type { UpsZoneWithCountries, UpsProduct, UpsBaseRateWithRefs } from '@/ty
 import type { PublicBaseRate } from '@/app/actions/ups/rates-public';
 import { getUpsBaseRates } from '@/app/actions/ups/rates';
 import { ZenBadge } from '@/components/ui/ZenUI';
+import { candidateCargoTypes, resolveDiscountRate } from '@/lib/ups/cargo-type-utils';
 
 type MatrixRate = UpsBaseRateWithRefs | PublicBaseRate;
 
@@ -21,7 +22,8 @@ interface Props {
   readOnly?: boolean;
   rates?: MatrixRate[];
   priceMode?: 'full' | 'agency' | 'shipper';
-  discountRateMap?: Record<string, number>;
+  // Issue #1027: discountRateMap을 중첩 구조로 변경 (zoneId -> cargoType -> rate)
+  discountRateMap?: Record<string, Record<string, number>>;
 }
 
 type ProductGroup = { label: string; items: UpsProduct[] };
@@ -126,12 +128,16 @@ export default function UpsBaseRateMatrix({
 
   const selectedProduct = products.find(p => p.id === selectedProductId);
 
-  const getDiscountRate = (zoneId: string): number => {
-    return discountRateMap[zoneId] ?? 0;
+  // Issue #1027: candidateCargoTypes 우선순위 폴백 로직 적용
+  const getDiscountRate = (zoneId: string, productCargoType?: string): number => {
+    const zoneRates = discountRateMap[zoneId];
+    return resolveDiscountRate(zoneRates, productCargoType);
   };
 
   const renderCellPrice = (rate: MatrixRate, zoneId: string, weightKg: number) => {
-    const discountRate = getDiscountRate(zoneId);
+    // Issue #1027: rate에서 product_id를 찾아 cargo_type 획득
+    const rateProduct = products.find(p => p.id === rate.product_id);
+    const discountRate = getDiscountRate(zoneId, rateProduct?.cargo_type);
     const hasCost = 'cost_price' in rate;
 
     switch (priceMode) {

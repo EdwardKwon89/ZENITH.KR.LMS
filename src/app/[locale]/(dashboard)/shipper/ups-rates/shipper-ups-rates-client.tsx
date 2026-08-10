@@ -5,6 +5,7 @@ import { DollarSign, Fuel, FileText, Layers, Scale, TrendingUp } from 'lucide-re
 import { ZenBadge } from '@/components/ui/ZenUI';
 import ZenDataGrid from '@/components/ui/ZenDataGrid';
 import UpsBaseRateMatrix from '@/components/ups/UpsBaseRateMatrix';
+import { candidateCargoTypes, resolveDiscountRate } from '@/lib/ups/cargo-type-utils';
 import type { UpsZoneWithCountries, UpsProduct } from '@/types/ups';
 import type { PublicBaseRate, PublicFuelSurcharge, PublicOtherCharge, PublicWeightTierRate, PublicFreightMinimum, PublicSurgeFee } from '@/app/actions/ups/rates-public';
 import type { ColumnDef } from '@tanstack/react-table';
@@ -29,7 +30,8 @@ interface Props {
   surgeFees: PublicSurgeFee[];
   weightTierRates: PublicWeightTierRate[];
   freightMinimums: PublicFreightMinimum[];
-  zoneDiscountMap: Record<string, number>;
+  // Issue #1027: zoneDiscountMap을 중첩 구조로 변경 (zoneId -> cargoType -> rate)
+  zoneDiscountMap: Record<string, Record<string, number>>;
 }
 
 export function ShipperUpsRatesClient({
@@ -38,10 +40,14 @@ export function ShipperUpsRatesClient({
 }: Props) {
   const [activeTab, setActiveTab] = useState<TabKey>('baseRates');
 
-  const getDiscountRate = (zoneId: string): number => zoneDiscountMap[zoneId] ?? 0;
+  // Issue #1027: candidateCargoTypes 우선순위 폴백 로직 적용
+  const getDiscountRate = (zoneId: string, productCargoType?: string): number => {
+    const zoneRates = zoneDiscountMap[zoneId];
+    return resolveDiscountRate(zoneRates, productCargoType);
+  };
 
-  const calcShipperPrice = (price: number, zoneId: string): number => {
-    const rate = getDiscountRate(zoneId);
+  const calcShipperPrice = (price: number, zoneId: string, productCargoType?: string): number => {
+    const rate = getDiscountRate(zoneId, productCargoType);
     if (rate <= 0) return price;
     return Math.round(price * (1 - rate));
   };
@@ -122,25 +128,25 @@ function SurgeFeeTable({ rows }: { rows: PublicSurgeFee[] }) {
   return <ZenDataGrid columns={columns} data={rows} />;
 }
 
-function WeightTierRateTable({ weightTierRates, calcShipperPrice }: { weightTierRates: PublicWeightTierRate[]; calcShipperPrice: (price: number, zoneId: string) => number }) {
+function WeightTierRateTable({ weightTierRates, calcShipperPrice }: { weightTierRates: PublicWeightTierRate[]; calcShipperPrice: (price: number, zoneId: string, productCargoType?: string) => number }) {
   const columns: ColumnDef<PublicWeightTierRate>[] = [
     { id: 'product', header: '제품', cell: ({ row }) => <span className="text-sm font-medium">{row.original.product?.product_code}</span> },
     { id: 'zone', header: 'Zone', cell: ({ row }) => <ZenBadge variant="default" className="font-mono">{row.original.zone?.zone_code}</ZenBadge> },
     { id: 'tier', header: '중량 구간', cell: ({ row }) => <span className="font-mono text-sm">{row.original.tier_min_kg}kg ~ {row.original.tier_max_kg != null ? `${row.original.tier_max_kg}kg` : '∞'}</span> },
     { id: 'shipper_price', header: '적용 운임/kg', cell: ({ row }) => {
-      const price = calcShipperPrice(row.original.price_per_kg_selling, row.original.zone_id);
+      const price = calcShipperPrice(row.original.price_per_kg_selling, row.original.zone_id, row.original.product?.cargo_type);
       return <span className="font-mono text-sm font-semibold text-brand-700">{price.toLocaleString()}원</span>;
     }},
   ];
   return <ZenDataGrid columns={columns} data={weightTierRates} />;
 }
 
-function FreightMinimumTable({ freightMinimums, calcShipperPrice }: { freightMinimums: PublicFreightMinimum[]; calcShipperPrice: (price: number, zoneId: string) => number }) {
+function FreightMinimumTable({ freightMinimums, calcShipperPrice }: { freightMinimums: PublicFreightMinimum[]; calcShipperPrice: (price: number, zoneId: string, productCargoType?: string) => number }) {
   const columns: ColumnDef<PublicFreightMinimum>[] = [
     { id: 'product', header: '제품', cell: ({ row }) => <span className="text-sm font-medium">{row.original.product?.product_code}</span> },
     { id: 'zone', header: 'Zone', cell: ({ row }) => <ZenBadge variant="default" className="font-mono">{row.original.zone?.zone_code}</ZenBadge> },
     { id: 'shipper_price', header: '적용 최소운임', cell: ({ row }) => {
-      const price = calcShipperPrice(row.original.min_charge_selling, row.original.zone_id);
+      const price = calcShipperPrice(row.original.min_charge_selling, row.original.zone_id, row.original.product?.cargo_type);
       return <span className="font-mono text-sm font-semibold text-brand-700">{price.toLocaleString()}원</span>;
     }},
   ];
