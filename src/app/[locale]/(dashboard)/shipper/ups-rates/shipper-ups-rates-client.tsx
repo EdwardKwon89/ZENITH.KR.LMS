@@ -5,6 +5,7 @@ import { DollarSign, Fuel, FileText, Layers, Scale, TrendingUp } from 'lucide-re
 import { ZenBadge } from '@/components/ui/ZenUI';
 import ZenDataGrid from '@/components/ui/ZenDataGrid';
 import UpsBaseRateMatrix from '@/components/ups/UpsBaseRateMatrix';
+import { candidateCargoTypes, resolveDiscountRate } from '@/lib/ups/cargo-type-utils';
 import type { UpsZoneWithCountries, UpsProduct } from '@/types/ups';
 import type { PublicBaseRate, PublicFuelSurcharge, PublicOtherCharge, PublicWeightTierRate, PublicFreightMinimum, PublicSurgeFee } from '@/app/actions/ups/rates-public';
 import type { ColumnDef } from '@tanstack/react-table';
@@ -19,14 +20,6 @@ const TABS: { key: TabKey; label: string; icon: React.ElementType }[] = [
   { key: 'weightTierRates', label: '20kg 초과 티어 요율', icon: Layers },
   { key: 'freightMinimums', label: 'Freight 최소운임', icon: Scale },
 ];
-
-// Issue #1027: freight.ts의 candidateCargoTypes와 동일한 패턴
-function candidateCargoTypes(productCargoType?: string): string[] {
-  if (productCargoType === 'DOC') return ['DOC', 'ALL'];
-  if (productCargoType === 'NON_DOC') return ['NON_DOC', 'ALL'];
-  // BOTH(Expedited/Flight): NON_DOC 우선, ALL 폴백 (DOC는 후보 아님)
-  return ['NON_DOC', 'ALL'];
-}
 
 interface Props {
   zones: UpsZoneWithCountries[];
@@ -50,10 +43,7 @@ export function ShipperUpsRatesClient({
   // Issue #1027: candidateCargoTypes 우선순위 폴백 로직 적용
   const getDiscountRate = (zoneId: string, productCargoType?: string): number => {
     const zoneRates = zoneDiscountMap[zoneId];
-    if (!zoneRates) return 0;
-
-    const candidates = candidateCargoTypes(productCargoType);
-    return candidates.map(ct => zoneRates[ct]).find(r => r !== undefined) ?? 0;
+    return resolveDiscountRate(zoneRates, productCargoType);
   };
 
   const calcShipperPrice = (price: number, zoneId: string, productCargoType?: string): number => {

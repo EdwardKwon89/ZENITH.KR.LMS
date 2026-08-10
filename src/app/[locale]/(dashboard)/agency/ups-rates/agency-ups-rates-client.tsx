@@ -6,6 +6,7 @@ import { ZenBadge } from '@/components/ui/ZenUI';
 import ZenDataGrid from '@/components/ui/ZenDataGrid';
 import UpsBaseRateMatrix from '@/components/ups/UpsBaseRateMatrix';
 import { ZoneDiscountForm } from '@/components/agency/ZoneDiscountForm';
+import { candidateCargoTypes, resolveDiscountRate } from '@/lib/ups/cargo-type-utils';
 import type { UpsZoneWithCountries, UpsProduct } from '@/types/ups';
 import type { PublicBaseRate, PublicFuelSurcharge, PublicOtherCharge, PublicWeightTierRate, PublicFreightMinimum, PublicSurgeFee } from '@/app/actions/ups/rates-public';
 import type { AgencyShipperRow } from '@/types/agency';
@@ -31,14 +32,6 @@ const TABS: { key: TabKey; label: string; icon: React.ElementType }[] = [
   { key: 'freightMinimums', label: 'Freight 최소운임', icon: Scale },
   { key: 'shipperDiscounts', label: '화주 할인율 관리', icon: Users },
 ];
-
-// Issue #1027: freight.ts의 candidateCargoTypes와 동일한 패턴
-function candidateCargoTypes(productCargoType?: string): string[] {
-  if (productCargoType === 'DOC') return ['DOC', 'ALL'];
-  if (productCargoType === 'NON_DOC') return ['NON_DOC', 'ALL'];
-  // BOTH(Expedited/Flight): NON_DOC 우선, ALL 폴백 (DOC는 후보 아님)
-  return ['NON_DOC', 'ALL'];
-}
 
 interface Props {
   zones: UpsZoneWithCountries[];
@@ -73,11 +66,8 @@ export function AgencyUpsRatesClient({
   // Issue #1027: candidateCargoTypes 우선순위 폴백 로직 적용
   const calcAgencyCost = (sellingPrice: number, zoneId: string, productCargoType?: string): number => {
     const zoneRates = policyByZone[zoneId];
-    if (!zoneRates) return sellingPrice;
-
-    const candidates = candidateCargoTypes(productCargoType);
-    const rate = candidates.map(ct => zoneRates[ct]).find(r => r !== undefined);
-    if (rate == null) return sellingPrice;
+    const rate = resolveDiscountRate(zoneRates, productCargoType);
+    if (rate == null || rate === 0) return sellingPrice;
     return Math.round(sellingPrice * (1 - rate));
   };
 
