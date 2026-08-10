@@ -18,6 +18,7 @@ import { UpsActualAdjustmentForm } from '@/components/orders/UpsActualAdjustment
 import OrderFinanceSummary from '@/components/finance/OrderFinanceSummary';
 import UpsTrackingEventsList from '@/components/tracking/UpsTrackingEventsList';
 import DocumentDownloadButton from '@/components/documents/DocumentDownloadButton';
+import { resolveDestCountryCode } from '@/lib/ups/order-helpers';
 import CommercialInvoicePDF from '@/components/documents/CommercialInvoicePDF';
 import PackingListPDF from '@/components/documents/PackingListPDF';
 import UpsInvoicePDF from '@/components/documents/UpsInvoicePDF';
@@ -263,7 +264,7 @@ export default async function UpsOrderDetailPage({ params }: UpsOrderDetailPageP
             </div>
             <UpsOrderBreakdownCard
               orderNo={order.order_no}
-              destCountryCode={order.recipient_country_code || (order.dest_port as any)?.country_code || 'US'}
+              destCountryCode={resolveDestCountryCode(order)}
               transportMode={order.transport_mode}
               snapshotMeta={(snapshot as any)?.metadata}
               cargoDetails={order.cargo_details as any}
