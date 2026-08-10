@@ -21,7 +21,8 @@ interface Props {
   readOnly?: boolean;
   rates?: MatrixRate[];
   priceMode?: 'full' | 'agency' | 'shipper';
-  discountRateMap?: Record<string, number>;
+  // Issue #1027: discountRateMap을 중첩 구조로 변경 (zoneId -> cargoType -> rate)
+  discountRateMap?: Record<string, Record<string, number>>;
 }
 
 type ProductGroup = { label: string; items: UpsProduct[] };
@@ -126,12 +127,20 @@ export default function UpsBaseRateMatrix({
 
   const selectedProduct = products.find(p => p.id === selectedProductId);
 
-  const getDiscountRate = (zoneId: string): number => {
-    return discountRateMap[zoneId] ?? 0;
+  // Issue #1027: productCargoType 파라미터 추가, ALL 폴백 로직 포함
+  const getDiscountRate = (zoneId: string, productCargoType?: string): number => {
+    const zoneRates = discountRateMap[zoneId];
+    if (!zoneRates) return 0;
+
+    // productCargoType이 없으면(Expedited/Flight 등) ALL 폴백
+    const cargoType = productCargoType === 'BOTH' || !productCargoType ? 'ALL' : productCargoType;
+    return zoneRates[cargoType] ?? zoneRates['ALL'] ?? 0;
   };
 
   const renderCellPrice = (rate: MatrixRate, zoneId: string, weightKg: number) => {
-    const discountRate = getDiscountRate(zoneId);
+    // Issue #1027: rate에서 product_id를 찾아 cargo_type 획득
+    const rateProduct = products.find(p => p.id === rate.product_id);
+    const discountRate = getDiscountRate(zoneId, rateProduct?.cargo_type);
     const hasCost = 'cost_price' in rate;
 
     switch (priceMode) {
