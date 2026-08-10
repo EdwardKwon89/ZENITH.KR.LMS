@@ -7,7 +7,7 @@
 | **담당** | Mike (Team B) |
 | **생성일** | 2026-08-11 |
 | **우선순위** | P2 |
-| **상태** | 🔄 (v1 반려, v2 대기) |
+| **상태** | ✅ |
 
 ## 현황 분석 (Jaison, 코드 직접 확인 완료)
 
@@ -127,7 +127,23 @@ PR 반려·close, 병합 없음. v2 착수 가능(승인 완료, 재확인 불�
 
 ## [작업 결과]
 
-_(v2 담당자 작성 예정)_
+**v2 — 커밋 `da14c68c`** `[Mike] feat: Issue #1041 법인정보 주소 입력 AddressInput 컴포넌트로 통일 (v2)` (+문서 커밋 `413716e2`) — **PR#1043**
+
+v1 반려 사유 3건 전부 해결:
+1. **GRANT 확장**: 신규 마이그레이션 `20260811010000_iss1041_corporate_address_grant_extend.sql` — `zen_organizations` 컬럼 단위 GRANT에 `country_code, state_province, city, address_detail, zipcode, address_english, address_detail_english` 7개 추가
+2. **`address_detail_english` 입력 필드**: `AddressInput.tsx`에 KR/해외 양쪽 분기 모두 hidden input 추가(해외 분기는 기존에 `address_english` hidden input도 없었던 것까지 함께 보강)
+3. **i18n 키**: `messages/{ko,en,ja,zh}.json`의 `Dashboard` 네임스페이스에 `form_*` 키 9개 추가(ja/zh는 `Dashboard` 네임스페이스 자체가 없어 신규 생성)
+4. 프론트(`corporate/page.tsx`)/백엔드(`admin/corporate.ts`) 필드 매핑은 v1과 동일(구조는 처음부터 정확했음)
+
+**신규 테스트 6건** (`tests/unit/member/corporate-address.test.tsx`) — 실제 `AddressInput` import+렌더링 기반(그림자 아님): KR/해외 양쪽 `address_detail_english`/`address_english` hidden input 렌더링 검증(4건) + defaultValues 반영 검증(2건)
+
+**Jaison 독립 검증**:
+- 격리 워크트리 fresh reset → `information_schema.column_privileges` 직접 조회로 GRANT 12개 컬럼 전부 반영 확인
+- `npm run test:regression`: **159/159 · 1112/1112 ALL PASS**(PR 자체 보고는 신규 6건만 언급 — 전체 스위트는 Jaison이 별도 확인) · `npm run build` SUCCESS · CI 전체 pass
+- **실제 로그인(`uat02_corp_shipper@zenith.kr`) → 상세주소 입력 → 저장 → DB 직접 조회**(v1이 실패했던 지점 재현): "법인 정보가 저장되었습니다" 성공 토스트 + DB에 정확히 반영 확인, 서버 로그에 `permission denied`/`MISSING_MESSAGE` 전무
+- PR#1043 Jaison 승인·머지, Issue #1041 종결
+
+**비차단 참고**: Mike가 이 파일을 이어쓰지 않고 별도 신규 파일(`TASK-B-271_..._Mike.md`)을 만들어 제출 — Jaison이 병합 시 이 파일로 통합, 원본 파일은 정리(아래 참조).
 
 ## [발견 이슈]
 
