@@ -8,7 +8,7 @@
 | **담당** | Baker (Team B) |
 | **생성일** | 2026-08-10 |
 | **우선순위** | **P1 / Critical** — 보안 취약점, 프로덕션에 동일 코드가 있다면 즉시 악용 가능 |
-| **상태** | ⬜ |
+| **상태** | 🔔 |
 
 ## 결함 체인 (Issue #1026 본문 전체 참조)
 
@@ -80,8 +80,70 @@ final_role := COALESCE(new.raw_user_meta_data->>'role', 'CORPORATE'); -- 'ADMIN'
 
 ## [작업 결과]
 
-_(담당자 작성 예정)_
+**담당**: Baker | **완료일**: 2026-08-10 | **코드 커밋**: `90ea3eaa` | **문서 커밋**: 아래 문서 커밋과 분리
+
+### 1. 결함 체인 수정 (3중 결함 전부 처리)
+
+| 결함 | 수정 | 파일 |
+|:-----|:-----|:-----|
+| **A (핵심)** | 신규 조직 생성 가입자 role → `ORG_TYPE_TO_ROLE` 명시적 매핑(CARRIER→CARRIER, AGENCY→AGENCY, SHIPPER→SHIPPER, CORPORATE→CORPORATE, CUSTOMS→CUSTOMS_BROKER, DELIVERY→DELIVERY_AGENT). ADMIN 폴백 완전 제거, 미매핑/누락 org_type은 `CORPORATE` 안전 폴백 | `login/actions.ts:23-34,162-166` |
+| **A (트리거)** | `handle_new_user()` `COALESCE(..., 'ADMIN')` → `COALESCE(..., 'CORPORATE')` — 기존 함수 본문 유지하고 한 줄만 정정 | 마이그레이션 `20260810120000_fix_handle_new_user_secure_role_fallback.sql` |
+| **B (방어)** | `approve_organization()` RPC 하드닝 — 승인 대상 조직 내 `role IN ('ADMIN','MANAGER','ZENITH_SUPER_ADMIN')` 프로필 존재 시 `RAISE EXCEPTION` 차단(권한 검사 → ALREADY_ACTIVE → 방어 → 승인 순서) | 마이그레이션 `20260810130000_harden_approve_organization_rbac.sql` |
+
+### 2. 테스트 (R-09)
+
+**단위 테스트 신규**: `tests/unit/auth/signup-role-mapping.test.ts` (6건, behavioral — `signup()` 호출 후 `auth.signUp` mock 인자 role 검증)
+
+- TC-265-01: AGENCY 신규 조직 → role=AGENCY (ADMIN 아님) ✅
+- TC-265-02: org_type별 정확한 매핑 (CARRIER/SHIPPER/CORPORATE/CUSTOMS/DELIVERY) ✅
+- TC-265-03: 알 수 없는 org_type('HACKER') → CORPORATE 폴백 (ADMIN 아님) ✅
+- TC-265-04: org_type 누락 → CORPORATE 폴백 ✅
+- TC-265-05: 기존 조직 가입 → role=USER 유지 (회귀 보호) ✅
+- TC-265-06: 개인 가입 → role=INDIVIDUAL 유지 ✅
+
+**DB 트리거/RPC 검증**: `tests/unit/db/defb039-handle-new-user-role-fallback.test.ts` (3건, **fresh DB `supabase db reset --yes` 기준 psql 직접 실행** — 정보스키마 등 미존재 오브젝트 참조 없음)
+
+- TC-265-07: role 메타데이터 누락 시 `handle_new_user()` 트리거 → **CORPORATE** 폴백 (ADMIN 아님) ✅
+- TC-265-08: role 메타데이터 명시(AGENCY) 시 그대로 부여 ✅
+- TC-265-09: `approve_organization()` — 조직 내 ADMIN 프로필 있으면 승인 RAISE EXCEPTION 차단 ✅
+
+### 3. 되돌리기 검증 (핵심 안전장치 — 실제 재현 확인)
+
+수정 전 상태(`login/actions.ts` role 라인 HEAD 버전으로 임시 스태시)로 되돌린 뒤 회귀 테스트 실행:
+
+```
+× TC-265-01: AGENCY 신규 조직 생성 → role=AGENCY (ADMIN 아님) — FAIL (AGENCY가 ADMIN 부여됨, 취약점 재현)
+× TC-265-02~04: org_type별 매핑/폴백 — 4건 FAIL (모두 ADMIN으로 부여되어 기대 불일치)
+Test Files  1 failed | Tests 4 failed
+```
+
+→ **수정 전 코드로 "신규 AGENCY 가입 → role=ADMIN" 증상이 실제로 재현됨을 확인** 후 픽스 복원, 복원 후 6건 전체 PASS 재확인.
+
+### 4. R-10 실제 브라우저 검증 (role·org_type 한정 화면이므로 실제 로그인/네비게이션 원칙 적용)
+
+baker 워크트리 dev 서버(:3010)에서 `/ko/register` 접속 → 신규 AGENCY 조직 생성 가입(대리점 선택) → wizard 5단계(법인회원→신규법인등록→ORG_CREATE→INFO→DOCS) 완료. 이후 로컬 DB 쿼리:
+
+```sql
+SELECT p.email, p.role, p.status, p.org_id, o.name AS org_name, o.type
+FROM public.zen_profiles p LEFT JOIN public.zen_organizations o ON o.id = p.org_id
+WHERE p.email LIKE 'r10-agency-%' ORDER BY p.created_at DESC LIMIT 5;
+-- r10-agency-...@zenith.kr | AGENCY | PENDING | d31ed8f4-... | R10 대리점 ... | AGENCY
+```
+
+→ **브라우저로 실제 가입한 신규 AGENCY 조직 생성자의 role이 `AGENCY`(ADMIN 아님), status PENDING 확인.**
+
+### 5. 검증 요약
+
+- `npx tsc --noEmit`: 본 Task 변경 파일 오류 0건 (기존 베이스 브랜치 잔존 오류 52건은 pre-existing, origin/TeamB_Dev와 동일)
+- `npm run test:regression`: **155 files / 1071 tests ALL PASS** (기존 152/1047 대비 +3 files/+24 tests)
+- `npm run build`: **SUCCESS** (Compiled successfully in 66s)
+- 마이그레이션 2건 fresh DB(`supabase db reset --yes`) 정상 적용 확인
+
+### 6. 범위
+
+- 프로덕션 기존 계정 감사(org_type≠PLATFORM인데 role=ADMIN)는 task 범위 밖 — JSJung 직접 확인 예정.
 
 ## [발견 이슈]
 
-_(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
+1. **`/register` UI에 PLATFORM org_type 노출되지 않음 (정상)**: `register/page.tsx` `OrgType = 'PLATFORM' | 'SHIPPER' | 'CARRIER' | 'AGENCY'` 타입에는 PLATFORM이 있지만, UI 선택지는 `(['SHIPPER','CARRIER','AGENCY'] as OrgType[])`만 렌더링 — 사용자가 PLATFORM을 선택할 수 없어 위험 노출 없음. 다만 타입 선언에 PLATFORM이 잔존하므로 향후 제거/정리 고려 가능(이번 범위 밖).
+2. **신규 조직 가입 성공 시 페이지 URL이 `/ko/register`에 머물러 있음**: signup 성공 후 `router.push(/ko/register/pending)`가 호출되지만(register/page.tsx:127), 스크립트 측 4초 대기 시점에도 URL이 `/ko/register`였음 — DB에는 정상적으로 PENDING 프로필 생성됨. 리다이렉트 타이밍/동작은 이번 취약점과 무관하나, 유저 피드백 관점에서 확인 여지 있음(이번 범위 밖).
