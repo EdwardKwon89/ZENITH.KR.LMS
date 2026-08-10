@@ -1,6 +1,7 @@
 import { logger } from '@/lib/logger';
 import { createAdminClient } from '@/utils/supabase/server';
-import { getNumericParam } from '../../params/service';
+import { getExchangeRate } from '../exchange-rate';
+import { getKstToday } from '@/lib/utils/date-kst';
 import { SettlementEngine } from './settlement';
 import { CostAggregator } from './cost-aggregator';
 
@@ -75,7 +76,8 @@ export class InvoiceGenerator {
       const randomSuffix = () => Math.floor(1000 + Math.random() * 9000);
 
       // 4. 기존 인보이스 (shipper 대상) — invoice_tier / billed_org_id 추가
-      const exchangeRate = await getNumericParam('EXCHANGE_RATE_USD_KRW', 1350);
+      // 출고확정(RELEASED)일 환율 규칙 — 인보이스 생성 시점 = 출고확정 시점이므로 KST 오늘 환율 사용
+      const exchangeRate = await getExchangeRate('USD', 'KRW', getKstToday(), supabase);
       const invoiceTier = order.agency_org_id ? 'AGENCY_TO_SHIPPER' : 'ADMIN_TO_SHIPPER';
 
       const { data: invoice, error: invError } = await supabase

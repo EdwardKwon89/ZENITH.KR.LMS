@@ -1623,6 +1623,7 @@
 - **예상 공수**: 0.3 MD (Express/Expedited 판매가 자료만 확보되면)
 - **우선순위**: Medium
 - **상태**: 🔄 부분 완료(SAVER_NONDOC만)
+- **[2026-08-09 정정]**: "WW_SAVER_NONDOC 해결 완료" 표현은 `zen_ups_base_rates`(0.5~20kg 260건)에만 해당. `zen_ups_weight_tier_rates`(20kg 초과 구간)는 이 migration이 건드리지 않았고 별도 결함이 있음 — [IMP-158] 참조.
 
 ## [IMP-150] SNTL 원가 적재 후 판매가(selling_price)/마크업 정책 — **SAVER는 실측치 확보, 나머지 상품 미정**
 
@@ -1634,6 +1635,20 @@
 - **예상 공수**: 0.5 MD (자료 확보 시)
 - **우선순위**: High — Express/Expedited/Flight는 여전히 더미 판매가라 마크업 정책 확정 전 실사용 금지
 - **상태**: 🔄 부분 완료(SAVER만)
+- **[2026-08-09 정정]**: "tier 21-44~500-999는 실측 반영"은 부정확 — 실제로는 `20260719000200` migration이 `weight_tier_rates`를 전혀 건드리지 않았고, 21-44~300-499는 원래(TASK-141 원본 시드) 값이 우연히 공식 UPS Rate Guide와 일치, 500-999·1000+는 원본 시드 자체가 손상값(300-499 대비 1/60 수준). [IMP-158] 참조.
+
+## [IMP-158] WW_SAVER_NONDOC weight_tier_rates 500kg+ 구간 판매가 손상값 + WW_EXPEDITED Z5 자체 오기 1건
+
+- **발견 경위**: 사용자 요청으로 "비서류 20kg 초과 화물 처리 로직이 원본 문서(UPS 운임 및 부가서비스.pdf)와 부합하는지" 전수 검증 중 발견. `zen_ups_weight_tier_rates`를 Zone×상품별로 PDF의 "20 kg 초과 화물(kg당 가격)" 5구간(21-44/45-70/71-99/100-299/300 and above) 표와 직접 대조.
+  1. **WW_SAVER_NONDOC, Zone 2~10, tier_min_kg IN (500, 1000)**: `price_per_kg_selling`이 같은 Zone의 300-499 구간 대비 약 1/60 수준(예: Z6 300-499=42,000원/kg인데 500-999=673.20원/kg, 1000+=650.25원/kg). PDF는 300kg 이상을 단일 구간("300 and above")으로 취급하므로 300-499=500-999=1000+ 여야 정상. Zone 1만 정상(20260809000000에서 이미 재작성됨). `price_per_kg_cost`는 전 구간 정상 — selling만 손상. IMP-149/150이 "실측 반영"으로 오기재했던 부분의 정정.
+  2. **WW_EXPEDITED, Zone 5, tier_min_kg=45(45-70kg)**: `price_per_kg_selling`=28,500원/kg으로 저장되어 있으나 PDF 원본은 28,200원/kg(21-44 구간과 동일 값을 45-70에도 실수로 복사). 이번 세션 본인이 작성한 `20260809020000` migration 858/867행의 자체 오기 — 다른 Zone은 전부 21-44=45-70 값이 동일해서 복붙해도 맞았는데, Zone5만 UPS 카드상 두 구간 값이 다름(28,500 vs 28,200)을 놓침.
+- **현재 상태**: 두 건 모두 수정 전. ①은 500kg 이상 단일 SAVER_NONDOC(비서류) 발송물 견적 시 판매가가 정상가의 약 1.6%로 계산되는 심각한 과소청구 위험(원가는 정상이라 역마진 확정). ②는 Zone5·45~70kg 구간에서만 kg당 300원 과다청구(경미).
+- **임시 조치**: 없음 — WW_SAVER_NONDOC 500kg 이상 단일 발송 견적/주문 등록은 수기로 우회 검증 필요.
+- **목표 구현**: DELETE+INSERT 또는 UPDATE migration으로 (1) WW_SAVER_NONDOC Zone2~10의 tier_min_kg 500/1000 `price_per_kg_selling`을 해당 Zone의 300-499 값과 동일하게 정정, (2) WW_EXPEDITED Zone5 tier_min_kg=45 `price_per_kg_selling`을 28,200으로 정정. 수정 후 `zen_ups_weight_tier_rates` 전체에 대해 "300-499 = 500-999 = 1000+" 불변식을 DO-block으로 검증.
+- **관련 파일**: `supabase/migrations/20260719000200_sntl_saver_selling_price.sql`(①원인 추정), `supabase/migrations/20260809020000_ups_export_selling_price_and_missing_cost_rows.sql:858,867`(②원인), `docs/80_RawData/20260609 SNTL 자료/UPS 운임 및 부가서비스.pdf`(p.19,20 대조 근거)
+- **예상 공수**: 0.2 MD
+- **우선순위**: High — ①은 실제 주문 발생 시 즉시 매출 손실로 이어지는 데이터 결함
+- **상태**: ⬜ 미착수 (분석·보고만 완료, 수정은 사용자 지시 대기)
 
 ## [IMP-151] `getMaxAllowedZoneDiscount`가 Zone 내 전 상품(더미 포함)을 함께 검사 — 현재 모든 Zone에서 허용 할인율 0%로 계산됨 — ✅ 해결 완료
 
@@ -1718,14 +1733,42 @@
 
 UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류 등) 처리는 SHXK 측 전체 상태 코드표가 문서화되어 있지 않아(코드베이스·문서 전체에서 실제 다뤄지는 코드는 `NT`/`DL` 2개뿐, `docs/80_RawData/Phase8_UPS_API_리서치_결과.md` 확인) **현재로선 조치 불가능**(Edward 확인, 2026-07-24). SHXK 측에 전체 코드표를 확인받기 전까지는 착수 대상에서 제외 — TASK-209 범위에도 포함하지 않음.
 
-## [IMP-157] createOrder()의 agency_org_id/예상운임 스냅샷 생성이 role==='AGENCY_SHIPPER' 문자열에만 의존 — CORPORATE 등 다른 role의 대리점 소속 화주는 누락됨
+## [IMP-157] createOrder()의 agency_org_id/예상운임 스냅샷 생성이 role==='AGENCY_SHIPPER' 문자열에만 의존 — **[2026-08-09 정정] 대리점 소속 화주뿐 아니라 비대리점 직접 화주 전체가 동일하게 누락됨(Critical), DEF-B-035/Issue 등록·TASK-B-258 배정**
 
 - **발견 경위**: JSJung 요청으로 "jungjs72@gmail.com 계정으로 입력된 오더가 agency@zenith.kr에서 검색이 안 됨" 재현·근본원인 분석 중 발견. `jungjs72@gmail.com`(role: `CORPORATE`)을 `agency@zenith.kr` 소속으로 `zen_agency_shippers`에 연결한 뒤 UPS 오더 3건(`ZEN-2026-000004/5/6`)을 등록했으나, 전부 `agency_org_id`가 NULL로 남아 대리점 세션(RLS 정책 `agency_shipper_select_own_orders`: `agency_org_id = 자기 org_id`)에서 조회 자체가 안 됨.
 - **근본 원인**: `createOrder()`(`src/app/actions/operations/orders.ts:121-146`)가 `agency_org_id` 조회(121행)와 UPS 예상운임 스냅샷 생성(`saveOrderRateSnapshot()` 호출, 146행) 둘 다 `profile.role === USER_ROLES.AGENCY_SHIPPER`(문자열 완전일치)로만 게이트됨. 그러나 대리점 소속 여부는 role이 아니라 `zen_agency_shippers` 테이블(role 무관)로 관리되는 별개의 관계 — role이 `CORPORATE`/`INDIVIDUAL` 등이어도 실제로는 대리점에 소속될 수 있는데, 이 코드는 그 케이스를 전혀 감지하지 못함.
 - **부수 피해(더 심각)**: 같은 조건문 때문에 **UPS 예상운임 스냅샷(`zen_order_rate_snapshots`) 생성 자체가 통째로 스킵**됨 — role이 AGENCY_SHIPPER가 아닌 대리점 소속 화주가 등록한 UPS 오더는 예상운임이 전혀 계산되지 않은 채로 남음(ups-detail 화면 전체 공란, agency/shipper 인보이스용 platform breakdown 데이터 부재).
-- **현재 상태**: JSJung 요청으로 코드 수정(DEF 등록) 대신 **기존 3건 오더의 데이터만 직접 백필**함 — `agency_org_id` 3건 모두 실제 컬럼에 설정 완료, `zen_order_rate_snapshots`도 실제 계산 함수(`computeUpsFreight`/`computeAgencyFreight`/`computeShipperFreight`) 로직을 그대로 재현해 3건 모두 생성 완료(대리점 20%/화주 25% 할인율 반영). 대리점 RLS 세션으로 직접 재현해 3건 모두 조회됨을 확인.
-- **임시 조치**: 위 백필로 기존 3건은 해결됐으나, **코드 자체는 수정되지 않음** — 앞으로 CORPORATE/INDIVIDUAL 등 AGENCY_SHIPPER가 아닌 role의 대리점 소속 화주가 UPS 오더를 등록할 때마다 동일 문제가 재발함.
-- **목표 구현**: `createOrder()`의 두 조건문을 `profile.role === 'AGENCY_SHIPPER'` 대신 **`zen_agency_shippers`에 `shipper_org_id = profile.org_id`인 활성 행이 있는지** 기준으로 변경(role 무관하게 실제 소속 관계로 판단). 두 로직(agency_org_id 설정 + rate snapshot 생성) 모두 동일하게 수정 필요.
-- **관련 파일**: `src/app/actions/operations/orders.ts:121-146`
-- **예상 공수**: 0.3 MD (조건 로직 변경 + 회귀 테스트)
-- **우선순위**: High — 재무 데이터(예상운임) 누락으로 이어지는 구조적 결함이나, 당장 급한 3건은 데이터 백필로 해소됨
+- **[2026-08-09 정정 — 범위 확대, Critical로 재분류]**: JSJung의 "admin 매입/매출이 산정되고 있나요?" 질문에 답하며 재검토한 결과, 위 서술은 문제를 "대리점 소속인데 role이 다른 케이스"로만 좁게 기술하고 있었으나 **실제로는 훨씬 넓은 범위**를 덮는 문제임을 확인:
+  - 146행 조건은 `role === AGENCY_SHIPPER`가 **아니면 무조건** 스킵 — 대리점 소속 여부와 무관하게, **대리점과 전혀 관계없는 순수 직접 화주(SHIPPER/CORPORATE/INDIVIDUAL)가 등록한 UPS 오더도 전부 스냅샷이 생성되지 않음.**
+  - `zen_order_rate_snapshots`가 없으면 `SettlementEngine.calculateOrderCosts()`(UPS 분기, `settlement.ts:71-73`)가 `"예상운임 스냅샷이 없습니다"` 에러로 즉시 실패 → `zen_order_costs`(매출 원장) 생성 불가 → `InvoiceGenerator.generateInvoice()`도 연쇄 실패 → **해당 오더는 인보이스 생성 자체가 불가능**.
+  - `order-revenue-cost.ts`의 ADMIN 매입(`platform.totalCostPrice`)·매출 폴백(`platform.totalSellingPrice`) 모두 이 스냅샷에서 읽으므로, 스냅샷이 없으면 매입/매출 화면에서도 완전히 0으로 표시됨.
+  - 이 경로가 살아나는 유일한 우회로는 창고 입고 시 실측 수정(`applyPackageMeasurements`, role 무관하게 동작)뿐인데, 이는 담당자가 실제로 치수를 재입력했을 때만 발동하는 조건부 경로라 보장되지 않음.
+  - 현재 DB의 UPS 오더 8건 전부 대리점 소속이라(비대리점 직접 오더 0건) 이 경로가 실제로 한 번도 검증된 적이 없었음.
+- **현재 상태**: 과거(대리점 소속 3건) — JSJung 요청으로 코드 수정 대신 **데이터 백필**만 처리(`agency_org_id`·`zen_order_rate_snapshots` 3건 모두 직접 재현해 생성). **비대리점 직접 화주 케이스는 백필 대상도 아니었고 여전히 미해결.**
+- **임시 조치**: 없음 — 비대리점 직접 화주의 UPS 오더는 지금도 등록 시점에 스냅샷이 생성되지 않음.
+- **목표 구현**: `createOrder()`의 두 조건문에서 `profile.role === 'AGENCY_SHIPPER'` 게이트를 제거. `agency_org_id` 설정은 `zen_agency_shippers`에 `shipper_org_id = profile.org_id`인 활성 행이 있는지로 판단(대리점 소속이면 설정, 없으면 null 유지 — `estimateUpsFreight`가 `agencyOrgId` 미전달 시 `{agency:null, shipper:null}`을 정상 반환하므로 안전). 예상운임 스냅샷 생성(`saveOrderRateSnapshot`)은 **role/대리점 소속 여부와 무관하게 UPS 오더면 항상 호출**하도록 변경.
+- **관련 파일**: `src/app/actions/operations/orders.ts:121-148`, `src/lib/finance/settlement/settlement.ts:71-73`, `src/app/actions/finance/order-revenue-cost.ts`
+- **예상 공수**: 0.5 MD (조건 로직 변경 + 비대리점 직접화주 회귀 테스트 신설 + 기존 대리점 케이스 되돌리기 검증)
+- **우선순위**: **Critical** — 대리점을 거치지 않는 모든 직접 UPS 화주 오더가 예상운임 산정·매입/매출 집계·인보이스 발행까지 전부 불가능한 상태. DEF-B-035로 별도 등록, GitHub Issue + TASK-B-258 배정 완료(아래 참조).
+
+## [IMP-159] UPS 기타 부가요금(otherChargeIds) 배선 누락 — SATURDAY 유류할증 적용 플래그 확인 필요
+
+- **발견 경위**: 사용자 요청으로 "유류할증료·급증 수수료 적용 로직" 검증 중 `src/app/actions/ups/freight.ts`에서 `EstimateUpsFreightInput.otherChargeIds`가 인터페이스에는 정의돼 있으나 실제로는 어디서도 읽히지 않고, `computeUpsFreight()` 호출부(freight.ts:209)에 `otherCharges: []`가 항상 하드코딩되어 있음을 확인. `grep -rn otherChargeIds src`로 전수 확인한 결과 이 필드를 실제로 채워서 호출하는 caller가 **코드베이스 전체에 0건**(타입 선언 2곳 외 전무).
+- **현재 상태**: `zen_ups_other_charges`에 등록된 DDP/DDU/RESI/SATURDAY/SURGE(Peak Season)/INSURANCE 등은 incoterms나 사용자 선택과 무관하게 **어떤 오더에도 실제로 계산에 포함된 적이 없음**(전부 죽은 경로). 유일한 예외는 `OVERSIZE`— 이건 `computeUpsFreight()` 내부에서 치수 기반 `oversizeApplied` 판정 시 별도 경로로 강제 포함되므로 정상 동작.
+  - 부수 확인: PDF("UPS 운임 및 부가서비스.pdf" p.6~7)의 "토요일 처리 수수료/토요일 배송 서비스" 문단 바로 아래 "*유류 할증료가 부과됩니다." 각주가 있어 SATURDAY도 유류할증 대상으로 보이는데, DB `zen_ups_other_charges.SATURDAY.fuel_surcharge_applicable = false`로 저장돼 있음. 다만 이 PDF는 2단 레이아웃이라 각주가 정확히 어느 항목까지 걸리는지 텍스트 추출만으로는 100% 단정하기 어려워 **재확인 필요**(원본 PDF 육안 확인 권장)로 표시.
+- **임시 조치**: 없음 — 현재 어차피 otherChargeIds 배선이 죽어있어 이 플래그 값 자체가 실사용에 영향 없음(SATURDAY가 선택돼도 반영 자체가 안 됨).
+- **목표 구현**: (1) 오더/견적 화면에서 DDP/DDU/RESI/SATURDAY 등 부가요금을 실제로 선택 가능하게 할 계획이 있다면 `estimateUpsFreight`가 `input.otherChargeIds`로 `zen_ups_other_charges`를 필터링해 `otherCharges`에 채워 넣도록 배선 추가, (2) SATURDAY의 `fuel_surcharge_applicable` 값은 원본 PDF 육안 재확인 후 정정.
+- **관련 파일**: `src/app/actions/ups/freight.ts:38,167-176,209`, `src/types/ups.ts:184`
+- **예상 공수**: 0.5 MD (배선 추가 시) / 0.1 MD (SATURDAY 플래그만 정정 시)
+- **우선순위**: Medium — 현재 DDP/DDU 등 부가요금이 주문 화면에서 선택되는 흐름 자체가 없다면 당장 영향 없으나, 향후 해당 UI가 추가되면 바로 매출 누락으로 이어짐
+
+## [IMP-160] `getShipperDailyBillingSummary` 주간/월간 그룹 다중환율 섞임 — 그룹 적용환율이 "마지막 인보이스 값"으로 덮어써짐 (PR #1001 리뷰 발견)
+
+- **발견 경위**: PR #1001(TASK-B-257 환율 관리 기능) Jaison 리뷰(비차단 참고)로 발견. `daily-billing.ts`가 인보이스별 `applied_exchange_rate` 스냅샷을 우선 적용하도록 변경되면서, 같은 그룹(`billed_org_id_periodKey`) 안에 인보이스가 여러 건이고 `periodType='weekly'`/`'monthly'`인 경우 서로 다른 스냅샷 환율이 섞일 수 있음.
+- **근본 원인**: `group.appliedExchangeRate`가 매 인보이스 반복마다 덮어써져 **그룹의 마지막으로 처리된 인보이스의 환율값만 남음**(가중평균 아님). 이후 `estimatedBillingAmountUsd = totalBillingAmountKrw / appliedExchangeRate`(`daily-billing.ts:289-290`, PR 미수정 기존 로직)도 그 값 하나로 역산되어 표시되는 "적용환율"·"예상 USD 청구액"이 왜곡될 수 있음.
+- **영향 범위**: `daily` 그룹은 같은 날 출고 오더끼리라 영향 작음. `weekly`/`monthly`는 서로 다른 출고확정일 환율이 섞이는 게 정상 시나리오라 왜곡 발생 가능.
+- **현재 상태**: PR #1001 범위는 아님(막지는 않음). 신규 테스트(`daily-billing-aggregation.test.ts`)는 "마지막 값 유지" 동작 자체만 검증할 뿐 정합성은 미검증.
+- **목표 구현**: 그룹 레벨 적용환율을 (a) 개별 인보이스별 `applied_exchange_rate`를 금액 가중평균하거나 (b) 그룹 대표 1건(예: 가장 큰 금액 인보이스) 기준으로 계산한 뒤 `estimatedBillingAmountUsd`도 동일 기준으로 역산하도록 변경. 그룹 내 환율 불일치 시 가시화(경고 표시)도 검토.
+- **관련 파일**: `src/app/actions/finance/daily-billing.ts:289-290` (`getShipperDailyBillingSummary`)
+- **예상 공수**: 0.5 MD (집계 로직 변경 + behavioral 테스트 보강)
+- **우선순위**: Medium — 표시용(estimated) 왜곡이며 실제 청구액 산정은 인보이스별 스냅샷을 따름

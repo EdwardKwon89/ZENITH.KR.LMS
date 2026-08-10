@@ -48,7 +48,7 @@ describe('TASK-B-207: UPS 오더 생성 시 zen_tracking_configs.provider_type �
       order: vi.fn().mockReturnThis(),
       limit: vi.fn().mockReturnThis(),
       single: vi.fn(),
-      maybeSingle: vi.fn(),
+      maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
     };
 
     (validateUserAction as any).mockResolvedValue({
