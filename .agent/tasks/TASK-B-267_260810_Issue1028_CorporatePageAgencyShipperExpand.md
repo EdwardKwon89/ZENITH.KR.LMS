@@ -7,7 +7,7 @@
 | **담당** | Dave (Team B) |
 | **생성일** | 2026-08-10 |
 | **우선순위** | P3 |
-| **상태** | ⬜ |
+| **상태** | 🔔 (완료 보고 — 검토 요청) |
 
 ## 현재 제한 지점 (3곳 — 반드시 함께 수정)
 
@@ -94,7 +94,62 @@ WITH CHECK (
 
 ## [작업 결과]
 
-_(담당자 작성 예정)_
+**작성자**: Dave | **작성일**: 2026-08-10 | **상태**: 🔔 (검토 요청)
+
+### 구현 (코드 커밋 `ce9355ce`)
+
+3곳을 동일 기준(CORPORATE/ADMIN/AGENCY/SHIPPER)으로 함께 수정:
+
+1. **`NaviSidebar.tsx` (187-191)**: "법인 관리"(corporate_mgmt) 메뉴 노출 조건에 `AGENCY`, `SHIPPER` 추가
+2. **`src/app/actions/admin/corporate.ts`**: `canManageCorporateInfo()` 헬퍼 신설(`CORPORATE/ADMIN/AGENCY/SHIPPER`) — `updateOrganizationInfo`/`createDepartment`/`updateDepartment`/`deleteDepartment` 4개 함수 역할 체크를 헬퍼로 통일
+3. **마이그레이션 `20260810020000_iss1028_corporate_mgmt_agency_shipper_rls.sql`**:
+   - `zen_organizations` UPDATE RLS: `role IN ('CORPORATE','ADMIN')` → `('CORPORATE','ADMIN','AGENCY','SHIPPER')` (DROP + CREATE 교체)
+   - **`zen_departments` 관리(FOR ALL) RLS**도 CORPORATE/ADMIN 제한 보유 확인 → 동일 기준으로 확장(org_id 매칭 + `role IN ('CORPORATE','AGENCY','SHIPPER')` OR `ADMIN`)
+   - 컬럼 GRANT(rep_name/biz_no/contact_phone/contact_email/address)는 기존 부여 유지 — 변경 불요
+   - `AGENCY_SHIPPER`는 범위 미포함 — 코드·RLS 모두 추가 안 함
+
+### 회귀 테스트 (코드 커밋 `ce9355ce` — `tests/unit/member/corporate.test.ts`)
+
+| TC | 시나리오 | 결과 |
+|:---|:---------|:-----|
+| TC-267-01 | AGENCY → updateOrganizationInfo 성공 | ✅ |
+| TC-267-02 | SHIPPER → updateOrganizationInfo 성공 | ✅ |
+| TC-267-03 | AGENCY/SHIPPER → 부서 create/update/delete 성공 | ✅ |
+| TC-267-04 | CORPORATE/ADMIN 하위 호환 유지 | ✅ |
+| TC-267-05 | CARRIER/INDIVIDUAL/USER/OPERATOR 거부 | ✅ |
+| TC-267-06 | AGENCY_SHIPPER 거부 (범위 미포함 확인) | ✅ |
+| TC-267-07 | 권한 없음 역할 부서 create 거부 | ✅ |
+
+### 되돌리기 검증 2건 (TASK-B-241/DEF-943 재발 방지)
+
+- **① 앱 체크만 확장 + RLS 원복**: AGENCY 사용자 스코프 UPDATE → `{data:null, error:null}`(조용한 실패, "저장 성공"으로 오인 가능) + DB에 이전값 유지 → **"토스트는 뜨지만 DB 미반영" 패턴 재현 확인** 후 복원
+- **② RLS만 확장 + 앱 체크 원복**: AGENCY `updateOrganizationInfo()` → `data:null`(권한 에러) 반환 → 앱 레벨이 독립적으로 차단함을 확인 후 복원
+
+### 검증 수치
+
+- 전체 회귀: `npm run test:regression` — **1069/1069 PASS** (153 파일, corporate 13건 포함)
+- `npm run build` — Compiled successfully (41s)
+- `npx supabase db reset` — 마이그레이션 정상 적용 + 시드 후에도 RLS 확장 유지 확인
+
+### R-10 실브라우저 검증 (문서 커밋, 스크린샷 `docs/99_Manual/E2E_267_Result/`)
+
+- AGENCY 역할 계정(`r10_agency_1028@zenith.kr`) 실제 로그인 → **사이드바 "법인 관리" 메뉴 노출 확인** (`01_sidebar_menu.png`)
+- `/ko/mypage/corporate` 진입 → 대표자명/연락처 수정(`02_form_filled.png`) → "정보 저장" 클릭(`03_saved.png`)
+- **DB 직접 조회**: `rep_name` = 수정값(`R10대표자_...`), `contact_phone` = `010-9999-8888` 실제 반영 확인 ✅
+
+### R-17 DoD 체크리스트
+
+- [x] 코드 커밋 (`ce9355ce`) — NaviSidebar + corporate.ts + 마이그레이션 + 테스트 7건
+- [x] 문서 커밋 — R-10 증적
+- [x] 회귀 1069/1069 PASS / build SUCCESS / db reset 적용 확인
+- [x] R-10 실브라우저 검증 (AGENCY 메뉴 노출 + 수정 저장 DB 반영)
+- [x] 되돌리기 검증 2건 (①RLS 원복 조용한 실패 재현 ②앱 체크 원복 거부 재현)
+
+## [발견 이슈]
+
+1. **`zen_departments` 관리 RLS 정책이 CORPORATE/ADMIN 제한 보유 확인 → 이번에 AGENCY/SHIPPER로 확장함** (task 체크리스트 4번 항목: 있으면 동일 확장에 해당). SELECT 정책("Users can view their own organization's departments")은 org_id 기준으로 이미 열려 있어 변경 불요.
+2. **AGENCY_SHIPPER 역할**: 이번 요청("agency, shipper")에 명시적으로 미포함되어 코드·RLS 모두 추가하지 않음. 대리점 소속 화주도 법인정보 관리가 필요할지는 JSJung 별도 확인 필요 — 확인 후 필요하면 동일 패턴으로 확장 가능.
+
 
 ## [발견 이슈]
 
