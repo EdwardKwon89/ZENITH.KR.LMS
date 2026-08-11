@@ -10,6 +10,8 @@
 | **우선순위** | **P1 (Critical)** |
 | **상태** | 🔔 (완료 보고 — 검토 요청) |
 
+> **PR#1057 반려 → 재작업(2차)**: ①자동 회귀 테스트 10건 신설(psql 기반 DB 실테스트) ②CI 대응 — `GRANT DELETE ON zen_ups_labels TO authenticated` 누락 보완(def117이 SELECT/INSERT/UPDATE만 부여, fresh DB에서 라벨 삭제 permission denied) + 테스트 `afterAll` import. 전체 회귀 1170/1170 PASS.
+
 ## 근본 원인 (확정 완료)
 
 MASTER AIR(AGENCY)가 UPS 오더(`ZEN-2026-000008`, 자가화주 — `shipper_id` = 본인 org_id, `agency_org_id` = NULL) 등록 시:
