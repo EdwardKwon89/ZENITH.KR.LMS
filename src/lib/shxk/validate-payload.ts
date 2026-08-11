@@ -32,6 +32,7 @@ export function validateShxkPayload(payload: ShxkPayloadShape): string[] {
   if (isEmpty(consignee?.consignee_name)) errors.push('수취인 성명 누락');
   if (isEmpty(consignee?.consignee_countrycode)) errors.push('수취인 국가코드 누락');
   if (isEmpty(consignee?.consignee_street)) errors.push('수취인 주소 누락');
+  if (isEmpty(consignee?.consignee_city)) errors.push('수취인 도시 누락'); // TASK-B-283 (Issue #1069 / DEF-B-055)
   if (isEmpty(consignee?.consignee_postcode)) errors.push('수취인 우편번호 누락');
   if (isEmpty(consignee?.consignee_telephone) && isEmpty(consignee?.consignee_mobile)) {
     errors.push('수취인 연락처 누락 (전화/휴대폰 중 1개 이상)');

@@ -17,7 +17,7 @@ vi.mock('@/lib/ups/label-mapping', () => ({
   buildCreateOrderPayload: vi.fn().mockReturnValue({
     reference_no: 'TEST001',
     shipper: { shipper_name: 'SNTL', shipper_countrycode: 'KR', shipper_street: '123 St', shipper_telephone: '010-1111-2222' },
-    consignee: { consignee_name: 'John', consignee_countrycode: 'US', consignee_street: '456 Oak St', consignee_postcode: '90001', consignee_telephone: '010-3333-4444' },
+    consignee: { consignee_name: 'John', consignee_countrycode: 'US', consignee_street: '456 Oak St', consignee_city: 'Los Angeles', consignee_postcode: '90001', consignee_telephone: '010-3333-4444' },
     cargovolume: [],
     invoice: [{ invoice_enname: 'Widget', invoice_quantity: '1', invoice_unitcharge: '10' }],
   }),

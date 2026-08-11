@@ -257,6 +257,53 @@ describe('UPS Labels Mapping Functions', () => {
     });
   });
 
+  describe('DEF-B-054: shipper_company 필드 (Issue #1067)', () => {
+    const baseOrder = {
+      order_no: 'ORD-282',
+      shipper_contact_name: 'Shipper Kim',
+      shipper_country_code: 'KR',
+      shipper_state_province: 'Seoul',
+      shipper_city: 'Mapo-gu',
+      shipper_zipcode: '04515',
+      shipper_contact_phone: '02-1234-5678',
+      recipient_name: 'John Doe',
+      recipient_country_code: 'US',
+      recipient_state_province: 'CA',
+      recipient_city: 'Los Angeles',
+      recipient_address: '123 Main St',
+      recipient_address_local: '',
+      recipient_zipcode: '90001',
+      recipient_phone: '213-555-0100',
+      recipient_email: 'john@example.com',
+      recipient_pccc: '123456',
+    };
+    const defaults = { name: 'SNTL Korea Co Ltd', country: 'KR' };
+
+    it('shipper_org.name이 shipper_company로 전달된다 (FXUPS 경로 SHXK 필수 검증 대응)', () => {
+      const order = { ...baseOrder, shipper_org: { id: 'org-1', name: 'MASTER AIR', address: 'Seoul' } };
+      const result = buildCreateOrderPayload('FXUPS', order as any, 'US', [], defaults);
+      expect((result.shipper as any).shipper_company).toBe('MASTER AIR');
+    });
+
+    it('shipper_org가 null이면 shipperDefaults.name으로 폴백', () => {
+      const order = { ...baseOrder, shipper_org: null };
+      const result = buildCreateOrderPayload('FXUPS', order as any, 'US', [], defaults);
+      expect((result.shipper as any).shipper_company).toBe('SNTL Korea Co Ltd');
+    });
+
+    it('shipper_org.name이 빈 문자열이면 shipperDefaults.name으로 폴백', () => {
+      const order = { ...baseOrder, shipper_org: { id: 'org-1', name: '', address: 'Seoul' } };
+      const result = buildCreateOrderPayload('FXUPS', order as any, 'US', [], defaults);
+      expect((result.shipper as any).shipper_company).toBe('SNTL Korea Co Ltd');
+    });
+
+    it('shipperDefaults.name도 비어있으면 빈 문자열 전달 (절대 undefined 아님)', () => {
+      const order = { ...baseOrder, shipper_org: null };
+      const result = buildCreateOrderPayload('FXUPS', order as any, 'US', [], { name: '', country: 'KR' });
+      expect((result.shipper as any).shipper_company).toBe('');
+    });
+  });
+
   describe('DEF-110: createorder reference_no 하이픈 제거', () => {
     const baseOrder = {
       shipper_contact_name: 'Shipper Kim',

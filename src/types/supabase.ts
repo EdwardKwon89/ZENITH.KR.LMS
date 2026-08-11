@@ -2458,6 +2458,7 @@ export type Database = {
           intl_ref_locked: boolean | null
           intl_ref_no: string | null
           length: number | null
+          measured_at: string | null
           order_id: string
           packing_count: number | null
           packing_unit: string
@@ -2480,6 +2481,7 @@ export type Database = {
           intl_ref_locked?: boolean | null
           intl_ref_no?: string | null
           length?: number | null
+          measured_at?: string | null
           order_id: string
           packing_count?: number | null
           packing_unit: string
@@ -2502,6 +2504,7 @@ export type Database = {
           intl_ref_locked?: boolean | null
           intl_ref_no?: string | null
           length?: number | null
+          measured_at?: string | null
           order_id?: string
           packing_count?: number | null
           packing_unit?: string

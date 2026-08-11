@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { canChangeStatus, isOrderEditable, isMasteredStatus } from '@/lib/logistics/status-machine';
+import { canChangeStatus, isOrderEditable, getOrderEditScope, isOrderPartiallyEditable, isMasteredStatus } from '@/lib/logistics/status-machine';
 import { OrderStatus } from '@/types/orders';
 import { USER_ROLES } from '@/lib/auth/rbac';
 
@@ -157,16 +157,53 @@ describe('ZENITH Status Machine: CLAIMED 전이 규칙 (R-09)', () => {
   });
 
   describe('isOrderEditable 수정 차단 (IMP-042)', () => {
-    it('TC-ED-T1: WAREHOUSED 상태는 수정 불가', () => {
-      expect(isOrderEditable(OrderStatus.WAREHOUSED)).toBe(false);
-    });
-
     it('TC-ED-T2: REGISTERED 상태는 수정 가능', () => {
       expect(isOrderEditable(OrderStatus.REGISTERED)).toBe(true);
     });
 
     it('TC-ED-T3: MASTERED 상태는 수정 불가', () => {
       expect(isOrderEditable(OrderStatus.MASTERED)).toBe(false);
+    });
+  });
+
+  describe('TASK-B-284: WAREHOUSED+UPS 부분 수정 (Issue #1070)', () => {
+    it('TC-284-T1: WAREHOUSED+UPS는 부분 수정 가능 (isOrderPartiallyEditable=true)', () => {
+      expect(isOrderPartiallyEditable(OrderStatus.WAREHOUSED, 'UPS')).toBe(true);
+    });
+
+    it('TC-284-T2: WAREHOUSED+비UPS(AIR 등)는 부분 수정 불가', () => {
+      expect(isOrderPartiallyEditable(OrderStatus.WAREHOUSED, 'AIR')).toBe(false);
+      expect(isOrderPartiallyEditable(OrderStatus.WAREHOUSED, undefined)).toBe(false);
+    });
+
+    it('TC-284-T3: getOrderEditScope(WAREHOUSED, UPS) — 헤더/치수 잠금 + 감사 필요', () => {
+      const scope = getOrderEditScope(OrderStatus.WAREHOUSED, 'UPS');
+      expect(scope.editable).toBe(true);
+      expect(scope.fullEditable).toBe(false);
+      expect(scope.lockShipperId).toBe(true);
+      expect(scope.lockTransportMode).toBe(true);
+      expect(scope.lockMeasuredPackageDims).toBe(true);
+      expect(scope.auditEdit).toBe(true);
+    });
+
+    it('TC-284-T4: getOrderEditScope(WAREHOUSED, AIR) — 수정 불가', () => {
+      const scope = getOrderEditScope(OrderStatus.WAREHOUSED, 'AIR');
+      expect(scope.editable).toBe(false);
+    });
+
+    it('TC-284-T5: getOrderEditScope(REGISTERED) — 전체 자유 수정, 잠금 없음', () => {
+      const scope = getOrderEditScope(OrderStatus.REGISTERED);
+      expect(scope.editable).toBe(true);
+      expect(scope.fullEditable).toBe(true);
+      expect(scope.lockShipperId).toBe(false);
+      expect(scope.lockTransportMode).toBe(false);
+      expect(scope.lockMeasuredPackageDims).toBe(false);
+      expect(scope.auditEdit).toBe(false);
+    });
+
+    it('TC-284-T6: getOrderEditScope(PACKED) — 수정 불가', () => {
+      const scope = getOrderEditScope(OrderStatus.PACKED);
+      expect(scope.editable).toBe(false);
     });
   });
 
