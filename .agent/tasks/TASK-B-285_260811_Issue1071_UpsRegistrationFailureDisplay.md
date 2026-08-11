@@ -7,7 +7,7 @@
 | **담당** | Baker (Team B) |
 | **생성일** | 2026-08-11 |
 | **우선순위** | P2 |
-| **상태** | ⬜ |
+| **상태** | 🔔 |
 | **의존성** | [TASK-B-284](TASK-B-284_260811_Issue1070_UpsWarehousedPartialEdit.md) — "수정하기" 링크가 실제로 동작하려면 선행 병합 필요(단, 본 Task의 실패 표출 부분 자체는 독립적으로 병행 착수 가능) |
 
 ## 현황 분석 (Jaison 조사 완료)
@@ -62,8 +62,29 @@ SHXK 원문(중/영문)을 그대로 노출할지, 자주 나오는 케이스(�
 
 ## [작업 결과]
 
-_(담당자 작성 예정)_
+**구현**
+- ① `zen_ups_label_errors` AGENCY SELECT RLS 신규 마이그레이션 `20260811030000_iss1071_ups_label_errors_agency_select_rls.sql` — 조건 `(agency_org_id = auth.jwt()?->>'org_id' OR shipper_id = auth.jwt()?->>'org_id')`, 기존 `zen_ups_label_errors_admin_all`(ALL)+Agency INSERT 정책과 병행. DB 적용 + db reset 후 재적용 완료(pg_policies 3개 확인).
+- ② 신규 서버 액션 `getLatestUpsLabelErrors(orderIds)` (`warehouse.ts`) — WAREHOUSE_ROLES 권한 체크, `.in("order_id")` + `.order("attempted_at", false)` 배치 조회, 오더별 최신 1건만 `latestByOrder` 반환(N+1 방지). `operations/index.ts` export.
+- ③ `UpsReceiveProcessForm.tsx` — ㉠ 큐 행에 `recent_fail_badge`("⚠ 최근 등록 실패") 적색 배지(오더별 최신 실패 존재 시) ㉡ 배치 등록 결과 모달(`batchResults`): 오더별 성공/실패 뱃지 + 실패 사유(SHXK 원문) + `수정하기 →` Link(`/orders/${orderId}/edit`).
+- ④ i18n ko/en/ja/zh `WarehouseUpsReceiving`에 `result_title, result_summary, result_success_badge, result_fail_badge, result_edit_link, result_confirm, recent_fail_badge` 7키 추가.
+- ⑤ 잔존물 복원: `confirmOutbound`의 `return { success: true, pkgsWithoutIntlRef }` — 워크트리 미커밋 상태로 제거돼 `outbound-ups.test.ts`를 깨뜨린 것을 HEAD 기준 복원.
+
+**회귀 테스트 신설 13건 (ALL PASS)**
+- `tests/unit/warehouse/defb047-get-latest-ups-label-errors.test.ts` — TC-285-01~05: 서버 액션 mock(최신 1건만 반환·빈 배열·권한없음 throw·DB 에러 throw).
+- `tests/unit/db/defb047-ups-label-errors-agency-select-rls.test.ts` — TC-285-11~14: 실 DB RLS(하위화주 AGENCY SELECT 성공·무관 AGENCY 차단·자가화주 패턴·정책 제거 시 0행 재현 후 복원).
+- `tests/unit/warehouse/ups-receive-process-form.test.tsx` — TC-285-21~24: 컴포넌트(실패 결과 모달에 orderId+메시지 포함·성공 뱃지·큐 배지·수정 링크 href).
+
+**검증**
+- 회귀 **170/170 파일 · 1205/1205 ALL PASS** (`npm run test:regression` 직접 실행).
+- `npm run build` SUCCESS(29.5s), tsc 신규 변경 파일 0건.
+
+**R-10 브라우저 검증** — `tests/e2e/r10-285-ups-registration-failure-display.spec.ts`
+- AGENCY 실제 로그인(`app_metadata role/org_id` 패턴) → `/ko/warehouse/ups-receive` 네비게이션(proxy.ts 화이트리스트 경유) → 큐 실패 배지 노출 → 배치 등록 확정(실패) → 결과 모달(실패 뱃지·실패 사유·수정 링크) → 수정 링크 href `/^\/orders\/[0-9a-f-]+\/edit$/` → 모달 닫기. **연속 2회 PASS**. 스크린샷 `docs/99_Manual/E2E_285_Result/01~03`.
+- 자기완결형 픽스처(beforeAll 사전 정리 + afterAll 전체 정리 포함) — auth.users/zen_profiles 잔존 문제 해소.
+- 발견/해결: ① `text=실패` strict mode violation(큐 배지·요약·뱃지 3곳 매칭) → 정확 매칭 `text="실패"`로 수정 ② 실패 사유는 라이브 SHXK 오류(픽스처 저장 메시지 아님) → 오류 문단(`p.text-red-700`) 노출·비공백 검증으로 변경 ③ 잔존 오더 중복(`zen_orders_order_no_key`) → beforeAll 사전 정리 추가.
+
+**코드 커밋**: `2bf73bf3`
 
 ## [발견 이슈]
 
-_(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
+- 없음 (범위 내)
