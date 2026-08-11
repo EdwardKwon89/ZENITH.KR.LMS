@@ -63,7 +63,7 @@ SHXK 원문(중/영문)을 그대로 노출할지, 자주 나오는 케이스(�
 ## [작업 결과]
 
 **구현**
-- ① `zen_ups_label_errors` AGENCY SELECT RLS 신규 마이그레이션 `20260811030000_iss1071_ups_label_errors_agency_select_rls.sql` — 조건 `(agency_org_id = auth.jwt()?->>'org_id' OR shipper_id = auth.jwt()?->>'org_id')`, 기존 `zen_ups_label_errors_admin_all`(ALL)+Agency INSERT 정책과 병행. DB 적용 + db reset 후 재적용 완료(pg_policies 3개 확인).
+- ① `zen_ups_label_errors` AGENCY SELECT RLS 신규 마이그레이션 `20260811070000_iss1071_ups_label_errors_agency_select_rls.sql` — 조건 `(agency_org_id = auth.jwt()?->>'org_id' OR shipper_id = auth.jwt()?->>'org_id')`, 기존 `zen_ups_label_errors_admin_all`(ALL)+Agency INSERT 정책과 병행. **fresh `supabase db reset --yes` 완주 확인**(신규 파일 포함 전체 재적용, pg_policies 3개 확인).
 - ② 신규 서버 액션 `getLatestUpsLabelErrors(orderIds)` (`warehouse.ts`) — WAREHOUSE_ROLES 권한 체크, `.in("order_id")` + `.order("attempted_at", false)` 배치 조회, 오더별 최신 1건만 `latestByOrder` 반환(N+1 방지). `operations/index.ts` export.
 - ③ `UpsReceiveProcessForm.tsx` — ㉠ 큐 행에 `recent_fail_badge`("⚠ 최근 등록 실패") 적색 배지(오더별 최신 실패 존재 시) ㉡ 배치 등록 결과 모달(`batchResults`): 오더별 성공/실패 뱃지 + 실패 사유(SHXK 원문) + `수정하기 →` Link(`/orders/${orderId}/edit`).
 - ④ i18n ko/en/ja/zh `WarehouseUpsReceiving`에 `result_title, result_summary, result_success_badge, result_fail_badge, result_edit_link, result_confirm, recent_fail_badge` 7키 추가.
@@ -74,16 +74,19 @@ SHXK 원문(중/영문)을 그대로 노출할지, 자주 나오는 케이스(�
 - `tests/unit/db/defb047-ups-label-errors-agency-select-rls.test.ts` — TC-285-11~14: 실 DB RLS(하위화주 AGENCY SELECT 성공·무관 AGENCY 차단·자가화주 패턴·정책 제거 시 0행 재현 후 복원).
 - `tests/unit/warehouse/ups-receive-process-form.test.tsx` — TC-285-21~24: 컴포넌트(실패 결과 모달에 orderId+메시지 포함·성공 뱃지·큐 배지·수정 링크 href).
 
-**검증**
-- 회귀 **170/170 파일 · 1205/1205 ALL PASS** (`npm run test:regression` 직접 실행).
-- `npm run build` SUCCESS(29.5s), tsc 신규 변경 파일 0건.
+**검증 (재검증 — 반려 대응 후 fresh reset 기준)**
+- **PR#1074 반려 사유 (Critical)**: 신규 마이그레이션 타임스탬프가 TeamB_Dev 기존 `20260811030000_iss1056...`(Dave PR#1057)과 **동일 버전**이어서 `supabase db reset`이 `schema_migrations_pkey`(SQLSTATE 23505) 중복으로 중단. 최초 `20260811030000` 채번 실수.
+- **재작업**: 파일명 `20260811030000_iss1071...` → `20260811070000_iss1071...`로 재채번(TeamB_Dev 최신 `20260811060000_iss1070...` 이후). 그 후 `supabase db reset --yes`를 **처음부터 끝까지 에러 없이 완주** 확인 — iss1071 포함 전체 22개 마이그레이션 적용 완료, pg_policies 3개(ADMIN ALL + AGENCY INSERT + **AGENCY SELECT**) 존재 확인.
+- 회귀 **170/170 파일 · 1205/1205 ALL PASS** (fresh reset 상태에서 `npm run test:regression` 직접 실행).
+- `npm run build` SUCCESS (26.9s), tsc 신규 변경 0건.
+- R-10 E2E 재검증 (fresh reset 상태에서 AGENCY 실제 로그인 → 네비게이션 → 배지 → 결과 모달) **PASS**.
 
 **R-10 브라우저 검증** — `tests/e2e/r10-285-ups-registration-failure-display.spec.ts`
 - AGENCY 실제 로그인(`app_metadata role/org_id` 패턴) → `/ko/warehouse/ups-receive` 네비게이션(proxy.ts 화이트리스트 경유) → 큐 실패 배지 노출 → 배치 등록 확정(실패) → 결과 모달(실패 뱃지·실패 사유·수정 링크) → 수정 링크 href `/^\/orders\/[0-9a-f-]+\/edit$/` → 모달 닫기. **연속 2회 PASS**. 스크린샷 `docs/99_Manual/E2E_285_Result/01~03`.
 - 자기완결형 픽스처(beforeAll 사전 정리 + afterAll 전체 정리 포함) — auth.users/zen_profiles 잔존 문제 해소.
 - 발견/해결: ① `text=실패` strict mode violation(큐 배지·요약·뱃지 3곳 매칭) → 정확 매칭 `text="실패"`로 수정 ② 실패 사유는 라이브 SHXK 오류(픽스처 저장 메시지 아님) → 오류 문단(`p.text-red-700`) 노출·비공백 검증으로 변경 ③ 잔존 오더 중복(`zen_orders_order_no_key`) → beforeAll 사전 정리 추가.
 
-**코드 커밋**: `2bf73bf3`
+**코드 커밋**: `2bf73bf3` (기능) · `95a66ecd` (반려 재작업 — 마이그레이션 재채번)
 
 ## [발견 이슈]
 
