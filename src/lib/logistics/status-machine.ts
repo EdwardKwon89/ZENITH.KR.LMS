@@ -77,10 +77,13 @@ export function canChangeStatus(
 /**
  * 화물 명세(중량, 부피) 수정이 가능한 상태인지 확인합니다.
  * CPO & Audit 권고: 입고(WAREHOUSED) 이후 수정 불가
+ *
+ * TASK-B-284 (Issue #1070): UPS 오더는 WAREHOUSED 상태에서도 부분 수정이 가능하다 —
+ * SHXK 등록(registerUpsOrder)은 WAREHOUSED→PACKED 전환 시점에만 호출되므로, 그 사이
+ * 창고 큐 대기 오더는 화주 정보 수정이 필요하다. 단, 실측된 패키지 치수/무게는 보호한다.
  */
 export function isOrderEditable(status: OrderStatus): boolean {
   const nonEditableStates = [
-    OrderStatus.WAREHOUSED,
     OrderStatus.PACKED,
     OrderStatus.RELEASED,
     OrderStatus.IN_TRANSIT,
@@ -90,6 +93,80 @@ export function isOrderEditable(status: OrderStatus): boolean {
     OrderStatus.MASTERED // 마스터 결합 시 수정 불가
   ];
   return !nonEditableStates.includes(status);
+}
+
+/**
+ * TASK-B-284 (Issue #1070): WAREHOUSED + UPS 오더가 "부분 수정 가능" 상태인지 확인.
+ * (WAREHOUSED + 비UPS는 여전히 수정 불가 — 부분 수정 허용 범위는 UPS만 해당)
+ */
+export function isOrderPartiallyEditable(status: OrderStatus, transportMode?: string): boolean {
+  return status === OrderStatus.WAREHOUSED && transportMode === 'UPS';
+}
+
+/**
+ * TASK-B-284 (Issue #1070): 오더 수정 가능 범위를 나타내는 스코프.
+ * - editable: 오더를 수정할 수 있는지 (전체 수정 or 부분 수정)
+ * - fullEditable: 모든 필드 수정 가능한지 (REGISTERED/SCHEDULED 등 자유 수정 단계)
+ * - lockShipperId / lockTransportMode: WAREHOUSED+UPS에서 항상 잠금
+ * - lockMeasuredPackageDims: 실측(measured_at)된 패키지의 치수/무게/포장수 잠금
+ * - auditEdit: WAREHOUSED 단계 수정이면 감사 로그 필요
+ */
+export interface OrderEditScope {
+  editable: boolean;
+  fullEditable: boolean;
+  lockShipperId: boolean;
+  lockTransportMode: boolean;
+  lockMeasuredPackageDims: boolean;
+  auditEdit: boolean;
+}
+
+export function getOrderEditScope(status: OrderStatus, transportMode?: string): OrderEditScope {
+  // WAREHOUSED: UPS만 부분 수정 가능 — 비UPS는 여전히 수정 불가 (실측값 보호 필요 없는 일반 화물)
+  if (status === OrderStatus.WAREHOUSED) {
+    if (transportMode === 'UPS') {
+      // WAREHOUSED + UPS: 헤더(제외 shipper_id/transport_mode)·아이템·미실측 패키지는 수정 가능,
+      // 실측 패키지 치수/무게는 보호, 수정 시 감사 로그 기록
+      return {
+        editable: true,
+        fullEditable: false,
+        lockShipperId: true,
+        lockTransportMode: true,
+        lockMeasuredPackageDims: true,
+        auditEdit: true,
+      };
+    }
+    // WAREHOUSED + 비UPS(또는 미지정): 수정 불가
+    return {
+      editable: false,
+      fullEditable: false,
+      lockShipperId: true,
+      lockTransportMode: true,
+      lockMeasuredPackageDims: true,
+      auditEdit: false,
+    };
+  }
+
+  if (!isOrderEditable(status)) {
+    // PACKED 이후(또는 취소/폐기/마스터)는 수정 불가
+    return {
+      editable: false,
+      fullEditable: false,
+      lockShipperId: true,
+      lockTransportMode: true,
+      lockMeasuredPackageDims: true,
+      auditEdit: false,
+    };
+  }
+
+  // REGISTERED/SCHEDULED 등 — 전체 자유 수정
+  return {
+    editable: true,
+    fullEditable: true,
+    lockShipperId: false,
+    lockTransportMode: false,
+    lockMeasuredPackageDims: false,
+    auditEdit: false,
+  };
 }
 
 /**

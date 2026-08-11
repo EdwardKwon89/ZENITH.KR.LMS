@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { OrderStatus } from '@/types/orders';
-import { isOrderEditable } from '@/lib/logistics/status-machine';
+import { isOrderEditable, getOrderEditScope, isOrderPartiallyEditable } from '@/lib/logistics/status-machine';
 
 vi.mock('@/lib/auth/guards', () => ({
   validateUserAction: vi.fn(),
@@ -77,8 +77,13 @@ describe('Order Update (DEF-109)', () => {
     expect(isOrderEditable(OrderStatus.REGISTERED)).toBe(true);
   });
 
-  it('TC-EDIT-PAGE-02: isOrderEditable returns false for WAREHOUSED', () => {
-    expect(isOrderEditable(OrderStatus.WAREHOUSED)).toBe(false);
+  it('TC-EDIT-PAGE-02: isOrderEditable returns true for WAREHOUSED (UPS 부분 수정 가능, Issue #1070)', () => {
+    // TASK-B-284: isOrderEditable은 전체/부분 수정 가능 상태를 boolean으로 나타냄 — WAREHOUSED는 true
+    expect(isOrderEditable(OrderStatus.WAREHOUSED)).toBe(true);
+    // 단, 부분 수정 허용(부분)은 UPS에서만
+    expect(isOrderPartiallyEditable(OrderStatus.WAREHOUSED, 'UPS')).toBe(true);
+    expect(isOrderPartiallyEditable(OrderStatus.WAREHOUSED, 'AIR')).toBe(false);
+    expect(getOrderEditScope(OrderStatus.WAREHOUSED, 'AIR').editable).toBe(false);
   });
 
   it('TC-EDIT-PAGE-03: isOrderEditable returns false for IN_TRANSIT', () => {

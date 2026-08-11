@@ -19,8 +19,7 @@ import PackingListPDF from '@/components/documents/PackingListPDF';
 import UpsInvoicePDF from '@/components/documents/UpsInvoicePDF';
 import { getDeclarations } from '@/app/actions/customs';
 import { getOrderRateSnapshot } from '@/app/actions/operations';
-import { isOrderEditable } from '@/lib/logistics/status-machine';
-import type { OrderStatus } from '@/types/orders';
+import { getOrderEditScope } from '@/lib/logistics/status-machine';import type { OrderStatus } from '@/types/orders';
 import OrderCustomsSection from '@/components/customs/OrderCustomsSection';
 import OrderCustomsAdminControl from '@/components/customs/OrderCustomsAdminControl';
 import { getTranslations } from 'next-intl/server';
@@ -324,7 +323,7 @@ export default async function OrderDetailPage({
                     <p className="text-sm font-bold">{order.dest_port?.code}</p>
                 </div>
             </div>
-            {isOrderEditable(order.status as OrderStatus) && (
+            {getOrderEditScope(order.status as OrderStatus, order.transport_mode as string | undefined).editable && (
                 <Link
                     href={`/orders/${orderId}/edit`}
                     className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors text-xs font-bold shadow-sm"
