@@ -9,6 +9,8 @@
 | **우선순위** | P2 |
 | **상태** | 🔔 (완료 보고 — 검토 요청) |
 
+> **PR#1073 반려 → v2 재작업(2차)**: Jaison 검토 결과 설계·핵심 로직(measured_at 잠금)은 정확하나, 신규 `zen_order_edit_log` 테이블에 `service_role` GRANT가 없어 CI fresh DB에서만 감사 로그 insert가 조용히 실패(TC-284-05 'expected 0 to be 1'). DEF-B-053(Issue #1063)과 동일 패턴 — `GRANT ALL ON zen_order_edit_log TO service_role` 추가(`618e43c3`) 후 fresh db reset 재검증 완료.
+
 ## 현황 분석 (Jaison 완료)
 
 현재 `isOrderEditable()`(`src/lib/logistics/status-machine.ts`)이 `WAREHOUSED` 상태부터 오더 수정을 전면 차단한다. 그런데 실제 SHXK 등록(`registerUpsOrder`)은 `WAREHOUSED→PACKED` 전환 시점(`confirmUpsRegistration`, `warehouse.ts:478-515`)에만 호출되며, 그 사이 오더는 창고 큐(`UpsReceiveProcessForm.tsx`)에서 배치 처리 대기하며 **실질적인 시간 갭**이 존재한다(수 분~수 시간).
@@ -112,23 +114,11 @@ WAREHOUSED 단계 수정이 발생하면(REGISTERED 등 기존 자유 수정 단
 - `npm run build`: SUCCESS
 - `npx tsc --noEmit`: 변경 파일 오류 없음
 
-## [Jaison 검토 — v1 반려]
-
-`/tmp/review-pr1073` 격리 워크트리에서 동일하게 재현: 신규 통합 테스트 6/6 PASS, 되돌리기 검증(강제 `isMeasuredLocked=false`)으로 TC-284-01/02 정확히 FAIL 재현 확인, 전체 회귀 168/168·1203/1203 PASS, build SUCCESS — **설계·핵심 로직(measured_at 기반 잠금) 자체는 정확**.
-
-그러나 `gh pr checks 1073`가 **"Regression Tests: fail"** 반환 — 로컬은 전부 PASS인데 CI만 실패하는, 바로 직전 DEF-B-053(Issue #1063)과 동일한 "로컬 누적 권한 vs fresh CI" 패턴이라 CI 로그를 직접 확인(`gh run view 31485803825 --log-failed`):
-
-```
-FAIL tests/integration/iss1070-ups-warehoused-partial-edit.test.ts
-  > TC-284-05: WAREHOUSED+UPS 수정 시 감사 로그 기록
-AssertionError: expected '0' to be '1'
-```
-
-**근본 원인**: 마이그레이션의 GRANT문(`GRANT INSERT, SELECT ON public.zen_order_edit_log TO authenticated;`)이 `service_role`을 빠뜨림. 테스트/`updateOrder()`가 감사 로그 insert에 쓰는 클라이언트는 `service_role`인데, 로컬 Docker DB는 `pg_default_acl`에 누적된 role 기본 권한 덕에 `service_role`도 이미 전체 권한(`arwdDxtm`)을 갖고 있어 통과하지만, fresh CI 컨테이너는 explicit GRANT만 유효 — `service_role` INSERT 권한이 없어 삽입이 조용히 실패해 로그 count가 0으로 남음. DEF-B-053 수정 시 확정된 동일 컨벤션(`GRANT ALL ON <table> TO service_role;`)을 이번 신규 테이블에도 적용했어야 함.
-
 ## [v2 재작업 (PR#1073 반려 대응, 완료)]
 
-**수정**: 마이그레이션 `20260811060000`에 `GRANT ALL ON public.zen_order_edit_log TO service_role;` 추가(커밋 `618e43c3`) — DEF-B-053(Issue #1063) 수정 컨벤션 그대로.
+**반려 사유 (Jaison)**: 설계·핵심 로직(measured_at 잠금)은 되돌리기 검증까지 정확 확인됐으나, 신규 `zen_order_edit_log` 테이블 GRANT에 `service_role` 누락 — `updateOrder()`가 감사 로그 insert에 service_role 클라이언트를 사용하는데, fresh CI 컨테이너는 explicit GRANT만 유효해 insert가 조용히 실패(TC-284-05 'expected 0 to be 1'). 로컬은 `pg_default_acl` 누적 권한으로 미탐지(DEF-B-053과 동일 패턴).
+
+**수정**: 마이그레이션 `20260811060000`에 `GRANT ALL ON public.zen_order_edit_log TO service_role;` 추가(커밋 `618e43c3`).
 
 **재검증** (fresh 스키마, 로컬 누적 권한 영향 배제):
 - `supabase db reset` → `has_table_privilege('service_role','public.zen_order_edit_log','INSERT')` = **true** 확인
