@@ -148,3 +148,13 @@ USING (
       AND o.id = (storage.foldername(name))[2]::uuid
   )
 );
+
+-- =====================================================
+-- GRANT: zen_ups_label_documents에 authenticated 롤 INSERT/DELETE 권한 보장
+-- (기존 20260722000003 마이그레이션이 CREATE TABLE + ENABLE RLS만 수행하고 GRANT 누락 —
+--  IMP-153(20260728110000)은 SELECT만 전역 부여. 로컬은 누적 GRANT로 되지만 fresh DB(CI)에서는
+--  INSERT/DELETE가 permission denied로 막혀, ups_label_docs_* INSERT/DELETE 정책이 동작하지 못함.
+--  TASK-B-278(GRANT DELETE ON zen_ups_labels)과 동일한 근본 해결)
+-- =====================================================
+
+GRANT INSERT, DELETE ON public.zen_ups_label_documents TO authenticated;
