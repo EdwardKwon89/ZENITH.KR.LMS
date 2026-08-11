@@ -8,7 +8,7 @@
 | **담당** | Dave (Team B) |
 | **생성일** | 2026-08-12 |
 | **우선순위** | **Critical (P1)** |
-| **상태** | ⬜ |
+| **상태** | ✅ 완료 |
 
 ## 근본 원인 (확정 완료 — DEF-B-058 참조)
 
@@ -58,8 +58,46 @@ useEffect(() => {
 
 ## [작업 결과]
 
-_(담당자 작성 예정)_
+### 커밋
+
+| 커밋 | 내용 |
+|:-----|:-----|
+| `63b2786e` | `[Dave] fix: TASK-B-287 edit 모드에서 신규등록용 자동완성이 저장값 덮어씀 (Issue #1078 / DEF-B-058, Critical)` |
+
+### 수정 내용
+
+`OrderRegistrationForm.tsx`의 신규등록용 자동완성 useEffect 2건에 `orderId`(edit 모드) 조기 return 가드 추가:
+
+1. **화주정보 자동완성(377~406행)**: `if (orderId) return;` — edit 모드에서 `getCurrentUserAffiliation()`이 `shipper_id`/`shipper_contact_*`/`shipper_address`/`shipper_biz_no`/`shipper_country_code`/`shipper_state_province`/`shipper_city`/`shipper_address_detail`/`shipper_zipcode`를 로그인 계정 소속 정보로 덮어쓰지 않음. (로그인 계정이 실제 화주와 다른 경우 고객 데이터 오염 방지)
+2. **DOC 패키지 치수 초기화(462~471행)**: `if (orderId) return;` — edit 모드에서 저장된 DOC 패키지 `length/width/height`를 지우지 않음. (TASK-B-076 원래 의도 — "사용자가 방금 DOC로 바꿨을 때" — 는 create 모드에서 유지)
+
+create 모드는 기존 동작 유지(자동완성 + DOC 치수 초기화 정상).
+
+### 회귀 테스트 (4건, RTL — 실제 OrderRegistrationForm 렌더링)
+
+`tests/unit/orders/defb058-edit-mode-autofill-overwrite.test.tsx`
+
+| TC | 내용 |
+|:---|:-----|
+| TC-287-01 | edit 모드(orderId 있음) — `getCurrentUserAffiliation` 미호출 + `shipper_contact_name`이 defaultValues 유지 |
+| TC-287-02 | create 모드(orderId 없음) — 자동완성 정상 동작(`shipper_contact_name` = 로그인 계정명) |
+| TC-287-03 | edit 모드 — DOC 패키지 defaultValues 치수(30) 유지 |
+| TC-287-04 | create 모드 — content_type을 DOC로 변경 시 치수 초기화 여전히 동작 (TASK-B-076 보존) |
+
+### 되돌리기 검증
+
+두 `orderId` 가드 일시 제거 → **TC-287-01(getCurrentUserAffiliation 호출되어 shipper_contact_name이 'Login User'로 덮어써짐)·TC-287-03(DOC 치수 30→빈 값)이 정확히 FAIL 재현** → 복원 후 4/4 PASS 확인.
+
+### 검증
+
+- `npm run test:regression`: **1224/1224 PASS** (173파일, 신규 +4)
+- `npm run build`: SUCCESS
+- `npx tsc --noEmit`: 오류 없음
+
+## [Jaison 최종 검토]
+
+`/tmp/review-pr1080` 격리 워크트리에서 재검증 — 신규 테스트 4/4 PASS(실제 `OrderRegistrationForm` 렌더링). **독립 되돌리기 검증**: 두 `if (orderId) return;` 가드를 수동 주석 처리 후 재실행 → TC-287-01(getCurrentUserAffiliation 호출됨, shipper_contact_name이 'Login User'로 덮어써짐)·TC-287-03(DOC 치수 30→빈 값) 정확히 FAIL 재현, 원복 후 4/4 PASS 재확인. 전체 회귀 173/173·1224/1224 PASS, build SUCCESS. 실제 CI(`gh pr checks 1080`) Regression Tests pass 확인. 수정 범위도 설계 그대로 최소(가드 2줄 + dependency array 추가)로 과설계 없음. PR#1080 승인·머지(TeamB_Dev, 커밋 `0e35cb42`), Issue #1078 종결.
 
 ## [발견 이슈]
 
-_(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
+없음

@@ -8,7 +8,7 @@
 | **담당** | Mike (Team B) |
 | **생성일** | 2026-08-12 |
 | **우선순위** | **High (P1)** |
-| **상태** | ⬜ |
+| **상태** | 🔄 (v1 반려, v2 재작업 대기) |
 
 ## 근본 원인 (확정 완료 — DEF-B-059 참조)
 
@@ -49,9 +49,29 @@
 
 - **Mike**: `.agent/VIOLATION_TRACKER.md` 참조 후 착수 — PR base 오류(TeamB_Dev 대신 develop/main)·회귀 테스트 0건·그림자 테스트 등 다수 유형 누적 이력 있음(JSJung 2026-07-15 결정에 따라 할당 지속, 재론 금지). 착수 전 반드시 **① PR base가 `TeamB_Dev`인지** ② `./scripts/next-task-number.sh B` 재확인 ③ 회귀 테스트가 실제 프로덕션 코드(`resolveShipperStreet` 등)를 import해서 검증하는지(테스트 파일 내부 재구현 금지 — 과거 그림자 테스트 반복 이력) 셋 다 스스로 점검 후 제출할 것.
 
-## [작업 결과]
+## [작업 결과] (v1, PR#1081 — 반려)
 
-_(담당자 작성 예정)_
+Mike가 배정 파일 대신 별도 파일(`TASK-B-289_260812_Issue1079_ShipperAddressEnglish_Mike.md`)로 진행 — 아래는 PR#1081 diff 기준 요약.
+
+**구현**: 마이그레이션(`zen_orders`에 `shipper_address_english`/`shipper_address_detail_english` 컬럼 추가) + `orderRegistrationSchema` 필드 추가 + `resolveShipperStreet()` 폴백 우선순위에 order-level english 최우선 추가. **단, `updateOrder()`의 headerData에만 반영 — `createOrder()`가 호출하는 `create_order_atomic()` RPC는 미수정.**
+
+**검증(자체 보고)**: TypeScript 통과, "핵심 단위 테스트 53개 + 회귀 테스트 9개" 전부 통과. `npm run test:regression` 전체 실행 결과·`npm run build` 결과 기재 없음.
+
+**코드 커밋**: `60d46b04`
+
+## [Jaison 검토 — v1 반려]
+
+`/tmp/review-pr1081` 격리 워크트리에서 `npx supabase db reset --yes`(exit 0) 후 **`create_order_atomic()` RPC를 직접 호출해 재현 확정**: payload에 `shipper_address_english: 'English Address Should Be Saved'`를 넣어도 반환된 row는 `"shipper_address_english": null` — `\df+`/`pg_get_functiondef`로 확인한 RPC 함수의 INSERT 컬럼 목록에 신규 컬럼이 전혀 없음(`20260715000001_iss489_ups_order_schema_v5.sql`에서 정의된 원본 컬럼 목록 그대로, 이번 PR이 RPC를 손대지 않음).
+
+**핵심 문제**: `createOrder()`(신규 오더 등록)는 이 RPC를 통해서만 저장되므로, **DEF-B-059가 실제 보고된 시나리오(신규 등록 시 영문주소 소실)가 이번 수정으로 전혀 해결되지 않음** — `updateOrder()`(기존 오더를 한 번 더 수정 저장)에서만 부분적으로 동작. PR 본문의 "createOrder/updateOrder 수정: 두 필드 저장 포함" 기재가 실제 diff·동작과 불일치.
+
+**추가 확인된 절차 문제**(재작업 시 함께 반영 요청, 반려의 부차적 사유):
+- 배정된 task file 대신 별도 파일 생성(Mike, 신규 유형 — 기존 설계 문서·체크리스트 미반영)
+- TC-DEF-B059-03(마이그레이션 SQL 검증) 2건이 `readFileSync`+`toContain()` 패턴 — 실제 DB 적용 여부 미검증(Mike 누적 유형 재발)
+- TC-DEF-B059-02 되돌리기 검증 1번째 테스트가 실제 소스를 되돌리지 않고 구 로직을 테스트 내부에 하드코딩해 비교 — 진짜 되돌리기 검증 아님
+- `npm run test:regression` 전체 실행·`npm run build` 결과가 PR/task file에 기재되지 않음(자체 보고 62건 vs 직전 PR들의 전체 스위트 173파일·1224+건)
+
+**PR#1081 close(병합 안 함), Issue #1079 라벨 status:rework 전환.** v2 재작업 범위: `create_order_atomic()` RPC에 신규 컬럼 INSERT 반영(필수) + 배정 task file로 통일 + toContain 대신 실 DB 검증 + 진짜 되돌리기 검증(실 소스 revert) + 전체 회귀·build 결과 기재.
 
 ## [발견 이슈]
 
