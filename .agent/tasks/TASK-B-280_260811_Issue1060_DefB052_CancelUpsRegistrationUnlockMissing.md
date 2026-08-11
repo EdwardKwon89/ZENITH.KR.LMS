@@ -8,7 +8,7 @@
 | **담당** | Dave (Team B) |
 | **생성일** | 2026-08-11 |
 | **우선순위** | P1 (High) |
-| **상태** | ⬜ |
+| **상태** | 🔔 (완료 보고 — 검토 요청) |
 
 ## 근본 원인 (확정 완료)
 
@@ -57,8 +57,40 @@ const packagesNeedingLabels = selectedOrders.flatMap((o) =>
 
 ## [작업 결과]
 
-_(담당자 작성 예정)_
+### 커밋
+
+| 커밋 | 내용 |
+|:-----|:-----|
+| `cb5d555d` | `[Dave] fix: TASK-B-280 UPS등록취소 시 패키지 intl_ref_locked 미해제 수정 (Issue #1060 / DEF-B-052)` |
+
+### 수정 내용
+
+`src/app/actions/operations/ups-labels.ts`의 `cancelUpsRegistration()`(`ups-labels.ts:447`)에 `unlockAllPackagesIntlRef(supabase, orderId)` 호출 추가(`ups-labels.ts:513`) — `voidUpsLabel()`(`ups-labels.ts:631`)과 **완전 동일 패턴**: 라벨 DELETE 직후 → `unlockErr`면 즉시 error return → tracking_no 초기화.
+
+- 취소 전: `markAllPackagesIssued()`가 `intl_ref_locked=true`, `intl_ref_no` 설정
+- 취소 후: `intl_ref_locked=false`로 해제되어 `OutboundProcessForm.tsx`의 `filter(!p.intl_ref_locked)`가 정상적으로 "라벨 재발급 필요"로 판단
+- `intl_ref_no`는 voidUpsLabel 명세와 동일하게 유지(`unlockAllPackagesIntlRef`는 locked만 해제 — 재등록 시 `markAllPackagesIssued`가 덮어씀)
+
+### 회귀 테스트 (`tests/integration/defb052-cancel-ups-registration-unlock.test.ts`, 3건)
+
+실 로컬 DB(docker `supabase_db_ZENITH_LMS_001`)에 fixture(PACKED 오더 + `intl_ref_locked=true` 패키지 2개 + 라벨 + 트래킹)를 세팅하고, 실제 서버 액션을 실행한 뒤 DB 상태를 직접 조회해 검증 (auth만 서비스롤 mock, SHXK removeorder만 mock).
+
+| TC | 검증 내용 | 결과 |
+|:---|:---------|:-----|
+| TC-280-01 | `cancelUpsRegistration()` 직접 호출 → `intl_ref_locked=false` 반영 (실 DB) | PASS |
+| TC-280-02 | 라벨 없음 → 실패 시 `intl_ref_locked` 유지 (회귀 방지) | PASS |
+| TC-280-03 | `undoUpsRegistration()`(PACKED→WAREHOUSED wrapper) 경유 → `intl_ref_locked=false` + 오더 상태 WAREHOUSED (통합) | PASS |
+
+### 되돌리기 검증
+
+`unlockAllPackagesIntlRef()` 호출을 일시 제거 후 재실행 → **TC-280-01/TC-280-03이 `intl_ref_locked='t'`로 정확히 FAIL 재현**(원래 DEF-B-052 버그 상태) → 복원 후 3/3 ALL PASS 확인.
+
+### 검증
+
+- `npm run test:regression`: **1173/1173 PASS** (165파일, 신규 +3)
+- `npm run build`: SUCCESS
+- `npx tsc --noEmit`: 신규 테스트 파일 오류 없음
 
 ## [발견 이슈]
 
-_(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
+없음
