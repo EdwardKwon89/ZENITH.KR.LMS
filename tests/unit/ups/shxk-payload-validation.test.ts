@@ -34,6 +34,7 @@ function buildValidPayload() {
       consignee_name: 'John Doe',
       consignee_countrycode: 'US',
       consignee_street: '456 Oak St',
+      consignee_city: 'Los Angeles',
       consignee_postcode: '90001',
       consignee_telephone: '010-3333-4444',
     },
@@ -79,6 +80,10 @@ describe('validateShxkPayload — 단위 테스트 (TASK-B-277)', () => {
     p = buildValidPayload();
     delete (p.consignee as any).consignee_street;
     expect(validateShxkPayload(p)).toContain('수취인 주소 누락');
+
+    p = buildValidPayload();
+    delete (p.consignee as any).consignee_city;
+    expect(validateShxkPayload(p)).toContain('수취인 도시 누락'); // TASK-B-283 (Issue #1069 / DEF-B-055)
 
     p = buildValidPayload();
     delete (p.consignee as any).consignee_postcode;
@@ -163,6 +168,7 @@ describe('placeShxkOrder — 필수 항목 누락 시 createorder 미호출 (TAS
       recipient_name: 'John',
       recipient_country_code: 'US',
       recipient_address: '456 Oak St',
+      recipient_city: 'Los Angeles',
       recipient_zipcode: '90001',
       recipient_phone: '010-3333-4444',
       shipper_org: undefined,

@@ -18,7 +18,7 @@ vi.mock('@/lib/ups/label-mapping', () => ({
   buildCreateOrderPayload: vi.fn().mockReturnValue({
     reference_no: 'TEST001',
     shipper: { shipper_name: 'SNTL', shipper_countrycode: 'KR', shipper_street: '123 St', shipper_telephone: '010-1111-2222' },
-    consignee: { consignee_name: 'John', consignee_countrycode: 'US', consignee_street: '456 Oak St', consignee_postcode: '90001', consignee_telephone: '010-3333-4444' },
+    consignee: { consignee_name: 'John', consignee_countrycode: 'US', consignee_street: '456 Oak St', consignee_city: 'Los Angeles', consignee_postcode: '90001', consignee_telephone: '010-3333-4444' },
     cargovolume: [],
     invoice: [{ invoice_enname: 'Widget', invoice_quantity: '1', invoice_unitcharge: '10' }],
   }),
@@ -78,7 +78,7 @@ beforeEach(() => {
 describe('TASK-B-167: registerUpsOrder', () => {
   it('createorder를 호출하고 saveInitialLabel까지 수행한다', async () => {
     const { registerUpsOrder } = await import('@/app/actions/operations/ups-labels');
-    const order = { id: ORDER_ID, order_no: REF_NO, recipient_country_code: 'US', ups_product_code: 'WPX', incoterms: 'DDP', dest_port_id: null };
+    const order = { id: ORDER_ID, order_no: REF_NO, recipient_country_code: 'US', recipient_city: 'Los Angeles', ups_product_code: 'WPX', incoterms: 'DDP', dest_port_id: null };
     const supabase = makeSupabase({
       zen_orders: { data: order, error: null },
       zen_order_packages: { data: [{ id: 'pkg-1', items: [] }], error: null },
@@ -97,7 +97,7 @@ describe('TASK-B-167: registerUpsOrder', () => {
   it('createorder 실패 시 zen_ups_label_errors에 기록한다', async () => {
     const { registerUpsOrder } = await import('@/app/actions/operations/ups-labels');
     vi.mocked(createorder).mockResolvedValue({ success: 0, data: null, message: 'duplicate' });
-    const order = { id: ORDER_ID, order_no: REF_NO, recipient_country_code: 'US', ups_product_code: 'WPX', incoterms: 'DDP', dest_port_id: null };
+    const order = { id: ORDER_ID, order_no: REF_NO, recipient_country_code: 'US', recipient_city: 'Los Angeles', ups_product_code: 'WPX', incoterms: 'DDP', dest_port_id: null };
     const supabase = makeSupabase({
       zen_orders: { data: order, error: null },
       zen_order_packages: { data: [{ id: 'pkg-1', items: [] }], error: null },
@@ -114,7 +114,7 @@ describe('TASK-B-167: registerUpsOrder', () => {
 
   it('getnewlabel을 호출하지 않는다', async () => {
     const { registerUpsOrder } = await import('@/app/actions/operations/ups-labels');
-    const order = { id: ORDER_ID, order_no: REF_NO, recipient_country_code: 'US', ups_product_code: 'WPX', incoterms: 'DDP', dest_port_id: null };
+    const order = { id: ORDER_ID, order_no: REF_NO, recipient_country_code: 'US', recipient_city: 'Los Angeles', ups_product_code: 'WPX', incoterms: 'DDP', dest_port_id: null };
     const supabase = makeSupabase({
       zen_orders: { data: order, error: null },
       zen_order_packages: { data: [{ id: 'pkg-1', items: [] }], error: null },
@@ -294,7 +294,7 @@ describe('TASK-B-167: cancelUpsRegistration', () => {
 describe('TASK-B-167: issueUpsLabel() wrapper', () => {
   it('fetchAndIssueUpsLabel 실패 시 success: false를 반환한다', async () => {
     const { issueUpsLabel } = await import('@/app/actions/operations/ups-labels');
-    const order = { id: ORDER_ID, order_no: REF_NO, recipient_country_code: 'US', ups_product_code: 'WPX', incoterms: 'DDP', dest_port_id: null };
+    const order = { id: ORDER_ID, order_no: REF_NO, recipient_country_code: 'US', recipient_city: 'Los Angeles', ups_product_code: 'WPX', incoterms: 'DDP', dest_port_id: null };
     const supabase = makeSupabase({
       zen_orders: { data: order, error: null },
       zen_order_packages: { data: [{ id: 'pkg-1', items: [] }], error: null },
