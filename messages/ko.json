@@ -703,7 +703,14 @@
     "undo_failed": "UPS 등록취소에 실패했습니다.",
     "today_history": "오늘의 UPS 접수 이력",
     "empty_history": "오늘 UPS 접수된 내역이 없습니다.",
-    "partial_success": "UPS 등록 완료: {success}건 성공, {fail}건 실패"
+    "partial_success": "UPS 등록 완료: {success}건 성공, {fail}건 실패",
+    "result_title": "UPS 등록 결과",
+    "result_summary": "{success}건 성공 · {fail}건 실패 — 실패한 오더를 확인하고 수정 후 재시도하세요.",
+    "result_success_badge": "성공",
+    "result_fail_badge": "실패",
+    "result_edit_link": "수정하기 →",
+    "result_confirm": "확인",
+    "recent_fail_badge": "⚠ 최근 등록 실패"
   },
   "ShipperInvoices": {
     "title": "청구서 조회",

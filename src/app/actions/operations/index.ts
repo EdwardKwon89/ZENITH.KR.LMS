@@ -70,4 +70,5 @@ export {
   getReleasedOrders,
   confirmDeparture,
   undoDeparture,
+  getLatestUpsLabelErrors,
 } from './warehouse';

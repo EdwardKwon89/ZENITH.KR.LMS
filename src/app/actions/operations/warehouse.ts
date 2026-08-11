@@ -183,6 +183,40 @@ export async function confirmOutbound(orderId: string) {
 }
 
 // ─────────────────────────────────────────────
+// TASK-B-285 (Issue #1071): UPS 등록 실패 이력 최신 조회
+// ─────────────────────────────────────────────
+
+export async function getLatestUpsLabelErrors(orderIds: string[]) {
+  const { supabase, profile } = await validateUserAction();
+  if (!profile) throw new Error("User profile not found");
+  const isAllowed = WAREHOUSE_ROLES.includes(profile.role as any);
+  if (!isAllowed) throw new Error("권한이 없습니다.");
+  if (!Array.isArray(orderIds) || orderIds.length === 0) {
+    return { success: true, errors: {} };
+  }
+
+  const { data, error } = await supabase
+    .from("zen_ups_label_errors")
+    .select("id, order_id, shxk_code, error_message, attempted_at")
+    .in("order_id", orderIds)
+    .order("attempted_at", { ascending: false });
+
+  if (error) {
+    logger.error("getLatestUpsLabelErrors error:", error);
+    throw new Error("Failed to fetch ups label errors");
+  }
+
+  const latestByOrder: Record<string, any> = {};
+  for (const row of data || []) {
+    if (!latestByOrder[row.order_id]) {
+      latestByOrder[row.order_id] = row;
+    }
+  }
+
+  return { success: true, errors: latestByOrder };
+}
+
+// ─────────────────────────────────────────────
 // B-1: 오더픽업 (Pickup) — UPS REGISTERED + PICKUP → SCHEDULED
 // ─────────────────────────────────────────────
 

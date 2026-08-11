@@ -708,7 +708,14 @@
     "undo_failed": "Failed to cancel UPS registration.",
     "today_history": "Today's UPS Receiving History",
     "empty_history": "No UPS receiving records processed today.",
-    "partial_success": "UPS registration complete: {success} succeeded, {fail} failed"
+    "partial_success": "UPS registration complete: {success} succeeded, {fail} failed",
+    "result_title": "UPS Registration Result",
+    "result_summary": "{success} succeeded · {fail} failed — review failed orders, fix and retry.",
+    "result_success_badge": "Success",
+    "result_fail_badge": "Failed",
+    "result_edit_link": "Edit →",
+    "result_confirm": "OK",
+    "recent_fail_badge": "⚠ Recent registration failed"
   },
   "ShipperInvoices": {
     "title": "Invoice View",

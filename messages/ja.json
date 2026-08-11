@@ -181,7 +181,14 @@
     "undo_failed": "UPS登録取消に失敗しました。",
     "today_history": "本日のUPS受取履歴",
     "empty_history": "本日のUPS受取履歴はありません。",
-    "partial_success": "UPS登録完了: {success}件成功、{fail}件失敗"
+    "partial_success": "UPS登録完了: {success}件成功、{fail}件失敗",
+    "result_title": "UPS登録結果",
+    "result_summary": "{success}件成功 · {fail}件失敗 — 失敗したオーダを確認し、修正後に再試行してください。",
+    "result_success_badge": "成功",
+    "result_fail_badge": "失敗",
+    "result_edit_link": "修正する →",
+    "result_confirm": "確認",
+    "recent_fail_badge": "⚠ 直近登録失敗"
   },
   "ShipperInvoices": {
     "title": "請求書照会",

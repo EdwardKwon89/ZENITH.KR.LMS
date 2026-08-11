@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import {
@@ -14,6 +15,7 @@ import {
   confirmUpsRegistration,
   undoUpsRegistration,
   getTodayUpsHistory,
+  getLatestUpsLabelErrors,
 } from "@/app/actions/operations";
 import { OrderStatus, ORDER_STATUS_META } from "@/types/orders";
 import {
@@ -40,6 +42,8 @@ export default function UpsReceiveProcessForm({ locale }: { locale: string }) {
   const [undoTarget, setUndoTarget] = useState<string | null>(null);
   const [undoLoading, setUndoLoading] = useState(false);
   const [history, setHistory] = useState<any[]>([]);
+  const [labelErrors, setLabelErrors] = useState<Record<string, any>>({});
+  const [batchResults, setBatchResults] = useState<any[] | null>(null);
 
   useEffect(() => {
     fetchData();
@@ -52,7 +56,12 @@ export default function UpsReceiveProcessForm({ locale }: { locale: string }) {
         getWarehousedOrders(),
         getTodayUpsHistory(),
       ]);
-      if (ordersRes.success) setOrders(ordersRes.orders);
+      if (ordersRes.success) {
+        setOrders(ordersRes.orders);
+        const orderIds = (ordersRes.orders || []).map((o: any) => o.id);
+        const errRes = await getLatestUpsLabelErrors(orderIds);
+        if (errRes.success) setLabelErrors(errRes.errors);
+      }
       if (historyRes.success) setHistory(historyRes.items);
     } catch (err: any) {
       toast.error(err.message || "데이터 로드 실패");
@@ -89,24 +98,34 @@ export default function UpsReceiveProcessForm({ locale }: { locale: string }) {
     }
 
     setSubmitLoading(true);
+    setBatchResults(null);
     try {
       const orderIds = [...selected];
-      let successCount = 0;
-      let failCount = 0;
+      const results: any[] = [];
 
       for (const orderId of orderIds) {
+        const order = orders.find((o: any) => o.id === orderId);
         const res = await confirmUpsRegistration(orderId);
         if (res.success) {
-          successCount++;
+          results.push({ orderId, orderNo: order?.order_no || "-", success: true });
         } else {
-          failCount++;
+          results.push({
+            orderId,
+            orderNo: order?.order_no || "-",
+            success: false,
+            error: res.error || "알 수 없는 오류",
+          });
         }
       }
+
+      const successCount = results.filter((r) => r.success).length;
+      const failCount = results.length - successCount;
 
       if (failCount === 0) {
         toast.success(t("success_msg", { count: successCount }));
       } else {
         toast.warning(t("partial_success", { success: successCount, fail: failCount }));
+        setBatchResults(results);
       }
 
       setSelected(new Set());
@@ -238,13 +257,18 @@ export default function UpsReceiveProcessForm({ locale }: { locale: string }) {
                     </div>
 
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1.5">
+                      <div className="flex items-center gap-2 mb-1.5 flex-wrap">
                         <span className="font-mono text-sm font-bold text-slate-900">
                           {order.order_no}
                         </span>
                         <ZenBadge className="bg-yellow-50 text-yellow-700 border-yellow-200 text-[10px]">
                           {orderStatusT(`${OrderStatus.WAREHOUSED}.label`)}
                         </ZenBadge>
+                        {labelErrors[order.id] && (
+                          <ZenBadge className="bg-red-50 text-red-700 border-red-200 text-[10px] flex items-center gap-1">
+                            {t("recent_fail_badge")}
+                          </ZenBadge>
+                        )}
                       </div>
 
                       <div className="text-xs text-slate-500 space-y-0.5">
@@ -350,6 +374,92 @@ export default function UpsReceiveProcessForm({ locale }: { locale: string }) {
           </div>
         </ZenCard>
       </div>
+
+      {batchResults && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-lg w-full max-h-[80vh] flex flex-col">
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                  <XCircle size={20} className="text-red-500" />
+                  {t("result_title")}
+                </h3>
+                <p className="text-xs text-slate-500 mt-1">
+                  {t("result_summary", {
+                    success: batchResults.filter((r) => r.success).length,
+                    fail: batchResults.filter((r) => !r.success).length,
+                  })}
+                </p>
+              </div>
+              <button
+                onClick={() => setBatchResults(null)}
+                className="text-slate-400 hover:text-slate-600 text-xl leading-none"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto space-y-3 pr-1">
+              {batchResults.map((r, idx) => (
+                <div
+                  key={idx}
+                  className={cn(
+                    "p-4 border rounded-2xl",
+                    r.success
+                      ? "bg-green-50/50 border-green-200"
+                      : "bg-red-50/50 border-red-200"
+                  )}
+                >
+                  <div className="flex items-center justify-between gap-3 flex-wrap">
+                    <div className="flex items-center gap-2 min-w-0">
+                      {r.success ? (
+                        <CheckCircle size={16} className="text-green-600 shrink-0" />
+                      ) : (
+                        <XCircle size={16} className="text-red-500 shrink-0" />
+                      )}
+                      <span className="font-mono text-sm font-bold text-slate-900">
+                        {r.orderNo}
+                      </span>
+                      <ZenBadge
+                        className={cn(
+                          "text-[10px]",
+                          r.success
+                            ? "bg-green-100 text-green-700 border-green-200"
+                            : "bg-red-100 text-red-700 border-red-200"
+                        )}
+                      >
+                        {r.success ? t("result_success_badge") : t("result_fail_badge")}
+                      </ZenBadge>
+                    </div>
+                    {!r.success && (
+                      <Link
+                        href={`/orders/${r.orderId}/edit`}
+                        className="text-xs font-bold text-blue-600 hover:text-blue-800 underline shrink-0"
+                      >
+                        {t("result_edit_link")}
+                      </Link>
+                    )}
+                  </div>
+                  {!r.success && r.error && (
+                    <p className="mt-2 text-xs text-red-700 bg-red-50 border border-red-100 rounded-lg px-3 py-2 break-words">
+                      {r.error}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-5 flex justify-end">
+              <ZenButton
+                onClick={() => setBatchResults(null)}
+                className="px-6 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-sm font-bold rounded-xl"
+              >
+                {t("result_confirm")}
+              </ZenButton>
+            </div>
+          </div>
+        </div>
+      )}
 
       {undoTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
