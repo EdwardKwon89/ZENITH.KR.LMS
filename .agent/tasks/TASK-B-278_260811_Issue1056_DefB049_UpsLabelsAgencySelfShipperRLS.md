@@ -83,22 +83,29 @@ AND (
 - 정책명: `Agency can view/insert/update shipper ups labels`, `ups_labels_agency_delete` (기존 유지, DROP+CREATE 재생성)
 - 자가화주 오더(agency_org_id NULL, shipper_id=본인 org)가 기존 `agency_org_id` 단일 체크로 항상 거짓 → SHXK createorder 성공 후 `saveInitialLabel()` INSERT 42501 차단되던 결함 해소 (DEF-B-046 동일 해법)
 
-### 실 DB RLS behavioral 검증 (authenticated 롤 시뮬레이션, 실제 DB 기반)
+### 회귀 테스트 (자동, 코드 커밋 `fa5c5050` — PR#1057 반려 대응)
 
-| 시나리오 | 결과 |
-|:---------|:-----|
-| 자가화주 AGENCY SELECT (본인 오더 라벨) | ✅ 1행 조회 |
-| 자가화주 AGENCY INSERT (라벨 생성) | ✅ 1행 영속 확인 |
-| 자가화주 AGENCY UPDATE | ✅ |
-| 자가화주 AGENCY DELETE | ✅ |
-| **무관 AGENCY INSERT (보안 회귀 방지)** | ✅ **42501 차단 유지** |
+PR#1057 반려 사유(마이그레이션 SQL은 정확, 단 자동 회귀 테스트 부재)에 대응해 **`tests/unit/db/defb049-ups-labels-self-shipper-rls.test.ts` 10건** 신설 — TASK-B-265와 동일한 psql 기반 DB 실테스트 패턴(실제 authenticated 롤 시뮬레이션으로 DB에 직접 CRUD 수행 + assert). vitest 회귀 스위트에 포함됨(테스트 파일 164개).
 
-**되돌리기 검증**: INSERT 정책을 이전 형태(`agency_org_id` 단일)로 원복 → 자가화주 INSERT **42501 재현** 확인 후 복원 → db reset으로 최종 정책 적용 재확인.
+| TC | 검증 | 결과 |
+|:---|:-----|:-----|
+| TC-278-01 | 자가화주 AGENCY SELECT 성공 | ✅ |
+| TC-278-02 | 자가화주 AGENCY INSERT 성공 + 영속 확인 | ✅ |
+| TC-278-03 | 자가화주 AGENCY UPDATE 성공 + 값 반영 | ✅ |
+| TC-278-04 | 자가화주 AGENCY DELETE 성공 | ✅ |
+| TC-278-05 | 무관 AGENCY SELECT (기존 authenticated_select 정책 — 이 Task 무관) | ✅ |
+| TC-278-06 | **무관 AGENCY INSERT 42501 차단** (보안 회귀 방지) | ✅ |
+| TC-278-07 | 무관 AGENCY UPDATE — RLS 행 필터로 0행 반영·값 불변 | ✅ |
+| TC-278-08 | 무관 AGENCY DELETE — 레코드 존속(차단) | ✅ |
+| TC-278-09 | 하위 화주 오더 라벨은 AGENCY 정상 관리 (기존 동작 회귀 방지) | ✅ |
+| TC-278-10 | **되돌리기 검증** — INSERT 정책 이전 형태 원복 시 자가화주도 42501 재차단 → 복원 후 성공 | ✅ |
+
+`setupFixture`가 항상 최신 정책 + 픽스처를 재설정해 멱등성 보장(되돌리기 테스트의 원복 상태 잔존으로 인한 연쇄 실패 방지). 전체 회귀 **1170/1170 PASS**에 포함 확인.
 
 ### 검증 수치
 
-- 전체 회귀: `npm run test:regression` — **1160/1160 PASS** (163 파일)
-- `npm run build` — Compiled successfully (14.7s)
+- 전체 회귀: `npm run test:regression` — **1170/1170 PASS** (164 파일, 신규 DB RLS 테스트 10건 포함)
+- `npm run build` — Compiled successfully (14.9s)
 - 앱 코드 수정 불필요 확인(RLS 정책만 문제) — `ups-labels.ts` 등 코드 변경 없음
 
 ### R-10 실브라우저 검증 (문서 커밋, 스크린샷 `docs/99_Manual/E2E_278_Result/`)
