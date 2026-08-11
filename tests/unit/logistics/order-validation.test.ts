@@ -182,6 +182,7 @@ describe('TASK-B-277: UPS 배송 SHXK 필수 항목 검증', () => {
     shipper_contact_phone: '010-0000-0000',
     recipient_country_code: 'US',
     recipient_zipcode: '90001',
+    recipient_city: 'Los Angeles',
     transport_mode: 'UPS',
     ups_product_code: 'WW_EXPEDITED',
     incoterms: 'DDP',
@@ -222,8 +223,17 @@ describe('TASK-B-277: UPS 배송 SHXK 필수 항목 검증', () => {
     }
   });
 
-  it('비UPS(AIR) 오더는 위 3개 필드 없이도 정상 제출 가능 (회귀 방지)', () => {
-    const { recipient_country_code, recipient_zipcode, shipper_contact_phone, ups_product_code, incoterms, ...airRest } = validUpsPayload;
+  it('UPS + recipient_city 누락 → 검증 실패 (DEF-B-055 / Issue #1069)', () => {
+    const { recipient_city, ...rest } = validUpsPayload;
+    const result = orderRegistrationSchema.safeParse(rest);
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues.some((i) => i.path.includes('recipient_city'))).toBe(true);
+    }
+  });
+
+  it('비UPS(AIR) 오더는 위 필드들 없이도 정상 제출 가능 (회귀 방지)', () => {
+    const { recipient_country_code, recipient_zipcode, recipient_city, shipper_contact_phone, ups_product_code, incoterms, ...airRest } = validUpsPayload;
     const air = {
       ...airRest,
       transport_mode: 'AIR',

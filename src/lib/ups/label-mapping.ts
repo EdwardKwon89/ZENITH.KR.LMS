@@ -51,8 +51,10 @@ export function resolveShipperStreet(
   order: Record<string, unknown>,
   shipperOrg: Record<string, unknown> | undefined,
 ): string {
-  const shipperAddr = (shipperOrg?.address_english as string) || (shipperOrg?.address as string) || (order.shipper_address as string) || '';
-  const shipperAddrDetail = (shipperOrg?.address_detail_english as string) || (shipperOrg?.address_detail as string) || (order.shipper_address_detail as string) || '';
+  // DEF-B-059: order-level english 값을 우선으로 사용 (Daum 우편번호에서 자동 채움)
+  // 우선순위: order.shipper_address_english > shipperOrg.address_english > shipperOrg.address > order.shipper_address
+  const shipperAddr = (order.shipper_address_english as string) || (shipperOrg?.address_english as string) || (shipperOrg?.address as string) || (order.shipper_address as string) || '';
+  const shipperAddrDetail = (order.shipper_address_detail_english as string) || (shipperOrg?.address_detail_english as string) || (shipperOrg?.address_detail as string) || (order.shipper_address_detail as string) || '';
   return [shipperAddr, shipperAddrDetail].filter(Boolean).join(' ');
 }
 
@@ -87,6 +89,7 @@ export function buildCreateOrderPayload(
     cargovolume,
     shipper: {
       shipper_name: (order.shipper_contact_name as string) || shipperDefaults.name,
+      shipper_company: (order.shipper_org as Record<string, unknown> | undefined)?.name as string || shipperDefaults.name,
       shipper_countrycode: (order.shipper_country_code as string) || shipperDefaults.country,
       shipper_province: (order.shipper_state_province as string) || '',
       shipper_city: (order.shipper_city as string) || '',

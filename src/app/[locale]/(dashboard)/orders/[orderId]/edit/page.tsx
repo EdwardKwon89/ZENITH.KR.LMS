@@ -6,7 +6,7 @@ import { getOrderDetails } from '@/app/actions/operations/orders';
 import { getOrganizations, getPorts } from '@/app/actions/master';
 import { OrderRegistrationForm } from '@/components/orders/OrderRegistrationForm';
 import { requireAuth } from '@/lib/auth/guards';
-import { isOrderEditable } from '@/lib/logistics/status-machine';
+import { getOrderEditScope } from '@/lib/logistics/status-machine';
 import type { OrderStatus } from '@/types/orders';
 
 export default async function EditOrderPage({
@@ -20,11 +20,18 @@ export default async function EditOrderPage({
   const rawOrder = await getOrderDetails(orderId);
   if (!rawOrder) redirect('/orders');
 
-  if (!isOrderEditable(rawOrder.status as OrderStatus)) {
+  const editScope = getOrderEditScope(rawOrder.status as OrderStatus, rawOrder.transport_mode as string | undefined);
+  if (!editScope.editable) {
     redirect(`/orders/${orderId}`);
   }
 
   const order: any = rawOrder;
+
+  // WAREHOUSED+UPS 부분 수정: 실측(measured_at)된 패키지 id 목록 — UI에서 치수/무게 잠금에 사용
+  const measuredPackageIds = (order.packages ?? [])
+    .filter((pkg: any) => !!pkg.measured_at)
+    .map((pkg: any) => pkg.id)
+    .filter(Boolean) as string[];
 
   const t = await getTranslations('Orders');
   const navT = await getTranslations('Navigation');
@@ -75,6 +82,8 @@ export default async function EditOrderPage({
     incoterms: (order as any).incoterms ?? 'DDP',
     ups_service_family: (order as any).ups_service_family ?? undefined,
     packages: (order.packages ?? []).map((pkg: any) => ({
+      id: pkg.id,
+      measured_at: pkg.measured_at ?? null,
       packing_unit: pkg.packing_unit,
       packing_count: pkg.packing_count,
       physical_box_count: pkg.physical_box_count ?? 1,
@@ -127,6 +136,8 @@ export default async function EditOrderPage({
           ports={ports}
           orderId={orderId}
           defaultValues={defaultValues}
+          editScope={editScope}
+          measuredPackageIds={measuredPackageIds}
         />
       </div>
     </div>

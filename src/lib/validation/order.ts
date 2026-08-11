@@ -48,10 +48,12 @@ export const orderRegistrationSchema = z.object({
   shipper_contact_phone: z.string().optional(),
   shipper_contact_email: z.string().email('Invalid email format').optional().or(z.literal('')),
   shipper_address: z.string().optional(),
+  shipper_address_english: z.string().optional(),
   shipper_country_code: z.string().optional().default('KR'),
   shipper_state_province: z.string().optional(),
   shipper_city: z.string().optional(),
   shipper_address_detail: z.string().optional(),
+  shipper_address_detail_english: z.string().optional(),
   shipper_zipcode: z.string().optional(),
   shipper_biz_no: z.string().optional(),
   
@@ -149,6 +151,8 @@ export const orderRegistrationSchema = z.object({
   // TASK-B-277 (Issue #1052): UPS 배송은 SHXK API 필수 항목 조건부 검증 —
   // recipient_country_code(필수), recipient_zipcode(중국행 실패로 실무상 필수),
   // shipper_contact_phone(SHXK 전화/휴대폰 중 1개 필수 — 우리 스키마엔 전화 1개만 존재).
+  // TASK-B-283 (Issue #1069 / DEF-B-055): recipient_city도 SHXK 필수(收件人城市不能为空)로
+  // 실발현 — TASK-B-277 당시 "국가별 조건부"로 범위 밖 처리했던 항목을 필수화.
   if (data.transport_mode === 'UPS') {
     if (!data.recipient_country_code || data.recipient_country_code.trim() === '') {
       ctx.addIssue({
@@ -162,6 +166,13 @@ export const orderRegistrationSchema = z.object({
         code: z.ZodIssueCode.custom,
         message: 'UPS 배송은 수하인 우편번호가 필수입니다(SHXK API 요구사항)',
         path: ['recipient_zipcode'],
+      });
+    }
+    if (!data.recipient_city || data.recipient_city.trim() === '') {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'UPS 배송은 수하인 도시가 필수입니다(SHXK API 요구사항)',
+        path: ['recipient_city'],
       });
     }
     if (!data.shipper_contact_phone || data.shipper_contact_phone.trim() === '') {
