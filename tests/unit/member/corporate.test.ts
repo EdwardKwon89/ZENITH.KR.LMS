@@ -122,3 +122,95 @@ describe('Corporate Actions Unit Tests', () => {
     expect(mockSupabase.select).not.toHaveBeenCalledWith(expect.stringContaining('metadata'));
   });
 });
+
+// ─── TASK-B-267 (Issue #1028): AGENCY/SHIPPER 역할 법인정보·부서 관리 확장 ─────────
+
+describe('Corporate Actions — AGENCY/SHIPPER 확장 (TASK-B-267 / Issue #1028)', () => {
+  const mockUser = { id: 'user-123' };
+  const mockSupabase = {
+    from: vi.fn().mockReturnThis(),
+    select: vi.fn().mockReturnThis(),
+    update: vi.fn().mockReturnThis(),
+    insert: vi.fn().mockReturnThis(),
+    delete: vi.fn().mockReturnThis(),
+    eq: vi.fn().mockReturnThis(),
+    single: vi.fn(),
+    then: vi.fn(),
+  };
+
+  function setup(role: string) {
+    vi.clearAllMocks();
+    const profile = { id: 'user-123', org_id: 'org-456', role };
+    (validateUserAction as any).mockResolvedValue({ user: mockUser, profile, supabase: mockSupabase });
+    mockSupabase.then.mockImplementation((cb) => cb({ data: {}, error: null }));
+    mockSupabase.single.mockResolvedValue({ data: {}, error: null });
+  }
+
+  it('TC-267-01: AGENCY 역할은 updateOrganizationInfo 성공 (법인정보 수정 허용)', async () => {
+    setup(USER_ROLES.AGENCY);
+    const result = await updateOrganizationInfo({ representative: 'Agency CEO', contact: '010-0000-1111' });
+    expect(result.data).toBe(true);
+    expect(result.error).toBeNull();
+    expect(mockSupabase.update).toHaveBeenCalledWith({ rep_name: 'Agency CEO', contact_phone: '010-0000-1111' });
+    expect(mockSupabase.eq).toHaveBeenCalledWith('id', 'org-456');
+  });
+
+  it('TC-267-02: SHIPPER 역할은 updateOrganizationInfo 성공', async () => {
+    setup(USER_ROLES.SHIPPER);
+    const result = await updateOrganizationInfo({ bizNo: '999-88-77777' });
+    expect(result.data).toBe(true);
+    expect(mockSupabase.update).toHaveBeenCalledWith({ biz_no: '999-88-77777' });
+  });
+
+  it('TC-267-03: AGENCY/SHIPPER 역할은 부서 create/update/delete 모두 허용', async () => {
+    for (const role of [USER_ROLES.AGENCY, USER_ROLES.SHIPPER]) {
+      setup(role);
+      const created = await createDepartment('Sales');
+      expect(created.data).toBe(true);
+      expect(mockSupabase.insert).toHaveBeenCalledWith({ org_id: 'org-456', name: 'Sales' });
+
+      setup(role);
+      const updated = await updateDepartment('dept-1', 'Marketing');
+      expect(updated.data).toBe(true);
+      expect(mockSupabase.update).toHaveBeenCalledWith({ name: 'Marketing' });
+
+      setup(role);
+      const deleted = await deleteDepartment('dept-1');
+      expect(deleted.data).toBe(true);
+      expect(mockSupabase.delete).toHaveBeenCalled();
+      expect(mockSupabase.eq).toHaveBeenCalledWith('id', 'dept-1');
+    }
+  });
+
+  it('TC-267-04: 기존 CORPORATE/ADMIN 하위 호환 유지', async () => {
+    for (const role of [USER_ROLES.CORPORATE, USER_ROLES.ADMIN]) {
+      setup(role);
+      const result = await updateOrganizationInfo({ representative: 'CEO' });
+      expect(result.data).toBe(true);
+      expect(result.error).toBeNull();
+    }
+  });
+
+  it('TC-267-05: 여전히 권한 없는 역할(CARRIER/INDIVIDUAL/USER 등)은 updateOrganizationInfo 거부', async () => {
+    for (const role of [USER_ROLES.CARRIER, USER_ROLES.INDIVIDUAL, USER_ROLES.USER, USER_ROLES.OPERATOR]) {
+      setup(role);
+      const result = await updateOrganizationInfo({ representative: 'Nope' });
+      expect(result.data).toBeNull();
+      expect(result.error).toBe('조직 정보를 수정할 권한이 없습니다.');
+    }
+  });
+
+  it('TC-267-06: AGENCY_SHIPPER는 이번 확장 범위 미포함 — updateOrganizationInfo 거부 (JSJung 확인 전 임의 추가 금지)', async () => {
+    setup(USER_ROLES.AGENCY_SHIPPER);
+    const result = await updateOrganizationInfo({ representative: 'Nope' });
+    expect(result.data).toBeNull();
+    expect(result.error).toBe('조직 정보를 수정할 권한이 없습니다.');
+  });
+
+  it('TC-267-07: 권한 없는 역할은 부서 create도 거부', async () => {
+    setup(USER_ROLES.CARRIER);
+    const result = await createDepartment('Sales');
+    expect(result.data).toBeNull();
+    expect(result.error).toBe('부서 관리 권한이 없습니다.');
+  });
+});

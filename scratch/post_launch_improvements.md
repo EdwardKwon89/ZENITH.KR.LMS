@@ -1772,3 +1772,42 @@ UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류
 - **관련 파일**: `src/app/actions/finance/daily-billing.ts:289-290` (`getShipperDailyBillingSummary`)
 - **예상 공수**: 0.5 MD (집계 로직 변경 + behavioral 테스트 보강)
 - **우선순위**: Medium — 표시용(estimated) 왜곡이며 실제 청구액 산정은 인보이스별 스냅샷을 따름
+
+## [IMP-161] `zen_ups_fuel_surcharges` 값 기반 placeholder 제거 로직(DEF-B-042 v2)이 실제 마이그레이션 파일을 검증하지 않고 SQL을 테스트 코드에 복제 — 향후 회귀 미탐지 위험
+
+- **발견 경위**: PR#1038(TASK-B-269 v2, Baker) 리뷰 중 Jaison이 되돌리기 검증으로 발견. `supabase/migrations/20260810140000_ups_fuel_surcharge_real_data.sql` 상단의 `DELETE FROM zen_ups_fuel_surcharges WHERE selling_rate=0.185 AND cost_rate=0.155`(seed placeholder를 주차와 무관하게 값 기준으로 제거하는 핵심 방어선) 한 줄을 실제 파일에서 제거하고 `supabase db reset` → `tests/unit/migrations/defb042-fuel-surcharge-real-data.test.ts` 재실행 → **7/7 그대로 PASS**(직접 재현 확인).
+- **근본 원인**: 이 테스트 스위트의 TC-269-01~06은 실제 마이그레이션이 적용된 DB 상태를 조회해 검증하지만(정상), 오늘 날짜(2026-08-10)가 우연히 13주 실데이터 범위의 마지막 주와 일치해서 `ON CONFLICT DO UPDATE`/NULL DELETE+INSERT 로직이 어차피 placeholder를 덮어써 버려 이 방어선의 존재 여부를 구분하지 못함. TC-269-07(신설, 미래주차 시뮬레이션)은 실제 파일을 실행하는 대신 동일 SQL을 테스트 코드 안에 손으로 복제해서 검증 — SQL 마이그레이션은 TS 함수처럼 import해 재사용할 수 없어 나온 불가피한 타협으로 보이나, 결과적으로 실제 파일의 회귀를 탐지하지 못함(PR#1030 Mike의 그림자 테스트와 유사한 유형이나, 이번은 SQL 마이그레이션의 구조적 한계에서 비롯된 경미한 사례).
+- **영향 범위**: 현재 PR#1038의 실제 코드는 정확히 구현되어 있음을 직접 확인(머지 차단 사유 아님). 다만 향후 누군가 이 DELETE 줄을 실수로 삭제·수정해도 CI가 못 잡음 — 특히 CI는 매 실행마다 fresh reset이라(R-08-2) 사실상 "최초 부트스트랩" 상황이 매번 재현되는데, 그 시점의 실제 wall-clock 날짜가 13주 범위(2026-05-18~08-10) 밖이면(2026-08-17부터 해당) 즉시 DEF-B-042 원본 버그가 재현됨.
+- **현재 상태**: 미수정 — PR#1038은 머지됨(코드 자체는 정확).
+- **임시 조치**: 없음(현재 코드가 맞으므로 즉시 위험 없음). 단, 2026-08-17 이후 최초로 이 저장소에서 fresh reset을 수행하는 시점(신규 개발자 온보딩, CI 최초 실행 등)에 `zen_ups_fuel_surcharges`에 placeholder 잔존 여부를 수동 확인 권장.
+- **목표 구현**: 시스템 시각을 세션 로컬로 조작 가능한 테스트 기법(예: DB 트랜잭션 내 `SET LOCAL` 트릭 조사, 또는 마이그레이션 파일을 별도 스크립트로 감싸 `psql -f <실제파일>`로 직접 실행 후 상태만 검증하는 방식으로 전환해 "실제 파일 실행" 보장) 도입 검토. 최소한 TC-269-07의 인라인 SQL과 실제 마이그레이션 파일의 해당 구문이 동일한지 diff/hash 비교하는 안전장치라도 추가.
+- **관련 파일**: `supabase/migrations/20260810140000_ups_fuel_surcharge_real_data.sql`, `supabase/migrations/20260628000000_ups_seed_data.sql`, `tests/unit/migrations/defb042-fuel-surcharge-real-data.test.ts`
+- **예상 공수**: 0.5 MD (테스트 기법 조사 및 재작성)
+- **우선순위**: Low — 현재 코드는 정확, 실제 위험은 미래의 실수(회귀)에 대한 탐지 공백일 뿐
+
+## [IMP-162] `zen_agency_shippers` 기반 권한/필터 로직이 "대리점 자가화주" 케이스를 놓치는 패턴이 12개 파일에 산재 (DEF-B-046 발견 중 확인)
+
+- **발견 경위**: DEF-B-046(TASK-B-274) 분석 중 — `warehouse.ts`의 `getAgencyShipperIds()`가 대리점 자기 자신의 org_id를 반환값에서 누락하는 버그를 확인하면서, 동일하게 `zen_agency_shippers` 테이블을 조회해 권한/필터를 구성하는 패턴을 `grep`으로 전수 확인한 결과 아래 12개 파일에도 각각 독립적으로 존재함을 발견:
+  ```
+  agency/zone-discounts.ts, agency/shipper-link.ts, agency/shippers.ts,
+  operations/bulk-orders.ts, operations/orders.ts, operations/tracking.ts,
+  finance/shipper-invoices.ts, finance/daily-billing.ts, finance/settlement.ts,
+  finance/ups-actual-charges.ts, finance/order-revenue-cost.ts
+  ```
+- **현재 상태**: 개별 파일 조사 미실시(DEF-B-046은 `warehouse.ts`만 범위로 한정해 수정). 위 12개 파일 각각이 동일한 "대리점 자가화주 오더 누락" 버그를 가지고 있는지, 아니면 애초에 하위 화주 전용 로직이라 자기 자신 포함이 불필요/부적절한 경우인지 파일별로 성격이 다를 수 있어 **일괄 판단 불가** — 개별 검토 필요.
+- **임시 조치**: 없음 — `warehouse.ts`만 DEF-B-046으로 수정, 나머지는 미조치.
+- **목표 구현**: 12개 파일을 개별 조사해 각각 (a) 대리점 자가화주 오더/케이스를 실제로 다뤄야 하는 컨텍스트인지, (b) 다뤄야 한다면 동일하게 자기 org_id 누락 버그가 있는지 판별 후 필요한 곳만 `warehouse.ts`와 동일한 패턴(`[...downstreamIds, orgId]`)으로 수정. 파일이 많아 1개 Task로 묶기보다 도메인별(agency/*, operations/*, finance/*)로 나눠 별도 Task 채번 권장.
+- **관련 파일**: 위 12개 파일 전체(`src/app/actions/agency/`, `src/app/actions/operations/`, `src/app/actions/finance/` 하위)
+- **예상 공수**: 1.5~2 MD (파일당 조사 15~20분 + 필요 시 수정·테스트 포함, 파일 수 감안)
+- **우선순위**: **High** — `warehouse.ts` 사례처럼 액션 자체를 하드 차단하는 패턴이 다른 파일(특히 finance 정산 관련)에도 있다면 대리점 자가화주 오더의 정산·인보이스 처리 자체가 막혀있을 가능성 있음, 조속한 개별 조사 권장
+- **[추가 확인, 2026-08-11]** 이 패턴의 "형제" 사례가 실제 프로덕션 실패로 확인됨 — `zen_ups_labels`의 RLS 정책(SELECT/INSERT/UPDATE/DELETE 4개)이 `zen_agency_shippers` 테이블이 아니라 `zen_orders.agency_org_id` 컬럼을 직접 체크하는 방식으로 동일한 자가화주 누락 버그를 가지고 있었고, JSJung의 실제 UPS 오더 등록 시도(MASTER AIR 계정)가 SHXK API 성공 후 라벨 저장 단계에서 막히는 실패로 나타남 → **DEF-B-049 / TASK-B-278**로 별도 등록·Baker 배정. 이 발견으로 "자가화주 케이스 누락"이 앱 레벨(`zen_agency_shippers` 조회, 이 IMP)뿐 아니라 **DB RLS 정책 레벨**에도 동일 계열로 존재할 수 있음이 확인됨 — 향후 12개 파일 개별 조사 시 관련 RLS 정책까지 함께 점검 권장.
+
+## [IMP-163] TASK-B-278(DEF-B-049) RLS 회귀 테스트가 INSERT 정책 실제 상태를 검증하지 못함 (setupFixture 자가 교정 마스킹)
+
+- **발견 경위**: PR#1057(TASK-B-278) v2 검토 중 — `tests/unit/db/defb049-ups-labels-self-shipper-rls.test.ts`의 `setupFixture()`가 매 describe 블록 `beforeAll`에서 `zen_ups_labels`의 INSERT 정책을 무조건 DROP+CREATE로 "올바른" 상태로 강제 재생성함을 확인. Jaison이 실제 DB의 INSERT 정책만 원래 버그 상태(agency_org_id 단일 체크)로 되돌린 뒤 재실행해도 10/10 그대로 PASS함을 재현(대조군으로 UPDATE 정책을 동일 방식으로 깨봤을 때는 TC-278-03이 정상적으로 FAIL하는 것과 대비).
+- **현재 상태**: 미수정 — SELECT/UPDATE/DELETE 3개 정책은 실제 마이그레이션 적용 상태를 제대로 검증하지만, INSERT 정책(이번 DEF-B-049 사고의 정확한 발생 지점 — SHXK 성공 후 라벨 저장 실패)만은 테스트가 스스로 정답을 만들어놓고 검증하는 구조라 실질적 회귀 방어력이 없음.
+- **임시 조치**: 없음 — JSJung 지시로 이 상태 그대로 PR#1057 승인·머지 진행(마이그레이션 SQL 자체는 별도로 authenticated 클라이언트 직접 검증 완료, 정확함 확인됨).
+- **목표 구현**: `setupFixture()`에서 INSERT 정책을 강제로 DROP+CREATE하는 블록 제거(또는 최소화). CI는 매번 `supabase db reset --yes`로 fresh DB에서 시작하므로 "이전 실행의 되돌리기 테스트 잔여 상태" 문제(주석에 명시된 도입 사유)는 실제로 발생하지 않음 — R-08-2 원칙과도 일치.
+- **관련 파일**: `tests/unit/db/defb049-ups-labels-self-shipper-rls.test.ts`
+- **예상 공수**: 0.1 MD (블록 제거 + 되돌리기 검증으로 재확인만 하면 됨)
+- **우선순위**: Medium — 마이그레이션 자체는 정확함이 별도로 검증됐고 즉각적 장애는 아니나, 향후 `zen_ups_labels` INSERT 정책이 다른 작업으로 실수로 깨져도 회귀 스위트가 못 잡는 사각지대가 남아있음

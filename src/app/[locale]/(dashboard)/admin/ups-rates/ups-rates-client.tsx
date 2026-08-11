@@ -22,10 +22,11 @@ import {
   createUpsSurgeFee, updateUpsSurgeFee, deleteUpsSurgeFee,
 } from '@/app/actions/ups/rates-mutation';
 import { createPricingSchedule, getScheduledPricingChanges, cancelPricingSchedule, getPricingAuditLog } from '@/app/actions/ups/pricing-schedule';
+import { getKstToday } from '@/lib/utils/date-kst';
 import type { ColumnDef } from '@tanstack/react-table';
 import UpsBaseRateMatrix from '@/components/ups/UpsBaseRateMatrix';
 
-interface AgencyPolicy { id: string; agency_org_id: string; discount_rate: string; is_active: boolean; agency: { name: string } | null; }
+interface AgencyPolicy { id: string; agency_org_id: string; cargo_type: string | null; zone_id: string; discount_rate: string; is_active: boolean; agency: { name: string } | null; zone?: { zone_code: string } | null; }
 interface Agency { id: string; name: string; volumetric_divisor?: number | null; }
 interface FuelSurchargeRow extends UpsFuelSurcharge { product: { product_code: string; product_name: string } | null; }
 
@@ -138,17 +139,18 @@ export default function UpsRatesClient({ zones, products, baseRates, fuelSurchar
 
   const openNew = () => {
     resetForm();
-    if (activeTab === 'agencyPolicies') setForm({ is_active: true, volumetric_divisor: 5000 });
+    if (activeTab === 'agencyPolicies') setForm({ is_active: true, volumetric_divisor: 6000 });
     setIsModalOpen(true);
   };
   const openEdit = (item: any) => {
     if (activeTab === 'agencyPolicies') {
       const zoneRates: Record<string, number> = {};
+      // Issue #1023: cargo_type까지 함께 필터링 (같은 대리점·다른 cargo_type 정책이 섞이지 않도록)
       (agencyPolicies as any[])
-        .filter((p: any) => p.agency_org_id === item.agency_org_id)
+        .filter((p: any) => p.agency_org_id === item.agency_org_id && (p.cargo_type ?? 'ALL') === (item.cargo_type ?? 'ALL'))
         .forEach((p: any) => { zoneRates[p.zone_id] = Number(p.discount_rate); });
       const org = (agencies as Agency[]).find((a) => a.id === item.agency_org_id);
-      setForm({ agency_org_id: item.agency_org_id, zone_rates: zoneRates, is_active: item.is_active, volumetric_divisor: org?.volumetric_divisor ?? 5000 });
+      setForm({ agency_org_id: item.agency_org_id, cargo_type: item.cargo_type ?? 'ALL', zone_rates: zoneRates, is_active: item.is_active, volumetric_divisor: org?.volumetric_divisor ?? 6000 });
       setEditingItem({ ...item, _agencyPolicies: true });
     } else {
       setForm({ ...item });
@@ -182,14 +184,22 @@ export default function UpsRatesClient({ zones, products, baseRates, fuelSurchar
         surgeFees: updateUpsSurgeFee,
       };
       if (activeTab === 'agencyPolicies') {
-        const { agency_org_id, zone_rates, is_active, volumetric_divisor, valid_from, valid_until } = form;
+        const { agency_org_id, zone_rates, is_active, volumetric_divisor, valid_from, valid_until, cargo_type } = form;
         if (!agency_org_id) throw new Error('대리점을 선택해주세요.');
         if (!valid_from) throw new Error('적용일자를 입력해주세요.');
+
+        // Issue #1021: 적용일자가 오늘이면 저장 즉시 실제 요금에 반영됨 — 사용자 확인
+        if (valid_from === getKstToday() && !window.confirm('적용일자가 오늘입니다. 저장 즉시 실제 요금에 반영됩니다. 계속하시겠습니까?')) {
+          return;
+        }
+
+        // Issue #1018: cargo_type은 target_ref에 포함 (없으면 'ALL' 기본값)
+        const cargoType = cargo_type || 'ALL';
 
         for (const zoneId of Object.keys(zone_rates ?? {})) {
           await createPricingSchedule({
             setting_type: 'AGENCY_DISCOUNT',
-            target_ref: { agency_org_id, zone_id: zoneId },
+            target_ref: { agency_org_id, zone_id: zoneId, cargo_type: cargoType },
             new_value: zone_rates[zoneId] ?? 0,
             valid_from,
             valid_until: valid_until || null,
@@ -274,7 +284,7 @@ export default function UpsRatesClient({ zones, products, baseRates, fuelSurchar
       );
       case 'fuelSurcharges': return <FuelSurchargeTable rows={fuelSurcharges} />;
       case 'otherCharges': return <OtherChargeTable otherCharges={otherCharges} canEdit={canEdit} onEdit={openEdit} onDelete={handleDelete} />;
-      case 'agencyPolicies': return <AgencyPolicyTable policies={agencyPolicies} canEdit={canEdit} onEdit={openEdit} agencies={agencies} scheduledChanges={scheduledChanges} onRefreshScheduled={fetchScheduledChanges} auditLog={auditLog} />;
+      case 'agencyPolicies': return <AgencyPolicyTable policies={agencyPolicies} canEdit={canEdit} onEdit={openEdit} agencies={agencies} zones={zones} scheduledChanges={scheduledChanges} onRefreshScheduled={fetchScheduledChanges} auditLog={auditLog} />;
       case 'weightTierRates': return <WeightTierRateTable weightTierRates={weightTierRates} canEdit={canEdit} onEdit={openEdit} onDelete={handleDelete} />;
       case 'freightMinimums': return <FreightMinimumTable freightMinimums={freightMinimums} canEdit={canEdit} onEdit={openEdit} onDelete={handleDelete} />;
       case 'surgeFees': return <SurgeFeeTable surgeFees={surgeFees} canEdit={canEdit} onEdit={openEdit} onDelete={handleDelete} />;
@@ -528,9 +538,7 @@ function OtherChargeForm({ form, setForm, editingItem }: any) {
 // ─── Agency Policy (Zone Matrix) ────────────────────────────
 
 function AgencyPolicyForm({ form, setForm, agencies, zones }: any) {
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  const minDate = tomorrow.toISOString().split('T')[0];
+  const minDate = getKstToday();
 
   return (
     <>
@@ -544,12 +552,24 @@ function AgencyPolicyForm({ form, setForm, agencies, zones }: any) {
       </div>
       <div className="space-y-1">
         <label className="text-xs font-bold text-slate-500 uppercase">Volumetric Divisor</label>
-        <select value={form.volumetric_divisor ?? 5000} onChange={e => setForm({ ...form, volumetric_divisor: Number(e.target.value) as 5000 | 5500 | 6000 })}
+        <select value={form.volumetric_divisor ?? 6000} onChange={e => setForm({ ...form, volumetric_divisor: Number(e.target.value) as 5000 | 5500 | 6000 })}
           className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm">
           <option value={5000}>5000 (Standard)</option>
           <option value={5500}>5500</option>
           <option value={6000}>6000</option>
         </select>
+      </div>
+      <div className="space-y-1">
+        <label className="text-xs font-bold text-slate-500 uppercase">화물 유형 (Issue #1018)</label>
+        <select value={form.cargo_type || 'ALL'} onChange={e => setForm({ ...form, cargo_type: e.target.value })}
+          className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm">
+          <option value="ALL">전체 (Expedited/Flight 포함)</option>
+          <option value="DOC">서류 (Express/Saver 한정)</option>
+          <option value="NON_DOC">비서류 (Express/Saver 한정)</option>
+        </select>
+        {form.cargo_type && form.cargo_type !== 'ALL' && (
+          <p className="text-[10px] text-amber-600 mt-1">※ DOC/NONDOC 선택 시 Express/Saver 상품에만 적용됩니다.</p>
+        )}
       </div>
       <div className="space-y-3">
         <label className="text-xs font-bold text-slate-500 uppercase">Zone별 할인율 (%)</label>
@@ -557,7 +577,7 @@ function AgencyPolicyForm({ form, setForm, agencies, zones }: any) {
           {(zones as UpsZoneWithCountries[]).filter((z: any) => z.is_active).sort((a: any, b: any) => a.sort_order - b.sort_order).map((zone: any) => (
             <div key={zone.id} className="flex items-center gap-2">
               <span className="w-10 text-xs font-mono font-bold text-slate-600 shrink-0">{zone.zone_code}</span>
-              <input type="number" step="0.01" min="0" max="99.99"
+              <input type="number" step="0.1" min="0" max="99.99"
                 value={form.zone_rates?.[zone.id] != null ? Math.round(Number(form.zone_rates[zone.id]) * 1000) / 10 : ''}
                 onChange={(e) => setForm({
                   ...form,
@@ -584,7 +604,7 @@ function AgencyPolicyForm({ form, setForm, agencies, zones }: any) {
             className="w-full px-2 py-1.5 bg-white border border-blue-200 rounded-lg text-sm" />
         </div>
       </div>
-      <p className="text-[10px] text-blue-600">* 적용일자를 지정하면 즉시 적용 대신 예약 등록됩니다 (매일 자정 배치 적용).</p>
+      <p className="text-[10px] text-blue-600">* 적용일자를 오늘로 지정하면 저장 즉시 실제 요금에 반영되고, 미래 날짜는 예약 등록 후 매일 자정 배치로 적용됩니다.</p>
       <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.is_active ?? true} onChange={e => setForm({ ...form, is_active: e.target.checked })} /> 활성</label>
     </>
   );
@@ -641,35 +661,79 @@ function OtherChargeTable({ otherCharges, canEdit, onEdit, onDelete }: any) {
   return <ZenDataGrid columns={columns} data={otherCharges} />;
 }
 
-function AgencyPolicyTable({ policies, canEdit, onEdit, agencies, scheduledChanges, onRefreshScheduled, auditLog }: any) {
+const CARGO_APPLY_TEXT: Record<string, string> = {
+  ALL: '전체 상품(Express/Saver/Expedited/Flight)',
+  DOC: 'Express/Saver DOC만',
+  NON_DOC: 'Express/Saver NON_DOC + Expedited/Flight',
+};
+
+function AgencyPolicyTable({ policies, canEdit, onEdit, agencies, zones, scheduledChanges, onRefreshScheduled, auditLog }: any) {
   const [search, setSearch] = useState('');
   const [showAuditLog, setShowAuditLog] = useState(false);
   const orgMap = Object.fromEntries((agencies as Agency[]).map((a: any) => [a.id, a.name]));
   const divisorMap = Object.fromEntries((agencies as Agency[]).map((a: any) => [a.id, a.volumetric_divisor]));
-  const filtered = search
-    ? policies.filter((p: any) => {
-        const name = p.agency?.name ?? orgMap[p.agency_org_id] ?? '';
+
+  // Issue #1023: (agency_org_id, cargo_type) 기준 pivot — 1행 = Zone별 할인율 컬럼 matrix
+  const activeZones = (zones as UpsZoneWithCountries[]).filter((z: any) => z.is_active).sort((a: any, b: any) => a.sort_order - b.sort_order);
+  const zoneCodeById = Object.fromEntries(activeZones.map((z: any) => [z.id, z.zone_code]));
+
+  const pivotMap = new Map<string, any>();
+  for (const p of policies as any[]) {
+    const cargoType = p.cargo_type ?? 'ALL';
+    const key = `${p.agency_org_id}::${cargoType}`;
+    if (!pivotMap.has(key)) {
+      pivotMap.set(key, {
+        agency_org_id: p.agency_org_id,
+        cargo_type: cargoType,
+        zoneRates: {} as Record<string, number>,
+        is_active: p.is_active,
+      });
+    }
+    const row = pivotMap.get(key);
+    row.zoneRates[p.zone_id] = Number(p.discount_rate);
+  }
+  let rows = Array.from(pivotMap.values());
+  rows = search
+    ? rows.filter((r: any) => {
+        const name = orgMap[r.agency_org_id] ?? r.agency_org_id;
         return name.toLowerCase().includes(search.toLowerCase());
       })
-    : policies;
+    : rows;
+
+  const zoneColumns: ColumnDef<any>[] = activeZones.map((z: any) => ({
+    id: `zone_${z.id}`,
+    header: () => <ZenBadge variant="default" className="font-mono">{z.zone_code}</ZenBadge>,
+    cell: ({ row }: any) => {
+      const v = row.original.zoneRates?.[z.id];
+      return <span className={`font-mono text-sm ${v != null ? 'font-semibold text-brand-700' : 'text-slate-300'}`}>{v != null ? `${(v * 100).toFixed(1)}%` : '-'}</span>;
+    },
+  }));
+
   const columns: ColumnDef<any>[] = [
-    { id: 'agency', header: '대리점', cell: ({ row }) => <span className="font-medium">{row.original.agency?.name ?? orgMap[row.original.agency_org_id] ?? row.original.agency_org_id}</span> },
-    { id: 'zone', header: 'Zone', cell: ({ row }) => <ZenBadge variant="default" className="font-mono">{row.original.zone?.zone_code ?? '-'}</ZenBadge> },
-    { accessorKey: 'discount_rate', header: '할인율', cell: ({ row }) => <span className="font-mono font-semibold text-brand-700">{(Number(row.original.discount_rate) * 100).toFixed(1)}%</span> },
+    { id: 'agency', header: '대리점', cell: ({ row }) => <span className="font-medium">{orgMap[row.original.agency_org_id] ?? row.original.agency_org_id}</span> },
+    { id: 'cargo', header: '구분', cell: ({ row }) => <ZenBadge variant={row.original.cargo_type === 'ALL' ? 'success' : row.original.cargo_type === 'DOC' ? 'info' : 'warning'} className="font-mono">{row.original.cargo_type}</ZenBadge> },
+    { id: 'apply', header: '적용서비스', cell: ({ row }) => <span className="text-xs text-slate-500">{CARGO_APPLY_TEXT[row.original.cargo_type] ?? row.original.cargo_type}</span> },
+    ...zoneColumns,
     { id: 'divisor', header: '부피중량', cell: ({ row }) => <span className="font-mono text-xs text-slate-500">{divisorMap[row.original.agency_org_id] ?? 5000}</span> },
     { id: 'status', header: '상태', cell: ({ row }) => <ZenBadge variant={row.original.is_active ? 'success' : 'default'}>{row.original.is_active ? '활성' : '비활성'}</ZenBadge> },
     ...(canEdit ? [{ id: 'actions' as const, header: '관리', cell: ({ row }: any) => <ActionsCell row={row} onEdit={onEdit} onDelete={() => {}} /> }] : []),
   ];
+
+  const zoneWidthHint = activeZones.length ? ` (${activeZones.length}개 Zone)` : '';
+
   return (
     <div className="space-y-3">
-      <input
-        type="text"
-        value={search}
-        onChange={e => setSearch(e.target.value)}
-        placeholder="대리점명으로 검색..."
-        className="w-full max-w-xs px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-500/10 focus:border-brand-500 transition-all"
-      />
-      <ZenDataGrid columns={columns} data={filtered} />
+      <div className="flex items-center gap-2">
+        <input
+          type="text"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          placeholder="대리점명으로 검색..."
+          className="w-full max-w-xs px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-500/10 focus:border-brand-500 transition-all"
+        />
+        <span className="text-[10px] text-slate-400">대리점 × 화물유형(cargo_type) 행{zoneWidthHint}</span>
+      </div>
+      <ZenDataGrid columns={columns} data={rows} />
       {scheduledChanges && scheduledChanges.length > 0 && (
         <div className="mt-4 p-3 bg-amber-50 rounded-xl border border-amber-200">
           <h4 className="text-xs font-bold text-amber-700 mb-2 uppercase">예정된 변경 ({scheduledChanges.length}건)</h4>

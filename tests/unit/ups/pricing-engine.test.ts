@@ -387,3 +387,63 @@ describe('TC-UPS-ENGINE-05: Shipper 단계 — 급증 수수료 pass-through (Is
     expect(result.finalFreight).toBeCloseTo(100100, 2);
   });
 });
+
+// ─── TASK-B-272 (Issue #1044 / DEF-B-044): 중국 CN → CNN/CNS Zone 정규화 ─────────
+
+const chinaZones: UpsZoneWithCountries[] = [
+  { id: 'z-cnn', zone_code: 'Z1', zone_name: 'China North', description: null, is_active: true, sort_order: 1, created_at: '', created_by: null,
+    countries: [
+      { id: 'cn1', zone_id: 'z-cnn', country_code: 'CNN', product_family: 'EXPRESS', direction: 'EXPORT', created_at: '', created_by: null },
+      { id: 'cn2', zone_id: 'z-cnn', country_code: 'CNN', product_family: 'SAVER', direction: 'EXPORT', created_at: '', created_by: null },
+    ] as any },
+  { id: 'z-cns', zone_code: 'Z10', zone_name: 'China South', description: null, is_active: true, sort_order: 10, created_at: '', created_by: null,
+    countries: [
+      { id: 'cn3', zone_id: 'z-cns', country_code: 'CNS', product_family: 'EXPRESS', direction: 'EXPORT', created_at: '', created_by: null },
+      { id: 'cn4', zone_id: 'z-cns', country_code: 'CNS', product_family: 'SAVER', direction: 'EXPORT', created_at: '', created_by: null },
+    ] as any },
+];
+
+describe('TC-UPS-CHINA-01: resolveZoneByCountry 중국(CN) 정규화 (DEF-B-044)', () => {
+  it('남부 성(Guangdong, GD) → CNS(Zone10) 매핑', () => {
+    const result = resolveZoneByCountry('CN', chinaZones, 'EXPRESS', 'EXPORT', 'GD');
+    expect(result.zone?.zone_code).toBe('Z10');
+    expect(result.fallbackApplied).toBe(false);
+  });
+
+  it('남부 8개 지역(FJ/HI/HN/YN/JX/GX/GD/CQ) 전부 → CNS(Zone10)', () => {
+    for (const state of ['FJ', 'HI', 'HN', 'YN', 'JX', 'GX', 'GD', 'CQ']) {
+      const result = resolveZoneByCountry('CN', chinaZones, 'EXPRESS', 'EXPORT', state);
+      expect(result.zone?.zone_code).toBe('Z10');
+    }
+  });
+
+  it('남부 목록 외 성(Beijing, BJ) → CNN(Zone1) 매핑', () => {
+    const result = resolveZoneByCountry('CN', chinaZones, 'EXPRESS', 'EXPORT', 'BJ');
+    expect(result.zone?.zone_code).toBe('Z1');
+    expect(result.fallbackApplied).toBe(false);
+  });
+
+  it('주 정보 미전달 → CNN(Zone1) 매핑 (방어적 기본값)', () => {
+    const result = resolveZoneByCountry('CN', chinaZones, 'EXPRESS', 'EXPORT');
+    expect(result.zone?.zone_code).toBe('Z1');
+  });
+
+  it('소문자 성 코드도 대소문자 무관하게 매핑된다', () => {
+    const result = resolveZoneByCountry('cn', chinaZones, 'EXPRESS', 'EXPORT', 'gd');
+    expect(result.zone?.zone_code).toBe('Z10');
+  });
+
+  it('SAVER 상품도 CNS/CNN 정규화가 동일 적용된다', () => {
+    const south = resolveZoneByCountry('CN', chinaZones, 'SAVER', 'EXPORT', 'GX');
+    expect(south.zone?.zone_code).toBe('Z10');
+    const north = resolveZoneByCountry('CN', chinaZones, 'SAVER', 'EXPORT', 'SH');
+    expect(north.zone?.zone_code).toBe('Z1');
+  });
+
+  it('CN 외 국가는 destStateProvince와 무관하게 기존 동작 그대로 (회귀 방지)', () => {
+    const jpn = resolveZoneByCountry('JPN', mockZones, 'EXPRESS', 'EXPORT', 'GD');
+    expect(jpn.zone?.zone_code).toBe('Z2');
+    const deu = resolveZoneByCountry('DEU', mockZones, 'EXPRESS', 'IMPORT', 'GD');
+    expect(deu.zone?.zone_code).toBe('Z6');
+  });
+});
