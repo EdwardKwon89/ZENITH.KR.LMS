@@ -178,6 +178,7 @@ export async function confirmOutbound(orderId: string) {
 
   revalidatePath("/(dashboard)/warehouse/outbound", "page");
   revalidatePath("/(dashboard)/orders", "page");
+  revalidatePath('/(dashboard)/orders/[orderId]', 'page');
 
   return { success: true, pkgsWithoutIntlRef };
 }
@@ -266,6 +267,7 @@ export async function confirmPickup(orderId: string) {
 
   revalidatePath("/(dashboard)/warehouse/pickup", "page");
   revalidatePath("/(dashboard)/orders", "page");
+  revalidatePath('/(dashboard)/orders/[orderId]', 'page');
 
   return { success: true };
 }
@@ -280,6 +282,7 @@ export async function cancelPickup(orderId: string) {
 
   revalidatePath("/(dashboard)/warehouse/pickup", "page");
   revalidatePath("/(dashboard)/orders", "page");
+  revalidatePath('/(dashboard)/orders/[orderId]', 'page');
 
   return { success: true };
 }
@@ -463,6 +466,7 @@ export async function cancelInbound(orderId: string) {
 
   revalidatePath("/(dashboard)/warehouse/inbound", "page");
   revalidatePath("/(dashboard)/orders", "page");
+  revalidatePath('/(dashboard)/orders/[orderId]', 'page');
 
   return { success: true, restoredStatus: prevStatus };
 }
@@ -537,6 +541,7 @@ export async function confirmUpsRegistration(orderId: string) {
   revalidatePath("/(dashboard)/warehouse/ups-receive", "page");
   revalidatePath("/(dashboard)/warehouse/outbound", "page");
   revalidatePath("/(dashboard)/orders", "page");
+  revalidatePath('/(dashboard)/orders/[orderId]', 'page');
 
   return {
     success: true,
@@ -573,6 +578,7 @@ export async function undoUpsRegistration(orderId: string) {
   revalidatePath("/(dashboard)/warehouse/ups-receive", "page");
   revalidatePath("/(dashboard)/warehouse/outbound", "page");
   revalidatePath("/(dashboard)/orders", "page");
+  revalidatePath('/(dashboard)/orders/[orderId]', 'page');
 
   return { success: true };
 }
@@ -639,6 +645,7 @@ export async function confirmDeparture(orderId: string) {
 
   revalidatePath("/(dashboard)/warehouse/departure", "page");
   revalidatePath("/(dashboard)/orders", "page");
+  revalidatePath('/(dashboard)/orders/[orderId]', 'page');
 
   return { success: true };
 }
@@ -671,6 +678,7 @@ export async function undoDeparture(orderId: string) {
 
   revalidatePath("/(dashboard)/warehouse/departure", "page");
   revalidatePath("/(dashboard)/orders", "page");
+  revalidatePath('/(dashboard)/orders/[orderId]', 'page');
 
   return { success: true };
 }
@@ -699,6 +707,7 @@ export async function undoOutbound(orderId: string) {
 
   revalidatePath("/(dashboard)/warehouse/outbound", "page");
   revalidatePath("/(dashboard)/orders", "page");
+  revalidatePath('/(dashboard)/orders/[orderId]', 'page');
 
   return { success: true };
 }

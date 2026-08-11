@@ -8,7 +8,7 @@
 | **담당** | Baker (Team B) |
 | **생성일** | 2026-08-12 |
 | **우선순위** | P2 (Medium) |
-| **상태** | ⬜ |
+| **상태** | 🔔 |
 
 ## 근본 원인 (확정 완료 — DEF-B-057 참조)
 
@@ -46,8 +46,29 @@ revalidatePath('/(dashboard)/orders/[orderId]', 'page');
 
 ## [작업 결과]
 
-_(담당자 작성 예정)_
+**구현**
+- `warehouse.ts` **9곳**(`undoUpsRegistration`·`confirmDeparture`·`undoDeparture` 등 라벨/출고 상태 변경 액션)과 `ups-labels.ts` **6곳**(`registerUpsOrder`·`cancelUpsRegistration`·`fetchAndIssueUpsLabel`·`voidUpsLabel`·`issueUpsLabel` 등)에 기존 `revalidatePath` 호출부 옆으로 `revalidatePath('/(dashboard)/orders/[orderId]', 'page')` 추가 — 총 **15개 지점**. 과설계 금지 원칙 준수(신규 revalidate 지점 발명 없음, 기존 호출부 옆에만 삽입).
+- 기존 `revalidatePath("/(dashboard)/orders", "page")`(목록) 및 각 화면 revalidate는 전부 유지(회귀 방지, grep으로 확인).
+
+**회귀 테스트 신설 6건 (ALL PASS)**
+- `tests/unit/ups/defb057-order-detail-revalidate-ups-labels.test.ts` — TC-288-01~04: `cancelUpsRegistration`/`voidUpsLabel` 성공 시 `/(dashboard)/orders/[orderId]` + 기존 `/(dashboard)/warehouse/outbound` revalidate 호출 검증, `removeorder` 실패 시 revalidate 미호출.
+- `tests/unit/warehouse/defb057-order-detail-revalidate-undo.test.ts` — TC-288-11~12: `undoUpsRegistration` 성공 시 `[orderId]` + 목록(`/orders`) + `ups-receive`/`outbound` revalidate 유지, `cancelUpsRegistration` 실패 시 revalidate 미호출.
+- 테스트 mock 구성: `next/cache`는 `unstable_cache` 보존을 위해 `importOriginal` 부분 모킹, `./orders`·`./ups-labels`는 모듈 ID를 앨리어스 경로(`@/app/actions/operations/...`)로 모킹(테스트 파일 상대경로 미스매치 이슈 해결).
+
+**검증**
+- 회귀 **174/174 파일 · 1226/1226 ALL PASS** (`npm run test:regression` 직접 실행).
+- `npm run build` SUCCESS.
+- 신규 마이그레이션 없음 — 순수 코드 수정이라 타임스탬프 충돌 위험 없음.
+
+**R-10 브라우저 검증** — `tests/e2e/r10-288-order-detail-stale-revalidate.spec.ts`
+- 자기완결형 픽스처(beforeAll 사전 정리 + afterAll 정리): SHIPPER 조직 · PACKED UPS 오더 · 활성 UPS 라벨(`is_voided=false`) 생성.
+- ADMIN 실제 로그인 → 오더 상세 페이지에서 UPS 등록 카드(`UPS등록취소` 버튼) 노출 확인 → 창고 `/ko/warehouse/outbound`에서 오더 선택 → `UPS접수취소` → 확인 모달(`접수취소 확정`) → `undoUpsRegistration` 실행.
+- DB 확정: `status` PACKED→**WAREHOUSED**, `zen_ups_labels` **0건** → 상세 페이지 재네비게이션 시 UPS 등록 카드 **제거** 확인. **PASS**.
+- 사전 조건: 3010 dev 서버를 `SHXK_TEST_MOCK=true`로 재시작(removeorder 성공 결정적 재현), 시드 `admin@zenith.kr` 사용.
+- 스크린샷 `docs/99_Manual/E2E_288_Result/01~05` (로그인 · 카드 노출 · 오더 선택 · 취소 확정 모달 · 카드 제거).
+
+- 코드 커밋: `8a170a6a59d12d71c5f8fddb751256e4bf940a28`
 
 ## [발견 이슈]
 
-_(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
+없음 (Task 범위 밖 이슈 미발견)
