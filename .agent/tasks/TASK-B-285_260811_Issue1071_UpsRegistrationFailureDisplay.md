@@ -7,7 +7,7 @@
 | **담당** | Baker (Team B) |
 | **생성일** | 2026-08-11 |
 | **우선순위** | P2 |
-| **상태** | 🔔 (v2 반려 대응 완료 — 재검토 요청) |
+| **상태** | ✅ 완료 |
 | **의존성** | [TASK-B-284](TASK-B-284_260811_Issue1070_UpsWarehousedPartialEdit.md) — "수정하기" 링크가 실제로 동작하려면 선행 병합 필요(단, 본 Task의 실패 표출 부분 자체는 독립적으로 병행 착수 가능) |
 
 ## 현황 분석 (Jaison 조사 완료)
@@ -104,6 +104,10 @@ Key (version)=(20260811030000) already exists.
 이 상태에서는 CI의 `supabase db reset --yes` 자체가 테스트 실행 전에 죽어 "회귀 170/170 ALL PASS"라는 자체 보고와 정면으로 모순 — 로컬 DB가 이미 해당 버전을 적용 완료로 기록해둔 상태(진짜 fresh reset이 아니었던 상태)에서 신규 파일이 조용히 스킵되며 실제로는 마이그레이션 본문이 한 번도 반영되지 않았을 가능성. DB 기반 RLS 테스트(TC-285-11~14)는 `setupFixture()`가 정책을 직접 DROP/CREATE하므로 실제 마이그레이션 파일 적용 여부와 무관하게 통과했을 것으로 추정.
 
 **PR#1074 close(병합 안 함, Issue #1071 라벨 status:rework 전환).** v2 재작업 범위: 마이그레이션 파일 재채번(예: `20260811070000_iss1071_...`, 최신 파일 `20260811060000_iss1070_...` 이후 시점) + `supabase db reset --yes`가 처음부터 끝까지 에러 없이 완주하는 것 직접 확인 후 전체 회귀 재실행·정확한 수치 재기재.
+
+## [Jaison 최종 검토]
+
+`/tmp/review-pr1074` 신규 격리 워크트리에서 v2 처음부터 재검증 — `npx supabase db reset --yes` **exit 0로 완주**(재채번된 `20260811070000_iss1071_...` 포함 전체 마이그레이션 정상 적용), `pg_policies` 직접 조회로 `zen_ups_label_errors` 정책 3개(ADMIN ALL·Agency INSERT·**Agency SELECT**) 실존 확인. 신규 테스트 3파일 13/13 PASS, RLS 되돌리기(TC-285-14, 정책 DROP→차단→복원) 재확인. 전체 회귀 171/171·1216/1216 PASS, build SUCCESS. **CI 미트리거**(마지막 커밋 후 16분+ 경과, `gh pr checks`에 체크 항목 자체 없음 — R-08-1 기준 충족) → 로컬 검증(fresh reset 포함)으로 대체. PR#1074 승인·머지(TeamB_Dev, 커밋 `08d483f9`), Issue #1071 종결.
 
 ## [발견 이슈]
 
