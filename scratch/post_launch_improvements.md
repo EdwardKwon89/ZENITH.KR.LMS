@@ -1811,3 +1811,13 @@ UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류
 - **관련 파일**: `tests/unit/db/defb049-ups-labels-self-shipper-rls.test.ts`
 - **예상 공수**: 0.1 MD (블록 제거 + 되돌리기 검증으로 재확인만 하면 됨)
 - **우선순위**: Medium — 마이그레이션 자체는 정확함이 별도로 검증됐고 즉각적 장애는 아니나, 향후 `zen_ups_labels` INSERT 정책이 다른 작업으로 실수로 깨져도 회귀 스위트가 못 잡는 사각지대가 남아있음
+
+## [IMP-164] zen_order_items DELETE 정책 부재로 deleteItemsByOrderId()가 사실상 데드코드
+
+- **발견 경위**: DEF-B-056(zen_order_items INSERT 정책 누락) 조사 중 함께 확인 — `zen_order_items`는 DELETE 정책도 전무해 `orderRepo.deleteItemsByOrderId()`가 항상 0행(no-op, 에러도 없음)으로 실행됨을 직접 재현 확인. 현재는 `zen_order_packages`의 정상 DELETE 정책 + `zen_order_items.package_id ON DELETE CASCADE`가 실질적으로 아이템 삭제를 대신 수행하고 있어 겉으로는 문제가 드러나지 않았음(다만 이 캐스케이드 경로 자체가 DEF-B-056의 데이터 소실 메커니즘의 일부).
+- **현재 상태**: TASK-B-286(DEF-B-056)에서 INSERT/UPDATE/DELETE 정책을 함께 추가하기로 설계했으므로 DELETE 정책도 그 안에서 함께 해결될 예정 — 이 IMP는 "정책 추가 후 `deleteItemsByOrderId()` 명시적 삭제 호출이 캐스케이드에 의존하지 않고 실제로 동작하는지"를 완료 보고 시 별도로 확인하라는 참고 메모.
+- **임시 조치**: 없음(TASK-B-286에서 함께 처리).
+- **목표 구현**: TASK-B-286 완료 보고 시 DELETE 정책이 실제로 `deleteItemsByOrderId()`를 동작시키는지(패키지 캐스케이드 없이도 아이템 단독 삭제가 성공하는지) 별도 확인 항목으로 포함.
+- **관련 파일**: `src/lib/repositories/order.repository.ts`(`deleteItemsByOrderId`), 신규 마이그레이션(TASK-B-286)
+- **예상 공수**: TASK-B-286에 포함(추가 공수 없음, 검증 항목 1개 추가 수준)
+- **우선순위**: Low — TASK-B-286에 이미 포함될 예정이라 별도 착수 불필요, 완료 보고 누락 방지용 기록
