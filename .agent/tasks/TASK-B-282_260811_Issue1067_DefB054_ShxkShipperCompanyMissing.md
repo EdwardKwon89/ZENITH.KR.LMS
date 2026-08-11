@@ -8,7 +8,7 @@
 | **담당** | Dave (Team B) |
 | **생성일** | 2026-08-11 |
 | **우선순위** | P2 |
-| **상태** | ⬜ |
+| **상태** | 🔔 (완료 보고 — 검토 요청) |
 
 ## 근본 원인 (확정 완료)
 
@@ -55,8 +55,40 @@
 
 ## [작업 결과]
 
-_(담당자 작성 예정)_
+### 커밋
+
+| 커밋 | 내용 |
+|:-----|:-----|
+| `b3d357ca` | `[Dave] fix: TASK-B-282 SHXK createorder shipper_company 필드 미전달 수정 (Issue #1067 / DEF-B-054)` |
+
+### 수정 내용
+
+**2곳 수정** (설계 확정과 동일):
+
+1. `src/app/actions/operations/ups-labels.ts:119` `lookupOrderPackages()` — `shipper_org:zen_organizations!shipper_id(...)` join select에 `name`(조직명) 추가
+2. `src/lib/ups/label-mapping.ts:90` `buildCreateOrderPayload()` — `shipper` 객체에 `shipper_company` 추가:
+   ```ts
+   shipper_company: (order.shipper_org as Record<string, unknown> | undefined)?.name as string || shipperDefaults.name,
+   ```
+   (기존 `shipper_name` 패턴과 동일 — 조직명 우선, 없으면 `shipperDefaults.name`(SHXK_SHIPPER_NAME 'SNTL Korea Co Ltd') 폴백)
+
+### 회귀 테스트 (6건)
+
+| 파일 | TC | 검증 내용 |
+|:-----|:---|:---------|
+| `defb054-shipper-company.test.ts` | 2건 | ① `registerUpsOrder` 경유 `zen_orders` select 문자열에 `shipper_org:zen_organizations!shipper_id` + `name` 포함 확인 ② 실제 `buildCreateOrderPayload` 호출 결과 createorder payload의 `shipper_company`가 조직명('MASTER AIR')으로 전달·`shipping_method='FXUPS'` 확인 |
+| `ups-labels-mapping.test.ts` | 4건 | ① `shipper_org.name` → `shipper_company` 전달 ② `shipper_org=null` → `shipperDefaults.name` 폴백 ③ `name=''` → 폴백 ④ `shipperDefaults.name=''` → 빈 문자열(undefined 아님) |
+
+### 되돌리기 검증
+
+`name`(select) + `shipper_company`(payload) 모두 일시 제거 후 재실행 → **6건 FAIL** 재현(원래 DEF-B-054 버그 상태) → 복원 후 6건 ALL PASS 확인.
+
+### 검증
+
+- `npm run test:regression`: **1191/1191 PASS** (167파일, 신규 +6)
+- `npm run build`: SUCCESS
+- `npx tsc --noEmit`: 신규 테스트 파일 오류 없음
 
 ## [발견 이슈]
 
-_(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
+없음
