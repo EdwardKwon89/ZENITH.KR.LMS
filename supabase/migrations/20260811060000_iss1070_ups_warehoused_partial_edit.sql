@@ -56,3 +56,9 @@ USING (true);
 -- =====================================================
 
 GRANT INSERT, SELECT ON public.zen_order_edit_log TO authenticated;
+
+-- DEF-B-053 (Issue #1063) 컨벤션: service_role에도 GRANT 필수 —
+-- 로컬 DB는 pg_default_acl 누적 권한으로 service_role이 이미 arwdDxtm 전체 권한을 갖지만,
+-- CI fresh 컨테이너는 explicit GRANT만 유효 — 누락 시 감사 로그 insert가 조용히 실패한다.
+-- (PR#1073 반려 사유 — TC-284-05가 CI에서만 'expected 0 to be 1'로 실패)
+GRANT ALL ON public.zen_order_edit_log TO service_role;
