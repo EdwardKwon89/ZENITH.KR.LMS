@@ -235,8 +235,12 @@ export async function updateOrder(orderId: string, payload: OrderRegistrationInp
     }
   });
 
-  await orderRepo.deleteItemsByOrderId(orderId);
-  await orderRepo.deletePackagesByOrderId(orderId);
+  // TASK-B-286 (Issue #1075 / DEF-B-056): delete 실패도 조용히 넘기지 않고 명시적 throw
+  const { error: delItemsErr } = await orderRepo.deleteItemsByOrderId(orderId);
+  if (delItemsErr) throw new Error(`기존 아이템 삭제 실패: ${delItemsErr.message}`);
+
+  const { error: delPkgsErr } = await orderRepo.deletePackagesByOrderId(orderId);
+  if (delPkgsErr) throw new Error(`기존 패키지 삭제 실패: ${delPkgsErr.message}`);
 
   if (validated.packages && validated.packages.length > 0) {
     for (const pkg of validated.packages) {
@@ -260,7 +264,10 @@ export async function updateOrder(orderId: string, payload: OrderRegistrationInp
         ...(isMeasuredLocked && measured?.measured_at ? { measured_at: measured.measured_at } : {}),
       });
 
-      if (pkgError || !packageData) continue;
+      // TASK-B-286 (Issue #1075 / DEF-B-056): 조용한 실패 금지 — 패키지 insert 실패 시 명시적 throw
+      if (pkgError || !packageData) {
+        throw new Error(`패키지 저장 실패: ${pkgError?.message ?? 'unknown'}`);
+      }
 
       if (pkg.items && pkg.items.length > 0) {
         const itemsToInsert = pkg.items.map(item => ({
@@ -275,7 +282,12 @@ export async function updateOrder(orderId: string, payload: OrderRegistrationInp
           item_packing_unit: item.item_packing_unit,
         }));
 
-        await orderRepo.insertItems(itemsToInsert);
+        const { error: itemsErr } = await orderRepo.insertItems(itemsToInsert);
+        // TASK-B-286 (Issue #1075 / DEF-B-056): 아이템 insert 실패 시 명시적 throw —
+        //   RLS 정책 부재 등으로 조용히 소실되지 않도록 방어
+        if (itemsErr) {
+          throw new Error(`아이템 저장 실패: ${itemsErr.message}`);
+        }
       }
     }
   }
