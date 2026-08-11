@@ -7,7 +7,7 @@
 | **담당** | Dave (Team B) |
 | **생성일** | 2026-08-11 |
 | **우선순위** | P2 |
-| **상태** | 🔔 (완료 보고 — 검토 요청) |
+| **상태** | ✅ 완료 |
 
 > **PR#1073 반려 → v2 재작업(2차)**: Jaison 검토 결과 설계·핵심 로직(measured_at 잠금)은 정확하나, 신규 `zen_order_edit_log` 테이블에 `service_role` GRANT가 없어 CI fresh DB에서만 감사 로그 insert가 조용히 실패(TC-284-05 'expected 0 to be 1'). DEF-B-053(Issue #1063)과 동일 패턴 — `GRANT ALL ON zen_order_edit_log TO service_role` 추가(`618e43c3`) 후 fresh db reset 재검증 완료.
 
@@ -124,6 +124,10 @@ WAREHOUSED 단계 수정이 발생하면(REGISTERED 등 기존 자유 수정 단
 - `supabase db reset` → `has_table_privilege('service_role','public.zen_order_edit_log','INSERT')` = **true** 확인
 - 통합 테스트 `iss1070-ups-warehoused-partial-edit.test.ts` **6/6 PASS**
 - 전체 회귀 **1203/1203 PASS** (168파일) · build SUCCESS
+
+## [Jaison 최종 검토]
+
+`/tmp/review-pr1073` 신규 격리 워크트리에서 v2 처음부터 재검증 — `npx supabase db reset --yes`(fresh 스키마) 후 마이그레이션의 `GRANT ALL ON public.zen_order_edit_log TO service_role;` 반영 확인, 통합 테스트 6/6 PASS, 되돌리기 검증(`isMeasuredLocked` 강제 false) 재확인 → TC-284-01/02 정확히 FAIL 재현, 원복 후 6/6 PASS. 전체 회귀 168/168·1203/1203 PASS·build SUCCESS. **실제 CI(`gh pr checks 1073`)도 Regression Tests pass로 확인**(이전 fail이던 TC-284-05 포함) — GRANT 수정이 fresh 컨테이너에서 실제로 효과가 있음을 실증. PR#1073 승인·머지(TeamB_Dev, 커밋 `b9dda85b`), Issue #1070 종결.
 
 ## [발견 이슈]
 
