@@ -8,7 +8,7 @@
 | **담당** | Dave (Team B) |
 | **생성일** | 2026-08-11 |
 | **우선순위** | P2 (High) |
-| **상태** | ⬜ |
+| **상태** | 🔔 (완료 보고 — 검토 요청) |
 
 ## 근본 원인 (확정 완료 — Jaison 전수 재검증)
 
@@ -57,7 +57,43 @@ DEF-B-049(TASK-B-278)와 동일 해법 — 4곳에 shipper_id 기반 OR 조건 �
 
 ## [작업 결과]
 
-_(담당자 작성 예정)_
+### 커밋
+
+| 커밋 | 내용 |
+|:-----|:-----|
+| `668da4a1` | `[Dave] fix: TASK-B-279 AGENCY 자가화주 RLS 잔여 차단 4곳 수정 (Issue #1058 / DEF-B-051)` — 마이그레이션 + 회귀 테스트 12건 |
+
+### 마이그레이션 (`supabase/migrations/20260811040000_iss1058_agency_self_shipper_rls_remaining.sql`)
+
+DEF-B-049와 동일 해법(shipper_id 기반 OR 조건 추가)으로 4곳 수정:
+
+| 대상 | 액션 | 수정 |
+|:-----|:----:|:-----|
+| `zen_tracking_configs` | UPDATE | `agency_org_id = 본인` 에 `OR shipper_id = 본인` 추가 (USING + WITH CHECK) |
+| `zen_ups_label_documents` | DELETE | `ups_label_docs_shipper_delete` 신규 (`is_org_member(auth.uid(), shipper_id)`) — INSERT/SELECT와 동일 패턴 |
+| `zen_ups_label_errors` | INSERT | `agency_org_id = 본인` 에 `OR is_org_member(auth.uid(), shipper_id)` 추가 (가장 심각 — SHXK 실패 에러 기록) |
+| `storage.objects` (`ups-labels/%`) | INSERT/SELECT/DELETE | `zen_orders` JOIN 조건에 `o.shipper_id = p.org_id` OR 추가 — 라벨 PDF 실물 업로드/조회/삭제 |
+
+무관 AGENCY(자기 오더·하위 화주 오더 아님) 차단은 유지됨을 테스트로 보장.
+
+### 회귀 테스트 (`tests/unit/db/defb051-agency-self-shipper-rls-remaining.test.ts`, 12건)
+
+psql 기반 authenticated 시뮬레이션(B-265/defb049 패턴) + **IMP-163 준수** — setupFixture는 데이터만 준비하고 검증 대상 RLS 정책은 절대 생성/재생성하지 않음.
+
+- **자가화주 AGENCY 성공 6건** (TC-279-01~06): tracking_configs UPDATE / docs DELETE / errors INSERT / storage INSERT·SELECT·DELETE
+- **무관 AGENCY 차단 5건** (TC-279-07~10): UPDATE·DELETE는 0행/값불변으로, INSERT는 42501로 차단 확인 + storage INSERT/SELECT/DELETE 전부
+- **기존 동작 회귀 방지 1건** (TC-279-11): 하위 화주 오더(agency_org_id=본인)는 AGENCY 정상 관리
+- **되돌리기 검증 1건** (TC-279-12): tracking_configs UPDATE 정책을 이전 형태(agency_org_id 단일)로 원복 → 자가화주 재차단(0행) 확인 → 마이그레이션과 동일한 최신 정책 복원 → 다시 성공 확인
+
+### 검증
+
+- `npm run test:regression`: **1182/1182 PASS** (165파일, 신규 +12)
+- `npm run build`: SUCCESS
+- `npx tsc --noEmit`: 신규 테스트 파일 오류 없음
+
+### 발견 이슈
+
+- `storage.objects`는 `storage.protect_delete` 트리거가 직접 DELETE를 차단함 — 테스트에서는 Storage API와 동일하게 `storage.allow_delete_query='true'` 설정 후 DELETE 수행(RLS 정책 검증에는 영향 없음).
 
 ## [발견 이슈]
 
