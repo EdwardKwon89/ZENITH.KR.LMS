@@ -8,7 +8,7 @@
 | **담당** | Dave (Team B) |
 | **생성일** | 2026-08-11 |
 | **우선순위** | **Critical (P1)** |
-| **상태** | 🔔 (완료 보고 — 검토 요청) |
+| **상태** | ✅ 완료 |
 
 ## 근본 원인 (확정 완료 — DEF-B-056 참조)
 
@@ -87,6 +87,10 @@
 - `npm run test:regression`: **1220/1220 PASS** (172파일, 신규 +4)
 - `npm run build`: SUCCESS
 - **fresh `supabase db reset` 재검증**(R-08-2): authenticated 7 GRANT + service_role INSERT=true + 정책 8건 + 통합 테스트 4/4 PASS
+
+## [Jaison 최종 검토]
+
+`/tmp/review-pr1076` 격리 워크트리에서 재검증 — `npx supabase db reset --yes` exit 0 완주, `zen_order_items` 정책 8건(SELECT 1 기존 + INSERT/UPDATE/DELETE 신규 7) 실제 생성 확인, `has_table_privilege`로 service_role/authenticated 양쪽 INSERT GRANT 확인. 신규 통합 테스트 4/4 PASS. **독립 되돌리기 검증**: INSERT 정책 2건 수동 DROP 후 TC-286-01/02/03 재실행 → 정확히 `아이템 저장 실패: new row violates row-level security policy` throw로 FAIL 재현(방어 코드 실동작 확인), `db reset`으로 복원 후 4/4 PASS 재확인. 전체 회귀 172/172·1220/1220 PASS, build SUCCESS. 실제 CI(`gh pr checks 1076`) Regression Tests pass 확인. PR#1076 승인·머지(TeamB_Dev, 커밋 `f5a40764`), Issue #1075 종결.
 
 ## [발견 이슈]
 
