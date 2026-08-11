@@ -8,7 +8,7 @@
 | **담당** | Dave (Team B) — 2026-08-11 Baker → Dave 재배정(JSJung 지시) |
 | **생성일** | 2026-08-11 |
 | **우선순위** | **P1 (Critical)** |
-| **상태** | 🔔 (완료 보고 — 검토 요청) |
+| **상태** | ✅ 완료 |
 
 > **PR#1057 반려 → 재작업(2차)**: ①자동 회귀 테스트 10건 신설(psql 기반 DB 실테스트) ②CI 대응 — `GRANT DELETE ON zen_ups_labels TO authenticated` 누락 보완(def117이 SELECT/INSERT/UPDATE만 부여, fresh DB에서 라벨 삭제 permission denied) + 테스트 `afterAll` import. 전체 회귀 1170/1170 PASS.
 
@@ -128,11 +128,10 @@ PR#1057 반려 사유(마이그레이션 SQL은 정확, 단 자동 회귀 테스
 ## [발견 이슈]
 
 1. **동일 RLS 패턴 다른 테이블 7개 발견** (IMP-162 계열): `zen_ups_label_documents`, `zen_tracking_configs`(2곳), `zen_order_rate_snapshots`(2곳), `zen_order_costs`, `zen_order_packages` — 전부 `agency_org_id = (본인 org_id)` 단일 체크로 자가화주 AGENCY를 차단하는 동일 패턴. 이번 Task 범위(zen_ups_labels) 밖이라 수정하지 않음 — 자가화주 AGENCY UPS 오더의 전체 흐름(스냅샷/트래킹/정산/라벨문서)이 여전히 이 패턴에 막힐 수 있어 **별도 DEF로 재등록 권장**(IMP-162 참조).
-2. **참고(이번 Task 범위 밖, task file 기재 원문)**: `_profiles_grade_backup_20260521`, `zen_customs_history`, `zen_invoice_history`, `zen_master_order_history`, `zen_ups_shxk_country_map` 5개 테이블 RLS 자체 비활성 — 별도 DEF로 JSJung 확인 필요.
+2. **참고(이번 Task 범위 밖, task file 기재 원문)**: `_profiles_grade_backup_20260521`, `zen_customs_history`, `zen_invoice_history`, `zen_master_order_history`, `zen_ups_shxk_country_map` 5개 테이블 RLS 자체 비활성(DEF-B-050 별도 등록됨) — JSJung 확인 필요.
 
+## [Jaison 최종 검토]
 
-## [발견 이슈]
+**v1(PR#1057) 반려**: 회귀 테스트 0건(vitest 기준 카운트 불변 확인) + 유일한 e2e 스펙이 실제로는 zen_ups_labels INSERT를 실행하지 않음(코드 주석으로 스스로 인정) — 마이그레이션 로직 자체는 Jaison이 별도 authenticated 클라이언트로 직접 재현해 정상 확인.
 
-_(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
-
-**참고 — 이번 Task 범위 밖, Jaison이 조사 중 별도 발견**: DB 어드바이저리 자동 감지로 `_profiles_grade_backup_20260521`, `zen_customs_history`, `zen_invoice_history`, `zen_master_order_history`, `zen_ups_shxk_country_map` 5개 테이블의 **RLS 자체가 비활성화** 상태임을 확인. anon/authenticated 키로 전체 노출 가능성 있음 — 정책 없이 RLS만 켜면 전체 접근이 막히므로 이번 Task에서 임의 조치하지 않음. 별도 DEF로 채번·JSJung 확인 필요.
+**v2(`300070b8`) — 3차 반려 후 JSJung 지시로 승인·머지**: `tests/unit/db/defb049-ups-labels-self-shipper-rls.test.ts` 10건 신설(psql 기반 실제 RLS 시뮬레이션, TASK-B-265 패턴) — fresh DB에서 직접 재실행해 10/10 PASS 확인, 대조군으로 UPDATE 정책을 실제로 깨봤더니 TC-278-03이 정확히 잡아냄(정상 작동 확인). 다만 `setupFixture()`가 매 실행마다 **INSERT 정책만 무조건 강제로 올바른 상태로 재생성**해, 실제 INSERT 정책을 깨봐도(원래 버그 상태로 되돌려도) 10/10 그대로 통과함을 직접 재현 확인 — SELECT/UPDATE/DELETE 3개는 실제 마이그레이션 상태를 제대로 검증하지만 INSERT(이번 사고의 정확한 발생 지점)만 테스트 스스로 정답을 만들어놓고 검증하는 셈. JSJung이 "그냥 승인 머지해줘" 지시 — **IMP-163으로 기록**하고 병합 진행. 회귀 164/164·1170/1170 ALL PASS(Jaison 재검증 일치), build SUCCESS, CI 전체 pass. PR#1057 Jaison 머지, Issue #1056 종결. 발견 이슈 1(7개 테이블 동일 패턴)은 별도 DEF 채번 예정, 발견 이슈 2(RLS 비활성 5테이블)는 DEF-B-050으로 이미 등록됨.

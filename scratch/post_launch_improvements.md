@@ -1801,3 +1801,13 @@ UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류
 - **예상 공수**: 1.5~2 MD (파일당 조사 15~20분 + 필요 시 수정·테스트 포함, 파일 수 감안)
 - **우선순위**: **High** — `warehouse.ts` 사례처럼 액션 자체를 하드 차단하는 패턴이 다른 파일(특히 finance 정산 관련)에도 있다면 대리점 자가화주 오더의 정산·인보이스 처리 자체가 막혀있을 가능성 있음, 조속한 개별 조사 권장
 - **[추가 확인, 2026-08-11]** 이 패턴의 "형제" 사례가 실제 프로덕션 실패로 확인됨 — `zen_ups_labels`의 RLS 정책(SELECT/INSERT/UPDATE/DELETE 4개)이 `zen_agency_shippers` 테이블이 아니라 `zen_orders.agency_org_id` 컬럼을 직접 체크하는 방식으로 동일한 자가화주 누락 버그를 가지고 있었고, JSJung의 실제 UPS 오더 등록 시도(MASTER AIR 계정)가 SHXK API 성공 후 라벨 저장 단계에서 막히는 실패로 나타남 → **DEF-B-049 / TASK-B-278**로 별도 등록·Baker 배정. 이 발견으로 "자가화주 케이스 누락"이 앱 레벨(`zen_agency_shippers` 조회, 이 IMP)뿐 아니라 **DB RLS 정책 레벨**에도 동일 계열로 존재할 수 있음이 확인됨 — 향후 12개 파일 개별 조사 시 관련 RLS 정책까지 함께 점검 권장.
+
+## [IMP-163] TASK-B-278(DEF-B-049) RLS 회귀 테스트가 INSERT 정책 실제 상태를 검증하지 못함 (setupFixture 자가 교정 마스킹)
+
+- **발견 경위**: PR#1057(TASK-B-278) v2 검토 중 — `tests/unit/db/defb049-ups-labels-self-shipper-rls.test.ts`의 `setupFixture()`가 매 describe 블록 `beforeAll`에서 `zen_ups_labels`의 INSERT 정책을 무조건 DROP+CREATE로 "올바른" 상태로 강제 재생성함을 확인. Jaison이 실제 DB의 INSERT 정책만 원래 버그 상태(agency_org_id 단일 체크)로 되돌린 뒤 재실행해도 10/10 그대로 PASS함을 재현(대조군으로 UPDATE 정책을 동일 방식으로 깨봤을 때는 TC-278-03이 정상적으로 FAIL하는 것과 대비).
+- **현재 상태**: 미수정 — SELECT/UPDATE/DELETE 3개 정책은 실제 마이그레이션 적용 상태를 제대로 검증하지만, INSERT 정책(이번 DEF-B-049 사고의 정확한 발생 지점 — SHXK 성공 후 라벨 저장 실패)만은 테스트가 스스로 정답을 만들어놓고 검증하는 구조라 실질적 회귀 방어력이 없음.
+- **임시 조치**: 없음 — JSJung 지시로 이 상태 그대로 PR#1057 승인·머지 진행(마이그레이션 SQL 자체는 별도로 authenticated 클라이언트 직접 검증 완료, 정확함 확인됨).
+- **목표 구현**: `setupFixture()`에서 INSERT 정책을 강제로 DROP+CREATE하는 블록 제거(또는 최소화). CI는 매번 `supabase db reset --yes`로 fresh DB에서 시작하므로 "이전 실행의 되돌리기 테스트 잔여 상태" 문제(주석에 명시된 도입 사유)는 실제로 발생하지 않음 — R-08-2 원칙과도 일치.
+- **관련 파일**: `tests/unit/db/defb049-ups-labels-self-shipper-rls.test.ts`
+- **예상 공수**: 0.1 MD (블록 제거 + 되돌리기 검증으로 재확인만 하면 됨)
+- **우선순위**: Medium — 마이그레이션 자체는 정확함이 별도로 검증됐고 즉각적 장애는 아니나, 향후 `zen_ups_labels` INSERT 정책이 다른 작업으로 실수로 깨져도 회귀 스위트가 못 잡는 사각지대가 남아있음
