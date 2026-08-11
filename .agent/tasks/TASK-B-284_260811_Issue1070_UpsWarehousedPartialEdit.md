@@ -7,7 +7,9 @@
 | **담당** | Dave (Team B) |
 | **생성일** | 2026-08-11 |
 | **우선순위** | P2 |
-| **상태** | ⬜ |
+| **상태** | ✅ 완료 |
+
+> **PR#1073 반려 → v2 재작업(2차)**: Jaison 검토 결과 설계·핵심 로직(measured_at 잠금)은 정확하나, 신규 `zen_order_edit_log` 테이블에 `service_role` GRANT가 없어 CI fresh DB에서만 감사 로그 insert가 조용히 실패(TC-284-05 'expected 0 to be 1'). DEF-B-053(Issue #1063)과 동일 패턴 — `GRANT ALL ON zen_order_edit_log TO service_role` 추가(`618e43c3`) 후 fresh db reset 재검증 완료.
 
 ## 현황 분석 (Jaison 완료)
 
@@ -74,10 +76,59 @@ WAREHOUSED 단계 수정이 발생하면(REGISTERED 등 기존 자유 수정 단
 
 - **Dave**: `.agent/VIOLATION_TRACKER.md` 참조 후 착수 — 채번 절차 누락 등 다수 유형 누적 이력 있음, JSJung 2026-07-15 결정에 따라 할당 지속(재론 금지). 착수 전 `./scripts/next-task-number.sh B` 재확인 필수. 직전 TASK-B-278/279/280/282는 절차 준수 양호. **이번 건은 이번 세션 중 가장 복잡한 Task(스키마 변경 + 서버 로직 + UI 3곳 동시 수정)이므로, 되돌리기 검증을 반드시 실제로 실측값이 덮어써지는 걸 재현하는 수준까지 해줄 것** — "필드가 안 보이니 안전하다"는 UI 레벨 확인만으로는 부족, 서버가 실제로 값을 거부/무시하는지 DB 직접 조회로 확인.
 
-## [작업 결과]
+## [작업 결과] (v1, PR#1073 — 반려)
 
-_(담당자 작성 예정)_
+### 커밋
+
+| 커밋 | 내용 |
+|:-----|:-----|
+| `55b696af` | `[Dave] feat: TASK-B-284 UPS 오더 WAREHOUSED 단계 부분 수정 허용 (Issue #1070)` |
+
+### 구현 내용 (설계 확정 1~6 반영)
+
+1. **마이그레이션 `20260811060000`** — `zen_order_packages.measured_at timestamptz NULL` 컬럼 + `zen_order_edit_log(order_id, edited_by, edited_at, order_status_at_edit)` 감사 테이블 + RLS(authenticated INSERT/SELECT) + GRANT
+2. **`applyPackageMeasurements()`** — 실측 저장 시 `measured_at = NOW()` 함께 기록
+3. **`status-machine.ts`** — `getOrderEditScope(status, transportMode)` 신설(`OrderEditScope`) + `isOrderPartiallyEditable()` / `isOrderEditable()` 재구성:
+   - WAREHOUSED+UPS: `editable=true, fullEditable=false, lockShipperId/TransportMode/MeasuredPackageDims=true, auditEdit=true`
+   - WAREHOUSED+비UPS: `editable=false` (실측값 보호 불필요한 일반 화물 — 기존 동작 유지)
+   - REGISTERED/SCHEDULED: 전체 자유 수정
+4. **`updateOrder()`** — ①`shipper_id`/`transport_mode` 잠금(헤더에서 기존값 강제) ②패키지 delete+reinsert를 `measured_at` 인지형 upsert로 개편 — `measured_at` 있는 패키지는 `id` 매칭으로 화주가 보낸 치수/무게/포장수를 무시하고 실측값+`measured_at` 유지 ③WAREHOUSED 수정 시 `zen_order_edit_log` insert (감사 로그 배선)
+5. **UI** — `edit/page.tsx`: `getOrderEditScope` 사용 + 실측 패키지 id 목록 전달 / `OrderRegistrationForm`: `editScope`·`measuredPackageIds` props, 잠긴 필드(shipper_id·transport_mode·실측 패키지 치수/무게/포장수) 읽기전용 + "실측 완료" 배지 + 부분 수정 안내 문구
+6. **감사 로그 insert** — `updateOrder()`에서 `editScope.auditEdit` 시 `zen_order_edit_log` 기록
+
+### 회귀 테스트 (12건 신규/갱신)
+
+| 파일 | 내용 |
+|:-----|:-----|
+| `status-machine.test.ts` | +6건: isOrderPartiallyEditable(WAREHOUSED+UPS true/AIR false), getOrderEditScope 4종(WAREHOUSED+UPS 잠금·감사 / WAREHOUSED+AIR 불가 / REGISTERED 자유 / PACKED 불가) |
+| `order-update.test.ts` | 갱신: WAREHOUSED+UPS 부분 수정 가능 + WAREHOUSED+AIR 거부 확인 |
+| `iss1070-ups-warehoused-partial-edit.test.ts` (실 DB 통합) | **6건 TC-284-01~06**: ①미실측 패키지 치수/무게 수정 성공 ②실측 패키지 치수/무게 수정 시도 → DB 불변(서버 보호) ③아이템은 measured_at 무관 성공 ④shipper_id/transport_mode 무시(잠금) ⑤감사 로그 기록 ⑥WAREHOUSED+AIR 거부 |
+
+### 되돌리기 검증
+
+`isMeasuredLocked` 로직 일시 제거(항상 false) → **TC-284-02가 실측 패키지 치수/무게가 999로 덮어써지는 회귀 재현(FAIL)** → 복원 후 6/6 ALL PASS 확인. "UI 숨김 아님, 서버가 실제로 값 거부"를 DB 직접 조회로 검증.
+
+### 검증
+
+- `npm run test:regression`: **1203/1203 PASS** (168파일, 신규 +6)
+- `npm run build`: SUCCESS
+- `npx tsc --noEmit`: 변경 파일 오류 없음
+
+## [v2 재작업 (PR#1073 반려 대응, 완료)]
+
+**반려 사유 (Jaison)**: 설계·핵심 로직(measured_at 잠금)은 되돌리기 검증까지 정확 확인됐으나, 신규 `zen_order_edit_log` 테이블 GRANT에 `service_role` 누락 — `updateOrder()`가 감사 로그 insert에 service_role 클라이언트를 사용하는데, fresh CI 컨테이너는 explicit GRANT만 유효해 insert가 조용히 실패(TC-284-05 'expected 0 to be 1'). 로컬은 `pg_default_acl` 누적 권한으로 미탐지(DEF-B-053과 동일 패턴).
+
+**수정**: 마이그레이션 `20260811060000`에 `GRANT ALL ON public.zen_order_edit_log TO service_role;` 추가(커밋 `618e43c3`).
+
+**재검증** (fresh 스키마, 로컬 누적 권한 영향 배제):
+- `supabase db reset` → `has_table_privilege('service_role','public.zen_order_edit_log','INSERT')` = **true** 확인
+- 통합 테스트 `iss1070-ups-warehoused-partial-edit.test.ts` **6/6 PASS**
+- 전체 회귀 **1203/1203 PASS** (168파일) · build SUCCESS
+
+## [Jaison 최종 검토]
+
+`/tmp/review-pr1073` 신규 격리 워크트리에서 v2 처음부터 재검증 — `npx supabase db reset --yes`(fresh 스키마) 후 마이그레이션의 `GRANT ALL ON public.zen_order_edit_log TO service_role;` 반영 확인, 통합 테스트 6/6 PASS, 되돌리기 검증(`isMeasuredLocked` 강제 false) 재확인 → TC-284-01/02 정확히 FAIL 재현, 원복 후 6/6 PASS. 전체 회귀 168/168·1203/1203 PASS·build SUCCESS. **실제 CI(`gh pr checks 1073`)도 Regression Tests pass로 확인**(이전 fail이던 TC-284-05 포함) — GRANT 수정이 fresh 컨테이너에서 실제로 효과가 있음을 실증. PR#1073 승인·머지(TeamB_Dev, 커밋 `b9dda85b`), Issue #1070 종결.
 
 ## [발견 이슈]
 
-_(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
+없음

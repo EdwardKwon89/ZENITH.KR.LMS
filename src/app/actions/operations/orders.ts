@@ -7,7 +7,7 @@ import { revalidatePath } from "next/cache";
 import { OrderRepository, AdminRepository } from "@/lib/repositories";
 import { generateOrderNo, generateMasterOrderNo } from "../master";
 import { OrderStatus } from "@/types/orders";
-import { canChangeStatus, isOrderEditable } from "@/lib/logistics/status-machine";
+import { canChangeStatus, getOrderEditScope } from "@/lib/logistics/status-machine";
 import { UserRole, USER_ROLES } from "@/lib/auth/rbac";
 import { generateInvoicesForOrder } from "../finance";
 
@@ -163,7 +163,9 @@ export async function updateOrder(orderId: string, payload: OrderRegistrationInp
 
   const { data: order, error: fetchError } = await orderRepo.findById(orderId);
   if (fetchError || !order) throw new Error("Order not found");
-  if (!isOrderEditable(order.status as OrderStatus)) {
+
+  const editScope = getOrderEditScope(order.status as OrderStatus, order.transport_mode ?? undefined);
+  if (!editScope.editable) {
     throw new Error(`Order ${orderId} cannot be edited in status: ${order.status}`);
   }
 
@@ -171,9 +173,10 @@ export async function updateOrder(orderId: string, payload: OrderRegistrationInp
 
   const validated = orderRegistrationSchema.parse(payload);
 
-  await orderRepo.updateHeader(orderId, {
+  // TASK-B-284 (Issue #1070): WAREHOUSED+UPS 부분 수정 — shipper_id/transport_mode는 항상 잠금
+  const headerData: Record<string, unknown> = {
     order_type: validated.order_type,
-    shipper_id: validated.shipper_id,
+    shipper_id: editScope.lockShipperId ? order.shipper_id : validated.shipper_id,
     origin_port_id: validated.origin_port_id,
     dest_port_id: validated.dest_port_id,
     description: validated.description,
@@ -186,7 +189,7 @@ export async function updateOrder(orderId: string, payload: OrderRegistrationInp
     recipient_pccc: validated.recipient_pccc,
     recipient_email: validated.recipient_email,
     delivery_notes: validated.delivery_notes,
-    transport_mode: validated.transport_mode,
+    transport_mode: editScope.lockTransportMode ? order.transport_mode : validated.transport_mode,
     estimated_cost: validated.estimated_cost,
     delivery_method: validated.delivery_method ?? 'DIRECT',
     pickup_location: validated.delivery_method === 'PICKUP' ? (validated.pickup_location ?? null) : null,
@@ -212,6 +215,24 @@ export async function updateOrder(orderId: string, payload: OrderRegistrationInp
     ups_product_code: validated.ups_product_code,
     incoterms: validated.incoterms,
     ups_service_family: validated.ups_service_family,
+  };
+  await orderRepo.updateHeader(orderId, headerData);
+
+  // TASK-B-284 (Issue #1070): 실측(measured_at)된 패키지의 치수/무게는 보호 —
+  //   WAREHOUSED+UPS 부분 수정에서 화주가 보낸 새 값으로 덮어쓰지 않는다.
+  const existingPackages = await orderRepo.getPackagesByOrderId(orderId);
+  const measuredById = new Map<string, { length: number | null; width: number | null; height: number | null; gross_weight: number | null; packing_count: number | null; measured_at: string | null }>();
+  (existingPackages.data ?? []).forEach((p: any) => {
+    if (p.measured_at) {
+      measuredById.set(p.id, {
+        length: p.length ?? null,
+        width: p.width ?? null,
+        height: p.height ?? null,
+        gross_weight: p.gross_weight ?? null,
+        packing_count: p.packing_count ?? null,
+        measured_at: p.measured_at,
+      });
+    }
   });
 
   await orderRepo.deleteItemsByOrderId(orderId);
@@ -219,19 +240,24 @@ export async function updateOrder(orderId: string, payload: OrderRegistrationInp
 
   if (validated.packages && validated.packages.length > 0) {
     for (const pkg of validated.packages) {
+      // WAREHOUSED+UPS 부분 수정: 패키지 id가 실측 대상이면 치수/무게/포장수 무시
+      const isMeasuredLocked = editScope.lockMeasuredPackageDims && !!pkg.id && measuredById.has(pkg.id);
+      const measured = isMeasuredLocked ? measuredById.get(pkg.id!) : undefined;
+
       const { data: packageData, error: pkgError } = await orderRepo.insertPackage({
         order_id: orderId,
         packing_unit: pkg.packing_unit,
-        packing_count: pkg.packing_count,
+        packing_count: isMeasuredLocked ? (measured?.packing_count ?? pkg.packing_count) : pkg.packing_count,
         physical_box_count: pkg.physical_box_count ?? 1,
-        length: pkg.length,
-        width: pkg.width,
-        height: pkg.height,
-        gross_weight: pkg.gross_weight,
+        length: isMeasuredLocked ? measured?.length : pkg.length,
+        width: isMeasuredLocked ? measured?.width : pkg.width,
+        height: isMeasuredLocked ? measured?.height : pkg.height,
+        gross_weight: isMeasuredLocked ? measured?.gross_weight : pkg.gross_weight,
         volume: pkg.volume,
         special_cargo_type: pkg.special_cargo_type ?? 'NONE',
         content_type: pkg.content_type ?? 'GENERAL',
         domestic_ref_no: pkg.domestic_ref_no ?? null,
+        ...(isMeasuredLocked && measured?.measured_at ? { measured_at: measured.measured_at } : {}),
       });
 
       if (pkgError || !packageData) continue;
@@ -252,6 +278,16 @@ export async function updateOrder(orderId: string, payload: OrderRegistrationInp
         await orderRepo.insertItems(itemsToInsert);
       }
     }
+  }
+
+  // TASK-B-284 (Issue #1070): WAREHOUSED 단계 수정이면 감사 로그 기록
+  if (editScope.auditEdit) {
+    await supabase.from('zen_order_edit_log').insert({
+      order_id: orderId,
+      edited_by: profile.id,
+      edited_at: new Date().toISOString(),
+      order_status_at_edit: order.status,
+    });
   }
 
   const itemDiffs: { sku: string; diff: number }[] = [];
@@ -763,6 +799,9 @@ async function applyPackageMeasurements(
       if (pkg.length !== undefined) updateData.length = pkg.length;
       if (pkg.width !== undefined) updateData.width = pkg.width;
       if (pkg.height !== undefined) updateData.height = pkg.height;
+      // TASK-B-284 (Issue #1070): 실측 저장 시 measured_at 기록 — WAREHOUSED 단계에서
+      // 이 패키지의 치수/무게를 화주 수정으로부터 보호하기 위한 기준이 된다.
+      updateData.measured_at = new Date().toISOString();
 
       await supabase.from('zen_order_packages').update(updateData).eq('id', pkg.packageId);
 
