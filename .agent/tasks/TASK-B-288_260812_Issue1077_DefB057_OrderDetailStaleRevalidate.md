@@ -8,7 +8,7 @@
 | **담당** | Baker (Team B) |
 | **생성일** | 2026-08-12 |
 | **우선순위** | P2 (Medium) |
-| **상태** | 🔔 |
+| **상태** | ✅ 완료 |
 
 ## 근본 원인 (확정 완료 — DEF-B-057 참조)
 
@@ -68,6 +68,10 @@ revalidatePath('/(dashboard)/orders/[orderId]', 'page');
 - 스크린샷 `docs/99_Manual/E2E_288_Result/01~05` (로그인 · 카드 노출 · 오더 선택 · 취소 확정 모달 · 카드 제거).
 
 - 코드 커밋: `8a170a6a59d12d71c5f8fddb751256e4bf940a28`
+
+## [Jaison 최종 검토]
+
+`/tmp/review-pr1082` 격리 워크트리에서 재검증 — 신규 테스트 6/6 PASS. **독립 되돌리기 검증**: `undoUpsRegistration()`의 신규 revalidatePath 호출을 수동 제거 후 재실행 → 정확히 FAIL 재현(3번째 호출 인자 불일치), 복원 후 2/2 PASS 재확인. 전체 회귀 175/175·1230/1230 PASS, build SUCCESS. 실제 CI(`gh pr checks 1082`) Regression Tests pass 확인. warehouse.ts 9곳 + ups-labels.ts 6곳(총 15지점) grep으로 누락 없이 확인, 과설계 없음. R-10 E2E가 실제 브라우저로 카드 노출→취소→새로고침 없이 카드 제거를 스크린샷 5장과 함께 검증. PR#1082 승인·머지(TeamB_Dev, 커밋 `62d2d1c4`), Issue #1077 종결.
 
 ## [발견 이슈]
 
