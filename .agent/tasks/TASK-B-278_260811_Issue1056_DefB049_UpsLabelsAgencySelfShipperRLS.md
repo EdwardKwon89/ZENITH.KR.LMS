@@ -8,7 +8,9 @@
 | **담당** | Dave (Team B) — 2026-08-11 Baker → Dave 재배정(JSJung 지시) |
 | **생성일** | 2026-08-11 |
 | **우선순위** | **P1 (Critical)** |
-| **상태** | ⬜ |
+| **상태** | 🔔 (완료 보고 — 검토 요청) |
+
+> **PR#1057 반려 → 재작업(2차)**: ①자동 회귀 테스트 10건 신설(psql 기반 DB 실테스트) ②CI 대응 — `GRANT DELETE ON zen_ups_labels TO authenticated` 누락 보완(def117이 SELECT/INSERT/UPDATE만 부여, fresh DB에서 라벨 삭제 permission denied) + 테스트 `afterAll` import. 전체 회귀 1170/1170 PASS.
 
 ## 근본 원인 (확정 완료)
 
@@ -67,7 +69,67 @@ AND (
 
 ## [작업 결과]
 
-_(담당자 작성 예정)_
+**작성자**: Dave | **작성일**: 2026-08-11 | **상태**: 🔔 (검토 요청)
+
+### 구현 (코드 커밋 `526231d7`)
+
+마이그레이션 `20260811030000_iss1056_ups_labels_agency_self_shipper_rls.sql` — `zen_ups_labels` AGENCY 관련 RLS 정책 4개(SELECT/INSERT/UPDATE/DELETE) 전부에 자가화주 조건 OR 추가:
+
+```sql
+AND (
+  zen_orders.agency_org_id = (SELECT org_id FROM public.zen_profiles WHERE id = auth.uid())
+  OR zen_orders.shipper_id = (SELECT org_id FROM public.zen_profiles WHERE id = auth.uid())
+)
+```
+
+- 정책명: `Agency can view/insert/update shipper ups labels`, `ups_labels_agency_delete` (기존 유지, DROP+CREATE 재생성)
+- 자가화주 오더(agency_org_id NULL, shipper_id=본인 org)가 기존 `agency_org_id` 단일 체크로 항상 거짓 → SHXK createorder 성공 후 `saveInitialLabel()` INSERT 42501 차단되던 결함 해소 (DEF-B-046 동일 해법)
+
+### 회귀 테스트 (자동, 코드 커밋 `fa5c5050` — PR#1057 반려 대응)
+
+PR#1057 반려 사유(마이그레이션 SQL은 정확, 단 자동 회귀 테스트 부재)에 대응해 **`tests/unit/db/defb049-ups-labels-self-shipper-rls.test.ts` 10건** 신설 — TASK-B-265와 동일한 psql 기반 DB 실테스트 패턴(실제 authenticated 롤 시뮬레이션으로 DB에 직접 CRUD 수행 + assert). vitest 회귀 스위트에 포함됨(테스트 파일 164개).
+
+| TC | 검증 | 결과 |
+|:---|:-----|:-----|
+| TC-278-01 | 자가화주 AGENCY SELECT 성공 | ✅ |
+| TC-278-02 | 자가화주 AGENCY INSERT 성공 + 영속 확인 | ✅ |
+| TC-278-03 | 자가화주 AGENCY UPDATE 성공 + 값 반영 | ✅ |
+| TC-278-04 | 자가화주 AGENCY DELETE 성공 | ✅ |
+| TC-278-05 | 무관 AGENCY SELECT (기존 authenticated_select 정책 — 이 Task 무관) | ✅ |
+| TC-278-06 | **무관 AGENCY INSERT 42501 차단** (보안 회귀 방지) | ✅ |
+| TC-278-07 | 무관 AGENCY UPDATE — RLS 행 필터로 0행 반영·값 불변 | ✅ |
+| TC-278-08 | 무관 AGENCY DELETE — 레코드 존속(차단) | ✅ |
+| TC-278-09 | 하위 화주 오더 라벨은 AGENCY 정상 관리 (기존 동작 회귀 방지) | ✅ |
+| TC-278-10 | **되돌리기 검증** — INSERT 정책 이전 형태 원복 시 자가화주도 42501 재차단 → 복원 후 성공 | ✅ |
+
+`setupFixture`가 항상 최신 정책 + 픽스처를 재설정해 멱등성 보장(되돌리기 테스트의 원복 상태 잔존으로 인한 연쇄 실패 방지). 전체 회귀 **1170/1170 PASS**에 포함 확인.
+
+### 검증 수치
+
+- 전체 회귀: `npm run test:regression` — **1170/1170 PASS** (164 파일, 신규 DB RLS 테스트 10건 포함)
+- `npm run build` — Compiled successfully (14.9s)
+- 앱 코드 수정 불필요 확인(RLS 정책만 문제) — `ups-labels.ts` 등 코드 변경 없음
+
+### R-10 실브라우저 검증 (문서 커밋, 스크린샷 `docs/99_Manual/E2E_278_Result/`)
+
+- 자가화주 AGENCY 계정(`r10_self_agency_278@zenith.kr`) 실제 로그인 (`01_self_agency_logged_in.png`)
+- 자가화주 오더(agency_org_id=NULL) 생성 → UPS 오더 등록 폼 진입 → **예상운임 정상 계산** (`02_self_agency_ups_form_estimate.png`) — RLS가 폼 단계를 막지 않음
+- RLS INSERT 증명은 DB authenticated 시뮬레이션으로 완료(위 표) — 실제 SHXK 호출은 orphan 오더 생성 위험이 있어 브라우저에서 직접 실행하지 않음
+
+### R-17 DoD 체크리스트
+
+- [x] 코드 커밋 (`526231d7`) — 마이그레이션
+- [x] 문서 커밋 — R-10 증적
+- [x] 회귀 1160/1160 PASS / build SUCCESS
+- [x] R-10 실브라우저 (자가화주 AGENCY UPS 폼 정상)
+- [x] 되돌리기 검증 (정책 원복 시 42501 재현)
+- [x] 보안 회귀 검증 (무관 AGENCY INSERT 42501 유지)
+
+## [발견 이슈]
+
+1. **동일 RLS 패턴 다른 테이블 7개 발견** (IMP-162 계열): `zen_ups_label_documents`, `zen_tracking_configs`(2곳), `zen_order_rate_snapshots`(2곳), `zen_order_costs`, `zen_order_packages` — 전부 `agency_org_id = (본인 org_id)` 단일 체크로 자가화주 AGENCY를 차단하는 동일 패턴. 이번 Task 범위(zen_ups_labels) 밖이라 수정하지 않음 — 자가화주 AGENCY UPS 오더의 전체 흐름(스냅샷/트래킹/정산/라벨문서)이 여전히 이 패턴에 막힐 수 있어 **별도 DEF로 재등록 권장**(IMP-162 참조).
+2. **참고(이번 Task 범위 밖, task file 기재 원문)**: `_profiles_grade_backup_20260521`, `zen_customs_history`, `zen_invoice_history`, `zen_master_order_history`, `zen_ups_shxk_country_map` 5개 테이블 RLS 자체 비활성 — 별도 DEF로 JSJung 확인 필요.
+
 
 ## [발견 이슈]
 
