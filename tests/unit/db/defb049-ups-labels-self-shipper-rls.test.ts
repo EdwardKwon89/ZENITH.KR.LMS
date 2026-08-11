@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { execSync } from 'child_process';
 
 // TASK-B-278 (Issue #1056 / DEF-B-049): zen_ups_labels AGENCY RLS 자가화주 조건 자동 회귀 테스트.

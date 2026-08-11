@@ -105,3 +105,11 @@ USING (
       )
   )
 );
+
+-- =====================================================
+-- GRANT: authenticated 롤에 DELETE 권한 보장 (ups_labels_agency_delete 정책 동작에 필요)
+-- (기존 def117 마이그레이션이 SELECT/INSERT/UPDATE는 부여했으나 DELETE 누락 —
+--  fresh DB(CI)에서 자가화주 AGENCY의 라벨 삭제가 permission denied로 막힘)
+-- =====================================================
+
+GRANT DELETE ON public.zen_ups_labels TO authenticated;
