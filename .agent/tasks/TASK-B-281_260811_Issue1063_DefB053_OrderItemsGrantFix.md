@@ -8,7 +8,7 @@
 | **담당** | Jaison (구현) — **예외 승인**: JSJung "니가 직접 수행해줘" 명시적 지시, Jaison이 기존 규칙(코드 Edit 항상 배정)과의 충돌을 먼저 고지하고 재확인 받은 후 진행(2026-08-11) |
 | **생성일** | 2026-08-11 |
 | **우선순위** | **P1** |
-| **상태** | 🔔 |
+| **상태** | ✅ 완료 |
 
 ## 근본 원인 (확정)
 
@@ -35,9 +35,13 @@ GRANT ALL ON public.zen_order_items TO service_role;
 
 ## [작업 결과]
 
-**커밋**: (아래 기재 예정)
+**커밋**: `1c206720` — `[Jaison] fix: TASK-B-281 zen_order_items GRANT 누락 수정 (Issue #1063 / DEF-B-053)`
+
+**PR**: #1064(TeamB_Dev base) — Jaison 승인·머지 완료(`60a5b896`)
 
 Jaison이 직접 원인 진단 + 수정 + 검증 수행(JSJung 예외 승인, 2026-08-11). 상세는 위 "근본 원인"/"수정 내용"/"검증" 참조.
+
+**실제 CI 확인**(Aiden 요청사항 준수 — 자체보고 아닌 실제 확인): PR#1064의 `gh pr checks` 결과 Regression Tests/Task File Check/Type Check **전부 pass** 직접 확인 후 머지. 로컬에서는 재현되지 않던 문제였으나 실제 CI(fresh DB)에서 통과 확인됨 — GRANT 추가가 근본 원인을 해소했음을 실증.
 
 ## [발견 이슈]
 
