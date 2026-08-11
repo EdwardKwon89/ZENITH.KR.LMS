@@ -345,6 +345,7 @@ export async function registerUpsOrder(
     }
 
     revalidatePath("/(dashboard)/warehouse/outbound", "page");
+    revalidatePath('/(dashboard)/orders/[orderId]', 'page');
 
     return {
       success: true,
@@ -415,6 +416,7 @@ export async function fetchAndIssueUpsLabel(
       const pkgErr = await markAllPackagesIssued(supabase, orderId, label.tracking_number);
       if (pkgErr) return { success: false, error: `Failed to mark packages issued: ${pkgErr}` };
       revalidatePath("/(dashboard)/warehouse/outbound", "page");
+      revalidatePath('/(dashboard)/orders/[orderId]', 'page');
 
       if (docType === 'COMBINED') {
         return { success: true, urls: storedUrls };
@@ -430,6 +432,7 @@ export async function fetchAndIssueUpsLabel(
     if (pkgErr) return { success: false, error: `Failed to mark packages issued: ${pkgErr}` };
 
     revalidatePath("/(dashboard)/warehouse/outbound", "page");
+    revalidatePath('/(dashboard)/orders/[orderId]', 'page');
 
     return { success: true, url: labelUrl ?? undefined };
   } catch (err) {
@@ -522,6 +525,7 @@ export async function cancelUpsRegistration(
     }
 
     revalidatePath("/(dashboard)/warehouse/outbound", "page");
+    revalidatePath('/(dashboard)/orders/[orderId]', 'page');
 
     return { success: true };
   } catch (err) {
@@ -549,6 +553,7 @@ export async function issueUpsLabel(
     const { packages } = await lookupOrderPackages(supabase, orderId);
 
     revalidatePath("/(dashboard)/warehouse/outbound", "page");
+    revalidatePath('/(dashboard)/orders/[orderId]', 'page');
 
     return {
       success: true,
@@ -640,6 +645,7 @@ export async function voidUpsLabel(
     }
 
     revalidatePath("/(dashboard)/warehouse/outbound", "page");
+    revalidatePath('/(dashboard)/orders/[orderId]', 'page');
 
     return { success: true };
   } catch (err) {
