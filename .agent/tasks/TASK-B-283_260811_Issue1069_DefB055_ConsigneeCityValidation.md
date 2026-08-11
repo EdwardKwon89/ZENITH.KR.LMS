@@ -8,7 +8,7 @@
 | **담당** | Dave (Team B) |
 | **생성일** | 2026-08-11 |
 | **우선순위** | **P1 (High)** |
-| **상태** | ⬜ |
+| **상태** | 🔔 (완료 보고 — 검토 요청) |
 
 ## 근본 원인 (확정 완료)
 
@@ -51,8 +51,36 @@ TASK-B-277과 동일 패턴:
 
 ## [작업 결과]
 
-_(담당자 작성 예정)_
+### 커밋
+
+| 커밋 | 내용 |
+|:-----|:-----|
+| `fe6bfac2` | `[Dave] fix: TASK-B-283 SHXK createorder 수취인 도시(consignee_city) 필드 미검증 수정 (Issue #1069 / DEF-B-055)` |
+
+### 수정 내용 (TASK-B-277 동일 패턴, 2곳)
+
+1. `src/lib/validation/order.ts` — UPS 조건부 필수 블록(`if (data.transport_mode === 'UPS')`)에 `recipient_city` 추가 (기존 `recipient_country_code`/`recipient_zipcode`/`shipper_contact_phone`과 병렬, 에러 메시지 "UPS 배송은 수하인 도시가 필수입니다(SHXK API 요구사항)")
+2. `src/lib/shxk/validate-payload.ts` — `validateShxkPayload()` consignee 체크에 `consignee_city` 추가(에러 "수취인 도시 누락")
+
+### 회귀 테스트
+
+| 파일 | 내용 |
+|:-----|:-----|
+| `order-validation.test.ts` | ① UPS + `recipient_city` 누락 → 검증 실패(신규) ② 비UPS(AIR)은 `recipient_city` 없이 통과(회귀 방지) ③ 기존 validUpsPayload에 `recipient_city` 추가 |
+| `shxk-payload-validation.test.ts` | `consignee_city` 누락 → "수취인 도시 누락" 에러 반환(신규) + 정상 payload에 `consignee_city` 추가 |
+
+**기존 UPS payload 사용 테스트 9개 파일 fixture 보정**(`recipient_city`/`consignee_city` 추가): `bulk-orders`·`direct-shipper-ups-snapshot`·`tracking-configs-provider-type`·`def123-tracking-no-sync`·`ups-labels-split`·`ups-labels-combined-doctype`·`ups-labels-agency-permission`·`warehouse-actions`·`shxk-payload-validation`
+
+### 되돌리기 검증
+
+`recipient_city`(order.ts) + `consignee_city`(validate-payload.ts) 모두 일시 제거 → **신규 테스트 2건 FAIL** 재현 → 복원 후 ALL PASS 확인.
+
+### 검증
+
+- `npm run test:regression`: **1192/1192 PASS** (167파일)
+- `npm run build`: SUCCESS
+- `npx tsc --noEmit`: 오류 없음
 
 ## [발견 이슈]
 
-_(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
+없음
