@@ -510,6 +510,9 @@ export async function cancelUpsRegistration(
       return { success: false, error: `라벨 레코드 삭제 실패: ${deleteErr.message}` };
     }
 
+    const unlockErr = await unlockAllPackagesIntlRef(supabase, orderId);
+    if (unlockErr) return { success: false, error: `intl_ref 복원 실패: ${unlockErr}` };
+
     const { error: trackingResetErr } = await supabase
       .from('zen_tracking_configs')
       .update({ tracking_no: null })
