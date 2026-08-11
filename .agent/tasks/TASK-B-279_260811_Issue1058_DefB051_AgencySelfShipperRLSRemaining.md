@@ -8,7 +8,7 @@
 | **담당** | Dave (Team B) |
 | **생성일** | 2026-08-11 |
 | **우선순위** | P2 (High) |
-| **상태** | 🔔 (완료 보고 — 검토 요청) |
+| **상태** | ✅ 완료 |
 
 ## 근본 원인 (확정 완료 — Jaison 전수 재검증)
 
@@ -99,3 +99,7 @@ psql 기반 authenticated 시뮬레이션(B-265/defb049 패턴) + **IMP-163 준�
 ## [발견 이슈]
 
 _(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
+
+## [Jaison 최종 검토]
+
+migration 되돌리기 검증 직접 재현(`zen_ups_label_errors` INSERT·`storage.objects` INSERT 정책 각각 실제로 깨서 해당 테스트만 정확히 FAIL함을 확인, IMP-163 미재발 확인) · 회귀 165/165·1182/1182 ALL PASS(재검증 일치) · build SUCCESS · CI 전체 pass. R-10은 JSJung이 직접 수행하기로 확인 — 승인·머지, Issue #1058 종결.
