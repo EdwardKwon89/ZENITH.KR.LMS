@@ -8,7 +8,7 @@
 | **담당** | Dave (Team B) |
 | **생성일** | 2026-08-11 |
 | **우선순위** | **Critical (P1)** |
-| **상태** | ⬜ |
+| **상태** | 🔔 (완료 보고 — 검토 요청) |
 
 ## 근본 원인 (확정 완료 — DEF-B-056 참조)
 
@@ -55,8 +55,39 @@
 
 ## [작업 결과]
 
-_(담당자 작성 예정)_
+### 커밋
+
+| 커밋 | 내용 |
+|:-----|:-----|
+| `dccacfde` | `[Dave] fix: TASK-B-286 zen_order_items INSERT RLS 정책 누락으로 오더 수정 시 아이템 전량 소실 (Issue #1075 / DEF-B-056, Critical)` |
+
+### 수정 내용 (설계 확정 1~3 반영)
+
+1. **마이그레이션 `20260811080000`** — `zen_order_items`에 INSERT/UPDATE/DELETE RLS 정책 추가 (`zen_order_packages`와 동일 패턴):
+   - Admin: `get_my_role() IN (ZENITH_SUPER_ADMIN/ADMIN/MANAGER)` INSERT/UPDATE/DELETE
+   - Members(화주 조직 소속): `is_org_member(auth.uid(), shipper_id)` join 기준 INSERT/UPDATE/DELETE
+   - Agency: `agency_org_id = 본인 org` UPDATE
+   - GRANT는 DEF-B-053(20260811050000)에서 authenticated/service_role 이미 부여 — RLS 정책만 추가
+2. **`updateOrder()` 방어 코드** — `insertItems()`·`insertPackage()`·`deleteItemsByOrderId()`·`deletePackagesByOrderId()` 반환 error 확인 후 실패 시 **명시적 throw** (기존 `continue`로 조용히 넘기던 것 제거)
+3. **GRANT 확인** — fresh DB에서 authenticated 7건 + `service_role` INSERT=true 확인 (DEF-B-053 패턴 재발 방지)
+
+### 회귀 테스트 (4건, JWT 인증 authenticated 클라이언트로 RLS 실제 평가)
+
+| TC | 내용 |
+|:---|:-----|
+| TC-286-01 | REGISTERED 오더 수정 저장 후 아이템 보존 (기존 수정 경로) |
+| TC-286-02 | WAREHOUSED+UPS 부분 수정 후 아이템 보존 |
+| TC-286-03 | 아이템 내용(item_name) 실제 반영 |
+| TC-286-04 | **되돌리기 검증** — INSERT 정책 제거 → updateOrder가 "아이템 저장 실패" throw → 정책 복원 → 재저장 성공 + 아이템 보존 |
+
+> 테스트는 service_role 우회 없이 **로컬 Supabase JWT로 서명한 화주 조직 소속 authenticated 클라이언트**를 사용해 RLS 정책을 실제로 통과해야만 성공 — INSERT 정책 부재 시 TC-286-01~03이 FAIL하는 역방향 구조.
+
+### 검증
+
+- `npm run test:regression`: **1220/1220 PASS** (172파일, 신규 +4)
+- `npm run build`: SUCCESS
+- **fresh `supabase db reset` 재검증**(R-08-2): authenticated 7 GRANT + service_role INSERT=true + 정책 8건 + 통합 테스트 4/4 PASS
 
 ## [발견 이슈]
 
-_(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
+없음
