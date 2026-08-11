@@ -14,6 +14,7 @@ import {
   applyOversizeRule,
   computeUpsFreight,
   resolveZoneByCountry,
+  resolveChinaSubCode,
   productFamilyFromCode,
 } from '@/lib/ups/pricing-engine';
 import { computeAgencyFreight } from '@/lib/ups/agency-pricing';
@@ -43,12 +44,28 @@ export interface EstimateUpsFreightInput {
   referenceDate?: string;
   /** Zone 조회 방향 (EXPORT | IMPORT). 기본값 EXPORT. */
   direction?: string;
+  /** DEF-B-044: 목적지 성/직할시 ISO 코드 — 중국(CN) 목적지 Zone(CNS/CNN) 판정용. */
+  destStateProvince?: string;
 }
 
 export interface UpsFreightEstimate {
   platform: UpsFreightResult;
   agency: UpsAgencyFreightResult | null;
   shipper: UpsShipperFreightResult | null;
+}
+
+/**
+ * Issue #1023 (DEF-B-038): 상품 cargo_type에 대한 할인율 정책 후보 순서(구체적 값 우선 → ALL 폴백).
+ * JSJung 확정 규칙:
+ *   - DOC 상품     → ['DOC', 'ALL']
+ *   - NON_DOC 상품 → ['NON_DOC', 'ALL']
+ *   - BOTH(Expedited/Flight) → ['NON_DOC', 'ALL'] (DOC 정책은 적용 대상 아님)
+ * 반환 배열 앞쪽일수록 우선순위가 높으며, 배열 순서로 "구체적 값 우선, 없으면 ALL" 폴백을 보장한다.
+ */
+function candidateCargoTypes(productCargoType: string): string[] {
+  if (productCargoType === 'DOC') return ['DOC', 'ALL'];
+  if (productCargoType === 'NON_DOC') return ['NON_DOC', 'ALL'];
+  return ['NON_DOC', 'ALL']; // BOTH (Expedited/Flight) — DOC는 후보에 없음
 }
 
 export async function estimateUpsFreight(input: EstimateUpsFreightInput): Promise<UpsFreightEstimate> {
@@ -73,7 +90,8 @@ export async function estimateUpsFreight(input: EstimateUpsFreightInput): Promis
     input.destCountryCode,
     zonesRaw as UpsZoneWithCountries[],
     productFamily,
-    direction
+    direction,
+    input.destStateProvince
   );
   if (!zone) throw new Error(`목적지 국가(${input.destCountryCode})에 매핑된 Zone이 없습니다.`);
 
@@ -177,10 +195,14 @@ export async function estimateUpsFreight(input: EstimateUpsFreightInput): Promis
   const oversizeCharge = (allOtherCharges ?? []).find((c) => c.charge_code === 'OVERSIZE') as UpsOtherCharge | undefined;
 
   // Issue #491: 급증 긴급 수수료(Surge Emergency Fee) — 도착국·기준일 기준 유효 단가 1건 조회
+  // DEF-B-045: zen_ups_surge_fees도 중국을 CNN/CNS로 분리 관리 — CN이면 resolveChinaSubCode로 정규화
+  const surgeFeeCountryCode = input.destCountryCode.toUpperCase() === 'CN'
+    ? resolveChinaSubCode(input.destStateProvince)
+    : input.destCountryCode;
   const { data: surgeFeeRows } = await supabase
     .from('zen_ups_surge_fees')
     .select('*')
-    .eq('destination_country_code', input.destCountryCode)
+    .eq('destination_country_code', surgeFeeCountryCode)
     .eq('is_active', true)
     .lte('effective_from', refDate)
     .or(`effective_until.is.null,effective_until.gte.${refDate}`)
@@ -221,13 +243,22 @@ export async function estimateUpsFreight(input: EstimateUpsFreightInput): Promis
   // Issue #617: 내부 원가 계산 목적 조회는 서비스 롤(admin) 클라이언트 사용 — RLS 우회
   const admin = await createAdminClient();
 
-  const { data: policy } = await admin
+  // Issue #1023 (DEF-B-038): cargo_type 폴백 — JSJung 확정 규칙
+  //   - DOC 상품  : ['DOC', 'ALL']  → DOC 없으면 ALL로 폴백
+  //   - NON_DOC 상품: ['NON_DOC', 'ALL'] → NON_DOC 없으면 ALL로 폴백
+  //   - BOTH(Expedited/Flight): ['NON_DOC', 'ALL'] → NON_DOC 우선, ALL 폴백 (DOC는 후보 아님)
+  const candidates = candidateCargoTypes(product.cargo_type);
+
+  const { data: policies } = await admin
     .from('zen_agency_pricing_policies')
-    .select('discount_rate')
+    .select('discount_rate, cargo_type')
     .eq('agency_org_id', input.agencyOrgId)
     .eq('zone_id', zone.id)
-    .eq('is_active', true)
-    .maybeSingle();
+    .in('cargo_type', candidates)
+    .eq('is_active', true);
+  const policy = candidates
+    .map((ct) => (policies as Array<{ discount_rate: string | number; cargo_type: string }> | null)?.find((p) => p.cargo_type === ct))
+    .find(Boolean);
   const discountRate = Number(policy?.discount_rate ?? 0);
 
   const agencyCharges: any[] = [];
@@ -248,15 +279,18 @@ export async function estimateUpsFreight(input: EstimateUpsFreightInput): Promis
     return { platform, agency, shipper: null };
   }
 
-  const { data: shipperZoneDiscount } = await supabase
+  const { data: shipperZoneDiscounts } = await supabase
     .from('zen_agency_shipper_zone_discounts')
-    .select('discount_rate')
+    .select('discount_rate, cargo_type')
     .eq('agency_org_id', input.agencyOrgId)
     .eq('shipper_org_id', input.shipperOrgId)
     .eq('zone_id', zone.id)
-    .eq('is_active', true)
-    .maybeSingle();
-  const shipperDiscountRate = Number(shipperZoneDiscount?.discount_rate ?? 0);
+    .in('cargo_type', candidates)
+    .eq('is_active', true);
+  const shipperPolicy = candidates
+    .map((ct) => (shipperZoneDiscounts as Array<{ discount_rate: string | number; cargo_type: string }> | null)?.find((p) => p.cargo_type === ct))
+    .find(Boolean);
+  const shipperDiscountRate = Number(shipperPolicy?.discount_rate ?? 0);
   const shipper = computeShipperFreight(
     platform.baseSellingPrice,
     platform.fuelSurchargeSellingAmount,

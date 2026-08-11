@@ -18,6 +18,7 @@ interface UpsProduct {
 interface UpsFreightEstimateSectionProps {
   shipperOrgId: string | null;
   destCountryCode?: string;
+  destStateProvince?: string;
   packages: OrderPackageInput[];
   selectedProductId?: string;
   selectedIncoterms?: 'DDU' | 'DDP';
@@ -40,6 +41,7 @@ function extractFamily(productCode: string): string {
 export function UpsFreightEstimateSection({
   shipperOrgId,
   destCountryCode,
+  destStateProvince,
   packages,
   selectedProductId,
   selectedIncoterms = 'DDP',
@@ -139,6 +141,7 @@ export function UpsFreightEstimateSection({
     estimateUpsFreight({
       productId: selectedProductId,
       destCountryCode,
+      destStateProvince,
       actualWeightKg: multiPkgResult.totalChargeableKg,
       incoterms: selectedIncoterms,
       agencyOrgId,
@@ -156,7 +159,7 @@ export function UpsFreightEstimateSection({
       });
 
     return () => { cancelled = true; };
-  }, [selectedProductId, destCountryCode, multiPkgResult.totalChargeableKg, selectedIncoterms, agencyOrgId, shipperOrgId]);
+  }, [selectedProductId, destCountryCode, destStateProvince, multiPkgResult.totalChargeableKg, selectedIncoterms, agencyOrgId, shipperOrgId]);
 
   useEffect(() => {
     onEstimateChange?.(estimate);

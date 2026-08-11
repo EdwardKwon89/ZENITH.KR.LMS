@@ -2,6 +2,7 @@
 
 import { createClient } from '@/utils/supabase/server';
 import { validateUserAction } from '@/lib/auth/guards';
+import { fetchAllRows } from '@/lib/ups/paginate-all';
 
 export interface PublicBaseRate {
   id: string;
@@ -19,15 +20,21 @@ export interface PublicBaseRate {
 export async function getPublicBaseRates(): Promise<PublicBaseRate[]> {
   const { supabase } = await validateUserAction();
   const refDate = new Date().toISOString().split('T')[0];
-  const { data, error } = await supabase
-    .from('zen_ups_base_rates')
-    .select('id, product_id, zone_id, weight_kg, selling_price, currency, valid_from, valid_until, product:product_id(product_code, product_name, cargo_type), zone:zone_id(zone_code, zone_name)')
-    .eq('is_active', true)
-    .lte('valid_from', refDate)
-    .or(`valid_until.is.null,valid_until.gte.${refDate}`)
-    .order('weight_kg');
-  if (error) throw new Error(error.message);
-  return (data ?? []) as unknown as PublicBaseRate[];
+  // DEF-B-041: zen_ups_base_rates가 1,000행 초과 — PostgREST 기본 제한에 걸리지 않도록 페이지네이션
+  const data = await fetchAllRows<PublicBaseRate>(async (from, to) => {
+    const { data, error } = await supabase
+      .from('zen_ups_base_rates')
+      .select('id, product_id, zone_id, weight_kg, selling_price, currency, valid_from, valid_until, product:product_id(product_code, product_name, cargo_type), zone:zone_id(zone_code, zone_name)')
+      .eq('is_active', true)
+      .lte('valid_from', refDate)
+      .or(`valid_until.is.null,valid_until.gte.${refDate}`)
+      .order('weight_kg')
+      // DEF-B-043: 페이지네이션 두 요청 간 동률(weight_kg 동일) 행 순서 보장 — id(UUID PK) 2차 정렬로 결정적 순서 확보
+      .order('id')
+      .range(from, to);
+    return { data, error };
+  });
+  return data as unknown as PublicBaseRate[];
 }
 
 export interface PublicFuelSurcharge {
@@ -79,7 +86,7 @@ export interface PublicWeightTierRate {
   currency: string;
   valid_from: string;
   valid_until: string | null;
-  product: { product_code: string; product_name: string } | null;
+  product: { product_code: string; product_name: string; cargo_type: string } | null;
   zone: { zone_code: string; zone_name: string } | null;
 }
 
@@ -87,7 +94,7 @@ export async function getPublicWeightTierRates(): Promise<PublicWeightTierRate[]
   const { supabase } = await validateUserAction();
   const { data, error } = await supabase
     .from('zen_ups_weight_tier_rates')
-    .select('id, product_id, zone_id, tier_min_kg, tier_max_kg, price_per_kg_selling, currency, valid_from, valid_until, product:product_id(product_code, product_name), zone:zone_id(zone_code, zone_name)')
+    .select('id, product_id, zone_id, tier_min_kg, tier_max_kg, price_per_kg_selling, currency, valid_from, valid_until, product:product_id(product_code, product_name, cargo_type), zone:zone_id(zone_code, zone_name)')
     .eq('is_active', true)
     .order('tier_min_kg');
   if (error) throw new Error(error.message);
@@ -100,7 +107,7 @@ export interface PublicFreightMinimum {
   product_id: string;
   min_charge_selling: number;
   currency: string;
-  product: { product_code: string; product_name: string } | null;
+  product: { product_code: string; product_name: string; cargo_type: string } | null;
   zone: { zone_code: string; zone_name: string } | null;
 }
 
@@ -108,7 +115,7 @@ export async function getPublicFreightMinimums(): Promise<PublicFreightMinimum[]
   const { supabase } = await validateUserAction();
   const { data, error } = await supabase
     .from('zen_ups_freight_minimums')
-    .select('id, zone_id, product_id, min_charge_selling, currency, product:product_id(product_code, product_name), zone:zone_id(zone_code, zone_name)')
+    .select('id, zone_id, product_id, min_charge_selling, currency, product:product_id(product_code, product_name, cargo_type), zone:zone_id(zone_code, zone_name)')
     .eq('is_active', true);
   if (error) throw new Error(error.message);
   return (data ?? []) as unknown as PublicFreightMinimum[];

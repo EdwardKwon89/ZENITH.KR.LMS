@@ -137,6 +137,41 @@ export const orderRegistrationSchema = z.object({
       });
     }
   }
+  // DEF-B-044 (Issue #1044): 중국(CN) 목적지는 UPS Zone이 지역(CNN/CNS)에 따라 달라
+  // 성/직할시(recipient_state_province)를 필수로 강제 — 미입력 시 조용히 추정하지 않는다.
+  if (data.recipient_country_code === 'CN' && (!data.recipient_state_province || data.recipient_state_province.trim() === '')) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: '중국 배송은 지역(성/직할시) 선택이 필수입니다 — UPS Zone이 지역에 따라 달라집니다',
+      path: ['recipient_state_province'],
+    });
+  }
+  // TASK-B-277 (Issue #1052): UPS 배송은 SHXK API 필수 항목 조건부 검증 —
+  // recipient_country_code(필수), recipient_zipcode(중국행 실패로 실무상 필수),
+  // shipper_contact_phone(SHXK 전화/휴대폰 중 1개 필수 — 우리 스키마엔 전화 1개만 존재).
+  if (data.transport_mode === 'UPS') {
+    if (!data.recipient_country_code || data.recipient_country_code.trim() === '') {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'UPS 배송은 수하인 국가 선택이 필수입니다',
+        path: ['recipient_country_code'],
+      });
+    }
+    if (!data.recipient_zipcode || data.recipient_zipcode.trim() === '') {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'UPS 배송은 수하인 우편번호가 필수입니다(SHXK API 요구사항)',
+        path: ['recipient_zipcode'],
+      });
+    }
+    if (!data.shipper_contact_phone || data.shipper_contact_phone.trim() === '') {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'UPS 배송은 화주 연락처가 필수입니다(SHXK API 요구사항)',
+        path: ['shipper_contact_phone'],
+      });
+    }
+  }
 });
 
 export type OrderItemInput = z.infer<typeof orderItemSchema>;
