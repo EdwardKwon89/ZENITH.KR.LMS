@@ -11,7 +11,7 @@ import { toast, Toaster } from 'sonner';
 import { buildAddressBookPayload } from '@/lib/orders/build-address-book-payload';
 import { 
   Package, Plus, Trash2, Save, 
-  ChevronRight, AlertCircle, CheckCircle2, Box, Layers, Plane, Ship, Zap, Truck, PackageCheck
+  ChevronRight, AlertCircle, CheckCircle2, Box, Layers, Plane, Ship, Zap, Truck, PackageCheck, Lock
 } from 'lucide-react';
 import { ZenCard, ZenButton, ZenInput, ZenBadge } from '@/components/ui/ZenUI';
 import { createOrder } from '@/app/actions/orders';
@@ -23,6 +23,7 @@ import { UpsFreightEstimate } from '@/app/actions/ups/freight';
 import { UpsServiceSelector } from './UpsServiceSelector';
 import { USER_ROLES } from '@/lib/auth/rbac';
 import { orderRegistrationSchema, OrderRegistrationInput } from '@/lib/validation/order';
+import type { OrderEditScope } from '@/lib/logistics/status-machine';
 import { estimateFreightCost, TransportMode } from '@/utils/logistics/freight-calculator';
 import { getAvailableServiceRates, getUsdKrwRate, getBaseCurrency, AvailableServiceRates } from '@/app/actions/operations/service-rates';
 import { createOrderServices } from '@/app/actions/operations/order-services';
@@ -35,6 +36,8 @@ interface OrderRegistrationFormProps {
   onSuccess?: () => void;
   orderId?: string;
   defaultValues?: Partial<OrderRegistrationInput>;
+  editScope?: OrderEditScope;
+  measuredPackageIds?: string[];
 }
 
 type Affiliation = {
@@ -238,7 +241,9 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
   ports,
   onSuccess,
   orderId,
-  defaultValues: externalDefaults
+  defaultValues: externalDefaults,
+  editScope,
+  measuredPackageIds = [],
 }) => {
   const t = useTranslations('Orders');
   const router = useRouter();
@@ -260,6 +265,16 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
 
   const isAgencyShipper = affiliation?.role === USER_ROLES.AGENCY_SHIPPER;
   const destPort = ports.find((p) => p.id === watch('dest_port_id'));
+
+  // TASK-B-284 (Issue #1070): WAREHOUSED+UPS 부분 수정 — 잠긴 필드 헬퍼
+  const lockShipperId = !!editScope?.lockShipperId;
+  const lockTransportMode = !!editScope?.lockTransportMode;
+  const isPartialEdit = !!editScope && !editScope.fullEditable;
+  const isPackageMeasured = (pkgIndex: number): boolean => {
+    if (!editScope?.lockMeasuredPackageDims) return false;
+    const pkg = (externalDefaults?.packages as any[] | undefined)?.[pkgIndex];
+    return !!pkg?.id && measuredPackageIds.includes(pkg.id as string);
+  };
 
   const [step, setStep] = React.useState<1 | 2 | 3>(1);
   const [selectedCombination, setSelectedCombination] = React.useState<string>('');
@@ -829,6 +844,16 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
 
       <form onSubmit={handleSubmit(onSubmit, onError)} className="w-full max-w-6xl mx-auto space-y-4 pb-20 px-4">
         
+        {isPartialEdit && (
+          <div className="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-[11px] font-medium text-amber-800">
+            <Lock size={14} className="mt-0.5 shrink-0" />
+            <div>
+              창고에서 입고 확정된 오더입니다 — 화주/운송수단(shipper_id, transport_mode)과
+              실측 완료된 패키지의 치수·무게는 수정할 수 없습니다. 그 외 정보는 SHXK 등록 전까지 수정 가능합니다.
+            </div>
+          </div>
+        )}
+        
         {/* 🚀 Top Action Bar */}
         <div className="flex justify-between items-center mb-8">
           <div className="flex gap-2">
@@ -842,8 +867,9 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
               <button
                 key={mode.code}
                 type="button"
+                disabled={lockTransportMode}
                 onClick={() => setValue('transport_mode', mode.code as any)}
-                className={`flex items-center gap-1.5 px-5 py-2 rounded-xl text-xs font-bold transition-all ${watch('transport_mode') === mode.code ? 'bg-slate-800 text-white shadow-lg' : 'bg-white text-slate-400 border border-slate-200 hover:bg-slate-50'}`}
+                className={`flex items-center gap-1.5 px-5 py-2 rounded-xl text-xs font-bold transition-all ${watch('transport_mode') === mode.code ? 'bg-slate-800 text-white shadow-lg' : 'bg-white text-slate-400 border border-slate-200 hover:bg-slate-50'} ${lockTransportMode ? 'cursor-not-allowed opacity-60' : ''}`}
               >
                 <mode.icon size={14} /> {mode.label}
               </button>
@@ -943,7 +969,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                         </div>
                         <select 
                           {...register('shipper_id')}
-                          disabled={!!affiliation}
+                          disabled={!!affiliation || lockShipperId}
                           className="w-full bg-white border border-slate-200 text-sm px-3 py-2 rounded-xl focus:ring-2 focus:ring-blue-100 outline-none transition-all mb-3"
                         >
                           {shippers.map(s => {
@@ -1255,6 +1281,11 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                       >
                         <div className="flex items-start justify-between absolute -top-3 left-4">
                           <ZenBadge variant="info" className="px-3 py-1 shadow-sm border border-white">PKG #{i + 1}</ZenBadge>
+                          {isPackageMeasured(i) && (
+                            <ZenBadge variant="warning" className="px-3 py-1 shadow-sm border border-white ml-1">
+                              <Lock size={10} className="inline mr-0.5" /> 실측 완료
+                            </ZenBadge>
+                          )}
                         </div>
                         <button
                           type="button"
@@ -1300,7 +1331,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                           </div>
                           <div className="col-span-3">
                             <label className="text-[9px] font-bold text-slate-400">COUNT</label>
-                            <ZenInput type="number" {...register(`packages.${i}.packing_count`, { valueAsNumber: true })} className="py-2 text-xs" />
+                            <ZenInput type="number" disabled={isPackageMeasured(i)} {...register(`packages.${i}.packing_count`, { valueAsNumber: true })} className={`py-2 text-xs ${isPackageMeasured(i) ? 'opacity-40 bg-slate-100' : ''}`} />
                           </div>
                           <div className="col-span-3">
                             <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">
@@ -1322,18 +1353,21 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                             <div className="grid grid-cols-3 gap-1 relative">
                               {(() => {
                                 const isDoc = watch(`packages.${i}.content_type`) === 'DOC';
+                                const isMeasured = isPackageMeasured(i);
+                                const dimDisabled = isDoc || isMeasured;
+                                const dimClass = `${dimDisabled ? 'opacity-40 bg-slate-100' : ''}`;
                                 return (
                                   <>
                                     <div className="relative">
-                                      <ZenInput type="number" placeholder="L" disabled={isDoc} {...register(`packages.${i}.length`, { valueAsNumber: true })} className={`py-2 text-xs pr-4 ${isDoc ? 'opacity-40 bg-slate-100' : ''}`} />
+                                      <ZenInput type="number" placeholder="L" disabled={dimDisabled} {...register(`packages.${i}.length`, { valueAsNumber: true })} className={`py-2 text-xs pr-4 ${dimClass}`} />
                                       <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[8px] text-slate-300 font-bold">L</span>
                                     </div>
                                     <div className="relative">
-                                      <ZenInput type="number" placeholder="W" disabled={isDoc} {...register(`packages.${i}.width`, { valueAsNumber: true })} className={`py-2 text-xs pr-4 ${isDoc ? 'opacity-40 bg-slate-100' : ''}`} />
+                                      <ZenInput type="number" placeholder="W" disabled={dimDisabled} {...register(`packages.${i}.width`, { valueAsNumber: true })} className={`py-2 text-xs pr-4 ${dimClass}`} />
                                       <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[8px] text-slate-300 font-bold">W</span>
                                     </div>
                                     <div className="relative">
-                                      <ZenInput type="number" placeholder="H" disabled={isDoc} {...register(`packages.${i}.height`, { valueAsNumber: true })} className={`py-2 text-xs pr-4 ${isDoc ? 'opacity-40 bg-slate-100' : ''}`} />
+                                      <ZenInput type="number" placeholder="H" disabled={dimDisabled} {...register(`packages.${i}.height`, { valueAsNumber: true })} className={`py-2 text-xs pr-4 ${dimClass}`} />
                                       <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[8px] text-slate-300 font-bold">H</span>
                                     </div>
                                   </>
@@ -1344,7 +1378,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                           <div className="col-span-3">
                             <label className="text-[9px] font-bold text-slate-400">WEIGHT <span className="text-rose-500">*</span> <span className="text-[8px] text-slate-300">kg</span></label>
                             <div className="relative">
-                              <ZenInput type="number" step="0.01" {...register(`packages.${i}.gross_weight`, { valueAsNumber: true })} className="py-2 text-xs pr-6" />
+                              <ZenInput type="number" step="0.01" disabled={isPackageMeasured(i)} {...register(`packages.${i}.gross_weight`, { valueAsNumber: true })} className={`py-2 text-xs pr-6 ${isPackageMeasured(i) ? 'opacity-40 bg-slate-100' : ''}`} />
                               <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[9px] text-slate-300 font-bold">kg</span>
                             </div>
                           </div>
