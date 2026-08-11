@@ -117,7 +117,7 @@ async function lookupOrderPackages(
   const { data: order, error: orderError } = await supabase
     .from('zen_orders')
     .select(`*, shipper_org:zen_organizations!shipper_id(
-      address, address_detail, address_english, address_detail_english,
+      name, address, address_detail, address_english, address_detail_english,
       country_code, state_province, city, zipcode
     )`)
     .eq('id', orderId)

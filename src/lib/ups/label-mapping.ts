@@ -87,6 +87,7 @@ export function buildCreateOrderPayload(
     cargovolume,
     shipper: {
       shipper_name: (order.shipper_contact_name as string) || shipperDefaults.name,
+      shipper_company: (order.shipper_org as Record<string, unknown> | undefined)?.name as string || shipperDefaults.name,
       shipper_countrycode: (order.shipper_country_code as string) || shipperDefaults.country,
       shipper_province: (order.shipper_state_province as string) || '',
       shipper_city: (order.shipper_city as string) || '',
