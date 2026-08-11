@@ -58,15 +58,33 @@ export function productFamilyFromCode(productCode: string): string {
 // 목적지 국가코드로 Zone 탐색 (TASK-179: productFamily + direction 파라미터 추가, 2단계 Fallback)
 // 정확매치 → 실패 시 EXPRESS/EXPORT fallback → 실패 시 null
 // fallbackApplied === true이면 fallback으로 찾은 결과 (호출자가 fallback 여부 인지 가능)
+//
+// DEF-B-044 (Issue #1044): 중국은 UPS 공식 Zone 차트가 CNN(북부, EXPORT Z1/IMPORT Z3)/CNS(남부, Z10)로
+// 분리 관리 — ISO 코드 'CN'으로는 조회 불가. destStateProvince(성/직할시 ISO 코드)로 CNS 여부를 판정해
+// 정규화한다. CHINA_SOUTH_STATE_CODES는 UPS 공식 PDF 정의(ups_zones_kr.pdf):
+// "China South = Fujian, Hainan, Hunan, Yunnan, Jiangxi, Guangxi, Guangdong Provinces and Chongqing City only".
+export const CHINA_SOUTH_STATE_CODES = ['FJ', 'HI', 'HN', 'YN', 'JX', 'GX', 'GD', 'CQ'];
+
+export function resolveChinaSubCode(destStateProvince?: string | null): string {
+  const state = destStateProvince?.trim().toUpperCase();
+  return state && CHINA_SOUTH_STATE_CODES.includes(state) ? 'CNS' : 'CNN';
+}
+
 export function resolveZoneByCountry(
   destCountryCode: string,
   zones: UpsZoneWithCountries[],
   productFamily: string = 'EXPRESS',
-  direction: string = 'EXPORT'
+  direction: string = 'EXPORT',
+  destStateProvince?: string
 ): ZoneResolveResult {
-  const code = destCountryCode.toUpperCase();
+  let code = destCountryCode.toUpperCase();
   const pf = productFamily.toUpperCase();
   const dir = direction.toUpperCase();
+
+  // DEF-B-044: 중국(CN) → CNN/CNS 정규화 (destStateProvince로 남부 여부 판정)
+  if (code === 'CN') {
+    code = resolveChinaSubCode(destStateProvince);
+  }
 
   // 1단계: 정확매치 (country_code, product_family, direction)
   for (const zone of zones) {

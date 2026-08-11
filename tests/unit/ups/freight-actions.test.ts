@@ -41,6 +41,10 @@ const BOX_PRODUCT = {
   id: 'p2', product_code: 'WW_FLIGHT', sub_code: null, product_name: 'Flight',
   cargo_type: 'BOX', ddu_available: false, ddp_available: true, is_active: true, sort_order: 2, created_at: '',
 };
+const EXPEDITED_PRODUCT = {
+  id: 'p3', product_code: 'WW_EXPEDITED', sub_code: null, product_name: 'Expedited',
+  cargo_type: 'BOTH', ddu_available: false, ddp_available: true, is_active: true, sort_order: 3, created_at: '',
+};
 const ZONE = {
   id: 'z1', zone_code: 'Z8', zone_name: 'North America', description: null, is_active: true, sort_order: 8,
   created_at: '', created_by: null, countries: [{ id: 'c1', zone_id: 'z1', country_code: 'USA', created_at: '', created_by: null }],
@@ -94,7 +98,7 @@ describe('TC-UPS-FREIGHT-01: estimateUpsFreight', () => {
     });
     (createAdminClient as any).mockResolvedValue(
       buildMockSupabase({
-        zen_agency_pricing_policies: createQueryMock({ data: { discount_rate: 0.1 } }),
+        zen_agency_pricing_policies: createQueryMock({ data: [{ discount_rate: 0.1, cargo_type: 'NON_DOC' }] }),
       })
     );
 
@@ -110,12 +114,12 @@ describe('TC-UPS-FREIGHT-01: estimateUpsFreight', () => {
   it('agencyOrgId + shipperOrgId 전달 시 Shipper 최종 운송비까지 계산한다', async () => {
     (validateUserAction as any).mockResolvedValue({
       supabase: buildMockSupabase({
-        zen_agency_shipper_zone_discounts: createQueryMock({ data: { discount_rate: 0.05 } }),
+        zen_agency_shipper_zone_discounts: createQueryMock({ data: [{ discount_rate: 0.05, cargo_type: 'NON_DOC' }] }),
       }),
     });
     (createAdminClient as any).mockResolvedValue(
       buildMockSupabase({
-        zen_agency_pricing_policies: createQueryMock({ data: { discount_rate: 0.1 } }),
+        zen_agency_pricing_policies: createQueryMock({ data: [{ discount_rate: 0.1, cargo_type: 'NON_DOC' }] }),
       })
     );
 
@@ -147,6 +151,206 @@ describe('TC-UPS-FREIGHT-01: estimateUpsFreight', () => {
     await expect(
       estimateUpsFreight({ productId: 'p1', destCountryCode: 'USA', actualWeightKg: 5 })
     ).rejects.toThrow(/기준요금/);
+  });
+});
+
+describe('TC-UPS-FREIGHT-03: 할인율 cargo_type 축 (Issue #1018 + #1023/DEF-B-038)', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it('Express/Saver(cargo_type=NON_DOC) 상품은 Admin→Agency 할인율 조회 시 cargo_type 후보 [NON_DOC, ALL]로 필터한다', async () => {
+    const policyMock = createQueryMock({ data: [{ discount_rate: 0.1, cargo_type: 'NON_DOC' }] });
+    (validateUserAction as any).mockResolvedValue({ supabase: buildMockSupabase() });
+    (createAdminClient as any).mockResolvedValue(
+      buildMockSupabase({ zen_agency_pricing_policies: policyMock })
+    );
+
+    await estimateUpsFreight({
+      productId: 'p1', destCountryCode: 'USA', actualWeightKg: 5, agencyOrgId: 'agency-1',
+    });
+
+    expect(policyMock.in).toHaveBeenCalledWith('cargo_type', ['NON_DOC', 'ALL']);
+  });
+
+  it('Expedited(cargo_type=BOTH) 상품은 cargo_type 후보 [NON_DOC, ALL]로 필터한다 — DOC 정책은 후보에서 제외', async () => {
+    const policyMock = createQueryMock({ data: [{ discount_rate: 0.2, cargo_type: 'ALL' }] });
+    (validateUserAction as any).mockResolvedValue({
+      supabase: buildMockSupabase({ zen_ups_products: createQueryMock({ data: EXPEDITED_PRODUCT }) }),
+    });
+    (createAdminClient as any).mockResolvedValue(
+      buildMockSupabase({ zen_agency_pricing_policies: policyMock })
+    );
+
+    await estimateUpsFreight({
+      productId: 'p3', destCountryCode: 'USA', actualWeightKg: 5, agencyOrgId: 'agency-1',
+    });
+
+    expect(policyMock.in).toHaveBeenCalledWith('cargo_type', ['NON_DOC', 'ALL']);
+  });
+
+  it('Agency→Shipper 할인율 조회에도 동일한 cargo_type 후보가 적용된다', async () => {
+    const shipperPolicyMock = createQueryMock({ data: [{ discount_rate: 0.05, cargo_type: 'NON_DOC' }] });
+    (validateUserAction as any).mockResolvedValue({
+      supabase: buildMockSupabase({ zen_agency_shipper_zone_discounts: shipperPolicyMock }),
+    });
+    (createAdminClient as any).mockResolvedValue(
+      buildMockSupabase({ zen_agency_pricing_policies: createQueryMock({ data: [{ discount_rate: 0.1, cargo_type: 'NON_DOC' }] }) })
+    );
+
+    await estimateUpsFreight({
+      productId: 'p1', destCountryCode: 'USA', actualWeightKg: 5,
+      agencyOrgId: 'agency-1', shipperOrgId: 'shipper-1',
+    });
+
+    expect(shipperPolicyMock.in).toHaveBeenCalledWith('cargo_type', ['NON_DOC', 'ALL']);
+  });
+});
+
+describe('TC-UPS-FREIGHT-04: cargo_type ALL/NON_DOC 폴백 (Issue #1023 / DEF-B-038)', () => {
+  const DOC_PRODUCT_FIXTURE = {
+    id: 'p-doc1', product_code: 'WW_EXPRESS_DOC', sub_code: null, product_name: 'Express DOC',
+    cargo_type: 'DOC', ddu_available: false, ddp_available: true, is_active: true, sort_order: 1, created_at: '',
+  };
+  const SAVER_NONDOC_PRODUCT_FIXTURE = {
+    id: 'p-sn1', product_code: 'WW_SAVER_NONDOC', sub_code: null, product_name: 'Saver NONDOC',
+    cargo_type: 'NON_DOC', ddu_available: false, ddp_available: true, is_active: true, sort_order: 2, created_at: '',
+  };
+
+  beforeEach(() => vi.clearAllMocks());
+
+  function runEstimate(opts: { product: any; agencyPolicies?: any[]; shipperDiscounts?: any[]; shipperOrgId?: boolean }) {
+    const supabaseMock = buildMockSupabase({
+      zen_ups_products: createQueryMock({ data: opts.product }),
+      ...(opts.shipperOrgId
+        ? { zen_agency_shipper_zone_discounts: createQueryMock({ data: opts.shipperDiscounts ?? [] }) }
+        : {}),
+    });
+    (validateUserAction as any).mockResolvedValue({ supabase: supabaseMock });
+    (createAdminClient as any).mockResolvedValue(
+      buildMockSupabase({
+        zen_agency_pricing_policies: createQueryMock({ data: opts.agencyPolicies ?? [] }),
+        zen_agency_other_charges: createQueryMock({ data: [] }),
+      })
+    );
+    return estimateUpsFreight({
+      productId: opts.product.id, destCountryCode: 'USA', actualWeightKg: 5,
+      agencyOrgId: 'agency-1', ...(opts.shipperOrgId ? { shipperOrgId: 'shipper-1' } : {}),
+    });
+  }
+
+  // ─── Admin→Agency (zen_agency_pricing_policies) ────────────────────────────
+
+  it('ALL만 등록 → DOC 상품(Express DOC)도 할인 적용 (폴백)', async () => {
+    const result = await runEstimate({
+      product: DOC_PRODUCT_FIXTURE,
+      agencyPolicies: [{ discount_rate: 0.1, cargo_type: 'ALL' }],
+    });
+    expect(result.agency).not.toBeNull();
+    expect(result.agency!.discountRate).toBe(0.1);
+  });
+
+  it('ALL만 등록 → NON_DOC 상품(Saver NONDOC)도 할인 적용 (폴백)', async () => {
+    const result = await runEstimate({
+      product: SAVER_NONDOC_PRODUCT_FIXTURE,
+      agencyPolicies: [{ discount_rate: 0.12, cargo_type: 'ALL' }],
+    });
+    expect(result.agency!.discountRate).toBe(0.12);
+  });
+
+  it('ALL만 등록 → BOTH 상품(Expedited)도 할인 적용 (폴백)', async () => {
+    const result = await runEstimate({
+      product: EXPEDITED_PRODUCT,
+      agencyPolicies: [{ discount_rate: 0.08, cargo_type: 'ALL' }],
+    });
+    expect(result.agency!.discountRate).toBe(0.08);
+  });
+
+  it('DOC만 등록 → DOC 상품 할인 적용, NON_DOC 상품 0% (미적용)', async () => {
+    const docResult = await runEstimate({
+      product: DOC_PRODUCT_FIXTURE,
+      agencyPolicies: [{ discount_rate: 0.15, cargo_type: 'DOC' }],
+    });
+    expect(docResult.agency!.discountRate).toBe(0.15);
+
+    const nonDocResult = await runEstimate({
+      product: SAVER_NONDOC_PRODUCT_FIXTURE,
+      agencyPolicies: [{ discount_rate: 0.15, cargo_type: 'DOC' }],
+    });
+    expect(nonDocResult.agency!.discountRate).toBe(0);
+  });
+
+  it('NON_DOC만 등록 → NON_DOC 상품 할인 적용, DOC 상품 0%, Expedited(전자)에도 적용', async () => {
+    const nonDocResult = await runEstimate({
+      product: SAVER_NONDOC_PRODUCT_FIXTURE,
+      agencyPolicies: [{ discount_rate: 0.18, cargo_type: 'NON_DOC' }],
+    });
+    expect(nonDocResult.agency!.discountRate).toBe(0.18);
+
+    const docResult = await runEstimate({
+      product: DOC_PRODUCT_FIXTURE,
+      agencyPolicies: [{ discount_rate: 0.18, cargo_type: 'NON_DOC' }],
+    });
+    expect(docResult.agency!.discountRate).toBe(0);
+
+    const expedResult = await runEstimate({
+      product: EXPEDITED_PRODUCT,
+      agencyPolicies: [{ discount_rate: 0.18, cargo_type: 'NON_DOC' }],
+    });
+    expect(expedResult.agency!.discountRate).toBe(0.18);
+  });
+
+  it('NON_DOC + ALL 동시 등록 → BOTH(Expedited)는 NON_DOC 우선 (폴백 우선순위)', async () => {
+    const result = await runEstimate({
+      product: EXPEDITED_PRODUCT,
+      agencyPolicies: [
+        { discount_rate: 0.05, cargo_type: 'ALL' },
+        { discount_rate: 0.18, cargo_type: 'NON_DOC' },
+      ],
+    });
+    expect(result.agency!.discountRate).toBe(0.18);
+  });
+
+  // ─── Agency→Shipper (zen_agency_shipper_zone_discounts) ────────────────────
+
+  it('SHIPPER 할인: ALL만 등록 → NON_DOC 상품 할인 적용 (폴백)', async () => {
+    const result = await runEstimate({
+      product: SAVER_NONDOC_PRODUCT_FIXTURE,
+      agencyPolicies: [{ discount_rate: 0.1, cargo_type: 'ALL' }],
+      shipperDiscounts: [{ discount_rate: 0.05, cargo_type: 'ALL' }],
+      shipperOrgId: true,
+    });
+    expect(result.shipper).not.toBeNull();
+    expect(result.shipper!.shipperDiscountRate).toBe(0.05);
+  });
+
+  it('SHIPPER 할인: NON_DOC + ALL 동시 등록 → NON_DOC 우선', async () => {
+    const result = await runEstimate({
+      product: EXPEDITED_PRODUCT,
+      agencyPolicies: [{ discount_rate: 0.1, cargo_type: 'ALL' }],
+      shipperDiscounts: [
+        { discount_rate: 0.03, cargo_type: 'ALL' },
+        { discount_rate: 0.09, cargo_type: 'NON_DOC' },
+      ],
+      shipperOrgId: true,
+    });
+    expect(result.shipper!.shipperDiscountRate).toBe(0.09);
+  });
+
+  it('SHIPPER 할인: DOC만 등록 → DOC 상품 적용, NON_DOC 상품 0%', async () => {
+    const docResult = await runEstimate({
+      product: DOC_PRODUCT_FIXTURE,
+      agencyPolicies: [{ discount_rate: 0.1, cargo_type: 'ALL' }],
+      shipperDiscounts: [{ discount_rate: 0.07, cargo_type: 'DOC' }],
+      shipperOrgId: true,
+    });
+    expect(docResult.shipper!.shipperDiscountRate).toBe(0.07);
+
+    const nonDocResult = await runEstimate({
+      product: SAVER_NONDOC_PRODUCT_FIXTURE,
+      agencyPolicies: [{ discount_rate: 0.1, cargo_type: 'ALL' }],
+      shipperDiscounts: [{ discount_rate: 0.07, cargo_type: 'DOC' }],
+      shipperOrgId: true,
+    });
+    expect(nonDocResult.shipper!.shipperDiscountRate).toBe(0);
   });
 });
 
@@ -214,7 +418,7 @@ describe('TC-UPS-FREIGHT-02: resolveZoneByCountry 연동 (GH#202)', () => {
     });
     (createAdminClient as any).mockResolvedValue(
       buildMockSupabase({
-        zen_agency_pricing_policies: createQueryMock({ data: { discount_rate: 0.15 } }),
+        zen_agency_pricing_policies: createQueryMock({ data: [{ discount_rate: 0.15, cargo_type: 'NON_DOC' }] }),
         zen_agency_other_charges: createQueryMock({ data: [] }),
       })
     );
@@ -362,5 +566,73 @@ describe('TC-UPS-FREIGHT-02: resolveZoneByCountry 연동 (GH#202)', () => {
 
       expect(result.platform.totalSellingPrice).toBeGreaterThan(0);
     });
+  });
+});
+
+// ─── TASK-B-273 (Issue #1046 / DEF-B-045): 중국 급증 수수료 CNN/CNS 정규화 ─────────
+
+describe('TC-UPS-FREIGHT-SURGE-CN: 중국 급증 긴급 수수료 조회 (DEF-B-045)', () => {
+  const CN_ZONE = {
+    id: 'z-cn', zone_code: 'Z1', zone_name: 'China North', description: null, is_active: true, sort_order: 1,
+    created_at: '', created_by: null, countries: [{ id: 'ccn1', zone_id: 'z-cn', country_code: 'CNN', product_family: 'EXPRESS', direction: 'EXPORT', created_at: '', created_by: null }],
+  };
+  const CN_SOUTH_ZONE = {
+    id: 'z-cns', zone_code: 'Z10', zone_name: 'China South', description: null, is_active: true, sort_order: 10,
+    created_at: '', created_by: null, countries: [{ id: 'ccns1', zone_id: 'z-cns', country_code: 'CNS', product_family: 'EXPRESS', direction: 'EXPORT', created_at: '', created_by: null }],
+  };
+  const SURGE = {
+    id: 'sf-cn', destination_country_code: 'CNS', selling_rate_per_kg: 143, cost_rate_per_kg: 143,
+    currency: 'KRW', effective_from: '2026-01-01', effective_until: null, is_active: true, created_at: '', created_by: null,
+  };
+
+  beforeEach(() => vi.clearAllMocks());
+
+  function runCnEstimate(destCountryCode: string, destStateProvince?: string) {
+    const surgeMock = createQueryMock({ data: [SURGE] });
+    (validateUserAction as any).mockResolvedValue({
+      supabase: buildMockSupabase({
+        zen_ups_zones: createQueryMock({ data: [CN_ZONE, CN_SOUTH_ZONE] }),
+        zen_ups_surge_fees: surgeMock,
+      }),
+    });
+    (createAdminClient as any).mockResolvedValue(buildMockSupabase());
+    return { estimate: estimateUpsFreight({
+      productId: 'p1', destCountryCode, destStateProvince, actualWeightKg: 5,
+    }), surgeMock };
+  }
+
+  it('destCountryCode=CN + destStateProvince=GD(남부) → CNS로 정규화되어 급증 수수료 정상 계산', async () => {
+    const { estimate, surgeMock } = runCnEstimate('CN', 'GD');
+    const result = await estimate;
+    expect(surgeMock.eq).toHaveBeenCalledWith('destination_country_code', 'CNS');
+    expect(result.platform.surgeFeeSellingAmount).toBeGreaterThan(0);
+  });
+
+  it('destCountryCode=CN + destStateProvince=BJ(목록 외) → CNN으로 정규화되어 정상 계산', async () => {
+    const { estimate, surgeMock } = runCnEstimate('CN', 'BJ');
+    const result = await estimate;
+    expect(surgeMock.eq).toHaveBeenCalledWith('destination_country_code', 'CNN');
+    expect(result.platform.surgeFeeSellingAmount).toBeGreaterThan(0);
+  });
+
+  it('destCountryCode=CN + 주 정보 없음 → CNN 기본으로 정규화되어 정상 계산 (방어적 동작)', async () => {
+    const { estimate, surgeMock } = runCnEstimate('CN');
+    const result = await estimate;
+    expect(surgeMock.eq).toHaveBeenCalledWith('destination_country_code', 'CNN');
+    expect(result.platform.surgeFeeSellingAmount).toBeGreaterThan(0);
+  });
+
+  it('CN 외 국가는 기존 동작 그대로 (회귀 방지)', async () => {
+    const surgeMock = createQueryMock({ data: [SURGE] });
+    (validateUserAction as any).mockResolvedValue({
+      supabase: buildMockSupabase({ zen_ups_surge_fees: surgeMock }),
+    });
+    (createAdminClient as any).mockResolvedValue(buildMockSupabase());
+
+    await estimateUpsFreight({ productId: 'p1', destCountryCode: 'USA', actualWeightKg: 5 });
+
+    expect(surgeMock.eq).toHaveBeenCalledWith('destination_country_code', 'USA');
+    expect(surgeMock.eq).not.toHaveBeenCalledWith('destination_country_code', 'CNN');
+    expect(surgeMock.eq).not.toHaveBeenCalledWith('destination_country_code', 'CNS');
   });
 });

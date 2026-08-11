@@ -530,7 +530,16 @@
     "error_load": "Failed to load data.",
     "confirm_delete": "Are you sure you want to delete this?",
     "prompt_add_dept": "Enter new department name",
-    "prompt_edit_dept": "Edit department name"
+    "prompt_edit_dept": "Edit department name",
+    "form_country": "Country",
+    "form_zipcode": "Postal Code",
+    "form_address": "Address",
+    "form_address_detail": "Address Detail",
+    "form_address_english": "Address (English)",
+    "form_address_detail_english": "Address Detail (English)",
+    "form_address_search": "Search Address",
+    "form_state_province": "State/Province",
+    "form_city": "City"
   },
   "Withdrawal": {
     "title": "Are you sure you want to withdraw?",

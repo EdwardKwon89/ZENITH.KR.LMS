@@ -9,6 +9,7 @@ import {
   SHXK_SHIPPER_NAME, SHXK_SHIPPER_COUNTRY,
 } from '@/lib/shxk/config';
 import { buildCreateOrderPayload } from '@/lib/ups/label-mapping';
+import { validateShxkPayload, type ShxkPayloadShape } from '@/lib/shxk/validate-payload';
 import { revalidatePath } from 'next/cache';
 import type { GetNewLabelItem } from '@/lib/shxk/order';
 
@@ -178,6 +179,12 @@ async function placeShxkOrder(
     name: SHXK_SHIPPER_NAME,
     country: SHXK_SHIPPER_COUNTRY,
   });
+
+  // TASK-B-277 (Issue #1052): SHXK 필수 필드 사전 검증 — 누락 시 API 호출 스킵하고 즉시 실패
+  const payloadErrors = validateShxkPayload(payload as ShxkPayloadShape);
+  if (payloadErrors.length > 0) {
+    return { error: `SHXK 필수 항목 누락: ${payloadErrors.join(', ')}`, message: payloadErrors.join(', ') };
+  }
 
   const orderRes = await createorder(payload as unknown as Parameters<typeof createorder>[0]);
 
@@ -502,6 +509,9 @@ export async function cancelUpsRegistration(
       logger.error('zen_ups_labels delete error:', deleteErr);
       return { success: false, error: `라벨 레코드 삭제 실패: ${deleteErr.message}` };
     }
+
+    const unlockErr = await unlockAllPackagesIntlRef(supabase, orderId);
+    if (unlockErr) return { success: false, error: `intl_ref 복원 실패: ${unlockErr}` };
 
     const { error: trackingResetErr } = await supabase
       .from('zen_tracking_configs')

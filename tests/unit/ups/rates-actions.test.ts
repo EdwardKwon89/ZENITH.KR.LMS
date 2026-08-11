@@ -27,7 +27,12 @@ describe('TC-UPS-R: UPS Rate Lookup Server Actions', () => {
       or: vi.fn().mockReturnThis(),
       order: vi.fn().mockReturnThis(),
       limit: vi.fn().mockReturnThis(),
+      range: vi.fn(),
     };
+
+    // DEF-B-041: 페이지네이션 도입 후 최종 .range(from, to)가 Promise로 resolve되어야 한다.
+    // 기본: 1페이지에 1000행 미만 데이터 반환(→ 루프 1회 종료)
+    mockSupabase.range.mockResolvedValue({ data: [], error: null });
 
     (validateUserAction as any).mockResolvedValue({
       user: { id: 'user-001' },
@@ -69,7 +74,7 @@ describe('TC-UPS-R: UPS Rate Lookup Server Actions', () => {
     const mockRates = [
       { id: 'r1', product_id: 'p1', zone_id: 'z1', weight_kg: 0.5, selling_price: 25, is_active: true, valid_from: '2026-01-01' },
     ];
-    mockSupabase.order.mockResolvedValue({ data: mockRates, error: null });
+    mockSupabase.range.mockResolvedValue({ data: mockRates, error: null });
 
     const result = await getUpsBaseRates({ productId: 'p1', zoneId: 'z1' });
 
@@ -103,5 +108,145 @@ describe('TC-UPS-R: UPS Rate Lookup Server Actions', () => {
     expect(mockSupabase.from).toHaveBeenCalledWith('zen_ups_other_charges');
     expect(mockSupabase.eq).toHaveBeenCalledWith('is_active', true);
     expect(result).toEqual(mockCharges);
+  });
+});
+
+// ─── TASK-B-268 (Issue #1034 / DEF-B-041): PostgREST 1,000행 제한 페이지네이션 ─────────
+
+describe('TC-UPS-R-PAG: getUpsBaseRates 페이지네이션 (DEF-B-041)', () => {
+  let mockSupabase: any;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockSupabase = {
+      from: vi.fn().mockReturnThis(),
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      lte: vi.fn().mockReturnThis(),
+      gte: vi.fn().mockReturnThis(),
+      or: vi.fn().mockReturnThis(),
+      order: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockReturnThis(),
+      range: vi.fn(),
+    };
+    (validateUserAction as any).mockResolvedValue({
+      user: { id: 'user-001' },
+      profile: { id: 'user-001', role: 'ADMIN', org_id: 'org-001' },
+      supabase: mockSupabase,
+    });
+  });
+
+  function makeRows(count: number, startIdx = 0) {
+    return Array.from({ length: count }, (_, i) => ({
+      id: `r-${startIdx + i}`, product_id: 'p1', zone_id: 'z1', weight_kg: startIdx + i + 0.5,
+      selling_price: 100, is_active: true, valid_from: '2026-01-01',
+    }));
+  }
+
+  it('TC-UPS-R-PAG-01: 1,000행 초과(1,200행) 데이터를 2회 range 호출로 전체 병합한다', async () => {
+    const page1 = makeRows(1000, 0);
+    const page2 = makeRows(200, 1000);
+    mockSupabase.range
+      .mockResolvedValueOnce({ data: page1, error: null })
+      .mockResolvedValueOnce({ data: page2, error: null });
+
+    const result = await getUpsBaseRates();
+
+    expect(result).toHaveLength(1200);
+    // range 호출 인자: [0, 999] → [1000, 1999]
+    expect(mockSupabase.range).toHaveBeenCalledTimes(2);
+    expect(mockSupabase.range).toHaveBeenNthCalledWith(1, 0, 999);
+    expect(mockSupabase.range).toHaveBeenNthCalledWith(2, 1000, 1999);
+    // 마지막 행(weight 1200.5)까지 포함됐는지 — 잘림 없이 전체 반환 확인
+    expect(result[1199].id).toBe('r-1199');
+  });
+
+  it('TC-UPS-R-PAG-02: 1,000행 이하면 range 1회 호출 후 종료 (기존 동작 회귀 방지)', async () => {
+    mockSupabase.range.mockResolvedValue({ data: makeRows(300), error: null });
+
+    const result = await getUpsBaseRates({ productId: 'p1' });
+
+    expect(result).toHaveLength(300);
+    expect(mockSupabase.range).toHaveBeenCalledTimes(1);
+    expect(mockSupabase.range).toHaveBeenCalledWith(0, 999);
+  });
+
+  it('TC-UPS-R-PAG-03: 정확히 1,000행이면 다음 페이지(빈 응답)까지 호출해 종료, 결과는 1,000행', async () => {
+    // 페이지네이션 헬퍼는 정확히 PAGE_SIZE(1000)행을 받으면 다음 페이지를 한 번 더 조회해
+    // 빈 응답으로 종료를 판단한다 — mock도 동일하게 2번째 호출은 빈 배열을 반환해야 한다.
+    mockSupabase.range
+      .mockResolvedValueOnce({ data: makeRows(1000), error: null })
+      .mockResolvedValueOnce({ data: [], error: null });
+
+    const result = await getUpsBaseRates();
+
+    expect(result).toHaveLength(1000);
+    expect(mockSupabase.range).toHaveBeenCalledTimes(2);
+    expect(mockSupabase.range).toHaveBeenNthCalledWith(1, 0, 999);
+    expect(mockSupabase.range).toHaveBeenNthCalledWith(2, 1000, 1999);
+  });
+
+  it('TC-UPS-R-PAG-04: 페이지네이션 시에도 productId/zoneId 필터가 유지된다', async () => {
+    mockSupabase.range
+      .mockResolvedValueOnce({ data: makeRows(1000, 0), error: null })
+      .mockResolvedValueOnce({ data: makeRows(200, 1000), error: null })
+      .mockResolvedValueOnce({ data: [], error: null });
+
+    await getUpsBaseRates({ productId: 'p1', zoneId: 'z1' });
+
+    expect(mockSupabase.eq).toHaveBeenCalledWith('product_id', 'p1');
+    expect(mockSupabase.eq).toHaveBeenCalledWith('zone_id', 'z1');
+  });
+
+  it('TC-UPS-R-PAG-05: 조회 에러 시 에러를 전파한다', async () => {
+    mockSupabase.range.mockResolvedValue({ data: null, error: { message: 'boom' } });
+
+    await expect(getUpsBaseRates()).rejects.toThrow('boom');
+  });
+});
+
+// ─── TASK-B-270 (Issue #1039 / DEF-B-043): 페이지네이션 tiebreaker 2차 정렬 ─────
+
+describe('TC-UPS-R-TIE: 페이지네이션 weight_kg/id 2차 정렬 (DEF-B-043)', () => {
+  let mockSupabase: any;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockSupabase = {
+      from: vi.fn().mockReturnThis(),
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      lte: vi.fn().mockReturnThis(),
+      gte: vi.fn().mockReturnThis(),
+      or: vi.fn().mockReturnThis(),
+      order: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockReturnThis(),
+      range: vi.fn().mockResolvedValue({ data: [], error: null }),
+    };
+    (validateUserAction as any).mockResolvedValue({
+      user: { id: 'user-001' },
+      profile: { id: 'user-001', role: 'ADMIN', org_id: 'org-001' },
+      supabase: mockSupabase,
+    });
+  });
+
+  it('TC-UPS-R-TIE-01: getUpsBaseRates가 weight_kg 정렬 후 id 2차 정렬을 호출한다 (behavioral)', async () => {
+    await getUpsBaseRates();
+
+    expect(mockSupabase.order).toHaveBeenCalledWith('weight_kg');
+    expect(mockSupabase.order).toHaveBeenCalledWith('id');
+    // weight_kg가 먼저, id가 나중에 호출되어야 함 (tiebreaker 순서)
+    const orderCalls = mockSupabase.order.mock.calls.map((c: any[]) => c[0]);
+    const wIdx = orderCalls.indexOf('weight_kg');
+    const idIdx = orderCalls.indexOf('id');
+    expect(wIdx).toBeGreaterThanOrEqual(0);
+    expect(idIdx).toBeGreaterThan(wIdx);
+  });
+
+  it('TC-UPS-R-TIE-02: productId 필터 시에도 weight_kg/id 2차 정렬이 유지된다', async () => {
+    await getUpsBaseRates({ productId: 'p1' });
+
+    expect(mockSupabase.order).toHaveBeenCalledWith('weight_kg');
+    expect(mockSupabase.order).toHaveBeenCalledWith('id');
   });
 });

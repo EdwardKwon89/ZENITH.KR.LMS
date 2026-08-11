@@ -1103,6 +1103,9 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                             }}
                             required
                           />
+                          {watch('recipient_country_code') === 'CN' && (
+                            <p className="text-[10px] text-amber-600 mt-1.5">※ 중국 배송은 UPS Zone이 지역(성/직할시)에 따라 달라지므로 시/도를 선택해야 합니다.</p>
+                          )}
                        </div>
                        <div>
                         <label className="text-[10px] font-bold text-slate-500 mb-1 block">Email</label>
@@ -1372,6 +1375,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                       <UpsFreightEstimateSection
                         shipperOrgId={affiliation?.orgId ?? null}
                         destCountryCode={watch('recipient_country_code') || undefined}
+                        destStateProvince={watch('recipient_state_province') || undefined}
                         packages={watchedPackages || []}
                         selectedProductId={upsProductId}
                         selectedIncoterms={watch('incoterms')}

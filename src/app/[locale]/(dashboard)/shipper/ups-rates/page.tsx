@@ -24,15 +24,19 @@ export default async function ShipperUpsRatesPage() {
     getPublicSurgeFees(),
   ]);
 
-  const zoneDiscountMap: Record<string, number> = {};
+  // Issue #1027: zoneDiscountMap을 중첩 구조로 변경 (zoneId -> cargoType -> rate)
+  const zoneDiscountMap: Record<string, Record<string, number>> = {};
   if (agencyOrgId) {
     const { data: zoneDiscounts } = await supabase
       .from('zen_agency_shipper_zone_discounts')
-      .select('zone_id, discount_rate')
+      .select('zone_id, cargo_type, discount_rate')
       .eq('shipper_org_id', profile.org_id)
       .eq('is_active', true);
     if (zoneDiscounts) {
-      for (const zd of zoneDiscounts) zoneDiscountMap[zd.zone_id] = Number(zd.discount_rate);
+      for (const zd of zoneDiscounts) {
+        if (!zoneDiscountMap[zd.zone_id]) zoneDiscountMap[zd.zone_id] = {};
+        zoneDiscountMap[zd.zone_id][zd.cargo_type] = Number(zd.discount_rate);
+      }
     }
   }
 

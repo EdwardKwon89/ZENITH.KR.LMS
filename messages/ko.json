@@ -525,7 +525,16 @@
     "error_load": "데이터를 불러오는 데 실패했습니다.",
     "confirm_delete": "정말 삭제하시겠습니까?",
     "prompt_add_dept": "새 부서 이름을 입력하세요",
-    "prompt_edit_dept": "부서 이름을 수정하세요"
+    "prompt_edit_dept": "부서 이름을 수정하세요",
+    "form_country": "국가",
+    "form_zipcode": "우편번호",
+    "form_address": "주소",
+    "form_address_detail": "상세주소",
+    "form_address_english": "영문 주소",
+    "form_address_detail_english": "영문 상세주소",
+    "form_address_search": "주소 검색",
+    "form_state_province": "시/도",
+    "form_city": "시/군/구"
   },
   "Withdrawal": {
     "title": "정말 탈퇴하시겠습니까?",
