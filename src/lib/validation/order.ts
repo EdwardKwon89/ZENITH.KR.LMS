@@ -48,10 +48,12 @@ export const orderRegistrationSchema = z.object({
   shipper_contact_phone: z.string().optional(),
   shipper_contact_email: z.string().email('Invalid email format').optional().or(z.literal('')),
   shipper_address: z.string().optional(),
+  shipper_address_english: z.string().optional(),
   shipper_country_code: z.string().optional().default('KR'),
   shipper_state_province: z.string().optional(),
   shipper_city: z.string().optional(),
   shipper_address_detail: z.string().optional(),
+  shipper_address_detail_english: z.string().optional(),
   shipper_zipcode: z.string().optional(),
   shipper_biz_no: z.string().optional(),
   
