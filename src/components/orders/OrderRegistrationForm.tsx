@@ -375,6 +375,10 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
   }, [addressBookDisplayName, watch]);
 
   useEffect(() => {
+    // TASK-B-287 (Issue #1078 / DEF-B-058): 수정(edit) 모드에서는 신규등록용 화주정보 자동완성 스킵 —
+    //   edit/page.tsx가 getOrderDetails()로 불러온 오더의 원래 저장값을 로그인 계정 소속 정보로
+    //   덮어쓰면 안 됨 (로그인 계정이 실제 화주와 다르면 고객 데이터 오염)
+    if (orderId) return;
     async function loadAffiliation() {
       try {
         const data = await getCurrentUserAffiliation();
@@ -403,7 +407,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
       } catch (err) { logger.error(err); } finally { setIsLoadingAffiliation(false); }
     }
     loadAffiliation();
-  }, [setValue, shippers]);
+  }, [orderId, setValue, shippers]);
 
   const { fields: packageFields, append: appendPackage, remove: removePackage } = useFieldArray({
     control,
@@ -460,6 +464,10 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
     [watchedPackages]
   );
   useEffect(() => {
+    // TASK-B-287 (Issue #1078 / DEF-B-058): 수정(edit) 모드에서는 DOC 치수 초기화 스킵 —
+    //   마운트 시점에 저장된 DOC 패키지 치수(length/width/height)를 지우면 안 됨.
+    //   (TASK-B-076 원래 의도는 "사용자가 content_type을 DOC로 방금 바꿨을 때" 초기화)
+    if (orderId) return;
     if (!watchedPackages) return;
     watchedPackages.forEach((pkg, i) => {
       if (pkg.content_type === 'DOC' && (pkg.length !== undefined || pkg.width !== undefined || pkg.height !== undefined)) {
@@ -468,7 +476,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
         setValue(`packages.${i}.height`, undefined);
       }
     });
-  }, [contentTypesKey, setValue]);
+  }, [orderId, contentTypesKey, setValue]);
 
   const filteredPorts = useMemo(() => {
     if (!transportMode) return ports;
