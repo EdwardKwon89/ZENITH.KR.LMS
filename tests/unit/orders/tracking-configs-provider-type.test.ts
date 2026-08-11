@@ -77,6 +77,7 @@ describe('TASK-B-207: UPS 오더 생성 시 zen_tracking_configs.provider_type �
       shipper_contact_phone: '010-0000-0000',
       recipient_country_code: 'US',
       recipient_zipcode: '90001',
+      recipient_city: 'Los Angeles',
       transport_mode: transportMode,
       packages: [
         {
