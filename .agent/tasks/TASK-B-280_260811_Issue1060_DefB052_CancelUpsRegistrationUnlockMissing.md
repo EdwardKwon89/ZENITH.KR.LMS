@@ -8,7 +8,7 @@
 | **담당** | Dave (Team B) |
 | **생성일** | 2026-08-11 |
 | **우선순위** | P1 (High) |
-| **상태** | 🔔 (완료 보고 — 검토 요청) |
+| **상태** | ✅ 완료 |
 
 ## 근본 원인 (확정 완료)
 
@@ -94,3 +94,7 @@ const packagesNeedingLabels = selectedOrders.flatMap((o) =>
 ## [발견 이슈]
 
 없음
+
+## [Jaison 최종 검토]
+
+코드 수정(voidUpsLabel과 동일 패턴으로 unlockAllPackagesIntlRef 호출 추가)이 설계와 정확히 일치, 신규 회귀 테스트 3건(TC-280-01~03)도 실 DB 기반으로 적절함을 확인. CI Regression Tests가 "fail"로 표시됐으나 JSJung이 직접 중단시킨 것으로 확인(실제 코드 결함 아님) — PR#1061 승인·머지, Issue #1060 종결.
