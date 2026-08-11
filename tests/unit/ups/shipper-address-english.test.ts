@@ -1,7 +1,17 @@
 // DEF-B-059 / Issue #1079: 오더 화주 주소 영문 컬럼 부재 수정 회귀 테스트
-// 실제 프로덕션 함수(resolveShipperStreet)를 import해서 검증
-import { describe, it, expect } from 'vitest';
+// 실제 프로덕션 함수(resolveShipperStreet)를 import해서 검증 + Supabase CLI로 DB 검증
+import { describe, it, expect, beforeAll } from 'vitest';
 import { resolveShipperStreet } from '@/lib/ups/label-mapping';
+import { execSync } from 'child_process';
+import { readFileSync } from 'fs';
+import { join } from 'path';
+
+function queryDB(sql: string): string {
+  return execSync(`npx supabase db query --local "${sql}"`, {
+    cwd: process.cwd(),
+    encoding: 'utf-8',
+  });
+}
 
 describe('TC-DEF-B059-01: resolveShipperStreet 실제 함수 검증', () => {
   it('order.shipper_address_english가 있으면 우선 사용', () => {
@@ -29,7 +39,6 @@ describe('TC-DEF-B059-01: resolveShipperStreet 실제 함수 검증', () => {
       address: '조직 주소',
     };
     const result = resolveShipperStreet(order, shipperOrg);
-    // shipper_address_detail_english가 없으므로 order.shipper_address_detail이 포함됨
     expect(result).toContain('Org English Address');
   });
 
@@ -42,7 +51,6 @@ describe('TC-DEF-B059-01: resolveShipperStreet 실제 함수 검증', () => {
       address: '조직 주소',
     };
     const result = resolveShipperStreet(order, shipperOrg);
-    // shipper_address_detail이 포함됨
     expect(result).toContain('조직 주소');
   });
 
@@ -52,7 +60,6 @@ describe('TC-DEF-B059-01: resolveShipperStreet 실제 함수 검증', () => {
       shipper_address_detail: '상세주소',
     };
     const result = resolveShipperStreet(order, undefined);
-    // shipper_address_detail이 포함됨
     expect(result).toContain('테스트 주소');
   });
 
@@ -63,9 +70,27 @@ describe('TC-DEF-B059-01: resolveShipperStreet 실제 함수 검증', () => {
   });
 });
 
-describe('TC-DEF-B059-02: 되돌리기 검증', () => {
+describe('TC-DEF-B059-02: 마이그레이션 DB 검증', () => {
+  it('zen_orders에 shipper_address_english 컬럼이 존재한다', () => {
+    const output = queryDB("SELECT column_name FROM information_schema.columns WHERE table_name = 'zen_orders' AND column_name = 'shipper_address_english';");
+    expect(output).toContain('shipper_address_english');
+  });
+
+  it('zen_orders에 shipper_address_detail_english 컬럼이 존재한다', () => {
+    const output = queryDB("SELECT column_name FROM information_schema.columns WHERE table_name = 'zen_orders' AND column_name = 'shipper_address_detail_english';");
+    expect(output).toContain('shipper_address_detail_english');
+  });
+
+  it('create_order_atomic 함수가 shipper_address_english를 포함한다', () => {
+    const output = queryDB("SELECT prosrc FROM pg_proc WHERE proname = 'create_order_atomic';");
+    expect(output).toContain('shipper_address_english');
+    expect(output).toContain('shipper_address_detail_english');
+  });
+});
+
+describe('TC-DEF-B059-03: 되돌리기 검증', () => {
   it('기존 코드는 order-level english를 무시했다', () => {
-    // 기존 코드: shipperOrg.address_english를 우선 사용
+    // 기존 로직: shipperOrg.address_english > shipperOrg.address > order.shipper_address
     const order = {
       shipper_address_english: '123 Test Street',
       shipper_address: '테스트 주소',
@@ -74,7 +99,6 @@ describe('TC-DEF-B059-02: 되돌리기 검증', () => {
       address: '조직 주소',
     };
     
-    // 기존 로직: shipperOrg.address_english > shipperOrg.address > order.shipper_address
     const buggyResult = (shipperOrg?.address_english as string) || (shipperOrg?.address as string) || (order.shipper_address as string) || '';
     expect(buggyResult).toBe('조직 주소'); // order.shipper_address_english가 무시됨
   });
@@ -89,23 +113,5 @@ describe('TC-DEF-B059-02: 되돌리기 검증', () => {
     };
     const result = resolveShipperStreet(order, shipperOrg);
     expect(result).toBe('123 Test Street');
-  });
-});
-
-describe('TC-DEF-B059-03: 마이그레이션 SQL 검증', () => {
-  it('마이그레이션 파일이 존재한다', () => {
-    const { existsSync } = require('fs');
-    const path = require('path');
-    const migrationPath = path.join(process.cwd(), 'supabase/migrations/20260812010000_iss1079_shipper_address_english_columns.sql');
-    expect(existsSync(migrationPath)).toBe(true);
-  });
-
-  it('마이그레이션에 shipper_address_english 컬럼이 포함되어 있다', () => {
-    const { readFileSync } = require('fs');
-    const path = require('path');
-    const migrationPath = path.join(process.cwd(), 'supabase/migrations/20260812010000_iss1079_shipper_address_english_columns.sql');
-    const content = readFileSync(migrationPath, 'utf-8');
-    expect(content).toContain('shipper_address_english');
-    expect(content).toContain('shipper_address_detail_english');
   });
 });

@@ -51,8 +51,20 @@
 
 ## [작업 결과]
 
-_(담당자 작성 예정)_
+**커밋**: `60d46b04` — `[Mike] fix: DEF-B-059 오더 화주 주소 영문 컬럼 추가 (Issue #1079)`
+
+**PR**: #1081 (TeamB_Dev base)
+
+**변경 파일**:
+1. `20260812010000_iss1079_shipper_address_english_columns.sql`: zen_orders에 영문 주소 컬럼 추가
+2. `20260812020000_iss1079_create_order_atomic_fix.sql`: create_order_atomic RPC 함수 업데이트
+3. `src/lib/validation/order.ts`: shipper_address_english, shipper_address_detail_english 필드 추가
+4. `src/app/actions/operations/orders.ts`: createOrder/updateOrder에 필드 포함
+5. `src/lib/ups/label-mapping.ts`: resolveShipperStreet() 폴백 우선순위 수정
+6. `tests/unit/ups/shipper-address-english.test.ts`: 회귀 테스트 9개
+
+**핵심 수정**: create_order_atomic() RPC 함수에 shipper_address_english, shipper_address_detail_english 컬럼 추가 (INSERT 컬럼 목록 + p_payload 추출부)
 
 ## [발견 이슈]
 
-_(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
+없음
