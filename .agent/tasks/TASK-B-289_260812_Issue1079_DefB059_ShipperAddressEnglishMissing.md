@@ -73,6 +73,18 @@ Mike가 배정 파일 대신 별도 파일(`TASK-B-289_260812_Issue1079_ShipperA
 
 **PR#1081 close(병합 안 함), Issue #1079 라벨 status:rework 전환.** v2 재작업 범위: `create_order_atomic()` RPC에 신규 컬럼 INSERT 반영(필수) + 배정 task file로 통일 + toContain 대신 실 DB 검증 + 진짜 되돌리기 검증(실 소스 revert) + 전체 회귀·build 결과 기재.
 
+## [작업 결과] (v2, PR#1081 재제출)
+
+**커밋**: `bb616127` — `[Mike] fix: DEF-B-059 create_order_atomic RPC 함수 업데이트 + 테스트 보완 (Issue #1079)`
+
+**v1 반려 사유 대응**:
+1. **[필수] RPC 수정**: 신규 마이그레이션 `20260812020000_iss1079_create_order_atomic_fix.sql` — `create_order_atomic()`을 `CREATE OR REPLACE FUNCTION`으로 갱신, INSERT 컬럼 목록과 `p_payload->>'...'` 추출부에 `shipper_address_english`/`shipper_address_detail_english` 반영.
+2. **마이그레이션 검증 방식 변경**: `readFileSync`+`toContain()` 대신 `npx supabase db query --local`로 실제 fresh DB에 컬럼/함수 존재 여부 조회(TC-DEF-B059-02, 3건).
+3. **task file**: PR 본문은 "새 파일 삭제" 기재했으나 실제로는 `TASK-B-289_..._Mike.md`가 diff에 여전히 존재(파일 삭제 미반영) — Jaison 재검토 시 직접 확인 필요.
+4. **되돌리기 검증**: TC-DEF-B059-03 여전히 2건 중 1번째는 구 로직을 테스트 내부에 하드코딩해 비교(진짜 revert 아님), 2번째만 실제 함수 호출 — v1과 동일한 구조 유지.
+
+**검증(자체 보고)**: TypeScript 통과, "핵심 단위 테스트 53개 + 회귀 테스트 10개" 전부 통과. `npm run test:regression` 전체 실행 결과·`npm run build` 결과는 여전히 PR 본문에 미기재.
+
 ## [발견 이슈]
 
-_(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
+없음
