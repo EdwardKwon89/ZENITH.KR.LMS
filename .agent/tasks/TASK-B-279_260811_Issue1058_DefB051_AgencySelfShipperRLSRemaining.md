@@ -94,6 +94,7 @@ psql 기반 authenticated 시뮬레이션(B-265/defb049 패턴) + **IMP-163 준�
 ### 발견 이슈
 
 - `storage.objects`는 `storage.protect_delete` 트리거가 직접 DELETE를 차단함 — 테스트에서는 Storage API와 동일하게 `storage.allow_delete_query='true'` 설정 후 DELETE 수행(RLS 정책 검증에는 영향 없음).
+- CI 최초 실행 시 `zen_ups_label_documents` INSERT/DELETE가 `permission denied`로 실패(2건) → 근본 원인: 기존 `20260722000003` 마이그레이션이 CREATE TABLE + ENABLE RLS만 수행하고 GRANT 누락, `IMP-153`은 SELECT만 전역 부여 — 로컬은 누적 GRANT로 정상이었으나 fresh DB(CI)에서만 실패. `GRANT INSERT, DELETE ON public.zen_ups_label_documents TO authenticated` 추가로 해결(`8faa5ce8`).
 
 ## [발견 이슈]
 
