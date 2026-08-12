@@ -7,7 +7,7 @@
 | **담당** | Dave (Team B) — 2026-08-13 Baker→Dave 재배정(JSJung 지시, 사유 미상 — Baker 착수 불가) |
 | **생성일** | 2026-08-13 |
 | **우선순위** | P3 |
-| **상태** | 🔔 (완료 보고 — 검토 요청) |
+| **상태** | ✅ 완료 |
 
 > **PR#1093 반려 → v2 재작업(2차)**: Jaison 검토 결과 코드/설계/회귀 테스트 방식은 정상이나, **캐시 저장(INSERT) 경로가 실제로는 동작하지 않는 치명적 결함** — `zen_hs_code_lookups`에 RLS 활성화하면서 SELECT 정책만 만들고 INSERT 정책이 없어, `/api/hs-lookup`의 authenticated 세션 upsert가 GRANT와 무관하게 전면 차단(42501, 조용히 캐시 실패 → AI 절감 0%). 실 DB fresh reset 후 `SET ROLE authenticated`로 INSERT 재현. 마이그레이션에 `Authenticated users can write hs code cache` INSERT 정책(`WITH CHECK true`) 추가 + 실 DB 기반 RLS 테스트 2건 신설(`a517511b`).
 
@@ -130,6 +130,16 @@ ON public.zen_hs_code_lookups FOR SELECT TO authenticated USING (true);
 - **실 DB 기반 RLS 테스트 2건 신설**(`tests/unit/db/iss1091-hs-lookup-cache-rls.test.ts`): `SET ROLE authenticated` + `request.jwt.claims`로 TC-293-09 INSERT 성공+저장 확인 / TC-293-10 SELECT 성공
 - **되돌리기 검증**: INSERT 정책 DROP 시 TC-293-09가 42501로 정확히 FAIL(반려 사유 재현) → db reset 복원 후 2/2 PASS
 - **재검증**: 전체 회귀 **1288/1288 PASS** (184파일) · build SUCCESS
+
+## [Jaison 최종 검토]
+
+`/tmp/review-pr1093` 격리 워크트리에서 v1→v2 순서로 재검증.
+
+**v1 반려**: 코드/설계·테스트 방식(실제 핸들러 import, mock 주입, 그림자 패턴 없음, 8/8 PASS·독립 되돌리기 검증 일치)은 정상이었으나, fresh `supabase db reset` 후 `docker exec psql`로 `SET ROLE authenticated` + `request.jwt.claims` 시뮬레이션해 직접 INSERT를 시도한 결과 `ERROR: new row violates row-level security policy` 확인 — 마이그레이션이 SELECT 정책만 만들고 INSERT 정책을 빠뜨려 캐시 저장이 전면 차단되는 결함(DEF-B-061과 동일 유형)이었음. 이 설계 자체는 제가 착수 승인 시 작성한 원 설계(위 ② 섹션)에도 INSERT 정책이 빠져 있었던 것이 원인 — 제 설계 누락도 원인의 일부.
+
+**v2 재검증**: `Authenticated users can write hs code cache` INSERT 정책(`WITH CHECK true`) 추가 확인. 신규 실 DB RLS 테스트(`iss1091-hs-lookup-cache-rls.test.ts`, mock 아님) 2건 PASS. **독립 되돌리기 검증**: INSERT 정책을 직접 `DROP` → TC-293-09/10 정확히 FAIL(`expected false to be true`, `expected '0' to be '1'`) → 정책 재생성 후 2/2 PASS 재확인. 기존 8건 포함 신규 10건 전체 PASS.
+
+전체 회귀 **184/184·1288/1288 ALL PASS**(재검증 일치) · `npm run build` SUCCESS · 실제 CI(`gh pr checks 1093`, 최신 커밋 기준) 3개 항목 전부 pass. PR#1093 v2 승인·머지(TeamB_Dev `b08b5180`), Issue #1091 종결.
 
 ## [발견 이슈]
 
