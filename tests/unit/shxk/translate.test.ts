@@ -29,6 +29,30 @@ describe('translateShxkText — 사전 기반 중→한/영 번역', () => {
   });
 });
 
+describe('translateShxkText — 실측 전체 문장 부분일치 (PR#1086 반려 대응)', () => {
+  it('실측 원문 "我们正在遇到运输延迟。我们将尽快递送您的包裹。" 번역됨 (사전 키 포함)', () => {
+    const r = translateShxkText('我们正在遇到运输延迟。我们将尽快递送您的包裹。');
+    expect(r).not.toBeNull();
+    expect(r?.ko).toBe('운송 지연이 발생하고 있습니다');
+  });
+
+  it('실측 원문 "发件人已创建标签，但是 UPS 尚未收到包裹。" 번역됨 (사전 키 포함)', () => {
+    const r = translateShxkText('发件人已创建标签，但是 UPS 尚未收到包裹。');
+    expect(r).not.toBeNull();
+    expect(r?.ko).toBe('발송인이 라벨을 생성했습니다');
+  });
+
+  it('앞부분/뒷부분 여분 텍스트가 붙은 문장도 사전 키로 매칭 (완전일치 아님)', () => {
+    // 사전 키 "离开设施"가 앞에 오고 뒷문장이 붙은 실전 패턴
+    const r = translateShxkText('离开设施，你的包裹正在路上。');
+    expect(r?.ko).toBe('시설을 출발했습니다');
+  });
+
+  it('어떤 사전 키도 포함하지 않는 문장은 null (원문 유지)', () => {
+    expect(translateShxkText('完全未知的事件描述内容')).toBeNull();
+  });
+});
+
 describe('pickShxkLocaleText — 로케일별 표출 문자열', () => {
   const zh = '离开设施';
   const ko = '시설을 출발했습니다';

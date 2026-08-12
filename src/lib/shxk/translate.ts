@@ -30,13 +30,18 @@ export const SHXK_TRANSLATION_DICT: Record<string, { ko: string; en: string }> =
 
 /**
  * 중문 텍스트를 ko/en 번역본으로 변환한다.
- * 사전에 정확히 일치하는 문구가 없으면 null 반환(원문 유지, 강제 번역 금지).
+ * TASK-B-290 v2 (PR#1086 반려 대응): 사전 키가 원문에 **부분 포함**되면 매칭한다 —
+ * 실측 원문은 "我们正在遇到运输延迟。我们将尽快递送您的包裹。"처럼 사전 키
+ * ("我们正在遇到运输延迟")에 뒷문장이 붙어 있어 완전일치로는 번역되지 않는다.
+ * 사전 키가 전혀 포함되지 않으면 null 반환(원문 유지, 강제 번역 금지).
  */
 export function translateShxkText(zh: string | null | undefined): { ko: string; en: string } | null {
   if (!zh) return null;
-  const hit = SHXK_TRANSLATION_DICT[zh.trim()];
-  if (!hit) return null;
-  return { ko: hit.ko, en: hit.en };
+  const trimmed = zh.trim();
+  for (const [key, val] of Object.entries(SHXK_TRANSLATION_DICT)) {
+    if (trimmed.includes(key)) return { ko: val.ko, en: val.en };
+  }
+  return null;
 }
 
 /**
