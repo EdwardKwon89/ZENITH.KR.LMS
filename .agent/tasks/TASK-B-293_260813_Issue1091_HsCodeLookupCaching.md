@@ -7,7 +7,7 @@
 | **담당** | Dave (Team B) — 2026-08-13 Baker→Dave 재배정(JSJung 지시, 사유 미상 — Baker 착수 불가) |
 | **생성일** | 2026-08-13 |
 | **우선순위** | P3 |
-| **상태** | 🔄 진행중 |
+| **상태** | 🔔 (완료 보고 — 검토 요청) |
 
 ## 현재 상태 (분석 완료 — Issue #1091 참조)
 
@@ -87,6 +87,39 @@ ON public.zen_hs_code_lookups FOR SELECT TO authenticated USING (true);
 
 - **Dave**: `.agent/VIOLATION_TRACKER.md` 참조 후 착수 — task file/ACTIVE_TASK.md 커밋 누락 유형 누적 이력(13회, 최다) 있음. JSJung 2026-07-15 결정에 따라 누적 이력과 무관하게 할당 지속(재론 금지). 착수 전 `./scripts/next-task-number.sh B`로 브랜치명 중복 여부 재확인. 이번 Task는 신규 마이그레이션 1건 포함 — **최신 TeamB_Dev 기준 브랜치 동기화 및 타임스탬프 충돌 여부 확인 필수**(Baker의 과거 PR#1074 v1 반려 사례 참고). 회귀 테스트는 실제 API 호출 횟수/DB 저장 여부를 검증하는 방식으로 작성할 것 — 정적 문자열 검사나 로직 재구현 금지(Mike PR#1090 4연속 반려 사례 참고).
 - **Baker 참고**: 사정으로 착수 불가하여 재배정됨 — 이번 배정 대상 아님.
+
+## [작업 결과]
+
+### 커밋
+
+| 커밋 | 내용 |
+|:-----|:-----|
+| `58eedbb8` | `[Dave] feat: TASK-B-293 HS Code 조회 캐싱 + 영문 전용 입력 강제 (Issue #1091)` |
+
+### 수정 내용 (설계 확정 ①~③ 그대로, 과설계 금지 준수)
+
+1. **마이그레이션 `20260813010000`** — `zen_hs_code_lookups` 캐시 테이블(`item_name_normalized TEXT UNIQUE NOT NULL` — lower(trim) 품목명 단독 키, 목적지 제외) + GRANT(authenticated SELECT/INSERT, service_role ALL) + RLS(authenticated SELECT — 전역 공유 캐시)
+2. **`handleItemNameBlur()` 영문 사전 체크** — `orderItemSchema`와 동일 정규식 `/^[A-Za-z0-9\s.,\-()&'"/#%+:]*$/`로 비영문(한글 등) 입력 시 fetch 자체 미호출 (제출 시점 검증은 유지 — 이중 방어)
+3. **`/api/hs-lookup` 캐시 우선 조회** — ①품목명 lower(trim) 정규화 ②`zen_hs_code_lookups` 조회 ③히트 → AI 미호출 즉시 반환 ④미스 → Claude Haiku 호출 ⑤`hs_code` non-null 성공 결과만 `upsert(onConflict: item_name_normalized, ignoreDuplicates)` 저장 (실패/저신뢰 null 미저장)
+
+### 회귀 테스트 (8건 신설)
+
+| 파일 | 건수 | 내용 |
+|:-----|:---:|:-----|
+| `tests/unit/hs-lookup/hs-lookup-cache.test.ts` | 6 | 캐시 히트→Anthropic 미호출 / 미스→AI 호출+캐시 upsert 저장 / AI null 반환→미저장 / lower(trim) 정규화 매칭 / 2글자 미만 미호출 / 미인증 401 |
+| `tests/unit/orders/iss1091-hscode-english-filter.test.tsx` | 2 | 한글 blur→fetch 미호출 / 영문 blur→fetch 호출 (실제 컴포넌트 렌더링) |
+
+> 실제 API 호출 횟수(mock messages.create)·DB 저장 호출(mock upsert)·fetch 호출 여부를 검증 — 정적 문자열/로직 재구현 금지 준수.
+
+### 독립 되돌리기 검증
+
+캐시 우선 조회 로직 + 영문 사전 필터 원복 → **TC-293-01/02/04/07이 정확히 FAIL** → 복원 후 8/8 PASS 확인.
+
+### 검증
+
+- `npm run test:regression`: **1286/1286 PASS** (183파일, 신규 +8)
+- `npm run build`: SUCCESS
+- **fresh `supabase db reset` 재검증**(R-08-2): authenticated GRANT + RLS 정책 1건 + `service_role` INSERT=true
 
 ## [발견 이슈]
 
