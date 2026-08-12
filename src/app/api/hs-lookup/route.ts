@@ -46,6 +46,22 @@ export async function POST(req: Request) {
     const truncatedName = itemName.slice(0, MAX_ITEM_NAME_LENGTH);
     const destCountry = body.dest_country_code?.trim();
 
+    // TASK-B-293 (Issue #1091): 캐시 우선 조회 — 품목명 단독 키(lower(trim)), 목적지 제외.
+    // HS Code 6자리는 국제 공통표준이라 목적지 무관 — 캐시 재사용률 극대화.
+    const cacheKey = truncatedName.toLowerCase().trim();
+    const { data: cached } = await supabase
+      .from('zen_hs_code_lookups')
+      .select('hs_code, confidence')
+      .eq('item_name_normalized', cacheKey)
+      .maybeSingle();
+
+    if (cached?.hs_code) {
+      return NextResponse.json<HsLookupResponse>({
+        hs_code: cached.hs_code,
+        confidence: (['high', 'medium', 'low'].includes(cached.confidence) ? cached.confidence : 'low') as HsLookupResponse['confidence'],
+      });
+    }
+
     // 3. Haiku 4.5 API 호출
     const message = await client.messages.create({
       model: 'claude-haiku-4-5-20251001',
@@ -62,6 +78,14 @@ export async function POST(req: Request) {
 
     const text = extractTextContent(message.content);
     const parsed = parseHsLookupJson(text);
+
+    // TASK-B-293 (Issue #1091): 성공 결과(hs_code가 null 아닌)만 캐시에 INSERT —
+    // 실패/저신뢰(null) 결과는 캐싱하지 않음(표현이 다른 재조회 기회를 막지 않기 위함).
+    if (parsed.hs_code) {
+      await supabase
+        .from('zen_hs_code_lookups')
+        .upsert({ item_name_normalized: cacheKey, hs_code: parsed.hs_code, confidence: parsed.confidence }, { onConflict: 'item_name_normalized', ignoreDuplicates: true });
+    }
 
     return NextResponse.json<HsLookupResponse>(parsed);
   } catch (error) {
