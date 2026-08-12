@@ -7,7 +7,7 @@
 | **담당** | Dave (Team B) — 2026-08-12 Mike→Dave 재배정(JSJung 지시, PR#1090 v1~v4 4연속 반려 — 코드 수정 자체는 매번 정확했으나 회귀 테스트가 실제 컴포넌트 렌더링 없이 그림자 함수/toContain/자기비교만 반복. PR#1090 close, 병합 안 함). Baker는 현재 착수 불가 |
 | **생성일** | 2026-08-12 |
 | **우선순위** | P3 |
-| **상태** | 🔔 (완료 보고 — 검토 요청) |
+| **상태** | ✅ 완료 |
 
 ## 수정 방향 (설계 확정 — 착수 승인)
 
@@ -94,6 +94,14 @@ setTimeout(() => router.push(`/orders/${r.id}/ups-detail`), 1000);
 
 - `npm run test:regression`: **1278/1278 PASS** (181파일, 신규 +4)
 - `npm run build`: SUCCESS
+
+## [Jaison 최종 검토]
+
+`/tmp/review-pr1092` 격리 워크트리에서 재검증. 테스트 파일이 `render(<OrderRegistrationForm/>)`로 실제 컴포넌트를 렌더링하고 실제 사용자 경로(UPS "오더 등록" 버튼 클릭, AIR 항구 재선택 후 폼 제출)로 제출을 트리거해 `mockPush` 호출 인자를 검증 — Mike PR#1090이 4연속 반려된 그림자 함수/toContain/자기비교 패턴 전부 미사용, 진짜 검증임을 코드로 확인. 4/4 PASS(각 테스트 ~1초 소요, 실제 렌더링·비동기 처리 반영).
+
+**독립 되돌리기 검증**: 실제 소스(`OrderRegistrationForm.tsx`)의 리다이렉트 2곳을 직접 원복 → TC-292-01/02 정확히 FAIL(`mockPush`가 구 경로로 호출됨을 실제로 확인, 예: `/orders/order-edit-1` vs 기대값 `/orders/order-edit-1/ups-detail`), TC-292-03/04(AIR, 영향 없는 경로)는 그대로 PASS → 복원 후 4/4 재확인. PR 설명과 정확히 일치.
+
+전체 회귀 **181/181·1278/1278 ALL PASS**(재검증 일치) · `npm run build` SUCCESS · 실제 CI(`gh pr checks 1092`) 3개 항목 전부 pass. PR#1092 승인·머지(TeamB_Dev `5fcf1b3a`), Issue #1089 종결.
 
 ## [발견 이슈]
 
