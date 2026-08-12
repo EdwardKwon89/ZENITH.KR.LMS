@@ -4,7 +4,7 @@
 |:-----|:------|
 | **Issue** | [#1091](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1091) |
 | **배경** | JSJung — HS Code 조회 시 품명 입력란 영문 전용 강제 + AI API 호출 절감(캐시 우선 조회) 요청. Jaison이 현재 구조 분석 후 설계 확정 |
-| **담당** | Baker (Team B) |
+| **담당** | Dave (Team B) — 2026-08-13 Baker→Dave 재배정(JSJung 지시, 사유 미상 — Baker 착수 불가) |
 | **생성일** | 2026-08-13 |
 | **우선순위** | P3 |
 | **상태** | 🔄 진행중 |
@@ -85,7 +85,8 @@ ON public.zen_hs_code_lookups FOR SELECT TO authenticated USING (true);
 
 ## 담당자 위반 이력 사전 경고
 
-- **Baker**: `.agent/VIOLATION_TRACKER.md` 참조 후 착수 — task file/ACTIVE_TASK.md 미반영 유형·마이그레이션 타임스탬프 충돌 이력 다수. JSJung 2026-07-15 결정에 따라 할당 지속(재론 금지). 이번 Task는 신규 마이그레이션 1건 포함 — **최신 TeamB_Dev 기준 브랜치 동기화 및 타임스탬프 충돌 여부 특히 재확인**(과거 PR#1074 v1 반려 사례 재발 방지). 회귀 테스트는 실제 API 호출 횟수/DB 저장 여부를 검증하는 방식으로 작성할 것 — 정적 문자열 검사나 로직 재구현 금지.
+- **Dave**: `.agent/VIOLATION_TRACKER.md` 참조 후 착수 — task file/ACTIVE_TASK.md 커밋 누락 유형 누적 이력(13회, 최다) 있음. JSJung 2026-07-15 결정에 따라 누적 이력과 무관하게 할당 지속(재론 금지). 착수 전 `./scripts/next-task-number.sh B`로 브랜치명 중복 여부 재확인. 이번 Task는 신규 마이그레이션 1건 포함 — **최신 TeamB_Dev 기준 브랜치 동기화 및 타임스탬프 충돌 여부 확인 필수**(Baker의 과거 PR#1074 v1 반려 사례 참고). 회귀 테스트는 실제 API 호출 횟수/DB 저장 여부를 검증하는 방식으로 작성할 것 — 정적 문자열 검사나 로직 재구현 금지(Mike PR#1090 4연속 반려 사례 참고).
+- **Baker 참고**: 사정으로 착수 불가하여 재배정됨 — 이번 배정 대상 아님.
 
 ## [발견 이슈]
 
