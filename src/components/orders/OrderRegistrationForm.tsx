@@ -734,7 +734,9 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
           icon: <CheckCircle2 className="text-green-500" />
         });
         if (onSuccess) onSuccess();
-        setTimeout(() => router.push(`/orders/${orderId}`), 1000);
+        // Issue #1089: UPS 오더는 ups-detail로 리다이렉션 (비UPS는 기존 유지)
+        const redirectPath = data.transport_mode === 'UPS' ? `/orders/${orderId}/ups-detail` : `/orders/${orderId}`;
+        setTimeout(() => router.push(redirectPath), 1000);
         return;
       }
 
@@ -754,7 +756,8 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
           icon: <CheckCircle2 className="text-green-500" />
         });
         if (onSuccess) onSuccess();
-        setTimeout(() => router.push(`/orders/${r.id}`), 1000);
+        // Issue #1089: UPS 신규 등록 성공 시 ups-detail로 리다이렉션
+        setTimeout(() => router.push(`/orders/${r.id}/ups-detail`), 1000);
         return;
       }
 
