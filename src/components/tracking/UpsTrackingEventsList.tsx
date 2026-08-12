@@ -1,8 +1,10 @@
 "use client";
 
 import React from "react";
+import { useLocale } from "next-intl";
 import { ZenBadge } from "@/components/ui/ZenUI";
 import { MapPin, Calendar, Clock, Package } from "lucide-react";
+import { pickShxkLocaleText } from "@/lib/shxk/translate";
 
 interface UpsTrackingEvent {
   id: string;
@@ -11,6 +13,8 @@ interface UpsTrackingEvent {
   event_time: string;
   event_code: string;
   event_desc: string;
+  event_desc_ko?: string | null;
+  event_desc_en?: string | null;
   location_city: string | null;
   location_country: string | null;
 }
@@ -20,6 +24,8 @@ interface UpsTrackingEventsListProps {
 }
 
 export default function UpsTrackingEventsList({ events }: UpsTrackingEventsListProps) {
+  const locale = useLocale();
+
   if (!events || events.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center text-slate-400">
@@ -47,7 +53,8 @@ export default function UpsTrackingEventsList({ events }: UpsTrackingEventsListP
                 {event.event_code}
               </ZenBadge>
               <span className="text-xs font-semibold text-slate-700">
-                {event.event_desc}
+                {/* TASK-B-290 (④): 로케일별 번역 표출 — ko/en 번역본 없으면 중문 원문 */}
+                {pickShxkLocaleText(locale, event.event_desc, event.event_desc_ko, event.event_desc_en)}
               </span>
             </div>
           </div>
@@ -65,7 +72,8 @@ export default function UpsTrackingEventsList({ events }: UpsTrackingEventsListP
             </span>
             <span className="flex items-center gap-1">
               <Clock size={10} />
-              {event.event_time?.split(" ")[1] || event.event_time}
+              {/* TASK-B-290 (⑤): event_time은 TIME 포맷("HH:MM:SS")이라 split(" ")[1] 가정 제거 */}
+              {event.event_time}
             </span>
           </div>
         </div>
