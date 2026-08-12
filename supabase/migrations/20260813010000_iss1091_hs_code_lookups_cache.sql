@@ -24,3 +24,13 @@ CREATE POLICY "Authenticated users can read hs code cache"
 ON public.zen_hs_code_lookups FOR SELECT
 TO authenticated
 USING (true);
+
+-- WRITE(INSERT): 모든 authenticated 허용 — /api/hs-lookup이 사용자 세션(authenticated RLS)으로
+-- 캐시를 저장하므로 INSERT 정책이 없으면 GRANT와 무관하게 전면 차단된다(RLS 활성 상태에서
+-- 해당 커맨드에 적용되는 정책이 0건이면 차단). 전역 공유 캐시이므로 소유권 스코프 없음.
+-- (PR#1093 반려 사유 — DEF-B-061과 동일한 SELECT만 있고 쓰기 정책 누락 패턴)
+DROP POLICY IF EXISTS "Authenticated users can write hs code cache" ON public.zen_hs_code_lookups;
+CREATE POLICY "Authenticated users can write hs code cache"
+ON public.zen_hs_code_lookups FOR INSERT
+TO authenticated
+WITH CHECK (true);
