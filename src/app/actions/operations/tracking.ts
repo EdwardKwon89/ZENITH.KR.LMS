@@ -271,7 +271,7 @@ export async function getUpsTrackingEvents(orderId: string) {
 
   const { data, error } = await supabase
     .from("zen_ups_tracking_events")
-    .select("id, tracking_number, order_id, event_date, event_time, event_code, event_desc, location_city, location_country")
+    .select("id, tracking_number, order_id, event_date, event_time, event_code, event_desc, event_desc_ko, event_desc_en, location_city, location_country")
     .eq("order_id", orderId)
     .order("event_date", { ascending: false })
     .order("event_time", { ascending: false });
