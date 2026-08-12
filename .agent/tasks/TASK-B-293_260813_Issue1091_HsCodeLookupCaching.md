@@ -9,6 +9,8 @@
 | **우선순위** | P3 |
 | **상태** | 🔔 (완료 보고 — 검토 요청) |
 
+> **PR#1093 반려 → v2 재작업(2차)**: Jaison 검토 결과 코드/설계/회귀 테스트 방식은 정상이나, **캐시 저장(INSERT) 경로가 실제로는 동작하지 않는 치명적 결함** — `zen_hs_code_lookups`에 RLS 활성화하면서 SELECT 정책만 만들고 INSERT 정책이 없어, `/api/hs-lookup`의 authenticated 세션 upsert가 GRANT와 무관하게 전면 차단(42501, 조용히 캐시 실패 → AI 절감 0%). 실 DB fresh reset 후 `SET ROLE authenticated`로 INSERT 재현. 마이그레이션에 `Authenticated users can write hs code cache` INSERT 정책(`WITH CHECK true`) 추가 + 실 DB 기반 RLS 테스트 2건 신설(`a517511b`).
+
 ## 현재 상태 (분석 완료 — Issue #1091 참조)
 
 1. `orderItemSchema`([src/lib/validation/order.ts:8-10](../../src/lib/validation/order.ts#L8-L10))에 영문 전용 정규식이 이미 있으나 **폼 제출 시점에만** 적용(react-hook-form 기본 `mode: 'onSubmit'`). HS 조회를 트리거하는 `handleItemNameBlur()`([src/components/orders/OrderRegistrationForm.tsx:304-328](../../src/components/orders/OrderRegistrationForm.tsx#L304-L328))는 이 검증과 무관하게 2글자 이상이면 언어 상관없이 무조건 AI 호출 — 한글 입력도 매번 AI 비용 발생.
@@ -120,6 +122,14 @@ ON public.zen_hs_code_lookups FOR SELECT TO authenticated USING (true);
 - `npm run test:regression`: **1286/1286 PASS** (183파일, 신규 +8)
 - `npm run build`: SUCCESS
 - **fresh `supabase db reset` 재검증**(R-08-2): authenticated GRANT + RLS 정책 1건 + `service_role` INSERT=true
+
+### v2 재작업 (PR#1093 반려 대응)
+
+- **반려 사유 (Jaison)**: `zen_hs_code_lookups`에 RLS 활성화 시 SELECT 정책만 있고 INSERT 정책이 없어, `/api/hs-lookup`의 authenticated 세션 `upsert`(캐시 저장)가 GRANT와 무관하게 전면 차단(42501) — 운영에서 조용히 캐싱만 실패, AI 호출 절감 0%. mock 기반 테스트(`upsert` 항상 성공 가정)가 RLS를 통과하지 않아 미탐지. DEF-B-061과 동일 유형.
+- **수정**: 마이그레이션 `20260813010000`에 `Authenticated users can write hs code cache` INSERT 정책(`WITH CHECK true`) 추가(`a517511b`)
+- **실 DB 기반 RLS 테스트 2건 신설**(`tests/unit/db/iss1091-hs-lookup-cache-rls.test.ts`): `SET ROLE authenticated` + `request.jwt.claims`로 TC-293-09 INSERT 성공+저장 확인 / TC-293-10 SELECT 성공
+- **되돌리기 검증**: INSERT 정책 DROP 시 TC-293-09가 42501로 정확히 FAIL(반려 사유 재현) → db reset 복원 후 2/2 PASS
+- **재검증**: 전체 회귀 **1288/1288 PASS** (184파일) · build SUCCESS
 
 ## [발견 이슈]
 
