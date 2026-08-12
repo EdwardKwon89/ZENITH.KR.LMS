@@ -7,7 +7,7 @@
 | **담당** | Dave (Team B) — 2026-08-12 Mike→Dave 재배정(JSJung 지시, PR#1090 v1~v4 4연속 반려 — 코드 수정 자체는 매번 정확했으나 회귀 테스트가 실제 컴포넌트 렌더링 없이 그림자 함수/toContain/자기비교만 반복. PR#1090 close, 병합 안 함). Baker는 현재 착수 불가 |
 | **생성일** | 2026-08-12 |
 | **우선순위** | P3 |
-| **상태** | 🔄 진행중 |
+| **상태** | 🔔 (완료 보고 — 검토 요청) |
 
 ## 수정 방향 (설계 확정 — 착수 승인)
 
@@ -53,6 +53,47 @@ setTimeout(() => router.push(`/orders/${r.id}/ups-detail`), 1000);
 - **Dave**: `.agent/VIOLATION_TRACKER.md` 참조 후 착수 — task file/ACTIVE_TASK.md 커밋 누락 유형 누적 이력(13회, 최다) 있음, JSJung 2026-07-15 결정에 따라 누적 이력과 무관하게 할당 지속(재론 금지). 착수 전 `./scripts/next-task-number.sh B` 재확인. 이번 Task는 코드 수정 자체는 이미 검증된 상태(Mike PR#1090에서 4차례 모두 정확)라 신규 로직 설계 리스크는 낮음 — 초점은 **회귀 테스트 품질**. 위 체크리스트의 "금지" 항목(readFileSync/toContain·그림자 함수·자기비교)을 특히 주의할 것 — Mike가 동일 Task에서 4연속 이 패턴으로 반려됐음.
 - **Baker 참고**: 현재 사정으로 착수 불가 상태 — 배정 대상 아님.
 - **Mike 참고**: PR#1090(v1~v4) close, 병합 안 됨 — 코드 수정 자체는 4차례 모두 정확했으나 회귀 테스트가 실제 컴포넌트 렌더링 없이 그림자 함수/toContain/자기비교만 반복해 재배정. VIOLATION_TRACKER 기록 참조.
+
+## [작업 결과]
+
+### 커밋
+
+| 커밋 | 내용 |
+|:-----|:-----|
+| `b7aa57f7` | `[Dave] feat: TASK-B-292 UPS 오더 등록/수정 저장 후 ups-detail 리다이렉션 (Issue #1089)` |
+
+### 수정 내용 (설계 확정 그대로, 과설계 금지 준수)
+
+`OrderRegistrationForm.tsx` `onSubmit()` 리다이렉션 2곳:
+
+1. **오더 수정 저장 후**(line 737): `data.transport_mode === 'UPS' ? /orders/{orderId}/ups-detail : /orders/{orderId}` — UPS는 ups-detail, 비UPS는 기존 유지
+2. **UPS 신규 등록 성공 후**(line 757): `/orders/{r.id}/ups-detail`로 변경
+
+비UPS 신규 등록 경로는 미변경(과설계 금지).
+
+### 회귀 테스트 (4건, RTL — 실제 OrderRegistrationForm 렌더링 + router.push 인자 검증)
+
+`tests/unit/orders/iss1089-ups-redirect-ups-detail.test.tsx`
+
+| TC | 내용 |
+|:---|:-----|
+| TC-292-01 | UPS 신규 등록 성공 → `router.push('/orders/{id}/ups-detail')` |
+| TC-292-02 | UPS 오더 수정 저장 성공 → `router.push('/orders/{id}/ups-detail')` |
+| TC-292-03 | 비UPS(AIR) 오더 수정 저장 → 기존대로 `router.push('/orders/{id}')` (회귀 방지) |
+| TC-292-04 | 비UPS(AIR) 신규 등록 성공 → 기존대로 `router.push('/orders/{id}')` (회귀 방지) |
+
+- **UPS 경로**: 실제 "오더 등록" 버튼 클릭(`handleUpsDirectSubmit` → `handleSubmit`) — `UpsFreightEstimateSection` mock이 `onProductChange`로 `ups_product_code` 설정(실제 동작 재현)
+- **AIR 경로**: 마운트 시 `transport_mode` effect가 항구를 초기화하므로 실제 사용자처럼 select에서 항구 재선택 후 폼 제출
+- **금지 패턴 회피**: readFileSync/toContain·그림자 함수·자기비교 전부 미사용 — 실제 컴포넌트 제출 로직 검증
+
+### 독립 되돌리기 검증
+
+리다이렉트 2곳을 원복(기존 `/orders/{id}`로) → **TC-292-01/02가 정확히 FAIL** (AIR 회귀 케이스 2건은 미변경 경로라 그대로 PASS) → 복원 후 4/4 PASS.
+
+### 검증
+
+- `npm run test:regression`: **1278/1278 PASS** (181파일, 신규 +4)
+- `npm run build`: SUCCESS
 
 ## [발견 이슈]
 
