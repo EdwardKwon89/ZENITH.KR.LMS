@@ -8,7 +8,7 @@
 | **담당** | Dave (Team B) — 2026-08-12 Baker→Dave 재배정(JSJung 지시, Baker 사정으로 착수 불가) |
 | **생성일** | 2026-08-12 |
 | **우선순위** | P2 (Medium) |
-| **상태** | 🔄 진행중 |
+| **상태** | 🔔 (완료 보고 — 검토 요청) |
 
 ## 근본 원인 (확정 완료 — DEF-B-060 참조)
 
@@ -101,6 +101,43 @@ await supabase.from('zen_tracking_configs')
 - **Dave**: `.agent/VIOLATION_TRACKER.md` 참조 후 착수 — task file/ACTIVE_TASK.md 커밋 누락 유형 누적 이력(13회, 최다) 있음, JSJung 2026-07-15 결정에 따라 누적 이력과 무관하게 할당 지속(재론 금지). 최근 반복 유형 — ①task file/ACTIVE_TASK.md 커밋 누락 ②채번 절차 미준수(`./scripts/next-task-number.sh B` 직접 실행 후 확인할 것) ③무관한 과거 task file 오염(워크트리 미격리 혼입 — 본인 전용 워크트리에서만 작업할 것). **이번 Task는 신규 마이그레이션 2건 포함** — 최신 TeamB_Dev 기준으로 타임스탬프 충돌 없는지 특히 주의.
 
 _(2026-08-12 재배정 이력: 최초 Baker 배정 → Baker 사정으로 착수 불가 → Dave로 재배정. Baker 관련 위반 경고는 무의미해져 삭제, Dave 기준으로 갱신)_
+
+## [작업 결과]
+
+### 커밋
+
+| 커밋 | 내용 |
+|:-----|:-----|
+| `41985e4d` | `[Dave] fix: TASK-B-290 UPS 트래킹 이벤트 저장 로직 4건 결함 수정 (Issue #1085 / DEF-B-060)` |
+
+### 수정 내용 (설계 확정 ①~⑤ 전부 반영)
+
+1. **① dedup**: `storeTrackingEvents()` — `event_date`+`event_time` 재조합 키(`"${event_date} ${event_time}"`)로 비교 (TIME 컬럼 재조회 포맷과 원본 `track_occur_date` 불일치 해소, 재폴링 중복 삽입 방지)
+2. **② 헤더값 오염 제거**: `event_code` ← `d.track_code || d.track_status || ''`, `location_country` ← `extractCountryCode(d.track_location)` (콤마 마지막 토큰 2자리 대문자만 채택, 아니면 NULL) — 헤더 `track_status`/`destination_country` 전 행 복사 중단
+3. **③ 현재 상태 저장**: `zen_tracking_configs`에 `last_track_status`/`last_track_status_name`/`last_tracked_at` 컬럼 신설(마이그레이션 `20260812030000`) + 매 폴링마다 갱신
+4. **④ 번역**: `zen_ups_tracking_events`에 `event_desc_ko`/`event_desc_en` 컬럼 신설(마이그레이션 `20260812040000`) + `src/lib/shxk/translate.ts` 신규(중→한/영 정적 사전 14개 + `translateShxkText`/`pickShxkLocaleText` 범용 시그니처) + 저장 시 적용
+5. **⑤ 로케일 연동**: `getUpsTrackingEvents` select 확장 + `UpsTrackingEventsList.tsx` `useLocale()`로 `pickShxkLocaleText` 표출 + `event_time` TIME 포맷(`split(" ")[1]` 가정 제거)
+
+### 회귀 테스트 (24건 신규)
+
+| 파일 | 내용 |
+|:-----|:-----|
+| `tests/unit/shxk/defb060-tracking-events-fix.test.ts` | 7건 — dedup(기존 이벤트 재폴링 시 미삽입/전량 삽입), event_code 이벤트별 값(헤더 미오염), location_country 파싱(헤더 미오염), last_track_status 갱신, 번역 저장, extractCountryCode 단위 |
+| `tests/unit/shxk/translate.test.ts` | 11건 — translateShxkText(사전 존재/미존재/null), pickShxkLocaleText(ko/zh/en/ja + 폴백), 사전 커버리지 ≥9 |
+| `tests/unit/tracking/defb060-tracking-list-locale.test.tsx` | 6건 — ko/zh/en 로케일 표출, 번역본 없으면 원문 폴백, event_time TIME 포맷, 빈 상태 |
+
+### 독립 되돌리기 검증 (실제 소스 원복)
+
+- dedup/event_code/location 원복 → TC-290-01/03/04 FAIL 재현
+- status 갱신 + 번역 저장 원복 → TC-290-05/06 FAIL 재현
+- 로케일 표출 원복 → ko/en 로케일 테스트 FAIL 재현
+- 모두 복원 후 24/24 PASS 확인
+
+### 검증
+
+- `npm run test:regression`: **1264/1264 PASS** (179파일, 신규 +24)
+- `npm run build`: SUCCESS
+- **fresh `supabase db reset` 재검증**(R-08-2): `zen_tracking_configs` 3컬럼 + `zen_ups_tracking_events` 2컬럼 확인
 
 ## [발견 이슈]
 
