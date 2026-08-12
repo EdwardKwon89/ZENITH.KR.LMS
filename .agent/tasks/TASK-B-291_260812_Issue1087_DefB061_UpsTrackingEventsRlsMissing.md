@@ -8,7 +8,7 @@
 | **담당** | Dave (Team B) — Baker는 현재 착수 불가(사정으로 배제) |
 | **생성일** | 2026-08-12 |
 | **우선순위** | **High (P1)** |
-| **상태** | 🔄 진행중 |
+| **상태** | 🔔 (완료 보고 — 검토 요청) |
 
 ## 근본 원인 (확정 완료 — DEF-B-061 참조)
 
@@ -77,6 +77,48 @@ USING (
 
 - **Dave**: `.agent/VIOLATION_TRACKER.md` 참조 후 착수 — task file/ACTIVE_TASK.md 커밋 누락 유형 누적 이력(13회, 최다) 있음, JSJung 2026-07-15 결정에 따라 누적 이력과 무관하게 할당 지속(재론 금지). 착수 전 `./scripts/next-task-number.sh B` 재확인. **이번 Task는 신규 마이그레이션 1건 포함** — 최신 TeamB_Dev 기준 타임스탬프 충돌 없는지 주의. 회귀 테스트는 TASK-B-278에서 확인된 "INSERT만 setupFixture가 매번 강제 재생성해 실제 회귀를 못 잡는" 사각지대(IMP-163)가 재발하지 않도록 — SELECT 정책 제거 시 반드시 실제로 0건이 되는지 fresh 상태에서 직접 확인할 것.
 - **Baker 참고**: 현재 사정으로 착수 불가 상태 — 이번 Task는 배정 대상 아님(TASK-B-290과 동일 사유).
+
+## [작업 결과]
+
+### 커밋
+
+| 커밋 | 내용 |
+|:-----|:-----|
+| `26642c2f` | `[Dave] fix: TASK-B-291 zen_ups_tracking_events RLS 정책 전무 수정 (Issue #1087 / DEF-B-061, High)` |
+
+### 수정 내용 (설계 확정 그대로, 과설계 금지 준수)
+
+마이그레이션 `20260812050000_iss1087_ups_tracking_events_rls.sql` — `zen_tracking_configs` 정책 패턴을 동일 적용:
+
+1. `GRANT SELECT ON public.zen_ups_tracking_events TO authenticated;`
+2. `Admins have full access to ups tracking events` — Admin/ZENITH_SUPER_ADMIN/MANAGER ALL
+3. `Users can view ups tracking events of their own zen_orders` — 화주 본인(shipper_id 소유) SELECT
+4. `Agency can view ups tracking events for shipper orders` — Agency(agency_org_id 소유) SELECT
+
+### 회귀 테스트 (6건, psql 기반 authenticated RLS 시뮬레이션 — B-265/278 패턴)
+
+`tests/unit/db/defb061-ups-tracking-events-rls.test.ts`
+
+| TC | 내용 |
+|:---|:-----|
+| TC-291-01 | Admin — 임의 오더 트래킹 이벤트 SELECT 성공 |
+| TC-291-02 | 화주 본인(shipper_id 소유) — 본인 오더 SELECT 성공 |
+| TC-291-03 | 화주 타인(무관 오더) — SELECT 0건 (차단) |
+| TC-291-04 | Agency(agency_org_id 소유 화주오더) — SELECT 성공 |
+| TC-291-05 | 무관 Agency — SELECT 0건 (차단) |
+| TC-291-06 | **되돌리기** — 화주 본인 SELECT 정책 제거 → 0건 → 복원 → 1건 |
+
+> **IMP-163 준수**: setupFixture는 검증 대상 정책을 절대 생성/재생성하지 않음 (데이터만 준비, 실제 마이그레이션 상태 검증).
+
+### 독립 되돌리기 검증
+
+정책 3개를 DROP(마이그레이션 적용 전 상태) → **TC-291-01/02/04가 정확히 0건으로 FAIL 재현** → `db reset`으로 복원 후 6/6 PASS 확인.
+
+### 검증
+
+- `npm run test:regression`: **1274/1274 PASS** (180파일, 신규 +6)
+- `npm run build`: SUCCESS
+- **fresh `supabase db reset` 재검증**(R-08-2): 정책 3개 + `authenticated` SELECT GRANT 확인
 
 ## [발견 이슈]
 
