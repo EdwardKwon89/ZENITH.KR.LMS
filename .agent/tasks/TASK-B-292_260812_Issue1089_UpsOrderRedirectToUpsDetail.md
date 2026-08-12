@@ -51,6 +51,20 @@ setTimeout(() => router.push(`/orders/${r.id}/ups-detail`), 1000);
 - **Mike**: `.agent/VIOLATION_TRACKER.md` 참조 후 착수 — `toContain()`/`readFileSync()` 그림자검증 패턴(9회 누적), 미배정 task file 중복 생성, 가짜 되돌리기 검증(구코드를 테스트에 인라인 하드코딩) 이력 다수. JSJung 2026-07-15 결정에 따라 할당 지속(재론 금지). 이번 Task는 신규 마이그레이션 없는 순수 프론트엔드 라우팅 수정 — 회귀 테스트는 **실제 `OrderRegistrationForm` 렌더링 + mock router 호출 인자 검증**으로 작성할 것(정적 파일 읽기/문자열 포함 검증 금지). 되돌리기 검증도 **실제 소스 코드를 되돌려서** 재현할 것(테스트 파일 안에 구버전 로직 하드코딩 금지). 반드시 사전 배정된 이 task file을 그대로 사용할 것(중복 생성 금지).
 - **Baker 참고**: 현재 사정으로 착수 불가 상태 — 배정 대상 아님.
 
+## [작업 결과]
+
+**커밋**: `4e7449a1` — `[Mike] feat: UPS 오더 등록/수정 저장 후 ups-detail 페이지로 리다이렉션 (Issue #1089)`
+
+**PR**: #1090 (TeamB_Dev base)
+
+**변경 파일**:
+- `src/components/orders/OrderRegistrationForm.tsx`: 리다이렉션 로직 수정
+
+**변경 내용**:
+1. 신규 등록(UPS) 성공 후: `/orders/r.id` → `/orders/r.id/ups-detail`
+2. 수정(UPS) 저장 후: transport_mode === 'UPS'일 때만 `/orders/orderId/ups-detail`
+3. 일반 오더는 기존 유지
+
 ## [발견 이슈]
 
 _(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
