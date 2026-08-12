@@ -306,6 +306,11 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
     const itemName = watch(`packages.${nestIndex}.items.${k}.item_name`) as string | undefined;
     if (!itemName || itemName.trim().length < 2) return;
 
+    // TASK-B-293 (Issue #1091): 영문 전용 사전 필터 — 비영문(한글 등)이면 AI 호출 자체를 스킵.
+    // orderItemSchema 제출 시점 검증과 동일한 정규식으로 이중 방어 (이중 방어 — 제출 검증은 유지)
+    const ENGLISH_ONLY_REGEX = /^[A-Za-z0-9\s.,\-()&'"/#%+:]*$/;
+    if (!ENGLISH_ONLY_REGEX.test(itemName.trim())) return;
+
     const key = `${nestIndex}-${k}`;
     setHsLookupLoading(key, true);
     setHsLookupResult(key, null);
@@ -734,7 +739,9 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
           icon: <CheckCircle2 className="text-green-500" />
         });
         if (onSuccess) onSuccess();
-        setTimeout(() => router.push(`/orders/${orderId}`), 1000);
+        // Issue #1089: UPS 오더는 ups-detail로 리다이렉션 (비UPS는 기존 유지)
+        const redirectPath = data.transport_mode === 'UPS' ? `/orders/${orderId}/ups-detail` : `/orders/${orderId}`;
+        setTimeout(() => router.push(redirectPath), 1000);
         return;
       }
 
@@ -754,7 +761,8 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
           icon: <CheckCircle2 className="text-green-500" />
         });
         if (onSuccess) onSuccess();
-        setTimeout(() => router.push(`/orders/${r.id}`), 1000);
+        // Issue #1089: UPS 신규 등록 성공 시 ups-detail로 리다이렉션
+        setTimeout(() => router.push(`/orders/${r.id}/ups-detail`), 1000);
         return;
       }
 
