@@ -306,6 +306,11 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
     const itemName = watch(`packages.${nestIndex}.items.${k}.item_name`) as string | undefined;
     if (!itemName || itemName.trim().length < 2) return;
 
+    // TASK-B-293 (Issue #1091): 영문 전용 사전 필터 — 비영문(한글 등)이면 AI 호출 자체를 스킵.
+    // orderItemSchema 제출 시점 검증과 동일한 정규식으로 이중 방어 (이중 방어 — 제출 검증은 유지)
+    const ENGLISH_ONLY_REGEX = /^[A-Za-z0-9\s.,\-()&'"/#%+:]*$/;
+    if (!ENGLISH_ONLY_REGEX.test(itemName.trim())) return;
+
     const key = `${nestIndex}-${k}`;
     setHsLookupLoading(key, true);
     setHsLookupResult(key, null);
