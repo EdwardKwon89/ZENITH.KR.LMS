@@ -5,7 +5,7 @@
 | **Issue** | [#1085](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1085) |
 | **DEF** | [DEF-B-060](../defects/DEF-B-060_UPS트래킹이벤트_저장로직_4건결함.md) |
 | **배경** | JSJung과 SHXK API 레벨 실측 테스트(`gettrack`/`gettrackingnumber`, 실제 운송장번호 `1ZJ443D30403088388`) 중 Jaison이 실제 응답 데이터를 매핑 로직에 대입해보며 4가지 결함 확정, JSJung과 수정 방향 논의 확정 |
-| **담당** | Baker (Team B) |
+| **담당** | Dave (Team B) — 2026-08-12 Baker→Dave 재배정(JSJung 지시, Baker 사정으로 착수 불가) |
 | **생성일** | 2026-08-12 |
 | **우선순위** | P2 (Medium) |
 | **상태** | 🔄 진행중 |
@@ -98,7 +98,9 @@ await supabase.from('zen_tracking_configs')
 
 ## 담당자 위반 이력 사전 경고
 
-- **Baker**: `.agent/VIOLATION_TRACKER.md` 참조 후 착수 — task file/ACTIVE_TASK.md 미반영 유형 누적 이력(5회) 있음, JSJung 2026-07-15 결정에 따라 할당 지속(재론 금지). 착수 전 `./scripts/next-task-number.sh B` 재확인. **이번 Task는 신규 마이그레이션 2건 포함** — 최신 TeamB_Dev 기준으로 타임스탬프 충돌 없는지 특히 주의(과거 PR#1074 v1 반려 사례 재발 방지).
+- **Dave**: `.agent/VIOLATION_TRACKER.md` 참조 후 착수 — task file/ACTIVE_TASK.md 커밋 누락 유형 누적 이력(13회, 최다) 있음, JSJung 2026-07-15 결정에 따라 누적 이력과 무관하게 할당 지속(재론 금지). 최근 반복 유형 — ①task file/ACTIVE_TASK.md 커밋 누락 ②채번 절차 미준수(`./scripts/next-task-number.sh B` 직접 실행 후 확인할 것) ③무관한 과거 task file 오염(워크트리 미격리 혼입 — 본인 전용 워크트리에서만 작업할 것). **이번 Task는 신규 마이그레이션 2건 포함** — 최신 TeamB_Dev 기준으로 타임스탬프 충돌 없는지 특히 주의.
+
+_(2026-08-12 재배정 이력: 최초 Baker 배정 → Baker 사정으로 착수 불가 → Dave로 재배정. Baker 관련 위반 경고는 무의미해져 삭제, Dave 기준으로 갱신)_
 
 ## [발견 이슈]
 
