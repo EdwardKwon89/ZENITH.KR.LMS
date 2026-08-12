@@ -8,7 +8,7 @@
 | **담당** | Dave (Team B) — Baker는 현재 착수 불가(사정으로 배제) |
 | **생성일** | 2026-08-12 |
 | **우선순위** | **High (P1)** |
-| **상태** | 🔔 (완료 보고 — 검토 요청) |
+| **상태** | ✅ 완료 |
 
 ## 근본 원인 (확정 완료 — DEF-B-061 참조)
 
@@ -119,6 +119,14 @@ USING (
 - `npm run test:regression`: **1274/1274 PASS** (180파일, 신규 +6)
 - `npm run build`: SUCCESS
 - **fresh `supabase db reset` 재검증**(R-08-2): 정책 3개 + `authenticated` SELECT GRANT 확인
+
+## [Jaison 최종 검토]
+
+`/tmp/review-pr1088` 격리 워크트리에서 fresh `supabase db reset`(신규 마이그레이션 정상 적용) 후 재검증. 마이그레이션이 설계안(GRANT 1줄 + 정책 3개)과 정확히 일치, 과설계 없음. 신규 테스트 6/6 PASS.
+
+**독립 되돌리기 검증**: 정책 3개를 직접 `DROP POLICY`로 수동 제거(수정 전 상태 재현) 후 재실행 → TC-291-01/02/04(Admin/화주본인/Agency 성공 케이스) 정확히 `expected '0' to be '1'` FAIL 재현, TC-291-03/05(차단 케이스)는 영향 없음 확인 → `db reset`으로 복원 후 6/6 재확인.
+
+전체 회귀 **180/180·1274/1274 ALL PASS**(재검증 일치) · `npm run build` SUCCESS · 실제 CI(`gh pr checks 1088`) 3개 항목 전부 pass. PR#1088 승인·머지(TeamB_Dev `1fb3cfd9`), Issue #1087 종결.
 
 ## [발견 이슈]
 
