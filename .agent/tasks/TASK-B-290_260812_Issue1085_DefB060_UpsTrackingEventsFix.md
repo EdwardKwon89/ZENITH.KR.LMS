@@ -10,6 +10,8 @@
 | **우선순위** | P2 (Medium) |
 | **상태** | 🔔 (완료 보고 — 검토 요청) |
 
+> **PR#1086 반려 → v2 재작업(2차)**: Jaison 검토 결과 ①②③⑤는 정상, **④ 번역 사전 완전일치 문제**만 반려 — `translateShxkText()`가 `SHXK_TRANSLATION_DICT[zh.trim()]` 완전일치라, 실측 원문 `'我们正在遇到运输延迟。我们将尽快递送您的包裹。'`처럼 사전 키에 뒷문장이 붙으면 번역 실패. 부분일치(사전 키 포함 스캔)로 변경 + 실측 전체 문장 테스트 4건 추가(`c97400c0`).
+
 ## 근본 원인 (확정 완료 — DEF-B-060 참조)
 
 `src/lib/shxk/tracking.ts`의 `storeTrackingEvents()`에 4가지 결함이 있음: ① `event_time`(TIME 컬럼) dedup 비교 포맷 불일치로 중복저장 ② `event_code`/`location_country`가 이벤트별 실제값 대신 응답 헤더값을 전 행 복사 ③ 헤더 `track_status`(현재 상태)를 저장하는 곳이 전혀 없음 ④ SHXK 중문 메시지가 번역 없이 그대로 저장·노출됨(로케일 미반영).
@@ -138,6 +140,14 @@ _(2026-08-12 재배정 이력: 최초 Baker 배정 → Baker 사정으로 착수
 - `npm run test:regression`: **1264/1264 PASS** (179파일, 신규 +24)
 - `npm run build`: SUCCESS
 - **fresh `supabase db reset` 재검증**(R-08-2): `zen_tracking_configs` 3컬럼 + `zen_ups_tracking_events` 2컬럼 확인
+
+### v2 재작업 (PR#1086 반려 대응)
+
+- **반려 사유 (Jaison)**: `translateShxkText()`가 `SHXK_TRANSLATION_DICT[zh.trim()]` **완전일치**로 조회 — 실측 원문 `'我们正在遇到运输延迟。我们将尽快递送您的包裹。'`(사전 키 `'我们正在遇到运输延迟'`에 뒷문장 포함) 등이 번역 실패해 항상 중문 원문 그대로 표출. 신규 테스트가 짧고 완전일치하는 픽스처(`离开设施`)만 써서 미탐지.
+- **수정**: `translateShxkText()`를 **부분일치(사전 키가 원문에 포함되는지 스캔)** 방식으로 변경 — `trimmed.includes(key)`면 매칭(`c97400c0`)
+- **회귀 테스트 +4건**: 실측 전체 문장 2건(운송지연 `'我们正在遇到运输延迟。我们将尽快递送您的包裹。'`, 라벨생성 `'发件人已创建标签，但是 UPS 尚未收到包裹。'`) + 앞/뒤 여분 문장 매칭 + 미포함 null
+- **되돌리기 검증**: 완전일치로 원복 시 신규 3건 FAIL 재현 → 복원 후 28/28 PASS
+- **재검증**: 전체 회귀 **1268/1268 PASS** (179파일) · build SUCCESS
 
 ## [발견 이슈]
 
