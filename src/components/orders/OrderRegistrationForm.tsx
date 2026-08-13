@@ -322,7 +322,6 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
   }, [restoreAutoShipperInfo]);
 
   // TASK-B-284 (Issue #1070): WAREHOUSED+UPS 부분 수정 — 잠긴 필드 헬퍼
-  const lockShipperId = !!editScope?.lockShipperId;
   const lockTransportMode = !!editScope?.lockTransportMode;
   const isPartialEdit = !!editScope && !editScope.fullEditable;
   const isPackageMeasured = (pkgIndex: number): boolean => {

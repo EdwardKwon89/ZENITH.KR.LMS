@@ -10,6 +10,7 @@ import React from 'react';
 const h = vi.hoisted(() => ({
   mockCreateOrder: vi.fn(),
   mockUpdateOrder: vi.fn(),
+  mockGetCurrentUserAffiliation: vi.fn(),
 }));
 
 vi.mock('next-intl', () => ({
@@ -23,13 +24,7 @@ vi.mock('sonner', () => ({ toast: { success: vi.fn(), error: vi.fn(), info: vi.f
 vi.mock('framer-motion', () => ({ motion: { div: ({ children }: any) => <div>{children}</div> }, AnimatePresence: ({ children }: any) => <>{children}</> }));
 vi.mock('@/lib/logger', () => ({ logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() } }));
 vi.mock('@/app/actions/master', () => ({
-  getCurrentUserAffiliation: vi.fn().mockResolvedValue({
-    userId: 'u', userName: 'User Kim', userEmail: 'kim@test.kr', userPhone: '010-9999-9999', role: 'SHIPPER',
-    orgId: '550e8400-e29b-41d4-a716-446655440001', orgName: 'MASTER AIR', orgAddress: 'Seoul HQ',
-    orgBizNo: '111-11-22222', orgCountryCode: 'KR', orgStateProvince: 'Seoul', orgCity: 'Gangnam',
-    orgAddressStreet: 'Street 1', orgAddressDetail: 'Bldg 2', orgZipcode: '04515',
-    isIndividual: false, dummyIndividualId: '1',
-  }),
+  getCurrentUserAffiliation: (...args: any[]) => h.mockGetCurrentUserAffiliation(...args),
 }));
 vi.mock('@/app/actions/agency/shipper-link', () => ({ getAgencyOrgIdByShipper: vi.fn().mockResolvedValue(null) }));
 vi.mock('@/app/actions/ups/rates', () => ({ getUpsProducts: vi.fn().mockResolvedValue([]) }));
@@ -48,7 +43,7 @@ vi.mock('@/components/orders/UpsFreightEstimateSection', () => {
   return { UpsFreightEstimateSection: MockEstimate };
 });
 vi.mock('@/components/address-book/AddressBookSelector', () => ({ default: () => <div /> }));
-vi.mock('@/components/common/AddressInput', () => ({ AddressInput: () => <div data-testid="address-input" /> }));
+vi.mock('@/components/common/AddressInput', () => ({ AddressInput: ({ prefix }: { prefix?: string }) => <div data-testid={`address-input-${prefix ?? 'unknown'}`} /> }));
 
 import { OrderRegistrationForm } from '@/components/orders/OrderRegistrationForm';
 
@@ -85,6 +80,17 @@ function findBtn(container: HTMLElement, text: string) {
 afterEach(() => cleanup());
 
 describe('TASK-B-296: 화주 정보 UI 단순화 (Issue #1102)', () => {
+  beforeEach(() => {
+    // 기본(법인 화주) affiliation mock
+    h.mockGetCurrentUserAffiliation.mockResolvedValue({
+      userId: 'u', userName: 'User Kim', userEmail: 'kim@test.kr', userPhone: '010-9999-9999', role: 'SHIPPER',
+      orgId: SHIPPER_ORG, orgName: 'MASTER AIR', orgAddress: 'Seoul HQ',
+      orgBizNo: '111-11-22222', orgCountryCode: 'KR', orgStateProvince: 'Seoul', orgCity: 'Gangnam',
+      orgAddressStreet: 'Street 1', orgAddressDetail: 'Bldg 2', orgZipcode: '04515',
+      isIndividual: false, dummyIndividualId: '11111111-1111-4111-8111-111111111111',
+    });
+  });
+
   it('TC-296-01: shipper_id select 엘리먼트가 렌더되지 않는다', async () => {
     const { container } = render(
       <OrderRegistrationForm shippers={[{ id: SHIPPER_ORG, name: 'MASTER AIR' }]} ports={[]} defaultValues={validDefaults()} />
@@ -197,6 +203,14 @@ describe('TASK-B-296: 화주 정보 UI 단순화 (Issue #1102)', () => {
   });
 
   it('TC-296-06: 개인 화주(isIndividual)도 주소 입력란이 렌더된다 (회귀 방지)', async () => {
+    // 실제 개인 화주 상태를 재현 — affiliation mock을 isIndividual: true로 오버라이드 (mockResolvedValueOnce가 기본값보다 우선)
+    h.mockGetCurrentUserAffiliation.mockResolvedValueOnce({
+      userId: 'u', userName: 'Individual User', userEmail: 'indiv@test.kr', userPhone: '010-1111-2222', role: 'SHIPPER',
+      orgId: null, orgName: null, orgAddress: null,
+      orgBizNo: null, orgCountryCode: 'KR', orgStateProvince: null, orgCity: null,
+      orgAddressStreet: null, orgAddressDetail: null, orgZipcode: null,
+      isIndividual: true, dummyIndividualId: '11111111-1111-4111-8111-111111111111',
+    });
     const individualDefaults = {
       ...validDefaults(),
       order_type: 'B2C_ECOM' as const,
@@ -206,7 +220,7 @@ describe('TASK-B-296: 화주 정보 UI 단순화 (Issue #1102)', () => {
     const { container } = render(
       <OrderRegistrationForm shippers={[]} ports={[]} defaultValues={individualDefaults} />
     );
-    await waitFor(() => expect(container.querySelector('[data-testid="address-input"]')).toBeTruthy());
-    expect(container.querySelector('[data-testid="address-input"]')).toBeTruthy();
+    await waitFor(() => expect(container.querySelector('[data-testid="address-input-shipper"]')).toBeTruthy());
+    expect(container.querySelector('[data-testid="address-input-shipper"]')).toBeTruthy();
   });
 });
