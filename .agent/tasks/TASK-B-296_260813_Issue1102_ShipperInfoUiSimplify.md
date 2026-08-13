@@ -7,7 +7,7 @@
 | **담당** | Dave (Team B) — TASK-B-295 직접 구현자, 동일 코드 최신 숙지 |
 | **생성일** | 2026-08-13 |
 | **우선순위** | P2 |
-| **상태** | 🔔 (완료 보고 — 검토 요청) |
+| **상태** | ✅ 완료 |
 
 ## 현재 상태 (분석 완료)
 
@@ -119,6 +119,18 @@
 - `npm run test:regression`: **1304/1304 PASS** (188파일)
 - `npm run build`: SUCCESS
 - 기존 TASK-B-295 토글 테스트 4건 포함 10건 PASS (회귀 없음)
+
+## [Jaison 최종 검토]
+
+`/tmp/review-pr1103` 격리 워크트리에서 v1→v2 순서로 재검증.
+
+**v1 반려**: `getCurrentUserAffiliation` mock이 `isIndividual: false`로 고정돼 있어 TC-296-06이 실제로는 개인 화주 상태를 재현하지 못함 — `AddressInput` 렌더 조건을 원래대로(`!affiliation?.isIndividual &&`) 되돌려도 6/6 그대로 PASS되는 것으로 실증(③번 변경 여부와 무관하게 항상 통과). 나머지 ①②④(TC-296-01/02/03)는 전체 파일 되돌리기 시 정확히 FAIL하는 것을 확인해 정상이었음.
+
+**v2 재검증**: `getCurrentUserAffiliation`을 hoisted mock으로 전환해 TC-296-06 전용 `mockResolvedValueOnce({isIndividual: true, ...})` 오버라이드 추가 + `AddressInput` mock을 `prefix` 기반 testid로 분리(폼 내 shipper/recipient/pickup 3개 인스턴스 중 shipper만 특정) — Dave가 반려 코멘트에서 지적한 것보다 한 단계 더 정확한 추가 근본 원인(동일 testid로 다른 AddressInput 인스턴스가 잡혔던 문제)까지 자체 발견해 함께 수정.
+
+**독립 되돌리기 검증(v2)**: `AddressInput` 렌더 조건을 다시 원복 → 이번엔 **TC-296-06만 정확히 FAIL**(`expected null to be truthy`), 나머지 5건은 영향 없이 PASS — 반려 사유가 정확히 해소됐음을 확인. 복원 후 10/10(TASK-B-295 기존 4건 포함) 재확인. `lockShipperId` dead variable 제거도 확인.
+
+전체 회귀 **188/188·1304/1304 ALL PASS**(재검증 일치) · `npm run build` SUCCESS · 실제 CI(`gh pr checks 1103`) 3개 항목 전부 pass. PR#1103 v2 승인·머지(TeamB_Dev `0d4bbab7`), Issue #1102 종결.
 
 ## [발견 이슈]
 
