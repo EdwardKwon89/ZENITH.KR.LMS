@@ -330,16 +330,38 @@ export function AddressInput({
                   '경남': '48', '제주': '49',
                 };
                 const matchedIso = Object.entries(KR_SIDO_TO_ISOCODE).find(([key]) => (data as any).sido?.startsWith(key))?.[1] ?? '';
+                // TASK-B-298 (Issue #1106, DEF-B-064): Kakao `sigunguEnglish`(영문)는 필수가 아니어서 일부 도로
+                // (예: 대왕판교로)에서 비어있거나 불완전할 수 있음 → 신뢰할 수 있는 한글 `sigungu`를 1차 매칭 소스로 사용.
+                // 구(區)가 설치된 전국 12개 일반시를 한글 시 이름 → 라이브러리 문자열로 매핑 (라이브러리 실데이터 대조 완료).
+                // - '수원시'→'Suwon'처럼 라이브러리에 '-si' 접미사가 없는 예외 존재
+                // - '천안시'/'전주시'/'포항시'/'창원시'는 라이브러리에 '-si' 없는 동명이인이 별개로 존재 → 반드시 '-si' 버전 선택
+                const KR_GU_CITY_TO_LIBNAME: Record<string, string> = {
+                  '수원시': 'Suwon',
+                  '성남시': 'Seongnam-si',
+                  '안양시': 'Anyang-si',
+                  '부천시': 'Bucheon-si',
+                  '안산시': 'Ansan-si',
+                  '고양시': 'Goyang-si',
+                  '용인시': 'Yongin-si',
+                  '청주시': 'Cheongju-si',
+                  '천안시': 'Cheonan-si',
+                  '전주시': 'Jeonju-si',
+                  '포항시': 'Pohang-si',
+                  '창원시': 'Changwon-si',
+                };
+                const cityList = City.getCitiesOfState('KR', matchedIso) ?? [];
+                const sigunguEn = (data as any).sigunguEnglish ?? '';
+                const sigunguFirstToken = String((data as any).sigungu ?? '').split(' ')[0] || '';
+                const mappedCityName = KR_GU_CITY_TO_LIBNAME[sigunguFirstToken];
                 // TASK-B-297 (Issue #1104, DEF-B-063): 라이브러리에 없는 구 단위 값("Seongnam-si Bundang-gu")은
                 // 가장 길게 prefix 일치하는 실제 라이브러리 옵션("Seongnam-si")으로 매칭한다.
                 // "Gwangju" vs "Gwangju-si"가 둘 다 존재하므로 반드시 일치 길이 내림차순 정렬 후 최장 일치 선택
                 // (단순 .find() 사용 시 "Gwangju-si OO-gu"가 더 짧고 부정확한 "Gwangju"에 매칭되는 오매칭 버그 발생).
-                const cityList = City.getCitiesOfState('KR', matchedIso) ?? [];
-                const sigunguEn = (data as any).sigunguEnglish ?? '';
+                // TASK-B-298: 한글 매핑 우선 → 매핑에 없으면(서울 구 단위 등) 이 폴백 로직 그대로 유지.
                 const matched = cityList
                   .filter((c) => sigunguEn.startsWith(c.name))
                   .sort((a, b) => b.name.length - a.name.length)[0];
-                const matchedCity = matched?.name ?? sigunguEn;
+                const matchedCity = mappedCityName ?? matched?.name ?? sigunguEn;
                 setSelectedState(matchedIso);
                 setSelectedCity(matchedCity);
                 if (setValue && prefix) {
