@@ -273,6 +273,54 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
     ? (affiliation?.userName || '')
     : (affiliation?.orgName || shippers.find((s: any) => s.id === watch('shipper_id'))?.name || '');
 
+  // TASK-B-296 (Issue #1102): 화주 정보 전체 필드 — 수기입력 시 초기화/복원 대상
+  const SHIPPER_INFO_FIELDS = [
+    'shipper_name', 'shipper_contact_name', 'shipper_contact_phone', 'shipper_contact_email',
+    'shipper_address', 'shipper_address_english', 'shipper_address_detail', 'shipper_address_detail_english',
+    'shipper_country_code', 'shipper_state_province', 'shipper_city', 'shipper_zipcode', 'shipper_biz_no',
+  ] as const;
+
+  const clearShipperInfoFields = useCallback(() => {
+    SHIPPER_INFO_FIELDS.forEach((f) => setValue(f, ''));
+  }, [setValue]);
+
+  // "내 정보 사용" 재전환 시 affiliation 파생값으로 복원 (loadAffiliation else-branch와 동일 값)
+  const restoreAutoShipperInfo = useCallback(() => {
+    if (affiliation?.isIndividual) {
+      setValue('shipper_name', affiliation.userName || '');
+      setValue('shipper_contact_name', affiliation.userName || '');
+      setValue('shipper_contact_email', affiliation.userEmail || '');
+      setValue('shipper_contact_phone', (affiliation as any)?.userPhone || '');
+    } else {
+      const matchedShipper = shippers.find((s: any) => s.id === affiliation?.orgId);
+      setValue('shipper_name', autoShipperName);
+      setValue('shipper_contact_name', affiliation?.userName || '');
+      setValue('shipper_contact_email', affiliation?.userEmail || '');
+      setValue('shipper_contact_phone', (affiliation as any)?.userPhone || '');
+      setValue('shipper_address', matchedShipper?.address || affiliation?.orgAddress || '');
+      setValue('shipper_biz_no', matchedShipper?.biz_no || affiliation?.orgBizNo || '');
+      setValue('shipper_country_code', affiliation?.orgCountryCode || 'KR');
+      setValue('shipper_state_province', affiliation?.orgStateProvince || '');
+      setValue('shipper_city', affiliation?.orgCity || '');
+      setValue('shipper_address_detail', affiliation?.orgAddressDetail || '');
+      setValue('shipper_zipcode', affiliation?.orgZipcode || '');
+    }
+    setValue('shipper_address_english', '');
+    setValue('shipper_address_detail_english', '');
+  }, [affiliation, shippers, autoShipperName, setValue]);
+
+  // "수기입력" 클릭 — 화주 정보 전체 필드 초기화 + 활성화 (TASK-B-296 ②)
+  const handleShipperManualClick = useCallback(() => {
+    setShipperNameMode('manual');
+    clearShipperInfoFields();
+  }, [clearShipperInfoFields]);
+
+  // "내 정보 사용" 클릭 — affiliation 파생값 복원 + 비활성화
+  const handleShipperAutoClick = useCallback(() => {
+    setShipperNameMode('auto');
+    restoreAutoShipperInfo();
+  }, [restoreAutoShipperInfo]);
+
   // TASK-B-284 (Issue #1070): WAREHOUSED+UPS 부분 수정 — 잠긴 필드 헬퍼
   const lockShipperId = !!editScope?.lockShipperId;
   const lockTransportMode = !!editScope?.lockTransportMode;
@@ -422,9 +470,10 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
   }, [orderId, setValue, shippers]);
 
   // TASK-B-295 (Issue #1100): 화주명 토글 모드 초기화 + "내 정보 사용" 모드 자동 동기화.
-  // - 신규 등록: 기본 "내 정보 사용" → affiliation 기반 화주명을 shipper_name에 자동 반영
-  // - 수정 모드: 기존 저장값(shipper_name)이 조직명과 다르면 "수기입력"으로 시작 (값 보존)
-  // - TASK-B-287 가드 준수: 수정 모드에서 affiliation 자동완성으로 기존 shipper_name을 덮어쓰지 않음
+  // TASK-B-296 (Issue #1102): auto 모드에서 화주 정보 전체 필드를 affiliation 파생값으로 채운다.
+  // - 신규 등록: 기본 "내 정보 사용" → affiliation 기반 화주 정보 자동 반영
+  // - 수정 모드: 기존 저장값(shipper_name)이 조직명과 다르면 "수기입력"으로 시작 (값 보존 — 초기화 없음)
+  // - TASK-B-287 가드 준수: 수정 모드에서 affiliation 자동완성으로 기존 값을 덮어쓰지 않음
   useEffect(() => {
     if (orderId) {
       const saved = (externalDefaults as any)?.shipper_name;
@@ -433,11 +482,11 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
       }
       return;
     }
-    if (shipperNameMode === 'auto' && autoShipperName) {
-      setValue('shipper_name', autoShipperName);
+    if (shipperNameMode === 'auto') {
+      restoreAutoShipperInfo();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [orderId, shipperNameMode, autoShipperName, setValue]);
+  }, [orderId, shipperNameMode, autoShipperName, restoreAutoShipperInfo]);
 
   const { fields: packageFields, append: appendPackage, remove: removePackage } = useFieldArray({
     control,
@@ -1008,39 +1057,22 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                             {affiliation ? (affiliation.isIndividual ? "개인 화주" : (affiliation.orgName || "법인 화주")) : "Checking..."}
                           </ZenBadge>
                         </div>
-                        <select 
-                          {...register('shipper_id')}
-                          disabled={!!affiliation || lockShipperId}
-                          className="w-full bg-white border border-slate-200 text-sm px-3 py-2 rounded-xl focus:ring-2 focus:ring-blue-100 outline-none transition-all mb-3"
-                        >
-                          {shippers.map(s => {
-                            const displayName = (s.id === affiliation?.dummyIndividualId && affiliation?.isIndividual)
-                              ? affiliation?.userName 
-                              : (s.id === affiliation?.orgId && !affiliation?.isIndividual)
-                                ? affiliation?.orgName
-                                : s.name;
-                            return <option key={s.id} value={s.id}>{displayName}</option>
-                          })}
-                        </select>
 
-                        {/* TASK-B-295 (Issue #1100): 화주명(발송인 표시명) 자유 입력 — 내 정보 사용 / 수기입력 */}
+                        {/* TASK-B-295 (Issue #1100) / TASK-B-296 (Issue #1102): 화주명(발송인 표시명) 자유 입력 — 내 정보 사용 / 수기입력 */}
                         <div className="mb-3">
                           <div className="flex items-center justify-between mb-1">
                             <label className="text-[10px] font-bold text-slate-500">{t('shipper_label')} (발송인 표시명)</label>
                             <div className="flex gap-1 bg-slate-100 rounded-lg p-0.5">
                               <button
                                 type="button"
-                                onClick={() => {
-                                  setShipperNameMode('auto');
-                                  setValue('shipper_name', autoShipperName);
-                                }}
+                                onClick={handleShipperAutoClick}
                                 className={`px-2 py-1 rounded-md text-[10px] font-bold transition-all ${shipperNameMode === 'auto' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
                               >
                                 내 정보 사용
                               </button>
                               <button
                                 type="button"
-                                onClick={() => setShipperNameMode('manual')}
+                                onClick={handleShipperManualClick}
                                 className={`px-2 py-1 rounded-md text-[10px] font-bold transition-all ${shipperNameMode === 'manual' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
                               >
                                 수기입력
@@ -1061,56 +1093,57 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                               <p className="text-slate-400 font-bold uppercase tracking-tighter mb-1">{t('contact_person')}</p>
                               <ZenInput 
                                 placeholder="담당자명"
+                                disabled={shipperNameMode === 'auto'}
                                 {...register('shipper_contact_name')}
-                                className="bg-white/80 py-1.5 text-[11px]"
+                                className={`bg-white/80 py-1.5 text-[11px] ${shipperNameMode === 'auto' ? 'opacity-60 bg-slate-100' : ''}`}
                               />
                             </div>
                             <div>
                               <p className="text-slate-400 font-bold uppercase tracking-tighter mb-1">{t('shipper_contact')} (Phone)</p>
                               <ZenInput 
                                 placeholder="010-XXXX-XXXX"
+                                disabled={shipperNameMode === 'auto'}
                                 {...register('shipper_contact_phone')}
-                                className="bg-white/80 py-1.5 text-[11px]"
+                                className={`bg-white/80 py-1.5 text-[11px] ${shipperNameMode === 'auto' ? 'opacity-60 bg-slate-100' : ''}`}
                               />
                             </div>
                             <div>
                               <p className="text-slate-400 font-bold uppercase tracking-tighter mb-1">E-mail (Reference)</p>
                               <ZenInput 
                                 placeholder="example@email.com"
+                                disabled={shipperNameMode === 'auto'}
                                 {...register('shipper_contact_email')}
-                                className="bg-white/80 py-1.5 text-[11px]"
+                                className={`bg-white/80 py-1.5 text-[11px] ${shipperNameMode === 'auto' ? 'opacity-60 bg-slate-100' : ''}`}
                               />
                             </div>
-                            {!affiliation?.isIndividual && (
-                               <>
-                                 <div>
-                                     <AddressInput
-                                       mode="rhf"
-                                       prefix="shipper"
-                                       register={register}
-                                       setValue={setValue}
-                                       t={t}
-                                       key={affiliation?.orgId || 'no-org'}
-                                       defaultValues={{
-                                         country_code: affiliation?.orgCountryCode ?? 'KR',
-                                         state_province: affiliation?.orgStateProvince ?? '',
-                                         city: affiliation?.orgCity ?? '',
-                                         address: affiliation?.orgAddressStreet ?? affiliation?.orgAddress ?? '',
-                                        address_detail: affiliation?.orgAddressDetail ?? '',
-                                        zipcode: affiliation?.orgZipcode ?? '',
-                                      }}
-                                   />
-                                </div>
-                                <div>
-                                  <p className="text-slate-400 font-bold uppercase tracking-tighter mb-1">{t('shipper_biz_no')}</p>
-                                  <ZenInput
-                                    readOnly
-                                    {...register('shipper_biz_no')}
-                                    className="bg-slate-50 py-1.5 text-[11px] text-slate-700 font-semibold"
-                                  />
-                                </div>
-                              </>
-                            )}
+                            {/* TASK-B-296 (Issue #1102): 개인/법인 무관 항상 주소 입력 표시 (auto 모드에선 비활성화) */}
+                            <div>
+                              <AddressInput
+                                mode="rhf"
+                                prefix="shipper"
+                                register={register}
+                                setValue={setValue}
+                                t={t}
+                                readOnly={shipperNameMode === 'auto'}
+                                key={affiliation?.orgId || 'no-org'}
+                                defaultValues={{
+                                  country_code: affiliation?.orgCountryCode ?? 'KR',
+                                  state_province: affiliation?.orgStateProvince ?? '',
+                                  city: affiliation?.orgCity ?? '',
+                                  address: affiliation?.orgAddressStreet ?? affiliation?.orgAddress ?? '',
+                                  address_detail: affiliation?.orgAddressDetail ?? '',
+                                  zipcode: affiliation?.orgZipcode ?? '',
+                                }}
+                              />
+                            </div>
+                            <div>
+                              <p className="text-slate-400 font-bold uppercase tracking-tighter mb-1">{t('shipper_biz_no')}</p>
+                              <ZenInput
+                                readOnly={shipperNameMode === 'auto'}
+                                {...register('shipper_biz_no')}
+                                className={`bg-slate-50 py-1.5 text-[11px] ${shipperNameMode === 'auto' ? 'text-slate-700 font-semibold' : 'bg-white/80 text-slate-900 font-semibold'}`}
+                              />
+                            </div>
                           </div>
                         </div>
                       </div>
