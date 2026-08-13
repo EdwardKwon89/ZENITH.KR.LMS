@@ -36,11 +36,16 @@ shipper_name: z.string().optional(),
 ```
 기존 `shipper_contact_name` 등과 동일한 위치(송하인 담당자/연락처 섹션)에 추가.
 
-### ③ `OrderRegistrationForm.tsx` — 화주명 자유 텍스트 입력
-- [L982-984](../../src/components/orders/OrderRegistrationForm.tsx#L982-L984)의 읽기전용 `ZenBadge`(조직명만 표시)를 유지하되, 그 아래에 `shipper_name` 자유 텍스트 `<ZenInput>` 추가(라벨: "화주명(서류/라벨 표시용)" 등 — `shipper_contact_name` 입력란과 동일 스타일).
-- **자동 채움**: 신규 등록 시 `affiliation.orgName`(법인) 또는 `affiliation.userName`(개인)으로 기본값 채움 — 기존 `shipper_contact_name` 자동완성 로직([L383-401](../../src/components/orders/OrderRegistrationForm.tsx#L383-L401))과 동일 패턴 재사용.
-- **수정 모드 가드**: TASK-B-287(DEF-B-058)에서 만든 "edit 모드에서는 자동완성 스킵" 가드를 그대로 재사용 — 기존 값 덮어쓰기 금지.
-- 이 입력란은 **항상 editable**(비활성화 금지) — `shipper_id` select(조직 선택)는 계속 `disabled={!!affiliation || lockShipperId}` 그대로 유지(오더 소유권 자체는 안 바뀜).
+### ③ `OrderRegistrationForm.tsx` — "내 정보 사용 / 수기입력" 토글 + 화주명 입력
+(2026-08-13 설계 수정 — JSJung 피드백: 화주 select는 그대로 유지하고, 사용자가 명시적으로 "내 정보 사용"과 "수기입력" 중 선택하도록)
+
+- [L980-985](../../src/components/orders/OrderRegistrationForm.tsx#L980-L985) 라벨 영역 옆에 세그먼트 토글(또는 라디오 버튼) 2개 추가: **"내 정보 사용"**(기본값) / **"수기입력"**. 로컬 state로 관리(예: `const [shipperNameMode, setShipperNameMode] = useState<'auto' | 'manual'>('auto')`) — 폼 필드 자체가 아니라 UI 모드 전환용이므로 `register()` 불필요.
+- `shipper_id` select(조직 선택, [L986-999](../../src/components/orders/OrderRegistrationForm.tsx#L986-L999))는 **토글과 무관하게 100% 그대로 유지** — 두 모드 모두에서 항상 노출, 기존 `disabled={!!affiliation || lockShipperId}` 로직도 변경 없음. 즉 오더 소유권(`shipper_id`)은 토글 상태와 무관하게 계속 select 값을 따름.
+- **"내 정보 사용" (기본값)**: `shipper_name` 입력란 `disabled`(또는 읽기전용) — 값은 기존 뱃지 로직과 동일하게 `affiliation.orgName`(법인) / `affiliation.userName`(개인)에서 자동 파생, `shipper_id` select 변경(대리점이 다른 화주 선택 등) 시에도 즉시 동기화.
+- **"수기입력" 선택 시**: `shipper_name` 입력란이 활성화되어 자유 텍스트 편집 가능(시스템 미등록 임의 화주명 입력). 모드 재전환("수기입력" → "내 정보 사용")하면 입력값을 버리고 다시 조직/개인명으로 되돌림(명확한 UX).
+- **수정 모드 초기값**: `defaultValues.shipper_name`이 존재하고 현재 `affiliation` 파생값과 다르면 토글 초기 상태를 "수기입력"으로 설정(기존에 수기입력된 값을 보존해서 보여주기 위함). 그 외(신규 등록, 또는 기존 값이 조직명과 동일/미설정)에는 "내 정보 사용" 기본값.
+- TASK-B-287(DEF-B-058) "edit 모드에서는 자동완성 스킵" 가드는 "내 정보 사용" 모드의 자동 동기화 로직에도 동일 적용 — 수정 화면 최초 진입 시 기존 저장값을 자동완성으로 덮어쓰지 않음(위 수정 모드 초기값 판단과 함께 처리).
+- 제출 시 `shipper_name`은 현재 입력란의 실제 값(모드와 무관하게 폼 상태에 반영된 값)을 그대로 전송 — 별도 모드 플래그를 서버로 보낼 필요 없음(모드는 순수 클라이언트 UX).
 
 ### ④ `createOrder`/`updateOrder` ([src/app/actions/operations/orders.ts](../../src/app/actions/operations/orders.ts))
 - `updateOrder`의 `headerData` 객체에 `shipper_name: validated.shipper_name,` 추가(`shipper_contact_name` 옆).
@@ -64,7 +69,7 @@ shipper_name: z.string().optional(),
 - [ ] `./scripts/next-task-number.sh B`로 TASK-B-295 확인
 - [ ] 마이그레이션(①) — 최신 TeamB_Dev 기준 타임스탬프 충돌 없는지 확인, `create_order_atomic()` 기존 로직 100% 보존 확인
 - [ ] `orderRegistrationSchema`에 `shipper_name` 추가(②)
-- [ ] `OrderRegistrationForm.tsx` 화주명 입력란 추가 + 자동완성/수정모드 가드(③)
+- [ ] `OrderRegistrationForm.tsx` "내 정보 사용/수기입력" 토글 + 화주명 입력란 + 자동완성/수정모드 가드(③) — `shipper_id` select는 무변경 확인
 - [ ] `createOrder`/`updateOrder` 배선(④)
 - [ ] 서류/라벨 4개 파일만 폴백 교체(⑤) — `grep -rn "shipper?\.name\|shipper\.name" src`로 전체 사용처 재확인 후 이 4곳 외 변경 없음을 자가 검증
 - [ ] **회귀 테스트 신설 (필수, R-09, 실제 동작 기반 — 그림자/toContain 금지)**:
@@ -73,10 +78,11 @@ shipper_name: z.string().optional(),
   - `shipper_name` 미입력(레거시 오더) 시 CI/PL/UPS Invoice/Shipping Label 데이터 빌더가 `order.shipper?.name`으로 정상 폴백하는지
   - `shipper_name` 입력된 오더는 위 4개 문서 데이터 빌더가 `shipper_name` 값을 사용하는지(조직명이 아니라)
   - 창고 입출고 등 **비대상 화면 최소 1곳**은 `shipper_name`이 입력돼 있어도 여전히 실제 조직명을 표시하는지(회귀 방지 — 스코프 밖 오염 확인)
-- [ ] **독립 되돌리기 검증**: `shipper_name` 폴백 로직을 원복해서 신규 테스트가 정확히 FAIL하는지 확인 후 복원
+  - **토글 UI 동작(실제 컴포넌트 렌더링 기반)**: 기본 상태 "내 정보 사용"에서 `shipper_name` 입력란이 disabled이고 값이 affiliation 파생값과 일치하는지 / "수기입력" 클릭 시 입력란이 활성화되고 자유 텍스트 입력이 폼 상태에 반영되는지 / "수기입력" → "내 정보 사용" 재전환 시 값이 조직/개인명으로 복원되는지 / 수정 모드에서 기존 저장값이 조직명과 다르면 초기 토글이 "수기입력"으로 시작하는지
+- [ ] **독립 되돌리기 검증**: `shipper_name` 폴백 로직 및 토글 활성/비활성 로직을 원복해서 신규 테스트가 정확히 FAIL하는지 확인 후 복원
 - [ ] `npm run test:regression` 직접 실행, 정확한 PASS 수치 기재
 - [ ] `npm run build` SUCCESS 확인
-- [ ] (R-10) 브라우저에서 실제로: 신규 UPS 오더 등록 시 화주명에 임의 텍스트("Test Shipper ABC") 입력 → 등록 후 ups-detail의 CI/PL/UPS Invoice PDF 미리보기(또는 다운로드) 및 화주 정보 카드에 그 텍스트가 표시되는지, 오더 수정 화면 재진입 시 값이 유지되는지, 창고 화면(예: 출고 확인)에서는 여전히 실제 조직명이 보이는지 스크린샷 첨부
+- [ ] (R-10) 브라우저에서 실제로: 신규 UPS 오더 등록 화면에서 기본값 "내 정보 사용" 상태 확인 → "수기입력" 클릭 후 화주명에 임의 텍스트("Test Shipper ABC") 입력 → 등록 후 ups-detail의 CI/PL/UPS Invoice PDF 미리보기(또는 다운로드) 및 화주 정보 카드에 그 텍스트가 표시되는지, 오더 수정 화면 재진입 시 토글이 "수기입력"으로 자동 표시되고 값이 유지되는지, "내 정보 사용"으로 되돌리면 조직명으로 복원되는지, 창고 화면(예: 출고 확인)에서는 여전히 실제 조직명이 보이는지 스크린샷 첨부
 
 ## 완료 보고 절차 (R-17 준수)
 
