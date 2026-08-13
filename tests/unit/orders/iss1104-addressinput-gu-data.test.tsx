@@ -1,12 +1,13 @@
 // TASK-B-297 (Issue #1104): DEF-B-063 — country-state-city 구(區) 단위 데이터 누락 회귀 테스트.
 //
-// Daum 주소검색 onComplete 응답의 sigunguEnglish가 country-state-city 라이브러리에 없는 값
-// (예: "Seongnam-si Bundang-gu")이어도 실제 AddressInput에 해당 값이 드롭다운 옵션으로 존재하고
-// 선택된 상태가 되어야 한다. (AddressInput mock 금지 — 실제 컴포넌트 렌더링)
+// 2026-08-13 설계 수정(JSJung 제안): 라이브러리에 없는 값을 동적으로 옵션 추가하는 최초안은 폐기.
+// City.getCitiesOfState의 실제 라이브러리 옵션 중 Daum 응답값과 **가장 길게 prefix 일치**하는 항목을 선택한다.
+// (AddressInput mock 금지 — 실제 컴포넌트 렌더링)
 //
 // 검증 시나리오:
-//  TC-297-063-01: 라이브러리에 없는 구 단위 시/군/구 ("Seongnam-si Bundang-gu") → 옵션 존재 + 선택됨
-//  TC-297-063-02: 정상 매칭 값 (서울 "Gangnam-gu") → 회귀 없이 기존 동작 유지
+//  TC-297-063-01: "Seongnam-si Bundang-gu"(라이브러리 미존재) → 실제 라이브러리 옵션 "Seongnam-si"로 매칭·선택
+//  TC-297-063-02: "Gwangju-si OO-gu" → "Gwangju"가 아니라 "Gwangju-si"로 선택 (짧은 접두 오매칭 회귀 방지 — 핵심)
+//  TC-297-063-03: 정상 매칭 값 (서울 "Gangnam-gu") → 회귀 없이 기존 동작 유지
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
@@ -46,16 +47,12 @@ vi.mock('react-daum-postcode', () => ({
 }));
 
 function citySelectOf(container: HTMLElement): HTMLSelectElement {
+  // AddressInput 단독 렌더: [0]=country, [1]=state, [2]=city
   return Array.from(container.querySelectorAll('select'))[2] as HTMLSelectElement;
 }
 
-function optionValues(select: HTMLSelectElement): string[] {
-  return Array.from(select.querySelectorAll('option')).map((o) => o.value);
-}
-
-describe('TASK-B-297 (Issue #1104) DEF-B-063: 구(區) 단위 시/군/구 데이터 누락', () => {
+describe('TASK-B-297 (Issue #1104) DEF-B-063: 구(區) 단위 시/군/구 데이터 누락 (최장 prefix 매칭)', () => {
   beforeEach(() => {
-    // 기본 Daum 응답: 경기도 성남시 분당구 (라이브러리에 "Seongnam-si Bundang-gu" 없음)
     h.mockDaumData = {
       roadAddress: 'Daewangpangyo-ro 123',
       zonecode: '13487',
@@ -67,31 +64,60 @@ describe('TASK-B-297 (Issue #1104) DEF-B-063: 구(區) 단위 시/군/구 데이
     };
   });
 
-  it('TC-297-063-01: 라이브러리에 없는 구 단위 값("Seongnam-si Bundang-gu")이 옵션으로 존재하고 선택된다', async () => {
+  it('TC-297-063-01: "Seongnam-si Bundang-gu" → 실제 라이브러리 옵션 "Seongnam-si"로 선택된다', async () => {
     const setValue = vi.fn();
     const { container } = render(<AddressInput t={mockT} prefix="shipper" setValue={setValue} mode="rhf" />);
 
-    // 주소 검색 버튼 → Daum 모달 → 분당구 주소 선택 (시/도 사전 선택 없이 검색만 수행)
     const searchButton = screen.getByRole('button', { name: 'Search' });
     fireEvent.click(searchButton);
     fireEvent.click(screen.getByRole('button', { name: 'select-address' }));
 
     await waitFor(() => {
       const citySelect = citySelectOf(container);
-      expect(citySelect.value).toBe('Seongnam-si Bundang-gu');
+      // 라이브러리 원본 옵션(Seongnam-si)으로 매칭 — 합성 옵션 아님
+      expect(citySelect.value).toBe('Seongnam-si');
     });
 
+    // 선택된 값이 드롭다운에 실제 옵션으로 존재해야 함
     const citySelect = citySelectOf(container);
-    expect(optionValues(citySelect)).toContain('Seongnam-si Bundang-gu');
+    const optionValues = Array.from(citySelect.querySelectorAll('option')).map((o) => o.value);
+    expect(optionValues).toContain('Seongnam-si');
+    expect(optionValues).not.toContain('Seongnam-si Bundang-gu');
 
     expect(setValue).toHaveBeenCalledWith('shipper_state_province', '41');
-    expect(setValue).toHaveBeenCalledWith('shipper_city', 'Seongnam-si Bundang-gu');
+    expect(setValue).toHaveBeenCalledWith('shipper_city', 'Seongnam-si');
     expect(setValue).toHaveBeenCalledWith('shipper_zipcode', '13487');
     expect(setValue).toHaveBeenCalledWith('shipper_address', 'Daewangpangyo-ro 123');
   });
 
-  it('TC-297-063-02: 정상 매칭 값(서울 "Gangnam-gu")은 회귀 없이 그대로 동작한다', async () => {
-    // 서울 강남구는 라이브러리에 정상 존재 → 기존 매칭 경로 그대로
+  it('TC-297-063-02: "Gwangju-si OO-gu" → "Gwangju"가 아니라 "Gwangju-si"로 선택된다 (짧은 접두 오매칭 방지)', async () => {
+    h.mockDaumData = {
+      roadAddress: 'Gwangju-ro 1',
+      zonecode: '12760',
+      roadAddressEnglish: '1 Gwangju-ro, OO-gu, Gwangju-si',
+      sido: '경기도',
+      sidoEnglish: 'Gyeonggi-do',
+      sigungu: '광주시 OO구',
+      sigunguEnglish: 'Gwangju-si OO-gu',
+    };
+    const setValue = vi.fn();
+    const { container } = render(<AddressInput t={mockT} prefix="shipper" setValue={setValue} mode="rhf" />);
+
+    const searchButton = screen.getByRole('button', { name: 'Search' });
+    fireEvent.click(searchButton);
+    fireEvent.click(screen.getByRole('button', { name: 'select-address' }));
+
+    await waitFor(() => {
+      const citySelect = citySelectOf(container);
+      // 가장 긴 일치("Gwangju-si")가 선택되어야 함 — "Gwangju"(짧은 접두) 오매칭 금지
+      expect(citySelect.value).toBe('Gwangju-si');
+    });
+
+    expect(setValue).toHaveBeenCalledWith('shipper_city', 'Gwangju-si');
+    expect(setValue).not.toHaveBeenCalledWith('shipper_city', 'Gwangju');
+  });
+
+  it('TC-297-063-03: 정상 매칭 값(서울 "Gangnam-gu")은 회귀 없이 그대로 동작한다', async () => {
     h.mockDaumData = {
       roadAddress: 'Gangnam-daero 1',
       zonecode: '06236',
@@ -114,9 +140,9 @@ describe('TASK-B-297 (Issue #1104) DEF-B-063: 구(區) 단위 시/군/구 데이
     });
 
     const citySelect = citySelectOf(container);
-    expect(optionValues(citySelect)).toContain('Gangnam-gu');
-    // 정상 매칭이므로 동적 옵션 중복이 없어야 함 (라이브러리 값 그대로 1회)
-    expect(optionValues(citySelect).filter((v) => v === 'Gangnam-gu')).toHaveLength(1);
+    const optionValues = Array.from(citySelect.querySelectorAll('option')).map((o) => o.value);
+    expect(optionValues).toContain('Gangnam-gu');
+    expect(optionValues.filter((v) => v === 'Gangnam-gu')).toHaveLength(1);
     expect(setValue).toHaveBeenCalledWith('shipper_state_province', '11');
     expect(setValue).toHaveBeenCalledWith('shipper_city', 'Gangnam-gu');
   });

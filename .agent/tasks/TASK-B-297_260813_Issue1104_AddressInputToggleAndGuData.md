@@ -36,32 +36,35 @@ defaultValues={
 `readOnly` prop은 기존 그대로 `shipperNameMode === 'auto'` 유지. 다른 3개 호출부(`agency/shippers/new`, `agency/shippers/[id]/edit`, `mypage/corporate`)는 토글이 없는 화면이라 **변경 대상 아님**.
 
 ### ② DEF-B-063 — `AddressInput.tsx`의 Daum `onComplete` 콜백만 수정
-`City.getCitiesOfState`에서 정확히 일치하는 항목이 없으면, Daum이 반환한 실제 값을 `cities` state에 동적으로 추가해서 화면에 표시·선택 가능하게 만든다:
+(2026-08-13 설계 수정 — JSJung 제안: 정확일치 대신 부분매칭. 라이브러리에 없는 값을 동적으로 옵션 추가하던 최초안은 폐기 — 기존 시/도 매칭 방식(`data.sido?.startsWith(key)`)과 동일하게 부분매칭으로 통일)
+
+`City.getCitiesOfState`로 얻은 실제 라이브러리 옵션 중 Daum 응답값과 **가장 길게 일치하는(prefix) 항목**을 선택:
 ```js
 const cityList = City.getCitiesOfState('KR', matchedIso) ?? [];
-const exactMatch = cityList.find(c => c.name === data.sigunguEnglish);
-const finalCityName = exactMatch?.name ?? data.sigunguEnglish ?? '';
-if (!exactMatch && finalCityName) {
-  setCities([...cityList, { name: finalCityName, countryCode: 'KR', stateCode: matchedIso } as ICity]);
-} else {
-  setCities(cityList);
-}
+const sigunguEn = (data as any).sigunguEnglish ?? '';
+const matched = cityList
+  .filter(c => sigunguEn.startsWith(c.name))
+  .sort((a, b) => b.name.length - a.name.length)[0]; // 가장 긴 일치 우선
+const finalCityName = matched?.name ?? sigunguEn;
 setSelectedCity(finalCityName);
 ```
-`selectedState` 변경에 반응하는 기존 `useEffect`([L80-84](../../src/components/common/AddressInput.tsx#L80-L84))가 이후 이 동적 추가 옵션을 덮어쓰지 않는지 반드시 확인(리마운트/effect 순서 직접 검증).
+`cities` state 자체는 라이브러리 원본 목록 그대로 유지(합성 옵션 추가 없음).
 
-과설계 금지 — ①은 `AddressInput` 컴포넌트 리팩터링 없이 호출부 prop만 변경. ②는 전체 한국 행정구역 데이터 자체 구축이 아니라 "검색된 값을 화면에서 선택 가능하게" 만드는 최소 수정만.
+**"가장 긴 일치" 정렬 필수 — 실측 확인된 이유**: 경기도(41) 목록에 `Gwangju`와 `Gwangju-si`가 **별개 항목으로 둘 다 존재**하고 배열상 `Gwangju`가 먼저 나온다. 단순 `.find()`(첫 매치)를 쓰면 "Gwangju-si OO구" 응답이 더 짧고 부정확한 `Gwangju`에 매칭되는 새 버그가 생긴다 — 반드시 일치 길이 내림차순 정렬 후 최장 일치를 선택할 것.
+
+과설계 금지 — ①은 `AddressInput` 컴포넌트 리팩터링 없이 호출부 prop만 변경. ②는 전체 한국 행정구역 데이터 자체 구축이 아니라 라이브러리에 이미 있는 옵션 중 최선의 것을 고르는 최소 수정만.
 
 ## 착수 체크리스트
 
 - [x] `git fetch origin && git pull origin TeamB_Dev` 후 `feature/teamb-297-addressinput-fixes` 브랜치 생성(전용 워크트리, R-17 §0)
 - [x] `./scripts/next-task-number.sh B`로 TASK-B-297 확인
 - [x] DEF-B-062 수정(①) — `OrderRegistrationForm.tsx` 호출부만
-- [x] DEF-B-063 수정(②) — `AddressInput.tsx` `onComplete` 콜백만
+- [x] DEF-B-063 수정(②) — `AddressInput.tsx` `onComplete` 콜백만 (2026-08-13 설계 수정안 적용 — 최장 prefix 매칭)
 - [x] **회귀 테스트 신설 (필수, R-09, 실제 컴포넌트 렌더링 기반 — 그림자/toContain 금지, `AddressInput` mock 금지)**:
   - [x] (DEF-B-062) "수기입력" 클릭 시 실제 `AddressInput`의 시/도·시/군/구·도로명주소·상세주소·우편번호가 빈 값이 되는지(mock 없이 실제 렌더링)
   - [x] (DEF-B-062) "내 정보 사용" 재전환 시 위 필드들이 조직 주소값으로 실제 복원되는지
-  - [x] (DEF-B-063) Daum `onComplete` mock 응답의 `sigunguEnglish`가 라이브러리 목록에 없는 값(예: "Seongnam-si Bundang-gu")일 때 완료 후 해당 값이 드롭다운에 옵션으로 존재하고 선택 상태인지
+  - [x] (DEF-B-063) Daum `onComplete` mock 응답의 `sigunguEnglish`가 라이브러리에 정확 매칭되지 않는 값(예: "Seongnam-si Bundang-gu")일 때 완료 후 `selectedCity`가 실제 라이브러리 옵션("Seongnam-si")으로 선택되는지
+  - [x] (DEF-B-063, 핵심) `sigunguEnglish`가 "Gwangju-si XXX-gu"일 때 `selectedCity`가 "Gwangju"가 아니라 "Gwangju-si"로 선택되는지(짧은 접두 오매칭 회귀 방지)
   - [x] (DEF-B-063) 기존에 정상 매칭되던 값(예: 서울 강남구)이 회귀 없이 그대로 동작하는지
 - [x] **독립 되돌리기 검증**: 각 수정 부분을 실제로 되돌려서 신규 테스트가 정확히 FAIL하는지 확인 후 복원
 - [x] `npm run test:regression` 직접 실행, 정확한 PASS 수치 기재
