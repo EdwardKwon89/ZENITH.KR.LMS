@@ -89,7 +89,8 @@ ON public.zen_hs_code_lookups FOR SELECT TO authenticated USING (true);
 
 ## [작업 결과]
 
-**커밋**: `22b84242` — `[Baker] feat: TASK-B-293 HS Code 조회 캐싱 + 영문 전용 입력 강제 (Issue #1091)`
+**커밋**: `22b84242` — `[Baker] feat: TASK-B-293 HS Code 조회 캐싱 + 영문 전용 입력 강제 (Issue #1091)`  
+**커밋**: `62060958` — `[Baker] refactor: TASK-B-293 ZEN_A4 준수 — 캐시 조회/저장·Haiku 호출 헬퍼 분리 (Issue #1091)` (ZEN_A4 함수 ≤50줄 — POST 49줄, 헬퍼 3개 각각 15/10/10줄)
 
 | 검증 항목 | 결과 |
 |:----------|:-----|
