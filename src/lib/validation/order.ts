@@ -44,6 +44,7 @@ export const orderRegistrationSchema = z.object({
   dest_port_id: z.string().uuid('Please select a valid destination port').optional(),
   
   // 송하인(화주) 담당자/연락처/이메일 (v2 스크린샷 피드백 반영)
+  shipper_name: z.string().optional(), // TASK-B-295 (Issue #1100): 화주명(발송인 표시명) 자유 입력 — 시스템 미등록 임의 화주명 오버라이드
   shipper_contact_name: z.string().optional(),
   shipper_contact_phone: z.string().optional(),
   shipper_contact_email: z.string().email('Invalid email format').optional().or(z.literal('')),
