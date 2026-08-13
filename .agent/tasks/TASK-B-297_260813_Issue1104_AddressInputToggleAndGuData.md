@@ -7,7 +7,7 @@
 | **담당** | Dave (Team B) — TASK-B-295/296 직접 구현자, `OrderRegistrationForm.tsx`·화주 정보 UI 최신 숙지 |
 | **생성일** | 2026-08-13 |
 | **우선순위** | P2 |
-| **상태** | 🔔 (완료 보고 — 검토 요청) |
+| **상태** | ✅ 완료 |
 
 ## 관련 결함 보고서
 
@@ -147,6 +147,17 @@ setSelectedCity(finalCityName);
 ### 설계 수정 반영 노트 (TeamB_Dev 머지로 수렴)
 
 착수 후 2026-08-13 JSJung 설계 수정이 TeamB_Dev에 반영됨 — "동적 옵션 추가" 최초안 폐기, 최장 prefix 부분매칭으로 확정. 이에 따라 `e2c68bdc` 구현을 설계 수정안으로 재작업하고 TeamB_Dev와 머지(`dddd5ea7`). 작업 결과는 **설계 수정안(최장 prefix 매칭)** 기준. PR 베이스도 재확인 후 최신 TeamB_Dev 기준으로 작성.
+
+## [Jaison 최종 검토]
+
+`/tmp/review-pr1105` 격리 워크트리에서 재검증. DEF-B-062·DEF-B-063 둘 다 설계 그대로 정확히 구현됐고, 특히 착수 직전 설계 수정(최장 prefix 매칭, 동적 옵션 추가 폐기)까지 반영됐음을 diff로 직접 확인. 신규 테스트 2개 파일 모두 `AddressInput` mock 없이 실제 컴포넌트 렌더링(요구사항 준수) — `react-daum-postcode`만 필요한 만큼 mock. 5/5 PASS(관련 기존 10건 포함 15/15).
+
+**독립 되돌리기 검증(2곳 개별)**:
+- `AddressInput.tsx`의 `sort`(최장 일치) 제거 → 단순 `.find()`로 원복 → **TC-297-063-02만 정확히 FAIL**(`Received: "Gwangju"` — 짧은 접두 오매칭이 실제로 재현됨, 이 설계 변경의 존재 이유를 직접 실증)
+- `OrderRegistrationForm.tsx`의 `key`/`defaultValues` 토글 반영을 origin/TeamB_Dev(TASK-B-296 상태)로 원복 → **TC-297-062-01/02 정확히 FAIL**(주소가 "Street 1"에 고정되어 안 지워짐/안 복원됨)
+- 각각 복원 후 재확인 PASS
+
+전체 회귀 **190/190·1309/1309 ALL PASS**(재검증 일치) · `npm run build` SUCCESS · 실제 CI(`gh pr checks 1105`) 3개 항목 전부 pass. PR#1105 승인·머지(TeamB_Dev `94f2101a`), Issue #1104 종결.
 
 ## [발견 이슈]
 
