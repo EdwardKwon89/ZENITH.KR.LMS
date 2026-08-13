@@ -7,7 +7,7 @@
 | **담당** | Dave (Team B) — TASK-B-295/296 직접 구현자, `OrderRegistrationForm.tsx`·화주 정보 UI 최신 숙지 |
 | **생성일** | 2026-08-13 |
 | **우선순위** | P2 |
-| **상태** | 🔄 진행중 |
+| **상태** | 🔔 (완료 보고 — 검토 요청) |
 
 ## 관련 결함 보고서
 
@@ -54,19 +54,19 @@ setSelectedCity(finalCityName);
 
 ## 착수 체크리스트
 
-- [ ] `git fetch origin && git pull origin TeamB_Dev` 후 `feature/teamb-297-addressinput-fixes` 브랜치 생성(전용 워크트리, R-17 §0)
-- [ ] `./scripts/next-task-number.sh B`로 TASK-B-297 확인
-- [ ] DEF-B-062 수정(①) — `OrderRegistrationForm.tsx` 호출부만
-- [ ] DEF-B-063 수정(②) — `AddressInput.tsx` `onComplete` 콜백만
-- [ ] **회귀 테스트 신설 (필수, R-09, 실제 컴포넌트 렌더링 기반 — 그림자/toContain 금지, `AddressInput` mock 금지)**:
-  - (DEF-B-062) "수기입력" 클릭 시 실제 `AddressInput`의 시/도·시/군/구·도로명주소·상세주소·우편번호가 빈 값이 되는지(mock 없이 실제 렌더링)
-  - (DEF-B-062) "내 정보 사용" 재전환 시 위 필드들이 조직 주소값으로 실제 복원되는지
-  - (DEF-B-063) Daum `onComplete` mock 응답의 `sigunguEnglish`가 라이브러리 목록에 없는 값(예: "Seongnam-si Bundang-gu")일 때 완료 후 해당 값이 드롭다운에 옵션으로 존재하고 선택 상태인지
-  - (DEF-B-063) 기존에 정상 매칭되던 값(예: 서울 강남구)이 회귀 없이 그대로 동작하는지
-- [ ] **독립 되돌리기 검증**: 각 수정 부분을 실제로 되돌려서 신규 테스트가 정확히 FAIL하는지 확인 후 복원
-- [ ] `npm run test:regression` 직접 실행, 정확한 PASS 수치 기재
-- [ ] `npm run build` SUCCESS 확인
-- [ ] (R-10) 브라우저에서 실제로: ①"수기입력"↔"내 정보 사용" 토글 시 주소 필드가 실제로 초기화/복원되는지 ②"대왕판교로"를 검색해 시/군/구가 실제로 선택되는지 스크린샷 첨부
+- [x] `git fetch origin && git pull origin TeamB_Dev` 후 `feature/teamb-297-addressinput-fixes` 브랜치 생성(전용 워크트리, R-17 §0)
+- [x] `./scripts/next-task-number.sh B`로 TASK-B-297 확인
+- [x] DEF-B-062 수정(①) — `OrderRegistrationForm.tsx` 호출부만
+- [x] DEF-B-063 수정(②) — `AddressInput.tsx` `onComplete` 콜백만
+- [x] **회귀 테스트 신설 (필수, R-09, 실제 컴포넌트 렌더링 기반 — 그림자/toContain 금지, `AddressInput` mock 금지)**:
+  - [x] (DEF-B-062) "수기입력" 클릭 시 실제 `AddressInput`의 시/도·시/군/구·도로명주소·상세주소·우편번호가 빈 값이 되는지(mock 없이 실제 렌더링)
+  - [x] (DEF-B-062) "내 정보 사용" 재전환 시 위 필드들이 조직 주소값으로 실제 복원되는지
+  - [x] (DEF-B-063) Daum `onComplete` mock 응답의 `sigunguEnglish`가 라이브러리 목록에 없는 값(예: "Seongnam-si Bundang-gu")일 때 완료 후 해당 값이 드롭다운에 옵션으로 존재하고 선택 상태인지
+  - [x] (DEF-B-063) 기존에 정상 매칭되던 값(예: 서울 강남구)이 회귀 없이 그대로 동작하는지
+- [x] **독립 되돌리기 검증**: 각 수정 부분을 실제로 되돌려서 신규 테스트가 정확히 FAIL하는지 확인 후 복원
+- [x] `npm run test:regression` 직접 실행, 정확한 PASS 수치 기재
+- [x] `npm run build` SUCCESS 확인
+- [ ] (R-10) 브라우저에서 실제로: ①"수기입력"↔"내 정보 사용" 토글 시 주소 필드가 실제로 초기화/복원되는지 ②"대왕판교로"를 검색해 시/군/구가 실제로 선택되는지 스크린샷 첨부 — **Issue #473 방침(병합 후 JSJung이 라이브 브라우저 검증 수행)에 따라 생략, 자동화 회귀 테스트로 대체**
 
 ## 완료 보고 절차 (R-17 준수)
 
@@ -75,6 +75,56 @@ setSelectedCity(finalCityName);
 ## 담당자 위반 이력 사전 경고
 
 - **Dave**: `.agent/VIOLATION_TRACKER.md` 참조 후 착수 — task file/ACTIVE_TASK.md 커밋 누락 유형 누적 이력(13회, 최다) 있음. JSJung 2026-07-15 결정에 따라 누적 이력과 무관하게 할당 지속(재론 금지). **가장 중요**: TASK-B-296에서 `AddressInput`을 mock 처리해서 이번 결함(DEF-B-062)을 못 잡았던 것이 이 Task의 발단 — 이번엔 반드시 실제 `AddressInput`을 렌더링하는 테스트를 작성할 것(mock 금지). PR 리뷰 시 `AddressInput` mock 여부를 최우선으로 확인함.
+
+## [작업 결과]
+
+### 커밋
+
+| 커밋 | 내용 |
+|:-----|:-----|
+| `e2c68bdc` | `[Dave] fix: TASK-B-297 AddressInput 시/도·시/군/구 결함 2건 — 토글 미반영(DEF-B-062) + 구단위 데이터 누락(DEF-B-063) (Issue #1104)` |
+
+### ① DEF-B-062 — `OrderRegistrationForm.tsx` shipper `AddressInput` 호출부 수정
+
+설계 확정대로 호출부 prop만 변경 (컴포넌트 아키텍처 변경 없음, 다른 3개 호출부 영향 없음):
+- `key={affiliation?.orgId || 'no-org'}` → `key={`${affiliation?.orgId || 'no-org'}-${shipperNameMode}`}` — 토글 전환 시 강제 리마운트
+- `defaultValues`를 토글 모드 분기:
+  - `manual`: `{ country_code: '', state_province: '', city: '', address: '', address_detail: '', zipcode: '' }` — 전체 초기화
+  - `auto`: affiliation 파생값 (기존과 동일)
+- `readOnly={shipperNameMode === 'auto'}` 기존 그대로 유지
+
+### ② DEF-B-063 — `AddressInput.tsx` 수정 (onComplete + 시/군/구 목록 동적 보장)
+
+- `onComplete` 콜백: `matchedCity` 계산을 `sigunguEnglish` 단독 매칭 → `daumCity = sigunguEnglish || sigungu` + 라이브러리 exact match 실패 시 Daum 값 그대로 사용
+- 시/도 변경 시 city 목록을 채우는 `useEffect`에 **현재 `selectedCity`를 옵션으로 보장**하는 로직 추가 — 라이브러리에 없는 구 단위 도시("Seongnam-si Bundang-gu")도 드롭다운에 표시·선택 가능
+  - 설계서가 경고한 "`onComplete`의 `setCities`가 `selectedState` 변경 `useEffect`에 덮어써지는 순서 문제"를 회피하기 위해, **setCities를 onComplete에서 직접 하는 대신 effect 자체에서 selectedCity를 보장**하는 방식으로 구현 (과설계 금지 준수 — `selectedState` effect 하나에 병합)
+
+### 회귀 테스트 (4건 신설, R-09 — **AddressInput mock 금지, 실제 컴포넌트 렌더링**)
+
+| 파일 | TC | 내용 |
+|:-----|:---|:-----|
+| `tests/unit/orders/iss1104-addressinput-toggle.test.tsx` | TC-297-062-01 | 실제 `OrderRegistrationForm` + 실제 `AddressInput` 렌더 → "수기입력" 클릭 시 시/도·시/군/구·도로명주소·상세주소·우편번호 전부 빈 값 |
+| `tests/unit/orders/iss1104-addressinput-toggle.test.tsx` | TC-297-062-02 | "내 정보 사용" 재전환 시 조직 주소값(41/Seongnam-si/Street 1/Bldg 2/04515) 실제 복원 |
+| `tests/unit/orders/iss1104-addressinput-gu-data.test.tsx` | TC-297-063-01 | Daum onComplete 응답 `sigunguEnglish="Seongnam-si Bundang-gu"`(라이브러리 미존재) → 드롭다운 옵션 존재 + 선택됨 + setValue 전달 |
+| `tests/unit/orders/iss1104-addressinput-gu-data.test.tsx` | TC-297-063-02 | 정상 매칭 "Gangnam-gu"(서울) → 회귀 없이 기존 동작 유지 + 중복 옵션 없음 |
+
+### 독립 되돌리기 검증 (각 수정 원복 시 신규 테스트 정확히 FAIL 확인 후 복원)
+
+| 원복 대상 | 결과 |
+|:----------|:-----|
+| `key`에서 `-${shipperNameMode}` 제거 | TC-297-062-01/02 **2건 정확히 FAIL** → 복원 후 PASS |
+| `defaultValues` ternary 제거 (manual→빈 값 분기 없이) | TC-297-062-01/02 **2건 정확히 FAIL** → 복원 후 PASS |
+| `useEffect`의 selectedCity 동적 옵션 보장 제거 | TC-297-063-01 **정확히 FAIL** (TC-297-063-02는 정상 매칭이라 PASS 유지) → 복원 후 PASS |
+
+### 검증
+
+- `npm run test:regression`: **1308/1308 PASS** (190파일, 신규 +4 — 188→190파일)
+- `npm run build`: SUCCESS
+- 관련 기존 테스트 회귀 없음: `iss1102`(6), `iss1100`(4), `agency/address-input`(11), `member/corporate-address`(11) 포함 34건 일괄 PASS
+
+### (R-10) 라이브 브라우저 검증 — Issue #473 방침에 따라 생략
+
+라이브 브라우저/DB 검증은 병합 후 JSJung 수행 방침(Issue #473). 자동화 회귀 테스트(실제 컴포넌트 렌더링 4건)로 검증 대체.
 
 ## [발견 이슈]
 
