@@ -177,6 +177,7 @@ export async function updateOrder(orderId: string, payload: OrderRegistrationInp
   const headerData: Record<string, unknown> = {
     order_type: validated.order_type,
     shipper_id: editScope.lockShipperId ? order.shipper_id : validated.shipper_id,
+    shipper_name: validated.shipper_name, // TASK-B-295 (Issue #1100)
     origin_port_id: validated.origin_port_id,
     dest_port_id: validated.dest_port_id,
     description: validated.description,

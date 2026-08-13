@@ -63,7 +63,7 @@ export default function TradeDocumentClient({ locale }: { locale: string }) {
       invoice_no: `INV-${orderData.order_no}`,
       date: new Date().toISOString().split('T')[0],
       shipper: {
-        name: orderData.shipper?.name || "ZENITH LOGISTICS",
+        name: orderData.shipper_name || orderData.shipper?.name || "ZENITH LOGISTICS",
         address: orderData.shipper?.address || "Seoul, Korea"
       },
       consignee: {
@@ -103,7 +103,7 @@ export default function TradeDocumentClient({ locale }: { locale: string }) {
       pl_no: `PL-${orderData.order_no}`,
       date: new Date().toISOString().split('T')[0],
       shipper: {
-        name: orderData.shipper?.name || "ZENITH LOGISTICS",
+        name: orderData.shipper_name || orderData.shipper?.name || "ZENITH LOGISTICS",
         address: orderData.shipper?.address || "Seoul, Korea"
       },
       consignee: {
@@ -213,7 +213,7 @@ export default function TradeDocumentClient({ locale }: { locale: string }) {
                   <User className="w-4 h-4 text-slate-400 mt-1 flex-shrink-0" />
                   <div>
                     <p className="text-xs text-slate-400 uppercase font-bold tracking-wider">Shipper</p>
-                    <p className="text-sm font-semibold text-slate-700">{orderData.shipper?.name || "Unknown"}</p>
+                    <p className="text-sm font-semibold text-slate-700">{orderData.shipper_name || orderData.shipper?.name || "Unknown"}</p>
                   </div>
                 </div>
                 <div className="flex gap-3">
