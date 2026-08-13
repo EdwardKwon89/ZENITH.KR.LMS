@@ -1116,6 +1116,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                               />
                             </div>
                             {/* TASK-B-296 (Issue #1102): 개인/법인 무관 항상 주소 입력 표시 (auto 모드에선 비활성화) */}
+                            {/* TASK-B-297 (Issue #1104, DEF-B-062): key+defaultValues에 shipperNameMode 반영 — 토글 전환 시 강제 리마운트로 주소 필드 실제 갱신 */}
                             <div>
                               <AddressInput
                                 mode="rhf"
@@ -1124,15 +1125,19 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                                 setValue={setValue}
                                 t={t}
                                 readOnly={shipperNameMode === 'auto'}
-                                key={affiliation?.orgId || 'no-org'}
-                                defaultValues={{
-                                  country_code: affiliation?.orgCountryCode ?? 'KR',
-                                  state_province: affiliation?.orgStateProvince ?? '',
-                                  city: affiliation?.orgCity ?? '',
-                                  address: affiliation?.orgAddressStreet ?? affiliation?.orgAddress ?? '',
-                                  address_detail: affiliation?.orgAddressDetail ?? '',
-                                  zipcode: affiliation?.orgZipcode ?? '',
-                                }}
+                                key={`${affiliation?.orgId || 'no-org'}-${shipperNameMode}`}
+                                defaultValues={
+                                  shipperNameMode === 'manual'
+                                    ? { country_code: '', state_province: '', city: '', address: '', address_detail: '', zipcode: '' }
+                                    : {
+                                        country_code: affiliation?.orgCountryCode ?? 'KR',
+                                        state_province: affiliation?.orgStateProvince ?? '',
+                                        city: affiliation?.orgCity ?? '',
+                                        address: affiliation?.orgAddressStreet ?? affiliation?.orgAddress ?? '',
+                                        address_detail: affiliation?.orgAddressDetail ?? '',
+                                        zipcode: affiliation?.orgZipcode ?? '',
+                                      }
+                                }
                               />
                             </div>
                             <div>

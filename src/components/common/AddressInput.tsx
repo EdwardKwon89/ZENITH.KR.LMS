@@ -330,7 +330,16 @@ export function AddressInput({
                   '경남': '48', '제주': '49',
                 };
                 const matchedIso = Object.entries(KR_SIDO_TO_ISOCODE).find(([key]) => (data as any).sido?.startsWith(key))?.[1] ?? '';
-                const matchedCity = City.getCitiesOfState('KR', matchedIso).find(c => c.name === (data as any).sigunguEnglish)?.name ?? (data as any).sigunguEnglish ?? '';
+                // TASK-B-297 (Issue #1104, DEF-B-063): 라이브러리에 없는 구 단위 값("Seongnam-si Bundang-gu")은
+                // 가장 길게 prefix 일치하는 실제 라이브러리 옵션("Seongnam-si")으로 매칭한다.
+                // "Gwangju" vs "Gwangju-si"가 둘 다 존재하므로 반드시 일치 길이 내림차순 정렬 후 최장 일치 선택
+                // (단순 .find() 사용 시 "Gwangju-si OO-gu"가 더 짧고 부정확한 "Gwangju"에 매칭되는 오매칭 버그 발생).
+                const cityList = City.getCitiesOfState('KR', matchedIso) ?? [];
+                const sigunguEn = (data as any).sigunguEnglish ?? '';
+                const matched = cityList
+                  .filter((c) => sigunguEn.startsWith(c.name))
+                  .sort((a, b) => b.name.length - a.name.length)[0];
+                const matchedCity = matched?.name ?? sigunguEn;
                 setSelectedState(matchedIso);
                 setSelectedCity(matchedCity);
                 if (setValue && prefix) {
