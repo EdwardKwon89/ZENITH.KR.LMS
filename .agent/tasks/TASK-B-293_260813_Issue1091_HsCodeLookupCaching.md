@@ -7,7 +7,7 @@
 | **담당** | Baker (Team B) |
 | **생성일** | 2026-08-13 |
 | **우선순위** | P3 |
-| **상태** | 🔄 진행중 |
+| **상태** | 🔔 보고 완료 |
 
 ## 현재 상태 (분석 완료 — Issue #1091 참조)
 
@@ -86,6 +86,21 @@ ON public.zen_hs_code_lookups FOR SELECT TO authenticated USING (true);
 ## 담당자 위반 이력 사전 경고
 
 - **Baker**: `.agent/VIOLATION_TRACKER.md` 참조 후 착수 — task file/ACTIVE_TASK.md 미반영 유형·마이그레이션 타임스탬프 충돌 이력 다수. JSJung 2026-07-15 결정에 따라 할당 지속(재론 금지). 이번 Task는 신규 마이그레이션 1건 포함 — **최신 TeamB_Dev 기준 브랜치 동기화 및 타임스탬프 충돌 여부 특히 재확인**(과거 PR#1074 v1 반려 사례 재발 방지). 회귀 테스트는 실제 API 호출 횟수/DB 저장 여부를 검증하는 방식으로 작성할 것 — 정적 문자열 검사나 로직 재구현 금지.
+
+## [작업 결과]
+
+**커밋**: `22b84242` — `[Baker] feat: TASK-B-293 HS Code 조회 캐싱 + 영문 전용 입력 강제 (Issue #1091)`
+
+| 검증 항목 | 결과 |
+|:----------|:-----|
+| 마이그레이션 | `supabase/migrations/20260813010000_iss1091_hs_code_lookups.sql` — `zen_hs_code_lookups` + GRANT(SELECT·INSERT authenticated / ALL service_role) + RLS + SELECT/INSERT 정책 2건. 최신 TeamB_Dev(`7284b9f8`) 기준 타임스탬프 충돌 없음 |
+| 회귀 테스트 신설 | `tests/unit/hs-lookup/hs-lookup-cache.test.ts`(5건) + `tests/unit/orders/hs-lookup-blur-english-only.test.tsx`(2건) — **7/7 PASS** (RTL 실제 컴포넌트 렌더 기반) |
+| 독립 되돌리기 검증 | ①route 캐시히트 guard 제거→히트 테스트 FAIL ②route insert guard 제거→저장 테스트 FAIL ③컴포넌트 regex 제거→한글 blur 테스트 FAIL — 3건 모두 확인 후 복원 |
+| 전체 회귀 | `npm run test:regression` — **1281/1281 PASS** |
+| 빌드 | `npm run build` — **SUCCESS**(`/api/hs-lookup` 라우트 포함) |
+| R-10 브라우저 검증 | ①캐시 미스: `Laptop Battery Pack` blur → AI 호출 → HS Code `850760` 표시 ②DB 캐시 행 확인: `laptop battery pack <ts>`(lowercase) `hs_code=850760` 저장됨 ③캐시 히트: 동일 품명 두 번째 입력 → 동일 `850760` 즉시 표시(무지연) ④한글 `노트북 배터리` blur → 로딩·결과 배너 모두 미출현(차단 확인). 스크린샷 `scratch/hs-lookup-r10/` |
+
+**R-10 진행 중 발견·해결**: playwright `webServer.reuseExistingServer`가 **메인 체크아웃의 dev 서버(포트 3000, 캐시 로직 미반영 코드)**를 재사용해 초기 검증이 실패함(캐시 INSERT 안 됨). baker 워크트리 전용 dev 서버(포트 3010)로 baseURL 전환 후 전체 검증 통과. 또한 로컬 supabase DB가 다른 세션에 의해 리셋되어 시드 재적용 필요 — `scripts/seed-local.ts`(멱등) 재실행으로 해소.
 
 ## [발견 이슈]
 
