@@ -7,7 +7,7 @@
 | **담당** | Dave (Team B) |
 | **생성일** | 2026-08-13 |
 | **우선순위** | P2 |
-| **상태** | 🔔 (완료 보고 — 검토 요청) |
+| **상태** | ✅ 완료 |
 
 ## 현재 상태 (분석 완료)
 
@@ -132,6 +132,25 @@ shipper_name: z.string().optional(),
 - `npm run test:regression`: **1297/1297 PASS** (187파일, 신규 +9)
 - `npm run build`: SUCCESS
 - **fresh `supabase db reset` 재검증**(R-08-2): shipper_name 컬럼 존재 + 통합 테스트 5/5 PASS
+
+## [Jaison 최종 검토]
+
+`/tmp/review-pr1101` 격리 워크트리에서 fresh `supabase db reset` 후 재검증.
+
+- **마이그레이션**: `create_order_atomic()` 함수 본문을 원본(`20260812020000_iss1079_create_order_atomic_fix.sql`)과 diff — `shipper_name` 컬럼/INSERT 값 2줄 추가 외 100% 동일 확인
+- **스코프 검증**: `grep -rn "shipper?\.name\|shipper\.name" src`로 전체 사용처 재확인 — PR이 건드린 4개 파일 외 32곳은 무변경 확인
+- 신규 테스트 9건 전부 실제 동작 기반(실 DB `createOrder`/`updateOrder`/`getOrderDocumentData` 또는 RTL 실제 컴포넌트 렌더링) — 그림자 패턴 없음. 9/9 PASS
+
+**독립 되돌리기 검증(3곳 개별)**:
+- `updateOrder`의 `shipper_name` 배선 라인 제거 → TC-295-02만 정확히 FAIL
+- 토글 초기화/자동동기화 `useEffect` 제거 → TC-295-04·TC-295-07만 정확히 FAIL(TC-295-05/06은 클릭 경로만 사용해 영향 없음, 예상과 일치)
+- 각각 복원 후 재확인 PASS
+
+전체 회귀 **187/187·1298/1298 ALL PASS**(PR claim 1297은 브랜치 분기 시점 기준 — 그 사이 병합된 PR#1099 신규 테스트 1건 포함 시 1298로 정확히 일치) · `npm run build` SUCCESS · 실제 CI(`gh pr checks 1101`) 3개 항목 전부 pass.
+
+**참고(반려 아님)**: 화주명 토글 초기화 로직이 개인 화주(`isIndividual`) 수정 모드에서 `affiliation` 비동기 로드 타이밍에 따라 토글 라벨이 잘못 "수기입력"으로 표시될 잠재 레이스 컨디션 발견(값 자체는 정확, 코스메틱). 데이터 손실 없어 반려 사유는 아니라고 판단해 승인·머지, `IMP-165`로 기록.
+
+PR#1101이 TASK-B-294 병합 이후의 TeamB_Dev와 충돌해 GitHub 자동 머지가 막혔던 것을 리뷰 워크트리에서 `.agent/ACTIVE_TASK.md` 충돌만 수동 해소(코드 변경 없음) 후 브랜치에 푸시, CI 재통과 확인 후 PR#1101 승인·머지(TeamB_Dev `3eaeea30`), Issue #1100 종결.
 
 ## [발견 이슈]
 
