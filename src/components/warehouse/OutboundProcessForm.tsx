@@ -375,7 +375,7 @@ export default function OutboundProcessForm({ locale }: { locale: string }) {
       order_no: order.order_no,
       date: new Date(order.created_at).toLocaleDateString("ko-KR"),
       shipper: {
-        name: order.shipper?.name || "-",
+        name: order.shipper_name || order.shipper?.name || "-",
         address: order.origin_port?.name || "",
       },
       consignee: {

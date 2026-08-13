@@ -140,7 +140,7 @@ export default async function UpsOrderDetailPage({ params }: UpsOrderDetailPageP
     invoice_no: invoice?.invoice_no || `CI-${order.order_no}`,
     date: new Date().toISOString().split('T')[0],
     shipper: {
-      name: order.shipper?.name || 'ZENITH LOGISTICS',
+      name: order.shipper_name || order.shipper?.name || 'ZENITH LOGISTICS',
       address: (order.shipper as any)?.address || 'Seoul, South Korea',
     },
     consignee: {
@@ -181,7 +181,7 @@ export default async function UpsOrderDetailPage({ params }: UpsOrderDetailPageP
     invoice_no: `UPS-${order.order_no}`,
     date: new Date().toISOString().split('T')[0],
     shipper: {
-      name: order.shipper?.name || 'ZENITH LOGISTICS',
+      name: order.shipper_name || order.shipper?.name || 'ZENITH LOGISTICS',
       address: (order.shipper as any)?.address || 'Seoul, South Korea',
       contact: order.shipper_contact_phone || order.shipper_contact_email || '',
     },
@@ -330,7 +330,7 @@ export default async function UpsOrderDetailPage({ params }: UpsOrderDetailPageP
             <div className="flex flex-col gap-3 text-xs">
               <div>
                 <span className="text-slate-400 block font-semibold">화주 (Shipper)</span>
-                <span className="font-bold text-slate-800 dark:text-gray-200">{order.shipper?.name || 'Standard Shipper'}</span>
+                <span className="font-bold text-slate-800 dark:text-gray-200">{order.shipper_name || order.shipper?.name || 'Standard Shipper'}</span>
               </div>
               <div>
                 <span className="text-slate-400 block font-semibold">수령인 (Consignee)</span>

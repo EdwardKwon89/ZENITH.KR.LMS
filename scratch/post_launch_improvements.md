@@ -1821,3 +1821,13 @@ UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류
 - **관련 파일**: `src/lib/repositories/order.repository.ts`(`deleteItemsByOrderId`), 신규 마이그레이션(TASK-B-286)
 - **예상 공수**: TASK-B-286에 포함(추가 공수 없음, 검증 항목 1개 추가 수준)
 - **우선순위**: Low — TASK-B-286에 이미 포함될 예정이라 별도 착수 불필요, 완료 보고 누락 방지용 기록
+
+## [IMP-165] 오더 등록 폼 "화주명" 토글 — 개인 화주(isIndividual) 수정 모드 초기값 판정에 잠재 레이스 컨디션
+
+- **발견 경위**: PR#1101(TASK-B-295, 화주명 자유 입력) 검토 중 코드 리딩으로 확인. `OrderRegistrationForm.tsx`의 화주명 토글 초기화 `useEffect`가 수정 모드에서 `defaultValues.shipper_name`(저장된 값)과 `autoShipperName`(현재 파생값)을 비교해 다르면 `'manual'`로 전환하는데, 되돌리는(`'auto'`로 복귀) 분기가 없음. `affiliation`은 비동기로 로드되므로 초기 렌더 시점엔 `autoShipperName`이 아직 확정되지 않은 값(개인 화주의 경우 `affiliation?.userName`이 필요하지만 `affiliation`이 null이라 빈 값)을 잠깐 가질 수 있고, 이 타이밍에 `saved !== autoShipperName`으로 잘못 판정되면 이후 `affiliation`이 로드돼 `autoShipperName`이 실제로는 `saved`와 일치하게 되어도 토글이 계속 `'manual'`로 고정됨. 법인 화주는 `shippers.find(s => s.id === shipper_id)?.name` 폴백이 있어 초기 렌더에도 값이 대체로 맞아 문제가 드러나지 않지만, 개인 화주(`isIndividual`)는 이 폴백이 실질적으로 작동하지 않을 가능성이 있음.
+- **현재 상태**: 실제 재현은 못했음(개인 화주 계정으로 직접 재현 시도 안 함) — 코드 리딩 기반 잠재 이슈. `shipper_name` 저장값 자체는 정확하므로 데이터 손실/오염은 없고, 토글 UI 라벨이 "수기입력"으로 잘못 표시되는 코스메틱 문제로 판단해 PR#1101은 반려하지 않고 승인·머지함.
+- **임시 조치**: 없음.
+- **목표 구현**: 개인 화주 계정으로 `shipper_name`을 별도 입력하지 않은 오더를 수정 화면에서 열어 토글이 "내 정보 사용"으로 정확히 표시되는지 실측 확인. 문제 재현 시 초기화 `useEffect`에 "일치하면 명시적으로 `'auto'`로 복귀"하는 분기 추가(또는 `affiliation` 로딩 완료를 기다린 뒤 1회만 판정하도록 정리).
+- **관련 파일**: `src/components/orders/OrderRegistrationForm.tsx`(화주명 토글 초기화 `useEffect`, TASK-B-295)
+- **예상 공수**: 0.2 MD (재현 확인 + 필요 시 수정·테스트 1건 추가)
+- **우선순위**: Low — 코스메틱 UI 이슈로 데이터 무결성에 영향 없음, 개인 화주 사용 빈도에 따라 우선순위 재검토 가능
