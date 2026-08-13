@@ -31,26 +31,29 @@ Daum 우편번호 API가 반환하는 `sigunguEnglish`(예: "Seongnam-si Bundang
 
 ## 수정 방향 (TASK-B-297에 배정, DEF-B-062와 함께 처리 — 같은 파일)
 
-과설계 방지를 위해 **완전한 행정구역 데이터셋 자체 구축(대안 A)은 이번 범위에서 제외**. 대신 Daum 응답값을 최대한 살리는 방향으로 최소 수정:
+(2026-08-13 설계 수정 — JSJung 제안: 정확일치 대신 부분매칭 사용. 최초안이었던 "라이브러리에 없는 값을 동적으로 옵션에 추가"하는 방식은 폐기 — 목록에 실제로 존재하지 않는 합성 옵션을 끼워넣는 것보다, 이미 코드에 있는 시/도 매칭 방식(`data.sido?.startsWith(key)`, [L336](../../src/components/common/AddressInput.tsx#L336))과 동일하게 **부분매칭**을 쓰는 게 더 일관되고 안전함)
 
-1. `City.getCitiesOfState`에서 정확히 일치하는 항목이 없을 경우, **`cities` state에 Daum이 반환한 실제 `sigunguEnglish`(또는 `sigungu`) 값을 동적으로 옵션에 추가**해서 최소한 화면에 표시·선택 가능하게 만든다(라이브러리 데이터를 신뢰할 수 없는 지역은 "그 주소에서 실제로 검색된 값"을 그대로 옵션화).
-   ```js
-   const cityList = City.getCitiesOfState('KR', matchedIso) ?? [];
-   const exactMatch = cityList.find(c => c.name === data.sigunguEnglish);
-   const finalCityName = exactMatch?.name ?? data.sigunguEnglish ?? '';
-   if (!exactMatch && finalCityName) {
-     setCities([...cityList, { name: finalCityName, countryCode: 'KR', stateCode: matchedIso } as ICity]);
-   } else {
-     setCities(cityList);
-   }
-   setSelectedCity(finalCityName);
-   ```
-2. 위 로직을 정확히 어디(useEffect vs onComplete 콜백 내부)에 넣을지는 기존 `cities` state 갱신 흐름(시/도 변경 시 자동 갱신되는 `useEffect`, [L80-84](../../src/components/common/AddressInput.tsx#L80-L84))과 충돌하지 않도록 구현자가 판단 — 특히 `selectedState` 변경에 반응하는 별도 `useEffect`가 있어 `onComplete` 콜백에서 수동으로 `setCities`한 값이 이후 그 `useEffect`에 의해 다시 덮어써지지 않는지 확인 필요.
+과설계 방지를 위해 **완전한 행정구역 데이터셋 자체 구축은 이번 범위에서 제외**. 라이브러리에 이미 존재하는 시/군/구 옵션 중 Daum 응답값과 **가장 길게 일치하는(prefix) 항목**을 선택하도록 수정:
 
-과설계 금지 — 전체 한국 행정구역 데이터 자체 구축, 다른 나라 데이터 보강 등은 범위 밖. 이번엔 "검색된 주소가 화면에서 사라지지 않고 선택 가능하게" 만드는 최소 수정만.
+```js
+const cityList = City.getCitiesOfState('KR', matchedIso) ?? [];
+const sigunguEn = (data as any).sigunguEnglish ?? '';
+const matched = cityList
+  .filter(c => sigunguEn.startsWith(c.name))
+  .sort((a, b) => b.name.length - a.name.length)[0]; // 가장 긴 일치 우선
+const finalCityName = matched?.name ?? sigunguEn;
+setSelectedCity(finalCityName);
+```
+
+**"가장 긴 일치" 정렬이 반드시 필요한 이유(실측 확인)**: 경기도(41) 목록에 `Gwangju`와 `Gwangju-si`가 **별개 항목으로 둘 다 존재**하며 배열 순서상 `Gwangju`가 먼저 나온다. 단순 `.find(c => sigunguEn.startsWith(c.name))`(첫 매치 채택)를 쓰면 "Gwangju-si OO구" 응답이 더 짧고 부정확한 `Gwangju`에 매칭되는 새로운 버그가 생긴다 — 반드시 일치 길이 기준 내림차순 정렬 후 첫 번째(최장 일치)를 선택할 것.
+
+`cities` state 자체는 라이브러리 원본 목록(`cityList`) 그대로 유지 — 합성 옵션을 추가하지 않으므로 드롭다운에는 항상 실제 존재하는 값만 노출된다(단, 시/군/구 세부 단위(예: 분당구)까지는 못 담고 상위 시 단위(성남시)까지만 선택됨 — 정확한 상세 주소는 도로명주소 필드에 이미 포함되어 있으므로 허용 가능한 손실로 판단).
+
+과설계 금지 — 전체 한국 행정구역 데이터 자체 구축, 다른 나라 데이터 보강 등은 범위 밖.
 
 ## 회귀 테스트 방향
 
-- Daum `onComplete` mock 응답에 `sigunguEnglish`가 라이브러리에 없는 값(예: "Seongnam-si Bundang-gu")일 때, 완료 후 `selectedCity`/화면에 해당 값이 실제로 선택 표시되는지(드롭다운에 해당 옵션이 존재하고 선택된 상태인지)
-- 기존에 정상 매칭되던 값(예: 서울 강남구)은 회귀 없이 그대로 동작하는지
-- 되돌리기 검증: 동적 옵션 추가 로직 제거 시 위 테스트가 정확히 FAIL하는지
+- Daum `onComplete` mock 응답에 `sigunguEnglish`가 라이브러리에 정확 매칭되지 않는 값(예: "Seongnam-si Bundang-gu")일 때, 완료 후 `selectedCity`가 실제 라이브러리 옵션("Seongnam-si")으로 선택되는지
+- **최장 일치 검증**: `sigunguEnglish`가 "Gwangju-si XXX-gu"일 때 `selectedCity`가 "Gwangju"가 아니라 "Gwangju-si"로 선택되는지(짧은 접두 오매칭 회귀 방지 — 이번 결함의 핵심 검증 포인트)
+- 기존에 정상 매칭되던 값(예: 서울 강남구, 이미 라이브러리에 구 단위로 존재)은 회귀 없이 그대로 동작하는지
+- 되돌리기 검증: 정렬 로직(`sort`) 제거 시 "Gwangju-si" 테스트가 정확히 FAIL하는지
