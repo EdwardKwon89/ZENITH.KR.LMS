@@ -45,8 +45,24 @@ export async function POST(req: Request) {
     // 최대 길이 제한 — 과도하게 긴 입력으로 토큰 비용 증가 방지
     const truncatedName = itemName.slice(0, MAX_ITEM_NAME_LENGTH);
     const destCountry = body.dest_country_code?.trim();
+    // 캐시 키 — 품목명 단독(lower(trim(item_name))). 목적지 국가 제외:
+    // HS Code 6자리는 국제 공통표준이라 목적지 무관, 키에 넣으면 재사용률만 떨어짐.
+    const normalizedName = itemName.toLowerCase();
 
-    // 3. Haiku 4.5 API 호출
+    // 3. 캐시 우선 조회 (TASK-B-293 / Issue #1091) — 히트 시 AI 호출 없이 즉시 반환
+    const { data: cached, error: cacheError } = await supabase
+      .from('zen_hs_code_lookups')
+      .select('hs_code, confidence')
+      .eq('item_name_normalized', normalizedName)
+      .maybeSingle();
+    if (!cacheError && cached?.hs_code) {
+      return NextResponse.json<HsLookupResponse>({
+        hs_code: cached.hs_code,
+        confidence: normalizeConfidence(cached.confidence),
+      });
+    }
+
+    // 4. Haiku 4.5 API 호출 (캐시 미스 시에만)
     const message = await client.messages.create({
       model: 'claude-haiku-4-5-20251001',
       max_tokens: 64,
@@ -62,6 +78,14 @@ export async function POST(req: Request) {
 
     const text = extractTextContent(message.content);
     const parsed = parseHsLookupJson(text);
+
+    // 5. 성공 결과만 캐시에 저장 — 실패(hs_code null)는 캐싱하지 않음:
+    //    표현이 다른 재조회 기회를 막지 않기 위함. insert 실패(UNIQUE 충돌 등)는 무시.
+    if (parsed.hs_code) {
+      await supabase
+        .from('zen_hs_code_lookups')
+        .insert({ item_name_normalized: normalizedName, hs_code: parsed.hs_code, confidence: parsed.confidence });
+    }
 
     return NextResponse.json<HsLookupResponse>(parsed);
   } catch (error) {
@@ -86,12 +110,14 @@ function parseHsLookupJson(text: string): HsLookupResponse {
     const parsed = JSON.parse(jsonText);
 
     const hsCode = typeof parsed.hs_code === 'string' ? parsed.hs_code : null;
-    const confidence = ['high', 'medium', 'low'].includes(parsed.confidence)
-      ? (parsed.confidence as HsLookupResponse['confidence'])
-      : 'low';
+    const confidence = normalizeConfidence(parsed.confidence);
 
     return { hs_code: hsCode, confidence };
   } catch {
     return { hs_code: null, confidence: 'low' };
   }
+}
+
+function normalizeConfidence(value: unknown): HsLookupResponse['confidence'] {
+  return value === 'high' || value === 'medium' || value === 'low' ? value : 'low';
 }

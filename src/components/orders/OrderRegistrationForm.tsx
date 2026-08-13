@@ -30,6 +30,10 @@ import { createOrderServices } from '@/app/actions/operations/order-services';
 import AddressBookSelector from '@/components/address-book/AddressBookSelector';
 import { AddressInput } from '@/components/common/AddressInput';
 
+// orderItemSchema(validation/order.ts:10)와 동일한 영문 전용 정규식 —
+// 제출 시점 검증과 별개로 HS 조회(AI API 호출) 트리거 전에 사전 차단한다. (TASK-B-293 / Issue #1091)
+const ENGLISH_ONLY_REGEX = /^[A-Za-z0-9\s.,\-()&'"/#%+:]*$/;
+
 interface OrderRegistrationFormProps {
   shippers: any[];
   ports: any[];
@@ -305,6 +309,8 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
   const handleItemNameBlur = useCallback(async (nestIndex: number, k: number) => {
     const itemName = watch(`packages.${nestIndex}.items.${k}.item_name`) as string | undefined;
     if (!itemName || itemName.trim().length < 2) return;
+    // 영문 전용 사전 필터 — 한글 등 비영문 입력은 AI 호출(fetch) 자체를 하지 않음 (TASK-B-293 / Issue #1091)
+    if (!ENGLISH_ONLY_REGEX.test(itemName.trim())) return;
 
     const key = `${nestIndex}-${k}`;
     setHsLookupLoading(key, true);
