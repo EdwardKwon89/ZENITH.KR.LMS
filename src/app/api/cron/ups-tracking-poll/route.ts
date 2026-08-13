@@ -5,7 +5,7 @@ import { pollTracking, storeTrackingEvents, isDelivered } from '@/lib/shxk/track
 import { OrderStatus } from '@/types/orders';
 
 /**
- * UPS 트래킹 폴링 배치 — 매일 실행
+ * UPS 트래킹 폴링 배치 — 3시간마다 실행
  * POST /api/cron/ups-tracking-poll
  *
  * IN_TRANSIT 상태 UPS 오더의 트래킹 정보를 조회하고,
@@ -131,6 +131,6 @@ export async function GET() {
   return NextResponse.json({
     status: 'ok',
     message: 'UPS tracking poll cron endpoint is active',
-    schedule: '30 15 * * * (daily at KST 00:30 / UTC 15:30)',
+    schedule: '30 */3 * * * (3시간마다, UTC 00:30/03:30/06:30/09:30/12:30/15:30/18:30/21:30)',
   });
 }

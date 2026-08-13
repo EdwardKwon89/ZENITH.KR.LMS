@@ -7,7 +7,7 @@
 | **담당** | Baker (Team B) |
 | **생성일** | 2026-08-13 |
 | **우선순위** | P3 |
-| **상태** | 🔄 진행중 |
+| **상태** | ✅ 완료 |
 
 ## 현재 상태 (분석 완료)
 
@@ -52,6 +52,30 @@
 ## 담당자 위반 이력 사전 경고
 
 - **Baker**: `.agent/VIOLATION_TRACKER.md` 참조 후 착수 — task file/ACTIVE_TASK.md 미반영 유형·마이그레이션 타임스탬프 충돌 이력 다수(이번 Task는 마이그레이션 없음, 해당 없음). 매우 단순한 설정값 변경 Task이나 R-09 회귀 테스트·독립 되돌리기 검증 절차는 동일하게 생략 없이 수행할 것.
+
+## [작업 결과]
+
+**커밋**: `fec90792` — `[Baker] chore: TASK-B-294 UPS 트래킹 폴링 크론 1일1회→3시간마다 (Issue #1098)`
+
+| 검증 항목 | 결과 |
+|:----------|:-----|
+| vercel.json | `ups-tracking-poll` cron `"30 15 * * *"` → `"30 */3 * * *"`(매 3시간 :30분, 하루 8회 — 기존 UTC 15:30/KST 00:30 포함) |
+| route.ts | JSDoc "매일 실행" → "3시간마다 실행" + GET 응답 `schedule` → `'30 */3 * * * (3시간마다, UTC 00:30/03:30/06:30/09:30/12:30/15:30/18:30/21:30)'` |
+| 회귀 테스트 신설 | `tests/unit/ups/ups-tracking-poll-cron.test.ts`에 `TC-ISS1098` 추가 — 실제 `GET()` 호출로 응답 `schedule` 필드가 `*/3` 포함하는지 검증(그림자/toContain-아닌 실제 라우트 호출 기반) |
+| 독립 되돌리기 검증 | schedule 문자열만 원복(`30 15 * * * daily`) 시 신규 테스트 **1건 FAIL** 재현 → 복원 후 5/5 PASS |
+| 전체 회귀 | `npm run test:regression` — **1289/1289 PASS** |
+| 빌드 | `npm run build` — **SUCCESS**(`/api/cron/ups-tracking-poll` 포함) |
+| R-10 브라우저 검증 | 로컬 dev 서버 `GET /api/cron/ups-tracking-poll` → 응답 `schedule`이 `30 */3 * * * (3시간마다, …)`로 확인됨. 실제 Vercel 크론 반영은 배포 담당(Aiden/JSJung) 확인 사항(Task 범위 외) |
+
+## [Jaison 최종 검토]
+
+`/tmp/review-pr1099` 격리 워크트리에서 재검증. `vercel.json`·`route.ts` 변경이 설계 그대로 정확히 반영됐고 폴링 로직은 무변경. 신규 테스트(`TC-ISS1098`)는 실제 `GET()` import+호출 기반으로 그림자 패턴 없음 — 5/5 PASS.
+
+**독립 되돌리기 검증**: `route.ts`의 `schedule` 문자열만 직접 원복 → 신규 테스트 정확히 FAIL(`expected '30 15 * * *...' to contain '*/3'`) → 복원 후 5/5 재확인.
+
+최초 로컬 전체 회귀에서 이 PR과 무관한 4개 파일·3개 테스트가 실패했으나(Jaison이 이전에 로컬 DB에 수동 복구해둔 데이터로 인한 상태 오염 — R-08-2), fresh `supabase db reset` 후 재실행하니 **184/184·1289/1289 ALL PASS**로 PR claim과 정확히 일치, 이 PR과 무관한 로컬 환경 이슈였음을 확인. `npm run build` SUCCESS. 실제 CI(`gh pr checks 1099`) 3개 항목 전부 pass.
+
+PR 브랜치가 TASK-B-295 커밋 이후의 TeamB_Dev와 충돌해 GitHub 자동 머지가 막혔던 것을 리뷰 워크트리에서 `.agent/ACTIVE_TASK.md` 충돌만 수동 해소(코드 변경 없음) 후 브랜치에 푸시, CI 재통과 확인 후 PR#1099 승인·머지(TeamB_Dev `64ce11c2`), Issue #1098 종결. (참고: 머지 완료 전 Issue를 성급히 종결했다가 충돌 발견 후 즉시 재오픈함 — 절차상 실수였으나 최종 상태는 정확함.)
 
 ## [발견 이슈]
 
