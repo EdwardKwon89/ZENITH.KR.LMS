@@ -86,6 +86,10 @@ setSelectedCity(finalCityName);
 | 커밋 | 내용 |
 |:-----|:-----|
 | `e2c68bdc` | `[Dave] fix: TASK-B-297 AddressInput 시/도·시/군/구 결함 2건 — 토글 미반영(DEF-B-062) + 구단위 데이터 누락(DEF-B-063) (Issue #1104)` |
+| `dddd5ea7` | `Merge origin/TeamB_Dev` — 2026-08-13 설계 수정(DEF-B-063 최장 prefix 매칭) 반영 + 테스트 재작업 |
+| `b3ee8661` | `[Dave] docs: TASK-B-297 완료 보고 — task file [작업 결과] + 상태 🔔 + ACTIVE_TASK 반영 (Issue #1104)` |
+
+> DEF-B-063은 설계 수정(동적 옵션 추가 → 최장 prefix 매칭)이 TeamB_Dev 반영 전후 두 버전을 구현·검증했음. 최종 제출물은 설계 수정안 기준(`e2c68bdc` 초안 → `dddd5ea7` 머지로 확정).
 
 ### ① DEF-B-062 — `OrderRegistrationForm.tsx` shipper `AddressInput` 호출부 수정
 
@@ -96,20 +100,31 @@ setSelectedCity(finalCityName);
   - `auto`: affiliation 파생값 (기존과 동일)
 - `readOnly={shipperNameMode === 'auto'}` 기존 그대로 유지
 
-### ② DEF-B-063 — `AddressInput.tsx` 수정 (onComplete + 시/군/구 목록 동적 보장)
+### ② DEF-B-063 — `AddressInput.tsx` `onComplete` 콜백 수정 (2026-08-13 설계 수정안 적용)
 
-- `onComplete` 콜백: `matchedCity` 계산을 `sigunguEnglish` 단독 매칭 → `daumCity = sigunguEnglish || sigungu` + 라이브러리 exact match 실패 시 Daum 값 그대로 사용
-- 시/도 변경 시 city 목록을 채우는 `useEffect`에 **현재 `selectedCity`를 옵션으로 보장**하는 로직 추가 — 라이브러리에 없는 구 단위 도시("Seongnam-si Bundang-gu")도 드롭다운에 표시·선택 가능
-  - 설계서가 경고한 "`onComplete`의 `setCities`가 `selectedState` 변경 `useEffect`에 덮어써지는 순서 문제"를 회피하기 위해, **setCities를 onComplete에서 직접 하는 대신 effect 자체에서 selectedCity를 보장**하는 방식으로 구현 (과설계 금지 준수 — `selectedState` effect 하나에 병합)
+**설계 수정 반영**: JSJung 제안(2026-08-13) — "동적 옵션 추가" 최초안 폐기 → **라이브러리 원본 옵션 중 최장 prefix 일치** 방식으로 구현. `cities` state는 라이브러리 원본 그대로 유지(합성 옵션 없음), 기존 시/도 매칭(`data.sido?.startsWith(key)`)과 동일한 부분매칭 패턴.
 
-### 회귀 테스트 (4건 신설, R-09 — **AddressInput mock 금지, 실제 컴포넌트 렌더링**)
+- `onComplete` 콜백: `City.getCitiesOfState('KR', matchedIso)` 목록 중 Daum `sigunguEnglish`와 **가장 길게 prefix 일치**하는 항목을 선택:
+  ```js
+  const cityList = City.getCitiesOfState('KR', matchedIso) ?? [];
+  const sigunguEn = (data as any).sigunguEnglish ?? '';
+  const matched = cityList
+    .filter((c) => sigunguEn.startsWith(c.name))
+    .sort((a, b) => b.name.length - a.name.length)[0]; // 최장 일치 우선
+  const matchedCity = matched?.name ?? sigunguEn;
+  ```
+- **최장 일치 정렬 필수(실측 확인)**: 경기도(41)에 `Gwangju`와 `Gwangju-si`가 별개로 존재 → 단순 `.find()` 시 "Gwangju-si OO구"가 `Gwangju`에 오매칭되는 신규 버그 방지.
+- 시/도 변경 `useEffect`는 원복(라이브러리 원본 목록 그대로) — 합성 옵션 추가 없음.
+
+### 회귀 테스트 (5건 신설, R-09 — **AddressInput mock 금지, 실제 컴포넌트 렌더링**)
 
 | 파일 | TC | 내용 |
 |:-----|:---|:-----|
 | `tests/unit/orders/iss1104-addressinput-toggle.test.tsx` | TC-297-062-01 | 실제 `OrderRegistrationForm` + 실제 `AddressInput` 렌더 → "수기입력" 클릭 시 시/도·시/군/구·도로명주소·상세주소·우편번호 전부 빈 값 |
 | `tests/unit/orders/iss1104-addressinput-toggle.test.tsx` | TC-297-062-02 | "내 정보 사용" 재전환 시 조직 주소값(41/Seongnam-si/Street 1/Bldg 2/04515) 실제 복원 |
-| `tests/unit/orders/iss1104-addressinput-gu-data.test.tsx` | TC-297-063-01 | Daum onComplete 응답 `sigunguEnglish="Seongnam-si Bundang-gu"`(라이브러리 미존재) → 드롭다운 옵션 존재 + 선택됨 + setValue 전달 |
-| `tests/unit/orders/iss1104-addressinput-gu-data.test.tsx` | TC-297-063-02 | 정상 매칭 "Gangnam-gu"(서울) → 회귀 없이 기존 동작 유지 + 중복 옵션 없음 |
+| `tests/unit/orders/iss1104-addressinput-gu-data.test.tsx` | TC-297-063-01 | `sigunguEnglish="Seongnam-si Bundang-gu"`(라이브러리 미존재) → 실제 라이브러리 옵션 `"Seongnam-si"`로 선택됨 + 합성 옵션 없음 + setValue 전달 |
+| `tests/unit/orders/iss1104-addressinput-gu-data.test.tsx` | TC-297-063-02 | **핵심** `sigunguEnglish="Gwangju-si OO-gu"` → `"Gwangju"`가 아니라 `"Gwangju-si"`로 선택 (짧은 접두 오매칭 회귀 방지) |
+| `tests/unit/orders/iss1104-addressinput-gu-data.test.tsx` | TC-297-063-03 | 정상 매칭 "Gangnam-gu"(서울) → 회귀 없이 기존 동작 유지 + 중복 옵션 없음 |
 
 ### 독립 되돌리기 검증 (각 수정 원복 시 신규 테스트 정확히 FAIL 확인 후 복원)
 
@@ -117,17 +132,21 @@ setSelectedCity(finalCityName);
 |:----------|:-----|
 | `key`에서 `-${shipperNameMode}` 제거 | TC-297-062-01/02 **2건 정확히 FAIL** → 복원 후 PASS |
 | `defaultValues` ternary 제거 (manual→빈 값 분기 없이) | TC-297-062-01/02 **2건 정확히 FAIL** → 복원 후 PASS |
-| `useEffect`의 selectedCity 동적 옵션 보장 제거 | TC-297-063-01 **정확히 FAIL** (TC-297-063-02는 정상 매칭이라 PASS 유지) → 복원 후 PASS |
+| `sort`(최장 일치 정렬) 제거 → 단순 `.find()` | TC-297-063-02 **정확히 FAIL** ("Gwangju-si" 대신 "Gwangju"에 매칭) → 복원 후 PASS |
 
 ### 검증
 
-- `npm run test:regression`: **1308/1308 PASS** (190파일, 신규 +4 — 188→190파일)
+- `npm run test:regression`: **1309/1309 PASS** (190파일, 신규 +5 — 188→190파일)
 - `npm run build`: SUCCESS
-- 관련 기존 테스트 회귀 없음: `iss1102`(6), `iss1100`(4), `agency/address-input`(11), `member/corporate-address`(11) 포함 34건 일괄 PASS
+- 관련 기존 테스트 회귀 없음: `iss1102`(6), `iss1100`(4), `agency/address-input`(11), `member/corporate-address`(11) 포함 35건 일괄 PASS
 
 ### (R-10) 라이브 브라우저 검증 — Issue #473 방침에 따라 생략
 
-라이브 브라우저/DB 검증은 병합 후 JSJung 수행 방침(Issue #473). 자동화 회귀 테스트(실제 컴포넌트 렌더링 4건)로 검증 대체.
+라이브 브라우저/DB 검증은 병합 후 JSJung 수행 방침(Issue #473). 자동화 회귀 테스트(실제 컴포넌트 렌더링 5건)로 검증 대체.
+
+### 설계 수정 반영 노트 (TeamB_Dev 머지로 수렴)
+
+착수 후 2026-08-13 JSJung 설계 수정이 TeamB_Dev에 반영됨 — "동적 옵션 추가" 최초안 폐기, 최장 prefix 부분매칭으로 확정. 이에 따라 `e2c68bdc` 구현을 설계 수정안으로 재작업하고 TeamB_Dev와 머지(`dddd5ea7`). 작업 결과는 **설계 수정안(최장 prefix 매칭)** 기준. PR 베이스도 재확인 후 최신 TeamB_Dev 기준으로 작성.
 
 ## [발견 이슈]
 
