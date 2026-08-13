@@ -70,6 +70,7 @@
 | 커밋 | 내용 |
 |:-----|:-----|
 | `518148a9` | `[Dave] refactor: TASK-B-296 화주 정보 UI 단순화 (Issue #1102)` |
+| `8b05e6b0` | `[Dave] fix: PR#1103 반려 재작업 — TC-296-06 개인 화주 상태 실제 재현 + lockShipperId 정리 (Issue #1102)` |
 
 ### 수정 내용 (설계 확정 ①~③ 그대로, 과설계 금지 준수)
 
@@ -92,17 +93,32 @@
 | TC-296-03 | 내 정보 사용 재전환 → affiliation 파생값 전체 복원 + 비활성화 |
 | TC-296-04 | 수정 모드(저장값 상이) → 자동판정 manual, 필드 초기화 없이 저장값 보존 |
 | TC-296-05 | 수기입력 후 제출 → 입력값이 createOrder payload에 그대로 매핑 (UPS 오더 등록 버튼 경로) |
-| TC-296-06 | 개인 화주(isIndividual)도 주소 입력란 렌더 (회귀 방지) |
+| TC-296-06 | 개인 화주(isIndividual)도 주소 입력란 렌더 (회귀 방지) — **isIndividual:true 오버라이드 + `address-input-shipper` 전용 셀렉터** |
+
+### PR#1103 반려 재작업 (2026-08-13, 1건) — `8b05e6b0`
+
+**반려 사유**: TC-296-06이 `getCurrentUserAffiliation` mock의 `isIndividual:false` 고정 때문에 실제 개인 화주 상태를 재현하지 못함(조건 원복해도 통과) → ③ 변경 여부와 무관하게 항상 PASS.
+
+**수정 내용**:
+1. **TC-296-06 — 개인 화주 상태 실제 재현**:
+   - `getCurrentUserAffiliation`을 hoisted mock(`mockGetCurrentUserAffiliation`)으로 전환 + `beforeEach`에서 기본(법인, `isIndividual:false`) 설정
+   - TC-296-06에서만 `mockResolvedValueOnce({..., isIndividual: true, ...})` 오버라이드 → 실제 개인 화주 상태로 마운트
+2. **셀렉터 전용화** — 근본 원인 추가 발견: 폼 내 `AddressInput`이 3개(shipper/recipient/pickup) 렌더되는데 mock testid가 전부 동일(`address-input`) → `querySelector`가 다른 인스턴스를 잡아 shipper 조건과 무관하게 통과. mock을 `prefix` 기반 testid(`address-input-${prefix}`)로 분리, TC-296-06은 `address-input-shipper`로 한정
+3. **`lockShipperId` dead variable 제거** — `OrderRegistrationForm.tsx:325` 로컬 변수(select 제거로 미사용, reviewer 참고 권장) 정리. `editScope.lockShipperId` 필드 자체는 서버(`orders.ts:179`)에서 사용 중이라 유지
+
+**독립 되돌리기 검증 (개선 후)**:
+- 조건 원복(`{!affiliation?.isIndividual && (<AddressInput ...>)}`) → **TC-296-06 정확히 FAIL** (isIndividual:true 재현 + shipper 전용 셀렉터 덕분에 이제 구분 가능) → 복원 후 6/6 PASS
+- (반려 전 상태의 문제였던 "다른 AddressInput 인스턴스가 잡혀 무조건 통과"도 셀렉터 전용화로 해소)
 
 ### 독립 되돌리기 검증
 
 `clearShipperInfoFields` 호출 제거(수기입력 클릭 시 초기화 없음) → **TC-296-02 정확히 FAIL** → 복원 후 6/6 PASS 확인.
 
-### 검증
+### 검증 (재작업 후 재실행)
 
-- `npm run test:regression`: **1304/1304 PASS** (188파일, 신규 +6)
+- `npm run test:regression`: **1304/1304 PASS** (188파일)
 - `npm run build`: SUCCESS
-- 기존 TASK-B-295 토글 테스트 4건 포함 전체 10건 PASS (회귀 없음)
+- 기존 TASK-B-295 토글 테스트 4건 포함 10건 PASS (회귀 없음)
 
 ## [발견 이슈]
 
