@@ -7,7 +7,7 @@
 | **담당** | Dave (Team B) — TASK-B-295 직접 구현자, 동일 코드 최신 숙지 |
 | **생성일** | 2026-08-13 |
 | **우선순위** | P2 |
-| **상태** | 🔄 진행중 |
+| **상태** | 🔔 (완료 보고 — 검토 요청) |
 
 ## 현재 상태 (분석 완료)
 
@@ -62,6 +62,47 @@
 ## 담당자 위반 이력 사전 경고
 
 - **Dave**: `.agent/VIOLATION_TRACKER.md` 참조 후 착수 — task file/ACTIVE_TASK.md 커밋 누락 유형 누적 이력(13회, 최다) 있음. JSJung 2026-07-15 결정에 따라 누적 이력과 무관하게 할당 지속(재론 금지). 이번 Task는 TASK-B-295에서 본인이 직접 만든 `shipperNameMode` 토글 로직을 확장하는 작업이라 설계 리스크는 낮음 — 초점은 **초기화 범위 누락 없이 전체 필드 포함**(특히 `shipper_biz_no` readOnly 해제, `shipper_country_code` 등 기본값 있는 필드도 빈 값으로 초기화하는지)과 **자동판정 manual vs 사용자 클릭 manual의 초기화 여부 차이**를 정확히 구현하는 것. 회귀 테스트는 실제 컴포넌트 렌더링 기반으로 작성할 것 — 정적 문자열 검사나 로직 재구현 금지.
+
+## [작업 결과]
+
+### 커밋
+
+| 커밋 | 내용 |
+|:-----|:-----|
+| `518148a9` | `[Dave] refactor: TASK-B-296 화주 정보 UI 단순화 (Issue #1102)` |
+
+### 수정 내용 (설계 확정 ①~③ 그대로, 과설계 금지 준수)
+
+1. **① `shipper_id` select 렌더 제거** — `register('shipper_id')`는 폼 상태로 유지(오더 소유권·RLS·RPC 로직 무변경), `ZenBadge`(법인/개인/조직명)는 표시용이라 유지
+2. **② 토글 적용 범위 화주 정보 전체 필드로 확장** (13개: `shipper_name`/`shipper_contact_name`/`shipper_contact_phone`/`shipper_contact_email`/`shipper_address`/`shipper_address_english`/`shipper_address_detail`/`shipper_address_detail_english`/`shipper_country_code`/`shipper_state_province`/`shipper_city`/`shipper_zipcode`/`shipper_biz_no`):
+   - 수기입력 클릭 → 전체 필드 빈 값 초기화 + 활성화 (`shipper_biz_no` `readOnly` 해제 포함)
+   - 내 정보 사용 클릭 → affiliation 파생값 전체 복원 + 비활성화
+   - 수정 모드 자동판정 manual(저장값이 조직명과 다름)은 **초기화 없이** 저장값 보존 — 사용자 클릭 manual과 자동판정 manual의 차이 구현
+3. **③ `AddressInput` 렌더 조건(`!affiliation?.isIndividual`) 제거** — 개인/법인 무관 항상 표시 (auto 모드에선 `readOnly`)
+4. **④ 서버 액션/스키마 변경 없음** — 매핑은 기존 구조 그대로, 회귀 테스트로 명시적 검증
+
+### 회귀 테스트 (6건 신설, RTL 실제 컴포넌트 렌더링)
+
+`tests/unit/orders/iss1102-shipper-info-ui-simplify.test.tsx`
+
+| TC | 내용 |
+|:---|:-----|
+| TC-296-01 | `shipper_id` select 엘리먼트 미렌더 |
+| TC-296-02 | 수기입력 클릭 → 전체 필드 빈 값 초기화 + 활성화 (biz_no readOnly 해제) |
+| TC-296-03 | 내 정보 사용 재전환 → affiliation 파생값 전체 복원 + 비활성화 |
+| TC-296-04 | 수정 모드(저장값 상이) → 자동판정 manual, 필드 초기화 없이 저장값 보존 |
+| TC-296-05 | 수기입력 후 제출 → 입력값이 createOrder payload에 그대로 매핑 (UPS 오더 등록 버튼 경로) |
+| TC-296-06 | 개인 화주(isIndividual)도 주소 입력란 렌더 (회귀 방지) |
+
+### 독립 되돌리기 검증
+
+`clearShipperInfoFields` 호출 제거(수기입력 클릭 시 초기화 없음) → **TC-296-02 정확히 FAIL** → 복원 후 6/6 PASS 확인.
+
+### 검증
+
+- `npm run test:regression`: **1304/1304 PASS** (188파일, 신규 +6)
+- `npm run build`: SUCCESS
+- 기존 TASK-B-295 토글 테스트 4건 포함 전체 10건 PASS (회귀 없음)
 
 ## [발견 이슈]
 
