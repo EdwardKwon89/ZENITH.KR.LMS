@@ -80,11 +80,19 @@ export function AddressInput({
   }, [countryCode]);
 
   // 시/도 변경 시 city 목록 갱신 (리셋은 onChange에서 처리 — Issue #530)
+  // TASK-B-297 (Issue #1104, DEF-B-063): Daum 주소검색으로 선택된 시/군/구가 country-state-city
+  // 라이브러리에 없더라도(예: "Seongnam-si Bundang-gu") 동적으로 옵션을 보장해 선택이 유지되도록 함.
+  // selectedState 변경 effect가 onComplete의 setCities를 덮어쓰는 순서 문제를 피하기 위해,
+  // effect 자체에서 현재 selectedCity를 보장하는 방식으로 구현.
   useEffect(() => {
     if (selectedState && countryCode) {
-      setCities(City.getCitiesOfState(countryCode, selectedState) ?? []);
+      const base = City.getCitiesOfState(countryCode, selectedState) ?? [];
+      const list = selectedCity && !base.some((c) => c.name === selectedCity)
+        ? [...base, { name: selectedCity, countryCode, stateCode: selectedState } as ICity]
+        : base;
+      setCities(list);
     }
-  }, [selectedState, countryCode]);
+  }, [selectedState, countryCode, selectedCity]);
 
   const a = (name: string) => (mode === 'rhf' ? rhf(prefix, name, register) : { name });
 
@@ -330,7 +338,11 @@ export function AddressInput({
                   '경남': '48', '제주': '49',
                 };
                 const matchedIso = Object.entries(KR_SIDO_TO_ISOCODE).find(([key]) => (data as any).sido?.startsWith(key))?.[1] ?? '';
-                const matchedCity = City.getCitiesOfState('KR', matchedIso).find(c => c.name === (data as any).sigunguEnglish)?.name ?? (data as any).sigunguEnglish ?? '';
+                // TASK-B-297 (Issue #1104, DEF-B-063): Daum sigunguEnglish가 라이브러리에 없으면(구 단위 도시 등)
+                // 실제 검색값(sigunguEnglish || sigungu)을 그대로 사용 — 동적 옵션 보장 effect가 표시·선택 보장.
+                const daumCity = (data as any).sigunguEnglish || (data as any).sigungu || '';
+                const exactMatch = City.getCitiesOfState('KR', matchedIso).find(c => c.name === daumCity);
+                const matchedCity = exactMatch?.name ?? daumCity;
                 setSelectedState(matchedIso);
                 setSelectedCity(matchedCity);
                 if (setValue && prefix) {
