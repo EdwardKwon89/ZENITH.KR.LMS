@@ -113,3 +113,12 @@ describe('TC-ISS635-E02: UPS Tracking Poll Cron 로직', () => {
     expect(body.polled).toBe(0);
   });
 });
+
+describe('TC-ISS1098: UPS Tracking Poll Cron 스케줄 문구 동기화 (TASK-B-294)', () => {
+  it('GET 응답 schedule 필드가 3시간 간격 새 크론식(*/3)을 반환 — vercel.json과 동기화', async () => {
+    const { GET } = await import('@/app/api/cron/ups-tracking-poll/route');
+    const res = await GET();
+    const body = await res.json();
+    expect(body.schedule).toContain('*/3');
+  });
+});

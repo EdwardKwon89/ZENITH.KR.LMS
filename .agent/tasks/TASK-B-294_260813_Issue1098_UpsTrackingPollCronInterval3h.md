@@ -7,7 +7,7 @@
 | **담당** | Baker (Team B) |
 | **생성일** | 2026-08-13 |
 | **우선순위** | P3 |
-| **상태** | 🔄 진행중 |
+| **상태** | 🔔 보고 완료 |
 
 ## 현재 상태 (분석 완료)
 
@@ -52,6 +52,20 @@
 ## 담당자 위반 이력 사전 경고
 
 - **Baker**: `.agent/VIOLATION_TRACKER.md` 참조 후 착수 — task file/ACTIVE_TASK.md 미반영 유형·마이그레이션 타임스탬프 충돌 이력 다수(이번 Task는 마이그레이션 없음, 해당 없음). 매우 단순한 설정값 변경 Task이나 R-09 회귀 테스트·독립 되돌리기 검증 절차는 동일하게 생략 없이 수행할 것.
+
+## [작업 결과]
+
+**커밋**: `fec90792` — `[Baker] chore: TASK-B-294 UPS 트래킹 폴링 크론 1일1회→3시간마다 (Issue #1098)`
+
+| 검증 항목 | 결과 |
+|:----------|:-----|
+| vercel.json | `ups-tracking-poll` cron `"30 15 * * *"` → `"30 */3 * * *"`(매 3시간 :30분, 하루 8회 — 기존 UTC 15:30/KST 00:30 포함) |
+| route.ts | JSDoc "매일 실행" → "3시간마다 실행" + GET 응답 `schedule` → `'30 */3 * * * (3시간마다, UTC 00:30/03:30/06:30/09:30/12:30/15:30/18:30/21:30)'` |
+| 회귀 테스트 신설 | `tests/unit/ups/ups-tracking-poll-cron.test.ts`에 `TC-ISS1098` 추가 — 실제 `GET()` 호출로 응답 `schedule` 필드가 `*/3` 포함하는지 검증(그림자/toContain-아닌 실제 라우트 호출 기반) |
+| 독립 되돌리기 검증 | schedule 문자열만 원복(`30 15 * * * daily`) 시 신규 테스트 **1건 FAIL** 재현 → 복원 후 5/5 PASS |
+| 전체 회귀 | `npm run test:regression` — **1289/1289 PASS** |
+| 빌드 | `npm run build` — **SUCCESS**(`/api/cron/ups-tracking-poll` 포함) |
+| R-10 브라우저 검증 | 로컬 dev 서버 `GET /api/cron/ups-tracking-poll` → 응답 `schedule`이 `30 */3 * * * (3시간마다, …)`로 확인됨. 실제 Vercel 크론 반영은 배포 담당(Aiden/JSJung) 확인 사항(Task 범위 외) |
 
 ## [발견 이슈]
 

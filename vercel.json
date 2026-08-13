@@ -6,7 +6,7 @@
     },
     {
       "path": "/api/cron/ups-tracking-poll",
-      "schedule": "30 15 * * *"
+      "schedule": "30 */3 * * *"
     },
     {
       "path": "/api/cron/exchange-rate-sync",
