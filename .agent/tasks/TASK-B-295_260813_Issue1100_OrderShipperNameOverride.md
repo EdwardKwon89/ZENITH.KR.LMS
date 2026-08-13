@@ -7,7 +7,7 @@
 | **담당** | Dave (Team B) |
 | **생성일** | 2026-08-13 |
 | **우선순위** | P2 |
-| **상태** | 🔄 진행중 |
+| **상태** | 🔔 (완료 보고 — 검토 요청) |
 
 ## 현재 상태 (분석 완료)
 
@@ -91,6 +91,47 @@ shipper_name: z.string().optional(),
 ## 담당자 위반 이력 사전 경고
 
 - **Dave**: `.agent/VIOLATION_TRACKER.md` 참조 후 착수 — task file/ACTIVE_TASK.md 커밋 누락 유형 누적 이력(13회, 최다) 있음. JSJung 2026-07-15 결정에 따라 누적 이력과 무관하게 할당 지속(재론 금지). 착수 전 `./scripts/next-task-number.sh B`로 브랜치명 중복 여부 재확인. 이번 Task는 신규 마이그레이션(RPC 함수 재정의 포함) 1건 — **최신 TeamB_Dev 기준 브랜치 동기화 및 타임스탬프 충돌 여부 확인 필수**. 회귀 테스트는 실제 DB 저장/폴백 동작을 검증하는 방식으로 작성할 것 — 정적 문자열 검사나 로직 재구현 금지. **가장 중요**: 서류/라벨 4개 파일 외 다른 `shipper?.name` 사용처를 절대 건드리지 말 것(과설계·스코프 오염 방지) — PR 리뷰 시 diff에 이 4개 파일 외 다른 파일의 `shipper.name` 관련 변경이 있으면 반려 사유가 됨.
+
+## [작업 결과]
+
+### 커밋
+
+| 커밋 | 내용 |
+|:-----|:-----|
+| `07293c0f` | `[Dave] feat: TASK-B-295 오더 화주명(발송인 표시명) 자유 입력 지원 (Issue #1100)` |
+
+### 수정 내용 (설계 확정 ①~⑤ 전부 반영, 과설계 금지 준수)
+
+1. **마이그레이션 `20260813020000`** — `zen_orders.shipper_name TEXT` 컬럼 추가 + `create_order_atomic` RPC `CREATE OR REPLACE` 재정의(기존 본문 100% 보존, INSERT 컬럼·VALUES에 `shipper_name` 2곳만 추가)
+2. **`orderRegistrationSchema`** — `shipper_name: z.string().optional()` 추가 (송하인 섹션)
+3. **`OrderRegistrationForm.tsx`** — "내 정보 사용/수기입력" 토글 + 화주명 입력란:
+   - auto(기본): `shipper_name` disabled + `affiliation` orgName(법인)/userName(개인) 자동 반영
+   - manual: 입력란 활성화 + 자유 텍스트 (시스템 미등록 임의 화주명)
+   - 재전환(auto) 시 조직명 복원
+   - 수정 모드: 기존 저장 `shipper_name`이 조직명과 다르면 "수기입력"으로 시작(값 보존) — TASK-B-287 edit 모드 자동완성 가드 준수
+   - `shipper_id` select는 무변경
+4. **`createOrder`/`updateOrder`** — `updateOrder` headerData에 `shipper_name: validated.shipper_name` 배선 (createOrder는 RPC p_payload 자동 포함)
+5. **서류/라벨 4개 파일만 폴백 교체** (`order.shipper_name || order.shipper?.name || fallback`): ups-detail(3)·orders detail(4)·TradeDocumentClient(3)·OutboundProcessForm(1) — `grep -rn "shipper?\.name\|shipper\.name" src`로 전체 30여 곳 확인 후 이 4곳 외 무변경
+
+### 회귀 테스트 (9건 신설)
+
+| 파일 | 건수 | 내용 |
+|:-----|:---:|:-----|
+| `iss1100-shipper-name-save.test.ts` (실 DB) | 3 | 신규 등록 shipper_name 실제 저장 / 수정 시 변경 반영 / 미입력 시 NULL |
+| `iss1100-shipper-name-docdata.test.ts` (실 DB) | 2 | getOrderDocumentData가 shipper_name·shipper.name 모두 반환(폴백 가능) / 미입력 시 shipper_name null + 조직명 폴백 |
+| `iss1100-shipper-name-toggle.test.tsx` (RTL) | 4 | 기본 auto disabled+orgName 일치 / manual 활성화+자유 텍스트 / 재전환 복원 / 수정 모드 manual 시작+값 유지 |
+
+> 실제 DB 저장·실제 컴포넌트 렌더링 기반 — 그림자/toContain 금지 준수.
+
+### 독립 되돌리기 검증
+
+`updateOrder` shipper_name 배선 + 토글 auto 동기화 + 수정 모드 manual 초기화 원복 → **TC-295-02/04/07 정확히 FAIL** → 복원 후 9/9 PASS 확인.
+
+### 검증
+
+- `npm run test:regression`: **1297/1297 PASS** (187파일, 신규 +9)
+- `npm run build`: SUCCESS
+- **fresh `supabase db reset` 재검증**(R-08-2): shipper_name 컬럼 존재 + 통합 테스트 5/5 PASS
 
 ## [발견 이슈]
 
