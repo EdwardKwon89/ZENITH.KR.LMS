@@ -50,11 +50,7 @@ export async function POST(req: Request) {
     const normalizedName = itemName.toLowerCase();
 
     // 3. 캐시 우선 조회 (TASK-B-293 / Issue #1091) — 히트 시 AI 호출 없이 즉시 반환
-    const { data: cached, error: cacheError } = await supabase
-      .from('zen_hs_code_lookups')
-      .select('hs_code, confidence')
-      .eq('item_name_normalized', normalizedName)
-      .maybeSingle();
+    const { data: cached, error: cacheError } = await getCachedHsLookup(supabase, normalizedName);
     if (!cacheError && cached?.hs_code) {
       return NextResponse.json<HsLookupResponse>({
         hs_code: cached.hs_code,
@@ -63,28 +59,13 @@ export async function POST(req: Request) {
     }
 
     // 4. Haiku 4.5 API 호출 (캐시 미스 시에만)
-    const message = await client.messages.create({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 64,
-      system:
-        'You are a customs HS code expert. Given an item name, return the most appropriate 6-digit HS code for international shipping. Respond ONLY with valid JSON: {"hs_code": "XXXXXX", "confidence": "high|medium|low"}. If uncertain, return {"hs_code": null, "confidence": "low"}.',
-      messages: [
-        {
-          role: 'user',
-          content: `Item name: "${truncatedName}"${destCountry ? `, destination: ${destCountry}` : ''}`,
-        },
-      ],
-    });
-
-    const text = extractTextContent(message.content);
+    const text = await callHaiku(truncatedName, destCountry);
     const parsed = parseHsLookupJson(text);
 
     // 5. 성공 결과만 캐시에 저장 — 실패(hs_code null)는 캐싱하지 않음:
     //    표현이 다른 재조회 기회를 막지 않기 위함. insert 실패(UNIQUE 충돌 등)는 무시.
     if (parsed.hs_code) {
-      await supabase
-        .from('zen_hs_code_lookups')
-        .insert({ item_name_normalized: normalizedName, hs_code: parsed.hs_code, confidence: parsed.confidence });
+      await saveHsLookup(supabase, normalizedName, parsed.hs_code, parsed.confidence);
     }
 
     return NextResponse.json<HsLookupResponse>(parsed);
@@ -92,6 +73,44 @@ export async function POST(req: Request) {
     logger.error('[HS-LOOKUP] Failed to extract HS code:', error);
     return NextResponse.json<HsLookupResponse>({ hs_code: null, confidence: 'low' });
   }
+}
+
+async function callHaiku(truncatedName: string, destCountry?: string) {
+  const message = await client.messages.create({
+    model: 'claude-haiku-4-5-20251001',
+    max_tokens: 64,
+    system:
+      'You are a customs HS code expert. Given an item name, return the most appropriate 6-digit HS code for international shipping. Respond ONLY with valid JSON: {"hs_code": "XXXXXX", "confidence": "high|medium|low"}. If uncertain, return {"hs_code": null, "confidence": "low"}.',
+    messages: [
+      {
+        role: 'user',
+        content: `Item name: "${truncatedName}"${destCountry ? `, destination: ${destCountry}` : ''}`,
+      },
+    ],
+  });
+  return extractTextContent(message.content);
+}
+
+async function getCachedHsLookup(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  itemNameNormalized: string,
+) {
+  return supabase
+    .from('zen_hs_code_lookups')
+    .select('hs_code, confidence')
+    .eq('item_name_normalized', itemNameNormalized)
+    .maybeSingle();
+}
+
+async function saveHsLookup(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  itemNameNormalized: string,
+  hsCode: string,
+  confidence: HsLookupResponse['confidence'],
+) {
+  await supabase
+    .from('zen_hs_code_lookups')
+    .insert({ item_name_normalized: itemNameNormalized, hs_code: hsCode, confidence });
 }
 
 function extractTextContent(content: Anthropic.Messages.ContentBlock[]): string {
