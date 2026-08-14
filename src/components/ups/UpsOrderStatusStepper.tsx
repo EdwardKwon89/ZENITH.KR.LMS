@@ -59,6 +59,15 @@ export default function UpsOrderStatusStepper({
   const isCanceled = currentStatus === OrderStatus.CANCELED;
   const isHeld = currentStatus === OrderStatus.HELD;
 
+  // TASK-B-304 (Issue #1128): CANCELED/HELD 전이 시각 — order_status_history에서 현재 상태로의 전이 중
+  // 가장 최근 것 (TASK-B-301의 reverse().find() 패턴 재사용). 정상 스텝 시각(회색)과 구분되는 배너 색으로 표출.
+  const exceptionCreatedAt = [...(statusHistory ?? [])].reverse().find((h) => h.next_status === currentStatus)?.created_at;
+  let exceptionTime = '';
+  if (exceptionCreatedAt) {
+    const parsed = new Date(exceptionCreatedAt);
+    if (!isNaN(parsed.getTime())) exceptionTime = parsed.toLocaleString('ko-KR');
+  }
+
   // Real-time tracking check handler
   const handleCheckRealtimeTracking = () => {
     if (!trackingNumber) {
@@ -150,14 +159,26 @@ export default function UpsOrderStatusStepper({
         {isCanceled && (
           <div className="p-4 bg-rose-50 dark:bg-rose-950/40 rounded-2xl border border-rose-200 dark:border-rose-800 flex items-center gap-3 text-xs text-rose-700 dark:text-rose-300">
             <AlertCircle className="w-5 h-5 text-rose-500 shrink-0" />
-            <span>본 오더는 현재 <strong className="font-bold">취소(CANCELED)</strong> 처리되었습니다.</span>
+            <div className="flex flex-col gap-0.5">
+              <span>본 오더는 현재 <strong className="font-bold">취소(CANCELED)</strong> 처리되었습니다.</span>
+              {/* TASK-B-304 (Issue #1128): 취소 전이 시각 — 정상 스텝 시각(회색)과 구분되는 rose 계열 */}
+              {exceptionTime && (
+                <span className="text-[10px] font-bold text-rose-500 dark:text-rose-400">취소 일시: {exceptionTime}</span>
+              )}
+            </div>
           </div>
         )}
 
         {isHeld && (
           <div className="p-4 bg-amber-50 dark:bg-amber-950/40 rounded-2xl border border-amber-200 dark:border-amber-800 flex items-center gap-3 text-xs text-amber-700 dark:text-amber-300">
             <AlertCircle className="w-5 h-5 text-amber-500 shrink-0" />
-            <span>본 오더는 현재 <strong className="font-bold">보류(HELD)</strong> 상태입니다. 사유 해제 후 진행됩니다.</span>
+            <div className="flex flex-col gap-0.5">
+              <span>본 오더는 현재 <strong className="font-bold">보류(HELD)</strong> 상태입니다. 사유 해제 후 진행됩니다.</span>
+              {/* TASK-B-304 (Issue #1128): 보류 전이 시각 — 정상 스텝 시각(회색)과 구분되는 amber 계열 */}
+              {exceptionTime && (
+                <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400">보류 일시: {exceptionTime}</span>
+              )}
+            </div>
           </div>
         )}
 
@@ -210,13 +231,6 @@ export default function UpsOrderStatusStepper({
                       {stage.label}
                     </span>
 
-                    {/* TASK-B-301 (Issue #1121): 단계별 전이 시각 (미도달 단계는 미표시) */}
-                    {stageTime && (
-                      <span className="text-[9px] text-slate-400 leading-tight">
-                        {stageTime}
-                      </span>
-                    )}
-
                     {/* Step Indicator Dot / Line */}
                     <div className="w-full flex items-center justify-center gap-1 mt-1">
                       <span
@@ -229,6 +243,13 @@ export default function UpsOrderStatusStepper({
                         }`}
                       />
                     </div>
+
+                    {/* TASK-B-304 (Issue #1128): 단계별 전이 시각 — Step Indicator 바 아래로 위치 이동 (기존 TASK-B-301) */}
+                    {stageTime && (
+                      <span className="text-[9px] text-slate-400 leading-tight">
+                        {stageTime}
+                      </span>
+                    )}
                   </div>
                 );
               })}

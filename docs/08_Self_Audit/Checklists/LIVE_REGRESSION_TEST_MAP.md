@@ -126,6 +126,12 @@
 | **TC-B301-03-01** | 오더 등록/수정 폼 UPS 필수표시 | UPS 모드에서 화주 연락처·수하인 국가/우편번호/시·군·구 라벨 `*` + 비UPS 미표시(조건부 정확성, TASK-B-301 ③) | `tests/unit/orders/order-registration-form-b301.test.tsx` |
 | **TC-B301-03-02** | AddressInput CN 시/도 필수표시 | `recipient_country_code='CN'`일 때만 시/도 라벨 `*` (DEF-B-044, TASK-B-301 ③) + AIR+CN 시 국가/우편번호/도시는 미표시 | `tests/unit/orders/order-registration-form-b301.test.tsx` |
 | **TC-B301-03-03** | AddressInput 새 prop 기본값 false 회귀 | `requiredCountry` 등 신규 prop 미전달 시 기존 소비처(대리점 화주 등록 등) 동작 불변(기본값 false) | `tests/unit/orders/order-registration-form-b301.test.tsx`, `tests/unit/orders/iss1104-addressinput-toggle.test.tsx` |
+| **TC-B304-01-01** | 스테퍼 단계별 시각 위치 — Step Indicator 바 아래 | 시각 span이 Dot/Line 바 다음에 렌더(DOM 순서 검증, TASK-B-304 ①) | `tests/unit/ups/ups-stepper-b304.test.tsx` |
+| **TC-B304-01-02** | 모든 시각 있는 스텝 indicator 바 아래 확인 | IN_TRANSIT 등 시각 보유 스텝 전부 위치 이동 확인 | `tests/unit/ups/ups-stepper-b304.test.tsx` |
+| **TC-B304-02-01** | CANCELED 배너 취소 일시 표시 | `order_status_history`에서 최근 CANCELED 전이 시각을 rose 계열로 표시 + 7단계 스테퍼 숨김 유지(TASK-B-304 ②) | `tests/unit/ups/ups-stepper-b304.test.tsx` |
+| **TC-B304-02-02** | HELD 배너 보류 일시 표시 | 최근 HELD 전이 시각을 amber 계열로 표시 + 7단계 스테퍼 유지 | `tests/unit/ups/ups-stepper-b304.test.tsx` |
+| **TC-B304-02-03** | 데이터 누락·Invalid Date 가드 | CANCELED/HELD 이력 없거나 Invalid Date면 시각 미표시(기존 TASK-B-301 가드 패턴) | `tests/unit/ups/ups-stepper-b304.test.tsx` |
+| **TC-B304-02-04** | 재전이 최근값 우선 | 같은 상태 재전이 이력 여러 건 시 `reverse().find()`로 최신만 표시 | `tests/unit/ups/ups-stepper-b304.test.tsx` |
 
 ### 10. UPS 일마감 (Phase 7 SPR-05 Daily Close)
 | ID | 테스트 항목 | 목적 | 파일 경로 |
