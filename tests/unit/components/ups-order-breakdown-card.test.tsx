@@ -44,10 +44,11 @@ describe('DEF-B-021: UpsOrderBreakdownCard 필드명 + 통화 수정', () => {
       />
     );
 
-    expect(screen.getByText('₩306,200.00')).toBeTruthy();
-    expect(screen.getByText('₩45,000.00')).toBeTruthy();
-    expect(screen.getByText('₩41,800.00')).toBeTruthy();
-    expect(screen.getByText('₩393,000.00 KRW')).toBeTruthy();
+    // TASK-B-302 (Issue #1123): KRW는 올림된 정수값 — 소수점 ".00" 미표시 (USD는 2자리 유지)
+    expect(screen.getByText('₩306,200')).toBeTruthy();
+    expect(screen.getByText('₩45,000')).toBeTruthy();
+    expect(screen.getByText('₩41,800')).toBeTruthy();
+    expect(screen.getByText('₩393,000 KRW')).toBeTruthy();
   });
 
   it('USD 통화: baseSellingPrice 필드와 $ 기호로 표시', () => {
@@ -176,11 +177,12 @@ describe('DEF-B-065 (TASK-B-299): Zone 표시 + 통화 3자리 쉼표', () => {
       />
     );
 
-    expect(screen.getByText('₩355,100.00')).toBeTruthy();
-    expect(screen.getByText('₩12,500.00')).toBeTruthy();
-    expect(screen.getByText('₩3,000.00')).toBeTruthy();
-    expect(screen.getByText('₩1,500.00')).toBeTruthy();
-    expect(screen.getByText('₩372,100.00 KRW')).toBeTruthy();
+    // TASK-B-302 (Issue #1123): KRW는 올림된 정수값 — 소수점 ".00" 미표시 (USD는 2자리 유지)
+    expect(screen.getByText('₩355,100')).toBeTruthy();
+    expect(screen.getByText('₩12,500')).toBeTruthy();
+    expect(screen.getByText('₩3,000')).toBeTruthy();
+    expect(screen.getByText('₩1,500')).toBeTruthy();
+    expect(screen.getByText('₩372,100 KRW')).toBeTruthy();
   });
 });
 

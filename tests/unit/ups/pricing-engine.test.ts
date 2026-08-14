@@ -175,6 +175,7 @@ describe('TC-UPS-ENGINE-04: Agency 단계 계산 (DEF-B-033: 기본운임에만 
       surgeFeeSellingAmount: 0,
       discountRate: 0.1,
       agencyOtherCharges: [{ sellingPrice: 3000, costPrice: 2000 }],
+      currency: 'KRW',
     });
     // discountedBase = 80000 * 0.9 = 72000, passthrough = 15000+5000+0 = 20000
     expect(result.baseSellingPrice).toBe(72000);
@@ -190,6 +191,7 @@ describe('TC-UPS-ENGINE-04: Agency 단계 계산 (DEF-B-033: 기본운임에만 
       surgeFeeSellingAmount: 0,
       discountRate: 0.2,
       agencyOtherCharges: [],
+      currency: 'KRW',
     });
     // discountedBase = 80000*0.8=64000, cost = 64000+15000+5000 = 84000 (fuel/other 무할인 그대로 포함됨을 확인)
     expect(result.agencyCostPrice).toBe(84000);
@@ -351,19 +353,25 @@ describe('TC-UPS-ENGINE-07: 급증 긴급 수수료(Surge Emergency Fee) 계산 
   it('kg당 단가 × 청구중량으로 급증 수수료를 계산하고 유류할증료를 추가 부과한다', () => {
     const data = { ...baseData(), surgeFee };
     // baseInput: actualWeightKg=5, dims 없음 → chargeableKg=5
-    // surge base = 4722 * 5 = 23610, fuelRate=0.185 → +23610*0.185=4367.85 → 27977.85
+    // surge base = 4722 * 5 = 23610, fuelRate=0.185 → 23610 + 23610*0.185 = 27977.85
+    // TASK-B-302: 판매가는 올림 → 27978 (정수 KRW)
     const result = computeUpsFreight(baseInput(), data);
     expect(result.breakdown.surgeFeeSellingRatePerKg).toBe(4722);
-    expect(result.surgeFeeSellingAmount).toBeCloseTo(23610 + 23610 * 0.185, 2);
+    expect(result.surgeFeeSellingAmount).toBe(27978);
   });
 
   it('급증 수수료는 원시 청구중량이 아니라 올림/반올림이 적용된 최종 청구중량을 기준으로 계산한다 (2026-08-10 JSJung 확정)', () => {
     const data = { ...baseData(), surgeFee };
     // actualWeightKg=4.2, dims 없음 → 원시 chargeableKg=4.2, 0.5kg 단위 올림 → 최종 청구중량 4.5
-    // surge base = 4722 * 4.5 = 21249 (4722*4.2=19832.4가 아님), fuelRate=0.185 → 21249*1.185
+    // surge base = 4722 * 4.5 = 21249 (4722*4.2=19832.4가 아님), fuelRate=0.185 → 21249*1.185 = 25180.065
+    // TASK-B-302: 판매가는 올림 → 25181 (정수 KRW)
     const result = computeUpsFreight({ ...baseInput(), actualWeightKg: 4.2 }, data);
+    // 원가: baseCost = 3800 * 4.5 = 17100, fuelCostRate=0.155 → 17100*1.155 = 19750.5 (올림 미적용 — 원가 계열 범위 밖)
     const expectedBase = 4722 * 4.5;
-    expect(result.surgeFeeSellingAmount).toBeCloseTo(expectedBase + expectedBase * 0.185, 2);
+    const expectedCostBase = 3800 * 4.5;
+    expect(result.surgeFeeSellingAmount).toBe(25181);
+    expect(result.surgeFeeCostAmount).toBeCloseTo(expectedCostBase + expectedCostBase * 0.155, 2);
+    expect(result.breakdown.surgeFeeCostAmount).toBeCloseTo(expectedCostBase + expectedCostBase * 0.155, 2);
   });
 
   it('급증 수수료가 totalSellingPrice/totalCostPrice에 합산된다', () => {

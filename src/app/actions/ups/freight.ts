@@ -273,6 +273,7 @@ export async function estimateUpsFreight(input: EstimateUpsFreightInput): Promis
       sellingPrice: Number(c.selling_price),
       costPrice: Number(c.cost_price),
     })),
+    currency: platform.currency,
   });
 
   if (!input.shipperOrgId) {
@@ -296,7 +297,8 @@ export async function estimateUpsFreight(input: EstimateUpsFreightInput): Promis
     platform.fuelSurchargeSellingAmount,
     platform.otherChargesSellingTotal,
     shipperDiscountRate,
-    platform.surgeFeeSellingAmount
+    platform.surgeFeeSellingAmount,
+    platform.currency
   );
 
   return { platform, agency, shipper };
