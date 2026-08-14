@@ -64,6 +64,7 @@ vi.mock('@/components/ui/ZenUI', () => ({
   ZenBadge: (props: any) => <span>{props.children}</span>,
 }));
 vi.mock('@/components/ups/UpsOrderStatusStepper', () => ({ default: () => <div /> }));
+vi.mock('@/components/ups/UpsDetailBackToListButton', () => ({ default: () => <div /> }));
 vi.mock('@/components/ups/UpsPackageItemsModal', () => ({ default: () => <div /> }));
 vi.mock('@/components/ups/UpsOrderBreakdownCard', () => ({ default: () => <div data-testid="breakdown-card" /> }));
 vi.mock('@/components/orders/UpsActualAdjustmentForm', () => ({ UpsActualAdjustmentForm: () => <div /> }));
