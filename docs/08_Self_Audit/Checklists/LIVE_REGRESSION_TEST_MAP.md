@@ -132,6 +132,18 @@
 | **TC-B304-02-02** | HELD 배너 보류 일시 표시 | 최근 HELD 전이 시각을 amber 계열로 표시 + 7단계 스테퍼 유지 | `tests/unit/ups/ups-stepper-b304.test.tsx` |
 | **TC-B304-02-03** | 데이터 누락·Invalid Date 가드 | CANCELED/HELD 이력 없거나 Invalid Date면 시각 미표시(기존 TASK-B-301 가드 패턴) | `tests/unit/ups/ups-stepper-b304.test.tsx` |
 | **TC-B304-02-04** | 재전이 최근값 우선 | 같은 상태 재전이 이력 여러 건 시 `reverse().find()`로 최신만 표시 | `tests/unit/ups/ups-stepper-b304.test.tsx` |
+| **TC-B303-01** | 오더 이력 화이트리스트 필드 추출 | `ORDER_EDIT_LOG_CORE_FIELDS` 32필드 화이트리스트로 스냅샷 추출, estimated_cost/packages/origin_port_id/dest_port_id 명시 제외 + 빈 필드 null 정규화(Issue #1125, TASK-B-303) | `tests/unit/orders/order-edit-log-b303.test.tsx` |
+| **TC-B303-02** | 이력 스냅샷 상수 무결성 | `ORDER_EDIT_LOG_CORE_FIELDS`와 `ORDER_EDIT_LOG_FIELD_LABELS` 라벨 키 1:1 일치(Issue #1125) | `tests/unit/orders/order-edit-log-b303.test.tsx` |
+| **TC-B303-03** | 이력 패널 빈 이력 미렌더 | UPS 오더 상세 이력 0건 시 패널 자체 미출력(Issue #1125) | `tests/unit/orders/order-edit-log-b303.test.tsx` |
+| **TC-B303-04** | CREATE 이력 등록값 전체 표시 | action=CREATE 시 new_data 화이트리스트 값 전체 표시 + 편집자/시간 표시(Issue #1125) | `tests/unit/orders/order-edit-log-b303.test.tsx` |
+| **TC-B303-05** | UPDATE 이력 변경 필드 diff 표시 | action=UPDATE 시 변경 필드만 `old(취소선)→new(굵게)` + 변경 없는 필드 미표시(Issue #1125) | `tests/unit/orders/order-edit-log-b303.test.tsx` |
+| **TC-B303-06** | 이력 패널 최신순 정렬 | edited_at desc로 최신 이력 먼저 표시(Issue #1125) | `tests/unit/orders/order-edit-log-b303.test.tsx` |
+| **TC-B303-07** | createOrder CREATE 이력 기록 | 신규 오더 등록 시 zen_order_edit_log에 action=CREATE + order_status_at_edit=REGISTERED + old_data=null 기록(Issue #1125) | `tests/unit/orders/order-edit-log-b303.test.tsx` |
+| **TC-B303-08** | updateOrder UPDATE 기록 정확성 | 수정 시 old/new 스냅샷에 정확한 전/후 값 + estimated_cost/packages 미포함(화이트리스트 제외, 실 DB) | `tests/integration/iss1125-order-edit-log.test.ts` |
+| **TC-B303-09** | 무변경 재제출 로그 미증가 | hasChanges 가드 — 화이트리스트 필드 변화 없으면 UPDATE 기록 안 함(실 DB) | `tests/integration/iss1125-order-edit-log.test.ts` |
+| **TC-B303-10** | packages만 변경 시 로그 영향 없음 | 패키지 변경은 화이트리스트 밖이라 UPDATE 미기록(실 DB) | `tests/integration/iss1125-order-edit-log.test.ts` |
+| **TC-B303-11** | WAREHOUSED+UPS 부분수정 UPDATE 기록 | 실측(measured_at) 패키지 부분수정 시 기존 감사 로직 유지 + action=UPDATE 기록(실 DB) | `tests/integration/iss1125-order-edit-log.test.ts` |
+| **TC-B303-12** | createOrder 실DB CREATE 기록 | 실제 RPC 기반 신규 오더 생성 시 edit_log에 CREATE + new_data 스냅샷 + REGISTERED 기록(실 DB) | `tests/integration/iss1125-order-edit-log.test.ts` |
 
 ### 10. UPS 일마감 (Phase 7 SPR-05 Daily Close)
 | ID | 테스트 항목 | 목적 | 파일 경로 |
