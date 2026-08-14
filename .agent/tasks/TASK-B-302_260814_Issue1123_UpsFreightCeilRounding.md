@@ -7,7 +7,7 @@
 | **우선순위** | P1 (금액 산정 로직 — 실 청구/정산에 영향) |
 | **GitHub Issue** | [#1123](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1123) |
 | **관련 결함** | 없음(JSJung 정책 지시) |
-| **상태** | 🔔 (완료 보고 — 검토 요청) |
+| **상태** | ✅ 완료(단, R-10 실브라우저 검증은 JSJung 대기 중) |
 
 ## 배경 (JSJung 확정 정책)
 
@@ -194,7 +194,16 @@ Dave 환경 브라우저 부재 — 병합 후 JSJung 실브라우저 검증 요
 
 ## [Jaison 최종 검토]
 
-_(PR 제출 후 작성 예정)_
+- 격리 워크트리(`/tmp/review-pr1124`)에서 `origin/TeamB_Dev` 병합 시 `ACTIVE_TASK.md` 충돌(TASK-B-303 등록 시점 겹침) — Dave PR 행 + TASK-B-303 신규 행 모두 보존하는 방식으로 직접 해소, PR 소스 브랜치에 재푸시 후 CI 재통과 확인
+- 코드 diff를 설계 7건과 1:1 대조 확인 — 전부 설계대로 정확히 구현. **설계 이상의 보강 2건 확인**: ①`ceilByCurrency`의 IEEE float epsilon 흡수(`18.51*100=1851.0000000000002` 같은 부동소수점 오차로 이미 정수/센트인 값이 올림 때문에 +1 되는 것 방지) ②`totalSellingPrice`에 `ceilByCurrency` 재적용으로 float 덧셈 드리프트(`100.01+18.51=118.52000000000001`) 정규화 — 둘 다 "라인 항목 합=표시 합계" 정합성을 해치지 않으면서 실제로 필요한 보강이었음을 직접 검증
+- 신규 테스트 `task-b302-freight-ceil.test.ts`(TC-CEIL-01~07) 직접 실행 — ZEN-2026-000073 실제 파라미터 재현 포함 70/70 PASS
+- **독립 되돌리기 검증 2건 직접 재현**: ①`baseSellingPrice` ceil 제거 → USD 케이스(TC-CEIL-05)만 정확히 FAIL(KRW는 이미 정수라 무영향, 재현 논리 타당) ②`buildBreakdown`의 `fuelSellAmt` 재사용을 원래 재계산 방식으로 되돌림 → TC-CEIL-03/03r 정확히 FAIL, divergence 값(166009.25 vs 166010)까지 예측과 정확히 일치. 각각 복원 후 70/70 재확인
+- 전체 회귀 `npm run test:regression` 직접 실행 — `196/196` test files·`1353/1353` tests ALL PASS(PR 자체 보고치 194/194·1343/1343와 파일수 차이는 병합한 최신 TeamB_Dev 기준 재측정 때문, 실패 0건은 동일)
+- `npm run build` SUCCESS 직접 확인
+- `gh pr checks 1124` — 병합 충돌 해소 재푸시 후 Regression Tests·Task File Check·Type Check 3항목 전부 pass
+- **DB 직접 조회**: ZEN-2026-000073의 `zen_orders.estimated_cost`·`zen_order_rate_snapshots.applied_unit_price` 둘 다 `526392.25` 그대로 — 소급 미적용 정책 정확히 준수 확인
+- PR#1124 승인·머지(TeamB_Dev `a0296eeb`), Issue #1123 종결
+- **R-10 미해결**: Dave·Jaison 둘 다 브라우저 환경 없어 신규 UPS 오더 등록 화면에서 실제 정수 표시가 보이는지 직접 확인 못함 — JSJung 라이브 확인 후 최종 종결 여부 판단 필요
 
 ## [발견 이슈]
 
