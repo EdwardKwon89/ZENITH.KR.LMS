@@ -1098,7 +1098,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                               />
                             </div>
                             <div>
-                              <p className="text-slate-400 font-bold uppercase tracking-tighter mb-1">{t('shipper_contact')} (Phone)</p>
+                              <p className="text-slate-400 font-bold uppercase tracking-tighter mb-1">{t('shipper_contact')} (Phone){transportMode === 'UPS' && <span className="text-rose-500"> *</span>}</p>
                               <ZenInput 
                                 placeholder="010-XXXX-XXXX"
                                 disabled={shipperNameMode === 'auto'}
@@ -1238,6 +1238,11 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                               zipcode: watch('recipient_zipcode') || '',
                             }}
                             required
+                            // TASK-B-301 (Issue #1121): UPS 모드에서만 하위 필드 필수표시 (SHXK API 요구사항)
+                            requiredCountry={transportMode === 'UPS'}
+                            requiredZipcode={transportMode === 'UPS'}
+                            requiredCity={transportMode === 'UPS'}
+                            requiredStateProvince={watch('recipient_country_code') === 'CN'}
                           />
                           {watch('recipient_country_code') === 'CN' && (
                             <p className="text-[10px] text-amber-600 mt-1.5">※ 중국 배송은 UPS Zone이 지역(성/직할시)에 따라 달라지므로 시/도를 선택해야 합니다.</p>

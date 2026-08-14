@@ -121,6 +121,11 @@
 | **TC-B300-04-01** | UPS 운임 카드 청구중량(Billing Weight) 표시 | `platform.breakdown.billingWeightKg`(5)와 chargeable(4.8) 구분 표시 + 미존재 시 billable 폴백(TASK-B-300 ④) | `tests/unit/components/ups-order-breakdown-card.test.tsx` |
 | **TC-B300-02-01** | ups-detail 배송 기본 정보 카드 확장 | 화주/수하인 연락처·이메일·주소(detail 이어붙임) 표시, 값 없으면 항목 숨김(TASK-B-300 ②) | `tests/unit/orders/ups-detail-b300.test.tsx` |
 | **TC-B300-03-01** | ups-detail Settlement Preview 제거 | ups-detail 렌더 시 "Settlement Preview" 미출현 + 일반 오더 상세 화면에는 여전히 표시(회귀 방지, TASK-B-300 ③) | `tests/unit/orders/ups-detail-b300.test.tsx`, `tests/unit/orders/order-detail-settlement-b300.test.tsx` |
+| **TC-B301-01-01** | ups-detail 스테퍼 단계별 전이 시각 표시 | `order_status_history` 기반 각 도달 스테이지에 `toLocaleString('ko-KR')` 시각 표시 + 같은 상태 재방문 시 최신 시각 우선 + 미도달 단계 미표시(TASK-B-301 ①) | `tests/unit/orders/ups-detail-b301.test.tsx` |
+| **TC-B301-02-01** | ups-detail "목록보기" 버튼 | `router.back()`으로 진입 직전 목록 화면 복귀 + 기존 "일반 오더 상세 보기로 이동" Link 제거(TASK-B-301 ②) | `tests/unit/orders/ups-detail-b301.test.tsx` |
+| **TC-B301-03-01** | 오더 등록/수정 폼 UPS 필수표시 | UPS 모드에서 화주 연락처·수하인 국가/우편번호/시·군·구 라벨 `*` + 비UPS 미표시(조건부 정확성, TASK-B-301 ③) | `tests/unit/orders/order-registration-form-b301.test.tsx` |
+| **TC-B301-03-02** | AddressInput CN 시/도 필수표시 | `recipient_country_code='CN'`일 때만 시/도 라벨 `*` (DEF-B-044, TASK-B-301 ③) + AIR+CN 시 국가/우편번호/도시는 미표시 | `tests/unit/orders/order-registration-form-b301.test.tsx` |
+| **TC-B301-03-03** | AddressInput 새 prop 기본값 false 회귀 | `requiredCountry` 등 신규 prop 미전달 시 기존 소비처(대리점 화주 등록 등) 동작 불변(기본값 false) | `tests/unit/orders/order-registration-form-b301.test.tsx`, `tests/unit/orders/iss1104-addressinput-toggle.test.tsx` |
 
 ### 10. UPS 일마감 (Phase 7 SPR-05 Daily Close)
 | ID | 테스트 항목 | 목적 | 파일 경로 |

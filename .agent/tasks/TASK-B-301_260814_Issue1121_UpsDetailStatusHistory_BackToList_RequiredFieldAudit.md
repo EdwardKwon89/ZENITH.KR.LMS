@@ -7,7 +7,7 @@
 | **우선순위** | P2 |
 | **GitHub Issue** | [#1121](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1121) |
 | **관련 결함** | 없음(JSJung 직접 요청 3건) |
-| **상태** | 🔄 착수 |
+| **상태** | ✅ 완료 |
 
 ## 배경
 
@@ -148,11 +148,28 @@ export default function UpsDetailBackToListButton() {
 
 ## [작업 결과]
 
-_(Baker 작성 예정)_
+**커밋**: `f60f3a99` — `[Baker] fix: TASK-B-301 UPS 상세 상태이력 시각+목록보기 버튼+오더 폼 필수표시 감사 (Issue #1121)`
+
+| # | 변경 | 검증 |
+|:--|:-----|:-----|
+| ① | `ups-detail/page.tsx` — `order_status_history` 인라인 쿼리 추가(`costs`/`invoice`와 동일 패턴, 별도 action 불필요). `UpsOrderStatusStepper.tsx` — `statusHistory?` prop 추가, 각 스테이지에서 `next_status` 매칭 이력 중 가장 최근(`reverse().find`) 시각을 스텝 라벨 아래 `text-[9px] text-slate-400`로 표시. 미도달 단계는 미표시, `Invalid Date` 가드 포함 | `ups-detail-b301.test.tsx` 2건(3단계 시각 표시+재방문 최신 우선·빈 이력 미표시) PASS + 되돌리기 1건 FAIL 재현 |
+| ② | `UpsDetailBackToListButton.tsx` 신설(client, `router.back()`). ups-detail 헤더의 고정 `Link`(일반 오더 상세) → "목록보기" 버튼으로 교체. `Link`/`ArrowLeft` import 정리(`ArrowLeft`는 page.tsx 유일 사용처 확인 후 제거, `Truck`/`FileText`/`User` 유지) | `ups-detail-b301.test.tsx` 2건(목록보기 노출+클릭 시 `router.back` 호출·기존 Link 제거) PASS + 되돌리기 2건 FAIL 재현. 기존 `ups-detail-b300.test.tsx`에 신규 컴포넌트 mock 추가 |
+| ③ | `AddressInput.tsx` — `requiredCountry`/`requiredZipcode`/`requiredCity`/`requiredStateProvince` prop 추가(기본값 false). 각 대응 라벨(KR/비KR 분기 전부)에 조건부 `*` 표시. `OrderRegistrationForm.tsx` — ①화주 연락처(Phone) `transportMode==='UPS'`일 때만 `*` ②recipient AddressInput에 `requiredCountry/Zipcode/City={transportMode==='UPS'}`, `requiredStateProvince={watch('recipient_country_code')==='CN'}` ③기존 CN 안내 문구 유지 | `order-registration-form-b301.test.tsx` 6건(UPS 화주 연락처·AIR 미표시·UPS 국가/우편번호/도시·CN 시/도·AIR+CN 시/도만·AddressInput 실제 렌더) PASS + 되돌리기 3건 FAIL 재현 |
+| 회귀 | — | `npm run test:regression` **1340/1340 PASS** (195 files, 기존 1330+신규 10) · `npm run build` SUCCESS |
+| R-10 | admin 로그인 실UI — ①ups-detail(ZEN-2026-000073) 스테퍼 시각 3개 표시(REGISTERED/WAREHOUSED 최신/PACKED) + "목록보기" 클릭 시 `/ko/orders` 복귀 ②`/ko/orders/new` UPS 모드 화주 연락처·국가/우편번호/시·군·구 `*` + CN 시/도 `*` + AIR 전환 시 해제 ③AGENCY 계정으로 대리점 화주 등록 화면 회귀 — 신규 `*` 없음. 스크린샷 `scratch/task-b-301-r10/` 8장 | **3 passed** |
+| 회귀 맵 | `LIVE_REGRESSION_TEST_MAP.md` 섹션 9 — `TC-B301-01-01`·`TC-B301-02-01`·`TC-B301-03-01`·`TC-B301-03-02`·`TC-B301-03-03` 5행 등재 (R-09 DoD) | — |
 
 ## [Jaison 최종 검토]
 
-_(PR 제출 후 작성 예정)_
+- 격리 워크트리(`/tmp/review-pr1122`)에서 `origin/TeamB_Dev` 병합 시 `ACTIVE_TASK.md` 충돌(TASK-B-302 등록 시점 겹침) — Baker PR 행 + TASK-B-302 신규 행 모두 보존하는 방식으로 직접 해소, PR 소스 브랜치에 재푸시 후 CI 재통과 확인
+- 코드 diff를 3건 설계와 1:1 대조 확인 — 전부 설계대로 정확히 구현됨
+- 신규 테스트 2개 파일 직접 실행 — 14/14 PASS(신규 10 + 기존 회귀 4), AddressInput mock 없이 실제 컴포넌트 렌더링
+- **독립 되돌리기 검증 3건 전부 수행**: ①`reverse()` 제거 → 재방문 케이스 1건 FAIL 재현 ②`UpsDetailBackToListButton` 원복 → 2건 FAIL 재현 ③required prop 4종 + `shipper_contact_phone` 조건부 표시 제거 → 4건 FAIL 재현("부재 확인" 2건은 되돌려도 참이라 정상적으로 계속 PASS, 검증 논리 타당). 각각 복원 후 재확인
+- 전체 회귀 `npm run test:regression` 직접 실행 — `195/195` test files·`1340/1340` tests ALL PASS(PR 주장과 정확히 일치)
+- `npm run build` SUCCESS 직접 확인
+- `gh pr checks 1122` — 병합 충돌 해소 재푸시 후 Regression Tests·Task File Check·Type Check 3항목 전부 pass
+- R-10 스크린샷 8장(`scratch/task-b-301-r10/`, Baker 로컬 워크트리) 직접 열람 — ZEN-2026-000073 재방문 WAREHOUSED 최신시각 표시, "목록보기" 텍스트, UPS 모드 필수표시(`*`) 전부 확인. **Agency 화주 등록 화면(AddressInput 다른 소비처) 회귀 스크린샷도 확인 — 새 prop 기본값 false라 `*` 미노출, 영향 없음**
+- PR#1122 승인·머지(TeamB_Dev `4cdb1a23`), Issue #1121 종결
 
 ## [발견 이슈]
 
