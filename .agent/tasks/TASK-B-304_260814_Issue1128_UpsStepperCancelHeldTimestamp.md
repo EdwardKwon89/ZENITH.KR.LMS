@@ -7,7 +7,7 @@
 | **우선순위** | P3 |
 | **GitHub Issue** | [#1128](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1128) |
 | **관련 결함** | 없음(JSJung 직접 요청) |
-| **상태** | 🔄 착수 |
+| **상태** | 🔔 (완료 보고 — 검토 요청) |
 
 ## 배경
 
@@ -122,7 +122,60 @@ if (exceptionCreatedAt) {
 
 ## [작업 결과]
 
-_(Dave 작성 예정)_
+### 커밋
+
+| 커밋 | 내용 |
+|:-----|:-----|
+| `baa9c1f5` | `[Dave] feat: TASK-B-304 UPS 스테퍼 취소/보류 시각 표출 + 단계별 시각 위치 바 아래로 이동 (Issue #1128)` |
+
+### ① 정상 스텝 시각 표시 위치 — 바 아래로 이동
+
+`UpsOrderStatusStepper.tsx` 단일 파일. 설계 확정대로 **순수 렌더링 순서만 이동**:
+- "Step Label" → **"Step Indicator Dot/Line" 바 → `stageTime`** 순서로 변경 (기존은 시각이 바 위)
+- `stageCreatedAt`/`stageTime` 계산 로직(L173-179)은 무변경
+
+### ② CANCELED/HELD 배너에 전이 시각 추가
+
+- **신규 계산**: `exceptionCreatedAt = [...(statusHistory ?? [])].reverse().find((h) => h.next_status === currentStatus)?.created_at` → `toLocaleString('ko-KR')`, Invalid Date 가드(빈 문자열)
+- **CANCELED 배너**: `취소 일시: {exceptionTime}` — `text-rose-500 dark:text-rose-400` (배너 rose 계열과 통일, 정상 시각 text-slate-400과 구분)
+- **HELD 배너**: `보류 일시: {exceptionTime}` — `text-amber-600 dark:text-amber-400` (동일 패턴, amber 계열)
+- 7단계 스테퍼 숨김 구조(`!isCanceled`)는 유지 — CANCELED만 스테퍼 숨김, HELD는 기존대로 유지 (기존 동작 무변경)
+
+### 회귀 테스트 (7건 신설, 실제 컴포넌트 렌더링 — mock 금지)
+
+`tests/unit/ups/ups-stepper-b304.test.tsx` (UpsOrderStatusStepper 직접 렌더)
+
+| TC | 내용 |
+|:---|:-----|
+| TC-B304-01-01 | 단계별 시각이 Step Indicator Dot/Line 바 **아래**에 렌더 (DOM 순서 검증) |
+| TC-B304-01-02 | 시각 있는 모든 스텝(IN_TRANSIT 포함) indicator 바 아래 확인 |
+| TC-B304-02-01 | CANCELED 배너 "취소 일시" rose 계열 표시 + 7단계 스테퍼 숨김 유지 |
+| TC-B304-02-02 | HELD 배너 "보류 일시" amber 계열 표시 + 7단계 스테퍼 유지 |
+| TC-B304-02-03 | statusHistory에 CANCELED/HELD 이력 없으면 시각 미표시 (데이터 누락 가드) |
+| TC-B304-02-04 | 같은 상태 재전이 이력 여러 건 → 가장 최근 것만 표시 (reverse().find()) |
+| TC-B304-02-05 | Invalid Date created_at → 시각 미표시 (TASK-B-301 가드 패턴 재사용) |
+
+### 독립 되돌리기 검증 (필수)
+
+| 원복 대상 | 결과 |
+|:----------|:-----|
+| 시각 위치 이동 되돌림(바 위로 복원) | **TC-B304-01-01/01-02 2건 정확히 FAIL** (DOM 순서 역전) → 복원 후 PASS |
+| CANCELED/HELD 배너 시각 표시 제거 | **TC-B304-02-01/02-02/02-04 3건 정확히 FAIL** → 복원 후 PASS |
+
+### 검증
+
+- `npm run test:regression`: **1360/1360 PASS** (197파일, 신규 +7 — 196→197파일)
+- `npm run build`: SUCCESS
+- 기존 스테퍼 관련 테스트(`ups-detail-b301`/`ups-detail-b300`) 포함 회귀 없음
+- `LIVE_REGRESSION_TEST_MAP.md`에 TC-B304-01-01~02-04 6행 추가 (R-09)
+
+### 환경 참고 (내 변경 아님 — DB 상태 이슈)
+
+- 최초 회귀 실행 시 `iss1070-ups-warehoused-partial-edit.test.ts` TC-284-05(감사 로그) 1건 실패 — 로컬 DB 잔여 상태 문제(zen_order_edit_log 잔류 데이터)로 확인. `supabase db reset --local` 후 **해당 테스트 6/6 PASS** 재확인. 본 변경은 스테퍼 UI 컴포넌트 단일 파일이라 `updateOrder` 감사 로그 경로와 무관.
+
+### (R-10) 라이브 브라우저 검증
+
+Dave 환경 브라우저 부재 — 병합 후 JSJung 실브라우저 검증 요청: ①CANCELED 오더 배너에 취소 일시 rose 표시 ②정상 UPS 오더 단계별 시각이 바 아래 위치 확인(레이아웃). (자동화 회귀 테스트로 DOM 순서·시각 표시 검증 완료)
 
 ## [Jaison 최종 검토]
 
