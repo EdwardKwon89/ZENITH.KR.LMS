@@ -1,6 +1,6 @@
 # 309. AWS 이관(Migration) 설계 초안
 
-> **문서번호:** Ds-11 계열 (R-11 API/설계 우선 원칙 적용) | **버전:** v0.8 (초안 — 미승인)
+> **문서번호:** Ds-11 계열 (R-11 API/설계 우선 원칙 적용) | **버전:** v0.9 (초안 — 미승인)
 > **작성일:** 2026-08-07 | **작성자:** Aiden (Claude, ZEN_CEO)
 > **상태:** ▶️ **재개, 서버 상태 확인 대기** (2026-08-14, Edward 지시) — AWS 접속 정보 수령, DB 전환 최종 결정은 SSH 서버 실사 후로 보류(§8). §4에 ④ "Vercel만 대체" 옵션 추가 검토 중
 > **v0.2 변경**: Edward 피드백("실제 배포 준비가 빠져 있다") 반영 — §6 실제 배포 준비 체크리스트 신설, Dockerfile/next.config.ts(`output: 'standalone'`)/package.json(`engines`) 실물 산출물 완료
@@ -10,6 +10,7 @@
 > **v0.6 변경**: **재개** — AWS 접속 정보 수령(2026-08-14). §8 신설 — 실제 수령한 정보의 형태가 §7 요청과 달라(IAM Access Key 대신 콘솔 로그인+SSH+MySQL 접속정보) 추가 확인·자료 필요 사항 기록
 > **v0.7 변경**: §4에 **④ "Vercel만 대체, Supabase Cloud 그대로" 옵션** 추가(§4.3) — Edward 질의("Supabase를 MySQL로 전환해도 되는가" → 비권장 확인 후 "AWS가 Vercel만 대체하고 기존 Supabase는 유지할 수도 있지 않은가") 반영. 코드/DB 리스크 0인 가장 단순한 경로로, 서버 상태 확인과 무관하게 즉시 착수 가능
 > **v0.8 변경**: §4.4 신설 — 원격 Supabase 플랜/사용량 Management API 실측(조직 플랜 `free` 확인, DB 24MB/Storage 530KB/사용자 16명 — 용량은 여유 있으나 자동 일시정지·PITR 부재·공유 Micro 컴퓨트가 실질 리스크). §4.3에 "AWS 기지불 계약 요인" 추가 — Edward 요청("Vercel의 무료/유료 제약처럼 Supabase도 조사 가능한가", "AWS는 이미 유료 계약")
+> **v0.9 변경**: §4.3 (b) 표에 **(b') AWS Amplify Hosting** 옵션 추가(오늘 세션 검토) — Vercel과 유사한 DX이나 vercel.json Cron 3개 재구현(EventBridge Scheduler)·src/middleware.ts Edge→Node.js 런타임 전환이 실제 작업으로 필요함을 코드 확인. 빌드 산출물(72MB)은 Amplify 220MB 상한 내 확인. 무료 티어 성격(12개월 한정 vs 영구)은 출처 상충 — 콘솔 확인 필요
 
 ---
 
@@ -122,6 +123,7 @@
 |---|---|---|
 | (a) 발견된 서버에 컨테이너 직접 실행 | SSH 접속만(`sntl.pem`) | 가장 빠름 — `docker run`으로 기존 Dockerfile 바로 배포. ECS/ALB/VPC 불필요. §8에서 조사 중인 서버 상태와 무관하게 즉시 착수 가능(MySQL 유무와 무관) |
 | (b) ECS Fargate(§3 확정안) | IAM Access Key 필요(§7) | 자동 스케일링·헬스체크·무중단 배포 등 정식 프로덕션 구성 |
+| (b') AWS Amplify Hosting (2026-08-14 신설 검토) | IAM Access Key 또는 콘솔 GitHub 연동(§7) | Vercel과 가장 유사한 DX(git push 자동배포·PR 프리뷰 배포), Fargate보다 운영 부담 적음. **단 코드 확인 결과 재작업 필요 지점 있음**: ①`vercel.json` Cron 3개(§2.1과 동일 이슈) — Amplify도 내장 스케줄러 없어 EventBridge Scheduler로 별도 구현 필요 ②`src/middleware.ts`가 인증가드·i18n·rate-limit을 처리하는 핵심 게이트인데 Amplify는 Edge API Routes 미지원(non-edge/Node.js 런타임 미들웨어만 지원) — Next.js 15의 Node.js 미들웨어 옵션으로 전환 후 실배포 검증 필요. 빌드 산출물은 `.next/standalone` 72MB로 Amplify의 220MB 상한 내 여유 있음(확인 완료). 무료 티어(월 빌드 1,000분·SSR 요청 50만 건 등)가 "12개월 신규계정 한정"인지 "영구"인지는 출처가 엇갈려 콘솔에서 직접 확인 필요 |
 
 **남는 질문**: 고객이 원래 "Vercel **및** Supabase"를 AWS로 옮겨달라고 했으므로(§1), ④는 이 요청의 절반만 충족한다. Supabase까지 옮기라고 한 실제 사유(비용 절감 / 데이터 소재지·규정준수 / 벤더 통합 / 단순히 "다 옮겨라") 확인 필요 — 사유에 따라 ④만으로 충분한지, 추후 ①②③ 중 하나로 DB까지 이관해야 하는지 갈림.
 
@@ -303,3 +305,4 @@ MySQL 접속 대상 IP가 Docker 브릿지 네트워크 게이트웨이 형태�
 | v0.6 | 2026-08-14 | Aiden (Claude) | **재개** — AWS 접속 정보 수령. §8 신설(수령 정보가 §7 요청과 형태 불일치, 기존 서버 가능성 발견, SSH 개인키·IAM Access Key 추가 필요, 읽기 전용 우선 원칙). §7 하위 절 번호 오류(8.1~8.4 → 7.1~7.4) 정정. Issue #995 `status:blocked` 해제 |
 | v0.7 | 2026-08-14 | Aiden (Claude) | §4.3 신설 — ④ "Vercel만 대체, Supabase Cloud 유지" 옵션 추가(코드/DB 리스크 0, 서버 상태와 무관하게 즉시 착수 가능). Issue #1112(MySQL vs PostgreSQL 결정 보류) 등록 |
 | v0.8 | 2026-08-14 | Aiden (Claude) | §4.4 신설 — 원격 Supabase 플랜/사용량 Management API 실측(조직 플랜 `free`, DB 24MB·Storage 530KB·사용자 16명). §4.3에 "AWS 기지불 계약 요인" 추가(Supabase Pro 업그레이드 vs AWS DB 이관 비교 필요) |
+| v0.9 | 2026-08-14 | Aiden (Claude) | §4.3 (b) 표에 (b') AWS Amplify Hosting 옵션 추가 — Vercel과 유사한 DX, 단 vercel.json Cron 3개 재구현(EventBridge Scheduler)과 src/middleware.ts Edge→Node.js 런타임 전환이 실작업으로 필요함을 코드 확인(Edge API Routes 미지원). 빌드 산출물(.next/standalone 72MB)은 Amplify 220MB 상한 내 확인. 무료 티어가 12개월 한정인지 영구인지는 출처 상충 — 콘솔 확인 필요 |
