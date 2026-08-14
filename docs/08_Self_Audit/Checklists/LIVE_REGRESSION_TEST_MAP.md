@@ -295,6 +295,8 @@
 | **TC-ERR-02** | 중대 에러 알림 연동 | `CRITICAL` 등급 에러 발생 시 관리자 인앱 알림 발송 검증 | `tests/unit/monitoring/error-log.test.ts` |
 | **TC-ERR-03** | 에러 로그 조회 보안 | 관리자 권한(`validateAdminAction`) 기반 로그 목록 접근 통제 확인 | `tests/unit/monitoring/error-log.test.ts` |
 | **TC-ERR-04** | 에러 조치 완료 처리 | `resolveErrorLog`를 통한 해결 상태(`resolved: true`) 업데이트 검증 | `tests/unit/monitoring/error-log.test.ts` |
+| **TC-REQID-01** | request-context ALS 전파 | `runWithRequestContext`의 async 경계 requestId 유지 검증 (TASK-1130) | `tests/unit/logging/request-context.test.ts` |
+| **TC-REQID-02** | request-context store 미주입 폴백 | 클라이언트 환경(store null)에서 no-op 동작 검증 | `tests/unit/logging/request-context.test.ts` |
 
 ### 22. 회원 등급 및 승급 (Member Grade)
 | ID | 테스트 항목 | 목적 | 파일 경로 |
