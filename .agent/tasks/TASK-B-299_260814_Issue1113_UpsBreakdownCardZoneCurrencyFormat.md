@@ -7,7 +7,7 @@
 | **우선순위** | P2 |
 | **GitHub Issue** | [#1113](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1113) |
 | **관련 결함** | [DEF-B-065](../defects/DEF-B-065_UpsOrderBreakdownCard_Zone고정값_통화쉼표미표시.md) |
-| **상태** | 🔔 보고 완료 |
+| **상태** | ✅ 완료 |
 
 ## 배경
 
@@ -75,10 +75,22 @@ const zoneId =
 
 ## [Jaison 최종 검토]
 
-_(PR 제출 후 작성 예정)_
+- 격리 워크트리(`/tmp/review-pr1114`)에서 `origin/TeamB_Dev` 병합 — 충돌 없음
+- 코드 diff를 DEF-B-065 설계와 1:1 대조 확인 — `zoneId` 경로 수정·하드코딩 `'Zone 5'` 제거·5개 지점 `toLocaleString` 전환 전부 설계대로 정확히 구현됨
+- 신규 테스트 `ups-order-breakdown-card.test.tsx` 직접 실행 — 6/6 PASS
+- **독립 되돌리기 검증**: ① `zoneId` 로직만 원복 → 신규 2건(Zone 7 표시·`-` 표시) 정확히 FAIL 재현 ② 쉼표 포맷만 원복(`toLocaleString`→`toFixed`) → 기존 KRW 테스트 1건 + 신규 쉼표 테스트 1건, 정확히 2건 FAIL 재현. 각각 복원 후 6/6 PASS 재확인
+- 전체 회귀 `npm run test:regression` 직접 실행 — `191/191` test files·`1318/1318` tests ALL PASS(PR 주장과 정확히 일치)
+- `npm run build` SUCCESS 직접 확인
+- `gh pr checks 1114` — Regression Tests·Task File Check·Type Check 3항목 전부 pass
+- R-10 스크린샷(`scratch/task-b-299-r10/01_ups-detail_zone7_currency.png`, Baker 로컬 워크트리)을 직접 열람 — ZEN-2026-000073 실제 화면에서 "Zone: Zone 7" 뱃지 정상 표시 확인. Playwright 스크립트(`scratch/task-b-299-r10.spec.ts`)도 실제 로그인+페이지이동+어서션 방식으로 작성되어 실제 실행 결과로 판단
+- PR#1114 승인·머지(TeamB_Dev `fe9d005d`), Issue #1113 종결
 
 ## [발견 이슈]
 
 _(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
+
+| DEF# | 제목 | 긴급도 | 상세 보고서 |
+|:----:|:-----|:------:|:-----------|
+| DEF-B-066 | UpsOrderBreakdownCard `productCode` 도 동일 패턴 하드코딩 폴백("UPS Express") 노출 | Medium | R-10 스크린샷 검토 중 Jaison 발견 — 별도 등록 예정 |
 
 없음
