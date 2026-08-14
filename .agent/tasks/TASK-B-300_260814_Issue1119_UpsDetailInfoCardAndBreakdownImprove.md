@@ -7,7 +7,7 @@
 | **우선순위** | P2 |
 | **GitHub Issue** | [#1119](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1119) |
 | **관련 결함** | [DEF-B-066](../defects/DEF-B-066_UpsOrderBreakdownCard_productCode_하드코딩폴백.md) |
-| **상태** | 🔔 보고 완료 |
+| **상태** | ✅ 완료 |
 
 ## [작업 결과]
 
@@ -25,7 +25,15 @@
 
 ## [Jaison 최종 검토]
 
-_(PR 제출 후 작성 예정)_
+- 격리 워크트리(`/tmp/review-pr1120`)에서 `origin/TeamB_Dev` 병합 — 충돌 없음
+- 코드 diff를 4건 설계와 1:1 대조 확인 — 전부 설계대로 정확히 구현됨
+- 신규/보강 테스트 3개 파일 직접 실행 — 18/18 PASS (mock 최소화, 실제 컴포넌트/서버 컴포넌트 렌더링)
+- **독립 되돌리기 검증 4건 전부 수행**: ①productCode 로직 원복 → 2건 FAIL 재현 ②billingWeightKg 로직 원복 → 구분표시 검증 1건 FAIL 재현 ③배송기본정보 확장 원복 → 2건 FAIL 재현(스코프 분리 확인 — 빈값숨김·Settlement 제거 테스트는 무영향) ④Settlement Preview 제거를 임시 원복(플레이스홀더 재삽입) → 미출현 검증 1건 FAIL 재현. 각각 복원 후 18/18 PASS 재확인
+- 전체 회귀 `npm run test:regression` 직접 실행 — `193/193` test files·`1330/1330` tests ALL PASS(PR 주장과 정확히 일치)
+- `npm run build` SUCCESS 직접 확인
+- `gh pr checks 1120` — Regression Tests·Task File Check·Type Check 3항목 전부 pass
+- R-10 스크린샷 2장(`scratch/task-b-300-r10/01_ups-detail_b300.png`, `02_order_detail_settlement_kept.png`, Baker 로컬 워크트리) 직접 열람 — 4건 전부 실제 화면에 정상 반영 확인 + 일반 오더 상세 화면 Settlement Preview 유지(③ 회귀 없음) 확인
+- PR#1120 승인·머지(TeamB_Dev `981cac32`), Issue #1119 종결
 
 ## 배경
 
