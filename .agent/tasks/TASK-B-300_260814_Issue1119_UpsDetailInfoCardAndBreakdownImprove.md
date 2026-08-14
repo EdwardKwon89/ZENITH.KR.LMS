@@ -7,7 +7,25 @@
 | **우선순위** | P2 |
 | **GitHub Issue** | [#1119](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1119) |
 | **관련 결함** | [DEF-B-066](../defects/DEF-B-066_UpsOrderBreakdownCard_productCode_하드코딩폴백.md) |
-| **상태** | 🔄 착수 |
+| **상태** | 🔔 보고 완료 |
+
+## [작업 결과]
+
+**커밋**: `c9c5b47b` — `[Baker] fix: TASK-B-300 UPS 오더 상세 화면 4건 개선 — productCode 폴백/배송정보 확장/Settlement 제거/청구중량 (Issue #1119 / DEF-B-066)`
+
+| # | 변경 | 검증 |
+|:--|:-----|:-----|
+| ① | `UpsOrderBreakdownCard.tsx` — productCode 하드코딩 `'UPS Express'` 폴백 제거. `cargoDetails.product_code` → `platform.breakdown.product.product_name` → `product_code` → `snapshotMeta.productCode` → `'-'` 순으로 참조 (DEF-B-066) | 단위 테스트 4건(상품명 표시/`-` 폴백/cargoDetails 우선/되돌리기) PASS + 되돌리기 검증 2건 FAIL 재현 |
+| ② | `ups-detail/page.tsx` — 배송 기본 정보 카드 확장. 화주 연락처(`shipper_contact_phone`)·이메일(`shipper_contact_email`)·주소(`shipper_address`+`_detail` 이어붙임), 수하인 연락처(`recipient_contact ?? recipient_phone`)·이메일(`recipient_email`) 추가. 값 없으면 항목 자체 숨김 | `ups-detail-b300.test.tsx` 3건(값 표시/phone 폴백/값 없음 숨김) PASS + 되돌리기 2건 FAIL 재현 |
+| ③ | `ups-detail/page.tsx` — Settlement Preview(`OrderFinanceSummary`) JSX·import 제거, 죽은 쿼리 `incidentFees` 제거. `costs`/`linkedInvoiceId`/`invoice`는 유지(`ciData.invoice_no` 사용). 일반 오더 상세 화면은 미변경 | `ups-detail-b300.test.tsx` 미출현 검증 + `order-detail-settlement-b300.test.tsx` 일반 화면 유지 검증 PASS + 되돌리기 4건 FAIL 재현 |
+| ④ | `UpsOrderBreakdownCard.tsx` — Weight Grid 3→4칸. "청구중량 (Billing Weight)"=`platform.breakdown.billingWeightKg`(폴백 `billableWeight`) 추가. 기존 3번째 칸 라벨 "과금 기준 중량 (Chargeable)"로 재명명(계산 유지) | 단위 테스트 2건(ZEN-2026-000073 5vs4.8 구분/폴백) PASS + 되돌리기 2건 FAIL 재현 |
+| 회귀 | — | `npm run test:regression` **1330/1330 PASS** (193 files) · `npm run build` SUCCESS |
+| R-10 | ZEN-2026-000073 실UI — ①상품명 뱃지 "UPS WorldWide Express Saver (비서류)" 표시+`UPS Express` 부재 ②"연락처: 010-1234-5678"·"+8639383020288"·이메일x2·주소 2건 표시 ③"Settlement Preview" 부재 ④"청구중량 5.00 kg" vs "과금 기준 4.80 kg" 구분 ⑤일반 오더 상세 화면 "Settlement Preview" 유지 — 스크린샷 `scratch/task-b-300-r10/01_ups-detail_b300.png`·`02_order_detail_settlement_kept.png` | **1 passed** |
+| 회귀 맵 | `LIVE_REGRESSION_TEST_MAP.md` 섹션 9 — `TC-DEF-B066-01`·`TC-B300-04-01`·`TC-B300-02-01`·`TC-B300-03-01` 4행 등재 (R-09 DoD) | — |
+
+## [Jaison 최종 검토]
+
+_(PR 제출 후 작성 예정)_
 
 ## 배경
 
@@ -91,14 +109,6 @@ const billingWeightKg = Number(snapshotMeta?.platform?.breakdown?.billingWeightK
 - Settlement Preview 섹션이 화면에서 사라짐
 - 청구중량 항목이 새로 표시되고 기존 항목과 값이 다름(반올림 차이가 있는 오더 기준)
 - **추가로 일반 오더 상세 화면**(`orders/[orderId]`)에서 Settlement Preview(구 OrderFinanceSummary)가 여전히 정상 표시되는지도 스크린샷으로 확인(③ 회귀 방지 증적)
-
-## [작업 결과]
-
-_(Baker 작성 예정)_
-
-## [Jaison 최종 검토]
-
-_(PR 제출 후 작성 예정)_
 
 ## [발견 이슈]
 
