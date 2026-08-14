@@ -7,7 +7,7 @@
 | **우선순위** | P2 |
 | **GitHub Issue** | [#1125](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1125) |
 | **관련 결함** | 없음(JSJung 신규 기능 요청) |
-| **상태** | 🔄 착수 |
+| **상태** | ✅ 완료 |
 
 ## 배경
 
@@ -198,7 +198,15 @@ export async function getOrderEditHistory(orderId: string) {
 
 ## [Jaison 최종 검토]
 
-_(PR 제출 후 작성 예정)_
+- 격리 워크트리(`/tmp/review-pr1127`)에서 `origin/TeamB_Dev` 병합 시 `ACTIVE_TASK.md` 충돌(TASK-B-304 등록 시점 겹침) — Baker PR 행 + TASK-B-304 신규 행 모두 보존하는 방식으로 직접 해소, PR 소스 브랜치에 재푸시 후 CI 재통과 확인
+- 코드 diff를 설계 4건과 1:1 대조 확인 — 마이그레이션·화이트리스트 32필드·createOrder/updateOrder 로깅(기존 WAREHOUSED+UPS 한정 로직 전면 대체, 이중기록 없음)·UpsOrderEditHistoryPanel(diff-only) 전부 설계대로 정확히 구현
+- **마이그레이션 fresh reset 검증**: `npx supabase db reset --yes` 직접 실행 후 `zen_order_edit_log` 스키마 확인 — `action`(NOT NULL, no default)·`old_data`·`new_data` 정확히 추가, 기존 RLS 정책 유지 확인
+- 신규 테스트 직접 실행 — unit 7/7, integration(실 DB) 5/5 ALL PASS
+- **독립 되돌리기 검증 2건**: ①`hasChanges` 가드 무력화 → TC-B303-09·10 정확히 FAIL 재현 ②패널 diff-only 필터 제거 → TC-B303-05 정확히 FAIL 재현. 각각 복원 후 재확인
+- fresh reset 직후 `npm run test:regression` 직접 실행 — `198/198`·`1365/1365` ALL PASS
+- `npm run build` SUCCESS 직접 확인
+- **CI 조사**: 최초 `gh pr checks`에서 Regression Tests fail — 원인 파악 전 머지 보류하고 조사. 실패 지점은 이 PR과 무관한 기존 파일(`iss1102-shipper-info-ui-simplify.test.tsx`, TASK-B-296)의 `waitFor` 타임아웃 1건이었고, 해당 테스트가 의존하는 `createOrder`는 완전히 mock 처리되어 이번 PR의 실제 구현과 무관함을 확인 + 로컬 fresh-reset 전체 회귀에서는 해당 파일 포함 198/198 전부 통과 — CI 환경 일시적 타이밍 이슈로 판단, `gh run rerun --failed`로 재실행해 3항목 전부 pass 확인 후 머지
+- PR#1127 승인·머지(TeamB_Dev `a35f18a5`), Issue #1125 종결
 
 ## [발견 이슈]
 
