@@ -7,7 +7,7 @@
 | **우선순위** | P1 (금액 산정 로직 — 실 청구/정산에 영향) |
 | **GitHub Issue** | [#1123](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1123) |
 | **관련 결함** | 없음(JSJung 정책 지시) |
-| **상태** | 🔄 착수 |
+| **상태** | 🔔 (완료 보고 — 검토 요청) |
 
 ## 배경 (JSJung 확정 정책)
 
@@ -110,7 +110,87 @@ agencySellingPrice: ceilByCurrency(discountedBase + passthroughTotal + agencyCha
 
 ## [작업 결과]
 
-_(Dave 작성 예정)_
+### 커밋
+
+| 커밋 | 내용 |
+|:-----|:-----|
+| `a9c4f39b` | `[Dave] feat: TASK-B-302 UPS 운임 전체 올림(Ceiling) 정책 — ceilByCurrency 유틸 + 계산 로직·표시 레이어 적용 (Issue #1123)` |
+
+### ① 공용 올림 유틸 — `pricing-engine.ts` `ceilByCurrency()`
+
+- KRW는 정수(원) 단위, 그 외(USD 등)는 소수점 2자리(센트) 단위 올림.
+- **설계 보강(발견)**: 순수 `Math.ceil(x*100)/100`은 IEEE float 드리프트(예: `18.51*100 = 1851.0000000000002`, `100.01+18.51 = 118.52000000000001`)로 이미 정수/센트인 값이 올림에 의해 +1 되는 오류 발생. **epsilon(1e-9·scale) 내 오차는 가장 가까운 단위값으로 정규화**해 흡수 — 테스트로 검증(TC-CEIL-01c: KRW `355100`→`355100`, USD `10.01`→`10.01`).
+
+### ② `computeUpsFreight()` — 라인 항목 개별 올림 후 합산
+
+- `currency` 결정을 함수 맨 앞으로 이동 (기존 return 직전에서만 결정 → 계산 각 단계에서 사용)
+- `baseSellingPrice`: 4개 분기(FREIGHT ≤70/초과, EXPRESS·SAVER ≤20/초과) 공통 지점에서 올림
+- `fuelSellAmt = ceilByCurrency(baseSellingPrice * fuelRate, currency)` (이미 올림된 base 기준)
+- `applyOtherCharges()`: 각 charge별 `base_s + fuel_s` 개별 올림 후 `sellingTotal` 합산 — 화면 개별 항목 합 = 표시 합계 항상 일치. 원가(costTotal/base_c/fuel_c)는 범위 밖 그대로.
+- `applySurgeFee()`: `sellingAmount = ceilByCurrency(base + base*fuelRate, currency)`. costAmount는 범위 밖.
+- `totalSellingPrice`: 개별 올림값 단순 합 + **통화별 올림 한 번 더 적용** — KRW는 정수라 identity(영향 없음), USD는 float 드리프트를 센트 단위로 정규화(설계 보강).
+
+### ③ `buildBreakdown()` — 유류할증 중복 재계산 제거 (정합성 버그 예방)
+
+- 시그니처에 `fuelSellAmt: number` 파라미터 추가, 호출부에서 전달받아 `fuelSurchargeSellingAmount`에 그대로 사용 — 본문 재계산(`baseSellingPrice * fuelRate`) 제거.
+- 되돌리기 검증: 재계산 방식 복원 시 `result.fuelSurchargeSellingAmount(166010)` vs `breakdown(166009.25)` divergence → **TC-CEIL-03/03r 정확히 FAIL** 확인 후 복원.
+
+### ④ `computeAgencyFreight()` — 대리점 단계
+
+- `AgencyFreightInput`에 `currency: string` 필드 추가 (호출부 `freight.ts`에서 `platform.currency` 전달)
+- 기존 `Math.round(x*100)/100` 3곳(L29/L39/L40) → `ceilByCurrency(x, input.currency)` 교체
+
+### ⑤ `computeShipperFreight()` — 화주 단계
+
+- 시그니처에 `currency: string = 'KRW'` 파라미터 추가 (기존 테스트 하위호환 위해 기본값 유지, 호출부에서 `platform.currency` 전달)
+- 기존 `Math.round(x*100)/100` 2곳(L17/L24) → `ceilByCurrency(x, currency)` 교체
+
+### ⑥ `freight.ts` 호출부 — currency 배선
+
+- `computeAgencyFreight({...})`에 `currency: platform.currency` 추가
+- `computeShipperFreight(...)` 마지막 위치에 `platform.currency` 인자 추가
+
+### ⑦ 표시 포맷 정리 (부수 작업)
+
+- `UpsOrderBreakdownCard.tsx`: `fmtAmount` 헬퍼 신설(통화별 분기), 5개 금액 표시(기본/유류/급증/기타/총액) 적용 — KRW 정수 표시, USD 2자리 유지
+- `UpsActualAdjustmentForm.tsx`: `fmtAmount` 헬퍼 신설, 5곳(estimatedTotal/actualTotal/variance/item.amount/row.amount) 적용
+- `UpsFreightEstimatePanel.tsx`·`ShipperDailyBillingClient.tsx`: 소스가 이미 정수화되어 **변경 불필요** 확인 (설계서대로)
+
+### 회귀 테스트 (13건 신설, `tests/unit/ups/task-b302-freight-ceil.test.ts`)
+
+| TC | 내용 |
+|:---|:-----|
+| TC-CEIL-01a/b/c | ceilByCurrency 단위 — KRW 정수 올림 / USD 센트 올림 / 나누어떨어지는 값 원값 유지(float drift 흡수 포함) |
+| TC-CEIL-02 | ZEN-2026-000073 재현(base 355100, fuel 46.75%) — 개별 항목 올림 합 = totalSellingPrice 정합성 |
+| TC-CEIL-03 | `result.fuelSurchargeSellingAmount === breakdown.fuelSurchargeSellingAmount` (buildBreakdown 정합성) |
+| TC-CEIL-03r | fuelSellAmt 파라미터 재사용 검증 — 독립 재계산 시 divergence 버그 재현 방지 |
+| TC-CEIL-03b | 기타 부가요금 포함 시 개별 항목 합 === sellingTotal |
+| TC-CEIL-04 | 원가 계열 올림 미적용 (소수 원가 비율 케이스 — `% 1 !== 0`) |
+| TC-CEIL-05 | USD 오더 — 센트 단위 올림 정확성 (base 100.005→100.01, total 118.52) |
+| TC-CEIL-06/06b/07/07b | Agency/Shipper 단계 KRW 정수·USD 센트 올림 |
+
+### 기존 테스트 정책 반영
+
+- `pricing-engine.test.ts`: surge 판매가 기대값 `toBeCloseTo` → 올림 정수값(27978/25181)으로 수정 (정책 변경 반영)
+- `ups-order-breakdown-card.test.tsx`: KRW 표시 `.00` 제거(`₩306,200` 등), USD는 2자리 유지
+
+### 독립 되돌리기 검증 (필수)
+
+| 원복 대상 | 결과 |
+|:----------|:-----|
+| `baseSellingPrice = ceilByCurrency(...)` 제거 | **TC-CEIL-05 정확히 FAIL** (USD base 100.005가 100.01로 안 올림됨) → 복원 후 PASS (KRW base는 정수라 no-op — USD 케이스가 실질 검증) |
+| `buildBreakdown` 재계산 방식 복원(`baseSellingPrice * fuelRate`) | **TC-CEIL-03/03r 정확히 FAIL** (166009.25 vs 166010 divergence 재현) → 복원 후 PASS |
+
+### 검증
+
+- `npm run test:regression`: **1343/1343 PASS** (194파일, 신규 +13 — 191→194파일)
+- `npm run build`: SUCCESS
+- 기존 UPS 관련 336건(38파일) 일괄 PASS — 회귀 없음
+- `LIVE_REGRESSION_TEST_MAP.md`에 TC-CEIL-01~07 추가 (R-09 DoD)
+
+### (R-10) 라이브 브라우저 검증
+
+Dave 환경 브라우저 부재 — 병합 후 JSJung 실브라우저 검증 요청: ①신규 UPS 오더 등록 시 예상운임 패널·오더상세 운임카드 KRW 정수 표시 + 개별 항목 합=합계 확인 ②기존 오더(ZEN-2026-000073 등) 재조회 시 값 불변(소급 미적용) 확인. (자동화 회귀 테스트로 소스 로직 검증 완료)
 
 ## [Jaison 최종 검토]
 
