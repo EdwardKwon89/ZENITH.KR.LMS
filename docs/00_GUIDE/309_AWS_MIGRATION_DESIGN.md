@@ -1,6 +1,6 @@
 # 309. AWS 이관(Migration) 설계 초안
 
-> **문서번호:** Ds-11 계열 (R-11 API/설계 우선 원칙 적용) | **버전:** v0.16 (초안 — 미승인)
+> **문서번호:** Ds-11 계열 (R-11 API/설계 우선 원칙 적용) | **버전:** v0.17 (초안 — 미승인)
 > **작성일:** 2026-08-07 | **작성자:** Aiden (Claude, ZEN_CEO)
 > **상태:** ▶️ **재개, 서버 상태 확인 대기** (2026-08-14, Edward 지시) — AWS 접속 정보 수령, DB 전환 최종 결정은 SSH 서버 실사 후로 보류(§8). §4에 ④ "Vercel만 대체" 옵션 추가 검토 중
 > **v0.2 변경**: Edward 피드백("실제 배포 준비가 빠져 있다") 반영 — §6 실제 배포 준비 체크리스트 신설, Dockerfile/next.config.ts(`output: 'standalone'`)/package.json(`engines`) 실물 산출물 완료
@@ -485,6 +485,16 @@ MySQL 접속 대상 IP가 Docker 브릿지 네트워크 게이트웨이 형태�
 - [ ] CloudWatch Log Group별 보존기간(Retention) 설정 — 기본값(Never Expire) 그대로 두지 않기
 - [ ] (선택) S3 Export/Lifecycle 정책 — 장기 보관 필요 시
 
+### 10.8 결론 — 로그 체계 정리 (2026-08-14, Edward 확정)
+
+> **Edward 확정**: "log를 정리하자면 — 자체 로그로는 남고, 전용 log 분석 SaaS 서비스 및 오픈소스로 연결은 추후 별도로 진행한다."
+
+이번 세션의 로깅 관련 논의(§10.6·§10.7, Sentry vs 자체 구축 검토)를 아래와 같이 최종 정리한다:
+
+- **지금 범위**: §10.6에서 구현·머지 완료된 구조화 로깅(JSON) + `AsyncLocalStorage` 기반 requestId 전파 + `Sentry.setUser()` 연결(Issue #1130, PR#1131)까지가 **현 단계의 완결된 산출물**이다. 별도의 전용 로그 분석 플랫폼(Datadog Logs, ELK/OpenSearch, Grafana Loki 등 SaaS·OSS 불문) 연동은 지금 시점에서 **착수하지 않는다.**
+- **후속 과제로 분리**: 전용 로그 분석 서비스(SaaS 또는 오픈소스 자체호스팅) 연동은 별도 Task로 취급하며, 착수 시점은 플랫폼 확장 로드맵이 구체화되는 때로 미룬다 — [[project_platform_expansion_error_tracking]] 참조.
+- **§4 핵심 결정(Supabase 처리 방안)과는 무관** — 로그 체계는 §4 결정과 독립적으로 이미 정리 완료.
+
 ---
 
 ## 개정 이력
@@ -507,3 +517,4 @@ MySQL 접속 대상 IP가 Docker 브릿지 네트워크 게이트웨이 형태�
 | v0.14 | 2026-08-14 | Aiden (Claude) | §10.6 신설 — 로컬 대비 AI Agent 진단 격차 실측(비구조화 로그·320곳/82파일·Sentry 사용자컨텍스트 없음) 및 보완 공수 산정(약 2~3일, IMP-013 전례 근거) |
 | v0.15 | 2026-08-14 | Aiden (Claude) | §10.7 신설 — CloudWatch Logs 보존기한 정책(기본 영구보관 위험 확인) 및 S3/Glacier 아카이빙 생명주기, 실측 가격 기반(수집 $0.76/GB·저장 $0.0314/GB-월) |
 | v0.16 | 2026-08-14 | Aiden (Claude) | §8.6 조사용 보안그룹 임시 규칙 제거 완료 확인 — SNTL 서버 조사 절차 완전 종료 |
+| v0.17 | 2026-08-14 | Aiden (Claude) | §10.8 신설 — 로그 체계 결론 확정(Edward): 자체 구조화 로그(§10.6)는 현 단계 완결, 전용 로그 분석 SaaS/OSS 연동은 별도 후속 Task로 분리 |
