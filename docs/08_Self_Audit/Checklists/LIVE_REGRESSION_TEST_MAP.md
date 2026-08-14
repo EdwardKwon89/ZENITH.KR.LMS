@@ -115,6 +115,8 @@
 | **TC-UPS-WH-01** | 창고 출고 — intl_ref_no 있음 | 정상 출고 (pkgsWithoutIntlRef=0) | `tests/unit/warehouse/outbound-ups.test.ts` |
 | **TC-UPS-WH-02** | 창고 출고 — intl_ref_no 없음 | pkgsWithoutIntlRef > 0 반환 | `tests/unit/warehouse/outbound-ups.test.ts` |
 | **TC-UPS-WH-03** | 창고 출고 — 상태 전이 | WAREHOUSED→RELEASED 전이 유지 | `tests/unit/warehouse/outbound-ups.test.ts` |
+| **TC-DEF-B065-01** | UPS 운임 카드 Zone 표시 | 스냅샷 중첩 경로(`platform.breakdown.zone`) 참조로 Zone 7 표시 + 미존재 시 `-`(하드코딩 `Zone 5` 폴백 회귀 방지, DEF-B-065) | `tests/unit/components/ups-order-breakdown-card.test.tsx` |
+| **TC-DEF-B065-02** | UPS 운임 카드 통화 3자리 쉼표 | 1,000 이상 금액 5개 항목(기본/유류/급증/기타/총액) `toLocaleString` 쉼표 표시(DEF-B-065) | `tests/unit/components/ups-order-breakdown-card.test.tsx` |
 
 ### 10. UPS 일마감 (Phase 7 SPR-05 Daily Close)
 | ID | 테스트 항목 | 목적 | 파일 경로 |

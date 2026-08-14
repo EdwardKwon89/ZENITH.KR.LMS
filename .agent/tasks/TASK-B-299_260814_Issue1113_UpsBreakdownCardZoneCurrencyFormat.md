@@ -7,7 +7,7 @@
 | **우선순위** | P2 |
 | **GitHub Issue** | [#1113](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1113) |
 | **관련 결함** | [DEF-B-065](../defects/DEF-B-065_UpsOrderBreakdownCard_Zone고정값_통화쉼표미표시.md) |
-| **상태** | 🔄 착수 |
+| **상태** | 🔔 보고 완료 |
 
 ## 배경
 
@@ -60,7 +60,18 @@ const zoneId =
 
 ## [작업 결과]
 
-_(Baker 작성 예정)_
+**커밋**: `d3b65f65` — `[Baker] fix: TASK-B-299 UPS 운임 카드 Zone 오표시 + 통화 3자리 쉼표 (Issue #1113 / DEF-B-065)`
+
+| 검증 항목 | 결과 |
+|:----------|:-----|
+| ① Zone 표시 수정 | `UpsOrderBreakdownCard.tsx:26` — `snapshotMeta?.platform?.breakdown?.zone?.zone_name ?? zone_code ?? (기존 최상위 fallback) ?? '-'`로 수정. 하드코딩 `'Zone 5'` 기본값 완전 제거(ZEN_2026-000073 실제 구조 `platform.breakdown.zone` 우선 참조) |
+| ② 통화 쉼표 | L107/111/116/122/127 5개 지점(기본/유류/급증/기타/총액) `.toFixed(2)` → `.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })` — 프로젝트 기존 컨벤션(`OrderFinanceSummary`·`ShipperDailyBillingClient`)과 통일 |
+| 회귀 테스트 | `tests/unit/components/ups-order-breakdown-card.test.tsx` — 기존 3건 금액 포맷 갱신(쉼표 반영) + 신규 `DEF-B-065` 3건(Zone 7 표시 / zone 미존재 시 `-`·"Zone 5" 미출현 / 5개 항목 쉼표) — **6/6 PASS** |
+| 독립 되돌리기 검증 | ①Zone 원복(`'Zone 5'`) 시 신규 2건 FAIL(Zone 7·`-` 케이스) 재현 → 복원 ②쉼표 원복(`toFixed`) 시 2건 FAIL(KRW·쉼표 케이스) 재현 → 복원, 복원 후 6/6 PASS |
+| 전체 회귀 | `npm run test:regression` — **1318/1318 PASS** |
+| 빌드 | `npm run build` — **SUCCESS** |
+| R-10 실UI 검증 | 로컬 dev 서버에서 ZEN-2026-000073 `ups-detail` 실제 화면(admin 로그인 + `page.goto`) — `Zone: Zone 7` · `₩355,100.00` · `₩526,392.25 KRW` 표시 + `Zone 5` 미표시 확인, 스크린샷 `scratch/task-b-299-r10/01_ups-detail_zone7_currency.png` |
+| 회귀 맵 | `LIVE_REGRESSION_TEST_MAP.md` 섹션 9에 `TC-DEF-B065-01/02` 등재(R-09 DoD) |
 
 ## [Jaison 최종 검토]
 
