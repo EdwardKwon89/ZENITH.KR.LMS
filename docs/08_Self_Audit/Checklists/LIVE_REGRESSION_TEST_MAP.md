@@ -522,6 +522,13 @@
 | **TC-UPS-ENGINE-07-03** | 급증 수수료 totalSellingPrice/totalCostPrice 합산 | 총액 반영 확인 | `tests/unit/ups/pricing-engine.test.ts` |
 | **TC-UPS-ENGINE-07-04** | Shipper 단계 급증 수수료 pass-through(할인 미적용) | Issue #491 Shipper 공식 확장 확인 | `tests/unit/ups/pricing-engine.test.ts` |
 | **TC-UPS-ENGINE-07-05** | Shipper 단계 급증 수수료 미지정 시 기존 동작과 동일 | 하위 호환 확인 | `tests/unit/ups/pricing-engine.test.ts` |
+| **TC-CEIL-01** | `ceilByCurrency` 통화별 올림 단위(KRW 정수/USD 센트/원값 유지) | TASK-B-302 올림 유틸 단위 정확성 + float drift(18.51*100) 정규화 확인 | `tests/unit/ups/task-b302-freight-ceil.test.ts` |
+| **TC-CEIL-02** | `computeUpsFreight` 라인 항목 개별 올림 후 합계 정합성 (ZEN-2026-000073 재현: base 355100, fuel 46.75%) | 기본운임+유류할증+급증+기타 정수 합 = totalSellingPrice 일치, 사용자 검산 가능성 확인 | `tests/unit/ups/task-b302-freight-ceil.test.ts` |
+| **TC-CEIL-03** | `buildBreakdown` 유류할증 중복 재계산 제거 — result/breakdown 정합성 | `fuelSellAmt` 파라미터 재사용으로 표시값·합계값 divergence 버그 방지(되돌리기 시 TC-CEIL-03r FAIL로 검증) | `tests/unit/ups/task-b302-freight-ceil.test.ts` |
+| **TC-CEIL-04** | 원가(totalCostPrice 등) 올림 미적용 | 범위 밖 항목 회귀 방지 — 소수 원가 비율 케이스 확인 | `tests/unit/ups/task-b302-freight-ceil.test.ts` |
+| **TC-CEIL-05** | USD 오더 센트 단위 올림 | KRW 전용 치우침 방지 — 통화 분기 정확성 확인 | `tests/unit/ups/task-b302-freight-ceil.test.ts` |
+| **TC-CEIL-06** | `computeAgencyFreight` 통화별 올림(KRW 정수/USD 센트) | 할인율 적용 결과 올림 정확성 확인 | `tests/unit/ups/task-b302-freight-ceil.test.ts` |
+| **TC-CEIL-07** | `computeShipperFreight` 통화별 올림(KRW 정수/USD 센트) | 할인율 적용 결과 올림 정확성 확인 | `tests/unit/ups/task-b302-freight-ceil.test.ts` |
 | **TC-ISS543-01** | UPS 서비스 티어 선택 유지 + product_code 문자열 저장 | 선택 유지 + UUID→코드 분리 검증 | `tests/unit/orders/ups-product-code-select.test.tsx` |
 
 ### 39. Phase 7.1 estimateUpsFreight 통합 Action (IMP-145)
