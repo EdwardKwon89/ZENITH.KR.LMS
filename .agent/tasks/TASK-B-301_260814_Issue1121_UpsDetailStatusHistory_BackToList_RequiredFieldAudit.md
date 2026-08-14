@@ -7,7 +7,7 @@
 | **우선순위** | P2 |
 | **GitHub Issue** | [#1121](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1121) |
 | **관련 결함** | 없음(JSJung 직접 요청 3건) |
-| **상태** | 🔔 완료 보고 |
+| **상태** | ✅ 완료 |
 
 ## 배경
 
@@ -161,7 +161,15 @@ export default function UpsDetailBackToListButton() {
 
 ## [Jaison 최종 검토]
 
-_(PR 제출 후 작성 예정)_
+- 격리 워크트리(`/tmp/review-pr1122`)에서 `origin/TeamB_Dev` 병합 시 `ACTIVE_TASK.md` 충돌(TASK-B-302 등록 시점 겹침) — Baker PR 행 + TASK-B-302 신규 행 모두 보존하는 방식으로 직접 해소, PR 소스 브랜치에 재푸시 후 CI 재통과 확인
+- 코드 diff를 3건 설계와 1:1 대조 확인 — 전부 설계대로 정확히 구현됨
+- 신규 테스트 2개 파일 직접 실행 — 14/14 PASS(신규 10 + 기존 회귀 4), AddressInput mock 없이 실제 컴포넌트 렌더링
+- **독립 되돌리기 검증 3건 전부 수행**: ①`reverse()` 제거 → 재방문 케이스 1건 FAIL 재현 ②`UpsDetailBackToListButton` 원복 → 2건 FAIL 재현 ③required prop 4종 + `shipper_contact_phone` 조건부 표시 제거 → 4건 FAIL 재현("부재 확인" 2건은 되돌려도 참이라 정상적으로 계속 PASS, 검증 논리 타당). 각각 복원 후 재확인
+- 전체 회귀 `npm run test:regression` 직접 실행 — `195/195` test files·`1340/1340` tests ALL PASS(PR 주장과 정확히 일치)
+- `npm run build` SUCCESS 직접 확인
+- `gh pr checks 1122` — 병합 충돌 해소 재푸시 후 Regression Tests·Task File Check·Type Check 3항목 전부 pass
+- R-10 스크린샷 8장(`scratch/task-b-301-r10/`, Baker 로컬 워크트리) 직접 열람 — ZEN-2026-000073 재방문 WAREHOUSED 최신시각 표시, "목록보기" 텍스트, UPS 모드 필수표시(`*`) 전부 확인. **Agency 화주 등록 화면(AddressInput 다른 소비처) 회귀 스크린샷도 확인 — 새 prop 기본값 false라 `*` 미노출, 영향 없음**
+- PR#1122 승인·머지(TeamB_Dev `4cdb1a23`), Issue #1121 종결
 
 ## [발견 이슈]
 
