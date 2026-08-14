@@ -1,21 +1,21 @@
 import React from 'react';
 import { requireAuth } from '@/lib/auth/guards';
-import { getOrderDetails } from '@/app/actions/operations/orders';
+import { getOrderDetails, getOrderEditHistory } from '@/app/actions/operations/orders';
 import { getOrderRateSnapshot } from '@/app/actions/operations/tisa';
 import { getUpsLabelStatus } from '@/app/actions/operations/ups-labels';
 import { getUpsTrackingEvents } from '@/app/actions/operations/tracking';
 import { checkPermission } from '@/lib/auth/rbac';
 import { notFound, redirect } from 'next/navigation';
-import Link from 'next/link';
-import { ArrowLeft, Truck, FileText, User } from 'lucide-react';
+import { Truck, FileText, User } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
 
 import { ZenCard, ZenBadge } from '@/components/ui/ZenUI';
 import UpsOrderStatusStepper from '@/components/ups/UpsOrderStatusStepper';
+import UpsDetailBackToListButton from '@/components/ups/UpsDetailBackToListButton';
 import UpsPackageItemsModal from '@/components/ups/UpsPackageItemsModal';
 import UpsOrderBreakdownCard from '@/components/ups/UpsOrderBreakdownCard';
+import UpsOrderEditHistoryPanel from '@/components/ups/UpsOrderEditHistoryPanel';
 import { UpsActualAdjustmentForm } from '@/components/orders/UpsActualAdjustmentForm';
-import OrderFinanceSummary from '@/components/finance/OrderFinanceSummary';
 import UpsTrackingEventsList from '@/components/tracking/UpsTrackingEventsList';
 import DocumentDownloadButton from '@/components/documents/DocumentDownloadButton';
 import { resolveDestCountryCode } from '@/lib/ups/order-helpers';
@@ -90,9 +90,15 @@ export default async function UpsOrderDetailPage({ params }: UpsOrderDetailPageP
     ? await supabase.from('zen_invoices').select('id, invoice_no, total_amount, status').eq('id', linkedInvoiceId).single()
     : { data: null };
 
-  const { data: incidentFees } = linkedInvoiceId
-    ? await supabase.from('zen_incident_fees').select('id, description, currency, fee_amount').eq('invoice_id', linkedInvoiceId)
-    : { data: [] };
+  // TASK-B-301 (Issue #1121): Fetch Order Status History for stage-wise transition timestamps
+  const { data: statusHistory } = await supabase
+    .from('order_status_history')
+    .select('prev_status, next_status, created_at')
+    .eq('order_id', orderId)
+    .order('created_at', { ascending: true });
+
+  // TASK-B-303 (Issue #1125): Fetch Order Edit History (zen_order_edit_log)
+  const editHistory = await getOrderEditHistory(orderId);
 
   // Fetch UPS Tracking Events (zen_ups_tracking_events)
   const upsTrackingData = await getUpsTrackingEvents(orderId);
@@ -230,13 +236,8 @@ export default async function UpsOrderDetailPage({ params }: UpsOrderDetailPageP
     <div className="flex-1 flex flex-col gap-6 p-4 md:p-8 max-w-7xl mx-auto w-full">
       {/* Navigation Header */}
       <div className="flex items-center justify-between">
-        <Link
-          href={`/orders/${orderId}`}
-          className="inline-flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          일반 오더 상세 보기로 이동
-        </Link>
+        {/* TASK-B-301 (Issue #1121): router.back() 목록보기 버튼 (기존 일반 오더 상세 Link 교체) */}
+        <UpsDetailBackToListButton />
         <ZenBadge className="text-xs font-mono font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
           UPS Special Delivery Detail
         </ZenBadge>
@@ -252,6 +253,7 @@ export default async function UpsOrderDetailPage({ params }: UpsOrderDetailPageP
             currentStatus={order.status || ''}
             trackingNumber={upsLabelStatus.trackingNumber}
             canManuallySetDelivered={isAdmin || isAgency}
+            statusHistory={statusHistory || []}
           />
 
           {/* 2. UPS Breakdown & Cargo Details (with Items Modal trigger) */}
@@ -288,7 +290,10 @@ export default async function UpsOrderDetailPage({ params }: UpsOrderDetailPageP
             <UpsTrackingEventsList events={upsTrackingEvents} />
           </section>
 
-          {/* 5. Trade Documents Section */}
+          {/* 5. Order Edit History Panel (TASK-B-303 / Issue #1125) */}
+          <UpsOrderEditHistoryPanel history={editHistory} />
+
+          {/* 6. Trade Documents Section */}
           <ZenCard className="p-6 flex flex-col gap-4">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-bold text-slate-900 dark:text-gray-100 flex items-center gap-2">
@@ -331,11 +336,29 @@ export default async function UpsOrderDetailPage({ params }: UpsOrderDetailPageP
               <div>
                 <span className="text-slate-400 block font-semibold">화주 (Shipper)</span>
                 <span className="font-bold text-slate-800 dark:text-gray-200">{order.shipper_name || order.shipper?.name || 'Standard Shipper'}</span>
+                {order.shipper_contact_phone && (
+                  <span className="text-slate-500 block">연락처: {order.shipper_contact_phone}</span>
+                )}
+                {order.shipper_contact_email && (
+                  <span className="text-slate-500 block">이메일: {order.shipper_contact_email}</span>
+                )}
+                {(order.shipper_address || (order.shipper as any)?.address) && (
+                  <span className="text-slate-500 block">
+                    주소: {order.shipper_address || (order.shipper as any)?.address}
+                    {order.shipper_address_detail ? ` ${order.shipper_address_detail}` : ''}
+                  </span>
+                )}
               </div>
               <div>
                 <span className="text-slate-400 block font-semibold">수령인 (Consignee)</span>
                 <span className="font-bold text-slate-800 dark:text-gray-200">{order.recipient_name}</span>
-                <span className="text-slate-500 block">{order.recipient_address}</span>
+                {(order.recipient_contact || order.recipient_phone) && (
+                  <span className="text-slate-500 block">연락처: {order.recipient_contact || order.recipient_phone}</span>
+                )}
+                {order.recipient_email && (
+                  <span className="text-slate-500 block">이메일: {order.recipient_email}</span>
+                )}
+                {order.recipient_address && <span className="text-slate-500 block">주소: {order.recipient_address}</span>}
               </div>
               <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-zinc-800">
                 <span className="text-slate-400">주문 상태</span>
@@ -344,15 +367,7 @@ export default async function UpsOrderDetailPage({ params }: UpsOrderDetailPageP
             </div>
           </ZenCard>
 
-          {/* Finance Summary Component */}
-          <OrderFinanceSummary
-            orderId={orderId}
-            initialCosts={costs || []}
-            initialInvoice={invoice || null}
-            incidentFees={incidentFees || []}
-            isAdmin={isAdmin}
-            canManageFinance={canManageFinance}
-          />
+          {/* Finance Summary Component — Settlement Preview 제거 (TASK-B-300 ③) */}
         </div>
       </div>
     </div>
