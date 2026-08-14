@@ -23,7 +23,11 @@ export default function UpsOrderBreakdownCard({
 }: UpsOrderBreakdownCardProps) {
   // Extract Zone and Product info
   const productCode = cargoDetails?.product_code || snapshotMeta?.productCode || 'UPS Express';
-  const zoneId = snapshotMeta?.zoneId || snapshotMeta?.zoneCode || snapshotMeta?.zone_id || 'Zone 5';
+  const zoneId =
+    snapshotMeta?.platform?.breakdown?.zone?.zone_name
+    ?? snapshotMeta?.platform?.breakdown?.zone?.zone_code
+    ?? snapshotMeta?.zoneId ?? snapshotMeta?.zoneCode ?? snapshotMeta?.zone_id
+    ?? '-';
 
   // Calculate weights
   const actualWeight = packages.reduce((sum, p) => sum + Number(p.gross_weight || 0), 0);
@@ -104,27 +108,27 @@ export default function UpsOrderBreakdownCard({
         <div className="space-y-2 text-xs">
           <div className="flex justify-between items-center text-slate-300 py-1 border-b border-white/5">
             <span>기본 운임 (Base Freight)</span>
-            <span className="font-mono text-white font-semibold">{currencySymbol}{baseFreight.toFixed(2)}</span>
+            <span className="font-mono text-white font-semibold">{currencySymbol}{baseFreight.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
           </div>
           <div className="flex justify-between items-center text-slate-300 py-1 border-b border-white/5">
             <span>유류 할증료 (Fuel Surcharge)</span>
-            <span className="font-mono text-white font-semibold">{currencySymbol}{fuelSurcharge.toFixed(2)}</span>
+            <span className="font-mono text-white font-semibold">{currencySymbol}{fuelSurcharge.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
           </div>
           {surgeFee > 0 && (
             <div className="flex justify-between items-center text-amber-300 py-1 border-b border-white/5 font-semibold">
               <span>UPS 급증 긴급 수수료 (Surge Fee)</span>
-              <span className="font-mono">{currencySymbol}{surgeFee.toFixed(2)}</span>
+              <span className="font-mono">{currencySymbol}{surgeFee.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
             </div>
           )}
           {extraCharges > 0 && (
             <div className="flex justify-between items-center text-slate-300 py-1 border-b border-white/5">
               <span>기타 부가 수수료 (Surcharges)</span>
-              <span className="font-mono text-white font-semibold">{currencySymbol}{extraCharges.toFixed(2)}</span>
+              <span className="font-mono text-white font-semibold">{currencySymbol}{extraCharges.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
             </div>
           )}
           <div className="flex justify-between items-center pt-2 text-sm font-extrabold">
             <span className="text-amber-200">추정 총 청구액 (Total Estimate)</span>
-            <span className="font-mono text-amber-400 text-base font-black">{currencySymbol}{totalFreight.toFixed(2)} {currencyCode}</span>
+            <span className="font-mono text-amber-400 text-base font-black">{currencySymbol}{totalFreight.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {currencyCode}</span>
           </div>
         </div>
       </div>
