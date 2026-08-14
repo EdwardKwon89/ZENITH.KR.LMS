@@ -7,7 +7,7 @@
 | **우선순위** | P3 |
 | **GitHub Issue** | [#1128](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1128) |
 | **관련 결함** | 없음(JSJung 직접 요청) |
-| **상태** | 🔔 (완료 보고 — 검토 요청) |
+| **상태** | ✅ 완료(단, R-10 실브라우저 검증은 JSJung 대기 중) |
 
 ## 배경
 
@@ -179,7 +179,16 @@ Dave 환경 브라우저 부재 — 병합 후 JSJung 실브라우저 검증 요
 
 ## [Jaison 최종 검토]
 
-_(PR 제출 후 작성 예정)_
+- 격리 워크트리(`/tmp/review-pr1129`)에서 `origin/TeamB_Dev` 병합 시 `ACTIVE_TASK.md` + `LIVE_REGRESSION_TEST_MAP.md` 2개 파일 충돌(TASK-B-303 병합 시점 겹침) — 양쪽 신규 행 모두 보존하는 방식으로 직접 해소, PR 소스 브랜치에 재푸시 후 CI 재통과 확인
+- 코드 diff를 설계 2건과 1:1 대조 확인 — 순수 렌더링 순서 이동 + 배너 시각 추가 둘 다 정확히 구현. `!isCanceled`(CANCELED만 스테퍼 숨김, HELD 유지) 기존 분기 보존 확인
+- 신규 테스트 직접 실행 — 7/7 PASS
+- **독립 되돌리기 검증 2건 직접 재현**: ①위치 원복 → 2건 FAIL ②`exceptionTime` 무력화 → 3건 FAIL(가드 테스트는 무영향). 각각 복원 후 재확인
+- fresh DB reset 후 `npm run test:regression` 직접 실행 — `199/199`·`1372/1372` ALL PASS
+- `npm run build` SUCCESS 직접 확인
+- `gh pr checks 1129` — 병합 충돌 해소 재푸시 후 Regression Tests·Task File Check·Type Check 3항목 전부 pass
+- Dave 로컬 워크트리에 R-10 스크린샷 없음 확인 — PR 본문의 "브라우저 환경 부재" 공개와 일치. 변경 자체가 단일 파일의 저위험 렌더링 순서/조건부 텍스트 조정이라 코드·테스트 검증만으로 승인, R-10은 JSJung 확인 대기로 명시
+- PR#1129 승인·머지(TeamB_Dev `bcdc973d`), Issue #1128 종결
+- **R-10 미해결**: CANCELED 취소일시 rose 표시·정상 진행 시각 위치는 JSJung 라이브 확인 후 최종 종결 여부 판단 필요
 
 ## [발견 이슈]
 
