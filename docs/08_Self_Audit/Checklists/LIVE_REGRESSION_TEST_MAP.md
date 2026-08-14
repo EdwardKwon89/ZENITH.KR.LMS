@@ -126,6 +126,18 @@
 | **TC-B301-03-01** | 오더 등록/수정 폼 UPS 필수표시 | UPS 모드에서 화주 연락처·수하인 국가/우편번호/시·군·구 라벨 `*` + 비UPS 미표시(조건부 정확성, TASK-B-301 ③) | `tests/unit/orders/order-registration-form-b301.test.tsx` |
 | **TC-B301-03-02** | AddressInput CN 시/도 필수표시 | `recipient_country_code='CN'`일 때만 시/도 라벨 `*` (DEF-B-044, TASK-B-301 ③) + AIR+CN 시 국가/우편번호/도시는 미표시 | `tests/unit/orders/order-registration-form-b301.test.tsx` |
 | **TC-B301-03-03** | AddressInput 새 prop 기본값 false 회귀 | `requiredCountry` 등 신규 prop 미전달 시 기존 소비처(대리점 화주 등록 등) 동작 불변(기본값 false) | `tests/unit/orders/order-registration-form-b301.test.tsx`, `tests/unit/orders/iss1104-addressinput-toggle.test.tsx` |
+| **TC-B303-01** | 오더 이력 화이트리스트 필드 추출 | `ORDER_EDIT_LOG_CORE_FIELDS` 32필드 화이트리스트로 스냅샷 추출, estimated_cost/packages/origin_port_id/dest_port_id 명시 제외 + 빈 필드 null 정규화(Issue #1125, TASK-B-303) | `tests/unit/orders/order-edit-log-b303.test.tsx` |
+| **TC-B303-02** | 이력 스냅샷 상수 무결성 | `ORDER_EDIT_LOG_CORE_FIELDS`와 `ORDER_EDIT_LOG_FIELD_LABELS` 라벨 키 1:1 일치(Issue #1125) | `tests/unit/orders/order-edit-log-b303.test.tsx` |
+| **TC-B303-03** | 이력 패널 빈 이력 미렌더 | UPS 오더 상세 이력 0건 시 패널 자체 미출력(Issue #1125) | `tests/unit/orders/order-edit-log-b303.test.tsx` |
+| **TC-B303-04** | CREATE 이력 등록값 전체 표시 | action=CREATE 시 new_data 화이트리스트 값 전체 표시 + 편집자/시간 표시(Issue #1125) | `tests/unit/orders/order-edit-log-b303.test.tsx` |
+| **TC-B303-05** | UPDATE 이력 변경 필드 diff 표시 | action=UPDATE 시 변경 필드만 `old(취소선)→new(굵게)` + 변경 없는 필드 미표시(Issue #1125) | `tests/unit/orders/order-edit-log-b303.test.tsx` |
+| **TC-B303-06** | 이력 패널 최신순 정렬 | edited_at desc로 최신 이력 먼저 표시(Issue #1125) | `tests/unit/orders/order-edit-log-b303.test.tsx` |
+| **TC-B303-07** | createOrder CREATE 이력 기록 | 신규 오더 등록 시 zen_order_edit_log에 action=CREATE + order_status_at_edit=REGISTERED + old_data=null 기록(Issue #1125) | `tests/unit/orders/order-edit-log-b303.test.tsx` |
+| **TC-B303-08** | updateOrder UPDATE 기록 정확성 | 수정 시 old/new 스냅샷에 정확한 전/후 값 + estimated_cost/packages 미포함(화이트리스트 제외, 실 DB) | `tests/integration/iss1125-order-edit-log.test.ts` |
+| **TC-B303-09** | 무변경 재제출 로그 미증가 | hasChanges 가드 — 화이트리스트 필드 변화 없으면 UPDATE 기록 안 함(실 DB) | `tests/integration/iss1125-order-edit-log.test.ts` |
+| **TC-B303-10** | packages만 변경 시 로그 영향 없음 | 패키지 변경은 화이트리스트 밖이라 UPDATE 미기록(실 DB) | `tests/integration/iss1125-order-edit-log.test.ts` |
+| **TC-B303-11** | WAREHOUSED+UPS 부분수정 UPDATE 기록 | 실측(measured_at) 패키지 부분수정 시 기존 감사 로직 유지 + action=UPDATE 기록(실 DB) | `tests/integration/iss1125-order-edit-log.test.ts` |
+| **TC-B303-12** | createOrder 실DB CREATE 기록 | 실제 RPC 기반 신규 오더 생성 시 edit_log에 CREATE + new_data 스냅샷 + REGISTERED 기록(실 DB) | `tests/integration/iss1125-order-edit-log.test.ts` |
 
 ### 10. UPS 일마감 (Phase 7 SPR-05 Daily Close)
 | ID | 테스트 항목 | 목적 | 파일 경로 |
