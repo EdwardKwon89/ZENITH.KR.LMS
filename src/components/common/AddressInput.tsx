@@ -24,6 +24,10 @@ interface AddressInputProps {
   readOnly?: boolean;
   setValue?: (name: any, value: any) => void;
   required?: boolean;
+  requiredCountry?: boolean;
+  requiredZipcode?: boolean;
+  requiredCity?: boolean;
+  requiredStateProvince?: boolean;
 }
 
 function rhf(p: string, n: string, r?: any) {
@@ -40,6 +44,10 @@ export function AddressInput({
   readOnly = false,
   setValue,
   required = false,
+  requiredCountry = false,
+  requiredZipcode = false,
+  requiredCity = false,
+  requiredStateProvince = false,
 }: AddressInputProps) {
   const [countryCode, setCountryCode] = useState(defaultValues.country_code || 'KR');
   const [countries, setCountries] = useState<ICountry[]>([]);
@@ -93,7 +101,7 @@ export function AddressInput({
       <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">{t('form_address')}{required && <span className="text-rose-500"> *</span>}</p>
 
       <div className="mb-4">
-        <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">{t('form_country')}</label>
+        <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">{t('form_country')}{requiredCountry && <span className="text-rose-500"> *</span>}</label>
         <select
           value={countryCode}
           onChange={(e) => {
@@ -121,7 +129,7 @@ export function AddressInput({
 
       {countryCode === 'KR' ? (
         <div className="mb-4">
-          <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">{t('form_zipcode')}</label>
+          <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">{t('form_zipcode')}{requiredZipcode && <span className="text-rose-500"> *</span>}</label>
           <div className="flex gap-2">
             <input
               {...a('zipcode')}
@@ -142,7 +150,7 @@ export function AddressInput({
       {countryCode === 'KR' && (
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div>
-            <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">{t('form_state_province')}</label>
+            <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">{t('form_state_province')}{requiredStateProvince && <span className="text-rose-500"> *</span>}</label>
             <select
               value={selectedState}
               onChange={(e) => {
@@ -165,7 +173,7 @@ export function AddressInput({
             {fieldErrors.state_province && <p className="text-xs text-red-500 mt-1">{fieldErrors.state_province}</p>}
           </div>
           <div>
-            <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">{t('form_city')}</label>
+            <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">{t('form_city')}{requiredCity && <span className="text-rose-500"> *</span>}</label>
             <select
               value={selectedCity}
               onChange={(e) => {
@@ -222,7 +230,7 @@ export function AddressInput({
         <>
           <div className="grid grid-cols-2 gap-4 mb-4">
             <div>
-              <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">{t('form_state_province')}</label>
+              <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">{t('form_state_province')}{requiredStateProvince && <span className="text-rose-500"> *</span>}</label>
               <select
                 value={selectedState}
                 onChange={(e) => {
@@ -245,7 +253,7 @@ export function AddressInput({
               {fieldErrors.state_province && <p className="text-xs text-red-500 mt-1">{fieldErrors.state_province}</p>}
             </div>
             <div>
-              <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">{t('form_city')}</label>
+              <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">{t('form_city')}{requiredCity && <span className="text-rose-500"> *</span>}</label>
               <select
                 value={selectedCity}
                 onChange={(e) => {
@@ -291,7 +299,7 @@ export function AddressInput({
               {fieldErrors.address_detail && <p className="text-xs text-red-500 mt-1">{fieldErrors.address_detail}</p>}
             </div>
             <div>
-              <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">{t('form_zipcode')}</label>
+              <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">{t('form_zipcode')}{requiredZipcode && <span className="text-rose-500"> *</span>}</label>
               <input
                 {...a('zipcode')}
                 value={postalCode}
