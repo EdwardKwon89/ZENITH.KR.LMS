@@ -3,7 +3,7 @@
 | 항목 | 내용 |
 |:-----|:------|
 | **생성일** | 2026-08-14 |
-| **담당** | Baker (구현) · Jaison (검토) |
+| **담당** | Dave (구현) · Jaison (검토) |
 | **우선순위** | P1 (금액 산정 로직 — 실 청구/정산에 영향) |
 | **GitHub Issue** | [#1123](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1123) |
 | **관련 결함** | 없음(JSJung 정책 지시) |
@@ -82,7 +82,7 @@ agencySellingPrice: ceilByCurrency(discountedBase + passthroughTotal + agencyCha
 
 ### ⑥ `freight.ts` 호출부 — `currency` 전달 배선
 
-`computeAgencyFreight({...})` 호출(L266-276)에 `currency: platform.currency` 추가. `computeShipperFreight(...)` 호출(L294-300)에 `platform.currency` 인자 추가(위치 인자이므로 마지막 또는 적절한 위치 — 기존 시그니처 순서 유지하며 추가 위치는 Baker가 함수 정의와 맞춰 결정).
+`computeAgencyFreight({...})` 호출(L266-276)에 `currency: platform.currency` 추가. `computeShipperFreight(...)` 호출(L294-300)에 `platform.currency` 인자 추가(위치 인자이므로 마지막 또는 적절한 위치 — 기존 시그니처 순서 유지하며 추가 위치는 Dave가 함수 정의와 맞춰 결정).
 
 ### ⑦ 표시 포맷 정리 (부수 작업 — 선택이 아닌 필수, 트레일링 ".00" 제거)
 
@@ -110,7 +110,7 @@ agencySellingPrice: ceilByCurrency(discountedBase + passthroughTotal + agencyCha
 
 ## [작업 결과]
 
-_(Baker 작성 예정)_
+_(Dave 작성 예정)_
 
 ## [Jaison 최종 검토]
 
