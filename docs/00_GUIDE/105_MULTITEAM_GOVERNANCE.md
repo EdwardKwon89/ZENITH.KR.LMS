@@ -15,7 +15,7 @@
 |:----|:----|
 | **Task 발령** | 팀 내 Sub-task 자율 발령 (팀 리더 서명) |
 | **에이전트 투입** | 팀 내 AI Agent 자율 배정 (Baker 등 팀 소속 에이전트) |
-| **ACTIVE_TASK 팀 섹션 관리** | 본인 팀 섹션 독립 편집 (타 팀 섹션 수정 금지) |
+| **Task 상태 관리** | 본인 팀 소관 GitHub Issue 라벨·assignee 독립 관리 (타 팀 Issue 라벨 수정 금지) |
 | **DoD 내부 검증** | 팀 내 완료 기준 자체 검증 후 PR 제출 |
 | **PR 제출** | `feature/teamX-*` → `develop` PR 생성 및 Aiden 검토 요청 |
 
@@ -63,8 +63,8 @@ Team B는 개별 `feature/teamb-*` 브랜치를 **develop에 직접 PR 제출하
 |:---------|:-----:|:----|
 | `.agent/tasks/TASK-XXX_*_[TeamA에이전트].md` | Team A | Team B 수정 금지 |
 | `.agent/tasks/TASK-XXX_*_[TeamB에이전트].md` | Team B | Team A 수정 금지 |
-| `ACTIVE_TASK.md 팀A 섹션` | Team A | Team B 수정 금지 |
-| `ACTIVE_TASK.md 팀B 섹션` | Team B | Team A 수정 금지 |
+| GitHub Issue (`team:a` 라벨) | Team A | Team B 라벨/assignee 수정 금지 |
+| GitHub Issue (`team:b` 라벨) | Team B | Team A 라벨/assignee 수정 금지 |
 | 공유 코드 (`rbac.ts` 등) | 공유 | PR 선착순, 후발 팀 리베이스 |
 | Migration 파일 | 작성 팀 | 타 팀 읽기 전용 |
 
@@ -79,8 +79,8 @@ Team B는 개별 `feature/teamb-*` 브랜치를 **develop에 직접 PR 제출하
 | Team C+ (향후) | `TASK-C-NNN` 등 | TASK-C-001 | 팀 투입 시 Aiden이 접두사 지정 |
 
 **채번 절차**:
-- 채번 전 **본인 팀 섹션 최대값 + 1** (타 팀 섹션 확인 불요 — 충돌 구조적 불가)
-- 채번 즉시 ACTIVE_TASK.md 팀 섹션에 등재 (번호 선점)
+- 채번 전 `./scripts/next-task-number.sh [A|B|C]` 실행(본인 팀 최대값 + 1을 `.agent/tasks/` 파일명 기준으로 자동 산출 — 타 팀 확인 불요, 충돌 구조적 불가)
+- 채번 즉시 `.agent/tasks/TASK-XXX_*.md` 상세 파일 생성으로 번호 선점
 - 기존 TASK-NNN으로 발령된 타팀 Task(TASK-139/140/142 등)는 그대로 유지 (소급 변경 없음)
 
 > **(Issue #86 Phase 4, 2026-07-07)** Task 발령 자체는 GitHub Issue 생성으로 전환됨(GOV_COMMON.md R-17 참조). 위 채번 절차는 담당 Agent가 Issue를 인지하고 **착수(🔄)하는 시점**에 수행한다 — 발령(Issue 생성) 시점에 미리 번호를 선점하지 않는다.
@@ -101,16 +101,14 @@ TASK 번호와 달리 DEF(결함) 번호는 팀 간 공유 채번 체계 없이 
 - **기존 DEF-001~125(팀 구분 없이 전역 채번되던 시절 번호)는 그대로 유지 (소급 변경 없음)** — TASK-139/140/142 선례와 동일 원칙
 - Team B는 이번 결정 시점 이후 신규 등록하는 결함부터 `DEF-B-NNN`을 사용한다. 기존에 이미 `DEF-121`~`DEF-124`로 통용 중인 Team B 결함(Issue #741/TASK-B-193, #771/TASK-B-195, #778/TASK-B-197 등)은 소급 변경하지 않는다.
 
-## ACTIVE_TASK.md 구조
+## 팀별 작업 조회 (2026-08-14, R-17 v3.0 — ACTIVE_TASK.md 팀별 상세 표 폐지)
 
-```markdown
-## Team A 활성 Task  ← Aiden 관할
-| TASK-NNN | ... |
+Task 상태는 더 이상 `.agent/ACTIVE_TASK.md`의 팀 섹션이 아니라 GitHub Issue 라벨로 구분한다.
 
-## Team B 활성 Task  ← Jaison(JSJung) 관할
-| TASK-NNN | ... |
-
-## Team C 활성 Task  ← 향후 팀 리더 관할
+```bash
+gh issue list --label team:a    # Team A (Aiden 관할)
+gh issue list --label team:b    # Team B (JSJung 관할)
+gh issue list --label team:c    # Team C+ (향후 팀 리더 관할)
 ```
 
 ## 위반 처리

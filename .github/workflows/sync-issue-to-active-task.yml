@@ -3,7 +3,8 @@ name: "[Sync] GitHub Issues → ACTIVE_TASK.md"
 # Issue #86 Phase 2
 # Issue 생성/라벨변경/종료/재오픈/담당자변경 시 .agent/ACTIVE_TASK.md 상단의
 # "GitHub Issues 현황(자동 동기화)" 섹션을 최신 오픈 이슈 목록으로 재생성합니다.
-# 팀별 상세 Task 표(수기 관리)는 건드리지 않습니다 — 대상은 GH_ISSUES_SYNC 마커 사이 블록뿐입니다.
+# 대상은 GH_ISSUES_SYNC 마커 사이 블록뿐이며, 그 외 내용(사용법 안내 등)은 건드리지 않습니다.
+# (2026-08-14, R-17 v3.0: 팀별 수기 상세 Task 표는 폐지됨 — GitHub Issue/PR이 유일한 진실 공급원)
 #
 # 2026-07-07 개정 (Edward 지시 — 방안 B): develop에 branch protection(Required status
 # check "Regression Tests")이 적용되어 기본 GITHUB_TOKEN(신원=github-actions[bot], admin

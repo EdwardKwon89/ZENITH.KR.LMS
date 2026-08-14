@@ -2,8 +2,10 @@
 """Regenerate the auto-synced GitHub Issues section in .agent/ACTIVE_TASK.md.
 
 Reads open issues via `gh issue list` and rewrites the block between the
-GH_ISSUES_SYNC markers. Everything outside the markers (the hand-curated
-team task tables) is left untouched.
+GH_ISSUES_SYNC markers. Everything outside the markers (usage notes, team
+branch/PR conventions) is left untouched. The file no longer carries a
+hand-curated team task table (retired 2026-08-14, R-17 v3.0) — GitHub
+Issues/PRs are the sole source of truth for task state.
 """
 import json
 import re

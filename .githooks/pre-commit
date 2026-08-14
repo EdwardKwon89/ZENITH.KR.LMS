@@ -1,7 +1,8 @@
 #!/bin/bash
 # ZENITH_LMS — Pre-commit Gate
 # R-08: 회귀 테스트 통과 필수 (R-01 에이전트 태그는 commit-msg 훅에서 검증)
-# R-17: ACTIVE_TASK 체계 준수 (구 R-TB TASK_BOARD 보호 → 폐기 2026-05-16)
+# R-17 v3.0(2026-08-14): Task 상태는 GitHub Issue 라벨로 관리 — .agent/ACTIVE_TASK.md는
+# GitHub Action 전용 자동 미러이므로 Agent 커밋에 동봉할 대상이 아니다.
 
 set -e
 
@@ -21,19 +22,16 @@ if [ -f "$REGRESSION_FILE" ]; then
   fi
 fi
 
-# ── R-17: ACTIVE_TASK 동기화 경고 ─────────────────────────────────
-# Task 상세 파일 변경 시 ACTIVE_TASK.md도 함께 변경됐는지 확인
+# ── R-17: GitHub Issue 라벨 갱신 리마인더 ─────────────────────────
+# Task 상세 파일 변경 시 GitHub Issue 라벨(status:in-progress/review 등) 갱신을 잊지 않도록 안내
 TASK_FILES=$(git diff --cached --name-only | grep "^\.agent/tasks/TASK-" || true)
 
 if [ -n "$TASK_FILES" ]; then
-  if ! git diff --cached --name-only | grep -q "^\.agent/ACTIVE_TASK\.md$"; then
-    echo ""
-    echo "⚠️  경고: Task 상세 파일 변경 시 ACTIVE_TASK.md 동기화 권장 (R-17)"
-    echo "   변경된 Task 파일:"
-    echo "$TASK_FILES" | sed 's/^/     /'
-    echo "   ACTIVE_TASK.md 상태가 이미 최신이면 무시하십시오."
-    echo ""
-  fi
+  echo ""
+  echo "ℹ️  참고: Task 상세 파일 변경분이 있습니다 — GitHub Issue 라벨(status:*) 갱신을 잊지 마십시오 (R-17 v3.0)."
+  echo "   변경된 Task 파일:"
+  echo "$TASK_FILES" | sed 's/^/     /'
+  echo ""
 fi
 
 echo "✅ Pre-commit 게이트 통과 — 커밋 진행"

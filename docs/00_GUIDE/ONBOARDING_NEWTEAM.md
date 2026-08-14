@@ -75,18 +75,18 @@ npm run test:regression    # 전체 회귀 테스트 — 모두 PASS 확인 후 
 
 ## 3. 핵심 거버넌스 규칙 (반드시 숙지)
 
-### R-17 작업 관리 (가장 중요)
+### R-17 작업 관리 (가장 중요, v3.0)
 
-모든 작업은 `.agent/ACTIVE_TASK.md` 기반으로 관리됩니다.
+모든 작업은 **GitHub Issue/PR**로 관리됩니다. `.agent/ACTIVE_TASK.md`는 열람용 자동 미러일 뿐이며, `IMP_PROGRESS.md`는 폐지되었습니다 — 어느 쪽도 수기 갱신 대상이 아닙니다.
 
 **커밋 순서 — 절대 준수**:
 ```
 1. [코드 커밋]  [Dev_B] feat: TASK-XXX 설명 (코드 파일만)
-2. [task file 🔔 업데이트] — [작업결과] 섹션 기재 + 커밋 해시 포함
-3. [ACTIVE_TASK.md] 상태 🔔 반영
-4. [IMP_PROGRESS.md] 해당 IMP 행 🔔 갱신
-5. check-R17-DoD 자가 검증 실행 → 전항목 통과 확인
-6. [문서 커밋]  [Dev_B] docs: TASK-XXX 완료 보고
+2. [task file 업데이트] — [작업결과] 섹션 기재 + 커밋 해시 포함
+3. gh issue edit #NNN --add-label status:review --remove-label status:in-progress
+4. check-R17-DoD 자가 검증 실행 → 전항목 통과 확인
+5. [문서 커밋]  [Dev_B] docs: TASK-XXX 완료 보고
+6. PR 생성 (`Closes #NNN`)
 ```
 
 > ⚠️ **코드 커밋에 문서 파일 포함 금지 (위반 시 반려)**
@@ -199,27 +199,27 @@ feature/ups-spr{NN}-devteam-{작업명}
 ### PR 체크리스트 (merge 전 필수)
 
 - [ ] 회귀 테스트 전체 PASS (결과 PR에 첨부)
-- [ ] ACTIVE_TASK.md 상태 🔔 확인
+- [ ] GitHub Issue 라벨 `status:review` 확인
 - [ ] DoD 모든 항목 `[x]` 체크
 - [ ] 커밋 해시 task file에 기재
 - [ ] 코드 커밋과 문서 커밋 분리 확인
 
 ---
 
-## 7. ACTIVE_TASK.md 운영 방법
+## 7. GitHub Issue 기반 작업 운영 방법
 
-### Task 상태 전환
+### Task 상태 전환 (Issue 라벨)
 
 ```
-⬜ (미착수) → 🔄 (구현 중) → 🔔 (검토 요청) → ✅ (Aiden 승인)
+status:open (미착수) → status:in-progress (구현 중) → status:review (검토 요청) → 머지·Close (Aiden 승인)
 ```
 
 ### Team B 착수 절차
 
-1. `.agent/ACTIVE_TASK.md`에서 Team B 할당 Task 확인
-2. `.agent/tasks/TASK-XXX_*.md` 상세 파일 읽기
+1. `gh issue list --assignee <본인>`으로 할당 Issue 확인
+2. `.agent/tasks/TASK-XXX_*.md` 상세 파일 읽기(없으면 Issue 본문 기반 신규 생성)
 3. 브랜치 생성: `git checkout -b feature/ups-spr01-devteam-agency-role develop`
-4. 작업 착수 시 상태 ⬜→🔄 변경 + ACTIVE_TASK.md 동시 반영
+4. 작업 착수 시 `gh issue edit #NNN --add-label status:in-progress --remove-label status:open` 실행
 
 ### Task 파일 작성 방법
 
@@ -239,7 +239,7 @@ feature/ups-spr{NN}-devteam-{작업명}
 git checkout develop
 git pull origin develop
 git checkout -b feature/ups-spr01-devteam-agency-role
-# 작업 시작 후 ACTIVE_TASK.md 상태 ⬜→🔄 변경
+# 작업 시작 후: gh issue edit #NNN --add-label status:in-progress --remove-label status:open
 ```
 
 **완료 기준 (DoD)**:
@@ -270,7 +270,7 @@ git checkout -b feature/ups-spr01-devteam-agency-role
 | 거버넌스 공통 규칙 | `GOV_COMMON.md` | R-01~R-18 전체 규칙 |
 | Phase 7 설계 | `docs/02_Analysis/An_12_Phase7_UPS특송서비스_설계.md` | DB 스키마 + API 명세 |
 | Phase 6 설계 (참조) | `docs/02_Analysis/An_11_Phase6_신규서비스역할모델_설계.md` | 기존 패턴 참조 |
-| 활성 Task 인덱스 | `.agent/ACTIVE_TASK.md` | 작업 관리 단일 소스 |
-| IMP 진척 현황 | `scratch/IMP_PROGRESS.md` | IMP 완료 현황 |
+| 작업 현황 조회 | `gh issue list` / `gh pr list` | 작업 관리 단일 소스(진실 공급원) |
+| 작업 현황 미러(열람용) | `.agent/ACTIVE_TASK.md` | GitHub Action 자동 생성, 수기 편집 금지 |
 | 고객 리뷰 원본 | `docs/80_RawData/고객 Review 20260609.md` | 요구사항 원문 |
 | UPS Interface 명세 | `docs/80_RawData/20260609 IBC和UPS Interface.pdf` | IBC/Pactrak API |
