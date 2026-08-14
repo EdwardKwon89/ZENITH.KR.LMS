@@ -27,6 +27,7 @@ interface UpsOrderStatusStepperProps {
   currentStatus: string;
   trackingNumber?: string | null;
   canManuallySetDelivered?: boolean;
+  statusHistory?: { next_status: string; created_at: string }[];
 }
 
 const STEPPER_STAGES: { status: OrderStatus; label: string; icon: React.ElementType }[] = [
@@ -44,6 +45,7 @@ export default function UpsOrderStatusStepper({
   currentStatus,
   trackingNumber,
   canManuallySetDelivered = true,
+  statusHistory,
 }: UpsOrderStatusStepperProps) {
   const [isPending, startTransition] = useTransition();
   const [isManualPending, startManualTransition] = useTransition();
@@ -168,6 +170,14 @@ export default function UpsOrderStatusStepper({
                 const isCompleted = currentStepIndex >= 0 && idx < currentStepIndex;
                 const isCurrent = currentStepIndex >= 0 && idx === currentStepIndex;
 
+                // TASK-B-301 (Issue #1121): 최근 전이 시각 (같은 상태 재방문 시 최신 우선)
+                const stageCreatedAt = [...(statusHistory ?? [])].reverse().find((h) => h.next_status === stage.status)?.created_at;
+                let stageTime = '';
+                if (stageCreatedAt) {
+                  const parsed = new Date(stageCreatedAt);
+                  if (!isNaN(parsed.getTime())) stageTime = parsed.toLocaleString('ko-KR');
+                }
+
                 return (
                   <div key={stage.status} className="flex flex-col items-center gap-2 text-center group">
                     {/* Step Icon Circle */}
@@ -199,6 +209,13 @@ export default function UpsOrderStatusStepper({
                     >
                       {stage.label}
                     </span>
+
+                    {/* TASK-B-301 (Issue #1121): 단계별 전이 시각 (미도달 단계는 미표시) */}
+                    {stageTime && (
+                      <span className="text-[9px] text-slate-400 leading-tight">
+                        {stageTime}
+                      </span>
+                    )}
 
                     {/* Step Indicator Dot / Line */}
                     <div className="w-full flex items-center justify-center gap-1 mt-1">

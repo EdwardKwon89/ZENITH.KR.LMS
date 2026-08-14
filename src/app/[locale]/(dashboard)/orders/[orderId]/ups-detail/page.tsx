@@ -6,12 +6,12 @@ import { getUpsLabelStatus } from '@/app/actions/operations/ups-labels';
 import { getUpsTrackingEvents } from '@/app/actions/operations/tracking';
 import { checkPermission } from '@/lib/auth/rbac';
 import { notFound, redirect } from 'next/navigation';
-import Link from 'next/link';
-import { ArrowLeft, Truck, FileText, User } from 'lucide-react';
+import { Truck, FileText, User } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
 
 import { ZenCard, ZenBadge } from '@/components/ui/ZenUI';
 import UpsOrderStatusStepper from '@/components/ups/UpsOrderStatusStepper';
+import UpsDetailBackToListButton from '@/components/ups/UpsDetailBackToListButton';
 import UpsPackageItemsModal from '@/components/ups/UpsPackageItemsModal';
 import UpsOrderBreakdownCard from '@/components/ups/UpsOrderBreakdownCard';
 import { UpsActualAdjustmentForm } from '@/components/orders/UpsActualAdjustmentForm';
@@ -88,6 +88,13 @@ export default async function UpsOrderDetailPage({ params }: UpsOrderDetailPageP
   const { data: invoice } = linkedInvoiceId
     ? await supabase.from('zen_invoices').select('id, invoice_no, total_amount, status').eq('id', linkedInvoiceId).single()
     : { data: null };
+
+  // TASK-B-301 (Issue #1121): Fetch Order Status History for stage-wise transition timestamps
+  const { data: statusHistory } = await supabase
+    .from('order_status_history')
+    .select('prev_status, next_status, created_at')
+    .eq('order_id', orderId)
+    .order('created_at', { ascending: true });
 
   // Fetch UPS Tracking Events (zen_ups_tracking_events)
   const upsTrackingData = await getUpsTrackingEvents(orderId);
@@ -225,13 +232,8 @@ export default async function UpsOrderDetailPage({ params }: UpsOrderDetailPageP
     <div className="flex-1 flex flex-col gap-6 p-4 md:p-8 max-w-7xl mx-auto w-full">
       {/* Navigation Header */}
       <div className="flex items-center justify-between">
-        <Link
-          href={`/orders/${orderId}`}
-          className="inline-flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          일반 오더 상세 보기로 이동
-        </Link>
+        {/* TASK-B-301 (Issue #1121): router.back() 목록보기 버튼 (기존 일반 오더 상세 Link 교체) */}
+        <UpsDetailBackToListButton />
         <ZenBadge className="text-xs font-mono font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
           UPS Special Delivery Detail
         </ZenBadge>
@@ -247,6 +249,7 @@ export default async function UpsOrderDetailPage({ params }: UpsOrderDetailPageP
             currentStatus={order.status || ''}
             trackingNumber={upsLabelStatus.trackingNumber}
             canManuallySetDelivered={isAdmin || isAgency}
+            statusHistory={statusHistory || []}
           />
 
           {/* 2. UPS Breakdown & Cargo Details (with Items Modal trigger) */}
