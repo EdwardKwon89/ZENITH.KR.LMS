@@ -117,6 +117,10 @@
 | **TC-UPS-WH-03** | 창고 출고 — 상태 전이 | WAREHOUSED→RELEASED 전이 유지 | `tests/unit/warehouse/outbound-ups.test.ts` |
 | **TC-DEF-B065-01** | UPS 운임 카드 Zone 표시 | 스냅샷 중첩 경로(`platform.breakdown.zone`) 참조로 Zone 7 표시 + 미존재 시 `-`(하드코딩 `Zone 5` 폴백 회귀 방지, DEF-B-065) | `tests/unit/components/ups-order-breakdown-card.test.tsx` |
 | **TC-DEF-B065-02** | UPS 운임 카드 통화 3자리 쉼표 | 1,000 이상 금액 5개 항목(기본/유류/급증/기타/총액) `toLocaleString` 쉼표 표시(DEF-B-065) | `tests/unit/components/ups-order-breakdown-card.test.tsx` |
+| **TC-DEF-B066-01** | UPS 운임 카드 상품명 표시 | `platform.breakdown.product.product_name` 참조로 실제 상품명 표시 + 미존재 시 `-`(하드코딩 `UPS Express` 폴백 회귀 방지, DEF-B-066) | `tests/unit/components/ups-order-breakdown-card.test.tsx` |
+| **TC-B300-04-01** | UPS 운임 카드 청구중량(Billing Weight) 표시 | `platform.breakdown.billingWeightKg`(5)와 chargeable(4.8) 구분 표시 + 미존재 시 billable 폴백(TASK-B-300 ④) | `tests/unit/components/ups-order-breakdown-card.test.tsx` |
+| **TC-B300-02-01** | ups-detail 배송 기본 정보 카드 확장 | 화주/수하인 연락처·이메일·주소(detail 이어붙임) 표시, 값 없으면 항목 숨김(TASK-B-300 ②) | `tests/unit/orders/ups-detail-b300.test.tsx` |
+| **TC-B300-03-01** | ups-detail Settlement Preview 제거 | ups-detail 렌더 시 "Settlement Preview" 미출현 + 일반 오더 상세 화면에는 여전히 표시(회귀 방지, TASK-B-300 ③) | `tests/unit/orders/ups-detail-b300.test.tsx`, `tests/unit/orders/order-detail-settlement-b300.test.tsx` |
 
 ### 10. UPS 일마감 (Phase 7 SPR-05 Daily Close)
 | ID | 테스트 항목 | 목적 | 파일 경로 |

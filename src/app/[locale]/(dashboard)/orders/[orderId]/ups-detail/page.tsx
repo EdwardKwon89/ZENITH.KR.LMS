@@ -15,7 +15,6 @@ import UpsOrderStatusStepper from '@/components/ups/UpsOrderStatusStepper';
 import UpsPackageItemsModal from '@/components/ups/UpsPackageItemsModal';
 import UpsOrderBreakdownCard from '@/components/ups/UpsOrderBreakdownCard';
 import { UpsActualAdjustmentForm } from '@/components/orders/UpsActualAdjustmentForm';
-import OrderFinanceSummary from '@/components/finance/OrderFinanceSummary';
 import UpsTrackingEventsList from '@/components/tracking/UpsTrackingEventsList';
 import DocumentDownloadButton from '@/components/documents/DocumentDownloadButton';
 import { resolveDestCountryCode } from '@/lib/ups/order-helpers';
@@ -89,10 +88,6 @@ export default async function UpsOrderDetailPage({ params }: UpsOrderDetailPageP
   const { data: invoice } = linkedInvoiceId
     ? await supabase.from('zen_invoices').select('id, invoice_no, total_amount, status').eq('id', linkedInvoiceId).single()
     : { data: null };
-
-  const { data: incidentFees } = linkedInvoiceId
-    ? await supabase.from('zen_incident_fees').select('id, description, currency, fee_amount').eq('invoice_id', linkedInvoiceId)
-    : { data: [] };
 
   // Fetch UPS Tracking Events (zen_ups_tracking_events)
   const upsTrackingData = await getUpsTrackingEvents(orderId);
@@ -331,11 +326,29 @@ export default async function UpsOrderDetailPage({ params }: UpsOrderDetailPageP
               <div>
                 <span className="text-slate-400 block font-semibold">화주 (Shipper)</span>
                 <span className="font-bold text-slate-800 dark:text-gray-200">{order.shipper_name || order.shipper?.name || 'Standard Shipper'}</span>
+                {order.shipper_contact_phone && (
+                  <span className="text-slate-500 block">연락처: {order.shipper_contact_phone}</span>
+                )}
+                {order.shipper_contact_email && (
+                  <span className="text-slate-500 block">이메일: {order.shipper_contact_email}</span>
+                )}
+                {(order.shipper_address || (order.shipper as any)?.address) && (
+                  <span className="text-slate-500 block">
+                    주소: {order.shipper_address || (order.shipper as any)?.address}
+                    {order.shipper_address_detail ? ` ${order.shipper_address_detail}` : ''}
+                  </span>
+                )}
               </div>
               <div>
                 <span className="text-slate-400 block font-semibold">수령인 (Consignee)</span>
                 <span className="font-bold text-slate-800 dark:text-gray-200">{order.recipient_name}</span>
-                <span className="text-slate-500 block">{order.recipient_address}</span>
+                {(order.recipient_contact || order.recipient_phone) && (
+                  <span className="text-slate-500 block">연락처: {order.recipient_contact || order.recipient_phone}</span>
+                )}
+                {order.recipient_email && (
+                  <span className="text-slate-500 block">이메일: {order.recipient_email}</span>
+                )}
+                {order.recipient_address && <span className="text-slate-500 block">주소: {order.recipient_address}</span>}
               </div>
               <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-zinc-800">
                 <span className="text-slate-400">주문 상태</span>
@@ -344,15 +357,7 @@ export default async function UpsOrderDetailPage({ params }: UpsOrderDetailPageP
             </div>
           </ZenCard>
 
-          {/* Finance Summary Component */}
-          <OrderFinanceSummary
-            orderId={orderId}
-            initialCosts={costs || []}
-            initialInvoice={invoice || null}
-            incidentFees={incidentFees || []}
-            isAdmin={isAdmin}
-            canManageFinance={canManageFinance}
-          />
+          {/* Finance Summary Component — Settlement Preview 제거 (TASK-B-300 ③) */}
         </div>
       </div>
     </div>

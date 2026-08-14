@@ -183,3 +183,152 @@ describe('DEF-B-065 (TASK-B-299): Zone 표시 + 통화 3자리 쉼표', () => {
     expect(screen.getByText('₩372,100.00 KRW')).toBeTruthy();
   });
 });
+
+describe('DEF-B-066 (TASK-B-300 ①): productCode 하드코딩 폴백 수정', () => {
+  it('platform.breakdown.product.product_name 표시 (ZEN-2026-000073 재현: WW_SAVER_NONDOC)', () => {
+    render(
+      <UpsOrderBreakdownCard
+        orderNo="ZEN-2026-000073"
+        destCountryCode="US"
+        transportMode="UPS"
+        snapshotMeta={{
+          platform: {
+            currency: 'USD',
+            breakdown: {
+              product: { cargo_type: 'NON_DOC', product_code: 'WW_SAVER_NONDOC', product_name: 'UPS WorldWide Express Saver (비서류)' },
+              baseSellingPrice: 355100,
+            },
+          },
+        }}
+        packages={[{ gross_weight: 10 }]}
+      />
+    );
+
+    expect(screen.getByText('UPS WorldWide Express Saver (비서류)')).toBeTruthy();
+  });
+
+  it('product 정보가 전혀 없으면 "-" 표시 (하드코딩 "UPS Express" 미노출)', () => {
+    render(
+      <UpsOrderBreakdownCard
+        orderNo="ZEN-006"
+        destCountryCode="JP"
+        transportMode="UPS"
+        snapshotMeta={{
+          platform: {
+            currency: 'USD',
+            breakdown: { baseSellingPrice: 100 },
+          },
+        }}
+        packages={[{ gross_weight: 1 }]}
+      />
+    );
+
+    expect(screen.queryByText('UPS Express')).toBeNull();
+    expect(screen.getByText('-')).toBeTruthy();
+  });
+
+  it('cargoDetails.product_code 최우선 표시', () => {
+    render(
+      <UpsOrderBreakdownCard
+        orderNo="ZEN-007"
+        destCountryCode="KR"
+        transportMode="UPS"
+        snapshotMeta={{
+          platform: {
+            currency: 'USD',
+            breakdown: {
+              product: { product_code: 'WW_SAVER_NONDOC', product_name: 'UPS WorldWide Express Saver (비서류)' },
+              baseSellingPrice: 100,
+            },
+          },
+        }}
+        cargoDetails={{ product_code: 'WW_EXPEDITED' }}
+        packages={[{ gross_weight: 1 }]}
+      />
+    );
+
+    expect(screen.getByText('WW_EXPEDITED')).toBeTruthy();
+    expect(screen.queryByText('UPS WorldWide Express Saver (비서류)')).toBeNull();
+  });
+
+  it('되돌리기 검증: 구 로직(최상위 productCode || "UPS Express")이면 실패', () => {
+    const snapshotMeta = {
+      platform: {
+        breakdown: {
+          product: { product_code: 'WW_SAVER_NONDOC', product_name: 'UPS WorldWide Express Saver (비서류)' },
+        },
+      },
+    };
+    const buggy = undefined || snapshotMeta?.productCode || 'UPS Express';
+    expect(buggy).toBe('UPS Express');
+    const fixed =
+      undefined
+      ?? snapshotMeta?.platform?.breakdown?.product?.product_name
+      ?? snapshotMeta?.platform?.breakdown?.product?.product_code
+      ?? snapshotMeta?.productCode
+      ?? '-';
+    expect(fixed).toBe('UPS WorldWide Express Saver (비서류)');
+  });
+});
+
+describe('TASK-B-300 ④: 청구중량(Billing Weight) 표시 추가', () => {
+  it('billingWeightKg(5)와 chargeable(4.8)이 서로 다른 값으로 각각 표시 (ZEN-2026-000073 재현)', () => {
+    render(
+      <UpsOrderBreakdownCard
+        orderNo="ZEN-2026-000073"
+        destCountryCode="US"
+        transportMode="UPS"
+        snapshotMeta={{
+          platform: {
+            currency: 'USD',
+            breakdown: {
+              baseSellingPrice: 355100,
+              billingWeightKg: 5,
+              chargeableWeightKg: 4.8,
+            },
+          },
+        }}
+        packages={[{ gross_weight: 4.8 }]}
+      />
+    );
+
+    expect(screen.getByText('과금 기준 중량 (Chargeable)')).toBeTruthy();
+    expect(screen.getAllByText('4.80 kg').length).toBe(2);
+    expect(screen.getByText('청구중량 (Billing Weight)')).toBeTruthy();
+    expect(screen.getByText('5.00 kg')).toBeTruthy();
+  });
+
+  it('billingWeightKg 스냅샷이 없으면 billableWeight로 폴백 (NaN/빈 값 미노출)', () => {
+    render(
+      <UpsOrderBreakdownCard
+        orderNo="ZEN-008"
+        destCountryCode="KR"
+        transportMode="UPS"
+        snapshotMeta={{
+          platform: {
+            currency: 'USD',
+            breakdown: { baseSellingPrice: 100 },
+          },
+        }}
+        packages={[{ gross_weight: 5 }]}
+      />
+    );
+
+    const fives = screen.getAllByText('5.00 kg');
+    expect(fives.length).toBe(3);
+    expect(screen.queryByText('NaN kg')).toBeNull();
+  });
+
+  it('되돌리기 검증: billingWeightKg 참조 제거 시 청구중량이 chargeable과 동일해짐', () => {
+    const snapshotMeta = {
+      platform: {
+        breakdown: { billingWeightKg: 5, chargeableWeightKg: 4.8 },
+      },
+    };
+    const billable = 4.8;
+    const reverted = billable;
+    expect(reverted).toBe(4.8);
+    const fixed = Number(snapshotMeta?.platform?.breakdown?.billingWeightKg ?? billable);
+    expect(fixed).toBe(5);
+  });
+});

@@ -22,7 +22,12 @@ export default function UpsOrderBreakdownCard({
   packages = [],
 }: UpsOrderBreakdownCardProps) {
   // Extract Zone and Product info
-  const productCode = cargoDetails?.product_code || snapshotMeta?.productCode || 'UPS Express';
+  const productCode =
+    cargoDetails?.product_code
+    ?? snapshotMeta?.platform?.breakdown?.product?.product_name
+    ?? snapshotMeta?.platform?.breakdown?.product?.product_code
+    ?? snapshotMeta?.productCode
+    ?? '-';
   const zoneId =
     snapshotMeta?.platform?.breakdown?.zone?.zone_name
     ?? snapshotMeta?.platform?.breakdown?.zone?.zone_code
@@ -36,6 +41,7 @@ export default function UpsOrderBreakdownCard({
     return sum + (vol * 1000000) / 5000;
   }, 0);
   const billableWeight = Math.max(actualWeight, totalVolumetricWeight, Number(snapshotMeta?.chargeableWeight || 0));
+  const billingWeightKg = Number(snapshotMeta?.platform?.breakdown?.billingWeightKg ?? snapshotMeta?.platform?.billingWeightKg ?? billableWeight);
 
   // Extract Breakdown
   const platformMeta = snapshotMeta?.platform;
@@ -81,7 +87,7 @@ export default function UpsOrderBreakdownCard({
       </div>
 
       {/* Weight Grid */}
-      <div className="grid grid-cols-3 gap-3 bg-white/5 p-4 rounded-2xl border border-white/10">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 bg-white/5 p-4 rounded-2xl border border-white/10">
         <div className="flex flex-col gap-1">
           <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">실측 총 중량 (Gross)</span>
           <span className="text-sm font-bold font-mono text-slate-200">{actualWeight.toFixed(2)} kg</span>
@@ -92,9 +98,15 @@ export default function UpsOrderBreakdownCard({
         </div>
         <div className="flex flex-col gap-1">
           <span className="text-[10px] text-amber-400 font-bold uppercase tracking-wider flex items-center gap-1">
-            <Scale className="w-3 h-3" /> 청구 대상 중량 (Billable)
+            <Scale className="w-3 h-3" /> 과금 기준 중량 (Chargeable)
           </span>
-          <span className="text-base font-extrabold font-mono text-amber-300">{billableWeight.toFixed(2)} kg</span>
+          <span className="text-sm font-extrabold font-mono text-amber-300">{billableWeight.toFixed(2)} kg</span>
+        </div>
+        <div className="flex flex-col gap-1">
+          <span className="text-[10px] text-amber-400 font-bold uppercase tracking-wider flex items-center gap-1">
+            <Scale className="w-3 h-3" /> 청구중량 (Billing Weight)
+          </span>
+          <span className="text-base font-extrabold font-mono text-amber-300">{billingWeightKg.toFixed(2)} kg</span>
         </div>
       </div>
 
