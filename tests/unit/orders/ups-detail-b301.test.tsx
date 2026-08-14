@@ -41,6 +41,7 @@ vi.mock('@/lib/auth/guards', () => ({
 vi.mock('@/lib/auth/rbac', () => ({ checkPermission: vi.fn().mockReturnValue(false) }));
 vi.mock('@/app/actions/operations/orders', () => ({
   getOrderDetails: vi.fn(),
+  getOrderEditHistory: vi.fn().mockResolvedValue([]),
 }));
 vi.mock('@/app/actions/operations/tisa', () => ({
   getOrderRateSnapshot: vi.fn().mockResolvedValue({ metadata: {} }),

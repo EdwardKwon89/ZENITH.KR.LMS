@@ -1,6 +1,6 @@
 import React from 'react';
 import { requireAuth } from '@/lib/auth/guards';
-import { getOrderDetails } from '@/app/actions/operations/orders';
+import { getOrderDetails, getOrderEditHistory } from '@/app/actions/operations/orders';
 import { getOrderRateSnapshot } from '@/app/actions/operations/tisa';
 import { getUpsLabelStatus } from '@/app/actions/operations/ups-labels';
 import { getUpsTrackingEvents } from '@/app/actions/operations/tracking';
@@ -14,6 +14,7 @@ import UpsOrderStatusStepper from '@/components/ups/UpsOrderStatusStepper';
 import UpsDetailBackToListButton from '@/components/ups/UpsDetailBackToListButton';
 import UpsPackageItemsModal from '@/components/ups/UpsPackageItemsModal';
 import UpsOrderBreakdownCard from '@/components/ups/UpsOrderBreakdownCard';
+import UpsOrderEditHistoryPanel from '@/components/ups/UpsOrderEditHistoryPanel';
 import { UpsActualAdjustmentForm } from '@/components/orders/UpsActualAdjustmentForm';
 import UpsTrackingEventsList from '@/components/tracking/UpsTrackingEventsList';
 import DocumentDownloadButton from '@/components/documents/DocumentDownloadButton';
@@ -95,6 +96,9 @@ export default async function UpsOrderDetailPage({ params }: UpsOrderDetailPageP
     .select('prev_status, next_status, created_at')
     .eq('order_id', orderId)
     .order('created_at', { ascending: true });
+
+  // TASK-B-303 (Issue #1125): Fetch Order Edit History (zen_order_edit_log)
+  const editHistory = await getOrderEditHistory(orderId);
 
   // Fetch UPS Tracking Events (zen_ups_tracking_events)
   const upsTrackingData = await getUpsTrackingEvents(orderId);
@@ -286,7 +290,10 @@ export default async function UpsOrderDetailPage({ params }: UpsOrderDetailPageP
             <UpsTrackingEventsList events={upsTrackingEvents} />
           </section>
 
-          {/* 5. Trade Documents Section */}
+          {/* 5. Order Edit History Panel (TASK-B-303 / Issue #1125) */}
+          <UpsOrderEditHistoryPanel history={editHistory} />
+
+          {/* 6. Trade Documents Section */}
           <ZenCard className="p-6 flex flex-col gap-4">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-bold text-slate-900 dark:text-gray-100 flex items-center gap-2">
