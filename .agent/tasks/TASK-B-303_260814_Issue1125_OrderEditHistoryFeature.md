@@ -166,7 +166,35 @@ export async function getOrderEditHistory(orderId: string) {
 
 ## [작업 결과]
 
-_(Baker 작성 예정)_
+**완료일:** 2026-08-14 (Baker) — Issue #1125 해결
+
+### 구현
+1. **마이그레이션** `supabase/migrations/20260814010000_iss1125_order_edit_log_action.sql`
+   - `zen_order_edit_log` 확장: `action VARCHAR(20) NOT NULL DEFAULT 'UPDATE'`(기존 행 백필 후 DEFAULT 제거) + `old_data`/`new_data` JSONB + COMMENT 3건. 로컬 DB(docker) 적용 완료.
+2. **화이트리스트** `src/lib/orders/edit-log-fields.ts` (신규)
+   - `ORDER_EDIT_LOG_CORE_FIELDS`(32필드) + `ORDER_EDIT_LOG_FIELD_LABELS`(한글 라벨) + `extractOrderEditLogSnapshot()`
+   - `estimated_cost`/`packages`/`items`/`origin_port_id`/`dest_port_id`는 **명시 제외** — 요율 재계산·포장 흐름에 의한 로그 오염 방지.
+3. **기록 로직** `src/app/actions/operations/orders.ts`
+   - `createOrder`: 등록 시 `action='CREATE'`, `old_data=null`, `new_data=스냅샷`, `order_status_at_edit='REGISTERED'` 기록.
+   - `updateOrder`: `hasChanges` 가드(JSON.stringify 화이트리스트 비교) → 변경 있을 때만 UPDATE 기록. 기존 WAREHOUSED+UPS 한정 `auditEdit` 블록은 전체 오더 기록으로 일반화(기존 TASK-B-284 동작 유지).
+   - `getOrderEditHistory(orderId)` 신설 — edited_at desc + 편집자명 attach.
+4. **UI 패널** `src/components/ups/UpsOrderEditHistoryPanel.tsx` (신규) + `ups-detail/page.tsx` 연동
+   - CREATE: new_data 전체 검정 표시 / UPDATE: 변경 필드만 `old(취소선)→new(굵게)` diff. 편집자(`?? '시스템'`), 시각 `toLocaleString('ko-KR')`. 이력 0건 시 패널 미렌더. **UPS 오더 상세 한정**(일반 오더 회귀 방지).
+
+### 검증
+- **단위 테스트** `tests/unit/orders/order-edit-log-b303.test.tsx` 7건 PASS(TC-B303-01~07)
+- **통합 테스트(실 DB)** `tests/integration/iss1125-order-edit-log.test.ts` 5건 PASS(TC-B303-08~12) — createOrder 실DB CASE(TC-B303-12) 포함
+- **독립 되돌리기 검증** 4종(hasChanges 가드 제거/CREATE insert 제거/estimated_cost 포함/UPDATE 블록 제거) 각각 정확히 FAIL 재현 후 원복, 5/5 PASS 복귀 확인
+- **전체 회귀** 198 files / **1364/1364 PASS** (3회차) + `npm run build` SUCCESS + tsc --noEmit src 에러 0건
+- **R-10 실UI** `scratch/task-b-303-r10.spec.ts` 4/4 PASS — ①CREATE 이력 1건+등록값 표시 ②연락처 변경→UPDATE diff ③무변경 재저장→건수 유지 ④일반 오더 패널 없음 (스크린샷 `scratch/task-b-303-r10/`)
+- **회귀 맵** `LIVE_REGRESSION_TEST_MAP.md` 9번 섹션에 TC-B303-01~12 등재 완료
+
+### 산출물
+- `supabase/migrations/20260814010000_iss1125_order_edit_log_action.sql`
+- `src/lib/orders/edit-log-fields.ts`, `src/components/ups/UpsOrderEditHistoryPanel.tsx`
+- `src/app/actions/operations/orders.ts`(createOrder/updateOrder/getOrderEditHistory), `src/app/[locale]/(dashboard)/orders/[orderId]/ups-detail/page.tsx`
+- `tests/unit/orders/order-edit-log-b303.test.tsx`, `tests/integration/iss1125-order-edit-log.test.ts`
+- 기존 mock 갱신: `ups-detail-b300.test.tsx`·`b301.test.tsx`(getOrderEditHistory), `delivery-method.test.ts`(insert)
 
 ## [Jaison 최종 검토]
 
