@@ -171,12 +171,19 @@ export const ORDER_EDIT_LOG_ACTION_LABELS: Record<string, string> = {
 };
 
 // TASK-B-311 (Issue #1145): 화물 스냅샷 — 패키지/품목 변경 이력용
+export interface CargoSummaryItem {
+  item_name: string;
+  quantity: number;
+  unit_price: number;
+  hs_code: string | null;
+}
+
 export interface CargoSummarySnapshot {
   package_count: number;
   total_weight: number;
   total_volume: number;
   item_count: number;
-  item_names: string[];
+  items: CargoSummaryItem[];
 }
 
 // 패키지 배열에서 화물 스냅샷 추출
@@ -184,13 +191,13 @@ export function extractCargoSummarySnapshot(
   packages: Record<string, unknown>[] | undefined | null,
 ): CargoSummarySnapshot {
   if (!packages || packages.length === 0) {
-    return { package_count: 0, total_weight: 0, total_volume: 0, item_count: 0, item_names: [] };
+    return { package_count: 0, total_weight: 0, total_volume: 0, item_count: 0, items: [] };
   }
 
   let totalWeight = 0;
   let totalVolume = 0;
   let itemCount = 0;
-  const itemNames: string[] = [];
+  const items: CargoSummaryItem[] = [];
 
   for (const pkg of packages) {
     totalWeight += Number(pkg.gross_weight ?? 0);
@@ -199,12 +206,15 @@ export function extractCargoSummarySnapshot(
       : 0);
     totalVolume += Number(vol);
 
-    const items = (pkg.items as Record<string, unknown>[]) || [];
-    itemCount += items.length;
-    for (const item of items) {
-      if (item.item_name && !itemNames.includes(item.item_name as string)) {
-        itemNames.push(item.item_name as string);
-      }
+    const pkgItems = (pkg.items as Record<string, unknown>[]) || [];
+    itemCount += pkgItems.length;
+    for (const item of pkgItems) {
+      items.push({
+        item_name: (item.item_name as string) || '',
+        quantity: Number(item.quantity ?? 0),
+        unit_price: Number(item.unit_price ?? 0),
+        hs_code: (item.hs_code as string) || null,
+      });
     }
   }
 
@@ -213,7 +223,7 @@ export function extractCargoSummarySnapshot(
     total_weight: totalWeight,
     total_volume: totalVolume,
     item_count: itemCount,
-    item_names: itemNames,
+    items,
   };
 }
 
@@ -229,7 +239,7 @@ export function cargoSummaryEquals(
     a.total_weight === b.total_weight &&
     a.total_volume === b.total_volume &&
     a.item_count === b.item_count &&
-    JSON.stringify(a.item_names) === JSON.stringify(b.item_names)
+    JSON.stringify(a.items) === JSON.stringify(b.items)
   );
 }
 
@@ -239,6 +249,9 @@ export function formatCargoSummary(snapshot: CargoSummarySnapshot): string {
   if (snapshot.package_count > 0) parts.push(`${snapshot.package_count}개 패키지`);
   if (snapshot.total_weight > 0) parts.push(`${snapshot.total_weight}kg`);
   if (snapshot.item_count > 0) parts.push(`${snapshot.item_count}개 품목`);
-  if (snapshot.item_names.length > 0) parts.push(`[${snapshot.item_names.join(', ')}]`);
+  if (snapshot.items.length > 0) {
+    const itemNames = [...new Set(snapshot.items.map((i) => i.item_name).filter(Boolean))];
+    if (itemNames.length > 0) parts.push(`[${itemNames.join(', ')}]`);
+  }
   return parts.length > 0 ? parts.join(' / ') : '화물 없음';
 }

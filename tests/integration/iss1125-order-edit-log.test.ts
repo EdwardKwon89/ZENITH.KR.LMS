@@ -199,7 +199,7 @@ describe('TASK-B-303: 오더 수정 이력 — zen_order_edit_log (Issue #1125)'
     let count = psql(`SELECT count(*) FROM public.zen_order_edit_log WHERE order_id='${ORDER}'`);
     expect(count).toBe('1');
 
-    // 2차: packages 구성만 변경(핵심 필드는 동일) → TASK-B-311: 화물 스냅샷 변경 시 로그 1건 추가
+    // 2차: packages 구성만 변경(핵심 필드는 동일) → 헤더 변경 없으면 로그 증가 없음
     await updateOrder(ORDER, buildPayload({
       packages: [
         {
@@ -218,8 +218,8 @@ describe('TASK-B-303: 오더 수정 이력 — zen_order_edit_log (Issue #1125)'
       ],
     }) as any);
     count = psql(`SELECT count(*) FROM public.zen_order_edit_log WHERE order_id='${ORDER}'`);
-    // TASK-B-311: 패키지 변경도 화물 스냅샷으로 기록되므로 총 2건
-    expect(count).toBe('2');
+    // TASK-B-311: 헤더 변경 없으면 로그 증가 없음 (화물 스냅샷은 헤더 변경과 함께 기록)
+    expect(count).toBe('1');
   });
 
   it('TC-B303-11: WAREHOUSED+UPS 부분수정 → 기존 TASK-B-284 감사 로직과 함께 UPDATE 기록 (실 DB)', async () => {

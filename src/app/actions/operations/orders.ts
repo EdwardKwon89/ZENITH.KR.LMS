@@ -108,6 +108,11 @@ export async function createOrder(payload: OrderRegistrationInput) {
 
   // TASK-B-303 (Issue #1125): 등록(CREATE) 이력 기록 — 화이트리스트 핵심 필드만 new_data에 스냅샷
   const newDataSnapshot = extractOrderEditLogSnapshot(validated as unknown as Record<string, unknown>);
+
+  // TASK-B-311 (Issue #1145): CREATE 시 화물 스냅샷 추가
+  const cargoSnapshot = extractCargoSummarySnapshot(validated.packages as Record<string, unknown>[] | undefined);
+  const newDataWithCargo = { ...newDataSnapshot, cargo_summary: cargoSnapshot };
+
   await supabase.from('zen_order_edit_log').insert({
     order_id: orderId,
     edited_by: profile.id,
@@ -115,7 +120,7 @@ export async function createOrder(payload: OrderRegistrationInput) {
     order_status_at_edit: 'REGISTERED',
     action: 'CREATE',
     old_data: null,
-    new_data: newDataSnapshot,
+    new_data: newDataWithCargo,
   });
 
   if (validated.transport_mode === 'UPS') {
@@ -241,9 +246,14 @@ export async function updateOrder(orderId: string, payload: OrderRegistrationInp
   const oldDataSnapshot = extractOrderEditLogSnapshot(order as Record<string, unknown>);
   const newDataSnapshot = extractOrderEditLogSnapshot(headerData as Record<string, unknown>);
 
-  // TASK-B-311 (Issue #1145): 화물 스냅샷 — 패키지/품목 변경 이력용
-  //   기존 패키지(삭제 전)와 새 패키지(저장 후)의 요약 스냅샷을 old/new_data에 추가
-  const { data: oldPackages } = await orderRepo.getPackagesByOrderId(orderId);
+  // TASK-B-311 (Issue #1145): 화물 스GMEM샷 — 패키지/품목 변경 이력용
+  //   기존 패키지+품목(삭제 전)과 새 패키지+품목(저장 후)의 요약 스냅샷을 old/new_data에 추가
+  //   oldItems는 위에서 이미 조회됨 (line 190)
+  const { data: oldPackagesRaw } = await orderRepo.getPackagesByOrderId(orderId);
+  const oldPackages = (oldPackagesRaw ?? []).map((pkg) => ({
+    ...pkg,
+    items: (oldItems ?? []).filter((item: any) => item.package_id === pkg.id),
+  }));
   const oldCargoSnapshot = extractCargoSummarySnapshot(oldPackages as Record<string, unknown>[]);
 
   // 이력 기록은 패키지 업데이트 후에 수행 (헤더+화물 변경을 단일 레코드로 기록)
@@ -346,18 +356,23 @@ export async function updateOrder(orderId: string, payload: OrderRegistrationInp
   }
 
   // TASK-B-311 (Issue #1145): 패키지/품목 변경 이력 기록
-  //   패키지 삭제 후 재insert된 새 패키지의 스냅샷 추출
-  const { data: updatedPackages } = await orderRepo.getPackagesByOrderId(orderId);
+  //   패키지 삭제 후 재insert된 새 패키지+품목의 스냅샷 추출
+  const { data: updatedPackagesRaw } = await orderRepo.getPackagesByOrderId(orderId);
+  const { data: updatedItems } = await orderRepo.getItemsFullByOrderId(orderId);
+  const updatedPackages = (updatedPackagesRaw ?? []).map((pkg) => ({
+    ...pkg,
+    items: (updatedItems ?? []).filter((item) => item.package_id === pkg.id),
+  }));
   const newCargoSnapshot = extractCargoSummarySnapshot(updatedPackages as Record<string, unknown>[]);
 
-  // 헤더 변경 또는 화물 변경이 있으면 이력 기록
+  // 헤더 변경이 있으면 이력 기록 (화물 변경만으로는 별도 로그 생성하지 않음 — 기존 정책 유지)
   const hasHeaderChanges = ORDER_EDIT_LOG_CORE_FIELDS.some(
     (f) => JSON.stringify(oldDataSnapshot[f]) !== JSON.stringify(newDataSnapshot[f])
   );
   const hasCargoChanges = JSON.stringify(oldCargoSnapshot) !== JSON.stringify(newCargoSnapshot);
 
-  if (hasHeaderChanges || hasCargoChanges) {
-    // 화물 스냅샷을 old/new_data에 추가
+  if (hasHeaderChanges) {
+    // 화물 스냅샷을 old/new_data에 추가 (헤더 변경과 함께 기록)
     const finalOldData = { ...oldDataSnapshot, cargo_summary: oldCargoSnapshot };
     const finalNewData = { ...newDataSnapshot, cargo_summary: newCargoSnapshot };
 
