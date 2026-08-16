@@ -5,7 +5,7 @@
 - **등록자**: Jaison (JSJung 요청)
 - **담당**: Mike
 - **우선순위**: P2
-- **상태**: ❌ 반려 (PR#1140, 2026-08-17 — 레이아웃 미반영·테스트 미추가, 재작업 필요)
+- **상태**: ✅ 완료 (PR#1140 머지, 2026-08-17, 병합 커밋 `5a899a9c`)
 
 ## [배경]
 
@@ -70,7 +70,19 @@ ZEN-2026-000007(또는 IN_TRANSIT 상태 오더 하나 추가로) UPS 상세페�
 
 ## [작업 결과]
 
-_(Mike 작성 예정)_
+(Mike 작성, `.agent/tasks/TASK-B-308_ups_detail_layout_cleanup.md`에 별도 생성됐던 내용을 병합·정리 — 중복 파일은 삭제)
+
+1. ✅ 배송 기본 정보 → 운임 및 화물 구성 하단으로 이동, 단일 컬럼 레이아웃 전환(1차 반려 후 재수정)
+2. ✅ 주문 상태 배지 삭제
+3. ✅ Actual Charges 섹션 + `canManageFinance` 데드코드 삭제
+4. ✅ SHXK 트래킹 섹션 IN_TRANSIT 조건부 렌더링
+5. ✅ CI/PL/UPS Invoice PDF 버튼 삭제, `UpsTradeDocumentActions`의 "CreateOrder 테스트" 버튼 + 관련 데드코드(`createLoading`/`CREATEORDER`/`Send` import) 삭제(1차 반려 후 추가 정리)
+6. ✅ 신규 테스트 4건 추가(IN_TRANSIT 양방향, Actual Charges 미표출, CI/PL/UPS Invoice 버튼 미표출)
+
+빌드 SUCCESS, 회귀 201 test files / 1406 tests ALL PASS(신규 4건 포함).
+
+- 커밋: `3aebbafd`(구현) → `6b53614b`(반려 사유 2건 수정)
+- PR: [#1140](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1140)
 
 ## [Jaison 최종 검토]
 
@@ -84,6 +96,16 @@ _(Mike 작성 예정)_
 Minor(비차단): `UpsTradeDocumentActions.tsx`의 `createLoading`/`'CREATEORDER'` 케이스/`Send` import 데드코드 미정리.
 
 GitHub Issue 라벨 `status:review` → `status:rework` 갱신 완료.
+
+---
+
+**PR#1140 최종 승인·머지 (2026-08-17)** — 병합 커밋 `5a899a9c`
+
+레이아웃(단일 컬럼 전환, `lg:col-span-2` 제거) + 신규 테스트 4건 정확히 반영 확인. 격리 워크트리 재검증: 회귀 201/201·1406/1406 ALL PASS(신규 4건), 빌드 성공, CI 3종 PASS. `UpsTradeDocumentActions` 데드코드까지 추가로 정리한 점 확인. 승인 후 머지, Issue #1139 close 완료.
+
+Minor(비차단): `ups-trade-documents.test.ts`의 `not.toContain('import.*issueUpsLabel')` 어서션이 문자열 부분일치라 정규식으로 동작하지 않음(항상 참) — 실제 코드는 정상 제거되어 결과에 영향 없으나 다음 기회에 정리 권장.
+
+R-10(UPS 상세페이지 실구동, 특히 IN_TRANSIT 오더로 SHXK 섹션 표출 확인) 스크린샷 미첨부 — JSJung 라이브 확인 필요.
 
 ## [발견 이슈]
 
