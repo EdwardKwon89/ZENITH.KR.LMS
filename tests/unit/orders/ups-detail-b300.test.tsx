@@ -142,7 +142,7 @@ describe('TASK-B-300 ②: 배송 기본 정보 카드 화주/수하인 연락처
     expect(screen.queryByText(/^연락처:/)).toBeNull();
     expect(screen.queryByText(/^이메일:/)).toBeNull();
     expect(screen.queryByText(/^주소:/)).toBeNull();
-    expect(screen.getByText('주문 상태')).toBeTruthy();
+    // TASK-B-308: "주문 상태" 배지 삭제됨
   });
 });
 

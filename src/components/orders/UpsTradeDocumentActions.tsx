@@ -173,19 +173,8 @@ export default function UpsTradeDocumentActions({ orderId, hasActiveLabel }: Ups
           onConfirm={() => setResultState(null)}
         />
       )}
+      {/* TASK-B-308: "CreateOrder 테스트" 버튼 삭제 */}
       <div className="flex flex-wrap gap-2 mt-4">
-        <button
-          onClick={() => handlePreview('CREATEORDER')}
-          disabled={createLoading}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-green-700 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors disabled:opacity-50"
-        >
-          {createLoading ? (
-            <Loader2 size={12} className="animate-spin" />
-          ) : (
-            <Send size={12} />
-          )}
-          {t('createorder_test')}
-        </button>
         {hasActiveLabel && (
           <>
             {DOC_BUTTONS.map(({ key, docType }) => (
