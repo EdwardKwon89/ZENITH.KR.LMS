@@ -19,7 +19,7 @@ import { UpsActualAdjustmentForm } from '@/components/orders/UpsActualAdjustment
 import UpsTrackingEventsList from '@/components/tracking/UpsTrackingEventsList';
 import DocumentDownloadButton from '@/components/documents/DocumentDownloadButton';
 import { resolveDestCountryCode } from '@/lib/ups/order-helpers';
-import { resolveConsigneeStreet, resolveShipperStreet } from '@/lib/ups/label-mapping'; // TASK-B-305
+import { resolveConsigneeStreet, resolveShipperStreet, resolveRegionName, resolveCountryName } from '@/lib/ups/label-mapping'; // TASK-B-305, TASK-B-307
 import CommercialInvoicePDF from '@/components/documents/CommercialInvoicePDF';
 import PackingListPDF from '@/components/documents/PackingListPDF';
 import UpsInvoicePDF from '@/components/documents/UpsInvoicePDF';
@@ -150,17 +150,17 @@ export default async function UpsOrderDetailPage({ params }: UpsOrderDetailPageP
       name: order.shipper_name || order.shipper?.name || 'ZENITH LOGISTICS',
       address: resolveShipperStreet(order, (order as any).shipper), // TASK-B-305: 영문 우선 표출
       city: (order as any).shipper_city || '',
-      state: (order as any).shipper_state_province || '',
+      state: resolveRegionName((order as any).shipper_state_province || '', (order as any).shipper_country_code || ''), // TASK-B-307: 코드→이름 변환
       zipcode: (order as any).shipper_zipcode || '',
-      country: (order as any).shipper_country_code || '',
+      country: resolveCountryName((order as any).shipper_country_code || ''), // TASK-B-307: 코드→이름 변환
     },
     consignee: {
       name: order.recipient_name || '',
       address: resolveConsigneeStreet(order), // TASK-B-305: 영문 우선 표출
       city: (order as any).recipient_city || '',
-      state: (order as any).recipient_state_province || '',
+      state: resolveRegionName((order as any).recipient_state_province || '', (order as any).recipient_country_code || ''), // TASK-B-307: 코드→이름 변환
       zipcode: (order as any).recipient_zipcode || '',
-      country: (order as any).recipient_country_code || '',
+      country: resolveCountryName((order as any).recipient_country_code || ''), // TASK-B-307: 코드→이름 변환
     },
     order_no: order.order_no,
     items: order.packages.flatMap((pkg: any) =>
@@ -199,18 +199,18 @@ export default async function UpsOrderDetailPage({ params }: UpsOrderDetailPageP
       name: order.shipper_name || order.shipper?.name || 'ZENITH LOGISTICS',
       address: resolveShipperStreet(order, (order as any).shipper), // TASK-B-305: 영문 우선 표출
       city: (order as any).shipper_city || '',
-      state: (order as any).shipper_state_province || '',
+      state: resolveRegionName((order as any).shipper_state_province || '', (order as any).shipper_country_code || ''), // TASK-B-307: 코드→이름 변환
       zipcode: (order as any).shipper_zipcode || '',
-      country: (order as any).shipper_country_code || '',
+      country: resolveCountryName((order as any).shipper_country_code || ''), // TASK-B-307: 코드→이름 변환
       contact: order.shipper_contact_phone || order.shipper_contact_email || '',
     },
     consignee: {
       name: order.recipient_name || '',
       address: resolveConsigneeStreet(order), // TASK-B-305: 영문 우선 표출
       city: (order as any).recipient_city || '',
-      state: (order as any).recipient_state_province || '',
+      state: resolveRegionName((order as any).recipient_state_province || '', (order.dest_port as any)?.country_code || ''), // TASK-B-307: 코드→이름 변환
       zipcode: (order as any).recipient_zipcode || '',
-      country: (order.dest_port as any)?.country_code || (order.dest_port as any)?.name || '',
+      country: resolveCountryName((order.dest_port as any)?.country_code || ''), // TASK-B-307: 코드→이름 변환
       contact: order.recipient_contact || order.recipient_phone || '',
     },
     packages: order.packages.map((pkg: any, idx: number) => {
@@ -363,13 +363,7 @@ export default async function UpsOrderDetailPage({ params }: UpsOrderDetailPageP
                     주소: {resolveShipperStreet(order, (order as any).shipper)} {/* TASK-B-305: 영문 우선 표출 */}
                   </span>
                 )}
-                {/* TASK-B-306: 화주 city/state/zipcode/country 표시 */}
-                {(order.shipper_city || order.shipper_state_province || order.shipper_zipcode || order.shipper_country_code) && (
-                  <span className="text-slate-500 block">
-                    {[order.shipper_city, order.shipper_state_province, order.shipper_zipcode].filter(Boolean).join(', ')}
-                    {order.shipper_country_code ? ` ${order.shipper_country_code}` : ''}
-                  </span>
-                )}
+                {/* TASK-B-307: 화주 city/state/zip/country 줄 제거 (Daum 주소가 이미 완전) */}
               </div>
               <div>
                 <span className="text-slate-400 block font-semibold">수령인 (Consignee)</span>
@@ -381,11 +375,11 @@ export default async function UpsOrderDetailPage({ params }: UpsOrderDetailPageP
                   <span className="text-slate-500 block">이메일: {order.recipient_email}</span>
                 )}
                 {order.recipient_address && <span className="text-slate-500 block">주소: {resolveConsigneeStreet(order)}</span>} {/* TASK-B-305: 영문 우선 표출 */}
-                {/* TASK-B-306: 수령인 city/state/zipcode/country 표시 */}
+                {/* TASK-B-307: 수령인 city/state/zipcode/country 표시 (코드→이름 변환) */}
                 {(order.recipient_city || order.recipient_state_province || order.recipient_zipcode || order.recipient_country_code) && (
                   <span className="text-slate-500 block">
-                    {[order.recipient_city, order.recipient_state_province, order.recipient_zipcode].filter(Boolean).join(', ')}
-                    {order.recipient_country_code ? ` ${order.recipient_country_code}` : ''}
+                    {[order.recipient_city, resolveRegionName(order.recipient_state_province as string, order.recipient_country_code as string), order.recipient_zipcode].filter(Boolean).join(', ')}
+                    {order.recipient_country_code ? ` ${resolveCountryName(order.recipient_country_code as string)}` : ''}
                   </span>
                 )}
               </div>
