@@ -5,7 +5,7 @@
 - **등록자**: Jaison (JSJung 요청)
 - **담당**: Mike
 - **우선순위**: P3
-- **상태**: 🔄 착수 가능 (설계 확정, 착수 직행)
+- **상태**: ✅ 완료 (PR#1142 머지, 2026-08-17, 병합 커밋 `3d742c30`)
 
 ## [배경]
 
@@ -75,11 +75,25 @@ ZEN-2026-000007로 UPS 상세페이지 스크린샷 — 화주/수령인 카드�
 
 ## [작업 결과]
 
-_(Mike 작성 예정)_
+(Mike 작성, `.agent/tasks/TASK-B-309_ups_detail_shipper_consignee_cards.md`에 별도 생성됐던 내용을 병합·정리 — 중복 파일은 삭제)
+
+1. ✅ ZenCard 1개 → 화주("화주 (Shipper)")/수령인("수령인 (Consignee)") 각각 별도 ZenCard 2개
+2. ✅ `grid grid-cols-1 md:grid-cols-2 gap-6`로 좌우 배치(모바일 세로 스택)
+3. ✅ 두 카드 대응 요소(h3/내용 div/각 span) className 완전 동일 — 폰트 통일
+4. ✅ 데이터 로직(resolveShipperStreet 등)은 표현식 단위로 무변경 — 순수 레이아웃 리팩터링
+
+빌드 SUCCESS, 회귀 201 test files / 1406 tests ALL PASS(기존 텍스트 기반 테스트 그대로 통과 — 콘텐츠 불변 방증).
+
+- 커밋: `a5d2f752`
+- PR: [#1142](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1142)
 
 ## [Jaison 최종 검토]
 
-_(PR 제출 후 작성)_
+**PR#1142 승인·머지 (2026-08-17)** — 병합 커밋 `3d742c30`
+
+diff로 지시 사항 전부 확인(카드 분리, 좌우 배치, className 통일, 데이터 로직 무변경). 격리 워크트리 재검증: 회귀 201/201·1406/1406 ALL PASS, 빌드 성공, CI 3종 PASS. 순수 구조 변경이라 신규 테스트 없이도 승인(로직 리스크 없음 — TASK-B-306과 동일 기준 적용).
+
+R-10(UPS 상세페이지 실구동, 화주/수령인 카드 좌우 배치 확인) 스크린샷 미첨부 — JSJung 라이브 확인 필요.
 
 ## [발견 이슈]
 
