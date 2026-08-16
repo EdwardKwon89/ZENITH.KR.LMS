@@ -111,10 +111,17 @@ export const ORDER_EDIT_LOG_FIELD_GROUPS: FieldGroup[] = [
     label: '기타',
     fields: ['description', 'delivery_notes'],
   },
+  // TASK-B-311: 화물정보 — 패키지/품목 스냅샷 (cargo_summary 키로 별도 처리)
+  {
+    key: 'cargo',
+    label: '화물정보',
+    fields: ['cargo_summary'],
+  },
 ];
 
 // 그룹별 변경 필드 수 계산 유틸
 // isCreate: CREATE의 경우 oldData가 null이므로 newData의非null 필드를 모두 "변경"으로 간주
+// TASK-B-311: cargo_summary 그룹은 별도 처리 (필드 단위 diff가 아닌 스냅샷 비교)
 export function computeGroupChanges(
   oldData: Record<string, unknown> | null,
   newData: Record<string, unknown> | null,
@@ -122,20 +129,37 @@ export function computeGroupChanges(
 ): { groupKey: string; groupLabel: string; changedFields: string[] }[] {
   if (!newData) return [];
 
-  return ORDER_EDIT_LOG_FIELD_GROUPS
+  const results = ORDER_EDIT_LOG_FIELD_GROUPS
     .map((group) => {
+      // 화물정보 그룹은 cargo_summary 스냅샷 비교로 처리
+      if (group.key === 'cargo') {
+        const oldSnapshot = oldData?.cargo_summary as CargoSummarySnapshot | undefined;
+        const newSnapshot = newData.cargo_summary as CargoSummarySnapshot | undefined;
+        if (isCreate) {
+          // CREATE: 새 스냅샷이 있으면 "변경"으로 간주
+          return newSnapshot
+            ? { groupKey: group.key, groupLabel: group.label, changedFields: ['cargo_summary'] }
+            : { groupKey: group.key, groupLabel: group.label, changedFields: [] };
+        }
+        // UPDATE: 스냅샷이 다르면 변경
+        return !cargoSummaryEquals(oldSnapshot, newSnapshot)
+          ? { groupKey: group.key, groupLabel: group.label, changedFields: ['cargo_summary'] }
+          : { groupKey: group.key, groupLabel: group.label, changedFields: [] };
+      }
+
+      // 일반 필드 그룹
       const changedFields = group.fields.filter((f) => {
         if (isCreate) {
-          // CREATE: newData에 값이 있으면 "추가된 필드"로 간주
           return newData[f] !== null && newData[f] !== undefined && newData[f] !== '';
         }
-        // UPDATE: oldData와 newData가 다르면 변경
         if (!oldData) return false;
         return JSON.stringify(oldData[f]) !== JSON.stringify(newData[f]);
       });
       return { groupKey: group.key, groupLabel: group.label, changedFields };
     })
     .filter((g) => g.changedFields.length > 0);
+
+  return results;
 }
 
 // 액션 한글 라벨
@@ -145,3 +169,76 @@ export const ORDER_EDIT_LOG_ACTION_LABELS: Record<string, string> = {
   CANCEL: '취소',
   APPLY: '적용',
 };
+
+// TASK-B-311 (Issue #1145): 화물 스냅샷 — 패키지/품목 변경 이력용
+export interface CargoSummarySnapshot {
+  package_count: number;
+  total_weight: number;
+  total_volume: number;
+  item_count: number;
+  item_names: string[];
+}
+
+// 패키지 배열에서 화물 스냅샷 추출
+export function extractCargoSummarySnapshot(
+  packages: Record<string, unknown>[] | undefined | null,
+): CargoSummarySnapshot {
+  if (!packages || packages.length === 0) {
+    return { package_count: 0, total_weight: 0, total_volume: 0, item_count: 0, item_names: [] };
+  }
+
+  let totalWeight = 0;
+  let totalVolume = 0;
+  let itemCount = 0;
+  const itemNames: string[] = [];
+
+  for (const pkg of packages) {
+    totalWeight += Number(pkg.gross_weight ?? 0);
+    const vol = Number(pkg.volume ?? 0) || (pkg.length && pkg.width && pkg.height
+      ? (Number(pkg.length) * Number(pkg.width) * Number(pkg.height)) / 1000000
+      : 0);
+    totalVolume += Number(vol);
+
+    const items = (pkg.items as Record<string, unknown>[]) || [];
+    itemCount += items.length;
+    for (const item of items) {
+      if (item.item_name && !itemNames.includes(item.item_name as string)) {
+        itemNames.push(item.item_name as string);
+      }
+    }
+  }
+
+  return {
+    package_count: packages.length,
+    total_weight: totalWeight,
+    total_volume: totalVolume,
+    item_count: itemCount,
+    item_names: itemNames,
+  };
+}
+
+// 화물 스냅샷 비교 (동일 여부)
+export function cargoSummaryEquals(
+  a: CargoSummarySnapshot | null | undefined,
+  b: CargoSummarySnapshot | null | undefined,
+): boolean {
+  if (!a && !b) return true;
+  if (!a || !b) return false;
+  return (
+    a.package_count === b.package_count &&
+    a.total_weight === b.total_weight &&
+    a.total_volume === b.total_volume &&
+    a.item_count === b.item_count &&
+    JSON.stringify(a.item_names) === JSON.stringify(b.item_names)
+  );
+}
+
+// 화물 스냅샷 한글 요약
+export function formatCargoSummary(snapshot: CargoSummarySnapshot): string {
+  const parts: string[] = [];
+  if (snapshot.package_count > 0) parts.push(`${snapshot.package_count}개 패키지`);
+  if (snapshot.total_weight > 0) parts.push(`${snapshot.total_weight}kg`);
+  if (snapshot.item_count > 0) parts.push(`${snapshot.item_count}개 품목`);
+  if (snapshot.item_names.length > 0) parts.push(`[${snapshot.item_names.join(', ')}]`);
+  return parts.length > 0 ? parts.join(' / ') : '화물 없음';
+}
