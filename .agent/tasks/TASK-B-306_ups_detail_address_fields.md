@@ -39,4 +39,7 @@ ups-detail/page.tsx "배송 기본 정보" 카드에서 화주·수령인 주소
 - **회귀 테스트**: 201 test files, 1392 tests **ALL PASS**
 
 ## 커밋 이력
-(커밋 후 기재)
+- 커밋 해시: `80fd1022`
+- 브랜치: `feature/teamb-306-ups-detail-address-fields-mike`
+- 메시지: `[Mike] fix: TASK-B-306 UPS 상세 배송기본정보 카드 — 화주/수령인 주소에 city/state/zipcode/country 추가`
+- PR: https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1136
