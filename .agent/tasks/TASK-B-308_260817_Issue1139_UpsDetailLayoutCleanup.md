@@ -5,7 +5,7 @@
 - **등록자**: Jaison (JSJung 요청)
 - **담당**: Mike
 - **우선순위**: P2
-- **상태**: 🔄 착수 가능 (설계 확정, 착수 직행)
+- **상태**: ❌ 반려 (PR#1140, 2026-08-17 — 레이아웃 미반영·테스트 미추가, 재작업 필요)
 
 ## [배경]
 
@@ -74,7 +74,16 @@ _(Mike 작성 예정)_
 
 ## [Jaison 최종 검토]
 
-_(PR 제출 후 작성)_
+**PR#1140 반려 (2026-08-17)** — 상세: [PR#1140 코멘트](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1140#issuecomment-5308511953)
+
+섹션 이동·삭제·조건부 표출 로직 자체는 정확함(diff로 확인). 회귀 201/201·1402/1402 PASS, 빌드 성공. 다만 2건으로 반려:
+
+1. **[Critical]** 바깥 그리드가 여전히 `grid grid-cols-1 lg:grid-cols-3`이고 콘텐츠 div가 `lg:col-span-2`로 남아있어, 오른쪽 컬럼 div만 삭제된 결과 데스크톱(lg+)에서 화면 오른쪽 1/3이 빈 공간으로 남는 시각적 결함. 설계 문서에 명시한 단일 컬럼 전환이 반영 안 됨.
+2. **[Major]** 신규 회귀 테스트 없음 — Issue에 명시적으로 재요청했는데도 기존 테스트 assertion 1줄 삭제 외 신규 테스트 0건(R-09).
+
+Minor(비차단): `UpsTradeDocumentActions.tsx`의 `createLoading`/`'CREATEORDER'` 케이스/`Send` import 데드코드 미정리.
+
+GitHub Issue 라벨 `status:review` → `status:rework` 갱신 완료.
 
 ## [발견 이슈]
 
