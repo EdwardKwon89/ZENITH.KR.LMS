@@ -42,4 +42,7 @@
 - **회귀 테스트**: 201 test files, 1406 tests **ALL PASS**
 
 ## 커밋 이력
-(커밋 후 기재)
+- 커밋 해시: `a5d2f752`
+- 브랜치: `feature/teamb-309-ups-detail-shipper-consignee-cards-mike`
+- 메시지: `[Mike] feat: TASK-B-309 UPS 상세 배송기본정보 — 화주/수령인 카드 분리 + 좌우 배치`
+- PR: https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1142
