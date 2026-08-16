@@ -248,11 +248,12 @@ export async function updateOrder(orderId: string, payload: OrderRegistrationInp
 
   // TASK-B-311 (Issue #1145): 화물 스GMEM샷 — 패키지/품목 변경 이력용
   //   기존 패키지+품목(삭제 전)과 새 패키지+품목(저장 후)의 요약 스냅샷을 old/new_data에 추가
-  //   oldItems는 위에서 이미 조회됨 (line 190)
+  //   oldItemsFull은 package_id를 포함한 전체 품목 조회 (인벤토리 diff용 oldItems와 별개)
   const { data: oldPackagesRaw } = await orderRepo.getPackagesByOrderId(orderId);
+  const { data: oldItemsFull } = await orderRepo.getItemsFullByOrderId(orderId);
   const oldPackages = (oldPackagesRaw ?? []).map((pkg) => ({
     ...pkg,
-    items: (oldItems ?? []).filter((item: any) => item.package_id === pkg.id),
+    items: (oldItemsFull ?? []).filter((item: any) => item.package_id === pkg.id),
   }));
   const oldCargoSnapshot = extractCargoSummarySnapshot(oldPackages as Record<string, unknown>[]);
 
@@ -371,8 +372,8 @@ export async function updateOrder(orderId: string, payload: OrderRegistrationInp
   );
   const hasCargoChanges = JSON.stringify(oldCargoSnapshot) !== JSON.stringify(newCargoSnapshot);
 
-  if (hasHeaderChanges) {
-    // 화물 스냅샷을 old/new_data에 추가 (헤더 변경과 함께 기록)
+  if (hasHeaderChanges || hasCargoChanges) {
+    // TASK-B-311: 화물 스냅샷을 old/new_data에 추가 (헤더 또는 화물 변경 시 기록)
     const finalOldData = { ...oldDataSnapshot, cargo_summary: oldCargoSnapshot };
     const finalNewData = { ...newDataSnapshot, cargo_summary: newCargoSnapshot };
 
