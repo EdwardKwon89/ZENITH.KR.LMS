@@ -6,7 +6,7 @@
 - **등록자**: Jaison (JSJung 실사용 피드백)
 - **담당**: Mike
 - **우선순위**: P2
-- **상태**: ❌ 반려 (PR#1138, 2026-08-16 — 테스트 미추가, 재작업 필요)
+- **상태**: ✅ 완료 (PR#1138 머지, 2026-08-16, 병합 커밋 `bd94704c`)
 
 ## [배경]
 
@@ -74,7 +74,17 @@ Gangseo-gu, 11, 07570 KR
 
 ## [작업 결과]
 
-_(Mike 작성 예정)_
+(Mike 작성, `.agent/tasks/TASK-B-307_address_code_to_name.md`에 별도 생성됐던 내용을 병합·정리 — 중복 파일은 삭제)
+
+1. ✅ `label-mapping.ts`에 `resolveRegionName(stateCode, countryCode)`/`resolveCountryName(countryCode)` 추가 (country-state-city 라이브러리, 파라미터 순서는 설계 문서와 반대지만 호출부 전체 일관 적용되어 문제 없음)
+2. ✅ `ups-detail/page.tsx` 화주 city/state/zip/country 줄 제거, 수령인 코드→이름 변환
+3. ✅ `orders/[orderId]/page.tsx`, `TradeDocumentClient.tsx` ciData/plData/upsInvoiceData 전체 동일 적용
+4. ✅ 단위 테스트 10건 추가(1차 반려 후 보강) — 정상 변환 3개국 + 빈 값 2케이스 + 폴백 2케이스
+
+빌드 SUCCESS, 회귀 201 test files / 1402 tests ALL PASS(신규 10건 포함).
+
+- 커밋: `a9749419`(구현) → `f1285595`(테스트 보강)
+- PR: [#1138](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1138)
 
 ## [Jaison 최종 검토]
 
@@ -85,6 +95,14 @@ _(Mike 작성 예정)_
 **반려 사유**: 신규 회귀 테스트 0건. PR#1136(TASK-B-306) 승인 시 "다음에 이 페이지를 건드릴 때는 테스트 추가 부탁드립니다"라고 명시적으로 요청했는데 이번에도 미반영 — 동일 지적 재발. `resolveRegionName`/`resolveCountryName` 단위 테스트 + "배송 기본 정보" 카드 렌더링 테스트(TASK-B-305의 `address-english-display.test.ts`, `ups-detail-b300.test.tsx` 패턴 재사용) 추가 요청.
 
 GitHub Issue 라벨 `status:review` → `status:rework` 갱신 완료.
+
+---
+
+**PR#1138 최종 승인·머지 (2026-08-16)** — 병합 커밋 `bd94704c`
+
+`resolveRegionName`/`resolveCountryName` 단위 테스트 10건 추가 확인(정상 변환 3개국 + 빈 값 + 폴백). 격리 워크트리 재검증: 회귀 201/201·1402/1402 ALL PASS(신규 10건), 빌드 성공, CI 3종 PASS. 코드 로직은 1차 검토에서 이미 diff 대조 + 실제 값 실행으로 검증 완료(예상값과 정확히 일치). 승인 후 머지, Issue #1137 close 완료.
+
+R-10(UPS 상세페이지·CI/PL/UPS Invoice PDF 실구동) 스크린샷 미첨부 — JSJung 라이브 확인 필요.
 
 ## [발견 이슈]
 
