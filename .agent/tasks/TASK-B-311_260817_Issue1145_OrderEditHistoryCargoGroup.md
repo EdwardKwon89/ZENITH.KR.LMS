@@ -5,7 +5,7 @@
 - **등록자**: Jaison (JSJung 요청 분석)
 - **담당**: Mike
 - **우선순위**: P2
-- **상태**: ❌ 반려 (PR#1146, 2026-08-17 — 품목 정보 미기록·CREATE 미적용, 재작업 필요)
+- **상태**: ❌ 반려 (PR#1146, 2026-08-17 2차 — old items 여전히 미조인 + 화물전용변경 로그누락 회귀, 재작업 필요)
 
 ## [배경]
 
@@ -85,6 +85,17 @@ _(Mike 작성 예정)_
 부가 발견: 1번 수정 시 quantity/unit_price도 스냅샷에 포함하도록 함께 요청(현재는 품목명만 비교해 단가만 바뀐 케이스가 감지 안 됨 — 실제 값으로 검증 완료).
 
 GitHub Issue 라벨 `status:review` → `status:rework` 갱신 완료.
+
+---
+
+**PR#1146 2차 반려 (2026-08-17)** — 상세: [PR#1146 코멘트](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1146#issuecomment-5309654239)
+
+1차 반려 사유 중 `createOrder()` 적용 + items에 quantity/unit_price/hs_code 포함은 정상 수정됨. 그러나 수정 과정에서 새 문제 2건 발생:
+
+1. **[Critical]** old 쪽 품목이 여전히 항상 빈 배열 — `oldItems`(인벤토리 diff용 기존 변수, `sku_code`/`quantity`만 select)를 재사용하면서 `package_id`가 없어 필터가 항상 빈 결과. new 쪽은 `getItemsFullByOrderId()`로 올바르게 조회하지만 old 쪽은 여전히 미조인 — 결과적으로 아무 것도 안 바뀐 품목까지 매번 "새로 생김"으로 잘못 표시됨.
+2. **[Critical] 새로운 회귀** — 로그 생성 조건이 `hasHeaderChanges || hasCargoChanges`(1차 수정본)에서 `hasHeaderChanges`만으로 되돌아가, 화물(패키지/품목)만 변경되고 헤더 필드가 그대로면 이력이 아예 안 남음. TASK-B-311의 존재 이유 자체와 배치되는 회귀.
+
+GitHub Issue 라벨 `status:rework` 유지.
 
 ## [발견 이슈]
 
