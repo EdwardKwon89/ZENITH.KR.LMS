@@ -6,7 +6,7 @@
 - **등록자**: Jaison (JSJung 요청 분석)
 - **담당**: Mike
 - **우선순위**: P2
-- **상태**: ❌ 반려 (PR#1134, 2026-08-16 — 재작업 필요)
+- **상태**: ❌ 반려 (PR#1134, 2026-08-16 2차 — 재작업 필요)
 
 ## [배경]
 
@@ -93,6 +93,17 @@ _(Mike 작성 예정)_
 기타: Task 상세 파일을 별도 경로로 중복 생성(재작업 시 통합 필요), PR base가 develop으로 잘못 설정되어 TeamB_Dev로 직접 정정.
 
 GitHub Issue 라벨 `status:review` → `status:rework` 갱신 완료.
+
+---
+
+**PR#1134 2차 반려 (2026-08-16)** — 상세: [PR#1134 코멘트](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1134#issuecomment-5306420816)
+
+1차 반려 4건은 모두 정상 수정 확인(격리 워크트리 재검증: 회귀 201/201·1392/1392 PASS, 빌드 성공, `create_order_atomic` v6 함수 본문 라인 단위 diff 대조 + 직접 RPC 호출로 `recipient_address_detail` 저장→재조회 라운드트립 확인). 다만 새로운 결함 1건 발견:
+
+- **[Critical]** `resolveShipperStreet(order, (order as any).shipper_org)` — 8개 호출부(3개 파일) 전부 두 번째 인자로 존재하지 않는 프로퍼티(`shipper_org`)를 참조. 실제 쿼리(`OrderRepository.findByIdWithRelations`, `getOrderDocumentData`)는 조인 결과를 `order.shipper`로 alias함. `(order as any)` 캐스팅이 타입 체크를 무력화해 빌드에서 안 잡힘. 실제 값으로 재현해 `order.shipper_org` 사용 시 org의 영문 주소 폴백이 전혀 작동하지 않고 한글 그대로 표출됨을 확인(PR 코멘트에 재현 코드 포함) — DEF-B-059 이전(2026-08-12 이전) 등록된 기존 오더 전체에서 이번 PR의 핵심 목적이 무효화됨.
+- 8곳 모두 `shipper_org` → `shipper`로 프로퍼티명만 수정하면 해결.
+
+Minor(비차단): `recipient_address_detail` 라운드트립 자동 테스트 없음(제가 직접 RPC로 대신 검증), task 파일 중복(병합 시 Jaison이 정리 예정).
 
 ## [발견 이슈]
 
