@@ -6,7 +6,7 @@
 - **등록자**: Jaison (JSJung 실사용 피드백)
 - **담당**: Mike
 - **우선순위**: P2
-- **상태**: 🔄 착수 가능 (설계 자명, 착수 직행)
+- **상태**: ✅ 완료 (PR#1136 머지, 2026-08-16, 병합 커밋 `1e5f47a3`)
 
 ## [배경]
 
@@ -48,11 +48,25 @@ ZEN-2026-000008(또는 city/state/zip 값이 있는 실제 오더)로 UPS 상세
 
 ## [작업 결과]
 
-_(Mike 작성 예정)_
+(Mike 작성, `.agent/tasks/TASK-B-306_ups_detail_address_fields.md`에 별도 생성됐던 내용을 병합·정리 — 중복 파일은 삭제)
+
+1. ✅ 화주 주소 아래 city/state/zipcode/country 라인 추가 (값 하나라도 있을 때만 표시)
+2. ✅ 수령인 주소 아래 동일 패턴 추가
+
+빌드 SUCCESS, 회귀 201 test files / 1392 tests ALL PASS.
+
+- 커밋: `80fd1022` [Mike] fix: TASK-B-306 구현
+- PR: [#1136](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1136)
 
 ## [Jaison 최종 검토]
 
-_(PR 제출 후 작성)_
+**PR#1136 승인·머지 (2026-08-16)** — 병합 커밋 `1e5f47a3`
+
+지시한 그대로 화주/수령인 양쪽에 city/state/zipcode/country 라인 추가 확인. 격리 워크트리 fresh reset 재검증(회귀 201/201·1392/1392 PASS, 빌드 성공, CI 3종 PASS). 실제 신고 케이스(ZEN-2026-000008)의 데이터로 렌더링 로직을 직접 실행해 `"Weihai, SD, 02750 CN"` 정상 출력 확인.
+
+Minor(비차단): 이 페이지에는 `ups-detail-b300.test.tsx` 등 RTL 렌더링 테스트 관례가 있는데 이번엔 신규 테스트 없음 — 단순 조건부 렌더링이라 막지 않았으나 다음 변경 시 관례 준수 권장.
+
+R-10 스크린샷 미첨부 — JSJung 라이브 확인 필요.
 
 ## [발견 이슈]
 
