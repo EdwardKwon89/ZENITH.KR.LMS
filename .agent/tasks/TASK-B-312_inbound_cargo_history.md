@@ -36,4 +36,7 @@ applyPackageMeasurements()에도 화물정보 이력 기록 추가
   - inbound.test.ts TC-DEF-B-016 모킹 수정 필요
 
 ## 커밋 이력
-(커밋 후 기재)
+- 커밋 해시: `5f136279`
+- 브랜치: `feature/teamb-311-edit-history-cargo-group-mike`
+- 메시지: `[Mike] feat: TASK-B-312 창고 입고 실측에도 화물정보 이력 기록 추가`
+- PR: https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1146
