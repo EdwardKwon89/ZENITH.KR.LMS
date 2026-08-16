@@ -7,7 +7,6 @@ import { getUpsTrackingEvents } from '@/app/actions/operations/tracking';
 import { checkPermission } from '@/lib/auth/rbac';
 import { notFound, redirect } from 'next/navigation';
 import { Truck, FileText, User } from 'lucide-react';
-import { getTranslations } from 'next-intl/server';
 
 import { ZenCard, ZenBadge } from '@/components/ui/ZenUI';
 import UpsOrderStatusStepper from '@/components/ups/UpsOrderStatusStepper';
@@ -15,14 +14,9 @@ import UpsDetailBackToListButton from '@/components/ups/UpsDetailBackToListButto
 import UpsPackageItemsModal from '@/components/ups/UpsPackageItemsModal';
 import UpsOrderBreakdownCard from '@/components/ups/UpsOrderBreakdownCard';
 import UpsOrderEditHistoryPanel from '@/components/ups/UpsOrderEditHistoryPanel';
-import { UpsActualAdjustmentForm } from '@/components/orders/UpsActualAdjustmentForm';
 import UpsTrackingEventsList from '@/components/tracking/UpsTrackingEventsList';
-import DocumentDownloadButton from '@/components/documents/DocumentDownloadButton';
 import { resolveDestCountryCode } from '@/lib/ups/order-helpers';
 import { resolveConsigneeStreet, resolveShipperStreet, resolveRegionName, resolveCountryName } from '@/lib/ups/label-mapping'; // TASK-B-305, TASK-B-307
-import CommercialInvoicePDF from '@/components/documents/CommercialInvoicePDF';
-import PackingListPDF from '@/components/documents/PackingListPDF';
-import UpsInvoicePDF from '@/components/documents/UpsInvoicePDF';
 import UpsTradeDocumentActions from '@/components/orders/UpsTradeDocumentActions';
 
 interface UpsOrderDetailPageProps {
@@ -65,18 +59,6 @@ export default async function UpsOrderDetailPage({ params }: UpsOrderDetailPageP
   const isShipper = order.shipper_id && (profile?.id === order.shipper_id || profile?.org_id === order.shipper_id);
   const isAgency = profile?.role === 'AGENCY';
 
-  let canManageFinance = isAdmin || profile?.role === 'MANAGER';
-  if (!canManageFinance && isAgency && profile?.org_id) {
-    const { data: agencyLink } = await supabase
-      .from('zen_agency_shippers')
-      .select('shipper_org_id')
-      .eq('agency_org_id', profile.org_id)
-      .eq('shipper_org_id', order.shipper_id)
-      .eq('is_active', true)
-      .maybeSingle();
-    canManageFinance = !!agencyLink;
-  }
-
   // Fetch Rate Snapshot
   const snapshot = await getOrderRateSnapshot(orderId);
 
@@ -108,146 +90,6 @@ export default async function UpsOrderDetailPage({ params }: UpsOrderDetailPageP
   // Label & Trade Doc Status
   const upsLabelStatus = await getUpsLabelStatus(orderId);
 
-  // Document labels
-  const tDoc = await getTranslations('Documents');
-  const tOrders = await getTranslations('Orders');
-
-  const docLabels = {
-    commercial_invoice: tDoc('commercial_invoice'),
-    packing_list: tDoc('packing_list'),
-    exporter: tDoc('exporter'),
-    consignee: tDoc('consignee'),
-    date: tDoc('date'),
-    order_no: tDoc('order_no'),
-    hs_code: tDoc('hs_code'),
-    item_desc: tDoc('item_desc'),
-    quantity: tDoc('quantity'),
-    unit_price: tDoc('unit_price'),
-    sub_total: tDoc('sub_total'),
-    total: tDoc('total'),
-    currency: tDoc('currency'),
-    declaration: tDoc('declaration'),
-    declaration_text: tDoc('declaration_text'),
-    generated_on: tDoc('generated_on'),
-    transport_mode: tDoc('transport_mode'),
-    express_air: tDoc('express_air'),
-    qty: tDoc('qty'),
-    pkgs: tDoc('pkgs'),
-    net_weight: tDoc('net_weight'),
-    gross_weight: tDoc('gross_weight'),
-    total_pkgs: tDoc('total_pkgs'),
-    trade_terms: tDoc('trade_terms'),
-    invoice_no: tDoc('invoice_no'),
-    pl_no: tDoc('pl_no'),
-    remarks: tDoc('remarks'),
-    remarks_text: tDoc('remarks_text'),
-  };
-
-  const ciData = {
-    invoice_no: invoice?.invoice_no || `CI-${order.order_no}`,
-    date: new Date().toISOString().split('T')[0],
-    shipper: {
-      name: order.shipper_name || order.shipper?.name || 'ZENITH LOGISTICS',
-      address: resolveShipperStreet(order, (order as any).shipper), // TASK-B-305: 영문 우선 표출
-      city: (order as any).shipper_city || '',
-      state: resolveRegionName((order as any).shipper_state_province || '', (order as any).shipper_country_code || ''), // TASK-B-307: 코드→이름 변환
-      zipcode: (order as any).shipper_zipcode || '',
-      country: resolveCountryName((order as any).shipper_country_code || ''), // TASK-B-307: 코드→이름 변환
-    },
-    consignee: {
-      name: order.recipient_name || '',
-      address: resolveConsigneeStreet(order), // TASK-B-305: 영문 우선 표출
-      city: (order as any).recipient_city || '',
-      state: resolveRegionName((order as any).recipient_state_province || '', (order as any).recipient_country_code || ''), // TASK-B-307: 코드→이름 변환
-      zipcode: (order as any).recipient_zipcode || '',
-      country: resolveCountryName((order as any).recipient_country_code || ''), // TASK-B-307: 코드→이름 변환
-    },
-    order_no: order.order_no,
-    items: order.packages.flatMap((pkg: any) =>
-      pkg.items.map((item: any) => ({
-        description: item.item_name,
-        hs_code: item.hs_code,
-        quantity: item.quantity,
-        unit_price: item.unit_price,
-        amount: item.quantity * item.unit_price,
-      }))
-    ),
-  };
-
-  const plData = {
-    pl_no: `PL-${order.order_no}`,
-    date: new Date().toISOString().split('T')[0],
-    shipper: ciData.shipper,
-    consignee: ciData.consignee, // TASK-B-305: 영문 우선 표출 (ciData에서 상속)
-    order_no: order.order_no,
-    packages: order.packages.map((pkg: any, idx: number) => ({
-      package_no: idx + 1,
-      net_weight: pkg.net_weight || pkg.gross_weight,
-      gross_weight: pkg.gross_weight,
-      dimensions: pkg.length && pkg.width && pkg.height ? `${pkg.length}x${pkg.width}x${pkg.height} cm` : 'N/A',
-      items: pkg.items.map((item: any) => ({
-        description: item.item_name,
-        quantity: item.quantity,
-      })),
-    })),
-  };
-
-  const upsInvoiceData = {
-    invoice_no: `UPS-${order.order_no}`,
-    date: new Date().toISOString().split('T')[0],
-    shipper: {
-      name: order.shipper_name || order.shipper?.name || 'ZENITH LOGISTICS',
-      address: resolveShipperStreet(order, (order as any).shipper), // TASK-B-305: 영문 우선 표출
-      city: (order as any).shipper_city || '',
-      state: resolveRegionName((order as any).shipper_state_province || '', (order as any).shipper_country_code || ''), // TASK-B-307: 코드→이름 변환
-      zipcode: (order as any).shipper_zipcode || '',
-      country: resolveCountryName((order as any).shipper_country_code || ''), // TASK-B-307: 코드→이름 변환
-      contact: order.shipper_contact_phone || order.shipper_contact_email || '',
-    },
-    consignee: {
-      name: order.recipient_name || '',
-      address: resolveConsigneeStreet(order), // TASK-B-305: 영문 우선 표출
-      city: (order as any).recipient_city || '',
-      state: resolveRegionName((order as any).recipient_state_province || '', (order.dest_port as any)?.country_code || ''), // TASK-B-307: 코드→이름 변환
-      zipcode: (order as any).recipient_zipcode || '',
-      country: resolveCountryName((order.dest_port as any)?.country_code || ''), // TASK-B-307: 코드→이름 변환
-      contact: order.recipient_contact || order.recipient_phone || '',
-    },
-    packages: order.packages.map((pkg: any, idx: number) => {
-      const actualWeight = pkg.gross_weight || 0;
-      const vol = pkg.volume ?? (pkg.length && pkg.width && pkg.height ? (pkg.length * pkg.width * pkg.height) / 1000000 : 0);
-      const volumetricWeight = (vol * 1000000) / 5000;
-      return {
-        ref_seq: idx + 1,
-        domestic_ref_no: pkg.domestic_ref_no,
-        intl_ref_no: pkg.intl_ref_no,
-        actual_weight_kg: actualWeight,
-        volumetric_weight_kg: volumetricWeight,
-        items: pkg.items.map((item: any) => ({
-          item_name: item.item_name,
-          quantity: item.quantity,
-          unit_price: item.unit_price || 0,
-          currency: item.currency || 'USD',
-        })),
-      };
-    }),
-    ups_service: {
-      product_code: (order.cargo_details as any)?.product_code || '',
-    },
-  };
-
-  const upsInvoiceLabels = {
-    ups_invoice_title: tOrders('ups_invoice.title'),
-    account_no: tOrders('ups_invoice.account_no'),
-    tracking_no: tOrders('ups_invoice.tracking_no'),
-    service_type: tOrders('ups_invoice.service_type'),
-    bill_to: tOrders('ups_invoice.bill_to'),
-    ref_no: tOrders('ups_invoice.ref_no'),
-    description: tOrders('ups_invoice.description'),
-    weight: tOrders('ups_invoice.weight'),
-    declared_value: tOrders('ups_invoice.declared_value'),
-  };
-
   return (
     <div className="flex-1 flex flex-col gap-6 p-4 md:p-8 max-w-7xl mx-auto w-full">
       {/* Navigation Header */}
@@ -259,10 +101,8 @@ export default async function UpsOrderDetailPage({ params }: UpsOrderDetailPageP
         </ZenBadge>
       </div>
 
-      {/* Main Grid Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column: Main Stepper, Breakdown, Adjustment Form, SHXK Events, Documents */}
-        <div className="lg:col-span-2 flex flex-col gap-6">
+      {/* Main Layout — TASK-B-308: 단일 컬럼 레이아웃 */}
+      <div className="flex flex-col gap-6">
           {/* 1. Primary Stepper: order.status Progress Bar & Real-time Poll Button */}
           <UpsOrderStatusStepper
             orderId={orderId}
@@ -290,58 +130,7 @@ export default async function UpsOrderDetailPage({ params }: UpsOrderDetailPageP
             />
           </div>
 
-          {/* 3. Actual Charges Adjustment Form (Issue #589) */}
-          <UpsActualAdjustmentForm
-            orderId={orderId}
-            orderStatus={order.status || ''}
-            isPlatformAdmin={canManageFinance}
-          />
-
-          {/* 4. UPS SHXK Tracking Events (zen_ups_tracking_events) - Auxiliary detail */}
-          <section className="bg-white dark:bg-zinc-950 rounded-3xl border border-slate-100 dark:border-zinc-800 p-6 shadow-sm">
-            <h3 className="text-lg font-bold text-slate-900 dark:text-gray-100 mb-4 flex items-center gap-2">
-              <Truck className="w-5 h-5 text-indigo-500" />
-              UPS 트래킹 이벤트 상세 (SHXK API)
-            </h3>
-            <UpsTrackingEventsList events={upsTrackingEvents} />
-          </section>
-
-          {/* 5. Order Edit History Panel (TASK-B-303 / Issue #1125) */}
-          <UpsOrderEditHistoryPanel history={editHistory} />
-
-          {/* 6. Trade Documents Section */}
-          <ZenCard className="p-6 flex flex-col gap-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-bold text-slate-900 dark:text-gray-100 flex items-center gap-2">
-                <FileText className="w-5 h-5 text-blue-500" />
-                UPS 무역 및 발송 서류 (Documents)
-              </h3>
-            </div>
-            <div className="flex flex-col gap-3">
-              <DocumentDownloadButton
-                document={<CommercialInvoicePDF data={ciData as any} labels={docLabels as any} />}
-                fileName={`CI_${order.order_no}.pdf`}
-                label={`${tDoc('ci')} (CI)`}
-              />
-              <DocumentDownloadButton
-                document={<PackingListPDF data={plData as any} labels={docLabels as any} />}
-                fileName={`PL_${order.order_no}.pdf`}
-                label={`${tDoc('pl')} (PL)`}
-              />
-              <DocumentDownloadButton
-                document={<UpsInvoicePDF data={upsInvoiceData as any} labels={upsInvoiceLabels as any} />}
-                fileName={`UPS_INVOICE_${orderId}_${new Date().toISOString().split('T')[0].replace(/-/g, '')}.pdf`}
-                label={`${tOrders('ups_invoice.download_button')} (UPS)`}
-                className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/30"
-              />
-              <UpsTradeDocumentActions orderId={orderId} hasActiveLabel={upsLabelStatus.hasActiveLabel} />
-            </div>
-          </ZenCard>
-        </div>
-
-        {/* Right Column: Order Summary & Finance Summary */}
-        <div className="flex flex-col gap-6">
-          {/* Shipper & Consignee Info Card */}
+          {/* 3. 배송 기본 정보 (Shipper / Consignee) — TASK-B-308: 운임 하단으로 이동 */}
           <ZenCard className="p-6 flex flex-col gap-4">
             <h3 className="font-bold text-slate-900 dark:text-gray-100 text-base flex items-center gap-2 border-b border-slate-100 dark:border-zinc-800 pb-3">
               <User className="w-4 h-4 text-primary" />
@@ -360,10 +149,9 @@ export default async function UpsOrderDetailPage({ params }: UpsOrderDetailPageP
                 )}
                 {(order.shipper_address || (order.shipper as any)?.address) && (
                   <span className="text-slate-500 block">
-                    주소: {resolveShipperStreet(order, (order as any).shipper)} {/* TASK-B-305: 영문 우선 표출 */}
+                    주소: {resolveShipperStreet(order, (order as any).shipper)}
                   </span>
                 )}
-                {/* TASK-B-307: 화주 city/state/zip/country 줄 제거 (Daum 주소가 이미 완전) */}
               </div>
               <div>
                 <span className="text-slate-400 block font-semibold">수령인 (Consignee)</span>
@@ -374,8 +162,7 @@ export default async function UpsOrderDetailPage({ params }: UpsOrderDetailPageP
                 {order.recipient_email && (
                   <span className="text-slate-500 block">이메일: {order.recipient_email}</span>
                 )}
-                {order.recipient_address && <span className="text-slate-500 block">주소: {resolveConsigneeStreet(order)}</span>} {/* TASK-B-305: 영문 우선 표출 */}
-                {/* TASK-B-307: 수령인 city/state/zipcode/country 표시 (코드→이름 변환) */}
+                {order.recipient_address && <span className="text-slate-500 block">주소: {resolveConsigneeStreet(order)}</span>}
                 {(order.recipient_city || order.recipient_state_province || order.recipient_zipcode || order.recipient_country_code) && (
                   <span className="text-slate-500 block">
                     {[order.recipient_city, resolveRegionName(order.recipient_state_province as string, order.recipient_country_code as string), order.recipient_zipcode].filter(Boolean).join(', ')}
@@ -383,15 +170,35 @@ export default async function UpsOrderDetailPage({ params }: UpsOrderDetailPageP
                   </span>
                 )}
               </div>
-              <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-zinc-800">
-                <span className="text-slate-400">주문 상태</span>
-                <ZenBadge className="text-[11px] font-bold bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300">{order.status}</ZenBadge>
-              </div>
             </div>
           </ZenCard>
 
-          {/* Finance Summary Component — Settlement Preview 제거 (TASK-B-300 ③) */}
-        </div>
+          {/* 4. UPS SHXK Tracking Events — TASK-B-308: IN_TRANSIT일 때만 표출 */}
+          {order.status === 'IN_TRANSIT' && (
+            <section className="bg-white dark:bg-zinc-950 rounded-3xl border border-slate-100 dark:border-zinc-800 p-6 shadow-sm">
+              <h3 className="text-lg font-bold text-slate-900 dark:text-gray-100 mb-4 flex items-center gap-2">
+                <Truck className="w-5 h-5 text-indigo-500" />
+                UPS 트래킹 이벤트 상세 (SHXK API)
+              </h3>
+              <UpsTrackingEventsList events={upsTrackingEvents} />
+            </section>
+          )}
+
+          {/* 5. Order Edit History Panel (TASK-B-303 / Issue #1125) */}
+          <UpsOrderEditHistoryPanel history={editHistory} />
+
+          {/* 5. Trade Documents Section — TASK-B-308: CI/PL/UPS Invoice PDF 버튼 삭제, UpsTradeDocumentActions만 유지 */}
+          <ZenCard className="p-6 flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-bold text-slate-900 dark:text-gray-100 flex items-center gap-2">
+                <FileText className="w-5 h-5 text-blue-500" />
+                UPS 무역 및 발송 서류 (Documents)
+              </h3>
+            </div>
+            <div className="flex flex-col gap-3">
+              <UpsTradeDocumentActions orderId={orderId} hasActiveLabel={upsLabelStatus.hasActiveLabel} />
+            </div>
+          </ZenCard>
       </div>
     </div>
   );

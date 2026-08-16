@@ -142,7 +142,7 @@ describe('TASK-B-300 ②: 배송 기본 정보 카드 화주/수하인 연락처
     expect(screen.queryByText(/^연락처:/)).toBeNull();
     expect(screen.queryByText(/^이메일:/)).toBeNull();
     expect(screen.queryByText(/^주소:/)).toBeNull();
-    expect(screen.getByText('주문 상태')).toBeTruthy();
+    // TASK-B-308: "주문 상태" 배지 삭제됨
   });
 });
 
@@ -151,5 +151,34 @@ describe('TASK-B-300 ③: ups-detail 페이지에서 Settlement Preview 제거',
     await renderPage(baseOrder);
 
     expect(screen.queryByText('Settlement Preview')).toBeNull();
+  });
+});
+
+describe('TASK-B-308: UPS 상세페이지 레이아웃 정리', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('SHXK 트래킹 섹션이 IN_TRANSIT일 때만 렌더링됨', async () => {
+    await renderPage({ ...baseOrder, status: 'IN_TRANSIT' });
+    expect(screen.getByText('UPS 트래킹 이벤트 상세 (SHXK API)')).toBeTruthy();
+  });
+
+  it('SHXK 트래킹 섹션이 IN_TRANSIT이 아닐 때 렌더링되지 않음', async () => {
+    await renderPage({ ...baseOrder, status: 'REGISTERED' });
+    expect(screen.queryByText('UPS 트래킹 이벤트 상세 (SHXK API)')).toBeNull();
+  });
+
+  it('Actual Charges 섹션이 렌더링되지 않음', async () => {
+    await renderPage(baseOrder);
+    expect(screen.queryByText('Actual Charges')).toBeNull();
+    expect(screen.queryByText('정산 조정')).toBeNull();
+  });
+
+  it('CI/PL/UPS Invoice PDF 버튼이 없음', async () => {
+    await renderPage(baseOrder);
+    expect(screen.queryByText('Commercial Invoice')).toBeNull();
+    expect(screen.queryByText('Packing List')).toBeNull();
+    expect(screen.queryByText('UPS Invoice')).toBeNull();
   });
 });

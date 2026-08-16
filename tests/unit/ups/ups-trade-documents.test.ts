@@ -61,14 +61,13 @@ describe('Issue #565/569: previewShxkPayload + issueUpsLabel', () => {
     expect(actionsSrc).toContain('buildCreateOrderPayload(shxkCode, order, countryCode, packages');
   });
 
-  it('UpsTradeDocumentActions.tsx에 previewShxkPayload와 issueUpsLabel 임포트가 있는지 검증', async () => {
+  it('UpsTradeDocumentActions.tsx에 previewShxkPayload 임포트가 있는지 검증', async () => {
     const fs = await import('fs');
     const src = fs.readFileSync('src/components/orders/UpsTradeDocumentActions.tsx', 'utf-8');
 
     expect(src).toContain('previewShxkPayload');
-    expect(src).toContain('issueUpsLabel');
-    expect(src).not.toContain('triggerCreateOrderTest');
-    expect(src).toContain('CREATEORDER');
+    // TASK-B-308: issueUpsLabel 제거됨
+    expect(src).not.toContain('import.*issueUpsLabel');
     expect(src).toContain('PreviewPopup');
   });
 });
