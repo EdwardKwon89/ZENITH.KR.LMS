@@ -39,29 +39,30 @@
 
 ## 작업 결과
 
-### 완료 항목
-1. ✅ **DB 마이그레이션**: `recipient_address_detail` 컬럼 추가
-   - 파일: `supabase/migrations/20260816100000_task_b305_recipient_address_detail.sql`
-   - `create_order_atomic` RPC 함수 업데이트 (INSERT에 recipient_address_detail 포함)
+### 완료 항목 (반려 사유 수정)
+1. ✅ **새 마이그레이션 파일 생성** (기존 마이그레이션 수정 금지)
+   - 파일: `supabase/migrations/20260816110000_task_b305_create_order_atomic_v6.sql`
+   - `create_order_atomic` RPC 함수를 `CREATE OR REPLACE`로 전체 재정의
+   - recipient_address_detail 컬럼 INSERT에 포함
 
-2. ✅ **서버 액션**: `updateOrder()`에 `recipient_address_detail` 저장 로직 추가
-   - 파일: `src/app/actions/operations/orders.ts`
+2. ✅ **화주 주소 영문 우선 표출 적용** (resolveShipperStreet)
+   - 적용: `ups-detail/page.tsx`, `orders/[orderId]/page.tsx`, `TradeDocumentClient.tsx`
+   - shipper + consignee 양쪽 모두 영문 우선 표출
 
-3. ✅ **AddressInput.tsx**: 화주/수하인 address_detail 영문 전용 검증
-   - `englishDetailOnly` prop 추가
-   - 영문 전용 검증 정규식: `/^[A-Za-z0-9\s.,\-()&'"/#%+:]*$/`
-   - 적용: `OrderRegistrationForm.tsx` (화주+수하인)
+3. ✅ **address_detail_english 필드 자동 반영 로직 추가**
+   - 파일: `src/components/common/AddressInput.tsx`
+   - 화주 상세주소 입력 시 `shipper_address_detail_english`에도 동일 반영
 
-4. ✅ **영문 우선 표출 유틸 함수**: `resolveConsigneeStreet()` 생성
-   - 파일: `src/lib/ups/label-mapping.ts`
-   - 우선순위: recipient_address_detail > recipient_address_local > recipient_address
+4. ✅ **신규 회귀 테스트 추가** (R-09)
+   - 파일: `tests/unit/logistics/address-english-display.test.ts`
+   - `resolveConsigneeStreet()`, `resolveShipperStreet()`, 영문 전용 검증 정규식 테스트
 
 5. ✅ **CI/PL/UPS Invoice 주소에 city/state/zipcode/country 포함**
-   - 적용: `ups-detail/page.tsx`, `orders/[orderId]/page.tsx`, `TradeDocumentClient.tsx`
+   - shipper + consignee 양쪽 모두 적용
    - PDF 컴포넌트 타입 업데이트: `CommercialInvoicePDF.tsx`, `PackingListPDF.tsx`
 
 ### 테스트 결과
-- **회귀 테스트**: 200 test files, 1377 tests **ALL PASS**
+- **회귀 테스트**: 201 test files, 1392 tests **ALL PASS** (신규 15건 추가)
 - **빌드**: TypeScript compilation **SUCCESS**
 
 ## 커밋 이력

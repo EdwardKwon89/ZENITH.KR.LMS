@@ -230,7 +230,13 @@ export function AddressInput({
                 }
                 setDetailError('');
                 setDetailAddress(value);
-                if (setValue && prefix) setValue(`${prefix}_address_detail`, value);
+                if (setValue && prefix) {
+                  setValue(`${prefix}_address_detail`, value);
+                  // TASK-B-305: 영문 전용 입력 시 address_detail_english에도 동일 반영
+                  if (englishDetailOnly && prefix === 'shipper') {
+                    setValue('shipper_address_detail_english', value);
+                  }
+                }
               }}
               disabled={readOnly}
               placeholder={englishDetailOnly ? 'English only (e.g., Apt 101, Suite 200)' : ''}
@@ -320,7 +326,13 @@ export function AddressInput({
                 }
                 setDetailError('');
                 setDetailAddress(value);
-                if (setValue && prefix) setValue(`${prefix}_address_detail`, value);
+                if (setValue && prefix) {
+                  setValue(`${prefix}_address_detail`, value);
+                  // TASK-B-305: 영문 전용 입력 시 address_detail_english에도 동일 반영
+                  if (englishDetailOnly && prefix === 'shipper') {
+                    setValue('shipper_address_detail_english', value);
+                  }
+                }
               }}
                 disabled={readOnly}
                 placeholder={englishDetailOnly ? 'English only (e.g., Apt 101, Suite 200)' : ''}

@@ -1,12 +1,5 @@
--- 20260813020000_iss1100_shipper_name_override.sql
--- TASK-B-295 (Issue #1100): 오더 화주명(발송인 표시명) 자유 입력 지원
---
--- zen_orders에 shipper_name(자유 텍스트 스냅샷) 컬럼을 추가하고, create_order_atomic RPC가
--- 신규 컬럼을 INSERT하도록 재정의한다. (오더 소유권 shipper_id는 그대로 — 화주명만 표시용 오버라이드)
-
-ALTER TABLE public.zen_orders ADD COLUMN shipper_name TEXT;
--- DEF-B-059 / Issue #1079: create_order_atomic RPC 함수에 영문 주소 컬럼 추가
--- 기존 RPC 함수를 CREATE OR REPLACE로 업데이트 (3개 파라미터 버전)
+-- TASK-B-305 (Issue #1133): create_order_atomic RPC 함수에 recipient_address_detail 컬럼 추가
+-- 기존 마이그레이션 수정 없이 CREATE OR REPLACE로 함수 전체 재정의
 
 CREATE OR REPLACE FUNCTION public.create_order_atomic(
   p_payload jsonb,
@@ -34,7 +27,7 @@ BEGIN
   -- 1. order_no 생성
   v_year := to_char(NOW(), 'YYYY');
   SELECT public.get_next_order_sequence(v_year, v_prefix) INTO v_order_no;
-  -- 2. zen_orders Header 삽입 (v5: recipient_country_code/state/city, shipper 주소 7컬럼, ups_product_code/incoterms 통합)
+  -- 2. zen_orders Header 삽입 (v6: recipient_address_detail 추가)
   INSERT INTO public.zen_orders (
     order_no,
     order_type,
@@ -49,6 +42,7 @@ BEGIN
     recipient_name,
     recipient_address,
     recipient_address_local,
+    recipient_address_detail,
     recipient_phone,
     recipient_zipcode,
     recipient_pccc,
@@ -93,6 +87,7 @@ BEGIN
     p_payload->>'recipient_name',
     p_payload->>'recipient_address',
     p_payload->>'recipient_address_local',
+    p_payload->>'recipient_address_detail',
     p_payload->>'recipient_phone',
     p_payload->>'recipient_zipcode',
     p_payload->>'recipient_pccc',
@@ -189,7 +184,7 @@ BEGIN
         ) VALUES (
           v_inv_id, (p_payload->>'shipper_id')::UUID,
           'RESERVATION', v_item.quantity, v_new_on_hand,
-          v_order_id, 'Order Registered (Atomic RPC v5): ' || v_order_id,
+          v_order_id, 'Order Registered (Atomic RPC v6): ' || v_order_id,
           p_user_id, NOW()
         );
       END IF;
@@ -200,7 +195,7 @@ BEGIN
     order_id, prev_status, next_status, reason, changed_by, created_at
   ) VALUES (
     v_order_id, NULL, 'REGISTERED',
-    'Order Registered (Atomic RPC v5)', p_user_id, NOW()
+    'Order Registered (Atomic RPC v6)', p_user_id, NOW()
   );
   -- 7. 결과 JSONB 리턴
   SELECT row_to_json(o) INTO v_order_result

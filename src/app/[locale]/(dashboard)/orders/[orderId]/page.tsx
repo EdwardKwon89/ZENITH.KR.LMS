@@ -20,7 +20,7 @@ import UpsInvoicePDF from '@/components/documents/UpsInvoicePDF';
 import { getDeclarations } from '@/app/actions/customs';
 import { getOrderRateSnapshot } from '@/app/actions/operations';
 import { getOrderEditScope } from '@/lib/logistics/status-machine';import type { OrderStatus } from '@/types/orders';
-import { resolveConsigneeStreet } from '@/lib/ups/label-mapping'; // TASK-B-305
+import { resolveConsigneeStreet, resolveShipperStreet } from '@/lib/ups/label-mapping'; // TASK-B-305
 import OrderCustomsSection from '@/components/customs/OrderCustomsSection';
 import OrderCustomsAdminControl from '@/components/customs/OrderCustomsAdminControl';
 import { getTranslations } from 'next-intl/server';
@@ -134,7 +134,11 @@ export default async function OrderDetailPage({
     date: new Date().toISOString().split('T')[0],
     shipper: {
       name: order.shipper_name || order.shipper?.name || 'ZENITH LOGISTICS',
-      address: (order.shipper as any)?.address || 'Seoul, South Korea'
+      address: resolveShipperStreet(order, (order as any).shipper_org), // TASK-B-305: 영문 우선 표출
+      city: (order as any).shipper_city || '',
+      state: (order as any).shipper_state_province || '',
+      zipcode: (order as any).shipper_zipcode || '',
+      country: (order as any).shipper_country_code || '',
     },
     consignee: {
       name: order.recipient_name || '',
@@ -165,7 +169,11 @@ export default async function OrderDetailPage({
     date: new Date().toISOString().split('T')[0],
     shipper: {
       name: order.shipper_name || order.shipper?.name || 'ZENITH LOGISTICS',
-      address: (order.shipper as any)?.address || 'Seoul, South Korea'
+      address: resolveShipperStreet(order, (order as any).shipper_org), // TASK-B-305: 영문 우선 표출
+      city: (order as any).shipper_city || '',
+      state: (order as any).shipper_state_province || '',
+      zipcode: (order as any).shipper_zipcode || '',
+      country: (order as any).shipper_country_code || '',
     },
     consignee: {
       name: order.recipient_name || '',
@@ -229,7 +237,11 @@ export default async function OrderDetailPage({
     date: new Date().toISOString().split('T')[0],
     shipper: {
       name: order.shipper_name || order.shipper?.name || 'ZENITH LOGISTICS',
-      address: (order.shipper as any)?.address || 'Seoul, South Korea',
+      address: resolveShipperStreet(order, (order as any).shipper_org), // TASK-B-305: 영문 우선 표출
+      city: (order as any).shipper_city || '',
+      state: (order as any).shipper_state_province || '',
+      zipcode: (order as any).shipper_zipcode || '',
+      country: (order as any).shipper_country_code || '',
       contact: order.shipper_contact_phone || order.shipper_contact_email || ''
     },
     consignee: {

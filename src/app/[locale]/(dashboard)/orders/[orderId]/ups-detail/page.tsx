@@ -19,7 +19,7 @@ import { UpsActualAdjustmentForm } from '@/components/orders/UpsActualAdjustment
 import UpsTrackingEventsList from '@/components/tracking/UpsTrackingEventsList';
 import DocumentDownloadButton from '@/components/documents/DocumentDownloadButton';
 import { resolveDestCountryCode } from '@/lib/ups/order-helpers';
-import { resolveConsigneeStreet } from '@/lib/ups/label-mapping'; // TASK-B-305
+import { resolveConsigneeStreet, resolveShipperStreet } from '@/lib/ups/label-mapping'; // TASK-B-305
 import CommercialInvoicePDF from '@/components/documents/CommercialInvoicePDF';
 import PackingListPDF from '@/components/documents/PackingListPDF';
 import UpsInvoicePDF from '@/components/documents/UpsInvoicePDF';
@@ -148,7 +148,11 @@ export default async function UpsOrderDetailPage({ params }: UpsOrderDetailPageP
     date: new Date().toISOString().split('T')[0],
     shipper: {
       name: order.shipper_name || order.shipper?.name || 'ZENITH LOGISTICS',
-      address: (order.shipper as any)?.address || 'Seoul, South Korea',
+      address: resolveShipperStreet(order, (order as any).shipper_org), // TASK-B-305: 영문 우선 표출
+      city: (order as any).shipper_city || '',
+      state: (order as any).shipper_state_province || '',
+      zipcode: (order as any).shipper_zipcode || '',
+      country: (order as any).shipper_country_code || '',
     },
     consignee: {
       name: order.recipient_name || '',
@@ -193,7 +197,11 @@ export default async function UpsOrderDetailPage({ params }: UpsOrderDetailPageP
     date: new Date().toISOString().split('T')[0],
     shipper: {
       name: order.shipper_name || order.shipper?.name || 'ZENITH LOGISTICS',
-      address: (order.shipper as any)?.address || 'Seoul, South Korea',
+      address: resolveShipperStreet(order, (order as any).shipper_org), // TASK-B-305: 영문 우선 표출
+      city: (order as any).shipper_city || '',
+      state: (order as any).shipper_state_province || '',
+      zipcode: (order as any).shipper_zipcode || '',
+      country: (order as any).shipper_country_code || '',
       contact: order.shipper_contact_phone || order.shipper_contact_email || '',
     },
     consignee: {
@@ -352,8 +360,7 @@ export default async function UpsOrderDetailPage({ params }: UpsOrderDetailPageP
                 )}
                 {(order.shipper_address || (order.shipper as any)?.address) && (
                   <span className="text-slate-500 block">
-                    주소: {order.shipper_address || (order.shipper as any)?.address}
-                    {order.shipper_address_detail ? ` ${order.shipper_address_detail}` : ''}
+                    주소: {resolveShipperStreet(order, (order as any).shipper_org)} {/* TASK-B-305: 영문 우선 표출 */}
                   </span>
                 )}
               </div>
@@ -366,7 +373,7 @@ export default async function UpsOrderDetailPage({ params }: UpsOrderDetailPageP
                 {order.recipient_email && (
                   <span className="text-slate-500 block">이메일: {order.recipient_email}</span>
                 )}
-                {order.recipient_address && <span className="text-slate-500 block">주소: {order.recipient_address}</span>}
+                {order.recipient_address && <span className="text-slate-500 block">주소: {resolveConsigneeStreet(order)}</span>} {/* TASK-B-305: 영문 우선 표출 */}
               </div>
               <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-zinc-800">
                 <span className="text-slate-400">주문 상태</span>

@@ -130,6 +130,10 @@ interface CIProps {
     shipper: {
       name: string;
       address: string;
+      city?: string; // TASK-B-305
+      state?: string; // TASK-B-305
+      zipcode?: string; // TASK-B-305
+      country?: string; // TASK-B-305
     };
     consignee: {
       name: string;
@@ -188,6 +192,13 @@ const CommercialInvoicePDF = ({ data, labels }: CIProps) => (
           <Text style={styles.label}>{labels.shipper}</Text>
           <Text style={styles.value}>{data.shipper.name}</Text>
           <Text style={styles.text}>{data.shipper.address}</Text>
+          {/* TASK-B-305: city/state/zipcode/country 표시 */}
+          {(data.shipper.city || data.shipper.state || data.shipper.zipcode || data.shipper.country) && (
+            <Text style={styles.text}>
+              {[data.shipper.city, data.shipper.state, data.shipper.zipcode].filter(Boolean).join(', ')}
+              {data.shipper.country ? ` ${data.shipper.country}` : ''}
+            </Text>
+          )}
         </View>
         <View style={styles.box}>
           <Text style={styles.label}>{labels.consignee}</Text>

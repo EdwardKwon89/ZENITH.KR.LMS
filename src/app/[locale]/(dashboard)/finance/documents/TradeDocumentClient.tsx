@@ -18,7 +18,7 @@ import { getOrderDocumentData } from "@/app/actions/finance";
 import { ZenButton, ZenInput, ZenCard } from "@/components/ui/ZenUI";
 import { toast } from "sonner";
 import dynamic from "next/dynamic";
-import { resolveConsigneeStreet } from "@/lib/ups/label-mapping"; // TASK-B-305
+import { resolveConsigneeStreet, resolveShipperStreet } from "@/lib/ups/label-mapping"; // TASK-B-305
 
 // Dynamic import for PDF components to avoid SSR issues
 const CommercialInvoicePDF = dynamic(() => import("@/components/documents/CommercialInvoicePDF"), { ssr: false });
@@ -53,7 +53,7 @@ export default function TradeDocumentClient({ locale }: { locale: string }) {
     if (!orderData) return {
       invoice_no: "",
       date: "",
-      shipper: { name: "", address: "" },
+      shipper: { name: "", address: "", city: "", state: "", zipcode: "", country: "" },
       consignee: { name: "", address: "", city: "", state: "", zipcode: "", country: "" },
       order_no: "",
       items: [],
@@ -65,7 +65,11 @@ export default function TradeDocumentClient({ locale }: { locale: string }) {
       date: new Date().toISOString().split('T')[0],
       shipper: {
         name: orderData.shipper_name || orderData.shipper?.name || "ZENITH LOGISTICS",
-        address: orderData.shipper?.address || "Seoul, Korea"
+        address: resolveShipperStreet(orderData, orderData.shipper_org), // TASK-B-305: 영문 우선 표출
+        city: orderData.shipper_city || "",
+        state: orderData.shipper_state_province || "",
+        zipcode: orderData.shipper_zipcode || "",
+        country: orderData.shipper_country_code || "",
       },
       consignee: {
         name: orderData.recipient_name || "VALUED CUSTOMER",
@@ -96,7 +100,7 @@ export default function TradeDocumentClient({ locale }: { locale: string }) {
     if (!orderData) return {
       pl_no: "",
       date: "",
-      shipper: { name: "", address: "" },
+      shipper: { name: "", address: "", city: "", state: "", zipcode: "", country: "" },
       consignee: { name: "", address: "", city: "", state: "", zipcode: "", country: "" },
       order_no: "",
       items: [],
@@ -109,7 +113,11 @@ export default function TradeDocumentClient({ locale }: { locale: string }) {
       date: new Date().toISOString().split('T')[0],
       shipper: {
         name: orderData.shipper_name || orderData.shipper?.name || "ZENITH LOGISTICS",
-        address: orderData.shipper?.address || "Seoul, Korea"
+        address: resolveShipperStreet(orderData, orderData.shipper_org), // TASK-B-305: 영문 우선 표출
+        city: orderData.shipper_city || "",
+        state: orderData.shipper_state_province || "",
+        zipcode: orderData.shipper_zipcode || "",
+        country: orderData.shipper_country_code || "",
       },
       consignee: {
         name: orderData.recipient_name || "VALUED CUSTOMER",
