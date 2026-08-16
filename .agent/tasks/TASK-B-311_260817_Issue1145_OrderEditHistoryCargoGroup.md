@@ -5,7 +5,7 @@
 - **등록자**: Jaison (JSJung 요청 분석)
 - **담당**: Mike
 - **우선순위**: P2
-- **상태**: ❌ 반려 (PR#1146, 2026-08-17 2차 — old items 여전히 미조인 + 화물전용변경 로그누락 회귀, 재작업 필요)
+- **상태**: ✅ 완료 (PR#1146 머지, 2026-08-17, 병합 커밋 `3aed22aa`)
 
 ## [배경]
 
@@ -71,7 +71,17 @@ interface CargoSummarySnapshot {
 
 ## [작업 결과]
 
-_(Mike 작성 예정)_
+(Mike 작성, `.agent/tasks/TASK-B-311_edit_history_cargo_group.md`에 별도 생성됐던 내용을 병합·정리 — 중복 파일은 삭제)
+
+1. ✅ `CargoSummarySnapshot`(package_count/total_weight/total_volume/item_count/items[{item_name,quantity,unit_price,hs_code}]) + 5번째 그룹 "화물정보" 추가
+2. ✅ `createOrder()`/`updateOrder()` 양쪽 모두 cargo_summary 기록(1·2차 반려 후 반영) — old/new 양쪽 `getItemsFullByOrderId()`로 package_id 포함 정확히 조회
+3. ✅ 로그 생성 조건 `hasHeaderChanges || hasCargoChanges` (화물 전용 변경도 이력 생성)
+4. ✅ `UpsOrderEditHistoryPanel.tsx`에 화물정보 그룹 렌더링(old→new 요약)
+
+빌드 SUCCESS, 회귀 201 test files / 1407 tests ALL PASS. 화물 전용 변경 실 DB 통합테스트(TC-B303-10) 통과.
+
+- 커밋: `66a55e17`(구현) → `78a1fde0`(1차 반려 수정) → `054042cf`(2차 반려 수정)
+- PR: [#1146](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1146)
 
 ## [Jaison 최종 검토]
 
@@ -96,6 +106,14 @@ GitHub Issue 라벨 `status:review` → `status:rework` 갱신 완료.
 2. **[Critical] 새로운 회귀** — 로그 생성 조건이 `hasHeaderChanges || hasCargoChanges`(1차 수정본)에서 `hasHeaderChanges`만으로 되돌아가, 화물(패키지/품목)만 변경되고 헤더 필드가 그대로면 이력이 아예 안 남음. TASK-B-311의 존재 이유 자체와 배치되는 회귀.
 
 GitHub Issue 라벨 `status:rework` 유지.
+
+---
+
+**PR#1146 최종 승인·머지 (2026-08-17)** — 병합 커밋 `3aed22aa`
+
+2차 반려 사유(old items 미조인, 화물전용변경 로그누락 회귀) 둘 다 정확히 수정 확인. `getItemsFullByOrderId()`로 old/new 양쪽 package_id 포함 조회, 로그 조건 `hasHeaderChanges || hasCargoChanges` 복원. 격리 워크트리 재검증: 통합테스트(TC-B303-10) 개별 실행 확인 + 전체 회귀 201/201·1407/1407 ALL PASS, 빌드 성공, CI 3종 PASS. 승인 후 머지, Issue #1145 close 완료.
+
+R-10(패키지 수/중량 변경하는 오더 수정 → 화물정보 배지+상세 스크린샷) 미첨부 — JSJung 라이브 확인 필요.
 
 ## [발견 이슈]
 
