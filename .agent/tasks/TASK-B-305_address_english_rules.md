@@ -65,4 +65,7 @@
 - **빌드**: TypeScript compilation **SUCCESS**
 
 ## 커밋 이력
-(커밋 후 기재)
+- 커밋 해시: `3df98fe3`
+- 브랜치: `feature/teamb-305-address-english-rules-mike`
+- 메시지: `[Mike] fix: TASK-B-305 영문 주소 출력 규칙 통일 — 화주/수하인 주소 영문 우선 표출 + 상세주소 영문전용 입력 (DEF-B-134 포함)`
+- PR: https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1134
