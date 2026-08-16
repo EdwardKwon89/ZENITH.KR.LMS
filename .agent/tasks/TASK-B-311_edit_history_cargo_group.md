@@ -52,7 +52,7 @@
 - **회귀 테스트**: 201 test files, 1407 tests **ALL PASS**
 
 ## 커밋 이력
-- 커밋 해시: `66a55e17`
+- 커밋 해시: `78a1fde0`
 - 브랜치: `feature/teamb-311-edit-history-cargo-group-mike`
-- 메시지: `[Mike] feat: TASK-B-311 등록/수정 이력 — 화물정보 그룹 추가`
+- 메시지: `[Mike] fix: TASK-B-311 반려 사유 수정`
 - PR: https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1146
