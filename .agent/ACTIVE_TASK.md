@@ -50,7 +50,6 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
-| [#1137](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1137) | TASK-B-307: 영문 주소 표출 — state/country 원시코드→이름 변환 + 화주 주소 중복 제거 (DEF-B-136) | b | p2 | rework | jungjs | 2026-08-16 |
 | [#1126](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1126) | [Aiden] R-17 v3.0 개편 — Team B 반영 필요 (develop→TeamB_Dev 병합 전 확인 요청) | b | p1 | - | jungjs | 2026-08-14 |
 | [#1118](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1118) | [future] IMP-094 — 요율 워크플로우 고도화 (Phase M) | a | p4 | - | 미배정 | 2026-08-14 |
 | [#1117](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1117) | [future] IMP-091 — Carrier Portal (운송사 배차 수락/거부) | a | p4 | - | 미배정 | 2026-08-14 |
