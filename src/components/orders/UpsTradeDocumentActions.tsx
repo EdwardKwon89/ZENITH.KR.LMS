@@ -3,11 +3,12 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { FileText, XCircle, Loader2, Send } from 'lucide-react';
-import { fetchShxkTradeDocument, voidUpsLabel, previewShxkPayload, issueUpsLabel } from '@/app/actions/operations/ups-labels';
+import { FileText, XCircle, Loader2 } from 'lucide-react';
+import { fetchShxkTradeDocument, voidUpsLabel, previewShxkPayload } from '@/app/actions/operations/ups-labels';
 import { toast } from 'sonner';
 
-type PreviewAction = 'CREATEORDER' | 'WAYBILL' | 'INVOICE' | 'CUSTOMS' | 'VOID';
+// TASK-B-308: CREATEORDER 제거
+type PreviewAction = 'WAYBILL' | 'INVOICE' | 'CUSTOMS' | 'VOID';
 
 interface UpsTradeDocumentActionsProps {
   orderId: string;
@@ -89,7 +90,6 @@ export default function UpsTradeDocumentActions({ orderId, hasActiveLabel }: Ups
   const t = useTranslations('Documents');
   const [loadingDoc, setLoadingDoc] = useState<string | null>(null);
   const [cancelling, setCancelling] = useState(false);
-  const [createLoading, setCreateLoading] = useState(false);
   const [previewState, setPreviewState] = useState<{ action: PreviewAction; payload: Record<string, unknown> } | null>(null);
   const [resultState, setResultState] = useState<{ action: PreviewAction; result: Record<string, unknown> } | null>(null);
   const router = useRouter();
@@ -107,24 +107,6 @@ export default function UpsTradeDocumentActions({ orderId, hasActiveLabel }: Ups
     if (!previewState) return;
     const { action } = previewState;
     setPreviewState(null);
-
-    if (action === 'CREATEORDER') {
-      setCreateLoading(true);
-      try {
-        const res = await issueUpsLabel(orderId);
-        if (res.success) {
-          toast.success(`라벨 발급 성공: trackingNo=${res.data?.tracking_number}, referenceNo=${res.data?.reference_no}`);
-          router.refresh();
-        } else {
-          toast.error(res.error || '라벨 발급에 실패했습니다.');
-        }
-      } catch (err: any) {
-        toast.error(err.message || '라벨 발급에 실패했습니다.');
-      } finally {
-        setCreateLoading(false);
-      }
-      return;
-    }
 
     if (action === 'VOID') {
       setCancelling(true);

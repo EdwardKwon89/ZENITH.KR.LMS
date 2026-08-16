@@ -101,10 +101,8 @@ export default async function UpsOrderDetailPage({ params }: UpsOrderDetailPageP
         </ZenBadge>
       </div>
 
-      {/* Main Grid Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column: Main Stepper, Breakdown, Adjustment Form, SHXK Events, Documents */}
-        <div className="lg:col-span-2 flex flex-col gap-6">
+      {/* Main Layout — TASK-B-308: 단일 컬럼 레이아웃 */}
+      <div className="flex flex-col gap-6">
           {/* 1. Primary Stepper: order.status Progress Bar & Real-time Poll Button */}
           <UpsOrderStatusStepper
             orderId={orderId}
@@ -201,7 +199,6 @@ export default async function UpsOrderDetailPage({ params }: UpsOrderDetailPageP
               <UpsTradeDocumentActions orderId={orderId} hasActiveLabel={upsLabelStatus.hasActiveLabel} />
             </div>
           </ZenCard>
-        </div>
       </div>
     </div>
   );
