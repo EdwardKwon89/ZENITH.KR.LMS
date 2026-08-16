@@ -6,7 +6,7 @@
 - **등록자**: Jaison (JSJung 요청 분석)
 - **담당**: Mike
 - **우선순위**: P2
-- **상태**: ❌ 반려 (PR#1134, 2026-08-16 2차 — 재작업 필요)
+- **상태**: ✅ 완료 (PR#1134 머지, 2026-08-16, 병합 커밋 `d5b4889d`)
 
 ## [배경]
 
@@ -77,7 +77,27 @@ UPS 오더 상세페이지 화주 주소 영문 표출 스크린샷, CI/PL/UPS I
 
 ## [작업 결과]
 
-_(Mike 작성 예정)_
+(Mike 작성, `.agent/tasks/TASK-B-305_address_english_rules.md`에 별도 생성됐던 내용을 병합·정리 — 중복 파일은 삭제)
+
+### 완료 항목 (2회 반려 후 최종 반영)
+1. ✅ **새 마이그레이션 파일 생성** (기존 마이그레이션 수정 금지 원칙 준수)
+   - `supabase/migrations/20260816100000_task_b305_recipient_address_detail.sql` — `recipient_address_detail` 컬럼 추가
+   - `supabase/migrations/20260816110000_task_b305_create_order_atomic_v6.sql` — `create_order_atomic` RPC `CREATE OR REPLACE`로 전체 재정의, INSERT에 `recipient_address_detail` 포함
+2. ✅ **`updateOrder()`에 `recipient_address_detail` 저장 로직 추가** (`src/app/actions/operations/orders.ts`)
+3. ✅ **화주 주소 영문 우선 표출 적용** (`resolveShipperStreet()` 재사용) — `ups-detail/page.tsx`, `orders/[orderId]/page.tsx`, `TradeDocumentClient.tsx` 3개 파일 8개 호출부 전부 적용, shipper+consignee 양쪽 city/state/zipcode/country 포함
+4. ✅ **`address_detail_english` 자동 반영** — `AddressInput.tsx`에서 화주 상세주소 입력 시 `shipper_address_detail_english`에도 동일 반영
+5. ✅ **신규 회귀 테스트 15건** — `tests/unit/logistics/address-english-display.test.ts`
+6. ✅ **CI/PL/UPS Invoice PDF** — `CommercialInvoicePDF.tsx`/`PackingListPDF.tsx` shipper+consignee 양쪽 city/state/zipcode/country 렌더링 추가
+
+### 테스트 결과
+- 회귀 테스트: 201 test files, 1392 tests ALL PASS (신규 15건)
+- 빌드: TypeScript compilation SUCCESS
+
+### 커밋 이력
+- `3df98fe3` [Mike] fix: 최초 구현
+- `47628357` [Mike] fix: 1차 반려 사유 4건 수정
+- `fedb2423` [Mike] fix: `resolveShipperStreet` 두 번째 인자(`shipper_org`→`shipper`) 수정
+- PR: [#1134](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1134)
 
 ## [Jaison 최종 검토]
 
@@ -104,6 +124,14 @@ GitHub Issue 라벨 `status:review` → `status:rework` 갱신 완료.
 - 8곳 모두 `shipper_org` → `shipper`로 프로퍼티명만 수정하면 해결.
 
 Minor(비차단): `recipient_address_detail` 라운드트립 자동 테스트 없음(제가 직접 RPC로 대신 검증), task 파일 중복(병합 시 Jaison이 정리 예정).
+
+---
+
+**PR#1134 최종 승인·머지 (2026-08-16)** — 병합 커밋 `d5b4889d`
+
+2차 반려 사유(`shipper_org`→`shipper` 8곳) 정확히 수정 확인. 격리 워크트리 fresh reset 재검증: 회귀 201/201·1392/1392 ALL PASS, 빌드 성공, CI 3종(Regression Tests/Task File Check/Type Check) 전체 PASS. 코드 diff 전체 재확인 결과 3회에 걸친 반려 사유 5건(마이그레이션 재사용·화주측 미적용·EN동기화 누락·테스트 미추가·shipper_org 오타) 모두 해소, 예상 밖 변경 없음. 승인 코멘트 게시 후 머지, Issue #1133 close 완료.
+
+R-10(UPS 상세페이지·CI/PL/UPS Invoice PDF 실구동 스크린샷)은 Mike 완료 보고에 미첨부 — JSJung 라이브 브라우저 확인 필요 항목으로 남겨둠(TASK-B-302/304와 동일한 방식).
 
 ## [발견 이슈]
 
