@@ -6,7 +6,7 @@
 - **등록자**: Jaison (JSJung 실사용 피드백)
 - **담당**: Mike
 - **우선순위**: P2
-- **상태**: 🔄 착수 가능 (설계 확정, 착수 직행)
+- **상태**: ❌ 반려 (PR#1138, 2026-08-16 — 테스트 미추가, 재작업 필요)
 
 ## [배경]
 
@@ -78,7 +78,13 @@ _(Mike 작성 예정)_
 
 ## [Jaison 최종 검토]
 
-_(PR 제출 후 작성)_
+**PR#1138 반려 (2026-08-16)** — 상세: [PR#1138 코멘트](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1138#issuecomment-5306793435)
+
+코드 자체는 정확함을 확인(3개 파일 전체 적용, 화주 카드 줄 삭제·CI/PL 유지 모두 설계대로, 실제 함수 실행으로 JSJung께 사전에 보여드린 예상값과 정확히 일치 — `"Weihai, Shandong, 02750 China"`). 회귀 201/201·1392/1392 PASS, 빌드·CI 전체 PASS.
+
+**반려 사유**: 신규 회귀 테스트 0건. PR#1136(TASK-B-306) 승인 시 "다음에 이 페이지를 건드릴 때는 테스트 추가 부탁드립니다"라고 명시적으로 요청했는데 이번에도 미반영 — 동일 지적 재발. `resolveRegionName`/`resolveCountryName` 단위 테스트 + "배송 기본 정보" 카드 렌더링 테스트(TASK-B-305의 `address-english-display.test.ts`, `ups-detail-b300.test.tsx` 패턴 재사용) 추가 요청.
+
+GitHub Issue 라벨 `status:review` → `status:rework` 갱신 완료.
 
 ## [발견 이슈]
 
