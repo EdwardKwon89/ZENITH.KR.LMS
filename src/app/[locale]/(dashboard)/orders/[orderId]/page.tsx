@@ -20,6 +20,7 @@ import UpsInvoicePDF from '@/components/documents/UpsInvoicePDF';
 import { getDeclarations } from '@/app/actions/customs';
 import { getOrderRateSnapshot } from '@/app/actions/operations';
 import { getOrderEditScope } from '@/lib/logistics/status-machine';import type { OrderStatus } from '@/types/orders';
+import { resolveConsigneeStreet } from '@/lib/ups/label-mapping'; // TASK-B-305
 import OrderCustomsSection from '@/components/customs/OrderCustomsSection';
 import OrderCustomsAdminControl from '@/components/customs/OrderCustomsAdminControl';
 import { getTranslations } from 'next-intl/server';
@@ -137,7 +138,11 @@ export default async function OrderDetailPage({
     },
     consignee: {
       name: order.recipient_name || '',
-      address: order.recipient_address || '',
+      address: resolveConsigneeStreet(order), // TASK-B-305: 영문 우선 표출
+      city: (order as any).recipient_city || '',
+      state: (order as any).recipient_state_province || '',
+      zipcode: (order as any).recipient_zipcode || '',
+      country: (order as any).recipient_country_code || '',
     },
     order_no: order.order_no,
     items: order.packages.flatMap((pkg: any) => 
@@ -164,7 +169,11 @@ export default async function OrderDetailPage({
     },
     consignee: {
       name: order.recipient_name || '',
-      address: order.recipient_address || '',
+      address: resolveConsigneeStreet(order), // TASK-B-305: 영문 우선 표출
+      city: (order as any).recipient_city || '',
+      state: (order as any).recipient_state_province || '',
+      zipcode: (order as any).recipient_zipcode || '',
+      country: (order as any).recipient_country_code || '',
     },
     order_no: order.order_no,
     items: order.packages.map((pkg: any) => ({
@@ -225,7 +234,10 @@ export default async function OrderDetailPage({
     },
     consignee: {
       name: order.recipient_name || '',
-      address: order.recipient_address || '',
+      address: resolveConsigneeStreet(order), // TASK-B-305: 영문 우선 표출
+      city: (order as any).recipient_city || '',
+      state: (order as any).recipient_state_province || '',
+      zipcode: (order as any).recipient_zipcode || '',
       country: (order.dest_port as any)?.country_code || (order.dest_port as any)?.name || '',
       contact: order.recipient_contact || order.recipient_phone || ''
     },

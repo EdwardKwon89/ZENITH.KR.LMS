@@ -18,6 +18,7 @@ import { getOrderDocumentData } from "@/app/actions/finance";
 import { ZenButton, ZenInput, ZenCard } from "@/components/ui/ZenUI";
 import { toast } from "sonner";
 import dynamic from "next/dynamic";
+import { resolveConsigneeStreet } from "@/lib/ups/label-mapping"; // TASK-B-305
 
 // Dynamic import for PDF components to avoid SSR issues
 const CommercialInvoicePDF = dynamic(() => import("@/components/documents/CommercialInvoicePDF"), { ssr: false });
@@ -53,7 +54,7 @@ export default function TradeDocumentClient({ locale }: { locale: string }) {
       invoice_no: "",
       date: "",
       shipper: { name: "", address: "" },
-      consignee: { name: "", address: "" },
+      consignee: { name: "", address: "", city: "", state: "", zipcode: "", country: "" },
       order_no: "",
       items: [],
       total_amount: 0,
@@ -68,7 +69,11 @@ export default function TradeDocumentClient({ locale }: { locale: string }) {
       },
       consignee: {
         name: orderData.recipient_name || "VALUED CUSTOMER",
-        address: orderData.recipient_address || "TBD"
+        address: resolveConsigneeStreet(orderData), // TASK-B-305: 영문 우선 표출
+        city: orderData.recipient_city || "",
+        state: orderData.recipient_state_province || "",
+        zipcode: orderData.recipient_zipcode || "",
+        country: orderData.recipient_country_code || "",
       },
       order_no: orderData.order_no,
       items: orderData.packages.flatMap((pkg: any) => 
@@ -92,7 +97,7 @@ export default function TradeDocumentClient({ locale }: { locale: string }) {
       pl_no: "",
       date: "",
       shipper: { name: "", address: "" },
-      consignee: { name: "", address: "" },
+      consignee: { name: "", address: "", city: "", state: "", zipcode: "", country: "" },
       order_no: "",
       items: [],
       total_pkgs: 0,
@@ -108,7 +113,11 @@ export default function TradeDocumentClient({ locale }: { locale: string }) {
       },
       consignee: {
         name: orderData.recipient_name || "VALUED CUSTOMER",
-        address: orderData.recipient_address || "TBD"
+        address: resolveConsigneeStreet(orderData), // TASK-B-305: 영문 우선 표출
+        city: orderData.recipient_city || "",
+        state: orderData.recipient_state_province || "",
+        zipcode: orderData.recipient_zipcode || "",
+        country: orderData.recipient_country_code || "",
       },
       order_no: orderData.order_no,
       items: orderData.packages.map((pkg: any) => ({

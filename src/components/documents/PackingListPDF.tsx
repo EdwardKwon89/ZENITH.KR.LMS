@@ -137,6 +137,10 @@ interface PLProps {
     consignee: {
       name: string;
       address: string;
+      city?: string; // TASK-B-305
+      state?: string; // TASK-B-305
+      zipcode?: string; // TASK-B-305
+      country?: string; // TASK-B-305
     };
     order_no: string;
     items: Array<{
@@ -194,6 +198,13 @@ const PackingListPDF = ({ data, labels }: PLProps) => (
           <Text style={styles.label}>{labels.consignee}</Text>
           <Text style={styles.value}>{data.consignee.name}</Text>
           <Text style={styles.text}>{data.consignee.address}</Text>
+          {/* TASK-B-305: city/state/zipcode/country 표시 */}
+          {(data.consignee.city || data.consignee.state || data.consignee.zipcode || data.consignee.country) && (
+            <Text style={styles.text}>
+              {[data.consignee.city, data.consignee.state, data.consignee.zipcode].filter(Boolean).join(', ')}
+              {data.consignee.country ? ` ${data.consignee.country}` : ''}
+            </Text>
+          )}
         </View>
       </View>
 
