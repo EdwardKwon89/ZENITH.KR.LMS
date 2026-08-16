@@ -65,7 +65,7 @@ export default function TradeDocumentClient({ locale }: { locale: string }) {
       date: new Date().toISOString().split('T')[0],
       shipper: {
         name: orderData.shipper_name || orderData.shipper?.name || "ZENITH LOGISTICS",
-        address: resolveShipperStreet(orderData, orderData.shipper_org), // TASK-B-305: 영문 우선 표출
+        address: resolveShipperStreet(orderData, orderData.shipper), // TASK-B-305: 영문 우선 표출
         city: orderData.shipper_city || "",
         state: orderData.shipper_state_province || "",
         zipcode: orderData.shipper_zipcode || "",
@@ -113,7 +113,7 @@ export default function TradeDocumentClient({ locale }: { locale: string }) {
       date: new Date().toISOString().split('T')[0],
       shipper: {
         name: orderData.shipper_name || orderData.shipper?.name || "ZENITH LOGISTICS",
-        address: resolveShipperStreet(orderData, orderData.shipper_org), // TASK-B-305: 영문 우선 표출
+        address: resolveShipperStreet(orderData, orderData.shipper), // TASK-B-305: 영문 우선 표출
         city: orderData.shipper_city || "",
         state: orderData.shipper_state_province || "",
         zipcode: orderData.shipper_zipcode || "",

@@ -39,7 +39,7 @@
 
 ## 작업 결과
 
-### 완료 항목 (반려 사유 수정)
+### 완료 항목 (반려 사유 2회 수정)
 1. ✅ **새 마이그레이션 파일 생성** (기존 마이그레이션 수정 금지)
    - 파일: `supabase/migrations/20260816110000_task_b305_create_order_atomic_v6.sql`
    - `create_order_atomic` RPC 함수를 `CREATE OR REPLACE`로 전체 재정의
@@ -48,6 +48,7 @@
 2. ✅ **화주 주소 영문 우선 표출 적용** (resolveShipperStreet)
    - 적용: `ups-detail/page.tsx`, `orders/[orderId]/page.tsx`, `TradeDocumentClient.tsx`
    - shipper + consignee 양쪽 모두 영문 우선 표출
+   - **修正**: `order.shipper_org` → `order.shipper`로 프로퍼티명 수정 (8곳)
 
 3. ✅ **address_detail_english 필드 자동 반영 로직 추가**
    - 파일: `src/components/common/AddressInput.tsx`

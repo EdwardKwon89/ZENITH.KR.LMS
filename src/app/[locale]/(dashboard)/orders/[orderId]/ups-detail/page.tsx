@@ -148,7 +148,7 @@ export default async function UpsOrderDetailPage({ params }: UpsOrderDetailPageP
     date: new Date().toISOString().split('T')[0],
     shipper: {
       name: order.shipper_name || order.shipper?.name || 'ZENITH LOGISTICS',
-      address: resolveShipperStreet(order, (order as any).shipper_org), // TASK-B-305: 영문 우선 표출
+      address: resolveShipperStreet(order, (order as any).shipper), // TASK-B-305: 영문 우선 표출
       city: (order as any).shipper_city || '',
       state: (order as any).shipper_state_province || '',
       zipcode: (order as any).shipper_zipcode || '',
@@ -197,7 +197,7 @@ export default async function UpsOrderDetailPage({ params }: UpsOrderDetailPageP
     date: new Date().toISOString().split('T')[0],
     shipper: {
       name: order.shipper_name || order.shipper?.name || 'ZENITH LOGISTICS',
-      address: resolveShipperStreet(order, (order as any).shipper_org), // TASK-B-305: 영문 우선 표출
+      address: resolveShipperStreet(order, (order as any).shipper), // TASK-B-305: 영문 우선 표출
       city: (order as any).shipper_city || '',
       state: (order as any).shipper_state_province || '',
       zipcode: (order as any).shipper_zipcode || '',
@@ -360,7 +360,7 @@ export default async function UpsOrderDetailPage({ params }: UpsOrderDetailPageP
                 )}
                 {(order.shipper_address || (order.shipper as any)?.address) && (
                   <span className="text-slate-500 block">
-                    주소: {resolveShipperStreet(order, (order as any).shipper_org)} {/* TASK-B-305: 영문 우선 표출 */}
+                    주소: {resolveShipperStreet(order, (order as any).shipper)} {/* TASK-B-305: 영문 우선 표출 */}
                   </span>
                 )}
               </div>
