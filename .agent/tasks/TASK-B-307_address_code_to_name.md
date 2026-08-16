@@ -49,4 +49,7 @@
 - **회귀 테스트**: 201 test files, 1392 tests **ALL PASS**
 
 ## 커밋 이력
-(커밋 후 기재)
+- 커밋 해시: `a9749419`
+- 브랜치: `feature/teamb-307-address-code-to-name-mike`
+- 메시지: `[Mike] fix: TASK-B-307 영문 주소 표출 — state/country 원시코드→이름 변환 + 화주 주소 중복 제거`
+- PR: https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1138
