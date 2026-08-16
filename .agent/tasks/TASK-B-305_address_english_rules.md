@@ -67,7 +67,7 @@
 - **빌드**: TypeScript compilation **SUCCESS**
 
 ## 커밋 이력
-- 커밋 해시: `47628357`
+- 커밋 해시: `fedb2423`
 - 브랜치: `feature/teamb-305-address-english-rules-mike`
-- 메시지: `[Mike] fix: TASK-B-305 영문 주소 출력 규칙 통일 — 반려 사유 4건 수정 완료`
+- 메시지: `[Mike] fix: TASK-B-305 resolveShipperStreet 두 번째 인자 수정`
 - PR: https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1134
