@@ -47,7 +47,7 @@
 - **회귀 테스트**: 201 test files, 1406 tests **ALL PASS**
 
 ## 커밋 이력
-- 커밋 해시: `ddced5dc`
+- 커밋 해시: `88f51e9f`
 - 브랜치: `feature/teamb-310-edit-history-panel-redesign-mike`
-- 메시지: `[Mike] feat: TASK-B-310 등록/수정 이력 패널 — 그룹 카드 + 클릭 상세보기 재설계`
+- 메시지: `[Mike] fix: TASK-B-310 CREATE 배지 문구 변경 + 테스트 추가`
 - PR: https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1144
