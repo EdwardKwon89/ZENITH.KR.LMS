@@ -1,4 +1,18 @@
 // Pure mapping functions — no server-only imports. Safe for client components and tests.
+import { Country, State } from 'country-state-city';
+
+// TASK-B-307 (Issue #1137): state/country 원시코드→이름 변환 유틸
+export function resolveRegionName(stateCode: string, countryCode: string): string {
+  if (!stateCode || !countryCode) return '';
+  const state = State.getStateByCodeAndCountry(stateCode, countryCode);
+  return state?.name || stateCode;
+}
+
+export function resolveCountryName(countryCode: string): string {
+  if (!countryCode) return '';
+  const country = Country.getCountryByCode(countryCode);
+  return country?.name || countryCode;
+}
 
 export function determineOrderCargotype(packages: Record<string, unknown>[]): { cargotype: string; mailCargoType: string } {
   if (packages.length === 0) return { cargotype: 'W', mailCargoType: '4' };

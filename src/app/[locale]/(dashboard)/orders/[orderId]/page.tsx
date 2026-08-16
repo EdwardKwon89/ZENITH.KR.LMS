@@ -20,7 +20,7 @@ import UpsInvoicePDF from '@/components/documents/UpsInvoicePDF';
 import { getDeclarations } from '@/app/actions/customs';
 import { getOrderRateSnapshot } from '@/app/actions/operations';
 import { getOrderEditScope } from '@/lib/logistics/status-machine';import type { OrderStatus } from '@/types/orders';
-import { resolveConsigneeStreet, resolveShipperStreet } from '@/lib/ups/label-mapping'; // TASK-B-305
+import { resolveConsigneeStreet, resolveShipperStreet, resolveRegionName, resolveCountryName } from '@/lib/ups/label-mapping'; // TASK-B-305, TASK-B-307
 import OrderCustomsSection from '@/components/customs/OrderCustomsSection';
 import OrderCustomsAdminControl from '@/components/customs/OrderCustomsAdminControl';
 import { getTranslations } from 'next-intl/server';
@@ -136,17 +136,17 @@ export default async function OrderDetailPage({
       name: order.shipper_name || order.shipper?.name || 'ZENITH LOGISTICS',
       address: resolveShipperStreet(order, (order as any).shipper), // TASK-B-305: 영문 우선 표출
       city: (order as any).shipper_city || '',
-      state: (order as any).shipper_state_province || '',
+      state: resolveRegionName((order as any).shipper_state_province || '', (order as any).shipper_country_code || ''), // TASK-B-307: 코드→이름 변환
       zipcode: (order as any).shipper_zipcode || '',
-      country: (order as any).shipper_country_code || '',
+      country: resolveCountryName((order as any).shipper_country_code || ''), // TASK-B-307: 코드→이름 변환
     },
     consignee: {
       name: order.recipient_name || '',
       address: resolveConsigneeStreet(order), // TASK-B-305: 영문 우선 표출
       city: (order as any).recipient_city || '',
-      state: (order as any).recipient_state_province || '',
+      state: resolveRegionName((order as any).recipient_state_province || '', (order as any).recipient_country_code || ''), // TASK-B-307: 코드→이름 변환
       zipcode: (order as any).recipient_zipcode || '',
-      country: (order as any).recipient_country_code || '',
+      country: resolveCountryName((order as any).recipient_country_code || ''), // TASK-B-307: 코드→이름 변환
     },
     order_no: order.order_no,
     items: order.packages.flatMap((pkg: any) => 
@@ -171,17 +171,17 @@ export default async function OrderDetailPage({
       name: order.shipper_name || order.shipper?.name || 'ZENITH LOGISTICS',
       address: resolveShipperStreet(order, (order as any).shipper), // TASK-B-305: 영문 우선 표출
       city: (order as any).shipper_city || '',
-      state: (order as any).shipper_state_province || '',
+      state: resolveRegionName((order as any).shipper_state_province || '', (order as any).shipper_country_code || ''), // TASK-B-307: 코드→이름 변환
       zipcode: (order as any).shipper_zipcode || '',
-      country: (order as any).shipper_country_code || '',
+      country: resolveCountryName((order as any).shipper_country_code || ''), // TASK-B-307: 코드→이름 변환
     },
     consignee: {
       name: order.recipient_name || '',
       address: resolveConsigneeStreet(order), // TASK-B-305: 영문 우선 표출
       city: (order as any).recipient_city || '',
-      state: (order as any).recipient_state_province || '',
+      state: resolveRegionName((order as any).recipient_state_province || '', (order as any).recipient_country_code || ''), // TASK-B-307: 코드→이름 변환
       zipcode: (order as any).recipient_zipcode || '',
-      country: (order as any).recipient_country_code || '',
+      country: resolveCountryName((order as any).recipient_country_code || ''), // TASK-B-307: 코드→이름 변환
     },
     order_no: order.order_no,
     items: order.packages.map((pkg: any) => ({
@@ -239,18 +239,18 @@ export default async function OrderDetailPage({
       name: order.shipper_name || order.shipper?.name || 'ZENITH LOGISTICS',
       address: resolveShipperStreet(order, (order as any).shipper), // TASK-B-305: 영문 우선 표출
       city: (order as any).shipper_city || '',
-      state: (order as any).shipper_state_province || '',
+      state: resolveRegionName((order as any).shipper_state_province || '', (order as any).shipper_country_code || ''), // TASK-B-307: 코드→이름 변환
       zipcode: (order as any).shipper_zipcode || '',
-      country: (order as any).shipper_country_code || '',
+      country: resolveCountryName((order as any).shipper_country_code || ''), // TASK-B-307: 코드→이름 변환
       contact: order.shipper_contact_phone || order.shipper_contact_email || ''
     },
     consignee: {
       name: order.recipient_name || '',
       address: resolveConsigneeStreet(order), // TASK-B-305: 영문 우선 표출
       city: (order as any).recipient_city || '',
-      state: (order as any).recipient_state_province || '',
+      state: resolveRegionName((order as any).recipient_state_province || '', (order.dest_port as any)?.country_code || ''), // TASK-B-307: 코드→이름 변환
       zipcode: (order as any).recipient_zipcode || '',
-      country: (order.dest_port as any)?.country_code || (order.dest_port as any)?.name || '',
+      country: resolveCountryName((order.dest_port as any)?.country_code || ''), // TASK-B-307: 코드→이름 변환
       contact: order.recipient_contact || order.recipient_phone || ''
     },
     packages: order.packages.map((pkg: any, idx: number) => {
