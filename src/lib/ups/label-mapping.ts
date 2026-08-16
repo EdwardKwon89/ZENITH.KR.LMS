@@ -58,6 +58,22 @@ export function resolveShipperStreet(
   return [shipperAddr, shipperAddrDetail].filter(Boolean).join(' ');
 }
 
+// TASK-B-305 (Issue #1133): 수하인 주소 영문 우선 표출 유틸
+// 우선순위: recipient_address_detail (영문 전용) > recipient_address_local > recipient_address
+export function resolveConsigneeStreet(
+  order: Record<string, unknown>,
+): string {
+  const consigneeAddr = (order.recipient_address as string) || '';
+  const localAddr = (order.recipient_address_local as string) || '';
+  const detailAddr = (order.recipient_address_detail as string) || '';
+  
+  // 영문 상세주소가 있으면 사용, 없으면 한글 원본 + 현지어 표기
+  if (detailAddr) {
+    return [consigneeAddr, detailAddr].filter(Boolean).join(' ');
+  }
+  return localAddr ? `${consigneeAddr} (${localAddr})` : consigneeAddr;
+}
+
 export function buildCreateOrderPayload(
   shxkCode: string,
   order: Record<string, unknown>,

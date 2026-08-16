@@ -228,6 +228,7 @@ export async function updateOrder(orderId: string, payload: OrderRegistrationInp
     recipient_state_province: validated.recipient_state_province,
     recipient_city: validated.recipient_city,
     recipient_address_local: validated.recipient_address_local,
+    recipient_address_detail: validated.recipient_address_detail,
     ups_product_code: validated.ups_product_code,
     incoterms: validated.incoterms,
     ups_service_family: validated.ups_service_family,

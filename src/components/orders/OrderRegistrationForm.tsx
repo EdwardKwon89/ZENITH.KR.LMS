@@ -1126,6 +1126,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                                 t={t}
                                 readOnly={shipperNameMode === 'auto'}
                                 key={`${affiliation?.orgId || 'no-org'}-${shipperNameMode}`}
+                                englishDetailOnly // TASK-B-305: 화주 상세주소 영문 전용
                                 defaultValues={
                                   shipperNameMode === 'manual'
                                     ? { country_code: '', state_province: '', city: '', address: '', address_detail: '', zipcode: '' }
@@ -1229,6 +1230,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                             register={register}
                             setValue={setValue}
                             t={t}
+                            englishDetailOnly // TASK-B-305: 수하인 상세주소 영문 전용
                             defaultValues={{
                               country_code: watch('recipient_country_code') || 'KR',
                               address: watch('recipient_address') || '',

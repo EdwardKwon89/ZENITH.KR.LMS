@@ -19,6 +19,7 @@ import { UpsActualAdjustmentForm } from '@/components/orders/UpsActualAdjustment
 import UpsTrackingEventsList from '@/components/tracking/UpsTrackingEventsList';
 import DocumentDownloadButton from '@/components/documents/DocumentDownloadButton';
 import { resolveDestCountryCode } from '@/lib/ups/order-helpers';
+import { resolveConsigneeStreet, resolveShipperStreet } from '@/lib/ups/label-mapping'; // TASK-B-305
 import CommercialInvoicePDF from '@/components/documents/CommercialInvoicePDF';
 import PackingListPDF from '@/components/documents/PackingListPDF';
 import UpsInvoicePDF from '@/components/documents/UpsInvoicePDF';
@@ -147,11 +148,19 @@ export default async function UpsOrderDetailPage({ params }: UpsOrderDetailPageP
     date: new Date().toISOString().split('T')[0],
     shipper: {
       name: order.shipper_name || order.shipper?.name || 'ZENITH LOGISTICS',
-      address: (order.shipper as any)?.address || 'Seoul, South Korea',
+      address: resolveShipperStreet(order, (order as any).shipper), // TASK-B-305: 영문 우선 표출
+      city: (order as any).shipper_city || '',
+      state: (order as any).shipper_state_province || '',
+      zipcode: (order as any).shipper_zipcode || '',
+      country: (order as any).shipper_country_code || '',
     },
     consignee: {
       name: order.recipient_name || '',
-      address: order.recipient_address || '',
+      address: resolveConsigneeStreet(order), // TASK-B-305: 영문 우선 표출
+      city: (order as any).recipient_city || '',
+      state: (order as any).recipient_state_province || '',
+      zipcode: (order as any).recipient_zipcode || '',
+      country: (order as any).recipient_country_code || '',
     },
     order_no: order.order_no,
     items: order.packages.flatMap((pkg: any) =>
@@ -169,7 +178,7 @@ export default async function UpsOrderDetailPage({ params }: UpsOrderDetailPageP
     pl_no: `PL-${order.order_no}`,
     date: new Date().toISOString().split('T')[0],
     shipper: ciData.shipper,
-    consignee: ciData.consignee,
+    consignee: ciData.consignee, // TASK-B-305: 영문 우선 표출 (ciData에서 상속)
     order_no: order.order_no,
     packages: order.packages.map((pkg: any, idx: number) => ({
       package_no: idx + 1,
@@ -188,12 +197,19 @@ export default async function UpsOrderDetailPage({ params }: UpsOrderDetailPageP
     date: new Date().toISOString().split('T')[0],
     shipper: {
       name: order.shipper_name || order.shipper?.name || 'ZENITH LOGISTICS',
-      address: (order.shipper as any)?.address || 'Seoul, South Korea',
+      address: resolveShipperStreet(order, (order as any).shipper), // TASK-B-305: 영문 우선 표출
+      city: (order as any).shipper_city || '',
+      state: (order as any).shipper_state_province || '',
+      zipcode: (order as any).shipper_zipcode || '',
+      country: (order as any).shipper_country_code || '',
       contact: order.shipper_contact_phone || order.shipper_contact_email || '',
     },
     consignee: {
       name: order.recipient_name || '',
-      address: order.recipient_address || '',
+      address: resolveConsigneeStreet(order), // TASK-B-305: 영문 우선 표출
+      city: (order as any).recipient_city || '',
+      state: (order as any).recipient_state_province || '',
+      zipcode: (order as any).recipient_zipcode || '',
       country: (order.dest_port as any)?.country_code || (order.dest_port as any)?.name || '',
       contact: order.recipient_contact || order.recipient_phone || '',
     },
@@ -344,8 +360,7 @@ export default async function UpsOrderDetailPage({ params }: UpsOrderDetailPageP
                 )}
                 {(order.shipper_address || (order.shipper as any)?.address) && (
                   <span className="text-slate-500 block">
-                    주소: {order.shipper_address || (order.shipper as any)?.address}
-                    {order.shipper_address_detail ? ` ${order.shipper_address_detail}` : ''}
+                    주소: {resolveShipperStreet(order, (order as any).shipper)} {/* TASK-B-305: 영문 우선 표출 */}
                   </span>
                 )}
               </div>
@@ -358,7 +373,7 @@ export default async function UpsOrderDetailPage({ params }: UpsOrderDetailPageP
                 {order.recipient_email && (
                   <span className="text-slate-500 block">이메일: {order.recipient_email}</span>
                 )}
-                {order.recipient_address && <span className="text-slate-500 block">주소: {order.recipient_address}</span>}
+                {order.recipient_address && <span className="text-slate-500 block">주소: {resolveConsigneeStreet(order)}</span>} {/* TASK-B-305: 영문 우선 표출 */}
               </div>
               <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-zinc-800">
                 <span className="text-slate-400">주문 상태</span>
