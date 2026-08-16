@@ -5,7 +5,7 @@
 - **등록자**: Jaison (JSJung 요청 분석)
 - **담당**: Mike
 - **우선순위**: P2
-- **상태**: ❌ 반려 (PR#1144, 2026-08-17 — CREATE 배지 문구 미반영, 재작업 필요)
+- **상태**: ✅ 완료 (PR#1144 머지, 2026-08-17, 병합 커밋 `0b8e1526`)
 
 ## [배경]
 
@@ -70,7 +70,16 @@ export const ORDER_EDIT_LOG_FIELD_GROUPS: Record<string, { label: string; fields
 
 ## [작업 결과]
 
-_(Mike 작성 예정)_
+(Mike 작성, `.agent/tasks/TASK-B-310_edit_history_panel_redesign.md`에 별도 생성됐던 내용을 병합·정리 — 중복 파일은 삭제)
+
+1. ✅ `ORDER_EDIT_LOG_FIELD_GROUPS`(화주/수하인/배송/기타 4그룹) + `computeGroupChanges()` + `ORDER_EDIT_LOG_ACTION_LABELS` 추가
+2. ✅ `UpsOrderEditHistoryPanel.tsx` 재설계 — `'use client'`, 카드 요약(액션 한글라벨+담당자+상대시각+변경 그룹 배지), 클릭 시 그룹별 아코디언 상세
+3. ✅ 1차 반려 후 CREATE 배지 문구("N건 등록") 조건 분기 수정 + 전용 테스트 추가
+
+빌드 SUCCESS, 회귀 201 test files / 1407 tests ALL PASS(신규 1건 포함).
+
+- 커밋: `ddced5dc`(구현) → `88f51e9f`(CREATE 배지 문구 수정 + 테스트)
+- PR: [#1144](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1144)
 
 ## [Jaison 최종 검토]
 
@@ -79,6 +88,14 @@ _(Mike 작성 예정)_
 그룹 매핑·computeGroupChanges·'use client' 전환·아코디언·상대시각·액션 한글라벨 전부 설계대로 정확함(diff 확인, 회귀 201/201·1406/1406 PASS, 빌드 성공). 다만 CREATE 항목의 그룹 배지가 `isCreate` 분기 없이 항상 "N건 변경"으로 표시되어 설계 명시 사항("CREATE는 'N건 등록'으로 문구 구분") 미반영 — 신규 등록 이력에 "N건 변경"이 뜨는 건 이번 재설계의 핵심 동기(등록/수정 오해 방지)와 정면으로 배치되어 반려. 한 줄 조건 분기로 수정 요청, 신규 테스트 없음도 함께 지적(해당 assertion이 있었으면 바로 잡혔을 사례).
 
 GitHub Issue 라벨 `status:review` → `status:rework` 갱신 완료.
+
+---
+
+**PR#1144 최종 승인·머지 (2026-08-17)** — 병합 커밋 `0b8e1526`
+
+`isCreate ? '등록' : '변경'` 조건 분기 + 요청한 전용 테스트(`건 등록` 표시/`건 변경` 부재) 정확히 반영 확인. 격리 워크트리 재검증: 회귀 201/201·1407/1407 ALL PASS(신규 1건), 빌드 성공, CI 3종 PASS. 승인 후 머지, Issue #1143 close 완료.
+
+R-10(등록+수정 이력 있는 오더로 접힌/펼친 상태 스크린샷) 미첨부 — JSJung 라이브 확인 필요.
 
 ## [발견 이슈]
 
