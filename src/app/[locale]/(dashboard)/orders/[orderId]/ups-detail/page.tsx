@@ -363,6 +363,13 @@ export default async function UpsOrderDetailPage({ params }: UpsOrderDetailPageP
                     주소: {resolveShipperStreet(order, (order as any).shipper)} {/* TASK-B-305: 영문 우선 표출 */}
                   </span>
                 )}
+                {/* TASK-B-306: 화주 city/state/zipcode/country 표시 */}
+                {(order.shipper_city || order.shipper_state_province || order.shipper_zipcode || order.shipper_country_code) && (
+                  <span className="text-slate-500 block">
+                    {[order.shipper_city, order.shipper_state_province, order.shipper_zipcode].filter(Boolean).join(', ')}
+                    {order.shipper_country_code ? ` ${order.shipper_country_code}` : ''}
+                  </span>
+                )}
               </div>
               <div>
                 <span className="text-slate-400 block font-semibold">수령인 (Consignee)</span>
@@ -374,6 +381,13 @@ export default async function UpsOrderDetailPage({ params }: UpsOrderDetailPageP
                   <span className="text-slate-500 block">이메일: {order.recipient_email}</span>
                 )}
                 {order.recipient_address && <span className="text-slate-500 block">주소: {resolveConsigneeStreet(order)}</span>} {/* TASK-B-305: 영문 우선 표출 */}
+                {/* TASK-B-306: 수령인 city/state/zipcode/country 표시 */}
+                {(order.recipient_city || order.recipient_state_province || order.recipient_zipcode || order.recipient_country_code) && (
+                  <span className="text-slate-500 block">
+                    {[order.recipient_city, order.recipient_state_province, order.recipient_zipcode].filter(Boolean).join(', ')}
+                    {order.recipient_country_code ? ` ${order.recipient_country_code}` : ''}
+                  </span>
+                )}
               </div>
               <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-zinc-800">
                 <span className="text-slate-400">주문 상태</span>
