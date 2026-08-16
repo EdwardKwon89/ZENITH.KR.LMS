@@ -73,3 +73,75 @@ export const ORDER_EDIT_LOG_FIELD_LABELS: Record<string, string> = {
   description: '비고',
   delivery_notes: '배송 메모',
 };
+
+// TASK-B-310 (Issue #1143): 필드 그룹 매핑 — 카드 요약 + 아코디언 상세용
+export interface FieldGroup {
+  key: string;
+  label: string;
+  fields: string[];
+}
+
+export const ORDER_EDIT_LOG_FIELD_GROUPS: FieldGroup[] = [
+  {
+    key: 'shipper',
+    label: '화주정보',
+    fields: [
+      'shipper_id', 'shipper_name', 'shipper_contact_name', 'shipper_contact_phone', 'shipper_contact_email',
+      'shipper_address', 'shipper_address_detail', 'shipper_country_code', 'shipper_state_province', 'shipper_city', 'shipper_zipcode', 'shipper_biz_no',
+    ],
+  },
+  {
+    key: 'recipient',
+    label: '수하인정보',
+    fields: [
+      'recipient_name', 'recipient_phone', 'recipient_email', 'recipient_address', 'recipient_address_detail',
+      'recipient_country_code', 'recipient_state_province', 'recipient_city', 'recipient_zipcode', 'recipient_pccc',
+    ],
+  },
+  {
+    key: 'shipping',
+    label: '배송정보',
+    fields: [
+      'transport_mode', 'delivery_method', 'incoterms', 'ups_product_code', 'ups_service_family',
+      'pickup_location', 'pickup_contact_name', 'pickup_contact_tel', 'pickup_address',
+    ],
+  },
+  {
+    key: 'other',
+    label: '기타',
+    fields: ['description', 'delivery_notes'],
+  },
+];
+
+// 그룹별 변경 필드 수 계산 유틸
+// isCreate: CREATE의 경우 oldData가 null이므로 newData의非null 필드를 모두 "변경"으로 간주
+export function computeGroupChanges(
+  oldData: Record<string, unknown> | null,
+  newData: Record<string, unknown> | null,
+  isCreate: boolean = false,
+): { groupKey: string; groupLabel: string; changedFields: string[] }[] {
+  if (!newData) return [];
+
+  return ORDER_EDIT_LOG_FIELD_GROUPS
+    .map((group) => {
+      const changedFields = group.fields.filter((f) => {
+        if (isCreate) {
+          // CREATE: newData에 값이 있으면 "추가된 필드"로 간주
+          return newData[f] !== null && newData[f] !== undefined && newData[f] !== '';
+        }
+        // UPDATE: oldData와 newData가 다르면 변경
+        if (!oldData) return false;
+        return JSON.stringify(oldData[f]) !== JSON.stringify(newData[f]);
+      });
+      return { groupKey: group.key, groupLabel: group.label, changedFields };
+    })
+    .filter((g) => g.changedFields.length > 0);
+}
+
+// 액션 한글 라벨
+export const ORDER_EDIT_LOG_ACTION_LABELS: Record<string, string> = {
+  CREATE: '등록',
+  UPDATE: '수정',
+  CANCEL: '취소',
+  APPLY: '적용',
+};

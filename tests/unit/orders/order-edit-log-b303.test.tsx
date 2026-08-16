@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
 
 // TASK-B-303 (Issue #1125): 오더 등록/수정 이력 — 회귀 테스트 (unit)
@@ -143,9 +143,13 @@ describe('② UpsOrderEditHistoryPanel — 등록/수정 이력 렌더', () => {
         ]}
       />
     );
-    expect(screen.getByText('CREATE')).toBeTruthy();
+    // TASK-B-310: 액션 라벨이 한글로 변경됨 (CREATE → 등록)
+    expect(screen.getByText('등록')).toBeTruthy();
     expect(screen.getByText('등록/수정 이력 (1건)')).toBeTruthy();
     expect(screen.getByText('Test Operator')).toBeTruthy();
+    // TASK-B-310: 아코디언 - 카드 클릭 시 상세 펼쳐짐
+    const cardButton = screen.getByRole('button');
+    fireEvent.click(cardButton);
     // 등록값 표시 (전체 필드)
     expect(screen.getByText('Recipient A')).toBeTruthy();
     expect(screen.getByText('010-1')).toBeTruthy();
@@ -169,6 +173,9 @@ describe('② UpsOrderEditHistoryPanel — 등록/수정 이력 렌더', () => {
         ]}
       />
     );
+    // TASK-B-310: 아코디언 - 카드 클릭 시 상세 펼쳐짐
+    const cardButton = screen.getByRole('button');
+    fireEvent.click(cardButton);
     // 변경된 필드만 — 수하인 연락처 diff 노출
     expect(screen.getByText(/010-1/)).toBeTruthy();
     expect(screen.getByText(/010-9999/)).toBeTruthy();
@@ -192,9 +199,10 @@ describe('② UpsOrderEditHistoryPanel — 등록/수정 이력 렌더', () => {
         ]}
       />
     );
+    // TASK-B-310: 액션 라벨이 한글로 변경됨 (UPDATE → 수정)
     const badges = container.querySelectorAll('span.font-bold');
     const firstBadge = badges[0]?.textContent ?? '';
-    expect(firstBadge).toBe('UPDATE');
+    expect(firstBadge).toBe('수정');
   });
 });
 
