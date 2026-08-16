@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { resolveConsigneeStreet, resolveShipperStreet } from '@/lib/ups/label-mapping';
+import { resolveConsigneeStreet, resolveShipperStreet, resolveRegionName, resolveCountryName } from '@/lib/ups/label-mapping';
 
 describe('TASK-B-305: 영문 주소 표출 유틸 함수', () => {
   describe('resolveConsigneeStreet', () => {
@@ -117,5 +117,51 @@ describe('TASK-B-305: 영문 전용 검증 정규식', () => {
 
   it('빈 문자열 통과', () => {
     expect(ENGLISH_ONLY_REGEX.test('')).toBe(true);
+  });
+});
+
+describe('TASK-B-307: state/country 원시코드→이름 변환 유틸', () => {
+  describe('resolveRegionName', () => {
+    it('중국 산동성 코드 변환', () => {
+      expect(resolveRegionName('SD', 'CN')).toBe('Shandong');
+    });
+
+    it('한국 서울 코드 변환', () => {
+      expect(resolveRegionName('11', 'KR')).toBe('Seoul');
+    });
+
+    it('빈 state 코드 시 빈 문자열 반환', () => {
+      expect(resolveRegionName('', 'CN')).toBe('');
+    });
+
+    it('빈 country 코드 시 빈 문자열 반환', () => {
+      expect(resolveRegionName('SD', '')).toBe('');
+    });
+
+    it('존재하지 않는 코드 시 원시 코드 반환 (폴백)', () => {
+      expect(resolveRegionName('INVALID', 'CN')).toBe('INVALID');
+    });
+  });
+
+  describe('resolveCountryName', () => {
+    it('중국 코드 변환', () => {
+      expect(resolveCountryName('CN')).toBe('China');
+    });
+
+    it('한국 코드 변환', () => {
+      expect(resolveCountryName('KR')).toBe('South Korea');
+    });
+
+    it('미국 코드 변환', () => {
+      expect(resolveCountryName('US')).toBe('United States');
+    });
+
+    it('빈 country 코드 시 빈 문자열 반환', () => {
+      expect(resolveCountryName('')).toBe('');
+    });
+
+    it('존재하지 않는 코드 시 원시 코드 반환 (폴백)', () => {
+      expect(resolveCountryName('INVALID')).toBe('INVALID');
+    });
   });
 });
