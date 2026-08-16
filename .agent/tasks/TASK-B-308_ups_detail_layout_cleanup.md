@@ -54,7 +54,7 @@ UPS 상세페이지 레이아웃 정리
 - **회귀 테스트**: 201 test files, 1402 tests **ALL PASS**
 
 ## 커밋 이력
-- 커밋 해시: `3aebbafd`
+- 커밋 해시: `6b53614b`
 - 브랜치: `feature/teamb-308-ups-detail-layout-cleanup-mike`
-- 메시지: `[Mike] feat: TASK-B-308 UPS 상세페이지 레이아웃 정리 — 섹션 재배치/삭제/조건부 표출`
+- 메시지: `[Mike] fix: TASK-B-308 반려 사유 2건 수정`
 - PR: https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1140
