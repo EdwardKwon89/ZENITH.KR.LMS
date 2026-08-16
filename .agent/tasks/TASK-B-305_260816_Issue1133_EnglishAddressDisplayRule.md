@@ -6,7 +6,7 @@
 - **등록자**: Jaison (JSJung 요청 분석)
 - **담당**: Mike
 - **우선순위**: P2
-- **상태**: 🔄 착수 가능 (설계 확정 완료, 구현 착수 직행)
+- **상태**: ❌ 반려 (PR#1134, 2026-08-16 — 재작업 필요)
 
 ## [배경]
 
@@ -81,7 +81,18 @@ _(Mike 작성 예정)_
 
 ## [Jaison 최종 검토]
 
-_(PR 제출 후 작성)_
+**PR#1134 반려 (2026-08-16)** — 상세: [PR#1134 코멘트](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1134#issuecomment-5306318593)
+
+격리 워크트리 검증(회귀 200/200·1377/1377 PASS, 빌드 성공) 자체는 문제없으나, 코드 diff 대조 결과 아래 4건으로 반려:
+
+1. **[Critical]** 이미 병합된 마이그레이션(`20260813020000_iss1100_shipper_name_override.sql`)을 직접 수정해 `create_order_atomic()` RPC에 `recipient_address_detail` INSERT 추가 — `schema_migrations.version`(PK) 기준으로 이미 적용된 환경에서는 재실행되지 않으므로, `createOrder()`(신규 등록) 경로에서 DEF-B-134가 실질적으로 미해결. 새 마이그레이션에 `CREATE OR REPLACE FUNCTION`으로 재정의 필요.
+2. **[Critical]** 이번 작업의 원래 계기였던 **화주 주소 영문 우선 표출**이 3개 파일(`ups-detail/page.tsx`, `orders/[orderId]/page.tsx`, `TradeDocumentClient.tsx`) 전부 미적용 — `resolveConsigneeStreet()`만 신설되고 수하인 쪽만 처리됨. 기존 `resolveShipperStreet()`는 이번 PR에서 한 번도 호출되지 않음. `ups-detail/page.tsx:355`의 원래 표출부도 그대로.
+3. **[Major]** `address_detail_english` 동기화 로직 누락 — `englishDetailOnly` 입력 검증은 추가됐으나 확정 설계(하나의 입력값을 `_english` 필드에도 반영)가 구현되지 않음.
+4. **[Major]** 신규 회귀 테스트 0건 (R-09 위반) — diff에 `tests/` 변경 없음, 로컬 재확인 결과도 develop 병합 시점과 동일한 200/1377으로 신규 테스트 없음 확인.
+
+기타: Task 상세 파일을 별도 경로로 중복 생성(재작업 시 통합 필요), PR base가 develop으로 잘못 설정되어 TeamB_Dev로 직접 정정.
+
+GitHub Issue 라벨 `status:review` → `status:rework` 갱신 완료.
 
 ## [발견 이슈]
 
