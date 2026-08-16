@@ -344,7 +344,9 @@ describe('ZENITH Logistics: Inbound Process Unit Tests', () => {
         // 3. currentPkg
         .mockResolvedValueOnce({ data: { gross_weight: 10, length: 20, width: 15, height: 10 }, error: null })
         // 4. UPS product
-        .mockResolvedValueOnce({ data: { id: 'product-1' }, error: null });
+        .mockResolvedValueOnce({ data: { id: 'product-1' }, error: null })
+        // TASK-B-312: 추가 maybeSingle 호출 (화물 스냅샷용) - 충분히 많은 수로 설정
+        .mockResolvedValue({ data: null, error: null });
 
       // from() chaining: order_packages select → returns packages data
       let fromCallCount = 0;
@@ -365,6 +367,14 @@ describe('ZENITH Logistics: Inbound Process Unit Tests', () => {
           chain.select.mockReturnValue({
             ...chain,
             eq: vi.fn().mockResolvedValue({ data: [{ gross_weight: 15, length: 30, width: 25, height: 20 }], error: null }),
+          });
+        }
+
+        // TASK-B-312: zen_order_items 쿼리 모킹 (배열 결과)
+        if (table === 'zen_order_items') {
+          chain.select.mockReturnValue({
+            ...chain,
+            eq: vi.fn().mockResolvedValue({ data: [], error: null }),
           });
         }
 
