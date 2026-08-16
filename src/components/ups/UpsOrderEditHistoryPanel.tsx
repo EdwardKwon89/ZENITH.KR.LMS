@@ -9,6 +9,8 @@ import {
   ORDER_EDIT_LOG_FIELD_GROUPS,
   ORDER_EDIT_LOG_ACTION_LABELS,
   computeGroupChanges,
+  formatCargoSummary,
+  CargoSummarySnapshot,
 } from '@/lib/orders/edit-log-fields';
 
 // TASK-B-310 (Issue #1143): 등록/수정 이력 패널 — 그룹 카드 + 클릭 상세보기 재설계
@@ -108,6 +110,31 @@ function HistoryCard({ entry }: { entry: OrderEditHistoryEntry }) {
                 </h4>
                 <div className="space-y-1">
                   {group.changedFields.map((fieldKey) => {
+                    // TASK-B-311: cargo_summary는 별도 포맷으로 표시
+                    if (fieldKey === 'cargo_summary') {
+                      const oldSnapshot = entry.old_data?.cargo_summary as CargoSummarySnapshot | undefined;
+                      const newSnapshot = entry.new_data?.cargo_summary as CargoSummarySnapshot | undefined;
+                      return (
+                        <div key={fieldKey} className="text-[11px]">
+                          {isCreate ? (
+                            <span className="font-bold text-slate-800 dark:text-slate-200">
+                              {formatCargoSummary(newSnapshot!)}
+                            </span>
+                          ) : (
+                            <div className="space-y-0.5">
+                              <div className="text-slate-400 line-through">
+                                {oldSnapshot ? formatCargoSummary(oldSnapshot) : '없음'}
+                              </div>
+                              <div className="text-slate-400 mx-0">→</div>
+                              <div className="font-bold text-slate-800 dark:text-slate-200">
+                                {newSnapshot ? formatCargoSummary(newSnapshot) : '없음'}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    }
+
                     const oldVal = entry.old_data?.[fieldKey] ?? null;
                     const newVal = entry.new_data?.[fieldKey] ?? null;
                     return (
