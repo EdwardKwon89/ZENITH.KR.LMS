@@ -157,6 +157,27 @@ describe('② UpsOrderEditHistoryPanel — 등록/수정 이력 렌더', () => {
     expect(screen.queryByText('변경사항 없음')).toBeNull();
   });
 
+  it('TC-B303-04b: CREATE 이력은 그룹 배지에 "N건 등록"으로 표시', () => {
+    render(
+      <UpsOrderEditHistoryPanel
+        history={[
+          {
+            id: '1',
+            action: 'CREATE',
+            old_data: null,
+            new_data: { recipient_name: 'Recipient A', recipient_phone: '010-1' },
+            order_status_at_edit: 'REGISTERED',
+            edited_at: '2026-08-14T00:00:00Z',
+            operator: { full_name: 'Test Operator' },
+          },
+        ]}
+      />
+    );
+    // TASK-B-310: CREATE는 "N건 등록" 배지 표시
+    expect(screen.getByText(/건 등록/)).toBeTruthy();
+    expect(screen.queryByText(/건 변경/)).toBeNull();
+  });
+
   it('TC-B303-05: UPDATE 이력은 실제로 바뀐 필드만 old→new diff로 표시', () => {
     render(
       <UpsOrderEditHistoryPanel

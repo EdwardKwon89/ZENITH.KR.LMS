@@ -80,7 +80,7 @@ function HistoryCard({ entry }: { entry: OrderEditHistoryEntry }) {
           </div>
         </div>
 
-        {/* 변경된 그룹 배지 */}
+        {/* 변경된 그룹 배지 — TASK-B-310: CREATE는 "N건 등록", UPDATE는 "N건 변경" */}
         {groupChanges.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-2">
             {groupChanges.map((g) => (
@@ -88,7 +88,7 @@ function HistoryCard({ entry }: { entry: OrderEditHistoryEntry }) {
                 key={g.groupKey}
                 className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800"
               >
-                {g.groupLabel} {g.changedFields.length}건 변경
+                {g.groupLabel} {g.changedFields.length}건 {isCreate ? '등록' : '변경'}
               </span>
             ))}
           </div>
