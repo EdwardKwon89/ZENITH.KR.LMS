@@ -130,16 +130,15 @@ export default async function UpsOrderDetailPage({ params }: UpsOrderDetailPageP
             />
           </div>
 
-          {/* 3. 배송 기본 정보 (Shipper / Consignee) — TASK-B-308: 운임 하단으로 이동 */}
-          <ZenCard className="p-6 flex flex-col gap-4">
-            <h3 className="font-bold text-slate-900 dark:text-gray-100 text-base flex items-center gap-2 border-b border-slate-100 dark:border-zinc-800 pb-3">
-              <User className="w-4 h-4 text-primary" />
-              배송 기본 정보 (Shipper / Consignee)
-            </h3>
-
-            <div className="flex flex-col gap-3 text-xs">
-              <div>
-                <span className="text-slate-400 block font-semibold">화주 (Shipper)</span>
+          {/* 3. 배송 기본 정보 — TASK-B-309: 화주/수령인 카드 분리 + 좌우 배치 */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* 화주 카드 */}
+            <ZenCard className="p-6 flex flex-col gap-4">
+              <h3 className="font-bold text-slate-900 dark:text-gray-100 text-base flex items-center gap-2 border-b border-slate-100 dark:border-zinc-800 pb-3">
+                <User className="w-4 h-4 text-primary" />
+                화주 (Shipper)
+              </h3>
+              <div className="flex flex-col gap-2 text-xs">
                 <span className="font-bold text-slate-800 dark:text-gray-200">{order.shipper_name || order.shipper?.name || 'Standard Shipper'}</span>
                 {order.shipper_contact_phone && (
                   <span className="text-slate-500 block">연락처: {order.shipper_contact_phone}</span>
@@ -153,8 +152,15 @@ export default async function UpsOrderDetailPage({ params }: UpsOrderDetailPageP
                   </span>
                 )}
               </div>
-              <div>
-                <span className="text-slate-400 block font-semibold">수령인 (Consignee)</span>
+            </ZenCard>
+
+            {/* 수령인 카드 */}
+            <ZenCard className="p-6 flex flex-col gap-4">
+              <h3 className="font-bold text-slate-900 dark:text-gray-100 text-base flex items-center gap-2 border-b border-slate-100 dark:border-zinc-800 pb-3">
+                <User className="w-4 h-4 text-primary" />
+                수령인 (Consignee)
+              </h3>
+              <div className="flex flex-col gap-2 text-xs">
                 <span className="font-bold text-slate-800 dark:text-gray-200">{order.recipient_name}</span>
                 {(order.recipient_contact || order.recipient_phone) && (
                   <span className="text-slate-500 block">연락처: {order.recipient_contact || order.recipient_phone}</span>
@@ -170,8 +176,8 @@ export default async function UpsOrderDetailPage({ params }: UpsOrderDetailPageP
                   </span>
                 )}
               </div>
-            </div>
-          </ZenCard>
+            </ZenCard>
+          </div>
 
           {/* 4. UPS SHXK Tracking Events — TASK-B-308: IN_TRANSIT일 때만 표출 */}
           {order.status === 'IN_TRANSIT' && (
