@@ -5,7 +5,7 @@
 - **등록자**: Jaison (JSJung 요청 분석)
 - **담당**: Mike
 - **우선순위**: P2
-- **상태**: 🔄 착수 가능 (설계 확정, 착수 직행)
+- **상태**: ❌ 반려 (PR#1146, 2026-08-17 — 품목 정보 미기록·CREATE 미적용, 재작업 필요)
 
 ## [배경]
 
@@ -75,7 +75,16 @@ _(Mike 작성 예정)_
 
 ## [Jaison 최종 검토]
 
-_(PR 제출 후 작성)_
+**PR#1146 반려 (2026-08-17)** — 상세: [PR#1146 코멘트](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1146#issuecomment-5309481784)
+
+패키지 요약(개수/총중량/총부피) 변경 감지 및 `updateOrder()` 삭제전/재삽입후 시점 처리는 정확함(실 DB 통합테스트로 확인). 다만 2건으로 반려:
+
+1. **[Critical]** `orderRepo.getPackagesByOrderId()`가 `items`를 select하지 않아(코드로 확인) `extractCargoSummarySnapshot()`의 `pkg.items`가 항상 `undefined` → `item_count`/`item_names`가 old/new 모두 항상 0/빈배열로 기록됨. 품목 이력이 사실상 미작동.
+2. **[Major]** `createOrder()`에 `extractCargoSummarySnapshot()` 호출이 전혀 없음 — 신규 등록 시 "화물정보 등록" 배지가 안 뜸(task file 명시 사항 미반영).
+
+부가 발견: 1번 수정 시 quantity/unit_price도 스냅샷에 포함하도록 함께 요청(현재는 품목명만 비교해 단가만 바뀐 케이스가 감지 안 됨 — 실제 값으로 검증 완료).
+
+GitHub Issue 라벨 `status:review` → `status:rework` 갱신 완료.
 
 ## [발견 이슈]
 
