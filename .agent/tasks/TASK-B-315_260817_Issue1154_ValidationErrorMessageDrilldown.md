@@ -6,7 +6,7 @@
 - **등록자**: Jaison (JSJung 실사용 피드백, TASK-B-314 후속)
 - **담당**: Mike
 - **우선순위**: P2
-- **상태**: 🔄 착수 가능 (설계 확정, 착수 직행)
+- **상태**: ❌ 반려 (PR#1155, 2026-08-17 — ref/type 체크 순서 오류로 목적 미달성, 재작업 필요)
 
 ## [배경]
 
@@ -63,7 +63,13 @@ _(Mike 작성 예정)_
 
 ## [Jaison 최종 검토]
 
-_(PR 제출 후 작성)_
+**PR#1155 반려 (2026-08-17)** — 상세: [PR#1155 코멘트](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1155#issuecomment-5311966569)
+
+빌드·회귀는 통과(201/201·1409/1409)하지만 이 버그를 잡는 테스트가 없어 통과된 것으로 추정. `findFirstErrorMessage()`의 `if ('ref' in obj || 'type' in obj) return null;`가 `obj.message` 체크보다 먼저 실행되어, RHF의 실제 FieldError leaf(항상 `{type, message, ref}` 동시 보유)에서 메시지를 찾기 전에 항상 `null`로 빠짐 — 목표였던 중첩 케이스는 물론, TASK-B-314 이전부터 되던 flat 필드 케이스까지 실제 값으로 재현해 확인(둘 다 `null` 반환). 결과적으로 모든 검증 실패가 "Check required fields"로만 표출되어 DEF-B-140이 해결되지 않고 오히려 후퇴함.
+
+수정 방향(message 체크를 먼저, ref/type은 "키 단위로 재귀 skip") + 이 함수에 대한 단위 테스트 추가 요청.
+
+GitHub Issue 라벨 `status:review` → `status:rework` 갱신 완료.
 
 ## [발견 이슈]
 
