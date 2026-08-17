@@ -34,7 +34,7 @@ applyPackageMeasurements()에도 화물정보 이력 기록 추가
 - **회귀 테스트**: 201 test files 중 200 PASS, 1 FAIL (테스트 모킹 문제)
 
 ## 커밋 이력
-- 커밋 해시: `5f136279`
+- 커밋 해시: `7b173ad4`
 - 브랜치: `feature/teamb-312-inbound-cargo-history-mike`
 - 메시지: `[Mike] feat: TASK-B-312 창고 입고 실측에도 화물정보 이력 기록 추가`
 - PR: https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1148
