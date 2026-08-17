@@ -182,3 +182,57 @@ describe('TASK-B-301 ③-2: recipient AddressInput 하위 필드 필수표시 (U
     expect(labels).not.toContain('City *');
   });
 });
+
+// TASK-B-315 (Issue #1154): findFirstErrorMessage 단위 테스트
+describe('findFirstErrorMessage (중첩 필드 leaf 메시지 검색)', () => {
+  // 컴포넌트에서 추출한 findFirstErrorMessage 로직을 동일하게 재현
+  const findFirstErrorMessage = (obj: any, depth = 0): string | null => {
+    if (depth > 10 || obj == null || typeof obj !== 'object') return null;
+    if (typeof obj.message === 'string' && obj.message) return obj.message;
+    if (Array.isArray(obj)) {
+      for (const item of obj) {
+        const msg = findFirstErrorMessage(item, depth + 1);
+        if (msg) return msg;
+      }
+      return null;
+    }
+    for (const [key, val] of Object.entries(obj)) {
+      if (key === 'ref' || key === 'type') continue;
+      const msg = findFirstErrorMessage(val, depth + 1);
+      if (msg) return msg;
+    }
+    return null;
+  };
+
+  it('단순 필드 에러에서 메시지 반환', () => {
+    const errors = {
+      shipper_id: { type: 'invalid_string', message: 'Please select a valid shipper', ref: {} },
+    };
+    expect(findFirstErrorMessage(errors)).toBe('Please select a valid shipper');
+  });
+
+  it('중첩 패키지/아이템 에러에서 leaf 메시지 반환', () => {
+    const errors = {
+      packages: [undefined, {
+        items: [{
+          item_name: { type: 'invalid_string', message: 'Item name must be in English', ref: {} },
+        }],
+      }],
+    };
+    expect(findFirstErrorMessage(errors)).toBe('Item name must be in English');
+  });
+
+  it('빈 에러 객체에서 null 반환', () => {
+    expect(findFirstErrorMessage({})).toBeNull();
+  });
+
+  it('ref/type 키는 건너뛰고 message를 찾음', () => {
+    const errors = {
+      type: 'required',
+      ref: {},
+      message: '',
+      nested: { message: 'Found it' },
+    };
+    expect(findFirstErrorMessage(errors)).toBe('Found it');
+  });
+});

@@ -887,11 +887,10 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
   };
 
   // TASK-B-315 (Issue #1154): 중첩 필드(packages/items)에서 첫 번째 leaf .message를 재귀적으로 찾는 헬퍼
+  // ref/type 키는 재귀 순회에서 건너뛰되, obj.message는 먼저 체크
   const findFirstErrorMessage = (obj: any, depth = 0): string | null => {
     if (depth > 10 || obj == null || typeof obj !== 'object') return null;
-    // ref/type 키는 DOM 엘리먼트 순회 원천 차단
-    if ('ref' in obj || 'type' in obj) return null;
-    // 직접 .message가 있으면 반환
+    // 먼저 .message 체크 (RHF FieldError: { type, message, ref })
     if (typeof obj.message === 'string' && obj.message) return obj.message;
     // 배열이면 각 요소 순회
     if (Array.isArray(obj)) {
@@ -899,9 +898,11 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
         const msg = findFirstErrorMessage(item, depth + 1);
         if (msg) return msg;
       }
+      return null;
     }
-    // 객체면 값 순회
-    for (const val of Object.values(obj)) {
+    // 객체면 값 순회 (ref/type 키는 건너뜀 — DOM 엘리먼트 순회 차단)
+    for (const [key, val] of Object.entries(obj)) {
+      if (key === 'ref' || key === 'type') continue;
       const msg = findFirstErrorMessage(val, depth + 1);
       if (msg) return msg;
     }
