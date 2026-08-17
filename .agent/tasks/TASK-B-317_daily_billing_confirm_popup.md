@@ -69,6 +69,6 @@
 - 커밋 해시: `9b9ebb60`
 - PR: https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1162
 
-### 4단계 (3차 수정)
-- 커밋 해시: `e6fb0f44`
+### 4단계 (4차 수정)
+- 커밋 해시: `55607e5b`
 - PR: https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1163
