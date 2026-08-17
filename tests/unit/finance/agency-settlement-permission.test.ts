@@ -128,6 +128,27 @@ describe('Agency 정산 권한 검증 단위 테스트 (Issue #603)', () => {
 
       await expect(generateInvoicesForOrder('ord-1')).rejects.toThrow('이미 정산이 마감된 오더');
     });
+
+    // TASK-B-316 (Issue #1156, DEF-B-141): 대리점 자기 자신을 화주로 등록한 오더 인보이스 생성 성공
+    it('Agency가 자체 오더(shipper_id === agencyOrgId) 인보이스 생성 시 성공', async () => {
+      (validateUserAction as any).mockResolvedValue({
+        supabase: mockSupabase,
+        profile: { id: 'agency-usr-1', role: USER_ROLES.AGENCY, org_id: 'agency-org-1' },
+      });
+
+      mockSupabase.from.mockImplementation((table: string) => {
+        if (table === 'zen_agency_shippers') {
+          return createChainableMock([]); // 하위 화주 없음 (자가 화주 케이스)
+        }
+        if (table === 'zen_orders') {
+          return createChainableMock({ shipper_id: 'agency-org-1' }); // 자기 소유 오더
+        }
+        return createChainableMock();
+      });
+
+      const res = await generateInvoicesForOrder('ord-1');
+      expect(res.success).toBe(true);
+    });
   });
 
   describe('updatePaymentStatus', () => {

@@ -419,13 +419,16 @@ export async function getCostReport(filters: {
   };
 }
 
+// TASK-B-316 (Issue #1156, DEF-B-141): 대리점 자기 자신을 화주로 등록한 오더도 관리 대상에 포함
+// warehouse.ts getAgencyShipperIds() 패턴과 동일
 async function resolveAgencyShipperIds(supabase: any, agencyOrgId: string): Promise<string[]> {
   const { data } = await supabase
     .from('zen_agency_shippers')
     .select('shipper_org_id')
     .eq('agency_org_id', agencyOrgId)
     .eq('is_active', true);
-  return (data || []).map((r: any) => r.shipper_org_id);
+  const downstreamIds = (data || []).map((r: any) => r.shipper_org_id);
+  return [...downstreamIds, agencyOrgId];
 }
 
 export async function addManualOrderCost(
