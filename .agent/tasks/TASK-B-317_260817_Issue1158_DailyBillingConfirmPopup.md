@@ -110,10 +110,15 @@ admin@zenith.kr로 `/finance/daily-billing` → 상세 펼치기 → IN_TRANSIT/
 - ✅ "인보이스" + "바로가기" → "청구" 컬럼 통합
 - ✅ 청구완료/청구확정 표시 정정 완료(`isFinalized ? '청구완료' : (invoiceNo ? '청구확정' : '미발행')`)
 
-### 2~4단계: applyPackageMeasurements export / zen_ups_actual_cost 스키마 확장 / 청구확정 팝업 — 미착수(Mike 계속 진행)
+### 2단계: applyPackageMeasurements export 전환 (✅ 완료, PR#1161 머지)
+- ✅ `orders.ts`의 `applyPackageMeasurements`에 `export` 키워드 추가(로직 변경 없음, 순수 가시성 변경)
+- ✅ `operations/index.ts` 배럴 export 추가
+- ✅ 기존 `confirmInbound`/`saveInboundMeasurements` 창고 흐름 회귀 없음 확인
 
-- 커밋: `b8b1d13d`(1단계 1차 구현) → `25483ca4`(라벨 반전 수정, PR#1160)
-- PR: [#1159](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1159)(반려, GitHub 특성상 "Merged" 오표시 — 실제 미반영, 아래 참조) → [#1160](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1160)(승인·머지, `aa0675a7`)
+### 3~4단계: zen_ups_actual_cost 스키마 확장 / 청구확정 팝업 — 미착수(Mike 계속 진행)
+
+- 커밋: `b8b1d13d`(1단계 1차 구현) → `25483ca4`(라벨 반전 수정, PR#1160) → `db62ae3a`(2단계 export 전환, PR#1161)
+- PR: [#1159](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1159)(반려, GitHub 특성상 "Merged" 오표시 — 실제 미반영, 아래 참조) → [#1160](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1160)(승인·머지, `aa0675a7`) → [#1161](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1161)(승인·머지, `71ca3018`)
 
 ## [Jaison 최종 검토]
 
@@ -136,6 +141,14 @@ CI 미실행(생성 20분 경과, 체크 자체 미표시) → R-08-1 대체 절
 **⚠️ 참고 — PR#1159 관련 별도 운영 사고**: PR#1159 반려 직후 Jaison의 작업 실수로 검토용 워크트리의 임시 병합 커밋이 TeamB_Dev에 잘못 push되어(정식 리뷰 미경유) 반려된 버그 코드가 잠시 유입, GitHub이 PR#1159를 자동으로 "Merged"로 오표시함. `git revert -m 2`로 즉시 사고 이전 상태와 완전히 동일하게 복구(`diff` 결과 없음 확인) — 실제 코드에는 영향 없었음. 상세: PR#1159 코멘트 참조.
 
 **⚠️ 운영 사고 및 복구 기록 (2026-08-17)**: 반려 직후 Jaison의 로컬 작업 실수로 검토용 워크트리(`/tmp/review-pr1159`)에서 만든 임시 병합 커밋(`de90c837`, 정식 `gh pr merge` 절차 미경유)이 `TeamB_Dev`에 직접 푸시되어, 반려된 라벨 반전 버그 코드가 잠시 공유 브랜치에 유입됨. GitHub이 이를 감지해 PR#1159가 자동으로 "Merged" 상태로 표시됨(실제 승인·리뷰 완료 아님). `git revert -m 2 de90c837`로 즉시 `TeamB_Dev`를 사고 이전 상태(`779bdf88`)와 완전히 동일하게 복구(`git diff 779bdf88 origin/TeamB_Dev` 결과 없음, 확인 완료) — 리버트 커밋 `34e9f829`. PR#1159는 GitHub 특성상 재오픈 불가하므로, Mike의 재작업분은 **새 PR**로 제출 필요.
+
+---
+
+**PR#1161 승인·머지 (2026-08-17, 2단계)** — 병합 커밋 `71ca3018`
+
+`applyPackageMeasurements`(orders.ts) export 전환 + `operations/index.ts` 배럴 export 추가 확인 — 순수 가시성 변경으로 로직 무변경, 설계(B-1)대로 정확히 구현됨. 커밋 메시지를 `Part of #1158`로 정리해 지난번 지적한 조기 이슈 클로즈 위험 회피 확인.
+
+이 브랜치도 `TeamB_Dev`와 `CONFLICTING`(중복 task file modify/delete만, 코드 충돌 없음) — 격리 워크트리에서 수동 해소(중복 파일 삭제) 후 병합, `origin/TeamB_Dev` 대신 직접 push. CI 미실행(생성 15분 경과) → R-08-1 대체 절차로 로컬 `test:regression`(201/201·1414/1414 PASS, 기존 창고 흐름 회귀 없음)+`build`(SUCCESS) 확인 후 승인. Issue #1158 `status:in-progress` 그대로 유지(조기 클로즈 없음 확인).
 
 ## [발견 이슈]
 
