@@ -228,17 +228,17 @@ function BillingGroupTable({
                                         <span className="ml-1 text-[9px] text-red-500 font-normal">⚠ 혼합통화</span>
                                       )}
                                     </td>
-                                    {/* TASK-B-317: "청구" 컬럼 — 청구완료/청구확정 표시 */}
+                                    {/* TASK-B-317: "청구" 컬럼 — isFinalized=true: 청구완료, false+invoiceNo: 청구확정 */}
                                     <td className="py-2 px-3 text-center">
                                       {ord.isFinalized ? (
                                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
                                           <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                                          청구확정
+                                          청구완료
                                         </span>
                                       ) : ord.invoiceNo ? (
                                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300">
                                           <FileText className="w-3 h-3 text-blue-600" />
-                                          청구완료
+                                          청구확정
                                         </span>
                                       ) : (
                                         <span className="text-[11px] text-slate-400">미발행</span>
