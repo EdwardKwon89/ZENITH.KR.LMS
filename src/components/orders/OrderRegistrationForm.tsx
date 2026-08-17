@@ -886,6 +886,29 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
     }
   };
 
+  // TASK-B-315 (Issue #1154): 중첩 필드(packages/items)에서 첫 번째 leaf .message를 재귀적으로 찾는 헬퍼
+  // ref/type 키는 재귀 순회에서 건너뛰되, obj.message는 먼저 체크
+  const findFirstErrorMessage = (obj: any, depth = 0): string | null => {
+    if (depth > 10 || obj == null || typeof obj !== 'object') return null;
+    // 먼저 .message 체크 (RHF FieldError: { type, message, ref })
+    if (typeof obj.message === 'string' && obj.message) return obj.message;
+    // 배열이면 각 요소 순회
+    if (Array.isArray(obj)) {
+      for (const item of obj) {
+        const msg = findFirstErrorMessage(item, depth + 1);
+        if (msg) return msg;
+      }
+      return null;
+    }
+    // 객체면 값 순회 (ref/type 키는 건너뜀 — DOM 엘리먼트 순회 차단)
+    for (const [key, val] of Object.entries(obj)) {
+      if (key === 'ref' || key === 'type') continue;
+      const msg = findFirstErrorMessage(val, depth + 1);
+      if (msg) return msg;
+    }
+    return null;
+  };
+
   const onError = (errors: any) => {
     // TASK-B-314 (Issue #1152): 필드명+메시지만 로깅 (순환참조 방지)
     const errorSummary = Object.entries(errors).map(([field, err]: [string, any]) => ({
@@ -893,8 +916,8 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
       message: err?.message || 'Invalid',
     }));
     logger.error('Validation Errors:', errorSummary);
-    const firstError = Object.values(errors)[0] as any;
-    const errorMessage = firstError?.message || 'Check required fields';
+    // TASK-B-315: 중첩 필드에서도 실제 에러 메시지 찾기
+    const errorMessage = findFirstErrorMessage(errors) || 'Check required fields';
     toast.error('Validation Error', { 
       description: errorMessage,
       action: {
