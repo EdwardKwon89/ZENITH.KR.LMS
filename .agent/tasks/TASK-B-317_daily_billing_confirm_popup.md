@@ -45,7 +45,7 @@
 - **회귀 테스트**: 201 test files, 1414 tests **ALL PASS**
 
 ## 커밋 이력
-- 커밋 해시: `b8b1d13d`
+- 커밋 해시: `25483ca4`
 - 브랜치: `feature/teamb-317-daily-billing-confirm-mike`
-- 메시지: `[Mike] feat: TASK-B-317 daily-billing 테이블 개편 (1단계)`
-- PR: https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1159
+- 메시지: `[Mike] fix: TASK-B-317 청구완료/청구확정 라벨 반전 수정`
+- PR: https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1160
