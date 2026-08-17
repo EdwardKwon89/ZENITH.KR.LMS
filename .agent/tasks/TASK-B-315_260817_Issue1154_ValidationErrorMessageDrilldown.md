@@ -6,7 +6,7 @@
 - **등록자**: Jaison (JSJung 실사용 피드백, TASK-B-314 후속)
 - **담당**: Mike
 - **우선순위**: P2
-- **상태**: ❌ 반려 (PR#1155, 2026-08-17 — ref/type 체크 순서 오류로 목적 미달성, 재작업 필요)
+- **상태**: ✅ 완료 (PR#1155 머지, 2026-08-17, 병합 커밋 `f56664fb`)
 
 ## [배경]
 
@@ -59,7 +59,14 @@ const onError = (errors: any) => {
 
 ## [작업 결과]
 
-_(Mike 작성 예정)_
+1. ✅ `findFirstErrorMessage()` 1차 구현 — `ref`/`type` 체크가 `message` 체크보다 먼저 실행되어 항상 `null` 반환하는 버그 있었음(1차 반려)
+2. ✅ 2차 수정 — `obj.message`를 먼저 체크, `ref`/`type`은 재귀 순회 시 해당 키만 skip하도록 로직 순서 변경
+3. ✅ 단위 테스트 4건 추가(`tests/unit/orders/order-registration-form-b301.test.tsx`): 단순 필드, 중첩 packages/items, 빈 객체, ref/type skip
+
+회귀 201/201 test files · 1413/1413 tests ALL PASS, 빌드 SUCCESS.
+
+- 커밋: `41864674`(1차 구현) → `f0d145fd`(2차 수정+테스트)
+- PR: [#1155](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1155)
 
 ## [Jaison 최종 검토]
 
@@ -70,6 +77,16 @@ _(Mike 작성 예정)_
 수정 방향(message 체크를 먼저, ref/type은 "키 단위로 재귀 skip") + 이 함수에 대한 단위 테스트 추가 요청.
 
 GitHub Issue 라벨 `status:review` → `status:rework` 갱신 완료.
+
+---
+
+**PR#1155 최종 승인·머지 (2026-08-17)** — 병합 커밋 `f56664fb`
+
+요청한 방향대로 정확히 수정됨(`obj.message` 우선 체크, `ref`/`type`은 재귀 시 해당 키만 skip). 독립 재현 스크립트로 재검증: 중첩 케이스("Item name must be in English")·flat 케이스("Shipper is required")·ref 내부 순환참조 안전성 모두 정상 확인. `order-registration-form-b301.test.tsx`에 요청한 4개 시나리오 단위 테스트 모두 추가됨.
+
+격리 워크트리 재검증: `origin/TeamB_Dev` 병합(docs-only, 충돌 없음) 후 회귀 201/201·1413/1413 ALL PASS, 빌드 성공, CI 3종(Regression Tests/Task File Check/Type Check) 모두 pass. 승인 후 머지, Issue #1154 close 완료.
+
+R-10(`/orders/new`에서 한글 품목명 입력 후 제출 → 구체적 검증 메시지 토스트 표출) 미첨부 — JSJung 라이브 확인 필요.
 
 ## [발견 이슈]
 
