@@ -115,10 +115,14 @@ admin@zenith.kr로 `/finance/daily-billing` → 상세 펼치기 → IN_TRANSIT/
 - ✅ `operations/index.ts` 배럴 export 추가
 - ✅ 기존 `confirmInbound`/`saveInboundMeasurements` 창고 흐름 회귀 없음 확인
 
-### 3~4단계: zen_ups_actual_cost 스키마 확장 / 청구확정 팝업 — 미착수(Mike 계속 진행)
+### 3단계: zen_ups_actual_cost 스키마 확장 (✅ 완료, PR#1162 머지)
+- ✅ `base_freight_currency`/`fuel_surcharge_currency`/`surge_fee_currency`(기본값 HKD) 추가
+- ✅ `zen_ups_actual_other_charges` 자식 테이블 생성(charge_name/amount/currency, FK `zen_ups_actual_cost(order_id)` ON DELETE CASCADE) + RLS 정책(admin/manager 전체, shipper/agency SELECT)
 
-- 커밋: `b8b1d13d`(1단계 1차 구현) → `25483ca4`(라벨 반전 수정, PR#1160) → `db62ae3a`(2단계 export 전환, PR#1161)
-- PR: [#1159](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1159)(반려, GitHub 특성상 "Merged" 오표시 — 실제 미반영, 아래 참조) → [#1160](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1160)(승인·머지, `aa0675a7`) → [#1161](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1161)(승인·머지, `71ca3018`)
+### 4단계: 청구확정 팝업 — 미착수(Mike 계속 진행)
+
+- 커밋: `b8b1d13d`(1단계 1차 구현) → `25483ca4`(라벨 반전 수정, PR#1160) → `db62ae3a`(2단계 export 전환, PR#1161) → `9b9ebb60`(3단계 스키마 확장, PR#1162)
+- PR: [#1159](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1159)(반려, GitHub 특성상 "Merged" 오표시 — 실제 미반영, 아래 참조) → [#1160](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1160)(승인·머지, `aa0675a7`) → [#1161](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1161)(승인·머지, `71ca3018`) → [#1162](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1162)(승인·머지, `8ecbf470`)
 
 ## [Jaison 최종 검토]
 
@@ -149,6 +153,16 @@ CI 미실행(생성 20분 경과, 체크 자체 미표시) → R-08-1 대체 절
 `applyPackageMeasurements`(orders.ts) export 전환 + `operations/index.ts` 배럴 export 추가 확인 — 순수 가시성 변경으로 로직 무변경, 설계(B-1)대로 정확히 구현됨. 커밋 메시지를 `Part of #1158`로 정리해 지난번 지적한 조기 이슈 클로즈 위험 회피 확인.
 
 이 브랜치도 `TeamB_Dev`와 `CONFLICTING`(중복 task file modify/delete만, 코드 충돌 없음) — 격리 워크트리에서 수동 해소(중복 파일 삭제) 후 병합, `origin/TeamB_Dev` 대신 직접 push. CI 미실행(생성 15분 경과) → R-08-1 대체 절차로 로컬 `test:regression`(201/201·1414/1414 PASS, 기존 창고 흐름 회귀 없음)+`build`(SUCCESS) 확인 후 승인. Issue #1158 `status:in-progress` 그대로 유지(조기 클로즈 없음 확인).
+
+---
+
+**PR#1162 승인·머지 (2026-08-17, 3단계)** — 병합 커밋 `8ecbf470`
+
+`zen_ups_actual_cost` 통화 컬럼 3종 추가 + `zen_ups_actual_other_charges` 자식 테이블(FK+RLS) 생성 확인 — 설계(§스키마 변경)대로 구현됨. 로컬 DB에 실제 적용해 `information_schema.columns`/`pg_constraint`로 컬럼·FK 직접 검증, `db reset` 재적용 idempotent 확인.
+
+발견 사항(블로킹 아님): (1) `db reset` 중 RLS 비활성화 5개 테이블 경고는 이 PR과 무관한 기존 이슈(DEF-B-050 이미 추적 중), (2) 설계서의 "admin 기본운임+7% 계산값 저장 컬럼"이 이번 마이그레이션엔 없음(원래 "제안" 표시였던 부분) — 4단계 구현 시 저장 위치 확인 필요, 이번 PR 자체 결함 아님.
+
+이 브랜치도 `TeamB_Dev`와 `CONFLICTING`(중복 task file modify/delete만) — 동일하게 워크트리에서 수동 해소 후 직접 push. CI 미실행(생성 19분 경과) → R-08-1 대체 절차로 로컬 검증(201/201·1414/1414 PASS, 빌드 성공) 후 승인. Issue #1158 `status:in-progress` 유지 확인.
 
 ## [발견 이슈]
 
