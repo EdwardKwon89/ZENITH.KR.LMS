@@ -73,3 +73,185 @@ export const ORDER_EDIT_LOG_FIELD_LABELS: Record<string, string> = {
   description: '비고',
   delivery_notes: '배송 메모',
 };
+
+// TASK-B-310 (Issue #1143): 필드 그룹 매핑 — 카드 요약 + 아코디언 상세용
+export interface FieldGroup {
+  key: string;
+  label: string;
+  fields: string[];
+}
+
+export const ORDER_EDIT_LOG_FIELD_GROUPS: FieldGroup[] = [
+  {
+    key: 'shipper',
+    label: '화주정보',
+    fields: [
+      'shipper_id', 'shipper_name', 'shipper_contact_name', 'shipper_contact_phone', 'shipper_contact_email',
+      'shipper_address', 'shipper_address_detail', 'shipper_country_code', 'shipper_state_province', 'shipper_city', 'shipper_zipcode', 'shipper_biz_no',
+    ],
+  },
+  {
+    key: 'recipient',
+    label: '수하인정보',
+    fields: [
+      'recipient_name', 'recipient_phone', 'recipient_email', 'recipient_address', 'recipient_address_detail',
+      'recipient_country_code', 'recipient_state_province', 'recipient_city', 'recipient_zipcode', 'recipient_pccc',
+    ],
+  },
+  {
+    key: 'shipping',
+    label: '배송정보',
+    fields: [
+      'transport_mode', 'delivery_method', 'incoterms', 'ups_product_code', 'ups_service_family',
+      'pickup_location', 'pickup_contact_name', 'pickup_contact_tel', 'pickup_address',
+    ],
+  },
+  {
+    key: 'other',
+    label: '기타',
+    fields: ['description', 'delivery_notes'],
+  },
+  // TASK-B-311: 화물정보 — 패키지/품목 스냅샷 (cargo_summary 키로 별도 처리)
+  {
+    key: 'cargo',
+    label: '화물정보',
+    fields: ['cargo_summary'],
+  },
+];
+
+// 그룹별 변경 필드 수 계산 유틸
+// isCreate: CREATE의 경우 oldData가 null이므로 newData의非null 필드를 모두 "변경"으로 간주
+// TASK-B-311: cargo_summary 그룹은 별도 처리 (필드 단위 diff가 아닌 스냅샷 비교)
+export function computeGroupChanges(
+  oldData: Record<string, unknown> | null,
+  newData: Record<string, unknown> | null,
+  isCreate: boolean = false,
+): { groupKey: string; groupLabel: string; changedFields: string[] }[] {
+  if (!newData) return [];
+
+  const results = ORDER_EDIT_LOG_FIELD_GROUPS
+    .map((group) => {
+      // 화물정보 그룹은 cargo_summary 스냅샷 비교로 처리
+      if (group.key === 'cargo') {
+        const oldSnapshot = oldData?.cargo_summary as CargoSummarySnapshot | undefined;
+        const newSnapshot = newData.cargo_summary as CargoSummarySnapshot | undefined;
+        if (isCreate) {
+          // CREATE: 새 스냅샷이 있으면 "변경"으로 간주
+          return newSnapshot
+            ? { groupKey: group.key, groupLabel: group.label, changedFields: ['cargo_summary'] }
+            : { groupKey: group.key, groupLabel: group.label, changedFields: [] };
+        }
+        // UPDATE: 스냅샷이 다르면 변경
+        return !cargoSummaryEquals(oldSnapshot, newSnapshot)
+          ? { groupKey: group.key, groupLabel: group.label, changedFields: ['cargo_summary'] }
+          : { groupKey: group.key, groupLabel: group.label, changedFields: [] };
+      }
+
+      // 일반 필드 그룹
+      const changedFields = group.fields.filter((f) => {
+        if (isCreate) {
+          return newData[f] !== null && newData[f] !== undefined && newData[f] !== '';
+        }
+        if (!oldData) return false;
+        return JSON.stringify(oldData[f]) !== JSON.stringify(newData[f]);
+      });
+      return { groupKey: group.key, groupLabel: group.label, changedFields };
+    })
+    .filter((g) => g.changedFields.length > 0);
+
+  return results;
+}
+
+// 액션 한글 라벨
+export const ORDER_EDIT_LOG_ACTION_LABELS: Record<string, string> = {
+  CREATE: '등록',
+  UPDATE: '수정',
+  CANCEL: '취소',
+  APPLY: '적용',
+};
+
+// TASK-B-311 (Issue #1145): 화물 스냅샷 — 패키지/품목 변경 이력용
+export interface CargoSummaryItem {
+  item_name: string;
+  quantity: number;
+  unit_price: number;
+  hs_code: string | null;
+}
+
+export interface CargoSummarySnapshot {
+  package_count: number;
+  total_weight: number;
+  total_volume: number;
+  item_count: number;
+  items: CargoSummaryItem[];
+}
+
+// 패키지 배열에서 화물 스냅샷 추출
+export function extractCargoSummarySnapshot(
+  packages: Record<string, unknown>[] | undefined | null,
+): CargoSummarySnapshot {
+  if (!packages || packages.length === 0) {
+    return { package_count: 0, total_weight: 0, total_volume: 0, item_count: 0, items: [] };
+  }
+
+  let totalWeight = 0;
+  let totalVolume = 0;
+  let itemCount = 0;
+  const items: CargoSummaryItem[] = [];
+
+  for (const pkg of packages) {
+    totalWeight += Number(pkg.gross_weight ?? 0);
+    const vol = Number(pkg.volume ?? 0) || (pkg.length && pkg.width && pkg.height
+      ? (Number(pkg.length) * Number(pkg.width) * Number(pkg.height)) / 1000000
+      : 0);
+    totalVolume += Number(vol);
+
+    const pkgItems = (pkg.items as Record<string, unknown>[]) || [];
+    itemCount += pkgItems.length;
+    for (const item of pkgItems) {
+      items.push({
+        item_name: (item.item_name as string) || '',
+        quantity: Number(item.quantity ?? 0),
+        unit_price: Number(item.unit_price ?? 0),
+        hs_code: (item.hs_code as string) || null,
+      });
+    }
+  }
+
+  return {
+    package_count: packages.length,
+    total_weight: totalWeight,
+    total_volume: totalVolume,
+    item_count: itemCount,
+    items,
+  };
+}
+
+// 화물 스냅샷 비교 (동일 여부)
+export function cargoSummaryEquals(
+  a: CargoSummarySnapshot | null | undefined,
+  b: CargoSummarySnapshot | null | undefined,
+): boolean {
+  if (!a && !b) return true;
+  if (!a || !b) return false;
+  return (
+    a.package_count === b.package_count &&
+    a.total_weight === b.total_weight &&
+    a.total_volume === b.total_volume &&
+    a.item_count === b.item_count &&
+    JSON.stringify(a.items) === JSON.stringify(b.items)
+  );
+}
+
+// 화물 스냅샷 한글 요약
+export function formatCargoSummary(snapshot: CargoSummarySnapshot): string {
+  const parts: string[] = [];
+  if (snapshot.package_count > 0) parts.push(`${snapshot.package_count}개 패키지`);
+  if (snapshot.total_weight > 0) parts.push(`${snapshot.total_weight}kg`);
+  if (snapshot.item_count > 0) parts.push(`${snapshot.item_count}개 품목`);
+  if (snapshot.items.length > 0) {
+    const itemNames = [...new Set(snapshot.items.map((i) => i.item_name).filter(Boolean))];
+    if (itemNames.length > 0) parts.push(`[${itemNames.join(', ')}]`);
+  }
+  return parts.length > 0 ? parts.join(' / ') : '화물 없음';
+}

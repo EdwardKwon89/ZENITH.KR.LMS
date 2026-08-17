@@ -16,7 +16,7 @@ import { generateTrackingHistory } from "@/lib/logistics/tracking";
 import { createAdminClient } from '@/utils/supabase/server';
 import { syncInventoryFromOrder } from "./inventory";
 import { estimateUpsFreight as estimateUpsFreightFn } from "@/app/actions/ups/freight";
-import { ORDER_EDIT_LOG_CORE_FIELDS, extractOrderEditLogSnapshot } from "@/lib/orders/edit-log-fields";
+import { ORDER_EDIT_LOG_CORE_FIELDS, extractOrderEditLogSnapshot, extractCargoSummarySnapshot } from "@/lib/orders/edit-log-fields";
 
 interface SaveOrderRateSnapshotParams {
   supabase: any;
@@ -108,6 +108,11 @@ export async function createOrder(payload: OrderRegistrationInput) {
 
   // TASK-B-303 (Issue #1125): 등록(CREATE) 이력 기록 — 화이트리스트 핵심 필드만 new_data에 스냅샷
   const newDataSnapshot = extractOrderEditLogSnapshot(validated as unknown as Record<string, unknown>);
+
+  // TASK-B-311 (Issue #1145): CREATE 시 화물 스냅샷 추가
+  const cargoSnapshot = extractCargoSummarySnapshot(validated.packages as Record<string, unknown>[] | undefined);
+  const newDataWithCargo = { ...newDataSnapshot, cargo_summary: cargoSnapshot };
+
   await supabase.from('zen_order_edit_log').insert({
     order_id: orderId,
     edited_by: profile.id,
@@ -115,7 +120,7 @@ export async function createOrder(payload: OrderRegistrationInput) {
     order_status_at_edit: 'REGISTERED',
     action: 'CREATE',
     old_data: null,
-    new_data: newDataSnapshot,
+    new_data: newDataWithCargo,
   });
 
   if (validated.transport_mode === 'UPS') {
@@ -228,6 +233,7 @@ export async function updateOrder(orderId: string, payload: OrderRegistrationInp
     recipient_state_province: validated.recipient_state_province,
     recipient_city: validated.recipient_city,
     recipient_address_local: validated.recipient_address_local,
+    recipient_address_detail: validated.recipient_address_detail,
     ups_product_code: validated.ups_product_code,
     incoterms: validated.incoterms,
     ups_service_family: validated.ups_service_family,
@@ -239,21 +245,19 @@ export async function updateOrder(orderId: string, payload: OrderRegistrationInp
   //   저장 자체는 createOrder/updateOrder 공용이므로 전체 오더에 대해 동일하게 수행한다.
   const oldDataSnapshot = extractOrderEditLogSnapshot(order as Record<string, unknown>);
   const newDataSnapshot = extractOrderEditLogSnapshot(headerData as Record<string, unknown>);
-  const hasChanges = ORDER_EDIT_LOG_CORE_FIELDS.some(
-    (f) => JSON.stringify(oldDataSnapshot[f]) !== JSON.stringify(newDataSnapshot[f])
-  );
-  if (hasChanges) {
-    await supabase.from('zen_order_edit_log').insert({
-      order_id: orderId,
-      edited_by: profile.id,
-      edited_at: new Date().toISOString(),
-      order_status_at_edit: order.status,
-      action: 'UPDATE',
-      old_data: oldDataSnapshot,
-      new_data: newDataSnapshot,
-    });
-  }
 
+  // TASK-B-311 (Issue #1145): 화물 스GMEM샷 — 패키지/품목 변경 이력용
+  //   기존 패키지+품목(삭제 전)과 새 패키지+품목(저장 후)의 요약 스냅샷을 old/new_data에 추가
+  //   oldItemsFull은 package_id를 포함한 전체 품목 조회 (인벤토리 diff용 oldItems와 별개)
+  const { data: oldPackagesRaw } = await orderRepo.getPackagesByOrderId(orderId);
+  const { data: oldItemsFull } = await orderRepo.getItemsFullByOrderId(orderId);
+  const oldPackages = (oldPackagesRaw ?? []).map((pkg) => ({
+    ...pkg,
+    items: (oldItemsFull ?? []).filter((item: any) => item.package_id === pkg.id),
+  }));
+  const oldCargoSnapshot = extractCargoSummarySnapshot(oldPackages as Record<string, unknown>[]);
+
+  // 이력 기록은 패키지 업데이트 후에 수행 (헤더+화물 변경을 단일 레코드로 기록)
   await orderRepo.updateHeader(orderId, headerData);
 
   // TASK-B-284 (Issue #1070): 실측(measured_at)된 패키지의 치수/무게는 보호 —
@@ -350,6 +354,38 @@ export async function updateOrder(orderId: string, payload: OrderRegistrationInp
 
   if (itemDiffs.length > 0) {
     await syncInventoryFromOrder(orderId, 'UPDATED', itemDiffs);
+  }
+
+  // TASK-B-311 (Issue #1145): 패키지/품목 변경 이력 기록
+  //   패키지 삭제 후 재insert된 새 패키지+품목의 스냅샷 추출
+  const { data: updatedPackagesRaw } = await orderRepo.getPackagesByOrderId(orderId);
+  const { data: updatedItems } = await orderRepo.getItemsFullByOrderId(orderId);
+  const updatedPackages = (updatedPackagesRaw ?? []).map((pkg) => ({
+    ...pkg,
+    items: (updatedItems ?? []).filter((item) => item.package_id === pkg.id),
+  }));
+  const newCargoSnapshot = extractCargoSummarySnapshot(updatedPackages as Record<string, unknown>[]);
+
+  // 헤더 변경이 있으면 이력 기록 (화물 변경만으로는 별도 로그 생성하지 않음 — 기존 정책 유지)
+  const hasHeaderChanges = ORDER_EDIT_LOG_CORE_FIELDS.some(
+    (f) => JSON.stringify(oldDataSnapshot[f]) !== JSON.stringify(newDataSnapshot[f])
+  );
+  const hasCargoChanges = JSON.stringify(oldCargoSnapshot) !== JSON.stringify(newCargoSnapshot);
+
+  if (hasHeaderChanges || hasCargoChanges) {
+    // TASK-B-311: 화물 스냅샷을 old/new_data에 추가 (헤더 또는 화물 변경 시 기록)
+    const finalOldData = { ...oldDataSnapshot, cargo_summary: oldCargoSnapshot };
+    const finalNewData = { ...newDataSnapshot, cargo_summary: newCargoSnapshot };
+
+    await supabase.from('zen_order_edit_log').insert({
+      order_id: orderId,
+      edited_by: profile.id,
+      edited_at: new Date().toISOString(),
+      order_status_at_edit: order.status,
+      action: 'UPDATE',
+      old_data: finalOldData,
+      new_data: finalNewData,
+    });
   }
 
   revalidatePath("/(dashboard)/orders", "page");

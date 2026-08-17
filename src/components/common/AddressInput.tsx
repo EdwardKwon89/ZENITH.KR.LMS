@@ -28,6 +28,7 @@ interface AddressInputProps {
   requiredZipcode?: boolean;
   requiredCity?: boolean;
   requiredStateProvince?: boolean;
+  englishDetailOnly?: boolean; // TASK-B-305: 화주/수하인 상세주소 영문 전용 검증
 }
 
 function rhf(p: string, n: string, r?: any) {
@@ -48,6 +49,7 @@ export function AddressInput({
   requiredZipcode = false,
   requiredCity = false,
   requiredStateProvince = false,
+  englishDetailOnly = false, // TASK-B-305
 }: AddressInputProps) {
   const [countryCode, setCountryCode] = useState(defaultValues.country_code || 'KR');
   const [countries, setCountries] = useState<ICountry[]>([]);
@@ -62,6 +64,10 @@ export function AddressInput({
   const [addressEnglish, setAddressEnglish] = useState(defaultValues.address_english || '');
   const [addressDetailEnglish, setAddressDetailEnglish] = useState(defaultValues.address_detail_english || '');
   const [showPostcode, setShowPostcode] = useState(false);
+  const [detailError, setDetailError] = useState<string>('');
+
+  // TASK-B-305: 영문 전용 검증 정규식 (화주/수하인 상세주소)
+  const ENGLISH_ONLY_REGEX = /^[A-Za-z0-9\s.,\-()&'"/#%+:]*$/;
 
   useEffect(() => {
     setCountries(Country.getAllCountries());
@@ -208,18 +214,37 @@ export function AddressInput({
             {fieldErrors.address && <p className="text-xs text-red-500 mt-1">{fieldErrors.address}</p>}
           </div>
           <div className="mb-4">
-            <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">{t('form_address_detail')}</label>
+            <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">
+              {t('form_address_detail')}
+              {englishDetailOnly && <span className="text-slate-400 ml-1">(English only)</span>}
+            </label>
             <input
               {...a('address_detail')}
               value={detailAddress}
               onChange={(e) => {
-                setDetailAddress(e.target.value);
-                if (setValue && prefix) setValue(`${prefix}_address_detail`, e.target.value);
+                const value = e.target.value;
+                // TASK-B-305: 영문 전용 검증 (화주/수하인 상세주소)
+                if (englishDetailOnly && value && !ENGLISH_ONLY_REGEX.test(value)) {
+                  setDetailError('상세주소는 영문만 입력 가능합니다 (English only)');
+                  return;
+                }
+                setDetailError('');
+                setDetailAddress(value);
+                if (setValue && prefix) {
+                  setValue(`${prefix}_address_detail`, value);
+                  // TASK-B-305: 영문 전용 입력 시 address_detail_english에도 동일 반영
+                  if (englishDetailOnly && prefix === 'shipper') {
+                    setValue('shipper_address_detail_english', value);
+                  }
+                }
               }}
               disabled={readOnly}
+              placeholder={englishDetailOnly ? 'English only (e.g., Apt 101, Suite 200)' : ''}
               className={`w-full h-10 px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${readOnly ? 'bg-slate-50' : ''}`}
             />
-            {fieldErrors.address_detail && <p className="text-xs text-red-500 mt-1">{fieldErrors.address_detail}</p>}
+            {(fieldErrors.address_detail || detailError) && (
+              <p className="text-xs text-red-500 mt-1">{detailError || fieldErrors.address_detail}</p>
+            )}
           </div>
           {mode === 'form-action' && <input name="state_province" type="hidden" value={selectedState} />}
           {mode === 'form-action' && <input name="city" type="hidden" value={selectedCity} />}
@@ -285,18 +310,37 @@ export function AddressInput({
           </div>
           <div className="grid grid-cols-2 gap-4 mb-4">
             <div>
-              <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">{t('form_address_detail')}</label>
+              <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">
+                {t('form_address_detail')}
+                {englishDetailOnly && <span className="text-slate-400 ml-1">(English only)</span>}
+              </label>
               <input
                 {...a('address_detail')}
                 value={detailAddress}
               onChange={(e) => {
-                setDetailAddress(e.target.value);
-                if (setValue && prefix) setValue(`${prefix}_address_detail`, e.target.value);
+                const value = e.target.value;
+                // TASK-B-305: 영문 전용 검증 (화주/수하인 상세주소)
+                if (englishDetailOnly && value && !ENGLISH_ONLY_REGEX.test(value)) {
+                  setDetailError('상세주소는 영문만 입력 가능합니다 (English only)');
+                  return;
+                }
+                setDetailError('');
+                setDetailAddress(value);
+                if (setValue && prefix) {
+                  setValue(`${prefix}_address_detail`, value);
+                  // TASK-B-305: 영문 전용 입력 시 address_detail_english에도 동일 반영
+                  if (englishDetailOnly && prefix === 'shipper') {
+                    setValue('shipper_address_detail_english', value);
+                  }
+                }
               }}
                 disabled={readOnly}
+                placeholder={englishDetailOnly ? 'English only (e.g., Apt 101, Suite 200)' : ''}
                 className={`w-full h-10 px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${readOnly ? 'bg-slate-50' : ''}`}
               />
-              {fieldErrors.address_detail && <p className="text-xs text-red-500 mt-1">{fieldErrors.address_detail}</p>}
+              {(fieldErrors.address_detail || detailError) && (
+                <p className="text-xs text-red-500 mt-1">{detailError || fieldErrors.address_detail}</p>
+              )}
             </div>
             <div>
               <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">{t('form_zipcode')}{requiredZipcode && <span className="text-rose-500"> *</span>}</label>
