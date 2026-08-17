@@ -362,7 +362,7 @@ describe('ZENITH Logistics: Inbound Process Unit Tests', () => {
           maybeSingle: mockSupabase.maybeSingle,
         };
 
-        if (table === 'zen_order_packages' && fromCallCount >= 5) {
+        if (table === 'zen_order_packages' && fromCallCount >= 7) {
           // packages query inside the freight calculation block
           chain.select.mockReturnValue({
             ...chain,
