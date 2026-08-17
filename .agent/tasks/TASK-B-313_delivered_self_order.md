@@ -25,4 +25,7 @@
 (작업 완료 후 기재)
 
 ## 커밋 이력
-(작업 완료 후 기재)
+- 커밋 해시: `71f74fd4`
+- 브랜치: `feature/teamb-313-delivered-self-order-mike`
+- 메시지: `[Mike] fix: TASK-B-313 수동 배송완료 전환 — 대리점 자체 오더 허용`
+- PR: https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1151
