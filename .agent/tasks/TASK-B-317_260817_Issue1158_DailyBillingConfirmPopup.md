@@ -125,6 +125,10 @@ admin@zenith.kr로 `/finance/daily-billing` → 상세 펼치기 → IN_TRANSIT/
 
 GitHub Issue 라벨 `status:in-progress` → `status:rework` 갱신 완료.
 
+---
+
+**⚠️ 운영 사고 및 복구 기록 (2026-08-17)**: 반려 직후 Jaison의 로컬 작업 실수로 검토용 워크트리(`/tmp/review-pr1159`)에서 만든 임시 병합 커밋(`de90c837`, 정식 `gh pr merge` 절차 미경유)이 `TeamB_Dev`에 직접 푸시되어, 반려된 라벨 반전 버그 코드가 잠시 공유 브랜치에 유입됨. GitHub이 이를 감지해 PR#1159가 자동으로 "Merged" 상태로 표시됨(실제 승인·리뷰 완료 아님). `git revert -m 2 de90c837`로 즉시 `TeamB_Dev`를 사고 이전 상태(`779bdf88`)와 완전히 동일하게 복구(`git diff 779bdf88 origin/TeamB_Dev` 결과 없음, 확인 완료) — 리버트 커밋 `34e9f829`. PR#1159는 GitHub 특성상 재오픈 불가하므로, Mike의 재작업분은 **새 PR**로 제출 필요.
+
 ## [발견 이슈]
 
 없음
