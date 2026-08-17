@@ -1,0 +1,104 @@
+# TASK-B-314: logger 순환참조 방어 + 오더등록 검증 실패 시 무반응 수정
+
+- **GitHub Issue**: [#1152](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1152)
+- **관련 결함**: [DEF-B-139](.agent/defects/DEF-B-139_로거_순환참조_크래시_오더등록검증실패시무반응.md)
+- **등록일**: 2026-08-17
+- **등록자**: Jaison (JSJung 실사용 피드백)
+- **담당**: Mike
+- **우선순위**: P1 (사용자 대면 무반응 버그)
+- **상태**: 🔄 착수 가능 (설계 확정, 착수 직행)
+
+## [배경]
+
+JSJung이 `/orders/new`에서 필수 입력 누락 상태로 제출 시 아무 안내 없이 조용히 실패하는 것을 발견. 원인은 `OrderRegistrationForm.tsx`의 `onError` 핸들러가 react-hook-form `errors` 객체(DOM `ref` 포함, React Fiber로 순환 참조)를 `logger.error()`에 그대로 넘겨 `JSON.stringify`가 크래시하고, 그 아래 있던 사용자 안내 토스트가 실행되지 못함.
+
+## [조사 결과]
+
+`src/lib/logger.ts:47`:
+```ts
+function emit(level: LogLevel, args: unknown[]) {
+  const entry = buildEntry(level, args);
+  const line = JSON.stringify(entry);   // 방어 로직 없음 — 순환참조 시 예외 던짐
+  ...
+}
+```
+
+`src/components/orders/OrderRegistrationForm.tsx:889-897`:
+```ts
+const onError = (errors: any) => {
+  logger.error('Validation Errors:', errors);   // errors[field].ref가 DOM 엘리먼트 → 순환참조
+  const firstError = Object.values(errors)[0] as any;
+  const errorMessage = firstError?.message || 'Check required fields';
+  toast.error('Validation Error', { ... });      // logger.error 예외로 도달 못함
+};
+```
+
+## [설계 확정]
+
+### 1. logger.ts — 순환참조 안전 stringify (근본 방어)
+
+```ts
+function safeStringify(value: unknown): string {
+  const seen = new WeakSet();
+  try {
+    return JSON.stringify(value, (_key, val) => {
+      if (typeof val === 'object' && val !== null) {
+        if (seen.has(val)) return '[Circular]';
+        seen.add(val);
+      }
+      return val;
+    });
+  } catch {
+    return JSON.stringify({ level: 'error', message: '[logger] failed to serialize log entry' });
+  }
+}
+
+function emit(level: LogLevel, args: unknown[]) {
+  const entry = buildEntry(level, args);
+  const line = safeStringify(entry);
+  ...
+}
+```
+try/catch까지 이중 방어(순환참조 외의 예상 못한 stringify 실패도 커버) — 어떤 경우에도 `emit()`이 예외를 던지지 않도록 보장.
+
+### 2. OrderRegistrationForm.tsx — 호출부 정리
+
+`onError`에서 원본 `errors` 객체(DOM ref 포함) 대신 직렬화 가능한 요약만 로깅:
+```ts
+const onError = (errors: any) => {
+  const summary = Object.fromEntries(
+    Object.entries(errors).map(([field, err]: [string, any]) => [field, err?.message ?? String(err?.type ?? 'invalid')])
+  );
+  logger.error('Validation Errors:', summary);
+  const firstError = Object.values(errors)[0] as any;
+  const errorMessage = firstError?.message || 'Check required fields';
+  toast.error('Validation Error', { ... });
+};
+```
+
+## [작업 범위]
+
+1. `src/lib/logger.ts`: `safeStringify()` 추가, `emit()`에 적용
+2. `src/components/orders/OrderRegistrationForm.tsx`: `onError`에서 로깅 대상을 필드명+메시지 요약으로 변경
+
+## [회귀 테스트 방향]
+
+- `logger.ts`: 순환참조 객체를 `logger.error()`에 전달해도 예외 없이 처리되는지(`[Circular]` 치환 확인)
+- `logger.ts`: DOM 엘리먼트를 포함한 실제와 유사한 객체(순환참조 mock)로도 크래시 없는지
+- `OrderRegistrationForm.tsx`: 필수 필드 누락 상태로 제출 시 `toast.error`가 정상 호출되는지(현재는 크래시로 미도달 — 이 테스트가 회귀 방지 핵심)
+
+## [R-10]
+
+`/orders/new`에서 필수 필드 비운 채 제출 → "Validation Error" 토스트가 정상 표출되는지 스크린샷.
+
+## [작업 결과]
+
+_(Mike 작성 예정)_
+
+## [Jaison 최종 검토]
+
+_(PR 제출 후 작성)_
+
+## [발견 이슈]
+
+없음
