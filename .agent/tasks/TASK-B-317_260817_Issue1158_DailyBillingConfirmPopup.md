@@ -119,19 +119,22 @@ admin@zenith.kr로 `/finance/daily-billing` → 상세 펼치기 → IN_TRANSIT/
 - ✅ `base_freight_currency`/`fuel_surcharge_currency`/`surge_fee_currency`(기본값 HKD) 추가
 - ✅ `zen_ups_actual_other_charges` 자식 테이블 생성(charge_name/amount/currency, FK `zen_ups_actual_cost(order_id)` ON DELETE CASCADE) + RLS 정책(admin/manager 전체, shipper/agency SELECT)
 
-### 4단계: 청구확정 팝업 (❌ 3차 반려, PR#1163)
+### 4단계: 청구확정 팝업 (❌ 4차 반려 — 마지막 잔여 1건만 남음, PR#1163)
 
 **1차 반려(구조 전면 미구현)**: 오더별 개별 팝업이 아니라 기존 그룹(화주×날짜) 일괄마감 모달에 입력 필드만 장식으로 추가 — 입력값이 서버 액션에 전달되지 않고 버려짐. 패키지 실측 수정·통화 선택·admin 원가 저장·신규 테이블 소비·개별 인보이스 마감 전부 없음.
 
 **2차 반려(핵심 금액 계산 버그)**: 구조는 개선됨(신규 `BillingConfirmModal.tsx` + `recordActualCostAndFinalize()` 서버 액션 + 배지 클릭 연결, 실제 `zen_ups_actual_cost` upsert + `finalizeInvoice()` 개별 호출 수행) — 1차의 "아무것도 저장 안 됨" 문제는 해결. 다만 +7% admin 원가가 화면 표시로만 계산되고 서버 저장은 원본값 그대로였고, 기타부가운임 배열이 모달에서 서버로 전달되지 않아 여전히 저장 안 됨. 통화 선택·패키지 실측 수정도 미구현.
 
-**3차 재작업 후 상태**: +7% admin 원가(`baseFreightKrw = Math.round(input*1.07)`)와 기타부가운임(이름+금액+통화 반복 입력, 배열 전송) 모두 서버에서 실제로 계산·저장됨을 신규 behavioral 테스트로 확인 — 2차 반려 사유였던 핵심 금액 계산 버그 2건 해결. 다만:
-- ❌ **기존 테스트 삭제** — `recordUpsActualCost`/`previewUpsActualCost`/`getUpsActualCost`(Issue #1009, 여전히 `/orders/[orderId]`·`/admin/ups-actual-charges`에서 사용 중) 대상 테스트 전체가 신규 테스트로 통째로 대체·삭제됨(1414→1408). 복원 필요.
-- ❌ 통화 선택이 기타부가운임에만 적용, 기본운임/유류할증료/급증긴급수수료는 여전히 KRW 고정(가장 명시적으로 요청됐던 기본운임 통화 선택 미반영)
-- ❌ B-1 패키지 실측 수정 — 3차례 모두 미구현
-- 상세: 아래 [Jaison 최종 검토] PR#1163 반려 사유 참조
+**3차 반려(기존 테스트 삭제)**: +7% admin 원가와 기타부가운임 저장 버그는 정확히 수정됨(신규 behavioral 테스트로 확인). 다만 기존 `Issue #1009` 테스트 10건이 신규 테스트로 대체되며 삭제됨(1414→1408) — 복원 요청. 통화 선택·B-1도 여전히 미해결.
 
-- 커밋: `b8b1d13d`(1단계 1차 구현) → `25483ca4`(라벨 반전 수정, PR#1160) → `db62ae3a`(2단계 export 전환, PR#1161) → `9b9ebb60`(3단계 스키마 확장, PR#1162) → `a52ea601`(4단계 1차, 반려) → `7edbb819`(4단계 2차, 반려) → `a071bd14`(4단계 3차, PR#1163, 반려)
+**4차 재작업 후 상태**: 기존 테스트 10건 정확히 복원 + 신규 4건 유지(총 1418, 삭제 없음) — 회귀 201/201·1418/1418 PASS, 빌드 성공, 3차 반려 사유 해소 확인.
+
+**범위 확정(JSJung, 2026-08-17)**: 통화 선택은 **기본운임에만** 필요(유류할증료·급증긴급수수료는 KRW 고정으로 충분 — 현재 구현과 일치). 패키지 실측 수정(B-1)은 이번 PR 범위에서 제외로 판단(Jaison 해석, PR 코멘트에 명시 후 확인 요청).
+
+- ❌ **잔여 1건**: 기본운임 입력 필드에 통화 선택 UI 없음(기타부가운임에만 있음) — 선택 통화 기준 출고확정일 환율 적용 필요. 이 항목만 반영되면 승인 가능.
+- 상세: 아래 [Jaison 최종 검토] PR#1163 4차 반려 참조
+
+- 커밋: `b8b1d13d`(1단계 1차 구현) → `25483ca4`(라벨 반전 수정, PR#1160) → `db62ae3a`(2단계 export 전환, PR#1161) → `9b9ebb60`(3단계 스키마 확장, PR#1162) → `a52ea601`(4단계 1차, 반려) → `7edbb819`(4단계 2차, 반려) → `a071bd14`(4단계 3차, 반려) → `e6fb0f44`(4단계 4차, PR#1163, 반려)
 - PR: [#1159](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1159)(반려, GitHub 특성상 "Merged" 오표시 — 실제 미반영, 아래 참조) → [#1160](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1160)(승인·머지, `aa0675a7`) → [#1161](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1161)(승인·머지, `71ca3018`) → [#1162](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1162)(승인·머지, `8ecbf470`) → [#1163](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1163)(반려, 재작업 필요)
 
 ## [Jaison 최종 검토]
@@ -207,3 +210,13 @@ GitHub Issue 라벨 `status:in-progress` → `status:rework` 갱신 완료.
 새로 발견: `tests/unit/finance/ups-actual-cost.test.ts`의 기존 `Issue #1009` describe 블록(`recordUpsActualCost`/`previewUpsActualCost`/`getUpsActualCost` 대상, 여전히 활성 사용 중인 함수) 전체가 신규 테스트로 대체되며 삭제됨(전체 테스트 수 1414→1408) — 회귀 안전망 손실, 복원 요청.
 
 잔여 미해결(3회 연속): 통화 선택이 기타부가운임에만 있고 기본운임/유류할증료/급증긴급수수료는 여전히 KRW 고정, B-1 패키지 실측 수정 완전 부재. 범위가 계속 커지고 있어 B-1을 별도 Task로 분리할지 JSJung과 상의 필요 — 다음 배정 코멘트에서 방향 안내 예정.
+
+---
+
+**PR#1163 4차 반려 (2026-08-17)** — 상세: [PR#1163 4차 코멘트](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1163#issuecomment-5315847225)
+
+3차 반려 사유(기존 테스트 삭제)가 정확히 해소됨을 확인 — TC-1009-01~10 전체 복원 + 신규 4건 유지(총 1418), 격리 워크트리 재검증 회귀 201/201·1418/1418 PASS, 빌드 성공.
+
+JSJung 확인(2026-08-17)으로 범위 확정: 통화 선택은 기본운임에만 필요(유류할증료·급증긴급수수료는 KRW 고정 유지로 충분, 현재 구현과 일치). 패키지 실측 수정(B-1)은 3차례 리뷰 동안 금액 계산 정확성에만 초점이 맞춰져 온 정황을 근거로 이번 PR 범위에서 제외하는 것으로 해석해 코멘트에 명시(오독 시 정정 요청함).
+
+남은 마지막 항목: 기본운임 입력 필드에 통화 선택 UI 추가 + 선택 통화 기준 출고확정일 환율 적용(서버의 `getExchangeRate` 호출은 이미 있으나 미사용). 이 1건만 반영되면 승인 예정. GitHub Issue `status:rework` 유지.
