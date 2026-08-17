@@ -5,6 +5,7 @@
 - **등록자**: Jaison (JSJung 요청)
 - **담당**: Mike
 - **우선순위**: P2 (신규 기능, 스키마 변경 포함)
+- **상태**: ❌ 1단계 반려 (PR#1159, 2026-08-17 — 청구완료/청구확정 라벨 반전, 재작업 필요)
 
 ## ⚠️ 담당자 위반이력 사전경고
 
@@ -104,11 +105,25 @@ admin@zenith.kr로 `/finance/daily-billing` → 상세 펼치기 → IN_TRANSIT/
 
 ## [작업 결과]
 
-_(Mike 작성 예정)_
+### 1단계: daily-billing 테이블 개편 (반려)
+- 오더번호를 링크로 변경(`/orders/${ord.orderId}/ups-detail`)
+- "인보이스" + "바로가기" → "청구" 컬럼 통합
+- ❌ 청구완료/청구확정 표시가 반대로 구현됨(아래 최종 검토 참조)
+
+### 2~4단계: applyPackageMeasurements export / zen_ups_actual_cost 스키마 확장 / 청구확정 팝업 — 미착수
+
+- 커밋: `b8b1d13d`(1단계 구현)
+- PR: [#1159](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1159)
 
 ## [Jaison 최종 검토]
 
-_(PR 제출 후 작성)_
+**PR#1159 반려 (2026-08-17, 1차)** — 상세: [PR#1159 코멘트](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1159#issuecomment-5313528926)
+
+요청 스펙(`isFinalized=true → "청구완료"`, `isFinalized=false → "청구확정"`)과 실제 구현이 정반대. task file 자체에도 반대로 기재되어 있어 단순 오탈자가 아니라 스펙을 반대로 이해한 것으로 판단 — 정산 마감된 오더가 "청구확정"(미완료로 오인), 미마감 오더가 "청구완료"(완료로 오인)로 표시되는 실사용 혼선 위험이 있어 반려. 추가로 `Closes #1158` 키워드 제거 요청(4단계 중 1단계만 완료, 조기 이슈 클로즈 방지).
+
+라벨 로직 자체 외 오더번호 링크·컬럼 통합은 스펙대로 정상 구현됨. 빌드/회귀(201/201·1414/1414)는 통과하나 이 반전을 잡는 테스트가 없었음 — 재작업 시 라벨 케이스 테스트 추가 요청.
+
+GitHub Issue 라벨 `status:in-progress` → `status:rework` 갱신 완료.
 
 ## [발견 이슈]
 
