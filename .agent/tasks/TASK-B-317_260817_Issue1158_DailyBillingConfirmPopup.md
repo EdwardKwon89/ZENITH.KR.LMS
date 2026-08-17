@@ -5,7 +5,7 @@
 - **등록자**: Jaison (JSJung 요청)
 - **담당**: Mike
 - **우선순위**: P2 (신규 기능, 스키마 변경 포함)
-- **상태**: 🔄 진행 중 — 1단계 완료(PR#1160 머지, 2026-08-17), 2~4단계 진행 예정
+- **상태**: 🔄 진행 중 — 1~3단계 완료, ❌ 4단계 반려(PR#1163, 2026-08-17 — 설계 요구사항 대부분 미구현, 재작업 필요)
 
 ## ⚠️ 담당자 위반이력 사전경고
 
@@ -119,10 +119,17 @@ admin@zenith.kr로 `/finance/daily-billing` → 상세 펼치기 → IN_TRANSIT/
 - ✅ `base_freight_currency`/`fuel_surcharge_currency`/`surge_fee_currency`(기본값 HKD) 추가
 - ✅ `zen_ups_actual_other_charges` 자식 테이블 생성(charge_name/amount/currency, FK `zen_ups_actual_cost(order_id)` ON DELETE CASCADE) + RLS 정책(admin/manager 전체, shipper/agency SELECT)
 
-### 4단계: 청구확정 팝업 — 미착수(Mike 계속 진행)
+### 4단계: 청구확정 팝업 (❌ 반려, PR#1163)
+- ❌ 오더별 개별 팝업이 아니라 기존 그룹(화주×날짜) 일괄마감 모달에 입력 필드만 장식으로 추가 — 입력값이 서버 액션에 전달되지 않고 버려짐
+- ❌ 패키지 실측 수정(`applyPackageMeasurements` 호출) 없음
+- ❌ 통화 선택·출고확정일 환율 적용 없음
+- ❌ admin 원가(+7%) 저장 로직 없음(텍스트 힌트로만 표시)
+- ❌ `zen_ups_actual_cost`/`zen_ups_actual_other_charges`(3단계에서 만든 테이블) 소비하는 코드 없음
+- ❌ `finalizeInvoice()` 개별 호출 없음(기존 그룹 `finalizeDailyShipperInvoices()` 그대로)
+- 상세: 아래 [Jaison 최종 검토] PR#1163 반려 사유 참조
 
-- 커밋: `b8b1d13d`(1단계 1차 구현) → `25483ca4`(라벨 반전 수정, PR#1160) → `db62ae3a`(2단계 export 전환, PR#1161) → `9b9ebb60`(3단계 스키마 확장, PR#1162)
-- PR: [#1159](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1159)(반려, GitHub 특성상 "Merged" 오표시 — 실제 미반영, 아래 참조) → [#1160](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1160)(승인·머지, `aa0675a7`) → [#1161](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1161)(승인·머지, `71ca3018`) → [#1162](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1162)(승인·머지, `8ecbf470`)
+- 커밋: `b8b1d13d`(1단계 1차 구현) → `25483ca4`(라벨 반전 수정, PR#1160) → `db62ae3a`(2단계 export 전환, PR#1161) → `9b9ebb60`(3단계 스키마 확장, PR#1162) → `a52ea601`(4단계, PR#1163, 반려)
+- PR: [#1159](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1159)(반려, GitHub 특성상 "Merged" 오표시 — 실제 미반영, 아래 참조) → [#1160](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1160)(승인·머지, `aa0675a7`) → [#1161](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1161)(승인·머지, `71ca3018`) → [#1162](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1162)(승인·머지, `8ecbf470`) → [#1163](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1163)(반려, 재작업 필요)
 
 ## [Jaison 최종 검토]
 
@@ -163,6 +170,20 @@ CI 미실행(생성 20분 경과, 체크 자체 미표시) → R-08-1 대체 절
 발견 사항(블로킹 아님): (1) `db reset` 중 RLS 비활성화 5개 테이블 경고는 이 PR과 무관한 기존 이슈(DEF-B-050 이미 추적 중), (2) 설계서의 "admin 기본운임+7% 계산값 저장 컬럼"이 이번 마이그레이션엔 없음(원래 "제안" 표시였던 부분) — 4단계 구현 시 저장 위치 확인 필요, 이번 PR 자체 결함 아님.
 
 이 브랜치도 `TeamB_Dev`와 `CONFLICTING`(중복 task file modify/delete만) — 동일하게 워크트리에서 수동 해소 후 직접 push. CI 미실행(생성 19분 경과) → R-08-1 대체 절차로 로컬 검증(201/201·1414/1414 PASS, 빌드 성공) 후 승인. Issue #1158 `status:in-progress` 유지 확인.
+
+---
+
+**PR#1163 반려 (2026-08-17, 4단계 — 심각)** — 상세: [PR#1163 코멘트](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1163#issuecomment-5314970771)
+
+수정 파일이 `ShipperDailyBillingClient.tsx` 1개(순수 프론트엔드)뿐이라는 점부터 이상 신호 — 2~3단계에서 준비한 백엔드(export한 `applyPackageMeasurements`, 신규 테이블 `zen_ups_actual_cost`/`zen_ups_actual_other_charges`)가 이 PR에서 전혀 소비되지 않음을 확인.
+
+`handleConfirmFinalize()` 코드를 직접 확인한 결과 결정적 문제 발견: 새로 추가한 4개 입력 필드(기본운임/유류할증료/급증긴급수수료/기타부가운임)를 이 함수가 **아예 읽지 않고**, 제출 시 호출되는 서버 액션도 이 Task 착수 전부터 있던 그룹(화주×날짜) 단위 `finalizeDailyShipperInvoices(group.invoiceIds, reason)` 그대로임을 확인 — 사용자가 숫자를 입력하고 "청구확정"을 눌러도 입력 내용과 무관하게 기존과 동일한 그룹 일괄마감만 수행됨. "+7% admin 원가"도 입력창 옆 텍스트 힌트로만 표시될 뿐 어디에도 저장되지 않음.
+
+설계([설계 확정] B-1~B-4) 대비 전면 미구현 확인: 오더별 개별 팝업 진입점 없음(Phase 1 배지 여전히 `onClick` 없는 `<span>`), 신규 컴포넌트 없음, 패키지 실측 수정 없음, 통화 선택·출고확정일 환율 없음, admin 원가 저장 없음, 기타부가운임 반복 입력(3단계 테이블 활용) 없음, `zen_ups_actual_cost` upsert 없음, `finalizeInvoice()` 개별 호출 없음, ADMIN+상태 게이트 검증 없음 — 8개 항목 전부 누락.
+
+task file에는 "4단계: 청구확정 팝업 구현 (완료)"로 전 항목 체크되어 있었으나 실질적으로는 기존 그룹 마감 모달에 기능 없는 장식용 입력창을 붙인 수준 — R-10(UI-기능 결합 검증) 명백히 위배. 빌드/회귀는 확인하지 않음(기능이 실질적으로 없어 통과 여부가 무의미하다고 판단). `Closes #1158` 키워드도 실제 완료 상태가 아니므로 제거 요청.
+
+GitHub Issue 라벨 `status:in-progress` → `status:rework` 갱신 완료.
 
 ## [발견 이슈]
 
