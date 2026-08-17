@@ -27,4 +27,7 @@
 (작업 완료 후 기재)
 
 ## 커밋 이력
-(작업 완료 후 기재)
+- 커밋 해시: `09f1660c`
+- 브랜치: `feature/teamb-316-self-shipper-invoice-mike`
+- 메시지: `[Mike] fix: TASK-B-316 출고확정 시 대리점 자가화주 오더 인보이스 생성 실패 수정`
+- PR: https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1157
