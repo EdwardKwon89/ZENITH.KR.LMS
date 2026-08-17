@@ -119,16 +119,20 @@ admin@zenith.kr로 `/finance/daily-billing` → 상세 펼치기 → IN_TRANSIT/
 - ✅ `base_freight_currency`/`fuel_surcharge_currency`/`surge_fee_currency`(기본값 HKD) 추가
 - ✅ `zen_ups_actual_other_charges` 자식 테이블 생성(charge_name/amount/currency, FK `zen_ups_actual_cost(order_id)` ON DELETE CASCADE) + RLS 정책(admin/manager 전체, shipper/agency SELECT)
 
-### 4단계: 청구확정 팝업 (❌ 반려, PR#1163)
-- ❌ 오더별 개별 팝업이 아니라 기존 그룹(화주×날짜) 일괄마감 모달에 입력 필드만 장식으로 추가 — 입력값이 서버 액션에 전달되지 않고 버려짐
-- ❌ 패키지 실측 수정(`applyPackageMeasurements` 호출) 없음
-- ❌ 통화 선택·출고확정일 환율 적용 없음
-- ❌ admin 원가(+7%) 저장 로직 없음(텍스트 힌트로만 표시)
-- ❌ `zen_ups_actual_cost`/`zen_ups_actual_other_charges`(3단계에서 만든 테이블) 소비하는 코드 없음
+### 4단계: 청구확정 팝업 (❌ 2차 반려, PR#1163)
+
+**1차 반려 사유(구조 전면 미구현)**: 오더별 개별 팝업이 아니라 기존 그룹(화주×날짜) 일괄마감 모달에 입력 필드만 장식으로 추가 — 입력값이 서버 액션에 전달되지 않고 버려짐. 패키지 실측 수정·통화 선택·admin 원가 저장·신규 테이블 소비·개별 인보이스 마감 전부 없음.
+
+**2차 재작업 후 상태**: 구조는 개선됨(신규 `BillingConfirmModal.tsx` + `recordActualCostAndFinalize()` 서버 액션 + 배지 클릭 연결, 실제 `zen_ups_actual_cost` upsert + `finalizeInvoice()` 개별 호출 수행) — 1차의 "아무것도 저장 안 됨" 문제는 해결. 다만 여전히:
+- ❌ **+7% admin 원가가 화면 표시(`baseFreightWithAdminFee`)로만 계산되고, 서버로는 마크업 미적용 원본값(`baseFreightKrw`)이 전송·저장됨** — Task 최초 요구사항 미충족
+- ❌ **기타부가운임이 여전히 저장 안 됨** — 서버는 `otherCharges` 배열을 받아 저장하는 로직이 있으나, 모달이 보내는 `input`에는 `otherChargesKrw`(단일 숫자)만 있고 `otherCharges` 배열 자체가 없어 해당 분기가 항상 미실행
+- ❌ 통화 선택 UI 없음(KRW 고정), 서버가 조회한 환율이 실제 계산에 전혀 쓰이지 않는 죽은 코드, `base_freight_currency`도 `'KRW'` 하드코딩
+- ❌ 패키지 실측 수정(B-1) 여전히 없음
+- ❌ 신규 서버 액션(`recordActualCostAndFinalize`) 테스트 전무
 - ❌ `finalizeInvoice()` 개별 호출 없음(기존 그룹 `finalizeDailyShipperInvoices()` 그대로)
 - 상세: 아래 [Jaison 최종 검토] PR#1163 반려 사유 참조
 
-- 커밋: `b8b1d13d`(1단계 1차 구현) → `25483ca4`(라벨 반전 수정, PR#1160) → `db62ae3a`(2단계 export 전환, PR#1161) → `9b9ebb60`(3단계 스키마 확장, PR#1162) → `a52ea601`(4단계, PR#1163, 반려)
+- 커밋: `b8b1d13d`(1단계 1차 구현) → `25483ca4`(라벨 반전 수정, PR#1160) → `db62ae3a`(2단계 export 전환, PR#1161) → `9b9ebb60`(3단계 스키마 확장, PR#1162) → `a52ea601`(4단계 1차, 반려) → `7edbb819`(4단계 2차 재구현, PR#1163, 반려)
 - PR: [#1159](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1159)(반려, GitHub 특성상 "Merged" 오표시 — 실제 미반영, 아래 참조) → [#1160](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1160)(승인·머지, `aa0675a7`) → [#1161](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1161)(승인·머지, `71ca3018`) → [#1162](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1162)(승인·머지, `8ecbf470`) → [#1163](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1163)(반려, 재작업 필요)
 
 ## [Jaison 최종 검토]
@@ -185,6 +189,12 @@ task file에는 "4단계: 청구확정 팝업 구현 (완료)"로 전 항목 체
 
 GitHub Issue 라벨 `status:in-progress` → `status:rework` 갱신 완료.
 
-## [발견 이슈]
+---
 
-없음
+**PR#1163 2차 반려 (2026-08-17)** — 상세: [PR#1163 2차 코멘트](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1163#issuecomment-5315248974)
+
+구조는 크게 개선됨을 확인 — 신규 `BillingConfirmModal.tsx`(개별 오더 대상) + `recordActualCostAndFinalize()` 서버 액션(ADMIN+IN_TRANSIT/DELIVERED 게이트, `zen_ups_actual_cost` upsert, `finalizeInvoice()` 개별 호출) + 배지 `onClick` 연결까지 실제로 동작. 1차 반려의 핵심 문제("입력값이 어디에도 저장 안 됨")는 해소.
+
+다만 코드를 직접 추적한 결과 2개의 실질적 금액 계산 버그 확인: (1) `baseFreightWithAdminFee = baseFreightKrw * 1.07`은 모달 화면 표시용으로만 계산되고 서버에는 마크업 미적용 원본값이 전송·저장됨(Task 최초 요구사항 미충족) (2) 서버는 `otherCharges` 배열을 받아 `zen_ups_actual_other_charges`에 저장하는 로직을 갖췄으나, 모달의 `input` 객체에 `otherCharges` 필드 자체가 없어(`otherChargesKrw` 단일 숫자만 존재) 해당 저장 로직이 영구히 미실행. 통화 선택 UI 부재(KRW 하드코딩, 조회한 환율이 실제 계산에 전혀 반영되지 않는 죽은 코드) 및 패키지 실측 수정(B-1)도 여전히 없음. 신규 서버 액션 단위 테스트도 전무 — 위 두 버그 모두 기본적인 behavioral 테스트 하나로 잡혔을 문제.
+
+재작업 요청: 마크업 적용값 전송/서버 계산, 기타부가운임 배열 실제 전송, 통화 선택+환율 실제 적용, 패키지 실측 수정 UI, 신규 액션 테스트 추가. Issue #1158 `status:rework` 유지.
