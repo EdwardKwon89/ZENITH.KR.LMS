@@ -5,6 +5,12 @@ import { toast } from 'sonner';
 import { RefreshCw, X } from 'lucide-react';
 import { recordActualCostAndFinalize, UpsActualCostInput } from '@/app/actions/finance/ups-actual-cost';
 
+interface OtherCharge {
+  name: string;
+  amount: number;
+  currency: string;
+}
+
 interface BillingConfirmModalProps {
   open: boolean;
   orderId: string;
@@ -34,12 +40,27 @@ export default function BillingConfirmModal({
   const [baseFreightKrw, setBaseFreightKrw] = useState(initialBaseFreight);
   const [fuelSurchargeKrw, setFuelSurchargeKrw] = useState(initialFuelSurcharge);
   const [surgeFeeKrw, setSurgeFeeKrw] = useState(initialSurgeFee);
-  const [otherChargesKrw, setOtherChargesKrw] = useState(initialOtherCharges);
+  const [otherCharges, setOtherCharges] = useState<OtherCharge[]>([]);
   const [reason, setReason] = useState('청구확정');
   const [loading, setLoading] = useState(false);
 
-  const totalKrw = baseFreightKrw + fuelSurchargeKrw + surgeFeeKrw + otherChargesKrw;
+  const otherChargesTotal = otherCharges.reduce((sum, c) => sum + c.amount, 0);
+  const totalKrw = baseFreightKrw + fuelSurchargeKrw + surgeFeeKrw + otherChargesTotal;
   const baseFreightWithAdminFee = Math.round(baseFreightKrw * 1.07);
+
+  const addOtherCharge = () => {
+    setOtherCharges([...otherCharges, { name: '', amount: 0, currency: 'KRW' }]);
+  };
+
+  const updateOtherCharge = (index: number, field: keyof OtherCharge, value: string | number) => {
+    const updated = [...otherCharges];
+    updated[index] = { ...updated[index], [field]: value };
+    setOtherCharges(updated);
+  };
+
+  const removeOtherCharge = (index: number) => {
+    setOtherCharges(otherCharges.filter((_, i) => i !== index));
+  };
 
   const handleConfirm = async () => {
     setLoading(true);
@@ -49,13 +70,15 @@ export default function BillingConfirmModal({
         fuelSurchargeKrw: number;
         surgeFeeKrw: number;
         otherChargesKrw: number;
+        otherCharges?: { name: string; amount: number; currency: string }[];
         invoiceId?: string;
         reason?: string;
       } = {
         baseFreightKrw,
         fuelSurchargeKrw,
         surgeFeeKrw,
-        otherChargesKrw,
+        otherChargesKrw: otherChargesTotal,
+        otherCharges: otherCharges.filter(c => c.name && c.amount > 0),
         invoiceId,
         reason,
       };
@@ -128,6 +151,18 @@ export default function BillingConfirmModal({
         <div className="grid grid-cols-2 gap-3 mb-3">
           <div>
             <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">
+              유류할증료 (KRW)
+            </label>
+            <input
+              type="number"
+              value={fuelSurchargeKrw}
+              onChange={(e) => setFuelSurchargeKrw(Number(e.target.value))}
+              className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-zinc-700 rounded-lg bg-slate-50 dark:bg-zinc-900 text-slate-900 dark:text-white"
+              placeholder="0"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">
               급증긴급수수료 (KRW)
             </label>
             <input
@@ -138,18 +173,56 @@ export default function BillingConfirmModal({
               placeholder="0"
             />
           </div>
-          <div>
-            <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">
-              기타부가운임 (KRW)
+        </div>
+
+        {/* TASK-B-317: 기타부가운임 반복 입력 (이름+금액+통화) */}
+        <div className="mb-3">
+          <div className="flex items-center justify-between mb-2">
+            <label className="block text-xs font-medium text-slate-500 dark:text-slate-400">
+              기타부가운임
             </label>
-            <input
-              type="number"
-              value={otherChargesKrw}
-              onChange={(e) => setOtherChargesKrw(Number(e.target.value))}
-              className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-zinc-700 rounded-lg bg-slate-50 dark:bg-zinc-900 text-slate-900 dark:text-white"
-              placeholder="0"
-            />
+            <button
+              type="button"
+              onClick={addOtherCharge}
+              className="text-xs text-blue-600 dark:text-blue-400 hover:underline"
+            >
+              + 추가
+            </button>
           </div>
+          {otherCharges.map((charge, index) => (
+            <div key={index} className="flex gap-2 mb-2">
+              <input
+                type="text"
+                value={charge.name}
+                onChange={(e) => updateOtherCharge(index, 'name', e.target.value)}
+                placeholder="부가운임명"
+                className="flex-1 px-2 py-1.5 text-xs border border-slate-200 dark:border-zinc-700 rounded-lg bg-slate-50 dark:bg-zinc-900 text-slate-900 dark:text-white"
+              />
+              <input
+                type="number"
+                value={charge.amount}
+                onChange={(e) => updateOtherCharge(index, 'amount', Number(e.target.value))}
+                placeholder="금액"
+                className="w-24 px-2 py-1.5 text-xs border border-slate-200 dark:border-zinc-700 rounded-lg bg-slate-50 dark:bg-zinc-900 text-slate-900 dark:text-white"
+              />
+              <select
+                value={charge.currency}
+                onChange={(e) => updateOtherCharge(index, 'currency', e.target.value)}
+                className="w-20 px-2 py-1.5 text-xs border border-slate-200 dark:border-zinc-700 rounded-lg bg-slate-50 dark:bg-zinc-900 text-slate-900 dark:text-white"
+              >
+                <option value="KRW">KRW</option>
+                <option value="USD">USD</option>
+                <option value="HKD">HKD</option>
+              </select>
+              <button
+                type="button"
+                onClick={() => removeOtherCharge(index)}
+                className="text-red-500 hover:text-red-700 text-xs"
+              >
+                삭제
+              </button>
+            </div>
+          ))}
         </div>
 
         {/* 합계 미리보기 */}

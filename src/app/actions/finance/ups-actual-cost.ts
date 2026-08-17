@@ -454,8 +454,9 @@ export async function recordActualCostAndFinalize(
     const releasedDate = await getOrderReleasedDate(supabase, orderId, order.created_at);
     const exchangeRate = await getExchangeRate('HKD', 'KRW', releasedDate, supabase);
 
-    // 4. KRW 금액 계산 (입력값 사용)
-    const baseFreightKrw = toNum(input.baseFreightKrw);
+    // 4. KRW 금액 계산 — TASK-B-317: 기본운임에 +7% admin 원가 적용
+    const baseFreightInput = toNum(input.baseFreightKrw);
+    const baseFreightKrw = Math.round(baseFreightInput * 1.07); // +7% admin 원가
     const fuelSurchargeKrw = toNum(input.fuelSurchargeKrw);
     const surgeFeeKrw = toNum(input.surgeFeeKrw);
     const otherChargesKrw = toNum(input.otherChargesKrw);
