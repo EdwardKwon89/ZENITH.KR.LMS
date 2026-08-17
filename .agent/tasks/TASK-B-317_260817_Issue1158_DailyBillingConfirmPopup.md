@@ -5,7 +5,7 @@
 - **등록자**: Jaison (JSJung 요청)
 - **담당**: Mike
 - **우선순위**: P2 (신규 기능, 스키마 변경 포함)
-- **상태**: 🔄 진행 중 — 1~3단계 완료, ❌ 4단계 반려(PR#1163, 2026-08-17 — 설계 요구사항 대부분 미구현, 재작업 필요)
+- **상태**: ✅ 전체 완료 (1~4단계, PR#1160/#1161/#1162/#1163 모두 머지, 2026-08-17)
 
 ## ⚠️ 담당자 위반이력 사전경고
 
@@ -119,7 +119,7 @@ admin@zenith.kr로 `/finance/daily-billing` → 상세 펼치기 → IN_TRANSIT/
 - ✅ `base_freight_currency`/`fuel_surcharge_currency`/`surge_fee_currency`(기본값 HKD) 추가
 - ✅ `zen_ups_actual_other_charges` 자식 테이블 생성(charge_name/amount/currency, FK `zen_ups_actual_cost(order_id)` ON DELETE CASCADE) + RLS 정책(admin/manager 전체, shipper/agency SELECT)
 
-### 4단계: 청구확정 팝업 (❌ 4차 반려 — 마지막 잔여 1건만 남음, PR#1163)
+### 4단계: 청구확정 팝업 (✅ 5차 만에 최종 승인·머지, PR#1163)
 
 **1차 반려(구조 전면 미구현)**: 오더별 개별 팝업이 아니라 기존 그룹(화주×날짜) 일괄마감 모달에 입력 필드만 장식으로 추가 — 입력값이 서버 액션에 전달되지 않고 버려짐. 패키지 실측 수정·통화 선택·admin 원가 저장·신규 테이블 소비·개별 인보이스 마감 전부 없음.
 
@@ -131,11 +131,21 @@ admin@zenith.kr로 `/finance/daily-billing` → 상세 펼치기 → IN_TRANSIT/
 
 **범위 확정(JSJung, 2026-08-17)**: 통화 선택은 **기본운임에만** 필요(유류할증료·급증긴급수수료는 KRW 고정으로 충분 — 현재 구현과 일치). 패키지 실측 수정(B-1)은 이번 PR 범위에서 제외로 판단(Jaison 해석, PR 코멘트에 명시 후 확인 요청).
 
-- ❌ **잔여 1건**: 기본운임 입력 필드에 통화 선택 UI 없음(기타부가운임에만 있음) — 선택 통화 기준 출고확정일 환율 적용 필요. 이 항목만 반영되면 승인 가능.
-- 상세: 아래 [Jaison 최종 검토] PR#1163 4차 반려 참조
+**5차 재작업 후 최종 승인**: 기본운임 통화 선택 드롭다운(KRW/USD/HKD) + 서버 `getExchangeRate(baseFreightCurrency,'KRW',releasedDate,supabase)` 적용 후 +7% admin 원가 계산 확인 — 마지막 잔여 항목 해결. `getExchangeRate` 인자 순서·의미 직접 검증, 회귀 201/201·1418/1418 PASS, 빌드 성공.
 
-- 커밋: `b8b1d13d`(1단계 1차 구현) → `25483ca4`(라벨 반전 수정, PR#1160) → `db62ae3a`(2단계 export 전환, PR#1161) → `9b9ebb60`(3단계 스키마 확장, PR#1162) → `a52ea601`(4단계 1차, 반려) → `7edbb819`(4단계 2차, 반려) → `a071bd14`(4단계 3차, 반려) → `e6fb0f44`(4단계 4차, PR#1163, 반려)
-- PR: [#1159](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1159)(반려, GitHub 특성상 "Merged" 오표시 — 실제 미반영, 아래 참조) → [#1160](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1160)(승인·머지, `aa0675a7`) → [#1161](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1161)(승인·머지, `71ca3018`) → [#1162](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1162)(승인·머지, `8ecbf470`) → [#1163](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1163)(반려, 재작업 필요)
+- ✅ 오더별 개별 팝업(`BillingConfirmModal.tsx`) — 배지 클릭으로 오픈
+- ✅ 기본운임 통화 선택(KRW/USD/HKD) + 출고확정일 환율 적용 + +7% admin 원가 계산·저장
+- ✅ 유류할증료/급증긴급수수료 — KRW 고정 입력(범위 확정에 따라 통화 선택 불필요)
+- ✅ 기타부가운임 — 이름+금액+통화 반복 입력, `zen_ups_actual_other_charges` 실제 저장
+- ✅ `zen_ups_actual_cost` upsert + `finalizeInvoice()` 개별 호출로 인보이스 마감
+- ✅ ADMIN 전용 + IN_TRANSIT/DELIVERED 게이트
+- ✅ `recordActualCostAndFinalize` 단위 테스트 4건(behavioral) + 기존 Issue #1009 테스트 10건 유지
+- ⚠️ **B-1 패키지 실측 수정**: 이번 Task 범위에서 제외 확정(JSJung, 기본운임 직접입력 방식으로 대체) — B-1 자체가 필요 없어짐에 따라 별도 Task 미등록
+- 발견 이슈(블로킹 아님, R-15 기록): 로컬 `zen_exchange_rates` 테이블이 완전히 비어있어 비-USD/KRW 통화(HKD 등) 선택 시 fallback이 USD 환율로 오적용될 수 있음 — TASK-B-317 이전부터 있던 공유 유틸리티 인프라 한계, 별도 IMP 등록
+- 상세: 아래 [Jaison 최종 검토] PR#1163 최종 승인 참조
+
+- 커밋: `b8b1d13d`(1단계 1차 구현) → `25483ca4`(라벨 반전 수정, PR#1160) → `db62ae3a`(2단계 export 전환, PR#1161) → `9b9ebb60`(3단계 스키마 확장, PR#1162) → `a52ea601`(4단계 1차, 반려) → `7edbb819`(4단계 2차, 반려) → `a071bd14`(4단계 3차, 반려) → `e6fb0f44`(4단계 4차, 반려) → `55607e5b`(4단계 5차, PR#1163, 최종 승인)
+- PR: [#1159](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1159)(반려, GitHub 특성상 "Merged" 오표시 — 실제 미반영, 아래 참조) → [#1160](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1160)(승인·머지, `aa0675a7`) → [#1161](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1161)(승인·머지, `71ca3018`) → [#1162](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1162)(승인·머지, `8ecbf470`) → [#1163](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1163)(5차례 검토 끝에 최종 승인·머지, `365c33e1`)
 
 ## [Jaison 최종 검토]
 
@@ -220,3 +230,15 @@ GitHub Issue 라벨 `status:in-progress` → `status:rework` 갱신 완료.
 JSJung 확인(2026-08-17)으로 범위 확정: 통화 선택은 기본운임에만 필요(유류할증료·급증긴급수수료는 KRW 고정 유지로 충분, 현재 구현과 일치). 패키지 실측 수정(B-1)은 3차례 리뷰 동안 금액 계산 정확성에만 초점이 맞춰져 온 정황을 근거로 이번 PR 범위에서 제외하는 것으로 해석해 코멘트에 명시(오독 시 정정 요청함).
 
 남은 마지막 항목: 기본운임 입력 필드에 통화 선택 UI 추가 + 선택 통화 기준 출고확정일 환율 적용(서버의 `getExchangeRate` 호출은 이미 있으나 미사용). 이 1건만 반영되면 승인 예정. GitHub Issue `status:rework` 유지.
+
+---
+
+**PR#1163 최종 승인·머지 (2026-08-17, 5차)** — 병합 커밋 `365c33e1` — 상세: [PR#1163 최종 코멘트](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1163#issuecomment-5316171571)
+
+기본운임 통화 선택 드롭다운(KRW/USD/HKD) + 서버 `getExchangeRate(baseFreightCurrency,'KRW',releasedDate,supabase)` 적용 후 +7% admin 원가 계산 확인 — `getExchangeRate` 정의를 직접 읽어 인자 순서·의미(base 금액×rate=quote 금액)가 이번 호출과 일치함을 검증. 격리 워크트리 재검증: `origin/TeamB_Dev` 병합(중복 task file만 충돌) 후 회귀 201/201·1418/1418 PASS, 빌드 성공. CI 전 라운드 공통 미실행 → R-08-1 대체 적용.
+
+**발견 이슈(블로킹 아님)**: `db reset` 후 `zen_exchange_rates` 테이블에 실제 환율 데이터가 0건 — HKD 등 비-USD/KRW 통화 선택 시 `getExchangeRate()`가 항상 `zen_system_params.EXCHANGE_RATE_USD_KRW`(1350) 파라미터로 폴백되어, 실제로는 USD 환율이 잘못 적용될 수 있음(HKD 실환율은 USD 대비 약 1/7~8 수준이라 과다 환산 위험). 이는 `exchange-rate.ts` 공유 유틸리티가 요청 통화와 무관하게 항상 USD_KRW 파라미터로 폴백하는 기존 동작이자, 로컬 DB에 실환율 시드가 없다는 인프라 한계 — TASK-B-317 이전부터 있던 `recordUpsActualCost`(Issue #1009)의 HKD 환율 조회도 동일하게 영향받는 문제라 이번 PR 범위 밖으로 판단, 반려 사유로 삼지 않음. R-15에 따라 `scratch/post_launch_improvements.md`에 별도 IMP로 기록 예정.
+
+승인 후 워크트리에서 수동 해소한 병합을 TeamB_Dev에 직접 push(PR `CONFLICTING` 상태로 `gh pr merge` 불가). Issue #1158 close 완료 — TASK-B-317 전체(1~4단계) 종료.
+
+R-10(admin@zenith.kr로 실제 UPS 오더 대상 청구확정 팝업 전체 흐름 스크린샷) 미첨부 — JSJung 라이브 확인 필요.
