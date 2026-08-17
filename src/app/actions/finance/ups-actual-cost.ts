@@ -14,6 +14,7 @@ export interface UpsActualCostInput {
   actualWidthCm?: number;
   actualHeightCm?: number;
   baseFreightHkd?: number;
+  baseFreightCurrency?: string; // TASK-B-317: 기본운임 통화 선택
   fuelSurchargeHkd?: number;
   surgeFeeHkd?: number;
   otherChargesHkd?: number;
@@ -454,9 +455,17 @@ export async function recordActualCostAndFinalize(
     const releasedDate = await getOrderReleasedDate(supabase, orderId, order.created_at);
     const exchangeRate = await getExchangeRate('HKD', 'KRW', releasedDate, supabase);
 
-    // 4. KRW 금액 계산 — TASK-B-317: 기본운임에 +7% admin 원가 적용
+    // 4. KRW 금액 계산 — TASK-B-317: 기본운임 통화 선택 + 환율 적용 + +7% admin 원가
+    const baseFreightCurrency = input.baseFreightCurrency || 'KRW';
     const baseFreightInput = toNum(input.baseFreightKrw);
-    const baseFreightKrw = Math.round(baseFreightInput * 1.07); // +7% admin 원가
+    let baseFreightKrw: number;
+    if (baseFreightCurrency === 'KRW') {
+      baseFreightKrw = Math.round(baseFreightInput * 1.07); // KRW는 +7% 적용
+    } else {
+      // 외국 통화는 선택 통화 기준 환율 적용 후 +7%
+      const currencyExchangeRate = await getExchangeRate(baseFreightCurrency, 'KRW', releasedDate, supabase);
+      baseFreightKrw = Math.round(baseFreightInput * currencyExchangeRate * 1.07);
+    }
     const fuelSurchargeKrw = toNum(input.fuelSurchargeKrw);
     const surgeFeeKrw = toNum(input.surgeFeeKrw);
     const otherChargesKrw = toNum(input.otherChargesKrw);
@@ -473,14 +482,14 @@ export async function recordActualCostAndFinalize(
         actual_length_cm: input.actualLengthCm || null,
         actual_width_cm: input.actualWidthCm || null,
         actual_height_cm: input.actualHeightCm || null,
-        base_freight_hkd: toNum(input.baseFreightHkd),
-        fuel_surcharge_hkd: toNum(input.fuelSurchargeHkd),
-        surge_fee_hkd: toNum(input.surgeFeeHkd),
-        other_charges_hkd: toNum(input.otherChargesHkd),
-        base_freight_currency: 'KRW',
+        base_freight_hkd: baseFreightKrw, // 환율 적용된 KRW 값
+        fuel_surcharge_hkd: toNum(input.fuelSurchargeKrw),
+        surge_fee_hkd: toNum(input.surgeFeeKrw),
+        other_charges_hkd: toNum(input.otherChargesKrw),
+        base_freight_currency: baseFreightCurrency,
         fuel_surcharge_currency: 'KRW',
         surge_fee_currency: 'KRW',
-        applied_exchange_rate: exchangeRate,
+        applied_exchange_rate: baseFreightCurrency === 'KRW' ? exchangeRate : (await getExchangeRate(baseFreightCurrency, 'KRW', releasedDate, supabase)),
         total_cost_krw: totalCostKrw,
         entered_by: user.id,
         notes: input.notes || null,

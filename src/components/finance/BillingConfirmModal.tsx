@@ -11,6 +11,12 @@ interface OtherCharge {
   currency: string;
 }
 
+const CURRENCY_OPTIONS = [
+  { value: 'KRW', label: 'KRW' },
+  { value: 'USD', label: 'USD' },
+  { value: 'HKD', label: 'HKD' },
+];
+
 interface BillingConfirmModalProps {
   open: boolean;
   orderId: string;
@@ -37,7 +43,8 @@ export default function BillingConfirmModal({
   onClose,
   onSuccess,
 }: BillingConfirmModalProps) {
-  const [baseFreightKrw, setBaseFreightKrw] = useState(initialBaseFreight);
+  const [baseFreightAmount, setBaseFreightAmount] = useState(initialBaseFreight);
+  const [baseFreightCurrency, setBaseFreightCurrency] = useState('KRW');
   const [fuelSurchargeKrw, setFuelSurchargeKrw] = useState(initialFuelSurcharge);
   const [surgeFeeKrw, setSurgeFeeKrw] = useState(initialSurgeFee);
   const [otherCharges, setOtherCharges] = useState<OtherCharge[]>([]);
@@ -45,8 +52,9 @@ export default function BillingConfirmModal({
   const [loading, setLoading] = useState(false);
 
   const otherChargesTotal = otherCharges.reduce((sum, c) => sum + c.amount, 0);
-  const totalKrw = baseFreightKrw + fuelSurchargeKrw + surgeFeeKrw + otherChargesTotal;
-  const baseFreightWithAdminFee = Math.round(baseFreightKrw * 1.07);
+  // TASK-B-317: 기본운임은 선택 통화로 입력, 환율 적용은 서버에서 처리
+  const baseFreightWithAdminFee = Math.round(baseFreightAmount * 1.07);
+  const totalKrw = baseFreightWithAdminFee + fuelSurchargeKrw + surgeFeeKrw + otherChargesTotal;
 
   const addOtherCharge = () => {
     setOtherCharges([...otherCharges, { name: '', amount: 0, currency: 'KRW' }]);
@@ -67,6 +75,7 @@ export default function BillingConfirmModal({
     try {
       const input: UpsActualCostInput & {
         baseFreightKrw: number;
+        baseFreightCurrency: string;
         fuelSurchargeKrw: number;
         surgeFeeKrw: number;
         otherChargesKrw: number;
@@ -74,7 +83,8 @@ export default function BillingConfirmModal({
         invoiceId?: string;
         reason?: string;
       } = {
-        baseFreightKrw,
+        baseFreightKrw: baseFreightAmount,
+        baseFreightCurrency,
         fuelSurchargeKrw,
         surgeFeeKrw,
         otherChargesKrw: otherChargesTotal,
@@ -117,23 +127,40 @@ export default function BillingConfirmModal({
           [{orderNo}] 인보이스를 청구확정 처리하시겠습니까?
         </p>
 
-        {/* 기본운임 입력 (+7% admin 원가 자동 계산) */}
-        <div className="grid grid-cols-2 gap-3 mb-3">
-          <div>
+        {/* 기본운임 입력 (+7% admin 원가 자동 계산) + 통화 선택 */}
+        <div className="grid grid-cols-3 gap-3 mb-3">
+          <div className="col-span-2">
             <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">
-              기본운임 (KRW)
+              기본운임
             </label>
             <input
               type="number"
-              value={baseFreightKrw}
-              onChange={(e) => setBaseFreightKrw(Number(e.target.value))}
+              value={baseFreightAmount}
+              onChange={(e) => setBaseFreightAmount(Number(e.target.value))}
               className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-zinc-700 rounded-lg bg-slate-50 dark:bg-zinc-900 text-slate-900 dark:text-white"
               placeholder="0"
             />
             <span className="text-[10px] text-slate-400 mt-1 block">
-              +7% admin 원가 = ₩{baseFreightWithAdminFee.toLocaleString()}
+              +7% admin 원가 = {baseFreightCurrency} {baseFreightWithAdminFee.toLocaleString()}
             </span>
           </div>
+          <div>
+            <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">
+              통화
+            </label>
+            <select
+              value={baseFreightCurrency}
+              onChange={(e) => setBaseFreightCurrency(e.target.value)}
+              className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-zinc-700 rounded-lg bg-slate-50 dark:bg-zinc-900 text-slate-900 dark:text-white"
+            >
+              {CURRENCY_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3 mb-3">
           <div>
             <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">
               유류할증료 (KRW)
@@ -142,6 +169,18 @@ export default function BillingConfirmModal({
               type="number"
               value={fuelSurchargeKrw}
               onChange={(e) => setFuelSurchargeKrw(Number(e.target.value))}
+              className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-zinc-700 rounded-lg bg-slate-50 dark:bg-zinc-900 text-slate-900 dark:text-white"
+              placeholder="0"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">
+              급증긴급수수료 (KRW)
+            </label>
+            <input
+              type="number"
+              value={surgeFeeKrw}
+              onChange={(e) => setSurgeFeeKrw(Number(e.target.value))}
               className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-zinc-700 rounded-lg bg-slate-50 dark:bg-zinc-900 text-slate-900 dark:text-white"
               placeholder="0"
             />
