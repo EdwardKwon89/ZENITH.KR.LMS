@@ -416,3 +416,134 @@ export async function previewUpsActualCost(
     return { success: false, error: err.message || '알 수 없는 서버 오류' };
   }
 }
+
+// TASK-B-317 (Issue #1158, 4단계): 개별 오더 청구확정 — 실제원가 저장 + 인보이스 마감
+export async function recordActualCostAndFinalize(
+  orderId: string,
+  input: UpsActualCostInput & {
+    baseFreightKrw?: number;
+    fuelSurchargeKrw?: number;
+    surgeFeeKrw?: number;
+    otherChargesKrw?: number;
+    otherCharges?: { name: string; amount: number; currency: string }[];
+    invoiceId?: string;
+    reason?: string;
+  }
+): Promise<UpsActualCostResult & { finalized?: boolean }> {
+  try {
+    const { supabase, profile, user } = await validateUserAction();
+    if (!profile) throw new Error('User profile not found');
+    assertAdmin(profile);
+
+    // 1. 오더 조회
+    const { data: order, error: orderError } = await supabase
+      .from('zen_orders')
+      .select('id, status, transport_mode, shipper_id, created_at')
+      .eq('id', orderId)
+      .single();
+
+    if (orderError || !order) return { success: false, error: '오더를 찾을 수 없습니다.' };
+    if (order.transport_mode !== 'UPS') return { success: false, error: 'UPS 오더가 아닙니다.' };
+
+    // 2. 상태 검증 (IN_TRANSIT 또는 DELIVERED에서만 가능)
+    if (!['IN_TRANSIT', 'DELIVERED'].includes(order.status)) {
+      return { success: false, error: 'IN_TRANSIT 또는 DELIVERED 상태에서만 청구확정이 가능합니다.' };
+    }
+
+    // 3. 출고확정일 환율 조회
+    const releasedDate = await getOrderReleasedDate(supabase, orderId, order.created_at);
+    const exchangeRate = await getExchangeRate('HKD', 'KRW', releasedDate, supabase);
+
+    // 4. KRW 금액 계산 (입력값 사용)
+    const baseFreightKrw = toNum(input.baseFreightKrw);
+    const fuelSurchargeKrw = toNum(input.fuelSurchargeKrw);
+    const surgeFeeKrw = toNum(input.surgeFeeKrw);
+    const otherChargesKrw = toNum(input.otherChargesKrw);
+    const totalCostKrw = baseFreightKrw + fuelSurchargeKrw + surgeFeeKrw + otherChargesKrw;
+
+    // 5. zen_ups_actual_cost upsert
+    const { error: upsertError } = await supabase
+      .from('zen_ups_actual_cost')
+      .upsert({
+        order_id: orderId,
+        ups_invoice_no: input.upsInvoiceNo || null,
+        ups_invoice_date: input.upsInvoiceDate || null,
+        actual_weight_kg: input.actualWeightKg || null,
+        actual_length_cm: input.actualLengthCm || null,
+        actual_width_cm: input.actualWidthCm || null,
+        actual_height_cm: input.actualHeightCm || null,
+        base_freight_hkd: toNum(input.baseFreightHkd),
+        fuel_surcharge_hkd: toNum(input.fuelSurchargeHkd),
+        surge_fee_hkd: toNum(input.surgeFeeHkd),
+        other_charges_hkd: toNum(input.otherChargesHkd),
+        base_freight_currency: 'KRW',
+        fuel_surcharge_currency: 'KRW',
+        surge_fee_currency: 'KRW',
+        applied_exchange_rate: exchangeRate,
+        total_cost_krw: totalCostKrw,
+        entered_by: user.id,
+        notes: input.notes || null,
+      }, { onConflict: 'order_id' });
+
+    if (upsertError) {
+      logger.error('Error upserting actual cost:', upsertError);
+      return { success: false, error: `실제 원가 저장 실패: ${upsertError.message}` };
+    }
+
+    // 6. 기타부가운임 저장 (zen_ups_actual_other_charges)
+    if (input.otherCharges && input.otherCharges.length > 0) {
+      // 기존 기타부가운임 삭제
+      await supabase
+        .from('zen_ups_actual_other_charges')
+        .delete()
+        .eq('order_id', orderId);
+
+      // 새 기타부가운임 삽입
+      const charges = input.otherCharges.map((c) => ({
+        order_id: orderId,
+        charge_name: c.name,
+        amount: c.amount,
+        currency: c.currency || 'KRW',
+      }));
+
+      if (charges.length > 0) {
+        const { error: chargesError } = await supabase
+          .from('zen_ups_actual_other_charges')
+          .insert(charges);
+
+        if (chargesError) {
+          logger.error('Error inserting other charges:', chargesError);
+          return { success: false, error: `기타부가운임 저장 실패: ${chargesError.message}` };
+        }
+      }
+    }
+
+    // 7. 인보이스 마감 (finalizeInvoice)
+    let finalized = false;
+    if (input.invoiceId) {
+      const { finalizeInvoice } = await import('./settlement');
+      const result = await finalizeInvoice(input.invoiceId, input.reason || '청구확정');
+      if (!result.success) {
+        logger.warn('Invoice finalization failed:', result.error);
+        // 인보이스 마감 실패해도 실제 원가는 저장됨
+      } else {
+        finalized = true;
+      }
+    }
+
+    revalidatePath('/(dashboard)/finance/daily-billing', 'page');
+    revalidatePath(`/(dashboard)/orders/${orderId}`, 'page');
+
+    return {
+      success: true,
+      releasedDate,
+      appliedExchangeRate: exchangeRate,
+      hkdTotal: toNum(input.baseFreightHkd) + toNum(input.fuelSurchargeHkd) + toNum(input.surgeFeeHkd) + toNum(input.otherChargesHkd),
+      totalCostKrw,
+      finalized,
+    };
+  } catch (err: any) {
+    logger.error('Error recording actual cost and finalizing:', err);
+    return { success: false, error: err.message || '알 수 없는 서버 오류' };
+  }
+}
