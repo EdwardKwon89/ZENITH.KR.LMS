@@ -36,9 +36,13 @@
 - ✅ "인보이스" + "바로가기" → "청구" 컬럼 통합
 - ✅ 청구완료/청구확정 표시 (청구완료: 파란색 배지, 청구확정: 초록색 배지)
 
-### 2단계: applyPackageMeasurements export 전환 (미착수)
-- 3단계: zen_ups_actual_cost 스키마 확장 (미착수)
-- 4단계: 청구확정 팝업 구현 (미착수)
+### 2단계: applyPackageMeasurements export 전환 (완료)
+- ✅ `orders.ts`에 export 키워드 추가
+- ✅ `operations/index.ts`에 export 추가
+
+### 3~4단계 (미착수)
+- zen_ups_actual_cost 스키마 확장
+- 청구확정 팝업 구현
 
 ### 테스트 결과
 - **빌드**: TypeScript compilation **SUCCESS**

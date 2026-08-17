@@ -15,6 +15,7 @@ export {
   confirmInbound,
   saveInboundMeasurements,
   getTodayInboundHistory,
+  applyPackageMeasurements, // TASK-B-317: 외부 호출 가능하도록 export
 } from './orders';
 
 export {

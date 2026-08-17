@@ -826,7 +826,8 @@ export interface FreightEstimateResult {
   currency?: string;
 }
 
-async function applyPackageMeasurements(
+// TASK-B-317: 외부(청구확정 팝업)에서 호출 가능하도록 export
+export async function applyPackageMeasurements(
   supabase: any,
   profile: { id: string; email?: string | null },
   orderId: string,
