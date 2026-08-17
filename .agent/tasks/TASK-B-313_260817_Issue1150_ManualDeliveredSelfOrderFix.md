@@ -6,7 +6,7 @@
 - **등록자**: Jaison (JSJung 실사용 피드백)
 - **담당**: Mike
 - **우선순위**: P2
-- **상태**: 🔄 착수 가능 (설계 자명, 착수 직행)
+- **상태**: ❌ 반려 (PR#1151, 2026-08-17 — 테스트 미추가, 재작업 필요)
 
 ## [배경]
 
@@ -62,7 +62,11 @@ _(Mike 작성 예정)_
 
 ## [Jaison 최종 검토]
 
-_(PR 제출 후 작성)_
+**PR#1151 반려 (2026-08-17)** — 상세: [PR#1151 코멘트](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1151#issuecomment-5310983516)
+
+코드 수정 자체는 정확함(diff 확인, 회귀 201/201·1407/1407 PASS, 빌드 성공). `tests/unit/ups/ups-order-detail-status.test.ts`에 `manuallySetOrderDeliveredAction` 실함수 호출 테스트가 이미 3개(사유누락/제휴화주성공/비제휴차단) 있는데, 정확히 이번에 고친 시나리오(대리점 자체 오더)만 빠져있어 반려. 기존 테스트를 거의 그대로 복사해 `shipper_id === profile.org_id` 케이스만 추가하면 되는 수준.
+
+GitHub Issue 라벨 `status:review` → `status:rework` 갱신 완료.
 
 ## [발견 이슈]
 
