@@ -26,7 +26,7 @@
 (작업 완료 후 기재)
 
 ## 커밋 이력
-- 커밋 해시: `41864674`
+- 커밋 해시: `f0d145fd`
 - 브랜치: `feature/teamb-315-nested-error-message-mike`
 - 메시지: `[Mike] fix: TASK-B-315 오더등록 검증 실패 토스트 — 중첩 필드 leaf 메시지 표출`
 - PR: https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1155
