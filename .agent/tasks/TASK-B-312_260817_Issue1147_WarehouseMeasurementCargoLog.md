@@ -6,7 +6,7 @@
 - **등록자**: Jaison (JSJung 실사용 피드백)
 - **담당**: Mike
 - **우선순위**: P2
-- **상태**: 🔄 착수 가능 (설계 확정, 착수 직행)
+- **상태**: ❌ 반려 (PR#1148, 2026-08-17 — 테스트 1건 실패 상태로 제출, 재작업 필요)
 
 ## [배경]
 
@@ -46,7 +46,13 @@ _(Mike 작성 예정)_
 
 ## [Jaison 최종 검토]
 
-_(PR 제출 후 작성)_
+**PR#1148 반려 (2026-08-17)** — 상세: [PR#1148 코멘트](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1148#issuecomment-5310398815)
+
+핵심 로직(old/new cargo snapshot, `select('*')`로 package_id 포함 조회 — TASK-B-311 재발 방지 반영됨, `weightVolumeChanged` 가드)은 정확함. 다만 PR 스스로 "200/201 PASS"라고 명시한 대로 테스트 1건이 실제로 실패하는 상태로 제출됨(R-08 위반 — 실패를 인지하고도 제출).
+
+**원인**: `tests/unit/logistics/inbound.test.ts`의 mock이 `fromCallCount`(호출 순번) 기반으로 `zen_order_packages` 분기를 하는데, TASK-B-312가 루프 이전에 호출 2건을 추가하면서 기존 `fromCallCount >= 5` 매직넘버가 밀려 루프 안 `currentPkg` 단일조회가 잘못된 분기(목록조회용 chain, `maybeSingle` 없음)에 걸림 — `TypeError: ...maybeSingle is not a function`. 이번 fallback 시도로는 카운터 밀림 자체가 해결 안 됨.
+
+GitHub Issue 라벨 `status:review` → `status:rework` 갱신 완료.
 
 ## [발견 이슈]
 
