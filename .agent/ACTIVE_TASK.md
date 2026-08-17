@@ -50,7 +50,7 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
-| [#1158](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1158) | [feat] TASK-B-317 — 화주별 일별 청구 집계 오더번호 링크·청구 컬럼 개편 + 청구확정(실제원가) 팝업 | b | p2 | in-progress | jungjs | 2026-08-17 |
+| [#1158](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1158) | [feat] TASK-B-317 — 화주별 일별 청구 집계 오더번호 링크·청구 컬럼 개편 + 청구확정(실제원가) 팝업 | b | p2 | rework | jungjs | 2026-08-17 |
 | [#1126](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1126) | [Aiden] R-17 v3.0 개편 — Team B 반영 필요 (develop→TeamB_Dev 병합 전 확인 요청) | b | p1 | - | jungjs | 2026-08-14 |
 | [#1118](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1118) | [future] IMP-094 — 요율 워크플로우 고도화 (Phase M) | a | p4 | - | 미배정 | 2026-08-14 |
 | [#1117](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1117) | [future] IMP-091 — Carrier Portal (운송사 배차 수락/거부) | a | p4 | - | 미배정 | 2026-08-14 |
