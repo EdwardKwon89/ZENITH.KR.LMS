@@ -193,15 +193,21 @@ function BillingGroupTable({
                                   <th className="py-2 px-3 text-right">기타부과금</th>
                                   <th className="py-2 px-3 text-right">사후조정</th>
                                   <th className="py-2 px-3 text-right">합계(KRW)</th>
-                                  <th className="py-2 px-3 text-center">인보이스</th>
-                                  <th className="py-2 px-3 text-center">바로가기</th>
+                                  {/* TASK-B-317: "인보이스" + "바로가기" → "청구" 컬럼 통합 */}
+                                  <th className="py-2 px-3 text-center">청구</th>
                                 </tr>
                               </thead>
                               <tbody className="divide-y divide-slate-100 dark:divide-zinc-800">
                                 {(expandedOrders[key] || []).map((ord) => (
                                   <tr key={ord.orderId} className="hover:bg-slate-50 dark:hover:bg-zinc-900/40">
+                                    {/* TASK-B-317: 오더번호를 링크로 변경 */}
                                     <td className="py-2 px-3 font-mono font-bold text-slate-800 dark:text-slate-200">
-                                      {ord.orderNo}
+                                      <Link
+                                        href={`/orders/${ord.orderId}/ups-detail`}
+                                        className="text-blue-600 dark:text-blue-400 hover:underline"
+                                      >
+                                        {ord.orderNo}
+                                      </Link>
                                     </td>
                                     <td className="py-2 px-3">
                                       <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-700 dark:bg-zinc-800 dark:text-slate-300">
@@ -222,23 +228,21 @@ function BillingGroupTable({
                                         <span className="ml-1 text-[9px] text-red-500 font-normal">⚠ 혼합통화</span>
                                       )}
                                     </td>
-                                    <td className="py-2 px-3 text-center font-mono">
-                                      {ord.invoiceNo ? (
-                                        <span className="text-[11px] text-slate-600 dark:text-slate-400">
-                                          {ord.invoiceNo} ({ord.isFinalized ? '마감' : '진행중'})
+                                    {/* TASK-B-317: "청구" 컬럼 — 청구완료/청구확정 표시 */}
+                                    <td className="py-2 px-3 text-center">
+                                      {ord.isFinalized ? (
+                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+                                          <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                                          청구확정
+                                        </span>
+                                      ) : ord.invoiceNo ? (
+                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300">
+                                          <FileText className="w-3 h-3 text-blue-600" />
+                                          청구완료
                                         </span>
                                       ) : (
                                         <span className="text-[11px] text-slate-400">미발행</span>
                                       )}
-                                    </td>
-                                    <td className="py-2 px-3 text-center">
-                                      <Link
-                                        href={`/orders/${ord.orderId}/ups-detail`}
-                                        className="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-600 dark:text-blue-400 hover:underline"
-                                      >
-                                        <span>UPS 상세</span>
-                                        <ExternalLink className="w-3 h-3" />
-                                      </Link>
                                     </td>
                                   </tr>
                                 ))}
