@@ -45,7 +45,12 @@
 - ✅ 기타부가운임 자식 테이블 생성 (zen_ups_actual_other_charges)
 - ✅ RLS 정책 적용
 
-### 4단계: 청구확정 팝업 구현 (미착수)
+### 4단계: 청구확정 팝업 구현 (완료)
+- ✅ 청구확정 팝업에 비용 입력 필드 추가
+- ✅ 기본운임 +7% admin 원가 자동 계산
+- ✅ 유류할증료/급증긴급수수료/기타부가운임 입력
+- ✅ 합계 미리보기 표시
+- ✅ 그룹 데이터에서 초기값 자동 설정
 
 ### 테스트 결과
 - **빌드**: TypeScript compilation **SUCCESS**
@@ -63,3 +68,7 @@
 ### 3단계
 - 커밋 해시: `9b9ebb60`
 - PR: https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1162
+
+### 4단계
+- 커밋 해시: `a52ea601`
+- PR: https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1163
