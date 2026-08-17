@@ -82,11 +82,25 @@ admin@zenith.kr로 `/finance/daily-billing`에서 Master Air 자가화주 오더
 
 ## [작업 결과]
 
-_(Mike 작성 예정)_
+1. ✅ `resolveAgencyShipperIds()`에 대리점 자기 자신 org_id 포함(`return [...downstreamIds, agencyOrgId]`) — `warehouse.ts`의 `getAgencyShipperIds()` 패턴과 동일
+2. ✅ 셀프 오더(`shipper_id === agencyOrgId`) 인보이스 생성 성공 테스트 추가(`tests/unit/finance/agency-settlement-permission.test.ts`) — mock Supabase로 `generateInvoicesForOrder()`를 실제 실행하는 행위 기반 테스트, toContain 아님
+
+회귀 201/201 test files · 1414/1414 tests ALL PASS, 빌드 SUCCESS.
+
+- 커밋: `09f1660c`(구현+테스트)
+- PR: [#1157](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1157)
 
 ## [Jaison 최종 검토]
 
-_(PR 제출 후 작성)_
+**PR#1157 승인·머지 (2026-08-17)** — 병합 커밋 `bc6e57e6`
+
+요청한 설계대로 정확히 수정됨. 신규 테스트가 실제 로직 실행 기반임을 확인 — `zen_agency_shippers` 빈 배열 + `zen_orders.shipper_id === agencyOrgId` 조건에서, 수정 전 로직으로 역산하면 반드시 예외가 발생했을 케이스로 구성되어 원래 버그를 정확히 잡아낼 수 있는 구조. 기존 정상/거부/마감 케이스 회귀도 그대로 통과.
+
+격리 워크트리 재검증: `origin/TeamB_Dev` 병합(docs-only, 충돌 없음) 후 회귀 201/201·1414/1414 ALL PASS, 빌드 성공, CI 3종 모두 pass. 승인 후 머지, Issue #1156 close 완료.
+
+Mike의 중복 task file(`TASK-B-316_self_shipper_invoice.md`)은 DoD 미체크·작업결과 플레이스홀더 상태로 제출됐으나, 이 canonical 파일로 통합 정리하며 삭제.
+
+R-10(`/finance/daily-billing`에서 Master Air 자가화주 오더 정상 집계 확인) 미첨부 — JSJung 라이브 확인 필요. 또한 기존에 이미 실패해 인보이스가 누락된 ZEN-2026-000008은 코드 수정만으로 소급 해결되지 않아 별도 백필 필요(TASK 범위 외, Jaison이 검토 예정).
 
 ## [발견 이슈]
 
