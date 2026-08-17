@@ -40,16 +40,26 @@
 - ✅ `orders.ts`에 export 키워드 추가
 - ✅ `operations/index.ts`에 export 추가
 
-### 3~4단계 (미착수)
-- zen_ups_actual_cost 스키마 확장
-- 청구확정 팝업 구현
+### 3단계: zen_ups_actual_cost 스키마 확장 + 기타부가운임 테이블 (완료)
+- ✅ 통화 자유선택 스키마 확장 (base_freight_currency, fuel_surcharge_currency, surge_fee_currency)
+- ✅ 기타부가운임 자식 테이블 생성 (zen_ups_actual_other_charges)
+- ✅ RLS 정책 적용
+
+### 4단계: 청구확정 팝업 구현 (미착수)
 
 ### 테스트 결과
 - **빌드**: TypeScript compilation **SUCCESS**
 - **회귀 테스트**: 201 test files, 1414 tests **ALL PASS**
 
 ## 커밋 이력
+### 1단계
 - 커밋 해시: `25483ca4`
-- 브랜치: `feature/teamb-317-daily-billing-confirm-mike`
-- 메시지: `[Mike] fix: TASK-B-317 청구완료/청구확정 라벨 반전 수정`
 - PR: https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1160
+
+### 2단계
+- 커밋 해시: `db62ae3a`
+- PR: https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1161
+
+### 3단계
+- 커밋 해시: `9b9ebb60`
+- PR: https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1162
