@@ -285,7 +285,11 @@ export default function ShipperDailyBillingClient({
     open: boolean;
     group: ShipperDailyBillingGroup | null;
     reason: string;
-  }>({ open: false, group: null, reason: '청구 집계 최종 운임 마감' });
+    baseFreightKrw: number;
+    fuelSurchargeKrw: number;
+    surgeFeeKrw: number;
+    otherChargesKrw: number;
+  }>({ open: false, group: null, reason: '청구 집계 최종 운임 마감', baseFreightKrw: 0, fuelSurchargeKrw: 0, surgeFeeKrw: 0, otherChargesKrw: 0 });
 
   const isAgencyView = role === 'AGENCY';
   const isShipperView = role === 'SHIPPER';
@@ -382,7 +386,16 @@ export default function ShipperDailyBillingClient({
       toast.error('마감할 인보이스가 없습니다.');
       return;
     }
-    setFinalizeModal({ open: true, group, reason: '청구 집계 최종 운임 마감' });
+    // TASK-B-317: 그룹 데이터에서 비용 초기값 설정
+    setFinalizeModal({
+      open: true,
+      group,
+      reason: '청구 집계 최종 운임 마감',
+      baseFreightKrw: group.totalBaseFreight,
+      fuelSurchargeKrw: group.totalFuelSurcharge,
+      surgeFeeKrw: group.totalSurgeFee,
+      otherChargesKrw: group.totalOtherCharge || 0,
+    });
   };
 
   const handleConfirmFinalize = async () => {
@@ -391,7 +404,7 @@ export default function ShipperDailyBillingClient({
 
     const key = `${group.shipperId}_${group.date}`;
     setFinalizingGroupKey(key);
-    setFinalizeModal({ open: false, group: null, reason: '청구 집계 최종 운임 마감' });
+    setFinalizeModal({ open: false, group: null, reason: '청구 집계 최종 운임 마감', baseFreightKrw: 0, fuelSurchargeKrw: 0, surgeFeeKrw: 0, otherChargesKrw: 0 });
 
     startTransition(async () => {
       const res = await finalizeDailyShipperInvoices(group.invoiceIds, reason);
@@ -633,18 +646,87 @@ export default function ShipperDailyBillingClient({
         </div>
       )}
 
-      {/* Finalize Confirmation Modal */}
+      {/* TASK-B-317: 청구확정 팝업 — 비용 입력 + 마감 처리 */}
       {finalizeModal.open && finalizeModal.group && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="bg-white dark:bg-zinc-950 rounded-2xl border border-slate-200 dark:border-zinc-800 shadow-xl p-6 w-full max-w-md mx-4">
+          <div className="bg-white dark:bg-zinc-950 rounded-2xl border border-slate-200 dark:border-zinc-800 shadow-xl p-6 w-full max-w-lg mx-4">
             <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
-              일괄 마감 확인
+              청구확정 (실제원가 입력)
             </h3>
             <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
               [{finalizeModal.group.shipperName} / {finalizeModal.group.date}] 총{' '}
               {finalizeModal.group.invoiceIds.length}건의 인보이스를 최종 정산 마감
               처리하시겠습니까?
             </p>
+
+            {/* 기본운임 입력 (+7% admin 원가 자동 계산) */}
+            <div className="grid grid-cols-2 gap-3 mb-3">
+              <div>
+                <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">
+                  기본운임 (KRW)
+                </label>
+                <input
+                  type="number"
+                  value={finalizeModal.baseFreightKrw}
+                  onChange={(e) => setFinalizeModal((prev) => ({ ...prev, baseFreightKrw: Number(e.target.value) }))}
+                  className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-zinc-700 rounded-lg bg-slate-50 dark:bg-zinc-900 text-slate-900 dark:text-white"
+                  placeholder="0"
+                />
+                <span className="text-[10px] text-slate-400 mt-1 block">
+                  +7% = ₩{Math.round(finalizeModal.baseFreightKrw * 1.07).toLocaleString()}
+                </span>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">
+                  유류할증료 (KRW)
+                </label>
+                <input
+                  type="number"
+                  value={finalizeModal.fuelSurchargeKrw}
+                  onChange={(e) => setFinalizeModal((prev) => ({ ...prev, fuelSurchargeKrw: Number(e.target.value) }))}
+                  className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-zinc-700 rounded-lg bg-slate-50 dark:bg-zinc-900 text-slate-900 dark:text-white"
+                  placeholder="0"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 mb-3">
+              <div>
+                <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">
+                  급증긴급수수료 (KRW)
+                </label>
+                <input
+                  type="number"
+                  value={finalizeModal.surgeFeeKrw}
+                  onChange={(e) => setFinalizeModal((prev) => ({ ...prev, surgeFeeKrw: Number(e.target.value) }))}
+                  className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-zinc-700 rounded-lg bg-slate-50 dark:bg-zinc-900 text-slate-900 dark:text-white"
+                  placeholder="0"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">
+                  기타부가운임 (KRW)
+                </label>
+                <input
+                  type="number"
+                  value={finalizeModal.otherChargesKrw}
+                  onChange={(e) => setFinalizeModal((prev) => ({ ...prev, otherChargesKrw: Number(e.target.value) }))}
+                  className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-zinc-700 rounded-lg bg-slate-50 dark:bg-zinc-900 text-slate-900 dark:text-white"
+                  placeholder="0"
+                />
+              </div>
+            </div>
+
+            {/* 합계 미리보기 */}
+            <div className="bg-slate-50 dark:bg-zinc-900 rounded-lg p-3 mb-4">
+              <div className="flex justify-between text-sm">
+                <span className="text-slate-600 dark:text-slate-400">총 합계 (KRW)</span>
+                <span className="font-bold text-amber-600 dark:text-amber-400">
+                  ₩{(finalizeModal.baseFreightKrw + finalizeModal.fuelSurchargeKrw + finalizeModal.surgeFeeKrw + finalizeModal.otherChargesKrw).toLocaleString()}
+                </span>
+              </div>
+            </div>
+
             <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">
               마감 사유 (선택)
             </label>
@@ -657,7 +739,7 @@ export default function ShipperDailyBillingClient({
             />
             <div className="flex justify-end gap-2">
               <button
-                onClick={() => setFinalizeModal({ open: false, group: null, reason: '청구 집계 최종 운임 마감' })}
+                onClick={() => setFinalizeModal({ open: false, group: null, reason: '청구 집계 최종 운임 마감', baseFreightKrw: 0, fuelSurchargeKrw: 0, surgeFeeKrw: 0, otherChargesKrw: 0 })}
                 className="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-lg transition-colors"
               >
                 취소
@@ -666,7 +748,7 @@ export default function ShipperDailyBillingClient({
                 onClick={handleConfirmFinalize}
                 className="px-4 py-2 text-sm font-medium text-white bg-amber-500 hover:bg-amber-600 rounded-lg transition-colors"
               >
-                마감 처리
+                청구확정
               </button>
             </div>
           </div>
