@@ -887,7 +887,12 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
   };
 
   const onError = (errors: any) => {
-    logger.error('Validation Errors:', errors);
+    // TASK-B-314 (Issue #1152): 필드명+메시지만 로깅 (순환참조 방지)
+    const errorSummary = Object.entries(errors).map(([field, err]: [string, any]) => ({
+      field,
+      message: err?.message || 'Invalid',
+    }));
+    logger.error('Validation Errors:', errorSummary);
     const firstError = Object.values(errors)[0] as any;
     const errorMessage = firstError?.message || 'Check required fields';
     toast.error('Validation Error', { 
