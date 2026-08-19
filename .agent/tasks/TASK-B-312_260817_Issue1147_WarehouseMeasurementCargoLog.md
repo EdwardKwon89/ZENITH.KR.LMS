@@ -6,7 +6,7 @@
 - **등록자**: Jaison (JSJung 실사용 피드백)
 - **담당**: Mike
 - **우선순위**: P2
-- **상태**: ❌ 반려 (PR#1148, 2026-08-17 — 테스트 1건 실패 상태로 제출, 재작업 필요)
+- **상태**: ✅ 완료 (PR#1148 머지, 2026-08-17, 병합 커밋 `0abdf531`)
 
 ## [배경]
 
@@ -42,7 +42,16 @@ WAREHOUSED 상태 UPS 오더를 창고 입고 실측 화면에서 중량 수정 
 
 ## [작업 결과]
 
-_(Mike 작성 예정)_
+(Mike 작성, `.agent/tasks/TASK-B-312_inbound_cargo_history.md`에 별도 생성됐던 내용을 병합·정리 — 중복 파일은 삭제)
+
+1. ✅ `applyPackageMeasurements()`에 old/new 화물 스냅샷 기록 추가 — `select('*')`로 package_id 포함 조회(TASK-B-311 재발 방지 반영)
+2. ✅ `weightVolumeChanged` 가드 + `cargoSummaryEquals` 비교 후 `zen_order_edit_log` insert
+3. ✅ 1차 반려(테스트 실패) 후 mock `fromCallCount` 매직넘버(5→7) 정확히 보정
+
+빌드 SUCCESS, 회귀 201 test files / 1407 tests ALL PASS.
+
+- 커밋: `e5a485b1`(구현) → `7b173ad4`(테스트 mock 보정)
+- PR: [#1148](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1148)
 
 ## [Jaison 최종 검토]
 
@@ -53,6 +62,14 @@ _(Mike 작성 예정)_
 **원인**: `tests/unit/logistics/inbound.test.ts`의 mock이 `fromCallCount`(호출 순번) 기반으로 `zen_order_packages` 분기를 하는데, TASK-B-312가 루프 이전에 호출 2건을 추가하면서 기존 `fromCallCount >= 5` 매직넘버가 밀려 루프 안 `currentPkg` 단일조회가 잘못된 분기(목록조회용 chain, `maybeSingle` 없음)에 걸림 — `TypeError: ...maybeSingle is not a function`. 이번 fallback 시도로는 카운터 밀림 자체가 해결 안 됨.
 
 GitHub Issue 라벨 `status:review` → `status:rework` 갱신 완료.
+
+---
+
+**PR#1148 최종 승인·머지 (2026-08-17)** — 병합 커밋 `0abdf531`
+
+`fromCallCount >= 5` → `>= 7` 정확한 보정 확인. 격리 워크트리 재검증: 회귀 201/201·1407/1407 ALL PASS(이전 실패하던 TC-DEF-B-016 포함), 빌드 성공, CI 3종 PASS. 핵심 로직은 1차 검토에서 이미 diff로 검증 완료. 승인 후 머지, Issue #1147 close 완료.
+
+R-10(창고 입고 실측 화면에서 중량 수정 → 등록/수정 이력 화물정보 표시 확인) 스크린샷 미첨부 — JSJung 라이브 확인 필요.
 
 ## [발견 이슈]
 

@@ -16,7 +16,7 @@ import { generateTrackingHistory } from "@/lib/logistics/tracking";
 import { createAdminClient } from '@/utils/supabase/server';
 import { syncInventoryFromOrder } from "./inventory";
 import { estimateUpsFreight as estimateUpsFreightFn } from "@/app/actions/ups/freight";
-import { ORDER_EDIT_LOG_CORE_FIELDS, extractOrderEditLogSnapshot, extractCargoSummarySnapshot } from "@/lib/orders/edit-log-fields";
+import { ORDER_EDIT_LOG_CORE_FIELDS, extractOrderEditLogSnapshot, extractCargoSummarySnapshot, cargoSummaryEquals } from "@/lib/orders/edit-log-fields";
 
 interface SaveOrderRateSnapshotParams {
   supabase: any;
@@ -826,7 +826,8 @@ export interface FreightEstimateResult {
   currency?: string;
 }
 
-async function applyPackageMeasurements(
+// TASK-B-317: 외부(청구확정 팝업)에서 호출 가능하도록 export
+export async function applyPackageMeasurements(
   supabase: any,
   profile: { id: string; email?: string | null },
   orderId: string,
@@ -851,6 +852,21 @@ async function applyPackageMeasurements(
     .select('status, transport_mode, ups_product_code, dest_port_id, recipient_country_code, incoterms, shipper_id, order_no, agency_org_id')
     .eq('id', orderId)
     .maybeSingle();
+
+  // TASK-B-312 (Issue #1147): 실측 전 화물 스냅샷 조회 (old)
+  const { data: oldPackagesRaw } = await supabase
+    .from('zen_order_packages')
+    .select('id, order_id, packing_unit, packing_count, length, width, height, gross_weight, volume, domestic_ref_no, intl_ref_no, remarks, measured_at, created_at')
+    .eq('order_id', orderId);
+  const { data: oldItemsFull } = await supabase
+    .from('zen_order_items')
+    .select('*')
+    .eq('order_id', orderId);
+  const oldPackages = (oldPackagesRaw ?? []).map((pkg: any) => ({
+    ...pkg,
+    items: (oldItemsFull ?? []).filter((item: any) => item.package_id === pkg.id),
+  }));
+  const oldCargoSnapshot = extractCargoSummarySnapshot(oldPackages as Record<string, unknown>[]);
 
   for (const pkg of packageUpdates) {
     const { data: currentPkg } = await supabase
@@ -982,6 +998,38 @@ async function applyPackageMeasurements(
       }
     } catch (snapErr) {
       logger.error('[INBOUND] Failed to recalculate rate snapshot:', snapErr);
+    }
+  }
+
+  // TASK-B-312 (Issue #1147): 실측 후 화물 스냅샷 조회 (new) + 이력 기록
+  if (weightVolumeChanged) {
+    const { data: newPackagesRaw } = await supabase
+      .from('zen_order_packages')
+      .select('id, order_id, packing_unit, packing_count, length, width, height, gross_weight, volume, domestic_ref_no, intl_ref_no, remarks, measured_at, created_at')
+      .eq('order_id', orderId);
+    const { data: newItemsFull } = await supabase
+      .from('zen_order_items')
+      .select('*')
+      .eq('order_id', orderId);
+    const newPackages = (newPackagesRaw ?? []).map((pkg: any) => ({
+      ...pkg,
+      items: (newItemsFull ?? []).filter((item: any) => item.package_id === pkg.id),
+    }));
+    const newCargoSnapshot = extractCargoSummarySnapshot(newPackages as Record<string, unknown>[]);
+
+    // 화물 스냅샷이 변경되었으면 이력 기록
+    if (!cargoSummaryEquals(oldCargoSnapshot, newCargoSnapshot)) {
+      const oldDataSnapshot = extractOrderEditLogSnapshot({});
+      const newDataSnapshot = extractOrderEditLogSnapshot({});
+      await supabase.from('zen_order_edit_log').insert({
+        order_id: orderId,
+        edited_by: profile.id,
+        edited_at: new Date().toISOString(),
+        order_status_at_edit: orderMeta?.status ?? null,
+        action: 'UPDATE',
+        old_data: { ...oldDataSnapshot, cargo_summary: oldCargoSnapshot },
+        new_data: { ...newDataSnapshot, cargo_summary: newCargoSnapshot },
+      });
     }
   }
 

@@ -25,6 +25,7 @@ import {
   Zap,
 } from 'lucide-react';
 import Link from 'next/link';
+import BillingConfirmModal from './BillingConfirmModal';
 
 interface ShipperDailyBillingClientProps {
   initialGroups: ShipperDailyBillingGroup[];
@@ -43,6 +44,7 @@ function BillingGroupTable({
   periodType,
   onToggleExpand,
   onBatchFinalize,
+  onBillingConfirm,
   canFinalize,
 }: {
   groups: ShipperDailyBillingGroup[];
@@ -54,6 +56,7 @@ function BillingGroupTable({
   periodType: 'daily' | 'weekly' | 'monthly';
   onToggleExpand: (g: ShipperDailyBillingGroup) => void;
   onBatchFinalize: (g: ShipperDailyBillingGroup) => void;
+  onBillingConfirm: (order: ShipperDailyOrderRow) => void;
   canFinalize: boolean;
 }) {
   return (
@@ -193,15 +196,21 @@ function BillingGroupTable({
                                   <th className="py-2 px-3 text-right">기타부과금</th>
                                   <th className="py-2 px-3 text-right">사후조정</th>
                                   <th className="py-2 px-3 text-right">합계(KRW)</th>
-                                  <th className="py-2 px-3 text-center">인보이스</th>
-                                  <th className="py-2 px-3 text-center">바로가기</th>
+                                  {/* TASK-B-317: "인보이스" + "바로가기" → "청구" 컬럼 통합 */}
+                                  <th className="py-2 px-3 text-center">청구</th>
                                 </tr>
                               </thead>
                               <tbody className="divide-y divide-slate-100 dark:divide-zinc-800">
                                 {(expandedOrders[key] || []).map((ord) => (
                                   <tr key={ord.orderId} className="hover:bg-slate-50 dark:hover:bg-zinc-900/40">
+                                    {/* TASK-B-317: 오더번호를 링크로 변경 */}
                                     <td className="py-2 px-3 font-mono font-bold text-slate-800 dark:text-slate-200">
-                                      {ord.orderNo}
+                                      <Link
+                                        href={`/orders/${ord.orderId}/ups-detail`}
+                                        className="text-blue-600 dark:text-blue-400 hover:underline"
+                                      >
+                                        {ord.orderNo}
+                                      </Link>
                                     </td>
                                     <td className="py-2 px-3">
                                       <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-700 dark:bg-zinc-800 dark:text-slate-300">
@@ -222,23 +231,24 @@ function BillingGroupTable({
                                         <span className="ml-1 text-[9px] text-red-500 font-normal">⚠ 혼합통화</span>
                                       )}
                                     </td>
-                                    <td className="py-2 px-3 text-center font-mono">
-                                      {ord.invoiceNo ? (
-                                        <span className="text-[11px] text-slate-600 dark:text-slate-400">
-                                          {ord.invoiceNo} ({ord.isFinalized ? '마감' : '진행중'})
+                                    {/* TASK-B-317: "청구" 컬럼 — isFinalized=true: 청구완료, false+invoiceNo: 청구확정 (클릭 가능) */}
+                                    <td className="py-2 px-3 text-center">
+                                      {ord.isFinalized ? (
+                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+                                          <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                                          청구완료
                                         </span>
+                                      ) : ord.invoiceNo ? (
+                                        <button
+                                          onClick={() => onBillingConfirm(ord)}
+                                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900 transition-colors cursor-pointer"
+                                        >
+                                          <FileText className="w-3 h-3 text-blue-600" />
+                                          청구확정
+                                        </button>
                                       ) : (
                                         <span className="text-[11px] text-slate-400">미발행</span>
                                       )}
-                                    </td>
-                                    <td className="py-2 px-3 text-center">
-                                      <Link
-                                        href={`/orders/${ord.orderId}/ups-detail`}
-                                        className="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-600 dark:text-blue-400 hover:underline"
-                                      >
-                                        <span>UPS 상세</span>
-                                        <ExternalLink className="w-3 h-3" />
-                                      </Link>
                                     </td>
                                   </tr>
                                 ))}
@@ -281,7 +291,23 @@ export default function ShipperDailyBillingClient({
     open: boolean;
     group: ShipperDailyBillingGroup | null;
     reason: string;
-  }>({ open: false, group: null, reason: '청구 집계 최종 운임 마감' });
+    baseFreightKrw: number;
+    fuelSurchargeKrw: number;
+    surgeFeeKrw: number;
+    otherChargesKrw: number;
+  }>({ open: false, group: null, reason: '청구 집계 최종 운임 마감', baseFreightKrw: 0, fuelSurchargeKrw: 0, surgeFeeKrw: 0, otherChargesKrw: 0 });
+
+  // TASK-B-317: 개별 오더 청구확정 팝업 상태
+  const [billingConfirmModal, setBillingConfirmModal] = useState<{
+    open: boolean;
+    orderId: string;
+    orderNo: string;
+    invoiceId?: string;
+    baseFreight?: number;
+    fuelSurcharge?: number;
+    surgeFee?: number;
+    otherCharges?: number;
+  }>({ open: false, orderId: '', orderNo: '' });
 
   const isAgencyView = role === 'AGENCY';
   const isShipperView = role === 'SHIPPER';
@@ -378,7 +404,35 @@ export default function ShipperDailyBillingClient({
       toast.error('마감할 인보이스가 없습니다.');
       return;
     }
-    setFinalizeModal({ open: true, group, reason: '청구 집계 최종 운임 마감' });
+    // TASK-B-317: 그룹 데이터에서 비용 초기값 설정
+    setFinalizeModal({
+      open: true,
+      group,
+      reason: '청구 집계 최종 운임 마감',
+      baseFreightKrw: group.totalBaseFreight,
+      fuelSurchargeKrw: group.totalFuelSurcharge,
+      surgeFeeKrw: group.totalSurgeFee,
+      otherChargesKrw: group.totalOtherCharge || 0,
+    });
+  };
+
+  // TASK-B-317: 개별 오더 청구확정 핸들러
+  const handleBillingConfirm = (order: ShipperDailyOrderRow) => {
+    setBillingConfirmModal({
+      open: true,
+      orderId: order.orderId,
+      orderNo: order.orderNo,
+      invoiceId: order.invoiceId,
+      baseFreight: order.baseFreight,
+      fuelSurcharge: order.fuelSurcharge,
+      surgeFee: order.surgeFee,
+      otherCharges: order.otherCharge,
+    });
+  };
+
+  const handleBillingConfirmSuccess = () => {
+    // 성공 시 목록 새로고침
+    fetchSummary();
   };
 
   const handleConfirmFinalize = async () => {
@@ -387,7 +441,7 @@ export default function ShipperDailyBillingClient({
 
     const key = `${group.shipperId}_${group.date}`;
     setFinalizingGroupKey(key);
-    setFinalizeModal({ open: false, group: null, reason: '청구 집계 최종 운임 마감' });
+    setFinalizeModal({ open: false, group: null, reason: '청구 집계 최종 운임 마감', baseFreightKrw: 0, fuelSurchargeKrw: 0, surgeFeeKrw: 0, otherChargesKrw: 0 });
 
     startTransition(async () => {
       const res = await finalizeDailyShipperInvoices(group.invoiceIds, reason);
@@ -566,6 +620,7 @@ export default function ShipperDailyBillingClient({
                 periodType={periodType}
                 onToggleExpand={toggleExpand}
                 onBatchFinalize={handleBatchFinalize}
+                onBillingConfirm={handleBillingConfirm}
                 canFinalize={!isShipperView}
               />
             )}
@@ -593,6 +648,7 @@ export default function ShipperDailyBillingClient({
                 periodType={periodType}
                 onToggleExpand={toggleExpand}
                 onBatchFinalize={handleBatchFinalize}
+                onBillingConfirm={handleBillingConfirm}
                 canFinalize={!isShipperView}
               />
             )}
@@ -623,24 +679,108 @@ export default function ShipperDailyBillingClient({
               periodType={periodType}
               onToggleExpand={toggleExpand}
               onBatchFinalize={handleBatchFinalize}
+              onBillingConfirm={handleBillingConfirm}
               canFinalize={!isShipperView}
             />
           )}
         </div>
       )}
 
-      {/* Finalize Confirmation Modal */}
+      {/* TASK-B-317: 개별 오더 청구확정 팝업 */}
+      <BillingConfirmModal
+        open={billingConfirmModal.open}
+        orderId={billingConfirmModal.orderId}
+        orderNo={billingConfirmModal.orderNo}
+        invoiceId={billingConfirmModal.invoiceId}
+        initialBaseFreight={billingConfirmModal.baseFreight}
+        initialFuelSurcharge={billingConfirmModal.fuelSurcharge}
+        initialSurgeFee={billingConfirmModal.surgeFee}
+        initialOtherCharges={billingConfirmModal.otherCharges}
+        onClose={() => setBillingConfirmModal({ open: false, orderId: '', orderNo: '' })}
+        onSuccess={handleBillingConfirmSuccess}
+      />
+
+      {/* 그룹 일괄 마감 팝업 */}
       {finalizeModal.open && finalizeModal.group && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="bg-white dark:bg-zinc-950 rounded-2xl border border-slate-200 dark:border-zinc-800 shadow-xl p-6 w-full max-w-md mx-4">
+          <div className="bg-white dark:bg-zinc-950 rounded-2xl border border-slate-200 dark:border-zinc-800 shadow-xl p-6 w-full max-w-lg mx-4">
             <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
-              일괄 마감 확인
+              청구확정 (실제원가 입력)
             </h3>
             <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
               [{finalizeModal.group.shipperName} / {finalizeModal.group.date}] 총{' '}
               {finalizeModal.group.invoiceIds.length}건의 인보이스를 최종 정산 마감
               처리하시겠습니까?
             </p>
+
+            {/* 기본운임 입력 (+7% admin 원가 자동 계산) */}
+            <div className="grid grid-cols-2 gap-3 mb-3">
+              <div>
+                <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">
+                  기본운임 (KRW)
+                </label>
+                <input
+                  type="number"
+                  value={finalizeModal.baseFreightKrw}
+                  onChange={(e) => setFinalizeModal((prev) => ({ ...prev, baseFreightKrw: Number(e.target.value) }))}
+                  className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-zinc-700 rounded-lg bg-slate-50 dark:bg-zinc-900 text-slate-900 dark:text-white"
+                  placeholder="0"
+                />
+                <span className="text-[10px] text-slate-400 mt-1 block">
+                  +7% = ₩{Math.round(finalizeModal.baseFreightKrw * 1.07).toLocaleString()}
+                </span>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">
+                  유류할증료 (KRW)
+                </label>
+                <input
+                  type="number"
+                  value={finalizeModal.fuelSurchargeKrw}
+                  onChange={(e) => setFinalizeModal((prev) => ({ ...prev, fuelSurchargeKrw: Number(e.target.value) }))}
+                  className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-zinc-700 rounded-lg bg-slate-50 dark:bg-zinc-900 text-slate-900 dark:text-white"
+                  placeholder="0"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 mb-3">
+              <div>
+                <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">
+                  급증긴급수수료 (KRW)
+                </label>
+                <input
+                  type="number"
+                  value={finalizeModal.surgeFeeKrw}
+                  onChange={(e) => setFinalizeModal((prev) => ({ ...prev, surgeFeeKrw: Number(e.target.value) }))}
+                  className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-zinc-700 rounded-lg bg-slate-50 dark:bg-zinc-900 text-slate-900 dark:text-white"
+                  placeholder="0"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">
+                  기타부가운임 (KRW)
+                </label>
+                <input
+                  type="number"
+                  value={finalizeModal.otherChargesKrw}
+                  onChange={(e) => setFinalizeModal((prev) => ({ ...prev, otherChargesKrw: Number(e.target.value) }))}
+                  className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-zinc-700 rounded-lg bg-slate-50 dark:bg-zinc-900 text-slate-900 dark:text-white"
+                  placeholder="0"
+                />
+              </div>
+            </div>
+
+            {/* 합계 미리보기 */}
+            <div className="bg-slate-50 dark:bg-zinc-900 rounded-lg p-3 mb-4">
+              <div className="flex justify-between text-sm">
+                <span className="text-slate-600 dark:text-slate-400">총 합계 (KRW)</span>
+                <span className="font-bold text-amber-600 dark:text-amber-400">
+                  ₩{(finalizeModal.baseFreightKrw + finalizeModal.fuelSurchargeKrw + finalizeModal.surgeFeeKrw + finalizeModal.otherChargesKrw).toLocaleString()}
+                </span>
+              </div>
+            </div>
+
             <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">
               마감 사유 (선택)
             </label>
@@ -653,7 +793,7 @@ export default function ShipperDailyBillingClient({
             />
             <div className="flex justify-end gap-2">
               <button
-                onClick={() => setFinalizeModal({ open: false, group: null, reason: '청구 집계 최종 운임 마감' })}
+                onClick={() => setFinalizeModal({ open: false, group: null, reason: '청구 집계 최종 운임 마감', baseFreightKrw: 0, fuelSurchargeKrw: 0, surgeFeeKrw: 0, otherChargesKrw: 0 })}
                 className="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-lg transition-colors"
               >
                 취소
@@ -662,7 +802,7 @@ export default function ShipperDailyBillingClient({
                 onClick={handleConfirmFinalize}
                 className="px-4 py-2 text-sm font-medium text-white bg-amber-500 hover:bg-amber-600 rounded-lg transition-colors"
               >
-                마감 처리
+                청구확정
               </button>
             </div>
           </div>
