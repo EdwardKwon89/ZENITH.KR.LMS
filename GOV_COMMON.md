@@ -386,4 +386,4 @@ PreToolUse GitNexus Hook에서 `Bash`가 제외되었습니다. 아래 경우는
 
 ## 📝 개정 이력
 
-> 최신 버전: **v3.1** (2026-08-19) | 전체 이력: [docs/00_GUIDE/GOV_CHANGELOG.md](docs/00_GUIDE/GOV_CHANGELOG.md)
+> 최신 버전: **v3.2** (2026-08-19) | 전체 이력: [docs/00_GUIDE/GOV_CHANGELOG.md](docs/00_GUIDE/GOV_CHANGELOG.md)

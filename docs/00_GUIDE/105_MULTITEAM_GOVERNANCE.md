@@ -26,6 +26,14 @@
 - **발견 경위**: TASK-B-135(Issue #503, PR#520) — Dave가 작업 배정 11분 만에 PR을 오픈했고, Jaison의 실제 기술 리뷰(import chain 추적 등)는 Aiden 반려 코멘트 이후 2분 뒤에야 등장함이 타임스탬프로 확인됨(2026-07-16, Edward 지시로 명문화)
 - **위반 시**: 팀 리더 사전 검토 없이 제출된 PR에서 Aiden이 결함(증적 오류·CI FAIL·테스트 누락 등)을 발견하면, R-17 위반 페널티와 별개로 팀 리더 본인의 "사전 검토 누락"으로 별도 기록한다
 
+### 라이브 브라우저/DB 검증 역할 분담 (2026-07-15 JSJung 지시, Issue #473)
+
+**Team B 구현 Agent(Dave/Baker/Mike)에게는 라이브 브라우저·DB 직접 검증을 요구하지 않는다.** 코드 diff가 설계대로 정확하고 회귀 테스트가 PASS하면 그 상태로 제출 가능하며, **실제 웹서버에서의 라이브 검증은 병합 후 JSJung이 직접 수행**한다.
+
+- **발견 경위**: Team B 구현 Agent 3인 모두 이 검증을 실제로 제대로 수행한 전례가 없었음(엉뚱한 필드를 검증하고 PASS 보고, 요청받은 브라우저 검증 대신 SQL INSERT/SELECT/DELETE로 대체 제출 등) — 개별 실수가 아니라 이 페르소나들에게 실질적인 브라우저 기반 검증 수단이 구조적으로 취약하다는 판단(JSJung, 2026-07-15)
+- **역할 분담**: 코드 논리 정확성 diff 리뷰(Jaison) · 회귀 테스트 PASS 확인(CI) → 변경 없음. 라이브 검증만 Dave/Baker/Mike → JSJung(병합 후)으로 이동
+- **주의**: 이 방침은 "라이브 검증 생략"이 아니라 "검증 주체 이동"이다 — 코드 자체의 논리 결함(예외 처리 미비 등)은 diff 리뷰에서 여전히 반려 대상
+
 ## Aiden (ZEN_CEO) 전속 권한 — 불변
 
 | 권한 | 내용 |
@@ -35,6 +43,15 @@
 | **✅ 최종 전환** | PR 머지 = ✅ 승인 (Aiden 단독) |
 | **develop → main 머지** | Sprint 완료 시 Aiden 단독 권한 |
 | **신규 팀 투입 결정** | Edward 승인 후 Aiden 집행 |
+
+### 🚫 Aiden 금지 사항 — 구현 Agent 대행 실행 (2026-08-19 신설, Issue #895/TASK-1135 절차위반 재발방지)
+
+**Aiden은 자신의 하위 도구(Agent/subagent tool)를 이용해 D_Kai·Riley·B_Kai(Team A) 또는 Dave·Baker·Mike(Team B)를 "대행"하여 코드를 작성해서는 안 된다.**
+
+- **왜 금지인가**: D_Kai·B_Kai·Baker 등은 Aiden(Claude)이 내부적으로 호출 가능한 하위 기능이 아니라, **서로 다른 모델·플랫폼으로 별도 세션에서 실행되는 완전히 독립된 존재**다(예: D_Kai = DeepSeek/OpenCode, Baker = GLM/OpenCode — 위 페르소나 표 참조). 이들은 오직 담당자(Edward는 Team A, JSJung은 Team B)가 각자의 세션에서 직접 호출해야 하며, Aiden이 자신의 Agent 도구로 흉내내어 대신 실행할 수 있는 대상이 아니다.
+- **정상 절차**: Aiden은 GitHub Issue 생성(Task 발령)까지만 수행하고 멈춘다 → 담당자가 별도 세션에서 실제 구현 Agent를 호출 → 구현 Agent가 PR 제출 → Aiden이 그 PR을 리뷰·승인·병합.
+- **발견 경위**: TASK-1135(Issue #895, DEF-130)에서 Aiden이 "D_Kai에게 위임"을 자체 Agent 도구로 임시 대행 세션을 띄우는 것으로 오해해, Edward의 개입 단계를 건너뛰고 진행함. 코드 자체는 Aiden이 직접 diff·테스트를 재검증해 안전성을 확인했으나(202파일/1426테스트 PASS, 실제 RLS 시뮬레이션, 되돌리기 검증 포함), 절차상 실제 구현 Agent가 작성한 것이 아니었음. Edward 지적으로 발견, 코드는 안전성 확인 후 그대로 유지, 절차만 본 항목으로 명문화.
+- **Aiden이 실제로 코드를 작성해도 되는 예외**: `feedback_defect_fix_delegation` 메모리 기준과 동일 — 1줄 오타·문서 전용 수정, 또는 Edward가 "이번 건은 직접 처리해줘"라고 명시적으로 예외를 지시한 경우만.
 
 ## 브랜치 전략 (Multi-Team)
 
