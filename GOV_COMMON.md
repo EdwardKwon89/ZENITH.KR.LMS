@@ -133,27 +133,27 @@ API 사양 변경 시 반드시 `Ds-11_API_상세_명세서.md`를 선제적으�
 - **우선순위**: `Critical` / `High` / `Medium` / `Low`
 - **면제 조건 없음**: 규모와 관계없이 모든 미결 개선 사항은 기록 대상입니다.
 
-### R-16 | 세션 시작 시 ACTIVE_TASK 확인 의무
-세션 최초 시작 시 반드시 `.agent/ACTIVE_TASK.md`를 읽어 본인에게 할당된 미완료 태스크(⬜·📝·🔄·❌)를 확인한다.
-- 🔍 상태 태스크: Aiden 설계 확정 대기 중 — 구현 착수 금지, 추가 대기
-- 🚫 상태 태스크: 전제조건 미충족 — 착수 금지
-- 상태 불일치(ACTIVE_TASK ↔ 상세 파일) 발견 시 착수 전 Aiden에게 보고하고 정정 지시를 기다린다. (SAR-2026-05-13-001 반영 및 신규 오케스트레이션 체계 확장)
-- **(Phase 4, 2026-07-07)** 신규 Task는 팀별 상세 표에 미리 ⬜ 행이 추가되지 않고 **GitHub Issue 생성으로 발령**된다. 파일 상단 `## 📡 GitHub Issues 현황 (자동 동기화)` 섹션(Issue 이벤트 발생 시 자동 갱신, 수기 편집 금지)에서 본인이 담당(assignee)인 이슈가 있는지 함께 확인한다. 팀별 상세 표는 착수(🔄) 시점부터 담당 Agent가 직접 행을 추가한다.
+### R-16 | 세션 시작 시 담당 Task 확인 의무
+세션 최초 시작 시 반드시 `gh issue list --assignee <본인>` (또는 `--label team:a`/`team:b`)으로 본인에게 할당된 미완료 이슈를 확인한다.
+- `status:blocked` 라벨 이슈: 전제조건 미충족 — 착수 금지
+- `status:draft` 라벨 이슈: Aiden 설계 확정 대기 중 — 구현 착수 금지, 추가 대기
+- 이슈 상태와 상세 파일(`.agent/tasks/`) 내용이 불일치하면 착수 전 Aiden에게 보고하고 정정 지시를 기다린다. (SAR-2026-05-13-001 반영 및 신규 오케스트레이션 체계 확장)
+- **(2026-08-14, R-17 v3.0)** 신규 Task는 GitHub Issue 생성으로 발령되며, 그 이슈의 라벨·assignee가 유일한 진실 공급원이다. `.agent/ACTIVE_TASK.md`는 GitHub Action이 관리하는 열람용 자동 미러일 뿐 — 착수 확인은 이 파일이 아니라 `gh issue list`로 직접 한다.
 
-### R-17 | Active Task 관리 체계 준수 의무
-모든 에이전트는 `.agent/ACTIVE_TASK.md` 기반 작업 관리 체계를 따른다.
+### R-17 | GitHub Issue 기반 작업 관리 체계 준수 의무 (v3.0, 2026-08-14 개편)
+모든 에이전트는 **GitHub Issue/PR을 유일한 진실 공급원**으로 하는 작업 관리 체계를 따른다. `.agent/ACTIVE_TASK.md`(팀별 수기 상세 표)와 `scratch/IMP_PROGRESS.md`는 2026-08-14부로 **폐지**되었다 — 실제 활동보다 갱신이 계속 뒤처져 신뢰할 수 없는 이중 기록이었기 때문이다(그 시점 기준 미해소 항목은 Issue #1115~1118로 전량 이관). 상태는 이제 Issue 라벨·assignee로만 표현한다.
 
 **전체 흐름**:
 ```
-⬜ → [📝 → 🔍] → 🔄 → 🔔 → ✅
-         ↑선택적      ↑구현   ↑보고  ↑Aiden
+status:open → [status:draft → (Aiden 확정)] → status:in-progress → status:review → (머지) → Close
+                   ↑선택적                        ↑구현                ↑보고           ↑Aiden 단독
 ```
 
-**Task 발령 절차 (Phase 4, 2026-07-07 — Issue #86)**:
+**Task 발령 절차**:
 - 신규 Task는 **GitHub Issue 생성**으로 발령한다. Team A는 Aiden, Team B는 JSJung·Jaison(R-19)이 발령 주체.
 - 필수 라벨: `team:a`/`team:b`(팀), `priority:pN`(우선순위), 필요 시 `type:feat`/`defect`. `status:open`은 기본값(미지정 시 자동 간주).
 - Issue에 담당 Agent를 assignee로 지정한다.
-- ACTIVE_TASK.md 팀별 상세 표에 **사전 ⬜ 행을 만들지 않는다** — 상단 `GitHub Issues 현황(자동 동기화)` 섹션이 발령 인덱스 역할을 대체한다. 상세 표 행은 담당 Agent가 착수 시 직접 추가한다(아래 착수 절차 3번).
+- `.agent/ACTIVE_TASK.md` 상단 `GitHub Issues 현황(자동 동기화)` 섹션은 열람 편의를 위한 미러일 뿐이며, 실제 발령·착수·완료 판단은 항상 `gh issue`/`gh pr` 조회로 한다.
 
 **착수 절차**:
 0. **[Git 동기화 — 필수, 예외 없음]** 작업 시작 전 반드시 아래 순서를 실행한다:
@@ -176,29 +176,26 @@ API 사양 변경 시 반드시 `Ds-11_API_상세_명세서.md`를 선제적으�
    스크립트가 안내하는 경로(리포지토리 상위 `ZENITH_LMS-worktrees/<페르소나>` — 실제 절대경로는 실행 환경마다 다르므로 출력된 경로를 그대로 사용)로 이동해 작업한다. 페르소나별로 **영속적인 전용 워크트리**를 자동 생성/재사용한다(최초 1회 생성, 이후 세션은 재사용). 재사용 시 이전 세션의 미커밋 변경분은 삭제하지 않고 `git stash`로 자동 보존한 뒤 `origin/develop` 최신 시점으로 복귀시킨다. 이 디렉토리 안에서 `next-task-number.sh`로 채번 후 새 브랜치를 만들어 작업한다.
    같은 공유 디렉토리(메인 체크아웃)에서 `git checkout`만으로 브랜치를 전환하며 작업하지 않는다.
    > **근거**: 공유 물리 디렉토리 사용 시 브랜치 전환 규율을 지켜도 교차 오염 가능. 수기 안내만으로는 재발 방지 안 됨. (Issue #358, 2026-07-11 최초 발생 / 2026-07-12 스크립트화 / 2026-07-21 Team A 확대)
-1. **(Phase 4)** 본인이 담당(assignee)인 GitHub Issue 확인 — `.agent/ACTIVE_TASK.md` 상단 `GitHub Issues 현황(자동 동기화)` 섹션 또는 `gh issue list --assignee <본인>` 으로 조회. 신규 Task는 여기서 발령되며, 팀별 상세 표에 사전 ⬜ 행이 없는 것이 정상이다.
-2. 상세 파일 존재 여부 확인 — 존재 시 타 Agent 착수 중, 건드리지 않음
-3. 상세 파일을 읽고(또는 신규 Task는 Issue 본문을 기반으로 상세 파일 신규 생성) 복잡도 판단 후 진행 방식 결정:
-   - **단순 Task** (구현 방향 자명): 착수 직행 — 팀별 상세 표에 🔄 행 신규 추가
-   - **복잡 Task** (대안 복수·설계 결정 필요): 📝 → 🔍 → 🔄 순으로 팀별 상세 표에 행 추가·전환
-4. **[GitHub Issue 라벨 갱신 — Phase 3]** `gh issue edit #NNN --add-label status:in-progress --remove-label status:open` 실행 (ACTIVE_TASK.md 🔄 반영과 동시). 이 라벨 변경이 기존 Project 보드 동기화·ACTIVE_TASK.md 자동 동기화를 함께 트리거한다.
+1. 본인이 담당(assignee)인 GitHub Issue 확인 — `gh issue list --assignee <본인>` 으로 조회.
+2. 상세 파일(`.agent/tasks/TASK-XXX_*.md`) 존재 여부 확인 — 존재 시 타 Agent 착수 중, 건드리지 않음
+3. 상세 파일을 Issue 본문을 기반으로 신규 생성(목표·DoD·전제조건 기재)하고 복잡도 판단 후 진행 방식 결정:
+   - **단순 Task** (구현 방향 자명): 착수 직행
+   - **복잡 Task** (대안 복수·설계 결정 필요): 아래 설계 의견 절차로 진행
+4. **[GitHub Issue 라벨 갱신]** `gh issue edit #NNN --add-label status:in-progress --remove-label status:open` 실행.
 
 **설계 의견 절차** (선택적, 복잡 Task 시):
-1. 상세 파일 `[설계 의견]` 섹션에 제안 방안·근거·리스크 작성
-2. 상세 파일 상태 📝 + ACTIVE_TASK.md 상태 동시 반영
-3. Aiden 검토 후 `[설계 확정]` 섹션 기록 + 상태 🔄로 전환 (Aiden 전속)
-4. 🔍 → 🔄 전환(착수 승인) 전까지 구현 코드 작성 금지
+1. 상세 파일 `[설계 의견]` 섹션에 제안 방안·근거·리스크 작성, `gh issue edit #NNN --add-label status:draft` 실행
+2. Aiden 검토 후 `[설계 확정]` 섹션 기록 + `status:draft` 제거·`status:in-progress` 부여 (Aiden 전속)
+3. 착수 승인 전까지 구현 코드 작성 금지
 
-**완료 보고 절차** (커밋 순서 엄수 — R-17 v2.1):
+**완료 보고 절차** (커밋 순서 엄수 — R-17 v3.0):
 1. **[코드 커밋]** `[Agent] type: IMP-XXX 설명` — 코드·회귀파일만 포함
-2. **상세 파일 `[작업 결과]` 섹션 작성** — 1번 커밋 해시 포함하여 기재 + 상태 🔔로 변경
-3. **ACTIVE_TASK.md 상태 동시 반영** — 🔄→🔔
-4. **[GitHub Issue 라벨 갱신 — Phase 3]** `gh issue edit #NNN --add-label status:review --remove-label status:in-progress` 실행 — Project 보드·ACTIVE_TASK.md 자동 동기화 섹션에 검토 대기 상태로 즉시 반영됨
-5. **`scratch/IMP_PROGRESS.md` 해당 IMP 행 🔔 갱신**
-6. **[자가 검증 — `check-R17-DoD` 실행]** `check-R17-DoD` 명령어를 실행하여 완료 보고 전 단계를 자가 점검한다. ❌ 항목(DoD 미체크·증거값 미기재·`TBD`·빈 값) 발견 시 **자체 수정 후 재실행** — 전항목 통과까지 반복. 통과 확인 후 문서 커밋 진행.
-7. **[문서 커밋]** `[Agent] docs: TASK-XXX 완료 보고 — task file 🔔` — task file·ACTIVE_TASK·IMP_PROGRESS 포함
-8. **[PR 생성]** `feature/* → develop` PR 생성 — GitHub Issue 번호 연결(`Closes #NNN`) 및 DoD 체크리스트 PR body에 기재. **PR 생성 없이 🔔 완료로 간주하지 않음.**
-9. ✅ 전환은 Aiden 단독 권한 (PR 머지) — Agent 자체 선언 절대 불가. **Aiden 반려 시** `gh issue edit #NNN --add-label status:rework --remove-label status:review` 실행(Aiden 담당) 후 상세 파일 `[Aiden 검토]` 섹션에 반려 사유 기재.
+2. **상세 파일 `[작업 결과]` 섹션 작성** — 1번 커밋 해시 포함하여 기재
+3. **[GitHub Issue 라벨 갱신]** `gh issue edit #NNN --add-label status:review --remove-label status:in-progress` 실행
+4. **[자가 검증 — `check-R17-DoD` 실행]** `check-R17-DoD` 명령어를 실행하여 완료 보고 전 단계를 자가 점검한다. ❌ 항목(DoD 미체크·증거값 미기재·`TBD`·빈 값) 발견 시 **자체 수정 후 재실행** — 전항목 통과까지 반복. 통과 확인 후 문서 커밋 진행.
+5. **[문서 커밋]** `[Agent] docs: TASK-XXX 완료 보고 — task file` — task file만 포함
+6. **[PR 생성]** `feature/* → develop` PR 생성 — GitHub Issue 번호 연결(`Closes #NNN`) 및 DoD 체크리스트 PR body에 기재. **PR 생성 없이 검토 요청 완료로 간주하지 않음.**
+7. ✅ 전환은 Aiden 단독 권한 (PR 머지 = Issue 자동 Close) — Agent 자체 선언 절대 불가. **Aiden 반려 시** `gh issue edit #NNN --add-label status:rework --remove-label status:review` 실행(Aiden 담당) 후 상세 파일 `[Aiden 검토]` 섹션에 반려 사유 기재.
 
 > ⚠️ **커밋 순서 위반 금지**: 코드 커밋 전 task file 🔔 변경 금지. task file 미업데이트 상태로 단일 커밋 금지. DoD 미체크·증거값 미기재 상태로 문서 커밋 금지. **PR 미생성 상태로 검토 요청 불가.**
 
@@ -216,16 +213,14 @@ API 사양 변경 시 반드시 `Ds-11_API_상세_명세서.md`를 선제적으�
 - 현재 누적 현황: [.agent/VIOLATION_TRACKER.md](.agent/VIOLATION_TRACKER.md) 참조
 
 **파일 조작 규칙**:
-- 상세 파일은 담당 Agent만 수정 가능 (단, `[설계 확정]`·`[Aiden 검토]` 섹션은 Aiden 전속)
-- ACTIVE_TASK.md는 상태 반영 목적으로만 수정 (내용 추가 금지)
-- **(Phase 2)** ACTIVE_TASK.md 상단 `<!-- GH_ISSUES_SYNC:START/END -->` 마커 사이 블록은 GitHub Action 전속 — 어떤 Agent도 수기 편집 금지(다음 자동 실행 시 덮어써짐)
-- 전제조건 블로커(🚫→⬜) 및 설계 착수 승인(🔍→🔄) 전환은 Aiden 전속
+- 상세 파일(`.agent/tasks/TASK-XXX_*.md`)은 담당 Agent만 수정 가능 (단, `[설계 확정]`·`[Aiden 검토]` 섹션은 Aiden 전속)
+- `.agent/ACTIVE_TASK.md`는 GitHub Action이 관리하는 열람 전용 자동 미러다 — 어떤 Agent도 수기 편집 금지(팀별 수기 상세 표는 2026-08-14부로 폐지)
+- 전제조건 블로커 해제(`status:blocked` 제거) 및 설계 착수 승인 전환은 Aiden 전속
 
 **아카이브 규칙**:
-- 완료 Task(✅)는 주 단위로 Aiden이 `.agent/archive/TASK_LOG_YYMMWW.md`로 이관
-- 상세 파일도 이관 후 삭제
+- 완료(Close)된 Issue의 상세 파일은 주 단위로 Aiden이 `.agent/archive/TASK_LOG_YYMMWW.md`로 이관 후 삭제
 
-**구 파일 참조 금지**: `TASK_BOARD.md` · `ACTIVE_AGENT.md` · `HANDOFF_BOX.md`는 폐기됨. `.agent/ACTIVE_TASK.md`와 `.agent/tasks/` 디렉토리를 단일 출처로 사용.
+**구 파일 참조 금지**: `TASK_BOARD.md`·`ACTIVE_AGENT.md`·`HANDOFF_BOX.md`·`scratch/IMP_PROGRESS.md`는 폐기됨. Task 상태의 단일 출처는 GitHub Issue/PR(`gh issue list`·`gh pr list`)이며, `.agent/tasks/`는 DoD·커밋 이력 상세 기록용으로만 사용한다.
 
 ### R-20 | 영향도 분석 GitNexus 우선 원칙 (2026-07-29 신설)
 
@@ -252,7 +247,7 @@ API 사양 변경 시 반드시 `Ds-11_API_상세_명세서.md`를 선제적으�
 **핵심 규칙 요약**:
 - **브랜치**: `feature/teama-*` · `feature/teamb-*` → `develop` (Aiden PR 리뷰·머지) → `main`
 - **TASK 채번**: Team A `TASK-NNN` / Team B `TASK-B-NNN` / Team C+ `TASK-C-NNN` (팀별 독립 순번). 번호 중복 반복 발생(Issue #358)으로 반드시 착수 전 `./scripts/next-task-number.sh [A|B|C]`로 다음 번호를 확인 후 채번한다 — 눈대중 채번 금지.
-- **파일 소유권**: 각 팀은 본인 팀 Task file·ACTIVE_TASK 섹션만 수정. 타 팀 파일 수정 금지.
+- **파일 소유권**: 각 팀은 본인 팀 Task file(`.agent/tasks/`)만 수정. 타 팀 파일 수정 금지. Task 상태는 GitHub Issue 라벨로 표현되므로 팀 간 충돌 대상 자체가 아니다.
 - **Aiden 전속**: ✅ PR 머지(최종 승인) · `develop → main` 머지 · 팀 간 조율 · 신규 팀 투입 결정
 
 ### R-18 | 발견 결함 보고 의무
@@ -320,7 +315,7 @@ _(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
 - [에이전트 역할 명세](docs/00_GUIDE/103_AGENT_ROLES_SPEC.md)
 - [기술 결정 사항](.planning/DECISIONS.md)
 - [프로젝트 컨텍스트](.planning/CONTEXT.md)
-- **[활성 작업 인덱스](.agent/ACTIVE_TASK.md)** ← 세션 시작 시 필독 (R-16·R-17)
+- **작업 현황 확인**: `gh issue list --assignee <본인>` ← 세션 시작 시 필수 (R-16·R-17). `.agent/ACTIVE_TASK.md`는 열람용 자동 미러일 뿐 진실 공급원이 아니다.
 
 ---
 
@@ -390,4 +385,4 @@ PreToolUse GitNexus Hook에서 `Bash`가 제외되었습니다. 아래 경우는
 
 ## 📝 개정 이력
 
-> 최신 버전: **v2.8** (2026-07-29) | 전체 이력: [docs/00_GUIDE/GOV_CHANGELOG.md](docs/00_GUIDE/GOV_CHANGELOG.md)
+> 최신 버전: **v3.0** (2026-08-14) | 전체 이력: [docs/00_GUIDE/GOV_CHANGELOG.md](docs/00_GUIDE/GOV_CHANGELOG.md)

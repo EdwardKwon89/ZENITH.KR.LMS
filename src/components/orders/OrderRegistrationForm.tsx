@@ -886,10 +886,38 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
     }
   };
 
+  // TASK-B-315 (Issue #1154): 중첩 필드(packages/items)에서 첫 번째 leaf .message를 재귀적으로 찾는 헬퍼
+  // ref/type 키는 재귀 순회에서 건너뛰되, obj.message는 먼저 체크
+  const findFirstErrorMessage = (obj: any, depth = 0): string | null => {
+    if (depth > 10 || obj == null || typeof obj !== 'object') return null;
+    // 먼저 .message 체크 (RHF FieldError: { type, message, ref })
+    if (typeof obj.message === 'string' && obj.message) return obj.message;
+    // 배열이면 각 요소 순회
+    if (Array.isArray(obj)) {
+      for (const item of obj) {
+        const msg = findFirstErrorMessage(item, depth + 1);
+        if (msg) return msg;
+      }
+      return null;
+    }
+    // 객체면 값 순회 (ref/type 키는 건너뜀 — DOM 엘리먼트 순회 차단)
+    for (const [key, val] of Object.entries(obj)) {
+      if (key === 'ref' || key === 'type') continue;
+      const msg = findFirstErrorMessage(val, depth + 1);
+      if (msg) return msg;
+    }
+    return null;
+  };
+
   const onError = (errors: any) => {
-    logger.error('Validation Errors:', errors);
-    const firstError = Object.values(errors)[0] as any;
-    const errorMessage = firstError?.message || 'Check required fields';
+    // TASK-B-314 (Issue #1152): 필드명+메시지만 로깅 (순환참조 방지)
+    const errorSummary = Object.entries(errors).map(([field, err]: [string, any]) => ({
+      field,
+      message: err?.message || 'Invalid',
+    }));
+    logger.error('Validation Errors:', errorSummary);
+    // TASK-B-315: 중첩 필드에서도 실제 에러 메시지 찾기
+    const errorMessage = findFirstErrorMessage(errors) || 'Check required fields';
     toast.error('Validation Error', { 
       description: errorMessage,
       action: {
@@ -1098,7 +1126,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                               />
                             </div>
                             <div>
-                              <p className="text-slate-400 font-bold uppercase tracking-tighter mb-1">{t('shipper_contact')} (Phone)</p>
+                              <p className="text-slate-400 font-bold uppercase tracking-tighter mb-1">{t('shipper_contact')} (Phone){transportMode === 'UPS' && <span className="text-rose-500"> *</span>}</p>
                               <ZenInput 
                                 placeholder="010-XXXX-XXXX"
                                 disabled={shipperNameMode === 'auto'}
@@ -1126,6 +1154,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                                 t={t}
                                 readOnly={shipperNameMode === 'auto'}
                                 key={`${affiliation?.orgId || 'no-org'}-${shipperNameMode}`}
+                                englishDetailOnly // TASK-B-305: 화주 상세주소 영문 전용
                                 defaultValues={
                                   shipperNameMode === 'manual'
                                     ? { country_code: '', state_province: '', city: '', address: '', address_detail: '', zipcode: '' }
@@ -1229,6 +1258,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                             register={register}
                             setValue={setValue}
                             t={t}
+                            englishDetailOnly // TASK-B-305: 수하인 상세주소 영문 전용
                             defaultValues={{
                               country_code: watch('recipient_country_code') || 'KR',
                               address: watch('recipient_address') || '',
@@ -1238,6 +1268,11 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                               zipcode: watch('recipient_zipcode') || '',
                             }}
                             required
+                            // TASK-B-301 (Issue #1121): UPS 모드에서만 하위 필드 필수표시 (SHXK API 요구사항)
+                            requiredCountry={transportMode === 'UPS'}
+                            requiredZipcode={transportMode === 'UPS'}
+                            requiredCity={transportMode === 'UPS'}
+                            requiredStateProvince={watch('recipient_country_code') === 'CN'}
                           />
                           {watch('recipient_country_code') === 'CN' && (
                             <p className="text-[10px] text-amber-600 mt-1.5">※ 중국 배송은 UPS Zone이 지역(성/직할시)에 따라 달라지므로 시/도를 선택해야 합니다.</p>
