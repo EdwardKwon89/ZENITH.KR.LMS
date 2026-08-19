@@ -2,6 +2,7 @@ import { logger } from '@/lib/logger';
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 import { checkPermission, USER_ROLES } from "./rbac";
+import { withRequestContext } from "@/lib/logging/request-context.server";
 export { checkPermission };
 
 /**
@@ -118,27 +119,29 @@ export async function validateAdminAction() {
  * 일반 사용자 세션을 검증하는 서버 액션용 가드입니다.
  */
 export async function validateUserAction() {
-  logger.info("[DEBUG] validateUserAction START");
-  const supabase = await createClient();
-  logger.info("[DEBUG] validateUserAction: Supabase client created");
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
-  logger.info("[DEBUG] validateUserAction: getUser result", { hasUser: !!user, email: user?.email, error: authError });
+  return withRequestContext(async () => {
+    logger.info("[DEBUG] validateUserAction START");
+    const supabase = await createClient();
+    logger.info("[DEBUG] validateUserAction: Supabase client created");
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    logger.info("[DEBUG] validateUserAction: getUser result", { hasUser: !!user, email: user?.email, error: authError });
 
-  if (!user) {
-    logger.error("[AUTH_REQUIRED] Session not found");
-    throw new Error("Login required");
-  }
+    if (!user) {
+      logger.error("[AUTH_REQUIRED] Session not found");
+      throw new Error("Login required");
+    }
 
-  const { data: profile, error: profileError } = await supabase
-    .from("zen_profiles")
-    .select('id, email, role, org_id, status, full_name, phone_number')
-    .eq("id", user.id)
-    .single();
-    
-  logger.info("[DEBUG] validateUserAction: profile result", { hasProfile: !!profile, error: profileError });
+    const { data: profile, error: profileError } = await supabase
+      .from("zen_profiles")
+      .select('id, email, role, org_id, status, full_name, phone_number')
+      .eq("id", user.id)
+      .single();
 
-  if (!profile) throw new Error("Profile not found");
+    logger.info("[DEBUG] validateUserAction: profile result", { hasProfile: !!profile, error: profileError });
 
-  return { user, profile, supabase };
+    if (!profile) throw new Error("Profile not found");
+
+    return { user, profile, supabase };
+  });
 }
 

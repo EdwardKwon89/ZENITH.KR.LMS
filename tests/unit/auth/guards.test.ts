@@ -3,6 +3,7 @@ import { validateAdminAction, validateUserAction } from '@/lib/auth/guards';
 import { createClient } from '@/utils/supabase/server';
 import { checkPermission } from '@/lib/auth/rbac';
 import { redirect } from 'next/navigation';
+import { getRequestContext } from '@/lib/logging/request-context';
 
 // Mock 의존성 설정
 vi.mock('@/utils/supabase/server', () => ({
@@ -22,6 +23,10 @@ vi.mock('next/navigation', () => ({
   redirect: vi.fn(),
 }));
 
+vi.mock('next/headers', () => ({
+  headers: vi.fn().mockResolvedValue({ get: () => null }),
+}));
+
 describe('ZENITH Security Guard: Server Action Authorization', () => {
   const mockUser = { id: 'user-123', email: 'admin@zenith.kr' };
   const mockProfile = { id: 'user-123', role: 'ADMIN', org_id: 'org-456' };
@@ -30,7 +35,7 @@ describe('ZENITH Security Guard: Server Action Authorization', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    
+
     // Supabase Mock 초기화
     mockSupabase = {
       auth: {
@@ -91,5 +96,35 @@ describe('ZENITH Security Guard: Server Action Authorization', () => {
     // Then
     expect(result.user).toEqual(mockUser);
     expect(checkPermission).not.toHaveBeenCalled(); // 일반 유저는 경로 권한 체크 패스
+  });
+
+  it('TC-G.5: [DEF-136] validateUserAction 내부에서 requestId 컨텍스트가 실제로 활성화되어야 함', async () => {
+    // Given
+    mockSupabase.auth.getUser.mockResolvedValue({ data: { user: mockUser } });
+    let capturedRequestId: string | undefined;
+    mockSupabase.single.mockImplementation(async () => {
+      // withRequestContext()로 감싸져 있다면 이 시점에 컨텍스트가 열려 있어야 함
+      capturedRequestId = getRequestContext()?.requestId;
+      return { data: mockProfile };
+    });
+
+    // When
+    await validateUserAction();
+
+    // Then — DEF-136 이전에는 항상 undefined였음(컨텍스트 미생성)
+    expect(capturedRequestId).toBeDefined();
+    expect(typeof capturedRequestId).toBe('string');
+  });
+
+  it('TC-G.6: [DEF-136] validateUserAction 반환 이후(컨텍스트 밖)에서는 다시 undefined로 돌아가야 함', async () => {
+    // Given — AsyncLocalStorage 스코프가 정확히 validateUserAction 내부로 한정되는지 확인
+    mockSupabase.auth.getUser.mockResolvedValue({ data: { user: mockUser } });
+    mockSupabase.single.mockResolvedValue({ data: mockProfile });
+
+    // When
+    await validateUserAction();
+
+    // Then
+    expect(getRequestContext()).toBeUndefined();
   });
 });
