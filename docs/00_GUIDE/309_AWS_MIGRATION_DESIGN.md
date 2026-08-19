@@ -1,6 +1,6 @@
 # 309. AWS 이관(Migration) 설계 초안
 
-> **문서번호:** Ds-11 계열 (R-11 API/설계 우선 원칙 적용) | **버전:** v0.17 (초안 — 미승인)
+> **문서번호:** Ds-11 계열 (R-11 API/설계 우선 원칙 적용) | **버전:** v0.18 (초안 — 미승인)
 > **작성일:** 2026-08-07 | **작성자:** Aiden (Claude, ZEN_CEO)
 > **상태:** ▶️ **재개, 서버 상태 확인 대기** (2026-08-14, Edward 지시) — AWS 접속 정보 수령, DB 전환 최종 결정은 SSH 서버 실사 후로 보류(§8). §4에 ④ "Vercel만 대체" 옵션 추가 검토 중
 > **v0.2 변경**: Edward 피드백("실제 배포 준비가 빠져 있다") 반영 — §6 실제 배포 준비 체크리스트 신설, Dockerfile/next.config.ts(`output: 'standalone'`)/package.json(`engines`) 실물 산출물 완료
@@ -221,6 +221,7 @@ Edward 질의("Vercel처럼 Supabase도 무료/유료 제약이 있는지") 반�
 | **모니터링/로깅** | Sentry(애플리케이션 에러)만 유지 확정 | Vercel의 기본 배포/함수 로그·Analytics를 대체할 CloudWatch Logs/Alarm 설계 필요 |
 | **비용 산정** | [x] §6.4 완료(2026-08-14, 실제 Pricing API 조회) | — |
 | **롤백 계획** | 미작성 | 1차 AWS 배포 후 문제 발생 시 기존 Vercel/Supabase로 되돌리는 절차(DNS TTL 사전 단축, 구 환경 유지 기간 등) |
+| **Node.js 버전 동기화** | package.json(20.x)·CI(20)·Dockerfile(node:22-alpine) 3곳 불일치 확인(2026-08-19) — Vercel이 2026-10-01부터 Node 20.x 배포 중단 예고 | TASK-1131(Issue #1168)로 24.x 통일 진행 중. Dockerfile을 그대로 쓰는 Fargate/컨테이너 이관 경로에도 동일하게 적용되므로, 이 Task 완료 후에도 향후 버전 변경 시 3곳(Vercel/CI/Dockerfile)을 함께 갱신하는 절차를 체크리스트에 유지할 것 |
 
 > **요약**: §4의 Supabase 처리 방안 결정과 무관하게 위 6.3 항목 대부분(도메인 결정, 네트워크 설계 골격, CI/CD 워크플로우 골격, Secrets 매핑 구체화, 비용 개략 산정)은 **지금 바로 착수 가능**하다. 단, Supabase Auth 대시보드 설정 확인은 원격 Supabase 프로젝트 접근 권한이 필요하고, 실제 리소스 프로비저닝은 AWS 자격증명 도착 후에만 가능하다.
 
@@ -518,3 +519,4 @@ MySQL 접속 대상 IP가 Docker 브릿지 네트워크 게이트웨이 형태�
 | v0.15 | 2026-08-14 | Aiden (Claude) | §10.7 신설 — CloudWatch Logs 보존기한 정책(기본 영구보관 위험 확인) 및 S3/Glacier 아카이빙 생명주기, 실측 가격 기반(수집 $0.76/GB·저장 $0.0314/GB-월) |
 | v0.16 | 2026-08-14 | Aiden (Claude) | §8.6 조사용 보안그룹 임시 규칙 제거 완료 확인 — SNTL 서버 조사 절차 완전 종료 |
 | v0.17 | 2026-08-14 | Aiden (Claude) | §10.8 신설 — 로그 체계 결론 확정(Edward): 자체 구조화 로그(§10.6)는 현 단계 완결, 전용 로그 분석 SaaS/OSS 연동은 별도 후속 Task로 분리 |
+| v0.18 | 2026-08-19 | Aiden (Claude) | §6.3에 Node.js 버전 동기화 항목 추가 — Vercel Node 20.x 지원종료 예고(2026-10-01) 계기로 package.json/CI/Dockerfile 3곳 버전 불일치 확인, TASK-1131(Issue #1168)로 24.x 통일 진행 중, Fargate 이관 경로에도 동일 영향 |

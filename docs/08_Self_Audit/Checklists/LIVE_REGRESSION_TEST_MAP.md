@@ -83,6 +83,8 @@
 | **TC-G.1** | 사용자 인증 가드 | 세션 유무 및 프로필 연결 무결성 | `tests/unit/auth/guards.test.ts` |
 | **TC-G.2** | 어드민 보안 가드 | 비권한자의 어드민 액션 접근 원천 차단 | `tests/unit/auth/guards.test.ts` |
 | **TC-G.3** | 세션 만료 응답 | 세션 부재 시 리다이렉트 또는 에러 전파 | `tests/unit/auth/guards.test.ts` |
+| **TC-G.5** | requestId 컨텍스트 활성화 (DEF-136) | validateUserAction() 내부 실행 중 요청 컨텍스트가 실제로 열려 있는지 | `tests/unit/auth/guards.test.ts` |
+| **TC-G.6** | requestId 컨텍스트 스코프 경계 (DEF-136) | validateUserAction() 반환 후 컨텍스트가 정확히 닫히는지 | `tests/unit/auth/guards.test.ts` |
 | **TC-MA.1** | 국가/항구 리스트 조회 | 기준 정보 로딩 및 정렬 순서 보장 | `tests/unit/master/master-actions.test.ts` |
 | **TC-MA.2** | 공통 코드 CRUD | 마스터 코드 추가/수정/삭제 로직 반영 | `tests/unit/master/master-actions.test.ts` |
 
