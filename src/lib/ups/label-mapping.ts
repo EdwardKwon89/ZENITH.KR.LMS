@@ -1,4 +1,18 @@
 // Pure mapping functions — no server-only imports. Safe for client components and tests.
+import { Country, State } from 'country-state-city';
+
+// TASK-B-307 (Issue #1137): state/country 원시코드→이름 변환 유틸
+export function resolveRegionName(stateCode: string, countryCode: string): string {
+  if (!stateCode || !countryCode) return '';
+  const state = State.getStateByCodeAndCountry(stateCode, countryCode);
+  return state?.name || stateCode;
+}
+
+export function resolveCountryName(countryCode: string): string {
+  if (!countryCode) return '';
+  const country = Country.getCountryByCode(countryCode);
+  return country?.name || countryCode;
+}
 
 export function determineOrderCargotype(packages: Record<string, unknown>[]): { cargotype: string; mailCargoType: string } {
   if (packages.length === 0) return { cargotype: 'W', mailCargoType: '4' };
@@ -56,6 +70,22 @@ export function resolveShipperStreet(
   const shipperAddr = (order.shipper_address_english as string) || (shipperOrg?.address_english as string) || (shipperOrg?.address as string) || (order.shipper_address as string) || '';
   const shipperAddrDetail = (order.shipper_address_detail_english as string) || (shipperOrg?.address_detail_english as string) || (shipperOrg?.address_detail as string) || (order.shipper_address_detail as string) || '';
   return [shipperAddr, shipperAddrDetail].filter(Boolean).join(' ');
+}
+
+// TASK-B-305 (Issue #1133): 수하인 주소 영문 우선 표출 유틸
+// 우선순위: recipient_address_detail (영문 전용) > recipient_address_local > recipient_address
+export function resolveConsigneeStreet(
+  order: Record<string, unknown>,
+): string {
+  const consigneeAddr = (order.recipient_address as string) || '';
+  const localAddr = (order.recipient_address_local as string) || '';
+  const detailAddr = (order.recipient_address_detail as string) || '';
+  
+  // 영문 상세주소가 있으면 사용, 없으면 한글 원본 + 현지어 표기
+  if (detailAddr) {
+    return [consigneeAddr, detailAddr].filter(Boolean).join(' ');
+  }
+  return localAddr ? `${consigneeAddr} (${localAddr})` : consigneeAddr;
 }
 
 export function buildCreateOrderPayload(

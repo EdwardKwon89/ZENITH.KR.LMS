@@ -69,4 +69,19 @@ describe('Logger Utility', () => {
     // Restore env
     (process.env as any).NODE_ENV = originalEnv;
   });
+
+  // TASK-B-314 (Issue #1152): 순환참조 객체가 safeStringify로 정상 처리되는지 검증
+  it('logger.error should handle circular references without crashing', () => {
+    const circular: any = { a: 1, b: 'test' };
+    circular.self = circular; // 순환참조 생성
+
+    // 예외 없이 로깅되어야 함
+    expect(() => logger.error('Circular test', circular)).not.toThrow();
+
+    const entry = parseEntry(errorSpy);
+    expect(entry.level).toBe('error');
+    expect(entry.message).toBe('Circular test');
+    // 순환참조가 [Circular]로 치환되어야 함
+    expect(JSON.stringify(entry)).toContain('[Circular]');
+  });
 });

@@ -31,6 +31,19 @@ export function ceilToHalfKg(weightKg: number): number {
   return Math.ceil(weightKg * 2) / 2;
 }
 
+// TASK-B-302 (Issue #1123): 통화별 올림 — KRW는 정수(원) 단위, 그 외(USD 등)는 소수점 2자리(센트) 단위.
+// JSJung 확정 정책 "UPS 모든 운임 표출은 올림으로 표출합니다" — 화면 표시뿐 아니라 계산 로직(저장값)에 적용.
+// 주의: IEEE float 오차 흡수 — 예) 18.51*100 = 1851.0000000000002, 100.01+18.51 = 118.52000000000001.
+// epsilon 내의 오차는 가장 가까운 단위값으로 정규화해 이미 정수/센트인 값이 올림에 의해 +1 되는 것을 방지한다.
+export function ceilByCurrency(amount: number, currency: string): number {
+  const scale = currency === 'KRW' ? 1 : 100;
+  const scaled = amount * scale;
+  const nearest = Math.round(scaled);
+  const epsilon = 1e-9 * Math.max(1, Math.abs(scaled));
+  const fixedScaled = Math.abs(scaled - nearest) < epsilon ? nearest : Math.ceil(scaled);
+  return fixedScaled / scale;
+}
+
 // DEF-095: 상품별 중량 반올림 단위. UPS 공식 Rate Guide(p.2) 원문 —
 // WW_EXPEDITED는 중량과 무관하게 항상 1kg 단위, 그 외 상품은 20kg 이하 0.5kg / 초과 1kg 단위로 올림.
 export function resolveBillingWeight(chargeableKg: number, productCode: string): number {
@@ -168,9 +181,12 @@ export function applyOversizeRule(
 }
 
 // 기타 부가요금 합산 (유류할증료 연동 포함)
+// TASK-B-302 (Issue #1123): 판매 항목은 각 charge별 개별 올림 후 합산 — 화면에 표시되는 개별 항목 합이
+// 표시 합계와 항상 일치(검산 정합성)하도록 함. costTotal/base_c/fuel_c는 원가 계열이라 올림 미적용(범위 밖).
 function applyOtherCharges(
   charges: UpsOtherCharge[],
-  fuelRate: number
+  fuelRate: number,
+  currency: string
 ): { sellingTotal: number; costTotal: number; items: UpsOtherChargeItem[] } {
   let sellingTotal = 0;
   let costTotal = 0;
@@ -180,7 +196,8 @@ function applyOtherCharges(
     const base_c = Number(c.cost_price ?? 0);
     const fuel_s = c.fuel_surcharge_applicable ? base_s * fuelRate : 0;
     const fuel_c = c.fuel_surcharge_applicable ? base_c * fuelRate : 0;
-    sellingTotal += base_s + fuel_s;
+    const itemSelling = ceilByCurrency(base_s + fuel_s, currency);
+    sellingTotal += itemSelling;
     costTotal += base_c + fuel_c;
     items.push({
       chargeId: c.id, chargeCode: c.charge_code, chargeName: c.charge_name,
@@ -192,6 +209,8 @@ function applyOtherCharges(
 }
 
 // 계산 근거 상세 객체 조립
+// TASK-B-302 (Issue #1123): fuelSellAmt(이미 올림 적용된 값)를 파라미터로 전달받아 재사용 —
+// 본문에서 재계산하지 않아 fuelSurchargeSellingAmount(result)와 breakdown 표시값이 항상 일치.
 function buildBreakdown(
   input: UpsFreightInput,
   data: UpsPricingData,
@@ -204,6 +223,7 @@ function buildBreakdown(
   baseSellingPrice: number,
   baseCostPrice: number,
   surge: ReturnType<typeof applySurgeFee>,
+  fuelSellAmt: number,
 ): UpsBreakdown {
   const fuelRate = Number(data.fuelSurcharge?.selling_rate ?? 0);
   const fuelCostRate = Number(data.fuelSurcharge?.cost_rate ?? 0);
@@ -220,7 +240,7 @@ function buildBreakdown(
     baseRateId, baseSellingPrice, baseCostPrice,
     costSurchargeRate: UPS_COST_SURCHARGE_RATE,
     fuelSurchargeId: data.fuelSurcharge?.id ?? null, fuelSurchargeRate: fuelRate,
-    fuelSurchargeSellingAmount: baseSellingPrice * fuelRate,
+    fuelSurchargeSellingAmount: fuelSellAmt,
     fuelSurchargeCostAmount: baseCostPrice * fuelCostRate,
     otherChargeItems: oc.items,
     otherChargesSellingTotal: oc.sellingTotal,
@@ -238,11 +258,13 @@ function buildBreakdown(
 // 급증 긴급 수수료(Surge Emergency Fee) 계산 — kg당 단가 × 청구중량(billingKg, 올림/반올림 및 대형포장물 최소중량까지
 // 반영된 최종 청구중량 — 기본운임 산정에 쓰이는 것과 동일한 값), 유류할증료 부과 대상 (Issue #491, 2026-08-10 JSJung 확정)
 // 도착국·기준일(effectiveDate, 미지정 시 오늘) 기준으로 유효한 단가 1건을 호출자가 미리 조회해 data.surgeFee로 전달한다.
+// TASK-B-302 (Issue #1123): sellingAmount는 올림 적용. costAmount는 원가 계열이라 범위 밖 — 유지.
 function applySurgeFee(
   surgeFee: UpsSurgeFee | null | undefined,
   billingKg: number,
   fuelRate: number,
   fuelCostRate: number,
+  currency: string,
 ): { id: string | null; sellingRatePerKg: number; sellingAmount: number; costAmount: number } {
   if (!surgeFee) {
     return { id: null, sellingRatePerKg: 0, sellingAmount: 0, costAmount: 0 };
@@ -252,7 +274,7 @@ function applySurgeFee(
   return {
     id: surgeFee.id,
     sellingRatePerKg: Number(surgeFee.selling_rate_per_kg),
-    sellingAmount: baseSelling + baseSelling * fuelRate,
+    sellingAmount: ceilByCurrency(baseSelling + baseSelling * fuelRate, currency),
     costAmount: baseCost + baseCost * fuelCostRate,
   };
 }
@@ -264,6 +286,9 @@ export function computeUpsFreight(
   input: UpsFreightInput,
   data: UpsPricingData & { oversizeCharge?: UpsOtherCharge }
 ): UpsFreightResult {
+  // TASK-B-302 (Issue #1123): 통화는 함수 전체에서 사용되므로 맨 앞에서 결정 (기존에는 return 직전에서만 결정)
+  const currency = data.baseRate?.currency || data.weightTierRates?.[0]?.currency || data.freightMinimum?.currency || 'KRW';
+
   const dims = (input.dimL && input.dimW && input.dimH)
     ? { l: input.dimL, w: input.dimW, h: input.dimH } : undefined;
   const { chargeableKg, volumetricKg } = calcChargeableWeight(
@@ -339,19 +364,24 @@ export function computeUpsFreight(
     }
   }
 
+  // TASK-B-302 (Issue #1123): 기본운임 판매가는 4개 분기(FREIGHT ≤70/초과, EXPRESS·SAVER ≤20/초과) 공통 지점에서 올림.
+  // 원가(baseCostPrice)는 내부 마진 추적용 — 범위 밖, 그대로 유지.
+  baseSellingPrice = ceilByCurrency(baseSellingPrice, currency);
+
   // 4. 부가요금 및 유류할증료 계산 (DWB·공용 최소운임 스텝 제거 — Issue #303)
   const fuelRate = Number(data.fuelSurcharge?.selling_rate ?? 0);
   const fuelCostRate = Number(data.fuelSurcharge?.cost_rate ?? 0);
 
-  const fuelSellAmt = baseSellingPrice * fuelRate;
+  // TASK-B-302: 유류할증 판매가는 이미 올림된 baseSellingPrice 기준으로 계산 후 올림
+  const fuelSellAmt = ceilByCurrency(baseSellingPrice * fuelRate, currency);
   const fuelCostAmt = baseCostPrice * fuelCostRate;
 
   const effectiveOtherCharges = [...data.otherCharges];
   if (oversizeApplied && data.oversizeCharge && !effectiveOtherCharges.some((c) => c.id === data.oversizeCharge!.id)) {
     effectiveOtherCharges.push(data.oversizeCharge);
   }
-  const oc = applyOtherCharges(effectiveOtherCharges, fuelRate);
-  const surge = applySurgeFee(data.surgeFee, actualWeight, fuelRate, fuelCostRate);
+  const oc = applyOtherCharges(effectiveOtherCharges, fuelRate, currency);
+  const surge = applySurgeFee(data.surgeFee, actualWeight, fuelRate, fuelCostRate, currency);
 
   return {
     chargeableWeightKg: chargeableKg,
@@ -364,11 +394,14 @@ export function computeUpsFreight(
     otherChargesCostTotal: oc.costTotal,
     surgeFeeSellingAmount: surge.sellingAmount,
     surgeFeeCostAmount: surge.costAmount,
-    totalSellingPrice: baseSellingPrice + fuelSellAmt + oc.sellingTotal + surge.sellingAmount,
+    // TASK-B-302: 각 항목이 이미 개별 올림된 값이므로 합산한다. KRW는 정수+정수=정수로 그대로이며,
+    // USD는 IEEE float 연산으로 2자리 합이 드리프트(예: 100.01+18.51=118.52000000000001)할 수 있어
+    // 통화별 올림을 한 번 더 적용해 정확한 센트 단위로 정규화한다 (KRW 정수에는 영향 없음 — identity).
+    totalSellingPrice: ceilByCurrency(baseSellingPrice + fuelSellAmt + oc.sellingTotal + surge.sellingAmount, currency),
     totalCostPrice: baseCostPrice + fuelCostAmt + oc.costTotal + surge.costAmount,
-    currency: data.baseRate?.currency || data.weightTierRates?.[0]?.currency || data.freightMinimum?.currency || 'KRW',
+    currency,
     breakdown: buildBreakdown(
-      input, data, chargeableKg, volumetricKg, actualWeight, oc, oversizeApplied, baseRateId, baseSellingPrice, baseCostPrice, surge
+      input, data, chargeableKg, volumetricKg, actualWeight, oc, oversizeApplied, baseRateId, baseSellingPrice, baseCostPrice, surge, fuelSellAmt
     ),
   };
 }

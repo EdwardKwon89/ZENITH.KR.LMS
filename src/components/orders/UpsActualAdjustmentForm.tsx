@@ -268,6 +268,11 @@ export function UpsActualAdjustmentForm({
   const estimatedTotal = reconciliation?.estimated || 0;
   const variance = reconciliation?.variance ?? 0;
   const currency = reconciliation?.currency || 'USD';
+  // TASK-B-302 (Issue #1123): KRW는 올림된 정수값이므로 소수점 미표시, USD는 2자리(센트) 표시 유지
+  const fmtAmount = (n: number) =>
+    currency === 'KRW'
+      ? n.toLocaleString()
+      : n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
   return (
     <ZenCard className="p-6">
@@ -297,7 +302,7 @@ export function UpsActualAdjustmentForm({
         <ZenCard className="p-4 bg-gray-50 dark:bg-zinc-900">
           <div className="text-xs text-gray-500 dark:text-zinc-400">예상 청구액 (Estimated)</div>
           <div className="text-2xl font-bold text-gray-800 dark:text-gray-200 mt-1">
-            {estimatedTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {currency}
+            {fmtAmount(estimatedTotal)} {currency}
           </div>
           <p className="text-[10px] text-gray-400 dark:text-zinc-500 mt-1">최초 예상 운임 스냅샷 합산액</p>
         </ZenCard>
@@ -305,7 +310,7 @@ export function UpsActualAdjustmentForm({
         <ZenCard className="p-4 bg-gray-50 dark:bg-zinc-900">
           <div className="text-xs text-gray-500 dark:text-zinc-400">실제 청구액 (Actual)</div>
           <div className="text-2xl font-bold text-primary mt-1">
-            {actualTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {currency}
+            {fmtAmount(actualTotal)} {currency}
           </div>
           <p className="text-[10px] text-gray-400 dark:text-zinc-500 mt-1">예상 청구액 + 아래 추가 등록된 부가요금의 합산액</p>
           {reconciliation?.invoiceNo && (
@@ -332,7 +337,7 @@ export function UpsActualAdjustmentForm({
                 : 'text-gray-800 dark:text-gray-200'
           }`}>
             {variance > 0 ? '+' : ''}
-            {variance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {currency}
+            {fmtAmount(variance)} {currency}
           </div>
           <p className="text-[10px] text-gray-400 dark:text-zinc-500 mt-1">
             {variance > 0
@@ -366,7 +371,7 @@ export function UpsActualAdjustmentForm({
               <tr key={`est-${i}`} className="border-b bg-gray-50/50 dark:bg-zinc-900/50">
                 <td className="p-3"><ZenBadge className="bg-gray-200 text-gray-700 dark:bg-zinc-700 dark:text-zinc-300">예상</ZenBadge></td>
                 <td className="p-3 font-semibold">{getCostTypeLabel(item.costType)}</td>
-                <td className="p-3"><span className="font-mono text-right block">{item.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></td>
+                <td className="p-3"><span className="font-mono text-right block">{fmtAmount(item.amount)}</span></td>
                 <td className="p-3">{item.currency}</td>
                 <td className="p-3 text-gray-400 text-xs">—</td>
                 {isEditable && <td className="p-3"></td>}
@@ -414,7 +419,7 @@ export function UpsActualAdjustmentForm({
                     />
                   ) : (
                     <span className="font-mono text-right block">
-                      {row.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      {fmtAmount(row.amount)}
                     </span>
                   )}
                 </td>

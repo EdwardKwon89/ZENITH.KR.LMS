@@ -115,6 +115,35 @@
 | **TC-UPS-WH-01** | 창고 출고 — intl_ref_no 있음 | 정상 출고 (pkgsWithoutIntlRef=0) | `tests/unit/warehouse/outbound-ups.test.ts` |
 | **TC-UPS-WH-02** | 창고 출고 — intl_ref_no 없음 | pkgsWithoutIntlRef > 0 반환 | `tests/unit/warehouse/outbound-ups.test.ts` |
 | **TC-UPS-WH-03** | 창고 출고 — 상태 전이 | WAREHOUSED→RELEASED 전이 유지 | `tests/unit/warehouse/outbound-ups.test.ts` |
+| **TC-DEF-B065-01** | UPS 운임 카드 Zone 표시 | 스냅샷 중첩 경로(`platform.breakdown.zone`) 참조로 Zone 7 표시 + 미존재 시 `-`(하드코딩 `Zone 5` 폴백 회귀 방지, DEF-B-065) | `tests/unit/components/ups-order-breakdown-card.test.tsx` |
+| **TC-DEF-B065-02** | UPS 운임 카드 통화 3자리 쉼표 | 1,000 이상 금액 5개 항목(기본/유류/급증/기타/총액) `toLocaleString` 쉼표 표시(DEF-B-065) | `tests/unit/components/ups-order-breakdown-card.test.tsx` |
+| **TC-DEF-B066-01** | UPS 운임 카드 상품명 표시 | `platform.breakdown.product.product_name` 참조로 실제 상품명 표시 + 미존재 시 `-`(하드코딩 `UPS Express` 폴백 회귀 방지, DEF-B-066) | `tests/unit/components/ups-order-breakdown-card.test.tsx` |
+| **TC-B300-04-01** | UPS 운임 카드 청구중량(Billing Weight) 표시 | `platform.breakdown.billingWeightKg`(5)와 chargeable(4.8) 구분 표시 + 미존재 시 billable 폴백(TASK-B-300 ④) | `tests/unit/components/ups-order-breakdown-card.test.tsx` |
+| **TC-B300-02-01** | ups-detail 배송 기본 정보 카드 확장 | 화주/수하인 연락처·이메일·주소(detail 이어붙임) 표시, 값 없으면 항목 숨김(TASK-B-300 ②) | `tests/unit/orders/ups-detail-b300.test.tsx` |
+| **TC-B300-03-01** | ups-detail Settlement Preview 제거 | ups-detail 렌더 시 "Settlement Preview" 미출현 + 일반 오더 상세 화면에는 여전히 표시(회귀 방지, TASK-B-300 ③) | `tests/unit/orders/ups-detail-b300.test.tsx`, `tests/unit/orders/order-detail-settlement-b300.test.tsx` |
+| **TC-B301-01-01** | ups-detail 스테퍼 단계별 전이 시각 표시 | `order_status_history` 기반 각 도달 스테이지에 `toLocaleString('ko-KR')` 시각 표시 + 같은 상태 재방문 시 최신 시각 우선 + 미도달 단계 미표시(TASK-B-301 ①) | `tests/unit/orders/ups-detail-b301.test.tsx` |
+| **TC-B301-02-01** | ups-detail "목록보기" 버튼 | `router.back()`으로 진입 직전 목록 화면 복귀 + 기존 "일반 오더 상세 보기로 이동" Link 제거(TASK-B-301 ②) | `tests/unit/orders/ups-detail-b301.test.tsx` |
+| **TC-B301-03-01** | 오더 등록/수정 폼 UPS 필수표시 | UPS 모드에서 화주 연락처·수하인 국가/우편번호/시·군·구 라벨 `*` + 비UPS 미표시(조건부 정확성, TASK-B-301 ③) | `tests/unit/orders/order-registration-form-b301.test.tsx` |
+| **TC-B301-03-02** | AddressInput CN 시/도 필수표시 | `recipient_country_code='CN'`일 때만 시/도 라벨 `*` (DEF-B-044, TASK-B-301 ③) + AIR+CN 시 국가/우편번호/도시는 미표시 | `tests/unit/orders/order-registration-form-b301.test.tsx` |
+| **TC-B301-03-03** | AddressInput 새 prop 기본값 false 회귀 | `requiredCountry` 등 신규 prop 미전달 시 기존 소비처(대리점 화주 등록 등) 동작 불변(기본값 false) | `tests/unit/orders/order-registration-form-b301.test.tsx`, `tests/unit/orders/iss1104-addressinput-toggle.test.tsx` |
+| **TC-B304-01-01** | 스테퍼 단계별 시각 위치 — Step Indicator 바 아래 | 시각 span이 Dot/Line 바 다음에 렌더(DOM 순서 검증, TASK-B-304 ①) | `tests/unit/ups/ups-stepper-b304.test.tsx` |
+| **TC-B304-01-02** | 모든 시각 있는 스텝 indicator 바 아래 확인 | IN_TRANSIT 등 시각 보유 스텝 전부 위치 이동 확인 | `tests/unit/ups/ups-stepper-b304.test.tsx` |
+| **TC-B304-02-01** | CANCELED 배너 취소 일시 표시 | `order_status_history`에서 최근 CANCELED 전이 시각을 rose 계열로 표시 + 7단계 스테퍼 숨김 유지(TASK-B-304 ②) | `tests/unit/ups/ups-stepper-b304.test.tsx` |
+| **TC-B304-02-02** | HELD 배너 보류 일시 표시 | 최근 HELD 전이 시각을 amber 계열로 표시 + 7단계 스테퍼 유지 | `tests/unit/ups/ups-stepper-b304.test.tsx` |
+| **TC-B304-02-03** | 데이터 누락·Invalid Date 가드 | CANCELED/HELD 이력 없거나 Invalid Date면 시각 미표시(기존 TASK-B-301 가드 패턴) | `tests/unit/ups/ups-stepper-b304.test.tsx` |
+| **TC-B304-02-04** | 재전이 최근값 우선 | 같은 상태 재전이 이력 여러 건 시 `reverse().find()`로 최신만 표시 | `tests/unit/ups/ups-stepper-b304.test.tsx` |
+| **TC-B303-01** | 오더 이력 화이트리스트 필드 추출 | `ORDER_EDIT_LOG_CORE_FIELDS` 32필드 화이트리스트로 스냅샷 추출, estimated_cost/packages/origin_port_id/dest_port_id 명시 제외 + 빈 필드 null 정규화(Issue #1125, TASK-B-303) | `tests/unit/orders/order-edit-log-b303.test.tsx` |
+| **TC-B303-02** | 이력 스냅샷 상수 무결성 | `ORDER_EDIT_LOG_CORE_FIELDS`와 `ORDER_EDIT_LOG_FIELD_LABELS` 라벨 키 1:1 일치(Issue #1125) | `tests/unit/orders/order-edit-log-b303.test.tsx` |
+| **TC-B303-03** | 이력 패널 빈 이력 미렌더 | UPS 오더 상세 이력 0건 시 패널 자체 미출력(Issue #1125) | `tests/unit/orders/order-edit-log-b303.test.tsx` |
+| **TC-B303-04** | CREATE 이력 등록값 전체 표시 | action=CREATE 시 new_data 화이트리스트 값 전체 표시 + 편집자/시간 표시(Issue #1125) | `tests/unit/orders/order-edit-log-b303.test.tsx` |
+| **TC-B303-05** | UPDATE 이력 변경 필드 diff 표시 | action=UPDATE 시 변경 필드만 `old(취소선)→new(굵게)` + 변경 없는 필드 미표시(Issue #1125) | `tests/unit/orders/order-edit-log-b303.test.tsx` |
+| **TC-B303-06** | 이력 패널 최신순 정렬 | edited_at desc로 최신 이력 먼저 표시(Issue #1125) | `tests/unit/orders/order-edit-log-b303.test.tsx` |
+| **TC-B303-07** | createOrder CREATE 이력 기록 | 신규 오더 등록 시 zen_order_edit_log에 action=CREATE + order_status_at_edit=REGISTERED + old_data=null 기록(Issue #1125) | `tests/unit/orders/order-edit-log-b303.test.tsx` |
+| **TC-B303-08** | updateOrder UPDATE 기록 정확성 | 수정 시 old/new 스냅샷에 정확한 전/후 값 + estimated_cost/packages 미포함(화이트리스트 제외, 실 DB) | `tests/integration/iss1125-order-edit-log.test.ts` |
+| **TC-B303-09** | 무변경 재제출 로그 미증가 | hasChanges 가드 — 화이트리스트 필드 변화 없으면 UPDATE 기록 안 함(실 DB) | `tests/integration/iss1125-order-edit-log.test.ts` |
+| **TC-B303-10** | packages만 변경 시 로그 영향 없음 | 패키지 변경은 화이트리스트 밖이라 UPDATE 미기록(실 DB) | `tests/integration/iss1125-order-edit-log.test.ts` |
+| **TC-B303-11** | WAREHOUSED+UPS 부분수정 UPDATE 기록 | 실측(measured_at) 패키지 부분수정 시 기존 감사 로직 유지 + action=UPDATE 기록(실 DB) | `tests/integration/iss1125-order-edit-log.test.ts` |
+| **TC-B303-12** | createOrder 실DB CREATE 기록 | 실제 RPC 기반 신규 오더 생성 시 edit_log에 CREATE + new_data 스냅샷 + REGISTERED 기록(실 DB) | `tests/integration/iss1125-order-edit-log.test.ts` |
 
 ### 10. UPS 일마감 (Phase 7 SPR-05 Daily Close)
 | ID | 테스트 항목 | 목적 | 파일 경로 |
@@ -518,6 +547,13 @@
 | **TC-UPS-ENGINE-07-03** | 급증 수수료 totalSellingPrice/totalCostPrice 합산 | 총액 반영 확인 | `tests/unit/ups/pricing-engine.test.ts` |
 | **TC-UPS-ENGINE-07-04** | Shipper 단계 급증 수수료 pass-through(할인 미적용) | Issue #491 Shipper 공식 확장 확인 | `tests/unit/ups/pricing-engine.test.ts` |
 | **TC-UPS-ENGINE-07-05** | Shipper 단계 급증 수수료 미지정 시 기존 동작과 동일 | 하위 호환 확인 | `tests/unit/ups/pricing-engine.test.ts` |
+| **TC-CEIL-01** | `ceilByCurrency` 통화별 올림 단위(KRW 정수/USD 센트/원값 유지) | TASK-B-302 올림 유틸 단위 정확성 + float drift(18.51*100) 정규화 확인 | `tests/unit/ups/task-b302-freight-ceil.test.ts` |
+| **TC-CEIL-02** | `computeUpsFreight` 라인 항목 개별 올림 후 합계 정합성 (ZEN-2026-000073 재현: base 355100, fuel 46.75%) | 기본운임+유류할증+급증+기타 정수 합 = totalSellingPrice 일치, 사용자 검산 가능성 확인 | `tests/unit/ups/task-b302-freight-ceil.test.ts` |
+| **TC-CEIL-03** | `buildBreakdown` 유류할증 중복 재계산 제거 — result/breakdown 정합성 | `fuelSellAmt` 파라미터 재사용으로 표시값·합계값 divergence 버그 방지(되돌리기 시 TC-CEIL-03r FAIL로 검증) | `tests/unit/ups/task-b302-freight-ceil.test.ts` |
+| **TC-CEIL-04** | 원가(totalCostPrice 등) 올림 미적용 | 범위 밖 항목 회귀 방지 — 소수 원가 비율 케이스 확인 | `tests/unit/ups/task-b302-freight-ceil.test.ts` |
+| **TC-CEIL-05** | USD 오더 센트 단위 올림 | KRW 전용 치우침 방지 — 통화 분기 정확성 확인 | `tests/unit/ups/task-b302-freight-ceil.test.ts` |
+| **TC-CEIL-06** | `computeAgencyFreight` 통화별 올림(KRW 정수/USD 센트) | 할인율 적용 결과 올림 정확성 확인 | `tests/unit/ups/task-b302-freight-ceil.test.ts` |
+| **TC-CEIL-07** | `computeShipperFreight` 통화별 올림(KRW 정수/USD 센트) | 할인율 적용 결과 올림 정확성 확인 | `tests/unit/ups/task-b302-freight-ceil.test.ts` |
 | **TC-ISS543-01** | UPS 서비스 티어 선택 유지 + product_code 문자열 저장 | 선택 유지 + UUID→코드 분리 검증 | `tests/unit/orders/ups-product-code-select.test.tsx` |
 
 ### 39. Phase 7.1 estimateUpsFreight 통합 Action (IMP-145)

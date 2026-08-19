@@ -1831,3 +1831,24 @@ UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류
 - **관련 파일**: `src/components/orders/OrderRegistrationForm.tsx`(화주명 토글 초기화 `useEffect`, TASK-B-295)
 - **예상 공수**: 0.2 MD (재현 확인 + 필요 시 수정·테스트 1건 추가)
 - **우선순위**: Low — 코스메틱 UI 이슈로 데이터 무결성에 영향 없음, 개인 화주 사용 빈도에 따라 우선순위 재검토 가능
+
+## [IMP-166] james 계정 복구 스크립트가 zen_sequences 카운터 미동기화 → 신규 오더 order_no 충돌 재발
+
+- **발견 경위**: 2026-08-17, PR#1155 검토 과정의 `supabase db reset`으로 로컬 DB가 초기화된 후 `scratch/restore-james-zen007-full.ts`로 james@sntl.co.kr + ZEN-2026-000007 오더를 복구. 이후 JSJung이 `/orders/new`에서 신규 오더 등록 시 `duplicate key value violates unique constraint "zen_orders_order_no_key"` 오류 보고. 원인: 복구 스크립트가 `zen_orders.order_no = 'ZEN-2026-000007'`을 직접 INSERT하지만, 채번 테이블 `zen_sequences`(prefix='ZEN', year='2026')의 `last_value`는 seed 값(6)에 머물러 있어, 다음 `get_next_order_sequence()` 호출 시 6→7로 증가하며 동일한 'ZEN-2026-000007'을 재발급 → 충돌.
+- **현재 상태**: 즉시 조치 완료 — `zen_sequences` 테이블의 ZEN/2026 `last_value`를 7로 수동 보정. `restore-james-zen007-full.ts`에도 7단계(시퀀스 동기화: 복원한 order_no의 순번 이상으로 `zen_sequences.last_value`를 upsert)를 추가해 향후 이 스크립트를 재실행해도 동일 문제가 재발하지 않도록 수정함.
+- **임시 조치**: 스크립트 자체 수정으로 근본 해결(재현 시 별도 수동 조치 불필요).
+- **목표 구현**: (완료) — 스크립트가 이제 자동으로 시퀀스를 동기화하므로 추가 구현 불필요. 다만 이런 유형의 "특정 order_no를 직접 INSERT하는" 복구/시드 스크립트가 이 프로젝트에 더 있다면(예: `scripts/seed-local.ts`) 동일 패턴(시퀀스 카운터 동기화 누락)이 있는지 별도 점검 권장.
+- **관련 파일**: `scratch/restore-james-zen007-full.ts`, `zen_sequences` 테이블, `public.get_next_order_sequence()`
+- **예상 공수**: 완료(추가 공수 없음) — `scripts/seed-local.ts` 등 유사 스크립트 점검만 필요 시 0.1 MD
+- **우선순위**: Low — 로컬 개발 편의용 복구 스크립트 한정 문제로 프로덕션/CI에는 영향 없음(R-08-2 참고: CI는 매번 fresh reset이라 이 시나리오 자체가 발생하지 않음)
+
+## [IMP-167] `zen_exchange_rates` 실환율 시드 데이터 부재 — 비-USD/KRW 통화 변환 시 오적용 위험
+
+- **발견 경위**: TASK-B-317 4단계(PR#1163, 청구확정 팝업) 5차 검토 중 — 기본운임 통화 선택(KRW/USD/HKD)을 검증하기 위해 `db reset` 후 `zen_exchange_rates` 테이블을 직접 조회한 결과 **0건**(어떤 통화쌍도 시드되어 있지 않음)을 확인. `src/lib/finance/exchange-rate.ts`의 `getExchangeRate(base, quote, date, supabase)`는 이 테이블에서 조회 실패 시 요청한 `base`/`quote`와 무관하게 항상 `zen_system_params.EXCHANGE_RATE_USD_KRW`(로컬 값 1350) 파라미터로 폴백함을 소스 직접 확인.
+- **영향**: HKD 등 USD가 아닌 통화를 선택해 금액을 입력해도, 실제로는 USD/KRW 환율(1350)이 그대로 적용됨 — HKD 실환율(USD 대비 약 1/7~8 수준, 대략 170~180 KRW/HKD)과 비교하면 **약 7~8배 과다 환산**되는 결과가 나올 수 있음. 이번에 새로 발견됐지만 TASK-B-317 이전부터 있던 `recordUpsActualCost`(Issue #1009, `ups-actual-cost.ts`)의 기존 HKD 환율 조회도 동일하게 영향받고 있었을 것으로 추정 — 로컬 개발 환경 한정 문제인지, 실운영(프로덕션) 환경에도 `zen_exchange_rates` 시드/동기화가 누락돼 있는지는 별도 확인 필요(`/api/cron/exchange-rate-sync`가 존재하는 것으로 보아 운영에서는 주기적 동기화가 되고 있을 가능성이 높으나 미검증).
+- **현재 상태**: TASK-B-317 범위 밖으로 판단해 PR#1163은 반려하지 않고 그대로 승인·머지(Mike의 구현 로직 자체는 정확 — `getExchangeRate` 호출 인자·의미는 올바름, 문제는 순수 데이터 부재).
+- **임시 조치**: 없음 — 로컬 개발/테스트 시 비-KRW 통화 선택 기능을 사용할 때는 이 한계를 인지하고 사용.
+- **목표 구현**: (1) 프로덕션 `zen_exchange_rates`에 HKD/USD 등 실제 사용 통화의 최신 환율이 정상 동기화되고 있는지 확인(`/api/cron/exchange-rate-sync` 로그 점검), (2) 로컬 개발 환경에서도 최소한의 대표 통화(USD, HKD 등) 환율을 `seed_data.sql` 등에 포함해 로컬에서도 정확한 값으로 검증 가능하게 함, (3) `getExchangeRate()`의 폴백 로직 자체를 "항상 USD_KRW로 폴백"이 아니라 "요청 통화쌍에 해당하는 파라미터가 없으면 명확히 에러/경고를 남기거나, 최소한 통화쌍별 폴백 파라미터를 별도로 두는" 방식으로 개선 검토.
+- **관련 파일**: `src/lib/finance/exchange-rate.ts`(`getExchangeRate`), `supabase/seed_data.sql`(또는 관련 시드 파일), `src/app/actions/finance/ups-actual-cost.ts`(`recordUpsActualCost`, `recordActualCostAndFinalize`), `src/app/api/cron/exchange-rate-sync`
+- **예상 공수**: 0.3~0.5 MD(운영 환경 점검 0.1MD + 로컬 시드 보완 0.1MD + 폴백 로직 개선 검토 0.1~0.3MD)
+- **우선순위**: Medium — 로컬 개발 정확성 문제이자, 운영 환경에서도 동일 현상이 있다면 실제 금액 계산 오류로 이어질 수 있어 운영 환경 점검이 선행되어야 함

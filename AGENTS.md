@@ -11,7 +11,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 # AGENTS.md — 에이전트 업무 규정
 
-> **문서번호:** Gov-03 | **버전:** v3.2 | **작성일:** 2026-06-24 (최종 개정: 2026-07-22)
+> **문서번호:** Gov-03 | **버전:** v3.3 | **작성일:** 2026-06-24 (최종 개정: 2026-08-14)
 
 이 문서는 ZENITH_LMS 개발에 참여하는 **모든 AI 에이전트**의 업무 규정을 정의합니다.
 세션 시작 전 아래 페르소나 식별 블록을 확인하여 자신의 페르소나를 파악하세요.
@@ -64,7 +64,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 1. **GOV_COMMON.md Read**: 공통 규칙 숙지 (필수)
 2. **PATH 설정**: `export PATH=$PATH:/opt/homebrew/bin`
 3. **페르소나 식별**: 위 [페르소나 자동 식별](#-페르소나-자동-식별) 블록 기준 (R-16)
-4. **활성 태스크 확인**: `.agent/ACTIVE_TASK.md` → 자신 담당 미완료 태스크(⬜·📝·🔄) 파악 (R-16)
+4. **활성 태스크 확인**: `gh issue list --assignee <본인>` → 자신 담당 미완료 이슈(`status:open`·`status:draft`·`status:in-progress`) 파악 (R-16, R-17 v3.0)
 5. **역할 명세 확인**: 본 문서의 역할 정의 및 파일 소유권 Zone 숙지
 
 ---
@@ -83,7 +83,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 | IMP-002 | 운임 요율 페이지 역할별 UI 분기 | Medium |
 | IMP-003 | Next.js middleware.ts → proxy.ts 마이그레이션 | Low |
 
-> 각 IMP 착수 전 반드시 Aiden(ACTIVE_TASK.md 경유)에게 착수 승인을 득해야 합니다.
+> 각 IMP 착수 전 반드시 Aiden(GitHub Issue 발령 경유)에게 착수 승인을 득해야 합니다.
 
 #### 영역 2 | 단위 테스트 커버리지 확장
 
@@ -128,7 +128,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 ### Ring (기타 모델) — 보조
 
 - 특정 태스크가 할당된 경우에만 작업 수행
-- 별도 역할 정의 없음 — ACTIVE_TASK.md 기반으로 동작
+- 별도 역할 정의 없음 — GitHub Issue 배정 기반으로 동작
 
 ---
 
@@ -140,18 +140,18 @@ This version has breaking changes — APIs, conventions, and file structure may 
 | **테스트 케이스 (신규)** | `__tests__/` (신규 케이스) | 확장 가능 | 소유 | 소유 | 소유 (병행) | — |
 | **IMP 구현** | `src/` | 소유 | — | — | 소유 (병행) | — |
 | **DB 마이그레이션** | `supabase/migrations/` | 소유 | — | — | 소유 (병행) | — |
-| **공유 (협의 필요)** | `src/` (IMP 외), `supabase/migrations/` (공통) | ACTIVE_TASK.md 기반 | ACTIVE_TASK.md 기반 | ACTIVE_TASK.md 기반 | ACTIVE_TASK.md 기반 | — |
+| **공유 (협의 필요)** | `src/` (IMP 외), `supabase/migrations/` (공통) | GitHub Issue 배정 기반 | GitHub Issue 배정 기반 | GitHub Issue 배정 기반 | GitHub Issue 배정 기반 | — |
 | **읽기 전용 (예외 있음)** | `.agent/`, `CLAUDE.md`, `docs/00_GUIDE/101~104_*.md` | 읽기 전용 | 읽기 전용 | 읽기 전용 | 읽기 전용 | 읽기 전용 |
 | **쓰기 가능 (공통)** | `AGENTS.md` | 쓰기 가능 | 쓰기 가능 | 쓰기 가능 | 쓰기 가능 | — |
 
-> `.agent/tasks/`·`.agent/ACTIVE_TASK.md`는 R-17 완료 보고 목적에 한해 모든 Agent 쓰기 허용.
+> `.agent/tasks/`는 R-17 완료 보고 목적에 한해 모든 Agent 쓰기 허용. `.agent/ACTIVE_TASK.md`는 GitHub Action 전용 자동 미러이므로 **어떤 Agent도 직접 쓰기 금지**(2026-08-14, R-17 v3.0).
 
 ---
 
 ## 🎯 중복 업무 우선순위
 
 동일 업무 유형이 중복될 경우 우선순위: **D_Kai > B_Kai > Noah**  
-단, Aiden이 TASK 발령 시 명시적으로 지정한 경우 지정 Agent 우선. (Baker는 Team B 소속으로 Team A ACTIVE_TASK.md 풀과 무관 — 이 우선순위 규칙 대상 아님)
+단, Aiden이 TASK 발령 시 명시적으로 지정한 경우 지정 Agent 우선. (Baker는 Team B 소속으로 Team A GitHub Issue 풀과 무관 — 이 우선순위 규칙 대상 아님)
 
 ---
 
@@ -159,12 +159,13 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 | 채널 | 용도 |
 | :--- | :--- |
-| `.agent/ACTIVE_TASK.md` | 태스크 할당 확인 및 상태 반영 (R-16·R-17) |
+| `gh issue list` / `gh issue view` | 태스크 할당·상태 확인 (R-16·R-17, 진실 공급원) |
+| `.agent/ACTIVE_TASK.md` | 태스크 현황 열람용 자동 미러 (쓰기 금지) |
 | `.agent/tasks/TASK-NNN_*.md` | 태스크 상세 파일 (작업 결과·발견 이슈 기재) |
 
-> **완료 보고 절차**: GOV_COMMON.md R-17 절차 준수 (코드 커밋 → task file 🔔 → 문서 커밋 → PR 생성)
+> **완료 보고 절차**: GOV_COMMON.md R-17 절차 준수 (코드 커밋 → task file 작성 → GitHub Issue 라벨 `status:review` 갱신 → 문서 커밋 → PR 생성)
 
-> ⚠️ **폐기된 파일** (사용 금지): `TASK_BOARD.md` · `HANDOFF_BOX.md` · `ACTIVE_AGENT.md`
+> ⚠️ **폐기된 파일** (사용 금지): `TASK_BOARD.md` · `HANDOFF_BOX.md` · `ACTIVE_AGENT.md` · `scratch/IMP_PROGRESS.md`
 
 ---
 
@@ -230,5 +231,6 @@ git commit -m "[D_Kai] feat: TASK-166 AGENTS.md 페르소나 중립 구조 개�
 | v3.0 | 2026-06-24 | D_Kai (DeepSeek) | 페르소나 중립 구조 개편 — 제목 공통화, 페르소나 자동 식별 블록 추가, 섹션 Noah 전용 표현 제거, 역할 정의 4분할, 파일 소유권 Zone 페르소나별 정리, 커밋 규약 공통화, 중복 업무 우선순위 규칙 명시 (Issue #93 · #88) |
 | v3.1 | 2026-07-21 | Aiden (Claude, ZEN_CEO) | **B_Kai 역할 정의 복원** — v3.0 이후 Team B의 모델명 충돌 정리 과정(`3cc9ddcd`)에서 B_Kai(Big Pickle) 섹션 전체가 Baker로 치환되며 유실, 이후 스텁 복구(`99d39ad5`) 시 "Deep Auditor (비활성화)"로 임의 라벨링된 것을 발견. TASK-166 원안("Test Engineer") 기준으로 B_Kai 역할 정의·파일 소유권 Zone·우선순위 규칙·커밋 태그 전면 복원. Baker 모델이 이후 Kimi/GLM-5.2로 재배정되어 Big Pickle 충돌 자체는 해소된 상태. (Issue #637 B_Kai 문의로 발견) |
 | v3.2 | 2026-07-22 | Aiden (Claude, ZEN_CEO) | **B_Kai/Baker "필수 검증 항목" 신설** — 역할·조직유형 한정 화면은 실제 로그인+`page.goto()` 네비게이션까지 검증 의무화. TASK-192(SUB_ADMIN 역할 도입) 당시 단위 테스트(서버 액션 mock 호출)만으로 검증하고 미들웨어(`proxy.ts`) 라우팅은 미검증하여, `rbac.ts`의 `STATIC_PERMISSIONS`와 `proxy.ts` 화이트리스트가 어긋난 채 배포된 사례(Issue #688) 발견 후 재발 방지 |
+| v3.3 | 2026-08-14 | Aiden (Claude, ZEN_CEO) | GOV_COMMON.md R-17 v3.0(GitHub Issue/PR 단일화) 반영 — 세션 초기화·완료 보고 절차·파일 소유권 Zone·협업 채널 표에서 `.agent/ACTIVE_TASK.md`를 활성 조회 대상으로 쓰던 6곳을 `gh issue list`/GitHub Issue 배정 기준으로 정정. `.agent/ACTIVE_TASK.md`는 이제 어떤 Agent도 쓰기 금지(자동 미러 전용)로 명시. 폐기 파일 목록에 `scratch/IMP_PROGRESS.md` 추가. |
 
 <!-- GitNexus 규정: GOV_COMMON.md 단일 출처 (@GOV_COMMON.md 인라인 로드로 자동 적용) -->

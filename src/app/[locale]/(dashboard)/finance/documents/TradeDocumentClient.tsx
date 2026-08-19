@@ -18,6 +18,7 @@ import { getOrderDocumentData } from "@/app/actions/finance";
 import { ZenButton, ZenInput, ZenCard } from "@/components/ui/ZenUI";
 import { toast } from "sonner";
 import dynamic from "next/dynamic";
+import { resolveConsigneeStreet, resolveShipperStreet, resolveRegionName, resolveCountryName } from "@/lib/ups/label-mapping"; // TASK-B-305, TASK-B-307
 
 // Dynamic import for PDF components to avoid SSR issues
 const CommercialInvoicePDF = dynamic(() => import("@/components/documents/CommercialInvoicePDF"), { ssr: false });
@@ -52,8 +53,8 @@ export default function TradeDocumentClient({ locale }: { locale: string }) {
     if (!orderData) return {
       invoice_no: "",
       date: "",
-      shipper: { name: "", address: "" },
-      consignee: { name: "", address: "" },
+      shipper: { name: "", address: "", city: "", state: "", zipcode: "", country: "" },
+      consignee: { name: "", address: "", city: "", state: "", zipcode: "", country: "" },
       order_no: "",
       items: [],
       total_amount: 0,
@@ -64,11 +65,19 @@ export default function TradeDocumentClient({ locale }: { locale: string }) {
       date: new Date().toISOString().split('T')[0],
       shipper: {
         name: orderData.shipper_name || orderData.shipper?.name || "ZENITH LOGISTICS",
-        address: orderData.shipper?.address || "Seoul, Korea"
+        address: resolveShipperStreet(orderData, orderData.shipper), // TASK-B-305: 영문 우선 표출
+        city: orderData.shipper_city || "",
+        state: resolveRegionName(orderData.shipper_state_province || "", orderData.shipper_country_code || ""), // TASK-B-307: 코드→이름 변환
+        zipcode: orderData.shipper_zipcode || "",
+        country: resolveCountryName(orderData.shipper_country_code || ""), // TASK-B-307: 코드→이름 변환
       },
       consignee: {
         name: orderData.recipient_name || "VALUED CUSTOMER",
-        address: orderData.recipient_address || "TBD"
+        address: resolveConsigneeStreet(orderData), // TASK-B-305: 영문 우선 표출
+        city: orderData.recipient_city || "",
+        state: resolveRegionName(orderData.recipient_state_province || "", orderData.recipient_country_code || ""), // TASK-B-307: 코드→이름 변환
+        zipcode: orderData.recipient_zipcode || "",
+        country: resolveCountryName(orderData.recipient_country_code || ""), // TASK-B-307: 코드→이름 변환
       },
       order_no: orderData.order_no,
       items: orderData.packages.flatMap((pkg: any) => 
@@ -91,8 +100,8 @@ export default function TradeDocumentClient({ locale }: { locale: string }) {
     if (!orderData) return {
       pl_no: "",
       date: "",
-      shipper: { name: "", address: "" },
-      consignee: { name: "", address: "" },
+      shipper: { name: "", address: "", city: "", state: "", zipcode: "", country: "" },
+      consignee: { name: "", address: "", city: "", state: "", zipcode: "", country: "" },
       order_no: "",
       items: [],
       total_pkgs: 0,
@@ -104,11 +113,19 @@ export default function TradeDocumentClient({ locale }: { locale: string }) {
       date: new Date().toISOString().split('T')[0],
       shipper: {
         name: orderData.shipper_name || orderData.shipper?.name || "ZENITH LOGISTICS",
-        address: orderData.shipper?.address || "Seoul, Korea"
+        address: resolveShipperStreet(orderData, orderData.shipper), // TASK-B-305: 영문 우선 표출
+        city: orderData.shipper_city || "",
+        state: resolveRegionName(orderData.shipper_state_province || "", orderData.shipper_country_code || ""), // TASK-B-307: 코드→이름 변환
+        zipcode: orderData.shipper_zipcode || "",
+        country: resolveCountryName(orderData.shipper_country_code || ""), // TASK-B-307: 코드→이름 변환
       },
       consignee: {
         name: orderData.recipient_name || "VALUED CUSTOMER",
-        address: orderData.recipient_address || "TBD"
+        address: resolveConsigneeStreet(orderData), // TASK-B-305: 영문 우선 표출
+        city: orderData.recipient_city || "",
+        state: resolveRegionName(orderData.recipient_state_province || "", orderData.recipient_country_code || ""), // TASK-B-307: 코드→이름 변환
+        zipcode: orderData.recipient_zipcode || "",
+        country: resolveCountryName(orderData.recipient_country_code || ""), // TASK-B-307: 코드→이름 변환
       },
       order_no: orderData.order_no,
       items: orderData.packages.map((pkg: any) => ({
