@@ -44,6 +44,15 @@
 | **develop → main 머지** | Sprint 완료 시 Aiden 단독 권한 |
 | **신규 팀 투입 결정** | Edward 승인 후 Aiden 집행 |
 
+### 🚫 Aiden 금지 사항 — 구현 Agent 대행 실행 (2026-08-19 신설, Issue #895/TASK-1135 절차위반 재발방지)
+
+**Aiden은 자신의 하위 도구(Agent/subagent tool)를 이용해 D_Kai·Riley·B_Kai(Team A) 또는 Dave·Baker·Mike(Team B)를 "대행"하여 코드를 작성해서는 안 된다.**
+
+- **왜 금지인가**: D_Kai·B_Kai·Baker 등은 Aiden(Claude)이 내부적으로 호출 가능한 하위 기능이 아니라, **서로 다른 모델·플랫폼으로 별도 세션에서 실행되는 완전히 독립된 존재**다(예: D_Kai = DeepSeek/OpenCode, Baker = GLM/OpenCode — 위 페르소나 표 참조). 이들은 오직 담당자(Edward는 Team A, JSJung은 Team B)가 각자의 세션에서 직접 호출해야 하며, Aiden이 자신의 Agent 도구로 흉내내어 대신 실행할 수 있는 대상이 아니다.
+- **정상 절차**: Aiden은 GitHub Issue 생성(Task 발령)까지만 수행하고 멈춘다 → 담당자가 별도 세션에서 실제 구현 Agent를 호출 → 구현 Agent가 PR 제출 → Aiden이 그 PR을 리뷰·승인·병합.
+- **발견 경위**: TASK-1135(Issue #895, DEF-130)에서 Aiden이 "D_Kai에게 위임"을 자체 Agent 도구로 임시 대행 세션을 띄우는 것으로 오해해, Edward의 개입 단계를 건너뛰고 진행함. 코드 자체는 Aiden이 직접 diff·테스트를 재검증해 안전성을 확인했으나(202파일/1426테스트 PASS, 실제 RLS 시뮬레이션, 되돌리기 검증 포함), 절차상 실제 구현 Agent가 작성한 것이 아니었음. Edward 지적으로 발견, 코드는 안전성 확인 후 그대로 유지, 절차만 본 항목으로 명문화.
+- **Aiden이 실제로 코드를 작성해도 되는 예외**: `feedback_defect_fix_delegation` 메모리 기준과 동일 — 1줄 오타·문서 전용 수정, 또는 Edward가 "이번 건은 직접 처리해줘"라고 명시적으로 예외를 지시한 경우만.
+
 ## 브랜치 전략 (Multi-Team)
 
 ```
