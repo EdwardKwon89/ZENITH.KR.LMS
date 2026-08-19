@@ -45,5 +45,6 @@ ZEN-2026-000011(WAREHOUSED, US행) UPS 발송 시도 시 9회 연속 동일 오�
   07:50:46 removeorder → success:1 (Edward가 테스트 목적으로 의도적 취소 — 별도 결함 아님)
   ```
 - **결론**: 인증키 미등록이 원인이었다는 진단이 실측으로 확정됨. §1(인증키 등록)·§3(정상 동작 재확인) DoD 완료.
-- **남은 DoD**(Team B/JSJung 후속 구현): §2 `assertShxkConfig()` 호출부 연결, §4 숫자/문자열 타입 재검토, §6 `LIVE_REGRESSION_TEST_MAP.md` 갱신.
+- **§4(숫자/문자열 타입 가설) 기각**: 이번 성공 호출은 `order_weight`/`order_pieces`/`cargovolume[].involume_*`를 여전히 숫자(JSON number)로 보낸 상태에서 인증키만 채워 넣고 재시도한 것 — 코드 수정 없이 성공했으므로, SHXK가 이 필드들을 숫자로 받아도 문제없다는 것이 실측으로 확인됨. 스펙 문서의 "string" 표기는 자릿수/소수점 형식 설명일 뿐, JSON 문자열 강제가 아니었던 것으로 판단. **재검토 불필요 — 종결.**
+- **남은 DoD**(Team B/JSJung 후속 구현): §2 `assertShxkConfig()` 호출부 연결(방어 코드 활성화, 재발 방지용), §6 `LIVE_REGRESSION_TEST_MAP.md` 갱신.
 - **별도 확인 필요**: ZEN-2026-000011(james@sntl.co.kr 실제 화물)은 테스트 후 의도적으로 취소된 상태라 **아직 실발송 미완료** — 실제 재발송 여부는 Edward 확인 대기.
