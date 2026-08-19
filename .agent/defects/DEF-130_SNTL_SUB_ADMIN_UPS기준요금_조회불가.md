@@ -51,4 +51,14 @@ TASK-192(Issue #618)에서 `UpsBaseRateMatrix` 컴포넌트를 "SUB_ADMIN 모드
 ## 관련 Task/Issue
 
 - 원 기능: TASK-192(Issue #618) — SNTL 원가 Matrix 편집 기능
-- 본 결함: 미배정, Team A 대상 신규 Task 발령 필요
+- 본 결함: TASK-1135(Issue #895)로 Team A(D_Kai) 배정·처리 완료
+
+## 조치 결과 (2026-08-19, TASK-1135)
+
+- **채택안**: A안(Aiden 설계 결정) — `zen_ups_base_rates`에 SUB_ADMIN 전용 SELECT 정책 추가, 수정 권한은 부여하지 않음.
+- **마이그레이션**: `supabase/migrations/20260819130000_def130_sub_admin_base_rates_select.sql`
+  - `is_managing_agency`와 동일 패턴의 `has_managed_sub_agency(uid)` 헬퍼(SECURITY DEFINER) 신설 — SUB_ADMIN이 ACTIVE 상태이고 하나 이상의 Sub-Agency(`zen_organizations.parent_id`)를 관리 중인지 확인.
+  - `ups_base_rates_sub_admin_select` SELECT 정책: `is_active = TRUE AND has_managed_sub_agency(auth.uid())`.
+- **스코프 설계 노트(중요)**: `zen_ups_base_rates`는 상품×구간×중량 단위의 플랫폼 공용 판매가 카탈로그로, `zen_agency_pricing_policies`(agency_org_id 보유)와 달리 특정 조직에 귀속되는 컬럼이 없다. 따라서 "그 특정 하위 대리점 소속 요율만" 식의 행 단위 스코프는 테이블 구조상 적용 불가능(AGENCY 역할의 기존 `ups_base_rates_agency_select`도 동일하게 전역 활성 요율 전체를 봄). 스코프는 "이 SUB_ADMIN이 실제로 하위 대리점을 관리하는 상태인가"(고아 SUB_ADMIN 방지) 수준에서만 적용했으며, 서로 다른 Master Agency 소속 SUB_ADMIN들도 동일한 공용 카탈로그를 보게 되는 것은 의도된 동작으로 확인·기록함(회귀 테스트 TC-DEF130-04).
+- **회귀 테스트**: `tests/unit/db/def130-ups-base-rates-sub-admin-select-rls.test.ts` (TC-DEF130-01~06) — SUB_ADMIN 조회 허용/비활성 미노출/고아 SUB_ADMIN 차단/타 Master Agency 조회 확인/수정 권한 미부여/되돌리기 검증.
+- **상세**: `.agent/tasks/TASK-1135_260819_Issue895_DefB130SubAdminBaseRatesRls.md`

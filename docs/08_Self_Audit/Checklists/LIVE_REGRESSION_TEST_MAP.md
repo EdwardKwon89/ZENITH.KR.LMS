@@ -114,6 +114,12 @@
 | **TC-UPS-ADMIN-09** | 20kg 초과 티어 요율 삭제 | `deleteUpsWeightTierRate` (비활성화) 정상 동작 | `tests/unit/ups/rates-admin-actions.test.ts` |
 | **TC-UPS-ADMIN-10** | Freight 최소운임 등록/수정 | `upsertUpsFreightMinimum` 정상 동작 | `tests/unit/ups/rates-admin-actions.test.ts` |
 | **TC-UPS-ADMIN-11** | Freight 최소운임 삭제 | `deleteUpsFreightMinimum` (비활성화) 정상 동작 | `tests/unit/ups/rates-admin-actions.test.ts` |
+| **TC-DEF130-01** | SUB_ADMIN 기준요금 조회 허용 | 하위 Sub-Agency를 관리 중인 SUB_ADMIN이 활성 `zen_ups_base_rates`를 SELECT 가능(DEF-130, Issue #895) | `tests/unit/db/def130-ups-base-rates-sub-admin-select-rls.test.ts` |
+| **TC-DEF130-02** | 비활성 요율 미노출 | `is_active=false` 요율은 SUB_ADMIN에게도 미노출 | `tests/unit/db/def130-ups-base-rates-sub-admin-select-rls.test.ts` |
+| **TC-DEF130-03** | 고아 SUB_ADMIN 조회 차단 | 하위 Sub-Agency가 없는 SUB_ADMIN은 조회 0행(`has_managed_sub_agency` 스코프) | `tests/unit/db/def130-ups-base-rates-sub-admin-select-rls.test.ts` |
+| **TC-DEF130-04** | 타 Master Agency SUB_ADMIN 조회 확인 | base_rates는 조직 귀속 컬럼이 없는 플랫폼 공용 카탈로그라 타 Master Agency 소속 SUB_ADMIN도 동일 조회 가능(의도된 동작, 설계 확정 기록) | `tests/unit/db/def130-ups-base-rates-sub-admin-select-rls.test.ts` |
+| **TC-DEF130-05** | SUB_ADMIN 수정 권한 미부여 | SUB_ADMIN의 base_rates UPDATE 시도는 RLS로 0행 영향(판매가 수정 불가 유지) | `tests/unit/db/def130-ups-base-rates-sub-admin-select-rls.test.ts` |
+| **TC-DEF130-06** | SELECT 정책 되돌리기 검증 | `ups_base_rates_sub_admin_select` 정책 제거 시 SUB_ADMIN 조회 0행 재현, 복원 후 1행 | `tests/unit/db/def130-ups-base-rates-sub-admin-select-rls.test.ts` |
 | **TC-UPS-WH-01** | 창고 출고 — intl_ref_no 있음 | 정상 출고 (pkgsWithoutIntlRef=0) | `tests/unit/warehouse/outbound-ups.test.ts` |
 | **TC-UPS-WH-02** | 창고 출고 — intl_ref_no 없음 | pkgsWithoutIntlRef > 0 반환 | `tests/unit/warehouse/outbound-ups.test.ts` |
 | **TC-UPS-WH-03** | 창고 출고 — 상태 전이 | WAREHOUSED→RELEASED 전이 유지 | `tests/unit/warehouse/outbound-ups.test.ts` |
