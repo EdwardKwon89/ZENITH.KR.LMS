@@ -24,6 +24,7 @@
 .DS_Store
 *.pem
 .aws/
+.ups_shxk_prod_keys/
 
 # debug
 npm-debug.log*
