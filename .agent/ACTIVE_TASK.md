@@ -74,10 +74,8 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 | [#726](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/726) | [fix] 급증수수료 등록 데이터 화폐단위(KRW) 감사 (SNTL 회의 W6) | b | p3 | in-progress | 미배정 | 2026-07-26 |
 | [#718](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/718) | 2026.07.22 SNTL 회의록 | - | - | - | 미배정 | 2026-07-23 |
 | [#616](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/616) | [GOV] 예약 요금(pricing-schedule) 시스템에 Agency/Shipper 할인율 마진 검증 부재 — Team B 검토 요청 | b | p2 | - | 미배정 | 2026-07-20 |
-| [#609](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/609) | [Aiden] CI 지연 원인 조사 결과 + 조치 — 큐 혼잡 완화 + TeamB_Dev 병합 CI 대기 불요로 개정 | b | p1 | - | jungjs | 2026-07-20 |
 | [#605](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/605) | [design] Agency 원가/판매가 Matrix 전환 검토 — 대리점 단위 Matrix + 화주 단위 하이브리드(Zone할인율+선택적 Matrix override) | b | p2 | - | jungjs | 2026-07-19 |
 | [#588](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/588) | [docs] UPS 오더 등록 후 처리 프로세스 현황 분석 (An_15) | b | p3 | - | 미배정 | 2026-07-18 |
-| [#521](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/521) | [Aiden] 2026-07-16 임시 운영 방침 — Team B develop 복사 브랜치(integration/teamb-260716) 자체 개발·병합 허용 | b | p1 | - | jungjs | 2026-07-18 |
 | [#473](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/473) | [Team B] 검증 절차 방침 변경 — 라이브 브라우저/DB 검증은 병합 후 JSJung이 수행 | b | - | - | 미배정 | 2026-07-14 |
 | [#358](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/358) | [Aiden] R-17 절차 오류 재발 방지 — 4단계 구조적 개선 (채번 자동화·회귀결과 신뢰 제거·CI 게이트·워크트리 격리) | a | p2 | - | jungjs | 2026-07-14 |
 | [#164](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/164) | [UAT-Epic] UPS 특송 서비스 — Team B 인수 테스트 (UAT-15~19) | b | p1 | open | jungjs | 2026-07-07 |
