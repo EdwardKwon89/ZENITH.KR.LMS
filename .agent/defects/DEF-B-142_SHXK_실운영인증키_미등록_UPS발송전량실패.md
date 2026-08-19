@@ -34,3 +34,16 @@ ZEN-2026-000011(WAREHOUSED, US행) UPS 발송 시도 시 9회 연속 동일 오�
 3. 실 인증키 등록 후, 실제(비-mock) 환경에서 `createorder` 테스트 호출로 정상 동작 재확인.
 4. 위 확인 이후 `order_weight`/`order_pieces`/`cargovolume[].involume_*` 필드의 문자열 캐스팅 여부를 SHXK 스펙과 재대조.
 5. 재발 방지: 이번처럼 mock 모드로만 검증된 기능을 "GoLive"로 선언하기 전, 실 API 대상 최소 1회 실통과 확인을 완료 체크리스트에 명시.
+
+## 해소 확인 (2026-08-19, Edward 실측)
+
+- Aiden이 실 `SHXK_APP_KEY`/`SHXK_APP_TOKEN`을 Vercel Production에 등록(Edward가 안전 채널로 값 전달) 후 **좁은 재배포**(코드 변경 없이 동일 커밋 재빌드, env만 반영) 진행.
+- Edward가 프로덕션 화면에서 ZEN-2026-000011 UPS 발송을 직접 재시도 — `zen_shxk_api_logs` 실측 확인:
+  ```
+  07:49:13 createorder → success:1, 실제 UPS 트래킹번호 1ZJ443D30411318800 발급
+           (이 시스템에서 실(non-mock) createorder 성공 사례 최초)
+  07:50:46 removeorder → success:1 (Edward가 테스트 목적으로 의도적 취소 — 별도 결함 아님)
+  ```
+- **결론**: 인증키 미등록이 원인이었다는 진단이 실측으로 확정됨. §1(인증키 등록)·§3(정상 동작 재확인) DoD 완료.
+- **남은 DoD**(Team B/JSJung 후속 구현): §2 `assertShxkConfig()` 호출부 연결, §4 숫자/문자열 타입 재검토, §6 `LIVE_REGRESSION_TEST_MAP.md` 갱신.
+- **별도 확인 필요**: ZEN-2026-000011(james@sntl.co.kr 실제 화물)은 테스트 후 의도적으로 취소된 상태라 **아직 실발송 미완료** — 실제 재발송 여부는 Edward 확인 대기.
