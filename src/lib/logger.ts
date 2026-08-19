@@ -2,6 +2,26 @@ import { getRequestContext } from '@/lib/logging/request-context';
 
 type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
+// TASK-B-314 (Issue #1152): 순환참조 안전 stringify — WeakSet 기반 + try/catch 이중 방어
+function safeStringify(obj: unknown): string {
+  const seen = new WeakSet();
+  try {
+    return JSON.stringify(obj, (_key, value) => {
+      if (typeof value === 'object' && value !== null) {
+        if (seen.has(value)) return '[Circular]';
+        seen.add(value);
+      }
+      if (value instanceof Error) {
+        return { name: value.name, message: value.message };
+      }
+      if (typeof value === 'bigint') return value.toString();
+      return value;
+    });
+  } catch {
+    return '{"error": "Failed to serialize log entry"}';
+  }
+}
+
 function serializeArg(arg: unknown): unknown {
   if (arg instanceof Error) {
     return { name: arg.name, message: arg.message, stack: arg.stack };
@@ -44,7 +64,7 @@ function buildEntry(level: LogLevel, args: unknown[]): Record<string, unknown> {
 
 function emit(level: LogLevel, args: unknown[]) {
   const entry = buildEntry(level, args);
-  const line = JSON.stringify(entry);
+  const line = safeStringify(entry);
   if (level === 'error') {
     console.error(line);
   } else if (level === 'warn') {

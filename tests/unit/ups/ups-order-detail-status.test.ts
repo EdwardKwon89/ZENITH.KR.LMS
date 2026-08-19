@@ -185,5 +185,33 @@ describe('UPS Order Detail order.status 중심 상태 재구성 및 액션 검�
       expect(res.success).toBe(false);
       expect(res.error).toContain('소속 대리점이 관리하는 화주의 오더만');
     });
+
+    // TASK-B-313 (Issue #1150): 대리점 자체 오더(자기 소유) 수동 배송완료 전환 성공
+    it('Agency 사용자가 자체 오더(shipper_id === org_id)를 수동으로 DELIVERED 전환 성공', async () => {
+      (validateUserAction as any).mockResolvedValue({
+        supabase: mockSupabase,
+        profile: { id: 'usr-agency-1', role: USER_ROLES.AGENCY, org_id: 'agency-org-1' },
+        user: { id: 'usr-agency-1' },
+      });
+
+      mockSupabase.from.mockImplementation((table: string) => {
+        if (table === 'zen_orders') {
+          return createChainableMock({
+            id: 'ord-200',
+            order_no: 'ORD-200',
+            status: OrderStatus.IN_TRANSIT,
+            shipper_id: 'agency-org-1', // 자기 소유 오더 (org_id와 동일)
+          });
+        }
+        // zen_agency_shippers 조회 불필요 (자기 소유)
+        if (table === 'order_status_history') {
+          return createChainableMock();
+        }
+        return createChainableMock();
+      });
+
+      const res = await manuallySetOrderDeliveredAction('ord-200', '자체 오더 배송 완료');
+      expect(res.success).toBe(true);
+    });
   });
 });

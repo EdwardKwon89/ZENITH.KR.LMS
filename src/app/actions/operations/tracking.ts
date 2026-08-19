@@ -394,22 +394,26 @@ export async function manuallySetOrderDeliveredAction(orderId: string, reason: s
   }
 
   // 2. Agency 스코프 권한 검증
+  // TASK-B-313 (Issue #1150): 대리점 자체 오더(자기 소유)는 zen_agency_shippers 조회 불필요
   const isAgency = profile?.role === 'AGENCY';
   if (isAgency) {
     if (!profile?.org_id) {
       return { success: false, error: 'Agency 소속 조직 정보가 없습니다.' };
     }
 
-    const { data: agencyLink } = await supabase
-      .from('zen_agency_shippers')
-      .select('id')
-      .eq('agency_org_id', profile.org_id)
-      .eq('shipper_org_id', order.shipper_id)
-      .eq('is_active', true)
-      .maybeSingle();
+    const isSelfOwnedOrder = order.shipper_id === profile.org_id;
+    if (!isSelfOwnedOrder) {
+      const { data: agencyLink } = await supabase
+        .from('zen_agency_shippers')
+        .select('id')
+        .eq('agency_org_id', profile.org_id)
+        .eq('shipper_org_id', order.shipper_id)
+        .eq('is_active', true)
+        .maybeSingle();
 
-    if (!agencyLink) {
-      return { success: false, error: '소속 대리점이 관리하는 화주의 오더만 상태를 전환할 수 있습니다.' };
+      if (!agencyLink) {
+        return { success: false, error: '소속 대리점이 관리하는 화주의 오더만 상태를 전환할 수 있습니다.' };
+      }
     }
   }
 
