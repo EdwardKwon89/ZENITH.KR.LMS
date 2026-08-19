@@ -11,8 +11,10 @@ import { execSync } from 'child_process';
 //   4) [설계 확정 기록] zen_ups_base_rates는 특정 조직에 귀속되는 컬럼이 없는 플랫폼 공용
 //      판매가 카탈로그(AGENCY 역할도 동일)이므로, 서로 다른 Master Agency 소속 SUB_ADMIN도
 //      동일하게 조회 가능함 — 이는 테이블 구조상 의도된 동작이며 버그가 아님을 명시적으로 확인
-//   5) SUB_ADMIN은 base_rates를 SELECT만 가능하고 UPDATE는 여전히 차단(0행 영향) — 판매가
-//      수정 권한은 부여하지 않음(cost_price 관리 경로는 zen_agency_pricing_policies로 유지)
+//   5) SUB_ADMIN은 base_rates를 SELECT만 가능하고 UPDATE는 여전히 차단 — 판매가 수정 권한은
+//      부여하지 않음(cost_price 관리 경로는 zen_agency_pricing_policies로 유지). 차단 방식은
+//      "0행 영향"(RLS 필터링) 또는 "permission denied for table"(authenticated 롤 자체에
+//      UPDATE GRANT 부재, 20260728110000_imp153 참조) 둘 다 결론이 같으므로 둘 다 인정한다
 //   6) 되돌리기 검증: SELECT 정책 제거 시 SUB_ADMIN 조회가 0행으로 재현
 
 function psql(sql: string): string {
@@ -108,20 +110,38 @@ function countAsAuthenticated(userId: string, rateId: string): number {
 }
 
 // authenticated 롤 + JWT sub 시뮬레이션으로 UPDATE 시도 후 영향받은 행 수 반환.
+//
+// [PR#1174 CI 반려 대응] `authenticated` 롤은 GRANT 레벨에서부터 zen_ups_base_rates에
+// UPDATE 권한 자체가 없음(20260728110000_imp153_authenticated_grant_일괄.sql이 authenticated에
+// 부여하는 것은 SELECT뿐이며, UPDATE/INSERT/DELETE는 service_role 전용 — DEF-096 grant 참조).
+// 이는 RLS와 별개의 레이어(테이블 단위 GRANT)로, "permission denied for table" 에러가 나면서
+// UPDATE 시도 자체가 실행되지 못하고 죽는다. fresh DB(CI)에서는 항상 이 에러가 나고, "0행
+// 갱신"(RLS로 필터링되어 조용히 실패)이든 "permission denied"(GRANT 자체가 없어 실행 거부)든
+// 결론은 동일하게 "SUB_ADMIN이 판매가를 수정할 수 없다"이므로 두 경우 모두 차단 확인으로 처리한다.
 function updateAttemptAsAuthenticated(userId: string, rateId: string): number {
-  const out = psql(`
-    SET ROLE authenticated;
-    SELECT set_config('request.jwt.claims', jsonb_build_object('sub', '${userId}', 'role', 'authenticated')::text, false);
-    WITH updated AS (
-      UPDATE public.zen_ups_base_rates SET selling_price = selling_price + 1
-      WHERE id = '${rateId}'
-      RETURNING id
-    )
-    SELECT count(*) FROM updated;
-    RESET ROLE;
-  `);
-  const lines = out.split('\n').filter((l) => /^\d+$/.test(l.trim()));
-  return lines.length ? parseInt(lines[lines.length - 1], 10) : 0;
+  try {
+    const out = psql(`
+      SET ROLE authenticated;
+      SELECT set_config('request.jwt.claims', jsonb_build_object('sub', '${userId}', 'role', 'authenticated')::text, false);
+      WITH updated AS (
+        UPDATE public.zen_ups_base_rates SET selling_price = selling_price + 1
+        WHERE id = '${rateId}'
+        RETURNING id
+      )
+      SELECT count(*) FROM updated;
+      RESET ROLE;
+    `);
+    const lines = out.split('\n').filter((l) => /^\d+$/.test(l.trim()));
+    return lines.length ? parseInt(lines[lines.length - 1], 10) : 0;
+  } catch (err: unknown) {
+    const message = String((err as { stderr?: string; message?: string })?.stderr ?? (err as Error)?.message ?? '');
+    if (/permission denied/i.test(message)) {
+      // GRANT 레벨에서 UPDATE 권한 자체가 없어 실행 거부됨 — "수정 불가" 결론과 동치이므로
+      // 0행 영향과 동일하게 취급한다.
+      return 0;
+    }
+    throw err;
+  }
 }
 
 describe('DEF-130 (Issue #895): zen_ups_base_rates SUB_ADMIN SELECT RLS', () => {
