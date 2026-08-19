@@ -249,6 +249,7 @@ status:open → [status:draft → (Aiden 확정)] → status:in-progress → sta
 - **TASK 채번**: Team A `TASK-NNN` / Team B `TASK-B-NNN` / Team C+ `TASK-C-NNN` (팀별 독립 순번). 번호 중복 반복 발생(Issue #358)으로 반드시 착수 전 `./scripts/next-task-number.sh [A|B|C]`로 다음 번호를 확인 후 채번한다 — 눈대중 채번 금지.
 - **파일 소유권**: 각 팀은 본인 팀 Task file(`.agent/tasks/`)만 수정. 타 팀 파일 수정 금지. Task 상태는 GitHub Issue 라벨로 표현되므로 팀 간 충돌 대상 자체가 아니다.
 - **Aiden 전속**: ✅ PR 머지(최종 승인) · `develop → main` 머지 · 팀 간 조율 · 신규 팀 투입 결정
+- **릴리즈 노트 자동 생성** (2026-08-19 도입): `develop → main` 병합 완료 직후 `gh release create <태그> --target main --generate-notes`로 태그+릴리즈 노트를 자동 생성한다. 병합된 PR 제목을 GitHub이 자동 취합하므로 별도 CHANGELOG.md 수기 관리는 하지 않는다 — 수기 이중기록은 갱신 누락으로 신뢰를 잃는 패턴이 이미 여러 차례 반복되었음(ACTIVE_TASK.md 폐지 사례 참조).
 
 ### R-18 | 발견 결함 보고 의무
 작업 수행 중 담당 Task 범위 밖의 버그·결함·블로커·설계 질문을 발견한 경우, 반드시 아래 절차에 따라 Aiden에게 보고한다.
@@ -385,4 +386,4 @@ PreToolUse GitNexus Hook에서 `Bash`가 제외되었습니다. 아래 경우는
 
 ## 📝 개정 이력
 
-> 최신 버전: **v3.0** (2026-08-14) | 전체 이력: [docs/00_GUIDE/GOV_CHANGELOG.md](docs/00_GUIDE/GOV_CHANGELOG.md)
+> 최신 버전: **v3.1** (2026-08-19) | 전체 이력: [docs/00_GUIDE/GOV_CHANGELOG.md](docs/00_GUIDE/GOV_CHANGELOG.md)

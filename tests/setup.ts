@@ -38,3 +38,16 @@ vi.mock('next/navigation', () => ({
   usePathname: () => '',
   useSearchParams: () => new URLSearchParams(),
 }));
+
+// DEF-136: validateUserAction()이 withRequestContext()를 거치며 next/headers를 호출하므로
+// 전역으로 mock — 실제 요청 스코프 밖(vitest)에서 호출하면 Next.js가 에러를 던짐.
+// 개별 테스트 파일에서 x-request-id 값을 다르게 검증해야 하면 파일 단위 vi.mock으로 덮어쓸 수 있음.
+vi.mock('next/headers', () => ({
+  headers: vi.fn().mockResolvedValue({ get: () => null }),
+  cookies: vi.fn().mockResolvedValue({
+    get: () => undefined,
+    getAll: () => [],
+    set: vi.fn(),
+    delete: vi.fn(),
+  }),
+}));
