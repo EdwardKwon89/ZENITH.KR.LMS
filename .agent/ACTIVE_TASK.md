@@ -50,6 +50,7 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
+| [#1176](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1176) | [Team A] TASK-1136: Session Idle Timeout 관리자 설정 + 다음 로그인부터 적용 | a | p2 | - | 미배정 | 2026-08-20 |
 | [#1172](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1172) | [Team A] TASK-1134: 중복 Task 번호 CI/pre-commit 기계적 차단 (Issue #358 후속) | a | p4 | - | 미배정 | 2026-08-19 |
 | [#1170](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1170) | [Team A] TASK-1133: requestId 완전 전파 — Server Action 개별 wrapping (309 §10.6 후속) | a | p4 | - | 미배정 | 2026-08-19 |
 | [#1168](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1168) | [Team A] TASK-1131: Node.js 20.x → 24.x 업그레이드 (Vercel 지원종료 2026-10-01 대응) | a | p3 | - | EdwardKwon89 | 2026-08-19 |
