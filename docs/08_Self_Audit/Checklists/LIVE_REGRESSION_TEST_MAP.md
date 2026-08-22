@@ -334,6 +334,17 @@
 | **TC-ERR-04** | 에러 조치 완료 처리 | `resolveErrorLog`를 통한 해결 상태(`resolved: true`) 업데이트 검증 | `tests/unit/monitoring/error-log.test.ts` |
 | **TC-REQID-01** | request-context ALS 전파 | `runWithRequestContext`의 async 경계 requestId 유지 검증 (TASK-1130) | `tests/unit/logging/request-context.test.ts` |
 | **TC-REQID-02** | request-context store 미주입 폴백 | 클라이언트 환경(store null)에서 no-op 동작 검증 | `tests/unit/logging/request-context.test.ts` |
+| **TC-SLS-01** | logger→Axiom 전달 | `logger.info` 콘솔 출력 유지 + Axiom transport entry 전달 검증 (TASK-1138) | `tests/unit/monitoring/logger-saas.test.ts` |
+| **TC-SLS-02** | logger.error→Sentry 이슈 | error 레벨 로그의 Sentry `captureMessage` 그룹핑 전송 검증 (TASK-1138) | `tests/unit/monitoring/logger-saas.test.ts` |
+| **TC-SLS-03** | info/warn Sentry 미생성 | 에러 아닌 레벨이 Sentry 이슈를 만들지 않음 검증 (TASK-1138) | `tests/unit/monitoring/logger-saas.test.ts` |
+| **TC-SLS-04** | 컨텍스트 전파 보존 | requestId/userId/orgId/route가 Axiom entry에 유지됨 검증 (TASK-1138) | `tests/unit/monitoring/logger-saas.test.ts` |
+| **TC-SLS-05** | Sentry 장애 내성 | Sentry 예외 시에도 콘솔 로깅 정상 동작 검증 (TASK-1138) | `tests/unit/monitoring/logger-saas.test.ts` |
+| **TC-AXM-01** | Axiom ingest 요청 스펙 | 엔드포인트/Bearer 인증/JSON 배치 페이로드 검증 (TASK-1138) | `tests/unit/monitoring/axiom-transport.test.ts` |
+| **TC-AXM-02** | env 미설정 no-op | AXIOM_TOKEN/DATASET 부재 시 전송 차단(클라이언트 안전성) 검증 (TASK-1138) | `tests/unit/monitoring/axiom-transport.test.ts` |
+| **TC-AXM-03** | 네트워크 실패 무결 | 전송 실패 시 예외 비전파(fire-and-forget) 검증 (TASK-1138) | `tests/unit/monitoring/axiom-transport.test.ts` |
+| **TC-AXM-04** | HTTP 오류 처리 | 4xx/5xx 응답 시 경고 후 정상 종료 검증 (TASK-1138) | `tests/unit/monitoring/axiom-transport.test.ts` |
+| **TC-AXM-05** | 임계치 자동 flush | 버퍼 25건 도달 시 즉시 배치 전송 및 중복 방지 검증 (TASK-1138) | `tests/unit/monitoring/axiom-transport.test.ts` |
+| **TC-AXM-06** | coalesce 타이머 flush | 동일 tick 로그 병합을 위한 지연 flush 동작 검증 (TASK-1138) | `tests/unit/monitoring/axiom-transport.test.ts` |
 
 ### 22. 회원 등급 및 승급 (Member Grade)
 | ID | 테스트 항목 | 목적 | 파일 경로 |

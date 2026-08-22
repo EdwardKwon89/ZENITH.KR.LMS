@@ -66,3 +66,9 @@ test-results/
 
 # ─── Temporary Log Files ────────────────────────────────
 scratch/
+
+# ─── Local-only SaaS credential notes (never commit) ───────
+.logSaaS/
+
+# Sentry Config File
+.env.sentry-build-plugin
