@@ -50,7 +50,6 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
-| [#1178](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1178) | [Team A] TASK-1138: 애플리케이션 로그/에러 추적 SaaS 연동 — Axiom(전체 로그) + Sentry(에러 전용) | a | p3 | review | 미배정 | 2026-08-22 |
 | [#1177](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1177) | [Team A] TASK-1137: 동일 계정 동시 로그인 감지 및 처리(알림 + 기존유지/강제로그아웃 선택) | a | p2 | - | 미배정 | 2026-08-20 |
 | [#1176](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1176) | [Team A] TASK-1136: Session Idle Timeout 관리자 설정 + 다음 로그인부터 적용 | a | p2 | - | 미배정 | 2026-08-20 |
 | [#1172](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1172) | [Team A] TASK-1134: 중복 Task 번호 CI/pre-commit 기계적 차단 (Issue #358 후속) | a | p4 | - | 미배정 | 2026-08-19 |
