@@ -5,7 +5,7 @@
 - **등록자**: Edward (Aiden 설계 확정 동반)
 - **담당**: B_Kai (Team A)
 - **우선순위**: P3
-- **상태**: ❌ 반려 — 재작업 필요 (status:rework, 2026-08-22 Aiden 검토)
+- **상태**: 🔍 재작업 완료 — 재검토 대기 (status:review, 2026-08-22. Aiden 반려(status:rework) 조치 완료)
 
 ## [배경]
 
@@ -59,7 +59,29 @@ Aiden이 Sentry 마법사 스캐폴딩을 `feature/teama-task-1138-logging-saas-
 ## [작업 결과]
 
 - **코드 커밋**: feccdd709d0b1a3cab82536993111bd735d9fbb9 — `[B_Kai] feat: TASK-1138 로그/에러 SaaS 연동 — Axiom 전송 transport + Sentry 배선 정리 (Issue #1178)`
+- **재작업 커밋**: 06a81ae9eaf503e569eb2dc01e9afe2059e77725 — `[B_Kai] fix: TASK-1138 재작업 — 데모 루트 레이아웃 삭제 + CSP worker-src 명시`
 - **브랜치**: `feature/teama-task-1138-logging-saas-axiom-sentry` (Aiden 스캐폴딩 커밋 e90ca34d4 기반)
+
+### 재작업 내역 (2026-08-22 반려 조치)
+
+Aiden PR#1179 반려(데모 루트 레이아웃 잔존 → 하이드레이션 불일치)에 대한 조치:
+
+| 조치 | 내용 |
+|:---|:---|
+| ① `src/app/layout.tsx` 삭제 | Sentry 마법사 데모 루트 레이아웃(`<html lang="en">`) 제거 — `src/app/[locale]/layout.tsx`(자체 `<html lang={locale}>` 렌더링)만 남김 |
+| ② CSP `worker-src 'self' blob:` 추가 | next.config.ts 헤더에 명시 추가 — Session Replay blob 워커 차단 해소(Aiden 부수 발견 건). PDF.js E2E에서 이미 동일 패치 사용 중이라 앱 기능과 정합. replayIntegration은 유지(세션 리플레이는 이슈 배경의 Sentry 도입 취지 포함) |
+
+**R-10 실브라우저 재검증** (dev 서버 + Playwright chromium, 반려 재현 방법과 동일):
+
+| 항목 | 결과 |
+|:---|:---|
+| `/ko` 접속 | `<html>` 태그 1개·`lang="ko"` 단일 렌더, 하이드레이션 에러 **0건**(수정 전: en/ko 중첩+에러), CSP 위반 0건 |
+| `/en` 접속 | `<html>` 태그 1개·`lang="en"`, 하이드레이션 에러 0건 |
+| 응답 헤더 실측 | `Content-Security-Policy`에 `worker-src 'self' blob:` 포함 확인 |
+
+**R-08 재검증**: `npm run build` 성공 · `npm run test:regression` **204 files / 1,437 tests ALL PASS**
+
+> 참고: `/ko` 로드 시 콘솔에 Supabase 406 리소스 오류 1건 관찰 — 세션 조회 관련 기존 동작으로 반려 사유·본 Task 범위 외 (별도 이슈 필요 시 R-18 보고)
 
 ### 구현 내역
 
