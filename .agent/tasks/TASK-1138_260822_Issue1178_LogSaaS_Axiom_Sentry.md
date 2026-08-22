@@ -5,7 +5,7 @@
 - **등록자**: Edward (Aiden 설계 확정 동반)
 - **담당**: B_Kai (Team A)
 - **우선순위**: P3
-- **상태**: 🔍 재작업 완료 — 재검토 대기 (status:review, 2026-08-22. Aiden 반려(status:rework) 조치 완료)
+- **상태**: ✅ 완료 (Issue Closed, 2026-08-22 Aiden 승인·병합)
 
 ## [배경]
 
@@ -147,6 +147,20 @@ Aiden PR#1179 반려(데모 루트 레이아웃 잔존 → 하이드레이션 �
 ### CI 참고
 
 - 이 PR은 `gh pr checks 1179` 확인 결과 **커밋 후 15분 이상 경과에도 체크 항목 자체가 전혀 생성되지 않음**(`gh run list`도 0건) — R-08-1(CI 미트리거) 해당 사례로 판단. 이번 반려는 CI 결과가 아니라 위 로컬 재현(격리 워크트리 + 실제 브라우저 렌더링)에 근거함. 재제출 시 CI가 트리거되는지도 함께 확인 요망.
+
+## [Aiden 재검토] — ✅ 승인 (2026-08-22)
+
+B_Kai 재작업(커밋 `e3da42970`)에 대해 반려 사유 해소 여부를 독립 재검증함:
+
+- **diff 확인**: `src/app/layout.tsx` 삭제(19줄 전량 제거) + `next.config.ts` CSP에 `worker-src 'self' blob:` 1줄 추가만 정확히 반영, 그 외 불필요한 변경 없음
+- **CI**: `gh pr checks 1179` — Regression Tests·Type Check·Task File Check **3/3 PASS** (이번엔 정상 트리거됨)
+- **독립 재현 검증**(반려 때와 동일한 방법 — 격리 워크트리 `npm ci` + `npm run dev` + Playwright chromium으로 재현, B_Kai 자체 보고를 그대로 신뢰하지 않고 재확인):
+  - `/ko` 응답 HTML `<html>` 태그 **1개**만 존재(`lang="ko"`) — 반려 사유였던 중첩 해소
+  - 응답 헤더 `Content-Security-Policy`에 `worker-src 'self' blob:` 포함 실측
+  - 브라우저 콘솔 React 하이드레이션 불일치 에러 **0건**(반려 시 재현됐던 에러 완전 소거)
+  - 잔여 콘솔 에러 1건(Supabase 406, `system_settings`)은 본 Task 범위 밖 기존 이슈로 확인 — B_Kai의 스코프 판단과 일치
+
+**판정**: ✅ 승인. PR#1179 머지 완료(develop, `--merge --admin`), Issue #1178 수동 Close(develop 병합이라 `Closes` 자동 종결 미적용 — main이 아닌 default 외 브랜치 병합 사례).
 
 ## [발견 이슈]
 
