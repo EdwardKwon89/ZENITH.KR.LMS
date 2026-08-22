@@ -59,7 +59,7 @@ Aiden이 Sentry 마법사 스캐폴딩을 `feature/teama-task-1138-logging-saas-
 ## [작업 결과]
 
 - **코드 커밋**: feccdd709d0b1a3cab82536993111bd735d9fbb9 — `[B_Kai] feat: TASK-1138 로그/에러 SaaS 연동 — Axiom 전송 transport + Sentry 배선 정리 (Issue #1178)`
-- **재작업 커밋**: 06a81ae9eaf503e569eb2dc01e9afe2059e77725 — `[B_Kai] fix: TASK-1138 재작업 — 데모 루트 레이아웃 삭제 + CSP worker-src 명시`
+- **재작업 커밋**: e3da4297006d88c9967e46bbaec663cacef88d62 — `[B_Kai] fix: TASK-1138 재작업 — 데모 루트 레이아웃 삭제 + CSP worker-src 명시` (※develop 리베이스로 해시 갱신, 구 06a81ae9e)
 - **브랜치**: `feature/teama-task-1138-logging-saas-axiom-sentry` (Aiden 스캐폴딩 커밋 e90ca34d4 기반)
 
 ### 재작업 내역 (2026-08-22 반려 조치)
