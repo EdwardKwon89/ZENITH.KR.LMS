@@ -5,7 +5,7 @@
 - **등록자**: Edward (Aiden 설계 확정 동반)
 - **담당**: B_Kai (Team A)
 - **우선순위**: P3
-- **상태**: 🔍 검토 대기 (status:review, 2026-08-22)
+- **상태**: ❌ 반려 — 재작업 필요 (status:rework, 2026-08-22 Aiden 검토)
 
 ## [배경]
 
@@ -94,6 +94,37 @@ Aiden이 Sentry 마법사 스캐폴딩을 `feature/teama-task-1138-logging-saas-
 1. **Axiom 대시보드 육안 확인**: 현재 토큰(`xaat-`, ingest-only)으로는 read 불가 — Edward/Aiden이 대시보드에서 `source == "b_kai_task1138"` 이벤트 확인 필요
 2. **Sentry 이슈 그룹핑/UI**: 배포(Vercel Preview) 후 실에러 발생 시켜 이슈 생성+딥링크 동작을 최종 확인 권장
 3. **logger.error의 Sentry captureMessage가 서버리스에서 이벤트 누락 가능성**: fire-and-forget 특성상 함수 freeze 직전 호출분은 유실될 수 있음 — 필요 시 후속 Task로 `after()` 훅 연결 검토
+
+## [Aiden 검토] — ❌ 반려 (2026-08-22)
+
+### 반려 사유
+
+**leftover `src/app/layout.tsx`(Aiden의 Sentry 마법사 스캐폴딩 커밋 e90ca34d4에서 생성된 데모용 루트 레이아웃)가 정리되지 않아, 실제 브라우저 렌더링에서 React 하이드레이션 불일치(hydration mismatch) 오류가 재현됨.**
+
+- `npm run build`/`npm run test:regression`은 PASS했지만(단위 테스트 영역), 이 결함은 **실제 페이지 렌더링에서만 드러나는 종류**라 유닛 테스트로는 잡히지 않음.
+- 이 프로젝트는 `src/app/[locale]/layout.tsx`가 자체적으로 `<html lang={locale}>`/`<body>`를 렌더링하는 구조(루트 레이아웃 역할을 겸함, `src/app/layout.tsx` 없이 동작하던 기존 설계)인데, Sentry 마법사가 데모 페이지(`sentry-example-page`)용으로 `src/app/layout.tsx`(`<html lang="en">`, 데모용 body 클래스 없음)를 별도 생성해뒀음.
+- B_Kai가 `sentry-example-page`/`sentry-example-api`는 정확히 삭제했으나, 그 둘이 의존하던 **`src/app/layout.tsx` 자체는 삭제 목록에서 누락**됨.
+- 격리 워크트리에서 이 브랜치를 직접 체크아웃해 `npm run dev` + Playwright로 `/ko` 접속 재현 확인:
+  - HTML에 `<html lang="en">`(신규 데모 레이아웃)와 `<html lang="ko" class="inter_...variable outfit_...variable...">`(기존 로케일 레이아웃)가 **중첩 출력**됨
+  - 브라우저 콘솔에 React 하이드레이션 불일치 에러 재현:
+    ```
+    A tree hydrated but some attributes of the server rendered HTML didn't match the client properties.
+    <html lang="en" className="inter_..._variable outfit_..._variable ...">
+    -   (실제로는 서버가 렌더링한 값과 클라이언트 값이 어긋남)
+      <body className="min-h-full flex flex-col bg-white ...">
+    ```
+  - 즉 모든 `/{locale}/*` 페이지에서 재현되는 문제로 추정(테스트한 `/ko` 기준)
+- **부수 발견(참고, 반려 필수 사유는 아님)**: `instrumentation-client.ts`의 `Sentry.replayIntegration()`이 이 프로젝트 CSP(`worker-src`/`script-src`)에 막혀 `blob:` 워커 생성이 차단됨 — Session Replay가 콘솔 CSP 위반 에러를 내며 실제로는 동작하지 않는 상태. DoD에 Session Replay가 명시 요구사항은 아니었으나, 재작업 시 함께 확인 권장(CSP 예외 추가 또는 replay 옵션 제거).
+
+### 필요 조치
+
+1. `src/app/layout.tsx` 삭제(데모 스캐폴딩 완전 정리 — `sentry-example-page`/`sentry-example-api`와 세트로 함께 삭제됐어야 함)
+2. 삭제 후 로컬에서 실제로 `/ko`(또는 임의 locale) 접속해 하이드레이션 에러가 사라졌는지 브라우저 콘솔로 직접 재확인(R-10 — 단위 테스트만으로 재검증 불충분, 이번에 동일 실수 반복 방지)
+3. (선택) Sentry Replay CSP 차단 건 — 유지할지, 제거할지 결정 후 반영
+
+### CI 참고
+
+- 이 PR은 `gh pr checks 1179` 확인 결과 **커밋 후 15분 이상 경과에도 체크 항목 자체가 전혀 생성되지 않음**(`gh run list`도 0건) — R-08-1(CI 미트리거) 해당 사례로 판단. 이번 반려는 CI 결과가 아니라 위 로컬 재현(격리 워크트리 + 실제 브라우저 렌더링)에 근거함. 재제출 시 CI가 트리거되는지도 함께 확인 요망.
 
 ## [발견 이슈]
 
