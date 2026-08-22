@@ -1,4 +1,6 @@
 import { getRequestContext } from '@/lib/logging/request-context';
+import { enqueueAxiomLog } from '@/lib/logging/axiom-transport';
+import * as Sentry from '@sentry/nextjs';
 
 type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
@@ -62,16 +64,39 @@ function buildEntry(level: LogLevel, args: unknown[]): Record<string, unknown> {
   return entry;
 }
 
+// TASK-1138 (Issue #1178): 에러성 로그는 설계 확정에 따라 Sentry 이슈로도 그룹핑 전송한다.
+// 어떤 경우에도 로깅 자체가 앱 로직을 방해하지 않도록 예외를 흡수한다.
+function captureErrorToSentry(entry: Record<string, unknown>) {
+  try {
+    Sentry.captureMessage(String(entry.message || 'logger.error'), {
+      level: 'error',
+      contexts: {
+        log_entry: {
+          level: entry.level,
+          requestId: entry.requestId,
+          userId: entry.userId,
+          orgId: entry.orgId,
+          route: entry.route,
+        },
+      },
+    });
+  } catch {
+    // no-op — Sentry 장애가 콘솔/Axiom 로깅 경로를 막지 않는다
+  }
+}
+
 function emit(level: LogLevel, args: unknown[]) {
   const entry = buildEntry(level, args);
   const line = safeStringify(entry);
   if (level === 'error') {
     console.error(line);
+    captureErrorToSentry(entry);
   } else if (level === 'warn') {
     console.warn(line);
   } else {
     console.log(line);
   }
+  enqueueAxiomLog(entry);
 }
 
 export const logger = {

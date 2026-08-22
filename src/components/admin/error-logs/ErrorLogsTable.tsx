@@ -146,7 +146,7 @@ export const ErrorLogsTable: React.FC<ErrorLogsTableProps> = ({ initialLogs, tot
             <ZenButton 
               variant="tactile" 
               className="p-1.5 h-8 w-8 rounded-lg bg-slate-100 border-none shadow-sm hover:bg-indigo-500 group transition-all"
-              onClick={() => window.open(`https://sentry.io/organizations/zenith-lms/issues/?query=${row.original.sentry_id}`, '_blank')}
+              onClick={() => window.open(`https://zenith-t2z.sentry.io/issues/?query=${row.original.sentry_id}`, '_blank')}
             >
               <ExternalLink size={14} className="text-slate-400 group-hover:text-white" />
             </ZenButton>
