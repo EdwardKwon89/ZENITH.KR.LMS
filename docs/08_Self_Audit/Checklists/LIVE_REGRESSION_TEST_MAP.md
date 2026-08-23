@@ -752,4 +752,15 @@
 1. **추가 의무**: 신규 기능 개발 시 위 카테고리에 맞는 테스트를 반드시 추가하십시오.
 2. **실행 의무**: 모든 커밋 전 `npm run test:regression`을 실행하여 위 명세 전원이 초록색인지 확인하십시오.
 
+---
+
+## 55. DatabaseRouteAdapter DB에러/빈결과 구분 로깅 (TASK-1139 / Issue #1184)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-DBE-01** | 직항 경로 조회 DB 에러 — logger.error 기록 | `zen_route_network` 조회 실패 시 에러 로그 기록 + 빈 배열 반환(예외 흡수) 검증 | `tests/unit/logistics/database-route-adapter-dberror.test.ts` |
+| **TC-DBE-02** | 직항 경로 정상 빈결과 — 무로그 | `data=[]` 정상 빈 결과는 로깅 없이 조용히 처리(노이즈 방지) 검증 | `tests/unit/logistics/database-route-adapter-dberror.test.ts` |
+| **TC-DBE-03** | 요율 조회 DB 에러 — logger.error 기록 | `zen_rate_cards` 조회 실패 시 에러 로그 기록 + cost 0 폴백 유지 검증 | `tests/unit/logistics/database-route-adapter-dberror.test.ts` |
+| **TC-DBE-04** | 요율 카드 정상 부재 — 무로그 | `data=null` 정상 부재는 로깅 없이 cost 0 처리 검증 | `tests/unit/logistics/database-route-adapter-dberror.test.ts` |
+| **TC-DBE-05** | 정상 흐름 — 에러 로그 없음 | 경로+요율 모두 존재 시 옵션 정상 생성·에러 로그 미발생 검증 | `tests/unit/logistics/database-route-adapter-dberror.test.ts` |
+
 
