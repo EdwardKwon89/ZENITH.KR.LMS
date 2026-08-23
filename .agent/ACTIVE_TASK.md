@@ -50,6 +50,11 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
+| [#1185](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1185) | [Team B] TASK-B-322: 로그 커버리지 개선 ⑤— admin/auth.ts 예외 객체 폐기 패턴 수정 (5건) | b | p2 | - | 미배정 | 2026-08-23 |
+| [#1184](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1184) | [Team A] TASK-1139: 로그 커버리지 개선 ④— DatabaseRouteAdapter.ts DB에러/무경로 구분불가 (2건) | a | p3 | - | 미배정 | 2026-08-23 |
+| [#1183](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1183) | [Team B] TASK-B-321: 로그 커버리지 개선 ③— ups-actual-charges/cost.ts DB쓰기 실패 무기록 (~21건) | b | p2 | - | 미배정 | 2026-08-23 |
+| [#1182](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1182) | [Team B] TASK-B-320: 로그 커버리지 개선 ②— lib/shxk/order.ts·tracking.ts logger 미도입 (6건) | b | p2 | - | 미배정 | 2026-08-23 |
+| [#1181](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1181) | [Team B] TASK-B-319: 로그 커버리지 개선 ①— ups-labels.ts 실패 반환값 무기록 해소 (~40건) | b | p2 | - | 미배정 | 2026-08-23 |
 | [#1177](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1177) | [Team A] TASK-1137: 동일 계정 동시 로그인 감지 및 처리(알림 + 기존유지/강제로그아웃 선택) | a | p2 | - | 미배정 | 2026-08-20 |
 | [#1176](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1176) | [Team A] TASK-1136: Session Idle Timeout 관리자 설정 + 다음 로그인부터 적용 | a | p2 | - | 미배정 | 2026-08-20 |
 | [#1172](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1172) | [Team A] TASK-1134: 중복 Task 번호 CI/pre-commit 기계적 차단 (Issue #358 후속) | a | p4 | - | 미배정 | 2026-08-19 |
