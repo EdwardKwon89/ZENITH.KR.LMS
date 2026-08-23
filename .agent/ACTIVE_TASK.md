@@ -50,7 +50,7 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
-| [#1186](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1186) | [Team A] TASK-1140: /admin/error-logs 조회 UI 개선 — 필터·검색 추가 (Issue #1178 후속) | a | p3 | in-progress | 미배정 | 2026-08-23 |
+| [#1186](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1186) | [Team A] TASK-1140: /admin/error-logs 조회 UI 개선 — 필터·검색 추가 (Issue #1178 후속) | a | p3 | review | 미배정 | 2026-08-23 |
 | [#1185](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1185) | [Team B] TASK-B-322: 로그 커버리지 개선 ⑤— admin/auth.ts 예외 객체 폐기 패턴 수정 (5건) | b | p2 | - | 미배정 | 2026-08-23 |
 | [#1184](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1184) | [Team A] TASK-1139: 로그 커버리지 개선 ④— DatabaseRouteAdapter.ts DB에러/무경로 구분불가 (2건) | a | p3 | review | 미배정 | 2026-08-23 |
 | [#1183](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1183) | [Team B] TASK-B-321: 로그 커버리지 개선 ③— ups-actual-charges/cost.ts DB쓰기 실패 무기록 (~21건) | b | p2 | - | 미배정 | 2026-08-23 |
