@@ -746,6 +746,17 @@
 | **TC-TISA-03** | 스냅샷 없음 — null 반환 | 스냅샷 미존재 시 null 반환 (회귀) | `tests/unit/operations/tisa.test.ts` |
 | **TC-TISA-04** | select 쿼리 metadata 컬럼 포함 확인 | 실제 DB 조회 시 metadata 컬럼이 select에 포함되는지 검증 | `tests/unit/operations/tisa.test.ts` |
 
+### 56. 에러로그 필터·검색·우선순위 정렬 (Issue #1186 / TASK-1140)
+> ⚠️ 섹션 55(TC-DBE, PR #1187)가 선행 머지될 경우 본 섹션은 57로 재번호핑 필요 없음 — 번호 충돌 없도록 56으로 선점 등록
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-ELF-01** | getErrorLogs severity 파라미터 전달 | severity 필터가 eq 조건으로 전달되는지 검증 | `tests/unit/monitoring/error-log-filters.test.ts` |
+| **TC-ELF-02** | getErrorLogs resolved 파라미터 전달 | 미해결(resolved=false) 필터 전달 검증 | `tests/unit/monitoring/error-log-filters.test.ts` |
+| **TC-ELF-03** | getErrorLogs search 키워드 ilike 전달 | 키워드 검색이 ilike(message)로 전달되며 trim 처리되는지 검증 | `tests/unit/monitoring/error-log-filters.test.ts` |
+| **TC-ELF-04** | search 빈 문자열 무시 | 공백뿐인 검색어에 ilike를 적용하지 않는지 검증 | `tests/unit/monitoring/error-log-filters.test.ts` |
+| **TC-ELF-05** | 기본 3단 다중 정렬 | resolved asc → severity asc(CRITICAL 우선) → created_at desc 순서 검증 | `tests/unit/monitoring/error-log-filters.test.ts` |
+| **TC-ELF-06** | 필터 없음 시 페이징만 적용 | 파라미터 부재 시 eq/ilike 미호출 및 정상 반환 검증 | `tests/unit/monitoring/error-log-filters.test.ts` |
+
 ---
 
 ## 📝 가이드라인 (R-09 Enforcement)
