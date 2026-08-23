@@ -5,7 +5,7 @@
 > **설계 주체:** Aiden (Claude, ZEN_CEO)
 > **승인 주체:** Master Edward
 > **작성일:** 2026-08-23
-> **버전:** v1.0
+> **버전:** v1.1 (데이터·이벤트 흐름도 §3 추가)
 > **관련 GOV:** GOV_COMMON.md v3.5 (ZEN_A4 §실패 관측성 의무 / §핵심 지점 실시간 알림 의무)
 > **관련 Issue:** #1178(TASK-1138, 최초 도입), #1181~#1186(커버리지 확대·알림 경로·조회 UI)
 
@@ -38,7 +38,55 @@ flowchart TB
 
 **설계 원칙**: 분석·검색처럼 전문성이 필요한 무거운 영역(로그 저장·인덱싱·이슈 dedup)은 SaaS에 위임하되, **"실패 발생 시 누구에게 어떻게 알릴지"는 플랫폼이 직접 소유**한다(SaaS 계정의 Alert Rule에 위임하지 않음 — 계정 접근 제약, 무료 플랜 팀원 초대 제약, 인앱 통합 필요성 등을 이유로 채택하지 않음).
 
-## 3. 실패 관측성 원칙 (Observability Principle)
+## 3. 데이터 및 이벤트 흐름도 (Data & Event Flow)
+
+### 3.1 이벤트 시퀀스 (실패 발생 시점 기준)
+
+```mermaid
+sequenceDiagram
+    participant Code as 애플리케이션 코드
+    participant Logger as logger.ts (emit)
+    participant Axiom as Axiom
+    participant Sentry as Sentry
+    participant Mon as logClientError()
+    participant DB as zen_error_logs (Supabase)
+    participant Mail as Resend 이메일
+    participant Admin as 관리자
+
+    Code->>Logger: logger.info/warn/error(message, data)
+    Note over Logger: buildEntry()가 requestId·userId·orgId·route를 자동 부착(DEF-136)
+
+    par 항상 실행
+        Logger->>Axiom: enqueueAxiomLog(entry) — fire-and-forget, 25건/10ms 배치
+    and error 레벨일 때만
+        Logger->>Sentry: Sentry.captureMessage(entry) — try/catch로 보호
+    end
+    Logger-->>Code: 콘솔 출력(회귀 유지), 함수 반환값은 그대로
+
+    alt 핵심 지점(Critical Point)으로 판정된 실패
+        Code->>Mon: logClientError({severity:'CRITICAL', error_type:'SERVER', message, url})
+        Mon->>DB: INSERT zen_error_logs (sentry_id 포함)
+        Mon->>Mail: sendCriticalErrorEmail() [신규, #1181에서 추가 예정]
+        Mail-->>Admin: 이메일 즉시 수신
+        Mon->>DB: INSERT zen_notifications (인앱 알림, channel=IN_APP)
+    end
+
+    Admin->>DB: /admin/error-logs 접속 → getErrorLogs(filter)
+    DB-->>Admin: 목록 반환(Severity·해결여부·Sentry 딥링크)
+    Admin->>DB: Resolve 클릭 → resolveErrorLog(id) → resolved=true
+```
+
+### 3.2 데이터 필드 흐름
+
+| 필드 | 발생 지점 | 도달하는 계층 |
+|:---|:---|:---|
+| `requestId`/`userId`/`orgId`/`route` | `src/lib/logging/request-context.ts`(DEF-136, AsyncLocalStorage) | Axiom entry, Sentry `contexts.log_entry` |
+| `level`(info/warn/error) | `logger.ts` 호출 인자 | Axiom(전체), Sentry(error만) |
+| `severity`(WARNING/ERROR/CRITICAL) | `logClientError()` 호출 인자 | `zen_error_logs`만(Axiom/Sentry의 `level`과는 별개 개념) |
+| `sentry_id` | `Sentry.captureException()`/`captureMessage()` 반환값 | `zen_error_logs` → `/admin/error-logs` 딥링크로 역참조 |
+| `error_type`(CLIENT/SERVER/EDGE) | 호출부에서 명시 | `zen_error_logs` |
+
+## 4. 실패 관측성 원칙 (Observability Principle)
 
 > 상세 규정: `GOV_COMMON.md` § ZEN_A4 Core Principles
 
@@ -53,7 +101,7 @@ if (orderRes.success === 0) return { error: orderRes.message };
 
 **최초 발견 규모**: 2026-08-22 전수 조사 기준 약 85개 지점(ups-labels.ts ~40건, shxk/order·tracking 6건, ups-actual-charges/cost ~21건, DatabaseRouteAdapter.ts 2건, admin/auth.ts 5건 등) — Issue #1181~1185로 순차 해소 중.
 
-## 4. 핵심 지점(Critical Point) 판단 기준과 알림 경로
+## 5. 핵심 지점(Critical Point) 판단 기준과 알림 경로
 
 전수 로깅만으로는 사람이 대시보드를 능동적으로 확인해야 문제를 알 수 있다. 아래 4개 기준 중 **2개 이상** 해당하는 실패 지점은 로깅에 더해 실시간 알림을 구성한다.
 
@@ -64,15 +112,15 @@ if (orderRes.success === 0) return { error: orderRes.message };
 | ③ 침묵성(Silent failure) | 실패해도 즉각적인 가시 신호 없이 조용히 넘어가는가(비동기·배치·백그라운드일수록 해당) |
 | ④ 과거 사고 이력 | 동일·유사 유형 실패가 실제 장애로 이어진 전례가 있는가 |
 
-### 4.1 알림 구현 방식
+### 5.1 알림 구현 방식
 
 Cron 폴링이 아니라, **실패 발생 시점에 동기 호출**해 진짜 실시간을 확보한다:
 
 1. 핵심 지점 실패 시 `logger.error()`와 별개로 `logClientError({severity:'CRITICAL', error_type:'SERVER', message, url})`(`src/app/actions/misc/monitoring.ts`)를 호출 → `zen_error_logs`에 즉시 기록
 2. `logClientError()`의 CRITICAL 분기는 기존 `sendInAppNotification()`(인앱 알림)에 더해 **이메일 발송**(`src/lib/notifications/email.ts`의 Resend 연동 패턴 재사용)까지 수행하도록 확장
-3. `/admin/error-logs` 화면이 플랫폼 자체 "진행 중 장애" 뷰 역할을 겸함(§5 참조)
+3. `/admin/error-logs` 화면이 플랫폼 자체 "진행 중 장애" 뷰 역할을 겸함(§6 참조)
 
-### 4.2 최초 적용 판정 결과
+### 5.2 최초 적용 판정 결과
 
 | Issue | 대상 | 판정 |
 |:---|:---|:---|
@@ -82,7 +130,7 @@ Cron 폴링이 아니라, **실패 발생 시점에 동기 호출**해 진짜 �
 | #1184 | DatabaseRouteAdapter.ts | 로깅만으로 충분 |
 | #1185 | admin/auth.ts | 로깅만으로 충분(에러 화면 즉시 노출로 침묵성 없음) |
 
-## 5. 관리자 조회 UI (`/admin/error-logs`)
+## 6. 관리자 조회 UI (`/admin/error-logs`)
 
 `ErrorLogsTable.tsx` + `getErrorLogs()`(`src/app/actions/misc/monitoring.ts`)로 `zen_error_logs`를 조회한다. Severity 배지, 에러 메시지, 발생 URL, 사용자 정보, Sentry 딥링크(`https://zenith-t2z.sentry.io/issues/?query={sentry_id}`), 해결 상태(Resolve 버튼)를 제공한다.
 
@@ -91,14 +139,14 @@ Cron 폴링이 아니라, **실패 발생 시점에 동기 호출**해 진짜 �
 - 오더/reference_no와의 직접 연결 없음
 - 키워드 검색 없음
 
-## 6. 알려진 한계 및 향후 과제
+## 7. 알려진 한계 및 향후 과제
 
 - **Fire-and-forget 유실 가능성**: Axiom 전송은 서버리스 함수 freeze 직전 호출분이 유실될 수 있음(`axiom-transport.ts` 배치 큐 특성). 핵심 지점은 `zen_error_logs` 동기 insert로 보완되므로 영향 낮음.
 - **Sentry 무료(Developer) 플랜**: 1인 전용이라 Team B 등 타 인원 초대 불가 — 필요 시 유료 플랜 전환 검토 필요(현재는 보류, Edward 결정 2026-08-22).
 - **Vercel Hobby 플랜 Runtime Logs 1시간 보관**: 근본적으로 플랫폼 자체 로그(Axiom/Sentry/`zen_error_logs`)로 우회했으므로 실사용에 지장 없음.
 - **로그 분석 엔진 자체 구축은 채택하지 않음**: Axiom/Sentry가 제공하는 저장·검색·dedup·스택트레이스 심볼화 등은 비용 대비 자체 구축 효율이 낮다고 판단(§2 원칙 참조). 알림 발송 책임만 플랫폼이 소유.
 
-## 7. 관련 Issue 이력
+## 8. 관련 Issue 이력
 
 | Issue | 내용 | 상태(2026-08-23 기준) |
 |:---|:---|:---|
