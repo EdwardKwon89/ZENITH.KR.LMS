@@ -60,3 +60,13 @@
 ## [발견 이슈]
 
 없음
+
+## [Aiden 검토]
+
+**2026-08-23 승인**
+
+- diff 직접 확인(`git diff origin/develop origin/feature/teama-task-1139-dbroute-dberror-log`) — task file 서술과 정확히 일치
+- 신규 테스트(TC-DBE-01~05) 내용 확인 — error/빈결과/정상흐름을 실제로 구분 검증하는 유의미한 테스트
+- `gh pr checks 1187` 실제 CI PASS 확인
+- 범위 준수 확인: Issue 확정 "2개 지점"만 수정, 스코프 외 항목(appendHubRoutes)은 후속 제안으로만 기재하고 임의 확장 없음
+- PR#1187 squash 머지 완료(커밋 `071d818090d23ca7ceeaa076b5674dd82cdcef74`), Issue #1184 Close 완료

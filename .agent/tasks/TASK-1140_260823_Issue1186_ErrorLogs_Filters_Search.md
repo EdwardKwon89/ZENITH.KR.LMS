@@ -79,3 +79,14 @@
 1. **[환경] 로컬 DB RLS 정책 드리프트**: 로컬 Supabase의 `zen_error_logs`에서 "Admin full access on zen_error_logs"(FOR ALL SELECT 허용) 정책이 소실되어 있었음(마이그레이션 `20260429100000_zen_error_logs.sql`에는 정의됨 → **마이그레이션 자체는 정상**, 로컬 DB 역사적 드리프트). 마이그레이션 원문대로 psql로 수동 복구 후 해소. **운영/스테이징 DB에도 동일 정책 존재 여부 점검 권장**(부재 시 관리자 에러로그 조회가 전면 실패함)
 2. **[환경] stale `.next` 캐시**: 브랜치 전환 반복 후 `/admin/*` 전 라우트가 404를 반환하는 현상 확인 — `.next` 삭제 후 재기동으로 해소. 향후 브랜치 스위칭 후 수상한 404는 캐시 클리어 선행 권장
 3. **[환경] auth 계정 소실**: 전일 TASK-1139 중 실행한 `supabase db reset`으로 시드 계정이 삭제되어 있었음 → `npm run db:seed` 재실행으로 복구(103_AGENT_ROLES_SPEC.md §5-1 절차 준수)
+
+## [Aiden 검토]
+
+**2026-08-23 승인**
+
+- diff 직접 확인(`git diff origin/develop origin/feature/teama-task-1140-errorlogs-filters`) — task file 서술과 정확히 일치
+- 부수 발견 버그 수정(상대경로 URL 렌더 크래시 방어) 확인 — 스코프 밖이지만 발견 즉시 수정한 타당한 판단
+- R-10 스크린샷(`01_default_critical_top.png`) 직접 열어 확인 — 필터 UI 노출, CRITICAL 미해결 건 최상단 정렬 실제 확인. 캡처 조작 없음
+- `gh pr checks 1188` 실제 CI PASS 확인
+- [발견 이슈] 1번(로컬 RLS 드리프트)은 별도 DEF 보고서 미작성 상태이나, 로컬 이력성 드리프트로 마이그레이션 자체는 정상 확인됨 — 별도 DEF 채번 대신 이슈 코멘트로 "운영/스테이징 동일 정책 존재 여부 확인 권고"만 남김(경미 사안 판단)
+- PR#1188 squash 머지 완료(커밋 `e47f5aa8adc6e672a18833340d86712221a5f859`), Issue #1186 Close 완료
