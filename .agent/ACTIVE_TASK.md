@@ -50,7 +50,7 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
-| [#1192](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1192) | [Team B] TASK-B-325: SHXK createorder shipper_street에 국가명 중복 포함 — UPS AddressLine3 거부 (DEF-B-145, High) | b | p1 | in-progress | jungjs | 2026-09-13 |
+| [#1192](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1192) | [Team B] TASK-B-325: SHXK createorder shipper_street에 국가명 중복 포함 — UPS AddressLine3 거부 (DEF-B-145, High) | b | p1 | review | jungjs | 2026-09-13 |
 | [#1190](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1190) | [Team B] TASK-B-324: 오더 화주명 수기입력값이 SHXK(UPS) 실제 배송 등록에 미반영 (DEF-B-144) | b | p2 | review | jungjs | 2026-09-13 |
 | [#1189](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1189) | [Team B] TASK-B-323: Resend 이메일 도메인(zenith-lms.com) 미인증 — 알림메일 전량 발송 실패 (DEF-B-143, High) | b | p1 | - | jungjs | 2026-08-25 |
 | [#1185](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1185) | [Team B] TASK-B-322: 로그 커버리지 개선 ⑤— admin/auth.ts 예외 객체 폐기 패턴 수정 (5건) | b | p2 | - | 미배정 | 2026-08-23 |
