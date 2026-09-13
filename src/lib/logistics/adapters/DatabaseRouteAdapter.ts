@@ -1,5 +1,6 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { IVirtualMapAdapter, RouteOption, RouteSegment } from '../routing';
+import { logger } from '@/lib/logger';
 
 interface RouteNetworkRow {
   id: string;
@@ -58,7 +59,11 @@ export class DatabaseRouteAdapter implements IVirtualMapAdapter {
 
     const { data: routes, error } = await query;
 
-    if (error || !routes || !Array.isArray(routes)) return;
+    if (error) {
+      logger.error(`[DB_ROUTE_ADAPTER] Direct route query failed (${origin} -> ${dest}):`, error.message);
+      return;
+    }
+    if (!routes || !Array.isArray(routes)) return;
 
     for (const r of routes as unknown as RouteNetworkRow[]) {
       const carrier = r.carrier;
@@ -191,7 +196,11 @@ export class DatabaseRouteAdapter implements IVirtualMapAdapter {
       .limit(1)
       .maybeSingle();
 
-    if (error || !data) return 0;
+    if (error) {
+      logger.error(`[DB_ROUTE_ADAPTER] Rate card query failed (${carrierId}/${transportMode}):`, error.message);
+      return 0;
+    }
+    if (!data) return 0;
 
     const raw = data as { tiers: { weight_slabs: RateCardTier[] } };
     const weightSlabs = raw.tiers?.weight_slabs;

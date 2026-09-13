@@ -119,7 +119,7 @@ describe('TASK-B-300 ②: 배송 기본 정보 카드 화주/수하인 연락처
 
     expect(screen.getByText('연락처: 010-1234-5678')).toBeTruthy();
     expect(screen.getByText('이메일: shipper@test.kr')).toBeTruthy();
-    expect(screen.getByText('주소: 서울 강남구 테헤란로 123')).toBeTruthy();
+    expect(screen.getByText('주소: 테헤란로 123, 서울 강남구')).toBeTruthy();
     expect(screen.getByText('연락처: 001-555-0101')).toBeTruthy();
     expect(screen.getByText('이메일: john@example.com')).toBeTruthy();
     expect(screen.getByText('주소: 123 Main St')).toBeTruthy();

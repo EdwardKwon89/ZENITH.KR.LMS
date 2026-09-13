@@ -30,6 +30,9 @@
 |---|--------|------|------|
 | **301** | 요율 라우팅 엔진 설계 | [301_ROUTING_ENGINE_DESIGN.md](./301_ROUTING_ENGINE_DESIGN.md) | 최적 경로 탐색 및 운임 계산 로직 |
 | **302** | 보안 가드 아키텍처 | [302_AUTH_GUARD_ARCHITECTURE.md](./302_AUTH_GUARD_ARCHITECTURE.md) | 권한 및 인증 미들웨어 구조 (v2.0 반영) |
+| **303** | 복합 요율 산정 엔진 | [303_COMPOSITE_PRICING_ENGINE.md](./303_COMPOSITE_PRICING_ENGINE.md) | 슬랩·할증·할인 복합 요율 계산 로직 |
+| **304** | GS1-128 바코드 표준 | [304_GS1_128_BARCODE_STANDARD.md](./304_GS1_128_BARCODE_STANDARD.md) | 창고 바코드 규격 |
+| **305** | 로그·에러 관측성 아키텍처 | [305_LOGGING_OBSERVABILITY_ARCHITECTURE.md](./305_LOGGING_OBSERVABILITY_ARCHITECTURE.md) | Axiom/Sentry/자체DB 3계층 로그 구조, 핵심 지점 실시간 알림 설계 |
 
 ### 3. 상세 설계 명세 (Design Specs)
 | # | 문서명 | Link | 개요 |
