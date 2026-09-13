@@ -735,6 +735,16 @@
 | **TC-SHXK-OVR-03** | registerUpsOrder 실제 등록 payload 반영 | placeShxkOrder 경로 createorder payload 검증 (mock SHXK 호출) | `tests/unit/ups/task-b324-shxk-shipper-name-override.test.ts` |
 | **TC-SHXK-OVR-04** | previewShxkPayload 미리보기 payload 반영 | preview 경로 createorder payload 검증 | `tests/unit/ups/task-b324-shxk-shipper-name-override.test.ts` |
 
+### 56. SHXK createorder 주소 국가명 중복 제거 + 상세주소 앞 정렬 (DEF-B-145 / Issue #1192 / TASK-B-325)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-SHXK-STREET-01** | resolveShipperStreet 실제 재현 오더 fixture → 국가명 제거 + 상세주소 앞 정렬 | UPS "Invalid ShipFrom AddressLine3" 재발 방지 (실제 전송값 기반 정확 일치) | `tests/unit/ups/defb145-street-country-dedup.test.ts` |
+| **TC-SHXK-STREET-02** | 결과에 국가명 중복 미포함 (Republic of Korea/South Korea/Korea) | AddressLine 국가명 중복 원천 차단 | `tests/unit/ups/defb145-street-country-dedup.test.ts` |
+| **TC-SHXK-STREET-03** | 시/구/도 세그먼트 유지 | 과잉 제거 금지 (도로명 이상만 보존) | `tests/unit/ups/defb145-street-country-dedup.test.ts` |
+| **TC-SHXK-STREET-04** | shipper_country_code 미셋(빈 값) 폴백 목록 처리 | 재현 오더와 동일한 빈 country_code 케이스 대응 | `tests/unit/ups/defb145-street-country-dedup.test.ts` |
+| **TC-SHXK-STREET-05** | resolveConsigneeStreet 동일 결함 점검 | 수하인 주소 국가명 제거 + 상세주소 앞 정렬 | `tests/unit/ups/defb145-street-country-dedup.test.ts` |
+| **TC-SHXK-STREET-06** | buildCreateOrderPayload shipper_street/consignee_street 반환값 검증 | 실제 createorder payload에 국가명 미포함 확인 | `tests/unit/ups/defb145-street-country-dedup.test.ts` |
+
 ---
 
 ## 📝 가이드라인 (R-09 Enforcement)

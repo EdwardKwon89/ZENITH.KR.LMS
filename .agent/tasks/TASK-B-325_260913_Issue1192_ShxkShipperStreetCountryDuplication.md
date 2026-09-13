@@ -8,7 +8,7 @@
 | **담당** | Baker (Team B) |
 | **생성일** | 2026-09-13 |
 | **우선순위** | P1 (High) |
-| **상태** | 🔄 진행 중 |
+| **상태** | 🔔 완료 보고 |
 
 ## 현재 상태 (Jaison 분석 완료)
 
@@ -78,20 +78,89 @@ Jaison이 실제 오더 데이터로 시뮬레이션해 아래와 같이 확정:
 - **task file/ACTIVE_TASK 상태 전환 누락 계열 5회**(task file 완전 누락 포함) — 코드 커밋과 완료보고 문서 커밋을 반드시 분리하고, `[작업 결과]` 섹션과 상태 🔔 전환을 빠짐없이 작성할 것.
 - 위 이력에도 불구하고 JSJung 2026-07-15 결정에 따라 할당 지속(재론 금지, [[project_dave_r17_assignment_policy]] 동일 원칙 적용).
 
-## [설계 의견]
+## [설계 의견] (Baker, 2026-09-13)
 
-_(담당자 작성 예정 — 착수 전 필수)_
+JSJung 확정 방향(`[상세주소, 도로명주소(국가명 제거)]`)을 기준으로 아래 세부 구현을 제안합니다.
+
+### 1. 주소 조합 로직 — `resolveShipperStreet()`
+
+현재: `[shipperAddr, shipperAddrDetail].filter(Boolean).join(' ')`
+변경: `[shipperAddrDetail, stripCountryToken(shipperAddr, shipper_country_code)].filter(Boolean).join(', ')`
+
+- **순서**: 상세주소(`_detail_english`)를 **맨 앞**으로, 그 뒤 도로명주소를 이어붙임. JSJung 확정 예시와 동일한 `detail, road` 순서.
+- **구분자**: 공백 → `, ` (확정 예시 표기 `6 floor, 601 room, 6 Daewangpangyo-ro...`과 일치).
+- **국가명 제거** `stripCountryToken(addr, countryCode)`:
+  - `resolveCountryName(countryCode)` 결과(예: `KR` → `South Korea`) + 공통 영문 국가명 폴백 목록(`Republic of Korea`, `Korea`, `United States`, `USA`, `Japan`, `China` 등)을 토큰 세트로 구성.
+  - 주소를 `, `로 분할한 세그먼트 중 **끝에서부터** 토큰 세트와 일치하는 세그먼트를 제거(도로명에는 국가명이 오지 않으므로 안전).
+  - `countryCode`가 빈 값인 경우 폴백 목록으로만 처리 — 이번 오더처럼 `shipper_country_code` 미셋 사례 대응.
+- 시/구/도 세그먼트는 확정 방향 예시(`...Bundang-gu, Seongnam-si, Gyeonggi-do`)에 따라 **제거하지 않음** — 국가명만 제거.
+
+### 2. `resolveConsigneeStreet()` 동시 수정
+
+- 동일 구조(`[consigneeAddr, detailAddr]`)라 같은 결함 노출 가능. 수하인 주소가 국가명 포함 + 상세주소 조합으로 저장되는 케이스 대응 차원에서 동일 로직(`[detail, stripCountry(addr)]`) 적용.
+- `buildCreateOrderPayload()`의 `consignee_street`는 인라인 조합(`localAddr ? \`${street} (${localAddr})\` : street`)이라 그대로 두면 동일 결함 재현 위험 — 이 경로에도 기존 필드 우선순위는 유지한 채 `stripCountryToken`만 적용(순서는 현행 유지, 과설계 금지).
+- ⚠️ 범위 관련: task 파일 원문에 "resolveConsigneeStreet() 수정은 Jaison 승인 필요" 명시되어 있어, 이 항목 승인을 요청합니다.
+
+### 3. 표시 화면 (CI/PL/PDF) 충돌 확인
+
+- `resolveShipperStreet`/`resolveConsigneeStreet`는 SHXK payload 외 CI/PL/Invoice PDF·order 상세 표시에도 사용됨. 본 함수 수정으로 표시 순서가 `detail, road`로 바뀌지만, 이는 확정 방향(국제 영문 주소 표기 관례)과 동일해 오히려 일관됩니다.
+- 국가명 중복 표시(표시 화면에 `address`에 국가명 + `country` 필드 별도 표기)도 함께 사라져 개선 효과. 별도 화면 코드 수정 불필요(함수 변경에 자동 추종).
+
+### 4. 회귀 테스트 (DoD 3)
+
+- 실제 재현 오더 `ZEN-2026-000015`의 전송값(`"6 Daewangpangyo-ro 351beon-gil, Bundang-gu, Seongnam-si, Gyeonggi-do, Republic of Korea 6 floor, 601 room"`)과 같은 shape의 fixture를 mock으로 사용.
+- `resolveShipperStreet()` → 확정 방향 `"6 floor, 601 room, 6 Daewangpangyo-ro 351beon-gil, Bundang-gu, Seongnam-si, Gyeonggi-do"` 정확 일치 검증(국가명 `Republic of Korea` 미포함 + 순서 검증).
+- `buildCreateOrderPayload()` 실제 호출해 `shipper_street`/`consignee_street` 반환값 검증 — 소스 문자열/존재 확인 테스트 금지(위반 이력 방지).
+
+### 리스크
+
+- 기존 회귀 테스트 2건(`address-english-display.test.ts`·`ups-labels-mapping.test.ts`)의 주소 조합 기대값이 공백 구분 → `, ` 구분·순서 변경으로 바뀜 — 테스트 기대값 갱신 필요.
+- 제거 토큰이 도로명에 우연히 포함된 경우(`...Road, Republic of Korea Place`) 과잉 제거 가능성 — 끝-세그먼트 완전 일치로만 제한해 완화.
 
 ## [설계 확정]
 
-_(Jaison 작성 예정)_
+2026-09-13 Jaison 승인 — Baker [설계 의견] 내용 그대로 확정(표시 화면 자동 추종 주의는 승인권자에 전달 확인됨).
 
 ## [작업 결과]
 
 _(담당자 작성 예정)_
 
+2026-09-13 Baker — **완료** ([설계 확정] 내용 그대로 구현)
+
+### 구현
+
+`src/lib/ups/label-mapping.ts`
+
+1. **`stripCountryToken(address, countryCode)` 헬퍼 신설**
+   - `resolveCountryName(countryCode)` 결과(예: `KR` → `South Korea`) + 하드코딩 폴백 목록(`Republic of Korea`, `Korea`, `United States`, `USA`, `Japan`, `China` 등 30종)을 토큰 세트로 구성.
+   - 주소를 `, `로 분할한 세그먼트를 **뒤에서부터** 검사, 토큰과 완전 일치하는 종단 국가명 세그먼트만 제거(과잉 제거 방지 — 도로명 세그먼트는 절대 제거 안 함).
+   - `countryCode` 빈 값(재현 오더 `ZEN-2026-000015` 상태)이어도 폴백 목록으로 동작.
+2. **`resolveShipperStreet()`** — 조합 순서를 `[상세주소, 도로명주소]`로 변경하고 구분자를 `, `로 통일 + 국가명 제거. JSJung 확정 예시와 정확 일치:
+   - `6 floor, 601 room, 6 Daewangpangyo-ro 351beon-gil, Bundang-gu, Seongnam-si, Gyeonggi-do` (국가명 제거, 시/구/도 유지)
+3. **`resolveConsigneeStreet()`** — 동일 패턴 적용 (Jaison 승인 범위 확대 반영).
+4. **`buildCreateOrderPayload()`** — `consignee_street` 인라인 조합 경로에도 `stripCountryToken` 적용(필드 우선순위·순서는 현행 유지, 과설계 금지 원칙).
+
+### 테스트 (R-09 + 독립 되돌리기 검증)
+
+| 항목 | 결과 |
+| :--- | :--- |
+| **신규 회귀 테스트** | `tests/unit/ups/defb145-street-country-dedup.test.ts` 9건 — 실제 재현 오더 `ZEN-2026-000015` 전송값 shape fixture 사용, `resolveShipperStreet`/`resolveConsigneeStreet`/`buildCreateOrderPayload` **실제 호출 + 반환값 정확 일치 검증**(`toContain` 소스 문자열 검사·함수 존재 확인 패턴 미사용) |
+| **기존 테스트 기대값 갱신** | 순서/구분자 변경(공백→`, `, 상세주소 앞)에 맞춰 4개 파일 갱신: `address-english-display.test.ts`·`ups-labels-mapping.test.ts`·`ups-labels-shipper-address.test.ts`·`shipper-address-english.test.ts`·`ups-detail-b300.test.tsx`(표시 화면 자동 추종 — 설계 확정 반영) |
+| **독립 되돌리기 검증** | 소스 수정 원복 시 신규 테스트 **8건 FAIL** 확인 → 복원 후 9건 PASS (결과 기록) |
+| **전체 회귀 (R-08)** | `npm run test:regression` → **203 test files / 1,434 tests / 전부 PASS** |
+| **빌드** | `npm run build` SUCCESS |
+
+### 발생한 환경 수리 (코드 변경 아님)
+
+- 로컬 DB `zen_sequences` 카운터가 `ZEN-2026-000015`(DEF-B-145 재현 오더)보다 뒤처져 있어 신규 `create_order_atomic` 호출이 `zen_orders_order_no_key` `duplicate key` 충돌 → 통합 테스트 3건 선재 실패(`iss1100-shipper-name-*`, `iss1125-order-edit-log`)가 소스 원복 상태에서도 동일 확인됨. `zen_sequences.last_value`를 15로 정렬해 해소(소스 변경 없음, 본 Task와 직접 관련 — 재현 오더가 원인).
+
+### 커밋
+
+- `d643af66d` `[Baker] fix: TASK-B-325 SHXK shipper_street 국가명 중복 포함 수정 (DEF-B-145)`
+
 ## [발견 이슈]
 
 _(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
 
-없음
+- **UPS 오더 상세/서류 화면 주소 표기 순서 변경**: `resolveShipperStreet`/`resolveConsigneeStreet`가 CI/PL/Invoice PDF·order 상세 표시에도 사용되어 모든 표시가 `[상세주소, 도로명주소]` 순서로 바뀜. 이는 설계 확정(국제 영문 주소 표기 관례)과 동일 방향이며 화면 코드 수정은 불필요(함수 자동 추종) — 다만 `ups-detail-b300` 테스트 기대값(`주소: 테헤란로 123, 서울 강남구`) 갱신이 필요했음. 차기 서류 검증 시 표기 일관성 확인 권장.
+- **로컬 DB `zen_sequences` 드리프트 (환경)**: `get_next_order_sequence`가 `zen_sequences` 카운터 기반인데, 재현 오더 `ZEN-2026-000015` 생성 시 카운터가 전진하지 않아 그 이후 모든 `create_order_atomic` 신규 오더가 duplicate key 충돌. 수동 seed/재현 데이터 생성 시 시퀀스 정렬 누락 가능 — 재발 시 `UPDATE public.zen_sequences SET last_value = <max order_no> WHERE prefix='ZEN' AND year='2026';` 필요.
