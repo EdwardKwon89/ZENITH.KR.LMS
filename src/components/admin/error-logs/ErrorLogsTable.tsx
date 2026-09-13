@@ -1,13 +1,14 @@
 "use client";
 import { logger } from '@/lib/logger';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import ZenDataGrid from '@/components/ui/ZenDataGrid';
-import { ZenBadge, ZenButton } from '@/components/ui/ZenUI';
+import { ZenBadge, ZenButton, ZenSelect } from '@/components/ui/ZenUI';
+import { ZenInput } from '@/components/ui/ZenInput';
 import { ColumnDef } from '@tanstack/react-table';
 import { format } from 'date-fns';
-import { CheckCircle, AlertCircle, ShieldAlert, ExternalLink, User, Globe } from 'lucide-react';
-import { resolveErrorLog } from '@/app/actions/monitoring';
+import { CheckCircle, AlertCircle, ShieldAlert, ExternalLink, User, Globe, Search } from 'lucide-react';
+import { resolveErrorLog, getErrorLogs } from '@/app/actions/monitoring';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
@@ -16,10 +17,66 @@ interface ErrorLogsTableProps {
   totalCount: number;
 }
 
+type SeverityFilter = 'ALL' | 'CRITICAL' | 'ERROR' | 'WARNING';
+type StatusFilter = 'ALL' | 'OPEN' | 'RESOLVED';
+
+const SEVERITY_OPTIONS = [
+  { value: 'ALL', label: 'All Severities' },
+  { value: 'CRITICAL', label: 'CRITICAL' },
+  { value: 'ERROR', label: 'ERROR' },
+  { value: 'WARNING', label: 'WARNING' },
+];
+
+const STATUS_OPTIONS = [
+  { value: 'ALL', label: 'All Statuses' },
+  { value: 'OPEN', label: 'Open' },
+  { value: 'RESOLVED', label: 'Resolved' },
+];
+
+const PAGE_SIZE = 50;
+
 export const ErrorLogsTable: React.FC<ErrorLogsTableProps> = ({ initialLogs, totalCount }) => {
   const t = useTranslations('Monitoring');
   const [logs, setLogs] = useState(initialLogs);
   const [isLoading, setIsLoading] = useState(false);
+  const [severityFilter, setSeverityFilter] = useState<SeverityFilter>('ALL');
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('ALL');
+  const [searchText, setSearchText] = useState('');
+  const isFirstRender = useRef(true);
+
+  const fetchLogs = React.useCallback(async (filters: {
+    severity: SeverityFilter;
+    status: StatusFilter;
+    search: string;
+  }) => {
+    setIsLoading(true);
+    try {
+      const result = await getErrorLogs({
+        page: 1,
+        pageSize: PAGE_SIZE,
+        severity: filters.severity === 'ALL' ? undefined : filters.severity,
+        resolved: filters.status === 'ALL' ? undefined : filters.status === 'OPEN' ? false : true,
+        search: filters.search.trim() || undefined,
+      });
+      setLogs(result.data);
+    } catch (error) {
+      logger.error('[ERROR_LOGS_TABLE] Failed to fetch logs:', error);
+      toast.error('로그 조회에 실패했습니다.');
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    const timer = setTimeout(() => {
+      fetchLogs({ severity: severityFilter, status: statusFilter, search: searchText });
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [severityFilter, statusFilter, searchText, fetchLogs]);
 
   const handleResolve = async (id: string) => {
     setIsLoading(true);
@@ -33,6 +90,7 @@ export const ErrorLogsTable: React.FC<ErrorLogsTableProps> = ({ initialLogs, tot
         log.id === id ? { ...log, resolved: true } : log
       ));
       toast.success('에러 로그가 해결됨으로 표시되었습니다.');
+      fetchLogs({ severity: severityFilter, status: statusFilter, search: searchText });
     } catch (error) {
       logger.error("Failed to resolve error log", error);
       toast.error('상태 변경에 실패했습니다.');
@@ -47,6 +105,15 @@ export const ErrorLogsTable: React.FC<ErrorLogsTableProps> = ({ initialLogs, tot
       case 'ERROR': return 'warning';
       case 'WARNING': return 'info';
       default: return 'default';
+    }
+  };
+
+  // 상대 경로 등 URL 파싱 불가 문자열은 원본 그대로 표기 (TASK-1140: 렌더 크래시 방지)
+  const getUrlDisplay = (rawUrl: string): string => {
+    try {
+      return new URL(rawUrl).pathname;
+    } catch {
+      return rawUrl;
     }
   };
 
@@ -74,7 +141,7 @@ export const ErrorLogsTable: React.FC<ErrorLogsTableProps> = ({ initialLogs, tot
             </span>
             {row.original.url && (
               <span className="text-[10px] text-slate-400 truncate flex items-center gap-1">
-                <Globe size={10} /> {new URL(row.original.url).pathname}
+                <Globe size={10} /> {getUrlDisplay(row.original.url)}
               </span>
             )}
           </div>
@@ -157,7 +224,33 @@ export const ErrorLogsTable: React.FC<ErrorLogsTableProps> = ({ initialLogs, tot
   ];
 
   return (
-    <div className="w-full">
+    <div className="w-full space-y-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[200px_200px_1fr] gap-3">
+        <ZenSelect
+          value={severityFilter}
+          onValueChange={(v) => setSeverityFilter(v as SeverityFilter)}
+          options={SEVERITY_OPTIONS}
+          className="py-2.5 rounded-xl text-sm font-bold"
+          aria-label="Severity filter"
+        />
+        <ZenSelect
+          value={statusFilter}
+          onValueChange={(v) => setStatusFilter(v as StatusFilter)}
+          options={STATUS_OPTIONS}
+          className="py-2.5 rounded-xl text-sm font-bold"
+          aria-label="Status filter"
+        />
+        <div className="relative">
+          <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+          <ZenInput
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+            placeholder="메시지 키워드 검색..."
+            className="py-2.5 pl-10 rounded-xl text-sm"
+            aria-label="Keyword search"
+          />
+        </div>
+      </div>
       <ZenDataGrid 
         columns={columns} 
         data={logs} 

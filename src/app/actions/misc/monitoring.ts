@@ -85,6 +85,7 @@ export async function getErrorLogs(params: {
   pageSize?: number;
   severity?: string;
   resolved?: boolean;
+  search?: string;
 }) {
   const { supabase } = await validateAdminAction();
   
@@ -103,8 +104,14 @@ export async function getErrorLogs(params: {
   if (params.resolved !== undefined) {
     query = query.eq('resolved', params.resolved);
   }
+  if (params.search && params.search.trim()) {
+    query = query.ilike('message', `%${params.search.trim()}%`);
+  }
 
+  // TASK-1140 (Issue #1186): 미해결(resolved=false) 우선 → CRITICAL → ERROR → WARNING(텍스트 정렬과 우선순위 일치) → 최신순
   const { data, error, count } = await query
+    .order('resolved', { ascending: true })
+    .order('severity', { ascending: true })
     .order('created_at', { ascending: false })
     .range(from, to);
 
