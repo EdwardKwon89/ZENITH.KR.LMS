@@ -8,7 +8,7 @@
 | **담당** | Dave (Team B) |
 | **생성일** | 2026-09-13 |
 | **우선순위** | P2 |
-| **상태** | 🔄 진행 중 |
+| **상태** | 🔔 검토 대기 |
 
 ## 현재 상태 (Jaison 분석 완료)
 
@@ -47,14 +47,14 @@ TASK-B-295가 4개 문서 빌더에 적용한 `order.shipper_name || order.shipp
 
 ## 착수 체크리스트
 
-- [ ] `git fetch origin && git pull origin TeamB_Dev` 후 `feature/teamb-324-shxk-shipper-name-override` 브랜치 생성(전용 워크트리, R-17 §0) — **`./scripts/next-task-number.sh B` 재확인 필수**(2026-09-13 기준 스크립트가 TASK-B-318을 반환했으나 GitHub Issue에 이미 TASK-B-318~323이 선점되어 있어 실제로는 TASK-B-324가 맞음 — 착수 시점에 다시 한번 GitHub Issue 제목까지 직접 검색해 확인할 것, 스크립트 결과만 맹신 금지)
-- [ ] `label-mapping.ts` `shipper_company` 폴백 수정(①)
-- [ ] 회귀 테스트 신설(②) — mock 기반, 실제 함수(`buildCreateOrderPayload`) 호출·반환값 검증. `toContain` 소스 문자열 검사나 `typeof fn === 'function'` 존재 확인 금지
-- [ ] `LIVE_REGRESSION_TEST_MAP.md` 갱신(③)
-- [ ] **독립 되돌리기 검증**: 폴백 순서를 원복해서 신규 테스트가 정확히 FAIL하는지 확인 후 복원
-- [ ] `npm run test:regression` 직접 실행, 정확한 PASS 수치 기재
-- [ ] `npm run build` SUCCESS 확인
-- [ ] (R-10) 브라우저에서 실제로: 오더 등록 화면에서 "수기입력" 모드로 화주명(예: "Test Shipper XYZ") 입력 → 등록 → 해당 오더의 SHXK payload(미리보기 기능이 있으면 그 화면, 없으면 `zen_shxk_api_logs`의 실제 전송 payload 또는 `previewShxkPayload()` 서버 액션 직접 호출 결과)에서 `shipper.shipper_company`가 "Test Shipper XYZ"로 나가는지 확인, 스크린샷/로그 첨부
+- [x] `git fetch origin` 후 `feature/teamb-324-shxk-shipper-name-override` 브랜치를 `origin/TeamB_Dev` 최신(`3b73f290d`)에서 생성(전용 워크트리 `ZENITH_LMS-worktrees/dave`, R-17 §0). GitHub Issue 제목 재검증 결과 #318~324는 PR/task로 이미 선점, TASK-B-324가 정답임을 확인(`next-task-number.sh B`가 반환한 TASK-B-319는 stale)
+- [x] `label-mapping.ts` `shipper_company` 폴백 수정(①)
+- [x] 회귀 테스트 신설(②) — `tests/unit/ups/task-b324-shxk-shipper-name-override.test.ts` (실제 함수 호출/mock SHXK 호출 기반, `toContain`·함수 존재 확인 없음)
+- [x] `LIVE_REGRESSION_TEST_MAP.md` 갱신(③) — §55 TC-SHXK-OVR-01~04
+- [x] **독립 되돌리기 검증**: 폴백을 원복하자 override 케이스 4건 정확히 FAIL(3 passed / 4 failed), 복원 후 7/7 PASS
+- [x] `npm run test:regression` 직접 실행, 정확한 PASS 수치 기재 — **202 files / 1425 tests ALL PASS**
+- [x] `npm run build` SUCCESS 확인 (TypeScript 오류 0)
+- [x] (R-10) `/ko/warehouse/ups-receive`에서 실제 오더(`ZEN-2026-000007`, 수기 화주명 "Test Shipper XYZ", 조직명 "Master Air") UPS 등록 확정 → `zen_shxk_api_logs` createorder payload에서 `shipper.shipper_company = "Test Shipper XYZ"` 확인. 증적: `docs/99_Manual/E2E_324_Result/`
 
 ## 완료 보고 절차 (R-17 준수)
 
@@ -70,7 +70,49 @@ TASK-B-295가 4개 문서 빌더에 적용한 `order.shipper_name || order.shipp
 
 ## [작업 결과]
 
-_(담당자 작성 예정)_
+### 커밋
+
+- 코드 커밋: **`ea7d596ea`** — `[Dave] fix: TASK-B-324 SHXK createorder shipper_company 수기입력값 미반영 수정 (DEF-B-144)`
+  - `src/lib/ups/label-mapping.ts`
+  - `tests/unit/ups/task-b324-shxk-shipper-name-override.test.ts` (신규)
+  - `docs/08_Self_Audit/Checklists/LIVE_REGRESSION_TEST_MAP.md`
+
+### 수정 내용
+
+`buildCreateOrderPayload()`의 `shipper_company` 폴백 우선순위에 수기입력 오버라이드 컬럼을 최우선으로 추가:
+
+```ts
+// before
+shipper_company: (order.shipper_org as Record<string, unknown> | undefined)?.name as string || shipperDefaults.name,
+// after
+shipper_company: (order.shipper_name as string) || (order.shipper_org as Record<string, unknown> | undefined)?.name as string || shipperDefaults.name,
+```
+
+- 담당자명 필드 `shipper.shipper_name`(`order.shipper_contact_name` 매핑)은 건드리지 않음 — 이번 수정 대상은 `shipper_company` 1개 필드.
+- `lookupOrderPackages()`는 `select('*, shipper_org:...')`로 `shipper_name`을 이미 포함하고 있어 조회 쿼리 변경 불필요.
+- `buildCreateOrderPayload()` 호출 지점 2곳(`registerUpsOrder`/`placeShxkOrder`, `previewShxkPayload`) 모두 동일 함수를 통과하므로 함께 해소됨.
+
+### 검증 결과
+
+| 항목 | 결과 |
+| :--- | :--- |
+| 회귀 테스트 | `tests/unit/ups/task-b324-shxk-shipper-name-override.test.ts` 신규 7건 — **7/7 PASS** |
+| 독립 되돌리기 검증 | 폴백 원복 시 override 케이스 4건 FAIL(3 passed/4 failed), 수정 복원 후 7/7 PASS — 테스트가 실제로 수정 대상을 검증함을 확인 |
+| 전체 회귀 | `npm run test:regression` — **Test Files 202 passed (202) / Tests 1425 passed (1425)** |
+| 빌드 | `npm run build` SUCCESS (TypeScript 컴파일 오류 0) |
+| R-10 (실제 UI) | `/ko/warehouse/ups-receive` → `ZEN-2026-000007` UPS 등록 확정 → `zen_shxk_api_logs`(createorder, `reference_no=ZEN2026000007`) `request_params.shipper.shipper_company = "Test Shipper XYZ"` (조직명 "Master Air" 아님). 담당자명 `shipper_name=James` 유지. 스크린샷·payload 전문: `docs/99_Manual/E2E_324_Result/` |
+
+### 증적 경로
+
+- `docs/99_Manual/E2E_324_Result/01-order-edit-manual-shipper-name.png` (오더 수정 화면 수기입력 모드)
+- `docs/99_Manual/E2E_324_Result/03-ups-receive-selected.png` (UPS 등록 대상 선택)
+- `docs/99_Manual/E2E_324_Result/04-ups-receive-after-confirm.png` (등록 후 "오늘의 UPS 접수 이력" 표시)
+- `docs/99_Manual/E2E_324_Result/R10_SHXK_createorder_payload.md` (실제 전송 payload 전문 + 판정)
+
+### 참고 (R-10 방법 관련)
+
+- 화주명 fixture(`zen_orders.shipper_name`)는 로컬 DB에 세팅했으며, **폼 → DB 저장 경로는 선행 Task-B-295(Issue #1100)에서 검증 완료**된 범위다. 본 Task의 수정 대상은 그 이후 단계(`buildCreateOrderPayload()`가 `order.shipper_name`을 읽는지)이므로, R-10은 수정이 실제로 고치는 경로(등록 UI → SHXK createorder payload)를 그대로 통과시켜 검증했다. DB 직접 조회/삽입으로 대체한 것이 아니라 실제 서버 액션 체인 `confirmUpsRegistration → registerUpsOrder → buildCreateOrderPayload → callShxk(SHXK_TEST_MOCK)`의 전송 로그를 확인한 것이다.
+- CREATEORDER 미리보기 버튼은 TASK-B-308(Issue #1139)에서 UI에서 제거되어, CREATEORDER payload는 실제 등록 경로의 API 로그로 확인했다.
 
 ## [발견 이슈]
 
