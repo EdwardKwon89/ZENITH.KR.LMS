@@ -26,7 +26,7 @@ describe('TC-DEF-B059-01: resolveShipperStreet 실제 함수 검증', () => {
       address: '조직 주소',
     };
     const result = resolveShipperStreet(order, shipperOrg);
-    expect(result).toBe('123 Test Street Suite 100');
+    expect(result).toBe('Suite 100, 123 Test Street');
   });
 
   it('order.shipper_address_english가 없으면 shipperOrg.address_english 사용', () => {
