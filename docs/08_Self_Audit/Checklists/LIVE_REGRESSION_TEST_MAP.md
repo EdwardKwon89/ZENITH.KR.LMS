@@ -747,7 +747,6 @@
 | **TC-TISA-04** | select 쿼리 metadata 컬럼 포함 확인 | 실제 DB 조회 시 metadata 컬럼이 select에 포함되는지 검증 | `tests/unit/operations/tisa.test.ts` |
 
 ### 56. 에러로그 필터·검색·우선순위 정렬 (Issue #1186 / TASK-1140)
-> ⚠️ 섹션 55(TC-DBE, PR #1187)가 선행 머지될 경우 본 섹션은 57로 재번호핑 필요 없음 — 번호 충돌 없도록 56으로 선점 등록
 | ID | 테스트 항목 | 목적 | 파일 경로 |
 | :--- | :--- | :--- | :--- |
 | **TC-ELF-01** | getErrorLogs severity 파라미터 전달 | severity 필터가 eq 조건으로 전달되는지 검증 | `tests/unit/monitoring/error-log-filters.test.ts` |
@@ -756,6 +755,35 @@
 | **TC-ELF-04** | search 빈 문자열 무시 | 공백뿐인 검색어에 ilike를 적용하지 않는지 검증 | `tests/unit/monitoring/error-log-filters.test.ts` |
 | **TC-ELF-05** | 기본 3단 다중 정렬 | resolved asc → severity asc(CRITICAL 우선) → created_at desc 순서 검증 | `tests/unit/monitoring/error-log-filters.test.ts` |
 | **TC-ELF-06** | 필터 없음 시 페이징만 적용 | 파라미터 부재 시 eq/ilike 미호출 및 정상 반환 검증 | `tests/unit/monitoring/error-log-filters.test.ts` |
+
+### 57. SHXK createorder 화주명 수기입력 오버라이드 (DEF-B-144 / Issue #1190 / TASK-B-324)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-SHXK-OVR-01** | 수기입력 화주명(shipper_name)이 shipper_company로 전달 | 폴백 우선순위 `shipper_name > shipper_org.name > shipperDefaults.name` 검증 | `tests/unit/ups/task-b324-shxk-shipper-name-override.test.ts` |
+| **TC-SHXK-OVR-02** | 레거시 오더(shipper_name 없음) 조직명 폴백 | 기존 동작 회귀 방지 | `tests/unit/ups/task-b324-shxk-shipper-name-override.test.ts` |
+| **TC-SHXK-OVR-03** | registerUpsOrder 실제 등록 payload 반영 | placeShxkOrder 경로 createorder payload 검증 (mock SHXK 호출) | `tests/unit/ups/task-b324-shxk-shipper-name-override.test.ts` |
+| **TC-SHXK-OVR-04** | previewShxkPayload 미리보기 payload 반영 | preview 경로 createorder payload 검증 | `tests/unit/ups/task-b324-shxk-shipper-name-override.test.ts` |
+
+### 58. SHXK createorder 주소 국가·시·구·도 제거 + 상세주소 앞 정렬 (DEF-B-145/146 / Issue #1192/#1194 / TASK-B-325/326)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-SHXK-STREET-01** | resolveShipperStreet 재현 오더 → 49자 성공형 변환 | UPS AddressLine 초과 방지 (시/구/도+국가 제거, 도로명+상세만) | `tests/unit/ups/defb145-street-country-dedup.test.ts` |
+| **TC-SHXK-STREET-02** | 결과에 국가·시·구·도 완전 미포함 | AddressLine 초과 근본 원천 차단 | `tests/unit/ups/defb145-street-country-dedup.test.ts` |
+| **TC-SHXK-STREET-03** | 시/구/도 세그먼트 제거 확인 (도로명만 보존) | DEF-B-146 방향 전환 — 시/구/도는 별도 필드로 전달 | `tests/unit/ups/defb145-street-country-dedup.test.ts` |
+| **TC-SHXK-STREET-04** | shipper_country_code 미셋/명시 관계없이 동일 결과 | 첫 세그먼트 방식은 country_code 무관 | `tests/unit/ups/defb145-street-country-dedup.test.ts` |
+| **TC-SHXK-STREET-05** | resolveConsigneeStreet 수하인 도로명+상세주소만 구성 | 수하인 street 동일 축약 | `tests/unit/ups/defb145-street-country-dedup.test.ts` |
+| **TC-SHXK-STREET-06** | buildCreateOrderPayload street 반환값 + city/province 별도 전달 확인 | 정보 손실 없음 검증 | `tests/unit/ups/defb145-street-country-dedup.test.ts` |
+| **TC-SHXK-STREET-07** | 과거 성공 사례(61자 국가명 포함) → 도로명만 남김 | 성공 패턴 정합성 | `tests/unit/ups/defb145-street-country-dedup.test.ts` |
+| **TC-SHXK-STREET-08** | 단일 세그먼트 주소(콤마 없음) → 전체 도로명 취급 | 한글/다국어 세이프 가드 | `tests/unit/ups/defb145-street-country-dedup.test.ts` |
+
+### 59. SHXK street 시/구/도 제거 → AddressLine 70자 이내 축약 (DEF-B-146 / Issue #1194 / TASK-B-326)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-SHXK-OVRFLOW-01** | 88자 입력 → 49자 성공형 변환 (Jaison 실검증값 정확 일치) | DEF-B-146 핵심 회귀 — 실제 API 검증값 기반 | `tests/unit/ups/defb146-street-city-province-overflow.test.ts` |
+| **TC-SHXK-OVRFLOW-02** | 결과 길이 ≤ 70자 (AddressLine 1~2줄 상한) | UPS AddressLine 초과 근본 차단 (길이 검증) | `tests/unit/ups/defb146-street-city-province-overflow.test.ts` |
+| **TC-SHXK-OVRFLOW-03** | shipper_street 시/구/도·국가 완전 제거 | 새로운 resolveRoadAddress 검증 | `tests/unit/ups/defb146-street-city-province-overflow.test.ts` |
+| **TC-SHXK-OVRFLOW-04** | shipper_street/consignee_street + city/province city/province 별도 확인 | 정보 손실 없음 종합 | `tests/unit/ups/defb146-street-city-province-overflow.test.ts` |
+| **TC-SHXK-OVRFLOW-05** | 수하인 street(단일 세그먼트 it venture tower) 동일 축약 | ZEN-2026-000015 수하인 실제 데이터 | `tests/unit/ups/defb146-street-city-province-overflow.test.ts` |
 
 ---
 

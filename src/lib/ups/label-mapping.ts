@@ -61,6 +61,15 @@ export function resolveShxkUnitCode(packingUnit: string): string {
   return SHXK_UNIT_CODE_MAP[(packingUnit || '').toUpperCase()] || 'PCE';
 }
 
+// TASK-B-325 (DEF-B-145) → TASK-B-326 (DEF-B-146): UPS AddressLine 거부 방지용 주소 축약
+// 국제 영문 주소 표기 관례상 상세주소는 도로명 주소 앞에 온다(JSJung 확정).
+// TASK-B-326: 시/구/도는 shipper_city/shipper_province 별도 필드로 이미 전달되므로,
+// street에는 도로명+상세주소만 남긴다. DB 관례(도로명, 구, 시, 도[, 국가] 순서)에 따라
+// 첫 번째 콤마 세그먼트 = 도로명 (2026-09-13 로컬 DB 16건 전수 검증, 예외 없음).
+function resolveRoadAddress(address: string): string {
+  return (address || '').split(',')[0]?.trim() || '';
+}
+
 export function resolveShipperStreet(
   order: Record<string, unknown>,
   shipperOrg: Record<string, unknown> | undefined,
@@ -69,23 +78,27 @@ export function resolveShipperStreet(
   // 우선순위: order.shipper_address_english > shipperOrg.address_english > shipperOrg.address > order.shipper_address
   const shipperAddr = (order.shipper_address_english as string) || (shipperOrg?.address_english as string) || (shipperOrg?.address as string) || (order.shipper_address as string) || '';
   const shipperAddrDetail = (order.shipper_address_detail_english as string) || (shipperOrg?.address_detail_english as string) || (shipperOrg?.address_detail as string) || (order.shipper_address_detail as string) || '';
-  return [shipperAddr, shipperAddrDetail].filter(Boolean).join(' ');
+  // TASK-B-326: 도로명만 사용 (첫 콤마 세그먼트) — 국가·시·구·도 자동 제거, 상세주소는 맨 앞
+  const road = resolveRoadAddress(shipperAddr);
+  return [shipperAddrDetail, road].filter(Boolean).join(', ');
 }
 
 // TASK-B-305 (Issue #1133): 수하인 주소 영문 우선 표출 유틸
 // 우선순위: recipient_address_detail (영문 전용) > recipient_address_local > recipient_address
+// TASK-B-325/326: 상세주소를 맨 앞으로 + 도로명만 사용 (국가·시·구·도 자동 제거)
 export function resolveConsigneeStreet(
   order: Record<string, unknown>,
 ): string {
   const consigneeAddr = (order.recipient_address as string) || '';
   const localAddr = (order.recipient_address_local as string) || '';
   const detailAddr = (order.recipient_address_detail as string) || '';
-  
+  const road = resolveRoadAddress(consigneeAddr);
+
   // 영문 상세주소가 있으면 사용, 없으면 한글 원본 + 현지어 표기
   if (detailAddr) {
-    return [consigneeAddr, detailAddr].filter(Boolean).join(' ');
+    return [detailAddr, road].filter(Boolean).join(', ');
   }
-  return localAddr ? `${consigneeAddr} (${localAddr})` : consigneeAddr;
+  return localAddr ? `${road} (${localAddr})` : road;
 }
 
 export function buildCreateOrderPayload(
@@ -104,7 +117,9 @@ export function buildCreateOrderPayload(
   const shipperStreet = resolveShipperStreet(order, order.shipper_org as Record<string, unknown> | undefined);
   const consigneeStreet = (order.recipient_address as string) || '';
   const localAddr = (order.recipient_address_local as string) || '';
-  const fullConsigneeStreet = localAddr ? `${consigneeStreet} (${localAddr})` : consigneeStreet;
+  // TASK-B-326: 수하인 street도 도로명만 사용 (시/구/도·국가 제거 — AddressLine 초과 방지)
+  const cleanConsigneeStreet = resolveRoadAddress(consigneeStreet);
+  const fullConsigneeStreet = localAddr ? `${cleanConsigneeStreet} (${localAddr})` : cleanConsigneeStreet;
 
   return {
     reference_no: (order.order_no as string).replace(/-/g, ''),
@@ -119,7 +134,7 @@ export function buildCreateOrderPayload(
     cargovolume,
     shipper: {
       shipper_name: (order.shipper_contact_name as string) || shipperDefaults.name,
-      shipper_company: (order.shipper_org as Record<string, unknown> | undefined)?.name as string || shipperDefaults.name,
+      shipper_company: (order.shipper_name as string) || (order.shipper_org as Record<string, unknown> | undefined)?.name as string || shipperDefaults.name,
       shipper_countrycode: (order.shipper_country_code as string) || shipperDefaults.country,
       shipper_province: (order.shipper_state_province as string) || '',
       shipper_city: (order.shipper_city as string) || '',

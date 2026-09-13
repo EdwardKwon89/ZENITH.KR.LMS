@@ -13,12 +13,12 @@ describe('TASK-B-305: 영문 주소 표출 유틸 함수', () => {
       expect(resolveConsigneeStreet(order)).toBe('123 Main St');
     });
 
-    it('recipient_address_detail이 있는 경우 주소 + 상세주소 결합', () => {
+    it('recipient_address_detail이 있는 경우 상세주소 + 주소 결합 (TASK-B-325: 상세주소가 앞)', () => {
       const order = {
         recipient_address: '123 Main St',
         recipient_address_detail: 'Apt 101',
       };
-      expect(resolveConsigneeStreet(order)).toBe('123 Main St Apt 101');
+      expect(resolveConsigneeStreet(order)).toBe('Apt 101, 123 Main St');
     });
 
     it('recipient_address_local이 있고 detail이 없는 경우 현지어 표기 포함', () => {
@@ -35,7 +35,7 @@ describe('TASK-B-305: 영문 주소 표출 유틸 함수', () => {
         recipient_address_local: '서울시 강남구',
         recipient_address_detail: 'Apt 101',
       };
-      expect(resolveConsigneeStreet(order)).toBe('123 Main St Apt 101');
+      expect(resolveConsigneeStreet(order)).toBe('Apt 101, 123 Main St');
     });
   });
 
@@ -55,13 +55,13 @@ describe('TASK-B-305: 영문 주소 표출 유틸 함수', () => {
       expect(resolveShipperStreet(order, shipperOrg)).toBe('456 English Ave');
     });
 
-    it('order.shipper_address_detail_english이 있는 경우 주소 + 상세주소 결합', () => {
+    it('order.shipper_address_detail_english이 있는 경우 상세주소 + 주소 결합', () => {
       const order = {
         shipper_address_english: '456 English Ave',
         shipper_address_detail_english: 'Suite 200',
       };
       const shipperOrg = undefined;
-      expect(resolveShipperStreet(order, shipperOrg)).toBe('456 English Ave Suite 200');
+      expect(resolveShipperStreet(order, shipperOrg)).toBe('Suite 200, 456 English Ave');
     });
 
     it('order에 영문 필드가 없으면 shipperOrg에서 조회', () => {
@@ -70,7 +70,7 @@ describe('TASK-B-305: 영문 주소 표출 유틸 함수', () => {
         address_english: '789 Org English St',
         address_detail_english: 'Floor 3',
       };
-      expect(resolveShipperStreet(order, shipperOrg)).toBe('789 Org English St Floor 3');
+      expect(resolveShipperStreet(order, shipperOrg)).toBe('Floor 3, 789 Org English St');
     });
 
     it('영문 필드가 모두 없으면 한글 주소로 폴백', () => {
@@ -79,7 +79,7 @@ describe('TASK-B-305: 영문 주소 표출 유틸 함수', () => {
         shipper_address_detail: '200호',
       };
       const shipperOrg = undefined;
-      expect(resolveShipperStreet(order, shipperOrg)).toBe('456 영어대로 200호');
+      expect(resolveShipperStreet(order, shipperOrg)).toBe('200호, 456 영어대로');
     });
 
     it('우선순위: order.english > org.english > org.address > order.address', () => {
