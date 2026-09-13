@@ -9,7 +9,7 @@
 | **담당** | Baker (Team B) — TASK-B-325 직접 작업자로 해당 함수 맥락 보유, 연속 배정 |
 | **생성일** | 2026-09-13 |
 | **우선순위** | P1 (High) |
-| **상태** | 🔄 진행 중 |
+| **상태** | 🔔 완료 (PR 검토 대기) |
 
 ## 현재 상태 (Jaison 재검증 완료)
 
@@ -77,13 +77,86 @@ resolveShipperStreet(): road = shipperAddr.split(',')[0]?.trim() (첫 세그먼�
 
 _(담당자 작성 예정 — 착수 전 필수)_
 
+2026-09-13 Baker — 아래 항목 1(필수 가정 검증) 완료 후 작성. Jaison 승인 요청.
+
+### 1. 가정 검증 결과 — "첫 세그먼트=도로명" 관례 유효 (예외 없음)
+
+로컬 DB에서 실제 주소 샘플 **16건** 전수 조회:
+
+| 소스 | 샘플 수 | 관례 |
+| :--- | :---: | :--- |
+| `zen_orders.shipper_address_english` | 1 | `6 Daewangpangyo-ro 351beon-gil, Bundang-gu, Seongnam-si, Gyeonggi-do, Republic of Korea` — 첫 세그먼트=도로명 ✓ |
+| `zen_organizations.address_english` | 2 | `461-5 Gonghang-daero, Gangseo-gu, Seoul, Republic of Korea` / `290-1 Dongsomun-ro, Seongbuk-gu, Seoul, ...` — 첫 세그먼트=도로명 ✓ |
+| `zen_orders.recipient_address` | 8 | `sunshine st. 889-89`, `it venture tower` 등 — 전부 **단일 세그먼트**(전체=도로명 취급 가능) ✓ |
+| `zen_shxk_api_logs` (실제 전송) | 5 | 성공 사례 `461-5 Gonghang-daero, Gangseo-gu, Seoul, Republic of Korea` 포함 전부 첫 세그먼트=도로명 ✓ |
+
+**예외 패턴 없음** — 한국 도로명주소 영문 `도로명, 구, 시, 도, 국가` 순서 관례가 일관 확인. 단일 세그먼트(콤마 없음: 영문 다국·한글 폴백)는 "전체=도로명"으로 처리하며, 한글 주소는 콤마 분리가 안 되므로 기존 방식대로 유지(시/구/도 보존).
+
+### 2. 구현 방향 — `stripCountryToken()` → `resolveRoadAddress()`(첫 콤마 세그먼트) **대체**
+
+```ts
+// street의 첫 번째 콤마 세그먼트(도로명)만 반환 — 국가·시·구·도는 자동 제거
+function resolveRoadAddress(address: string): string {
+  return (address || '').split(',')[0]?.trim() || '';
+}
+```
+
+- `resolveShipperStreet()`: `road = resolveRoadAddress(shipperAddr)` 후 `[detail, road]` 구성 — Jaison 실검증 성공형 `6 floor, 601 room, 6 Daewangpangyo-ro 351beon-gil`(49자)과 정확 일치.
+- `resolveConsigneeStreet()`·`buildCreateOrderPayload()` consignee 인라인 경로 동일 적용.
+- **stripCountryToken 폐기 근거**: 데이터 관례상 국가명은 항상 첫 세그먼트 이후에 위치 → 첫 세그먼트만 취하면 국가·시·구·도가 동시에 자동 제거되어 독자적 국가명 제거 로직 불필요. 콤마 없는 영문 주소에 국가명이 공백으로 붙은 극단 케이스는 현재 DB에 0건(발견 시 후속 이슈로 처리).
+- 시/구/도는 `shipper_city`/`shipper_province`(별도 필드)로 이미 전달됨(DEF-B-106·실전송 로그 확인, province는 원코드) — 정보 손실 없음.
+- TASK-B-325의 순서 교정(상세주소 앞)·구분자 `, `는 유지(되돌리지 않음).
+
+### 3. 리스크
+
+- **도로명 내부 쉼표 포함**(드묾, 예: `Room A, Bldg C, 123 Road`): 첫 세그먼트를 도로명으로 오판 가능 — 현재 데이터 16건에 없음. 발견 시 Jaison 보고 후 도로명 DB 저장 관례 정비(별도 이슈) 필요.
+- **한글 폴백(콤마 없는 한글 주소)**: 시/구/도가 street에 남음 — 영문 우선 정책상 폴백 경로로 제한적 발생, 유지.
+- 기존 DEF-B-145 테스트 기대값(시/구/도 유지 검증)이 뒤집힘 — 의도된 방향 전환임을 주석 명시하고 갱신(삭제 금지).
+
+### 4. 회귀 테스트 (DoD)
+
+- Jaison 실검증 2값 fixture: `6 floor, 601 room, 6 Daewangpangyo-ro 351beon-gil`(49자 성공형, 시/구/도 미포함 검증) + `461-5 Gonghang-daero`(성공 예시 국제 주소).
+- 단일 세그먼트 `it venture tower`(실재 ZEN-2026-000015 수하인) + `901 room` → `901 room, it venture tower`.
+- `resolveShipperStreet`/`resolveConsigneeStreet`/`buildCreateOrderPayload` 실제 호출·반환값 정확 일치 검증.
+
 ## [설계 확정]
 
 _(Jaison 작성 예정)_
 
+2026-09-13 Jaison 승인 — Baker [설계 의견] 내용 그대로 확정(가정 검증 16건 + stripCountryToken→resolveRoadAddress 대체 + DEF-B-145 순서 유지 + 테스트 기대값 방향 전환).
+
 ## [작업 결과]
 
-_(담당자 작성 예정)_
+2026-09-13 Baker 완료 (브랜치 `feature/teamb-326-shxk-shipper-street-city-province-overflow`, 워크트리 `ZENITH_LMS-worktrees/baker`)
+
+### 코드 변경 (`src/lib/ups/label-mapping.ts`)
+
+- `stripCountryToken()`·`COUNTRY_NAME_FALLBACKS` 삭제 → **`resolveRoadAddress()`**(첫 콤마 세그먼트) 신설로 대체 (국가·시·구·도 동시 자동 제거)
+- `resolveShipperStreet()`: `road = resolveRoadAddress(shipperAddr)` → `[detail, road]` 구성 — Jaison 실검증 성공형 `6 floor, 601 room, 6 Daewangpangyo-ro 351beon-gil`(49자)와 정확 일치
+- `resolveConsigneeStreet()`·`buildCreateOrderPayload()`(consignee 인라인 경로) 동일 적용 — 수하인 단일 세그먼트 `it venture tower` 전체를 도로명 취급
+- TASK-B-325의 상세주소 앞 정렬·구분자 `, `는 유지(되돌리지 않음), `shipper_city`/`shipper_province` 별도 필드 전달은 그대로
+
+### 커밋
+
+| 커밋 | 내용 |
+| :--- | :--- |
+| `37c94f07c` | `[Baker] fix: TASK-B-326 SHXK shipper_street 시·구·도 제거로 AddressLine 초과 해소 (DEF-B-146)` |
+
+### 회귀 테스트 (R-09)
+
+- **신규** `tests/unit/ups/defb146-street-city-province-overflow.test.ts` (7건) — Jaison 실검증 2값 fixture(49자 성공형), AddressLine ≤70자 길이 검증, shipper/consignee + city/province 별도 전달 확인, 단일 세그먼트 `it venture tower`
+- **갱신** `tests/unit/ups/defb145-street-country-dedup.test.ts` — 시/구/도 "유지" 검증 → "제거" 검증으로 의도된 방향 전환(주석 명시, 삭제 아님) + 과거 성공 사례(61자) → 도로명만 남김 + country_code 무관 검증
+- **독립 되돌리기 검증**: `label-mapping.ts` 원복 시 신규 테스트 5건 FAIL 확인 → 패치 복원 후 20건 PASS (baker 기록)
+- `npm run test:regression` — **204 files / 1,445 tests 전부 PASS** (Duration 328.49s)
+- `npm run build` — **SUCCESS** (Proxy Middleware 포함 정상)
+
+### R-10 (실전송) 처리
+
+실제 오더 재전송(R-10)은 **Jaison의 직접 SHXK API 실검증(2026-09-13)으로 대체** — 49자 payload `order_id=785179` 발급·성공 + 실 트래킹 `1ZJ443D30406066155` 확인 후 `removeorder` 정리 완료. 본 수정 생성 payload가 동일 49자 변환을 테스트로 보증하므로 신규 실전송 불필요(실 화물 생성을 피하기 위함).
+
+### 상태
+
+현재 상태 `🔄 진행 중` → **🔔 완료(PR 검토 대기)**
 
 ## [발견 이슈]
 
