@@ -61,40 +61,13 @@ export function resolveShxkUnitCode(packingUnit: string): string {
   return SHXK_UNIT_CODE_MAP[(packingUnit || '').toUpperCase()] || 'PCE';
 }
 
-// TASK-B-325 (DEF-B-145): UPS AddressLine 거부 방지용 국가명 토큰 제거
+// TASK-B-325 (DEF-B-145) → TASK-B-326 (DEF-B-146): UPS AddressLine 거부 방지용 주소 축약
 // 국제 영문 주소 표기 관례상 상세주소는 도로명 주소 앞에 온다(JSJung 확정).
-const COUNTRY_NAME_FALLBACKS = [
-  'Republic of Korea', 'South Korea', 'Korea',
-  'United States', 'United States of America', 'USA', 'U.S.A.',
-  'Japan', 'People\u2019s Republic of China', 'People\'s Republic of China', 'China',
-  'Taiwan', 'Hong Kong', 'Macau',
-  'United Kingdom', 'U.K.', 'UK', 'Great Britain',
-  'Germany', 'France', 'Italy', 'Spain',
-  'Canada', 'Australia', 'New Zealand',
-  'Vietnam', 'Viet Nam', 'Thailand', 'Singapore', 'Malaysia', 'Indonesia', 'Philippines',
-  'India', 'Russia', 'Brazil', 'Mexico',
-];
-
-function stripCountryToken(address: string, countryCode?: string): string {
-  if (!address) return address;
-  const tokens = new Set<string>();
-  if (countryCode) {
-    const resolved = resolveCountryName(countryCode);
-    if (resolved) tokens.add(resolved.toLowerCase());
-  }
-  for (const name of COUNTRY_NAME_FALLBACKS) tokens.add(name.toLowerCase());
-
-  const segments = address.split(',').map((s) => s.trim()).filter(Boolean);
-  const trimmed = [...segments].reverse();
-  for (let i = 0; i < trimmed.length; i++) {
-    if (!tokens.has(trimmed[i].toLowerCase())) {
-      // 뒤에서부터 국가명이 아닌 세그먼트가 나오는 지점에서 멈춘다.
-      trimmed.splice(0, i);
-      return trimmed.reverse().join(', ');
-    }
-  }
-  // 전부 국가명 세그먼트뿐이면 비운다.
-  return '';
+// TASK-B-326: 시/구/도는 shipper_city/shipper_province 별도 필드로 이미 전달되므로,
+// street에는 도로명+상세주소만 남긴다. DB 관례(도로명, 구, 시, 도[, 국가] 순서)에 따라
+// 첫 번째 콤마 세그먼트 = 도로명 (2026-09-13 로컬 DB 16건 전수 검증, 예외 없음).
+function resolveRoadAddress(address: string): string {
+  return (address || '').split(',')[0]?.trim() || '';
 }
 
 export function resolveShipperStreet(
@@ -105,21 +78,21 @@ export function resolveShipperStreet(
   // 우선순위: order.shipper_address_english > shipperOrg.address_english > shipperOrg.address > order.shipper_address
   const shipperAddr = (order.shipper_address_english as string) || (shipperOrg?.address_english as string) || (shipperOrg?.address as string) || (order.shipper_address as string) || '';
   const shipperAddrDetail = (order.shipper_address_detail_english as string) || (shipperOrg?.address_detail_english as string) || (shipperOrg?.address_detail as string) || (order.shipper_address_detail as string) || '';
-  // TASK-B-325: 상세주소를 맨 앞으로 + 국가명 토큰 제거 (UPS AddressLine 중복 거부 방지)
-  const road = stripCountryToken(shipperAddr, (order.shipper_country_code as string) || undefined);
+  // TASK-B-326: 도로명만 사용 (첫 콤마 세그먼트) — 국가·시·구·도 자동 제거, 상세주소는 맨 앞
+  const road = resolveRoadAddress(shipperAddr);
   return [shipperAddrDetail, road].filter(Boolean).join(', ');
 }
 
 // TASK-B-305 (Issue #1133): 수하인 주소 영문 우선 표출 유틸
 // 우선순위: recipient_address_detail (영문 전용) > recipient_address_local > recipient_address
-// TASK-B-325: 상세주소를 맨 앞으로 + 국가명 토큰 제거 (shipper와 동일 패턴 적용)
+// TASK-B-325/326: 상세주소를 맨 앞으로 + 도로명만 사용 (국가·시·구·도 자동 제거)
 export function resolveConsigneeStreet(
   order: Record<string, unknown>,
 ): string {
   const consigneeAddr = (order.recipient_address as string) || '';
   const localAddr = (order.recipient_address_local as string) || '';
   const detailAddr = (order.recipient_address_detail as string) || '';
-  const road = stripCountryToken(consigneeAddr, (order.recipient_country_code as string) || undefined);
+  const road = resolveRoadAddress(consigneeAddr);
 
   // 영문 상세주소가 있으면 사용, 없으면 한글 원본 + 현지어 표기
   if (detailAddr) {
@@ -144,8 +117,8 @@ export function buildCreateOrderPayload(
   const shipperStreet = resolveShipperStreet(order, order.shipper_org as Record<string, unknown> | undefined);
   const consigneeStreet = (order.recipient_address as string) || '';
   const localAddr = (order.recipient_address_local as string) || '';
-  // TASK-B-325: 수하인 street에도 국가명 토큰이 포함되지 않도록 제거 (AddressLine 중복 거부 방지)
-  const cleanConsigneeStreet = stripCountryToken(consigneeStreet, (order.recipient_country_code as string) || undefined);
+  // TASK-B-326: 수하인 street도 도로명만 사용 (시/구/도·국가 제거 — AddressLine 초과 방지)
+  const cleanConsigneeStreet = resolveRoadAddress(consigneeStreet);
   const fullConsigneeStreet = localAddr ? `${cleanConsigneeStreet} (${localAddr})` : cleanConsigneeStreet;
 
   return {
