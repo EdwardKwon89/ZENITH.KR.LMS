@@ -61,7 +61,7 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 | [#1172](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1172) | [Team A] TASK-1134: 중복 Task 번호 CI/pre-commit 기계적 차단 (Issue #358 후속) | a | p4 | - | 미배정 | 2026-08-19 |
 | [#1170](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1170) | [Team A] TASK-1133: requestId 완전 전파 — Server Action 개별 wrapping (309 §10.6 후속) | a | p4 | - | 미배정 | 2026-08-19 |
 | [#1168](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1168) | [Team A] TASK-1131: Node.js 20.x → 24.x 업그레이드 (Vercel 지원종료 2026-10-01 대응) | a | p3 | - | EdwardKwon89 | 2026-08-19 |
-| [#1165](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1165) | [Team B] TASK-B-318: SHXK 실운영 인증키 미등록으로 UPS 발송 전량 실패 (DEF-B-142, Critical) | b | p1 | - | jungjs | 2026-08-19 |
+| [#1165](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1165) | [Team B] TASK-B-318: SHXK 실운영 인증키 미등록으로 UPS 발송 전량 실패 (DEF-B-142, Critical) | b | p2 | - | jungjs | 2026-09-13 |
 | [#1126](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1126) | [Aiden] R-17 v3.0 개편 — Team B 반영 필요 (develop→TeamB_Dev 병합 전 확인 요청) | b | p1 | - | jungjs | 2026-08-14 |
 | [#1118](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1118) | [future] IMP-094 — 요율 워크플로우 고도화 (Phase M) | a | p4 | - | 미배정 | 2026-08-14 |
 | [#1117](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1117) | [future] IMP-091 — Carrier Portal (운송사 배차 수락/거부) | a | p4 | - | 미배정 | 2026-08-14 |
