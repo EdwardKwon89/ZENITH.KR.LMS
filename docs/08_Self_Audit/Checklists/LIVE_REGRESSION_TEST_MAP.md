@@ -727,6 +727,14 @@
 | **TC-TISA-03** | 스냅샷 없음 — null 반환 | 스냅샷 미존재 시 null 반환 (회귀) | `tests/unit/operations/tisa.test.ts` |
 | **TC-TISA-04** | select 쿼리 metadata 컬럼 포함 확인 | 실제 DB 조회 시 metadata 컬럼이 select에 포함되는지 검증 | `tests/unit/operations/tisa.test.ts` |
 
+### 55. SHXK createorder 화주명 수기입력 오버라이드 (DEF-B-144 / Issue #1190 / TASK-B-324)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-SHXK-OVR-01** | 수기입력 화주명(shipper_name)이 shipper_company로 전달 | 폴백 우선순위 `shipper_name > shipper_org.name > shipperDefaults.name` 검증 | `tests/unit/ups/task-b324-shxk-shipper-name-override.test.ts` |
+| **TC-SHXK-OVR-02** | 레거시 오더(shipper_name 없음) 조직명 폴백 | 기존 동작 회귀 방지 | `tests/unit/ups/task-b324-shxk-shipper-name-override.test.ts` |
+| **TC-SHXK-OVR-03** | registerUpsOrder 실제 등록 payload 반영 | placeShxkOrder 경로 createorder payload 검증 (mock SHXK 호출) | `tests/unit/ups/task-b324-shxk-shipper-name-override.test.ts` |
+| **TC-SHXK-OVR-04** | previewShxkPayload 미리보기 payload 반영 | preview 경로 createorder payload 검증 | `tests/unit/ups/task-b324-shxk-shipper-name-override.test.ts` |
+
 ---
 
 ## 📝 가이드라인 (R-09 Enforcement)
