@@ -34,14 +34,24 @@
 - 동일 구조의 [`resolveConsigneeStreet()`](../../src/lib/ups/label-mapping.ts#L77-L89)(수하인 측)도 같은 위험 존재 여부 확인 필요.
 - TASK-B-324(Issue #1190, 화주명 수기입력 오버라이드)와는 **무관한 별개 결함** — 혼동 금지. 화주명·조직 연결 자체는 정상.
 
-## 수정 방향 (설계 의견 필요 — 복잡 Task로 판단)
+## 수정 방향 (JSJung 확인 반영, 2026-09-13 — 세부 구현은 여전히 Baker `[설계 의견]` 필요)
 
-주소 조합 로직을 어떻게 바꿀지(예: `address_english`에서 시/도/국가 토큰을 정규식으로 제거할지, 상세주소 삽입 위치를 도로명 바로 뒤로 옮길지, 원본 데이터 소스(Daum 우편번호 위젯 등) 단계에서 애초에 도로명만 저장하도록 바꿀지)에 따라 부작용 범위가 다르다. 착수 전 `.agent/tasks/TASK-B-325_...md`의 `[설계 의견]` 섹션에 제안 방안·근거·리스크를 작성해 Jaison 검토를 받을 것 — 바로 구현 착수 금지.
+**JSJung 지적**: 국제 영문 주소 표기 관례상 상세주소(층/호수 등)는 도로명 주소 **앞**에 와야 한다(예: "Suite 601, 6F, 6 Daewangpangyo-ro..."). 현재 코드(`[shipperAddr, shipperAddrDetail].filter(Boolean).join(' ')`)는 도로명 주소 뒤에, 그것도 국가명 뒤에 상세주소를 붙이는 이중으로 잘못된 순서다.
 
-**검토 시 고려할 점**:
-- `order.shipper_address_english`가 이미 DB에 "전체 조합 주소"로 저장돼 있다면, `label-mapping.ts`만 고쳐서는 근본 해결이 안 될 수 있음(다른 소비처 — CI/PL/Invoice PDF 등 — 는 이 필드를 그대로 "주소 표시"용으로 쓰고 있을 가능성, TASK-B-295/305/307 등 최근 영문주소 표출 관련 Task들과 충돌 여부 확인 필요)
-- 국가명만 안전하게 제거(정규식으로 끝의 ", Republic of ..." 패턴 매칭)하는 최소 수정이 가장 리스크가 낮을 수 있음 — 과설계(전체 주소 파이프라인 재설계) 금지
-- `resolveConsigneeStreet()`도 동일 문제가 있는지 실제 데이터로 확인 후 필요 시 같이 수정(범위 확대 시 Jaison 승인 필요)
+Jaison이 실제 오더 데이터로 시뮬레이션해 아래와 같이 확정:
+
+| 버전 | 결과 |
+|---|---|
+| 현재(버그) | `6 Daewangpangyo-ro 351beon-gil, Bundang-gu, Seongnam-si, Gyeonggi-do, Republic of Korea 6 floor, 601 room` |
+| **확정 방향** | `6 floor, 601 room, 6 Daewangpangyo-ro 351beon-gil, Bundang-gu, Seongnam-si, Gyeonggi-do` |
+
+즉 조합 순서를 **`[상세주소, 도로명주소(국가명 제거)]`**로 변경 — 국가명 제거(AddressLine 거부 방지)와 순서 교정(주소 표기 관례 준수)을 함께 적용한다.
+
+**Baker가 착수 전 `[설계 의견]`에서 확정해야 할 세부사항**(방향 자체는 위로 고정, 구현 디테일만 의견 제출):
+- 국가명 제거 방식: `resolveCountryName(shipper_country_code)`로 실제 국가명을 구해 정규식 매칭할지, 하드코딩된 문자열 매칭으로 할지(이번 오더처럼 `shipper_country_code`가 빈 값인 경우의 폴백 처리 포함)
+- `order.shipper_address_english`가 이미 DB에 "전체 조합 주소"로 저장돼 있다면, `label-mapping.ts`만 고쳐서는 근본 해결이 안 될 수 있음(다른 소비처 — CI/PL/Invoice PDF 등 — 는 이 필드를 그대로 "주소 표시"용으로 쓰고 있을 가능성, TASK-B-295/305/307 등 최근 영문주소 표출 관련 Task들과 충돌 여부 확인 필요) — 이 화면들도 순서를 맞출지, `label-mapping.ts`(SHXK 전송용)만 우선 고칠지
+- `resolveConsigneeStreet()`도 동일 문제가 있는지 실제 데이터로 확인 후 동일한 `[상세주소, 도로명주소]` 순서로 같이 수정(범위 확대이므로 Jaison 승인 필요)
+- 과설계 금지 — 전체 주소 파이프라인 재설계는 범위 밖, 위 확정 방향(순서 교정 + 국가명 제거) 안에서 구현
 
 ## 착수 체크리스트
 

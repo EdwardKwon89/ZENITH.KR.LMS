@@ -39,8 +39,16 @@
 - 동일 패턴을 쓰는 [`resolveConsigneeStreet()`](../../src/lib/ups/label-mapping.ts#L77-L89)(수하인 측)도 같은 구조적 위험 존재 — 확인 필요
 - 재현에 실제 SHXK/UPS API 응답이 필요해(주소값에 따라 오류 여부가 갈림) 로컬 mock 테스트만으로는 검증이 어려움 — 재현 조건 정의가 이번 Task의 핵심 난이도
 
-## 권장 조치
+## 권장 조치 (2026-09-13 JSJung 확인 반영)
 
-- `resolveShipperStreet()`/`resolveConsigneeStreet()`가 시/구/도/국가명을 중복 포함하지 않도록 정리 — `shipper_city`/`shipper_state_province`/`shipper_country_code`로 이미 별도 전달되는 구/시/도/국가 토큰을 `shipper_street` 조합 시 제거하거나,애초에 도로명 상세주소만 추출하는 방식 검토
-- 상세주소(`_detail_english`)는 국가명 뒤가 아니라 도로명 바로 뒤(구/시/도 앞)에 오도록 순서 조정도 함께 고려
+국제 영문 주소 표기 관례상 상세주소(층/호수)는 도로명 주소 **앞**에 와야 한다는 JSJung 지적에 따라, 조합 순서를 `[상세주소, 도로명주소(국가명 제거)]`로 확정:
+
+| 버전 | 결과(실제 오더 `ZEN-2026-000015` 데이터 기준) |
+|---|---|
+| 현재(버그) | `6 Daewangpangyo-ro 351beon-gil, Bundang-gu, Seongnam-si, Gyeonggi-do, Republic of Korea 6 floor, 601 room` |
+| 확정 방향 | `6 floor, 601 room, 6 Daewangpangyo-ro 351beon-gil, Bundang-gu, Seongnam-si, Gyeonggi-do` |
+
+- `resolveShipperStreet()`/`resolveConsigneeStreet()`가 시/구/도/국가명을 중복 포함하지 않도록 정리 — `shipper_city`/`shipper_state_province`/`shipper_country_code`로 이미 별도 전달되는 국가 토큰을 `shipper_street` 조합 시 제거
+- 상세주소(`_detail_english`)를 국가명 뒤가 아니라 **맨 앞**으로 이동
+- 세부 구현(국가명 제거 방식, `resolveConsigneeStreet()` 동시 수정 여부 등)은 [TASK-B-325](../tasks/TASK-B-325_260913_Issue1192_ShxkShipperStreetCountryDuplication.md) 담당자(Baker) 설계 의견에서 확정
 - 재현/검증 방법은 실제 SHXK 응답을 mock으로 고정해 회귀 테스트화(현재 이 문자열·오류 응답을 fixture로 사용 가능) — `docs/80_RawData/Phase8_UPS_API_리서치_결과.md`에 UPS AddressLine 분할 규칙이 명시돼 있지 않다면 SHXK 측에 문의가 필요할 수 있음
