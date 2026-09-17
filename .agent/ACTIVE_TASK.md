@@ -67,14 +67,12 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 | [#1116](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1116) | [future] IMP-069 — IBC 어댑터 구현 (미국 통관) | a | p3 | blocked | 미배정 | 2026-08-14 |
 | [#1115](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1115) | [future] IMP-028 — UNI-PASS EDI 연동 (통관 연계) | a | p4 | - | 미배정 | 2026-08-14 |
 | [#1112](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1112) | [Aiden] AWS 이관 관련 — 기존 MySQL 서버 발견, DB 전환(MySQL vs PostgreSQL) 여부 결정 필요 | a | p2 | - | jungjs | 2026-08-14 |
-| [#1111](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1111) | [ops] Vercel Hobby 플랜 제약 — ups-tracking-poll 3시간마다 크론이 배포를 통째로 막음 (TASK-B-294) | b | p2 | - | jungjs | 2026-08-13 |
 | [#995](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/995) | [Aiden] AWS 이관(Migration) 검토 — 고객요청, Supabase 처리 방안 결정 필요 | a | p1 | open | jungjs | 2026-08-14 |
 | [#988](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/988) | [Aiden] 세션 타임아웃 미적용 — 실 서비스 전환 전 필수 조치 | - | p2 | - | 미배정 | 2026-07-31 |
 | [#987](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/987) | [Aiden] Team B R-17 위반 대응 체계 재검토 요청 — 3회 기준 미집행 장기화 | b | p1 | - | jungjs | 2026-08-11 |
 | [#978](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/978) | [Aiden] 개선제안 — 계층형 비즈니스 규칙(가격/정산) 일관성 재발방지 4개 조치 (DEF-B-031/032/033 근본원인 기반) | b | p2 | - | jungjs | 2026-07-29 |
 | [#952](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/952) | [fix] DEF-132 — 운임 스냅샷 멀티패키지 치수 첫 번째만 반영 (오더등록·입고재계산 양쪽) | b | p2 | - | 미배정 | 2026-07-29 |
 | [#946](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/946) | [fix] DEF-B-023 — UPS 오더 상세 무역서류(CI/PL/UPS Invoice) PDF 라벨 번역키 대량 누락 | b | p2 | - | 미배정 | 2026-07-28 |
-| [#886](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/886) | [verify] DEF-125 재검증 요청 — TASK-B-218/220으로 이미 해소된 것으로 추정됨 | b | p2 | - | 미배정 | 2026-07-27 |
 | [#770](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/770) | [설계 협의 필요] zen_tracking_configs provider_type/provider_name — transport_mode 반영 방식 (Edward 협의 필요) | - | - | blocked | EdwardKwon89 | 2026-07-24 |
 | [#727](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/727) | [fix] 창고 화면 전반 일괄처리 지원 여부 점검·보완 (SNTL 회의 W7) | b | p3 | in-progress | 미배정 | 2026-07-23 |
 | [#726](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/726) | [fix] 급증수수료 등록 데이터 화폐단위(KRW) 감사 (SNTL 회의 W6) | b | p3 | in-progress | 미배정 | 2026-07-26 |
