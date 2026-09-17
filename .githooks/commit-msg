@@ -17,5 +17,29 @@ if ! echo "$COMMIT_MSG" | grep -qE '^\[(Claude|Gemini|OpenCode|Codex|Jaison|B_Ka
   exit 1
 fi
 
+# ── R-17 §0: 워크트리 격리 검증 (전용 워크트리가 있는 Team A 페르소나만) ──
+# Issue #1199 — TASK-B-318(Issue #1165)에서 B_Kai가 공유 메인 디렉터리에서
+# 작업해 Aiden의 미커밋 변경분이 커밋에 혼입된 사고 재발 방지.
+TAG=$(echo "$COMMIT_MSG" | grep -oE '^\[(B_Kai|D_Kai|Riley)\]' | tr -d '[]')
+
+if [ -n "$TAG" ]; then
+  PERSONA=$(echo "$TAG" | tr '[:upper:]' '[:lower:]')
+  TOPLEVEL=$(git rev-parse --show-toplevel)
+  BASENAME=$(basename "$TOPLEVEL")
+
+  case "$BASENAME" in
+    "$PERSONA"|"$PERSONA"_*) : ;;  # 정상 — 전용 워크트리 안에서 커밋 중 (d_kai_task1130 등 파생 워크트리도 허용)
+    *)
+      echo ""
+      echo "❌ BLOCKED: [$TAG] 태그로 커밋하려 하지만 전용 워크트리가 아닌 곳에서 실행됨 (R-17 §0 위반, Issue #1199)"
+      echo "   현재 경로: $TOPLEVEL"
+      echo "   먼저 실행: ./scripts/agent-worktree-init.sh $PERSONA"
+      echo "   안내되는 경로로 이동한 뒤 다시 커밋하십시오."
+      echo ""
+      exit 1
+      ;;
+  esac
+fi
+
 echo "✅ Commit-msg 게이트 통과 — 커밋 진행"
 exit 0
