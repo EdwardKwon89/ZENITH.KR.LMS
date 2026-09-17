@@ -802,4 +802,12 @@
 | **TC-DBE-04** | 요율 카드 정상 부재 — 무로그 | `data=null` 정상 부재는 로깅 없이 cost 0 처리 검증 | `tests/unit/logistics/database-route-adapter-dberror.test.ts` |
 | **TC-DBE-05** | 정상 흐름 — 에러 로그 없음 | 경로+요율 모두 존재 시 옵션 정상 생성·에러 로그 미발생 검증 | `tests/unit/logistics/database-route-adapter-dberror.test.ts` |
 
+---
+
+## 60. SHXK 인증키 미설정 방어 — assertShxkConfig 연결 (DEF-B-142 / Issue #1165 / TASK-B-318)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-SHXK-CFG-01** | 비-mock + SHXK_APP_KEY/SHXK_APP_TOKEN 미설정 → 즉시 실패 | 키 미설정 시 빈 값 전송 대신 명확한 한글 에러로 즉시 반환 (fetch+감사로그 미발생) | `tests/unit/shxk/client.test.ts` |
+| **TC-SHXK-CFG-02** | mock 모드 + 키 미설정 → mock 응답 정상 | 개발/테스트 환경 mock 경로는 키 없이도 동작 유지 (방어와 무관) | `tests/unit/shxk/client.test.ts` |
+
 
