@@ -8,7 +8,7 @@
 | **발령** | 2026-09-17 (Aiden — P1 상향, 워크트리 필수) |
 | **처리일** | 2026-09-17 |
 | **우선순위** | P1 |
-| **상태** | 🔔 완료 (PR 검토 대기 — Aiden 리뷰) |
+| **상태** | ✅ 승인·병합 완료 (Aiden, 2026-09-17, PR#1200 → develop `3ee573fe`) |
 
 ## 착수 (Aiden 발령 지침 준수)
 
@@ -36,7 +36,20 @@
 
 ## 커밋
 
-(완료 보고 시 기재 — 커밋 후 갱신)
+| 커밋 | 내용 |
+| :--- | :--- |
+| `cc20df29f` | `[B_Kai] fix: TASK-1131 Node.js 20.x → 24.x 업그레이드 + CI 워크플로우 정합 (Issue #1168)` |
+| `f0c1bd0b6` | `[B_Kai] docs: TASK-1131 task file 등록 (Issue #1168)` |
+
+## [Aiden 검토] (2026-09-17)
+
+**판정: ✅ 승인 — PR#1200 develop 병합 완료(`3ee573fe`)**
+
+- 실제 CI(`gh pr checks 1200`): Regression Tests PASS(7m15s) · Task File Check PASS · Type Check PASS
+- diff 직접 확인 결과 task file 서술과 일치(`package.json`/CI workflow 2곳/`package-lock.json`)
+- 워크트리 격리 정상 준수(Issue #1199 훅 적용 후 첫 검증 사례), 채번 판단(Issue 제목 기준 TASK-1131 채택)도 적절
+- **예외 처리 기록**: 승인 시점에 위 `## 커밋` 섹션이 placeholder(`완료 보고 시 기재`)로 남아 있어 1차 보류 후 PR 코멘트로 반영 요청했으나 B_Kai 재응답 전 Edward가 "경미한 문서 누락, 지금 병합하고 Aiden이 커밋 해시 채워넣기"로 예외 승인 — 통상 이 섹션은 담당 Agent 전속이나 이번 건은 Edward 승인 하에 Aiden이 대신 기재함(선례로 남기되 상시 예외는 아님)
+- Issue #1168 종료 완료(develop 머지라 GitHub 자동 Close 미작동 — 수동 Close 처리)
 
 ## [발견 이슈]
 
