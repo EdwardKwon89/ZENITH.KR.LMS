@@ -9,10 +9,18 @@ const mockFetch = vi.fn();
 
 vi.mock('@/utils/supabase/server', () => ({ createAdminClient: mockCreateAdminClient }));
 vi.mock('@/lib/logger', () => ({ logger: { error: mockLoggerError } }));
-vi.mock('./config', () => ({
+
+const mockConfigKeys = vi.hoisted(() => ({ shxkAppKey: 'test-key', shxkAppToken: 'test-token' }));
+
+vi.mock('@/lib/shxk/config', () => ({
   SHXK_ENDPOINT: 'https://mock-shxk.test/api',
-  SHXK_APP_KEY: 'test-key',
-  SHXK_APP_TOKEN: 'test-token',
+  get SHXK_APP_KEY() { return mockConfigKeys.shxkAppKey },
+  get SHXK_APP_TOKEN() { return mockConfigKeys.shxkAppToken },
+  assertShxkConfig: () => {
+    if (!mockConfigKeys.shxkAppKey || !mockConfigKeys.shxkAppToken) {
+      throw new Error('SHXK_APP_KEY / SHXK_APP_TOKEN 환경변수가 설정되지 않았습니다.');
+    }
+  },
 }));
 
 async function callShxk(
@@ -132,6 +140,44 @@ describe('SHXK API 로깅 (Issue #661)', () => {
     expect(insertArg.success).toBe(false);
     expect(insertArg.error_message).toContain('ECONNREFUSED');
 
+    vi.unstubAllEnvs();
+  });
+
+  // ─────────────────────────
+  // 키 미설정 방어 (TASK-B-318 / DEF-B-142)
+  // ─────────────────────────
+
+  it('TC-SHXK-10: 비-mock + 키 미설정 → assertShxkConfig로 즉시 실패 (fetch/로그 없음)', async () => {
+    vi.stubEnv('SHXK_TEST_MOCK', 'false');
+    mockConfigKeys.shxkAppKey = '';
+    mockConfigKeys.shxkAppToken = '';
+
+    await expect(callShxk('createorder', { reference_no: 'NO-KEY' })).rejects.toThrow(
+      'SHXK_APP_KEY / SHXK_APP_TOKEN 환경변수가 설정되지 않았습니다.',
+    );
+
+    expect(mockFetch).not.toHaveBeenCalled();
+    expect(mockCreateAdminClient).not.toHaveBeenCalled();
+    expect(mockLoggerError).not.toHaveBeenCalled();
+
+    mockConfigKeys.shxkAppKey = 'test-key';
+    mockConfigKeys.shxkAppToken = 'test-token';
+    vi.unstubAllEnvs();
+  });
+
+  it('TC-SHXK-11: mock 모드 + 키 미설정 → mock 응답 정상 반환 (방어 우회 불필요)', async () => {
+    vi.stubEnv('SHXK_TEST_MOCK', 'true');
+    mockConfigKeys.shxkAppKey = '';
+    mockConfigKeys.shxkAppToken = '';
+
+    const result = await callShxk('createorder', { reference_no: 'MOCK-NO-KEY' });
+
+    expect(result.success).toBe(1);
+    expect((result.data as Record<string, unknown>)?.refrence_no).toBe('MOCK-NO-KEY');
+    expect(mockFetch).not.toHaveBeenCalled();
+
+    mockConfigKeys.shxkAppKey = 'test-key';
+    mockConfigKeys.shxkAppToken = 'test-token';
     vi.unstubAllEnvs();
   });
 
