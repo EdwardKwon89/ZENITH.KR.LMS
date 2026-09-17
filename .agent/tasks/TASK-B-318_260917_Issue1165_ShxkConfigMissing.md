@@ -9,7 +9,7 @@
 | **생성일** | 2026-08-19 (Issue 등록) |
 | **처리일** | 2026-09-17 (코드 완료) |
 | **우선순위** | P2 / Critical |
-| **상태** | 🔔 완료 (PR 검토 대기 — Aiden 리뷰) |
+| **상태** | ✅ 승인·병합 완료 (Aiden, 2026-09-17, PR#1198 → develop `71d45ab1`) |
 
 ## DoD 현황
 
@@ -52,9 +52,21 @@
 
 ## [완료 보고 절차 기록] (R-17)
 
-1. ✅ 코드 커밋 → 2. ✅ task file 작성(본 문서) → 3. `status:review` 라벨 갱신 → 4. 문서 커밋 → 5. PR 생성 → 6. Aiden 검토 대기
+1. ✅ 코드 커밋 → 2. ✅ task file 작성(본 문서) → 3. `status:review` 라벨 갱신 → 4. 문서 커밋 → 5. PR 생성 → 6. ✅ Aiden 검토·승인·병합 완료
+
+## [Aiden 검토] (2026-09-17)
+
+**판정: ✅ 승인 — PR#1198 develop 병합 완료(`71d45ab1`)**
+
+- DoD §1~§5 전항목 확인 완료, §6은 본 Task 범위 밖(Edward 확인 사안)으로 별도 관리
+- 실제 CI(`gh pr checks 1198`): Regression Tests PASS(7m31s) · Task File Check PASS · Type Check PASS
+- diff 직접 확인(`git diff origin/develop origin/feature/teama-task-318-shxk-config-guard`): `client.ts`의 `assertShxkConfig()` 호출 추가, `LIVE_REGRESSION_TEST_MAP.md` 섹션 60 추가 — task file 서술과 일치
+- **병합 전 발견 및 조치**: 위 §[발견 이슈]에 기재된 "무관 변경 포함" 건을 검토한 결과, 단순 삭제/이동이 아니라 **Sentry config 이동(`sentry.*.config.ts` → `src/`)에 대응하는 `src/instrumentation.ts` 상대경로 수정이 누락**되어 병합 시 Sentry server/edge instrumentation이 깨지는 잠재 결함으로 확인됨. Aiden이 별도 fix 커밋(`f8b3bdcb5`)으로 정정 후 PR#1198에 반영, CI 재확인 후 병합.
+- **근본 원인**: B_Kai가 전용 워크트리(`b_kai`, 최종활동 8/23)를 사용하지 않고 공유 메인 디렉터리에서 작업(R-17 §0 위반) — VIOLATION_TRACKER.md 기록 완료, 재발 방지 기술 조치(commit-msg 훅 워크트리 검증)를 Issue #1199로 신설·적용·종료함.
+- Issue #1165 종료 완료(develop 머지라 GitHub 자동 Close 미작동 — 수동 Close 처리)
 
 ## [발견 이슈]
 
 - ZEN-2026-000011 실제 재발송은 Edward 확인 대기 (§6) — 별도 Issue로 분리할지 결정 필요.
 - 회귀 테스트(1,400여건)가 전부 mock 모드로 동작해 인증/타입 검증 계열 결함을 원천적으로 잡아낼 수 없는 구조 — "mock 검증으로 GoLive 선언" 관행 재검토는 Issue 본문에서 별도 논의 예정으로 명시됨.
+- ~~"세션 시작 전 이미 스테이징되어 있던 무관 변경" — 위 [Aiden 검토] 참조, 실제로는 잠재 결함이었고 조치 완료.~~
