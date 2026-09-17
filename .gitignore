@@ -72,3 +72,7 @@ scratch/
 
 # Sentry Config File
 .env.sentry-build-plugin
+
+# ─── R-10 검증용 임시 Playwright config (PLAYWRIGHT_PORT env var 사용 권장, /tmp에 둘 것) ───
+playwright.r10*.config.ts
+playwright*.local.config.ts
