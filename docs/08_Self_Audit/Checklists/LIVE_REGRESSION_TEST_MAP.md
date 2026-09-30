@@ -794,6 +794,17 @@
 | **TC-INVH-04** | WAREHOUSED/PACKED 아닌 오더 거부 유지 | 가드 로직 회귀 방지 | `tests/unit/warehouse/defb149-confirm-outbound-history-removal.test.ts` |
 | **TC-INVH-05** | 빈 packages/빈 레코드에서도 성공 | history 의존 제거로 성공 조건 단순화 검증 | `tests/unit/warehouse/defb149-confirm-outbound-history-removal.test.ts` |
 
+### 61. UPS 라벨 Storage 업로드 실패 재시도 + 오류 구분 (DEF-B-148 / Issue #1201 / TASK-B-328)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-UPS-STG-01** | 업로드 1회 실패 후 재시도 성공 → signedUrl 반환 + upload 2회 호출 | Storage 일시 장애 자동 복구 검증 | `tests/unit/ups/defb148-ups-label-storage-upload-retry.test.ts` |
+| **TC-UPS-STG-02** | 업로드 전건 실패 → 재시도 1회 후 throw + uploadError 전체 구조화 로깅 | 근본원인 진단 로그 검증 (DEF-B-148) | `tests/unit/ups/defb148-ups-label-storage-upload-retry.test.ts` |
+| **TC-UPS-STG-03** | uploadError.message 빈 문자열이어도 에러 메시지에 객체 정보 포함 | `<none>` 오류 메시지 재발 방지 | `tests/unit/ups/defb148-ups-label-storage-upload-retry.test.ts` |
+| **TC-UPS-STG-04** | getnewlabel 성공 + Storage 실패 → "배송 처리는 완료" 메시지 + markAllPackagesIssued 호출 | 오진단성 메시지 제거 + 패키지 마킹 누락 방지(③) | `tests/unit/ups/defb148-ups-label-storage-upload-retry.test.ts` |
+| **TC-UPS-STG-05** | getnewlabel 자체 실패 → "라벨 발급 실패 (getnewlabel)" 유지 + 마킹 미수행 | 실패 원인 구분 회귀 방지 | `tests/unit/ups/defb148-ups-label-storage-upload-retry.test.ts` |
+| **TC-UPS-STG-06** | getnewlabel 성공 + Storage 성공 → signed URL 반환 + 패키지 마킹 | 정상 경로 회귀 방지 | `tests/unit/ups/defb148-ups-label-storage-upload-retry.test.ts` |
+| **TC-UPS-STG-07** | getnewlabel 실패 시 Storage 업로드 미호출 | 불필요 Storage 호출 차단 교차 검증 | `tests/unit/ups/defb148-ups-label-storage-upload-retry.test.ts` |
+
 ---
 
 ## 📝 가이드라인 (R-09 Enforcement)
