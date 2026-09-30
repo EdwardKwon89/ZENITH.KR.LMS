@@ -807,6 +807,18 @@
 
 ---
 
+### 62. SHXK 무역서류 처리 완료 메시지 + revalidatePath (DEF-B-147 / Issue #1196 / TASK-B-327)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-TRDOC-01** | WAYBILL 성공 시 완료 토스트 + router.refresh | 처리 완료 안내 부재 해소 검증 | `tests/unit/ups/task-b327-trade-document-toast.test.tsx` |
+| **TC-TRDOC-02** | CUSTOMS 성공 시 완료 토스트 + router.refresh | 동일 경로 회귀 방지 | `tests/unit/ups/task-b327-trade-document-toast.test.tsx` |
+| **TC-TRDOC-03** | INVOICE 실패 시 에러 토스트, 완료 토스트/refresh 미호출 | 실패 케이스 사용자 안내 검증 | `tests/unit/ups/task-b327-trade-document-toast.test.tsx` |
+| **TC-TRDOC-04** | 성공 응답 url 존재 시 "문서 열기" 링크 노출 | raw JSON 팝업 개선(③) 검증 | `tests/unit/ups/task-b327-trade-document-toast.test.tsx` |
+| **TC-TRDOC-05** | fetchShxkTradeDocument 성공 시 revalidatePath(orders/[orderId]) 호출 | 서버 액션 리프레시 누락 버그 검증 | `tests/unit/ups/task-b327-fetch-trade-document.test.ts` |
+| **TC-TRDOC-06** | getnewlabel 실패 시 success=false + revalidatePath 미호출 | 실패 시 화면 갱신 오호출 방지 | `tests/unit/ups/task-b327-fetch-trade-document.test.ts` |
+
+---
+
 ## 📝 가이드라인 (R-09 Enforcement)
 1. **추가 의무**: 신규 기능 개발 시 위 카테고리에 맞는 테스트를 반드시 추가하십시오.
 2. **실행 의무**: 모든 커밋 전 `npm run test:regression`을 실행하여 위 명세 전원이 초록색인지 확인하십시오.

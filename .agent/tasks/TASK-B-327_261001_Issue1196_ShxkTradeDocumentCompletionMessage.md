@@ -8,7 +8,7 @@
 | **담당** | Dave (Team B) |
 | **생성일** | 2026-10-01 |
 | **우선순위** | P2 (Medium) |
-| **상태** | 🔄 진행 중 |
+| **상태** | 🔔 검토 대기 |
 
 ## 현재 상태 (Jaison, TeamB_Dev 현재 코드로 재확인 완료)
 
@@ -53,15 +53,15 @@ DEF 원문의 "가능하면" 문구는 필수 아님 — 시간이 부족하면 
 
 ## 착수 체크리스트
 
-- [ ] `git fetch origin && git pull origin TeamB_Dev` 후 `feature/teamb-327-shxk-trade-document-completion-msg` 브랜치 생성(전용 워크트리, R-17 §0) — TASK-B-328과 동시 진행 중일 수 있으니 최신 동기화 특히 주의
-- [ ] ① `handleConfirmPreview()` + `fetchShxkTradeDocument()` 수정
-- [ ] ② INVOICE 실제 PDF 확인(SHXK_TEST_MOCK=false 실제 호출, Sandbox 없음 — 테스트 후 필요 시 `removeorder` 등 정리) 후 조치 방향 결정, 스코프 확대 필요 시 Jaison 보고 후 대기
-- [ ] 회귀 테스트 신설(R-09): `fetchShxkTradeDocument` 성공/실패 각각에 대해 실제 `handleConfirmPreview` 호출 기반(RTL) 검증 — toast/router.refresh 호출 여부 확인, `toContain` 금지
-- [ ] `LIVE_REGRESSION_TEST_MAP.md` 갱신
-- [ ] **독립 되돌리기 검증**
-- [ ] `npm run test:regression` 직접 실행, 정확한 PASS 수치 기재
-- [ ] `npm run build` SUCCESS 확인
-- [ ] (R-10) 실제 UI에서 WAYBILL/INVOICE/CUSTOMS 각각 클릭 → 완료 토스트 확인, INVOICE 실제 PDF 내용 확인 스크린샷 첨부
+- [x] `git fetch origin` 후 `feature/teamb-327-shxk-trade-document-completion-msg` 브랜치를 `origin/TeamB_Dev` 최신(`57ac8c7f0`, TASK-B-328 병합 반영)에서 생성(전용 워크트리 `ZENITH_LMS-worktrees/dave`, R-17 §0) — TASK-B-328과 충돌 없음 확인
+- [x] ① `handleConfirmPreview()` + `fetchShxkTradeDocument()` 수정
+- [x] ② INVOICE 실제 PDF 확인(SHXK_TEST_MOCK=false 실제 호출) 후 조치 방향 결정 — **결과: 문서유형 매핑 문제로 확정, 스코프 확대 필요 → Jaison 판단 대기** (아래 [작업 결과] ② 참조)
+- [x] 회귀 테스트 신설(R-09): RTL(컴포넌트 실제 렌더·상호작용) + 서버 액션 실제 호출 기반, `toContain` 미사용
+- [x] `LIVE_REGRESSION_TEST_MAP.md` 갱신 (§62 TC-TRDOC-01~06)
+- [x] **독립 되돌리기 검증**: 수정 원복 시 신규 테스트 4건 정확히 FAIL(6건 중 4 FAIL/2 PASS) → 복원 후 6/6 PASS
+- [x] `npm run test:regression` 직접 실행, 정확한 PASS 수치 기재 — **213 files / 1493 tests ALL PASS**
+- [x] `npm run build` SUCCESS 확인 (TypeScript 0 errors)
+- [x] (R-10) 실제 UI에서 WAYBILL/INVOICE/CUSTOMS 각각 클릭 → 완료 토스트 확인, INVOICE 실제 PDF 내용 확인 스크린샷 첨부 — `docs/99_Manual/E2E_327_Result/`
 
 ## 완료 보고 절차 (R-17 준수)
 
@@ -73,10 +73,63 @@ DEF 원문의 "가능하면" 문구는 필수 아님 — 시간이 부족하면 
 
 ## [작업 결과]
 
-_(담당자 작성 예정)_
+### 커밋
+
+- 코드 커밋: **`aee50f033`** — `[Dave] fix: TASK-B-327 SHXK 무역서류 처리 완료 메시지 추가 + INVOICE 문서유형 확인 (DEF-B-147)`
+  - `src/components/orders/UpsTradeDocumentActions.tsx`
+  - `src/app/actions/operations/ups-labels.ts`
+  - `tests/unit/ups/task-b327-trade-document-toast.test.tsx` (신규)
+  - `tests/unit/ups/task-b327-fetch-trade-document.test.ts` (신규)
+  - `docs/08_Self_Audit/Checklists/LIVE_REGRESSION_TEST_MAP.md`
+
+### ① 수정 내용 (확정 버그)
+
+- `UpsTradeDocumentActions.tsx` `handleConfirmPreview()` — WAYBILL/INVOICE/CUSTOMS 분기:
+  - `res.success` 시 `toast.success('문서 처리가 완료되었습니다.')` + `router.refresh()`
+  - 실패 시 `toast.error(res.error || '문서 처리에 실패했습니다.')`
+  - 기존 raw JSON `ResultPopup`은 유지
+- ③ (선택 최소 반영): 성공 응답에 `url`이 있으면 `ResultPopup`에 **"문서 열기"** 링크 추가 (과설계 없이 다운로드/열람 링크만)
+- `ups-labels.ts` `fetchShxkTradeDocument()` — 저장 성공 후 `revalidatePath('/(dashboard)/orders/[orderId]', 'page')` 추가 (동일 파일 다른 라벨 액션과 패턴 일치)
+
+### ② INVOICE 문서유형 조사 결과 — **문서 매핑/설계 문제로 확정 (데이터 누락 아님)**
+
+실제 SHXK API(`SHXK_TEST_MOCK=false`)로 테스트 오더를 `createorder` → `getnewlabel`(content_type 1/2/3) → PDF 다운로드 → `removeorder` 정리(`order_id=800929`, `removeorder` 성공)하여 실물 확인:
+
+| 문서 | content_type | 파일크기 | SHA-256 | 내용 |
+| :--- | :---: | :---: | :--- | :--- |
+| 운송장(WAYBILL) | 1 | 45,197 B | `cfcb1107…` | 운송장 라벨 |
+| 세관신고서(CUSTOMS) | 2 | 208,965 B | `1af8afe6…` | 4p 세관/상업 인보이스(품목·수량·금액 포함) |
+| **INVOICE 버튼** | **3** | **45,197 B** | **`cfcb1107…` (동일)** | **운송장 라벨 — WAYBILL과 SHA-256 완전 동일** |
+
+- SHXK 공식 스펙상 `lable_content_type=3`은 **"배송물류"** 문서이며 상업송장이 아니다. SHXK API에 별도 인보이스 유형은 없다.
+- 결과적으로 "INVOICE" 버튼이 실제로는 **운송장을 반환** — 고객이 기대한 상업 인보이스 내용(품목/금액)이 없어 "빈 문서"로 보였다.
+- **∴ 데이터 누락 버그가 아니라 설계(문서 유형 매핑) 문제.** task file 지침 §49대로 임의 스코프 확대는 하지 않고, 아래 조치안을 Jaison에게 보고 후 판단 대기한다.
+
+  **조치안(택1):** (a) 버튼 라벨을 "배송물류 문서"로 정정, (b) 실제 상업 인보이스 내용은 CUSTOMS(content_type=2) 문서를 노출, (c) 자체 상업송장 PDF 생성(Issue #946/DEF-B-023 연계) — (c)는 별도 Task 필요.
+
+### 검증
+
+| 항목 | 결과 |
+| :--- | :--- |
+| 신규 회귀 테스트 | 6건 — **6/6 PASS** (RTL 컴포넌트 상호작용 4 + 서버 액션 revalidatePath 2) |
+| 독립 되돌리기 검증 | 수정 원복 시 4건 FAIL(6건 중 4 FAIL/2 PASS), 복원 후 6/6 PASS |
+| 전체 회귀 | `npm run test:regression` — **Test Files 213 passed / Tests 1493 passed** |
+| 빌드 | `npm run build` SUCCESS (TypeScript 0 errors) |
+| R-10 (실제 UI) | 오더 `ZEN-2026-000007`에서 운송장/INVOICE/세관신고서 버튼 클릭 → 결과 확인. WAYBILL 성공 시 완료 토스트 + "문서 열기" 링크 표시 확인. INVOICE 버튼 결과 팝업(`SHXK Response — INVOICE`) 및 실물 PDF(운송장) 확인 |
+
+### 증적 경로
+
+- `docs/99_Manual/E2E_327_Result/R10_UI_toast_verification.md` (실제 UI 토스트/링크 검증)
+- `docs/99_Manual/E2E_327_Result/R10_INVOICE_content_type3_finding.md` (② 조사 결과)
+- `docs/99_Manual/E2E_327_Result/0-waybill-preview-popup.png`, `1-waybill-after-confirm.png`
+- `docs/99_Manual/E2E_327_Result/1-invoice-after-confirm.png`
+- `docs/99_Manual/E2E_327_Result/INVOICE_content_type_3.pdf` / `.png` (실제 반환 운송장), `INVOICE_WAYBILL_content_type_1.pdf`, `INVOICE_CUSTOMS_content_type_2.pdf`
+
+### R-10 방법 관련 고지 (자가검증 위조 금지 준수)
+
+- ② 검증은 DB 조회·추정이 아니라 **실제 SHXK API를 직접 호출해 받은 진짜 PDF 파일**을 열어 판정했다(해시 비교 포함). 실 화물 생성 후 `removeorder`로 정리 완료.
+- UI 검증은 로컬 dev + mock 모드로 진행했으며, mock의 다운로드 URL만 로컬 PDF 서버로 일시 변경해 "다운로드/저장 성공" 경로를 재현했다(해당 임시 변경은 커밋에서 제외·원복 완료). 실제 SHXK 실물 확인은 위 ②에서 별도 실호출로 완료.
 
 ## [발견 이슈]
-
-_(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
 
 없음
