@@ -51,7 +51,7 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
 | [#1202](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1202) | [Team B] TASK-B-329: 출고확정 시 재고이력(zen_inventory_history) insert 실패 — inventory_id NULL 제약위반, 3주+ 재발 (DEF-B-149, High) | b | p1 | review | jungjs | 2026-09-30 |
-| [#1201](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1201) | [Team B] TASK-B-328: UPS 라벨/무역서류 PDF Storage 업로드 실패 — 화면 오류 표출(처리는 완료) (DEF-B-148, Medium) | b | p2 | in-progress | jungjs | 2026-09-30 |
+| [#1201](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1201) | [Team B] TASK-B-328: UPS 라벨/무역서류 PDF Storage 업로드 실패 — 화면 오류 표출(처리는 완료) (DEF-B-148, Medium) | b | p2 | review | jungjs | 2026-09-30 |
 | [#1196](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1196) | [Team B] TASK-B-327: SHXK 무역서류(운송장/INV/세관신고서) 처리 완료 메시지 부재 + INVOICE 문서유형 매핑 의심 (DEF-B-147, Medium) | b | p2 | in-progress | jungjs | 2026-09-30 |
 | [#1189](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1189) | [Team B] TASK-B-323: Resend 이메일 도메인(zenith-lms.com) 미인증 — 알림메일 전량 발송 실패 (DEF-B-143, High) | b | p1 | - | jungjs | 2026-08-25 |
 | [#1185](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1185) | [Team B] TASK-B-322: 로그 커버리지 개선 ⑤— admin/auth.ts 예외 객체 폐기 패턴 수정 (5건) | b | p2 | - | 미배정 | 2026-08-23 |
