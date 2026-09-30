@@ -62,6 +62,7 @@ function ResultPopup({ result, action, onConfirm }: {
   action: PreviewAction;
   onConfirm: () => void;
 }) {
+  const docUrl = typeof result.url === 'string' && result.url ? result.url : null;
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={onConfirm}>
       <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full mx-4 max-h-[80vh] flex flex-col" onClick={e => e.stopPropagation()}>
@@ -74,6 +75,16 @@ function ResultPopup({ result, action, onConfirm }: {
           </pre>
         </div>
         <div className="px-5 py-3 border-t border-gray-200 flex justify-end gap-2">
+          {docUrl && (
+            <a
+              href={docUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-4 py-2 text-xs font-semibold text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors"
+            >
+              문서 열기
+            </a>
+          )}
           <button
             onClick={onConfirm}
             className="px-4 py-2 text-xs font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
@@ -130,6 +141,13 @@ export default function UpsTradeDocumentActions({ orderId, hasActiveLabel }: Ups
     setLoadingDoc(docKey);
     try {
       const res = await fetchShxkTradeDocument(orderId, action as 'WAYBILL' | 'INVOICE' | 'CUSTOMS');
+      // TASK-B-327 (DEF-B-147): 성공/실패를 사용자에게 명확히 안내 — raw JSON 팝업만 뜨던 문제 해소
+      if (res.success) {
+        toast.success('문서 처리가 완료되었습니다.');
+        router.refresh();
+      } else {
+        toast.error(res.error || '문서 처리에 실패했습니다.');
+      }
       setResultState({ action, result: res as Record<string, unknown> });
     } catch (err: any) {
       toast.error(err.message || '문서 조회에 실패했습니다.');

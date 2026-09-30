@@ -889,6 +889,8 @@ export async function fetchShxkTradeDocument(
     if (!storedUrls.length) {
       return { success: false, error: '문서 다운로드/저장 실패' };
     }
+    // TASK-B-327 (DEF-B-147): 다른 라벨 액션(registerUpsOrder/voidUpsLabel 등)과 동일하게 문서 저장 후 화면 갱신
+    revalidatePath('/(dashboard)/orders/[orderId]', 'page');
     return { success: true, url: storedUrls[0] };
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error';
