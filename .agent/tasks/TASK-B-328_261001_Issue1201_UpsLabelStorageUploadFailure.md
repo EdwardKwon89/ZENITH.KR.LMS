@@ -138,8 +138,10 @@ Promise<{ signedUrl: string | null; getNewLabelFailed: boolean }>
 
 ### 커밋
 
-- **코드 커밋**: `e6534fca00c637768f4a2c9b70643fbbd5ecc323` — `[Mike] fix: TASK-B-328 UPS 라벨 Storage 업로드 실패 오류 메시지·재시도 개선 (DEF-B-148)`
+- **코드 커밋**: `7c1c19322e68d1438f37373ce22340760dd5bdb5` — `[Mike] fix: TASK-B-328 UPS 라벨 Storage 업로드 실패 오류 메시지·재시도 개선 (DEF-B-148)`
   - 포함: `src/app/actions/operations/ups-labels.ts`, `tests/unit/ups/defb148-ups-label-storage-upload-retry.test.ts`, `docs/08_Self_Audit/Checklists/LIVE_REGRESSION_TEST_MAP.md`
+- **docs 커밋**: `4fc32abaf96e61726a8a3473fd3ed53142ffd59a` — `[Mike] docs: TASK-B-328 작업 결과 기록`
+- **반려 대응(2026-10-01)**: PR#1204 Jaison 반려 — `LIVE_REGRESSION_TEST_MAP.md` 섹션 번호 충돌(TASK-B-329가 §60 선점). `origin/TeamB_Dev` rebase 후 본 건을 **§61로 변경**, force-push 완료. 코드/테스트는 충돌 없어 그대로 유지, rebase 후 신규 테스트 7/7 PASS 재확인. (rebase로 커밋 해시 변경: `e6534fca0`→`7c1c19322`, `d27b655b0`→`4fc32abaf`)
 
 ## [발견 이슈]
 
