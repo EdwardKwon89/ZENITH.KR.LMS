@@ -1852,3 +1852,30 @@ UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류
 - **관련 파일**: `src/lib/finance/exchange-rate.ts`(`getExchangeRate`), `supabase/seed_data.sql`(또는 관련 시드 파일), `src/app/actions/finance/ups-actual-cost.ts`(`recordUpsActualCost`, `recordActualCostAndFinalize`), `src/app/api/cron/exchange-rate-sync`
 - **예상 공수**: 0.3~0.5 MD(운영 환경 점검 0.1MD + 로컬 시드 보완 0.1MD + 폴백 로직 개선 검토 0.1~0.3MD)
 - **우선순위**: Medium — 로컬 개발 정확성 문제이자, 운영 환경에서도 동일 현상이 있다면 실제 금액 계산 오류로 이어질 수 있어 운영 환경 점검이 선행되어야 함
+
+---
+
+## [IMP-168] `SESSION_IDLE_TIMEOUT_MIN` 관리자 설정값이 실제 세션 타임아웃 로직과 연결되어 있지 않음(고아 설정)
+
+- **발견 경위**: 2026-08-20, Edward의 "Session Timeout이 구현되었는가" 질문에 답하기 위해 코드 확인 중 발견. 실제 세션 유휴 타임아웃은 `src/lib/auth/proxy.ts:84`의 `authGuard()`에 구현되어 있으며(IMP-071), `zen_last_activity` 쿠키 기준으로 유휴 시간을 계산해 초과 시 강제 로그아웃(`supabase.auth.signOut()`) + `/login?reason=timeout` 리다이렉트 처리함 — 이 부분 자체는 정상 동작.
+- **현재 상태**: 그런데 실제 타임아웃 값은 `process.env.SESSION_IDLE_TIMEOUT_MIN`(미설정 시 기본 30분)만 읽는다. 반면 `supabase/migrations/20260419130000_create_system_settings.sql`이 만든 `system_settings` 테이블에는 `SESSION_IDLE_TIMEOUT_MIN = '10'`(AUTH 카테고리, "세션 유휴 타임아웃" 라벨)이 시드되어 있어 언뜻 "관리자가 UI에서 조정 가능한 값"처럼 보인다. 하지만 확인 결과 admin 설정 화면(`/admin/settings`, `AdminSettingsClient`)은 이 `system_settings` 테이블이 아니라 이후(2026-04-26) 신설된 별도 테이블 `zen_system_params`(요율·부피계수 등 비즈니스 상수 전용, `SESSION_IDLE_TIMEOUT_MIN` 키 없음)를 사용한다. 즉 `system_settings.SESSION_IDLE_TIMEOUT_MIN` 값은 (1) 어떤 admin UI에도 노출되지 않고, (2) `proxy.ts`의 실제 로직도 이 테이블을 전혀 조회하지 않아 — 이 값을 바꿔도 실제 타임아웃 동작에 아무 영향이 없는 고아(orphan) 설정임.
+- **영향**: 기능 장애는 아님(env var 기본값 30분으로 정상 동작 중)이나, 향후 누군가 "세션 타임아웃을 이 화면에서 바꿀 수 있겠지"라고 오인해 `system_settings` 값을 수정해도 실제로는 아무 효과가 없어 혼란을 야기할 수 있음. 또한 시드값(10분)과 실제 기본 동작(30분)이 서로 다른 숫자로 존재해 문서/코드 간 불일치 인상을 줌.
+- **임시 조치**: 없음 — 발견만 하고 별도 조치는 하지 않음(Edward 질의응답 과정에서 부수적으로 발견, 본 세션의 작업 범위 밖).
+- **목표 구현**: 둘 중 하나로 정리 필요 — (A) `proxy.ts`가 `system_settings`(또는 `zen_system_params`로 이관 후) 값을 실제로 조회하도록 배선해 관리자 설정이 실동작하게 만들거나, (B) 관리자가 조정할 계획이 없다면 `system_settings`의 해당 시드 행과 관련 UI 기대를 제거해 혼란 요소를 없앰. 배포 환경(Vercel)에 `SESSION_IDLE_TIMEOUT_MIN` env var가 실제로 설정되어 있는지도 함께 확인 권장(미설정 시 기본 30분).
+- **관련 파일**: `src/lib/auth/proxy.ts`(`authGuard`, L83-102), `supabase/migrations/20260419130000_create_system_settings.sql`, `supabase/migrations/20260426060000_zen_system_params_feature_flags.sql`, `src/app/[locale]/(dashboard)/admin/settings/settings-client.tsx`
+- **예상 공수**: 0.3~0.5 MD (배선 방식 결정 후 구현 + 회귀 테스트)
+- **우선순위**: Low — 현재 기능 자체는 정상 동작(env var 기본값), 관리 UX 정합성 문제에 한정
+- **상태**: 🔜 Issue #1176(TASK-1136)로 발령됨(2026-08-20, Edward 요청 반영 — admin 설정 가능 + 다음 로그인부터 적용 방식으로 설계 확정)
+
+---
+
+## [IMP-169] `/admin/error-logs`가 `logger.error()` 전체를 커버하지 않음 — Sentry/Axiom에는 있는데 자체 화면엔 없는 사각지대
+
+- **발견 경위**: 2026-09-30, 금일 원격 Vercel UPS 출고 오류(DEF-B-148/149, Issue #1201/#1202) 조사 중 발견. Aiden이 Vercel MCP `get_runtime_errors`로 오류를 찾았는데, 같은 오류가 `/admin/error-logs`(`zen_error_logs`) 화면에는 전혀 없다는 점을 확인하는 과정에서 드러남.
+- **현재 상태**: `src/lib/logger.ts`의 `logger.error()`는 호출 시 (1) `console.error`(→Vercel 런타임로그), (2) Sentry(`captureMessage`), (3) Axiom(`enqueueAxiomLog`) 세 곳으로 항상 전송된다(TASK-1138, 2026-08-22). 반면 `/admin/error-logs` 화면이 조회하는 `zen_error_logs` 테이블은 `logClientError()`(`src/app/actions/misc/monitoring.ts`)를 **명시적으로 호출한 지점만** 기록한다 — 이 둘은 서로 다른 파이프라인이다. 오늘 발견한 `confirmOutbound`(`warehouse.ts`)·`downloadAndStoreLabelDoc`(`ups-labels.ts`)는 `logger.error()`만 호출하고 `logClientError()`는 호출하지 않아, Sentry/Axiom/Vercel 로그에는 남지만 `/admin/error-logs`에는 절대 뜨지 않는다.
+- **영향**: GOV_COMMON.md ZEN_A4 "핵심 지점 실시간 알림" 절(v1.4)이 도입되며 `/admin/error-logs`가 "플랫폼 자체 진행 중 장애 뷰"로 명명되었는데(#1181~1185 DoD), 실제로는 `logger.error()`를 호출하는 모든 실패 지점의 극히 일부(명시적으로 `logClientError()`까지 연결한 지점)만 커버한다. 운영자가 이 화면만 보고 "장애 없음"으로 오인할 위험 — 오늘처럼 Vercel/Sentry/Axiom을 직접 뒤져야만 실제 실패 지점을 발견할 수 있는 상태.
+- **임시 조치**: 없음 — 발견만 하고 조치는 하지 않음(본 세션 작업 범위 밖).
+- **목표 구현**: 검토 필요한 두 방향 — (A) `logger.error()` 호출 시 일정 기준(예: 라우트별 빈도, 최근 N일 재발) 이상이면 자동으로 `zen_error_logs`에도 적재되도록 `logger.ts` 자체를 확장, 또는 (B) `/admin/error-logs`의 성격을 "CRITICAL 알림 대상 전용"으로 명확히 재정의하고, 전체 `logger.error()` 로그 열람은 Sentry/Axiom 대시보드 링크 안내로 분리(둘을 같은 화면인 것처럼 다루지 않기). 어느 쪽이든 Team B가 Sentry/Axiom 접근권한을 실제로 갖고 있는지부터 확인 필요.
+- **관련 파일**: `src/lib/logger.ts`, `src/app/actions/misc/monitoring.ts`(`logClientError`), `src/app/[locale]/(dashboard)/admin/error-logs/`
+- **예상 공수**: 0.5~1 MD (방향 결정 후 구현 + 회귀 테스트, 방향 결정 자체에 별도 논의 필요할 수 있음)
+- **우선순위**: Medium — 기능 장애는 아니나 관측성 정책(GOV_COMMON.md ZEN_A4)의 실효성에 직결되는 구조적 사각지대
