@@ -39,9 +39,3 @@ James 신고에 따르면 INVOICE 문서를 열었을 때 내용이 비어 보�
 ## 파일 소유권 확인
 
 `git log --follow`로 확인 — `UpsTradeDocumentActions.tsx`·`ups-labels.ts` 전 커밋이 Dave/Mike/Baker(Team B) 태그, Team A 이력 없음 → **Team B 담당**. → **TASK-B-327로 배정**
-
-## Jaison 추가 확인 (2026-10-01, TeamB_Dev 반영 시)
-
-이 DEF 파일이 원래 `develop`/`main`에만 존재하고 **TeamB_Dev에는 없던 상태**로 18일간 방치되어 있었음(Issue #1196은 2026-09-13 생성, task file도 미생성). Aiden이 어느 시점에 develop에 직접 커밋한 것으로 추정 — TeamB_Dev 동기화 공백. 내용 자체는 수정 없이 그대로 반영.
-
-**주의(TASK-B-328과 중복 방지)**: `downloadAndStoreLabelDoc()`은 DEF-B-148(TASK-B-328)의 `fetchAndSaveLabel()` 경로와 공유된다. TASK-B-328은 그 헬퍼 자체(재시도·로깅)만 개선하고 `fetchShxkTradeDocument()`의 메시지 개선은 건드리지 않기로 했으므로, 이 Task(TASK-B-327)에서 `revalidatePath`/`toast.success` 추가 시 `downloadAndStoreLabelDoc()` 자체 시그니처가 TASK-B-328에서 바뀌면(재시도 로직 추가 등) 병합 순서에 따라 충돌 가능 — PR 제출 전 TeamB_Dev 최신 상태로 반드시 재동기화할 것.
