@@ -8,7 +8,7 @@
 | **담당** | Mike (Team B) |
 | **생성일** | 2026-10-01 |
 | **우선순위** | P2 (Medium) |
-| **상태** | 🔄 진행 중 |
+| **상태** | 🔔 리뷰 대기 |
 
 ## 현재 상태 (Jaison 분석 완료)
 
@@ -51,21 +51,21 @@ Storage 실패로 `fetchAndSaveLabel`이 실패값을 반환하는 상황을 실
 
 ## 착수 체크리스트
 
-- [ ] `git fetch origin && git pull origin TeamB_Dev` 후 `feature/teamb-328-ups-label-storage-upload-failure` 브랜치 생성(전용 워크트리, R-17 §0) — `next-task-number.sh B` 결과가 stale할 수 있음(2026-09-13 TASK-B-318 사례), GitHub Issue 제목 검색으로 328이 맞는지 재확인(이번엔 Issue #1201 제목에 이미 TASK-B-328로 명시돼 있어 확인 용이)
-- [ ] ③ `markAllPackagesIssued()` 스킵 영향 실제 확인(필수, 위 참조) — 결과에 따라 설계 조정 여부 판단
-- [ ] `downloadAndStoreLabelDoc()` 재시도+구조화 로깅 추가(①)
-- [ ] `fetchAndSaveLabel()`/`fetchAndIssueUpsLabel()`(docType 없음) 오류 구분(②)
-- [ ] `fetchShxkTradeDocument()`·`fetchAndIssueUpsLabel()`(docType 있음)는 손대지 말 것 — TASK-B-327 스코프와 중복 방지(공통 헬퍼 `downloadAndStoreLabelDoc()` 수정은 그대로 이득이 감)
-- [ ] 회귀 테스트 신설(R-09): Storage 업로드 mock 실패 → 재시도 1회 확인, 실패 원인 구분(getNewLabelFailed) 검증, 실제 함수 호출 기반(`toContain`·함수 존재 확인 금지)
-- [ ] `LIVE_REGRESSION_TEST_MAP.md` 갱신
-- [ ] **독립 되돌리기 검증**: 수정 원복 시 신규 테스트가 정확히 FAIL하는지 확인 후 복원
-- [ ] `npm run test:regression` 직접 실행, 정확한 PASS 수치 기재
-- [ ] `npm run build` SUCCESS 확인
-- [ ] (R-10) 실제 UI에서 Storage 업로드를 인위적으로 실패시켜(또는 mock) 정확한 오류 메시지가 뜨는지, 재시도 로그가 남는지 확인, 스크린샷/로그 첨부
+- [x] `git fetch origin && git pull origin TeamB_Dev` 후 `feature/teamb-328-ups-label-storage-upload-failure` 브랜치 생성(전용 워크트리 `ZENITH_LMS-worktrees/mike`, R-17 §0) — Issue #1201 제목에 TASK-B-328 명시 확인
+- [x] ③ `markAllPackagesIssued()` 스킵 영향 실제 확인 — 결과: `confirmOutbound()`는 `intl_ref_locked`를 **강제 차단하지 않음**(누락 시 `pkgsWithoutIntlRef` 경고만 표시, 출고확정은 진행). 다만 UI(`OutboundProcessForm`)가 `intl_ref_locked` 기준으로 라벨 재발급을 유도하므로, SHXK 발급 성공 시 Storage 실패와 무관하게 마킹 수행하는 쪽으로 설계 변경
+- [x] `downloadAndStoreLabelDoc()` 재시도+구조화 로깅 추가(①)
+- [x] `fetchAndSaveLabel()`/`fetchAndIssueUpsLabel()`(docType 없음) 오류 구분(②)
+- [x] `fetchShxkTradeDocument()`·`fetchAndIssueUpsLabel()`(docType 있음)는 손대지 않음 — TASK-B-327 스코프 중복 방지
+- [x] 회귀 테스트 신설(R-09): `tests/unit/ups/defb148-ups-label-storage-upload-retry.test.ts` 7건 — 실제 `downloadAndStoreLabelDoc`/`fetchAndIssueUpsLabel` 호출 기반 behavioral, `readFileSync`+`toContain` 없음
+- [x] `LIVE_REGRESSION_TEST_MAP.md` 갱신 (§60, TC-UPS-STG-01~07)
+- [x] **독립 되돌리기 검증**: TeamB_Dev 원본으로 복원 시 신규 테스트 4건 FAIL(재시도 부재·빈 메시지·오진단성 메시지·마킹 스킵) → 수정본 복원 시 7/7 PASS 확인
+- [x] `npm run test:regression` 직접 실행: **210 files / 1482 tests ALL PASS**
+- [x] `npm run build` SUCCESS (Next.js 16.2.4, TypeScript 통과)
+- [x] (R-10) behavioral mock 기반 검증 — 서버 액션 `fetchAndIssueUpsLabel` 실제 경로에서 Storage upload 실패 mock → 정확한 오류 메시지 + 재시도 로그(logger.error 구조화 payload) + `markAllPackagesIssued` 호출 확인. **운영 UI 실측 스크린샷은 미수행**(로컬에서 Storage를 인위 실패시킬 환경 부재 — 테스트가 서버 액션 전체 경로를 mock 검증한 것으로 대체)
 
 ## 완료 보고 절차 (R-17 준수)
 
-1. **[코드 커밋]** `[Mike] fix: TASK-B-328 UPS 라벨 Storage 업로드 실패 오류 메시지·재시도 개선 (DEF-B-148)` → 2. task file `[작업 결과]` 작성(커밋 해시 실제 값 기재, ③ 확인 결과 포함) + 상태 🔔 → 3. `gh issue edit 1201 --add-label status:review --remove-label status:in-progress` → 4. `check-R17-DoD` 통과 → 5. 문서 커밋 → 6. PR 생성(`feature/* → TeamB_Dev`, `Closes #1201`)
+1. **[코드 커밋]** `[Mike] fix: TASK-B-328 UPS 라벨 Storage 업로드 실패 오류 메시지·재시도 개선 (DEF-B-148)` → 2. task file `[작업 결과]` 작성 + 상태 🔔 → 3. `gh issue edit 1201 --add-label status:review --remove-label status:in-progress` → 4. `check-R17-DoD` 통과 → 5. 문서 커밋 → 6. PR 생성(`feature/* → TeamB_Dev`, `Closes #1201`)
 
 ## 담당자 위반 이력 사전 경고
 
@@ -76,10 +76,73 @@ Storage 실패로 `fetchAndSaveLabel`이 실패값을 반환하는 상황을 실
 
 ## [작업 결과]
 
-_(담당자 작성 예정)_
+### 수정 요약
+
+| 구분 | 내용 |
+|:-----|:------|
+| **이슈/DEF** | Issue #1201 / DEF-B-148 |
+| **브랜치** | `feature/teamb-328-ups-label-storage-upload-failure` (워크트리 `ZENITH_LMS-worktrees/mike` 격리) |
+| **수정 파일** | `src/app/actions/operations/ups-labels.ts` |
+| **신규 테스트** | `tests/unit/ups/defb148-ups-label-storage-upload-retry.test.ts` (7건) |
+| **문서** | `docs/08_Self_Audit/Checklists/LIVE_REGRESSION_TEST_MAP.md` §60 |
+
+### ① `downloadAndStoreLabelDoc()` 공통 개선
+
+- Storage 업로드 실패 시 **1회 재시도**(500ms backoff, 단순 재호출 — 별도 라이브러리 없음)
+- 실패 시 `uploadError` 객체 전체를 `describeStorageError()`로 구조화해 `logger.error`에 기록(own property 순회 + message/error/statusCode/hint/details 보강)
+- `uploadError.message`가 빈 문자열이던 사례(DEF-B-148 `<none>`) 대응: throw 메시지에 `.message`가 비어있으면 **객체 전체 JSON**을 포함해 근본원인 진단 가능하게 함
+- 3개 호출부(`fetchAndSaveLabel`, `fetchAndIssueUpsLabel` docType 있음, `fetchShxkTradeDocument`) 공통 적용 — 스코프상 TASK-B-327에도 이득
+
+### ② `fetchAndSaveLabel()` 반환 타입 확장 + 오류 구분
+
+```ts
+// before: Promise<string | null>
+// after:
+Promise<{ signedUrl: string | null; getNewLabelFailed: boolean }>
+```
+
+- `getNewLabelFailed: true` (SHXK getnewlabel 자체 실패) → 기존 메시지 유지: `'라벨 발급 실패 (getnewlabel)'`
+- `getNewLabelFailed: false` + `signedUrl: null` (Storage 저장만 실패) → 정확한 메시지: `'배송 처리는 완료되었으나 라벨 문서 저장에 실패했습니다. 잠시 후 다시 시도해주세요.'`
+- **스코프 준수**: `fetchShxkTradeDocument()`(무역서류 관리 경로) 및 `fetchAndIssueUpsLabel()` docType 있음 분기의 개별 메시지는 건드리지 않음(TASK-B-327과 중복/충돌 방지)
+
+### ③ `markAllPackagesIssued()` 스킵 영향 확인 결과 + 설계 변경
+
+**코드 분석 확인**:
+- `confirmOutbound()`(`src/app/actions/operations/warehouse.ts`)는 `intl_ref_no`/`intl_ref_locked`를 **필수 조건으로 차단하지 않음** — 누락 시 `pkgsWithoutIntlRef` 카운트만 반환해 UI 경고 토스트 표시, 출고확정 자체는 진행됨
+- 다만 `OutboundProcessForm.tsx`가 `intl_ref_locked` 기준으로 라벨 재발급을 유도하므로, Storage 실패로 마킹이 스킵되면 사용자가 "라벨 미발급" 상태로 오인하고 재발급을 시도하게 됨
+
+**설계 변경(반영됨)**:
+- SHXK `getnewlabel` **발급 성공**(`getNewLabelFailed: false`)인 경우 Storage 저장 성공/실패와 무관하게 `markAllPackagesIssued()`를 먼저 호출
+- 패키지 `intl_ref_no`/`intl_ref_locked`는 트래킹 번호가 유통하는 동안 보존되어야 하므로 문서 아카이빙 실패와 분리 처리
+- Storage 실패 시에도 메시지에 "배송 처리는 완료" 사실을 명시해 사용자 오인 제거
+
+### 검증 결과
+
+| 항목 | 결과 |
+|:-----|:-----|
+| 신규 회귀 테스트 | **7/7 PASS** (behavioral, 실제 서버 액션 호출) |
+| 전체 회귀 테스트 | **210 files / 1482 tests ALL PASS** (`npm run test:regression`) |
+| 빌드 | **SUCCESS** (`npm run build`, Next.js 16.2.4 + TypeScript 통과) |
+| 독립 되돌리기 검증 | TeamB_Dev 원본 복원 시 신규 테스트 **4건 FAIL**(재시도 upload 1회 호출·빈 메시지 `"PDF 업로드 실패: "`·오진단성 `"라벨 발급 실패 (getnewlabel)"`·마킹 미수행) → 수정본 복원 시 7/7 PASS. 테스트가 실제 수정 대상을 검증함을 확인 |
+| 기존 UPS 래블 관련 테스트 | `ups-labels-download-store` / `ups-labels-split` / `ups-labels-combined-doctype` / `ups-labels-agency-permission` 전건 PASS(31건) |
+
+### 테스트 설계 (위양성 방지)
+
+- `readFileSync`+`toContain()` 소스 문자열 검사 **미사용** (Mike 반복 위반 이력 관련 자가검증)
+- `downloadAndStoreLabelDoc` 직접 호출: upload mock 시퀀스로 재시도 횟수·구조화 로깅 payload 검증
+- `fetchAndIssueUpsLabel` 직접 호출(docType 없음): `getnewlabel` mock + Storage upload mock 조합으로 아래 4경로 구분 검증
+  1. getnewlabel 성공 + Storage 실패 → 정확한 메시지 + `zen_order_packages` update 호출(마킹 수행)
+  2. getnewlabel 실패 → 기존 메시지 + 마킹 미수행 + Storage 미호출
+  3. 전 성공 → signed URL + 마킹 수행
+  4. 교차 검증: getnewlabel 실패 시 Storage upload 호출 자체 없음
+
+### 커밋
+
+- **코드 커밋**: `e6534fca00c637768f4a2c9b70643fbbd5ecc323` — `[Mike] fix: TASK-B-328 UPS 라벨 Storage 업로드 실패 오류 메시지·재시도 개선 (DEF-B-148)`
+  - 포함: `src/app/actions/operations/ups-labels.ts`, `tests/unit/ups/defb148-ups-label-storage-upload-retry.test.ts`, `docs/08_Self_Audit/Checklists/LIVE_REGRESSION_TEST_MAP.md`
 
 ## [발견 이슈]
 
-_(담당 Task 범위 밖 이슈. 없으면 "없음" 기재)_
-
-없음
+1. **`uploadError.message` 빈 문자열 근본원인은 여전히 미상** — 이번 수정으로 재발 시 구조화 로그(statusCode/error/hint/details 포함)에 객체 전체가 남아 진단 가능해졌으나, 원래 StorageError가 왜 빈 message를 반환했는지(네트워크 중단/타임아웃/권한/버킷 정책 중 무엇)는 운영 로그에서 확인 전. 다음 재발 시 Vercel 로그의 `[downloadAndStoreLabelDoc] Storage upload failed` payload를 확인할 것.
+2. **R-10 운영 UI 실측 미수행** — 로컬/워크트리 환경에서 Supabase Storage를 인위 실패시킬 수단이 없어, 서버 액션 전체 경로 behavioral mock으로 대체. 운영 배포 후 동일 경로 재현 시 스크린샷·로그 추가 첨부 바람.
+3. `fetchAndIssueUpsLabel`의 docType 있음 분기(L492) 및 `fetchShxkTradeDocument`(L787 근방)의 개별 오류 메시지("발급된 문서 저장 실패"/"문서 다운로드/저장 실패")는 이번 스코프 밖 — TASK-B-327 담당.
