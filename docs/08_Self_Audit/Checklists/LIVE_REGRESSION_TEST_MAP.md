@@ -785,6 +785,15 @@
 | **TC-SHXK-OVRFLOW-04** | shipper_street/consignee_street + city/province city/province 별도 확인 | 정보 손실 없음 종합 | `tests/unit/ups/defb146-street-city-province-overflow.test.ts` |
 | **TC-SHXK-OVRFLOW-05** | 수하인 street(단일 세그먼트 it venture tower) 동일 축약 | ZEN-2026-000015 수하인 실제 데이터 | `tests/unit/ups/defb146-street-city-province-overflow.test.ts` |
 
+### 60. confirmOutbound zen_inventory_history insert 제거 (DEF-B-149 / Issue #1202 / TASK-B-329)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-INVH-01** | 출고확정 시 zen_inventory_history from/insert 호출 0건 | SKU 재고 이력 insert 원천 차단 검증 (from 호출 카운트) | `tests/unit/warehouse/defb149-confirm-outbound-history-removal.test.ts` |
+| **TC-INVH-02** | RELEASED 상태 전환 + revalidatePath 보존 | insert 제거가 정상 출고 흐름에 영향 없음 | `tests/unit/warehouse/defb149-confirm-outbound-history-removal.test.ts` |
+| **TC-INVH-03** | pkgsWithoutIntlRef 계산 보존 | 출고 패키지 조회 로직 무손상 | `tests/unit/warehouse/defb149-confirm-outbound-history-removal.test.ts` |
+| **TC-INVH-04** | WAREHOUSED/PACKED 아닌 오더 거부 유지 | 가드 로직 회귀 방지 | `tests/unit/warehouse/defb149-confirm-outbound-history-removal.test.ts` |
+| **TC-INVH-05** | 빈 packages/빈 레코드에서도 성공 | history 의존 제거로 성공 조건 단순화 검증 | `tests/unit/warehouse/defb149-confirm-outbound-history-removal.test.ts` |
+
 ---
 
 ## 📝 가이드라인 (R-09 Enforcement)
