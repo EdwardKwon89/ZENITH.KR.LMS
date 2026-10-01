@@ -1879,4 +1879,4 @@ UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류
 - **관련 파일**: `src/lib/logger.ts`, `src/app/actions/misc/monitoring.ts`(`logClientError`), `src/app/[locale]/(dashboard)/admin/error-logs/`
 - **예상 공수**: 0.5~1 MD (방향 결정 후 구현 + 회귀 테스트, 방향 결정 자체에 별도 논의 필요할 수 있음)
 - **우선순위**: Medium — 기능 장애는 아니나 관측성 정책(GOV_COMMON.md ZEN_A4)의 실효성에 직결되는 구조적 사각지대
-- **상태**: 🔜 Issue #1208(TASK-1141)로 발령됨(2026-10-01, Edward 확인 — Option C(`logClientError()`를 `logger.error()`로 흡수) 채택, Team A 배정)
+- **상태**: ✅ 완료 — Issue #1208(TASK-1141), B_Kai 구현, PR #1209 Aiden 승인·develop 병합(커밋 `6ef5ff1e0`, 2026-10-01). `logger.error()`가 자동으로 `zen_error_logs`에 적재되어 Team B도 Admin 계정으로 `/admin/error-logs`에서 production 오류를 독립 확인 가능해짐.
