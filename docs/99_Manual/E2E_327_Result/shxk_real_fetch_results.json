@@ -1,0 +1,23 @@
+{
+  "refNo": "ZEN327853120",
+  "summary": {
+    "WAYBILL": {
+      "contentType": "1",
+      "success": 1,
+      "url": "https://api-pdf.oss-cn-shenzhen.aliyuncs.com/pdf/20261001/9BF51322871B88A6/33a83965-2065-4a2a-b8c4-4c43d2b3dfb8.pdf",
+      "enmessage": "获取订单标签成功"
+    },
+    "CUSTOMS": {
+      "contentType": "2",
+      "success": 1,
+      "url": "https://api-pdf.oss-cn-shenzhen.aliyuncs.com/pdf/20261001/9BF51322871B88A6/e6bc5c9c-c88d-4832-9877-1be51e522e7d.pdf",
+      "enmessage": "获取订单标签成功"
+    },
+    "INVOICE": {
+      "contentType": "3",
+      "success": 1,
+      "url": "https://api-pdf.oss-cn-shenzhen.aliyuncs.com/pdf/20261001/9BF51322871B88A6/33a83965-2065-4a2a-b8c4-4c43d2b3dfb8.pdf",
+      "enmessage": "获取订单标签成功"
+    }
+  }
+}
