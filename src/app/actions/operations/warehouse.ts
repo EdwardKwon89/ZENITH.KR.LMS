@@ -124,7 +124,7 @@ export async function getTodayReleasedOrders() {
 }
 
 export async function confirmOutbound(orderId: string) {
-  const { supabase, user, profile } = await validateUserAction();
+  const { supabase, profile } = await validateUserAction();
   if (!profile) throw new Error("User profile not found");
   const isAllowed = WAREHOUSE_ROLES.includes(profile.role as any);
   if (!isAllowed) {
@@ -146,12 +146,6 @@ export async function confirmOutbound(orderId: string) {
     }
   }
 
-  const packages = (order as any).packages || [];
-  const totalQty = packages.reduce((sum: number, p: any) => {
-    return sum + (p.packing_count || p.items?.length || 0);
-  }, 0);
-  const orgId = (order as any).org_id || profile.org_id;
-
   const { data: pkgs } = await supabase
     .from("zen_order_packages")
     .select("id, intl_ref_no, packing_count")
@@ -159,22 +153,6 @@ export async function confirmOutbound(orderId: string) {
   const pkgsWithoutIntlRef = (pkgs || []).filter((p) => !p.intl_ref_no).length;
 
   await updateOrderStatus(orderId, OrderStatus.RELEASED, "[출고확정]");
-
-  const { error: historyError } = await supabase
-    .from("zen_inventory_history")
-    .insert({
-      org_id: orgId,
-      transaction_type: "OUTBOUND" as any,
-      change_qty: -totalQty,
-      result_qty: 0,
-      reference_id: orderId,
-      remarks: `출고확정: ${order.order_no}`,
-      created_by: user.id,
-    });
-
-  if (historyError) {
-    logger.error("confirmOutbound history insert error:", historyError);
-  }
 
   revalidatePath("/(dashboard)/warehouse/outbound", "page");
   revalidatePath("/(dashboard)/orders", "page");

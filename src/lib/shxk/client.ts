@@ -1,5 +1,5 @@
 import 'server-only'
-import { SHXK_ENDPOINT, SHXK_APP_KEY, SHXK_APP_TOKEN } from './config'
+import { SHXK_ENDPOINT, SHXK_APP_KEY, SHXK_APP_TOKEN, assertShxkConfig } from './config'
 import { createAdminClient } from '@/utils/supabase/server'
 import { logger } from '@/lib/logger'
 import type {
@@ -155,6 +155,8 @@ export async function callShxk(
     await logShxkCall({ method, params, response: mockResponse, isMock: true })
     return mockResponse
   }
+
+  assertShxkConfig()
 
   const body = buildShxkBody(method, params)
   let res: Response

@@ -345,6 +345,19 @@
 | **TC-AXM-04** | HTTP 오류 처리 | 4xx/5xx 응답 시 경고 후 정상 종료 검증 (TASK-1138) | `tests/unit/monitoring/axiom-transport.test.ts` |
 | **TC-AXM-05** | 임계치 자동 flush | 버퍼 25건 도달 시 즉시 배치 전송 및 중복 방지 검증 (TASK-1138) | `tests/unit/monitoring/axiom-transport.test.ts` |
 | **TC-AXM-06** | coalesce 타이머 flush | 동일 tick 로그 병합을 위한 지연 flush 동작 검증 (TASK-1138) | `tests/unit/monitoring/axiom-transport.test.ts` |
+| **TC-ELP-01** | logger.error 자동 적재 | `logger.error` 호출 시 `zen_error_logs`에 ERROR/SERVER 행 실제 적재 검증 (TASK-1141) | `tests/unit/monitoring/logger-errorlog-pipeline.test.ts` |
+| **TC-ELP-02** | warn/info 비적재 | `logger.warn/info`는 `zen_error_logs`에 적재하지 않음 검증 (TASK-1141) | `tests/unit/monitoring/logger-errorlog-pipeline.test.ts` |
+| **TC-ELP-03** | DB 실패 내성 | 적재 실패 시 예외 없이 종료·재귀 호출 없음 검증 (TASK-1141) | `tests/unit/monitoring/logger-errorlog-pipeline.test.ts` |
+| **TC-ELP-04** | Edge 스킵 | Edge 런타임 DB 적재 스킵·나머지 파이프라인 유지 검증 (TASK-1141) | `tests/unit/monitoring/logger-errorlog-pipeline.test.ts` |
+| **TC-ELP-05** | 브라우저 채널 | 브라우저 `logger.error` 시 POST `/api/error-logs` 요청 검증 (TASK-1141) | `tests/unit/monitoring/logger-errorlog-pipeline.test.ts` |
+| **TC-ELP-06** | UUID 귀속 | request-context UUID user/org 포함·비-UUID NULL 검증 (TASK-1141) | `tests/unit/monitoring/logger-errorlog-pipeline.test.ts` |
+| **TC-ELP-07** | CRITICAL 미승격 | 자동 적재(ERROR)가 인앱 알림 미발송 검증 (TASK-1141) | `tests/unit/monitoring/logger-errorlog-pipeline.test.ts` |
+| **TC-ELP-08** | stack 승격 | Error 객체 stack의 stack 컬럼 승격 검증 (TASK-1141) | `tests/unit/monitoring/logger-errorlog-pipeline.test.ts` |
+| **TC-ELR-01** | 클라이언트 채널 적재 | POST `/api/error-logs` 유효 ERROR의 CLIENT 행 적재 검증 (TASK-1141) | `tests/unit/monitoring/error-logs-route.test.ts` |
+| **TC-ELR-02** | CRITICAL 거부 | CRITICAL severity 400 거부·미적재 검증 (TASK-1141) | `tests/unit/monitoring/error-logs-route.test.ts` |
+| **TC-ELR-03** | message 필수 | message 없이 400 반환 검증 (TASK-1141) | `tests/unit/monitoring/error-logs-route.test.ts` |
+| **TC-ELR-04** | 길이 상한 | 2000자 초과 메시지 truncate 적재 검증 (TASK-1141) | `tests/unit/monitoring/error-logs-route.test.ts` |
+| **TC-ELR-05** | DB 실패 500 | DB 실패 시 500·logger 재귀 없이 warn 종료 검증 (TASK-1141) | `tests/unit/monitoring/error-logs-route.test.ts` |
 
 ### 22. 회원 등급 및 승급 (Member Grade)
 | ID | 테스트 항목 | 목적 | 파일 경로 |
@@ -785,6 +798,38 @@
 | **TC-SHXK-OVRFLOW-04** | shipper_street/consignee_street + city/province city/province 별도 확인 | 정보 손실 없음 종합 | `tests/unit/ups/defb146-street-city-province-overflow.test.ts` |
 | **TC-SHXK-OVRFLOW-05** | 수하인 street(단일 세그먼트 it venture tower) 동일 축약 | ZEN-2026-000015 수하인 실제 데이터 | `tests/unit/ups/defb146-street-city-province-overflow.test.ts` |
 
+### 60. confirmOutbound zen_inventory_history insert 제거 (DEF-B-149 / Issue #1202 / TASK-B-329)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-INVH-01** | 출고확정 시 zen_inventory_history from/insert 호출 0건 | SKU 재고 이력 insert 원천 차단 검증 (from 호출 카운트) | `tests/unit/warehouse/defb149-confirm-outbound-history-removal.test.ts` |
+| **TC-INVH-02** | RELEASED 상태 전환 + revalidatePath 보존 | insert 제거가 정상 출고 흐름에 영향 없음 | `tests/unit/warehouse/defb149-confirm-outbound-history-removal.test.ts` |
+| **TC-INVH-03** | pkgsWithoutIntlRef 계산 보존 | 출고 패키지 조회 로직 무손상 | `tests/unit/warehouse/defb149-confirm-outbound-history-removal.test.ts` |
+| **TC-INVH-04** | WAREHOUSED/PACKED 아닌 오더 거부 유지 | 가드 로직 회귀 방지 | `tests/unit/warehouse/defb149-confirm-outbound-history-removal.test.ts` |
+| **TC-INVH-05** | 빈 packages/빈 레코드에서도 성공 | history 의존 제거로 성공 조건 단순화 검증 | `tests/unit/warehouse/defb149-confirm-outbound-history-removal.test.ts` |
+
+### 61. UPS 라벨 Storage 업로드 실패 재시도 + 오류 구분 (DEF-B-148 / Issue #1201 / TASK-B-328)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-UPS-STG-01** | 업로드 1회 실패 후 재시도 성공 → signedUrl 반환 + upload 2회 호출 | Storage 일시 장애 자동 복구 검증 | `tests/unit/ups/defb148-ups-label-storage-upload-retry.test.ts` |
+| **TC-UPS-STG-02** | 업로드 전건 실패 → 재시도 1회 후 throw + uploadError 전체 구조화 로깅 | 근본원인 진단 로그 검증 (DEF-B-148) | `tests/unit/ups/defb148-ups-label-storage-upload-retry.test.ts` |
+| **TC-UPS-STG-03** | uploadError.message 빈 문자열이어도 에러 메시지에 객체 정보 포함 | `<none>` 오류 메시지 재발 방지 | `tests/unit/ups/defb148-ups-label-storage-upload-retry.test.ts` |
+| **TC-UPS-STG-04** | getnewlabel 성공 + Storage 실패 → "배송 처리는 완료" 메시지 + markAllPackagesIssued 호출 | 오진단성 메시지 제거 + 패키지 마킹 누락 방지(③) | `tests/unit/ups/defb148-ups-label-storage-upload-retry.test.ts` |
+| **TC-UPS-STG-05** | getnewlabel 자체 실패 → "라벨 발급 실패 (getnewlabel)" 유지 + 마킹 미수행 | 실패 원인 구분 회귀 방지 | `tests/unit/ups/defb148-ups-label-storage-upload-retry.test.ts` |
+| **TC-UPS-STG-06** | getnewlabel 성공 + Storage 성공 → signed URL 반환 + 패키지 마킹 | 정상 경로 회귀 방지 | `tests/unit/ups/defb148-ups-label-storage-upload-retry.test.ts` |
+| **TC-UPS-STG-07** | getnewlabel 실패 시 Storage 업로드 미호출 | 불필요 Storage 호출 차단 교차 검증 | `tests/unit/ups/defb148-ups-label-storage-upload-retry.test.ts` |
+
+---
+
+### 62. SHXK 무역서류 처리 완료 메시지 + revalidatePath (DEF-B-147 / Issue #1196 / TASK-B-327)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-TRDOC-01** | WAYBILL 성공 시 완료 토스트 + router.refresh | 처리 완료 안내 부재 해소 검증 | `tests/unit/ups/task-b327-trade-document-toast.test.tsx` |
+| **TC-TRDOC-02** | CUSTOMS 성공 시 완료 토스트 + router.refresh | 동일 경로 회귀 방지 | `tests/unit/ups/task-b327-trade-document-toast.test.tsx` |
+| **TC-TRDOC-03** | INVOICE 실패 시 에러 토스트, 완료 토스트/refresh 미호출 | 실패 케이스 사용자 안내 검증 | `tests/unit/ups/task-b327-trade-document-toast.test.tsx` |
+| **TC-TRDOC-04** | 성공 응답 url 존재 시 "문서 열기" 링크 노출 | raw JSON 팝업 개선(③) 검증 | `tests/unit/ups/task-b327-trade-document-toast.test.tsx` |
+| **TC-TRDOC-05** | fetchShxkTradeDocument 성공 시 revalidatePath(orders/[orderId]) 호출 | 서버 액션 리프레시 누락 버그 검증 | `tests/unit/ups/task-b327-fetch-trade-document.test.ts` |
+| **TC-TRDOC-06** | getnewlabel 실패 시 success=false + revalidatePath 미호출 | 실패 시 화면 갱신 오호출 방지 | `tests/unit/ups/task-b327-fetch-trade-document.test.ts` |
+
 ---
 
 ## 📝 가이드라인 (R-09 Enforcement)
@@ -801,5 +846,13 @@
 | **TC-DBE-03** | 요율 조회 DB 에러 — logger.error 기록 | `zen_rate_cards` 조회 실패 시 에러 로그 기록 + cost 0 폴백 유지 검증 | `tests/unit/logistics/database-route-adapter-dberror.test.ts` |
 | **TC-DBE-04** | 요율 카드 정상 부재 — 무로그 | `data=null` 정상 부재는 로깅 없이 cost 0 처리 검증 | `tests/unit/logistics/database-route-adapter-dberror.test.ts` |
 | **TC-DBE-05** | 정상 흐름 — 에러 로그 없음 | 경로+요율 모두 존재 시 옵션 정상 생성·에러 로그 미발생 검증 | `tests/unit/logistics/database-route-adapter-dberror.test.ts` |
+
+---
+
+## 60. SHXK 인증키 미설정 방어 — assertShxkConfig 연결 (DEF-B-142 / Issue #1165 / TASK-B-318)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-SHXK-CFG-01** | 비-mock + SHXK_APP_KEY/SHXK_APP_TOKEN 미설정 → 즉시 실패 | 키 미설정 시 빈 값 전송 대신 명확한 한글 에러로 즉시 반환 (fetch+감사로그 미발생) | `tests/unit/shxk/client.test.ts` |
+| **TC-SHXK-CFG-02** | mock 모드 + 키 미설정 → mock 응답 정상 | 개발/테스트 환경 mock 경로는 키 없이도 동작 유지 (방어와 무관) | `tests/unit/shxk/client.test.ts` |
 
 
