@@ -50,6 +50,7 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
+| [#1207](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1207) | [Team A] TASK-1141: logger.error()/logClientError() 로깅 파이프라인 통합 — /admin/error-logs 관측 사각지대 해소 (IMP-169) | a | p2 | - | 미배정 | 2026-10-01 |
 | [#1189](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1189) | [Team B] TASK-B-323: Resend 이메일 도메인(zenith-lms.com) 미인증 — 알림메일 전량 발송 실패 (DEF-B-143, High) | b | p1 | - | jungjs | 2026-08-25 |
 | [#1185](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1185) | [Team B] TASK-B-322: 로그 커버리지 개선 ⑤— admin/auth.ts 예외 객체 폐기 패턴 수정 (5건) | b | p2 | - | 미배정 | 2026-08-23 |
 | [#1183](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1183) | [Team B] TASK-B-321: 로그 커버리지 개선 ③— ups-actual-charges/cost.ts DB쓰기 실패 무기록 (~21건) | b | p2 | - | 미배정 | 2026-08-23 |
