@@ -1,5 +1,6 @@
 import { getRequestContext } from '@/lib/logging/request-context';
 import { enqueueAxiomLog } from '@/lib/logging/axiom-transport';
+import { enqueueErrorLog } from '@/lib/logging/error-log-transport';
 import * as Sentry from '@sentry/nextjs';
 
 type LogLevel = 'debug' | 'info' | 'warn' | 'error';
@@ -66,9 +67,11 @@ function buildEntry(level: LogLevel, args: unknown[]): Record<string, unknown> {
 
 // TASK-1138 (Issue #1178): 에러성 로그는 설계 확정에 따라 Sentry 이슈로도 그룹핑 전송한다.
 // 어떤 경우에도 로깅 자체가 앱 로직을 방해하지 않도록 예외를 흡수한다.
-function captureErrorToSentry(entry: Record<string, unknown>) {
+// TASK-1141: captureMessage가 반환하는 event id를 돌려준다 — zen_error_logs 행의
+// sentry_id로 저장해 /admin/error-logs 화면의 Sentry 링크 기능과 정합을 맞춘다.
+function captureErrorToSentry(entry: Record<string, unknown>): string | undefined {
   try {
-    Sentry.captureMessage(String(entry.message || 'logger.error'), {
+    return Sentry.captureMessage(String(entry.message || 'logger.error'), {
       level: 'error',
       contexts: {
         log_entry: {
@@ -79,9 +82,10 @@ function captureErrorToSentry(entry: Record<string, unknown>) {
           route: entry.route,
         },
       },
-    });
+    }) as string | undefined;
   } catch {
     // no-op — Sentry 장애가 콘솔/Axiom 로깅 경로를 막지 않는다
+    return undefined;
   }
 }
 
@@ -90,7 +94,21 @@ function emit(level: LogLevel, args: unknown[]) {
   const line = safeStringify(entry);
   if (level === 'error') {
     console.error(line);
-    captureErrorToSentry(entry);
+    const sentryId = captureErrorToSentry(entry);
+    // TASK-1141 (Issue #1208, Option C): logClientError() 흡수 — 모든 error 레벨이
+    // 기본 severity(ERROR, 비-CRITICAL)로 zen_error_logs에도 자동 적재된다.
+    // CRITICAL 승격 + 알림은 기존 logClientError 명시 호출 경로로만 유지된다.
+    // warn은 자동 적재하지 않는다 (rate-limit/권한 경고 등 high-volume 신호가
+    // 에러 화면을 묻지 않도록 — warn 열람은 Axiom/Sentry 대시보드로).
+    enqueueErrorLog({
+      message: entry.message,
+      data: Array.isArray(entry.data) ? (entry.data as unknown[]) : undefined,
+      requestId: entry.requestId,
+      userId: entry.userId,
+      orgId: entry.orgId,
+      route: entry.route,
+      sentryId,
+    });
   } else if (level === 'warn') {
     console.warn(line);
   } else {

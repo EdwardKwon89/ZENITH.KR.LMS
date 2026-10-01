@@ -345,6 +345,19 @@
 | **TC-AXM-04** | HTTP 오류 처리 | 4xx/5xx 응답 시 경고 후 정상 종료 검증 (TASK-1138) | `tests/unit/monitoring/axiom-transport.test.ts` |
 | **TC-AXM-05** | 임계치 자동 flush | 버퍼 25건 도달 시 즉시 배치 전송 및 중복 방지 검증 (TASK-1138) | `tests/unit/monitoring/axiom-transport.test.ts` |
 | **TC-AXM-06** | coalesce 타이머 flush | 동일 tick 로그 병합을 위한 지연 flush 동작 검증 (TASK-1138) | `tests/unit/monitoring/axiom-transport.test.ts` |
+| **TC-ELP-01** | logger.error 자동 적재 | `logger.error` 호출 시 `zen_error_logs`에 ERROR/SERVER 행 실제 적재 검증 (TASK-1141) | `tests/unit/monitoring/logger-errorlog-pipeline.test.ts` |
+| **TC-ELP-02** | warn/info 비적재 | `logger.warn/info`는 `zen_error_logs`에 적재하지 않음 검증 (TASK-1141) | `tests/unit/monitoring/logger-errorlog-pipeline.test.ts` |
+| **TC-ELP-03** | DB 실패 내성 | 적재 실패 시 예외 없이 종료·재귀 호출 없음 검증 (TASK-1141) | `tests/unit/monitoring/logger-errorlog-pipeline.test.ts` |
+| **TC-ELP-04** | Edge 스킵 | Edge 런타임 DB 적재 스킵·나머지 파이프라인 유지 검증 (TASK-1141) | `tests/unit/monitoring/logger-errorlog-pipeline.test.ts` |
+| **TC-ELP-05** | 브라우저 채널 | 브라우저 `logger.error` 시 POST `/api/error-logs` 요청 검증 (TASK-1141) | `tests/unit/monitoring/logger-errorlog-pipeline.test.ts` |
+| **TC-ELP-06** | UUID 귀속 | request-context UUID user/org 포함·비-UUID NULL 검증 (TASK-1141) | `tests/unit/monitoring/logger-errorlog-pipeline.test.ts` |
+| **TC-ELP-07** | CRITICAL 미승격 | 자동 적재(ERROR)가 인앱 알림 미발송 검증 (TASK-1141) | `tests/unit/monitoring/logger-errorlog-pipeline.test.ts` |
+| **TC-ELP-08** | stack 승격 | Error 객체 stack의 stack 컬럼 승격 검증 (TASK-1141) | `tests/unit/monitoring/logger-errorlog-pipeline.test.ts` |
+| **TC-ELR-01** | 클라이언트 채널 적재 | POST `/api/error-logs` 유효 ERROR의 CLIENT 행 적재 검증 (TASK-1141) | `tests/unit/monitoring/error-logs-route.test.ts` |
+| **TC-ELR-02** | CRITICAL 거부 | CRITICAL severity 400 거부·미적재 검증 (TASK-1141) | `tests/unit/monitoring/error-logs-route.test.ts` |
+| **TC-ELR-03** | message 필수 | message 없이 400 반환 검증 (TASK-1141) | `tests/unit/monitoring/error-logs-route.test.ts` |
+| **TC-ELR-04** | 길이 상한 | 2000자 초과 메시지 truncate 적재 검증 (TASK-1141) | `tests/unit/monitoring/error-logs-route.test.ts` |
+| **TC-ELR-05** | DB 실패 500 | DB 실패 시 500·logger 재귀 없이 warn 종료 검증 (TASK-1141) | `tests/unit/monitoring/error-logs-route.test.ts` |
 
 ### 22. 회원 등급 및 승급 (Member Grade)
 | ID | 테스트 항목 | 목적 | 파일 경로 |
