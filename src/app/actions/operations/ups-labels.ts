@@ -15,6 +15,8 @@ import type { GetNewLabelItem } from '@/lib/shxk/order';
 
 const DOC_TYPE_CONTENT_MAP = { WAYBILL: '1', CUSTOMS: '2', INVOICE: '3', COMBINED: '6' } as const;
 
+const STORAGE_UPLOAD_RETRY_DELAY_MS = 500;
+
 type DocType = keyof typeof DOC_TYPE_CONTENT_MAP;
 
 function resolveContentType(docType: DocType): string {
@@ -27,9 +29,56 @@ function resolveDocTypeLabel(contentType: string): string {
 }
 
 /**
+ * StorageError는 실패 유형에 따라 `.message`가 비어올 수 있음(DEF-B-148).
+ * 근본원인 진단을 위해 객체 전체의 own property를 구조화해 반환한다.
+ */
+function describeStorageError(uploadError: unknown): Record<string, unknown> {
+  if (uploadError == null) return { raw: String(uploadError) };
+  if (typeof uploadError !== 'object') return { value: String(uploadError) };
+
+  const src = uploadError as Record<string, unknown>;
+  const described: Record<string, unknown> = {};
+  for (const key of Object.getOwnPropertyNames(src)) {
+    try {
+      const value = (src as Record<string, unknown>)[key];
+      described[key] = typeof value === 'function' ? '[function]' : value;
+    } catch {
+      described[key] = '[unreadable]';
+    }
+  }
+  if (described.message === undefined) described.message = (src as { message?: unknown }).message;
+  if (described.error === undefined) described.error = (src as { error?: unknown }).error;
+  if (described.statusCode === undefined) {
+    described.statusCode = (src as { statusCode?: unknown }).statusCode ?? (src as { status?: unknown }).status;
+  }
+  if (described.hint === undefined) described.hint = (src as { hint?: unknown }).hint;
+  if (described.details === undefined) described.details = (src as { details?: unknown }).details;
+  return described;
+}
+
+function resolveUploadErrorDetail(uploadError: unknown): string {
+  const described = describeStorageError(uploadError);
+  const directMessage = (uploadError as { message?: string } | null)?.message;
+  // DEF-B-148: message가 비어있던 사례(`<none>`) 재발 방지 — 빈 값이면 객체 전체를 JSON으로 남긴다
+  if (directMessage && String(directMessage).trim().length > 0) return String(directMessage);
+  try {
+    return JSON.stringify(described);
+  } catch {
+    const fallback =
+      (uploadError as { error?: string } | null)?.error ||
+      (uploadError as { hint?: string } | null)?.hint ||
+      'unknown';
+    return String(fallback);
+  }
+}
+
+/**
  * SHXK 외부 URL에서 PDF를 다운로드하여 Supabase Storage에 업로드하고,
  * zen_ups_label_documents 테이블에 메타데이터를 기록한 뒤 signed URL을 반환한다.
  * invoice-files.ts의 generateInvoicePdf 패턴을 재사용.
+ *
+ * DEF-B-148 (TASK-B-328): 업로드 실패 시 1회 재시도 + uploadError 객체 전체를
+ * 구조화 로깅해 근본원인(용량/네트워크/권한 등) 진단 가능하게 개선.
  */
 export async function downloadAndStoreLabelDoc(
   supabase: SupabaseClient,
@@ -49,18 +98,45 @@ export async function downloadAndStoreLabelDoc(
 
   const uuid = crypto.randomUUID();
   const storagePath = `ups-labels/${orderId}/${docType.toLowerCase()}-${uuid.slice(0, 8)}.pdf`;
+  const uploadOptions = {
+    contentType: 'application/pdf',
+    upsert: false,
+    metadata: { order_id: orderId, reference_no: referenceNo, doc_type: docType },
+  };
 
-  const { error: uploadError } = await supabase.storage
+  let { error: uploadError } = await supabase.storage
     .from('invoices')
-    .upload(storagePath, buffer, {
-      contentType: 'application/pdf',
-      upsert: false,
-      metadata: { order_id: orderId, reference_no: referenceNo, doc_type: docType },
-    });
+    .upload(storagePath, buffer, uploadOptions);
 
   if (uploadError) {
-    logger.error('[downloadAndStoreLabelDoc] Storage upload failed:', uploadError);
-    throw new Error(`PDF 업로드 실패: ${uploadError.message}`);
+    logger.error('[downloadAndStoreLabelDoc] Storage upload failed:', {
+      orderId,
+      referenceNo,
+      storagePath,
+      contentType,
+      docType,
+      attempt: 1,
+      uploadError: describeStorageError(uploadError),
+    });
+
+    await new Promise((resolve) => setTimeout(resolve, STORAGE_UPLOAD_RETRY_DELAY_MS));
+    const retry = await supabase.storage
+      .from('invoices')
+      .upload(storagePath, buffer, uploadOptions);
+    uploadError = retry.error;
+
+    if (uploadError) {
+      logger.error('[downloadAndStoreLabelDoc] Storage upload retry failed:', {
+        orderId,
+        referenceNo,
+        storagePath,
+        contentType,
+        docType,
+        attempt: 2,
+        uploadError: describeStorageError(uploadError),
+      });
+      throw new Error(`PDF 업로드 실패: ${resolveUploadErrorDetail(uploadError)}`);
+    }
   }
 
   const { error: insertError } = await supabase
@@ -222,12 +298,16 @@ async function saveInitialLabel(
   return error?.message ?? null;
 }
 
+/**
+ * DEF-B-148 (TASK-B-328): getnewlabel 자체 실패 vs Storage 저장 실패를 구분해
+ * 호출부가 정확한 오류 메시지를 반환할 수 있도록 반환 타입을 확장.
+ */
 async function fetchAndSaveLabel(
   supabase: SupabaseClient,
   referenceNo: string,
   orderId: string,
   labelId: string | null,
-): Promise<string | null> {
+): Promise<{ signedUrl: string | null; getNewLabelFailed: boolean }> {
   const configInfo = {
     lable_file_type: '2',
     lable_paper_type: '1',
@@ -238,7 +318,7 @@ async function fetchAndSaveLabel(
 
   if (labelRes.success !== 1 || !labelRes.data?.length) {
     logger.warn(`getnewlabel failed for ${referenceNo}: ${labelRes.message}`);
-    return null;
+    return { signedUrl: null, getNewLabelFailed: true };
   }
 
   const items = labelRes.data;
@@ -269,7 +349,7 @@ async function fetchAndSaveLabel(
     .eq('reference_no', referenceNo);
 
   if (error) logger.error('zen_ups_labels label update error:', error);
-  return lastSignedUrl;
+  return { signedUrl: lastSignedUrl, getNewLabelFailed: false };
 }
 
 async function markAllPackagesIssued(
@@ -425,16 +505,28 @@ export async function fetchAndIssueUpsLabel(
     }
 
     // docType 없음 → 기본 라벨 발급 (fetchAndSaveLabel)
-    const labelUrl = await fetchAndSaveLabel(supabase, label.reference_no, orderId, label.id);
-    if (!labelUrl) return { success: false, error: '라벨 발급 실패 (getnewlabel)' };
+    // DEF-B-148 (TASK-B-328): getnewlabel 실패 vs Storage 저장 실패를 구분해
+    // 오진단성 메시지 제거. SHXK 발급 성공 시 Storage 실패와 무관하게
+    // markAllPackagesIssued를 수행해 패키지 마킹이 누락되지 않도록 함(③ 설계 변경).
+    const labelResult = await fetchAndSaveLabel(supabase, label.reference_no, orderId, label.id);
+    if (labelResult.getNewLabelFailed) {
+      return { success: false, error: '라벨 발급 실패 (getnewlabel)' };
+    }
 
     const pkgErr = await markAllPackagesIssued(supabase, orderId, label.tracking_number);
     if (pkgErr) return { success: false, error: `Failed to mark packages issued: ${pkgErr}` };
 
+    if (!labelResult.signedUrl) {
+      return {
+        success: false,
+        error: '배송 처리는 완료되었으나 라벨 문서 저장에 실패했습니다. 잠시 후 다시 시도해주세요.',
+      };
+    }
+
     revalidatePath("/(dashboard)/warehouse/outbound", "page");
     revalidatePath('/(dashboard)/orders/[orderId]', 'page');
 
-    return { success: true, url: labelUrl ?? undefined };
+    return { success: true, url: labelResult.signedUrl };
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error';
     logger.error('fetchAndIssueUpsLabel error:', err);
@@ -797,6 +889,8 @@ export async function fetchShxkTradeDocument(
     if (!storedUrls.length) {
       return { success: false, error: '문서 다운로드/저장 실패' };
     }
+    // TASK-B-327 (DEF-B-147): 다른 라벨 액션(registerUpsOrder/voidUpsLabel 등)과 동일하게 문서 저장 후 화면 갱신
+    revalidatePath('/(dashboard)/orders/[orderId]', 'page');
     return { success: true, url: storedUrls[0] };
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error';
