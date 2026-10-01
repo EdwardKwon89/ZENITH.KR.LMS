@@ -50,7 +50,7 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
-| [#1208](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1208) | [Team A] TASK-1141: logger.error()/logClientError() 로깅 파이프라인 통합 — /admin/error-logs 관측 사각지대 해소 (IMP-169) | a | p2 | in-progress | 미배정 | 2026-10-01 |
+| [#1208](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1208) | [Team A] TASK-1141: logger.error()/logClientError() 로깅 파이프라인 통합 — /admin/error-logs 관측 사각지대 해소 (IMP-169) | a | p2 | review | 미배정 | 2026-10-01 |
 | [#1207](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1207) | [Team A] TASK-1141: logger.error()/logClientError() 로깅 파이프라인 통합 — /admin/error-logs 관측 사각지대 해소 (IMP-169) | a | p2 | - | 미배정 | 2026-10-01 |
 | [#1189](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1189) | [Team B] TASK-B-323: Resend 이메일 도메인(zenith-lms.com) 미인증 — 알림메일 전량 발송 실패 (DEF-B-143, High) | b | p1 | - | jungjs | 2026-08-25 |
 | [#1185](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1185) | [Team B] TASK-B-322: 로그 커버리지 개선 ⑤— admin/auth.ts 예외 객체 폐기 패턴 수정 (5건) | b | p2 | - | 미배정 | 2026-08-23 |
@@ -80,7 +80,7 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 | [#163](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/163) | [UAT-19] UPS 인보이스 PDF — Team B 수동 브라우저 UAT | b | p1 | open | jungjs | 2026-07-01 |
 | [#162](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/162) | [UAT-18] 창고 출고 UPS 연계 — Team B 수동 브라우저 UAT | b | p1 | open | jungjs | 2026-07-01 |
 | [#161](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/161) | [UAT-17] UPS 특송 오더 발송 — Team B 수동 브라우저 UAT | b | p1 | in-progress | jungjs | 2026-07-07 |
-| [#76](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/76) | [설계안] B_Kai/D_Kai 작업 자동화 — OpenCode headless 기반 자율 에이전트 실행 체계 | - | - | - | 미배정 | 2026-06-22 |
+| [#76](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/76) | [설계안] B_Kai/D_Kai 작업 자동화 — OpenCode headless 기반 자율 에이전트 실행 체계 | - | - | - | 미배정 | 2026-10-01 |
 <!-- GH_ISSUES_SYNC:END -->
 
 > 위 표는 스냅샷입니다. 항상 최신 상태는 `gh issue list`로 직접 확인하십시오.
