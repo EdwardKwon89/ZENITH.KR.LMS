@@ -358,6 +358,12 @@
 | **TC-ELR-03** | message 필수 | message 없이 400 반환 검증 (TASK-1141) | `tests/unit/monitoring/error-logs-route.test.ts` |
 | **TC-ELR-04** | 길이 상한 | 2000자 초과 메시지 truncate 적재 검증 (TASK-1141) | `tests/unit/monitoring/error-logs-route.test.ts` |
 | **TC-ELR-05** | DB 실패 500 | DB 실패 시 500·logger 재귀 없이 warn 종료 검증 (TASK-1141) | `tests/unit/monitoring/error-logs-route.test.ts` |
+| **TC-DEF137-01** | Admin 로그 조회 | ADMIN 세션 `zen_error_logs` SELECT 가시성 검증 (TASK-1142/DEF-137) | `tests/unit/migrations/def137-zen-error-logs-admin-rls.test.ts` |
+| **TC-DEF137-02** | Admin 해결 처리 | ADMIN 세션 UPDATE resolved 성공 검증 (TASK-1142/DEF-137) | `tests/unit/migrations/def137-zen-error-logs-admin-rls.test.ts` |
+| **TC-DEF137-03** | 非-Admin 조회 차단 | 非-ADMIN 세션 SELECT 0건 검증 (TASK-1142/DEF-137) | `tests/unit/migrations/def137-zen-error-logs-admin-rls.test.ts` |
+| **TC-DEF137-04** | 非-Admin 해결 차단 | 非-ADMIN 세션 UPDATE 0행 검증 (TASK-1142/DEF-137) | `tests/unit/migrations/def137-zen-error-logs-admin-rls.test.ts` |
+| **TC-DEF137-05** | 인증 INSERT 유지 | 인증 세션 로그 INSERT + ADMIN 조회 검증 (TASK-1142/DEF-137) | `tests/unit/migrations/def137-zen-error-logs-admin-rls.test.ts` |
+| **TC-DEF137-06** | SuperAdmin 조회 | ZENITH_SUPER_ADMIN 세션 SELECT 가시성 검증 (TASK-1142/DEF-137) | `tests/unit/migrations/def137-zen-error-logs-admin-rls.test.ts` |
 
 ### 22. 회원 등급 및 승급 (Member Grade)
 | ID | 테스트 항목 | 목적 | 파일 경로 |
