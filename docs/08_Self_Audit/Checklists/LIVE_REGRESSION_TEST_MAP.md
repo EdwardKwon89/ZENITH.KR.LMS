@@ -364,6 +364,11 @@
 | **TC-DEF137-04** | 非-Admin 해결 차단 | 非-ADMIN 세션 UPDATE 0행 검증 (TASK-1142/DEF-137) | `tests/unit/migrations/def137-zen-error-logs-admin-rls.test.ts` |
 | **TC-DEF137-05** | 인증 INSERT 유지 | 인증 세션 로그 INSERT + ADMIN 조회 검증 (TASK-1142/DEF-137) | `tests/unit/migrations/def137-zen-error-logs-admin-rls.test.ts` |
 | **TC-DEF137-06** | SuperAdmin 조회 | ZENITH_SUPER_ADMIN 세션 SELECT 가시성 검증 (TASK-1142/DEF-137) | `tests/unit/migrations/def137-zen-error-logs-admin-rls.test.ts` |
+| **TC-AUD-01** | 감사: Admin 파일 조회 | ADMIN 세션 `zen_invoice_files` 마커행 조회 검증 (TASK-1143) | `tests/unit/migrations/task1143-profiles-rls-audit.test.ts` |
+| **TC-AUD-02** | 감사: 소속 파일 조회 | 소속 화주 자사 파일 조회 검증 (TASK-1143) | `tests/unit/migrations/task1143-profiles-rls-audit.test.ts` |
+| **TC-AUD-03** | 감사: 타사 차단 | 타사 사용자 파일 0건 검증 (TASK-1143) | `tests/unit/migrations/task1143-profiles-rls-audit.test.ts` |
+| **TC-AUD-04** | 감사: 참조 목록 고정 | bare-`profiles` 참조 정책 2건 목록 검증 (TASK-1143) | `tests/unit/migrations/task1143-profiles-rls-audit.test.ts` |
+| **TC-AUD-05** | 감사: 1142 유지 | `zen_error_logs` Admin 정책 유지 검증 (TASK-1143) | `tests/unit/migrations/task1143-profiles-rls-audit.test.ts` |
 
 ### 22. 회원 등급 및 승급 (Member Grade)
 | ID | 테스트 항목 | 목적 | 파일 경로 |
