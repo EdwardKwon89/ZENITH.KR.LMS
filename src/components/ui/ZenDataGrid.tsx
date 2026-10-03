@@ -111,7 +111,8 @@ export default function ZenDataGrid<TData, TValue>({
                   {headerGroup.headers.map((header) => (
                     <th
                       key={header.id}
-                      className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider"
+                      // TASK-1147 (Issue #1222, DEF-140): 헤더 라벨 개행 방지 (전역, 안전)
+                      className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap"
                     >
                       {header.isPlaceholder ? null : (
                         <div
@@ -156,7 +157,15 @@ export default function ZenDataGrid<TData, TValue>({
                     className="hover:bg-brand-50/30 transition-colors group"
                   >
                     {row.getVisibleCells().map((cell) => (
-                      <td key={cell.id} className="px-6 py-4 text-sm text-slate-700">
+                      <td
+                        key={cell.id}
+                        // TASK-1147 (Issue #1222, DEF-140): meta.nowrap 옵트인 컬럼(액션 등)
+                        // 줄바꿈 방지 — 미지정 컬럼은 기존 동작 유지
+                        className={cn(
+                          "px-6 py-4 text-sm text-slate-700",
+                          (cell.column.columnDef.meta as { nowrap?: boolean } | undefined)?.nowrap && "whitespace-nowrap"
+                        )}
+                      >
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </td>
                     ))}
