@@ -358,6 +358,27 @@
 | **TC-ELR-03** | message 필수 | message 없이 400 반환 검증 (TASK-1141) | `tests/unit/monitoring/error-logs-route.test.ts` |
 | **TC-ELR-04** | 길이 상한 | 2000자 초과 메시지 truncate 적재 검증 (TASK-1141) | `tests/unit/monitoring/error-logs-route.test.ts` |
 | **TC-ELR-05** | DB 실패 500 | DB 실패 시 500·logger 재귀 없이 warn 종료 검증 (TASK-1141) | `tests/unit/monitoring/error-logs-route.test.ts` |
+| **TC-DEF137-01** | Admin 로그 조회 | ADMIN 세션 `zen_error_logs` SELECT 가시성 검증 (TASK-1142/DEF-137) | `tests/unit/migrations/def137-zen-error-logs-admin-rls.test.ts` |
+| **TC-DEF137-02** | Admin 해결 처리 | ADMIN 세션 UPDATE resolved 성공 검증 (TASK-1142/DEF-137) | `tests/unit/migrations/def137-zen-error-logs-admin-rls.test.ts` |
+| **TC-DEF137-03** | 非-Admin 조회 차단 | 非-ADMIN 세션 SELECT 0건 검증 (TASK-1142/DEF-137) | `tests/unit/migrations/def137-zen-error-logs-admin-rls.test.ts` |
+| **TC-DEF137-04** | 非-Admin 해결 차단 | 非-ADMIN 세션 UPDATE 0행 검증 (TASK-1142/DEF-137) | `tests/unit/migrations/def137-zen-error-logs-admin-rls.test.ts` |
+| **TC-DEF137-05** | 인증 INSERT 유지 | 인증 세션 로그 INSERT + ADMIN 조회 검증 (TASK-1142/DEF-137) | `tests/unit/migrations/def137-zen-error-logs-admin-rls.test.ts` |
+| **TC-DEF137-06** | SuperAdmin 조회 | ZENITH_SUPER_ADMIN 세션 SELECT 가시성 검증 (TASK-1142/DEF-137) | `tests/unit/migrations/def137-zen-error-logs-admin-rls.test.ts` |
+| **TC-AUD-01** | 감사: Admin 파일 조회 | ADMIN 세션 `zen_invoice_files` 마커행 조회 검증 (TASK-1143) | `tests/unit/migrations/task1143-profiles-rls-audit.test.ts` |
+| **TC-AUD-02** | 감사: 소속 파일 조회 | 소속 화주 자사 파일 조회 검증 (TASK-1143) | `tests/unit/migrations/task1143-profiles-rls-audit.test.ts` |
+| **TC-AUD-03** | 감사: 타사 차단 | 타사 사용자 파일 0건 검증 (TASK-1143) | `tests/unit/migrations/task1143-profiles-rls-audit.test.ts` |
+| **TC-AUD-04** | 감사: 참조 목록 고정 | bare-`profiles` 참조 정책 2건 목록 검증 (TASK-1143) | `tests/unit/migrations/task1143-profiles-rls-audit.test.ts` |
+| **TC-AUD-05** | 감사: 1142 유지 | `zen_error_logs` Admin 정책 유지 검증 (TASK-1143) | `tests/unit/migrations/task1143-profiles-rls-audit.test.ts` |
+| **TC-UPSRV-01** | UPS확정 ups-detail 갱신 | `confirmUpsRegistration` 성공 시 ups-detail 포함 revalidate 검증 (TASK-1145/DEF-138) | `tests/unit/warehouse/def138-ups-detail-revalidate.test.ts` |
+| **TC-UPSRV-02** | 기존 경로 유지 | confirm 4개 기존 경로 유지 검증 (TASK-1145/DEF-138) | `tests/unit/warehouse/def138-ups-detail-revalidate.test.ts` |
+| **TC-UPSRV-03** | UPS취소 ups-detail 갱신 | `undoUpsRegistration` 성공 시 ups-detail 포함 revalidate 검증 (TASK-1145/DEF-138) | `tests/unit/warehouse/def138-ups-detail-revalidate.test.ts` |
+| **TC-UPSRV-04** | 실패 시 미갱신 | 등록 실패 시 revalidate 미호출 검증 (TASK-1145/DEF-138) | `tests/unit/warehouse/def138-ups-detail-revalidate.test.ts` |
+| **TC-ORDLIST-01** | 목록 접수일자 | 접수일자 헤더·ko-KR 날짜 셀 렌더링 검증 (TASK-1144/IMP-170) | `tests/unit/orders/order-datatable-display.test.tsx` |
+| **TC-ORDLIST-02** | 목록 소속/화주 병기 | 소속·화주 상이 시 "소속/화주" 병기 검증 (TASK-1144/IMP-171) | `tests/unit/orders/order-datatable-display.test.tsx` |
+| **TC-ORDLIST-03** | 병기 중복 방지 | 동일 값 단일 표시 검증 (TASK-1144/IMP-171) | `tests/unit/orders/order-datatable-display.test.tsx` |
+| **TC-ORDLIST-04** | 병기 폴백 | override 미입력·둘 다 없음 폴백 검증 (TASK-1144/IMP-171) | `tests/unit/orders/order-datatable-display.test.tsx` |
+| **TC-ORDLIST-05** | 일자 폴백 | created_at 없음·비정상 시 - 표시 검증 (TASK-1144/IMP-170) | `tests/unit/orders/order-datatable-display.test.tsx` |
+| **TC-ORDLIST-06** | 병기 단독 표시 | 소속 없음·override만 있을 때 단독 표시 검증 (TASK-1144/IMP-171) | `tests/unit/orders/order-datatable-display.test.tsx` |
 
 ### 22. 회원 등급 및 승급 (Member Grade)
 | ID | 테스트 항목 | 목적 | 파일 경로 |
