@@ -378,6 +378,11 @@
 | **TC-ERRLOG-03** | Control 줄바꿈 방지 | Control 셀 nowrap 검증 (TASK-1147/DEF-140) | `tests/unit/admin/error-logs-layout.test.tsx` |
 | **TC-ERRLOG-04** | 그리드 헤더 보호 | 그리드 th nowrap 검증 (TASK-1147/DEF-140) | `tests/unit/admin/error-logs-layout.test.tsx` |
 | **TC-ERRLOG-05** | 그리드 옵트인 | meta.nowrap 컬럼 보호 검증 (TASK-1147/DEF-140) | `tests/unit/admin/error-logs-layout.test.tsx` |
+| **TC-PREF-01** | 상세 prefetch 차단 | 행별 상세 Link prefetch=false 검증 (TASK-1148/DEF-141) | `tests/unit/orders/order-prefetch.test.tsx` |
+| **TC-PREF-02** | UPS 상세 차단 | UPS ups-detail Link prefetch=false 검증 (TASK-1148/DEF-141) | `tests/unit/orders/order-prefetch.test.tsx` |
+| **TC-PREF-03** | 전행 차단 | 20행 전부 차단 검증 (TASK-1148/DEF-141) | `tests/unit/orders/order-prefetch.test.tsx` |
+| **TC-PREF-04** | 페이지네이션 유지 | 페이지 Link 기본 prefetch 유지 검증 (TASK-1148/DEF-141) | `tests/unit/orders/order-prefetch.test.tsx` |
+| **TC-PREF-05** | 링크 정상 동작 | href 유지 검증 (TASK-1148/DEF-141) | `tests/unit/orders/order-prefetch.test.tsx` |
 | **TC-ORDLIST-01** | 목록 접수일자 | 접수일자 헤더·ko-KR 날짜 셀 렌더링 검증 (TASK-1144/IMP-170) | `tests/unit/orders/order-datatable-display.test.tsx` |
 | **TC-ORDLIST-02** | 목록 소속/화주 병기 | 소속·화주 상이 시 "소속/화주" 병기 검증 (TASK-1144/IMP-171) | `tests/unit/orders/order-datatable-display.test.tsx` |
 | **TC-ORDLIST-03** | 병기 중복 방지 | 동일 값 단일 표시 검증 (TASK-1144/IMP-171) | `tests/unit/orders/order-datatable-display.test.tsx` |

@@ -176,7 +176,12 @@ export default function OrderDataTable({
                     })()}
                   </td>
                   <td className="px-6 py-2.5 text-right">
-                    <Link 
+                    {/* TASK-1148 (Issue #1226, DEF-141): prefetch 끊기 —
+                        상세 경로에 loading.tsx가 없어 행별 Link가 풀 서버 렌더링
+                        prefetch를 최대 40건까지 동시 발사해 목록 전환이 5초+ 지연됨.
+                        페이지네이션은 가벼운 목록 쿼리라 기본값 유지 (빠른 전환). */}
+                    <Link
+                      prefetch={false}
                       href={`/${safeLocale}/orders/${order.id}${order.transport_mode === 'UPS' ? '/ups-detail' : ''}`}
                       className="inline-flex items-center gap-1 text-[12px] font-bold text-blue-600 hover:text-blue-700 transition-colors border-b border-transparent hover:border-blue-600"
                     >
