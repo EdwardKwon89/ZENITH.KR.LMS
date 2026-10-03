@@ -55,4 +55,7 @@
 
 ## [Aiden 검토]
 
-- (반려 시 사유 기재)
+- **판정**: ✅ 승인
+- **근거**: CI(Regression/Type Check) PASS, diff 직접 확인 — `ZenStatusBadge.tsx`/`OrderDataTable.tsx` nowrap 3곳 + `resolveRouteCodes()` 폴백 로직이 DEF-139 권고와 정확히 일치. 신규 테스트 5건(TC-ORDLIST-07~11) 실동작 검증.
+- PR#1223 머지 완료(develop), Issue #1221 Close 완료.
+- 작업 지시: 2026-10-03 16:03 KST / 작업 완료(승인): 2026-10-03 16:45 KST
