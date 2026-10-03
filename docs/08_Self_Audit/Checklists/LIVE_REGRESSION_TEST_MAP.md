@@ -369,6 +369,10 @@
 | **TC-AUD-03** | 감사: 타사 차단 | 타사 사용자 파일 0건 검증 (TASK-1143) | `tests/unit/migrations/task1143-profiles-rls-audit.test.ts` |
 | **TC-AUD-04** | 감사: 참조 목록 고정 | bare-`profiles` 참조 정책 2건 목록 검증 (TASK-1143) | `tests/unit/migrations/task1143-profiles-rls-audit.test.ts` |
 | **TC-AUD-05** | 감사: 1142 유지 | `zen_error_logs` Admin 정책 유지 검증 (TASK-1143) | `tests/unit/migrations/task1143-profiles-rls-audit.test.ts` |
+| **TC-UPSRV-01** | UPS확정 ups-detail 갱신 | `confirmUpsRegistration` 성공 시 ups-detail 포함 revalidate 검증 (TASK-1145/DEF-138) | `tests/unit/warehouse/def138-ups-detail-revalidate.test.ts` |
+| **TC-UPSRV-02** | 기존 경로 유지 | confirm 4개 기존 경로 유지 검증 (TASK-1145/DEF-138) | `tests/unit/warehouse/def138-ups-detail-revalidate.test.ts` |
+| **TC-UPSRV-03** | UPS취소 ups-detail 갱신 | `undoUpsRegistration` 성공 시 ups-detail 포함 revalidate 검증 (TASK-1145/DEF-138) | `tests/unit/warehouse/def138-ups-detail-revalidate.test.ts` |
+| **TC-UPSRV-04** | 실패 시 미갱신 | 등록 실패 시 revalidate 미호출 검증 (TASK-1145/DEF-138) | `tests/unit/warehouse/def138-ups-detail-revalidate.test.ts` |
 | **TC-ORDLIST-01** | 목록 접수일자 | 접수일자 헤더·ko-KR 날짜 셀 렌더링 검증 (TASK-1144/IMP-170) | `tests/unit/orders/order-datatable-display.test.tsx` |
 | **TC-ORDLIST-02** | 목록 소속/화주 병기 | 소속·화주 상이 시 "소속/화주" 병기 검증 (TASK-1144/IMP-171) | `tests/unit/orders/order-datatable-display.test.tsx` |
 | **TC-ORDLIST-03** | 병기 중복 방지 | 동일 값 단일 표시 검증 (TASK-1144/IMP-171) | `tests/unit/orders/order-datatable-display.test.tsx` |
