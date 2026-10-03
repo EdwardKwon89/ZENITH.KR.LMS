@@ -50,7 +50,7 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
-| [#1216](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1216) | [Team A] TASK-1144: 오더 목록 화면 개선 — 접수일자 컬럼 추가 + Shipper 소속/화주 병기 (IMP-170/171, Low) | a | p3 | - | 미배정 | 2026-10-03 |
+| [#1216](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1216) | [Team A] TASK-1144: 오더 목록 화면 개선 — 접수일자 컬럼 추가 + Shipper 소속/화주 병기 (IMP-170/171, Low) | a | p3 | in-progress | 미배정 | 2026-10-03 |
 | [#1212](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1212) | [Team B] TASK-B-330: UPS 등록 확정 후 오더 상세(ups-detail) 캐시 미갱신 (DEF-138, Medium) | b | p2 | - | 미배정 | 2026-10-02 |
 | [#1189](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1189) | [Team B] TASK-B-323: Resend 이메일 도메인(zenith-lms.com) 미인증 — 알림메일 전량 발송 실패 (DEF-B-143, High) | b | p1 | - | jungjs | 2026-10-01 |
 | [#1185](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1185) | [Team B] TASK-B-322: 로그 커버리지 개선 ⑤— admin/auth.ts 예외 객체 폐기 패턴 수정 (5건) | b | p2 | - | 미배정 | 2026-08-23 |
