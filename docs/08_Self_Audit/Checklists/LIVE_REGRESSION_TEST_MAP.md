@@ -383,6 +383,10 @@
 | **TC-PREF-03** | 전행 차단 | 20행 전부 차단 검증 (TASK-1148/DEF-141) | `tests/unit/orders/order-prefetch.test.tsx` |
 | **TC-PREF-04** | 페이지네이션 유지 | 페이지 Link 기본 prefetch 유지 검증 (TASK-1148/DEF-141) | `tests/unit/orders/order-prefetch.test.tsx` |
 | **TC-PREF-05** | 링크 정상 동작 | href 유지 검증 (TASK-1148/DEF-141) | `tests/unit/orders/order-prefetch.test.tsx` |
+| **TC-DEDUP-01** | 인증 재조회 생략 | preloaded 시 validateUserAction 미호출 검증 (TASK-1149/DEF-142) | `tests/unit/orders/order-list-dedup.test.tsx` |
+| **TC-DEDUP-02** | 기존 동작 유지 | 미제공 시 기존 호출 검증 (TASK-1149/DEF-142) | `tests/unit/orders/order-list-dedup.test.tsx` |
+| **TC-DEDUP-03** | select 축소 고정 | 렌더 필수 컬럼 포함·bare * 제거 검증 (TASK-1149/DEF-142) | `tests/unit/orders/order-list-dedup.test.tsx` |
+| **TC-DEDUP-04** | 소속 스코핑 유지 | CORPORATE shipper_id 필터 유지 검증 (TASK-1149/DEF-142) | `tests/unit/orders/order-list-dedup.test.tsx` |
 | **TC-ORDLIST-01** | 목록 접수일자 | 접수일자 헤더·ko-KR 날짜 셀 렌더링 검증 (TASK-1144/IMP-170) | `tests/unit/orders/order-datatable-display.test.tsx` |
 | **TC-ORDLIST-02** | 목록 소속/화주 병기 | 소속·화주 상이 시 "소속/화주" 병기 검증 (TASK-1144/IMP-171) | `tests/unit/orders/order-datatable-display.test.tsx` |
 | **TC-ORDLIST-03** | 병기 중복 방지 | 동일 값 단일 표시 검증 (TASK-1144/IMP-171) | `tests/unit/orders/order-datatable-display.test.tsx` |

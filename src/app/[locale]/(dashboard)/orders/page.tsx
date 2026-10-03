@@ -16,7 +16,7 @@ export default async function OrdersPage({
   const { locale } = await params;
   const resolvedSearchParams = await searchParams;
   // 1. 보안 가드 (세션 확인)
-  const { profile } = await requireAuth();
+  const { profile, user, supabase } = await requireAuth();
 
   // 2. 검색 파라미터 파싱
   const page = typeof resolvedSearchParams.page === 'string' ? parseInt(resolvedSearchParams.page) : 1;
@@ -25,11 +25,14 @@ export default async function OrdersPage({
   const search = typeof resolvedSearchParams.search === 'string' ? resolvedSearchParams.search : undefined;
 
   // 3. 지능형 데이터 엔진 호출 (20-Row Standard)
+  // TASK-1149 (Issue #1229, DEF-142): 위 requireAuth 결과를 전달해
+  // getOrders 내부 인증 재조회(getUser+profile) 1회분을 생략한다.
   const { orders, totalCount, pageSize } = await getOrders({
     page,
     status,
     order_type,
-    search
+    search,
+    preloaded: { user, profile, supabase },
   });
 
   // 4. Feature Flags 확인
