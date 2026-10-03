@@ -39,6 +39,26 @@ export function formatShipperCell(orgName: unknown, shipperName: unknown): strin
   return org || override || '-';
 }
 
+// TASK-1146 (Issue #1221, DEF-139): ROUTE 표시 코드 결정
+// - 항구 코드가 하나라도 있으면 그대로 (기존 동작 유지)
+// - 둘 다 없고 transport_mode가 UPS면 국가 코드로 폴백 (UPS는 항구 개념 없음)
+// - 그 외(둘 다 없음 + 非-UPS)는 기존대로 undefined 반환 (빈 배지 — 변경 없음)
+export function resolveRouteCodes(order: {
+  origin_port?: { code?: string } | null;
+  dest_port?: { code?: string } | null;
+  transport_mode?: string;
+  pickup_country_code?: string | null;
+  recipient_country_code?: string | null;
+}): [string | undefined, string | undefined] {
+  const origin = order.origin_port?.code;
+  const dest = order.dest_port?.code;
+  if (origin || dest) return [origin, dest];
+  if (order.transport_mode === 'UPS') {
+    return [order.pickup_country_code || undefined, order.recipient_country_code || undefined];
+  }
+  return [origin, dest];
+}
+
 export default function OrderDataTable({ 
   orders, 
   totalCount, 
@@ -98,10 +118,17 @@ export default function OrderDataTable({
                     <span className="text-[13px] text-slate-800 font-bold">{order.recipient_name || '-'}</span>
                   </td>
                   <td className="px-6 py-2.5">
-                    <div className="flex items-center gap-2 text-[12px] font-medium">
-                      <span className="text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">{order.origin_port?.code}</span>
-                      <span className="text-slate-400">→</span>
-                      <span className="text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">{order.dest_port?.code}</span>
+                    <div className="flex items-center gap-2 text-[12px] font-medium whitespace-nowrap">
+                      {(() => {
+                        const [originCode, destCode] = resolveRouteCodes(order);
+                        return (
+                          <>
+                            <span className="text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">{originCode}</span>
+                            <span className="text-slate-400">→</span>
+                            <span className="text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">{destCode}</span>
+                          </>
+                        );
+                      })()}
                     </div>
                   </td>
                   <td className="px-6 py-2.5">
@@ -141,7 +168,8 @@ export default function OrderDataTable({
                         PAID: '결제완료'
                       };
                       return (
-                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${styles[status]}`}>
+                        // TASK-1146 (Issue #1221, DEF-139): BILLING 배지 내부 개행 방지
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border whitespace-nowrap ${styles[status]}`}>
                           {labels[status]}
                         </span>
                       );
