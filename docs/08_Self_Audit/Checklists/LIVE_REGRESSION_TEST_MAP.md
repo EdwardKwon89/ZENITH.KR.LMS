@@ -379,6 +379,11 @@
 | **TC-ORDLIST-04** | 병기 폴백 | override 미입력·둘 다 없음 폴백 검증 (TASK-1144/IMP-171) | `tests/unit/orders/order-datatable-display.test.tsx` |
 | **TC-ORDLIST-05** | 일자 폴백 | created_at 없음·비정상 시 - 표시 검증 (TASK-1144/IMP-170) | `tests/unit/orders/order-datatable-display.test.tsx` |
 | **TC-ORDLIST-06** | 병기 단독 표시 | 소속 없음·override만 있을 때 단독 표시 검증 (TASK-1144/IMP-171) | `tests/unit/orders/order-datatable-display.test.tsx` |
+| **TC-ORDLIST-07** | 배지 개행 방지 | STATUS 배지 nowrap 클래스 검증 (TASK-1146/DEF-139) | `tests/unit/orders/order-badges-route.test.tsx` |
+| **TC-ORDLIST-08** | 목록 배지 개행 방지 | 목록 STATUS·BILLING 배지 nowrap 검증 (TASK-1146/DEF-139) | `tests/unit/orders/order-badges-route.test.tsx` |
+| **TC-ORDLIST-09** | UPS ROUTE 폴백 | 항구 없는 UPS 오더 국가 코드 표시 검증 (TASK-1146/DEF-139) | `tests/unit/orders/order-badges-route.test.tsx` |
+| **TC-ORDLIST-10** | 非-UPS 무폴백 | 非-UPS 무항구 오더 폴백 미적용 검증 (TASK-1146/DEF-139) | `tests/unit/orders/order-badges-route.test.tsx` |
+| **TC-ORDLIST-11** | 항구 우선 | 항구 존재 시 폴백 없이 유지 검증 (TASK-1146/DEF-139) | `tests/unit/orders/order-badges-route.test.tsx` |
 
 ### 22. 회원 등급 및 승급 (Member Grade)
 | ID | 테스트 항목 | 목적 | 파일 경로 |
