@@ -1892,17 +1892,17 @@ UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류
 - **관련 파일**: `src/components/orders/OrderDataTable.tsx`
 - **예상 공수**: 0.1 MD 미만 (렌더링 한 줄 추가 수준)
 - **우선순위**: Low — 기능 장애 아님, 가독성 개선
-- **상태**: 🔜 Issue 발령 대기
+- **상태**: 🔜 Issue 발령됨(IMP-171과 통합, 2026-10-03)
 
 ---
 
-## [IMP-171] 오더 목록 "Shipper" 컬럼과 상세 화면 "Shipper" 표시값이 서로 다른 개념을 같은 라벨로 노출
+## [IMP-171] 오더 목록 "Shipper" 컬럼이 소속조직명만 표시 — 화주 표시명 병기 필요
 
 - **발견 경위**: 2026-10-02, Edward가 동일 오더(ZEN-2026-000022)에서 목록은 "master air", 상세는 "WOOWON CO.,LTD"로 다르게 표시된다고 지적. Explore 에이전트가 preview DB 직접 조회로 원인 확정.
-- **현재 상태**: 버그 아님 — 의도된 설계. 목록(`OrderDataTable.tsx`)은 `order.shipper?.name`(`zen_orders.shipper_id`가 가리키는 `zen_organizations.name` — 오더를 소유/정산하는 조직, 이 건에서는 대리점 "master air")을 표시. 상세 화면은 `order.shipper_name || order.shipper?.name`(`zen_orders.shipper_name` — TASK-B-295/Issue #1100에서 신설된 "서류에 찍을 실제 화주 표시명" 수기입력 오버라이드 컬럼)을 우선 표시. TASK-B-295 설계 문서에 "서류/라벨 생성 4곳만 override 사용, 나머지 운영 화면(목록 포함)은 의도적으로 실제 소속 조직명 유지"라고 명시되어 있어 현재 동작은 설계대로임. 다만 두 화면 모두 "Shipper"라는 동일 라벨을 써서 사용자가 "같은 값이어야 하는데 다르다"고 오인하기 쉬운 **라벨링/UX 갭**은 실재함.
-- **임시 조치**: 없음 — 데이터 수정 불필요.
-- **목표 구현**: (A) 목록 헤더를 "Shipper(소속조직)"처럼 명확히 하거나 조직 type이 AGENCY일 때 "(대리점)" 배지 추가, 또는 (B) 상세 화면 화주 카드에 "표시명: WOOWON / 소속: master air(대리점)" 형태로 두 값을 함께 노출. TASK-B-295가 명시적으로 스코프를 4곳(서류 생성)으로 제한했던 결정이라 목록·상세 쪽 라벨 변경은 Edward 의사결정 필요.
-- **관련 파일**: `src/components/orders/OrderDataTable.tsx`, 오더 상세 화면(`ups-detail/page.tsx` 등), `.agent/tasks/` TASK-B-295 설계 문서
-- **예상 공수**: 0.3~0.5 MD (라벨/배지 추가 수준, 데이터 로직 변경 없음)
-- **우선순위**: Low — 버그 아닌 UX 명확화, Edward 판단 대기
-- **상태**: 🔜 Edward 결정 대기(처리 여부 자체 미정)
+- **현재 상태**: 버그 아님 — 의도된 설계. 목록(`OrderDataTable.tsx`)은 `order.shipper?.name`(`zen_orders.shipper_id`가 가리키는 `zen_organizations.name` — 오더를 소유/정산하는 조직, 이 건에서는 대리점 "master air")만 표시. 상세 화면은 `order.shipper_name || order.shipper?.name`(`zen_orders.shipper_name` — TASK-B-295/Issue #1100에서 신설된 "서류에 찍을 실제 화주 표시명" 수기입력 오버라이드 컬럼)을 우선 표시. TASK-B-295 설계 문서에 "서류/라벨 생성 4곳만 override 사용, 나머지 운영 화면(목록 포함)은 의도적으로 실제 소속 조직명 유지"라고 명시되어 있어 현재 동작은 설계대로였음.
+- **Edward 확정 결정(2026-10-03)**: 현재 동작(소속조직명만 표시)이 가독성 부족 — 목록 화면도 "소속/화주" 형태로 **두 값을 병기**하도록 변경. 예: `Master air/Woowon Co. LTD`. 데이터 로직(override 컬럼 자체)은 그대로 유지, 목록 표시만 개선.
+- **목표 구현**: `OrderDataTable.tsx`의 Shipper 셀을 `{소속조직명}/{화주 표시명(shipper_name ?? 소속조직명)}` 형태로 렌더링. 둘이 같은 값이면("" 오버라이드 없음) 중복 표시 방지 로직 검토(예: 같으면 1개만 표시).
+- **관련 파일**: `src/components/orders/OrderDataTable.tsx`
+- **예상 공수**: 0.3 MD
+- **우선순위**: Low — 버그 아닌 UX 개선, Edward 확정
+- **상태**: 🔜 Issue 발령됨(IMP-170과 통합, 2026-10-03)
