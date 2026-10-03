@@ -1880,3 +1880,29 @@ UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류
 - **예상 공수**: 0.5~1 MD (방향 결정 후 구현 + 회귀 테스트, 방향 결정 자체에 별도 논의 필요할 수 있음)
 - **우선순위**: Medium — 기능 장애는 아니나 관측성 정책(GOV_COMMON.md ZEN_A4)의 실효성에 직결되는 구조적 사각지대
 - **상태**: ✅ 완료 — Issue #1208(TASK-1141), B_Kai 구현, PR #1209 Aiden 승인·develop 병합(커밋 `6ef5ff1e0`, 2026-10-01). `logger.error()`가 자동으로 `zen_error_logs`에 적재되어 Team B도 Admin 계정으로 `/admin/error-logs`에서 production 오류를 독립 확인 가능해짐.
+
+---
+
+## [IMP-170] 오더 목록(`/orders`) 화면에 접수일자 컬럼 부재
+
+- **발견 경위**: 2026-10-02, Edward가 Order 목록 화면 스크린샷과 함께 가독성 문제로 지적 — ORDER NO/TYPE/SHIPPER/RECIPIENT/ROUTE/STATUS/BILLING/ACTIONS 컬럼만 있고 오더가 언제 접수됐는지 알 수 없음.
+- **현재 상태**: `OrderRepository.findList()`(`src/lib/repositories/order.repository.ts`)가 `select('*', ...)`로 이미 `created_at`을 조회해오고 있으나, `OrderDataTable.tsx`(`src/components/orders/OrderDataTable.tsx`)의 테이블 헤더·행 렌더링에 날짜 컬럼 자체가 없어 표시만 안 되고 있음 — 데이터 추가 조회 불필요, 순수 UI 렌더링 누락.
+- **임시 조치**: 없음.
+- **목표 구현**: `OrderDataTable.tsx`에 "접수일자" 컬럼 헤더 + `{new Date(order.created_at).toLocaleDateString('ko-KR')}` 형태의 셀 렌더링 추가.
+- **관련 파일**: `src/components/orders/OrderDataTable.tsx`
+- **예상 공수**: 0.1 MD 미만 (렌더링 한 줄 추가 수준)
+- **우선순위**: Low — 기능 장애 아님, 가독성 개선
+- **상태**: 🔜 Issue 발령됨(IMP-171과 통합, 2026-10-03)
+
+---
+
+## [IMP-171] 오더 목록 "Shipper" 컬럼이 소속조직명만 표시 — 화주 표시명 병기 필요
+
+- **발견 경위**: 2026-10-02, Edward가 동일 오더(ZEN-2026-000022)에서 목록은 "master air", 상세는 "WOOWON CO.,LTD"로 다르게 표시된다고 지적. Explore 에이전트가 preview DB 직접 조회로 원인 확정.
+- **현재 상태**: 버그 아님 — 의도된 설계. 목록(`OrderDataTable.tsx`)은 `order.shipper?.name`(`zen_orders.shipper_id`가 가리키는 `zen_organizations.name` — 오더를 소유/정산하는 조직, 이 건에서는 대리점 "master air")만 표시. 상세 화면은 `order.shipper_name || order.shipper?.name`(`zen_orders.shipper_name` — TASK-B-295/Issue #1100에서 신설된 "서류에 찍을 실제 화주 표시명" 수기입력 오버라이드 컬럼)을 우선 표시. TASK-B-295 설계 문서에 "서류/라벨 생성 4곳만 override 사용, 나머지 운영 화면(목록 포함)은 의도적으로 실제 소속 조직명 유지"라고 명시되어 있어 현재 동작은 설계대로였음.
+- **Edward 확정 결정(2026-10-03)**: 현재 동작(소속조직명만 표시)이 가독성 부족 — 목록 화면도 "소속/화주" 형태로 **두 값을 병기**하도록 변경. 예: `Master air/Woowon Co. LTD`. 데이터 로직(override 컬럼 자체)은 그대로 유지, 목록 표시만 개선.
+- **목표 구현**: `OrderDataTable.tsx`의 Shipper 셀을 `{소속조직명}/{화주 표시명(shipper_name ?? 소속조직명)}` 형태로 렌더링. 둘이 같은 값이면("" 오버라이드 없음) 중복 표시 방지 로직 검토(예: 같으면 1개만 표시).
+- **관련 파일**: `src/components/orders/OrderDataTable.tsx`
+- **예상 공수**: 0.3 MD
+- **우선순위**: Low — 버그 아닌 UX 개선, Edward 확정
+- **상태**: 🔜 Issue 발령됨(IMP-170과 통합, 2026-10-03)
