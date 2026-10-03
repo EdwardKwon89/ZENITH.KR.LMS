@@ -21,6 +21,24 @@ interface OrderDataTableProps {
   userRole?: string;
 }
 
+// TASK-1144 (Issue #1216, IMP-170/171): 목록 표시용 포맷터
+// - 접수일자: created_at을 ko-KR 날짜로 표시 (데이터는 findList가 이미 조회)
+// - Shipper: "소속/화주" 병기 — override(shipper_name)가 소속조직명과 다를 때만
+//   병기하고, 동일·미입력 시 중복 노출 방지 (Edward 확정, 2026-10-03)
+export function formatReceivedDate(createdAt: unknown): string {
+  if (!createdAt) return '-';
+  const d = new Date(String(createdAt));
+  if (Number.isNaN(d.getTime())) return '-';
+  return d.toLocaleDateString('ko-KR');
+}
+
+export function formatShipperCell(orgName: unknown, shipperName: unknown): string {
+  const org = typeof orgName === 'string' ? orgName.trim() : '';
+  const override = typeof shipperName === 'string' ? shipperName.trim() : '';
+  if (org && override && override !== org) return `${org}/${override}`;
+  return org || override || '-';
+}
+
 export default function OrderDataTable({ 
   orders, 
   totalCount, 
@@ -44,6 +62,7 @@ export default function OrderDataTable({
           <thead>
             <tr className="bg-slate-50 border-b border-slate-200">
               <th className="px-6 py-2.5 text-[11px] font-bold text-slate-500 uppercase tracking-widest">Order No</th>
+              <th className="px-6 py-2.5 text-[11px] font-bold text-slate-500 uppercase tracking-widest">접수일자</th>
               <th className="px-6 py-2.5 text-[11px] font-bold text-slate-500 uppercase tracking-widest">Type</th>
               <th className="px-6 py-2.5 text-[11px] font-bold text-slate-500 uppercase tracking-widest">Shipper</th>
               <th className="px-6 py-2.5 text-[11px] font-bold text-slate-500 uppercase tracking-widest">Recipient</th>
@@ -56,7 +75,7 @@ export default function OrderDataTable({
           <tbody className="divide-y divide-slate-100">
             {orders.length === 0 ? (
               <tr>
-                <td colSpan={8} className="px-6 py-20 text-center text-slate-400 italic">
+                <td colSpan={9} className="px-6 py-20 text-center text-slate-400 italic">
                   No orders found. Use the filters to refine your search.
                 </td>
               </tr>
@@ -67,10 +86,13 @@ export default function OrderDataTable({
                     <span className="text-[13px] text-slate-900 font-bold group-hover:text-blue-600 transition-colors">{order.order_no}</span>
                   </td>
                   <td className="px-6 py-2.5">
+                    <span className="text-[12px] text-slate-600 font-medium">{formatReceivedDate(order.created_at)}</span>
+                  </td>
+                  <td className="px-6 py-2.5">
                     <span className="text-[12px] text-slate-600 font-medium">{order.order_type}</span>
                   </td>
                   <td className="px-6 py-2.5">
-                    <span className="text-[13px] text-slate-800 font-bold">{order.shipper?.name || '-'}</span>
+                    <span className="text-[13px] text-slate-800 font-bold">{formatShipperCell(order.shipper?.name, order.shipper_name)}</span>
                   </td>
                   <td className="px-6 py-2.5">
                     <span className="text-[13px] text-slate-800 font-bold">{order.recipient_name || '-'}</span>
