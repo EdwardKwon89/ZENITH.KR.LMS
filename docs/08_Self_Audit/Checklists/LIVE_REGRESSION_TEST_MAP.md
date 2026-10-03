@@ -369,6 +369,12 @@
 | **TC-AUD-03** | 감사: 타사 차단 | 타사 사용자 파일 0건 검증 (TASK-1143) | `tests/unit/migrations/task1143-profiles-rls-audit.test.ts` |
 | **TC-AUD-04** | 감사: 참조 목록 고정 | bare-`profiles` 참조 정책 2건 목록 검증 (TASK-1143) | `tests/unit/migrations/task1143-profiles-rls-audit.test.ts` |
 | **TC-AUD-05** | 감사: 1142 유지 | `zen_error_logs` Admin 정책 유지 검증 (TASK-1143) | `tests/unit/migrations/task1143-profiles-rls-audit.test.ts` |
+| **TC-ORDLIST-01** | 목록 접수일자 | 접수일자 헤더·ko-KR 날짜 셀 렌더링 검증 (TASK-1144/IMP-170) | `tests/unit/orders/order-datatable-display.test.tsx` |
+| **TC-ORDLIST-02** | 목록 소속/화주 병기 | 소속·화주 상이 시 "소속/화주" 병기 검증 (TASK-1144/IMP-171) | `tests/unit/orders/order-datatable-display.test.tsx` |
+| **TC-ORDLIST-03** | 병기 중복 방지 | 동일 값 단일 표시 검증 (TASK-1144/IMP-171) | `tests/unit/orders/order-datatable-display.test.tsx` |
+| **TC-ORDLIST-04** | 병기 폴백 | override 미입력·둘 다 없음 폴백 검증 (TASK-1144/IMP-171) | `tests/unit/orders/order-datatable-display.test.tsx` |
+| **TC-ORDLIST-05** | 일자 폴백 | created_at 없음·비정상 시 - 표시 검증 (TASK-1144/IMP-170) | `tests/unit/orders/order-datatable-display.test.tsx` |
+| **TC-ORDLIST-06** | 병기 단독 표시 | 소속 없음·override만 있을 때 단독 표시 검증 (TASK-1144/IMP-171) | `tests/unit/orders/order-datatable-display.test.tsx` |
 
 ### 22. 회원 등급 및 승급 (Member Grade)
 | ID | 테스트 항목 | 목적 | 파일 경로 |
