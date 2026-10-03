@@ -1919,3 +1919,16 @@ UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류
 - **예상 공수**: 0.5~1 MD (리전 이전은 영향범위 전수 재검증 필요 — 다른 라우트/API의 지연 특성도 함께 바뀌므로 신중한 검토 필요)
 - **우선순위**: Medium — 기능 장애 아니며 DEF-141로 1차 개선 완료된 상태, Pilot 집중운영 중 체감 속도 추가 개선 여지로 기록
 - **상태**: 🔜 미착수
+
+---
+
+## [IMP-173] `validateUserAction()`/`requireAuth()` 전역 인증·프로필 중복조회 구조 (Pilot 이후 Stage-Gate 검토 대상)
+
+- **발견 경위**: 2026-10-03, B_Kai가 DEF-141(Link 프리페치 폭주) 수정 후에도 오더목록 페이지전환이 3초+ 지속되는 것을 추가 진단하며 발견(Issue #1226 코멘트). Aiden이 코드로 교차검증.
+- **현재 상태**: `orders/page.tsx`의 `requireAuth()`와 `getOrders()` 내부 `validateUserAction()`(둘 다 `src/lib/auth/guards.ts`)이 동일한 `supabase.auth.getUser()` + `zen_profiles` SELECT를 각각 독립 실행 — 페이지 전환 1회당 동일 사용자 정보를 중복 조회. `grep` 확인 결과 `validateUserAction()`은 서버 액션 **46개 파일**, `requireAuth()`는 페이지 **41개**에서 사용 중 — 같은 요청 흐름에서 함께 호출되는 모든 화면에 동일 중복조회가 반복될 가능성이 높은 **플랫폼 전역 구조 문제**.
+- **임시 조치**: Orders 페이지 한정으로는 DEF-142/TASK-1149로 분리 처리(옵션 파라미터로 저위험 해소). 본 항목은 46개 파일에 걸친 전역 구조 개선 자체를 가리킴.
+- **목표 구현**: 요청 단위 캐싱(React `cache()` 활용해 동일 요청 내 `getUser()+profile` 조회를 1회로 통합) 또는 page→action profile 전달 패턴의 표준화. 영향범위가 넓어 R-20 GitNexus impact 분석(`validateUserAction`/`requireAuth` 양쪽) 선행 필수.
+- **관련 파일**: `src/lib/auth/guards.ts`, 46개 `validateUserAction()` 호출부, 41개 `requireAuth()` 호출부 전체
+- **예상 공수**: 1~2 MD (설계 의견 절차 필요 — R-17 복잡 Task, 전역 영향 분석 포함)
+- **우선순위**: Medium — 기능 장애 아니나 플랫폼 전반 체감 속도에 영향, Pilot(10/5~10/15) 종료 후 Stage-Gate 검토로 범위·설계 확정 예정(Edward 확인, 2026-10-03)
+- **상태**: 🔜 미착수 (Pilot 이후 착수 예정)
