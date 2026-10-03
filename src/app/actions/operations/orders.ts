@@ -402,7 +402,8 @@ export async function getOrders({
   status,
   order_type,
   transport_mode,
-  search
+  search,
+  preloaded,
 }: {
   page?: number;
   pageSize?: number;
@@ -410,8 +411,15 @@ export async function getOrders({
   order_type?: string;
   transport_mode?: string;
   search?: string;
+  // TASK-1149 (Issue #1229, DEF-142): 호출자가 이미 인증을 마친 경우
+  // (예: orders/page.tsx의 requireAuth 결과) 전달받아 내부
+  // validateUserAction() 재조회(getUser+profile)를 생략한다.
+  // 옵션 파라미터라 기존 호출부는 100% 기존 동작 유지.
+  preloaded?: { user: any; profile: any; supabase: any };
 } = {}) {
-  const { supabase, profile, user } = await validateUserAction();
+  // preloaded가 있으면 재조회 생략, 없으면 기존 경로 그대로
+  const auth = preloaded ?? await validateUserAction();
+  const { supabase, profile, user } = auth;
 
   const orderRepo = new OrderRepository(supabase);
   const adminRepo = new AdminRepository(supabase);
