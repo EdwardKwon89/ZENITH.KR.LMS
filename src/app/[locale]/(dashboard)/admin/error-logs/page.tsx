@@ -12,7 +12,10 @@ export default async function AdminErrorLogsPage() {
   });
 
   return (
-    <div className="p-6 md:p-10 space-y-8">
+    // TASK-1147 (Issue #1222, DEF-140): 루트 자체 패딩(p-6 md:p-10) 제거 —
+    // (dashboard) 레이아웃 <main>의 공통 패딩과 중복되어 다른 화면보다
+    // 좌측 여백이 40px 넓어지던 이중 패딩 해소. space-y 리듬은 유지.
+    <div className="space-y-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-4xl font-black text-slate-900 tracking-tight font-heading">

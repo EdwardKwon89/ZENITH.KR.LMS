@@ -373,12 +373,22 @@
 | **TC-UPSRV-02** | 기존 경로 유지 | confirm 4개 기존 경로 유지 검증 (TASK-1145/DEF-138) | `tests/unit/warehouse/def138-ups-detail-revalidate.test.ts` |
 | **TC-UPSRV-03** | UPS취소 ups-detail 갱신 | `undoUpsRegistration` 성공 시 ups-detail 포함 revalidate 검증 (TASK-1145/DEF-138) | `tests/unit/warehouse/def138-ups-detail-revalidate.test.ts` |
 | **TC-UPSRV-04** | 실패 시 미갱신 | 등록 실패 시 revalidate 미호출 검증 (TASK-1145/DEF-138) | `tests/unit/warehouse/def138-ups-detail-revalidate.test.ts` |
+| **TC-ERRLOG-01** | 에러로그 패딩 해소 | 페이지 루트 자체 패딩 제거 검증 (TASK-1147/DEF-140) | `tests/unit/admin/error-logs-layout.test.tsx` |
+| **TC-ERRLOG-02** | 메시지 폭 상한 | Error Message 셀 300px 상한 검증 (TASK-1147/DEF-140) | `tests/unit/admin/error-logs-layout.test.tsx` |
+| **TC-ERRLOG-03** | Control 줄바꿈 방지 | Control 셀 nowrap 검증 (TASK-1147/DEF-140) | `tests/unit/admin/error-logs-layout.test.tsx` |
+| **TC-ERRLOG-04** | 그리드 헤더 보호 | 그리드 th nowrap 검증 (TASK-1147/DEF-140) | `tests/unit/admin/error-logs-layout.test.tsx` |
+| **TC-ERRLOG-05** | 그리드 옵트인 | meta.nowrap 컬럼 보호 검증 (TASK-1147/DEF-140) | `tests/unit/admin/error-logs-layout.test.tsx` |
 | **TC-ORDLIST-01** | 목록 접수일자 | 접수일자 헤더·ko-KR 날짜 셀 렌더링 검증 (TASK-1144/IMP-170) | `tests/unit/orders/order-datatable-display.test.tsx` |
 | **TC-ORDLIST-02** | 목록 소속/화주 병기 | 소속·화주 상이 시 "소속/화주" 병기 검증 (TASK-1144/IMP-171) | `tests/unit/orders/order-datatable-display.test.tsx` |
 | **TC-ORDLIST-03** | 병기 중복 방지 | 동일 값 단일 표시 검증 (TASK-1144/IMP-171) | `tests/unit/orders/order-datatable-display.test.tsx` |
 | **TC-ORDLIST-04** | 병기 폴백 | override 미입력·둘 다 없음 폴백 검증 (TASK-1144/IMP-171) | `tests/unit/orders/order-datatable-display.test.tsx` |
 | **TC-ORDLIST-05** | 일자 폴백 | created_at 없음·비정상 시 - 표시 검증 (TASK-1144/IMP-170) | `tests/unit/orders/order-datatable-display.test.tsx` |
 | **TC-ORDLIST-06** | 병기 단독 표시 | 소속 없음·override만 있을 때 단독 표시 검증 (TASK-1144/IMP-171) | `tests/unit/orders/order-datatable-display.test.tsx` |
+| **TC-ORDLIST-07** | 배지 개행 방지 | STATUS 배지 nowrap 클래스 검증 (TASK-1146/DEF-139) | `tests/unit/orders/order-badges-route.test.tsx` |
+| **TC-ORDLIST-08** | 목록 배지 개행 방지 | 목록 STATUS·BILLING 배지 nowrap 검증 (TASK-1146/DEF-139) | `tests/unit/orders/order-badges-route.test.tsx` |
+| **TC-ORDLIST-09** | UPS ROUTE 폴백 | 항구 없는 UPS 오더 국가 코드 표시 검증 (TASK-1146/DEF-139) | `tests/unit/orders/order-badges-route.test.tsx` |
+| **TC-ORDLIST-10** | 非-UPS 무폴백 | 非-UPS 무항구 오더 폴백 미적용 검증 (TASK-1146/DEF-139) | `tests/unit/orders/order-badges-route.test.tsx` |
+| **TC-ORDLIST-11** | 항구 우선 | 항구 존재 시 폴백 없이 유지 검증 (TASK-1146/DEF-139) | `tests/unit/orders/order-badges-route.test.tsx` |
 
 ### 22. 회원 등급 및 승급 (Member Grade)
 | ID | 테스트 항목 | 목적 | 파일 경로 |
