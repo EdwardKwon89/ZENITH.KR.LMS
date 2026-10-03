@@ -1906,3 +1906,16 @@ UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류
 - **예상 공수**: 0.3 MD
 - **우선순위**: Low — 버그 아닌 UX 개선, Edward 확정
 - **상태**: 🔜 Issue 발령됨(IMP-170과 통합, 2026-10-03)
+
+---
+
+## [IMP-172] Vercel 함수 리전(iad1, 미동부)과 Supabase 리전(Seoul) 불일치 — 순차 DB 왕복마다 교차대륙 지연 누적
+
+- **발견 경위**: 2026-10-03, DEF-141(오더목록 Link 프리페치 폭주) 수정 배포 후 Aiden이 production 재실측 중 발견. prefetch 폭주는 완전히 해소됐으나(네트워크 캡처로 상세 prefetch 요청 0건 확인), 페이지 전환 자체는 여전히 **1.7~3.2초** 소요됨(수정 전 5초+ 대비 개선되었으나 완전 해소는 아님).
+- **현재 상태**: `vercel.json`/`next.config.*`에 `regions` 설정이 없어 Vercel 기본 리전(`iad1`, 미국 동부 Washington D.C.)에서 함수가 실행됨 — 반면 Supabase 프로젝트(`ayowrwmufagzstqiqrnj`)는 Seoul 리전. `getOrders()`(`src/app/actions/operations/orders.ts`)는 `validateUserAction()`(인증+프로필 조회) → `adminRepo.findSettingByKey("default_page_size")` → `orderRepo.findList()` 순으로 **최소 3회의 DB 왕복을 순차(직렬) 실행**하는데, 각 왕복마다 태평양 횡단 왕복지연(추정 400~500ms)이 그대로 누적됨. 별도 실측(동일 쿼리를 Supabase REST에 직접 호출)으로는 쿼리 자체가 0.1~0.6초로 빠른 것을 확인했으므로, 체감 지연의 상당 부분은 "쿼리 비용"이 아니라 "리전 간 왕복 횟수×지연"으로 추정됨.
+- **임시 조치**: 없음 — DEF-141 수정(prefetch 차단)만으로 5초+ → 2~3초대 1차 개선 완료, 이번 세션 범위 밖이라 추가 조치 보류.
+- **목표 구현**: 검토 필요한 두 방향 — (A) `vercel.json`에 `"regions": ["icn1"]` 추가해 함수 실행 리전을 Supabase와 동일한 Seoul로 이동(단, Vercel Hobby 플랜의 리전 커스터마이징 지원 여부 확인 필요), (B) `getOrders()` 내부의 `validateUserAction()`/`findSettingByKey()`/`findList()` 호출을 가능한 범위에서 병렬화(`Promise.all`)하거나, `default_page_size` 설정을 요청마다 새로 조회하지 않도록 캐싱(예: 서버 모듈 레벨 캐시 또는 짧은 TTL).
+- **관련 파일**: `vercel.json`, `src/app/actions/operations/orders.ts`(`getOrders`), `src/lib/repositories/order.repository.ts`
+- **예상 공수**: 0.5~1 MD (리전 이전은 영향범위 전수 재검증 필요 — 다른 라우트/API의 지연 특성도 함께 바뀌므로 신중한 검토 필요)
+- **우선순위**: Medium — 기능 장애 아니며 DEF-141로 1차 개선 완료된 상태, Pilot 집중운영 중 체감 속도 추가 개선 여지로 기록
+- **상태**: 🔜 미착수
