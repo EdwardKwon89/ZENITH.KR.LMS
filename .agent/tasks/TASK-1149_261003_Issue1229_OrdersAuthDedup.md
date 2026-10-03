@@ -60,4 +60,9 @@
 
 ## [Aiden 검토]
 
-- (반려 시 사유 기재)
+- **판정**: ✅ 승인
+- **근거**: CI(Regression/Type Check) PASS, diff 직접 확인 — `preloaded` 옵션 파라미터 방식이 기존 46개 호출부와 100% 호환됨을 코드·TC-DEDUP-02로 확인. `select('*')`→14컬럼 축소는 `OrderDataTable.tsx`/`StatusChangeModal`의 전체 필드 사용 목록과 직접 대조해 누락 없음을 확인. `findList()` 호출부가 `getOrders` 1건뿐이라 타 화면 영향 없음.
+- TC-DEDUP-04(CORPORATE `shipper_id` 스코핑이 preloaded 경로에서도 유지)가 가장 중요한 보안 회귀 가드 — 정확히 짚음.
+- R-10 production 재실측을 본 Task 범위 밖으로 명시한 판단 적절 — Aiden이 별도 진행.
+- PR#1230 머지 완료(develop), Issue #1229 Close 완료.
+- 작업 지시: 2026-10-03 18:19 KST / 작업 완료(승인): 2026-10-03 18:51 KST
