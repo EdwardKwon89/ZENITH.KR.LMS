@@ -8,13 +8,16 @@ interface ItemsTotalSummaryProps {
 
 export function formatCurrencyAmount(amount: number, currency: string): string {
   try {
-    const formatted = new Intl.NumberFormat('en-US', {
+    const parts = new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency,
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(amount);
-    return `${formatted} ${currency}`;
+      currencyDisplay: 'code',
+    }).formatToParts(amount);
+    const number = parts
+      .filter((p) => p.type !== 'currency' && p.type !== 'literal')
+      .map((p) => p.value)
+      .join('');
+    return `${number} ${currency}`;
   } catch {
     return `${amount.toFixed(2)} ${currency}`;
   }
