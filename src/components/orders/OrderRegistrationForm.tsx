@@ -29,6 +29,7 @@ import { getAvailableServiceRates, getUsdKrwRate, getBaseCurrency, AvailableServ
 import { createOrderServices } from '@/app/actions/operations/order-services';
 import AddressBookSelector from '@/components/address-book/AddressBookSelector';
 import { AddressInput } from '@/components/common/AddressInput';
+import ItemsTotalSummary from './ItemsTotalSummary';
 
 interface OrderRegistrationFormProps {
   shippers: any[];
@@ -1583,6 +1584,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                           <p className="text-xl font-black text-blue-300">{new Intl.NumberFormat('ko-KR', { style: 'currency', currency: upsEstimate.platform.currency || 'USD' }).format(upsEstimate.shipper?.finalFreight ?? upsEstimate.platform.totalSellingPrice)}</p>
                         </div>
                       )}
+                      {transportMode === 'UPS' && <ItemsTotalSummary packages={watchedPackages || []} className="text-right" />}
                     </div>
                   </div>
                 </ZenCard>
