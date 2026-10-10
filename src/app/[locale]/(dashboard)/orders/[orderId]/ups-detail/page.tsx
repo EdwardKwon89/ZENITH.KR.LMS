@@ -18,6 +18,7 @@ import UpsTrackingEventsList from '@/components/tracking/UpsTrackingEventsList';
 import { resolveDestCountryCode } from '@/lib/ups/order-helpers';
 import { resolveConsigneeStreet, resolveShipperStreet, resolveRegionName, resolveCountryName } from '@/lib/ups/label-mapping'; // TASK-B-305, TASK-B-307
 import UpsTradeDocumentActions from '@/components/orders/UpsTradeDocumentActions';
+import ItemsTotalSummary from '@/components/orders/ItemsTotalSummary';
 
 interface UpsOrderDetailPageProps {
   params: Promise<{
@@ -114,11 +115,14 @@ export default async function UpsOrderDetailPage({ params }: UpsOrderDetailPageP
 
           {/* 2. UPS Breakdown & Cargo Details (with Items Modal trigger) */}
           <div className="flex flex-col gap-3">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-3">
               <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                 운임 및 화물 구성 (Breakdown & Packages)
               </span>
-              <UpsPackageItemsModal packages={order.packages || []} />
+              <div className="flex items-center gap-4">
+                <ItemsTotalSummary packages={order.packages || []} className="text-right" />
+                <UpsPackageItemsModal packages={order.packages || []} />
+              </div>
             </div>
             <UpsOrderBreakdownCard
               orderNo={order.order_no}
