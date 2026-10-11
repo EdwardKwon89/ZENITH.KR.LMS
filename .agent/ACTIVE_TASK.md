@@ -50,8 +50,6 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
-| [#1234](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1234) | [Team B] TASK-B-331: 품목 금액 통화 표기 수정 — 기호 제거·코드 뒤 표기·통화별 소수 자릿수 (TASK-B-330 후속) | b | p3 | review | jungjs | 2026-10-10 |
-| [#1232](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1232) | [Team B] TASK-B-330: UPS 오더 등록·상세 화면 Item 총금액(수량×단가) 통화별 소계 표시 (정정윤 차장 요청) | b | p3 | review | jungjs | 2026-10-10 |
 | [#1218](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1218) | [Aiden] Stage-Gate Code Review — UPS 핵심 경로(오더등록~정산) 대상, 적절한 시점에 실시 | - | p3 | - | 미배정 | 2026-10-03 |
 | [#1189](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1189) | [Team B] TASK-B-323: Resend 이메일 도메인(zenith-lms.com) 미인증 — 알림메일 전량 발송 실패 (DEF-B-143, High) | b | p1 | - | jungjs | 2026-10-01 |
 | [#1185](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1185) | [Team B] TASK-B-322: 로그 커버리지 개선 ⑤— admin/auth.ts 예외 객체 폐기 패턴 수정 (5건) | b | p2 | - | 미배정 | 2026-08-23 |
