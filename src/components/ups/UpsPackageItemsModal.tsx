@@ -2,6 +2,8 @@
 
 import React, { useState } from 'react';
 import { Package, X, FileText, Layers } from 'lucide-react';
+import { sumItemAmountByCurrency } from '@/lib/orders/item-totals';
+import { formatCurrencyAmount } from '@/components/orders/ItemsTotalSummary';
 
 interface PackageItem {
   id?: string;
@@ -36,11 +38,7 @@ export default function UpsPackageItemsModal({ packages }: UpsPackageItemsModalP
     (sum, pkg) => sum + pkg.items.reduce((itemSum, item) => itemSum + (item.quantity || 0), 0),
     0
   );
-  const totalAmountUsd = packages.reduce(
-    (sum, pkg) =>
-      sum + pkg.items.reduce((itemSum, item) => itemSum + (item.quantity || 0) * (item.unit_price || 0), 0),
-    0
-  );
+  const totalsByCurrency = sumItemAmountByCurrency(packages);
 
   return (
     <>
@@ -114,22 +112,23 @@ export default function UpsPackageItemsModal({ packages }: UpsPackageItemsModalP
                             <th className="py-2 px-3">품명 (Description)</th>
                             <th className="py-2 px-3 font-mono">HS 코드</th>
                             <th className="py-2 px-3 text-right font-mono">수량</th>
-                            <th className="py-2 px-3 text-right font-mono">단가 (USD)</th>
-                            <th className="py-2 px-3 text-right font-mono">합계 (USD)</th>
+                            <th className="py-2 px-3 text-right font-mono">단가</th>
+                            <th className="py-2 px-3 text-right font-mono">합계</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100 dark:divide-zinc-800">
                           {(pkg.items || []).map((item, itemIdx) => {
                             const amount = (item.quantity || 0) * (item.unit_price || 0);
+                            const currency = (item.currency || 'USD').trim().toUpperCase();
                             return (
                               <tr key={item.id || itemIdx} className="hover:bg-slate-100/50 dark:hover:bg-zinc-900/60">
                                 <td className="py-2 px-3 text-slate-400 font-mono text-[11px]">{itemIdx + 1}</td>
                                 <td className="py-2 px-3 font-bold text-slate-800 dark:text-slate-200">{item.item_name}</td>
                                 <td className="py-2 px-3 font-mono text-slate-600 dark:text-slate-400">{item.hs_code || '-'}</td>
                                 <td className="py-2 px-3 text-right font-mono font-semibold">{item.quantity}</td>
-                                <td className="py-2 px-3 text-right font-mono">${(item.unit_price || 0).toFixed(2)}</td>
+                                <td className="py-2 px-3 text-right font-mono">{formatCurrencyAmount(item.unit_price || 0, currency)}</td>
                                 <td className="py-2 px-3 text-right font-mono font-bold text-amber-600 dark:text-amber-400">
-                                  ${amount.toFixed(2)}
+                                  {formatCurrencyAmount(amount, currency)}
                                 </td>
                               </tr>
                             );
@@ -146,7 +145,18 @@ export default function UpsPackageItemsModal({ packages }: UpsPackageItemsModalP
             <div className="p-4 border-t border-slate-100 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900 flex items-center justify-between text-xs">
               <div className="flex items-center gap-4 text-slate-600 dark:text-slate-400">
                 <span>총 수량: <strong className="text-slate-900 dark:text-white font-mono">{totalQuantity}개</strong></span>
-                <span>총 신고 금액: <strong className="text-amber-600 dark:text-amber-400 font-mono font-bold">${totalAmountUsd.toFixed(2)} USD</strong></span>
+                <span className="flex items-center gap-2">
+                  총 신고 금액:
+                  {Object.keys(totalsByCurrency).length === 0 ? (
+                    <strong className="text-amber-600 dark:text-amber-400 font-mono font-bold">-</strong>
+                  ) : (
+                    Object.entries(totalsByCurrency).map(([currency, amount]) => (
+                      <strong key={currency} className="text-amber-600 dark:text-amber-400 font-mono font-bold">
+                        {formatCurrencyAmount(amount, currency)}
+                      </strong>
+                    ))
+                  )}
+                </span>
               </div>
               <button
                 onClick={() => setIsOpen(false)}
