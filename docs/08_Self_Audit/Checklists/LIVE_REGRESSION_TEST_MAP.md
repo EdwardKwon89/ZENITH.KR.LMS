@@ -895,4 +895,30 @@
 | **TC-SHXK-CFG-01** | 비-mock + SHXK_APP_KEY/SHXK_APP_TOKEN 미설정 → 즉시 실패 | 키 미설정 시 빈 값 전송 대신 명확한 한글 에러로 즉시 반환 (fetch+감사로그 미발생) | `tests/unit/shxk/client.test.ts` |
 | **TC-SHXK-CFG-02** | mock 모드 + 키 미설정 → mock 응답 정상 | 개발/테스트 환경 mock 경로는 키 없이도 동작 유지 (방어와 무관) | `tests/unit/shxk/client.test.ts` |
 
+---
+
+## 63. UPS 오더 품목 총금액 통화별 소계 표시 (Issue #1232 / TASK-B-330)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-ITEMTOT-01** | 단일 통화 품목 (수량×단가) 합산 | 기본 합계 산식 검증 | `tests/unit/orders/item-totals.test.ts` |
+| **TC-ITEMTOT-02** | USD + KRW 혼합 시 두 키로 각각 합산(환산 없음) | 통화별 소계(정정윤 차장 요구 ①) 검증 | `tests/unit/orders/item-totals.test.ts` |
+| **TC-ITEMTOT-03** | 빈 packages / 빈 items → `{}` | 빈 상태 안전 반환 검증 | `tests/unit/orders/item-totals.test.ts` |
+| **TC-ITEMTOT-04** | null·NaN·음수 quantity/unit_price 무시 | 비정상 단가 방어(0 처리) 검증 | `tests/unit/orders/item-totals.test.ts` |
+| **TC-ITEMTOT-05** | 소수점(0.1×3) 부동소수 합산 | 정밀도 케이스(toBeCloseTo) 검증 | `tests/unit/orders/item-totals.test.ts` |
+| **TC-ITEMTOT-06** | currency 미지정/공백/소문자 정규화 | 이전 `$ USD` 고정 표기 결함 대응 검증 | `tests/unit/orders/item-totals.test.ts` |
+| **TC-ITEMTOT-07** | 입력 객체/배열 불변 | 순수 함수 불변성 검증 | `tests/unit/orders/item-totals.test.ts` |
+
+---
+
+## 64. 품목 금액 통화 표기 수정 — 기호 제거·코드 뒤 표기·통화별 소수 (Issue #1234 / TASK-B-331)
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-CURFMT-01** | USD → `20.00 USD` (기호 제거, 코드 뒤 표기) | 표기 형식 결함(TASK-B-330 후속) 검증 | `tests/unit/orders/format-currency-amount.test.ts` |
+| **TC-CURFMT-02** | CNY → `360.00 CNY` (소수 2자리 유지) | 통화별 소수 자릿수 검증 | `tests/unit/orders/format-currency-amount.test.ts` |
+| **TC-CURFMT-03** | KRW → `50,000 KRW` (Intl 기본 0자리) | 0자리 통화(강제 2자리 제거) 검증 | `tests/unit/orders/format-currency-amount.test.ts` |
+| **TC-CURFMT-04** | JPY → `1,000 JPY` (Intl 기본 0자리) | 0자리 통화 검증 | `tests/unit/orders/format-currency-amount.test.ts` |
+| **TC-CURFMT-05** | `1234567.891` USD → `1,234,567.89 USD` | 반올림·천단위 구분 검증 | `tests/unit/orders/format-currency-amount.test.ts` |
+| **TC-CURFMT-06** | EUR → `12.50 EUR` / 0 → `0.00 USD` | 소수 2자리·0 표기 검증 | `tests/unit/orders/format-currency-amount.test.ts` |
+| **TC-CURFMT-07** | 잘못된 코드 `5, 'X'` → `5.00 X` | RangeError 폴백 검증 | `tests/unit/orders/format-currency-amount.test.ts` |
+
 
