@@ -66,7 +66,7 @@ function setupFixture() {
       ('${ADMIN_USER}', '${ADMIN_ORG}', '284-admin@test.kr', 'ADMIN', 'ACTIVE')
     ON CONFLICT (id) DO UPDATE SET org_id = EXCLUDED.org_id, role = EXCLUDED.role, status = EXCLUDED.status;
     INSERT INTO public.zen_orders (id, order_no, shipper_id, agency_org_id, transport_mode, status, recipient_name, recipient_phone, cargo_details) VALUES
-      ('${ORDER}', 'ZEN-284-WARE', '${SHIPPER_ORG}', NULL, 'UPS', 'WAREHOUSED', 'Recv', '010-1', '{}'::jsonb)
+      ('${ORDER}', 'ZEN-284-WARE', '${SHIPPER_ORG}', NULL, 'UPS', 'WAREHOUSED', 'Recv', '0101', '{}'::jsonb)
     ON CONFLICT (id) DO UPDATE SET status = EXCLUDED.status;
     -- 실측 완료 패키지 (창고가 측정한 값 — SHXK 전송 컬럼과 동일)
     INSERT INTO public.zen_order_packages (id, order_id, packing_unit, packing_count, gross_weight, length, width, height, measured_at, content_type, special_cargo_type, physical_box_count) VALUES
@@ -107,11 +107,11 @@ function buildPayload(overrides: Record<string, unknown> = {}) {
     shipper_id: SHIPPER_ORG,
     recipient_name: 'Updated Recipient',
     recipient_address: 'New Address 123',
-    recipient_phone: '010-9999-0000',
+    recipient_phone: '01099990000',
     recipient_country_code: 'US',
     recipient_zipcode: '90001',
     recipient_city: 'Los Angeles',
-    shipper_contact_phone: '010-0000-0000',
+    shipper_contact_phone: '01000000000',
     transport_mode: 'UPS' as const,
     ups_product_code: 'WW_EXPEDITED',
     incoterms: 'DDP' as const,
@@ -127,7 +127,7 @@ function buildPayload(overrides: Record<string, unknown> = {}) {
         gross_weight: 999,
         special_cargo_type: 'NONE',
         content_type: 'NONDOC',
-        items: [{ item_name: 'Measured Item', quantity: 1, unit_price: 100, currency: 'USD' }],
+        items: [{ item_name: 'Measured Item', quantity: 1, unit_price: 100, currency: 'USD', hs_code: '8471300000' }],
       },
       {
         id: PKG_UNMEASURED,
@@ -140,7 +140,7 @@ function buildPayload(overrides: Record<string, unknown> = {}) {
         gross_weight: 50,
         special_cargo_type: 'NONE',
         content_type: 'NONDOC',
-        items: [{ item_name: 'Unmeasured Item', quantity: 1, unit_price: 50, currency: 'USD' }],
+        items: [{ item_name: 'Unmeasured Item', quantity: 1, unit_price: 50, currency: 'USD', hs_code: '8471300000' }],
       },
     ],
     ...overrides,
@@ -216,7 +216,7 @@ describe('DEF-B-052~ TASK-B-284: UPS WAREHOUSED 부분 수정 (Issue #1070)', ()
           gross_weight: 999,
           special_cargo_type: 'NONE',
           content_type: 'NONDOC',
-          items: [{ item_name: 'Measured Item RENAMED', quantity: 2, unit_price: 200, currency: 'USD' }],
+          items: [{ item_name: 'Measured Item RENAMED', quantity: 2, unit_price: 200, currency: 'USD', hs_code: '8471300000' }],
         },
         {
           id: PKG_UNMEASURED,
@@ -229,7 +229,7 @@ describe('DEF-B-052~ TASK-B-284: UPS WAREHOUSED 부분 수정 (Issue #1070)', ()
           gross_weight: 50,
           special_cargo_type: 'NONE',
           content_type: 'NONDOC',
-          items: [{ item_name: 'Unmeasured Item', quantity: 1, unit_price: 50, currency: 'USD' }],
+          items: [{ item_name: 'Unmeasured Item', quantity: 1, unit_price: 50, currency: 'USD', hs_code: '8471300000' }],
         },
       ],
     });

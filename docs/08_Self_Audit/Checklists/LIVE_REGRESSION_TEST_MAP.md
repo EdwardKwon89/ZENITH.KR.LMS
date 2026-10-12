@@ -868,4 +868,23 @@
 | **TC-CURFMT-06** | EUR → `12.50 EUR` / 0 → `0.00 USD` | 소수 2자리·0 표기 검증 | `tests/unit/orders/format-currency-amount.test.ts` |
 | **TC-CURFMT-07** | 잘못된 코드 `5, 'X'` → `5.00 X` | RangeError 폴백 검증 | `tests/unit/orders/format-currency-amount.test.ts` |
 
+## 65. SHXK/UPS 규격 사전검증 — HS코드 필수·품명 35자·전화번호 15자리 (Issue #1239)
+
+폼(zod) 스키마와 SHXK payload 사전검증에 SHXK·UPS 규격을 반영 — 외부 호출 실패 대신 저장/호출 전 명확한 한글 에러로 차단. 상수는 `src/lib/validation/shxk-limits.ts` 단일 정의(`HS_CODE_MAX=30`, `ITEM_NAME_MAX=35`, `PHONE_MAX_DIGITS=15`, `stripNonDigits`). HS·품명 규칙은 UPS 한정, 전화는 전 모드(값 있을 때).
+
+| TC ID | 입력/조건 | 기대 결과 | 테스트 파일 |
+|:------|:---------|:----------|:-----------|
+| **TC-SHXKFLD-01** | UPS + 품목 HS 빈 값 | 실패, path `packages.0.items.0.hs_code` | `tests/unit/orders/shxk-field-limits.test.ts` |
+| **TC-SHXKFIELD-02** | UPS + HS 있음 | 통과 | `tests/unit/orders/shxk-field-limits.test.ts` |
+| **TC-SHXKFIELD-03** | AIR + HS 빈 값 | 통과 (UPS 한정 확인) | `tests/unit/orders/shxk-field-limits.test.ts` |
+| **TC-SHXFIELD-04** | UPS HS 코드 31자 초과 | 실패 | `tests/unit/orders/shxk-field-limits.test.ts` |
+| **TC-SHXFIELD-05** | UPS 품명 35자 통과 / 36자 실패 (path item_name) | UPS 한도 검증 | `tests/unit/orders/shxk-field-limits.test.ts` |
+| **TC-SHXFIELD-06** | AIR 품명 36자 → 통과 (UPS 한정 확인) | 모드 조건부 검증 | `tests/unit/orders/shxk-field-limits.test.ts` |
+| **TC-SHXFIELD-07** | 전화 `010-1234-5678` 실패 / `01012345678` 통과 / 16자리 실패 | 숫자만 + 15자리 검증 | `tests/unit/orders/shxk-field-limits.test.ts` |
+| **TC-SHXFIELD-08** | `stripNonDigits('010-1234-5678') === '01012345678'` | 헬퍼 검증 | `tests/unit/orders/shxk-field-limits.test.ts` |
+| **TC-SHXPAY-01** | 정상 payload → `[]` | 기준 케이스 | `tests/unit/shxk/validate-payload-limits.test.ts` |
+| **TC-SHXPAY-02** | invoice `hs_code` 누락 → `품목 1: HS 코드 누락` | 서버 사전검증(기존 저장분 보호) | `tests/unit/shxk/validate-payload-limits.test.ts` |
+| **TC-SHXPAY-03** | 품명 36자 → `품목 1: 품명 35자 초과` | 서버 사전검증 | `tests/unit/shxk/validate-payload-limits.test.ts` |
+| **TC-SHXPAY-04** | 하이픈 전화 → `…전화번호는 숫자만…` / 16자리 → `…15자리 이하…` | 서버 사전검증 | `tests/unit/shxk/validate-payload-limits.test.ts` |
+
 

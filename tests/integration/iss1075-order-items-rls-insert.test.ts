@@ -91,8 +91,8 @@ function setupFixture() {
       ('${SHIPPER_USER}', '${SHIPPER_ORG}', '286-shipper@test.kr', 'SHIPPER', 'ACTIVE')
     ON CONFLICT (id) DO UPDATE SET org_id = EXCLUDED.org_id, role = EXCLUDED.role, status = EXCLUDED.status;
     INSERT INTO public.zen_orders (id, order_no, shipper_id, agency_org_id, transport_mode, status, recipient_name, recipient_phone, cargo_details) VALUES
-      ('${ORDER_REG}', 'ZEN-286-REG', '${SHIPPER_ORG}', NULL, 'AIR', 'REGISTERED', 'Recv1', '010-1', '{}'::jsonb),
-      ('${ORDER_WARE}', 'ZEN-286-WARE', '${SHIPPER_ORG}', NULL, 'UPS', 'WAREHOUSED', 'Recv2', '010-2', '{}'::jsonb)
+      ('${ORDER_REG}', 'ZEN-286-REG', '${SHIPPER_ORG}', NULL, 'AIR', 'REGISTERED', 'Recv1', '0101', '{}'::jsonb),
+      ('${ORDER_WARE}', 'ZEN-286-WARE', '${SHIPPER_ORG}', NULL, 'UPS', 'WAREHOUSED', 'Recv2', '0102', '{}'::jsonb)
     ON CONFLICT (id) DO UPDATE SET status = EXCLUDED.status;
     INSERT INTO public.zen_order_packages (id, order_id, packing_unit, packing_count, gross_weight, length, width, height, content_type, special_cargo_type, physical_box_count) VALUES
       ('28600000-0000-4000-8000-000000000020', '${ORDER_REG}', 'BOX', 1, 5, 10, 10, 10, 'NONDOC', 'NONE', 1),
@@ -127,11 +127,11 @@ function buildPayload(orderId: string, overrides: Record<string, unknown> = {}) 
     shipper_id: SHIPPER_ORG,
     recipient_name: 'Updated Recipient',
     recipient_address: 'New Address 123',
-    recipient_phone: '010-9999-0000',
+    recipient_phone: '01099990000',
     recipient_country_code: 'US',
     recipient_zipcode: '90001',
     recipient_city: 'Los Angeles',
-    shipper_contact_phone: '010-0000-0000',
+    shipper_contact_phone: '01000000000',
     transport_mode: orderId === ORDER_WARE ? 'UPS' as const : 'AIR' as const,
     ...(orderId === ORDER_WARE
       ? { ups_product_code: 'WW_EXPEDITED', incoterms: 'DDP' as const }
@@ -147,7 +147,7 @@ function buildPayload(orderId: string, overrides: Record<string, unknown> = {}) 
         gross_weight: 50,
         special_cargo_type: 'NONE',
         content_type: 'NONDOC',
-        items: [{ item_name: `Item ${orderId}`, quantity: 2, unit_price: 200, currency: 'USD' }],
+        items: [{ item_name: `Item ${orderId.slice(0, 8)}`, quantity: 2, unit_price: 200, currency: 'USD', hs_code: '8471300000' }],
       },
     ],
     ...overrides,
@@ -210,7 +210,7 @@ describe('TASK-B-286: zen_order_items RLS INSERT 누락 — 아이템 소실 (Is
     expect(result.success).toBe(true);
 
     const itemName = psql(`SELECT item_name FROM public.zen_order_items WHERE order_id='${ORDER_REG}' LIMIT 1`);
-    expect(itemName).toBe('Item 28600000-0000-4000-8000-000000000010');
+    expect(itemName).toBe('Item 28600000');
   });
 
   it('TC-286-04: INSERT 정책 제거 시 updateOrder가 throw (되돌리기 검증)', async () => {

@@ -56,18 +56,18 @@ function validDefaults(overrides: Record<string, unknown> = {}) {
     shipper_contact_name: 'Kim',
     recipient_name: 'John',
     recipient_address: '123 St',
-    recipient_phone: '010-2',
+    recipient_phone: '0102',
     recipient_country_code: 'US',
     recipient_zipcode: '90001',
     recipient_city: 'LA',
-    shipper_contact_phone: '010-0000-0000',
+    shipper_contact_phone: '01000000000',
     transport_mode: 'AIR' as const,
     origin_port_id: '550e8400-e29b-41d4-a716-446655440002',
     dest_port_id: '550e8400-e29b-41d4-a716-446655440003',
     packages: [{
       packing_unit: 'BOX', packing_count: 1, physical_box_count: 1, length: 0, width: 0, height: 0,
       gross_weight: 5, special_cargo_type: 'NONE', content_type: 'GENERAL',
-      items: [{ item_name: 'W', quantity: 1, unit_price: 1, currency: 'USD', item_packing_unit: 'EA' }],
+      items: [{ item_name: 'W', quantity: 1, unit_price: 1, currency: 'USD', item_packing_unit: 'EA', hs_code: '8471300000' }],
     }],
     ...overrides,
   };
@@ -83,7 +83,7 @@ describe('TASK-B-296: 화주 정보 UI 단순화 (Issue #1102)', () => {
   beforeEach(() => {
     // 기본(법인 화주) affiliation mock
     h.mockGetCurrentUserAffiliation.mockResolvedValue({
-      userId: 'u', userName: 'User Kim', userEmail: 'kim@test.kr', userPhone: '010-9999-9999', role: 'SHIPPER',
+      userId: 'u', userName: 'User Kim', userEmail: 'kim@test.kr', userPhone: '01099999999', role: 'SHIPPER',
       orgId: SHIPPER_ORG, orgName: 'MASTER AIR', orgAddress: 'Seoul HQ',
       orgBizNo: '111-11-22222', orgCountryCode: 'KR', orgStateProvince: 'Seoul', orgCity: 'Gangnam',
       orgAddressStreet: 'Street 1', orgAddressDetail: 'Bldg 2', orgZipcode: '04515',
@@ -205,7 +205,7 @@ describe('TASK-B-296: 화주 정보 UI 단순화 (Issue #1102)', () => {
   it('TC-296-06: 개인 화주(isIndividual)도 주소 입력란이 렌더된다 (회귀 방지)', async () => {
     // 실제 개인 화주 상태를 재현 — affiliation mock을 isIndividual: true로 오버라이드 (mockResolvedValueOnce가 기본값보다 우선)
     h.mockGetCurrentUserAffiliation.mockResolvedValueOnce({
-      userId: 'u', userName: 'Individual User', userEmail: 'indiv@test.kr', userPhone: '010-1111-2222', role: 'SHIPPER',
+      userId: 'u', userName: 'Individual User', userEmail: 'indiv@test.kr', userPhone: '01011112222', role: 'SHIPPER',
       orgId: null, orgName: null, orgAddress: null,
       orgBizNo: null, orgCountryCode: 'KR', orgStateProvince: null, orgCity: null,
       orgAddressStreet: null, orgAddressDetail: null, orgZipcode: null,
