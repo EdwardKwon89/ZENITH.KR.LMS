@@ -80,7 +80,7 @@
 - **코드 커밋**: `d8990a178` — `[Baker] fix: TASK-B-336 미존재·비활성 ups_product_code 등록 전 거부 + 스냅샷 누락 경고 (#1247)`
 - **변경 파일**: `src/lib/orders/ups-product-guard.ts`(신규), `src/app/actions/operations/orders.ts`, `tests/unit/orders/ups-product-guard.test.ts`(신규), `tests/integration/def-b151-ups-product-guard.test.ts`(신규), `tests/unit/operations/bulk-orders.test.ts`, `tests/unit/orders/order-edit-log-b303.test.tsx`, `docs/08_Self_Audit/Checklists/LIVE_REGRESSION_TEST_MAP.md`(§69), `.agent/defects/DEF-B-151_*.md`(조치 상태)
 - **검증**: `npm test` **220 files / 1563 tests PASS**, `npm run build` 성공, `tsc --noEmit` 변경 파일 오류 0
-- **PR**: (작성 예정) — base `TeamB_Dev`
+- **PR**: [#1248](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1248) — base `TeamB_Dev`
 
 ## 7. [발견 이슈]
 
