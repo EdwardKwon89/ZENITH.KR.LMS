@@ -84,6 +84,6 @@ UPS 오더 수하인/발송인 전화 비숫자(하이픈 등) 포함: 11건 / 1
 
 - 코드 커밋: `f10e83f8f5e5773a7682a96ca4703e20613cb1f4` — `[Baker] fix: TASK-B-333 수정 화면 화주명·주소·CONTENT 저장값 복원 (#1240)`
   - 변경 파일(5): `src/lib/orders/edit-defaults.ts`(신규), `.../orders/[orderId]/edit/page.tsx`, `src/components/orders/OrderRegistrationForm.tsx`, `tests/unit/orders/edit-defaults.test.ts`(신규), `docs/08_Self_Audit/Checklists/LIVE_REGRESSION_TEST_MAP.md`
-- 문서 커밋(본 task file): (커밋 후 기재)
-- PR: (생성 후 기재) — base `TeamB_Dev`
+- 문서 커밋(본 task file): `e5728e6805b0f4bdc06b5ed22902100d0937075d`
+- PR: #1242 (base `TeamB_Dev`) — https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1242 — CI 3종 PASS (Task File 8s / Type Check 1m13s / Regression 6m14s)
 
