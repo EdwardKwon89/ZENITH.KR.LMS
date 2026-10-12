@@ -77,6 +77,7 @@ TASK-B-334(PR #1244)에서 발견: 엑셀 대량 등록 템플릿 샘플 자체�
 - **코드 커밋**: `fcee5a6a5` — `[Baker] fix: TASK-B-335 대량 등록 UPS 전용 명문화 + 템플릿 정합 (#1245)`
 - **변경 파일**: `src/app/actions/operations/bulk-orders.ts`, `src/lib/excel/bulk-order-template.ts`, `src/components/orders/BulkOrderUploadModal.tsx`, `tests/unit/operations/bulk-orders.test.ts`, `docs/08_Self_Audit/Checklists/LIVE_REGRESSION_TEST_MAP.md`(§67 갱신·§68 신설)
 - **검증**: `npm run test:regression` **218 files / 1551 tests PASS**, `npm run build` 성공, `tsc --noEmit` 변경 파일 오류 0
+- **PR**: [#1246](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1246) — base `TeamB_Dev`
 
 ## 7. [발견 이슈]
 
