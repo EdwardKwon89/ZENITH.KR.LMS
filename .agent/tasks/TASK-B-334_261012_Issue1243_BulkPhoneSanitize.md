@@ -94,7 +94,8 @@ shipper_contact_phone: stripNonDigits(toStr(orderRow.shipper_contact_phone)) || 
 - **코드 커밋**: `93f1b7677` — `[Baker] fix: TASK-B-334 대량 등록 전화번호 정제 누락 보완 (#1243)`
 - **변경 파일**: `src/app/actions/operations/bulk-orders.ts`(전화 정제), `tests/unit/operations/bulk-orders.test.ts`(신규 4 TC), `docs/08_Self_Audit/Checklists/LIVE_REGRESSION_TEST_MAP.md`(§67)
 - **검증 수치**: `npm run test:regression` = **218 files / 1546 tests PASS**, `npm run build` = SUCCESS
-- **문서 커밋**: (커밋 후 기재) — 본 task file + `TASK-B-333_*.md`(wc -l 소급 기재)
+- **문서 커밋**: `987293f73` — `[Baker] docs: TASK-B-334 task file + TASK-B-333 wc -l 소급 기재 (Issue #1243)`
+- **PR**: [#1244](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1244) — base `TeamB_Dev`
 
 ## 8. 발견 이슈
 
