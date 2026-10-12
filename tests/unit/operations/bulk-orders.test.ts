@@ -204,6 +204,74 @@ describe('bulkCreateOrders', () => {
     expect(results[0].error).toBe('소속 화주가 아닙니다.');
     expect(createOrder).not.toHaveBeenCalled();
   });
+
+  // TASK-B-334 (Issue #1243): orderRegistrationSchema 전화 규칙(숫자만·15자리)이 엑셀 대량 등록 경로에도
+  // 적용되는데 bulk-orders.ts가 정제 없이 원본을 넘겨 회귀 위험 — 하이픈/공백 전화가 정제되어 성공해야 한다.
+  it('TASK-B-334: 하이픈 전화(UPS 행)가 정제되어 성공 + createOrder에 숫자만 전달', async () => {
+    (createOrder as any).mockResolvedValueOnce({ id: 'ord-1', order_no: 'ORD-001' });
+
+    const sheets = {
+      orders: [makeValidOrderRow({ recipient_phone: '010-1234-5678', shipper_contact_phone: '010-0000-0000' })],
+      packages: [makePackageSeq(1, 1)] as any[],
+      items: [makeItemSeq(1, 1)] as any[],
+    };
+
+    const { results } = await bulkCreateOrders(sheets as any);
+
+    if (results[0].error) console.error('ERROR[0]:', results[0].error);
+    expect(results[0]).toMatchObject({ orderSeq: 1, success: true, orderId: 'ord-1' });
+    const callArg = (createOrder as any).mock.calls[0][0];
+    expect(callArg.recipient_phone).toBe('01012345678');
+    expect(callArg.shipper_contact_phone).toBe('01000000000');
+  });
+
+  it('TASK-B-334: 비UPS(AIR) 행에서도 전화는 정제되어 스키마가 전화로 거부하지 않음', async () => {
+    // 비UPS 행은 bulk-orders.ts가 origin/dest port를 매핑하지 않아 port 검증에서 먼저 실패한다(기존 결함, 본 Task 범위 밖).
+    // 이 테스트는 그와 무관하게 하이픈/공백 전화가 정제되어 "전화번호" 에러가 발생하지 않음을 고정한다.
+    const sheets = {
+      orders: [makeValidOrderRow({
+        transport_mode: 'AIR',
+        recipient_phone: '+86 393 8302 0288',
+        shipper_contact_phone: '010 1234 5678',
+      })],
+      packages: [makePackageSeq(1, 1)] as any[],
+      items: [makeItemSeq(1, 1)] as any[],
+    };
+
+    const { results } = await bulkCreateOrders(sheets as any);
+
+    expect(results[0].success).toBe(false);
+    expect(results[0].error).not.toContain('전화번호는 숫자만');
+    expect(results[0].error).not.toContain('15자리');
+  });
+
+  it('TASK-B-334: 정제 후 빈 값이 되는 전화는 스키마가 거부하고 createOrder 미호출', async () => {
+    const sheets = {
+      orders: [makeValidOrderRow({ recipient_phone: '-- () --' })],
+      packages: [makePackageSeq(1, 1)] as any[],
+      items: [makeItemSeq(1, 1)] as any[],
+    };
+
+    const { results } = await bulkCreateOrders(sheets as any);
+
+    expect(results[0].success).toBe(false);
+    expect(results[0].error).toContain('전화번호는 숫자만');
+    expect(createOrder).not.toHaveBeenCalled();
+  });
+
+  it('TASK-B-334: 정제 후 15자리 초과 전화는 스키마가 거부', async () => {
+    const sheets = {
+      orders: [makeValidOrderRow({ recipient_phone: '1234567890123456' })],
+      packages: [makePackageSeq(1, 1)] as any[],
+      items: [makeItemSeq(1, 1)] as any[],
+    };
+
+    const { results } = await bulkCreateOrders(sheets as any);
+
+    expect(results[0].success).toBe(false);
+    expect(results[0].error).toContain('15자리');
+    expect(createOrder).not.toHaveBeenCalled();
+  });
 });
 
 describe('generateBulkOrderTemplate', () => {
