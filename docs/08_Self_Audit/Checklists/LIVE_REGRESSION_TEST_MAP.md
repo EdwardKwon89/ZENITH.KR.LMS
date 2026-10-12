@@ -887,4 +887,24 @@
 | **TC-SHXPAY-03** | 품명 36자 → `품목 1: 품명 35자 초과` | 서버 사전검증 | `tests/unit/shxk/validate-payload-limits.test.ts` |
 | **TC-SHXPAY-04** | 하이픈 전화 → `…전화번호는 숫자만…` / 16자리 → `…15자리 이하…` | 서버 사전검증 | `tests/unit/shxk/validate-payload-limits.test.ts` |
 
+## 66. 수정 화면 화주명·주소·패키지 CONTENT 저장값 복원 (Issue #1240 / TASK-B-333)
+
+수정(edit) 화면 진입 시 `edit/page.tsx`의 defaultValues가 ①`shipper_name`·`shipper_address_english`·`shipper_address_detail_english`를 누락하고 ②UPS 오더의 `content_type`을 `?? 'GENERAL'`로 넘겨 CONTENT select(옵션 DOC/NONDOC 2개)가 공백으로 렌더링되던 결함(#1238 항목 4·5) 복원. 로직을 `src/lib/orders/edit-defaults.ts`로 추출 — `buildOrderEditDefaults`(누락 필드·전화 정제·content_type 정규화), `resolveShipperAddressDefaults`(수정 모드 저장 주소값), `normalizeUpsContentType`(UPS 한정 정규화). 폼은 UPS 모드에서 GENERAL/기타 잔존값을 NONDOC으로 보정한다.
+
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-EDTDF-01** | 저장된 `shipper_name`·`shipper_address_english`·`shipper_address_detail_english` 보존 | 항목 4 복원 | `tests/unit/orders/edit-defaults.test.ts` |
+| **TC-EDTDF-02** | UPS 패키지 `GENERAL` → `NONDOC` 정규화 | 항목 5 복원 | `tests/unit/orders/edit-defaults.test.ts` |
+| **TC-EDTDF-03** | UPS `DOC` 유지 | 항목 5 오검출 방지 | `tests/unit/orders/edit-defaults.test.ts` |
+| **TC-EDTDF-04** | 비UPS `GENERAL` 유지 | 모드 조건부 회귀 방지 | `tests/unit/orders/edit-defaults.test.ts` |
+| **TC-EDTDF-05** | 레거시 하이픈 전화 `010-1234-5678` → `01012345678` | TASK-B-332 후속 정제 | `tests/unit/orders/edit-defaults.test.ts` |
+| **TC-EDTDF-06** | 숫자 전화 불변 / null·undefined → `''` | 빈값 처리 | `tests/unit/orders/edit-defaults.test.ts` |
+| **TC-EDTDF-07** | `normalizeUpsContentType` UPS null/''/'XYZ' → NONDOC, DOC → DOC | 순수함수 단위 | `tests/unit/orders/edit-defaults.test.ts` |
+| **TC-EDTDF-08** | `normalizeUpsContentType` 비UPS null/undefined → GENERAL | 순수함수 단위 | `tests/unit/orders/edit-defaults.test.ts` |
+| **TC-EDTDF-09** | 수정 모드 + 토글 없음 → 저장 주소값(영문 포함) | 항목 4 AddressInput 복원 | `tests/unit/orders/edit-defaults.test.ts` |
+| **TC-EDTDF-10** | 수정 모드 + 토글 후 manual → 빈 값 | 사용자 조작 우선 | `tests/unit/orders/edit-defaults.test.ts` |
+| **TC-EDTDF-11** | 수정 모드 + 토글 후 auto → affiliation 파생값 | 사용자 조작 우선 | `tests/unit/orders/edit-defaults.test.ts` |
+| **TC-EDTDF-12** | 신규 등록 manual → 빈 값 / auto → affiliation | 회귀 방지 | `tests/unit/orders/edit-defaults.test.ts` |
+
+
 

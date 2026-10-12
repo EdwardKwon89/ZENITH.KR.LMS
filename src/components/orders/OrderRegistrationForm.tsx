@@ -24,6 +24,7 @@ import { UpsServiceSelector } from './UpsServiceSelector';
 import { USER_ROLES } from '@/lib/auth/rbac';
 import { orderRegistrationSchema, OrderRegistrationInput } from '@/lib/validation/order';
 import { HS_CODE_MAX, ITEM_NAME_MAX, PHONE_MAX_DIGITS, stripNonDigits } from '@/lib/validation/shxk-limits';
+import { resolveShipperAddressDefaults } from '@/lib/orders/edit-defaults';
 import type { OrderEditScope } from '@/lib/logistics/status-machine';
 import { estimateFreightCost, TransportMode } from '@/utils/logistics/freight-calculator';
 import { getAvailableServiceRates, getUsdKrwRate, getBaseCurrency, AvailableServiceRates } from '@/app/actions/operations/service-rates';
@@ -275,6 +276,9 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
 
   // TASK-B-295 (Issue #1100): 화주명(발송인 표시명) 자유 입력 — "내 정보 사용/수기입력" 토글
   const [shipperNameMode, setShipperNameMode] = React.useState<'auto' | 'manual'>('auto');
+  // TASK-B-333 (Issue #1240): 수정 모드에서 사용자가 auto/수기입력 토글을 누른 적이 있는지 추적.
+  // 토글 전에는 화주 AddressInput에 저장값을, 토글 후에는 기존 로직(manual 빈 값 / auto 소속값)을 사용.
+  const [shipperToggled, setShipperToggled] = React.useState(false);
   // 내 정보 사용 모드에서 표시할 화주명 (법인→orgName, 개인→userName, 그 외→선택된 화주 조직명)
   const autoShipperName = affiliation?.isIndividual
     ? (affiliation?.userName || '')
@@ -290,7 +294,6 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
   const clearShipperInfoFields = useCallback(() => {
     SHIPPER_INFO_FIELDS.forEach((f) => setValue(f, ''));
   }, [setValue]);
-
   // "내 정보 사용" 재전환 시 affiliation 파생값으로 복원 (loadAffiliation else-branch와 동일 값)
   const restoreAutoShipperInfo = useCallback(() => {
     if (affiliation?.isIndividual) {
@@ -318,12 +321,14 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
 
   // "수기입력" 클릭 — 화주 정보 전체 필드 초기화 + 활성화 (TASK-B-296 ②)
   const handleShipperManualClick = useCallback(() => {
+    setShipperToggled(true);
     setShipperNameMode('manual');
     clearShipperInfoFields();
   }, [clearShipperInfoFields]);
 
   // "내 정보 사용" 클릭 — affiliation 파생값 복원 + 비활성화
   const handleShipperAutoClick = useCallback(() => {
+    setShipperToggled(true);
     setShipperNameMode('auto');
     restoreAutoShipperInfo();
   }, [restoreAutoShipperInfo]);
@@ -562,6 +567,18 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
       }
     });
   }, [orderId, contentTypesKey, setValue]);
+
+  // TASK-B-333 (Issue #1240, 항목 5): UPS 모드에서 저장/잔존 content_type이 DOC/NONDOC이 아니면(GENERAL 등)
+  // CONTENT select가 공백으로 렌더링되므로 NONDOC으로 보정한다.
+  useEffect(() => {
+    if (transportMode !== 'UPS') return;
+    if (!watchedPackages) return;
+    watchedPackages.forEach((pkg, i) => {
+      if (pkg?.content_type !== 'DOC' && pkg?.content_type !== 'NONDOC') {
+        setValue(`packages.${i}.content_type`, 'NONDOC', { shouldValidate: false });
+      }
+    });
+  }, [transportMode, contentTypesKey, setValue]);
 
   const filteredPorts = useMemo(() => {
     if (!transportMode) return ports;
@@ -1168,18 +1185,22 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                                 readOnly={shipperNameMode === 'auto'}
                                 key={`${affiliation?.orgId || 'no-org'}-${shipperNameMode}`}
                                 englishDetailOnly // TASK-B-305: 화주 상세주소 영문 전용
-                                defaultValues={
-                                  shipperNameMode === 'manual'
-                                    ? { country_code: '', state_province: '', city: '', address: '', address_detail: '', zipcode: '' }
-                                    : {
-                                        country_code: affiliation?.orgCountryCode ?? 'KR',
-                                        state_province: affiliation?.orgStateProvince ?? '',
-                                        city: affiliation?.orgCity ?? '',
-                                        address: affiliation?.orgAddressStreet ?? affiliation?.orgAddress ?? '',
-                                        address_detail: affiliation?.orgAddressDetail ?? '',
-                                        zipcode: affiliation?.orgZipcode ?? '',
-                                      }
-                                }
+                                defaultValues={resolveShipperAddressDefaults({
+                                  isEdit: !!orderId,
+                                  touched: shipperToggled,
+                                  mode: shipperNameMode,
+                                  saved: {
+                                    country_code: (externalDefaults as any)?.shipper_country_code,
+                                    state_province: (externalDefaults as any)?.shipper_state_province,
+                                    city: (externalDefaults as any)?.shipper_city,
+                                    address: (externalDefaults as any)?.shipper_address,
+                                    address_detail: (externalDefaults as any)?.shipper_address_detail,
+                                    zipcode: (externalDefaults as any)?.shipper_zipcode,
+                                    address_english: (externalDefaults as any)?.shipper_address_english,
+                                    address_detail_english: (externalDefaults as any)?.shipper_address_detail_english,
+                                  },
+                                  affiliation,
+                                })}
                               />
                             </div>
                             <div>
@@ -1424,7 +1445,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                     <ZenButton 
                       type="button" 
                       variant="glass" 
-                      onClick={() => appendPackage({ packing_unit: 'BOX', packing_count: 1, physical_box_count: 1, gross_weight: 0, special_cargo_type: 'NONE', content_type: 'GENERAL', domestic_ref_no: '', items: [{ item_name: '', quantity: 1, unit_price: 0, currency: 'USD', item_packing_unit: 'EA' }] })}
+                      onClick={() => appendPackage({ packing_unit: 'BOX', packing_count: 1, physical_box_count: 1, gross_weight: 0, special_cargo_type: 'NONE', content_type: transportMode === 'UPS' ? 'NONDOC' : 'GENERAL', domestic_ref_no: '', items: [{ item_name: '', quantity: 1, unit_price: 0, currency: 'USD', item_packing_unit: 'EA' }] })}
                       className="px-3 py-1 text-xs"
                     >
                       <Plus size={14} /> 패키지 추가
