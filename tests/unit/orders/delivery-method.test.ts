@@ -55,7 +55,7 @@ describe('IMP-118: Order Delivery Method Selection and Validation (TC-UPS-ORDER)
     dest_port_id: '550e8400-e29b-41d4-a716-446655440002',
     recipient_name: 'Hong Gil-dong',
     recipient_address: '123 Zenith St, Seoul',
-    recipient_phone: '010-1234-5678', 
+    recipient_phone: '01012345678', 
     packages: [
       {
         packing_unit: 'BOX',
@@ -115,7 +115,7 @@ describe('IMP-118: Order Delivery Method Selection and Validation (TC-UPS-ORDER)
       pickup_address: '123 Pickup St',
       pickup_country_code: 'KR',
       pickup_contact_name: 'Lee Min-su',
-      pickup_contact_tel: '010-9999-8888',
+      pickup_contact_tel: '01099998888',
     };
 
     const result = await createOrder(payload as any) as any;
@@ -127,7 +127,7 @@ describe('IMP-118: Order Delivery Method Selection and Validation (TC-UPS-ORDER)
     expect(rpcCall[1].p_payload.delivery_method).toBe('PICKUP');
     expect(rpcCall[1].p_payload.pickup_address).toBe('123 Pickup St');
     expect(rpcCall[1].p_payload.pickup_contact_name).toBe('Lee Min-su');
-    expect(rpcCall[1].p_payload.pickup_contact_tel).toBe('010-9999-8888');
+    expect(rpcCall[1].p_payload.pickup_contact_tel).toBe('01099998888');
   });
 
   it('TC-UPS-ORDER-03: PICKUP 선택 + pickup_address 누락 — Zod 검증 에러 반환', async () => {
@@ -135,7 +135,7 @@ describe('IMP-118: Order Delivery Method Selection and Validation (TC-UPS-ORDER)
       ...basePayload,
       delivery_method: 'PICKUP',
       pickup_contact_name: 'Lee Min-su',
-      pickup_contact_tel: '010-9999-8888',
+      pickup_contact_tel: '01099998888',
     };
 
     // Zod validation should fail directly

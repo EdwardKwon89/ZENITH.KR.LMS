@@ -61,11 +61,11 @@ function buildPayload(overrides: Record<string, unknown> = {}) {
     shipper_id: '30300000-0000-4000-8000-000000000002',
     recipient_name: 'Recipient A',
     recipient_address: '123 Main St',
-    recipient_phone: '010-1234-5678',
+    recipient_phone: '01012345678',
     recipient_country_code: 'US',
     recipient_zipcode: '90001',
     recipient_city: 'Los Angeles',
-    shipper_contact_phone: '010-0000-0000',
+    shipper_contact_phone: '01000000000',
     transport_mode: 'UPS' as const,
     ups_product_code: 'WW_EXPEDITED',
     packages: [
@@ -79,7 +79,7 @@ function buildPayload(overrides: Record<string, unknown> = {}) {
         gross_weight: 1,
         special_cargo_type: 'NONE',
         content_type: 'NONDOC',
-        items: [{ item_name: 'Item', quantity: 1, unit_price: 10, currency: 'USD' }],
+        items: [{ item_name: 'Item', quantity: 1, unit_price: 10, currency: 'USD', hs_code: '8471300000' }],
       },
     ],
     ...overrides,
@@ -91,7 +91,7 @@ describe('① edit-log-fields — 화이트리스트 부분 스냅샷', () => {
     const row = {
       shipper_id: 'org-1',
       recipient_name: 'Recipient A',
-      recipient_phone: '010-1',
+      recipient_phone: '0101',
       estimated_cost: 1234, // 제외 대상
       packages: [], // 제외 대상
       random_field: 'x',
@@ -101,7 +101,7 @@ describe('① edit-log-fields — 화이트리스트 부분 스냅샷', () => {
     // 화이트리스트 필드는 포함
     expect(snap.shipper_id).toBe('org-1');
     expect(snap.recipient_name).toBe('Recipient A');
-    expect(snap.recipient_phone).toBe('010-1');
+    expect(snap.recipient_phone).toBe('0101');
     // 제외 대상(estimated_cost/packages/items/origin_port_id/dest_port_id)은 없음
     expect(snap.estimated_cost).toBeUndefined();
     expect(snap.packages).toBeUndefined();
@@ -135,7 +135,7 @@ describe('② UpsOrderEditHistoryPanel — 등록/수정 이력 렌더', () => {
             id: '1',
             action: 'CREATE',
             old_data: null,
-            new_data: { recipient_name: 'Recipient A', recipient_phone: '010-1', recipient_email: null },
+            new_data: { recipient_name: 'Recipient A', recipient_phone: '0101', recipient_email: null },
             order_status_at_edit: 'REGISTERED',
             edited_at: '2026-08-14T00:00:00Z',
             operator: { full_name: 'Test Operator' },
@@ -152,7 +152,7 @@ describe('② UpsOrderEditHistoryPanel — 등록/수정 이력 렌더', () => {
     fireEvent.click(cardButton);
     // 등록값 표시 (전체 필드)
     expect(screen.getByText('Recipient A')).toBeTruthy();
-    expect(screen.getByText('010-1')).toBeTruthy();
+    expect(screen.getByText('0101')).toBeTruthy();
     // 변경사항 없음 라벨은 미표시
     expect(screen.queryByText('변경사항 없음')).toBeNull();
   });
@@ -165,7 +165,7 @@ describe('② UpsOrderEditHistoryPanel — 등록/수정 이력 렌더', () => {
             id: '1',
             action: 'CREATE',
             old_data: null,
-            new_data: { recipient_name: 'Recipient A', recipient_phone: '010-1' },
+            new_data: { recipient_name: 'Recipient A', recipient_phone: '0101' },
             order_status_at_edit: 'REGISTERED',
             edited_at: '2026-08-14T00:00:00Z',
             operator: { full_name: 'Test Operator' },
@@ -185,8 +185,8 @@ describe('② UpsOrderEditHistoryPanel — 등록/수정 이력 렌더', () => {
           {
             id: '2',
             action: 'UPDATE',
-            old_data: { recipient_name: 'Recipient A', recipient_phone: '010-1', recipient_email: 'a@b.c' },
-            new_data: { recipient_name: 'Recipient A', recipient_phone: '010-9999', recipient_email: 'a@b.c' },
+            old_data: { recipient_name: 'Recipient A', recipient_phone: '0101', recipient_email: 'a@b.c' },
+            new_data: { recipient_name: 'Recipient A', recipient_phone: '0109999', recipient_email: 'a@b.c' },
             order_status_at_edit: 'REGISTERED',
             edited_at: '2026-08-14T01:00:00Z',
             operator: { full_name: 'Operator B' },
@@ -198,8 +198,8 @@ describe('② UpsOrderEditHistoryPanel — 등록/수정 이력 렌더', () => {
     const cardButton = screen.getByRole('button');
     fireEvent.click(cardButton);
     // 변경된 필드만 — 수하인 연락처 diff 노출
-    expect(screen.getByText(/010-1/)).toBeTruthy();
-    expect(screen.getByText(/010-9999/)).toBeTruthy();
+    expect(screen.getByText(/0101/)).toBeTruthy();
+    expect(screen.getByText(/0109999/)).toBeTruthy();
     // 변경되지 않은 필드(수하인명)는 diff에 미노출
     expect(screen.queryByText(/수하인명/)).toBeNull();
     expect(screen.queryByText(/a@b\.c/)).toBeNull();
@@ -210,11 +210,11 @@ describe('② UpsOrderEditHistoryPanel — 등록/수정 이력 렌더', () => {
       <UpsOrderEditHistoryPanel
         history={[
           {
-            id: '2', action: 'UPDATE', old_data: { recipient_phone: '010-1' }, new_data: { recipient_phone: '010-2' },
+            id: '2', action: 'UPDATE', old_data: { recipient_phone: '0101' }, new_data: { recipient_phone: '0102' },
             order_status_at_edit: 'REGISTERED', edited_at: '2026-08-14T02:00:00Z', operator: { full_name: 'A' },
           },
           {
-            id: '1', action: 'CREATE', old_data: null, new_data: { recipient_phone: '010-1' },
+            id: '1', action: 'CREATE', old_data: null, new_data: { recipient_phone: '0101' },
             order_status_at_edit: 'REGISTERED', edited_at: '2026-08-14T00:00:00Z', operator: { full_name: 'B' },
           },
         ]}
@@ -262,8 +262,8 @@ describe('③ createOrder — CREATE 이력 기록 (mock supabase)', () => {
     expect(log.order_status_at_edit).toBe('REGISTERED');
     // new_data에 핵심 필드 스냅샷
     expect(log.new_data.recipient_name).toBe('Recipient A');
-    expect(log.new_data.recipient_phone).toBe('010-1234-5678');
-    expect(log.new_data.shipper_contact_phone).toBe('010-0000-0000');
+    expect(log.new_data.recipient_phone).toBe('01012345678');
+    expect(log.new_data.shipper_contact_phone).toBe('01000000000');
     expect(log.new_data.transport_mode).toBe('UPS');
   });
 });

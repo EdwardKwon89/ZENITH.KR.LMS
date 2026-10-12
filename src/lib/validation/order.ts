@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { HS_CODE_MAX, ITEM_NAME_MAX, PHONE_MAX_DIGITS } from './shxk-limits';
 
 /**
  * 오더 상세 항목(Item) 검증 스키마 (패킹 하위)
@@ -46,7 +47,11 @@ export const orderRegistrationSchema = z.object({
   // 송하인(화주) 담당자/연락처/이메일 (v2 스크린샷 피드백 반영)
   shipper_name: z.string().optional(), // TASK-B-295 (Issue #1100): 화주명(발송인 표시명) 자유 입력 — 시스템 미등록 임의 화주명 오버라이드
   shipper_contact_name: z.string().optional(),
-  shipper_contact_phone: z.string().optional(),
+  // TASK-B-332 (Issue #1239): 전화번호 — 값이 있으면 숫자만 + 최대 15자리(E.164), 비숫자/하이픈 차단.
+  // (기존 저장분 하이픈은 서버 payload 검증에서 정제되어 전송)
+  shipper_contact_phone: z.string()
+    .regex(/^\d*$/, '전화번호는 숫자만 입력할 수 있습니다').max(PHONE_MAX_DIGITS, `전화번호는 ${PHONE_MAX_DIGITS}자리 이하여야 합니다`)
+    .optional(),
   shipper_contact_email: z.string().email('Invalid email format').optional().or(z.literal('')),
   shipper_address: z.string().optional(),
   shipper_address_english: z.string().optional(),
@@ -63,7 +68,8 @@ export const orderRegistrationSchema = z.object({
   recipient_address: z.string().min(1, 'Recipient address is required'),
   recipient_address_local: z.string().optional(),
   recipient_address_detail: z.string().optional(),
-  recipient_phone: z.string().min(1, 'Recipient phone is required'),
+  recipient_phone: z.string().min(1, 'Recipient phone is required')
+    .regex(/^\d+$/, '전화번호는 숫자만 입력할 수 있습니다').max(PHONE_MAX_DIGITS, `전화번호는 ${PHONE_MAX_DIGITS}자리 이하여야 합니다`),
   recipient_zipcode: z.string().optional(),
   recipient_country_code: z.string().optional(),
   recipient_state_province: z.string().optional(),
@@ -183,6 +189,32 @@ export const orderRegistrationSchema = z.object({
         path: ['shipper_contact_phone'],
       });
     }
+    // TASK-B-332 (Issue #1239): 품목 HS 코드 필수·최대 30자 / 품명 최대 35자 — SHXK·UPS 규격 사전검증
+    data.packages.forEach((pkg, i) => {
+      pkg.items.forEach((item, k) => {
+        const hsCode = item.hs_code ?? '';
+        if (hsCode.trim() === '') {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'UPS 배송은 품목 HS 코드가 필수입니다(SHXK API 요구사항)',
+            path: ['packages', i, 'items', k, 'hs_code'],
+          });
+        } else if (hsCode.trim().length > HS_CODE_MAX) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: `UPS HS 코드는 ${HS_CODE_MAX}자 이하여야 합니다(현재 ${hsCode.trim().length}자)`,
+            path: ['packages', i, 'items', k, 'hs_code'],
+          });
+        }
+        if (item.item_name.length > ITEM_NAME_MAX) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: `UPS 품명은 ${ITEM_NAME_MAX}자 이하여야 합니다(현재 ${item.item_name.length}자)`,
+            path: ['packages', i, 'items', k, 'item_name'],
+          });
+        }
+      });
+    });
   }
 });
 

@@ -1,5 +1,6 @@
 // Pure mapping functions — no server-only imports. Safe for client components and tests.
 import { Country, State } from 'country-state-city';
+import { stripNonDigits } from '@/lib/validation/shxk-limits';
 
 // TASK-B-307 (Issue #1137): state/country 원시코드→이름 변환 유틸
 export function resolveRegionName(stateCode: string, countryCode: string): string {
@@ -140,7 +141,7 @@ export function buildCreateOrderPayload(
       shipper_city: (order.shipper_city as string) || '',
       shipper_street: shipperStreet,
       shipper_postcode: (order.shipper_zipcode as string) || '',
-      shipper_telephone: (order.shipper_contact_phone as string) || '',
+      shipper_telephone: stripNonDigits((order.shipper_contact_phone as string) || ''),
     },
     consignee: {
       consignee_name: (order.recipient_name as string) || 'E2E Consignee',
@@ -149,7 +150,7 @@ export function buildCreateOrderPayload(
       consignee_city: (order.recipient_city as string) || '',
       consignee_street: fullConsigneeStreet,
       consignee_postcode: (order.recipient_zipcode as string) || '',
-      consignee_telephone: (order.recipient_phone as string) || '',
+      consignee_telephone: stripNonDigits((order.recipient_phone as string) || ''),
       consignee_email: (order.recipient_email as string) || '',
       consignee_tariff: (order.recipient_pccc as string) || '',
     },

@@ -19,7 +19,7 @@ vi.mock('@/lib/ups/label-mapping', () => ({
     shipper: { shipper_name: 'SNTL', shipper_countrycode: 'KR', shipper_street: '123 St', shipper_telephone: '010-1111-2222' },
     consignee: { consignee_name: 'John', consignee_countrycode: 'US', consignee_street: '456 Oak St', consignee_city: 'Los Angeles', consignee_postcode: '90001', consignee_telephone: '010-3333-4444' },
     cargovolume: [],
-    invoice: [{ invoice_enname: 'Widget', invoice_quantity: '1', invoice_unitcharge: '10' }],
+    invoice: [{ invoice_enname: 'Widget', invoice_quantity: '1', invoice_unitcharge: '10', hs_code: '8471300000' }],
   }),
   determineOrderCargotype: vi.fn().mockReturnValue({ cargotype: 'W', mailCargoType: '4' }),
   buildCargovolume: vi.fn().mockReturnValue([]),

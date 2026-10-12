@@ -23,6 +23,7 @@ import { UpsFreightEstimate } from '@/app/actions/ups/freight';
 import { UpsServiceSelector } from './UpsServiceSelector';
 import { USER_ROLES } from '@/lib/auth/rbac';
 import { orderRegistrationSchema, OrderRegistrationInput } from '@/lib/validation/order';
+import { HS_CODE_MAX, ITEM_NAME_MAX, PHONE_MAX_DIGITS, stripNonDigits } from '@/lib/validation/shxk-limits';
 import type { OrderEditScope } from '@/lib/logistics/status-machine';
 import { estimateFreightCost, TransportMode } from '@/utils/logistics/freight-calculator';
 import { getAvailableServiceRates, getUsdKrwRate, getBaseCurrency, AvailableServiceRates } from '@/app/actions/operations/service-rates';
@@ -69,11 +70,12 @@ const NestedItems: React.FC<{
   register: any;
   errors: any;
   t: any;
+  isUps?: boolean;
   hsLookupLoadingMap?: Record<string, boolean>;
   hsLookupResultMap?: Record<string, { hs_code: string; confidence: 'high' | 'medium' | 'low' } | null>;
   onItemNameBlur?: (k: number) => void;
   onAcceptHsLookup?: (k: number) => void;
-}> = ({ nestIndex, control, register, errors, t, hsLookupLoadingMap = {}, hsLookupResultMap = {}, onItemNameBlur, onAcceptHsLookup }) => {
+}> = ({ nestIndex, control, register, errors, t, isUps = false, hsLookupLoadingMap = {}, hsLookupResultMap = {}, onItemNameBlur, onAcceptHsLookup }) => {
   const { fields, append, remove } = useFieldArray({
     control,
     name: `packages.${nestIndex}.items` as any
@@ -103,6 +105,7 @@ const NestedItems: React.FC<{
                 <label className="text-[9px] font-bold text-slate-400 mb-1 block">{t('item_name')} <span className="text-rose-500">*</span></label>
                 <ZenInput 
                   placeholder={t('item_name')}
+                  maxLength={isUps ? ITEM_NAME_MAX : undefined}
                   {...register(`packages.${nestIndex}.items.${k}.item_name`)}
                   onBlur={(e) => {
                     register(`packages.${nestIndex}.items.${k}.item_name`).onBlur?.(e);
@@ -115,7 +118,7 @@ const NestedItems: React.FC<{
                 )}
               </div>
               <div className="col-span-4">
-                <label className="text-[9px] font-bold text-slate-400 mb-1 block">HS Code</label>
+                <label className="text-[9px] font-bold text-slate-400 mb-1 block">HS Code{isUps && <span className="text-rose-500"> *</span>}</label>
                 <div className="relative">
                   <ZenInput 
                     placeholder="HS Code"
@@ -128,6 +131,9 @@ const NestedItems: React.FC<{
                     </span>
                   )}
                 </div>
+                {errors?.packages?.[nestIndex]?.items?.[k]?.hs_code && (
+                  <p className="text-[9px] text-rose-500 mt-1">{errors.packages[nestIndex].items[k].hs_code?.message}</p>
+                )}
                 {hsLookupResultMap[`${nestIndex}-${k}`] && !hsLookupLoadingMap[`${nestIndex}-${k}`] && (
                   <div className="mt-1 flex items-center gap-1">
                     <span className={`text-[9px] font-bold px-1 rounded ${
@@ -291,13 +297,13 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
       setValue('shipper_name', affiliation.userName || '');
       setValue('shipper_contact_name', affiliation.userName || '');
       setValue('shipper_contact_email', affiliation.userEmail || '');
-      setValue('shipper_contact_phone', (affiliation as any)?.userPhone || '');
+      setValue('shipper_contact_phone', stripNonDigits((affiliation as any)?.userPhone || ''));
     } else {
       const matchedShipper = shippers.find((s: any) => s.id === affiliation?.orgId);
       setValue('shipper_name', autoShipperName);
       setValue('shipper_contact_name', affiliation?.userName || '');
       setValue('shipper_contact_email', affiliation?.userEmail || '');
-      setValue('shipper_contact_phone', (affiliation as any)?.userPhone || '');
+      setValue('shipper_contact_phone', stripNonDigits((affiliation as any)?.userPhone || ''));
       setValue('shipper_address', matchedShipper?.address || affiliation?.orgAddress || '');
       setValue('shipper_biz_no', matchedShipper?.biz_no || affiliation?.orgBizNo || '');
       setValue('shipper_country_code', affiliation?.orgCountryCode || 'KR');
@@ -448,14 +454,14 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
           setValue('shipper_id', data.dummyIndividualId);
           setValue('shipper_contact_name', data.userName);
           setValue('shipper_contact_email', data.userEmail);
-          setValue('shipper_contact_phone', data.userPhone || '');
+          setValue('shipper_contact_phone', stripNonDigits(data.userPhone || ''));
         } else {
           const matchedShipper = shippers.find((s: any) => s.id === data.orgId);
           setValue('order_type', 'B2B');
           setValue('shipper_id', data.orgId as string);
           setValue('shipper_contact_name', data.userName);
           setValue('shipper_contact_email', data.userEmail);
-          setValue('shipper_contact_phone', data.userPhone || '');
+          setValue('shipper_contact_phone', stripNonDigits(data.userPhone || ''));
           setValue('shipper_address', matchedShipper?.address || data.orgAddress || '');
           setValue('shipper_biz_no', matchedShipper?.biz_no || data.orgBizNo || '');
           setValue('shipper_country_code', data.orgCountryCode || 'KR');
@@ -1129,9 +1135,15 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                             <div>
                               <p className="text-slate-400 font-bold uppercase tracking-tighter mb-1">{t('shipper_contact')} (Phone){transportMode === 'UPS' && <span className="text-rose-500"> *</span>}</p>
                               <ZenInput 
-                                placeholder="010-XXXX-XXXX"
+                                placeholder="01012345678"
+                                inputMode="numeric"
+                                maxLength={PHONE_MAX_DIGITS}
                                 disabled={shipperNameMode === 'auto'}
                                 {...register('shipper_contact_phone')}
+                                onChange={(e) => {
+                                  e.target.value = stripNonDigits(e.target.value);
+                                  register('shipper_contact_phone').onChange(e);
+                                }}
                                 className={`bg-white/80 py-1.5 text-[11px] ${shipperNameMode === 'auto' ? 'opacity-60 bg-slate-100' : ''}`}
                               />
                             </div>
@@ -1232,7 +1244,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                             setValue('recipient_address', entry.recipient_address);
                             setValue('recipient_address_detail', entry.recipient_address_detail || '');
                             setValue('recipient_address_local', entry.recipient_address_local || '');
-                            setValue('recipient_phone', entry.recipient_phone || '');
+                            setValue('recipient_phone', stripNonDigits(entry.recipient_phone || ''));
                             setValue('recipient_country_code', entry.country_code || '');
                             setValue('recipient_state_province', entry.state_province || '');
                             setValue('recipient_city', entry.city || '');
@@ -1248,7 +1260,10 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                       </div>
                       <div>
                         <label className="text-[10px] font-bold text-slate-500 mb-1 block">Phone <span className="text-rose-500">*</span></label>
-                        <ZenInput placeholder="010-XXXX-XXXX" {...register('recipient_phone')} error={!!errors.recipient_phone} className="py-2 text-xs" />
+                        <ZenInput placeholder="01012345678" inputMode="numeric" maxLength={PHONE_MAX_DIGITS} {...register('recipient_phone')} onChange={(e) => {
+                            e.target.value = stripNonDigits(e.target.value);
+                            register('recipient_phone').onChange(e);
+                          }} error={!!errors.recipient_phone} className="py-2 text-xs" />
                       </div>
                       <div>
                         <label className="text-[10px] font-bold text-slate-500 mb-1 block">PCCC</label>
@@ -1537,6 +1552,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                           register={register}
                           errors={errors}
                           t={t}
+                          isUps={transportMode === 'UPS'}
                           hsLookupLoadingMap={hsLookupLoadingMap}
                           hsLookupResultMap={hsLookupResultMap}
                           onItemNameBlur={(k) => handleItemNameBlur(i, k)}
