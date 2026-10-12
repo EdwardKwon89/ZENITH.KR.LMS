@@ -50,6 +50,7 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
+| [#1243](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1243) | [Team B] TASK-B-334: 대량 등록(bulk-orders) 전화번호 정제 누락 보완 — TASK-B-332 후속 회귀 방지 (Aiden 검토 요청) | b | p1 | open | jungjs | 2026-10-12 |
 | [#1240](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1240) | [Team B] TASK-B-333: 수정 화면 화주명·주소·패키지 CONTENT(DOC/NONDOC) 저장값 복원 (#1238 항목 4·5) | b | p2 | review | jungjs | 2026-10-12 |
 | [#1239](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1239) | [Team B] TASK-B-332: SHXK/UPS 규격 사전검증 — HS코드 필수·품명 35자·전화번호 숫자 15자리 (#1238 항목 1·2·3) | b | p2 | review | jungjs | 2026-10-12 |
 | [#1238](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1238) | 2026.10.12 오류사항 및 보완사항 | b | p2 | - | 미배정 | 2026-10-12 |
