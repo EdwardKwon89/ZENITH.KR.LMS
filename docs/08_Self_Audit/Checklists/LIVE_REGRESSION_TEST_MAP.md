@@ -913,9 +913,21 @@ TASK-B-332가 `orderRegistrationSchema`의 전화 규칙(숫자만 `/^\d*$/`·`/
 | ID | 테스트 항목 | 목적 | 파일 경로 |
 | :--- | :--- | :--- | :--- |
 | **TC-BULKPH-01** | 하이픈 전화 UPS 행 `010-1234-5678` → 정제되어 성공, `createOrder`에 `01012345678` 전달 | 실제 입력 경로 보호(회귀) | `tests/unit/operations/bulk-orders.test.ts` |
-| **TC-BULKPH-02** | 비UPS(AIR) 행 하이픈·공백·`+` 전화 → "전화번호" 에러 미발생(정제 확인) | 전 모드 정제 확인 | `tests/unit/operations/bulk-orders.test.ts` |
+| **TC-BULKPH-02** | UPS 행 `+`·공백 전화 → 정제되어 성공, `createOrder`에 숫자만 전달 (TASK-B-335에서 AIR 전제 소멸로 수정) | 전 모드 정제 확인 | `tests/unit/operations/bulk-orders.test.ts` |
 | **TC-BULKPH-03** | 정제 후 빈 값(`-- () --`) → 스키마 거부(`전화번호는 숫자만`) + `createOrder` 미호출 | 빈 값 위임 | `tests/unit/operations/bulk-orders.test.ts` |
 | **TC-BULKPH-04** | 정제 후 16자리 → 스키마 거부(`15자리`) + `createOrder` 미호출 | 15자리 위임 | `tests/unit/operations/bulk-orders.test.ts` |
+
+## 68. 대량 등록 UPS 전용 명문화 + 템플릿 정합 (Issue #1245 / TASK-B-335 / DEF-B-150)
+
+대량 등록이 비UPS 행을 항상 실패시키고(스키마는 비UPS에 port 필수, 템플릿·매핑엔 port 없음), 제공 템플릿 샘플 자체가 어떤 모드로도 등록 불가(AIR 기본 + `shipper_contact_phone` 컬럼 부재 + 빈 HS/국가/우편번호/도시 + `GENERAL` content_type)였던 결함. JSJung 결정(방향 A)에 따라 대량 등록을 UPS 전용으로 명문화하고 템플릿 샘플을 실제 검증 통과값으로 교체, Zod 오류를 사람이 읽을 수 있게 포맷. `src/app/actions/operations/bulk-orders.ts`의 행 루프 선두에서 `BULK_SUPPORTED_MODE='UPS'` 검사(비UPS 행만 실패·배치는 계속), `content_type`은 기존 `normalizeUpsContentType` 재사용, `formatBulkError`로 `경로: 메시지` 노출. `src/lib/excel/bulk-order-template.ts`에 `shipper_contact_phone` 컬럼 추가 + UPS 통과 샘플(상수 `BULK_*_SAMPLE`).
+
+| ID | 검증 내용 | 기대 결과 | 테스트 위치 |
+| :-- | :-- | :-- | :-- |
+| TC-BULKUPS-01 | 비UPS(AIR) 행 + UPS 행 혼합 배치 | AIR 행만 `success:false`(`대량 등록은 UPS 오더만 지원합니다`), UPS 행 성공·`createOrder` 1회 | `tests/unit/operations/bulk-orders.test.ts` |
+| TC-BULKUPS-02 | `transport_mode` 공란 / 소문자·공백(` ups `) | UPS로 대문자 정규화되어 성공, `createOrder.transport_mode='UPS'` | `tests/unit/operations/bulk-orders.test.ts` |
+| TC-BULKUPS-03 | 패키지 `content_type` 공란/`GENERAL`/`DOC` | 공란·GENERAL → `NONDOC`, `DOC` 유지 | `tests/unit/operations/bulk-orders.test.ts` |
+| TC-BULKUPS-04 | 템플릿 라운드트립(`generateBulkOrderTemplate` → `XLSX.read` → `bulkCreateOrders`) | 샘플 행 `success:true`(템플릿 회귀 시 FAIL) | `tests/unit/operations/bulk-orders.test.ts` |
+| TC-BULKUPS-05 | UPS 행 HS 누락 시 오류 문자열 | JSON이 아닌 `packages.0.items.0.hs_code: UPS 배송은 품목 HS 코드가 필수입니다…` | `tests/unit/operations/bulk-orders.test.ts` |
 
 
 
