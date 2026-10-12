@@ -376,6 +376,10 @@ describe('bulkCreateOrders', () => {
     expect(callArg.packages[0].content_type).toBe('NONDOC');
     expect(callArg.packages[0].items[0].hs_code).toBeTruthy();
     expect(callArg.recipient_country_code).toBe('US');
+    // DEF-B-151: 샘플 ups_product_code는 DB(zen_ups_products)에 실존하는 코드여야 한다.
+    // 'WWE'는 미존재 → saveOrderRateSnapshot이 조용히 건너뛰어 운임 스냅샷 없는 오더가 생성됨.
+    expect(callArg.ups_product_code).toBe('WW_SAVER_NONDOC');
+    expect(callArg.ups_product_code).not.toBe('WWE');
   });
 
   it('TASK-B-335: Zod 오류가 JSON 문자열이 아니라 "경로: 메시지" 형식으로 노출된다', async () => {

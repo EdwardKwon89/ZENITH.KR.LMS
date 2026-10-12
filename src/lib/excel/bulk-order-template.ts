@@ -19,11 +19,14 @@ export const BULK_ORDER_HEADERS = [
 
 // 실제 검증(orderRegistrationSchema, UPS 분기)을 통과하는 샘플.
 // - transport_mode: UPS (공란 시 UPS 기본값이지만 명시)
+// - ups_product_code: DB(zen_ups_products)에 실존하는 코드여야 함. 'WWE' 등 미존재 코드는
+//   saveOrderRateSnapshot(orders.ts)이 if(!product)return으로 조용히 건너뛰어 운임 스냅샷 없는
+//   오더가 생성된다(DEF-B-151). content_type=NONDOC과 일관되게 비서류 코드 사용.
 // - shipper_contact_phone / recipient_phone: 숫자만(하이픈 미포함)
 // - recipient_country_code/zipcode/city: UPS 필수
 export const BULK_ORDER_SAMPLE = [
   '1', 'B2B', '', '0212345678', 'UPS',
-  'WWE', 'DDP', 'John Smith', '123 Main St', '14155551234',
+  'WW_SAVER_NONDOC', 'DDP', 'John Smith', '123 Main St', '14155551234',
   '', '', '90001', 'US',
   'CA', 'Los Angeles', '', '', '',
   '', '', '', '', '',
