@@ -1,11 +1,24 @@
 'use server';
 
+import { z } from 'zod';
 import { validateUserAction } from '@/lib/auth/guards';
 import { USER_ROLES } from '@/lib/auth/rbac';
 import { orderRegistrationSchema, orderPackageSchema, orderItemSchema } from '@/lib/validation/order';
 import type { OrderRegistrationInput, OrderPackageInput } from '@/lib/validation/order';
 import { stripNonDigits } from '@/lib/validation/shxk-limits';
+import { normalizeUpsContentType } from '@/lib/orders/edit-defaults';
 import { createOrder } from './orders';
+
+// TASK-B-335 (Issue #1245, DEF-B-150): 대량 등록은 UPS 오더만 지원한다.
+// ('use server' 파일은 async 함수만 export 가능하므로 상수는 모듈 내부 전용)
+const BULK_SUPPORTED_MODE = 'UPS';
+
+function formatBulkError(err: unknown): string {
+  if (err instanceof z.ZodError) {
+    return err.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`).join('; ');
+  }
+  return (err as any)?.message ?? String(err);
+}
 
 export interface BulkOrderResult {
   orderSeq: string | number;
@@ -72,7 +85,7 @@ function mapExcelRowToPackageInput(pkgRow: Record<string, unknown>, itemRows: Re
     height: toNum(pkgRow.height) || undefined,
     gross_weight: toNum(pkgRow.gross_weight),
     special_cargo_type: toStr(pkgRow.special_cargo_type) || 'NONE',
-    content_type: toStr(pkgRow.content_type) || 'GENERAL',
+    content_type: normalizeUpsContentType(toStr(pkgRow.content_type), BULK_SUPPORTED_MODE),
     domestic_ref_no: toStr(pkgRow.domestic_ref_no) || undefined,
     items,
   });
@@ -82,7 +95,8 @@ function mapExcelRowToOrderInput(
   orderRow: Record<string, unknown>,
   packages: OrderPackageInput[],
   profile: { id: string; org_id?: string; role: string },
-  agencyShipperIds: Set<string> | null
+  agencyShipperIds: Set<string> | null,
+  transportMode: string,
 ): OrderRegistrationInput {
   const isShipperRole = [USER_ROLES.SHIPPER, USER_ROLES.AGENCY_SHIPPER, USER_ROLES.CORPORATE, USER_ROLES.INDIVIDUAL].includes(profile.role as any);
 
@@ -97,7 +111,6 @@ function mapExcelRowToOrderInput(
   }
 
   const orderType = toStr(orderRow.order_type) || 'B2B';
-  const transportMode = toStr(orderRow.transport_mode) || 'AIR';
 
   const upsFields: Partial<OrderRegistrationInput> = transportMode === 'UPS' ? {
     ups_product_code: toStr(orderRow.ups_product_code) || undefined,
@@ -176,6 +189,11 @@ export async function bulkCreateOrders(sheets: BulkOrderSheets): Promise<{ resul
   for (const orderRow of sheets.orders) {
     const orderSeq = orderRow.order_seq as string | number;
     try {
+      const transportMode = (toStr(orderRow.transport_mode) || BULK_SUPPORTED_MODE).toUpperCase();
+      if (transportMode !== BULK_SUPPORTED_MODE) {
+        throw new Error(`대량 등록은 UPS 오더만 지원합니다 (현재 transport_mode=${toStr(orderRow.transport_mode)})`);
+      }
+
       const packageRows = sheets.packages.filter((p) => p.order_seq === orderSeq);
       if (packageRows.length === 0) {
         throw new Error(`order_seq=${orderSeq}에 연결된 패키지가 없습니다.`);
@@ -190,7 +208,7 @@ export async function bulkCreateOrders(sheets: BulkOrderSheets): Promise<{ resul
         return mapExcelRowToPackageInput(pkgRow, itemRows);
       });
 
-      const payload = mapExcelRowToOrderInput(orderRow, packages, profile, agencyShipperIds);
+      const payload = mapExcelRowToOrderInput(orderRow, packages, profile, agencyShipperIds, transportMode);
 
       const order = await createOrder(payload);
       results.push({
@@ -200,7 +218,7 @@ export async function bulkCreateOrders(sheets: BulkOrderSheets): Promise<{ resul
         orderNo: (order as any)?.order_no,
       });
     } catch (err: any) {
-      results.push({ orderSeq, success: false, error: err.message ?? String(err) });
+      results.push({ orderSeq, success: false, error: formatBulkError(err) });
     }
   }
 
