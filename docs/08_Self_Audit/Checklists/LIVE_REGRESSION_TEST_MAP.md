@@ -906,5 +906,17 @@
 | **TC-EDTDF-11** | 수정 모드 + 토글 후 auto → affiliation 파생값 | 사용자 조작 우선 | `tests/unit/orders/edit-defaults.test.ts` |
 | **TC-EDTDF-12** | 신규 등록 manual → 빈 값 / auto → affiliation | 회귀 방지 | `tests/unit/orders/edit-defaults.test.ts` |
 
+## 67. 대량 등록(bulk-orders) 전화번호 정제 (Issue #1243 / TASK-B-334)
+
+TASK-B-332가 `orderRegistrationSchema`의 전화 규칙(숫자만 `/^\d*$/`·`/^\d+$/` + 최대 15자리)을 전 모드에 적용했는데, 엑셀 대량 등록 경로(`bulk-orders.ts`)가 정제 없이 원본을 스키마에 전달해 하이픈 전화 행이 거부되던 회귀(#1239 후속)를 수정. `mapExcelRowToOrderInput`에서 전화 2필드에 `stripNonDigits` 적용 후 스키마에 위임(15자리 초과·빈 값 판정은 스키마).
+
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-BULKPH-01** | 하이픈 전화 UPS 행 `010-1234-5678` → 정제되어 성공, `createOrder`에 `01012345678` 전달 | 실제 입력 경로 보호(회귀) | `tests/unit/operations/bulk-orders.test.ts` |
+| **TC-BULKPH-02** | 비UPS(AIR) 행 하이픈·공백·`+` 전화 → "전화번호" 에러 미발생(정제 확인) | 전 모드 정제 확인 | `tests/unit/operations/bulk-orders.test.ts` |
+| **TC-BULKPH-03** | 정제 후 빈 값(`-- () --`) → 스키마 거부(`전화번호는 숫자만`) + `createOrder` 미호출 | 빈 값 위임 | `tests/unit/operations/bulk-orders.test.ts` |
+| **TC-BULKPH-04** | 정제 후 16자리 → 스키마 거부(`15자리`) + `createOrder` 미호출 | 15자리 위임 | `tests/unit/operations/bulk-orders.test.ts` |
+
+
 
 

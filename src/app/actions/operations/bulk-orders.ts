@@ -4,6 +4,7 @@ import { validateUserAction } from '@/lib/auth/guards';
 import { USER_ROLES } from '@/lib/auth/rbac';
 import { orderRegistrationSchema, orderPackageSchema, orderItemSchema } from '@/lib/validation/order';
 import type { OrderRegistrationInput, OrderPackageInput } from '@/lib/validation/order';
+import { stripNonDigits } from '@/lib/validation/shxk-limits';
 import { createOrder } from './orders';
 
 export interface BulkOrderResult {
@@ -110,8 +111,10 @@ function mapExcelRowToOrderInput(
     transport_mode: transportMode as any,
     recipient_name: toStr(orderRow.recipient_name),
     recipient_address: toStr(orderRow.recipient_address),
-    recipient_phone: toStr(orderRow.recipient_phone),
-    shipper_contact_phone: toStr(orderRow.shipper_contact_phone) || undefined,
+    // TASK-B-334 (Issue #1243): orderRegistrationSchema의 전화 규칙(숫자만·15자리)이 전 모드에 적용되므로
+    // 엑셀 입력의 하이픈/공백/`+` 등을 스키마 검증 전에 제거한다. 빈 값·15자리 초과 판정은 스키마에 위임.
+    recipient_phone: stripNonDigits(toStr(orderRow.recipient_phone)),
+    shipper_contact_phone: stripNonDigits(toStr(orderRow.shipper_contact_phone)) || undefined,
     recipient_address_local: toStr(orderRow.recipient_address_local) || undefined,
     recipient_address_detail: toStr(orderRow.recipient_address_detail) || undefined,
     recipient_zipcode: toStr(orderRow.recipient_zipcode) || undefined,
