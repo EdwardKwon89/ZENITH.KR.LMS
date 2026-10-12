@@ -50,7 +50,7 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
-| [#1240](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1240) | [Team B] TASK-B-333: 수정 화면 화주명·주소·패키지 CONTENT(DOC/NONDOC) 저장값 복원 (#1238 항목 4·5) | b | p2 | blocked | jungjs | 2026-10-12 |
+| [#1240](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1240) | [Team B] TASK-B-333: 수정 화면 화주명·주소·패키지 CONTENT(DOC/NONDOC) 저장값 복원 (#1238 항목 4·5) | b | p2 | open | jungjs | 2026-10-12 |
 | [#1239](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1239) | [Team B] TASK-B-332: SHXK/UPS 규격 사전검증 — HS코드 필수·품명 35자·전화번호 숫자 15자리 (#1238 항목 1·2·3) | b | p2 | review | jungjs | 2026-10-12 |
 | [#1238](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1238) | 2026.10.12 오류사항 및 보완사항 | b | p2 | - | 미배정 | 2026-10-12 |
 | [#1218](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1218) | [Aiden] Stage-Gate Code Review — UPS 핵심 경로(오더등록~정산) 대상, 적절한 시점에 실시 | - | p3 | - | 미배정 | 2026-10-11 |
