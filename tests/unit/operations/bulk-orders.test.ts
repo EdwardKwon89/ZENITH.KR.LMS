@@ -396,6 +396,33 @@ describe('bulkCreateOrders', () => {
     expect(results[0].error).not.toContain('"code"');
     expect(results[0].error).not.toContain('{');
   });
+
+  // === TASK-B-336 (Issue #1247, DEF-B-151): 미존재 ups_product_code 거부 행 격리 ===
+
+  it('TASK-B-336: createOrder가 미존재 product_code로 throw → 해당 행만 실패, 다른 행 성공', async () => {
+    (createOrder as any).mockRejectedValueOnce(
+      new Error('존재하지 않거나 비활성화된 UPS 상품 코드입니다: WWE')
+    );
+    (createOrder as any).mockResolvedValueOnce({ id: 'ord-2', order_no: 'ORD-002' });
+
+    const sheets = {
+      orders: [
+        makeValidOrderRow({ order_seq: 1, ups_product_code: 'WWE' }),
+        makeValidOrderRow({ order_seq: 2, ups_product_code: 'WW_SAVER_NONDOC' }),
+      ],
+      packages: [makePackageSeq(1, 1), makePackageSeq(2, 2)] as any[],
+      items: [makeItemSeq(1, 1), makeItemSeq(2, 2)] as any[],
+    };
+
+    const { results } = await bulkCreateOrders(sheets as any);
+
+    expect(results[0].success).toBe(false);
+    expect(results[0].error).toContain('존재하지 않거나 비활성화된 UPS 상품 코드입니다: WWE');
+    // 'WWE' 미존재 오류는 JSON({)·코드 문자열이 아니라 message 그대로 노출
+    expect(results[0].error).not.toContain('{');
+    expect(results[1]).toMatchObject({ orderSeq: 2, success: true, orderId: 'ord-2' });
+    expect(createOrder).toHaveBeenCalledTimes(2);
+  });
 });
 
 describe('generateBulkOrderTemplate', () => {
