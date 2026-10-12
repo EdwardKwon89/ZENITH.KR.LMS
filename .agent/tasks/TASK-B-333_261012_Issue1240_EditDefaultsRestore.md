@@ -74,6 +74,7 @@ UPS 오더 수하인/발송인 전화 비숫자(하이픈 등) 포함: 11건 / 1
 - [x] MAP §66 신설 (R-09)
 - [x] R-04 LIVE 자가점검: 폼 defaultValues(항목 4)·content_type select 도메인(항목 5)·전화 정제 3계층 확인
 - [x] R-15 해당 없음: DB 스키마/마이그레이션 무변경(순수 helper·UI), 회귀 테스트 커버 (Baker R-10 예외, 2026-07-15)
+- [x] **`OrderRegistrationForm.tsx` 줄 수 (TASK-B-334 보완, 2026-10-12)**: develop `1,893`줄 → `TeamB_Dev` `1,930`줄 (**+37**, Hard Limit 1,500 초과 상태). TASK-B-333 본문에 `wc -l` 전후 값 기재가 누락되어 Aiden 보완 지시(#1243)로 소급 기재. (값: `git show origin/develop:… | wc -l` = 1893, `git show origin/TeamB_Dev:… | wc -l` = 1930)
 
 ## 7. 발견 이슈
 
