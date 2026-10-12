@@ -47,22 +47,26 @@ TASK-B-334(PR #1244)에서 발견: 엑셀 대량 등록 템플릿 샘플 자체�
 | **TC-BULKUPS-01** | AIR 행 + UPS 행 혼합 | AIR만 `success:false`·`대량 등록은 UPS 오더만 지원합니다`·`transport_mode=AIR`, UPS 성공, `createOrder` 1회 |
 | **TC-BULKUPS-02** | `transport_mode` 공란 / ` ups ` | UPS 정규화, `createOrder.transport_mode='UPS'` |
 | **TC-BULKUPS-03** | `content_type` 공란/`GENERAL`/`DOC` | `NONDOC`/`NONDOC`/`DOC` |
-| **TC-BULKUPS-04** | 템플릿 라운드트립 | 샘플 행 `success:true`, `transport_mode='UPS'`, `content_type='NONDOC'`, hs_code 有, 국가 `US` |
+| **TC-BULKUPS-04** | 템플릿 라운드트립 | 샘플 행 `success:true`, `transport_mode='UPS'`, `content_type='NONDOC'`, hs_code 有, 국가 `US`, `ups_product_code='WW_SAVER_NONDOC'`(≠`'WWE'`) |
 | **TC-BULKUPS-05** | UPS 행 HS 누락 | error가 `packages.0.items.0.hs_code: UPS 배송은 품목 HS 코드가 필수입니다…`, `{`·`"code"` 미포함 |
 | **TC-BULKPH-02** (수정) | UPS 행 `+86 393 8302 0288` / `010 1234 5678` | 정제되어 성공, `createOrder`에 `8639383020288`/`01012345678` |
 
 - **TC-BULKPH-02 변경 사유**: 원래 "AIR 행 전화 정제"였으나 AIR가 이제 사전 거부되어 **전제 소멸**. 삭제·약화 아니라 UPS 행 정제 케이스로 수정.
-- **되돌리기 검증(3종 직접 수행)**:
+- **되돌리기 검증(4종 직접 수행)**:
   - (a) 모드 검사 제거 → TC-BULKUPS-01 FAIL
   - (b) 템플릿 샘플 `AIR`로 되돌림 → TC-BULKUPS-04 FAIL
   - (c) `normalizeUpsContentType` 제거(원 `|| 'GENERAL'`) → TC-BULKUPS-03 FAIL
+  - (d) **보완**: 샘플 `ups_product_code`를 `'WWE'`로 되돌림 → TC-BULKUPS-04 FAIL(`toBe('WW_SAVER_NONDOC')`)
   - 각각 단독 FAIL 확인 후 복원 → 17/17 PASS. vacuous 아님.
+- **DEF-B-151 보완**: 샘플 `ups_product_code`가 DB(`zen_ups_products`) 실존 코드인지 라운드트립 테스트가 `toBe('WW_SAVER_NONDOC')`로 고정. DB 실측(인용): `docker exec supabase_db_ZENITH_LMS_001 psql -U postgres -Atc "select product_code from zen_ups_products where product_code='WW_SAVER_NONDOC'"` → `WW_SAVER_NONDOC`. 정본 상수(전체 실존 코드 집합)는 코드베이스에 **부재**(`pricing-engine.ts`의 `PRODUCT_FAMILY_MAP`은 prefix→family 매핑이라 정본 집합이 아님) → **(나) 방식 생략, DB 실측으로 대체**.
 
 ## 5. 검증 (DoD)
 
 - [x] 구현 1~5 (모드 검사 / content_type 정규화 / formatBulkError / 템플릿 UPS 통과 / 안내문·미리보기)
 - [x] 테스트 1~5 + TC-BULKPH-02 수정 (17/17 PASS)
-- [x] 되돌리기 검증 3종 직접 수행·기재(섹션 4)
+- [x] 되돌리기 검증 4종 직접 수행·기재(섹션 4, (d)=보완)
+- [x] **보완(반려)**: 템플릿 샘플 `ups_product_code` `'WWE'`→`'WW_SAVER_NONDOC'`(DB 실존 코드, 라운드트립 `toBe` 검증 + 되돌리기 (d))
+- [x] **R-18**: 발견 이슈를 `DEF# 포함 표`로 기재 + `DEF-B-150`(대량 등록)·`DEF-B-151`(미존재 product_code 무음 통과) 보고서 작성
 - [x] `LIVE_REGRESSION_TEST_MAP.md` §68 신설 + §67 TC-BULKPH-02 설명 갱신 (R-09)
 - [x] `npm run test:regression` 전체 PASS (R-08) — **218 files / 1551 tests**
 - [x] `npm run build` 성공
@@ -75,12 +79,18 @@ TASK-B-334(PR #1244)에서 발견: 엑셀 대량 등록 템플릿 샘플 자체�
 ## 6. [작업 결과]
 
 - **코드 커밋**: `fcee5a6a5` — `[Baker] fix: TASK-B-335 대량 등록 UPS 전용 명문화 + 템플릿 정합 (#1245)`
-- **변경 파일**: `src/app/actions/operations/bulk-orders.ts`, `src/lib/excel/bulk-order-template.ts`, `src/components/orders/BulkOrderUploadModal.tsx`, `tests/unit/operations/bulk-orders.test.ts`, `docs/08_Self_Audit/Checklists/LIVE_REGRESSION_TEST_MAP.md`(§67 갱신·§68 신설)
+- **보완 코드 커밋**: `d104ba447` — `[Baker] fix: TASK-B-335 템플릿 샘플 ups_product_code WW_SAVER_NONDOC 교체 (Issue #1245)` (반려 대응)
+- **변경 파일**: `src/app/actions/operations/bulk-orders.ts`, `src/lib/excel/bulk-order-template.ts`, `src/components/orders/BulkOrderUploadModal.tsx`, `tests/unit/operations/bulk-orders.test.ts`, `docs/08_Self_Audit/Checklists/LIVE_REGRESSION_TEST_MAP.md`(§67 갱신·§68 신설), `.agent/defects/DEF-B-150_*.md`·`DEF-B-151_*.md`
 - **검증**: `npm run test:regression` **218 files / 1551 tests PASS**, `npm run build` 성공, `tsc --noEmit` 변경 파일 오류 0
 - **PR**: [#1246](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1246) — base `TeamB_Dev`
 
 ## 7. [발견 이슈]
 
-1. **비UPS 지원은 영구 미지원(방향 A 명문화)**: `origin_port_id`/`dest_port_id`는 템플릿·매핑에 없으므로 비UPS 행의 port 검증 문제는 UPS 전용화로 회피됨. 향후 비UPS 대량 등록이 필요하면 port 컬럼 + 코드→UUID 매핑을 별도 IMP로 진행해야 함(본 Task 범위 밖).
-2. **`formatBulkError`는 Zod 오류에만 경로 포맷 적용**: `createOrder` 내부에서 던지는 비Zod 오류는 기존대로 `err.message` 노출 — 별도 개선 여지.
-3. **`ups_product_code` 값 검증 부재**: 스키마는 문자열만 검사(실제 UPS product code 유효성 미검증). 오타 시 API 단계에서 실패 — 기존 동작 유지(범위 밖).
+| DEF# | 결함 | 긴급도 | 보고서 | 상태 |
+|:--|:--|:--|:--|:--|
+| **DEF-B-150** | 엑셀 대량 등록 — 비UPS 행 전량 실패 + 제공 템플릿이 어떤 모드로도 등록 불가 | Medium | [`.agent/defects/DEF-B-150_대량등록_비UPS실패_템플릿불일치.md`](../defects/DEF-B-150_대량등록_비UPS실패_템플릿불일치.md) | **본 Task에서 해결**(방향 A) |
+| **DEF-B-151** | 미존재 `ups_product_code`(예 `WWE`) 무음 통과 → `saveOrderRateSnapshot`이 `if(!product)return`으로 조용히 건너뛰어 **운임 스냅샷 없는 UPS 오더** 생성(오타 시 API 단계 실패가 아님) | Medium | [`.agent/defects/DEF-B-151_대량등록_미존재_ups_product_code_운임스냅샷_무음누락.md`](../defects/DEF-B-151_대량등록_미존재_ups_product_code_운임스냅샷_무음누락.md) | 보고서만(별도 Task 미발령) |
+| — | `formatBulkError`는 Zod 오류에만 경로 포맷 적용(비Zod 오류는 `err.message`) | Low | (본 task 파일) | 범위 밖 |
+
+> **정정**: 본 보완의 계기 — 초기 task file의 "오타 시 API 단계에서 실패" 기재는 **사실과 다름**(실제는 무음 통과·스냅샷 누락). `DEF-B-151`로 정정·보고.
+> **참고**: 비UPS 대량 등록 영구 미지원(방향 A) — 향후 필요 시 port 컬럼 + 코드→UUID 매핑을 별도 IMP로.
