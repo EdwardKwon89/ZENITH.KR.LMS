@@ -929,6 +929,24 @@ TASK-B-332가 `orderRegistrationSchema`의 전화 규칙(숫자만 `/^\d*$/`·`/
 | TC-BULKUPS-04 | 템플릿 라운드트립(`generateBulkOrderTemplate` → `XLSX.read` → `bulkCreateOrders`) | 샘플 행 `success:true`(템플릿 회귀 시 FAIL) | `tests/unit/operations/bulk-orders.test.ts` |
 | TC-BULKUPS-05 | UPS 행 HS 누락 시 오류 문자열 | JSON이 아닌 `packages.0.items.0.hs_code: UPS 배송은 품목 HS 코드가 필수입니다…` | `tests/unit/operations/bulk-orders.test.ts` |
 
+## 69. 미존재·비활성 ups_product_code 등록 전 거부 + 스냅샷 누락 경고 (Issue #1247 / TASK-B-336 / DEF-B-151)
+
+`orderRegistrationSchema.ups_product_code`가 `z.string().optional()`(무검증)이라 오타·구버전 코드(예 `WWE`)로 UPS 오더를 등록해도 저장에 성공하고, `saveOrderRateSnapshot`이 미존재 상품을 만나면 `if (!product) return;`으로 **무음 스킵** → 운임 스냅샷 없는 오더가 생성되던 결함. 신규 헬퍼 `src/lib/orders/ups-product-guard.ts`의 `assertActiveUpsProduct(supabase, code)`가 `zen_ups_products`를 `product_code` + `is_active=true`로 조회(`.maybeSingle()`)해 미존재·비활성이면 오더 생성(RPC) 이전에 거부하고, DB 조회 `error`는 "없음"과 구분해 throw. `createOrder`는 스키마 통과 직후 RPC 이전에, `updateOrder`는 기존 저장값과 다르게 지정될 때만 검증(레거시 오더 수정 차단 방지). `saveOrderRateSnapshot`의 무음 `return` 2곳에 `logger.warn` 추가(동작 불변). 화주 세션(RLS `is_active = true`)에서도 정상 코드가 통과함을 실DB 통합 테스트로 실측.
+
+| ID | 검증 내용 | 기대 결과 | 테스트 위치 |
+| :-- | :-- | :-- | :-- |
+| TC-336-01 | `assertActiveUpsProduct` — 활성 코드 통과 + 쿼리에 `product_code`·`is_active=true` 조건 포함(인자 캡처) | resolve, `filters.product_code`·`is_active===true` | `tests/unit/orders/ups-product-guard.test.ts` |
+| TC-336-02 | 미존재 코드 `WWE` | `존재하지 않거나 비활성화된 UPS 상품 코드입니다: WWE` throw | `tests/unit/orders/ups-product-guard.test.ts` |
+| TC-336-03 | DB 조회 `error` 반환 | `UPS 상품 코드 검증 중 오류가 발생했습니다: …` — "없음"과 구분된 DB 오류 | `tests/unit/orders/ups-product-guard.test.ts` |
+| TC-336-04 | `createOrder` 미존재 코드 | RPC 차단: throw + `createOrderViaRpc` **0회**·`supabase.rpc` 0회 | `tests/unit/orders/ups-product-guard.test.ts` |
+| TC-336-05 | `createOrder` 실존 활성 코드 | 검증 통과 후 `createOrderViaRpc` 1회 | `tests/unit/orders/ups-product-guard.test.ts` |
+| TC-336-06 | `createOrder` 비UPS(AIR, 코드 무효값) | `from('zen_ups_products')` **0회**, 오더 생성 1회 | `tests/unit/orders/ups-product-guard.test.ts` |
+| TC-336-07 | `updateOrder` 기존 저장값과 동일 코드 | 상품 조회 **0회**(재검증 생략), `updateHeader` 1회 | `tests/unit/orders/ups-product-guard.test.ts` |
+| TC-336-08 | `updateOrder` 기존값과 다른 미존재 코드 | throw + `updateHeader` 0회 | `tests/unit/orders/ups-product-guard.test.ts` |
+| TC-336-09 | `saveOrderRateSnapshot` 상품 미존재 | `logger.warn`(오더 ID·`product_code` 포함), 스냅샷 insert 미발생(동작 불변) | `tests/unit/orders/ups-product-guard.test.ts` |
+| TC-336-RLS-01/02 | 실DB·화주 세션(R-14): `WW_SAVER_NONDOC` 통과 / `WWE` 거부 | RLS(`is_active=true`) 하에서 정상 코드까지 거부되지 않음 | `tests/integration/def-b151-ups-product-guard.test.ts` |
+| TC-336-BULK | 대량 등록: 한 행이 미존재 코드로 throw | 해당 행만 `success:false`(메시지 그대로 노출), 다른 행 성공(행 격리) | `tests/unit/operations/bulk-orders.test.ts` |
+
 
 
 

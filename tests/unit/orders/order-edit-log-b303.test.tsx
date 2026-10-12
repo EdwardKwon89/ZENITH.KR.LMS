@@ -50,7 +50,10 @@ function buildSupabaseMock(insertCalls: any[]) {
       }),
       update: vi.fn().mockResolvedValue({ error: null }),
       eq: vi.fn().mockReturnThis(),
-      maybeSingle: vi.fn().mockResolvedValue({ data: null }),
+      // TASK-B-336 (Issue #1247): createOrder가 생성 전 활성 UPS 상품코드를 조회한다.
+      maybeSingle: vi.fn().mockResolvedValue({
+        data: table === 'zen_ups_products' ? { product_code: 'WW_EXPEDITED' } : null,
+      }),
     }),
   };
 }
