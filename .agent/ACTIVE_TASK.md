@@ -50,7 +50,7 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
-| [#1247](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1247) | [Team B] TASK-B-336: 미존재·비활성 ups_product_code 등록 전 거부 + 스냅샷 누락 경고 (DEF-B-151) | b | p2 | in-progress | jungjs | 2026-10-12 |
+| [#1247](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1247) | [Team B] TASK-B-336: 미존재·비활성 ups_product_code 등록 전 거부 + 스냅샷 누락 경고 (DEF-B-151) | b | p2 | review | jungjs | 2026-10-12 |
 | [#1245](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1245) | [Team B] TASK-B-335: 엑셀 대량 등록 UPS 전용 명문화 + 템플릿 정합 (DEF-B-150, 방향 A) | b | p2 | review | 미배정 | 2026-10-12 |
 | [#1243](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1243) | [Team B] TASK-B-334: 대량 등록(bulk-orders) 전화번호 정제 누락 보완 — TASK-B-332 후속 회귀 방지 (Aiden 검토 요청) | b | p1 | review | jungjs | 2026-10-12 |
 | [#1240](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1240) | [Team B] TASK-B-333: 수정 화면 화주명·주소·패키지 CONTENT(DOC/NONDOC) 저장값 복원 (#1238 항목 4·5) | b | p2 | review | jungjs | 2026-10-12 |
