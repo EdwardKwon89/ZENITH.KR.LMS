@@ -50,11 +50,6 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
-| [#1247](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1247) | [Team B] TASK-B-336: 미존재·비활성 ups_product_code 등록 전 거부 + 스냅샷 누락 경고 (DEF-B-151) | b | p2 | review | jungjs | 2026-10-12 |
-| [#1245](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1245) | [Team B] TASK-B-335: 엑셀 대량 등록 UPS 전용 명문화 + 템플릿 정합 (DEF-B-150, 방향 A) | b | p2 | review | 미배정 | 2026-10-12 |
-| [#1243](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1243) | [Team B] TASK-B-334: 대량 등록(bulk-orders) 전화번호 정제 누락 보완 — TASK-B-332 후속 회귀 방지 (Aiden 검토 요청) | b | p1 | review | jungjs | 2026-10-12 |
-| [#1240](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1240) | [Team B] TASK-B-333: 수정 화면 화주명·주소·패키지 CONTENT(DOC/NONDOC) 저장값 복원 (#1238 항목 4·5) | b | p2 | review | jungjs | 2026-10-12 |
-| [#1239](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1239) | [Team B] TASK-B-332: SHXK/UPS 규격 사전검증 — HS코드 필수·품명 35자·전화번호 숫자 15자리 (#1238 항목 1·2·3) | b | p2 | review | jungjs | 2026-10-12 |
 | [#1238](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1238) | 2026.10.12 오류사항 및 보완사항 | b | p2 | - | 미배정 | 2026-10-12 |
 | [#1218](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1218) | [Aiden] Stage-Gate Code Review — UPS 핵심 경로(오더등록~정산) 대상, 적절한 시점에 실시 | - | p3 | - | 미배정 | 2026-10-11 |
 | [#1189](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1189) | [Team B] TASK-B-323: Resend 이메일 도메인(zenith-lms.com) 미인증 — 알림메일 전량 발송 실패 (DEF-B-143, High) | b | p1 | - | jungjs | 2026-10-01 |
