@@ -2,14 +2,17 @@
 tags: ["procedure"]
 ---
 
-# [209] Vercel 원격 배포 SOP (고객 시연용)
+# [209] Vercel 원격 배포 SOP (Pilot 운영 환경)
 
 > **프로젝트:** ZENITH_LMS
 > **문서번호:** 209
 > **작성자:** Aiden (Claude)
-> **최종 수정일:** 2026-07-27
+> **최종 수정일:** 2026-10-11
 
-이 문서는 develop 브랜치의 최신 상태를 고객 시연용으로 원격 Vercel + 원격 Supabase에 배포하는 표준 절차를 정의합니다. **2026-07-27 Edward 지시로, 이 절차는 매번 자동 수행하지 않으며 Edward가 명시적으로 지시한 시점에만 실행합니다.**
+이 문서는 develop 브랜치의 최신 상태를 원격 Vercel + 원격 Supabase에 배포하는 표준 절차를 정의합니다. **2026-07-27 Edward 지시로, 이 절차는 매번 자동 수행하지 않으며 Edward가 명시적으로 지시한 시점에만 실행합니다.**
+
+> [!WARNING]
+> **(2026-10-11 개정)** 원격 Supabase(`Zenith_LMS`, ref `ayowrwmufagzstqiqrnj`)는 2026-10-05~10-15 Pilot 집중운영 시작 이후 **실제 업무 데이터**를 담고 있습니다. 문서 최초 작성 시점(2026-07-27)의 "고객 시연용 더미 데이터" 전제는 더 이상 유효하지 않습니다. 배포·마이그레이션 시 반드시 **기존 데이터 보전**을 전제로 작업하십시오 — 상세 원칙은 아래 2단계 참조.
 
 ## 0. 핵심 전제
 
@@ -40,8 +43,18 @@ gh pr merge <PR번호> --merge --admin --delete-branch
 ```bash
 supabase link --project-ref ayowrwmufagzstqiqrnj
 supabase migration list          # pending 마이그레이션 확인
-supabase db push --yes           # 전체 적용
 ```
+
+> [!IMPORTANT]
+> **데이터 보전 원칙 (2026-10-11 신설 — 원격 DB가 Pilot 실데이터로 전환됨에 따라)**
+> - `supabase db push --yes`로 **전체 일괄 적용하기 전**, pending 마이그레이션 파일 각각을 열어 `DROP TABLE`/`DROP COLUMN`/`TRUNCATE`/파괴적 `ALTER COLUMN TYPE` 등 데이터 유실 가능 DDL이 있는지 검토한다. 있다면 백업(`supabase db dump --data-only`) 또는 별도 데이터 이행(backfill) 절차를 먼저 수립하고 Edward 승인을 받는다.
+> - `supabase db reset`은 **로컬 전용**(R-08-2)이며, 원격(`--linked` 등)에는 **절대 실행 금지** — "Pilot이라 데이터가 적으니 괜찮다"는 예외 없음.
+> - 적용 전후로 핵심 테이블(`zen_orders`, `profiles`, `zen_invoices` 등) row count를 REST API(`Prefer: count=exact`, `Range: 0-0` 헤더로 응답의 `Content-Range`만 확인)로 조회해 배포 완료 보고에 "기존 데이터 보전 확인" 증적으로 남긴다.
+>
+> 검토 완료 후 적용:
+> ```bash
+> supabase db push --yes           # 전체 적용
+> ```
 
 ## 3. Vercel Production 환경변수 확인/설정
 
@@ -108,4 +121,5 @@ Playwright 등으로 실제 로그인 → 핵심 화면(오더 목록, UPS 오�
 
 ---
 ## 📝 개정 이력
+- **v1.1 (2026-10-11)**: 원격 Supabase가 Pilot 운영 시작(2026-10-05)으로 실데이터 보유 환경으로 전환됨에 따라 문서 제목·전제를 "고객 시연용"→"Pilot 운영 환경"으로 정정, 2단계에 데이터 보전 원칙(파괴적 DDL 사전 검토·원격 reset 금지·row count 증적) 신설
 - **v1.0 (2026-07-27)**: 최초 작성 — 2026-07-27 고객 시연 배포 작업(develop 824커밋 반영) 중 겪은 실제 장애(env 개행 버그, .vercelignore 부재, Supabase 일시정지, dest_country_code 컬럼 버그) 및 해결 절차 기록

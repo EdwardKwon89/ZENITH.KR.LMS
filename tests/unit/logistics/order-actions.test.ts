@@ -61,7 +61,7 @@ describe('ZENITH Logistics: Order Creation Logic', () => {
       dest_port_id: '550e8400-e29b-41d4-a716-446655440002',
       recipient_name: 'Hong Gil-dong',
       recipient_address: '123 Zenith St, Seoul',
-      recipient_phone: '010-1234-5678', 
+      recipient_phone: '01012345678', 
       packages: [
         {
           packing_unit: 'BOX',
@@ -89,7 +89,7 @@ describe('ZENITH Logistics: Order Creation Logic', () => {
     // Supabase RPC 호출 데이터 검증
     const rpcCall = mockSupabase.rpc.mock.calls[0];
     expect(rpcCall[0]).toBe('create_order_atomic');
-    expect(rpcCall[1].p_payload.recipient_phone).toBe('010-1234-5678'); 
+    expect(rpcCall[1].p_payload.recipient_phone).toBe('01012345678'); 
     expect(rpcCall[1].p_user_id).toBe(mockProfile.id); 
     expect(rpcCall[1].p_org_id).toBe(mockProfile.org_id); 
     
@@ -113,11 +113,11 @@ describe('ZENITH Logistics: Order Creation Logic', () => {
       dest_port_id: '550e8400-e29b-41d4-a716-446655440002',
       recipient_name: 'Lee Young-hee',
       recipient_address: '456 Zenith Tower, Busan',
-      recipient_phone: '010-8888-9999',
+      recipient_phone: '01088889999',
       
       // 스크린샷 피드백 신규 필드
       shipper_contact_name: 'Manager Kim',
-      shipper_contact_phone: '010-1111-2222',
+      shipper_contact_phone: '01011112222',
       description: 'Special delivery instruction: Ring the bell',
       
       packages: [
@@ -145,7 +145,7 @@ describe('ZENITH Logistics: Order Creation Logic', () => {
     const rpcCall = mockSupabase.rpc.mock.calls[0];
     expect(rpcCall[0]).toBe('create_order_atomic');
     expect(rpcCall[1].p_payload.shipper_contact_name).toBe('Manager Kim');
-    expect(rpcCall[1].p_payload.shipper_contact_phone).toBe('010-1111-2222');
+    expect(rpcCall[1].p_payload.shipper_contact_phone).toBe('01011112222');
     expect(rpcCall[1].p_payload.description).toBe('Special delivery instruction: Ring the bell');
   });
 
@@ -158,7 +158,7 @@ describe('ZENITH Logistics: Order Creation Logic', () => {
       dest_port_id: '550e8400-e29b-41d4-a716-446655440002',
       recipient_name: 'Hong Gil-dong',
       recipient_address: '123 Zenith St, Seoul',
-      recipient_phone: '010-1234-5678',
+      recipient_phone: '01012345678',
       packages: [
         {
           packing_unit: 'BOX',
@@ -197,7 +197,7 @@ describe('ZENITH Logistics: Order Creation Logic', () => {
       dest_port_id: '550e8400-e29b-41d4-a716-446655440002',
       recipient_name: 'John Doe',
       recipient_address: '456 Oak St',
-      recipient_phone: '010-5555-6666',
+      recipient_phone: '01055556666',
       recipient_country_code: 'US',
       recipient_state_province: 'CA',
       recipient_city: 'Los Angeles',
@@ -252,7 +252,7 @@ describe('ZENITH Logistics: Order Creation Logic', () => {
       dest_port_id: '550e8400-e29b-41d4-a716-446655440002',
       recipient_name: 'Jane',
       recipient_address: '789 Pine St',
-      recipient_phone: '010-7777-8888',
+      recipient_phone: '01077778888',
       ups_product_code: 'WW_EXPEDITED',
       incoterms: 'DDU',
       packages: [
