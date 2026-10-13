@@ -162,6 +162,9 @@ export default function BulkOrderUploadModal({ onClose }: BulkOrderUploadModalPr
                   <li>• <strong>오더(Order)</strong>: 1행 = 1오더, order_seq는 고유 식별자</li>
                   <li>• <strong>패키지(Package)</strong>: 1행 = 1패키지, order_seq로 오더에 연결</li>
                   <li>• <strong>아이템(Item)</strong>: 1행 = 1아이템, package_seq로 패키지에 연결</li>
+                  <li>• 대량 등록은 <strong>UPS 오더만 지원</strong>합니다 (transport_mode 생략 시 UPS)</li>
+                  <li>• UPS 필수: HS 코드 · 수하인 국가/우편번호/도시 · 화주 연락처</li>
+                  <li>• 품명 35자 이내 · 전화번호는 숫자만(하이픈 자동 제거)</li>
                 </ul>
               </div>
               <div className="flex gap-3">
@@ -209,7 +212,7 @@ export default function BulkOrderUploadModal({ onClose }: BulkOrderUploadModalPr
                         <tr key={idx} className="hover:bg-slate-50 dark:hover:bg-neutral-900/40">
                           <td className="py-2 px-3 font-mono">{String(orderSeq)}</td>
                           <td className="py-2 px-3">{String(row.order_type || '')}</td>
-                          <td className="py-2 px-3">{String(row.transport_mode || '')}</td>
+                          <td className="py-2 px-3">{row.transport_mode ? String(row.transport_mode) : 'UPS (기본)'}</td>
                           <td className="py-2 px-3">{String(row.recipient_name || '')}</td>
                           <td className="py-2 px-3 max-w-[200px] truncate">{String(row.recipient_address || '')}</td>
                           <td className="py-2 px-3">{pkgs.length}</td>

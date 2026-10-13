@@ -17,6 +17,7 @@ import { createAdminClient } from '@/utils/supabase/server';
 import { syncInventoryFromOrder } from "./inventory";
 import { estimateUpsFreight as estimateUpsFreightFn } from "@/app/actions/ups/freight";
 import { ORDER_EDIT_LOG_CORE_FIELDS, extractOrderEditLogSnapshot, extractCargoSummarySnapshot, cargoSummaryEquals } from "@/lib/orders/edit-log-fields";
+import { assertActiveUpsProduct } from "@/lib/orders/ups-product-guard";
 
 interface SaveOrderRateSnapshotParams {
   supabase: any;
@@ -37,7 +38,12 @@ export async function saveOrderRateSnapshot({
       .eq('product_code', validated.ups_product_code)
       .maybeSingle();
 
-    if (!product) return;
+    if (!product) {
+    logger.warn(
+      `[ORDER_RATE_SNAPSHOT] UPS 상품 코드 미존재·비활성으로 스냅샷 생성 생략: orderId=${orderId}, product_code=${validated.ups_product_code}`
+    );
+    return;
+  }
 
     const totalWeight = validated.packages.reduce(
       (sum, pkg) => sum + (pkg.gross_weight || 0), 0
@@ -51,7 +57,12 @@ export async function saveOrderRateSnapshot({
 
     const destCountryCode = validated.recipient_country_code || port?.country_code;
 
-    if (!(totalWeight > 0 && destCountryCode)) return;
+    if (!(totalWeight > 0 && destCountryCode)) {
+    logger.warn(
+      `[ORDER_RATE_SNAPSHOT] 중량 또는 목적지 국가 누락으로 스냅샷 생성 생략: orderId=${orderId}, totalWeight=${totalWeight}, destCountryCode=${destCountryCode ?? 'null'}`
+    );
+    return;
+  }
 
     const estimate = await estimateFn({
       productId: product.id,
@@ -94,6 +105,11 @@ export async function createOrder(payload: OrderRegistrationInput) {
     delete (validated as any).pickup_location;
     delete (validated as any).pickup_contact_name;
     delete (validated as any).pickup_contact_tel;
+  }
+
+  // TASK-B-336 (Issue #1247 / DEF-B-151): 미존재·비활성 ups_product_code는 오더 생성 전에 거부
+  if (validated.transport_mode === 'UPS' && validated.ups_product_code) {
+    await assertActiveUpsProduct(supabase, validated.ups_product_code);
   }
 
   const orderRepo = new OrderRepository(supabase);
@@ -190,6 +206,17 @@ export async function updateOrder(orderId: string, payload: OrderRegistrationInp
   const { data: oldItems } = await orderRepo.getItemsByOrderId(orderId);
 
   const validated = orderRegistrationSchema.parse(payload);
+
+  // TASK-B-336 (Issue #1247 / DEF-B-151): UPS 상품코드가 기존 저장값과 다르게 지정될 때만 검증
+  //   (레거시 오더 수정 차단 방지 — 기존 코드가 비활성/미존재여도 그대로 두면 통과)
+  const effectiveTransportMode = editScope.lockTransportMode ? order.transport_mode : validated.transport_mode;
+  if (
+    effectiveTransportMode === 'UPS' &&
+    validated.ups_product_code &&
+    validated.ups_product_code !== order.ups_product_code
+  ) {
+    await assertActiveUpsProduct(supabase, validated.ups_product_code);
+  }
 
   // TASK-B-284 (Issue #1070): WAREHOUSED+UPS 부분 수정 — shipper_id/transport_mode는 항상 잠금
   const headerData: Record<string, unknown> = {

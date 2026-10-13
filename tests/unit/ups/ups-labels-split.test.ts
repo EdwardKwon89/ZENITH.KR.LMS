@@ -17,10 +17,10 @@ vi.mock('@/utils/supabase/server', () => ({ createAdminClient: vi.fn(), createCl
 vi.mock('@/lib/ups/label-mapping', () => ({
   buildCreateOrderPayload: vi.fn().mockReturnValue({
     reference_no: 'TEST001',
-    shipper: { shipper_name: 'SNTL', shipper_countrycode: 'KR', shipper_street: '123 St', shipper_telephone: '010-1111-2222' },
-    consignee: { consignee_name: 'John', consignee_countrycode: 'US', consignee_street: '456 Oak St', consignee_city: 'Los Angeles', consignee_postcode: '90001', consignee_telephone: '010-3333-4444' },
+    shipper: { shipper_name: 'SNTL', shipper_countrycode: 'KR', shipper_street: '123 St', shipper_telephone: '01011112222' },
+    consignee: { consignee_name: 'John', consignee_countrycode: 'US', consignee_street: '456 Oak St', consignee_city: 'Los Angeles', consignee_postcode: '90001', consignee_telephone: '01033334444' },
     cargovolume: [],
-    invoice: [{ invoice_enname: 'Widget', invoice_quantity: '1', invoice_unitcharge: '10' }],
+    invoice: [{ invoice_enname: 'Widget', invoice_quantity: '1', invoice_unitcharge: '10', hs_code: '8471300000' }],
   }),
   determineOrderCargotype: vi.fn().mockReturnValue({ cargotype: 'W', mailCargoType: '4' }),
   buildCargovolume: vi.fn().mockReturnValue([]),
@@ -81,7 +81,7 @@ describe('TASK-B-167: registerUpsOrder', () => {
     const order = { id: ORDER_ID, order_no: REF_NO, recipient_country_code: 'US', recipient_city: 'Los Angeles', ups_product_code: 'WPX', incoterms: 'DDP', dest_port_id: null };
     const supabase = makeSupabase({
       zen_orders: { data: order, error: null },
-      zen_order_packages: { data: [{ id: 'pkg-1', items: [] }], error: null },
+      zen_order_packages: { data: [{ id: 'pkg-1', items: [{ item_name: 'Widget', quantity: 1, unit_price: 10, hs_code: '8471300000' }] }], error: null },
       zen_ups_labels: { data: null, error: null },
       zen_ups_shxk_country_map: { data: { shxk_code: 'SHP-CODE' }, error: null },
     });
@@ -100,7 +100,7 @@ describe('TASK-B-167: registerUpsOrder', () => {
     const order = { id: ORDER_ID, order_no: REF_NO, recipient_country_code: 'US', recipient_city: 'Los Angeles', ups_product_code: 'WPX', incoterms: 'DDP', dest_port_id: null };
     const supabase = makeSupabase({
       zen_orders: { data: order, error: null },
-      zen_order_packages: { data: [{ id: 'pkg-1', items: [] }], error: null },
+      zen_order_packages: { data: [{ id: 'pkg-1', items: [{ item_name: 'Widget', quantity: 1, unit_price: 10, hs_code: '8471300000' }] }], error: null },
       zen_ups_label_errors: { data: null, error: null },
       zen_ups_shxk_country_map: { data: { shxk_code: 'SHP-CODE' }, error: null },
     });
@@ -117,7 +117,7 @@ describe('TASK-B-167: registerUpsOrder', () => {
     const order = { id: ORDER_ID, order_no: REF_NO, recipient_country_code: 'US', recipient_city: 'Los Angeles', ups_product_code: 'WPX', incoterms: 'DDP', dest_port_id: null };
     const supabase = makeSupabase({
       zen_orders: { data: order, error: null },
-      zen_order_packages: { data: [{ id: 'pkg-1', items: [] }], error: null },
+      zen_order_packages: { data: [{ id: 'pkg-1', items: [{ item_name: 'Widget', quantity: 1, unit_price: 10, hs_code: '8471300000' }] }], error: null },
       zen_ups_labels: { data: null, error: null },
       zen_ups_shxk_country_map: { data: { shxk_code: 'SHP-CODE' }, error: null },
     });
@@ -297,7 +297,7 @@ describe('TASK-B-167: issueUpsLabel() wrapper', () => {
     const order = { id: ORDER_ID, order_no: REF_NO, recipient_country_code: 'US', recipient_city: 'Los Angeles', ups_product_code: 'WPX', incoterms: 'DDP', dest_port_id: null };
     const supabase = makeSupabase({
       zen_orders: { data: order, error: null },
-      zen_order_packages: { data: [{ id: 'pkg-1', items: [] }], error: null },
+      zen_order_packages: { data: [{ id: 'pkg-1', items: [{ item_name: 'Widget', quantity: 1, unit_price: 10, hs_code: '8471300000' }] }], error: null },
       zen_ups_labels: { data: { id: 'lbl-1', reference_no: REF_NO, tracking_number: 'TK123' }, error: null },
       zen_ups_shxk_country_map: { data: { shxk_code: 'SHP-CODE' }, error: null },
     });

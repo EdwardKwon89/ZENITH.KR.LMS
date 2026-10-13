@@ -23,6 +23,8 @@ import { UpsFreightEstimate } from '@/app/actions/ups/freight';
 import { UpsServiceSelector } from './UpsServiceSelector';
 import { USER_ROLES } from '@/lib/auth/rbac';
 import { orderRegistrationSchema, OrderRegistrationInput } from '@/lib/validation/order';
+import { HS_CODE_MAX, ITEM_NAME_MAX, PHONE_MAX_DIGITS, stripNonDigits } from '@/lib/validation/shxk-limits';
+import { resolveShipperAddressDefaults } from '@/lib/orders/edit-defaults';
 import type { OrderEditScope } from '@/lib/logistics/status-machine';
 import { estimateFreightCost, TransportMode } from '@/utils/logistics/freight-calculator';
 import { getAvailableServiceRates, getUsdKrwRate, getBaseCurrency, AvailableServiceRates } from '@/app/actions/operations/service-rates';
@@ -69,11 +71,12 @@ const NestedItems: React.FC<{
   register: any;
   errors: any;
   t: any;
+  isUps?: boolean;
   hsLookupLoadingMap?: Record<string, boolean>;
   hsLookupResultMap?: Record<string, { hs_code: string; confidence: 'high' | 'medium' | 'low' } | null>;
   onItemNameBlur?: (k: number) => void;
   onAcceptHsLookup?: (k: number) => void;
-}> = ({ nestIndex, control, register, errors, t, hsLookupLoadingMap = {}, hsLookupResultMap = {}, onItemNameBlur, onAcceptHsLookup }) => {
+}> = ({ nestIndex, control, register, errors, t, isUps = false, hsLookupLoadingMap = {}, hsLookupResultMap = {}, onItemNameBlur, onAcceptHsLookup }) => {
   const { fields, append, remove } = useFieldArray({
     control,
     name: `packages.${nestIndex}.items` as any
@@ -103,6 +106,7 @@ const NestedItems: React.FC<{
                 <label className="text-[9px] font-bold text-slate-400 mb-1 block">{t('item_name')} <span className="text-rose-500">*</span></label>
                 <ZenInput 
                   placeholder={t('item_name')}
+                  maxLength={isUps ? ITEM_NAME_MAX : undefined}
                   {...register(`packages.${nestIndex}.items.${k}.item_name`)}
                   onBlur={(e) => {
                     register(`packages.${nestIndex}.items.${k}.item_name`).onBlur?.(e);
@@ -115,7 +119,7 @@ const NestedItems: React.FC<{
                 )}
               </div>
               <div className="col-span-4">
-                <label className="text-[9px] font-bold text-slate-400 mb-1 block">HS Code</label>
+                <label className="text-[9px] font-bold text-slate-400 mb-1 block">HS Code{isUps && <span className="text-rose-500"> *</span>}</label>
                 <div className="relative">
                   <ZenInput 
                     placeholder="HS Code"
@@ -128,6 +132,9 @@ const NestedItems: React.FC<{
                     </span>
                   )}
                 </div>
+                {errors?.packages?.[nestIndex]?.items?.[k]?.hs_code && (
+                  <p className="text-[9px] text-rose-500 mt-1">{errors.packages[nestIndex].items[k].hs_code?.message}</p>
+                )}
                 {hsLookupResultMap[`${nestIndex}-${k}`] && !hsLookupLoadingMap[`${nestIndex}-${k}`] && (
                   <div className="mt-1 flex items-center gap-1">
                     <span className={`text-[9px] font-bold px-1 rounded ${
@@ -269,6 +276,9 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
 
   // TASK-B-295 (Issue #1100): 화주명(발송인 표시명) 자유 입력 — "내 정보 사용/수기입력" 토글
   const [shipperNameMode, setShipperNameMode] = React.useState<'auto' | 'manual'>('auto');
+  // TASK-B-333 (Issue #1240): 수정 모드에서 사용자가 auto/수기입력 토글을 누른 적이 있는지 추적.
+  // 토글 전에는 화주 AddressInput에 저장값을, 토글 후에는 기존 로직(manual 빈 값 / auto 소속값)을 사용.
+  const [shipperToggled, setShipperToggled] = React.useState(false);
   // 내 정보 사용 모드에서 표시할 화주명 (법인→orgName, 개인→userName, 그 외→선택된 화주 조직명)
   const autoShipperName = affiliation?.isIndividual
     ? (affiliation?.userName || '')
@@ -284,20 +294,19 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
   const clearShipperInfoFields = useCallback(() => {
     SHIPPER_INFO_FIELDS.forEach((f) => setValue(f, ''));
   }, [setValue]);
-
   // "내 정보 사용" 재전환 시 affiliation 파생값으로 복원 (loadAffiliation else-branch와 동일 값)
   const restoreAutoShipperInfo = useCallback(() => {
     if (affiliation?.isIndividual) {
       setValue('shipper_name', affiliation.userName || '');
       setValue('shipper_contact_name', affiliation.userName || '');
       setValue('shipper_contact_email', affiliation.userEmail || '');
-      setValue('shipper_contact_phone', (affiliation as any)?.userPhone || '');
+      setValue('shipper_contact_phone', stripNonDigits((affiliation as any)?.userPhone || ''));
     } else {
       const matchedShipper = shippers.find((s: any) => s.id === affiliation?.orgId);
       setValue('shipper_name', autoShipperName);
       setValue('shipper_contact_name', affiliation?.userName || '');
       setValue('shipper_contact_email', affiliation?.userEmail || '');
-      setValue('shipper_contact_phone', (affiliation as any)?.userPhone || '');
+      setValue('shipper_contact_phone', stripNonDigits((affiliation as any)?.userPhone || ''));
       setValue('shipper_address', matchedShipper?.address || affiliation?.orgAddress || '');
       setValue('shipper_biz_no', matchedShipper?.biz_no || affiliation?.orgBizNo || '');
       setValue('shipper_country_code', affiliation?.orgCountryCode || 'KR');
@@ -312,12 +321,14 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
 
   // "수기입력" 클릭 — 화주 정보 전체 필드 초기화 + 활성화 (TASK-B-296 ②)
   const handleShipperManualClick = useCallback(() => {
+    setShipperToggled(true);
     setShipperNameMode('manual');
     clearShipperInfoFields();
   }, [clearShipperInfoFields]);
 
   // "내 정보 사용" 클릭 — affiliation 파생값 복원 + 비활성화
   const handleShipperAutoClick = useCallback(() => {
+    setShipperToggled(true);
     setShipperNameMode('auto');
     restoreAutoShipperInfo();
   }, [restoreAutoShipperInfo]);
@@ -448,14 +459,14 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
           setValue('shipper_id', data.dummyIndividualId);
           setValue('shipper_contact_name', data.userName);
           setValue('shipper_contact_email', data.userEmail);
-          setValue('shipper_contact_phone', data.userPhone || '');
+          setValue('shipper_contact_phone', stripNonDigits(data.userPhone || ''));
         } else {
           const matchedShipper = shippers.find((s: any) => s.id === data.orgId);
           setValue('order_type', 'B2B');
           setValue('shipper_id', data.orgId as string);
           setValue('shipper_contact_name', data.userName);
           setValue('shipper_contact_email', data.userEmail);
-          setValue('shipper_contact_phone', data.userPhone || '');
+          setValue('shipper_contact_phone', stripNonDigits(data.userPhone || ''));
           setValue('shipper_address', matchedShipper?.address || data.orgAddress || '');
           setValue('shipper_biz_no', matchedShipper?.biz_no || data.orgBizNo || '');
           setValue('shipper_country_code', data.orgCountryCode || 'KR');
@@ -556,6 +567,18 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
       }
     });
   }, [orderId, contentTypesKey, setValue]);
+
+  // TASK-B-333 (Issue #1240, 항목 5): UPS 모드에서 저장/잔존 content_type이 DOC/NONDOC이 아니면(GENERAL 등)
+  // CONTENT select가 공백으로 렌더링되므로 NONDOC으로 보정한다.
+  useEffect(() => {
+    if (transportMode !== 'UPS') return;
+    if (!watchedPackages) return;
+    watchedPackages.forEach((pkg, i) => {
+      if (pkg?.content_type !== 'DOC' && pkg?.content_type !== 'NONDOC') {
+        setValue(`packages.${i}.content_type`, 'NONDOC', { shouldValidate: false });
+      }
+    });
+  }, [transportMode, contentTypesKey, setValue]);
 
   const filteredPorts = useMemo(() => {
     if (!transportMode) return ports;
@@ -1129,9 +1152,15 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                             <div>
                               <p className="text-slate-400 font-bold uppercase tracking-tighter mb-1">{t('shipper_contact')} (Phone){transportMode === 'UPS' && <span className="text-rose-500"> *</span>}</p>
                               <ZenInput 
-                                placeholder="010-XXXX-XXXX"
+                                placeholder="01012345678"
+                                inputMode="numeric"
+                                maxLength={PHONE_MAX_DIGITS}
                                 disabled={shipperNameMode === 'auto'}
                                 {...register('shipper_contact_phone')}
+                                onChange={(e) => {
+                                  e.target.value = stripNonDigits(e.target.value);
+                                  register('shipper_contact_phone').onChange(e);
+                                }}
                                 className={`bg-white/80 py-1.5 text-[11px] ${shipperNameMode === 'auto' ? 'opacity-60 bg-slate-100' : ''}`}
                               />
                             </div>
@@ -1156,18 +1185,22 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                                 readOnly={shipperNameMode === 'auto'}
                                 key={`${affiliation?.orgId || 'no-org'}-${shipperNameMode}`}
                                 englishDetailOnly // TASK-B-305: 화주 상세주소 영문 전용
-                                defaultValues={
-                                  shipperNameMode === 'manual'
-                                    ? { country_code: '', state_province: '', city: '', address: '', address_detail: '', zipcode: '' }
-                                    : {
-                                        country_code: affiliation?.orgCountryCode ?? 'KR',
-                                        state_province: affiliation?.orgStateProvince ?? '',
-                                        city: affiliation?.orgCity ?? '',
-                                        address: affiliation?.orgAddressStreet ?? affiliation?.orgAddress ?? '',
-                                        address_detail: affiliation?.orgAddressDetail ?? '',
-                                        zipcode: affiliation?.orgZipcode ?? '',
-                                      }
-                                }
+                                defaultValues={resolveShipperAddressDefaults({
+                                  isEdit: !!orderId,
+                                  touched: shipperToggled,
+                                  mode: shipperNameMode,
+                                  saved: {
+                                    country_code: (externalDefaults as any)?.shipper_country_code,
+                                    state_province: (externalDefaults as any)?.shipper_state_province,
+                                    city: (externalDefaults as any)?.shipper_city,
+                                    address: (externalDefaults as any)?.shipper_address,
+                                    address_detail: (externalDefaults as any)?.shipper_address_detail,
+                                    zipcode: (externalDefaults as any)?.shipper_zipcode,
+                                    address_english: (externalDefaults as any)?.shipper_address_english,
+                                    address_detail_english: (externalDefaults as any)?.shipper_address_detail_english,
+                                  },
+                                  affiliation,
+                                })}
                               />
                             </div>
                             <div>
@@ -1232,7 +1265,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                             setValue('recipient_address', entry.recipient_address);
                             setValue('recipient_address_detail', entry.recipient_address_detail || '');
                             setValue('recipient_address_local', entry.recipient_address_local || '');
-                            setValue('recipient_phone', entry.recipient_phone || '');
+                            setValue('recipient_phone', stripNonDigits(entry.recipient_phone || ''));
                             setValue('recipient_country_code', entry.country_code || '');
                             setValue('recipient_state_province', entry.state_province || '');
                             setValue('recipient_city', entry.city || '');
@@ -1248,7 +1281,10 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                       </div>
                       <div>
                         <label className="text-[10px] font-bold text-slate-500 mb-1 block">Phone <span className="text-rose-500">*</span></label>
-                        <ZenInput placeholder="010-XXXX-XXXX" {...register('recipient_phone')} error={!!errors.recipient_phone} className="py-2 text-xs" />
+                        <ZenInput placeholder="01012345678" inputMode="numeric" maxLength={PHONE_MAX_DIGITS} {...register('recipient_phone')} onChange={(e) => {
+                            e.target.value = stripNonDigits(e.target.value);
+                            register('recipient_phone').onChange(e);
+                          }} error={!!errors.recipient_phone} className="py-2 text-xs" />
                       </div>
                       <div>
                         <label className="text-[10px] font-bold text-slate-500 mb-1 block">PCCC</label>
@@ -1409,7 +1445,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                     <ZenButton 
                       type="button" 
                       variant="glass" 
-                      onClick={() => appendPackage({ packing_unit: 'BOX', packing_count: 1, physical_box_count: 1, gross_weight: 0, special_cargo_type: 'NONE', content_type: 'GENERAL', domestic_ref_no: '', items: [{ item_name: '', quantity: 1, unit_price: 0, currency: 'USD', item_packing_unit: 'EA' }] })}
+                      onClick={() => appendPackage({ packing_unit: 'BOX', packing_count: 1, physical_box_count: 1, gross_weight: 0, special_cargo_type: 'NONE', content_type: transportMode === 'UPS' ? 'NONDOC' : 'GENERAL', domestic_ref_no: '', items: [{ item_name: '', quantity: 1, unit_price: 0, currency: 'USD', item_packing_unit: 'EA' }] })}
                       className="px-3 py-1 text-xs"
                     >
                       <Plus size={14} /> 패키지 추가
@@ -1537,6 +1573,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                           register={register}
                           errors={errors}
                           t={t}
+                          isUps={transportMode === 'UPS'}
                           hsLookupLoadingMap={hsLookupLoadingMap}
                           hsLookupResultMap={hsLookupResultMap}
                           onItemNameBlur={(k) => handleItemNameBlur(i, k)}

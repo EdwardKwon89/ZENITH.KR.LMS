@@ -921,4 +921,85 @@
 | **TC-CURFMT-06** | EUR → `12.50 EUR` / 0 → `0.00 USD` | 소수 2자리·0 표기 검증 | `tests/unit/orders/format-currency-amount.test.ts` |
 | **TC-CURFMT-07** | 잘못된 코드 `5, 'X'` → `5.00 X` | RangeError 폴백 검증 | `tests/unit/orders/format-currency-amount.test.ts` |
 
+## 65. SHXK/UPS 규격 사전검증 — HS코드 필수·품명 35자·전화번호 15자리 (Issue #1239)
+
+폼(zod) 스키마와 SHXK payload 사전검증에 SHXK·UPS 규격을 반영 — 외부 호출 실패 대신 저장/호출 전 명확한 한글 에러로 차단. 상수는 `src/lib/validation/shxk-limits.ts` 단일 정의(`HS_CODE_MAX=30`, `ITEM_NAME_MAX=35`, `PHONE_MAX_DIGITS=15`, `stripNonDigits`). HS·품명 규칙은 UPS 한정, 전화는 전 모드(값 있을 때).
+
+| TC ID | 입력/조건 | 기대 결과 | 테스트 파일 |
+|:------|:---------|:----------|:-----------|
+| **TC-SHXKFLD-01** | UPS + 품목 HS 빈 값 | 실패, path `packages.0.items.0.hs_code` | `tests/unit/orders/shxk-field-limits.test.ts` |
+| **TC-SHXKFIELD-02** | UPS + HS 있음 | 통과 | `tests/unit/orders/shxk-field-limits.test.ts` |
+| **TC-SHXKFIELD-03** | AIR + HS 빈 값 | 통과 (UPS 한정 확인) | `tests/unit/orders/shxk-field-limits.test.ts` |
+| **TC-SHXFIELD-04** | UPS HS 코드 31자 초과 | 실패 | `tests/unit/orders/shxk-field-limits.test.ts` |
+| **TC-SHXFIELD-05** | UPS 품명 35자 통과 / 36자 실패 (path item_name) | UPS 한도 검증 | `tests/unit/orders/shxk-field-limits.test.ts` |
+| **TC-SHXFIELD-06** | AIR 품명 36자 → 통과 (UPS 한정 확인) | 모드 조건부 검증 | `tests/unit/orders/shxk-field-limits.test.ts` |
+| **TC-SHXFIELD-07** | 전화 `010-1234-5678` 실패 / `01012345678` 통과 / 16자리 실패 | 숫자만 + 15자리 검증 | `tests/unit/orders/shxk-field-limits.test.ts` |
+| **TC-SHXFIELD-08** | `stripNonDigits('010-1234-5678') === '01012345678'` | 헬퍼 검증 | `tests/unit/orders/shxk-field-limits.test.ts` |
+| **TC-SHXPAY-01** | 정상 payload → `[]` | 기준 케이스 | `tests/unit/shxk/validate-payload-limits.test.ts` |
+| **TC-SHXPAY-02** | invoice `hs_code` 누락 → `품목 1: HS 코드 누락` | 서버 사전검증(기존 저장분 보호) | `tests/unit/shxk/validate-payload-limits.test.ts` |
+| **TC-SHXPAY-03** | 품명 36자 → `품목 1: 품명 35자 초과` | 서버 사전검증 | `tests/unit/shxk/validate-payload-limits.test.ts` |
+| **TC-SHXPAY-04** | 하이픈 전화 → `…전화번호는 숫자만…` / 16자리 → `…15자리 이하…` | 서버 사전검증 | `tests/unit/shxk/validate-payload-limits.test.ts` |
+
+## 66. 수정 화면 화주명·주소·패키지 CONTENT 저장값 복원 (Issue #1240 / TASK-B-333)
+
+수정(edit) 화면 진입 시 `edit/page.tsx`의 defaultValues가 ①`shipper_name`·`shipper_address_english`·`shipper_address_detail_english`를 누락하고 ②UPS 오더의 `content_type`을 `?? 'GENERAL'`로 넘겨 CONTENT select(옵션 DOC/NONDOC 2개)가 공백으로 렌더링되던 결함(#1238 항목 4·5) 복원. 로직을 `src/lib/orders/edit-defaults.ts`로 추출 — `buildOrderEditDefaults`(누락 필드·전화 정제·content_type 정규화), `resolveShipperAddressDefaults`(수정 모드 저장 주소값), `normalizeUpsContentType`(UPS 한정 정규화). 폼은 UPS 모드에서 GENERAL/기타 잔존값을 NONDOC으로 보정한다.
+
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-EDTDF-01** | 저장된 `shipper_name`·`shipper_address_english`·`shipper_address_detail_english` 보존 | 항목 4 복원 | `tests/unit/orders/edit-defaults.test.ts` |
+| **TC-EDTDF-02** | UPS 패키지 `GENERAL` → `NONDOC` 정규화 | 항목 5 복원 | `tests/unit/orders/edit-defaults.test.ts` |
+| **TC-EDTDF-03** | UPS `DOC` 유지 | 항목 5 오검출 방지 | `tests/unit/orders/edit-defaults.test.ts` |
+| **TC-EDTDF-04** | 비UPS `GENERAL` 유지 | 모드 조건부 회귀 방지 | `tests/unit/orders/edit-defaults.test.ts` |
+| **TC-EDTDF-05** | 레거시 하이픈 전화 `010-1234-5678` → `01012345678` | TASK-B-332 후속 정제 | `tests/unit/orders/edit-defaults.test.ts` |
+| **TC-EDTDF-06** | 숫자 전화 불변 / null·undefined → `''` | 빈값 처리 | `tests/unit/orders/edit-defaults.test.ts` |
+| **TC-EDTDF-07** | `normalizeUpsContentType` UPS null/''/'XYZ' → NONDOC, DOC → DOC | 순수함수 단위 | `tests/unit/orders/edit-defaults.test.ts` |
+| **TC-EDTDF-08** | `normalizeUpsContentType` 비UPS null/undefined → GENERAL | 순수함수 단위 | `tests/unit/orders/edit-defaults.test.ts` |
+| **TC-EDTDF-09** | 수정 모드 + 토글 없음 → 저장 주소값(영문 포함) | 항목 4 AddressInput 복원 | `tests/unit/orders/edit-defaults.test.ts` |
+| **TC-EDTDF-10** | 수정 모드 + 토글 후 manual → 빈 값 | 사용자 조작 우선 | `tests/unit/orders/edit-defaults.test.ts` |
+| **TC-EDTDF-11** | 수정 모드 + 토글 후 auto → affiliation 파생값 | 사용자 조작 우선 | `tests/unit/orders/edit-defaults.test.ts` |
+| **TC-EDTDF-12** | 신규 등록 manual → 빈 값 / auto → affiliation | 회귀 방지 | `tests/unit/orders/edit-defaults.test.ts` |
+
+## 67. 대량 등록(bulk-orders) 전화번호 정제 (Issue #1243 / TASK-B-334)
+
+TASK-B-332가 `orderRegistrationSchema`의 전화 규칙(숫자만 `/^\d*$/`·`/^\d+$/` + 최대 15자리)을 전 모드에 적용했는데, 엑셀 대량 등록 경로(`bulk-orders.ts`)가 정제 없이 원본을 스키마에 전달해 하이픈 전화 행이 거부되던 회귀(#1239 후속)를 수정. `mapExcelRowToOrderInput`에서 전화 2필드에 `stripNonDigits` 적용 후 스키마에 위임(15자리 초과·빈 값 판정은 스키마).
+
+| ID | 테스트 항목 | 목적 | 파일 경로 |
+| :--- | :--- | :--- | :--- |
+| **TC-BULKPH-01** | 하이픈 전화 UPS 행 `010-1234-5678` → 정제되어 성공, `createOrder`에 `01012345678` 전달 | 실제 입력 경로 보호(회귀) | `tests/unit/operations/bulk-orders.test.ts` |
+| **TC-BULKPH-02** | UPS 행 `+`·공백 전화 → 정제되어 성공, `createOrder`에 숫자만 전달 (TASK-B-335에서 AIR 전제 소멸로 수정) | 전 모드 정제 확인 | `tests/unit/operations/bulk-orders.test.ts` |
+| **TC-BULKPH-03** | 정제 후 빈 값(`-- () --`) → 스키마 거부(`전화번호는 숫자만`) + `createOrder` 미호출 | 빈 값 위임 | `tests/unit/operations/bulk-orders.test.ts` |
+| **TC-BULKPH-04** | 정제 후 16자리 → 스키마 거부(`15자리`) + `createOrder` 미호출 | 15자리 위임 | `tests/unit/operations/bulk-orders.test.ts` |
+
+## 68. 대량 등록 UPS 전용 명문화 + 템플릿 정합 (Issue #1245 / TASK-B-335 / DEF-B-150)
+
+대량 등록이 비UPS 행을 항상 실패시키고(스키마는 비UPS에 port 필수, 템플릿·매핑엔 port 없음), 제공 템플릿 샘플 자체가 어떤 모드로도 등록 불가(AIR 기본 + `shipper_contact_phone` 컬럼 부재 + 빈 HS/국가/우편번호/도시 + `GENERAL` content_type)였던 결함. JSJung 결정(방향 A)에 따라 대량 등록을 UPS 전용으로 명문화하고 템플릿 샘플을 실제 검증 통과값으로 교체, Zod 오류를 사람이 읽을 수 있게 포맷. `src/app/actions/operations/bulk-orders.ts`의 행 루프 선두에서 `BULK_SUPPORTED_MODE='UPS'` 검사(비UPS 행만 실패·배치는 계속), `content_type`은 기존 `normalizeUpsContentType` 재사용, `formatBulkError`로 `경로: 메시지` 노출. `src/lib/excel/bulk-order-template.ts`에 `shipper_contact_phone` 컬럼 추가 + UPS 통과 샘플(상수 `BULK_*_SAMPLE`).
+
+| ID | 검증 내용 | 기대 결과 | 테스트 위치 |
+| :-- | :-- | :-- | :-- |
+| TC-BULKUPS-01 | 비UPS(AIR) 행 + UPS 행 혼합 배치 | AIR 행만 `success:false`(`대량 등록은 UPS 오더만 지원합니다`), UPS 행 성공·`createOrder` 1회 | `tests/unit/operations/bulk-orders.test.ts` |
+| TC-BULKUPS-02 | `transport_mode` 공란 / 소문자·공백(` ups `) | UPS로 대문자 정규화되어 성공, `createOrder.transport_mode='UPS'` | `tests/unit/operations/bulk-orders.test.ts` |
+| TC-BULKUPS-03 | 패키지 `content_type` 공란/`GENERAL`/`DOC` | 공란·GENERAL → `NONDOC`, `DOC` 유지 | `tests/unit/operations/bulk-orders.test.ts` |
+| TC-BULKUPS-04 | 템플릿 라운드트립(`generateBulkOrderTemplate` → `XLSX.read` → `bulkCreateOrders`) | 샘플 행 `success:true`(템플릿 회귀 시 FAIL) | `tests/unit/operations/bulk-orders.test.ts` |
+| TC-BULKUPS-05 | UPS 행 HS 누락 시 오류 문자열 | JSON이 아닌 `packages.0.items.0.hs_code: UPS 배송은 품목 HS 코드가 필수입니다…` | `tests/unit/operations/bulk-orders.test.ts` |
+
+## 69. 미존재·비활성 ups_product_code 등록 전 거부 + 스냅샷 누락 경고 (Issue #1247 / TASK-B-336 / DEF-B-151)
+
+`orderRegistrationSchema.ups_product_code`가 `z.string().optional()`(무검증)이라 오타·구버전 코드(예 `WWE`)로 UPS 오더를 등록해도 저장에 성공하고, `saveOrderRateSnapshot`이 미존재 상품을 만나면 `if (!product) return;`으로 **무음 스킵** → 운임 스냅샷 없는 오더가 생성되던 결함. 신규 헬퍼 `src/lib/orders/ups-product-guard.ts`의 `assertActiveUpsProduct(supabase, code)`가 `zen_ups_products`를 `product_code` + `is_active=true`로 조회(`.maybeSingle()`)해 미존재·비활성이면 오더 생성(RPC) 이전에 거부하고, DB 조회 `error`는 "없음"과 구분해 throw. `createOrder`는 스키마 통과 직후 RPC 이전에, `updateOrder`는 기존 저장값과 다르게 지정될 때만 검증(레거시 오더 수정 차단 방지). `saveOrderRateSnapshot`의 무음 `return` 2곳에 `logger.warn` 추가(동작 불변). 화주 세션(RLS `is_active = true`)에서도 정상 코드가 통과함을 실DB 통합 테스트로 실측.
+
+| ID | 검증 내용 | 기대 결과 | 테스트 위치 |
+| :-- | :-- | :-- | :-- |
+| TC-336-01 | `assertActiveUpsProduct` — 활성 코드 통과 + 쿼리에 `product_code`·`is_active=true` 조건 포함(인자 캡처) | resolve, `filters.product_code`·`is_active===true` | `tests/unit/orders/ups-product-guard.test.ts` |
+| TC-336-02 | 미존재 코드 `WWE` | `존재하지 않거나 비활성화된 UPS 상품 코드입니다: WWE` throw | `tests/unit/orders/ups-product-guard.test.ts` |
+| TC-336-03 | DB 조회 `error` 반환 | `UPS 상품 코드 검증 중 오류가 발생했습니다: …` — "없음"과 구분된 DB 오류 | `tests/unit/orders/ups-product-guard.test.ts` |
+| TC-336-04 | `createOrder` 미존재 코드 | RPC 차단: throw + `createOrderViaRpc` **0회**·`supabase.rpc` 0회 | `tests/unit/orders/ups-product-guard.test.ts` |
+| TC-336-05 | `createOrder` 실존 활성 코드 | 검증 통과 후 `createOrderViaRpc` 1회 | `tests/unit/orders/ups-product-guard.test.ts` |
+| TC-336-06 | `createOrder` 비UPS(AIR, 코드 무효값) | `from('zen_ups_products')` **0회**, 오더 생성 1회 | `tests/unit/orders/ups-product-guard.test.ts` |
+| TC-336-07 | `updateOrder` 기존 저장값과 동일 코드 | 상품 조회 **0회**(재검증 생략), `updateHeader` 1회 | `tests/unit/orders/ups-product-guard.test.ts` |
+| TC-336-08 | `updateOrder` 기존값과 다른 미존재 코드 | throw + `updateHeader` 0회 | `tests/unit/orders/ups-product-guard.test.ts` |
+| TC-336-09 | `saveOrderRateSnapshot` 상품 미존재 | `logger.warn`(오더 ID·`product_code` 포함), 스냅샷 insert 미발생(동작 불변) | `tests/unit/orders/ups-product-guard.test.ts` |
+| TC-336-RLS-01/02 | 실DB·화주 세션(R-14): `WW_SAVER_NONDOC` 통과 / `WWE` 거부 | RLS(`is_active=true`) 하에서 정상 코드까지 거부되지 않음 | `tests/integration/def-b151-ups-product-guard.test.ts` |
+| TC-336-BULK | 대량 등록: 한 행이 미존재 코드로 throw | 해당 행만 `success:false`(메시지 그대로 노출), 다른 행 성공(행 격리) | `tests/unit/operations/bulk-orders.test.ts` |
+
+
+
 
