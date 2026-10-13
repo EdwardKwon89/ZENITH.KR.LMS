@@ -11,7 +11,7 @@ describe('ZENITH Order Integrity: Registration Schema Validation', () => {
     dest_port_id: validUUID,
     recipient_name: 'Hong Gil-dong',
     recipient_address: '123 Zenith St, Seoul',
-    recipient_phone: '010-1234-5678',
+    recipient_phone: '01012345678',
     packages: [
       {
         packing_unit: 'BOX',
@@ -55,14 +55,14 @@ describe('ZENITH Order Integrity: Registration Schema Validation', () => {
     const payloadWithNewFields = {
       ...validPayload,
       shipper_contact_name: 'Manager Kim',
-      shipper_contact_phone: '010-9999-8888',
+      shipper_contact_phone: '01099998888',
       description: 'Handle with care. Fragile items inside.'
     };
     const result = orderRegistrationSchema.safeParse(payloadWithNewFields);
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data.shipper_contact_name).toBe('Manager Kim');
-      expect(result.data.shipper_contact_phone).toBe('010-9999-8888');
+      expect(result.data.shipper_contact_phone).toBe('01099998888');
       expect(result.data.description).toContain('Fragile');
     }
   });
@@ -133,10 +133,10 @@ describe('DEF-B-044: CN 목적지 성/직할시 조건부 필수 검증', () => 
     dest_port_id: validUUID,
     recipient_name: 'Li Wei',
     recipient_address: '123 Shanghai Rd',
-    recipient_phone: '010-1234-5678',
+    recipient_phone: '01012345678',
     recipient_country_code: 'CN',
     packages: [
-      { packing_unit: 'BOX', packing_count: 1, gross_weight: 5, items: [{ item_name: 'Widget', quantity: 1, unit_price: 10 }] }
+      { packing_unit: 'BOX', packing_count: 1, gross_weight: 5, items: [{ item_name: 'Widget', quantity: 1, unit_price: 10, hs_code: '8471300000' }] }
     ],
   };
 
@@ -178,8 +178,8 @@ describe('TASK-B-277: UPS 배송 SHXK 필수 항목 검증', () => {
     shipper_id: validUUID,
     recipient_name: 'John Doe',
     recipient_address: '123 Oak St',
-    recipient_phone: '010-1234-5678',
-    shipper_contact_phone: '010-0000-0000',
+    recipient_phone: '01012345678',
+    shipper_contact_phone: '01000000000',
     recipient_country_code: 'US',
     recipient_zipcode: '90001',
     recipient_city: 'Los Angeles',
@@ -187,7 +187,7 @@ describe('TASK-B-277: UPS 배송 SHXK 필수 항목 검증', () => {
     ups_product_code: 'WW_EXPEDITED',
     incoterms: 'DDP',
     packages: [
-      { packing_unit: 'BOX', packing_count: 1, gross_weight: 5, items: [{ item_name: 'Widget', quantity: 1, unit_price: 10 }] }
+      { packing_unit: 'BOX', packing_count: 1, gross_weight: 5, items: [{ item_name: 'Widget', quantity: 1, unit_price: 10, hs_code: '8471300000' }] }
     ],
   };
 

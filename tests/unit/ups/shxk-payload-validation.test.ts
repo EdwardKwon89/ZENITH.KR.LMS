@@ -28,7 +28,7 @@ function buildValidPayload() {
       shipper_name: 'SNTL',
       shipper_countrycode: 'KR',
       shipper_street: '123 Zenith St',
-      shipper_telephone: '010-1111-2222',
+      shipper_telephone: '01011112222',
     },
     consignee: {
       consignee_name: 'John Doe',
@@ -36,10 +36,10 @@ function buildValidPayload() {
       consignee_street: '456 Oak St',
       consignee_city: 'Los Angeles',
       consignee_postcode: '90001',
-      consignee_telephone: '010-3333-4444',
+      consignee_telephone: '01033334444',
     },
     invoice: [
-      { invoice_enname: 'Widget', invoice_quantity: '1', invoice_unitcharge: '10.00' },
+      { invoice_enname: 'Widget', invoice_quantity: '1', invoice_unitcharge: '10.00', hs_code: '8471300000' },
     ],
   };
 }
@@ -127,17 +127,17 @@ describe('placeShxkOrder — 필수 항목 누락 시 createorder 미호출 (TAS
       order_no: 'ZEN-2026-000001',
       shipper_contact_name: 'SNTL',
       shipper_country_code: 'KR',
-      shipper_contact_phone: '010-1111-2222',
+      shipper_contact_phone: '01011112222',
       shipper_address: '123 St',
       recipient_name: 'John',
       recipient_country_code: 'US',
       recipient_address: '456 Oak St',
       recipient_zipcode: '',
-      recipient_phone: '010-3333-4444',
+      recipient_phone: '01033334444',
       shipper_org: undefined,
     };
     const packages: Record<string, unknown>[] = [
-      { id: 'p1', length: 10, width: 10, height: 10, gross_weight: 5, packing_count: 1, content_type: 'NONDOC', items: [{ item_name: 'Widget', quantity: 1, unit_price: 10, item_packing_unit: 'EA' }] },
+      { id: 'p1', length: 10, width: 10, height: 10, gross_weight: 5, packing_count: 1, content_type: 'NONDOC', items: [{ item_name: 'Widget', quantity: 1, unit_price: 10, item_packing_unit: 'EA', hs_code: '8471300000' }] },
     ];
 
     const payload = labelMapping.buildCreateOrderPayload('SHP', order as any, 'US', packages, { name: 'SNTL', country: 'KR' });
@@ -163,18 +163,18 @@ describe('placeShxkOrder — 필수 항목 누락 시 createorder 미호출 (TAS
       order_no: 'ZEN-2026-000002',
       shipper_contact_name: 'SNTL',
       shipper_country_code: 'KR',
-      shipper_contact_phone: '010-1111-2222',
+      shipper_contact_phone: '01011112222',
       shipper_address: '123 St',
       recipient_name: 'John',
       recipient_country_code: 'US',
       recipient_address: '456 Oak St',
       recipient_city: 'Los Angeles',
       recipient_zipcode: '90001',
-      recipient_phone: '010-3333-4444',
+      recipient_phone: '01033334444',
       shipper_org: undefined,
     };
     const packages: Record<string, unknown>[] = [
-      { id: 'p1', length: 10, width: 10, height: 10, gross_weight: 5, packing_count: 1, content_type: 'NONDOC', items: [{ item_name: 'Widget', quantity: 1, unit_price: 10, item_packing_unit: 'EA' }] },
+      { id: 'p1', length: 10, width: 10, height: 10, gross_weight: 5, packing_count: 1, content_type: 'NONDOC', items: [{ item_name: 'Widget', quantity: 1, unit_price: 10, item_packing_unit: 'EA', hs_code: '8471300000' }] },
     ];
     const payload = labelMapping.buildCreateOrderPayload('SHP', order as any, 'US', packages, { name: 'SNTL', country: 'KR' });
     expect(validateShxkPayload(payload)).toEqual([]);

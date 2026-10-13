@@ -63,7 +63,7 @@ function setupFixture(status = 'REGISTERED') {
       ('${ADMIN_USER}', '${ADMIN_ORG}', '303-admin@test.kr', 'ADMIN', 'ACTIVE')
     ON CONFLICT (id) DO UPDATE SET org_id = EXCLUDED.org_id, role = EXCLUDED.role, status = EXCLUDED.status;
     INSERT INTO public.zen_orders (id, order_no, shipper_id, agency_org_id, transport_mode, status, recipient_name, recipient_phone, recipient_country_code, cargo_details) VALUES
-      ('${ORDER}', 'ZEN-303', '${SHIPPER_ORG}', NULL, 'UPS', '${status}', 'Recv', '010-1', 'US', '{}'::jsonb)
+      ('${ORDER}', 'ZEN-303', '${SHIPPER_ORG}', NULL, 'UPS', '${status}', 'Recv', '0101', 'US', '{}'::jsonb)
     ON CONFLICT (id) DO UPDATE SET status = EXCLUDED.status;
     INSERT INTO public.zen_order_packages (id, order_id, packing_unit, packing_count, gross_weight, length, width, height, measured_at, content_type, special_cargo_type, physical_box_count) VALUES
       ('${PKG_MEASURED}', '${ORDER}', 'BOX', 1, 12.5, 30, 20, 10, ${status === 'WAREHOUSED' ? 'now()' : 'NULL'}, 'NONDOC', 'NONE', 1),
@@ -94,11 +94,11 @@ function buildPayload(overrides: Record<string, unknown> = {}) {
     shipper_id: SHIPPER_ORG,
     recipient_name: 'Updated Recipient',
     recipient_address: 'New Address 123',
-    recipient_phone: '010-9999-0000',
+    recipient_phone: '01099990000',
     recipient_country_code: 'US',
     recipient_zipcode: '90001',
     recipient_city: 'Los Angeles',
-    shipper_contact_phone: '010-0000-0000',
+    shipper_contact_phone: '01000000000',
     transport_mode: 'UPS' as const,
     ups_product_code: 'WW_EXPEDITED',
     packages: [
@@ -113,7 +113,7 @@ function buildPayload(overrides: Record<string, unknown> = {}) {
         gross_weight: 999,
         special_cargo_type: 'NONE',
         content_type: 'NONDOC',
-        items: [{ item_name: 'Measured Item', quantity: 1, unit_price: 100, currency: 'USD' }],
+        items: [{ item_name: 'Measured Item', quantity: 1, unit_price: 100, currency: 'USD', hs_code: '8471300000' }],
       },
       {
         id: PKG_UNMEASURED,
@@ -126,7 +126,7 @@ function buildPayload(overrides: Record<string, unknown> = {}) {
         gross_weight: 50,
         special_cargo_type: 'NONE',
         content_type: 'NONDOC',
-        items: [{ item_name: 'Unmeasured Item', quantity: 1, unit_price: 50, currency: 'USD' }],
+        items: [{ item_name: 'Unmeasured Item', quantity: 1, unit_price: 50, currency: 'USD', hs_code: '8471300000' }],
       },
     ],
     ...overrides,
@@ -161,12 +161,12 @@ describe('TASK-B-303: 오더 수정 이력 — zen_order_edit_log (Issue #1125)'
 
     // old_data: 수정 전 값
     const oldPhone = psql(`SELECT old_data->>'recipient_phone' FROM public.zen_order_edit_log WHERE order_id='${ORDER}'`);
-    expect(oldPhone).toBe('010-1');
+    expect(oldPhone).toBe('0101');
     const oldName = psql(`SELECT old_data->>'recipient_name' FROM public.zen_order_edit_log WHERE order_id='${ORDER}'`);
     expect(oldName).toBe('Recv');
     // new_data: 수정 후 값
     const newPhone = psql(`SELECT new_data->>'recipient_phone' FROM public.zen_order_edit_log WHERE order_id='${ORDER}'`);
-    expect(newPhone).toBe('010-9999-0000');
+    expect(newPhone).toBe('01099990000');
     const newName = psql(`SELECT new_data->>'recipient_name' FROM public.zen_order_edit_log WHERE order_id='${ORDER}'`);
     expect(newName).toBe('Updated Recipient');
     // 화이트리스트 밖 필드는 스냅샷에 없음
@@ -213,7 +213,7 @@ describe('TASK-B-303: 오더 수정 이력 — zen_order_edit_log (Issue #1125)'
           gross_weight: 2,
           special_cargo_type: 'NONE',
           content_type: 'NONDOC',
-          items: [{ item_name: 'Renamed Item', quantity: 2, unit_price: 300, currency: 'USD' }],
+          items: [{ item_name: 'Renamed Item', quantity: 2, unit_price: 300, currency: 'USD', hs_code: '8471300000' }],
         },
       ],
     }) as any);
@@ -233,7 +233,7 @@ describe('TASK-B-303: 오더 수정 이력 — zen_order_edit_log (Issue #1125)'
     const statusAtEdit = psql(`SELECT order_status_at_edit FROM public.zen_order_edit_log WHERE order_id='${ORDER}'`);
     expect(statusAtEdit).toBe('WAREHOUSED');
     const newPhone = psql(`SELECT new_data->>'recipient_phone' FROM public.zen_order_edit_log WHERE order_id='${ORDER}'`);
-    expect(newPhone).toBe('010-9999-0000');
+    expect(newPhone).toBe('01099990000');
   });
 
   it('TC-B303-12: createOrder 실DB → edit_log에 action=CREATE + new_data 스냅샷 기록 (실 DB)', async () => {
@@ -253,7 +253,7 @@ describe('TASK-B-303: 오더 수정 이력 — zen_order_edit_log (Issue #1125)'
       const newName = psql(`SELECT new_data->>'recipient_name' FROM public.zen_order_edit_log WHERE order_id='${createdOrderId}'`);
       expect(newName).toBe('Updated Recipient');
       const newPhone = psql(`SELECT new_data->>'recipient_phone' FROM public.zen_order_edit_log WHERE order_id='${createdOrderId}'`);
-      expect(newPhone).toBe('010-9999-0000');
+      expect(newPhone).toBe('01099990000');
       const oldIsNull = psql(`SELECT (old_data IS NULL)::text FROM public.zen_order_edit_log WHERE order_id='${createdOrderId}'`);
       expect(oldIsNull).toBe('true');
       const statusAtEdit = psql(`SELECT order_status_at_edit FROM public.zen_order_edit_log WHERE order_id='${createdOrderId}'`);

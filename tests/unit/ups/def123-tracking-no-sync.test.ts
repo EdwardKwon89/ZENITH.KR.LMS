@@ -16,10 +16,10 @@ vi.mock('@/lib/shxk/order', () => ({
 vi.mock('@/lib/ups/label-mapping', () => ({
   buildCreateOrderPayload: vi.fn().mockReturnValue({
     reference_no: 'TEST001',
-    shipper: { shipper_name: 'SNTL', shipper_countrycode: 'KR', shipper_street: '123 St', shipper_telephone: '010-1111-2222' },
-    consignee: { consignee_name: 'John', consignee_countrycode: 'US', consignee_street: '456 Oak St', consignee_city: 'Los Angeles', consignee_postcode: '90001', consignee_telephone: '010-3333-4444' },
+    shipper: { shipper_name: 'SNTL', shipper_countrycode: 'KR', shipper_street: '123 St', shipper_telephone: '01011112222' },
+    consignee: { consignee_name: 'John', consignee_countrycode: 'US', consignee_street: '456 Oak St', consignee_city: 'Los Angeles', consignee_postcode: '90001', consignee_telephone: '01033334444' },
     cargovolume: [],
-    invoice: [{ invoice_enname: 'Widget', invoice_quantity: '1', invoice_unitcharge: '10' }],
+    invoice: [{ invoice_enname: 'Widget', invoice_quantity: '1', invoice_unitcharge: '10', hs_code: '8471300000' }],
   }),
   determineOrderCargotype: vi.fn().mockReturnValue({ cargotype: 'W', mailCargoType: '4' }),
   buildCargovolume: vi.fn().mockReturnValue([]),
@@ -76,7 +76,7 @@ function createMockSupabase() {
           select: vi.fn().mockReturnThis(),
           eq: vi.fn().mockReturnThis(),
           order: vi.fn().mockResolvedValue({
-            data: [{ id: 'pkg-1', order_id: 'order-1', items: [] }],
+            data: [{ id: 'pkg-1', order_id: 'order-1', items: [{ item_name: 'Widget', quantity: 1, unit_price: 10, hs_code: '8471300000' }] }],
             error: null,
           }),
         };

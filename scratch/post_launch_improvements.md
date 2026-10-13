@@ -1932,3 +1932,55 @@ UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류
 - **예상 공수**: 1~2 MD (설계 의견 절차 필요 — R-17 복잡 Task, 전역 영향 분석 포함)
 - **우선순위**: Medium — 기능 장애 아니나 플랫폼 전반 체감 속도에 영향, Pilot(10/5~10/15) 종료 후 Stage-Gate 검토로 범위·설계 확정 예정(Edward 확인, 2026-10-03)
 - **상태**: 🔜 미착수 (Pilot 이후 착수 예정)
+
+---
+
+## [IMP-174] `OrderRegistrationForm.tsx` Hard Limit(1,500줄) 초과 — SRP 기준 파일 분리
+
+- **발견 경위**: 2026-10-12, Aiden이 TASK-B-332/333 검토(Issue #1239·#1240) 중 `wc -l` 실측. TASK-B-332(+18)·TASK-B-333(+19)이 이미 초과 상태의 파일에 계속 줄을 더함.
+- **현재 상태**: `develop` 1,893줄 → `TeamB_Dev` 1,930줄(+37). GOV_COMMON ZEN_A4 기준 소스코드 Hard Limit 1,500줄 초과(차단 기준). 폼 로직(화주 정보·수하인·패키지/품목·UPS 서비스 선택·운임 추정·HS 조회)이 단일 컴포넌트에 집중되어, 최근 3개 Task(B-332/333/335)가 모두 같은 파일을 수정하며 순차 병합을 강제당함(동일 파일 충돌 방지 위해 B-333을 B-332 병합 후 착수).
+- **임시 조치**: 신규 로직은 헬퍼 파일(`shxk-limits.ts`, `edit-defaults.ts`)로 추출해 폼 증가분 최소화. 분리 자체는 미수행.
+- **목표 구현**: 섹션 단위 분리(화주 정보 / 수하인 / 패키지·품목 / UPS 서비스·운임 / 제출 로직) + 커스텀 훅 추출. 동작 불변 리팩터링 — TASK-B-287(DOC 치수 보호)·TASK-B-297(토글 리마운트)·TASK-B-333(수정 화면 복원) 기존 테스트 전량 유지가 전제. R-20 GitNexus impact 선행 필수.
+- **관련 파일**: `src/components/orders/OrderRegistrationForm.tsx`, 연관 테스트 `tests/unit/orders/*`
+- **예상 공수**: 2~3 MD (복잡 Task — 설계 의견 절차 필요, Team B 소유 파일이므로 Team B 발령)
+- **우선순위**: Medium — 기능 장애 아님, 단 Hard Limit 위반 지속 및 병렬 작업 충돌 비용 누적. Pilot(10/15) 종료 후 착수 권장
+- **상태**: 🔜 미착수
+
+---
+
+## [IMP-175] `ups_product_code` 스키마 레벨 필수·유효성 검증 (TASK-B-336 후속)
+
+- **발견 경위**: 2026-10-13, TASK-B-336(Issue #1247, DEF-B-151) 검토 중. Baker가 범위 밖으로 분리해 task file `[발견 이슈]`에 IMP 후보로 기재.
+- **현재 상태**: TASK-B-336은 `createOrder`/`updateOrder` 서버 액션에서만 `assertActiveUpsProduct`로 미존재·비활성 코드를 거부함. `orderRegistrationSchema.ups_product_code`는 여전히 `z.string().optional()` — UPS 모드에서도 빈 값 통과, 스키마 단독으로는 코드 유효성 판정 불가(DB 조회가 필요해 zod 단독으로는 불가능한 부분도 있음).
+- **임시 조치**: 서버 액션 가드(DB 조회)로 미존재·비활성 코드 차단, `saveOrderRateSnapshot` 스킵 시 `logger.warn`.
+- **목표 구현**: ①UPS 모드에서 `ups_product_code` 필수화(`superRefine`, 기존 UPS 조건부 검증 패턴) — 단 레거시 오더 수정 시 기존 값 보존 영향 확인 ②폼(`UpsServiceSelector`)에서 활성 상품 목록만 선택 가능함을 확인(수동 입력 경로 존재 여부 점검). 엑셀 템플릿 샘플 코드는 TASK-B-335에서 `WW_SAVER_NONDOC`으로 교체 완료.
+- **관련 파일**: `src/lib/validation/order.ts`, `src/lib/orders/ups-product-guard.ts`, `src/components/orders/UpsServiceSelector*`
+- **예상 공수**: 0.5 MD
+- **우선순위**: Low — 서버 가드로 실해는 차단됨, 방어 계층 보강 성격
+- **상태**: 🔜 미착수
+
+---
+
+## [IMP-176] 오더 서버 액션 전화번호 정제 방어적 계층화 + 레거시 하이픈 데이터 출처 정리
+
+- **발견 경위**: 2026-10-13, TASK-B-334(Issue #1243) 검토 중. Baker `[발견 이슈]` 2·3번.
+- **현재 상태**: `createOrder`/`updateOrder`는 전화를 정제하지 않고 **호출자 정제에 의존**함. 현재 호출자는 폼(정제)·엑셀 대량 등록(TASK-B-334로 정제)뿐이라 누락은 없으나, 신규 호출 경로(API 라우트 등) 추가 시 `orderRegistrationSchema`의 숫자만 규칙에 의해 reject될 수 있음. 또한 `scripts/seed-local.ts`·일부 migration이 하이픈 전화를 직접 insert하여 DB 레거시 하이픈 값의 출처가 됨(전송 단계 `label-mapping`·`validate-payload`에서 정제되어 실해는 없음).
+- **임시 조치**: 폼·bulk 각각에서 `stripNonDigits` 적용, 수정 화면은 `buildOrderEditDefaults`에서 표시 시점 정제(DB 자동 일괄 UPDATE 금지 원칙 유지).
+- **목표 구현**: ①서버 액션 진입부 또는 스키마 `preprocess`로 전화 정제를 단일 지점화(호출자 정제는 UX용으로만 유지) ②시드·migration의 하이픈 전화 제거 ③레거시 DB 하이픈 데이터 정리 필요성 판단(Pilot 실데이터 — 원격 대상이므로 Edward 승인·백업 선행, 209 SOP 데이터 보전 원칙 준수).
+- **관련 파일**: `src/app/actions/operations/orders.ts`, `src/lib/validation/order.ts`, `scripts/seed-local.ts`
+- **예상 공수**: 0.5 MD (③ 제외)
+- **우선순위**: Low
+- **상태**: 🔜 미착수
+
+---
+
+## [IMP-177] `saveOrderRateSnapshot` 잔여 무음 스킵 경로(중량·목적지 누락) 관측성 재평가
+
+- **발견 경위**: 2026-10-13, TASK-B-336(Issue #1247) 검토 중. Aiden 참고 의견(비차단).
+- **현재 상태**: TASK-B-336이 미존재 상품 코드는 등록 전 거부로 근본 해소했으나, `saveOrderRateSnapshot`에는 **중량 0 또는 목적지 국가 누락 시 스냅샷 생성을 건너뛰는 경로**가 남아 있음. 현재는 `logger.warn`만 기록. 이 경로는 GOV_COMMON "핵심 지점 실시간 알림 의무" 4기준 중 ①금전 영향(스냅샷 누락 → 정산·인보이스 실패) ③침묵성(오더는 정상 생성됨)에 해당하나, TASK-B-336은 "근본 해소 + logger.warn 가시화"를 근거로 알림을 구성하지 않음(task file에 판단 근거 기재됨 — 규정 위반 아님). 다만 중량·목적지 누락은 입력 단계 검증으로 막히지 않는 경로라면 여전히 무음 결함 가능성 존재.
+- **임시 조치**: `logger.warn`(orderId·totalWeight·destCountryCode 포함).
+- **목표 구현**: ①해당 경로가 실제로 도달 가능한지 확인(UPS 오더는 중량·수하인 국가가 스키마상 필수인지) — 도달 불가면 종결 ②도달 가능하면 사전 검증으로 전환하거나 `logClientError(severity: 'CRITICAL')` 알림 구성 ③`saveOrderRateSnapshot` 신규 `logger.warn` 블록 들여쓰기 정리(스타일).
+- **관련 파일**: `src/app/actions/operations/orders.ts`(`saveOrderRateSnapshot`)
+- **예상 공수**: 0.3 MD (①확인 후 판단)
+- **우선순위**: Low
+- **상태**: 🔜 미착수

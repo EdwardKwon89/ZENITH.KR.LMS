@@ -97,7 +97,7 @@ function validDefaults(overrides: Record<string, unknown> = {}) {
     shipper_id: SHIPPER_ORG,
     shipper_contact_name: 'Shipper Kim',
     shipper_contact_email: 'shipper@test.kr',
-    shipper_contact_phone: '010-0000-0000',
+    shipper_contact_phone: '01000000000',
     shipper_address: 'Seoul',
     shipper_country_code: 'KR',
     shipper_state_province: '',
@@ -105,7 +105,7 @@ function validDefaults(overrides: Record<string, unknown> = {}) {
     shipper_zipcode: '04515',
     recipient_name: 'John Doe',
     recipient_address: '123 Main St',
-    recipient_phone: '010-1111-2222',
+    recipient_phone: '01011112222',
     recipient_country_code: 'US',
     recipient_state_province: 'CA',
     recipient_city: 'Los Angeles',
@@ -123,7 +123,7 @@ function validDefaults(overrides: Record<string, unknown> = {}) {
       gross_weight: 5,
       special_cargo_type: 'NONE',
       content_type: 'GENERAL',
-      items: [{ item_name: 'Widget', quantity: 1, unit_price: 10, currency: 'USD', item_packing_unit: 'EA' }],
+      items: [{ item_name: 'Widget', quantity: 1, unit_price: 10, currency: 'USD', item_packing_unit: 'EA', hs_code: '8471300000' }],
     }],
     ...overrides,
   };
@@ -133,7 +133,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   mockPush.mockClear();
   mockGetCurrentUserAffiliation.mockResolvedValue({
-    userId: 'user-1', userName: 'Login User', userEmail: 'login@test.kr', userPhone: '010-1111-2222',
+    userId: 'user-1', userName: 'Login User', userEmail: 'login@test.kr', userPhone: '01011112222',
     role: 'SHIPPER', orgId: SHIPPER_ORG, orgName: 'MASTER AIR',
     orgAddress: 'Seoul', orgBizNo: '111-11', orgCountryCode: 'KR', orgStateProvince: 'Seoul',
     orgCity: 'Seoul', orgAddressStreet: 'Seoul', orgAddressDetail: '', orgZipcode: '04515',
