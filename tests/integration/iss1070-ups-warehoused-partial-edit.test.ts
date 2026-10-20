@@ -5,16 +5,18 @@ import { execSync } from 'child_process';
 
 dotenv.config({ path: '.env.local' });
 
-// TASK-B-284 (Issue #1070): UPS 오더 WAREHOUSED 단계 부분 수정 허용 (measured_at 기반) 회귀 테스트.
+// TASK-B-284 (Issue #1070): UPS 오더 WAREHOUSED 단계 수정 허용 (measured_at 기반) 회귀 테스트.
 //
 // 실제 로컬 DB(docker supabase_db_ZENITH_LMS_001)에 WAREHOUSED+UPS 오더 + 패키지(실측/미실측)를
 // 세팅하고, 실제 updateOrder() 서버 액션을 실행한 뒤 DB 상태를 직접 조회해 검증한다.
 //
-// 핵심: UI 숨김이 아니라 서버가 실제로 실측값을 무시/보호하는지가 관건 — updateOrder()가
-// measured_at이 있는 패키지의 치수/무게를 화주가 보낸 새 값으로 덮어쓰지 않는지 확인.
+// TASK-B-339 (Issue #1254)으로 잠금(lockMeasuredPackageDims)이 해제되어 WAREHOUSED+UPS는 전체 수정
+// 가능이 되었다. 실측값 보호는 잠금이 아니라 updateOrder의 안전장치 ①이 맡는다:
+//   실측 패키지의 5개 값(치수 3·중량·포장수)을 바꾸면 measured_at을 이월하지 않으므로
+//   패키지는 "미실측" 상태가 되어 창고가 재실측해야 한다.
 //
-// 되돌리기 검증: measured_at 잠금 로직 제거 시 실측 패키지 치수/무게가 실제로 덮어써지는
-// 회귀를 재현할 수 있어야 한다 (아래 TC-284-02가 그 역할).
+// 되돌리기 검증: 안전장치 ①을 제거하면(항상 이월) 화주가 보낸 새 값이 실측값으로 남아
+// 재실측이 발생하지 않는 회귀를 TC-284-02가 재현한다.
 
 const URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'http://127.0.0.1:54321';
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -167,7 +169,17 @@ describe('DEF-B-052~ TASK-B-284: UPS WAREHOUSED 부분 수정 (Issue #1070)', ()
 
   it('TC-284-01: WAREHOUSED+UPS — 헤더 수정 성공 + 미실측 패키지 치수/무게 수정 성공 (실 DB)', async () => {
     const { updateOrder } = await import('@/app/actions/operations/orders');
-    const payload = buildPayload();
+    // TASK-B-339 (Issue #1254): 잠금이 해제되어 실측 패키지에 999를 보내면 measured_at이 해제되고
+    //   두 패키지 모두 "미실측"이 되어 getPkg(ORDER,false)가 구분 불가가 된다. 이 케이스의 목적은
+    //   "미실측 패키지 수정 성공"이므로 실측 패키지는 기존 값을 그대로 보내 식별을 유지한다.
+    //   (측값 변경 경로는 TC-284-02가 담당)
+    const base = buildPayload();
+    const payload = buildPayload({
+      packages: [
+        { ...base.packages[0], length: 30, width: 20, height: 10, gross_weight: 12.5 },
+        base.packages[1],
+      ],
+    });
     const result = await updateOrder(ORDER, payload as any);
 
     expect(result.success).toBe(true);
@@ -175,6 +187,9 @@ describe('DEF-B-052~ TASK-B-284: UPS WAREHOUSED 부분 수정 (Issue #1070)', ()
     // 헤더 수정 반영
     const recipientName = psql(`SELECT recipient_name FROM public.zen_orders WHERE id='${ORDER}'`);
     expect(recipientName).toBe('Updated Recipient');
+
+    // 실측 패키지는 값 불변 → measured_at 유지 (식별 가능성 유지)
+    expect(getPkg(ORDER, true).pkgMeasured).toBe('t');
 
     // 미실측 패키지는 새 치수/무게로 갱신됨
     const pkg = getPkg(ORDER, false);
@@ -185,20 +200,23 @@ describe('DEF-B-052~ TASK-B-284: UPS WAREHOUSED 부분 수정 (Issue #1070)', ()
     expect(pkg.pkgMeasured).toBe('f');
   });
 
-  it('TC-284-02: WAREHOUSED+UPS — 실측 패키지 치수/무게 수정 시도 → DB 값 불변 (서버 레벨 보호)', async () => {
+  it('TC-284-02: WAREHOUSED+UPS — 실측 패키지 값 변경 시 measured_at 해제 → 창고 재실측 필요 (TASK-B-339 갱신)', async () => {
+    // TASK-B-339 (Issue #1254): 잠금(lockMeasuredPackageDims)이 해제되어 값 변경은 이제 허용된다.
+    //   대신 안전장치 ①이 동작한다 — 값을 바꾸면 measured_at을 이월하지 않으므로 패키지는 "미실측"이 되어
+    //   창고가 재실측해야 한다(화주의 낡은 값이 실측값으로 남지 않는다).
     const { updateOrder } = await import('@/app/actions/operations/orders');
     const payload = buildPayload(); // PKG_MEASURED는 length/width/height/gross_weight=999 시도
     const result = await updateOrder(ORDER, payload as any);
 
     expect(result.success).toBe(true);
 
-    // 실측 패키지는 999로 덮어쓰이지 않고 기존 실측값(30x20x10, 12.5kg) 유지
-    const pkg = getPkg(ORDER, true);
-    expect(pkg.gw).toBe('12.5');
-    expect(pkg.len).toBe('30');
-    expect(pkg.wid).toBe('20');
-    expect(pkg.hgt).toBe('10');
-    expect(pkg.pkgMeasured).toBe('t'); // measured_at 유지
+    // 값이 바뀌었으므로 실측 플래그가 해제된다 (기존 잠금 상태: 30x20x10/12.5 유지 + measured_at 보존)
+    const pkg = getPkg(ORDER, false);
+    expect(pkg.gw).toBe('999');
+    expect(pkg.len).toBe('999');
+    expect(pkg.wid).toBe('999');
+    expect(pkg.hgt).toBe('999');
+    expect(pkg.pkgMeasured).toBe('f'); // measured_at 해제 → 창고 재실측 필요
   });
 
   it('TC-284-03: WAREHOUSED+UPS — 아이템 수정은 measured_at과 무관하게 항상 성공', async () => {

@@ -38,7 +38,12 @@ vi.mock('@/lib/auth/guards', () => ({
     profile: { id: 'admin-1', role: 'ADMIN', org_id: 'org-admin' },
   }),
 }));
-vi.mock('@/lib/auth/rbac', () => ({ checkPermission: vi.fn().mockReturnValue(false) }));
+// TASK-B-339: 페이지가 ups-edit-availability → status-machine → rbac(USER_ROLES)로 이어져 모듈 그래프에
+//   rbac이 새로 들어왔다. checkPermission만 목킹한 채 나머지 내보내기는 실제 값을 쓰도록 보강(단언 무관).
+vi.mock('@/lib/auth/rbac', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/auth/rbac')>()),
+  checkPermission: vi.fn().mockReturnValue(false),
+}));
 vi.mock('@/app/actions/operations/orders', () => ({
   getOrderDetails: vi.fn(),
   getOrderEditHistory: vi.fn().mockResolvedValue([]),
@@ -68,6 +73,7 @@ vi.mock('lucide-react', () => ({
   Truck: () => <span />,
   FileText: () => <span />,
   User: () => <span />,
+  Pencil: () => <span />, // TASK-B-339: 헤더 수정 버튼 아이콘
   CheckCircle2: () => <span />,
   Clock: () => <span />,
   RefreshCw: () => <span />,

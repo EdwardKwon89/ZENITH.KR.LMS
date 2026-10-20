@@ -947,6 +947,30 @@ TASK-B-332가 `orderRegistrationSchema`의 전화 규칙(숫자만 `/^\d*$/`·`/
 | TC-336-RLS-01/02 | 실DB·화주 세션(R-14): `WW_SAVER_NONDOC` 통과 / `WWE` 거부 | RLS(`is_active=true`) 하에서 정상 코드까지 거부되지 않음 | `tests/integration/def-b151-ups-product-guard.test.ts` |
 | TC-336-BULK | 대량 등록: 한 행이 미존재 코드로 throw | 해당 행만 `success:false`(메시지 그대로 노출), 다른 행 성공(행 격리) | `tests/unit/operations/bulk-orders.test.ts` |
 
+## 71. UPS 오더 "UPS 등록 전까지" 전체 수정 + 상세 화면 수정 버튼 (Issue #1254 / TASK-B-339)
+
+고객 요청(JSJung 2026-10-20 Q1·Q2 확정)으로 UPS 오더는 **UPS 등록 전**(창고 `UPS 등록` = WAREHOUSED→PACKED·SHXK createorder 이전)까지 전체 수정 가능해졌다. TASK-B-284(#1070)의 WAREHOUSED+UPS 부분 수정 통제(화주·운송수단·실측 치수 잠금)를 의도적으로 완화하되, 세 가지 안전장치로 보완했다.
+
+- **등록 판정은 상태가 아니라 사실(활성 라벨)**: HELD/RETURNED/CLAIMED는 PACKED·IN_TRANSIT 이후에도 전이 가능하므로 상태만으로는 "등록 전"을 보장하지 못한다(결함 ①). `src/lib/orders/ups-registration.ts`의 `hasActiveUpsLabel`(zen_ups_labels, `is_voided=false`, DB error는 throw) + `src/lib/orders/ups-edit-availability.ts`의 `getUpsEditAvailability`(등록 사실이 상태보다 우선)로 단일 정본화하고, 서버(`updateOrder`)·수정 화면·UPS 상세가 모두 이를 소비한다.
+- **안전장치 ①**: 잠금이 풀려도 실측 패키지의 5개 값(치수 3·중량·포장수)이 모두 기존과 같을 때만 `measured_at`을 이월하고, 하나라도 바뀌면 이월하지 않아 "미실측"(창고 재실측 필요)이 된다.
+- **안전장치 ②**: `orderPackageSchema.measured_at`을 받아, 폼 로드 시점 값과 DB 현재 `measured_at`이 다르면(창고가 그 사이 실측/재실측) 저장을 거부한다(낙관적 동시성).
+- **안전장치 ③**: `src/lib/orders/rate-snapshot-refresh.ts`의 `refreshUpsRateSnapshot`이 UPS 수정 후 운임 스냅샷을 **update-or-insert**(`unique_order_snapshot(order_id)` 유일 인덱스)로 갱신하며, `is_manual=true`는 덮어쓰지 않는다.
+- **화면**: UPS 상세 헤더에 `수정` 버튼(가능=Link, 불가=비활성 `aria-disabled`), 수정 화면 리다이렉트·돌아가기 경로는 `src/lib/orders/detail-path.ts`의 `getOrderDetailPath`로 단일화. WAREHOUSED+**비UPS**는 여전히 수정 불가.
+
+| ID | 검증 내용 | 기대 결과 | 테스트 위치 |
+| :-- | :-- | :-- | :-- |
+| TC-AVL-01~04 | `getUpsEditAvailability` (REGISTERED/SCHEDULED/WAREHOUSED,false) | editable, WAREHOUSED는 message에 `재실측` 포함 | `tests/unit/orders/ups-edit-availability.test.ts` |
+| TC-AVL-05~08 | (PACKED/IN_TRANSIT,false) + (HELD/RETURNED/CLAIMED/REGISTERED/WAREHOUSED,true) + 전체 상태 순회 | 상태 불가=STATUS / 활성 라벨=UPS_REGISTERED(상태 무관 최우선) | `tests/unit/orders/ups-edit-availability.test.ts` |
+| TC-LBL-01~06 | `hasActiveUpsLabel` — `.eq('order_id')`·`.eq('is_voided',false)` 인자 캡처 | 있음 true / 없음 false / DB error throw | `tests/unit/orders/ups-registration.test.ts` |
+| TC-PATH-01~05 | `getOrderDetailPath` | UPS→`/orders/{id}/ups-detail`, AIR/`null`/`undefined`→`/orders/{id}` | `tests/unit/orders/detail-path.test.ts` |
+| TC-SNAP-01~07 | `refreshUpsRateSnapshot` — 기존/없음/`is_manual`/계산 불가/추정 throw/인자·국가 대체 | update-or-insert, `is_manual` 보존, 계산 불가 시 warn·불변, throw 전파 | `tests/unit/orders/rate-snapshot-refresh.test.ts` |
+| TC-339-①~⑨ | `updateOrder` — 라벨 차단 / 잠금 해제 반영 / `measured_at` 이월·해제 / 동시성 거부 / 비UPS 라벨 조회 0회 | 삭제·삽입 0회 포함 인자 캡처 단언 | `tests/unit/logistics/order-update-b339.test.ts` |
+| TC-BTN-①~⑤ | UPS 상세 렌더 — 수정 링크 href / WAREHOUSED title `재실측` / PACKED `aria-disabled` / HELD+라벨 `UPS 등록취소` | 실제 default export 렌더, 부정 단언 전 목록보기 존재 단언 | `tests/unit/orders/ups-detail-edit-button.test.tsx` |
+| TC-FRM-①~④ | `getOrderEditScope('WAREHOUSED','UPS')` 실제 함수로 폼 렌더 | 부분 수정 배너 없음 / 운송수단·실측 입력 disabled 아님 | `tests/unit/orders/edit-form-warehoused-unlocked.test.tsx` |
+| TC-339-INT-①~⑥ | 실DB(R-14) — 라벨 없음 실측 변경/불변, 활성 라벨 거부, 낙관적 동시성, 화주 세션 RLS 조회, 스냅샷 1행 유지 | `measured_at` NULL/보존, 거부 시 DB 불변, RLS로 라벨 조회 가능 | `tests/integration/ups-edit-before-registration.test.ts` |
+| TC-284-01/02 | 기존 TASK-B-284 통합 — 잠금 해제 반영(미실측 수정 / 실측 값 변경 시 재실측) | TC-284-02는 새 사양으로 갱신(기대값 변경) | `tests/integration/iss1070-ups-warehoused-partial-edit.test.ts` |
+| TC-284-T2/T3/T4 | `getOrderEditScope` WAREHOUSED+UPS 잠금 해제 / WAREHOUSED+비UPS 불가 | T3 기대값 갱신, T2·T4 불변 | `tests/unit/logistics/status-machine.test.ts` |
+
 
 
 

@@ -21,6 +21,10 @@ export const orderItemSchema = z.object({
  */
 export const orderPackageSchema = z.object({
   id: z.string().uuid().optional(),
+  // TASK-B-339 (Issue #1254 / 안전장치 ②): 낙관적 동시성 — 화면 로드 시점의 실측 시각을 그대로 되돌려 보낸다.
+  //   서버는 DB의 현재 measured_at과 비교해 다르면 저장을 거부한다(창고가 그 사이 실측/재실측함).
+  //   edit-defaults.ts는 이미 폼에 실어 보내고 있었으나 스키마에 없어 Zod가 제거하고 있었다.
+  measured_at: z.string().nullable().optional(),
   packing_unit: z.string().min(1, 'Packing unit is required'),
   packing_count: z.number().int().positive().default(1),
   physical_box_count: z.number().int().positive().optional().default(1),
