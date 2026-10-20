@@ -132,7 +132,7 @@ export function buildOrderEditDefaults(order: OrderEditDefaultsInput): Record<st
         unit_price: item.unit_price ?? 0,
         currency: item.currency ?? 'USD',
         hs_code: item.hs_code ?? '',
-        item_packing_unit: item.item_packing_unit ?? 'EA',
+        item_packing_unit: item.item_packing_unit ?? 'PCE',
       })),
     })),
   };

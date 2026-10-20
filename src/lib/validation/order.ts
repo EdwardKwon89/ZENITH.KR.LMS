@@ -13,7 +13,7 @@ export const orderItemSchema = z.object({
   unit_price: z.number().nonnegative('Unit price cannot be negative').default(0),
   currency: z.string().default('USD'),
   hs_code: z.string().optional(), // B2C 선택, B2B 권장
-  item_packing_unit: z.string().default('EA'), // 아이템 소단위 (EA, SET 등)
+  item_packing_unit: z.string().default('PCE'), // 아이템 소단위 — SHXK 신고단위 (TASK-B-337: 기본값 EA→PCE)
 });
 
 /**
