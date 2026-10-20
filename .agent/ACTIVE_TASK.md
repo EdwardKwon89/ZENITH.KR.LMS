@@ -50,7 +50,7 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
-| [#1254](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1254) | [Team B] TASK-B-339: UPS 오더 "UPS 등록 전까지" 수정 가능 + 상세 화면 수정 버튼 진입 (고객 요청, #1253 대체) | b | p1 | in-progress | jungjs | 2026-10-20 |
+| [#1254](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1254) | [Team B] TASK-B-339: UPS 오더 "UPS 등록 전까지" 수정 가능 + 상세 화면 수정 버튼 진입 (고객 요청, #1253 대체) | b | p1 | rework | jungjs | 2026-10-20 |
 | [#1251](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1251) | [Team B] TASK-B-337: SHXK getdeclareunit 7개 단위 반영 — 정본 목록·YDS/KG 지원·정합 테스트 | b | p3 | open | jungjs | 2026-10-20 |
 | [#1238](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1238) | 2026.10.12 오류사항 및 보완사항 | b | p2 | - | 미배정 | 2026-10-12 |
 | [#1218](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1218) | [Aiden] Stage-Gate Code Review — UPS 핵심 경로(오더등록~정산) 대상, 적절한 시점에 실시 | - | p3 | - | 미배정 | 2026-10-11 |
