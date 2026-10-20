@@ -59,7 +59,12 @@ export const orderRegistrationSchema = z.object({
   shipper_contact_email: z.string().email('Invalid email format').optional().or(z.literal('')),
   shipper_address: z.string().optional(),
   shipper_address_english: z.string().optional(),
-  shipper_country_code: z.string().optional().default('KR'),
+  // TASK-B-340 (Issue #1256): `''`/공백/undefined를 'KR'로 정정 — `.default()`는 undefined일 때만
+  //   작동하고 빈 문자열은 통과시켜 화주 국가코드가 ''로 저장되던 원인. 다른 값은 trim만 적용.
+  shipper_country_code: z.string().optional().transform((v) => {
+    const trimmed = v?.trim();
+    return trimmed ? trimmed : 'KR';
+  }),
   shipper_state_province: z.string().optional(),
   shipper_city: z.string().optional(),
   shipper_address_detail: z.string().optional(),

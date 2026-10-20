@@ -974,3 +974,16 @@ TASK-B-332가 `orderRegistrationSchema`의 전화 규칙(숫자만 `/^\d*$/`·`/
 
 
 
+## 72. UPS 수정 화면 화주 "주소" 공백 — 국가코드 빈 값 처리·저장 방지·기존 데이터 정정 (Issue #1256 / TASK-B-340)
+
+UPS 오더 수정 화면에서 화주 주소가 비어 보이는 결함. 원인은 `shipper_country_code`가 `''`(빈 문자열)로 저장된 행으로, 화면은 국가를 `|| 'KR'`로 표시하면서도 한국 주소(roadAddress) 초기화는 `=== 'KR'` 엄격 비교라 주소를 채우지 않았다. 표시(AddressInput)·기본값(edit-defaults)·저장 스키마(order.ts) 3중으로 정정하고, 기존 `''` 데이터는 멱등 마이그레이션으로 보정한다. `recipient_country_code`와 SHXK 전송 로직(`|| defaults.country`)은 변경하지 않는다.
+
+| ID | 검증 내용 | 기대 결과 | 테스트 위치 |
+| :-- | :-- | :-- | :-- |
+| TC-340-A | 실제 `AddressInput` 렌더 — `country_code:''` + 한국 주소 | "주소" 입력에 주소 문자열 표시(국가 select 존재 선행 단언) | `tests/unit/components/address-input-empty-country.test.tsx` |
+| TC-340-B | `country_code:'KR'` + 한국 주소 (회귀) | 동일하게 주소 표시 | `tests/unit/components/address-input-empty-country.test.tsx` |
+| TC-340-C | `country_code:'US'` + 주소 | 해외 주소 입력에 표시, 한국 검색칸(placeholder `Search`) 없음 | `tests/unit/components/address-input-empty-country.test.tsx` |
+| TC-340-DEF | `buildOrderEditDefaults` / `resolveShipperAddressDefaults` | `''`→`KR`, `null`→`KR`, `'JP'`→`'JP'`, `recipient` 불변 | `tests/unit/orders/edit-defaults.test.ts` |
+| TC-340-SCH | `orderRegistrationSchema` — `shipper_country_code` | `''`/`'  '`/미지정→`KR`, `'JP'`→`'JP'`, `' KR '`→`'KR'` | `tests/unit/orders/shipper-country-schema.test.ts` |
+| TC-340-MIG | 실DB(R-14): 마이그레이션 파일 실제 실행 | `''`+주소 행만 `KR`로 정정, NULL/주소없음/다른 국가 불변, 재실행 `UPDATE 0` | `tests/integration/task-b340-backfill-country.test.ts` |
+
