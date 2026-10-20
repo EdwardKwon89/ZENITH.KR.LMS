@@ -52,7 +52,7 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
 | [#1256](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1256) | [Team B] TASK-B-340: UPS 수정 화면 화주 "주소" 공백 — 국가코드 빈 값 처리·저장 방지·기존 데이터 정정 | b | p2 | review | jungjs | 2026-10-20 |
 | [#1254](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1254) | [Team B] TASK-B-339: UPS 오더 "UPS 등록 전까지" 수정 가능 + 상세 화면 수정 버튼 진입 (고객 요청, #1253 대체) | b | p1 | review | jungjs | 2026-10-20 |
-| [#1251](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1251) | [Team B] TASK-B-337: SHXK getdeclareunit 7개 단위 반영 — 정본 목록·YDS/KG 지원·정합 테스트 | b | p3 | in-progress | jungjs | 2026-10-20 |
+| [#1251](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1251) | [Team B] TASK-B-337: SHXK getdeclareunit 7개 단위 반영 — 정본 목록·YDS/KG 지원·정합 테스트 | b | p3 | review | jungjs | 2026-10-20 |
 | [#1238](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1238) | 2026.10.12 오류사항 및 보완사항 | b | p2 | - | 미배정 | 2026-10-12 |
 | [#1218](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1218) | [Aiden] Stage-Gate Code Review — UPS 핵심 경로(오더등록~정산) 대상, 적절한 시점에 실시 | - | p3 | - | 미배정 | 2026-10-11 |
 | [#1189](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1189) | [Team B] TASK-B-323: Resend 이메일 도메인(zenith-lms.com) 미인증 — 알림메일 전량 발송 실패 (DEF-B-143, High) | b | p1 | - | jungjs | 2026-10-13 |
