@@ -297,6 +297,24 @@ describe('TASK-B-339: updateOrder — UPS 등록 전까지 수정 (Issue #1254)'
     expect(refreshUpsRateSnapshotMock.mock.calls[0][0].orderId).toBe(ORDER_ID);
   });
 
+  it('TC-339-⑦-b: REGISTERED+AIR → UPS로 변경 시 운임 스냅샷 갱신 호출 (수정 후 운송수단 기준)', async () => {
+    repoMock.state.order = makeOrder({ status: OrderStatus.REGISTERED, transport_mode: 'AIR' });
+
+    const updateOrder = await loadUpdateOrder();
+    await updateOrder(ORDER_ID, makePayload({ transport_mode: 'UPS' }) as any);
+
+    expect(refreshUpsRateSnapshotMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('TC-339-⑦-c: UPS → AIR로 변경 시 운임 스냅샷 갱신 호출 안 함', async () => {
+    repoMock.state.order = makeOrder();
+
+    const updateOrder = await loadUpdateOrder();
+    await updateOrder(ORDER_ID, makePayload({ transport_mode: 'AIR' }) as any);
+
+    expect(refreshUpsRateSnapshotMock).not.toHaveBeenCalled();
+  });
+
   it('TC-339-⑧: 스냅샷 갱신 실패해도 수정 저장은 롤백되지 않고 성공한다', async () => {
     repoMock.state.order = makeOrder();
     refreshUpsRateSnapshotMock.mockRejectedValue(new Error('snapshot boom'));
@@ -315,6 +333,53 @@ describe('TASK-B-339: updateOrder — UPS 등록 전까지 수정 (Issue #1254)'
     await updateOrder(
       ORDER_ID,
       makePayload({ packages: [makePackage({ length: 30, width: 20, height: 10, gross_weight: 12.5, packing_count: 1 })] }) as any
+    );
+
+    expect(repoMock.calls.insertPackage[0][0].measured_at).toBe(MEASURED_AT);
+  });
+
+  it('TC-339-⑨-b: DB 치수가 null인 실측 패키지에 폼이 0을 제출 → measured_at 이월 (null=0 정규화)', async () => {
+    // edit-defaults.ts가 DB null 치수를 0으로 실어 보내고 폼(valueAsNumber)이 그 0을 그대로 제출한다.
+    repoMock.state.order = makeOrder();
+    repoMock.state.packages = [
+      { id: PKG_ID, length: null, width: null, height: null, gross_weight: 12.5, packing_count: 1, measured_at: MEASURED_AT },
+    ];
+
+    const updateOrder = await loadUpdateOrder();
+    await updateOrder(
+      ORDER_ID,
+      makePayload({ packages: [makePackage({ length: 0, width: 0, height: 0 })] }) as any
+    );
+
+    expect(repoMock.calls.insertPackage[0][0].measured_at).toBe(MEASURED_AT);
+  });
+
+  it('TC-339-⑨-c: DB length가 null인데 payload가 5 → measured_at 없음 (실제 값 변경)', async () => {
+    repoMock.state.order = makeOrder();
+    repoMock.state.packages = [
+      { id: PKG_ID, length: null, width: 20, height: 10, gross_weight: 12.5, packing_count: 1, measured_at: MEASURED_AT },
+    ];
+
+    const updateOrder = await loadUpdateOrder();
+    await updateOrder(
+      ORDER_ID,
+      makePayload({ packages: [makePackage({ length: 5, width: 20, height: 10 })] }) as any
+    );
+
+    expect(repoMock.calls.insertPackage[0][0].measured_at).toBeUndefined();
+  });
+
+  it('TC-339-⑨-d: DB gross_weight가 null(0과 동일 취급)이고 payload가 0 → measured_at 이월', async () => {
+    // payload null은 z.number() 필수 스키마에서 Zod가 거부되어(저장 자체 불가) 반대 방향(null↔0)으로 검증한다.
+    repoMock.state.order = makeOrder();
+    repoMock.state.packages = [
+      { id: PKG_ID, length: 30, width: 20, height: 10, gross_weight: null, packing_count: 1, measured_at: MEASURED_AT },
+    ];
+
+    const updateOrder = await loadUpdateOrder();
+    await updateOrder(
+      ORDER_ID,
+      makePayload({ packages: [makePackage({ gross_weight: 0 })] }) as any
     );
 
     expect(repoMock.calls.insertPackage[0][0].measured_at).toBe(MEASURED_AT);

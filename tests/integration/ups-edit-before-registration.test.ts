@@ -73,6 +73,7 @@ const SHIPPER_ORG = '33900000-0000-4000-8000-000000000003';
 const ORDER = '33900000-0000-4000-8000-000000000010';
 const PKG_MEASURED = '33900000-0000-4000-8000-000000000020';
 const PKG_UNMEASURED = '33900000-0000-4000-8000-000000000021';
+const PKG_NULL_DIMS = '33900000-0000-4000-8000-000000000022';
 const LABEL_ID = '33900000-0000-4000-8000-000000000030';
 const ORIGIN_PORT = '33900000-0000-4000-8000-000000000041';
 const DEST_PORT = '33900000-0000-4000-8000-000000000042';
@@ -119,12 +120,14 @@ function setupFixture() {
     INSERT INTO public.zen_order_packages (id, order_id, packing_unit, packing_count, gross_weight,
       length, width, height, measured_at, content_type, special_cargo_type, physical_box_count) VALUES
       ('${PKG_MEASURED}', '${ORDER}', 'BOX', 1, 12.5, 30, 20, 10, now(), 'NONDOC', 'NONE', 1),
-      ('${PKG_UNMEASURED}', '${ORDER}', 'BOX', 1, 5, 10, 10, 10, NULL, 'NONDOC', 'NONE', 1)
+      ('${PKG_UNMEASURED}', '${ORDER}', 'BOX', 1, 5, 10, 10, 10, NULL, 'NONDOC', 'NONE', 1),
+      ('${PKG_NULL_DIMS}', '${ORDER}', 'BOX', 1, 7, NULL, NULL, NULL, now(), 'NONDOC', 'NONE', 1)
     ON CONFLICT (id) DO UPDATE SET gross_weight = EXCLUDED.gross_weight, length = EXCLUDED.length,
       width = EXCLUDED.width, height = EXCLUDED.height, measured_at = EXCLUDED.measured_at;
     INSERT INTO public.zen_order_items (order_id, package_id, item_name, quantity, unit_price, currency, hs_code) VALUES
       ('${ORDER}', '${PKG_MEASURED}', 'Measured Item', 1, 100, 'USD', '8471300000'),
-      ('${ORDER}', '${PKG_UNMEASURED}', 'Unmeasured Item', 1, 50, 'USD', '8471300000')
+      ('${ORDER}', '${PKG_UNMEASURED}', 'Unmeasured Item', 1, 50, 'USD', '8471300000'),
+      ('${ORDER}', '${PKG_NULL_DIMS}', 'Null Dims Item', 1, 25, 'USD', '8471300000')
     ON CONFLICT DO NOTHING;
   `);
 }
@@ -145,6 +148,14 @@ function getPackages(orderId: string) {
 function measuredPackageMeasuredAt(): string | null {
   const value = psql(
     `SELECT measured_at::text FROM public.zen_order_packages WHERE order_id='${ORDER}' AND gross_weight = 12.5 LIMIT 1`
+  );
+  return value || null;
+}
+
+/** 지정 중량 패키지의 현재 measured_at ISO 문자열 (치수 null 케이스용). */
+function measuredAtByWeight(weight: number): string | null {
+  const value = psql(
+    `SELECT measured_at::text FROM public.zen_order_packages WHERE order_id='${ORDER}' AND gross_weight = ${weight} LIMIT 1`
   );
   return value || null;
 }
@@ -253,13 +264,32 @@ describe('TASK-B-339: UPS 등록 전 수정 (Issue #1254, 실 DB)', () => {
     expect(unmeasured?.measured).toBe(false);
   });
 
-  it('TC-339-INT-②: 라벨 없음 + 실측 치수 불변 → 저장 성공 + measured_at 보존', async () => {
+  it('TC-339-INT-②: 라벨 없음 + 실측 치수 불변 → 저장 성공 + measured_at 보존 (치수 null 패키지 포함)', async () => {
     const { updateOrder } = await import('@/app/actions/operations/orders');
     const before = measuredPackageMeasuredAt();
     expect(before).not.toBeNull();
+    // 치수가 DB에서 NULL인 실측 패키지: 수정 화면(edit-defaults)은 이를 0으로 실어 보낸다.
+    const nullDimsBefore = measuredAtByWeight(7);
+    expect(nullDimsBefore).not.toBeNull();
 
     const payload = buildPayload();
     (payload.packages[0] as any).measured_at = before; // 폼 로드 시점 시각
+    // 폼과 동일하게 DB null 치수를 0으로 제출 + measured_at 동봉
+    payload.packages.push({
+      id: PKG_NULL_DIMS,
+      packing_unit: 'BOX',
+      packing_count: 1,
+      physical_box_count: 1,
+      length: 0,
+      width: 0,
+      height: 0,
+      gross_weight: 7,
+      measured_at: nullDimsBefore,
+      special_cargo_type: 'NONE',
+      content_type: 'NONDOC',
+      items: [{ item_name: 'Null Dims Item', quantity: 1, unit_price: 25, currency: 'USD', hs_code: '8471300000' }],
+    } as any);
+
     const result = await updateOrder(ORDER, payload as any);
     expect(result.success).toBe(true);
 
@@ -267,6 +297,8 @@ describe('TASK-B-339: UPS 등록 전 수정 (Issue #1254, 실 DB)', () => {
     const after = measuredPackageMeasuredAt();
     expect(after).not.toBeNull();
     expect(after).toBe(before); // 5개 값 불변 → measured_at 이월 (안전장치 ①)
+    // null(DB) ↔ 0(폼)을 같은 값으로 취급 → 불필요한 재실측이 강제되지 않는다
+    expect(measuredAtByWeight(7)).toBe(nullDimsBefore);
   });
 
   it('TC-339-INT-③: 활성 라벨 삽입 후 → 저장 거부 + DB 불변', async () => {

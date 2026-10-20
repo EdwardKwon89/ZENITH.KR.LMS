@@ -189,11 +189,17 @@ export async function createOrder(payload: OrderRegistrationInput) {
   return order;
 }
 
-/** TASK-B-339 (Issue #1254): 숫자 정규화 — null·빈값·'10' vs 10 차이를 없애 비교용으로 쓴다. */
-function normalizePackageNumber(value: unknown): number | null {
-  if (value === null || value === undefined || value === '') return null;
-  const num = Number(value);
-  return Number.isFinite(num) ? num : null;
+/**
+ * TASK-B-339 (Issue #1254): 숫자 정규화 — null·undefined·''·0·NaN을 모두 "비어 있음(=0)"으로,
+ * '10' vs 10 같은 표기 차이도 같은 수로 취급한다.
+ *   근거: 수정 화면 기본값(`edit-defaults.ts`)이 DB의 null 치수를 0으로 실어 보내고
+ *   (`length: pkg.length ?? 0`), 폼 입력(valueAsNumber)이 그 0을 그대로 제출한다.
+ *   null(DB) !== 0(폼)로 판정하면 값이 바뀌지 않았는데도 measured_at이 지워져 불필요한 재실측이 강제된다.
+ *   (NONDOC 실측 패키지가 중량만 실측하고 치수가 비어 있는 경우 실제로 발생한다.)
+ */
+function normalizePackageNumber(value: unknown): number {
+  const num = Number(value ?? 0);
+  return Number.isFinite(num) ? num : 0;
 }
 
 /**
@@ -493,7 +499,10 @@ export async function updateOrder(orderId: string, payload: OrderRegistrationInp
 
   // TASK-B-339 (Issue #1254 / 안전장치 ③): UPS 오더는 수정 후 운임 스냅샷 갱신 —
   //   중량·치수가 바뀌어도 스냅샷이 낡은 채 남는 결함(③) 방지. 실패해도 수정 저장은 롤백하지 않고 기록만.
-  if (order.transport_mode === 'UPS') {
+  //   판정은 반드시 "수정 후" 운송수단(effectiveTransportMode) 기준 —
+  //   수정 전 원본(order.transport_mode)으로 보면 UPS→비UPS는 불필요하게 갱신하고,
+  //   비UPS→UPS는 갱신을 놓쳐 스냅샷이 없는 채 남는다.
+  if (effectiveTransportMode === 'UPS') {
     try {
       await refreshUpsRateSnapshot({ supabase, orderId, estimateFn: estimateUpsFreightFn });
     } catch (err) {
