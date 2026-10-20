@@ -53,7 +53,7 @@ export const BULK_ITEM_HEADERS = [
 // UPS는 HS 코드 필수·품명 35자 이내(영문) — 샘플은 실제 HS 코드.
 export const BULK_ITEM_SAMPLE = [
   '1', '1', 'Sample Item', '2', '50', 'USD', '8471300000',
-  'EA', '',
+  'PCE', '',
 ];
 
 export function generateBulkOrderTemplate(): string {

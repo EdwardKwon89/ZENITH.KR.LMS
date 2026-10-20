@@ -1,6 +1,7 @@
 // Pure mapping functions — no server-only imports. Safe for client components and tests.
 import { Country, State } from 'country-state-city';
 import { stripNonDigits } from '@/lib/validation/shxk-limits';
+import { isShxkDeclareUnit } from '@/lib/shxk/declare-units';
 
 // TASK-B-307 (Issue #1137): state/country 원시코드→이름 변환 유틸
 export function resolveRegionName(stateCode: string, countryCode: string): string {
@@ -51,15 +52,11 @@ export function buildInvoiceFromItems(packages: Record<string, unknown>[]): Reco
   return items.length > 0 ? items : [{ invoice_enname: 'General Merchandise', invoice_quantity: '1', invoice_unitcharge: '1.00', unit_code: 'PCE' }];
 }
 
-const SHXK_UNIT_CODE_MAP: Record<string, string> = {
-  EA: 'PCE',
-  PCS: 'PCE',
-  SET: 'SET',
-  MTR: 'MTR',
-};
-
+// TASK-B-337 (Issue #1251 v2): 변환 없이 SHXK 정본 목록의 코드를 그대로 전송한다.
+// 빈 값·목록에 없는 값만 PCE로 폴백한다. (이전 EA→PCE·PCS→PCE 매핑은 폐기)
 export function resolveShxkUnitCode(packingUnit: string): string {
-  return SHXK_UNIT_CODE_MAP[(packingUnit || '').toUpperCase()] || 'PCE';
+  const upper = (packingUnit || '').toUpperCase();
+  return isShxkDeclareUnit(upper) ? upper : 'PCE';
 }
 
 // TASK-B-325 (DEF-B-145) → TASK-B-326 (DEF-B-146): UPS AddressLine 거부 방지용 주소 축약

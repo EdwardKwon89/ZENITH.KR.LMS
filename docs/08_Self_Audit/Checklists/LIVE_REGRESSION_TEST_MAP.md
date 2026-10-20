@@ -947,6 +947,20 @@ TASK-B-332가 `orderRegistrationSchema`의 전화 규칙(숫자만 `/^\d*$/`·`/
 | TC-336-RLS-01/02 | 실DB·화주 세션(R-14): `WW_SAVER_NONDOC` 통과 / `WWE` 거부 | RLS(`is_active=true`) 하에서 정상 코드까지 거부되지 않음 | `tests/integration/def-b151-ups-product-guard.test.ts` |
 | TC-336-BULK | 대량 등록: 한 행이 미존재 코드로 throw | 해당 행만 `success:false`(메시지 그대로 노출), 다른 행 성공(행 격리) | `tests/unit/operations/bulk-orders.test.ts` |
 
+## 70. SHXK 신고단위 7종 정본 목록·YDS/KG 지원·정합 테스트 (Issue #1251 / TASK-B-337)
+
+SHXK `getdeclareunit` 실측(2026-10-13) 7개 신고단위(`PCE, SET, MTR, PCS, EA, YDS, KG`)를 정본 상수 `SHXK_DECLARE_UNITS`(`src/lib/shxk/declare-units.ts`)로 도입하고, **v2 결정(JSJung 2026-10-21)에 따라 코드 그대로 표출·전송**한다. 기존 `SHXK_UNIT_CODE_MAP`(`EA→PCE`, `PCS→PCE`) 변환은 폐기 — 빈 값/목록 외 값만 `PCE` 폴백. 신규 품목 기본값을 `EA`→`PCE`로 변경(`EA`가 중국어 "套"로 나가는 것 방지). 실서버 createorder의 `EA`·`PCS`·`YDS`·`KG` 수락 여부는 병합 후 JSJung 라이브 확인 몫(미확인 위험).
+
+| ID | 검증 내용 | 기대 결과 | 테스트 위치 |
+| :-- | :-- | :-- | :-- |
+| TC-337-1 | `resolveShxkUnitCode` — 7개 코드 각각 + 소문자 대문자화 + 빈 값/`XYZ` 폴백 | 각 코드 자기 자신 반환(변환 없음), `''`·`XYZ`→`PCE` | `tests/unit/ups/shxk-declare-units.test.ts` |
+| TC-337-2 | 정합 불변식: `PACKING_UNIT_OPTIONS` 전 항목 → `resolveShxkUnitCode(v)===v` && `isShxkDeclareUnit(v)` | 옵션/목록/매핑 어긋나면 FAIL (모듈 import, 복사 금지) | `tests/unit/ups/shxk-declare-units.test.ts` |
+| TC-337-3 | `PACKING_UNIT_OPTIONS` 집합 == `SHXK_DECLARE_UNITS` code 집합(7개, 순서 무관) | 한쪽만 늘리면 FAIL | `tests/unit/ups/shxk-declare-units.test.ts` |
+| TC-337-4 | `buildInvoiceFromItems` — `EA`/`PCS`/`YDS`/`KG` | `unit_code`가 입력과 같은 값으로 나감 | `tests/unit/ups/shxk-declare-units.test.ts` |
+| TC-337-5 | `validateShxkPayload` 단위 검사 | 허용 단위(`PCE`) 에러 0 / `XYZ`는 한글 에러 반환 배열 포함 | `tests/unit/ups/shxk-declare-units.test.ts` |
+| TC-337-6 | 기본값 `PCE` | `DEFAULT_PACKING_UNIT==='PCE'` + `orderItemSchema.parse` 미지정 시 `'PCE'` | `tests/unit/ups/shxk-declare-units.test.ts` |
+| TC-337-MAP | `ups-labels-mapping.test.ts` 갱신 | `EA→EA`, `PCS→PCS`, `ea→EA`, `buildInvoiceFromItems` EA 기대값 `EA` (요구 변경) | `tests/unit/ups/ups-labels-mapping.test.ts` |
+
 ## 71. UPS 오더 "UPS 등록 전까지" 전체 수정 + 상세 화면 수정 버튼 (Issue #1254 / TASK-B-339)
 
 고객 요청(JSJung 2026-10-20 Q1·Q2 확정)으로 UPS 오더는 **UPS 등록 전**(창고 `UPS 등록` = WAREHOUSED→PACKED·SHXK createorder 이전)까지 전체 수정 가능해졌다. TASK-B-284(#1070)의 WAREHOUSED+UPS 부분 수정 통제(화주·운송수단·실측 치수 잠금)를 의도적으로 완화하되, 세 가지 안전장치로 보완했다.
@@ -964,10 +978,10 @@ TASK-B-332가 `orderRegistrationSchema`의 전화 규칙(숫자만 `/^\d*$/`·`/
 | TC-LBL-01~06 | `hasActiveUpsLabel` — `.eq('order_id')`·`.eq('is_voided',false)` 인자 캡처 | 있음 true / 없음 false / DB error throw | `tests/unit/orders/ups-registration.test.ts` |
 | TC-PATH-01~05 | `getOrderDetailPath` | UPS→`/orders/{id}/ups-detail`, AIR/`null`/`undefined`→`/orders/{id}` | `tests/unit/orders/detail-path.test.ts` |
 | TC-SNAP-01~07 | `refreshUpsRateSnapshot` — 기존/없음/`is_manual`/계산 불가/추정 throw/인자·국가 대체 | update-or-insert, `is_manual` 보존, 계산 불가 시 warn·불변, throw 전파 | `tests/unit/orders/rate-snapshot-refresh.test.ts` |
-| TC-339-①~⑨ | `updateOrder` — 라벨 차단 / 잠금 해제 반영 / `measured_at` 이월·해제 / 동시성 거부 / 비UPS 라벨 조회 0회 | 삭제·삽입 0회 포함 인자 캡처 단언 | `tests/unit/logistics/order-update-b339.test.ts` |
+| TC-339-①~⑨-d | `updateOrder` — 라벨 차단 / 잠금 해제 반영 / `measured_at` 이월·해제 / 동시성 거부 / 비UPS 라벨 조회 0회 / ⑦-b·⑦-c 수정 후 **운송수단 기준 스냅샷 갱신**(AIR→UPS 갱신·UPS→AIR 미갱신) / ⑨-b~d **null↔0 정규화**(DB null + 폼 0 → 이월, DB null + 폼 5 → 미이월, gross_weight null↔0) | 삭제·삽입 0회 포함 인자 캡처 단언 | `tests/unit/logistics/order-update-b339.test.ts` |
 | TC-BTN-①~⑤ | UPS 상세 렌더 — 수정 링크 href / WAREHOUSED title `재실측` / PACKED `aria-disabled` / HELD+라벨 `UPS 등록취소` | 실제 default export 렌더, 부정 단언 전 목록보기 존재 단언 | `tests/unit/orders/ups-detail-edit-button.test.tsx` |
 | TC-FRM-①~④ | `getOrderEditScope('WAREHOUSED','UPS')` 실제 함수로 폼 렌더 | 부분 수정 배너 없음 / 운송수단·실측 입력 disabled 아님 | `tests/unit/orders/edit-form-warehoused-unlocked.test.tsx` |
-| TC-339-INT-①~⑥ | 실DB(R-14) — 라벨 없음 실측 변경/불변, 활성 라벨 거부, 낙관적 동시성, 화주 세션 RLS 조회, 스냅샷 1행 유지 | `measured_at` NULL/보존, 거부 시 DB 불변, RLS로 라벨 조회 가능 | `tests/integration/ups-edit-before-registration.test.ts` |
+| TC-339-INT-①~⑥ | 실DB(R-14) — 라벨 없음 실측 변경/불변, 활성 라벨 거부, 낙관적 동시성, 화주 세션 RLS 조회, 스냅샷 1행 유지 / INT-②는 **치수 null 패키지 케이스 포함**(null↔0 정규화 후 `measured_at` 보존) | `measured_at` NULL/보존, 거부 시 DB 불변, RLS로 라벨 조회 가능 | `tests/integration/ups-edit-before-registration.test.ts` |
 | TC-284-01/02 | 기존 TASK-B-284 통합 — 잠금 해제 반영(미실측 수정 / 실측 값 변경 시 재실측) | TC-284-02는 새 사양으로 갱신(기대값 변경) | `tests/integration/iss1070-ups-warehoused-partial-edit.test.ts` |
 | TC-284-T2/T3/T4 | `getOrderEditScope` WAREHOUSED+UPS 잠금 해제 / WAREHOUSED+비UPS 불가 | T3 기대값 갱신, T2·T4 불변 | `tests/unit/logistics/status-machine.test.ts` |
 
