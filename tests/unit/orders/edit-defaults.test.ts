@@ -166,3 +166,26 @@ describe('TASK-B-333: resolveShipperAddressDefaults (Issue #1240 항목 4)', () 
     });
   });
 });
+
+// TASK-B-340 (Issue #1256): 화주 국가코드 빈 값('') 기본값 정정 — `??`는 ''을 통과시켰다.
+describe('TASK-B-340: 화주 국가코드 빈 값 기본값 정정 (Issue #1256)', () => {
+  it('buildOrderEditDefaults — "" → KR, null → KR, "JP" → JP (recipient는 불변)', () => {
+    expect((buildOrderEditDefaults(baseOrder({ shipper_country_code: '' })) as any).shipper_country_code).toBe('KR');
+    expect((buildOrderEditDefaults(baseOrder({ shipper_country_code: null })) as any).shipper_country_code).toBe('KR');
+    expect((buildOrderEditDefaults(baseOrder({ shipper_country_code: 'JP' })) as any).shipper_country_code).toBe('JP');
+    // recipient_country_code는 이 Task에서 변경하지 않는다 — ''가 그대로 유지됨
+    expect((buildOrderEditDefaults(baseOrder({ recipient_country_code: '' })) as any).recipient_country_code).toBe('');
+  });
+
+  it('resolveShipperAddressDefaults — saved.country_code "" → KR', () => {
+    const res = resolveShipperAddressDefaults({
+      isEdit: true,
+      touched: false,
+      mode: 'auto',
+      saved: { country_code: '', address: 'Saved Street 1' },
+      affiliation: null,
+    });
+    expect(res.country_code).toBe('KR');
+    expect(res.address).toBe('Saved Street 1');
+  });
+});

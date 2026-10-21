@@ -119,6 +119,9 @@ function buildSupabase(opts: { activeCode?: string; fromProducts?: { chain: any;
       select: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
       order: vi.fn().mockReturnThis(),
+      // TASK-B-339: updateOrder의 UPS 라벨 가드(hasActiveUpsLabel)가 zen_ups_labels에
+      //   .limit(1).maybeSingle() 체인을 사용한다 — 체인 호환용으로만 추가(단언 무관).
+      limit: vi.fn().mockReturnThis(),
       maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
       single: vi.fn().mockResolvedValue({ data: null, error: null }),
       insert: vi.fn().mockResolvedValue({ error: null }),

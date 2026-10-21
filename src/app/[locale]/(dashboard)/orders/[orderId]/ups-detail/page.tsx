@@ -6,7 +6,10 @@ import { getUpsLabelStatus } from '@/app/actions/operations/ups-labels';
 import { getUpsTrackingEvents } from '@/app/actions/operations/tracking';
 import { checkPermission } from '@/lib/auth/rbac';
 import { notFound, redirect } from 'next/navigation';
-import { Truck, FileText, User } from 'lucide-react';
+import Link from 'next/link';
+import { Truck, FileText, User, Pencil } from 'lucide-react';
+import { OrderStatus } from '@/types/orders';
+import { getUpsEditAvailability } from '@/lib/orders/ups-edit-availability';
 
 import { ZenCard, ZenBadge } from '@/components/ui/ZenUI';
 import UpsOrderStatusStepper from '@/components/ups/UpsOrderStatusStepper';
@@ -91,15 +94,45 @@ export default async function UpsOrderDetailPage({ params }: UpsOrderDetailPageP
   // Label & Trade Doc Status
   const upsLabelStatus = await getUpsLabelStatus(orderId);
 
+  // TASK-B-339 (Issue #1254): 상세 화면에서 수정 버튼으로 진입 — 등록 사실(활성 라벨)을 반영해 판정.
+  //   등록 여부는 이미 조회한 getUpsLabelStatus를 재사용한다 (추가 쿼리 금지).
+  const editAvailability = getUpsEditAvailability(
+    order.status as OrderStatus,
+    !!upsLabelStatus.hasActiveLabel
+  );
+
   return (
     <div className="flex-1 flex flex-col gap-6 p-4 md:p-8 max-w-7xl mx-auto w-full">
       {/* Navigation Header */}
       <div className="flex items-center justify-between">
         {/* TASK-B-301 (Issue #1121): router.back() 목록보기 버튼 (기존 일반 오더 상세 Link 교체) */}
         <UpsDetailBackToListButton />
-        <ZenBadge className="text-xs font-mono font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
-          UPS Special Delivery Detail
-        </ZenBadge>
+        <div className="flex items-center gap-2">
+          {editAvailability.editable ? (
+            <Link
+              href={`/orders/${orderId}/edit`}
+              title={editAvailability.message}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 text-white text-xs font-bold hover:bg-blue-700 transition-colors"
+            >
+              <Pencil size={14} />
+              수정
+            </Link>
+          ) : (
+            <button
+              type="button"
+              disabled
+              aria-disabled="true"
+              title={editAvailability.message}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-200 text-slate-400 text-xs font-bold cursor-not-allowed dark:bg-slate-800 dark:text-slate-600"
+            >
+              <Pencil size={14} />
+              수정
+            </button>
+          )}
+          <ZenBadge className="text-xs font-mono font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+            UPS Special Delivery Detail
+          </ZenBadge>
+        </div>
       </div>
 
       {/* Main Layout — TASK-B-308: 단일 컬럼 레이아웃 */}

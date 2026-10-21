@@ -176,13 +176,15 @@ describe('ZENITH Status Machine: CLAIMED 전이 규칙 (R-09)', () => {
       expect(isOrderPartiallyEditable(OrderStatus.WAREHOUSED, undefined)).toBe(false);
     });
 
-    it('TC-284-T3: getOrderEditScope(WAREHOUSED, UPS) — 헤더/치수 잠금 + 감사 필요', () => {
+    it('TC-284-T3: getOrderEditScope(WAREHOUSED, UPS) — 전체 수정 가능 + 잠금 해제 + 감사 필요 (TASK-B-339 갱신)', () => {
+      // TASK-B-339 (Issue #1254): 고객 요청으로 잠금 3종이 해제되어 전체 수정 가능(fullEditable)이 되었다.
+      //   실측값 보호는 updateOrder의 measured_at 규칙(값 변경 시 재실측 필요)이 맡는다.
       const scope = getOrderEditScope(OrderStatus.WAREHOUSED, 'UPS');
       expect(scope.editable).toBe(true);
-      expect(scope.fullEditable).toBe(false);
-      expect(scope.lockShipperId).toBe(true);
-      expect(scope.lockTransportMode).toBe(true);
-      expect(scope.lockMeasuredPackageDims).toBe(true);
+      expect(scope.fullEditable).toBe(true);
+      expect(scope.lockShipperId).toBe(false);
+      expect(scope.lockTransportMode).toBe(false);
+      expect(scope.lockMeasuredPackageDims).toBe(false);
       expect(scope.auditEdit).toBe(true);
     });
 

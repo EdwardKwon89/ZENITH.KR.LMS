@@ -77,12 +77,12 @@ describe('UPS Labels Mapping Functions', () => {
   });
 
   describe('resolveShxkUnitCode', () => {
-    it('EA → PCE', () => {
-      expect(resolveShxkUnitCode('EA')).toBe('PCE');
+    it('EA → EA (TASK-B-337: 변환 없음)', () => {
+      expect(resolveShxkUnitCode('EA')).toBe('EA');
     });
 
-    it('PCS → PCE', () => {
-      expect(resolveShxkUnitCode('PCS')).toBe('PCE');
+    it('PCS → PCS (TASK-B-337: 변환 없음)', () => {
+      expect(resolveShxkUnitCode('PCS')).toBe('PCS');
     });
 
     it('SET → SET', () => {
@@ -93,6 +93,14 @@ describe('UPS Labels Mapping Functions', () => {
       expect(resolveShxkUnitCode('MTR')).toBe('MTR');
     });
 
+    it('YDS → YDS (TASK-B-337: 신규 지원)', () => {
+      expect(resolveShxkUnitCode('YDS')).toBe('YDS');
+    });
+
+    it('KG → KG (TASK-B-337: 신규 지원)', () => {
+      expect(resolveShxkUnitCode('KG')).toBe('KG');
+    });
+
     it('빈 문자열 → PCE (기본값)', () => {
       expect(resolveShxkUnitCode('')).toBe('PCE');
     });
@@ -101,8 +109,8 @@ describe('UPS Labels Mapping Functions', () => {
       expect(resolveShxkUnitCode('XYZ')).toBe('PCE');
     });
 
-    it('소문자 ea → PCE (대소문자 무시)', () => {
-      expect(resolveShxkUnitCode('ea')).toBe('PCE');
+    it('소문자 ea → EA (대소문자 무시, TASK-B-337: 변환 없음)', () => {
+      expect(resolveShxkUnitCode('ea')).toBe('EA');
     });
   });
 
@@ -115,14 +123,14 @@ describe('UPS Labels Mapping Functions', () => {
       const result = buildInvoiceFromItems(pkgs as any);
 
       expect(result).toHaveLength(2);
-      expect(result[0]).toMatchObject({ invoice_enname: 'Widget', invoice_quantity: '2', invoice_unitcharge: '10', sku: 'W001', unit_code: 'PCE' });
+      expect(result[0]).toMatchObject({ invoice_enname: 'Widget', invoice_quantity: '2', invoice_unitcharge: '10', sku: 'W001', unit_code: 'EA' });
       expect(result[1]).toMatchObject({ invoice_enname: 'Gadget', invoice_quantity: '1', invoice_unitcharge: '50', hs_code: '8471', unit_code: 'MTR' });
     });
 
-    it('item_packing_unit을 unit_code로 변환해 반환한다', () => {
+    it('item_packing_unit을 unit_code로 변환해 반환한다 (TASK-B-337: EA는 그대로)', () => {
       const packages = [{ items: [{ item_name: 'Jeans', quantity: 1, unit_price: 10, item_packing_unit: 'EA' }] }];
       const result = buildInvoiceFromItems(packages);
-      expect(result[0].unit_code).toBe('PCE');
+      expect(result[0].unit_code).toBe('EA');
     });
 
     it('item_packing_unit 없으면 PCE 기본값', () => {

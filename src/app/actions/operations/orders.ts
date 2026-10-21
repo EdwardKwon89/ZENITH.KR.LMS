@@ -18,6 +18,9 @@ import { syncInventoryFromOrder } from "./inventory";
 import { estimateUpsFreight as estimateUpsFreightFn } from "@/app/actions/ups/freight";
 import { ORDER_EDIT_LOG_CORE_FIELDS, extractOrderEditLogSnapshot, extractCargoSummarySnapshot, cargoSummaryEquals } from "@/lib/orders/edit-log-fields";
 import { assertActiveUpsProduct } from "@/lib/orders/ups-product-guard";
+import { hasActiveUpsLabel } from "@/lib/orders/ups-registration";
+import { getUpsEditAvailability } from "@/lib/orders/ups-edit-availability";
+import { refreshUpsRateSnapshot } from "@/lib/orders/rate-snapshot-refresh";
 
 interface SaveOrderRateSnapshotParams {
   supabase: any;
@@ -187,6 +190,46 @@ export async function createOrder(payload: OrderRegistrationInput) {
 }
 
 /**
+ * TASK-B-339 (Issue #1254): 숫자 정규화 — null·undefined·''·0·NaN을 모두 "비어 있음(=0)"으로,
+ * '10' vs 10 같은 표기 차이도 같은 수로 취급한다.
+ *   근거: 수정 화면 기본값(`edit-defaults.ts`)이 DB의 null 치수를 0으로 실어 보내고
+ *   (`length: pkg.length ?? 0`), 폼 입력(valueAsNumber)이 그 0을 그대로 제출한다.
+ *   null(DB) !== 0(폼)로 판정하면 값이 바뀌지 않았는데도 measured_at이 지워져 불필요한 재실측이 강제된다.
+ *   (NONDOC 실측 패키지가 중량만 실측하고 치수가 비어 있는 경우 실제로 발생한다.)
+ */
+function normalizePackageNumber(value: unknown): number {
+  const num = Number(value ?? 0);
+  return Number.isFinite(num) ? num : 0;
+}
+
+/**
+ * TASK-B-339 (Issue #1254 / 안전장치 ①): 실측 패키지의 5개 값(치수 3·중량·포장수)이 기존과 같은지.
+ * 같을 때만 measured_at을 이월하고, 하나라도 다르면 이월하지 않아 패키지가 "미실측"이 된다.
+ */
+function measuredValuesUnchanged(
+  previous: { length: number | null; width: number | null; height: number | null; gross_weight: number | null; packing_count: number | null },
+  pkg: { length?: unknown; width?: unknown; height?: unknown; gross_weight?: unknown; packing_count?: unknown }
+): boolean {
+  return (
+    normalizePackageNumber(previous.length) === normalizePackageNumber(pkg.length) &&
+    normalizePackageNumber(previous.width) === normalizePackageNumber(pkg.width) &&
+    normalizePackageNumber(previous.height) === normalizePackageNumber(pkg.height) &&
+    normalizePackageNumber(previous.gross_weight) === normalizePackageNumber(pkg.gross_weight) &&
+    normalizePackageNumber(previous.packing_count) === normalizePackageNumber(pkg.packing_count)
+  );
+}
+
+/**
+ * TASK-B-339 (Issue #1254 / 안전장치 ②): 타임스탬프 정규화 — DB·폼이 표기 방식이 달라도
+ * 같은 시각이면 같다고 본다 (ISO/PostgreSQL 표기 혼용 방지).
+ */
+function normalizeIsoTimestamp(value: unknown): string | null {
+  if (!value) return null;
+  const date = new Date(String(value));
+  return Number.isNaN(date.getTime()) ? String(value) : date.toISOString();
+}
+
+/**
  * [WBS 2.1 / Ds-11 3.7] 기존 오더를 수정하고 인벤토리를 재조정합니다.
  */
 export async function updateOrder(orderId: string, payload: OrderRegistrationInput) {
@@ -201,6 +244,18 @@ export async function updateOrder(orderId: string, payload: OrderRegistrationInp
   const editScope = getOrderEditScope(order.status as OrderStatus, order.transport_mode ?? undefined);
   if (!editScope.editable) {
     throw new Error(`Order ${orderId} cannot be edited in status: ${order.status}`);
+  }
+
+  // TASK-B-339 (Issue #1254): UPS 등록(활성 라벨) 후에는 수정 불가 — 상태와 무관하게 최우선.
+  //   UI가 숨겼거나 구버전 화면이 있어도 서버가 막는다. DB error는 hasActiveUpsLabel이 throw한다.
+  if (order.transport_mode === 'UPS') {
+    const availability = getUpsEditAvailability(
+      order.status as OrderStatus,
+      await hasActiveUpsLabel(supabase, orderId)
+    );
+    if (!availability.editable) {
+      throw new Error(availability.message);
+    }
   }
 
   const { data: oldItems } = await orderRepo.getItemsByOrderId(orderId);
@@ -284,6 +339,24 @@ export async function updateOrder(orderId: string, payload: OrderRegistrationInp
   }));
   const oldCargoSnapshot = extractCargoSummarySnapshot(oldPackages as Record<string, unknown>[]);
 
+  // TASK-B-339 (Issue #1254 / 안전장치 ②): 낡은 폼 덮어쓰기 방지(낙관적 동시성).
+  //   잠금이 풀리면서 화주가 실측값을 수정할 수 있게 되었으므로, 화면을 열어둔 사이 창고가 실측/재실측한
+  //   경우를 감지해 저장을 거부한다. 폼이 실어 보낸 measured_at(화면 로드 시점)과 DB의 현재 measured_at이
+  //   다르면 이미 갱신된 것이다.
+  //   measured_at을 아예 보내지 않은 payload(레거시/형식 미포함)는 비교 대상이 아니므로 건너뛴다.
+  const previousPackagesById = new Map<string, any>();
+  (oldPackagesRaw ?? []).forEach((p: any) => {
+    if (p?.id) previousPackagesById.set(p.id, p);
+  });
+  for (const pkg of validated.packages ?? []) {
+    if (pkg.measured_at === undefined || !pkg.id) continue;
+    const previous = previousPackagesById.get(pkg.id);
+    if (!previous?.measured_at) continue;
+    if (normalizeIsoTimestamp(previous.measured_at) !== normalizeIsoTimestamp(pkg.measured_at)) {
+      throw new Error('창고에서 실측값이 갱신되었습니다. 화면을 새로고침한 뒤 다시 수정해 주세요.');
+    }
+  }
+
   // 이력 기록은 패키지 업데이트 후에 수행 (헤더+화물 변경을 단일 레코드로 기록)
   await orderRepo.updateHeader(orderId, headerData);
 
@@ -313,24 +386,33 @@ export async function updateOrder(orderId: string, payload: OrderRegistrationInp
 
   if (validated.packages && validated.packages.length > 0) {
     for (const pkg of validated.packages) {
-      // WAREHOUSED+UPS 부분 수정: 패키지 id가 실측 대상이면 치수/무게/포장수 무시
-      const isMeasuredLocked = editScope.lockMeasuredPackageDims && !!pkg.id && measuredById.has(pkg.id);
-      const measured = isMeasuredLocked ? measuredById.get(pkg.id!) : undefined;
+      const previousMeasured = !!pkg.id ? measuredById.get(pkg.id) : undefined;
+
+      // TASK-B-284 (Issue #1070): 잠금 스코프에서는 실측값을 그대로 유지 (다른 스코프 호환용 —
+      //   WAREHOUSED+UPS는 TASK-B-339에서 lockMeasuredPackageDims=false가 되어 자연히 비활성)
+      const isMeasuredLocked = editScope.lockMeasuredPackageDims && !!previousMeasured;
+
+      // TASK-B-339 (Issue #1254 / 안전장치 ①): 잠금이 풀렸더라도 실측값은 5개 값(치수 3·중량·포장수)이
+      //   모두 기존과 같을 때만 measured_at을 이월한다. 하나라도 바뀌면 이월하지 않으므로 패키지는
+      //   "미실측" 상태가 되어 창고가 재실측해야 한다 (화주의 낡은 값이 실측값으로 남는 것을 차단).
+      const keepMeasuredAt =
+        isMeasuredLocked || (!!previousMeasured && measuredValuesUnchanged(previousMeasured, pkg));
+      const measured = keepMeasuredAt ? previousMeasured : undefined;
 
       const { data: packageData, error: pkgError } = await orderRepo.insertPackage({
         order_id: orderId,
         packing_unit: pkg.packing_unit,
-        packing_count: isMeasuredLocked ? (measured?.packing_count ?? pkg.packing_count) : pkg.packing_count,
+        packing_count: keepMeasuredAt ? (measured?.packing_count ?? pkg.packing_count) : pkg.packing_count,
         physical_box_count: pkg.physical_box_count ?? 1,
-        length: isMeasuredLocked ? measured?.length : pkg.length,
-        width: isMeasuredLocked ? measured?.width : pkg.width,
-        height: isMeasuredLocked ? measured?.height : pkg.height,
-        gross_weight: isMeasuredLocked ? measured?.gross_weight : pkg.gross_weight,
+        length: keepMeasuredAt ? measured?.length : pkg.length,
+        width: keepMeasuredAt ? measured?.width : pkg.width,
+        height: keepMeasuredAt ? measured?.height : pkg.height,
+        gross_weight: keepMeasuredAt ? measured?.gross_weight : pkg.gross_weight,
         volume: pkg.volume,
         special_cargo_type: pkg.special_cargo_type ?? 'NONE',
         content_type: pkg.content_type ?? 'GENERAL',
         domestic_ref_no: pkg.domestic_ref_no ?? null,
-        ...(isMeasuredLocked && measured?.measured_at ? { measured_at: measured.measured_at } : {}),
+        ...(keepMeasuredAt && measured?.measured_at ? { measured_at: measured.measured_at } : {}),
       });
 
       // TASK-B-286 (Issue #1075 / DEF-B-056): 조용한 실패 금지 — 패키지 insert 실패 시 명시적 throw
@@ -413,6 +495,19 @@ export async function updateOrder(orderId: string, payload: OrderRegistrationInp
       old_data: finalOldData,
       new_data: finalNewData,
     });
+  }
+
+  // TASK-B-339 (Issue #1254 / 안전장치 ③): UPS 오더는 수정 후 운임 스냅샷 갱신 —
+  //   중량·치수가 바뀌어도 스냅샷이 낡은 채 남는 결함(③) 방지. 실패해도 수정 저장은 롤백하지 않고 기록만.
+  //   판정은 반드시 "수정 후" 운송수단(effectiveTransportMode) 기준 —
+  //   수정 전 원본(order.transport_mode)으로 보면 UPS→비UPS는 불필요하게 갱신하고,
+  //   비UPS→UPS는 갱신을 놓쳐 스냅샷이 없는 채 남는다.
+  if (effectiveTransportMode === 'UPS') {
+    try {
+      await refreshUpsRateSnapshot({ supabase, orderId, estimateFn: estimateUpsFreightFn });
+    } catch (err) {
+      logger.error('[ORDER_UPDATE] UPS 운임 스냅샷 갱신 실패(수정 저장은 유지):', err);
+    }
   }
 
   revalidatePath("/(dashboard)/orders", "page");

@@ -32,6 +32,7 @@ import { createOrderServices } from '@/app/actions/operations/order-services';
 import AddressBookSelector from '@/components/address-book/AddressBookSelector';
 import { AddressInput } from '@/components/common/AddressInput';
 import ItemsTotalSummary from './ItemsTotalSummary';
+import { PACKING_UNIT_OPTIONS, DEFAULT_PACKING_UNIT } from '@/lib/orders/packing-units';
 
 interface OrderRegistrationFormProps {
   shippers: any[];
@@ -90,7 +91,7 @@ const NestedItems: React.FC<{
         </span>
         <button 
           type="button" 
-          onClick={() => append({ item_name: '', quantity: 1, unit_price: 0, currency: 'USD', item_packing_unit: 'EA' })}
+          onClick={() => append({ item_name: '', quantity: 1, unit_price: 0, currency: 'USD', item_packing_unit: DEFAULT_PACKING_UNIT })}
           className="text-[10px] bg-blue-50 text-blue-600 px-2 py-1 rounded-md hover:bg-blue-100 transition-colors flex items-center gap-1"
         >
           <Plus size={10} /> {t('add_item')}
@@ -178,10 +179,9 @@ const NestedItems: React.FC<{
                   {...register(`packages.${nestIndex}.items.${k}.item_packing_unit`)}
                   className="w-full text-xs h-9 bg-white border border-slate-200 rounded-lg focus:outline-none"
                 >
-                   <option value="EA">EA</option>
-                   <option value="SET">SET</option>
-                   <option value="PCS">PCS</option>
-                   <option value="MTR">MTR</option>
+                  {PACKING_UNIT_OPTIONS.map((u) => (
+                    <option key={u.value} value={u.value} title={u.title}>{u.value}</option>
+                  ))}
                 </select>
               </div>
               <div className="col-span-3">
@@ -239,7 +239,7 @@ export const ORDER_REGISTRATION_DEFAULT_VALUES = {
       special_cargo_type: 'NONE',
       content_type: 'GENERAL',
       domestic_ref_no: '',
-      items: [{ item_name: '', quantity: 1, unit_price: 0, currency: 'USD', item_packing_unit: 'EA' }],
+      items: [{ item_name: '', quantity: 1, unit_price: 0, currency: 'USD', item_packing_unit: DEFAULT_PACKING_UNIT }],
     },
   ],
 };
@@ -1445,7 +1445,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                     <ZenButton 
                       type="button" 
                       variant="glass" 
-                      onClick={() => appendPackage({ packing_unit: 'BOX', packing_count: 1, physical_box_count: 1, gross_weight: 0, special_cargo_type: 'NONE', content_type: transportMode === 'UPS' ? 'NONDOC' : 'GENERAL', domestic_ref_no: '', items: [{ item_name: '', quantity: 1, unit_price: 0, currency: 'USD', item_packing_unit: 'EA' }] })}
+                      onClick={() => appendPackage({ packing_unit: 'BOX', packing_count: 1, physical_box_count: 1, gross_weight: 0, special_cargo_type: 'NONE', content_type: transportMode === 'UPS' ? 'NONDOC' : 'GENERAL', domestic_ref_no: '', items: [{ item_name: '', quantity: 1, unit_price: 0, currency: 'USD', item_packing_unit: DEFAULT_PACKING_UNIT }] })}
                       className="px-3 py-1 text-xs"
                     >
                       <Plus size={14} /> 패키지 추가

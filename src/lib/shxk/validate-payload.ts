@@ -7,6 +7,7 @@
 // 필수 필드 기준: docs/80_RawData/Phase8_UPS_API_리서치_결과.md (SHXK createorder 공식 필드 스펙)
 
 import { HS_CODE_MAX, ITEM_NAME_MAX, PHONE_MAX_DIGITS, stripNonDigits } from '@/lib/validation/shxk-limits';
+import { isShxkDeclareUnit } from '@/lib/shxk/declare-units';
 
 export interface ShxkPayloadShape {
   shipper?: Record<string, unknown>;
@@ -64,6 +65,11 @@ export function validateShxkPayload(payload: ShxkPayloadShape): string[] {
       if (isEmpty(item.invoice_unitcharge)) errors.push(`품목 ${idx}: 단가 누락`);
       if (isEmpty(item.hs_code)) errors.push(`품목 ${idx}: HS 코드 누락`);
       else if (String(item.hs_code).trim().length > HS_CODE_MAX) errors.push(`품목 ${idx}: HS 코드 ${HS_CODE_MAX}자 초과`);
+      // TASK-B-337 (Issue #1251): unit_code가 있으면 SHXK 허용 단위인지 검사.
+      // 매핑(resolveShxkUnitCode)을 거치므로 정상 경로에서는 발생하지 않는 방어선이다.
+      if (!isEmpty(item.unit_code) && !isShxkDeclareUnit(String(item.unit_code))) {
+        errors.push(`품목 ${idx}: 단위 코드 ${String(item.unit_code)}은(는) SHXK 허용 단위가 아닙니다`);
+      }
     });
   }
 

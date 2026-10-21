@@ -150,7 +150,7 @@ appToken={token}&appKey={key}&serviceMethod={method}&paramsJson={json}
 | `invoice[].invoice_enname` | string | 500 | **Y** | 영문 품명 |
 | `invoice[].invoice_cnname` | string | 500 | 조건 | 중문 품명 |
 | `invoice[].invoice_quantity` | string | 6 | **Y** | 수량 |
-| `invoice[].unit_code` | string | | | 단위: MTR(미터) / PCE(개) / SET(세트), 기본 PCE |
+| `invoice[].unit_code` | string | | | 단위: `PCE`(件) / `SET`(套) / `MTR`(米) / `PCS`(个) / `EA`(套) / `YDS`(码) / `KG`(千克), 기본 PCE. (출처: `getdeclareunit` 실측 2026-10-13 · TASK-B-337 v2: 코드 그대로 전송. 주의: `EA` 중국어 명칭 "套") |
 | `invoice[].invoice_unitcharge` | string | 12,2 | **Y** | 단가(USD), 소수2자리 |
 | `invoice[].hs_code` | string | 30 | | HS코드 |
 | `invoice[].register_code` | string | 30 | | HTS번호 (미국용) |

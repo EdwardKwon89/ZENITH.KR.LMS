@@ -96,8 +96,12 @@ export function isOrderEditable(status: OrderStatus): boolean {
 }
 
 /**
- * TASK-B-284 (Issue #1070): WAREHOUSED + UPS 오더가 "부분 수정 가능" 상태인지 확인.
- * (WAREHOUSED + 비UPS는 여전히 수정 불가 — 부분 수정 허용 범위는 UPS만 해당)
+ * TASK-B-284 (Issue #1070): WAREHOUSED + UPS 오더가 "수정 가능" 상태인지 확인.
+ * (WAREHOUSED + 비UPS는 여전히 수정 불가 — 허용 범위는 UPS만 해당)
+ *
+ * TASK-B-339 (Issue #1254)에서 의미가 바뀌었다: 고객 요청으로 WAREHOUSED+UPS는 이제 **전체 수정**
+ * (fullEditable:true)이므로 "부분 수정"이 아니라 "수정 가능 여부"를 묻는 함수가 되었다.
+ * 스코프 플래그를 소비하는 쪽은 `getOrderEditScope`를 사용하고 이 함수는 참조처가 없다.
  */
 export function isOrderPartiallyEditable(status: OrderStatus, transportMode?: string): boolean {
   return status === OrderStatus.WAREHOUSED && transportMode === 'UPS';
@@ -107,9 +111,13 @@ export function isOrderPartiallyEditable(status: OrderStatus, transportMode?: st
  * TASK-B-284 (Issue #1070): 오더 수정 가능 범위를 나타내는 스코프.
  * - editable: 오더를 수정할 수 있는지 (전체 수정 or 부분 수정)
  * - fullEditable: 모든 필드 수정 가능한지 (REGISTERED/SCHEDULED 등 자유 수정 단계)
- * - lockShipperId / lockTransportMode: WAREHOUSED+UPS에서 항상 잠금
- * - lockMeasuredPackageDims: 실측(measured_at)된 패키지의 치수/무게/포장수 잠금
+ * - lockShipperId / lockTransportMode / lockMeasuredPackageDims: 잠금 플래그
  * - auditEdit: WAREHOUSED 단계 수정이면 감사 로그 필요
+ *
+ * TASK-B-339 (Issue #1254, JSJung 2026-10-20 Q2 확정): 고객 요청으로 WAREHOUSED+UPS는
+ * **전체 수정 가능**이 되었다 — 화주·운송수단 잠금과 실측 패키지 치수·무게 잠금을 해제한다.
+ * 실측값 보호는 잠금이 아니라 updateOrder의 안전장치 ①(값 변경 시 measured_at 해제 → 창고 재실측 필요)
+ * 와 안전장치 ②(낙관적 동시성)이 맡는다. **WAREHOUSED+비UPS는 여전히 수정 불가**다.
  */
 export interface OrderEditScope {
   editable: boolean;
@@ -121,17 +129,17 @@ export interface OrderEditScope {
 }
 
 export function getOrderEditScope(status: OrderStatus, transportMode?: string): OrderEditScope {
-  // WAREHOUSED: UPS만 부분 수정 가능 — 비UPS는 여전히 수정 불가 (실측값 보호 필요 없는 일반 화물)
+  // WAREHOUSED: UPS만 수정 가능 — 비UPS는 여전히 수정 불가 (실측값 보호 필요 없는 일반 화물)
   if (status === OrderStatus.WAREHOUSED) {
     if (transportMode === 'UPS') {
-      // WAREHOUSED + UPS: 헤더(제외 shipper_id/transport_mode)·아이템·미실측 패키지는 수정 가능,
-      // 실측 패키지 치수/무게는 보호, 수정 시 감사 로그 기록
+      // WAREHOUSED + UPS (TASK-B-339): 전체 수정 가능 — 잠금 3종 해제, 감사 로그는 유지
+      //   실측값 보호는 updateOrder의 measured_at 규칙(값 변경 시 재실측 필요)이 담당
       return {
         editable: true,
-        fullEditable: false,
-        lockShipperId: true,
-        lockTransportMode: true,
-        lockMeasuredPackageDims: true,
+        fullEditable: true,
+        lockShipperId: false,
+        lockTransportMode: false,
+        lockMeasuredPackageDims: false,
         auditEdit: true,
       };
     }

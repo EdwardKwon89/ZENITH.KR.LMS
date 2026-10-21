@@ -84,7 +84,7 @@ export function buildOrderEditDefaults(order: OrderEditDefaultsInput): Record<st
     shipper_contact_email: order.shipper_contact_email ?? '',
     shipper_address: order.shipper_address ?? '',
     shipper_address_english: order.shipper_address_english ?? '',
-    shipper_country_code: order.shipper_country_code ?? 'KR',
+    shipper_country_code: order.shipper_country_code || 'KR',
     shipper_state_province: order.shipper_state_province ?? '',
     shipper_city: order.shipper_city ?? '',
     shipper_address_detail: order.shipper_address_detail ?? '',
@@ -132,7 +132,7 @@ export function buildOrderEditDefaults(order: OrderEditDefaultsInput): Record<st
         unit_price: item.unit_price ?? 0,
         currency: item.currency ?? 'USD',
         hs_code: item.hs_code ?? '',
-        item_packing_unit: item.item_packing_unit ?? 'EA',
+        item_packing_unit: item.item_packing_unit ?? 'PCE',
       })),
     })),
   };
@@ -181,7 +181,7 @@ export function resolveShipperAddressDefaults({
 }: ResolveShipperAddressInput): ShipperSavedAddress {
   if (isEdit && !touched) {
     return {
-      country_code: saved?.country_code ?? 'KR',
+      country_code: saved?.country_code || 'KR',
       state_province: saved?.state_province ?? '',
       city: saved?.city ?? '',
       address: saved?.address ?? '',
