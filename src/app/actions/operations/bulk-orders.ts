@@ -73,7 +73,7 @@ function mapExcelRowToPackageInput(pkgRow: Record<string, unknown>, itemRows: Re
     unit_price: toNum(it.unit_price),
     currency: toStr(it.currency) || 'USD',
     hs_code: toStr(it.hs_code) || undefined,
-    item_packing_unit: toStr(it.item_packing_unit) || 'EA',
+    item_packing_unit: toStr(it.item_packing_unit) || 'PCE',
   }));
 
   return orderPackageSchema.parse({

@@ -77,10 +77,12 @@ describe('Order Update (DEF-109)', () => {
     expect(isOrderEditable(OrderStatus.REGISTERED)).toBe(true);
   });
 
-  it('TC-EDIT-PAGE-02: isOrderEditable returns true for WAREHOUSED (UPS 부분 수정 가능, Issue #1070)', () => {
-    // TASK-B-284: isOrderEditable은 전체/부분 수정 가능 상태를 boolean으로 나타냄 — WAREHOUSED는 true
+  it('TC-EDIT-PAGE-02: isOrderEditable returns true for WAREHOUSED (Issue #1070)', () => {
+    // isOrderEditable은 전체/수정 가능 상태를 boolean으로 나타냄 — WAREHOUSED는 true
     expect(isOrderEditable(OrderStatus.WAREHOUSED)).toBe(true);
-    // 단, 부분 수정 허용(부분)은 UPS에서만
+    // TASK-B-339 (Issue #1254): 잠금 해제 후에도 isOrderPartiallyEditable 자체의 반환값은 true다
+    //   (이름과 달리 "WAREHOUSED+UPS인지"만 묻는 함수 — 의미 변화는 status-machine.ts 주석 참조).
+    //   허용 범위는 UPS뿐이며 비UPS는 여전히 수정 불가다.
     expect(isOrderPartiallyEditable(OrderStatus.WAREHOUSED, 'UPS')).toBe(true);
     expect(isOrderPartiallyEditable(OrderStatus.WAREHOUSED, 'AIR')).toBe(false);
     expect(getOrderEditScope(OrderStatus.WAREHOUSED, 'AIR').editable).toBe(false);
