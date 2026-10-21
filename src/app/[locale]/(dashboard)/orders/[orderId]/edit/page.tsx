@@ -8,6 +8,9 @@ import { OrderRegistrationForm } from '@/components/orders/OrderRegistrationForm
 import { buildOrderEditDefaults } from '@/lib/orders/edit-defaults';
 import { requireAuth } from '@/lib/auth/guards';
 import { getOrderEditScope } from '@/lib/logistics/status-machine';
+import { hasActiveUpsLabel } from '@/lib/orders/ups-registration';
+import { getUpsEditAvailability } from '@/lib/orders/ups-edit-availability';
+import { getOrderDetailPath } from '@/lib/orders/detail-path';
 import type { OrderStatus } from '@/types/orders';
 
 export default async function EditOrderPage({
@@ -15,20 +18,28 @@ export default async function EditOrderPage({
 }: {
   params: Promise<{ orderId: string; locale: string }>;
 }) {
-  await requireAuth();
+  const { supabase } = await requireAuth();
   const { orderId } = await params;
 
   const rawOrder = await getOrderDetails(orderId);
   if (!rawOrder) redirect('/orders');
 
+  // TASK-B-339 (Issue #1254): UPS 오더는 상태만으로 수정 가능 여부를 판단하지 않는다 —
+  //   활성 UPS 라벨(등록 사실)을 반영해 판정한다.
+  const isUpsOrder = rawOrder.transport_mode === 'UPS';
   const editScope = getOrderEditScope(rawOrder.status as OrderStatus, rawOrder.transport_mode as string | undefined);
-  if (!editScope.editable) {
-    redirect(`/orders/${orderId}`);
+  const availability = isUpsOrder
+    ? getUpsEditAvailability(rawOrder.status as OrderStatus, await hasActiveUpsLabel(supabase, orderId))
+    : null;
+
+  const detailPath = getOrderDetailPath(orderId, rawOrder.transport_mode as string | null);
+  if (!editScope.editable || (availability && !availability.editable)) {
+    redirect(detailPath);
   }
 
   const order: any = rawOrder;
 
-  // WAREHOUSED+UPS 부분 수정: 실측(measured_at)된 패키지 id 목록 — UI에서 치수/무게 잠금에 사용
+  // 실측(measured_at)된 패키지 id 목록 — UI에서 치수/무게 입력 처리에 사용
   const measuredPackageIds = (order.packages ?? [])
     .filter((pkg: any) => !!pkg.measured_at)
     .map((pkg: any) => pkg.id)
@@ -53,7 +64,7 @@ export default async function EditOrderPage({
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Link
-              href={`/orders/${orderId}`}
+              href={detailPath}
               className="p-1.5 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 hover:shadow-sm transition-all text-slate-400 hover:text-slate-600"
             >
               <ChevronLeft size={16} />

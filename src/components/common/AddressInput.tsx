@@ -52,6 +52,9 @@ export function AddressInput({
   englishDetailOnly = false, // TASK-B-305
 }: AddressInputProps) {
   const [countryCode, setCountryCode] = useState(defaultValues.country_code || 'KR');
+  // TASK-B-340 (Issue #1256): 국가코드가 ''/null/undefined면 화면 표시(54행 `|| 'KR'`)와 동일하게
+  //   KR로 간주한다. `=== 'KR'` 엄격 비교만 하면 ''일 때 한국 주소(roadAddress)가 비어 보인다.
+  const normalizedDefaultCountryCode = defaultValues.country_code || 'KR';
   const [countries, setCountries] = useState<ICountry[]>([]);
   const [states, setStates] = useState<IState[]>([]);
   const [cities, setCities] = useState<ICity[]>([]);
@@ -60,7 +63,7 @@ export function AddressInput({
   const [streetAddress, setStreetAddress] = useState(defaultValues.address || '');
   const [detailAddress, setDetailAddress] = useState(defaultValues.address_detail || '');
   const [postalCode, setPostalCode] = useState(defaultValues.zipcode || '');
-  const [roadAddress, setRoadAddress] = useState(defaultValues.country_code === 'KR' ? (defaultValues.address || '') : '');
+  const [roadAddress, setRoadAddress] = useState(normalizedDefaultCountryCode === 'KR' ? (defaultValues.address || '') : '');
   const [addressEnglish, setAddressEnglish] = useState(defaultValues.address_english || '');
   const [addressDetailEnglish, setAddressDetailEnglish] = useState(defaultValues.address_detail_english || '');
   const [showPostcode, setShowPostcode] = useState(false);
@@ -79,7 +82,7 @@ export function AddressInput({
     if (defaultValues.city) setSelectedCity(defaultValues.city);
     if (defaultValues.address !== undefined) {
       setStreetAddress(defaultValues.address || '');
-      if (defaultValues.country_code === 'KR') setRoadAddress(defaultValues.address || '');
+      if (normalizedDefaultCountryCode === 'KR') setRoadAddress(defaultValues.address || '');
     }
     if (defaultValues.address_detail !== undefined) setDetailAddress(defaultValues.address_detail || '');
     if (defaultValues.zipcode !== undefined) setPostalCode(defaultValues.zipcode || '');

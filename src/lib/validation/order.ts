@@ -13,7 +13,7 @@ export const orderItemSchema = z.object({
   unit_price: z.number().nonnegative('Unit price cannot be negative').default(0),
   currency: z.string().default('USD'),
   hs_code: z.string().optional(), // B2C 선택, B2B 권장
-  item_packing_unit: z.string().default('EA'), // 아이템 소단위 (EA, SET 등)
+  item_packing_unit: z.string().default('PCE'), // 아이템 소단위 — SHXK 신고단위 (TASK-B-337: 기본값 EA→PCE)
 });
 
 /**
@@ -21,6 +21,10 @@ export const orderItemSchema = z.object({
  */
 export const orderPackageSchema = z.object({
   id: z.string().uuid().optional(),
+  // TASK-B-339 (Issue #1254 / 안전장치 ②): 낙관적 동시성 — 화면 로드 시점의 실측 시각을 그대로 되돌려 보낸다.
+  //   서버는 DB의 현재 measured_at과 비교해 다르면 저장을 거부한다(창고가 그 사이 실측/재실측함).
+  //   edit-defaults.ts는 이미 폼에 실어 보내고 있었으나 스키마에 없어 Zod가 제거하고 있었다.
+  measured_at: z.string().nullable().optional(),
   packing_unit: z.string().min(1, 'Packing unit is required'),
   packing_count: z.number().int().positive().default(1),
   physical_box_count: z.number().int().positive().optional().default(1),
@@ -55,7 +59,12 @@ export const orderRegistrationSchema = z.object({
   shipper_contact_email: z.string().email('Invalid email format').optional().or(z.literal('')),
   shipper_address: z.string().optional(),
   shipper_address_english: z.string().optional(),
-  shipper_country_code: z.string().optional().default('KR'),
+  // TASK-B-340 (Issue #1256): `''`/공백/undefined를 'KR'로 정정 — `.default()`는 undefined일 때만
+  //   작동하고 빈 문자열은 통과시켜 화주 국가코드가 ''로 저장되던 원인. 다른 값은 trim만 적용.
+  shipper_country_code: z.string().optional().transform((v) => {
+    const trimmed = v?.trim();
+    return trimmed ? trimmed : 'KR';
+  }),
   shipper_state_province: z.string().optional(),
   shipper_city: z.string().optional(),
   shipper_address_detail: z.string().optional(),
