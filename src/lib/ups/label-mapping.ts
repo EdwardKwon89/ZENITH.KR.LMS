@@ -99,6 +99,32 @@ export function resolveConsigneeStreet(
   return localAddr ? `${road} (${localAddr})` : road;
 }
 
+// TASK-B-341 (Issue #1261): SHXK createorder의 shipper 블록.
+// 화면 "화주명"(zen_orders.shipper_name)을 shipper_name·shipper_company **양쪽에 동일 적용**한다
+// (JSJung 2026-10-21 결정). 폴백: order.shipper_name → shipper_org.name → shipperDefaults.name
+// 담당자명(order.shipper_contact_name)은 SHXK payload 어디에도 전송하지 않는다(동일 결정).
+function buildShipperPayload(
+  order: Record<string, unknown>,
+  shipperDefaults: { name: string; country: string },
+): Record<string, unknown> {
+  const shipperOrg = order.shipper_org as Record<string, unknown> | undefined;
+  const shipperDisplayName =
+    (order.shipper_name as string)
+    || (shipperOrg?.name as string)
+    || shipperDefaults.name;
+
+  return {
+    shipper_name: shipperDisplayName,
+    shipper_company: shipperDisplayName,
+    shipper_countrycode: (order.shipper_country_code as string) || shipperDefaults.country,
+    shipper_province: (order.shipper_state_province as string) || '',
+    shipper_city: (order.shipper_city as string) || '',
+    shipper_street: resolveShipperStreet(order, shipperOrg),
+    shipper_postcode: (order.shipper_zipcode as string) || '',
+    shipper_telephone: stripNonDigits((order.shipper_contact_phone as string) || ''),
+  };
+}
+
 export function buildCreateOrderPayload(
   shxkCode: string,
   order: Record<string, unknown>,
@@ -112,7 +138,6 @@ export function buildCreateOrderPayload(
   const totalPieces = packages.reduce((sum, p) => sum + Number(p.physical_box_count ?? p.packing_count ?? 1), 0);
   const totalWeight = packages.reduce((sum, p) => sum + Number(p.gross_weight ?? 0), 0);
 
-  const shipperStreet = resolveShipperStreet(order, order.shipper_org as Record<string, unknown> | undefined);
   const consigneeStreet = (order.recipient_address as string) || '';
   const localAddr = (order.recipient_address_local as string) || '';
   // TASK-B-326: 수하인 street도 도로명만 사용 (시/구/도·국가 제거 — AddressLine 초과 방지)
@@ -130,16 +155,7 @@ export function buildCreateOrderPayload(
     cargotype,
     mail_cargo_type: mailCargoType,
     cargovolume,
-    shipper: {
-      shipper_name: (order.shipper_contact_name as string) || shipperDefaults.name,
-      shipper_company: (order.shipper_name as string) || (order.shipper_org as Record<string, unknown> | undefined)?.name as string || shipperDefaults.name,
-      shipper_countrycode: (order.shipper_country_code as string) || shipperDefaults.country,
-      shipper_province: (order.shipper_state_province as string) || '',
-      shipper_city: (order.shipper_city as string) || '',
-      shipper_street: shipperStreet,
-      shipper_postcode: (order.shipper_zipcode as string) || '',
-      shipper_telephone: stripNonDigits((order.shipper_contact_phone as string) || ''),
-    },
+    shipper: buildShipperPayload(order, shipperDefaults),
     consignee: {
       consignee_name: (order.recipient_name as string) || 'E2E Consignee',
       consignee_countrycode: (order.recipient_country_code as string) || countryCode,
