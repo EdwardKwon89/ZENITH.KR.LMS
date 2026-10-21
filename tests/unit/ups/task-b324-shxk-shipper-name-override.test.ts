@@ -197,11 +197,14 @@ describe('TASK-B-324: SHXK createorder shipper_company 수기입력값 반영 (D
       expect((result.shipper as any).shipper_company).toBe('SNTL Korea Co Ltd');
     });
 
-    it('수기입력 화주명은 담당자명 필드(shipper.shipper_name)를 덮어쓰지 않는다', () => {
+    it('수기입력 화주명은 shipper_name·shipper_company 두 필드에 동일 적용된다 (TASK-B-341로 갱신)', () => {
+      // TASK-B-341 (Issue #1261, JSJung 2026-10-21 결정): SHXK shipper_name은 담당자명이 아니라
+      // 화면 "화주명"(order.shipper_name)으로 통일되어 shipper_company와 같은 값으로 전송된다.
+      // (TASK-B-324의 "담당자명 필드를 덮어쓰지 않는다" 기대값은 이 결정으로 대체됨)
       const order = { ...basePayloadOrder, shipper_name: 'Test Shipper XYZ', shipper_org: { name: 'MASTER AIR' } };
       const result = buildCreateOrderPayload('FXUPS', order as any, 'US', [], defaults);
       expect((result.shipper as any).shipper_company).toBe('Test Shipper XYZ');
-      expect((result.shipper as any).shipper_name).toBe('Shipper Kim');
+      expect((result.shipper as any).shipper_name).toBe('Test Shipper XYZ');
     });
   });
 

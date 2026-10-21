@@ -1001,3 +1001,21 @@ UPS 오더 수정 화면에서 화주 주소가 비어 보이는 결함. 원인�
 | TC-340-SCH | `orderRegistrationSchema` — `shipper_country_code` | `''`/`'  '`/미지정→`KR`, `'JP'`→`'JP'`, `' KR '`→`'KR'` | `tests/unit/orders/shipper-country-schema.test.ts` |
 | TC-340-MIG | 실DB(R-14): 마이그레이션 파일 실제 실행 | `''`+주소 행만 `KR`로 정정, NULL/주소없음/다른 국가 불변, 재실행 `UPDATE 0` | `tests/integration/task-b340-backfill-country.test.ts` |
 
+
+## 73. SHXK createorder shipper_name·shipper_company = 화면 "화주명" 통일 (Issue #1261 / TASK-B-341)
+
+SHXK `createorder` 페이로드의 `shipper.shipper_name`이 화면 "담당자명"(`zen_orders.shipper_contact_name`)으로 나가면서 `shipper_company`(화주명)와 불일치하던 것을, **JSJung 2026-10-21 결정**에 따라 양쪽 모두 화면 "화주명"(`zen_orders.shipper_name`)으로 통일한다. 폴백 체인은 기존 `shipper_company`와 동일하게 `order.shipper_name` → `order.shipper_org.name` → `shipperDefaults.name`. **담당자명(`order.shipper_contact_name`)은 SHXK payload 어디에도 전송하지 않는다** (동일 결정). DB·화면·`validate-payload.ts` 변경 없음 — `buildCreateOrderPayload()`의 shipper 블록만 변경 (`src/lib/ups/label-mapping.ts`).
+
+| ID | 검증 내용 | 기대 결과 | 테스트 위치 |
+| :-- | :-- | :-- | :-- |
+| TC-341-1 | 실제 `buildCreateOrderPayload` 호출 — `shipper_name='ABC Trading'` + `shipper_contact_name='Kim'` | `shipper_name`·`shipper_company` 모두 `'ABC Trading'` (`toBe`) | `tests/unit/ups/task-b341-shxk-shipper-name-unify.test.ts` |
+| TC-341-2 | `shipper_name` 빈 값 + `shipper_org.name='MASTER AIR'` | 두 필드 모두 `'MASTER AIR'` | 동일 |
+| TC-341-3 | 화주명·조직명 모두 없음 | 두 필드 모두 `shipperDefaults.name` | 동일 |
+| TC-341-4 | `shipper_contact_name` 값이 payload shipper 어디에도 없는지 | 전체 필드 값 스캔 부정 단언(`not.toContain`) | 동일 |
+| TC-341-5 | shipper 나머지 필드(`countrycode`/`province`/`city`/`street`/`postcode`/`telephone`) | 변경 전과 동일 | 동일 |
+| TC-341-6 | 한국어 화주명 | 두 필드에 그대로 실림(SHXK 전송 전 사전 검증) | 동일 |
+| TC-341-7 | 실제 서버 액션 `registerUpsOrder()` → SHXK `createorder` payload | 두 필드 모두 `'ABC Trading'` | 동일 |
+| TC-341-8 | `previewShxkPayload('CREATEORDER')` 미리보기 payload | 두 필드 모두 `'ABC Trading'` | 동일 |
+| TC-341-9 | 레거시 오더(`shipper_name` 없음) → 실제 등록 경로 | 두 필드 모두 `'MASTER AIR'` | 동일 |
+| TC-341-RST | 되돌리기 검증: `shipper_name`을 담당자명 체인으로 원복 | TC-341-1 FAIL(`expected 'Kim' to be 'ABC Trading'`) — 전체 8건 FAIL / 1 PASS | 동일 |
+| TC-341-EXIST | 기존 기대값 갱신 — `ups-labels-mapping.test.ts`(화주명 기본값 폴백), `task-b324-shxk-shipper-name-override.test.ts`(담당자명 미덮어쓰기 → 두 필드 동일 적용) | TASK-B-341 사양으로 갱신 | `tests/unit/ups/ups-labels-mapping.test.ts`, `tests/unit/ups/task-b324-shxk-shipper-name-override.test.ts` |

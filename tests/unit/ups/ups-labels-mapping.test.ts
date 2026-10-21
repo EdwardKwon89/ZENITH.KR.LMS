@@ -218,7 +218,10 @@ describe('UPS Labels Mapping Functions', () => {
       expect(result.order_pieces).toBe(2);
       expect(result.order_weight).toBe(5);
 
-      expect((result.shipper as any).shipper_name).toBe('Shipper Kim');
+      // TASK-B-341 (Issue #1261): shipper_name은 화면 "화주명"(order.shipper_name → shipper_org.name → defaults)이며
+      // 담당자명(shipper_contact_name)이 아니다. 이 픽스처는 shipper_name·shipper_org 모두 없음 → 기본값.
+      expect((result.shipper as any).shipper_name).toBe('SNTL Korea Co Ltd');
+      expect((result.shipper as any).shipper_company).toBe('SNTL Korea Co Ltd');
       expect((result.shipper as any).shipper_countrycode).toBe('KR');
 
       expect((result.consignee as any).consignee_name).toBe('John Doe');
@@ -233,11 +236,13 @@ describe('UPS Labels Mapping Functions', () => {
       expect((result.invoice as any[])).toHaveLength(1);
     });
 
-    it('shipperDefaults 폴백 동작 검증 (shipper_contact_name/shipper_country_code 없을 때)', () => {
+    it('shipperDefaults 폴백 동작 검증 (화주명·조직명·국가코드가 없을 때)', () => {
+      // TASK-B-341 (Issue #1261): shipper_name은 담당자명이 아니라 "화주명" 폴백 체인을 따른다.
       const orderNoContact = { ...sampleOrder, shipper_contact_name: '', shipper_country_code: '' };
       const result = buildCreateOrderPayload('SHP-CODE', orderNoContact as any, 'US', samplePackages as any, shipperDefaults);
 
       expect((result.shipper as any).shipper_name).toBe('SNTL Korea Co Ltd');
+      expect((result.shipper as any).shipper_company).toBe('SNTL Korea Co Ltd');
       expect((result.shipper as any).shipper_countrycode).toBe('KR');
     });
 
