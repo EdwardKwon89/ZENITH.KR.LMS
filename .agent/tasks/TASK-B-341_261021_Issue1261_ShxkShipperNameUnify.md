@@ -123,6 +123,8 @@ const shipperDisplayName =
 
 ## 8. [작업 결과]
 
+> ⚠️ **후속 (2026-10-22)**: **`shipper_company` 결정은 TASK-B-342(Issue #1263)에서 번복됨** — JSJung 2026-10-22 결정으로 `shipper_company`는 화면 "화주명"이 아니라 회사 기본값(환경변수 `SHXK_SHIPPER_NAME`) 고정으로 변경되었다. `shipper_name`은 화면 "화주명" 그대로 유지. 상세는 `.agent/tasks/TASK-B-342_261022_Issue1263_ShxkShipperCompanyDefault.md` · DEF-B-153 갱신 참조.
+
 - **변경 파일**:
   - 수정: `src/lib/ups/label-mapping.ts` (shipper 블록)
   - 테스트 신규: `tests/unit/ups/task-b341-shxk-shipper-name-unify.test.ts` (9케이스)
