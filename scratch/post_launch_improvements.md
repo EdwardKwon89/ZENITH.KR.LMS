@@ -1988,7 +1988,7 @@ UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류
 
 ---
 
-## [IMP-170] `scripts/check-db-freshness.sh`가 전역 `supabase` CLI를 요구 — CLI 미설치 환경에서 조용히 exit 127 (R-08-2 자동 확인 실패)
+## [IMP-178] `scripts/check-db-freshness.sh`가 전역 `supabase` CLI를 요구 — CLI 미설치 환경에서 조용히 exit 127 (R-08-2 자동 확인 실패)
 
 - **발견 경위**: 2026-10-21, TASK-B-341(Issue #1261) 착수 시 R-17 절차상 `./scripts/check-db-freshness.sh` 실행 → `[db-freshness] 로컬 마이그레이션 상태 확인 중...`만 출력하고 **exit 127**(command not found)로 종료됨. 원인: 스크립트 25행이 `supabase migration list --local`을 전역 바이너리(`supabase`)로 호출하는데, 이 환경에는 Supabase CLI가 전역 설치돼 있지 않음(`npx supabase`로는 정상 동작 — `npx supabase --version` → v2.95.4). `scripts/agent-worktree-init.sh` 85행이 `|| echo ...`로 감싸고 있어, 워크트리 초기화 스크립트에서는 **성공처럼 보이는 안내 문구만 출력**되고 실제로는 신선도 확인이 전혀 수행되지 않은 채 착수하게 된다.
 - **현재 상태**: 신선도 확인을 수동으로 대체 가능(`npx supabase migration list --local` → pending 1건 확인 → `npx supabase db reset --yes` + `npx tsx scripts/seed-local.ts` → pending 0건 → 회귀 재실행 PASS). TASK-B-341은 이 경로로 R-08-2를 충족함. 다만 **스크립트 자체는 여전히 전역 `supabase`를 요구**하므로, 전역 CLI가 없는 개발·CI 환경에서는 매번 동일하게 조용히 실패한다.

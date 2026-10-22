@@ -116,7 +116,7 @@ const shipperDisplayName =
 - [x] `npm run build` 성공 (exit 0)
 - [x] **R-08-2** 로컬 DB 신선도 — pending 마이그레이션 1건(`20261021090000`, TASK-B-340 백필) 확인 → `supabase db reset --yes` + `scripts/seed-local.ts` 실행 후 pending 0건, 회귀 재실행 PASS
 - [x] **ZEN_A4 관측성** — 순수 필드 값 치환(성공/실패 분기 없음, 외부 API 호출 결과는 `placeShxkOrder` 기존 로깅 경로) → 로깅 대상 아님
-- [x] **R-15** 개선 사항 기록 — `scratch/post_launch_improvements.md`에 **IMP-170** 기재(`check-db-freshness.sh`의 전역 `supabase` CLI 의존 → exit 127로 조용히 실패, `agent-worktree-init.sh`의 `||` 처리로 착수 시 자동 경고도 무력화)
+- [x] **R-15** 개선 사항 기록 — `scratch/post_launch_improvements.md`에 **IMP-178** 기재(`check-db-freshness.sh`의 전역 `supabase` CLI 의존 → exit 127로 조용히 실패, `agent-worktree-init.sh`의 `||` 처리로 착수 시 자동 경고도 무력화)
 - [x] **R-10** UI 변경 없음 — 백엔드 매핑 단독. 단, 실제 서버 액션 경로(`previewShxkPayload('CREATEORDER')`)로 두 필드 동일 값 검증(TC-341-8)을 스크린샷 대신 테스트 증적으로 첨부
 - [x] **R-04** 자가점검 — base `7012ac96a` 대비 소스 1 + 테스트(신규 1, 기존 2 수정) + MAP 1
 - [x] **R-18** — DEF-B-153 작성(§9)
@@ -146,7 +146,7 @@ const shipperDisplayName =
 - **Jaison 검토(2026-10-21) 코드 승인** — PR #1262 코멘트: 구현·범위·CI·테스트 실효성·구 사양 테스트 갱신·DEF-B-153 항목 모두 승인. 보완 요청 3건(헤더 상태 미변경 / §5 테스트 표 불일치·컬럼 구분 깨짐 / R-15 IMP 미기록)을 아래 보완 커밋에서 반영.
   - 보완 ① 헤더 상태 `🔨 진행 중` → `🔔 리뷰 대기`
   - 보완 ② §5 테스트 표를 실제 테스트(TC-341-1~9)·`LIVE_REGRESSION_TEST_MAP.md` §73과 1:1로 정정, 컬럼 구분(`|`) 복구
-  - 보완 ③ R-15 — `scratch/post_launch_improvements.md`에 **IMP-170** 기재(§7·§9 참조)
+  - 보완 ③ R-15 — `scratch/post_launch_improvements.md`에 **IMP-178** 기재(§7·§9 참조)
 
 ## 9. [발견 이슈]
 
