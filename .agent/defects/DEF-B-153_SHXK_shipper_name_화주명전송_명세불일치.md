@@ -5,7 +5,7 @@
 | **발견 경위** | TASK-B-341(Issue #1261) 작업 중 발견 — JSJung 2026-10-21 결정("SHXK `shipper_name`·`shipper_company`를 화면 '화주명'으로 통일")을 구현하면서 SHXK API 명세와 대조 |
 | **긴급도** | Low (결함 확정 아님 — SHXK 서버 측 수신 검증 미확인. 다만 라벨 발급 실패로 이어질 수 있는 여지) |
 | **발견일** | 2026-10-21 |
-| **조치 상태** | 미조치 (TASK-B-341 범위 밖 — 코드 차단 금지 지시에 따라 미검증 상태로 보고) |
+| **조치 상태** | 부분 조치 (2026-10-22 TASK-B-342 / Issue #1263 — `shipper_company`는 회사 기본값 고정으로 **해소**. `shipper_name` 관련 위험은 **잔존**) |
 
 ## 현상
 
@@ -16,14 +16,19 @@ SHXK `createorder` API 명세(`docs/80_RawData/Phase8_UPS_API_리서치_결과.m
 | `shipper.shipper_name` | 200 | **발송인 성명** (필수) |
 | `shipper.shipper_company` | 200 | 발송인 회사명 |
 
-TASK-B-341(JSJung 결정) 이후로는 두 필드에 **동일하게 화면 "화주명"**(`zen_orders.shipper_name`)이 들어간다.
+TASK-B-341(JSJung 결정) 이후로는 두 필드에 **동일하게 화면 "화주명"**(`zen_orders.shipper_name`)이 들어갔다.
 즉 `shipper_name`(성명 자리)에 회사명·조직명이 전송된다.
+
+> **TASK-B-342(Issue #1263, JSJung 2026-10-22 결정)로 갱신 (2026-10-22)**
+> - `shipper_company`는 **회사 기본값**(환경변수 `SHXK_SHIPPER_NAME`, 기본 `SNTL Korea Co Ltd`)으로 고정되어 **화주명·조직명이 더 이상 전송되지 않는다** → 아래 위험 ①~③ 중 **`shipper_company`에 해당하는 부분은 해소**되었다(고정값이라 길이·한글 위험 없음).
+> - `shipper_name`은 화면 "화주명" 그대로 유지(`order.shipper_name` → `shipper_org.name` → `shipperDefaults.name` 폴백) → **성명 자리에 회사명이 전송되는 위험은 그대로 잔존**한다.
+> - 아래 서술은 `shipper_name` 관점의 잔존 위험을 다룬다.
 
 ### 미검증 위험 3가지
 
-1. **명세 의미 불일치** — `shipper_name`은 "발송인 성명"이다. 회사명·한글을 성명 자리에 넣는 것은 명세 정의와 어긋난다. SHXK가 성명 형식(영문·인명 규격) 검증이 있으면 `createorder`가 거부될 수 있다. **실서버 수신 동작 미확인.**
-2. **200자 제한 미검증** — SHXK 명세상 두 필드 모두 최대 200자다. 우리 코드(`src/lib/shxk/validate-payload.ts`)는 품명(`ITEM_NAME_MAX`)·HS 코드(`HS_CODE_MAX`)·전화번호만 검증하고 `shipper_name`·`shipper_company` 길이는 검증하지 않는다. 화면 "화주명"은 자유 입력(`z.string().optional()`, Issue #1100/TASK-B-295)이라 **200자 초과 값이 그대로 전송**된다 → SHXK 거부 가능.
-3. **한글·특수문자** — "화주명"은 한글 입력 가능(`src/components/orders/OrderRegistrationForm.tsx` `register('shipper_name')`). 한글 회사명이 `shipper_name`으로 전송되어 SHXK가 영문만 허용할 경우 실패 가능. (기존 `shipper_company` 경로는 이미 같은 값을 보내왔으나, `shipper_name`은 **필수(Y)** 필드라 거부 시 라벨 발급 전체가 실패한다.)
+1. **명세 의미 불일치 (잔존 — `shipper_name`)** — `shipper_name`은 "발송인 성명"이다. 회사명·한글을 성명 자리에 넣는 것은 명세 정의와 어긋난다. SHXK가 성명 형식(영문·인명 규격) 검증이 있으면 `createorder`가 거부될 수 있다. **실서버 수신 동작 미확인.** (`shipper_company`는 TASK-B-342로 기본값 고정 → 이 위험은 해소)
+2. **200자 제한 미검증 (잔존 — `shipper_name`)** — SHXK 명세상 두 필드 모두 최대 200자다. 우리 코드(`src/lib/shxk/validate-payload.ts`)는 품명(`ITEM_NAME_MAX`)·HS 코드(`HS_CODE_MAX`)·전화번호만 검증하고 `shipper_name`·`shipper_company` 길이는 검증하지 않는다. 화면 "화주명"은 자유 입력(`z.string().optional()`, Issue #1100/TASK-B-295)이라 **200자 초과 값이 그대로 전송**된다 → SHXK 거부 가능. (`shipper_company`는 TASK-B-342로 고정값 → 이 위험은 해소)
+3. **한글·특수문자 (잔존 — `shipper_name`)** — "화주명"은 한글 입력 가능(`src/components/orders/OrderRegistrationForm.tsx` `register('shipper_name')`). 한글 회사명이 `shipper_name`으로 전송되어 SHXK가 영문만 허용할 경우 실패 가능. (`shipper_company`는 TASK-B-342로 기본값 고정 → 이 위험은 해소. `shipper_name`은 **필수(Y)** 필드라 거부 시 라벨 발급 전체가 실패한다.)
 
 ## 영향 범위
 
@@ -34,6 +39,8 @@ TASK-B-341(JSJung 결정) 이후로는 두 필드에 **동일하게 화면 "화�
 ## 기존 데이터 영향 (참고)
 
 `zen_orders.shipper_name`이 NULL인 기존 오더는 조직명(`shipper_org.name`)으로 폴백된다. 변경 이전에는 `shipper_name` 자리에 담당자명(`shipper_contact_name`)이 전송되던 필드이므로, **기존 오더 재발급 시 값이 달라진다**(담당자명 → 화주명/조직명). 이는 JSJung 결정의 의도된 동작이며 확정 불가 판정 대상은 아니다.
+
+> **TASK-B-342 추가 영향 (2026-10-22)**: `shipper_company`는 TASK-B-341 상태(화주명) → 기본값(`SNTL Korea Co Ltd`)으로 바뀐다. 이미 TASK-B-341 상태로 라벨이 발급된 오더는 영향 없으나, **이후 발급분(또는 재발급분)의 `shipper_company` 값이 달라진다** → 운영 공지 필요 여부는 JSJung 판단.
 
 ## 권장 조치
 

@@ -99,10 +99,11 @@ export function resolveConsigneeStreet(
   return localAddr ? `${road} (${localAddr})` : road;
 }
 
-// TASK-B-341 (Issue #1261): SHXK createorder의 shipper 블록.
-// 화면 "화주명"(zen_orders.shipper_name)을 shipper_name·shipper_company **양쪽에 동일 적용**한다
-// (JSJung 2026-10-21 결정). 폴백: order.shipper_name → shipper_org.name → shipperDefaults.name
-// 담당자명(order.shipper_contact_name)은 SHXK payload 어디에도 전송하지 않는다(동일 결정).
+// TASK-B-341 (Issue #1261) → TASK-B-342 (Issue #1263): SHXK createorder의 shipper 블록.
+// shipper_name    = 화면 "화주명"(zen_orders.shipper_name). 폴백: order.shipper_name → shipper_org.name → shipperDefaults.name
+// shipper_company = 회사 기본값 고정 (shipperDefaults.name = 환경변수 SHXK_SHIPPER_NAME)
+//   (JSJung 2026-10-22 결정 — TASK-B-341의 "두 필드 모두 화주명" 결정을 번복)
+// 담당자명(order.shipper_contact_name)은 SHXK payload 어디에도 전송하지 않는다.
 function buildShipperPayload(
   order: Record<string, unknown>,
   shipperDefaults: { name: string; country: string },
@@ -115,7 +116,7 @@ function buildShipperPayload(
 
   return {
     shipper_name: shipperDisplayName,
-    shipper_company: shipperDisplayName,
+    shipper_company: shipperDefaults.name,
     shipper_countrycode: (order.shipper_country_code as string) || shipperDefaults.country,
     shipper_province: (order.shipper_state_province as string) || '',
     shipper_city: (order.shipper_city as string) || '',
