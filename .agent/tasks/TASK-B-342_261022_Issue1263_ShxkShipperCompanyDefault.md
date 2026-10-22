@@ -170,6 +170,7 @@ return {
 | 전체 회귀 (R-08) | `npm run test:regression` | **`Test Files 234 passed (234)` / `Tests 1680 passed (1680)`** (90 skipped 포함 총 1680) |
 | 빌드 | `npm run build` | `✓ Compiled successfully in 17.2s`, `BUILD_EXIT=0` |
 | DB 최신화 (R-08-2) | `npx supabase start` → `npx supabase migration list --local` → `npx tsx scripts/seed-local.ts` | pending 마이그레이션 0건, 시드 무결성 체크 전부 PASS |
+| PR CI (R-17 §Aiden 전속 CI 확인 의무 참고) | `gh pr checks 1264` | `Regression Tests` **pass (10m32s)** / `Task File Check` pass / `Type Check` pass (2026-10-22 확인) |
 
 > **R-08-2 참고**: 전역 `supabase` CLI 미설치로 `./scripts/check-db-freshness.sh`는 exit 127이므로 동일 동작을 `npx supabase`로 수행했다(기존 IMP-170 참조). 최초 회귀 실행 시 Docker 미기동으로 DB 의존 테스트 30개 파일이 실패했으나, **코드 결함 아님**(localhost:54322 connection refused)임을 확인 → Docker 기동 + 로컬 Supabase 기동 + 시드 후 전량 PASS.
 
