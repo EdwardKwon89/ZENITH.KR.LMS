@@ -4,13 +4,18 @@ import { buildCreateOrderPayload } from '@/lib/ups/label-mapping';
 // TASK-B-324 (Issue #1190 / DEF-B-144): 오더 화주명 수기입력값(order.shipper_name)이
 // SHXK createorder payload의 shipper.shipper_company로 전달되지 않던 결함 회귀 테스트.
 //
-// 1. buildCreateOrderPayload() 단위 검증 — 폴백 우선순위:
+// ⚠️ TASK-B-342 (Issue #1263, JSJung 2026-10-22 결정) — **shipper_company 사양 번복**
+//   shipper_company는 수기입력 화주명·조직명이 아니라 회사 기본값(shipperDefaults.name = SHXK_SHIPPER_NAME) 고정.
+//   아래 shipper_company 기대값은 TASK-B-342 사양으로 갱신되었다.
+//   shipper_name은 TASK-B-341 사양대로 화면 "화주명"(order.shipper_name) 그대로다.
+//
+// 1. buildCreateOrderPayload() 단위 검증 — shipper_name 폴백 우선순위:
 //    order.shipper_name > order.shipper_org?.name > shipperDefaults.name
 // 2. 실제 서버 액션 경로(registerUpsOrder / previewShxkPayload)에서
-//    createorder payload로 수기입력값이 나가는지 mock SHXK 호출로 검증.
+//    createorder payload의 shipper_company가 기본값으로 나가는지 mock SHXK 호출로 검증.
 //
-// 되돌리기 검증: label-mapping.ts의 `order.shipper_name ||` 폴백을 제거하면
-// 아래 "수기입력값 우선" 케이스들이 정확히 FAIL한다.
+// 되돌리기 검증: label-mapping.ts의 `shipper_company: shipperDefaults.name`을
+// `shipperDisplayName`으로 되돌리면 아래 케이스들이 정확히 FAIL한다.
 
 vi.mock('server-only', () => ({}));
 vi.mock('@/lib/logger', () => ({ logger: { info: vi.fn(), error: vi.fn(), warn: vi.fn() } }));
@@ -155,8 +160,8 @@ beforeEach(() => {
   });
 });
 
-describe('TASK-B-324: SHXK createorder shipper_company 수기입력값 반영 (DEF-B-144)', () => {
-  describe('buildCreateOrderPayload() 단위 — shipper_company 폴백 우선순위', () => {
+describe('TASK-B-324 → TASK-B-342: SHXK createorder shipper_company = 기본값 고정 (DEF-B-144 / Issue #1263)', () => {
+  describe('buildCreateOrderPayload() 단위 — shipper_name 폴백 우선순위 / shipper_company 기본값 고정', () => {
     const defaults = { name: 'SNTL Korea Co Ltd', country: 'KR' };
     const basePayloadOrder = {
       order_no: 'ORD-324',
@@ -179,37 +184,39 @@ describe('TASK-B-324: SHXK createorder shipper_company 수기입력값 반영 (D
       recipient_pccc: '123456',
     };
 
-    it('수기입력 화주명(shipper_name)이 있으면 조직명보다 우선해 shipper_company로 전달된다', () => {
+    it('수기입력 화주명(shipper_name)이 shipper_name으로 전달되고 shipper_company는 기본값이다 (TASK-B-342 갱신)', () => {
       const order = { ...basePayloadOrder, shipper_name: 'Test Shipper XYZ', shipper_org: { name: 'MASTER AIR' } };
       const result = buildCreateOrderPayload('FXUPS', order as any, 'US', [], defaults);
-      expect((result.shipper as any).shipper_company).toBe('Test Shipper XYZ');
+      expect((result.shipper as any).shipper_name).toBe('Test Shipper XYZ');
+      expect((result.shipper as any).shipper_company).toBe('SNTL Korea Co Ltd');
     });
 
-    it('수기입력 화주명이 없으면(레거시) 조직명으로 폴백한다', () => {
+    it('수기입력 화주명이 없으면(레거시) shipper_name은 조직명으로 폴백하고 shipper_company는 기본값이다 (TASK-B-342 갱신)', () => {
       const order = { ...basePayloadOrder, shipper_name: '', shipper_org: { name: 'MASTER AIR' } };
       const result = buildCreateOrderPayload('FXUPS', order as any, 'US', [], defaults);
-      expect((result.shipper as any).shipper_company).toBe('MASTER AIR');
+      expect((result.shipper as any).shipper_name).toBe('MASTER AIR');
+      expect((result.shipper as any).shipper_company).toBe('SNTL Korea Co Ltd');
     });
 
-    it('수기입력 화주명과 조직명이 모두 없으면 shipperDefaults.name으로 폴백한다', () => {
+    it('수기입력 화주명과 조직명이 모두 없으면 두 필드 모두 shipperDefaults.name으로 폴백한다', () => {
       const order = { ...basePayloadOrder, shipper_name: '', shipper_org: null };
       const result = buildCreateOrderPayload('FXUPS', order as any, 'US', [], defaults);
       expect((result.shipper as any).shipper_company).toBe('SNTL Korea Co Ltd');
     });
 
-    it('수기입력 화주명은 shipper_name·shipper_company 두 필드에 동일 적용된다 (TASK-B-341로 갱신)', () => {
+    it('수기입력 화주명은 shipper_name에만 적용되고 shipper_company는 기본값이다 (TASK-B-342로 갱신)', () => {
       // TASK-B-341 (Issue #1261, JSJung 2026-10-21 결정): SHXK shipper_name은 담당자명이 아니라
-      // 화면 "화주명"(order.shipper_name)으로 통일되어 shipper_company와 같은 값으로 전송된다.
-      // (TASK-B-324의 "담당자명 필드를 덮어쓰지 않는다" 기대값은 이 결정으로 대체됨)
+      // 화면 "화주명"(order.shipper_name)으로 통일됨.
+      // TASK-B-342 (Issue #1263, JSJung 2026-10-22 결정): shipper_company는 회사 기본값 고정으로 번복.
       const order = { ...basePayloadOrder, shipper_name: 'Test Shipper XYZ', shipper_org: { name: 'MASTER AIR' } };
       const result = buildCreateOrderPayload('FXUPS', order as any, 'US', [], defaults);
-      expect((result.shipper as any).shipper_company).toBe('Test Shipper XYZ');
       expect((result.shipper as any).shipper_name).toBe('Test Shipper XYZ');
+      expect((result.shipper as any).shipper_company).toBe('SNTL Korea Co Ltd');
     });
   });
 
   describe('registerUpsOrder() 실제 등록 경로 — placeShxkOrder payload', () => {
-    it('수기입력 화주명이 createorder payload의 shipper_company로 나간다', async () => {
+    it('createorder payload의 shipper_company는 SHXK_SHIPPER_NAME이다 (TASK-B-342 갱신)', async () => {
       const { chain } = createMockSupabase({ shipper_name: 'Test Shipper XYZ' });
       mockValidateUserAction.mockResolvedValue({
         supabase: chain,
@@ -222,11 +229,12 @@ describe('TASK-B-324: SHXK createorder shipper_company 수기입력값 반영 (D
       expect(result.success).toBe(true);
       expect(mockCreateorder).toHaveBeenCalledTimes(1);
       const payload = mockCreateorder.mock.calls[0][0];
-      expect(payload.shipper.shipper_company).toBe('Test Shipper XYZ');
+      expect(payload.shipper.shipper_name).toBe('Test Shipper XYZ');
+      expect(payload.shipper.shipper_company).toBe('SNTL');
       expect(payload.shipping_method).toBe('FXUPS');
     });
 
-    it('레거시 오더(shipper_name 없음)는 조직명이 createorder payload로 나간다', async () => {
+    it('레거시 오더(shipper_name 없음)도 shipper_company는 SHXK_SHIPPER_NAME이다 (TASK-B-342 갱신)', async () => {
       const { chain } = createMockSupabase({ shipper_name: null });
       mockValidateUserAction.mockResolvedValue({
         supabase: chain,
@@ -238,12 +246,13 @@ describe('TASK-B-324: SHXK createorder shipper_company 수기입력값 반영 (D
 
       expect(mockCreateorder).toHaveBeenCalledTimes(1);
       const payload = mockCreateorder.mock.calls[0][0];
-      expect(payload.shipper.shipper_company).toBe('MASTER AIR');
+      expect(payload.shipper.shipper_name).toBe('MASTER AIR');
+      expect(payload.shipper.shipper_company).toBe('SNTL');
     });
   });
 
   describe('previewShxkPayload() 미리보기 경로', () => {
-    it('CREATEORDER 미리보기 payload의 shipper_company에 수기입력값이 반영된다', async () => {
+    it('CREATEORDER 미리보기 payload의 shipper_company는 SHXK_SHIPPER_NAME이다 (TASK-B-342 갱신)', async () => {
       const { chain } = createMockSupabase({ shipper_name: 'Test Shipper XYZ' });
       mockValidateUserAction.mockResolvedValue({
         supabase: chain,
@@ -254,7 +263,8 @@ describe('TASK-B-324: SHXK createorder shipper_company 수기입력값 반영 (D
       const result = await previewShxkPayload('order-324', 'CREATEORDER');
 
       expect(result.success).toBe(true);
-      expect((result.payload!.shipper as any).shipper_company).toBe('Test Shipper XYZ');
+      expect((result.payload!.shipper as any).shipper_name).toBe('Test Shipper XYZ');
+      expect((result.payload!.shipper as any).shipper_company).toBe('SNTL');
     });
   });
 });

@@ -4,7 +4,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 //
 // 1. lookupOrderPackages()의 shipper_org join select에 name(조직명)이 포함되는지 확인
 //    (실제 registerUpsOrder 경유 — select 문자열 캡처)
-// 2. buildCreateOrderPayload()가 shipper_company를 조직명으로 채우는지 확인 (실제 함수 사용)
+// 2. buildCreateOrderPayload()가 shipper_company를 채우는지 확인 (실제 함수 사용)
+//
+// ⚠️ TASK-B-342 (Issue #1263, JSJung 2026-10-22 결정): shipper_company는 조직명/화주명이 아니라
+//    회사 기본값(shipperDefaults.name = SHXK_SHIPPER_NAME) 고정. 아래 기대값은 TASK-B-342 사양.
 //
 // 되돌리기 검증: name 누락 시 select 캡처 테스트가 실패하고,
 // shipper_company 배선 제거 시 payload 테스트가 실패함을 보장한다.
@@ -171,7 +174,7 @@ describe('DEF-B-054: shipper_company 필드 미전달 (Issue #1067)', () => {
     expect(orderSelect).toMatch(/shipper_org:zen_organizations!shipper_id/);
   });
 
-  it('registerUpsOrder가 createorder payload의 shipper_company에 조직명(MASTER AIR)을 전달한다', async () => {
+  it('registerUpsOrder가 createorder payload의 shipper_company에 회사 기본값(SHXK_SHIPPER_NAME)을 전달한다 (TASK-B-342 갱신)', async () => {
     const { chain } = createMockSupabase();
     mockValidateUserAction.mockResolvedValue({
       supabase: chain,
@@ -183,7 +186,7 @@ describe('DEF-B-054: shipper_company 필드 미전달 (Issue #1067)', () => {
 
     expect(mockPlaceShxkOrder).toHaveBeenCalledTimes(1);
     const payload = mockPlaceShxkOrder.mock.calls[0][0];
-    expect(payload.shipper.shipper_company).toBe('MASTER AIR');
+    expect(payload.shipper.shipper_company).toBe('SNTL');
     expect(payload.shipping_method).toBe('FXUPS');
   });
 });
