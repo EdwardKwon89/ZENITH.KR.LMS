@@ -8,7 +8,7 @@
 | **최종 승인** | JSJung |
 | **생성일** | 2026-10-22 |
 | **우선순위** | P2 (`priority:p2`, `type:fix`) |
-| **상태** | 🔔 리뷰 대기 |
+| **상태** | 🔔 리뷰 대기 (Issue #1263 `status:review`, PR #1264) |
 | **브랜치** | `feature/teamb-342-shxk-shipper-company-default-baker` (base `origin/TeamB_Dev` @ `df8c5b04c`) |
 | **채번 확인** | `git ls-tree -r origin/TeamB_Dev --name-only \| grep -oE 'TASK-B-[0-9]+'` → 최대 `TASK-B-341` → **`TASK-B-342` 중복 없음 확인** (착수 직전 재확인 완료) |
 
@@ -132,7 +132,7 @@ return {
 - [x] `npm run test:regression` 전체 PASS (R-08) — `Test Files 234 passed (234)` / `Tests 1680 passed (1680)`, `npm run build` 성공 (`BUILD_EXIT=0`, `✓ Compiled successfully in 17.2s`)
 - [x] TASK-B-341 task file `[작업 결과]`에 "shipper_company 결정은 TASK-B-342에서 번복됨" 한 줄 추가
 - [x] DEF-B-153 갱신 (`shipper_company` 해소, `shipper_name`만 잔존)
-- [x] `check-R17-DoD` 자가 검증 통과 (2026-10-22) — task file 내 `TBD`·`<PLACEHOLDER>`·빈 값 0건, 미체크 DoD 0건(본 항목 제외) 확인. PR은 `Closes #1263` 포함, base `TeamB_Dev`로 생성 예정(PR 생성 후 PR 번호를 헤더 상태에 기재)
+- [x] `check-R17-DoD` 자가 검증 통과 (2026-10-22) — task file 내 `TBD`·`<PLACEHOLDER>`·빈 값 0건, 미체크 DoD 0건 확인. PR #1264(`Closes #1263`, base `TeamB_Dev`) 생성 완료 — DoD 체크리스트는 PR 본문에 기재
 
 ## 8. [작업 결과]
 
@@ -183,6 +183,7 @@ return {
 
 - 코드 커밋: `9544d301344dac145739fa55e95d934bf44acc16`
 - 문서 커밋: 본 task file · DEF-B-153 · TASK-B-341 task file(번복 표기 1줄)
+- PR: #1264 (`feature/teamb-342-shxk-shipper-company-default-baker` → `TeamB_Dev`, `Closes #1263`) — 머지는 JSJung 단독 권한(R-17 v3.0)
 
 ## 9. [발견 이슈]
 
