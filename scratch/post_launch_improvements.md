@@ -1984,3 +1984,17 @@ UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류
 - **예상 공수**: 0.3 MD (①확인 후 판단)
 - **우선순위**: Low
 - **상태**: 🔜 미착수
+
+
+---
+
+## [IMP-178] `scripts/check-db-freshness.sh`가 전역 `supabase` CLI를 요구 — CLI 미설치 환경에서 조용히 exit 127 (R-08-2 자동 확인 실패)
+
+- **발견 경위**: 2026-10-21, TASK-B-341(Issue #1261) 착수 시 R-17 절차상 `./scripts/check-db-freshness.sh` 실행 → `[db-freshness] 로컬 마이그레이션 상태 확인 중...`만 출력하고 **exit 127**(command not found)로 종료됨. 원인: 스크립트 25행이 `supabase migration list --local`을 전역 바이너리(`supabase`)로 호출하는데, 이 환경에는 Supabase CLI가 전역 설치돼 있지 않음(`npx supabase`로는 정상 동작 — `npx supabase --version` → v2.95.4). `scripts/agent-worktree-init.sh` 85행이 `|| echo ...`로 감싸고 있어, 워크트리 초기화 스크립트에서는 **성공처럼 보이는 안내 문구만 출력**되고 실제로는 신선도 확인이 전혀 수행되지 않은 채 착수하게 된다.
+- **현재 상태**: 신선도 확인을 수동으로 대체 가능(`npx supabase migration list --local` → pending 1건 확인 → `npx supabase db reset --yes` + `npx tsx scripts/seed-local.ts` → pending 0건 → 회귀 재실행 PASS). TASK-B-341은 이 경로로 R-08-2를 충족함. 다만 **스크립트 자체는 여전히 전역 `supabase`를 요구**하므로, 전역 CLI가 없는 개발·CI 환경에서는 매번 동일하게 조용히 실패한다.
+- **영향**: (1) R-08-2 자동 확인이 사실상 무력화 → "로컬 DB 최신"으로 오인한 채 stale DB로 검증하고 PASS를 보고할 수 있음(DEF-128 재발 패턴의 입구). (2) exit 127이 exit 1(pending 있음)과 구분되지 않아, 스크립트 호출자가 "pending 마이그레이션 있음"으로 오해할 수 있음. (3) `agent-worktree-init.sh`의 `||` 처리 때문에 착수 시 자동 경고도 실질적으로 동작하지 않음(리다이렉트 문구만 출력). CI는 매번 `supabase db reset`으로 fresh DB를 만들므로 CI 결과 자체에는 영향 없음.
+- **임시 조치**: TASK-B-341 세션에서 `npx supabase`로 직접 pending 확인·reset·seed 후 회귀 재실행(결과는 PR #1262 코멘트에 기재). 스크립트 코드는 변경하지 않음(본 Task 범위 밖).
+- **목표 구현**: (A) `check-db-freshness.sh`가 `supabase` 바이너리를 직접 호출하지 않고 `npx supabase`로 호출하도록 변경해 전역 설치 의존 제거, (B) CLI 부재(exit 127) 시 pending 0건과 **명확히 구분되는** 종료 코드·메시지 출력(exit 2 등) 및 "확인 불가" 상태 명시, (C) `agent-worktree-init.sh`의 `||` 처리에서 exit 127(확인 불가) vs exit 1(pending 있음)을 분기해 각각 다른 경고 문구 출력, (D) 문서(GOV_COMMON.md R-08-2)에도 "CLI 미설치 시 확인 불가" 상태가 존재한다는 사실 명시.
+- **관련 파일**: `scripts/check-db-freshness.sh`(25·29·41·46행), `scripts/agent-worktree-init.sh`(85행), `GOV_COMMON.md`(R-08-2)
+- **예상 공수**: 0.2~0.3 MD (스크립트 수정 + 동작 케이스 4종 검증)
+- **우선순위**: Low — 기능 장애 아님. 다만 R-08-2의 자동화 가치가 환경에 따라 0이 되는 문제로, DEF-128(로컬 DB stale) 재발 방어선의 사각지대
