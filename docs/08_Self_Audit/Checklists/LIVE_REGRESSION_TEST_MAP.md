@@ -1056,3 +1056,6 @@ SHXK `createorder` 페이로드의 `shipper.shipper_name`이 화면 "담당자�
 | TC-343-3 | `buildCreateOrderPayload` - 전송 지점에서 쉼표 제거 | payload shipper_street/consignee_street에 `,` 미포함, city/province도 쉼표 치환 | 동일 |
 | TC-343-4 | 기존 저장분(쉼표 포함) 전송 시 정제(벌크 경로) | `buildCreateOrderPayload`/`buildShipperPayload` 경유 시 쉼표 제거 확인 | 동일 |
 | TC-343-LEN | AddressLine 길이 검증 | 별도 Task로 분리 (실측 후 Jaison 확정) | - |
+| TC-343-UI-01 | AddressInput 해외 주소 입력 시 쉼표→공백 치환 | 입력값 정제 확인 | `tests/unit/components/address-input-comma-strip.test.tsx` |
+| TC-343-UI-02 | AddressInput 상세주소 입력 시 쉼표→공백 치환 | 입력값 정제 확인 | 동일 |
+| TC-343-UI-03 | 다음우편번호 자동채움 시 `address_english` 원본 유지 | 도로명 추출 순서 보장 확인 | 동일 |
