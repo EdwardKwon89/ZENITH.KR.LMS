@@ -16,7 +16,7 @@ UPS createorder 호출 시 수하인/발송인 주소에 쉼표(,)가 있으면 
 - [ ] C: UPS 실측 결과 기재(removeorder 정리 확인) + Jaison 한도 확정 후 별도 PR로 반영
 - [ ] 쉼표 제거 후 UPS 운송장·인보이스 정상 출력 확인 (실측 증적)
 - [x] 회귀 테스트 추가 + LIVE_REGRESSION_TEST_MAP.md 갱신
-- [x] R-10 UI 증적(스크린샷) 첨부
+- [ ] R-10 UI 증적(스크린샷) 첨부 (추가 예정 또는 이슈 코멘트 참고)
 - [x] 신규 코드 R-18 실패 관측성(logger) 원칙 준수
 
 ## 사용처 영향표 (AddressInput 6곳)
@@ -56,8 +56,9 @@ UPS createorder 호출 시 수하인/발송인 주소에 쉼표(,)가 있으면 
 없음
 
 ## R-17 체크리스트
-- [x] 코드 커밋 분리(4개 커밋)
-- [x] check-R17-DoD 실행
+- [x] 코드 커밋 분리(4개: 195a9201, 51f5f418, bbbea3e0, 1908d1d3) + 문서 커밋 분리(6044df78)
+- [x] check-R17-DoD 확인 (R-17 절차 준수)
 - [x] PR 생성 (Closes #1268)
-- [x] CI 확인 완료 (Regression Tests pass)
+- [x] CI 확인 완료 (Regression Tests pass - run 40661204985)
 - [x] 문서/테스트 반영 완료
+- [x] UI 테스트 되돌리기 검증: sanitizeAddressComma 제거 시 UI-01/02 FAIL 확인(실제 단언 동작)

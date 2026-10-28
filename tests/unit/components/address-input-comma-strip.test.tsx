@@ -40,27 +40,20 @@ describe('TC-343-UI: AddressInput 쉼표 입력 시 공백 치환', () => {
     render(<AddressInput t={mockT} />);
     const countrySelect = screen.getAllByRole('combobox')[0];
     fireEvent.change(countrySelect, { target: { value: 'US' } });
-    const inputs = document.querySelectorAll('input[type="text"]');
-    // 해외 주소 입력 필드
-    const addressInput = Array.from(inputs).find((el) => (el as HTMLInputElement).value === '' && el.getAttribute('name')?.includes('address')) as HTMLInputElement;
-    if (addressInput) {
-      fireEvent.change(addressInput, { target: { value: '123 Main St, Apt 1' } });
-      expect(addressInput.value).toBe('123 Main St Apt 1');
-    }
+    const addressInput = document.querySelector('input[name="address"]') as HTMLInputElement;
+    expect(addressInput).not.toBeNull();
+    fireEvent.change(addressInput!, { target: { value: '123 Main St, Apt 1' } });
+    expect(addressInput!.value).toBe('123 Main St Apt 1');
   });
 
   it('상세주소 입력 시 쉼표가 공백으로 치환된다', () => {
     render(<AddressInput t={mockT} />);
     const countrySelect = screen.getAllByRole('combobox')[0];
     fireEvent.change(countrySelect, { target: { value: 'US' } });
-    const detailInputs = Array.from(document.querySelectorAll('input[type="text"]')).filter((el) => {
-      const label = el.closest('div')?.querySelector('label')?.textContent || '';
-      return label.includes('Detail');
-    });
-    if (detailInputs[0]) {
-      fireEvent.change(detailInputs[0], { target: { value: 'Apt 1, 2F' } });
-      expect((detailInputs[0] as HTMLInputElement).value).toBe('Apt 1 2F');
-    }
+    const detailInput = document.querySelector('input[name="address_detail"]') as HTMLInputElement;
+    expect(detailInput).not.toBeNull();
+    fireEvent.change(detailInput!, { target: { value: 'Apt 1, 2F' } });
+    expect(detailInput!.value).toBe('Apt 1 2F');
   });
 
   it('다음우편번호 자동채움 시 address_english는 쉼표 원본 유지 (도로명 추출 순서 보장)', () => {
