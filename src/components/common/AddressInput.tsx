@@ -88,15 +88,13 @@ export function AddressInput({
     if (defaultValues.state_province) setSelectedState(defaultValues.state_province);
     if (defaultValues.city) setSelectedCity(defaultValues.city);
     if (defaultValues.address !== undefined) {
-      const sanitizedAddr = sanitizeAddressComma(defaultValues.address || '');
-      setStreetAddress(sanitizedAddr);
-      if (normalizedDefaultCountryCode === 'KR') setRoadAddress(sanitizedAddr);
+      setStreetAddress(defaultValues.address || '');
+      if (normalizedDefaultCountryCode === 'KR') setRoadAddress(defaultValues.address || '');
     }
     if (defaultValues.address_detail !== undefined) setDetailAddress(sanitizeAddressComma(defaultValues.address_detail || ''));
     if (defaultValues.zipcode !== undefined) setPostalCode(defaultValues.zipcode || '');
-    if (defaultValues.address_english !== undefined && setValue && prefix) {
-      const sanitizedEng = sanitizeAddressComma(defaultValues.address_english || '');
-      setAddressEnglish(sanitizedEng);
+    if (defaultValues.address_english !== undefined) {
+      setAddressEnglish(defaultValues.address_english || '');
     }
   }, [defaultValues.country_code, defaultValues.state_province, defaultValues.city, defaultValues.address, defaultValues.address_detail, defaultValues.zipcode, defaultValues.address_english]);
 
@@ -254,23 +252,6 @@ export function AddressInput({
                   }
                 }
               }}
-              onPaste={(e) => {
-                e.preventDefault();
-                const text = e.clipboardData.getData('text');
-                const value = sanitizeAddressComma(text);
-                if (englishDetailOnly && value && !ENGLISH_ONLY_REGEX.test(value)) {
-                  setDetailError('상세주소는 영문만 입력 가능합니다 (English only)');
-                  return;
-                }
-                setDetailError('');
-                setDetailAddress(value);
-                if (setValue && prefix) {
-                  setValue(`${prefix}_address_detail`, value);
-                  if (englishDetailOnly && prefix === 'shipper') {
-                    setValue('shipper_address_detail_english', value);
-                  }
-                }
-              }}
               disabled={readOnly}
               placeholder={englishDetailOnly ? 'English only (e.g., Apt 101, Suite 200)' : ''}
               className={`w-full h-10 px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${readOnly ? 'bg-slate-50' : ''}`}
@@ -342,15 +323,6 @@ export function AddressInput({
                   setValue(`${prefix}_address`, value);
                 }
               }}
-              onPaste={(e) => {
-                e.preventDefault();
-                const text = e.clipboardData.getData('text');
-                const value = sanitizeAddressComma(text);
-                setStreetAddress(value);
-                if (setValue && prefix) {
-                  setValue(`${prefix}_address`, value);
-                }
-              }}
               disabled={readOnly}
               className={`w-full h-10 px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${readOnly ? 'bg-slate-50' : ''}`}
             />
@@ -378,23 +350,6 @@ export function AddressInput({
                 if (setValue && prefix) {
                   setValue(`${prefix}_address_detail`, value);
                   // TASK-B-305: 영문 전용 입력 시 address_detail_english에도 동일 반영
-                  if (englishDetailOnly && prefix === 'shipper') {
-                    setValue('shipper_address_detail_english', value);
-                  }
-                }
-              }}
-              onPaste={(e) => {
-                e.preventDefault();
-                const text = e.clipboardData.getData('text');
-                const value = sanitizeAddressComma(text);
-                if (englishDetailOnly && value && !ENGLISH_ONLY_REGEX.test(value)) {
-                  setDetailError('상세주소는 영문만 입력 가능합니다 (English only)');
-                  return;
-                }
-                setDetailError('');
-                setDetailAddress(value);
-                if (setValue && prefix) {
-                  setValue(`${prefix}_address_detail`, value);
                   if (englishDetailOnly && prefix === 'shipper') {
                     setValue('shipper_address_detail_english', value);
                   }
@@ -436,11 +391,13 @@ export function AddressInput({
           >
             <DaumPostcodeEmbed
               onComplete={(data) => {
-                const sanitizedRoad = sanitizeAddressComma(data.roadAddress || '');
-                setRoadAddress(sanitizedRoad);
+                const roadKorean = data.roadAddress || '';
+                setRoadAddress(roadKorean);
                 setPostalCode(data.zonecode);
                 setShowPostcode(false);
-                const englishAddr = sanitizeAddressComma((data as any).roadAddressEnglish || '');
+                // TASK-B-343: 도로명 추출 순서 유지를 위해 다음우편번호 영문주소는 쉼표 치환하지 않음
+                // (resolveRoadAddress가 첫 쉼표 토막 = 도로명으로 사용, city/state는 별도 필드)
+                const englishAddr = (data as any).roadAddressEnglish || '';
                 setAddressEnglish(englishAddr);
                 const KR_SIDO_TO_ISOCODE: Record<string, string> = {
                   '서울': '11', '부산': '26', '대구': '27', '인천': '28', '광주': '29',
@@ -484,7 +441,7 @@ export function AddressInput({
                 setSelectedState(matchedIso);
                 setSelectedCity(matchedCity);
                 if (setValue && prefix) {
-                  setValue(`${prefix}_address`, sanitizedRoad);
+                  setValue(`${prefix}_address`, roadKorean);
                   setValue(`${prefix}_zipcode`, data.zonecode);
                   setValue(`${prefix}_address_detail`, '');
                   setValue(`${prefix}_address_english`, englishAddr);

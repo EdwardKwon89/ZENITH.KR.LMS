@@ -126,8 +126,8 @@ function buildShipperPayload(
     || shipperDefaults.name;
 
   return {
-    shipper_name: sanitizeComma(shipperDisplayName),
-    shipper_company: sanitizeComma(shipperDefaults.name),
+    shipper_name: shipperDisplayName,
+    shipper_company: shipperDefaults.name,
     shipper_countrycode: (order.shipper_country_code as string) || shipperDefaults.country,
     shipper_province: sanitizeComma((order.shipper_state_province as string) || ''),
     shipper_city: sanitizeComma((order.shipper_city as string) || ''),
@@ -170,7 +170,7 @@ export function buildCreateOrderPayload(
     cargovolume,
     shipper: buildShipperPayload(order, shipperDefaults),
     consignee: {
-      consignee_name: sanitizeComma((order.recipient_name as string) || 'E2E Consignee'),
+      consignee_name: (order.recipient_name as string) || 'E2E Consignee',
       consignee_countrycode: (order.recipient_country_code as string) || countryCode,
       consignee_province: sanitizeComma((order.recipient_state_province as string) || ''),
       consignee_city: sanitizeComma((order.recipient_city as string) || ''),
