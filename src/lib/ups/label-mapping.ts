@@ -64,15 +64,13 @@ export function resolveShxkUnitCode(packingUnit: string): string {
 // TASK-B-326: 시/구/도는 shipper_city/shipper_province 별도 필드로 이미 전달되므로,
 // street에는 도로명+상세주소만 남긴다. DB 관례(도로명, 구, 시, 도[, 국가] 순서)에 따라
 // 첫 번째 콤마 세그먼트 = 도로명 (2026-09-13 로컬 DB 16건 전수 검증, 예외 없음).
-// TASK-B-343: 도로명 추출 후 쉼표 제거(공백 치환). 순서: split by comma first to get road segment.
 function sanitizeComma(value: string): string {
   if (!value) return '';
   return value.replace(/,/g, ' ').replace(/\s+/g, ' ').trim();
 }
 
 function resolveRoadAddress(address: string): string {
-  const road = (address || '').split(',')[0]?.trim() || '';
-  return sanitizeComma(road);
+  return (address || '').split(',')[0]?.trim() || '';
 }
 
 export function resolveShipperStreet(
@@ -84,30 +82,26 @@ export function resolveShipperStreet(
   const shipperAddr = (order.shipper_address_english as string) || (shipperOrg?.address_english as string) || (shipperOrg?.address as string) || (order.shipper_address as string) || '';
   const shipperAddrDetail = (order.shipper_address_detail_english as string) || (shipperOrg?.address_detail_english as string) || (shipperOrg?.address_detail as string) || (order.shipper_address_detail as string) || '';
   // TASK-B-326: 도로명만 사용 (첫 콤마 세그먼트) — 국가·시·구·도 자동 제거, 상세주소는 맨 앞
-  // TASK-B-343: 도로명 추출 후 쉼표 치환, 최종 문자열도 쉼표 제거
   const road = resolveRoadAddress(shipperAddr);
-  const detail = sanitizeComma(shipperAddrDetail);
-  return sanitizeComma([detail, road].filter(Boolean).join(', '));
+  return [shipperAddrDetail, road].filter(Boolean).join(', ');
 }
 
 // TASK-B-305 (Issue #1133): 수하인 주소 영문 우선 표출 유틸
 // 우선순위: recipient_address_detail (영문 전용) > recipient_address_local > recipient_address
 // TASK-B-325/326: 상세주소를 맨 앞으로 + 도로명만 사용 (국가·시·구·도 자동 제거)
-// TASK-B-343: 쉼표 치환
 export function resolveConsigneeStreet(
   order: Record<string, unknown>,
 ): string {
   const consigneeAddr = (order.recipient_address as string) || '';
-  const localAddr = sanitizeComma((order.recipient_address_local as string) || '');
-  const detailAddr = sanitizeComma((order.recipient_address_detail as string) || '');
+  const localAddr = (order.recipient_address_local as string) || '';
+  const detailAddr = (order.recipient_address_detail as string) || '';
   const road = resolveRoadAddress(consigneeAddr);
 
   // 영문 상세주소가 있으면 사용, 없으면 한글 원본 + 현지어 표기
   if (detailAddr) {
-    return sanitizeComma([detailAddr, road].filter(Boolean).join(', '));
+    return [detailAddr, road].filter(Boolean).join(', ');
   }
-  const result = localAddr ? `${road} (${localAddr})` : road;
-  return sanitizeComma(result);
+  return localAddr ? `${road} (${localAddr})` : road;
 }
 
 // TASK-B-341 (Issue #1261) → TASK-B-342 (Issue #1263): SHXK createorder의 shipper 블록.
@@ -125,13 +119,19 @@ function buildShipperPayload(
     || (shipperOrg?.name as string)
     || shipperDefaults.name;
 
+  const shipperAddr = (order.shipper_address_english as string) || (shipperOrg?.address_english as string) || (shipperOrg?.address as string) || (order.shipper_address as string) || '';
+  const shipperAddrDetail = (order.shipper_address_detail_english as string) || (shipperOrg?.address_detail_english as string) || (shipperOrg?.address_detail as string) || (order.shipper_address_detail as string) || '';
+  const road = sanitizeComma(resolveRoadAddress(shipperAddr));
+  const detail = sanitizeComma(shipperAddrDetail);
+  const shipperStreet = sanitizeComma([detail, road].filter(Boolean).join(', '));
+
   return {
     shipper_name: shipperDisplayName,
     shipper_company: shipperDefaults.name,
     shipper_countrycode: (order.shipper_country_code as string) || shipperDefaults.country,
     shipper_province: sanitizeComma((order.shipper_state_province as string) || ''),
     shipper_city: sanitizeComma((order.shipper_city as string) || ''),
-    shipper_street: resolveShipperStreet(order, shipperOrg),
+    shipper_street: shipperStreet,
     shipper_postcode: (order.shipper_zipcode as string) || '',
     shipper_telephone: stripNonDigits((order.shipper_contact_phone as string) || ''),
   };
@@ -151,10 +151,10 @@ export function buildCreateOrderPayload(
   const totalWeight = packages.reduce((sum, p) => sum + Number(p.gross_weight ?? 0), 0);
 
   const consigneeStreet = (order.recipient_address as string) || '';
-  const localAddr = sanitizeComma((order.recipient_address_local as string) || '');
+  const localAddr = (order.recipient_address_local as string) || '';
   // TASK-B-326: 수하인 street도 도로명만 사용 (시/구/도·국가 제거 — AddressLine 초과 방지)
-  // TASK-B-343: 도로명 추출 후 쉼표 치환 (기존 저장분 커버)
-  const cleanConsigneeStreet = resolveRoadAddress(consigneeStreet);
+  // TASK-B-343: 전송 시점에만 쉼표 치환 (표시/무역서류는 기존 출력 유지)
+  const cleanConsigneeStreet = sanitizeComma(resolveRoadAddress(consigneeStreet));
   const fullConsigneeStreet = sanitizeComma(localAddr ? `${cleanConsigneeStreet} (${localAddr})` : cleanConsigneeStreet);
 
   return {

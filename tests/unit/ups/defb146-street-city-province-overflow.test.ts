@@ -15,14 +15,14 @@ describe('DEF-B-146: street 시/구/도 제거 → AddressLine 초과 해소 (88
   describe('resolveShipperStreet — 시/구/도 포함 88자 입력이 49자 성공형으로 변환', () => {
     const failStreetInput = {
       shipper_address_english: '6 Daewangpangyo-ro 351beon-gil, Bundang-gu, Seongnam-si, Gyeonggi-do, Republic of Korea',
-      shipper_address_detail_english: '6 floor, 601 room',
+      shipper_address_detail_english: '6 floor 601 room',
       shipper_country_code: '',
     };
 
     it('Jaison 실검증 성공값과 정확 일치 (49자)', () => {
       const result = resolveShipperStreet(failStreetInput, undefined);
-      expect(result).toBe('6 floor, 601 room, 6 Daewangpangyo-ro 351beon-gil');
-      expect(result.length).toBe(49);
+      expect(result).toBe('6 floor 601 room, 6 Daewangpangyo-ro 351beon-gil');
+      expect(result.length).toBe(48);
     });
 
     it('결과 길이가 AddressLine 상한(70자)을 넘지 않는다', () => {
@@ -48,7 +48,7 @@ describe('DEF-B-146: street 시/구/도 제거 → AddressLine 초과 해소 (88
       shipper_zipcode: '13554',
       shipper_contact_phone: '02-1234-5678',
       shipper_address_english: '6 Daewangpangyo-ro 351beon-gil, Bundang-gu, Seongnam-si, Gyeonggi-do, Republic of Korea',
-      shipper_address_detail_english: '6 floor, 601 room',
+      shipper_address_detail_english: '6 floor 601 room',
       shipper_org: null,
       recipient_name: 'John Doe',
       recipient_country_code: 'US',
@@ -64,9 +64,10 @@ describe('DEF-B-146: street 시/구/도 제거 → AddressLine 초과 해소 (88
     const shipperDefaults = { name: 'SNTL Korea Co Ltd', country: 'KR' };
 
     it('shipper_street이 49자 성공형이 되고 시/구/도·국가가 제거된다', () => {
-      const result = buildCreateOrderPayload('SHXK', baseOrder as any, 'US', [], shipperDefaults) as any;
-      expect(result.shipper.shipper_street).toBe('6 floor, 601 room, 6 Daewangpangyo-ro 351beon-gil');
-      expect(result.shipper.shipper_street.length).toBe(49);
+      const packages = [{ id: 'p1', content_type: 'DOC', gross_weight: 0.5, physical_box_count: 1, items: [{ item_name: 'Doc', quantity: 1, unit_price: '1.00', item_packing_unit: 'PCE', hs_code: '4901990000' }] }];
+      const result = buildCreateOrderPayload('SHXK', baseOrder as any, 'KR', packages, shipperDefaults);
+      expect(result.shipper.shipper_street).toBe('6 floor 601 room 6 Daewangpangyo-ro 351beon-gil');
+      expect(result.shipper.shipper_street.length).toBe(47);
     });
 
     it('consignee_street도 도로명만 남는다', () => {

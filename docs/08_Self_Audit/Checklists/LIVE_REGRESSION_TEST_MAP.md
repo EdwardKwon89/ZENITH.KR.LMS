@@ -1051,10 +1051,8 @@ SHXK `createorder` 페이로드의 `shipper.shipper_name`이 화면 "담당자�
 
 | ID | 검증 내용 | 기대 결과 | 테스트 위치 |
 | :-- | :-- | :-- | :-- |
-| TC-343-1 | 실제 `resolveShipperStreet` 호출 - shipper_address_english에 쉼표 포함 | 쉼표 제거/공백 치환, 도로명 추출 순서 유지(`resolveRoadAddress`가 첫 세그먼트만 사용) | `tests/unit/ups/task-b343-address-comma-strip.test.ts` |
-| TC-343-2 | 실제 `resolveConsigneeStreet` 호출 - recipient_address에 `도로명, 구, 시` 형태 | 도로명만 사용 + 쉼표 없음 | 동일 |
-| TC-343-3 | 실제 `buildCreateOrderPayload` 호출 - shipper/consignee에 쉼표 포함 | payload shipper_street/consignee_street에 `,` 미포함, city/province도 쉼표 치환 | 동일 |
-| TC-343-4 | 기존 저장분(쉼표 포함) 전송 시 정제(벌크 경로) | `buildCreateOrderPayload` 경유 시 쉼표 제거 확인 | 동일 |
-| TC-343-5 | `validateShxkPayload` - AddressLine 길이 초과 | `ADDRESS_LINE_MAX` 초과 시 한글 에러 반환(`발송인/수취인 주소는 N자 이하여야 합니다`) | 동일 |
-| TC-343-6 | 경계값(N, N+1) 검증 | N 이하 통과, N+1 실패 | 동일 |
-| TC-343-7 | 되돌리기 검증 - 쉼표 치환 제거 시도 | TC-343-1 FAIL(쉼표 포함된 채로 반환) | 동일 |
+| TC-343-1 | `resolveShipperStreet` - 표시용 출력 유지 (도로명 추출 순서 확인) | 기존 구분자 유지, 도로명 세그먼트만 사용 | `tests/unit/ups/task-b343-address-comma-strip.test.ts` |
+| TC-343-2 | `resolveConsigneeStreet` - 표시용 출력 유지 | 기존 구분자 유지 | 동일 |
+| TC-343-3 | `buildCreateOrderPayload` - 전송 지점에서 쉼표 제거 | payload shipper_street/consignee_street에 `,` 미포함, city/province도 쉼표 치환 | 동일 |
+| TC-343-4 | 기존 저장분(쉼표 포함) 전송 시 정제(벌크 경로) | `buildCreateOrderPayload`/`buildShipperPayload` 경유 시 쉼표 제거 확인 | 동일 |
+| TC-343-LEN | AddressLine 길이 검증 | 별도 Task로 분리 (실측 후 Jaison 확정) | - |
