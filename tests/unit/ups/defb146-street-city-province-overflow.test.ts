@@ -15,14 +15,14 @@ describe('DEF-B-146: street 시/구/도 제거 → AddressLine 초과 해소 (88
   describe('resolveShipperStreet — 시/구/도 포함 88자 입력이 49자 성공형으로 변환', () => {
     const failStreetInput = {
       shipper_address_english: '6 Daewangpangyo-ro 351beon-gil, Bundang-gu, Seongnam-si, Gyeonggi-do, Republic of Korea',
-      shipper_address_detail_english: '6 floor 601 room',
+      shipper_address_detail_english: '6 floor, 601 room',
       shipper_country_code: '',
     };
 
     it('Jaison 실검증 성공값과 정확 일치 (49자)', () => {
       const result = resolveShipperStreet(failStreetInput, undefined);
-      expect(result).toBe('6 floor 601 room, 6 Daewangpangyo-ro 351beon-gil');
-      expect(result.length).toBe(48);
+      expect(result).toBe('6 floor, 601 room, 6 Daewangpangyo-ro 351beon-gil');
+      expect(result.length).toBe(49);
     });
 
     it('결과 길이가 AddressLine 상한(70자)을 넘지 않는다', () => {
@@ -48,7 +48,7 @@ describe('DEF-B-146: street 시/구/도 제거 → AddressLine 초과 해소 (88
       shipper_zipcode: '13554',
       shipper_contact_phone: '02-1234-5678',
       shipper_address_english: '6 Daewangpangyo-ro 351beon-gil, Bundang-gu, Seongnam-si, Gyeonggi-do, Republic of Korea',
-      shipper_address_detail_english: '6 floor 601 room',
+      shipper_address_detail_english: '6 floor, 601 room',
       shipper_org: null,
       recipient_name: 'John Doe',
       recipient_country_code: 'US',

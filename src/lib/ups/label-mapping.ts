@@ -119,19 +119,13 @@ function buildShipperPayload(
     || (shipperOrg?.name as string)
     || shipperDefaults.name;
 
-  const shipperAddr = (order.shipper_address_english as string) || (shipperOrg?.address_english as string) || (shipperOrg?.address as string) || (order.shipper_address as string) || '';
-  const shipperAddrDetail = (order.shipper_address_detail_english as string) || (shipperOrg?.address_detail_english as string) || (shipperOrg?.address_detail as string) || (order.shipper_address_detail as string) || '';
-  const road = sanitizeComma(resolveRoadAddress(shipperAddr));
-  const detail = sanitizeComma(shipperAddrDetail);
-  const shipperStreet = sanitizeComma([detail, road].filter(Boolean).join(', '));
-
   return {
     shipper_name: shipperDisplayName,
     shipper_company: shipperDefaults.name,
     shipper_countrycode: (order.shipper_country_code as string) || shipperDefaults.country,
     shipper_province: sanitizeComma((order.shipper_state_province as string) || ''),
     shipper_city: sanitizeComma((order.shipper_city as string) || ''),
-    shipper_street: shipperStreet,
+    shipper_street: sanitizeComma(resolveShipperStreet(order, shipperOrg)),
     shipper_postcode: (order.shipper_zipcode as string) || '',
     shipper_telephone: stripNonDigits((order.shipper_contact_phone as string) || ''),
   };
