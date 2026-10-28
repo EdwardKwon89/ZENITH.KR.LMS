@@ -9,11 +9,16 @@
  * - ITEM_NAME_MAX=35: UPS 실측 오류 "Valid range is 0 to 35"
  *   (SHXK 명세는 500자지만 UPS가 더 엄격).
  * - PHONE_MAX_DIGITS=15: 국제 전화 E.164 상한 (SHXK 명세 100자 대비 UPS 하류 한도 기준).
+ * - TASK-B-343: UPS AddressLine 길이 사전검증 (실측 후 Jaison 확정)
  */
 
 export const HS_CODE_MAX = 30;
 export const ITEM_NAME_MAX = 35;
 export const PHONE_MAX_DIGITS = 15;
+
+// TASK-B-343: UPS AddressLine 최대 길이 (실측 확정 전 기본값 - Jaison 확인 후 조정)
+// 참고: DEF-B-145/146 실측상 61자 성공, 88자 실패, 49자 성공
+export const ADDRESS_LINE_MAX = 50;
 
 /**
  * 문자열에서 비숫자를 모두 제거한다. 전화번호 입력 정제용.

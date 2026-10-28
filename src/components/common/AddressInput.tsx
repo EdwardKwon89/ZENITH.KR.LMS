@@ -5,6 +5,12 @@ import { DaumPostcodeEmbed } from 'react-daum-postcode';
 import { Country, State, City } from 'country-state-city';
 import type { ICountry, IState, ICity } from 'country-state-city';
 
+// TASK-B-343: 주소 입력 시 쉼표 차단 - 공백 치환 후 연속 공백 정리
+function sanitizeAddressComma(value: string): string {
+  if (!value) return value;
+  return value.replace(/,/g, ' ').replace(/\s+/g, ' ');
+}
+
 interface AddressInputProps {
   t: (key: string) => string;
   fieldErrors?: Record<string, string>;
@@ -70,7 +76,8 @@ export function AddressInput({
   const [detailError, setDetailError] = useState<string>('');
 
   // TASK-B-305: 영문 전용 검증 정규식 (화주/수하인 상세주소)
-  const ENGLISH_ONLY_REGEX = /^[A-Za-z0-9\s.,\-()&'"/#%+:]*$/;
+  // TASK-B-343: 입력 차단 범위 전체 - 쉼표는 허용하지 않음(즉시 제거)
+  const ENGLISH_ONLY_REGEX = /^[A-Za-z0-9\s.\-()&'"/#%+:]*$/;
 
   useEffect(() => {
     setCountries(Country.getAllCountries());
@@ -81,12 +88,17 @@ export function AddressInput({
     if (defaultValues.state_province) setSelectedState(defaultValues.state_province);
     if (defaultValues.city) setSelectedCity(defaultValues.city);
     if (defaultValues.address !== undefined) {
-      setStreetAddress(defaultValues.address || '');
-      if (normalizedDefaultCountryCode === 'KR') setRoadAddress(defaultValues.address || '');
+      const sanitizedAddr = sanitizeAddressComma(defaultValues.address || '');
+      setStreetAddress(sanitizedAddr);
+      if (normalizedDefaultCountryCode === 'KR') setRoadAddress(sanitizedAddr);
     }
-    if (defaultValues.address_detail !== undefined) setDetailAddress(defaultValues.address_detail || '');
+    if (defaultValues.address_detail !== undefined) setDetailAddress(sanitizeAddressComma(defaultValues.address_detail || ''));
     if (defaultValues.zipcode !== undefined) setPostalCode(defaultValues.zipcode || '');
-  }, [defaultValues.country_code, defaultValues.state_province, defaultValues.city, defaultValues.address, defaultValues.address_detail, defaultValues.zipcode]);
+    if (defaultValues.address_english !== undefined && setValue && prefix) {
+      const sanitizedEng = sanitizeAddressComma(defaultValues.address_english || '');
+      setAddressEnglish(sanitizedEng);
+    }
+  }, [defaultValues.country_code, defaultValues.state_province, defaultValues.city, defaultValues.address, defaultValues.address_detail, defaultValues.zipcode, defaultValues.address_english]);
 
   // 국가 변경 시 state 목록 갱신 (리셋은 onChange에서 처리 — Issue #530)
   useEffect(() => {
@@ -225,7 +237,8 @@ export function AddressInput({
               {...a('address_detail')}
               value={detailAddress}
               onChange={(e) => {
-                const value = e.target.value;
+                const raw = e.target.value;
+                const value = sanitizeAddressComma(raw);
                 // TASK-B-305: 영문 전용 검증 (화주/수하인 상세주소)
                 if (englishDetailOnly && value && !ENGLISH_ONLY_REGEX.test(value)) {
                   setDetailError('상세주소는 영문만 입력 가능합니다 (English only)');
@@ -236,6 +249,23 @@ export function AddressInput({
                 if (setValue && prefix) {
                   setValue(`${prefix}_address_detail`, value);
                   // TASK-B-305: 영문 전용 입력 시 address_detail_english에도 동일 반영
+                  if (englishDetailOnly && prefix === 'shipper') {
+                    setValue('shipper_address_detail_english', value);
+                  }
+                }
+              }}
+              onPaste={(e) => {
+                e.preventDefault();
+                const text = e.clipboardData.getData('text');
+                const value = sanitizeAddressComma(text);
+                if (englishDetailOnly && value && !ENGLISH_ONLY_REGEX.test(value)) {
+                  setDetailError('상세주소는 영문만 입력 가능합니다 (English only)');
+                  return;
+                }
+                setDetailError('');
+                setDetailAddress(value);
+                if (setValue && prefix) {
+                  setValue(`${prefix}_address_detail`, value);
                   if (englishDetailOnly && prefix === 'shipper') {
                     setValue('shipper_address_detail_english', value);
                   }
@@ -305,7 +335,22 @@ export function AddressInput({
             <input
               {...a('address')}
               value={streetAddress}
-              onChange={(e) => setStreetAddress(e.target.value)}
+              onChange={(e) => {
+                const value = sanitizeAddressComma(e.target.value);
+                setStreetAddress(value);
+                if (setValue && prefix) {
+                  setValue(`${prefix}_address`, value);
+                }
+              }}
+              onPaste={(e) => {
+                e.preventDefault();
+                const text = e.clipboardData.getData('text');
+                const value = sanitizeAddressComma(text);
+                setStreetAddress(value);
+                if (setValue && prefix) {
+                  setValue(`${prefix}_address`, value);
+                }
+              }}
               disabled={readOnly}
               className={`w-full h-10 px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${readOnly ? 'bg-slate-50' : ''}`}
             />
@@ -321,7 +366,8 @@ export function AddressInput({
                 {...a('address_detail')}
                 value={detailAddress}
               onChange={(e) => {
-                const value = e.target.value;
+                const raw = e.target.value;
+                const value = sanitizeAddressComma(raw);
                 // TASK-B-305: 영문 전용 검증 (화주/수하인 상세주소)
                 if (englishDetailOnly && value && !ENGLISH_ONLY_REGEX.test(value)) {
                   setDetailError('상세주소는 영문만 입력 가능합니다 (English only)');
@@ -332,6 +378,23 @@ export function AddressInput({
                 if (setValue && prefix) {
                   setValue(`${prefix}_address_detail`, value);
                   // TASK-B-305: 영문 전용 입력 시 address_detail_english에도 동일 반영
+                  if (englishDetailOnly && prefix === 'shipper') {
+                    setValue('shipper_address_detail_english', value);
+                  }
+                }
+              }}
+              onPaste={(e) => {
+                e.preventDefault();
+                const text = e.clipboardData.getData('text');
+                const value = sanitizeAddressComma(text);
+                if (englishDetailOnly && value && !ENGLISH_ONLY_REGEX.test(value)) {
+                  setDetailError('상세주소는 영문만 입력 가능합니다 (English only)');
+                  return;
+                }
+                setDetailError('');
+                setDetailAddress(value);
+                if (setValue && prefix) {
+                  setValue(`${prefix}_address_detail`, value);
                   if (englishDetailOnly && prefix === 'shipper') {
                     setValue('shipper_address_detail_english', value);
                   }
@@ -373,10 +436,11 @@ export function AddressInput({
           >
             <DaumPostcodeEmbed
               onComplete={(data) => {
-                setRoadAddress(data.roadAddress);
+                const sanitizedRoad = sanitizeAddressComma(data.roadAddress || '');
+                setRoadAddress(sanitizedRoad);
                 setPostalCode(data.zonecode);
                 setShowPostcode(false);
-                const englishAddr = (data as any).roadAddressEnglish || '';
+                const englishAddr = sanitizeAddressComma((data as any).roadAddressEnglish || '');
                 setAddressEnglish(englishAddr);
                 const KR_SIDO_TO_ISOCODE: Record<string, string> = {
                   '서울': '11', '부산': '26', '대구': '27', '인천': '28', '광주': '29',
@@ -420,7 +484,7 @@ export function AddressInput({
                 setSelectedState(matchedIso);
                 setSelectedCity(matchedCity);
                 if (setValue && prefix) {
-                  setValue(`${prefix}_address`, data.roadAddress);
+                  setValue(`${prefix}_address`, sanitizedRoad);
                   setValue(`${prefix}_zipcode`, data.zonecode);
                   setValue(`${prefix}_address_detail`, '');
                   setValue(`${prefix}_address_english`, englishAddr);

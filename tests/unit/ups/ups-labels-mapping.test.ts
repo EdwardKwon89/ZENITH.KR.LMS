@@ -170,7 +170,7 @@ describe('UPS Labels Mapping Functions', () => {
 
     it('address + address_detail 조합 (TASK-B-325: 상세주소가 앞)', () => {
       const org = { address_english: 'Main St', address_detail_english: 'Unit 101' };
-      expect(resolveShipperStreet({} as any, org as any)).toBe('Unit 101, Main St');
+      expect(resolveShipperStreet({} as any, org as any)).toBe('Unit 101 Main St');
     });
   });
 

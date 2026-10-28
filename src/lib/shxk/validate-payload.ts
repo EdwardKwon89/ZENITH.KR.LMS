@@ -6,7 +6,7 @@
 //
 // 필수 필드 기준: docs/80_RawData/Phase8_UPS_API_리서치_결과.md (SHXK createorder 공식 필드 스펙)
 
-import { HS_CODE_MAX, ITEM_NAME_MAX, PHONE_MAX_DIGITS, stripNonDigits } from '@/lib/validation/shxk-limits';
+import { HS_CODE_MAX, ITEM_NAME_MAX, PHONE_MAX_DIGITS, ADDRESS_LINE_MAX, stripNonDigits } from '@/lib/validation/shxk-limits';
 import { isShxkDeclareUnit } from '@/lib/shxk/declare-units';
 
 export interface ShxkPayloadShape {
@@ -39,6 +39,9 @@ export function validateShxkPayload(payload: ShxkPayloadShape): string[] {
   if (isEmpty(shipper?.shipper_name)) errors.push('발송인 성명 누락');
   if (isEmpty(shipper?.shipper_countrycode)) errors.push('발송인 국가코드 누락');
   if (isEmpty(shipper?.shipper_street)) errors.push('발송인 주소 누락');
+  else if (String(shipper?.shipper_street).length > ADDRESS_LINE_MAX) {
+    errors.push(`발송인 주소는 ${ADDRESS_LINE_MAX}자 이하여야 합니다`);
+  }
   if (isEmpty(shipper?.shipper_telephone) && isEmpty(shipper?.shipper_mobile)) {
     errors.push('발송인 연락처 누락 (전화/휴대폰 중 1개 이상)');
   }
@@ -47,6 +50,9 @@ export function validateShxkPayload(payload: ShxkPayloadShape): string[] {
   if (isEmpty(consignee?.consignee_name)) errors.push('수취인 성명 누락');
   if (isEmpty(consignee?.consignee_countrycode)) errors.push('수취인 국가코드 누락');
   if (isEmpty(consignee?.consignee_street)) errors.push('수취인 주소 누락');
+  else if (String(consignee?.consignee_street).length > ADDRESS_LINE_MAX) {
+    errors.push(`수취인 주소는 ${ADDRESS_LINE_MAX}자 이하여야 합니다`);
+  }
   if (isEmpty(consignee?.consignee_city)) errors.push('수취인 도시 누락'); // TASK-B-283 (Issue #1069 / DEF-B-055)
   if (isEmpty(consignee?.consignee_postcode)) errors.push('수취인 우편번호 누락');
   if (isEmpty(consignee?.consignee_telephone) && isEmpty(consignee?.consignee_mobile)) {
