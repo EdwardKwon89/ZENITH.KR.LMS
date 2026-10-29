@@ -51,6 +51,26 @@ rm -f <scratch>/prod.env      # 키가 담긴 임시 파일은 즉시 삭제, �
 
 ## 2. 배포 실행 (격리 worktree)
 
+### 2-A. 권장: 가드 스크립트 `scripts/deploy-prod.sh`
+위 §0-2·아래 수동 절차를 자동화한 스크립트다. **항상 `origin/main`을 임시 worktree에 체크아웃해 그곳에서 배포**하며, 종료 시 worktree를 스스로 정리한다.
+
+```bash
+./scripts/deploy-prod.sh --dry-run --expect <main 병합 커밋>   # 1) 게이트만 점검 (배포 안 함)
+./scripts/deploy-prod.sh --expect <main 병합 커밋>             # 2) 실제 배포 + V1~V3 자동 검증
+```
+
+| 게이트 | 실패 시 |
+|:--|:--|
+| `origin/main`이 `--expect` 커밋과 일치 | exit 1, 배포 안 함 |
+| main↔develop **코드 파일** 동일 (문서 차이는 통과) | exit 1 — 의도한 차이면 `--allow-diverge` |
+| worktree HEAD = origin/main, `.vercelignore` 존재 | exit 1 |
+
+종료 코드: `0` 성공 / `1` 배포 전 게이트 실패 / `2` 환경 오류 / `3` 배포 후 검증 실패. 스크립트는 V1(Ready)·V2(alias)·V3(HTTP 200)만 검증하므로 **V4(row count)·V5(신규 ERROR)와 §1의 G4(마이그레이션)·row count 기준선은 직접 수행**한다. Edward의 배포 승인도 대체하지 않는다.
+
+> ⚠️ 검증 상태(2026-10-29): `--dry-run` 게이트 경로와 오류 종료 코드(1·2)는 실행해 검증했다. **실제 배포 경로(`vercel --prod` 실행·URL 파싱·V1~V3)는 아직 실배포로 검증되지 않았다** — 다음 배포 때 첫 실행 결과를 확인하고 이 문장을 갱신한다.
+
+### 2-B. 수동 절차 (스크립트를 쓸 수 없을 때)
+
 ```bash
 git fetch origin
 WT=<scratch>/wt-deploy

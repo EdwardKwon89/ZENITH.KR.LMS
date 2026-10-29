@@ -2005,6 +2005,7 @@ UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류
 
 - **발견 경위**: 2026-10-29 09:44 KST, TASK-B-343 릴리즈(PR #1272, `cfe06fdd6`) 배포 중 발견. `main` 병합 직후 공유 체크아웃(`develop` checkout, `origin/develop`보다 21커밋 뒤처진 `bbfb79fc5`)에서 `vercel --prod --yes`를 실행해 **B-343이 없는 오래된 소스(`zenith-140yfnteq`)가 프로덕션에 배포**됨. 배포 후 `grep sanitizeComma`로 누락을 확인하고 09:47 KST에 `origin/main` 격리 worktree에서 재배포(`zenith-8rjsei5da`)해 해소.
 - **현재 상태**: 재배포로 프로덕션은 `cfe06fdd6` 기준 정상. 약 3분간 stale 코드가 서비스됨(데이터 변경·신규 에러 로그 없음, row count 전후 동일 — 오더 49/프로필 16/인보이스 24/에러로그 70). 원인은 Vercel 프로젝트가 GitHub 연동이 없어(SOP 209 §0) CLI가 로컬 디렉토리를 그대로 업로드하는데, 배포 전 "배포 소스 = 방금 병합한 main"을 확인하는 단계가 SOP에 없었던 것.
+- **진행 상태(2026-10-29)**: (A)(B) 구현 완료 — `scripts/deploy-prod.sh`(게이트·격리 worktree·V1~V3 검증·롤백 대상 출력), dry-run·오류 종료코드 검증. **미완: 실배포 경로 첫 검증(다음 배포 시), (C) 장기 검토.**
 - **임시 조치**: 실행 런북 `docs/00_GUIDE/211_PRODUCTION_DEPLOY_RUNBOOK.md` 작성(배포 전·후 게이트, 보고 양식, 롤백, 장애 사례) + SOP 209 v1.2(§4)에 "격리 worktree에서 `origin/main` 기준 배포 + HEAD 해시 확인" 절차를 문서화함(본 항목과 같은 커밋).
 - **목표 구현**: (A) 배포 전 자동 가드 스크립트(`scripts/deploy-prod.sh` 등) — `git fetch` 후 `git rev-parse HEAD`가 `origin/main`과 다르면 exit 1로 중단, 또는 스크립트가 직접 임시 worktree를 만들어 배포·정리까지 수행, (B) 배포 완료 후 `vercel inspect` alias 연결 확인과 배포 소스 해시를 출력, (C) 장기적으로 Vercel–GitHub 연동 또는 GitHub Actions 배포 전환 검토(AWS 이관 Issue #995 일정과 함께 판단).
 - **관련 파일**: `docs/00_GUIDE/209_VERCEL_DEPLOYMENT_SOP.md`(§0·§4), `.vercel/project.json`, `.vercelignore`

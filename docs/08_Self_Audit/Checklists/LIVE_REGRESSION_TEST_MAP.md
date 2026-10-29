@@ -1112,3 +1112,18 @@ SHXK `createorder` 페이로드의 `shipper.shipper_name`이 화면 "담당자�
 | TC-343-UI-01 | AddressInput 해외 주소 입력 시 쉼표→공백 치환 | 입력값 정제 확인 | `tests/unit/components/address-input-comma-strip.test.tsx` |
 | TC-343-UI-02 | AddressInput 상세주소 입력 시 쉼표→공백 치환 | 입력값 정제 확인 | 동일 |
 | TC-343-UI-03 | 다음우편번호 자동채움 시 `address_english` 원본 유지 | 도로명 추출 순서 보장 확인 | 동일 |
+
+
+## 76. 프로덕션 배포 가드 스크립트 `scripts/deploy-prod.sh` (IMP-179)
+
+**배경**: `vercel --prod`는 로컬 작업 디렉토리를 업로드한다. 2026-10-29 21커밋 뒤처진 로컬 develop이 그대로 배포되어 TASK-B-343이 약 3분 누락됨. 항상 `origin/main` 격리 worktree에서 배포하도록 가드 스크립트 도입.
+**범위 한계**: 네트워크·vercel 없이 검증 가능한 범위만 자동 테스트. 실제 배포 경로(vercel 실행·URL 파싱·V1~V3)는 다음 배포 시 첫 실행으로 확인.
+
+| ID | 검증 내용 | 기대 결과 | 테스트 위치 |
+| :-- | :-- | :-- | :-- |
+| TC-179-1 | `bash -n` 문법 검사 | exit 0 | `tests/unit/scripts/deploy-prod.test.ts` |
+| TC-179-2 | 알 수 없는 옵션 | exit 2, '알 수 없는 옵션' 메시지, 배포 시도 없음 | 동일 |
+| TC-179-3 | `--expect` 값 누락 | exit 2 | 동일 |
+| TC-179-4 | `vercel --prod` 실행 위치 | 모든 실행 라인이 `cd "$WT"` 서브셸 안 (로컬 체크아웃 직접 배포 회귀 방지) | 동일 |
+| TC-179-5 | 배포 소스 고정 | `git worktree add --detach "$WT" origin/main` + `trap cleanup EXIT` | 동일 |
+
