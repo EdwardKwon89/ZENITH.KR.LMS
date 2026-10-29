@@ -77,6 +77,8 @@ vercel env ls
 > [!CAUTION]
 > **`vercel --prod`는 원격 `main`이 아니라 "명령을 실행한 로컬 작업 디렉토리"를 업로드한다.** 공유 체크아웃은 `develop`이 checkout된 채 `origin`보다 뒤처져 있는 경우가 많아, 그대로 배포하면 **병합된 최신 코드가 빠진 오래된 소스가 프로덕션에 올라간다** (2026-10-29 실제 발생 — 21커밋 뒤처진 로컬 develop이 배포되어 TASK-B-343이 누락된 채 약 3분간 서비스, IMP-179). 따라서 **공유 체크아웃에서 직접 배포하지 않고, 반드시 아래 절차로 격리 worktree에서 실행한다.**
 
+> 이 절차를 자동화한 가드 스크립트: **`./scripts/deploy-prod.sh --expect <main 병합 커밋>`** (사용법·게이트는 211 §2-A). 스크립트 사용을 권장한다.
+
 ```bash
 git fetch origin
 WT=<임시경로>/wt-deploy
