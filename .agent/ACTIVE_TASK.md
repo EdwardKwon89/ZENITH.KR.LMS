@@ -50,6 +50,7 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
+| [#1270](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1270) | [Team B] TASK-B-344: UPS/SHXK 주소 AddressLine 길이 사전검증 (#1268 분리) | b | p2 | open | jungjs | 2026-10-29 |
 | [#1268](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1268) | [Team B] TASK-B-341: UPS createorder 주소 쉼표 제거 + 주소 입력 쉼표 차단 + AddressLine 길이 사전검증 | b | p2 | review | jungjs | 2026-10-28 |
 | [#1238](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1238) | 2026.10.12 오류사항 및 보완사항 | b | p2 | - | 미배정 | 2026-10-12 |
 | [#1218](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1218) | [Aiden] Stage-Gate Code Review — UPS 핵심 경로(오더등록~정산) 대상, 적절한 시점에 실시 | - | p3 | - | 미배정 | 2026-10-11 |
