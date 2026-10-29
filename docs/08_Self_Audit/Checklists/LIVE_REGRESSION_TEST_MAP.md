@@ -1095,3 +1095,20 @@ SHXK `createorder` 페이로드의 `shipper.shipper_name`이 화면 "담당자�
 | TC-342-9 | 레거시 오더(`shipper_name` 없음) → 실제 등록 경로 | `shipper_name='MASTER AIR'`, `shipper_company='SNTL'` | 동일 |
 | TC-342-RST | 되돌리기 검증: `shipper_company`을 `shipperDisplayName`으로 원복 | TC-342-1 FAIL(`expected 'ABC Trading' to be 'SNTL Korea Co Ltd'`) — 전체 **7건 FAIL / 2 PASS** | 동일 |
 | TC-342-EXIST | 기존 기대값 갱신 4개 파일 | `shipper_company` 기대값을 기본값으로 갱신 | `tests/unit/ups/task-b341-shxk-shipper-name-unify.test.ts`, `tests/unit/ups/ups-labels-mapping.test.ts`, `tests/unit/ups/task-b324-shxk-shipper-name-override.test.ts`, `tests/unit/ups/defb054-shipper-company.test.ts` |
+
+
+## 75. UPS createorder 주소 쉼표 제거 + 입력 차단 + AddressLine 길이 검증 (Issue #1268 / TASK-B-343)
+
+**배경**: UPS createorder 호출 시 수하인/발송인 주소에 쉼표(,)가 있으면 UPS 운송장/인보이스에서 쉼표 앞부분만 출력됨. 또한 UPS(SHXK 경유)는 주소를 AddressLine 줄당 약 35자로 나누며 초과 시 거부.  
+**요구사항(JSJung 2026-10-28)**: AddressInput 전체 사용처에서 쉼표 입력 시 즉시 공백 치환(붙여넣기 포함), 전송 계층에서 도로명 추출 후 쉼표 치환, AddressLine 길이 사전검증.
+
+| ID | 검증 내용 | 기대 결과 | 테스트 위치 |
+| :-- | :-- | :-- | :-- |
+| TC-343-1 | `resolveShipperStreet` - 표시용 출력 유지 (도로명 추출 순서 확인) | 기존 구분자 유지, 도로명 세그먼트만 사용 | `tests/unit/ups/task-b343-address-comma-strip.test.ts` |
+| TC-343-2 | `resolveConsigneeStreet` - 표시용 출력 유지 | 기존 구분자 유지 | 동일 |
+| TC-343-3 | `buildCreateOrderPayload` - 전송 지점에서 쉼표 제거 | payload shipper_street/consignee_street에 `,` 미포함, city/province도 쉼표 치환 | 동일 |
+| TC-343-4 | 기존 저장분(쉼표 포함) 전송 시 정제(벌크 경로) | `buildCreateOrderPayload`/`buildShipperPayload` 경유 시 쉼표 제거 확인 | 동일 |
+| TC-343-LEN | AddressLine 길이 검증 | 별도 Task로 분리 (실측 후 Jaison 확정) | - |
+| TC-343-UI-01 | AddressInput 해외 주소 입력 시 쉼표→공백 치환 | 입력값 정제 확인 | `tests/unit/components/address-input-comma-strip.test.tsx` |
+| TC-343-UI-02 | AddressInput 상세주소 입력 시 쉼표→공백 치환 | 입력값 정제 확인 | 동일 |
+| TC-343-UI-03 | 다음우편번호 자동채움 시 `address_english` 원본 유지 | 도로명 추출 순서 보장 확인 | 동일 |

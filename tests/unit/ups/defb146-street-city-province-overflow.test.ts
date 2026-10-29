@@ -64,9 +64,10 @@ describe('DEF-B-146: street 시/구/도 제거 → AddressLine 초과 해소 (88
     const shipperDefaults = { name: 'SNTL Korea Co Ltd', country: 'KR' };
 
     it('shipper_street이 49자 성공형이 되고 시/구/도·국가가 제거된다', () => {
-      const result = buildCreateOrderPayload('SHXK', baseOrder as any, 'US', [], shipperDefaults) as any;
-      expect(result.shipper.shipper_street).toBe('6 floor, 601 room, 6 Daewangpangyo-ro 351beon-gil');
-      expect(result.shipper.shipper_street.length).toBe(49);
+      const packages = [{ id: 'p1', content_type: 'DOC', gross_weight: 0.5, physical_box_count: 1, items: [{ item_name: 'Doc', quantity: 1, unit_price: '1.00', item_packing_unit: 'PCE', hs_code: '4901990000' }] }];
+      const result = buildCreateOrderPayload('SHXK', baseOrder as any, 'KR', packages, shipperDefaults);
+      expect(result.shipper.shipper_street).toBe('6 floor 601 room 6 Daewangpangyo-ro 351beon-gil');
+      expect(result.shipper.shipper_street.length).toBe(47);
     });
 
     it('consignee_street도 도로명만 남는다', () => {
