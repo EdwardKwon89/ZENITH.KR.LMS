@@ -1998,3 +1998,15 @@ UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류
 - **관련 파일**: `scripts/check-db-freshness.sh`(25·29·41·46행), `scripts/agent-worktree-init.sh`(85행), `GOV_COMMON.md`(R-08-2)
 - **예상 공수**: 0.2~0.3 MD (스크립트 수정 + 동작 케이스 4종 검증)
 - **우선순위**: Low — 기능 장애 아님. 다만 R-08-2의 자동화 가치가 환경에 따라 0이 되는 문제로, DEF-128(로컬 DB stale) 재발 방어선의 사각지대
+
+---
+
+## [IMP-179] 프로덕션 배포(`vercel --prod`)가 로컬 작업 디렉토리를 올리는 구조 — stale 소스 배포를 막는 안전장치 부재
+
+- **발견 경위**: 2026-10-29 09:44 KST, TASK-B-343 릴리즈(PR #1272, `cfe06fdd6`) 배포 중 발견. `main` 병합 직후 공유 체크아웃(`develop` checkout, `origin/develop`보다 21커밋 뒤처진 `bbfb79fc5`)에서 `vercel --prod --yes`를 실행해 **B-343이 없는 오래된 소스(`zenith-140yfnteq`)가 프로덕션에 배포**됨. 배포 후 `grep sanitizeComma`로 누락을 확인하고 09:47 KST에 `origin/main` 격리 worktree에서 재배포(`zenith-8rjsei5da`)해 해소.
+- **현재 상태**: 재배포로 프로덕션은 `cfe06fdd6` 기준 정상. 약 3분간 stale 코드가 서비스됨(데이터 변경·신규 에러 로그 없음, row count 전후 동일 — 오더 49/프로필 16/인보이스 24/에러로그 70). 원인은 Vercel 프로젝트가 GitHub 연동이 없어(SOP 209 §0) CLI가 로컬 디렉토리를 그대로 업로드하는데, 배포 전 "배포 소스 = 방금 병합한 main"을 확인하는 단계가 SOP에 없었던 것.
+- **임시 조치**: SOP 209 v1.2(§4)에 "격리 worktree에서 `origin/main` 기준 배포 + HEAD 해시 확인" 절차를 문서화함(본 항목과 같은 커밋).
+- **목표 구현**: (A) 배포 전 자동 가드 스크립트(`scripts/deploy-prod.sh` 등) — `git fetch` 후 `git rev-parse HEAD`가 `origin/main`과 다르면 exit 1로 중단, 또는 스크립트가 직접 임시 worktree를 만들어 배포·정리까지 수행, (B) 배포 완료 후 `vercel inspect` alias 연결 확인과 배포 소스 해시를 출력, (C) 장기적으로 Vercel–GitHub 연동 또는 GitHub Actions 배포 전환 검토(AWS 이관 Issue #995 일정과 함께 판단).
+- **관련 파일**: `docs/00_GUIDE/209_VERCEL_DEPLOYMENT_SOP.md`(§0·§4), `.vercel/project.json`, `.vercelignore`
+- **예상 공수**: 0.3~0.5 MD (A+B 스크립트), C는 별도 검토
+- **우선순위**: Medium — 이번엔 3분·데이터 영향 없이 해소됐으나, 병합 코드가 통째로 빠진 채 프로덕션에 올라가는 유형이라 Pilot 실데이터 환경에서는 재발 시 기능 회귀·오동작 위험이 큼. 현재 방어선은 SOP 문서뿐(강제력 없음 — R-17 worktree 수기 안내가 재발했던 전례와 동일하므로 스크립트화 권장)
