@@ -134,7 +134,7 @@ describe('DEF-B-145/146: 주소 조합 시 국가·시·구·도 제거(도로�
 
     it('shipper.shipper_street에 국가·시·구·도가 제거되고 상세주소가 앞에 온다 (Jaison 실검증 성공형)', () => {
       const result = buildCreateOrderPayload('SHXK', baseOrder as any, 'US', emptyPackages, shipperDefaults);
-      expect((result.shipper as any).shipper_street).toBe('6 floor, 601 room, 6 Daewangpangyo-ro 351beon-gil');
+      expect((result.shipper as any).shipper_street).toBe('6 floor 601 room 6 Daewangpangyo-ro 351beon-gil');
       // 시/구/도·국가명 완전 제거 확인
       const street = (result.shipper as any).shipper_street as string;
       for (const segment of ['Bundang-gu', 'Seongnam-si', 'Gyeonggi-do', 'Republic of Korea']) {
