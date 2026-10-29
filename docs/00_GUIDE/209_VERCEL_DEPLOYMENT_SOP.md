@@ -7,7 +7,7 @@ tags: ["procedure"]
 > **프로젝트:** ZENITH_LMS
 > **문서번호:** 209
 > **작성자:** Aiden (Claude)
-> **최종 수정일:** 2026-10-11
+> **최종 수정일:** 2026-10-29
 
 이 문서는 develop 브랜치의 최신 상태를 원격 Vercel + 원격 Supabase에 배포하는 표준 절차를 정의합니다. **2026-07-27 Edward 지시로, 이 절차는 매번 자동 수행하지 않으며 Edward가 명시적으로 지시한 시점에만 실행합니다.**
 
@@ -74,9 +74,21 @@ vercel env ls
 
 ## 4. Vercel Production 배포 (CLI 직접)
 
+> [!CAUTION]
+> **`vercel --prod`는 원격 `main`이 아니라 "명령을 실행한 로컬 작업 디렉토리"를 업로드한다.** 공유 체크아웃은 `develop`이 checkout된 채 `origin`보다 뒤처져 있는 경우가 많아, 그대로 배포하면 **병합된 최신 코드가 빠진 오래된 소스가 프로덕션에 올라간다** (2026-10-29 실제 발생 — 21커밋 뒤처진 로컬 develop이 배포되어 TASK-B-343이 누락된 채 약 3분간 서비스, IMP-179). 따라서 **공유 체크아웃에서 직접 배포하지 않고, 반드시 아래 절차로 격리 worktree에서 실행한다.**
+
 ```bash
+git fetch origin
+WT=<임시경로>/wt-deploy
+git worktree add --detach "$WT" origin/main          # 병합 직후의 main을 정확히 체크아웃
+cd "$WT"
+git rev-parse --short HEAD                            # ★ 방금 병합한 main 커밋 해시와 일치하는지 눈으로 확인
+mkdir -p .vercel && cp <공유 체크아웃>/.vercel/project.json .vercel/   # 프로젝트 링크 복사
 vercel --prod --yes
+cd - && git worktree remove --force "$WT"             # 배포 후 정리
 ```
+
+배포 후 `vercel inspect <배포URL>`로 alias(`zenith-lms-hazel.vercel.app`)가 새 배포에 연결됐는지, 배포 직전 확인한 HEAD 해시가 배포 소스와 같은지 보고서에 기재한다.
 
 > [!IMPORTANT]
 > **`.vercelignore` 파일이 반드시 있어야 함** — 없으면 `.next`(로컬 빌드 캐시, 수 GB)·`.gitnexus`(100MB+) 등이 업로드되어 **"File size limit exceeded (100 MB)"**로 배포 실패함(2026-07-27 실제 발생). 저장소에 이미 커밋되어 있으므로(`/.vercelignore`) 별도 조치 불요 — 혹시 없다면 아래 내용으로 재생성:
@@ -121,5 +133,6 @@ Playwright 등으로 실제 로그인 → 핵심 화면(오더 목록, UPS 오�
 
 ---
 ## 📝 개정 이력
+- **v1.2 (2026-10-29)**: 4단계에 "격리 worktree에서 `origin/main` 기준 배포" 절차와 HEAD 해시 확인 의무 신설 — 로컬 develop(21커밋 뒤처짐)이 그대로 배포되어 병합 코드(TASK-B-343)가 누락된 사고 재발 방지 (IMP-179)
 - **v1.1 (2026-10-11)**: 원격 Supabase가 Pilot 운영 시작(2026-10-05)으로 실데이터 보유 환경으로 전환됨에 따라 문서 제목·전제를 "고객 시연용"→"Pilot 운영 환경"으로 정정, 2단계에 데이터 보전 원칙(파괴적 DDL 사전 검토·원격 reset 금지·row count 증적) 신설
 - **v1.0 (2026-07-27)**: 최초 작성 — 2026-07-27 고객 시연 배포 작업(develop 824커밋 반영) 중 겪은 실제 장애(env 개행 버그, .vercelignore 부재, Supabase 일시정지, dest_country_code 컬럼 버그) 및 해결 절차 기록
