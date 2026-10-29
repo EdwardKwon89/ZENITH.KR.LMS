@@ -64,6 +64,11 @@ export function resolveShxkUnitCode(packingUnit: string): string {
 // TASK-B-326: 시/구/도는 shipper_city/shipper_province 별도 필드로 이미 전달되므로,
 // street에는 도로명+상세주소만 남긴다. DB 관례(도로명, 구, 시, 도[, 국가] 순서)에 따라
 // 첫 번째 콤마 세그먼트 = 도로명 (2026-09-13 로컬 DB 16건 전수 검증, 예외 없음).
+function sanitizeComma(value: string): string {
+  if (!value) return '';
+  return value.replace(/,/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
 function resolveRoadAddress(address: string): string {
   return (address || '').split(',')[0]?.trim() || '';
 }
@@ -118,9 +123,9 @@ function buildShipperPayload(
     shipper_name: shipperDisplayName,
     shipper_company: shipperDefaults.name,
     shipper_countrycode: (order.shipper_country_code as string) || shipperDefaults.country,
-    shipper_province: (order.shipper_state_province as string) || '',
-    shipper_city: (order.shipper_city as string) || '',
-    shipper_street: resolveShipperStreet(order, shipperOrg),
+    shipper_province: sanitizeComma((order.shipper_state_province as string) || ''),
+    shipper_city: sanitizeComma((order.shipper_city as string) || ''),
+    shipper_street: sanitizeComma(resolveShipperStreet(order, shipperOrg)),
     shipper_postcode: (order.shipper_zipcode as string) || '',
     shipper_telephone: stripNonDigits((order.shipper_contact_phone as string) || ''),
   };
@@ -142,8 +147,9 @@ export function buildCreateOrderPayload(
   const consigneeStreet = (order.recipient_address as string) || '';
   const localAddr = (order.recipient_address_local as string) || '';
   // TASK-B-326: 수하인 street도 도로명만 사용 (시/구/도·국가 제거 — AddressLine 초과 방지)
-  const cleanConsigneeStreet = resolveRoadAddress(consigneeStreet);
-  const fullConsigneeStreet = localAddr ? `${cleanConsigneeStreet} (${localAddr})` : cleanConsigneeStreet;
+  // TASK-B-343: 전송 시점에만 쉼표 치환 (표시/무역서류는 기존 출력 유지)
+  const cleanConsigneeStreet = sanitizeComma(resolveRoadAddress(consigneeStreet));
+  const fullConsigneeStreet = sanitizeComma(localAddr ? `${cleanConsigneeStreet} (${localAddr})` : cleanConsigneeStreet);
 
   return {
     reference_no: (order.order_no as string).replace(/-/g, ''),
@@ -160,8 +166,8 @@ export function buildCreateOrderPayload(
     consignee: {
       consignee_name: (order.recipient_name as string) || 'E2E Consignee',
       consignee_countrycode: (order.recipient_country_code as string) || countryCode,
-      consignee_province: (order.recipient_state_province as string) || '',
-      consignee_city: (order.recipient_city as string) || '',
+      consignee_province: sanitizeComma((order.recipient_state_province as string) || ''),
+      consignee_city: sanitizeComma((order.recipient_city as string) || ''),
       consignee_street: fullConsigneeStreet,
       consignee_postcode: (order.recipient_zipcode as string) || '',
       consignee_telephone: stripNonDigits((order.recipient_phone as string) || ''),
