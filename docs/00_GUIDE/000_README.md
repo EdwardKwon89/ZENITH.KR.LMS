@@ -64,6 +64,7 @@ tags: ["governance"]
 | **208** | **Supabase 원격 SOP** | [208_SUPABASE_REMOTE_SOP.md](./208_SUPABASE_REMOTE_SOP.md) | Supabase 원격 접속 및 운영 절차 |
 | **209** | **Vercel 원격 배포 SOP** | [209_VERCEL_DEPLOYMENT_SOP.md](./209_VERCEL_DEPLOYMENT_SOP.md) | 고객 시연용 develop→Vercel/Supabase 원격 배포 절차 (Edward 지시 시에만 실행) |
 | **210** | **AI 에이전트 개발 재작업 방지 가이드** | [210_AI_AGENT_REWORK_PREVENTION_GUIDE.md](./210_AI_AGENT_REWORK_PREVENTION_GUIDE.md) | VIOLATION_TRACKER·DEF·SAR·IMP 전수(309건) 분석 기반 반복 실패 패턴 정량화 + 타 프로젝트 이식 가능한 재작업 방지 체크리스트 |
+| **211** | **프로덕션 배포 실행 런북** | [211_PRODUCTION_DEPLOY_RUNBOOK.md](./211_PRODUCTION_DEPLOY_RUNBOOK.md) | 209 SOP의 실행 체크리스트 — 배포 전·후 게이트, row count 증적, 롤백, 2026-10-29 실제 장애 사례 (IMP-179) |
 
 ---
 

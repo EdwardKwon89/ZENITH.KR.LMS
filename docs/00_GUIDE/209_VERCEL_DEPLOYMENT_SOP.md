@@ -88,6 +88,8 @@ vercel --prod --yes
 cd - && git worktree remove --force "$WT"             # 배포 후 정리
 ```
 
+> 단계별 게이트·보고 양식·롤백·장애 사례는 **[211 프로덕션 배포 실행 런북](./211_PRODUCTION_DEPLOY_RUNBOOK.md)** 참조.
+
 배포 후 `vercel inspect <배포URL>`로 alias(`zenith-lms-hazel.vercel.app`)가 새 배포에 연결됐는지, 배포 직전 확인한 HEAD 해시가 배포 소스와 같은지 보고서에 기재한다.
 
 > [!IMPORTANT]
