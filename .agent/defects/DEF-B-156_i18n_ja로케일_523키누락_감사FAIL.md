@@ -1,4 +1,4 @@
-# DEF-B-154: `npm run check:i18n` 감사 FAIL — ja 로케일이 en 대비 523개 키 누락
+# DEF-B-156: `npm run check:i18n` 감사 FAIL — ja 로케일이 en 대비 523개 키 누락
 
 | 항목 | 내용 |
 |:-----|:------|

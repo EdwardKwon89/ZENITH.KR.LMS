@@ -1,7 +1,7 @@
 # 🗺️ LIVE Regression Test Master Map
 
-> **총 테스트 케이스:** 1,712 Cases (vitest 개별 테스트 기준, 237 test files)
-> **최종 검증일:** 2026-11-13 (TASK-B-347 전화번호 입력 안내문구·숫자 외 입력 차단 · TC-347-1~8 등재 · 1,712/1,712 PASS)  
+> **총 테스트 케이스:** 1,714 Cases (vitest 개별 테스트 기준, 237 test files)
+> **최종 검증일:** 2026-11-13 (TASK-B-347 전화번호 입력 안내문구·숫자 외 입력 차단 · §78 TC-347-1~8 등재 · 1,714/1,714 PASS)  
 
 제니스 플랫폼의 비즈니스 영속성을 보장하는 회귀 테스트 케이스의 통합 명세서입니다. 모든 신규 개발 및 수정 시 이 맵에 케이스가 추가되어야 하며, 전체 테스트가 통과되어야 합니다.
 
@@ -1109,5 +1109,5 @@ SHXK `createorder` 페이로드의 `shipper.shipper_name`이 화면 "담당자�
 | TC-347-7 | `normalizePhoneDigits` 서버측 정규화 헬퍼 | `"010-1234 5678"`→`01012345678`, 16자리→15자리 절단, `(02)1234-5678`→`0212345678` | 동일 |
 | TC-347-8 | 주소록 연락처 PhoneInput 적용 | maxLength=15·inputMode=numeric·안내문구 렌더, 입력 정규화, 수정 진입 시 레거시 `010-1111` → `0101111` | `tests/unit/address-book/AddressBookClient.test.tsx` |
 
-**회귀 검증 (2026-11-13)**: `npm run test:regression` **237 test files / 1,712 tests 전부 PASS**.
+**회귀 검증 (2026-11-13)**: `npm run test:regression` **237 test files / 1,714 tests 전부 PASS** (rebase 후 `origin/TeamB_Dev` 최신 포함 재실행 기준).
 **되돌리기 검증 (테스트 유효성)**: 구현(`src`+`messages`) `git stash` 시 신규·관련 테스트 **3 files / 5 tests FAIL** → 복구 시 전부 PASS — 테스트가 실제 구현을 검증함을 확인.

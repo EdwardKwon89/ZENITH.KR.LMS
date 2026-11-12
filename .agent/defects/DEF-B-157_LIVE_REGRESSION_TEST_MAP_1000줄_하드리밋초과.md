@@ -1,4 +1,4 @@
-# DEF-B-155: `LIVE_REGRESSION_TEST_MAP.md`가 ZEN_A4 파일 길이 하드 리밋(1,000줄) 초과 — 사전 존재, 본 Task로 1,100줄
+# DEF-B-157: `LIVE_REGRESSION_TEST_MAP.md`가 ZEN_A4 파일 길이 하드 리밋(1,000줄) 초과 — 사전 존재, 본 Task로 1,100줄
 
 | 항목 | 내용 |
 |:-----|:------|
