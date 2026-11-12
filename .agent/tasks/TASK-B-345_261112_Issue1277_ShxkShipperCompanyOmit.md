@@ -125,6 +125,9 @@ return {
 | 빌드 | `npm run build` | `BUILD_EXIT=0` |
 | 타입체크 (advisory) | `npx tsc --noEmit` | 변경 파일 관련 오류 **0건**. 기존 오류 132건(무관 파일, `.github/workflows/pr-checks.yml`상 비차단 advisory) |
 | DB 신선도 (R-08-2) | `npx supabase migration list --local` | pending 마이그레이션 **0건** (Docker 기동 후 `npx supabase start` 완료 상태에서 회귀 실행) |
+| PR CI — `Task File Check` | `gh pr checks 1282` | **pass** |
+| PR CI — `Type Check` | 동일 | **pass** (advisory) |
+| PR CI — `Regression Tests` | 동일 | **fail (13s)** — `Start local Supabase` 단계에서 `[inbucket] in supabase/config.toml is no longer supported` 로 즉시 실패. CI가 `supabase/setup-cli@v1` + `version: latest`(v3.x)를 쓰면서 `supabase/config.toml`의 deprecated `[inbucket]` 섹션이 거부된 **인프라 드리프트**로, 본 PR diff(`supabase/` 변경 0건)와 무관하다. 로컬(v2.95.4)에서는 동일 스위트 **236/1687 PASS**. → 발견 이슈 4 |
 
 ### 8.4 미변경 확인
 
@@ -142,3 +145,4 @@ return {
 1. **[환경] 로컬 Docker/Supabase 미기동** — 최초 회귀 실행 환경에서 `docker: stopped`, `localhost:54322` down 이었다. `open -a Docker` → `npx supabase start` 후 회귀 전량 PASS. 코드 결함 아님(TASK-B-342에서도 동일 현상 기록). → 별도 조치 불요, 환경 표준화는 기존 IMP-170 범위.
 2. **[환경] `check-R17-DoD` 명령 부재** — 본 워크트리 PATH에 `check-R17-DoD` 실행 파일/슬래시 커맨드가 없어( `which` 미검출) 명령 자체 실행이 불가했다. 대신 R-17 DoD 체크리스트를 수동 동치 점검했다(DoD 전항목 체크·미완성 표기 0건·증거값 기재·PR diff 내 task file 포함 확인). → 스크립트 미설치 환경 정비는 Jaison 확인 필요.
 3. **[범위 밖] 타입 오류 기존 132건** — `tests/unit/warehouse/warehouse-actions.test.ts` 등 무관 파일의 기존 오류. CI에서 advisory(비차단)이며 본 Task 변경 파일에는 오류 없음. → 본 Task 범위 외.
+4. **[CI 차단 — 전 PR 공통] `Regression Tests` 가 `Start local Supabase` 에서 즉시 실패** — 로그: `[inbucket] in supabase/config.toml is no longer supported. Use [local_smtp] instead.` CI는 `supabase/setup-cli@v1` + `version: latest`(v3.x)를 사용하고 `supabase/config.toml:99` 에 deprecated `[inbucket]` 섹션이 남아 있어, **본 PR과 무관하게 모든 PR의 Regression 체크가 13초 만에 실패**한다(직전 머지 PR #1275 시점에는 pass). 본 Task diff에 `supabase/` 변경은 없다. 조치 후보: ① `supabase/config.toml`을 `[local_smtp]` 로 마이그레이션 ② `.github/workflows/pr-checks.yml`의 CLI 버전을 v2.x로 핀. 두 방안 모두 공유 파일(`supabase/config.toml`·workflow) 변경이라 **Jaison/JSJung 판단 필요** — 본 Task에서 임의 수정하지 않았다.
