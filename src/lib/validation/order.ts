@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { HS_CODE_MAX, ITEM_NAME_MAX, PHONE_MAX_DIGITS } from './shxk-limits';
+import { HS_CODE_MAX, ITEM_NAME_MAX, PHONE_MAX_DIGITS, stripNonDigits } from './shxk-limits';
 
 /**
  * 오더 상세 항목(Item) 검증 스키마 (패킹 하위)
@@ -104,6 +104,9 @@ export const orderRegistrationSchema = z.object({
   delivery_method: z.enum(['DIRECT', 'PICKUP']).default('DIRECT'),
   pickup_location: z.string().optional(),
   pickup_contact_name: z.string().optional(),
+  // TASK-B-347 (Issue #1279): 픽업 연락처 — 필드 자체는 선택. 형식(숫자·하이픈·길이) 검증은
+  //   superRefine에서 delivery_method==='PICKUP'일 때만 수행한다(DIRECT는 서버가 pickup_*를
+  //  삭제하므로 값 내용과 무관 — 기존 동작 보존).
   pickup_contact_tel: z.string().optional(),
   pickup_country_code: z.string().optional(),
   pickup_state_province: z.string().optional(),
@@ -153,6 +156,22 @@ export const orderRegistrationSchema = z.object({
         message: 'Pickup contact phone is required when delivery method is PICKUP',
         path: ['pickup_contact_tel'],
       });
+    } else {
+      // TASK-B-347 (Issue #1279): 픽업 연락처 형식 — 하이픈 표기 허용(기존 E2E 계약:
+      //   '032-111-2222' 그대로 저장)하되 문자·특수기호 차단 + 숫자 15자리 상한(클라이언트 우회 방지)
+      if (!/^[\d-]*$/.test(data.pickup_contact_tel)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: '전화번호는 숫자와 하이픈만 입력할 수 있습니다',
+          path: ['pickup_contact_tel'],
+        });
+      } else if (stripNonDigits(data.pickup_contact_tel).length > PHONE_MAX_DIGITS) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `전화번호는 ${PHONE_MAX_DIGITS}자리 이하여야 합니다`,
+          path: ['pickup_contact_tel'],
+        });
+      }
     }
   }
   // DEF-B-044 (Issue #1044): 중국(CN) 목적지는 UPS Zone이 지역(CNN/CNS)에 따라 달라

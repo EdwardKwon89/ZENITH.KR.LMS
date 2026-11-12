@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { normalizePhoneDigits } from './shxk-limits';
 
 /**
  * 주소록(zen_address_book) 항목 검증 스키마
@@ -10,7 +11,9 @@ export const addressBookEntrySchema = z.object({
   recipient_address: z.string().min(1, 'Recipient address is required'),
   recipient_address_local: z.string().optional(),
   recipient_address_detail: z.string().optional(),
-  recipient_phone: z.string().optional(),
+  // TASK-B-347 (Issue #1279): 서버측에서도 비숫자 제거 + 15자리 상한.
+  // 거부가 아니라 정규화: 레거시 하이픈 포함 저장분('010-1111')이 재저장을 막지 않도록.
+  recipient_phone: z.string().transform((v) => normalizePhoneDigits(v)).optional(),
   country_code: z.string().optional(),
   state_province: z.string().optional(),
   city: z.string().optional(),

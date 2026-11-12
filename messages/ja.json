@@ -1,5 +1,7 @@
 {
   "Common": {
+    "phoneHelp": "数字のみ入力（ハイフンなし、最大 {max} 桁）",
+    "phoneHelpHyphen": "数字とハイフンのみ入力（例：010-1234-5678、最大 {max} 桁）",
     "title": "ZENITH LMS",
     "description": "SNTL 統合物流プラットフォーム",
     "login": "ログイン",
@@ -311,6 +313,7 @@
     "form_contact_email": "メール",
     "form_contact_name": "担当者名",
     "form_contact_phone": "電話番号",
+    "form_contact_phone_help": "ハイフン付き 010-1234-5678 形式で入力",
     "form_country": "国",
     "form_discount_rate": "割引率",
     "form_grade": "等級",
