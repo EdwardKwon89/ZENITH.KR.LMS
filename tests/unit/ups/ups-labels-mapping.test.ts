@@ -220,9 +220,9 @@ describe('UPS Labels Mapping Functions', () => {
 
       // TASK-B-341 (Issue #1261): shipper_name은 화면 "화주명"(order.shipper_name → shipper_org.name → defaults)이며
       // 담당자명(shipper_contact_name)이 아니다. 이 픽스처는 shipper_name·shipper_org 모두 없음 → 기본값.
-      // TASK-B-342 (Issue #1263): shipper_company는 shipper_name과 무관하게 항상 기본값(shipperDefaults.name)이다.
+      // TASK-B-345 (Issue #1277): shipper_company는 전송하지 않는다(키 부재).
       expect((result.shipper as any).shipper_name).toBe('SNTL Korea Co Ltd');
-      expect((result.shipper as any).shipper_company).toBe('SNTL Korea Co Ltd');
+      expect(result.shipper as any).not.toHaveProperty('shipper_company');
       expect((result.shipper as any).shipper_countrycode).toBe('KR');
 
       expect((result.consignee as any).consignee_name).toBe('John Doe');
@@ -243,7 +243,7 @@ describe('UPS Labels Mapping Functions', () => {
       const result = buildCreateOrderPayload('SHP-CODE', orderNoContact as any, 'US', samplePackages as any, shipperDefaults);
 
       expect((result.shipper as any).shipper_name).toBe('SNTL Korea Co Ltd');
-      expect((result.shipper as any).shipper_company).toBe('SNTL Korea Co Ltd');
+      expect(result.shipper as any).not.toHaveProperty('shipper_company');
       expect((result.shipper as any).shipper_countrycode).toBe('KR');
     });
 
@@ -271,7 +271,7 @@ describe('UPS Labels Mapping Functions', () => {
     });
   });
 
-  describe('DEF-B-054: shipper_company 필드 (Issue #1067) — TASK-B-342로 기본값 고정', () => {
+  describe('DEF-B-054: shipper_company 필드 (Issue #1067) — TASK-B-345로 미전송', () => {
     const baseOrder = {
       order_no: 'ORD-282',
       shipper_contact_name: 'Shipper Kim',
@@ -293,28 +293,28 @@ describe('UPS Labels Mapping Functions', () => {
     };
     const defaults = { name: 'SNTL Korea Co Ltd', country: 'KR' };
 
-    it('shipper_org.name이 있어도 shipper_company는 기본값이다 (TASK-B-342 갱신, FXUPS 경로 SHXK 필수 검증 대응)', () => {
+    it('shipper_org.name이 있어도 shipper_company 키는 전송되지 않는다 (TASK-B-345 갱신, FXUPS 경로 SHXK 필수 검증 대응)', () => {
       const order = { ...baseOrder, shipper_org: { id: 'org-1', name: 'MASTER AIR', address: 'Seoul' } };
       const result = buildCreateOrderPayload('FXUPS', order as any, 'US', [], defaults);
-      expect((result.shipper as any).shipper_company).toBe('SNTL Korea Co Ltd');
+      expect(result.shipper as any).not.toHaveProperty('shipper_company');
     });
 
-    it('shipper_org가 null이면 shipperDefaults.name으로 폴백', () => {
+    it('shipper_org가 null이어도 shipper_company 키는 생성되지 않는다 (TASK-B-345 갱신)', () => {
       const order = { ...baseOrder, shipper_org: null };
       const result = buildCreateOrderPayload('FXUPS', order as any, 'US', [], defaults);
-      expect((result.shipper as any).shipper_company).toBe('SNTL Korea Co Ltd');
+      expect(result.shipper as any).not.toHaveProperty('shipper_company');
     });
 
-    it('shipper_org.name이 빈 문자열이면 shipperDefaults.name으로 폴백', () => {
+    it('shipper_org.name이 빈 문자열이어도 shipper_company 키는 생성되지 않는다 (TASK-B-345 갱신)', () => {
       const order = { ...baseOrder, shipper_org: { id: 'org-1', name: '', address: 'Seoul' } };
       const result = buildCreateOrderPayload('FXUPS', order as any, 'US', [], defaults);
-      expect((result.shipper as any).shipper_company).toBe('SNTL Korea Co Ltd');
+      expect(result.shipper as any).not.toHaveProperty('shipper_company');
     });
 
-    it('shipperDefaults.name도 비어있으면 빈 문자열 전달 (절대 undefined 아님)', () => {
+    it('shipperDefaults.name이 비어있어도 shipper_company 키는 생성되지 않는다 (빈 문자열 전송도 없음, TASK-B-345 갱신)', () => {
       const order = { ...baseOrder, shipper_org: null };
       const result = buildCreateOrderPayload('FXUPS', order as any, 'US', [], { name: '', country: 'KR' });
-      expect((result.shipper as any).shipper_company).toBe('');
+      expect(result.shipper as any).not.toHaveProperty('shipper_company');
     });
   });
 
