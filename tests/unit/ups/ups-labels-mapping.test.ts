@@ -7,6 +7,7 @@ import {
   resolveShxkUnitCode,
   buildCreateOrderPayload,
 } from '@/lib/ups/label-mapping';
+import { validateShxkPayload, type ShxkPayloadShape } from '@/lib/shxk/validate-payload';
 
 describe('UPS Labels Mapping Functions', () => {
   describe('determineOrderCargotype', () => {
@@ -247,11 +248,41 @@ describe('UPS Labels Mapping Functions', () => {
       expect((result.shipper as any).shipper_countrycode).toBe('KR');
     });
 
-    it('recipient_name 없으면 기본값 "E2E Consignee" 사용', () => {
-      const orderNoName = { ...sampleOrder, recipient_name: '' };
-      const result = buildCreateOrderPayload('SHP-CODE', orderNoName as any, 'US', samplePackages as any, shipperDefaults);
+    // TASK-B-346 (Issue #1278): consignee_name에 테스트용 폴백을 넣지 않는다.
+    // 성명이 비면 buildCreateOrderPayload()는 빈 문자열을 만들고,
+    // validateShxkPayload()가 '수취인 성명 누락' 단일 오류로 SHXK 호출을 차단한다.
+    describe('TASK-B-346: consignee_name 폴백 제거', () => {
+      const orderWithShipperAddress = {
+        ...sampleOrder,
+        shipper_address: '123 Zenith St',
+      };
+      const packagesWithHsCode = [
+        {
+          ...samplePackages[0],
+          items: [{ item_name: 'Widget', quantity: 1, unit_price: 100, hs_code: '8471300000' }],
+        },
+      ];
 
-      expect((result.consignee as any).consignee_name).toBe('E2E Consignee');
+      it('recipient_name 없으면 consignee_name은 빈 문자열 (폴백 없음)', () => {
+        const orderNoName = { ...orderWithShipperAddress, recipient_name: '' };
+        const result = buildCreateOrderPayload('SHP-CODE', orderNoName as any, 'US', packagesWithHsCode as any, shipperDefaults);
+
+        expect((result.consignee as any).consignee_name).toBe('');
+      });
+
+      it('recipient_name 없으면 validateShxkPayload가 "수취인 성명 누락" 단일 오류로 차단', () => {
+        const orderNoName = { ...orderWithShipperAddress, recipient_name: '' };
+        const result = buildCreateOrderPayload('SHP-CODE', orderNoName as any, 'US', packagesWithHsCode as any, shipperDefaults);
+
+        expect(validateShxkPayload(result as unknown as ShxkPayloadShape)).toEqual(['수취인 성명 누락']);
+      });
+
+      it('recipient_name 있으면 consignee_name 그대로 전송 + 사전검증 통과', () => {
+        const result = buildCreateOrderPayload('SHP-CODE', orderWithShipperAddress as any, 'US', packagesWithHsCode as any, shipperDefaults);
+
+        expect((result.consignee as any).consignee_name).toBe('John Doe');
+        expect(validateShxkPayload(result as unknown as ShxkPayloadShape)).toEqual([]);
+      });
     });
 
     it('recipient_address_local 있으면 street에 괄호 추가', () => {

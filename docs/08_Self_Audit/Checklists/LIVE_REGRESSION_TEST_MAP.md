@@ -1080,3 +1080,16 @@ SHXK `createorder` 페이로드의 `shipper.shipper_name`이 화면 "담당자�
 | TC-345-8 | 레거시 오더(`shipper_name` 없음) → 실제 등록 경로 | `shipper_name='MASTER AIR'`, `shipper_company` 키 부재 | 동일 (TC-342-9) |
 | TC-345-RST | 되돌리기 검증: `buildShipperPayload()`에 `shipper_company: shipperDefaults.name` 재삽입 | 영향 5개 파일 **30 failed / 37 passed (67)** 후 원복 시 67 passed — `not.toHaveProperty` 단언이 실제로 잡아냄 (§74 TC-342-RST 대체) | 5개 파일 |
 | TC-345-EXIST | 기존 기대값 갱신 5개 파일 | `shipper_company` `toBe` 단언 → `not.toHaveProperty` 로 전환 | `tests/unit/ups/task-b342-shxk-shipper-company-default.test.ts`, `tests/unit/ups/task-b341-shxk-shipper-name-unify.test.ts`, `tests/unit/ups/task-b324-shxk-shipper-name-override.test.ts`, `tests/unit/ups/defb054-shipper-company.test.ts`, `tests/unit/ups/ups-labels-mapping.test.ts` |
+
+## 77. SHXK consignee_name 테스트용 폴백 제거 (Issue #1278 / TASK-B-346, PR①)
+
+**배경**: `buildCreateOrderPayload()`의 consignee 블록에 `recipient_name || 'E2E Consignee'` 테스트용 폴백이 운영 코드에 남아 있어, 수취인 성명이 비어 있으면 가짜 이름이 SHXK로 전송될 수 있었다.  
+**요구사항(JSJung 2026-11-12)**: `consignee_name` ← `recipient_name`(수취인 성명) 고정, 기본값 없음. 빈 값은 `validateShxkPayload()`의 `'수취인 성명 누락'` 사전검증이 SHXK 호출 전에 차단.
+
+| ID | 검증 내용 | 기대 결과 | 테스트 위치 |
+| :-- | :-- | :-- | :-- |
+| TC-346-1 | `recipient_name=''` 로 `buildCreateOrderPayload()` 호출 | `consignee.consignee_name === ''` (`toBe`, 폴백 없음) | `tests/unit/ups/ups-labels-mapping.test.ts` |
+| TC-346-2 | TC-346-1 payload를 `validateShxkPayload()`에 통과 | `errors` 배열 `toEqual(['수취인 성명 누락'])` — 다른 오류 없이 단일 차단 | 동일 |
+| TC-346-3 | `recipient_name='John Doe'` 정상값 | `consignee_name='John Doe'` + `validateShxkPayload()` `toEqual([])` | 동일 |
+| TC-346-GREP | 폴백 문자열 잔존 점검 | `grep -rn "E2E Consignee" src tests` 0건 | - |
+| TC-346-RST | 되돌리기 검증: `consignee_name` 폴백 원복 | TC-346-1/2 FAIL — 전체 **2 failed / 40 passed** (`expected 'E2E Consignee' to be ''`, `expected [] to deeply equal [ '수취인 성명 누락' ]`) | 동일 |
