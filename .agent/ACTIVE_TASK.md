@@ -53,7 +53,7 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 | [#1283](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1283) | [Team B] DEF-B-154: CI Regression Tests 전 PR 실패 — supabase CLI latest가 config.toml [inbucket] 거부 (Aiden 보고) | b | p1 | open | 미배정 | 2026-11-12 |
 | [#1281](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1281) | [Team B] TASK-B-349: 아이템 Packing Unit 저장 정합성 실DB 검증 | b | p2 | open | 미배정 | 2026-11-12 |
 | [#1280](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1280) | [Team B] TASK-B-348: 사용자 노출 오류메시지 로케일 정합화 (영문/중문 혼재 노출 제거) | b | p2 | open | 미배정 | 2026-11-12 |
-| [#1279](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1279) | [Team B] TASK-B-347: 전화번호 입력 안내문구 + 숫자 외 입력 차단 전수 점검 | b | p3 | in-progress | 미배정 | 2026-11-12 |
+| [#1279](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1279) | [Team B] TASK-B-347: 전화번호 입력 안내문구 + 숫자 외 입력 차단 전수 점검 | b | p3 | review | 미배정 | 2026-11-12 |
 | [#1278](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1278) | [Team B] TASK-B-346: SHXK createorder consignee 전체 매핑 재점검 (감사 → 갭 보완) | b | p2 | review | 미배정 | 2026-11-12 |
 | [#1277](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1277) | [Team B] TASK-B-345: SHXK createorder shipper_company 미전송 처리 (TASK-B-342 결정 번복) | b | p2 | review | 미배정 | 2026-11-12 |
 | [#1276](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1276) | [Team B] 원격 브랜치 정리 후속 — 판단 보류 브랜치 11건 점검 요청 | b | p3 | open | jungjs | 2026-10-29 |
