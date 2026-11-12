@@ -757,14 +757,14 @@
 | **TC-ELF-06** | 필터 없음 시 페이징만 적용 | 파라미터 부재 시 eq/ilike 미호출 및 정상 반환 검증 | `tests/unit/monitoring/error-log-filters.test.ts` |
 
 ### 57. SHXK createorder 화주명 수기입력 오버라이드 (DEF-B-144 / Issue #1190 / TASK-B-324)
-> ⚠️ **TASK-B-342(Issue #1263)로 `shipper_company` 사양이 기본값 고정으로 변경됨** — 아래 기대 결과는 TASK-B-342 기준(2026-10-22 갱신).
+> ⚠️ **TASK-B-345(Issue #1277, JSJung 2026-11-12 결정)로 `shipper_company` 키 자체가 미전송으로 번복됨** — 아래 기대 결과는 `shipper_company` 키 부재 기준(2026-11-12 갱신). 상세는 §76.
 
 | ID | 테스트 항목 | 목적 | 파일 경로 |
 | :--- | :--- | :--- | :--- |
-| **TC-SHXK-OVR-01** | 수기입력 화주명(shipper_name)이 `shipper_name`으로 전달되고 `shipper_company`는 기본값 | `shipper_name` 폴백 우선순위 `shipper_name > shipper_org.name > shipperDefaults.name` 검증 + `shipper_company`는 항상 `shipperDefaults.name` | `tests/unit/ups/task-b324-shxk-shipper-name-override.test.ts` |
-| **TC-SHXK-OVR-02** | 레거시 오더(shipper_name 없음) 조직명 폴백 | 기존 동작 회귀 방지 (`shipper_name`만 폴백 — `shipper_company`는 기본값 고정) | `tests/unit/ups/task-b324-shxk-shipper-name-override.test.ts` |
-| **TC-SHXK-OVR-03** | registerUpsOrder 실제 등록 payload 반영 | placeShxkOrder 경로 createorder payload 검증 (mock SHXK 호출) — `shipper_company == SHXK_SHIPPER_NAME` | `tests/unit/ups/task-b324-shxk-shipper-name-override.test.ts` |
-| **TC-SHXK-OVR-04** | previewShxkPayload 미리보기 payload 반영 | preview 경로 createorder payload 검증 — `shipper_company == SHXK_SHIPPER_NAME` | `tests/unit/ups/task-b324-shxk-shipper-name-override.test.ts` |
+| **TC-SHXK-OVR-01** | 수기입력 화주명(shipper_name)이 `shipper_name`으로 전달되고 `shipper_company` 키는 없음 | `shipper_name` 폴백 우선순위 `shipper_name > shipper_org.name > shipperDefaults.name` 검증 + `shipper_company` 키 부재(`not.toHaveProperty`) | `tests/unit/ups/task-b324-shxk-shipper-name-override.test.ts` |
+| **TC-SHXK-OVR-02** | 레거시 오더(shipper_name 없음) 조직명 폴백 | 기존 동작 회귀 방지 (`shipper_name`만 폴백 — `shipper_company` 키 부재) | `tests/unit/ups/task-b324-shxk-shipper-name-override.test.ts` |
+| **TC-SHXK-OVR-03** | registerUpsOrder 실제 등록 payload 반영 | placeShxkOrder 경로 createorder payload 검증 (mock SHXK 호출) — `shipper_company` 키 부재 | `tests/unit/ups/task-b324-shxk-shipper-name-override.test.ts` |
+| **TC-SHXK-OVR-04** | previewShxkPayload 미리보기 payload 반영 | preview 경로 createorder payload 검증 — `shipper_company` 키 부재 | `tests/unit/ups/task-b324-shxk-shipper-name-override.test.ts` |
 
 ### 58. SHXK createorder 주소 국가·시·구·도 제거 + 상세주소 앞 정렬 (DEF-B-145/146 / Issue #1192/#1194 / TASK-B-325/326)
 | ID | 테스트 항목 | 목적 | 파일 경로 |
@@ -1006,7 +1006,8 @@ UPS 오더 수정 화면에서 화주 주소가 비어 보이는 결함. 원인�
 
 ## 73. SHXK createorder shipper_name·shipper_company = 화면 "화주명" 통일 (Issue #1261 / TASK-B-341)
 
-> ⚠️ **TASK-B-342(Issue #1263, JSJung 2026-10-22 결정)로 `shipper_company` 사양이 번복됨** — `shipper_company`는 이제 화면 "화주명"이 아니라 **회사 기본값(`shipperDefaults.name` = 환경변수 `SHXK_SHIPPER_NAME`)** 고정이다. 아래 기대 결과는 TASK-B-342 기준으로 갱신(2026-10-22). 상세는 §74.
+> ⚠️ **TASK-B-342(Issue #1263, JSJung 2026-10-22 결정)로 `shipper_company` 사양이 기본값 고정으로 변경됨** — 아래 기대 결과는 TASK-B-342 기준(2026-10-22 갱신). 상세는 §74.
+> ⚠️ **TASK-B-345(Issue #1277, JSJung 2026-11-12 결정)로 `shipper_company` 키 자체가 미전송으로 재번복됨** — 아래 TC-341-* 기대 결과 중 `shipper_company` 값은 현재 **키 부재**이며, 테스트 파일도 그 기준으로 갱신됨. 상세는 §76.
 
 SHXK `createorder` 페이로드의 `shipper.shipper_name`이 화면 "담당자명"(`zen_orders.shipper_contact_name`)으로 나가면서 `shipper_company`(화주명)와 불일치하던 것을, **JSJung 2026-10-21 결정**에 따라 양쪽 모두 화면 "화주명"(`zen_orders.shipper_name`)으로 통일한다. 폴백 체인은 기존 `shipper_company`와 동일하게 `order.shipper_name` → `order.shipper_org.name` → `shipperDefaults.name`. **담당자명(`order.shipper_contact_name`)은 SHXK payload 어디에도 전송하지 않는다** (동일 결정). DB·화면·`validate-payload.ts` 변경 없음 — `buildCreateOrderPayload()`의 shipper 블록만 변경 (`src/lib/ups/label-mapping.ts`).
 
@@ -1026,6 +1027,8 @@ SHXK `createorder` 페이로드의 `shipper.shipper_name`이 화면 "담당자�
 
 
 ## 74. SHXK createorder shipper_company = 회사 기본값 고정 (Issue #1263 / TASK-B-342)
+
+> 🚫 **현행 사양 아님 — TASK-B-345(Issue #1277, JSJung 2026-11-12 결정)로 번복됨.** `shipper_company`는 이제 회사 기본값으로도 전송하지 않고 **키 자체를 제거**한다. 아래 표는 TASK-B-342 시점의 이력이며, 현행 기대 결과는 §76 참조.
 
 **JSJung 2026-10-22 결정** — TASK-B-341(§73)의 "두 필드 모두 화면 화주명" 결정을 번복한다. `shipper.shipper_company`는 화면 "화주명"이 아니라 **회사 기본값**(환경변수 `SHXK_SHIPPER_NAME`, 기본 `SNTL Korea Co Ltd`)으로 고정한다. `shipper_name`은 화면 "화주명" 그대로 유지(폴백 체인 변경 없음). **담당자명(`order.shipper_contact_name`)은 계속 SHXK payload 어디에도 전송하지 않는다.** 호출처·config·DB·화면·`validate-payload.ts` 변경 없음 — `buildShipperPayload()`의 `shipper_company` 1줄만 변경 (`src/lib/ups/label-mapping.ts`).
 
@@ -1059,3 +1062,21 @@ SHXK `createorder` 페이로드의 `shipper.shipper_name`이 화면 "담당자�
 | TC-343-UI-01 | AddressInput 해외 주소 입력 시 쉼표→공백 치환 | 입력값 정제 확인 | `tests/unit/components/address-input-comma-strip.test.tsx` |
 | TC-343-UI-02 | AddressInput 상세주소 입력 시 쉼표→공백 치환 | 입력값 정제 확인 | 동일 |
 | TC-343-UI-03 | 다음우편번호 자동채움 시 `address_english` 원본 유지 | 도로명 추출 순서 보장 확인 | 동일 |
+
+
+## 76. SHXK createorder shipper_company 미전송 (Issue #1277 / TASK-B-345)
+
+**JSJung 2026-11-12 결정** — TASK-B-342(§74)의 "`shipper_company` = 회사 기본값 고정" 결정을 번복한다. SHXK 명세상 `shipper_company`는 선택 필드(200자)이므로 **키 자체를 payload에서 제거**한다(빈 문자열 전송 아님). `shipper_name`은 화면 "화주명" 그대로 유지(폴백 체인 변경 없음). `shipperDefaults.name`(= `SHXK_SHIPPER_NAME`)은 `shipper_name` 폴백 전용으로만 남는다. 호출처·config·DB·화면·`validate-payload.ts` 변경 없음 — `buildShipperPayload()`의 `shipper_company` 1줄 제거 (`src/lib/ups/label-mapping.ts`).
+
+| ID | 검증 내용 | 기대 결과 | 테스트 위치 |
+| :-- | :-- | :-- | :-- |
+| TC-345-1 | 실제 `buildCreateOrderPayload` 호출 — `shipper_name='ABC Trading'` | `shipper_name='ABC Trading'`, `payload.shipper`에 `shipper_company` 키 부재(`not.toHaveProperty`) | `tests/unit/ups/task-b342-shxk-shipper-company-default.test.ts` (TC-342-1) |
+| TC-345-2 | `shipper_name` 빈 값 + `shipper_org.name='MASTER AIR'` | `shipper_name='MASTER AIR'`, `shipper_company` 키 부재 | 동일 (TC-342-2) |
+| TC-345-3 | 한글 화주명(`'한국무역'`) | `shipper_name='한국무역'`, `shipper_company` 키 부재 | 동일 (TC-342-3) |
+| TC-345-4 | `shipperDefaults.name='X CORP'` 주입 | `shipper_company` 키 부재 + `shipperDefaults.name`이 다른 필드로도 새지 않음 | 동일 (TC-342-4) |
+| TC-345-5 | shipper 나머지 필드(`countrycode`/`province`/`city`/`street`/`postcode`/`telephone`) | 변경 전과 동일 | 동일 (TC-342-6) |
+| TC-345-6 | 실제 서버 액션 `registerUpsOrder()` → `createorder` payload (mock SHXK 호출) | `shipper_name='ABC Trading'`, `shipper_company` 키 부재 | 동일 (TC-342-7) |
+| TC-345-7 | `previewShxkPayload('CREATEORDER')` 미리보기 payload | `shipper_name='ABC Trading'`, `shipper_company` 키 부재 | 동일 (TC-342-8) |
+| TC-345-8 | 레거시 오더(`shipper_name` 없음) → 실제 등록 경로 | `shipper_name='MASTER AIR'`, `shipper_company` 키 부재 | 동일 (TC-342-9) |
+| TC-345-RST | 되돌리기 검증: `buildShipperPayload()`에 `shipper_company: shipperDefaults.name` 재삽입 | 영향 5개 파일 **30 failed / 37 passed (67)** 후 원복 시 67 passed — `not.toHaveProperty` 단언이 실제로 잡아냄 (§74 TC-342-RST 대체) | 5개 파일 |
+| TC-345-EXIST | 기존 기대값 갱신 5개 파일 | `shipper_company` `toBe` 단언 → `not.toHaveProperty` 로 전환 | `tests/unit/ups/task-b342-shxk-shipper-company-default.test.ts`, `tests/unit/ups/task-b341-shxk-shipper-name-unify.test.ts`, `tests/unit/ups/task-b324-shxk-shipper-name-override.test.ts`, `tests/unit/ups/defb054-shipper-company.test.ts`, `tests/unit/ups/ups-labels-mapping.test.ts` |

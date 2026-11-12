@@ -104,10 +104,12 @@ export function resolveConsigneeStreet(
   return localAddr ? `${road} (${localAddr})` : road;
 }
 
-// TASK-B-341 (Issue #1261) → TASK-B-342 (Issue #1263): SHXK createorder의 shipper 블록.
+// TASK-B-341 (Issue #1261) → TASK-B-342 (Issue #1263) → TASK-B-345 (Issue #1277): SHXK createorder의 shipper 블록.
 // shipper_name    = 화면 "화주명"(zen_orders.shipper_name). 폴백: order.shipper_name → shipper_org.name → shipperDefaults.name
-// shipper_company = 회사 기본값 고정 (shipperDefaults.name = 환경변수 SHXK_SHIPPER_NAME)
-//   (JSJung 2026-10-22 결정 — TASK-B-341의 "두 필드 모두 화주명" 결정을 번복)
+// shipper_company = 전송하지 않는다.
+//   (2026-11-12 JSJung 결정 — TASK-B-342의 "회사 기본값 고정" 결정을 번복, TASK-B-345)
+//   SHXK 명세상 선택 필드이므로 키 자체를 payload에서 제거한다(빈 문자열 전송 아님).
+//   shipperDefaults.name은 shipper_name 폴백용으로만 사용한다.
 // 담당자명(order.shipper_contact_name)은 SHXK payload 어디에도 전송하지 않는다.
 function buildShipperPayload(
   order: Record<string, unknown>,
@@ -121,7 +123,6 @@ function buildShipperPayload(
 
   return {
     shipper_name: shipperDisplayName,
-    shipper_company: shipperDefaults.name,
     shipper_countrycode: (order.shipper_country_code as string) || shipperDefaults.country,
     shipper_province: sanitizeComma((order.shipper_state_province as string) || ''),
     shipper_city: sanitizeComma((order.shipper_city as string) || ''),
