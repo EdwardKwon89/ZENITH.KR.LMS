@@ -5,7 +5,7 @@
 | **발견 경위** | TASK-B-341(Issue #1261) 작업 중 발견 — JSJung 2026-10-21 결정("SHXK `shipper_name`·`shipper_company`를 화면 '화주명'으로 통일")을 구현하면서 SHXK API 명세와 대조 |
 | **긴급도** | Low (결함 확정 아님 — SHXK 서버 측 수신 검증 미확인. 다만 라벨 발급 실패로 이어질 수 있는 여지) |
 | **발견일** | 2026-10-21 |
-| **조치 상태** | 부분 조치 (2026-10-22 TASK-B-342 / Issue #1263 — `shipper_company`는 회사 기본값 고정으로 **해소**. `shipper_name` 관련 위험은 **잔존**) |
+| **조치 상태** | 부분 조치 (2026-10-22 TASK-B-342 / Issue #1263 — `shipper_company`는 회사 기본값 고정으로 **해소**. `shipper_name` 관련 위험은 **잔존**. 2026-11-12 TASK-B-345 / Issue #1277 — `shipper_company`는 **키 자체 미전송**으로 재번복, 위험 해소 유지) |
 
 ## 현상
 
@@ -51,3 +51,7 @@ TASK-B-341(JSJung 결정) 이후로는 두 필드에 **동일하게 화면 "화�
 ## 파일 소유권 확인
 
 `src/lib/ups/label-mapping.ts`, `src/lib/shxk/validate-payload.ts` 모두 Team B 주도 파일 → **Team B 담당**
+
+---
+
+- 2026-11-12 shipper_company 전송 중단(TASK-B-345 / Issue #1277) — TASK-B-342의 회사 기본값 고정 결정을 JSJung 지시로 번복, `shipper_company` 키를 payload에서 제거(빈 문자열 전송 아님). `shipper_name` 잔존 위험은 변동 없음.
