@@ -46,7 +46,13 @@ SHXK createorder payload의 `consignee.consignee_name`에 남아 있던 테스�
 - **vacuous 단언 점검:** 신규 테스트에 `toContain(`·`typeof`·`.toBeDefined()` 단독 단언 없음 (`toEqual`/`toBe`만 사용)
 
 ## [발견 이슈]
-없음
+1. **[CI 차단 — 전 PR 공통, 본 Task 무관] `Regression Tests` 가 `Start local Supabase` 단계에서 즉시 실패 (19s)**
+   - 로그: `[inbucket] in supabase/config.toml is no longer supported. Use [local_smtp] instead.` → `Process completed with exit code 1.`
+   - 원인: CI가 `supabase/setup-cli@v1` + `version: latest`(v3.x)를 사용하는데 `supabase/config.toml` 에 deprecated `[inbucket]` 섹션이 남아 있어 `supabase start` 자체가 거부됨. 본 PR diff에 `supabase/` 변경 0건.
+   - 동일 실패가 직전 PR #1282(TASK-B-345)에서도 재현됨(12s fail) — **본 Task와 무관한 인프라 드리프트**.
+   - **이미 Jaison이 `DEF-B-154`(CI Regression supabase start inbucket 설정 거부)로 보고 중** (`docs/jaison-def-b-154-ci-supabase-inbucket` 브랜치 존재) → 중복 DEF 파일 생성하지 않음.
+   - 본 PR CI 실제 결과: `Regression Tests` **fail (인프라)**, `Type Check` **pass**, `Task File Check` **pass**. 로컬(v2.95.4) 동일 스위트는 **236 files / 1689 tests PASS**, `npm run build` EXIT=0.
+   - 조치 후보(공유 파일이라 본 Task에서 임의 수정 안 함): ① `supabase/config.toml` 을 `[local_smtp]` 로 마이그레이션 ② workflow CLI 버전 v2.x 핀.
 
 ## R-17 체크리스트
 - [x] 코드 커밋 (`26181fbdd` — 코드·테스트·회귀맵만, task file 미포함)
@@ -56,4 +62,14 @@ SHXK createorder payload의 `consignee.consignee_name`에 남아 있던 테스�
 - [x] 문서 커밋 (task file만)
 - [x] PR 생성 (`base=TeamB_Dev`, `Closes #1278`)
 - [x] `gh pr checks <PR번호>` 실제 출력 보고 (이전 커밋 결과 인용 금지)
+
+## PR / CI 실제 결과
+- **PR:** #1285 (base `TeamB_Dev` ← head `feature/teamb-task-b346-iss1278-consignee-pr1-name-fallback`) — `gh pr view 1285 --json baseRefName` → `"TeamB_Dev"` 확인
+- **`gh pr checks 1285` 실제 출력 (2026-11-12, run 43235505748):**
+  ```
+  Regression Tests                        fail     19s
+  Task File Check (advisory, non-blocking) pass     9s
+  Type Check (advisory, non-blocking)      pass     1m12s
+  ```
+- **Regression Tests fail 원인 = CI 인프라** (`Start local Supabase` → `[inbucket] in supabase/config.toml is no longer supported`), 본 PR diff 무관 — 상세는 [발견 이슈] 1. 로컬 동일 스위트는 236 files / 1689 tests PASS.
 
