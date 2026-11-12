@@ -50,6 +50,11 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
+| [#1281](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1281) | [Team B] TASK-B-349: 아이템 Packing Unit 저장 정합성 실DB 검증 | b | p2 | open | 미배정 | 2026-11-12 |
+| [#1280](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1280) | [Team B] TASK-B-348: 사용자 노출 오류메시지 한글 단일화 (영문/중문 노출 제거) | b | p2 | draft | 미배정 | 2026-11-12 |
+| [#1279](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1279) | [Team B] TASK-B-347: 전화번호 입력 안내문구 + 숫자 외 입력 차단 전수 점검 | b | p3 | open | 미배정 | 2026-11-12 |
+| [#1278](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1278) | [Team B] TASK-B-346: SHXK createorder 수하인 회사명·담당자 입력/전송 (입력 가능 여부 확인 포함) | b | p2 | draft | 미배정 | 2026-11-12 |
+| [#1277](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1277) | [Team B] TASK-B-345: SHXK createorder shipper_company 미전송 처리 (TASK-B-342 결정 번복) | b | p2 | open | 미배정 | 2026-11-12 |
 | [#1276](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1276) | [Team B] 원격 브랜치 정리 후속 — 판단 보류 브랜치 11건 점검 요청 | b | p3 | open | jungjs | 2026-10-29 |
 | [#1270](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1270) | [Team B] TASK-B-344: UPS/SHXK 주소 AddressLine 길이 사전검증 (#1268 분리) | b | p2 | open | jungjs | 2026-10-29 |
 | [#1268](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1268) | [Team B] TASK-B-343: UPS createorder 주소 쉼표 제거 + 주소 입력 쉼표 차단 (길이 사전검증은 #1270 분리) | b | p2 | review | jungjs | 2026-10-29 |
