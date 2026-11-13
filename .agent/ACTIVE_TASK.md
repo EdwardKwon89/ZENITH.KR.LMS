@@ -50,7 +50,7 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
-| [#1281](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1281) | [Team B] TASK-B-349: 아이템 Packing Unit 저장 정합성 실DB 검증 | b | p2 | in-progress | 미배정 | 2026-11-13 |
+| [#1281](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1281) | [Team B] TASK-B-349: 아이템 Packing Unit 저장 정합성 실DB 검증 | b | p2 | review | 미배정 | 2026-11-13 |
 | [#1280](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1280) | [Team B] TASK-B-348: 사용자 노출 오류메시지 로케일 정합화 (영문/중문 혼재 노출 제거) | b | p2 | draft | 미배정 | 2026-11-13 |
 | [#1279](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1279) | [Team B] TASK-B-347: 전화번호 입력 안내문구 + 숫자 외 입력 차단 전수 점검 | b | p3 | review | 미배정 | 2026-11-13 |
 | [#1278](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1278) | [Team B] TASK-B-346: SHXK createorder consignee 전체 매핑 재점검 (감사 → 갭 보완) | b | p2 | review | 미배정 | 2026-11-13 |
