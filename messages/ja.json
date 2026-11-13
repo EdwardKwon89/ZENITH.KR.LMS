@@ -14,7 +14,13 @@
     "insufficient_balance": "残高が不足しています。",
     "not_found": "対象が見つかりません。",
     "network_error": "ネットワークエラーが発生しました。しばらくしてから再試行してください。",
-    "unknown_action": "サポートされていないリクエストです。"
+    "unknown_action": "サポートされていないリクエストです。",
+    "profile_not_found": "ユーザープロフィールが見つかりません。",
+    "destination_country_not_found": "目的地の国コードが見つかりません。",
+    "label_not_found": "発行済みラベルが見つかりません。",
+    "document_save_failed": "書類のダウンロード/保存に失敗しました。",
+    "document_save_failed_after_shipping": "配送処理は完了しましたが、ラベルの書類保存に失敗しました。しばらくしてから再試行してください。",
+    "shxk_validation_failed": "SHXK 事前検証に失敗しました: {fields}"
   },
   "Common": {
     "phoneHelp": "数字のみ入力（ハイフンなし、最大 {max} 桁）",

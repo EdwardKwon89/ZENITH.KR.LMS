@@ -12,10 +12,30 @@ import { buildCreateOrderPayload } from '@/lib/ups/label-mapping';
 import { validateShxkPayload, type ShxkPayloadShape } from '@/lib/shxk/validate-payload';
 import { revalidatePath } from 'next/cache';
 import type { GetNewLabelItem } from '@/lib/shxk/order';
+import { actionLocale, trError } from '@/lib/i18n/action-error';
+import { translateShxkMessage } from '@/lib/shxk/translate';
 
 const DOC_TYPE_CONTENT_MAP = { WAYBILL: '1', CUSTOMS: '2', INVOICE: '3', COMBINED: '6' } as const;
 
 const STORAGE_UPLOAD_RETRY_DELAY_MS = 500;
+
+type ErrorKey = Parameters<typeof trError>[0];
+
+/**
+ * TASK-B-351 (Issue #1299): SHXK 응답 원문을 현재 로케일 문장으로 변환한다.
+ * - 사전(translate.ts)에 매칭되면 해당 로케일 번역문 반환
+ * - 미매칭이면 일반문구(`Errors.shxk_generic`, `{code}`)로 대체
+ * - **원문은 반환하지 않는다** — 호출부에서 logger / zen_ups_label_errors 로만 보존.
+ */
+async function resolveShxkError(
+  message: string | null | undefined,
+  fallbackKey: ErrorKey,
+  fallbackCode: string,
+): Promise<string> {
+  const localized = translateShxkMessage(message, await actionLocale());
+  if (localized) return localized;
+  return trError(fallbackKey, { code: fallbackCode });
+}
 
 type DocType = keyof typeof DOC_TYPE_CONTENT_MAP;
 
@@ -173,11 +193,14 @@ export interface IssueUpsLabelResult {
 }
 
 async function checkLabelPermission(profile: { role: string } | null): Promise<string | null> {
-  if (!profile) return 'User profile not found';
+  if (!profile) {
+    logger.warn('[checkLabelPermission] User profile not found');
+    return trError('profile_not_found');
+  }
   const allowed: string[] = [USER_ROLES.ADMIN, USER_ROLES.MANAGER, USER_ROLES.ZENITH_SUPER_ADMIN, USER_ROLES.AGENCY];
   if (!allowed.includes(profile.role as string)) {
     logger.warn(`[checkLabelPermission] Denied for role: ${profile.role}`);
-    return '권한이 없습니다. ADMIN, MANAGER, ZENITH_SUPER_ADMIN, AGENCY만 가능합니다.';
+    return trError('permission_denied');
   }
   return null;
 }
@@ -199,7 +222,11 @@ async function lookupOrderPackages(
     .eq('id', orderId)
     .single();
 
-  if (orderError || !order) return { packages: [], order: null, error: 'Order not found' };
+  if (orderError || !order) {
+    if (orderError) logger.error('lookupOrderPackages: zen_orders select failed', orderError);
+    else logger.warn(`lookupOrderPackages: order not found (${orderId})`);
+    return { packages: [], order: null, error: await trError('order_not_found') };
+  }
 
   const { data: pkgs, error: pkgError } = await supabase
     .from('zen_order_packages')
@@ -207,8 +234,14 @@ async function lookupOrderPackages(
     .eq('order_id', orderId)
     .order('created_at', { ascending: true });
 
-  if (pkgError) return { packages: [], order: null, error: 'Failed to fetch packages' };
-  if (!pkgs || pkgs.length === 0) return { packages: [], order: null, error: 'Order has no packages' };
+  if (pkgError) {
+    logger.error('lookupOrderPackages: zen_order_packages select failed', pkgError);
+    return { packages: [], order: null, error: await trError('packages_not_found') };
+  }
+  if (!pkgs || pkgs.length === 0) {
+    logger.warn(`lookupOrderPackages: order has no packages (${orderId})`);
+    return { packages: [], order: null, error: await trError('order_has_no_packages') };
+  }
 
   return { packages: pkgs as Record<string, unknown>[], order: order as Record<string, unknown>, error: null };
 }
@@ -250,7 +283,7 @@ async function placeShxkOrder(
   order: Record<string, unknown>,
   countryCode: string,
   packages: Record<string, unknown>[],
-): Promise<{ orderId: string; trackingNo: string | null; refrenceNo: string; message: string } | { error: string; message?: string }> {
+): Promise<{ orderId: string; trackingNo: string | null; refrenceNo: string; message: string } | { error: string; rawMessage?: string }> {
   const payload = buildCreateOrderPayload(shxkCode, order, countryCode, packages, {
     name: SHXK_SHIPPER_NAME,
     country: SHXK_SHIPPER_COUNTRY,
@@ -260,14 +293,25 @@ async function placeShxkOrder(
   const payloadErrors = validateShxkPayload(payload as ShxkPayloadShape);
   if (payloadErrors.length > 0) {
     logger.warn(`placeShxkOrder: payload validation failed — ${payloadErrors.join(', ')}`); // TASK-B-344 (Issue #1270)
-    return { error: `SHXK 필수 항목 누락: ${payloadErrors.join(', ')}`, message: payloadErrors.join(', ') };
+    // TASK-B-351 (Issue #1299): 사용자에게는 로케일 문장만 — 필드 원문은 로그에 이미 남겼다.
+    return { error: await trError('shxk_validation_failed', { fields: payloadErrors.join(', ') }) };
   }
 
   const orderRes = await createorder(payload as unknown as Parameters<typeof createorder>[0]);
 
-  if (orderRes.success === 0) return { error: `createorder failed: ${orderRes.message}`, message: orderRes.message };
+  if (orderRes.success === 0) {
+    logger.error(`[SHXK] createorder failed — raw message: ${orderRes.message}`);
+    return {
+      error: await resolveShxkError(orderRes.message, 'shxk_generic', 'CREATEORDER'),
+      rawMessage: orderRes.message,
+    };
+  }
   if (orderRes.success === 2 && !orderRes.data?.order_id) {
-    return { error: 'duplicate order but no existing order_id returned', message: orderRes.message };
+    logger.error(`[SHXK] createorder duplicate without order_id — raw message: ${orderRes.message}`);
+    return {
+      error: await trError('shxk_generic', { code: 'DUPLICATE_ORDER' }),
+      rawMessage: orderRes.message,
+    };
   }
 
   return {
@@ -308,7 +352,7 @@ async function fetchAndSaveLabel(
   referenceNo: string,
   orderId: string,
   labelId: string | null,
-): Promise<{ signedUrl: string | null; getNewLabelFailed: boolean }> {
+): Promise<{ signedUrl: string | null; getNewLabelFailed: boolean; failureMessage?: string }> {
   const configInfo = {
     lable_file_type: '2',
     lable_paper_type: '1',
@@ -319,7 +363,7 @@ async function fetchAndSaveLabel(
 
   if (labelRes.success !== 1 || !labelRes.data?.length) {
     logger.warn(`getnewlabel failed for ${referenceNo}: ${labelRes.message}`);
-    return { signedUrl: null, getNewLabelFailed: true };
+    return { signedUrl: null, getNewLabelFailed: true, failureMessage: labelRes.message };
   }
 
   const items = labelRes.data;
@@ -389,22 +433,29 @@ export async function registerUpsOrder(
 
     const { packages, order, error: lookupErr } = await lookupOrderPackages(supabase, orderId);
     if (lookupErr) return { success: false, error: lookupErr };
-    if (!order) return { success: false, error: 'Order not found' };
+    if (!order) return { success: false, error: await trError('order_not_found') };
 
     const countryCode = (order.recipient_country_code as string)
       || await resolveCountryCode(supabase, order.dest_port_id as string)
       || '';
-    if (!countryCode) return { success: false, error: 'Destination country code not found' };
+    if (!countryCode) {
+      logger.warn(`registerUpsOrder: destination country code not found (order=${orderId})`);
+      return { success: false, error: await trError('destination_country_not_found') };
+    }
 
     const shxkCode = await resolveShxkCode(supabase, order.ups_product_code as string, 'KOR', order.incoterms as string);
-    if (!shxkCode) return { success: false, error: `shipping method not found for product=${order.ups_product_code}, country=KOR, incoterms=${order.incoterms}` };
+    if (!shxkCode) {
+      logger.warn(`registerUpsOrder: shipping method not found (product=${order.ups_product_code}, incoterms=${order.incoterms})`);
+      return { success: false, error: await trError('shipping_method_not_found') };
+    }
 
     const orderResult = await placeShxkOrder(shxkCode, order!, countryCode, packages);
     if ('error' in orderResult) {
       await supabase.from('zen_ups_label_errors').insert({
         order_id: order.id as string,
         shxk_code: shxkCode,
-        error_message: orderResult.message || orderResult.error,
+        // TASK-B-351: 사용자 반환값에는 원문을 넣지 않고, DB(zen_ups_label_errors)에만 원문 보존
+        error_message: orderResult.rawMessage || orderResult.error,
         attempted_by: profile!.id,
       });
       return { success: false, error: orderResult.error };
@@ -412,7 +463,10 @@ export async function registerUpsOrder(
 
     const orderNo = order.order_no as string;
     const insertErr = await saveInitialLabel(supabase, order.id as string, orderNo, orderResult.trackingNo, profile!.id, orderResult.message);
-    if (insertErr) return { success: false, error: `Failed to save label record: ${insertErr}` };
+    if (insertErr) {
+      logger.error('registerUpsOrder: zen_ups_labels insert failed', insertErr);
+      return { success: false, error: await trError('generic', { code: 'LABEL_RECORD_SAVE' }) };
+    }
 
     // DEF-123: zen_tracking_configs.tracking_no를 실제 UPS 운송장번호로 갱신
     if (orderResult.trackingNo) {
@@ -437,9 +491,8 @@ export async function registerUpsOrder(
       },
     };
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Unknown error';
     logger.error('registerUpsOrder error:', err);
-    return { success: false, error: message };
+    return { success: false, error: await trError('generic', { code: 'UNEXPECTED' }) };
   }
 }
 
@@ -464,7 +517,10 @@ export async function fetchAndIssueUpsLabel(
     if (permErr) return { success: false, error: permErr };
 
     const label = await fetchActiveLabelByOrder(supabase, orderId);
-    if (!label) return { success: false, error: '발급된 라벨이 없습니다.' };
+    if (!label) {
+      logger.warn(`No active label (order=${orderId})`);
+      return { success: false, error: await trError('label_not_found') };
+    }
 
     if (docType) {
       const configInfo = {
@@ -475,7 +531,11 @@ export async function fetchAndIssueUpsLabel(
       };
       const res = await getnewlabel(configInfo, [{ reference_no: reference_no_clean(label.reference_no) }]);
       if (res.success !== 1 || !res.data?.length) {
-        return { success: false, error: res.message || '문서 조회 실패' };
+        logger.error(`[SHXK] getnewlabel(docType=${docType}) failed — raw message: ${res.message}`);
+        return {
+          success: false,
+          error: await resolveShxkError(res.message, 'document_fetch_failed', 'GETNEWLABEL_DOC'),
+        };
       }
 
       const storedUrls: string[] = [];
@@ -492,10 +552,16 @@ export async function fetchAndIssueUpsLabel(
         }
       }
 
-      if (!storedUrls.length) return { success: false, error: '발급된 문서 저장 실패' };
+      if (!storedUrls.length) {
+        logger.error(`fetchAndIssueUpsLabel: document download/store failed (order=${orderId}, docType=${docType})`);
+        return { success: false, error: await trError('document_save_failed') };
+      }
 
       const pkgErr = await markAllPackagesIssued(supabase, orderId, label.tracking_number);
-      if (pkgErr) return { success: false, error: `Failed to mark packages issued: ${pkgErr}` };
+      if (pkgErr) {
+        logger.error('fetchAndIssueUpsLabel: mark packages issued failed', pkgErr);
+        return { success: false, error: await trError('generic', { code: 'PACKAGES_MARK' }) };
+      }
       revalidatePath("/(dashboard)/warehouse/outbound", "page");
       revalidatePath('/(dashboard)/orders/[orderId]', 'page');
 
@@ -511,16 +577,24 @@ export async function fetchAndIssueUpsLabel(
     // markAllPackagesIssued를 수행해 패키지 마킹이 누락되지 않도록 함(③ 설계 변경).
     const labelResult = await fetchAndSaveLabel(supabase, label.reference_no, orderId, label.id);
     if (labelResult.getNewLabelFailed) {
-      return { success: false, error: '라벨 발급 실패 (getnewlabel)' };
+      logger.error(`[SHXK] getnewlabel failed — raw message: ${labelResult.failureMessage ?? ''}`);
+      return {
+        success: false,
+        error: await resolveShxkError(labelResult.failureMessage, 'label_issue_failed', 'GETNEWLABEL'),
+      };
     }
 
     const pkgErr = await markAllPackagesIssued(supabase, orderId, label.tracking_number);
-    if (pkgErr) return { success: false, error: `Failed to mark packages issued: ${pkgErr}` };
+    if (pkgErr) {
+      logger.error('fetchAndIssueUpsLabel: mark packages issued failed', pkgErr);
+      return { success: false, error: await trError('generic', { code: 'PACKAGES_MARK' }) };
+    }
 
     if (!labelResult.signedUrl) {
+      logger.error(`fetchAndIssueUpsLabel: label document save failed (order=${orderId})`);
       return {
         success: false,
-        error: '배송 처리는 완료되었으나 라벨 문서 저장에 실패했습니다. 잠시 후 다시 시도해주세요.',
+        error: await trError('document_save_failed_after_shipping'),
       };
     }
 
@@ -529,9 +603,8 @@ export async function fetchAndIssueUpsLabel(
 
     return { success: true, url: labelResult.signedUrl };
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Unknown error';
     logger.error('fetchAndIssueUpsLabel error:', err);
-    return { success: false, error: message };
+    return { success: false, error: await trError('generic', { code: 'UNEXPECTED' }) };
   }
 }
 
@@ -557,17 +630,21 @@ export async function cancelUpsRegistration(
 
     if (labelsErr) {
       logger.error('zen_ups_labels select error:', labelsErr);
-      return { success: false, error: `라벨 조회 실패: ${labelsErr.message}` };
+      return { success: false, error: await trError('generic', { code: 'LABEL_LOOKUP' }) };
     }
     if (!labels || labels.length === 0) {
-      return { success: false, error: '취소할 UPS 라벨 레코드가 없습니다.' };
+      logger.warn(`cancelUpsRegistration: no cancellable label (order=${orderId})`);
+      return { success: false, error: await trError('label_not_found') };
     }
 
     const referenceNo = labels[0].reference_no;
     const removeRes = await removeorder(referenceNo.replace(/-/g, ''));
     if (removeRes.success === 0) {
       logger.error(`removeorder failed for order ${orderId}: ${removeRes.message}`);
-      return { success: false, error: `UPS 라벨 회수 실패(SHXK): ${removeRes.message}` };
+      return {
+        success: false,
+        error: await resolveShxkError(removeRes.message, 'label_void_failed', 'REMOVEORDER'),
+      };
     }
 
     const labelIds = labels.map((l) => l.id);
@@ -603,11 +680,14 @@ export async function cancelUpsRegistration(
 
     if (deleteErr) {
       logger.error('zen_ups_labels delete error:', deleteErr);
-      return { success: false, error: `라벨 레코드 삭제 실패: ${deleteErr.message}` };
+      return { success: false, error: await trError('generic', { code: 'LABEL_RECORD_DELETE' }) };
     }
 
     const unlockErr = await unlockAllPackagesIntlRef(supabase, orderId);
-    if (unlockErr) return { success: false, error: `intl_ref 복원 실패: ${unlockErr}` };
+    if (unlockErr) {
+      logger.error('cancelUpsRegistration: intl_ref unlock failed', unlockErr);
+      return { success: false, error: await trError('generic', { code: 'PACKAGES_UNLOCK' }) };
+    }
 
     const { error: trackingResetErr } = await supabase
       .from('zen_tracking_configs')
@@ -622,9 +702,8 @@ export async function cancelUpsRegistration(
 
     return { success: true };
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Unknown error';
     logger.error('cancelUpsRegistration error:', err);
-    return { success: false, error: message };
+    return { success: false, error: await trError('generic', { code: 'UNEXPECTED' }) };
   }
 }
 
@@ -659,9 +738,8 @@ export async function issueUpsLabel(
       },
     };
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Unknown error';
     logger.error('issueUpsLabel error:', err);
-    return { success: false, error: message };
+    return { success: false, error: await trError('generic', { code: 'UNEXPECTED' }) };
   }
 }
 
@@ -715,19 +793,31 @@ export async function voidUpsLabel(
     if (permErr) return { success: false, error: permErr };
 
     const label = await fetchActiveLabelByOrder(supabase, orderId);
-    if (!label) return { success: false, error: 'Void할 레이블이 없습니다.' };
+    if (!label) {
+      logger.warn(`voidUpsLabel: no active label (order=${orderId})`);
+      return { success: false, error: await trError('label_not_found') };
+    }
 
     const removeRes = await removeorder(label.reference_no.replace(/-/g, ''));
     if (removeRes.success === 0) {
       logger.error(`removeorder failed for order ${orderId}: ${removeRes.message}`);
-      return { success: false, error: `UPS 라벨 회수 실패(SHXK): ${removeRes.message}` };
+      return {
+        success: false,
+        error: await resolveShxkError(removeRes.message, 'label_void_failed', 'REMOVEORDER'),
+      };
     }
 
     const updateErr = await markLabelVoidedByOrder(supabase, orderId);
-    if (updateErr) return { success: false, error: `레이블 폐기 기록 실패: ${updateErr}` };
+    if (updateErr) {
+      logger.error('voidUpsLabel: label void update failed', updateErr);
+      return { success: false, error: await trError('generic', { code: 'LABEL_VOID_RECORD' }) };
+    }
 
     const unlockErr = await unlockAllPackagesIntlRef(supabase, orderId);
-    if (unlockErr) return { success: false, error: `intl_ref 복원 실패: ${unlockErr}` };
+    if (unlockErr) {
+      logger.error('voidUpsLabel: intl_ref unlock failed', unlockErr);
+      return { success: false, error: await trError('generic', { code: 'PACKAGES_UNLOCK' }) };
+    }
 
     const { error: trackingResetErr } = await supabase
       .from('zen_tracking_configs')
@@ -742,9 +832,8 @@ export async function voidUpsLabel(
 
     return { success: true };
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Unknown error';
     logger.error('voidUpsLabel error:', err);
-    return { success: false, error: message };
+    return { success: false, error: await trError('generic', { code: 'UNEXPECTED' }) };
   }
 }
 
@@ -766,15 +855,15 @@ export async function previewShxkPayload(
     if (action === 'CREATEORDER') {
       const { packages, order, error: lookupErr } = await lookupOrderPackages(supabase, orderId);
       if (lookupErr) return { success: false, error: lookupErr };
-      if (!order) return { success: false, error: 'Order not found' };
+      if (!order) return { success: false, error: await trError('order_not_found') };
 
       const countryCode = (order.recipient_country_code as string)
         || await resolveCountryCode(supabase, order.dest_port_id as string)
         || '';
-      if (!countryCode) return { success: false, error: 'Destination country code not found' };
+      if (!countryCode) return { success: false, error: await trError('destination_country_not_found') };
 
       const shxkCode = await resolveShxkCode(supabase, order.ups_product_code as string, 'KOR', order.incoterms as string);
-      if (!shxkCode) return { success: false, error: `shipping method not found for product=${order.ups_product_code}, country=KOR, incoterms=${order.incoterms}` };
+      if (!shxkCode) return { success: false, error: await trError('shipping_method_not_found') };
 
       const payload = buildCreateOrderPayload(shxkCode, order, countryCode, packages, {
         name: SHXK_SHIPPER_NAME,
@@ -784,7 +873,10 @@ export async function previewShxkPayload(
     }
 
     const label = await fetchActiveLabelByOrder(supabase, orderId);
-    if (!label) return { success: false, error: '발급된 라벨이 없습니다.' };
+    if (!label) {
+      logger.warn(`No active label (order=${orderId})`);
+      return { success: false, error: await trError('label_not_found') };
+    }
 
     if (action === 'WAYBILL' || action === 'INVOICE' || action === 'CUSTOMS') {
       const docTypeMap: Record<string, string> = { WAYBILL: '1', CUSTOMS: '2', INVOICE: '3' };
@@ -801,11 +893,11 @@ export async function previewShxkPayload(
       return { success: true, payload: { reference_no: label.reference_no.replace(/-/g, '') } as Record<string, unknown> };
     }
 
-    return { success: false, error: 'Unknown action' };
+    logger.warn(`previewShxkPayload: unsupported action (${action})`);
+    return { success: false, error: await trError('unknown_action') };
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Unknown error';
     logger.error('previewShxkPayload error:', err);
-    return { success: false, error: message };
+    return { success: false, error: await trError('generic', { code: 'UNEXPECTED' }) };
   }
 }
 
@@ -819,15 +911,15 @@ export async function triggerCreateOrderTest(
 
     const { packages, order, error: lookupErr } = await lookupOrderPackages(supabase, orderId);
     if (lookupErr) return { success: false, error: lookupErr };
-    if (!order) return { success: false, error: 'Order not found' };
+    if (!order) return { success: false, error: await trError('order_not_found') };
 
     const countryCode = (order.recipient_country_code as string)
       || await resolveCountryCode(supabase, order.dest_port_id as string)
       || '';
-    if (!countryCode) return { success: false, error: 'Destination country code not found' };
+    if (!countryCode) return { success: false, error: await trError('destination_country_not_found') };
 
     const shxkCode = await resolveShxkCode(supabase, order.ups_product_code as string, 'KOR', order.incoterms as string);
-    if (!shxkCode) return { success: false, error: `shipping method not found for product=${order.ups_product_code}, country=KOR, incoterms=${order.incoterms}` };
+    if (!shxkCode) return { success: false, error: await trError('shipping_method_not_found') };
 
     const orderResult = await placeShxkOrder(shxkCode, order!, countryCode, packages);
     if ('error' in orderResult) {
@@ -843,9 +935,8 @@ export async function triggerCreateOrderTest(
       },
     };
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Unknown error';
     logger.error('triggerCreateOrderTest error:', err);
-    return { success: false, error: message };
+    return { success: false, error: await trError('generic', { code: 'UNEXPECTED' }) };
   }
 }
 
@@ -859,7 +950,10 @@ export async function fetchShxkTradeDocument(
     if (permErr) return { success: false, error: permErr };
 
     const label = await fetchActiveLabelByOrder(supabase, orderId);
-    if (!label) return { success: false, error: '발급된 라벨이 없습니다.' };
+    if (!label) {
+      logger.warn(`No active label (order=${orderId})`);
+      return { success: false, error: await trError('label_not_found') };
+    }
 
     const configInfo = {
       lable_file_type: '2',
@@ -870,7 +964,11 @@ export async function fetchShxkTradeDocument(
     const res = await getnewlabel(configInfo, [{ reference_no: reference_no_clean(label.reference_no) }]);
 
     if (res.success !== 1 || !res.data?.length) {
-      return { success: false, error: res.message || '문서 조회 실패' };
+      logger.error(`[SHXK] fetchShxkTradeDocument(${docType}) failed — raw message: ${res.message}`);
+      return {
+        success: false,
+        error: await resolveShxkError(res.message, 'document_fetch_failed', 'GETNEWLABEL_DOC'),
+      };
     }
 
     const storedUrls: string[] = [];
@@ -888,14 +986,14 @@ export async function fetchShxkTradeDocument(
     }
 
     if (!storedUrls.length) {
-      return { success: false, error: '문서 다운로드/저장 실패' };
+      logger.error(`fetchShxkTradeDocument: document download/store failed (order=${orderId}, docType=${docType})`);
+      return { success: false, error: await trError('document_save_failed') };
     }
     // TASK-B-327 (DEF-B-147): 다른 라벨 액션(registerUpsOrder/voidUpsLabel 등)과 동일하게 문서 저장 후 화면 갱신
     revalidatePath('/(dashboard)/orders/[orderId]', 'page');
     return { success: true, url: storedUrls[0] };
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Unknown error';
     logger.error('fetchShxkTradeDocument error:', err);
-    return { success: false, error: message };
+    return { success: false, error: await trError('generic', { code: 'UNEXPECTED' }) };
   }
 }

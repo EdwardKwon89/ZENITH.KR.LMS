@@ -87,7 +87,9 @@ describe('TASK-B-327: fetchShxkTradeDocument revalidatePath (DEF-B-147)', () => 
     const res = await fetchShxkTradeDocument('order-1', 'INVOICE');
 
     expect(res.success).toBe(false);
-    expect(res.error).toBe('未找到订单信息');
+    // TASK-B-351 (Issue #1299): SHXK 중문 원문 대신 로케일(ko) 문장 반환 — 의도된 갱신
+    expect(res.error).toBe('주문 정보를 찾을 수 없습니다');
+    expect(res.error).not.toContain('未找到订单信息');
     expect(revalidatePath).not.toHaveBeenCalled();
   });
 });

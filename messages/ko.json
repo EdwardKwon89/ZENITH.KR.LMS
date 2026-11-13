@@ -14,7 +14,13 @@
     "insufficient_balance": "잔액이 부족합니다.",
     "not_found": "대상을 찾을 수 없습니다.",
     "network_error": "네트워크 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.",
-    "unknown_action": "지원하지 않는 요청입니다."
+    "unknown_action": "지원하지 않는 요청입니다.",
+    "profile_not_found": "사용자 프로필을 찾을 수 없습니다.",
+    "destination_country_not_found": "목적지 국가 코드를 찾을 수 없습니다.",
+    "label_not_found": "발급된 라벨이 없습니다.",
+    "document_save_failed": "문서 다운로드/저장 실패",
+    "document_save_failed_after_shipping": "배송 처리는 완료되었으나 라벨 문서 저장에 실패했습니다. 잠시 후 다시 시도해주세요.",
+    "shxk_validation_failed": "SHXK 사전검증에 실패했습니다: {fields}"
   },
   "Common": {
     "phoneHelp": "숫자만 입력 (하이픈 제외, 최대 {max}자리)",
