@@ -39,7 +39,7 @@
 
 | 분류 | 문서명 | 상세 내용 |
 | :--- | :--- | :--- |
-| **API 명세** | [Ds_11_API_상세_명세서.md](docs/03_Design/Ds_11_API_상세_명세서.md) | **API First**: 전체 모듈 통합 API 규격 및 입출력 정의 |
+| **API 명세** | [Ds_11_API_상세_명세서.md](docs/02_Analysis/Ds_11_API_상세_명세서.md) | **API First**: 전체 모듈 통합 API 규격 및 입출력 정의 |
 | **UI 설계** | [Ds_01_화면설계_공통_컴포넌트.md](docs/03_Design/Ds_01_화면설계_공통_컴포넌트.md) | 공통 UI 컴포넌트 및 레이아웃 가이드 |
 | **인증 보안** | [302_AUTH_GUARD_ARCHITECTURE.md](docs/03_Design/302_AUTH_GUARD_ARCHITECTURE.md) | Next.js Middleware 기반 권한 제어 엔진 설계 |
 | **데이터 모델** | [An_01_데이터사전.md](docs/02_Analysis/An_01_데이터사전.md) | 전역 데이터 엔티티 및 컬럼 정의서 |
