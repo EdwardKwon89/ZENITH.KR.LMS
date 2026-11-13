@@ -83,6 +83,7 @@ Team B는 개별 `feature/teamb-*` 브랜치를 **develop에 직접 PR 제출하
 | GitHub Issue (`team:a` 라벨) | Team A | Team B 라벨/assignee 수정 금지 |
 | GitHub Issue (`team:b` 라벨) | Team B | Team A 라벨/assignee 수정 금지 |
 | 공유 코드 (`rbac.ts` 등) | 공유 | PR 선착순, 후발 팀 리베이스 |
+| API 상세 명세서 Ds-11 (`docs/02_Analysis/Ds_11_API_상세_명세서.md`) | 공유 | **구현 PR 안에서 갱신(R-12, GOV_COMMON v3.7)**, PR 선착순·후발 팀 리베이스. 신규 Server Action이 baseline(`scripts/ds11-sync-baseline.json`) 밖에서 Ds-11에 없으면 PR Checks `Docs Sync Check`가 경고(비차단) |
 | Migration 파일 | 작성 팀 | 타 팀 읽기 전용 |
 
 ## TASK 번호 채번 규칙 (v2.0 — 팀 접두사 체계)

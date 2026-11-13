@@ -115,8 +115,19 @@ CI는 매 실행마다 `supabase db reset`으로 스키마+SQL 시드를 완전�
 ### R-11 | API 설계 우선 원칙
 모든 기능 개발 시 코드 구현보다 **API 명세(`Ds-11`) 및 데이터 모델 설계**를 최우선으로 완료하고 사용자의 승인을 득해야 합니다. 명세 미확정 상태의 구현은 금지됩니다.
 
+**(2026-11-13, v3.7)** `Ds-11`의 **현행 위치는 `docs/02_Analysis/Ds_11_API_상세_명세서.md`** 이다(구 INDEX+DETAIL 구조 17파일은 2026-07-06 `docs/03_Design/_archive/ds_11/`로 아카이브 — GH#206 #13). 설계 승인 시점에 명세를 확정할 수 없는 변경은 task file `[설계 의견]`·Issue 본문에 근거를 남기고 **Ds-11 반영 시점**을 명시한다.
+
 ### R-12 | 명세-코드 동기화 의무
 API 사양 변경 시 반드시 `Ds-11_API_상세_명세서.md`를 선제적으로 업데이트해야 합니다. 코드와 명세의 불일치는 심각한 결함으로 간주됩니다.
+
+**(2026-11-13, v3.7 — DEF-145: 2026-07-16 이후 신규 액션 20개가 Ds-11에 0개 반영된 것을 계기로 집행 수단 신설)**
+- **트리거**: `src/app/actions/**`(`use server`)의 export 함수, Supabase RPC, 외부 연동(SHXK·UPS 등) payload 계약의 **신규·변경·삭제**.
+- **시점**: 구현과 **같은 PR 안에서** Ds-11을 갱신한다(R-11 설계 단계에서 이미 반영했다면 PR에서 일치 여부를 확인). 불가하면 PR 본문에 사유와 후속 IMP 번호를 적는다.
+- **최소 기재 항목**: 함수명·소스 경로·권한·입력·출력·오류.
+- **제외**: 내부 헬퍼, 테스트, `use server`가 아닌 `src/lib` 유틸.
+- **책임**: 구현 Agent가 PR 안에서 갱신하고, Aiden이 머지 전에 확인한다.
+- **자동 점검(1단계, advisory)**: `scripts/check-ds11-sync.mjs`(`npm run check:ds11`)가 `src/app/actions` 함수명이 Ds-11에 언급되는지 확인한다. 2026-11-13 기준 미반영 206개는 `scripts/ds11-sync-baseline.json`에 고정(래칫)하고, **baseline 밖의 신규 미반영**만 PR Checks(`Docs Sync Check`)가 경고한다. baseline은 **줄어들기만** 해야 하며 확대(`--allow-grow`)는 PR 본문에 사유를 적어야 한다. 이 점검은 **이름 언급 여부만** 본다 — 내용 정확성(2단계)과 필수 승격(`--strict`)은 관찰 후 별도 결정한다.
+- **문서 링크**: 문서를 이동·삭제·아카이브할 때는 참조를 `grep`으로 전수 점검한다. `scripts/check-doc-links.mjs`(`npm run check:doc-links`)가 baseline 밖의 **신규 깨진 상대 링크**를 경고한다(근거: GH#206 #13 아카이브 때 "깨지는 링크 없음"으로 확인했으나 4곳이 누락됨).
 
 ### R-13 | 테스트 결과물 관리 의무
 모든 테스트 결과(로그, 스크린샷 등)는 ROOT 폴더가 아닌 지정된 `docs/` 하부 폴더에 저장합니다.
@@ -410,4 +421,4 @@ PreToolUse GitNexus Hook에서 `Bash`가 제외되었습니다. 아래 경우는
 
 ## 📝 개정 이력
 
-> 최신 버전: **v3.6** (2026-10-01) | 전체 이력: [docs/00_GUIDE/GOV_CHANGELOG.md](docs/00_GUIDE/GOV_CHANGELOG.md)
+> 최신 버전: **v3.7** (2026-11-13) | 전체 이력: [docs/00_GUIDE/GOV_CHANGELOG.md](docs/00_GUIDE/GOV_CHANGELOG.md)
