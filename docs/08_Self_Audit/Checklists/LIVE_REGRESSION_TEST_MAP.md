@@ -1162,3 +1162,28 @@ SHXK `createorder` 페이로드의 `shipper.shipper_name`이 화면 "담당자�
 | TC-350-RST-B | 파일럿 되돌리기 | `wallet.ts`를 `error:'INSUFFICIENT_BALANCE'`로 원복 → **1 failed / 3 passed (4)** (`expected 'INSUFFICIENT_BALANCE' to be '잔액이 부족합니다.'`) → 복구 후 4 passed | `tests/unit/finance/wallet.test.ts` |
 
 **회귀 검증 (2026-11-13, rebase 후 재실행)**: `npm run test:regression` **240 test files / 1,741 tests 전부 PASS** (TASK-B-344 §80 병합분 포함).
+
+## 82. SHXK consignee_company — 수하인 회사명 전 구간 반영 (Issue #1278 / TASK-B-346, PR②)
+
+**배경**: PR①에서 `consignee_name` 폴백을 제거한 데 이어, SHXK createorder `consignee.consignee_company`(수취인 회사명, 선택·최대 200자)에 대응하는 입력이 전무했다. JSJung 결정(2026-11-12): 하우스 입력 "회사명" 1개를 `consignee_company`로 전송. 별도 "담당자" 필드는 만들지 않으며(`recipient_name`이 담당자 역할), 레거시 `recipient_contact`는 미사용.
+**범위**: DB 컬럼 `zen_orders.recipient_company` + RPC `create_order_atomic` v7 + 앱 레이어(입력 UI·zod·수정 복원·edit-log·SHXK payload) 전 구간. 주소록(`zen_address_book`)에는 회사명 컬럼이 없어 주소록 선택 시 회사명을 비운다(후속 개선 후보).
+
+| ID | 검증 내용 | 기대 결과 | 테스트 위치 |
+| :-- | :-- | :-- | :-- |
+| TC-346-01 | 신규 등록 — 실DB RPC v7 `recipient_company` 저장 | `createOrder({recipient_company:'Acme Trading Co'})` → 실DB `zen_orders.recipient_company` `toBe('Acme Trading Co')` | `tests/integration/task-b346-recipient-company.test.ts` |
+| TC-346-02 | 신규 등록 미입력(키 생략) | 실DB 값 `toBeNull()` (빈 문자열 아님) | 동일 |
+| TC-346-03 | 수정 경로(`updateOrder`→`updateHeader`) | `'First Co'`→`'Second Co'` 반영, 빈 값 저장 시 `''` (실DB SELECT) | 동일 |
+| TC-346-04 | 수정화면 복원 `buildOrderEditDefaults` | 실DB 행 → `recipient_company` `toBe('Restore Me Ltd')` | 동일 |
+| TC-346-05 | SHXK 전송 `buildCreateOrderPayload` | 실DB 값 → `consignee.consignee_company` `toBe('Acme Trading Co')` / 미입력 시 `not.toHaveProperty('consignee_company')` | 동일 |
+| TC-346-06 | payload 매핑(단위) — 입력 시 전송 + 사전검증 통과 | `consignee_company` `toBe('Acme Trading Co')`, `validateShxkPayload` `toEqual([])` | `tests/unit/ups/ups-labels-mapping.test.ts` |
+| TC-346-07 | payload 매핑(단위) — 미입력/빈 문자열 | `not.toHaveProperty('consignee_company')` (키 자체 생략) | 동일 |
+| TC-346-08 | payload 매핑(단위) — 쉼표 치환 | `'Acme, Inc.'` → `'Acme Inc.'` | 동일 |
+| TC-346-09 | 사전검증 경계 — `validateShxkPayload` | 미입력 `toEqual([])` / 200자 `toEqual([])` / 201자 `toEqual(['수취인 회사명 200자 초과'])` 단일 오류 | `tests/unit/shxk/validate-payload-limits.test.ts` |
+| TC-346-10 | zod 경계 — `orderRegistrationSchema` | 미입력 `success=true` / 200자 `true` / 201자 `false`(path `recipient_company`) | `tests/unit/orders/shxk-field-limits.test.ts` |
+| TC-346-11 | 수정화면 복원(단위) — 저장값/null | `'Acme Trading Co'` 보존 / null·undefined → `''` | `tests/unit/orders/edit-defaults.test.ts` |
+
+**회귀 검증 (2026-11-13, `origin/TeamB_Dev` rebase 후 재실행)**: `npm run test:regression` **241 test files / 1,758 tests 전부 PASS** (485초). `npm run build` **EXIT=0**.
+**되돌리기 검증 (테스트 유효성)**:
+- (A) RPC v7에서 `recipient_company` insert 컬럼·값 2줄 주석 처리 + `npx supabase db reset` → **TC-346-01 FAIL** (`expected null to be 'Acme Trading Co'`) → 복구 후 **5/5 PASS**.
+- (B) `orders.ts` `headerData`의 `recipient_company` 제거 → **TC-346-03 FAIL** (`expected 'First Co' to be 'Second Co'`) → 복구 후 PASS.
+**명세 동기화**: `docs/02_Analysis/Ds_11_API_상세_명세서.md` `createOrder` 절에 수하인 필드 매핑표 + `recipient_company` 컬럼·RPC v7 기재(R-11/R-12).

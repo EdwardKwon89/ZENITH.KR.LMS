@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { HS_CODE_MAX, ITEM_NAME_MAX, PHONE_MAX_DIGITS, stripNonDigits } from './shxk-limits';
+import { HS_CODE_MAX, ITEM_NAME_MAX, PHONE_MAX_DIGITS, RECIPIENT_COMPANY_MAX, stripNonDigits } from './shxk-limits';
 
 /**
  * 오더 상세 항목(Item) 검증 스키마 (패킹 하위)
@@ -74,6 +74,8 @@ export const orderRegistrationSchema = z.object({
   
   // 수취인 상세 정보 (v2 핵심 추가)
   recipient_name: z.string().min(1, 'Recipient name is required'),
+  // TASK-B-346 (Issue #1278): 수하인 회사명 — SHXK consignee_company 매핑 (선택, 200자)
+  recipient_company: z.string().max(RECIPIENT_COMPANY_MAX, `회사명은 ${RECIPIENT_COMPANY_MAX}자 이하여야 합니다`).optional(),
   recipient_address: z.string().min(1, 'Recipient address is required'),
   recipient_address_local: z.string().optional(),
   recipient_address_detail: z.string().optional(),

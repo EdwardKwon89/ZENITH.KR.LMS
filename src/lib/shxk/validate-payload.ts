@@ -6,7 +6,7 @@
 //
 // 필수 필드 기준: docs/80_RawData/Phase8_UPS_API_리서치_결과.md (SHXK createorder 공식 필드 스펙)
 
-import { HS_CODE_MAX, ITEM_NAME_MAX, PHONE_MAX_DIGITS, SHIPPER_STREET_MAX, CONSIGNEE_STREET_MAX, stripNonDigits } from '@/lib/validation/shxk-limits';
+import { HS_CODE_MAX, ITEM_NAME_MAX, PHONE_MAX_DIGITS, RECIPIENT_COMPANY_MAX, SHIPPER_STREET_MAX, CONSIGNEE_STREET_MAX, stripNonDigits } from '@/lib/validation/shxk-limits';
 import { isShxkDeclareUnit } from '@/lib/shxk/declare-units';
 
 export interface ShxkPayloadShape {
@@ -57,6 +57,10 @@ export function validateShxkPayload(payload: ShxkPayloadShape): string[] {
   checkPhone('발송인', shipper?.shipper_telephone, errors);
 
   if (isEmpty(consignee?.consignee_name)) errors.push('수취인 성명 누락');
+  // TASK-B-346 (Issue #1278): 수하인 회사명은 선택. 값이 있으면 SHXK 상한(200자)을 넘지 않아야 한다.
+  if (!isEmpty(consignee?.consignee_company) && String(consignee?.consignee_company).length > RECIPIENT_COMPANY_MAX) {
+    errors.push(`수취인 회사명 ${RECIPIENT_COMPANY_MAX}자 초과`);
+  }
   if (isEmpty(consignee?.consignee_countrycode)) errors.push('수취인 국가코드 누락');
   if (isEmpty(consignee?.consignee_street)) errors.push('수취인 주소 누락');
   else checkStreetLength('수취인', consignee?.consignee_street, CONSIGNEE_STREET_MAX, errors); // TASK-B-344 (Issue #1270)

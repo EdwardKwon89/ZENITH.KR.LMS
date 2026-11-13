@@ -1256,6 +1256,9 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                           key={refetchAddressBook}
                           onSelect={(entry) => {
                             setValue('recipient_name', entry.recipient_name);
+                            // TASK-B-346 (Issue #1278): 주소록(zen_address_book)에는 회사명 컬럼이 없으므로
+                            //   주소록 선택 시 회사명을 비운다(이전 입력값이 다른 주소로 남는 것 방지).
+                            setValue('recipient_company', '');
                             setValue('recipient_address', entry.recipient_address);
                             setValue('recipient_address_detail', entry.recipient_address_detail || '');
                             setValue('recipient_address_local', entry.recipient_address_local || '');
@@ -1272,6 +1275,11 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                       <div>
                         <label className="text-[10px] font-bold text-slate-500 mb-1 block">Recipient Name <span className="text-rose-500">*</span></label>
                         <ZenInput placeholder="Full Name" {...register('recipient_name')} error={!!errors.recipient_name} className="py-2 text-xs" />
+                      </div>
+                      <div>
+                        {/* TASK-B-346 (Issue #1278): 수하인 회사명 — SHXK consignee_company (선택) */}
+                        <label className="text-[10px] font-bold text-slate-500 mb-1 block">Company</label>
+                        <ZenInput placeholder="Company Name" {...register('recipient_company')} error={!!errors.recipient_company} className="py-2 text-xs" />
                       </div>
                       <div>
                         <label className="text-[10px] font-bold text-slate-500 mb-1 block">Phone <span className="text-rose-500">*</span></label>

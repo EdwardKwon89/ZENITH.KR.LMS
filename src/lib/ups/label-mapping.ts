@@ -168,6 +168,11 @@ export function buildCreateOrderPayload(
       // TASK-B-346 (Issue #1278): 테스트용 폴백 제거 — 수취인 성명이 비면
       // validateShxkPayload()의 '수취인 성명 누락' 사전검증이 SHXK 호출 전에 차단한다.
       consignee_name: (order.recipient_name as string) || '',
+      // TASK-B-346 PR② (Issue #1278): 수하인 회사명 — 입력이 있을 때만 전송(빈 값이면 키 자체를 생략).
+      // TASK-B-343 선례대로 전송 시점에 쉼표를 공백으로 치환한다(라벨 인쇄 시 쉼표 절단 방지).
+      ...(order.recipient_company
+        ? { consignee_company: sanitizeComma(String(order.recipient_company)) }
+        : {}),
       consignee_countrycode: (order.recipient_country_code as string) || countryCode,
       consignee_province: sanitizeComma((order.recipient_state_province as string) || ''),
       consignee_city: sanitizeComma((order.recipient_city as string) || ''),

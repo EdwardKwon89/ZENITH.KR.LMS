@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { orderRegistrationSchema } from '@/lib/validation/order';
-import { stripNonDigits, HS_CODE_MAX, ITEM_NAME_MAX, PHONE_MAX_DIGITS } from '@/lib/validation/shxk-limits';
+import { stripNonDigits, HS_CODE_MAX, ITEM_NAME_MAX, PHONE_MAX_DIGITS, RECIPIENT_COMPANY_MAX } from '@/lib/validation/shxk-limits';
 
 // 실제 orderRegistrationSchema.safeParse 호출 — vacuous/shadow 금지 (TASK-B-332 / Issue #1239)
 const baseUps = () => ({
@@ -140,5 +140,29 @@ describe('orderRegistrationSchema — 전화번호 숫자만 + 15자리', () => 
     payload.recipient_phone = '9'.repeat(PHONE_MAX_DIGITS + 1);
     const result = orderRegistrationSchema.safeParse(payload);
     expect(result.success).toBe(false);
+  });
+});
+
+describe('orderRegistrationSchema — 수하인 회사명 200자 (TASK-B-346 / Issue #1278)', () => {
+  it('recipient_company 미입력 → 통과 (선택 필드)', () => {
+    const result = orderRegistrationSchema.safeParse(baseUps());
+    expect(result.success).toBe(true);
+  });
+
+  it(`recipient_company ${RECIPIENT_COMPANY_MAX}자 → 통과 (경계값)`, () => {
+    const payload = baseUps();
+    (payload as any).recipient_company = 'A'.repeat(RECIPIENT_COMPANY_MAX);
+    const result = orderRegistrationSchema.safeParse(payload);
+    expect(result.success).toBe(true);
+  });
+
+  it(`recipient_company ${RECIPIENT_COMPANY_MAX + 1}자 → 실패, path recipient_company`, () => {
+    const payload = baseUps();
+    (payload as any).recipient_company = 'A'.repeat(RECIPIENT_COMPANY_MAX + 1);
+    const result = orderRegistrationSchema.safeParse(payload);
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues.some((i) => i.path.join('.') === 'recipient_company')).toBe(true);
+    }
   });
 });

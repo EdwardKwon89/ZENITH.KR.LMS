@@ -40,6 +40,7 @@ export interface OrderEditDefaultsInput {
   shipper_zipcode?: string | null;
   shipper_biz_no?: string | null;
   recipient_name?: string | null;
+  recipient_company?: string | null;
   recipient_address?: string | null;
   recipient_address_local?: string | null;
   recipient_address_detail?: string | null;
@@ -92,6 +93,7 @@ export function buildOrderEditDefaults(order: OrderEditDefaultsInput): Record<st
     shipper_zipcode: order.shipper_zipcode ?? '',
     shipper_biz_no: order.shipper_biz_no ?? '',
     recipient_name: order.recipient_name ?? '',
+    recipient_company: order.recipient_company ?? '',
     recipient_address: order.recipient_address ?? '',
     recipient_address_local: order.recipient_address_local ?? '',
     recipient_address_detail: order.recipient_address_detail ?? '',
