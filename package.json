@@ -17,7 +17,9 @@
     "db:seed": "tsx --env-file=.env.local scripts/seed-local.ts",
     "test:e2e:filtered": "./scripts/test_with_filter.sh 'npx playwright test' docs/99_Manual/E2E_Result/latest_result.txt",
     "gitnexus:index": "gitnexus analyze --skip-agents-md",
-    "check:i18n": "tsx scripts/audit-i18n.ts"
+    "check:i18n": "tsx scripts/audit-i18n.ts",
+    "check:ds11": "node scripts/check-ds11-sync.mjs",
+    "check:doc-links": "node scripts/check-doc-links.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.110.0",
