@@ -76,3 +76,6 @@ scratch/
 # ─── R-10 검증용 임시 Playwright config (PLAYWRIGHT_PORT env var 사용 권장, /tmp에 둘 것) ───
 playwright.r10*.config.ts
 playwright*.local.config.ts
+
+# ─── orchestration: Edward 로컬 도구(에이전트 상호 검토 호출기) — 저장소 미포함(Edward 결정 2026-11-13). 확정 보고서는 docs/08_Self_Audit/Reviews/ 로 복사 ───
+orchestration/
