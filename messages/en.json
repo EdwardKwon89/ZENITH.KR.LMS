@@ -1,4 +1,21 @@
 {
+  "Errors": {
+    "generic": "Something went wrong. Please try again shortly. (Code: {code})",
+    "order_not_found": "Order not found.",
+    "packages_not_found": "Package information for this order could not be found.",
+    "order_has_no_packages": "This order has no packages.",
+    "shipping_method_not_found": "No shipping method matches this product, country, and incoterms.",
+    "shxk_required_missing": "Required SHXK fields are missing: {fields}",
+    "shxk_generic": "The carrier system could not process the request. Please try again shortly. (Code: {code})",
+    "label_issue_failed": "Failed to issue the label.",
+    "label_void_failed": "Failed to void the label.",
+    "document_fetch_failed": "Failed to load the trade document.",
+    "permission_denied": "You do not have permission.",
+    "insufficient_balance": "Insufficient balance.",
+    "not_found": "The requested item could not be found.",
+    "network_error": "A network error occurred. Please try again shortly.",
+    "unknown_action": "Unsupported request."
+  },
   "Common": {
     "phoneHelp": "Numbers only (no hyphens, max {max} digits)",
     "phoneHelpHyphen": "Numbers and hyphens only (e.g. 010-1234-5678, max {max} digits)",
