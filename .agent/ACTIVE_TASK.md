@@ -50,7 +50,7 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
-| [#1299](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1299) | [Team B] TASK-B-351: 오류 메시지 로케일 ①-b-1 — ups-labels.ts + SHXK 사전 4개 로케일 (#1280 구현 2단계) | b | p2 | open | 미배정 | 2026-11-13 |
+| [#1299](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1299) | [Team B] TASK-B-351: 오류 메시지 로케일 ①-b-1 — ups-labels.ts + SHXK 사전 4개 로케일 (#1280 구현 2단계) | b | p2 | in-progress | 미배정 | 2026-11-13 |
 | [#1298](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1298) | [Aiden] R-12(Ds-11 동기화) 개정·Docs Sync Check 도입 안내 — Team B 영향 및 회신 요청 | b | p2 | - | jungjs | 2026-11-13 |
 | [#1292](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1292) | [Team B] TASK-B-350: 오류 메시지 로케일 ①-a — Errors 네임스페이스·헬퍼·로케일 실증 (#1280 구현 1단계) | b | p2 | review | jungjs | 2026-11-13 |
 | [#1291](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1291) | [Team B] #1280 설계 확정 공유 + 회귀맵 분리(R-09/DEF-B-157) 결정 요청 (Aiden 보고) | b | p2 | open | 미배정 | 2026-11-13 |
