@@ -1,7 +1,7 @@
 # 🗺️ LIVE Regression Test Master Map
 
-> **총 테스트 케이스:** 1,734 Cases (vitest 개별 테스트 기준, 239 test files)
-> **최종 검증일:** 2026-11-13 (TASK-B-344 주소 AddressLine 길이 사전검증 · §80 TC-344-1~5 등재 · 1,734/1,734 PASS)  
+> **총 테스트 케이스:** 1,741 Cases (vitest 개별 테스트 기준, 240 test files)
+> **최종 검증일:** 2026-11-13 (TASK-B-350 오류 로케일 인프라 · §81 TC-350-01~05 등재 · 1,741/1,741 PASS)  
 
 제니스 플랫폼의 비즈니스 영속성을 보장하는 회귀 테스트 케이스의 통합 명세서입니다. 모든 신규 개발 및 수정 시 이 맵에 케이스가 추가되어야 하며, 전체 테스트가 통과되어야 합니다.
 
@@ -1160,3 +1160,5 @@ SHXK `createorder` 페이로드의 `shipper.shipper_name`이 화면 "담당자�
 | TC-350-05 | 테스트 중앙 mock이 실제 문구 반환 | `tests/setup.ts`의 `next-intl/server` mock이 `messages/ko.json` 실제 값을 ICU 치환해 반환(키 문자열 반환 금지) | `tests/setup.ts` |
 | TC-350-RST-A | 키 동기화 되돌리기 | `en.Errors.insufficient_balance` 삭제 → **2 failed / 5 passed (7)** → 복구 후 7 passed | `tests/unit/i18n/errors-key-sync.test.ts` |
 | TC-350-RST-B | 파일럿 되돌리기 | `wallet.ts`를 `error:'INSUFFICIENT_BALANCE'`로 원복 → **1 failed / 3 passed (4)** (`expected 'INSUFFICIENT_BALANCE' to be '잔액이 부족합니다.'`) → 복구 후 4 passed | `tests/unit/finance/wallet.test.ts` |
+
+**회귀 검증 (2026-11-13, rebase 후 재실행)**: `npm run test:regression` **240 test files / 1,741 tests 전부 PASS** (TASK-B-344 §80 병합분 포함).
