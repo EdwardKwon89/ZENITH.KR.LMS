@@ -134,12 +134,20 @@ JSJung 확정(2026-11-12): 하우스 입력 "회사명" 1개 → `consignee_comp
 - [x] `gh pr checks <PR번호>` 실제 출력 보고 (이전 커밋 결과 인용 금지)
 
 ## PR② / CI 실제 결과
-- **PR:** (아래 PR 번호 기재) (base `TeamB_Dev` ← head `feature/teamb-task-b346-iss1278-consignee-pr2-company`)
-- **`gh pr checks` 실제 출력:** (PR 생성 직후 실측값 기재)
+- **PR:** #1300 (base `TeamB_Dev` ← head `feature/teamb-task-b346-iss1278-consignee-pr2-company`) — `gh pr view 1300 --json baseRefName` → `"TeamB_Dev"` 확인
+- **`gh pr checks 1300` 실제 출력 (2026-11-13, run 43376129792 — rebase 후 최종 head `d16690ada`):**
+  ```
+  Regression Tests                        pass     7m42s
+  Task File Check (advisory, non-blocking) pass     7s
+  Type Check (advisory, non-blocking)      pass     1m32s
+  Docs Sync Check (advisory, non-blocking) pass     9s
+  ```
+- **PR 생성 직후 첫 CI 미실행 원인:** base가 전진해 `mergeable=CONFLICTING` 상태가 되면 GitHub이 `pull_request` merge-ref를 만들지 못해 워크플로가 아예 트리거되지 않는다(`no checks reported`). `git rebase origin/TeamB_Dev`(회귀맵 §81→§82 재번호) + force push 후 정상 트리거·전항목 PASS.
 
 ## [발견 이슈] (PR②)
 1. **주소록(`zen_address_book`)에 회사명 컬럼 부재** — 주소록에서 수하인을 선택하면 회사명을 채울 소스가 없어, 이전 입력값이 남지 않도록 주소록 선택 시 회사명을 빈 값으로 초기화했다(`OrderRegistrationForm.tsx`). 주소록 스키마에 회사명을 추가하는 것은 본 Task 범위 밖 — 후속 개선 후보(JSJung/Jaison 판단 필요).
 2. **`src/types/supabase.ts` stale** — 본 PR②에서 필요한 `recipient_company`만 추가했다. 파일 자체가 `recipient_address_detail` 등 기존 컬럼도 누락한 상태(자동 생성 재실행 필요) — 범위 확대 방지를 위해 미포함.
-3. **CI `Regression Tests` 실패 = 인프라 드리프트(PR①와 동일)** — `[inbucket] in supabase/config.toml is no longer supported`. 본 PR② diff 무관, Jaison `DEF-B-154`로 이미 보고 중 → 중복 DEF 미생성.
+3. **PR 생성 직후 CI 무트리거 = base 충돌** — 위 PR②/CI 결과 항목 참조. base 전진 시 rebase 없이는 CI가 실행조차 되지 않으므로, PR 생성 직후 `gh pr view --json mergeable` 확인이 필요하다.
+
 
 
