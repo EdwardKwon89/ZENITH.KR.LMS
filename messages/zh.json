@@ -1,4 +1,21 @@
 {
+  "Errors": {
+    "generic": "请求处理失败，请稍后重试。（代码：{code}）",
+    "order_not_found": "找不到订单。",
+    "packages_not_found": "找不到该订单的包裹信息。",
+    "order_has_no_packages": "该订单没有包裹。",
+    "shipping_method_not_found": "没有匹配该商品/国家/贸易条款的运输方式。",
+    "shxk_required_missing": "SHXK 必填项缺失：{fields}",
+    "shxk_generic": "快递公司系统未能处理该请求，请稍后重试。（代码：{code}）",
+    "label_issue_failed": "面单签发失败。",
+    "label_void_failed": "面单作废失败。",
+    "document_fetch_failed": "无法加载贸易文件。",
+    "permission_denied": "您没有权限。",
+    "insufficient_balance": "余额不足。",
+    "not_found": "找不到目标。",
+    "network_error": "发生网络错误，请稍后重试。",
+    "unknown_action": "不支持的请求。"
+  },
   "Common": {
     "phoneHelp": "仅限数字（不含连字符，最多 {max} 位）",
     "phoneHelpHyphen": "仅可输入数字和连字符（例：010-1234-5678，最多 {max} 位）",

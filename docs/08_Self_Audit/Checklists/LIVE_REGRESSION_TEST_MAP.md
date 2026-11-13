@@ -1145,3 +1145,18 @@ SHXK `createorder` 페이로드의 `shipper.shipper_name`이 화면 "담당자�
 **회귀 검증 (2026-11-13)**: `npm run test:regression` **239 test files / 1,734 tests 전부 PASS** (487초, db freshness OK).
 **되돌리기 검증 (테스트 유효성)**: `validate-payload.ts`의 `checkStreetLength` 호출 2줄 제거 → **4 failed / 11 passed** (TC-344-1 71자·TC-344-2 106자·TC-344-3 87자·TC-344-5 통합 FAIL) → 복구 후 **15/15 PASS**.
 **실패 관측성**: `placeShxkOrder`의 사전검증 실패 분기에 `logger.warn` 1줄 추가(`ups-labels.ts:262`) — 추가 전에는 오류 반환만 존재(로그 없음).
+## 81. 서버 액션 오류 로케일 인프라 + 파일럿 (Issue #1292 / TASK-B-350)
+
+**2026-11-13, Dave** — 부모 #1280 설계 확정안(안 ②)의 1단계(PR ①-a). `messages/{ko,en,zh,ja}.json`에 **`Errors` 네임스페이스**(ko 기준 15키, 4개 로케일 동일 세트)를 신설하고, 서버 액션이 `trError()`로 현재 로케일 문장을 반환하도록 인프라를 깔았다. **파일럿 1건**: `payInvoiceFromWallet()`의 `INSUFFICIENT_BALANCE` 코드 문자열 노출 제거(`PaymentModal.tsx` 무수정). UPS/SHXK/창고 액션 일괄 적용(①-b)은 범위 외.
+
+**로케일 해석 실증(2026-11-13, 로컬 dev + Supabase)**: 임시 Server Action POST를 `/ko`·`/en`·`/zh`·`/ja`에서 실행 → 각각 해당 로케일 문구 반환(`npm run dev -p 3100`, Next.js 16.2.4). 상세 원문은 task file §2.
+
+| ID | 검증 내용 | 기대 결과 | 테스트 위치 |
+| :-- | :-- | :-- | :-- |
+| TC-350-01 | `Errors` 키 집합 4개 로케일 동기화 | ko 기준 15키와 en/zh/ja 키 집합 완전 일치(`toEqual`), 누락·추가 모두 FAIL | `tests/unit/i18n/errors-key-sync.test.ts` |
+| TC-350-02 | `Errors` 값 비어 있음 차단 | 4개 로케일 전 키가 truthy string | 동일 |
+| TC-350-03 | ICU 플레이스홀더 동기화 | `{code}`·`{fields}` 등 키별 플레이스홀더 이름 집합이 ko와 동일 | 동일 |
+| TC-350-04 | 파일럿: 지갑 결제 잔액 부족 | `error`가 `INSUFFICIENT_BALANCE`가 아니라 현재 로케일(ko) 문장 `잔액이 부족합니다.` | `tests/unit/finance/wallet.test.ts` (WAL-04) |
+| TC-350-05 | 테스트 중앙 mock이 실제 문구 반환 | `tests/setup.ts`의 `next-intl/server` mock이 `messages/ko.json` 실제 값을 ICU 치환해 반환(키 문자열 반환 금지) | `tests/setup.ts` |
+| TC-350-RST-A | 키 동기화 되돌리기 | `en.Errors.insufficient_balance` 삭제 → **2 failed / 5 passed (7)** → 복구 후 7 passed | `tests/unit/i18n/errors-key-sync.test.ts` |
+| TC-350-RST-B | 파일럿 되돌리기 | `wallet.ts`를 `error:'INSUFFICIENT_BALANCE'`로 원복 → **1 failed / 3 passed (4)** (`expected 'INSUFFICIENT_BALANCE' to be '잔액이 부족합니다.'`) → 복구 후 4 passed | `tests/unit/finance/wallet.test.ts` |

@@ -112,7 +112,9 @@ describe('Wallet Server Actions', () => {
     const result = await payInvoiceFromWallet('inv-123');
     
     expect(result.success).toBe(false);
-    expect(result.error).toBe('INSUFFICIENT_BALANCE');
+    // TASK-B-350 (Issue #1292): 코드 문자열 대신 현재 로케일(테스트=ko) 문장을 반환한다.
+    // (tests/setup.ts 의 next-intl/server 중앙 mock 이 messages/ko.json 실제 값을 돌려준다)
+    expect(result.error).toBe('잔액이 부족합니다.');
   });
 
   it('WAL-04: should fail payment if invoice is already paid', async () => {
