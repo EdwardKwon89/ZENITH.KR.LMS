@@ -13,6 +13,8 @@
  *   (실제 .length 49자·58자 성공 / 87자 실패)와 모순 없음. Jaison 확정 2026-11-13 (잠정값).
  * - CONSIGNEE_STREET_MAX=105: UPS ShipTo AddressLine 3줄×약 35자 **가정** — ShipTo 실패 실측
  *   없음. Jaison 확정 2026-11-13 (잠정값 — 실제 거부 로그가 쌓이면 값만 조정).
+ * - RECIPIENT_COMPANY_MAX=200: SHXK 명세 `consignee.consignee_company` 상한 200자
+ *   (docs/80_RawData/Phase8_UPS_API_리서치_결과.md).
  */
 
 export const HS_CODE_MAX = 30;
@@ -21,6 +23,8 @@ export const PHONE_MAX_DIGITS = 15;
 // TASK-B-344 (Issue #1270): UPS AddressLine 한도 — 근거는 상단 헤더 참조 (Jaison 확정 잠정값)
 export const SHIPPER_STREET_MAX = 70;
 export const CONSIGNEE_STREET_MAX = 105;
+// TASK-B-346 (Issue #1278): 수하인 회사명(consignee_company) SHXK 명세 상한
+export const RECIPIENT_COMPANY_MAX = 200;
 
 /**
  * 문자열에서 비숫자를 모두 제거한다. 전화번호 입력 정제용.

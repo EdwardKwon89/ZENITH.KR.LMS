@@ -285,6 +285,49 @@ describe('UPS Labels Mapping Functions', () => {
       });
     });
 
+    // TASK-B-346 PR② (Issue #1278): 수하인 회사명 → SHXK consignee_company.
+    //   입력이 있을 때만 키를 만들고(빈 값이면 키 자체 생략), 전송 시점에 쉼표를 공백으로 치환한다.
+    describe('TASK-B-346 PR②: consignee_company 매핑', () => {
+      const orderWithShipperAddress = {
+        ...sampleOrder,
+        shipper_address: '123 Zenith St',
+      };
+      const packagesWithHsCode = [
+        {
+          ...samplePackages[0],
+          items: [{ item_name: 'Widget', quantity: 1, unit_price: 100, hs_code: '8471300000' }],
+        },
+      ];
+
+      it('recipient_company 있으면 consignee_company로 전송 + 사전검증 통과', () => {
+        const order = { ...orderWithShipperAddress, recipient_company: 'Acme Trading Co' };
+        const result = buildCreateOrderPayload('SHP-CODE', order as any, 'US', packagesWithHsCode as any, shipperDefaults);
+
+        expect((result.consignee as any).consignee_company).toBe('Acme Trading Co');
+        expect(validateShxkPayload(result as unknown as ShxkPayloadShape)).toEqual([]);
+      });
+
+      it('recipient_company 없으면 consignee_company 키 자체가 없다', () => {
+        const result = buildCreateOrderPayload('SHP-CODE', orderWithShipperAddress as any, 'US', packagesWithHsCode as any, shipperDefaults);
+
+        expect(result.consignee as any).not.toHaveProperty('consignee_company');
+      });
+
+      it('recipient_company 빈 문자열이면 consignee_company 키 자체가 없다', () => {
+        const order = { ...orderWithShipperAddress, recipient_company: '' };
+        const result = buildCreateOrderPayload('SHP-CODE', order as any, 'US', packagesWithHsCode as any, shipperDefaults);
+
+        expect(result.consignee as any).not.toHaveProperty('consignee_company');
+      });
+
+      it('recipient_company 쉼표 포함 → 전송 시 공백으로 치환', () => {
+        const order = { ...orderWithShipperAddress, recipient_company: 'Acme, Inc.' };
+        const result = buildCreateOrderPayload('SHP-CODE', order as any, 'US', packagesWithHsCode as any, shipperDefaults);
+
+        expect((result.consignee as any).consignee_company).toBe('Acme Inc.');
+      });
+    });
+
     it('recipient_address_local 있으면 street에 괄호 추가', () => {
       const orderWithLocal = { ...sampleOrder, recipient_address_local: '서울시 강남구' };
       const result = buildCreateOrderPayload('SHP-CODE', orderWithLocal as any, 'US', samplePackages as any, shipperDefaults);

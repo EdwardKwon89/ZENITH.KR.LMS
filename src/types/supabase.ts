@@ -2806,6 +2806,7 @@ export type Database = {
           recipient_address: string | null
           recipient_address_local: string | null
           recipient_city: string | null
+          recipient_company: string | null
           recipient_contact: string | null
           recipient_country_code: string | null
           recipient_email: string | null
@@ -2860,6 +2861,7 @@ export type Database = {
           recipient_address?: string | null
           recipient_address_local?: string | null
           recipient_city?: string | null
+          recipient_company?: string | null
           recipient_contact?: string | null
           recipient_country_code?: string | null
           recipient_email?: string | null
@@ -2914,6 +2916,7 @@ export type Database = {
           recipient_address?: string | null
           recipient_address_local?: string | null
           recipient_city?: string | null
+          recipient_company?: string | null
           recipient_contact?: string | null
           recipient_country_code?: string | null
           recipient_email?: string | null

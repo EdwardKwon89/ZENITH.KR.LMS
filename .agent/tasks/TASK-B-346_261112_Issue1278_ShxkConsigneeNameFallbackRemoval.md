@@ -1,11 +1,14 @@
-# TASK-B-346: SHXK createorder consignee 전체 매핑 재점검 — PR① `'E2E Consignee'` 폴백 제거
+# TASK-B-346: SHXK createorder consignee 전체 매핑 재점검 — PR① 폴백 제거 + PR② 회사명 반영
 
 **상태:** 🔔 검토대기
 **담당:** Baker (Team B)
 **배정 이슈:** #1278
-**브랜치:** feature/teamb-task-b346-iss1278-consignee-pr1-name-fallback
+**브랜치(PR①):** feature/teamb-task-b346-iss1278-consignee-pr1-name-fallback (머지 완료 #1285)
+**브랜치(PR②):** feature/teamb-task-b346-iss1278-consignee-pr2-company
 **베이스:** origin/TeamB_Dev
 **생성일:** 2026-11-12
+
+> **PR 분할**: PR①(`consignee_name` 폴백 제거)은 #1285로 머지 완료. 본 Task file은 PR②(수하인 회사명 전 구간)에서 재사용한다 — PR③(consignee 잔여 필드 감사)은 별도 지시 대기.
 
 ## 목표
 SHXK createorder payload의 `consignee.consignee_name`에 남아 있던 테스트용 폴백 `'E2E Consignee'`를 제거한다.
@@ -72,4 +75,79 @@ SHXK createorder payload의 `consignee.consignee_name`에 남아 있던 테스�
   Type Check (advisory, non-blocking)      pass     1m12s
   ```
 - **Regression Tests fail 원인 = CI 인프라** (`Start local Supabase` → `[inbucket] in supabase/config.toml is no longer supported`), 본 PR diff 무관 — 상세는 [발견 이슈] 1. 로컬 동일 스위트는 236 files / 1689 tests PASS.
+
+---
+
+# PR② — 수하인 회사명(`recipient_company`) 전 구간 반영
+
+**브랜치:** feature/teamb-task-b346-iss1278-consignee-pr2-company (base `origin/TeamB_Dev` = `0fd7528ff`)
+**범위:** DB 컬럼 + RPC v7 + 앱 레이어(입력 UI·zod·수정 복원·edit-log·SHXK payload) 전 구간. 회귀맵 §81.
+
+## 목표
+SHXK createorder `consignee.consignee_company`(수취인 회사명, 선택·최대 200자)에 대응하는 입력이 전무했던 갭을 채운다.
+JSJung 확정(2026-11-12): 하우스 입력 "회사명" 1개 → `consignee_company`. 별도 "담당자" 필드는 만들지 않으며(`recipient_name`이 담당자 역할), 레거시 `recipient_contact`는 미사용.
+
+## DoD (PR②)
+- [x] DB 컬럼 `zen_orders.recipient_company` (text, nullable) 추가 — `20261113090000_task_b346_recipient_company.sql`
+- [x] RPC `create_order_atomic` v7 — `p_payload->>'recipient_company'` 저장 (`20261113090100_task_b346_create_order_atomic_v7.sql`, v6 기준 CREATE OR REPLACE — TASK-B-305 선례)
+- [x] 앱 레이어: 등록/수정 폼 입력(회사명) · zod(`max 200`) · `validateShxkPayload` 사전검증 · `buildCreateOrderPayload` → `consignee_company` · 수정화면 복원(`buildOrderEditDefaults`) · edit-log(`recipient_company`)
+- [x] 빈 값이면 payload에서 `consignee_company` **키 자체 생략**(미전송), 전송 시 쉼표→공백 치환(TASK-B-343 선례)
+- [x] 실DB 왕복 통합 테스트 5건(TC-346-01~05) — mock 금지(R-14), RPC 실제 실행 후 psql 직접 SELECT
+- [x] 단위 테스트 3파일 신규 케이스(TC-346-06~11), vacuous 단언 없음
+- [x] `npm run test:regression` 전체 PASS, `npm run build` EXIT=0
+- [x] 회귀맵 §81 추가, Ds-11 명세 선갱신(R-11/R-12)
+- [x] R-17 절차 준수: 코드 커밋 → task file `[작업 결과]` → `status:review` → `check-R17-DoD` → 문서 커밋 → PR(`base=TeamB_Dev`, `Closes #1278`)
+
+## [작업 결과] (PR②)
+- **명세 선갱신 커밋:** `9e17d6f2b` (`[Baker] docs: TASK-B-346 PR② Ds-11 명세 선갱신 — recipient_company/consignee 매핑 (Issue #1278)`) — `docs/02_Analysis/Ds_11_API_상세_명세서.md` `createOrder` 절에 수하인 필드 매핑표 + 컬럼·RPC v7 기재 (R-11/R-12)
+- **코드 커밋:** `662f24ebc` (`[Baker] feat: TASK-B-346 PR② 수하인 회사명(recipient_company) 전 구간 반영 (Issue #1278)`) — 17 files changed, 600 insertions(+), 5 deletions(-)
+  - `supabase/migrations/20261113090000_task_b346_recipient_company.sql` (신규): `ALTER TABLE public.zen_orders ADD COLUMN IF NOT EXISTS recipient_company text` + `COMMENT ON COLUMN`
+  - `supabase/migrations/20261113090100_task_b346_create_order_atomic_v7.sql` (신규): RPC v7 — INSERT 컬럼·값에 `recipient_company` 추가, `'Order Registered (Atomic RPC v7)'`
+  - `src/lib/validation/shxk-limits.ts`: `RECIPIENT_COMPANY_MAX = 200` (SHXK 명세 상한)
+  - `src/lib/validation/order.ts`: zod `recipient_company: z.string().max(200).optional()`
+  - `src/lib/shxk/validate-payload.ts`: 값이 있으면 200자 초과 시 `수취인 회사명 200자 초과` 단일 오류
+  - `src/lib/ups/label-mapping.ts`: `consignee_company`를 **입력이 있을 때만** 스프레드(빈 값이면 키 생략) + `sanitizeComma` 적용
+  - `src/lib/orders/edit-defaults.ts`: 수정화면 복원 `recipient_company: order.recipient_company ?? ''`
+  - `src/lib/orders/edit-log-fields.ts`: CORE_FIELDS·라벨(`수하인 회사명`) 추가
+  - `src/app/actions/operations/orders.ts`: `headerData.recipient_company`
+  - `src/components/orders/OrderRegistrationForm.tsx`: 수하인 "Company" 입력 1개 추가, 주소록 선택 시 회사명 초기화(주소록에 회사명 컬럼 없음)
+  - `src/types/supabase.ts`: `recipient_company` 3곳(Row/Insert/Update) 추가
+  - `tests/integration/task-b346-recipient-company.test.ts` (신규) + 단위 4파일 신규 케이스
+  - `docs/08_Self_Audit/Checklists/LIVE_REGRESSION_TEST_MAP.md`: 회귀맵 **§82** (TC-346-01~11)
+- **rebase:** PR 생성 직후 base가 `0fd7528ff` → `0749d5466`(PR #1294·#1297 등 7커밋 전진)로 변경되어 `git rebase origin/TeamB_Dev` 수행. 회귀맵 충돌은 upstream TASK-B-350 섹션을 **§81**로 유지하고 본 Task를 **§82로 재번호**하여 해소(코드·테스트·마이그레이션은 자동 병합, 충돌 없음). 최종 커밋 해시는 rebase 후 값.
+- **실DB 마이그레이션 적용:** `npx supabase db reset` 성공 — `recipient_company` text 컬럼 존재, `create_order_atomic` 함수 정의에 `recipient_company` 포함(position 605), `migration list` 로컬 반영 확인
+- **표적 테스트:** 단위 4파일 **88 passed**, 통합 `task-b346-recipient-company.test.ts` **5 passed**
+- **회귀 테스트:** `npm run test:regression` → **Test Files 241 passed (241) / Tests 1758 passed (1758)**, Duration 485.61s (`origin/TeamB_Dev` rebase 후 최종 head 기준)
+- **빌드:** `npm run build` → **EXIT=0**
+- **되돌리기 검증 (테스트 유효성):**
+  - (A) RPC v7에서 `recipient_company` insert 컬럼·값 2줄 주석 처리 + `npx supabase db reset` → **TC-346-01 FAIL** (`AssertionError: expected null to be 'Acme Trading Co'`) → 복구 후 **5/5 PASS**
+  - (B) `orders.ts` `headerData`의 `recipient_company` 제거 → **TC-346-03 FAIL** (`AssertionError: expected 'First Co' to be 'Second Co'`) → 복구 후 PASS
+- **vacuous 단언 점검:** 신규 테스트는 `toEqual`/`toBe`/`toHaveProperty`/`not.toHaveProperty`만 사용 — `toContain`·`typeof`·`.toBeDefined()` 단독 단언 없음
+
+## R-17 체크리스트 (PR②)
+- [x] 코드 커밋 (`662f24ebc` — 마이그레이션·src·tests·회귀맵, task file 미포함)
+- [x] task file `[작업 결과]` 작성 (실제 커밋 해시 기재)
+- [x] GitHub Issue 라벨 `status:review` 전환
+- [x] `check-R17-DoD` 전항목 통과
+- [x] 문서 커밋 (task file만)
+- [x] PR 생성 (`base=TeamB_Dev`, `Closes #1278`)
+- [x] `gh pr checks <PR번호>` 실제 출력 보고 (이전 커밋 결과 인용 금지)
+
+## PR② / CI 실제 결과
+- **PR:** #1300 (base `TeamB_Dev` ← head `feature/teamb-task-b346-iss1278-consignee-pr2-company`) — `gh pr view 1300 --json baseRefName` → `"TeamB_Dev"` 확인
+- **`gh pr checks 1300` 실제 출력 (2026-11-13, run 43376129792 — rebase 후 최종 head `d16690ada`):**
+  ```
+  Regression Tests                        pass     7m42s
+  Task File Check (advisory, non-blocking) pass     7s
+  Type Check (advisory, non-blocking)      pass     1m32s
+  Docs Sync Check (advisory, non-blocking) pass     9s
+  ```
+- **PR 생성 직후 첫 CI 미실행 원인:** base가 전진해 `mergeable=CONFLICTING` 상태가 되면 GitHub이 `pull_request` merge-ref를 만들지 못해 워크플로가 아예 트리거되지 않는다(`no checks reported`). `git rebase origin/TeamB_Dev`(회귀맵 §81→§82 재번호) + force push 후 정상 트리거·전항목 PASS.
+
+## [발견 이슈] (PR②)
+1. **주소록(`zen_address_book`)에 회사명 컬럼 부재** — 주소록에서 수하인을 선택하면 회사명을 채울 소스가 없어, 이전 입력값이 남지 않도록 주소록 선택 시 회사명을 빈 값으로 초기화했다(`OrderRegistrationForm.tsx`). 주소록 스키마에 회사명을 추가하는 것은 본 Task 범위 밖 — 후속 개선 후보(JSJung/Jaison 판단 필요).
+2. **`src/types/supabase.ts` stale** — 본 PR②에서 필요한 `recipient_company`만 추가했다. 파일 자체가 `recipient_address_detail` 등 기존 컬럼도 누락한 상태(자동 생성 재실행 필요) — 범위 확대 방지를 위해 미포함.
+3. **PR 생성 직후 CI 무트리거 = base 충돌** — 위 PR②/CI 결과 항목 참조. base 전진 시 rebase 없이는 CI가 실행조차 되지 않으므로, PR 생성 직후 `gh pr view --json mergeable` 확인이 필요하다.
+
+
 
