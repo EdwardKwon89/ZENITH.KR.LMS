@@ -1,7 +1,7 @@
 # 🗺️ LIVE Regression Test Master Map
 
-> **총 테스트 케이스:** 1,714 Cases (vitest 개별 테스트 기준, 237 test files)
-> **최종 검증일:** 2026-11-13 (TASK-B-347 전화번호 입력 안내문구·숫자 외 입력 차단 · §78 TC-347-1~8 등재 · 1,714/1,714 PASS)  
+> **총 테스트 케이스:** 1,719 Cases (vitest 개별 테스트 기준, 238 test files)
+> **최종 검증일:** 2026-11-13 (TASK-B-349 아이템 Packing Unit 실DB 검증 · §79 TC-349-01~05 등재 · 1,719/1,719 PASS)  
 
 제니스 플랫폼의 비즈니스 영속성을 보장하는 회귀 테스트 케이스의 통합 명세서입니다. 모든 신규 개발 및 수정 시 이 맵에 케이스가 추가되어야 하며, 전체 테스트가 통과되어야 합니다.
 
@@ -1111,3 +1111,21 @@ SHXK `createorder` 페이로드의 `shipper.shipper_name`이 화면 "담당자�
 
 **회귀 검증 (2026-11-13)**: `npm run test:regression` **237 test files / 1,714 tests 전부 PASS** (rebase 후 `origin/TeamB_Dev` 최신 포함 재실행 기준).
 **되돌리기 검증 (테스트 유효성)**: 구현(`src`+`messages`) `git stash` 시 신규·관련 테스트 **3 files / 5 tests FAIL** → 복구 시 전부 PASS — 테스트가 실제 구현을 검증함을 확인.
+
+## 79. 아이템 Packing Unit 저장 정합성 실DB 검증 (Issue #1281 / TASK-B-349)
+
+**2026-11-13, Mike** — `item_packing_unit`이 등록(RPC) → 저장 → 수정화면 복원 → 수정 저장 → SHXK `unit_code` 전송 전 구간에서 유지되는지 **실DB 왕복 검증**(로컬 Supabase R-14: 서버 액션·RPC 실제 실행 + psql 직접 SELECT, 모의 금지). **src 수정 없는 검증 전용 Task — 불일치 발견되지 않음(의심 지점 (a)~(d) 모두 문제 없음, 판정은 task file).**
+
+| ID | 검증 내용 | 기대 결과 | 테스트 위치 |
+| :-- | :-- | :-- | :-- |
+| TC-349-01 | 신규 등록 `create_order_atomic`(실RPC) — 아이템3개 상이 단위(PCE/SET/KG) | `zen_order_items.item_packing_unit`이 아이템별로 정확히 일치 (의심지역 (d) jsonb 키 매핑 포함) | `tests/integration/task-b349-item-packing-unit.test.ts` |
+| TC-349-02 | 수정 경로 `updateOrder` → `insertItems` | 단위 보존(SET→SET) + 단위 변경(PCE→MTR)이 DB에 반영 | 동일 |
+| TC-349-03 | 수정화면 복원 `buildOrderEditDefaults`(실DB 행 입력) | 저장값 그대로 복원(EA/PCS/CTN 보존), 널만 PCE 폴백; 옵션 목록에 EA·PCS 포함·CTN 부재 단언 (의심지역 (b)(c) 근거) | 동일 |
+| TC-349-04 | SHXK 전송 `buildInvoiceFromItems`(실DB 행 입력) | `unit_code` = 선택값(PCE/SET/KG), 목록 밖 `CTN`→`PCE` 폴백·목록 내 `EA`→`EA` 현행 동작 고정 | 동일 |
+| TC-349-05 | 패키지 `packing_unit`(BOX) ↔ 아이템 단위 | 등록·수정 후 패키지 BOX 유지 + 아이템 단위 불변 — 상호 덮어쓰기 없음 (의심지역 (a)) | 동일 |
+
+**회귀 검증 (2026-11-13)**: `npm run test:regression` **238 test files / 1,719 tests 전부 PASS** (378초).
+**되돌리기 검증 (테스트 유효성)**:
+- (A) RPC 마이그레이션 `20260816110000_task_b305_create_order_atomic_v6.sql`의 `item_packing_unit` insert 컬럼·값 제거 + `supabase db reset` → **4 failed / 1 passed** (TC-349-01·03·04·05 FAIL) → `git checkout --` 복구 + reset 후 5/5 PASS.
+- (B) `src/app/actions/operations/orders.ts:433` itemsToInsert의 `item_packing_unit` 라인 제거 → **2 failed / 3 passed** (TC-349-02·05 FAIL) → `git checkout --` 복구 후 5/5 PASS.
+- 각 복구 후 `git diff --stat`에 의도치 않은 변경 0건 확인.
