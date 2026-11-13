@@ -2011,3 +2011,58 @@ UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류
 - **관련 파일**: `docs/00_GUIDE/209_VERCEL_DEPLOYMENT_SOP.md`(§0·§4), `.vercel/project.json`, `.vercelignore`
 - **예상 공수**: 0.3~0.5 MD (A+B 스크립트), C는 별도 검토
 - **우선순위**: Medium — 이번엔 3분·데이터 영향 없이 해소됐으나, 병합 코드가 통째로 빠진 채 프로덕션에 올라가는 유형이라 Pilot 실데이터 환경에서는 재발 시 기능 회귀·오동작 위험이 큼. 현재 방어선은 SOP 문서뿐(강제력 없음 — R-17 worktree 수기 안내가 재발했던 전례와 동일하므로 스크립트화 권장)
+
+
+---
+
+## [IMP-180] 담당자 미지정 High/p1 이슈가 방치되는 구조 — 세션 시작 점검(R-16)이 `--assignee` 기준이라 걸러내지 못함 (DEF-B-154 사례)
+
+- **발견 경위**: 2026-11-13 09:25 KST, #1283(DEF-B-154, CI Regression 전 PR 실패, p1) 처리 중 발견. 이슈는 2026-11-12 13:58 KST에 Team B가 원인까지 정확히 진단해 올렸고(수정은 Aiden 소유 영역인 CI 설정이라 직접 수정 불가), **assignee 없이 `status:open`·`priority:p1`로 약 19시간 방치**. 그동안 Team B는 PR#1282·#1285·#1286 3건을 CI 없이 로컬 대체 검증(R-08-1)으로 진행.
+- **현재 상태**: 2026-11-13 PR#1287/#1288로 해소(CLI 2.122.1 고정). 그러나 "소유 영역 밖 수정이 필요한 긴급 이슈"가 담당자 없이 올라올 때 누가 언제 집는지 정해진 규칙이 없음.
+- **원인**: R-16 세션 시작 점검이 `gh issue list --assignee <본인>`이라 assignee 미지정 이슈는 조회 대상이 아님. R-18 "긴급도 High → Aiden이 Edward에게 보고 후 TASK 발령"도 이슈가 올라온 사실을 Aiden이 인지해야 시작되는데, 인지 경로(알림/조회)가 없음.
+- **영향**: 팀 전체 CI 적색 상태가 반나절 이상 지속되면 모든 PR이 CI 검증 없이 로컬 증적에만 의존 — 머지 품질 방어선(R-08) 약화. 이번엔 코드 결함은 없었으나 이상적 상황이 아님.
+- **임시 조치**: 없음(이번 건은 수동 처리).
+- **목표 구현**: (A) R-16에 "assignee 미지정 + `priority:p1` 또는 `status:open` 오픈 이슈 조회(`gh issue list --search "no:assignee label:priority:p1"`)"를 세션 시작 점검 항목으로 추가, (B) R-18 보고 이슈 생성 시 Aiden을 자동 assignee로 지정하거나 `needs:aiden` 라벨 부여 규칙화(Team B 이슈 템플릿 반영), (C) 선택: GitHub Action으로 미지정 p1 이슈 6시간 경과 시 알림 코멘트.
+- **관련 파일**: `GOV_COMMON.md`(R-16·R-18), `.github/ISSUE_TEMPLATE/`(존재 시), Team B 지침(`105_MULTITEAM_GOVERNANCE.md`)
+- **예상 공수**: 0.3 MD (A·B 문서 개정), C 포함 시 +0.3 MD
+- **우선순위**: Medium
+
+---
+
+## [IMP-181] CI Supabase CLI 버전 고정(2.122.1) 후속 — `[inbucket]` → `[local_smtp]` 전환 및 고정 해제 계획
+
+- **발견 경위**: 2026-11-13 09:24 KST, DEF-B-154 조치(PR#1287/#1288) 중. `version: latest`가 3.x로 해석되어 `supabase/config.toml`의 `[inbucket]`을 거부하는 것이 원인이었고, 즉시 복구책으로 CLI를 2.122.1로 고정.
+- **현재 상태**: 고정으로 CI 정상화. 단 고정은 임시 방어선 — 2.x가 EOL되거나 `supabase/setup-cli` 액션이 구버전 다운로드를 중단하면 다시 실패. 로컬 개발 CLI(`npx supabase@2.122.1`)도 같은 이유로 고정 중(2026-11-09 메모). 3.0은 config 비호환 외에도 mac 서명 이슈가 있었음.
+- **임시 조치**: `.github/workflows/pr-checks.yml`에 `version: 2.122.1` + 주석으로 사유 기재.
+- **목표 구현**: ①3.x 로컬·CI에서 `supabase start` 실측하며 `config.toml` 전체 비호환 항목 파악(`[inbucket]`→`[local_smtp]` 포함, R-06 Context7로 최신 문서 확인) ②`[local_smtp]` 전환 시 로컬 이메일 테스트 흐름(Inbucket UI 포트 54324 의존 여부) 영향 확인 ③전환 후 CI 고정 버전 상향 또는 `latest` 복귀(복귀 시 마이너 업데이트 영향 모니터링) ④`check-db-freshness.sh`(IMP-178)·docs의 CLI 버전 표기 일괄 갱신.
+- **관련 파일**: `supabase/config.toml`(99행 `[inbucket]`), `.github/workflows/pr-checks.yml`, `scripts/check-db-freshness.sh`, `docs/00_GUIDE/` 로컬 개발 가이드
+- **예상 공수**: 0.5 MD (3.x 비호환 조사 포함)
+- **우선순위**: Low — 고정으로 장애 해소됨. 단 기술 부채이므로 Pilot 이후 정기 점검 시점에 처리 권장
+
+
+---
+
+## [IMP-182] 검토 산출물(제출 보고서) 파일이 무고지로 0바이트 훼손 — 보호·무결성 확인 장치 부재 (`riley_review.md` 사고)
+
+- **발견 경위**: 2026-11-13 12:16 KST, 문서 231 v0.2 2차 교차 검증(Riley·B_Kai·D_Kai) 결과에서 3인이 모두 "`docs/08_Self_Audit/Reviews/231/riley_review.md`가 0바이트"라고 지적. Aiden이 `stat`으로 확인 — **size=0, mtime=11:24:38**. 제출 시점(10:52)에는 32,273바이트·188줄이었음(Aiden이 10:5x에 전문 Read).
+- **현재 상태**: Riley 세션 기록(`~/.gemini/antigravity/brain/43b932d2-…/.system_generated/logs/transcript_full.jsonl`의 step 50 `write_file` + step 55 `edit_file`)에서 프로그램으로 재구성해 복원(32,273바이트·188줄, SHA-256 앞 12자리 `166e234170c7`). **훼손 원인은 미특정** — 확인된 사실: ①해당 시각(11:23:50~11:25:30) 저장소·worktree에서 변경된 파일은 이 1개뿐 ②오케스트레이션 첫 실행(11:51:58)보다 약 27분 앞섬 ③오케스트레이션 raw 로그(`orchestration/logs/runs/*.ndjson`)에 해당 파일에 대한 쓰기성 명령 0건 ④Riley 세션 기록은 10:54에 종료. Antigravity IDE 프로세스가 실행 중이었으나 관련성은 **확인 못 함**.
+- **영향**: 2차 검증이 0바이트 자료로 수행되어 **(R) 의견 14건의 반영표 대조가 실질적으로 이루어지지 않음**(231 부록 E #1).
+- **임시 조치**: 복원, 제출 보고서 2종(`riley_review.md`·`bkai_review.md`) 쓰기 금지(`chmod a-w`), 체크섬 기록.
+- **목표 구현**: (A) 제출·확정된 검토 보고서는 커밋하거나 읽기 전용+체크섬 파일로 고정하고, 검토 시작 시 크기·체크섬 검증을 `debate.py`에 추가(자료 파일이 0바이트·체크섬 불일치면 실행 중단) (B) 검토 기간 중 제출 파일은 미추적 상태로 두지 말고 즉시 커밋 (C) 원인 조사: Antigravity IDE 에디터 버퍼 동기화·Riley 별도 세션 가능성 확인.
+- **관련 파일**: `docs/08_Self_Audit/Reviews/231/riley_review.md`, `orchestration/script/debate.py`(Edward 로컬 도구 — 저장소 미포함)
+- **예상 공수**: 0.2 MD (A·B), C는 조사
+- **우선순위**: Medium — 검토 근거 자료가 소리 없이 사라질 수 있다는 점에서 재발 시 의사결정 품질에 직접 영향
+
+---
+
+## [IMP-183] Ds-11(API 상세 명세서) 참조 경로 불일치 4곳 + 2026-07-15 이후 미갱신(R-12 준수 미확인)
+
+- **발견 경위**: 2026-11-13, 문서 231 검토 중 D_Kai·Riley가 "Ds-11 문서 부재"라 지적했고 Aiden이 `docs/03_Design/`만 확인해 동의(**오류**). 이후 Edward 지시로 아카이브 의도를 조사하던 중 B_Kai의 GH#206 #13 재조사 기록에서 **현행본이 `docs/02_Analysis/Ds_11_API_상세_명세서.md`에 있음**을 확인(554줄, v2.1 Sync, 마지막 수정 2026-07-15 TASK-184 §11.11).
+- **아카이브 경위(확인됨)**: 2026-07-06 커밋 `e4456c485`(GH#206 #13)로 구 INDEX+DETAIL 등 17파일이 `docs/03_Design/_archive/ds_11/`로 이동. B_Kai 재조사("02_Analysis본이 단독 Truth, 나머지는 DEPRECATED/Draft/구 구조")를 Aiden이 승인, Edward가 PR#221 병합 — **의도된 정리**. 이슈 본문의 "3파일"은 B_Kai 1차 조사 오류(디렉토리 누락)였고 재조사에서 17개로 정정됨.
+- **현재 상태**: ① 구 경로(`docs/03_Design/Ds_11_API_상세_명세서.md`)를 가리키는 문서 4곳 — `MASTER_INDEX.md:42`, `README.md:53`, `docs/00_GUIDE/303_API_FIRST_DEVELOPMENT_GUIDE.md:25`, `docs/03_Design/Ds_10_API_INVENTORY.md:21`(링크 깨짐). `GOV_COMMON.md` R-11(116행)·R-12(119행)는 파일명만 적어 경로 문제 없음 ② 2026-07-15 이후 `src/app/actions` 변경 커밋 153건, 신규 액션 파일 7개(`admin/exchange-rates`, `finance/{daily-billing,order-revenue-cost,shipper-invoices,ups-actual-charges,ups-actual-cost}`, `operations/bulk-orders`) — Ds-11 수정 0건. **함수명 기준 대조(2026-11-13)**: `use server` 액션 함수 298개(54파일) 중 Ds-11에 이름이 나오는 것 92개(30%), Ds-10 인벤토리 37개(12%), 둘 중 하나라도 96개(32%); 7/16 이후 추가 20개 함수는 Ds-11 언급 0개. 한계: ①이름 언급 여부일 뿐 언급된 92개의 시그니처·응답 정확성은 미검증 ②파일 이동(경로 재편)으로 git '최초 추가일'이 신뢰되지 않아 **4/27 동기화 시점 대비 얼마나 벌어졌는지는 분리 불가** → R-12(선제 갱신 의무) 준수가 확인되지 않음.
+- **조치 이력**: **(A) 참조 경로 4곳 정정 완료(2026-11-13, Edward 승인)** — 구 경로 잔존 0건. 불일치 기록: **DEF-145**(`.agent/defects/DEF-145_*.md`) + 함수 단위 전체 목록 `docs/08_Self_Audit/Ds11_Gap/Ds11_Gap_Report_20261113.md`. **(B)의 집행 장치는 2026-11-13 Edward 승인으로 구현**: 자동 점검+래칫(`scripts/check-ds11-sync.mjs`, baseline 206), 링크 점검(`scripts/check-doc-links.mjs`, baseline 84), CI advisory job(`pr-checks.yml`), R-11·R-12 개정(GOV_COMMON v3.7). 남은 것은 206개 백로그 해소·2단계(내용 정확성)·필수 승격 시점·R-11 샘플 점검(DEF-145 §8).
+- **임시 조치**: 문서 231은 명세 근거를 Ds-11 현행본(미갱신분은 코드·Issue로 보완)·105·코드 상수 주석으로 서술.
+- **목표 구현**: (A) 참조 경로 4곳을 `docs/02_Analysis/Ds_11_API_상세_명세서.md`로 정정 (B) 신규 액션 7개 및 변경분을 Ds-11과 내용 대조해 갱신 범위 확정, R-12 운영 방식 결정(전수 갱신 vs 변경 큰 모듈·외부 계약 중심) — Edward 결정.
+- **관련 파일**: `docs/02_Analysis/Ds_11_API_상세_명세서.md`, `MASTER_INDEX.md`, `README.md`, 303 가이드, `Ds_10_API_INVENTORY.md`, `GOV_COMMON.md`(R-12)
+- **예상 공수**: (A) 0.1 MD, (B) 1~2 MD (내용 대조 범위에 따라)
+- **우선순위**: Medium (R-12 준수 가시화 — 현재는 위반 여부조차 확인되지 않는 상태)
