@@ -1905,3 +1905,15 @@ UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류
 - **관련 파일**: `src/lib/shxk/validate-payload.ts`, `src/app/actions/operations/ups-labels.ts`(`placeShxkOrder`), `messages/{ko,en,zh,ja}.json`(`Errors.shxk_validation_failed`), `tests/unit/ups/shxk-payload-validation.test.ts`
 - **예상 공수**: 0.3~0.5 MD (검증 코드 12종 키화 + 4개 로케일 문구 + 기존 테스트 갱신)
 - **우선순위**: Low~Medium — 기능 장애는 아니나, 로케일 정합(#1280) 목표의 마지막 잔여 구간
+
+---
+
+## [IMP-172] `Errors` 네임스페이스 zh/ja 신규 문구 초안 검수 (TASK-B-351 산출물)
+
+- **발견 경위**: 2026-11-13, TASK-B-351(Issue #1299)에서 `messages/{zh,ja}.json`의 `Errors` 네임스페이스에 신규 키 6개(`profile_not_found`, `destination_country_not_found`, `label_not_found`, `document_save_failed`, `document_save_failed_after_shipping`, `shxk_validation_failed`)와 SHXK 오류 사전 2건(`未找到订单信息`, `Invalid ShipFrom AddressLine3`)의 zh/ja 문구를 Dave가 초안 작성했다.
+- **현재 상태**: 키 세트·ICU 플레이스홀더 일치(`errors-key-sync.test.ts`)는 자동 검증되지만, **문구의 자연스러움/용어 일관성은 사람 검수 대상**이다. Jaison 리뷰에서도 "머지 후 JSJung 검수 대상으로 IMP에 남겨 달라"고 요청.
+- **영향**: 문구 품질 문제로 그치며 기능 오류는 아니다. 다만 고객 노출 문구이므로 검수 전까지 잠정 문구로 운영된다.
+- **목표 구현**: zh/ja 원어민(또는 담당자) 검수 → 필요 시 `messages/{zh,ja}.json` `Errors.*` 및 `SHXK_TRANSLATION_DICT` 문구 수정. 이후 `errors-key-sync` + `translate.test.ts` 기대값 동기 갱신.
+- **관련 파일**: `messages/zh.json`, `messages/ja.json`, `src/lib/shxk/translate.ts`, `tests/unit/i18n/errors-key-sync.test.ts`, `tests/unit/shxk/translate.test.ts`
+- **예상 공수**: 0.1~0.2 MD (검수·문구 수정·테스트 기대값 갱신)
+- **우선순위**: Low — 기능 무관, 표시 문구 품질
