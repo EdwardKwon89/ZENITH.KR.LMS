@@ -1,5 +1,7 @@
 {
   "Common": {
+    "phoneHelp": "Numbers only (no hyphens, max {max} digits)",
+    "phoneHelpHyphen": "Numbers and hyphens only (e.g. 010-1234-5678, max {max} digits)",
     "title": "ZENITH LMS",
     "description": "SNTL Integrated Logistics Platform",
     "login": "Login",
@@ -838,6 +840,7 @@
     "form_contact_email": "Email",
     "form_contact_name": "Contact Name",
     "form_contact_phone": "Phone",
+    "form_contact_phone_help": "Enter in 010-1234-5678 format including hyphens",
     "form_country": "Country",
     "form_discount_rate": "Discount Rate",
     "form_grade": "Grade",

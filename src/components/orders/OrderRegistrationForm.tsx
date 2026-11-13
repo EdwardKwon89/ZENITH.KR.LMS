@@ -14,6 +14,7 @@ import {
   ChevronRight, AlertCircle, CheckCircle2, Box, Layers, Plane, Ship, Zap, Truck, PackageCheck, Lock
 } from 'lucide-react';
 import { ZenCard, ZenButton, ZenInput, ZenBadge } from '@/components/ui/ZenUI';
+import { PhoneInput } from '@/components/ui/PhoneInput';
 import { createOrder } from '@/app/actions/orders';
 import { updateOrder } from '@/app/actions/operations/orders';
 import { createAddressBookEntry } from '@/app/actions/operations/address-book';
@@ -23,7 +24,7 @@ import { UpsFreightEstimate } from '@/app/actions/ups/freight';
 import { UpsServiceSelector } from './UpsServiceSelector';
 import { USER_ROLES } from '@/lib/auth/rbac';
 import { orderRegistrationSchema, OrderRegistrationInput } from '@/lib/validation/order';
-import { HS_CODE_MAX, ITEM_NAME_MAX, PHONE_MAX_DIGITS, stripNonDigits } from '@/lib/validation/shxk-limits';
+import { HS_CODE_MAX, ITEM_NAME_MAX, stripNonDigits } from '@/lib/validation/shxk-limits';
 import { resolveShipperAddressDefaults } from '@/lib/orders/edit-defaults';
 import type { OrderEditScope } from '@/lib/logistics/status-machine';
 import { estimateFreightCost, TransportMode } from '@/utils/logistics/freight-calculator';
@@ -1151,16 +1152,9 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                             </div>
                             <div>
                               <p className="text-slate-400 font-bold uppercase tracking-tighter mb-1">{t('shipper_contact')} (Phone){transportMode === 'UPS' && <span className="text-rose-500"> *</span>}</p>
-                              <ZenInput 
-                                placeholder="01012345678"
-                                inputMode="numeric"
-                                maxLength={PHONE_MAX_DIGITS}
+                              <PhoneInput 
                                 disabled={shipperNameMode === 'auto'}
                                 {...register('shipper_contact_phone')}
-                                onChange={(e) => {
-                                  e.target.value = stripNonDigits(e.target.value);
-                                  register('shipper_contact_phone').onChange(e);
-                                }}
                                 className={`bg-white/80 py-1.5 text-[11px] ${shipperNameMode === 'auto' ? 'opacity-60 bg-slate-100' : ''}`}
                               />
                             </div>
@@ -1281,10 +1275,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                       </div>
                       <div>
                         <label className="text-[10px] font-bold text-slate-500 mb-1 block">Phone <span className="text-rose-500">*</span></label>
-                        <ZenInput placeholder="01012345678" inputMode="numeric" maxLength={PHONE_MAX_DIGITS} {...register('recipient_phone')} onChange={(e) => {
-                            e.target.value = stripNonDigits(e.target.value);
-                            register('recipient_phone').onChange(e);
-                          }} error={!!errors.recipient_phone} className="py-2 text-xs" />
+                        <PhoneInput {...register('recipient_phone')} error={!!errors.recipient_phone} className="py-2 text-xs" />
                       </div>
                       <div>
                         <label className="text-[10px] font-bold text-slate-500 mb-1 block">PCCC</label>
@@ -1418,7 +1409,8 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                         <label className="text-[10px] font-bold text-slate-500 mb-1 block">
                           {t('pickup_contact_tel')} <span className="text-rose-500">*</span>
                         </label>
-                        <ZenInput
+                        <PhoneInput
+                          allowHyphens
                           placeholder="010-XXXX-XXXX"
                           {...register('pickup_contact_tel')}
                           error={!!errors.pickup_contact_tel}

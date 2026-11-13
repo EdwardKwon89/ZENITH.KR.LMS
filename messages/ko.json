@@ -1,5 +1,7 @@
 {
   "Common": {
+    "phoneHelp": "숫자만 입력 (하이픈 제외, 최대 {max}자리)",
+    "phoneHelpHyphen": "숫자와 하이픈만 입력 (예: 010-1234-5678, 최대 {max}자리)",
     "title": "ZENITH LMS",
     "description": "SNTL 통합 물류 플랫폼",
     "login": "로그인",
@@ -833,6 +835,7 @@
     "form_contact_email": "이메일",
     "form_contact_name": "담당자명",
     "form_contact_phone": "연락처",
+    "form_contact_phone_help": "하이픈 포함 010-1234-5678 형식으로 입력",
     "form_country": "국가",
     "form_discount_rate": "할인율",
     "form_grade": "등급",

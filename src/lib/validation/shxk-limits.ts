@@ -22,3 +22,15 @@ export const PHONE_MAX_DIGITS = 15;
 export function stripNonDigits(value: string): string {
   return (value ?? '').replace(/\D/g, '');
 }
+
+/**
+ * 전화 필드 서버측 정규화 (TASK-B-347 / Issue #1279):
+ * 비숫자 제거 후 E.164 상한(PHONE_MAX_DIGITS) 초과분절단.
+ *
+ * 거부(reject)가 아니라 정규화하는 이유: 레거시 저장분(하이픈·괄호 포함)이
+ * 다른 필드와 함께 재저장될 때 전체 저장을 막지 않으면서 전화 필드만 정제하기 위함
+ * (예: 조직 정보 수정 시 기존 `02-1234-5678` 형식 contact_phone).
+ */
+export function normalizePhoneDigits(value: string): string {
+  return stripNonDigits(value).slice(0, PHONE_MAX_DIGITS);
+}
