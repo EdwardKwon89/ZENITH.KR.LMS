@@ -58,7 +58,7 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 | [#1278](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1278) | [Team B] TASK-B-346: SHXK createorder consignee 전체 매핑 재점검 (감사 → 갭 보완) | b | p2 | review | 미배정 | 2026-11-13 |
 | [#1277](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1277) | [Team B] TASK-B-345: SHXK createorder shipper_company 미전송 처리 (TASK-B-342 결정 번복) | b | p2 | review | 미배정 | 2026-11-13 |
 | [#1276](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1276) | [Team B] 원격 브랜치 정리 후속 — 판단 보류 브랜치 11건 점검 요청 | b | p3 | open | jungjs | 2026-10-29 |
-| [#1270](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1270) | [Team B] TASK-B-344: UPS/SHXK 주소 AddressLine 길이 사전검증 (#1268 분리) | b | p2 | in-progress | jungjs | 2026-11-13 |
+| [#1270](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1270) | [Team B] TASK-B-344: UPS/SHXK 주소 AddressLine 길이 사전검증 (#1268 분리) | b | p2 | review | jungjs | 2026-11-13 |
 | [#1268](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1268) | [Team B] TASK-B-343: UPS createorder 주소 쉼표 제거 + 주소 입력 쉼표 차단 (길이 사전검증은 #1270 분리) | b | p2 | review | jungjs | 2026-11-13 |
 | [#1238](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1238) | 2026.10.12 오류사항 및 보완사항 | b | p2 | - | 미배정 | 2026-10-12 |
 | [#1218](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1218) | [Aiden] Stage-Gate Code Review — UPS 핵심 경로(오더등록~정산) 대상, 적절한 시점에 실시 | - | p3 | - | 미배정 | 2026-10-11 |
