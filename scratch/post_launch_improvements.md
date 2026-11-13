@@ -1892,3 +1892,16 @@ UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류
 - **관련 파일**: `scripts/check-db-freshness.sh`(25·29·41·46행), `scripts/agent-worktree-init.sh`(85행), `GOV_COMMON.md`(R-08-2)
 - **예상 공수**: 0.2~0.3 MD (스크립트 수정 + 동작 케이스 4종 검증)
 - **우선순위**: Low — 기능 장애 아님. 다만 R-08-2의 자동화 가치가 환경에 따라 0이 되는 문제로, DEF-128(로컬 DB stale) 재발 방어선의 사각지대
+
+---
+
+## [IMP-171] SHXK 사전검증 메시지(`validate-payload.ts`)가 한글 고정 — 비한국어 사용자에게 한글 혼입
+
+- **발견 경위**: 2026-11-13, TASK-B-351(Issue #1299 / 부모 #1280)에서 `ups-labels.ts`의 사용자 반환 오류를 로케일 문장으로 전환하는 과정. `placeShxkOrder()`의 사전검증 실패는 `Errors.shxk_validation_failed`("SHXK 사전검증에 실패했습니다: {fields}")로 감쌌지만, `{fields}`에 들어가는 값은 `src/lib/shxk/validate-payload.ts`가 반환하는 **한글 고정 문자열**(예: `발송인 성명 누락`, `수취인 우편번호 누락`)이다.
+- **현재 상태**: 결과적으로 ko 사용자에게는 자연스럽지만, en/zh/ja 사용자에게는 "SHXK pre-validation failed: 발송인 성명 누락"처럼 **한국어 필드 오류가 섞여 표시**된다. 지시(#1299)에 따라 이번 Task에서는 `validate-payload.ts`를 수정하지 않고 한계만 기록한다.
+- **영향**: 비한국어 로케일에서 SHXK 등록 실패 시 세부 원인 파악이 어렵다(다만 일반문구+필드 목록은 표시되므로 "완전 미번역"은 아님). `ups-labels.ts` 단독 전환으로는 해소 불가.
+- **임시 조치**: 없음(문구 래퍼만 적용).
+- **목표 구현**: (A) `validate-payload.ts`가 `{code, params}` 형태(예: `{ code: 'shipper_name_missing' }`)를 반환하도록 바꾸고 호출부에서 `Errors.shxk_fields.*` 키로 로케일 변환, 또는 (B) 검증 함수에 `t` 함수를 주입해 사전검증 단계에서 로케일 문장 생성. 두 방안 모두 `validate-payload.ts`의 기존 한글 문자열 단언 테스트(`tests/unit/ups/shxk-payload-validation.test.ts` 등)를 코드 기반으로 갱신해야 한다.
+- **관련 파일**: `src/lib/shxk/validate-payload.ts`, `src/app/actions/operations/ups-labels.ts`(`placeShxkOrder`), `messages/{ko,en,zh,ja}.json`(`Errors.shxk_validation_failed`), `tests/unit/ups/shxk-payload-validation.test.ts`
+- **예상 공수**: 0.3~0.5 MD (검증 코드 12종 키화 + 4개 로케일 문구 + 기존 테스트 갱신)
+- **우선순위**: Low~Medium — 기능 장애는 아니나, 로케일 정합(#1280) 목표의 마지막 잔여 구간

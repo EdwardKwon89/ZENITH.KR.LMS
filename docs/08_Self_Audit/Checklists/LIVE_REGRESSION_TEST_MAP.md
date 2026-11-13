@@ -1,7 +1,7 @@
 # 🗺️ LIVE Regression Test Master Map
 
-> **총 테스트 케이스:** 1,741 Cases (vitest 개별 테스트 기준, 240 test files)
-> **최종 검증일:** 2026-11-13 (TASK-B-350 오류 로케일 인프라 · §81 TC-350-01~05 등재 · 1,741/1,741 PASS)  
+> **총 테스트 케이스:** 1,759 Cases (vitest 개별 테스트 기준, 242 test files)
+> **최종 검증일:** 2026-11-13 (TASK-B-351 ups-labels 오류 로케일 전환 · §82 TC-351-01~11 등재 · 1,759/1,759 PASS)  
 
 제니스 플랫폼의 비즈니스 영속성을 보장하는 회귀 테스트 케이스의 통합 명세서입니다. 모든 신규 개발 및 수정 시 이 맵에 케이스가 추가되어야 하며, 전체 테스트가 통과되어야 합니다.
 
@@ -1187,3 +1187,25 @@ SHXK `createorder` 페이로드의 `shipper.shipper_name`이 화면 "담당자�
 - (A) RPC v7에서 `recipient_company` insert 컬럼·값 2줄 주석 처리 + `npx supabase db reset` → **TC-346-01 FAIL** (`expected null to be 'Acme Trading Co'`) → 복구 후 **5/5 PASS**.
 - (B) `orders.ts` `headerData`의 `recipient_company` 제거 → **TC-346-03 FAIL** (`expected 'First Co' to be 'Second Co'`) → 복구 후 PASS.
 **명세 동기화**: `docs/02_Analysis/Ds_11_API_상세_명세서.md` `createOrder` 절에 수하인 필드 매핑표 + `recipient_company` 컬럼·RPC v7 기재(R-11/R-12).
+
+## 83. ups-labels 사용자 오류 로케일 전환 + SHXK 4개 로케일 사전 (Issue #1299 / TASK-B-351)
+
+**2026-11-13, Dave** — 부모 #1280(안 ②)의 2단계. `src/app/actions/operations/ups-labels.ts`에서 **사용자에게 반환되는 오류를 전부 현재 로케일 문장**으로 전환했다(`trError()`). SHXK 응답 원문·DB 오류 원문·예외 `err.message`는 사용자 반환값에 넣지 않고 `logger`(및 `zen_ups_label_errors` INSERT)에만 보존한다. `src/lib/shxk/translate.ts` 사전을 `{ko,en,zh,ja}`로 확장(zh=원문)하고, 실제 관측된 오류 문구 2건(`未找到订单信息`, `Invalid ShipFrom AddressLine3`)을 등재했다. `pickShxkLocaleText`의 ja가 en 대신 **ja 번역**을 쓰도록 변경.
+
+| ID | 검증 내용 | 기대 결과 | 테스트 위치 |
+| :-- | :-- | :-- | :-- |
+| TC-351-01 | SHXK 실측 중문 오류 매칭 → ko 문장 | `registerUpsOrder` 반환 `error === '주문 정보를 찾을 수 없습니다'`, 원문 미포함 | `tests/unit/ups/task-b351-error-locale.test.ts` |
+| TC-351-02 | SHXK 미매칭 원문 → 일반문구(코드) | `error === '…(코드: CREATEORDER)'`, 원문(`RAW_SERVER_DETAIL_9f3`) 미포함 | 동일 |
+| TC-351-03 | SHXK 사전검증 실패 | `error`가 `SHXK 사전검증에 실패했습니다: …` + `createorder` 미호출 | 동일 |
+| TC-351-04 | 예외 `err.message` 원문 은닉 | `error`는 `(코드: UNEXPECTED)`, 내부 토큰 미포함, `logger.error`가 Error 객체로 호출 | 동일 |
+| TC-351-05 | DB 오류(`labelsErr.message`) 은닉 | `cancelUpsRegistration` `error`가 `(코드: LABEL_LOOKUP)`, DB 원문 미포함 | 동일 |
+| TC-351-06 | `removeorder` 중문 오류 매칭 | `error === '주문 정보를 찾을 수 없습니다'`, 원문 미포함 | 동일 |
+| TC-351-07 | `Errors` 4개 로케일 문장 반환 | `trError('shxk_generic',{code})` = ko/en/zh/ja 각각의 실제 문구, `{fields}` 치환 | `tests/unit/i18n/action-error.test.ts` |
+| TC-351-08 | 로케일 폴백 | `getLocale()` 예외·미지원 로케일 → `ko` | 동일 |
+| TC-351-09 | SHXK 사전 4개 로케일 | `translateShxkMessage` 2개 실측 문구 × 4개 로케일, 미매칭 → `null` | `tests/unit/shxk/translate.test.ts` |
+| TC-351-10 | ja 표출 정합 | `pickShxkLocaleText('ja',…)` → 사전 ja(이전 en) | 동일, `tests/unit/tracking/defb060-tracking-list-locale.test.tsx` |
+| TC-351-11 | `Errors` 키 동기화(21키) | ko 기준 21키 완전 일치 + ICU 파라미터 일치 | `tests/unit/i18n/errors-key-sync.test.ts` |
+| TC-351-RST-A | SHXK 매칭 무력화(원문 반환) | **2 failed / 4 passed** → 복구 후 6 passed | `tests/unit/ups/task-b351-error-locale.test.ts` |
+| TC-351-RST-B | `err.message` 반환 원복 | **1 failed / 5 passed** → 복구 후 6 passed | 동일 |
+
+**회귀 검증 (2026-11-13)**: `npm run test:regression` **242 test files / 1,759 tests 전부 PASS**.

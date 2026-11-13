@@ -14,7 +14,13 @@
     "insufficient_balance": "Insufficient balance.",
     "not_found": "The requested item could not be found.",
     "network_error": "A network error occurred. Please try again shortly.",
-    "unknown_action": "Unsupported request."
+    "unknown_action": "Unsupported request.",
+    "profile_not_found": "User profile could not be found.",
+    "destination_country_not_found": "Destination country code could not be found.",
+    "label_not_found": "No issued label was found.",
+    "document_save_failed": "Failed to download or save the document.",
+    "document_save_failed_after_shipping": "Shipping was completed, but the label document could not be saved. Please try again shortly.",
+    "shxk_validation_failed": "SHXK pre-validation failed: {fields}"
   },
   "Common": {
     "phoneHelp": "Numbers only (no hyphens, max {max} digits)",

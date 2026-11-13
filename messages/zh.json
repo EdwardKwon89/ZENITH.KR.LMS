@@ -14,7 +14,13 @@
     "insufficient_balance": "余额不足。",
     "not_found": "找不到目标。",
     "network_error": "发生网络错误，请稍后重试。",
-    "unknown_action": "不支持的请求。"
+    "unknown_action": "不支持的请求。",
+    "profile_not_found": "找不到用户资料。",
+    "destination_country_not_found": "找不到目的地国家代码。",
+    "label_not_found": "找不到已签发的面单。",
+    "document_save_failed": "文件下载/保存失败。",
+    "document_save_failed_after_shipping": "配送已处理完成，但面单文件保存失败，请稍后重试。",
+    "shxk_validation_failed": "SHXK 预校验失败：{fields}"
   },
   "Common": {
     "phoneHelp": "仅限数字（不含连字符，最多 {max} 位）",
