@@ -65,9 +65,11 @@ jobs:
           node-version: '24'
           cache: 'npm'
 
+      # DEF-B-154: latest(3.x)는 config.toml [inbucket]을 거부(→ [local_smtp] 요구)해 supabase start 실패.
+      # 로컬 개발 CLI와 동일한 2.122.1로 고정. 3.x 전환은 config.toml 마이그레이션과 함께 별도 Task로 진행.
       - uses: supabase/setup-cli@v1
         with:
-          version: latest
+          version: 2.122.1
 
       - name: Start local Supabase
         run: supabase start
