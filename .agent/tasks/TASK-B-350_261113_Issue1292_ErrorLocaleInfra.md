@@ -99,7 +99,7 @@ $ git status --short
 - ICU 플레이스홀더(`{code}`·`{fields}`) 치환 포함. **키 문자열을 그대로 반환하지 않음**(문구 단언이 의미를 유지하도록).
 - 키가 없으면 `MISSING_MESSAGE: …` 예외 → 문구 누락이 테스트에서 즉시 드러난다.
 - 파일 단위 `vi.mock('next-intl/server')`가 있으면 그 mock이 우선(기존 31개 파일 영향 없음).
-- **기존 테스트 무수정 통과 확인**: 전체 회귀 239파일/1,726테스트 PASS(§6).
+- **기존 테스트 무수정 통과 확인**: 전체 회귀 240파일/1,741테스트 PASS(§6).
 
 ### 3-4. 키 동기화 테스트 (`tests/unit/i18n/errors-key-sync.test.ts`, 86줄, 7 테스트)
 - ko 기준 15키 집합을 `toEqual`로 고정(키 추가·삭제 시 갱신 강제), en/zh/ja 키 집합 `toEqual`, 값 truthy/string, ICU 플레이스홀더 이름 집합 일치.
@@ -130,7 +130,7 @@ if (rpcError.message.includes('INSUFFICIENT_BALANCE')) {
 | `tests/unit/i18n/errors-key-sync.test.ts` | 신규 |
 | `src/app/actions/misc/wallet.ts` | **파일럿 1건** |
 | `tests/unit/finance/wallet.test.ts` | 파일럿 기대값 갱신 |
-| `docs/08_Self_Audit/Checklists/LIVE_REGRESSION_TEST_MAP.md` | §80 신규 |
+| `docs/08_Self_Audit/Checklists/LIVE_REGRESSION_TEST_MAP.md` | §81 신규 |
 - `ups-labels.ts`·`ups-actual-cost.ts`·`ups-actual-charges.ts`·`tracking.ts`·`warehouse.ts`·`src/components/**` 변경 **0건**.
 
 ### 3-7. R-20 영향도 (GitNexus 불가)
@@ -180,15 +180,15 @@ if (rpcError.message.includes('INSUFFICIENT_BALANCE')) {
 - [x] `tests/unit/i18n/errors-key-sync.test.ts` (키 집합 `toEqual`·빈 값 없음·ICU 파라미터 일치)
 - [x] 파일럿 `wallet.ts` 코드 문자열 제거 + `wallet.test.ts` 의도적 갱신
 - [x] 키 동기화 되돌리기 검증(en 키 1개 삭제 → 2 failed/5 passed → 복구 7 passed)
-- [x] 전체 회귀 PASS — `Test Files 239 passed (239)` / `Tests 1726 passed (1726)`
-- [x] 회귀맵 새 섹션 §80 등재(R-09)
+- [x] 전체 회귀 PASS — `Test Files 240 passed (240)` / `Tests 1741 passed (1741)`
+- [x] 회귀맵 새 섹션 §81 등재(R-09)
 - [x] `git diff origin/TeamB_Dev --stat` 에 파일럿 외 액션·`src/components/` 변경 없음
 - [x] R-20: GitNexus 불가 명시 + grep 호출처 확인(§3-7)
 - [x] `npm run build` → `BUILD_EXIT=0` (`✓ Compiled successfully in 27.3s`)
 
 ## 6. [작업 결과]
 
-- 코드 커밋: **`10e42223b`** `[Dave] feat: TASK-B-350 오류 로케일 인프라(Errors 네임스페이스·trError) + 파일럿 wallet`
+- 코드 커밋: **`d199724c6`** `[Dave] feat: TASK-B-350 오류 로케일 인프라(Errors 네임스페이스·trError) + 파일럿 wallet` (rebase 후 재작성된 해시)
 - 문서 커밋: 본 task file (`.agent/tasks/TASK-B-350_261113_Issue1292_ErrorLocaleInfra.md`)
 - PR: base `TeamB_Dev` / `Closes #1292`
 - 라벨: `status:open` → `status:in-progress` → `status:review`
@@ -201,17 +201,32 @@ if (rpcError.message.includes('INSUFFICIENT_BALANCE')) {
 | 신규/영향 테스트 | `npx vitest run tests/unit/i18n/errors-key-sync.test.ts tests/unit/finance/wallet.test.ts` | `Test Files 2 passed (2)` / `Tests 11 passed (11)` |
 | 키 동기화 되돌리기 | en 키 삭제 → 실행 → 복구 | **2 failed / 5 passed (7)** → 복구 후 **7 passed** |
 | 파일럿 되돌리기 | `error:'INSUFFICIENT_BALANCE'` 원복 → 실행 → 복구 | **1 failed / 3 passed (4)** → 복구 후 **4 passed** |
-| 전체 회귀(R-08) | `npm run test:regression` | **`Test Files 239 passed (239)` / `Tests 1726 passed (1726)`** (exit 0) |
+| 전체 회귀(R-08) | `npm run test:regression` | **`Test Files 240 passed (240)` / `Tests 1741 passed (1741)`** (exit 0) |
 | 빌드 | `npm run build` | `BUILD_EXIT=0`, `✓ Compiled successfully in 27.3s` |
 | 타입체크(advisory) | `npx tsc --noEmit` | 오류 174건(전부 기존·무관 파일), **본 Task 변경 파일 0건** |
 | DB 신선도 | `npx supabase migration list --local` | pending **0건** |
 
 ### 6-2. 산출물 요약
-- `Errors` 15키 × 4 로케일 / `trError()`·`actionLocale()` 34줄 / `src/i18n/locales.ts` 10줄 / 키 동기화 테스트 7건 / 중앙 mock 48줄 / 회귀맵 §80.
+- `Errors` 15키 × 4 로케일 / `trError()`·`actionLocale()` 34줄 / `src/i18n/locales.ts` 10줄 / 키 동기화 테스트 7건 / 중앙 mock 48줄 / 회귀맵 §81.
 - 파일럿: `wallet.ts`에서 `INSUFFICIENT_BALANCE` **사용자 노출 제거**, 클라이언트 수정 0건.
 
 ### 6-3. `check-R17-DoD`
 본 환경에 `check-R17-DoD` 실행 파일/슬래시 커맨드가 **없음**(`which` 미검출, TASK-B-345/348 동일) → §5 DoD를 수동 대조했다(미체크 0건, placeholder 0건, 커밋 해시·회귀 카운트 기재 완료).
+
+### 6-4. 🔁 재작업 이력 (Jaison 리뷰 2026-11-13 — 머지 충돌 해소)
+
+**차단 사유**: `LIVE_REGRESSION_TEST_MAP.md` 충돌 — #1293(Mike, TASK-B-344)이 먼저 머지되어 **§80을 사용**했고 본 PR도 §80이었다. 통과 CI도 충돌 이전 base 기준이라 최종 머지 상태 증거가 아니었음.
+
+| 단계 | 실행 | 결과 |
+|:--|:--|:--|
+| 1 | `git fetch origin TeamB_Dev` → `git rebase origin/TeamB_Dev` | base `92025f86c` → **`0fd7528ff`**(#1293 병합분 포함) |
+| 2 | 충돌 해소 | **타 Task(§80 Mike/TASK-B-344) 섹션 무수정 유지**, 본인 섹션만 **§81로 재번호**. 충돌 마커 0건 확인 |
+| 3 | 회귀맵 헤더 재계산 | `1,734 Cases / 239 files` → **`1,741 Cases / 240 files`**(#1293 값 위에 본 PR 신규 7테스트·1파일 합산, 덮어쓰기 없음). 최종 검증일 문구를 TASK-B-350 §81로 갱신, §81에 회귀 검증 줄 추가 |
+| 4 | 회귀 재실행 | `npm run test:regression` → **`Test Files 240 passed (240)` / `Tests 1741 passed (1741)`** (exit 0, §6-1 표 갱신) |
+| 5 | push | `git push --force-with-lease` |
+
+- 재작업 커밋: 회귀맵·task file 커밋 2건(코드 로직 변경 0건 — rebase로 인한 해시 재작성만).
+- **코드/테스트 내용은 리뷰 승인 상태 그대로**이며, 충돌 해소·카운트 갱신 외 변경 없음.
 
 ## 7. [발견 이슈]
 
