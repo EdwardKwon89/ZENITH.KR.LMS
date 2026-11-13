@@ -50,7 +50,7 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
-| [#1292](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1292) | [Team B] TASK-B-350: 오류 메시지 로케일 ①-a — Errors 네임스페이스·헬퍼·로케일 실증 (#1280 구현 1단계) | b | p2 | open | 미배정 | 2026-11-13 |
+| [#1292](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1292) | [Team B] TASK-B-350: 오류 메시지 로케일 ①-a — Errors 네임스페이스·헬퍼·로케일 실증 (#1280 구현 1단계) | b | p2 | open | jungjs | 2026-11-13 |
 | [#1291](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1291) | [Team B] #1280 설계 확정 공유 + 회귀맵 분리(R-09/DEF-B-157) 결정 요청 (Aiden 보고) | b | p2 | open | 미배정 | 2026-11-13 |
 | [#1281](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1281) | [Team B] TASK-B-349: 아이템 Packing Unit 저장 정합성 실DB 검증 | b | p2 | review | 미배정 | 2026-11-13 |
 | [#1280](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1280) | [Team B] TASK-B-348: 사용자 노출 오류메시지 로케일 정합화 (영문/중문 혼재 노출 제거) | b | p2 | draft | 미배정 | 2026-11-13 |
