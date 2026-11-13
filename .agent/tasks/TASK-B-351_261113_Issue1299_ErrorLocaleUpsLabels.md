@@ -142,7 +142,7 @@
 
 - [x] 각 작업 항목 1~6 근거(파일:줄·테스트명) — §2
 - [x] `ups-labels.ts` 사용자 노출 원문 리터럴 0건 — §5-2의 **실제 command 출력** 기재
-- [x] 전체 회귀 PASS — `Test Files 242 passed (242)` / `Tests 1759 passed (1759)`
+- [x] 전체 회귀 PASS — `Test Files 243 passed (243)` / `Tests 1776 passed (1776)`
 - [x] `npm run build` 성공 — `BUILD_EXIT=0`, `✓ Compiled successfully in 23.9s`
 - [x] diff 범위 준수 — §5-1 (`ups-actual-*`·`tracking.ts`·`warehouse.ts`·`components/**`·`wrapper.ts` 0건)
 - [x] 파일 길이 Hard Limit(1,500줄) 이내 — **999줄** (base 901)
@@ -215,17 +215,32 @@ $ grep -n "throw new Error" src/app/actions/operations/ups-labels.ts
 
 ## 6. [작업 결과]
 
-- **코드 커밋**: `7715d4f55` `[Dave] feat: TASK-B-351 ups-labels 오류 로케일 전환 + SHXK 4개 로케일 사전`
-- 문서 커밋: 본 task file
+- **코드 커밋**: `7715d4f55` `[Dave] feat: TASK-B-351 ups-labels 오류 로케일 전환 + SHXK 4개 로케일 사전` (rebase 후 재작성: **`dff6dcc22`**)
+- 문서 커밋: 본 task file (rebase 후 재작성: `e2364e1fa` → 재작업 커밋으로 갱신)
 - PR: base `TeamB_Dev` / `Closes #1299` (부모 #1280은 닫지 않음)
 - 라벨: `status:open` → `status:in-progress` → `status:review`
+
+### 6-3. 🔁 재작업 이력 (Jaison 리뷰 2026-11-13 — 회귀맵 §번호 충돌)
+
+**차단 사유**: PR #1300(Baker, TASK-B-346 PR②)이 먼저 머지되며 `LIVE_REGRESSION_TEST_MAP.md` **§82를 선점** → 본 PR과 충돌(해당 파일만 CONFLICT).
+
+| 단계 | 실행 | 결과 |
+|:--|:--|:--|
+| 1 | `git fetch origin TeamB_Dev` → `git rebase origin/TeamB_Dev` | base `0749d5466` → **`b45c92915`**(#1300 병합분 포함) |
+| 2 | 충돌 해소 | **타 Task(§82 Baker) 섹션 무수정 유지**, 본인 섹션만 **§83으로 재번호**. 충돌 마커 0건 확인 |
+| 3 | 회귀맵 헤더 | `1,759 Cases / 242 files` → **`1,776 Cases / 243 files`**(#1300의 1,758/241 위에 본 PR 신규분 합산 — 덮어쓰기 없음) |
+| 4 | 회귀 재실행 | `npm run test:regression` → **`Test Files 243 passed (243)` / `Tests 1776 passed (1776)`** (exit 0) |
+| 5 | push | `git push --force-with-lease` |
+
+- **코드/테스트 로직 변경 0건** — rebase로 인한 해시 재작성 + 회귀맵 번호/카운트 + task file 표기만 변경.
+- Jaison 비차단 메모 반영: zh/ja 초안 검수 건을 **IMP-172**로 등록(§7-8). DB flake는 재실행 2회 연속 PASS로 **DEF 미등록**(§7-4).
 
 ### 6-1. 검증 결과
 
 | 검증 | 명령 | 결과 |
 |:--|:--|:--|
 | 영향/신규 테스트 | `npx vitest run tests/unit/ups tests/unit/shxk tests/unit/i18n tests/integration/defb052-cancel-ups-registration-unlock.test.ts` | `Test Files 53 passed (53)` / `Tests 489 passed (489)` |
-| 전체 회귀(R-08) | `npm run test:regression` | **`Test Files 242 passed (242)` / `Tests 1759 passed (1759)`** (exit 0) |
+| 전체 회귀(R-08) | `npm run test:regression` | **`Test Files 243 passed (243)` / `Tests 1776 passed (1776)`** (exit 0) |
 | 빌드 | `npm run build` | `BUILD_EXIT=0`, `✓ Compiled successfully in 23.9s` |
 | 타입체크(advisory) | `npx tsc --noEmit` | 기존 174건(변경 파일 0건) — base와 동일 |
 | 되돌리기 A (SHXK 원문 누출) | §3-3 | **2 failed / 4 passed** → 복구 6 passed |
@@ -239,7 +254,8 @@ $ grep -n "throw new Error" src/app/actions/operations/ups-labels.ts
 1. **[수치] 이슈 기재 "리터럴 49건" vs 실측 35줄** — 착수 시 `grep -nE "error: *[\`'\"]|message: *[\`'\"]" src/app/actions/operations/ups-labels.ts | grep -v "logger\."` → **35줄**. 이슈의 49건과 차이가 있어(집계 범위·패턴 차이로 추정) **실측값 35를 기준으로 전량 전환**했고, 최종 0줄을 §5-2 출력으로 확인했다.
 2. **[테스트 기반] 전역 mock은 ko 고정** — `tests/setup.ts`의 `next-intl/server` mock이 ko를 반환하므로, 로케일별 검증은 `tests/unit/i18n/action-error.test.ts`에서 **개별 로케일 스위치 mock**으로 분리했다. 실제 요청 헤더 경로는 TASK-B-350 §2에서 dev 서버로 실증된 상태(이번 Task에서 재실증 불요 지시).
 3. **[i18n 잔여] `validate-payload.ts` 문구가 한글 고정** — `{fields}`에 한글이 섞여 비한국어 사용자에게 노출된다. 이번 지시대로 미수정, **IMP-171**(`scratch/post_launch_improvements.md`)로 등록(R-15).
-4. **[CI/회귀] DB 의존 테스트 2건 1회 flake** — 첫 전체 회귀에서 `tests/unit/ups/ups-zone-name-relabel.test.ts` 2건이 실패했으나, 단독 실행 **7/7 PASS**, 재실행 전체 **242 files PASS**. 병렬 DB 테스트 경합으로 추정(코드 변경 무관, `ups-zone-name-relabel`은 본 Task 미수정 파일).
+4. **[CI/회귀] DB 의존 테스트 2건 1회 flake** — 최초 전체 회귀에서 `tests/unit/ups/ups-zone-name-relabel.test.ts` 2건이 실패했으나, 단독 실행 **7/7 PASS**, **재실행 2회 연속 전체 PASS**(rebase 후 포함). 병렬 DB 테스트 경합으로 추정(본 Task 미수정 파일) → **재현되지 않아 DEF 등록 보류**, 재발 시 DEF-B-158+ 등록 대상.
 5. **[함수 길이] 기존 액션 함수가 base부터 50줄 초과** — `downloadAndStoreLabelDoc` 83, `registerUpsOrder` 63→72, `fetchAndIssueUpsLabel` 80→100, `cancelUpsRegistration` 87→93, `previewShxkPayload` 54→57. 이번 Task는 문구 분기·로그 추가로 소폭 증가했고, **분해 리팩터링은 범위 외**로 하지 않았다. 신규 함수는 모두 50줄 이하(§5-3).
 6. **[범위 확인] `withAction()` 미사용·미수정** — `src/lib/actions/wrapper.ts` diff 0건. 방침(명시적 반환 B안) 준수.
 7. **[SHXK] 오류 사전은 관측 2건만** — `未找到订单信息`, `Invalid ShipFrom AddressLine3`. 추가 문구는 실측 확보 후 등재 필요(추측 등재 금지 준수).
+8. **[i18n] zh/ja 신규 문구 초안 검수 필요** — `Errors` 신규 6키 + SHXK 오류 사전 2건의 zh/ja 문구는 Dave 초안이다. Jaison 리뷰 메모에 따라 **IMP-172**로 등록(머지 후 JSJung 검수 대상).
