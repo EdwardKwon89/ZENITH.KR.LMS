@@ -259,6 +259,7 @@ async function placeShxkOrder(
   // TASK-B-277 (Issue #1052): SHXK 필수 필드 사전 검증 — 누락 시 API 호출 스킵하고 즉시 실패
   const payloadErrors = validateShxkPayload(payload as ShxkPayloadShape);
   if (payloadErrors.length > 0) {
+    logger.warn(`placeShxkOrder: payload validation failed — ${payloadErrors.join(', ')}`); // TASK-B-344 (Issue #1270)
     return { error: `SHXK 필수 항목 누락: ${payloadErrors.join(', ')}`, message: payloadErrors.join(', ') };
   }
 

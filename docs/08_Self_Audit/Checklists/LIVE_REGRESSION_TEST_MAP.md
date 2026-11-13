@@ -1,7 +1,7 @@
 # 🗺️ LIVE Regression Test Master Map
 
-> **총 테스트 케이스:** 1,719 Cases (vitest 개별 테스트 기준, 238 test files)
-> **최종 검증일:** 2026-11-13 (TASK-B-349 아이템 Packing Unit 실DB 검증 · §79 TC-349-01~05 등재 · 1,719/1,719 PASS)  
+> **총 테스트 케이스:** 1,734 Cases (vitest 개별 테스트 기준, 239 test files)
+> **최종 검증일:** 2026-11-13 (TASK-B-344 주소 AddressLine 길이 사전검증 · §80 TC-344-1~5 등재 · 1,734/1,734 PASS)  
 
 제니스 플랫폼의 비즈니스 영속성을 보장하는 회귀 테스트 케이스의 통합 명세서입니다. 모든 신규 개발 및 수정 시 이 맵에 케이스가 추가되어야 하며, 전체 테스트가 통과되어야 합니다.
 
@@ -1129,3 +1129,19 @@ SHXK `createorder` 페이로드의 `shipper.shipper_name`이 화면 "담당자�
 - (A) RPC 마이그레이션 `20260816110000_task_b305_create_order_atomic_v6.sql`의 `item_packing_unit` insert 컬럼·값 제거 + `supabase db reset` → **4 failed / 1 passed** (TC-349-01·03·04·05 FAIL) → `git checkout --` 복구 + reset 후 5/5 PASS.
 - (B) `src/app/actions/operations/orders.ts:433` itemsToInsert의 `item_packing_unit` 라인 제거 → **2 failed / 3 passed** (TC-349-02·05 FAIL) → `git checkout --` 복구 후 5/5 PASS.
 - 각 복구 후 `git diff --stat`에 의도치 않은 변경 0건 확인.
+
+## 80. UPS/SHXK 주소 AddressLine 길이 사전검증 (Issue #1270 / TASK-B-344)
+
+**2026-11-13, Mike** — `shipper_street`·`consignee_street`가 UPS AddressLine 한도를 넘으면 SHXK 호출 **이전에** 한글 오류로 차단. 한도는 Jaison 확정 잠정값(`SHIPPER_STREET_MAX=70` ShipFrom 2줄×35 / `CONSIGNEE_STREET_MAX=105` ShipTo 3줄×35 **가정** — ShipTo 실패 실측 없음). 검사는 **조립·쉼표 치환 후 최종 전송 문자열 `.length`** 기준.
+
+| ID | 검증 내용 | 기대 결과 | 테스트 위치 |
+| :-- | :-- | :-- | :-- |
+| TC-344-1 | shipper_street 경계 — `validateShxkPayload` 실제 호출 | 70자 `toEqual([])` / 71자 `toEqual(['발송인 주소가 너무 깁니다(현재 71자, 최대 70자) — 상세주소를 줄여 주세요'])` | `tests/unit/shxk/task-b344-address-line-length.test.ts` |
+| TC-344-2 | consignee_street 경계 | 105자 통과 / 106자 한글 오류 (`toEqual`) | 동일 |
+| TC-344-3 | DEF-B-146 실측 fixture — **실제 `.length` 87/58/49** (문서 표기 88/61 아님) | 87자 shipper 차단(실패 재현) / 58자·49자 통과 / 87자 consignee는 통과(105 잠정값 비차단 고정) | 동일 |
+| TC-344-4 | 빈 주소 — 기존 누락 검사와 중복 없음 | `toEqual(['발송인 주소 누락'])` · `toEqual(['수취인 주소 누락'])` 단독 | 동일 |
+| TC-344-5 | 통합 `buildCreateOrderPayload` → `validateShxkPayload` (조립 후 길이 판정) | 도로명 세그먼트 추출·쉼표 치환 후 한도 초과 시 발송인→수취인 순서 `toEqual`로 차단 / 한도 이내 `toEqual([])` | 동일 |
+
+**회귀 검증 (2026-11-13)**: `npm run test:regression` **239 test files / 1,734 tests 전부 PASS** (487초, db freshness OK).
+**되돌리기 검증 (테스트 유효성)**: `validate-payload.ts`의 `checkStreetLength` 호출 2줄 제거 → **4 failed / 11 passed** (TC-344-1 71자·TC-344-2 106자·TC-344-3 87자·TC-344-5 통합 FAIL) → 복구 후 **15/15 PASS**.
+**실패 관측성**: `placeShxkOrder`의 사전검증 실패 분기에 `logger.warn` 1줄 추가(`ups-labels.ts:262`) — 추가 전에는 오류 반환만 존재(로그 없음).

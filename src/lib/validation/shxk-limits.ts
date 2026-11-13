@@ -9,11 +9,18 @@
  * - ITEM_NAME_MAX=35: UPS 실측 오류 "Valid range is 0 to 35"
  *   (SHXK 명세는 500자지만 UPS가 더 엄격).
  * - PHONE_MAX_DIGITS=15: 국제 전화 E.164 상한 (SHXK 명세 100자 대비 UPS 하류 한도 기준).
+ * - SHIPPER_STREET_MAX=70: UPS ShipFrom AddressLine 2줄×약 35자 추정 — DEF-B-145/146 실측
+ *   (실제 .length 49자·58자 성공 / 87자 실패)와 모순 없음. Jaison 확정 2026-11-13 (잠정값).
+ * - CONSIGNEE_STREET_MAX=105: UPS ShipTo AddressLine 3줄×약 35자 **가정** — ShipTo 실패 실측
+ *   없음. Jaison 확정 2026-11-13 (잠정값 — 실제 거부 로그가 쌓이면 값만 조정).
  */
 
 export const HS_CODE_MAX = 30;
 export const ITEM_NAME_MAX = 35;
 export const PHONE_MAX_DIGITS = 15;
+// TASK-B-344 (Issue #1270): UPS AddressLine 한도 — 근거는 상단 헤더 참조 (Jaison 확정 잠정값)
+export const SHIPPER_STREET_MAX = 70;
+export const CONSIGNEE_STREET_MAX = 105;
 
 /**
  * 문자열에서 비숫자를 모두 제거한다. 전화번호 입력 정제용.
