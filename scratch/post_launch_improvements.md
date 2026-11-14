@@ -2102,3 +2102,15 @@ UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류
 - **관련 파일**: `docs/08_Self_Audit/Checklists/LIVE_REGRESSION_TEST_MAP.md`, `scratch/post_launch_improvements.md`, `scripts/next-task-number.sh`·`scripts/next-def-number.sh`(참고 패턴), Issue #1291, `docs/00_GUIDE/105_MULTITEAM_GOVERNANCE.md`
 - **예상 공수**: (A) 0.3~0.5 MD, (B) 1 MD 내외(분할 범위에 따라)
 - **우선순위**: Medium — 기능 무관이나 병렬 작업이 늘수록 병합마다 재발
+
+---
+
+## [IMP-187] develop→TeamB_Dev 동기화 사전 점검 도구 (`check-branch-drift.sh`)
+
+- **발견 경위**: 2026-11-14, 105 개정(동기화를 Team B 리더가 착수 전·통합 PR 제출 전에 수행) 논의 중 — 동기화 판단에 필요한 정보(뒤처진 커밋 수, 예상 충돌 파일, 진행 중 브랜치와의 겹침)를 얻는 표준 도구가 없다.
+- **현재 상태**: 수동으로 `git rev-list --count TeamB_Dev..develop`, `git merge --no-commit --no-ff develop`(시험 병합), `git merge-tree`를 사용해야 한다. 담당자별로 절차가 달라질 수 있고, 2026-10-01~11-14 198커밋 뒤처짐은 확인 수단·점검 습관이 없어 방치된 결과.
+- **임시 조치**: 105 §"develop → TeamB_Dev 동기화"에 수동 명령을 명시. 충돌 파일·해소 방식은 PR 본문에 기록.
+- **목표 구현**: `scripts/check-branch-drift.sh [팀브랜치]` — ① 뒤처진 커밋 수 ② 시험 병합(격리 워크트리, 결과 폐기) 충돌 파일 목록 ③ develop 쪽 변경 공유 파일(회귀맵·IMP·Ds-11·`package.json`·락파일·마이그레이션 등) ④ 선택: 진행 중(`status:in-progress`) 브랜치와 변경 파일 겹침. `agent-worktree-init.sh`·`check-db-freshness.sh`와 같은 방식으로 착수 시 자동 호출 검토. advisory로 시작(차단하지 않음).
+- **관련 파일**: `docs/00_GUIDE/105_MULTITEAM_GOVERNANCE.md`, `scripts/agent-worktree-init.sh`·`scripts/check-db-freshness.sh`(참고 패턴), IMP-186
+- **예상 공수**: 0.5 MD
+- **우선순위**: Medium — 동기화 누락이 번호·파일 충돌과 통합 지연으로 이어짐(IMP-186과 한 쌍)
