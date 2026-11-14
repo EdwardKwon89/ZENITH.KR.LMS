@@ -10,7 +10,7 @@ tags: ["procedure"]
 > **대상**: 모든 Agent (Aiden / Riley / D_Kai / B_Kai / Team B), 향후 MLFF BOS 개발
 > **작성일**: 2026-11-13
 > **작성자**: Aiden (Claude)
-> **버전**: v1.3 (**방법론 확정** 2026-11-13 — 3차 교차 검증 반영 후 Aiden 최종 검증 통과, Edward 지시. v1.1: Edward 결정 반영 — §7-2 원칙 (A), Ds-11 서술 정정. v1.2(2026-11-14): §10 #3 PoC 격리 운용 방안 기록. v1.3(2026-11-14): §10 #1 도구 4종 승인. 단 도구 도입(§10 #1)·GOV 규정 편입(§10 #14)·기타 §10 항목은 별도 결정 전까지 미결이며, R-11에 따라 **결정 전 구현·도구 도입 금지**)
+> **버전**: v1.3 (**방법론 확정** 2026-11-13 — 3차 교차 검증 반영 후 Aiden 최종 검증 통과, Edward 지시. v1.1: Edward 결정 반영 — §7-2 원칙 (A), Ds-11 서술 정정. v1.2(2026-11-14): §10 #3 PoC 격리 운용 방안 기록. v1.3(2026-11-14): §10 #1 도구 4종 승인. 단 GOV 규정 편입(§10 #14)·기타 §10 항목은 별도 결정 전까지 미결이며, R-11에 따라 **결정 전 구현·도구 도입 금지**)
 > **의견 출처**: [Riley](../08_Self_Audit/Reviews/231/riley_review.md) · [B_Kai](../08_Self_Audit/Reviews/231/bkai_review.md) · 2차 교차 검증 [round2/](../08_Self_Audit/Reviews/231/round2/) · 3차 [round3/](../08_Self_Audit/Reviews/231/round3/) (반영 내역은 부록 C·E·F)
 > **관련**: [106 품질 게이트웨이](./106_QUALITY_GATEWAY_GUIDE.md) · [301 QAM](./301_QUALITY_ASSURANCE_MANUAL.md) · [105 도메인 지식(§9 엣지케이스)](./105_DOMAIN_KNOWLEDGE.md) · [201 SAR](./201_SAR_RULE.md) · [306 §A 테스트 자산](./306_NEW_PROJECT_REUSE_REVIEW.md) · [참조 112 (Java 검증 아키텍처)](../10_Reference/112_AI_Agent_Test_Java_Reference.md)
 > **표기 규칙**: `§N` = N장 전체, `§N.M` = N장 M절(소제목이 있는 장: 1·4·5·8), **`§7-M` = 7장의 M번 항목**(7장은 소제목 없이 번호 목록 1~8), `§10 #K` = 10장 표의 K번 행, `부록 X #K` = 부록 X 표의 K번 행, `(R)`·`(B)`·`(D)` = 제안자 Riley·B_Kai·D_Kai. 다른 문서의 절은 `305 §1.6`처럼 **문서 번호를 함께** 쓴다. 줄 번호는 이 파일의 현재 버전 기준.
