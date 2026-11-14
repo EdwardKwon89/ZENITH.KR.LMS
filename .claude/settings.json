@@ -15,18 +15,5 @@
       "EnterPlanMode",
       "ExitPlanMode"
     ]
-  },
-  "hooks": {
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "export PATH=$PATH:/opt/homebrew/bin && cd /Users/edward.kwon/WorkSpace/ZENITH_LMS_001 && (rtk npm run test:regression 2>&1 | tail -10 && echo 'PASS' > .agent/LAST_REGRESSION_RESULT) || echo 'FAIL' > .agent/LAST_REGRESSION_RESULT",
-            "timeout": 120
-          }
-        ]
-      }
-    ]
   }
 }
