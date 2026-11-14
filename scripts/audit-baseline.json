@@ -1,0 +1,33 @@
+{
+  "_comment": "npm audit(--omit=dev) 래칫 허용 목록(key = 패키지:심각도). 줄어들기만 해야 한다. 생성: node scripts/check-audit.mjs --update-baseline",
+  "generatedAt": "2026-11-14",
+  "count": 26,
+  "entries": [
+    "@babel/core:low",
+    "@sentry/bundler-plugin-core:moderate",
+    "@sentry/bundler-plugins:moderate",
+    "@sentry/nextjs:critical",
+    "@sentry/webpack-plugin:moderate",
+    "baseline-browser-mapping:moderate",
+    "brace-expansion:high",
+    "browserslist:high",
+    "dompurify:high",
+    "fast-uri:high",
+    "fflate:moderate",
+    "glob:moderate",
+    "icu-minify:low",
+    "minimatch:moderate",
+    "nanoid:high",
+    "next-intl:moderate",
+    "next:critical",
+    "postcss:high",
+    "resend:moderate",
+    "sharp:high",
+    "source-map-js:high",
+    "svix:moderate",
+    "uuid:moderate",
+    "ws:high",
+    "xlsx:high",
+    "zod:high"
+  ]
+}
