@@ -284,6 +284,7 @@ export async function updateOrder(orderId: string, payload: OrderRegistrationInp
     shipper_contact_name: validated.shipper_contact_name,
     shipper_contact_phone: validated.shipper_contact_phone,
     recipient_name: validated.recipient_name,
+    recipient_company: validated.recipient_company,
     recipient_address: validated.recipient_address,
     recipient_phone: validated.recipient_phone,
     recipient_zipcode: validated.recipient_zipcode,

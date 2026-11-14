@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { validateShxkPayload } from '@/lib/shxk/validate-payload';
-import { ITEM_NAME_MAX } from '@/lib/validation/shxk-limits';
+import { ITEM_NAME_MAX, RECIPIENT_COMPANY_MAX } from '@/lib/validation/shxk-limits';
 
 // 실제 validateShxkPayload 호출 — 반환된 에러 배열에 대한 toContain 만 허용 (TASK-B-332 / Issue #1239)
 const base = () => ({
@@ -44,6 +44,24 @@ describe('validateShxkPayload — 품명 35자 초과', () => {
     payload.invoice[0].invoice_enname = 'A'.repeat(ITEM_NAME_MAX + 1);
     const errors = validateShxkPayload(payload);
     expect(errors).toContain(`품목 1: 품명 ${ITEM_NAME_MAX}자 초과`);
+  });
+});
+
+describe('validateShxkPayload — 수취인 회사명 200자 (TASK-B-346)', () => {
+  it('consignee_company 없으면 에러 없음 (선택 필드)', () => {
+    expect(validateShxkPayload(base())).toEqual([]);
+  });
+
+  it(`consignee_company ${RECIPIENT_COMPANY_MAX}자 → 에러 없음 (경계값)`, () => {
+    const payload = base();
+    (payload.consignee as any).consignee_company = 'A'.repeat(RECIPIENT_COMPANY_MAX);
+    expect(validateShxkPayload(payload)).toEqual([]);
+  });
+
+  it(`consignee_company ${RECIPIENT_COMPANY_MAX + 1}자 → 회사명 초과 단일 에러`, () => {
+    const payload = base();
+    (payload.consignee as any).consignee_company = 'A'.repeat(RECIPIENT_COMPANY_MAX + 1);
+    expect(validateShxkPayload(payload)).toEqual([`수취인 회사명 ${RECIPIENT_COMPANY_MAX}자 초과`]);
   });
 });
 

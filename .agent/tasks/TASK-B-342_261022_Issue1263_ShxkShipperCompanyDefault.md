@@ -192,3 +192,7 @@ return {
 2. **[환경] Docker 데몬 미기동 상태에서 회귀 테스트 실패** — DB 의존 테스트 30개 파일이 `connection refused`로 실패하나 이는 코드 결함이 아니다. `npx supabase start` + 시드 후 전량 PASS. → **이번 Task 범위 외** (테스트 환경 표준화는 별도 과제 후보).
 3. **[범위 밖] Issue #1261이 여전히 `OPEN`** — 선행 TASK-B-341의 PR #1262는 병합되었으나 Issue 자동 close가 동작하지 않아 `status:review` 라벨과 `OPEN` 상태가 남아 있다. → TASK-B-342와 무관한 별도 후처리 필요(JSJung 확인).
 4. **[운영] `shipper_company` 값 변경에 따른 배포 공지 필요 여부** — TASK-B-341 상태로 이미 발급된 라벨/오더는 `shipper_company`가 화주명이고, TASK-B-342 적용 이후 발급분은 `SNTL Korea Co Ltd`가 된다. 동일 오더 재발급 시 값이 달라진다. **운영 공지 필요 여부는 JSJung 판단 사항**(DEF-B-153 "기존 데이터 영향"에 기재).
+
+---
+
+- 2026-11-12 shipper_company 전송 중단(TASK-B-345 / Issue #1277) — 본 Task(TASK-B-342)의 "회사 기본값 고정" 결정은 JSJung 지시로 번복되었다. `shipper_company` 키를 payload에서 제거(빈 문자열 전송 아님)하며, `shipperDefaults.name`은 `shipper_name` 폴백 전용으로만 남는다.

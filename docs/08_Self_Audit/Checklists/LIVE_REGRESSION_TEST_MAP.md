@@ -1,7 +1,7 @@
 # 🗺️ LIVE Regression Test Master Map
 
-> **총 테스트 케이스:** 464 Cases (vitest 개별 테스트 기준, 77 test files)
-> **최종 검증일:** 2026-07-07 (TASK-B-060 UPS 견적 UI 연동 · TC-P7-UI-ESTIMATE-01/02 등재 · 485/485 PASS)  
+> **총 테스트 케이스:** 1,781 Cases (vitest 개별 테스트 기준, 244 test files)
+> **최종 검증일:** 2026-11-13 (TASK-B-351 ups-labels 오류 로케일 전환 · §84 TC-351-01~11 등재 · 1,781 합산, TeamB_Dev 동기화 261114: develop §76 deploy-prod 5건 반영 — CI 재확인 필요)  
 
 제니스 플랫폼의 비즈니스 영속성을 보장하는 회귀 테스트 케이스의 통합 명세서입니다. 모든 신규 개발 및 수정 시 이 맵에 케이스가 추가되어야 하며, 전체 테스트가 통과되어야 합니다.
 
@@ -810,14 +810,14 @@
 | **TC-ELF-06** | 필터 없음 시 페이징만 적용 | 파라미터 부재 시 eq/ilike 미호출 및 정상 반환 검증 | `tests/unit/monitoring/error-log-filters.test.ts` |
 
 ### 57. SHXK createorder 화주명 수기입력 오버라이드 (DEF-B-144 / Issue #1190 / TASK-B-324)
-> ⚠️ **TASK-B-342(Issue #1263)로 `shipper_company` 사양이 기본값 고정으로 변경됨** — 아래 기대 결과는 TASK-B-342 기준(2026-10-22 갱신).
+> ⚠️ **TASK-B-345(Issue #1277, JSJung 2026-11-12 결정)로 `shipper_company` 키 자체가 미전송으로 번복됨** — 아래 기대 결과는 `shipper_company` 키 부재 기준(2026-11-12 갱신). 상세는 §76.
 
 | ID | 테스트 항목 | 목적 | 파일 경로 |
 | :--- | :--- | :--- | :--- |
-| **TC-SHXK-OVR-01** | 수기입력 화주명(shipper_name)이 `shipper_name`으로 전달되고 `shipper_company`는 기본값 | `shipper_name` 폴백 우선순위 `shipper_name > shipper_org.name > shipperDefaults.name` 검증 + `shipper_company`는 항상 `shipperDefaults.name` | `tests/unit/ups/task-b324-shxk-shipper-name-override.test.ts` |
-| **TC-SHXK-OVR-02** | 레거시 오더(shipper_name 없음) 조직명 폴백 | 기존 동작 회귀 방지 (`shipper_name`만 폴백 — `shipper_company`는 기본값 고정) | `tests/unit/ups/task-b324-shxk-shipper-name-override.test.ts` |
-| **TC-SHXK-OVR-03** | registerUpsOrder 실제 등록 payload 반영 | placeShxkOrder 경로 createorder payload 검증 (mock SHXK 호출) — `shipper_company == SHXK_SHIPPER_NAME` | `tests/unit/ups/task-b324-shxk-shipper-name-override.test.ts` |
-| **TC-SHXK-OVR-04** | previewShxkPayload 미리보기 payload 반영 | preview 경로 createorder payload 검증 — `shipper_company == SHXK_SHIPPER_NAME` | `tests/unit/ups/task-b324-shxk-shipper-name-override.test.ts` |
+| **TC-SHXK-OVR-01** | 수기입력 화주명(shipper_name)이 `shipper_name`으로 전달되고 `shipper_company` 키는 없음 | `shipper_name` 폴백 우선순위 `shipper_name > shipper_org.name > shipperDefaults.name` 검증 + `shipper_company` 키 부재(`not.toHaveProperty`) | `tests/unit/ups/task-b324-shxk-shipper-name-override.test.ts` |
+| **TC-SHXK-OVR-02** | 레거시 오더(shipper_name 없음) 조직명 폴백 | 기존 동작 회귀 방지 (`shipper_name`만 폴백 — `shipper_company` 키 부재) | `tests/unit/ups/task-b324-shxk-shipper-name-override.test.ts` |
+| **TC-SHXK-OVR-03** | registerUpsOrder 실제 등록 payload 반영 | placeShxkOrder 경로 createorder payload 검증 (mock SHXK 호출) — `shipper_company` 키 부재 | `tests/unit/ups/task-b324-shxk-shipper-name-override.test.ts` |
+| **TC-SHXK-OVR-04** | previewShxkPayload 미리보기 payload 반영 | preview 경로 createorder payload 검증 — `shipper_company` 키 부재 | `tests/unit/ups/task-b324-shxk-shipper-name-override.test.ts` |
 
 ### 58. SHXK createorder 주소 국가·시·구·도 제거 + 상세주소 앞 정렬 (DEF-B-145/146 / Issue #1192/#1194 / TASK-B-325/326)
 | ID | 테스트 항목 | 목적 | 파일 경로 |
@@ -1059,7 +1059,8 @@ UPS 오더 수정 화면에서 화주 주소가 비어 보이는 결함. 원인�
 
 ## 73. SHXK createorder shipper_name·shipper_company = 화면 "화주명" 통일 (Issue #1261 / TASK-B-341)
 
-> ⚠️ **TASK-B-342(Issue #1263, JSJung 2026-10-22 결정)로 `shipper_company` 사양이 번복됨** — `shipper_company`는 이제 화면 "화주명"이 아니라 **회사 기본값(`shipperDefaults.name` = 환경변수 `SHXK_SHIPPER_NAME`)** 고정이다. 아래 기대 결과는 TASK-B-342 기준으로 갱신(2026-10-22). 상세는 §74.
+> ⚠️ **TASK-B-342(Issue #1263, JSJung 2026-10-22 결정)로 `shipper_company` 사양이 기본값 고정으로 변경됨** — 아래 기대 결과는 TASK-B-342 기준(2026-10-22 갱신). 상세는 §74.
+> ⚠️ **TASK-B-345(Issue #1277, JSJung 2026-11-12 결정)로 `shipper_company` 키 자체가 미전송으로 재번복됨** — 아래 TC-341-* 기대 결과 중 `shipper_company` 값은 현재 **키 부재**이며, 테스트 파일도 그 기준으로 갱신됨. 상세는 §76.
 
 SHXK `createorder` 페이로드의 `shipper.shipper_name`이 화면 "담당자명"(`zen_orders.shipper_contact_name`)으로 나가면서 `shipper_company`(화주명)와 불일치하던 것을, **JSJung 2026-10-21 결정**에 따라 양쪽 모두 화면 "화주명"(`zen_orders.shipper_name`)으로 통일한다. 폴백 체인은 기존 `shipper_company`와 동일하게 `order.shipper_name` → `order.shipper_org.name` → `shipperDefaults.name`. **담당자명(`order.shipper_contact_name`)은 SHXK payload 어디에도 전송하지 않는다** (동일 결정). DB·화면·`validate-payload.ts` 변경 없음 — `buildCreateOrderPayload()`의 shipper 블록만 변경 (`src/lib/ups/label-mapping.ts`).
 
@@ -1079,6 +1080,8 @@ SHXK `createorder` 페이로드의 `shipper.shipper_name`이 화면 "담당자�
 
 
 ## 74. SHXK createorder shipper_company = 회사 기본값 고정 (Issue #1263 / TASK-B-342)
+
+> 🚫 **현행 사양 아님 — TASK-B-345(Issue #1277, JSJung 2026-11-12 결정)로 번복됨.** `shipper_company`는 이제 회사 기본값으로도 전송하지 않고 **키 자체를 제거**한다. 아래 표는 TASK-B-342 시점의 이력이며, 현행 기대 결과는 §76 참조.
 
 **JSJung 2026-10-22 결정** — TASK-B-341(§73)의 "두 필드 모두 화면 화주명" 결정을 번복한다. `shipper.shipper_company`는 화면 "화주명"이 아니라 **회사 기본값**(환경변수 `SHXK_SHIPPER_NAME`, 기본 `SNTL Korea Co Ltd`)으로 고정한다. `shipper_name`은 화면 "화주명" 그대로 유지(폴백 체인 변경 없음). **담당자명(`order.shipper_contact_name`)은 계속 SHXK payload 어디에도 전송하지 않는다.** 호출처·config·DB·화면·`validate-payload.ts` 변경 없음 — `buildShipperPayload()`의 `shipper_company` 1줄만 변경 (`src/lib/ups/label-mapping.ts`).
 
@@ -1127,3 +1130,148 @@ SHXK `createorder` 페이로드의 `shipper.shipper_name`이 화면 "담당자�
 | TC-179-4 | `vercel --prod` 실행 위치 | 모든 실행 라인이 `cd "$WT"` 서브셸 안 (로컬 체크아웃 직접 배포 회귀 방지) | 동일 |
 | TC-179-5 | 배포 소스 고정 | `git worktree add --detach "$WT" origin/main` + `trap cleanup EXIT` | 동일 |
 
+## 77. SHXK createorder shipper_company 미전송 (Issue #1277 / TASK-B-345)
+
+**JSJung 2026-11-12 결정** — TASK-B-342(§74)의 "`shipper_company` = 회사 기본값 고정" 결정을 번복한다. SHXK 명세상 `shipper_company`는 선택 필드(200자)이므로 **키 자체를 payload에서 제거**한다(빈 문자열 전송 아님). `shipper_name`은 화면 "화주명" 그대로 유지(폴백 체인 변경 없음). `shipperDefaults.name`(= `SHXK_SHIPPER_NAME`)은 `shipper_name` 폴백 전용으로만 남는다. 호출처·config·DB·화면·`validate-payload.ts` 변경 없음 — `buildShipperPayload()`의 `shipper_company` 1줄 제거 (`src/lib/ups/label-mapping.ts`).
+
+| ID | 검증 내용 | 기대 결과 | 테스트 위치 |
+| :-- | :-- | :-- | :-- |
+| TC-345-1 | 실제 `buildCreateOrderPayload` 호출 — `shipper_name='ABC Trading'` | `shipper_name='ABC Trading'`, `payload.shipper`에 `shipper_company` 키 부재(`not.toHaveProperty`) | `tests/unit/ups/task-b342-shxk-shipper-company-default.test.ts` (TC-342-1) |
+| TC-345-2 | `shipper_name` 빈 값 + `shipper_org.name='MASTER AIR'` | `shipper_name='MASTER AIR'`, `shipper_company` 키 부재 | 동일 (TC-342-2) |
+| TC-345-3 | 한글 화주명(`'한국무역'`) | `shipper_name='한국무역'`, `shipper_company` 키 부재 | 동일 (TC-342-3) |
+| TC-345-4 | `shipperDefaults.name='X CORP'` 주입 | `shipper_company` 키 부재 + `shipperDefaults.name`이 다른 필드로도 새지 않음 | 동일 (TC-342-4) |
+| TC-345-5 | shipper 나머지 필드(`countrycode`/`province`/`city`/`street`/`postcode`/`telephone`) | 변경 전과 동일 | 동일 (TC-342-6) |
+| TC-345-6 | 실제 서버 액션 `registerUpsOrder()` → `createorder` payload (mock SHXK 호출) | `shipper_name='ABC Trading'`, `shipper_company` 키 부재 | 동일 (TC-342-7) |
+| TC-345-7 | `previewShxkPayload('CREATEORDER')` 미리보기 payload | `shipper_name='ABC Trading'`, `shipper_company` 키 부재 | 동일 (TC-342-8) |
+| TC-345-8 | 레거시 오더(`shipper_name` 없음) → 실제 등록 경로 | `shipper_name='MASTER AIR'`, `shipper_company` 키 부재 | 동일 (TC-342-9) |
+| TC-345-RST | 되돌리기 검증: `buildShipperPayload()`에 `shipper_company: shipperDefaults.name` 재삽입 | 영향 5개 파일 **30 failed / 37 passed (67)** 후 원복 시 67 passed — `not.toHaveProperty` 단언이 실제로 잡아냄 (§74 TC-342-RST 대체) | 5개 파일 |
+| TC-345-EXIST | 기존 기대값 갱신 5개 파일 | `shipper_company` `toBe` 단언 → `not.toHaveProperty` 로 전환 | `tests/unit/ups/task-b342-shxk-shipper-company-default.test.ts`, `tests/unit/ups/task-b341-shxk-shipper-name-unify.test.ts`, `tests/unit/ups/task-b324-shxk-shipper-name-override.test.ts`, `tests/unit/ups/defb054-shipper-company.test.ts`, `tests/unit/ups/ups-labels-mapping.test.ts` |
+
+## 78. SHXK consignee_name 테스트용 폴백 제거 (Issue #1278 / TASK-B-346, PR①)
+
+**배경**: `buildCreateOrderPayload()`의 consignee 블록에 `recipient_name || 'E2E Consignee'` 테스트용 폴백이 운영 코드에 남아 있어, 수취인 성명이 비어 있으면 가짜 이름이 SHXK로 전송될 수 있었다.  
+**요구사항(JSJung 2026-11-12)**: `consignee_name` ← `recipient_name`(수취인 성명) 고정, 기본값 없음. 빈 값은 `validateShxkPayload()`의 `'수취인 성명 누락'` 사전검증이 SHXK 호출 전에 차단.
+
+| ID | 검증 내용 | 기대 결과 | 테스트 위치 |
+| :-- | :-- | :-- | :-- |
+| TC-346-1 | `recipient_name=''` 로 `buildCreateOrderPayload()` 호출 | `consignee.consignee_name === ''` (`toBe`, 폴백 없음) | `tests/unit/ups/ups-labels-mapping.test.ts` |
+| TC-346-2 | TC-346-1 payload를 `validateShxkPayload()`에 통과 | `errors` 배열 `toEqual(['수취인 성명 누락'])` — 다른 오류 없이 단일 차단 | 동일 |
+| TC-346-3 | `recipient_name='John Doe'` 정상값 | `consignee_name='John Doe'` + `validateShxkPayload()` `toEqual([])` | 동일 |
+| TC-346-GREP | 폴백 문자열 잔존 점검 | `grep -rn "E2E Consignee" src tests` 0건 | - |
+| TC-346-RST | 되돌리기 검증: `consignee_name` 폴백 원복 | TC-346-1/2 FAIL — 전체 **2 failed / 40 passed** (`expected 'E2E Consignee' to be ''`, `expected [] to deeply equal [ '수취인 성명 누락' ]`) | 동일 |
+
+## 79. 전화번호 입력 안내문구 +숫자 외 입력 차단 (Issue #1279 / TASK-B-347)
+
+**2026-11-13, Mike** — 공용 `PhoneInput` 컴포넌트(`src/components/ui/PhoneInput.tsx`)로 전화 입력 통일(정규화 + maxLength + i18n 안내문구), 로케일 키 4개(ko/en/zh/ja) 추가, 갭 지점(주소록·회원정보·픽업 연락처·대행사 화주 담당 전화) 적용, 서버 zod/정규화 보강.
+
+| ID | 검증 내용 | 기대 결과 | 테스트 위치 |
+| :-- | :-- | :-- | :-- |
+| TC-347-1 | PhoneInput 정규화(키보드·붙여넣기 공통 onChange 경로) + onChange 위임 + maxLength/inputMode | `"010-1234 5678"` → `01012345678`, 문자·특수기호·한글 제거, onChange 호출 시점 value 이미 정제, maxLength=15·inputMode=numeric | `tests/unit/components/phone-input.test.tsx` |
+| TC-347-2 | 안내문구 i18n 보간 렌더 (ko 실제 messages) | `Common.phoneHelp`가 `{max}`=15로 보간 표시 / `Common.phoneHelpHyphen` 표시 / `showHelp=false`면 미표시 | 동일 |
+| TC-347-3 | allowHyphens 변형 (픽업 연락처 E2E 계약) | `032-111-2222` 하이픈째 보존, 문자·특수기호만 제거, inputMode=numeric 미설정 | 동일 |
+| TC-347-4 | i18n 키 4개 로케일 실재 (ko/en/zh/ja) | `Common.phoneHelp`·`Common.phoneHelpHyphen`(둘 다 `{max}` 보유)·`AgencyShippers.form_contact_phone_help` 존재 | 동일 |
+| TC-347-5 | 서버 zod `pickup_contact_tel` (PICKUP일 때만 형식 검증) | 하이픈 표기 통과+값 불변 / 문자 포함·숫자 16자리 실패 시 `path=['pickup_contact_tel']` | 동일 |
+| TC-347-6 | 서버 zod 주소록 전화 정규화 (`addressBookEntrySchema`) | 레거시 하이픈·문자 혼입값도 저장 시숫자만(정규화, 거부 아님) | 동일 |
+| TC-347-7 | `normalizePhoneDigits` 서버측 정규화 헬퍼 | `"010-1234 5678"`→`01012345678`, 16자리→15자리 절단, `(02)1234-5678`→`0212345678` | 동일 |
+| TC-347-8 | 주소록 연락처 PhoneInput 적용 | maxLength=15·inputMode=numeric·안내문구 렌더, 입력 정규화, 수정 진입 시 레거시 `010-1111` → `0101111` | `tests/unit/address-book/AddressBookClient.test.tsx` |
+
+**회귀 검증 (2026-11-13)**: `npm run test:regression` **237 test files / 1,714 tests 전부 PASS** (rebase 후 `origin/TeamB_Dev` 최신 포함 재실행 기준).
+**되돌리기 검증 (테스트 유효성)**: 구현(`src`+`messages`) `git stash` 시 신규·관련 테스트 **3 files / 5 tests FAIL** → 복구 시 전부 PASS — 테스트가 실제 구현을 검증함을 확인.
+
+## 80. 아이템 Packing Unit 저장 정합성 실DB 검증 (Issue #1281 / TASK-B-349)
+
+**2026-11-13, Mike** — `item_packing_unit`이 등록(RPC) → 저장 → 수정화면 복원 → 수정 저장 → SHXK `unit_code` 전송 전 구간에서 유지되는지 **실DB 왕복 검증**(로컬 Supabase R-14: 서버 액션·RPC 실제 실행 + psql 직접 SELECT, 모의 금지). **src 수정 없는 검증 전용 Task — 불일치 발견되지 않음(의심 지점 (a)~(d) 모두 문제 없음, 판정은 task file).**
+
+| ID | 검증 내용 | 기대 결과 | 테스트 위치 |
+| :-- | :-- | :-- | :-- |
+| TC-349-01 | 신규 등록 `create_order_atomic`(실RPC) — 아이템3개 상이 단위(PCE/SET/KG) | `zen_order_items.item_packing_unit`이 아이템별로 정확히 일치 (의심지역 (d) jsonb 키 매핑 포함) | `tests/integration/task-b349-item-packing-unit.test.ts` |
+| TC-349-02 | 수정 경로 `updateOrder` → `insertItems` | 단위 보존(SET→SET) + 단위 변경(PCE→MTR)이 DB에 반영 | 동일 |
+| TC-349-03 | 수정화면 복원 `buildOrderEditDefaults`(실DB 행 입력) | 저장값 그대로 복원(EA/PCS/CTN 보존), 널만 PCE 폴백; 옵션 목록에 EA·PCS 포함·CTN 부재 단언 (의심지역 (b)(c) 근거) | 동일 |
+| TC-349-04 | SHXK 전송 `buildInvoiceFromItems`(실DB 행 입력) | `unit_code` = 선택값(PCE/SET/KG), 목록 밖 `CTN`→`PCE` 폴백·목록 내 `EA`→`EA` 현행 동작 고정 | 동일 |
+| TC-349-05 | 패키지 `packing_unit`(BOX) ↔ 아이템 단위 | 등록·수정 후 패키지 BOX 유지 + 아이템 단위 불변 — 상호 덮어쓰기 없음 (의심지역 (a)) | 동일 |
+
+**회귀 검증 (2026-11-13)**: `npm run test:regression` **238 test files / 1,719 tests 전부 PASS** (378초).
+**되돌리기 검증 (테스트 유효성)**:
+- (A) RPC 마이그레이션 `20260816110000_task_b305_create_order_atomic_v6.sql`의 `item_packing_unit` insert 컬럼·값 제거 + `supabase db reset` → **4 failed / 1 passed** (TC-349-01·03·04·05 FAIL) → `git checkout --` 복구 + reset 후 5/5 PASS.
+- (B) `src/app/actions/operations/orders.ts:433` itemsToInsert의 `item_packing_unit` 라인 제거 → **2 failed / 3 passed** (TC-349-02·05 FAIL) → `git checkout --` 복구 후 5/5 PASS.
+- 각 복구 후 `git diff --stat`에 의도치 않은 변경 0건 확인.
+
+## 81. UPS/SHXK 주소 AddressLine 길이 사전검증 (Issue #1270 / TASK-B-344)
+
+**2026-11-13, Mike** — `shipper_street`·`consignee_street`가 UPS AddressLine 한도를 넘으면 SHXK 호출 **이전에** 한글 오류로 차단. 한도는 Jaison 확정 잠정값(`SHIPPER_STREET_MAX=70` ShipFrom 2줄×35 / `CONSIGNEE_STREET_MAX=105` ShipTo 3줄×35 **가정** — ShipTo 실패 실측 없음). 검사는 **조립·쉼표 치환 후 최종 전송 문자열 `.length`** 기준.
+
+| ID | 검증 내용 | 기대 결과 | 테스트 위치 |
+| :-- | :-- | :-- | :-- |
+| TC-344-1 | shipper_street 경계 — `validateShxkPayload` 실제 호출 | 70자 `toEqual([])` / 71자 `toEqual(['발송인 주소가 너무 깁니다(현재 71자, 최대 70자) — 상세주소를 줄여 주세요'])` | `tests/unit/shxk/task-b344-address-line-length.test.ts` |
+| TC-344-2 | consignee_street 경계 | 105자 통과 / 106자 한글 오류 (`toEqual`) | 동일 |
+| TC-344-3 | DEF-B-146 실측 fixture — **실제 `.length` 87/58/49** (문서 표기 88/61 아님) | 87자 shipper 차단(실패 재현) / 58자·49자 통과 / 87자 consignee는 통과(105 잠정값 비차단 고정) | 동일 |
+| TC-344-4 | 빈 주소 — 기존 누락 검사와 중복 없음 | `toEqual(['발송인 주소 누락'])` · `toEqual(['수취인 주소 누락'])` 단독 | 동일 |
+| TC-344-5 | 통합 `buildCreateOrderPayload` → `validateShxkPayload` (조립 후 길이 판정) | 도로명 세그먼트 추출·쉼표 치환 후 한도 초과 시 발송인→수취인 순서 `toEqual`로 차단 / 한도 이내 `toEqual([])` | 동일 |
+
+**회귀 검증 (2026-11-13)**: `npm run test:regression` **239 test files / 1,734 tests 전부 PASS** (487초, db freshness OK).
+**되돌리기 검증 (테스트 유효성)**: `validate-payload.ts`의 `checkStreetLength` 호출 2줄 제거 → **4 failed / 11 passed** (TC-344-1 71자·TC-344-2 106자·TC-344-3 87자·TC-344-5 통합 FAIL) → 복구 후 **15/15 PASS**.
+**실패 관측성**: `placeShxkOrder`의 사전검증 실패 분기에 `logger.warn` 1줄 추가(`ups-labels.ts:262`) — 추가 전에는 오류 반환만 존재(로그 없음).
+## 82. 서버 액션 오류 로케일 인프라 + 파일럿 (Issue #1292 / TASK-B-350)
+
+**2026-11-13, Dave** — 부모 #1280 설계 확정안(안 ②)의 1단계(PR ①-a). `messages/{ko,en,zh,ja}.json`에 **`Errors` 네임스페이스**(ko 기준 15키, 4개 로케일 동일 세트)를 신설하고, 서버 액션이 `trError()`로 현재 로케일 문장을 반환하도록 인프라를 깔았다. **파일럿 1건**: `payInvoiceFromWallet()`의 `INSUFFICIENT_BALANCE` 코드 문자열 노출 제거(`PaymentModal.tsx` 무수정). UPS/SHXK/창고 액션 일괄 적용(①-b)은 범위 외.
+
+**로케일 해석 실증(2026-11-13, 로컬 dev + Supabase)**: 임시 Server Action POST를 `/ko`·`/en`·`/zh`·`/ja`에서 실행 → 각각 해당 로케일 문구 반환(`npm run dev -p 3100`, Next.js 16.2.4). 상세 원문은 task file §2.
+
+| ID | 검증 내용 | 기대 결과 | 테스트 위치 |
+| :-- | :-- | :-- | :-- |
+| TC-350-01 | `Errors` 키 집합 4개 로케일 동기화 | ko 기준 15키와 en/zh/ja 키 집합 완전 일치(`toEqual`), 누락·추가 모두 FAIL | `tests/unit/i18n/errors-key-sync.test.ts` |
+| TC-350-02 | `Errors` 값 비어 있음 차단 | 4개 로케일 전 키가 truthy string | 동일 |
+| TC-350-03 | ICU 플레이스홀더 동기화 | `{code}`·`{fields}` 등 키별 플레이스홀더 이름 집합이 ko와 동일 | 동일 |
+| TC-350-04 | 파일럿: 지갑 결제 잔액 부족 | `error`가 `INSUFFICIENT_BALANCE`가 아니라 현재 로케일(ko) 문장 `잔액이 부족합니다.` | `tests/unit/finance/wallet.test.ts` (WAL-04) |
+| TC-350-05 | 테스트 중앙 mock이 실제 문구 반환 | `tests/setup.ts`의 `next-intl/server` mock이 `messages/ko.json` 실제 값을 ICU 치환해 반환(키 문자열 반환 금지) | `tests/setup.ts` |
+| TC-350-RST-A | 키 동기화 되돌리기 | `en.Errors.insufficient_balance` 삭제 → **2 failed / 5 passed (7)** → 복구 후 7 passed | `tests/unit/i18n/errors-key-sync.test.ts` |
+| TC-350-RST-B | 파일럿 되돌리기 | `wallet.ts`를 `error:'INSUFFICIENT_BALANCE'`로 원복 → **1 failed / 3 passed (4)** (`expected 'INSUFFICIENT_BALANCE' to be '잔액이 부족합니다.'`) → 복구 후 4 passed | `tests/unit/finance/wallet.test.ts` |
+
+**회귀 검증 (2026-11-13, rebase 후 재실행)**: `npm run test:regression` **240 test files / 1,741 tests 전부 PASS** (TASK-B-344 §81 병합분 포함).
+
+## 83. SHXK consignee_company — 수하인 회사명 전 구간 반영 (Issue #1278 / TASK-B-346, PR②)
+
+**배경**: PR①에서 `consignee_name` 폴백을 제거한 데 이어, SHXK createorder `consignee.consignee_company`(수취인 회사명, 선택·최대 200자)에 대응하는 입력이 전무했다. JSJung 결정(2026-11-12): 하우스 입력 "회사명" 1개를 `consignee_company`로 전송. 별도 "담당자" 필드는 만들지 않으며(`recipient_name`이 담당자 역할), 레거시 `recipient_contact`는 미사용.
+**범위**: DB 컬럼 `zen_orders.recipient_company` + RPC `create_order_atomic` v7 + 앱 레이어(입력 UI·zod·수정 복원·edit-log·SHXK payload) 전 구간. 주소록(`zen_address_book`)에는 회사명 컬럼이 없어 주소록 선택 시 회사명을 비운다(후속 개선 후보).
+
+| ID | 검증 내용 | 기대 결과 | 테스트 위치 |
+| :-- | :-- | :-- | :-- |
+| TC-346-01 | 신규 등록 — 실DB RPC v7 `recipient_company` 저장 | `createOrder({recipient_company:'Acme Trading Co'})` → 실DB `zen_orders.recipient_company` `toBe('Acme Trading Co')` | `tests/integration/task-b346-recipient-company.test.ts` |
+| TC-346-02 | 신규 등록 미입력(키 생략) | 실DB 값 `toBeNull()` (빈 문자열 아님) | 동일 |
+| TC-346-03 | 수정 경로(`updateOrder`→`updateHeader`) | `'First Co'`→`'Second Co'` 반영, 빈 값 저장 시 `''` (실DB SELECT) | 동일 |
+| TC-346-04 | 수정화면 복원 `buildOrderEditDefaults` | 실DB 행 → `recipient_company` `toBe('Restore Me Ltd')` | 동일 |
+| TC-346-05 | SHXK 전송 `buildCreateOrderPayload` | 실DB 값 → `consignee.consignee_company` `toBe('Acme Trading Co')` / 미입력 시 `not.toHaveProperty('consignee_company')` | 동일 |
+| TC-346-06 | payload 매핑(단위) — 입력 시 전송 + 사전검증 통과 | `consignee_company` `toBe('Acme Trading Co')`, `validateShxkPayload` `toEqual([])` | `tests/unit/ups/ups-labels-mapping.test.ts` |
+| TC-346-07 | payload 매핑(단위) — 미입력/빈 문자열 | `not.toHaveProperty('consignee_company')` (키 자체 생략) | 동일 |
+| TC-346-08 | payload 매핑(단위) — 쉼표 치환 | `'Acme, Inc.'` → `'Acme Inc.'` | 동일 |
+| TC-346-09 | 사전검증 경계 — `validateShxkPayload` | 미입력 `toEqual([])` / 200자 `toEqual([])` / 201자 `toEqual(['수취인 회사명 200자 초과'])` 단일 오류 | `tests/unit/shxk/validate-payload-limits.test.ts` |
+| TC-346-10 | zod 경계 — `orderRegistrationSchema` | 미입력 `success=true` / 200자 `true` / 201자 `false`(path `recipient_company`) | `tests/unit/orders/shxk-field-limits.test.ts` |
+| TC-346-11 | 수정화면 복원(단위) — 저장값/null | `'Acme Trading Co'` 보존 / null·undefined → `''` | `tests/unit/orders/edit-defaults.test.ts` |
+
+**회귀 검증 (2026-11-13, `origin/TeamB_Dev` rebase 후 재실행)**: `npm run test:regression` **241 test files / 1,758 tests 전부 PASS** (485초). `npm run build` **EXIT=0**.
+**되돌리기 검증 (테스트 유효성)**:
+- (A) RPC v7에서 `recipient_company` insert 컬럼·값 2줄 주석 처리 + `npx supabase db reset` → **TC-346-01 FAIL** (`expected null to be 'Acme Trading Co'`) → 복구 후 **5/5 PASS**.
+- (B) `orders.ts` `headerData`의 `recipient_company` 제거 → **TC-346-03 FAIL** (`expected 'First Co' to be 'Second Co'`) → 복구 후 PASS.
+**명세 동기화**: `docs/02_Analysis/Ds_11_API_상세_명세서.md` `createOrder` 절에 수하인 필드 매핑표 + `recipient_company` 컬럼·RPC v7 기재(R-11/R-12).
+
+## 84. ups-labels 사용자 오류 로케일 전환 + SHXK 4개 로케일 사전 (Issue #1299 / TASK-B-351)
+
+**2026-11-13, Dave** — 부모 #1280(안 ②)의 2단계. `src/app/actions/operations/ups-labels.ts`에서 **사용자에게 반환되는 오류를 전부 현재 로케일 문장**으로 전환했다(`trError()`). SHXK 응답 원문·DB 오류 원문·예외 `err.message`는 사용자 반환값에 넣지 않고 `logger`(및 `zen_ups_label_errors` INSERT)에만 보존한다. `src/lib/shxk/translate.ts` 사전을 `{ko,en,zh,ja}`로 확장(zh=원문)하고, 실제 관측된 오류 문구 2건(`未找到订单信息`, `Invalid ShipFrom AddressLine3`)을 등재했다. `pickShxkLocaleText`의 ja가 en 대신 **ja 번역**을 쓰도록 변경.
+
+| ID | 검증 내용 | 기대 결과 | 테스트 위치 |
+| :-- | :-- | :-- | :-- |
+| TC-351-01 | SHXK 실측 중문 오류 매칭 → ko 문장 | `registerUpsOrder` 반환 `error === '주문 정보를 찾을 수 없습니다'`, 원문 미포함 | `tests/unit/ups/task-b351-error-locale.test.ts` |
+| TC-351-02 | SHXK 미매칭 원문 → 일반문구(코드) | `error === '…(코드: CREATEORDER)'`, 원문(`RAW_SERVER_DETAIL_9f3`) 미포함 | 동일 |
+| TC-351-03 | SHXK 사전검증 실패 | `error`가 `SHXK 사전검증에 실패했습니다: …` + `createorder` 미호출 | 동일 |
+| TC-351-04 | 예외 `err.message` 원문 은닉 | `error`는 `(코드: UNEXPECTED)`, 내부 토큰 미포함, `logger.error`가 Error 객체로 호출 | 동일 |
+| TC-351-05 | DB 오류(`labelsErr.message`) 은닉 | `cancelUpsRegistration` `error`가 `(코드: LABEL_LOOKUP)`, DB 원문 미포함 | 동일 |
+| TC-351-06 | `removeorder` 중문 오류 매칭 | `error === '주문 정보를 찾을 수 없습니다'`, 원문 미포함 | 동일 |
+| TC-351-07 | `Errors` 4개 로케일 문장 반환 | `trError('shxk_generic',{code})` = ko/en/zh/ja 각각의 실제 문구, `{fields}` 치환 | `tests/unit/i18n/action-error.test.ts` |
+| TC-351-08 | 로케일 폴백 | `getLocale()` 예외·미지원 로케일 → `ko` | 동일 |
+| TC-351-09 | SHXK 사전 4개 로케일 | `translateShxkMessage` 2개 실측 문구 × 4개 로케일, 미매칭 → `null` | `tests/unit/shxk/translate.test.ts` |
+| TC-351-10 | ja 표출 정합 | `pickShxkLocaleText('ja',…)` → 사전 ja(이전 en) | 동일, `tests/unit/tracking/defb060-tracking-list-locale.test.tsx` |
+| TC-351-11 | `Errors` 키 동기화(21키) | ko 기준 21키 완전 일치 + ICU 파라미터 일치 | `tests/unit/i18n/errors-key-sync.test.ts` |
+| TC-351-RST-A | SHXK 매칭 무력화(원문 반환) | **2 failed / 4 passed** → 복구 후 6 passed | `tests/unit/ups/task-b351-error-locale.test.ts` |
+| TC-351-RST-B | `err.message` 반환 원복 | **1 failed / 5 passed** → 복구 후 6 passed | 동일 |
+
+**회귀 검증 (2026-11-13, `origin/TeamB_Dev` rebase 후 재실행)**: `npm run test:regression` **243 test files / 1,776 tests 전부 PASS** (TASK-B-346 PR② §83 병합분 포함).

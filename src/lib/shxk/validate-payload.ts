@@ -6,7 +6,7 @@
 //
 // 필수 필드 기준: docs/80_RawData/Phase8_UPS_API_리서치_결과.md (SHXK createorder 공식 필드 스펙)
 
-import { HS_CODE_MAX, ITEM_NAME_MAX, PHONE_MAX_DIGITS, stripNonDigits } from '@/lib/validation/shxk-limits';
+import { HS_CODE_MAX, ITEM_NAME_MAX, PHONE_MAX_DIGITS, RECIPIENT_COMPANY_MAX, SHIPPER_STREET_MAX, CONSIGNEE_STREET_MAX, stripNonDigits } from '@/lib/validation/shxk-limits';
 import { isShxkDeclareUnit } from '@/lib/shxk/declare-units';
 
 export interface ShxkPayloadShape {
@@ -30,6 +30,17 @@ function checkPhone(prefix: string, value: unknown, errors: string[]): void {
   }
 }
 
+// TASK-B-344 (Issue #1270): UPS AddressLine 길이 사전검증 — checkPhone과 같은 패턴의小型 헬퍼.
+// 길이는 **최종 전송 문자열의 .length** 기준(buildCreateOrderPayload가 조립·쉼표 치환한 뒤).
+// 빈 값은 위의 '주소 누락' 검사가 처리하므로 길이 검사에서는 중복 오류를 만들지 않는다.
+function checkStreetLength(prefix: string, value: unknown, max: number, errors: string[]): void {
+  if (isEmpty(value)) return;
+  const len = String(value).length;
+  if (len > max) {
+    errors.push(`${prefix} 주소가 너무 깁니다(현재 ${len}자, 최대 ${max}자) — 상세주소를 줄여 주세요`);
+  }
+}
+
 export function validateShxkPayload(payload: ShxkPayloadShape): string[] {
   const errors: string[] = [];
   const shipper = payload.shipper as Record<string, unknown> | undefined;
@@ -39,14 +50,20 @@ export function validateShxkPayload(payload: ShxkPayloadShape): string[] {
   if (isEmpty(shipper?.shipper_name)) errors.push('발송인 성명 누락');
   if (isEmpty(shipper?.shipper_countrycode)) errors.push('발송인 국가코드 누락');
   if (isEmpty(shipper?.shipper_street)) errors.push('발송인 주소 누락');
+  else checkStreetLength('발송인', shipper?.shipper_street, SHIPPER_STREET_MAX, errors); // TASK-B-344 (Issue #1270)
   if (isEmpty(shipper?.shipper_telephone) && isEmpty(shipper?.shipper_mobile)) {
     errors.push('발송인 연락처 누락 (전화/휴대폰 중 1개 이상)');
   }
   checkPhone('발송인', shipper?.shipper_telephone, errors);
 
   if (isEmpty(consignee?.consignee_name)) errors.push('수취인 성명 누락');
+  // TASK-B-346 (Issue #1278): 수하인 회사명은 선택. 값이 있으면 SHXK 상한(200자)을 넘지 않아야 한다.
+  if (!isEmpty(consignee?.consignee_company) && String(consignee?.consignee_company).length > RECIPIENT_COMPANY_MAX) {
+    errors.push(`수취인 회사명 ${RECIPIENT_COMPANY_MAX}자 초과`);
+  }
   if (isEmpty(consignee?.consignee_countrycode)) errors.push('수취인 국가코드 누락');
   if (isEmpty(consignee?.consignee_street)) errors.push('수취인 주소 누락');
+  else checkStreetLength('수취인', consignee?.consignee_street, CONSIGNEE_STREET_MAX, errors); // TASK-B-344 (Issue #1270)
   if (isEmpty(consignee?.consignee_city)) errors.push('수취인 도시 누락'); // TASK-B-283 (Issue #1069 / DEF-B-055)
   if (isEmpty(consignee?.consignee_postcode)) errors.push('수취인 우편번호 누락');
   if (isEmpty(consignee?.consignee_telephone) && isEmpty(consignee?.consignee_mobile)) {

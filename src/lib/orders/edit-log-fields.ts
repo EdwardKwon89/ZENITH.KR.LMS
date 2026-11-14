@@ -15,7 +15,7 @@ export const ORDER_EDIT_LOG_CORE_FIELDS = [
   'shipper_id', 'shipper_name', 'shipper_contact_name', 'shipper_contact_phone', 'shipper_contact_email',
   'shipper_address', 'shipper_address_detail', 'shipper_country_code', 'shipper_state_province', 'shipper_city', 'shipper_zipcode', 'shipper_biz_no',
   // 수하인
-  'recipient_name', 'recipient_phone', 'recipient_email', 'recipient_address', 'recipient_address_detail',
+  'recipient_name', 'recipient_company', 'recipient_phone', 'recipient_email', 'recipient_address', 'recipient_address_detail',
   'recipient_country_code', 'recipient_state_province', 'recipient_city', 'recipient_zipcode', 'recipient_pccc',
   // 배송
   'transport_mode', 'delivery_method', 'incoterms', 'ups_product_code', 'ups_service_family',
@@ -50,6 +50,7 @@ export const ORDER_EDIT_LOG_FIELD_LABELS: Record<string, string> = {
   shipper_biz_no: '화주 사업자번호',
   // 수하인
   recipient_name: '수하인명',
+  recipient_company: '수하인 회사명',
   recipient_phone: '수하인 연락처',
   recipient_email: '수하인 이메일',
   recipient_address: '수하인 주소',

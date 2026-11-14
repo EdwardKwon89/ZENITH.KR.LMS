@@ -2,6 +2,8 @@
 
 import { validateUserAction, validateAdminAction } from '@/lib/auth/guards';
 import { revalidatePath } from 'next/cache';
+import { trError } from '@/lib/i18n/action-error';
+import { logger } from '@/lib/logger';
 
 /**
  * [PH5-WAL-01] 현재 사용자의 조직 지갑 잔액을 조회합니다.
@@ -170,7 +172,11 @@ export async function payInvoiceFromWallet(invoiceId: string) {
 
   if (rpcError) {
     if (rpcError.message.includes('INSUFFICIENT_BALANCE')) {
-      return { success: false, error: 'INSUFFICIENT_BALANCE', message: '지갑 잔액이 부족합니다.' };
+      // TASK-B-350 (Issue #1292): 코드 문자열(INSUFFICIENT_BALANCE)이 화면에 노출되지 않도록
+      // 현재 로케일의 문장을 반환한다. 원문(RPC 오류)은 로그에만 남긴다.
+      logger.warn(`[WALLET] pay_invoice_from_wallet_atomic failed: ${rpcError.message}`);
+      const insufficientBalance = await trError('insufficient_balance');
+      return { success: false, error: insufficientBalance, message: insufficientBalance };
     }
     throw new Error(rpcError.message);
   }
