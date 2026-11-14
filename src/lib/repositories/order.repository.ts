@@ -79,8 +79,18 @@ export class OrderRepository extends BaseRepository {
   } = {}) {
     let query = this.db
       .from('zen_orders')
+      // TASK-1149 (Issue #1229, DEF-142): 기존 select('*')는 61컬럼 전량을
+      // 매 페이지 전환마다 전송. OrderDataTable 렌더링 실사용 컬럼만 지정한다.
+      // 소비처 전수 확인: OrderDataTable(order_no/type/created_at/shipper/
+      // shipper_name/recipient/status/billing/transport/route 코드) +
+      // StatusChangeModal(id/status) — 누락 시 렌더 깨짐이므로 추가·삭제 시
+      // tests/unit/orders/order-list-dedup.test.ts TC-DEDUP-03과 함께 갱신할 것.
       .select(`
-        *,
+        id, order_no, order_type, created_at,
+        shipper_id, shipper_name, recipient_name,
+        origin_port_id, dest_port_id,
+        status, billing_status, transport_mode,
+        pickup_country_code, recipient_country_code,
         shipper:zen_organizations!shipper_id(name),
         origin_port:zen_ports!origin_port_id(name, code),
         dest_port:zen_ports!dest_port_id(name, code)

@@ -4,7 +4,6 @@ import { logger } from '@/lib/logger';
 import React, { useEffect } from 'react';
 import * as Sentry from "@sentry/nextjs";
 import { ZenErrorView } from '@/components/ui/ZenErrorView';
-import { logClientError } from '@/app/actions/monitoring';
 
 export default function GlobalDashboardError({
   error,
@@ -15,18 +14,10 @@ export default function GlobalDashboardError({
 }) {
   useEffect(() => {
     // Sentry에 에러 전송
-    const eventId = Sentry.captureException(error);
+    Sentry.captureException(error);
 
-    // 로컬 DB 모니터링 시스템에 에러 기록
-    logClientError({
-      message: error.message || "Unknown Dashboard Error",
-      stack: error.stack,
-      url: window.location.href,
-      severity: "ERROR",
-      error_type: "CLIENT",
-      sentry_id: eventId
-    });
-
+    // TASK-1141: severity ERROR 명시 logClientError 호출은 logger.error()에 흡수되어
+    // 삭제 — logger.error가 zen_error_logs에 자동 적재하므로 중복 기록 방지.
     logger.error("Dashboard Runtime Error:", error);
   }, [error]);
 

@@ -131,7 +131,9 @@ export const ErrorLogsTable: React.FC<ErrorLogsTableProps> = ({ initialLogs, tot
       header: 'Error Message',
       accessorKey: 'message',
       cell: ({ row }) => (
-        <div className="flex flex-col max-w-[400px]">
+        // TASK-1147 (Issue #1222, DEF-140): 400px → 300px — Error Message 컬럼이
+        // 테이블 폭을 과점해 Control 컬럼이 뷰포트 밖으로 밀리던 원인 해소
+        <div className="flex flex-col max-w-[300px]">
           <span className="font-bold text-slate-900 truncate" title={row.original.message}>
             {row.original.message}
           </span>
@@ -197,8 +199,10 @@ export const ErrorLogsTable: React.FC<ErrorLogsTableProps> = ({ initialLogs, tot
     {
       header: 'Control',
       id: 'actions',
+      // TASK-1147 (Issue #1222, DEF-140): 액션 컬럼 줄바꿈 방지 (그리드 공용 보호와 병행)
+      meta: { nowrap: true },
       cell: ({ row }) => (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 whitespace-nowrap">
           {!row.original.resolved && (
             <ZenButton 
               variant="glass" 

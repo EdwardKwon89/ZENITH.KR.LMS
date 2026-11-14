@@ -1,5 +1,4 @@
 "use client";
-import { logger } from '@/lib/logger';
 
 import * as Sentry from "@sentry/nextjs";
 import { useEffect } from "react";
@@ -21,7 +20,7 @@ export default function GlobalError({
     // Sentry에 에러 전송 및 이벤트 ID 확보
     const eventId = Sentry.captureException(error);
     
-    // DB 에러 로그에 시스템 임계 에러로 기록
+    // DB 에러 로그에 시스템 임계 에러로 기록 (CRITICAL 명시 호출 — 알림 경로 보존)
     logClientError({
       message: error.message || "Unknown Global Error",
       stack: error.stack,
@@ -30,8 +29,9 @@ export default function GlobalError({
       sentry_id: eventId,
       url: typeof window !== "undefined" ? window.location.href : undefined,
     });
-    
-    logger.error("Global Runtime Error:", error);
+
+    // TASK-1141: logger.error는 호출 시 동일 장애를 ERROR 1건으로 추가 적재하므로
+    // 여기서는 호출하지 않는다 (CRITICAL 1행만 기록 — Sentry는 위 captureException으로 보존).
   }, [error]);
 
   return (

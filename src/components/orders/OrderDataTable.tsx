@@ -21,6 +21,44 @@ interface OrderDataTableProps {
   userRole?: string;
 }
 
+// TASK-1144 (Issue #1216, IMP-170/171): 목록 표시용 포맷터
+// - 접수일자: created_at을 ko-KR 날짜로 표시 (데이터는 findList가 이미 조회)
+// - Shipper: "소속/화주" 병기 — override(shipper_name)가 소속조직명과 다를 때만
+//   병기하고, 동일·미입력 시 중복 노출 방지 (Edward 확정, 2026-10-03)
+export function formatReceivedDate(createdAt: unknown): string {
+  if (!createdAt) return '-';
+  const d = new Date(String(createdAt));
+  if (Number.isNaN(d.getTime())) return '-';
+  return d.toLocaleDateString('ko-KR');
+}
+
+export function formatShipperCell(orgName: unknown, shipperName: unknown): string {
+  const org = typeof orgName === 'string' ? orgName.trim() : '';
+  const override = typeof shipperName === 'string' ? shipperName.trim() : '';
+  if (org && override && override !== org) return `${org}/${override}`;
+  return org || override || '-';
+}
+
+// TASK-1146 (Issue #1221, DEF-139): ROUTE 표시 코드 결정
+// - 항구 코드가 하나라도 있으면 그대로 (기존 동작 유지)
+// - 둘 다 없고 transport_mode가 UPS면 국가 코드로 폴백 (UPS는 항구 개념 없음)
+// - 그 외(둘 다 없음 + 非-UPS)는 기존대로 undefined 반환 (빈 배지 — 변경 없음)
+export function resolveRouteCodes(order: {
+  origin_port?: { code?: string } | null;
+  dest_port?: { code?: string } | null;
+  transport_mode?: string;
+  pickup_country_code?: string | null;
+  recipient_country_code?: string | null;
+}): [string | undefined, string | undefined] {
+  const origin = order.origin_port?.code;
+  const dest = order.dest_port?.code;
+  if (origin || dest) return [origin, dest];
+  if (order.transport_mode === 'UPS') {
+    return [order.pickup_country_code || undefined, order.recipient_country_code || undefined];
+  }
+  return [origin, dest];
+}
+
 export default function OrderDataTable({ 
   orders, 
   totalCount, 
@@ -44,6 +82,7 @@ export default function OrderDataTable({
           <thead>
             <tr className="bg-slate-50 border-b border-slate-200">
               <th className="px-6 py-2.5 text-[11px] font-bold text-slate-500 uppercase tracking-widest">Order No</th>
+              <th className="px-6 py-2.5 text-[11px] font-bold text-slate-500 uppercase tracking-widest">접수일자</th>
               <th className="px-6 py-2.5 text-[11px] font-bold text-slate-500 uppercase tracking-widest">Type</th>
               <th className="px-6 py-2.5 text-[11px] font-bold text-slate-500 uppercase tracking-widest">Shipper</th>
               <th className="px-6 py-2.5 text-[11px] font-bold text-slate-500 uppercase tracking-widest">Recipient</th>
@@ -56,7 +95,7 @@ export default function OrderDataTable({
           <tbody className="divide-y divide-slate-100">
             {orders.length === 0 ? (
               <tr>
-                <td colSpan={8} className="px-6 py-20 text-center text-slate-400 italic">
+                <td colSpan={9} className="px-6 py-20 text-center text-slate-400 italic">
                   No orders found. Use the filters to refine your search.
                 </td>
               </tr>
@@ -67,19 +106,29 @@ export default function OrderDataTable({
                     <span className="text-[13px] text-slate-900 font-bold group-hover:text-blue-600 transition-colors">{order.order_no}</span>
                   </td>
                   <td className="px-6 py-2.5">
+                    <span className="text-[12px] text-slate-600 font-medium">{formatReceivedDate(order.created_at)}</span>
+                  </td>
+                  <td className="px-6 py-2.5">
                     <span className="text-[12px] text-slate-600 font-medium">{order.order_type}</span>
                   </td>
                   <td className="px-6 py-2.5">
-                    <span className="text-[13px] text-slate-800 font-bold">{order.shipper?.name || '-'}</span>
+                    <span className="text-[13px] text-slate-800 font-bold">{formatShipperCell(order.shipper?.name, order.shipper_name)}</span>
                   </td>
                   <td className="px-6 py-2.5">
                     <span className="text-[13px] text-slate-800 font-bold">{order.recipient_name || '-'}</span>
                   </td>
                   <td className="px-6 py-2.5">
-                    <div className="flex items-center gap-2 text-[12px] font-medium">
-                      <span className="text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">{order.origin_port?.code}</span>
-                      <span className="text-slate-400">→</span>
-                      <span className="text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">{order.dest_port?.code}</span>
+                    <div className="flex items-center gap-2 text-[12px] font-medium whitespace-nowrap">
+                      {(() => {
+                        const [originCode, destCode] = resolveRouteCodes(order);
+                        return (
+                          <>
+                            <span className="text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">{originCode}</span>
+                            <span className="text-slate-400">→</span>
+                            <span className="text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">{destCode}</span>
+                          </>
+                        );
+                      })()}
                     </div>
                   </td>
                   <td className="px-6 py-2.5">
@@ -119,14 +168,20 @@ export default function OrderDataTable({
                         PAID: '결제완료'
                       };
                       return (
-                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${styles[status]}`}>
+                        // TASK-1146 (Issue #1221, DEF-139): BILLING 배지 내부 개행 방지
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border whitespace-nowrap ${styles[status]}`}>
                           {labels[status]}
                         </span>
                       );
                     })()}
                   </td>
                   <td className="px-6 py-2.5 text-right">
-                    <Link 
+                    {/* TASK-1148 (Issue #1226, DEF-141): prefetch 끊기 —
+                        상세 경로에 loading.tsx가 없어 행별 Link가 풀 서버 렌더링
+                        prefetch를 최대 40건까지 동시 발사해 목록 전환이 5초+ 지연됨.
+                        페이지네이션은 가벼운 목록 쿼리라 기본값 유지 (빠른 전환). */}
+                    <Link
+                      prefetch={false}
                       href={`/${safeLocale}/orders/${order.id}${order.transport_mode === 'UPS' ? '/ups-detail' : ''}`}
                       className="inline-flex items-center gap-1 text-[12px] font-bold text-blue-600 hover:text-blue-700 transition-colors border-b border-transparent hover:border-blue-600"
                     >

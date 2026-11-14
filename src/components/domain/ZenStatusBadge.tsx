@@ -35,7 +35,8 @@ export function ZenStatusBadge({
     return (
       <span
         className={cn(
-          'font-bold border rounded',
+          // TASK-1146 (Issue #1221, DEF-139): 배지 내부 개행 방지 (테이블은 overflow-x-auto)
+          'font-bold border rounded whitespace-nowrap',
           sizeStyles[size],
           'bg-slate-100 text-slate-600 border-slate-200',
           className,
@@ -49,7 +50,8 @@ export function ZenStatusBadge({
   return (
     <span
       className={cn(
-        'font-bold border',
+        // TASK-1146 (Issue #1221, DEF-139): 배지 내부 개행 방지 (테이블은 overflow-x-auto)
+        'font-bold border whitespace-nowrap',
         sizeStyles[size],
         meta.color,
         clickable && 'cursor-pointer hover:ring-2 hover:ring-offset-1 ring-blue-400 transition-all',

@@ -1879,10 +1879,116 @@ UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류
 - **관련 파일**: `src/lib/logger.ts`, `src/app/actions/misc/monitoring.ts`(`logClientError`), `src/app/[locale]/(dashboard)/admin/error-logs/`
 - **예상 공수**: 0.5~1 MD (방향 결정 후 구현 + 회귀 테스트, 방향 결정 자체에 별도 논의 필요할 수 있음)
 - **우선순위**: Medium — 기능 장애는 아니나 관측성 정책(GOV_COMMON.md ZEN_A4)의 실효성에 직결되는 구조적 사각지대
+- **상태**: ✅ 완료 — Issue #1208(TASK-1141), B_Kai 구현, PR #1209 Aiden 승인·develop 병합(커밋 `6ef5ff1e0`, 2026-10-01). `logger.error()`가 자동으로 `zen_error_logs`에 적재되어 Team B도 Admin 계정으로 `/admin/error-logs`에서 production 오류를 독립 확인 가능해짐.
 
 ---
 
-## [IMP-170] `scripts/check-db-freshness.sh`가 전역 `supabase` CLI를 요구 — CLI 미설치 환경에서 조용히 exit 127 (R-08-2 자동 확인 실패)
+## [IMP-170] 오더 목록(`/orders`) 화면에 접수일자 컬럼 부재
+
+- **발견 경위**: 2026-10-02, Edward가 Order 목록 화면 스크린샷과 함께 가독성 문제로 지적 — ORDER NO/TYPE/SHIPPER/RECIPIENT/ROUTE/STATUS/BILLING/ACTIONS 컬럼만 있고 오더가 언제 접수됐는지 알 수 없음.
+- **현재 상태**: `OrderRepository.findList()`(`src/lib/repositories/order.repository.ts`)가 `select('*', ...)`로 이미 `created_at`을 조회해오고 있으나, `OrderDataTable.tsx`(`src/components/orders/OrderDataTable.tsx`)의 테이블 헤더·행 렌더링에 날짜 컬럼 자체가 없어 표시만 안 되고 있음 — 데이터 추가 조회 불필요, 순수 UI 렌더링 누락.
+- **임시 조치**: 없음.
+- **목표 구현**: `OrderDataTable.tsx`에 "접수일자" 컬럼 헤더 + `{new Date(order.created_at).toLocaleDateString('ko-KR')}` 형태의 셀 렌더링 추가.
+- **관련 파일**: `src/components/orders/OrderDataTable.tsx`
+- **예상 공수**: 0.1 MD 미만 (렌더링 한 줄 추가 수준)
+- **우선순위**: Low — 기능 장애 아님, 가독성 개선
+- **상태**: 🔜 Issue 발령됨(IMP-171과 통합, 2026-10-03)
+
+---
+
+## [IMP-171] 오더 목록 "Shipper" 컬럼이 소속조직명만 표시 — 화주 표시명 병기 필요
+
+- **발견 경위**: 2026-10-02, Edward가 동일 오더(ZEN-2026-000022)에서 목록은 "master air", 상세는 "WOOWON CO.,LTD"로 다르게 표시된다고 지적. Explore 에이전트가 preview DB 직접 조회로 원인 확정.
+- **현재 상태**: 버그 아님 — 의도된 설계. 목록(`OrderDataTable.tsx`)은 `order.shipper?.name`(`zen_orders.shipper_id`가 가리키는 `zen_organizations.name` — 오더를 소유/정산하는 조직, 이 건에서는 대리점 "master air")만 표시. 상세 화면은 `order.shipper_name || order.shipper?.name`(`zen_orders.shipper_name` — TASK-B-295/Issue #1100에서 신설된 "서류에 찍을 실제 화주 표시명" 수기입력 오버라이드 컬럼)을 우선 표시. TASK-B-295 설계 문서에 "서류/라벨 생성 4곳만 override 사용, 나머지 운영 화면(목록 포함)은 의도적으로 실제 소속 조직명 유지"라고 명시되어 있어 현재 동작은 설계대로였음.
+- **Edward 확정 결정(2026-10-03)**: 현재 동작(소속조직명만 표시)이 가독성 부족 — 목록 화면도 "소속/화주" 형태로 **두 값을 병기**하도록 변경. 예: `Master air/Woowon Co. LTD`. 데이터 로직(override 컬럼 자체)은 그대로 유지, 목록 표시만 개선.
+- **목표 구현**: `OrderDataTable.tsx`의 Shipper 셀을 `{소속조직명}/{화주 표시명(shipper_name ?? 소속조직명)}` 형태로 렌더링. 둘이 같은 값이면("" 오버라이드 없음) 중복 표시 방지 로직 검토(예: 같으면 1개만 표시).
+- **관련 파일**: `src/components/orders/OrderDataTable.tsx`
+- **예상 공수**: 0.3 MD
+- **우선순위**: Low — 버그 아닌 UX 개선, Edward 확정
+- **상태**: 🔜 Issue 발령됨(IMP-170과 통합, 2026-10-03)
+
+---
+
+## [IMP-172] Vercel 함수 리전(iad1, 미동부)과 Supabase 리전(Seoul) 불일치 — 순차 DB 왕복마다 교차대륙 지연 누적
+
+- **발견 경위**: 2026-10-03, DEF-141(오더목록 Link 프리페치 폭주) 수정 배포 후 Aiden이 production 재실측 중 발견. prefetch 폭주는 완전히 해소됐으나(네트워크 캡처로 상세 prefetch 요청 0건 확인), 페이지 전환 자체는 여전히 **1.7~3.2초** 소요됨(수정 전 5초+ 대비 개선되었으나 완전 해소는 아님).
+- **현재 상태**: `vercel.json`/`next.config.*`에 `regions` 설정이 없어 Vercel 기본 리전(`iad1`, 미국 동부 Washington D.C.)에서 함수가 실행됨 — 반면 Supabase 프로젝트(`ayowrwmufagzstqiqrnj`)는 Seoul 리전. `getOrders()`(`src/app/actions/operations/orders.ts`)는 `validateUserAction()`(인증+프로필 조회) → `adminRepo.findSettingByKey("default_page_size")` → `orderRepo.findList()` 순으로 **최소 3회의 DB 왕복을 순차(직렬) 실행**하는데, 각 왕복마다 태평양 횡단 왕복지연(추정 400~500ms)이 그대로 누적됨. 별도 실측(동일 쿼리를 Supabase REST에 직접 호출)으로는 쿼리 자체가 0.1~0.6초로 빠른 것을 확인했으므로, 체감 지연의 상당 부분은 "쿼리 비용"이 아니라 "리전 간 왕복 횟수×지연"으로 추정됨.
+- **임시 조치**: 없음 — DEF-141 수정(prefetch 차단)만으로 5초+ → 2~3초대 1차 개선 완료, 이번 세션 범위 밖이라 추가 조치 보류.
+- **목표 구현**: 검토 필요한 두 방향 — (A) `vercel.json`에 `"regions": ["icn1"]` 추가해 함수 실행 리전을 Supabase와 동일한 Seoul로 이동(단, Vercel Hobby 플랜의 리전 커스터마이징 지원 여부 확인 필요), (B) `getOrders()` 내부의 `validateUserAction()`/`findSettingByKey()`/`findList()` 호출을 가능한 범위에서 병렬화(`Promise.all`)하거나, `default_page_size` 설정을 요청마다 새로 조회하지 않도록 캐싱(예: 서버 모듈 레벨 캐시 또는 짧은 TTL).
+- **관련 파일**: `vercel.json`, `src/app/actions/operations/orders.ts`(`getOrders`), `src/lib/repositories/order.repository.ts`
+- **예상 공수**: 0.5~1 MD (리전 이전은 영향범위 전수 재검증 필요 — 다른 라우트/API의 지연 특성도 함께 바뀌므로 신중한 검토 필요)
+- **우선순위**: Medium — 기능 장애 아니며 DEF-141로 1차 개선 완료된 상태, Pilot 집중운영 중 체감 속도 추가 개선 여지로 기록
+- **상태**: 🔜 미착수
+
+---
+
+## [IMP-173] `validateUserAction()`/`requireAuth()` 전역 인증·프로필 중복조회 구조 (Pilot 이후 Stage-Gate 검토 대상)
+
+- **발견 경위**: 2026-10-03, B_Kai가 DEF-141(Link 프리페치 폭주) 수정 후에도 오더목록 페이지전환이 3초+ 지속되는 것을 추가 진단하며 발견(Issue #1226 코멘트). Aiden이 코드로 교차검증.
+- **현재 상태**: `orders/page.tsx`의 `requireAuth()`와 `getOrders()` 내부 `validateUserAction()`(둘 다 `src/lib/auth/guards.ts`)이 동일한 `supabase.auth.getUser()` + `zen_profiles` SELECT를 각각 독립 실행 — 페이지 전환 1회당 동일 사용자 정보를 중복 조회. `grep` 확인 결과 `validateUserAction()`은 서버 액션 **46개 파일**, `requireAuth()`는 페이지 **41개**에서 사용 중 — 같은 요청 흐름에서 함께 호출되는 모든 화면에 동일 중복조회가 반복될 가능성이 높은 **플랫폼 전역 구조 문제**.
+- **임시 조치**: Orders 페이지 한정으로는 DEF-142/TASK-1149로 분리 처리(옵션 파라미터로 저위험 해소). 본 항목은 46개 파일에 걸친 전역 구조 개선 자체를 가리킴.
+- **목표 구현**: 요청 단위 캐싱(React `cache()` 활용해 동일 요청 내 `getUser()+profile` 조회를 1회로 통합) 또는 page→action profile 전달 패턴의 표준화. 영향범위가 넓어 R-20 GitNexus impact 분석(`validateUserAction`/`requireAuth` 양쪽) 선행 필수.
+- **관련 파일**: `src/lib/auth/guards.ts`, 46개 `validateUserAction()` 호출부, 41개 `requireAuth()` 호출부 전체
+- **예상 공수**: 1~2 MD (설계 의견 절차 필요 — R-17 복잡 Task, 전역 영향 분석 포함)
+- **우선순위**: Medium — 기능 장애 아니나 플랫폼 전반 체감 속도에 영향, Pilot(10/5~10/15) 종료 후 Stage-Gate 검토로 범위·설계 확정 예정(Edward 확인, 2026-10-03)
+- **상태**: 🔜 미착수 (Pilot 이후 착수 예정)
+
+---
+
+## [IMP-174] `OrderRegistrationForm.tsx` Hard Limit(1,500줄) 초과 — SRP 기준 파일 분리
+
+- **발견 경위**: 2026-10-12, Aiden이 TASK-B-332/333 검토(Issue #1239·#1240) 중 `wc -l` 실측. TASK-B-332(+18)·TASK-B-333(+19)이 이미 초과 상태의 파일에 계속 줄을 더함.
+- **현재 상태**: `develop` 1,893줄 → `TeamB_Dev` 1,930줄(+37). GOV_COMMON ZEN_A4 기준 소스코드 Hard Limit 1,500줄 초과(차단 기준). 폼 로직(화주 정보·수하인·패키지/품목·UPS 서비스 선택·운임 추정·HS 조회)이 단일 컴포넌트에 집중되어, 최근 3개 Task(B-332/333/335)가 모두 같은 파일을 수정하며 순차 병합을 강제당함(동일 파일 충돌 방지 위해 B-333을 B-332 병합 후 착수).
+- **임시 조치**: 신규 로직은 헬퍼 파일(`shxk-limits.ts`, `edit-defaults.ts`)로 추출해 폼 증가분 최소화. 분리 자체는 미수행.
+- **목표 구현**: 섹션 단위 분리(화주 정보 / 수하인 / 패키지·품목 / UPS 서비스·운임 / 제출 로직) + 커스텀 훅 추출. 동작 불변 리팩터링 — TASK-B-287(DOC 치수 보호)·TASK-B-297(토글 리마운트)·TASK-B-333(수정 화면 복원) 기존 테스트 전량 유지가 전제. R-20 GitNexus impact 선행 필수.
+- **관련 파일**: `src/components/orders/OrderRegistrationForm.tsx`, 연관 테스트 `tests/unit/orders/*`
+- **예상 공수**: 2~3 MD (복잡 Task — 설계 의견 절차 필요, Team B 소유 파일이므로 Team B 발령)
+- **우선순위**: Medium — 기능 장애 아님, 단 Hard Limit 위반 지속 및 병렬 작업 충돌 비용 누적. Pilot(10/15) 종료 후 착수 권장
+- **상태**: 🔜 미착수
+
+---
+
+## [IMP-175] `ups_product_code` 스키마 레벨 필수·유효성 검증 (TASK-B-336 후속)
+
+- **발견 경위**: 2026-10-13, TASK-B-336(Issue #1247, DEF-B-151) 검토 중. Baker가 범위 밖으로 분리해 task file `[발견 이슈]`에 IMP 후보로 기재.
+- **현재 상태**: TASK-B-336은 `createOrder`/`updateOrder` 서버 액션에서만 `assertActiveUpsProduct`로 미존재·비활성 코드를 거부함. `orderRegistrationSchema.ups_product_code`는 여전히 `z.string().optional()` — UPS 모드에서도 빈 값 통과, 스키마 단독으로는 코드 유효성 판정 불가(DB 조회가 필요해 zod 단독으로는 불가능한 부분도 있음).
+- **임시 조치**: 서버 액션 가드(DB 조회)로 미존재·비활성 코드 차단, `saveOrderRateSnapshot` 스킵 시 `logger.warn`.
+- **목표 구현**: ①UPS 모드에서 `ups_product_code` 필수화(`superRefine`, 기존 UPS 조건부 검증 패턴) — 단 레거시 오더 수정 시 기존 값 보존 영향 확인 ②폼(`UpsServiceSelector`)에서 활성 상품 목록만 선택 가능함을 확인(수동 입력 경로 존재 여부 점검). 엑셀 템플릿 샘플 코드는 TASK-B-335에서 `WW_SAVER_NONDOC`으로 교체 완료.
+- **관련 파일**: `src/lib/validation/order.ts`, `src/lib/orders/ups-product-guard.ts`, `src/components/orders/UpsServiceSelector*`
+- **예상 공수**: 0.5 MD
+- **우선순위**: Low — 서버 가드로 실해는 차단됨, 방어 계층 보강 성격
+- **상태**: 🔜 미착수
+
+---
+
+## [IMP-176] 오더 서버 액션 전화번호 정제 방어적 계층화 + 레거시 하이픈 데이터 출처 정리
+
+- **발견 경위**: 2026-10-13, TASK-B-334(Issue #1243) 검토 중. Baker `[발견 이슈]` 2·3번.
+- **현재 상태**: `createOrder`/`updateOrder`는 전화를 정제하지 않고 **호출자 정제에 의존**함. 현재 호출자는 폼(정제)·엑셀 대량 등록(TASK-B-334로 정제)뿐이라 누락은 없으나, 신규 호출 경로(API 라우트 등) 추가 시 `orderRegistrationSchema`의 숫자만 규칙에 의해 reject될 수 있음. 또한 `scripts/seed-local.ts`·일부 migration이 하이픈 전화를 직접 insert하여 DB 레거시 하이픈 값의 출처가 됨(전송 단계 `label-mapping`·`validate-payload`에서 정제되어 실해는 없음).
+- **임시 조치**: 폼·bulk 각각에서 `stripNonDigits` 적용, 수정 화면은 `buildOrderEditDefaults`에서 표시 시점 정제(DB 자동 일괄 UPDATE 금지 원칙 유지).
+- **목표 구현**: ①서버 액션 진입부 또는 스키마 `preprocess`로 전화 정제를 단일 지점화(호출자 정제는 UX용으로만 유지) ②시드·migration의 하이픈 전화 제거 ③레거시 DB 하이픈 데이터 정리 필요성 판단(Pilot 실데이터 — 원격 대상이므로 Edward 승인·백업 선행, 209 SOP 데이터 보전 원칙 준수).
+- **관련 파일**: `src/app/actions/operations/orders.ts`, `src/lib/validation/order.ts`, `scripts/seed-local.ts`
+- **예상 공수**: 0.5 MD (③ 제외)
+- **우선순위**: Low
+- **상태**: 🔜 미착수
+
+---
+
+## [IMP-177] `saveOrderRateSnapshot` 잔여 무음 스킵 경로(중량·목적지 누락) 관측성 재평가
+
+- **발견 경위**: 2026-10-13, TASK-B-336(Issue #1247) 검토 중. Aiden 참고 의견(비차단).
+- **현재 상태**: TASK-B-336이 미존재 상품 코드는 등록 전 거부로 근본 해소했으나, `saveOrderRateSnapshot`에는 **중량 0 또는 목적지 국가 누락 시 스냅샷 생성을 건너뛰는 경로**가 남아 있음. 현재는 `logger.warn`만 기록. 이 경로는 GOV_COMMON "핵심 지점 실시간 알림 의무" 4기준 중 ①금전 영향(스냅샷 누락 → 정산·인보이스 실패) ③침묵성(오더는 정상 생성됨)에 해당하나, TASK-B-336은 "근본 해소 + logger.warn 가시화"를 근거로 알림을 구성하지 않음(task file에 판단 근거 기재됨 — 규정 위반 아님). 다만 중량·목적지 누락은 입력 단계 검증으로 막히지 않는 경로라면 여전히 무음 결함 가능성 존재.
+- **임시 조치**: `logger.warn`(orderId·totalWeight·destCountryCode 포함).
+- **목표 구현**: ①해당 경로가 실제로 도달 가능한지 확인(UPS 오더는 중량·수하인 국가가 스키마상 필수인지) — 도달 불가면 종결 ②도달 가능하면 사전 검증으로 전환하거나 `logClientError(severity: 'CRITICAL')` 알림 구성 ③`saveOrderRateSnapshot` 신규 `logger.warn` 블록 들여쓰기 정리(스타일).
+- **관련 파일**: `src/app/actions/operations/orders.ts`(`saveOrderRateSnapshot`)
+- **예상 공수**: 0.3 MD (①확인 후 판단)
+- **우선순위**: Low
+- **상태**: 🔜 미착수
+
+
+---
+
+## [IMP-178] `scripts/check-db-freshness.sh`가 전역 `supabase` CLI를 요구 — CLI 미설치 환경에서 조용히 exit 127 (R-08-2 자동 확인 실패)
 
 - **발견 경위**: 2026-10-21, TASK-B-341(Issue #1261) 착수 시 R-17 절차상 `./scripts/check-db-freshness.sh` 실행 → `[db-freshness] 로컬 마이그레이션 상태 확인 중...`만 출력하고 **exit 127**(command not found)로 종료됨. 원인: 스크립트 25행이 `supabase migration list --local`을 전역 바이너리(`supabase`)로 호출하는데, 이 환경에는 Supabase CLI가 전역 설치돼 있지 않음(`npx supabase`로는 정상 동작 — `npx supabase --version` → v2.95.4). `scripts/agent-worktree-init.sh` 85행이 `|| echo ...`로 감싸고 있어, 워크트리 초기화 스크립트에서는 **성공처럼 보이는 안내 문구만 출력**되고 실제로는 신선도 확인이 전혀 수행되지 않은 채 착수하게 된다.
 - **현재 상태**: 신선도 확인을 수동으로 대체 가능(`npx supabase migration list --local` → pending 1건 확인 → `npx supabase db reset --yes` + `npx tsx scripts/seed-local.ts` → pending 0건 → 회귀 재실행 PASS). TASK-B-341은 이 경로로 R-08-2를 충족함. 다만 **스크립트 자체는 여전히 전역 `supabase`를 요구**하므로, 전역 CLI가 없는 개발·CI 환경에서는 매번 동일하게 조용히 실패한다.
@@ -1895,7 +2001,73 @@ UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류
 
 ---
 
-## [IMP-171] SHXK 사전검증 메시지(`validate-payload.ts`)가 한글 고정 — 비한국어 사용자에게 한글 혼입
+## [IMP-179] 프로덕션 배포(`vercel --prod`)가 로컬 작업 디렉토리를 올리는 구조 — stale 소스 배포를 막는 안전장치 부재
+
+- **발견 경위**: 2026-10-29 09:44 KST, TASK-B-343 릴리즈(PR #1272, `cfe06fdd6`) 배포 중 발견. `main` 병합 직후 공유 체크아웃(`develop` checkout, `origin/develop`보다 21커밋 뒤처진 `bbfb79fc5`)에서 `vercel --prod --yes`를 실행해 **B-343이 없는 오래된 소스(`zenith-140yfnteq`)가 프로덕션에 배포**됨. 배포 후 `grep sanitizeComma`로 누락을 확인하고 09:47 KST에 `origin/main` 격리 worktree에서 재배포(`zenith-8rjsei5da`)해 해소.
+- **현재 상태**: 재배포로 프로덕션은 `cfe06fdd6` 기준 정상. 약 3분간 stale 코드가 서비스됨(데이터 변경·신규 에러 로그 없음, row count 전후 동일 — 오더 49/프로필 16/인보이스 24/에러로그 70). 원인은 Vercel 프로젝트가 GitHub 연동이 없어(SOP 209 §0) CLI가 로컬 디렉토리를 그대로 업로드하는데, 배포 전 "배포 소스 = 방금 병합한 main"을 확인하는 단계가 SOP에 없었던 것.
+- **진행 상태(2026-10-29)**: (A)(B) 구현 완료 — `scripts/deploy-prod.sh`(게이트·격리 worktree·V1~V3 검증·롤백 대상 출력), dry-run·오류 종료코드 검증. **미완: 실배포 경로 첫 검증(다음 배포 시), (C) 장기 검토.**
+- **임시 조치**: 실행 런북 `docs/00_GUIDE/211_PRODUCTION_DEPLOY_RUNBOOK.md` 작성(배포 전·후 게이트, 보고 양식, 롤백, 장애 사례) + SOP 209 v1.2(§4)에 "격리 worktree에서 `origin/main` 기준 배포 + HEAD 해시 확인" 절차를 문서화함(본 항목과 같은 커밋).
+- **목표 구현**: (A) 배포 전 자동 가드 스크립트(`scripts/deploy-prod.sh` 등) — `git fetch` 후 `git rev-parse HEAD`가 `origin/main`과 다르면 exit 1로 중단, 또는 스크립트가 직접 임시 worktree를 만들어 배포·정리까지 수행, (B) 배포 완료 후 `vercel inspect` alias 연결 확인과 배포 소스 해시를 출력, (C) 장기적으로 Vercel–GitHub 연동 또는 GitHub Actions 배포 전환 검토(AWS 이관 Issue #995 일정과 함께 판단).
+- **관련 파일**: `docs/00_GUIDE/209_VERCEL_DEPLOYMENT_SOP.md`(§0·§4), `.vercel/project.json`, `.vercelignore`
+- **예상 공수**: 0.3~0.5 MD (A+B 스크립트), C는 별도 검토
+- **우선순위**: Medium — 이번엔 3분·데이터 영향 없이 해소됐으나, 병합 코드가 통째로 빠진 채 프로덕션에 올라가는 유형이라 Pilot 실데이터 환경에서는 재발 시 기능 회귀·오동작 위험이 큼. 현재 방어선은 SOP 문서뿐(강제력 없음 — R-17 worktree 수기 안내가 재발했던 전례와 동일하므로 스크립트화 권장)
+
+
+---
+
+## [IMP-180] 담당자 미지정 High/p1 이슈가 방치되는 구조 — 세션 시작 점검(R-16)이 `--assignee` 기준이라 걸러내지 못함 (DEF-B-154 사례)
+
+- **발견 경위**: 2026-11-13 09:25 KST, #1283(DEF-B-154, CI Regression 전 PR 실패, p1) 처리 중 발견. 이슈는 2026-11-12 13:58 KST에 Team B가 원인까지 정확히 진단해 올렸고(수정은 Aiden 소유 영역인 CI 설정이라 직접 수정 불가), **assignee 없이 `status:open`·`priority:p1`로 약 19시간 방치**. 그동안 Team B는 PR#1282·#1285·#1286 3건을 CI 없이 로컬 대체 검증(R-08-1)으로 진행.
+- **현재 상태**: 2026-11-13 PR#1287/#1288로 해소(CLI 2.122.1 고정). 그러나 "소유 영역 밖 수정이 필요한 긴급 이슈"가 담당자 없이 올라올 때 누가 언제 집는지 정해진 규칙이 없음.
+- **원인**: R-16 세션 시작 점검이 `gh issue list --assignee <본인>`이라 assignee 미지정 이슈는 조회 대상이 아님. R-18 "긴급도 High → Aiden이 Edward에게 보고 후 TASK 발령"도 이슈가 올라온 사실을 Aiden이 인지해야 시작되는데, 인지 경로(알림/조회)가 없음.
+- **영향**: 팀 전체 CI 적색 상태가 반나절 이상 지속되면 모든 PR이 CI 검증 없이 로컬 증적에만 의존 — 머지 품질 방어선(R-08) 약화. 이번엔 코드 결함은 없었으나 이상적 상황이 아님.
+- **임시 조치**: 없음(이번 건은 수동 처리).
+- **목표 구현**: (A) R-16에 "assignee 미지정 + `priority:p1` 또는 `status:open` 오픈 이슈 조회(`gh issue list --search "no:assignee label:priority:p1"`)"를 세션 시작 점검 항목으로 추가, (B) R-18 보고 이슈 생성 시 Aiden을 자동 assignee로 지정하거나 `needs:aiden` 라벨 부여 규칙화(Team B 이슈 템플릿 반영), (C) 선택: GitHub Action으로 미지정 p1 이슈 6시간 경과 시 알림 코멘트.
+- **관련 파일**: `GOV_COMMON.md`(R-16·R-18), `.github/ISSUE_TEMPLATE/`(존재 시), Team B 지침(`105_MULTITEAM_GOVERNANCE.md`)
+- **예상 공수**: 0.3 MD (A·B 문서 개정), C 포함 시 +0.3 MD
+- **우선순위**: Medium
+
+---
+
+## [IMP-181] CI Supabase CLI 버전 고정(2.122.1) 후속 — `[inbucket]` → `[local_smtp]` 전환 및 고정 해제 계획
+
+- **발견 경위**: 2026-11-13 09:24 KST, DEF-B-154 조치(PR#1287/#1288) 중. `version: latest`가 3.x로 해석되어 `supabase/config.toml`의 `[inbucket]`을 거부하는 것이 원인이었고, 즉시 복구책으로 CLI를 2.122.1로 고정.
+- **현재 상태**: 고정으로 CI 정상화. 단 고정은 임시 방어선 — 2.x가 EOL되거나 `supabase/setup-cli` 액션이 구버전 다운로드를 중단하면 다시 실패. 로컬 개발 CLI(`npx supabase@2.122.1`)도 같은 이유로 고정 중(2026-11-09 메모). 3.0은 config 비호환 외에도 mac 서명 이슈가 있었음.
+- **임시 조치**: `.github/workflows/pr-checks.yml`에 `version: 2.122.1` + 주석으로 사유 기재.
+- **목표 구현**: ①3.x 로컬·CI에서 `supabase start` 실측하며 `config.toml` 전체 비호환 항목 파악(`[inbucket]`→`[local_smtp]` 포함, R-06 Context7로 최신 문서 확인) ②`[local_smtp]` 전환 시 로컬 이메일 테스트 흐름(Inbucket UI 포트 54324 의존 여부) 영향 확인 ③전환 후 CI 고정 버전 상향 또는 `latest` 복귀(복귀 시 마이너 업데이트 영향 모니터링) ④`check-db-freshness.sh`(IMP-178)·docs의 CLI 버전 표기 일괄 갱신.
+- **관련 파일**: `supabase/config.toml`(99행 `[inbucket]`), `.github/workflows/pr-checks.yml`, `scripts/check-db-freshness.sh`, `docs/00_GUIDE/` 로컬 개발 가이드
+- **예상 공수**: 0.5 MD (3.x 비호환 조사 포함)
+- **우선순위**: Low — 고정으로 장애 해소됨. 단 기술 부채이므로 Pilot 이후 정기 점검 시점에 처리 권장
+
+
+---
+
+## [IMP-182] 검토 산출물(제출 보고서) 파일이 무고지로 0바이트 훼손 — 보호·무결성 확인 장치 부재 (`riley_review.md` 사고)
+
+- **발견 경위**: 2026-11-13 12:16 KST, 문서 231 v0.2 2차 교차 검증(Riley·B_Kai·D_Kai) 결과에서 3인이 모두 "`docs/08_Self_Audit/Reviews/231/riley_review.md`가 0바이트"라고 지적. Aiden이 `stat`으로 확인 — **size=0, mtime=11:24:38**. 제출 시점(10:52)에는 32,273바이트·188줄이었음(Aiden이 10:5x에 전문 Read).
+- **현재 상태**: Riley 세션 기록(`~/.gemini/antigravity/brain/43b932d2-…/.system_generated/logs/transcript_full.jsonl`의 step 50 `write_file` + step 55 `edit_file`)에서 프로그램으로 재구성해 복원(32,273바이트·188줄, SHA-256 앞 12자리 `166e234170c7`). **훼손 원인은 미특정** — 확인된 사실: ①해당 시각(11:23:50~11:25:30) 저장소·worktree에서 변경된 파일은 이 1개뿐 ②오케스트레이션 첫 실행(11:51:58)보다 약 27분 앞섬 ③오케스트레이션 raw 로그(`orchestration/logs/runs/*.ndjson`)에 해당 파일에 대한 쓰기성 명령 0건 ④Riley 세션 기록은 10:54에 종료. Antigravity IDE 프로세스가 실행 중이었으나 관련성은 **확인 못 함**.
+- **영향**: 2차 검증이 0바이트 자료로 수행되어 **(R) 의견 14건의 반영표 대조가 실질적으로 이루어지지 않음**(231 부록 E #1).
+- **임시 조치**: 복원, 제출 보고서 2종(`riley_review.md`·`bkai_review.md`) 쓰기 금지(`chmod a-w`), 체크섬 기록.
+- **목표 구현**: (A) 제출·확정된 검토 보고서는 커밋하거나 읽기 전용+체크섬 파일로 고정하고, 검토 시작 시 크기·체크섬 검증을 `debate.py`에 추가(자료 파일이 0바이트·체크섬 불일치면 실행 중단) (B) 검토 기간 중 제출 파일은 미추적 상태로 두지 말고 즉시 커밋 (C) 원인 조사: Antigravity IDE 에디터 버퍼 동기화·Riley 별도 세션 가능성 확인.
+- **관련 파일**: `docs/08_Self_Audit/Reviews/231/riley_review.md`, `orchestration/script/debate.py`(Edward 로컬 도구 — 저장소 미포함)
+- **예상 공수**: 0.2 MD (A·B), C는 조사
+- **우선순위**: Medium — 검토 근거 자료가 소리 없이 사라질 수 있다는 점에서 재발 시 의사결정 품질에 직접 영향
+
+---
+
+## [IMP-183] Ds-11(API 상세 명세서) 참조 경로 불일치 4곳 + 2026-07-15 이후 미갱신(R-12 준수 미확인)
+
+- **발견 경위**: 2026-11-13, 문서 231 검토 중 D_Kai·Riley가 "Ds-11 문서 부재"라 지적했고 Aiden이 `docs/03_Design/`만 확인해 동의(**오류**). 이후 Edward 지시로 아카이브 의도를 조사하던 중 B_Kai의 GH#206 #13 재조사 기록에서 **현행본이 `docs/02_Analysis/Ds_11_API_상세_명세서.md`에 있음**을 확인(554줄, v2.1 Sync, 마지막 수정 2026-07-15 TASK-184 §11.11).
+- **아카이브 경위(확인됨)**: 2026-07-06 커밋 `e4456c485`(GH#206 #13)로 구 INDEX+DETAIL 등 17파일이 `docs/03_Design/_archive/ds_11/`로 이동. B_Kai 재조사("02_Analysis본이 단독 Truth, 나머지는 DEPRECATED/Draft/구 구조")를 Aiden이 승인, Edward가 PR#221 병합 — **의도된 정리**. 이슈 본문의 "3파일"은 B_Kai 1차 조사 오류(디렉토리 누락)였고 재조사에서 17개로 정정됨.
+- **현재 상태**: ① 구 경로(`docs/03_Design/Ds_11_API_상세_명세서.md`)를 가리키는 문서 4곳 — `MASTER_INDEX.md:42`, `README.md:53`, `docs/00_GUIDE/303_API_FIRST_DEVELOPMENT_GUIDE.md:25`, `docs/03_Design/Ds_10_API_INVENTORY.md:21`(링크 깨짐). `GOV_COMMON.md` R-11(116행)·R-12(119행)는 파일명만 적어 경로 문제 없음 ② 2026-07-15 이후 `src/app/actions` 변경 커밋 153건, 신규 액션 파일 7개(`admin/exchange-rates`, `finance/{daily-billing,order-revenue-cost,shipper-invoices,ups-actual-charges,ups-actual-cost}`, `operations/bulk-orders`) — Ds-11 수정 0건. **함수명 기준 대조(2026-11-13)**: `use server` 액션 함수 298개(54파일) 중 Ds-11에 이름이 나오는 것 92개(30%), Ds-10 인벤토리 37개(12%), 둘 중 하나라도 96개(32%); 7/16 이후 추가 20개 함수는 Ds-11 언급 0개. 한계: ①이름 언급 여부일 뿐 언급된 92개의 시그니처·응답 정확성은 미검증 ②파일 이동(경로 재편)으로 git '최초 추가일'이 신뢰되지 않아 **4/27 동기화 시점 대비 얼마나 벌어졌는지는 분리 불가** → R-12(선제 갱신 의무) 준수가 확인되지 않음.
+- **조치 이력**: **(A) 참조 경로 4곳 정정 완료(2026-11-13, Edward 승인)** — 구 경로 잔존 0건. 불일치 기록: **DEF-145**(`.agent/defects/DEF-145_*.md`) + 함수 단위 전체 목록 `docs/08_Self_Audit/Ds11_Gap/Ds11_Gap_Report_20261113.md`. **(B)의 집행 장치는 2026-11-13 Edward 승인으로 구현**: 자동 점검+래칫(`scripts/check-ds11-sync.mjs`, baseline 206), 링크 점검(`scripts/check-doc-links.mjs`, baseline 84), CI advisory job(`pr-checks.yml`), R-11·R-12 개정(GOV_COMMON v3.7). 남은 것은 206개 백로그 해소·2단계(내용 정확성)·필수 승격 시점·R-11 샘플 점검(DEF-145 §8).
+- **임시 조치**: 문서 231은 명세 근거를 Ds-11 현행본(미갱신분은 코드·Issue로 보완)·105·코드 상수 주석으로 서술.
+- **목표 구현**: (A) 참조 경로 4곳을 `docs/02_Analysis/Ds_11_API_상세_명세서.md`로 정정 (B) 신규 액션 7개 및 변경분을 Ds-11과 내용 대조해 갱신 범위 확정, R-12 운영 방식 결정(전수 갱신 vs 변경 큰 모듈·외부 계약 중심) — Edward 결정.
+- **관련 파일**: `docs/02_Analysis/Ds_11_API_상세_명세서.md`, `MASTER_INDEX.md`, `README.md`, 303 가이드, `Ds_10_API_INVENTORY.md`, `GOV_COMMON.md`(R-12)
+- **예상 공수**: (A) 0.1 MD, (B) 1~2 MD (내용 대조 범위에 따라)
+- **우선순위**: Medium (R-12 준수 가시화 — 현재는 위반 여부조차 확인되지 않는 상태)
+
+## [IMP-184] SHXK 사전검증 메시지(`validate-payload.ts`)가 한글 고정 — 비한국어 사용자에게 한글 혼입
 
 - **발견 경위**: 2026-11-13, TASK-B-351(Issue #1299 / 부모 #1280)에서 `ups-labels.ts`의 사용자 반환 오류를 로케일 문장으로 전환하는 과정. `placeShxkOrder()`의 사전검증 실패는 `Errors.shxk_validation_failed`("SHXK 사전검증에 실패했습니다: {fields}")로 감쌌지만, `{fields}`에 들어가는 값은 `src/lib/shxk/validate-payload.ts`가 반환하는 **한글 고정 문자열**(예: `발송인 성명 누락`, `수취인 우편번호 누락`)이다.
 - **현재 상태**: 결과적으로 ko 사용자에게는 자연스럽지만, en/zh/ja 사용자에게는 "SHXK pre-validation failed: 발송인 성명 누락"처럼 **한국어 필드 오류가 섞여 표시**된다. 지시(#1299)에 따라 이번 Task에서는 `validate-payload.ts`를 수정하지 않고 한계만 기록한다.
@@ -1908,7 +2080,7 @@ UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류
 
 ---
 
-## [IMP-172] `Errors` 네임스페이스 zh/ja 신규 문구 초안 검수 (TASK-B-351 산출물)
+## [IMP-185] `Errors` 네임스페이스 zh/ja 신규 문구 초안 검수 (TASK-B-351 산출물)
 
 - **발견 경위**: 2026-11-13, TASK-B-351(Issue #1299)에서 `messages/{zh,ja}.json`의 `Errors` 네임스페이스에 신규 키 6개(`profile_not_found`, `destination_country_not_found`, `label_not_found`, `document_save_failed`, `document_save_failed_after_shipping`, `shxk_validation_failed`)와 SHXK 오류 사전 2건(`未找到订单信息`, `Invalid ShipFrom AddressLine3`)의 zh/ja 문구를 Dave가 초안 작성했다.
 - **현재 상태**: 키 세트·ICU 플레이스홀더 일치(`errors-key-sync.test.ts`)는 자동 검증되지만, **문구의 자연스러움/용어 일관성은 사람 검수 대상**이다. Jaison 리뷰에서도 "머지 후 JSJung 검수 대상으로 IMP에 남겨 달라"고 요청.
