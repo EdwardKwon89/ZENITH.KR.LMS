@@ -125,7 +125,7 @@ return {
 - [x] R-08-2 로컬 DB 신선도 — pending 마이그레이션 **0건**(`npx supabase migration list --local`), `npx tsx scripts/seed-local.ts` 실행 후 시드 무결성 체크 전부 PASS
 - [x] ZEN_A4 관측성 — 순수 필드 값 치환(성공/실패 분기 없음, 외부 API 호출 결과는 `placeShxkOrder` 기존 로깅 경로) → 로깅 대상 아님
 - [x] ZEN_A4 50줄 준수 — `buildShipperPayload()` 21줄(`src/lib/ups/label-mapping.ts:107-127`)
-- [x] R-15 개선 사항 — 전역 `supabase` CLI 의존 건은 기존 **IMP-170**에 등록됨 → 신규 IMP 등록 불필요(§9-1)
+- [x] R-15 개선 사항 — 전역 `supabase` CLI 의존 건은 기존 **IMP-178**에 등록됨 → 신규 IMP 등록 불필요(§9-1)
 - [x] R-10 UI 변경 없음 — 백엔드 매핑 단독. 실제 서버 액션 경로(`registerUpsOrder`/`previewShxkPayload('CREATEORDER')`) 검증으로 대체(TC-342-7~9)
 - [x] R-04 자가점검 — base `df8c5b04c` 대비 소스 1(`src/lib/ups/label-mapping.ts`) + 테스트(신규 1, 기존 4 수정) + MAP 1
 - [x] R-18 — DEF-B-153 갱신(신규 DEF 작성 아님, 기존 DEF-B-153의 `shipper_company` 해소·잔존 항목 반영)

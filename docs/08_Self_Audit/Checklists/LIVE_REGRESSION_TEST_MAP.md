@@ -1,7 +1,7 @@
 # 🗺️ LIVE Regression Test Master Map
 
-> **총 테스트 케이스:** 1,776 Cases (vitest 개별 테스트 기준, 243 test files)
-> **최종 검증일:** 2026-11-13 (TASK-B-351 ups-labels 오류 로케일 전환 · §83 TC-351-01~11 등재 · 1,776/1,776 PASS)  
+> **총 테스트 케이스:** 1,781 Cases (vitest 개별 테스트 기준, 244 test files)
+> **최종 검증일:** 2026-11-13 (TASK-B-351 ups-labels 오류 로케일 전환 · §84 TC-351-01~11 등재 · 1,781 합산, TeamB_Dev 동기화 261114: develop §76 deploy-prod 5건 반영 — CI 재확인 필요)  
 
 제니스 플랫폼의 비즈니스 영속성을 보장하는 회귀 테스트 케이스의 통합 명세서입니다. 모든 신규 개발 및 수정 시 이 맵에 케이스가 추가되어야 하며, 전체 테스트가 통과되어야 합니다.
 
@@ -345,6 +345,59 @@
 | **TC-AXM-04** | HTTP 오류 처리 | 4xx/5xx 응답 시 경고 후 정상 종료 검증 (TASK-1138) | `tests/unit/monitoring/axiom-transport.test.ts` |
 | **TC-AXM-05** | 임계치 자동 flush | 버퍼 25건 도달 시 즉시 배치 전송 및 중복 방지 검증 (TASK-1138) | `tests/unit/monitoring/axiom-transport.test.ts` |
 | **TC-AXM-06** | coalesce 타이머 flush | 동일 tick 로그 병합을 위한 지연 flush 동작 검증 (TASK-1138) | `tests/unit/monitoring/axiom-transport.test.ts` |
+| **TC-ELP-01** | logger.error 자동 적재 | `logger.error` 호출 시 `zen_error_logs`에 ERROR/SERVER 행 실제 적재 검증 (TASK-1141) | `tests/unit/monitoring/logger-errorlog-pipeline.test.ts` |
+| **TC-ELP-02** | warn/info 비적재 | `logger.warn/info`는 `zen_error_logs`에 적재하지 않음 검증 (TASK-1141) | `tests/unit/monitoring/logger-errorlog-pipeline.test.ts` |
+| **TC-ELP-03** | DB 실패 내성 | 적재 실패 시 예외 없이 종료·재귀 호출 없음 검증 (TASK-1141) | `tests/unit/monitoring/logger-errorlog-pipeline.test.ts` |
+| **TC-ELP-04** | Edge 스킵 | Edge 런타임 DB 적재 스킵·나머지 파이프라인 유지 검증 (TASK-1141) | `tests/unit/monitoring/logger-errorlog-pipeline.test.ts` |
+| **TC-ELP-05** | 브라우저 채널 | 브라우저 `logger.error` 시 POST `/api/error-logs` 요청 검증 (TASK-1141) | `tests/unit/monitoring/logger-errorlog-pipeline.test.ts` |
+| **TC-ELP-06** | UUID 귀속 | request-context UUID user/org 포함·비-UUID NULL 검증 (TASK-1141) | `tests/unit/monitoring/logger-errorlog-pipeline.test.ts` |
+| **TC-ELP-07** | CRITICAL 미승격 | 자동 적재(ERROR)가 인앱 알림 미발송 검증 (TASK-1141) | `tests/unit/monitoring/logger-errorlog-pipeline.test.ts` |
+| **TC-ELP-08** | stack 승격 | Error 객체 stack의 stack 컬럼 승격 검증 (TASK-1141) | `tests/unit/monitoring/logger-errorlog-pipeline.test.ts` |
+| **TC-ELR-01** | 클라이언트 채널 적재 | POST `/api/error-logs` 유효 ERROR의 CLIENT 행 적재 검증 (TASK-1141) | `tests/unit/monitoring/error-logs-route.test.ts` |
+| **TC-ELR-02** | CRITICAL 거부 | CRITICAL severity 400 거부·미적재 검증 (TASK-1141) | `tests/unit/monitoring/error-logs-route.test.ts` |
+| **TC-ELR-03** | message 필수 | message 없이 400 반환 검증 (TASK-1141) | `tests/unit/monitoring/error-logs-route.test.ts` |
+| **TC-ELR-04** | 길이 상한 | 2000자 초과 메시지 truncate 적재 검증 (TASK-1141) | `tests/unit/monitoring/error-logs-route.test.ts` |
+| **TC-ELR-05** | DB 실패 500 | DB 실패 시 500·logger 재귀 없이 warn 종료 검증 (TASK-1141) | `tests/unit/monitoring/error-logs-route.test.ts` |
+| **TC-DEF137-01** | Admin 로그 조회 | ADMIN 세션 `zen_error_logs` SELECT 가시성 검증 (TASK-1142/DEF-137) | `tests/unit/migrations/def137-zen-error-logs-admin-rls.test.ts` |
+| **TC-DEF137-02** | Admin 해결 처리 | ADMIN 세션 UPDATE resolved 성공 검증 (TASK-1142/DEF-137) | `tests/unit/migrations/def137-zen-error-logs-admin-rls.test.ts` |
+| **TC-DEF137-03** | 非-Admin 조회 차단 | 非-ADMIN 세션 SELECT 0건 검증 (TASK-1142/DEF-137) | `tests/unit/migrations/def137-zen-error-logs-admin-rls.test.ts` |
+| **TC-DEF137-04** | 非-Admin 해결 차단 | 非-ADMIN 세션 UPDATE 0행 검증 (TASK-1142/DEF-137) | `tests/unit/migrations/def137-zen-error-logs-admin-rls.test.ts` |
+| **TC-DEF137-05** | 인증 INSERT 유지 | 인증 세션 로그 INSERT + ADMIN 조회 검증 (TASK-1142/DEF-137) | `tests/unit/migrations/def137-zen-error-logs-admin-rls.test.ts` |
+| **TC-DEF137-06** | SuperAdmin 조회 | ZENITH_SUPER_ADMIN 세션 SELECT 가시성 검증 (TASK-1142/DEF-137) | `tests/unit/migrations/def137-zen-error-logs-admin-rls.test.ts` |
+| **TC-AUD-01** | 감사: Admin 파일 조회 | ADMIN 세션 `zen_invoice_files` 마커행 조회 검증 (TASK-1143) | `tests/unit/migrations/task1143-profiles-rls-audit.test.ts` |
+| **TC-AUD-02** | 감사: 소속 파일 조회 | 소속 화주 자사 파일 조회 검증 (TASK-1143) | `tests/unit/migrations/task1143-profiles-rls-audit.test.ts` |
+| **TC-AUD-03** | 감사: 타사 차단 | 타사 사용자 파일 0건 검증 (TASK-1143) | `tests/unit/migrations/task1143-profiles-rls-audit.test.ts` |
+| **TC-AUD-04** | 감사: 참조 목록 고정 | bare-`profiles` 참조 정책 2건 목록 검증 (TASK-1143) | `tests/unit/migrations/task1143-profiles-rls-audit.test.ts` |
+| **TC-AUD-05** | 감사: 1142 유지 | `zen_error_logs` Admin 정책 유지 검증 (TASK-1143) | `tests/unit/migrations/task1143-profiles-rls-audit.test.ts` |
+| **TC-UPSRV-01** | UPS확정 ups-detail 갱신 | `confirmUpsRegistration` 성공 시 ups-detail 포함 revalidate 검증 (TASK-1145/DEF-138) | `tests/unit/warehouse/def138-ups-detail-revalidate.test.ts` |
+| **TC-UPSRV-02** | 기존 경로 유지 | confirm 4개 기존 경로 유지 검증 (TASK-1145/DEF-138) | `tests/unit/warehouse/def138-ups-detail-revalidate.test.ts` |
+| **TC-UPSRV-03** | UPS취소 ups-detail 갱신 | `undoUpsRegistration` 성공 시 ups-detail 포함 revalidate 검증 (TASK-1145/DEF-138) | `tests/unit/warehouse/def138-ups-detail-revalidate.test.ts` |
+| **TC-UPSRV-04** | 실패 시 미갱신 | 등록 실패 시 revalidate 미호출 검증 (TASK-1145/DEF-138) | `tests/unit/warehouse/def138-ups-detail-revalidate.test.ts` |
+| **TC-ERRLOG-01** | 에러로그 패딩 해소 | 페이지 루트 자체 패딩 제거 검증 (TASK-1147/DEF-140) | `tests/unit/admin/error-logs-layout.test.tsx` |
+| **TC-ERRLOG-02** | 메시지 폭 상한 | Error Message 셀 300px 상한 검증 (TASK-1147/DEF-140) | `tests/unit/admin/error-logs-layout.test.tsx` |
+| **TC-ERRLOG-03** | Control 줄바꿈 방지 | Control 셀 nowrap 검증 (TASK-1147/DEF-140) | `tests/unit/admin/error-logs-layout.test.tsx` |
+| **TC-ERRLOG-04** | 그리드 헤더 보호 | 그리드 th nowrap 검증 (TASK-1147/DEF-140) | `tests/unit/admin/error-logs-layout.test.tsx` |
+| **TC-ERRLOG-05** | 그리드 옵트인 | meta.nowrap 컬럼 보호 검증 (TASK-1147/DEF-140) | `tests/unit/admin/error-logs-layout.test.tsx` |
+| **TC-PREF-01** | 상세 prefetch 차단 | 행별 상세 Link prefetch=false 검증 (TASK-1148/DEF-141) | `tests/unit/orders/order-prefetch.test.tsx` |
+| **TC-PREF-02** | UPS 상세 차단 | UPS ups-detail Link prefetch=false 검증 (TASK-1148/DEF-141) | `tests/unit/orders/order-prefetch.test.tsx` |
+| **TC-PREF-03** | 전행 차단 | 20행 전부 차단 검증 (TASK-1148/DEF-141) | `tests/unit/orders/order-prefetch.test.tsx` |
+| **TC-PREF-04** | 페이지네이션 유지 | 페이지 Link 기본 prefetch 유지 검증 (TASK-1148/DEF-141) | `tests/unit/orders/order-prefetch.test.tsx` |
+| **TC-PREF-05** | 링크 정상 동작 | href 유지 검증 (TASK-1148/DEF-141) | `tests/unit/orders/order-prefetch.test.tsx` |
+| **TC-DEDUP-01** | 인증 재조회 생략 | preloaded 시 validateUserAction 미호출 검증 (TASK-1149/DEF-142) | `tests/unit/orders/order-list-dedup.test.tsx` |
+| **TC-DEDUP-02** | 기존 동작 유지 | 미제공 시 기존 호출 검증 (TASK-1149/DEF-142) | `tests/unit/orders/order-list-dedup.test.tsx` |
+| **TC-DEDUP-03** | select 축소 고정 | 렌더 필수 컬럼 포함·bare * 제거 검증 (TASK-1149/DEF-142) | `tests/unit/orders/order-list-dedup.test.tsx` |
+| **TC-DEDUP-04** | 소속 스코핑 유지 | CORPORATE shipper_id 필터 유지 검증 (TASK-1149/DEF-142) | `tests/unit/orders/order-list-dedup.test.tsx` |
+| **TC-ORDLIST-01** | 목록 접수일자 | 접수일자 헤더·ko-KR 날짜 셀 렌더링 검증 (TASK-1144/IMP-170) | `tests/unit/orders/order-datatable-display.test.tsx` |
+| **TC-ORDLIST-02** | 목록 소속/화주 병기 | 소속·화주 상이 시 "소속/화주" 병기 검증 (TASK-1144/IMP-171) | `tests/unit/orders/order-datatable-display.test.tsx` |
+| **TC-ORDLIST-03** | 병기 중복 방지 | 동일 값 단일 표시 검증 (TASK-1144/IMP-171) | `tests/unit/orders/order-datatable-display.test.tsx` |
+| **TC-ORDLIST-04** | 병기 폴백 | override 미입력·둘 다 없음 폴백 검증 (TASK-1144/IMP-171) | `tests/unit/orders/order-datatable-display.test.tsx` |
+| **TC-ORDLIST-05** | 일자 폴백 | created_at 없음·비정상 시 - 표시 검증 (TASK-1144/IMP-170) | `tests/unit/orders/order-datatable-display.test.tsx` |
+| **TC-ORDLIST-06** | 병기 단독 표시 | 소속 없음·override만 있을 때 단독 표시 검증 (TASK-1144/IMP-171) | `tests/unit/orders/order-datatable-display.test.tsx` |
+| **TC-ORDLIST-07** | 배지 개행 방지 | STATUS 배지 nowrap 클래스 검증 (TASK-1146/DEF-139) | `tests/unit/orders/order-badges-route.test.tsx` |
+| **TC-ORDLIST-08** | 목록 배지 개행 방지 | 목록 STATUS·BILLING 배지 nowrap 검증 (TASK-1146/DEF-139) | `tests/unit/orders/order-badges-route.test.tsx` |
+| **TC-ORDLIST-09** | UPS ROUTE 폴백 | 항구 없는 UPS 오더 국가 코드 표시 검증 (TASK-1146/DEF-139) | `tests/unit/orders/order-badges-route.test.tsx` |
+| **TC-ORDLIST-10** | 非-UPS 무폴백 | 非-UPS 무항구 오더 폴백 미적용 검증 (TASK-1146/DEF-139) | `tests/unit/orders/order-badges-route.test.tsx` |
+| **TC-ORDLIST-11** | 항구 우선 | 항구 존재 시 폴백 없이 유지 검증 (TASK-1146/DEF-139) | `tests/unit/orders/order-badges-route.test.tsx` |
 
 ### 22. 회원 등급 및 승급 (Member Grade)
 | ID | 테스트 항목 | 목적 | 파일 경로 |
@@ -1064,7 +1117,20 @@ SHXK `createorder` 페이로드의 `shipper.shipper_name`이 화면 "담당자�
 | TC-343-UI-03 | 다음우편번호 자동채움 시 `address_english` 원본 유지 | 도로명 추출 순서 보장 확인 | 동일 |
 
 
-## 76. SHXK createorder shipper_company 미전송 (Issue #1277 / TASK-B-345)
+## 76. 프로덕션 배포 가드 스크립트 `scripts/deploy-prod.sh` (IMP-179)
+
+**배경**: `vercel --prod`는 로컬 작업 디렉토리를 업로드한다. 2026-10-29 21커밋 뒤처진 로컬 develop이 그대로 배포되어 TASK-B-343이 약 3분 누락됨. 항상 `origin/main` 격리 worktree에서 배포하도록 가드 스크립트 도입.
+**범위 한계**: 네트워크·vercel 없이 검증 가능한 범위만 자동 테스트. 실제 배포 경로(vercel 실행·URL 파싱·V1~V3)는 다음 배포 시 첫 실행으로 확인.
+
+| ID | 검증 내용 | 기대 결과 | 테스트 위치 |
+| :-- | :-- | :-- | :-- |
+| TC-179-1 | `bash -n` 문법 검사 | exit 0 | `tests/unit/scripts/deploy-prod.test.ts` |
+| TC-179-2 | 알 수 없는 옵션 | exit 2, '알 수 없는 옵션' 메시지, 배포 시도 없음 | 동일 |
+| TC-179-3 | `--expect` 값 누락 | exit 2 | 동일 |
+| TC-179-4 | `vercel --prod` 실행 위치 | 모든 실행 라인이 `cd "$WT"` 서브셸 안 (로컬 체크아웃 직접 배포 회귀 방지) | 동일 |
+| TC-179-5 | 배포 소스 고정 | `git worktree add --detach "$WT" origin/main` + `trap cleanup EXIT` | 동일 |
+
+## 77. SHXK createorder shipper_company 미전송 (Issue #1277 / TASK-B-345)
 
 **JSJung 2026-11-12 결정** — TASK-B-342(§74)의 "`shipper_company` = 회사 기본값 고정" 결정을 번복한다. SHXK 명세상 `shipper_company`는 선택 필드(200자)이므로 **키 자체를 payload에서 제거**한다(빈 문자열 전송 아님). `shipper_name`은 화면 "화주명" 그대로 유지(폴백 체인 변경 없음). `shipperDefaults.name`(= `SHXK_SHIPPER_NAME`)은 `shipper_name` 폴백 전용으로만 남는다. 호출처·config·DB·화면·`validate-payload.ts` 변경 없음 — `buildShipperPayload()`의 `shipper_company` 1줄 제거 (`src/lib/ups/label-mapping.ts`).
 
@@ -1081,7 +1147,7 @@ SHXK `createorder` 페이로드의 `shipper.shipper_name`이 화면 "담당자�
 | TC-345-RST | 되돌리기 검증: `buildShipperPayload()`에 `shipper_company: shipperDefaults.name` 재삽입 | 영향 5개 파일 **30 failed / 37 passed (67)** 후 원복 시 67 passed — `not.toHaveProperty` 단언이 실제로 잡아냄 (§74 TC-342-RST 대체) | 5개 파일 |
 | TC-345-EXIST | 기존 기대값 갱신 5개 파일 | `shipper_company` `toBe` 단언 → `not.toHaveProperty` 로 전환 | `tests/unit/ups/task-b342-shxk-shipper-company-default.test.ts`, `tests/unit/ups/task-b341-shxk-shipper-name-unify.test.ts`, `tests/unit/ups/task-b324-shxk-shipper-name-override.test.ts`, `tests/unit/ups/defb054-shipper-company.test.ts`, `tests/unit/ups/ups-labels-mapping.test.ts` |
 
-## 77. SHXK consignee_name 테스트용 폴백 제거 (Issue #1278 / TASK-B-346, PR①)
+## 78. SHXK consignee_name 테스트용 폴백 제거 (Issue #1278 / TASK-B-346, PR①)
 
 **배경**: `buildCreateOrderPayload()`의 consignee 블록에 `recipient_name || 'E2E Consignee'` 테스트용 폴백이 운영 코드에 남아 있어, 수취인 성명이 비어 있으면 가짜 이름이 SHXK로 전송될 수 있었다.  
 **요구사항(JSJung 2026-11-12)**: `consignee_name` ← `recipient_name`(수취인 성명) 고정, 기본값 없음. 빈 값은 `validateShxkPayload()`의 `'수취인 성명 누락'` 사전검증이 SHXK 호출 전에 차단.
@@ -1094,7 +1160,7 @@ SHXK `createorder` 페이로드의 `shipper.shipper_name`이 화면 "담당자�
 | TC-346-GREP | 폴백 문자열 잔존 점검 | `grep -rn "E2E Consignee" src tests` 0건 | - |
 | TC-346-RST | 되돌리기 검증: `consignee_name` 폴백 원복 | TC-346-1/2 FAIL — 전체 **2 failed / 40 passed** (`expected 'E2E Consignee' to be ''`, `expected [] to deeply equal [ '수취인 성명 누락' ]`) | 동일 |
 
-## 78. 전화번호 입력 안내문구 +숫자 외 입력 차단 (Issue #1279 / TASK-B-347)
+## 79. 전화번호 입력 안내문구 +숫자 외 입력 차단 (Issue #1279 / TASK-B-347)
 
 **2026-11-13, Mike** — 공용 `PhoneInput` 컴포넌트(`src/components/ui/PhoneInput.tsx`)로 전화 입력 통일(정규화 + maxLength + i18n 안내문구), 로케일 키 4개(ko/en/zh/ja) 추가, 갭 지점(주소록·회원정보·픽업 연락처·대행사 화주 담당 전화) 적용, 서버 zod/정규화 보강.
 
@@ -1112,7 +1178,7 @@ SHXK `createorder` 페이로드의 `shipper.shipper_name`이 화면 "담당자�
 **회귀 검증 (2026-11-13)**: `npm run test:regression` **237 test files / 1,714 tests 전부 PASS** (rebase 후 `origin/TeamB_Dev` 최신 포함 재실행 기준).
 **되돌리기 검증 (테스트 유효성)**: 구현(`src`+`messages`) `git stash` 시 신규·관련 테스트 **3 files / 5 tests FAIL** → 복구 시 전부 PASS — 테스트가 실제 구현을 검증함을 확인.
 
-## 79. 아이템 Packing Unit 저장 정합성 실DB 검증 (Issue #1281 / TASK-B-349)
+## 80. 아이템 Packing Unit 저장 정합성 실DB 검증 (Issue #1281 / TASK-B-349)
 
 **2026-11-13, Mike** — `item_packing_unit`이 등록(RPC) → 저장 → 수정화면 복원 → 수정 저장 → SHXK `unit_code` 전송 전 구간에서 유지되는지 **실DB 왕복 검증**(로컬 Supabase R-14: 서버 액션·RPC 실제 실행 + psql 직접 SELECT, 모의 금지). **src 수정 없는 검증 전용 Task — 불일치 발견되지 않음(의심 지점 (a)~(d) 모두 문제 없음, 판정은 task file).**
 
@@ -1130,7 +1196,7 @@ SHXK `createorder` 페이로드의 `shipper.shipper_name`이 화면 "담당자�
 - (B) `src/app/actions/operations/orders.ts:433` itemsToInsert의 `item_packing_unit` 라인 제거 → **2 failed / 3 passed** (TC-349-02·05 FAIL) → `git checkout --` 복구 후 5/5 PASS.
 - 각 복구 후 `git diff --stat`에 의도치 않은 변경 0건 확인.
 
-## 80. UPS/SHXK 주소 AddressLine 길이 사전검증 (Issue #1270 / TASK-B-344)
+## 81. UPS/SHXK 주소 AddressLine 길이 사전검증 (Issue #1270 / TASK-B-344)
 
 **2026-11-13, Mike** — `shipper_street`·`consignee_street`가 UPS AddressLine 한도를 넘으면 SHXK 호출 **이전에** 한글 오류로 차단. 한도는 Jaison 확정 잠정값(`SHIPPER_STREET_MAX=70` ShipFrom 2줄×35 / `CONSIGNEE_STREET_MAX=105` ShipTo 3줄×35 **가정** — ShipTo 실패 실측 없음). 검사는 **조립·쉼표 치환 후 최종 전송 문자열 `.length`** 기준.
 
@@ -1145,7 +1211,7 @@ SHXK `createorder` 페이로드의 `shipper.shipper_name`이 화면 "담당자�
 **회귀 검증 (2026-11-13)**: `npm run test:regression` **239 test files / 1,734 tests 전부 PASS** (487초, db freshness OK).
 **되돌리기 검증 (테스트 유효성)**: `validate-payload.ts`의 `checkStreetLength` 호출 2줄 제거 → **4 failed / 11 passed** (TC-344-1 71자·TC-344-2 106자·TC-344-3 87자·TC-344-5 통합 FAIL) → 복구 후 **15/15 PASS**.
 **실패 관측성**: `placeShxkOrder`의 사전검증 실패 분기에 `logger.warn` 1줄 추가(`ups-labels.ts:262`) — 추가 전에는 오류 반환만 존재(로그 없음).
-## 81. 서버 액션 오류 로케일 인프라 + 파일럿 (Issue #1292 / TASK-B-350)
+## 82. 서버 액션 오류 로케일 인프라 + 파일럿 (Issue #1292 / TASK-B-350)
 
 **2026-11-13, Dave** — 부모 #1280 설계 확정안(안 ②)의 1단계(PR ①-a). `messages/{ko,en,zh,ja}.json`에 **`Errors` 네임스페이스**(ko 기준 15키, 4개 로케일 동일 세트)를 신설하고, 서버 액션이 `trError()`로 현재 로케일 문장을 반환하도록 인프라를 깔았다. **파일럿 1건**: `payInvoiceFromWallet()`의 `INSUFFICIENT_BALANCE` 코드 문자열 노출 제거(`PaymentModal.tsx` 무수정). UPS/SHXK/창고 액션 일괄 적용(①-b)은 범위 외.
 
@@ -1161,9 +1227,9 @@ SHXK `createorder` 페이로드의 `shipper.shipper_name`이 화면 "담당자�
 | TC-350-RST-A | 키 동기화 되돌리기 | `en.Errors.insufficient_balance` 삭제 → **2 failed / 5 passed (7)** → 복구 후 7 passed | `tests/unit/i18n/errors-key-sync.test.ts` |
 | TC-350-RST-B | 파일럿 되돌리기 | `wallet.ts`를 `error:'INSUFFICIENT_BALANCE'`로 원복 → **1 failed / 3 passed (4)** (`expected 'INSUFFICIENT_BALANCE' to be '잔액이 부족합니다.'`) → 복구 후 4 passed | `tests/unit/finance/wallet.test.ts` |
 
-**회귀 검증 (2026-11-13, rebase 후 재실행)**: `npm run test:regression` **240 test files / 1,741 tests 전부 PASS** (TASK-B-344 §80 병합분 포함).
+**회귀 검증 (2026-11-13, rebase 후 재실행)**: `npm run test:regression` **240 test files / 1,741 tests 전부 PASS** (TASK-B-344 §81 병합분 포함).
 
-## 82. SHXK consignee_company — 수하인 회사명 전 구간 반영 (Issue #1278 / TASK-B-346, PR②)
+## 83. SHXK consignee_company — 수하인 회사명 전 구간 반영 (Issue #1278 / TASK-B-346, PR②)
 
 **배경**: PR①에서 `consignee_name` 폴백을 제거한 데 이어, SHXK createorder `consignee.consignee_company`(수취인 회사명, 선택·최대 200자)에 대응하는 입력이 전무했다. JSJung 결정(2026-11-12): 하우스 입력 "회사명" 1개를 `consignee_company`로 전송. 별도 "담당자" 필드는 만들지 않으며(`recipient_name`이 담당자 역할), 레거시 `recipient_contact`는 미사용.
 **범위**: DB 컬럼 `zen_orders.recipient_company` + RPC `create_order_atomic` v7 + 앱 레이어(입력 UI·zod·수정 복원·edit-log·SHXK payload) 전 구간. 주소록(`zen_address_book`)에는 회사명 컬럼이 없어 주소록 선택 시 회사명을 비운다(후속 개선 후보).
@@ -1188,7 +1254,7 @@ SHXK `createorder` 페이로드의 `shipper.shipper_name`이 화면 "담당자�
 - (B) `orders.ts` `headerData`의 `recipient_company` 제거 → **TC-346-03 FAIL** (`expected 'First Co' to be 'Second Co'`) → 복구 후 PASS.
 **명세 동기화**: `docs/02_Analysis/Ds_11_API_상세_명세서.md` `createOrder` 절에 수하인 필드 매핑표 + `recipient_company` 컬럼·RPC v7 기재(R-11/R-12).
 
-## 83. ups-labels 사용자 오류 로케일 전환 + SHXK 4개 로케일 사전 (Issue #1299 / TASK-B-351)
+## 84. ups-labels 사용자 오류 로케일 전환 + SHXK 4개 로케일 사전 (Issue #1299 / TASK-B-351)
 
 **2026-11-13, Dave** — 부모 #1280(안 ②)의 2단계. `src/app/actions/operations/ups-labels.ts`에서 **사용자에게 반환되는 오류를 전부 현재 로케일 문장**으로 전환했다(`trError()`). SHXK 응답 원문·DB 오류 원문·예외 `err.message`는 사용자 반환값에 넣지 않고 `logger`(및 `zen_ups_label_errors` INSERT)에만 보존한다. `src/lib/shxk/translate.ts` 사전을 `{ko,en,zh,ja}`로 확장(zh=원문)하고, 실제 관측된 오류 문구 2건(`未找到订单信息`, `Invalid ShipFrom AddressLine3`)을 등재했다. `pickShxkLocaleText`의 ja가 en 대신 **ja 번역**을 쓰도록 변경.
 
@@ -1208,4 +1274,4 @@ SHXK `createorder` 페이로드의 `shipper.shipper_name`이 화면 "담당자�
 | TC-351-RST-A | SHXK 매칭 무력화(원문 반환) | **2 failed / 4 passed** → 복구 후 6 passed | `tests/unit/ups/task-b351-error-locale.test.ts` |
 | TC-351-RST-B | `err.message` 반환 원복 | **1 failed / 5 passed** → 복구 후 6 passed | 동일 |
 
-**회귀 검증 (2026-11-13, `origin/TeamB_Dev` rebase 후 재실행)**: `npm run test:regression` **243 test files / 1,776 tests 전부 PASS** (TASK-B-346 PR② §82 병합분 포함).
+**회귀 검증 (2026-11-13, `origin/TeamB_Dev` rebase 후 재실행)**: `npm run test:regression` **243 test files / 1,776 tests 전부 PASS** (TASK-B-346 PR② §83 병합분 포함).

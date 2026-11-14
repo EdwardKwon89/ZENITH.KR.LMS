@@ -25,6 +25,7 @@
 | **001** | 통합 문서 작성 가이드 | [001_Complete_Document_Writing_Guide.md](./001_Complete_Document_Writing_Guide.md) | 프로젝트 전수 문서화 표준 및 작성법 상세 |
 | **002** | 감사 관리 정책 | [002_Audit_Management_Policy.md](./002_Audit_Management_Policy.md) | Self-Audit 및 품질 검증 운영 정책 |
 | **111** | AI Coding Agent Skill/Plugin/MCP 추천 보고서 | [111_AI_Coding_Agent_Skill_Recommendation_Report.md](./111_AI_Coding_Agent_Skill_Recommendation_Report.md) | 업무용 웹 서비스 개발용 AI Agent 역량 구성 및 도입 우선순위 권고안 |
+| **112** | AI Agent Java 고신뢰 검증 아키텍처 (참조) | [112_AI_Agent_Test_Java_Reference.md](./112_AI_Agent_Test_Java_Reference.md) | 타 Agent 생성 Java 기반 검증 참조 문서(구 GUIDE/401). ZENITH 비적용 — 테스트 전략은 GUIDE/231 참조. MLFF BOS 검토 시 도구 매핑용 |
 
 ---
 

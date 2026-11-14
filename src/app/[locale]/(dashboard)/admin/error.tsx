@@ -3,7 +3,6 @@
 import React, { useEffect } from 'react';
 import * as Sentry from "@sentry/nextjs";
 import { logger } from '@/lib/logger';
-import { logClientError } from '@/app/actions/monitoring';
 import { ErrorFallback } from '@/components/ui/ErrorFallback';
 
 export default function AdminError({
@@ -14,15 +13,9 @@ export default function AdminError({
   reset: () => void;
 }) {
   useEffect(() => {
-    const eventId = Sentry.captureException(error);
-    logClientError({
-      message: error.message || "Unknown Admin Error",
-      stack: error.stack,
-      url: typeof window !== "undefined" ? window.location.href : "",
-      severity: "ERROR",
-      error_type: "CLIENT",
-      sentry_id: eventId
-    });
+    Sentry.captureException(error);
+    // TASK-1141: severity ERROR 명시 logClientError 호출은 logger.error()에 흡수되어
+    // 삭제 — logger.error가 zen_error_logs에 자동 적재하므로 중복 기록 방지.
     logger.error("Admin Error:", error);
   }, [error]);
 

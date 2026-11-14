@@ -98,7 +98,7 @@
 ### 2-5. 접두어 교체 (항목 5)
 
 - `SHXK 필수 항목 누락: ${payloadErrors.join(', ')}` → **`trError('shxk_validation_failed', { fields })`** (`ko: "SHXK 사전검증에 실패했습니다: {fields}"`).
-- `validate-payload.ts` 문구는 여전히 한글 고정 → 이번에는 미수정, 한계를 **`scratch/post_launch_improvements.md` IMP-171** 및 §7-발견 이슈로 기록(R-15).
+- `validate-payload.ts` 문구는 여전히 한글 고정 → 이번에는 미수정, 한계를 **`scratch/post_launch_improvements.md` IMP-184** 및 §7-발견 이슈로 기록(R-15).
 - 영향 테스트: `tests/unit/ups/shxk-payload-validation.test.ts`는 `validateShxkPayload()` 반환 문자열을 직접 단언하므로 **변경 불필요**(접두어 단언은 `ups-labels` 호출부 테스트인 TC-351-03으로 신규 검증).
 
 ### 2-6. 관측성 (항목 6)
@@ -233,7 +233,7 @@ $ grep -n "throw new Error" src/app/actions/operations/ups-labels.ts
 | 5 | push | `git push --force-with-lease` |
 
 - **코드/테스트 로직 변경 0건** — rebase로 인한 해시 재작성 + 회귀맵 번호/카운트 + task file 표기만 변경.
-- Jaison 비차단 메모 반영: zh/ja 초안 검수 건을 **IMP-172**로 등록(§7-8). DB flake는 재실행 2회 연속 PASS로 **DEF 미등록**(§7-4).
+- Jaison 비차단 메모 반영: zh/ja 초안 검수 건을 **IMP-185**로 등록(§7-8). DB flake는 재실행 2회 연속 PASS로 **DEF 미등록**(§7-4).
 
 ### 6-1. 검증 결과
 
@@ -253,9 +253,9 @@ $ grep -n "throw new Error" src/app/actions/operations/ups-labels.ts
 
 1. **[수치] 이슈 기재 "리터럴 49건" vs 실측 35줄** — 착수 시 `grep -nE "error: *[\`'\"]|message: *[\`'\"]" src/app/actions/operations/ups-labels.ts | grep -v "logger\."` → **35줄**. 이슈의 49건과 차이가 있어(집계 범위·패턴 차이로 추정) **실측값 35를 기준으로 전량 전환**했고, 최종 0줄을 §5-2 출력으로 확인했다.
 2. **[테스트 기반] 전역 mock은 ko 고정** — `tests/setup.ts`의 `next-intl/server` mock이 ko를 반환하므로, 로케일별 검증은 `tests/unit/i18n/action-error.test.ts`에서 **개별 로케일 스위치 mock**으로 분리했다. 실제 요청 헤더 경로는 TASK-B-350 §2에서 dev 서버로 실증된 상태(이번 Task에서 재실증 불요 지시).
-3. **[i18n 잔여] `validate-payload.ts` 문구가 한글 고정** — `{fields}`에 한글이 섞여 비한국어 사용자에게 노출된다. 이번 지시대로 미수정, **IMP-171**(`scratch/post_launch_improvements.md`)로 등록(R-15).
+3. **[i18n 잔여] `validate-payload.ts` 문구가 한글 고정** — `{fields}`에 한글이 섞여 비한국어 사용자에게 노출된다. 이번 지시대로 미수정, **IMP-184**(`scratch/post_launch_improvements.md`)로 등록(R-15).
 4. **[CI/회귀] DB 의존 테스트 2건 1회 flake** — 최초 전체 회귀에서 `tests/unit/ups/ups-zone-name-relabel.test.ts` 2건이 실패했으나, 단독 실행 **7/7 PASS**, **재실행 2회 연속 전체 PASS**(rebase 후 포함). 병렬 DB 테스트 경합으로 추정(본 Task 미수정 파일) → **재현되지 않아 DEF 등록 보류**, 재발 시 DEF-B-158+ 등록 대상.
 5. **[함수 길이] 기존 액션 함수가 base부터 50줄 초과** — `downloadAndStoreLabelDoc` 83, `registerUpsOrder` 63→72, `fetchAndIssueUpsLabel` 80→100, `cancelUpsRegistration` 87→93, `previewShxkPayload` 54→57. 이번 Task는 문구 분기·로그 추가로 소폭 증가했고, **분해 리팩터링은 범위 외**로 하지 않았다. 신규 함수는 모두 50줄 이하(§5-3).
 6. **[범위 확인] `withAction()` 미사용·미수정** — `src/lib/actions/wrapper.ts` diff 0건. 방침(명시적 반환 B안) 준수.
 7. **[SHXK] 오류 사전은 관측 2건만** — `未找到订单信息`, `Invalid ShipFrom AddressLine3`. 추가 문구는 실측 확보 후 등재 필요(추측 등재 금지 준수).
-8. **[i18n] zh/ja 신규 문구 초안 검수 필요** — `Errors` 신규 6키 + SHXK 오류 사전 2건의 zh/ja 문구는 Dave 초안이다. Jaison 리뷰 메모에 따라 **IMP-172**로 등록(머지 후 JSJung 검수 대상).
+8. **[i18n] zh/ja 신규 문구 초안 검수 필요** — `Errors` 신규 6키 + SHXK 오류 사전 2건의 zh/ja 문구는 Dave 초안이다. Jaison 리뷰 메모에 따라 **IMP-185**로 등록(머지 후 JSJung 검수 대상).

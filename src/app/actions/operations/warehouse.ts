@@ -520,6 +520,9 @@ export async function confirmUpsRegistration(orderId: string) {
   revalidatePath("/(dashboard)/warehouse/outbound", "page");
   revalidatePath("/(dashboard)/orders", "page");
   revalidatePath('/(dashboard)/orders/[orderId]', 'page');
+  // TASK-1145 (Issue #1212, DEF-138): 목록이 UPS 오더를 ups-detail 경로로 링크하므로
+  // 해당 경로도 갱신 (tracking.ts 선례와 동일)
+  revalidatePath('/(dashboard)/orders/[orderId]/ups-detail', 'page');
 
   return {
     success: true,
@@ -557,6 +560,8 @@ export async function undoUpsRegistration(orderId: string) {
   revalidatePath("/(dashboard)/warehouse/outbound", "page");
   revalidatePath("/(dashboard)/orders", "page");
   revalidatePath('/(dashboard)/orders/[orderId]', 'page');
+  // TASK-1145 (Issue #1212, DEF-138): confirmUpsRegistration과 대칭 (위 참조)
+  revalidatePath('/(dashboard)/orders/[orderId]/ups-detail', 'page');
 
   return { success: true };
 }
