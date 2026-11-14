@@ -2089,3 +2089,15 @@ UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류
 - **관련 파일**: `messages/zh.json`, `messages/ja.json`, `src/lib/shxk/translate.ts`, `tests/unit/i18n/errors-key-sync.test.ts`, `tests/unit/shxk/translate.test.ts`
 - **예상 공수**: 0.1~0.2 MD (검수·문구 수정·테스트 기대값 갱신)
 - **우선순위**: Low — 기능 무관, 표시 문구 품질
+
+---
+
+## [IMP-186] 단일 파일 꼬리 추가형 번호(회귀맵 §번호·IMP ID) 병렬 작업 충돌 — 채번 방식 개선
+
+- **발견 경위**: 2026-11-14, TeamB_Dev→develop 통합 사전 검토 중 `LIVE_REGRESSION_TEST_MAP.md`(§번호)와 `scratch/post_launch_improvements.md`(IMP ID) 두 파일에서 양 브랜치가 같은 번호를 꼬리에 추가한 충돌이 발생(PR #1303에서 해소). 동일 원인이 TASK-B-350/B-351 재작업, Issue #1291(회귀맵 분할 결정, DEF-B-157)로 이미 관측되었고, TASK·DEF 번호는 `next-task-number.sh`·`next-def-number.sh`로 대응했으나 **회귀맵 §번호와 IMP ID에는 채번 도구가 없다**.
+- **현재 상태**: 병렬 작업(Team A/B)이 같은 시점에 각자 "다음 번호"를 꼬리에 붙이면 병합 시 번호가 겹친다. 이번 충돌 해소 결과 — 회귀맵 Team B §76~83을 §77~84로 재부여, Team B IMP-171→184·IMP-172→185로 재부여(관련 task file 참조 정정). 해소 비용과 참조 오류 위험이 수작업에 있다.
+- **임시 조치**: 같은 날 통합 주기 개정(105, 2026-11-14 — 당일 KST 23:00까지 완료분은 당일 반영)으로 브랜치 간 간격을 줄여 충돌 빈도를 낮춤. 충돌 시 develop 번호를 유지하고 후행 브랜치를 재부여.
+- **목표 구현**: (A) IMP ID — `next-imp-number.sh [A|B]`로 채번하거나 항목을 `scratch/imp/IMP-NNN.md` 개별 파일로 분리(꼬리 추가 충돌 제거) (B) 회귀맵 — §번호 의존 제거(도메인별 파일 분할 또는 번호 없는 앵커)와 `next-section-number.sh`; **Issue #1291(분할 결정)과 함께 Edward 판단**. 어느 쪽이든 기존 참조(task file 등)의 번호 이전 계획 필요.
+- **관련 파일**: `docs/08_Self_Audit/Checklists/LIVE_REGRESSION_TEST_MAP.md`, `scratch/post_launch_improvements.md`, `scripts/next-task-number.sh`·`scripts/next-def-number.sh`(참고 패턴), Issue #1291, `docs/00_GUIDE/105_MULTITEAM_GOVERNANCE.md`
+- **예상 공수**: (A) 0.3~0.5 MD, (B) 1 MD 내외(분할 범위에 따라)
+- **우선순위**: Medium — 기능 무관이나 병렬 작업이 늘수록 병합마다 재발
