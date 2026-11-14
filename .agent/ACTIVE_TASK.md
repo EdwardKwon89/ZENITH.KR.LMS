@@ -50,9 +50,13 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
+| [#1298](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1298) | [Aiden] R-12(Ds-11 동기화) 개정·Docs Sync Check 도입 안내 — Team B 영향 및 회신 요청 | b | p2 | - | jungjs | 2026-11-14 |
+| [#1291](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1291) | [Team B] #1280 설계 확정 공유 + 회귀맵 분리(R-09/DEF-B-157) 결정 요청 (Aiden 보고) | b | p2 | open | 미배정 | 2026-11-13 |
+| [#1280](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1280) | [Team B] TASK-B-348: 사용자 노출 오류메시지 로케일 정합화 (영문/중문 혼재 노출 제거) | b | p2 | draft | 미배정 | 2026-11-13 |
+| [#1276](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1276) | [Team B] 원격 브랜치 정리 후속 — 판단 보류 브랜치 11건 점검 요청 | b | p3 | open | jungjs | 2026-10-29 |
 | [#1238](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1238) | 2026.10.12 오류사항 및 보완사항 | b | p2 | - | 미배정 | 2026-10-12 |
 | [#1218](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1218) | [Aiden] Stage-Gate Code Review — UPS 핵심 경로(오더등록~정산) 대상, 적절한 시점에 실시 | - | p3 | - | 미배정 | 2026-10-11 |
-| [#1189](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1189) | [Team B] TASK-B-323: Resend 이메일 도메인(zenith-lms.com) 미인증 — 알림메일 전량 발송 실패 (DEF-B-143, High) | b | p1 | - | jungjs | 2026-10-01 |
+| [#1189](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1189) | [Team B] TASK-B-323: Resend 이메일 도메인(zenith-lms.com) 미인증 — 알림메일 전량 발송 실패 (DEF-B-143, High) | b | p1 | - | jungjs | 2026-10-13 |
 | [#1185](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1185) | [Team B] TASK-B-322: 로그 커버리지 개선 ⑤— admin/auth.ts 예외 객체 폐기 패턴 수정 (5건) | b | p2 | - | 미배정 | 2026-08-23 |
 | [#1183](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1183) | [Team B] TASK-B-321: 로그 커버리지 개선 ③— ups-actual-charges/cost.ts DB쓰기 실패 무기록 (~21건) | b | p2 | - | 미배정 | 2026-08-23 |
 | [#1182](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1182) | [Team B] TASK-B-320: 로그 커버리지 개선 ②— lib/shxk/order.ts·tracking.ts logger 미도입 (6건) | b | p2 | - | 미배정 | 2026-08-23 |
