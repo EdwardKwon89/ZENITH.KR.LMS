@@ -66,9 +66,9 @@ Team C: feature/teamc-*  ──────────────────�
 Team B는 개별 `feature/teamb-*` 브랜치를 **develop에 직접 PR 제출하지 않고**, 먼저 고정 브랜치 `TeamB_Dev`로 자체 병합해 최신 상태를 유지한다.
 
 - **개별 → TeamB_Dev**: Jaison 사전검토(diff + **로컬 검증**: `npm run build` + `npm run test:regression`) 후 팀 자체 판단으로 병합 (Aiden 승인 불요). **GitHub Actions CI 완료 대기는 불요**(2026-07-20 개정 — Aiden이 develop에 직접 반영할 때 쓰는 방식과 동일하게, TeamB_Dev는 내부 통합 브랜치라 최종 게이트가 아니므로 로컬 검증으로 충분. CI 큐 혼잡으로 인한 Team B 대기 시간 문제 완화 목적)
-- **TeamB_Dev → develop**: Aiden이 정기적으로(1일 1~2회 권장) 배치 병합 — develop 병합은 여전히 Aiden 단독 권한(R-17 §0/R-19 불변). **이 단계는 기존 원칙(R-17 v2.2) 그대로 유지** — 실제 GitHub Actions CI 통과 확인이 원칙이며, CI가 15분 내 트리거되지 않을 때만 R-08-1 로컬 대체 검증 허용. 즉 CI 생략이 허용되는 건 개별→TeamB_Dev 단계뿐이고, develop에 실제로 반영되는 이 단계의 검증 기준은 낮아지지 않는다.
+- **TeamB_Dev → develop**: Aiden이 **필요 시** 병합한다(고정 주기 없음 — 2026-11-14 개정). 다만 **당일(KST 23:00까지) 완료(`status:review`)된 Team B Task는 당일 안에 반영**한다. 23:00 이후 완료분은 다음 날 처리하며, Edward/Aiden 지시가 있으면 추가 PR·병합을 수행한다 — develop 병합은 여전히 Aiden 단독 권한(R-17 §0/R-19 불변). **이 단계는 기존 원칙(R-17 v2.2) 그대로 유지** — 실제 GitHub Actions CI 통과 확인이 원칙이며, CI가 15분 내 트리거되지 않을 때만 R-08-1 로컬 대체 검증 허용. 즉 CI 생략이 허용되는 건 개별→TeamB_Dev 단계뿐이고, develop에 실제로 반영되는 이 단계의 검증 기준은 낮아지지 않는다.
 - 이전에는 `integration/teamb-YYMMDD` 형태로 매일 새 브랜치를 만들었으나(2026-07-16~18), 브랜치명이 바뀔 때마다 CI 트리거 목록을 갱신해야 하는 문제가 반복돼 **고정 브랜치로 전환**(과거 `integration/teamb-*` 브랜치는 이력 보존용으로 남겨두고 신규 작업 대상에서 제외)
-- Aiden의 배치 병합 시 develop→TeamB_Dev 역방향 병합도 함께 수행해 두 브랜치의 드리프트를 방지한다(충돌은 시간순으로 해소 — [107_MULTIAGENT_SCALING_PROPOSAL.md](107_MULTIAGENT_SCALING_PROPOSAL.md) 참조)
+- Aiden의 병합 시 develop→TeamB_Dev 역방향 병합도 **같은 날 함께 수행**해 두 브랜치의 드리프트를 방지한다(근거: 2026-11-14 점검 — 통합 간격 1~25일로 불규칙, 마지막 develop→TeamB_Dev 동기화 2026-10-01 이후 198커밋 뒤처져 회귀맵 §번호·IMP 번호 충돌 발생. 충돌은 시간순으로 해소 — [107_MULTIAGENT_SCALING_PROPOSAL.md](107_MULTIAGENT_SCALING_PROPOSAL.md) 참조)
 
 - 각 팀은 `develop`을 베이스로 브랜치 생성
 - PR 대상: `develop` (팀 리더가 PR 생성 + Aiden 검토 요청)
