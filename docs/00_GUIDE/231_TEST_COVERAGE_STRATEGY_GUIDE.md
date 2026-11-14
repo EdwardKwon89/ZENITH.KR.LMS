@@ -10,7 +10,7 @@ tags: ["procedure"]
 > **대상**: 모든 Agent (Aiden / Riley / D_Kai / B_Kai / Team B), 향후 MLFF BOS 개발
 > **작성일**: 2026-11-13
 > **작성자**: Aiden (Claude)
-> **버전**: v1.1 (**방법론 확정** 2026-11-13 — 3차 교차 검증 반영 후 Aiden 최종 검증 통과, Edward 지시. v1.1: Edward 결정 반영 — §7-2 원칙 (A), Ds-11 서술 정정. 단 도구 도입(§10 #1)·GOV 규정 편입(§10 #14)·기타 §10 항목은 별도 결정 전까지 미결이며, R-11에 따라 **결정 전 구현·도구 도입 금지**)
+> **버전**: v1.2 (**방법론 확정** 2026-11-13 — 3차 교차 검증 반영 후 Aiden 최종 검증 통과, Edward 지시. v1.1: Edward 결정 반영 — §7-2 원칙 (A), Ds-11 서술 정정. v1.2(2026-11-14): §10 #3 PoC 격리 운용 방안 기록. 단 도구 도입(§10 #1)·GOV 규정 편입(§10 #14)·기타 §10 항목은 별도 결정 전까지 미결이며, R-11에 따라 **결정 전 구현·도구 도입 금지**)
 > **의견 출처**: [Riley](../08_Self_Audit/Reviews/231/riley_review.md) · [B_Kai](../08_Self_Audit/Reviews/231/bkai_review.md) · 2차 교차 검증 [round2/](../08_Self_Audit/Reviews/231/round2/) · 3차 [round3/](../08_Self_Audit/Reviews/231/round3/) (반영 내역은 부록 C·E·F)
 > **관련**: [106 품질 게이트웨이](./106_QUALITY_GATEWAY_GUIDE.md) · [301 QAM](./301_QUALITY_ASSURANCE_MANUAL.md) · [105 도메인 지식(§9 엣지케이스)](./105_DOMAIN_KNOWLEDGE.md) · [201 SAR](./201_SAR_RULE.md) · [306 §A 테스트 자산](./306_NEW_PROJECT_REUSE_REVIEW.md) · [참조 112 (Java 검증 아키텍처)](../10_Reference/112_AI_Agent_Test_Java_Reference.md)
 > **표기 규칙**: `§N` = N장 전체, `§N.M` = N장 M절(소제목이 있는 장: 1·4·5·8), **`§7-M` = 7장의 M번 항목**(7장은 소제목 없이 번호 목록 1~8), `§10 #K` = 10장 표의 K번 행, `부록 X #K` = 부록 X 표의 K번 행, `(R)`·`(B)`·`(D)` = 제안자 Riley·B_Kai·D_Kai. 다른 문서의 절은 `305 §1.6`처럼 **문서 번호를 함께** 쓴다. 줄 번호는 이 파일의 현재 버전 기준.
@@ -399,7 +399,7 @@ GOV_COMMON의 "실패 관측성 의무"(반환 전 `logger.error/warn`)는 현�
 |:-:|:--|:--|:--|
 | 1 | devDependencies 추가(coverage-v8, fast-check, Stryker) 승인 | Riley 찬성(런타임 영향 없음), B_Kai 국소 도입 찬성 | Edward |
 | 2 | PoC 대상 3모듈 확정 — ① `status-machine.ts`·`ups-edit-availability.ts`·`ups-registration.ts` / ② **UPS `pricing-engine.ts`+`discount-guard.ts`**(UPS 엔진으로 특정할지 포함) / ③ `label-mapping.ts`·`validate-payload.ts`·`shxk-limits.ts` | Riley 조건부 찬성(파일 특정 필수), B_Kai "운임 엔진 경계 특정 필요" — **양측 모두 파일 특정 요구** | Edward / CPO |
-| 3 | PoC 구현 주체 — Riley는 **교차 검증(Cross-Team Breaker)** 제안: `ups/*`·`shxk/*`는 Team B 영역이므로 Team A가 명세 기반 테스트·변이 측정 수행 (반대 배정도 가능) | Riley 제안, B_Kai 직접 언급 없음. 파일 소유권(R-19) 확인 필요 | Edward |
+| 3 | PoC 구현 주체 — Riley는 **교차 검증(Cross-Team Breaker)** 제안: `ups/*`·`shxk/*`는 Team B 영역이므로 Team A가 명세 기반 테스트·변이 측정 수행 (반대 배정도 가능) | Riley 제안, B_Kai 직접 언급 없음. 파일 소유권(R-19) 확인 필요. **격리 운용 방안(2026-11-14 반영 — 검증·채택 확정 전까지 Team B 작업에 영향을 주지 않기 위함)**: ⓐ 모듈 ③(`label-mapping.ts`·`validate-payload.ts`·`shxk-limits.ts`)은 Team B 담당 파일이므로 Team B 협의·동의 전까지 제외하고 ①②부터 진행, 협의 후에도 `src/` 읽기 전용 ⓑ `src/` 수정 없이 새 경로(예: `tests/poc-231/`)에 새 파일만 추가 ⓒ PoC 기간 중 `LIVE_REGRESSION_TEST_MAP.md`·`package.json`·lockfile·`pr-checks.yml` 미수정 — 결과는 PoC 전용 문서에 기록하고 채택 확정 시 한 번에 반영(R-09) ⓓ PoC 테스트는 `test:regression` 대상에서 분리 ⓔ `feature/teama-*` 브랜치에서 Draft PR(`do-not-merge`)로 두고 검증 전 develop 미병합, R-17 §0 워크트리에서 작업 ⓕ 착수 전 Team B에 범위·제외 파일·일정을 Issue 코멘트로 고지 ⓖ 채택 후 반입은 별도 PR로 분리하고 **신규 Task부터 점진 적용**. **별도 원격 저장소 대안**은 기본으로 채택하지 않음(동기화 비용·R-17 추적 분리·반입 시 충돌 재발) — Stryker·fast-check를 CI에서 측정하려고 `package.json`·CI 변경이 필요할 때만 한정해 사용하고 결과는 문서로만 반입. 착수 전 모듈 ①②의 소유 팀을 `git log`로 확인 | Edward |
 | 4 | 실DB 테스트(D3-B·D6·D7) 실행 위치 | Riley: D3-B·D6은 PR CI 포함, D7은 야간/수동. B_Kai: 안정성 전제(fixture 헬퍼) 필요, CI 현황 미확인 | 단계 1 실측 후 Aiden 제안 |
 | 5 | 커버 맵 파일 신설 승인 | 양측 찬성, 단 **자동 생성 + 핵심 10~15개 한정 + PR 직접 편집 금지**(Riley), 점진 구축(B_Kai) | Edward |
 | 6 | 301 QAM Gate 2 정의 개정 | Riley 개정 후보안 제시, B_Kai 수치 선제 규정 반대 → **수치는 PoC 후 확정** | PoC 후 |
@@ -560,5 +560,6 @@ GOV_COMMON의 "실패 관측성 의무"(반환 전 `logger.error/warn`)는 현�
 | v0.5 | 2026-11-13 | Aiden (Claude) | 3차 교차 검증(Riley·B_Kai·D_Kai) 반영(부록 F 16건). §1.3·§4.9·§8.6 적용 시점 통일(PoC 기간 시범·권고, 필수화는 §10 #14), §4.9 양식 현실화(DoD·`TC-<Task>-<연번>`·위험 0개 약식), §7-2를 심볼 존재 기준 조건부 분기로 재작성, §5.2·§8.2 D3-B/D8 근거 분리, §4.3 현행 fixture 패턴 명시, 305 편입을 §1.6 재판정으로 후퇴, 사실 오류 정정(Ds 목록, R-14, §7-7 참조, TeamB_Dev 기준 표기), §10 #16·#17 추가. 승인 전 |
 | v1.0 | 2026-11-13 | Aiden (Claude) | **방법론 확정.** Aiden 최종 검증(구조·참조·사실 대조)에서 2건 정정 — Ds-11을 "미작성"이 아니라 `_archive/ds_11/` 이동 상태로 정정(§4.4·§7-1·§10 #11·부록 E #11), 표기 규칙 추가(머리말), §7-4 210 문서 위치 구체화. 부록 F #17·#18. §10 미결 항목은 유지 |
 | v1.1 | 2026-11-13 | Aiden (Claude) | Edward 결정 반영: §7-2 원칙을 (A) 별도 Spec PR로 확정하고 난이도(위험 기준)별 분리 운영 채택, (B)는 PoC 후 결정(§10 #10). **Ds-11 정정**: 활성 문서가 없다는 v0.2~v1.0 서술은 오류 — 현행본 `docs/02_Analysis/Ds_11_API_상세_명세서.md`, 실제 문제는 구 경로 참조 4곳과 2026-07-15 이후 미갱신(§4.4·§4.9·§7-1·§10 #11, 부록 E #11·F #17·#19) |
+| v1.2 | 2026-11-14 | Aiden (Claude) | Edward 지시 반영: §10 #3에 PoC **Team B 영향 차단 격리 운용 방안**(모듈 ③ 제외·`src/` 무수정·공유 파일 미수정·Draft PR 보류·신규 Task부터 점진 적용)과 별도 원격 저장소 대안 판단 기록. 결정 상태는 미결 유지 |
 
 [← 목록으로 돌아가기](./000_README.md)
