@@ -2114,3 +2114,15 @@ UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류
 - **관련 파일**: `docs/00_GUIDE/105_MULTITEAM_GOVERNANCE.md`, `scripts/agent-worktree-init.sh`·`scripts/check-db-freshness.sh`(참고 패턴), IMP-186
 - **예상 공수**: 0.5 MD
 - **우선순위**: Medium — 동기화 누락이 번호·파일 충돌과 통합 지연으로 이어짐(IMP-186과 한 쌍)
+
+---
+
+## [IMP-188] `next-task-number.sh`가 Issue만 있는 Task 번호를 감지하지 못해 채번 충돌 발생
+
+- **발견 경위**: 2026-11-15, DEF-146 영향 분석 Task 발령 중 `./scripts/next-task-number.sh A`가 `TASK-1150`을 반환했으나 이미 같은 번호의 Issue(#1309, 회귀맵 이전 Task)가 발령되어 있었다. 발령 직후 이슈 제목을 TASK-1151로 정정해 실제 충돌은 피했다.
+- **현재 상태**: 스크립트는 `.agent/tasks/TASK-*` 파일명만 기준으로 다음 번호를 계산한다. R-17에서 Task는 Issue로 먼저 발령되고 상세 파일은 담당 Agent가 착수 시 생성하므로, **발령~착수 사이의 Task 번호가 감지되지 않는다**(blocked 상태로 오래 대기하는 Task일수록 위험).
+- **임시 조치**: 발령 전 `gh issue list --state all --search "TASK-NNNN"`로 번호를 수동 확인.
+- **목표 구현**: `next-task-number.sh`·`next-def-number.sh`가 task file뿐 아니라 `gh issue list --state all`의 제목(`TASK-N`·`DEF-N`)도 조회해 최댓값+1을 반환(gh 미인증 시 경고와 함께 파일 기준 폴백). IMP-186·IMP-187과 함께 채번 일원화 검토.
+- **관련 파일**: `scripts/next-task-number.sh`, `scripts/next-def-number.sh`, R-19(번호 채번 규칙)
+- **예상 공수**: 0.2 MD
+- **우선순위**: Medium — 번호 중복은 Issue #358에서 이미 반복 확인된 사고 유형

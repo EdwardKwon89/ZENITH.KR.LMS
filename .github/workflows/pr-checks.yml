@@ -72,6 +72,23 @@ jobs:
       - name: 문서 링크 점검 (신규 깨진 링크)
         run: node scripts/check-doc-links.mjs || true
 
+  audit-advisory:
+    name: Dependency Audit (advisory, non-blocking)
+    # DEF-146: 운영 의존성 취약점(npm audit --omit=dev) 래칫. baseline(scripts/audit-baseline.json) 밖의
+    # **신규·심각도 상승**만 ::warning 으로 알리고 항상 exit 0. npm ci 불필요(lockfile 기준 감사, 레지스트리 접근 필요).
+    runs-on: ubuntu-latest
+    if: github.head_ref != 'bot/sync-active-task'
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: 의존성 취약점 점검 (신규·상승만 경고)
+        run: node scripts/check-audit.mjs || true
+
   regression:
     name: Regression Tests
     runs-on: ubuntu-latest
