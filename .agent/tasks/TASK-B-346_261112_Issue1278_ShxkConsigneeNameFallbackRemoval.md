@@ -4,11 +4,12 @@
 **담당:** Baker (Team B)
 **배정 이슈:** #1278
 **브랜치(PR①):** feature/teamb-task-b346-iss1278-consignee-pr1-name-fallback (머지 완료 #1285)
-**브랜치(PR②):** feature/teamb-task-b346-iss1278-consignee-pr2-company
+**브랜치(PR②):** feature/teamb-task-b346-iss1278-consignee-pr2-company (머지 완료 #1300)
+**브랜치(PR③):** feature/teamb-task-b346-iss1278-consignee-pr3-audit
 **베이스:** origin/TeamB_Dev
 **생성일:** 2026-11-12
 
-> **PR 분할**: PR①(`consignee_name` 폴백 제거)은 #1285로 머지 완료. 본 Task file은 PR②(수하인 회사명 전 구간)에서 재사용한다 — PR③(consignee 잔여 필드 감사)은 별도 지시 대기.
+> **PR 분할**: PR①(`consignee_name` 폴백 제거)은 #1285로 머지 완료. PR②(수하인 회사명 전 구간)는 #1300으로 머지 완료. 본 Task file은 PR③(`consignee.*` 18필드 감사 → 명세 상한 보완)에서 재사용한다.
 
 ## 목표
 SHXK createorder payload의 `consignee.consignee_name`에 남아 있던 테스트용 폴백 `'E2E Consignee'`를 제거한다.
@@ -148,6 +149,98 @@ JSJung 확정(2026-11-12): 하우스 입력 "회사명" 1개 → `consignee_comp
 1. **주소록(`zen_address_book`)에 회사명 컬럼 부재** — 주소록에서 수하인을 선택하면 회사명을 채울 소스가 없어, 이전 입력값이 남지 않도록 주소록 선택 시 회사명을 빈 값으로 초기화했다(`OrderRegistrationForm.tsx`). 주소록 스키마에 회사명을 추가하는 것은 본 Task 범위 밖 — 후속 개선 후보(JSJung/Jaison 판단 필요).
 2. **`src/types/supabase.ts` stale** — 본 PR②에서 필요한 `recipient_company`만 추가했다. 파일 자체가 `recipient_address_detail` 등 기존 컬럼도 누락한 상태(자동 생성 재실행 필요) — 범위 확대 방지를 위해 미포함.
 3. **PR 생성 직후 CI 무트리거 = base 충돌** — 위 PR②/CI 결과 항목 참조. base 전진 시 rebase 없이는 CI가 실행조차 되지 않으므로, PR 생성 직후 `gh pr view --json mergeable` 확인이 필요하다.
+
+---
+
+# PR③ — SHXK consignee 전체 매핑 감사 + 명세 상한 보완 + 회사명 공백 정규화
+
+**브랜치:** feature/teamb-task-b346-iss1278-consignee-pr3-audit (base `origin/TeamB_Dev` = `5056416d5`)
+**범위:** 감사(18필드) + 명세 상한 검증 보완(7필드) + 회사명 공백 정규화. 회귀맵 §86. **DB 마이그레이션·UI 변경 없음.**
+
+## 목표
+SHXK `createorder`의 `consignee.*` 전체 명세(`docs/80_RawData/Phase8_UPS_API_리서치_결과.md` 130~147행, 18개 필드)와 현재 전송·검증 상태를 대조(감사)하고, **명세 위반이 객관적으로 확인되는 갭만** 보완한다. 새 DB 컬럼·입력 UI가 필요한 항목은 구현하지 않고 결정 요청 표로 보고한다(R-11).
+
+## DoD (PR③)
+- [x] 1단계 감사 표(18행) — 모든 "현재 …" 칸에 `파일:줄` 근거(추정 금지)
+- [x] 2단계 (a) 공백만 회사명(`"  "`) 미전송(trim 후 빈 값이면 키 생략)
+- [x] 2단계 (b) 명세 상한 있으나 앱 검증 없던 7필드 사전검증 추가 — `shxk-limits.ts` 상수(명세 행 주석) + `validate-payload.ts` 단일 오류 `수취인 … N자 초과` + 6필드 zod max
+- [x] 3단계 미전송 8필드 결정 요청 표(task file + Issue 코멘트) + IMP-190 등록 (구현 안 함)
+- [x] Ds-11 수하인 매핑표 **선갱신**(R-11/R-12) 후 `npm run check:ds11` 기록
+- [x] 되돌리기 검증 2건(A: 사전검증 / B: 회사명 공백) failed/passed 수 기록
+- [x] `npm run test:regression` 전체 PASS, `npm run build` EXIT=0
+- [x] 회귀맵 §86 추가
+- [x] UI 변경 없음
+- [x] R-17 절차 준수
+
+## [PR③ 감사] — SHXK createorder `consignee.*` 18필드 대조
+> "현재" 칸의 줄 번호는 **PR③ 수정 전** 기준. 명세 = `docs/80_RawData/Phase8_UPS_API_리서치_결과.md` 130~147행.
+
+| # | 명세 필드 | 최대길이 | 필수 | 현재 전송 (label-mapping.ts) | 현재 검증 (order.ts zod / validate-payload.ts) | 갭 | 조치 |
+| :-- | :-- | :-- | :-- | :-- | :-- | :-- | :-- |
+| 1 | `consignee_name` | 200 | Y | L170 `\|\| ''` | zod L76 `.min(1)`만 / vp L59 누락만 | 상한 검증 전무 | **수정** zod max 200 + vp 200 |
+| 2 | `consignee_company` | 200 | N | L173–175 조건부 스프레드 | zod L78 max 200 / vp L60–63 200 | 상한 OK. 단 **공백만 입력 시 `''` 전송** | **수정**(공백 정규화) |
+| 3 | `consignee_countrycode` | 2 | Y | L176 `\|\| countryCode` | zod L85(없음) / vp L64 누락만 | 상한 검증 없음 | **수정** vp 2 (zod 제외 — select 제어) |
+| 4 | `consignee_province` | 300 | 조건 | L177 `sanitizeComma` | zod L86(없음) / vp 없음 | 상한 검증 없음 | **수정** zod max 300 + vp 300 |
+| 5 | `consignee_city` | 300 | 조건 | L178 `sanitizeComma` | zod L87(없음) / vp L67 누락만 | 상한 검증 없음 | **수정** zod max 300 + vp 300 |
+| 6 | `consignee_district` | 300 | 조건 | **미전송** | — | 입력·전송 없음 | **보류 → IMP-190** |
+| 7 | `consignee_street` | 300 | Y | L179 `fullConsigneeStreet` | zod L79 `.min(1)` / vp L65–66 누락 + 105(`checkStreetLength`) | 앱 105 < 명세 300 — 의도적 더 엄격(UPS AddressLine) | **보류(갭 아님)** |
+| 8 | `consignee_postcode` | 100 | 조건 | L180 `\|\| ''` | zod L84(없음) / vp L68 누락만 | 상한 검증 없음 | **수정** zod max 100 + vp 100 |
+| 9 | `consignee_doorplate` | 300 | N | **미전송** | — | 입력·전송 없음 | **보류 → IMP-190** |
+| 10 | `consignee_areacode` | 10 | N | **미전송** | — | 입력·전송 없음 | **보류 → IMP-190** |
+| 11 | `consignee_telephone` | 100 | 조건 | L181 `stripNonDigits` | zod L82–83 max 15 digits / vp L69–72 `checkPhone` 15 | 앱 15 < 명세 100 — 의도적 더 엄격(E.164) | **보류(갭 아님)** |
+| 12 | `consignee_mobile` | 100 | 조건 | **미전송** | — | 입력·전송 없음 | **보류 → IMP-190** |
+| 13 | `consignee_email` | 100 | N | L182 `\|\| ''` | zod L90 `.email()`만 / vp 없음 | 상한 검증 없음 | **수정** zod max 100 + vp 100 |
+| 14 | `consignee_fax` | 100 | N | **미전송** | — | 입력·전송 없음 | **보류 → IMP-190** |
+| 15 | `consignee_certificatetype` | — | N | **미전송** | — | 입력·전송 없음 | **보류 → IMP-190** |
+| 16 | `consignee_certificatecode` | 50 | N | **미전송** | — | 입력·전송 없음 | **보류 → IMP-190** |
+| 17 | `consignee_credentials_period` | 50 | N | **미전송** | — | 입력·전송 없음 | **보류 → IMP-190** |
+| 18 | `consignee_tariff` | 50 | 조건 | L183 `\|\| ''` | zod L89(없음) / vp 없음 | 상한 검증 없음 | **수정** zod max 50 + vp 50 |
+
+**감사 결론**: 전송 중 10필드 중 5필드가 상한 검증 공백(#1·#3·#4·#5·#8·#13·#18 중 회사명 제외 7필드 중 6필드는 zod도 없음) → 이번 PR에서 보완. street·telephone은 앱이 명세보다 엄격(의도적). 미전송 8필드는 별도 결정.
+
+## [PR③ 결정 요청] — 미전송 8필드 (구현하지 않음, 결정 대기)
+| 명세 필드 | 필요 여부(권장) | 필요한 컬럼·UI | 영향 국가 | 권장안 |
+| :-- | :-- | :-- | :-- | :-- |
+| `consignee_district` | 조건부 필요 | `zen_orders.recipient_district`(text) + 수하인 주소 "구/군" 입력 | 주-도시-구 구조 국가(CN·JP·일부 EU) | 1단계 포함 검토 |
+| `consignee_doorplate` | 낮음 | `recipient_doorplate` + 입력 | 문패 체계 국가(CN 등) | 보류(거부 로그 확인 후) |
+| `consignee_areacode` | 낮음 | `recipient_areacode` + 입력 | 일부 아시아 | 보류 |
+| `consignee_mobile` | 조건부 필요 | `recipient_mobile` + 입력(전화와 별도) | 대부분 국가(휴대폰이 주 연락처) | 1단계 포함 검토(현재 `telephone` 폴백) |
+| `consignee_fax` | 불필요 | — | — | 미전송 확정 권장 |
+| `consignee_certificatetype` | 정책 결정 필요 | `recipient_certificate_type` + select(ID/PP) | 신분증 기반 통관 국가 | 정책 확정 후 |
+| `consignee_certificatecode` | 정책 결정 필요 | `recipient_certificate_code` + 입력 | 상동 | 정책 확정 후 |
+| `consignee_credentials_period` | 정책 결정 필요 | `recipient_credentials_period` + 입력 | 상동 | 정책 확정 후 |
+
+## [작업 결과] (PR③)
+- **명세 선갱신:** `docs/02_Analysis/Ds_11_API_상세_명세서.md` `createOrder` 절 수하인 매핑표 갱신 — 명세 상한·미전송 8필드 기재. `npm run check:ds11` → `액션 함수 298개 | Ds-11 언급 92개 | 미반영 206개 (허용 목록 206개)` **OK** (신규 미반영 0)
+- **코드 커밋:** `88629c7b1` (`[Baker] fix: TASK-B-346 PR③ SHXK consignee 명세 상한 보완 + 회사명 공백 정규화 (Issue #1278)`) — 10 files changed, 395 insertions(+), 57 deletions(-)
+  - `src/lib/ups/label-mapping.ts`: `consigneeCompany`를 미리 `sanitizeComma` 후 빈 값이면 키 생략(공백만 입력 결함 수정)
+  - `src/lib/validation/shxk-limits.ts`: `CONSIGNEE_NAME_MAX`(200)·`_COUNTRYCODE_MAX`(2)·`_PROVINCE_MAX`(300)·`_CITY_MAX`(300)·`_POSTCODE_MAX`(100)·`_EMAIL_MAX`(100)·`_TARIFF_MAX`(50) 추가(명세 행 주석)
+  - `src/lib/shxk/validate-payload.ts`: `checkMaxLength` + `CONSIGNEE_MAX_LENGTHS`/`checkConsigneeMaxLengths` — 경계 초과 시 `수취인 … N자 초과` 단일 오류
+  - `src/lib/validation/order.ts`: zod max 6필드(성명·주/도·도시·우편번호·통관부호·이메일)
+  - 단위 3파일 신규 케이스(TC-346-12~22), `docs/08_Self_Audit/Checklists/LIVE_REGRESSION_TEST_MAP.md` 회귀맵 **§86**
+- **함수 길이 준수(ZEN_A4 / GOV_COMMON.md:307, 50줄 엄격)**: 이번 변경으로 50줄을 초과하게 된 두 함수를 리팩터링 — `validateShxkPayload` **52→35줄**(invoice 루프를 `checkInvoiceItems()`로 분리), `buildCreateOrderPayload` **55→39줄**(consignee 리터럴을 `buildConsigneePayload()`로 분리). 변경 파일(`validate-payload.ts`·`label-mapping.ts`·`order.ts`·`shxk-limits.ts`)의 모든 top-level 함수 ≤50줄 확인(`^}` 종료 스캔). ※ `order.ts`의 `superRefine` 콜백(127줄)은 **기존 코드로 본 PR에서 미변경**(Advisory, 별도 리팩터링 대상).
+- **UI 변경 없음** (컴포넌트 파일 무변경)
+- **되돌리기 검증 (테스트 유효성):**
+  - (A) `validate-payload.ts` `checkConsigneeMaxLengths(...)` 호출 주석 처리 → `tests/unit/shxk/validate-payload-limits.test.ts` **7 failed / 15 passed** → 복구 후 **22 passed**
+  - (B) `label-mapping.ts` 회사명 공백 정규화 원복(truthiness 스프레드) → `tests/unit/ups/ups-labels-mapping.test.ts` **1 failed / 47 passed** → 복구 후 **48 passed**
+- **표적 테스트:** 3파일 **98 passed**
+- **회귀 테스트:** `npm run test:regression` → **Test Files 254 passed (254) / Tests 1862 passed (1862)**, Duration 401.39s (리팩터링 후 재실행)
+- **빌드:** `npm run build` → **EXIT=0** (TypeScript 오류 0건, 라우트 테이블 정상 출력)
+- **vacuous 단언 점검:** 신규 테스트는 `toEqual`/`toBe`/`toHaveProperty`/`not.toHaveProperty`만 사용 — `toContain`·`typeof`·`.toBeDefined()` 단독 단언 없음
+
+## R-17 체크리스트 (PR③)
+- [ ] 코드 커밋 (코드·테스트·Ds-11·회귀맵·IMP, task file 미포함)
+- [ ] task file `[작업 결과]` 작성 (실제 커밋 해시 기재)
+- [ ] GitHub Issue 라벨 `status:review` 전환
+- [ ] `check-R17-DoD` 전항목 통과 (미설치 시 수동 교차점검 — 본 Task는 수동 점검)
+- [ ] 문서 커밋 (task file만)
+- [ ] PR 생성 (`base=TeamB_Dev`, body `Refs #1278`)
+- [ ] `gh pr checks <PR번호>` 실제 출력 보고 (이전 커밋 결과 인용 금지)
+
+## PR③ / CI 실제 결과
+- **PR:** __PR__
+- **`gh pr checks <PR번호>` 실제 출력:** __CI__
+
 
 
 
