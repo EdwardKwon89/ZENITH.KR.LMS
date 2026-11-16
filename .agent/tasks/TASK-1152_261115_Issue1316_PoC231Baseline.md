@@ -138,6 +138,19 @@ Test Files  254 passed (254)
 - **후속 제안**: Stryker를 상시 도입할 경우(`231 §10 #1` 채택 시) `vitest.config.ts`의 `exclude`에 `**/.stryker-tmp/**`를 추가하는 것이 근본 방어다. 본 PoC는 `src/`·`vitest.config.ts` 무수정 조건(ⓑ) 때문에 config 수정 대신 샌드박스 위치 이동으로 해결했다. → 채택 PR에서 함께 반영 권고.
 - **보고서 반영**: `231_PoC_Baseline_Report_D1_20261115.md` §1.3 「격리 사고 1건과 구조적 조치」.
 
-### 2. R-06 Context7 MCP 미가동
+### 2. `tests/` 하위 `.ts` 추가만으로 `next build`(프로덕션 빌드)가 깨진다 (격리 설계 결함, 자체 해결)
+
+- **현상**: PR #1318 CI `Regression Tests`가 **`npm run build` 단계에서 실패**해 `test:regression`이 실행조차 되지 않았다(run 43696048503).
+  ```
+  ./tests/poc-231/vitest.coverage.config.ts:27:3
+  Type error: Argument of type 'UserConfig & Promise<UserConfig> & ...' is not assignable to parameter of type 'never'.
+  ```
+- **원인**: `tsconfig.json`의 `include`가 `**/*.ts`라서 `next build`가 PoC 설정 파일까지 타입체크한다. Next는 `*.test.*`·`*.spec.*`는 제외하지만 **`*.config.ts`는 제외하지 않는다**. 즉 231 §10 #3 ⓑ("새 파일만 추가")를 지켜도 **빌드 영향 0이 자동 보장되지 않는다**. 부차 원인으로 vitest 4의 `defineConfig` 반환 타입이 유니온이라 `mergeConfig` 오버로드가 성립하지 않는다.
+- **조치(본 Task 내)**: `baseConfig as ViteUserConfig` 명시 캐스팅 + `defineConfig` 제거 + `coverage.all` 제거(vitest 4 폐기 옵션). **`tsconfig.json`·`package.json`·lockfile은 수정하지 않았다**(격리 조건 ⓑ 유지).
+- **검증**: `npx tsc --noEmit`(해당 2파일) 무오류 → `npm run build` 로컬 성공 → `coverage.all` 제거 후 커버리지 수치 완전 동일(96.05 / 82.14 / 96.42 / 95.79).
+- **후속 제안**: PoC·도구용 TS를 계속 `tests/`에 둘 경우 ① `tsconfig.json` `exclude`에 `tests/poc-*/**` 추가, 또는 ② 설정 파일을 `.mjs`로 작성(타입체크 대상 아님) 중 하나를 표준으로 확정할 것. → 채택 PR에서 함께 반영 권고.
+- **보고서 반영**: `231_PoC_Baseline_Report_D1_20261115.md` §1.3 「격리 사고 2건 — `next build` 타입체크」.
+
+### 3. R-06 Context7 MCP 미가동
 
 - 본 세션에서 `mcp__context7__*` 도구가 노출되지 않아 `npm view`(실제 peer/engine 값) + 공식 문서로 대체했다. 설치·실행 검증까지 완료했으므로 판정에는 영향 없음. 도구 미가동 자체는 별도 확인 필요.

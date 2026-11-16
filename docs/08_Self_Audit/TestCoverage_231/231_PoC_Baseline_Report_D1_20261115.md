@@ -88,6 +88,21 @@ npm install --no-save --no-audit --no-fund \
 
 > 결과적으로 "측정 산출물은 리포지토리 밖 또는 gitignore" + "회귀 glob에 걸릴 수 있는 위치에 테스트 파일을 두지 않는다"는 두 겹의 분리가 확보됐다. 이 조치 후 재측정한 값이 본 보고서 §3·§4의 수치다.
 
+#### ⚠️ 격리 사고 2건 — `next build` 타입체크 (2026-11-15, CI에서 발견)
+
+PR CI(`Regression Tests`)가 **`npm run build` 단계에서 실패**했다(`test:regression` 단계는 실행조차 되지 않음).
+
+```
+./tests/poc-231/vitest.coverage.config.ts:27:3
+Type error: Argument of type 'UserConfig & Promise<UserConfig> & ...' is not assignable to parameter of type 'never'.
+```
+
+- **원인 1**: `tsconfig.json`의 `include`가 `**/*.ts`라서 `next build`가 **PoC 설정 파일까지 타입체크**한다. (`*.test.*`·`*.spec.*`는 Next가 제외하지만 `*.config.ts`는 제외 대상이 아니다.) 즉 **`tests/` 하위에 `.ts` 파일을 추가하는 것만으로 프로덕션 빌드가 깨질 수 있다** — 231 §10 #3 ⓑ("새 파일만 추가")를 지켜도 빌드 영향 0이 자동으로 보장되지 않는다.
+- **원인 2**: `mergeConfig(baseConfig, defineConfig({...}))`에서 vitest 4의 `defineConfig` 반환 타입이 유니온이라 `mergeConfig` 오버로드가 성립하지 않는다.
+- **조치(본 Task 내)**: `baseConfig as ViteUserConfig` 명시 캐스팅 + `defineConfig` 제거 + `coverage.all` 제거(vitest 4에서 폐기된 옵션). **`tsconfig.json`은 수정하지 않았다.**
+- **검증**: `npx tsc --noEmit`(해당 2파일) 무오류, `npm run build` 로컬 성공, `coverage.all` 제거 후 커버리지 수치 완전 동일(96.05/82.14/96.42/95.79).
+- **후속 제안**: PoC/도구용 TS 파일을 계속 `tests/`에 둘 경우 ① `tsconfig.json` `exclude`에 `tests/poc-*/**` 추가, 또는 ② 설정 파일을 `.mjs`로 작성(타입체크 대상 아님) 중 하나를 표준으로 정할 필요가 있다. 본 PoC는 `src/`·공용 설정 무수정 조건을 우선해 **파일 내부 타입 수정**으로 해결했다.
+
 ---
 
 ## 2. 모듈 경계 (231 §8.2 ①②)

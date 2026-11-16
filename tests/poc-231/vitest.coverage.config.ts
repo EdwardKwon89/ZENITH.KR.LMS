@@ -6,11 +6,16 @@
  *  - 이 디렉토리(`tests/poc-231/`)에 새 파일만 추가한다.
  *  - `npm run test:regression`(=`vitest run`, 기본 config) 대상에서 분리된다 — 별도 `--config`로만 실행.
  *
+ * ⚠️ 타입 주의: `tsconfig.json`의 include가 `**\/*.ts`라서 `next build`가 이 파일도 타입체크한다.
+ *   따라서 vitest의 `defineConfig` 반환 타입(유니온)을 `mergeConfig`에 그대로 넘기면
+ *   "Argument of type ... is not assignable to parameter of type 'never'" 로 빌드가 깨진다.
+ *   → `ViteUserConfig`로 명시 캐스팅해 빌드 영향 0을 유지한다(2026-11-15 CI 실측).
+ *
  * 사용법:
  *   npx vitest run --config tests/poc-231/vitest.coverage.config.ts \
  *     tests/unit/logistics tests/unit/orders tests/unit/ups
  */
-import { defineConfig, mergeConfig } from 'vitest/config';
+import { mergeConfig, type ViteUserConfig } from 'vitest/config';
 import baseConfig from '../../vitest.config';
 
 /** 231 §8.2 PoC 대상 ①② — 5개 파일 */
@@ -22,19 +27,18 @@ const POC_231_TARGETS = [
   'src/lib/ups/discount-guard.ts',
 ];
 
-export default mergeConfig(
-  baseConfig,
-  defineConfig({
-    test: {
-      coverage: {
-        provider: 'v8',
-        enabled: true,
-        // 측정만 한다 — 차단 기준(thresholds) 없음 (231 §10 #1 ⓒ)
-        all: true,
-        include: POC_231_TARGETS,
-        reporter: ['text', 'json', 'json-summary'],
-        reportsDirectory: './tests/poc-231/reports/coverage',
-      },
+const coverageOverrides: ViteUserConfig = {
+  test: {
+    coverage: {
+      provider: 'v8',
+      enabled: true,
+      // 측정만 한다 — 차단 기준(thresholds) 없음 (231 §10 #1 ⓒ)
+      // (vitest 4에서 `all` 옵션은 제거됨 — include에 지정한 파일은 미import여도 보고된다)
+      include: POC_231_TARGETS,
+      reporter: ['text', 'json', 'json-summary'],
+      reportsDirectory: './tests/poc-231/reports/coverage',
     },
-  }),
-);
+  },
+};
+
+export default mergeConfig(baseConfig as ViteUserConfig, coverageOverrides);
