@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { Suspense, useState, useEffect } from 'react';
 import { ZenAurora, ZenCard, ZenButton, ZenInput } from '@/components/ui/ZenUI';
 import { ShieldCheck, User, Building, Search, Upload, CheckCircle2, ArrowRight, ArrowLeft } from 'lucide-react';
@@ -11,6 +12,7 @@ type SignupStep = 'TYPE' | 'INFO' | 'ORG_JOIN' | 'ORG_CREATE' | 'DOCS' | 'COMPLE
 type OrgType = 'PLATFORM' | 'SHIPPER' | 'CARRIER' | 'AGENCY';
 
 export default function RegisterPage() {
+  const errT = useTranslations('Errors');
   const params = useParams();
   const router = useRouter();
   const locale = params?.locale as string || 'ko';
@@ -127,7 +129,8 @@ export default function RegisterPage() {
         router.push(`/${locale}/register/pending`);
       }
     } catch (err: any) {
-      setError(err.message);
+      console.error(err);
+      setError(errT('generic', { code: 'AUTH_REGISTER' }));
     } finally {
       setIsPending(false);
     }

@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import React, { useState, useEffect } from 'react';
 import { getSubAgencyProfitSummary, SubAgencyProfitRow } from '@/app/actions/finance';
 import { Calendar, DollarSign, ArrowDownRight, ArrowUpRight, TrendingUp, Building2 } from 'lucide-react';
@@ -7,6 +8,7 @@ import { toast } from 'sonner';
 import { ZenCard, ZenButton, ZenInput, ZenBadge } from '@/components/ui/ZenUI';
 
 export default function SubAgencyProfitClient() {
+  const errT = useTranslations('Errors');
   const [loading, setLoading] = useState(true);
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
@@ -35,7 +37,8 @@ export default function SubAgencyProfitClient() {
         totalMarginRate: res.totalMarginRate,
       });
     } catch (err: any) {
-      toast.error(err.message || 'SNTL 수익금 집계 데이터를 불러오지 못했습니다.');
+      console.error(err);
+      toast.error(errT('generic', { code: 'SUBAGENCY_LOAD' }));
     } finally {
       setLoading(false);
     }

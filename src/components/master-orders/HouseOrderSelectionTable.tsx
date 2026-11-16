@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { OrderListItem } from '@/types/orders';
 import { useState, useMemo } from 'react';
 import { ZenButton } from '../ui/ZenUI';
@@ -16,6 +17,7 @@ export default function HouseOrderSelectionTable({ orders, ports }: HouseOrderSe
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [originFilter, setOriginFilter] = useState<string>('');
   const [destFilter, setDestFilter] = useState<string>('');
+  const errT = useTranslations('Errors');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // 선택된 오더들의 정보
@@ -52,7 +54,8 @@ export default function HouseOrderSelectionTable({ orders, ports }: HouseOrderSe
       toast.success('마스터 오더가 성공적으로 생성되었습니다.');
       setSelectedIds([]);
     } catch (err: any) {
-      toast.error(err.message);
+      console.error(err);
+      toast.error(errT('generic', { code: 'HOUSE_CREATE' }));
     } finally {
       setIsSubmitting(false);
     }
