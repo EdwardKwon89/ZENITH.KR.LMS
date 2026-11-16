@@ -99,6 +99,7 @@ function ResultPopup({ result, action, onConfirm }: {
 
 export default function UpsTradeDocumentActions({ orderId, hasActiveLabel }: UpsTradeDocumentActionsProps) {
   const t = useTranslations('Documents');
+  const te = useTranslations('Errors');
   const [loadingDoc, setLoadingDoc] = useState<string | null>(null);
   const [cancelling, setCancelling] = useState(false);
   const [previewState, setPreviewState] = useState<{ action: PreviewAction; payload: Record<string, unknown> } | null>(null);
@@ -110,7 +111,7 @@ export default function UpsTradeDocumentActions({ orderId, hasActiveLabel }: Ups
     if (res.success && res.payload) {
       setPreviewState({ action, payload: res.payload });
     } else {
-      toast.error(res.error || '미리보기 생성에 실패했습니다.');
+      toast.error(res.error || te('generic', { code: 'PREVIEW_FAILED' }));
     }
   };
 
@@ -127,10 +128,11 @@ export default function UpsTradeDocumentActions({ orderId, hasActiveLabel }: Ups
           toast.success('UPS 등록이 취소되었습니다.');
           router.refresh();
         } else {
-          toast.error(res.error || '취소에 실패했습니다.');
+          toast.error(res.error || te('generic', { code: 'VOID_FAILED' }));
         }
       } catch (err: any) {
-        toast.error(err.message || '취소에 실패했습니다.');
+        console.error(err);
+        toast.error(te('generic', { code: 'UNEXPECTED' }));
       } finally {
         setCancelling(false);
       }
@@ -146,11 +148,12 @@ export default function UpsTradeDocumentActions({ orderId, hasActiveLabel }: Ups
         toast.success('문서 처리가 완료되었습니다.');
         router.refresh();
       } else {
-        toast.error(res.error || '문서 처리에 실패했습니다.');
+        toast.error(res.error || te('generic', { code: 'DOCUMENT_FAILED' }));
       }
       setResultState({ action, result: res as Record<string, unknown> });
     } catch (err: any) {
-      toast.error(err.message || '문서 조회에 실패했습니다.');
+      console.error(err);
+        toast.error(te('generic', { code: 'UNEXPECTED' }));
     } finally {
       setLoadingDoc(null);
     }

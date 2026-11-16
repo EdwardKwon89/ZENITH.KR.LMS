@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Loader2, Download } from 'lucide-react';
 import { toast } from 'sonner';
 import { ZenButton } from '@/components/ui/ZenUI';
+import { useTranslations } from 'next-intl';
 
 interface ExportButtonProps {
   data?: any[];
@@ -18,6 +19,7 @@ export default function ExportButton({
   type = 'REVENUE',
   className = ""
 }: ExportButtonProps) {
+  const te = useTranslations('Errors');
   const [isExporting, setIsExporting] = useState(false);
 
   const handleExport = async () => {
@@ -53,7 +55,8 @@ export default function ExportButton({
 
       toast.success('Excel file generated successfully.');
     } catch (error: any) {
-      toast.error(`Export failed: ${error.message}`);
+      console.error(error);
+      toast.error(te('generic', { code: 'EXPORT' }));
     } finally {
       setIsExporting(false);
     }

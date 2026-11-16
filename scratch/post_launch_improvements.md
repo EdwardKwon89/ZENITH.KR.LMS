@@ -2084,6 +2084,7 @@ UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류
 ## [IMP-185] `Errors` 네임스페이스 zh/ja 신규 문구 초안 검수 (TASK-B-351 산출물)
 
 - **발견 경위**: 2026-11-13, TASK-B-351(Issue #1299)에서 `messages/{zh,ja}.json`의 `Errors` 네임스페이스에 신규 키 6개(`profile_not_found`, `destination_country_not_found`, `label_not_found`, `document_save_failed`, `document_save_failed_after_shipping`, `shxk_validation_failed`)와 SHXK 오류 사전 2건(`未找到订单信息`, `Invalid ShipFrom AddressLine3`)의 zh/ja 문구를 Dave가 초안 작성했다.
+  - **TASK-B-354(Issue #1330) 추가분(18키)**: `invoice_not_found`·`invoice_already_finalized`·`invoice_already_canceled`·`invoice_finalize_reason_required`·`settlement_order_already_finalized`·`settlement_recalc_locked`·`settlement_items_locked`·`invoice_create_failed`·`cost_name_required`·`cost_amount_invalid`·`cost_currency_required`·`order_edit_status_invalid`·`master_order_bound`·`route_required_for_scheduled`·`measurements_stale`·`inbound_no_measurement_changes`·`ups_edit_registered_locked`·`ups_edit_status_locked` — zh/ja 초안 검수 동일 대상.
   - **TASK-B-352(Issue #1325) 추가분(9키)**: `not_ups_order`, `ups_actual_cost_status_invalid`, `ups_actual_charge_status_invalid`, `billing_finalize_status_invalid`, `shipper_scope_denied`, `manual_reason_required`, `already_delivered`, `agency_org_missing`, `status_change_denied` — zh/ja 초안 검수 동일 대상.
 - **현재 상태**: 키 세트·ICU 플레이스홀더 일치(`errors-key-sync.test.ts`)는 자동 검증되지만, **문구의 자연스러움/용어 일관성은 사람 검수 대상**이다. Jaison 리뷰에서도 "머지 후 JSJung 검수 대상으로 IMP에 남겨 달라"고 요청.
 - **영향**: 문구 품질 문제로 그치며 기능 오류는 아니다. 다만 고객 노출 문구이므로 검수 전까지 잠정 문구로 운영된다.
@@ -2165,3 +2166,16 @@ UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류
 - **관련 파일**: `src/app/actions/finance/ups-actual-cost.ts`, `src/app/actions/finance/ups-actual-charges.ts`, `src/app/actions/misc/monitoring.ts`(`logClientError`), `GOV_COMMON.md` ZEN_A4
 - **예상 공수**: 0.3~0.5 MD (연동 지점 선정 + 중복/노이즈 정책 + 알림 확인 테스트)
 - **우선순위**: Medium — 기능 장애는 아니나 금전 정합성 영역의 침묵 실패 방지
+
+
+---
+
+## [IMP-193] `settlement`·`orders` 금전/고객접점 실패 지점의 핵심 알림(`logClientError(CRITICAL)`) 미구성
+
+- **발견 경위**: 2026-11-17, TASK-B-354(Issue #1330)에서 `settlement.ts`·`orders.ts`의 사용자 도달 오류를 로케일 문장으로 전환하고 실패 반환/throw 직전에 `logger.error`/`logger.warn`을 보강했다. ZEN_A4 핵심 지점 알림 4기준(금전·고객접점·침묵성·사고이력)을 대조한 결과 정산 마감·마감 후 조정·입금 상태 변경(`settlement.ts`)과 오더 등록/수정/상태 전이(`orders.ts`)가 **3~4개 기준 해당**이다.
+- **현재 상태**: 로그만 보강했고 `logClientError()`(→`zen_error_logs` `/admin/error-logs`) 연동은 Task 지시상 범위 밖. 따라서 정산/인보이스/오더 저장 실패가 운영자 화면에 자동 노출되지 않는다.
+- **영향**: 금전 정합성(인보이스 금액/마감/입금) 및 고객 접점(오더 등록·수정) 실패가 침묵할 수 있다.
+- **목표 구현**: `settlement.ts`(finalize/markInvoiceFinalized/updatePaymentStatus/createPostFinalizationAdjustment)와 `orders.ts`(createOrder/updateOrder/updateOrderStatus)의 DB·RPC 실패 상위 지점에 `logClientError(CRITICAL)` 연동. 기존 #1181~#1185 및 IMP-192(`ups-actual-*`) 알림과 중복·노이즈 방지 정책을 함께 설계.
+- **관련 파일**: `src/app/actions/finance/settlement.ts`, `src/app/actions/operations/orders.ts`, `src/app/actions/misc/monitoring.ts`(`logClientError`), `GOV_COMMON.md` ZEN_A4
+- **예상 공수**: 0.5 MD (지점 선정 + 중복 정책 + 알림 확인 테스트)
+- **우선순위**: Medium — 기능 장애는 아니나 금전/고객접점 영역의 침묵 실패 방지

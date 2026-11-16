@@ -114,6 +114,11 @@ import UpsOrderDetailPage from '@/app/[locale]/(dashboard)/orders/[orderId]/ups-
 import { getOrderDetails } from '@/app/actions/operations/orders';
 import { UPS_REGISTERED_EDIT_BLOCK_MESSAGE } from '@/lib/orders/ups-edit-availability';
 
+vi.mock('next-intl', () => ({
+  useTranslations: () => (key: string) => key,
+  useLocale: () => 'ko',
+}));
+
 const ORDER_ID = 'o1';
 
 const baseOrder = {

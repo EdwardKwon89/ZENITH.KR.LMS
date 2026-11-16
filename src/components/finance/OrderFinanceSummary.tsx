@@ -49,6 +49,7 @@ export default function OrderFinanceSummary({
 }: OrderFinanceSummaryProps) {
   const canManage = canManageFinance !== undefined ? canManageFinance : isAdmin;
   const t = useTranslations('Finance');
+  const te = useTranslations('Errors');
   const [costs, setCosts] = useState<CostItem[]>(initialCosts);
   const [invoice, setInvoice] = useState<Invoice | null>(initialInvoice);
   const [isCalculating, setIsCalculating] = useState(false);
@@ -71,7 +72,7 @@ export default function OrderFinanceSummary({
         setCosts(result.costs || []);
         toast.success('Settlement recalculated successfully');
       } else {
-        toast.error(result.message || result.error || 'Failed to recalculate settlement');
+        toast.error(result.message || result.error || te('generic', { code: 'SETTLEMENT_RECALC' }));
       }
     } catch (error) {
       toast.error('An unexpected error occurred');
@@ -90,7 +91,7 @@ export default function OrderFinanceSummary({
         setInvoice(result.invoice);
         toast.success(`Invoice ${result.invoice.invoice_no} generated`);
       } else {
-        toast.error(result.message || result.error || 'Failed to generate invoice');
+        toast.error(result.message || result.error || te('generic', { code: 'INVOICE_GENERATE' }));
       }
     } catch (error) {
       toast.error('An unexpected error occurred');
@@ -213,7 +214,8 @@ export default function OrderFinanceSummary({
                       if (refreshed.success) setCosts(refreshed.costs || []);
                     }
                   } catch (e: any) {
-                    toast.error(e.message || 'Failed to add charge');
+                    console.error(e);
+                    toast.error(te('generic', { code: 'CHARGE_ADD' }));
                   } finally {
                     setIsAddingCost(false);
                   }

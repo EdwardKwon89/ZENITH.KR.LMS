@@ -1,7 +1,7 @@
 # 🗺️ LIVE Regression Test Master Map
 
-> **총 테스트 케이스:** 1,891 Cases (vitest 개별 테스트 기준, 257 test files)
-> **최종 검증일:** 2026-11-16 (TASK-B-353 warehouse 오류 로케일 전환 · §87 TC-353-01~04 등재 · 1,891/1,891 PASS — §85(B-352)·§86(B-346) 포함 rebase 후 재실행)  
+> **총 테스트 케이스:** 1,904 Cases (vitest 개별 테스트 기준, 259 test files)
+> **최종 검증일:** 2026-11-17 (TASK-B-354 settlement/orders 오류 로케일 전환 · §88 TC-354-01~10 등재 · 1,904/1,904 PASS)  
 
 제니스 플랫폼의 비즈니스 영속성을 보장하는 회귀 테스트 케이스의 통합 명세서입니다. 모든 신규 개발 및 수정 시 이 맵에 케이스가 추가되어야 하며, 전체 테스트가 통과되어야 합니다.
 
@@ -1336,3 +1336,23 @@ SHXK `createorder` 페이로드의 `shipper.shipper_name`이 화면 "담당자�
 **기존 테스트 갱신 (약화 없이, 사유 포함)**:
 - `defb047-get-latest-ups-label-errors.test.ts:126` — `toThrow('Failed to fetch ups label errors')` → ko 문구 (영문 리터럴 → 로케일 전환에 따른 정확문자열 갱신).
 - `warehouse-actions.test.ts:5`·`departure-actions.test.ts:5` — `next-intl/server`의 **키-통과 스텁**(`getTranslations`가 키를 그대로 반환)을 **실 ko 메시지 반환**으로 교체 (스텁 때문에 `trError`가 키명을 만들던 것 — 문구 자체는 약화 없음).
+
+## 88. settlement·orders + 청구/주문/UPS 화면 오류 로케일 전환 (Issue #1330 / TASK-B-354)
+
+**2026-11-17, Dave** — 부모 #1280(안 ②)의 4단계. `src/app/actions/finance/settlement.ts`·`src/app/actions/operations/orders.ts`의 사용자 도달 오류를 **현재 로케일 문장**으로 전환(`trError()`), 대상 클라이언트 15파일의 `err.message` 직노출을 `console.error` + `Errors.generic`(+코드)로 대체했다. 기존 `Errors` 40키를 우선 재사용하고 **18키 추가(총 58키, 4개 로케일 동일 세트)**. throw는 호출자 판단표에 따라 **전부 유지**(호출자가 catch로만 처리하는 곳에서 반환 전환 금지 — B-352 반려 사례), DB/시스템 실패는 `generic`+`{code}` + `logger.error(…, error객체)`.
+
+| ID | 검증 내용 | 기대 결과 | 테스트 위치 |
+| :-- | :-- | :-- | :-- |
+| TC-354-01 | `finalizeInvoice` 인보이스 없음 | `{success:false,error:'인보이스를 찾을 수 없습니다.'}` + `logger.warn` | `tests/unit/finance/task-b354-error-locale.test.ts` |
+| TC-354-02 | `getOrganizations` DB 오류 | throw가 generic(ko)+`ORGANIZATION_LOOKUP`, DB 원문 미포함, `logger.error(…, error객체)` | 동일 |
+| TC-354-03 | `updateOrder` 수정 불가 상태 | **reject**(반환 아님) + 정확 ko 문장(`{status}` 치환) | 동일 |
+| TC-354-04 | 신규 키 4개 로케일 | `invoice_not_found`·`order_edit_status_invalid`·`ups_edit_registered_locked` ko/en/zh/ja (en 단언 포함) | `tests/unit/i18n/task-b354-locale.test.ts` |
+| TC-354-05 | 정산 권한/스코프 | 권한·화주 스코프 문구 `toBe` | `tests/unit/finance/agency-settlement-permission.test.ts` |
+| TC-354-06 | 오더 상태/수정 잠금 | 상태 전이 거부·수정 잠금 문구 | `tests/unit/logistics/order-status.test.ts`, `order-update.test.ts`, `order-update-b339.test.ts` |
+| TC-354-07 | 마스터 오더 오류 | 생성/해체/조회 문구 | `tests/unit/master/master-actions.test.ts`, `master-detail.test.ts` |
+| TC-354-08 | 바코드 조회 DB 오류 | generic(ko)+`ORDER_BARCODE_LOOKUP` | `tests/unit/logistics/inbound.test.ts` |
+| TC-354-09 | 클라이언트 훅 도입 대응 | `next-intl` mock 추가 후 렌더 PASS | `tests/unit/orders/ups-detail-b301.test.tsx`, `ups-detail-edit-button.test.tsx`, `tests/unit/ups/ups-stepper-b304.test.tsx` |
+| TC-354-10 | `Errors` 키 동기화(58키) | ko 기준 58키 완전 일치 + ICU 파라미터 일치 | `tests/unit/i18n/errors-key-sync.test.ts` |
+| TC-354-RST | DB 원문 은닉 되돌리기 | `getOrganizations` 원문 반환으로 원복 → **1 failed / 2 passed** → 복구 3 passed | `tests/unit/finance/task-b354-error-locale.test.ts` |
+
+**회귀 검증 (2026-11-17)**: `npm run test:regression` **259 test files / 1,904 tests 전부 PASS**. `npm run build` **EXIT=0**.

@@ -6,6 +6,11 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 import UpsOrderStatusStepper from '@/components/ups/UpsOrderStatusStepper';
 
+vi.mock('next-intl', () => ({
+  useTranslations: () => (key: string) => key,
+  useLocale: () => 'ko',
+}));
+
 vi.mock('sonner', () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 vi.mock('@/app/actions/operations/tracking', () => ({
   checkRealtimeUpsTrackingAction: vi.fn(),

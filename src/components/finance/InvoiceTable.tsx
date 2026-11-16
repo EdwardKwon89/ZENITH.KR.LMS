@@ -10,6 +10,7 @@ import { TaxInvoiceSheet } from './TaxInvoiceSheet';
 import { PaymentModal } from './PaymentModal';
 import { issueInvoicePdf } from '@/app/actions/finance';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 
 interface InvoiceTableProps {
   invoices: any[];
@@ -17,6 +18,7 @@ interface InvoiceTableProps {
 
 export const InvoiceTable: React.FC<InvoiceTableProps> = ({ invoices }) => {
   const router = useRouter();
+  const te = useTranslations('Errors');
   const [selectedInvoice, setSelectedInvoice] = useState<{ id: string; no: string } | null>(null);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [isTaxSheetOpen, setIsTaxSheetOpen] = useState(false);
@@ -33,7 +35,8 @@ export const InvoiceTable: React.FC<InvoiceTableProps> = ({ invoices }) => {
         toast.success('PDF가 성공적으로 발행되었습니다.');
       }
     } catch (error: any) {
-      toast.error(`발행 실패: ${error.message}`);
+      console.error(error);
+      toast.error(te('generic', { code: 'INVOICE_ISSUE' }));
     } finally {
       setIssuingIds(prev => {
         const next = new Set(prev);

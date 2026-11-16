@@ -152,7 +152,7 @@ describe('ZENITH Logistics: Inbound Process Unit Tests', () => {
         .mockResolvedValueOnce({ data: null, error: new Error('DB connection lost') });
 
       // When & Then
-      await expect(getOrderByBarcodeOrNo(orderNo)).rejects.toThrow('오더 조회 실패');
+      await expect(getOrderByBarcodeOrNo(orderNo)).rejects.toThrow('요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요. (코드: ORDER_BARCODE_LOOKUP)');
     });
 
     it('TC-INB.6: [Success] 조회 시 packages[].id가 정상 포함되어야 함 (DEF-B-009 재발 방지)', async () => {
