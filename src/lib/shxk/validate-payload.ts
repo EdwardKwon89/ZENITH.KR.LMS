@@ -6,7 +6,7 @@
 //
 // 필수 필드 기준: docs/80_RawData/Phase8_UPS_API_리서치_결과.md (SHXK createorder 공식 필드 스펙)
 
-import { HS_CODE_MAX, ITEM_NAME_MAX, PHONE_MAX_DIGITS, RECIPIENT_COMPANY_MAX, SHIPPER_STREET_MAX, CONSIGNEE_STREET_MAX, stripNonDigits } from '@/lib/validation/shxk-limits';
+import { HS_CODE_MAX, ITEM_NAME_MAX, PHONE_MAX_DIGITS, RECIPIENT_COMPANY_MAX, SHIPPER_STREET_MAX, CONSIGNEE_STREET_MAX, CONSIGNEE_NAME_MAX, CONSIGNEE_COUNTRYCODE_MAX, CONSIGNEE_PROVINCE_MAX, CONSIGNEE_CITY_MAX, CONSIGNEE_POSTCODE_MAX, CONSIGNEE_EMAIL_MAX, CONSIGNEE_TARIFF_MAX, stripNonDigits } from '@/lib/validation/shxk-limits';
 import { isShxkDeclareUnit } from '@/lib/shxk/declare-units';
 
 export interface ShxkPayloadShape {
@@ -41,6 +41,53 @@ function checkStreetLength(prefix: string, value: unknown, max: number, errors: 
   }
 }
 
+// TASK-B-346 PR③ (Issue #1278): SHXK 명세 `consignee.*` 상한 사전검증 — checkStreetLength와 동일 패턴.
+// 빈 값은 각 필드의 '누락' 검사가 처리하므로 여기서는 중복 오류를 만들지 않는다(경계 초과 시 단일 오류).
+function checkMaxLength(label: string, value: unknown, max: number, errors: string[]): void {
+  if (isEmpty(value)) return;
+  if (String(value).length > max) errors.push(`${label} ${max}자 초과`);
+}
+
+// TASK-B-346 PR③ (Issue #1278): SHXK createorder `consignee.*` 명세 상한 일괄 검사.
+// 명세 행 근거는 shxk-limits.ts 상수 주석 참조. street·telephone은 별도(더 엄격한) 한도로 검사한다.
+const CONSIGNEE_MAX_LENGTHS: ReadonlyArray<readonly [key: string, label: string, max: number]> = [
+  ['consignee_name', '수취인 성명', CONSIGNEE_NAME_MAX],
+  ['consignee_countrycode', '수취인 국가코드', CONSIGNEE_COUNTRYCODE_MAX],
+  ['consignee_province', '수취인 주/도', CONSIGNEE_PROVINCE_MAX],
+  ['consignee_city', '수취인 도시', CONSIGNEE_CITY_MAX],
+  ['consignee_postcode', '수취인 우편번호', CONSIGNEE_POSTCODE_MAX],
+  ['consignee_email', '수취인 이메일', CONSIGNEE_EMAIL_MAX],
+  ['consignee_tariff', '수취인 통관부호', CONSIGNEE_TARIFF_MAX],
+];
+
+function checkConsigneeMaxLengths(consignee: Record<string, unknown> | undefined, errors: string[]): void {
+  for (const [key, label, max] of CONSIGNEE_MAX_LENGTHS) {
+    checkMaxLength(label, consignee?.[key], max, errors);
+  }
+}
+
+// TASK-B-332 (Issue #1239) / TASK-B-337 (Issue #1251): 통관 신고 품목(invoice[]) 사전검증.
+function checkInvoiceItems(invoice: Record<string, unknown>[] | undefined, errors: string[]): void {
+  if (!invoice || invoice.length === 0) {
+    errors.push('통관 신고 품목 누락');
+    return;
+  }
+  invoice.forEach((item, i) => {
+    const idx = i + 1;
+    if (isEmpty(item.invoice_enname)) errors.push(`품목 ${idx}: 영문 품명 누락`);
+    else if (String(item.invoice_enname).length > ITEM_NAME_MAX) errors.push(`품목 ${idx}: 품명 ${ITEM_NAME_MAX}자 초과`);
+    if (isEmpty(item.invoice_quantity)) errors.push(`품목 ${idx}: 수량 누락`);
+    if (isEmpty(item.invoice_unitcharge)) errors.push(`품목 ${idx}: 단가 누락`);
+    if (isEmpty(item.hs_code)) errors.push(`품목 ${idx}: HS 코드 누락`);
+    else if (String(item.hs_code).trim().length > HS_CODE_MAX) errors.push(`품목 ${idx}: HS 코드 ${HS_CODE_MAX}자 초과`);
+    // TASK-B-337 (Issue #1251): unit_code가 있으면 SHXK 허용 단위인지 검사.
+    // 매핑(resolveShxkUnitCode)을 거치므로 정상 경로에서는 발생하지 않는 방어선이다.
+    if (!isEmpty(item.unit_code) && !isShxkDeclareUnit(String(item.unit_code))) {
+      errors.push(`품목 ${idx}: 단위 코드 ${String(item.unit_code)}은(는) SHXK 허용 단위가 아닙니다`);
+    }
+  });
+}
+
 export function validateShxkPayload(payload: ShxkPayloadShape): string[] {
   const errors: string[] = [];
   const shipper = payload.shipper as Record<string, unknown> | undefined;
@@ -70,25 +117,9 @@ export function validateShxkPayload(payload: ShxkPayloadShape): string[] {
     errors.push('수취인 연락처 누락 (전화/휴대폰 중 1개 이상)');
   }
   checkPhone('수취인', consignee?.consignee_telephone, errors);
+  checkConsigneeMaxLengths(consignee, errors); // TASK-B-346 PR③ (Issue #1278)
 
-  if (!invoice || invoice.length === 0) {
-    errors.push('통관 신고 품목 누락');
-  } else {
-    invoice.forEach((item, i) => {
-      const idx = i + 1;
-      if (isEmpty(item.invoice_enname)) errors.push(`품목 ${idx}: 영문 품명 누락`);
-      else if (String(item.invoice_enname).length > ITEM_NAME_MAX) errors.push(`품목 ${idx}: 품명 ${ITEM_NAME_MAX}자 초과`);
-      if (isEmpty(item.invoice_quantity)) errors.push(`품목 ${idx}: 수량 누락`);
-      if (isEmpty(item.invoice_unitcharge)) errors.push(`품목 ${idx}: 단가 누락`);
-      if (isEmpty(item.hs_code)) errors.push(`품목 ${idx}: HS 코드 누락`);
-      else if (String(item.hs_code).trim().length > HS_CODE_MAX) errors.push(`품목 ${idx}: HS 코드 ${HS_CODE_MAX}자 초과`);
-      // TASK-B-337 (Issue #1251): unit_code가 있으면 SHXK 허용 단위인지 검사.
-      // 매핑(resolveShxkUnitCode)을 거치므로 정상 경로에서는 발생하지 않는 방어선이다.
-      if (!isEmpty(item.unit_code) && !isShxkDeclareUnit(String(item.unit_code))) {
-        errors.push(`품목 ${idx}: 단위 코드 ${String(item.unit_code)}은(는) SHXK 허용 단위가 아닙니다`);
-      }
-    });
-  }
+  checkInvoiceItems(invoice, errors); // TASK-B-332 (Issue #1239) / TASK-B-337 (Issue #1251)
 
   return errors;
 }

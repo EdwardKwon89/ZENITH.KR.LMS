@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { HS_CODE_MAX, ITEM_NAME_MAX, PHONE_MAX_DIGITS, RECIPIENT_COMPANY_MAX, stripNonDigits } from './shxk-limits';
+import { HS_CODE_MAX, ITEM_NAME_MAX, PHONE_MAX_DIGITS, RECIPIENT_COMPANY_MAX, CONSIGNEE_NAME_MAX, CONSIGNEE_PROVINCE_MAX, CONSIGNEE_CITY_MAX, CONSIGNEE_POSTCODE_MAX, CONSIGNEE_EMAIL_MAX, CONSIGNEE_TARIFF_MAX, stripNonDigits } from './shxk-limits';
 
 /**
  * 오더 상세 항목(Item) 검증 스키마 (패킹 하위)
@@ -73,7 +73,10 @@ export const orderRegistrationSchema = z.object({
   shipper_biz_no: z.string().optional(),
   
   // 수취인 상세 정보 (v2 핵심 추가)
-  recipient_name: z.string().min(1, 'Recipient name is required'),
+  // TASK-B-346 PR③ (Issue #1278): SHXK consignee.* 명세 상한을 폼 단계에서도 적용한다
+  // (사전검증은 SHXK 호출 직전 방어선 — 폼에서 먼저 막아 UX를 개선). 상수는 shxk-limits.ts.
+  recipient_name: z.string().min(1, 'Recipient name is required')
+    .max(CONSIGNEE_NAME_MAX, `수취인 성명은 ${CONSIGNEE_NAME_MAX}자 이하여야 합니다`),
   // TASK-B-346 (Issue #1278): 수하인 회사명 — SHXK consignee_company 매핑 (선택, 200자)
   recipient_company: z.string().max(RECIPIENT_COMPANY_MAX, `회사명은 ${RECIPIENT_COMPANY_MAX}자 이하여야 합니다`).optional(),
   recipient_address: z.string().min(1, 'Recipient address is required'),
@@ -81,13 +84,13 @@ export const orderRegistrationSchema = z.object({
   recipient_address_detail: z.string().optional(),
   recipient_phone: z.string().min(1, 'Recipient phone is required')
     .regex(/^\d+$/, '전화번호는 숫자만 입력할 수 있습니다').max(PHONE_MAX_DIGITS, `전화번호는 ${PHONE_MAX_DIGITS}자리 이하여야 합니다`),
-  recipient_zipcode: z.string().optional(),
+  recipient_zipcode: z.string().max(CONSIGNEE_POSTCODE_MAX, `우편번호는 ${CONSIGNEE_POSTCODE_MAX}자 이하여야 합니다`).optional(),
   recipient_country_code: z.string().optional(),
-  recipient_state_province: z.string().optional(),
-  recipient_city: z.string().optional(),
+  recipient_state_province: z.string().max(CONSIGNEE_PROVINCE_MAX, `주/도는 ${CONSIGNEE_PROVINCE_MAX}자 이하여야 합니다`).optional(),
+  recipient_city: z.string().max(CONSIGNEE_CITY_MAX, `도시는 ${CONSIGNEE_CITY_MAX}자 이하여야 합니다`).optional(),
   
-  recipient_pccc: z.string().optional(),
-  recipient_email: z.string().email('Invalid email format').optional().or(z.literal('')),
+  recipient_pccc: z.string().max(CONSIGNEE_TARIFF_MAX, `개인통관고유부호는 ${CONSIGNEE_TARIFF_MAX}자 이하여야 합니다`).optional(),
+  recipient_email: z.string().max(CONSIGNEE_EMAIL_MAX, `이메일은 ${CONSIGNEE_EMAIL_MAX}자 이하여야 합니다`).email('Invalid email format').optional().or(z.literal('')),
   description: z.string().optional(),
   delivery_notes: z.string().optional(),
   

@@ -1,6 +1,16 @@
 import { describe, it, expect } from 'vitest';
 import { validateShxkPayload } from '@/lib/shxk/validate-payload';
-import { ITEM_NAME_MAX, RECIPIENT_COMPANY_MAX } from '@/lib/validation/shxk-limits';
+import {
+  ITEM_NAME_MAX,
+  RECIPIENT_COMPANY_MAX,
+  CONSIGNEE_NAME_MAX,
+  CONSIGNEE_COUNTRYCODE_MAX,
+  CONSIGNEE_PROVINCE_MAX,
+  CONSIGNEE_CITY_MAX,
+  CONSIGNEE_POSTCODE_MAX,
+  CONSIGNEE_EMAIL_MAX,
+  CONSIGNEE_TARIFF_MAX,
+} from '@/lib/validation/shxk-limits';
 
 // 실제 validateShxkPayload 호출 — 반환된 에러 배열에 대한 toContain 만 허용 (TASK-B-332 / Issue #1239)
 const base = () => ({
@@ -80,5 +90,105 @@ describe('validateShxkPayload — 전화번호 숫자만 + 15자리', () => {
     payload.shipper.shipper_telephone = '1'.repeat(16);
     const errors = validateShxkPayload(payload);
     expect(errors).toContain('발송인 전화번호는 15자리 이하여야 합니다');
+  });
+});
+
+// TASK-B-346 PR③ (Issue #1278): SHXK 명세 consignee.* 상한 — 경계 N → 에러 없음 / N+1 → 단일 에러.
+// 명세 행 근거는 shxk-limits.ts 상수 주석 참조 (docs/80_RawData/Phase8_UPS_API_리서치_결과.md 130~147행).
+describe('validateShxkPayload — 수취인 성명 상한 (TASK-B-346 PR③)', () => {
+  it(`${CONSIGNEE_NAME_MAX}자 → 에러 없음 (경계값)`, () => {
+    const payload = base();
+    (payload.consignee as any).consignee_name = 'A'.repeat(CONSIGNEE_NAME_MAX);
+    expect(validateShxkPayload(payload)).toEqual([]);
+  });
+
+  it(`${CONSIGNEE_NAME_MAX + 1}자 → 단일 에러`, () => {
+    const payload = base();
+    (payload.consignee as any).consignee_name = 'A'.repeat(CONSIGNEE_NAME_MAX + 1);
+    expect(validateShxkPayload(payload)).toEqual([`수취인 성명 ${CONSIGNEE_NAME_MAX}자 초과`]);
+  });
+});
+
+describe('validateShxkPayload — 수취인 국가코드 상한 (TASK-B-346 PR③)', () => {
+  it(`${CONSIGNEE_COUNTRYCODE_MAX}자 → 에러 없음 (경계값)`, () => {
+    const payload = base();
+    (payload.consignee as any).consignee_countrycode = 'A'.repeat(CONSIGNEE_COUNTRYCODE_MAX);
+    expect(validateShxkPayload(payload)).toEqual([]);
+  });
+
+  it(`${CONSIGNEE_COUNTRYCODE_MAX + 1}자 → 단일 에러`, () => {
+    const payload = base();
+    (payload.consignee as any).consignee_countrycode = 'A'.repeat(CONSIGNEE_COUNTRYCODE_MAX + 1);
+    expect(validateShxkPayload(payload)).toEqual([`수취인 국가코드 ${CONSIGNEE_COUNTRYCODE_MAX}자 초과`]);
+  });
+});
+
+describe('validateShxkPayload — 수취인 주/도 상한 (TASK-B-346 PR③)', () => {
+  it(`${CONSIGNEE_PROVINCE_MAX}자 → 에러 없음 (경계값)`, () => {
+    const payload = base();
+    (payload.consignee as any).consignee_province = 'A'.repeat(CONSIGNEE_PROVINCE_MAX);
+    expect(validateShxkPayload(payload)).toEqual([]);
+  });
+
+  it(`${CONSIGNEE_PROVINCE_MAX + 1}자 → 단일 에러`, () => {
+    const payload = base();
+    (payload.consignee as any).consignee_province = 'A'.repeat(CONSIGNEE_PROVINCE_MAX + 1);
+    expect(validateShxkPayload(payload)).toEqual([`수취인 주/도 ${CONSIGNEE_PROVINCE_MAX}자 초과`]);
+  });
+});
+
+describe('validateShxkPayload — 수취인 도시 상한 (TASK-B-346 PR③)', () => {
+  it(`${CONSIGNEE_CITY_MAX}자 → 에러 없음 (경계값)`, () => {
+    const payload = base();
+    (payload.consignee as any).consignee_city = 'A'.repeat(CONSIGNEE_CITY_MAX);
+    expect(validateShxkPayload(payload)).toEqual([]);
+  });
+
+  it(`${CONSIGNEE_CITY_MAX + 1}자 → 단일 에러`, () => {
+    const payload = base();
+    (payload.consignee as any).consignee_city = 'A'.repeat(CONSIGNEE_CITY_MAX + 1);
+    expect(validateShxkPayload(payload)).toEqual([`수취인 도시 ${CONSIGNEE_CITY_MAX}자 초과`]);
+  });
+});
+
+describe('validateShxkPayload — 수취인 우편번호 상한 (TASK-B-346 PR③)', () => {
+  it(`${CONSIGNEE_POSTCODE_MAX}자 → 에러 없음 (경계값)`, () => {
+    const payload = base();
+    (payload.consignee as any).consignee_postcode = 'A'.repeat(CONSIGNEE_POSTCODE_MAX);
+    expect(validateShxkPayload(payload)).toEqual([]);
+  });
+
+  it(`${CONSIGNEE_POSTCODE_MAX + 1}자 → 단일 에러`, () => {
+    const payload = base();
+    (payload.consignee as any).consignee_postcode = 'A'.repeat(CONSIGNEE_POSTCODE_MAX + 1);
+    expect(validateShxkPayload(payload)).toEqual([`수취인 우편번호 ${CONSIGNEE_POSTCODE_MAX}자 초과`]);
+  });
+});
+
+describe('validateShxkPayload — 수취인 이메일 상한 (TASK-B-346 PR③)', () => {
+  it(`${CONSIGNEE_EMAIL_MAX}자 → 에러 없음 (경계값)`, () => {
+    const payload = base();
+    (payload.consignee as any).consignee_email = 'A'.repeat(CONSIGNEE_EMAIL_MAX);
+    expect(validateShxkPayload(payload)).toEqual([]);
+  });
+
+  it(`${CONSIGNEE_EMAIL_MAX + 1}자 → 단일 에러`, () => {
+    const payload = base();
+    (payload.consignee as any).consignee_email = 'A'.repeat(CONSIGNEE_EMAIL_MAX + 1);
+    expect(validateShxkPayload(payload)).toEqual([`수취인 이메일 ${CONSIGNEE_EMAIL_MAX}자 초과`]);
+  });
+});
+
+describe('validateShxkPayload — 수취인 통관부호 상한 (TASK-B-346 PR③)', () => {
+  it(`${CONSIGNEE_TARIFF_MAX}자 → 에러 없음 (경계값)`, () => {
+    const payload = base();
+    (payload.consignee as any).consignee_tariff = 'A'.repeat(CONSIGNEE_TARIFF_MAX);
+    expect(validateShxkPayload(payload)).toEqual([]);
+  });
+
+  it(`${CONSIGNEE_TARIFF_MAX + 1}자 → 단일 에러`, () => {
+    const payload = base();
+    (payload.consignee as any).consignee_tariff = 'A'.repeat(CONSIGNEE_TARIFF_MAX + 1);
+    expect(validateShxkPayload(payload)).toEqual([`수취인 통관부호 ${CONSIGNEE_TARIFF_MAX}자 초과`]);
   });
 });
