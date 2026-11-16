@@ -51,6 +51,13 @@ const nextConfig = {
       },
     ];
   },
+  // Next 16.3+는 기본으로 TypeScript CLI(tsc)를 사용해 tsconfig의 전체 파일(테스트 포함)을 검사한다.
+  // 이 저장소의 tests/ 에는 기존 타입 오류가 다수 있고 CI도 advisory로만 다루므로(IMP-134),
+  // next build의 타입 검사를 16.2.4와 동일한 동작(JS 컴파일러 API)으로 유지한다.
+  // TODO(IMP-190): tests/ 타입 오류 정리 후 이 옵션 제거 검토.
+  experimental: {
+    useTypeScriptCli: false,
+  },
 };
 
 export default withSentryConfig(withNextIntl(nextConfig), {
