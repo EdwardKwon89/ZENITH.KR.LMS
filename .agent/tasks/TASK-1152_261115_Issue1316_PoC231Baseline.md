@@ -103,7 +103,7 @@
 | ⓐ | 모듈 ③(SHXK) 제외 | 대상 5개 파일 한정 ✅ |
 | ⓑ | `src/` 무수정, 새 경로에 새 파일만 | `git diff --name-only 128e6e13b..HEAD -- src/` = **0건** ✅ |
 | ⓒ | LRTM·package.json·lockfile·pr-checks.yml 미수정 | 위 4경로 diff **0건**, `npm install --no-save` 사용 ✅ |
-| ⓓ | PoC 테스트 `test:regression` 분리 | 회귀 254파일/1834케이스 = 기준선과 동일 ✅ (초기 1회 오염 → 발견 이슈 #1 조치) |
+| ⓓ | PoC 테스트 `test:regression` 분리 | 회귀 254파일/1834케이스 = 기준선과 동일(로컬·PR CI 모두) ✅ (초기 1회 오염 → 발견 이슈 #1 조치) |
 | ⓔ | Draft PR + `do-not-merge` | Draft PR 생성 + 라벨 ✅ |
 | ⓕ | Team B 사전 고지 | #1298 게시(회신 없음) → Edward 지시로 격리 전제 선행 |
 | ⓖ | 채택 후 반입은 별도 PR | 본 Task는 측정·보고만 ✅ |
@@ -111,13 +111,20 @@
 ### 5. R-08 회귀 검증
 
 ```
+[로컬, Node v24.14.0]
 Test Files  254 passed (254)
      Tests  1834 passed (1834)
-  Duration  235.57s   (로컬, Node v24.14.0)
+  Duration  235.57s
+
+[PR CI, run 43781243331 (head 753ccd604)]
+Test Files  254 passed (254)
+     Tests  1834 passed (1834)
+  Duration  336.54s
 ```
 
-- CI 기준선(run 43613667398) **254 파일 / 1834 케이스 / 실패 0** 과 **정확히 일치** → PoC 도입 영향 0.
-- 로컬 소요 235.57s vs CI 201.50s 차이는 러너 성능 차이.
+- CI 기준선(run 43613667398) **254 파일 / 1834 케이스 / 실패 0** 과 **로컬·PR CI 모두 정확히 일치** → PoC 도입 영향 0.
+- PR CI는 **`npm run build` success → `npm run test:regression` success** (Regression Tests job 전체 success, advisory 4종도 success).
+- 소요 시간 차이(201.50s / 235.57s / 336.54s)는 러너 성능·부하 차이.
 
 ### 6. 재현
 
@@ -127,6 +134,7 @@ Test Files  254 passed (254)
 
 - 231 §10 의사결정(#4 실DB 위치, #6 Gate 2 수치, #13 편입 기준, #16 D3-B)은 **Aiden/Edward 결정 사항** — 본 보고서 §8이 입력값.
 - Stryker 상시 도입 시 `vitest.config.ts` `exclude`에 `**/.stryker-tmp/**` 추가 권고(발견 이슈 #1).
+- PoC/도구용 TS를 계속 `tests/`에 둘 경우 `tsconfig.json` `exclude`(`tests/poc-*/**`) 또는 `.mjs` 작성 중 하나를 표준화 권고(발견 이슈 #2).
 
 ## [발견 이슈] (R-18)
 
