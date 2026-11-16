@@ -2084,6 +2084,7 @@ UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류
 ## [IMP-185] `Errors` 네임스페이스 zh/ja 신규 문구 초안 검수 (TASK-B-351 산출물)
 
 - **발견 경위**: 2026-11-13, TASK-B-351(Issue #1299)에서 `messages/{zh,ja}.json`의 `Errors` 네임스페이스에 신규 키 6개(`profile_not_found`, `destination_country_not_found`, `label_not_found`, `document_save_failed`, `document_save_failed_after_shipping`, `shxk_validation_failed`)와 SHXK 오류 사전 2건(`未找到订单信息`, `Invalid ShipFrom AddressLine3`)의 zh/ja 문구를 Dave가 초안 작성했다.
+  - **TASK-B-356(Issue #1334) 추가분(10키)**: `auth_invalid_credentials`·`auth_email_not_confirmed`·`auth_account_exists`·`auth_password_invalid`·`auth_rate_limited`·`auth_unexpected`·`auth_signup_failed`·`auth_signup_profile_failed`·`inventory_not_found`·`inventory_below_zero` — zh/ja 초안 검수 동일 대상.
   - **TASK-B-354(Issue #1330) 추가분(18키)**: `invoice_not_found`·`invoice_already_finalized`·`invoice_already_canceled`·`invoice_finalize_reason_required`·`settlement_order_already_finalized`·`settlement_recalc_locked`·`settlement_items_locked`·`invoice_create_failed`·`cost_name_required`·`cost_amount_invalid`·`cost_currency_required`·`order_edit_status_invalid`·`master_order_bound`·`route_required_for_scheduled`·`measurements_stale`·`inbound_no_measurement_changes`·`ups_edit_registered_locked`·`ups_edit_status_locked` — zh/ja 초안 검수 동일 대상.
   - **TASK-B-352(Issue #1325) 추가분(9키)**: `not_ups_order`, `ups_actual_cost_status_invalid`, `ups_actual_charge_status_invalid`, `billing_finalize_status_invalid`, `shipper_scope_denied`, `manual_reason_required`, `already_delivered`, `agency_org_missing`, `status_change_denied` — zh/ja 초안 검수 동일 대상.
 - **현재 상태**: 키 세트·ICU 플레이스홀더 일치(`errors-key-sync.test.ts`)는 자동 검증되지만, **문구의 자연스러움/용어 일관성은 사람 검수 대상**이다. Jaison 리뷰에서도 "머지 후 JSJung 검수 대상으로 IMP에 남겨 달라"고 요청.
@@ -2180,3 +2181,28 @@ UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류
 - **관련 파일**: `src/app/actions/finance/settlement.ts`, `src/app/actions/operations/orders.ts`, `src/app/actions/misc/monitoring.ts`(`logClientError`), `GOV_COMMON.md` ZEN_A4
 - **예상 공수**: 0.5 MD (지점 선정 + 중복 정책 + 알림 확인 테스트)
 - **우선순위**: Medium — 기능 장애는 아니나 금전/고객접점 영역의 침묵 실패 방지
+
+
+---
+
+## [IMP-194] 상태 전이 거부 사유(`validation.message`·`availability.message`)가 사용자 문구에서 빠짐 — 사유 파라미터화 후속
+
+- **발견 경위**: TASK-B-354(Issue #1330)에서 `orders.ts`의 상태 전이 거부를 `Errors.status_change_denied`/`ups_edit_registered_locked` 등 로케일 키로 대체하면서, 기존에 사용자에게 표시되던 구체 사유(`canChangeStatus().message`, UPS 수정 불가 사유)는 `logger.warn`에만 남게 되었다.
+- **현재 상태**: 사용자는 "상태를 변경할 권한이 없습니다." 같은 일반 문구만 보고, 어떤 규칙에 걸렸는지 알 수 없다(로그에는 남음).
+- **영향**: 관리자/대리점이 상태 변경 실패 원인을 화면에서 파악하기 어려워 문의·재시도 증가 가능.
+- **목표 구현**: `Errors.status_change_denied`에 `{reason}` 파라미터를 추가하고, `canChangeStatus`/`getUpsEditAvailability`의 사유를 로케일별 키(예: `status_change_reason.*`)로 매핑해 전달. 사유 코드 표를 `lib/logistics/status-machine`에 정의.
+- **관련 파일**: `src/app/actions/operations/orders.ts`, `src/lib/logistics/status-machine.ts`, `src/lib/orders/ups-edit-availability.ts`, `messages/{ko,en,zh,ja}.json`
+- **예상 공수**: 0.3~0.5 MD (사유 코드 매핑 + 4개 로케일 문구 + 테스트)
+- **우선순위**: Low~Medium — 기능 장애는 아니나 운영 UX 개선
+
+---
+
+## [IMP-195] `changePassword`·회원가입 비밀번호 정책 위반 사유가 `generic` 치환으로 약화 — Supabase 오류 코드별 세분화 후속
+
+- **발견 경위**: TASK-B-355(B-355 리뷰)에서 `changePassword`의 Supabase 원문 노출을 `generic`으로 치환했고, TASK-B-356(Issue #1334)에서 회원가입 비밀번호 오류도 `Errors.auth_password_invalid`("비밀번호가 보안 정책을 충족하지 않습니다.")로 통일했다. 결과적으로 "최소 길이/문자 조합/재사용 금지" 등 구체 사유가 사용자에게 전달되지 않는다.
+- **현재 상태**: Supabase `AuthApiError`의 `code`(예: `weak_password`)를 활용하지 않고 메시지 문자열 매칭으로만 분기한다.
+- **영향**: 사용자가 비밀번호 정책을 만족시키기 위해 시행착오를 반복할 수 있다(기능 오류는 아님).
+- **목표 구현**: Supabase 오류 `code`/`weak_password.reasons`를 코드별 로케일 문구로 매핑(길이·조합·재사용 등). `changePassword`·`signup` 공통 헬퍼로 정리.
+- **관련 파일**: `src/app/[locale]/(auth)/login/actions.ts`, `src/app/actions/admin/auth.ts`, `messages/{ko,en,zh,ja}.json`
+- **예상 공수**: 0.3 MD (코드 매핑 + 문구 + 테스트)
+- **우선순위**: Low — 보안 정보 비노출은 유지하면서 안내 품질만 개선

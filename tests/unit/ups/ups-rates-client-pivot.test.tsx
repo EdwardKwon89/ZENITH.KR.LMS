@@ -3,6 +3,11 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import React from 'react';
 import UpsRatesClient from '@/app/[locale]/(dashboard)/admin/ups-rates/ups-rates-client';
 
+vi.mock('next-intl', () => ({
+  useTranslations: () => (key: string) => key,
+  useLocale: () => 'ko',
+}));
+
 // ─── TASK-B-264 / Issue #1023 — Part 2: AgencyPolicyTable pivot 검증 ─────────
 
 vi.mock('@/app/actions/ups/rates-mutation', () => ({

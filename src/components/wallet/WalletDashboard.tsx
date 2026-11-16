@@ -9,6 +9,7 @@ import { Wallet, ArrowUpRight, ArrowDownLeft, RefreshCcw, History } from 'lucide
 
 export function WalletDashboard() {
   const t = useTranslations('Wallet');
+  const te = useTranslations('Errors');
   const [balanceData, setBalanceData] = useState<{ balance: number; currency: string } | null>(null);
   const [transactions, setTransactions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -44,7 +45,8 @@ export function WalletDashboard() {
         fetchData();
       }
     } catch (error: any) {
-      alert(error.message);
+      console.error(error);
+      alert(te('generic', { code: 'WALLET_ACTION' }));
     }
   };
 

@@ -79,7 +79,17 @@
     "measurements_stale": "仓库已更新实测值。请刷新页面后重试。",
     "inbound_no_measurement_changes": "没有可保存的测量值变更。",
     "ups_edit_registered_locked": "已登记 UPS 的订单无法修改。请先在仓库取消 UPS 登记后再操作。",
-    "ups_edit_status_locked": "当前状态下无法修改订单。"
+    "ups_edit_status_locked": "当前状态下无法修改订单。",
+    "auth_invalid_credentials": "邮箱或密码不正确。",
+    "auth_email_not_confirmed": "邮箱尚未验证，请查收邮件并完成验证。",
+    "auth_account_exists": "该邮箱已注册，请直接登录。",
+    "auth_password_invalid": "密码不符合安全策略。",
+    "auth_rate_limited": "请求过于频繁，请稍后重试。",
+    "auth_unexpected": "登录时发生错误，请稍后重试。",
+    "auth_signup_failed": "注册失败，请检查输入信息。",
+    "auth_signup_profile_failed": "创建用户资料失败，请稍后重试。",
+    "inventory_not_found": "找不到库存项目。",
+    "inventory_below_zero": "库存数量不能小于 0。"
   },
   "Common": {
     "phoneHelp": "仅限数字（不含连字符，最多 {max} 位）",

@@ -79,7 +79,17 @@
     "measurements_stale": "倉庫で実測値が更新されました。画面を更新してから再試行してください。",
     "inbound_no_measurement_changes": "保存する測定値の変更がありません。",
     "ups_edit_registered_locked": "UPS 登録済みの注文は編集できません。倉庫で UPS 登録を取消してから操作してください。",
-    "ups_edit_status_locked": "現在のステータスでは編集できません。"
+    "ups_edit_status_locked": "現在のステータスでは編集できません。",
+    "auth_invalid_credentials": "メールアドレスまたはパスワードが正しくありません。",
+    "auth_email_not_confirmed": "メールアドレスの確認が完了していません。受信トレイをご確認ください。",
+    "auth_account_exists": "このメールアドレスは既に登録されています。ログインしてください。",
+    "auth_password_invalid": "パスワードがセキュリティポリシーを満たしていません。",
+    "auth_rate_limited": "リクエストが多すぎます。しばらくしてから再試行してください。",
+    "auth_unexpected": "ログイン中にエラーが発生しました。しばらくしてから再試行してください。",
+    "auth_signup_failed": "登録に失敗しました。入力内容をご確認ください。",
+    "auth_signup_profile_failed": "プロフィールの作成に失敗しました。しばらくしてから再試行してください。",
+    "inventory_not_found": "在庫品目が見つかりません。",
+    "inventory_below_zero": "在庫数量は 0 未満にできません。"
   },
   "Common": {
     "phoneHelp": "数字のみ入力（ハイフンなし、最大 {max} 桁）",

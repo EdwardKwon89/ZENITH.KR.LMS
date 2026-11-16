@@ -79,7 +79,17 @@
     "measurements_stale": "Measurements were updated in the warehouse. Refresh the page and try again.",
     "inbound_no_measurement_changes": "There are no measurement changes to save.",
     "ups_edit_registered_locked": "Orders registered with UPS cannot be edited. Cancel the UPS registration in the warehouse first.",
-    "ups_edit_status_locked": "The order cannot be edited in its current status."
+    "ups_edit_status_locked": "The order cannot be edited in its current status.",
+    "auth_invalid_credentials": "The email or password is incorrect.",
+    "auth_email_not_confirmed": "Your email has not been confirmed yet. Please check your inbox.",
+    "auth_account_exists": "This email is already registered. Please sign in.",
+    "auth_password_invalid": "The password does not meet the security policy.",
+    "auth_rate_limited": "Too many requests. Please try again shortly.",
+    "auth_unexpected": "An error occurred during sign-in. Please try again shortly.",
+    "auth_signup_failed": "Sign-up failed. Please check the information you entered.",
+    "auth_signup_profile_failed": "Failed to create the profile. Please try again shortly.",
+    "inventory_not_found": "Inventory item not found.",
+    "inventory_below_zero": "Inventory quantity cannot be negative."
   },
   "Common": {
     "phoneHelp": "Numbers only (no hyphens, max {max} digits)",

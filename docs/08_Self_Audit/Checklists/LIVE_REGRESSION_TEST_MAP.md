@@ -1,7 +1,7 @@
 # 🗺️ LIVE Regression Test Master Map
 
-> **총 테스트 케이스:** 1,917 Cases (vitest 개별 테스트 기준, 260 test files)
-> **최종 검증일:** 2026-11-17 (TASK-B-355 인증·회원·VOC·지원 오류 로케일 전환 · §89 TC-355-01~04 등재 · 1,917/1,917 PASS)
+> **총 테스트 케이스:** 1,923 Cases (vitest 개별 테스트 기준, 261 test files)
+> **최종 검증일:** 2026-11-17 (TASK-B-356 로그인/가입·잔여 액션·alert 화면 오류 로케일 전환 · §90 TC-356-01~10 등재 · 1,923/1,923 PASS)
 
 제니스 플랫폼의 비즈니스 영속성을 보장하는 회귀 테스트 케이스의 통합 명세서입니다. 모든 신규 개발 및 수정 시 이 맵에 케이스가 추가되어야 하며, 전체 테스트가 통과되어야 합니다.
 
@@ -1374,3 +1374,23 @@ SHXK `createorder` 페이로드의 `shipper.shipper_name`이 화면 "담당자�
 - `tests/unit/logistics/voc.test.ts:109` — `toContain('UNAUTHORIZED')` → `toBe('권한이 없습니다.')` (원문 영문 → 로케일 전환 + 부분매칭→정확문칭 **강화**).
 - `tests/unit/member/profile.test.ts:62` — `'탈퇴 처리 중 오류가 발생했습니다.'` → `'요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요. (코드: WITHDRAW)'` (반환 메시지가 generic+코드로 전환됨에 따른 정확문자열 갱신).
 - `tests/unit/i18n/errors-key-sync.test.ts` — baseline 배열 58→80키로 재생성(ko.json 실측 합집합, `Errors` 4로케일 동기화 규칙).
+
+## 90. 로그인/가입 + 잔여 액션 + alert/showToast 화면 오류 로케일 전환 (Issue #1334 / TASK-B-356)
+
+**2026-11-17, Dave** — 부모 #1280 마무리 단계. `login/actions.ts`의 인증 오류(영문·`error.message` 직반환)를 **로케일 문장**으로 수렴(계정 존재 여부 비구분 유지), 잔여 액션 5파일(`daily-billing`·`inventory`·`notifications`·`invoice`·`organization`)의 사용자 도달 원문을 `generic`+코드로 대체, `alert`/`showToast` 화면 11파일 22지점의 `err.message` 직노출을 `console.error` + `Errors.generic`(+코드)로 전환했다. `Errors` **10키 추가(총 90키, 4개 로케일 동일 세트)**. `alert()`는 toast로 바꾸지 않고 문구만 로케일화(지시).
+
+| ID | 검증 내용 | 기대 결과 | 테스트 위치 |
+| :-- | :-- | :-- | :-- |
+| TC-356-01 | 로그인 `Invalid login credentials` | `error` = `이메일 또는 비밀번호가 올바르지 않습니다.`, 원문 미포함, `logger.error` 원문 기록 | `tests/unit/auth/task-b356-login-locale.test.ts` |
+| TC-356-02 | 로그인 en 로케일 | `The email or password is incorrect.` (en 단언) | 동일 |
+| TC-356-03 | 이메일 미인증 로그인 | 기존 구분 유지 + 로케일 문구 | 동일 |
+| TC-356-04 | 알 수 없는 로그인 오류 | `로그인 중 오류가 발생했습니다…` (원문 미노출) | 동일 |
+| TC-356-05 | 회원가입 이미 가입된 이메일 | `이미 가입된 이메일입니다. 로그인해 주세요.` | 동일 |
+| TC-356-06 | 회원가입 비밀번호 정책 위반 | `비밀번호가 보안 정책을 충족하지 않습니다.` (원문 미노출) | 동일 |
+| TC-356-07 | 재고 조정 검증 | `재고 수량은 0 미만이 될 수 없습니다.` 반환(원문 미포함) | `tests/unit/logistics/inventory.test.ts` |
+| TC-356-08 | 문서 오더 조회 실패 | `오더를 찾을 수 없습니다.` / generic(ko)+`ORDER_LOOKUP` | `tests/unit/documents/document-actions.test.ts` |
+| TC-356-09 | `alert`/`showToast` 화면 | `next-intl` mock 추가 후 렌더 PASS | `tests/unit/ups/ups-rates-client-pivot.test.tsx` 등 |
+| TC-356-10 | `Errors` 키 동기화(90키) | ko 기준 90키 완전 일치 + ICU 파라미터 일치 | `tests/unit/i18n/errors-key-sync.test.ts` |
+| TC-356-RST | 로그인 원문 복귀 되돌리기 | `error.message` 직반환으로 원복 → **4 failed / 2 passed** → 복구 6 passed | `tests/unit/auth/task-b356-login-locale.test.ts` |
+
+**회귀 검증 (2026-11-17)**: `npm run test:regression` **261 test files / 1,923 tests 전부 PASS**. `npm run build` **EXIT=0**.

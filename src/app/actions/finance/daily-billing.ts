@@ -7,6 +7,7 @@ import { getExchangeRate } from '@/lib/finance/exchange-rate';
 import { getKstToday } from '@/lib/utils/date-kst';
 import { generateInvoicesForOrder, finalizeInvoice } from './settlement';
 import { revalidatePath } from 'next/cache';
+import { trError } from '@/lib/i18n/action-error';
 
 export interface ShipperDailyBillingGroup {
   date: string; // Period Key (YYYY-MM-DD | YYYY년 WNN주 | YYYY-MM)
@@ -114,7 +115,7 @@ export async function getShipperDailyBillingSummary(params?: {
 }) {
   try {
     const { supabase, profile } = await validateUserAction();
-    if (!profile) throw new Error('User profile not found');
+    if (!profile) throw new Error(await trError('profile_not_found'));
 
     const periodType = params?.periodType || 'daily';
     // 스냅샷(applied_exchange_rate) 없는 극단 케이스의 최후 fallback
@@ -141,7 +142,10 @@ export async function getShipperDailyBillingSummary(params?: {
       if (params?.endDate) query.lte('created_at', `${params.endDate}T23:59:59Z`);
 
       const { data, error } = await query;
-      if (error) throw new Error(`인보이스 조회 실패: ${error.message}`);
+      if (error) {
+        logger.error('daily-billing: invoice lookup failed', error);
+        throw new Error(await trError('generic', { code: 'INVOICE_LOOKUP' }));
+      }
       invoices = data || [];
     } else if (profile.role === USER_ROLES.AGENCY) {
       const { data: links } = await supabase
@@ -183,7 +187,10 @@ export async function getShipperDailyBillingSummary(params?: {
       if (params?.startDate) query.gte('created_at', `${params.startDate}T00:00:00Z`);
       if (params?.endDate) query.lte('created_at', `${params.endDate}T23:59:59Z`);
       const { data, error } = await query;
-      if (error) throw new Error(`인보이스 조회 실패: ${error.message}`);
+      if (error) {
+        logger.error('daily-billing: invoice lookup failed', error);
+        throw new Error(await trError('generic', { code: 'INVOICE_LOOKUP' }));
+      }
       invoices = data || [];
     }
 
@@ -297,7 +304,7 @@ export async function getShipperDailyBillingSummary(params?: {
     return { success: true, groups, exchangeRate: fallbackRate };
   } catch (err: any) {
     logger.error('getShipperDailyBillingSummary failed:', err);
-    return { success: false, error: err.message || '일별/주별/월별 집계 조회 중 오류 발생', groups: [] };
+    return { success: false, error: await trError('generic', { code: 'SUMMARY_LOOKUP' }), groups: [] };
   }
 }
 
@@ -325,7 +332,10 @@ export async function getShipperDailyOrdersDetails(
       .in('id', invoiceIds)
       .neq('status', 'CANCELED');
 
-    if (invErr) throw new Error(`인보이스 조회 실패: ${invErr.message}`);
+    if (invErr) {
+      logger.error('daily-billing: invoice lookup failed', invErr);
+      throw new Error(await trError('generic', { code: 'INVOICE_LOOKUP' }));
+    }
     if (!invoices || invoices.length === 0) return { success: true, orders: [] };
 
     const orderIds = [...new Set(
@@ -342,7 +352,10 @@ export async function getShipperDailyOrdersDetails(
       `)
       .in('id', orderIds);
 
-    if (ordersErr) throw new Error(`오더 상세 목록 조회 실패: ${ordersErr.message}`);
+    if (ordersErr) {
+      logger.error('daily-billing: order detail lookup failed', ordersErr);
+      throw new Error(await trError('generic', { code: 'ORDER_DETAIL_LOOKUP' }));
+    }
     if (!orders || orders.length === 0) return { success: true, orders: [] };
 
     const { data: costs } = await supabase
@@ -411,7 +424,7 @@ export async function getShipperDailyOrdersDetails(
     return { success: true, orders: resultRows };
   } catch (err: any) {
     logger.error('getShipperDailyOrdersDetails failed:', err);
-    return { success: false, error: err.message || '상세 내역 조회 실패' };
+    return { success: false, error: await trError('generic', { code: 'ORDERS_DETAIL_LOOKUP' }) };
   }
 }
 
@@ -424,12 +437,13 @@ export async function finalizeDailyShipperInvoices(
 ): Promise<{ success: boolean; finalizedCount: number; failedCount: number; errors?: string[] }> {
   try {
     const { profile } = await validateUserAction();
-    if (!profile) throw new Error('User profile not found');
+    if (!profile) throw new Error(await trError('profile_not_found'));
 
     const adminRoles = [USER_ROLES.ADMIN, USER_ROLES.MANAGER, USER_ROLES.ZENITH_SUPER_ADMIN] as string[];
     const isAdmin = adminRoles.includes(profile.role);
     if (!isAdmin && profile.role !== USER_ROLES.AGENCY) {
-      throw new Error('인보이스 일괄 마감 권한이 없습니다.');
+      logger.warn(`daily-billing: bulk finalize denied for role: ${profile.role}`);
+      throw new Error(await trError('permission_denied'));
     }
 
     let finalizedCount = 0;

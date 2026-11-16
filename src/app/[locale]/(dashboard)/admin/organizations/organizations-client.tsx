@@ -1,4 +1,5 @@
 'use client';
+import { useTranslations } from 'next-intl';
 import { logger } from '@/lib/logger';
 
 import { useState } from 'react';
@@ -16,6 +17,7 @@ interface OrganizationApprovalClientProps {
 }
 
 export default function OrganizationApprovalClient({ initialData }: OrganizationApprovalClientProps) {
+  const te = useTranslations('Errors');
   const [pendingOrgs, setPendingOrgs] = useState<any[]>(initialData?.organizations || []);
   const [loading, setLoading] = useState(false);
   const [platformVersion, setPlatformVersion] = useState<string>('v2.1 Premium');
@@ -52,7 +54,8 @@ export default function OrganizationApprovalClient({ initialData }: Organization
         await refreshData();
       }
     } catch (error: any) {
-      alert(`SYSTEM_ERROR: 승인 프로토콜 실행 실패 - ${error.message}`);
+      console.error(error);
+      alert(te('generic', { code: 'ORGANIZATION_APPROVE' }));
     } finally {
       setLoading(false);
     }
@@ -70,7 +73,8 @@ export default function OrganizationApprovalClient({ initialData }: Organization
         await refreshData();
       }
     } catch (error: any) {
-      alert(`ERROR: 보완 요청 실패 - ${error.message}`);
+      console.error(error);
+      alert(te('generic', { code: 'ORGANIZATION_SUPPLEMENT' }));
     } finally {
       setLoading(false);
     }
@@ -88,7 +92,8 @@ export default function OrganizationApprovalClient({ initialData }: Organization
         await refreshData();
       }
     } catch (error: any) {
-      alert(`ERROR: 반려 처리 실패 - ${error.message}`);
+      console.error(error);
+      alert(te('generic', { code: 'ORGANIZATION_REJECT' }));
     } finally {
       setLoading(false);
     }
@@ -97,7 +102,8 @@ export default function OrganizationApprovalClient({ initialData }: Organization
   const handleViewDocument = async (filePath: string) => {
     const result = await getDocumentSignedUrl(filePath);
     if (result.error) {
-      alert('문서를 불러오는 중 오류가 발생했습니다: ' + result.error);
+      console.error(result.error);
+      alert(result.error || te('fetch_failed'));
       return;
     }
     if (result.signedUrl) {

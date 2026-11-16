@@ -1,4 +1,5 @@
 "use client";
+import { useTranslations } from 'next-intl';
 
 import { useState, useCallback } from "react";
 import { ColumnDef } from "@tanstack/react-table";
@@ -30,6 +31,7 @@ const EMPTY_FORM: CreateCustomsRateData = {
 };
 
 export default function CustomsRatesClient({ initialRates, organizations, userRole, userOrgId }: Props) {
+  const te = useTranslations('Errors');
   const [rates, setRates] = useState(initialRates);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingRate, setEditingRate] = useState<CustomsRate | null>(null);
@@ -76,7 +78,8 @@ export default function CustomsRatesClient({ initialRates, organizations, userRo
       }
       window.location.reload();
     } catch (e) {
-      alert(e instanceof Error ? e.message : '처리 중 오류가 발생했습니다.');
+      console.error(e);
+      alert(te('generic', { code: 'RATE_SAVE' }));
     } finally {
       setLoading(false);
     }
@@ -90,7 +93,8 @@ export default function CustomsRatesClient({ initialRates, organizations, userRo
       if (error) throw new Error(error);
       window.location.reload();
     } catch (e) {
-      alert(e instanceof Error ? e.message : '처리 중 오류가 발생했습니다.');
+      console.error(e);
+      alert(te('generic', { code: 'RATE_SAVE' }));
     } finally {
       setLoading(false);
     }

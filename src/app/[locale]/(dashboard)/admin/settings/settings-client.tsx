@@ -1,4 +1,5 @@
 'use client';
+import { useTranslations } from 'next-intl';
 
 import { useState } from 'react';
 import { ZenCard, ZenButton } from '@/components/ui/ZenUI';
@@ -30,6 +31,7 @@ interface AdminSettingsClientProps {
 export default function AdminSettingsClient({ initialData }: AdminSettingsClientProps) {
   const params = useParams();
   const locale = params.locale as string;
+  const te = useTranslations('Errors');
   const [paramsList, setParamsList] = useState<SystemParam[]>(initialData);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState<string | null>(null);
@@ -41,7 +43,7 @@ export default function AdminSettingsClient({ initialData }: AdminSettingsClient
       const data = await getSystemParams();
       setParamsList(data);
     } catch (error: any) {
-      showToast('설정을 불러오는 중 오류가 발생했습니다.', 'error');
+      showToast(te('fetch_failed'), 'error');
     } finally {
       setLoading(false);
     }
@@ -72,7 +74,8 @@ export default function AdminSettingsClient({ initialData }: AdminSettingsClient
       await updateSystemParam(key, payload);
       showToast(`${param.key} 정책이 성공적으로 업데이트되었습니다.`, 'success');
     } catch (error: any) {
-      showToast(`저장 실패: ${error.message}`, 'error');
+      console.error(error);
+      showToast(te('generic', { code: 'SETTINGS_SAVE' }), 'error');
     }
     setSaving(null);
   };
