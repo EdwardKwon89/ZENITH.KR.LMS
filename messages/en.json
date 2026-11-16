@@ -1,5 +1,15 @@
 {
   "Errors": {
+    "fetch_failed": "Failed to fetch data. Please try again later.",
+    "status_outbound_confirm": "Only orders in WAREHOUSED or PACKED status can be confirmed for outbound.",
+    "status_cancel_inbound": "Only orders in WAREHOUSED status can cancel inbound processing.",
+    "status_ups_register": "Only orders in WAREHOUSED status can be registered with UPS.",
+    "status_ups_undo": "Only orders in PACKED status can cancel UPS registration.",
+    "status_departure_confirm": "Only orders in RELEASED status can be confirmed as departed.",
+    "status_departure_cancel": "Only orders in RELEASED status can cancel departure.",
+    "status_departure_undo": "Only orders in IN_TRANSIT status can cancel departure confirmation.",
+    "own_shipper_outbound": "Only orders belonging to your own shippers can be processed for outbound.",
+    "own_shipper_only": "Only orders belonging to your own shippers can be processed.",
     "generic": "Something went wrong. Please try again shortly. (Code: {code})",
     "order_not_found": "Order not found.",
     "packages_not_found": "Package information for this order could not be found.",
@@ -612,6 +622,9 @@
     "back": "Back to Home"
   },
   "WarehouseInbound": {
+    "cargo_found": "Cargo found.",
+    "no_measurements": "No measurement changes.",
+    "measurements_saved": "Measurements saved.",
     "title": "Warehouse Inbound Process",
     "scan_placeholder": "Scan or enter barcode/order number",
     "search_btn": "Search",
@@ -665,6 +678,7 @@
     "no_pickup_orders": "No orders available for pickup."
   },
   "WarehouseOutbound": {
+    "confirm_outbound_partial_failed": "Failed to process some orders for outbound.",
     "title": "Outbound Process",
     "select_orders": "Select Orders for Outbound",
     "search_placeholder": "Search by order number",

@@ -1,5 +1,15 @@
 {
   "Errors": {
+    "fetch_failed": "データの取得に失敗しました。しばらくしてから再度お試しください。",
+    "status_outbound_confirm": "WAREHOUSED または PACKED 状態の注文のみ出庫確認できます。",
+    "status_cancel_inbound": "WAREHOUSED 状態の注文のみ入庫取消できます。",
+    "status_ups_register": "WAREHOUSED 状態の注文のみ UPS 登録できます。",
+    "status_ups_undo": "PACKED 状態の注文のみ UPS 登録取消できます。",
+    "status_departure_confirm": "RELEASED 状態の注文のみ出庫確認できます。",
+    "status_departure_cancel": "RELEASED 状態の注文のみ出庫取消できます。",
+    "status_departure_undo": "IN_TRANSIT 状態の注文のみ出庫確認取消できます。",
+    "own_shipper_outbound": "ご自身の荷主に属する注文のみ出庫処理できます。",
+    "own_shipper_only": "ご自身の荷主に属する注文のみ処理できます。",
     "generic": "リクエストを処理できませんでした。しばらくしてから再試行してください。（コード: {code}）",
     "order_not_found": "注文が見つかりません。",
     "packages_not_found": "この注文の荷物情報が見つかりません。",
@@ -138,6 +148,7 @@
     "my_security_desc": "アカウントのセキュリティのため、定期的にパスワードを変更してください。"
   },
   "WarehouseOutbound": {
+    "confirm_outbound_partial_failed": "一部の注文の出庫処理に失敗しました。",
     "title": "出庫処理",
     "select_orders": "出庫するオーダを選択",
     "search_placeholder": "オーダ番号で検索",
@@ -424,5 +435,10 @@
     "form_address_search": "住所検索",
     "form_state_province": "州/省",
     "form_city": "市/区"
+  },
+  "WarehouseInbound": {
+    "cargo_found": "貨物が見つかりました。",
+    "no_measurements": "変更された測定値はありません。",
+    "measurements_saved": "測定値が保存されました。"
   }
 }

@@ -2,8 +2,11 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 vi.mock('server-only', () => ({}));
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }));
+// TASK-B-353: 키-통과 스텁 → 실제 ko 메시지 반환 (trError가 실문구를 만들도록)
+import koMessages from '../../../messages/ko.json';
 vi.mock('next-intl/server', () => ({
-  getTranslations: vi.fn().mockReturnValue(vi.fn((key: string) => key)),
+  getLocale: vi.fn().mockResolvedValue('ko'),
+  getTranslations: vi.fn().mockImplementation(() => (key: string) => (koMessages as any).Errors?.[key] ?? key),
 }));
 vi.mock('@/lib/logger', () => ({ logger: { info: vi.fn(), error: vi.fn(), warn: vi.fn() } }));
 vi.mock('@/lib/shxk/config', () => ({ SHXK_SHIPPER_NAME: 'SNTL', SHXK_SHIPPER_COUNTRY: 'KR' }));

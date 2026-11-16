@@ -2091,6 +2091,7 @@ UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류
 - **관련 파일**: `messages/zh.json`, `messages/ja.json`, `src/lib/shxk/translate.ts`, `tests/unit/i18n/errors-key-sync.test.ts`, `tests/unit/shxk/translate.test.ts`
 - **예상 공수**: 0.1~0.2 MD (검수·문구 수정·테스트 기대값 갱신)
 - **우선순위**: Low — 기능 무관, 표시 문구 품질
+- **TASK-B-353(2026-11-16) 신규 키 목록 추가**: `Errors` 10종(`fetch_failed`, `status_outbound_confirm`, `status_cancel_inbound`, `status_ups_register`, `status_ups_undo`, `status_departure_confirm`, `status_departure_cancel`, `status_departure_undo`, `own_shipper_outbound`, `own_shipper_only`) + `WarehouseOutbound.confirm_outbound_partial_failed` + `WarehouseInbound.{cargo_found, no_measurements, measurements_saved}` — zh/ja 문구는 동일하게 **잠정 초안**(위 사람 검수 대상에 포함). 참고: `zh`·`ja`에는 `WarehouseInbound`·`WarehousePickup` 네임스페이스 자체가 없어(기존 결함, DEF-B-156 계열) 이번에 `WarehouseInbound` 블록을 신규 생성해 신규 3키만 추가했다(기존 키 미생성).
 
 ---
 

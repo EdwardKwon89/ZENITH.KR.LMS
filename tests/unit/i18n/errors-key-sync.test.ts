@@ -35,7 +35,7 @@ describe('Errors 네임스페이스 로케일 키 동기화 (TASK-B-350)', () =>
   const baseline = errorsOf(loadMessages(BASELINE));
   const baselineKeys = Object.keys(baseline).sort();
 
-  it('ko 기준 키가 30개이고 모두 비어 있지 않은 문자열이다', () => {
+  it('ko 기준 키가 40개이고 모두 비어 있지 않은 문자열이다', () => {
     expect(baselineKeys).toEqual([
       'agency_org_missing',
       'already_delivered',
@@ -44,6 +44,7 @@ describe('Errors 네임스페이스 로케일 키 동기화 (TASK-B-350)', () =>
       'document_fetch_failed',
       'document_save_failed',
       'document_save_failed_after_shipping',
+      'fetch_failed',
       'generic',
       'insufficient_balance',
       'label_issue_failed',
@@ -55,6 +56,8 @@ describe('Errors 네임스페이스 로케일 키 동기화 (TASK-B-350)', () =>
       'not_ups_order',
       'order_has_no_packages',
       'order_not_found',
+      'own_shipper_only',
+      'own_shipper_outbound',
       'packages_not_found',
       'permission_denied',
       'profile_not_found',
@@ -63,7 +66,14 @@ describe('Errors 네임스페이스 로케일 키 동기화 (TASK-B-350)', () =>
       'shxk_generic',
       'shxk_required_missing',
       'shxk_validation_failed',
+      'status_cancel_inbound',
       'status_change_denied',
+      'status_departure_cancel',
+      'status_departure_confirm',
+      'status_departure_undo',
+      'status_outbound_confirm',
+      'status_ups_register',
+      'status_ups_undo',
       'unknown_action',
       'ups_actual_charge_status_invalid',
       'ups_actual_cost_status_invalid',
