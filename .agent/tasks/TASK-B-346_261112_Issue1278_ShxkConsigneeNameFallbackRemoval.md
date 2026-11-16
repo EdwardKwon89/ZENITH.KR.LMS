@@ -212,7 +212,7 @@ SHXK `createorder`의 `consignee.*` 전체 명세(`docs/80_RawData/Phase8_UPS_AP
 
 ## [작업 결과] (PR③)
 - **명세 선갱신:** `docs/02_Analysis/Ds_11_API_상세_명세서.md` `createOrder` 절 수하인 매핑표 갱신 — 명세 상한·미전송 8필드 기재. `npm run check:ds11` → `액션 함수 298개 | Ds-11 언급 92개 | 미반영 206개 (허용 목록 206개)` **OK** (신규 미반영 0)
-- **코드 커밋:** `88629c7b1` (`[Baker] fix: TASK-B-346 PR③ SHXK consignee 명세 상한 보완 + 회사명 공백 정규화 (Issue #1278)`) — 10 files changed, 395 insertions(+), 57 deletions(-)
+- **코드 커밋:** `4443e052d` (`[Baker] fix: TASK-B-346 PR③ SHXK consignee 명세 상한 보완 + 회사명 공백 정규화 (Issue #1278)`) — 10 files changed, 394 insertions(+), 57 deletions(-) (2026-11-16 `origin/TeamB_Dev` rebase 후 해시)
   - `src/lib/ups/label-mapping.ts`: `consigneeCompany`를 미리 `sanitizeComma` 후 빈 값이면 키 생략(공백만 입력 결함 수정)
   - `src/lib/validation/shxk-limits.ts`: `CONSIGNEE_NAME_MAX`(200)·`_COUNTRYCODE_MAX`(2)·`_PROVINCE_MAX`(300)·`_CITY_MAX`(300)·`_POSTCODE_MAX`(100)·`_EMAIL_MAX`(100)·`_TARIFF_MAX`(50) 추가(명세 행 주석)
   - `src/lib/shxk/validate-payload.ts`: `checkMaxLength` + `CONSIGNEE_MAX_LENGTHS`/`checkConsigneeMaxLengths` — 경계 초과 시 `수취인 … N자 초과` 단일 오류
@@ -224,7 +224,7 @@ SHXK `createorder`의 `consignee.*` 전체 명세(`docs/80_RawData/Phase8_UPS_AP
   - (A) `validate-payload.ts` `checkConsigneeMaxLengths(...)` 호출 주석 처리 → `tests/unit/shxk/validate-payload-limits.test.ts` **7 failed / 15 passed** → 복구 후 **22 passed**
   - (B) `label-mapping.ts` 회사명 공백 정규화 원복(truthiness 스프레드) → `tests/unit/ups/ups-labels-mapping.test.ts` **1 failed / 47 passed** → 복구 후 **48 passed**
 - **표적 테스트:** 3파일 **98 passed**
-- **회귀 테스트:** `npm run test:regression` → **Test Files 254 passed (254) / Tests 1862 passed (1862)**, Duration 401.39s (리팩터링 후 재실행)
+- **회귀 테스트:** `npm run test:regression` → **Test Files 256 passed (256) / Tests 1879 passed (1879)**, Duration 484.72s (rebase(#1326 머지) 후 재실행 — Dave §85 테스트 포함)
 - **빌드:** `npm run build` → **EXIT=0** (TypeScript 오류 0건, 라우트 테이블 정상 출력)
 - **vacuous 단언 점검:** 신규 테스트는 `toEqual`/`toBe`/`toHaveProperty`/`not.toHaveProperty`만 사용 — `toContain`·`typeof`·`.toBeDefined()` 단독 단언 없음
 
@@ -232,29 +232,38 @@ SHXK `createorder`의 `consignee.*` 전체 명세(`docs/80_RawData/Phase8_UPS_AP
 - **사유:** `IMP-190`이 세 곳에서 동시 사용(① 본 PR 미전송 8필드, ② Dave PR #1326, ③ Aiden `next.config.ts:57 TODO(IMP-190)`). TeamB_Dev 파일 최대 번호가 IMP-189이므로 본 PR이 IMP-191을 선점.
 - **정정 범위(본 PR 소유 파일):** `scratch/post_launch_improvements.md`(항목 헤더) · `docs/02_Analysis/Ds_11_API_상세_명세서.md`(참조 1) · `docs/08_Self_Audit/Checklists/LIVE_REGRESSION_TEST_MAP.md`(§86 참조 2) · 본 task file(참조 9).
 - **미변경(타 소유, 의도적 제외):** `next.config.ts:57 TODO(IMP-190)`(Aiden 예약) · `TASK-1153_*.md`(Aiden 예약) — 그대로 유지.
-- **커밋:** `9d5c2f019` (`[Baker] fix: TASK-B-346 PR③ IMP-190→191 번호 정정 (Issue #1278)`)
+- **커밋:** `d9ac2f178` (`[Baker] fix: TASK-B-346 PR③ IMP-190→191 번호 정정 (Issue #1278)`)
+
+## [rebase 반영] `origin/TeamB_Dev` #1326 머지 후 rebase (2026-11-16)
+- **사유:** Jaison 안내 — 머지 순서 #1326(Dave) 우선(회귀맵 §85→§86 순서 유지). #1326 머지(`b209c6e50`) 후 rebase.
+- **rebase 대상:** `origin/TeamB_Dev` = `b209c6e50` (PR #1326 머지 커밋). 본 브랜치 커밋 6개 재적용.
+- **충돌 2건 해소:**
+  - `docs/08_Self_Audit/Checklists/LIVE_REGRESSION_TEST_MAP.md` — Dave §85와 본인 §86이 같은 위치에 추가됨 → **양쪽 병존**(§85 다음 §86, 재번호 없음).
+  - `scratch/post_launch_improvements.md` — Dave IMP-192와 본인 IMP-191이 꼬리에 추가됨 → **양쪽 보존**(IMP-191 다음 IMP-192, 번호 순).
+- **rebase 후 해시(전면 재기록):** 코드 `4443e052d` · IMP 정정 `d9ac2f178` · task file(작업 결과) `4abe83f6b` · (PR/CI 기입) `6bd0a9160` · (CI 문구) `743dd8911` · (리뷰 반영) `da446ff86` 이후.
+- **재검증:** rebase 후 `npm run test:regression` 전체 재실행 — 결과는 아래 [회귀 테스트] 및 PR③/CI 절 참조.
 
 ## R-17 체크리스트 (PR③)
-- [x] 코드 커밋 (코드·테스트·Ds-11·회귀맵·IMP, task file 미포함) — `88629c7b1`
+- [x] 코드 커밋 (코드·테스트·Ds-11·회귀맵·IMP, task file 미포함) — `4443e052d`
 - [x] task file `[작업 결과]` 작성 (실제 커밋 해시 기재)
 - [x] GitHub Issue 라벨 `status:review` 전환 (#1278)
 - [x] `check-R17-DoD` 전항목 통과 (미설치 시 수동 교차점검 — 본 Task는 수동 점검: diff 범위·파일 1,500줄·함수 50줄)
-- [x] 문서 커밋 (task file만) — `2e290549f`
+- [x] 문서 커밋 (task file만) — `4abe83f6b`
 - [x] PR 생성 (`base=TeamB_Dev`, body `Refs #1278`) — #1327
-- [x] `gh pr checks <PR번호>` 실제 출력 보고 (이전 커밋 결과 인용 금지) — run `43818128092` headSha = 최종 head `2e290549f`
+- [x] `gh pr checks <PR번호>` 실제 출력 보고 (이전 커밋 결과 인용 금지) — rebase 후 최종 head 기준 재확인(아래 PR③/CI 절)
 
 ## PR③ / CI 실제 결과
 - **PR:** #1327 (base `TeamB_Dev`, `Refs #1278`) — `mergeable=MERGEABLE`
-- **코드 커밋:** `88629c7b1` (이 커밋을 포함한 PR head `2e290549f`에서 아래 CI 실행 — 코드 변경을 모두 포함)
-- **`gh pr checks 1327` 실제 출력** (run `43818128092`, headSha `2e290549fc58434b418bca33b83e1f54bbc23fc9`):
+- **rebase 후 코드 커밋:** `4443e052d` (이 커밋을 포함한 PR head `da446ff86`에서 아래 CI 실행 — 코드 변경을 모두 포함)
+- **`gh pr checks 1327` 실제 출력** (run `43838783938`, headSha `da446ff86ae44f805516f244ade8b42b7a4d9130`):
   ```
   Dependency Audit (advisory, non-blocking)   pass  11s
-  Docs Sync Check (advisory, non-blocking)    pass  15s
-  Regression Tests                            pass  10m29s
-  Task File Check (advisory, non-blocking)    pass  10s
-  Type Check (advisory, non-blocking)         pass  1m31s
+  Docs Sync Check (advisory, non-blocking)    pass  11s
+  Regression Tests                            pass  6m30s
+  Task File Check (advisory, non-blocking)    pass  9s
+  Type Check (advisory, non-blocking)         pass  58s
   ```
-- **비고:** 이후 커밋(`2e290549f`·`494034f52` 등)은 task file만 변경(docs-only) — 코드·테스트 무변경. 최종 head의 CI도 `gh pr checks`로 확인(전항목 pass).
+- **비고:** rebase(`origin/TeamB_Dev` `b209c6e50` = #1326 머지) 후 재실행 결과. 최종 head CI는 PR 코멘트 참조.
 
 
 
