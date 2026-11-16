@@ -1296,3 +1296,27 @@ SHXK `createorder` 페이로드의 `shipper.shipper_name`이 화면 "담당자�
 | TC-352-RST-B | 관측성 로그 1줄 제거 | **1 failed / 3 passed** → 복구 4 passed | 동일 |
 
 **회귀 검증 (2026-11-16, 재작업 후 재실행)**: `npm run test:regression` **256 test files / 1,851 tests 전부 PASS**. `npm run build` **EXIT=0**.
+
+## 86. SHXK consignee 전체 매핑 감사 + 명세 상한 보완 + 회사명 공백 정규화 (Issue #1278 / TASK-B-346, PR③)
+
+**2026-11-16, Baker** — PR①(성명 폴백 제거)·PR②(회사명 전 구간)에 이어, SHXK createorder `consignee.*` 18개 필드(`docs/80_RawData/Phase8_UPS_API_리서치_결과.md` 130~147행)를 현재 전송·검증 상태와 대조(감사)했다. **명세상 최대길이가 있으나 앱에 검증이 없던 7개 필드**(성명 200·국가코드 2·주/도 300·도시 300·우편번호 100·이메일 100·통관부호 50)를 폼(zod)·사전검증(`validateShxkPayload`)에 추가하고, **공백만 입력된 회사명이 `consignee_company: ''`로 전송되던 결함**을 수정했다. `street`(앱 105 < 명세 300)·`telephone`(앱 15 < 명세 100)은 앱이 명세보다 엄격하므로 의도적 갭 아님으로 판정. 명세에 있으나 **미전송인 8개 필드**(district·doorplate·areacode·mobile·fax·certificatetype·certificatecode·credentials_period)는 신규 컬럼·UI가 필요해 구현하지 않고 결정 요청(IMP-190)으로 보고한다. **UI 변경 없음.**
+
+| ID | 검증 내용 | 기대 결과 | 테스트 위치 |
+| :-- | :-- | :-- | :-- |
+| TC-346-12 | 성명 상한 사전검증 경계 | 200자 `toEqual([])` / 201자 `toEqual(['수취인 성명 200자 초과'])` | `tests/unit/shxk/validate-payload-limits.test.ts` |
+| TC-346-13 | 국가코드 상한 사전검증 경계 | 2자 `toEqual([])` / 3자 `toEqual(['수취인 국가코드 2자 초과'])` | 동일 |
+| TC-346-14 | 주/도 상한 사전검증 경계 | 300자 `toEqual([])` / 301자 `toEqual(['수취인 주/도 300자 초과'])` | 동일 |
+| TC-346-15 | 도시 상한 사전검증 경계 | 300자 `toEqual([])` / 301자 `toEqual(['수취인 도시 300자 초과'])` | 동일 |
+| TC-346-16 | 우편번호 상한 사전검증 경계 | 100자 `toEqual([])` / 101자 `toEqual(['수취인 우편번호 100자 초과'])` | 동일 |
+| TC-346-17 | 이메일 상한 사전검증 경계 | 100자 `toEqual([])` / 101자 `toEqual(['수취인 이메일 100자 초과'])` | 동일 |
+| TC-346-18 | 통관부호 상한 사전검증 경계 | 50자 `toEqual([])` / 51자 `toEqual(['수취인 통관부호 50자 초과'])` | 동일 |
+| TC-346-19 | 성명·주/도·도시·우편번호·통관부호 zod 경계 | N자 `success=true` / N+1자 `success=false`(path 일치) | `tests/unit/orders/shxk-field-limits.test.ts` |
+| TC-346-20 | 이메일 zod 경계 | 100자(유효 이메일) `success=true` / 101자 `success=false`(path `recipient_email`) | 동일 |
+| TC-346-21 | 공백만 회사명 미전송 | `recipient_company:'  '` → `not.toHaveProperty('consignee_company')` | `tests/unit/ups/ups-labels-mapping.test.ts` |
+| TC-346-22 | 회사명 앞뒤 공백 trim | `'  Acme Trading Co  '` → `toBe('Acme Trading Co')` | 동일 |
+| TC-346-RST-A | `checkConsigneeMaxLengths` 호출 제거 | **7 failed / 15 passed** → 복구 후 22 passed | `tests/unit/shxk/validate-payload-limits.test.ts` |
+| TC-346-RST-B | 회사명 공백 정규화 원복(truthiness 스프레드) | **1 failed / 47 passed** → 복구 후 48 passed | `tests/unit/ups/ups-labels-mapping.test.ts` |
+
+**회귀 검증 (2026-11-16, `origin/TeamB_Dev` rebase 후 재실행)**: `npm run test:regression` **254 test files / 1,862 tests 전부 PASS** (401초). `npm run build` **EXIT=0**.
+**명세 동기화**: `docs/02_Analysis/Ds_11_API_상세_명세서.md` `createOrder` 절 수하인 매핑표에 명세 상한·미전송 8개 필드 기재(R-11/R-12). `npm run check:ds11` → `액션 함수 298개 | Ds-11 언급 92개 | 미반영 206개 (허용 목록 206개)` OK.
+**결정 요청**: 미전송 8개 필드는 Issue #1278 PR③ 코멘트의 결정 요청 표 + `scratch/post_launch_improvements.md` IMP-190 참조.

@@ -326,6 +326,21 @@ describe('UPS Labels Mapping Functions', () => {
 
         expect((result.consignee as any).consignee_company).toBe('Acme Inc.');
       });
+
+      // TASK-B-346 PR③ (Issue #1278): 공백만 있는 회사명("  ")은 trim 후 빈 값 → 키 자체 생략.
+      it('recipient_company 공백만("  ")이면 consignee_company 키 자체가 없다 (PR③)', () => {
+        const order = { ...orderWithShipperAddress, recipient_company: '  ' };
+        const result = buildCreateOrderPayload('SHP-CODE', order as any, 'US', packagesWithHsCode as any, shipperDefaults);
+
+        expect(result.consignee as any).not.toHaveProperty('consignee_company');
+      });
+
+      it('recipient_company 앞뒤 공백은 trim되어 전송된다 (PR③)', () => {
+        const order = { ...orderWithShipperAddress, recipient_company: '  Acme Trading Co  ' };
+        const result = buildCreateOrderPayload('SHP-CODE', order as any, 'US', packagesWithHsCode as any, shipperDefaults);
+
+        expect((result.consignee as any).consignee_company).toBe('Acme Trading Co');
+      });
     });
 
     it('recipient_address_local 있으면 street에 괄호 추가', () => {

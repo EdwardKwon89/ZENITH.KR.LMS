@@ -15,6 +15,11 @@
  *   없음. Jaison 확정 2026-11-13 (잠정값 — 실제 거부 로그가 쌓이면 값만 조정).
  * - RECIPIENT_COMPANY_MAX=200: SHXK 명세 `consignee.consignee_company` 상한 200자
  *   (docs/80_RawData/Phase8_UPS_API_리서치_결과.md).
+ * - CONSIGNEE_*_MAX (TASK-B-346 PR③ / Issue #1278): SHXK 명세 `consignee.*` 상한 —
+ *   명세 행 번호를 각 상수 주석에 명기한다. `consignee_street`(명세 300)는 UPS AddressLine
+ *   사정으로 앱이 더 엄격한 CONSIGNEE_STREET_MAX(105), `consignee_telephone`(명세 100)은
+ *   PHONE_MAX_DIGITS(15)를 적용하므로 여기 상한을 추가하지 않는다(의도적 갭 아님).
+ *   ※ 이 상한들은 SHXK 명세값이며, UPS 하류 거부 실측 로그로 확정된 값이 아니다(잠정).
  */
 
 export const HS_CODE_MAX = 30;
@@ -25,6 +30,16 @@ export const SHIPPER_STREET_MAX = 70;
 export const CONSIGNEE_STREET_MAX = 105;
 // TASK-B-346 (Issue #1278): 수하인 회사명(consignee_company) SHXK 명세 상한
 export const RECIPIENT_COMPANY_MAX = 200;
+
+// TASK-B-346 PR③ (Issue #1278): SHXK createorder `consignee.*` 명세 상한
+// (docs/80_RawData/Phase8_UPS_API_리서치_결과.md 130~147행 — 각 주석의 행 번호 참조)
+export const CONSIGNEE_NAME_MAX = 200; // 명세 130행
+export const CONSIGNEE_COUNTRYCODE_MAX = 2; // 명세 132행
+export const CONSIGNEE_PROVINCE_MAX = 300; // 명세 133행
+export const CONSIGNEE_CITY_MAX = 300; // 명세 134행
+export const CONSIGNEE_POSTCODE_MAX = 100; // 명세 137행
+export const CONSIGNEE_EMAIL_MAX = 100; // 명세 142행
+export const CONSIGNEE_TARIFF_MAX = 50; // 명세 147행
 
 /**
  * 문자열에서 비숫자를 모두 제거한다. 전화번호 입력 정제용.

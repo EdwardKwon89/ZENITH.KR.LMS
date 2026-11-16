@@ -2140,6 +2140,18 @@ UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류
 - **예상 공수**: 0.5~1 MD (역할 정책 확정 + 액션 15모듈 정리 + 페이지 게이트 + 회귀)
 - **우선순위**: Medium — 현재 직접 유출은 미확인(액션 가드·RLS가 2차 방어)이나 미들웨어 우회 취약점과 결합 시 노출. IMP-001과 동일 방향이라 통합 진행이 효율적
 
+---
+
+## [IMP-190] SHXK createorder `consignee.*` 미전송 8개 필드 — 신규 컬럼·UI 필요 (결정 요청)
+
+- **발견 경위**: 2026-11-16, TASK-B-346 PR③(Issue #1278)에서 SHXK createorder `consignee.*` 18개 필드를 감사한 결과, 명세(`docs/80_RawData/Phase8_UPS_API_리서치_결과.md` 130~147행)에 있으나 현재 payload에 전송되지 않는 8개 필드를 확인했다.
+- **미전송 필드**: `consignee_district`(구/군, 300)·`consignee_doorplate`(문패번호, 300)·`consignee_areacode`(지역코드, 10)·`consignee_mobile`(휴대폰, 100)·`consignee_fax`(팩스, 100)·`consignee_certificatetype`(증명서유형: ID/PP)·`consignee_certificatecode`(증명서번호, 50)·`consignee_credentials_period`(증명서 유효기간, 50).
+- **현재 상태**: 위 8개는 `zen_orders`에 대응 컬럼이 없고 입력 UI도 없어 payload 매핑 자체가 불가능하다. 필수(Y)는 아니나 `district`·`areacode`·`mobile`은 일부 국가(아시아·중남미 등)의 수취인 통관·배송 정확도에 영향을 줄 수 있고, `certificatetype`/`certificatecode`/`credentials_period`는 특정 국가의 신분증 기반 통관에 요구될 수 있다.
+- **목표 구현(택1 또는 단계적)**: ① 컬럼·UI 신설 후 매핑(district·doorplate·areacode·mobile·fax) ② 증명서 3종은 별도 정책 결정 후 진행 ③ 불필요 확정 시 Ds-11 감사 표에 "미전송 확정"으로 종결.
+- **관련 파일**: `supabase/migrations/`(신규), `src/lib/ups/label-mapping.ts`, `src/lib/validation/order.ts`, `src/lib/validation/shxk-limits.ts`, `src/components/orders/OrderRegistrationForm.tsx`, `docs/02_Analysis/Ds_11_API_상세_명세서.md`
+- **예상 공수**: 1.5~3 MD (컬럼·RPC·UI·복원·검증·회귀, 필드 수에 비례)
+- **우선순위**: Low~Medium — 현재 운영상 거부 사례 미확인. 실제 SHXK 거부/반송 로그에서 특정 필드 부재가 원인으로 확인되면 상향.
+- **결정 요청**: Jaison/JSJung — 위 8개 필드별 필요 여부(결정 요청 표는 Issue #1278 PR③ 코멘트 참조).
 
 ---
 
