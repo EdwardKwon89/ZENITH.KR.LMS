@@ -1,7 +1,7 @@
 # 🗺️ LIVE Regression Test Master Map
 
-> **총 테스트 케이스:** 1,781 Cases (vitest 개별 테스트 기준, 244 test files)
-> **최종 검증일:** 2026-11-13 (TASK-B-351 ups-labels 오류 로케일 전환 · §84 TC-351-01~11 등재 · 1,781 합산, TeamB_Dev 동기화 261114: develop §76 deploy-prod 5건 반영 — CI 재확인 필요)  
+> **총 테스트 케이스:** 1,851 Cases (vitest 개별 테스트 기준, 256 test files)
+> **최종 검증일:** 2026-11-16 (TASK-B-352 ups-actual/tracking 오류 로케일 전환 · §85 TC-352-01~10 등재 · 1,851/1,851 PASS)  
 
 제니스 플랫폼의 비즈니스 영속성을 보장하는 회귀 테스트 케이스의 통합 명세서입니다. 모든 신규 개발 및 수정 시 이 맵에 케이스가 추가되어야 하며, 전체 테스트가 통과되어야 합니다.
 
@@ -1275,3 +1275,24 @@ SHXK `createorder` 페이로드의 `shipper.shipper_name`이 화면 "담당자�
 | TC-351-RST-B | `err.message` 반환 원복 | **1 failed / 5 passed** → 복구 후 6 passed | 동일 |
 
 **회귀 검증 (2026-11-13, `origin/TeamB_Dev` rebase 후 재실행)**: `npm run test:regression` **243 test files / 1,776 tests 전부 PASS** (TASK-B-346 PR② §83 병합분 포함).
+
+## 85. ups-actual-cost·charges·tracking 사용자 오류 로케일 전환 (Issue #1325 / TASK-B-352)
+
+**2026-11-16, Dave** — 부모 #1280(안 ②)의 3단계. `src/app/actions/finance/ups-actual-cost.ts`·`ups-actual-charges.ts`·`src/app/actions/operations/tracking.ts`에서 **사용자 반환 오류를 현재 로케일 문장**으로 전환(`trError()`). DB 오류·예외 원문은 반환값에 넣지 않고 `logger.error(…, error객체)`에만 보존했다(#1183 처리). throw 13건은 **반환 전환 8건 / getter 계약 유지 5건**(컴포넌트 수정 금지 범위)으로 판정했고, getter 5건도 메시지는 로케일 문구다. SHXK 원문 패스스루는 3파일에 **없음(해당 없음)**. `Errors` 9키 추가(총 **30키**, 4개 로케일 동일 세트).
+
+| ID | 검증 내용 | 기대 결과 | 테스트 위치 |
+| :-- | :-- | :-- | :-- |
+| TC-352-01 | 원가 DB upsert 실패 | `error` = generic(ko)+`ACTUAL_COST_SAVE`, DB 원문 미포함, `logger.error(…, error객체)` | `tests/unit/finance/task-b352-error-locale.test.ts` |
+| TC-352-02 | 부가요금 delete 실패 | `error` = generic(ko)+`CHARGES_DELETE`, 원문 미포함, logger 인자 검증 | 동일 |
+| TC-352-03 | 수동 배송완료 상태 update 실패 | `error` = generic(ko)+`STATUS_UPDATE`, 원문 미포함, logger 인자 검증 | 동일 |
+| TC-352-04 | getter 조회 실패(throw) | throw 메시지가 generic(ko)+`ACTUAL_COST_LOOKUP`, 원문 미포함 | 동일 |
+| TC-352-05 | 신규 키 4개 로케일 문구 | `not_ups_order`·`ups_actual_charge_status_invalid`·`manual_reason_required` 각 ko/en/zh/ja 실제 문장 | `tests/unit/i18n/task-b352-locale.test.ts` |
+| TC-352-06 | 상태/권한/스코프 문구 | `recordUpsActualCost`·`recordUpsActualCharges` 대표 실패가 ko 문장(`toBe`) | `tests/unit/finance/ups-actual-cost.test.ts`, `ups-actual-charges.test.ts` |
+| TC-352-07 | 케이스별 기대값 | `billing_finalize_status_invalid`·`shipper_scope_denied`·`label_not_found` `toBe` | `ups-actual-cost.test.ts`, `ups-order-detail-status.test.ts` |
+| TC-352-08 | 하위 조정 실패 원문 은닉 | generic(ko)+`POST_FINALIZATION_ADJUST` | `tests/unit/finance/ups-actual-charges-dual-invoice.test.ts` |
+| TC-352-09 | 트래킹 이벤트 INSERT 실패 | throw 아님 — `{success:false,error:generic(ko)+TRACKING_EVENT_SAVE}` | `tests/unit/operations/tracking-actions.test.ts` |
+| TC-352-10 | `Errors` 키 동기화(30키) | ko 기준 30키 완전 일치 + ICU 파라미터 일치 | `tests/unit/i18n/errors-key-sync.test.ts` |
+| TC-352-RST-A | DB 원문 은닉 되돌리기 | **1 failed / 3 passed** → 복구 4 passed | `task-b352-error-locale.test.ts` |
+| TC-352-RST-B | 관측성 로그 1줄 제거 | **1 failed / 3 passed** → 복구 4 passed | 동일 |
+
+**회귀 검증 (2026-11-16, 재작업 후 재실행)**: `npm run test:regression` **256 test files / 1,851 tests 전부 PASS**. `npm run build` **EXIT=0**.

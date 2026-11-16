@@ -20,7 +20,16 @@
     "label_not_found": "発行済みラベルが見つかりません。",
     "document_save_failed": "書類のダウンロード/保存に失敗しました。",
     "document_save_failed_after_shipping": "配送処理は完了しましたが、ラベルの書類保存に失敗しました。しばらくしてから再試行してください。",
-    "shxk_validation_failed": "SHXK 事前検証に失敗しました: {fields}"
+    "shxk_validation_failed": "SHXK 事前検証に失敗しました: {fields}",
+    "not_ups_order": "UPS 注文ではありません。",
+    "ups_actual_cost_status_invalid": "実費は注文が IN_TRANSIT または DELIVERED の状態でのみ入力できます。",
+    "ups_actual_charge_status_invalid": "実費請求は注文が IN_TRANSIT または DELIVERED の状態でのみ入力できます。",
+    "billing_finalize_status_invalid": "請求確定は注文が IN_TRANSIT または DELIVERED の状態でのみ可能です。",
+    "shipper_scope_denied": "所属代理店の荷主の注文のみ処理できます。",
+    "manual_reason_required": "手動で配送完了に変更するには理由の入力が必須です。",
+    "already_delivered": "すでに配送完了状態です。",
+    "agency_org_missing": "代理店の所属組織情報がありません。",
+    "status_change_denied": "ステータスを変更する権限がありません。"
   },
   "Common": {
     "phoneHelp": "数字のみ入力（ハイフンなし、最大 {max} 桁）",

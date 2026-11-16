@@ -35,8 +35,11 @@ describe('Errors 네임스페이스 로케일 키 동기화 (TASK-B-350)', () =>
   const baseline = errorsOf(loadMessages(BASELINE));
   const baselineKeys = Object.keys(baseline).sort();
 
-  it('ko 기준 키가 21개이고 모두 비어 있지 않은 문자열이다', () => {
+  it('ko 기준 키가 30개이고 모두 비어 있지 않은 문자열이다', () => {
     expect(baselineKeys).toEqual([
+      'agency_org_missing',
+      'already_delivered',
+      'billing_finalize_status_invalid',
       'destination_country_not_found',
       'document_fetch_failed',
       'document_save_failed',
@@ -46,18 +49,24 @@ describe('Errors 네임스페이스 로케일 키 동기화 (TASK-B-350)', () =>
       'label_issue_failed',
       'label_not_found',
       'label_void_failed',
+      'manual_reason_required',
       'network_error',
       'not_found',
+      'not_ups_order',
       'order_has_no_packages',
       'order_not_found',
       'packages_not_found',
       'permission_denied',
       'profile_not_found',
+      'shipper_scope_denied',
       'shipping_method_not_found',
       'shxk_generic',
       'shxk_required_missing',
       'shxk_validation_failed',
+      'status_change_denied',
       'unknown_action',
+      'ups_actual_charge_status_invalid',
+      'ups_actual_cost_status_invalid',
     ]);
 
     for (const key of baselineKeys) {
