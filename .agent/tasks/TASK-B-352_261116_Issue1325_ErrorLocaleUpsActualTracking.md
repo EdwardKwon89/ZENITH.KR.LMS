@@ -118,11 +118,11 @@ $ grep -nE "orderRes\.message|removeRes\.message|res\.message|cnmessage|enmessag
 
 | 지점 | 금전 | 고객접점 | 침묵성 | 사고이력 | 해당 수 | 판정 |
 |:--|:--:|:--:|:--:|:--:|:--:|:--|
-| `ups-actual-cost` DB 쓰기 실패(원가 확정) | O | O(오더 상세) | O | O(#1183) | **4** | **알림 필요** → IMP-190 |
-| `ups-actual-charges` DB 쓰기 실패(청구/조정) | O | O | O | O(#1183) | **4** | **알림 필요** → IMP-190 |
+| `ups-actual-cost` DB 쓰기 실패(원가 확정) | O | O(오더 상세) | O | O(#1183) | **4** | **알림 필요** → IMP-192 |
+| `ups-actual-charges` DB 쓰기 실패(청구/조정) | O | O | O | O(#1183) | **4** | **알림 필요** → IMP-192 |
 | `tracking` 조회/저장 실패 | △ | O | O | X | 2 | 알림 필요(후속 판단) — 이번엔 로그만 |
 
-- **알림(`logClientError(CRITICAL)`) 신규 구성은 이번 PR 범위 밖**(지시) → **IMP-190** 등록.
+- **알림(`logClientError(CRITICAL)`) 신규 구성은 이번 PR 범위 밖**(지시) → **IMP-192** 등록.
 
 ## 7. 산출물
 
@@ -243,6 +243,11 @@ $ git diff --stat
 
 - 코드 로직 변경은 위 2개 함수의 실패 처리 방식 복원뿐이며, 나머지 전환·로깅은 그대로다.
 
+### 10-4. 🔁 2차 재작업 (Jaison 재검토 2026-11-16 — IMP 번호 예약 충돌)
+
+- `IMP-190`은 Aiden이 `next.config.ts:57`의 `TODO(IMP-190)`로 **예약**한 번호였다(PR #1327이 `IMP-191`로 이동 중). 본 Task의 알림 IMP를 **`IMP-192`로 정정**.
+- 수정 범위: `scratch/post_launch_improvements.md` 제목 1건 + 본 task file 참조 4건. **코드/테스트 변경 0건** → 회귀 재실행 생략(직전 `256 files / 1,851 tests PASS` 그대로), CI 최종 head 기준으로 재확인.
+
 ### 10-2. `check-R17-DoD`
 본 환경에 `check-R17-DoD` 실행 파일/슬래시 커맨드가 **없음**(`which` 미검출 — B-345/348/350/351 동일) → §8 DoD를 수동 대조했다(미체크 0건·placeholder 0건·증거 명령/출력 기재).
 
@@ -250,7 +255,7 @@ $ git diff --stat
 
 1. **[범위 제약] getter 5건은 throw 유지** — `getUpsActualCost`·`getUpsActualCharges`·`getUpsChargeReconciliation`·`searchDeliveredUpsOrders`(×2)는 반환 계약을 `{success,error}`로 바꾸려면 `src/components/**` 수정이 필요하나, 이번 DoD가 `components/**` diff 0건을 요구한다. → **메시지는 로케일 문구 + 원문은 logger**로 처리(원문 노출 0). 계약 전환은 B-353에서 클라이언트와 함께 다루는 것이 안전.
 2. **[계약 확장] `tracking` getter 2건에 `error?` 필드 추가** — `getTrackingRawLogs`·`getGlobalTrackingOverview`가 실패 시 빈 결과 + `error` 필드를 반환하도록 확장했다. 기존 소비자(`orders/[orderId]/page.tsx`, `TrackingDashboard.tsx`)는 해당 필드를 읽지 않아 **무수정으로 동작**(컴포넌트 diff 0건).
-3. **[관측성] #1183 ~21지점 로깅 보강 완료** — DB 쓰기 실패는 모두 `logger.error(…, error객체)`. 다만 `ups-actual-*`는 ZEN_A4 알림 기준 3~4개 해당(금전·고객접점·침묵성·이력)이므로 `logClientError(CRITICAL)` 연동이 필요하나 **이번 PR 범위 밖** → **IMP-190** 등록.
+3. **[관측성] #1183 ~21지점 로깅 보강 완료** — DB 쓰기 실패는 모두 `logger.error(…, error객체)`. 다만 `ups-actual-*`는 ZEN_A4 알림 기준 3~4개 해당(금전·고객접점·침묵성·이력)이므로 `logClientError(CRITICAL)` 연동이 필요하나 **이번 PR 범위 밖** → **IMP-192** 등록.
 4. **[i18n] 신규 9키 zh/ja 초안** — IMP-185에 키 목록 추가 기재(지시). 문구 검수는 JSJung 대상.
 5. **[회귀 수치] 256 files / 1,850 tests** — develop 동기화(#1324)로 base 테스트 수가 244/1,781에서 증가한 값이며, 본 Task 신규 2파일·9테스트가 포함된 실행 결과다.
 6. **[테스트 갱신] `toContain` → `toBe`** — 기존 느슨한 단언을 새 로케일 문구 정확 비교로 강화했다(단언 약화 없음). `ups-order-detail-status`의 라벨/스코프 문구도 `toBe`로 갱신.

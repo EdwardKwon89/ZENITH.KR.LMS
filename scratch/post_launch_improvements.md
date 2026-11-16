@@ -2143,7 +2143,7 @@ UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류
 
 ---
 
-## [IMP-190] `ups-actual-cost`/`ups-actual-charges` 실패 지점의 핵심 알림(`logClientError(CRITICAL)`) 미구성
+## [IMP-192] `ups-actual-cost`/`ups-actual-charges` 실패 지점의 핵심 알림(`logClientError(CRITICAL)`) 미구성
 
 - **발견 경위**: 2026-11-16, TASK-B-352(Issue #1325)에서 두 파일의 모든 실패 반환 지점에 `logger.error`/`logger.warn`을 보강(#1183 처리)하면서, ZEN_A4 핵심 지점 알림 4기준(금전·고객접점·침묵성·사고이력)을 대조한 결과 **`ups-actual-*`는 3개 기준 해당**(실비·청구 기록=금전 영향 / 오더 상세 화면 노출=고객접점 / #1183 이력)했다.
 - **현재 상태**: B-352는 로그만 보강했고, `logClientError()`(→`zen_error_logs` `/admin/error-logs`) 연동은 Task 지시상 **범위 밖**으로 두었다. 따라서 원가/청구 저장 실패는 Sentry/Axiom/Vercel 로그에는 남으나 운영자 화면(`/admin/error-logs`)에는 자동 노출되지 않는다.
