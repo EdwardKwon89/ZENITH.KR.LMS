@@ -1,5 +1,15 @@
 {
   "Errors": {
+    "fetch_failed": "数据加载失败，请稍后重试。",
+    "status_outbound_confirm": "仅 WAREHOUSED 或 PACKED 状态的订单可以做出库确认。",
+    "status_cancel_inbound": "仅 WAREHOUSED 状态的订单可以取消入库。",
+    "status_ups_register": "仅 WAREHOUSED 状态的订单可以进行 UPS 登记。",
+    "status_ups_undo": "仅 PACKED 状态的订单可以取消 UPS 登记。",
+    "status_departure_confirm": "仅 RELEASED 状态的订单可以做出库確認。",
+    "status_departure_cancel": "仅 RELEASED 状态的订单可以取消出库。",
+    "status_departure_undo": "仅 IN_TRANSIT 状态的订单可以取消出库确认。",
+    "own_shipper_outbound": "仅隶属于您自身货主的订单可以做出库处理。",
+    "own_shipper_only": "仅隶属于您自身货主的订单可以处理。",
     "generic": "请求处理失败，请稍后重试。（代码：{code}）",
     "order_not_found": "找不到订单。",
     "packages_not_found": "找不到该订单的包裹信息。",
@@ -150,6 +160,7 @@
     "rate_limit_exceeded": "请求过于频繁，请在 {seconds} 秒后重试。"
   },
   "WarehouseOutbound": {
+    "confirm_outbound_partial_failed": "部分订单出库处理失败。",
     "title": "出库处理",
     "select_orders": "选择要出库的订单",
     "search_placeholder": "按订单号搜索",
@@ -436,5 +447,10 @@
     "form_address_search": "搜索地址",
     "form_state_province": "州/省",
     "form_city": "城市"
+  },
+  "WarehouseInbound": {
+    "cargo_found": "已找到货物。",
+    "no_measurements": "没有更改的测量值。",
+    "measurements_saved": "测量值已保存。"
   }
 }

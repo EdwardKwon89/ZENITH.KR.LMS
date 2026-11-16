@@ -1,7 +1,7 @@
 # 🗺️ LIVE Regression Test Master Map
 
-> **총 테스트 케이스:** 1,851 Cases (vitest 개별 테스트 기준, 256 test files)
-> **최종 검증일:** 2026-11-16 (TASK-B-352 ups-actual/tracking 오류 로케일 전환 · §85 TC-352-01~10 등재 · 1,851/1,851 PASS)  
+> **총 테스트 케이스:** 1,891 Cases (vitest 개별 테스트 기준, 257 test files)
+> **최종 검증일:** 2026-11-16 (TASK-B-353 warehouse 오류 로케일 전환 · §87 TC-353-01~04 등재 · 1,891/1,891 PASS — §85(B-352)·§86(B-346) 포함 rebase 후 재실행)  
 
 제니스 플랫폼의 비즈니스 영속성을 보장하는 회귀 테스트 케이스의 통합 명세서입니다. 모든 신규 개발 및 수정 시 이 맵에 케이스가 추가되어야 하며, 전체 테스트가 통과되어야 합니다.
 
@@ -1320,3 +1320,19 @@ SHXK `createorder` 페이로드의 `shipper.shipper_name`이 화면 "담당자�
 **회귀 검증 (2026-11-16, `origin/TeamB_Dev` rebase 후 재실행)**: `npm run test:regression` **254 test files / 1,862 tests 전부 PASS** (401초). `npm run build` **EXIT=0**.
 **명세 동기화**: `docs/02_Analysis/Ds_11_API_상세_명세서.md` `createOrder` 절 수하인 매핑표에 명세 상한·미전송 8개 필드 기재(R-11/R-12). `npm run check:ds11` → `액션 함수 298개 | Ds-11 언급 92개 | 미반영 206개 (허용 목록 206개)` OK.
 **결정 요청**: 미전송 8개 필드는 Issue #1278 PR③ 코멘트의 결정 요청 표 + `scratch/post_launch_improvements.md` IMP-191 참조.
+## 87. warehouse 오류 메시지 로케일 전환 (Issue #1328 / TASK-B-353, 부모 #1280)
+
+**2026-11-16, Mike** — `warehouse.ts`(throw55 + 반환 리터럴3)와 창고 화면5개(`err.message` 노출23행 · 리터럴 toast4 · 컴포넌트 내부 throw3)의 사용자 노출 오류를 현재 로케일 문장으로 전환. B-351/B-352와 동일 방식(`trError()` + `Errors` 키 재사용, `withAction()` 미사용), **throw→반환 전환 0건**(B-352 `addTrackingEvent` 선례 + `confirmPickup`/`cancelPickup` fire-and-forget 호출자 존재 → 반환 전환 시 성공 토스트 회귀).
+
+| ID | 검증 내용 | 기대 결과 | 테스트 위치 |
+| :-- | :-- | :-- | :-- |
+| TC-353-1 | (a) 대표 실패3경로의 ko 문장·영문 원문 미포함 | profile 없음 → `toBe('사용자 프로필을 찾을 수 없습니다.')` + `not.toBe('User profile not found')` / 조회 실패 → `toBe('데이터를 불러오지 못했습니다…')` + `not.toBe('Failed to fetch ups label errors')` / 상태 불일치 → `toBe('WAREHOUSED 상태의 오더만 UPS 등록할 수 있습니다.')` | `tests/unit/warehouse/task-b353-error-locale.test.ts` |
+| TC-353-2 | (b) 호출자 계약 고정 | throw 유지(`confirmPickup`, 호출자 catch-only·await뒤 성공토스트) → `rejects` 없이 message `toBe('권한이 없습니다.')` + `updateOrderStatus` 미호출 / 기존 반환(`undoDeparture`) → `{success:false, error:'오더를 찾을 수 없습니다.'}` | 동일 |
+| TC-353-3 | (c) 4개 로케일(ko/en/zh/ja) 대표 키4종 | `Errors.fetch_failed`·`status_ups_register`·`own_shipper_only`, `WarehouseInbound.measurements_saved` 존재·비어 있지 않음 + ko≠en 문구 차이 | 동일 |
+| TC-353-4 | (d) logger 인자 | `toHaveBeenCalledWith('undoDeparture: order not found (order-x)')` · `toHaveBeenCalledWith('confirmUpsRegistration: passthrough failure', 'DB down raw')` | 동일 |
+
+**회귀 검증 (2026-11-16, `origin/TeamB_Dev` rebase 후 재실행)**: `npm run test:regression` **257 test files / 1,891 tests 전부 PASS** (437초) · `npm run build` **EXIT=0**. (rebase 전 자체 실행: 255/1,846 PASS)
+**되돌리기 검증 (테스트 유효성)**: `confirmPickup`의 throw를 반환으로 임시 전환(B-352 회귀 시뮬레이션) → **1 failed / 11 passed** (TC-353-2 reject 계약 FAIL: "expected the action to reject but it resolved") → 복구 후 **12/12 PASS**.
+**기존 테스트 갱신 (약화 없이, 사유 포함)**:
+- `defb047-get-latest-ups-label-errors.test.ts:126` — `toThrow('Failed to fetch ups label errors')` → ko 문구 (영문 리터럴 → 로케일 전환에 따른 정확문자열 갱신).
+- `warehouse-actions.test.ts:5`·`departure-actions.test.ts:5` — `next-intl/server`의 **키-통과 스텁**(`getTranslations`가 키를 그대로 반환)을 **실 ko 메시지 반환**으로 교체 (스텁 때문에 `trError`가 키명을 만들던 것 — 문구 자체는 약화 없음).

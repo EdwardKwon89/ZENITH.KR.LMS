@@ -47,6 +47,7 @@ export default function OutboundProcessForm({ locale }: { locale: string }) {
   const t = useTranslations("WarehouseOutbound");
   const labelT = useTranslations("ShippingLabel");
   const orderStatusT = useTranslations("orderStatus");
+  const errT = useTranslations('Errors');
 
   const [orders, setOrders] = useState<any[]>([]);
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -84,7 +85,8 @@ export default function OutboundProcessForm({ locale }: { locale: string }) {
       setOrders(allOrders);
       if (historyRes.success) setHistory(historyRes.items);
     } catch (err: any) {
-      toast.error(err.message || "데이터 로드 실패");
+      console.error(err);
+      toast.error(errT('generic', { code: 'DATA_LOAD' }));
     } finally {
       setLoading(false);
     }
@@ -144,7 +146,8 @@ export default function OutboundProcessForm({ locale }: { locale: string }) {
         toast.error(res.error || t("undo_outbound_failed"));
       }
     } catch (err: any) {
-      toast.error(err.message || t("undo_outbound_failed"));
+      console.error(err);
+      toast.error(errT('generic', { code: 'UNDO_OUTBOUND' }));
     } finally {
       setUndoOutboundLoading(false);
     }
@@ -190,10 +193,11 @@ export default function OutboundProcessForm({ locale }: { locale: string }) {
         setPendingOrders([]);
         await fetchData();
       } else {
-        toast.warning("일부 오더 출고 처리에 실패했습니다.");
+        toast.warning(t("confirm_outbound_partial_failed"));
       }
     } catch (err: any) {
-      toast.error(err.message || "출고 확정 실패");
+      console.error(err);
+      toast.error(errT('generic', { code: 'CONFIRM_OUTBOUND' }));
     } finally {
       setVoidLoading(false);
     }
@@ -210,7 +214,8 @@ export default function OutboundProcessForm({ locale }: { locale: string }) {
         toast.error(res.error || t("ups_label_issue_failed"));
       }
     } catch (err: any) {
-      toast.error(err.message || t("ups_label_issue_failed"));
+      console.error(err);
+      toast.error(errT('generic', { code: 'LABEL_ISSUE' }));
     } finally {
       setIssuingLabels(false);
     }
@@ -232,7 +237,8 @@ export default function OutboundProcessForm({ locale }: { locale: string }) {
         toast.error(res.error || t("ups_label_void_failed"));
       }
     } catch (err: any) {
-      toast.error(err.message || t("ups_label_void_failed"));
+      console.error(err);
+      toast.error(errT('generic', { code: 'LABEL_VOID' }));
     } finally {
       setVoidLoading(false);
     }
@@ -250,7 +256,8 @@ export default function OutboundProcessForm({ locale }: { locale: string }) {
         toast.error(res.error || t("undo_ups_failed"));
       }
     } catch (err: any) {
-      toast.error(err.message || t("undo_ups_failed"));
+      console.error(err);
+      toast.error(errT('generic', { code: 'UNDO_UPS' }));
     } finally {
       setUndoUpsLoading(false);
     }
@@ -295,7 +302,8 @@ export default function OutboundProcessForm({ locale }: { locale: string }) {
         await fetchData();
       }
     } catch (err: any) {
-      toast.error(err.message || t("undo_ups_failed"));
+      console.error(err);
+      toast.error(errT('generic', { code: 'UNDO_UPS' }));
     } finally {
       setUndoUpsLoading(false);
     }
@@ -316,7 +324,8 @@ export default function OutboundProcessForm({ locale }: { locale: string }) {
         toast.error(res.error || t("label_print_failed"));
       }
     } catch (err: any) {
-      toast.error(err.message || t("label_print_failed"));
+      console.error(err);
+      toast.error(errT('generic', { code: 'LABEL_PRINT' }));
     } finally {
       setPrintingLabels(prev => {
         const next = new Set(prev);

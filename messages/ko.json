@@ -1,5 +1,15 @@
 {
   "Errors": {
+    "fetch_failed": "데이터를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.",
+    "status_outbound_confirm": "WAREHOUSED 또는 PACKED 상태의 오더만 출고 확정할 수 있습니다.",
+    "status_cancel_inbound": "WAREHOUSED 상태의 오더만 입고취소할 수 있습니다.",
+    "status_ups_register": "WAREHOUSED 상태의 오더만 UPS 등록할 수 있습니다.",
+    "status_ups_undo": "PACKED 상태의 오더만 UPS등록취소할 수 있습니다.",
+    "status_departure_confirm": "RELEASED 상태의 오더만 출고확정할 수 있습니다.",
+    "status_departure_cancel": "RELEASED 상태의 오더만 출고취소할 수 있습니다.",
+    "status_departure_undo": "IN_TRANSIT 상태의 오더만 출고확정취소할 수 있습니다.",
+    "own_shipper_outbound": "본인 소속 화주의 오더만 출고 처리할 수 있습니다.",
+    "own_shipper_only": "본인 소속 화주의 오더만 처리할 수 있습니다.",
     "generic": "요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요. (코드: {code})",
     "order_not_found": "오더를 찾을 수 없습니다.",
     "packages_not_found": "오더의 패키지 정보를 찾을 수 없습니다.",
@@ -607,6 +617,9 @@
     "back": "홈으로"
   },
   "WarehouseInbound": {
+    "cargo_found": "화물을 찾았습니다.",
+    "no_measurements": "변경된 측정값이 없습니다.",
+    "measurements_saved": "측정값이 저장되었습니다.",
     "title": "창고 입고 처리",
     "scan_placeholder": "바코드 또는 오더번호를 스캔/입력하세요",
     "search_btn": "조회",
@@ -660,6 +673,7 @@
     "no_pickup_orders": "픽업 대상 오더가 없습니다."
   },
   "WarehouseOutbound": {
+    "confirm_outbound_partial_failed": "일부 오더 출고 처리에 실패했습니다.",
     "title": "창고 출고 처리",
     "select_orders": "출고할 오더 선택",
     "search_placeholder": "오더번호로 검색",

@@ -30,6 +30,7 @@ import { cn } from "@/lib/utils";
 export default function DepartureConfirmForm({ locale }: { locale: string }) {
   const t = useTranslations("WarehouseDeparture");
   const orderStatusT = useTranslations("orderStatus");
+  const errT = useTranslations('Errors');
 
   const [orders, setOrders] = useState<any[]>([]);
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -54,7 +55,8 @@ export default function DepartureConfirmForm({ locale }: { locale: string }) {
       if (ordersRes.success) setOrders(ordersRes.orders);
       if (historyRes.success) setHistory(historyRes.items);
     } catch (err: any) {
-      toast.error(err.message || "데이터 로드 실패");
+      console.error(err);
+      toast.error(errT('generic', { code: 'DATA_LOAD' }));
     } finally {
       setLoading(false);
     }
@@ -111,7 +113,8 @@ export default function DepartureConfirmForm({ locale }: { locale: string }) {
         await fetchData();
       }
     } catch (err: any) {
-      toast.error(err.message || "출고확정 처리 실패");
+      console.error(err);
+      toast.error(errT('generic', { code: 'DEPARTURE_CONFIRM' }));
     } finally {
       setSubmitLoading(false);
     }
@@ -129,7 +132,8 @@ export default function DepartureConfirmForm({ locale }: { locale: string }) {
         toast.error(res.error || t("undo_failed"));
       }
     } catch (err: any) {
-      toast.error(err.message || t("undo_failed"));
+      console.error(err);
+      toast.error(errT('generic', { code: 'UNDO_DEPARTURE' }));
     } finally {
       setUndoLoading(false);
     }

@@ -33,6 +33,7 @@ import { cn } from "@/lib/utils";
 export default function PickupProcessForm({ locale }: { locale: string }) {
   const t = useTranslations("WarehousePickup");
   const orderStatusT = useTranslations("orderStatus");
+  const errT = useTranslations('Errors');
 
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -48,7 +49,8 @@ export default function PickupProcessForm({ locale }: { locale: string }) {
       const result = await getPickupOrders();
       setOrders(result.orders || []);
     } catch (err: any) {
-      toast.error(err.message || "픽업 대상 조회 실패");
+      console.error(err);
+      toast.error(errT('generic', { code: 'PICKUP_LOAD' }));
     } finally {
       setLoading(false);
     }
@@ -80,7 +82,8 @@ export default function PickupProcessForm({ locale }: { locale: string }) {
       setConfirmTarget(null);
       await Promise.all([fetchOrders(), fetchHistory()]);
     } catch (err: any) {
-      toast.error(err.message || "픽업 처리 실패");
+      console.error(err);
+      toast.error(errT('generic', { code: 'PICKUP_CONFIRM' }));
     } finally {
       setSubmitLoading(null);
     }
@@ -95,7 +98,8 @@ export default function PickupProcessForm({ locale }: { locale: string }) {
       setCancelTarget(null);
       await Promise.all([fetchOrders(), fetchHistory()]);
     } catch (err: any) {
-      toast.error(err.message || "픽업 취소 실패");
+      console.error(err);
+      toast.error(errT('generic', { code: 'PICKUP_CANCEL' }));
     } finally {
       setSubmitLoading(null);
     }
