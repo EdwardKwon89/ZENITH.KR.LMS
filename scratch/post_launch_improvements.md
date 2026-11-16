@@ -1450,6 +1450,7 @@
 - **예상 공수**: 0.5 MD (hook 로직 재설계 + 팀 공지)
 - **우선순위**: **High로 상향** — PASS 오기재 방향(PR#309·#313)이 실제로 발생함이 확인되어, 리뷰어가 매번 실제 CI를 직접 조회하지 않으면 회귀 실패가 은폐된 채 병합될 실질적 위험이 입증됨
 - **상태**: 🔄 1단계 적용 완료(2026-07-11) — `.githooks/pre-commit`에서 이 파일 기반 하드 블록(exit 1) 제거, 경고만 출력하도록 완화. 병합 판단은 원격 CI(`gh pr checks`) 전용으로 전환. pre-commit이 실제 테스트를 재실행하는 강화안(3단계)은 로컬 환경 준비 후 별도 검토.
+- **상태 갱신(2026-11-14, 종결)**: 2단계 완료 — 이 파일을 4개월간 `FAIL`로 방치한 채 pre-commit이 매 커밋 경고를 출력하는 문제(Edward 지적)로 근본 조치. 파일 삭제 + `.gitignore` 등록, `.githooks/pre-commit` 검사 제거, `.claude/settings.json` `Stop` 훅 제거(세션 종료마다 최대 120초 회귀 실행 후 파일을 쓰던 동작 — `테스트 | tail && PASS` 구조라 파이프 종료코드 때문에 값이 부정확했음), `GEMINI.md` 표준 절차에서 기록 줄 제거, `104` 가이드에 폐지 주석. 병합 판단은 원격 CI(`gh pr checks`) 단독. 3단계(pre-commit에서 실제 테스트 재실행)는 채택하지 않음 — 로컬 DB 상태 의존(R-08-2)으로 재현성이 낮고 CI가 이미 매번 fresh DB로 판정.
 
 ## [IMP-136] `gh pr merge --squash`가 stale 브랜치의 ACTIVE_TASK.md 행 삭제를 그대로 반영(병합 후 데이터 유실)
 
@@ -2089,3 +2090,51 @@ UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류
 - **관련 파일**: `messages/zh.json`, `messages/ja.json`, `src/lib/shxk/translate.ts`, `tests/unit/i18n/errors-key-sync.test.ts`, `tests/unit/shxk/translate.test.ts`
 - **예상 공수**: 0.1~0.2 MD (검수·문구 수정·테스트 기대값 갱신)
 - **우선순위**: Low — 기능 무관, 표시 문구 품질
+
+---
+
+## [IMP-186] 단일 파일 꼬리 추가형 번호(회귀맵 §번호·IMP ID) 병렬 작업 충돌 — 채번 방식 개선
+
+- **발견 경위**: 2026-11-14, TeamB_Dev→develop 통합 사전 검토 중 `LIVE_REGRESSION_TEST_MAP.md`(§번호)와 `scratch/post_launch_improvements.md`(IMP ID) 두 파일에서 양 브랜치가 같은 번호를 꼬리에 추가한 충돌이 발생(PR #1303에서 해소). 동일 원인이 TASK-B-350/B-351 재작업, Issue #1291(회귀맵 분할 결정, DEF-B-157)로 이미 관측되었고, TASK·DEF 번호는 `next-task-number.sh`·`next-def-number.sh`로 대응했으나 **회귀맵 §번호와 IMP ID에는 채번 도구가 없다**.
+- **현재 상태**: 병렬 작업(Team A/B)이 같은 시점에 각자 "다음 번호"를 꼬리에 붙이면 병합 시 번호가 겹친다. 이번 충돌 해소 결과 — 회귀맵 Team B §76~83을 §77~84로 재부여, Team B IMP-171→184·IMP-172→185로 재부여(관련 task file 참조 정정). 해소 비용과 참조 오류 위험이 수작업에 있다.
+- **임시 조치**: 같은 날 통합 주기 개정(105, 2026-11-14 — 당일 KST 23:00까지 완료분은 당일 반영)으로 브랜치 간 간격을 줄여 충돌 빈도를 낮춤. 충돌 시 develop 번호를 유지하고 후행 브랜치를 재부여.
+- **목표 구현**: (A) IMP ID — `next-imp-number.sh [A|B]`로 채번하거나 항목을 `scratch/imp/IMP-NNN.md` 개별 파일로 분리(꼬리 추가 충돌 제거) (B) 회귀맵 — §번호 의존 제거(도메인별 파일 분할 또는 번호 없는 앵커)와 `next-section-number.sh`; **Issue #1291(분할 결정)과 함께 Edward 판단**. 어느 쪽이든 기존 참조(task file 등)의 번호 이전 계획 필요.
+- **관련 파일**: `docs/08_Self_Audit/Checklists/LIVE_REGRESSION_TEST_MAP.md`, `scratch/post_launch_improvements.md`, `scripts/next-task-number.sh`·`scripts/next-def-number.sh`(참고 패턴), Issue #1291, `docs/00_GUIDE/105_MULTITEAM_GOVERNANCE.md`
+- **예상 공수**: (A) 0.3~0.5 MD, (B) 1 MD 내외(분할 범위에 따라)
+- **우선순위**: Medium — 기능 무관이나 병렬 작업이 늘수록 병합마다 재발
+
+---
+
+## [IMP-187] develop→TeamB_Dev 동기화 사전 점검 도구 (`check-branch-drift.sh`)
+
+- **발견 경위**: 2026-11-14, 105 개정(동기화를 Team B 리더가 착수 전·통합 PR 제출 전에 수행) 논의 중 — 동기화 판단에 필요한 정보(뒤처진 커밋 수, 예상 충돌 파일, 진행 중 브랜치와의 겹침)를 얻는 표준 도구가 없다.
+- **현재 상태**: 수동으로 `git rev-list --count TeamB_Dev..develop`, `git merge --no-commit --no-ff develop`(시험 병합), `git merge-tree`를 사용해야 한다. 담당자별로 절차가 달라질 수 있고, 2026-10-01~11-14 198커밋 뒤처짐은 확인 수단·점검 습관이 없어 방치된 결과.
+- **임시 조치**: 105 §"develop → TeamB_Dev 동기화"에 수동 명령을 명시. 충돌 파일·해소 방식은 PR 본문에 기록.
+- **목표 구현**: `scripts/check-branch-drift.sh [팀브랜치]` — ① 뒤처진 커밋 수 ② 시험 병합(격리 워크트리, 결과 폐기) 충돌 파일 목록 ③ develop 쪽 변경 공유 파일(회귀맵·IMP·Ds-11·`package.json`·락파일·마이그레이션 등) ④ 선택: 진행 중(`status:in-progress`) 브랜치와 변경 파일 겹침. `agent-worktree-init.sh`·`check-db-freshness.sh`와 같은 방식으로 착수 시 자동 호출 검토. advisory로 시작(차단하지 않음).
+- **관련 파일**: `docs/00_GUIDE/105_MULTITEAM_GOVERNANCE.md`, `scripts/agent-worktree-init.sh`·`scripts/check-db-freshness.sh`(참고 패턴), IMP-186
+- **예상 공수**: 0.5 MD
+- **우선순위**: Medium — 동기화 누락이 번호·파일 충돌과 통합 지연으로 이어짐(IMP-186과 한 쌍)
+
+---
+
+## [IMP-188] `next-task-number.sh`가 Issue만 있는 Task 번호를 감지하지 못해 채번 충돌 발생
+
+- **발견 경위**: 2026-11-15, DEF-146 영향 분석 Task 발령 중 `./scripts/next-task-number.sh A`가 `TASK-1150`을 반환했으나 이미 같은 번호의 Issue(#1309, 회귀맵 이전 Task)가 발령되어 있었다. 발령 직후 이슈 제목을 TASK-1151로 정정해 실제 충돌은 피했다.
+- **현재 상태**: 스크립트는 `.agent/tasks/TASK-*` 파일명만 기준으로 다음 번호를 계산한다. R-17에서 Task는 Issue로 먼저 발령되고 상세 파일은 담당 Agent가 착수 시 생성하므로, **발령~착수 사이의 Task 번호가 감지되지 않는다**(blocked 상태로 오래 대기하는 Task일수록 위험).
+- **임시 조치**: 발령 전 `gh issue list --state all --search "TASK-NNNN"`로 번호를 수동 확인.
+- **목표 구현**: `next-task-number.sh`·`next-def-number.sh`가 task file뿐 아니라 `gh issue list --state all`의 제목(`TASK-N`·`DEF-N`)도 조회해 최댓값+1을 반환(gh 미인증 시 경고와 함께 파일 기준 폴백). IMP-186·IMP-187과 함께 채번 일원화 검토.
+- **관련 파일**: `scripts/next-task-number.sh`, `scripts/next-def-number.sh`, R-19(번호 채번 규칙)
+- **예상 공수**: 0.2 MD
+- **우선순위**: Medium — 번호 중복은 Issue #358에서 이미 반복 확인된 사고 유형
+
+---
+
+## [IMP-189] `admin` 서버 액션 15모듈의 역할 판정이 인라인 중복 — RBAC 권한표(`checkPermission`) 미사용
+
+- **발견 경위**: 2026-11-15, TASK-1151(Issue #1314 / DEF-146) 취약점 도달 가능성 분석 중 "미들웨어를 우회하면 남는 2차 방어선"을 추적하다 발견(DEF-147 참조).
+- **현재 상태**: `src/app/actions/admin/*.ts` 15모듈 중 `checkPermission()` 사용 **0건**. 역할 판정은 ① `validateAdminAction()` 6모듈 ② `profile.role !== USER_ROLES.X` 인라인 비교 6모듈 ③ 역할 검사 없음 1모듈(`auth.ts`, 본인 계정 작업)로 **분산**되어 있다. 모듈마다 허용 역할 집합이 조금씩 달라(`ADMIN`만 / `ADMIN+MANAGER` / `ADMIN+MANAGER+CUSTOMS_BROKER` 등) 권한표를 코드로 파악할 수 없고, 페이지 레벨 게이트도 22건 중 11건이 없다(DEF-147).
+- **임시 조치**: 현행 유지. TASK-1151 보고서 §3.1과 DEF-147에 실태 표를 남겨 판단 근거 확보.
+- **목표 구현**: IMP-001(RBAC DB 기반 전환)과 함께 — `admin` 액션의 역할 판정을 `checkPermissionDB`/`checkPermission` 단일 경로로 통일하고, 허용 역할 집합은 `rbac.ts` 권한표로 이동. 아울러 `admin/layout.tsx` 서버측 역할 게이트 신설(DEF-147 권장 조치 1)로 페이지·액션 이중 방어 구조 확립.
+- **관련 파일**: `src/app/actions/admin/*.ts`, `src/lib/auth/rbac.ts`, `src/lib/auth/guards.ts`, `src/app/[locale]/(dashboard)/admin/layout.tsx`(신설), `src/lib/auth/proxy.ts`, `.agent/defects/DEF-147_admin페이지_역할게이트_미들웨어단독.md`
+- **예상 공수**: 0.5~1 MD (역할 정책 확정 + 액션 15모듈 정리 + 페이지 게이트 + 회귀)
+- **우선순위**: Medium — 현재 직접 유출은 미확인(액션 가드·RLS가 2차 방어)이나 미들웨어 우회 취약점과 결합 시 노출. IMP-001과 동일 방향이라 통합 진행이 효율적

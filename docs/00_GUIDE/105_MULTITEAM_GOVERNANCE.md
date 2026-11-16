@@ -66,9 +66,35 @@ Team C: feature/teamc-*  ──────────────────�
 Team B는 개별 `feature/teamb-*` 브랜치를 **develop에 직접 PR 제출하지 않고**, 먼저 고정 브랜치 `TeamB_Dev`로 자체 병합해 최신 상태를 유지한다.
 
 - **개별 → TeamB_Dev**: Jaison 사전검토(diff + **로컬 검증**: `npm run build` + `npm run test:regression`) 후 팀 자체 판단으로 병합 (Aiden 승인 불요). **GitHub Actions CI 완료 대기는 불요**(2026-07-20 개정 — Aiden이 develop에 직접 반영할 때 쓰는 방식과 동일하게, TeamB_Dev는 내부 통합 브랜치라 최종 게이트가 아니므로 로컬 검증으로 충분. CI 큐 혼잡으로 인한 Team B 대기 시간 문제 완화 목적)
-- **TeamB_Dev → develop**: Aiden이 정기적으로(1일 1~2회 권장) 배치 병합 — develop 병합은 여전히 Aiden 단독 권한(R-17 §0/R-19 불변). **이 단계는 기존 원칙(R-17 v2.2) 그대로 유지** — 실제 GitHub Actions CI 통과 확인이 원칙이며, CI가 15분 내 트리거되지 않을 때만 R-08-1 로컬 대체 검증 허용. 즉 CI 생략이 허용되는 건 개별→TeamB_Dev 단계뿐이고, develop에 실제로 반영되는 이 단계의 검증 기준은 낮아지지 않는다.
+- **TeamB_Dev → develop**: Aiden이 **필요 시** 병합한다(고정 주기 없음 — 2026-11-14 개정). 다만 **당일(KST 23:00까지) 완료(`status:review`)된 Team B Task는 당일 안에 반영**한다. 23:00 이후 완료분은 다음 날 처리하며, Edward/Aiden 지시가 있으면 추가 PR·병합을 수행한다 — develop 병합은 여전히 Aiden 단독 권한(R-17 §0/R-19 불변). **이 단계는 기존 원칙(R-17 v2.2) 그대로 유지** — 실제 GitHub Actions CI 통과 확인이 원칙이며, CI가 15분 내 트리거되지 않을 때만 R-08-1 로컬 대체 검증 허용. 즉 CI 생략이 허용되는 건 개별→TeamB_Dev 단계뿐이고, develop에 실제로 반영되는 이 단계의 검증 기준은 낮아지지 않는다.
 - 이전에는 `integration/teamb-YYMMDD` 형태로 매일 새 브랜치를 만들었으나(2026-07-16~18), 브랜치명이 바뀔 때마다 CI 트리거 목록을 갱신해야 하는 문제가 반복돼 **고정 브랜치로 전환**(과거 `integration/teamb-*` 브랜치는 이력 보존용으로 남겨두고 신규 작업 대상에서 제외)
-- Aiden의 배치 병합 시 develop→TeamB_Dev 역방향 병합도 함께 수행해 두 브랜치의 드리프트를 방지한다(충돌은 시간순으로 해소 — [107_MULTIAGENT_SCALING_PROPOSAL.md](107_MULTIAGENT_SCALING_PROPOSAL.md) 참조)
+#### develop → TeamB_Dev 동기화와 충돌 처리 (2026-11-14 개정, Edward 승인)
+
+> **근거**: 2026-11-14 점검 — 통합 간격 1~25일로 불규칙, 마지막 develop→TeamB_Dev 동기화(2026-10-01) 이후 198커밋 뒤처져 회귀맵 §번호·IMP 번호 충돌 발생. 반대로 Aiden이 develop 병합 시마다 TeamB_Dev에 밀어 넣으면 **Team B 작업 중 Base가 바뀌어** 이미 끝낸 로컬 검증이 무효가 되고 병합 시점에 충돌이 몰린다. 따라서 동기화는 **당기는 방식(Team B가 시점을 통제)** 으로 한다. 충돌은 시간순으로 해소 — [107_MULTIAGENT_SCALING_PROPOSAL.md](107_MULTIAGENT_SCALING_PROPOSAL.md) 참조.
+
+**1. 동기화 주체·시점**
+- **주체**: Team B 리더(Jaison). Aiden은 TeamB_Dev에 develop을 밀어 넣지 않는다.
+- **시점**: ① **새 Task 착수 전**, ② **TeamB_Dev→develop 통합 PR 제출 전**. 확인은 `git rev-list --count TeamB_Dev..develop` — 0이 아니면 동기화한 뒤 착수·제출한다(작업 사이의 빈틈에 수행).
+- **진행 중인 개별 브랜치**: 강제 rebase하지 않는다. 현재 Task 검증을 마친 뒤 TeamB_Dev를 자기 브랜치에 **병합(merge)** 해 최신화한다(공유 브랜치 이력 보존). 병합 시 충돌은 그 브랜치 작성자가 해소하고 영향 테스트를 로컬에서 재실행한다.
+- **Aiden의 역할**: develop 병합 시 변경한 공유 파일 목록을 PR 본문·Issue에 남기고(선택: Team B에 알림), 통합 PR은 **develop을 포함해 충돌 없이(`CLEAN`)** 올라왔을 때만 병합한다. 아니면 병합을 중단하고 Team B에 동기화를 요청한다.
+
+**2. 병합 방향별 주체**
+
+| 방향 | 병합 주체 | 충돌 해소 주체 |
+|:--|:--|:--|
+| `feature/teamb-*` → TeamB_Dev | Team B(Jaison) | Team B 작성자 |
+| develop → TeamB_Dev (착수 전 동기화) | Team B 리더 | Team B 리더 |
+| TeamB_Dev → develop (통합) | **Aiden/Edward** (R-17 Aiden 단독) | **기본: Team B**(Aiden이 중단·요청 후 TeamB_Dev 쪽에서 동기화). **예외: Aiden/Edward** — ① 당일(KST 23:00) 기준·Edward 지시로 대기 불가 ② Team A 담당 파일(Ds-11·GOV 문서) 충돌 ③ 번호 재부여 등 기계적 충돌 |
+
+**3. 충돌 발생 시 조치**
+1. 격리 워크트리(R-17 §0)에서 해소한다.
+2. 이미 develop에 병합된 내용을 기준으로 한다. 번호 충돌은 Team B 쪽을 재부여하고 참조(task file 등)를 grep으로 전수 정정한다.
+3. 양 팀 로직이 의미상 충돌하거나 Team A 담당 파일이면 한쪽을 임의로 고르지 않고 Aiden에게 보고 후 정한다(R-19, 핵심 가드레일).
+4. 해소 후 `build`와 `test:regression`을 새 DB(`supabase db reset`)에서 재실행한다. 의미 충돌은 통합 PR의 실제 CI로 확인한다(R-17).
+5. PR 본문에 충돌 파일·해소 방식을 기록한다. 같은 유형이 반복되면 R-15에 따라 구조 개선 IMP로 올린다(예: IMP-186 채번, IMP-187 사전 점검 도구).
+6. 반나절 안에 해소되지 않으면 Aiden이 지원한다 — 판단 기준·범위를 정해 주며, 도메인 판단이 필요한 부분은 Team B 확인을 받는다.
+
+**4. 회피**: 분기 기간 단축(Task 사이 동기화), Team A는 Team B 영역 파일 미수정(R-19), 락파일·`package.json`·마이그레이션 등 공유 자원 변경은 별도 PR로 분리하고 사전 고지, 새 마이그레이션·RPC 버전 생성 전 develop·TeamB_Dev 양쪽의 최신 번호 확인(타임스탬프가 늦은 쪽이 양보).
 
 - 각 팀은 `develop`을 베이스로 브랜치 생성
 - PR 대상: `develop` (팀 리더가 PR 생성 + Aiden 검토 요청)
