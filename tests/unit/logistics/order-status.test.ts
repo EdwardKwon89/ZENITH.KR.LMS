@@ -84,7 +84,7 @@ describe('ZENITH Logistics: Order Status Machine Action', () => {
     supabase.single.mockResolvedValueOnce({ data: { status: OrderStatus.WAREHOUSED } });
 
     await expect(updateOrderStatus('order-1', OrderStatus.CANCELED))
-      .rejects.toThrow(/상태에서 CANCELED으로 변경할 수 없습니다/);
+      .rejects.toThrow(/상태를 변경할 권한이 없습니다/);
   });
 
   it('TC-S.3: [Failure] 유효하지 않은 상태 전이 시도 시 에러를 발생시켜야 함 (예: REGISTERED -> DELIVERED)', async () => {
@@ -102,7 +102,7 @@ describe('ZENITH Logistics: Order Status Machine Action', () => {
     supabase.single.mockResolvedValueOnce({ data: { status: OrderStatus.REGISTERED } });
 
     await expect(updateOrderStatus('order-1', OrderStatus.DELIVERED))
-      .rejects.toThrow(/상태에서 DELIVERED으로 변경할 수 없습니다/);
+      .rejects.toThrow(/상태를 변경할 권한이 없습니다/);
   });
 
   it('TC-S.3: UPS 오더는 route_option_id 없이도 REGISTERED→SCHEDULED 전이 성공 (DEF-B-025)', async () => {

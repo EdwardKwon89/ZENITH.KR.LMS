@@ -71,6 +71,6 @@ describe('ZENITH Master Detail: Data Integrity Audit', () => {
     supabase.single.mockResolvedValueOnce({ data: null, error: { message: 'Not found' } });
 
     await expect(getMasterOrderWithHouses('invalid-id'))
-      .rejects.toThrow(/Master order not found/);
+      .rejects.toThrow(/대상을 찾을 수 없습니다/);
   });
 });

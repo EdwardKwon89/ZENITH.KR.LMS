@@ -1,6 +1,7 @@
 "use server";
 
 import { logger } from '@/lib/logger';
+import { trError } from '@/lib/i18n/action-error';
 
 import { validateAdminAction, validateUserAction } from "@/lib/auth/guards";
 import { revalidatePath } from "next/cache";
@@ -101,7 +102,7 @@ export async function saveOrderRateSnapshot({
  */
 export async function createOrder(payload: OrderRegistrationInput) {
   const { supabase, user, profile } = await validateUserAction();
-  if (!profile) throw new Error("User profile not found");
+  if (!profile) { logger.warn('[orders] profile not found'); throw new Error(await trError('profile_not_found')); }
 
   const validated = orderRegistrationSchema.parse(payload);
   if (validated.delivery_method === 'DIRECT') {
@@ -119,11 +120,15 @@ export async function createOrder(payload: OrderRegistrationInput) {
   const { data: order, error: rpcError } = await orderRepo.createOrderViaRpc(validated, user.id, profile.org_id as string);
 
   if (rpcError) {
-    throw new Error(`Order creation failed: ${rpcError.message}`);
+    logger.error('createOrder: RPC create_order_atomic failed', rpcError);
+    throw new Error(await trError('generic', { code: 'ORDER_CREATE' }));
   }
 
   const orderId = (order as any)?.id;
-  if (!orderId) throw new Error("Order creation returned no ID");
+  if (!orderId) {
+    logger.error('createOrder: RPC returned no order id');
+    throw new Error(await trError('generic', { code: 'ORDER_CREATE' }));
+  }
 
   // TASK-B-303 (Issue #1125): 등록(CREATE) 이력 기록 — 화이트리스트 핵심 필드만 new_data에 스냅샷
   const newDataSnapshot = extractOrderEditLogSnapshot(validated as unknown as Record<string, unknown>);
@@ -234,16 +239,21 @@ function normalizeIsoTimestamp(value: unknown): string | null {
  */
 export async function updateOrder(orderId: string, payload: OrderRegistrationInput) {
   const { supabase, profile } = await validateUserAction();
-  if (!profile) throw new Error("User profile not found");
+  if (!profile) { logger.warn('[orders] profile not found'); throw new Error(await trError('profile_not_found')); }
 
   const orderRepo = new OrderRepository(supabase);
 
   const { data: order, error: fetchError } = await orderRepo.findById(orderId);
-  if (fetchError || !order) throw new Error("Order not found");
+  if (fetchError || !order) {
+    if (fetchError) logger.error('updateOrder: order lookup failed', fetchError);
+    else logger.warn(`updateOrder: order not found (${orderId})`);
+    throw new Error(await trError('order_not_found'));
+  }
 
   const editScope = getOrderEditScope(order.status as OrderStatus, order.transport_mode ?? undefined);
   if (!editScope.editable) {
-    throw new Error(`Order ${orderId} cannot be edited in status: ${order.status}`);
+    logger.warn(`updateOrder: edit blocked by status ${order.status} (${orderId})`);
+    throw new Error(await trError('order_edit_status_invalid', { status: String(order.status) }));
   }
 
   // TASK-B-339 (Issue #1254): UPS 등록(활성 라벨) 후에는 수정 불가 — 상태와 무관하게 최우선.
@@ -254,7 +264,10 @@ export async function updateOrder(orderId: string, payload: OrderRegistrationInp
       await hasActiveUpsLabel(supabase, orderId)
     );
     if (!availability.editable) {
-      throw new Error(availability.message);
+      logger.warn(`updateOrder: UPS edit unavailable (${orderId}) — ${availability.message}`);
+      throw new Error(await trError(
+        availability.reason === 'UPS_REGISTERED' ? 'ups_edit_registered_locked' : 'ups_edit_status_locked',
+      ));
     }
   }
 
@@ -354,7 +367,8 @@ export async function updateOrder(orderId: string, payload: OrderRegistrationInp
     const previous = previousPackagesById.get(pkg.id);
     if (!previous?.measured_at) continue;
     if (normalizeIsoTimestamp(previous.measured_at) !== normalizeIsoTimestamp(pkg.measured_at)) {
-      throw new Error('창고에서 실측값이 갱신되었습니다. 화면을 새로고침한 뒤 다시 수정해 주세요.');
+      logger.warn(`updateOrder: measurements changed in warehouse (${orderId})`);
+      throw new Error(await trError('measurements_stale'));
     }
   }
 
@@ -380,10 +394,16 @@ export async function updateOrder(orderId: string, payload: OrderRegistrationInp
 
   // TASK-B-286 (Issue #1075 / DEF-B-056): delete 실패도 조용히 넘기지 않고 명시적 throw
   const { error: delItemsErr } = await orderRepo.deleteItemsByOrderId(orderId);
-  if (delItemsErr) throw new Error(`기존 아이템 삭제 실패: ${delItemsErr.message}`);
+  if (delItemsErr) {
+    logger.error('updateOrder: existing items delete failed', delItemsErr);
+    throw new Error(await trError('generic', { code: 'ORDER_ITEM_SAVE' }));
+  }
 
   const { error: delPkgsErr } = await orderRepo.deletePackagesByOrderId(orderId);
-  if (delPkgsErr) throw new Error(`기존 패키지 삭제 실패: ${delPkgsErr.message}`);
+  if (delPkgsErr) {
+    logger.error('updateOrder: existing packages delete failed', delPkgsErr);
+    throw new Error(await trError('generic', { code: 'ORDER_PACKAGE_SAVE' }));
+  }
 
   if (validated.packages && validated.packages.length > 0) {
     for (const pkg of validated.packages) {
@@ -418,7 +438,8 @@ export async function updateOrder(orderId: string, payload: OrderRegistrationInp
 
       // TASK-B-286 (Issue #1075 / DEF-B-056): 조용한 실패 금지 — 패키지 insert 실패 시 명시적 throw
       if (pkgError || !packageData) {
-        throw new Error(`패키지 저장 실패: ${pkgError?.message ?? 'unknown'}`);
+        logger.error('updateOrder: package insert failed', pkgError);
+        throw new Error(await trError('generic', { code: 'PACKAGE_SAVE' }));
       }
 
       if (pkg.items && pkg.items.length > 0) {
@@ -438,7 +459,8 @@ export async function updateOrder(orderId: string, payload: OrderRegistrationInp
         // TASK-B-286 (Issue #1075 / DEF-B-056): 아이템 insert 실패 시 명시적 throw —
         //   RLS 정책 부재 등으로 조용히 소실되지 않도록 방어
         if (itemsErr) {
-          throw new Error(`아이템 저장 실패: ${itemsErr.message}`);
+          logger.error('updateOrder: item insert failed', itemsErr);
+          throw new Error(await trError('generic', { code: 'ITEM_SAVE' }));
         }
       }
     }
@@ -551,7 +573,7 @@ export async function getOrders({
   const { data: setting } = await adminRepo.findSettingByKey("default_page_size");
   if (setting) effectivePageSize = parseInt(setting.setting_value, 10);
 
-  if (!profile) throw new Error("User profile not found");
+  if (!profile) { logger.warn('[orders] profile not found'); throw new Error(await trError('profile_not_found')); }
 
   const userProfile = profile as any;
   const shipperId = userProfile.role === USER_ROLES.CORPORATE ? userProfile.org_id : undefined;
@@ -568,7 +590,10 @@ export async function getOrders({
     createdBy,
   });
 
-  if (error) throw new Error(error.message);
+  if (error) {
+    logger.error('getOrders: list lookup failed', error);
+    throw new Error(await trError('generic', { code: 'ORDER_LIST_LOOKUP' }));
+  }
 
   return {
     orders: data || [],
@@ -587,13 +612,22 @@ export async function getOrderDetails(orderId: string) {
   const orderRepo = new OrderRepository(supabase);
 
   const { data: order, error: orderError } = await orderRepo.findByIdWithRelations(orderId);
-  if (orderError) throw new Error(orderError.message);
+  if (orderError) {
+    logger.error('getOrderDetails: order lookup failed', orderError);
+    throw new Error(await trError('generic', { code: 'ORDER_DETAIL_LOOKUP' }));
+  }
 
   const { data: packages, error: pkgError } = await orderRepo.getPackagesByOrderId(orderId);
-  if (pkgError) throw new Error(pkgError.message);
+  if (pkgError) {
+    logger.error('getOrderDetails: package lookup failed', pkgError);
+    throw new Error(await trError('generic', { code: 'ORDER_DETAIL_LOOKUP' }));
+  }
 
   const { data: items, error: itemsError } = await orderRepo.getItemsFullByOrderId(orderId);
-  if (itemsError) throw new Error(itemsError.message);
+  if (itemsError) {
+    logger.error('getOrderDetails: item lookup failed', itemsError);
+    throw new Error(await trError('generic', { code: 'ORDER_DETAIL_LOOKUP' }));
+  }
 
   const packagesWithItems = packages.map(pkg => ({
     ...pkg,
@@ -622,17 +656,22 @@ export async function updateOrderStatus(
   reason?: string
 ) {
   const { supabase, user, profile } = await validateUserAction();
-  if (!profile) throw new Error("User profile not found");
+  if (!profile) { logger.warn('[orders] profile not found'); throw new Error(await trError('profile_not_found')); }
 
   const orderRepo = new OrderRepository(supabase);
 
   const { data: orderData } = await orderRepo.getMasterOrderId(orderId);
   if (orderData?.master_order_id) {
-    throw new Error("⚠️ 마스터 오더에 결합된 상태입니다. 수정을 위해 먼저 마스터를 해체(Dissolve)하십시오.");
+    logger.warn(`updateOrderStatus: bound to master order (${orderId})`);
+    throw new Error(await trError('master_order_bound'));
   }
 
   const { data: currentOrder, error: fetchError } = await orderRepo.getStatus(orderId);
-  if (fetchError || !currentOrder) throw new Error("Order not found");
+  if (fetchError || !currentOrder) {
+    if (fetchError) logger.error('updateOrderStatus: order lookup failed', fetchError);
+    else logger.warn(`updateOrderStatus: order not found (${orderId})`);
+    throw new Error(await trError('order_not_found'));
+  }
 
   if (currentOrder.status === OrderStatus.REGISTERED && nextStatus === OrderStatus.SCHEDULED && currentOrder.transport_mode !== 'UPS') {
     const orderCheck = await supabase
@@ -642,7 +681,8 @@ export async function updateOrderStatus(
       .maybeSingle();
     const routeOptionId = orderCheck?.data?.route_option_id;
     if (!routeOptionId) {
-      throw new Error('경로를 먼저 선택해야 일정 확정(SCHEDULED)이 가능합니다.');
+      logger.warn(`updateOrderStatus: route required for SCHEDULED (${orderId})`);
+      throw new Error(await trError('route_required_for_scheduled'));
     }
   }
 
@@ -653,7 +693,8 @@ export async function updateOrderStatus(
   );
 
   if (!validation.allowed) {
-    throw new Error(validation.message || "상태 변경 권한이 없거나 유효하지 않은 전이입니다.");
+    logger.warn(`updateOrderStatus: transition denied — ${validation.message ?? 'no reason'} (${orderId})`);
+    throw new Error(await trError('status_change_denied'));
   }
 
   // 3. 트랜잭션 처리 (RPC 호출)
@@ -665,7 +706,10 @@ export async function updateOrderStatus(
     p_user_id: user.id,
   });
 
-  if (rpcError) throw new Error(`Update failed: ${rpcError.message}`);
+  if (rpcError) {
+    logger.error('updateOrderStatus: RPC update failed', rpcError);
+    throw new Error(await trError('generic', { code: 'ORDER_UPDATE' }));
+  }
 
   await Promise.all([
     nextStatus === OrderStatus.RELEASED
@@ -709,7 +753,10 @@ export async function createMasterOrder(payload: {
   const master_no = await generateMasterOrderNo(supabase);
 
   const { data: stats, error: statsError } = await orderRepo.getOrdersAggregation(payload.houseOrderIds);
-  if (statsError) throw new Error(`Aggregation failed: ${statsError.message}`);
+  if (statsError) {
+    logger.error('createMasterOrder: aggregation failed', statsError);
+    throw new Error(await trError('generic', { code: 'MASTER_ORDER_CREATE' }));
+  }
 
   const { data: master, error: masterError } = await orderRepo.insertMasterOrder({
     master_no,
@@ -725,10 +772,16 @@ export async function createMasterOrder(payload: {
     created_by: user.id,
   });
 
-  if (masterError) throw new Error(`Master creation failed: ${masterError.message}`);
+  if (masterError) {
+    logger.error('createMasterOrder: master insert failed', masterError);
+    throw new Error(await trError('generic', { code: 'MASTER_ORDER_CREATE' }));
+  }
 
   const { error: bindingError } = await orderRepo.bindHouseOrders(master.id, payload.houseOrderIds, OrderStatus.MASTERED);
-  if (bindingError) throw new Error(`Binding failed: ${bindingError.message}`);
+  if (bindingError) {
+    logger.error('createMasterOrder: binding failed', bindingError);
+    throw new Error(await trError('generic', { code: 'MASTER_ORDER_CREATE' }));
+  }
 
   revalidatePath("/(dashboard)/logistics/master", "page");
   return master;
@@ -743,7 +796,10 @@ export async function dissolveMasterOrder(masterId: string) {
   const orderRepo = new OrderRepository(supabase);
 
   const { error } = await orderRepo.dissolveMasterOrderAtomic(masterId, user.id);
-  if (error) throw new Error(`Master dissolution failed: ${error.message}`);
+  if (error) {
+    logger.error('dissolveMasterOrder: dissolution failed', error);
+    throw new Error(await trError('generic', { code: 'MASTER_ORDER_DISSOLVE' }));
+  }
 
   revalidatePath("/(dashboard)/logistics/master", "page");
   return { success: true };
@@ -758,7 +814,10 @@ export async function getMasterOrders(page = 1, pageSize = 50) {
   const orderRepo = new OrderRepository(supabase);
   const { data, error, count } = await orderRepo.findMastersList(page, pageSize);
 
-  if (error) throw new Error(error.message);
+  if (error) {
+    logger.error('getMasterOrders: lookup failed', error);
+    throw new Error(await trError('generic', { code: 'MASTER_ORDER_LIST_LOOKUP' }));
+  }
   return { masterOrders: data || [], total: count || 0 };
 }
 
@@ -771,7 +830,10 @@ export async function getPendingHouseOrders(page = 1, pageSize = 50) {
   const orderRepo = new OrderRepository(supabase);
   const { data, error, count } = await orderRepo.findPendingHouseOrders(page, pageSize);
 
-  if (error) throw new Error(error.message);
+  if (error) {
+    logger.error('getPendingHouseOrders: lookup failed', error);
+    throw new Error(await trError('generic', { code: 'PENDING_HOUSE_LOOKUP' }));
+  }
   return { orders: data || [], total: count || 0 };
 }
 
@@ -791,7 +853,10 @@ export async function updateMasterOrderStatus(
   const prevStatus = master?.status ?? null;
 
   const { error: updateError } = await orderRepo.updateMasterStatus(masterId, nextStatus, reason);
-  if (updateError) throw new Error(`Master status update failed: ${updateError.message}`);
+  if (updateError) {
+    logger.error('updateMasterOrderStatus: update failed', updateError);
+    throw new Error(await trError('generic', { code: 'MASTER_STATUS_UPDATE' }));
+  }
 
   // IMP-051: Audit history (best-effort)
   void (async () => {
@@ -826,11 +891,16 @@ export async function getMasterOrderWithHouses(masterId: string, page = 1, pageS
 
   const { data: master, error: masterError } = await orderRepo.findMasterById(masterId);
   if (masterError || !master) {
-    throw new Error(`Master order not found: ${masterError?.message}`);
+    if (masterError) logger.error('getMasterOrderWithHouses: master lookup failed', masterError);
+    else logger.warn(`getMasterOrderWithHouses: master not found (${masterId})`);
+    throw new Error(await trError('not_found'));
   }
 
   const { data: houses, error: housesError, count } = await orderRepo.findHousesByMasterId(masterId, page, pageSize);
-  if (housesError) throw new Error(`Failed to fetch linked houses: ${housesError.message}`);
+  if (housesError) {
+    logger.error('getMasterOrderWithHouses: house lookup failed', housesError);
+    throw new Error(await trError('generic', { code: 'LINKED_HOUSES_LOOKUP' }));
+  }
 
   return {
     ...master,
@@ -909,7 +979,7 @@ export async function getOrderByBarcodeOrNo(barcodeOrNo: string) {
 
   if (error) {
     logger.error('Failed to fetch order by barcode:', error);
-    throw new Error(`오더 조회 실패: ${error.message}`);
+    throw new Error(await trError('generic', { code: 'ORDER_BARCODE_LOOKUP' }));
   }
 
   if (!order) {
@@ -920,7 +990,7 @@ export async function getOrderByBarcodeOrNo(barcodeOrNo: string) {
   const { data: items, error: itemsError } = await orderRepo.getItemsFullByOrderId(order.id);
   if (itemsError) {
     logger.error('Failed to fetch order items:', itemsError);
-    throw new Error(`오더 품목 조회 실패: ${itemsError.message}`);
+    throw new Error(await trError('generic', { code: 'ORDER_ITEMS_LOOKUP' }));
   }
 
   // 3. 현재 운임 스냅샷 조회 (예상운임 상시 표시용)
@@ -1178,7 +1248,7 @@ export async function confirmInbound(
   packageUpdates?: PackageMeasurementUpdate[]
 ) {
   const { supabase, profile } = await validateUserAction();
-  if (!profile) throw new Error("User profile not found");
+  if (!profile) { logger.warn('[orders] profile not found'); throw new Error(await trError('profile_not_found')); }
 
   const statusLabel = inspectStatus === 'NORMAL' ? '정상' : '손상';
   const formattedReason = `[검수: ${statusLabel}]${note ? ` ${note}` : ''}`;
@@ -1201,9 +1271,10 @@ export async function saveInboundMeasurements(
   packageUpdates: PackageMeasurementUpdate[]
 ) {
   const { supabase, profile } = await validateUserAction();
-  if (!profile) throw new Error("User profile not found");
+  if (!profile) { logger.warn('[orders] profile not found'); throw new Error(await trError('profile_not_found')); }
   if (!packageUpdates || packageUpdates.length === 0) {
-    return { success: false, error: '변경된 측정값이 없습니다.' };
+    logger.warn(`saveInboundMeasurements: no measurement changes (${orderId})`);
+    return { success: false, error: await trError('inbound_no_measurement_changes') };
   }
 
   const freightEstimate = await applyPackageMeasurements(supabase, profile, orderId, packageUpdates);
@@ -1275,7 +1346,7 @@ export async function getTodayInboundHistory() {
 
   if (error) {
     logger.error('Failed to fetch today inbound history:', error);
-    throw new Error(`오늘의 입고 이력 조회 실패: ${error.message}`);
+    throw new Error(await trError('generic', { code: 'INBOUND_HISTORY_LOOKUP' }));
   }
 
   return attachOperatorNames(supabase, data || []);
@@ -1292,6 +1363,9 @@ export async function getOrderEditHistory(orderId: string) {
     .select('id, action, old_data, new_data, order_status_at_edit, edited_by, edited_at')
     .eq('order_id', orderId)
     .order('edited_at', { ascending: false });
-  if (error) throw new Error(error.message);
+  if (error) {
+    logger.error('getOrderEditHistory: lookup failed', error);
+    throw new Error(await trError('generic', { code: 'ORDER_HISTORY_LOOKUP' }));
+  }
   return attachOperatorNames(supabase, (data ?? []).map((r) => ({ ...r, changed_by: r.edited_by })));
 }

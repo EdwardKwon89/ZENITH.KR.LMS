@@ -70,7 +70,7 @@ describe('Order Update (DEF-109)', () => {
       transport_mode: 'AIR' as const,
     };
 
-    await expect(updateOrder('order-1', payload as any)).rejects.toThrow(/cannot be edited/);
+    await expect(updateOrder('order-1', payload as any)).rejects.toThrow(/현재 상태에서는 오더를 수정할 수 없습니다/);
   });
 
   it('TC-EDIT-PAGE-01: isOrderEditable returns true for REGISTERED', () => {

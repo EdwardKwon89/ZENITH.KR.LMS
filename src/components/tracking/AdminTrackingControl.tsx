@@ -7,6 +7,7 @@ import { Plus, Settings, ShieldAlert, Check } from 'lucide-react';
 import { trackingEventSchema, TrackingEventInput } from '@/lib/validation/tracking';
 import { addTrackingEvent, updateTrackingConfig } from '@/app/actions/tracking';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 
 interface AdminTrackingControlProps {
   orderId: string;
@@ -18,6 +19,7 @@ interface AdminTrackingControlProps {
  * 관리자가 트래킹 공급자를 변경하거나 이벤트를 강제 오버라이딩하는 제어판
  */
 export default function AdminTrackingControl({ orderId, currentProvider }: AdminTrackingControlProps) {
+  const te = useTranslations('Errors');
   const [isAdding, setIsAdding] = useState(false);
   const [isPending, setIsPending] = useState(false);
 
@@ -41,7 +43,8 @@ export default function AdminTrackingControl({ orderId, currentProvider }: Admin
       setIsAdding(false);
       reset();
     } catch (error: any) {
-      toast.error(error.message);
+      console.error(error);
+      toast.error(te('generic', { code: 'UNEXPECTED' }));
     } finally {
       setIsPending(false);
     }
@@ -52,7 +55,8 @@ export default function AdminTrackingControl({ orderId, currentProvider }: Admin
       await updateTrackingConfig(orderId, type, type === 'VIRTUAL' ? 'ZSim (Virtual)' : 'Manual Admin');
       toast.success(`트래킹 공급자가 ${type}으로 변경되었습니다.`);
     } catch (error: any) {
-      toast.error(error.message);
+      console.error(error);
+      toast.error(te('generic', { code: 'UNEXPECTED' }));
     }
   };
 

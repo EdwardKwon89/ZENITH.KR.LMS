@@ -35,6 +35,7 @@ export function OrderQnaSection({
   locale = "ko" 
 }: OrderQnaSectionProps) {
   const t = useTranslations("Support");
+  const te = useTranslations('Errors');
   const tVoc = useTranslations("VOC");
   const router = useRouter();
   const [items, setItems] = useState<any[]>([]);
@@ -100,7 +101,8 @@ export function OrderQnaSection({
       setReplyContent("");
       await loadItems();
     } catch (error: any) {
-      toast.error(error.message || "답변 등록에 실패했습니다.");
+      console.error(error);
+      toast.error(te('generic', { code: 'ANSWER_SUBMIT' }));
     } finally {
       setSubmitting(false);
     }

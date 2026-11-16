@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { toast } from 'sonner';
 import { RefreshCw, X } from 'lucide-react';
 import { recordActualCostAndFinalize, UpsActualCostInput } from '@/app/actions/finance/ups-actual-cost';
+import { useTranslations } from 'next-intl';
 
 interface OtherCharge {
   name: string;
@@ -43,6 +44,7 @@ export default function BillingConfirmModal({
   onClose,
   onSuccess,
 }: BillingConfirmModalProps) {
+  const te = useTranslations('Errors');
   const [baseFreightAmount, setBaseFreightAmount] = useState(initialBaseFreight);
   const [baseFreightCurrency, setBaseFreightCurrency] = useState('KRW');
   const [fuelSurchargeKrw, setFuelSurchargeKrw] = useState(initialFuelSurcharge);
@@ -100,10 +102,11 @@ export default function BillingConfirmModal({
         onSuccess();
         onClose();
       } else {
-        toast.error(result.error || '청구확정 실패');
+        toast.error(result.error || te('generic', { code: 'BILLING_CONFIRM' }));
       }
     } catch (err: any) {
-      toast.error(err.message || '청구확정 중 오류 발생');
+      console.error(err);
+        toast.error(te('generic', { code: 'UNEXPECTED' }));
     } finally {
       setLoading(false);
     }

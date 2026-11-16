@@ -104,7 +104,7 @@ describe('Agency 정산 권한 검증 단위 테스트 (Issue #603)', () => {
         return createChainableMock();
       });
 
-      await expect(generateInvoicesForOrder('ord-1')).rejects.toThrow('본인 소속 화주의 오더에 대해서만 인보이스를 생성할 수 있습니다.');
+      await expect(generateInvoicesForOrder('ord-1')).rejects.toThrow('본인 소속 화주의 오더만 처리할 수 있습니다.');
     });
 
     it('마감된 오더의 인보이스 생성 차단 가드 정상 동작', async () => {
@@ -183,7 +183,7 @@ describe('Agency 정산 권한 검증 단위 테스트 (Issue #603)', () => {
         profile: { id: 'corp-usr-1', role: USER_ROLES.CORPORATE, org_id: 'corp-org-1' },
       });
 
-      await expect(updatePaymentStatus('inv-1', 'PAID', 1000)).rejects.toThrow('결제 상태를 수정할 권한이 없습니다.');
+      await expect(updatePaymentStatus('inv-1', 'PAID', 1000)).rejects.toThrow('권한이 없습니다.');
     });
   });
 
@@ -349,7 +349,7 @@ describe('Agency 정산 권한 검증 단위 테스트 (Issue #603)', () => {
 
       const res = await finalizeInvoice('inv-1');
       expect(res.success).toBe(false);
-      expect(res.error).toContain('본인 소속 화주의 인보이스만 마감할 수 있습니다.');
+      expect(res.error).toBe('본인 소속 화주의 오더만 처리할 수 있습니다.');
     });
 
     it('권한 없는 역할(CORPORATE) 마감 시 에러 반환', async () => {
@@ -373,7 +373,7 @@ describe('Agency 정산 권한 검증 단위 테스트 (Issue #603)', () => {
 
       const res = await finalizeInvoice('inv-1');
       expect(res.success).toBe(false);
-      expect(res.error).toContain('정산 마감 권한이 없습니다.');
+      expect(res.error).toBe('권한이 없습니다.');
     });
 
     it('인보이스 미조회 시 에러 반환', async () => {

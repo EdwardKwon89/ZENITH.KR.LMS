@@ -17,6 +17,7 @@ import {
   FileText,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 import {
   checkRealtimeUpsTrackingAction,
   manuallySetOrderDeliveredAction,
@@ -47,6 +48,7 @@ export default function UpsOrderStatusStepper({
   canManuallySetDelivered = true,
   statusHistory,
 }: UpsOrderStatusStepperProps) {
+  const te = useTranslations('Errors');
   const [isPending, startTransition] = useTransition();
   const [isManualPending, startManualTransition] = useTransition();
 
@@ -84,7 +86,7 @@ export default function UpsOrderStatusStepper({
           toast.success(`UPS 실시간 배송 확인 완료: ${res.trackStatusName || res.trackStatus || '정상 조회'}`);
         }
       } else {
-        toast.error(res.error || '실시간 배송 확인 중 오류 발생');
+        toast.error(res.error || te('generic', { code: 'TRACKING_CHECK' }));
       }
     });
   };
@@ -105,7 +107,7 @@ export default function UpsOrderStatusStepper({
         setIsModalOpen(false);
         setManualReason('');
       } else {
-        toast.error(res.error || '수동 전환 실패');
+        toast.error(res.error || te('generic', { code: 'STATUS_CHANGE' }));
       }
     });
   };

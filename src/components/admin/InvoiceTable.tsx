@@ -10,6 +10,7 @@ import { FileText, History, Download, Loader2, Lock } from 'lucide-react';
 import { toast } from 'sonner';
 import { issueInvoicePdf, finalizeInvoice } from '@/app/actions/finance';
 import { InvoiceHistorySheet } from '@/components/finance/InvoiceHistorySheet';
+import { useTranslations } from 'next-intl';
 
 interface InvoiceTableProps {
   invoices: any[];
@@ -17,6 +18,7 @@ interface InvoiceTableProps {
 }
 
 export const InvoiceTable: React.FC<InvoiceTableProps> = ({ invoices, isAdmin }) => {
+  const te = useTranslations('Errors');
   const [selectedInvoice, setSelectedInvoice] = useState<any | null>(null);
   const [historyInvoice, setHistoryInvoice] = useState<any | null>(null);
   const [finalizeInvoiceData, setFinalizeInvoiceData] = useState<any | null>(null);
@@ -39,7 +41,8 @@ export const InvoiceTable: React.FC<InvoiceTableProps> = ({ invoices, isAdmin })
         setHistoryInvoice(invoices.find(inv => inv.id === invoiceId));
       }
     } catch (err: any) {
-      toast.error(`발행 실패: ${err.message}`);
+      console.error(err);
+      toast.error(te('generic', { code: 'INVOICE_ISSUE' }));
     } finally {
       setIssuingId(null);
     }
@@ -61,10 +64,11 @@ export const InvoiceTable: React.FC<InvoiceTableProps> = ({ invoices, isAdmin })
         setFinalizeReason('');
         router.refresh();
       } else {
-        toast.error(result.error || '정산 마감 실패');
+        toast.error(result.error || te('generic', { code: 'INVOICE_FINALIZE' }));
       }
     } catch (err: any) {
-      toast.error(`정산 마감 실패: ${err.message}`);
+      console.error(err);
+        toast.error(te('generic', { code: 'INVOICE_FINALIZE' }));
     } finally {
       setFinalizing(false);
     }

@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import BillingConfirmModal from './BillingConfirmModal';
+import { useTranslations } from 'next-intl';
 
 interface ShipperDailyBillingClientProps {
   initialGroups: ShipperDailyBillingGroup[];
@@ -275,6 +276,7 @@ export default function ShipperDailyBillingClient({
   role,
   agencyOrgId,
 }: ShipperDailyBillingClientProps) {
+  const te = useTranslations('Errors');
   const [groups, setGroups] = useState<ShipperDailyBillingGroup[]>(initialGroups);
   const [periodType, setPeriodType] = useState<'daily' | 'weekly' | 'monthly'>('daily');
   const [startDate, setStartDate] = useState('');
@@ -394,7 +396,7 @@ export default function ShipperDailyBillingClient({
       if (res.success && res.orders) {
         setExpandedOrders((prev) => ({ ...prev, [key]: res.orders! }));
       } else {
-        toast.error(res.error || '상세 오더 목록 조회 실패');
+        toast.error(res.error || te('generic', { code: 'ACTION_FAILED' }));
       }
     }
   };
@@ -462,7 +464,8 @@ export default function ShipperDailyBillingClient({
           })
         );
       } else {
-        toast.error(`정산 마감 중 오류 발생: ${res.errors?.join(', ') || '실패'}`);
+        console.error('Settlement close failed:', res.errors);
+        toast.error(te('generic', { code: 'SETTLEMENT_CLOSE' }));
       }
     });
   };
