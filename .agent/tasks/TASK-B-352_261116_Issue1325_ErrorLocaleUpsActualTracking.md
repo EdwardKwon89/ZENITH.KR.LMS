@@ -65,13 +65,13 @@ $ for f in src/app/actions/finance/ups-actual-cost.ts src/app/actions/finance/up
 | 6 | `ups-actual-charges.ts:289` | 예상 운임 조회 실패 | **간접** — `getUpsChargeReconciliation` (동일 컴포넌트:162) | **throw 유지 + 로케일 문구 + logger.error** |
 | 7 | `ups-actual-charges.ts:308` | 실제 청구 조회 실패 | **간접** — 동일 | **throw 유지 + 로케일 문구 + logger.error** |
 | 8 | `ups-actual-charges.ts:363` | 오더 검색 실패 | **도달** — `ups-actual-charges-client.tsx:37`이 catch 후 `toast.error(err.message)` | **throw 유지 + 로케일 문구 + logger.error** (문구는 로케일 일반문구 → 원문 미노출) |
-| 9 | `tracking.ts:97` | add tracking event 실패 | **도달** — `AdminTrackingControl.tsx:43`이 catch 후 `toast.error(error.message)` | **반환 전환** (`{success:false,error}`) |
-| 10 | `tracking.ts:127` | update tracking config 실패 | **도달** — `AdminTrackingControl.tsx:54` toast | **반환 전환** |
+| 9 | `tracking.ts:97` | add tracking event 실패 | **도달** — `AdminTrackingControl.tsx:39`는 **반환값을 보지 않고** catch에서만 `toast.error` → 반환 전환 시 실패가 성공 토스트로 보임 | **throw 유지 + 로케일 문구 + logger.error**(재작업) |
+| 10 | `tracking.ts:127` | update tracking config 실패 | **도달** — `AdminTrackingControl.tsx:52` 동일 구조 | **throw 유지 + 로케일 문구 + logger.error**(재작업) |
 | 11 | `tracking.ts:145` | fetch configs 실패 | **도달** — `TrackingDashboard.tsx:68` catch(로그만). 반환 무시 → 계약 확장 안전 | **반환 전환** (`{success:false,processed:0,errors:0,error}`) |
 | 12 | `tracking.ts:179` | raw logs 조회 실패 | 서버 컴포넌트(`orders/[orderId]/page.tsx:105`) 렌더 경로 — throw 시 페이지 오류(원문은 Next가 마스킹) | **반환 전환** (`{logs:[],total:0,error}` — 기존 필드 유지) |
 | 13 | `tracking.ts:211` | tracking overview 조회 실패 | **도달** — `TrackingDashboard.tsx:52` catch(로그만) | **반환 전환** (`{configs:[],total:0,error}`) |
 
-> 요약: **반환 전환 8건**, **throw 유지 5건**(getter 계약 유지 — components 수정 금지 범위). 유지 5건도 메시지는 `trError` 문구이며 원문은 로그에만 남는다.
+> 요약: **반환 전환 6건**, **throw 유지 7건**(getter 5 + tracking 2 — 호출 화면이 반환값을 보지 않고 catch로만 실패 처리). 유지 7건도 메시지는 `trError` 문구이며 원문은 로그에만 남는다.
 
 ## 5. 작업 항목 4 — SHXK 원문 패스스루
 
@@ -138,7 +138,7 @@ $ grep -nE "orderRes\.message|removeRes\.message|res\.message|cnmessage|enmessag
 | 갱신 | `tests/unit/finance/ups-actual-cost.test.ts` | `toContain` → `toBe` (not_ups_order / cost_status / permission_denied / billing_finalize_status) |
 | 갱신 | `tests/unit/finance/ups-actual-charges.test.ts` | `toContain` → `toBe` (charge_status / shipper_scope_denied) |
 | 갱신 | `tests/unit/finance/ups-actual-charges-dual-invoice.test.ts` | `'추가 인보이스 생성 실패'` → `generic(ko)+POST_FINALIZATION_ADJUST` |
-| 갱신 | `tests/unit/operations/tracking-actions.test.ts` | throw 단언 → 반환 `{success:false,error:generic(ko)+TRACKING_EVENT_SAVE}` |
+| 갱신 | `tests/unit/operations/tracking-actions.test.ts` | INSERT/updateConfig 실패가 **reject**(정확 ko 문구) + DB 원문 미포함 + `logger.error(…, error객체)` 계약 고정 (재작업) |
 | 갱신 | `tests/unit/ups/ups-order-detail-status.test.ts` | label 문구 → `label_not_found` / 스코프 문구 → `shipper_scope_denied` (`toBe`) |
 | 갱신 | `tests/unit/i18n/errors-key-sync.test.ts` | 21키 → **30키** |
 
@@ -147,6 +147,7 @@ $ grep -nE "orderRes\.message|removeRes\.message|res\.message|cnmessage|enmessag
 |:--|:--|:--|:--|
 | A. DB 원문 은닉 | `recordUpsActualCharges` delete 실패를 `` `기존 실제 요금 삭제 실패: ${deleteError.message}` ``로 원복 | **1 failed / 3 passed** (`expected '기존 실제 요금 삭제 실패: DB_SECRET_CHARGE_DELE…' to be '…(코드: CHARGES_DELETE)'`) | 원복 후 **4 passed** |
 | B. 관측성 | `recordUpsActualCost` upsert 실패의 `logger.error(…, upsertError)` 한 줄 삭제 | **1 failed / 3 passed** (`expected "vi.fn()" to be called with arguments`) | 원복 후 **4 passed**, `diff` 동일 |
+| C. 호출 계약(재작업) | `addTrackingEvent` 실패를 `throw` → `return {success:false,error}` 로 원복 | **1 failed / 8 passed** (`expected undefined to be an instance of Error` — 성공 토스트 회귀 재현) | 원복 후 **9 passed**, `diff` 동일 |
 
 ## 8. 검증 (DoD)
 
@@ -211,7 +212,7 @@ $ git diff --stat
 
 ## 10. [작업 결과]
 
-- **코드 커밋**: `fef7e1f07` `[Dave] feat: TASK-B-352 ups-actual·charges·tracking 오류 로케일 전환`
+- **코드 커밋**: `fef7e1f07` `[Dave] feat: TASK-B-352 ups-actual·charges·tracking 오류 로케일 전환` / 재작업 `18b0be059` `[Dave] fix: TASK-B-352 재작업 — tracking 이벤트/공급자 실패는 throw 유지(성공 토스트 회귀 방지)`
 - 문서 커밋: 본 task file
 - PR: base `TeamB_Dev` / `Closes #1325` (부모 #1280은 닫지 않음)
 - 라벨: `status:open` → `status:in-progress` → `status:review`
@@ -221,11 +222,26 @@ $ git diff --stat
 | 검증 | 명령 | 결과 |
 |:--|:--|:--|
 | 신규/영향 테스트 | `npx vitest run <8개 파일>` | `Test Files 8 passed (8)` / `Tests 61 passed (61)` |
-| 전체 회귀(R-08) | `npm run test:regression` | **`Test Files 256 passed (256)` / `Tests 1850 passed (1850)`** (exit 0) |
-| 빌드 | `npm run build` | `BUILD_EXIT=0`, `✓ Compiled successfully in 23.1s` |
+| 전체 회귀(R-08) | `npm run test:regression` | **`Test Files 256 passed (256)` / `Tests 1851 passed (1851)`** (exit 0) — 재작업 후 재실행 |
+| 빌드 | `npm run build` | `BUILD_EXIT=0`, `✓ Compiled successfully in 8.9s` (재작업 후) |
 | 타입체크(advisory) | `npx tsc --noEmit` | 변경 파일 오류 **0건** (전체 기존 오류 212건 — base와 동일 계열) |
 | 되돌리기 A (DB 원문 은닉) | §7-3 | **1 failed / 3 passed** → 복구 4 passed |
 | 되돌리기 B (관측성 로그) | §7-3 | **1 failed / 3 passed** → 복구 4 passed, `diff` 동일 |
+
+### 10-3. 🔁 재작업 이력 (Jaison 리뷰 2026-11-16 — 성공 토스트 회귀)
+
+**차단 사유**: `addTrackingEvent`·`updateTrackingConfig`를 반환 방식으로 바꾸면서, 유일 호출자 `AdminTrackingControl.tsx:36-56`이 **반환값을 보지 않고** `try { await … ; toast.success } catch { toast.error }` 구조라 **DB 실패 시에도 성공 토스트**가 뜨는 회귀.
+
+| 단계 | 실행 | 결과 |
+|:--|:--|:--|
+| 1 | 두 함수를 **throw 유지 + 로케일 문구**로 되돌림(원문은 `logger.error(…, error객체)`) | 성공 시 `{success:true}` 계약 그대로 |
+| 2 | 테스트 갱신: INSERT/updateConfig 실패 → `rejects.toThrow(정확 ko 문구)` + 원문 미포함 + logger 인자 검증 | `tracking-actions.test.ts` 통과 |
+| 3 | **재발 방지 테스트 1건 추가**: `updateTrackingConfig` reject 계약 고정 | 통과 |
+| 4 | 되돌리기 C: 반환 방식으로 원복 → **1 failed / 8 passed** → 복구 **9 passed** | 회귀 재현 확인 |
+| 5 | task file §4 표 9·10행, 요약 카운트 **6건/7건**으로 정정 | — |
+| 6 | 전체 회귀·빌드 재실행 | §10-1 갱신 |
+
+- 코드 로직 변경은 위 2개 함수의 실패 처리 방식 복원뿐이며, 나머지 전환·로깅은 그대로다.
 
 ### 10-2. `check-R17-DoD`
 본 환경에 `check-R17-DoD` 실행 파일/슬래시 커맨드가 **없음**(`which` 미검출 — B-345/348/350/351 동일) → §8 DoD를 수동 대조했다(미체크 0건·placeholder 0건·증거 명령/출력 기재).
@@ -238,3 +254,6 @@ $ git diff --stat
 4. **[i18n] 신규 9키 zh/ja 초안** — IMP-185에 키 목록 추가 기재(지시). 문구 검수는 JSJung 대상.
 5. **[회귀 수치] 256 files / 1,850 tests** — develop 동기화(#1324)로 base 테스트 수가 244/1,781에서 증가한 값이며, 본 Task 신규 2파일·9테스트가 포함된 실행 결과다.
 6. **[테스트 갱신] `toContain` → `toBe`** — 기존 느슨한 단언을 새 로케일 문구 정확 비교로 강화했다(단언 약화 없음). `ups-order-detail-status`의 라벨/스코프 문구도 `toBe`로 갱신.
+7. **[동작 변화] `getTrackingRawLogs` 실패 시 동작 변경** — 이전에는 throw로 서버 컴포넌트 렌더가 오류 페이지가 됐으나, 이제 **빈 목록 + `error` 필드**를 반환해 관리자 보조 화면이 빈 상태로 렌더된다(원인은 `logger.error`에 기록). Jaison 리뷰에서 수용(단, PR 본문에 명시 요청) → 본 항목으로 기록.
+8. **[UX 변화] `status_change_denied` 통일로 구체 사유 미표시** — 기존에는 `check.message`(예: 상태전이 규칙 상세)를 사용자에게 보여줬으나, 로케일 문구로 통일하며 **구체 사유는 로그에만** 남는다. 사유를 문구 파라미터로 넘기는 개선은 **IMP 후보**(Jaison 비차단 메모 1).
+9. **[문구 의미] `label_not_found` 재사용** — "활성 UPS 운송장 번호 없음"에 "발급된 라벨이 없습니다"를 사용했다. 의미가 인접하나 완전히 같지는 않으므로 zh/ja 검수(IMP-185) 시 함께 검토 대상(Jaison 비차단 메모 2).
