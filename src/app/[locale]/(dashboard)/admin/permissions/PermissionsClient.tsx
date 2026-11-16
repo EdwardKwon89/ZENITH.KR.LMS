@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from 'next-intl';
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Shield, Save, CheckCircle2, AlertCircle } from "lucide-react";
@@ -27,6 +28,7 @@ export default function PermissionsClient({
   resources: Resource[];
   initialPermissions: PermissionRecord[];
 }) {
+  const errT = useTranslations('Errors');
   const [selectedRole, setSelectedRole] = useState(roles[0]);
   const [currentAllowedPaths, setCurrentAllowedPaths] = useState<string[]>(
     initialPermissions
@@ -57,10 +59,12 @@ export default function PermissionsClient({
       if (result.success) {
         toast.success(`${selectedRole} 권한이 저장되었습니다.`);
       } else {
-        toast.error(`저장 실패: ${result.error}`);
+        console.error(result.error);
+        toast.error(errT('generic', { code: 'PERMISSIONS_SAVE' }));
       }
     } catch (error) {
-      toast.error("알 수 없는 오류가 발생했습니다.");
+      console.error(error);
+      toast.error(errT('generic', { code: 'PERMISSIONS_UNEXPECTED' }));
     } finally {
       setIsSaving(false);
     }

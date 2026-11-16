@@ -106,6 +106,6 @@ describe('VOC Action Unit Tests', () => {
     // Act & Assert
     const result = await createVoc(payload);
     expect(result.data).toBeNull();
-    expect(result.error).toContain('UNAUTHORIZED');
+    expect(result.error).toBe('권한이 없습니다.');
   });
 });

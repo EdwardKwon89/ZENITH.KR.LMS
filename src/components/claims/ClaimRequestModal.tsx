@@ -17,6 +17,7 @@ interface ClaimRequestModalProps {
 
 export const ClaimRequestModal: React.FC<ClaimRequestModalProps> = ({ orderId, orderNo, onClose }) => {
   const t = useTranslations('Claims');
+  const errT = useTranslations('Errors');
   const [reasonCode, setReasonCode] = useState<'DELAY' | 'DAMAGE' | 'MISDELIVERY'>('DELAY');
   const [description, setDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -38,7 +39,8 @@ export const ClaimRequestModal: React.FC<ClaimRequestModalProps> = ({ orderId, o
       onClose();
     } catch (error: any) {
       logger.error('Claim error:', error);
-      toast.error(t('error_register') + ': ' + error.message);
+      console.error(error);
+      toast.error(errT('generic', { code: 'CLAIM_REGISTER' }));
     } finally {
       setIsSubmitting(false);
     }

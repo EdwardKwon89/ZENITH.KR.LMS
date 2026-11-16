@@ -18,6 +18,7 @@ interface ZoneDiscountFormProps {
 export function ZoneDiscountForm({ shipperOrgId, shipperType, zones, agencyOrgId }: ZoneDiscountFormProps) {
   const t = useTranslations('AgencyShippers');
   const [zoneRates, setZoneRates] = useState<Record<string, number>>({});
+  const errT = useTranslations('Errors');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -43,7 +44,8 @@ export function ZoneDiscountForm({ shipperOrgId, shipperType, zones, agencyOrgId
         const logs = await getPricingAuditLog('SHIPPER_DISCOUNT');
         setAuditLog(logs.filter((l: any) => l.target_ref?.shipper_org_id === shipperOrgId));
       } catch (e: any) {
-        setError(e.message);
+        console.error(e);
+      setError(errT('generic', { code: 'ZONE_DISCOUNT_OP' }));
       } finally {
         setLoading(false);
       }
@@ -58,11 +60,11 @@ export function ZoneDiscountForm({ shipperOrgId, shipperType, zones, agencyOrgId
     setError('');
     try {
       if (!validFrom) {
-        setError('적용일자를 입력해주세요.');
+        setError(errT('zone_date_required'));
         return;
       }
       if (!agencyOrgId) {
-        setError('대리점 정보를 찾을 수 없습니다.');
+        setError(errT('not_found'));
         return;
       }
       // Issue #1021: 적용일자가 오늘이면 저장 즉시 실제 요금에 반영됨 — 사용자 확인
@@ -84,7 +86,8 @@ export function ZoneDiscountForm({ shipperOrgId, shipperType, zones, agencyOrgId
       const scheduled = await getScheduledPricingChanges('SHIPPER_DISCOUNT');
       setScheduledChanges(scheduled.filter((s: any) => s.target_ref?.shipper_org_id === shipperOrgId));
     } catch (e: any) {
-      setError(e.message);
+      console.error(e);
+      setError(errT('generic', { code: 'ZONE_DISCOUNT_OP' }));
     } finally {
       setSaving(false);
     }

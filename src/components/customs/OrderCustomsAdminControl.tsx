@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -19,6 +20,7 @@ interface OrderCustomsAdminControlProps {
  * 관리자가 통관 신고를 생성하고 제출 및 상태를 관리하는 제어판
  */
 export default function OrderCustomsAdminControl({ orderId, declaration }: OrderCustomsAdminControlProps) {
+  const errT = useTranslations('Errors');
   const [isPending, setIsPending] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
 
@@ -63,7 +65,8 @@ export default function OrderCustomsAdminControl({ orderId, declaration }: Order
         resetCreate();
       }
     } catch (error: any) {
-      toast.error(error.message);
+      console.error(error);
+      toast.error(errT('generic', { code: 'CUSTOMS_CREATE' }));
     } finally {
       setIsPending(false);
     }
@@ -81,7 +84,8 @@ export default function OrderCustomsAdminControl({ orderId, declaration }: Order
         toast.success('관세청에 신고가 제출되었습니다.');
       }
     } catch (error: any) {
-      toast.error(error.message);
+      console.error(error);
+      toast.error(errT('generic', { code: 'CUSTOMS_SUBMIT' }));
     } finally {
       setIsPending(false);
     }
@@ -103,7 +107,8 @@ export default function OrderCustomsAdminControl({ orderId, declaration }: Order
         toast.success(`통관 상태가 ${status}로 변경되었습니다.`);
       }
     } catch (error: any) {
-      toast.error(error.message);
+      console.error(error);
+      toast.error(errT('generic', { code: 'CUSTOMS_STATUS' }));
     } finally {
       setIsPending(false);
     }

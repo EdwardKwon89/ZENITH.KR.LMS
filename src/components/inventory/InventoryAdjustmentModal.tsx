@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from 'next-intl';
 import { Inventory } from "@/types/inventory";
 import { ZenButton, ZenInput, ZenCard } from "@/components/ui/ZenUI";
 import { useState } from "react";
@@ -18,6 +19,7 @@ export default function InventoryAdjustmentModal({
   onClose,
   inventory
 }: InventoryAdjustmentModalProps) {
+  const errT = useTranslations('Errors');
   const [qtyChange, setQtyChange] = useState<string>("0");
   const [reason, setReason] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -27,12 +29,12 @@ export default function InventoryAdjustmentModal({
   const handleAdjust = async () => {
     const amount = parseInt(qtyChange);
     if (isNaN(amount) || amount === 0) {
-      toast.error("Please enter a valid non-zero quantity.");
+      toast.error(errT('qty_required'));
       return;
     }
 
     if (!reason.trim()) {
-      toast.error("Please provide a reason for adjustment.");
+      toast.error(errT('qty_reason_required'));
       return;
     }
 
@@ -50,10 +52,11 @@ export default function InventoryAdjustmentModal({
         setQtyChange("0");
         setReason("");
       } else {
-        toast.error(result.error || "Failed to adjust inventory.");
+        toast.error(result.error || errT('generic', { code: 'INVENTORY_ADJUST' }));
       }
     } catch (error) {
-      toast.error("An unexpected error occurred.");
+      console.error(error);
+      toast.error(errT('generic', { code: 'INVENTORY_UNEXPECTED' }));
     } finally {
       setIsSubmitting(false);
     }

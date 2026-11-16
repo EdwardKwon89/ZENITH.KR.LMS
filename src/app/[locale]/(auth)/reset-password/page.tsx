@@ -10,6 +10,7 @@ import Link from 'next/link';
 
 export default function ResetPasswordPage() {
   const t = useTranslations('Auth');
+  const errT = useTranslations('Errors');
   const params = useParams();
   const locale = params?.locale as string || 'ko';
   
@@ -33,7 +34,8 @@ export default function ResetPasswordPage() {
         setIsSuccess(true);
       }
     } catch (err) {
-      setError('오류가 발생했습니다. 다시 시도해 주세요.');
+      console.error(err);
+      setError(errT('generic', { code: 'PASSWORD_RESET' }));
     } finally {
       setIsPending(false);
     }

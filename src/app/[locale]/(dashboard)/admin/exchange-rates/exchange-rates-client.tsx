@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { RefreshCw } from 'lucide-react';
@@ -26,6 +27,7 @@ export default function ExchangeRatesClient({ initialRates, initialTotal, syncSt
   const router = useRouter();
   const isAdmin = userRole === USER_ROLES.ADMIN || userRole === USER_ROLES.ZENITH_SUPER_ADMIN;
   const [isPending, startTransition] = useTransition();
+  const errT = useTranslations('Errors');
   const [rateDate, setRateDate] = useState(() => {
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -38,7 +40,7 @@ export default function ExchangeRatesClient({ initialRates, initialTotal, syncSt
     setError(null);
     const numericRate = Number(rate);
     if (!rateDate || !Number.isFinite(numericRate) || numericRate <= 0) {
-      setError('환율(양수)과 일자를 입력해주세요.');
+      setError(errT('exchange_amount_date_required'));
       return;
     }
 
@@ -55,7 +57,8 @@ export default function ExchangeRatesClient({ initialRates, initialTotal, syncSt
         setRate('');
         router.refresh();
       } catch (e: any) {
-        setError(e.message || '환율 보정 저장에 실패했습니다.');
+        console.error(e);
+        setError(errT('generic', { code: 'EXCHANGE_SAVE' }));
       }
     });
   };

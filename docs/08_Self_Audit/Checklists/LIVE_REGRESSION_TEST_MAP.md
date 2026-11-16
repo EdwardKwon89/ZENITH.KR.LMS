@@ -1,7 +1,7 @@
 # 🗺️ LIVE Regression Test Master Map
 
-> **총 테스트 케이스:** 1,904 Cases (vitest 개별 테스트 기준, 259 test files)
-> **최종 검증일:** 2026-11-17 (TASK-B-354 settlement/orders 오류 로케일 전환 · §88 TC-354-01~10 등재 · 1,904/1,904 PASS)  
+> **총 테스트 케이스:** 1,917 Cases (vitest 개별 테스트 기준, 260 test files)
+> **최종 검증일:** 2026-11-17 (TASK-B-355 인증·회원·VOC·지원 오류 로케일 전환 · §89 TC-355-01~04 등재 · 1,917/1,917 PASS)
 
 제니스 플랫폼의 비즈니스 영속성을 보장하는 회귀 테스트 케이스의 통합 명세서입니다. 모든 신규 개발 및 수정 시 이 맵에 케이스가 추가되어야 하며, 전체 테스트가 통과되어야 합니다.
 
@@ -1356,3 +1356,21 @@ SHXK `createorder` 페이로드의 `shipper.shipper_name`이 화면 "담당자�
 | TC-354-RST | DB 원문 은닉 되돌리기 | `getOrganizations` 원문 반환으로 원복 → **1 failed / 2 passed** → 복구 3 passed | `tests/unit/finance/task-b354-error-locale.test.ts` |
 
 **회귀 검증 (2026-11-17)**: `npm run test:regression` **259 test files / 1,904 tests 전부 PASS**. `npm run build` **EXIT=0**.
+
+## 89. 인증·회원·VOC·지원 액션 + 인증/마이페이지/관리 화면 오류 로케일 전환 (Issue #1331 / TASK-B-355, 부모 #1280)
+
+**2026-11-17, Mike** — 서버5종(`admin/auth.ts`·`admin/member.ts`·`misc/voc.ts`·`misc/support.ts`·`misc/monitoring.ts`)의 throw55·raw 반환을 `trError`로 전환(**56건**) + 인증/마이페이지/관리 화면 **24파일**의 `err.message` 노출·한/영 리터럴 제거. B-351/352/353과 동일 방식(`trError`+`Errors` 키, `withAction` 미사용), **throw→반환 전환 0건**(호출자 판단표: 반환/withAction 계약은 기존 구조 유지, message만 교체). `withAction` 래퍼7곳은 wrapper가 raw를 `logger.error`로 보존하면서 `err.message`를 **데이터로 반환**하므로 메시지 교체로 로케일이 도달함을 실측.
+
+| ID | 검증 내용 | 기대 결과 | 테스트 위치 |
+| :-- | :-- | :-- | :-- |
+| TC-355-1 | (a) 대표 실패2경로 — ko 문장 + 영문/원문 미노출 | createQna(profile 없음) → `rejects.toThrow('사용자 프로필을 찾을 수 없습니다.')` + `not.toBe('User profile not found')` / findPersonalId(DB 예외) → `toHaveProperty('error','서버 내부 오류가 발생했습니다.')` + Supabase 원문(`RAW_SUPABASE_SECRET_XYZ`) 미포함 | `tests/unit/i18n/task-b355-error-locale.test.ts` |
+| TC-355-2 | (b) 호출자 계약 3종 | throw 유지(createQna) = reject / 반환(findPersonalId) = `{error: ko}`·`not.toHaveProperty('success')` / withAction(createVoc) = `{data:null, error:'…(코드: VOC_VALIDATION)'}` | 동일 |
+| TC-355-3 | (c) 4로케일 키 + **보안 문구 원문1:1** + **EN 단언**(B-353 리뷰 지적 반영) | 키4종 실재 / ko `current_password_incorrect`=`'현재 비밀번호가 올바르지 않습니다.'`·`find_member_not_found` 원문 동일 / en `permission_denied`=`'You do not have permission.'`·`fetch_failed`·`current_password_incorrect` 정확 + ko≠en | 동일 |
+| TC-355-4 | (d) logger 인자 — 원문 객체 보존 | `toHaveBeenCalledWith('[AUTH_ACTION] findPersonalId catch:', rawError)` / `'[MEMBER_ACTION] withdrawUser Error:', objectContaining({message:'DB Error'})` + 전달 인자가 `typeof object` | 동일 |
+
+**회귀 검증 (2026-11-17)**: `npm run test:regression` **260 test files / 1,917 tests 전부 PASS** (462초) · `npm run build` **EXIT=0** · `check-db-freshness` OK.
+**되돌리기 검증 (테스트 유효성)**: support `createQna`의 profile throw를 영문 원문으로 임시 복원 → **2 failed / 11 passed** (TC-355-1·2 FAIL) → 복구 후 **13/13 PASS**.
+**기존 테스트 갱신 (약화 없이, 사유)**:
+- `tests/unit/logistics/voc.test.ts:109` — `toContain('UNAUTHORIZED')` → `toBe('권한이 없습니다.')` (원문 영문 → 로케일 전환 + 부분매칭→정확문칭 **강화**).
+- `tests/unit/member/profile.test.ts:62` — `'탈퇴 처리 중 오류가 발생했습니다.'` → `'요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요. (코드: WITHDRAW)'` (반환 메시지가 generic+코드로 전환됨에 따른 정확문자열 갱신).
+- `tests/unit/i18n/errors-key-sync.test.ts` — baseline 배열 58→80키로 재생성(ko.json 실측 합집합, `Errors` 4로케일 동기화 규칙).

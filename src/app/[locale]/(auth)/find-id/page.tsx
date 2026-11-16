@@ -12,6 +12,7 @@ type TabType = 'personal' | 'corporate';
 
 export default function FindIdPage() {
   const t = useTranslations('Auth');
+  const errT = useTranslations('Errors');
   const params = useParams();
   const router = useRouter();
   const locale = params?.locale as string || 'ko';
@@ -37,8 +38,9 @@ export default function FindIdPage() {
       } else if (res.results && res.results.length > 0) {
         setResult(res.results);
       }
-    } catch {
-      setError('오류가 발생했습니다. 다시 시도해 주세요.');
+    } catch (err) {
+      console.error(err);
+      setError(errT('generic', { code: 'AUTH_FIND_ID' }));
     } finally {
       setIsPending(false);
     }
@@ -61,8 +63,9 @@ export default function FindIdPage() {
       } else if (res.maskedEmail) {
         setResult([{ email: res.maskedEmail }]);
       }
-    } catch {
-      setError('오류가 발생했습니다. 다시 시도해 주세요.');
+    } catch (err) {
+      console.error(err);
+      setError(errT('generic', { code: 'AUTH_FIND_ID' }));
     } finally {
       setIsPending(false);
     }

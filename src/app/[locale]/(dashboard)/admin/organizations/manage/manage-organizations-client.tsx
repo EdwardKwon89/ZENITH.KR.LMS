@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useState, useCallback, useEffect } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { Building, Search, Plus, X, AlertCircle, CheckCircle, XCircle } from 'lucide-react';
@@ -37,6 +38,7 @@ export default function ManageOrganizationsClient({
   orgStatuses,
 }: ManageOrganizationsClientProps) {
   const [organizations, setOrganizations] = useState<any[]>(initialOrganizations);
+  const errT = useTranslations('Errors');
   const [total, setTotal] = useState(initialTotal);
   const [loading, setLoading] = useState(false);
   const [filterType, setFilterType] = useState('');
@@ -64,7 +66,8 @@ export default function ManageOrganizationsClient({
       setTotal(result.total);
       setPage(p);
     } catch (err: any) {
-      setError(err.message);
+      console.error(err);
+      setError(errT('generic', { code: 'ORG_LOAD' }));
     } finally {
       setLoading(false);
     }
@@ -87,7 +90,8 @@ export default function ManageOrganizationsClient({
       setShowCreateModal(false);
       fetchOrganizations(1);
     } catch (err: any) {
-      setError(err.message);
+      console.error(err);
+      setError(errT('generic', { code: 'ORG_CREATE' }));
     }
   };
 
@@ -96,7 +100,8 @@ export default function ManageOrganizationsClient({
       await updateOrganization(orgId, { status });
       fetchOrganizations(page);
     } catch (err: any) {
-      setError(err.message);
+      console.error(err);
+      setError(errT('generic', { code: 'ORG_UPDATE' }));
     }
   };
 
