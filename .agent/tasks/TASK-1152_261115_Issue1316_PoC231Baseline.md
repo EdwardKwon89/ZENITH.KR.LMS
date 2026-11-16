@@ -7,7 +7,7 @@
 | **담당** | B_Kai (Team A) — Worker, Auditor: Aiden (R-01) |
 | **착수** | 2026-11-15 KST |
 | **우선순위** | P2 (type:feat) |
-| **상태** | ✅ 완료 — 검토 대기 (`status:review`) |
+| **상태** | 🔔 **검토 대기** (`status:review`) — ✅ 완료 전환은 Aiden 단독 판정 |
 | **브랜치** | `feature/teama-poc231-baseline` (origin/develop `128e6e13b` 기준) |
 | **PR** | Draft + `do-not-merge` (develop 병합 금지) |
 
@@ -56,8 +56,8 @@
 | 계측 설정 (변이 실행) | `tests/poc-231/vitest.mutation.config.ts` | `5a41d8182` |
 | Stryker 설정 | `tests/poc-231/stryker.config.mjs` | `5a41d8182` |
 | 산출물 gitignore | `tests/poc-231/.gitignore` (`reports/`, `.stryker-tmp/`) | `5a41d8182` |
-| 기준선 보고서 (부록 D-1) | `docs/08_Self_Audit/TestCoverage_231/231_PoC_Baseline_Report_D1_20261115.md` | (문서 커밋) |
-| 자기감사 인덱스 등록 | `docs/08_Self_Audit/000_README.md` | (문서 커밋) |
+| 기준선 보고서 (부록 D-1) | `docs/08_Self_Audit/TestCoverage_231/231_PoC_Baseline_Report_D1_20261115.md` | `a6c91ced6` (+ `b995fec77`, `753ccd604`, `4720ae8f1`) |
+| 자기감사 인덱스 등록 | `docs/08_Self_Audit/000_README.md` | `a6c91ced6` |
 
 ### 2. 측정 결과 (모듈 ①② 5개 파일)
 
@@ -85,7 +85,7 @@
 | **합계** | **515** | **397** | **92** | **26** | **77.09%** | **81.19%** |
 
 - timeout 0 · error 0. 격리 조치 전/후 2회 독립 실행에서 수치 완전 동일(재현성 확인).
-- **라인 96% ↔ 변이 77%의 19%p 격차** — "실행은 되지만 단언이 없는 코드"가 그만큼 존재.
+- **동일 테스트 집합(6파일/133케이스) 기준 라인 95.18% ↔ 변이 77.09% = 18.09%p 격차** — "실행은 되지만 단언이 없는 코드"가 그만큼 존재. (Aiden 보완 요청 #1 반영: 변이와 같은 6파일 집합으로 3파일 커버리지 재측정, 3.99초 → 보고서 §3.4)
 - 주요 생존 변이: 20kg(`:51`)·70kg(`:317`)·oversize(`:171`) 경계 연산자, 제품군 매핑 `:56~62` StringLiteral 7,
   CANCELED/DISPOSED/MASTERED 빈 전이 배열(`:28~31`) 및 `getOrderEditScope` 잠금 플래그 10건.
 
