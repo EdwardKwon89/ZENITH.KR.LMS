@@ -164,7 +164,7 @@ SHXK `createorder`의 `consignee.*` 전체 명세(`docs/80_RawData/Phase8_UPS_AP
 - [x] 1단계 감사 표(18행) — 모든 "현재 …" 칸에 `파일:줄` 근거(추정 금지)
 - [x] 2단계 (a) 공백만 회사명(`"  "`) 미전송(trim 후 빈 값이면 키 생략)
 - [x] 2단계 (b) 명세 상한 있으나 앱 검증 없던 7필드 사전검증 추가 — `shxk-limits.ts` 상수(명세 행 주석) + `validate-payload.ts` 단일 오류 `수취인 … N자 초과` + 6필드 zod max
-- [x] 3단계 미전송 8필드 결정 요청 표(task file + Issue 코멘트) + IMP-190 등록 (구현 안 함)
+- [x] 3단계 미전송 8필드 결정 요청 표(task file + Issue 코멘트) + IMP-191 등록 (구현 안 함)
 - [x] Ds-11 수하인 매핑표 **선갱신**(R-11/R-12) 후 `npm run check:ds11` 기록
 - [x] 되돌리기 검증 2건(A: 사전검증 / B: 회사명 공백) failed/passed 수 기록
 - [x] `npm run test:regression` 전체 PASS, `npm run build` EXIT=0
@@ -182,18 +182,18 @@ SHXK `createorder`의 `consignee.*` 전체 명세(`docs/80_RawData/Phase8_UPS_AP
 | 3 | `consignee_countrycode` | 2 | Y | L176 `\|\| countryCode` | zod L85(없음) / vp L64 누락만 | 상한 검증 없음 | **수정** vp 2 (zod 제외 — select 제어) |
 | 4 | `consignee_province` | 300 | 조건 | L177 `sanitizeComma` | zod L86(없음) / vp 없음 | 상한 검증 없음 | **수정** zod max 300 + vp 300 |
 | 5 | `consignee_city` | 300 | 조건 | L178 `sanitizeComma` | zod L87(없음) / vp L67 누락만 | 상한 검증 없음 | **수정** zod max 300 + vp 300 |
-| 6 | `consignee_district` | 300 | 조건 | **미전송** | — | 입력·전송 없음 | **보류 → IMP-190** |
+| 6 | `consignee_district` | 300 | 조건 | **미전송** | — | 입력·전송 없음 | **보류 → IMP-191** |
 | 7 | `consignee_street` | 300 | Y | L179 `fullConsigneeStreet` | zod L79 `.min(1)` / vp L65–66 누락 + 105(`checkStreetLength`) | 앱 105 < 명세 300 — 의도적 더 엄격(UPS AddressLine) | **보류(갭 아님)** |
 | 8 | `consignee_postcode` | 100 | 조건 | L180 `\|\| ''` | zod L84(없음) / vp L68 누락만 | 상한 검증 없음 | **수정** zod max 100 + vp 100 |
-| 9 | `consignee_doorplate` | 300 | N | **미전송** | — | 입력·전송 없음 | **보류 → IMP-190** |
-| 10 | `consignee_areacode` | 10 | N | **미전송** | — | 입력·전송 없음 | **보류 → IMP-190** |
+| 9 | `consignee_doorplate` | 300 | N | **미전송** | — | 입력·전송 없음 | **보류 → IMP-191** |
+| 10 | `consignee_areacode` | 10 | N | **미전송** | — | 입력·전송 없음 | **보류 → IMP-191** |
 | 11 | `consignee_telephone` | 100 | 조건 | L181 `stripNonDigits` | zod L82–83 max 15 digits / vp L69–72 `checkPhone` 15 | 앱 15 < 명세 100 — 의도적 더 엄격(E.164) | **보류(갭 아님)** |
-| 12 | `consignee_mobile` | 100 | 조건 | **미전송** | — | 입력·전송 없음 | **보류 → IMP-190** |
+| 12 | `consignee_mobile` | 100 | 조건 | **미전송** | — | 입력·전송 없음 | **보류 → IMP-191** |
 | 13 | `consignee_email` | 100 | N | L182 `\|\| ''` | zod L90 `.email()`만 / vp 없음 | 상한 검증 없음 | **수정** zod max 100 + vp 100 |
-| 14 | `consignee_fax` | 100 | N | **미전송** | — | 입력·전송 없음 | **보류 → IMP-190** |
-| 15 | `consignee_certificatetype` | — | N | **미전송** | — | 입력·전송 없음 | **보류 → IMP-190** |
-| 16 | `consignee_certificatecode` | 50 | N | **미전송** | — | 입력·전송 없음 | **보류 → IMP-190** |
-| 17 | `consignee_credentials_period` | 50 | N | **미전송** | — | 입력·전송 없음 | **보류 → IMP-190** |
+| 14 | `consignee_fax` | 100 | N | **미전송** | — | 입력·전송 없음 | **보류 → IMP-191** |
+| 15 | `consignee_certificatetype` | — | N | **미전송** | — | 입력·전송 없음 | **보류 → IMP-191** |
+| 16 | `consignee_certificatecode` | 50 | N | **미전송** | — | 입력·전송 없음 | **보류 → IMP-191** |
+| 17 | `consignee_credentials_period` | 50 | N | **미전송** | — | 입력·전송 없음 | **보류 → IMP-191** |
 | 18 | `consignee_tariff` | 50 | 조건 | L183 `\|\| ''` | zod L89(없음) / vp 없음 | 상한 검증 없음 | **수정** zod max 50 + vp 50 |
 
 **감사 결론**: 전송 중 10필드 중 5필드가 상한 검증 공백(#1·#3·#4·#5·#8·#13·#18 중 회사명 제외 7필드 중 6필드는 zod도 없음) → 이번 PR에서 보완. street·telephone은 앱이 명세보다 엄격(의도적). 미전송 8필드는 별도 결정.
@@ -227,6 +227,12 @@ SHXK `createorder`의 `consignee.*` 전체 명세(`docs/80_RawData/Phase8_UPS_AP
 - **회귀 테스트:** `npm run test:regression` → **Test Files 254 passed (254) / Tests 1862 passed (1862)**, Duration 401.39s (리팩터링 후 재실행)
 - **빌드:** `npm run build` → **EXIT=0** (TypeScript 오류 0건, 라우트 테이블 정상 출력)
 - **vacuous 단언 점검:** 신규 테스트는 `toEqual`/`toBe`/`toHaveProperty`/`not.toHaveProperty`만 사용 — `toContain`·`typeof`·`.toBeDefined()` 단독 단언 없음
+
+## [리뷰 반영] Jaison 리뷰 — IMP 번호 정정 (IMP-190 → IMP-191)
+- **사유:** `IMP-190`이 세 곳에서 동시 사용(① 본 PR 미전송 8필드, ② Dave PR #1326, ③ Aiden `next.config.ts:57 TODO(IMP-190)`). TeamB_Dev 파일 최대 번호가 IMP-189이므로 본 PR이 IMP-191을 선점.
+- **정정 범위(본 PR 소유 파일):** `scratch/post_launch_improvements.md`(항목 헤더) · `docs/02_Analysis/Ds_11_API_상세_명세서.md`(참조 1) · `docs/08_Self_Audit/Checklists/LIVE_REGRESSION_TEST_MAP.md`(§86 참조 2) · 본 task file(참조 9).
+- **미변경(타 소유, 의도적 제외):** `next.config.ts:57 TODO(IMP-190)`(Aiden 예약) · `TASK-1153_*.md`(Aiden 예약) — 그대로 유지.
+- **커밋:** `9d5c2f019` (`[Baker] fix: TASK-B-346 PR③ IMP-190→191 번호 정정 (Issue #1278)`)
 
 ## R-17 체크리스트 (PR③)
 - [x] 코드 커밋 (코드·테스트·Ds-11·회귀맵·IMP, task file 미포함) — `88629c7b1`
