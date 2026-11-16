@@ -229,17 +229,24 @@ SHXK `createorder`의 `consignee.*` 전체 명세(`docs/80_RawData/Phase8_UPS_AP
 - **vacuous 단언 점검:** 신규 테스트는 `toEqual`/`toBe`/`toHaveProperty`/`not.toHaveProperty`만 사용 — `toContain`·`typeof`·`.toBeDefined()` 단독 단언 없음
 
 ## R-17 체크리스트 (PR③)
-- [ ] 코드 커밋 (코드·테스트·Ds-11·회귀맵·IMP, task file 미포함)
-- [ ] task file `[작업 결과]` 작성 (실제 커밋 해시 기재)
-- [ ] GitHub Issue 라벨 `status:review` 전환
-- [ ] `check-R17-DoD` 전항목 통과 (미설치 시 수동 교차점검 — 본 Task는 수동 점검)
-- [ ] 문서 커밋 (task file만)
-- [ ] PR 생성 (`base=TeamB_Dev`, body `Refs #1278`)
-- [ ] `gh pr checks <PR번호>` 실제 출력 보고 (이전 커밋 결과 인용 금지)
+- [x] 코드 커밋 (코드·테스트·Ds-11·회귀맵·IMP, task file 미포함) — `88629c7b1`
+- [x] task file `[작업 결과]` 작성 (실제 커밋 해시 기재)
+- [x] GitHub Issue 라벨 `status:review` 전환 (#1278)
+- [x] `check-R17-DoD` 전항목 통과 (미설치 시 수동 교차점검 — 본 Task는 수동 점검: diff 범위·파일 1,500줄·함수 50줄)
+- [x] 문서 커밋 (task file만) — `2e290549f`
+- [x] PR 생성 (`base=TeamB_Dev`, body `Refs #1278`) — #1327
+- [x] `gh pr checks <PR번호>` 실제 출력 보고 (이전 커밋 결과 인용 금지) — run `43818128092` headSha = 최종 head `2e290549f`
 
 ## PR③ / CI 실제 결과
-- **PR:** __PR__
-- **`gh pr checks <PR번호>` 실제 출력:** __CI__
+- **PR:** #1327 (base `TeamB_Dev`, `Refs #1278`) — `mergeable=MERGEABLE`, head `2e290549f`
+- **`gh pr checks 1327` 실제 출력** (run `43818128092`, headSha `2e290549fc58434b418bca33b83e1f54bbc23fc9` = 최종 head와 일치):
+  ```
+  Dependency Audit (advisory, non-blocking)   pass  11s
+  Docs Sync Check (advisory, non-blocking)    pass  15s
+  Regression Tests                            pass  10m29s
+  Task File Check (advisory, non-blocking)    pass  10s
+  Type Check (advisory, non-blocking)         pass  1m31s
+  ```
 
 
 
