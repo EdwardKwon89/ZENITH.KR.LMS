@@ -79,3 +79,6 @@ playwright*.local.config.ts
 
 # ─── orchestration: Edward 로컬 도구(에이전트 상호 검토 호출기) — 저장소 미포함(Edward 결정 2026-11-13). 확정 보고서는 docs/08_Self_Audit/Reviews/ 로 복사 ───
 orchestration/
+
+# ─── 폐지된 자체보고 파일(IMP-135, 2026-11-14): 에이전트 문서·구 훅이 재생성해도 커밋되지 않도록 무시 ───
+.agent/LAST_REGRESSION_RESULT

@@ -373,6 +373,8 @@ Phase 시작
 
 ### Layer 1 — Git Pre-commit Hook (진입 차단)
 
+> ⚠️ **현행과 다름 (2026-11-14)**: 아래 예시와 Layer 3의 `.agent/LAST_REGRESSION_RESULT` 방식은 **폐지**되었다. 자체보고 파일이 실제 결과와 반복해서 어긋나(IMP-135) 2026-07-11 하드 블록을 해제했고, 2026-11-14 파일·`Stop` 훅·pre-commit 검사를 모두 제거했다. 현행 R-08 판단 근거는 원격 CI(`gh pr checks`)이며 현행 훅은 `.githooks/pre-commit`·`commit-msg`를 따른다. 아래는 설계 이력으로만 보존한다.
+
 ```bash
 #!/bin/bash
 # .git/hooks/pre-commit

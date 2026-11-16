@@ -299,6 +299,25 @@ if (!order) return { success: false, error: await trError('order_not_found') };
 | Q4 | `validation/order.ts` zod 메시지(15건)를 PR③로 분리할지, PR②에 포함할지 | PR③ 분리 |
 | Q5 | `LIVE_REGRESSION_TEST_MAP.md`가 1,113줄(DEF-B-157 하드리밋 초과) — 신규 섹션을 본 파일에 추가할지, `LIVE_REGRESSION_TEST_MAP_TOOLS.md` 같은 분리 파일로 둘지 | 분리 파일 + 본 파일에 링크 1줄 |
 
+## 5-1. [설계 확정] (Aiden 전속 — 2026-11-14 23:34 KST, Edward 승인)
+
+> `[설계 확정]` 섹션은 Aiden 전속(R-17). Q1~Q5에 대한 회신과 구현 조건. **#1280 `status:draft` → `status:in-progress` 전환.** 설계 ①-a(TASK-B-350)·①-b-1(TASK-B-351)은 이미 구현·통합(PR #1304)되었으며 본 확정이 소급 적용된다.
+
+| # | 결정 | 조건·비고 |
+|:--|:--|:--|
+| Q1 | **안 ② 채택** — 서버 액션이 로케일 문장을 반환(기존 `{error:string}` 계약 유지). `errorCode`는 선택 필드로만 유보 | 신규 액션은 `trError()`/`actionLocale()` 경로를 사용하고 반환 이전 `logger`(GOV 실패 관측성)를 유지 |
+| Q2 | **승인** — `Errors` 네임스페이스 한정 ko/en/zh/ja 4개 로케일 완비, 나머지는 DEF-B-156 유지 | 키 동기화 테스트(`errors-key-sync`)로 누락을 빌드에서 차단. zh/ja 문구는 잠정(IMP-185 검수) |
+| Q3 | **승인** — `getLocale()` + 실패 시 `defaultLocale('ko')` 폴백 | 구현 전 실제 `/en` 호출로 헤더 기반 로케일 해석을 **실행으로 실증**하고 증적을 task file에 기재 |
+| Q4 | **PR③ 분리 승인** — `validation/order.ts` zod 메시지(15건)는 선택 범위 | PR②(그 외 액션) 완료 후 착수 여부 재판단 |
+| Q5 | **분리 파일(`..._TOOLS.md`) 신설 금지** — 회귀맵 구조는 #1291(C안: Task별 항목 파일 + 인덱스)·TASK-1150에서 일괄 이전 | 이전 전까지 **기존 파일 꼬리에 추가**(번호는 develop 기준 확인, IMP-186). 이전 시 freeze 고지 |
+
+**구현 시 공통 조건**
+1. **프로덕션 throw 531건**: 서버 액션에서 throw된 예외 메시지는 Next가 가린다 — 처리 방침(변환 대상/그대로 두는 대상)을 각 PR 본문에 명시한다.
+2. **분할 유지**: ①-a 인프라 → ①-b UPS/SHXK/창고 → ② 나머지 → ③ zod(선택). PR①이 병합된 뒤 PR② 착수(키 충돌 방지).
+3. **후속 IMP 연계**: `validate-payload.ts` 한글 고정 메시지(IMP-184), zh/ja 문구 검수(IMP-185). 본 Task 범위에서는 해소하지 않는다.
+4. **회귀**: R-08 전체 회귀 PASS, R-09 신규 케이스 등재, 서버 액션 변경은 R-10 에러 로그 확인("에러 로그 확인 — 無") 포함.
+5. **SHXK 중문 오류**: 사전 번역 → 미번역 시 로케일별 일반문구 → 원문은 로그에만(JSJung 확정 2026-11-12) — 변경 없음.
+
 ## 6. 검증 (DoD — 설계 단계)
 
 - [x] `[설계 의견]` 섹션에 안 ①/②/③ 장단점·리스크 비교 + 추천안 1개 명시
