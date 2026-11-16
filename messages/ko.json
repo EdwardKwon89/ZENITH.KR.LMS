@@ -20,7 +20,16 @@
     "label_not_found": "발급된 라벨이 없습니다.",
     "document_save_failed": "문서 다운로드/저장 실패",
     "document_save_failed_after_shipping": "배송 처리는 완료되었으나 라벨 문서 저장에 실패했습니다. 잠시 후 다시 시도해주세요.",
-    "shxk_validation_failed": "SHXK 사전검증에 실패했습니다: {fields}"
+    "shxk_validation_failed": "SHXK 사전검증에 실패했습니다: {fields}",
+    "not_ups_order": "UPS 오더가 아닙니다.",
+    "ups_actual_cost_status_invalid": "오더가 IN_TRANSIT 또는 DELIVERED 상태일 때만 실제 원가를 입력할 수 있습니다.",
+    "ups_actual_charge_status_invalid": "오더가 IN_TRANSIT 또는 DELIVERED 상태일 때만 실제 청구 요금을 입력할 수 있습니다.",
+    "billing_finalize_status_invalid": "IN_TRANSIT 또는 DELIVERED 상태에서만 청구확정이 가능합니다.",
+    "shipper_scope_denied": "본인 소속 화주의 오더만 처리할 수 있습니다.",
+    "manual_reason_required": "수동 배송 완료 전환 사유 입력은 필수입니다.",
+    "already_delivered": "이미 배송 완료 상태입니다.",
+    "agency_org_missing": "Agency 소속 조직 정보가 없습니다.",
+    "status_change_denied": "상태를 변경할 권한이 없습니다."
   },
   "Common": {
     "phoneHelp": "숫자만 입력 (하이픈 제외, 최대 {max}자리)",

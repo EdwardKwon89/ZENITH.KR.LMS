@@ -122,7 +122,7 @@ describe('Issue #1009: UPS 사후 원가 확정 (zen_ups_actual_cost)', () => {
 
     const result = await recordUpsActualCost('order-1', { baseFreightHkd: 100 });
     expect(result.success).toBe(false);
-    expect(result.error).toContain('UPS');
+    expect(result.error).toBe('UPS 오더가 아닙니다.');
   });
 
   it('TC-1009-03: REGISTERED 상태 → 차단 (IN_TRANSIT/DELIVERED만)', async () => {
@@ -131,7 +131,7 @@ describe('Issue #1009: UPS 사후 원가 확정 (zen_ups_actual_cost)', () => {
 
     const result = await recordUpsActualCost('order-1', { baseFreightHkd: 100 });
     expect(result.success).toBe(false);
-    expect(result.error).toContain('IN_TRANSIT 또는 DELIVERED');
+    expect(result.error).toBe('오더가 IN_TRANSIT 또는 DELIVERED 상태일 때만 실제 원가를 입력할 수 있습니다.');
   });
 
   it('TC-1009-04: 비관리자 → 거부', async () => {
@@ -140,7 +140,7 @@ describe('Issue #1009: UPS 사후 원가 확정 (zen_ups_actual_cost)', () => {
 
     const result = await recordUpsActualCost('order-1', { baseFreightHkd: 100 });
     expect(result.success).toBe(false);
-    expect(result.error).toContain('권한');
+    expect(result.error).toBe('권한이 없습니다.');
   });
 
   it('TC-1009-05: 부피/중량 변경 → 매출 재계산 + 미마감 agency/shipper 인보이스 반영', async () => {
@@ -360,7 +360,7 @@ describe('recordActualCostAndFinalize (TASK-B-317)', () => {
     });
 
     expect(result.success).toBe(false);
-    expect(result.error).toContain('권한이 없습니다');
+    expect(result.error).toBe('권한이 없습니다.');
   });
 
   it('IN_TRANSIT/DELIVERED가 아닌 상태는 거부', async () => {
@@ -382,7 +382,7 @@ describe('recordActualCostAndFinalize (TASK-B-317)', () => {
     });
 
     expect(result.success).toBe(false);
-    expect(result.error).toContain('IN_TRANSIT 또는 DELIVERED');
+    expect(result.error).toBe('IN_TRANSIT 또는 DELIVERED 상태에서만 청구확정이 가능합니다.');
   });
 
   it('기타부가운임이 실제로 저장됨', async () => {

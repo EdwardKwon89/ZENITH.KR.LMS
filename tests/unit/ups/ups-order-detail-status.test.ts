@@ -113,7 +113,8 @@ describe('UPS Order Detail order.status 중심 상태 재구성 및 액션 검�
 
       const res = await checkRealtimeUpsTrackingAction('ord-100');
       expect(res.success).toBe(false);
-      expect(res.error).toContain('발급된 활성 UPS 운송장 번호가 없습니다');
+      // TASK-B-352: label_not_found 로케일 문구로 전환
+      expect(res.error).toBe('발급된 라벨이 없습니다.');
     });
   });
 
@@ -183,7 +184,8 @@ describe('UPS Order Detail order.status 중심 상태 재구성 및 액션 검�
 
       const res = await manuallySetOrderDeliveredAction('ord-100', '타사 오더 시도');
       expect(res.success).toBe(false);
-      expect(res.error).toContain('소속 대리점이 관리하는 화주의 오더만');
+      // TASK-B-352: shipper_scope_denied 로케일 문구로 전환
+      expect(res.error).toBe('본인 소속 화주의 오더만 처리할 수 있습니다.');
     });
 
     // TASK-B-313 (Issue #1150): 대리점 자체 오더(자기 소유) 수동 배송완료 전환 성공

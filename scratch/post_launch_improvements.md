@@ -2084,6 +2084,7 @@ UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류
 ## [IMP-185] `Errors` 네임스페이스 zh/ja 신규 문구 초안 검수 (TASK-B-351 산출물)
 
 - **발견 경위**: 2026-11-13, TASK-B-351(Issue #1299)에서 `messages/{zh,ja}.json`의 `Errors` 네임스페이스에 신규 키 6개(`profile_not_found`, `destination_country_not_found`, `label_not_found`, `document_save_failed`, `document_save_failed_after_shipping`, `shxk_validation_failed`)와 SHXK 오류 사전 2건(`未找到订单信息`, `Invalid ShipFrom AddressLine3`)의 zh/ja 문구를 Dave가 초안 작성했다.
+  - **TASK-B-352(Issue #1325) 추가분(9키)**: `not_ups_order`, `ups_actual_cost_status_invalid`, `ups_actual_charge_status_invalid`, `billing_finalize_status_invalid`, `shipper_scope_denied`, `manual_reason_required`, `already_delivered`, `agency_org_missing`, `status_change_denied` — zh/ja 초안 검수 동일 대상.
 - **현재 상태**: 키 세트·ICU 플레이스홀더 일치(`errors-key-sync.test.ts`)는 자동 검증되지만, **문구의 자연스러움/용어 일관성은 사람 검수 대상**이다. Jaison 리뷰에서도 "머지 후 JSJung 검수 대상으로 IMP에 남겨 달라"고 요청.
 - **영향**: 문구 품질 문제로 그치며 기능 오류는 아니다. 다만 고객 노출 문구이므로 검수 전까지 잠정 문구로 운영된다.
 - **목표 구현**: zh/ja 원어민(또는 담당자) 검수 → 필요 시 `messages/{zh,ja}.json` `Errors.*` 및 `SHXK_TRANSLATION_DICT` 문구 수정. 이후 `errors-key-sync` + `translate.test.ts` 기대값 동기 갱신.
@@ -2138,3 +2139,16 @@ UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류
 - **관련 파일**: `src/app/actions/admin/*.ts`, `src/lib/auth/rbac.ts`, `src/lib/auth/guards.ts`, `src/app/[locale]/(dashboard)/admin/layout.tsx`(신설), `src/lib/auth/proxy.ts`, `.agent/defects/DEF-147_admin페이지_역할게이트_미들웨어단독.md`
 - **예상 공수**: 0.5~1 MD (역할 정책 확정 + 액션 15모듈 정리 + 페이지 게이트 + 회귀)
 - **우선순위**: Medium — 현재 직접 유출은 미확인(액션 가드·RLS가 2차 방어)이나 미들웨어 우회 취약점과 결합 시 노출. IMP-001과 동일 방향이라 통합 진행이 효율적
+
+
+---
+
+## [IMP-190] `ups-actual-cost`/`ups-actual-charges` 실패 지점의 핵심 알림(`logClientError(CRITICAL)`) 미구성
+
+- **발견 경위**: 2026-11-16, TASK-B-352(Issue #1325)에서 두 파일의 모든 실패 반환 지점에 `logger.error`/`logger.warn`을 보강(#1183 처리)하면서, ZEN_A4 핵심 지점 알림 4기준(금전·고객접점·침묵성·사고이력)을 대조한 결과 **`ups-actual-*`는 3개 기준 해당**(실비·청구 기록=금전 영향 / 오더 상세 화면 노출=고객접점 / #1183 이력)했다.
+- **현재 상태**: B-352는 로그만 보강했고, `logClientError()`(→`zen_error_logs` `/admin/error-logs`) 연동은 Task 지시상 **범위 밖**으로 두었다. 따라서 원가/청구 저장 실패는 Sentry/Axiom/Vercel 로그에는 남으나 운영자 화면(`/admin/error-logs`)에는 자동 노출되지 않는다.
+- **영향**: 정산 금액 정합성에 직결되는 DB 쓰기 실패가 운영자 대시보드에서 보이지 않아, 침묵성 실패(수동 확인 전까지 미인지) 가능성이 남는다.
+- **목표 구현**: `ups-actual-cost.ts`·`ups-actual-charges.ts`의 DB 쓰기 실패(약 20지점) 중 금전 영향 상위 지점(원가 upsert, 인보이스 금액 갱신, 조정 비용 insert/update, 마감 후 조정 실패)에 `logClientError(CRITICAL)` 연동 + 알림 문구/식별자 설계. 기존 #1181~#1185 알림 파이프라인과 중복 방지 정책 확인 필요.
+- **관련 파일**: `src/app/actions/finance/ups-actual-cost.ts`, `src/app/actions/finance/ups-actual-charges.ts`, `src/app/actions/misc/monitoring.ts`(`logClientError`), `GOV_COMMON.md` ZEN_A4
+- **예상 공수**: 0.3~0.5 MD (연동 지점 선정 + 중복/노이즈 정책 + 알림 확인 테스트)
+- **우선순위**: Medium — 기능 장애는 아니나 금전 정합성 영역의 침묵 실패 방지

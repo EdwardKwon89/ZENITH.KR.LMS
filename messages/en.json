@@ -20,7 +20,16 @@
     "label_not_found": "No issued label was found.",
     "document_save_failed": "Failed to download or save the document.",
     "document_save_failed_after_shipping": "Shipping was completed, but the label document could not be saved. Please try again shortly.",
-    "shxk_validation_failed": "SHXK pre-validation failed: {fields}"
+    "shxk_validation_failed": "SHXK pre-validation failed: {fields}",
+    "not_ups_order": "This is not a UPS order.",
+    "ups_actual_cost_status_invalid": "Actual cost can be entered only when the order is IN_TRANSIT or DELIVERED.",
+    "ups_actual_charge_status_invalid": "Actual charges can be entered only when the order is IN_TRANSIT or DELIVERED.",
+    "billing_finalize_status_invalid": "Billing can be finalized only when the order is IN_TRANSIT or DELIVERED.",
+    "shipper_scope_denied": "Only orders of shippers belonging to your agency can be processed.",
+    "manual_reason_required": "A reason is required to manually mark the order as delivered.",
+    "already_delivered": "The order is already delivered.",
+    "agency_org_missing": "Agency organization information is missing.",
+    "status_change_denied": "You do not have permission to change the status."
   },
   "Common": {
     "phoneHelp": "Numbers only (no hyphens, max {max} digits)",

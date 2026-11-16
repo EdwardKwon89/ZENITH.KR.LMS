@@ -52,16 +52,22 @@ describe('TC-OPS-TRK-01: addTrackingEvent', () => {
     expect(updateOrderStatus).not.toHaveBeenCalled();
   });
 
-  it('INSERT 실패 시 에러 throw', async () => {
+  it('INSERT 실패 시 로케일 오류를 반환한다 (throw 아님, TASK-B-352)', async () => {
     mockSupabase.from = vi.fn(() => ({
       insert: vi.fn().mockResolvedValue({ error: new Error('DB error') }),
     }));
 
-    await expect(addTrackingEvent('order-003', {
+    const result = await addTrackingEvent('order-003', {
       event_code: 'DELIVERED',
       location: 'Seoul',
       description: 'Fail test',
-    })).rejects.toThrow('Failed to add tracking event');
+    });
+
+    expect(result.success).toBe(false);
+    expect((result as { error?: string }).error).toBe(
+      '요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요. (코드: TRACKING_EVENT_SAVE)',
+    );
+    expect(updateOrderStatus).not.toHaveBeenCalled();
   });
 });
 

@@ -74,7 +74,7 @@ describe('TASK-B-204: IN_TRANSIT 부가요금 등록', () => {
 
     const result = await recordUpsActualCharges('order-1', []);
     expect(result.success).toBe(false);
-    expect(result.error).toContain('IN_TRANSIT 또는 DELIVERED');
+    expect(result.error).toBe('오더가 IN_TRANSIT 또는 DELIVERED 상태일 때만 실제 청구 요금을 입력할 수 있습니다.');
   });
 
   it('TC-B204-03: SHIPPER 권한 없음 → 거부', async () => {
@@ -127,7 +127,7 @@ describe('TASK-B-204: IN_TRANSIT 부가요금 등록', () => {
 
     const result = await recordUpsActualCharges('order-1', []);
     expect(result.success).toBe(false);
-    expect(result.error).toContain('본인 소속 화주의 오더만');
+    expect(result.error).toBe('본인 소속 화주의 오더만 처리할 수 있습니다.');
   });
 
   it('TC-B204-07: searchDeliveredUpsOrders가 recipient_country_code를 사용한다 (DEF-B-018)', async () => {
