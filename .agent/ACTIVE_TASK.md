@@ -50,6 +50,7 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
+| [#1319](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1319) | [Aiden] xlsx 소스 전환·P0 의존성 상향 — Team B 영향 의견 요청 (DEF-146 후속) | b | p2 | - | jungjs | 2026-11-16 |
 | [#1316](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1316) | [Team A] TASK-1152: 테스트 강화 PoC 단계 1 — 모듈 ①② 커버리지·변이 점수 기준선 측정 (231, 격리 운용) | a | p2 | review | 미배정 | 2026-11-15 |
 | [#1309](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1309) | [Team A] TASK-1150: 회귀맵 Task별 항목 파일 + 인덱스 구조 이전 + 정합성 점검 (IMP-186(B) / #1291 / R-09 개정) | a | p2 | blocked | 미배정 | 2026-11-14 |
 | [#1298](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1298) | [Aiden] R-12(Ds-11 동기화) 개정·Docs Sync Check 도입 안내 — Team B 영향 및 회신 요청 | b | p2 | - | jungjs | 2026-11-14 |
