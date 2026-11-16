@@ -4,6 +4,7 @@ import { logger } from '@/lib/logger';
 
 import { validateAdminAction, validateUserAction } from "@/lib/auth/guards";
 import { revalidatePath } from "next/cache";
+import { trError } from '@/lib/i18n/action-error';
 import {
   inventoryAdjustmentSchema,
   InventoryAdjustmentInput,
@@ -18,7 +19,7 @@ import { USER_ROLES } from "@/lib/auth/rbac";
  */
 export async function getInventoryList(payload: InventoryFilterInput) {
   const { supabase, profile } = await validateUserAction();
-  if (!profile) throw new Error("User profile not found");
+  if (!profile) throw new Error(await trError('profile_not_found'));
 
   const validated = inventoryFilterSchema.parse(payload);
   const { page, pageSize, search, lowStockOnly } = validated;
@@ -50,7 +51,10 @@ export async function getInventoryList(payload: InventoryFilterInput) {
     .order("sku_code", { ascending: true })
     .range(from, to);
 
-  if (error) throw new Error(`Failed to fetch inventory: ${error.message}`);
+  if (error) {
+    logger.error('getInventory: lookup failed', error);
+    throw new Error(await trError('generic', { code: 'INVENTORY_LOOKUP' }));
+  }
 
   return {
     items: data || [],
@@ -73,7 +77,10 @@ export async function getInventoryHistory(inventoryId: string, page = 1, pageSiz
     .order("created_at", { ascending: false })
     .range(from, to);
 
-  if (error) throw new Error(`Failed to fetch inventory history: ${error.message}`);
+  if (error) {
+    logger.error('getInventoryHistory: lookup failed', error);
+    throw new Error(await trError('generic', { code: 'INVENTORY_HISTORY_LOOKUP' }));
+  }
 
   return {
     success: true,
@@ -88,7 +95,7 @@ export async function getInventoryHistory(inventoryId: string, page = 1, pageSiz
 export async function adjustInventory(payload: InventoryAdjustmentInput) {
   try {
     const { supabase, user, profile } = await validateAdminAction();
-    if (!profile) throw new Error("User profile not found");
+    if (!profile) return { success: false, error: await trError('profile_not_found') };
 
     const validated = inventoryAdjustmentSchema.parse(payload);
     const { inventoryId, adjustmentQty, reason } = validated;
@@ -100,10 +107,16 @@ export async function adjustInventory(payload: InventoryAdjustmentInput) {
       .eq("id", inventoryId)
       .single();
 
-    if (fetchError || !inventory) throw new Error("Inventory item not found");
+    if (fetchError || !inventory) {
+      if (fetchError) logger.error('adjustInventory: lookup failed', fetchError);
+      return { success: false, error: await trError('inventory_not_found') };
+    }
 
     const newQty = inventory.on_hand_qty + adjustmentQty;
-    if (newQty < 0) throw new Error("재고 수량은 0 미만이 될 수 없습니다.");
+    if (newQty < 0) {
+      logger.warn(`adjustInventory: quantity would go negative (${inventoryId})`);
+      return { success: false, error: await trError('inventory_below_zero') };
+    }
 
     // 2. 재고 수량 업데이트
     const { error: updateError } = await supabase
@@ -114,7 +127,10 @@ export async function adjustInventory(payload: InventoryAdjustmentInput) {
       })
       .eq("id", inventoryId);
 
-    if (updateError) throw new Error(`Update failed: ${updateError.message}`);
+    if (updateError) {
+      logger.error('adjustInventory: update failed', updateError);
+      return { success: false, error: await trError('generic', { code: 'INVENTORY_UPDATE' }) };
+    }
 
     // 3. 이력 기록
     const { error: historyError } = await supabase
@@ -136,7 +152,8 @@ export async function adjustInventory(payload: InventoryAdjustmentInput) {
     revalidatePath("/(dashboard)/inventory", "page");
     return { success: true, finalQty: newQty };
   } catch (err: any) {
-    return { success: false, error: err.message || "Failed to adjust inventory" };
+    logger.error('adjustInventory failed:', err);
+    return { success: false, error: await trError('generic', { code: 'INVENTORY_ADJUST' }) };
   }
 }
 

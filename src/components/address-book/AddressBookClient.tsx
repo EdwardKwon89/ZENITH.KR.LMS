@@ -1,4 +1,5 @@
 "use client";
+import { useTranslations } from 'next-intl';
 
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -37,6 +38,7 @@ interface AddressBookClientProps {
 }
 
 export default function AddressBookClient({ initialEntries }: AddressBookClientProps) {
+  const te = useTranslations('Errors');
   const [entries, setEntries] = useState<AddressBookEntry[]>(initialEntries);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -69,7 +71,8 @@ export default function AddressBookClient({ initialEntries }: AddressBookClientP
       }
       reset();
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to save');
+      console.error(err);
+      alert(te('generic', { code: 'ADDRESS_SAVE' }));
     } finally {
       setIsSubmitting(false);
     }
@@ -102,7 +105,8 @@ export default function AddressBookClient({ initialEntries }: AddressBookClientP
       await deleteAddressBookEntry(id);
       setEntries((prev) => prev.filter((e) => e.id !== id));
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to delete');
+      console.error(err);
+      alert(te('generic', { code: 'ADDRESS_DELETE' }));
     }
   };
 

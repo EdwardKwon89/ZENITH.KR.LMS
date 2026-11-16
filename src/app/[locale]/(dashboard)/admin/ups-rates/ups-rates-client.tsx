@@ -1,4 +1,5 @@
 'use client';
+import { useTranslations } from 'next-intl';
 
 import { useState, useCallback, useEffect } from 'react';
 import { Plus, Edit2, Trash2, XCircle, Globe, Package, DollarSign, Fuel, FileText, Building, Scale, Layers, TrendingUp } from 'lucide-react';
@@ -59,6 +60,7 @@ const TABS: { key: TabKey; label: string; icon: React.ElementType }[] = [
 ];
 
 export default function UpsRatesClient({ zones, products, baseRates, fuelSurcharges, otherCharges, agencyPolicies, agencies, weightTierRates, freightMinimums, surgeFees, userRole }: Props) {
+  const te = useTranslations('Errors');
   const [activeTab, setActiveTab] = useState<TabKey>('zones');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
@@ -131,7 +133,8 @@ export default function UpsRatesClient({ zones, products, baseRates, fuelSurchar
       });
       window.location.reload();
     } catch (e) {
-      alert(e instanceof Error ? e.message : '처리 중 오류가 발생했습니다.');
+      console.error(e);
+      alert(te('generic', { code: 'RATE_SAVE' }));
     } finally {
       setLoading(false);
     }
@@ -221,7 +224,8 @@ export default function UpsRatesClient({ zones, products, baseRates, fuelSurchar
       }
       window.location.reload();
     } catch (e) {
-      alert(e instanceof Error ? e.message : '처리 중 오류가 발생했습니다.');
+      console.error(e);
+      alert(te('generic', { code: 'RATE_SAVE' }));
     } finally {
       setLoading(false);
     }
@@ -242,7 +246,8 @@ export default function UpsRatesClient({ zones, products, baseRates, fuelSurchar
       await del[activeTab]?.(id);
       window.location.reload();
     } catch (e) {
-      alert(e instanceof Error ? e.message : '처리 중 오류가 발생했습니다.');
+      console.error(e);
+      alert(te('generic', { code: 'RATE_SAVE' }));
     } finally {
       setLoading(false);
     }

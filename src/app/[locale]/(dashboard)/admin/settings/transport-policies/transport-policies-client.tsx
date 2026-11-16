@@ -1,4 +1,5 @@
 "use client";
+import { useTranslations } from 'next-intl';
 
 import { useState } from "react";
 import { motion } from "framer-motion";
@@ -33,6 +34,7 @@ const TRANSPORT_LABELS: Record<string, string> = {
 };
 
 export default function TransportPoliciesClient({ initialPolicies, userRole }: Props) {
+  const te = useTranslations('Errors');
   const [policies, setPolicies] = useState(initialPolicies);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<Partial<TransportPolicyData>>({});
@@ -65,7 +67,8 @@ export default function TransportPoliciesClient({ initialPolicies, userRole }: P
       setEditingId(null);
       setEditForm({});
     } catch (e) {
-      alert((e as Error).message);
+      console.error(e);
+      alert(te('generic', { code: 'POLICY_SAVE' }));
     } finally {
       setSaving(null);
     }

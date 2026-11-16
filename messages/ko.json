@@ -79,7 +79,17 @@
     "measurements_stale": "창고에서 실측값이 갱신되었습니다. 화면을 새로고침한 뒤 다시 수정해 주세요.",
     "inbound_no_measurement_changes": "변경된 측정값이 없습니다.",
     "ups_edit_registered_locked": "UPS에 등록된 오더는 수정할 수 없습니다. 수정이 필요하면 창고에서 \"UPS 등록취소\" 후 진행하세요.",
-    "ups_edit_status_locked": "현재 상태에서는 수정할 수 없습니다."
+    "ups_edit_status_locked": "현재 상태에서는 수정할 수 없습니다.",
+    "auth_invalid_credentials": "이메일 또는 비밀번호가 올바르지 않습니다.",
+    "auth_email_not_confirmed": "이메일 인증이 완료되지 않았습니다. 받은 편지함을 확인해 주세요.",
+    "auth_account_exists": "이미 가입된 이메일입니다. 로그인해 주세요.",
+    "auth_password_invalid": "비밀번호가 보안 정책을 충족하지 않습니다.",
+    "auth_rate_limited": "요청이 너무 많습니다. 잠시 후 다시 시도해 주세요.",
+    "auth_unexpected": "로그인 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.",
+    "auth_signup_failed": "회원가입에 실패했습니다. 입력 정보를 확인해 주세요.",
+    "auth_signup_profile_failed": "프로필 생성에 실패했습니다. 잠시 후 다시 시도해 주세요.",
+    "inventory_not_found": "재고 품목을 찾을 수 없습니다.",
+    "inventory_below_zero": "재고 수량은 0 미만이 될 수 없습니다."
   },
   "Common": {
     "phoneHelp": "숫자만 입력 (하이픈 제외, 최대 {max}자리)",

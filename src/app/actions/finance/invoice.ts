@@ -10,6 +10,7 @@ import { escapeHtml } from '@/lib/utils/escape-html';
 import { getNumericParam } from "@/lib/params/service";
 import { getExchangeRate } from '@/lib/finance/exchange-rate';
 import { getKstToday } from '@/lib/utils/date-kst';
+import { trError } from '@/lib/i18n/action-error';
 import { generateInvoicePdfBuffer } from '@/lib/finance/pdf';
 import { Resend } from 'resend';
 
@@ -33,13 +34,14 @@ export async function generateInvoiceAction(orderId: string) {
 
 export async function issueInvoicePdf(invoiceId: string) {
   const { supabase, profile } = await validateAdminAction();
-  if (!profile) throw new Error("인증 정보가 없습니다.");
+  if (!profile) throw new Error(await trError('profile_not_found'));
   const financeRepo = new FinanceRepository(supabase);
 
   const { data: invoice, error: invError } = await financeRepo.findByIdBasic(invoiceId);
 
   if (invError || !invoice) {
-    throw new Error(`인보이스 정보를 찾을 수 없습니다: ${invError?.message}`);
+    if (invError) logger.error('invoice: lookup failed', invError);
+    throw new Error(await trError('invoice_not_found'));
   }
 
   const shipperMeta = (invoice.shipper as any)?.metadata || {};
@@ -79,7 +81,8 @@ export async function issueInvoicePdf(invoiceId: string) {
     });
 
   if (uploadError) {
-    throw new Error(`PDF 업로드 실패: ${uploadError.message}`);
+    logger.error('invoice: PDF upload failed', uploadError);
+    throw new Error(await trError('generic', { code: 'INVOICE_PDF_UPLOAD' }));
   }
 
   const { error: histError } = await financeRepo.insertPdfHistory({
@@ -95,7 +98,8 @@ export async function issueInvoicePdf(invoiceId: string) {
   });
 
   if (histError) {
-    throw new Error(`발행 이력 저장 실패: ${histError.message}`);
+    logger.error('invoice: issue history insert failed', histError);
+    throw new Error(await trError('generic', { code: 'INVOICE_HISTORY_SAVE' }));
   }
 
   revalidatePath('/finance/invoices');
@@ -109,7 +113,8 @@ export async function getInvoicePdfHistory(invoiceId: string) {
   const { data, error } = await financeRepo.findPdfHistory(invoiceId);
 
   if (error) {
-    throw new Error(`이력 조회 실패: ${error.message}`);
+    logger.error('invoice: history lookup failed', error);
+    throw new Error(await trError('generic', { code: 'INVOICE_HISTORY_LOOKUP' }));
   }
 
   const historyWithUrls = await Promise.all((data || []).map(async (item) => {
@@ -128,14 +133,15 @@ export async function getInvoicePdfHistory(invoiceId: string) {
 
 export async function issueTaxInvoice(invoiceId: string) {
   const { supabase, profile } = await validateAdminAction();
-  if (!profile) throw new Error("인증 정보가 없습니다.");
+  if (!profile) throw new Error(await trError('profile_not_found'));
   const financeRepo = new FinanceRepository(supabase);
 
   const { data: invoice, error: invError } = await financeRepo.findById(invoiceId);
 
   if (invError || !invoice) {
     logger.error(`[Action] Invoice not found:`, invError);
-    throw new Error(`인보이스 정보를 찾을 수 없습니다: ${invError?.message}`);
+    if (invError) logger.error('invoice: lookup failed', invError);
+    throw new Error(await trError('invoice_not_found'));
   }
 
   const taxInvoiceNo = `TX-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${Math.floor(1000 + Math.random() * 9000)}`;
@@ -198,7 +204,8 @@ export async function issueTaxInvoice(invoiceId: string) {
 
   if (txError) {
     logger.error(`[Action] Tax invoice insertion failed:`, txError);
-    throw new Error(`세금계산서 생성 실패: ${txError.message}`);
+    logger.error('invoice: tax invoice create failed', txError);
+    throw new Error(await trError('generic', { code: 'TAX_INVOICE_CREATE' }));
   }
 
   // IMP-051: Audit history (best-effort)
@@ -223,13 +230,15 @@ export async function sendTaxInvoiceEmail(taxInvoiceId: string, recipientEmail: 
   const { data: tx, error: txError } = await financeRepo.findTaxInvoiceById(taxInvoiceId);
 
   if (txError || !tx) {
-    throw new Error(`세금계산서 정보를 찾을 수 없습니다: ${txError?.message}`);
+    if (txError) logger.error('invoice: tax invoice lookup failed', txError);
+    throw new Error(await trError('invoice_not_found'));
   }
 
   try {
     const resendInstance = getResend();
     if (!resendInstance) {
-      throw new Error('이메일 발송 서비스(Resend)가 설정되지 않았습니다.');
+      logger.error('invoice: email service is not configured');
+      throw new Error(await trError('generic', { code: 'EMAIL_NOT_CONFIGURED' }));
     }
     const { data: emailData, error: emailError } = await resendInstance.emails.send({
       from: 'ZENITH LMS <notifications@zenith.kr>',
@@ -265,7 +274,8 @@ export async function sendTaxInvoiceEmail(taxInvoiceId: string, recipientEmail: 
       metadata: { ...(tx.metadata as Record<string, unknown> | undefined) ?? {}, error: error.message }
     });
 
-    throw new Error(`이메일 발송 실패: ${error.message}`);
+    logger.error('sendTaxInvoiceEmail failed:', error);
+    throw new Error(await trError('generic', { code: 'EMAIL_SEND' }));
   }
 }
 
@@ -276,7 +286,8 @@ export async function getTaxInvoiceHistory(invoiceId: string) {
   const { data, error } = await financeRepo.findTaxInvoicesByInvoiceId(invoiceId);
 
   if (error) {
-    throw new Error(`이력 조회 실패: ${error.message}`);
+    logger.error('invoice: history lookup failed', error);
+    throw new Error(await trError('generic', { code: 'INVOICE_HISTORY_LOOKUP' }));
   }
 
   return data;
@@ -296,8 +307,14 @@ export async function getOrderDocumentData(orderNo: string) {
     .eq('order_no', orderNo)
     .maybeSingle();
 
-  if (orderError) throw new Error(`오더 조회 중 오류 발생: ${orderError.message}`);
-  if (!order) throw new Error(`해당 번호(${orderNo})의 오더를 찾을 수 없습니다.`);
+  if (orderError) {
+    logger.error('invoice: order lookup failed', orderError);
+    throw new Error(await trError('generic', { code: 'ORDER_LOOKUP' }));
+  }
+  if (!order) {
+    logger.warn(`invoice: order not found (${orderNo})`);
+    throw new Error(await trError('order_not_found'));
+  }
 
   const { data: packages, error: pkgError } = await supabase
     .from('zen_order_packages')
@@ -305,7 +322,10 @@ export async function getOrderDocumentData(orderNo: string) {
     .eq('order_id', order.id)
     .order('created_at', { ascending: true });
 
-  if (pkgError) throw new Error(`패킹 정보 조회 실패: ${pkgError.message}`);
+  if (pkgError) {
+    logger.error('invoice: package lookup failed', pkgError);
+    throw new Error(await trError('generic', { code: 'PACKAGE_LOOKUP' }));
+  }
 
   const { data: items, error: itemsError } = await supabase
     .from('zen_order_items')
@@ -313,7 +333,10 @@ export async function getOrderDocumentData(orderNo: string) {
     .eq('order_id', order.id)
     .order('created_at', { ascending: true });
 
-  if (itemsError) throw new Error(`아이템 정보 조회 실패: ${itemsError.message}`);
+  if (itemsError) {
+    logger.error('invoice: item lookup failed', itemsError);
+    throw new Error(await trError('generic', { code: 'ITEM_LOOKUP' }));
+  }
 
   const packagesWithItems = packages.map(pkg => ({
     ...pkg,
