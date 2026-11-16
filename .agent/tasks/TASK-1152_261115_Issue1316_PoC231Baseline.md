@@ -136,7 +136,7 @@ Test Files  254 passed (254)
 - **원인**: Stryker 기본 `tempDirName`(`.stryker-tmp`)이 `tests/poc-231/.stryker-tmp/`에 리포지토리 전체 사본을 만들고, 기본 `vitest.config.ts`의 glob(`**/*.{test,spec}.*`)이 그 사본의 테스트 파일까지 수집했다. 파일명 규칙(`*.config.ts`)만으로는 "PoC ↔ 회귀 분리"가 보장되지 않는다.
 - **조치(본 Task 내)**: `tempDirName`을 `os.tmpdir()/zenith-lms-poc231-stryker`(리포 밖)로 이동 + `vitest.related: false`(샌드박스가 리포 밖이면 `--related`가 연관 테스트를 못 찾음) + `.gitignore`에 `.stryker-tmp/` 추가.
 - **후속 제안**: Stryker를 상시 도입할 경우(`231 §10 #1` 채택 시) `vitest.config.ts`의 `exclude`에 `**/.stryker-tmp/**`를 추가하는 것이 근본 방어다. 본 PoC는 `src/`·`vitest.config.ts` 무수정 조건(ⓑ) 때문에 config 수정 대신 샌드박스 위치 이동으로 해결했다. → 채택 PR에서 함께 반영 권고.
-- **보고서 반영**: `231_PoC_Baseline_Report_D1_20261115.md` §1.3 「격리 사고 1건과 구조적 조치」.
+- **보고서 반영**: `231_PoC_Baseline_Report_D1_20261115.md` §1.3 「격리 사고 1」.
 
 ### 2. `tests/` 하위 `.ts` 추가만으로 `next build`(프로덕션 빌드)가 깨진다 (격리 설계 결함, 자체 해결)
 
@@ -149,7 +149,7 @@ Test Files  254 passed (254)
 - **조치(본 Task 내)**: `baseConfig as ViteUserConfig` 명시 캐스팅 + `defineConfig` 제거 + `coverage.all` 제거(vitest 4 폐기 옵션). **`tsconfig.json`·`package.json`·lockfile은 수정하지 않았다**(격리 조건 ⓑ 유지).
 - **검증**: `npx tsc --noEmit`(해당 2파일) 무오류 → `npm run build` 로컬 성공 → `coverage.all` 제거 후 커버리지 수치 완전 동일(96.05 / 82.14 / 96.42 / 95.79).
 - **후속 제안**: PoC·도구용 TS를 계속 `tests/`에 둘 경우 ① `tsconfig.json` `exclude`에 `tests/poc-*/**` 추가, 또는 ② 설정 파일을 `.mjs`로 작성(타입체크 대상 아님) 중 하나를 표준으로 확정할 것. → 채택 PR에서 함께 반영 권고.
-- **보고서 반영**: `231_PoC_Baseline_Report_D1_20261115.md` §1.3 「격리 사고 2건 — `next build` 타입체크」.
+- **보고서 반영**: `231_PoC_Baseline_Report_D1_20261115.md` §1.3 「격리 사고 2」.
 
 ### 3. R-06 Context7 MCP 미가동
 
