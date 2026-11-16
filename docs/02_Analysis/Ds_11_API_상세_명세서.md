@@ -85,7 +85,7 @@
   | `recipient_address` / `recipient_address_local` | string | N | 전송 street 기준 최대 105자 | `consignee.consignee_street` | 도로명 추출 + 상세주소 결합. 앱 한도(105)가 SHXK 명세(300)보다 엄격 — UPS AddressLine 기준 |
   | `recipient_zipcode` | string | N | 최대 100자 | `consignee.consignee_postcode` | 100자 초과는 폼(zod)·사전검증이 차단 (PR③) |
 
-- **SHXK 명세상 미전송 수하인 필드 (TASK-B-346 PR③ 감사)**: `consignee_district`(300)·`consignee_doorplate`(300)·`consignee_areacode`(10)·`consignee_mobile`(100)·`consignee_fax`(100)·`consignee_certificatetype`·`consignee_certificatecode`(50)·`consignee_credentials_period`(50) 8개는 현재 입력 UI·payload 매핑이 없다. 신규 DB 컬럼·UI가 필요할 수 있는 항목으로, 구현 전 결정 요청 대상 — `scratch/post_launch_improvements.md` IMP-190 참조.
+- **SHXK 명세상 미전송 수하인 필드 (TASK-B-346 PR③ 감사)**: `consignee_district`(300)·`consignee_doorplate`(300)·`consignee_areacode`(10)·`consignee_mobile`(100)·`consignee_fax`(100)·`consignee_certificatetype`·`consignee_certificatecode`(50)·`consignee_credentials_period`(50) 8개는 현재 입력 UI·payload 매핑이 없다. 신규 DB 컬럼·UI가 필요할 수 있는 항목으로, 구현 전 결정 요청 대상 — `scratch/post_launch_improvements.md` IMP-191 참조.
 
 - **DB 컬럼**: `zen_orders.recipient_company` (text, nullable) — 마이그레이션 `20261113090000_task_b346_recipient_company.sql`로 추가. `create_order_atomic` v7이 `p_payload->>'recipient_company'`를 저장.
 - **레거시 참고**: `zen_orders.recipient_contact` 컬럼은 조회 전용 레거시로, 본 명세의 수하인 입력/전송 경로에서는 사용하지 않는다.

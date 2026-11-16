@@ -2142,7 +2142,7 @@ UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류
 
 ---
 
-## [IMP-190] SHXK createorder `consignee.*` 미전송 8개 필드 — 신규 컬럼·UI 필요 (결정 요청)
+## [IMP-191] SHXK createorder `consignee.*` 미전송 8개 필드 — 신규 컬럼·UI 필요 (결정 요청)
 
 - **발견 경위**: 2026-11-16, TASK-B-346 PR③(Issue #1278)에서 SHXK createorder `consignee.*` 18개 필드를 감사한 결과, 명세(`docs/80_RawData/Phase8_UPS_API_리서치_결과.md` 130~147행)에 있으나 현재 payload에 전송되지 않는 8개 필드를 확인했다.
 - **미전송 필드**: `consignee_district`(구/군, 300)·`consignee_doorplate`(문패번호, 300)·`consignee_areacode`(지역코드, 10)·`consignee_mobile`(휴대폰, 100)·`consignee_fax`(팩스, 100)·`consignee_certificatetype`(증명서유형: ID/PP)·`consignee_certificatecode`(증명서번호, 50)·`consignee_credentials_period`(증명서 유효기간, 50).

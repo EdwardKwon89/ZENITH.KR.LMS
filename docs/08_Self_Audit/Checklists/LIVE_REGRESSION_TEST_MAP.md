@@ -1299,7 +1299,7 @@ SHXK `createorder` 페이로드의 `shipper.shipper_name`이 화면 "담당자�
 
 ## 86. SHXK consignee 전체 매핑 감사 + 명세 상한 보완 + 회사명 공백 정규화 (Issue #1278 / TASK-B-346, PR③)
 
-**2026-11-16, Baker** — PR①(성명 폴백 제거)·PR②(회사명 전 구간)에 이어, SHXK createorder `consignee.*` 18개 필드(`docs/80_RawData/Phase8_UPS_API_리서치_결과.md` 130~147행)를 현재 전송·검증 상태와 대조(감사)했다. **명세상 최대길이가 있으나 앱에 검증이 없던 7개 필드**(성명 200·국가코드 2·주/도 300·도시 300·우편번호 100·이메일 100·통관부호 50)를 폼(zod)·사전검증(`validateShxkPayload`)에 추가하고, **공백만 입력된 회사명이 `consignee_company: ''`로 전송되던 결함**을 수정했다. `street`(앱 105 < 명세 300)·`telephone`(앱 15 < 명세 100)은 앱이 명세보다 엄격하므로 의도적 갭 아님으로 판정. 명세에 있으나 **미전송인 8개 필드**(district·doorplate·areacode·mobile·fax·certificatetype·certificatecode·credentials_period)는 신규 컬럼·UI가 필요해 구현하지 않고 결정 요청(IMP-190)으로 보고한다. **UI 변경 없음.**
+**2026-11-16, Baker** — PR①(성명 폴백 제거)·PR②(회사명 전 구간)에 이어, SHXK createorder `consignee.*` 18개 필드(`docs/80_RawData/Phase8_UPS_API_리서치_결과.md` 130~147행)를 현재 전송·검증 상태와 대조(감사)했다. **명세상 최대길이가 있으나 앱에 검증이 없던 7개 필드**(성명 200·국가코드 2·주/도 300·도시 300·우편번호 100·이메일 100·통관부호 50)를 폼(zod)·사전검증(`validateShxkPayload`)에 추가하고, **공백만 입력된 회사명이 `consignee_company: ''`로 전송되던 결함**을 수정했다. `street`(앱 105 < 명세 300)·`telephone`(앱 15 < 명세 100)은 앱이 명세보다 엄격하므로 의도적 갭 아님으로 판정. 명세에 있으나 **미전송인 8개 필드**(district·doorplate·areacode·mobile·fax·certificatetype·certificatecode·credentials_period)는 신규 컬럼·UI가 필요해 구현하지 않고 결정 요청(IMP-191)으로 보고한다. **UI 변경 없음.**
 
 | ID | 검증 내용 | 기대 결과 | 테스트 위치 |
 | :-- | :-- | :-- | :-- |
@@ -1319,4 +1319,4 @@ SHXK `createorder` 페이로드의 `shipper.shipper_name`이 화면 "담당자�
 
 **회귀 검증 (2026-11-16, `origin/TeamB_Dev` rebase 후 재실행)**: `npm run test:regression` **254 test files / 1,862 tests 전부 PASS** (401초). `npm run build` **EXIT=0**.
 **명세 동기화**: `docs/02_Analysis/Ds_11_API_상세_명세서.md` `createOrder` 절 수하인 매핑표에 명세 상한·미전송 8개 필드 기재(R-11/R-12). `npm run check:ds11` → `액션 함수 298개 | Ds-11 언급 92개 | 미반영 206개 (허용 목록 206개)` OK.
-**결정 요청**: 미전송 8개 필드는 Issue #1278 PR③ 코멘트의 결정 요청 표 + `scratch/post_launch_improvements.md` IMP-190 참조.
+**결정 요청**: 미전송 8개 필드는 Issue #1278 PR③ 코멘트의 결정 요청 표 + `scratch/post_launch_improvements.md` IMP-191 참조.
