@@ -238,8 +238,9 @@ SHXK `createorder`의 `consignee.*` 전체 명세(`docs/80_RawData/Phase8_UPS_AP
 - [x] `gh pr checks <PR번호>` 실제 출력 보고 (이전 커밋 결과 인용 금지) — run `43818128092` headSha = 최종 head `2e290549f`
 
 ## PR③ / CI 실제 결과
-- **PR:** #1327 (base `TeamB_Dev`, `Refs #1278`) — `mergeable=MERGEABLE`, head `2e290549f`
-- **`gh pr checks 1327` 실제 출력** (run `43818128092`, headSha `2e290549fc58434b418bca33b83e1f54bbc23fc9` = 최종 head와 일치):
+- **PR:** #1327 (base `TeamB_Dev`, `Refs #1278`) — `mergeable=MERGEABLE`
+- **코드 커밋:** `88629c7b1` (이 커밋을 포함한 PR head `2e290549f`에서 아래 CI 실행 — 코드 변경을 모두 포함)
+- **`gh pr checks 1327` 실제 출력** (run `43818128092`, headSha `2e290549fc58434b418bca33b83e1f54bbc23fc9`):
   ```
   Dependency Audit (advisory, non-blocking)   pass  11s
   Docs Sync Check (advisory, non-blocking)    pass  15s
@@ -247,6 +248,7 @@ SHXK `createorder`의 `consignee.*` 전체 명세(`docs/80_RawData/Phase8_UPS_AP
   Task File Check (advisory, non-blocking)    pass  10s
   Type Check (advisory, non-blocking)         pass  1m31s
   ```
+- **비고:** 이후 커밋(`2e290549f`·`494034f52` 등)은 task file만 변경(docs-only) — 코드·테스트 무변경. 최종 head의 CI도 `gh pr checks`로 확인(전항목 pass).
 
 
 
