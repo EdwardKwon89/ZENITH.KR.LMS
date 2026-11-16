@@ -1,12 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { addTrackingEvent, getGlobalTrackingOverview } from '@/app/actions/operations/tracking';
+import { addTrackingEvent, updateTrackingConfig, getGlobalTrackingOverview } from '@/app/actions/operations/tracking';
 import { validateAdminAction, validateUserAction } from '@/lib/auth/guards';
 
 vi.mock('@/lib/auth/guards', () => ({ validateUserAction: vi.fn(), validateAdminAction: vi.fn() }));
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn(), unstable_cache: (fn: any) => fn }));
 vi.mock('@/app/actions/operations/orders', () => ({ updateOrderStatus: vi.fn() }));
+vi.mock('@/lib/logger', () => ({ logger: { info: vi.fn(), error: vi.fn(), warn: vi.fn() } }));
 
 import { updateOrderStatus } from '@/app/actions/operations/orders';
+import { logger } from '@/lib/logger';
 
 describe('TC-OPS-TRK-01: addTrackingEvent', () => {
   let mockSupabase: any;
@@ -52,22 +54,58 @@ describe('TC-OPS-TRK-01: addTrackingEvent', () => {
     expect(updateOrderStatus).not.toHaveBeenCalled();
   });
 
-  it('INSERT 실패 시 로케일 오류를 반환한다 (throw 아님, TASK-B-352)', async () => {
+  it('INSERT 실패 시 로케일 문구로 throw 하고 DB 원문은 로그로만 남긴다 (TASK-B-352 재작업)', async () => {
+    const dbError = new Error('DB_RAW_SECRET_9x');
     mockSupabase.from = vi.fn(() => ({
-      insert: vi.fn().mockResolvedValue({ error: new Error('DB error') }),
+      insert: vi.fn().mockResolvedValue({ error: dbError }),
     }));
 
-    const result = await addTrackingEvent('order-003', {
-      event_code: 'DELIVERED',
-      location: 'Seoul',
-      description: 'Fail test',
-    });
+    let caught: Error | undefined;
+    try {
+      await addTrackingEvent('order-003', {
+        event_code: 'DELIVERED',
+        location: 'Seoul',
+        description: 'Fail test',
+      });
+    } catch (err) {
+      caught = err as Error;
+    }
 
-    expect(result.success).toBe(false);
-    expect((result as { error?: string }).error).toBe(
+    // 호출자(AdminTrackingControl)가 catch 로만 실패를 인지하므로 reject 계약을 고정한다.
+    expect(caught).toBeInstanceOf(Error);
+    expect(caught?.message).toBe(
       '요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요. (코드: TRACKING_EVENT_SAVE)',
     );
+    expect(caught?.message).not.toContain('DB_RAW_SECRET_9x');
+    expect(logger.error).toHaveBeenCalledWith(
+      'addTrackingEvent: zen_tracking_events insert failed',
+      dbError,
+    );
     expect(updateOrderStatus).not.toHaveBeenCalled();
+  });
+
+  it('updateTrackingConfig 실패도 reject 계약 + 로케일 문구 + 원문 미노출 (TASK-B-352 재작업)', async () => {
+    const dbError = new Error('DB_RAW_SECRET_CFG_7z');
+    mockSupabase.from = vi.fn(() => ({
+      update: vi.fn(() => ({ eq: vi.fn().mockResolvedValue({ error: dbError }) })),
+    }));
+
+    await expect(updateTrackingConfig('order-004', 'MANUAL')).rejects.toThrow(
+      '요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요. (코드: TRACKING_CONFIG_SAVE)',
+    );
+
+    let caught: Error | undefined;
+    try {
+      // 위 rejects 단언과 별개로 원문 미노출 + logger 인자를 확인하기 위해 한 번 더 호출
+      await updateTrackingConfig('order-004', 'MANUAL');
+    } catch (err) {
+      caught = err as Error;
+    }
+    expect(caught?.message).not.toContain('DB_RAW_SECRET_CFG_7z');
+    expect(logger.error).toHaveBeenCalledWith(
+      'updateTrackingConfig: zen_tracking_configs update failed',
+      dbError,
+    );
   });
 });
 

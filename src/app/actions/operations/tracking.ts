@@ -96,8 +96,10 @@ export async function addTrackingEvent(
     });
 
   if (error) {
+    // TASK-B-352 재작업: 호출자(AdminTrackingControl)가 반환값을 보지 않고 catch로만 실패를 처리하므로
+    // 실패는 throw 로 유지한다(성공 토스트 오표시 방지). 메시지는 로케일 문구, 원문은 로그에만.
     logger.error('addTrackingEvent: zen_tracking_events insert failed', error);
-    return { success: false, error: await trError('generic', { code: 'TRACKING_EVENT_SAVE' }) };
+    throw new Error(await trError('generic', { code: 'TRACKING_EVENT_SAVE' }));
   }
 
   const nextStatus = EVENT_TO_ORDER_STATUS[payload.event_code as keyof typeof EVENT_TO_ORDER_STATUS];
@@ -129,8 +131,9 @@ export async function updateTrackingConfig(
     .eq("order_id", orderId);
 
   if (error) {
+    // TASK-B-352 재작업: 호출자가 catch 로만 실패를 처리 → throw 유지(로케일 문구, 원문은 로그).
     logger.error('updateTrackingConfig: zen_tracking_configs update failed', error);
-    return { success: false, error: await trError('generic', { code: 'TRACKING_CONFIG_SAVE' }) };
+    throw new Error(await trError('generic', { code: 'TRACKING_CONFIG_SAVE' }));
   }
 
   revalidatePath(`/(dashboard)/orders/${orderId}`, "page");

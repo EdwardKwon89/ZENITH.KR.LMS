@@ -1,7 +1,7 @@
 # 🗺️ LIVE Regression Test Master Map
 
-> **총 테스트 케이스:** 1,850 Cases (vitest 개별 테스트 기준, 256 test files)
-> **최종 검증일:** 2026-11-16 (TASK-B-352 ups-actual/tracking 오류 로케일 전환 · §85 TC-352-01~10 등재 · 1,850/1,850 PASS)  
+> **총 테스트 케이스:** 1,851 Cases (vitest 개별 테스트 기준, 256 test files)
+> **최종 검증일:** 2026-11-16 (TASK-B-352 ups-actual/tracking 오류 로케일 전환 · §85 TC-352-01~10 등재 · 1,851/1,851 PASS)  
 
 제니스 플랫폼의 비즈니스 영속성을 보장하는 회귀 테스트 케이스의 통합 명세서입니다. 모든 신규 개발 및 수정 시 이 맵에 케이스가 추가되어야 하며, 전체 테스트가 통과되어야 합니다.
 
@@ -1295,4 +1295,4 @@ SHXK `createorder` 페이로드의 `shipper.shipper_name`이 화면 "담당자�
 | TC-352-RST-A | DB 원문 은닉 되돌리기 | **1 failed / 3 passed** → 복구 4 passed | `task-b352-error-locale.test.ts` |
 | TC-352-RST-B | 관측성 로그 1줄 제거 | **1 failed / 3 passed** → 복구 4 passed | 동일 |
 
-**회귀 검증 (2026-11-16)**: `npm run test:regression` **256 test files / 1,850 tests 전부 PASS**. `npm run build` **EXIT=0**.
+**회귀 검증 (2026-11-16, 재작업 후 재실행)**: `npm run test:regression` **256 test files / 1,851 tests 전부 PASS**. `npm run build` **EXIT=0**.
