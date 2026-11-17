@@ -1,0 +1,48 @@
+## 3. 오더 관리 (Order Management)
+물류 오더(House Order) 및 집행 오더(Master Order)의 생명주기를 관리합니다.
+- **Path**: `src/app/actions/orders.ts`
+
+### createOrder(payload)
+- **설명**: 신규 하우스 오더 등록 (Header + Packages + Items 동시 처리)
+- **Input**: `OrderRegistrationInput` (Zod Schema 검증)
+- **Output**: `Promise<Order>`
+- **저장 경로**: `create_order_atomic` RPC (v7, `20261113090100_task_b346_create_order_atomic_v7.sql`)
+- **주요 Input 필드 — 수하인(Consignee)**: `buildCreateOrderPayload()`가 SHXK createorder `consignee.*`로 매핑하는 필드. 제약은 SHXK 명세(`docs/80_RawData/Phase8_UPS_API_리서치_결과.md` 130~147행) 기준이며, 앱이 명세보다 엄격한 필드는 별도 표기한다.
+
+  | 필드 | 타입 | 필수 | 제약 | SHXK 매핑 | 비고 |
+  | :--- | :--- | :-- | :--- | :--- | :--- |
+  | `recipient_name` | string | Y | 1~200자 | `consignee.consignee_name` | 수취인 성명. 기본값(폴백) 없음 — 빈 값은 `validateShxkPayload()`가 차단 (TASK-B-346 PR①). 200자 초과는 폼(zod)·사전검증이 차단 (PR③) |
+  | `recipient_company` | string | N | 최대 200자 | `consignee.consignee_company` | 수취인 회사명. 빈 값·공백만이면 payload에서 미전송 (TASK-B-346 PR②·PR③) |
+  | `recipient_phone` | string | Y | 숫자 15자리 이하 | `consignee.consignee_telephone` | 앱 한도(15)가 SHXK 명세(100)보다 엄격 — UPS E.164 기준 |
+  | `recipient_email` | string | N | 이메일 형식, 최대 100자 | `consignee.consignee_email` | 100자 초과는 폼(zod)·사전검증이 차단 (PR③) |
+  | `recipient_pccc` | string | N | 최대 50자 | `consignee.consignee_tariff` | 50자 초과는 폼(zod)·사전검증이 차단 (PR③) |
+  | `recipient_country_code` | string | N | 최대 2자 (ISO 3166-1 alpha-2) | `consignee.consignee_countrycode` | 2자 초과는 사전검증이 차단 (PR③) |
+  | `recipient_state_province` | string | N | 최대 300자 | `consignee.consignee_province` | 300자 초과는 폼(zod)·사전검증이 차단 (PR③) |
+  | `recipient_city` | string | N | 최대 300자 | `consignee.consignee_city` | 300자 초과는 폼(zod)·사전검증이 차단 (PR③) |
+  | `recipient_address` / `recipient_address_local` | string | N | 전송 street 기준 최대 105자 | `consignee.consignee_street` | 도로명 추출 + 상세주소 결합. 앱 한도(105)가 SHXK 명세(300)보다 엄격 — UPS AddressLine 기준 |
+  | `recipient_zipcode` | string | N | 최대 100자 | `consignee.consignee_postcode` | 100자 초과는 폼(zod)·사전검증이 차단 (PR③) |
+
+- **SHXK 명세상 미전송 수하인 필드 (TASK-B-346 PR③ 감사)**: `consignee_district`(300)·`consignee_doorplate`(300)·`consignee_areacode`(10)·`consignee_mobile`(100)·`consignee_fax`(100)·`consignee_certificatetype`·`consignee_certificatecode`(50)·`consignee_credentials_period`(50) 8개는 현재 입력 UI·payload 매핑이 없다. 신규 DB 컬럼·UI가 필요할 수 있는 항목으로, 구현 전 결정 요청 대상 — `scratch/post_launch_improvements.md` IMP-191 참조.
+
+- **DB 컬럼**: `zen_orders.recipient_company` (text, nullable) — 마이그레이션 `20261113090000_task_b346_recipient_company.sql`로 추가. `create_order_atomic` v7이 `p_payload->>'recipient_company'`를 저장.
+- **레거시 참고**: `zen_orders.recipient_contact` 컬럼은 조회 전용 레거시로, 본 명세의 수하인 입력/전송 경로에서는 사용하지 않는다.
+
+### getOrders(filters)
+- **설명**: 필터 조건에 따른 오더 리스트 조회 (Pagination 지원)
+- **Input**: `{ status?, query?, page?, pageSize? }`
+
+### getOrderDetails(orderId)
+- **설명**: 특정 오더의 상세 정보 및 패킹/아이템 리스트 조회
+
+### updateOrderStatus(orderId, newStatus)
+- **설명**: 상태 머신(Status Machine) 규칙에 따른 오더 상태 변경
+- **Validation**: `canChangeStatus` 로직 통과 필수
+
+### createMasterOrder(payload) / dissolveMasterOrder(masterId)
+- **설명**: 여러 하우스 오더를 하나의 마스터 오더로 묶거나(Binding) 해제(Dissolve)
+
+### getMasterOrders() / getMasterOrderWithHouses(masterId)
+- **설명**: 마스터 오더 목록 및 포함된 하우스 오더 상세 조회
+
+---
+
