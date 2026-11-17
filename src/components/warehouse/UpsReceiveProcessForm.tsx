@@ -33,6 +33,7 @@ import { cn } from "@/lib/utils";
 export default function UpsReceiveProcessForm({ locale }: { locale: string }) {
   const t = useTranslations("WarehouseUpsReceiving");
   const orderStatusT = useTranslations("orderStatus");
+  const errT = useTranslations('Errors');
 
   const [orders, setOrders] = useState<any[]>([]);
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -64,7 +65,8 @@ export default function UpsReceiveProcessForm({ locale }: { locale: string }) {
       }
       if (historyRes.success) setHistory(historyRes.items);
     } catch (err: any) {
-      toast.error(err.message || "데이터 로드 실패");
+      console.error(err);
+      toast.error(errT('generic', { code: 'DATA_LOAD' }));
     } finally {
       setLoading(false);
     }
@@ -131,7 +133,8 @@ export default function UpsReceiveProcessForm({ locale }: { locale: string }) {
       setSelected(new Set());
       await fetchData();
     } catch (err: any) {
-      toast.error(err.message || "UPS 등록 실패");
+      console.error(err);
+      toast.error(errT('generic', { code: 'UPS_REGISTER' }));
     } finally {
       setSubmitLoading(false);
     }
@@ -149,7 +152,8 @@ export default function UpsReceiveProcessForm({ locale }: { locale: string }) {
         toast.error(res.error || t("undo_failed"));
       }
     } catch (err: any) {
-      toast.error(err.message || t("undo_failed"));
+      console.error(err);
+      toast.error(errT('generic', { code: 'UNDO_UPS' }));
     } finally {
       setUndoLoading(false);
     }

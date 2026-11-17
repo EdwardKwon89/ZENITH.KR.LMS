@@ -9,6 +9,7 @@ import * as XLSX from 'xlsx';
 import { bulkCreateOrders, type BulkOrderResult } from '@/app/actions/operations/bulk-orders';
 import { generateBulkOrderTemplate } from '@/lib/excel/bulk-order-template';
 import { logger } from '@/lib/logger';
+import { useTranslations } from 'next-intl';
 
 interface BulkOrderUploadModalProps {
   onClose: () => void;
@@ -23,6 +24,7 @@ interface ParsedSheets {
 }
 
 export default function BulkOrderUploadModal({ onClose }: BulkOrderUploadModalProps) {
+  const te = useTranslations('Errors');
   const [step, setStep] = useState<Step>('select');
   const [sheets, setSheets] = useState<ParsedSheets | null>(null);
   const [results, setResults] = useState<BulkOrderResult[]>([]);
@@ -47,7 +49,8 @@ export default function BulkOrderUploadModal({ onClose }: BulkOrderUploadModalPr
       URL.revokeObjectURL(url);
       toast.success('템플릿 다운로드 완료');
     } catch (err: any) {
-      toast.error('템플릿 다운로드 실패: ' + err.message);
+      console.error(err);
+      toast.error(te('generic', { code: 'TEMPLATE_DOWNLOAD' }));
     }
   }, []);
 
@@ -82,7 +85,8 @@ export default function BulkOrderUploadModal({ onClose }: BulkOrderUploadModalPr
       setSheets({ orders: rawOrders, packages: rawPackages, items: rawItems });
       setStep('preview');
     } catch (err: any) {
-      toast.error('파일 파싱 실패: ' + err.message);
+      console.error(err);
+      toast.error(te('generic', { code: 'FILE_PARSE' }));
     }
   }, []);
 
@@ -101,7 +105,8 @@ export default function BulkOrderUploadModal({ onClose }: BulkOrderUploadModalPr
         toast.warning(`${successCount}건 성공, ${failCount}건 실패`);
       }
     } catch (err: any) {
-      toast.error('등록 실패: ' + err.message);
+      console.error(err);
+      toast.error(te('generic', { code: 'BULK_UPLOAD' }));
     } finally {
       setIsSubmitting(false);
     }

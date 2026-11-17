@@ -1,4 +1,5 @@
 'use client';
+import { useTranslations } from 'next-intl';
 import { logger } from '@/lib/logger';
 
 import { useState, useEffect } from 'react';
@@ -60,6 +61,7 @@ export interface RatesFormState {
 }
 
 export function useRates(): RatesFormState {
+  const te = useTranslations('Errors');
   const [carriers, setCarriers] = useState<any[]>([]);
   const [ports, setPorts] = useState<Port[]>([]);
   const [selectedCarrier, setSelectedCarrier] = useState('');
@@ -232,7 +234,8 @@ export function useRates(): RatesFormState {
       fetchRateCards();
       return true;
     } catch (err: any) {
-      alert(`저장 중 오류 발생: ${err.message}`);
+      console.error(err);
+      alert(te('generic', { code: 'RATE_SAVE' }));
       return false;
     } finally {
       setLoading(false);
@@ -245,7 +248,8 @@ export function useRates(): RatesFormState {
       await deleteRateCard(id);
       fetchRateCards();
     } catch (err: any) {
-      alert(err.message);
+      console.error(err);
+      alert(te('generic', { code: 'RATE_ACTION' }));
     }
   };
 

@@ -1,7 +1,7 @@
 # 🗺️ LIVE Regression Test Master Map
 
-> **총 테스트 케이스:** 1,781 Cases (vitest 개별 테스트 기준, 244 test files)
-> **최종 검증일:** 2026-11-13 (TASK-B-351 ups-labels 오류 로케일 전환 · §84 TC-351-01~11 등재 · 1,781 합산, TeamB_Dev 동기화 261114: develop §76 deploy-prod 5건 반영 — CI 재확인 필요)  
+> **총 테스트 케이스:** 1,923 Cases (vitest 개별 테스트 기준, 261 test files)
+> **최종 검증일:** 2026-11-17 (TASK-B-356 로그인/가입·잔여 액션·alert 화면 오류 로케일 전환 · §90 TC-356-01~10 등재 · 1,923/1,923 PASS)
 
 제니스 플랫폼의 비즈니스 영속성을 보장하는 회귀 테스트 케이스의 통합 명세서입니다. 모든 신규 개발 및 수정 시 이 맵에 케이스가 추가되어야 하며, 전체 테스트가 통과되어야 합니다.
 
@@ -1275,3 +1275,122 @@ SHXK `createorder` 페이로드의 `shipper.shipper_name`이 화면 "담당자�
 | TC-351-RST-B | `err.message` 반환 원복 | **1 failed / 5 passed** → 복구 후 6 passed | 동일 |
 
 **회귀 검증 (2026-11-13, `origin/TeamB_Dev` rebase 후 재실행)**: `npm run test:regression` **243 test files / 1,776 tests 전부 PASS** (TASK-B-346 PR② §83 병합분 포함).
+
+## 85. ups-actual-cost·charges·tracking 사용자 오류 로케일 전환 (Issue #1325 / TASK-B-352)
+
+**2026-11-16, Dave** — 부모 #1280(안 ②)의 3단계. `src/app/actions/finance/ups-actual-cost.ts`·`ups-actual-charges.ts`·`src/app/actions/operations/tracking.ts`에서 **사용자 반환 오류를 현재 로케일 문장**으로 전환(`trError()`). DB 오류·예외 원문은 반환값에 넣지 않고 `logger.error(…, error객체)`에만 보존했다(#1183 처리). throw 13건은 **반환 전환 8건 / getter 계약 유지 5건**(컴포넌트 수정 금지 범위)으로 판정했고, getter 5건도 메시지는 로케일 문구다. SHXK 원문 패스스루는 3파일에 **없음(해당 없음)**. `Errors` 9키 추가(총 **30키**, 4개 로케일 동일 세트).
+
+| ID | 검증 내용 | 기대 결과 | 테스트 위치 |
+| :-- | :-- | :-- | :-- |
+| TC-352-01 | 원가 DB upsert 실패 | `error` = generic(ko)+`ACTUAL_COST_SAVE`, DB 원문 미포함, `logger.error(…, error객체)` | `tests/unit/finance/task-b352-error-locale.test.ts` |
+| TC-352-02 | 부가요금 delete 실패 | `error` = generic(ko)+`CHARGES_DELETE`, 원문 미포함, logger 인자 검증 | 동일 |
+| TC-352-03 | 수동 배송완료 상태 update 실패 | `error` = generic(ko)+`STATUS_UPDATE`, 원문 미포함, logger 인자 검증 | 동일 |
+| TC-352-04 | getter 조회 실패(throw) | throw 메시지가 generic(ko)+`ACTUAL_COST_LOOKUP`, 원문 미포함 | 동일 |
+| TC-352-05 | 신규 키 4개 로케일 문구 | `not_ups_order`·`ups_actual_charge_status_invalid`·`manual_reason_required` 각 ko/en/zh/ja 실제 문장 | `tests/unit/i18n/task-b352-locale.test.ts` |
+| TC-352-06 | 상태/권한/스코프 문구 | `recordUpsActualCost`·`recordUpsActualCharges` 대표 실패가 ko 문장(`toBe`) | `tests/unit/finance/ups-actual-cost.test.ts`, `ups-actual-charges.test.ts` |
+| TC-352-07 | 케이스별 기대값 | `billing_finalize_status_invalid`·`shipper_scope_denied`·`label_not_found` `toBe` | `ups-actual-cost.test.ts`, `ups-order-detail-status.test.ts` |
+| TC-352-08 | 하위 조정 실패 원문 은닉 | generic(ko)+`POST_FINALIZATION_ADJUST` | `tests/unit/finance/ups-actual-charges-dual-invoice.test.ts` |
+| TC-352-09 | 트래킹 이벤트 INSERT 실패 | throw 아님 — `{success:false,error:generic(ko)+TRACKING_EVENT_SAVE}` | `tests/unit/operations/tracking-actions.test.ts` |
+| TC-352-10 | `Errors` 키 동기화(30키) | ko 기준 30키 완전 일치 + ICU 파라미터 일치 | `tests/unit/i18n/errors-key-sync.test.ts` |
+| TC-352-RST-A | DB 원문 은닉 되돌리기 | **1 failed / 3 passed** → 복구 4 passed | `task-b352-error-locale.test.ts` |
+| TC-352-RST-B | 관측성 로그 1줄 제거 | **1 failed / 3 passed** → 복구 4 passed | 동일 |
+
+**회귀 검증 (2026-11-16, 재작업 후 재실행)**: `npm run test:regression` **256 test files / 1,851 tests 전부 PASS**. `npm run build` **EXIT=0**.
+
+## 86. SHXK consignee 전체 매핑 감사 + 명세 상한 보완 + 회사명 공백 정규화 (Issue #1278 / TASK-B-346, PR③)
+
+**2026-11-16, Baker** — PR①(성명 폴백 제거)·PR②(회사명 전 구간)에 이어, SHXK createorder `consignee.*` 18개 필드(`docs/80_RawData/Phase8_UPS_API_리서치_결과.md` 130~147행)를 현재 전송·검증 상태와 대조(감사)했다. **명세상 최대길이가 있으나 앱에 검증이 없던 7개 필드**(성명 200·국가코드 2·주/도 300·도시 300·우편번호 100·이메일 100·통관부호 50)를 폼(zod)·사전검증(`validateShxkPayload`)에 추가하고, **공백만 입력된 회사명이 `consignee_company: ''`로 전송되던 결함**을 수정했다. `street`(앱 105 < 명세 300)·`telephone`(앱 15 < 명세 100)은 앱이 명세보다 엄격하므로 의도적 갭 아님으로 판정. 명세에 있으나 **미전송인 8개 필드**(district·doorplate·areacode·mobile·fax·certificatetype·certificatecode·credentials_period)는 신규 컬럼·UI가 필요해 구현하지 않고 결정 요청(IMP-191)으로 보고한다. **UI 변경 없음.**
+
+| ID | 검증 내용 | 기대 결과 | 테스트 위치 |
+| :-- | :-- | :-- | :-- |
+| TC-346-12 | 성명 상한 사전검증 경계 | 200자 `toEqual([])` / 201자 `toEqual(['수취인 성명 200자 초과'])` | `tests/unit/shxk/validate-payload-limits.test.ts` |
+| TC-346-13 | 국가코드 상한 사전검증 경계 | 2자 `toEqual([])` / 3자 `toEqual(['수취인 국가코드 2자 초과'])` | 동일 |
+| TC-346-14 | 주/도 상한 사전검증 경계 | 300자 `toEqual([])` / 301자 `toEqual(['수취인 주/도 300자 초과'])` | 동일 |
+| TC-346-15 | 도시 상한 사전검증 경계 | 300자 `toEqual([])` / 301자 `toEqual(['수취인 도시 300자 초과'])` | 동일 |
+| TC-346-16 | 우편번호 상한 사전검증 경계 | 100자 `toEqual([])` / 101자 `toEqual(['수취인 우편번호 100자 초과'])` | 동일 |
+| TC-346-17 | 이메일 상한 사전검증 경계 | 100자 `toEqual([])` / 101자 `toEqual(['수취인 이메일 100자 초과'])` | 동일 |
+| TC-346-18 | 통관부호 상한 사전검증 경계 | 50자 `toEqual([])` / 51자 `toEqual(['수취인 통관부호 50자 초과'])` | 동일 |
+| TC-346-19 | 성명·주/도·도시·우편번호·통관부호 zod 경계 | N자 `success=true` / N+1자 `success=false`(path 일치) | `tests/unit/orders/shxk-field-limits.test.ts` |
+| TC-346-20 | 이메일 zod 경계 | 100자(유효 이메일) `success=true` / 101자 `success=false`(path `recipient_email`) | 동일 |
+| TC-346-21 | 공백만 회사명 미전송 | `recipient_company:'  '` → `not.toHaveProperty('consignee_company')` | `tests/unit/ups/ups-labels-mapping.test.ts` |
+| TC-346-22 | 회사명 앞뒤 공백 trim | `'  Acme Trading Co  '` → `toBe('Acme Trading Co')` | 동일 |
+| TC-346-RST-A | `checkConsigneeMaxLengths` 호출 제거 | **7 failed / 15 passed** → 복구 후 22 passed | `tests/unit/shxk/validate-payload-limits.test.ts` |
+| TC-346-RST-B | 회사명 공백 정규화 원복(truthiness 스프레드) | **1 failed / 47 passed** → 복구 후 48 passed | `tests/unit/ups/ups-labels-mapping.test.ts` |
+
+**회귀 검증 (2026-11-16, `origin/TeamB_Dev` rebase 후 재실행)**: `npm run test:regression` **254 test files / 1,862 tests 전부 PASS** (401초). `npm run build` **EXIT=0**.
+**명세 동기화**: `docs/02_Analysis/Ds_11_API_상세_명세서.md` `createOrder` 절 수하인 매핑표에 명세 상한·미전송 8개 필드 기재(R-11/R-12). `npm run check:ds11` → `액션 함수 298개 | Ds-11 언급 92개 | 미반영 206개 (허용 목록 206개)` OK.
+**결정 요청**: 미전송 8개 필드는 Issue #1278 PR③ 코멘트의 결정 요청 표 + `scratch/post_launch_improvements.md` IMP-191 참조.
+## 87. warehouse 오류 메시지 로케일 전환 (Issue #1328 / TASK-B-353, 부모 #1280)
+
+**2026-11-16, Mike** — `warehouse.ts`(throw55 + 반환 리터럴3)와 창고 화면5개(`err.message` 노출23행 · 리터럴 toast4 · 컴포넌트 내부 throw3)의 사용자 노출 오류를 현재 로케일 문장으로 전환. B-351/B-352와 동일 방식(`trError()` + `Errors` 키 재사용, `withAction()` 미사용), **throw→반환 전환 0건**(B-352 `addTrackingEvent` 선례 + `confirmPickup`/`cancelPickup` fire-and-forget 호출자 존재 → 반환 전환 시 성공 토스트 회귀).
+
+| ID | 검증 내용 | 기대 결과 | 테스트 위치 |
+| :-- | :-- | :-- | :-- |
+| TC-353-1 | (a) 대표 실패3경로의 ko 문장·영문 원문 미포함 | profile 없음 → `toBe('사용자 프로필을 찾을 수 없습니다.')` + `not.toBe('User profile not found')` / 조회 실패 → `toBe('데이터를 불러오지 못했습니다…')` + `not.toBe('Failed to fetch ups label errors')` / 상태 불일치 → `toBe('WAREHOUSED 상태의 오더만 UPS 등록할 수 있습니다.')` | `tests/unit/warehouse/task-b353-error-locale.test.ts` |
+| TC-353-2 | (b) 호출자 계약 고정 | throw 유지(`confirmPickup`, 호출자 catch-only·await뒤 성공토스트) → `rejects` 없이 message `toBe('권한이 없습니다.')` + `updateOrderStatus` 미호출 / 기존 반환(`undoDeparture`) → `{success:false, error:'오더를 찾을 수 없습니다.'}` | 동일 |
+| TC-353-3 | (c) 4개 로케일(ko/en/zh/ja) 대표 키4종 | `Errors.fetch_failed`·`status_ups_register`·`own_shipper_only`, `WarehouseInbound.measurements_saved` 존재·비어 있지 않음 + ko≠en 문구 차이 | 동일 |
+| TC-353-4 | (d) logger 인자 | `toHaveBeenCalledWith('undoDeparture: order not found (order-x)')` · `toHaveBeenCalledWith('confirmUpsRegistration: passthrough failure', 'DB down raw')` | 동일 |
+
+**회귀 검증 (2026-11-16, `origin/TeamB_Dev` rebase 후 재실행)**: `npm run test:regression` **257 test files / 1,891 tests 전부 PASS** (437초) · `npm run build` **EXIT=0**. (rebase 전 자체 실행: 255/1,846 PASS)
+**되돌리기 검증 (테스트 유효성)**: `confirmPickup`의 throw를 반환으로 임시 전환(B-352 회귀 시뮬레이션) → **1 failed / 11 passed** (TC-353-2 reject 계약 FAIL: "expected the action to reject but it resolved") → 복구 후 **12/12 PASS**.
+**기존 테스트 갱신 (약화 없이, 사유 포함)**:
+- `defb047-get-latest-ups-label-errors.test.ts:126` — `toThrow('Failed to fetch ups label errors')` → ko 문구 (영문 리터럴 → 로케일 전환에 따른 정확문자열 갱신).
+- `warehouse-actions.test.ts:5`·`departure-actions.test.ts:5` — `next-intl/server`의 **키-통과 스텁**(`getTranslations`가 키를 그대로 반환)을 **실 ko 메시지 반환**으로 교체 (스텁 때문에 `trError`가 키명을 만들던 것 — 문구 자체는 약화 없음).
+
+## 88. settlement·orders + 청구/주문/UPS 화면 오류 로케일 전환 (Issue #1330 / TASK-B-354)
+
+**2026-11-17, Dave** — 부모 #1280(안 ②)의 4단계. `src/app/actions/finance/settlement.ts`·`src/app/actions/operations/orders.ts`의 사용자 도달 오류를 **현재 로케일 문장**으로 전환(`trError()`), 대상 클라이언트 15파일의 `err.message` 직노출을 `console.error` + `Errors.generic`(+코드)로 대체했다. 기존 `Errors` 40키를 우선 재사용하고 **18키 추가(총 58키, 4개 로케일 동일 세트)**. throw는 호출자 판단표에 따라 **전부 유지**(호출자가 catch로만 처리하는 곳에서 반환 전환 금지 — B-352 반려 사례), DB/시스템 실패는 `generic`+`{code}` + `logger.error(…, error객체)`.
+
+| ID | 검증 내용 | 기대 결과 | 테스트 위치 |
+| :-- | :-- | :-- | :-- |
+| TC-354-01 | `finalizeInvoice` 인보이스 없음 | `{success:false,error:'인보이스를 찾을 수 없습니다.'}` + `logger.warn` | `tests/unit/finance/task-b354-error-locale.test.ts` |
+| TC-354-02 | `getOrganizations` DB 오류 | throw가 generic(ko)+`ORGANIZATION_LOOKUP`, DB 원문 미포함, `logger.error(…, error객체)` | 동일 |
+| TC-354-03 | `updateOrder` 수정 불가 상태 | **reject**(반환 아님) + 정확 ko 문장(`{status}` 치환) | 동일 |
+| TC-354-04 | 신규 키 4개 로케일 | `invoice_not_found`·`order_edit_status_invalid`·`ups_edit_registered_locked` ko/en/zh/ja (en 단언 포함) | `tests/unit/i18n/task-b354-locale.test.ts` |
+| TC-354-05 | 정산 권한/스코프 | 권한·화주 스코프 문구 `toBe` | `tests/unit/finance/agency-settlement-permission.test.ts` |
+| TC-354-06 | 오더 상태/수정 잠금 | 상태 전이 거부·수정 잠금 문구 | `tests/unit/logistics/order-status.test.ts`, `order-update.test.ts`, `order-update-b339.test.ts` |
+| TC-354-07 | 마스터 오더 오류 | 생성/해체/조회 문구 | `tests/unit/master/master-actions.test.ts`, `master-detail.test.ts` |
+| TC-354-08 | 바코드 조회 DB 오류 | generic(ko)+`ORDER_BARCODE_LOOKUP` | `tests/unit/logistics/inbound.test.ts` |
+| TC-354-09 | 클라이언트 훅 도입 대응 | `next-intl` mock 추가 후 렌더 PASS | `tests/unit/orders/ups-detail-b301.test.tsx`, `ups-detail-edit-button.test.tsx`, `tests/unit/ups/ups-stepper-b304.test.tsx` |
+| TC-354-10 | `Errors` 키 동기화(58키) | ko 기준 58키 완전 일치 + ICU 파라미터 일치 | `tests/unit/i18n/errors-key-sync.test.ts` |
+| TC-354-RST | DB 원문 은닉 되돌리기 | `getOrganizations` 원문 반환으로 원복 → **1 failed / 2 passed** → 복구 3 passed | `tests/unit/finance/task-b354-error-locale.test.ts` |
+
+**회귀 검증 (2026-11-17)**: `npm run test:regression` **259 test files / 1,904 tests 전부 PASS**. `npm run build` **EXIT=0**.
+
+## 89. 인증·회원·VOC·지원 액션 + 인증/마이페이지/관리 화면 오류 로케일 전환 (Issue #1331 / TASK-B-355, 부모 #1280)
+
+**2026-11-17, Mike** — 서버5종(`admin/auth.ts`·`admin/member.ts`·`misc/voc.ts`·`misc/support.ts`·`misc/monitoring.ts`)의 throw55·raw 반환을 `trError`로 전환(**56건**) + 인증/마이페이지/관리 화면 **24파일**의 `err.message` 노출·한/영 리터럴 제거. B-351/352/353과 동일 방식(`trError`+`Errors` 키, `withAction` 미사용), **throw→반환 전환 0건**(호출자 판단표: 반환/withAction 계약은 기존 구조 유지, message만 교체). `withAction` 래퍼7곳은 wrapper가 raw를 `logger.error`로 보존하면서 `err.message`를 **데이터로 반환**하므로 메시지 교체로 로케일이 도달함을 실측.
+
+| ID | 검증 내용 | 기대 결과 | 테스트 위치 |
+| :-- | :-- | :-- | :-- |
+| TC-355-1 | (a) 대표 실패2경로 — ko 문장 + 영문/원문 미노출 | createQna(profile 없음) → `rejects.toThrow('사용자 프로필을 찾을 수 없습니다.')` + `not.toBe('User profile not found')` / findPersonalId(DB 예외) → `toHaveProperty('error','서버 내부 오류가 발생했습니다.')` + Supabase 원문(`RAW_SUPABASE_SECRET_XYZ`) 미포함 | `tests/unit/i18n/task-b355-error-locale.test.ts` |
+| TC-355-2 | (b) 호출자 계약 3종 | throw 유지(createQna) = reject / 반환(findPersonalId) = `{error: ko}`·`not.toHaveProperty('success')` / withAction(createVoc) = `{data:null, error:'…(코드: VOC_VALIDATION)'}` | 동일 |
+| TC-355-3 | (c) 4로케일 키 + **보안 문구 원문1:1** + **EN 단언**(B-353 리뷰 지적 반영) | 키4종 실재 / ko `current_password_incorrect`=`'현재 비밀번호가 올바르지 않습니다.'`·`find_member_not_found` 원문 동일 / en `permission_denied`=`'You do not have permission.'`·`fetch_failed`·`current_password_incorrect` 정확 + ko≠en | 동일 |
+| TC-355-4 | (d) logger 인자 — 원문 객체 보존 | `toHaveBeenCalledWith('[AUTH_ACTION] findPersonalId catch:', rawError)` / `'[MEMBER_ACTION] withdrawUser Error:', objectContaining({message:'DB Error'})` + 전달 인자가 `typeof object` | 동일 |
+
+**회귀 검증 (2026-11-17)**: `npm run test:regression` **260 test files / 1,917 tests 전부 PASS** (462초) · `npm run build` **EXIT=0** · `check-db-freshness` OK.
+**되돌리기 검증 (테스트 유효성)**: support `createQna`의 profile throw를 영문 원문으로 임시 복원 → **2 failed / 11 passed** (TC-355-1·2 FAIL) → 복구 후 **13/13 PASS**.
+**기존 테스트 갱신 (약화 없이, 사유)**:
+- `tests/unit/logistics/voc.test.ts:109` — `toContain('UNAUTHORIZED')` → `toBe('권한이 없습니다.')` (원문 영문 → 로케일 전환 + 부분매칭→정확문칭 **강화**).
+- `tests/unit/member/profile.test.ts:62` — `'탈퇴 처리 중 오류가 발생했습니다.'` → `'요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요. (코드: WITHDRAW)'` (반환 메시지가 generic+코드로 전환됨에 따른 정확문자열 갱신).
+- `tests/unit/i18n/errors-key-sync.test.ts` — baseline 배열 58→80키로 재생성(ko.json 실측 합집합, `Errors` 4로케일 동기화 규칙).
+
+## 90. 로그인/가입 + 잔여 액션 + alert/showToast 화면 오류 로케일 전환 (Issue #1334 / TASK-B-356)
+
+**2026-11-17, Dave** — 부모 #1280 마무리 단계. `login/actions.ts`의 인증 오류(영문·`error.message` 직반환)를 **로케일 문장**으로 수렴(계정 존재 여부 비구분 유지), 잔여 액션 5파일(`daily-billing`·`inventory`·`notifications`·`invoice`·`organization`)의 사용자 도달 원문을 `generic`+코드로 대체, `alert`/`showToast` 화면 11파일 22지점의 `err.message` 직노출을 `console.error` + `Errors.generic`(+코드)로 전환했다. `Errors` **10키 추가(총 90키, 4개 로케일 동일 세트)**. `alert()`는 toast로 바꾸지 않고 문구만 로케일화(지시).
+
+| ID | 검증 내용 | 기대 결과 | 테스트 위치 |
+| :-- | :-- | :-- | :-- |
+| TC-356-01 | 로그인 `Invalid login credentials` | `error` = `이메일 또는 비밀번호가 올바르지 않습니다.`, 원문 미포함, `logger.error` 원문 기록 | `tests/unit/auth/task-b356-login-locale.test.ts` |
+| TC-356-02 | 로그인 en 로케일 | `The email or password is incorrect.` (en 단언) | 동일 |
+| TC-356-03 | 이메일 미인증 로그인 | 기존 구분 유지 + 로케일 문구 | 동일 |
+| TC-356-04 | 알 수 없는 로그인 오류 | `로그인 중 오류가 발생했습니다…` (원문 미노출) | 동일 |
+| TC-356-05 | 회원가입 이미 가입된 이메일 | `이미 가입된 이메일입니다. 로그인해 주세요.` | 동일 |
+| TC-356-06 | 회원가입 비밀번호 정책 위반 | `비밀번호가 보안 정책을 충족하지 않습니다.` (원문 미노출) | 동일 |
+| TC-356-07 | 재고 조정 검증 | `재고 수량은 0 미만이 될 수 없습니다.` 반환(원문 미포함) | `tests/unit/logistics/inventory.test.ts` |
+| TC-356-08 | 문서 오더 조회 실패 | `오더를 찾을 수 없습니다.` / generic(ko)+`ORDER_LOOKUP` | `tests/unit/documents/document-actions.test.ts` |
+| TC-356-09 | `alert`/`showToast` 화면 | `next-intl` mock 추가 후 렌더 PASS | `tests/unit/ups/ups-rates-client-pivot.test.tsx` 등 |
+| TC-356-10 | `Errors` 키 동기화(90키) | ko 기준 90키 완전 일치 + ICU 파라미터 일치 | `tests/unit/i18n/errors-key-sync.test.ts` |
+| TC-356-RST | 로그인 원문 복귀 되돌리기 | `error.message` 직반환으로 원복 → **4 failed / 2 passed** → 복구 6 passed | `tests/unit/auth/task-b356-login-locale.test.ts` |
+
+**회귀 검증 (2026-11-17)**: `npm run test:regression` **261 test files / 1,923 tests 전부 PASS**. `npm run build` **EXIT=0**.

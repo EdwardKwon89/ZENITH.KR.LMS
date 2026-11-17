@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from 'next-intl';
 import { useState } from "react";
 import { ZenCard, ZenButton, ZenInput } from "@/components/ui/ZenUI";
 import { Scan, PackageCheck, Truck, RefreshCw } from "lucide-react";
@@ -9,6 +10,7 @@ import { OrderStatus } from "@/types/orders";
 import { createClient } from "@/utils/supabase/client";
 
 export default function InventoryScanner() {
+  const errT = useTranslations('Errors');
   const [barcode, setBarcode] = useState("");
   const [isProcessing, setIsBusy] = useState(false);
   const [mode, setMode] = useState<'INBOUND' | 'OUTBOUND'>('INBOUND');
@@ -44,7 +46,8 @@ export default function InventoryScanner() {
         setBarcode("");
       }
     } catch (err: any) {
-      toast.error(`Scan failed: ${err.message}`);
+      console.error(err);
+      toast.error(errT('generic', { code: 'SCAN' }));
     } finally {
       setIsBusy(false);
     }

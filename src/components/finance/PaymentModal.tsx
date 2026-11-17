@@ -28,6 +28,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
   onSuccess
 }) => {
   const t = useTranslations('Wallet');
+  const te = useTranslations('Errors');
   const [loading, setLoading] = useState(false);
   const [selectedMethod, setSelectedMethod] = useState<'WALLET' | 'BANK_TRANSFER'>('WALLET');
 
@@ -49,7 +50,8 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
         onClose();
       }
     } catch (error: any) {
-      toast.error(error.message || 'Payment failed');
+      console.error(error);
+      toast.error(te('generic', { code: 'UNEXPECTED' }));
     } finally {
       setLoading(false);
     }

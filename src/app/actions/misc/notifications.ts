@@ -6,6 +6,7 @@ import { createClient as createServerClient } from "@/utils/supabase/server";
 import { OrderStatus } from "@/types/orders";
 import { sendStatusChangeEmail } from "@/lib/notifications/email";
 import { revalidatePath } from "next/cache";
+import { trError } from '@/lib/i18n/action-error';
 
 type NotificationTriggerStatus = Extract<
   OrderStatus,
@@ -216,7 +217,7 @@ export async function sendInAppNotification(params: {
 
   if (error) {
     logger.error("[NOTIF] sendInAppNotification failed:", error);
-    return { success: false, error: error.message };
+    return { success: false, error: await trError('generic', { code: 'NOTIFICATION_CREATE' }) };
   }
 
   return { success: true, notificationId: data.id };

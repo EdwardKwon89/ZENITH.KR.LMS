@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { MasterOrderListItem } from '@/types/orders';
 import { ZenButton } from '../ui/ZenUI';
 import { Barcode, FileText, Trash2, Globe, Ship, Hash } from 'lucide-react';
@@ -13,6 +14,7 @@ interface MasterOrderTableProps {
 }
 
 export default function MasterOrderTable({ masters, locale }: MasterOrderTableProps) {
+  const errT = useTranslations('Errors');
   const [isBusy, setIsBusy] = useState<string | null>(null);
 
   const handleDissolve = async (id: string, masterNo: string) => {
@@ -23,7 +25,8 @@ export default function MasterOrderTable({ masters, locale }: MasterOrderTablePr
       await dissolveMasterOrder(id);
       toast.success(`${masterNo} 해체 완료`);
     } catch (err: any) {
-      toast.error(err.message);
+      console.error(err);
+      toast.error(errT('generic', { code: 'MASTER_DISSOLVE' }));
     } finally {
       setIsBusy(null);
     }

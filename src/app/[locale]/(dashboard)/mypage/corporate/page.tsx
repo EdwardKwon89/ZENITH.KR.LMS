@@ -32,6 +32,7 @@ import { useTranslations } from 'next-intl';
 
 export default function CorporatePage() {
   const t = useTranslations('Dashboard');
+  const errT = useTranslations('Errors');
   const [activeTab, setActiveTab] = useState<'info' | 'dept'>('info');
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -49,7 +50,7 @@ export default function CorporatePage() {
         setDepts(deptsData.departments);
       } catch (err) {
         logger.error(err);
-        toast.error('데이터를 불러오는 데 실패했습니다.');
+        toast.error(errT('fetch_failed'));
       } finally {
         setIsLoading(false);
       }
@@ -84,7 +85,8 @@ export default function CorporatePage() {
         toast.success(t('success_save_org'));
       }
     } catch (err: any) {
-      toast.error(err.message);
+      console.error(err);
+      toast.error(errT('generic', { code: 'ORGANIZATION_SAVE' }));
     } finally {
       setIsSaving(false);
     }
@@ -103,7 +105,8 @@ export default function CorporatePage() {
         toast.success(t('success_add_dept'));
       }
     } catch (err: any) {
-      toast.error(err.message);
+      console.error(err);
+      toast.error(errT('generic', { code: 'ORGANIZATION_SAVE' }));
     }
   }
 
@@ -120,7 +123,8 @@ export default function CorporatePage() {
         toast.success(t('success_edit_dept'));
       }
     } catch (err: any) {
-      toast.error(err.message);
+      console.error(err);
+      toast.error(errT('generic', { code: 'ORGANIZATION_SAVE' }));
     }
   }
 
@@ -136,7 +140,8 @@ export default function CorporatePage() {
         toast.success(t('success_delete_dept'));
       }
     } catch (err: any) {
-      toast.error(err.message);
+      console.error(err);
+      toast.error(errT('generic', { code: 'ORGANIZATION_SAVE' }));
     }
   }
 

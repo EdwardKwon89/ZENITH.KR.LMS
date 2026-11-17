@@ -255,6 +255,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
   measuredPackageIds = [],
 }) => {
   const t = useTranslations('Orders');
+  const te = useTranslations('Errors');
   const router = useRouter();
   const [affiliation, setAffiliation] = React.useState<Affiliation>(null);
   const [isLoadingAffiliation, setIsLoadingAffiliation] = React.useState(true);
@@ -440,7 +441,8 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
       setShowAddressBookInput(false);
       setAddressBookDisplayName('');
     } catch (err: any) {
-      toast.error('주소록 저장 실패', { description: err.message });
+      console.error(err);
+      toast.error(te('generic', { code: 'ADDRESS_SAVE' }));
     } finally {
       setSavingToAddressBook(false);
     }
@@ -805,7 +807,8 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
         setStep(3);
       } else {
         setRatesError(err.message || "요율 정보를 불러오는 데 실패했습니다.");
-        toast.error("요율 조회 실패", { description: err.message });
+        console.error(err);
+        toast.error(te('generic', { code: 'RATE_LOOKUP' }));
       }
     } finally {
       setRatesLoading(false);

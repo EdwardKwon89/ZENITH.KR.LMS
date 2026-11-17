@@ -20,6 +20,26 @@ async function getClientIp() {
   return headerStore.get('x-real-ip') || '127.0.0.1';
 }
 
+/**
+ * TASK-B-356 (Issue #1334): Supabase 인증 오류를 로케일 문장으로 변환한다.
+ * 보안: "Invalid login credentials"는 계정 존재 여부를 구분하지 않는 단일 문구로 수렴시키고,
+ * 기존에 구분되던 사유(이메일 미인증·이미 가입됨·비밀번호 정책·레이트리밋)는 구분 수준을 유지한다.
+ */
+async function resolveAuthError(
+  message: string | undefined,
+  locale: string,
+  context: 'login' | 'signup',
+): Promise<string> {
+  const t = await getTranslations({ locale, namespace: 'Errors' });
+  const m = (message ?? '').toLowerCase();
+  if (m.includes('invalid login credentials') || m.includes('invalid credentials')) return t('auth_invalid_credentials');
+  if (m.includes('email not confirmed')) return t('auth_email_not_confirmed');
+  if (m.includes('already registered') || m.includes('already been registered')) return t('auth_account_exists');
+  if (m.includes('password')) return t('auth_password_invalid');
+  if (m.includes('rate limit') || m.includes('too many')) return t('auth_rate_limited');
+  return context === 'login' ? t('auth_unexpected') : t('auth_signup_failed');
+}
+
 // DEF-B-039 (Issue #1026): 신규 조직 생성 가입자의 org_type → role 명시적 매핑.
 // ADMIN/CARRIER 전용 분기 제거 — ADMIN 폴백은 절대 금지.
 // 미매핑/누락 org_type은 안전 기본값 CORPORATE로 폴백.
@@ -88,7 +108,7 @@ export async function login(formData: FormData) {
 
     if (error) {
       logger.error('[ACTION] login AUTH ERROR:', error.message);
-      return { error: error.message };
+      return { error: await resolveAuthError(error.message, locale, 'login') };
     }
 
     logger.info('[ACTION] login AUTH SUCCESS:', data.user?.id);
@@ -109,7 +129,7 @@ export async function login(formData: FormData) {
       throw e; 
     }
     logger.error('[ACTION] login UNEXPECTED ERROR:', e);
-    return { error: 'An unexpected error occurred during login.' };
+    return { error: await resolveAuthError(undefined, locale, 'login') };
   }
   
   // Call redirect outside try-catch
@@ -169,7 +189,8 @@ export async function signup(formData: FormData, locale: string = 'ko') {
   });
 
   if (error) {
-    return { error: error.message };
+    logger.error('[SIGNUP_ACTION] AUTH ERROR:', error.message);
+    return { error: await resolveAuthError(error.message, locale, 'signup') };
   }
 
   // 회원가입 성공 시 확인 메일 발송 (non-fatal)
@@ -209,8 +230,11 @@ export async function signup(formData: FormData, locale: string = 'ko') {
       .single();
 
     if (profileError || !profile?.org_id) {
-      console.error('[SIGNUP_ACTION] Profile not found after signup:', profileError);
-      return { error: 'Profile creation failed. Please try again.' };
+      logger.error('[SIGNUP_ACTION] Profile not found after signup:', profileError);
+      {
+        const t = await getTranslations({ locale, namespace: 'Errors' });
+        return { error: t('auth_signup_profile_failed') };
+      }
     }
 
     const fileExt = docFile.name.split('.').pop();

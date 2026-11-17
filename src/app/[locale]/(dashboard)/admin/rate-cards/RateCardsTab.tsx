@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { createRateCard, updateRateCard, deleteRateCard, getRateCards } from '@/app/actions/admin/rate-cards';
@@ -33,6 +34,7 @@ const TRANSPORT_MODES = ['AIR', 'SEA', 'LAND', 'EXP'] as const;
 export function RateCardsTab() {
   const [cards, setCards] = useState<RateCard[]>([]);
   const [carriers, setCarriers] = useState<Carrier[]>([]);
+  const errT = useTranslations('Errors');
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -54,7 +56,8 @@ export function RateCardsTab() {
       const data = await getRateCards();
       setCards(data as unknown as RateCard[]);
     } catch (err: any) {
-      setError(err.message);
+      console.error(err);
+      setError(errT('generic', { code: 'RATE_CARD_LOAD' }));
     } finally {
       setLoading(false);
     }
@@ -112,12 +115,12 @@ export function RateCardsTab() {
 
   const handleSave = async () => {
     if (!formData.carrier_id || !formData.valid_from) {
-      setError('Carrier and Valid From are required.');
+      setError(errT('rate_carrier_from_required'));
       return;
     }
 
     if (formData.tiers.weight_slabs.length === 0 || formData.tiers.cbm_slabs.length === 0) {
-      setError('Both Weight Slabs and CBM Slabs must have at least 1 entry.');
+      setError(errT('rate_slabs_required'));
       return;
     }
 
@@ -139,7 +142,8 @@ export function RateCardsTab() {
       resetForm();
       fetchCards();
     } catch (err: any) {
-      setError(err.message);
+      console.error(err);
+      setError(errT('generic', { code: 'RATE_CARD_SAVE' }));
     }
   };
 
@@ -149,7 +153,8 @@ export function RateCardsTab() {
       await deleteRateCard(id);
       fetchCards();
     } catch (err: any) {
-      setError(err.message);
+      console.error(err);
+      setError(errT('generic', { code: 'RATE_CARD_DELETE' }));
     }
   };
 

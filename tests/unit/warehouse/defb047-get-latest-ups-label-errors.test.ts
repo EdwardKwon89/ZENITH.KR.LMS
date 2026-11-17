@@ -123,6 +123,6 @@ describe('TASK-B-285 (Issue #1071): getLatestUpsLabelErrors 서버 액션', () =
       supabase: errorDb,
     });
 
-    await expect(getLatestUpsLabelErrors(['o-1'])).rejects.toThrow('Failed to fetch ups label errors');
+    await expect(getLatestUpsLabelErrors(['o-1'])).rejects.toThrow('데이터를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.');
   });
 });

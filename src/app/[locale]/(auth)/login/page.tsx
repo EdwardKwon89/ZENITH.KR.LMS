@@ -11,6 +11,7 @@ import Link from 'next/link';
 
 function LoginForm() {
   const t = useTranslations('Auth');
+  const errT = useTranslations('Errors');
   const params = useParams();
   const locale = params?.locale as string || 'ko';
   const { error, setError } = useAuth();
@@ -39,7 +40,8 @@ function LoginForm() {
       if (err.message?.includes('NEXT_REDIRECT')) {
         return;
       }
-      setError(err.message || '인증 과정에서 오류가 발생했습니다.');
+      console.error(err);
+      setError(errT('generic', { code: 'AUTH_LOGIN' }));
     } finally {
       setIsPending(false);
     }

@@ -59,6 +59,6 @@ describe('Profile Actions Unit Tests', () => {
     
     const result = await withdrawUser();
     
-    expect(result.error).toBe('탈퇴 처리 중 오류가 발생했습니다.');
+    expect(result.error).toBe('요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요. (코드: WITHDRAW)');
   });
 });

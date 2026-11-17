@@ -1,6 +1,7 @@
 'use server';
 
 import { logger } from '@/lib/logger';
+import { trError } from '@/lib/i18n/action-error';
 
 import { SettlementEngine, InvoiceGenerator } from '@/lib/finance/settlement';
 import { revalidatePath } from 'next/cache';
@@ -13,12 +14,13 @@ import { sendInvoiceFinalizedEmail } from '@/lib/notifications/email';
 
 export async function generateInvoicesForOrder(orderId: string) {
   const { supabase, profile } = await validateUserAction();
-  if (!profile) throw new Error('User profile not found');
+  if (!profile) throw new Error(await trError('profile_not_found'));
 
   const adminRoles = [USER_ROLES.ADMIN, USER_ROLES.MANAGER, USER_ROLES.ZENITH_SUPER_ADMIN] as string[];
   const isAdmin = adminRoles.includes(profile.role);
   if (!isAdmin && profile.role !== USER_ROLES.AGENCY) {
-    throw new Error('정산서를 생성할 권한이 없습니다.');
+    logger.warn(`[generateInvoicesForOrder] denied for role: ${profile.role}`);
+    throw new Error(await trError('permission_denied'));
   }
 
   if (profile.role === USER_ROLES.AGENCY) {
@@ -30,7 +32,8 @@ export async function generateInvoicesForOrder(orderId: string) {
       .single();
 
     if (!order || !agencyShipperIds.includes(order.shipper_id)) {
-      throw new Error('본인 소속 화주의 오더에 대해서만 인보이스를 생성할 수 있습니다.');
+      logger.warn(`[generateInvoicesForOrder] shipper out of agency scope (${orderId})`);
+      throw new Error(await trError('own_shipper_only'));
     }
   }
 
@@ -46,13 +49,15 @@ export async function generateInvoicesForOrder(orderId: string) {
     .maybeSingle();
 
   if (finalizedCheck) {
-    throw new Error('이미 정산이 마감된 오더입니다. 인보이스를 생성할 수 없습니다.');
+    logger.warn(`[generateInvoicesForOrder] already finalized order (${orderId})`);
+    throw new Error(await trError('settlement_order_already_finalized'));
   }
 
   const result = await generator.generateInvoice(orderId);
 
   if (!result.success) {
-    throw new Error(result.message || "정산서 생성 실패");
+    logger.error('[generateInvoicesForOrder] invoice generation failed:', result.message);
+    throw new Error(await trError('invoice_create_failed'));
   }
 
   revalidatePath("/finance/invoices");
@@ -77,7 +82,7 @@ async function assertFinalizePermission(supabase: any, profile: any, invoice: an
 
   if (profile.role === USER_ROLES.AGENCY) {
     const orderId = invoice.metadata?.source_order_id;
-    if (!orderId) return '인보이스에 연결된 오더를 찾을 수 없습니다.';
+    if (!orderId) { logger.warn('[assertFinalizePermission] invoice has no linked order'); return await trError('not_found'); }
 
     const agencyShipperIds = await resolveAgencyShipperIds(supabase, profile.org_id!);
     const { data: order } = await supabase
@@ -87,10 +92,12 @@ async function assertFinalizePermission(supabase: any, profile: any, invoice: an
       .single();
 
     if (!order || !agencyShipperIds.includes(order.shipper_id)) {
-      return '본인 소속 화주의 인보이스만 마감할 수 있습니다.';
+      logger.warn('[assertFinalizePermission] shipper out of agency scope');
+      return await trError('own_shipper_only');
     }
   } else if (!isAdmin) {
-    return '정산 마감 권한이 없습니다.';
+    logger.warn(`[assertFinalizePermission] denied for role: ${profile.role}`);
+    return await trError('permission_denied');
   }
   return null;
 }
@@ -100,7 +107,10 @@ async function computeInvoiceTotal(supabase: any, invoiceId: string) {
     .from('zen_order_costs')
     .select('unit_price, quantity')
     .eq('invoice_id', invoiceId);
-  if (error) throw new Error('비용 정보를 조회할 수 없습니다.');
+  if (error) {
+    logger.error('computeInvoiceTotal: zen_order_costs lookup failed', error);
+    throw new Error(await trError('generic', { code: 'COST_LOOKUP' }));
+  }
   return (linkedCosts || []).reduce((sum: number, c: any) => sum + (Number(c.unit_price) * Number(c.quantity || 1)), 0);
 }
 
@@ -114,7 +124,10 @@ async function markInvoiceFinalized(supabase: any, invoiceId: string, totalAmoun
   if (reason) updateData.finalized_reason = reason;
 
   const { error } = await supabase.from('zen_invoices').update(updateData).eq('id', invoiceId);
-  if (error) throw new Error(`정산 마감 실패: ${error.message}`);
+  if (error) {
+    logger.error('markInvoiceFinalized: zen_invoices update failed', error);
+    throw new Error(await trError('generic', { code: 'INVOICE_FINALIZE' }));
+  }
 
   await supabase.from('zen_invoice_history').insert({
     invoice_id: invoiceId,
@@ -131,18 +144,25 @@ export async function finalizeInvoice(
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const { supabase, profile, user } = await validateUserAction();
-    if (!profile) throw new Error('User profile not found');
+    if (!profile) return { success: false, error: await trError('profile_not_found') };
 
     const invoice = await lookupInvoice(supabase, invoiceId);
-    if (!invoice) return { success: false, error: '인보이스를 찾을 수 없습니다.' };
-    if (invoice.is_finalized) return { success: false, error: '이미 정산이 마감된 인보이스입니다.' };
+    if (!invoice) {
+      logger.warn(`finalizeInvoice: invoice not found (${invoiceId})`);
+      return { success: false, error: await trError('invoice_not_found') };
+    }
+    if (invoice.is_finalized) {
+      logger.warn(`finalizeInvoice: already finalized (${invoiceId})`);
+      return { success: false, error: await trError('invoice_already_finalized') };
+    }
 
     const permError = await assertFinalizePermission(supabase, profile, invoice);
     if (permError) return { success: false, error: permError };
 
     const isAdminAction = profile.role !== USER_ROLES.AGENCY;
     if (isAdminAction && !reason?.trim()) {
-      return { success: false, error: 'Admin 예외 마감 시 사유를 입력해야 합니다.' };
+      logger.warn(`finalizeInvoice: reason required (${invoiceId})`);
+      return { success: false, error: await trError('invoice_finalize_reason_required') };
     }
 
     const totalAmount = await computeInvoiceTotal(supabase, invoiceId);
@@ -186,7 +206,7 @@ export async function finalizeInvoice(
     return { success: true };
   } catch (err: any) {
     logger.error('Finalize invoice error:', err);
-    return { success: false, error: err.message || '알 수 없는 서버 오류' };
+    return { success: false, error: await trError('generic', { code: 'UNEXPECTED' }) };
   }
 }
 
@@ -197,17 +217,21 @@ export async function updatePaymentStatus(
   paymentMethod: string = 'BANK_TRANSFER'
 ) {
   const { supabase, profile, user } = await validateUserAction();
-  if (!profile) throw new Error('User profile not found');
+  if (!profile) throw new Error(await trError('profile_not_found'));
 
   const adminRoles = [USER_ROLES.ADMIN, USER_ROLES.MANAGER, USER_ROLES.ZENITH_SUPER_ADMIN] as string[];
   const isAdmin = adminRoles.includes(profile.role);
   if (!isAdmin && profile.role !== USER_ROLES.AGENCY) {
-    throw new Error('결제 상태를 수정할 권한이 없습니다.');
+    logger.warn(`[updatePaymentStatus] denied for role: ${profile.role}`);
+    throw new Error(await trError('permission_denied'));
   }
 
   const financeRepo = new FinanceRepository(supabase);
   const { data: existingInvoice } = await financeRepo.findByIdBasic(invoiceId);
-  if (!existingInvoice) throw new Error('인보이스를 찾을 수 없습니다.');
+  if (!existingInvoice) {
+    logger.warn(`[updatePaymentStatus] invoice not found (${invoiceId})`);
+    throw new Error(await trError('invoice_not_found'));
+  }
 
   if (profile.role === USER_ROLES.AGENCY) {
     const agencyShipperIds = await resolveAgencyShipperIds(supabase, profile.org_id!);
@@ -219,7 +243,8 @@ export async function updatePaymentStatus(
         .eq('id', orderId)
         .single();
       if (!order || !agencyShipperIds.includes(order.shipper_id)) {
-        throw new Error('본인 소속 화주의 인보이스 결제 상태만 변경할 수 있습니다.');
+        logger.warn(`[updatePaymentStatus] shipper out of agency scope (${invoiceId})`);
+        throw new Error(await trError('own_shipper_only'));
       }
     }
   }
@@ -232,7 +257,10 @@ export async function updatePaymentStatus(
     payment_method: paymentMethod,
   });
 
-  if (invError) throw new Error(`결제 상태 업데이트 실패: ${invError.message}`);
+  if (invError) {
+    logger.error('updatePaymentStatus: update failed', invError);
+    throw new Error(await trError('generic', { code: 'PAYMENT_STATUS_UPDATE' }));
+  }
 
   // IMP-051: Audit history (best-effort)
   void (async () => {
@@ -259,12 +287,13 @@ export async function updatePaymentStatus(
 export async function calculateSettlementAction(orderId: string) {
   logger.info(`[Action] calculateSettlementAction started for order: ${orderId}`);
   const { supabase, profile } = await validateUserAction();
-  if (!profile) throw new Error('User profile not found');
+  if (!profile) throw new Error(await trError('profile_not_found'));
 
   const adminRoles = [USER_ROLES.ADMIN, USER_ROLES.MANAGER, USER_ROLES.ZENITH_SUPER_ADMIN] as string[];
   const isAdmin = adminRoles.includes(profile.role);
   if (!isAdmin && profile.role !== USER_ROLES.AGENCY) {
-    throw new Error('정산 재계산을 실행할 권한이 없습니다.');
+    logger.warn(`[calculateSettlementAction] denied for role: ${profile.role}`);
+    throw new Error(await trError('permission_denied'));
   }
 
   if (profile.role === USER_ROLES.AGENCY) {
@@ -276,7 +305,8 @@ export async function calculateSettlementAction(orderId: string) {
       .single();
 
     if (!order || !agencyShipperIds.includes(order.shipper_id)) {
-      throw new Error('본인 소속 화주의 오더에 대해서만 정산을 계산할 수 있습니다.');
+      logger.warn(`[calculateSettlementAction] shipper out of agency scope (${orderId})`);
+      throw new Error(await trError('own_shipper_only'));
     }
   }
 
@@ -284,9 +314,13 @@ export async function calculateSettlementAction(orderId: string) {
   logger.info(`[Action] User Profile: ${profile.email}, Role: ${profile.role}`);
 
   const { data: existingCosts, error: costsCheckError } = await financeRepo.findByOrderId(orderId);
-  if (costsCheckError) throw new Error(`비용 확인 실패: ${costsCheckError.message}`);
+  if (costsCheckError) {
+    logger.error('calculateSettlementAction: cost lookup failed', costsCheckError);
+    throw new Error(await trError('generic', { code: 'COST_LOOKUP' }));
+  }
   if (existingCosts?.some(c => c.invoice_id !== null)) {
-    throw new Error('Cannot recalculate costs after invoice has been issued.');
+    logger.warn(`[calculateSettlementAction] recalculation locked by invoice (${orderId})`);
+    throw new Error(await trError('settlement_recalc_locked'));
   }
 
   const engine = new SettlementEngine();
@@ -312,7 +346,7 @@ export async function calculateSettlementAction(orderId: string) {
 
 export async function getSettlementOverview() {
   const { supabase, profile } = await validateUserAction();
-  if (!profile) throw new Error("User profile not found");
+  if (!profile) throw new Error(await trError('profile_not_found'));
   const financeRepo = new FinanceRepository(supabase);
 
   const isAdmin = profile.role === USER_ROLES.ZENITH_SUPER_ADMIN || profile.role === USER_ROLES.ADMIN;
@@ -322,7 +356,8 @@ export async function getSettlementOverview() {
   const { data: recentInvoices, error: recentError } = await financeRepo.findRecentInvoices(5, shipperId);
 
   if (unpaidError || recentError) {
-    throw new Error("Failed to fetch settlement overview");
+    logger.error('getSettlementOverview: lookup failed', unpaidError || recentError);
+    throw new Error(await trError('generic', { code: 'SETTLEMENT_OVERVIEW_LOOKUP' }));
   }
 
   const totalUnpaid = unpaidSum?.reduce((sum, inv) => sum + Number(inv.total_amount), 0) || 0;
@@ -336,7 +371,7 @@ export async function getSettlementOverview() {
 
 export async function getWeeklyRevenueChart() {
   const { supabase, profile } = await validateUserAction();
-  if (!profile) throw new Error("User profile not found");
+  if (!profile) throw new Error(await trError('profile_not_found'));
   const financeRepo = new FinanceRepository(supabase);
 
   const isAdmin = profile.role === USER_ROLES.ZENITH_SUPER_ADMIN || profile.role === USER_ROLES.ADMIN;
@@ -352,7 +387,10 @@ export async function getWeeklyRevenueChart() {
     now.toISOString(),
     shipperId,
   );
-  if (error) throw new Error(`매출 통계 조회 실패: ${error.message}`);
+  if (error) {
+    logger.error('getWeeklyRevenueChart: lookup failed', error);
+    throw new Error(await trError('generic', { code: 'REVENUE_CHART_LOOKUP' }));
+  }
 
   const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   const chartDataMap: Record<string, number> = {};
@@ -388,7 +426,10 @@ export async function getRevenueReport(filters: {
   const financeRepo = new FinanceRepository(supabase);
 
   const { data, error } = await financeRepo.findRevenueReport(filters);
-  if (error) throw new Error(`수입 리포트 조회 실패: ${error.message}`);
+  if (error) {
+    logger.error('getRevenueReport: lookup failed', error);
+    throw new Error(await trError('generic', { code: 'REVENUE_REPORT_LOOKUP' }));
+  }
 
   const totalRevenue = data?.reduce((sum, inv) => sum + Number(inv.total_amount), 0) || 0;
   const count = data?.length || 0;
@@ -409,7 +450,10 @@ export async function getCostReport(filters: {
   const financeRepo = new FinanceRepository(supabase);
 
   const { data, error } = await financeRepo.findCostReport(filters);
-  if (error) throw new Error(`비용 리포트 조회 실패: ${error.message}`);
+  if (error) {
+    logger.error('getCostReport: lookup failed', error);
+    throw new Error(await trError('generic', { code: 'COST_REPORT_LOOKUP' }));
+  }
 
   const totalCost = data?.reduce((sum, cost) => sum + Number(cost.total_amount), 0) || 0;
 
@@ -439,22 +483,26 @@ export async function addManualOrderCost(
 ) {
   logger.info(`[addManualOrderCost] orderId=${orderId}, costName=${costName}, amount=${amount}, currency=${currency}`);
   const { supabase, profile } = await validateUserAction();
-  if (!profile) throw new Error('User profile not found');
+  if (!profile) throw new Error(await trError('profile_not_found'));
 
-  if (!costName.trim()) throw new Error('비용 항목명을 입력해주세요.');
-  if (amount <= 0) throw new Error('금액은 0보다 커야 합니다.');
-  if (!currency) throw new Error('통화를 지정해주세요.');
+  if (!costName.trim()) { logger.warn('[addManualOrderCost] cost name missing'); throw new Error(await trError('cost_name_required')); }
+  if (amount <= 0) { logger.warn('[addManualOrderCost] invalid amount'); throw new Error(await trError('cost_amount_invalid')); }
+  if (!currency) { logger.warn('[addManualOrderCost] currency missing'); throw new Error(await trError('cost_currency_required')); }
 
   // 권한 확인: AGENCY는 소속 화주 오더만, ADMIN/MANAGER는 전체
   const adminRoles = [USER_ROLES.ADMIN, USER_ROLES.MANAGER, USER_ROLES.ZENITH_SUPER_ADMIN] as string[];
   const isAdmin = adminRoles.includes(profile.role);
   if (!isAdmin && profile.role !== USER_ROLES.AGENCY) {
-    throw new Error('기타 부가운임을 추가할 권한이 없습니다.');
+    logger.warn(`[addManualOrderCost] denied for role: ${profile.role}`);
+    throw new Error(await trError('permission_denied'));
   }
 
   if (profile.role === USER_ROLES.AGENCY) {
     const agencyShipperIds = await resolveAgencyShipperIds(supabase, profile.org_id!);
-    if (!agencyShipperIds) throw new Error('소속 화주 정보를 조회할 수 없습니다.');
+    if (!agencyShipperIds) {
+      logger.error('[addManualOrderCost] agency shipper lookup returned nothing');
+      throw new Error(await trError('generic', { code: 'AGENCY_SHIPPER_LOOKUP' }));
+    }
 
     const { data: order } = await supabase
       .from('zen_orders')
@@ -463,7 +511,8 @@ export async function addManualOrderCost(
       .single();
 
     if (!order || !agencyShipperIds.includes(order.shipper_id)) {
-      throw new Error('소속 화주의 오더만 수정할 수 있습니다.');
+      logger.warn(`[addManualOrderCost] shipper out of agency scope (${orderId})`);
+      throw new Error(await trError('own_shipper_only'));
     }
   }
 
@@ -476,7 +525,8 @@ export async function addManualOrderCost(
     .limit(1);
 
   if (existingInvoiced && existingInvoiced.length > 0) {
-    throw new Error('이미 확정된 청구서가 있어 정산 항목을 추가할 수 없습니다.');
+    logger.warn(`[addManualOrderCost] settlement items locked (${orderId})`);
+    throw new Error(await trError('settlement_items_locked'));
   }
 
   // currency 일치 확인은 Aiden 권고사항 — 오더 기준 통화 컬럼이 없어 넘어온 값 그대로 사용
@@ -492,7 +542,10 @@ export async function addManualOrderCost(
       is_revenue: true,
     });
 
-  if (insertError) throw new Error(`부가운임 추가 실패: ${insertError.message}`);
+  if (insertError) {
+    logger.error('addManualOrderCost: zen_order_costs insert failed', insertError);
+    throw new Error(await trError('generic', { code: 'COST_INSERT' }));
+  }
 
   revalidatePath(`/orders/${orderId}`);
   revalidatePath(`/(dashboard)/orders/${orderId}`);
@@ -510,14 +563,20 @@ export async function createPostFinalizationAdjustment(
     const { supabase } = await validateAdminAction();
     const { data: origInv } = await supabase
       .from('zen_invoices').select('shipper_id, metadata, invoice_no').eq('id', originalInvoiceId).single();
-    if (!origInv) return { success: false, error: '원 인보이스를 찾을 수 없습니다.' };
+    if (!origInv) {
+      logger.warn(`createPostFinalizationAdjustment: original invoice not found (${originalInvoiceId})`);
+      return { success: false, error: await trError('invoice_not_found') };
+    }
     const { data: order } = await supabase
       .from('zen_orders').select('order_no').eq('id', orderId).single();
     const invCurrency = currency || 'USD';
 
     if (adjustmentAmount !== 0) {
       const newInv = await createAdjustmentInvoice(supabase, origInv, orderId, order?.order_no, adjustmentAmount, invCurrency);
-      if (!newInv) return { success: false, error: '추가 인보이스 생성 실패' };
+      if (!newInv) {
+        logger.error(`createPostFinalizationAdjustment: adjustment invoice create failed (${orderId})`);
+        return { success: false, error: await trError('invoice_create_failed') };
+      }
       await linkAdjustmentCosts(supabase, orderId, newInv.id);
       const total = await calcAdjustmentTotal(supabase, newInv.id);
       await supabase.from('zen_invoices').update({ total_amount: total }).eq('id', newInv.id);
@@ -532,7 +591,7 @@ export async function createPostFinalizationAdjustment(
     return { success: true, adjustmentAmount };
   } catch (err: any) {
     logger.error('createPostFinalizationAdjustment error:', err);
-    return { success: false, error: err.message || '마감 후 조정 실패' };
+    return { success: false, error: await trError('generic', { code: 'UNEXPECTED' }) };
   }
 }
 
@@ -576,12 +635,18 @@ export async function rejectInvoice(
 ): Promise<{ success: boolean; newInvoiceId?: string; error?: string }> {
   try {
     const { supabase, profile, user } = await validateUserAction();
-    if (!profile) throw new Error('User profile not found');
+    if (!profile) return { success: false, error: await trError('profile_not_found') };
 
     const { data: invoice, error: invErr } = await supabase
       .from('zen_invoices').select('*, metadata').eq('id', invoiceId).single();
-    if (invErr || !invoice) return { success: false, error: '인보이스를 찾을 수 없습니다.' };
-    if (invoice.status === 'CANCELED') return { success: false, error: '이미 취소된 인보이스입니다.' };
+    if (invErr || !invoice) {
+      logger.warn(`rejectInvoice: invoice not found (${invoiceId})`);
+      return { success: false, error: await trError('invoice_not_found') };
+    }
+    if (invoice.status === 'CANCELED') {
+      logger.warn(`rejectInvoice: already canceled (${invoiceId})`);
+      return { success: false, error: await trError('invoice_already_canceled') };
+    }
 
     const permErr = await assertFinalizePermission(supabase, profile, invoice);
     if (permErr) return { success: false, error: permErr };
@@ -591,7 +656,10 @@ export async function rejectInvoice(
     const { error: cancelErr } = await supabase.from('zen_invoices')
       .update({ status: 'CANCELED', is_finalized: false, finalized_at: null, finalized_by: null, finalized_reason: null })
       .eq('id', invoiceId);
-    if (cancelErr) return { success: false, error: `인보이스 취소 실패: ${cancelErr.message}` };
+    if (cancelErr) {
+      logger.error('rejectInvoice: cancel update failed', cancelErr);
+      return { success: false, error: await trError('generic', { code: 'INVOICE_CANCEL' }) };
+    }
 
     await supabase.from('zen_invoice_history').insert({
       invoice_id: invoiceId, prev_status: invoice.status, next_status: 'CANCELED',
@@ -624,7 +692,7 @@ export async function rejectInvoice(
     return { success: true, newInvoiceId };
   } catch (err: any) {
     logger.error('rejectInvoice error:', err);
-    return { success: false, error: err.message || '인보이스 거부 처리 실패' };
+    return { success: false, error: await trError('generic', { code: 'UNEXPECTED' }) };
   }
 }
 
@@ -635,6 +703,9 @@ export async function getOrganizations() {
     .select('id, name')
     .order('name');
 
-  if (error) throw new Error(`조직 조회 실패: ${error.message}`);
+  if (error) {
+    logger.error('getOrganizations: lookup failed', error);
+    throw new Error(await trError('generic', { code: 'ORGANIZATION_LOOKUP' }));
+  }
   return data || [];
 }

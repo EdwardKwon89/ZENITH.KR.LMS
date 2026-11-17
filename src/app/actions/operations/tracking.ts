@@ -6,6 +6,7 @@ import { validateUserAction, validateAdminAction } from "@/lib/auth/guards";
 import { revalidatePath } from "next/cache";
 import { trackingManager, EVENT_TO_ORDER_STATUS } from "@/lib/logistics/tracking";
 import { updateOrderStatus } from './orders';
+import { trError } from '@/lib/i18n/action-error';
 
 /**
  * 특정 오더의 트래킹 데이터 및 마일스톤 정보를 조회합니다.
@@ -60,8 +61,8 @@ export async function refreshTrackingData(orderId: string) {
     revalidatePath(`/(dashboard)/orders/${orderId}`, "page");
     return { success: true, count: steps.length };
   } catch (error: any) {
-    logger.error(`[REFRESH_TRACKING] Error:`, error.message);
-    return { success: false, error: error.message };
+    logger.error(`[REFRESH_TRACKING] Error:`, error);
+    return { success: false, error: await trError('generic', { code: 'UNEXPECTED' }) };
   }
 }
 
@@ -94,7 +95,12 @@ export async function addTrackingEvent(
       hub_port_code: payload.hub_port_code ?? null,
     });
 
-  if (error) throw new Error(`Failed to add tracking event: ${error.message}`);
+  if (error) {
+    // TASK-B-352 재작업: 호출자(AdminTrackingControl)가 반환값을 보지 않고 catch로만 실패를 처리하므로
+    // 실패는 throw 로 유지한다(성공 토스트 오표시 방지). 메시지는 로케일 문구, 원문은 로그에만.
+    logger.error('addTrackingEvent: zen_tracking_events insert failed', error);
+    throw new Error(await trError('generic', { code: 'TRACKING_EVENT_SAVE' }));
+  }
 
   const nextStatus = EVENT_TO_ORDER_STATUS[payload.event_code as keyof typeof EVENT_TO_ORDER_STATUS];
   if (nextStatus) {
@@ -124,7 +130,11 @@ export async function updateTrackingConfig(
     })
     .eq("order_id", orderId);
 
-  if (error) throw new Error(`Failed to update tracking config: ${error.message}`);
+  if (error) {
+    // TASK-B-352 재작업: 호출자가 catch 로만 실패를 처리 → throw 유지(로케일 문구, 원문은 로그).
+    logger.error('updateTrackingConfig: zen_tracking_configs update failed', error);
+    throw new Error(await trError('generic', { code: 'TRACKING_CONFIG_SAVE' }));
+  }
 
   revalidatePath(`/(dashboard)/orders/${orderId}`, "page");
   return { success: true };
@@ -142,7 +152,15 @@ export async function syncExternalTracking() {
     .select("order_id, provider_type")
     .eq("provider_type", "API");
 
-  if (error) throw new Error(`Failed to fetch tracking configs: ${error.message}`);
+  if (error) {
+    logger.error('syncExternalTracking: zen_tracking_configs select failed', error);
+    return {
+      success: false,
+      processed: 0,
+      errors: 0,
+      error: await trError('generic', { code: 'TRACKING_CONFIG_LOOKUP' }),
+    };
+  }
 
   let processed = 0;
   let errors = 0;
@@ -176,7 +194,10 @@ export async function getTrackingRawLogs(orderId: string, page = 1, pageSize = 5
     .order("created_at", { ascending: false })
     .range(from, to);
 
-  if (error) throw new Error(`Failed to fetch raw logs: ${error.message}`);
+  if (error) {
+    logger.error('getTrackingRawLogs: zen_tracking_raw_logs select failed', error);
+    return { logs: [], total: 0, error: await trError('generic', { code: 'TRACKING_RAW_LOGS_LOOKUP' }) };
+  }
 
   return { logs, total: count || 0 };
 }
@@ -208,7 +229,10 @@ export async function getGlobalTrackingOverview(page = 1, pageSize = 50) {
     `, { count: "exact" })
     .order("updated_at", { ascending: false });
 
-  if (error) throw new Error(`Failed to fetch tracking overview: ${error.message}`);
+  if (error) {
+    logger.error('getGlobalTrackingOverview: zen_tracking_configs select failed', error);
+    return { configs: [], total: 0, error: await trError('generic', { code: 'TRACKING_OVERVIEW_LOOKUP' }) };
+  }
 
   const orderIds = (data ?? []).map(c => c.order_id).filter(Boolean);
 
@@ -299,7 +323,9 @@ export async function checkRealtimeUpsTrackingAction(orderId: string) {
     .single();
 
   if (orderError || !order) {
-    return { success: false, error: '오더를 찾을 수 없습니다.' };
+    if (orderError) logger.error('checkRealtimeUpsTrackingAction: zen_orders select failed', orderError);
+    else logger.warn(`checkRealtimeUpsTrackingAction: order not found (${orderId})`);
+    return { success: false, error: await trError('order_not_found') };
   }
 
   const { data: label } = await supabase
@@ -312,7 +338,8 @@ export async function checkRealtimeUpsTrackingAction(orderId: string) {
     .maybeSingle();
 
   if (!label?.tracking_number) {
-    return { success: false, error: '발급된 활성 UPS 운송장 번호가 없습니다.' };
+    logger.warn(`checkRealtimeUpsTrackingAction: no active UPS tracking number (${orderId})`);
+    return { success: false, error: await trError('label_not_found') };
   }
 
   // 2. SHXK API 폴링
@@ -320,7 +347,8 @@ export async function checkRealtimeUpsTrackingAction(orderId: string) {
   const trackData = await pollTracking(label.tracking_number);
 
   if (!trackData) {
-    return { success: false, error: 'UPS 실시간 트래킹 데이터를 가져오지 못했습니다. (SHXK API)' };
+    logger.error(`checkRealtimeUpsTrackingAction: SHXK poll returned no data (${orderId})`);
+    return { success: false, error: await trError('shxk_generic', { code: 'TRACKING_POLL' }) };
   }
 
   // 3. 트래킹 이벤트 저장
@@ -352,6 +380,8 @@ export async function checkRealtimeUpsTrackingAction(orderId: string) {
       } catch (notifErr) {
         logger.error(`[checkRealtimeUpsTrackingAction] Notification trigger error:`, notifErr);
       }
+    } else {
+      logger.error('checkRealtimeUpsTrackingAction: zen_orders status update failed', updateError);
     }
   }
 
@@ -375,7 +405,8 @@ export async function manuallySetOrderDeliveredAction(orderId: string, reason: s
   const { supabase, profile, user } = await validateUserAction();
 
   if (!reason || !reason.trim()) {
-    return { success: false, error: '수동 배송 완료 전환 사유 입력은 필수입니다.' };
+    logger.warn(`manuallySetOrderDeliveredAction: reason missing (${orderId})`);
+    return { success: false, error: await trError('manual_reason_required') };
   }
 
   // 1. 오더 정보 조회
@@ -386,11 +417,14 @@ export async function manuallySetOrderDeliveredAction(orderId: string, reason: s
     .single();
 
   if (orderError || !order) {
-    return { success: false, error: '오더를 찾을 수 없습니다.' };
+    if (orderError) logger.error('manuallySetOrderDeliveredAction: zen_orders select failed', orderError);
+    else logger.warn(`manuallySetOrderDeliveredAction: order not found (${orderId})`);
+    return { success: false, error: await trError('order_not_found') };
   }
 
   if (order.status === 'DELIVERED') {
-    return { success: false, error: '이미 배송 완료 상태입니다.' };
+    logger.warn(`manuallySetOrderDeliveredAction: already delivered (${orderId})`);
+    return { success: false, error: await trError('already_delivered') };
   }
 
   // 2. Agency 스코프 권한 검증
@@ -398,7 +432,8 @@ export async function manuallySetOrderDeliveredAction(orderId: string, reason: s
   const isAgency = profile?.role === 'AGENCY';
   if (isAgency) {
     if (!profile?.org_id) {
-      return { success: false, error: 'Agency 소속 조직 정보가 없습니다.' };
+      logger.warn(`manuallySetOrderDeliveredAction: agency org missing (${orderId})`);
+      return { success: false, error: await trError('agency_org_missing') };
     }
 
     const isSelfOwnedOrder = order.shipper_id === profile.org_id;
@@ -412,7 +447,8 @@ export async function manuallySetOrderDeliveredAction(orderId: string, reason: s
         .maybeSingle();
 
       if (!agencyLink) {
-        return { success: false, error: '소속 대리점이 관리하는 화주의 오더만 상태를 전환할 수 있습니다.' };
+        logger.warn(`manuallySetOrderDeliveredAction: shipper out of agency scope (${orderId})`);
+        return { success: false, error: await trError('shipper_scope_denied') };
       }
     }
   }
@@ -423,7 +459,8 @@ export async function manuallySetOrderDeliveredAction(orderId: string, reason: s
 
   const check = canChangeStatus(order.status as any, OrderStatus.DELIVERED, profile?.role);
   if (!check.allowed) {
-    return { success: false, error: check.message || '상태를 변경할 권한이 없습니다.' };
+    logger.warn(`manuallySetOrderDeliveredAction: status change denied — ${check.message ?? 'no reason'}`);
+    return { success: false, error: await trError('status_change_denied') };
   }
 
   // 4. 상태 변경 및 이력 기록
@@ -433,7 +470,8 @@ export async function manuallySetOrderDeliveredAction(orderId: string, reason: s
     .eq('id', orderId);
 
   if (updateError) {
-    return { success: false, error: `상태 업데이트 실패: ${updateError.message}` };
+    logger.error('manuallySetOrderDeliveredAction: zen_orders status update failed', updateError);
+    return { success: false, error: await trError('generic', { code: 'STATUS_UPDATE' }) };
   }
 
   await supabase.from('order_status_history').insert({

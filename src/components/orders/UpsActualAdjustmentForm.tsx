@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { Loader2, Plus, Trash2, HelpCircle, Calculator } from 'lucide-react';
 import { ZenCard, ZenButton, ZenInput, ZenSelect, ZenBadge } from '@/components/ui/ZenUI';
 import { getCostTypeLabel } from '@/lib/finance/settlement/cost-type-labels';
+import { useTranslations } from 'next-intl';
 
 function AcInput({ label, ...props }: { label: string } & React.InputHTMLAttributes<HTMLInputElement>) {
   return (
@@ -35,6 +36,7 @@ export function UpsActualAdjustmentForm({
   orderStatus,
   isPlatformAdmin,
 }: UpsActualAdjustmentFormProps) {
+  const te = useTranslations('Errors');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [reconciliation, setReconciliation] = useState<{
@@ -146,11 +148,12 @@ export function UpsActualAdjustmentForm({
         loadData();
       } else {
         setAcError(res.error || '저장 실패');
-        toast.error(res.error || '저장 실패');
+        toast.error(res.error || te('generic', { code: 'ACTUAL_SAVE' }));
       }
     } catch (err: any) {
       setAcError(err.message || '저장 실패');
-      toast.error(err.message || '저장 실패');
+      console.error(err);
+        toast.error(te('generic', { code: 'UNEXPECTED' }));
     } finally {
       setAcSaving(false);
     }
@@ -242,10 +245,11 @@ export function UpsActualAdjustmentForm({
         toast.success('UPS 실제 청구 요금 및 조정 비용이 성공적으로 반영되었습니다.');
         loadData();
       } else {
-        toast.error(res.error || '저장 중 오류가 발생했습니다.');
+        toast.error(res.error || te('generic', { code: 'CHARGE_SAVE' }));
       }
     } catch (err: any) {
-      toast.error(err.message || '저장 실패');
+      console.error(err);
+        toast.error(te('generic', { code: 'UNEXPECTED' }));
     } finally {
       setSaving(false);
     }

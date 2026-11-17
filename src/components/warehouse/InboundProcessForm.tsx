@@ -24,6 +24,7 @@ import { cn } from "@/lib/utils";
 export default function InboundProcessForm({ locale }: { locale: string }) {
   const t = useTranslations("WarehouseInbound");
   const orderStatusT = useTranslations("orderStatus");
+  const errT = useTranslations('Errors');
 
   const [barcode, setBarcode] = useState("");
   const [loading, setLoading] = useState(false);
@@ -59,7 +60,8 @@ export default function InboundProcessForm({ locale }: { locale: string }) {
       const data = await getTodayInboundHistory();
       setHistory(data || []);
     } catch (err: any) {
-      toast.error(err.message || "이력 로드 실패");
+      console.error(err);
+      toast.error(errT('generic', { code: 'INBOUND_HISTORY' }));
     }
   };
 
@@ -81,14 +83,15 @@ export default function InboundProcessForm({ locale }: { locale: string }) {
         setNote("");
         setPackageEdits({});
         setFreightEstimate(null);
-        toast.success("화물을 찾았습니다.");
+        toast.success(t("cargo_found"));
       } else {
         setErrorMsg(t("error_not_found"));
         toast.error(t("error_not_found"));
       }
     } catch (err: any) {
-      setErrorMsg(err.message || "오더 조회 중 오류 발생");
-      toast.error(err.message || "오더 조회 중 오류 발생");
+      setErrorMsg(errT('generic', { code: 'ORDER_LOOKUP' }));
+      console.error(err);
+      toast.error(errT('generic', { code: 'ORDER_LOOKUP' }));
     } finally {
       setLoading(false);
       focusInput();
@@ -134,10 +137,11 @@ export default function InboundProcessForm({ locale }: { locale: string }) {
         setPackageEdits({});
         await fetchHistory();
       } else {
-        throw new Error("입고 처리에 실패했습니다.");
+        throw new Error(errT('generic', { code: 'INBOUND_CONFIRM' }));
       }
     } catch (err: any) {
-      toast.error(err.message || "입고 확정 실패");
+      console.error(err);
+      toast.error(errT('generic', { code: 'INBOUND_CONFIRM' }));
     } finally {
       setSubmitLoading(false);
       focusInput();
@@ -149,14 +153,14 @@ export default function InboundProcessForm({ locale }: { locale: string }) {
     if (!order) return;
     const updates = buildPackageUpdates();
     if (updates.length === 0) {
-      toast.info("변경된 측정값이 없습니다.");
+      toast.info(t("no_measurements"));
       return;
     }
     setSavingMeasurements(true);
     try {
       const result = await saveInboundMeasurements(order.id, updates);
       if (result.success) {
-        toast.success("측정값이 저장되었습니다.");
+        toast.success(t("measurements_saved"));
         setFreightEstimate(result.freightEstimate ?? null);
         if (result.freightEstimate?.newFreight != null) {
           setDisplayFreight({
@@ -165,10 +169,11 @@ export default function InboundProcessForm({ locale }: { locale: string }) {
           });
         }
       } else {
-        throw new Error(result.error || "저장 실패");
+        throw new Error(errT('generic', { code: 'INBOUND_SAVE' }));
       }
     } catch (err: any) {
-      toast.error(err.message || "측정값 저장 실패");
+      console.error(err);
+      toast.error(errT('generic', { code: 'INBOUND_SAVE' }));
     } finally {
       setSavingMeasurements(false);
     }
@@ -188,10 +193,11 @@ export default function InboundProcessForm({ locale }: { locale: string }) {
         setBarcode("");
         await fetchHistory();
       } else {
-        throw new Error("입고 취소 처리에 실패했습니다.");
+        throw new Error(errT('generic', { code: 'INBOUND_CANCEL' }));
       }
     } catch (err: any) {
-      toast.error(err.message || "입고 취소 실패");
+      console.error(err);
+      toast.error(errT('generic', { code: 'INBOUND_CANCEL' }));
     } finally {
       setCancelLoading(false);
       focusInput();

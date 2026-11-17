@@ -296,6 +296,6 @@ describe('DEF-B-052~ TASK-B-284: UPS WAREHOUSED 부분 수정 (Issue #1070)', ()
       origin_port_id: '550e8400-e29b-41d4-a716-446655440001',
       dest_port_id: '550e8400-e29b-41d4-a716-446655440002',
     });
-    await expect(updateOrder(ORDER, payload as any)).rejects.toThrow(/cannot be edited/);
+    await expect(updateOrder(ORDER, payload as any)).rejects.toThrow(/현재 상태에서는 오더를 수정할 수 없습니다/);
   });
 });

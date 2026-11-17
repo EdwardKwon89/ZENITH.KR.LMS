@@ -2084,12 +2084,17 @@ UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류
 ## [IMP-185] `Errors` 네임스페이스 zh/ja 신규 문구 초안 검수 (TASK-B-351 산출물)
 
 - **발견 경위**: 2026-11-13, TASK-B-351(Issue #1299)에서 `messages/{zh,ja}.json`의 `Errors` 네임스페이스에 신규 키 6개(`profile_not_found`, `destination_country_not_found`, `label_not_found`, `document_save_failed`, `document_save_failed_after_shipping`, `shxk_validation_failed`)와 SHXK 오류 사전 2건(`未找到订单信息`, `Invalid ShipFrom AddressLine3`)의 zh/ja 문구를 Dave가 초안 작성했다.
+  - **TASK-B-356(Issue #1334) 추가분(10키)**: `auth_invalid_credentials`·`auth_email_not_confirmed`·`auth_account_exists`·`auth_password_invalid`·`auth_rate_limited`·`auth_unexpected`·`auth_signup_failed`·`auth_signup_profile_failed`·`inventory_not_found`·`inventory_below_zero` — zh/ja 초안 검수 동일 대상.
+  - **TASK-B-354(Issue #1330) 추가분(18키)**: `invoice_not_found`·`invoice_already_finalized`·`invoice_already_canceled`·`invoice_finalize_reason_required`·`settlement_order_already_finalized`·`settlement_recalc_locked`·`settlement_items_locked`·`invoice_create_failed`·`cost_name_required`·`cost_amount_invalid`·`cost_currency_required`·`order_edit_status_invalid`·`master_order_bound`·`route_required_for_scheduled`·`measurements_stale`·`inbound_no_measurement_changes`·`ups_edit_registered_locked`·`ups_edit_status_locked` — zh/ja 초안 검수 동일 대상.
+  - **TASK-B-352(Issue #1325) 추가분(9키)**: `not_ups_order`, `ups_actual_cost_status_invalid`, `ups_actual_charge_status_invalid`, `billing_finalize_status_invalid`, `shipper_scope_denied`, `manual_reason_required`, `already_delivered`, `agency_org_missing`, `status_change_denied` — zh/ja 초안 검수 동일 대상.
 - **현재 상태**: 키 세트·ICU 플레이스홀더 일치(`errors-key-sync.test.ts`)는 자동 검증되지만, **문구의 자연스러움/용어 일관성은 사람 검수 대상**이다. Jaison 리뷰에서도 "머지 후 JSJung 검수 대상으로 IMP에 남겨 달라"고 요청.
 - **영향**: 문구 품질 문제로 그치며 기능 오류는 아니다. 다만 고객 노출 문구이므로 검수 전까지 잠정 문구로 운영된다.
 - **목표 구현**: zh/ja 원어민(또는 담당자) 검수 → 필요 시 `messages/{zh,ja}.json` `Errors.*` 및 `SHXK_TRANSLATION_DICT` 문구 수정. 이후 `errors-key-sync` + `translate.test.ts` 기대값 동기 갱신.
 - **관련 파일**: `messages/zh.json`, `messages/ja.json`, `src/lib/shxk/translate.ts`, `tests/unit/i18n/errors-key-sync.test.ts`, `tests/unit/shxk/translate.test.ts`
 - **예상 공수**: 0.1~0.2 MD (검수·문구 수정·테스트 기대값 갱신)
 - **우선순위**: Low — 기능 무관, 표시 문구 품질
+- **TASK-B-355(2026-11-17) 신규 키 목록 추가**: `Errors` **22종** — 보안 문구 원문1:1 8종(`find_member_not_found`, `find_corp_not_found`, `find_corp_admin_not_found`, `internal_error`, `password_reset_failed`, `password_change_failed`, `email_not_available`, `current_password_incorrect`) + 도메인 4종(`grade_promotion_individual_only`, `grade_promotion_pending_exists`, `grade_promotion_already_processed`, `cannot_suspend_self`, `voc_closed_not_revertable` = 5종) + 검증 힌트 9종(`withdraw_confirm_input`, `grade_fill_all_required`, `rate_carrier_from_required`, `rate_slabs_required`, `surcharge_required`, `exchange_amount_date_required`, `zone_date_required`, `qty_required`, `qty_reason_required`) — zh/ja 동일 잠정 초안(사람 검수 대상). **참고**: `qty_required`·`qty_reason_required`는 원문이 영어라 ko/en 동일값(원문 유지) — 한글화 여부는 검수 시 판단. `Errors` 총계 58→**80키**.
+- **TASK-B-353(2026-11-16) 신규 키 목록 추가**: `Errors` 10종(`fetch_failed`, `status_outbound_confirm`, `status_cancel_inbound`, `status_ups_register`, `status_ups_undo`, `status_departure_confirm`, `status_departure_cancel`, `status_departure_undo`, `own_shipper_outbound`, `own_shipper_only`) + `WarehouseOutbound.confirm_outbound_partial_failed` + `WarehouseInbound.{cargo_found, no_measurements, measurements_saved}` — zh/ja 문구는 동일하게 **잠정 초안**(위 사람 검수 대상에 포함). 참고: `zh`·`ja`에는 `WarehouseInbound`·`WarehousePickup` 네임스페이스 자체가 없어(기존 결함, DEF-B-156 계열) 이번에 `WarehouseInbound` 블록을 신규 생성해 신규 3키만 추가했다(기존 키 미생성).
 
 ---
 
@@ -2150,3 +2155,66 @@ UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류
 - **관련 파일**: `next.config.ts`(57행 TODO), `tsconfig.json`, `tests/**`
 - **예상 공수**: 1~2 MD (분류 후 확정)
 - **우선순위**: Low~Medium — 현재 빌드·운영 영향 없음, 단 `experimental` 옵션 의존이라 Next 상향 시 재발 위험(PoC 도구 설정도 `.mjs`로 우회 중, 문서 231 v1.7)
+
+---
+
+## [IMP-191] SHXK createorder `consignee.*` 미전송 8개 필드 — 신규 컬럼·UI 필요 (결정 요청)
+
+- **발견 경위**: 2026-11-16, TASK-B-346 PR③(Issue #1278)에서 SHXK createorder `consignee.*` 18개 필드를 감사한 결과, 명세(`docs/80_RawData/Phase8_UPS_API_리서치_결과.md` 130~147행)에 있으나 현재 payload에 전송되지 않는 8개 필드를 확인했다.
+- **미전송 필드**: `consignee_district`(구/군, 300)·`consignee_doorplate`(문패번호, 300)·`consignee_areacode`(지역코드, 10)·`consignee_mobile`(휴대폰, 100)·`consignee_fax`(팩스, 100)·`consignee_certificatetype`(증명서유형: ID/PP)·`consignee_certificatecode`(증명서번호, 50)·`consignee_credentials_period`(증명서 유효기간, 50).
+- **현재 상태**: 위 8개는 `zen_orders`에 대응 컬럼이 없고 입력 UI도 없어 payload 매핑 자체가 불가능하다. 필수(Y)는 아니나 `district`·`areacode`·`mobile`은 일부 국가(아시아·중남미 등)의 수취인 통관·배송 정확도에 영향을 줄 수 있고, `certificatetype`/`certificatecode`/`credentials_period`는 특정 국가의 신분증 기반 통관에 요구될 수 있다.
+- **목표 구현(택1 또는 단계적)**: ① 컬럼·UI 신설 후 매핑(district·doorplate·areacode·mobile·fax) ② 증명서 3종은 별도 정책 결정 후 진행 ③ 불필요 확정 시 Ds-11 감사 표에 "미전송 확정"으로 종결.
+- **관련 파일**: `supabase/migrations/`(신규), `src/lib/ups/label-mapping.ts`, `src/lib/validation/order.ts`, `src/lib/validation/shxk-limits.ts`, `src/components/orders/OrderRegistrationForm.tsx`, `docs/02_Analysis/Ds_11_API_상세_명세서.md`
+- **예상 공수**: 1.5~3 MD (컬럼·RPC·UI·복원·검증·회귀, 필드 수에 비례)
+- **우선순위**: Low~Medium — 현재 운영상 거부 사례 미확인. 실제 SHXK 거부/반송 로그에서 특정 필드 부재가 원인으로 확인되면 상향.
+- **결정 요청**: Jaison/JSJung — 위 8개 필드별 필요 여부(결정 요청 표는 Issue #1278 PR③ 코멘트 참조).
+
+---
+
+## [IMP-192] `ups-actual-cost`/`ups-actual-charges` 실패 지점의 핵심 알림(`logClientError(CRITICAL)`) 미구성
+
+- **발견 경위**: 2026-11-16, TASK-B-352(Issue #1325)에서 두 파일의 모든 실패 반환 지점에 `logger.error`/`logger.warn`을 보강(#1183 처리)하면서, ZEN_A4 핵심 지점 알림 4기준(금전·고객접점·침묵성·사고이력)을 대조한 결과 **`ups-actual-*`는 3개 기준 해당**(실비·청구 기록=금전 영향 / 오더 상세 화면 노출=고객접점 / #1183 이력)했다.
+- **현재 상태**: B-352는 로그만 보강했고, `logClientError()`(→`zen_error_logs` `/admin/error-logs`) 연동은 Task 지시상 **범위 밖**으로 두었다. 따라서 원가/청구 저장 실패는 Sentry/Axiom/Vercel 로그에는 남으나 운영자 화면(`/admin/error-logs`)에는 자동 노출되지 않는다.
+- **영향**: 정산 금액 정합성에 직결되는 DB 쓰기 실패가 운영자 대시보드에서 보이지 않아, 침묵성 실패(수동 확인 전까지 미인지) 가능성이 남는다.
+- **목표 구현**: `ups-actual-cost.ts`·`ups-actual-charges.ts`의 DB 쓰기 실패(약 20지점) 중 금전 영향 상위 지점(원가 upsert, 인보이스 금액 갱신, 조정 비용 insert/update, 마감 후 조정 실패)에 `logClientError(CRITICAL)` 연동 + 알림 문구/식별자 설계. 기존 #1181~#1185 알림 파이프라인과 중복 방지 정책 확인 필요.
+- **관련 파일**: `src/app/actions/finance/ups-actual-cost.ts`, `src/app/actions/finance/ups-actual-charges.ts`, `src/app/actions/misc/monitoring.ts`(`logClientError`), `GOV_COMMON.md` ZEN_A4
+- **예상 공수**: 0.3~0.5 MD (연동 지점 선정 + 중복/노이즈 정책 + 알림 확인 테스트)
+- **우선순위**: Medium — 기능 장애는 아니나 금전 정합성 영역의 침묵 실패 방지
+
+
+---
+
+## [IMP-193] `settlement`·`orders` 금전/고객접점 실패 지점의 핵심 알림(`logClientError(CRITICAL)`) 미구성
+
+- **발견 경위**: 2026-11-17, TASK-B-354(Issue #1330)에서 `settlement.ts`·`orders.ts`의 사용자 도달 오류를 로케일 문장으로 전환하고 실패 반환/throw 직전에 `logger.error`/`logger.warn`을 보강했다. ZEN_A4 핵심 지점 알림 4기준(금전·고객접점·침묵성·사고이력)을 대조한 결과 정산 마감·마감 후 조정·입금 상태 변경(`settlement.ts`)과 오더 등록/수정/상태 전이(`orders.ts`)가 **3~4개 기준 해당**이다.
+- **현재 상태**: 로그만 보강했고 `logClientError()`(→`zen_error_logs` `/admin/error-logs`) 연동은 Task 지시상 범위 밖. 따라서 정산/인보이스/오더 저장 실패가 운영자 화면에 자동 노출되지 않는다.
+- **영향**: 금전 정합성(인보이스 금액/마감/입금) 및 고객 접점(오더 등록·수정) 실패가 침묵할 수 있다.
+- **목표 구현**: `settlement.ts`(finalize/markInvoiceFinalized/updatePaymentStatus/createPostFinalizationAdjustment)와 `orders.ts`(createOrder/updateOrder/updateOrderStatus)의 DB·RPC 실패 상위 지점에 `logClientError(CRITICAL)` 연동. 기존 #1181~#1185 및 IMP-192(`ups-actual-*`) 알림과 중복·노이즈 방지 정책을 함께 설계.
+- **관련 파일**: `src/app/actions/finance/settlement.ts`, `src/app/actions/operations/orders.ts`, `src/app/actions/misc/monitoring.ts`(`logClientError`), `GOV_COMMON.md` ZEN_A4
+- **예상 공수**: 0.5 MD (지점 선정 + 중복 정책 + 알림 확인 테스트)
+- **우선순위**: Medium — 기능 장애는 아니나 금전/고객접점 영역의 침묵 실패 방지
+
+
+---
+
+## [IMP-194] 상태 전이 거부 사유(`validation.message`·`availability.message`)가 사용자 문구에서 빠짐 — 사유 파라미터화 후속
+
+- **발견 경위**: TASK-B-354(Issue #1330)에서 `orders.ts`의 상태 전이 거부를 `Errors.status_change_denied`/`ups_edit_registered_locked` 등 로케일 키로 대체하면서, 기존에 사용자에게 표시되던 구체 사유(`canChangeStatus().message`, UPS 수정 불가 사유)는 `logger.warn`에만 남게 되었다.
+- **현재 상태**: 사용자는 "상태를 변경할 권한이 없습니다." 같은 일반 문구만 보고, 어떤 규칙에 걸렸는지 알 수 없다(로그에는 남음).
+- **영향**: 관리자/대리점이 상태 변경 실패 원인을 화면에서 파악하기 어려워 문의·재시도 증가 가능.
+- **목표 구현**: `Errors.status_change_denied`에 `{reason}` 파라미터를 추가하고, `canChangeStatus`/`getUpsEditAvailability`의 사유를 로케일별 키(예: `status_change_reason.*`)로 매핑해 전달. 사유 코드 표를 `lib/logistics/status-machine`에 정의.
+- **관련 파일**: `src/app/actions/operations/orders.ts`, `src/lib/logistics/status-machine.ts`, `src/lib/orders/ups-edit-availability.ts`, `messages/{ko,en,zh,ja}.json`
+- **예상 공수**: 0.3~0.5 MD (사유 코드 매핑 + 4개 로케일 문구 + 테스트)
+- **우선순위**: Low~Medium — 기능 장애는 아니나 운영 UX 개선
+
+---
+
+## [IMP-195] `changePassword`·회원가입 비밀번호 정책 위반 사유가 `generic` 치환으로 약화 — Supabase 오류 코드별 세분화 후속
+
+- **발견 경위**: TASK-B-355(B-355 리뷰)에서 `changePassword`의 Supabase 원문 노출을 `generic`으로 치환했고, TASK-B-356(Issue #1334)에서 회원가입 비밀번호 오류도 `Errors.auth_password_invalid`("비밀번호가 보안 정책을 충족하지 않습니다.")로 통일했다. 결과적으로 "최소 길이/문자 조합/재사용 금지" 등 구체 사유가 사용자에게 전달되지 않는다.
+- **현재 상태**: Supabase `AuthApiError`의 `code`(예: `weak_password`)를 활용하지 않고 메시지 문자열 매칭으로만 분기한다.
+- **영향**: 사용자가 비밀번호 정책을 만족시키기 위해 시행착오를 반복할 수 있다(기능 오류는 아님).
+- **목표 구현**: Supabase 오류 `code`/`weak_password.reasons`를 코드별 로케일 문구로 매핑(길이·조합·재사용 등). `changePassword`·`signup` 공통 헬퍼로 정리.
+- **관련 파일**: `src/app/[locale]/(auth)/login/actions.ts`, `src/app/actions/admin/auth.ts`, `messages/{ko,en,zh,ja}.json`
+- **예상 공수**: 0.3 MD (코드 매핑 + 문구 + 테스트)
+- **우선순위**: Low — 보안 정보 비노출은 유지하면서 안내 품질만 개선

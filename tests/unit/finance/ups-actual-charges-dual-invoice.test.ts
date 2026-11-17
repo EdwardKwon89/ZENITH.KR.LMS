@@ -184,6 +184,7 @@ describe('TASK-B-236: recordUpsActualCharges 두 인보이스 동시 갱신 (Iss
     const result = await recordUpsActualCharges(ORDER_ID, CHARGES);
 
     expect(result.success).toBe(false);
-    expect(result.error).toBe('추가 인보이스 생성 실패');
+    // TASK-B-352: 하위 조정 실패 원문은 노출하지 않고 로케일 일반문구+코드로 반환
+    expect(result.error).toBe('요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요. (코드: POST_FINALIZATION_ADJUST)');
   });
 });

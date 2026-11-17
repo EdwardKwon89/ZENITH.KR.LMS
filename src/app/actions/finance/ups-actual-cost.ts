@@ -5,6 +5,7 @@ import { validateUserAction } from '@/lib/auth/guards';
 import { logger } from '@/lib/logger';
 import { getExchangeRate } from '@/lib/finance/exchange-rate';
 import { estimateUpsFreight } from '@/app/actions/ups/freight';
+import { trError } from '@/lib/i18n/action-error';
 
 export interface UpsActualCostInput {
   upsInvoiceNo?: string;
@@ -39,9 +40,11 @@ export interface UpsActualCostResult {
 
 const ADMIN_ROLES = ['ZENITH_SUPER_ADMIN', 'ADMIN', 'MANAGER'] as const;
 
-function assertAdmin(profile: { role: string }) {
-  if (ADMIN_ROLES.includes(profile.role as any)) return;
-  throw new Error('UPS 실제 원가 확정 권한이 없습니다 (ADMIN/MANAGER만 가능).');
+/** TASK-B-352: 권한 실패는 throw 대신 로케일 문장을 반환한다(사용자 도달 경로). */
+async function assertAdmin(profile: { role: string } | null): Promise<string | null> {
+  if (profile && ADMIN_ROLES.includes(profile.role as any)) return null;
+  logger.warn(`[assertAdmin] Denied for role: ${profile?.role ?? 'unknown'}`);
+  return trError('permission_denied');
 }
 
 function toNum(v: unknown): number {
@@ -80,7 +83,10 @@ export async function getUpsActualCost(orderId: string) {
     .eq('order_id', orderId)
     .maybeSingle();
 
-  if (error) throw new Error(`실제 원가 조회 실패: ${error.message}`);
+  if (error) {
+    logger.error('getUpsActualCost: zen_ups_actual_cost select failed', error);
+    throw new Error(await trError('generic', { code: 'ACTUAL_COST_LOOKUP' }));
+  }
   return data;
 }
 
@@ -153,7 +159,8 @@ export async function recordUpsActualCost(
 ): Promise<UpsActualCostResult> {
   try {
     const { supabase, user, profile } = await validateUserAction();
-    assertAdmin(profile);
+    const permErr = await assertAdmin(profile);
+    if (permErr) return { success: false, error: permErr };
 
     const { data: order, error: orderError } = await supabase
       .from('zen_orders')
@@ -174,10 +181,18 @@ export async function recordUpsActualCost(
       .eq('id', orderId)
       .single();
 
-    if (orderError || !order) return { success: false, error: '오더를 찾을 수 없습니다.' };
-    if (order.transport_mode !== 'UPS') return { success: false, error: 'UPS 오더가 아닙니다.' };
+    if (orderError || !order) {
+      if (orderError) logger.error('recordUpsActualCost: zen_orders select failed', orderError);
+      else logger.warn(`recordUpsActualCost: order not found (${orderId})`);
+      return { success: false, error: await trError('order_not_found') };
+    }
+    if (order.transport_mode !== 'UPS') {
+      logger.warn(`recordUpsActualCost: not a UPS order (${orderId})`);
+      return { success: false, error: await trError('not_ups_order') };
+    }
     if (order.status !== 'IN_TRANSIT' && order.status !== 'DELIVERED') {
-      return { success: false, error: '오더가 IN_TRANSIT 또는 DELIVERED 상태일 때만 실제 원가를 입력할 수 있습니다.' };
+      logger.warn(`recordUpsActualCost: invalid status ${order.status} (${orderId})`);
+      return { success: false, error: await trError('ups_actual_cost_status_invalid') };
     }
 
     const rawSnapshot = (order as any).snapshot;
@@ -205,7 +220,10 @@ export async function recordUpsActualCost(
       },
       { onConflict: 'order_id' }
     );
-    if (upsertError) return { success: false, error: `실제 원가 저장 실패: ${upsertError.message}` };
+    if (upsertError) {
+      logger.error('recordUpsActualCost: zen_ups_actual_cost upsert failed', upsertError);
+      return { success: false, error: await trError('generic', { code: 'ACTUAL_COST_SAVE' }) };
+    }
 
     // 2. RELEASED 일자 기준 HKD/KRW 환율 → KRW 환산 원가
     const releasedDate = await getOrderReleasedDate(supabase, orderId, order.created_at);
@@ -216,7 +234,10 @@ export async function recordUpsActualCost(
       .from('zen_ups_actual_cost')
       .update({ applied_exchange_rate: exchangeRate, total_cost_krw: totalCostKrw })
       .eq('order_id', orderId);
-    if (updateError) return { success: false, error: `원가 환산 저장 실패: ${updateError.message}` };
+    if (updateError) {
+      logger.error('recordUpsActualCost: exchange rate update failed', updateError);
+      return { success: false, error: await trError('generic', { code: 'ACTUAL_COST_EXCHANGE_SAVE' }) };
+    }
 
     // 3. 부피/최종중량 변경 시 agency/shipper 매출 연동 재계산
     const weightOrDimsChanged =
@@ -246,7 +267,10 @@ export async function recordUpsActualCost(
         .filter('metadata->>source_order_id', 'eq', orderId)
         .neq('status', 'CANCELED');
 
-      if (invError) return { success: false, error: `인보이스 조회 실패: ${invError.message}` };
+      if (invError) {
+        logger.error('recordUpsActualCost: zen_invoices lookup failed', invError);
+        return { success: false, error: await trError('generic', { code: 'INVOICE_LOOKUP' }) };
+      }
 
       const shipperInvoices = (existingInvoices || []).filter(
         (inv: any) => inv.invoice_tier === 'AGENCY_TO_SHIPPER' || inv.invoice_tier === 'ADMIN_TO_SHIPPER'
@@ -265,7 +289,10 @@ export async function recordUpsActualCost(
             const res = await createPostFinalizationAdjustment(
               orderId, agencyDelta, agencyInvoice.currency || 'USD', user.id, agencyInvoice.id
             );
-            if (!res.success) return { success: false, error: `ADMIN_TO_AGENCY 마감 후 조정 실패: ${res.error}` };
+            if (!res.success) {
+              logger.error('recordUpsActualCost: ADMIN_TO_AGENCY post-finalization adjustment failed', res.error);
+              return { success: false, error: await trError('generic', { code: 'POST_FINALIZATION_ADJUST' }) };
+            }
           }
         } else {
           const meta = (agencyInvoice.metadata || {}) as Record<string, any>;
@@ -283,7 +310,10 @@ export async function recordUpsActualCost(
             .from('zen_invoices')
             .update({ total_amount: revenue.newAgencyTotal, metadata: { ...meta, platform_breakdown: newBreakdown } })
             .eq('id', agencyInvoice.id);
-          if (updErr) return { success: false, error: `ADMIN_TO_AGENCY 인보이스 갱신 실패: ${updErr.message}` };
+          if (updErr) {
+            logger.error('recordUpsActualCost: ADMIN_TO_AGENCY invoice update failed', updErr);
+            return { success: false, error: await trError('generic', { code: 'INVOICE_UPDATE' }) };
+          }
         }
       }
 
@@ -299,7 +329,10 @@ export async function recordUpsActualCost(
             const res = await createPostFinalizationAdjustment(
               orderId, shipperDelta, inv.currency || 'USD', user.id, inv.id
             );
-            if (!res.success) return { success: false, error: `화주 인보이스 마감 후 조정 실패: ${res.error}` };
+            if (!res.success) {
+              logger.error('recordUpsActualCost: shipper post-finalization adjustment failed', res.error);
+              return { success: false, error: await trError('generic', { code: 'POST_FINALIZATION_ADJUST' }) };
+            }
           }
           continue;
         }
@@ -321,21 +354,30 @@ export async function recordUpsActualCost(
             is_revenue: true,
             invoice_id: inv.id,
           });
-          if (insErr) return { success: false, error: `화주 조정 비용 생성 실패: ${insErr.message}` };
+          if (insErr) {
+            logger.error('recordUpsActualCost: shipper adjustment cost insert failed', insErr);
+            return { success: false, error: await trError('generic', { code: 'ADJUSTMENT_COST_CREATE' }) };
+          }
         }
 
         const { data: linkedCosts, error: costsError } = await supabase
           .from('zen_order_costs')
           .select('unit_price, quantity')
           .eq('invoice_id', inv.id);
-        if (costsError) return { success: false, error: `연결 비용 조회 실패: ${costsError.message}` };
+        if (costsError) {
+          logger.error('recordUpsActualCost: linked cost lookup failed', costsError);
+          return { success: false, error: await trError('generic', { code: 'LINKED_COST_LOOKUP' }) };
+        }
 
         const newTotal = (linkedCosts || []).reduce((sum, c) => sum + toNum(c.unit_price) * toNum(c.quantity), 0);
         const { error: updInvErr } = await supabase
           .from('zen_invoices')
           .update({ total_amount: newTotal })
           .eq('id', inv.id);
-        if (updInvErr) return { success: false, error: `화주 인보이스 금액 갱신 실패: ${updInvErr.message}` };
+        if (updInvErr) {
+          logger.error('recordUpsActualCost: shipper invoice amount update failed', updInvErr);
+          return { success: false, error: await trError('generic', { code: 'INVOICE_AMOUNT_UPDATE' }) };
+        }
       }
     }
 
@@ -353,7 +395,7 @@ export async function recordUpsActualCost(
     };
   } catch (err: any) {
     logger.error('Error recording UPS actual cost:', err);
-    return { success: false, error: err.message || '알 수 없는 서버 오류' };
+    return { success: false, error: await trError('generic', { code: 'UNEXPECTED' }) };
   }
 }
 
@@ -364,7 +406,8 @@ export async function previewUpsActualCost(
 ): Promise<UpsActualCostResult> {
   try {
     const { supabase, profile } = await validateUserAction();
-    assertAdmin(profile);
+    const permErr = await assertAdmin(profile);
+    if (permErr) return { success: false, error: permErr };
 
     const { data: order, error: orderError } = await supabase
       .from('zen_orders')
@@ -384,8 +427,15 @@ export async function previewUpsActualCost(
       .eq('id', orderId)
       .single();
 
-    if (orderError || !order) return { success: false, error: '오더를 찾을 수 없습니다.' };
-    if (order.transport_mode !== 'UPS') return { success: false, error: 'UPS 오더가 아닙니다.' };
+    if (orderError || !order) {
+      if (orderError) logger.error('UPS actual cost: zen_orders select failed', orderError);
+      else logger.warn(`UPS actual cost: order not found (${orderId})`);
+      return { success: false, error: await trError('order_not_found') };
+    }
+    if (order.transport_mode !== 'UPS') {
+      logger.warn(`UPS actual cost: not a UPS order (${orderId})`);
+      return { success: false, error: await trError('not_ups_order') };
+    }
 
     const rawSnapshot = (order as any).snapshot;
     const snapshotMeta = (Array.isArray(rawSnapshot) ? rawSnapshot?.[0]?.metadata : rawSnapshot?.metadata) as Record<string, any> | null;
@@ -414,7 +464,7 @@ export async function previewUpsActualCost(
     return { success: true, releasedDate, appliedExchangeRate: exchangeRate, hkdTotal, totalCostKrw, recalc };
   } catch (err: any) {
     logger.error('Error previewing UPS actual cost:', err);
-    return { success: false, error: err.message || '알 수 없는 서버 오류' };
+    return { success: false, error: await trError('generic', { code: 'UNEXPECTED' }) };
   }
 }
 
@@ -433,8 +483,9 @@ export async function recordActualCostAndFinalize(
 ): Promise<UpsActualCostResult & { finalized?: boolean }> {
   try {
     const { supabase, profile, user } = await validateUserAction();
-    if (!profile) throw new Error('User profile not found');
-    assertAdmin(profile);
+    if (!profile) return { success: false, error: await trError('profile_not_found') };
+    const permErr = await assertAdmin(profile);
+    if (permErr) return { success: false, error: permErr };
 
     // 1. 오더 조회
     const { data: order, error: orderError } = await supabase
@@ -443,12 +494,20 @@ export async function recordActualCostAndFinalize(
       .eq('id', orderId)
       .single();
 
-    if (orderError || !order) return { success: false, error: '오더를 찾을 수 없습니다.' };
-    if (order.transport_mode !== 'UPS') return { success: false, error: 'UPS 오더가 아닙니다.' };
+    if (orderError || !order) {
+      if (orderError) logger.error('UPS actual cost: zen_orders select failed', orderError);
+      else logger.warn(`UPS actual cost: order not found (${orderId})`);
+      return { success: false, error: await trError('order_not_found') };
+    }
+    if (order.transport_mode !== 'UPS') {
+      logger.warn(`UPS actual cost: not a UPS order (${orderId})`);
+      return { success: false, error: await trError('not_ups_order') };
+    }
 
     // 2. 상태 검증 (IN_TRANSIT 또는 DELIVERED에서만 가능)
     if (!['IN_TRANSIT', 'DELIVERED'].includes(order.status)) {
-      return { success: false, error: 'IN_TRANSIT 또는 DELIVERED 상태에서만 청구확정이 가능합니다.' };
+      logger.warn(`recordActualCostAndFinalize: invalid status ${order.status} (${orderId})`);
+      return { success: false, error: await trError('billing_finalize_status_invalid') };
     }
 
     // 3. 출고확정일 환율 조회
@@ -496,8 +555,8 @@ export async function recordActualCostAndFinalize(
       }, { onConflict: 'order_id' });
 
     if (upsertError) {
-      logger.error('Error upserting actual cost:', upsertError);
-      return { success: false, error: `실제 원가 저장 실패: ${upsertError.message}` };
+      logger.error('recordActualCostAndFinalize: zen_ups_actual_cost upsert failed', upsertError);
+      return { success: false, error: await trError('generic', { code: 'ACTUAL_COST_SAVE' }) };
     }
 
     // 6. 기타부가운임 저장 (zen_ups_actual_other_charges)
@@ -522,8 +581,8 @@ export async function recordActualCostAndFinalize(
           .insert(charges);
 
         if (chargesError) {
-          logger.error('Error inserting other charges:', chargesError);
-          return { success: false, error: `기타부가운임 저장 실패: ${chargesError.message}` };
+          logger.error('recordActualCostAndFinalize: other charges insert failed', chargesError);
+          return { success: false, error: await trError('generic', { code: 'OTHER_CHARGES_SAVE' }) };
         }
       }
     }
@@ -554,6 +613,6 @@ export async function recordActualCostAndFinalize(
     };
   } catch (err: any) {
     logger.error('Error recording actual cost and finalizing:', err);
-    return { success: false, error: err.message || '알 수 없는 서버 오류' };
+    return { success: false, error: await trError('generic', { code: 'UNEXPECTED' }) };
   }
 }

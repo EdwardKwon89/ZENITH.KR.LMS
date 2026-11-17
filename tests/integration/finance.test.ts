@@ -141,7 +141,7 @@ describe('ZENITH Finance Integration: WBS 3.2 Integrity Test', () => {
       });
 
       await expect(updatePaymentStatus('inv-101', 'PAID', 1000))
-        .rejects.toThrow("결제 상태를 수정할 권한이 없습니다.");
+        .rejects.toThrow("권한이 없습니다.");
     });
 
     it('TC-F.6: [Policy] 인보이스가 생성된 오더는 상태 변경이 제한되어야 함 (Data Integrity)', async () => {
