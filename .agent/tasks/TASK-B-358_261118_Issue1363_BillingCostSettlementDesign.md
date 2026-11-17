@@ -308,7 +308,7 @@ export function computeUpsActualCostKrw(
 ## 10. [작업 결과]
 
 - 코드 커밋: **없음**(설계 단계)
-- 문서 커밋(초판): `826faf33e` / **보완 커밋**: (push 후 기재)
+- 문서 커밋(초판): `826faf33e` / **보완 커밋**: `477841f07` (`[Dave] docs: TASK-B-358 설계 보완 — 항목별 통화·스키마 중복 제거·판별 표지 보강`)
 - PR: #1373 (`Refs #1363`, 라벨 `status:draft` 유지)
 - base: `origin/TeamB_Dev` @ `4ba3e8184` (#1372 동기화 머지 반영, rebase 완료)
 
