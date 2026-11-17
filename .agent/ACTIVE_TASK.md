@@ -50,6 +50,7 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
+| [#1363](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1363) | [Team B] TASK-B-358: 청구서관리 ① 오더정산 상태·원가 계산 통합 — 설계 의견 단계 | b | p2 | open | 미배정 | 2026-11-17 |
 | [#1362](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1362) | [Aiden → Team B] DEF-151 UPS 요율 조회 액션 원가 포함 반환·가드 공백, /agency/other-charges 원가 노출 수정 요청 | b | p1 | open | 미배정 | 2026-11-17 |
 | [#1356](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1356) | [Aiden → Team B] DEF-150 finance/UPS 실비·정산 액션 대리점 필터 누락·가드 공백 수정 요청 | b | p1 | open | 미배정 | 2026-11-17 |
 | [#1349](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1349) | [Aiden] DEF-149 §1.1 — agency/shippers.ts 대리점 소유권 검증 누락(교차 테넌트 IDOR) 수정 요청 (Team B 소유) | b | p1 | open | 미배정 | 2026-11-17 |
