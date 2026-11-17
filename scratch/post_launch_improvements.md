@@ -2218,3 +2218,13 @@ UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류
 - **관련 파일**: `src/app/[locale]/(auth)/login/actions.ts`, `src/app/actions/admin/auth.ts`, `messages/{ko,en,zh,ja}.json`
 - **예상 공수**: 0.3 MD (코드 매핑 + 문구 + 테스트)
 - **우선순위**: Low — 보안 정보 비노출은 유지하면서 안내 품질만 개선
+
+## [IMP-196] SHXK 핵심 지점 실시간 알림 구성 (createorder·getnewlabel·pollTracking)
+
+- **발견 경위**: 2026-11-17, TASK-B-357(#1351) 로그 커버리지 작업의 핵심 지점 알림 4기준 판정 중 확인 — 특히 `app/api/cron/ups-tracking-poll/route.ts`의 `if (!trackData) continue`는 폴링 실패를 **무음으로 건너뛰어**(이전엔 로그조차 없었음) DEF-B-142(SHXK 인증키 미등록 장기간 무음 사고)와 같은 침묵 실패 패턴이 남아있었다.
+- **현재 상태**: TASK-B-357로 `lib/shxk/order.ts`·`tracking.ts` 실패 분기에 `logger.warn/error`가 도입되어 **로그는 남지만**, 능동 통지(알림)는 없다 — 운영자가 로그를 능동 확인해야만 알 수 있다.
+- **임시 조치**: TASK-B-357의 logger 도입(로그 확보) + cron/호출자 기존 로그.
+- **목표 구현**: 4기준 중2개 이상 해당 지점(`createorder`②고객접점+④사고이력, `getnewlabel`②+④, `pollTracking` cron 경로③침묵성+④)의 실패 시 GOV 핵심 지점 실시간 알림 경로(`logClientError` severity `CRITICAL` → zen_error_logs + 인앱+이메일, GOV v3.4/v3.5)로 자동 통지. 대상·심각도 임계값 설계 필요.
+- **관련 파일**: `src/lib/shxk/order.ts`, `src/lib/shxk/tracking.ts`, `src/app/api/cron/ups-tracking-poll/route.ts`, `src/app/actions/misc/monitoring.ts`(logClientError)
+- **예상 공수**: 0.5~1 MD (알림 경로 재사용 시 하한)
+- **우선순위**: High —침묵성(③, cron) + 과거 사사(④, DEF-B-142) 동시 해당
