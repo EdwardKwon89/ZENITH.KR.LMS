@@ -2126,3 +2126,27 @@ UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류
 - **관련 파일**: `scripts/next-task-number.sh`, `scripts/next-def-number.sh`, R-19(번호 채번 규칙)
 - **예상 공수**: 0.2 MD
 - **우선순위**: Medium — 번호 중복은 Issue #358에서 이미 반복 확인된 사고 유형
+
+---
+
+## [IMP-189] `admin` 서버 액션 15모듈의 역할 판정이 인라인 중복 — RBAC 권한표(`checkPermission`) 미사용
+
+- **발견 경위**: 2026-11-15, TASK-1151(Issue #1314 / DEF-146) 취약점 도달 가능성 분석 중 "미들웨어를 우회하면 남는 2차 방어선"을 추적하다 발견(DEF-147 참조).
+- **현재 상태**: `src/app/actions/admin/*.ts` 15모듈 중 `checkPermission()` 사용 **0건**. 역할 판정은 ① `validateAdminAction()` 6모듈 ② `profile.role !== USER_ROLES.X` 인라인 비교 6모듈 ③ 역할 검사 없음 1모듈(`auth.ts`, 본인 계정 작업)로 **분산**되어 있다. 모듈마다 허용 역할 집합이 조금씩 달라(`ADMIN`만 / `ADMIN+MANAGER` / `ADMIN+MANAGER+CUSTOMS_BROKER` 등) 권한표를 코드로 파악할 수 없고, 페이지 레벨 게이트도 22건 중 11건이 없다(DEF-147).
+- **임시 조치**: 현행 유지. TASK-1151 보고서 §3.1과 DEF-147에 실태 표를 남겨 판단 근거 확보.
+- **목표 구현**: IMP-001(RBAC DB 기반 전환)과 함께 — `admin` 액션의 역할 판정을 `checkPermissionDB`/`checkPermission` 단일 경로로 통일하고, 허용 역할 집합은 `rbac.ts` 권한표로 이동. 아울러 `admin/layout.tsx` 서버측 역할 게이트 신설(DEF-147 권장 조치 1)로 페이지·액션 이중 방어 구조 확립.
+- **관련 파일**: `src/app/actions/admin/*.ts`, `src/lib/auth/rbac.ts`, `src/lib/auth/guards.ts`, `src/app/[locale]/(dashboard)/admin/layout.tsx`(신설), `src/lib/auth/proxy.ts`, `.agent/defects/DEF-147_admin페이지_역할게이트_미들웨어단독.md`
+- **예상 공수**: 0.5~1 MD (역할 정책 확정 + 액션 15모듈 정리 + 페이지 게이트 + 회귀)
+- **우선순위**: Medium — 현재 직접 유출은 미확인(액션 가드·RLS가 2차 방어)이나 미들웨어 우회 취약점과 결합 시 노출. IMP-001과 동일 방향이라 통합 진행이 효율적
+
+---
+
+## [IMP-190] `tests/**` 기존 타입 오류 212건 — Next 16.3+ `tsc` CLI 타입 검사에서 빌드 실패 요인
+
+- **발견 경위**: 2026-11-16, TASK-1153(Issue #1320 / DEF-146 P0) `next` 16.4.6 상향 중 D_Kai가 발견. Next 16.3+는 `experimental.useTypeScriptCli` 기본값이 tsc CLI라 `tests/**`의 기존 타입 오류가 표면화되어 `npm run build`가 실패했다.
+- **현재 상태**: `next.config.ts`에 `experimental: { useTypeScriptCli: false }`(+ `TODO(IMP-190)`)를 두어 16.2.4와 동일한 동작(JS 컴파일러 API)을 유지 중. CI 타입 검사는 advisory(IMP-134)이며 오류 212건은 그대로다.
+- **임시 조치**: 위 옵션으로 빌드 통과 유지. 이 옵션은 실험적(`experimental`)이라 이후 Next 버전에서 제거·변경될 수 있다 — Next 상향 때마다 `npm run build` 결과를 확인한다.
+- **목표 구현**: `tests/**` 타입 오류를 정리하거나 `tsconfig`에서 tests를 빌드 대상에서 분리(별도 `tsconfig.test.json`)한 뒤 `useTypeScriptCli: false` 제거. 오류 212건의 분류(구 mock 타입·`any` 누락 등)를 먼저 측정.
+- **관련 파일**: `next.config.ts`(57행 TODO), `tsconfig.json`, `tests/**`
+- **예상 공수**: 1~2 MD (분류 후 확정)
+- **우선순위**: Low~Medium — 현재 빌드·운영 영향 없음, 단 `experimental` 옵션 의존이라 Next 상향 시 재발 위험(PoC 도구 설정도 `.mjs`로 우회 중, 문서 231 v1.7)
