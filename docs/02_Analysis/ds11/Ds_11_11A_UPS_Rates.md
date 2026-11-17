@@ -179,3 +179,183 @@ Team A가 제공하는 API 계약 — Team B가 오더 등록 화면 연동 시 
 - **Admin CRUD**: `rates-mutation.ts`의 `createUpsSurgeFee`/`updateUpsSurgeFee`/`deleteUpsSurgeFee` (11.2 참조), `/admin/ups-rates` "급증 수수료" 탭.
 - **운영 프로세스**: UPS 공지(PDF/URL) 수신 시 관리자가 Admin UI에서 직접 등록. URL 기반 AI 자동 파싱은 Jungjs 제안 — 후속 개선 과제로 분리(이번 스코프 아님).
 
+
+### 11.15 UPS 요율·원가 마스터 조회 Actions (`src/app/actions/ups/rates.ts` — TASK-1164 / Issue #1360)
+
+#### getUpsZones()
+- **Path**: `src/app/actions/ups/rates.ts:18-27`
+- **설명**: 활성 상태(`is_active = true`)인 UPS Zone 목록(`zen_ups_zones`)과 각 Zone에 매핑된 국가 목록(`countries:zen_ups_zone_countries(*)`)을 `sort_order` 오름차순으로 조회합니다.
+- **권한**: `validateUserAction()` (`src/app/actions/ups/rates.ts:19`, 로그인 세션만 검증하며 별도 역할 가드 없음 — DB RLS `ups_zones_authenticated_select` 및 `ups_zone_countries_authenticated_select`로 인증 사용자 전체 조회 허용)
+- **Input**: 없음 (`()`)
+- **Output**: `Promise<UpsZoneWithCountries[]>` (`src/types/ups.ts:29-31`, `zones ?? []`)
+- **오류**: 미인증/프로필 부재 시 `validateUserAction()`에서 `Error("Login required")` / `Error("Profile not found")` throw (`guards.ts:44-65`); DB 조회 실패 시 `Error(error.message)` throw (`rates.ts:25`)
+
+#### getUpsProducts(cargoType?)
+- **Path**: `src/app/actions/ups/rates.ts:29-39`
+- **설명**: 활성 상태(`is_active = true`)인 UPS 서비스 상품 목록(`zen_ups_products`)을 조회하며, `cargoType` 전달 시 해당 화물 유형(`'DOC' | 'NON_DOC' | 'BOTH'`)으로 필터링하여 `sort_order` 오름차순으로 반환합니다.
+- **권한**: `validateUserAction()` (`src/app/actions/ups/rates.ts:30`, 로그인 세션만 검증 — DB RLS `ups_products_authenticated_select` 적용)
+- **Input**: `cargoType?: UpsCargoType` (`'DOC' | 'NON_DOC' | 'BOTH'`, 선택, `src/types/ups.ts:4`)
+- **Output**: `Promise<UpsProduct[]>` (`src/types/ups.ts:33-45`, `data ?? []`)
+- **오류**: 미인증 시 `validateUserAction()` 예외 throw; DB 조회 실패 시 `Error(error.message)` throw (`rates.ts:37`)
+
+#### getUpsBaseRates(filters?)
+- **Path**: `src/app/actions/ups/rates.ts:41-67`
+- **설명**: 기준일(`referenceDate`, 미전달 시 오늘 `YYYY-MM-DD`)에 유효하고 활성 상태(`is_active = true`)인 UPS 기준요금(`zen_ups_base_rates`, 판매가 `selling_price` 및 원가 `cost_price` 포함, `product`·`zone` 조인)을 `fetchAllRows`(1,000행 단위 페이지네이션, `weight_kg`·`id` 정렬)로 전수 조회합니다.
+- **권한**: `validateUserAction()` (`src/app/actions/ups/rates.ts:46`, 액션 레벨 역할 가드 없음 — DB RLS `ups_base_rates_agency_select`·`ups_base_rates_shipper_select`가 활성 행 SELECT를 허용하므로 비관리자 직접 호출 시 `cost_price` 원가 컬럼 노출 가능, `DEF-151` 참조)
+- **Input**: `filters?: { productId?: string; zoneId?: string; referenceDate?: string }` (모두 선택; `referenceDate`는 `YYYY-MM-DD`, 기본값 오늘)
+- **Output**: `Promise<UpsBaseRateWithRefs[]>` (`src/types/ups.ts:47-65`, 통화 기본 `'KRW'`, 중량 0.5kg 단위)
+- **오류**: 미인증 시 `validateUserAction()` 예외 throw; 페이지네이션 쿼리 실패 시 `fetchAllRows`에서 `Error(error?.message ?? 'query failed')` throw (`src/lib/ups/paginate-all.ts:19`)
+
+#### getUpsFuelSurcharge(productId?, referenceDate?)
+- **Path**: `src/app/actions/ups/rates.ts:69-85`
+- **설명**: 기준일(`referenceDate`, 기본값 오늘) 이전(`effective_week <= refDate`)의 가장 최근 UPS 유류할증료율(`zen_ups_fuel_surcharges`, `selling_rate`·`cost_rate` 비율 포함) 단건을 조회합니다 (`productId` 전달 시 해당 상품 또는 공통 `product_id IS NULL` 조건 매칭).
+- **권한**: `validateUserAction()` (`src/app/actions/ups/rates.ts:73`, 액션 레벨 역할 가드 없음 — DB RLS `ups_fuel_surcharges_authenticated_select`로 인증 사용자 전체 조회 허용되어 `cost_rate` 원가율 노출 가능, `DEF-151` 참조)
+- **Input**: `productId?: string | null` (UPS 상품 UUID, 선택), `referenceDate?: string` (`YYYY-MM-DD`, 기본값 오늘)
+- **Output**: `Promise<UpsFuelSurcharge | null>` (`src/types/ups.ts:67-75`, `data?.[0] ?? null`)
+- **오류**: 미인증 시 `validateUserAction()` 예외 throw; DB 조회 실패 시 `Error(error.message)` throw (`rates.ts:83`)
+
+#### getUpsOtherCharges()
+- **Path**: `src/app/actions/ups/rates.ts:87-96`
+- **설명**: 활성 상태(`is_active = true`)인 UPS 공통 부가요금 목록(`zen_ups_other_charges`, `selling_price`·`cost_price`·`unit`·`fuel_surcharge_applicable` 포함)을 `charge_code` 오름차순으로 조회합니다.
+- **권한**: `validateUserAction()` (`src/app/actions/ups/rates.ts:88`, 액션 레벨 역할 가드 없음 — `/agency/other-charges` 페이지에서도 호출되어 `cost_price`가 RSC payload에 포함됨, `DEF-151` 참조)
+- **Input**: 없음 (`()`)
+- **Output**: `Promise<UpsOtherCharge[]>` (`src/types/ups.ts:77-89`, `data ?? []`, 통화 기본 `'KRW'`)
+- **오류**: 미인증 시 `validateUserAction()` 예외 throw; DB 조회 실패 시 `Error(error.message)` throw (`rates.ts:94`)
+
+#### getUpsSurgeFees()
+- **Path**: `src/app/actions/ups/rates.ts:99-108`
+- **설명**: Admin 관리 화면용으로 도착국별 UPS 급증 긴급 수수료 전체 이력(`zen_ups_surge_fees`, 과거 기간 포함, `selling_rate_per_kg`·`cost_rate_per_kg` 포함)을 `destination_country_code` 오름차순·`effective_from` 내림차순으로 조회합니다.
+- **권한**: `validateUserAction()` (`src/app/actions/ups/rates.ts:100`, 액션 레벨 역할 가드 및 `is_active` 필터 없음 — DB RLS `ups_surge_fees_authenticated_select`가 `is_active = true` 행을 인증 사용자 전체에 허용하므로 비관리자 호출 시 `cost_rate_per_kg` 노출 가능, `DEF-151` 참조)
+- **Input**: 없음 (`()`)
+- **Output**: `Promise<UpsSurgeFee[]>` (`src/types/ups.ts:107-118`, `data ?? []`, kg당 단가, 통화 기본 `'KRW'`)
+- **오류**: 미인증 시 `validateUserAction()` 예외 throw; DB 조회 실패 시 `Error(error.message)` throw (`rates.ts:106`)
+
+#### getUpsWeightTierRates()
+- **Path**: `src/app/actions/ups/rates.ts:110-119`
+- **설명**: 활성 상태(`is_active = true`)인 20kg 초과 구간별 kg당 단가 요율 목록(`zen_ups_weight_tier_rates`, `price_per_kg_selling`·`price_per_kg_cost` 및 `product`·`zone` 조인 포함)을 `tier_min_kg` 오름차순으로 조회합니다.
+- **권한**: `validateUserAction()` (`src/app/actions/ups/rates.ts:111`, 액션 레벨 역할 가드 없음 — DB RLS가 `AGENCY`·`CORPORATE`·`INDIVIDUAL`의 활성 행 SELECT를 허용하므로 비관리자 직접 호출 시 `price_per_kg_cost` 노출 가능, `DEF-151` 참조)
+- **Input**: 없음 (`()`)
+- **Output**: `Promise<UpsWeightTierRateWithRefs[]>` (`src/types/ups.ts:275-290, 305-308`, `data ?? []`)
+- **오류**: 미인증 시 `validateUserAction()` 예외 throw; DB 조회 실패 시 `Error(error.message)` throw (`rates.ts:117`)
+
+#### getUpsFreightMinimums()
+- **Path**: `src/app/actions/ups/rates.ts:121-129`
+- **설명**: 활성 상태(`is_active = true`)인 Freight 상품 최소 청구 운임 목록(`zen_ups_freight_minimums`, `min_charge_selling`·`min_charge_cost` 및 `product`·`zone` 조인 포함)을 조회합니다.
+- **권한**: `validateUserAction()` (`src/app/actions/ups/rates.ts:122`, 액션 레벨 역할 가드 없음 — DB RLS가 `AGENCY`·`CORPORATE`·`INDIVIDUAL`의 활성 행 SELECT를 허용하므로 비관리자 직접 호출 시 `min_charge_cost` 노출 가능, `DEF-151` 참조)
+- **Input**: 없음 (`()`)
+- **Output**: `Promise<UpsFreightMinimumWithRefs[]>` (`src/types/ups.ts:292-303, 310-313`, `data ?? []`)
+- **오류**: 미인증 시 `validateUserAction()` 예외 throw; DB 조회 실패 시 `Error(error.message)` throw (`rates.ts:127`)
+
+### 11.16 UPS 요율·대리점 정책·부피계수 변경 Actions (`src/app/actions/ups/rates-mutation.ts` — TASK-1164 / Issue #1360)
+
+#### upsertAgencyCostRate(data)
+- **Path**: `src/app/actions/ups/rates-mutation.ts:124-156`
+- **설명**: 기존 등록된 UPS 기준요금 행(`zen_ups_base_rates`, `product_id + zone_id + weight_kg + valid_from` 일치)을 찾아 원가(`cost_price`)와 `updated_at`만 수정합니다 (Issue #618, Master Agency `SUB_ADMIN` 원가 편집 지원).
+- **권한**: `validateUserAction()` + `requireAdminManagerOrSubAdmin(profile?.role)` (`rates-mutation.ts:17-21, 131-132`, 허용 역할: `ADMIN`, `MANAGER`, `ZENITH_SUPER_ADMIN`, `SUB_ADMIN`) + `createAdminClient()`(service_role로 `zen_ups_base_rates` RLS 우회 업데이트, `L134`)
+- **Input**: `data: { product_id: string; zone_id: string; weight_kg: number; valid_from: string; cost_price: number }`
+- **Output**: `Promise<void>`
+- **오류**: 미인증 시 `validateUserAction()` 예외 throw; 역할 불충족 시 `Error("Agency 원가 할인율 관리 권한이 없습니다.")` throw (`L19`); 대상 기준요금 미존재 또는 조회 실패 시 `Error("해당 기준요금을 찾을 수 없습니다. 기준요금이 먼저 등록되어야 합니다.")` throw (`L145-147`); DB 업데이트 실패 시 `Error(updateError.message)` throw (`L154`)
+- **부수효과**: `zen_ups_base_rates.cost_price` 업데이트(`L149-152`), `revalidatePath('/admin/ups-rates')` (`L155`)
+
+#### getAgencyPricingPolicies(agencyOrgId?)
+- **Path**: `src/app/actions/ups/rates-mutation.ts:255-265`
+- **설명**: 활성 상태(`is_active = true`)인 대리점별 UPS Zone 할인율 정책 목록(`zen_agency_pricing_policies`, `agency:agency_org_id(name)`·`zone:zone_id(zone_code, zone_name)` 조인)을 `agency_org_id` 오름차순으로 조회합니다 (`agencyOrgId` 전달 시 해당 대리점으로 필터링).
+- **권한**: `validateUserAction()` (`rates-mutation.ts:256`, 액션 레벨 역할 가드 및 `agencyOrgId === profile.org_id` 소유권 검증 없음 — 일반 세션 클라이언트를 통해 DB RLS `agency_pricing_policies_admin_all`·`agency_pricing_policies_sub_admin_scoped`·`agency_pricing_policies_agency_select`에만 의존, `DEF-151` 참조)
+- **Input**: `agencyOrgId?: string` (대리점 조직 UUID, 선택)
+- **Output**: `Promise<Array<Record<string, unknown>>>` (`zen_agency_pricing_policies` 행 + `agency`·`zone` 조인 배열, `data ?? []`)
+- **오류**: 미인증 시 `validateUserAction()` 예외 throw; DB 조회 실패 시 `Error(error.message)` throw (`rates-mutation.ts:263`)
+
+#### upsertUpsWeightTierRate(data)
+- **Path**: `src/app/actions/ups/rates-mutation.ts:290-312`
+- **설명**: 20kg 초과 구간별 kg당 단가 요율(`zen_ups_weight_tier_rates`)을 `onConflict: 'product_id,zone_id,tier_min_kg,valid_from'` 기준으로 Upsert합니다 (`currency` 기본값 `'KRW'`).
+- **권한**: `validateUserAction()` + `requireAdminOrManager(profile?.role)` (`rates-mutation.ts:9-13, 303-304`, 허용 역할: `ADMIN`, `MANAGER`, `ZENITH_SUPER_ADMIN`)
+- **Input**: `data: { id?: string; product_id: string; zone_id: string; tier_min_kg: number; tier_max_kg?: number | null; price_per_kg_selling: number; price_per_kg_cost: number; currency?: string; valid_from: string; valid_until?: string | null; is_active?: boolean }`
+- **Output**: `Promise<void>`
+- **오류**: 미인증 시 `validateUserAction()` 예외 throw; 역할 불충족 시 `Error("UPS 요율 관리 권한이 없습니다.")` throw (`L11`); DB Upsert 실패 시 `Error(error.message)` throw (`L310`)
+- **부수효과**: `zen_ups_weight_tier_rates` 행 Upsert(`L305-309`), `revalidatePath('/admin/ups-rates')` (`L311`)
+
+#### deleteUpsWeightTierRate(id)
+- **Path**: `src/app/actions/ups/rates-mutation.ts:314-323`
+- **설명**: 지정한 중량 구간 요율 행(`zen_ups_weight_tier_rates.id`)을 소프트 삭제(`is_active = false`, `updated_at` 갱신)합니다.
+- **권한**: `validateUserAction()` + `requireAdminOrManager(profile?.role)` (`rates-mutation.ts:315-316`, 허용 역할: `ADMIN`, `MANAGER`, `ZENITH_SUPER_ADMIN`)
+- **Input**: `id: string` (`zen_ups_weight_tier_rates.id` UUID)
+- **Output**: `Promise<void>`
+- **오류**: 미인증 시 `validateUserAction()` 예외 throw; 역할 불충족 시 `Error("UPS 요율 관리 권한이 없습니다.")` throw (`L11`); DB 업데이트 실패 시 `Error(error.message)` throw (`L321`)
+- **부수효과**: `zen_ups_weight_tier_rates.is_active = false` 업데이트(`L317-320`), `revalidatePath('/admin/ups-rates')` (`L322`)
+
+#### upsertUpsFreightMinimum(data)
+- **Path**: `src/app/actions/ups/rates-mutation.ts:327-345`
+- **설명**: Freight 상품 최소 청구 운임(`zen_ups_freight_minimums`)을 `onConflict: 'product_id,zone_id'` 기준으로 Upsert합니다 (`currency` 기본값 `'KRW'`).
+- **권한**: `validateUserAction()` + `requireAdminOrManager(profile?.role)` (`rates-mutation.ts:336-337`, 허용 역할: `ADMIN`, `MANAGER`, `ZENITH_SUPER_ADMIN`)
+- **Input**: `data: { id?: string; zone_id: string; product_id: string; min_charge_selling: number; min_charge_cost: number; currency?: string; is_active?: boolean }`
+- **Output**: `Promise<void>`
+- **오류**: 미인증 시 `validateUserAction()` 예외 throw; 역할 불충족 시 `Error("UPS 요율 관리 권한이 없습니다.")` throw (`L11`); DB Upsert 실패 시 `Error(error.message)` throw (`L343`)
+- **부수효과**: `zen_ups_freight_minimums` 행 Upsert(`L338-342`), `revalidatePath('/admin/ups-rates')` (`L344`)
+
+#### deleteUpsFreightMinimum(id)
+- **Path**: `src/app/actions/ups/rates-mutation.ts:347-356`
+- **설명**: 지정한 Freight 최소운임 행(`zen_ups_freight_minimums.id`)을 소프트 삭제(`is_active = false`, `updated_at` 갱신)합니다.
+- **권한**: `validateUserAction()` + `requireAdminOrManager(profile?.role)` (`rates-mutation.ts:348-349`, 허용 역할: `ADMIN`, `MANAGER`, `ZENITH_SUPER_ADMIN`)
+- **Input**: `id: string` (`zen_ups_freight_minimums.id` UUID)
+- **Output**: `Promise<void>`
+- **오류**: 미인증 시 `validateUserAction()` 예외 throw; 역할 불충족 시 `Error("UPS 요율 관리 권한이 없습니다.")` throw (`L11`); DB 업데이트 실패 시 `Error(error.message)` throw (`L354`)
+- **부수효과**: `zen_ups_freight_minimums.is_active = false` 업데이트(`L350-353`), `revalidatePath('/admin/ups-rates')` (`L355`)
+
+#### updateAgencyVolumetricDivisor(agencyOrgId, volumetricDivisor)
+- **Path**: `src/app/actions/ups/rates-mutation.ts:360-373`
+- **설명**: 대리점 조직(`zen_organizations.id = agencyOrgId`)의 UPS 부피중량 제수(`volumetric_divisor`)를 `5000`, `5500`, `6000` 중 하나로 업데이트합니다 (Issue #312).
+- **권한**: `validateUserAction()` + `requireAdminOrManager(profile?.role)` (`rates-mutation.ts:364-365`, 허용 역할: `ADMIN`, `MANAGER`, `ZENITH_SUPER_ADMIN`)
+- **Input**: `agencyOrgId: string` (대리점 조직 UUID), `volumetricDivisor: 5000 | 5500 | 6000`
+- **Output**: `Promise<{ success: true }>` (`rates-mutation.ts:372`)
+- **오류**: 미인증 시 `validateUserAction()` 예외 throw; 역할 불충족 시 `Error("UPS 요율 관리 권한이 없습니다.")` throw (`L11`); DB 업데이트 실패(CHECK 제약 위반 등) 시 `Error(error.message)` throw (`L370`)
+- **부수효과**: `zen_organizations.volumetric_divisor` 업데이트(`L366-369`), `revalidatePath('/admin/ups-rates')` (`L371`)
+
+### 11.17 UPS 공개 판매가 조회 Actions — 원가 제외 (`src/app/actions/ups/rates-public.ts` — TASK-1164 / Issue #1360)
+
+#### getPublicBaseRates()
+- **Path**: `src/app/actions/ups/rates-public.ts:20-38`
+- **설명**: Agency·화주 요율표 화면용으로 원가(`cost_price`) 컬럼을 제외하고 오늘(`refDate`) 기준 유효·활성 상태(`is_active = true`)인 UPS 기준요금 판매가 목록(`zen_ups_base_rates`, `product`·`zone` 조인)을 `fetchAllRows`(1,000행 페이지네이션, `weight_kg`·`id` 정렬)로 전수 조회합니다 (TASK-B-091).
+- **권한**: `validateUserAction()` (`src/app/actions/ups/rates-public.ts:21`, 로그인 세션 검증 — DB RLS `ups_base_rates_admin_all`·`agency_select`·`shipper_select`·`sub_admin_select` 적용)
+- **Input**: 없음 (`()`)
+- **Output**: `Promise<PublicBaseRate[]>` (`rates-public.ts:7-18`, `selling_price`·`currency`·`weight_kg`·`product`·`zone` 포함, `cost_price` 미포함)
+- **오류**: 미인증 시 `validateUserAction()` 예외 throw; 쿼리 실패 시 `fetchAllRows`에서 `Error(error?.message ?? 'query failed')` throw (`paginate-all.ts:19`)
+
+#### getPublicFuelSurcharges()
+- **Path**: `src/app/actions/ups/rates-public.ts:48-56`
+- **설명**: 원가율(`cost_rate`) 컬럼을 제외하고 UPS 유류할증료 판매 요율 이력(`zen_ups_fuel_surcharges`, `selling_rate` 및 `product` 조인)을 `effective_week` 내림차순으로 조회합니다.
+- **권한**: `validateUserAction()` (`src/app/actions/ups/rates-public.ts:49`, 로그인 세션 검증 — DB RLS `ups_fuel_surcharges_authenticated_select` 적용)
+- **Input**: 없음 (`()`)
+- **Output**: `Promise<PublicFuelSurcharge[]>` (`rates-public.ts:40-46`, `data ?? []`, `cost_rate` 미포함)
+- **오류**: 미인증 시 `validateUserAction()` 예외 throw; DB 조회 실패 시 `Error(error.message)` throw (`rates-public.ts:54`)
+
+#### getPublicOtherCharges()
+- **Path**: `src/app/actions/ups/rates-public.ts:68-77`
+- **설명**: 원가(`cost_price`) 컬럼을 제외하고 활성 상태(`is_active = true`)인 UPS 부가요금 판매가 목록(`zen_ups_other_charges`, `selling_price`·`unit`·`fuel_surcharge_applicable`·`currency`)을 `charge_code` 오름차순으로 조회합니다.
+- **권한**: `validateUserAction()` (`src/app/actions/ups/rates-public.ts:69`, 로그인 세션 검증 — DB RLS `ups_other_charges_authenticated_select` 적용)
+- **Input**: 없음 (`()`)
+- **Output**: `Promise<PublicOtherCharge[]>` (`rates-public.ts:58-66`, `data ?? []`, `cost_price` 미포함)
+- **오류**: 미인증 시 `validateUserAction()` 예외 throw; DB 조회 실패 시 `Error(error.message)` throw (`rates-public.ts:75`)
+
+#### getPublicWeightTierRates()
+- **Path**: `src/app/actions/ups/rates-public.ts:93-102`
+- **설명**: 원가(`price_per_kg_cost`) 컬럼을 제외하고 활성 상태(`is_active = true`)인 20kg 초과 중량 구간별 kg당 판매 단가 목록(`zen_ups_weight_tier_rates`, `price_per_kg_selling` 및 `product`·`zone` 조인)을 `tier_min_kg` 오름차순으로 조회합니다 (단, `getPublicBaseRates`와 달리 `valid_from`/`valid_until` 기준일 필터는 미적용 — `DEF-151` 참조).
+- **권한**: `validateUserAction()` (`src/app/actions/ups/rates-public.ts:94`, 로그인 세션 검증 — DB RLS 적용)
+- **Input**: 없음 (`()`)
+- **Output**: `Promise<PublicWeightTierRate[]>` (`rates-public.ts:79-91`, `data ?? []`, `price_per_kg_cost` 미포함)
+- **오류**: 미인증 시 `validateUserAction()` 예외 throw; DB 조회 실패 시 `Error(error.message)` throw (`rates-public.ts:100`)
+
+#### getPublicFreightMinimums()
+- **Path**: `src/app/actions/ups/rates-public.ts:114-122`
+- **설명**: 원가(`min_charge_cost`) 컬럼을 제외하고 활성 상태(`is_active = true`)인 Freight 상품 최소 청구 판매 운임 목록(`zen_ups_freight_minimums`, `min_charge_selling` 및 `product`·`zone` 조인)을 조회합니다.
+- **권한**: `validateUserAction()` (`src/app/actions/ups/rates-public.ts:115`, 로그인 세션 검증 — DB RLS 적용)
+- **Input**: 없음 (`()`)
+- **Output**: `Promise<PublicFreightMinimum[]>` (`rates-public.ts:104-112`, `data ?? []`, `min_charge_cost` 미포함)
+- **오류**: 미인증 시 `validateUserAction()` 예외 throw; DB 조회 실패 시 `Error(error.message)` throw (`rates-public.ts:120`)
+
+#### getPublicSurgeFees()
+- **Path**: `src/app/actions/ups/rates-public.ts:134-146`
+- **설명**: 원가(`cost_rate_per_kg`) 컬럼을 제외하고 오늘(`refDate`) 기준 유효 구간(`effective_from <= refDate` 및 `effective_until IS NULL OR >= refDate`)이며 활성 상태(`is_active = true`)인 도착국별 UPS 급증 긴급 수수료 판매 단가 목록(`zen_ups_surge_fees`, `selling_rate_per_kg`)을 `destination_country_code` 오름차순으로 조회합니다 (Issue #491).
+- **권한**: `validateUserAction()` (`src/app/actions/ups/rates-public.ts:135`, 로그인 세션 검증 — DB RLS `ups_surge_fees_authenticated_select` 적용)
+- **Input**: 없음 (`()`)
+- **Output**: `Promise<PublicSurgeFee[]>` (`rates-public.ts:125-132`, `data ?? []`, `cost_rate_per_kg` 미포함)
+- **오류**: 미인증 시 `validateUserAction()` 예외 throw; DB 조회 실패 시 `Error(error.message)` throw (`rates-public.ts:144`)

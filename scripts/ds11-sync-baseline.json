@@ -3,7 +3,7 @@
   "ds11": "docs/02_Analysis/Ds_11_API_상세_명세서.md",
   "generatedAt": "2026-11-17",
   "total": 298,
-  "count": 165,
+  "count": 144,
   "entries": [
     "admin/auth.ts:changePassword",
     "admin/auth.ts:changePasswordWithReauth",
@@ -148,27 +148,6 @@
     "ups/pricing-schedule.ts:createPricingSchedule",
     "ups/pricing-schedule.ts:getPricingAuditLog",
     "ups/pricing-schedule.ts:getScheduledPricingChanges",
-    "ups/pricing-schedule.ts:updatePricingSchedule",
-    "ups/rates-mutation.ts:deleteUpsFreightMinimum",
-    "ups/rates-mutation.ts:deleteUpsWeightTierRate",
-    "ups/rates-mutation.ts:getAgencyPricingPolicies",
-    "ups/rates-mutation.ts:updateAgencyVolumetricDivisor",
-    "ups/rates-mutation.ts:upsertAgencyCostRate",
-    "ups/rates-mutation.ts:upsertUpsFreightMinimum",
-    "ups/rates-mutation.ts:upsertUpsWeightTierRate",
-    "ups/rates-public.ts:getPublicBaseRates",
-    "ups/rates-public.ts:getPublicFreightMinimums",
-    "ups/rates-public.ts:getPublicFuelSurcharges",
-    "ups/rates-public.ts:getPublicOtherCharges",
-    "ups/rates-public.ts:getPublicSurgeFees",
-    "ups/rates-public.ts:getPublicWeightTierRates",
-    "ups/rates.ts:getUpsBaseRates",
-    "ups/rates.ts:getUpsFreightMinimums",
-    "ups/rates.ts:getUpsFuelSurcharge",
-    "ups/rates.ts:getUpsOtherCharges",
-    "ups/rates.ts:getUpsProducts",
-    "ups/rates.ts:getUpsSurgeFees",
-    "ups/rates.ts:getUpsWeightTierRates",
-    "ups/rates.ts:getUpsZones"
+    "ups/pricing-schedule.ts:updatePricingSchedule"
   ]
 }
