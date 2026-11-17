@@ -115,7 +115,7 @@ CI는 매 실행마다 `supabase db reset`으로 스키마+SQL 시드를 완전�
 ### R-11 | API 설계 우선 원칙
 모든 기능 개발 시 코드 구현보다 **API 명세(`Ds-11`) 및 데이터 모델 설계**를 최우선으로 완료하고 사용자의 승인을 득해야 합니다. 명세 미확정 상태의 구현은 금지됩니다.
 
-**(2026-11-13, v3.7)** `Ds-11`의 **현행 위치는 `docs/02_Analysis/Ds_11_API_상세_명세서.md`** 이다(구 INDEX+DETAIL 구조 17파일은 2026-07-06 `docs/03_Design/_archive/ds_11/`로 아카이브 — GH#206 #13). 설계 승인 시점에 명세를 확정할 수 없는 변경은 task file `[설계 의견]`·Issue 본문에 근거를 남기고 **Ds-11 반영 시점**을 명시한다.
+**(2026-11-13, v3.7)** `Ds-11`의 **현행 위치는 `docs/02_Analysis/Ds_11_API_상세_명세서.md`** 이다(구 INDEX+DETAIL 구조 17파일은 2026-07-06 `docs/03_Design/_archive/ds_11/`로 아카이브 — GH#206 #13). 설계 승인 시점에 명세를 확정할 수 없는 변경은 task file `[설계 의견]`·Issue 본문에 근거를 남기고 **Ds-11 반영 시점**을 명시한다. **(2026-11-17, v3.9)** 이 파일은 **인덱스(목차·운영 규칙)** 이고 본문은 **`docs/02_Analysis/ds11/Ds_11_*.md`(도메인·장 단위 9개 파일)** 로 분할되었다(TASK-1163, 3차 배치 전 1,000줄 Hard Limit 대비). 신규 함수는 해당 도메인 파일에 기재하고, 인덱스 경로는 유지된다(참조 링크는 인덱스 기준으로 유효).
 
 ### R-12 | 명세-코드 동기화 의무
 API 사양 변경 시 반드시 `Ds-11_API_상세_명세서.md`를 선제적으로 업데이트해야 합니다. 코드와 명세의 불일치는 심각한 결함으로 간주됩니다.
@@ -126,7 +126,7 @@ API 사양 변경 시 반드시 `Ds-11_API_상세_명세서.md`를 선제적으�
 - **최소 기재 항목**: 함수명·소스 경로·권한·입력·출력·오류.
 - **제외**: 내부 헬퍼, 테스트, `use server`가 아닌 `src/lib` 유틸.
 - **책임**: 구현 Agent가 PR 안에서 갱신하고, Aiden이 머지 전에 확인한다.
-- **자동 점검(1단계, advisory)**: `scripts/check-ds11-sync.mjs`(`npm run check:ds11`)가 `src/app/actions` 함수명이 Ds-11에 언급되는지 확인한다. 2026-11-13 기준 미반영 206개는 `scripts/ds11-sync-baseline.json`에 고정(래칫)하고, **baseline 밖의 신규 미반영**만 PR Checks(`Docs Sync Check`)가 경고한다. baseline은 **줄어들기만** 해야 하며 확대(`--allow-grow`)는 PR 본문에 사유를 적어야 한다. 이 점검은 **이름 언급 여부만** 본다 — 내용 정확성(2단계)과 필수 승격(`--strict`)은 관찰 후 별도 결정한다.
+- **자동 점검(1단계, advisory)**: `scripts/check-ds11-sync.mjs`(`npm run check:ds11`)가 `src/app/actions` 함수명이 Ds-11에 언급되는지 확인한다. 2026-11-13 기준 미반영 206개는 `scripts/ds11-sync-baseline.json`에 고정(래칫)하고, **baseline 밖의 신규 미반영**만 PR Checks(`Docs Sync Check`)가 경고한다. baseline은 **줄어들기만** 해야 하며 확대(`--allow-grow`)는 PR 본문에 사유를 적어야 한다. 이 점검은 **이름 언급 여부만** 본다 — 내용 정확성(2단계)과 필수 승격(`--strict`)은 관찰 후 별도 결정한다. (2026-11-17 v3.9: 스캔 대상은 인덱스 + `docs/02_Analysis/ds11/` 직하위 `*.md`.)
 - **문서 링크**: 문서를 이동·삭제·아카이브할 때는 참조를 `grep`으로 전수 점검한다. `scripts/check-doc-links.mjs`(`npm run check:doc-links`)가 baseline 밖의 **신규 깨진 상대 링크**를 경고한다(근거: GH#206 #13 아카이브 때 "깨지는 링크 없음"으로 확인했으나 4곳이 누락됨).
 
 ### R-13 | 테스트 결과물 관리 의무
@@ -424,4 +424,4 @@ PreToolUse GitNexus Hook에서 `Bash`가 제외되었습니다. 아래 경우는
 
 ## 📝 개정 이력
 
-> 최신 버전: **v3.8** (2026-11-17) | 전체 이력: [docs/00_GUIDE/GOV_CHANGELOG.md](docs/00_GUIDE/GOV_CHANGELOG.md)
+> 최신 버전: **v3.9** (2026-11-17) | 전체 이력: [docs/00_GUIDE/GOV_CHANGELOG.md](docs/00_GUIDE/GOV_CHANGELOG.md)
