@@ -50,6 +50,7 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
+| [#1369](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1369) | [Team B] TASK-B-363: 청구서관리 ⑥ 레거시 병행 정책 반영 및 컷오버 — 기존 메뉴·UPS 인보이스 처리 | b | p2 | blocked | 미배정 | 2026-11-17 |
 | [#1368](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1368) | [Team B] TASK-B-362: 청구서관리 ⑤ 청구서 PDF 생성·다운로드 및 발행 이메일 | b | p2 | blocked | 미배정 | 2026-11-17 |
 | [#1367](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1367) | [Team B] TASK-B-361: 청구서관리 ④ 화면 — S3 목록·S4 생성·S5 상세·역할별 메뉴 3경로 | b | p2 | blocked | 미배정 | 2026-11-17 |
 | [#1366](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1366) | [Team B] TASK-B-360: 청구서관리 ③ 서버 액션 — 후보 조회·생성·취소·발행·입금확인·조회·Excel(A4) | b | p2 | blocked | 미배정 | 2026-11-17 |
