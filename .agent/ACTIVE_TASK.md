@@ -50,7 +50,6 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
-| [#1360](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1360) | [Team A] TASK-1164: R-12 — Ds-11 미반영 backlog 3차 (ups/rates·rates-mutation·rates-public 21개 함수) | a | p3 | review | 미배정 | 2026-11-17 |
 | [#1356](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1356) | [Aiden → Team B] DEF-150 finance/UPS 실비·정산 액션 대리점 필터 누락·가드 공백 수정 요청 | b | p1 | open | 미배정 | 2026-11-17 |
 | [#1349](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1349) | [Aiden] DEF-149 §1.1 — agency/shippers.ts 대리점 소유권 검증 누락(교차 테넌트 IDOR) 수정 요청 (Team B 소유) | b | p1 | open | 미배정 | 2026-11-17 |
 | [#1347](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1347) | [Team A] TASK-1161: 실DB 테스트 공용 fixture 헬퍼 신설 (231 §10 #4 선행, B_Kai) | a | p3 | open | 미배정 | 2026-11-17 |
