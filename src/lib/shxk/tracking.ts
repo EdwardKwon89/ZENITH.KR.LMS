@@ -1,4 +1,5 @@
 import 'server-only'
+import { logger } from '@/lib/logger'
 import { callShxk } from './client'
 import { createAdminClient } from '@/utils/supabase/server'
 import { translateShxkText } from './translate'
@@ -39,9 +40,16 @@ export async function pollTracking(
   trackingNumber: string,
 ): Promise<GetTrackData | null> {
   const res = await callShxk('gettrack', { tracking_number: trackingNumber })
-  if (res.success !== 1) return null
+  // TASK-B-357 (Issue #1351): 실패 분기 로그 — return null 동작 불변
+  if (res.success !== 1) {
+    logger.warn('[SHXK] pollTracking 업무 실패', { method: 'gettrack', success: res.success, message: res.enmessage || res.cnmessage || '', tracking_number: trackingNumber })
+    return null
+  }
   const list = res.data as GetTrackData[] | undefined
-  if (!list || list.length === 0) return null
+  if (!list || list.length === 0) {
+    logger.error('[SHXK] pollTracking 성공 응답인데 빈 데이터', { method: 'gettrack', tracking_number: trackingNumber })
+    return null
+  }
   return list[0]
 }
 
@@ -56,10 +64,13 @@ export async function storeTrackingEvents(
   // TASK-B-290 (① dedup): event_time은 TIME 컬럼이라 재조회 시 "HH:MM:SS"(날짜 없음) —
   // event_date와 재조합해 원본 track_occur_date("YYYY-MM-DD HH:MM:SS")와 비교해야
   // 중복 방지 필터가 동작한다.
-  const { data: existing } = await supabase
+  const { data: existing, error: existingError } = await supabase
     .from('zen_ups_tracking_events')
     .select('event_date, event_time')
     .eq('tracking_number', trackingNumber)
+  if (existingError) {
+    logger.error('[SHXK] storeTrackingEvents 기존 이벤트 조회 실패', { tracking_number: trackingNumber, order_id: orderId, err: existingError })
+  }
 
   const existingKeys = new Set(
     (existing ?? []).map((e: any) => `${e.event_date} ${e.event_time}`),
@@ -88,12 +99,15 @@ export async function storeTrackingEvents(
     })
 
   if (events.length > 0) {
-    await supabase.from('zen_ups_tracking_events').insert(events)
+    const { error: insertError } = await supabase.from('zen_ups_tracking_events').insert(events)
+    if (insertError) {
+      logger.error('[SHXK] storeTrackingEvents 이벤트 insert 실패', { tracking_number: trackingNumber, order_id: orderId, count: events.length, err: insertError })
+    }
   }
 
   // TASK-B-290 (③): 폴링 시점의 전체 현재 상태를 매 폴링마다 갱신
   // (배송완료 여부와 무관하게 항상 — is_active 업데이트와 별개)
-  await supabase
+  const { error: statusError } = await supabase
     .from('zen_tracking_configs')
     .update({
       last_track_status: data.track_status,
@@ -101,12 +115,18 @@ export async function storeTrackingEvents(
       last_tracked_at: new Date().toISOString(),
     })
     .eq('tracking_no', trackingNumber)
+  if (statusError) {
+    logger.error('[SHXK] storeTrackingEvents 상태 갱신 실패', { tracking_number: trackingNumber, err: statusError })
+  }
 
   if (isDelivered(data.track_status)) {
-    await supabase
+    const { error: activeError } = await supabase
       .from('zen_tracking_configs')
       .update({ is_active: false })
       .eq('tracking_no', trackingNumber)
+    if (activeError) {
+      logger.error('[SHXK] storeTrackingEvents is_active 갱신 실패', { tracking_number: trackingNumber, err: activeError })
+    }
   }
 }
 

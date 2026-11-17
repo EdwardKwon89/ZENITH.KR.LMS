@@ -1,4 +1,5 @@
 import 'server-only'
+import { logger } from '@/lib/logger'
 import { callShxk } from './client'
 
 export interface CreateOrderRequest {
@@ -35,7 +36,10 @@ export interface GetNewLabelItem {
 
 function assertData<T>(raw: unknown): T {
   if (!raw || typeof raw !== 'object') {
-    throw new Error('shxk API returned empty data')
+    // TASK-B-357 (Issue #1351): 원문 보존 — throw는 그대로(동작 불변), 로그에만 기록
+    const err = new Error('shxk API returned empty data')
+    logger.error('[SHXK] 응답 data 형식 오류', err)
+    throw err
   }
   return raw as T
 }
@@ -44,10 +48,17 @@ export async function createorder(
   params: CreateOrderRequest,
 ): Promise<{ success: number; data: CreateOrderResponse | null; message: string }> {
   const res = await callShxk('createorder', params as unknown as Record<string, unknown>)
+  const message = res.enmessage || res.cnmessage || ''
+  // TASK-B-357 (Issue #1351): 실패 분기 로그 — 반환 형태/throw는 불변
+  if (res.success !== 1) {
+    logger.warn('[SHXK] createorder 업무 실패', { method: 'createorder', success: res.success, message, reference_no: params.reference_no })
+  } else if (!res.data) {
+    logger.error('[SHXK] createorder 성공 응답인데 data 없음', { method: 'createorder', message, reference_no: params.reference_no })
+  }
   return {
     success: res.success,
     data: res.data ? assertData<CreateOrderResponse>(res.data) : null,
-    message: res.enmessage || res.cnmessage || '',
+    message,
   }
 }
 
@@ -55,10 +66,17 @@ export async function gettrackingnumber(
   orderId: string,
 ): Promise<{ success: number; data: GetTrackingNumberResponse | null; message: string }> {
   const res = await callShxk('gettrackingnumber', { order_id: orderId })
+  const message = res.enmessage || res.cnmessage || ''
+  // TASK-B-357 (Issue #1351): 실패 분기 로그 — 반환 형태/throw는 불변
+  if (res.success !== 1) {
+    logger.warn('[SHXK] gettrackingnumber 업무 실패', { method: 'gettrackingnumber', success: res.success, message, order_id: orderId })
+  } else if (!res.data) {
+    logger.error('[SHXK] gettrackingnumber 성공 응답인데 data 없음', { method: 'gettrackingnumber', message, order_id: orderId })
+  }
   return {
     success: res.success,
     data: res.data ? assertData<GetTrackingNumberResponse>(res.data) : null,
-    message: res.enmessage || res.cnmessage || '',
+    message,
   }
 }
 
@@ -80,10 +98,17 @@ export async function getnewlabel(
       lable_content_type: item.lable_content_type ? String(item.lable_content_type) : undefined,
     }))
   }
+  const message = res.enmessage || res.cnmessage || ''
+  // TASK-B-357 (Issue #1351): 실패 분기 로그 — 반환 형태/throw는 불변
+  if (res.success !== 1) {
+    logger.warn('[SHXK] getnewlabel 업무 실패', { method: 'getnewlabel', success: res.success, message, reference_nos: listorder.map((o) => o.reference_no) })
+  } else if (!items) {
+    logger.error('[SHXK] getnewlabel 성공 응답인데 라벨 data 없음', { method: 'getnewlabel', message, reference_nos: listorder.map((o) => o.reference_no) })
+  }
   return {
     success: res.success,
     data: items,
-    message: res.enmessage || res.cnmessage || '',
+    message,
   }
 }
 
@@ -91,8 +116,13 @@ export async function removeorder(
   referenceNo: string,
 ): Promise<{ success: number; message: string }> {
   const res = await callShxk('removeorder', { reference_no: referenceNo })
+  const message = res.enmessage || res.cnmessage || ''
+  // TASK-B-357 (Issue #1351): 실패 분기 로그 — 반환 형태는 불변
+  if (res.success !== 1) {
+    logger.warn('[SHXK] removeorder 업무 실패', { method: 'removeorder', success: res.success, message, reference_no: referenceNo })
+  }
   return {
     success: res.success,
-    message: res.enmessage || res.cnmessage || '',
+    message,
   }
 }
