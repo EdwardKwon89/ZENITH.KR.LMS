@@ -3,7 +3,8 @@
  * Ds-11 ↔ Server Action 동기화 점검 — R-12(명세-코드 동기화 의무) 집행 1단계 (DEF-145 / IMP-183)
  *
  * 무엇을 보는가 (1단계): `src/app/actions/**` 의 `use server` 파일에서 export 되는 함수 이름이
- *   `docs/02_Analysis/Ds_11_API_상세_명세서.md` 본문에 한 번이라도 나오는지.
+ *   `docs/02_Analysis/Ds_11_API_상세_명세서.md`(인덱스) 및 `docs/02_Analysis/ds11/*.md`(장별 분할 본문)에
+ *   한 번이라도 나오는지.
  *   ※ 이름 언급 여부만 본다 — 언급된 내용의 정확성은 점검하지 않는다(2단계 과제).
  *
  * 래칫(ratchet): 2026-11-13 기준 미반영 함수는 `scripts/ds11-sync-baseline.json` 에 고정(허용 목록).
@@ -22,6 +23,7 @@ import { fileURLToPath } from 'node:url';
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const ACTIONS_DIR = join(ROOT, 'src/app/actions');
 const DS11 = 'docs/02_Analysis/Ds_11_API_상세_명세서.md';
+const DS11_DIR = 'docs/02_Analysis/ds11';
 const BASELINE = join(ROOT, 'scripts/ds11-sync-baseline.json');
 const args = new Set(process.argv.slice(2));
 const STRICT = args.has('--strict');
@@ -59,7 +61,21 @@ if (!existsSync(join(ROOT, DS11))) {
   console.error(`✖ Ds-11 현행 파일이 없습니다: ${DS11} — R-11·R-12 참조 경로 확인 필요`);
   process.exit(2);
 }
-const ds11 = readFileSync(join(ROOT, DS11), 'utf8');
+const ds11DirAbs = join(ROOT, DS11_DIR);
+const ds11SubFiles = existsSync(ds11DirAbs)
+  ? readdirSync(ds11DirAbs, { withFileTypes: true })
+      .filter((e) => e.isFile() && e.name.endsWith('.md'))
+      .map((e) => e.name)
+      .sort()
+  : [];
+if (ds11SubFiles.length === 0) {
+  console.error(`✖ Ds-11 분할 디렉터리(${DS11_DIR})에 .md 파일이 없습니다 — R-11·R-12 참조 경로 확인 필요`);
+  process.exit(2);
+}
+const ds11 = [
+  readFileSync(join(ROOT, DS11), 'utf8'),
+  ...ds11SubFiles.map((f) => readFileSync(join(ds11DirAbs, f), 'utf8')),
+].join('\n');
 const rows = collectActions();
 const missing = rows.filter((r) => !mentioned(ds11, r.name));
 const missingKeys = new Set(missing.map((r) => r.key));
