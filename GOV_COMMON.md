@@ -139,12 +139,15 @@ API 사양 변경 시 반드시 `Ds-11_API_상세_명세서.md`를 선제적으�
 ### R-14 | E2E 테스트 환경 표준
 모든 E2E 테스트 및 개발은 **로컬 Supabase 환경**을 원칙으로 수행합니다. 원격(Cloud) Supabase 접속이 필요한 경우에는 반드시 사용자에게 승인을 득한 후 실시합니다.
 
-### R-15 | 개선 사항 도출 및 기록 의무
-작업 수행 중 즉시 수정이 불가하거나 별도 계획이 필요한 개선 사항을 발견한 경우, 반드시 `scratch/post_launch_improvements.md` 파일에 즉시 기록합니다.
-- **항목 형식**: `IMP-NNN` (자동 증가 일련번호)
-- **필수 기재 항목**: 발견 경위, 현재 상태, 임시 조치, 목표 구현, 관련 파일, 예상 공수, 우선순위
-- **우선순위**: `Critical` / `High` / `Medium` / `Low`
-- **면제 조건 없음**: 규모와 관계없이 모든 미결 개선 사항은 기록 대상입니다.
+### R-15 | 개선 사항 도출 및 건의 의무 (v3.8 개정 — IMP 등록은 Aiden 전속)
+작업 수행 중 즉시 수정이 불가하거나 별도 계획이 필요한 개선 사항을 발견한 경우, 반드시 **GitHub Issue로 건의**한다. `IMP-NNN` 번호를 직접 부여하거나 `scratch/post_launch_improvements.md`를 **직접 수정하지 않는다**(Aiden 전속).
+- **건의 방법**: Issue 템플릿 `개선 제안 (IMP)`(`.github/ISSUE_TEMPLATE/imp.yml`, 라벨 `type:imp`). 제목은 `[IMP 제안] 요약`.
+- **필수 기재 항목**: 발견 경위, 현재 상태, 임시 조치, 목표 구현, 관련 파일, 예상 공수, 우선순위 제안(`Critical` / `High` / `Medium` / `Low`).
+- **등록·번호 부여(Aiden 전속)**: Aiden이 건의 Issue를 검토해 채택하면 `IMP-NNN`을 부여하고 `scratch/post_launch_improvements.md`에 기록한 뒤, Issue에 번호를 회신하고 Close한다. 반려·병합(기존 IMP와 중복)도 사유를 코멘트로 남기고 Close한다. 미처리 건은 Aiden이 세션 시작 점검(R-16) 때 `gh issue list --label type:imp --state open`으로 확인한다.
+- **Task 문서 참조**: 번호 부여 전에는 task file·PR 본문에 `IMP 제안 #이슈번호`로 적는다. 번호가 부여되면 Aiden이 회신하므로 그때 `IMP-NNN`으로 정정해도 되고 정정하지 않아도 된다(Issue 링크가 근거).
+- **면제 조건 없음**: 규모와 관계없이 모든 미결 개선 사항은 건의 대상이다. (Aiden 본인이 발견한 항목은 Issue 없이 직접 기록할 수 있다.)
+- **기존 항목**: 이미 등록된 IMP-001~IMP-195는 변경·이관하지 않는다. 번호는 단일 채번자(Aiden)만 이어서 부여한다.
+- **근거**: 2026-11-17 develop→TeamB_Dev 통합 중 `post_launch_improvements.md` 꼬리 추가 충돌(IMP-190/191). 같은 이유로 Team B가 IMP 번호를 3회 정정했다(IMP-170→178, 190→191, 190→192). 여러 팀·에이전트가 한 파일 꼬리에 직접 번호를 부여하는 구조(IMP-186)가 충돌과 번호 중복의 원인이었다.
 
 ### R-16 | 세션 시작 시 담당 Task 확인 의무
 세션 최초 시작 시 반드시 `gh issue list --assignee <본인>` (또는 `--label team:a`/`team:b`)으로 본인에게 할당된 미완료 이슈를 확인한다.
@@ -421,4 +424,4 @@ PreToolUse GitNexus Hook에서 `Bash`가 제외되었습니다. 아래 경우는
 
 ## 📝 개정 이력
 
-> 최신 버전: **v3.7** (2026-11-13) | 전체 이력: [docs/00_GUIDE/GOV_CHANGELOG.md](docs/00_GUIDE/GOV_CHANGELOG.md)
+> 최신 버전: **v3.8** (2026-11-17) | 전체 이력: [docs/00_GUIDE/GOV_CHANGELOG.md](docs/00_GUIDE/GOV_CHANGELOG.md)
