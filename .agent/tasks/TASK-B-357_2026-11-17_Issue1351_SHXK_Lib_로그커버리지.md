@@ -66,7 +66,10 @@ grep -nE "success|throw|return null|catch" ...                     # → 아래 
 
 - **return/throw 문장 원본 무변경**: `data: res.data ? assertData<...>(res.data) : null` 등 반환 구문 원본 유지(`order.ts` 반환부 grep으로 확인), `return null`2곳·`storeTrackingEvents` 제어흐름 무변경 — 로그 삽입만 수행.
 - `message`는 `res.enmessage || res.cnmessage || ''` 원문을 **상수로 승격**만(값 동일), 응답 원문은 로그·반환 양쪽에 그대로.
-- tsc 신규 오류 **0**(기존 base와 stash 대조 동일212).
+- tsc **정정(리뷰 반영)**: 최초 기재("신규0·212 동일")는 신규 테스트 파일의 **TS2339 4건**(Jaison 리뷰에서 발견 — `logger.warn.mock.calls` 직접 접근)을 포함하지 않은 잘못된 측정이었다. 수정(`vi.mocked(logger.warn/error).mock.calls` 경유) 후 **실제 재측**:
+  - `npx tsc --noEmit | grep task-b357` → **(빈 출력)**
+  - 전체 tsc: **base(origin/TeamB_Dev 실측) 212 = 내 변경 후 212 → 신규0** (내3개 파일 `shxk/order`·`shxk/tracking`·`task-b357` 오류0건 grep으로 동시 확인)
+  - (참고: 임시 측정 중216이 나온 경우는 base 스캔에 미수정 테스트4건이 섞인 값 = 212+4)
 
 ### 작업3 — 로그 필드(민감정보 통제) 표
 
@@ -124,7 +127,20 @@ grep -nE "success|throw|return null|catch" ...                     # → 아래 
 
 - **환경에 명령 없음**(OpenCode 커맨드=프롬프트 템플릿) — "없으면 없다고 기재" 조항 적용, **수동 대조 완료**: 코드 커밋 → task file[작업 결과]+해시 → `status:review` → 문서 커밋 → PR(리뷰 요청 코멘트) 순서, DoD 전 항목 근거(파일:줄·테스트명), 플레이스홀더/미체크0건.
 
-### 비고 (미해소 질문2건 — 이슈 코멘트 #issuecomment-6937806847)
+### 재작업 (Jaison 리뷰 — head `00899ee46`, "경미 수정1건 후 승인")
+
+| 구분 | 내용 | 조치 |
+|:--|:--|:--|
+| **필수** | 신규 테스트 tsc **TS2339 4건**(`task-b357-…test.ts:261,277`의 `logger.*.mock.calls` 직접 접근) + "tsc 신규0" 기재가 사실과 다름 | `vi.mocked(logger.warn/error).mock.calls` 경유로 교체(런타임 동일) — `npx tsc --noEmit \| grep task-b357` **빈 출력** 확인, 위 tsc 근거를 실제 재측치로 정정 |
+| 경미 | IMP-196 오탈자 "과거 **사사**"→"**사고**", "4기준 중2개" 띄어쓰기 | `scratch/post_launch_improvements.md:2227,2230` 수정 |
+| 재검증 | — | 신규 **23/23 PASS**, `tests/unit/shxk`+`ups`+`operations` **549 tests PASS**(Jaison 재현치 동일) |
+
+### 질문2건 — Jaison 답변 (2026-11-1705:58)
+
+1. **develop 동기화5커밋**: 본 PR에서는 **요구 없음**(대상 파일 무관), Aiden 동기화 PR로 해소. 다음 Task 착수 전 `rev-list`≠0이면 동일하게 보고.
+2. **IMP 기록 방식**: **(B) 승인** — base GOV 구 R-15로 직접 기록 허용. v3.8 동기화 후 Aiden 소유 항목임을 PR 본문에 명시한 점 적절, 답변 지연에 대한 위반 아님.
+
+### 비고 (원래 질문 — 위2건으로 해소)
 
 1. **develop 동기화(5커밋·기대0 불일치)**: 전부 문서/거버넌스성(231 가이드·GOV R-15 v3.8·imp.yml)이고 대상 파일과 무관 → 보고·동기화 요청 완료, 답변 없이 진행(base는 지시대로 `origin/TeamB_Dev`).
 2. **IMP 기록 방식 충돌**: 지시(scratch 직접·최대값+1) vs GOV R-15 v3.8(develop에만 존재, Aiden 전속) — **본 Task의 TeamB_Dev base GOV는 구(R-15 직접 기록)**이므로 지시대로 **IMP-196을 scratch에 직접 등록**했고, v3.8 동기화 후엔 Aiden 소유 항목으로 남는다(v3.8 "기존 항목 변경·이관 없음" 조항) — 답변 시 지시 반영.
