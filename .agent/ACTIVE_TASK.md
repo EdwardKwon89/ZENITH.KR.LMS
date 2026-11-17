@@ -50,7 +50,7 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
-| [#1351](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1351) | [Team B] TASK-B-357: 로그 커버리지 ② — lib/shxk/order.ts·tracking.ts 실패 분기 logger 도입 (#1182) | b | p2 | open | 미배정 | 2026-11-17 |
+| [#1351](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1351) | [Team B] TASK-B-357: 로그 커버리지 ② — lib/shxk/order.ts·tracking.ts 실패 분기 logger 도입 (#1182) | b | p2 | in-progress | 미배정 | 2026-11-17 |
 | [#1349](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1349) | [Aiden] DEF-149 §1.1 — agency/shippers.ts 대리점 소유권 검증 누락(교차 테넌트 IDOR) 수정 요청 (Team B 소유) | b | p1 | open | 미배정 | 2026-11-17 |
 | [#1347](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1347) | [Team A] TASK-1161: 실DB 테스트 공용 fixture 헬퍼 신설 (231 §10 #4 선행, B_Kai) | a | p3 | open | 미배정 | 2026-11-17 |
 | [#1346](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1346) | [Team A] TASK-1160: 231 PoC 단계 2 — 모듈 ①② 위험 3군 재현·실DB 편입 측정 (§10 #4·#6·#13·#16 확정 반영) | a | p3 | blocked | 미배정 | 2026-11-17 |
@@ -70,7 +70,7 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 | [#1218](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1218) | [Aiden] Stage-Gate Code Review — UPS 핵심 경로(오더등록~정산) 대상, 적절한 시점에 실시 | - | p3 | - | 미배정 | 2026-10-11 |
 | [#1189](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1189) | [Team B] TASK-B-323: Resend 이메일 도메인(zenith-lms.com) 미인증 — 알림메일 전량 발송 실패 (DEF-B-143, High) | b | p1 | - | jungjs | 2026-10-13 |
 | [#1185](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1185) | [Team B] TASK-B-322: 로그 커버리지 개선 ⑤— admin/auth.ts 예외 객체 폐기 패턴 수정 (5건) | b | p2 | - | 미배정 | 2026-08-23 |
-| [#1182](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1182) | [Team B] TASK-B-320: 로그 커버리지 개선 ②— lib/shxk/order.ts·tracking.ts logger 미도입 (6건) | b | p2 | - | 미배정 | 2026-08-23 |
+| [#1182](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1182) | [Team B] TASK-B-320: 로그 커버리지 개선 ②— lib/shxk/order.ts·tracking.ts logger 미도입 (6건) | b | p2 | - | 미배정 | 2026-11-17 |
 | [#1181](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1181) | [Team B] TASK-B-319: 로그 커버리지 개선 ①— ups-labels.ts 실패 반환값 무기록 해소 (~40건) | b | p2 | - | 미배정 | 2026-08-23 |
 | [#1177](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1177) | [Team A] TASK-1137: 동일 계정 동시 로그인 감지 및 처리(알림 + 기존유지/강제로그아웃 선택) | a | p2 | - | 미배정 | 2026-08-20 |
 | [#1176](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1176) | [Team A] TASK-1136: Session Idle Timeout 관리자 설정 + 다음 로그인부터 적용 | a | p2 | - | 미배정 | 2026-08-20 |
