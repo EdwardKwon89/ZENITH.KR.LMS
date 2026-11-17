@@ -2146,6 +2146,18 @@ UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류
 
 ---
 
+## [IMP-190] `tests/**` 기존 타입 오류 212건 — Next 16.3+ `tsc` CLI 타입 검사에서 빌드 실패 요인
+
+- **발견 경위**: 2026-11-16, TASK-1153(Issue #1320 / DEF-146 P0) `next` 16.4.6 상향 중 D_Kai가 발견. Next 16.3+는 `experimental.useTypeScriptCli` 기본값이 tsc CLI라 `tests/**`의 기존 타입 오류가 표면화되어 `npm run build`가 실패했다.
+- **현재 상태**: `next.config.ts`에 `experimental: { useTypeScriptCli: false }`(+ `TODO(IMP-190)`)를 두어 16.2.4와 동일한 동작(JS 컴파일러 API)을 유지 중. CI 타입 검사는 advisory(IMP-134)이며 오류 212건은 그대로다.
+- **임시 조치**: 위 옵션으로 빌드 통과 유지. 이 옵션은 실험적(`experimental`)이라 이후 Next 버전에서 제거·변경될 수 있다 — Next 상향 때마다 `npm run build` 결과를 확인한다.
+- **목표 구현**: `tests/**` 타입 오류를 정리하거나 `tsconfig`에서 tests를 빌드 대상에서 분리(별도 `tsconfig.test.json`)한 뒤 `useTypeScriptCli: false` 제거. 오류 212건의 분류(구 mock 타입·`any` 누락 등)를 먼저 측정.
+- **관련 파일**: `next.config.ts`(57행 TODO), `tsconfig.json`, `tests/**`
+- **예상 공수**: 1~2 MD (분류 후 확정)
+- **우선순위**: Low~Medium — 현재 빌드·운영 영향 없음, 단 `experimental` 옵션 의존이라 Next 상향 시 재발 위험(PoC 도구 설정도 `.mjs`로 우회 중, 문서 231 v1.7)
+
+---
+
 ## [IMP-191] SHXK createorder `consignee.*` 미전송 8개 필드 — 신규 컬럼·UI 필요 (결정 요청)
 
 - **발견 경위**: 2026-11-16, TASK-B-346 PR③(Issue #1278)에서 SHXK createorder `consignee.*` 18개 필드를 감사한 결과, 명세(`docs/80_RawData/Phase8_UPS_API_리서치_결과.md` 130~147행)에 있으나 현재 payload에 전송되지 않는 8개 필드를 확인했다.
