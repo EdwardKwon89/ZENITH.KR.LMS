@@ -258,7 +258,7 @@ describe('TC-357-5: (e) 로그 인자에 인증키·개인정보 미포함', () 
       consignee: { consignee_name: '수취인PRIVATE', consignee_telephone: '01022223333', consignee_address: '서울 강남구 비밀주소123' },
     });
 
-    const allLogged = [...logger.warn.mock.calls, ...logger.error.mock.calls]
+    const allLogged = [...vi.mocked(logger.warn).mock.calls, ...vi.mocked(logger.error).mock.calls]
       .map((c) => JSON.stringify(c)).join(' ');
     expect(allLogged).not.toContain('홍길동PRIVATE');
     expect(allLogged).not.toContain('수취인PRIVATE');
@@ -274,7 +274,7 @@ describe('TC-357-5: (e) 로그 인자에 인증키·개인정보 미포함', () 
   it('getnewlabel 실패 시 configInfo(인증정보 후보)가 로그에 새지 않는다', async () => {
     mockCallShxk.mockResolvedValue({ success: 0, enmessage: 'fail', data: null });
     await getnewlabel({ appKey: 'SECRET_APP_KEY_XYZ', appToken: 'SECRET_TOKEN_XYZ' }, [{ reference_no: 'REF-L' }]);
-    const allLogged = JSON.stringify([...logger.warn.mock.calls, ...logger.error.mock.calls]);
+    const allLogged = JSON.stringify([...vi.mocked(logger.warn).mock.calls, ...vi.mocked(logger.error).mock.calls]);
     expect(allLogged).not.toContain('SECRET_APP_KEY_XYZ');
     expect(allLogged).not.toContain('SECRET_TOKEN_XYZ');
     expect(allLogged).toContain('REF-L');
