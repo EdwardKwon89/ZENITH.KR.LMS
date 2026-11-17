@@ -1,0 +1,57 @@
+name: 개선 제안 (IMP)
+description: 즉시 수정 불가·별도 계획이 필요한 개선 사항 건의 (R-15). 번호 부여·등록은 Aiden이 합니다.
+title: "[IMP 제안] "
+labels: ["type:imp"]
+body:
+  - type: markdown
+    attributes:
+      value: "## 개선 제안 — R-15 준수\nIMP 번호는 직접 부여하지 마세요. 검토 후 Aiden이 `IMP-NNN`을 부여해 회신합니다."
+  - type: input
+    id: reporter
+    attributes:
+      label: 건의 Agent
+      placeholder: "예: Dave"
+    validations:
+      required: true
+  - type: textarea
+    id: found
+    attributes:
+      label: 발견 경위
+    validations:
+      required: true
+  - type: textarea
+    id: state
+    attributes:
+      label: 현재 상태
+    validations:
+      required: true
+  - type: textarea
+    id: workaround
+    attributes:
+      label: 임시 조치
+  - type: textarea
+    id: goal
+    attributes:
+      label: 목표 구현
+    validations:
+      required: true
+  - type: input
+    id: files
+    attributes:
+      label: 관련 파일
+  - type: input
+    id: effort
+    attributes:
+      label: 예상 공수
+      placeholder: "예: 0.5 MD"
+  - type: dropdown
+    id: priority
+    attributes:
+      label: 우선순위 제안
+      options:
+        - Critical
+        - High
+        - Medium
+        - Low
+    validations:
+      required: true
