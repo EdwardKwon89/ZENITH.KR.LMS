@@ -163,6 +163,13 @@ Test Files  254 passed (254)
 
 - 본 세션에서 `mcp__context7__*` 도구가 노출되지 않아 `npm view`(실제 peer/engine 값) + 공식 문서로 대체했다. 설치·실행 검증까지 완료했으므로 판정에는 영향 없음. 도구 미가동 자체는 별도 확인 필요.
 
+## [브랜치 정합성] (2026-11-17, B_Kai)
+
+- **현상**: Aiden 승인 후 상태 표기 커밋(`f49dcb253`)에 **CI 런이 생성되지 않음**(체크 0건). 원인은 develop 전진(`128e6e13b` → `ab906b190`)으로 PR이 **CONFLICTING** 상태가 되어 GitHub이 merge ref를 만들지 못한 것. PR close→reopen으로도 재현.
+- **조치**: `origin/develop` 병합(`2c91bb531`). 충돌 1건은 `231_PoC_Baseline_Report_D1_20261115.md`(추가/추가) — develop 반입본(`7cc5762dc`, Aiden 주석 2줄 포함)을 채택했고 본문 내용은 동일.
+- **결과**: PR diff = PoC 자산 4파일 + task file만(`src/`·package.json·lockfile·pr-checks.yml·LRTM diff **0**). CI run 43989949960 **5/5 success**, 회귀 **254 파일 / 1834 케이스 / 실패 0**, `build` → `test:regression` 모두 success.
+- **주의**: develop 병합으로 `package.json`·lockfile은 develop 값(TASK-1153 의존성 상향)을 따르며, **PoC 측정 수치는 병합 전 기준 커밋(`128e6e13b`) 측정값**이다(도구 4종 버전 고정 유지).
+
 ## [Aiden 검토]
 
 - **판정**: ✅ **승인 (PoC 단계 1 산출물 수락)** — 2026-11-16 10:14 KST, Edward 승인. PR #1318은 **병합하지 않고 Draft 유지**(PoC 단계 2 기반).
