@@ -50,7 +50,7 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
-| [#1389](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1389) | [Team A] TASK-1167: DEF-156 — calculate_order_costs 권한 구성 정정 (IMP-035-RL 조치 복구) | a | p1 | draft | 미배정 | 2026-11-18 |
+| [#1389](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1389) | [Team A] TASK-1167: DEF-156 — calculate_order_costs 권한 구성 정정 (IMP-035-RL 조치 복구) | a | p1 | in-progress | 미배정 | 2026-11-18 |
 | [#1386](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1386) | [Team A] TASK-1166: DEF-153 — zen_rate_cards SELECT RLS 화주 세션 원가·마진 조회 차단 (High) | a | p1 | in-progress | 미배정 | 2026-11-18 |
 | [#1377](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1377) | [Team B] TASK-B-367: 청구서관리 ①-4 정산 되돌리기·주문 수정 잠금 — unmarkOrderCostSettled·updateOrder (설계 Q-G) | b | p2 | blocked | 미배정 | 2026-11-17 |
 | [#1376](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1376) | [Team B] TASK-B-366: 청구서관리 ①-3 오더정산 서버 액션 — 목록·정산완료·정산후 수정 잠금 (설계 PR-3) | b | p2 | blocked | 미배정 | 2026-11-17 |
