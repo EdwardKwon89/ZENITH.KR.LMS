@@ -1394,3 +1394,17 @@ SHXK `createorder` 페이로드의 `shipper.shipper_name`이 화면 "담당자�
 | TC-356-RST | 로그인 원문 복귀 되돌리기 | `error.message` 직반환으로 원복 → **4 failed / 2 passed** → 복구 6 passed | `tests/unit/auth/task-b356-login-locale.test.ts` |
 
 **회귀 검증 (2026-11-17)**: `npm run test:regression` **261 test files / 1,923 tests 전부 PASS**. `npm run build` **EXIT=0**.
+
+## 92. 유지보수 모드 라우트 이동 + 리다이렉트 루프 방지 (Issue #1337 / TASK-1155, DEF-148)
+
+**2026-11-18, D_Kai** — 점검 페이지가 라우트 그룹 `src/app/[locale]/(maintenance)/page.tsx` 에 있어 실제 경로가 `/[locale]` 이었고, 프록시(`src/lib/auth/proxy.ts`)가 안내하는 `/{locale}/maintenance` 는 **404** 였다. 페이지를 `src/app/[locale]/maintenance/page.tsx` 로 이동하고, 리다이렉트 대상 경로를 `DEFAULT_REDIRECTS.MAINTENANCE` 상수로 고정했다. 아울러 점검 안내 페이지가 소속(`orgType`)·`PENDING`·`SUSPENDED` 가드보다 우선하도록 조기 반환을 추가해 **무한 리다이렉트 루프**를 차단했다(기존에는 `/maintenance` 가 리다이렉트 대상에서만 제외되어, 안내 페이지 도착 후 소속 경로로 되돌려지는 루프가 가능한 구조였다).
+
+| ID | 검증 내용 | 기대 결과 | 테스트 위치 |
+| :-- | :-- | :-- | :-- |
+| TC-1155-01 | 리다이렉트 대상 상수 ↔ 실제 라우트 파일 | `DEFAULT_REDIRECTS.MAINTENANCE='/maintenance'`, `src/app/[locale]/maintenance/page.tsx` 존재, `(maintenance)` 그룹 부재 | `tests/unit/auth/maintenance-route.test.ts` |
+| TC-1155-02 | 점검 모드 ON + 화주 `/ko/orders` | `/ko/maintenance` 로 리다이렉트 | 동일 |
+| TC-1155-03 | 점검 모드 ON + 화주 `/ko/maintenance` | 리다이렉트 없음(`null`) — 루프 방지 | 동일 |
+| TC-1155-04 | 점검 모드 ON + `PENDING` 화주 `/ko/maintenance` | 리다이렉트 없음 — `/register/pending` 왕복 루프 차단 | 동일 |
+| TC-1155-05 | 점검 모드 ON + `SUSPENDED` 사용자 `/ko/maintenance` | 리다이렉트·세션종료 없음 — `/suspended` 왕복 루프 차단 | 동일 |
+| TC-1155-06 | 점검 모드 ON + 플랫폼 관리자 `/ko/orders` | 정상 통과(`null`) | 동일 |
+| TC-1155-07 | 점검 모드 ON + 화주 루트 `/ko` | 리다이렉트 없음(기존 동작 유지) | 동일 |
