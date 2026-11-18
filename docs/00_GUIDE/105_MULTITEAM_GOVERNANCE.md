@@ -109,6 +109,7 @@ Team B는 개별 `feature/teamb-*` 브랜치를 **develop에 직접 PR 제출하
 | GitHub Issue (`team:a` 라벨) | Team A | Team B 라벨/assignee 수정 금지 |
 | GitHub Issue (`team:b` 라벨) | Team B | Team A 라벨/assignee 수정 금지 |
 | 공유 코드 (`rbac.ts` 등) | 공유 | PR 선착순, 후발 팀 리베이스 |
+| 회귀 테스트 맵 (`docs/08_Self_Audit/Checklists/regression-items/TASK-*.md`) | 병렬 무충돌 | **신규 케이스는 Task별 파일로만 추가(R-09 v3.10, TASK-1150)**, `LIVE_REGRESSION_TEST_MAP.md` 인덱스 직접 수정 금지. PR Checks `LRTM Sync Check`가 유령 경로·미등재·E2E 수동 표기를 점검 |
 | API 상세 명세서 Ds-11 (인덱스 `docs/02_Analysis/Ds_11_API_상세_명세서.md` + 본문 분할 `docs/02_Analysis/ds11/Ds_11_*.md` — 신규 함수는 해당 도메인 분할 파일에 기재, TASK-1163) | 공유 | **구현 PR 안에서 갱신(R-12, GOV_COMMON v3.7)**, PR 선착순·후발 팀 리베이스. 신규 Server Action이 baseline(`scripts/ds11-sync-baseline.json`) 밖에서 Ds-11에 없으면 PR Checks `Docs Sync Check`가 경고(비차단) |
 | Migration 파일 | 작성 팀 | 타 팀 읽기 전용 |
 

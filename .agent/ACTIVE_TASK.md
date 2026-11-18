@@ -50,12 +50,34 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
+| [#1389](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1389) | [Team A] TASK-1167: DEF-156 — calculate_order_costs 권한 구성 정정 (IMP-035-RL 조치 복구) | a | p1 | open | 미배정 | 2026-11-18 |
+| [#1386](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1386) | [Team A] TASK-1166: DEF-153 — zen_rate_cards SELECT RLS 화주 세션 원가·마진 조회 차단 (High) | a | p1 | in-progress | 미배정 | 2026-11-18 |
+| [#1377](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1377) | [Team B] TASK-B-367: 청구서관리 ①-4 정산 되돌리기·주문 수정 잠금 — unmarkOrderCostSettled·updateOrder (설계 Q-G) | b | p2 | blocked | 미배정 | 2026-11-17 |
+| [#1376](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1376) | [Team B] TASK-B-366: 청구서관리 ①-3 오더정산 서버 액션 — 목록·정산완료·정산후 수정 잠금 (설계 PR-3) | b | p2 | blocked | 미배정 | 2026-11-17 |
+| [#1374](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1374) | [Team B] TASK-B-364: 청구서관리 ①-1 원가 계산 통합 — computeUpsActualCostKrw (설계 PR-1) | b | p2 | rework | 미배정 | 2026-11-18 |
+| [#1371](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1371) | [Team B → Aiden] Gale(Gemini 4 Argon) 페르소나 등록 요청 — agent-worktree-init.sh 등 | a | p3 | open | 미배정 | 2026-11-18 |
+| [#1369](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1369) | [Team B] TASK-B-363: 청구서관리 ⑥ 레거시 병행 정책 반영 및 컷오버 — 기존 메뉴·UPS 인보이스 처리 | b | p2 | blocked | 미배정 | 2026-11-17 |
+| [#1368](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1368) | [Team B] TASK-B-362: 청구서관리 ⑤ 청구서 PDF 생성·다운로드 및 발행 이메일 | b | p2 | blocked | 미배정 | 2026-11-17 |
+| [#1367](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1367) | [Team B] TASK-B-361: 청구서관리 ④ 화면 — S3 목록·S4 생성·S5 상세·역할별 메뉴 3경로 | b | p2 | blocked | 미배정 | 2026-11-18 |
+| [#1366](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1366) | [Team B] TASK-B-360: 청구서관리 ③ 서버 액션 — 후보 조회·생성·취소·발행·입금확인·조회·Excel(A4) | b | p2 | blocked | 미배정 | 2026-11-18 |
+| [#1365](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1365) | [Team B] TASK-B-359: 청구서관리 ② 청구서 DB — 헤더·항목 테이블·채번 RPC·RLS | b | p2 | blocked | 미배정 | 2026-11-18 |
+| [#1364](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1364) | [Team B] EPIC: 청구서관리 — 오더정산·청구서 생성/관리 (추적용) | b | p2 | in-progress | 미배정 | 2026-11-18 |
+| [#1362](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1362) | [Aiden → Team B] DEF-151 UPS 요율 조회 액션 원가 포함 반환·가드 공백, /agency/other-charges 원가 노출 수정 요청 | b | p1 | open | 미배정 | 2026-11-17 |
+| [#1356](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1356) | [Aiden → Team B] DEF-150 finance/UPS 실비·정산 액션 대리점 필터 누락·가드 공백 수정 요청 | b | p1 | open | 미배정 | 2026-11-17 |
+| [#1349](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1349) | [Aiden] DEF-149 §1.1 — agency/shippers.ts 대리점 소유권 검증 누락(교차 테넌트 IDOR) 수정 요청 (Team B 소유) | b | p1 | open | 미배정 | 2026-11-17 |
+| [#1347](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1347) | [Team A] TASK-1161: 실DB 테스트 공용 fixture 헬퍼 신설 (231 §10 #4 선행, B_Kai) | a | p3 | in-progress | 미배정 | 2026-11-18 |
+| [#1346](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1346) | [Team A] TASK-1160: 231 PoC 단계 2 — 모듈 ①② 위험 3군 재현·실DB 편입 측정 (§10 #4·#6·#13·#16 확정 반영) | a | p3 | blocked | 미배정 | 2026-11-18 |
+| [#1344](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1344) | [Team A] TASK-1158: IMP-188 — next-task-number·next-def-number가 Issue 번호도 감지하도록 개선 | a | p3 | review | 미배정 | 2026-11-18 |
+| [#1336](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1336) | [Team A] TASK-1154: DEF-146 P2 — 간접 의존 high 4건 해소 (browserslist·dompurify·source-map-js·ws) | a | p2 | open | 미배정 | 2026-11-18 |
+| [#1319](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1319) | [Aiden] xlsx 소스 전환·P0 의존성 상향 — Team B 영향 의견 요청 (DEF-146 후속) | b | p2 | - | jungjs | 2026-11-18 |
+| [#1298](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1298) | [Aiden] R-12(Ds-11 동기화) 개정·Docs Sync Check 도입 안내 — Team B 영향 및 회신 요청 | b | p2 | - | jungjs | 2026-11-16 |
+| [#1291](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1291) | [Team B] #1280 설계 확정 공유 + 회귀맵 분리(R-09/DEF-B-157) 결정 요청 (Aiden 보고) | b | p2 | open | 미배정 | 2026-11-18 |
+| [#1280](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1280) | [Team B] TASK-B-348: 사용자 노출 오류메시지 로케일 정합화 (영문/중문 혼재 노출 제거) | b | p2 | in-progress | 미배정 | 2026-11-17 |
+| [#1276](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1276) | [Team B] 원격 브랜치 정리 후속 — 판단 보류 브랜치 11건 점검 요청 | b | p3 | open | jungjs | 2026-10-29 |
 | [#1238](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1238) | 2026.10.12 오류사항 및 보완사항 | b | p2 | - | 미배정 | 2026-10-12 |
 | [#1218](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1218) | [Aiden] Stage-Gate Code Review — UPS 핵심 경로(오더등록~정산) 대상, 적절한 시점에 실시 | - | p3 | - | 미배정 | 2026-10-11 |
-| [#1189](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1189) | [Team B] TASK-B-323: Resend 이메일 도메인(zenith-lms.com) 미인증 — 알림메일 전량 발송 실패 (DEF-B-143, High) | b | p1 | - | jungjs | 2026-10-01 |
+| [#1189](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1189) | [Team B] TASK-B-323: Resend 이메일 도메인(zenith-lms.com) 미인증 — 알림메일 전량 발송 실패 (DEF-B-143, High) | b | p1 | - | jungjs | 2026-10-13 |
 | [#1185](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1185) | [Team B] TASK-B-322: 로그 커버리지 개선 ⑤— admin/auth.ts 예외 객체 폐기 패턴 수정 (5건) | b | p2 | - | 미배정 | 2026-08-23 |
-| [#1183](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1183) | [Team B] TASK-B-321: 로그 커버리지 개선 ③— ups-actual-charges/cost.ts DB쓰기 실패 무기록 (~21건) | b | p2 | - | 미배정 | 2026-08-23 |
-| [#1182](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1182) | [Team B] TASK-B-320: 로그 커버리지 개선 ②— lib/shxk/order.ts·tracking.ts logger 미도입 (6건) | b | p2 | - | 미배정 | 2026-08-23 |
 | [#1181](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1181) | [Team B] TASK-B-319: 로그 커버리지 개선 ①— ups-labels.ts 실패 반환값 무기록 해소 (~40건) | b | p2 | - | 미배정 | 2026-08-23 |
 | [#1177](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1177) | [Team A] TASK-1137: 동일 계정 동시 로그인 감지 및 처리(알림 + 기존유지/강제로그아웃 선택) | a | p2 | - | 미배정 | 2026-08-20 |
 | [#1176](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1176) | [Team A] TASK-1136: Session Idle Timeout 관리자 설정 + 다음 로그인부터 적용 | a | p2 | - | 미배정 | 2026-08-20 |
