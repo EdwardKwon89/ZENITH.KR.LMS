@@ -13,7 +13,7 @@
 |:--|:--|
 | 목표 | UPS 최종 청구서 기반 **오더정산**(원가 확정) 후, 대상·월 차수별 **청구서 생성→발행→입금확인·마감**, Excel(A4) 저장 |
 | 범위 | UPS 오더만 신규 방식. 기존 UPS 인보이스·비UPS 오더는 유지(Q4 확정) |
-| 총 공수 | 약 **50일** (설계 3 + 구현 약 42 + 통합·전환 약 5, 구간 소계 합) |
+| 총 공수 | 약 **53일** (수기 화주 R11 반영 +3.2일, v0.3) (설계 3 + 구현 약 42 + 통합·전환 약 5, 구간 소계 합) |
 | 임계 경로 | 1 설계 확정 → 2 오더정산 → 3 청구서 DB → 4 청구서 액션 → 5 화면·메뉴 → 8 통합 검증 |
 | 병행 가능 | 6 PDF·메일은 4 이후 5와 병행. 3의 DB 설계는 2 구현과 병행 가능(마이그레이션 번호 충돌만 주의) |
 | 외부 의존 | Resend 도메인 인증(#1189), DEF-150(#1356) 권한 가드 수정, 컷오버일 결정 |
@@ -60,6 +60,7 @@ Worker 후보: Dave / Baker / Mike (할당은 Task 발령 시 JSJung 확인). Au
 | 3.1 | 마이그레이션: `zen_billing_statements`, `zen_billing_statement_items`(`UNIQUE(order_id, tier)`, 취소 시 cascade로 오더 해제) | 구현 Agent | Jaison | 1.5 | M1 | 항목은 금액 스냅샷 보관, `supabase db reset` 통과 |
 | 3.2 | 채번 RPC: 청구서 번호·월 내 차수 순번 자동 | 구현 Agent | Jaison | 1 | 3.1 | 동시 생성 시 중복 없음 테스트 |
 | 3.3 | RLS: 관리=발행자만, SELECT 3경로(본인 생성, 청구받은 발행·마감, Admin의 대리점 감독) | 구현 Agent | Jaison | 2 | 3.1 | 자기완결 fixture RLS 테스트(타 생성자 접근 불가, 화주 DRAFT 비노출, 감독 읽기 전용) |
+| 3.5 | **수기 화주(R11)**: 헤더 `billed_party_type`·nullable `billed_org_id`·`billed_name/biz_no`·`billed_key` + CHECK, 채번 유일키를 `billed_key` 기준으로, 수기 대상 RLS(발행자·Admin 감독만) | 구현 Agent | Jaison | +0.7 | 3.1 | CHECK 위반·수기 청구서 타 대리점 접근 불가 RLS 테스트 |
 | 3.4 | 마이그레이션 번호 충돌 점검(`next-task-number.sh` 등) 및 DB 최신화(R-08-2) | 구현 Agent | Jaison | 0.3 | 3.1 | 충돌 없음 증적 |
 
 소계 약 4.8일. 마일스톤 **M3: 청구서 DB 머지**.
@@ -71,6 +72,7 @@ Worker 후보: Dave / Baker / Mike (할당은 Task 발령 시 JSJung 확인). Au
 | WBS | 작업 | Worker | Auditor | 공수 | 선행 | 산출물·DoD |
 |:--|:--|:--|:--|:-:|:--|:--|
 | 4.1 | `listBillableOrders` (대상·조회 기준·기간 필수, 정산완료·미포함·UPS만, 미정산 제외 건수) | 구현 Agent | Jaison | 1.5 | M2, M3 | 기간 누락·역전 거부, 대상 소속 검증 |
+| 4.1b | **수기 화주(R11)**: `listAdhocShipperNames`, `listBillableOrders`의 `billedTarget`(ORG/ADHOC) — ADHOC은 `shipper_id=발행 대리점`·화주명 정규화 일치·사업자번호 선택 | 구현 Agent | Jaison | +1.5 | 4.1 | `agency_org_id` NULL 오더 포함 테스트, 표기 변형·타 대리점 오더 혼입 방지 테스트 |
 | 4.2 | `createBillingStatement` (DRAFT 저장, 항목 스냅샷, 차수 자동) | 구현 Agent | Jaison | 2 | 4.1 | UNIQUE 충돌·동시성 테스트 |
 | 4.3 | `cancelBillingStatement` (생성자·DRAFT만), `issueBillingStatement` (발행=확정, 이후 변경 불가) | 구현 Agent | Jaison | 1.5 | 4.2 | 상태 전이 위반 거부, 서버 강제 |
 | 4.4 | `confirmStatementPayment` (전액만, 불일치 시 저장 안 함 → 마감) + 오더 `billing_status` 연동 | 구현 Agent | Jaison | 1.5 | 4.3 | 입금액 불일치 테스트 |
@@ -88,6 +90,7 @@ Worker 후보: Dave / Baker / Mike (할당은 Task 발령 시 JSJung 확인). Au
 |:--|:--|:--|:--|:-:|:--|:--|
 | 5.1 | S3 청구서 목록(조회 범위 필터·범위 배지·Excel 버튼) | 구현 Agent | Jaison | 2 | M4 | 화면 설계 준수 |
 | 5.2 | S4 청구서 생성(대상·월·UPS 오더 조회 기간·후보 선택·합계) | 구현 Agent | Jaison | 2.5 | M4 | 기간 필수 검증 UI |
+| 5.2b | **수기 화주(R11)**: S4 청구 대상 방식 선택(등록/수기), 자동완성·유사명 칩·후보의 화주명 열, 청구서 표시명 스냅샷 입력 | 구현 Agent | Jaison | +1.0 | 5.2, 4.1b | 대리점 계정 수기 화주로 후보 조회·생성 스크린샷 |
 | 5.3 | S5 청구서 상세(상태별 작업, 조회 전용 모드, Excel) | 구현 Agent | Jaison | 2 | M4 | 발행 시 확인 창, 발행 후 취소 버튼 없음 |
 | 5.4 | 3개 경로 재사용 구성: `/finance/statements`, `/agency/statements`, `/shipper/statements` | 구현 Agent | Jaison | 1 | 5.1~5.3 | 서버에서 역할로 범위 결정 |
 | 5.5 | 메뉴 추가(NaviSidebar), 경로 허용 목록(rbac·proxy·권한 화면) | 구현 Agent | Jaison | 1 | 5.4 | R-20 영향도 분석(인덱스 최신성 확인), `detect_changes` |
