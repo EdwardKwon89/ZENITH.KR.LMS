@@ -70,7 +70,6 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 | [#1344](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1344) | [Team A] TASK-1158: IMP-188 — next-task-number·next-def-number가 Issue 번호도 감지하도록 개선 | a | p3 | review | 미배정 | 2026-11-18 |
 | [#1336](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1336) | [Team A] TASK-1154: DEF-146 P2 — 간접 의존 high 4건 해소 (browserslist·dompurify·source-map-js·ws) | a | p2 | open | 미배정 | 2026-11-16 |
 | [#1319](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1319) | [Aiden] xlsx 소스 전환·P0 의존성 상향 — Team B 영향 의견 요청 (DEF-146 후속) | b | p2 | - | jungjs | 2026-11-18 |
-| [#1309](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1309) | [Team A] TASK-1150: 회귀맵 Task별 항목 파일 + 인덱스 구조 이전 + 정합성 점검 (IMP-186(B) / #1291 / R-09 개정) | a | p2 | review | 미배정 | 2026-11-18 |
 | [#1298](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1298) | [Aiden] R-12(Ds-11 동기화) 개정·Docs Sync Check 도입 안내 — Team B 영향 및 회신 요청 | b | p2 | - | jungjs | 2026-11-16 |
 | [#1291](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1291) | [Team B] #1280 설계 확정 공유 + 회귀맵 분리(R-09/DEF-B-157) 결정 요청 (Aiden 보고) | b | p2 | open | 미배정 | 2026-11-18 |
 | [#1280](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1280) | [Team B] TASK-B-348: 사용자 노출 오류메시지 로케일 정합화 (영문/중문 혼재 노출 제거) | b | p2 | in-progress | 미배정 | 2026-11-17 |
