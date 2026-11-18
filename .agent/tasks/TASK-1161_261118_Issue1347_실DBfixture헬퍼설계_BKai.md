@@ -185,11 +185,48 @@ createTestOrg(opts?: {
 ## 6. DoD (완료 정의)
 
 - [x] `[설계 의견]` 작성 → Aiden `[설계 확정]` 완료(2026-11-18 11:50 KST, 5건 승인 + 조건 7건)
-- [ ] 헬퍼 3종(+`addCleanup`·org_id 단언·로컬 가드)과 헬퍼 테스트, 사용 가이드
-- [ ] 파일럿 이전 2건(`p6-transport-policy`·`tracking-business-qa`) 전/후 비교(결과 동일·시간·flaky 0/5회) — 조건 ⑥ 소유 확인 완료
-- [ ] build·회귀 전체 PASS 수치, `src/`·`package.json`·lockfile 변경 0건, 기준선은 착수 시점 develop 최신 CI(조건 ⑦)
-- [ ] 회귀 등재: #1387 머지 후 `regression-items/TASK-1161_Issue1347_*.md` + `check:lrtm`(조건 ⑤), R-17 완료 보고·`check-R17-DoD` 준수
+- [x] 헬퍼 3종(+`addCleanup`·org_id 단언·로컬 가드)과 헬퍼 테스트, 사용 가이드
+- [x] 파일럿 이전 2건(`p6-transport-policy`·`tracking-business-qa`) 전/후 비교(결과 동일·시간·flaky 0/5회) — 조건 ⑥ 소유 확인 완료
+- [x] build·회귀 전체 PASS 수치, `src/`·`package.json`·lockfile 변경 0건, 기준선은 착수 시점 develop 최신 CI(조건 ⑦)
+- [x] 회귀 등재: #1387 머지 후 `regression-items/TASK-1161_Issue1347_*.md` + `check:lrtm`(조건 ⑤), R-17 완료 보고·`check-R17-DoD` 준수
 
 ## 7. `[작업 결과]`
 
-_(구현 완료 후 기재 — 커밋 해시는 `scripts/insert-commit-hash.sh`로 자동 삽입)_
+- 코드 커밋: `01a87e0eb3849149b5ff7833cd6b1e6af830de5a`
+- 구현 브랜치: `feature/teama-task-1161-db-fixture-helper-design` (develop 직접 커밋 없음, PR 필수)
+
+### 산출물
+
+| 파일 | 내용 |
+|:--|:--|
+| `tests/integration/helpers/db.ts` | 헬퍼 3종 — `createTestOrg`(트리거协作)·`makeJwt`+`assertOrgIdClaim`·`psql`(stdin/컨테이너 결정), `getServiceClient`/`getUserClient`, 로컬 가드, LIFO 멱등 `addCleanup`/`cleanup` |
+| `tests/integration/helpers/db.test.ts` | 신규 Vitest 5건(TC-HELPER-01~05) — 컨테이너 결정, JWT org_id, 로컬 가드(원격 throw), 트리거 연동·멱등 정리 |
+| `tests/integration/p6-transport-policy.test.ts` | 파일럿 이전 — seed 조직 의존 → `createTestOrg`. **단언 42줄 바이트 동일** |
+| `tests/integration/tracking-business-qa.test.ts` | 파일럿 이전 — 수동 env 파싱·고정 order ID → 헬퍼. **단언 7줄 바이트 동일** |
+| `docs/08_Self_Audit/TestCoverage_231/231_실DB_헬퍼_사용가이드.md` | 사용 가이드(조건 ④·Aiden 결정 5) |
+| `docs/08_Self_Audit/Checklists/regression-items/TASK-1161_Issue1347_db-fixture-helper.md` | 회귀 등재(조건 ⑤, #1387 머지 후) |
+
+### 검증 수치 (기준: 착수 시점 최신 develop/CI)
+
+| 검증 | 결과 |
+|:--|:--|
+| 헬퍼 + 파일럿 3건 연속 5회 | 14/14 ×5회 = **flaky 0** (RUN5는 프로세스 행 병목으로 단독 재실행, 14/14 통과) |
+| 파일럿 전/후 비교 | 원본 9/9 (2.35s) → 이전 9/9 (3.14s), **결과 동일**·오버헤드 +0.79s(격리 fixture 생성·정리) |
+| 헬퍼 단위 테스트 | 5/5 PASS |
+| `npm run build` | PASS |
+| ESLint(신규 2파일) | 0 errors |
+| `npm run check:lrtm -- --strict` | Vitest 266개 \| 맵 등재 167개 \| 미등재 99개(허용목록 99) \| **유령 0·E2E 미표기 0·신규 미등재 0** |
+| `npm run test:regression` | **265/265 파일, 1945/1945 테스트 PASS** (474.16s) |
+| `src/`·`package.json`·lockfile | **변경 0건** |
+
+- 회귀 1차 실행에서 `xlsx-vendor`(0.18.5 vs 0.20.3) 1건 실패 — rebase 후 작업트리 node_modules에 구버전이 남은 환경 문제. 벤더 tgz(`vendor/xlsx-0.20.3.tgz`, 0.20.3 확인)로 node_modules만 교체(lockfile 무변경) 후 단독 5/5 + 전체 재실행 1945/1945 PASS 확인.
+- 전체 회귀 로그의 `row-level security policy` ERROR·`policy ... does not exist` NOTICE는 기존 테스트의 의도된 음성 시나리오/마이그레이션 로그이며 최종 results와 무관(265/265 PASS).
+
+### 조건 7건 이행 확인
+
+① 로컬 가드(`assertLocalSupabaseUrl`, 원격 URL → throw, TC-HELPER-04 검증) ② 트리거协作(`raw_user_meta_data.org_id`로 프로필 자동 생성 후 `UPDATE` 정정, 트리거 억제·이중 INSERT 없음) ③ org_id 일치(`assertOrgIdClaim`이 JWT ↔ DB 프로필 대조, TC-HELPER-05 실측) ④ `addCleanup` LIFO·멱등(TC-HELPER-05, 파일럿 2건이 오더·패키지 정리 사용) ⑤ #1387 머지 확인 후 등재 1개 + `check:lrtm --strict` 통과, 맵 본문 수정 없음 ⑥ team 소유 확인(git log `[Claude]`·`[Gemini]`) 후 단언 무변경 이전 ⑦ 검증 수치를 develop 최신 실측(265/1945)으로 갱신, flaky 0/5회.
+
+### 후속 (이 PR 범위 외)
+
+- R-09 헬퍼 사용 의무화는 Aiden 별도 처리.
+- D_Kai 통지: Issue #1347 코멘트로 파일럿 1건(`p6-transport-policy.test.ts`) 협의 완료.
