@@ -359,3 +359,48 @@ Team A가 제공하는 API 계약 — Team B가 오더 등록 화면 연동 시 
 - **Input**: 없음 (`()`)
 - **Output**: `Promise<PublicSurgeFee[]>` (`rates-public.ts:125-132`, `data ?? []`, `cost_rate_per_kg` 미포함)
 - **오류**: 미인증 시 `validateUserAction()` 예외 throw; DB 조회 실패 시 `Error(error.message)` throw (`rates-public.ts:144`)
+
+### 11.18 UPS 할인율·부피계수 적용 예약 및 감사 로그 Actions (`src/app/actions/ups/pricing-schedule.ts` — TASK-1165 / Issue #1378)
+
+#### createPricingSchedule(input)
+- **Path**: `src/app/actions/ups/pricing-schedule.ts:135-186`
+- **설명**: UPS 대리점 할인율(`AGENCY_DISCOUNT`), 화주 할인율(`SHIPPER_DISCOUNT`), 대리점 부피중량 제수(`VOLUMETRIC_DIVISOR`) 변경 예약을 `zen_ups_pricing_schedule`(`status: 'SCHEDULED'`)에 등록하고 감사 로그(`CREATE`)를 남깁니다. `valid_from`이 오늘(KST) 이하이면 익일 자정 cron을 기다리지 않고 `applySchedule()`로 즉시 반영(`status = 'APPLIED'`)합니다 (TASK-B-263 / Issue #1021).
+- **권한**: `validateUserAction()` + `requireSchedulePermission(profile?.role, input.setting_type, input.target_ref, profile?.org_id)` (`pricing-schedule.ts:35-48, 136-137` — `ADMIN`·`MANAGER`·`ZENITH_SUPER_ADMIN` 전체 허용; `AGENCY`는 `SHIPPER_DISCOUNT`이면서 `target_ref.agency_org_id === profile.org_id`인 경우만 허용. 단, `AGENCY` 호출 시 `new_value` 역마진·범위 검증 및 `shipper_org_id` 소속 확인 부재는 `DEF-152` 참조) + `createAdminClient()`(L141)
+- **Input**: `input: { setting_type: 'AGENCY_DISCOUNT' | 'SHIPPER_DISCOUNT' | 'VOLUMETRIC_DIVISOR'; target_ref: Record<string, string>; new_value: number; valid_from: string; valid_until?: string | null }` (`pricing-schedule.ts:11-19`)
+- **Output**: `Promise<Record<string, unknown>>` (생성된 `zen_ups_pricing_schedule` 행 — 당일 즉시 적용 시 `status: 'APPLIED'`, 미래 일자 시 `'SCHEDULED'`)
+- **오류**: 권한 불충족 시 `Error("UPS 요율 관리 권한이 없습니다.")` / `Error("본인 소속 대리점의 할인율만 관리할 수 있습니다.")` throw(`L41-47`); 과거 일자(`< getKstToday()`) 또는 `valid_until <= valid_from` 시 `validateScheduleDates` throw(`L56-64`); 기간 중복 시 `checkOverlap`에서 `Error("기간이 겹치는 예약이 이미 존재합니다 ...")` throw(`L102`); DB insert/적용 실패 시 `Error(error.message)` throw
+- **부수효과**: `zen_ups_pricing_schedule` INSERT(`L161-165`), `zen_ups_pricing_setting_audit_log`(`action: 'CREATE'`) INSERT(`L169-175`), 당일(`<= getKstToday()`)이면 `applySchedule()` 실행(`zen_agency_pricing_policies`/`zen_agency_shipper_zone_discounts`/`zen_organizations` 갱신 + `status='APPLIED'` + `APPLY` 감사 로그, `L179-182`), `revalidatePath('/admin/ups-rates')`(`L184`)
+
+#### updatePricingSchedule(id, input)
+- **Path**: `src/app/actions/ups/pricing-schedule.ts:190-258`
+- **설명**: `SCHEDULED` 상태인 예약(`zen_ups_pricing_schedule.id`)의 `new_value`, `valid_from`, `valid_until`을 수정하고 `UPDATE` 감사 로그를 기록합니다. 수정 후 `valid_from`이 오늘(KST) 이하이면 즉시 `applySchedule()`로 반영합니다 (TASK-B-263).
+- **권한**: `validateUserAction()` + `createAdminClient()` 조회 후 `requireSchedulePermission(profile?.role, existing.setting_type, existing.target_ref, profile?.org_id)` (`pricing-schedule.ts:191-204`)
+- **Input**: `id: string` (`zen_ups_pricing_schedule.id`), `input: { new_value?: number; valid_from?: string; valid_until?: string | null }` (`L21-25`)
+- **Output**: `Promise<void>`
+- **오류**: 미존재 시 `Error("해당 예약을 찾을 수 없습니다.")` throw(`L201`); `status !== 'SCHEDULED'` 시 `Error("SCHEDULED 상태인 예약만 수정 가능합니다.")` throw(`L202`); 권한·날짜·기간 중복·DB 오류 시 각각 `Error` throw
+- **부수효과**: `zen_ups_pricing_schedule` UPDATE(`L230-233`), `zen_ups_pricing_setting_audit_log`(`action: 'UPDATE'`) INSERT(`L237-244`), 당일이면 `applySchedule()` 실행(`L248-255`), `revalidatePath('/admin/ups-rates')`(`L257`)
+
+#### cancelPricingSchedule(id)
+- **Path**: `src/app/actions/ups/pricing-schedule.ts:262-294`
+- **설명**: `SCHEDULED` 상태인 예약(`zen_ups_pricing_schedule.id`)의 상태를 `CANCELLED`로 변경하고 `CANCEL` 감사 로그를 기록합니다.
+- **권한**: `validateUserAction()` + `createAdminClient()` 조회 후 `requireSchedulePermission(profile?.role, existing.setting_type, existing.target_ref, profile?.org_id)` (`pricing-schedule.ts:263-276`)
+- **Input**: `id: string` (`zen_ups_pricing_schedule.id`)
+- **Output**: `Promise<void>`
+- **오류**: 미존재 시 `Error("해당 예약을 찾을 수 없습니다.")` throw(`L273`); `status !== 'SCHEDULED'` 시 `Error("SCHEDULED 상태인 예약만 취소 가능합니다.")` throw(`L274`); 권한·DB 실패 시 `Error` throw
+- **부수효과**: `zen_ups_pricing_schedule.status = 'CANCELLED'` UPDATE(`L278-281`), `zen_ups_pricing_setting_audit_log`(`action: 'CANCEL'`) INSERT(`L285-291`), `revalidatePath('/admin/ups-rates')`(`L293`)
+
+#### getScheduledPricingChanges(settingType?)
+- **Path**: `src/app/actions/ups/pricing-schedule.ts:298-323`
+- **설명**: 요율·부피계수 예약 목록(`zen_ups_pricing_schedule`)을 `valid_from` 오름차순으로 조회합니다 (`AGENCY` 호출 시 본인 `agency_org_id`로 자동 필터링).
+- **권한**: `validateUserAction()` + 역할 검증(`ADMIN`·`MANAGER`·`ZENITH_SUPER_ADMIN` 또는 `AGENCY && settingType === 'SHIPPER_DISCOUNT'`, `L299-305`, `AGENCY`는 `target_ref->>agency_org_id = profile.org_id` 강제 필터, `L316-318`)
+- **Input**: `settingType?: 'AGENCY_DISCOUNT' | 'SHIPPER_DISCOUNT' | 'VOLUMETRIC_DIVISOR'` (선택)
+- **Output**: `Promise<Array<Record<string, unknown>>>` (`data || []`)
+- **오류**: 권한 불충족 시 `Error("UPS 요율 관리 권한이 없습니다.")` throw(`L304`); DB 조회 실패 시 `Error(error.message)` throw(`L321`)
+
+#### getPricingAuditLog(settingType?, targetRef?)
+- **Path**: `src/app/actions/ups/pricing-schedule.ts:325-357`
+- **설명**: 요율·부피계수 설정 변경 감사 로그(`zen_ups_pricing_setting_audit_log`)를 `changed_at` 내림차순 최대 100건 조회합니다.
+- **권한**: `validateUserAction()` + 역할 검증(`ADMIN`·`MANAGER`·`ZENITH_SUPER_ADMIN` 또는 `AGENCY && settingType === 'SHIPPER_DISCOUNT'`, `L326-332`, `AGENCY`는 `target_ref->>agency_org_id = profile.org_id` 강제 필터, `L350-352`)
+- **Input**: `settingType?: SettingType`, `targetRef?: Record<string, string>` (선택)
+- **Output**: `Promise<Array<Record<string, unknown>>>` (`data || []`, 최대 100건)
+- **오류**: 권한 불충족 시 `Error("UPS 요율 관리 권한이 없습니다.")` throw(`L331`); DB 조회 실패 시 `Error(error.message)` throw(`L355`)

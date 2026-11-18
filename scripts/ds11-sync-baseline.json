@@ -1,9 +1,9 @@
 {
   "_comment": "R-12 래칫 허용 목록: Ds-11에 이름이 없는 기존 Server Action 함수(key = actions 상대경로:함수명). 줄어들기만 해야 한다. 생성: node scripts/check-ds11-sync.mjs --update-baseline",
   "ds11": "docs/02_Analysis/Ds_11_API_상세_명세서.md",
-  "generatedAt": "2026-11-17",
+  "generatedAt": "2026-11-18",
   "total": 298,
-  "count": 144,
+  "count": 126,
   "entries": [
     "admin/auth.ts:changePassword",
     "admin/auth.ts:changePasswordWithReauth",
@@ -17,9 +17,6 @@
     "admin/corporate.ts:getOrganizationInfo",
     "admin/corporate.ts:updateDepartment",
     "admin/corporate.ts:updateOrganizationInfo",
-    "admin/exchange-rates.ts:getExchangeRateSyncStatus",
-    "admin/exchange-rates.ts:listExchangeRates",
-    "admin/exchange-rates.ts:setManualExchangeRate",
     "admin/master-data.ts:getCommonCodes",
     "admin/master.ts:generateMasterOrderNo",
     "admin/master.ts:generateOrderNo",
@@ -45,17 +42,7 @@
     "admin/organization.ts:rejectOrganization",
     "admin/organization.ts:requestOrganizationSupplement",
     "admin/organization.ts:updateOrganization",
-    "admin/rate-cards.ts:createRateCard",
-    "admin/rate-cards.ts:deleteRateCard",
-    "admin/rate-cards.ts:getRateCards",
-    "admin/rate-cards.ts:updateRateCard",
-    "admin/rates.ts:createRateCard",
-    "admin/rates.ts:deleteRateCard",
-    "admin/rates.ts:getRateCards",
-    "admin/rates.ts:updateRateCard",
     "admin/rbac.ts:updateRolePermissions",
-    "admin/transport-policies.ts:getTransportPolicies",
-    "admin/transport-policies.ts:updateTransportPolicy",
     "finance/daily-billing.ts:finalizeDailyShipperInvoices",
     "finance/daily-billing.ts:getShipperDailyBillingSummary",
     "finance/daily-billing.ts:getShipperDailyOrdersDetails",
@@ -143,11 +130,6 @@
     "operations/warehouse.ts:getWarehousedOrders",
     "operations/warehouse.ts:undoDeparture",
     "operations/warehouse.ts:undoOutbound",
-    "operations/warehouse.ts:undoUpsRegistration",
-    "ups/pricing-schedule.ts:cancelPricingSchedule",
-    "ups/pricing-schedule.ts:createPricingSchedule",
-    "ups/pricing-schedule.ts:getPricingAuditLog",
-    "ups/pricing-schedule.ts:getScheduledPricingChanges",
-    "ups/pricing-schedule.ts:updatePricingSchedule"
+    "operations/warehouse.ts:undoUpsRegistration"
   ]
 }
