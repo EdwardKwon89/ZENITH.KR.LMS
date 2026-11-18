@@ -729,9 +729,6 @@ export default function ShipperDailyBillingClient({
                   className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-zinc-700 rounded-lg bg-slate-50 dark:bg-zinc-900 text-slate-900 dark:text-white"
                   placeholder="0"
                 />
-                <span className="text-[10px] text-slate-400 mt-1 block">
-                  +7% = ₩{Math.round(finalizeModal.baseFreightKrw * 1.07).toLocaleString()}
-                </span>
               </div>
               <div>
                 <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">

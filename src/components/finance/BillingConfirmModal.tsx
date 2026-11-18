@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { RefreshCw, X } from 'lucide-react';
-import { recordActualCostAndFinalize, UpsActualCostInput } from '@/app/actions/finance/ups-actual-cost';
+import { recordActualCostAndFinalize, previewUpsActualCost, UpsActualCostInput } from '@/app/actions/finance/ups-actual-cost';
 import { useTranslations } from 'next-intl';
 
 interface OtherCharge {
@@ -52,11 +52,38 @@ export default function BillingConfirmModal({
   const [otherCharges, setOtherCharges] = useState<OtherCharge[]>([]);
   const [reason, setReason] = useState('청구확정');
   const [loading, setLoading] = useState(false);
+  const [previewTotalKrw, setPreviewTotalKrw] = useState<number | null>(null);
 
-  const otherChargesTotal = otherCharges.reduce((sum, c) => sum + c.amount, 0);
-  // TASK-B-317: 기본운임은 선택 통화로 입력, 환율 적용은 서버에서 처리
-  const baseFreightWithAdminFee = Math.round(baseFreightAmount * 1.07);
-  const totalKrw = baseFreightWithAdminFee + fuelSurchargeKrw + surgeFeeKrw + otherChargesTotal;
+  const buildInput = () => {
+    const otherChargesTotal = otherCharges.reduce((sum, c) => sum + c.amount, 0);
+    return {
+      baseFreightKrw: baseFreightAmount,
+      baseFreightCurrency,
+      fuelSurchargeKrw,
+      surgeFeeKrw,
+      otherChargesKrw: otherChargesTotal,
+      otherCharges: otherCharges.filter((c) => c.name && c.amount > 0),
+      invoiceId,
+      reason,
+    };
+  };
+
+  // TASK-B-364: 클라이언트 측 가산 계산 제거 — 서버 미리보기 응답을 표시한다.
+  useEffect(() => {
+    if (!open) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await previewUpsActualCost(orderId, buildInput());
+        if (!cancelled) setPreviewTotalKrw(res.success ? (res.totalCostKrw ?? null) : null);
+      } catch (err) {
+        console.error(err);
+        if (!cancelled) setPreviewTotalKrw(null);
+      }
+    })();
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, orderId, baseFreightAmount, baseFreightCurrency, fuelSurchargeKrw, surgeFeeKrw, otherCharges]);
 
   const addOtherCharge = () => {
     setOtherCharges([...otherCharges, { name: '', amount: 0, currency: 'KRW' }]);
@@ -84,21 +111,12 @@ export default function BillingConfirmModal({
         otherCharges?: { name: string; amount: number; currency: string }[];
         invoiceId?: string;
         reason?: string;
-      } = {
-        baseFreightKrw: baseFreightAmount,
-        baseFreightCurrency,
-        fuelSurchargeKrw,
-        surgeFeeKrw,
-        otherChargesKrw: otherChargesTotal,
-        otherCharges: otherCharges.filter(c => c.name && c.amount > 0),
-        invoiceId,
-        reason,
-      };
+      } = buildInput();
 
       const result = await recordActualCostAndFinalize(orderId, input);
 
       if (result.success) {
-        toast.success(`청구확정 완료: ${orderNo} (총 ₩${totalKrw.toLocaleString()})`);
+        toast.success(`청구확정 완료: ${orderNo} (총 ₩${(previewTotalKrw ?? 0).toLocaleString()})`);
         onSuccess();
         onClose();
       } else {
@@ -143,9 +161,6 @@ export default function BillingConfirmModal({
               className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-zinc-700 rounded-lg bg-slate-50 dark:bg-zinc-900 text-slate-900 dark:text-white"
               placeholder="0"
             />
-            <span className="text-[10px] text-slate-400 mt-1 block">
-              +7% admin 원가 = {baseFreightCurrency} {baseFreightWithAdminFee.toLocaleString()}
-            </span>
           </div>
           <div>
             <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">
@@ -272,7 +287,7 @@ export default function BillingConfirmModal({
           <div className="flex justify-between text-sm">
             <span className="text-slate-600 dark:text-slate-400">총 합계 (KRW)</span>
             <span className="font-bold text-amber-600 dark:text-amber-400">
-              ₩{totalKrw.toLocaleString()}
+              {previewTotalKrw != null ? `₩${previewTotalKrw.toLocaleString()}` : '—'}
             </span>
           </div>
         </div>

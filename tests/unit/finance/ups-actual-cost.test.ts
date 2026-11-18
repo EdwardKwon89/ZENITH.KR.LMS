@@ -111,7 +111,7 @@ describe('Issue #1009: UPS 사후 원가 확정 (zen_ups_actual_cost)', () => {
     expect(result.success).toBe(true);
     expect(result.hkdTotal).toBe(1300);
     expect(result.appliedExchangeRate).toBe(150);
-    expect(result.totalCostKrw).toBe(195000);
+    expect(result.totalCostKrw).toBe(205500);
     expect(result.releasedDate).toBe('2026-07-25');
     expect(result.recalc!.weightOrDimsChanged).toBe(false);
   });
@@ -263,7 +263,7 @@ describe('Issue #1009: UPS 사후 원가 확정 (zen_ups_actual_cost)', () => {
     });
 
     expect(result.success).toBe(true);
-    expect(result.totalCostKrw).toBe(195000);
+    expect(result.totalCostKrw).toBe(208650);
     expect(result.recalc!.newAgencyTotal).toBe(1200);
     expect(result.recalc!.newShipperTotal).toBe(1600);
   });
