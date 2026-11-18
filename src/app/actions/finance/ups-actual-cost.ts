@@ -229,12 +229,12 @@ export async function recordUpsActualCost(
         id,
         order_no,
         status,
+        cost_settlement_status,
         transport_mode,
         shipper_id,
         agency_org_id,
         recipient_country_code,
         ups_product_code,
-        ups_product_id,
         incoterms,
         created_at,
         snapshot:zen_order_rate_snapshots ( metadata )
@@ -254,6 +254,11 @@ export async function recordUpsActualCost(
     if (order.status !== 'IN_TRANSIT' && order.status !== 'DELIVERED') {
       logger.warn(`recordUpsActualCost: invalid status ${order.status} (${orderId})`);
       return { success: false, error: await trError('ups_actual_cost_status_invalid') };
+    }
+    // TASK-B-366: 정산 완료 오더는 원가 수정 금지(먼저 정산 해제 필요)
+    if ((order as any).cost_settlement_status === 'SETTLED') {
+      logger.warn(`recordUpsActualCost: cost settlement locked (${orderId})`);
+      return { success: false, error: await trError('cost_settled_locked') };
     }
 
     const rawSnapshot = (order as any).snapshot;
@@ -295,7 +300,14 @@ export async function recordUpsActualCost(
 
     const { error: updateError } = await supabase
       .from('zen_ups_actual_cost')
-      .update({ applied_exchange_rate: exchangeRate, total_cost_krw: totalCostKrw })
+      .update({
+        applied_exchange_rate: exchangeRate,
+        total_cost_krw: totalCostKrw,
+        cost_surcharge_rate: computed.base.surchargeRate,
+        cost_surcharge_amount_krw: computed.base.surchargeAmountKrw,
+        applied_exchange_rates: computed.appliedExchangeRates,
+        calc_version: 2,
+      })
       .eq('order_id', orderId);
     if (updateError) {
       logger.error('recordUpsActualCost: exchange rate update failed', updateError);
@@ -482,7 +494,6 @@ export async function previewUpsActualCost(
         agency_org_id,
         recipient_country_code,
         ups_product_code,
-        ups_product_id,
         incoterms,
         created_at,
         snapshot:zen_order_rate_snapshots ( metadata )
@@ -568,7 +579,7 @@ export async function recordActualCostAndFinalize(
     // 1. 오더 조회
     const { data: order, error: orderError } = await supabase
       .from('zen_orders')
-      .select('id, status, transport_mode, shipper_id, created_at')
+      .select('id, status, transport_mode, cost_settlement_status, shipper_id, created_at')
       .eq('id', orderId)
       .single();
 
@@ -586,6 +597,11 @@ export async function recordActualCostAndFinalize(
     if (!['IN_TRANSIT', 'DELIVERED'].includes(order.status)) {
       logger.warn(`recordActualCostAndFinalize: invalid status ${order.status} (${orderId})`);
       return { success: false, error: await trError('billing_finalize_status_invalid') };
+    }
+    // TASK-B-366: 정산 완료 오더는 원가 수정 금지(먼저 정산 해제 필요)
+    if ((order as any).cost_settlement_status === 'SETTLED') {
+      logger.warn(`recordActualCostAndFinalize: cost settlement locked (${orderId})`);
+      return { success: false, error: await trError('cost_settled_locked') };
     }
 
     // 3. 출고확정일 환율 조회
@@ -631,6 +647,10 @@ export async function recordActualCostAndFinalize(
         surge_fee_currency: 'KRW',
         applied_exchange_rate: appliedExchangeRate,
         total_cost_krw: totalCostKrw,
+        cost_surcharge_rate: computed.base.surchargeRate,
+        cost_surcharge_amount_krw: computed.base.surchargeAmountKrw,
+        applied_exchange_rates: computed.appliedExchangeRates,
+        calc_version: 2,
         entered_by: user.id,
         notes: input.notes || null,
       }, { onConflict: 'order_id' });
@@ -641,13 +661,13 @@ export async function recordActualCostAndFinalize(
     }
 
     // 6. 기타부가운임 저장 (zen_ups_actual_other_charges)
-    if (computed.otherCharges.length > 0) {
-      // 기존 기타부가운임 삭제
-      await supabase
-        .from('zen_ups_actual_other_charges')
-        .delete()
-        .eq('order_id', orderId);
+    // DEF-B-159: 목록이 비어도 항상 기존 자식 행을 삭제해 메인 합계와 정합을 맞춘다.
+    await supabase
+      .from('zen_ups_actual_other_charges')
+      .delete()
+      .eq('order_id', orderId);
 
+    if (computed.otherCharges.length > 0) {
       // 새 기타부가운임 삽입 (목록 정규화 결과)
       const charges = computed.otherCharges.map((c) => ({
         order_id: orderId,
@@ -694,6 +714,209 @@ export async function recordActualCostAndFinalize(
     };
   } catch (err: any) {
     logger.error('Error recording actual cost and finalizing:', err);
+    return { success: false, error: await trError('generic', { code: 'UNEXPECTED' }) };
+  }
+}
+
+// ─── TASK-B-366 (Issue #1376): 오더정산 목록·정산완료 서버 액션 ────────────────
+
+export interface CostSettlementFilter {
+  status: 'NOT_SETTLED' | 'SETTLED' | 'ALL';
+  from: string;
+  to: string;
+  q?: string;
+}
+
+export interface CostSettlementOrderRow {
+  orderId: string;
+  orderNo: string;
+  shipperName: string | null;
+  agencyName: string | null;
+  deliveredAt: string | null;
+  settlementStatus: 'NOT_SETTLED' | 'SETTLED';
+  costSettledAt: string | null;
+  upsInvoiceNo: string | null;
+  hasActualCost: boolean;
+  legacyInvoiced: boolean;
+  excludedReason: 'LEGACY_INVOICED' | null;
+}
+
+export interface CostSettlementListResult {
+  success: boolean;
+  orders?: CostSettlementOrderRow[];
+  total?: number;
+  error?: string;
+}
+
+/** 컷오버일 이전 오더 판정 — 실제 기준일은 #1369에서 확정한다. */
+function isBeforeCutover(_order: { created_at?: string | null }): boolean {
+  // TODO(#1369): 컷오버일 확정 후 구현. 이번 Task에서는 항상 false(stub).
+  return false;
+}
+
+function deliveredDateOf(history: Array<{ order_id: string; created_at: string }> | null | undefined) {
+  const map = new Map<string, string>();
+  for (const row of history ?? []) {
+    if (!map.has(row.order_id) || row.created_at > (map.get(row.order_id) as string)) {
+      map.set(row.order_id, row.created_at);
+    }
+  }
+  return map;
+}
+
+/** Admin 오더정산 대상 목록 — DELIVERED UPS 오더 + 정산상태/기간/검색 필터. */
+export async function getOrdersForCostSettlement(filter: CostSettlementFilter): Promise<CostSettlementListResult> {
+  try {
+    const { supabase, profile } = await validateUserAction();
+    const permErr = await assertAdmin(profile);
+    if (permErr) return { success: false, error: permErr };
+
+    if (!filter?.from || !filter?.to || filter.from > filter.to) {
+      logger.warn(`getOrdersForCostSettlement: invalid date range ${filter?.from} ~ ${filter?.to}`);
+      return { success: false, error: await trError('generic', { code: 'DATE_RANGE_INVALID' }) };
+    }
+
+    let query = supabase
+      .from('zen_orders')
+      .select('id, order_no, status, cost_settlement_status, cost_settled_at, created_at, shipper_id, agency_org_id, shipper:zen_organizations!shipper_id(name), agency:zen_organizations!agency_org_id(name)')
+      .eq('transport_mode', 'UPS')
+      .eq('status', 'DELIVERED')
+      .limit(500);
+    if (filter.status !== 'ALL') query = query.eq('cost_settlement_status', filter.status);
+    if (filter.q?.trim()) query = query.ilike('order_no', `%${filter.q.trim()}%`);
+
+    const { data: orders, error } = await query;
+    if (error) {
+      logger.error('getOrdersForCostSettlement: order lookup failed', error);
+      return { success: false, error: await trError('generic', { code: 'ORDER_LIST_LOOKUP' }) };
+    }
+    if (!orders || orders.length === 0) return { success: true, orders: [], total: 0 };
+
+    const orderIds = orders.map((o: any) => o.id);
+    const [historyRes, costRes, invoiceRes] = await Promise.all([
+      supabase.from('order_status_history').select('order_id, created_at').in('order_id', orderIds).eq('next_status', 'DELIVERED').order('created_at', { ascending: false }),
+      supabase.from('zen_ups_actual_cost').select('order_id, ups_invoice_no').in('order_id', orderIds),
+      supabase.from('zen_invoices').select('metadata').neq('status', 'CANCELED').filter('metadata->>source_order_id', 'in', `(${orderIds.join(',')})`),
+    ]);
+
+    // 보조 조회 실패를 무시하면 레거시 인보이스 오더가 정산 대상처럼 보이는 fail-open이 된다.
+    if (historyRes.error) {
+      logger.error('getOrdersForCostSettlement: delivery history lookup failed', historyRes.error);
+      return { success: false, error: await trError('generic', { code: 'HISTORY_LOOKUP' }) };
+    }
+    if (costRes.error) {
+      logger.error('getOrdersForCostSettlement: actual cost lookup failed', costRes.error);
+      return { success: false, error: await trError('generic', { code: 'COST_LOOKUP' }) };
+    }
+    if (invoiceRes.error) {
+      logger.error('getOrdersForCostSettlement: legacy invoice lookup failed', invoiceRes.error);
+      return { success: false, error: await trError('generic', { code: 'LEGACY_INVOICE_LOOKUP' }) };
+    }
+
+    const deliveredMap = deliveredDateOf(historyRes.data as any);
+    const costMap = new Map<string, string | null>((costRes.data ?? []).map((c: any) => [c.order_id, c.ups_invoice_no ?? null]));
+    const legacyIds = new Set<string>((invoiceRes.data ?? []).map((inv: any) => inv.metadata?.source_order_id).filter(Boolean));
+
+    const rows: CostSettlementOrderRow[] = [];
+    for (const order of orders as any[]) {
+      const deliveredAt = deliveredMap.get(order.id) ?? null;
+      if (deliveredAt) {
+        const day = deliveredAt.slice(0, 10);
+        if (day < filter.from || day > filter.to) continue;
+      } else {
+        continue; // 배송완료일 미확인 오더는 기간 필터 대상이 아니다
+      }
+      const legacyInvoiced = legacyIds.has(order.id);
+      rows.push({
+        orderId: order.id,
+        orderNo: order.order_no,
+        shipperName: order.shipper?.name ?? null,
+        agencyName: order.agency?.name ?? null,
+        deliveredAt,
+        settlementStatus: order.cost_settlement_status ?? 'NOT_SETTLED',
+        costSettledAt: order.cost_settled_at ?? null,
+        upsInvoiceNo: costMap.get(order.id) ?? null,
+        hasActualCost: costMap.has(order.id),
+        legacyInvoiced,
+        excludedReason: legacyInvoiced ? 'LEGACY_INVOICED' : null,
+      });
+    }
+
+    return { success: true, orders: rows, total: rows.length };
+  } catch (err) {
+    logger.error('getOrdersForCostSettlement failed:', err);
+    return { success: false, error: await trError('generic', { code: 'UNEXPECTED' }) };
+  }
+}
+
+/** Admin 오더정산 완료 — DELIVERED·UPS·원가 입력·레거시 미청구·미정산 조건을 모두 만족해야 한다. */
+export async function markOrderCostSettled(orderId: string): Promise<{ success: boolean; settledAt?: string; error?: string }> {
+  try {
+    const { supabase, profile } = await validateUserAction();
+    const permErr = await assertAdmin(profile);
+    if (permErr) return { success: false, error: permErr };
+
+    const { data: order, error: orderError } = await supabase
+      .from('zen_orders')
+      .select('id, status, transport_mode, cost_settlement_status, created_at')
+      .eq('id', orderId)
+      .single();
+    if (orderError || !order) {
+      logger.warn(`markOrderCostSettled: order not found (${orderId})`);
+      return { success: false, error: await trError('order_not_found') };
+    }
+    if (order.transport_mode !== 'UPS') return { success: false, error: await trError('not_ups_order') };
+    if (order.status !== 'DELIVERED') {
+      logger.warn(`markOrderCostSettled: order not delivered (${orderId}, ${order.status})`);
+      return { success: false, error: await trError('ups_actual_cost_status_invalid') };
+    }
+    if (order.cost_settlement_status === 'SETTLED') {
+      logger.warn(`markOrderCostSettled: already settled (${orderId})`);
+      return { success: false, error: await trError('already_settled') };
+    }
+    if (isBeforeCutover(order)) {
+      logger.warn(`markOrderCostSettled: before cutover (${orderId})`);
+      return { success: false, error: await trError('legacy_invoiced_order') };
+    }
+
+    const { data: costRow } = await supabase.from('zen_ups_actual_cost').select('id').eq('order_id', orderId).maybeSingle();
+    if (!costRow) {
+      logger.warn(`markOrderCostSettled: actual cost missing (${orderId})`);
+      return { success: false, error: await trError('cost_not_entered') };
+    }
+
+    const { data: legacyInvoices } = await supabase
+      .from('zen_invoices')
+      .select('id')
+      .filter('metadata->>source_order_id', 'eq', orderId)
+      .neq('status', 'CANCELED')
+      .limit(1);
+    if (legacyInvoices && legacyInvoices.length > 0) {
+      logger.warn(`markOrderCostSettled: legacy per-order invoice exists (${orderId})`);
+      return { success: false, error: await trError('legacy_invoiced_order') };
+    }
+
+    const settledAt = new Date().toISOString();
+    const { data: updated, error: updateError } = await supabase
+      .from('zen_orders')
+      .update({ cost_settlement_status: 'SETTLED', cost_settled_at: settledAt, cost_settled_by: profile!.id })
+      .eq('id', orderId)
+      .eq('cost_settlement_status', 'NOT_SETTLED')
+      .select('id');
+    if (updateError) {
+      logger.error('markOrderCostSettled: conditional update failed', updateError);
+      return { success: false, error: await trError('generic', { code: 'SETTLE_UPDATE' }) };
+    }
+    if (!updated || updated.length === 0) {
+      logger.warn(`markOrderCostSettled: concurrent settle detected (${orderId})`);
+      return { success: false, error: await trError('already_settled') };
+    }
+
+    revalidatePath(`/(dashboard)/orders/${orderId}`, 'page');
+    revalidatePath('/admin/ups-actual-charges');
+    return { success: true, settledAt };
+  } catch (err) {
+    logger.error('markOrderCostSettled failed:', err);
     return { success: false, error: await trError('generic', { code: 'UNEXPECTED' }) };
   }
 }

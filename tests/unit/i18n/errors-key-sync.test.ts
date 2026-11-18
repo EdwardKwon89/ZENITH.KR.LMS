@@ -35,10 +35,11 @@ describe('Errors 네임스페이스 로케일 키 동기화 (TASK-B-350)', () =>
   const baseline = errorsOf(loadMessages(BASELINE));
   const baselineKeys = Object.keys(baseline).sort();
 
-  it('ko 기준 키가 90개이고 모두 비어 있지 않은 문자열이다', () => {
+  it('ko 기준 키가 94개이고 모두 비어 있지 않은 문자열이다', () => {
     expect(baselineKeys).toEqual([
       'agency_org_missing',
       'already_delivered',
+      'already_settled',
       'auth_account_exists',
       'auth_email_not_confirmed',
       'auth_invalid_credentials',
@@ -52,6 +53,8 @@ describe('Errors 네임스페이스 로케일 키 동기화 (TASK-B-350)', () =>
       'cost_amount_invalid',
       'cost_currency_required',
       'cost_name_required',
+      'cost_not_entered',
+      'cost_settled_locked',
       'current_password_incorrect',
       'destination_country_not_found',
       'document_fetch_failed',
@@ -81,6 +84,7 @@ describe('Errors 네임스페이스 로케일 키 동기화 (TASK-B-350)', () =>
       'label_issue_failed',
       'label_not_found',
       'label_void_failed',
+      'legacy_invoiced_order',
       'manual_reason_required',
       'master_order_bound',
       'measurements_stale',

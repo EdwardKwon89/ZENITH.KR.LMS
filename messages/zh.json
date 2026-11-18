@@ -89,7 +89,11 @@
     "auth_signup_failed": "注册失败，请检查输入信息。",
     "auth_signup_profile_failed": "创建用户资料失败，请稍后重试。",
     "inventory_not_found": "找不到库存项目。",
-    "inventory_below_zero": "库存数量不能小于 0。"
+    "inventory_below_zero": "库存数量不能小于 0。",
+    "cost_not_entered": "请先输入实际成本。",
+    "already_settled": "该订单已完成成本结算。",
+    "cost_settled_locked": "已结算的订单无法修改成本或重量，请先取消结算。",
+    "legacy_invoiced_order": "该订单已签发按订单发票，不属于新结算流程范围。"
   },
   "Common": {
     "phoneHelp": "仅限数字（不含连字符，最多 {max} 位）",

@@ -2228,3 +2228,25 @@ UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류
 - **관련 파일**: `src/lib/shxk/order.ts`, `src/lib/shxk/tracking.ts`, `src/app/api/cron/ups-tracking-poll/route.ts`, `src/app/actions/misc/monitoring.ts`(logClientError)
 - **예상 공수**: 0.5~1 MD (알림 경로 재사용 시 하한)
 - **우선순위**: High —침묵성(③, cron) + 과거 사고(④, DEF-B-142) 동시 해당
+
+---
+
+## [IMP-197] 오더정산 목록(`getOrdersForCostSettlement`) 확장성 — 500건 상한·URL 길이·서버측 기간 필터/페이지네이션
+
+- **발견 경위**: TASK-B-366(Issue #1376) Jaison 리뷰. 목록은 `DELIVERED`+`UPS` 오더를 최대 500건 조회한 뒤 배송완료일로 메모리 필터링하고, 보조 조회 3곳에 `.in('order_id', ids)`로 uuid 최대 500개(≈19KB)를 쿼리스트링에 싣는다.
+- **현재 상태**: 오더가 500건을 넘으면 기간 내 오더가 누락될 수 있고, 500건 근접 시 414/연결 거부 가능성이 있다. 화면 Task(#1367)에서 서버측 기간 필터·페이지네이션과 함께 처리 필요.
+- **목표 구현**: `order_status_history` DELIVERED 시각을 조인/서브쿼리로 서버 필터링, 페이지네이션 도입, `.in()`은 청크 분할(예: 100개) 또는 RPC로 대체.
+- **관련 파일**: `src/app/actions/finance/ups-actual-cost.ts`(`getOrdersForCostSettlement`), 후속 화면 컴포넌트(#1367)
+- **예상 공수**: 0.5 MD (쿼리 개편 + 화면 연동)
+- **우선순위**: Medium — 데이터 증가 시 목록 누락·오류로 이어짐
+
+---
+
+## [IMP-198] 오더정산 후 잠금의 TOCTOU·RLS 경로 검증 공백
+
+- **발견 경위**: TASK-B-366(Issue #1376) Jaison 리뷰(비차단). `recordUpsActualCost`/`recordActualCostAndFinalize`가 `SETTLED`를 읽은 뒤 저장하는 사이에 `markOrderCostSettled`가 끼어들 수 있고(TOCTOU), 통합 테스트는 service role 클라이언트를 사용해 Admin 세션의 RLS UPDATE 경로를 검증하지 않는다.
+- **현재 상태**: 관리자 전용·저확률이라 사고 위험은 낮으나, 이론상 정산 후 원가가 덮어써질 수 있다. RLS 경로는 JSJung이 병합 후 화면에서 확인 예정.
+- **목표 구현**: B-367 또는 청구서 DB(#1365) 병합 후 DB 트리거/조건부 UPDATE(`WHERE cost_settlement_status='NOT_SETTLED'`)로 저장 자체를 원자적으로 차단하고, Admin 사용자 세션 기반 RLS 통합 테스트 추가.
+- **관련 파일**: `src/app/actions/finance/ups-actual-cost.ts`, `supabase/migrations/`(트리거 도입 시), `tests/integration/task-b366-cost-settlement.test.ts`
+- **예상 공수**: 0.3~0.5 MD (트리거 또는 조건부 UPDATE + RLS 테스트)
+- **우선순위**: Low~Medium — 금전 정합성 방어선 보강
