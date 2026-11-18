@@ -50,7 +50,6 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
-| [#1378](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1378) | [Team A] TASK-1165: R-12 — Ds-11 미반영 backlog 4차 (요율카드·UPS 할인율 예약·환율·운송정책 18개 함수) | a | p3 | review | 미배정 | 2026-11-18 |
 | [#1377](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1377) | [Team B] TASK-B-367: 청구서관리 ①-4 정산 되돌리기·주문 수정 잠금 — unmarkOrderCostSettled·updateOrder (설계 Q-G) | b | p2 | blocked | 미배정 | 2026-11-17 |
 | [#1376](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1376) | [Team B] TASK-B-366: 청구서관리 ①-3 오더정산 서버 액션 — 목록·정산완료·정산후 수정 잠금 (설계 PR-3) | b | p2 | blocked | 미배정 | 2026-11-17 |
 | [#1375](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1375) | [Team B] TASK-B-365: 청구서관리 ①-2 오더정산 마이그레이션 — 정산 상태 컬럼·원가 스냅샷 컬럼 (설계 PR-2) | b | p2 | open | 미배정 | 2026-11-17 |
