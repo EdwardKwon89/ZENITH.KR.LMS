@@ -1453,3 +1453,28 @@ SHXK `createorder` 페이로드의 `shipper.shipper_name`이 화면 "담당자�
 | TC-364-RST | 되돌리기: 가산 계수 제거 | `(1+surchargeRate)`→`1` 원복 시 **5 failed / 3 passed** → 복구 8 passed | `actual-cost-compute.test.ts`, `task-b364-cost-integration.test.ts` |
 
 **회귀 검증 (2026-11-18, rebase 후)**: `npm run test:regression` **266 test files / 1,966 tests 전부 PASS**(B-365 포함). `npm run build` **EXIT=0**.
+
+## 94. 오더정산 서버 액션 — 목록·정산완료·정산 후 수정 잠금 (Issue #1376 / TASK-B-366, 에픽 #1364)
+
+**2026-11-18, Dave** — 청구서관리 ①-3(설계 TASK-B-358 PR-3). `getOrdersForCostSettlement`(DELIVERED+UPS 목록·정산상태/기간/검색 필터, 레거시 인보이스 행은 표시하되 `LEGACY_INVOICED`로 제외)와 `markOrderCostSettled`(Admin, DELIVERED·UPS·원가 입력·미정산·레거시 미청구 조건 + 조건부 UPDATE로 동시성 1건만 성공)를 추가했다. `recordUpsActualCost`·`recordActualCostAndFinalize`는 `cost_settlement_status='SETTLED'`이면 `cost_settled_locked`로 거부하고(미리보기는 허용), 저장 시 `calc_version=2`·`cost_surcharge_rate`·`cost_surcharge_amount_krw`·`applied_exchange_rates` 스냅샷을 기록한다. **DEF-B-159**(기타부가운임 빈 목록 저장 시 자식 행 잔존)도 이 PR에서 수정. **스키마 변경 없음**(B-365 컬럼 사용), `assertAdmin` 호출부 미변경(#1356).
+
+| ID | 검증 내용 | 기대 결과 | 테스트 위치 |
+| :-- | :-- | :-- | :-- |
+| TC-366-01 | `markOrderCostSettled` 거부 사유 5종 | UPS 아님·DELIVERED 아님·이미 정산·원가 미입력·레거시 인보이스 → 각 오류 키 | `tests/unit/finance/task-b366-cost-settlement.test.ts` |
+| TC-366-02 | 정상 정산 | `cost_settlement_status=SETTLED` + `cost_settled_at/by` 기록 | 동일 |
+| TC-366-03 | 동시 요청 2건 (실DB) | **1건만 성공**, 패자는 `already_settled` — 조건부 UPDATE | `tests/integration/task-b366-cost-settlement.test.ts` |
+| TC-366-04 | 목록 기간 역전 | `generic{DATE_RANGE_INVALID}` | unit |
+| TC-366-05 | 레거시 인보이스 오더 | 목록 표시 + `legacyInvoiced=true`·`excludedReason=LEGACY_INVOICED` | unit |
+| TC-366-06 | 배송완료일 기간 밖 | 목록 제외(`total=0`) | unit |
+| TC-366-07 | SETTLED 오더 B 경로 수정 | `cost_settled_locked` | unit |
+| TC-366-08 | SETTLED 오더 A 경로 청구확정 | `cost_settled_locked` | unit |
+| TC-366-09 | SETTLED 오더 미리보기 (실DB) | 잠금 오류 미반환(허용) | integration |
+| TC-366-10 | 스냅샷 저장 (실DB) | `calc_version=2`·가산율 0.07·가산액>0·`applied_exchange_rates` HKD 존재, 가산액≈`round(기본운임×환율×0.07)` | integration |
+| TC-366-11 | DEF-B-159 빈 목록 | delete 1회·insert 0회 | unit |
+| TC-366-RST-1 | 되돌리기: 잠금 2곳 제거 | **2 failed / 10 passed** → 복구 12/12 | unit |
+| TC-366-RST-2 | 되돌리기: 조건부 UPDATE 술어 제거 | **1 failed / 5 skipped** (`length 1 but got 2`) → 복구 6/6 | integration |
+| TC-366-RST-3 | 되돌리기: DEF-B-159 원복 | **1 failed / 11 skipped** (`+0 to be 1`) → 복구 12/12 | unit |
+
+**회귀 검증 (2026-11-18)**: `npm run test:regression` **268 test files / 1,984 tests 전부 PASS**(B-364·B-365 포함). `npm run build` **EXIT=0**.
+**Ds-11**: `node scripts/check-ds11-sync.mjs` → 허용 목록 밖 신규 미반영 없음(함수 2종 추가 반영).
+**발견 이슈**: `zen_orders.ups_product_id` 미존재 컬럼을 select하던 실DB 잠복 버그(`42703`)를 이 PR에서 제거 — 기존 단위 테스트가 Supabase mock이라 미검출. 상세는 task file §4.

@@ -89,7 +89,11 @@
     "auth_signup_failed": "登録に失敗しました。入力内容をご確認ください。",
     "auth_signup_profile_failed": "プロフィールの作成に失敗しました。しばらくしてから再試行してください。",
     "inventory_not_found": "在庫品目が見つかりません。",
-    "inventory_below_zero": "在庫数量は 0 未満にできません。"
+    "inventory_below_zero": "在庫数量は 0 未満にできません。",
+    "cost_not_entered": "先に実費を入力してください。",
+    "already_settled": "この注文はすでに原価確定済みです。",
+    "cost_settled_locked": "原価確定済みの注文は原価・重量を変更できません。先に確定を解除してください。",
+    "legacy_invoiced_order": "この注文は注文単位の請求書が発行済みのため、新しい確定フローの対象外です。"
   },
   "Common": {
     "phoneHelp": "数字のみ入力（ハイフンなし、最大 {max} 桁）",

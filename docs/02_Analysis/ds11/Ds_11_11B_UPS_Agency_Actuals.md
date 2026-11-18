@@ -122,30 +122,47 @@
 - **오류**: 미인증 시 `validateUserAction` 예외 throw; DB 조회 실패 시 `logger.error` 후 `Error(await trError('generic', { code: 'ACTUAL_COST_LOOKUP' }))` throw (`L86-89`)
 
 #### recordUpsActualCost(orderId, input)
-- **Path**: `src/app/actions/finance/ups-actual-cost.ts:156-400`
-- **설명**: UPS 오더(`IN_TRANSIT` 또는 `DELIVERED`)의 실제 원가(HKD 항목 합계 및 출고일 기준 HKD→KRW 환산 원가)를 `zen_ups_actual_cost`에 Upsert하고, 실측 중량/부피 입력 시 `estimateUpsFreight()`를 재호출해 대리점·화주 인보이스 금액을 연동 재계산합니다 (Issue #1009). **TASK-B-364(#1374)부터 원가 계산은 `computeUpsActualCostKrw()`(`src/lib/ups/actual-cost.ts`)로 통합되어 기본운임에만 `UPS_COST_SURCHARGE_RATE`(+7%)를 적용합니다**(이전에는 이 경로에 가산이 없었음).
+- **Path**: `src/app/actions/finance/ups-actual-cost.ts:217-474`
+- **설명**: UPS 오더(`IN_TRANSIT` 또는 `DELIVERED`)의 실제 원가(HKD 항목 합계 및 출고일 기준 HKD→KRW 환산 원가)를 `zen_ups_actual_cost`에 Upsert하고, 실측 중량/부피 입력 시 `estimateUpsFreight()`를 재호출해 대리점·화주 인보이스 금액을 연동 재계산합니다 (Issue #1009). **TASK-B-364(#1374)부터 원가 계산은 `computeUpsActualCostKrw()`(`src/lib/ups/actual-cost.ts`)로 통합되어 기본운임에만 `UPS_COST_SURCHARGE_RATE`(+7%)를 적용합니다**(이전에는 이 경로에 가산이 없었음). **TASK-B-366(#1376)부터 오더정산 완료(`cost_settlement_status='SETTLED'`) 오더는 원가·중량 수정을 거부하며**, 저장 시 계산 규칙 스냅샷(`cost_surcharge_rate`·`cost_surcharge_amount_krw`·`applied_exchange_rates`·`calc_version=2`)을 함께 기록합니다.
 - **권한**: `validateUserAction()` + `assertAdmin(profile)` (`src/app/actions/finance/ups-actual-cost.ts:44-48, 161-163`: `ZENITH_SUPER_ADMIN`·`ADMIN`·`MANAGER`만 허용)
 - **Input**: `orderId: string`, `input: UpsActualCostInput & { baseFreightKrw?, baseFreightCurrency?, fuelSurchargeKrw?, surgeFeeKrw?, otherChargesKrw?, otherCharges?: Array<{ name, amount, currency }> }` (`{ upsInvoiceNo?, upsInvoiceDate?, actualWeightKg?, actualLengthCm?, actualWidthCm?, actualHeightCm?, baseFreightHkd?, baseFreightCurrency?, fuelSurchargeHkd?, surgeFeeHkd?, otherChargesHkd?, notes? }`, `L10-23`)
 - **Output**: `Promise<UpsActualCostResult>` (`{ success: boolean, error?: string, releasedDate?: string, appliedExchangeRate?: number, hkdTotal?: number, totalCostKrw?: number, recalc?: { weightOrDimsChanged, newAgencyTotal, newShipperTotal, agencyDelta, shipperDelta } }`, `L25-39, 388-395`)
-- **오류**: 권한 불충족(`permission_denied`, `L163`), 오더 미존재(`order_not_found`, `L187`), 비UPS 오더(`not_ups_order`, `L191`), 상태 부적합(`ups_actual_cost_status_invalid`, `L195`), DB upsert/update/인보이스 조정 실패 또는 예외 시 `logger.error` 후 `{ success: false, error: await trError('generic', { code: ... }) }` 반환
-- **부수효과**: `zen_ups_actual_cost` upsert 및 환율·KRW 원가 업데이트(`L205-240`), 중량/치수 변경 시 `zen_order_costs`(`UPS_ACTUAL_COST_ADJ`) 델타 반영 및 미마감 `zen_invoices` 총액 갱신 또는 마감 인보이스 `createPostFinalizationAdjustment` 호출(`L254-382`), `revalidatePath(\`/orders/\${orderId}\`)`·`revalidatePath(\`/(dashboard)/orders/\${orderId}\`)`·`revalidatePath('/admin/ups-actual-charges')` (`L384-386`)
+- **오류**: 권한 불충족(`permission_denied`, `L163`), 오더 미존재(`order_not_found`, `L187`), 비UPS 오더(`not_ups_order`, `L191`), 상태 부적합(`ups_actual_cost_status_invalid`, `L195`), **정산 완료 오더(`cost_settled_locked`, `L258-261`)**, DB upsert/update/인보이스 조정 실패 또는 예외 시 `logger.error` 후 `{ success: false, error: await trError('generic', { code: ... }) }` 반환
+- **부수효과**: `zen_ups_actual_cost` upsert 및 환율·KRW 원가·계산 스냅샷 업데이트(`L205-240`), 중량/치수 변경 시 `zen_order_costs`(`UPS_ACTUAL_COST_ADJ`) 델타 반영 및 미마감 `zen_invoices` 총액 갱신 또는 마감 인보이스 `createPostFinalizationAdjustment` 호출(`L254-382`), `revalidatePath(\`/orders/\${orderId}\`)`·`revalidatePath(\`/(dashboard)/orders/\${orderId}\`)`·`revalidatePath('/admin/ups-actual-charges')` (`L384-386`)
 
 #### previewUpsActualCost(orderId, input)
-- **Path**: `src/app/actions/finance/ups-actual-cost.ts:403-469`
-- **설명**: DB 저장 없이 UPS 오더(`orderId`)의 출고일 기준 환율, 원가 합계 및 중량/치수 변경에 따른 대리점·화주 매출 재계산 결과(`recalc`)를 미리보기로 산출해 반환합니다. **TASK-B-364(#1374)부터 `recordUpsActualCost`와 동일한 `computeUpsActualCostKrw()` 규칙(기본운임 +7%)을 사용하며**, 청구확정 입력(기본운임 통화 + KRW 유류·급증 + 기타 목록)도 받아 동일 결과를 계산합니다(클라이언트의 자체 가산 계산 제거).
+- **Path**: `src/app/actions/finance/ups-actual-cost.ts:478-558`
+- **설명**: DB 저장 없이 UPS 오더(`orderId`)의 출고일 기준 환율, 원가 합계 및 중량/치수 변경에 따른 대리점·화주 매출 재계산 결과(`recalc`)를 미리보기로 산출해 반환합니다. **TASK-B-364(#1374)부터 `recordUpsActualCost`와 동일한 `computeUpsActualCostKrw()` 규칙(기본운임 +7%)을 사용하며**, 청구확정 입력(기본운임 통화 + KRW 유류·급증 + 기타 목록)도 받아 동일 결과를 계산합니다(클라이언트의 자체 가산 계산 제거). **TASK-B-366(#1376): 저장이 없는 미리보기는 정산 완료 오더(`cost_settled_locked`)에도 허용됩니다.**
 - **권한**: `validateUserAction()` + `assertAdmin(profile)` (`src/app/actions/finance/ups-actual-cost.ts:408-410`: `ZENITH_SUPER_ADMIN`·`ADMIN`·`MANAGER`만 허용)
 - **Input**: `orderId: string`, `input: UpsActualCostInput & { baseFreightKrw?, baseFreightCurrency?, fuelSurchargeKrw?, surgeFeeKrw?, otherChargesKrw?, otherCharges?: Array<{ name, amount, currency }> }`
 - **Output**: `Promise<UpsActualCostResult>` (`ups-actual-cost.ts:464`)
 - **오류**: 권한 불충족(`permission_denied`, `L410`), 오더 미존재(`order_not_found`, `L433`), 비UPS 오더(`not_ups_order`, `L437`), 예외 발생 시 `logger.error` 후 `{ success: false, error: await trError('generic', { code: 'UNEXPECTED' }) }` 반환 (`L465-468`)
 
 #### recordActualCostAndFinalize(orderId, input)
-- **Path**: `src/app/actions/finance/ups-actual-cost.ts:472-618`
-- **설명**: 개별 UPS 오더(`IN_TRANSIT` 또는 `DELIVERED`)의 통화별 기본운임(`+7%` 원가 할증 반영)·유류할증·급증수수료·기타부가운임을 KRW 기준으로 `zen_ups_actual_cost` 및 `zen_ups_actual_other_charges`에 저장하고, `input.invoiceId`가 있으면 `finalizeInvoice()`를 호출해 인보이스를 즉시 마감합니다 (TASK-B-317 / Issue #1158). **TASK-B-364(#1374)부터 계산은 `computeUpsActualCostKrw()`로 통합**(항목별 통화·기타 목록, 기본운임만 +7%, KRW 기본운임이면 `applied_exchange_rate=1`)되었고, 기타부가운임은 정규화된 목록으로 자식 테이블에 저장됩니다.
+- **Path**: `src/app/actions/finance/ups-actual-cost.ts:562-718`
+- **설명**: 개별 UPS 오더(`IN_TRANSIT` 또는 `DELIVERED`)의 통화별 기본운임(`+7%` 원가 할증 반영)·유류할증·급증수수료·기타부가운임을 KRW 기준으로 `zen_ups_actual_cost` 및 `zen_ups_actual_other_charges`에 저장하고, `input.invoiceId`가 있으면 `finalizeInvoice()`를 호출해 인보이스를 즉시 마감합니다 (TASK-B-317 / Issue #1158). **TASK-B-364(#1374)부터 계산은 `computeUpsActualCostKrw()`로 통합**(항목별 통화·기타 목록, 기본운임만 +7%, KRW 기본운임이면 `applied_exchange_rate=1`)되었고, 기타부가운임은 정규화된 목록으로 자식 테이블에 저장됩니다. **TASK-B-366(#1376)부터 정산 완료 오더는 `cost_settled_locked`로 거부하며, 계산 스냅샷(`cost_surcharge_rate`·`cost_surcharge_amount_krw`·`applied_exchange_rates`·`calc_version=2`)을 함께 저장합니다.** **DEF-B-159: 기타부가운임 목록이 비어도 기존 자식 행을 항상 삭제합니다.**
 - **권한**: `validateUserAction()` + `assertAdmin(profile)` (`src/app/actions/finance/ups-actual-cost.ts:485-488`: `ZENITH_SUPER_ADMIN`·`ADMIN`·`MANAGER`만 허용)
 - **Input**: `orderId: string`, `input: UpsActualCostInput & { baseFreightKrw?, fuelSurchargeKrw?, surgeFeeKrw?, otherChargesKrw?, otherCharges?: Array<{ name: string, amount: number, currency: string }>, invoiceId?: string, reason?: string }` (`L474-482`)
 - **Output**: `Promise<UpsActualCostResult & { finalized?: boolean }>` (`ups-actual-cost.ts:483, 606-613`)
-- **오류**: 프로필 부재(`profile_not_found`), 권한 불충족(`permission_denied`), 오더 미존재(`order_not_found`), 비UPS 오더(`not_ups_order`), 상태 부적합(`billing_finalize_status_invalid`, `L510`), 원가 upsert 실패(`ACTUAL_COST_SAVE`, `L559`), 기타부가운임 저장 실패(`OTHER_CHARGES_SAVE`, `L585`), 예외 발생 시 `logger.error` 후 `{ success: false, error }` 반환 (`invoiceId` 마감 실패 시에는 `logger.warn` 기록 후 `finalized: false`, `success: true`로 비차단 반환 `L595-600`)
-- **부수효과**: `zen_ups_actual_cost` upsert(`L534-555`), `zen_ups_actual_other_charges` 기존 삭제 후 재삽입(`L563-588`), `input.invoiceId` 존재 시 `finalizeInvoice()` 호출(`L592-601`), `revalidatePath('/(dashboard)/finance/daily-billing', 'page')` 및 `revalidatePath(\`/(dashboard)/orders/\${orderId}\`, 'page')` (`L603-604`)
+- **오류**: 프로필 부재(`profile_not_found`), 권한 불충족(`permission_denied`), 오더 미존재(`order_not_found`), 비UPS 오더(`not_ups_order`), 상태 부적합(`billing_finalize_status_invalid`, `L510`), **정산 완료 오더(`cost_settled_locked`, `L602-605`)**, 원가 upsert 실패(`ACTUAL_COST_SAVE`, `L559`), 기타부가운임 저장 실패(`OTHER_CHARGES_SAVE`, `L585`), 예외 발생 시 `logger.error` 후 `{ success: false, error }` 반환 (`invoiceId` 마감 실패 시에는 `logger.warn` 기록 후 `finalized: false`, `success: true`로 비차단 반환 `L595-600`)
+- **부수효과**: `zen_ups_actual_cost` upsert(`L534-555`), 기타부가운임 기존 행 **항상 삭제** 후 목록이 있을 때만 재삽입(`L665-688` — DEF-B-159), `input.invoiceId` 존재 시 `finalizeInvoice()` 호출(`L695-704`), `revalidatePath('/(dashboard)/finance/daily-billing', 'page')` 및 `revalidatePath(\`/(dashboard)/orders/\${orderId}\`, 'page')` (`L705-706`)
+
+#### getOrdersForCostSettlement(filter)
+- **Path**: `src/app/actions/finance/ups-actual-cost.ts:769-837`
+- **설명**: 오더정산 대상 목록을 조회합니다(TASK-B-366 / Issue #1376). `DELIVERED` + `UPS` 오더를 대상으로 정산상태(`NOT_SETTLED`/`SETTLED`/`ALL`), 배송완료일 기간(`from`~`to`), 오더번호 검색어(`q`)로 필터링하고, 각 행에 배송완료일·정산상태·정산일시·UPS 청구서번호·실제원가 입력 여부를 담아 반환합니다. 기존 오더별 인보이스(`zen_invoices.metadata.source_order_id`)가 있는 오더는 목록에 **표시하되** `legacyInvoiced=true`·`excludedReason='LEGACY_INVOICED'`로 정산 대상에서 제외합니다.
+- **권한**: `validateUserAction()` + `assertAdmin(profile)` (동일 파일 `L770-772`)
+- **Input**: `filter: CostSettlementFilter` — `{ status: 'NOT_SETTLED' | 'SETTLED' | 'ALL', from: string, to: string, q?: string }`
+- **Output**: `Promise<CostSettlementListResult>` — `{ success, orders?: CostSettlementOrderRow[], total?: number, error?: string }` (`L761-767`)
+- **오류**: 권한 불충족(`permission_denied`), 기간 누락·역전(`generic{DATE_RANGE_INVALID}`, `L774-777`), 목록 조회 실패(`generic{ORDER_LIST_LOOKUP}`, `L788-792`), 예외 시 `generic{UNEXPECTED}`. 배송완료일(`order_status_history.next_status='DELIVERED'`)이 없거나 기간 밖인 오더는 결과에서 제외합니다(`L804-812`).
+
+#### markOrderCostSettled(orderId)
+- **Path**: `src/app/actions/finance/ups-actual-cost.ts:840-908`
+- **설명**: UPS 오더를 오더정산 완료 상태로 전환합니다(TASK-B-366 / Issue #1376). `cost_settlement_status`를 `SETTLED`로, `cost_settled_at`·`cost_settled_by`를 기록합니다. 정산 완료 후에는 `recordUpsActualCost`·`recordActualCostAndFinalize`가 원가·중량 수정을 거부합니다.
+- **권한**: `validateUserAction()` + `assertAdmin(profile)` (동일 파일 `L841-843`)
+- **Input**: `orderId: string`
+- **Output**: `Promise<{ success: boolean, settledAt?: string, error?: string }>` (`L840`)
+- **오류**: 오더 미존재(`order_not_found`, `L852-855`), 비UPS 오더(`not_ups_order`, `L856`), `DELIVERED` 아님(`ups_actual_cost_status_invalid`, `L857-860`), 이미 정산됨(`already_settled`, `L861-864`), 컷오버일 이전 오더(`legacy_invoiced_order`, `L865-868` — 기준일은 #1369에서 확정, 현재 항상 false인 stub), 원가 미입력(`cost_not_entered`, `L870-874`), 기존 오더별 인보이스 존재(`legacy_invoiced_order`, `L876-884` — 이중청구 방지), 조건부 UPDATE 영향 행 0건(`already_settled`, `L886-899` — 동시 요청 중 1건만 성공)
+- **부수효과**: `zen_orders` 조건부 UPDATE(`WHERE id=$1 AND cost_settlement_status='NOT_SETTLED'`), `revalidatePath(\`/(dashboard)/orders/\${orderId}\`, 'page')`·`revalidatePath('/admin/ups-actual-charges')` (`L902-903`)
 
 ---
 

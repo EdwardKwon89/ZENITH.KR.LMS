@@ -89,7 +89,11 @@
     "auth_signup_failed": "Sign-up failed. Please check the information you entered.",
     "auth_signup_profile_failed": "Failed to create the profile. Please try again shortly.",
     "inventory_not_found": "Inventory item not found.",
-    "inventory_below_zero": "Inventory quantity cannot be negative."
+    "inventory_below_zero": "Inventory quantity cannot be negative.",
+    "cost_not_entered": "Enter the actual cost first.",
+    "already_settled": "This order has already been cost-settled.",
+    "cost_settled_locked": "Cost or weight cannot be changed after settlement. Unmark the settlement first.",
+    "legacy_invoiced_order": "This order already has a per-order invoice and is not eligible for the new settlement flow."
   },
   "Common": {
     "phoneHelp": "Numbers only (no hyphens, max {max} digits)",
