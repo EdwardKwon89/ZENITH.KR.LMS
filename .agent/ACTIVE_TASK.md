@@ -70,7 +70,7 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 | [#1344](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1344) | [Team A] TASK-1158: IMP-188 — next-task-number·next-def-number가 Issue 번호도 감지하도록 개선 | a | p3 | open | 미배정 | 2026-11-18 |
 | [#1339](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1339) | [Team A] TASK-1157: DEF-146 P1 — xlsx 0.20.3 벤더링 전환 ([설계 확정] 포함, Team B 동의) | a | p1 | review | 미배정 | 2026-11-18 |
 | [#1338](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1338) | [Team A] TASK-1156: DEF-147 — 비관리자에게 열린 admin 화면 접근통제 점검 (점검·보고 Task) | a | p2 | in-progress | 미배정 | 2026-11-17 |
-| [#1337](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1337) | [Team A] TASK-1155: DEF-148 — 유지보수 모드 리다이렉트 404 수정 (maintenance 라우트 이동) | a | p2 | open | 미배정 | 2026-11-16 |
+| [#1337](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1337) | [Team A] TASK-1155: DEF-148 — 유지보수 모드 리다이렉트 404 수정 (maintenance 라우트 이동) | a | p2 | in-progress | 미배정 | 2026-11-18 |
 | [#1336](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1336) | [Team A] TASK-1154: DEF-146 P2 — 간접 의존 high 4건 해소 (browserslist·dompurify·source-map-js·ws) | a | p2 | open | 미배정 | 2026-11-16 |
 | [#1319](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1319) | [Aiden] xlsx 소스 전환·P0 의존성 상향 — Team B 영향 의견 요청 (DEF-146 후속) | b | p2 | - | jungjs | 2026-11-16 |
 | [#1309](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1309) | [Team A] TASK-1150: 회귀맵 Task별 항목 파일 + 인덱스 구조 이전 + 정합성 점검 (IMP-186(B) / #1291 / R-09 개정) | a | p2 | draft | 미배정 | 2026-11-17 |
