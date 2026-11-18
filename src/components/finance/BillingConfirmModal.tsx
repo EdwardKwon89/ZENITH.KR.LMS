@@ -69,10 +69,12 @@ export default function BillingConfirmModal({
   };
 
   // TASK-B-364: 클라이언트 측 가산 계산 제거 — 서버 미리보기 응답을 표시한다.
+  // 입력 변경마다 호출하지 않도록 300ms 디바운스를 적용하고, 응답 전에는 합계를 `—`로 표시한다.
   useEffect(() => {
     if (!open) return;
     let cancelled = false;
-    (async () => {
+    setPreviewTotalKrw(null);
+    const timer = setTimeout(async () => {
       try {
         const res = await previewUpsActualCost(orderId, buildInput());
         if (!cancelled) setPreviewTotalKrw(res.success ? (res.totalCostKrw ?? null) : null);
@@ -80,8 +82,8 @@ export default function BillingConfirmModal({
         console.error(err);
         if (!cancelled) setPreviewTotalKrw(null);
       }
-    })();
-    return () => { cancelled = true; };
+    }, 300);
+    return () => { cancelled = true; clearTimeout(timer); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, orderId, baseFreightAmount, baseFreightCurrency, fuelSurchargeKrw, surgeFeeKrw, otherCharges]);
 
@@ -116,7 +118,9 @@ export default function BillingConfirmModal({
       const result = await recordActualCostAndFinalize(orderId, input);
 
       if (result.success) {
-        toast.success(`청구확정 완료: ${orderNo} (총 ₩${(previewTotalKrw ?? 0).toLocaleString()})`);
+        // TASK-B-364 리뷰 반영: 미리보기 지연/실패와 무관하게 확정 응답의 총액을 표시한다.
+        const confirmedTotal = result.totalCostKrw ?? previewTotalKrw ?? 0;
+        toast.success(`청구확정 완료: ${orderNo} (총 ₩${confirmedTotal.toLocaleString()})`);
         onSuccess();
         onClose();
       } else {
