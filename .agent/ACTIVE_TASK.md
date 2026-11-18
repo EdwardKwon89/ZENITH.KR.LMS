@@ -67,7 +67,7 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 | [#1349](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1349) | [Aiden] DEF-149 §1.1 — agency/shippers.ts 대리점 소유권 검증 누락(교차 테넌트 IDOR) 수정 요청 (Team B 소유) | b | p1 | open | 미배정 | 2026-11-17 |
 | [#1347](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1347) | [Team A] TASK-1161: 실DB 테스트 공용 fixture 헬퍼 신설 (231 §10 #4 선행, B_Kai) | a | p3 | open | 미배정 | 2026-11-17 |
 | [#1346](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1346) | [Team A] TASK-1160: 231 PoC 단계 2 — 모듈 ①② 위험 3군 재현·실DB 편입 측정 (§10 #4·#6·#13·#16 확정 반영) | a | p3 | blocked | 미배정 | 2026-11-17 |
-| [#1344](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1344) | [Team A] TASK-1158: IMP-188 — next-task-number·next-def-number가 Issue 번호도 감지하도록 개선 | a | p3 | open | 미배정 | 2026-11-18 |
+| [#1344](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1344) | [Team A] TASK-1158: IMP-188 — next-task-number·next-def-number가 Issue 번호도 감지하도록 개선 | a | p3 | in-progress | 미배정 | 2026-11-18 |
 | [#1338](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1338) | [Team A] TASK-1156: DEF-147 — 비관리자에게 열린 admin 화면 접근통제 점검 (점검·보고 Task) | a | p2 | in-progress | 미배정 | 2026-11-17 |
 | [#1337](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1337) | [Team A] TASK-1155: DEF-148 — 유지보수 모드 리다이렉트 404 수정 (maintenance 라우트 이동) | a | p2 | in-progress | 미배정 | 2026-11-18 |
 | [#1336](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1336) | [Team A] TASK-1154: DEF-146 P2 — 간접 의존 high 4건 해소 (browserslist·dompurify·source-map-js·ws) | a | p2 | open | 미배정 | 2026-11-16 |
