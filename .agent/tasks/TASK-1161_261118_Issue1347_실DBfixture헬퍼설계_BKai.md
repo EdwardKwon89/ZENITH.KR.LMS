@@ -7,7 +7,7 @@
 | **발령** | Aiden / Edward 승인 — 2026-11-17 KST |
 | **수행(Worker)** | B_Kai (Team A) · **검증(Auditor)**: Aiden (R-01) |
 | **근거** | 문서 231 §10 #4 확정(Edward 2026-11-17), PoC 단계 1 보고서 §5.3·§8.5 |
-| **상태** | **`[설계 의견]` 작성 완료 — Aiden `[설계 확정]` 대기 (`status:draft`)** (R-11) |
+| **상태** | **`[설계 확정]` 완료(2026-11-18 11:50 KST) — 구현 중 (`status:in-progress`)** (R-11) |
 | **브랜치** | `feature/teama-task-1161-db-fixture-helper-design` (base `origin/develop` `2e5a9ba6`) |
 | **작성일** | 2026-11-18 |
 | **성격** | **설계 게이트 전용** — Aiden 확정 전 구현 금지. `src/`·`package.json`·lockfile 변경 없음. |
@@ -138,15 +138,57 @@ createTestOrg(opts?: {
 
 ## 5. `[설계 확정]` (Aiden 기재란)
 
-_(대기 — Aiden이 Issue #1347에 `[설계 확정]`을 남기면 이 섹션에 원문 복사)_
+## [설계 확정] TASK-1161 — Aiden, 2026-11-18 11:50 KST (Edward 승인 하에 진행)
+
+`[설계 의견]`(커밋 `9b0025f0`) 검토 결과 **5건 모두 승인**하되, 아래 **필수 조건 7건**을 구현 DoD에 추가한다. 조사 근거(tsconfig 타입체크 범위, `psql` 셸 보간 결함, `makeJwt` org_id 부재, Team A 실DB 파일 1개뿐)는 독립 확인했고 타당하다.
+
+### 결정 5건
+1. **위치**: A안 `tests/integration/helpers/db.ts` 확정(+ `db.test.ts`). 이슈 후보 `tests/helpers/db.ts`는 채택하지 않는다.
+2. **`psql`**: stdin 전달(`execFileSync`) + 컨테이너 해석 순서(env override → `config.toml` project_id → `docker ps` 단일 매칭) 승인. **0개 또는 2개 이상 매칭이면 추측하지 말고 throw**(어느 DB인지 모호한 상태로 실행 금지).
+3. **파일럿**: `p6-transport-policy.test.ts` 승인(Team A·D_Kai — 착수 전 #1386 진행 중인 D_Kai에게 이 Issue 코멘트로 통지만, 별도 협의 불필요). `tracking-business-qa.test.ts`는 **조건부 승인**(조건 ⑥). Team B 소유 12건 미이전 승인.
+4. **가이드**: `docs/08_Self_Audit/TestCoverage_231/231_실DB_헬퍼_사용가이드.md` 승인(`check-doc-links` 신규 0건).
+5. **R-09 의무화**: 이 Task에서 하지 않는다. Aiden이 별도 개정.
+
+### 필수 조건 7건 (설계 의견에 없던 리스크)
+① **로컬 전용 가드(R-14)**: 헬퍼(`getServiceClient`·`createTestOrg`·`cleanup`)는 Supabase URL의 호스트가 `127.0.0.1`/`localhost`가 아니면 **즉시 throw**한다. 근거: `tracking-business-qa.test.ts`가 `.env.local`을 직접 파싱해 **고정 order ID를 `zen_orders`에서 delete 후 insert**하는데, `.env.local`이 원격(Pilot 실데이터)을 가리키면 그대로 실DB를 지운다. 헬퍼는 이를 구조적으로 막아야 한다. 가드 동작 테스트(원격 URL → throw) 포함.
+② **`handle_new_user` 트리거 확인**: `auth.users`에는 `on_auth_user_created` 트리거(`20260418002000_expand_identity_auth.sql:70-86`, `20260418184000_sync_auth_metadata.sql`)가 있다. `auth.users` → `zen_organizations` → `zen_profiles` 직접 삽입 시 **트리거가 프로필을 자동 생성해 중복·충돌**할 수 있다. 트리거 본문을 확인해 설계(트리거 의존/억제/충돌 회피)를 task file에 기술하고, 필요하면 GoTrue admin API 대안과 비교한다.
+③ **org_id 출처 일치**: RLS가 JWT `app_metadata.org_id`를 읽는지 `zen_profiles.org_id`를 읽는지 확인하고, 헬퍼가 만드는 JWT 클레임과 DB 프로필 값이 **항상 일치**하도록 한다(`assertOrgIdClaim`이 DB 값과도 대조).
+④ **정리 확장 훅**: `cleanup()`은 헬퍼가 만든 3종만 지우므로, 테스트가 그 조직 아래 만드는 오더·패키지 등은 FK로 삭제를 막는다. `addCleanup(fn)`(등록 역순 실행, 멱등) 같은 훅을 제공하고, 파일럿에서 실제로 사용해 검증한다.
+⑤ **회귀 등재 방식 정정**: DoD의 "R-09 갱신 — freeze 공지 전 기존 방식"은 **폐기**(#1347 정정 코멘트 참조). `regression-items/TASK-1161_Issue1347_*.md` 1개 등재 + `npm run check:lrtm`(미등재 Vitest 래칫) 통과. `helpers/db.test.ts`는 신규 Vitest 파일이므로 등재 누락 시 래칫에 걸린다.
+⑥ **`tracking-business-qa` 파일럿 조건**: 착수 시 `git log`로 **소유 팀을 먼저 확정**한다(설계 의견의 "Ring equiv" 추정은 근거가 약함). Team B 소유로 확인되면 제외하고 **파일럿 1건 + 헬퍼 테스트**로 DoD를 충족한 뒤 Aiden에게 보고한다. 이전 시 **단언(assertion)은 한 줄도 바꾸지 않고** 셋업·정리만 헬퍼로 교체해 "결과 동일"을 증명한다(고정 order ID 의존은 `createTestOrg`로 대체하되 테스트 의미 불변).
+⑦ **검증 수치 갱신**: 기준선은 설계 의견의 254/1834가 아니라 **착수 시점 develop 최신 CI**(현재 263파일 안팎, #1387·#1384 머지 후 달라짐) 기준으로 기록한다. flaky는 **파일럿 파일 + `db.test.ts`를 연속 5회**(CI 또는 로컬) 실행해 0건 + 전체 회귀 1회 통과로 입증한다.
+
+### 진행 방식
+- 위 확정 내용을 task file `[설계 확정]` 섹션에 **원문 그대로 옮겨 기재**(가감 금지, R-17 — 해당 섹션은 Aiden 전속).
+- `status:draft` 제거, `status:in-progress` 부여(R-17).
+- 구현 착수 전 `git fetch` + 최신 develop 기준(#1387이 머지되면 `regression-items/` 구조가 develop에 있음). 머지 전이면 구현은 진행하되 등재(⑤)만 머지 후로 미룬다.
+- 설계 브랜치(`feature/teama-task-1161-db-fixture-helper-design`)는 구현 브랜치로 이어 써도 되나, **develop 직접 커밋 금지**·PR 필수.
+
+
+## 5.1 `[설계 확정]` 필수 조건 7건 — 이행 계획 (B_Kai 정리)
+
+| # | 조건 | 조사·이행 방안 |
+|:-:|:--|:--|
+| ① | 로컬 전용 가드(R-14) | `getServiceClient`·`createTestOrg`·`cleanup` 진입 시 `SUPABASE_URL` 호스트가 `127.0.0.1`/`localhost`가 아니면 즉시 throw. `db.test.ts`에 원격 URL → throw 케이스 포함. `psql`은 docker 로컬 컨테이너만 대상으로 해석. |
+| ② | `handle_new_user` 트리거 | **확인 완료**: `20260418002000_expand_identity_auth.sql:70-86`의 `AFTER INSERT ON auth.users` 트리거가 `20260418184000_sync_auth_metadata.sql`에서 고도화됨 — `raw_user_meta_data.org_id`로 조직을 찾아 `zen_profiles`를 **자동 INSERT**하고 `raw_app_meta_data`에 `org_type·role·status`만 동기화(`org_id`는 넣지 않음 → null 함정의 구조적 원인). 설계: `auth.users` INSERT 시 `raw_user_meta_data`에 `org_id`를 넣어 **트리거가 프로필을 생성하도록 두고**, 직후 `UPDATE zen_profiles SET role/status/org_id`로 원하는 값으로 정정. 트리거 억제·직접 이중 INSERT는 하지 않음. GoTrue admin API 대안은 service 키 HTTP 호출이 추가되어 불채택. |
+| ③ | org_id 출처 일치 | RLS는 대부분 `zen_profiles.org_id`(auth.uid() 조인)를 읽고, JWT의 `app_metadata.org_id`는 미들웨어·일부 정책에서 사용. 헬퍼가 만드는 JWT 클레임과 DB 프로필 `org_id`가 항상 같도록 `assertOrgIdClaim(token, profileOrgId)`가 DB 값과도 대조. |
+| ④ | 정리 확장 훅 | `addCleanup(fn)` 제공 — 등록 **역순(LIFO)** 실행, 멱등. 헬퍼가 만든 3종 외에 테스트가 만든 오더·패키지까지 정리하도록 파일럿 2건에서 실제 사용. |
+| ⑤ | 회귀 등재 방식 | **#1387 미머지 확인(2026-11-18)** → 구현은 진행, 등재는 머지 후 `docs/08_Self_Audit/Checklists/regression-items/TASK-1161_Issue1347_*.md` 1개(`_TEMPLATE_item.md`) 추가 + `npm run check:lrtm` 통과. 머지 전에는 맵 본문에 섹션 번호를 임의 부여하지 않음. `db.test.ts`는 신규 Vitest 파일이므로 래칫 대상임을 인지. |
+| ⑥ | `tracking-business-qa` 소유 확인 | `git log` 4건 전부 `EdwardKwon89`, 태그 `[Claude]`·`[Gemini]` → **Team B 소유 아님** 확인 → 파일럿 2건 진행. 이전 시 **단언은 한 줄도 변경하지 않고** 셋업·정리만 헬퍼로 교체해 "결과 동일" 증명. 고정 order ID 의존은 `createTestOrg`로 대체. |
+| ⑦ | 검증 수치 갱신 | 기준선은 254/1834가 아니라 **착수 시점 develop 최신 CI**(실측 후 기록)로 갱신. flaky는 **파일럿 2건 + `db.test.ts` 연속 5회** + 전체 회귀 1회로 입증. |
+
+- D_Kai 통지: 파일럿 1건 `p6-transport-policy.test.ts`에 대해 Issue #1347 코멘트로 통지(별도 협의 불필요 — Aiden 결정 3).
+- 설계 브랜치 `feature/teama-task-1161-db-fixture-helper-design`를 구현 브랜치로 계속 사용. develop 직접 커밋 금지, PR 필수.
+
+---
 
 ## 6. DoD (완료 정의)
 
-- [ ] `[설계 의견]` 작성(완료) → Aiden `[설계 확정]` 확인 후 구현 — **현재 이 단계(확정 대기)**
-- [ ] 헬퍼 3종(+정리·org_id 검증)과 헬퍼 테스트, 사용 가이드
-- [ ] 파일럿 이전 2~3건 전/후 비교(결과 동일·시간·flaky 0/5회)
-- [ ] build·회귀 전체 PASS 수치, `src/`·`package.json`·lockfile 변경 0건
-- [ ] R-09 갱신, R-17 완료 보고 절차·`check-R17-DoD` 준수
+- [x] `[설계 의견]` 작성 → Aiden `[설계 확정]` 완료(2026-11-18 11:50 KST, 5건 승인 + 조건 7건)
+- [ ] 헬퍼 3종(+`addCleanup`·org_id 단언·로컬 가드)과 헬퍼 테스트, 사용 가이드
+- [ ] 파일럿 이전 2건(`p6-transport-policy`·`tracking-business-qa`) 전/후 비교(결과 동일·시간·flaky 0/5회) — 조건 ⑥ 소유 확인 완료
+- [ ] build·회귀 전체 PASS 수치, `src/`·`package.json`·lockfile 변경 0건, 기준선은 착수 시점 develop 최신 CI(조건 ⑦)
+- [ ] 회귀 등재: #1387 머지 후 `regression-items/TASK-1161_Issue1347_*.md` + `check:lrtm`(조건 ⑤), R-17 완료 보고·`check-R17-DoD` 준수
 
 ## 7. `[작업 결과]`
 
