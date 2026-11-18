@@ -1395,6 +1395,20 @@ SHXK `createorder` 페이로드의 `shipper.shipper_name`이 화면 "담당자�
 
 **회귀 검증 (2026-11-17)**: `npm run test:regression` **261 test files / 1,923 tests 전부 PASS**. `npm run build` **EXIT=0**.
 
+## 91. xlsx 0.20.3 벤더링 + `sheet_to_json` 기본 동작 회귀 (Issue #1339 / TASK-1157, DEF-146 P1)
+
+**2026-11-17, D_Kai** — `xlsx@0.18.5`(프로토타입 오염 <0.19.3, ReDoS <0.20.2)는 npm 레지스트리에 수정판이 없어, SheetJS 공식 CDN 의 **0.20.3 tarball 을 `vendor/xlsx-0.20.3.tgz` 로 커밋**하고 `"xlsx": "file:vendor/xlsx-0.20.3.tgz"` 로 고정했다. `npm audit --omit=dev` 는 `file:` 의존성을 검사하지 못하므로(사각지대) ① tarball SHA-256·lockfile integrity ② 설치 버전 하한 ③ **대량등록 파서가 쓰는 `read` + `sheet_to_json` 기본 옵션 동작**을 테스트로 잠갔다. 0.18.5↔0.20.3 실증 비교(R-06)에서는 날짜·숫자·빈 셀·수식·다중 시트가 **읽기/쓰기/`raw:false` 모두 동일**했고, 차이는 미사용 경로인 `cellDates:true` 의 UTC 해석뿐이었다.
+
+| ID | 검증 내용 | 기대 결과 | 테스트 위치 |
+| :-- | :-- | :-- | :-- |
+| TC-1157-01 | 설치 버전이 취약점 수정판 이상 | `XLSX.version === '0.20.3'` (0.18.5 로 되돌리면 즉시 실패) | `tests/unit/excel/xlsx-vendor.test.ts` |
+| TC-1157-02 | 벤더링 무결성 | `package.json` = `file:vendor/xlsx-0.20.3.tgz` · tarball SHA-256 = `.sha256` = `8dc73fc3…99fe8` · lockfile `integrity`(SRI) = tarball SHA-512 | 동일 |
+| TC-1157-03 | `read` + `sheet_to_json` 기본 — 날짜/숫자/빈 셀 | 날짜 셀 serial `46037`(**number**, Date/문자열 아님) · 수량 `10`/`0` number · 명시적 빈 셀 `''` · 미존재 셀은 키 생략 | 동일 |
+| TC-1157-04 | `raw:false` 포맷 문자열 | 날짜 `1/15/26`·`3/1/26`, 숫자 `'10'`·`'1234.56'` (0.20.1 UTC 변경 영향 없음 고정) | 동일 |
+| TC-1157-05 | 다중 시트 보존 | `SheetNames` = `['오더','패키지','아이템']` + 시트별 파싱 값 일치 | 동일 |
+
+**회귀 검증 (2026-11-17)**: `npm run test:regression` **262 test files / 1,928 tests 전부 PASS**. `npm run build` **EXIT=0**. `npm run check:vendor` 통과(SHA-256·버전 하한·Dockerfile `COPY vendor`·README). `npm run check:audit` 신규 0건(baseline `xlsx:high` 제거).
+
 ## 92. 유지보수 모드 라우트 이동 + 리다이렉트 루프 방지 (Issue #1337 / TASK-1155, DEF-148)
 
 **2026-11-18, D_Kai** — 점검 페이지가 라우트 그룹 `src/app/[locale]/(maintenance)/page.tsx` 에 있어 실제 경로가 `/[locale]` 이었고, 프록시(`src/lib/auth/proxy.ts`)가 안내하는 `/{locale}/maintenance` 는 **404** 였다. 페이지를 `src/app/[locale]/maintenance/page.tsx` 로 이동하고, 리다이렉트 대상 경로를 `DEFAULT_REDIRECTS.MAINTENANCE` 상수로 고정했다. 아울러 점검 안내 페이지가 소속(`orgType`)·`PENDING`·`SUSPENDED` 가드보다 우선하도록 조기 반환을 추가해 **무한 리다이렉트 루프**를 차단했다(기존에는 `/maintenance` 가 리다이렉트 대상에서만 제외되어, 안내 페이지 도착 후 소속 경로로 되돌려지는 루프가 가능한 구조였다).
@@ -1408,3 +1422,4 @@ SHXK `createorder` 페이로드의 `shipper.shipper_name`이 화면 "담당자�
 | TC-1155-05 | 점검 모드 ON + `SUSPENDED` 사용자 `/ko/maintenance` | 리다이렉트·세션종료 없음 — `/suspended` 왕복 루프 차단 | 동일 |
 | TC-1155-06 | 점검 모드 ON + 플랫폼 관리자 `/ko/orders` | 정상 통과(`null`) | 동일 |
 | TC-1155-07 | 점검 모드 ON + 화주 루트 `/ko` | 리다이렉트 없음(기존 동작 유지) | 동일 |
+
