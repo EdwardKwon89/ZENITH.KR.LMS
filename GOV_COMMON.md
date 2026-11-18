@@ -105,7 +105,9 @@ CI는 매 실행마다 `supabase db reset`으로 스키마+SQL 시드를 완전�
 - 반복 재발 시 원인 자체(GitHub Actions 인프라)를 문제 삼기보다, 이 대체 절차를 표준 대응으로 계속 적용한다 — 상시 모니터링으로 예방 가능한 종류의 문제가 아님이 확인됨.
 
 ### R-09 | 회귀 테스트 확장 의무
-신규 기능 개발 및 수정 작업 이후에는 반드시 관련 **회귀 테스트 케이스를 신규 추가**하고, `docs/08_Self_Audit/Checklists/LIVE_REGRESSION_TEST_MAP.md`를 업데이트해야 합니다.
+신규 기능 개발 및 수정 작업 이후에는 반드시 관련 **회귀 테스트 케이스를 신규 추가**하고, `docs/08_Self_Audit/Checklists/regression-items/TASK-*.md`에 개별 회귀 항목 파일을 등재해야 합니다.
+
+**(2026-11-18, v3.10 — IMP-186(B) / TASK-1150)**: `docs/08_Self_Audit/Checklists/LIVE_REGRESSION_TEST_MAP.md`는 자동 생성되는 **추적 인덱스**(수동 편집 금지)이며, 구 단일 맵(§1~§92)은 `lrtm-archive/` 읽기 전용 아카이브로 고정되었다. 개별 Task PR에서는 `regression-items/TASK-*.md` 파일 1개만 추가하며, `npm run check:lrtm`(`scripts/check-lrtm-sync.mjs`)으로 유령 경로(0건)·신규 미등재 Vitest 파일(래칫 `scripts/lrtm-sync-baseline.json`)·`tests/e2e/` 수동 표기(`CI 미실행`/`수동`)를 검증한다. 인덱스 본문은 자동 갱신 Action 도입 전까지 Aiden이 병합 시점에 `npm run build:lrtm`으로 수동 재생성한다.
 
 ### R-10 | 기능-UI 결합 검증 의무
 백엔드 로직(API/RPC)의 완성이 '완료'를 의미하지 않습니다. 해당 기능을 최종 사용자가 호출하고 결과를 확인할 수 있는 **물리적 UI가 완비**되고 실구동이 확인된 경우에만 WBS를 완료로 변경할 수 있습니다. 완료 보고 시 반드시 UI 구동 증적(스크린샷/녹화)을 포함해야 합니다.
