@@ -1452,4 +1452,4 @@ SHXK `createorder` 페이로드의 `shipper.shipper_name`이 화면 "담당자�
 | TC-364-09 | 청구확정 모달 표시 합계 | 서버 preview `totalCostKrw`(213,000)와 화면 표시 일치, 클라이언트 `×1.07` 없음 | `tests/unit/components/billing-confirm-modal-preview.test.tsx` |
 | TC-364-RST | 되돌리기: 가산 계수 제거 | `(1+surchargeRate)`→`1` 원복 시 **5 failed / 3 passed** → 복구 8 passed | `actual-cost-compute.test.ts`, `task-b364-cost-integration.test.ts` |
 
-**회귀 검증 (2026-11-18)**: `npm run test:regression` **265 test files / 1,956 tests 전부 PASS**. `npm run build` **EXIT=0**.
+**회귀 검증 (2026-11-18, rebase 후)**: `npm run test:regression` **266 test files / 1,966 tests 전부 PASS**(B-365 포함). `npm run build` **EXIT=0**.

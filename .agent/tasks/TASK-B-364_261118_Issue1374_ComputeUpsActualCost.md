@@ -43,7 +43,7 @@
 - [x] `git diff origin/TeamB_Dev...HEAD --name-only | grep -E "^supabase/"` → **출력 없음**(스키마 변경 없음)
 - [x] `git diff origin/TeamB_Dev...HEAD -- src/app/actions/finance/ups-actual-cost.ts | grep assertAdmin` → **출력 없음**(권한 로직 미변경)
 - [x] `grep -rn "1\.07" src` → **출력 없음**
-- [x] 전체 회귀 PASS + build 성공 — **`265 files / 1,956 tests`**, `BUILD_EXIT=0`(6.9s)
+- [x] 전체 회귀 PASS + build 성공 — **`266 files / 1,966 tests`**, `BUILD_EXIT=0`(6.1s, rebase 후)
 - [x] Ds-11 `Ds_11_11B_UPS_Agency_Actuals.md` 갱신(R-12)
 - [x] `/admin/error-logs` 신규 ERROR **0건**(로컬 `zen_error_logs` 최근 1일 severity=ERROR 조회)
 
@@ -62,8 +62,8 @@
 
 | 검증 | 결과 |
 |:--|:--|
-| 전체 회귀 | **`Test Files 265 passed (265)` / `Tests 1956 passed (1956)`** |
-| 빌드 | `BUILD_EXIT=0`, `✓ Compiled successfully in 6.9s` |
+| 전체 회귀 | **`Test Files 266 passed (266)` / `Tests 1966 passed (1966)`** |
+| 빌드 | `BUILD_EXIT=0`, `✓ Compiled successfully in 6.1s` |
 | 되돌리기(T6) | **5 failed / 3 passed** → 복구 **8 passed** |
 | 스키마 변경 | 없음(`supabase/` diff 0) |
 | `assertAdmin` diff | 없음 |
