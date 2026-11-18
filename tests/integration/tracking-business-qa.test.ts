@@ -1,28 +1,29 @@
-import { describe, it, expect, beforeAll } from 'vitest';
-import { createClient } from '@supabase/supabase-js';
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { randomUUID } from 'node:crypto';
+import { createTestOrg, getServiceClient } from './helpers/db';
 import { trackingManager } from '../../src/lib/logistics/tracking';
-import path from 'path';
-import fs from 'fs';
 
-// Manually parse .env.local
-const envPath = path.resolve(__dirname, '../../.env.local');
-const envContent = fs.readFileSync(envPath, 'utf-8');
-const env: Record<string, string> = {};
-envContent.split('\n').forEach(line => {
-  const match = line.match(/^([^#=]+)=(.+)$/);
-  if (match) env[match[1].trim()] = match[2].trim();
-});
-
-const supabaseUrl = env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = env.SUPABASE_SERVICE_ROLE_KEY || env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+// TASK-1161 / Issue #1347 — 파일럿 이전: 수동 .env.local 파싱과 고정 order ID를
+// 공용 헬퍼(createTestOrg/getServiceClient)로 대체. 아래 it() 블록의 단언은 한 줄도 변경하지 않는다.
+// 로컬 전용 가드가 원격 .env.local을 구조적으로 차단한다(Aiden 조건 ①).
 
 describe('QA-02 Tracking Business Integration', () => {
   let supabase: any;
-  const testOrderId = '3ff5b116-29cd-4d90-8dd0-0e99c36a2155'; // Previously identified order
+  let identity: Awaited<ReturnType<typeof createTestOrg>>;
+  let testOrderId: string;
 
   beforeAll(async () => {
     console.log('[QA-02] Starting beforeAll setup...');
-    supabase = createClient(supabaseUrl, supabaseKey);
+    supabase = getServiceClient();
+    identity = await createTestOrg({ prefix: 'trk_qa' });
+    testOrderId = randomUUID();
+
+    // 헬퍼 정리에 등록 — trackingManager가 만든 이벤트·로그까지 역순으로 제거
+    identity.addCleanup(async () => {
+      await supabase.from('zen_tracking_raw_logs').delete().eq('order_id', testOrderId);
+      await supabase.from('zen_tracking_events').delete().eq('order_id', testOrderId);
+      await supabase.from('zen_tracking_configs').delete().eq('order_id', testOrderId);
+    });
 
     // [Cleanup] ALWAYS delete and re-insert to guarantee single, clean configuration.
     // This prevents .single() failures from duplicate rows in any run scenario.
@@ -35,7 +36,8 @@ describe('QA-02 Tracking Business Integration', () => {
       .from('zen_orders')
       .insert({
         id: testOrderId,
-        order_no: 'TRK-QA-TEST-001',
+        order_no: `TRK-QA-${identity.prefix.toUpperCase()}`,
+        shipper_id: identity.orgId,
         cargo_details: {},
         status: 'REGISTERED',
         transport_mode: 'AIR' // [Required] Added for rate matching engine
@@ -53,7 +55,7 @@ describe('QA-02 Tracking Business Integration', () => {
         order_id: testOrderId,
         provider_type: 'API',
         provider_name: 'MockCarrier',
-        tracking_no: 'TRK-MOCK-12345'
+        tracking_no: `TRK-MOCK-${identity.prefix.toUpperCase()}`
       });
 
     if (insertError) {
@@ -61,6 +63,10 @@ describe('QA-02 Tracking Business Integration', () => {
     } else {
       console.log('[QA-02] Mock config inserted successfully');
     }
+  });
+
+  afterAll(async () => {
+    await identity.cleanup();
   });
 
 
