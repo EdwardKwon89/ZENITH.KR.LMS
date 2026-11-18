@@ -61,9 +61,11 @@ CREATE TABLE IF NOT EXISTS public.zen_billing_statements (
   closed_by          uuid REFERENCES public.zen_profiles(id) ON DELETE SET NULL,
 
   -- R11 (Jaison 배정 코멘트): ORG면 org 필수 / ADHOC면 org NULL + name 필수
+  -- (PR #1397 수정 4: ADHOC 공백 이름 방지 — ' '만으로 billed_key='ADHOC:'가 되는 것 차단)
   CONSTRAINT zen_billing_statements_party_check CHECK (
     (billed_party_type = 'ORG'   AND billed_org_id IS NOT NULL) OR
-    (billed_party_type = 'ADHOC' AND billed_org_id IS NULL AND billed_name IS NOT NULL)
+    (billed_party_type = 'ADHOC' AND billed_org_id IS NULL AND billed_name IS NOT NULL
+       AND btrim(billed_name) <> '')
   ),
   -- 조건 3 (Q7 전액만): CLOSED ⇒ paid_amount = total_amount (NULL도 거부)
   CONSTRAINT zen_billing_statements_paid_check CHECK (
@@ -226,6 +228,14 @@ BEGIN
     v_key := 'ADHOC:' || lower(btrim(regexp_replace(p_billed_name, '\s+', ' ', 'g')));
   END IF;
 
+  -- PR #1397 수정 3: 발행자 유형 ↔ tier 정합성 (AGENCY는 AGENCY_TO_SHIPPER만, 비대리점은 ADMIN_*만)
+  IF v_issuer_type = 'AGENCY' AND p_tier <> 'AGENCY_TO_SHIPPER' THEN
+    RAISE EXCEPTION 'tier_mismatch_for_issuer: agency issuer can only issue AGENCY_TO_SHIPPER (got %)', p_tier;
+  END IF;
+  IF v_issuer_type <> 'AGENCY' AND p_tier = 'AGENCY_TO_SHIPPER' THEN
+    RAISE EXCEPTION 'tier_mismatch_for_issuer: non-agency issuer cannot issue AGENCY_TO_SHIPPER';
+  END IF;
+
   -- 동시성: (issuer, billed_key, 년, 월) 단위 advisory lock 선취 → max(round)+1
   PERFORM pg_advisory_xact_lock(
     hashtext('billing_round'),
@@ -344,11 +354,17 @@ SET search_path = public
 AS $$
 DECLARE
   v_status text;
+  v_issuer uuid;
+  v_issuer_type text;
   v_header uuid;
+  v_order_order uuid;
+  v_order_shipper uuid;
+  v_order_agency uuid;
+  v_order_settled text;
 BEGIN
   v_header := CASE WHEN TG_OP = 'DELETE' THEN OLD.statement_id ELSE NEW.statement_id END;
 
-  SELECT status INTO v_status FROM public.zen_billing_statements WHERE id = v_header;
+  SELECT status, issuer_org_id INTO v_status, v_issuer FROM public.zen_billing_statements WHERE id = v_header;
 
   IF NOT FOUND THEN
     -- 조건 4: 헤더 CASCADE 삭제 중(헤더가 이미 없음) — 항목 DELETE 허용
@@ -360,6 +376,26 @@ BEGIN
   -- 발행 이후 항목 INSERT/UPDATE/DELETE 전면 거부
   IF v_status <> 'DRAFT' THEN
     RAISE EXCEPTION 'items_locked_after_issue: status=%', v_status;
+  END IF;
+
+  -- PR #1397 수정 2: 오더 적합성 (INSERT + order_id 변경 UPDATE만 — RLS 최종 방어선)
+  IF TG_OP = 'INSERT' OR (TG_OP = 'UPDATE' AND NEW.order_id IS DISTINCT FROM OLD.order_id) THEN
+    SELECT o.shipper_id, o.agency_org_id, o.cost_settlement_status
+      INTO v_order_shipper, v_order_agency, v_order_settled
+    FROM public.zen_orders o WHERE o.id = NEW.order_id;
+    IF NOT FOUND THEN
+      RAISE EXCEPTION 'item_order_not_eligible: order not found';
+    END IF;
+    -- ① 정산완료(SETTLED) 오더만 청구서 포함 가능
+    IF v_order_settled IS DISTINCT FROM 'SETTLED' THEN
+      RAISE EXCEPTION 'item_order_not_eligible: cost not settled (status=%)', coalesce(v_order_settled, 'NULL');
+    END IF;
+    -- ② 발행자가 대리점이면 자기 소속 오더만 (Admin/비대리점 발행자는 전체 허용)
+    SELECT type INTO v_issuer_type FROM public.zen_organizations WHERE id = v_issuer;
+    IF v_issuer_type = 'AGENCY' AND v_order_shipper IS DISTINCT FROM v_issuer
+       AND v_order_agency IS DISTINCT FROM v_issuer THEN
+      RAISE EXCEPTION 'item_order_not_eligible: order not owned by issuer org';
+    END IF;
   END IF;
 
   IF TG_OP = 'DELETE' THEN RETURN OLD; END IF;
@@ -429,6 +465,18 @@ CREATE POLICY bill_stmt_insert_issuer ON public.zen_billing_statements
       billed_party_type = 'ORG'
       OR EXISTS (SELECT 1 FROM public.zen_organizations o
                  WHERE o.id = issuer_org_id AND o.type = 'AGENCY')  -- 조건 6: ADHOC은 대리점 발행자만
+    )
+    -- PR #1397 수정 1: 상태 머신 우회 차단 — 직접 INSERT는 DRAFT만 (ISSUED/CLOSED 즉시 생성 불가)
+    AND status = 'DRAFT'
+    AND issued_at IS NULL AND paid_amount IS NULL AND closed_at IS NULL
+    -- PR #1397 수정 3: 발행자 유형 ↔ tier 정합성 (INSERT 경로에서도 강제)
+    AND (
+      (EXISTS (SELECT 1 FROM public.zen_organizations o
+               WHERE o.id = issuer_org_id AND o.type = 'AGENCY') AND tier = 'AGENCY_TO_SHIPPER')
+      OR
+      (NOT EXISTS (SELECT 1 FROM public.zen_organizations o
+                   WHERE o.id = issuer_org_id AND o.type = 'AGENCY')
+       AND tier IN ('ADMIN_TO_AGENCY', 'ADMIN_TO_SHIPPER'))
     )
   );
 

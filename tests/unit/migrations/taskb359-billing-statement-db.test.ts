@@ -91,10 +91,16 @@ ${sql}`.replace(/"/g, '\\"').replace(/\$/g, '\\$').replace(/`/g, '\\`');
   });
 }
 
-function makeOrder(): string {
+function makeOrder(opts?: { settled?: boolean; shipperId?: string; agencyId?: string }): string {
   const id = randomUUID();
-  psql(`INSERT INTO public.zen_orders (id, order_no, cargo_details, transport_mode, status, created_at)
-        VALUES ('${id}', 'ZEN-B359-${id.substring(0, 8)}', '{}'::jsonb, 'UPS', 'WAREHOUSED', NOW())`);
+  const settled = (opts?.settled ?? true) ? 'SETTLED' : 'NOT_SETTLED';
+  // 기본: 수기 화주 오더 패턴 (shipper_id = 발행 대리점, agency_org_id NULL)
+  const shipper = opts?.shipperId ?? ORG_ISSUER;
+  const agency = opts?.agencyId ? `'${opts.agencyId}'` : 'NULL';
+  // TASK-B-365 CHECK: SETTLED ⇒ cost_settled_at·cost_settled_by NOT NULL
+  const settledCols = opts?.settled === false ? 'NULL, NULL' : `now(), '${U_ISSUER}'`;
+  psql(`INSERT INTO public.zen_orders (id, order_no, cargo_details, transport_mode, status, shipper_id, agency_org_id, cost_settlement_status, cost_settled_at, cost_settled_by, created_at)
+        VALUES ('${id}', 'ZEN-B359-${id.substring(0, 8)}', '{}'::jsonb, 'UPS', 'WAREHOUSED', '${shipper}', ${agency}, '${settled}', ${settledCols}, NOW())`);
   madeOrders.push(id);
   return id;
 }
@@ -458,10 +464,11 @@ describe('TASK-B-359 (Issue #1365): 청구서 DB — 헤더·항목·채번 RPC�
       expect(err).toContain('zen_billing_statement_items_hdr_fk');
     });
 
-    it('TC-359-U3: 다른 tier는 허용 — 같은 오더가 ADMIN_TO_AGENCY 청구서에도 1회 포함', () => {
-      const adminTier = createStatement(U_ISSUER, { orgId: ORG_SHIPPER, tier: 'ADMIN_TO_AGENCY', month: 7 });
+    it('TC-359-U3: 다른 tier는 허용 — 같은 오더가 ADMIN_TO_AGENCY 청구서에도 1회 포함 (Admin 발행자)', () => {
+      // PR #1397 수정 3 반영: ADMIN_TO_AGENCY는 비대리점(Admin) 발행자만 만들 수 있음
+      const adminTier = createStatement(U_ADMIN, { orgId: ORG_SHIPPER, tier: 'ADMIN_TO_AGENCY', month: 7 });
       const adminId = psql(`SELECT id::text FROM public.zen_billing_statements WHERE statement_no='${adminTier.split('|')[0]}'`);
-      expect(addItem(U_ISSUER, adminId, orderX, 'ADMIN_TO_AGENCY', 115)).toBe('');
+      expect(addItem(U_ADMIN, adminId, orderX, 'ADMIN_TO_AGENCY', 115)).toBe('');
       expect(psql(`SELECT count(*) FROM public.zen_billing_statement_items WHERE order_id='${orderX}'`)).toBe('2');
     });
 
@@ -584,6 +591,100 @@ describe('TASK-B-359 (Issue #1365): 청구서 DB — 헤더·항목·채번 RPC�
       expect(psqlAsErr(U_ISSUER, `UPDATE public.zen_billing_statements SET created_at=now() - interval '1 day' WHERE statement_no='${no}'`))
         .toContain('created_fields_immutable');
       psqlAs(U_ISSUER, `DELETE FROM public.zen_billing_statements WHERE statement_no='${no}'`);
+    });
+  });
+
+  // ========== PR #1397 검토 수정 1~4 ==========
+  describe('TC-359-FX: PR #1397 수정 반영 — INSERT 상태 우회·오더 적합성·tier 정합성·공백 ADHOC', () => {
+    it('TC-359-FX1: authenticated의 ISSUED/CLOSED 직접 헤더 INSERT 전부 거부 (수정 1)', () => {
+      const issErr = psqlAsErr(U_ISSUER, `
+        INSERT INTO public.zen_billing_statements
+          (statement_no, issuer_org_id, billed_party_type, billed_org_id, tier, period_year, period_month, round_no, status, issued_at, issued_by)
+        VALUES ('ST-202610-90-9001', '${ORG_ISSUER}', 'ORG', '${ORG_SHIPPER}', 'AGENCY_TO_SHIPPER', 2026, 10, 90, 'ISSUED', now(), '${U_ISSUER}');`);
+      expect(issErr.toLowerCase()).toContain('row-level security');
+
+      const closedErr = psqlAsErr(U_ISSUER, `
+        INSERT INTO public.zen_billing_statements
+          (statement_no, issuer_org_id, billed_party_type, billed_org_id, tier, period_year, period_month, round_no, status, issued_at, paid_amount, closed_at)
+        VALUES ('ST-202610-91-9001', '${ORG_ISSUER}', 'ORG', '${ORG_SHIPPER}', 'AGENCY_TO_SHIPPER', 2026, 10, 91, 'CLOSED', now(), 115, now());`);
+      expect(closedErr.toLowerCase()).toContain('row-level security');
+
+      // 부수효과 0: 두 statement_no도 존재하지 않아야 함
+      expect(psql(`SELECT count(*) FROM public.zen_billing_statements WHERE statement_no IN ('ST-202610-90-9001','ST-202610-91-9001')`)).toBe('0');
+      // 정상 DRAFT INSERT는 계속 허용 (RLS 회귀 없음)
+      const ok = psqlAsErr(U_ISSUER, `
+        INSERT INTO public.zen_billing_statements
+          (statement_no, issuer_org_id, billed_party_type, billed_org_id, tier, period_year, period_month, round_no)
+        VALUES ('ST-202610-92-9001', '${ORG_ISSUER}', 'ORG', '${ORG_SHIPPER}', 'AGENCY_TO_SHIPPER', 2026, 10, 92)`);
+      expect(ok).toBe('');
+      psqlAs(U_ISSUER, `DELETE FROM public.zen_billing_statements WHERE statement_no='ST-202610-92-9001'`);
+    });
+
+    it('TC-359-FX2: 항목 INSERT — 미정산 오더·타 대리점 오더 거부 + 정상 2경로(수기 shipper_id·등록 agency_org_id) 허용 (수정 2)', () => {
+      const r = createStatement(U_ISSUER, { orgId: ORG_SHIPPER, month: 12 });
+      const stmtId = psql(`SELECT id::text FROM public.zen_billing_statements WHERE statement_no='${r.split('|')[0]}'`);
+
+      // ① 미정산 오더 → 거부
+      const unsettled = makeOrder({ settled: false });
+      const e1 = addItem(U_ISSUER, stmtId, unsettled, 'AGENCY_TO_SHIPPER', 100);
+      expect(e1).toContain('item_order_not_eligible');
+      expect(e1).toContain('NOT_SETTLED');
+
+      // ② 타 대리점 소속 오더(AGENCY B의 화주) → 거부
+      const foreign = makeOrder({ shipperId: ORG_OTHER });
+      const e2 = addItem(U_ISSUER, stmtId, foreign, 'AGENCY_TO_SHIPPER', 100);
+      expect(e2).toContain('item_order_not_eligible');
+
+      // ③ 정상 A: 수기 화주 오더 — shipper_id = 발행 대리점 → 허용
+      const adhocOrder = makeOrder({ shipperId: ORG_ISSUER });
+      expect(addItem(U_ISSUER, stmtId, adhocOrder, 'AGENCY_TO_SHIPPER', 100)).toBe('');
+
+      // ④ 정상 B: 등록 화주 오더 — agency_org_id = 발행 대리점 (shipper_id는 실제 화주) → 허용
+      const registeredOrder = makeOrder({ shipperId: ORG_SHIPPER, agencyId: ORG_ISSUER });
+      expect(addItem(U_ISSUER, stmtId, registeredOrder, 'AGENCY_TO_SHIPPER', 100)).toBe('');
+
+      expect(psql(`SELECT count(*) FROM public.zen_billing_statement_items WHERE statement_id='${stmtId}'`)).toBe('2');
+
+      // ⑤ order_id 변경 UPDATE로 외부 오더를 끼우는 경로도 거부
+      const e5 = psqlAsErr(U_ISSUER, `
+        UPDATE public.zen_billing_statement_items SET order_id='${foreign}'
+        WHERE statement_id='${stmtId}' AND order_id='${adhocOrder}'`);
+      expect(e5).toContain('item_order_not_eligible');
+
+      // 정리: DRAFT 헤더 삭제(항목 CASCADE)
+      psqlAs(U_ISSUER, `DELETE FROM public.zen_billing_statements WHERE id='${stmtId}'`);
+    });
+
+    it('TC-359-FX3: tier 정합성 — 대리점의 ADMIN_TO_AGENCY 거부, Admin의 AGENCY_TO_SHIPPER 거부 (수정 3)', () => {
+      // RPC 경로
+      const agencyErr = psqlAsErr(U_ISSUER, `
+        SELECT stmt_no FROM public.create_billing_statement('ADMIN_TO_AGENCY', 2026, 10, '${ORG_SHIPPER}', NULL, NULL, NULL, NULL);`);
+      expect(agencyErr).toContain('tier_mismatch_for_issuer');
+
+      const adminErr = psqlAsErr(U_ADMIN, `
+        SELECT stmt_no FROM public.create_billing_statement('AGENCY_TO_SHIPPER', 2026, 10, '${ORG_SHIPPER}', NULL, NULL, NULL, NULL);`);
+      expect(adminErr).toContain('tier_mismatch_for_issuer');
+
+      // INSERT 정책 경로 (RLS WITH CHECK)
+      const policyErr = psqlAsErr(U_ISSUER, `
+        INSERT INTO public.zen_billing_statements
+          (statement_no, issuer_org_id, billed_party_type, billed_org_id, tier, period_year, period_month, round_no)
+        VALUES ('ST-202610-93-9001', '${ORG_ISSUER}', 'ORG', '${ORG_SHIPPER}', 'ADMIN_TO_AGENCY', 2026, 10, 93)`);
+      expect(policyErr.toLowerCase()).toContain('row-level security');
+
+      // Admin의 정상 tier(ADMIN_TO_SHIPPER)는 허용 (회귀 없음)
+      const adminOk = createStatement(U_ADMIN, { orgId: ORG_SHIPPER, tier: 'ADMIN_TO_SHIPPER', month: 10 });
+      expect(adminOk.split('|')[1]).toBe('1'); // Admin조직(ORG_STRANGER)의 독립 차수
+      psqlAs(U_ADMIN, `DELETE FROM public.zen_billing_statements WHERE statement_no='${adminOk.split('|')[0]}'`);
+    });
+
+    it('TC-359-FX4: ADHOC 공백 이름 직접 INSERT → party_check 거부 (수정 4)', () => {
+      const err = psqlAsErr(U_ISSUER, `
+        INSERT INTO public.zen_billing_statements
+          (statement_no, issuer_org_id, billed_party_type, billed_org_id, billed_name, tier, period_year, period_month, round_no)
+        VALUES ('ST-202610-94-9001', '${ORG_ISSUER}', 'ADHOC', NULL, '   ', 'AGENCY_TO_SHIPPER', 2026, 10, 94)`);
+      expect(err.toLowerCase()).toContain('zen_billing_statements_party_check');
+      expect(psql(`SELECT count(*) FROM public.zen_billing_statements WHERE statement_no='ST-202610-94-9001'`)).toBe('0');
     });
   });
 });
