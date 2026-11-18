@@ -72,4 +72,6 @@ export const DEFAULT_REDIRECTS = {
   UNAUTHENTICATED: '/login',
   UNAUTHORIZED: '/403',
   PENDING: '/register/pending',
+  /** DEF-148: 유지보수 모드 안내 페이지. 실제 라우트는 src/app/[locale]/maintenance/page.tsx */
+  MAINTENANCE: '/maintenance',
 };

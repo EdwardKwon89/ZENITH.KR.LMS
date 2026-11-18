@@ -490,5 +490,11 @@
     "cargo_found": "貨物が見つかりました。",
     "no_measurements": "変更された測定値はありません。",
     "measurements_saved": "測定値が保存されました。"
+  },
+  "Maintenance": {
+    "title": "メンテナンス中",
+    "message": "サービスは現在メンテナンス中です。しばらくしてから再度お試しください。",
+    "eta_unknown": "復旧予定時刻は未定です。",
+    "back": "ホームへ戻る"
   }
 }
