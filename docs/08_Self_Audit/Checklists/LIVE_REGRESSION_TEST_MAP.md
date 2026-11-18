@@ -1,7 +1,7 @@
 # 🗺️ LIVE Regression Test Master Map
 
-> **총 테스트 케이스:** 1,946 Cases (vitest 개별 테스트 기준, 262 test files)
-> **최종 검증일:** 2026-11-17 (TASK-B-357 SHXK Lib 로그 커버리지② · §91 TC-357-01~05 등재 · 1,946/1,946 PASS)
+> **총 테스트 케이스:** 1,956 Cases (vitest 개별 테스트 기준, 263 test files)
+> **최종 검증일:** 2026-11-18 (TASK-B-365 오더정산 마이그레이션 · §92 TC-365-01~10 등재 · 1,956/1,956 PASS)
 
 제니스 플랫폼의 비즈니스 영속성을 보장하는 회귀 테스트 케이스의 통합 명세서입니다. 모든 신규 개발 및 수정 시 이 맵에 케이스가 추가되어야 하며, 전체 테스트가 통과되어야 합니다.
 
@@ -1411,3 +1411,26 @@ SHXK `createorder` 페이로드의 `shipper.shipper_name`이 화면 "담당자�
 **되돌리기 검증 (테스트 유효성)**: `createorder`의 warn 분기 임시 제거 → **1 failed / 22 passed** (TC-357-1 createorder FAIL) → 복구 후 **23/23 PASS**.
 **기존 테스트**: `tests/unit/shxk` + `tests/unit/ups` **51 files / 518 tests 전부 PASS** (단언 약화 없음).
 **알림 4기준 판정**: `createorder`(②고객접점+④DEF-B-142 등 사고이력)·`getnewlabel`(②+④)·`pollTracking` cron 경로(③침묵성 — `route.ts`의 `if (!trackData) continue` 무음 skip + ④) → **알림 필요3지점 → IMP-196 등록**(알림 신규 구성은 범위 밖).
+
+---
+
+## 92. 오더정산 상태·UPS 원가 스냅샷 컬럼 마이그레이션 (Issue #1375 / TASK-B-365, 에픽 #1364)
+
+**2026-11-18, Mike** — `zen_orders`에 정산 상태 3컬럼(`cost_settlement_status`/`cost_settled_at`/`cost_settled_by`) + CHECK 2종(값 집합·`SETTLED⇒at/by NOT NULL`) + 부분 인덱스 `idx_zen_orders_cost_settlement`, `zen_ups_actual_cost`에 규칙 스냅샷 5컬럼(`cost_surcharge_rate`/`cost_surcharge_amount_krw`/`calc_version` DEFAULT 1/`applied_exchange_rates`/`cost_legacy_snapshot`) 추가. **컬럼 추가만(서비스 영향 0), 백필 없음.** 기존 `*_hkd`·`*_currency`·`applied_exchange_rate`·`other_charges_hkd`는 COMMENT로 의미 고정.
+
+| ID | 검증 내용 | 기대 결과 | 테스트 위치 |
+| :-- | :-- | :-- | :-- |
+| TC-365-1 | `cost_settlement_status` 기본값 | 명시 없이 INSERT → `NOT_SETTLED` | `tests/unit/migrations/taskb365-cost-settlement-columns.test.ts` |
+| TC-365-2 | 허용 안 되는 값 INSERT 거부 | `BOGUS_STATUS` → `zen_orders_cost_settlement_status_check` 위반 에러 | 동일 |
+| TC-365-3 | `SETTLED`인데 `cost_settled_at` NULL → CHECK 거부 | `zen_orders_cost_settled_complete_check` 위반 에러 | 동일 |
+| TC-365-3b | `SETTLED`인데 `cost_settled_by` NULL → CHECK 거부 | 동일 CHECK 위반 에러 | 동일 |
+| TC-365-4 | `SETTLED` + at/by 모두 있으면 허용 | INSERT 성공·상태 `SETTLED` 확인 | 동일 |
+| TC-365-4b | FK `ON DELETE SET NULL` + CHECK 정의 확인 (**DEF-B-158 충돌**) | `pg_get_constraintdef`로 두 제약 정의 각각 고정 (정산자 프로필 삭제 시 CHECK 위반 → 미해소, DEF-B-158 보고) | 동일 |
+| TC-365-5 | 부분 인덱스 존재 | `pg_indexes`에 `idx_zen_orders_cost_settlement`, `WHERE (transport_mode = 'UPS')` + `(cost_settlement_status, transport_mode)` 확인 | 동일 |
+| TC-365-6 | `zen_ups_actual_cost` 신규 5컬럼 + 기본값 | INSERT 시 `calc_version=1`, 나머지 4컬럼 NULL | 동일 |
+| TC-365-7 | 마이그레이션 재실행(멱등) = 기존 행 변경 0 | 재실행 전후 `count(*)`·`sum(total_cost_krw)`·정산 상태 집계 동일 | 동일 |
+| TC-365-8 | 기존 컬럼 의미 고정 COMMENT | `other_charges_hkd` COMMENT에 `KRW 합계` 포함 | 동일 |
+
+**회귀 검증 (2026-11-18)**: `npm run test:regression` **263 test files / 1,956 tests 전부 PASS** · `supabase db reset --yes` 통과(번호 충돌 없음) · `check-db-freshness` OK.
+**되돌리기 검증 (테스트 유효성)**: 신규 3+5컬럼·인덱스·CHECK 일괄 DROP(롤백 SQL 실행) → **9 failed / 1 passed** (COMMENT 존재 검증 1건만 생존) → 마이그레이션 재적용 → **10/10 PASS**.
+**DEF-B-158 (Medium)**: `cost_settled_by`의 `ON DELETE SET NULL`와 `SETTLED⇒settled_by NOT NULL` CHECK 상호 모순 — 정산자 프로필 삭제가 항상 실패. 명세가 두 제약을 모두 확정한 충돌이며, 현재 미사용 컬럼이라 영향 0 (PR-3/B-367 병합 전 정정 필요).
