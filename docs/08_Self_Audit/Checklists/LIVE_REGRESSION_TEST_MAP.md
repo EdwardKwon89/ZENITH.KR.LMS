@@ -1471,10 +1471,16 @@ SHXK `createorder` 페이로드의 `shipper.shipper_name`이 화면 "담당자�
 | TC-366-09 | SETTLED 오더 미리보기 (실DB) | 잠금 오류 미반환(허용) | integration |
 | TC-366-10 | 스냅샷 저장 (실DB) | `calc_version=2`·가산율 0.07·가산액>0·`applied_exchange_rates` HKD 존재, 가산액≈`round(기본운임×환율×0.07)` | integration |
 | TC-366-11 | DEF-B-159 빈 목록 | delete 1회·insert 0회 | unit |
-| TC-366-RST-1 | 되돌리기: 잠금 2곳 제거 | **2 failed / 10 passed** → 복구 12/12 | unit |
-| TC-366-RST-2 | 되돌리기: 조건부 UPDATE 술어 제거 | **1 failed / 5 skipped** (`length 1 but got 2`) → 복구 6/6 | integration |
-| TC-366-RST-3 | 되돌리기: DEF-B-159 원복 | **1 failed / 11 skipped** (`+0 to be 1`) → 복구 12/12 | unit |
+| TC-366-12~14 | 보조 조회 오류 fail-open 차단 | 배송완료일/원가/레거시 인보이스 조회 실패 시 `success=false` + `HISTORY_LOOKUP`/`COST_LOOKUP`/`LEGACY_INVOICE_LOOKUP` | unit |
+| TC-366-15 | 레거시 인보이스 실DB 판정 | 미취소 인보이스 → `legacy_invoiced_order`·목록 `LEGACY_INVOICED`, CANCELED만 → 정산 성공 | integration |
+| TC-366-RST-1 | 되돌리기: 잠금 2곳 제거 | **2 failed / 13 passed** → 복구 15/15 | unit |
+| TC-366-RST-2 | 되돌리기: 조건부 UPDATE 술어 제거 | **1 failed / 8 skipped** (`length 1 but got 2`) → 복구 9/9 | integration |
+| TC-366-RST-3 | 되돌리기: DEF-B-159 원복 | **1 failed / 14 skipped** (`+0 to be 1`) → 복구 15/15 | unit |
+| TC-366-RST-4 | 되돌리기: 레거시 인보이스 검증 비활성화 | **1 failed / 2 passed / 6 skipped** → 복구 9/9 | integration |
+| TC-366-RST-5 | 되돌리기: CANCELED 제외 조건 제거 | **1 failed / 2 passed / 6 skipped** → 복구 9/9 | integration |
+| TC-366-RST-6 | 되돌리기: 인보이스 조회 오류 체크 제거 | **1 failed / 14 skipped** → 복구 15/15 | unit |
 
-**회귀 검증 (2026-11-18)**: `npm run test:regression` **268 test files / 1,984 tests 전부 PASS**(B-364·B-365 포함). `npm run build` **EXIT=0**.
+**회귀 검증 (2026-11-18, 리뷰 반영 후)**: `npm run test:regression` **268 test files / 1,990 tests 전부 PASS**(B-364·B-365 포함). `npm run build` **EXIT=0**.
+**리뷰 반영(Jaison)**: 보조 조회 3곳 error 미확인(fail-open) → 실패 반환으로 수정 + 단위 3건, 레거시 인보이스 필터를 실DB fixture(미취소/CANCELED)로 검증 + 되돌리기 3건 추가. 비차단 2건은 IMP-197·198 등록.
 **Ds-11**: `node scripts/check-ds11-sync.mjs` → 허용 목록 밖 신규 미반영 없음(함수 2종 추가 반영).
 **발견 이슈**: `zen_orders.ups_product_id` 미존재 컬럼을 select하던 실DB 잠복 버그(`42703`)를 이 PR에서 제거 — 기존 단위 테스트가 Supabase mock이라 미검출. 상세는 task file §4.

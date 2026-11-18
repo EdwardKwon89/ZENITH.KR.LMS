@@ -12,6 +12,7 @@ type State = {
   updatedPayload: any;
   otherDelete: number;
   otherInsert: number;
+  errors: { history: any; cost: any; invoice: any };
 };
 
 const state: State = {
@@ -25,6 +26,7 @@ const state: State = {
   updatedPayload: null,
   otherDelete: 0,
   otherInsert: 0,
+  errors: { history: null, cost: null, invoice: null },
 };
 
 vi.mock('@/lib/auth/guards', () => ({
@@ -45,8 +47,8 @@ vi.mock('@/app/actions/finance/settlement', () => ({
 }));
 
 /** Supabase 체이너블 쿼리 mock — 어떤 체인 순서로도 최종 await/단건 조회가 가능하다. */
-function query(data: any, opts: { single?: any; maybeSingle?: any } = {}) {
-  const result = { data, error: null };
+function query(data: any, opts: { single?: any; maybeSingle?: any; error?: any } = {}) {
+  const result = { data, error: opts.error ?? null };
   const chain: any = {
     select: () => chain,
     eq: () => chain,
@@ -82,16 +84,16 @@ const mockSupabase: any = {
     }
     if (table === 'zen_ups_actual_cost') {
       return {
-        select: () => query(state.costRows, { maybeSingle: state.costRow }),
+        select: () => query(state.costRows, { maybeSingle: state.costRow, error: state.errors.cost }),
         upsert: async () => ({ error: null }),
         update: () => ({ eq: async () => ({ error: null }) }),
       };
     }
     if (table === 'zen_invoices') {
-      return { select: () => query(state.legacyInvoices) };
+      return { select: () => query(state.legacyInvoices, { error: state.errors.invoice }) };
     }
     if (table === 'order_status_history') {
-      return { select: () => query(state.history, { maybeSingle: state.released }) };
+      return { select: () => query(state.history, { maybeSingle: state.released, error: state.errors.history }) };
     }
     if (table === 'zen_ups_actual_other_charges') {
       return {
@@ -134,6 +136,7 @@ beforeEach(() => {
   state.updatedPayload = null;
   state.otherDelete = 0;
   state.otherInsert = 0;
+  state.errors = { history: null, cost: null, invoice: null };
   vi.mocked(validateUserAction).mockResolvedValue({
     supabase: mockSupabase,
     user: { id: 'user-1' },
@@ -205,6 +208,33 @@ describe('getOrdersForCostSettlement 필터 (TASK-B-366)', () => {
     expect(res.orders?.[0].legacyInvoiced).toBe(true);
     expect(res.orders?.[0].excludedReason).toBe('LEGACY_INVOICED');
     expect(res.orders?.[0].hasActualCost).toBe(true);
+  });
+
+  it('배송완료일 보조 조회가 실패하면 success=false (HISTORY_LOOKUP)', async () => {
+    state.orders = [order({ id: 'order-1', order_no: 'ORD-1' })];
+    state.errors.history = { message: 'history boom' };
+
+    const res = await getOrdersForCostSettlement({ status: 'ALL', from: '2026-11-01', to: '2026-11-30' });
+    expect(res.success).toBe(false);
+    expect(res.error).toContain('HISTORY_LOOKUP');
+  });
+
+  it('원가 보조 조회가 실패하면 success=false (COST_LOOKUP)', async () => {
+    state.orders = [order({ id: 'order-1', order_no: 'ORD-1' })];
+    state.errors.cost = { message: 'cost boom' };
+
+    const res = await getOrdersForCostSettlement({ status: 'ALL', from: '2026-11-01', to: '2026-11-30' });
+    expect(res.success).toBe(false);
+    expect(res.error).toContain('COST_LOOKUP');
+  });
+
+  it('레거시 인보이스 조회가 실패하면 success=false (LEGACY_INVOICE_LOOKUP)', async () => {
+    state.orders = [order({ id: 'order-1', order_no: 'ORD-1' })];
+    state.errors.invoice = { message: 'invoice boom' };
+
+    const res = await getOrdersForCostSettlement({ status: 'ALL', from: '2026-11-01', to: '2026-11-30' });
+    expect(res.success).toBe(false);
+    expect(res.error).toContain('LEGACY_INVOICE_LOOKUP');
   });
 
   it('배송완료일이 기간 밖이면 목록에서 제외한다', async () => {

@@ -148,15 +148,15 @@
 - **부수효과**: `zen_ups_actual_cost` upsert(`L534-555`), 기타부가운임 기존 행 **항상 삭제** 후 목록이 있을 때만 재삽입(`L665-688` — DEF-B-159), `input.invoiceId` 존재 시 `finalizeInvoice()` 호출(`L695-704`), `revalidatePath('/(dashboard)/finance/daily-billing', 'page')` 및 `revalidatePath(\`/(dashboard)/orders/\${orderId}\`, 'page')` (`L705-706`)
 
 #### getOrdersForCostSettlement(filter)
-- **Path**: `src/app/actions/finance/ups-actual-cost.ts:769-837`
+- **Path**: `src/app/actions/finance/ups-actual-cost.ts:768-851`
 - **설명**: 오더정산 대상 목록을 조회합니다(TASK-B-366 / Issue #1376). `DELIVERED` + `UPS` 오더를 대상으로 정산상태(`NOT_SETTLED`/`SETTLED`/`ALL`), 배송완료일 기간(`from`~`to`), 오더번호 검색어(`q`)로 필터링하고, 각 행에 배송완료일·정산상태·정산일시·UPS 청구서번호·실제원가 입력 여부를 담아 반환합니다. 기존 오더별 인보이스(`zen_invoices.metadata.source_order_id`)가 있는 오더는 목록에 **표시하되** `legacyInvoiced=true`·`excludedReason='LEGACY_INVOICED'`로 정산 대상에서 제외합니다.
 - **권한**: `validateUserAction()` + `assertAdmin(profile)` (동일 파일 `L770-772`)
 - **Input**: `filter: CostSettlementFilter` — `{ status: 'NOT_SETTLED' | 'SETTLED' | 'ALL', from: string, to: string, q?: string }`
 - **Output**: `Promise<CostSettlementListResult>` — `{ success, orders?: CostSettlementOrderRow[], total?: number, error?: string }` (`L761-767`)
-- **오류**: 권한 불충족(`permission_denied`), 기간 누락·역전(`generic{DATE_RANGE_INVALID}`, `L774-777`), 목록 조회 실패(`generic{ORDER_LIST_LOOKUP}`, `L788-792`), 예외 시 `generic{UNEXPECTED}`. 배송완료일(`order_status_history.next_status='DELIVERED'`)이 없거나 기간 밖인 오더는 결과에서 제외합니다(`L804-812`).
+- **오류**: 권한 불충족(`permission_denied`), 기간 누락·역전(`generic{DATE_RANGE_INVALID}`, `L774-777`), 목록 조회 실패(`generic{ORDER_LIST_LOOKUP}`, `L789-792`), **보조 조회 실패는 fail-open 금지** — 배송완료일 `generic{HISTORY_LOOKUP}`, 원가 `generic{COST_LOOKUP}`, 레거시 인보이스 `generic{LEGACY_INVOICE_LOOKUP}`(`L801-814`), 예외 시 `generic{UNEXPECTED}`. 배송완료일(`order_status_history.next_status='DELIVERED'`)이 없거나 기간 밖인 오더는 결과에서 제외합니다(`L804-812`).
 
 #### markOrderCostSettled(orderId)
-- **Path**: `src/app/actions/finance/ups-actual-cost.ts:840-908`
+- **Path**: `src/app/actions/finance/ups-actual-cost.ts:853-921`
 - **설명**: UPS 오더를 오더정산 완료 상태로 전환합니다(TASK-B-366 / Issue #1376). `cost_settlement_status`를 `SETTLED`로, `cost_settled_at`·`cost_settled_by`를 기록합니다. 정산 완료 후에는 `recordUpsActualCost`·`recordActualCostAndFinalize`가 원가·중량 수정을 거부합니다.
 - **권한**: `validateUserAction()` + `assertAdmin(profile)` (동일 파일 `L841-843`)
 - **Input**: `orderId: string`

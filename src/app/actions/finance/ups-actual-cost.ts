@@ -489,7 +489,6 @@ export async function previewUpsActualCost(
       .select(`
         id,
         status,
-        cost_settlement_status,
         transport_mode,
         shipper_id,
         agency_org_id,
@@ -799,6 +798,20 @@ export async function getOrdersForCostSettlement(filter: CostSettlementFilter): 
       supabase.from('zen_ups_actual_cost').select('order_id, ups_invoice_no').in('order_id', orderIds),
       supabase.from('zen_invoices').select('metadata').neq('status', 'CANCELED').filter('metadata->>source_order_id', 'in', `(${orderIds.join(',')})`),
     ]);
+
+    // 보조 조회 실패를 무시하면 레거시 인보이스 오더가 정산 대상처럼 보이는 fail-open이 된다.
+    if (historyRes.error) {
+      logger.error('getOrdersForCostSettlement: delivery history lookup failed', historyRes.error);
+      return { success: false, error: await trError('generic', { code: 'HISTORY_LOOKUP' }) };
+    }
+    if (costRes.error) {
+      logger.error('getOrdersForCostSettlement: actual cost lookup failed', costRes.error);
+      return { success: false, error: await trError('generic', { code: 'COST_LOOKUP' }) };
+    }
+    if (invoiceRes.error) {
+      logger.error('getOrdersForCostSettlement: legacy invoice lookup failed', invoiceRes.error);
+      return { success: false, error: await trError('generic', { code: 'LEGACY_INVOICE_LOOKUP' }) };
+    }
 
     const deliveredMap = deliveredDateOf(historyRes.data as any);
     const costMap = new Map<string, string | null>((costRes.data ?? []).map((c: any) => [c.order_id, c.ups_invoice_no ?? null]));
