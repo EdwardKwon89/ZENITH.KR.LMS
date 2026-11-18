@@ -144,3 +144,26 @@
 
 - `npm audit` 은 `file:` 의존성을 검사하지 않으므로 **`xlsx:high` 소멸은 "해소"가 아니라 "관측 불가"** 다. 이 사각지대는 `check:vendor`(고정 바이트 무결성) + `vendor/README.md`(수동 점검 절차) + 회귀 테스트(버전 하한) 3중으로 보완했다.
 - Team B 소유 파일(`BulkOrderUploadModal.tsx` 등)은 **소스 수정 없음** — `read`/`sheet_to_json` 기본 옵션 그대로 호환됨을 실증으로 확인.
+
+---
+
+## [Aiden 검토]
+
+> 검토·승인: Aiden (ZEN_CEO) — 2026-11-18 09:29 KST · Edward 승인 후 머지
+
+**판정: ✅ 승인** — PR #1379 develop 머지 완료(Issue #1339 Close).
+
+| 검토 항목 | 결과 |
+|:--|:--|
+| DoD | 전항목 `[x]` + 증거값 기재. 미체크 1건은 Aiden 담당(Team B 동기화 고지)이며 구현 Agent 범위 밖 |
+| R-17 커밋 순서 | 준수 — 코드 `356ac423`(R-09 회귀맵 포함) → 문서 `419d2405`(task file·증적) |
+| 실제 CI(`gh pr checks`) | 6건 전부 PASS (Regression Tests 10m23s, Vendor Integrity, Dependency Audit, Type Check, Docs Sync, Task File Check), 실패 0 |
+| diff 직접 확인 | PR 설명과 일치 — `package.json` `file:vendor/xlsx-0.20.3.tgz`, lockfile `resolved`·sha512 `integrity`·버전 0.20.3, Dockerfile `npm ci` 직전 `COPY vendor`, `vendor-advisory` job `continue-on-error`, `audit-baseline.json` 13→12(축소만), `src/` 변경 0건 |
+| tarball 독립 검증 | Aiden이 직접 계산한 SHA-256 `8dc73fc3…99fe8`이 `.sha256` 파일과 일치, 내부 `package.json` 버전 0.20.3 |
+| 병합 가능성 | `merge-tree` 충돌 없음, PR body `Closes #1339` |
+
+**후속 (Aiden 처리 완료)**
+- Team B develop→TeamB_Dev 동기화 고지·수동 4경로 교차 확인 요청: #1319 코멘트 게시(2026-11-18 09:35 KST)
+- #1309(TASK-1150) `[설계 확정]` 기록 — 선행 조건(#1339 병합) 해소
+
+**유의사항**: `npm audit`이 `file:` 의존성을 검사하지 못하므로 `xlsx:high` 소멸은 해소가 아닌 관측 불가 상태다. `check:vendor`·`vendor/README.md` 수동 점검 절차·회귀 테스트(버전 하한)로 보완하며, `xlsx` 버전 상향 시 반드시 해당 절차를 따른다.
