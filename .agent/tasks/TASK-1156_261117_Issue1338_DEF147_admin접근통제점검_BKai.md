@@ -114,9 +114,10 @@
 |:-:|:--|:--|:-:|
 | 1 | 코드(문서) 커밋 | `bc095f3eeada1ff1c45a0ade640ed0b38fcff178` (`[B_Kai] docs: TASK-1156 … (#1338)`) | ✅ |
 | 2 | `[작업 결과]` 섹션 + 40자 해시 | 위 섹션. 스크립트 자동 삽입, `TBD`·`<PLACEHOLDER>` 0건 | ✅ |
-| 3 | Issue 라벨 `status:review` | 보완 push 후 `status:rework` → `status:review` 재전환 예정 | ⏳ |
-| 4 | 자가검증 전항목 통과 | 본 표 전부 ✅/⏳, 미해결 ❌ 없음 | ✅ |
-| 5 | 문서 커밋(task file만) | 보완 커밋 생성 후 push | ⏳ |
+| 3 | Issue 라벨 `status:review` | `status:rework` → `status:review` 재전환 + PR 코멘트 보고 | ✅ |
+| 4 | 자가검증 전항목 통과 | 본 표 전부 ✅, 미해결 ❌ 없음 | ✅ |
+| 5 | 문서 커밋(task file만) | `52f928cf` (`[B_Kai] docs: TASK-1156 R-17 보완 …`) push | ✅ |
+| 6-보완 | CI 재통과 | PR #1383 checks 6/6 Passed, 0 Failed (보완 push 후 재확인) | ✅ |
 | 6 | PR 생성 + `Closes #NNN` + DoD 체크리스트 | PR #1383 (`Closes #1338`), 본문 DoD 체크리스트 보완 반영 | ✅ |
 | 7 | ✅ 전환은 Aiden 단독 | 본 Agent는 머지하지 않음 | ✅ |
 
