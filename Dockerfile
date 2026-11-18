@@ -4,6 +4,9 @@
 FROM node:22-alpine AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
+# DEF-146: xlsx 는 npm 레지스트리 대신 벤더링한 tarball(file:vendor/...)을 쓰므로
+# npm ci 전에 vendor/ 가 반드시 있어야 한다 (없으면 빌드 실패).
+COPY vendor ./vendor
 RUN npm ci
 
 FROM node:22-alpine AS builder
