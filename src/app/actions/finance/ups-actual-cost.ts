@@ -6,6 +6,7 @@ import { logger } from '@/lib/logger';
 import { getExchangeRate } from '@/lib/finance/exchange-rate';
 import { estimateUpsFreight } from '@/app/actions/ups/freight';
 import { trError } from '@/lib/i18n/action-error';
+import { computeUpsActualCostKrw, type UpsActualCostAmounts } from '@/lib/ups/actual-cost';
 
 export interface UpsActualCostInput {
   upsInvoiceNo?: string;
@@ -35,6 +36,66 @@ export interface UpsActualCostResult {
     newShipperTotal: number;
     agencyDelta: number;
     shipperDelta: number;
+  };
+}
+
+type CurrencyAwareInput = UpsActualCostInput & {
+  baseFreightKrw?: number;
+  baseFreightCurrency?: string;
+  fuelSurchargeKrw?: number;
+  surgeFeeKrw?: number;
+  otherChargesKrw?: number;
+  otherCharges?: { name: string; amount: number; currency: string }[];
+};
+
+/** 청구확정(A) 입력 형태인지 판별한다. B(원가 폼)는 HKD 필드만 사용한다. */
+function isFinalizeCostInput(input: CurrencyAwareInput): boolean {
+  return input.baseFreightCurrency != null
+    || input.baseFreightKrw != null
+    || input.fuelSurchargeKrw != null
+    || input.otherChargesKrw != null;
+}
+
+/** 입력을 통합 계산 함수의 `amounts`/`rates` 형태로 정규화한다. */
+function buildCostAmounts(input: CurrencyAwareInput, baseExchangeRate: number) {
+  const toNumLocal = (v: unknown) => {
+    const n = Number(v);
+    return Number.isFinite(n) ? n : 0;
+  };
+
+  if (isFinalizeCostInput(input)) {
+    const currency = input.baseFreightCurrency || 'KRW';
+    const otherCharges = (input.otherCharges ?? []).map((c) => ({
+      name: c.name,
+      amount: toNumLocal(c.amount),
+      currency: c.currency || 'KRW',
+    }));
+    const otherKrw = toNumLocal(input.otherChargesKrw ?? input.otherChargesHkd);
+    if (otherCharges.length === 0 && otherKrw > 0) {
+      otherCharges.push({ name: '기타부가운임', amount: otherKrw, currency: 'KRW' });
+    }
+    return {
+      amounts: {
+        baseFreight: { amount: toNumLocal(input.baseFreightKrw ?? input.baseFreightHkd), currency },
+        fuelSurcharge: { amount: toNumLocal(input.fuelSurchargeKrw ?? input.fuelSurchargeHkd), currency: 'KRW' },
+        surgeFee: { amount: toNumLocal(input.surgeFeeKrw ?? input.surgeFeeHkd), currency: 'KRW' },
+        otherCharges,
+      } as UpsActualCostAmounts,
+      exchangeRates: { KRW: 1, [currency]: baseExchangeRate } as Record<string, number>,
+    };
+  }
+
+  const otherHkd = toNumLocal(input.otherChargesHkd);
+  return {
+    amounts: {
+      baseFreight: { amount: toNumLocal(input.baseFreightHkd), currency: 'HKD' },
+      fuelSurcharge: { amount: toNumLocal(input.fuelSurchargeHkd), currency: 'HKD' },
+      surgeFee: { amount: toNumLocal(input.surgeFeeHkd), currency: 'HKD' },
+      otherCharges: otherHkd > 0
+        ? [{ name: '기타부가운임', amount: otherHkd, currency: 'HKD' }]
+        : [],
+    } as UpsActualCostAmounts,
+    exchangeRates: { HKD: baseExchangeRate, KRW: 1 } as Record<string, number>,
   };
 }
 
@@ -225,10 +286,12 @@ export async function recordUpsActualCost(
       return { success: false, error: await trError('generic', { code: 'ACTUAL_COST_SAVE' }) };
     }
 
-    // 2. RELEASED 일자 기준 HKD/KRW 환율 → KRW 환산 원가
+    // 2. RELEASED 일자 기준 HKD/KRW 환율 → 통합 계산(기본운임 +7% 포함)
     const releasedDate = await getOrderReleasedDate(supabase, orderId, order.created_at);
     const exchangeRate = await getExchangeRate('HKD', 'KRW', releasedDate, supabase);
-    const totalCostKrw = Math.round(hkdTotal * exchangeRate * 100) / 100;
+    const { amounts, exchangeRates } = buildCostAmounts(input, exchangeRate);
+    const computed = computeUpsActualCostKrw(amounts, { exchangeRates });
+    const totalCostKrw = computed.totalCostKrw;
 
     const { error: updateError } = await supabase
       .from('zen_ups_actual_cost')
@@ -402,7 +465,7 @@ export async function recordUpsActualCost(
 /** 실제 원가 확정 미리보기 — 저장 없이 적용 환율/원가/재계산 결과만 반환 */
 export async function previewUpsActualCost(
   orderId: string,
-  input: UpsActualCostInput
+  input: CurrencyAwareInput
 ): Promise<UpsActualCostResult> {
   try {
     const { supabase, profile } = await validateUserAction();
@@ -443,8 +506,23 @@ export async function previewUpsActualCost(
 
     const hkdTotal = toNum(input.baseFreightHkd) + toNum(input.fuelSurchargeHkd) + toNum(input.surgeFeeHkd) + toNum(input.otherChargesHkd);
     const releasedDate = await getOrderReleasedDate(supabase, orderId, order.created_at);
-    const exchangeRate = await getExchangeRate('HKD', 'KRW', releasedDate, supabase);
-    const totalCostKrw = Math.round(hkdTotal * exchangeRate * 100) / 100;
+    const previewInput = input as CurrencyAwareInput;
+    const previewIsFinalize = isFinalizeCostInput(previewInput);
+    const previewCurrency = previewInput.baseFreightCurrency || 'KRW';
+    const baseExchangeRate = !previewIsFinalize
+      ? await getExchangeRate('HKD', 'KRW', releasedDate, supabase)
+      : previewCurrency === 'KRW'
+        ? 1
+        : await getExchangeRate(previewCurrency, 'KRW', releasedDate, supabase);
+    const { amounts, exchangeRates } = buildCostAmounts(previewInput, baseExchangeRate);
+    for (const currency of new Set(amounts.otherCharges.map((c) => c.currency))) {
+      if (currency !== 'KRW' && exchangeRates[currency] == null) {
+        exchangeRates[currency] = await getExchangeRate(currency, 'KRW', releasedDate, supabase);
+      }
+    }
+    const computed = computeUpsActualCostKrw(amounts, { exchangeRates });
+    const totalCostKrw = computed.totalCostKrw;
+    const appliedRate = computed.base.exchangeRate;
 
     const weightOrDimsChanged =
       input.actualWeightKg != null || input.actualLengthCm != null || input.actualWidthCm != null || input.actualHeightCm != null;
@@ -461,7 +539,7 @@ export async function previewUpsActualCost(
       };
     }
 
-    return { success: true, releasedDate, appliedExchangeRate: exchangeRate, hkdTotal, totalCostKrw, recalc };
+    return { success: true, releasedDate, appliedExchangeRate: appliedRate, hkdTotal, totalCostKrw, recalc };
   } catch (err: any) {
     logger.error('Error previewing UPS actual cost:', err);
     return { success: false, error: await trError('generic', { code: 'UNEXPECTED' }) };
@@ -514,21 +592,24 @@ export async function recordActualCostAndFinalize(
     const releasedDate = await getOrderReleasedDate(supabase, orderId, order.created_at);
     const exchangeRate = await getExchangeRate('HKD', 'KRW', releasedDate, supabase);
 
-    // 4. KRW 금액 계산 — TASK-B-317: 기본운임 통화 선택 + 환율 적용 + +7% admin 원가
+    // 4. KRW 금액 계산 — 통합 함수(항목별 통화, 기본운임에만 +7%)
     const baseFreightCurrency = input.baseFreightCurrency || 'KRW';
-    const baseFreightInput = toNum(input.baseFreightKrw);
-    let baseFreightKrw: number;
-    if (baseFreightCurrency === 'KRW') {
-      baseFreightKrw = Math.round(baseFreightInput * 1.07); // KRW는 +7% 적용
-    } else {
-      // 외국 통화는 선택 통화 기준 환율 적용 후 +7%
-      const currencyExchangeRate = await getExchangeRate(baseFreightCurrency, 'KRW', releasedDate, supabase);
-      baseFreightKrw = Math.round(baseFreightInput * currencyExchangeRate * 1.07);
+    const baseCurrencyRate = baseFreightCurrency === 'KRW'
+      ? 1
+      : await getExchangeRate(baseFreightCurrency, 'KRW', releasedDate, supabase);
+    const finalizeInput = input as CurrencyAwareInput;
+    const { amounts, exchangeRates } = buildCostAmounts(finalizeInput, baseCurrencyRate);
+    exchangeRates.HKD = exchangeRates.HKD ?? exchangeRate;
+    for (const currency of new Set(amounts.otherCharges.map((c) => c.currency))) {
+      if (currency !== 'KRW' && exchangeRates[currency] == null) {
+        exchangeRates[currency] = await getExchangeRate(currency, 'KRW', releasedDate, supabase);
+      }
     }
-    const fuelSurchargeKrw = toNum(input.fuelSurchargeKrw);
-    const surgeFeeKrw = toNum(input.surgeFeeKrw);
-    const otherChargesKrw = toNum(input.otherChargesKrw);
-    const totalCostKrw = baseFreightKrw + fuelSurchargeKrw + surgeFeeKrw + otherChargesKrw;
+    const computed = computeUpsActualCostKrw(amounts, { exchangeRates });
+    const baseFreightKrw = computed.base.krw;
+    const totalCostKrw = computed.totalCostKrw;
+    const otherChargesKrw = computed.otherChargesKrwTotal;
+    const appliedExchangeRate = computed.base.exchangeRate;
 
     // 5. zen_ups_actual_cost upsert
     const { error: upsertError } = await supabase
@@ -541,14 +622,14 @@ export async function recordActualCostAndFinalize(
         actual_length_cm: input.actualLengthCm || null,
         actual_width_cm: input.actualWidthCm || null,
         actual_height_cm: input.actualHeightCm || null,
-        base_freight_hkd: baseFreightKrw, // 환율 적용된 KRW 값
-        fuel_surcharge_hkd: toNum(input.fuelSurchargeKrw),
-        surge_fee_hkd: toNum(input.surgeFeeKrw),
-        other_charges_hkd: toNum(input.otherChargesKrw),
+        base_freight_hkd: baseFreightKrw, // 환율 적용된 KRW 값 (스키마 변경은 후속 PR)
+        fuel_surcharge_hkd: computed.fuel.krw,
+        surge_fee_hkd: computed.surge.krw,
+        other_charges_hkd: otherChargesKrw,
         base_freight_currency: baseFreightCurrency,
         fuel_surcharge_currency: 'KRW',
         surge_fee_currency: 'KRW',
-        applied_exchange_rate: baseFreightCurrency === 'KRW' ? exchangeRate : (await getExchangeRate(baseFreightCurrency, 'KRW', releasedDate, supabase)),
+        applied_exchange_rate: appliedExchangeRate,
         total_cost_krw: totalCostKrw,
         entered_by: user.id,
         notes: input.notes || null,
@@ -560,19 +641,19 @@ export async function recordActualCostAndFinalize(
     }
 
     // 6. 기타부가운임 저장 (zen_ups_actual_other_charges)
-    if (input.otherCharges && input.otherCharges.length > 0) {
+    if (computed.otherCharges.length > 0) {
       // 기존 기타부가운임 삭제
       await supabase
         .from('zen_ups_actual_other_charges')
         .delete()
         .eq('order_id', orderId);
 
-      // 새 기타부가운임 삽입
-      const charges = input.otherCharges.map((c) => ({
+      // 새 기타부가운임 삽입 (목록 정규화 결과)
+      const charges = computed.otherCharges.map((c) => ({
         order_id: orderId,
         charge_name: c.name,
         amount: c.amount,
-        currency: c.currency || 'KRW',
+        currency: c.currency,
       }));
 
       if (charges.length > 0) {

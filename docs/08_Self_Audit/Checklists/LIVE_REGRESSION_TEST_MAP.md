@@ -1,7 +1,7 @@
 # 🗺️ LIVE Regression Test Master Map
 
-> **총 테스트 케이스:** 1,956 Cases (vitest 개별 테스트 기준, 263 test files)
-> **최종 검증일:** 2026-11-18 (TASK-B-365 오더정산 마이그레이션 · §92 TC-365-01~10 등재 · 1,956/1,956 PASS)
+> **총 테스트 케이스:** 1,966 Cases (vitest 개별 테스트 기준, 266 test files)
+> **최종 검증일:** 2026-11-18 (TASK-B-364·B-365 통합 · §92(B-365)·§93(B-364) 등재 · 1,966/1,966 PASS)
 
 제니스 플랫폼의 비즈니스 영속성을 보장하는 회귀 테스트 케이스의 통합 명세서입니다. 모든 신규 개발 및 수정 시 이 맵에 케이스가 추가되어야 하며, 전체 테스트가 통과되어야 합니다.
 
@@ -1434,3 +1434,22 @@ SHXK `createorder` 페이로드의 `shipper.shipper_name`이 화면 "담당자�
 **회귀 검증 (2026-11-18)**: `npm run test:regression` **263 test files / 1,956 tests 전부 PASS** · `supabase db reset --yes` 통과(번호 충돌 없음) · `check-db-freshness` OK.
 **되돌리기 검증 (테스트 유효성)**: 신규 3+5컬럼·인덱스·CHECK 일괄 DROP(롤백 SQL 실행) → **9 failed / 1 passed** (COMMENT 존재 검증 1건만 생존) → 마이그레이션 재적용 → **10/10 PASS**.
 **DEF-B-158 (해소)**: `cost_settled_by`의 `ON DELETE SET NULL`와 `SETTLED⇒settled_by NOT NULL` CHECK 상호 모순 — 정산자 프로필 삭제가 항상 실패. **2026-11-18 Jaison (A)안 확정 → PR #1392에서 FK를 `ON DELETE RESTRICT`로 정정**(정산자 프로필 하드 삭제 차단 = 감사값 보존). 현재 미사용 컬럼이라 영향 0.
+
+## 93. UPS 실제원가 계산 통합 — computeUpsActualCostKrw (Issue #1374 / TASK-B-364)
+
+**2026-11-18, Dave** — 청구서관리 ①-1(설계 TASK-B-358 PR-1). 경로별로 달랐던 실제원가 계산을 순수 함수 `computeUpsActualCostKrw(amounts, rates)`(`src/lib/ups/actual-cost.ts`)로 통합했다. **기본운임에만 +7%**(`UPS_COST_SURCHARGE_RATE` 단일 참조), 항목별 통화 환산, 기타부가운임 목록 처리, 누락 환율은 `MISSING_RATE:<통화>` throw. `recordUpsActualCost`·`previewUpsActualCost`·`recordActualCostAndFinalize`가 동일 규칙을 사용하고, 청구확정 모달의 클라이언트 `×1.07` 계산을 제거해 표시 합계를 서버 미리보기 응답으로 대체했다. **스키마 변경 없음.**
+
+| ID | 검증 내용 | 기대 결과 | 테스트 위치 |
+| :-- | :-- | :-- | :-- |
+| TC-364-01 | 기본운임 +7%(유류·급증 미가산) | 기본 1000 HKD·rate150 → base 160500, surcharge 10500, 총 213000 | `tests/unit/ups/actual-cost-compute.test.ts` |
+| TC-364-02 | KRW 입력 | 환율 1, 100000 → 107000 | 동일 |
+| TC-364-03 | 항목 통화 혼합(USD/HKD/KRW) | 1,539,500 (USD base + HKD fuel + KRW other) | 동일 |
+| TC-364-04 | 기타부가운임 2행 | 행별 환산(15,000+50,000), 합계 65,000 | 동일 |
+| TC-364-05 | 환율 누락 | `MISSING_RATE:JPY` throw | 동일 |
+| TC-364-06 | A·B 경로 동일 결과 | A(기본 HKD 1,000·유류 45,000 KRW·급증 7,500 KRW)와 B(기본 1,000·유류 300·급증 50 HKD) 모두 `total_cost_krw=213000` | `tests/unit/finance/task-b364-cost-integration.test.ts` |
+| TC-364-07 | KRW 기본운임 저장 | `applied_exchange_rate=1`, `total_cost_krw=107000` | 동일 |
+| TC-364-08 | 기타부가운임 2행 저장 | 자식 2행 + 메인 `other_charges_hkd`=65,000 | 동일 |
+| TC-364-09 | 청구확정 모달 표시 합계 | 서버 preview `totalCostKrw`(213,000)와 화면 표시 일치, 클라이언트 `×1.07` 없음 | `tests/unit/components/billing-confirm-modal-preview.test.tsx` |
+| TC-364-RST | 되돌리기: 가산 계수 제거 | `(1+surchargeRate)`→`1` 원복 시 **5 failed / 3 passed** → 복구 8 passed | `actual-cost-compute.test.ts`, `task-b364-cost-integration.test.ts` |
+
+**회귀 검증 (2026-11-18, rebase 후)**: `npm run test:regression` **266 test files / 1,966 tests 전부 PASS**(B-365 포함). `npm run build` **EXIT=0**.
