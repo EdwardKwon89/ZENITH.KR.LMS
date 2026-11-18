@@ -89,22 +89,28 @@ describe('TASK-B-365 (Issue #1375): 오더정산 상태·원가 스냅샷 컬럼
       psql(`DELETE FROM public.zen_orders WHERE id='${settledId}'`);
     });
 
-    // DEF-B-158: `ON DELETE SET NULL`와 `SETTLED ⇒ settled_by NOT NULL` CHECK는 상호 모순이다.
-    // 정산자 프로필을 삭제하면 SET NULL이 CHECK를 위반해 DELETE가 실패한다(명세가 두 제약을
-    // 모두 확정 — 구현은 명세대로, 충돌은 DEF로 보고). 실제 삭제 시도는 하지 않는다.
-    it('TC-365-4b: FK는 ON DELETE SET NULL, CHECK는 SETTLED ⇒ at/by NOT NULL (DEF-B-158 충돌 명세 확인)', () => {
-      const fk = psql(
-        `SELECT pg_get_constraintdef(oid) FROM pg_constraint
-         WHERE conrelid='zen_orders'::regclass AND conname='zen_orders_cost_settled_by_fkey'`
+    // DEF-B-158: (A)안 확정(2026-11-18 Jaison) — FK는 ON DELETE RESTRICT, CHECK는
+    // SETTLED ⇒ at/by NOT NULL. 정산자 프로필을 실제로 DELETE해 FK 위반이 나는지 검증한다.
+    it('TC-365-4b: 정산자 프로필 DELETE → FK RESTRICT로 거부, 행 불변 (DEF-B-158 (A)안)', () => {
+      // TC-365-4와 별개의 SETTLED 오더 + 전용 정산자 프로필
+      const settlerId = randomUUID();
+      const settledId = randomUUID();
+      psql(`INSERT INTO public.zen_profiles (id, org_id, email, role, created_at) VALUES ('${settlerId}', '${ORG_ID}', 'b365-settler-${settlerId.substring(0, 8)}@test.com', 'ADMIN', NOW())`);
+      psql(
+        `INSERT INTO public.zen_orders (id, order_no, cargo_details, transport_mode, cost_settlement_status, cost_settled_at, cost_settled_by)
+         VALUES ('${settledId}', 'ZEN-B365-RESTR-${settledId.substring(0, 8)}', '{}'::jsonb, 'UPS', 'SETTLED', NOW(), '${settlerId}')`
       );
-      expect(fk).toContain('ON DELETE SET NULL');
 
-      const chk = psql(
-        `SELECT pg_get_constraintdef(oid) FROM pg_constraint
-         WHERE conrelid='zen_orders'::regclass AND conname='zen_orders_cost_settled_complete_check'`
-      );
-      expect(chk).toContain('cost_settled_at IS NOT NULL');
-      expect(chk).toContain('cost_settled_by IS NOT NULL');
+      const err = psqlErr(`DELETE FROM public.zen_profiles WHERE id='${settlerId}'`);
+      expect(err).toContain('zen_orders_cost_settled_by_fkey');
+
+      // 거부 후 프로필·오더 모두 그대로인지 확인
+      expect(psql(`SELECT count(*) FROM public.zen_profiles WHERE id='${settlerId}'`)).toBe('1');
+      expect(psql(`SELECT cost_settled_by FROM public.zen_orders WHERE id='${settledId}'`)).toBe(settlerId);
+
+      // 정리: 오더 먼저 삭제하면 프로필 삭제 가능
+      psql(`DELETE FROM public.zen_orders WHERE id='${settledId}'`);
+      psql(`DELETE FROM public.zen_profiles WHERE id='${settlerId}'`);
     });
 
     it('TC-365-5: 부분 인덱스 idx_zen_orders_cost_settlement 존재 (pg_indexes, UPS 조건부)', () => {

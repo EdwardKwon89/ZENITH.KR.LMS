@@ -26,10 +26,10 @@ ALTER TABLE public.zen_orders ADD CONSTRAINT zen_orders_cost_settled_complete_ch
     OR (cost_settled_at IS NOT NULL AND cost_settled_by IS NOT NULL)
   );
 
--- 정산자 FK (프로필 삭제 시 SET NULL)
+-- 정산자 FK (감사 필수값 — 정산 이력 있는 프로필 하드 삭제 차단. DEF-B-158: (A)안 확정)
 ALTER TABLE public.zen_orders DROP CONSTRAINT IF EXISTS zen_orders_cost_settled_by_fkey;
 ALTER TABLE public.zen_orders ADD CONSTRAINT zen_orders_cost_settled_by_fkey
-  FOREIGN KEY (cost_settled_by) REFERENCES public.zen_profiles (id) ON DELETE SET NULL;
+  FOREIGN KEY (cost_settled_by) REFERENCES public.zen_profiles (id) ON DELETE RESTRICT;
 
 -- 부분 인덱스: UPS 오더 정산 현황 조회용
 CREATE INDEX IF NOT EXISTS idx_zen_orders_cost_settlement
@@ -38,7 +38,7 @@ CREATE INDEX IF NOT EXISTS idx_zen_orders_cost_settlement
 
 COMMENT ON COLUMN public.zen_orders.cost_settlement_status IS '오더정산 상태 (NOT_SETTLED 기본 / SETTLED). SETTLED면 cost_settled_at·cost_settled_by 필수';
 COMMENT ON COLUMN public.zen_orders.cost_settled_at IS '오더정산 완료 시각 (SETTLED 시점)';
-COMMENT ON COLUMN public.zen_orders.cost_settled_by IS '오더정산 완료 처리자 (zen_profiles.id, 프로필 삭제 시 NULL)';
+COMMENT ON COLUMN public.zen_orders.cost_settled_by IS '오더정산 완료 처리자 (zen_profiles.id, FK ON DELETE RESTRICT — 정산 이력 있는 프로필은 삭제 불가)';
 COMMENT ON INDEX public.idx_zen_orders_cost_settlement IS 'TASK-B-365: UPS 오더 정산 상태 부분 인덱스';
 
 -- ============================================================
