@@ -2250,3 +2250,18 @@ UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류
 - **관련 파일**: `src/app/actions/finance/ups-actual-cost.ts`, `supabase/migrations/`(트리거 도입 시), `tests/integration/task-b366-cost-settlement.test.ts`
 - **예상 공수**: 0.3~0.5 MD (트리거 또는 조건부 UPDATE + RLS 테스트)
 - **우선순위**: Low~Medium — 금전 정합성 방어선 보강
+
+---
+
+## [IMP-199] 청구서 DB 카운터 GRANT 최소화 + 발행 합계 검증·CLOSED 후 불변 컬럼 검토 (PR #1397 비차단 리뷰 항목)
+
+- **발견 경위**: 2026-11-19 TASK-B-359(#1365) PR #1397의 Jaison 검토에서 비차단 항목으로 지적된 4건.
+- **현재 상태**:
+  1. `zen_billing_statement_seq`에 `GRANT ALL ... TO authenticated`가 남아 있음 — RLS(정책 0개)로 실해는 없으나 최소권한 원칙에 어긋남 (`REVOKE ALL ... TO authenticated` 정리 권장).
+  2. 헤더 `total_amount`와 항목 `SUM(line_total)` 일치가 DB에서 강제되지 않음 — 발행 시 트리거에서 합계 검증(불일치 시 거부)을 검토.
+  3. CLOSED 후 `paid_date`·`closed_at` 변경 가능(금액 `paid_amount`는 조건 3 CHECK로 고정) — 발행 후 불변 컬럼 목록 포함 여부 검토.
+  4. `statement_no` 직접 지정 가능 — 수정 1(DRAFT 한정 INSERT)·형식 CHECK·UNIQUE로 실위험이 낮아 허용됨(현상 기록용).
+- **목표 구현**: ① GRANT REVOKE 정리(마이그레이션), ② 발행 트리거 내 합계 검증 + 테스트, ③ CLOSED 후 감사 컬럼 불변화 여부 결정·반영.
+- **관련 파일**: `supabase/migrations/20261119090000_task_b359_billing_statement_db.sql`, `tests/unit/migrations/taskb359-billing-statement-db.test.ts`
+- **예상 공수**: 0.5 MD
+- **우선순위**: Medium — ②는 금전 합계 무결성, ③은 경미, ①은 방어적 위생
