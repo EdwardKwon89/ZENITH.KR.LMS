@@ -11,9 +11,9 @@
 ## 📊 실측 Vitest 회귀 스위트 현황 (자동 집계)
 
 - **스캔 범위**: `tests/**/*.{test,spec}.{ts,tsx}` (`tests/e2e/**`, `tests/poc-*/**` 제외 — `vitest.config.ts` 기준)
-- **실측 테스트 파일 수**: **264개**
-- **실측 테스트 케이스 수 (`it`/`test` 블록)**: **1,890건**
-- **신규 구조 등재 Task 수**: **1건**
+- **실측 테스트 파일 수**: **268개**
+- **실측 테스트 케이스 수 (`it`/`test` 블록)**: **1,933건**
+- **신규 구조 등재 Task 수**: **5건**
 
 ---
 
@@ -33,6 +33,10 @@
 <!-- LRTM_ITEMS_START -->
 | Task | Issue | 팀 | 작성일 | 케이스 수 | 테스트 파일 | 차원(231) | 상세 |
 |:---|:---:|:---:|:---:|---:|:---|:---:|:---:|
+| **TASK-1167** | #1389 | Team A | 2026-11-19 | 4건 | `tests/integration/task-1167-calculate-order-costs-security.test.ts` | D1, D3 | [상세](./regression-items/TASK-1167_Issue1389_calculate-order-costs-security.md) |
+| **TASK-1166** | #1386 | Team A | 2026-11-18 | 19건 | `tests/unit/migrations/task1166-def153-rate-cards-rls.test.ts` | D3, D5 | [상세](./regression-items/TASK-1166_Issue1386_rate-cards-rls.md) |
+| **TASK-1161** | #1347 | Team A | 2026-11-18 | 7건 | `tests/integration/p6-transport-policy.test.ts`, `tests/integration/tracking-business-qa.test.ts`, `tests/integration/helpers/db.test.ts` | D1, D5, D6 | [상세](./regression-items/TASK-1161_Issue1347_db-fixture-helper.md) |
+| **TASK-1158** | #1344 | Team A | 2026-11-18 | 8건 | `tests/unit/scripts/next-number-scripts.test.ts` | D1, D6 | [상세](./regression-items/TASK-1158_Issue1344_next-number-issue-scan.md) |
 | **TASK-1150** | #1309 | Team A | 2026-11-18 | 5건 | `tests/unit/scripts/lrtm-sync.test.ts` | D1, D6 | [상세](./regression-items/TASK-1150_Issue1309_lrtm-sync.md) |
 <!-- LRTM_ITEMS_END -->
 
