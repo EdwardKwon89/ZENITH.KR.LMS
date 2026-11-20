@@ -5630,6 +5630,44 @@ export type Database = {
           },
         ]
       }
+      zen_rate_cards_safe: {
+        Row: {
+          carrier_id: string | null
+          created_at: string | null
+          currency: string | null
+          dest_port_id: string | null
+          id: string | null
+          is_active: boolean | null
+          origin_port_id: string | null
+          tiers: Json | null
+          transport_mode: string | null
+          valid_from: string | null
+          valid_until: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "zen_rate_cards_carrier_id_fkey"
+            columns: ["carrier_id"]
+            isOneToOne: false
+            referencedRelation: "zen_carriers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "zen_rate_cards_dest_port_id_fkey"
+            columns: ["dest_port_id"]
+            isOneToOne: false
+            referencedRelation: "zen_ports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "zen_rate_cards_origin_port_id_fkey"
+            columns: ["origin_port_id"]
+            isOneToOne: false
+            referencedRelation: "zen_ports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       approve_organization: { Args: { target_org_id: string }; Returns: string }

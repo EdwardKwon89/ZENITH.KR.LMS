@@ -122,7 +122,7 @@ describe('TC-R.4: getRouteOptions — 3종 옵션 생성 및 UPSERT 정책', () 
         handler.then = (resolve: any) => resolve({ data: mockRoutes, error: null });
         return handler;
       }
-      if (table === 'zen_rate_cards') {
+      if (table === 'zen_rate_cards_safe') {
         return {
           select: vi.fn().mockReturnThis(),
           eq: vi.fn().mockReturnThis(),
@@ -410,7 +410,7 @@ describe('TC-R.8: Hub 경로 탐색 — DatabaseRouteAdapter.appendHubRoutes', (
       if (table === 'zen_order_packages') {
         return { select: vi.fn().mockReturnThis(), eq: vi.fn().mockResolvedValue({ data: [], error: null }) };
       }
-      if (table === 'zen_rate_cards') {
+      if (table === 'zen_rate_cards_safe') {
         return {
           select: vi.fn().mockReturnThis(),
           eq: vi.fn().mockReturnThis(),

@@ -36,7 +36,7 @@ function createSupabase(routeNetworkResult?: QueryResult, rateCardResult?: Query
   const mock: any = { from: vi.fn() };
   mock.from.mockImplementation((table: string) => {
     if (table === 'zen_route_network') return createQueryHandler(routeNetworkResult ?? { data: [], error: null });
-    if (table === 'zen_rate_cards') return createQueryHandler(rateCardResult ?? { data: null, error: null });
+    if (table === 'zen_rate_cards_safe') return createQueryHandler(rateCardResult ?? { data: null, error: null });
     throw new Error(`unexpected table: ${table}`);
   });
   return mock;

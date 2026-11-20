@@ -27,7 +27,7 @@ describe('TC-R-09: Rate Card Port-Based Matching', () => {
     const matcher = new TISARateMatcher(mockSupabase as any);
     await matcher.matchRateCard('carrier-1', 'AIR' as any, 'port-icn');
 
-    expect(mockSupabase.from).toHaveBeenCalledWith('zen_rate_cards');
+    expect(mockSupabase.from).toHaveBeenCalledWith('zen_rate_cards_safe');
     expect(queryChain.eq).toHaveBeenCalledWith('carrier_id', 'carrier-1');
     expect(queryChain.eq).toHaveBeenCalledWith('transport_mode', 'AIR');
     expect(queryChain.eq).toHaveBeenCalledWith('is_active', true);

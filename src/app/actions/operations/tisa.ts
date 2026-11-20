@@ -2,6 +2,7 @@
 
 import { logger } from "@/lib/logger";
 import { validateUserAction, checkPermission } from "@/lib/auth/guards";
+import { createAdminClient } from "@/utils/supabase/server";
 
 export interface TisaSnapshotResult {
   id: string;
@@ -54,7 +55,7 @@ export async function getOrderRateSnapshot(orderId: string): Promise<TisaSnapsho
     // 2. Resolve rate card metadata (version_no, priority, valid_from, valid_to)
     const { data: rateCard } = snapshot.rate_card_id
       ? await supabase
-          .from("zen_rate_cards")
+          .from("zen_rate_cards_safe")
           .select("valid_from, valid_until")
           .eq("id", snapshot.rate_card_id)
           .maybeSingle()
@@ -110,9 +111,9 @@ export async function getOrderRateSnapshot(orderId: string): Promise<TisaSnapsho
 
   // 5a. Route selected but no snapshot — trigger auto-capture
   if (routeData?.selected_option_id) {
-    let { data: orderData } = await supabase
+    const { data: orderData } = await supabase
       .from("zen_orders")
-      .select("carrier_id, origin_port_id, dest_port_id, shipper_id, created_at, transport_mode")
+      .select("carrier_id, origin_port_id, dest_port_id, shipper_id, agency_org_id, created_at, transport_mode")
       .eq("id", orderId)
       .maybeSingle();
 
@@ -135,8 +136,20 @@ export async function getOrderRateSnapshot(orderId: string): Promise<TisaSnapsho
     }
 
     if (orderData) {
-      // Call fn_get_best_matching_rate via rpc
-      const { data: rateResult } = await supabase.rpc("fn_get_best_matching_rate", {
+      // Aiden 확정 조건 ①: service_role 로 RPC/INSERT 를 수행하기 전에
+      // 호출자의 역할·소유(화주 org / 배정 대리점)를 서버에서 명시 검증한다.
+      const isShipperOrgMember = !!profile.org_id && orderData.shipper_id === profile.org_id;
+      const isAgencyStakeholder = !!profile.org_id && orderData.agency_org_id === profile.org_id;
+      if (!isAdmin && !isShipperOrgMember && !isAgencyStakeholder) {
+        logger.warn(`[TISA] rate snapshot auto-capture denied: order=${orderId} user=${profile.id}`);
+        return null;
+      }
+
+      // fn_get_best_matching_rate 는 SECURITY INVOKER 라서 화주 세션에서는
+      // base 테이블 RLS(0행)로 매칭이 불가능하다. 위에서 접근 권한을 검증했으므로
+      // RPC 실행과 스냅샷 기록만 service_role 클라이언트로 수행한다.
+      const adminClient = await createAdminClient();
+      const { data: rateResult } = await adminClient.rpc("fn_get_best_matching_rate", {
         p_carrier_id: orderData.carrier_id,
         p_origin_port: orderData.origin_port_id,
         p_dest_port: orderData.dest_port_id,
@@ -148,8 +161,9 @@ export async function getOrderRateSnapshot(orderId: string): Promise<TisaSnapsho
       if (rateResult && rateResult.length > 0) {
         const match = rateResult[0] as any;
 
-        // Insert snapshot
-        const { data: inserted } = await supabase
+        // RPC 반환에는 carrier_cost 가 포함되지만, 응답(result)에는 관리자에게만
+        // 노출한다(비관리자 경로에서는 어떤 필드로도 반환하지 않는다).
+        const { data: inserted } = await adminClient
           .from("zen_order_rate_snapshots")
           .insert({
             order_id: orderId,

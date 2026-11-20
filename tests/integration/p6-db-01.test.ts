@@ -133,7 +133,7 @@ describe('TC-P6-DB-01: Phase 6 DB 스키마 연동 통합 테스트', () => {
     expect(result.error).toBeNull();
     expect(result.data).toBeDefined();
     expect(supabase.from).toHaveBeenCalledWith('zen_ports');
-    expect(supabase.from).toHaveBeenCalledWith('zen_rate_cards');
+    expect(supabase.from).toHaveBeenCalledWith('zen_rate_cards_safe');
     expect(supabase.from).toHaveBeenCalledWith('zen_customs_rates');
     expect(supabase.from).toHaveBeenCalledWith('zen_delivery_rates');
   });
