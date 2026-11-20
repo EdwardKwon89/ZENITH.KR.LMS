@@ -164,5 +164,15 @@
 - **오류**: 오더 미존재(`order_not_found`, `L852-855`), 비UPS 오더(`not_ups_order`, `L856`), `DELIVERED` 아님(`ups_actual_cost_status_invalid`, `L857-860`), 이미 정산됨(`already_settled`, `L861-864`), 컷오버일 이전 오더(`legacy_invoiced_order`, `L865-868` — 기준일은 #1369에서 확정, 현재 항상 false인 stub), 원가 미입력(`cost_not_entered`, `L870-874`), 기존 오더별 인보이스 존재(`legacy_invoiced_order`, `L876-884` — 이중청구 방지), 조건부 UPDATE 영향 행 0건(`already_settled`, `L886-899` — 동시 요청 중 1건만 성공)
 - **부수효과**: `zen_orders` 조건부 UPDATE(`WHERE id=$1 AND cost_settlement_status='NOT_SETTLED'`), `revalidatePath(\`/(dashboard)/orders/\${orderId}\`, 'page')`·`revalidatePath('/admin/ups-actual-charges')` (`L902-903`)
 
+#### unmarkOrderCostSettled(orderId)
+- **Path**: `src/app/actions/finance/ups-actual-cost.ts:925-971`
+- **설명**: UPS 오더의 오더정산을 되돌립니다(TASK-B-367 / Issue #1377). `cost_settlement_status`를 `NOT_SETTLED`로, `cost_settled_at`·`cost_settled_by`를 `NULL`로 복원합니다. **`zen_billing_statement_items`에 해당 오더가 하나라도 있으면(tier 무관, `order_id` 기준) 청구서 취소가 선행되어야 하며 `statement_includes_order`로 거부합니다.** user-session client(`validateUserAction().supabase`)만 사용해 RLS를 우회하지 않습니다.
+- **권한**: `validateUserAction()` + `assertAdmin(profile)` (동일 파일 `L102-109`: `ADMIN_ROLES` = `ZENITH_SUPER_ADMIN`·`ADMIN`·`MANAGER`만 허용, 호출 `L927-929`)
+- **Input**: `orderId: string`
+- **Output**: `Promise<{ success: boolean, error?: string }>` (`L925`)
+- **오류**: 권한 불충족(`permission_denied`, `L927-929`), 오더 미존재(`order_not_found`, `L932-935`), 정산 상태가 `SETTLED`가 아님(`not_found`, `L936-939`), **청구서 항목 조회 실패는 `generic{STATEMENT_ITEM_LOOKUP}`로 실패 처리(청구서 없음으로 오인 금지 — #1396 수정 1 동일 원칙, `L943-946`)**, 청구서 포함 오더(`statement_includes_order`, `L947-950`), 조건부 UPDATE 실패(`generic{UNMARK_UPDATE}`, `L956-959`), 조건부 UPDATE 영향 행 0건(동시 되돌리기 경합, `not_found`, `L960-963`), 예외 시 `logger.error` + `generic{UNEXPECTED}` (`L967-970`). 실패 분기마다 `logger.warn`/`logger.error`가 원본 오류와 함께 기록됩니다.
+- **부수효과**: `zen_orders` 조건부 UPDATE(`WHERE id=$1 AND cost_settlement_status='SETTLED'`, 영향 행 0이면 실패), `revalidatePath(\`/(dashboard)/orders/\${orderId}\`, 'page')`·`revalidatePath('/admin/ups-actual-charges')` (`L964-965`)
+- **제약**: "청구서 포함 확인 → UPDATE" 사이에 항목이 삽입될 수 있는 TOCTOU 경합은 **DB 트리거 방어를 IMP로 건의**(R-15 — IMP-198에 덧붙이지 않고 신규 번호 부여). 본 Task에서는 DB 마이그레이션을 추가하지 않습니다.
+
 ---
 

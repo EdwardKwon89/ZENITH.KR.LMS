@@ -34,6 +34,13 @@
 ### getOrderDetails(orderId)
 - **설명**: 특정 오더의 상세 정보 및 패킹/아이템 리스트 조회
 
+### updateOrder(orderId, payload)
+- **Path**: `src/app/actions/operations/orders.ts:241` (`src/app/actions/orders.ts`는 re-export 한 줄)
+- **설명**: 기존 오더를 수정하고 인벤토리를 재조정합니다. **TASK-B-367(#1377)부터 오더정산 완료(`cost_settlement_status='SETTLED'`) 오더는 중량·치수(패키지별 `length`·`width`·`height`·`gross_weight`, 패키지 수) 수정이 `cost_settled_locked`로 차단됩니다.** 비중량 필드(화주·수하인·배송정보 등)만 수정하면 통과합니다.
+- **가드 위치·근거**: `getOrderEditScope`가 상태를 제한하지만 DELIVERED에서 도달 가능한 `RETURNED`/`CLAIMED`/`HELD`/`REGISTERED`/`SCHEDULED`/`WAREHOUSED(UPS)`는 `editable=true`이므로 상태 가드만으로는 SETTLED 오더의 화물 수정이 가능합니다. `src/lib/orders/settled-cargo-guard.ts`의 `assertSettledCargoEditAllowed`를 오더 조회 직후·모든 쓰기 전에 호출(1~3줄)해 차단합니다(상태 전이표 전수 결과는 TASK-B-367 task file §1-2 참조).
+- **권한**: `validateUserAction()` (로그인 세션). 기존 서버 가드(`getOrderEditScope`, UPS 활성 라벨, 실측 낙관적 동시성)는 그대로 유지됩니다.
+- **오류**: 상태 부적합(`order_edit_status_invalid`), **정산 완료 오더의 화물 수정(`cost_settled_locked`, `src/lib/orders/settled-cargo-guard.ts:29`)**, UPS 활성 라벨 존재, 실측값 stale(`measurements_stale`) 등 기존 오류 유지.
+
 ### updateOrderStatus(orderId, newStatus)
 - **설명**: 상태 머신(Status Machine) 규칙에 따른 오더 상태 변경
 - **Validation**: `canChangeStatus` 로직 통과 필수

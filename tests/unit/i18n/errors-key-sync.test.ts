@@ -35,7 +35,7 @@ describe('Errors 네임스페이스 로케일 키 동기화 (TASK-B-350)', () =>
   const baseline = errorsOf(loadMessages(BASELINE));
   const baselineKeys = Object.keys(baseline).sort();
 
-  it('ko 기준 키가 94개이고 모두 비어 있지 않은 문자열이다', () => {
+  it('ko 기준 키가 95개이고 모두 비어 있지 않은 문자열이다', () => {
     expect(baselineKeys).toEqual([
       'agency_org_missing',
       'already_delivered',
@@ -114,6 +114,7 @@ describe('Errors 네임스페이스 로케일 키 동기화 (TASK-B-350)', () =>
       'shxk_generic',
       'shxk_required_missing',
       'shxk_validation_failed',
+      'statement_includes_order',
       'status_cancel_inbound',
       'status_change_denied',
       'status_departure_cancel',

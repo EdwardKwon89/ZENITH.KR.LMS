@@ -93,7 +93,8 @@
     "cost_not_entered": "실제 원가를 먼저 입력해야 합니다.",
     "already_settled": "이미 오더정산이 완료되었습니다.",
     "cost_settled_locked": "오더정산이 완료된 오더는 원가·중량을 수정할 수 없습니다. 먼저 정산을 해제하세요.",
-    "legacy_invoiced_order": "기존 오더별 인보이스가 발행된 오더입니다. 신규 정산 대상이 아닙니다."
+    "legacy_invoiced_order": "기존 오더별 인보이스가 발행된 오더입니다. 신규 정산 대상이 아닙니다.",
+    "statement_includes_order": "이 오더는 청구서에 포함되어 정산을 해제할 수 없습니다. 먼저 청구서를 취소하세요."
   },
   "Common": {
     "phoneHelp": "숫자만 입력 (하이픈 제외, 최대 {max}자리)",
