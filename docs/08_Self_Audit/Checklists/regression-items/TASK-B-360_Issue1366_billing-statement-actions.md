@@ -30,7 +30,25 @@
 | TC-360-17 | 수기 화주명 자동완성 — 대리점 한정 | 대리점 집계 정상, Admin 호출은 `adhoc_requires_agency` 거부 | 동일 | CI (vitest) |
 | TC-360-18 | 비소속 대상 거부 | 소속 링크 없는 화주 org → `target_not_allowed` | 동일 | CI (vitest) |
 
-**회귀 검증 (2026-11-21)**: `npx vitest run tests/integration/task-b360-billing-statements.test.ts` **18/18 PASS (2회 연속 — 멱등성 확인)** · `supabase db reset --yes` 통과(마이그레이션 `20261120090000`, 번호 충돌 0) · `npm run check:ds11` OK.
-**되돌리기 검증 (테스트 유효성)**: 통합 생성 RPC `DROP` → suite 전체 FAIL → `supabase db reset` 복구 → 18/18 PASS (PR 본문에 상세 기재).
+
+| TC-360-19 | `ADMIN_TO_AGENCY`: `metadata.agency`와 `platform` 금액이 다른 오더 → **agency 값** 단언 (80,000/16,000/4,000/800, `line_total`=100,800, 헤더 합계 일치) | 조건 4 2차 실측 정정분이 실제 RPC 경로에서 검증됨 | `tests/integration/task-b360-billing-statements.test.ts` | CI (vitest) |
+| TC-360-20 | `ADMIN_TO_AGENCY`: `metadata.agency` 없는 오더 → **platform 폴백** (100,000/126,000, `chargeWeightKg=7`) | 폴백 분기 검증 | 동일 | CI (vitest) |
+| TC-360-21 | `ADMIN_TO_SHIPPER`: Admin 발행 tier 서버 도출 + `shipper_id` 불일치 오더 거부 | tier=`ADMIN_TO_SHIPPER`, 불일치는 `order_not_eligible` + 헤더 잔존 1건(부분 저장 없음) | 동일 | CI (vitest) |
+| TC-360-22 | RPC `agency_org_id` 자격 검증 | 대상≠오더 소속 → `order_not_eligible` + 해당 월 헤더 0건 | 동일 | CI (vitest) |
+| TC-360-23 | ADHOC 생성 성공(대리점) + 비대리점 발행자 거부 | `ADHOC\|AGENCY_TO_SHIPPER` 헤더 생성 / Admin은 `adhoc_requires_agency` | 동일 | CI (vitest) |
+| TC-360-24 | 통화 가드 (조건 4b) | 비 KRW 매출 → `unsupported_cost_currency` 전용 Errors 키 + **헤더 잔존 0**(트랜잭션 롤백) | 동일 | CI (vitest) |
+| TC-360-25~26 | **TOCTOU — 조건부 술어 rowCount authority** | 분류 통과 후 UPDATE/DELETE가 0건이면 오류 반환(`rowCount=0` 로그) — 조건부 술어·rowCount 처리 제거 시 **FAIL** | `tests/unit/finance/task-b360-billable-limits.test.ts` | CI (vitest) |
+| TC-360-27~28 | **상한 신호 (truncated)** | 오더 500건/수기 화주 1,000건 도달 시 `truncated=true` + `logger.warn`, 미만이면 `false` | 동일 | CI (vitest) |
+| TC-360-29 | `paidAt` 형식 검증 + `orderIds` 중복 제거 | `YYYY-MM-DD` 아니면 generic 거부(UPDATE 미도달), 중복 id는 Set으로 제거 후 RPC에 전달 | 동일 | CI (vitest) |
+
+**회귀 검증 (2026-11-21, PR #1404 검토 반영 후)**: 통합 **24/24** + 단위 **8/8** = **32/32 PASS** · `npm run test:regression` 전체 PASS · `supabase db reset --yes` 통과(마이그레이션 `20261120090000`, 번호 충돌 0) · `check:ds11`·`check:lrtm` OK · **전체 29개 함수 50줄 초과 0개** · `tsc` 내 파일 오류 0건.
+**되돌리기 검증 (조건별, PR 본문 표에 상세 기재)**:
+| 조건 | 되돌리기 내용 | 결과 |
+|:--|:--|:--|
+| ① | `billing_items_amounts`의 `metadata.agency` 분기 제거(platform만 사용) | **FAIL** (80,000→100,000으로 대체됨) |
+| ② | `cancel/issue/confirm`의 조건부 술어(`.eq('status',…)`) + `rowCount=0` 처리 제거 | **FAIL** (TOCTOU 2건 — 분류 통과 후 0건인데 성공 반환) |
+| ③ | `confirmStatementPayment`의 금액 불일치 검사 제거 | **PASS (24/24+8/8)** — DB CHECK `zen_billing_statements_paid_check`가 **이중 방어** |
+| ④ | RPC의 `agency_org_id` 자격 검증 제거 | **FAIL** (소속 불일치 오더 통과) |
+| (참고) | 통합 RPC 2종 `DROP` | suite 전체 FAIL → `supabase db reset` 복구 → 32/32 PASS |
 **구현 중 발견·해정**: ① `zen_billing_statement_items`→헤더 FK가 2개(단일·복합)라 PostgREST embed 모호 → 상세는 복수 쿼리로 조회 ② `zen_profiles.email` UNIQUE + 고정 prefix가 이전 실행 잔여물과 충돌해 `on_auth_user_created`가 조용히 실패 → 랜덤 suffix + purge(참조 FK 순서대로) ③ ORG 대상 필터 누락 실버그 → `shipper_id`/`agency_org_id` 조건 적용.
 **주의 (R-09 v3.10)**: 회귀 맵 단일 파일에 `## N.` 추가 금지 — 본 파일이 등재 단위.

@@ -47,9 +47,15 @@ const ORDER_CONC = '36000000-0000-4000-8000-000000000016';      // 동시 생성
 const ORDER_LIST = '36000000-0000-4000-8000-000000000017';      // 후보 조회 (정상 → 포함 후 제외)
 const ORDER_OTHER = '36000000-0000-4000-8000-000000000018';     // 타 대리점 발행분 (후보 제외)
 const ORDER_ADHOC = '36000000-0000-4000-8000-000000000019';     // 수기 화주 (shipper_id = 발행 대리점)
+const ORDER_A2A = '36000000-0000-4000-8000-00000000001A';        // Admin→대리점 (agency≠platform 금액)
+const ORDER_PLAT = '36000000-0000-4000-8000-00000000001B';       // metadata.agency 없음 → platform 폴백
+const ORDER_A2S = '36000000-0000-4000-8000-00000000001C';        // Admin→화주 (agency_org_id NULL)
+const ORDER_MISMATCH = '36000000-0000-4000-8000-00000000001D';   // shipper_id ≠ 청구 대상
+const ORDER_USD = '36000000-0000-4000-8000-00000000001E';        // 비 KRW 매출 → 통화 가드
 const ALL_ORDERS = [
   ORDER_RLS, ORDER_ST1, ORDER_ST2, ORDER_PAY, ORDER_UNSETTLED,
   ORDER_CONC, ORDER_LIST, ORDER_OTHER, ORDER_ADHOC,
+  ORDER_A2A, ORDER_PLAT, ORDER_A2S, ORDER_MISMATCH, ORDER_USD,
 ];
 
 /** 현재 서버 액션 호출 주체를 해당 identity의 authenticated 세션으로 전환한다. */
@@ -63,6 +69,7 @@ function asUser(identity: Identity) {
 
 function seedOrder(id: string, opts: {
   shipperOrg: string; agencyOrg?: string | null; settled: boolean; shipperName?: string;
+  platformOnly?: boolean; usd?: boolean;
 }) {
   const settled = opts.settled
     ? `'SETTLED', now(), '${admin.userId}'`
@@ -85,14 +92,18 @@ function seedOrder(id: string, opts: {
     INSERT INTO public.zen_order_rate_snapshots
       (id, order_id, applied_unit_price, applied_currency, applied_rule, metadata, snapshot_at)
     VALUES (gen_random_uuid(), '${id}', 1000, 'KRW', 'TEST',
-            '{"platform":{"billingWeightKg":5,"chargeableWeightKg":4.78,"baseSellingPrice":100000,"fuelSurchargeSellingAmount":20000,"surgeFeeSellingAmount":5000,"otherChargesSellingTotal":1000,"currency":"KRW"},
-              "agency":{"baseSellingPrice":80000,"fuelSurchargeSellingAmount":16000,"surgeFeeSellingAmount":4000,"otherChargesSellingTotal":800,"agencyCostPrice":100800}}'::jsonb, now())
+            (CASE WHEN ${opts.platformOnly ? 'true' : 'false'} THEN
+              '{"platform":{"billingWeightKg":7,"chargeableWeightKg":6.5,"baseSellingPrice":100000,"fuelSurchargeSellingAmount":20000,"surgeFeeSellingAmount":5000,"otherChargesSellingTotal":1000,"currency":"KRW"}}'
+            ELSE
+              '{"platform":{"billingWeightKg":5,"chargeableWeightKg":4.78,"baseSellingPrice":100000,"fuelSurchargeSellingAmount":20000,"surgeFeeSellingAmount":5000,"otherChargesSellingTotal":1000,"currency":"KRW"},
+                "agency":{"baseSellingPrice":80000,"fuelSurchargeSellingAmount":16000,"surgeFeeSellingAmount":4000,"otherChargesSellingTotal":800,"agencyCostPrice":100800}}'
+            END)::jsonb, now())
     ON CONFLICT (order_id) DO UPDATE SET metadata = EXCLUDED.metadata;
     INSERT INTO public.zen_order_costs (id, order_id, cost_type, unit_price, quantity, currency, is_revenue, created_at)
-    VALUES (gen_random_uuid(), '${id}', 'BASE_FREIGHT', 100000, 1, 'KRW', true, now()),
-          (gen_random_uuid(), '${id}', 'FUEL_SURCHARGE', 20000, 1, 'KRW', true, now()),
-          (gen_random_uuid(), '${id}', 'SURGE_FEE', 5000, 1, 'KRW', true, now()),
-          (gen_random_uuid(), '${id}', 'OTHER_CHARGE', 1000, 1, 'KRW', true, now())
+    VALUES (gen_random_uuid(), '${id}', 'BASE_FREIGHT', 100000, 1, '${opts.usd ? 'USD' : 'KRW'}', true, now()),
+          (gen_random_uuid(), '${id}', 'FUEL_SURCHARGE', 20000, 1, '${opts.usd ? 'USD' : 'KRW'}', true, now()),
+          (gen_random_uuid(), '${id}', 'SURGE_FEE', 5000, 1, '${opts.usd ? 'USD' : 'KRW'}', true, now()),
+          (gen_random_uuid(), '${id}', 'OTHER_CHARGE', 1000, 1, '${opts.usd ? 'USD' : 'KRW'}', true, now())
     ON CONFLICT DO NOTHING;
   `);
 }
@@ -166,6 +177,12 @@ beforeAll(async () => {
   seedOrder(ORDER_OTHER, { shipperOrg: shipper.orgId, agencyOrg: otherAgency.orgId, settled: true });
   // 수기 화주 오더: shipper_id = 발행 대리점 (An_17 §3-2 — agency_org_id는 NULL)
   seedOrder(ORDER_ADHOC, { shipperOrg: agency.orgId, agencyOrg: null, settled: true, shipperName: '  (주)ABC   Co ' });
+  // 금액 원천 검증용 (조건 4 — 2차 실측 정정분)
+  seedOrder(ORDER_A2A, { shipperOrg: shipper.orgId, agencyOrg: agency.orgId, settled: true });
+  seedOrder(ORDER_PLAT, { shipperOrg: shipper.orgId, agencyOrg: agency.orgId, settled: true, platformOnly: true });
+  seedOrder(ORDER_A2S, { shipperOrg: shipper.orgId, agencyOrg: null, settled: true });
+  seedOrder(ORDER_MISMATCH, { shipperOrg: stranger.orgId, agencyOrg: null, settled: true });
+  seedOrder(ORDER_USD, { shipperOrg: shipper.orgId, agencyOrg: agency.orgId, settled: true, usd: true });
 });
 
 afterAll(async () => {
@@ -505,5 +522,108 @@ describe('listBillableOrders / listAdhocShipperNames', () => {
     const res = await listBillableOrders({ ...RANGE, billedTarget: ORG_TARGET(stranger.orgId) });
     expect(res.success).toBe(false);
     expect(res.error).toBe('청구 대상이 내 소속이 아니거나 올바르지 않습니다.');
+  });
+});
+
+// ───────────────────────────────── 조건 4·티어 경로 (PR #1404 검토 보완)
+
+describe('티어별 금액 원천·ADHOC·통화 가드 (실제 RPC 호출)', () => {
+  it('ADMIN_TO_AGENCY: metadata.agency 금액이 platform과 다르면 agency 값을 쓴다 (조건 4 정정분)', async () => {
+    asUser(admin);
+    // platform=126000 / agency=100800 — 서로 다른 값
+    const res = await createBillingStatement({
+      billedTarget: ORG_TARGET(agency.orgId), year: 2026, month: 4, orderIds: [ORDER_A2A],
+    });
+    expect(res.success).toBe(true);
+
+    const row = psql(`SELECT i.base_freight || '|' || i.fuel_surcharge || '|' || i.surge_fee || '|' || i.other_charges
+                             || '|' || i.line_total || '|' || i.charge_weight_kg || '|' || s.tier
+                      FROM public.zen_billing_statement_items i
+                      JOIN public.zen_billing_statements s ON s.id = i.statement_id
+                      WHERE s.statement_no = '${res.statementNo}'`);
+    // agency 값(80000/16000/4000/800)이어야 하고 platform(100000/…)이 아니어야 한다
+    expect(row).toBe('80000.00|16000.00|4000.00|800.00|100800.00|5.00|ADMIN_TO_AGENCY');
+    // line_total = 4개 합 (불변식)
+    expect(80000 + 16000 + 4000 + 800).toBe(100800);
+
+    // 헤더 합계도 agency 값
+    expect(psql(`SELECT total_amount::text FROM public.zen_billing_statements WHERE statement_no='${res.statementNo}'`)).toBe('100800.00');
+  });
+
+  it('ADMIN_TO_AGENCY: metadata.agency가 없으면 platform 폴백을 쓴다', async () => {
+    asUser(admin);
+    const res = await createBillingStatement({
+      billedTarget: ORG_TARGET(agency.orgId), year: 2026, month: 3, orderIds: [ORDER_PLAT],
+    });
+    expect(res.success).toBe(true);
+    const row = psql(`SELECT i.base_freight || '|' || i.line_total || '|' || i.charge_weight_kg
+                      FROM public.zen_billing_statement_items i
+                      JOIN public.zen_billing_statements s ON s.id = i.statement_id
+                      WHERE s.statement_no = '${res.statementNo}'`);
+    // platform 값(100000/126000), 청구중량도 platform의 billingWeightKg=7
+    expect(row).toBe('100000.00|126000.00|7.00');
+  });
+
+  it('ADMIN_TO_SHIPPER: Admin 발행은 서버가 tier를 도출하고, shipper_id 불일치 오더는 거부한다', async () => {
+    asUser(admin);
+    // agency_org_id=NULL + shipper_id=청구 대상 → 정상
+    const ok = await createBillingStatement({
+      billedTarget: ORG_TARGET(shipper.orgId), year: 2026, month: 2, orderIds: [ORDER_A2S],
+    });
+    expect(ok.success).toBe(true);
+    expect(psql(`SELECT tier FROM public.zen_billing_statements WHERE statement_no='${ok.statementNo}'`)).toBe('ADMIN_TO_SHIPPER');
+
+    // shipper_id ≠ 청구 대상(stranger 소속) → 거부
+    const ng = await createBillingStatement({
+      billedTarget: ORG_TARGET(shipper.orgId), year: 2026, month: 2, orderIds: [ORDER_MISMATCH],
+    });
+    expect(ng.success).toBe(false);
+    expect(ng.error).toBe('정산이 완료되지 않았거나 청구 대상에 속하지 않은 오더가 포함되어 있습니다.');
+    // 부분 저장 없음 — 위 실패로 헤더가 추가로 남지 않는다
+    expect(psql(`SELECT count(*) FROM public.zen_billing_statements
+                 WHERE issuer_org_id='${admin.orgId}' AND period_month = 2`)).toBe('1');
+  });
+
+  it('ADHOC 생성은 대리점만 성공하고 비대리점 발행자는 거부한다', async () => {
+    asUser(agency);
+    const ok = await createBillingStatement({
+      billedTarget: { type: 'ADHOC', shipperName: '(주)abc co' }, year: 2026, month: 1, orderIds: [ORDER_ADHOC],
+    });
+    expect(ok.success).toBe(true);
+    expect(psql(`SELECT billed_party_type || '|' || tier FROM public.zen_billing_statements WHERE statement_no='${ok.statementNo}'`))
+      .toBe('ADHOC|AGENCY_TO_SHIPPER');
+
+    asUser(admin);
+    const ng = await createBillingStatement({
+      billedTarget: { type: 'ADHOC', shipperName: 'Anyone' }, year: 2026, month: 1, orderIds: [ORDER_A2S],
+    });
+    expect(ng.success).toBe(false);
+    expect(ng.error).toBe('수기 화주 청구는 대리점 계정만 가능합니다.');
+  });
+
+  it('ADMIN_TO_AGENCY: agency_org_id가 청구 대상과 다른 오더는 거부한다 (RPC 자격 검증)', async () => {
+    asUser(admin);
+    // ORDER_A2S는 agency_org_id=NULL — 대상은 ORG_ISSUER(AGENCY)라 소속 불일치
+    const res = await createBillingStatement({
+      billedTarget: ORG_TARGET(agency.orgId), year: 2025, month: 11, orderIds: [ORDER_A2S],
+    });
+    expect(res.success).toBe(false);
+    expect(res.error).toBe('정산이 완료되지 않았거나 청구 대상에 속하지 않은 오더가 포함되어 있습니다.');
+    expect(psql(`SELECT count(*) FROM public.zen_billing_statements WHERE period_year = 2025 AND period_month = 11`)).toBe('0');
+  });
+
+  it('통화 가드: 비 KRW 매출 행이 있으면 거부되고 헤더가 남지 않는다', async () => {
+    asUser(agency);
+    const before = Number(psql(`SELECT count(*) FROM public.zen_billing_statements WHERE issuer_org_id='${agency.orgId}'`));
+
+    const res = await createBillingStatement({
+      billedTarget: ORG_TARGET(shipper.orgId), year: 2025, month: 12, orderIds: [ORDER_USD],
+    });
+    expect(res.success).toBe(false);
+    expect(res.error).toBe('통화가 KRW가 아닌 매출 항목이 있어 청구서를 만들 수 없습니다. (원가 관리에서 통화를 확인해 주세요)');
+
+    // 헤더 잔존 0 (한 트랜잭션 롤백 — orphan 없음)
+    expect(Number(psql(`SELECT count(*) FROM public.zen_billing_statements WHERE issuer_org_id='${agency.orgId}'`))).toBe(before);
+    expect(psql(`SELECT count(*) FROM public.zen_billing_statements WHERE period_year = 2025 AND period_month = 12`)).toBe('0');
   });
 });

@@ -108,7 +108,8 @@
     "payment_amount_mismatch": "入金金额必须与账单金额一致。（仅支持全额）",
     "statement_empty": "没有订单的账单无法签发。",
     "statement_not_found": "找不到该账单。",
-    "target_not_allowed": "开账对象不属于您的范围或无效。"
+    "target_not_allowed": "开账对象不属于您的范围或无效。",
+    "unsupported_cost_currency": "存在非 KRW 的营收项目，无法生成账单。（请在成本管理中检查币种）"
   },
   "Common": {
     "phoneHelp": "仅限数字（不含连字符，最多 {max} 位）",

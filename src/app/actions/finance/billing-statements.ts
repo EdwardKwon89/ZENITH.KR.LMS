@@ -48,6 +48,8 @@ export interface BillableOrdersResult {
   total?: number;
   totalAmount?: number;
   excludedUnsettled?: number;
+  /** 상한(500) 도달 시 true — 일부 후보가 누락될 수 있음을 알린다 (조용한 누락 방지) */
+  truncated?: boolean;
   error?: string;
 }
 
@@ -125,6 +127,7 @@ const DB_ERROR_KEYS: Array<[RegExp, ErrorKey]> = [
   [/header_delete_forbidden|items_locked_after_issue|invalid_status_transition/, 'not_draft'],
   [/zen_billing_statements_paid_check/, 'payment_amount_mismatch'],
   [/header_not_found/, 'statement_not_found'],
+  [/unsupported_cost_currency/, 'unsupported_cost_currency'],
 ];
 
 /** 수기 화주명 정규화 — RPC `billed_key`의 ADHOC 규칙과 동일 (공백 압축·양끝 제거·소문자) */
@@ -201,6 +204,190 @@ function scopeOf(issuerOrgId: string, myOrgId: string, role: string): StatementL
 
 // ───────────────────────────────────────────── 1. 후보 조회 (WBS 4.1)
 
+/** 조회 상한 — 초과 시 조용히 통과시키지 않고 `truncated: true` 신호 (금전 영향 조용한 누락 방지) */
+const BILLABLE_ORDER_LIMIT = 500;
+const ADHOC_NAME_LIMIT = 1000;
+
+const BILLABLE_ORDER_FIELDS =
+  'id, order_no, status, cost_settlement_status, shipper_id, agency_org_id, shipper_name, shipper_biz_no, ' +
+  'shipper:zen_organizations!shipper_id(name), agency:zen_organizations!agency_org_id(name)';
+
+interface ResolvedTarget {
+  tier: string;
+  applyFilter: (q: any) => any;
+  adhocName?: string;
+  adhocBizNo?: string;
+}
+
+/** 대상 검증 + tier 도출(조건 3) — 발행자 소속 필터까지 함께 만든다. */
+async function resolveBillableTarget(
+  supabase: any,
+  ctx: ProfileCtx,
+  target: BillableTarget | undefined,
+): Promise<{ resolved: ResolvedTarget } | { error: string }> {
+  if (target?.type === 'ADHOC') {
+    if (ctx.orgType !== 'AGENCY') return { error: await trError('adhoc_requires_agency') };
+    if (!target.shipperName?.trim()) return { error: await trError('adhoc_name_required') };
+    return {
+      resolved: {
+        tier: deriveTier(ctx.orgType, null, true),
+        applyFilter: (q) => q.eq('shipper_id', ctx.orgId),
+        adhocName: target.shipperName,
+        adhocBizNo: target.bizNo,
+      },
+    };
+  }
+  if (target?.type !== 'ORG') return { error: await trError('target_not_allowed') };
+
+  const { data: tOrg, error } = await supabase
+    .from('zen_organizations').select('type, id').eq('id', target.orgId).maybeSingle();
+  if (error) {
+    logger.error('[resolveBillableTarget] target org lookup failed', error);
+    return { error: await trError('generic', { code: 'TARGET_LOOKUP' }) };
+  }
+  if (!tOrg) return { error: await trError('target_not_allowed') };
+
+  if (ctx.orgType === 'AGENCY') {
+    if (tOrg.type === 'AGENCY') return { error: await trError('target_not_allowed') };
+    const { data: link, error: lErr } = await supabase.from('zen_agency_shippers').select('id')
+      .eq('agency_org_id', ctx.orgId).eq('shipper_org_id', target.orgId).eq('is_active', true).maybeSingle();
+    if (lErr) {
+      logger.error('[resolveBillableTarget] agency link lookup failed', lErr);
+      return { error: await trError('generic', { code: 'LINK_LOOKUP' }) };
+    }
+    if (!link) return { error: await trError('target_not_allowed') };
+  }
+
+  const tier = deriveTier(ctx.orgType, tOrg.type, false);
+  // 대상 소속 필터 — RPC의 자격 검증과 동일해야 후보가 정확하다
+  const applyFilter =
+    tier === 'ADMIN_TO_AGENCY' ? (q: any) => q.eq('agency_org_id', target.orgId)
+    : ctx.orgType === 'AGENCY'  ? (q: any) => q.eq('shipper_id', target.orgId).eq('agency_org_id', ctx.orgId)
+    :                            (q: any) => q.eq('shipper_id', target.orgId);
+  return { resolved: { tier, applyFilter } };
+}
+
+/** 후보 오더 조회 — 상한 도달 시 `truncated` 신호, ADHOC은 정규화 일치(부분문자 아님)로 재검증 */
+async function fetchScopedOrders(
+  supabase: any,
+  target: ResolvedTarget,
+): Promise<{ orders: any[]; truncated: boolean } | { error: string }> {
+  let query = supabase.from('zen_orders')
+    .select(BILLABLE_ORDER_FIELDS)
+    .eq('transport_mode', 'UPS')
+    .eq('status', 'DELIVERED')
+    .order('created_at', { ascending: false })
+    .limit(BILLABLE_ORDER_LIMIT);
+  query = target.applyFilter(query);
+  const { data, error } = await query;
+  if (error) {
+    logger.error('[fetchScopedOrders] order lookup failed', error);
+    return { error: await trError('generic', { code: 'ORDER_LIST_LOOKUP' }) };
+  }
+
+  const all = data ?? [];
+  const truncated = all.length >= BILLABLE_ORDER_LIMIT;
+  if (truncated) {
+    logger.warn(`[fetchScopedOrders] limit ${BILLABLE_ORDER_LIMIT} reached — 후보가 상한에 걸려 일부가 누락될 수 있다`);
+  }
+  if (!target.adhocName) return { orders: all, truncated };
+
+  const norm = normalizeShipperName(target.adhocName);
+  const biz = target.adhocBizNo?.trim();
+  return {
+    orders: all.filter((o: any) =>
+      normalizeShipperName(String(o.shipper_name ?? '')) === norm &&
+      (!biz || String(o.shipper_biz_no ?? '') === biz)),
+    truncated,
+  };
+}
+
+/** 기준일 + 이미 포함된 오더 — 기간은 DB 쪽 필터, 포함 조회는 후보 id로 한정(전체 1,000행 상한 회피) */
+async function fetchBasisAndIncluded(
+  supabase: any,
+  orderIds: string[],
+  tier: string,
+  basis: DateBasis,
+  dateFrom: string,
+  dateTo: string,
+): Promise<{ dateOf: Map<string, string>; included: Set<string> } | { error: string }> {
+  const [histRes, incRes] = await Promise.all([
+    supabase.from('order_status_history').select('order_id, created_at')
+      .in('order_id', orderIds).eq('next_status', basis)
+      .gte('created_at', `${dateFrom}T00:00:00`).lte('created_at', `${dateTo}T23:59:59`)
+      .order('created_at', { ascending: false }),
+    supabase.from('zen_billing_statement_items').select('order_id, tier')
+      .eq('tier', tier).in('order_id', orderIds),
+  ]);
+  // 보조 조회 실패를 무시하면 빈 목록으로 위장된다 (코멘트 4번 fail-open 금지)
+  if (histRes.error) {
+    logger.error('[fetchBasisAndIncluded] basis date lookup failed', histRes.error);
+    return { error: await trError('generic', { code: 'HISTORY_LOOKUP' }) };
+  }
+  if (incRes.error) {
+    logger.error('[fetchBasisAndIncluded] included lookup failed', incRes.error);
+    return { error: await trError('generic', { code: 'INCLUDED_LOOKUP' }) };
+  }
+  const dateOf = new Map<string, string>();
+  for (const h of histRes.data ?? []) {
+    if (!dateOf.has(h.order_id)) dateOf.set(h.order_id, String(h.created_at).slice(0, 10));
+  }
+  return { dateOf, included: new Set<string>((incRes.data ?? []).map((r: any) => r.order_id)) };
+}
+
+/** 기간 내 후보 분리 — 미정산은 건수로 분리, 이미 포함된 오더는 제외 */
+function partitionCandidates(
+  scoped: any[],
+  dateOf: Map<string, string>,
+  included: Set<string>,
+  dateFrom: string,
+  dateTo: string,
+): { candidates: any[]; excludedUnsettled: number } {
+  const inRange = scoped.filter((o: any) => {
+    const d = dateOf.get(o.id);
+    return !!d && d >= dateFrom && d <= dateTo;
+  });
+  const excludedUnsettled = inRange.filter((o: any) => o.cost_settlement_status !== 'SETTLED').length;
+  const candidates = inRange.filter(
+    (o: any) => o.cost_settlement_status === 'SETTLED' && !included.has(o.id),
+  );
+  return { candidates, excludedUnsettled };
+}
+
+/** 후보 행 + 금액 스냅샷 매핑 (금액은 RPC `billing_items_amounts` 단일 원천) */
+async function mapBillableRows(
+  supabase: any,
+  candidates: any[],
+  dateOf: Map<string, string>,
+  tier: string,
+): Promise<{ rows: BillableOrderRow[]; totalAmount: number } | { error: string }> {
+  const amtRes = await supabase.rpc('billing_items_amounts', {
+    p_order_ids: candidates.map((o) => o.id), p_tier: tier,
+  });
+  if (amtRes.error) {
+    logger.error('[mapBillableRows] amount snapshot failed', amtRes.error);
+    return { error: await trError('generic', { code: 'AMOUNT_LOOKUP' }) };
+  }
+  const amtMap = new Map<string, any>((amtRes.data ?? []).map((r: any) => [r.order_id, r]));
+  const rows: BillableOrderRow[] = candidates.map((o: any) => {
+    const a = amtMap.get(o.id) ?? {};
+    return {
+      orderId: o.id,
+      orderNo: o.order_no,
+      basisDate: dateOf.get(o.id) ?? null,
+      shipperName: (o.shipper as any)?.name ?? o.shipper_name ?? null,
+      agencyName: (o.agency as any)?.name ?? null,
+      chargeWeightKg: Number(a.charge_weight_kg ?? 0),
+      baseFreight: Number(a.base_freight ?? 0),
+      fuelSurcharge: Number(a.fuel_surcharge ?? 0),
+      surgeFee: Number(a.surge_fee ?? 0),
+      otherCharges: Number(a.other_charges ?? 0),
+      lineTotal: Number(a.line_total ?? 0),
+    };
+  });
+  return { rows, totalAmount: rows.reduce((s, r) => s + r.lineTotal, 0) };
+}
+
 export async function listBillableOrders(input: ListBillableOrdersInput): Promise<BillableOrdersResult> {
   try {
     const auth = await profileContext();
@@ -209,145 +396,37 @@ export async function listBillableOrders(input: ListBillableOrdersInput): Promis
 
     const roleErr = await issuerRoleError(ctx.role);
     if (roleErr) return { success: false, error: roleErr };
-
     const rangeErr = await dateRangeError(input?.dateFrom, input?.dateTo);
     if (rangeErr) return { success: false, error: rangeErr };
 
-    // 대상 검증 + tier 도출
-    let tier: string;
-    let targetFilter: (q: any) => any;
-    const target = input.billedTarget;
-    if (target?.type === 'ADHOC') {
-      if (ctx.orgType !== 'AGENCY') return { success: false, error: await trError('adhoc_requires_agency') };
-      if (!target.shipperName?.trim()) return { success: false, error: await trError('adhoc_name_required') };
-      tier = deriveTier(ctx.orgType, null, true);
-      targetFilter = (q) => q.eq('shipper_id', ctx.orgId);
-    } else if (target?.type === 'ORG') {
-      const { data: tOrg, error: tErr } = await supabase
-        .from('zen_organizations').select('type, id').eq('id', target.orgId).maybeSingle();
-      if (tErr) {
-        logger.error('[listBillableOrders] target lookup failed', tErr);
-        return { success: false, error: await trError('generic', { code: 'TARGET_LOOKUP' }) };
-      }
-      if (!tOrg) return { success: false, error: await trError('target_not_allowed') };
-      if (ctx.orgType === 'AGENCY') {
-        if (tOrg.type === 'AGENCY') return { success: false, error: await trError('target_not_allowed') };
-        const { data: link, error: lErr } = await supabase
-          .from('zen_agency_shippers').select('id')
-          .eq('agency_org_id', ctx.orgId).eq('shipper_org_id', target.orgId).eq('is_active', true)
-          .maybeSingle();
-        if (lErr) {
-          logger.error('[listBillableOrders] agency link lookup failed', lErr);
-          return { success: false, error: await trError('generic', { code: 'LINK_LOOKUP' }) };
-        }
-        if (!link) return { success: false, error: await trError('target_not_allowed') };
-      }
-      tier = deriveTier(ctx.orgType, tOrg.type, false);
-      // 대상 소속 필터 (RPC의 자격 검증과 동일해야 후보가 정확하다)
-      if (tier === 'ADMIN_TO_AGENCY') {
-        targetFilter = (q) => q.eq('agency_org_id', target.orgId);
-      } else if (ctx.orgType === 'AGENCY') {
-        // 등록 화주: shipper_id = 대상 화주 AND agency_org_id = 발행 대리점 (items_guard와 동일한 소속 요건)
-        targetFilter = (q) => q.eq('shipper_id', target.orgId).eq('agency_org_id', ctx.orgId);
-      } else {
-        targetFilter = (q) => q.eq('shipper_id', target.orgId);
-      }
-    } else {
-      return { success: false, error: await trError('target_not_allowed') };
+    const targetRes = await resolveBillableTarget(supabase, ctx, input.billedTarget);
+    if ('error' in targetRes) return { success: false, error: targetRes.error };
+
+    const fetched = await fetchScopedOrders(supabase, targetRes.resolved);
+    if ('error' in fetched) return { success: false, error: fetched.error };
+    const { orders: scoped, truncated } = fetched;
+    if (!scoped.length) {
+      return { success: true, orders: [], total: 0, totalAmount: 0, excludedUnsettled: 0, truncated };
     }
 
-    // UPS·DELIVERED 후보 (대상 소속 필터 포함)
-    let query = supabase
-      .from('zen_orders')
-      .select('id, order_no, status, cost_settlement_status, shipper_id, agency_org_id, shipper_name, shipper_biz_no, shipper:zen_organizations!shipper_id(name), agency:zen_organizations!agency_org_id(name)')
-      .eq('transport_mode', 'UPS')
-      .eq('status', 'DELIVERED')
-      .limit(500);
-    query = targetFilter(query);
-    const { data: orders, error } = await query;
-    if (error) {
-      logger.error('[listBillableOrders] order lookup failed', error);
-      return { success: false, error: await trError('generic', { code: 'ORDER_LIST_LOOKUP' }) };
-    }
+    const basisRes = await fetchBasisAndIncluded(
+      supabase, scoped.map((o) => o.id), targetRes.resolved.tier,
+      input.dateBasis, input.dateFrom, input.dateTo,
+    );
+    if ('error' in basisRes) return { success: false, error: basisRes.error };
 
-    // 대상 소속 재검증 (클라이언트 값 불신 — An_17 §5-2)
-    // ADHOC: shipper_id=발행 대리점 + 화주명 **정규화 일치**(+사업자번호 지정 시 일치) — 부분문자가 아님
-    let scoped = orders ?? [];
-    if (target?.type === 'ADHOC') {
-      const norm = normalizeShipperName(target.shipperName);
-      const biz = target.bizNo?.trim();
-      scoped = scoped.filter((o: any) => {
-        if (normalizeShipperName(String(o.shipper_name ?? '')) !== norm) return false;
-        if (biz && String(o.shipper_biz_no ?? '') !== biz) return false;
-        return true;
-      });
-    }
-    if (!scoped.length) return { success: true, orders: [], total: 0, totalAmount: 0, excludedUnsettled: 0 };
-    const ordersInScope = scoped;
-
-    const ids = ordersInScope.map((o: any) => o.id);
-    const [histRes, incRes] = await Promise.all([
-      supabase.from('order_status_history')
-        .select('order_id, created_at, next_status')
-        .in('order_id', ids)
-        .eq('next_status', input.dateBasis)
-        .order('created_at', { ascending: false }),
-      supabase.from('zen_billing_statement_items').select('order_id, tier').eq('tier', tier),
-    ]);
-    // 보조 조회 실패를 무시하면 빈 목록으로 위장된다 (코멘트 4번 fail-open 금지)
-    if (histRes.error) {
-      logger.error('[listBillableOrders] basis date lookup failed', histRes.error);
-      return { success: false, error: await trError('generic', { code: 'HISTORY_LOOKUP' }) };
-    }
-    if (incRes.error) {
-      logger.error('[listBillableOrders] included orders lookup failed', incRes.error);
-      return { success: false, error: await trError('generic', { code: 'INCLUDED_LOOKUP' }) };
-    }
-
-    const dateOf = new Map<string, string>();
-    for (const h of histRes.data ?? []) {
-      if (!dateOf.has(h.order_id)) dateOf.set(h.order_id, String(h.created_at).slice(0, 10));
-    }
-    const included = new Set<string>((incRes.data ?? []).map((r: any) => r.order_id));
-
-    const inRange = ordersInScope.filter((o: any) => {
-      const d = dateOf.get(o.id);
-      return !!d && d >= input.dateFrom && d <= input.dateTo;
-    });
-    const excludedUnsettled = inRange.filter((o: any) => o.cost_settlement_status !== 'SETTLED').length;
-    const candidates = inRange.filter(
-      (o: any) => o.cost_settlement_status === 'SETTLED' && !included.has(o.id),
+    const { candidates, excludedUnsettled } = partitionCandidates(
+      scoped, basisRes.dateOf, basisRes.included, input.dateFrom!, input.dateTo!,
     );
     if (!candidates.length) {
-      return { success: true, orders: [], total: 0, totalAmount: 0, excludedUnsettled };
+      return { success: true, orders: [], total: 0, totalAmount: 0, excludedUnsettled, truncated };
     }
-
-    const candIds = candidates.map((o: any) => o.id);
-    const amtRes = await supabase.rpc('billing_items_amounts', { p_order_ids: candIds, p_tier: tier });
-    if (amtRes.error) {
-      logger.error('[listBillableOrders] amount snapshot failed', amtRes.error);
-      return { success: false, error: await trError('generic', { code: 'AMOUNT_LOOKUP' }) };
-    }
-    const amtMap = new Map<string, any>((amtRes.data ?? []).map((r: any) => [r.order_id, r]));
-
-    const rows: BillableOrderRow[] = candidates.map((o: any) => {
-      const a = amtMap.get(o.id) ?? {};
-      return {
-        orderId: o.id,
-        orderNo: o.order_no,
-        basisDate: dateOf.get(o.id) ?? null,
-        shipperName: (o.shipper as any)?.name ?? o.shipper_name ?? null,
-        agencyName: (o.agency as any)?.name ?? null,
-        chargeWeightKg: Number(a.charge_weight_kg ?? 0),
-        baseFreight: Number(a.base_freight ?? 0),
-        fuelSurcharge: Number(a.fuel_surcharge ?? 0),
-        surgeFee: Number(a.surge_fee ?? 0),
-        otherCharges: Number(a.other_charges ?? 0),
-        lineTotal: Number(a.line_total ?? 0),
-      };
-    });
-    const totalAmount = rows.reduce((s, r) => s + r.lineTotal, 0);
-    return { success: true, orders: rows, total: rows.length, totalAmount, excludedUnsettled };
+    const mapped = await mapBillableRows(supabase, candidates, basisRes.dateOf, targetRes.resolved.tier);
+    if ('error' in mapped) return { success: false, error: mapped.error };
+    return {
+      success: true, orders: mapped.rows, total: mapped.rows.length,
+      totalAmount: mapped.totalAmount, excludedUnsettled, truncated,
+    };
   } catch (err) {
     logger.error('[listBillableOrders] failed:', err);
     return { success: false, error: await trError('generic', { code: 'UNEXPECTED' }) };
@@ -356,10 +435,62 @@ export async function listBillableOrders(input: ListBillableOrdersInput): Promis
 
 // ───────────────────────────────────────────── 2. 수기 화주명 자동완성 (WBS 4.1b)
 
+/** 발행 대리점의 수기 화주 오더 조회 — 상한 도달 시 `truncated` 신호 */
+async function fetchAdhocOrders(
+  supabase: any, ctx: ProfileCtx, q?: string,
+): Promise<{ orders: any[]; truncated: boolean } | { error: string }> {
+  let query = supabase.from('zen_orders')
+    .select('id, shipper_name, cost_settlement_status')
+    .eq('shipper_id', ctx.orgId)
+    .eq('transport_mode', 'UPS')
+    .not('shipper_name', 'is', null)
+    .neq('shipper_name', '')
+    .order('created_at', { ascending: false })
+    .limit(ADHOC_NAME_LIMIT);
+  if (q?.trim()) query = query.ilike('shipper_name', `%${q.trim()}%`);
+
+  const { data, error } = await query;
+  if (error) {
+    logger.error('[fetchAdhocOrders] order lookup failed', error);
+    return { error: await trError('generic', { code: 'ORDER_LIST_LOOKUP' }) };
+  }
+  const all = data ?? [];
+  const truncated = all.length >= ADHOC_NAME_LIMIT;
+  if (truncated) {
+    logger.warn(`[fetchAdhocOrders] limit ${ADHOC_NAME_LIMIT} reached — 일부 화주명이 누락될 수 있다`);
+  }
+  return { orders: all, truncated };
+}
+
+/** 정규화 그룹 집계 — 청구서 포함(id, tier)은 후보 id로 한정 조회 */
+async function groupAdhocNames(
+  supabase: any, orders: any[],
+): Promise<{ names: AdhocShipperNameRow[] } | { error: string }> {
+  const { data: inc, error } = await supabase
+    .from('zen_billing_statement_items').select('order_id, tier')
+    .eq('tier', 'AGENCY_TO_SHIPPER').in('order_id', orders.map((o) => o.id));
+  if (error) {
+    logger.error('[groupAdhocNames] included lookup failed', error);
+    return { error: await trError('generic', { code: 'INCLUDED_LOOKUP' }) };
+  }
+  const included = new Set<string>((inc ?? []).map((r: any) => r.order_id));
+
+  const groups = new Map<string, AdhocShipperNameRow>();
+  for (const o of orders) {
+    const name = String(o.shipper_name);
+    const normalized = normalizeShipperName(name);
+    const g = groups.get(normalized) ?? { name, normalized, count: 0, billableCount: 0 };
+    g.count += 1;
+    if (o.cost_settlement_status === 'SETTLED' && !included.has(o.id)) g.billableCount += 1;
+    groups.set(normalized, g);
+  }
+  return {
+    names: [...groups.values()].sort((a, b) => b.billableCount - a.billableCount || b.count - a.count),
+  };
+}
+
 export async function listAdhocShipperNames(q?: string): Promise<{
-  success: boolean;
-  names?: AdhocShipperNameRow[];
-  error?: string;
+  success: boolean; names?: AdhocShipperNameRow[]; truncated?: boolean; error?: string;
 }> {
   try {
     const auth = await profileContext();
@@ -370,39 +501,15 @@ export async function listAdhocShipperNames(q?: string): Promise<{
       return { success: false, error: await trError('adhoc_requires_agency') };
     }
 
-    let query = supabase
-      .from('zen_orders')
-      .select('id, shipper_name, cost_settlement_status')
-      .eq('shipper_id', ctx.orgId)
-      .eq('transport_mode', 'UPS')
-      .not('shipper_name', 'is', null)
-      .neq('shipper_name', '')
-      .limit(1000);
-    if (q?.trim()) query = query.ilike('shipper_name', `%${q.trim()}%`);
-    const { data: orders, error } = await query;
-    if (error) {
-      logger.error('[listAdhocShipperNames] order lookup failed', error);
-      return { success: false, error: await trError('generic', { code: 'ORDER_LIST_LOOKUP' }) };
+    const fetched = await fetchAdhocOrders(supabase, ctx, q);
+    if ('error' in fetched) return { success: false, error: fetched.error };
+    if (!fetched.orders.length) {
+      return { success: true, names: [], truncated: fetched.truncated };
     }
-    const { data: inc, error: incErr } = await supabase
-      .from('zen_billing_statement_items').select('order_id, tier').eq('tier', 'AGENCY_TO_SHIPPER');
-    if (incErr) {
-      logger.error('[listAdhocShipperNames] included lookup failed', incErr);
-      return { success: false, error: await trError('generic', { code: 'INCLUDED_LOOKUP' }) };
-    }
-    const included = new Set<string>((inc ?? []).map((r: any) => r.order_id));
 
-    const groups = new Map<string, AdhocShipperNameRow>();
-    for (const o of orders ?? []) {
-      const name = String(o.shipper_name);
-      const normalized = normalizeShipperName(name);
-      const g = groups.get(normalized) ?? { name, normalized, count: 0, billableCount: 0 };
-      g.count += 1;
-      if (o.cost_settlement_status === 'SETTLED' && !included.has(o.id)) g.billableCount += 1;
-      groups.set(normalized, g);
-    }
-    const names = [...groups.values()].sort((a, b) => b.billableCount - a.billableCount || b.count - a.count);
-    return { success: true, names };
+    const grouped = await groupAdhocNames(supabase, fetched.orders);
+    if ('error' in grouped) return { success: false, error: grouped.error };
+    return { success: true, names: grouped.names, truncated: fetched.truncated };
   } catch (err) {
     logger.error('[listAdhocShipperNames] failed:', err);
     return { success: false, error: await trError('generic', { code: 'UNEXPECTED' }) };
@@ -420,6 +527,21 @@ export interface CreateBillingStatementInput {
   periodTo?: string | null;
 }
 
+/** 통합 생성 RPC 인자 구성 (생성 함수를 50줄 이내로 유지하기 위한 분리) */
+function createStatementRpcArgs(input: CreateBillingStatementInput, orderIds: string[]) {
+  const t = input.billedTarget;
+  return {
+    p_billed_org_id: t?.type === 'ORG' ? t.orgId : null,
+    p_billed_name: t?.type === 'ADHOC' ? t.shipperName : null,
+    p_billed_biz_no: t?.type === 'ADHOC' ? t.bizNo ?? null : null,
+    p_year: input.year,
+    p_month: input.month,
+    p_period_from: input.periodFrom ?? null,
+    p_period_to: input.periodTo ?? null,
+    p_order_ids: orderIds,
+  };
+}
+
 export async function createBillingStatement(input: CreateBillingStatementInput): Promise<{
   success: boolean; statementId?: string; statementNo?: string; roundNo?: number; error?: string;
 }> {
@@ -430,21 +552,19 @@ export async function createBillingStatement(input: CreateBillingStatementInput)
     const roleErr = await issuerRoleError(ctx.role);
     if (roleErr) return { success: false, error: roleErr };
 
-    if (!Array.isArray(input?.orderIds) || input.orderIds.length === 0) {
+    // 중복 id 제거 — RPC의 count(*) 대조가 order_not_found로 오해되지 않도록 (비차단 리뷰)
+    const raw = Array.isArray(input?.orderIds) ? input.orderIds : [];
+    const orderIds = [...new Set(raw)];
+    if (!orderIds.length) {
       logger.warn('[createBillingStatement] empty orderIds');
       return { success: false, error: await trError('order_ids_required') };
     }
-    const target = input.billedTarget;
-    const { data, error } = await supabase.rpc('create_billing_statement_with_items', {
-      p_billed_org_id: target?.type === 'ORG' ? target.orgId : null,
-      p_billed_name: target?.type === 'ADHOC' ? target.shipperName : null,
-      p_billed_biz_no: target?.type === 'ADHOC' ? target.bizNo ?? null : null,
-      p_year: input.year,
-      p_month: input.month,
-      p_period_from: input.periodFrom ?? null,
-      p_period_to: input.periodTo ?? null,
-      p_order_ids: input.orderIds,
-    });
+    if (orderIds.length !== raw.length) {
+      logger.warn(`[createBillingStatement] duplicate orderIds removed: ${raw.length} -> ${orderIds.length}`);
+    }
+    const { data, error } = await supabase.rpc(
+      'create_billing_statement_with_items', createStatementRpcArgs(input, orderIds),
+    );
     if (error) {
       logger.warn(`[createBillingStatement] rpc rejected: ${error.message}`);
       return { success: false, error: await userError(error.message, 'createBillingStatement') };
@@ -579,6 +699,50 @@ export async function issueBillingStatement(id: string): Promise<{
 
 // ───────────────────────────────────────────── 6. 입금확인(전액만 → CLOSED) (WBS 4.4)
 
+/** 입금확인 대상 분류 — CLOSED/ISSUED 여부를 오류로 구분 (선조회는 분류 전용, 결정은 조�건부 UPDATE가 담당) */
+async function loadPaymentTarget(
+  supabase: any, ctx: ProfileCtx, id: string,
+): Promise<{ row: any } | { error: string }> {
+  const loaded = await loadOwnStatement(supabase, ctx, id);
+  if ('error' in loaded) return loaded;
+  if (loaded.row.status === 'CLOSED') {
+    logger.warn(`[confirmStatementPayment] already CLOSED (${id})`);
+    return { error: await trError('already_closed') };
+  }
+  if (loaded.row.status !== 'ISSUED') {
+    logger.warn(`[confirmStatementPayment] not ISSUED (${id}, ${loaded.row.status})`);
+    return { error: await trError('not_issued') };
+  }
+  return { row: loaded.row };
+}
+
+/** 조건부 UPDATE가 authority (선조회는 분류 전용 — TOCTOU 방어). rowCount=0 → 상태가 바뀐 경우 */
+async function applyClosedPayment(
+  supabase: any, ctx: ProfileCtx, id: string, amount: number, paidAt: string,
+): Promise<{ success: boolean; error?: string }> {
+  const { data, error } = await supabase
+    .from('zen_billing_statements')
+    .update({
+      status: 'CLOSED', paid_amount: amount, paid_date: paidAt,
+      closed_at: new Date().toISOString(), closed_by: ctx.userId,
+    })
+    .eq('id', id)
+    .eq('issuer_org_id', ctx.orgId)
+    .eq('status', 'ISSUED')
+    .select('id, status');
+  if (error) {
+    logger.warn(`[confirmStatementPayment] rejected: ${error.message}`);
+    return { success: false, error: await userError(error.message, 'confirmStatementPayment') };
+  }
+  if (!data?.length) {
+    logger.warn(`[confirmStatementPayment] rowCount=0 (state changed concurrently: ${id})`);
+    return { success: false, error: await trError('not_issued') };
+  }
+  revalidatePath('/finance/statements');
+  revalidatePath('/agency/statements');
+  return { success: true };
+}
+
 export async function confirmStatementPayment(
   id: string,
   input: { paidAt?: string; amount: number },
@@ -590,45 +754,22 @@ export async function confirmStatementPayment(
     const roleErr = await issuerRoleError(ctx.role);
     if (roleErr) return { success: false, error: roleErr };
 
-    const loaded = await loadOwnStatement(supabase, ctx, id);
-    if ('error' in loaded) return { success: false, error: loaded.error };
-    if (loaded.row.status === 'CLOSED') {
-      return { success: false, error: await trError('already_closed') };
-    }
-    if (loaded.row.status !== 'ISSUED') {
-      logger.warn(`[confirmStatementPayment] not ISSUED (${id}, ${loaded.row.status})`);
-      return { success: false, error: await trError('not_issued') };
-    }
+    const target = await loadPaymentTarget(supabase, ctx, id);
+    if ('error' in target) return { success: false, error: target.error };
     // 전액만 (Q7) — 불일치면 **저장하지 않고** 오류 (DB CHECK도 이중 방어)
     const amount = Number(input?.amount);
-    const total = Number(loaded.row.total_amount);
+    const total = Number(target.row.total_amount);
     if (!Number.isFinite(amount) || amount !== total) {
       logger.warn(`[confirmStatementPayment] amount mismatch (${id}: paid=${amount} vs total=${total})`);
       return { success: false, error: await trError('payment_amount_mismatch') };
     }
 
     const paidAt = input?.paidAt ?? new Date().toISOString().slice(0, 10);
-    const { data, error } = await supabase
-      .from('zen_billing_statements')
-      .update({
-        status: 'CLOSED', paid_amount: amount, paid_date: paidAt,
-        closed_at: new Date().toISOString(), closed_by: ctx.userId,
-      })
-      .eq('id', id)
-      .eq('issuer_org_id', ctx.orgId)
-      .eq('status', 'ISSUED')
-      .select('id, status');
-    if (error) {
-      logger.warn(`[confirmStatementPayment] rejected: ${error.message}`);
-      return { success: false, error: await userError(error.message, 'confirmStatementPayment') };
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(paidAt)) {
+      logger.warn(`[confirmStatementPayment] invalid paidAt format (${id}: ${paidAt})`);
+      return { success: false, error: await trError('generic', { code: 'PAID_AT_INVALID' }) };
     }
-    if (!data?.length) {
-      logger.warn(`[confirmStatementPayment] rowCount=0 (state changed concurrently: ${id})`);
-      return { success: false, error: await trError('not_issued') };
-    }
-    revalidatePath('/finance/statements');
-    revalidatePath('/agency/statements');
-    return { success: true };
+    return applyClosedPayment(supabase, ctx, id, amount, paidAt);
   } catch (err) {
     logger.error('[confirmStatementPayment] failed:', err);
     return { success: false, error: await trError('generic', { code: 'UNEXPECTED' }) };
@@ -692,6 +833,59 @@ export async function getBillingStatements(filter?: GetStatementsFilter): Promis
 
 // ───────────────────────────────────────────── 8. 청구서 상세 (존재 비노출) (WBS 4.5)
 
+/** 청구서 항목 조회 — items→헤더 FK가 단일·복합 2개라 embed 모호(TASK-B-360 실측) → 복수 쿼리 */
+async function fetchStatementItems(
+  supabase: any, statementId: string,
+): Promise<{ items: any[] } | { error: string }> {
+  const { data, error } = await supabase
+    .from('zen_billing_statement_items')
+    .select('order_id, charge_weight_kg, base_freight, fuel_surcharge, surge_fee, other_charges, line_total, order:zen_orders(order_no)')
+    .eq('statement_id', statementId);
+  if (error) {
+    logger.error('[fetchStatementItems] lookup failed', error);
+    return { error: await trError('generic', { code: 'STATEMENT_LOOKUP' }) };
+  }
+  return { items: (data ?? []) as any[] };
+}
+
+/** 항목 행 매핑 */
+function mapDetailRows(items: any[]): StatementItemRow[] {
+  return items.map((i: any) => ({
+    orderId: i.order_id,
+    orderNo: i.order?.order_no ?? null,
+    chargeWeightKg: Number(i.charge_weight_kg ?? 0),
+    baseFreight: Number(i.base_freight ?? 0),
+    fuelSurcharge: Number(i.fuel_surcharge ?? 0),
+    surgeFee: Number(i.surge_fee ?? 0),
+    otherCharges: Number(i.other_charges ?? 0),
+    lineTotal: Number(i.line_total ?? 0),
+  }));
+}
+
+/** 헤더+항목+범위 배지 → 상세 DTO */
+function buildStatementDetail(data: any, rows: StatementItemRow[], ctx: ProfileCtx): StatementDetail {
+  return {
+    id: data.id,
+    statementNo: data.statement_no,
+    billedPartyType: data.billed_party_type,
+    billedOrgId: data.billed_org_id,
+    billedName: data.billed_name,
+    billedBizNo: data.billed_biz_no,
+    tier: data.tier,
+    periodYear: data.period_year,
+    periodMonth: data.period_month,
+    roundNo: data.round_no,
+    periodFrom: data.period_from,
+    periodTo: data.period_to,
+    totalAmount: Number(data.total_amount ?? 0),
+    status: data.status,
+    issuerOrgId: data.issuer_org_id,
+    scope: scopeOf(data.issuer_org_id, ctx.orgId, ctx.role),
+    createdAt: data.created_at,
+    items: rows,
+  };
+}
+
 export async function getBillingStatementDetail(id: string): Promise<{
   success: boolean; detail?: StatementDetail; error?: string;
 }> {
@@ -714,45 +908,10 @@ export async function getBillingStatementDetail(id: string): Promise<{
     if (!data) {
       return { success: false, error: await trError('statement_not_found') };
     }
-    const { data: items, error: itemsError } = await supabase
-      .from('zen_billing_statement_items')
-      .select('order_id, charge_weight_kg, base_freight, fuel_surcharge, surge_fee, other_charges, line_total, order:zen_orders(order_no)')
-      .eq('statement_id', id);
-    if (itemsError) {
-      logger.error('[getBillingStatementDetail] items lookup failed', itemsError);
-      return { success: false, error: await trError('generic', { code: 'STATEMENT_LOOKUP' }) };
-    }
-    const rows: StatementItemRow[] = ((items as any[]) ?? []).map((i: any) => ({
-      orderId: i.order_id,
-      orderNo: i.order?.order_no ?? null,
-      chargeWeightKg: Number(i.charge_weight_kg ?? 0),
-      baseFreight: Number(i.base_freight ?? 0),
-      fuelSurcharge: Number(i.fuel_surcharge ?? 0),
-      surgeFee: Number(i.surge_fee ?? 0),
-      otherCharges: Number(i.other_charges ?? 0),
-      lineTotal: Number(i.line_total ?? 0),
-    }));
-    const detail: StatementDetail = {
-      id: data.id,
-      statementNo: data.statement_no,
-      billedPartyType: data.billed_party_type,
-      billedOrgId: data.billed_org_id,
-      billedName: data.billed_name,
-      billedBizNo: data.billed_biz_no,
-      tier: data.tier,
-      periodYear: data.period_year,
-      periodMonth: data.period_month,
-      roundNo: data.round_no,
-      periodFrom: data.period_from,
-      periodTo: data.period_to,
-      totalAmount: Number(data.total_amount ?? 0),
-      status: data.status,
-      issuerOrgId: data.issuer_org_id,
-      scope: scopeOf(data.issuer_org_id, ctx.orgId, ctx.role),
-      createdAt: data.created_at,
-      items: rows,
-    };
-    return { success: true, detail };
+    const itemRes = await fetchStatementItems(supabase, id);
+    if ('error' in itemRes) return { success: false, error: itemRes.error };
+    const rows = mapDetailRows(itemRes.items);
+    return { success: true, detail: buildStatementDetail(data, rows, ctx) };
   } catch (err) {
     logger.error('[getBillingStatementDetail] failed:', err);
     return { success: false, error: await trError('generic', { code: 'UNEXPECTED' }) };
