@@ -139,3 +139,84 @@
 
 ---
 
+### 4.3 청구서 관리(월 차수) — `src/app/actions/finance/billing-statements.ts` (TASK-B-360 / Issue #1366)
+
+공통: `validateUserAction()`의 **user-session client**로만 DB·RPC 호출(`service_role`은 #1397 RLS·트리거 우회 — 금지). 발행자 권한은 `issuer_org_id = 내 org`(조건 2), tier는 **서버가 도출**(조건 3, 클라이언트 미전달), 금액은 **DB 원천만**(조건 4 — `billing_items_amounts` 단일 원천). 실패 분기 전 `logger.warn/error`, 사용자 문구는 `Errors` 키 매핑(DB 원문 미노출).
+
+#### listBillableOrders(input)
+- **Path**: `src/app/actions/finance/billing-statements.ts:231-330`
+- **설명**: 청구 후보 UPS 오더 조회 — `billedTarget`(`ORG{orgId}` | `ADHOC{shipperName,bizNo?}`), `dateBasis`(`DELIVERED`|`RELEASED`), 기간 **필수·역전 거부**. `UPS`+`DELIVERED`+대상 소속+**같은 tier 청구서 미포함**만 후보, `excludedUnsettled`(미정산 제외 건수)와 금액 스냅샷(`billing_items_amounts`)을 함께 반환. ADHOC은 `shipper_id=발행 대리점` + 화주명 **정규화 일치**(부분문자 아님).
+- **권한**: `ADMIN`·`ZENITH_SUPER_ADMIN`·`AGENCY`만 (그 외 `permission_denied`)
+- **Input**: `{ billedTarget, dateBasis, dateFrom, dateTo }`
+- **Output**: `Promise<{ success; orders?: BillableOrderRow[]; total?; totalAmount?; excludedUnsettled?; error? }>`
+- **오류**: `generic{DATE_RANGE_INVALID}`(기간 누락·역전), `adhoc_requires_agency`(비대리점의 ADHOC), `adhoc_name_required`, `target_not_allowed`(소속 링크 없음·존재하지 않는 대상), `generic{TARGET_LOOKUP|LINK_LOOKUP|ORDER_LIST_LOOKUP|HISTORY_LOOKUP|INCLUDED_LOOKUP|AMOUNT_LOOKUP}`(조회 실패 — **fail-open 금지, 빈 목록으로 위장하지 않음**), `generic{UNEXPECTED}`
+- **부수효과**: 조회만 (DB 변경 없음)
+
+#### listAdhocShipperNames(q?)
+- **Path**: `src/app/actions/finance/billing-statements.ts:336-385`
+- **설명**: 발행 대리점이 등록한 UPS 오더의 수기 화주명 목록 — 정규화 그룹 집계(`name`/`normalized`/`count`/`billableCount`). 자동완성·유사명 경고용.
+- **권한**: 발행 org 유형이 `AGENCY`인 세션만
+- **Input**: `q?: string` (부분 검색, 선택)
+- **Output**: `Promise<{ success; names?: AdhocShipperNameRow[]; error? }>`
+- **오류**: `adhoc_requires_agency`, `generic{ORDER_LIST_LOOKUP|INCLUDED_LOOKUP|UNEXPECTED}`
+- **부수효과**: 조회만
+
+#### createBillingStatement(input)
+- **Path**: `src/app/actions/finance/billing-statements.ts:419-476`
+- **설명**: 통합 생성 RPC `create_billing_statement_with_items` 호출 — tier 도출 → 헤더 생성 → 금액 스냅샷 항목 INSERT → 합계 갱신을 **한 트랜잭션**에서 수행(Q-A). 클라이언트 금액 미사용, `orderIds` 빈 배열 거부.
+- **권한**: `ADMIN`·`ZENITH_SUPER_ADMIN`·`AGENCY`
+- **Input**: `{ billedTarget, year, month, orderIds[], periodFrom?, periodTo? }`
+- **Output**: `Promise<{ success; statementId?; statementNo?; roundNo?; error? }>`
+- **오류**: `order_ids_required`, `order_not_eligible`(미정산·타 소속), `order_already_inclusive`(UNIQUE `23505` 매핑), `target_not_allowed`, `adhoc_requires_agency`, `adhoc_name_required`, `profile_not_found`, `permission_denied`, `statement_empty`, `generic{STATEMENT_CREATE|UNEXPECTED}`. `zero_amount_count>0`이면 `logger.warn`(조건 4b — 저장은 허용)
+- **부수효과**: `zen_billing_statements`/`zen_billing_statement_items` INSERT, `revalidatePath('/finance/statements'|'/agency/statements')`
+
+#### cancelBillingStatement(id)
+- **Path**: `src/app/actions/finance/billing-statements.ts:483-532`
+- **설명**: DRAFT 초안 취소(=헤더 행 삭제 → 항목 CASCADE → 오더 다시 후보). 조건부 `DELETE ... WHERE id AND issuer_org_id=내 org AND status='DRAFT'`의 `rowCount`가 authority(선조회는 오류 분류용 — TOCTOU 방어).
+- **권한**: 발행 org 구성원만 (`issuer_org_id = 내 org`)
+- **Input**: `id: string`
+- **Output**: `Promise<{ success: boolean; error?: string }>`
+- **오류**: `statement_not_found`(RLS 미노출 = 미존재와 동일), `not_issuer`, `not_draft`, `generic{STATEMENT_CANCEL|UNEXPECTED}`
+- **부수효과**: `zen_billing_statements` 행 DELETE(항목 CASCADE), `revalidatePath` 2곳
+
+#### issueBillingStatement(id)
+- **Path**: `src/app/actions/finance/billing-statements.ts:539-587`
+- **설명**: 발행(확정) DRAFT→ISSUED. 조건부 `UPDATE ... WHERE id AND issuer_org_id AND status='DRAFT'`의 `rowCount`가 authority, **항목 0건은 DB 트리거 `issue_without_items`가 최종 방어**.
+- **권한**: 발행 org 구성원만
+- **Input**: `id: string`
+- **Output**: `Promise<{ success; issuedAt?; error? }>`
+- **오류**: `statement_not_found`, `not_issuer`, `not_draft`, `already_issued`, `statement_empty`(트리거 `issue_without_items` 매핑), `generic{UNEXPECTED}`
+- **부수효과**: `status='ISSUED'`, `issued_at`, `issued_by` 갱신, `revalidatePath` 2곳
+
+#### confirmStatementPayment(id, { paidAt, amount })
+- **Path**: `src/app/actions/finance/billing-statements.ts:594-653`
+- **설명**: 입금확인 ISSUED→CLOSED — **전액만**(Q7). `amount !== total_amount`이면 **저장하지 않고** 오류(DB CHECK `zen_billing_statements_paid_check`가 이중 방어). 조건부 `UPDATE ... WHERE status='ISSUED'`의 `rowCount`가 authority.
+- **권한**: 발행 org 구성원만
+- **Input**: `id: string`, `{ paidAt?: string; amount: number }`
+- **Output**: `Promise<{ success: boolean; error?: string }>`
+- **오류**: `statement_not_found`, `not_issuer`, `already_closed`, `not_issued`, **`payment_amount_mismatch`**(금액 불일치 — 저장 안 됨), `generic{UNEXPECTED}`
+- **부수효과**: `status='CLOSED'`, `paid_amount`, `paid_date`, `closed_at`, `closed_by` 갱신, `revalidatePath` 2곳
+
+#### getBillingStatements(filter)
+- **Path**: `src/app/actions/finance/billing-statements.ts:660-715`
+- **설명**: 청구서 목록 — **RLS 3경로**(① 발행 전 상태 ② 청구받은 org의 ISSUED/CLOSED ③ Admin 대리점 발행분 감독)가 범위를 강제하고, 서버는 `scope` 배지(`MINE`/`RECEIVED`/`SUPERVISED`)만 계산.
+- **권한**: 역할 무관 — RLS가 범위 결정 (화주도 경로 ②로 조회 가능)
+- **Input**: `{ billedOrgId?, year?, month?, status? }`
+- **Output**: `Promise<{ success; statements?: StatementListRow[]; total?; error? }>`
+- **오류**: `generic{STATEMENT_LOOKUP|UNEXPECTED}`
+- **부수효과**: 조회만
+
+#### getBillingStatementDetail(id)
+- **Path**: `src/app/actions/finance/billing-statements.ts:722-778`
+- **설명**: 청구서 상세(헤더+항목+오더번호). 헤더·항목을 **복수 쿼리**로 조회(`items`→헤더 FK가 단일·복합 2개라 PostgREST embed가 모호 — TASK-B-360 실측).
+- **권한**: RLS 3경로 — **보이지 않으면 `statement_not_found`로 미존재와 동일 응답**(존재 여부 비노출)
+- **Input**: `id: string`
+- **Output**: `Promise<{ success; detail?: StatementDetail; error? }>`
+- **오류**: `statement_not_found`(타 생성자·미존재 동일), `generic{STATEMENT_LOOKUP|UNEXPECTED}`
+- **부수효과**: 조회만
+
+#### normalizeShipperName(name)
+- **Path**: `src/app/actions/finance/billing-statements.ts:150-153`
+- **설명**: 수기 화주명 정규화 — RPC `billed_key`의 ADHOC 규칙과 동일(공백 압축·양끝 제거·소문자). 후보 매칭과 자동완성 집계에서 공용.
+- **Input**: `name: string` / **Output**: `string` (순수 함수, DB 접근 없음)
+

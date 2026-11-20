@@ -94,7 +94,21 @@
     "already_settled": "该订单已完成成本结算。",
     "cost_settled_locked": "已结算的订单无法修改成本或重量，请先取消结算。",
     "legacy_invoiced_order": "该订单已签发按订单发票，不属于新结算流程范围。",
-    "statement_includes_order": "该订单已包含在账单中，无法取消结算。请先取消账单。"
+    "statement_includes_order": "该订单已包含在账单中，无法取消结算。请先取消账单。",
+    "adhoc_name_required": "请输入手工发货人名称。",
+    "adhoc_requires_agency": "手工发货人开账仅限代理店账户。",
+    "already_closed": "该账单已确认收款（已关闭）。",
+    "already_issued": "该账单已签发。",
+    "not_draft": "仅可处理草稿（DRAFT）状态的账单。",
+    "not_issuer": "仅可由签发该账单的组织执行此操作。",
+    "not_issued": "仅可对已签发的账单确认收款。",
+    "order_already_inclusive": "该订单已包含在账单中。",
+    "order_ids_required": "请至少选择一个要开账单的订单。",
+    "order_not_eligible": "所选订单中包含未完成结算或不属于开账范围的订单。",
+    "payment_amount_mismatch": "入金金额必须与账单金额一致。（仅支持全额）",
+    "statement_empty": "没有订单的账单无法签发。",
+    "statement_not_found": "找不到该账单。",
+    "target_not_allowed": "开账对象不属于您的范围或无效。"
   },
   "Common": {
     "phoneHelp": "仅限数字（不含连字符，最多 {max} 位）",

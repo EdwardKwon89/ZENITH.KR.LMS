@@ -94,7 +94,21 @@
     "already_settled": "This order has already been cost-settled.",
     "cost_settled_locked": "Cost or weight cannot be changed after settlement. Unmark the settlement first.",
     "legacy_invoiced_order": "This order already has a per-order invoice and is not eligible for the new settlement flow.",
-    "statement_includes_order": "This order is included in a billing statement and cannot be unmarked. Cancel the statement first."
+    "statement_includes_order": "This order is included in a billing statement and cannot be unmarked. Cancel the statement first.",
+    "adhoc_name_required": "Enter the ad-hoc shipper name.",
+    "adhoc_requires_agency": "Only agency accounts can bill ad-hoc shippers.",
+    "already_closed": "This statement has already been closed.",
+    "already_issued": "This statement has already been issued.",
+    "not_draft": "Only DRAFT statements can be processed.",
+    "not_issuer": "Only the issuing organization can perform this action.",
+    "not_issued": "Only issued statements can be confirmed for payment.",
+    "order_already_inclusive": "This order is already included in a statement.",
+    "order_ids_required": "Select at least one order to bill.",
+    "order_not_eligible": "The selection includes an order that is not settled or not in scope.",
+    "payment_amount_mismatch": "The payment amount must match the billed amount. (only full payment)",
+    "statement_empty": "A statement with no orders cannot be issued.",
+    "statement_not_found": "Statement not found.",
+    "target_not_allowed": "The billing target is not in your scope or is invalid."
   },
   "Common": {
     "phoneHelp": "Numbers only (no hyphens, max {max} digits)",

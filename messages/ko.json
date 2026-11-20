@@ -94,7 +94,21 @@
     "already_settled": "이미 오더정산이 완료되었습니다.",
     "cost_settled_locked": "오더정산이 완료된 오더는 원가·중량을 수정할 수 없습니다. 먼저 정산을 해제하세요.",
     "legacy_invoiced_order": "기존 오더별 인보이스가 발행된 오더입니다. 신규 정산 대상이 아닙니다.",
-    "statement_includes_order": "이 오더는 청구서에 포함되어 정산을 해제할 수 없습니다. 먼저 청구서를 취소하세요."
+    "statement_includes_order": "이 오더는 청구서에 포함되어 정산을 해제할 수 없습니다. 먼저 청구서를 취소하세요.",
+    "adhoc_name_required": "수기 화주명을 입력해야 합니다.",
+    "adhoc_requires_agency": "수기 화주 청구는 대리점 계정만 가능합니다.",
+    "already_closed": "이미 입금확인(마감)된 청구서입니다.",
+    "already_issued": "이미 발행된 청구서입니다.",
+    "not_draft": "초안(DRAFT) 상태의 청구서만 처리할 수 있습니다.",
+    "not_issuer": "이 청구서를 발행한 조직만 처리할 수 있습니다.",
+    "not_issued": "발행(확정)된 청구서만 입금확인할 수 있습니다.",
+    "order_already_inclusive": "이미 청구서에 포함된 오더입니다.",
+    "order_ids_required": "청구할 오더를 하나 이상 선택해야 합니다.",
+    "order_not_eligible": "정산이 완료되지 않았거나 청구 대상에 속하지 않은 오더가 포함되어 있습니다.",
+    "payment_amount_mismatch": "입금액이 청구액과 일치해야 합니다. (전액만 확인 가능)",
+    "statement_empty": "오더가 없는 청구서는 발행할 수 없습니다.",
+    "statement_not_found": "청구서를 찾을 수 없습니다.",
+    "target_not_allowed": "청구 대상이 내 소속이 아니거나 올바르지 않습니다."
   },
   "Common": {
     "phoneHelp": "숫자만 입력 (하이픈 제외, 최대 {max}자리)",
