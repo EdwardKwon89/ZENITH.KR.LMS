@@ -1,58 +1,43 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import dotenv from 'dotenv';
+import { SupabaseClient } from '@supabase/supabase-js';
 import { SettlementEngine } from '@/lib/finance/settlement/settlement';
+import { createTestOrg, getServiceClient } from './helpers/db';
 
-dotenv.config({ path: '.env.local' });
-
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'http://127.0.0.1:54321';
-const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+// TASK-1161 / Issue #1347 — 파일럿 이전: seed 조직 의존을 공용 헬퍼로 대체.
+// 단언(expect)은 한 줄도 변경하지 않는다. 남은 공용 seed 의존은 ICN/SIN 포트와
+// zen_transport_pricing_policies 행뿐이며, 이는 이 파일의 원래 전제다(명시적 선언).
 
 describe('IMP-105: Transport Pricing Policy Integration Tests (TC-POLICY-01~07)', () => {
   let supabase: SupabaseClient;
   let engine: SettlementEngine;
+  let shipperIdentity: Awaited<ReturnType<typeof createTestOrg>>;
+  let carrierIdentity: Awaited<ReturnType<typeof createTestOrg>>;
   let testShipperId: string;
   let testCarrierId: string;
   let testPortIcn: string;
   let testPortSin: string;
 
   beforeAll(async () => {
-    if (!SERVICE_KEY) throw new Error('SUPABASE_SERVICE_ROLE_KEY is required in env');
-    supabase = createClient(SUPABASE_URL, SERVICE_KEY);
+    supabase = getServiceClient();
     engine = new SettlementEngine();
 
-    // 1. Get or create test organizations
-    const { data: shipper } = await supabase
-       .from('zen_organizations')
-       .select('id')
-       .eq('name', 'Global Shipper Corp')
-       .single();
-    testShipperId = shipper?.id;
+    // 1. 공용 헬퍼로 격리된 조직·사용자·프로필 생성(시드 의존 없음, 로컬 전용 가드 적용)
+    shipperIdentity = await createTestOrg({ prefix: 'policy_shipper' });
+    carrierIdentity = await createTestOrg({ prefix: 'policy_carrier', orgType: 'CARRIER' });
+    testShipperId = shipperIdentity.orgId;
+    testCarrierId = carrierIdentity.orgId;
 
-    const { data: carrier } = await supabase
-       .from('zen_organizations')
-       .select('id')
-       .eq('name', 'Fast Carrier Ltd')
-       .single();
-    testCarrierId = carrier?.id;
-
-    const { data: existingCarrier } = await supabase
-      .from('zen_carriers')
-      .select('id')
-      .eq('id', testCarrierId)
-      .maybeSingle();
-
-    if (!existingCarrier) {
-      await supabase
-        .from('zen_carriers')
-        .insert({
-          id: testCarrierId,
-          code: 'FAST_CARRIER',
-          name: 'Fast Carrier Ltd',
-          transport_mode: 'AIR',
-          org_id: testCarrierId
-        });
-    }
+    const { error: carrierError } = await supabase.from('zen_carriers').insert({
+      id: testCarrierId,
+      code: `FAST_CARRIER_${carrierIdentity.prefix.toUpperCase()}`,
+      name: 'Fast Carrier Ltd',
+      transport_mode: 'AIR',
+      org_id: testCarrierId
+    });
+    if (carrierError) throw carrierError;
+    carrierIdentity.addCleanup(async () => {
+      await supabase.from('zen_carriers').delete().eq('id', testCarrierId);
+    });
 
     // 2. Cleanup any leftovers from previous failed runs
     const testOrderNos = [
@@ -90,6 +75,11 @@ describe('IMP-105: Transport Pricing Policy Integration Tests (TC-POLICY-01~07)'
       .eq('code', 'SIN')
       .single();
     testPortSin = portSin?.id;
+  });
+
+  afterAll(async () => {
+    await carrierIdentity.cleanup();
+    await shipperIdentity.cleanup();
   });
 
   // Helper to cleanup database records created during test

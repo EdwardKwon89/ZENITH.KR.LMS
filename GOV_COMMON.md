@@ -105,7 +105,9 @@ CI는 매 실행마다 `supabase db reset`으로 스키마+SQL 시드를 완전�
 - 반복 재발 시 원인 자체(GitHub Actions 인프라)를 문제 삼기보다, 이 대체 절차를 표준 대응으로 계속 적용한다 — 상시 모니터링으로 예방 가능한 종류의 문제가 아님이 확인됨.
 
 ### R-09 | 회귀 테스트 확장 의무
-신규 기능 개발 및 수정 작업 이후에는 반드시 관련 **회귀 테스트 케이스를 신규 추가**하고, `docs/08_Self_Audit/Checklists/LIVE_REGRESSION_TEST_MAP.md`를 업데이트해야 합니다.
+신규 기능 개발 및 수정 작업 이후에는 반드시 관련 **회귀 테스트 케이스를 신규 추가**하고, `docs/08_Self_Audit/Checklists/regression-items/TASK-*.md`에 개별 회귀 항목 파일을 등재해야 합니다.
+
+**(2026-11-18, v3.10 — IMP-186(B) / TASK-1150)**: `docs/08_Self_Audit/Checklists/LIVE_REGRESSION_TEST_MAP.md`는 자동 생성되는 **추적 인덱스**(수동 편집 금지)이며, 구 단일 맵(§1~§92)은 `lrtm-archive/` 읽기 전용 아카이브로 고정되었다. 개별 Task PR에서는 `regression-items/TASK-*.md` 파일 1개만 추가하며, `npm run check:lrtm`(`scripts/check-lrtm-sync.mjs`)으로 유령 경로(0건)·신규 미등재 Vitest 파일(래칫 `scripts/lrtm-sync-baseline.json`)·`tests/e2e/` 수동 표기(`CI 미실행`/`수동`)를 검증한다. 인덱스 본문은 자동 갱신 Action 도입 전까지 Aiden이 병합 시점에 `npm run build:lrtm`으로 수동 재생성한다.
 
 ### R-10 | 기능-UI 결합 검증 의무
 백엔드 로직(API/RPC)의 완성이 '완료'를 의미하지 않습니다. 해당 기능을 최종 사용자가 호출하고 결과를 확인할 수 있는 **물리적 UI가 완비**되고 실구동이 확인된 경우에만 WBS를 완료로 변경할 수 있습니다. 완료 보고 시 반드시 UI 구동 증적(스크린샷/녹화)을 포함해야 합니다.
@@ -212,7 +214,7 @@ status:open → [status:draft → (Aiden 확정)] → status:in-progress → sta
 4. **[자가 검증 — `check-R17-DoD` 실행]** `check-R17-DoD` 명령어를 실행하여 완료 보고 전 단계를 자가 점검한다. ❌ 항목(DoD 미체크·증거값 미기재·`TBD`·빈 값) 발견 시 **자체 수정 후 재실행** — 전항목 통과까지 반복. 통과 확인 후 문서 커밋 진행.
 5. **[문서 커밋]** `[Agent] docs: TASK-XXX 완료 보고 — task file` — task file만 포함
 6. **[PR 생성]** `feature/* → develop` PR 생성 — GitHub Issue 번호 연결(`Closes #NNN`) 및 DoD 체크리스트 PR body에 기재. **PR 생성 없이 검토 요청 완료로 간주하지 않음.**
-7. ✅ 전환은 Aiden 단독 권한 (PR 머지 = Issue 자동 Close) — Agent 자체 선언 절대 불가. **Aiden 반려 시** `gh issue edit #NNN --add-label status:rework --remove-label status:review` 실행(Aiden 담당) 후 상세 파일 `[Aiden 검토]` 섹션에 반려 사유 기재.
+7. ✅ 전환은 오케스트레이션 책임자(Edward/Aiden) 권한 (PR 머지 = Issue 자동 Close) — Agent 자체 선언 절대 불가. **Aiden 반려 시** `gh issue edit #NNN --add-label status:rework --remove-label status:review` 실행(Aiden 담당) 후 상세 파일 `[Aiden 검토]` 섹션에 반려 사유 기재.
 
 > ⚠️ **커밋 순서 위반 금지**: 코드 커밋 전 task file 🔔 변경 금지. task file 미업데이트 상태로 단일 커밋 금지. DoD 미체크·증거값 미기재 상태로 문서 커밋 금지. **PR 미생성 상태로 검토 요청 불가.**
 
@@ -262,10 +264,10 @@ status:open → [status:draft → (Aiden 확정)] → status:in-progress → sta
 **현재 팀 구성**: Team A (Aiden · D_Kai) / Team B (JSJung·Jaison 총괄, 구현: Dave·Baker·Mike)
 
 **핵심 규칙 요약**:
-- **브랜치**: `feature/teama-*` · `feature/teamb-*` → `develop` (Aiden PR 리뷰·머지) → `main`
+- **브랜치**: `feature/teama-*` → `develop`(Team A 리더가 오케스트레이션 책임자를 겸직, `TeamA_Dev` 없음) / `feature/teamb-*` → `TeamB_Dev`(Team B 리더) → `develop`(오케스트레이션 책임자, 마일스톤 기준) → `main`
 - **TASK 채번**: Team A `TASK-NNN` / Team B `TASK-B-NNN` / Team C+ `TASK-C-NNN` (팀별 독립 순번). 번호 중복 반복 발생(Issue #358)으로 반드시 착수 전 `./scripts/next-task-number.sh [A|B|C]`로 다음 번호를 확인 후 채번한다 — 눈대중 채번 금지.
 - **파일 소유권**: 각 팀은 본인 팀 Task file(`.agent/tasks/`)만 수정. 타 팀 파일 수정 금지. Task 상태는 GitHub Issue 라벨로 표현되므로 팀 간 충돌 대상 자체가 아니다.
-- **Aiden 전속**: ✅ PR 머지(최종 승인) · `develop → main` 머지 · 팀 간 조율 · 신규 팀 투입 결정
+- **오케스트레이션 책임자(Edward/Aiden) 전속**: ✅ PR 머지(최종 승인) · `TeamB_Dev → develop` 통합 · `develop → main` 머지 및 운영 배포(배포는 211 런북·Edward 명시 지시) · 팀 간 조율 · 신규 팀 투입 결정
 - **릴리즈 노트 자동 생성** (2026-08-19 도입): `develop → main` 병합 완료 직후 `gh release create <태그> --target main --generate-notes`로 태그+릴리즈 노트를 자동 생성한다. 병합된 PR 제목을 GitHub이 자동 취합하므로 별도 CHANGELOG.md 수기 관리는 하지 않는다 — 수기 이중기록은 갱신 누락으로 신뢰를 잃는 패턴이 이미 여러 차례 반복되었음(ACTIVE_TASK.md 폐지 사례 참조).
 
 ### R-18 | 발견 결함 보고 의무
@@ -424,4 +426,4 @@ PreToolUse GitNexus Hook에서 `Bash`가 제외되었습니다. 아래 경우는
 
 ## 📝 개정 이력
 
-> 최신 버전: **v3.9** (2026-11-17) | 전체 이력: [docs/00_GUIDE/GOV_CHANGELOG.md](docs/00_GUIDE/GOV_CHANGELOG.md)
+> 최신 버전: **v3.11** (2026-11-20) | 전체 이력: [docs/00_GUIDE/GOV_CHANGELOG.md](docs/00_GUIDE/GOV_CHANGELOG.md)

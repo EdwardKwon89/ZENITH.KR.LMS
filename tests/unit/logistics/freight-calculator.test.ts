@@ -62,7 +62,7 @@ describe('Freight Calculator Utility', () => {
             order: () => chain,
             limit: () => chain,
             maybeSingle: async () => {
-              if (table === 'zen_rate_cards') {
+              if (table === 'zen_rate_cards_safe') {
                 return {
                   data: {
                     tiers: {
@@ -134,7 +134,7 @@ describe('Freight Calculator Utility', () => {
             limit: () => chain,
             currentCarrier: '',
             maybeSingle: async () => {
-              if (table === 'zen_rate_cards') {
+              if (table === 'zen_rate_cards_safe') {
                 if ((chain as any).currentCarrier === 'carrier-1') {
                   return {
                       data: {
