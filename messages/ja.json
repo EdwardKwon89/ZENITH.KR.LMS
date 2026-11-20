@@ -94,7 +94,22 @@
     "already_settled": "この注文はすでに原価確定済みです。",
     "cost_settled_locked": "原価確定済みの注文は原価・重量を変更できません。先に確定を解除してください。",
     "legacy_invoiced_order": "この注文は注文単位の請求書が発行済みのため、新しい確定フローの対象外です。",
-    "statement_includes_order": "この注文は請求書に含まれているため、確定を解除できません。先に請求書を取り消してください。"
+    "statement_includes_order": "この注文は請求書に含まれているため、確定を解除できません。先に請求書を取り消してください。",
+    "adhoc_name_required": "手動出荷者名を入力してください。",
+    "adhoc_requires_agency": "手動出荷者請求は代理店アカウントのみ利用できます。",
+    "already_closed": "既に入金確認済み（クローズ済み）の請求書です。",
+    "already_issued": "既に発行済みの請求書です。",
+    "not_draft": "下書き（DRAFT）状態の請求書のみ処理できます。",
+    "not_issuer": "この請求書を発行した組織のみ操作できます。",
+    "not_issued": "発行済みの請求書のみ入金確認できます。",
+    "order_already_inclusive": "既に請求書に含まれているオーダーです。",
+    "order_ids_required": "請求するオーダーを1件以上選択してください。",
+    "order_not_eligible": "未確定または請求対象外のオーダーが含まれています。",
+    "payment_amount_mismatch": "入金額が請求額と一致する必要があります。（全額のみ）",
+    "statement_empty": "オーダーのない請求書は発行できません。",
+    "statement_not_found": "請求書が見つかりません。",
+    "target_not_allowed": "請求先が自分の範囲外か、正しくありません。",
+    "unsupported_cost_currency": "KRW以外の売上項目があるため請求書を作成できません。（原価管理で通貨を確認してください）"
   },
   "Common": {
     "phoneHelp": "数字のみ入力（ハイフンなし、最大 {max} 桁）",
