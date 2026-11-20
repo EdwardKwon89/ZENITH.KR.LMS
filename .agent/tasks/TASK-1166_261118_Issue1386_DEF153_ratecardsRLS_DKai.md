@@ -130,7 +130,7 @@
 - **코드 커밋**: `d63f6b89ccbdb647c57d9d8c2869b1fe8e05ba8d` — `[D_Kai] fix: TASK-1166 DEF-153 요율 카드 원가·마진 화주 조회 차단 (#1386)`
 - **테스트/회귀맵 커밋**: `a3413d34` — `[D_Kai] test: TASK-1166 DEF-153 회귀 테스트 17건 + 회귀맵 등재 (#1386)`
 - **R-10 증적 커밋**: `7ad399b4` — `[D_Kai] docs: TASK-1166 DEF-153 R-10 UI 증적 (#1386)`
-- **문서 커밋 (완료 보고)**: <PLACEHOLDER>
+- **문서 커밋 (완료 보고)**: `642696e8c56aa5b9ed236dffb98760fdcb33c2dd` — `[D_Kai] docs: TASK-1166 보완 재작업(회귀맵 원복·공개 문구 축소·DoD) 및 R-17 완료 보고 (#1386)`
 - **develop 병합**: `9160b60a` — `[D_Kai] merge: develop → feature/teama-task-1166-def153-ratecards-rls (보완 1 반영)`
 - **Issue 라벨**: `status:in-progress` → `status:review` → (Aiden 보완 지시) `status:rework` → 보완 후 `status:review` 복귀
 - **PR**: #1399 → `develop`
