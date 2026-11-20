@@ -920,3 +920,52 @@ export async function markOrderCostSettled(orderId: string): Promise<{ success: 
     return { success: false, error: await trError('generic', { code: 'UNEXPECTED' }) };
   }
 }
+
+/** TASK-B-367 (#1377): Admin 오더정산 되돌리기 — 청구서에 포함된 오더는 거부한다. */
+export async function unmarkOrderCostSettled(orderId: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    const { supabase, profile } = await validateUserAction();
+    const permErr = await assertAdmin(profile);
+    if (permErr) return { success: false, error: permErr };
+    const { data: order, error: orderError } = await supabase
+      .from('zen_orders').select('id, cost_settlement_status').eq('id', orderId).single();
+    if (orderError || !order) {
+      logger.error('unmarkOrderCostSettled: order lookup failed', orderError ?? orderId);
+      return { success: false, error: await trError('order_not_found') };
+    }
+    if (order.cost_settlement_status !== 'SETTLED') {
+      logger.warn(`unmarkOrderCostSettled: not settled (${orderId}, ${order.cost_settlement_status})`);
+      return { success: false, error: await trError('not_found') };
+    }
+    // 어떤 tier든 청구서 항목이 있으면 거부 — 조회 오류는 "없음"이 아니라 실패로 처리.
+    const { data: items, error: itemsError } = await supabase
+      .from('zen_billing_statement_items').select('id').eq('order_id', orderId).limit(1);
+    if (itemsError) {
+      logger.error('unmarkOrderCostSettled: statement items lookup failed', itemsError);
+      return { success: false, error: await trError('generic', { code: 'STATEMENT_ITEM_LOOKUP' }) };
+    }
+    if (items && items.length > 0) {
+      logger.warn(`unmarkOrderCostSettled: order included in billing statement (${orderId})`);
+      return { success: false, error: await trError('statement_includes_order') };
+    }
+    // 조건부 UPDATE — 동시 되돌리기/재정산 경합에서 1건만 성공.
+    const { data: updated, error: updateError } = await supabase
+      .from('zen_orders')
+      .update({ cost_settlement_status: 'NOT_SETTLED', cost_settled_at: null, cost_settled_by: null })
+      .eq('id', orderId).eq('cost_settlement_status', 'SETTLED').select('id');
+    if (updateError) {
+      logger.error('unmarkOrderCostSettled: conditional update failed', updateError);
+      return { success: false, error: await trError('generic', { code: 'UNMARK_UPDATE' }) };
+    }
+    if (!updated || updated.length === 0) {
+      logger.warn(`unmarkOrderCostSettled: concurrent unmark detected (${orderId})`);
+      return { success: false, error: await trError('not_found') };
+    }
+    revalidatePath(`/(dashboard)/orders/${orderId}`, 'page');
+    revalidatePath('/admin/ups-actual-charges');
+    return { success: true };
+  } catch (err) {
+    logger.error('unmarkOrderCostSettled failed:', err);
+    return { success: false, error: await trError('generic', { code: 'UNEXPECTED' }) };
+  }
+}

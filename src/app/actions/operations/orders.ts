@@ -22,6 +22,7 @@ import { assertActiveUpsProduct } from "@/lib/orders/ups-product-guard";
 import { hasActiveUpsLabel } from "@/lib/orders/ups-registration";
 import { getUpsEditAvailability } from "@/lib/orders/ups-edit-availability";
 import { refreshUpsRateSnapshot } from "@/lib/orders/rate-snapshot-refresh";
+import { assertSettledCargoEditAllowed } from "@/lib/orders/settled-cargo-guard"; // TASK-B-367
 
 interface SaveOrderRateSnapshotParams {
   supabase: any;
@@ -352,6 +353,11 @@ export async function updateOrder(orderId: string, payload: OrderRegistrationInp
     items: (oldItemsFull ?? []).filter((item: any) => item.package_id === pkg.id),
   }));
   const oldCargoSnapshot = extractCargoSummarySnapshot(oldPackages as Record<string, unknown>[]);
+
+  // TASK-B-367 (#1377): SETTLED & editable 상태에서 중량·치수 변경 차단 (모든 쓰기 전).
+  await assertSettledCargoEditAllowed(
+    (order as any).cost_settlement_status === 'SETTLED', oldPackagesRaw ?? [], validated.packages as any,
+  );
 
   // TASK-B-339 (Issue #1254 / 안전장치 ②): 낡은 폼 덮어쓰기 방지(낙관적 동시성).
   //   잠금이 풀리면서 화주가 실측값을 수정할 수 있게 되었으므로, 화면을 열어둔 사이 창고가 실측/재실측한

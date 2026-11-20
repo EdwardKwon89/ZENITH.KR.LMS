@@ -93,7 +93,8 @@
     "cost_not_entered": "请先输入实际成本。",
     "already_settled": "该订单已完成成本结算。",
     "cost_settled_locked": "已结算的订单无法修改成本或重量，请先取消结算。",
-    "legacy_invoiced_order": "该订单已签发按订单发票，不属于新结算流程范围。"
+    "legacy_invoiced_order": "该订单已签发按订单发票，不属于新结算流程范围。",
+    "statement_includes_order": "该订单已包含在账单中，无法取消结算。请先取消账单。"
   },
   "Common": {
     "phoneHelp": "仅限数字（不含连字符，最多 {max} 位）",

@@ -34,6 +34,7 @@ export {
 export {
   getOrdersForCostSettlement,
   markOrderCostSettled,
+  unmarkOrderCostSettled,
 } from './ups-actual-cost';
 
 export {

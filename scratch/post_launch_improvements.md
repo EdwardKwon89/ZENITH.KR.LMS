@@ -2265,3 +2265,15 @@ UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류
 - **관련 파일**: `supabase/migrations/20261119090000_task_b359_billing_statement_db.sql`, `tests/unit/migrations/taskb359-billing-statement-db.test.ts`
 - **예상 공수**: 0.5 MD
 - **우선순위**: Medium — ②는 금전 합계 무결성, ③은 경미, ①은 방어적 위생
+
+---
+
+## [IMP-200] 오더정산 되돌리기의 청구서 포함 검사 TOCTOU — DB 트리거 원자적 방어
+
+- **발견 경위**: 2026-11-20 TASK-B-367(#1377) Jaison 배정 코멘트 사전 지적 + 구현 중 확인. `unmarkOrderCostSettled`가 `zen_billing_statement_items`에 청구서 항목이 없는 것을 확인한 뒤 `zen_orders`를 `NOT_SETTLED`로 갱신하는 사이, 다른 트랜잭션이 같은 오더를 항목에 삽입하면 "청구서 포함 오더의 정산 해제"가 통과할 수 있다(IMP-198 계열 경합의 되돌리기 방향).
+- **현재 상태**: 애플리케이션 레벨에서 `order_id` 기준 선조회 + 조건부 UPDATE(`.eq('cost_settlement_status','SETTLED')`)로 동시 되돌리기는 1건만 성공하도록 막혀 있으나, **항목 삽입과의 교차 경합은 차단하지 못함**. Admin 전용·저확률이라 즉시 사고 위험은 낮음. 실DB 통합 테스트는 항목 선행 삽입/헤더 CASCADE 해제 경로를 검증하며, 경합 자체는 재현하지 않음.
+- **임시 조치**: 조회→UPDATE 순서 고정 + 조건부 UPDATE 영향 행 0건 검사, 청구서 항목 조회 오류를 "없음"이 아닌 실패로 처리. 경합 가능성은 task file `[발견 이슈]`·regression item에 기록.
+- **목표 구현**: DB 트리거/제약으로 `cost_settlement_status='NOT_SETTLED'` 전이 시 해당 `order_id`의 `zen_billing_statement_items` 존재를 원자적으로 거부(또는 역방향으로 SETTLED 오더에 항목 INSERT 시 정산 상태를 되돌리는 트랜잭션과 직렬화). Admin 사용자 세션(RLS) 기반 경합 통합 테스트 추가. **IMP-198(정산 후 원가 덮어쓰기 TOCTOU)과는 반대 방향이므로 별도 항목으로 등록** — 기존 IMP-198에 덧붙이지 않음(Jaison 지시).
+- **관련 파일**: `src/app/actions/finance/ups-actual-cost.ts`, `supabase/migrations/`(트리거 도입 시), `tests/integration/task-b367-unmark-cost-settled.test.ts`
+- **예상 공수**: 0.3~0.5 MD
+- **우선순위**: Low~Medium — 금전 정합성 방어선 보강, IMP-198과 함께 처리 가능

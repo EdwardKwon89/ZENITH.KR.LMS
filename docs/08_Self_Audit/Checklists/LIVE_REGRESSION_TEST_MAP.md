@@ -11,9 +11,9 @@
 ## 📊 실측 Vitest 회귀 스위트 현황 (자동 집계)
 
 - **스캔 범위**: `tests/**/*.{test,spec}.{ts,tsx}` (`tests/e2e/**`, `tests/poc-*/**` 제외 — `vitest.config.ts` 기준)
-- **실측 테스트 파일 수**: **276개**
-- **실측 테스트 케이스 수 (`it`/`test` 블록)**: **2,035건**
-- **신규 구조 등재 Task 수**: **10건**
+- **실측 테스트 파일 수**: **279개**
+- **실측 테스트 케이스 수 (`it`/`test` 블록)**: **2,059건**
+- **신규 구조 등재 Task 수**: **11건**
 
 ---
 
@@ -33,6 +33,7 @@
 <!-- LRTM_ITEMS_START -->
 | Task | Issue | 팀 | 작성일 | 케이스 수 | 테스트 파일 | 차원(231) | 상세 |
 |:---|:---:|:---:|:---:|---:|:---|:---:|:---:|
+| **TASK-B-367** | #1377 | Team B | 2026-11-20 | 19건 | `tests/unit/finance/task-b367-unmark-cost-settled.test.ts`, `tests/unit/orders/task-b367-settled-cargo-guard.test.ts`, `tests/integration/task-b367-unmark-cost-settled.test.ts`, `tests/unit/i18n/errors-key-sync.test.ts` | D1, D5 | [상세](./regression-items/TASK-B-367_Issue1377_unmark-cost-settled.md) |
 | **TASK-B-366** | #1376 | - | - | 19건 | `tests/unit/finance/task-b366-cost-settlement.test.ts`, `tests/integration/task-b366-cost-settlement.test.ts` | - | [상세](./regression-items/TASK-B-366_Issue1376_cost-settlement-actions.md) |
 | **TASK-B-365** | #1375 | - | - | 10건 | `tests/unit/migrations/taskb365-cost-settlement-columns.test.ts` | - | [상세](./regression-items/TASK-B-365_Issue1375_cost-settlement-columns.md) |
 | **TASK-B-364** | #1374 | - | - | 10건 | `tests/unit/ups/actual-cost-compute.test.ts`, `tests/unit/finance/task-b364-cost-integration.test.ts`, `tests/unit/components/billing-confirm-modal-preview.test.tsx` | - | [상세](./regression-items/TASK-B-364_Issue1374_cost-integration.md) |

@@ -93,7 +93,8 @@
     "cost_not_entered": "先に実費を入力してください。",
     "already_settled": "この注文はすでに原価確定済みです。",
     "cost_settled_locked": "原価確定済みの注文は原価・重量を変更できません。先に確定を解除してください。",
-    "legacy_invoiced_order": "この注文は注文単位の請求書が発行済みのため、新しい確定フローの対象外です。"
+    "legacy_invoiced_order": "この注文は注文単位の請求書が発行済みのため、新しい確定フローの対象外です。",
+    "statement_includes_order": "この注文は請求書に含まれているため、確定を解除できません。先に請求書を取り消してください。"
   },
   "Common": {
     "phoneHelp": "数字のみ入力（ハイフンなし、最大 {max} 桁）",
