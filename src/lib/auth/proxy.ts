@@ -65,10 +65,17 @@ export async function authGuard(
       user?.app_metadata?.role === USER_ROLES.ZENITH_SUPER_ADMIN || 
       (user?.app_metadata?.role === USER_ROLES.ADMIN && user?.app_metadata?.org_type === 'PLATFORM');
 
-    if (isMaintenanceMode && !isPlatformUser && !isAuthPage && purePath !== '/' && purePath !== '/maintenance') {
-      const url = request.nextUrl.clone();
-      url.pathname = `/${locale}/maintenance`;
-      return { response: mergeHeaders(NextResponse.redirect(url), supabaseResponse), redirectUrl: url.pathname };
+    if (isMaintenanceMode && !isPlatformUser) {
+      // DEF-148: 점검 안내 페이지는 소속·상태 가드보다 우선한다.
+      // 여기서 즉시 반환하지 않으면 아래 orgType·PENDING·SUSPENDED 분기가 소속 경로로
+      // 되돌려 다시 점검 페이지로 리다이렉트하는 무한 루프가 발생한다.
+      if (purePath === DEFAULT_REDIRECTS.MAINTENANCE) return null;
+
+      if (!isAuthPage && purePath !== '/') {
+        const url = request.nextUrl.clone();
+        url.pathname = `/${locale}${DEFAULT_REDIRECTS.MAINTENANCE}`;
+        return { response: mergeHeaders(NextResponse.redirect(url), supabaseResponse), redirectUrl: url.pathname };
+      }
     }
   }
 

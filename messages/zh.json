@@ -506,5 +506,11 @@
     "cargo_found": "已找到货物。",
     "no_measurements": "没有更改的测量值。",
     "measurements_saved": "测量值已保存。"
+  },
+  "Maintenance": {
+    "title": "维护中",
+    "message": "服务正在维护中，请稍后重试。",
+    "eta_unknown": "预计恢复时间尚未确定。",
+    "back": "返回首页"
   }
 }

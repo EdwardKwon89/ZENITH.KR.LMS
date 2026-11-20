@@ -28,7 +28,7 @@ export const createOrderServices = withAction(async function (orderId: string, s
   for (const s of services) {
     if (s.rate_card_id) {
       const { data: rateCard, error } = await supabase
-        .from("zen_rate_cards")
+        .from("zen_rate_cards_safe")
         .select("id, is_active, valid_from, valid_until")
         .eq("id", s.rate_card_id)
         .single();

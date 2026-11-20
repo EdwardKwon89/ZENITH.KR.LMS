@@ -89,6 +89,41 @@ jobs:
       - name: 의존성 취약점 점검 (신규·상승만 경고)
         run: node scripts/check-audit.mjs || true
 
+  vendor-advisory:
+    name: Vendor Integrity (advisory, non-blocking)
+    # DEF-146 / TASK-1157: npm audit 은 `file:vendor/*.tgz` 의존성을 검사하지 못한다(사각지대).
+    # 벤더링한 tarball 의 SHA-256·내부 버전·Dockerfile COPY vendor·vendor/README.md 만 점검하고
+    # 항상 exit 0. 저장소 파일만 읽으므로 npm ci 불필요.
+    runs-on: ubuntu-latest
+    if: github.head_ref != 'bot/sync-active-task'
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: 벤더링 의존성 무결성 점검
+        run: node scripts/check-vendor.mjs || true
+
+  lrtm-sync-advisory:
+    name: LRTM Sync Check (advisory, non-blocking)
+    # IMP-186(B) / TASK-1150: 회귀맵 ↔ 실제 Vitest 정합성 점검(유령 경로·baseline 밖 신규 미등재·E2E 수동 표기).
+    # advisory + continue-on-error 로 운영하며 저장소 파일만 읽으므로 npm ci 불필요.
+    runs-on: ubuntu-latest
+    if: github.head_ref != 'bot/sync-active-task'
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: 회귀 테스트 맵 정합성 점검 (R-09)
+        run: node scripts/check-lrtm-sync.mjs || true
+
   regression:
     name: Regression Tests
     runs-on: ubuntu-latest
