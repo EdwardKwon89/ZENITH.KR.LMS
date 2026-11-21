@@ -50,7 +50,7 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
-| [#1407](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1407) | [Team A] TASK-1169: create_order_atomic v7 구버전 payload 호환 로컬 검증 (D_Kai) | a | p2 | open | 미배정 | 2026-11-21 |
+| [#1407](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1407) | [Team A] TASK-1169: create_order_atomic v7 구버전 payload 호환 로컬 검증 (D_Kai) | a | p2 | review | 미배정 | 2026-11-21 |
 | [#1406](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1406) | [Team A] TASK-1168: DEF-157 — 스냅샷 테이블 화주측 원가 컬럼 노출 해소 (Riley) | a | p2 | draft | 미배정 | 2026-11-21 |
 | [#1371](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1371) | [Team B → Aiden] Gale(Gemini 4 Argon) 페르소나 등록 요청 — agent-worktree-init.sh 등 | a | p3 | open | 미배정 | 2026-11-18 |
 | [#1369](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1369) | [Team B] TASK-B-363: 청구서관리 ⑥ 레거시 병행 정책 반영 및 컷오버 — 기존 메뉴·UPS 인보이스 처리 | b | p2 | blocked | 미배정 | 2026-11-20 |
