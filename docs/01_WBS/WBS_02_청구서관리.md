@@ -77,7 +77,7 @@ Worker 후보: Dave / Baker / Mike (할당은 Task 발령 시 JSJung 확인). Au
 | 4.3 | `cancelBillingStatement` (생성자·DRAFT만), `issueBillingStatement` (발행=확정, 이후 변경 불가) | 구현 Agent | Jaison | 1.5 | 4.2 | 상태 전이 위반 거부, 서버 강제 |
 | 4.4 | `confirmStatementPayment` (전액만, 불일치 시 저장 안 함 → 마감) + 오더 `billing_status` 연동 | 구현 Agent | Jaison | 1.5 | 4.3 | 입금액 불일치 테스트 |
 | 4.5 | `getBillingStatements`, `getBillingStatementDetail` (RLS 범위, 타 생성자는 존재 비노출) | 구현 Agent | Jaison | 1 | 4.2 | 조회 범위 3경로 테스트 |
-| 4.6 | `exportBillingStatementExcel` (A4 세로, 너비 1페이지 맞춤, 좁은 여백, 제목행 반복, 인쇄영역, 시트2개) | 구현 Agent | Jaison | 2.5 | 4.5 | 라이브러리 선정(현행 의존성·Context7 확인), 출력 파일 인쇄 설정 검증 테스트 |
+| 4.6 | `exportBillingStatementExcel` (A4 — 시트1 세로·시트2 가로, 너비 1페이지 맞춤, 좁은 여백, 제목행 반복, 인쇄영역, 시트2개 — 양식: An_17 부록 A) | 구현 Agent | Jaison | 2.5 | 4.5 | 라이브러리 선정(현행 의존성·Context7 확인), 출력 파일 인쇄 설정 검증 테스트 |
 | 4.7 | Ds-11 반영(R-12), 회귀 테스트·맵 갱신 | 구현 Agent | Jaison/Aiden | 1.5 | 4.1~4.6 | `check:ds11` baseline 밖 신규 미반영 0 |
 
 소계 약 11.5일. 마일스톤 **M4: 청구서 액션 머지**.
