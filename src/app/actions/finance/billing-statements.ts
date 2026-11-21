@@ -12,6 +12,7 @@ import { validateUserAction } from '@/lib/auth/guards';
 import { USER_ROLES } from '@/lib/auth/rbac';
 import { logger } from '@/lib/logger';
 import { trError, type ErrorKey } from '@/lib/i18n/action-error';
+import { kstDateString, kstRangeBounds } from '@/lib/utils/date-kst';
 
 // ───────────────────────────────────────────── types
 
@@ -302,7 +303,7 @@ async function fetchScopedOrders(
   };
 }
 
-/** 기준일 + 이미 포함된 오더 — 기간은 DB 쪽 필터, 포함 조회는 후보 id로 한정(전체 1,000행 상한 회피) */
+/** 기준일 + 이미 포함된 오더 — 기간은 DB 쪽 필터(KST 개구 구간), 포함 조회는 후보 id로 한정 */
 async function fetchBasisAndIncluded(
   supabase: any,
   orderIds: string[],
@@ -311,10 +312,12 @@ async function fetchBasisAndIncluded(
   dateFrom: string,
   dateTo: string,
 ): Promise<{ dateOf: Map<string, string>; included: Set<string> } | { error: string }> {
+  // KST 달력일 기준 절반 개구 구간 — `23:59:59` 종료는 소수초 오더를 누락시킨다
+  const bounds = kstRangeBounds(dateFrom, dateTo);
   const [histRes, incRes] = await Promise.all([
     supabase.from('order_status_history').select('order_id, created_at')
       .in('order_id', orderIds).eq('next_status', basis)
-      .gte('created_at', `${dateFrom}T00:00:00`).lte('created_at', `${dateTo}T23:59:59`)
+      .gte('created_at', bounds.start).lt('created_at', bounds.endExclusive)
       .order('created_at', { ascending: false }),
     supabase.from('zen_billing_statement_items').select('order_id, tier')
       .eq('tier', tier).in('order_id', orderIds),
@@ -330,12 +333,13 @@ async function fetchBasisAndIncluded(
   }
   const dateOf = new Map<string, string>();
   for (const h of histRes.data ?? []) {
-    if (!dateOf.has(h.order_id)) dateOf.set(h.order_id, String(h.created_at).slice(0, 10));
+    // 표시 기준일도 KST 달력일 (UTC slice는 KST 자정을 넘는 오더의 날짜를 어긋나게 만든다)
+    if (!dateOf.has(h.order_id)) dateOf.set(h.order_id, kstDateString(String(h.created_at)));
   }
   return { dateOf, included: new Set<string>((incRes.data ?? []).map((r: any) => r.order_id)) };
 }
 
-/** 기간 내 후보 분리 — 미정산은 건수로 분리, 이미 포함된 오더는 제외 */
+/** 기간 내 후보 분리 — `dateOf`는 KST 달력일이라 `dateFrom/dateTo`(KST)와 직접 비교해도 동일하다 */
 function partitionCandidates(
   scoped: any[],
   dateOf: Map<string, string>,

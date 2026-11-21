@@ -69,7 +69,7 @@ function asUser(identity: Identity) {
 
 function seedOrder(id: string, opts: {
   shipperOrg: string; agencyOrg?: string | null; settled: boolean; shipperName?: string;
-  platformOnly?: boolean; usd?: boolean;
+  platformOnly?: boolean; usd?: boolean; basisAt?: string;
 }) {
   const settled = opts.settled
     ? `'SETTLED', now(), '${admin.userId}'`
@@ -87,7 +87,7 @@ function seedOrder(id: string, opts: {
       shipper_id = EXCLUDED.shipper_id, agency_org_id = EXCLUDED.agency_org_id,
       shipper_name = EXCLUDED.shipper_name;
     INSERT INTO public.order_status_history (order_id, prev_status, next_status, changed_by, created_at)
-    VALUES ('${id}', 'IN_TRANSIT', 'DELIVERED', '${admin.userId}', '2026-11-10T10:00:00Z')
+    VALUES ('${id}', 'IN_TRANSIT', 'DELIVERED', '${admin.userId}', '${opts.basisAt ?? '2026-11-10T10:00:00Z'}')
     ON CONFLICT DO NOTHING;
     INSERT INTO public.zen_order_rate_snapshots
       (id, order_id, applied_unit_price, applied_currency, applied_rule, metadata, snapshot_at)
@@ -625,5 +625,81 @@ describe('티어별 금액 원천·ADHOC·통화 가드 (실제 RPC 호출)', ()
     // 헤더 잔존 0 (한 트랜잭션 롤백 — orphan 없음)
     expect(Number(psql(`SELECT count(*) FROM public.zen_billing_statements WHERE issuer_org_id='${agency.orgId}'`))).toBe(before);
     expect(psql(`SELECT count(*) FROM public.zen_billing_statements WHERE period_year = 2025 AND period_month = 12`)).toBe('0');
+  });
+});
+
+// ───────────────────────── KST 기준 청구 기간 필터 (british-1, 2026-11-21 Jaison)
+
+describe('KST 기준 청구 기간 필터 (british-1)', () => {
+  let kstShipper: Identity;
+  // KST 달력일 vs UTC가 어긋나는 경계 시각 3건 (모두 2026-11-30 DELIVERED)
+  const ORD_K1 = '36000000-0000-4000-8000-000000000021'; // 11/30 23:30 KST = 14:30Z
+  const ORD_K2 = '36000000-0000-4000-8000-000000000022'; // 12/01 00:10 KST = 11/30 15:10Z
+  const ORD_K3 = '36000000-0000-4000-8000-000000000023'; // 11/30 23:59:59.500 KST = 14:59:59.500Z
+  const KST_IDS = [ORD_K1, ORD_K2, ORD_K3];
+  const NOV = { dateFrom: '2026-11-01', dateTo: '2026-11-30', dateBasis: 'DELIVERED' as const };
+  const DEC = { dateFrom: '2026-12-01', dateTo: '2026-12-31', dateBasis: 'DELIVERED' as const };
+
+  beforeAll(async () => {
+    kstShipper = await createTestOrg({
+      prefix: `b360_kst_${randomUUID().slice(0, 8)}`, role: 'SHIPPER', orgType: 'INDIVIDUAL',
+    });
+    psql(`INSERT INTO public.zen_agency_shippers (id, agency_org_id, shipper_org_id, shipper_type, is_active, created_at)
+          VALUES (gen_random_uuid(), '${agency.orgId}', '${kstShipper.orgId}', 'INDIVIDUAL', TRUE, now())
+          ON CONFLICT DO NOTHING`);
+    seedOrder(ORD_K1, { shipperOrg: kstShipper.orgId, agencyOrg: agency.orgId, settled: true, basisAt: '2026-11-30T14:30:00Z' });
+    seedOrder(ORD_K2, { shipperOrg: kstShipper.orgId, agencyOrg: agency.orgId, settled: true, basisAt: '2026-11-30T15:10:00Z' });
+    seedOrder(ORD_K3, { shipperOrg: kstShipper.orgId, agencyOrg: agency.orgId, settled: true, basisAt: '2026-11-30T14:59:59.500Z' });
+  });
+
+  afterAll(async () => {
+    const ids = KST_IDS.map((o) => `'${o}'`).join(',');
+    psql(`DELETE FROM public.zen_order_costs WHERE order_id IN (${ids});`);
+    psql(`DELETE FROM public.zen_order_rate_snapshots WHERE order_id IN (${ids});`);
+    psql(`DELETE FROM public.order_status_history WHERE order_id IN (${ids});`);
+    psql(`DELETE FROM public.zen_orders WHERE id IN (${ids});`);
+    psql(`DELETE FROM public.zen_agency_shippers WHERE shipper_org_id='${kstShipper.orgId}';`);
+    try { await kstShipper.cleanup(); } catch { /* best-effort */ }
+  });
+
+  async function candidateIds(range: { dateFrom: string; dateTo: string; dateBasis: 'DELIVERED' }) {
+    asUser(agency);
+    const res = await listBillableOrders({ ...range, billedTarget: ORG_TARGET(kstShipper.orgId) });
+    expect(res.success).toBe(true);
+    return (res.orders ?? []).map((o) => o.orderId);
+  }
+
+  it('① 11/30 23:30 KST(=14:30Z) DELIVERED 오더는 11월 후보에 포함된다', async () => {
+    const ids = await candidateIds(NOV);
+    expect(ids).toContain(ORD_K1);
+    const res = await listBillableOrders({ ...NOV, billedTarget: ORG_TARGET(kstShipper.orgId) });
+    const row = (res.orders ?? []).find((o) => o.orderId === ORD_K1);
+    expect(row?.basisDate).toBe('2026-11-30'); // KST 달력일 (UTC slice와도 일치하는 경계)
+  });
+
+  it('② 12/01 00:10 KST(=11/30 15:10Z) 오더는 11월 후보에서 빠지고 12월에 포함된다', async () => {
+    const nov = await candidateIds(NOV);
+    expect(nov).not.toContain(ORD_K2);
+    const dec = await candidateIds(DEC);
+    expect(dec).toContain(ORD_K2);
+    const res = await listBillableOrders({ ...DEC, billedTarget: ORG_TARGET(kstShipper.orgId) });
+    const row = (res.orders ?? []).find((o) => o.orderId === ORD_K2);
+    expect(row?.basisDate).toBe('2026-12-01'); // UTC로는 11-30으로 어긋난다
+  });
+
+  it('③ 마지막 날 23:59:59.500 KST 오더는 11월 후보에 포함된다 (소수초 누락 없음)', async () => {
+    const ids = await candidateIds(NOV);
+    expect(ids).toContain(ORD_K3);
+    const res = await listBillableOrders({ ...NOV, billedTarget: ORG_TARGET(kstShipper.orgId) });
+    const row = (res.orders ?? []).find((o) => o.orderId === ORD_K3);
+    expect(row?.basisDate).toBe('2026-11-30');
+  });
+
+  it('KST 월 경계(12-01 00:00+09 = 11-30 15:00Z) 양쪽으로 오더가 갈린다', async () => {
+    // ①·③(14:30Z, 14:59:59.5Z)은 경계 전, ②(15:10Z)는 경계 후
+    const nov = await candidateIds(NOV);
+    expect(nov).toContain(ORD_K1);
+    expect(nov).toContain(ORD_K3);
+    expect(nov).not.toContain(ORD_K2);
   });
 });
