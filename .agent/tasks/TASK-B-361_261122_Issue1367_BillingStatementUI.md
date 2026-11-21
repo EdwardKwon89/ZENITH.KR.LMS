@@ -8,8 +8,8 @@
 | **최종 승인** | JSJung |
 | **생성일** | 2026-11-22 |
 | **우선순위** | P2 (`team:b`, `priority:p2`, `type:feat`) |
-| **상태** | 🔁 Jaison 검토 수정요청 2건 반영 완료 — 재커밋 후 CI 재확인 예정 (`status:review` 유지). ⒝ 후속 예정. ⒜는 DEF-B-162 해소(#1416) 반영 위해 `origin/TeamB_Dev` @ `c89a5d2d9`로 rebase 완료 |
-| **브랜치** | `feature/teamb-task-b361-iss1367-billing-statement-ui` (rebase onto `origin/TeamB_Dev` @ `c89a5d2d9`, 구 base `19403fdec`) |
+| **상태** | 🔔 ⒝ PR #1413 검토 대기 (`status:review`) — ⒜ PR #1412 병합 완료(2026-11-22T04:02:37Z, merge `5dc7fe379`), ⒝ `origin/TeamB_Dev` @ `5dc7fe379` 재base 완료. S1·S2 화면은 범위 외(후속 Task) |
+| **브랜치** | ⒜ `feature/teamb-task-b361-iss1367-billing-statement-ui` (PR #1412, **MERGED** @ `5dc7fe379`) / ⒝ `feature/teamb-task-b361b-iss1367-billing-statement-ui` (PR #1413, 재base onto `origin/TeamB_Dev` @ `5dc7fe379`) |
 | **선행 조건** | ✅ #1366 ⒜(PR #1404, 2026-11-20 병합) / ✅ PR #1405(2026-11-21 병합) / ✅ Excel Route Handler PR #1411(2026-11-21 병합) / ✅ DB 마이그레이션 최신(pending 0) |
 | **범위** | WBS 5.1~5.7 — **⒜ PR `Refs #1367`**: S3 목록·S4 생성(수기 화주 포함)·S5 상세·3경로 공용 컴포넌트 / **⒝ PR `Closes #1367`**: 메뉴·경로 허용·i18n 정리·증적 |
 | **설계 기준** | `docs/02_Analysis/An_17_청구서관리_오더정산_청구서_설계.md` §6-4~§6-6·§6-5b·§6-5c + 이슈 본문·Jaison 2026-11-21 코멘트(충돌 시 코멘트 우선) |
@@ -99,16 +99,17 @@ $ gh issue list --state all --search "TASK-B-361 in:title"
 | 심볼 | grep 참조처 | ⒜ 변경 | 비고 |
 |:--|:--|:--|:--|
 | 서버 액션 8종 | B-360 테스트, `api/finance/statements/[id]/export/route.ts`, 신규 8페이지·6컴포넌트 | **소비자만 추가**, 액션 본체 미수정 | 액션의 `revalidatePath('/finance/statements')`·`('/agency/statements')`가 신규 라우트와 정합 |
-| `Statements` i18n | 신규 컴포넌트 6종 + 3 테스트 | 신규 네임스페이스 78키 × 4로케일 | 기존 키 참조 0, `Errors` 키 변경 0 |
-| `NaviSidebar.tsx` | `(dashboard)/layout.tsx` | 없음 (⒝ 범위) | "정산/재무" children·"대리점 관리" children·화주 메뉴 삽입 예정 |
-| `rbac.ts` `ALL_RESOURCE_PATHS` | 권한 관리 화면 | 없음 (⒝ 범위) | `/finance`·`/agency`·`/shipper` 상위 경로는 이미 등록 — 세부 경로 추가 여부 ⒝에서 결정 |
-| `proxy.ts` 비플랫폼 허용 목록 | 미들웨어 라우팅 | 없음 (⒝ 범위) | `/agency`·`/shipper`는 이미 `startsWith` 허용. `/finance/statements`는 Admin(PLATFORM) 전용이라 제약 없음 |
+| `Statements` i18n | 신규 컴포넌트 6종 + 3 테스트 | 신규 네임스페이스 78키(⒜) + ⒝ `excel` 1키 → **79키 × 4로케일** | 기존 키 참조 0, `Errors` 키 변경 0 |
+| `NaviSidebar.tsx` | `(dashboard)/layout.tsx` | **⒝ 메뉴 3종 추가** | "정산/재무" children에 `/finance/statements`, "대리점 관리" children 마지막에 `/agency/statements`, 화주 메뉴 끝에 `/shipper/statements`. 노출은 기존 `checkPermission(role, href, allowedPaths)` 경로(부모 접두 `/finance`·`/agency`·`/shipper` 매칭)가 그대로 적용 → 별도 권한 코드 추가 없음 |
+| `rbac.ts` `ALL_RESOURCE_PATHS` | 권한 관리 화면 | **변경 없음 (⒝ 실측 판정)** | `/finance`·`/agency`·`/shipper` 상위 경로가 이미 등록되어 있고 `checkPermission`은 접두 매칭 — 세부 경로 등록 불필요. 로컬 `zen_role_permissions` 실측: ADMIN=`/finance`, AGENCY=`/agency`, SHIPPER·AGENCY_SHIPPER=`/shipper` 상위 경로 보유 |
+| `proxy.ts` 비플랫폼 허용 목록 | 미들웨어 라우팅 | **변경 없음 (⒝ 실측 판정)** | 비플랫폼(`orgType !== 'PLATFORM'`)은 `purePath.startsWith(allowedRoot)`로 `/agency`·`/shipper` 하위 전체 허용 → 신규 경로 자동 허용. `/finance/statements`는 ADMIN·ZENITH_SUPER_ADMIN(PLATFORM) 전용이라 이 분기 대상 아님 |
 
-→ 변경 심볼은 기대 범위(신규 컴포넌트·라우트·i18n·회귀 항목) 안, 범위 밖 기존 파일 수정 0. `detect_changes` 상당 확인을 grep 전수로 대체.
+→ 변경 심볼은 기대 범위(신규 컴포넌트·라우트·i18n·메뉴·회귀 항목) 안, 범위 밖 기존 파일 수정 0(`rbac.ts`·`proxy.ts`는 검토만). `detect_changes` 상당 확인을 grep 전수로 대체.
 
 ### 2-8. i18n 실측
 
-`Statements` 네임스페이스 **78키 × ko/en/zh/ja 동일 키셋**(key set 비교 PASS). 신규 `Errors` 키 없음 — `errors-key-sync` 기대 110키 유지.
+- ⒜: `Statements` 네임스페이스 **78키 × ko/en/zh/ja 동일 키셋**(key set 비교 PASS). 신규 `Errors` 키 없음 — `errors-key-sync` 기대 110키 유지.
+- ⒝: `Statements.excel` 1키 추가 → **79키 × 4로케일 동일**. `Navigation`에 `statements_nav`·`shipper_statements_nav` 신규 2키, 기존 `shipper_invoices_nav`에 `(기존)`/`(Legacy)` 접미 부여(설계 §6-5c). 4로케일 모두 동일 키 반영, `Errors` 110키 유지. `npm run check:i18n` 전역 FAIL은 기존 DEF-B-156(ja 519키 누락)이며 신규 키 누락은 0.
 
 ## 3. [발견 이슈]
 
@@ -116,12 +117,12 @@ _담당 Task 범위 밖 이슈 / 설계·DTO 간극_
 
 | DEF# | 제목 | 긴급도 | 상세 |
 |:--|:--|:--|:--|
-| DEF-B-156(기존) | `npm run check:i18n` 감사 FAIL — ja 로케일이 en 대비 519키 누락(기존 523 → 신규 키 일부 반영으로 감소) | Low | `.agent/defects/DEF-B-156_i18n_ja로케일_523키누락_감사FAIL.md`. 본 Task의 `Statements` 78키는 4로케일 모두 존재(실패 목록에 `Statements.*` 없음). stash 비교 없이도 base `ja.json`이 25 top-level key뿐임을 확인 → 기존 결함. 범위 밖이라 미수정. |
+| DEF-B-156(기존) | `npm run check:i18n` 감사 FAIL — ja 로케일이 en 대비 519키 누락(기존 523 → 신규 키 일부 반영으로 감소) | Low | `.agent/defects/DEF-B-156_i18n_ja로케일_523키누락_감사FAIL.md`. 본 Task의 `Statements` 79키(⒝ `excel` 포함)는 4로케일 모두 존재(실패 목록에 `Statements.*` 없음). stash 비교 없이도 base `ja.json`이 25 top-level key뿐임을 확인 → 기존 결함. 범위 밖이라 미수정. |
 | DEF-B-162 | `'use server'` 액션 파일의 비동기 아닌 export `normalizeShipperName`로 `npm run build` 전역 실패 | High → **해소됨** | `.agent/defects/DEF-B-162_청구서액션_비동기아닌_export_빌드실패.md`. B-360 ⒜(PR #1404) 산출물. **Mike/TASK-B-368(PR #1416, 2026-11-22 병합)**이 순수 유틸 `src/lib/finance/billing/normalize-shipper-name.ts`로 분리해 해소. 본 ⒜는 rebase 후 `StatementCreate.tsx`의 로컬 `normalize()`를 해당 공용 유틸 import로 교체(Jaison 2026-11-22 지시) — 규칙 단일 출처. |
 
 | 구분 | 내용 | 조치 |
 |:--|:--|:--|
-| 설계-코드 불일치 | 설계 §6-5c의 오더정산 경로 `/finance/order-settlement` 미존재 + `markOrderCostSettled` 호출 화면 없음 | 링크 제거, 역할별 안내 문구로 대체. 이슈 #1367에 S1·S2 구현 여부 질문 게시 |
+| 설계-코드 불일치 | 설계 §6-5c의 오더정산 경로 `/finance/order-settlement` 미존재 + `markOrderCostSettled` 호출 화면 없음 | 링크 제거, 역할별 안내 문구로 대체. 이슈 #1367에 S1·S2 구현 여부 질문 게시 → **Jaison 판단: 본 Task 범위 외, JSJung 확인 후 후속 Task 발령** |
 | Jaison 리뷰(비차단) | `formatKrw` 원 단위 반올림 → 소수 `numeric(14,2)` 값이 Excel(2자리)과 1원 차이 가능 | 설계 §3-1b "반올림은 현행 `Math.round` 유지"에 따라 의도적. 2자리 표시/정책 변경은 IMP 제안으로 이관 |
 | Jaison 리뷰(비차단) | 연/월 입력과 `dateFrom`/`dateTo`가 독립 | 서버 액션은 4값을 그대로 RPC에 전달, RPC는 연/월 범위만 검증하고 기간과의 일관성 검증 없음(메타 기록). 현 동작 유지·기재 |
 | Jaison 리뷰(비차단) | Admin 대상 목록 `getOrganizations(1,500)` 500건에서 조용히 잘림 | IMP 제안(검색/초과 경고)으로 이관. 본 PR 범위 밖 |
@@ -132,7 +133,7 @@ _담당 Task 범위 밖 이슈 / 설계·DTO 간극_
 
 ## 4. [작업 결과]
 
-- 코드 커밋: `d9c8003132c95cc2a0ed7407e3d1eab926dda3e6`(rebase 후 `85ade9850`) + 공용 유틸 전환 `d08b83c5bd92af1099bbe316a33d592a009b277f` + **Jaison 리뷰 수정 `aaeb5f7f04d2eecdea6a075678a9eb2f274c6c9d`**
+- 코드 커밋: ⒜ `85ade9850`(rebase) + 공용 유틸 `d08b83c5b` + Jaison 리뷰 수정 `aaeb5f7f0` / ⒝ `142b5a16b` → 재base 후 `081d945a9`
 
 ### ⒜ PR (WBS 5.1~5.4, `Refs #1367`)
 - **공용 컴포넌트** `src/components/finance/statements/` 8파일 — `types.ts`(DTO·`formatKrw`·`isIssuerScope`), `Badges.tsx`(상태 3색/범위 배지), `StatementModals.tsx`(발행 경고·입금 전액 사전검증), `StatementsList.tsx`(S3 필터 5종+range 버튼 매트릭스), `StatementCreate.tsx`(S4 2단계·ADHOC·truncated/미정산 안내), `StatementDetail.tsx`(S5 상태별 작업영역), `index.ts`, `page-helpers.ts`(서버 가드).
@@ -165,8 +166,15 @@ _담당 Task 범위 밖 이슈 / 설계·DTO 간극_
 | 🟡 | `getOrganizations(1,500)` 잘림 | IMP 제안 이관 |
 | 🟡 | 연/월 vs 기간 독립 | 실측 기재(서버는 4값 그대로 전달, RPC는 연/월 범위만 검증) |
 
-### ⒝ PR (WBS 5.5~5.7) — 별도 커밋/PR 예정
-- 미구현(⒝ 예정): `NaviSidebar.tsx` 메뉴 3종, `rbac.ts`·`proxy.ts` 경로 허용 검토, nav i18n, Excel 링크(`/api/finance/statements/[id]/export`), R-10 역할별 스크린샷. 이 PR에서는 만들지 않음(Jaison 지시 — Excel 버튼 선제 생성 시 404).
+### ⒝ PR (WBS 5.5~5.7, `Closes #1367`) — ⒜ 최종 head `28ef7c150`에서 분기
+- **메뉴 3종** `src/components/layout/NaviSidebar.tsx` — Admin "정산/재무" 그룹의 수입·비용 현황 다음에 `/finance/statements`, 대리점 "대리점 관리" 그룹 마지막에 `/agency/statements`, 화주는 기존 `청구서 조회` 아래에 `/shipper/statements`. 모두 기존 `checkPermission(role, href, allowedPaths)` 필터를 타므로 새 권한 분기 없음(§2-7).
+- **경로 허용 검토** — `rbac.ts`·`proxy.ts` **무변경**. 부모 접두 경로(`/finance`·`/agency`·`/shipper`)가 이미 등록·허용되어 세부 경로 추가가 불필요함을 로컬 `zen_role_permissions` 실측 + 코드 grep으로 확인.
+- **nav i18n** — `Navigation.statements_nav`·`shipper_statements_nav` 신규, `shipper_invoices_nav`에 `(기존)` 접미(4로케일 동시). `Statements.excel` 신규 → 78키.
+- **Excel 링크** — S3 각 행(`TC-361-26·27`)과 S5 상세(`TC-361-28`)에서 `/api/finance/statements/{id}/export` 링크 렌더. **조회 전용(RECEIVED·SUPERVISED)에서도 노출**, 변형 버튼은 계속 미렌더. 실제 Route Handler는 #1366 ⒝-2(PR #1411) 병합본 사용.
+- **회귀** — statements 테스트 21→24케이스, R-09 항목 Continued(TC-361-26~28), `build:lrtm` 재실행(25→28건, 전체 2,145→2,148건) + `check:lrtm` PASS(유령 0·허용목록 밖 미등재 0).
+- **되돌리기 검증 추가 2건** — 목록 Excel 링크 제거 시 TC-361-26·27 FAIL(2 failed/7 passed), 상세 Excel 링크 제거 시 TC-361-28 FAIL(1 failed/8 passed). 복구 후 24/24 재PASS, 잔존 마커 0. ⒜ 5건 + ⒝ 2건 = 총 7건.
+- **vacuous 패턴 0건** — ⒝ 신규 테스트도 렌더 결과(`getByRole('link')` + href/download 속성)만 단언.
+- **전체 회귀** — `npm run test:regression` 286파일/**2189케이스** PASS(697.93초, ⒜ 2186 + ⒝ 3). `exceljs@4.4.0`은 ⒜에서 `--no-save --no-package-lock`으로 재설치한 상태 유지(추적 파일 변경 없음).
 
 ## 5. 검증 (DoD)
 
@@ -189,9 +197,34 @@ _담당 Task 범위 밖 이슈 / 설계·DTO 간극_
 - [x] 스타일/타입: 신규 파일 `npx eslint` 0 warning, `npx tsc --noEmit`에서 statements 관련 에러 0(기존 `exceljs`·E2E·`.next` 에러는 범위 밖)
 - [x] `check-R17-DoD` 자가 검증 통과 — 코드 커밋 → 해시 자동삽입 → 🔄→🔔 실제 diff 확인 → 문서 커밋 → PR 순서. (opentemplate 명령이므로 수동 동치 점검)
 
-### ⒝ PR 이관 항목 (5.5~5.7 — 본 ⒜ PR에서는 의도적으로 미포함)
-- [ ] 초안 취소 확인 단계(`StatementsList.doCancel`·`StatementDetail.issueCancel`) + 취소 클릭 시 `cancelBillingStatement` 호출 0 단언 (Jaison 🟡 권고)
-- [ ] `NaviSidebar.tsx` 메뉴 3종(Admin 정산/재무·대리점 관리·화주) + nav i18n 4로케일
-- [ ] `rbac.ts`·`proxy.ts` 경로 허용 검토(§2-7 실측 결과 반영)
-- [ ] Excel 링크 → `/api/finance/statements/[id]/export`(S3 행·S5 상세, 조회 전용 포함)
-- [ ] R-10 역할별(Admin·대리점·화주) 스크린샷 증적 + 실제 `page.goto()` 네비게이션 검증
+### ⒝ PR DoD (5.5~5.7)
+- [x] `NaviSidebar.tsx` 메뉴 3종(Admin 정산/재무·대리점 관리·화주) + nav i18n 4로케일 — 설계 §6-5c 위치 준수
+- [x] `rbac.ts`·`proxy.ts` 경로 허용 검토(§2-7 실측 결과 반영) — 부모 접두 경로로 이미 허용되어 **무변경 판정**, 근거 task file에 기재
+- [x] Excel 링크 → `/api/finance/statements/[id]/export`(S3 행·S5 상세, 조회 전용 포함) — 렌더 단언 3케이스(TC-361-29~31) + 되돌리기 2건
+- [x] 4로케일 `Statements` 79키 동일, `Navigation` 신규 2키 4로케일 반영, `Errors` 110키 유지 (`check:i18n` 전역 FAIL은 DEF-B-156)
+- [x] R-09 v3.10: TC-361-29~31 추가, `npm run build:lrtm` + `npm run check:lrtm` PASS(유령 0·허용목록 밖 미등재 0)
+- [x] 되돌리면 테스트 FAIL — §4 ⒝ 추가 2건 실측(⒜ 8건 + ⒝ 2건 = 총 10건)
+- [x] 컴포넌트 테스트 렌더 결과 단언, vacuous 패턴 0건
+- [ ] R-10 역할별(Admin·대리점·화주) 스크린샷 증적 + 실제 `page.goto()` 네비게이션 검증 — **SETTLED 오더 시드 + 무링크 안내 문구 확인 위해 재실행 예정**
+- [x] `check-R17-DoD` 자가 검증 — ⒜ 동일 절차(코드 커밋 → 해시 삽입 → 문서 커밋 → PR) 준수
+- [ ] S1·S2 화면은 Jaison 판단으로 범위 외 — JSJung 확인 후 후속 Task 발령(본 PR에서 착수하지 않음)
+
+## 6. R-10 실구동 증적 (⒝) — ⚠️ SETTLED 시드 반영 재실행 예정
+
+_아래는 ⒜ 리뷰 수정(오더정산 링크 제거·역할별 안내) 이전에 촬영한 스크린샷이다. SETTLED 오더 시드와 Admin/대리점 무링크 안내 문구 확인을 위해 재실행 후 갱신한다._
+
+_원문 기록: IP 주소/계정/경로를 실제 브라우저에서 확인한 기록. 스크린샷 저장: `docs/99_Manual/E2E_361_Result/`(R-13)._
+
+실행: `npx next start -p 3008`(프로덕션 빌드) + Playwright 3케이스, **3/3 PASS(15.6초)**. 각 케이스에서 (1) 실제 로그인 성공 후 리다이렉트, (2) 역할별 사이드바 메뉴 노출(`청구서 관리` / `청구서 (월 차수)`), (3) `page.goto()`로 대상 경로 직접 진입 — HTTP < 400 + `청구서 관리` 헤딩 렌더, (4) pageerror·console error 0건을 확인함. 단위 테스트(서버 액션 mock)가 아닌 **실제 미들웨어(`proxy.ts`) 라우팅까지 검증** — R-10·AGENTS.md 필수 검증 항목(2026-07-22) 준수.
+
+| 역할 | 계정(RBAC role) | 실제 네비게이션 | 확인 결과 | 증적 |
+|:--|:--|:--|:--|:--|
+| ADMIN | `r10b361admin@zenith.kr` (ADMIN / PLATFORM) | 로그인 → 메뉴 `청구서 관리` 노출 → `page.goto('/ko/finance/statements')` | **PASS** — HTTP 200, 헤딩 `청구서 관리`, errors 0 | `admin_01_login.png`·`admin_02_statements.png` |
+| AGENCY | `r10b361agency@zenith.kr` (AGENCY / AGENCY) | 로그인 → 메뉴 `청구서 관리` 노출 → `page.goto('/ko/agency/statements')` | **PASS** — HTTP 200, 헤딩 `청구서 관리`, errors 0 | `agency_01_login.png`·`agency_02_statements.png` |
+| 화주 | `r10b361shipper@zenith.kr` (AGENCY_SHIPPER / SHIPPER) | 로그인 → 메뉴 `청구서 (월 차수)` 노출 → `page.goto('/ko/shipper/statements')` | **PASS** — HTTP 200, 헤딩 `청구서 관리`, errors 0 | `shipper_01_login.png`·`shipper_02_statements.png` |
+
+> 화주 계정은 초기에 `CORPORATE`로 만들었으나 `checkPermission`이 `/shipper` 경로를 `SHIPPER`·`AGENCY_SHIPPER`에만 허용(`rbac.ts` §rolePaths)하므로 사이드바에 화주 메뉴가 노출되지 않았다. roles spec §5 기준의 `AGENCY_SHIPPER`로 재설정한 뒤 3/3 PASS. 이 실측으로 rbac/proxy 무변경 판정(상위 경로 접두 허용)이 실제 브라우저에서도 확인됨.
+>
+> 에러 로그 확인 — 無 (R-10 v3.6): ⒝는 신규 서버 액션/API 라우트를 추가하지 않고 기존 병합본(#1366 PR #1411) Excel Route Handler를 링크만 했으므로 ⒝ 기인 신규 ERROR 없음. 배포 후 `/admin/error-logs` 최종 확인은 JSJung 담당(병합 후).
+>
+> ⚠️ 기존 ⒝ 검증 당시에는 DEF-B-162로 `npm run build`가 실패해 로컬 검증용으로만 해당 export를 일시 비공개화해 프로덕션 빌드 후 `next start`로 실구동 확인했고 **임시 수정은 커밋하지 않고 원복**함(`git diff` 0 확인). 재base 후에는 Mike/TASK-B-368(PR #1416) 병합으로 DEF-B-162가 해소되어 임시 수정 없이 프로덕션 빌드 가능.
