@@ -40,7 +40,10 @@ const ORDER_A2A = '36100000-0000-4000-8000-000000000001'; // Admin → 대리점
 const ORDER_SHIP = '36100000-0000-4000-8000-000000000002'; // 대리점 → 화주 (AGENCY_TO_SHIPPER, CLOSED)
 const ORDER_DRAFT = '36100000-0000-4000-8000-000000000003'; // DRAFT (청구받은 화주 404)
 const ORDER_ADH = '36100000-0000-4000-8000-000000000004'; // ADHOC + 수식 주입 시도
-const ALL_ORDERS = [ORDER_A2A, ORDER_SHIP, ORDER_DRAFT, ORDER_ADH];
+const ORDER_DEC1 = '36100000-0000-4000-8000-000000000005'; // 소수 금액·중량 (10.10+20.20, 0.10kg)
+const ORDER_DEC2 = '36100000-0000-4000-8000-000000000006'; // 소수 금액·중량 (10.10+20.20, 0.20kg)
+const ORDER_PAID = '36100000-0000-4000-8000-000000000007'; // 기본 입금일 KST 검증용
+const ALL_ORDERS = [ORDER_A2A, ORDER_SHIP, ORDER_DRAFT, ORDER_ADH, ORDER_DEC1, ORDER_DEC2, ORDER_PAID];
 
 const SHEET_SUMMARY = '청구서';
 const SHEET_DETAIL = '오더별 상세';
@@ -51,6 +54,8 @@ let stmtA2A: string;   // ISSUED · ADMIN_TO_AGENCY
 let stmtShip: string;  // CLOSED · AGENCY_TO_SHIPPER
 let stmtDraft: string; // DRAFT · AGENCY_TO_SHIPPER
 let stmtAdh: string;   // DRAFT · ADHOC (주입 시도)
+let stmtDec: string;   // DRAFT · 소수 금액 (합 60.60)
+let stmtPaid: string;  // ISSUED · 기본 입금일 KST 검증
 
 function asUser(identity: Identity) {
   mockValidateUserAction.mockResolvedValue({
@@ -63,6 +68,10 @@ function asUser(identity: Identity) {
 function seedOrder(id: string, opts: {
   shipperOrg: string; agencyOrg?: string | null; shipperName?: string;
   recipientName?: string; country?: string; tracking?: string; basisAt?: string;
+  /** 소수 금액 fixture — 'base'(줄당 10.10) | 'fuel'(줄당 20.20). 두 줄 합 30.30이 float에선 30.299999999999997 */
+  decimal?: 'base' | 'fuel';
+  /** 청구중량 (metadata.platform.billingWeightKg) */
+  weight?: number;
 }) {
   psql(`
     INSERT INTO public.zen_orders
@@ -86,14 +95,14 @@ function seedOrder(id: string, opts: {
     INSERT INTO public.zen_order_rate_snapshots
       (id, order_id, applied_unit_price, applied_currency, applied_rule, metadata, snapshot_at)
     VALUES (gen_random_uuid(), '${id}', 1000, 'KRW', 'TEST',
-            '{"platform":{"billingWeightKg":5,"chargeableWeightKg":4.78,"baseSellingPrice":100000,"fuelSurchargeSellingAmount":20000,"surgeFeeSellingAmount":5000,"otherChargesSellingTotal":1000,"currency":"KRW"},
-              "agency":{"baseSellingPrice":80000,"fuelSurchargeSellingAmount":16000,"surgeFeeSellingAmount":4000,"otherChargesSellingTotal":800,"agencyCostPrice":100800}}'::jsonb, now())
+            ('{"platform":{"billingWeightKg":${opts.weight ?? 5},"chargeableWeightKg":4.78,"baseSellingPrice":100000,"fuelSurchargeSellingAmount":20000,"surgeFeeSellingAmount":5000,"otherChargesSellingTotal":1000,"currency":"KRW"},
+              "agency":{"baseSellingPrice":80000,"fuelSurchargeSellingAmount":16000,"surgeFeeSellingAmount":4000,"otherChargesSellingTotal":800,"agencyCostPrice":100800}}')::jsonb, now())
     ON CONFLICT (order_id) DO UPDATE SET metadata = EXCLUDED.metadata;
     INSERT INTO public.zen_order_costs (id, order_id, cost_type, unit_price, quantity, currency, is_revenue, created_at)
-    VALUES (gen_random_uuid(), '${id}', 'BASE_FREIGHT', 100000, 1, 'KRW', true, now()),
-          (gen_random_uuid(), '${id}', 'FUEL_SURCHARGE', 20000, 1, 'KRW', true, now()),
-          (gen_random_uuid(), '${id}', 'SURGE_FEE', 5000, 1, 'KRW', true, now()),
-          (gen_random_uuid(), '${id}', 'OTHER_CHARGE', 1000, 1, 'KRW', true, now())
+    VALUES (gen_random_uuid(), '${id}', 'BASE_FREIGHT', ${opts.decimal === 'base' ? '10.10' : opts.decimal ? '0' : '100000'}, 1, 'KRW', true, now()),
+          (gen_random_uuid(), '${id}', 'FUEL_SURCHARGE', ${opts.decimal === 'fuel' ? '20.20' : opts.decimal ? '0' : '20000'}, 1, 'KRW', true, now()),
+          (gen_random_uuid(), '${id}', 'SURGE_FEE', ${opts.decimal ? '0' : '5000'}, 1, 'KRW', true, now()),
+          (gen_random_uuid(), '${id}', 'OTHER_CHARGE', ${opts.decimal ? '0' : '1000'}, 1, 'KRW', true, now())
     ON CONFLICT DO NOTHING;
   `);
   if (opts.tracking) {
@@ -231,6 +240,10 @@ beforeAll(async () => {
     shipperOrg: agency.orgId, agencyOrg: null, shipperName: INJECTION_NAME,
     recipientName: '수기수하인', country: 'CN',
   });
+  // 소수 금액·중량 fixture — 줄당 10.10 / 20.20, 두 줄 합 30.30(float에선 30.299999999999997) · 중량 0.10+0.20=0.30
+  seedOrder(ORDER_DEC1, { shipperOrg: shipper.orgId, agencyOrg: agency.orgId, decimal: 'base', weight: 0.1, recipientName: '소수수하인1', country: 'US' });
+  seedOrder(ORDER_DEC2, { shipperOrg: shipper.orgId, agencyOrg: agency.orgId, decimal: 'fuel', weight: 0.2, recipientName: '소수수하인2', country: 'JP' });
+  seedOrder(ORDER_PAID, { shipperOrg: shipper.orgId, agencyOrg: agency.orgId, recipientName: '입금수하인', country: 'KR' });
 
   // ① Admin → 대리점 (ISSUED) — 화주명 열 있는 tier
   asUser(admin);
@@ -266,6 +279,21 @@ beforeAll(async () => {
   });
   expect(adh.success, adh.error).toBe(true);
   stmtAdh = adh.statementId!;
+
+  // ⑤ 소수 금액 DRAFT — 부동소수 합산 결함 재현용 (합 60.60, 중량 0.30)
+  const dec = await createBillingStatement({
+    billedTarget: { type: 'ORG', orgId: shipper.orgId }, year: 2026, month: 8, orderIds: [ORDER_DEC1, ORDER_DEC2],
+  });
+  expect(dec.success, dec.error).toBe(true);
+  stmtDec = dec.statementId!;
+
+  // ⑥ 입금일 KST 검증용 (발행만 해 두고 테스트에서 입금확인)
+  const paid = await createBillingStatement({
+    billedTarget: { type: 'ORG', orgId: shipper.orgId }, year: 2026, month: 7, orderIds: [ORDER_PAID],
+  });
+  expect(paid.success, paid.error).toBe(true);
+  stmtPaid = paid.statementId!;
+  expect((await issueBillingStatement(stmtPaid)).success).toBe(true);
 });
 
 afterAll(async () => {
@@ -600,5 +628,76 @@ describe('DRAFT 표시와 파일명 (부록A §2·§6)', () => {
     expect(disposition).toContain(statementNoOf(stmtAdh));
     const ascii = disposition.match(/filename="([^"]*)"/)?.[1] ?? '';
     expect(ascii).not.toMatch(/[\\/:*?"<>|]/); // ASCII fallback에 금지 문자 없음
+  });
+});
+
+// ───────────────────────────── PR #1411 수정 요청 — 소수 금액·KST 입금일·0.01 정밀도
+
+describe('소수 금액·중량 (PR #1411 🔴1·🔴2)', () => {
+  it('10.10+20.20 두 줄(합 30.30)·중량 0.10+0.20(0.30)도 200이고 표시값에 노이즈가 없다', async () => {
+    const res = await httpExport(stmtDec, agency);
+    expect(res.status).toBe(200);
+    const wb = await parseWorkbook(res);
+    const s1 = sheet(wb, SHEET_SUMMARY);
+    const s2 = sheet(wb, SHEET_DETAIL);
+
+    // 요약 금액 — 분 단위 정수 합산이라 부동소수 노이즈가 없다
+    expect(s1.getCell('B15').value).toBe(10.1);   // 기본운임 10.10
+    expect(s1.getCell('B16').value).toBe(20.2);   // 유류할증료 20.20
+    expect(s1.getCell('B17').value).toBe(0);      // 할증료 0.00
+    expect(s1.getCell('B18').value).toBe(0);      // 기타 0.00
+    expect(s1.getCell('B20').value).toBe(30.3);   // 공급가액 합계 (float 합이면 30.299999999999997)
+
+    // 중량 문자열 — float 합이면 "0.30000000000000004 kg"
+    expect(text(s1, 'D23')).toBe('총 청구중량 0.30 kg');
+
+    // 상세 합계 행(마지막 행) = 헤더 총액, 개별 금액은 숫자 셀
+    const lastRow = s2.rowCount; // 3행 머리글 + 항목 2행 + 합계 1행 = 6
+    expect(lastRow).toBe(6);
+    expect(s2.getCell(addrOf(s2, '합계', lastRow)).value).toBe(30.3);
+    expect(s2.getCell(addrOf(s2, '청구중량(kg)', lastRow)).value).toBe(0.3);
+    expect(s2.getCell(addrOf(s2, '기본운임', 4)).value).toBe(10.1);
+    expect(s2.getCell(addrOf(s2, '유류할증료', 5)).value).toBe(20.2);
+    expect(typeof s2.getCell(addrOf(s2, '합계', 4)).value).toBe('number');
+
+    const headerTotal = Number(psql(`SELECT total_amount FROM public.zen_billing_statements WHERE id='${stmtDec}'`));
+    expect(headerTotal).toBe(30.3);
+  });
+
+  it('합계를 0.01만 어긋나도 500 (분 단위 정밀도 — 1원 미만 조작 차단)', async () => {
+    const totalBefore = Number(psql(`SELECT sum(line_total) FROM public.zen_billing_statement_items WHERE statement_id='${stmtDec}'`));
+    const rowBefore = Number(psql(`SELECT line_total FROM public.zen_billing_statement_items
+                                   WHERE statement_id='${stmtDec}' AND order_id='${ORDER_DEC1}'`));
+    expect(totalBefore).toBe(30.3);
+    expect(rowBefore).toBe(10.1);
+
+    const updated = psql(`UPDATE public.zen_billing_statement_items
+                          SET line_total = line_total + 0.01
+                          WHERE statement_id='${stmtDec}' AND order_id='${ORDER_DEC1}'
+                          RETURNING line_total::text`);
+    expect(Number(updated)).toBeCloseTo(rowBefore + 0.01, 2); // 10.10 → 10.11 (합 30.31)
+
+    const res = await httpExport(stmtDec, agency);
+    expect(res.status).toBe(500); // 30.31 ≠ 30.30 — 분 단위 정밀도로 감지
+    expect(res.headers.get('Content-Type')).not.toContain('spreadsheetml');
+
+    psql(`UPDATE public.zen_billing_statement_items SET line_total = ${rowBefore}
+          WHERE statement_id='${stmtDec}' AND order_id='${ORDER_DEC1}'`);
+    expect((await httpExport(stmtDec, agency)).status).toBe(200);
+  });
+
+  it('기본 입금일은 KST 날짜다 (UTC 18:00 = KST 다음날 03:00)', async () => {
+    asUser(agency);
+    const total = Number(psql(`SELECT total_amount FROM public.zen_billing_statements WHERE id='${stmtPaid}'`));
+    // Date만 fake — 네트워크·타이머는 실제. UTC 2026-11-30 18:00 = KST 2026-12-01 03:00
+    vi.useFakeTimers({ toFake: ['Date'], now: new Date('2026-11-30T18:00:00Z') });
+    try {
+      const res = await confirmStatementPayment(stmtPaid, { amount: total });
+      expect(res.success, res.error).toBe(true);
+    } finally {
+      vi.useRealTimers();
+    }
+    // UTC slice면 '2026-11-30'(전날), KST면 '2026-12-01'
+    expect(psql(`SELECT paid_date FROM public.zen_billing_statements WHERE id='${stmtPaid}'`)).toBe('2026-12-01');
   });
 });

@@ -12,7 +12,7 @@ import { validateUserAction } from '@/lib/auth/guards';
 import { USER_ROLES } from '@/lib/auth/rbac';
 import { logger } from '@/lib/logger';
 import { trError, type ErrorKey } from '@/lib/i18n/action-error';
-import { kstDateString, kstRangeBounds } from '@/lib/utils/date-kst';
+import { getKstToday, kstDateString, kstRangeBounds } from '@/lib/utils/date-kst';
 
 // ───────────────────────────────────────────── types
 
@@ -151,8 +151,11 @@ async function issuerRoleError(role: string): Promise<string | null> {
 }
 
 /** 기간 검증: 시작·끝 필수 + 역전 금지 (B-366과 동일한 generic 코드 재사용) */
+/** YYYY-MM-DD 형식 — 형식이 아니면 `kstRangeBounds`가 RangeError로 `UNEXPECTED`를 낳는다 (PR #1410 후속 권고) */
+const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+
 async function dateRangeError(from?: string, to?: string): Promise<string | null> {
-  if (!from || !to || from > to) {
+  if (!from || !to || !ISO_DATE_RE.test(from) || !ISO_DATE_RE.test(to) || from > to) {
     logger.warn(`[billing] invalid date range ${from ?? '(none)'} ~ ${to ?? '(none)'}`);
     return trError('generic', { code: 'DATE_RANGE_INVALID' });
   }
@@ -768,7 +771,8 @@ export async function confirmStatementPayment(
       return { success: false, error: await trError('payment_amount_mismatch') };
     }
 
-    const paidAt = input?.paidAt ?? new Date().toISOString().slice(0, 10);
+    // 기본 입금일은 **KST** — UTC slice는 00:00~09:00 KST에 전날 날짜를 만든다 (PR #1410 후속 권고)
+    const paidAt = input?.paidAt ?? getKstToday();
     if (!/^\d{4}-\d{2}-\d{2}$/.test(paidAt)) {
       logger.warn(`[confirmStatementPayment] invalid paidAt format (${id}: ${paidAt})`);
       return { success: false, error: await trError('generic', { code: 'PAID_AT_INVALID' }) };

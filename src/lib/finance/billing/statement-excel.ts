@@ -43,7 +43,7 @@ export const EXCEL_LABELS = {
   supplyTotal: '공급가액 합계',
   vatNote: '※ 부가가치세 별도 (세금계산서는 별도 발행)',
   itemCount: (n: number) => `오더 건수 ${n}건`,
-  totalWeight: (kg: number) => `총 청구중량 ${kg} kg`,
+  totalWeight: (kg: number) => `총 청구중량 ${kg.toFixed(2)} kg`,
   statusLabel: '상태',
   statusText: { DRAFT: '초안', ISSUED: '발행됨', CLOSED: '입금완료' } as Record<string, string>,
   paidInfo: (date: string, amount: string) => `입금 확인 ${date} / 입금액 ${amount}`,
@@ -299,7 +299,7 @@ function summaryFooterBlock(ws: ExcelJS.Worksheet, data: StatementExportData): v
   const statusText = L.statusText[header.status] ?? header.status;
   const extra =
     header.status === 'CLOSED' && header.paidDate
-      ? ` — ${L.paidInfo(header.paidDate, String(header.paidAmount ?? 0))}`
+      ? ` — ${L.paidInfo(header.paidDate, Number(header.paidAmount ?? 0).toLocaleString('ko-KR'))}`
       : '';
   put(ws, 'B24', `${statusText}${extra}`, 'value');
 }
@@ -481,10 +481,21 @@ export function buildExportFilename(header: StatementExportHeader): string {
   return `${[...base].slice(0, 80).join('')}.xlsx`;
 }
 
-/** RFC 5987 — `filename*=UTF-8''…` 로 한글 파일명 보존 */
+/** RFC 5987 attr-char(`ALPHA / DIGIT / !#$&+-.^_`|~`)만 미인코딩, 나머지는 %XX (UTF-8 바이트) */
+function encodeRfc5987(value: string): string {
+  const attrChars = /^[A-Za-z0-9!#$&+\-.^_`|~]$/;
+  let out = '';
+  for (const byte of Buffer.from(value, 'utf8')) {
+    const ch = String.fromCharCode(byte);
+    out += attrChars.test(ch) ? ch : `%${byte.toString(16).toUpperCase().padStart(2, '0')}`;
+  }
+  return out;
+}
+
+/** RFC 5987 — `filename*=UTF-8''…` 로 한글 파일명 보존 (attr-char 집합을 엄밀히 지킨다) */
 export function contentDisposition(filename: string): string {
   const ascii = filename.replace(/[^\x20-\x7E]/g, '_').replace(/"/g, '');
-  return `attachment; filename="${ascii}"; filename*=UTF-8''${encodeURIComponent(filename)}`;
+  return `attachment; filename="${ascii}"; filename*=UTF-8''${encodeRfc5987(filename)}`;
 }
 
 // ───────────────────────────────────────────── 빌드 · 오케스트레이션

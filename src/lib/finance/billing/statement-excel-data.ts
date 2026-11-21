@@ -82,10 +82,46 @@ export type StatementExportLoad =
 const HEADER_SELECT =
   'id, statement_no, tier, status, period_year, period_month, round_no, period_from, period_to, ' +
   'total_amount, issued_at, paid_date, paid_amount, billed_party_type, billed_name, billed_biz_no, ' +
-  'issuer:zen_organizations!issuer_org_id(name, biz_no, rep_name, address, contact_name, contact_phone), ' +
+  'issuer:zen_organizations!issuer_org_id(name, biz_no, rep_name, address, address_detail, contact_name, contact_phone), ' +
   'billed:zen_organizations!billed_org_id(name, biz_no)';
 
 // ───────────────────────────────────────────── 조회
+// ───────────────────────────────────────────── 페이징 조회 (PostgREST `max_rows=1000` 잘림 방지)
+
+/** 페이지 크기 — supabase/config.toml `max_rows=1000`보다 작게 잡아 페이지 경계 잘림을 피한다 */
+const PAGE_SIZE = 500;
+/** 안전 상한 — 이 행 수를 넘어도 페이지가 비지 않으면 이상 상태로 보고 500 (조용한 부분 출력 금지) */
+const MAX_ROWS = 10000;
+
+type PageFetch = (from: number, to: number) => PromiseLike<{ data: any[] | null; error: any }>;
+type PageResult = { rows: any[] } | { status: 500; reason: string };
+
+/**
+ * 페이지 단위 전량 조회 — 조회 실패는 빈 결과로 삼키지 않고 500으로 전파한다(§7 부분 파일 금지).
+ * 상한 초과 시에도 500 — 라벨·이력처럼 합계로 역산할 수 없는 조회라 조용한 잘림이 더 위험하다.
+ */
+async function fetchAllPages(
+  logLabel: string,
+  failReason: string,
+  fetchPage: PageFetch,
+): Promise<PageResult> {
+  const rows: any[] = [];
+  for (let from = 0; ; from += PAGE_SIZE) {
+    const { data, error } = await fetchPage(from, from + PAGE_SIZE - 1);
+    if (error) {
+      logger.error(`[statement-export] ${logLabel} lookup failed`, error);
+      return { status: 500, reason: failReason };
+    }
+    const page = data ?? [];
+    rows.push(...page);
+    if (page.length < PAGE_SIZE) return { rows };
+    if (rows.length >= MAX_ROWS) {
+      logger.error(`[statement-export] ${logLabel} exceeded ${MAX_ROWS} rows — 출력 중단`);
+      return { status: 500, reason: `${failReason}_LIMIT` };
+    }
+  }
+}
+
 
 /** 헤더 + 발행자/청구대상 조직 — RLS로 안 보이면 null (미존재와 동일, §7) */
 async function loadStatementHeader(
@@ -145,63 +181,74 @@ function joinAddress(address?: string | null, detail?: string | null): string | 
 async function loadStatementItems(
   supabase: any,
   id: string,
-): Promise<{ items: any[] } | { status: 404 | 500; reason: string }> {
-  const { data, error } = await supabase
-    .from('zen_billing_statement_items')
-    .select(
-      'order_id, charge_weight_kg, base_freight, fuel_surcharge, surge_fee, other_charges, line_total, ' +
-      'order:zen_orders!order_id(order_no, recipient_name, recipient_country_code, shipper_name, ' +
-      'shipper:zen_organizations!shipper_id(name))',
-    )
-    .eq('statement_id', id);
-  if (error) {
-    logger.error('[statement-export] items lookup failed', error);
-    return { status: 500, reason: 'ITEMS_LOOKUP' };
+): Promise<{ items: any[] } | { status: 500; reason: string }> {
+  const paged = await fetchAllPages('items', 'ITEMS_LOOKUP', (from, to) =>
+    supabase
+      .from('zen_billing_statement_items')
+      .select(
+        'order_id, charge_weight_kg, base_freight, fuel_surcharge, surge_fee, other_charges, line_total, ' +
+        'order:zen_orders!order_id(order_no, recipient_name, recipient_country_code, shipper_name, ' +
+        'shipper:zen_organizations!shipper_id(name))',
+      )
+      .eq('statement_id', id)
+      .order('id', { ascending: true })
+      .range(from, to),
+  );
+  if ('status' in paged) return paged;
+  // RLS로 order 임베드가 null이면 빈 칸 행이 조용히 만들어진다 — 명시적 실패로 전환(§7)
+  const broken = paged.rows.filter((i: any) => !i.order);
+  if (broken.length) {
+    logger.error(
+      `[statement-export] order embed is null for ${broken.length} item(s) (statement=${id})`,
+    );
+    return { status: 500, reason: 'ORDER_EMBED_NULL' };
   }
-  return { items: (data ?? []) as any[] };
+  return { items: paged.rows };
 }
 
 /** 운송장번호 (voided 제외) — order_id → 쉼표 연결 문자열 */
 async function loadTrackingMap(
   supabase: any,
   orderIds: string[],
-): Promise<Map<string, string>> {
-  if (!orderIds.length) return new Map();
-  const { data, error } = await supabase
-    .from('zen_ups_labels')
-    .select('order_id, tracking_number')
-    .in('order_id', orderIds)
-    .eq('is_voided', false);
-  if (error) {
-    logger.error('[statement-export] labels lookup failed', error);
-    return new Map();
-  }
+): Promise<{ map: Map<string, string> } | { status: 500; reason: string }> {
+  if (!orderIds.length) return { map: new Map() };
+  const paged = await fetchAllPages('labels', 'LABELS_LOOKUP', (from, to) =>
+    supabase
+      .from('zen_ups_labels')
+      .select('order_id, tracking_number')
+      .in('order_id', orderIds)
+      .eq('is_voided', false)
+      .order('id', { ascending: true })
+      .range(from, to),
+  );
+  if ('status' in paged) return paged;
   const map = new Map<string, string[]>();
-  for (const r of (data ?? []) as any[]) {
+  for (const r of paged.rows) {
     const list = map.get(r.order_id) ?? [];
     if (!list.includes(r.tracking_number)) list.push(r.tracking_number);
     map.set(r.order_id, list);
   }
-  return new Map([...map].map(([k, v]) => [k, v.join(',')]));
+  return { map: new Map([...map].map(([k, v]) => [k, v.join(',')])) };
 }
 
 /** 기준일 — 배송완료(DELIVERED) 우선, 없으면 출고확정(RELEASED) (§4-D) */
 async function loadBasisDates(
   supabase: any,
   orderIds: string[],
-): Promise<Map<string, Date>> {
-  if (!orderIds.length) return new Map();
-  const { data, error } = await supabase
-    .from('order_status_history')
-    .select('order_id, next_status, created_at')
-    .in('order_id', orderIds)
-    .in('next_status', ['DELIVERED', 'RELEASED']);
-  if (error) {
-    logger.error('[statement-export] basis history lookup failed', error);
-    return new Map();
-  }
+): Promise<{ map: Map<string, Date> } | { status: 500; reason: string }> {
+  if (!orderIds.length) return { map: new Map() };
+  const paged = await fetchAllPages('history', 'HISTORY_LOOKUP', (from, to) =>
+    supabase
+      .from('order_status_history')
+      .select('order_id, next_status, created_at')
+      .in('order_id', orderIds)
+      .in('next_status', ['DELIVERED', 'RELEASED'])
+      .order('id', { ascending: true })
+      .range(from, to),
+  );
+  if ('status' in paged) return paged;
   const best = new Map<string, { status: string; at: string }>();
-  for (const h of (data ?? []) as any[]) {
+  for (const h of paged.rows) {
     const cur = best.get(h.order_id);
     const prefer = h.next_status === 'DELIVERED';
     const curPrefer = cur?.status === 'DELIVERED';
@@ -211,7 +258,7 @@ async function loadBasisDates(
   }
   const out = new Map<string, Date>();
   for (const [orderId, v] of best) out.set(orderId, kstDateToUtcDate(kstDateString(v.at)));
-  return out;
+  return { map: out };
 }
 
 /** KST 달력일 문자열 → 해당 날짜를 가리키는 Date (ExcelJS는 UTC 필드로 직렬화) */
@@ -222,22 +269,33 @@ export function kstDateToUtcDate(yyyyMmDd: string): Date {
 
 // ───────────────────────────────────────────── 집계·검증
 
+/**
+ * 금액을 **정수 분 단위(1/100)** 로 환산한다.
+ * `10.10 + 20.20`은 JS 부동소수에서 `30.299999999999997`이 되어 `===` 비교와 문자열화가 깨진다.
+ * DB는 `numeric(14,2)`라 항상 2자리 → 분 단위 정수로 합산·비교한다.
+ */
+export function toCents(value: number): number {
+  return Math.round(value * 100);
+}
+
 export function totalsOf(rows: StatementExportRow[]): StatementExportTotals {
-  const sum = (pick: (r: StatementExportRow) => number) => rows.reduce((s, r) => s + pick(r), 0);
+  const centsOf = (pick: (r: StatementExportRow) => number) =>
+    rows.reduce((acc, r) => acc + toCents(pick(r)), 0);
+  const won = (cents: number) => cents / 100;
   return {
     itemCount: rows.length,
-    chargeWeightKg: sum((r) => r.chargeWeightKg),
-    baseFreight: sum((r) => r.baseFreight),
-    fuelSurcharge: sum((r) => r.fuelSurcharge),
-    surgeFee: sum((r) => r.surgeFee),
-    otherCharges: sum((r) => r.otherCharges),
-    lineTotal: sum((r) => r.lineTotal),
+    chargeWeightKg: won(centsOf((r) => r.chargeWeightKg)),
+    baseFreight: won(centsOf((r) => r.baseFreight)),
+    fuelSurcharge: won(centsOf((r) => r.fuelSurcharge)),
+    surgeFee: won(centsOf((r) => r.surgeFee)),
+    otherCharges: won(centsOf((r) => r.otherCharges)),
+    lineTotal: won(centsOf((r) => r.lineTotal)),
   };
 }
 
-/** §1-1: 항목 합 = 헤더 total_amount. 불일치면 파일을 만들지 않는다 */
+/** §1-1: 항목 합 = 헤더 total_amount — **분 단위 정수로 비교**(부동소수 오탐 방지). 0.01 어긋나도 실패한다 */
 export function totalsMatchHeader(totals: StatementExportTotals, header: StatementExportHeader): boolean {
-  return totals.lineTotal === header.totalAmount;
+  return toCents(totals.lineTotal) === toCents(header.totalAmount);
 }
 
 // ───────────────────────────────────────────── orchestration
@@ -252,12 +310,15 @@ export async function loadStatementExport(supabase: any, id: string): Promise<St
   if ('status' in itemRes) return { ok: false, ...itemRes };
 
   const orderIds = itemRes.items.map((i: any) => i.order_id);
-  const [tracking, basis] = await Promise.all([
+  const [trackingRes, basisRes] = await Promise.all([
     loadTrackingMap(supabase, orderIds),
     loadBasisDates(supabase, orderIds),
   ]);
+  // 라벨·기준일 조회 실패를 빈 칸으로 삼으면 공란 파일이 200으로 나간다 — 500으로 전파(§7)
+  if ('status' in trackingRes) return { ok: false, ...trackingRes };
+  if ('status' in basisRes) return { ok: false, ...basisRes };
 
-  const rows = itemRes.items.map((i: any) => toItemRow(i, tracking, basis));
+  const rows = itemRes.items.map((i: any) => toItemRow(i, trackingRes.map, basisRes.map));
   const totals = totalsOf(rows);
   if (!totalsMatchHeader(totals, head.header)) {
     // 부분 파일 금지 — 생성 자체를 거부한다 (§1-1, §7)
