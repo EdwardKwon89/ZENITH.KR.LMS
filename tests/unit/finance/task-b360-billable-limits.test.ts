@@ -225,3 +225,24 @@ describe('TOCTOU — 분류와 UPDATE 사이 상태가 바뀐 경우 (조건부 
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('rowCount=0'));
   });
 });
+
+describe('dateRangeError 형식 검증 (PR #1410 후속 권고 3)', () => {
+  it('YYYY-MM-DD 형식이 아니면 DATE_RANGE_INVALID — UNEXPECTED(RangeError)로 새지 않는다', async () => {
+    asAgency(mockSupabase({ orders: [] }));
+    const res = await listBillableOrders({
+      ...RANGE, dateTo: 'abc', billedTarget: TARGET,
+    });
+    expect(res.success).toBe(false);
+    expect(res.error).toBe('요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요. (코드: DATE_RANGE_INVALID)');
+    expect(logger.error).not.toHaveBeenCalled(); // RangeError → UNEXPECTED 경로를 밟지 않는다
+  });
+
+  it('형식은 맞지만 역전된 기간도 DATE_RANGE_INVALID', async () => {
+    asAgency(mockSupabase({ orders: [] }));
+    const res = await listBillableOrders({
+      ...RANGE, dateFrom: '2026-11-30', dateTo: '2026-11-01', billedTarget: TARGET,
+    });
+    expect(res.success).toBe(false);
+    expect(res.error).toBe('요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요. (코드: DATE_RANGE_INVALID)');
+  });
+});
