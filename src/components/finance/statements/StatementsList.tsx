@@ -7,7 +7,7 @@ import React, { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import { FileText, Plus } from 'lucide-react';
+import { FileText, Plus, Download } from 'lucide-react';
 import { ZenCard, ZenButton, ZenSelect } from '@/components/ui/ZenUI';
 import { cancelBillingStatement } from '@/app/actions/finance/billing-statements';
 import { StatementStatusBadge, StatementScopeBadge } from './Badges';
@@ -165,6 +165,14 @@ export default function StatementsList({ statements, basePath, canCreate, locale
                       <Link href={detailHref(row.id)} className="text-blue-600 hover:underline inline-flex items-center gap-1">
                         <FileText size={14} />{t('view')}
                       </Link>
+                      {/* 읽기 전용 경로에서도 Excel 저장 허용 (설계 §6-4 · 이슈 결정사항) */}
+                      <a
+                        href={`/api/finance/statements/${row.id}/export`}
+                        download
+                        className="text-emerald-700 hover:underline inline-flex items-center gap-1"
+                      >
+                        <Download size={14} />{t('excel')}
+                      </a>
                       {/* 읽기 전용 경로(RECEIVED/SUPERVISED)에서는 변형 버튼을 렌더하지 않는다 */}
                       {mine && row.status === 'DRAFT' && (
                         <button type="button" className="text-rose-600 hover:underline" disabled={busyId === row.id} onClick={() => doCancel(row.id)}>

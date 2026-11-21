@@ -22,7 +22,7 @@ vi.mock('next-intl', () => {
     title: '청구서 관리', createButton: '+ 청구서 생성', filterScope: '조회 범위',
     scopeAll: '전체', scopeMine: '내 청구', scopeReceived: '나에게 청구된', scopeSupervised: '감독 조회',
     statusDraft: '초안', statusIssued: '발행', statusClosed: '마감',
-    view: '보기', cancel: '취소', confirmPayment: '입금확인',
+    view: '보기', cancel: '취소', confirmPayment: '입금확인', excel: 'Excel 저장',
     colAction: '작업', onlyMineNote: '※본인 생성분만 표시',
   };
   return {
@@ -111,5 +111,18 @@ describe('S3 청구서 목록 — scope/status별 버튼 노출 (TASK-B-361)', (
     await waitFor(() => expect(m.cancel).toHaveBeenCalledWith('a'));
     await waitFor(() => expect(tbl().queryByText('ST-a')).toBeNull());
     expect(tbl().getByText('ST-b')).toBeTruthy();
+  });
+
+  it('TC-361-26: 내 청구 행은 Excel 저장 링크를 렌더한다', () => {
+    render(<StatementsList {...base} statements={[row('x', 'MINE', 'DRAFT')]} />);
+    const link = tbl().getByRole('link', { name: 'Excel 저장' });
+    expect(link.getAttribute('href')).toBe('/api/finance/statements/x/export');
+    expect(link.hasAttribute('download')).toBe(true);
+  });
+
+  it('TC-361-27: 읽기 전용(나에게 청구된) 행에서도 Excel 저장 링크를 렌더한다', () => {
+    render(<StatementsList {...base} basePath="/shipper/statements" canCreate={false} statements={[row('r', 'RECEIVED', 'ISSUED')]} />);
+    expect(tbl().queryByRole('button', { name: '취소' })).toBeNull();
+    expect(tbl().getByRole('link', { name: 'Excel 저장' }).getAttribute('href')).toBe('/api/finance/statements/r/export');
   });
 });

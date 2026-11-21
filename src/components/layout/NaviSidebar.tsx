@@ -118,6 +118,8 @@ export default function NaviSidebar({
       children: [
         { title: t("finance_revenue"), href: "/finance/revenue" },
         { title: t("finance_costs"), href: "/finance/costs" },
+        // TASK-B-361 (Issue #1367) — 설계 §6-5c: "수입 현황·비용 현황" 다음
+        { title: t("statements_nav"), href: "/finance/statements" },
         { title: t("finance_daily_billing"), href: "/finance/daily-billing" },
         { title: t("finance_transport_costs"), href: "/admin/transport-costs" },
         { title: t("finance_ups_actual_charges"), href: "/admin/ups-actual-charges" },
@@ -170,10 +172,14 @@ export default function NaviSidebar({
         { title: t("agency_ups_rates_nav"), href: "/agency/ups-rates" },
         { title: t("agency_other_charges_nav"), href: "/agency/other-charges" },
         { title: t("agency_settlements_nav"), href: "/agency/settlements" },
+        // TASK-B-361 (Issue #1367) — 설계 §6-5c: "대리점 관리" 그룹 마지막
+        { title: t("statements_nav"), href: "/agency/statements" },
       ]
     },
     { title: t("shipper_ups_rates_nav"), href: "/shipper/ups-rates", icon: DollarSign },
     { title: t("shipper_invoices_nav"), href: "/shipper/invoices", icon: FileText },
+    // TASK-B-361 (Issue #1367) — 설계 §6-5c: 기존 "청구서 조회" 아래
+    { title: t("shipper_statements_nav"), href: "/shipper/statements", icon: FileText },
     {
       title: t("mypage"),
       href: "/mypage",

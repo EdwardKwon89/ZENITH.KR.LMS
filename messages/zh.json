@@ -77,7 +77,8 @@
     "notFound": "找不到账单。",
     "readOnly": "只读",
     "billedBizNoLabel": "注册号",
-    "noCandidates": "未查询到候选订单。"
+    "noCandidates": "未查询到候选订单。",
+    "excel": "导出 Excel"
   },
   "Errors": {
     "withdraw_confirm_input": "请准确输入“退出”。",
@@ -256,7 +257,10 @@
     "orders_assigned": "分配订单",
     "agency_other_charges_nav": "附加费查看",
     "agency_ups_rates_nav": "UPS费率查询",
-    "shipper_ups_rates_nav": "UPS运费查询"
+    "shipper_ups_rates_nav": "UPS运费查询",
+    "shipper_invoices_nav": "账单查询（旧版）",
+    "statements_nav": "账单管理",
+    "shipper_statements_nav": "账单（月度）"
   },
   "Orders": {
     "ups_invoice": {

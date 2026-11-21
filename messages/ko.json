@@ -77,7 +77,8 @@
     "notFound": "청구서를 찾을 수 없습니다.",
     "readOnly": "조회 전용",
     "billedBizNoLabel": "사업자번호",
-    "noCandidates": "조회된 후보 오더가 없습니다."
+    "noCandidates": "조회된 후보 오더가 없습니다.",
+    "excel": "Excel 저장"
   },
   "Errors": {
     "withdraw_confirm_input": "'탈퇴'를 정확히 입력해 주세요.",
@@ -300,7 +301,9 @@
     "agency_settlements_nav": "정산 조회",
     "agency_ups_rates_nav": "UPS 요율 조회",
     "shipper_ups_rates_nav": "UPS 운임 조회",
-    "shipper_invoices_nav": "청구서 조회"
+    "shipper_invoices_nav": "청구서 조회(기존)",
+    "statements_nav": "청구서 관리",
+    "shipper_statements_nav": "청구서 (월 차수)"
   },
   "VOC": {
     "title": "VOC 관리",

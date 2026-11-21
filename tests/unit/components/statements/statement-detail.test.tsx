@@ -39,7 +39,7 @@ vi.mock('next-intl', () => {
     colFuelSurcharge: '유류할증료', colSurgeFee: '급증수수료', colOtherCharges: '기타',
     colSubtotal: '소계', colBilledTarget: '청구대상', colPeriodRound: '기간/차수',
     totalLabel: '합계 {amount}원', itemCount: '오더 {count}건', billedBizNoLabel: '사업자번호',
-    view: '보기', actionFailed: '요청을 처리하지 못했습니다.',
+    view: '보기', actionFailed: '요청을 처리하지 못했습니다.', excel: 'Excel 저장',
   };
   return {
     useTranslations: () => (key: string, params?: Record<string, unknown>) => {
@@ -141,5 +141,13 @@ describe('S5 청구서 상세 — 권한별 작업 영역 (TASK-B-361)', () => {
     render(<StatementDetail {...base} detail={null} error="요청한 청구서가 존재하지 않습니다." />);
     expect(screen.getByText('청구서를 찾을 수 없습니다.')).toBeTruthy();
     expect(screen.getByText('요청한 청구서가 존재하지 않습니다.')).toBeTruthy();
+  });
+
+  it('TC-361-28: 읽기 전용 상세에서도 Excel 저장 링크를 렌더한다', () => {
+    render(<StatementDetail {...base} basePath="/shipper/statements" detail={detail({ status: 'ISSUED', scope: 'RECEIVED' })} />);
+    const link = screen.getByRole('link', { name: 'Excel 저장' });
+    expect(link.getAttribute('href')).toBe('/api/finance/statements/st-1/export');
+    expect(link.hasAttribute('download')).toBe(true);
+    expect(screen.queryByRole('button', { name: '발행' })).toBeNull();
   });
 });

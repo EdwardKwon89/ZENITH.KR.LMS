@@ -8,7 +8,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import { FileWarning } from 'lucide-react';
+import { FileWarning, Download } from 'lucide-react';
 import { ZenCard, ZenButton, ZenBadge } from '@/components/ui/ZenUI';
 import { cancelBillingStatement } from '@/app/actions/finance/billing-statements';
 import { StatementStatusBadge, StatementScopeBadge } from './Badges';
@@ -65,7 +65,17 @@ export default function StatementDetail({ detail, error, basePath, locale }: Sta
     <div className="flex-1 flex flex-col gap-6 p-4 md:p-8 max-w-5xl mx-auto w-full">
       <div className="flex items-center justify-between gap-4">
         <h1 className="text-2xl font-bold">{t('detailTitle')}</h1>
-        <Link href={listHref} className="text-blue-600 hover:underline text-sm">{t('view')}</Link>
+        <div className="flex items-center gap-4">
+          {/* 읽기 전용 경로에서도 Excel 저장 허용 (설계 §6-6 · 이슈 결정사항) */}
+          <a
+            href={`/api/finance/statements/${current.id}/export`}
+            download
+            className="text-emerald-700 hover:underline inline-flex items-center gap-1 text-sm"
+          >
+            <Download size={14} />{t('excel')}
+          </a>
+          <Link href={listHref} className="text-blue-600 hover:underline text-sm">{t('view')}</Link>
+        </div>
       </div>
 
       <ZenCard className="space-y-3">
