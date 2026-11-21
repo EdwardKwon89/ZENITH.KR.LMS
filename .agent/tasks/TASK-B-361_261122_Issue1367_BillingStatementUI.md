@@ -8,7 +8,7 @@
 | **최종 승인** | JSJung |
 | **생성일** | 2026-11-22 |
 | **우선순위** | P2 (`team:b`, `priority:p2`, `type:feat`) |
-| **상태** | 🔔 ⒝ PR #1413 검토 대기 (`status:review`) — ⒜ PR #1412 병합 완료(2026-11-22T04:02:37Z, merge `5dc7fe379`), ⒝ `origin/TeamB_Dev` @ `5dc7fe379` 재base 완료. S1·S2 화면은 범위 외(후속 Task) |
+| **상태** | 🔔 [PR #1413](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1413)(`Closes`) 검토 대기 (`status:review`) — [PR #1412](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1412)(`Refs`) 병합 완료(2026-11-22T04:02:37Z, merge `5dc7fe379`), ⒝ `origin/TeamB_Dev` @ `5dc7fe379` 재base 완료. S1·S2 화면은 범위 외(후속 Task) |
 | **브랜치** | ⒜ `feature/teamb-task-b361-iss1367-billing-statement-ui` (PR #1412, **MERGED** @ `5dc7fe379`) / ⒝ `feature/teamb-task-b361b-iss1367-billing-statement-ui` (PR #1413, 재base onto `origin/TeamB_Dev` @ `5dc7fe379`) |
 | **선행 조건** | ✅ #1366 ⒜(PR #1404, 2026-11-20 병합) / ✅ PR #1405(2026-11-21 병합) / ✅ Excel Route Handler PR #1411(2026-11-21 병합) / ✅ DB 마이그레이션 최신(pending 0) |
 | **범위** | WBS 5.1~5.7 — **⒜ PR `Refs #1367`**: S3 목록·S4 생성(수기 화주 포함)·S5 상세·3경로 공용 컴포넌트 / **⒝ PR `Closes #1367`**: 메뉴·경로 허용·i18n 정리·증적 |
