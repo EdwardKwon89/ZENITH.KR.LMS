@@ -53,6 +53,16 @@
 | TC-360-39 | DRAFT 표시(§6) — 빨간 배너 `초안 — 발행 전 문서`+`[초안]` 접두 / ISSUED는 공백 / CLOSED는 입금 확인 정보 | 상태별 표시 | 동일 | CI (vitest) |
 | TC-360-40 | 파일명(§2) — 금지 문자 `_` 치환·80자 제한·`filename*=UTF-8''`(RFC 5987) ASCII fallback에 금지 문자 없음 | 응답 헤더 단언 | 동일 | CI (vitest) |
 
+| TC-360-41 | **소수 금액·중량**(PR #1411 🔴) — 줄당 10.10/20.20(합 **30.30**)·중량 0.10+0.20(**0.30**) 청구서가 **200**이고 요약 셀=10.1/20.2/30.3, 중량 문자열 `0.30 kg`(float면 `0.30000000000000004`) | 정수 분(1/100) 합산 검증 | `tests/integration/task-b360-excel-export.test.ts` | CI (vitest) |
+| TC-360-42 | 합계를 **0.01만** 조작해도 500 (10.10→10.11), 복원 시 200 | 분 단위 정밀도 — `===` 부동소수 회귀 시 **FAIL**(정상 청구서가 500) | 동일 | CI (vitest) |
+| TC-360-43 | 기본 입금일 **KST** — UTC 18:00(=KST 다음날 03:00)에 입금확인하면 `paid_date=2026-12-01` (UTC slice면 11-30) | PR #1410 후속 권고 2 | 동일 | CI (vitest) |
+| TC-360-44 | 조회 실패 조용한 삼킴 차단 — 라벨/이력/항목 오류 각각 **500**(`LABELS_LOOKUP`/`HISTORY_LOOKUP`/`ITEMS_LOOKUP`), order 임베드 null → **500 `ORDER_EMBED_NULL`** | 빈 Map 위장 시 200 → **FAIL** | `tests/unit/finance/task-b360-excel-data.test.ts` | CI (vitest) |
+| TC-360-45 | PostgREST `max_rows=1000` 잘림 방지 — 페이지가 계속 full이면 상한(10,000행)에서 **500 `LABELS_LOOKUP_LIMIT`**, 상한 전 종료 시 정상 수집 | 페이징 루프 검증 | 동일 | CI (vitest) |
+| TC-360-46 | 소수 금액 단위 — 10.10+20.20이 float 비교에선 `30.299999999999997`로 헤더 30.30과 어긋나 **500** → 정수 분 비교로 200 | 🔴1 오탐 재현(fixture가 재현하지 못하면 회귀) | 동일 | CI (vitest) |
+| TC-360-47 | `dateRangeError` 형식 검증 — `dateTo='abc'`·역전 기간 모두 `DATE_RANGE_INVALID` (RangeError→`UNEXPECTED` 아님) | PR #1410 후속 권고 3 | `tests/unit/finance/task-b360-billable-limits.test.ts` | CI (vitest) |
+
+**회귀 검증 (2026-11-22, PR #1411 수정 반영 후)**: 신규 통합 **19/19** + 신규 단위 **8/8** + 기존 통합 **28/28** + 기존 단위 **10/10** = **65/65 PASS** · `npm run test:regression` 전체 PASS · `tsc` 관련 오류 0 · `check:ds11`·`check:lrtm`·`check:doc-links`·`check:audit`·`check:vendor` 전부 OK.
+
 **회귀 검증 (2026-11-21, PR #1404 검토 반영 후)**: 통합 **24/24** + 단위 **8/8** = **32/32 PASS** · `npm run test:regression` 전체 PASS · `supabase db reset --yes` 통과(마이그레이션 `20261120090000`, 번호 충돌 0) · `check:ds11`·`check:lrtm` OK · **전체 29개 함수 50줄 초과 0개** · `tsc` 내 파일 오류 0건.
 **되돌리기 검증 (조건별, PR 본문 표에 상세 기재)**:
 | 조건 | 되돌리기 내용 | 결과 |
@@ -62,5 +72,12 @@
 | ③ | `confirmStatementPayment`의 금액 불일치 검사 제거 | **PASS (24/24+8/8)** — DB CHECK `zen_billing_statements_paid_check`가 **이중 방어** |
 | ④ | RPC의 `agency_org_id` 자격 검증 제거 | **FAIL** (소속 불일치 오더 통과) |
 | (참고) | 통합 RPC 2종 `DROP` | suite 전체 FAIL → `supabase db reset` 복구 → 32/32 PASS |
+| **A(재측정)** | Excel 인쇄 설정 적용 2줄 제거 | **FAIL 4** (§8-1 3건 + `printArea` 1건) |
+| **B(재측정)** | `totalsMatchHeader()` 비활성화 | **FAIL 3** (통합 2 + 단위 1 — 불일치가 200 통과) |
+| **C(재측정)** | 헤더 미존재 404 → 500 | **FAIL 3** (존재 비노출 소실) |
+| **R1** | 정수 분 합산·비교 → **float 합산 + `===`** 복원(PR #1411 🔴1·🔴2 회귀) | **FAIL 3** — 통합 2건(**정상 청구서가 500** = 지적된 오탐 재현 + 중량 `0.30000000000000004`)·단위 1건 |
+| **R2** | 라벨 조회 오류를 빈 Map으로 삼킴 복원 | **FAIL 1** — 500 기대가 200 |
+| **R3** | order 임베드 null 가드 제거 | **FAIL 1** — 500 기대가 200 |
+| **④(PR #1410 후속)** | `lt endExclusive` → `lte <dateTo>T23:59:59+09` 변형 | **FAIL 2** — ③ 소수초(14:59:59.5Z 누락) + 월경계. ①·②은 PASS(달력일 동일) → 소수초 단언의 차별력 실측 완료 |
 **구현 중 발견·해정**: ① `zen_billing_statement_items`→헤더 FK가 2개(단일·복합)라 PostgREST embed 모호 → 상세는 복수 쿼리로 조회 ② `zen_profiles.email` UNIQUE + 고정 prefix가 이전 실행 잔여물과 충돌해 `on_auth_user_created`가 조용히 실패 → 랜덤 suffix + purge(참조 FK 순서대로) ③ ORG 대상 필터 누락 실버그 → `shipper_id`/`agency_org_id` 조건 적용.
 **주의 (R-09 v3.10)**: 회귀 맵 단일 파일에 `## N.` 추가 금지 — 본 파일이 등재 단위.

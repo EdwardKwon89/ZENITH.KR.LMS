@@ -190,7 +190,7 @@
 
 #### confirmStatementPayment(id, { paidAt, amount })
 - **Path**: `src/app/actions/finance/billing-statements.ts:594-653`
-- **설명**: 입금확인 ISSUED→CLOSED — **전액만**(Q7). `amount !== total_amount`이면 **저장하지 않고** 오류(DB CHECK `zen_billing_statements_paid_check`가 이중 방어). 조건부 `UPDATE ... WHERE status='ISSUED'`의 `rowCount`가 authority.
+- **설명**: 입금확인 ISSUED→CLOSED — **전액만**(Q7). `amount !== total_amount`이면 **저장하지 않고** 오류(DB CHECK `zen_billing_statements_paid_check`가 이중 방어). 조건부 `UPDATE ... WHERE status='ISSUED'`의 `rowCount`가 authority. `paidAt` 미지정 시 기본값은 **KST 오늘**(`getKstToday()`) — UTC `slice`는 00:00~09:00 KST에 전날을 만든다(PR #1410 후속 권고). `dateFrom/dateTo`는 `YYYY-MM-DD` 형식을 검증하지 않으면 `kstRangeBounds`가 RangeError로 `UNEXPECTED`를 냈으나, 형식 검증으로 `DATE_RANGE_INVALID`를 반환한다.
 - **권한**: 발행 org 구성원만
 - **Input**: `id: string`, `{ paidAt?: string; amount: number }`
 - **Output**: `Promise<{ success: boolean; error?: string }>`
