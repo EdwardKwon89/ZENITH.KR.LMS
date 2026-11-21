@@ -41,6 +41,18 @@
 | TC-360-27~28 | **상한 신호 (truncated)** | 오더 500건/수기 화주 1,000건 도달 시 `truncated=true` + `logger.warn`, 미만이면 `false` | 동일 | CI (vitest) |
 | TC-360-29 | `paidAt` 형식 검증 + `orderIds` 중복 제거 | `YYYY-MM-DD` 아니면 generic 거부(UPDATE 미도달), 중복 id는 Set으로 제거 후 RPC에 전달 | 동일 | CI (vitest) |
 
+| TC-360-30 | **Excel 인쇄 설정 재파싱 단언**(§8-1) — 생성 .xlsx를 exceljs로 다시 열어 시트1 `paperSize=9`+`portrait`+`fitToHeight=1`, 시트2 `paperSize=9`+`landscape`+`fitToHeight=0`, 여백(0.4/0.6/0.3)·가운데 맞춤·눈금선(시트1 화면·인쇄 숙김 / 시트2 화면 표시·인쇄 숙김)·3행 틀 고정 | 소스 문자열 검사 없이 파일 구조로만 단언 | `tests/integration/task-b360-excel-export.test.ts` | CI (vitest) |
+| TC-360-31 | `Print_Titles`(상세 3행 반복)·`Print_Area`(`A1:F24` / `A1:M<행>`)·머리글(`&R<번호>` / `&L<번호>&R오더별 상세`)·바닥글(`&C페이지 &P / &N`) | 재파싱 값 단언 | 동일 | CI (vitest) |
+| TC-360-32 | 값 단언(§8-2) — 상세 행 수=항목 수, 합계 행=`total_amount`, 오더·금액 셀은 **숫자**, 기준일은 **날짜 값**+`yyyy-mm-dd`(KST 달력일), 수하인·도착국가 표시 | 저장값 그대로 출력 | 동일 | CI (vitest) |
+| TC-360-33 | 상세 4개 금액 열 합 = 요약 4개 금액(80,000/16,000/4,000/800 = 100,800) | 재계산 없이 저장값 대조(§1-1) | 동일 | CI (vitest) |
+| TC-360-34 | 권한(§8-3) — 발행자·Admin 감독·청구받은 화주(CLOSED) **200** / 타 대리점·DRAFT 청구받은 화주·비소속 화주 **404(미존재와 동일 바디)** / 미인증 **401** | **실제 authenticated JWT 세션**(service_role 미사용) | 동일 | CI (vitest) |
+| TC-360-35 | 수식 주입 방지(§8-4) — `=HYPERLINK(...)` 청구 대상명이 **문자열 셀**(`formula=undefined`) | §1-4 | 동일 | CI (vitest) |
+| TC-360-36 | tier별 구성(§8-5) — `ADMIN_TO_AGENCY`=13열(지정 12+No, 화주명 포함)·`printArea A1:M`, 나머지=12열(지정 11+No)·`A1:L` | 열 정의 배열에서 열 문자 계산(하드코딩 금지) | 동일 | CI (vitest) |
+| TC-360-37 | 서식(§6) — 합계 열 굵게·머리글 `#E7ECF3` 배경·정렬(좌/중앙/우)·`#,##0.00;-#,##0.00` 형식 | 재파싱 단언 | 동일 | CI (vitest) |
+| TC-360-38 | **합계 불일치 → 파일 미생성**(§1-1·§8-6) — DRAFT 항목 `line_total` 조작 시 **500** + xlsx 헤더 없음 + `logger.error('total mismatch')`, 복원 시 200 | 부분 파일 금지 | 동일 | CI (vitest) |
+| TC-360-39 | DRAFT 표시(§6) — 빨간 배너 `초안 — 발행 전 문서`+`[초안]` 접두 / ISSUED는 공백 / CLOSED는 입금 확인 정보 | 상태별 표시 | 동일 | CI (vitest) |
+| TC-360-40 | 파일명(§2) — 금지 문자 `_` 치환·80자 제한·`filename*=UTF-8''`(RFC 5987) ASCII fallback에 금지 문자 없음 | 응답 헤더 단언 | 동일 | CI (vitest) |
+
 **회귀 검증 (2026-11-21, PR #1404 검토 반영 후)**: 통합 **24/24** + 단위 **8/8** = **32/32 PASS** · `npm run test:regression` 전체 PASS · `supabase db reset --yes` 통과(마이그레이션 `20261120090000`, 번호 충돌 0) · `check:ds11`·`check:lrtm` OK · **전체 29개 함수 50줄 초과 0개** · `tsc` 내 파일 오류 0건.
 **되돌리기 검증 (조건별, PR 본문 표에 상세 기재)**:
 | 조건 | 되돌리기 내용 | 결과 |

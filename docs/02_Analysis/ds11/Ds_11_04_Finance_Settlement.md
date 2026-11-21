@@ -215,6 +215,15 @@
 - **오류**: `statement_not_found`(타 생성자·미존재 동일), `generic{STATEMENT_LOOKUP|UNEXPECTED}`
 - **부수효과**: 조회만
 
+#### GET /api/finance/statements/[id]/export (청구서 Excel 출력)
+- **Path**: `src/app/api/finance/statements/[id]/export/route.ts` (빌더: `src/lib/finance/billing/statement-excel*.ts`)
+- **설명**: 청구서 `.xlsx` 다운로드(WBS 4.6) — **Route Handler**(서버 액션은 파일을 반환하지 않는다, An_17 부록 A §2). 시트1 `청구서`(A4 세로 요약) + 시트2 `오더별 상세`(A4 가로, tier별 11/12열 + No) — 양식은 `An_17_부록A_청구서_Excel_출력양식_설계.md` v1.0. 금액·중량은 저장값만 쓰고 **출력 직전 항목 합 = 헤더 `total_amount` 검증**(불일치 시 파일 미생성). 라이브러리 `exceljs@4.4.0`(JSJung 승인 2026-11-21).
+- **권한**: 인증된 세션 + **`getBillingStatementDetail`과 동일한 RLS 3경로** — 안 보이면 404(존재 비노출). 미인증 401.
+- **Input**: URL param `id` (uuid)
+- **Output**: 200 `.xlsx` (`Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`, `Cache-Control: no-store`, `Content-Disposition` RFC 5987)
+- **오류**: 401(미인증), 404(미존재·RLS 차단 — 동일 응답), 500(`HEADER_LOOKUP`/`ITEMS_LOOKUP`/`TOTAL_MISMATCH`/`BUILD_FAILED` — 전부 `logger.error`, 파일 미생성)
+- **부수효과**: 조회만 (DB 변경 없음) · 성공 시 `logger.info(statement_id·건수만 — 금액·상호 제외)`
+
 #### normalizeShipperName(name)
 - **Path**: `src/app/actions/finance/billing-statements.ts:150-153`
 - **설명**: 수기 화주명 정규화 — RPC `billed_key`의 ADHOC 규칙과 동일(공백 압축·양끝 제거·소문자). 후보 매칭과 자동완성 집계에서 공용.
