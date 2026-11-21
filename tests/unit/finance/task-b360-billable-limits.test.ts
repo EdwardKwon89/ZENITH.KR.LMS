@@ -11,7 +11,7 @@ function makeChain(data: any, error: any = null): Chain {
   const chain: any = {};
   for (const m of [
     'select', 'insert', 'update', 'delete', 'eq', 'neq', 'not', 'in', 'ilike',
-    'order', 'limit', 'range', 'single', 'maybeSingle', 'filter', 'gte', 'lte', 'is',
+    'order', 'limit', 'range', 'single', 'maybeSingle', 'filter', 'gte', 'lte', 'lt', 'gt', 'is',
   ]) {
     chain[m] = vi.fn().mockReturnValue(chain);
   }
