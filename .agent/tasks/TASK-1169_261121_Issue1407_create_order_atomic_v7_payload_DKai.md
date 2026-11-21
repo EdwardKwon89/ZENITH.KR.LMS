@@ -89,7 +89,7 @@
 
 - 코드 커밋: `1af180b6d94d5d2cc69c9595d0e53e472625fbe9`
 - 커밋 내용: 회귀 테스트 5케이스 + `regression-items/` 등재 — **`src/` 변경 없음**(검증 전용 Task)
-- **문서 커밋 (완료 보고)**: <PLACEHOLDER>
+- **문서 커밋 (완료 보고)**: `2ddac1d04b72e195674daae75f8ecdf93d712c8a` — `[D_Kai] docs: TASK-1169 v7 payload 호환 검증 결과 및 R-17 완료 보고 (#1407)`
 - **브랜치**: `feature/teama-task-1169-create-order-atomic-v7` → `develop` (PR)
 - **Issue 라벨**: `status:open` → `status:in-progress` → `status:review`
 - **실배포/운영 DB**: **미수행** — 로컬/CI 검증만
