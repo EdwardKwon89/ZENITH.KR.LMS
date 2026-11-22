@@ -45,17 +45,16 @@
 
 | # | 파일 | 변경 |
 |:--|:--|:--|
-| 1 | `src/app/actions/finance/ups-actual-charges.ts` | `resolveAgencyScopeShipperIds()` 추가(활성 연결 화주 + 자가화주 `agencyOrgId`). `recordUpsActualCharges`·`searchDeliveredUpsOrders` 1단계/2단계 모두 동일 스코프 적용. 조회 실패 시 자가화주만 허용(안전 축소) + `logger.error` |
-| 2 | 〃 | `recordUpsActualCharges`: **ACTIVE 프로필**·유한 금액 검증, 마감 인보이스 사전 거부. 소유 검증 통과 후 **AGENCY에 한해** `createAdminClient()`로 쓰기(`zen_ups_actual_charges`·`zen_order_costs`·`zen_invoices`). 기존 AGENCY INSERT/UPDATE RLS 정책 부재로 `CHARGES_INSERT` 실패하던 문제 해소(DB 변경 없음, DEF-153 패턴) |
-| 2-1 | 〃 | **리뷰 반영**: SUSPENDED AGENCY 차단, 마감 인보이스는 쓰기 전 `invoice_already_finalized` 거부(부분 쓰기 방지), AGENCY는 `AGENCY_TO_SHIPPER` 인보이스만 갱신(`ADMIN_TO_AGENCY` 제외), 금액 `Number.isFinite` 검증 |
-| 3 | `src/lib/orders/order-released-date.ts` (신규) | `getOrderReleasedDate` 이동 — `'use server'` 파일의 무인증 export 제거(§1.2) |
-| 4 | `src/app/actions/finance/ups-actual-cost.ts` | helper import로 전환(내부 3곳), export 제거 |
-| 5 | `src/app/[locale]/(dashboard)/finance/order-settlement/[orderId]/page.tsx` | helper import 경로 갱신 |
-| 6 | `tests/integration/task-b372-agency-scope.test.ts` (신규) | 실제 AGENCY 로그인 세션·실DB — 검색 1·2단계 스코프, 실비등록 성공/차단 |
-| 7 | `tests/unit/finance/ups-actual-cost.test.ts` | helper import 경로 갱신 |
-| 8 | `tests/unit/finance/ups-actual-charges.test.ts` | AGENCY admin client mock 추가 |
-| 9 | `docs/02_Analysis/ds11/Ds_11_11B_UPS_Agency_Actuals.md` | `recordUpsActualCharges`/`searchDeliveredUpsOrders` 권한·스코프, `getOrderReleasedDate`를 lib 내부 헬퍼로 정정 |
-| 10 | `docs/08_Self_Audit/Checklists/regression-items/TASK-B-372_Issue1356_def150-pr1.md` (신규) | R-09 회귀 항목 |
+| 1 | `src/app/actions/finance/ups-actual-charges.ts` | `assertAdminOrAgency` → **`assertAdminOnly`**(`ZENITH_SUPER_ADMIN`·`ADMIN`·`MANAGER`만). `recordUpsActualCharges`·`searchDeliveredUpsOrders`·`getUpsActualCharges`·`getUpsChargeReconciliation` **4개 모두** 적용. 비관리자는 `logger.warn` + `permission_denied`(조회는 throw) |
+| 2 | 〃 | AGENCY 분기·스코프 필터·`writeDb`/admin client 분기 제거(리뷰 지시). 관리자 가드 통과 후 4개 함수 DB 접근은 `createAdminClient()` 사용(SUPER_ADMIN이 `zen_ups_actual_charges` RLS 정책에 없음 — 정책 교체는 별도 Task) |
+| 3 | 〃 | `recordUpsActualCharges`: 금액 `Number.isFinite` 검증 유지. 마감 인보이스 판정은 기존 관리자 흐름 유지 |
+| 4 | `src/app/[locale]/(dashboard)/orders/[orderId]/page.tsx` | `UpsActualAdjustmentForm`을 **관리자(`isAdmin` 또는 MANAGER)일 때만 렌더**. 폼은 `getUpsActualCharges`·`getUpsChargeReconciliation`·`recordUpsActualCharges` 3개를 호출하므로 비관리자 렌더 제거로 호출 자체 차단(PR 본문 기재) |
+| 5 | `src/lib/orders/order-released-date.ts` (신규) | `getOrderReleasedDate` 이동(§1.2 유지) |
+| 6 | `src/app/actions/finance/ups-actual-cost.ts`, 오더정산 상세 page, 단위 테스트 | helper import 경로 갱신 |
+| 7 | `tests/integration/task-b372-admin-only.test.ts` (신규) | 실제 로그인 세션·실DB — 관리자 3역할 허용 4함수, 비관리자 3역할 거부 4함수 |
+| 8 | `tests/unit/finance/ups-actual-charges.test.ts` | AGENCY 허용 테스트를 거부로 반전, 관리자 기준 금액 검증·guard 테스트 |
+| 9 | `docs/02_Analysis/ds11/Ds_11_11B_UPS_Agency_Actuals.md` | 4개 함수 권한을 admin 전용으로 정정 |
+| 10 | `docs/08_Self_Audit/Checklists/regression-items/TASK-B-372_Issue1356_def150-pr1.md` | R-09 회귀 항목 |
 
 **마이그레이션·DB 정책 변경 없음.**
 
@@ -63,53 +62,47 @@
 
 | TC | 내용 | 결과 |
 |:--|:--|:--|
-| TC-372-01 | AGENCY 검색(1단계 order_no): 소속·자가화주 1건, 타 화주/비소속 0건 | PASS |
-| TC-372-02 | AGENCY 검색(2단계 tracking_no): 소속·자가화주 1건, 타 화주/비소속 0건 | PASS |
-| TC-372-03 | 비소속(읽기 가능) 오더 실비등록 | `shipper_scope_denied` PASS |
-| TC-372-04 | 소속·자가화주 오더 실비등록 | 성공 + `zen_ups_actual_charges` 1행 PASS (admin client) |
-| TC-372-05 | §1.2 helper 이동 후 기존 단위·페이지 import | 14/14 PASS |
-| TC-372-06 | SUSPENDED AGENCY | `permission_denied`, 실비 0행 | PASS |
-| TC-372-07 | 마감 인보이스 + AGENCY | 쓰기 전 거부(`invoice_already_finalized`), 기존 실비 행 보존 | PASS |
-| TC-372-08 | 미마감 인보이스 갱신 | `ADMIN_TO_AGENCY` 110 불변, `AGENCY_TO_SHIPPER` 60 갱신 | PASS |
-| TC-372-09 | NaN/Infinity + 비소유(admin client 미호출) | `cost_amount_invalid`, `createAdminClient` 미호출 | PASS |
-| TC-372-RST-1 | 2단계(tracking_no) 스코프 필터 제거 | **1 failed / 3 passed** → 복구 4/4 |
-| TC-372-RST-2 | 헬퍼에서 자가화주(`agencyOrgId`) 제외 | **3 failed / 1 passed** → 복구 4/4 |
-| TC-372-RST-3 | AGENCY admin client 쓰기 제거 | **1 failed / 3 passed** (`CHARGES_INSERT`) → 복구 4/4 |
-| TC-372-RST-4 | ACTIVE 가드 제거 | **1 failed / 6 passed** (SUSPENDED 성공) → 복구 7/7 |
-| TC-372-RST-5 | 마감 인보이스 사전 거부 제거 | **1 failed / 6 passed** (부분 쓰기 후 `POST_FINALIZATION_ADJUST`) → 복구 7/7 |
-| TC-372-RST-6 | AGENCY `ADMIN_TO_AGENCY` 제외 제거 | **1 failed / 6 passed** (120으로 변경) → 복구 7/7 |
+| TC-372-01 | SUPER_ADMIN·ADMIN·MANAGER: 검색·조회·대사·등록 | 4함수 모두 성공(등록 시 `zen_ups_actual_charges` 1행) PASS |
+| TC-372-02 | AGENCY·SHIPPER·OPERATOR: 4함수 모두 거부 | `permission_denied`, 실비 행 불변 PASS |
+| TC-372-03 | AGENCY 단위(등록 거부) | `권한이 없습니다.` PASS |
+| TC-372-04 | 비유한 금액(ADMIN) | `cost_amount_invalid`, admin client 미호출 PASS |
+| TC-372-05 | §1.2 helper 이동 | 단위 14/14 PASS |
+| TC-372-RST-1 | `assertAdminOnly`를 항상 null(가드 제거) | **3 failed / 3 passed** (비관리자 3역할) → 복구 6/6 |
 
 ## 3. 검증 (DoD)
 
-- [x] 실제 로그인 세션(`signInWithPassword`)·실DB 통합 테스트 PASS (서버 액션 mock 없음)
-- [x] 2단계(tracking_no) 경로 별도 검증 + 되돌리기 실측
-- [x] `npm run test:regression` **294 files / 2,256 tests PASS**, `npm run build` **EXIT=0**
-- [x] R-12 Ds-11 갱신, `check:ds11` OK
+- [x] 실제 로그인 세션(`signInWithPassword`)·실DB — 관리자/비관리자 4함수 교차 검증
+- [x] 폼 렌더 게이트(비관리자 호출 차단) — page.tsx 조건 확인
+- [x] 되돌리기 실측(가드 제거 3F/3P)
+- [x] `npm run test:regression` **294 files / 2,255 tests PASS**, `npm run build` **EXIT=0**
+- [x] R-12 Ds-11 4개 함수 admin 전용 정정, `check:ds11` OK
 - [x] `zen_error_logs` 최근 1일 신규 ERROR **0건**
 - [x] `git diff --stat origin/TeamB_Dev...HEAD -- scratch` 출력 없음(R-15)
 - [x] `git diff --numstat origin/TeamB_Dev...HEAD` (최종):
 ```text
-105	0	.agent/tasks/TASK-B-372_261123_Issue1356_Def150Finance.md
-9	9	docs/02_Analysis/ds11/Ds_11_11B_UPS_Agency_Actuals.md
-32	0	docs/08_Self_Audit/Checklists/regression-items/TASK-B-372_Issue1356_def150-pr1.md
+115	0	.agent/tasks/TASK-B-372_261123_Issue1356_Def150Finance.md
+11	11	docs/02_Analysis/ds11/Ds_11_11B_UPS_Agency_Actuals.md
+23	0	docs/08_Self_Audit/Checklists/regression-items/TASK-B-372_Issue1356_def150-pr1.md
 2	1	src/app/[locale]/(dashboard)/finance/order-settlement/[orderId]/page.tsx
-78	31	src/app/actions/finance/ups-actual-charges.ts
+2	1	src/app/[locale]/(dashboard)/orders/[orderId]/page.tsx
+48	55	src/app/actions/finance/ups-actual-charges.ts
 1	16	src/app/actions/finance/ups-actual-cost.ts
 24	0	src/lib/orders/order-released-date.ts
-254	0	tests/integration/task-b372-agency-scope.test.ts
-28	1	tests/unit/finance/ups-actual-charges.test.ts
+169	0	tests/integration/task-b372-admin-only.test.ts
+1	0	tests/unit/finance/task-b352-error-locale.test.ts
+4	0	tests/unit/finance/ups-actual-charges-dual-invoice.test.ts
+32	4	tests/unit/finance/ups-actual-charges.test.ts
 1	1	tests/unit/finance/ups-actual-cost.test.ts
 ```
 
 ## 4. [발견 이슈]
 
-1. **[블로커 해소·승인 요청] AGENCY 실비등록 쓰기 RLS 부재** — `zen_ups_actual_charges`·`zen_order_costs`·`zen_invoices`에 AGENCY INSERT/UPDATE 정책이 없어, 필터만 수정하면 소속/자가화주 오더도 `CHARGES_INSERT`로 실패한다(실측). **DB 마이그레이션 없이** DEF-153 패턴(소유 검증 후 admin client)으로 AGENCY 경로만 쓰기를 전환해 DoD "실비등록 가능"을 충족했다. 이슈 #1356에 질문 코멘트를 남겼으며, Jaison이 마이그레이션 방식을 선호하면 정책 추가 PR로 교체 필요.
-2. **[설계 의견·Aiden 확인] AGENCY의 `ADMIN_TO_AGENCY` 인보이스 갱신 제외** — AGENCY 실비가 플랫폼→대리점 청구액을 바꾸는 것은 금전 경계상 부적절하다고 판단해, AGENCY는 자신이 발행하는 `AGENCY_TO_SHIPPER`만 갱신하도록 했다. Jaison 리뷰 ③에서 Aiden 확인 요청. 마감 인보이스는 AGENCY에게 사전 거부(부분 쓰기 방지)로 결정.
-3. **[환경] `zen_agency_shippers` JWT 의존** — RLS가 `auth.jwt()->app_metadata.role/org_id`를 보므로 통합 테스트 계정 생성 시 `app_metadata`를 함께 설정해야 한다(테스트 픽스처 보정).
-4. **[참고] §1.3/§1.4는 PR-2** — 조회 5종 가드·MANAGER `isAdmin`/`{error}` 로깅은 Jaison 지시대로 설계 의견 후 별도 PR.
+1. **[후속 Task] RLS `shipper_agency_select` 제거** — JSJung 확정 규칙(실비는 관리자 전용)에 따라 화주·대리점의 직접 SELECT 정책도 제거해야 한다. Jaison 지시대로 **별도 설계 의견 PR**(마이그레이션)로 분리하며, 새 task 번호는 TASK-B-375로 채번 예정(로컬 task file 기준 B-372 다음, #1349=B-374·#1362=B-373 제외). 설계 의견에 (a) 정책 제거 후 관리자 세션의 `zen_order_costs` 읽기 유지 (b) 화주·대리점 세션 SELECT 0건 실DB 검증 (c) 이 테이블을 읽는 뷰·함수 전수 조회 결과를 포함한다.
+2. **[구조] SUPER_ADMIN RLS 갭** — `zen_ups_actual_charges` 관리자 정책이 `ADMIN`·`MANAGER`만 포함해 SUPER_ADMIN은 사용자 세션으로 조회/쓰기 불가. 관리자 가드 통과 후 `createAdminClient()`를 사용해 기능을 보장하고, 정책 교체 시 함께 정리한다.
+3. **[참고] §1.3/§1.4는 PR-2** — `getUpsActualCost`·`getInvoicePdfHistory`·`getTaxInvoiceHistory`와 MANAGER `isAdmin`/`{error}` 로깅은 별도 PR-2 설계 의견 대상.
 
 ## 5. [작업 결과]
 
-- 코드 커밋: `6b8044811` (초판) / **리뷰 반영** `90f87bd70` (ACTIVE 가드·마감 사전 거부·인보이스 경계·금액 검증)
+- 코드 커밋: `6b8044811` (초판) / `90f87bd70` (1차 리뷰) / **`62f532037`** (JSJung 확정 방향 전환)
 - 문서 커밋: 본 task file (docs-only)
 - PR: `feature/teamb-task-b372-iss1356-def150-pr1` → `TeamB_Dev` (**`Refs #1356`**)
