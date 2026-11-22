@@ -40,5 +40,5 @@
 | RST-6 | #1367 Admin S1 링크 제거 | **1 failed / 8 passed** | 9/9 PASS |
 
 **회귀 검증**: `npm run test:regression` → **290파일 / 2,217케이스 전부 PASS (exit 0)**. `npm run build` → **성공 (exit 0)**. 신규 Vitest 14건 + 갱신 1건 + E2E 1건(수동).
-**R-10 실구동**: Playwright E2E-27 1/1 PASS (32.9s) — 스크린샷 `docs/99_Manual/E2E_27_Result/S1-목록.png`·`S2-임시저장.png`·`S2-정산완료.png`·`S2-되돌리기.png`.
+**R-10 실구동**: Playwright E2E-27 1/1 PASS (23.3s) — 스크린샷 `docs/99_Manual/E2E_27_Result/S1-목록.png`·`S2-임시저장.png`·`S2-정산완료.png`·`S2-되돌리기.png`.
 **발견 이슈**: S2 기타부가운임 다중행·항목별 KRW 분해는 서버 액션 계약 확장 필요 → **IMP-201**, 스냅샷 없는 오더의 시스템 값 fallback → **IMP-202**. UPS 청구서 PDF 첨부(선택 범위)는 미구현.

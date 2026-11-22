@@ -53,7 +53,7 @@
 | TC-369-13 | Admin 메뉴 링크 렌더 | PASS |
 | TC-369-14 | 대리점 메뉴 링크 없음 | PASS |
 | TC-369-15 | #1367 Admin 안내 S1 링크(TC-361-09 갱신) | PASS |
-| TC-369-16 | R-10 실구동 (`page.goto`·정산/되돌리기) | **PASS (32.9s)** |
+| TC-369-16 | R-10 실구동 (`page.goto`·정산/되돌리기) | **PASS (23.3s)** |
 
 **되돌리기 검증 (실측)**:
 
@@ -68,7 +68,7 @@
 
 ## 3. 검증 (DoD)
 
-- [x] R-10 실구동 — Playwright E2E-27 **1/1 PASS (32.9s)**: Admin 실제 로그인 → `/ko/finance/order-settlement` → S2 저장 → 정산 완료 → 되돌리기. 스크린샷 4장.
+- [x] R-10 실구동 — Playwright E2E-27 **1/1 PASS (23.3s)**: Admin 실제 로그인 → `/ko/finance/order-settlement` → S2 저장 → 정산 완료 → 되돌리기. 스크린샷 4장.
 - [x] 컴포넌트 테스트 14건 — 실제 `OrderSettlementList`·`OrderSettlementDetail`·`NaviSidebar` import·렌더. `readFileSync`/source 문자열/`test.skip` **0건**
 - [x] 되돌리기 검증 6종 — 위 표 실측값
 - [x] `npm run test:regression` → **290 files / 2,217 tests 전부 PASS (exit 0)**

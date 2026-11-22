@@ -8,7 +8,8 @@ import dotenv from 'dotenv';
 dotenv.config({ path: '.env.local' });
 
 const SCREENSHOT_DIR = 'docs/99_Manual/E2E_27_Result';
-const ADMIN_EMAIL = 'admin@zenith.kr';
+// 전용 계정 — 공용 admin@zenith.kr(다른 E2E/개발) 삭제를 피한다.
+const ADMIN_EMAIL = 'e2e27_admin@zenith.kr';
 const ADMIN_PASSWORD = 'password1234';
 const SHIPPER_ORG_ID = '36900000-0000-4000-8000-000000000002';
 const ORDER_ID = '36900000-0000-4000-8000-000000000010';
