@@ -31,6 +31,7 @@ export default async function AgencyStatementNewPage({ params }: { params: Promi
       locale={locale}
       targets={targets}
       allowAdhoc={cfg.allowAdhoc}
+      canSettleOrders={cfg.canSettleOrders}
       defaultYear={Number(today.slice(0, 4))}
       defaultMonth={Number(today.slice(5, 7))}
     />

@@ -25,13 +25,34 @@ export interface StatementCreateProps {
   locale: string;
   targets: StatementTarget[];
   allowAdhoc: boolean;
+  /** Admin(원가 정산 가능) 여부 — 서버 역할로 계산해 내려준다. */
+  canSettleOrders: boolean;
   defaultYear: number;
   defaultMonth: number;
 }
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
-export default function StatementCreate({ basePath, locale, targets, allowAdhoc, defaultYear, defaultMonth }: StatementCreateProps) {
+// Jaison 리뷰(2026-11-22): 조회 후 조건이 바뀌면 이전 후보/선택을 숨기고 저장을 막는다.
+// 조건 10종을 스냅샷으로 비교해 새 필드가 추가되어도 누락 없이 무효화되게 한다.
+interface LookupConditions {
+  mode: 'ORG' | 'ADHOC';
+  orgId: string;
+  shipperName: string;
+  bizNo: string;
+  year: string;
+  month: string;
+  dateBasis: DateBasis;
+  dateFrom: string;
+  dateTo: string;
+}
+
+const sameConditions = (a: LookupConditions, b: LookupConditions): boolean =>
+  a.mode === b.mode && a.orgId === b.orgId && a.shipperName === b.shipperName &&
+  a.bizNo === b.bizNo && a.year === b.year && a.month === b.month &&
+  a.dateBasis === b.dateBasis && a.dateFrom === b.dateFrom && a.dateTo === b.dateTo;
+
+export default function StatementCreate({ basePath, locale, targets, allowAdhoc, canSettleOrders, defaultYear, defaultMonth }: StatementCreateProps) {
   const t = useTranslations('Statements');
   const router = useRouter();
 
@@ -53,6 +74,12 @@ export default function StatementCreate({ basePath, locale, targets, allowAdhoc,
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  // 마지막 성공 조회의 조건 스냅샷 — null이면 아직 유효한 조회 결과가 없다.
+  const [lookupConditions, setLookupConditions] = useState<LookupConditions | null>(null);
+
+  const conditions: LookupConditions = { mode, orgId, shipperName, bizNo, year, month, dateBasis, dateFrom, dateTo };
+  const isStale = lookupConditions !== null && !sameConditions(lookupConditions, conditions);
+  const showLookupNotices = lookupConditions !== null && !isStale;
 
   // 수기 화주 자동완성 — 과거 오더의 정규화된 수기 화주명 그룹.
   useEffect(() => {
@@ -96,11 +123,17 @@ export default function StatementCreate({ basePath, locale, targets, allowAdhoc,
     if (!validateDates()) return;
 
     setLoading(true);
+    // 이전 조회 잔존물 제거 — 실패 시에도 이전 총건수·미정산·상한 경고가 남지 않는다.
+    setLookupConditions(null);
+    setOrders([]);
+    setSelectedIds([]);
+    setTotal(0);
+    setExcludedUnsettled(0);
+    setTruncated(false);
     const res = await listBillableOrders({ billedTarget: target, dateBasis, dateFrom, dateTo });
     setLoading(false);
     if (!res.success) {
       setError(res.error ?? t('actionFailed'));
-      setOrders([]);
       return;
     }
     setOrders(res.orders ?? []);
@@ -108,6 +141,7 @@ export default function StatementCreate({ basePath, locale, targets, allowAdhoc,
     setExcludedUnsettled(res.excludedUnsettled ?? 0);
     setTruncated(Boolean(res.truncated));
     setSelectedIds([]);
+    setLookupConditions(conditions);
   };
 
   const selectedTotal = orders
@@ -119,6 +153,7 @@ export default function StatementCreate({ basePath, locale, targets, allowAdhoc,
 
   const save = async () => {
     setError(null);
+    if (isStale) { setError(t('conditionsChanged')); return; }
     const target = billedTarget();
     if (!target) { setError(t('targetRequired')); return; }
     if (selectedIds.length === 0) { setError(t('noCandidates')); return; }
@@ -231,17 +266,21 @@ export default function StatementCreate({ basePath, locale, targets, allowAdhoc,
         {error && <p className="text-sm text-rose-600" role="alert">{error}</p>}
       </ZenCard>
 
-      {excludedUnsettled > 0 && (
-        <div className="rounded-xl bg-amber-50 p-3 text-sm text-amber-800 flex flex-wrap items-center gap-2">
-          <span>{t('excludedUnsettled', { count: excludedUnsettled })}</span>
-          <Link href={`/${locale}/settlement`} className="underline font-semibold">{t('goOrderSettlement')}</Link>
+      {isStale && (
+        <div className="rounded-xl bg-amber-50 p-3 text-sm text-amber-800" role="status">{t('conditionsChanged')}</div>
+      )}
+      {showLookupNotices && excludedUnsettled > 0 && (
+        <div className="rounded-xl bg-amber-50 p-3 text-sm text-amber-800">
+          <span>{canSettleOrders
+            ? t('excludedUnsettledAdmin', { count: excludedUnsettled })
+            : t('excludedUnsettledAgency', { count: excludedUnsettled })}</span>
         </div>
       )}
-      {truncated && (
+      {showLookupNotices && truncated && (
         <div className="rounded-xl bg-rose-50 p-3 text-sm text-rose-700" role="alert">{t('truncatedWarning')}</div>
       )}
 
-      {orders.length > 0 && (
+      {showLookupNotices && orders.length > 0 && (
         <ZenCard className="overflow-x-auto space-y-3">
           <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
             <div className="flex items-center gap-3">

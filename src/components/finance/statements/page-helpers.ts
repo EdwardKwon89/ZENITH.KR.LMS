@@ -14,6 +14,8 @@ export interface StatementRouteConfig {
   roles: string[];
   canCreate: boolean;
   allowAdhoc: boolean;
+  /** 원가 정산 표시 권한(Admin) — 현재 S1·S2 화면 미구현으로 안내 문구 분기에만 사용. */
+  canSettleOrders: boolean;
 }
 
 export const STATEMENT_ROUTES: Record<StatementArea, StatementRouteConfig> = {
@@ -24,6 +26,7 @@ export const STATEMENT_ROUTES: Record<StatementArea, StatementRouteConfig> = {
     canCreate: true,
     // 설계 §6-5d: Admin 수기 화주 청구는 범위 외 (등록 조직만)
     allowAdhoc: false,
+    canSettleOrders: true,
   },
   agency: {
     basePath: '/agency/statements',
@@ -31,6 +34,7 @@ export const STATEMENT_ROUTES: Record<StatementArea, StatementRouteConfig> = {
     roles: [USER_ROLES.AGENCY],
     canCreate: true,
     allowAdhoc: true,
+    canSettleOrders: false,
   },
   shipper: {
     basePath: '/shipper/statements',
@@ -38,6 +42,7 @@ export const STATEMENT_ROUTES: Record<StatementArea, StatementRouteConfig> = {
     roles: [USER_ROLES.SHIPPER, USER_ROLES.AGENCY_SHIPPER],
     canCreate: false,
     allowAdhoc: false,
+    canSettleOrders: false,
   },
 };
 

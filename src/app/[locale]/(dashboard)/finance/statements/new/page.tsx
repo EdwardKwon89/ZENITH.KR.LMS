@@ -26,6 +26,7 @@ export default async function FinanceStatementNewPage({ params }: { params: Prom
       locale={locale}
       targets={targets}
       allowAdhoc={cfg.allowAdhoc}
+      canSettleOrders={cfg.canSettleOrders}
       defaultYear={Number(today.slice(0, 4))}
       defaultMonth={Number(today.slice(5, 7))}
     />

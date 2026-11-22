@@ -11,9 +11,9 @@ const m = vi.hoisted(() => ({
 }));
 
 vi.mock('@/app/actions/finance/billing-statements', () => ({
-  listBillableOrders: (...a: any[]) => m.listOrders(...a),
-  listAdhocShipperNames: (...a: any[]) => m.listNames(...a),
-  createBillingStatement: (...a: any[]) => m.create(...a),
+  listBillableOrders: (...a: unknown[]) => m.listOrders(...a),
+  listAdhocShipperNames: (...a: unknown[]) => m.listNames(...a),
+  createBillingStatement: (...a: unknown[]) => m.create(...a),
   cancelBillingStatement: vi.fn(),
   confirmStatementPayment: vi.fn(),
   issueBillingStatement: vi.fn(),
@@ -33,7 +33,9 @@ vi.mock('next-intl', () => {
     colBasisDateDelivered: '배송완료일', colBasisDateReleased: '출고확정일',
     dateFrom: '시작일', dateTo: '종료일', lookupOrders: '후보 오더 조회',
     truncatedWarning: '조회 결과가 상한에 도달했습니다. 기간을 좁혀 다시 조회하세요.',
-    excludedUnsettled: '미정산 {count}건은 제외됨 — 오더정산으로 이동', goOrderSettlement: '오더정산으로 이동',
+    conditionsChanged: '조회 조건이 변경되었습니다. 다시 조회하세요.',
+    excludedUnsettledAdmin: '미정산 {count}건은 제외됨 — 오더정산 화면이 없어 정산 처리가 불가합니다',
+    excludedUnsettledAgency: '미정산 {count}건은 제외됨 — 관리자에게 정산 처리를 요청하세요',
     colOrderNo: '오더번호', colShipperName: '오더별 화주명', colWeight: '청구중량(kg)',
     colBaseFreight: '기본운임', colFuelSurcharge: '유류할증료', colSurgeFee: '급증수수료', colOtherCharges: '기타',
     colLineTotal: '금액', selectAll: '전체선택', selectedCount: '선택 {count}건 / 후보 {total}건',
@@ -52,7 +54,11 @@ vi.mock('sonner', () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 
 import StatementCreate from '@/components/finance/statements/StatementCreate';
 
-const base = { basePath: '/finance/statements', locale: 'ko', allowAdhoc: false, defaultYear: 2026, defaultMonth: 10, targets: [{ id: 'org1', name: 'B대리점' }] };
+const base = {
+  basePath: '/finance/statements', locale: 'ko', allowAdhoc: false, canSettleOrders: true,
+  defaultYear: 2026, defaultMonth: 10,
+  targets: [{ id: 'org1', name: 'B대리점' }, { id: 'org2', name: 'A사' }],
+};
 
 const order = {
   orderId: 'o1', orderNo: 'ORD-1', basisDate: '2026-10-05', shipperName: 'C사', agencyName: 'B대리점',
@@ -77,14 +83,26 @@ describe('S4 청구서 생성 (TASK-B-361)', () => {
     await waitFor(() => expect(screen.getByRole('alert').textContent).toContain('상한에 도달했습니다'));
   });
 
-  it('TC-361-09: excludedUnsettled 안내와 오더정산 링크를 렌더한다', async () => {
+  it('TC-361-09: Admin은 미정산 안내 문구만 보고 잘못된 오더정산 링크가 없다 (Jaison 리뷰)', async () => {
     m.listOrders.mockResolvedValue({ success: true, orders: [order], total: 1, totalAmount: 54000, excludedUnsettled: 3, truncated: false });
     render(<StatementCreate {...base} />);
     fireEvent.change(screen.getByLabelText('청구 대상'), { target: { value: 'org1' } });
     setDates();
     fireEvent.click(screen.getByRole('button', { name: '후보 오더 조회' }));
     await waitFor(() => expect(screen.getByText(/미정산 3건은 제외됨/)).toBeTruthy());
-    expect(screen.getByRole('link', { name: '오더정산으로 이동' }).getAttribute('href')).toBe('/ko/settlement');
+    expect(screen.getByText(/오더정산 화면이 없어/)).toBeTruthy();
+    expect(screen.queryByRole('link', { name: /오더정산/ })).toBeNull();
+  });
+
+  it('TC-361-09b: 대리점은 관리자 요청 문구를 보고 오더정산 링크가 없다', async () => {
+    m.listOrders.mockResolvedValue({ success: true, orders: [order], total: 1, totalAmount: 54000, excludedUnsettled: 2, truncated: false });
+    render(<StatementCreate {...base} basePath="/agency/statements" allowAdhoc canSettleOrders={false} />);
+    fireEvent.change(screen.getByLabelText('청구 대상'), { target: { value: 'org1' } });
+    setDates();
+    fireEvent.click(screen.getByRole('button', { name: '후보 오더 조회' }));
+    await waitFor(() => expect(screen.getByText(/미정산 2건은 제외됨/)).toBeTruthy());
+    expect(screen.getByText(/관리자에게 정산 처리를 요청하세요/)).toBeTruthy();
+    expect(screen.queryByRole('link', { name: /오더정산/ })).toBeNull();
   });
 
   it('TC-361-10: 후보 표에 오더별 화주명 열과 값을 렌더한다', async () => {
@@ -145,5 +163,50 @@ describe('S4 청구서 생성 (TASK-B-361)', () => {
       year: 2026, month: 10, orderIds: ['o1'], periodFrom: '2026-10-01', periodTo: '2026-10-31',
     })));
     expect(m.push).toHaveBeenCalledWith('/ko/finance/statements/st-1');
+  });
+
+  it('TC-361-20: 조회 후 청구 대상을 바꾸면 이전 후보·안내·저장 버튼이 사라진다 (Jaison 리뷰)', async () => {
+    m.listOrders.mockResolvedValue({ success: true, orders: [order], total: 1, totalAmount: 54000, excludedUnsettled: 2, truncated: true });
+    render(<StatementCreate {...base} />);
+    fireEvent.change(screen.getByLabelText('청구 대상'), { target: { value: 'org1' } });
+    setDates();
+    fireEvent.click(screen.getByRole('button', { name: '후보 오더 조회' }));
+    await waitFor(() => expect(screen.getByText('ORD-1')).toBeTruthy());
+    expect(screen.getByText(/미정산 2건은 제외됨/)).toBeTruthy();
+    expect(screen.getByText(/상한에 도달했습니다/)).toBeTruthy();
+
+    fireEvent.change(screen.getByLabelText('청구 대상'), { target: { value: 'org2' } });
+    await waitFor(() => expect(screen.getByText('조회 조건이 변경되었습니다. 다시 조회하세요.')).toBeTruthy());
+    expect(screen.queryByRole('table')).toBeNull();
+    expect(screen.queryByRole('button', { name: '초안 저장' })).toBeNull();
+    expect(screen.queryByText(/미정산 2건은 제외됨/)).toBeNull();
+    expect(screen.queryByText(/상한에 도달했습니다/)).toBeNull();
+    expect(m.create).not.toHaveBeenCalled();
+  });
+
+  it('TC-361-21: 조회 후 기간을 바꾸면 이전 선택 오더로 저장할 수 없다', async () => {
+    m.listOrders.mockResolvedValue({ success: true, orders: [order], total: 1, totalAmount: 54000, excludedUnsettled: 0, truncated: false });
+    m.create.mockResolvedValue({ success: true, statementId: 'st-1', statementNo: 'ST-202610-01-1', roundNo: 1 });
+    render(<StatementCreate {...base} />);
+    fireEvent.change(screen.getByLabelText('청구 대상'), { target: { value: 'org1' } });
+    setDates();
+    fireEvent.click(screen.getByRole('button', { name: '후보 오더 조회' }));
+    await waitFor(() => expect(screen.getByText('ORD-1')).toBeTruthy());
+    fireEvent.click(within(screen.getByRole('table')).getAllByRole('checkbox')[0]);
+
+    fireEvent.change(screen.getByLabelText('종료일'), { target: { value: '2026-11-30' } });
+    await waitFor(() => expect(screen.getByText('조회 조건이 변경되었습니다. 다시 조회하세요.')).toBeTruthy());
+    expect(screen.queryByRole('table')).toBeNull();
+    expect(screen.queryByRole('button', { name: '초안 저장' })).toBeNull();
+
+    // 재조회하면 새 조건의 후보로 다시 선택·저장할 수 있다.
+    fireEvent.click(screen.getByRole('button', { name: '후보 오더 조회' }));
+    await waitFor(() => expect(m.listOrders).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(screen.getByText('ORD-1')).toBeTruthy());
+    fireEvent.click(within(screen.getByRole('table')).getAllByRole('checkbox')[0]);
+    fireEvent.click(screen.getByRole('button', { name: '초안 저장' }));
+    await waitFor(() => expect(m.create).toHaveBeenCalledWith(expect.objectContaining({
+      periodFrom: '2026-10-01', periodTo: '2026-11-30', orderIds: ['o1'],
+    })));
   });
 });
