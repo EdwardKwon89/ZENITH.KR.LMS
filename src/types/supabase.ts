@@ -5630,6 +5630,38 @@ export type Database = {
           },
         ]
       }
+      zen_order_rate_snapshots_safe: {
+        Row: {
+          applied_currency: string | null
+          applied_rule: string | null
+          applied_unit_price: number | null
+          id: string | null
+          is_manual: boolean | null
+          metadata: Json | null
+          order_id: string | null
+          override_reason: string | null
+          priority: number | null
+          rate_card_id: string | null
+          snapshot_at: string | null
+          version_no: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "zen_order_rate_snapshots_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: true
+            referencedRelation: "zen_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "zen_order_rate_snapshots_rate_card_id_fkey"
+            columns: ["rate_card_id"]
+            isOneToOne: false
+            referencedRelation: "zen_rate_cards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       zen_rate_cards_safe: {
         Row: {
           carrier_id: string | null
