@@ -272,7 +272,14 @@ export default function StatementCreate({ basePath, locale, targets, allowAdhoc,
       {showLookupNotices && excludedUnsettled > 0 && (
         <div className="rounded-xl bg-amber-50 p-3 text-sm text-amber-800">
           <span>{canSettleOrders
-            ? t('excludedUnsettledAdmin', { count: excludedUnsettled })
+            ? (
+              <>
+                {t('excludedUnsettledAdmin', { count: excludedUnsettled })}{' '}
+                <Link href={`/${locale}/finance/order-settlement`} className="font-semibold underline">
+                  {t('goOrderSettlement')}
+                </Link>
+              </>
+            )
             : t('excludedUnsettledAgency', { count: excludedUnsettled })}</span>
         </div>
       )}

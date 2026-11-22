@@ -118,6 +118,8 @@ export default function NaviSidebar({
       children: [
         { title: t("finance_revenue"), href: "/finance/revenue" },
         { title: t("finance_costs"), href: "/finance/costs" },
+        // TASK-B-369 (Issue #1425) — 설계 §6-5c: "수입 현황·비용 현황" 다음
+        { title: t("order_settlement_nav"), href: "/finance/order-settlement" },
         // TASK-B-361 (Issue #1367) — 설계 §6-5c: "수입 현황·비용 현황" 다음
         { title: t("statements_nav"), href: "/finance/statements" },
         { title: t("finance_daily_billing"), href: "/finance/daily-billing" },
