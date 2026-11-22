@@ -50,8 +50,8 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
+| [#1425](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1425) | [Team B] TASK-B-369: 청구서관리 ①-4 오더정산 화면 — S1 목록·S2 상세·메뉴 (WBS 2.6) | b | p2 | open | 미배정 | 2026-11-22 |
 | [#1420](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1420) | [Aiden → Team B] DEF-157 후속: zen_order_rate_snapshots 화주·대리점 세션 접근을 안전 뷰로 전환 요청 (orders.ts·rate-snapshot-refresh.ts) | b | p2 | blocked | 미배정 | 2026-11-22 |
-| [#1419](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1419) | [Aiden → Team B] DEF-B-162: billing-statements.ts 'use server' 파일의 동기 함수 export — #1367 빌드 실패 원인 수정 요청 | b | p1 | open | 미배정 | 2026-11-22 |
 | [#1418](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1418) | [IMP] 청구서 Excel 출력 후속 3건 — in() URL 청크 조회·날짜 달력 검증·JSDoc 정리 (#1411 검토 후속) | b | p3 | open | 미배정 | 2026-11-22 |
 | [#1406](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1406) | [Team A] TASK-1168: DEF-157 — 스냅샷 테이블 화주측 원가 컬럼 노출 해소 (Riley) | a | p2 | in-progress | 미배정 | 2026-11-22 |
 | [#1371](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1371) | [Team B → Aiden] Gale(Gemini 4 Argon) 페르소나 등록 요청 — agent-worktree-init.sh 등 | a | p3 | open | 미배정 | 2026-11-18 |
