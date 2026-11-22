@@ -8,8 +8,8 @@
 | **최종 승인** | JSJung |
 | **생성일** | 2026-11-22 |
 | **우선순위** | P2 (`team:b`, `priority:p2`, `type:feat`) |
-| **상태** | 🔔 제출 완료 — ⒜ PR 검토 대기 (`status:review`), ⒝ 후속 예정 |
-| **브랜치** | `feature/teamb-task-b361-iss1367-billing-statement-ui` (base `origin/TeamB_Dev` @ `19403fdec`) |
+| **상태** | 🔔 ⒜ PR #1412 검토 대기 (`status:review`), ⒝ 후속 예정. ⒜는 DEF-B-162 해소(#1416) 반영 위해 `origin/TeamB_Dev` @ `c89a5d2d9`로 rebase 완료 |
+| **브랜치** | `feature/teamb-task-b361-iss1367-billing-statement-ui` (rebase onto `origin/TeamB_Dev` @ `c89a5d2d9`, 구 base `19403fdec`) |
 | **선행 조건** | ✅ #1366 ⒜(PR #1404, 2026-11-20 병합) / ✅ PR #1405(2026-11-21 병합) / ✅ Excel Route Handler PR #1411(2026-11-21 병합) / ✅ DB 마이그레이션 최신(pending 0) |
 | **범위** | WBS 5.1~5.7 — **⒜ PR `Refs #1367`**: S3 목록·S4 생성(수기 화주 포함)·S5 상세·3경로 공용 컴포넌트 / **⒝ PR `Closes #1367`**: 메뉴·경로 허용·i18n 정리·증적 |
 | **설계 기준** | `docs/02_Analysis/An_17_청구서관리_오더정산_청구서_설계.md` §6-4~§6-6·§6-5b·§6-5c + 이슈 본문·Jaison 2026-11-21 코멘트(충돌 시 코멘트 우선) |
@@ -114,7 +114,7 @@ _담당 Task 범위 밖 이슈 / 설계·DTO 간극_
 | DEF# | 제목 | 긴급도 | 상세 |
 |:--|:--|:--|:--|
 | DEF-B-156(기존) | `npm run check:i18n` 감사 FAIL — ja 로케일이 en 대비 519키 누락(기존 523 → 신규 키 일부 반영으로 감소) | Low | `.agent/defects/DEF-B-156_i18n_ja로케일_523키누락_감사FAIL.md`. 본 Task의 `Statements` 77키는 4로케일 모두 존재(실패 목록에 `Statements.*` 없음). stash 비교 없이도 base `ja.json`이 25 top-level key뿐임을 확인 → 기존 결함. 범위 밖이라 미수정. |
-| **DEF-B-162(신규)** | `'use server'` 액션 파일의 비동기 아닌 export `normalizeShipperName`로 **`npm run build` 전역 실패** | **High** | `.agent/defects/DEF-B-162_청구서액션_비동기아닌_export_빌드실패.md`. `billing-statements.ts:135`(`export function`) — 병합된 B-360 ⒜(PR #1404) 산출물로 `origin/TeamB_Dev`에 동일 존재, **본 커밋은 해당 파일 미수정**. 근본 조치는 헬퍼를 순수 유틸 모듈로 분리 → 별도 TASK 발령 필요. 범위 밖이라 미수정. |
+| DEF-B-162 | `'use server'` 액션 파일의 비동기 아닌 export `normalizeShipperName`로 `npm run build` 전역 실패 | High → **해소됨** | `.agent/defects/DEF-B-162_청구서액션_비동기아닌_export_빌드실패.md`. B-360 ⒜(PR #1404) 산출물. **Mike/TASK-B-368(PR #1416, 2026-11-22 병합)**이 순수 유틸 `src/lib/finance/billing/normalize-shipper-name.ts`로 분리해 해소. 본 ⒜는 rebase 후 `StatementCreate.tsx`의 로컬 `normalize()`를 해당 공용 유틸 import로 교체(Jaison 2026-11-22 지시) — 규칙 단일 출처. |
 
 | 구분 | 내용 | 조치 |
 |:--|:--|:--|
@@ -126,14 +126,14 @@ _담당 Task 범위 밖 이슈 / 설계·DTO 간극_
 
 ## 4. [작업 결과]
 
-- 코드 커밋: `d9c8003132c95cc2a0ed7407e3d1eab926dda3e6`
+- 코드 커밋: `d9c8003132c95cc2a0ed7407e3d1eab926dda3e6`(rebase 후 `85ade9850`) + 공용 유틸 전환 `d08b83c5bd92af1099bbe316a33d592a009b277f`
 
 ### ⒜ PR (WBS 5.1~5.4, `Refs #1367`)
 - **공용 컴포넌트** `src/components/finance/statements/` 8파일 — `types.ts`(DTO·`formatKrw`·`isIssuerScope`), `Badges.tsx`(상태 3색/범위 배지), `StatementModals.tsx`(발행 경고·입금 전액 사전검증), `StatementsList.tsx`(S3 필터 5종+range 버튼 매트릭스), `StatementCreate.tsx`(S4 2단계·ADHOC·truncated/미정산 안내), `StatementDetail.tsx`(S5 상태별 작업영역), `index.ts`, `page-helpers.ts`(서버 가드).
 - **3경로 8페이지** — finance/agency: 목록·생성·상세, shipper: 목록·상세(조회 전용, `/new` 없음).
 - **i18n** — `Statements` 77키 × 4로케일 추가. `Errors` 키 변경 0.
 - **회귀** — `tests/unit/components/statements/` 3파일 21케이스(모두 렌더 결과 단언). R-09 항목 1건 신규 + `build:lrtm`/`check:lrtm` PASS.
-- **되돌리기 검증** — 아래 5건 모두 실제로 되돌려 FAIL 확인 후 복구(복구 후 21/21 재PASS, 잔존 마커 0):
+- **되돌리기 검증** — 아래 6건 모두 실제로 되돌려 FAIL 확인 후 복구(복구 후 21/21 재PASS, 잔존 마커 0). 6건째는 rebase 후 공용 유틸 전환(`normalizeShipperName`)에 따른 값 단언 추가(Jaison 2026-11-22 지시):
 
 | 되돌린 구현 | 실패 테스트 | 실측 결과 |
 |:--|:--|:--|
@@ -142,6 +142,7 @@ _담당 Task 범위 밖 이슈 / 설계·DTO 간극_
 | S5 작업영역 `mine &&` → `true &&` | TC-361-16·17 | 2 failed / 6 passed |
 | 발행 모달 `issueWarning` 제거 | TC-361-18 | 1 failed / 7 passed |
 | 입금 전액 사전검증 → `false &&` | TC-361-19 | 1 failed / 7 passed |
+| `normalizeShipperName(shipperName)` → `shipperName` (공용 유틸 미적용) | TC-361-11 값 단언 (`'  ABC   주식회사  '` → 칩 1건) | 1 failed / 5 passed |
 
 - **vacuous 패턴 0건** — 신규 테스트·컴포넌트 `grep -rnE 'test\.skip|readFileSync|toContain\(.*source|typeof .* === .function'` 결과 0.
 - **전체 회귀** — `npm run test:regression` 286파일/2186케이스 전부 PASS(709.34초). stale `exceljs@4.4.0`을 `--no-save --no-package-lock`으로 재설치해 `task-b360-excel-export.test.ts`(19/19)까지 통과, 추적 파일 변경 없음.
@@ -163,7 +164,8 @@ _담당 Task 범위 밖 이슈 / 설계·DTO 간극_
 - [x] 컴포넌트 테스트 렌더 결과 단언, vacuous 패턴 0건
 - [x] Ds-11: 신규 액션/RPC 없음 → 갱신 불필요. `npm run check:ds11` PASS(미반영 125개 모두 허용 목록)
 - [x] R-09 v3.10: `regression-items/TASK-B-361_*.md` 신규, `npm run build:lrtm` + `npm run check:lrtm` PASS(유령 0·허용목록 밖 미등재 0)
-- [x] `npm run test:regression` 전체 PASS(286파일/2186케이스, 709초, stale `exceljs` 재설치 후). **`npm run build`는 실패** — 원인은 병합된 B-360 ⒜의 비동기 아닌 export(`billing-statements.ts:135`), 본 Task 범위 밖 → **DEF-B-162(High) 등록**, 별도 TASK 조치 필요. 본 Task 신규 파일로 인한 빌드 에러 0(에러 import trace는 기존 액션 파일)
+- [x] `npm run test:regression` 전체 PASS(286파일/2186케이스, 709초, stale `exceljs` 재설치 후). `npm run build`는 **rebase 후 PASS** — DEF-B-162는 Mike/TASK-B-368(PR #1416)이 순수 유틸로 분리해 해소, 본 ⒜는 `StatementCreate.tsx`의 로컬 `normalize()`를 공용 유틸 import로 교체해 규칙 단일 출처 확보(Jaison 지시). CI Regression Tests 재확인 필요.
+- [x] Jaison 지시(2026-11-22) 반영 — `origin/TeamB_Dev` @ `c89a5d2d9` rebase, 공용 유틸 import 전환, `normalize()` 값 단언 유지 + 되돌리기 표 반영(총 6건). 로컬 `npm run build` PASS.
 - [x] 에러 로그 확인 — 無(로컬 Supabase `zen_error_logs` severity=ERROR 0건, 전체 0행). 라이브 최종 확인은 병합 후 JSJung
 - [x] 스타일/타입: 신규 파일 `npx eslint` 0 warning, `npx tsc --noEmit`에서 statements 관련 에러 0(기존 `exceljs`·E2E·`.next` 에러는 범위 밖)
 - [x] `check-R17-DoD` 자가 검증 통과 — 코드 커밋 → 해시 자동삽입 → 🔄→🔔 실제 diff 확인 → 문서 커밋 → PR 순서. (opentemplate 명령이므로 수동 동치 점검)

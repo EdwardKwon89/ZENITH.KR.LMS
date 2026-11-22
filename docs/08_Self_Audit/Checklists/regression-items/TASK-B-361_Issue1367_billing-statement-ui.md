@@ -39,7 +39,7 @@
 
 ## 되돌리기(Revert) 검증 결과
 
-아래 5건은 2026-11-22 실제로 구현을 되돌려 `npx vitest run`을 실행한 뒤 즉시 복구하여 확인함(복구 후 21/21 재PASS, REVERT CHECK 잔존 0).
+아래 6건은 2026-11-22 실제로 구현을 되돌려 `npx vitest run`을 실행한 뒤 즉시 복구하여 확인함(복구 후 21/21 재PASS, REVERT CHECK 잔존 0). 6건째는 Jaison 지시(2026-11-22)로 공용 유틸 전환 시 추가된 값 단언 검증.
 
 | 되돌릴 구현 (실제 조작) | 기대 실패 테스트 | 실제 결과 (실측) |
 |:--|:--|:--|
@@ -48,3 +48,4 @@
 | `StatementDetail` 작업 영역의 `mine &&` → `true &&` | TC-361-16·17 | **FAIL** — 2 failed / 6 passed (16·17) |
 | `IssueConfirmModal`의 `{t('issueWarning')}` 제거 | TC-361-18 | **FAIL** — 1 failed / 7 passed (18) |
 | `PaymentConfirmModal`의 전액 사전 검증 → `false &&` | TC-361-19 | **FAIL** — 1 failed / 7 passed (19) |
+| `normalizeShipperName(shipperName)` → `shipperName` (공용 유틸 미적용) | TC-361-11 값 단언 (`'  ABC   주식회사  '` → 칩 1건) | **FAIL** — 1 failed / 5 passed (11) |

@@ -7,7 +7,7 @@
 | 발견 경위 | TASK-B-361(Issue #1367) ⒜ PR 완료 검증中 `npm run build` 실행 시 Turbopack 빌드 실패. 원인 추적 결과 병합된 B-360 서버 액션 파일의 기존 export임을 확인 |
 | 대상 | `src/app/actions/finance/billing-statements.ts:135` (`export function normalizeShipperName`) |
 | 긴급도 | **High** — `npm run build`가 전역 실패하여 모든 후속 PR의 배포 게이트가 막힘 |
-| 상태 | 미조치 — 담당 Task 범위 밖(B-360 산출물), R-18에 따라 보고. 수정은 별도 TASK 발령 필요 |
+| 상태 | **해소됨 (2026-11-22)** — Mike / TASK-B-368 (이슈 #1415, PR #1416 병합)이 `normalizeShipperName`을 순수 유틸 `src/lib/finance/billing/normalize-shipper-name.ts`로 분리. `TeamB_Dev` @ `c89a5d2d9` 기준 `npm run build` PASS 확인. 당초 B-360 산출물로 본 Task 범위 밖이었으나 선행 TASK로 조치 완료 |
 
 ## 현상
 
