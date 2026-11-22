@@ -21,7 +21,7 @@ import { ORDER_EDIT_LOG_CORE_FIELDS, extractOrderEditLogSnapshot, extractCargoSu
 import { assertActiveUpsProduct } from "@/lib/orders/ups-product-guard";
 import { hasActiveUpsLabel } from "@/lib/orders/ups-registration";
 import { getUpsEditAvailability } from "@/lib/orders/ups-edit-availability";
-import { refreshUpsRateSnapshot } from "@/lib/orders/rate-snapshot-refresh";
+import { canWriteOrderRateSnapshot, refreshUpsRateSnapshot } from "@/lib/orders/rate-snapshot-refresh";
 import { assertSettledCargoEditAllowed } from "@/lib/orders/settled-cargo-guard"; // TASK-B-367
 
 interface SaveOrderRateSnapshotParams {
@@ -81,7 +81,19 @@ export async function saveOrderRateSnapshot({
       shipperOrgId: profile.org_id,
     });
 
-    const { error: snapError } = await supabase
+    // TASK-B-370 (Issue #1420): 소유 검증 후 service_role로 기록(안전 뷰 전환 대응).
+    const { data: orderOwner } = await supabase
+      .from('zen_orders')
+      .select('shipper_id, agency_org_id')
+      .eq('id', orderId)
+      .maybeSingle();
+    if (!canWriteOrderRateSnapshot(profile, orderOwner)) {
+      logger.warn(`[ORDER_RATE_SNAPSHOT] 스냅샷 쓰기 권한 없음 — 생성 생략: orderId=${orderId}, user=${(profile as any).id ?? 'unknown'}`);
+      return;
+    }
+
+    const adminClient = await createAdminClient();
+    const { error: snapError } = await adminClient
       .from('zen_order_rate_snapshots')
       .insert({
         order_id: orderId,
@@ -533,7 +545,7 @@ export async function updateOrder(orderId: string, payload: OrderRegistrationInp
   //   비UPS→UPS는 갱신을 놓쳐 스냅샷이 없는 채 남는다.
   if (effectiveTransportMode === 'UPS') {
     try {
-      await refreshUpsRateSnapshot({ supabase, orderId, estimateFn: estimateUpsFreightFn });
+      await refreshUpsRateSnapshot({ supabase, orderId, profile, estimateFn: estimateUpsFreightFn });
     } catch (err) {
       logger.error('[ORDER_UPDATE] UPS 운임 스냅샷 갱신 실패(수정 저장은 유지):', err);
     }
@@ -1001,7 +1013,7 @@ export async function getOrderByBarcodeOrNo(barcodeOrNo: string) {
 
   // 3. 현재 운임 스냅샷 조회 (예상운임 상시 표시용)
   const { data: rateSnapshot } = await supabase
-    .from('zen_order_rate_snapshots')
+    .from('zen_order_rate_snapshots_safe')
     .select('applied_unit_price, applied_currency')
     .eq('order_id', order.id)
     .order('snapshot_at', { ascending: false })
@@ -1036,7 +1048,7 @@ export interface FreightEstimateResult {
 // TASK-B-317: 외부(청구확정 팝업)에서 호출 가능하도록 export
 export async function applyPackageMeasurements(
   supabase: any,
-  profile: { id: string; email?: string | null },
+  profile: { id: string; email?: string | null; role?: string | null; org_id?: string | null },
   orderId: string,
   packageUpdates: PackageMeasurementUpdate[],
 ): Promise<FreightEstimateResult> {
@@ -1046,7 +1058,7 @@ export async function applyPackageMeasurements(
   let currency: string | undefined;
 
   const { data: existingSnapshot } = await supabase
-    .from('zen_order_rate_snapshots')
+    .from('zen_order_rate_snapshots_safe')
     .select('metadata, applied_unit_price')
     .eq('order_id', orderId)
     .order('snapshot_at', { ascending: false })
@@ -1152,24 +1164,35 @@ export async function applyPackageMeasurements(
             shipperOrgId: orderMeta.shipper_id,
           });
 
-          if (previousSnapshot) {
-            await supabase
-              .from('zen_order_rate_snapshots')
-              .update({
-                applied_unit_price: newEstimate.platform.totalSellingPrice,
-                metadata: newEstimate as unknown as Record<string, unknown>,
-              })
-              .eq('order_id', orderId);
+          if (canWriteOrderRateSnapshot(profile, orderMeta)) {
+            const adminClient = await createAdminClient();
+            if (previousSnapshot) {
+              const { error: snapUpdateError } = await adminClient
+                .from('zen_order_rate_snapshots')
+                .update({
+                  applied_unit_price: newEstimate.platform.totalSellingPrice,
+                  metadata: newEstimate as unknown as Record<string, unknown>,
+                })
+                .eq('order_id', orderId);
+              if (snapUpdateError) {
+                logger.error('[INBOUND] Failed to update rate snapshot:', snapUpdateError);
+              }
+            } else {
+              const { error: snapInsertError } = await adminClient
+                .from('zen_order_rate_snapshots')
+                .insert({
+                  order_id: orderId,
+                  applied_unit_price: newEstimate.platform.totalSellingPrice,
+                  applied_currency: newEstimate.platform.currency ?? 'USD',
+                  applied_rule: 'UPS_3TIER',
+                  metadata: newEstimate as unknown as Record<string, unknown>,
+                });
+              if (snapInsertError) {
+                logger.error('[INBOUND] Failed to insert rate snapshot:', snapInsertError);
+              }
+            }
           } else {
-            await supabase
-              .from('zen_order_rate_snapshots')
-              .insert({
-                order_id: orderId,
-                applied_unit_price: newEstimate.platform.totalSellingPrice,
-                applied_currency: newEstimate.platform.currency ?? 'USD',
-                applied_rule: 'UPS_3TIER',
-                metadata: newEstimate as unknown as Record<string, unknown>,
-              });
+            logger.warn(`[INBOUND] 스냅샷 쓰기 권한 없음 — 갱신 생략: orderId=${orderId}, user=${profile.id}`);
           }
 
           oldFreight = previousSnapshot?.metadata?.platform?.totalSellingPrice || 0;

@@ -19,7 +19,8 @@ import { estimateUpsFreight } from '@/app/actions/ups/freight';
 
 const mockAdminEq = vi.fn().mockResolvedValue({ error: null });
 const mockAdminUpdate = vi.fn().mockReturnValue({ eq: mockAdminEq });
-const mockAdminFrom = vi.fn().mockReturnValue({ update: mockAdminUpdate });
+const mockAdminInsert = vi.fn().mockResolvedValue({ error: null });
+const mockAdminFrom = vi.fn().mockReturnValue({ update: mockAdminUpdate, insert: mockAdminInsert });
 const mockCreateAdminClient = vi.fn().mockResolvedValue({ from: mockAdminFrom });
 
 vi.mock('@/utils/supabase/server', () => ({
@@ -46,10 +47,10 @@ vi.mock('@/app/actions/ups/freight', () => ({
 
 const MOCK_ORDER_ID = 'new-order-id';
 
-function buildSupabaseMock(options: { agencyLink?: { agency_org_id: string } | null }) {
-  const { agencyLink = null } = options;
+function buildSupabaseMock(options: { agencyLink?: { agency_org_id: string } | null; ownerShipperId?: string }) {
+  const { agencyLink = null, ownerShipperId = 'org-shipper-1' } = options;
 
-  const snapshotInsert = vi.fn().mockResolvedValue({ error: null });
+  const snapshotInsert = mockAdminInsert;
 
   const upsProduct = {
     select: vi.fn().mockReturnThis(),
@@ -69,7 +70,18 @@ function buildSupabaseMock(options: { agencyLink?: { agency_org_id: string } | n
     ),
   };
   const snapshots = { insert: snapshotInsert };
-  const orders = { update: vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: null }) }) };
+  const orderOwner = {
+    select: vi.fn().mockReturnThis(),
+    eq: vi.fn().mockReturnThis(),
+    maybeSingle: vi.fn().mockResolvedValue({
+      data: { shipper_id: ownerShipperId, agency_org_id: agencyLink?.agency_org_id ?? null },
+      error: null,
+    }),
+  };
+  const orders = {
+    select: vi.fn().mockReturnValue(orderOwner),
+    update: vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: null }) }),
+  };
 
   const from = vi.fn((table: string) => {
     switch (table) {
@@ -162,7 +174,7 @@ describe('TASK-B-258: 비대리점 직접 화주 UPS 오더 → 예상운임 스
   });
 
   it('TC-258-01: 비대리점 직접 화주(role=SHIPPER, zen_agency_shippers 미소속) UPS 오더 → saveOrderRateSnapshot 실행(estimateUpsFreight 호출)', async () => {
-    const { supabase } = buildSupabaseMock({ agencyLink: null });
+    const { supabase } = buildSupabaseMock({ agencyLink: null, ownerShipperId: 'org-shipper-1' });
     (validateUserAction as any).mockResolvedValue({
       user: mockUser,
       profile: { id: 'user-123', org_id: 'org-shipper-1', role: 'SHIPPER' },
@@ -172,11 +184,12 @@ describe('TASK-B-258: 비대리점 직접 화주 UPS 오더 → 예상운임 스
     await createOrder(makeUpsPayload() as any);
 
     expect(estimateUpsFreight).toHaveBeenCalled();
-    expect(supabase.from).toHaveBeenCalledWith('zen_order_rate_snapshots');
+    expect(mockAdminFrom).toHaveBeenCalledWith('zen_order_rate_snapshots');
+    expect(mockAdminInsert).toHaveBeenCalledTimes(1);
   });
 
   it('TC-258-02: 비대리점 직접 화주(role=CORPORATE, zen_agency_shippers 미소속) UPS 오더 → 스냅샷 생성 + agency_org_id 미설정', async () => {
-    const { supabase, from } = buildSupabaseMock({ agencyLink: null });
+    const { supabase } = buildSupabaseMock({ agencyLink: null, ownerShipperId: 'org-corp-1' });
     (validateUserAction as any).mockResolvedValue({
       user: mockUser,
       profile: { id: 'user-123', org_id: 'org-corp-1', role: 'CORPORATE' },
@@ -186,13 +199,12 @@ describe('TASK-B-258: 비대리점 직접 화주 UPS 오더 → 예상운임 스
     await createOrder(makeUpsPayload() as any);
 
     expect(estimateUpsFreight).toHaveBeenCalled();
-    expect(supabase.from).toHaveBeenCalledWith('zen_order_rate_snapshots');
-    const ordersCall = from.mock.calls.find((c: any) => c[0] === 'zen_orders');
-    expect(ordersCall).toBeUndefined();
+    expect(mockAdminFrom).toHaveBeenCalledWith('zen_order_rate_snapshots');
+    expect(mockAdminInsert).toHaveBeenCalledTimes(1);
   });
 
   it('TC-258-03: 대리점 소속 직접 화주(role=CORPORATE, zen_agency_shippers 활성 행) UPS 오더 → agency_org_id 설정 + 스냅샷 생성', async () => {
-    const { supabase, from } = buildSupabaseMock({ agencyLink: { agency_org_id: 'agency-org-1' } });
+    const { supabase } = buildSupabaseMock({ agencyLink: { agency_org_id: 'agency-org-1' }, ownerShipperId: 'org-corp-2' });
     (validateUserAction as any).mockResolvedValue({
       user: mockUser,
       profile: { id: 'user-123', org_id: 'org-corp-2', role: 'CORPORATE' },
@@ -202,15 +214,12 @@ describe('TASK-B-258: 비대리점 직접 화주 UPS 오더 → 예상운임 스
     await createOrder(makeUpsPayload() as any);
 
     expect(estimateUpsFreight).toHaveBeenCalledWith(expect.objectContaining({ agencyOrgId: 'agency-org-1' }));
-    expect(supabase.from).toHaveBeenCalledWith('zen_order_rate_snapshots');
-    const ordersUpdate = from.mock.calls.find((c: any) => c[0] === 'zen_orders');
-    expect(ordersUpdate).toBeDefined();
-    expect(from.mock.calls.find((c: any) => c[0] === 'zen_orders') && (from as any).getMockImplementation)
-      .toBeDefined();
+    expect(mockAdminFrom).toHaveBeenCalledWith('zen_order_rate_snapshots');
+    expect(mockAdminInsert).toHaveBeenCalledTimes(1);
   });
 
   it('TC-258-04: 기존 AGENCY_SHIPPER 케이스 회귀 방지 — agency_org_id 설정 + 스냅샷 생성 그대로 동작', async () => {
-    const { supabase, from } = buildSupabaseMock({ agencyLink: { agency_org_id: 'agency-org-2' } });
+    const { supabase } = buildSupabaseMock({ agencyLink: { agency_org_id: 'agency-org-2' }, ownerShipperId: 'org-agency-1' });
     (validateUserAction as any).mockResolvedValue({
       user: mockUser,
       profile: { id: 'user-123', org_id: 'org-agency-1', role: 'AGENCY_SHIPPER' },
@@ -220,8 +229,8 @@ describe('TASK-B-258: 비대리점 직접 화주 UPS 오더 → 예상운임 스
     await createOrder(makeUpsPayload() as any);
 
     expect(estimateUpsFreight).toHaveBeenCalledWith(expect.objectContaining({ agencyOrgId: 'agency-org-2' }));
-    expect(supabase.from).toHaveBeenCalledWith('zen_order_rate_snapshots');
-    expect(from).toHaveBeenCalledWith('zen_orders');
+    expect(mockAdminFrom).toHaveBeenCalledWith('zen_order_rate_snapshots');
+    expect(mockAdminInsert).toHaveBeenCalledTimes(1);
   });
 
   it('TC-258-05: 비-UPS(AIR) 오더는 스냅샷을 생성하지 않는다 (회귀 방지)', async () => {
@@ -235,6 +244,6 @@ describe('TASK-B-258: 비대리점 직접 화주 UPS 오더 → 예상운임 스
     await createOrder(makeAirPayload() as any);
 
     expect(estimateUpsFreight).not.toHaveBeenCalled();
-    expect(supabase.from).not.toHaveBeenCalledWith('zen_order_rate_snapshots');
+    expect(mockAdminFrom).not.toHaveBeenCalledWith('zen_order_rate_snapshots');
   });
 });

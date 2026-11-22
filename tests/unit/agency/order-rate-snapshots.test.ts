@@ -80,6 +80,14 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { saveOrderRateSnapshot } from '@/app/actions/operations/orders';
 import { estimateUpsFreight } from '@/app/actions/ups/freight';
 
+const adminMocks = vi.hoisted(() => ({
+  insert: vi.fn(),
+  from: vi.fn(),
+}));
+vi.mock('@/utils/supabase/server', () => ({
+  createAdminClient: vi.fn().mockResolvedValue({ from: adminMocks.from }),
+}));
+
 vi.mock('@/app/actions/ups/freight', () => ({
   estimateUpsFreight: vi.fn(),
 }));
@@ -102,8 +110,9 @@ describe('TC-P7-ORDER-SNAPSHOT-03: saveOrderRateSnapshot — DB 조회 + estimat
     vi.clearAllMocks();
 
     mockInsertTable = {
-      insert: vi.fn().mockReturnThis(),
+      insert: adminMocks.insert.mockReturnValue({ error: null }),
     };
+    adminMocks.from.mockReturnValue(mockInsertTable);
 
     mockSupabase = {
       from: vi.fn((table: string) => {
@@ -121,8 +130,12 @@ describe('TC-P7-ORDER-SNAPSHOT-03: saveOrderRateSnapshot — DB 조회 + estimat
             maybeSingle: vi.fn().mockResolvedValue({ data: mockPort, error: null }),
           };
         }
-        if (table === 'zen_order_rate_snapshots') {
-          return mockInsertTable;
+        if (table === 'zen_orders') {
+          return {
+            select: vi.fn().mockReturnThis(),
+            eq: vi.fn().mockReturnThis(),
+            maybeSingle: vi.fn().mockResolvedValue({ data: { shipper_id: 'agency-org-001', agency_org_id: mockAgencyOrgId }, error: null }),
+          };
         }
         if (table === 'zen_agency_shippers') {
           return {
@@ -169,8 +182,8 @@ describe('TC-P7-ORDER-SNAPSHOT-03: saveOrderRateSnapshot — DB 조회 + estimat
       agencyOrgId: mockAgencyOrgId,
       shipperOrgId: profile.org_id,
     });
-    expect(mockSupabase.from).toHaveBeenCalledWith('zen_order_rate_snapshots');
-    expect(mockInsertTable.insert).toHaveBeenCalledWith({
+    expect(adminMocks.from).toHaveBeenCalledWith('zen_order_rate_snapshots');
+    expect(adminMocks.insert).toHaveBeenCalledWith({
       order_id: mockOrderId,
       applied_unit_price: 150.00,
       applied_currency: 'USD',
