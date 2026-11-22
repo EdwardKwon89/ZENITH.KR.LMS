@@ -50,6 +50,8 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
+| [#1420](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1420) | [Aiden → Team B] DEF-157 후속: zen_order_rate_snapshots 화주·대리점 세션 접근을 안전 뷰로 전환 요청 (orders.ts·rate-snapshot-refresh.ts) | b | p2 | blocked | 미배정 | 2026-11-22 |
+| [#1419](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1419) | [Aiden → Team B] DEF-B-162: billing-statements.ts 'use server' 파일의 동기 함수 export — #1367 빌드 실패 원인 수정 요청 | b | p1 | open | 미배정 | 2026-11-22 |
 | [#1418](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1418) | [IMP] 청구서 Excel 출력 후속 3건 — in() URL 청크 조회·날짜 달력 검증·JSDoc 정리 (#1411 검토 후속) | b | p3 | open | 미배정 | 2026-11-22 |
 | [#1417](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1417) | [IMP] 'use server' 파일의 non-async export를 CI에서 탐지하는 점검 제안 (DEF-B-162 재발 방지) | b | p3 | open | 미배정 | 2026-11-22 |
 | [#1415](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1415) | [Team B] TASK-B-368: DEF-B-162 — 'use server' 액션 파일의 비동기 아닌 export(normalizeShipperName) 분리 — #1412/#1413 build 차단 해소 (High) | b | p1 | in-progress | 미배정 | 2026-11-22 |
@@ -63,7 +65,7 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 | [#1356](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1356) | [Aiden → Team B] DEF-150 finance/UPS 실비·정산 액션 대리점 필터 누락·가드 공백 수정 요청 | b | p1 | open | 미배정 | 2026-11-17 |
 | [#1349](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1349) | [Aiden] DEF-149 §1.1 — agency/shippers.ts 대리점 소유권 검증 누락(교차 테넌트 IDOR) 수정 요청 (Team B 소유) | b | p1 | open | 미배정 | 2026-11-17 |
 | [#1346](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1346) | [Team A] TASK-1160: 231 PoC 단계 2 — 모듈 ①② 위험 3군 재현·실DB 편입 측정 (§10 #4·#6·#13·#16 확정 반영) | a | p3 | blocked | 미배정 | 2026-11-18 |
-| [#1336](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1336) | [Team A] TASK-1154: DEF-146 P2 — 간접 의존 high 4건 해소 (browserslist·dompurify·source-map-js·ws) | a | p2 | open | 미배정 | 2026-11-18 |
+| [#1336](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1336) | [Team A] TASK-1154: DEF-146 P2 — 간접 의존 high 4건 해소 (browserslist·dompurify·source-map-js·ws) | a | p2 | open | 미배정 | 2026-11-22 |
 | [#1319](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1319) | [Aiden] xlsx 소스 전환·P0 의존성 상향 — Team B 영향 의견 요청 (DEF-146 후속) | b | p2 | - | jungjs | 2026-11-18 |
 | [#1298](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1298) | [Aiden] R-12(Ds-11 동기화) 개정·Docs Sync Check 도입 안내 — Team B 영향 및 회신 요청 | b | p2 | - | jungjs | 2026-11-16 |
 | [#1291](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1291) | [Team B] #1280 설계 확정 공유 + 회귀맵 분리(R-09/DEF-B-157) 결정 요청 (Aiden 보고) | b | p2 | open | 미배정 | 2026-11-18 |
