@@ -55,7 +55,7 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 | [#1432](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1432) | [IMP 제안] 오더정산 S2 — 요율 스냅샷 없는 기존 오더의 시스템 등록값 대체 소스 | - | - | - | 미배정 | 2026-11-22 |
 | [#1431](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1431) | [IMP 제안] 오더정산 S2 — 기타부가운임 다중행 입력 + 항목별 KRW 분해 | - | - | - | 미배정 | 2026-11-22 |
 | [#1428](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1428) | [보류] 회귀 테스트 2파일 DB 질의 방식 통일 (npx supabase db query → docker exec psql) | b | p4 | - | 미배정 | 2026-11-22 |
-| [#1420](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1420) | [Aiden → Team B] DEF-157 후속: zen_order_rate_snapshots 화주·대리점 세션 접근을 안전 뷰로 전환 요청 (orders.ts·rate-snapshot-refresh.ts) | b | p2 | review | 미배정 | 2026-11-22 |
+| [#1420](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1420) | [Aiden → Team B] DEF-157 후속: zen_order_rate_snapshots 화주·대리점 세션 접근을 안전 뷰로 전환 요청 (orders.ts·rate-snapshot-refresh.ts) | b | p2 | rework | 미배정 | 2026-11-22 |
 | [#1418](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1418) | [IMP] 청구서 Excel 출력 후속 3건 — in() URL 청크 조회·날짜 달력 검증·JSDoc 정리 (#1411 검토 후속) | b | p3 | open | 미배정 | 2026-11-22 |
 | [#1371](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1371) | [Team B → Aiden] Gale(Gemini 4 Argon) 페르소나 등록 요청 — agent-worktree-init.sh 등 | a | p3 | open | 미배정 | 2026-11-18 |
 | [#1369](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1369) | [Team B] TASK-B-363: 청구서관리 ⑥ 레거시 병행 정책 반영 및 컷오버 — 기존 메뉴·UPS 인보이스 처리 | b | p2 | blocked | 미배정 | 2026-11-20 |
