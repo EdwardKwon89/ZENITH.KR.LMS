@@ -42,7 +42,7 @@ describe('TASK-B-204: IN_TRANSIT 부가요금 등록', () => {
     (validateUserAction as any).mockResolvedValue({
       supabase: mockSupabase,
       user: { id: 'user-id' },
-      profile: { id: 'user-id', role, org_id: orgId || 'org-1' },
+      profile: { id: 'user-id', role, org_id: orgId || 'org-1', status: 'ACTIVE' },
     });
   }
 
@@ -112,6 +112,26 @@ describe('TASK-B-204: IN_TRANSIT 부가요금 등록', () => {
     expect(result.success).toBe(true);
   });
 
+  it('TC-B204-04b: NaN/Infinity 금액은 거부하고 쓰기를 수행하지 않는다', async () => {
+    mockValidateUser(USER_ROLES.AGENCY, 'agency-org');
+    mockOrderChain({ status: 'IN_TRANSIT', transport_mode: 'UPS', shipper_id: 'shipper-1' });
+    mockSupabase.from.mockImplementation((table: string) => {
+      if (table === 'zen_orders') return createChainableMock({ status: 'IN_TRANSIT', transport_mode: 'UPS', shipper_id: 'shipper-1' });
+      if (table === 'zen_agency_shippers') return createChainableMock([{ shipper_org_id: 'shipper-1' }]);
+      return createChainableMock();
+    });
+
+    for (const amount of [Number.NaN, Number.POSITIVE_INFINITY]) {
+      const result = await recordUpsActualCharges('order-1', [
+        { chargeType: 'BASE', amount, currency: 'USD' },
+      ]);
+      expect(result.success).toBe(false);
+      expect(result.error).toBe('금액은 0보다 커야 합니다.');
+    }
+    const { createAdminClient } = await import('@/utils/supabase/server');
+    expect(createAdminClient).not.toHaveBeenCalled();
+  });
+
   it('TC-B204-05: DELIVERED 상태 기존 플로우 회귀 확인 (마감 전)', async () => {
     mockValidateUser(USER_ROLES.ADMIN);
     mockOrderChain({ status: 'DELIVERED', transport_mode: 'UPS', shipper_id: 'shipper-1' });
@@ -133,6 +153,8 @@ describe('TASK-B-204: IN_TRANSIT 부가요금 등록', () => {
     const result = await recordUpsActualCharges('order-1', []);
     expect(result.success).toBe(false);
     expect(result.error).toBe('본인 소속 화주의 오더만 처리할 수 있습니다.');
+    const { createAdminClient } = await import('@/utils/supabase/server');
+    expect(createAdminClient).not.toHaveBeenCalled();
   });
 
   it('TC-B204-07: searchDeliveredUpsOrders가 recipient_country_code를 사용한다 (DEF-B-018)', async () => {

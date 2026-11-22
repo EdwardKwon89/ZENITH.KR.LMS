@@ -16,10 +16,17 @@
 | TC-372-03 | 비소속(읽기 가능) 오더 실비등록 | `shipper_scope_denied` | 동일 |
 | TC-372-04 | 소속·자가화주 오더 실비등록 | 성공 + `zen_ups_actual_charges` 1행 | 동일 |
 | TC-372-05 | §1.2 helper 이동 | 기존 단위 14/14 + 오더정산 페이지 import 정상 | `tests/unit/finance/ups-actual-cost.test.ts` |
-| TC-372-RST-1 | 2단계 스코프 필터 제거 | **1 failed / 3 passed** → 복구 4/4 | 동일 |
+| TC-372-06 | SUSPENDED AGENCY | `permission_denied` + 실비 0행 | 동일 |
+| TC-372-07 | 마감 인보이스 + AGENCY | 사전 거부 + 기존 실비 보존 | 동일 |
+| TC-372-08 | 미마감 인보이스 | `ADMIN_TO_AGENCY` 불변 / `AGENCY_TO_SHIPPER` 갱신 | 동일 |
+| TC-372-09 | 비유한 금액·비소유 | `cost_amount_invalid`, admin client 미호출 | `tests/unit/finance/ups-actual-charges.test.ts` |
+| TC-372-RST-1 | 2단계 스코프 필터 제거 | **1 failed / 3 passed** → 복구 4/4 | 동일 | 동일 |
 | TC-372-RST-2 | 자가화주 제외 | **3 failed / 1 passed** → 복구 4/4 | 동일 |
 | TC-372-RST-3 | AGENCY admin client 쓰기 제거 | **1 failed / 3 passed** (`CHARGES_INSERT`) → 복구 4/4 | 동일 |
+| TC-372-RST-4 | ACTIVE 가드 제거 | **1 failed / 6 passed** → 복구 7/7 | 동일 |
+| TC-372-RST-5 | 마감 사전 거부 제거 | **1 failed / 6 passed** → 복구 7/7 | 동일 |
+| TC-372-RST-6 | AGENCY `ADMIN_TO_AGENCY` 제외 제거 | **1 failed / 6 passed** → 복구 7/7 | 동일 |
 
-**회귀 검증**: `npm run test:regression` → **294파일 / 2,252케이스 전부 PASS (exit 0)**. `npm run build` → **성공 (exit 0)**. `zen_error_logs` 최근 1일 신규 ERROR 0건.
+**회귀 검증**: `npm run test:regression` → **294파일 / 2,256케이스 전부 PASS (exit 0)**. `npm run build` → **성공 (exit 0)**. `zen_error_logs` 최근 1일 신규 ERROR 0건.
 **R-12 Ds-11**: `Ds_11_11B_UPS_Agency_Actuals.md`의 `recordUpsActualCharges`/`searchDeliveredUpsOrders`/`getOrderReleasedDate` 갱신, `check:ds11` OK.
 **발견 이슈**: AGENCY 쓰기 RLS 부재 → DB 변경 없이 소유 검증 후 admin client로 해소(이슈 #1356 질문 코멘트). §1.3/§1.4는 PR-2.

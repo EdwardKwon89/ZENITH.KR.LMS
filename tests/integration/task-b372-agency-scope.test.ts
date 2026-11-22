@@ -38,6 +38,9 @@ const ORDER_SELF = '37200000-0000-4000-8000-000000000011';
 const ORDER_OTHER = '37200000-0000-4000-8000-000000000012';
 const ORDER_OUT_OF_SCOPE = '37200000-0000-4000-8000-000000000013';
 const EMAIL = 'b372-agency@test.kr';
+const INV_ADMIN_TO_AGENCY = '37200000-0000-4000-8000-000000000030';
+const INV_AGENCY_TO_SHIPPER = '37200000-0000-4000-8000-000000000031';
+const INV_FINALIZED = '37200000-0000-4000-8000-000000000032';
 
 const admin = createClient(URL, SERVICE_KEY, { auth: { persistSession: false } });
 let agencySession: SupabaseClient;
@@ -49,8 +52,19 @@ async function deleteUser() {
   if (u) await admin.auth.admin.deleteUser(u.id);
 }
 
+function resetInvoiceFixtures() {
+  // 마감 인보이스 잔여물이 zen_order_costs 변경 트리거/FK에 막히므로 테스트 정리에서만 트리거를 끈다.
+  psql(`
+    SET session_replication_role = replica;
+    DELETE FROM public.zen_invoices WHERE invoice_no LIKE 'INV-B372-%';
+    DELETE FROM public.zen_ups_actual_charges WHERE order_id IN ('${ORDER_LINKED}','${ORDER_SELF}','${ORDER_OTHER}','${ORDER_OUT_OF_SCOPE}');
+    DELETE FROM public.zen_order_costs WHERE order_id IN ('${ORDER_LINKED}','${ORDER_SELF}','${ORDER_OTHER}','${ORDER_OUT_OF_SCOPE}');
+    SET session_replication_role = origin;
+  `);
+}
+
 function cleanup() {
-  psql(`DELETE FROM public.zen_ups_actual_charges WHERE order_id IN ('${ORDER_LINKED}','${ORDER_SELF}','${ORDER_OTHER}','${ORDER_OUT_OF_SCOPE}');`);
+  resetInvoiceFixtures();
   psql(`DELETE FROM public.zen_tracking_configs WHERE order_id IN ('${ORDER_LINKED}','${ORDER_SELF}','${ORDER_OTHER}','${ORDER_OUT_OF_SCOPE}');`);
   psql(`DELETE FROM public.zen_orders WHERE id IN ('${ORDER_LINKED}','${ORDER_SELF}','${ORDER_OTHER}','${ORDER_OUT_OF_SCOPE}');`);
   psql(`DELETE FROM public.zen_agency_shippers WHERE agency_org_id='${AGENCY_ORG}';`);
@@ -115,6 +129,8 @@ beforeAll(async () => {
 });
 
 beforeEach(() => {
+  resetInvoiceFixtures();
+  agencyProfile.status = 'ACTIVE';
   mockValidateUserAction.mockResolvedValue({
     supabase: agencySession,
     user: { id: agencyProfile.id },
@@ -175,5 +191,64 @@ describe('TASK-B-372 §1.1 — AGENCY 실비등록 스코프', () => {
       expect(res.success, JSON.stringify(res)).toBe(true);
       expect(Number(psql(`SELECT count(*) FROM public.zen_ups_actual_charges WHERE order_id='${orderId}' AND charge_type='TEST';`))).toBe(1);
     }
+  });
+
+  it('SUSPENDED AGENCY는 service_role 쓰기에 도달하지 못한다 (0행)', async () => {
+    psql(`UPDATE public.zen_profiles SET status='SUSPENDED' WHERE email='${EMAIL}';`);
+    agencyProfile.status = 'SUSPENDED';
+
+    const res = await recordUpsActualCharges(ORDER_LINKED, [
+      { chargeType: 'TEST', amount: 10, currency: 'USD' },
+    ]);
+
+    expect(res.success).toBe(false);
+    expect(Number(psql(`SELECT count(*) FROM public.zen_ups_actual_charges WHERE order_id='${ORDER_LINKED}';`))).toBe(0);
+    psql(`UPDATE public.zen_profiles SET status='ACTIVE' WHERE email='${EMAIL}';`);
+  });
+
+  it('마감 인보이스가 있으면 AGENCY는 쓰기 전에 거부하고 기존 실비 행을 보존한다', async () => {
+    psql(`
+      INSERT INTO public.zen_ups_actual_charges (order_id, charge_type, charge_amount, currency, entered_by)
+      VALUES ('${ORDER_LINKED}', 'BEFORE', 5, 'USD', '${agencyProfile.id}');
+      INSERT INTO public.zen_invoices (id, invoice_no, shipper_id, total_amount, currency, due_date, status, metadata, invoice_tier, billed_org_id)
+      VALUES ('${INV_FINALIZED}', 'INV-B372-FIN', '${SHIPPER_LINKED}', 100, 'USD', '2026-12-31', 'UNPAID',
+              '{"source_order_id":"${ORDER_LINKED}"}'::jsonb, 'ADMIN_TO_AGENCY', '${AGENCY_ORG}');
+      UPDATE public.zen_invoices SET is_finalized=true, finalized_at=now() WHERE id='${INV_FINALIZED}';
+    `);
+
+    const res = await recordUpsActualCharges(ORDER_LINKED, [
+      { chargeType: 'AFTER', amount: 10, currency: 'USD' },
+    ]);
+
+    expect(res.success).toBe(false);
+    expect(res.error).toContain('마감');
+    const row = psql(`SELECT count(*)::text||'|'||max(charge_type) FROM public.zen_ups_actual_charges WHERE order_id='${ORDER_LINKED}';`);
+    expect(row).toBe('1|BEFORE');
+  });
+
+  it('미마감 인보이스: AGENCY_TO_SHIPPER만 갱신하고 ADMIN_TO_AGENCY는 건드리지 않는다', async () => {
+    psql(`
+      INSERT INTO public.zen_invoices (id, invoice_no, shipper_id, total_amount, currency, due_date, status, metadata, invoice_tier, billed_org_id)
+      VALUES
+        ('${INV_ADMIN_TO_AGENCY}', 'INV-B372-AA', '${AGENCY_ORG}', 110, 'USD', '2026-12-31', 'UNPAID',
+         '{"source_order_id":"${ORDER_LINKED}","platform_breakdown":{"baseFreight":100,"fuelSurcharge":10,"surgeFee":0,"otherCharges":0}}'::jsonb,
+         'ADMIN_TO_AGENCY', '${AGENCY_ORG}'),
+        ('${INV_AGENCY_TO_SHIPPER}', 'INV-B372-AS', '${SHIPPER_LINKED}', 50, 'USD', '2026-12-31', 'UNPAID',
+         '{"source_order_id":"${ORDER_LINKED}"}'::jsonb, 'AGENCY_TO_SHIPPER', '${SHIPPER_LINKED}');
+      INSERT INTO public.zen_order_costs (order_id, cost_type, unit_price, quantity, currency, is_revenue)
+      VALUES ('${ORDER_LINKED}', 'BASE_FREIGHT', 100, 1, 'USD', false);
+      INSERT INTO public.zen_order_costs (order_id, cost_type, unit_price, quantity, currency, is_revenue, invoice_id)
+      VALUES ('${ORDER_LINKED}', 'OTHER_CHARGE', 50, 1, 'USD', true, '${INV_AGENCY_TO_SHIPPER}');
+    `);
+
+    const res = await recordUpsActualCharges(ORDER_LINKED, [
+      { chargeType: 'TEST', amount: 10, currency: 'USD' },
+    ]);
+    expect(res.success, JSON.stringify(res)).toBe(true);
+
+    const adminToAgency = Number(psql(`SELECT total_amount FROM public.zen_invoices WHERE id='${INV_ADMIN_TO_AGENCY}';`));
+    const agencyToShipper = Number(psql(`SELECT total_amount FROM public.zen_invoices WHERE id='${INV_AGENCY_TO_SHIPPER}';`));
+    expect(adminToAgency).toBe(110);
+    expect(agencyToShipper).toBe(60);
   });
 });

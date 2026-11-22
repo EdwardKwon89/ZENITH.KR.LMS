@@ -58,6 +58,12 @@ export async function recordUpsActualCharges(
     const permErr = await assertAdminOrAgency(profile);
     if (permErr) return { success: false, error: permErr };
 
+    // TASK-B-372 리뷰 ①: service_role 쓰기는 RLS의 ACTIVE 조건을 우회하므로 명시 검증.
+    if (profile.role === 'AGENCY' && profile.status !== 'ACTIVE') {
+      logger.warn(`recordUpsActualCharges: inactive agency profile (${profile.id ?? 'unknown'})`);
+      return { success: false, error: await trError('permission_denied') };
+    }
+
     const { data: order, error: orderError } = await supabase
       .from('zen_orders')
       .select('status, transport_mode, shipper_id')
@@ -92,6 +98,11 @@ export async function recordUpsActualCharges(
     // TASK-B-372 (#1356): AGENCY는 소속/자가화주 검증을 통과한 뒤에만 service_role로
     // 쓰기를 수행한다(zen_ups_actual_charges·zen_order_costs·zen_invoices 모두 AGENCY
     // INSERT/UPDATE 정책이 없어 사용자 세션으로는 실비등록이 불가능 — DEF-150 §1.1).
+    if (charges.some((c) => !Number.isFinite(c.amount))) {
+      logger.warn(`recordUpsActualCharges: non-finite amount (${orderId})`);
+      return { success: false, error: await trError('cost_amount_invalid') };
+    }
+
     const writeDb = profile.role === 'AGENCY' ? await createAdminClient() : supabase;
 
     const { data: existingInvoices } = await writeDb
@@ -99,6 +110,15 @@ export async function recordUpsActualCharges(
       .select('id, is_finalized, invoice_tier, billed_org_id, metadata')
       .filter('metadata->>source_order_id', 'eq', orderId)
       .neq('status', 'CANCELED');
+
+    // 리뷰 ②: 쓰기(실비 DELETE/INSERT) 이전에 마감 인보이스 여부를 확정한다.
+    // AGENCY는 마감 조정(createPostFinalizationAdjustment, admin 전용)을 호출할 수 없으므로
+    // 부분 쓰기를 만들지 않고 사전 거부한다.
+    const finalizedInvoices = (existingInvoices || []).filter((inv: any) => inv.is_finalized);
+    if (profile.role === 'AGENCY' && finalizedInvoices.length > 0) {
+      logger.warn(`recordUpsActualCharges: finalized invoice exists for agency (${orderId})`);
+      return { success: false, error: await trError('invoice_already_finalized') };
+    }
 
     const { error: deleteError } = await writeDb
       .from('zen_ups_actual_charges')
@@ -154,8 +174,7 @@ export async function recordUpsActualCharges(
     const actualSum = estimatedSum + additionalSum;
     const adjustmentAmount = actualSum - estimatedSum;
 
-    // 마감 후 조정: 신규 추가 인보이스 발행 경로 (TASK-194-C)
-    const finalizedInvoices = (existingInvoices || []).filter((inv: any) => inv.is_finalized);
+    // 마감 후 조정: 신규 추가 인보이스 발행 경로 (TASK-194-C) — ADMIN/MANAGER 전용
     if (finalizedInvoices.length > 0) {
       const { createPostFinalizationAdjustment } = await import('@/app/actions/finance/settlement');
       const results = await Promise.all(
@@ -229,6 +248,9 @@ export async function recordUpsActualCharges(
 
     // 마감 전 갱신: 연결된 인보이스 total_amount 재계산
     for (const inv of (existingInvoices || [])) {
+      // 리뷰 ③: AGENCY가 플랫폼→대리점(ADMIN_TO_AGENCY) 청구액을 바꾸지 않도록 제외.
+      // AGENCY는 자신이 발행하는 AGENCY_TO_SHIPPER만 실비 반영한다(설계 의견 — Aiden 확인 요청).
+      if (profile.role === 'AGENCY' && inv.invoice_tier !== 'AGENCY_TO_SHIPPER') continue;
       if (inv.invoice_tier === 'ADMIN_TO_AGENCY') {
         // ADMIN_TO_AGENCY: metadata.platform_breakdown에서 platformTotal 계산 + additionalSum
         const meta = (inv.metadata || {}) as Record<string, any>;
