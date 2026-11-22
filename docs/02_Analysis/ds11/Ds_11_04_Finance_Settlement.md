@@ -224,8 +224,9 @@
 - **오류**: 401(미인증), 404(미존재·RLS 차단 — 동일 응답), 500(`HEADER_LOOKUP`/`ITEMS_LOOKUP`/`TOTAL_MISMATCH`/`BUILD_FAILED` — 전부 `logger.error`, 파일 미생성)
 - **부수효과**: 조회만 (DB 변경 없음) · 성공 시 `logger.info(statement_id·건수만 — 금액·상호 제외)`
 
-#### normalizeShipperName(name)
-- **Path**: `src/app/actions/finance/billing-statements.ts:150-153`
-- **설명**: 수기 화주명 정규화 — RPC `billed_key`의 ADHOC 규칙과 동일(공백 압축·양끝 제거·소문자). 후보 매칭과 자동완성 집계에서 공용.
+#### normalizeShipperName(name) — 내부 유틸 (서버 액션 아님)
+- **Path**: `src/lib/finance/billing/normalize-shipper-name.ts` (TASK-B-368 / DEF-B-162로 **`billing-statements.ts`에서 분리**)
+- **설명**: 수기 화주명 정규화 — RPC `billed_key`의 ADHOC 규칙과 동일(공백 압축·양끝 제거·소문자). 후보 매칭(`listBillableOrders` ADHOC 필터)과 자동완성 집계(`listAdhocShipperNames`)에서 공용.
 - **Input**: `name: string` / **Output**: `string` (순수 함수, DB 접근 없음)
+- **분리 사유**: `'use server'` 파일은 **async 함수만 export** 가능 — 이 함수를 그대로 export하면 클라이언트 컴포넌트가 파일을 import하는 순간 `npm run build`가 실패(DEF-B-162). **규칙·시그니처 무변경**, 호출 코드 3곳은 import로 전환.
 
