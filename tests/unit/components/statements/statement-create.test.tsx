@@ -34,7 +34,8 @@ vi.mock('next-intl', () => {
     dateFrom: '시작일', dateTo: '종료일', lookupOrders: '후보 오더 조회',
     truncatedWarning: '조회 결과가 상한에 도달했습니다. 기간을 좁혀 다시 조회하세요.',
     conditionsChanged: '조회 조건이 변경되었습니다. 다시 조회하세요.',
-    excludedUnsettledAdmin: '미정산 {count}건은 제외됨 — 오더정산 화면이 없어 정산 처리가 불가합니다',
+    excludedUnsettledAdmin: '미정산 {count}건은 제외됨 — 오더정산에서 먼저 정산하세요.',
+    goOrderSettlement: '오더정산으로 이동',
     excludedUnsettledAgency: '미정산 {count}건은 제외됨 — 관리자에게 정산 처리를 요청하세요',
     colOrderNo: '오더번호', colShipperName: '오더별 화주명', colWeight: '청구중량(kg)',
     colBaseFreight: '기본운임', colFuelSurcharge: '유류할증료', colSurgeFee: '급증수수료', colOtherCharges: '기타',
@@ -83,15 +84,15 @@ describe('S4 청구서 생성 (TASK-B-361)', () => {
     await waitFor(() => expect(screen.getByRole('alert').textContent).toContain('상한에 도달했습니다'));
   });
 
-  it('TC-361-09: Admin은 미정산 안내 문구만 보고 잘못된 오더정산 링크가 없다 (Jaison 리뷰)', async () => {
+  it('TC-361-09: Admin은 미정산 안내에서 오더정산 화면으로 이동하는 링크를 본다 (TASK-B-369 갱신)', async () => {
     m.listOrders.mockResolvedValue({ success: true, orders: [order], total: 1, totalAmount: 54000, excludedUnsettled: 3, truncated: false });
     render(<StatementCreate {...base} />);
     fireEvent.change(screen.getByLabelText('청구 대상'), { target: { value: 'org1' } });
     setDates();
     fireEvent.click(screen.getByRole('button', { name: '후보 오더 조회' }));
     await waitFor(() => expect(screen.getByText(/미정산 3건은 제외됨/)).toBeTruthy());
-    expect(screen.getByText(/오더정산 화면이 없어/)).toBeTruthy();
-    expect(screen.queryByRole('link', { name: /오더정산/ })).toBeNull();
+    const link = screen.getByRole('link', { name: /오더정산으로 이동/ });
+    expect(link.getAttribute('href')).toBe('/ko/finance/order-settlement');
   });
 
   it('TC-361-26: 대리점은 관리자 요청 문구를 보고 오더정산 링크가 없다', async () => {
