@@ -36,6 +36,7 @@ export interface RateSnapshotActor {
   id?: string;
   role?: string | null;
   org_id?: string | null;
+  status?: string | null;
 }
 
 interface RateSnapshotOrderOwner {
@@ -53,6 +54,7 @@ export function canWriteOrderRateSnapshot(
   order: RateSnapshotOrderOwner | null | undefined,
 ): boolean {
   if (!profile || !order) return false;
+  if (profile.status && profile.status !== 'ACTIVE') return false;
   if (profile.role === USER_ROLES.ADMIN || profile.role === USER_ROLES.ZENITH_SUPER_ADMIN) return true;
   if (!profile.org_id) return false;
   return order.shipper_id === profile.org_id || order.agency_org_id === profile.org_id;

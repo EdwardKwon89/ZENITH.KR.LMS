@@ -40,6 +40,7 @@ const ACCOUNTS = [
   { key: 'shipperA', email: 'b370-shipper-a@test.kr', role: 'SHIPPER', org: SHIPPER_A },
   { key: 'agency', email: 'b370-agency@test.kr', role: 'AGENCY', org: AGENCY_ORG },
   { key: 'shipperB', email: 'b370-shipper-b@test.kr', role: 'SHIPPER', org: SHIPPER_B },
+  { key: 'manager', email: 'b370-manager@test.kr', role: 'MANAGER', org: ADMIN_ORG },
 ] as const;
 
 type AccountKey = (typeof ACCOUNTS)[number]['key'];
@@ -273,10 +274,72 @@ describe('TASK-B-370 쓰기 — 소유 검증 후 admin client', () => {
     );
 
     expect(result.changed).toBe(true);
+    expect(result.oldFreight).toBe(111);
     expect(result.newFreight).toBe(401);
     expect(Number(psql(`SELECT gross_weight FROM public.zen_order_packages WHERE id='${PACKAGE}';`))).toBe(7);
     const [count, price] = psql(`SELECT count(*)::text||'|'||max(applied_unit_price)::text FROM public.zen_order_rate_snapshots WHERE order_id='${ORDER}';`).split('|');
     expect(Number(count)).toBe(1);
     expect(Number(price)).toBe(401);
+  });
+
+  it('실측 경로: 대리점 세션이 중량 변경 시 스냅샷 1행 UPDATE', async () => {
+    resetSnapshot();
+    resetPackage(5);
+    const freight = await import('@/app/actions/ups/freight');
+    (freight.estimateUpsFreight as any).mockResolvedValue({ platform: { totalSellingPrice: 402, currency: 'USD' } });
+
+    const result = await applyPackageMeasurements(
+      sessions.agency!,
+      profiles.agency,
+      ORDER,
+      [{ packageId: PACKAGE, gross_weight: 7 }],
+    );
+
+    expect(result.changed).toBe(true);
+    expect(result.oldFreight).toBe(111);
+    expect(result.newFreight).toBe(402);
+    const [count, price] = psql(`SELECT count(*)::text||'|'||max(applied_unit_price)::text FROM public.zen_order_rate_snapshots WHERE order_id='${ORDER}';`).split('|');
+    expect(Number(count)).toBe(1);
+    expect(Number(price)).toBe(402);
+  });
+
+  it('실측 경로: 관리자 세션이 중량 변경 시 스냅샷 1행 UPDATE', async () => {
+    resetSnapshot();
+    resetPackage(5);
+    const freight = await import('@/app/actions/ups/freight');
+    (freight.estimateUpsFreight as any).mockResolvedValue({ platform: { totalSellingPrice: 403, currency: 'USD' } });
+
+    const result = await applyPackageMeasurements(
+      sessions.admin!,
+      profiles.admin,
+      ORDER,
+      [{ packageId: PACKAGE, gross_weight: 7 }],
+    );
+
+    expect(result.changed).toBe(true);
+    expect(result.newFreight).toBe(403);
+    const [count, price] = psql(`SELECT count(*)::text||'|'||max(applied_unit_price)::text FROM public.zen_order_rate_snapshots WHERE order_id='${ORDER}';`).split('|');
+    expect(Number(count)).toBe(1);
+    expect(Number(price)).toBe(403);
+  });
+
+  it('실측 경로: 패키지를 읽을 수 있는 비소유 MANAGER 는 스냅샷을 덮어쓰지 않는다', async () => {
+    resetSnapshot(111);
+    resetPackage(5);
+    const freight = await import('@/app/actions/ups/freight');
+    (freight.estimateUpsFreight as any).mockResolvedValue({ platform: { totalSellingPrice: 404, currency: 'USD' } });
+
+    await applyPackageMeasurements(
+      sessions.manager!,
+      profiles.manager,
+      ORDER,
+      [{ packageId: PACKAGE, gross_weight: 7 }],
+    );
+
+    // 패키지는 MANAGER 권한으로 변경되지만(읽기/쓰기 허용), 스냅샷은 소유자가 아니므로 불변.
+    expect(Number(psql(`SELECT gross_weight FROM public.zen_order_packages WHERE id='${PACKAGE}';`))).toBe(7);
+    const [count, price] = psql(`SELECT count(*)::text||'|'||max(applied_unit_price)::text FROM public.zen_order_rate_snapshots WHERE order_id='${ORDER}';`).split('|');
+    expect(Number(count)).toBe(1);
+    expect(Number(price)).toBe(111);
   });
 });

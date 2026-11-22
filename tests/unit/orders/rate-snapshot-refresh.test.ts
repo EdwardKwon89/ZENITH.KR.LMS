@@ -212,6 +212,25 @@ describe('TASK-B-339: refreshUpsRateSnapshot (Issue #1254)', () => {
     });
   });
 
+  it('TC-SNAP-09: 비활성(ACTIVE 아님) 프로필은 소유 화주라도 쓰기 0회 (TASK-B-370)', async () => {
+    const { supabase, writes } = createSupabaseMock({
+      zen_orders: FULL_ORDER,
+      zen_order_packages: [{ length: 30, width: 20, height: 10, gross_weight: 12.5 }],
+      zen_ups_products: { id: 'product-1' },
+      zen_order_rate_snapshots_safe: { id: 'snap-1', is_manual: false },
+    });
+
+    await refreshUpsRateSnapshot({
+      supabase,
+      orderId: ORDER_ID,
+      profile: { id: 'user-suspended', role: 'SHIPPER', org_id: 'org-shipper', status: 'SUSPENDED' },
+      estimateFn,
+    });
+
+    expect(writes.filter((w) => w.table === 'zen_order_rate_snapshots')).toHaveLength(0);
+    expect(estimateFn).not.toHaveBeenCalled();
+  });
+
   it('TC-SNAP-08: 소유하지 않은 화주 세션은 쓰기 0회 + 추정 함수 미호출 (TASK-B-370)', async () => {
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const { supabase, writes } = createSupabaseMock({

@@ -20,7 +20,9 @@
 | TC-370-07 | 등록 경로 `saveOrderRateSnapshot` | 소유 화주 INSERT(1행, metadata 전체 키), 비소유 INSERT 0행 | 동일 |
 | TC-370-08 | 실측 경로 `applyPackageMeasurements` | 중량 변경 저장 + 스냅샷 1행 UPDATE + `newFreight` 반환 | 동일 |
 | TC-370-09 | 기존 수정 통합 회귀 | UPS 수정 후 스냅샷 1행 유지·값 갱신 (Admin 세션 전환) | `tests/integration/ups-edit-before-registration.test.ts` |
-| TC-370-10 | 소유 검증 헬퍼·읽기 테이블 단위 검증 | 안전 뷰 read/`is_manual` 유지/비소유 차단/추정 함수 전파 | `tests/unit/orders/rate-snapshot-refresh.test.ts` |
+| TC-370-10 | 소유 검증 헬퍼·읽기 테이블 단위 검증 | 안전 뷰 read/`is_manual` 유지/비소유·비활성 차단/추정 함수 전파 | `tests/unit/orders/rate-snapshot-refresh.test.ts` |
+| TC-370-12 | 실측 경로 대리점·관리자 | 중량 변경 + 스냅샷 1행 UPDATE, `oldFreight` 111 유지 | `tests/integration/task-b370-snapshot-safe-view.test.ts` |
+| TC-370-14 | 실측 경로 비소유 MANAGER | 패키지 SELECT/UPDATE는 가능하지만 스냅샷 불변(111) | 동일 |
 | TC-370-11 | 등록 경로 직접 화주 회귀 | SHIPPER·CORPORATE·AGENCY_SHIPPER 스냅샷 생성(admin client) | `tests/unit/orders/direct-shipper-ups-snapshot.test.ts` |
 
 **되돌리기 검증 (실측)**:
@@ -30,7 +32,8 @@
 | RST-1 | 소유 검증 헬퍼를 항상 `true` | **2 failed / 15 passed** (등록 비소유·TC-SNAP-08) | 17/17 PASS |
 | RST-2 | `refresh` 조회를 base table로 원복 | **2 failed / 8 passed** (TC-SNAP-01·03) | 10/10 PASS |
 | RST-3 | `saveOrderRateSnapshot` 소유 검증 제거 | **1 failed / 6 skipped** (비소유 INSERT 1건) | 7/7 PASS |
+| RST-4 | 실측 경로 가드(`L1167`)를 항상 true | **1 failed / 9 passed** (비소유 MANAGER가 스냅샷 404로 덮어씀) | 10/10 PASS |
 
-**회귀 검증**: `npm run test:regression` → **293파일 / 2,244케이스 전부 PASS (exit 0)**. `npm run build` → **성공 (exit 0)**. `zen_error_logs` 최근 1일 신규 ERROR 0건.
+**회귀 검증**: `npm run test:regression` → **293파일 / 2,248케이스 전부 PASS (exit 0)**. `npm run build` → **성공 (exit 0)**. `zen_error_logs` 최근 1일 신규 ERROR 0건.
 **R-12 Ds-11**: 서버 액션 export 시그니처 변경 없음(lib 함수 `refreshUpsRateSnapshot` 파라미터 추가는 Ds-11 대상 아님) → 해당 없음.
 **환경 메모**: 안전 뷰는 `auth.uid()` 기반 WHERE를 가지므로 **service_role/ admin client로 읽으면 0행**이다. 서버 액션 경로는 반드시 사용자 세션 client로 읽고, 쓰기만 admin client를 쓴다.
