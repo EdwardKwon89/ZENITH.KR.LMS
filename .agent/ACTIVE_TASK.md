@@ -50,6 +50,7 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
+| [#1418](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1418) | [IMP] 청구서 Excel 출력 후속 3건 — in() URL 청크 조회·날짜 달력 검증·JSDoc 정리 (#1411 검토 후속) | b | p3 | open | 미배정 | 2026-11-22 |
 | [#1417](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1417) | [IMP] 'use server' 파일의 non-async export를 CI에서 탐지하는 점검 제안 (DEF-B-162 재발 방지) | b | p3 | open | 미배정 | 2026-11-22 |
 | [#1415](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1415) | [Team B] TASK-B-368: DEF-B-162 — 'use server' 액션 파일의 비동기 아닌 export(normalizeShipperName) 분리 — #1412/#1413 build 차단 해소 (High) | b | p1 | in-progress | 미배정 | 2026-11-22 |
 | [#1406](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1406) | [Team A] TASK-1168: DEF-157 — 스냅샷 테이블 화주측 원가 컬럼 노출 해소 (Riley) | a | p2 | in-progress | 미배정 | 2026-11-22 |
