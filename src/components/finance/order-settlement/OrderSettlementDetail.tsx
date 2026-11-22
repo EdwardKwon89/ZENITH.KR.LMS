@@ -17,7 +17,7 @@ import {
   unmarkOrderCostSettled,
   type UpsActualCostInput,
 } from '@/app/actions/finance/ups-actual-cost';
-import type { CostSettlementStatus, OrderSettlementDetailData } from './types';
+import type { CostSettlementStatus, OrderSettlementDetailData, SavedActualCost } from './types';
 import { formatDecimal, formatKrw, formatKstDate, toNumberOrNull } from './types';
 
 export interface OrderSettlementDetailProps {
@@ -39,6 +39,38 @@ interface PreviewState {
 
 const EMPTY_PREVIEW: PreviewState = { totalCostKrw: null, appliedExchangeRate: null, recalc: null };
 
+interface FormState {
+  invoiceNo: string;
+  invoiceDate: string;
+  weightKg: string;
+  lengthCm: string;
+  widthCm: string;
+  heightCm: string;
+  baseFreight: string;
+  fuelSurcharge: string;
+  surgeFee: string;
+  otherCharges: string;
+  notes: string;
+}
+
+/** 저장값 프리필 — KRW 기준 행은 HKD 입력으로 변환하지 않는다(통화 혼입 방지). */
+function buildFormState(saved: SavedActualCost | null): FormState {
+  const hkd = saved && !saved.krwBased ? saved : null;
+  return {
+    invoiceNo: saved?.upsInvoiceNo ?? '',
+    invoiceDate: saved?.upsInvoiceDate ?? '',
+    weightKg: saved?.actualWeightKg != null ? String(saved.actualWeightKg) : '',
+    lengthCm: saved?.actualLengthCm != null ? String(saved.actualLengthCm) : '',
+    widthCm: saved?.actualWidthCm != null ? String(saved.actualWidthCm) : '',
+    heightCm: saved?.actualHeightCm != null ? String(saved.actualHeightCm) : '',
+    baseFreight: hkd?.baseFreightHkd != null ? String(hkd.baseFreightHkd) : '',
+    fuelSurcharge: hkd?.fuelSurchargeHkd != null ? String(hkd.fuelSurchargeHkd) : '',
+    surgeFee: hkd?.surgeFeeHkd != null ? String(hkd.surgeFeeHkd) : '',
+    otherCharges: hkd?.otherChargesHkd != null ? String(hkd.otherChargesHkd) : '',
+    notes: saved?.notes ?? '',
+  };
+}
+
 export default function OrderSettlementDetail({ detail, locale }: OrderSettlementDetailProps) {
   const t = useTranslations('OrderSettlement');
   const router = useRouter();
@@ -48,18 +80,18 @@ export default function OrderSettlementDetail({ detail, locale }: OrderSettlemen
   const settled = status === 'SETTLED';
 
   // 기존 저장값 프리필 — KRW 기준 행은 HKD 입력으로 변환하지 않는다(통화 혼입 방지).
-  const hkdPrefill = saved && !saved.krwBased ? saved : null;
-  const [invoiceNo, setInvoiceNo] = useState(saved?.upsInvoiceNo ?? '');
-  const [invoiceDate, setInvoiceDate] = useState(saved?.upsInvoiceDate ?? '');
-  const [weightKg, setWeightKg] = useState(saved?.actualWeightKg != null ? String(saved.actualWeightKg) : '');
-  const [lengthCm, setLengthCm] = useState(saved?.actualLengthCm != null ? String(saved.actualLengthCm) : '');
-  const [widthCm, setWidthCm] = useState(saved?.actualWidthCm != null ? String(saved.actualWidthCm) : '');
-  const [heightCm, setHeightCm] = useState(saved?.actualHeightCm != null ? String(saved.actualHeightCm) : '');
-  const [baseFreight, setBaseFreight] = useState(hkdPrefill?.baseFreightHkd != null ? String(hkdPrefill.baseFreightHkd) : '');
-  const [fuelSurcharge, setFuelSurcharge] = useState(hkdPrefill?.fuelSurchargeHkd != null ? String(hkdPrefill.fuelSurchargeHkd) : '');
-  const [surgeFee, setSurgeFee] = useState(hkdPrefill?.surgeFeeHkd != null ? String(hkdPrefill.surgeFeeHkd) : '');
-  const [otherCharges, setOtherCharges] = useState(hkdPrefill?.otherChargesHkd != null ? String(hkdPrefill.otherChargesHkd) : '');
-  const [notes, setNotes] = useState(saved?.notes ?? '');
+  const initialForm = buildFormState(saved);
+  const [invoiceNo, setInvoiceNo] = useState(initialForm.invoiceNo);
+  const [invoiceDate, setInvoiceDate] = useState(initialForm.invoiceDate);
+  const [weightKg, setWeightKg] = useState(initialForm.weightKg);
+  const [lengthCm, setLengthCm] = useState(initialForm.lengthCm);
+  const [widthCm, setWidthCm] = useState(initialForm.widthCm);
+  const [heightCm, setHeightCm] = useState(initialForm.heightCm);
+  const [baseFreight, setBaseFreight] = useState(initialForm.baseFreight);
+  const [fuelSurcharge, setFuelSurcharge] = useState(initialForm.fuelSurcharge);
+  const [surgeFee, setSurgeFee] = useState(initialForm.surgeFee);
+  const [otherCharges, setOtherCharges] = useState(initialForm.otherCharges);
+  const [notes, setNotes] = useState(initialForm.notes);
 
   const [preview, setPreview] = useState<PreviewState>(EMPTY_PREVIEW);
   const [previewError, setPreviewError] = useState<string | null>(null);
@@ -69,6 +101,15 @@ export default function OrderSettlementDetail({ detail, locale }: OrderSettlemen
   const [confirmError, setConfirmError] = useState<string | null>(null);
   const [confirming, setConfirming] = useState(false);
   const [hasSaved, setHasSaved] = useState(saved != null);
+  // 저장 성공 시점의 입력 스냅샷 — 현재 입력과 다르면 정산 완료를 막는다(미저장 값 확정 방지).
+  const [savedFormKey, setSavedFormKey] = useState<string | null>(() => (saved ? JSON.stringify(initialForm) : null));
+
+  const formState: FormState = {
+    invoiceNo, invoiceDate, weightKg, lengthCm, widthCm, heightCm,
+    baseFreight, fuelSurcharge, surgeFee, otherCharges, notes,
+  };
+  const formKey = JSON.stringify(formState);
+  const isDirty = hasSaved && savedFormKey !== null && formKey !== savedFormKey;
 
   const hasAnyInput = useMemo(
     () => [weightKg, lengthCm, widthCm, heightCm, baseFreight, fuelSurcharge, surgeFee, otherCharges]
@@ -147,6 +188,7 @@ export default function OrderSettlementDetail({ detail, locale }: OrderSettlemen
     }
     setSaving(true);
     setFormError(null);
+    const pendingFormKey = formKey;
     const res = await recordUpsActualCost(detail.orderId, buildInput());
     setSaving(false);
     if (!res.success) {
@@ -154,12 +196,17 @@ export default function OrderSettlementDetail({ detail, locale }: OrderSettlemen
       return;
     }
     setHasSaved(true);
+    setSavedFormKey(pendingFormKey);
     toast.success(t('saveSuccess', { amount: formatKrw(res.totalCostKrw ?? 0) }));
     router.refresh();
   };
 
   const confirmAction = async () => {
     if (!confirmKind) return;
+    if (confirmKind === 'settle' && isDirty) {
+      setConfirmError(t('dirtyNotice'));
+      return;
+    }
     setConfirming(true);
     setConfirmError(null);
     const res = confirmKind === 'settle'
@@ -334,6 +381,9 @@ export default function OrderSettlementDetail({ detail, locale }: OrderSettlemen
         </div>
       </ZenCard>
 
+      {isDirty && (
+        <p className="rounded-xl bg-amber-50 p-3 text-sm text-amber-800" role="status">{t('dirtyNotice')}</p>
+      )}
       {formError && <p className="text-sm text-rose-600" role="alert">{formError}</p>}
 
       <div className="flex flex-wrap justify-end gap-2">
@@ -348,7 +398,7 @@ export default function OrderSettlementDetail({ detail, locale }: OrderSettlemen
         ) : (
           <ZenButton
             onClick={() => { setConfirmError(null); setConfirmKind('settle'); }}
-            disabled={detail.legacyInvoiced || !hasSaved}
+            disabled={detail.legacyInvoiced || !hasSaved || isDirty}
           >
             <ShieldCheck size={16} />{t('markSettled')}
           </ZenButton>

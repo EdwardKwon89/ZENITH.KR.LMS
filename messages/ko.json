@@ -86,7 +86,7 @@
   },
   "OrderSettlement": {
     "title": "오더정산",
-    "unsettledBadge": "미정산 {count}건",
+    "unsettledBadge": "조회 결과 중 미정산 {count}건",
     "filterDeliveredFrom": "배송완료일 시작",
     "filterDeliveredTo": "배송완료일 종료",
     "filterStatus": "정산 상태",
@@ -111,6 +111,7 @@
     "dateRequired": "조회 기간(시작·종료)은 필수입니다.",
     "dateRangeInvalid": "시작일은 종료일보다 빠르거나 같아야 합니다.",
     "actionFailed": "요청을 처리하지 못했습니다.",
+    "dirtyNotice": "변경 사항이 있습니다. 먼저 임시저장한 뒤 정산 완료하세요.",
     "detailTitle": "오더정산 — {orderNo}",
     "backToList": "목록으로",
     "labelShipper": "화주",

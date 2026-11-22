@@ -27,6 +27,9 @@
 | TC-369-14 | 대리점 메뉴 | 오더정산 링크 없음 | 동일 |
 | TC-369-15 | #1367 문구 교체 | Admin 안내에서 S1 링크 렌더(href `/ko/finance/order-settlement`), 대리점 링크 없음 | `tests/unit/components/statements/statement-create.test.tsx` (TC-361-09 갱신) |
 | TC-369-16 | R-10 실구동 (수동, **CI 미실행**) | Admin 실제 로그인 → S1 `page.goto` → S2 저장 → 정산 완료 → 되돌리기 | `tests/e2e/e2e-27-order-settlement-ui.spec.ts` |
+| TC-369-17 | S2 저장 후 입력 변경 | [정산 완료] 비활성 + "먼저 저장" 안내 렌더 | `tests/unit/components/order-settlement/order-settlement-detail.test.tsx` |
+| TC-369-18 | S2 변경 사항 임시저장 | 성공 후 [정산 완료] 재활성 | 동일 |
+| TC-369-19 | S2 미저장 변경 상태 클릭 | `markOrderCostSettled` 미호출·모달 미표시 | 동일 |
 
 **되돌리기 검증 (구현 유효성 — 테스트가 실제로 실패함을 증명)**:
 
@@ -38,7 +41,8 @@
 | RST-4 | S2 저장 토스트 합계를 클라이언트 값으로 변경 | **1 failed / 7 passed** | 8/8 PASS |
 | RST-5 | 레거시 오더 [정산 완료] 비활성 조건 제거 | **1 failed / 7 passed** | 8/8 PASS |
 | RST-6 | #1367 Admin S1 링크 제거 | **1 failed / 8 passed** | 9/9 PASS |
+| RST-7 | dirty 판정을 항상 false로 제거 | **3 failed / 8 passed** | 11/11 PASS |
 
-**회귀 검증**: `npm run test:regression` → **290파일 / 2,217케이스 전부 PASS (exit 0)**. `npm run build` → **성공 (exit 0)**. 신규 Vitest 14건 + 갱신 1건 + E2E 1건(수동).
+**회귀 검증**: `npm run test:regression` → **290파일 / 2,220케이스 전부 PASS (exit 0)**. `npm run build` → **성공 (exit 0)**. 신규 Vitest 17건 + 갱신 1건 + E2E 1건(수동).
 **R-10 실구동**: Playwright E2E-27 1/1 PASS (23.3s) — 스크린샷 `docs/99_Manual/E2E_27_Result/S1-목록.png`·`S2-임시저장.png`·`S2-정산완료.png`·`S2-되돌리기.png`.
-**발견 이슈**: S2 기타부가운임 다중행·항목별 KRW 분해는 서버 액션 계약 확장 필요 → **IMP-201**, 스냅샷 없는 오더의 시스템 값 fallback → **IMP-202**. UPS 청구서 PDF 첨부(선택 범위)는 미구현.
+**발견 이슈**: S2 기타부가운임 다중행·항목별 KRW 분해 → **IMP 제안 #1431**, 스냅샷 없는 오더 시스템 값 fallback → **#1432**, `ADMIN_ROLES` 공용 상수 → **#1433**, UPS 청구서 PDF 첨부(선택) → **#1434**. R-15에 따라 `scratch/post_launch_improvements.md` 직접 수정은 되돌림.

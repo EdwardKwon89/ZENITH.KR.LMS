@@ -86,7 +86,7 @@
   },
   "OrderSettlement": {
     "title": "オーダー精算",
-    "unsettledBadge": "未精算 {count}件",
+    "unsettledBadge": "検索結果の未精算 {count}件",
     "filterDeliveredFrom": "配達完了日（開始）",
     "filterDeliveredTo": "配達完了日（終了）",
     "filterStatus": "精算状態",
@@ -111,6 +111,7 @@
     "dateRequired": "検索期間（開始・終了）は必須です。",
     "dateRangeInvalid": "開始日は終了日以前にしてください。",
     "actionFailed": "リクエストを処理できませんでした。",
+    "dirtyNotice": "未保存の変更があります。先に一時保存してから精算完了してください。",
     "detailTitle": "オーダー精算 — {orderNo}",
     "backToList": "一覧へ戻る",
     "labelShipper": "荷主",

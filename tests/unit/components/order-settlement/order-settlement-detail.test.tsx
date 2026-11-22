@@ -56,6 +56,7 @@ vi.mock('next-intl', () => {
     markConfirm: '정산 완료', unmarkConfirm: '되돌리기', close: '닫기',
     saveSuccess: '저장했습니다. 원가 합계 {amount}원', markSuccess: '정산 완료 처리했습니다.', unmarkSuccess: '정산을 되돌렸습니다.',
     actionFailed: '요청을 처리하지 못했습니다.',
+    dirtyNotice: '변경 사항이 있습니다. 먼저 임시저장한 뒤 정산 완료하세요.',
   };
   return {
     useTranslations: () => (key: string, params?: Record<string, unknown>) => {
@@ -180,6 +181,39 @@ describe('S2 오더정산 상세 (TASK-B-369)', () => {
 
     await waitFor(() => expect(screen.getByRole('alert').textContent).toBe('청구서에 포함된 오더는 되돌릴 수 없습니다.'));
     expect(screen.getByRole('dialog')).toBeTruthy();
+  });
+
+  it('TC-369-17: 저장 후 입력을 바꾸면 [정산 완료]가 비활성되고 안내가 표시된다', () => {
+    render(<OrderSettlementDetail detail={detail({ savedCost })} locale="ko" />);
+
+    fireEvent.change(screen.getByLabelText('기본운임 (HKD)'), { target: { value: '999' } });
+
+    const markButton = screen.getByRole('button', { name: /정산 완료/ }) as HTMLButtonElement;
+    expect(markButton.disabled).toBe(true);
+    expect(screen.getByRole('status').textContent).toContain('변경 사항이 있습니다');
+  });
+
+  it('TC-369-18: 변경 사항을 임시저장하면 [정산 완료]가 다시 활성화된다', async () => {
+    m.record.mockResolvedValue({ success: true, totalCostKrw: 213000 });
+    render(<OrderSettlementDetail detail={detail({ savedCost })} locale="ko" />);
+
+    fireEvent.change(screen.getByLabelText('기본운임 (HKD)'), { target: { value: '999' } });
+    expect((screen.getByRole('button', { name: /정산 완료/ }) as HTMLButtonElement).disabled).toBe(true);
+
+    fireEvent.click(screen.getByRole('button', { name: /임시저장/ }));
+
+    await waitFor(() => expect((screen.getByRole('button', { name: /정산 완료/ }) as HTMLButtonElement).disabled).toBe(false));
+  });
+
+  it('TC-369-19: 미저장 변경이 있으면 [정산 완료]를 눌러도 서버 액션을 호출하지 않는다', () => {
+    render(<OrderSettlementDetail detail={detail({ savedCost })} locale="ko" />);
+
+    fireEvent.change(screen.getByLabelText('유류할증료 (HKD)'), { target: { value: '999' } });
+    const markButton = screen.getByRole('button', { name: /정산 완료/ }) as HTMLButtonElement;
+    fireEvent.click(markButton);
+
+    expect(m.mark).not.toHaveBeenCalled();
+    expect(screen.queryByRole('dialog')).toBeNull();
   });
 
   it('TC-369-12: 입력값이 없으면 저장하지 않고 안내한다', () => {

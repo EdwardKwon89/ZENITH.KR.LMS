@@ -86,7 +86,7 @@
   },
   "OrderSettlement": {
     "title": "Order settlement",
-    "unsettledBadge": "{count} unsettled",
+    "unsettledBadge": "Unsettled in results: {count}",
     "filterDeliveredFrom": "Delivered from",
     "filterDeliveredTo": "Delivered to",
     "filterStatus": "Settlement status",
@@ -111,6 +111,7 @@
     "dateRequired": "Start and end dates are required.",
     "dateRangeInvalid": "Start date must be on or before end date.",
     "actionFailed": "Something went wrong.",
+    "dirtyNotice": "You have unsaved changes. Save the draft before marking as settled.",
     "detailTitle": "Order settlement — {orderNo}",
     "backToList": "Back to list",
     "labelShipper": "Shipper",

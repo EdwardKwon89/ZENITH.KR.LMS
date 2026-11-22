@@ -86,7 +86,7 @@
   },
   "OrderSettlement": {
     "title": "订单结算",
-    "unsettledBadge": "未结算 {count} 件",
+    "unsettledBadge": "查询结果中未结算 {count} 件",
     "filterDeliveredFrom": "送达日期起",
     "filterDeliveredTo": "送达日期止",
     "filterStatus": "结算状态",
@@ -111,6 +111,7 @@
     "dateRequired": "查询期间（开始/结束）为必填项。",
     "dateRangeInvalid": "开始日期必须早于或等于结束日期。",
     "actionFailed": "请求处理失败。",
+    "dirtyNotice": "有未保存的更改。请先临时保存，再完成结算。",
     "detailTitle": "订单结算 — {orderNo}",
     "backToList": "返回列表",
     "labelShipper": "货主",

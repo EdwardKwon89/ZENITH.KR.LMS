@@ -16,7 +16,7 @@ vi.mock('@/app/actions/finance/ups-actual-cost', () => ({
 vi.mock('next-intl', () => {
   const ko: Record<string, string> = {
     title: '오더정산',
-    unsettledBadge: '미정산 {count}건',
+    unsettledBadge: '조회 결과 중 미정산 {count}건',
     filterDeliveredFrom: '배송완료일 시작',
     filterDeliveredTo: '배송완료일 종료',
     filterStatus: '정산 상태',
@@ -87,7 +87,7 @@ describe('S1 오더정산 목록 (TASK-B-369)', () => {
     expect(screen.getByText('ORD-1')).toBeTruthy();
     expect(screen.getByText('INV-2')).toBeTruthy();
     // 레거시 오더는 미정산 건수에서 제외된다 (o1만 집계).
-    expect(screen.getByText('미정산 1건')).toBeTruthy();
+    expect(screen.getByText('조회 결과 중 미정산 1건')).toBeTruthy();
     expect(screen.getByText('레거시 청구됨')).toBeTruthy();
 
     const settleLink = screen.getByRole('link', { name: /정산/ });
