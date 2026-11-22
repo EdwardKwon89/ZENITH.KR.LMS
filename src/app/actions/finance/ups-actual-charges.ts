@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { validateAdminAction, validateUserAction } from '@/lib/auth/guards';
 import { logger } from '@/lib/logger';
 import { trError } from '@/lib/i18n/action-error';
+import { createAdminClient } from '@/utils/supabase/server';
 
 export interface UpsActualChargeInput {
   chargeType: string;
@@ -17,10 +18,9 @@ export interface UpsActualChargeInput {
 const ADMIN_ROLES = ['ZENITH_SUPER_ADMIN', 'ADMIN', 'MANAGER'] as const;
 
 /** TASK-B-352: 권한 실패는 throw 대신 로케일 문장을 반환한다(사용자 도달 경로). */
-async function assertAdminOrAgency(profile: { role: string; org_id?: string }): Promise<string | null> {
+async function assertAdminOnly(profile: { role: string; org_id?: string }): Promise<string | null> {
   if (ADMIN_ROLES.includes(profile.role as any)) return null;
-  if (profile.role === 'AGENCY') return null;
-  logger.warn(`[assertAdminOrAgency] Denied for role: ${profile.role}`);
+  logger.warn(`[assertAdminOnly] Denied for role: ${profile.role}`);
   return trError('permission_denied');
 }
 
@@ -29,11 +29,20 @@ export async function recordUpsActualCharges(
   charges: UpsActualChargeInput[]
 ): Promise<{ success: boolean; adjustmentAmount?: number; error?: string }> {
   try {
-    const { supabase, user, profile } = await validateUserAction();
-    const permErr = await assertAdminOrAgency(profile);
+    const { user, profile } = await validateUserAction();
+    const permErr = await assertAdminOnly(profile);
     if (permErr) return { success: false, error: permErr };
 
-    const { data: order, error: orderError } = await supabase
+    if (charges.some((c) => !Number.isFinite(c.amount))) {
+      logger.warn(`recordUpsActualCharges: non-finite amount (${orderId})`);
+      return { success: false, error: await trError('cost_amount_invalid') };
+    }
+
+    // SUPER_ADMIN은 zen_ups_actual_charges RLS 정책(ADMIN/MANAGER)에 없으므로,
+    // admin 역할 가드를 통과한 뒤의 DB 접근은 service_role로 수행한다(정책 교체는 별도 PR).
+    const db = await createAdminClient();
+
+    const { data: order, error: orderError } = await db
       .from('zen_orders')
       .select('status, transport_mode, shipper_id')
       .eq('id', orderId)
@@ -50,32 +59,20 @@ export async function recordUpsActualCharges(
       return { success: false, error: await trError('not_ups_order') };
     }
 
-    // AGENCY: 본인 소속 화주 오더만 허용
-    if (profile.role === 'AGENCY') {
-      const { data: links } = await supabase
-        .from('zen_agency_shippers')
-        .select('shipper_org_id')
-        .eq('agency_org_id', profile.org_id)
-        .eq('is_active', true);
-      const shipperIds = (links || []).map((l: any) => l.shipper_org_id);
-      if (!shipperIds.includes(order.shipper_id)) {
-        logger.warn(`recordUpsActualCharges: shipper out of agency scope (${orderId})`);
-        return { success: false, error: await trError('shipper_scope_denied') };
-      }
-    }
-
     if (order.status !== 'IN_TRANSIT' && order.status !== 'DELIVERED') {
       logger.warn(`recordUpsActualCharges: invalid status ${order.status} (${orderId})`);
       return { success: false, error: await trError('ups_actual_charge_status_invalid') };
     }
 
-    const { data: existingInvoices } = await supabase
+    const { data: existingInvoices } = await db
       .from('zen_invoices')
       .select('id, is_finalized, invoice_tier, billed_org_id, metadata')
       .filter('metadata->>source_order_id', 'eq', orderId)
       .neq('status', 'CANCELED');
 
-    const { error: deleteError } = await supabase
+    const finalizedInvoices = (existingInvoices || []).filter((inv: any) => inv.is_finalized);
+
+    const { error: deleteError } = await db
       .from('zen_ups_actual_charges')
       .delete()
       .eq('order_id', orderId);
@@ -101,7 +98,7 @@ export async function recordUpsActualCharges(
     });
 
     if (actualChargesToInsert.length > 0) {
-      const { error: insertError } = await supabase
+      const { error: insertError } = await db
         .from('zen_ups_actual_charges')
         .insert(actualChargesToInsert);
 
@@ -111,7 +108,7 @@ export async function recordUpsActualCharges(
       }
     }
 
-    const { data: estimatedCosts, error: estError } = await supabase
+    const { data: estimatedCosts, error: estError } = await db
       .from('zen_order_costs')
       .select('cost_type, unit_price, quantity')
       .eq('order_id', orderId)
@@ -129,8 +126,7 @@ export async function recordUpsActualCharges(
     const actualSum = estimatedSum + additionalSum;
     const adjustmentAmount = actualSum - estimatedSum;
 
-    // 마감 후 조정: 신규 추가 인보이스 발행 경로 (TASK-194-C)
-    const finalizedInvoices = (existingInvoices || []).filter((inv: any) => inv.is_finalized);
+    // 마감 후 조정: 신규 추가 인보이스 발행 경로 (TASK-194-C) — ADMIN/MANAGER 전용
     if (finalizedInvoices.length > 0) {
       const { createPostFinalizationAdjustment } = await import('@/app/actions/finance/settlement');
       const results = await Promise.all(
@@ -148,7 +144,7 @@ export async function recordUpsActualCharges(
 
     // zen_order_costs에 UPS_ACTUAL_ADJUSTMENT upsert
     if (adjustmentAmount === 0) {
-      const { error: deleteCostError } = await supabase
+      const { error: deleteCostError } = await db
         .from('zen_order_costs')
         .delete()
         .eq('order_id', orderId)
@@ -159,7 +155,7 @@ export async function recordUpsActualCharges(
         return { success: false, error: await trError('generic', { code: 'ADJUSTMENT_DELETE' }) };
       }
     } else {
-      const { data: existingAdjustId, error: checkCostError } = await supabase
+      const { data: existingAdjustId, error: checkCostError } = await db
         .from('zen_order_costs')
         .select('id')
         .eq('order_id', orderId)
@@ -174,7 +170,7 @@ export async function recordUpsActualCharges(
       const defaultCurrency = charges[0]?.currency || 'USD';
 
       if (existingAdjustId) {
-        const { error: updateCostError } = await supabase
+        const { error: updateCostError } = await db
           .from('zen_order_costs')
           .update({ unit_price: adjustmentAmount, currency: defaultCurrency })
           .eq('id', existingAdjustId.id);
@@ -184,7 +180,7 @@ export async function recordUpsActualCharges(
           return { success: false, error: await trError('generic', { code: 'ADJUSTMENT_UPDATE' }) };
         }
       } else {
-        const { error: insertCostError } = await supabase
+        const { error: insertCostError } = await db
           .from('zen_order_costs')
           .insert({
             order_id: orderId,
@@ -214,7 +210,7 @@ export async function recordUpsActualCharges(
           + Number(breakdown.otherCharges || 0);
         const newTotal = platformTotal + additionalSum;
 
-        const { error: updateInvError } = await supabase
+        const { error: updateInvError } = await db
           .from('zen_invoices')
           .update({ total_amount: newTotal })
           .eq('id', inv.id);
@@ -226,7 +222,7 @@ export async function recordUpsActualCharges(
       } else {
         // AGENCY_TO_SHIPPER / ADMIN_TO_SHIPPER: 기존 로직 (zen_order_costs 기반)
         if (adjustmentAmount !== 0) {
-          const { error: linkError } = await supabase
+          const { error: linkError } = await db
             .from('zen_order_costs')
             .update({ invoice_id: inv.id })
             .eq('order_id', orderId)
@@ -239,7 +235,7 @@ export async function recordUpsActualCharges(
           }
         }
 
-        const { data: linkedCosts, error: costsError } = await supabase
+        const { data: linkedCosts, error: costsError } = await db
           .from('zen_order_costs')
           .select('unit_price, quantity')
           .eq('invoice_id', inv.id);
@@ -253,7 +249,7 @@ export async function recordUpsActualCharges(
           return sum + (Number(c.unit_price) * Number(c.quantity || 1));
         }, 0);
 
-        const { error: updateInvError } = await supabase
+        const { error: updateInvError } = await db
           .from('zen_invoices')
           .update({ total_amount: newTotal })
           .eq('id', inv.id);
@@ -277,8 +273,11 @@ export async function recordUpsActualCharges(
 }
 
 export async function getUpsActualCharges(orderId: string) {
-  const { supabase } = await validateUserAction();
-  const { data, error } = await supabase
+  const { profile } = await validateUserAction();
+  const permErr = await assertAdminOnly(profile);
+  if (permErr) throw new Error(permErr);
+  const db = await createAdminClient();
+  const { data, error } = await db
     .from('zen_ups_actual_charges')
     .select(`
       *,
@@ -299,10 +298,13 @@ export async function getUpsActualCharges(orderId: string) {
 }
 
 export async function getUpsChargeReconciliation(orderId: string) {
-  const { supabase } = await validateUserAction();
+  const { profile } = await validateUserAction();
+  const permErr = await assertAdminOnly(profile);
+  if (permErr) throw new Error(permErr);
+  const db = await createAdminClient();
 
   // 1. 예상비용 합산
-  const { data: estimatedCosts, error: estError } = await supabase
+  const { data: estimatedCosts, error: estError } = await db
     .from('zen_order_costs')
     .select('cost_type, unit_price, quantity, currency')
     .eq('order_id', orderId)
@@ -325,7 +327,7 @@ export async function getUpsChargeReconciliation(orderId: string) {
   }));
 
   // 2. 실제청구 합산
-  const { data: actualCharges, error: actError } = await supabase
+  const { data: actualCharges, error: actError } = await db
     .from('zen_ups_actual_charges')
     .select('charge_amount')
     .eq('order_id', orderId);
@@ -344,7 +346,7 @@ export async function getUpsChargeReconciliation(orderId: string) {
   const variance = actual - estimated;
 
   // 3. 정산 마감 여부 확인 + 청구서 정보 조회
-  const { data: existingInvoice } = await supabase
+  const { data: existingInvoice } = await db
     .from('zen_invoices')
     .select('id, invoice_no, created_at, is_finalized')
     .filter('metadata->>source_order_id', 'eq', orderId)
@@ -364,15 +366,16 @@ export async function getUpsChargeReconciliation(orderId: string) {
 }
 
 export async function searchDeliveredUpsOrders(query: string) {
-  const { supabase, profile } = await validateUserAction();
-  const permErr = await assertAdminOrAgency(profile);
+  const { profile } = await validateUserAction();
+  const permErr = await assertAdminOnly(profile);
   if (permErr) throw new Error(permErr);
+  const db = await createAdminClient();
 
   const trimmed = query.trim();
   if (!trimmed) return [];
 
   // 1. zen_orders 에서 order_no 검색
-  const { data: orders, error } = await supabase
+  const { data: orders, error } = await db
     .from('zen_orders')
     .select(`
       id,
@@ -393,22 +396,12 @@ export async function searchDeliveredUpsOrders(query: string) {
     throw new Error(await trError('generic', { code: 'ORDER_SEARCH' }));
   }
 
-  // AGENCY: 본인 소속 화주 오더만 필터링
   let resultList = orders || [];
-  if (profile.role === 'AGENCY') {
-    const { data: links } = await supabase
-      .from('zen_agency_shippers')
-      .select('shipper_org_id')
-      .eq('agency_org_id', profile.org_id)
-      .eq('is_active', true);
-    const shipperIds = new Set((links || []).map((l: any) => l.shipper_org_id));
-    resultList = resultList.filter((o) => shipperIds.has(o.shipper_id));
-  }
 
   const orderIds = new Set<string>(resultList.map((o) => o.id));
 
   // 2. tracking_no 로 검색
-  const { data: trackingMatches, error: trackErr } = await supabase
+  const { data: trackingMatches, error: trackErr } = await db
     .from('zen_tracking_configs')
     .select('order_id')
     .ilike('tracking_no', `%${trimmed}%`);
@@ -421,7 +414,7 @@ export async function searchDeliveredUpsOrders(query: string) {
     const idsToFetch = matchedIds.filter(id => !orderIds.has(id));
 
     if (idsToFetch.length > 0) {
-      let moreOrdersQuery = supabase
+      let moreOrdersQuery = db
         .from('zen_orders')
         .select(`
           id,

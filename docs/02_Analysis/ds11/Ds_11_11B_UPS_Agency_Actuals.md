@@ -71,18 +71,18 @@
 ### 11.13 UPS 실비 청구·대사 Actions (`src/app/actions/finance/ups-actual-charges.ts` — TASK-1162 / Issue #1354)
 
 #### recordUpsActualCharges(orderId, charges)
-- **Path**: `src/app/actions/finance/ups-actual-charges.ts:27-277`
+- **Path**: `src/app/actions/finance/ups-actual-charges.ts:27-290`
 - **설명**: UPS 오더(`IN_TRANSIT` 또는 `DELIVERED`)의 추가 실비 청구 항목(`zen_ups_actual_charges`)을 전체 교체 저장하고, 예상 비용 대비 차액(`adjustmentAmount`)을 `zen_order_costs`(`UPS_ACTUAL_ADJUSTMENT`) 및 연결 인보이스(`zen_invoices.total_amount`)에 반영합니다 (마감된 인보이스가 있으면 `createPostFinalizationAdjustment`로 추가 인보이스 발행).
-- **권한**: `validateUserAction()` + `assertAdminOrAgency(profile)` (`src/app/actions/finance/ups-actual-charges.ts:20-25, 32-34`: `ZENITH_SUPER_ADMIN`·`ADMIN`·`MANAGER`·`AGENCY` 허용) + `AGENCY`인 경우 `zen_agency_shippers` 활성 연결 화주 소속 검증 (`L54-65` — 단, 대리점 본인 화주 `profile.org_id` 미포함은 `DEF-150` 참조)
+- **권한**: `validateUserAction()` + `assertAdminOnly(profile)` — **`ZENITH_SUPER_ADMIN`·`ADMIN`·`MANAGER`만 허용**(JSJung 확정, TASK-B-372). AGENCY·화주·OPERATOR는 어떤 경로로도 불가하며 `permission_denied` + `logger.warn`. 가드 통과 후 DB 접근은 `createAdminClient()`로 수행합니다(SUPER_ADMIN이 `zen_ups_actual_charges` RLS 정책에 없어서 — RLS 정책 교체는 별도 Task). 금액은 `Number.isFinite` 검증 후 처리합니다.
 - **Input**: `orderId: string` (오더 UUID), `charges: UpsActualChargeInput[]` (`Array<{ chargeType: string, amount: number, currency: string, upsInvoiceNo?: string, upsInvoiceDate?: string, notes?: string }>`, `L8-15`)
 - **Output**: `Promise<{ success: boolean; adjustmentAmount?: number; error?: string }>` (`ups-actual-charges.ts:30, 146, 272`)
 - **오류**: 권한 불충족(`permission_denied`, `L24`), 오더 미존재(`order_not_found`, `L45`), 비UPS 오더(`not_ups_order`, `L50`), 타 대리점 화주 오더(`shipper_scope_denied`, `L63`), 상태 부적합(`ups_actual_charge_status_invalid`, `L69`), 실비 삭제/삽입·조정 비용 반영·인보이스 금액 갱신·마감 후 조정 실패 또는 예외 발생 시 `logger.error` 기록 후 `{ success: false, error: await trError('generic', { code: ... }) }` 반환
-- **부수효과**: `zen_ups_actual_charges` 기존 행 삭제 후 재삽입(`L78-112`), 마감 인보이스 존재 시 `createPostFinalizationAdjustment` 호출(`L133-146`), 미마감 시 `zen_order_costs`(`UPS_ACTUAL_ADJUSTMENT`) upsert/삭제 및 `zen_invoices.total_amount` 갱신(`L150-266`), `revalidatePath(\`/orders/\${orderId}\`)`·`revalidatePath(\`/(dashboard)/orders/\${orderId}\`)`·`revalidatePath('/admin/ups-actual-charges')` (`L268-270`)
+- **부수효과**: `zen_ups_actual_charges` 기존 행 삭제 후 재삽입, 마감 인보이스 존재 시 `createPostFinalizationAdjustment` 호출, 미마감 시 `zen_order_costs`(`UPS_ACTUAL_ADJUSTMENT`) upsert/삭제 및 `zen_invoices.total_amount` 갱신, `revalidatePath(\`/orders/\${orderId}\`)`·`revalidatePath(\`/(dashboard)/orders/\${orderId}\`)`·`revalidatePath('/admin/ups-actual-charges')`
 
 #### getUpsActualCharges(orderId)
 - **Path**: `src/app/actions/finance/ups-actual-charges.ts:279-299`
 - **설명**: 특정 UPS 오더(`orderId`)에 등록된 실비 청구 항목 목록(`zen_ups_actual_charges` + `entered_by_profile` 조인)을 등록일 오름차순으로 조회합니다.
-- **권한**: `validateUserAction()` (`src/app/actions/finance/ups-actual-charges.ts:280`, 로그인 세션만 검증하며 액션 내 별도 역할·소유권 가드 없음 — `DEF-150` 참조)
+- **권한**: `validateUserAction()` + `assertAdminOnly(profile)` — **`ZENITH_SUPER_ADMIN`·`ADMIN`·`MANAGER`만 허용**(TASK-B-372). 비관리자는 `Error(permission_denied)` throw. 조회는 admin client 사용.
 - **Input**: `orderId: string` (오더 UUID)
 - **Output**: `Promise<Array<Record<string, unknown>>>` (`ups-actual-charges.ts:298`)
 - **오류**: 미인증 시 `validateUserAction` 예외 throw; DB 조회 실패 시 `logger.error` 후 `Error(await trError('generic', { code: 'ACTUAL_CHARGES_LOOKUP' }))` throw (`L293-296`)
@@ -90,15 +90,15 @@
 #### getUpsChargeReconciliation(orderId)
 - **Path**: `src/app/actions/finance/ups-actual-charges.ts:301-364`
 - **설명**: 특정 UPS 오더(`orderId`)의 예상 비용 합계(`zen_order_costs`), 실제 청구 합계(`estimated + zen_ups_actual_charges`), 차액(`variance`), 통화 및 인보이스 마감 여부를 대사하여 반환합니다.
-- **권한**: `validateUserAction()` (`src/app/actions/finance/ups-actual-charges.ts:302`, 로그인 세션만 검증하며 액션 내 별도 역할·소유권 가드 없음 — `DEF-150` 참조)
+- **권한**: `validateUserAction()` + `assertAdminOnly(profile)` — **`ZENITH_SUPER_ADMIN`·`ADMIN`·`MANAGER`만 허용**(TASK-B-372). 비관리자는 `Error(permission_denied)` throw. 조회는 admin client 사용.
 - **Input**: `orderId: string` (오더 UUID)
 - **Output**: `Promise<{ estimated: number; estimatedBreakdown: Array<{ costType: string; amount: number; currency: string }>; actual: number; variance: number; currency: string; isFinalized: boolean; invoiceNo: string | null; invoiceDate: string | null }>` (`ups-actual-charges.ts:354-363`)
 - **오류**: 예상 비용 조회 실패(`ESTIMATED_COST_LOOKUP`, `L311-314`) 또는 실비 조회 실패(`ACTUAL_CHARGES_LOOKUP`, `L333-336`) 시 `logger.error` 후 `Error(await trError('generic', ...))` throw
 
 #### searchDeliveredUpsOrders(query)
-- **Path**: `src/app/actions/finance/ups-actual-charges.ts:366-454`
+- **Path**: `src/app/actions/finance/ups-actual-charges.ts:390-490`
 - **설명**: 오더 번호(`order_no`) 또는 운송장 번호(`zen_tracking_configs.tracking_no`) 부분 일치(`ilike`)로 `IN_TRANSIT`·`DELIVERED` 상태의 UPS 오더 목록을 검색합니다.
-- **권한**: `validateUserAction()` + `assertAdminOrAgency(profile)` (`src/app/actions/finance/ups-actual-charges.ts:367-369`: `ZENITH_SUPER_ADMIN`·`ADMIN`·`MANAGER`·`AGENCY` 허용) + 1단계(`order_no`) 검색 시 `AGENCY`는 `zen_agency_shippers` 소속 화주 오더만 필터링 (`L398-406` — 단, 2단계 `tracking_no` 검색 결과 병합 시 `AGENCY` 필터 누락 및 대리점 본인 화주 미포함 결함은 `DEF-150` 참조)
+- **권한**: `validateUserAction()` + `assertAdminOnly(profile)` — **`ZENITH_SUPER_ADMIN`·`ADMIN`·`MANAGER`만 허용**(TASK-B-372). 비관리자는 `Error(permission_denied)` throw. 1단계·2단계(tracking_no) 모두 admin client로 조회합니다.
 - **Input**: `query: string` (공백 제거 후 빈 문자열이면 즉시 `[]` 반환, `L371-372`)
 - **Output**: `Promise<Array<Record<string, unknown>>>` (`ups-actual-charges.ts:453`)
 - **오류**: 권한 불충족 시 `Error(permErr)` throw (`L369`); 오더 검색 실패 시 `logger.error` 후 `Error(await trError('generic', { code: 'ORDER_SEARCH' }))` throw (`L391-394`, 트래킹 번호 조회 에러는 `logger.error`만 기록 후 비차단 진행 `L416-418`)
@@ -106,12 +106,12 @@
 ### 11.14 UPS 실제 원가 확정·정산 마감 Actions (`src/app/actions/finance/ups-actual-cost.ts` — TASK-1162 / Issue #1354)
 
 #### getOrderReleasedDate(supabase, orderId, fallbackCreatedAt?)
-- **Path**: `src/app/actions/finance/ups-actual-cost.ts:56-69`
+- **Path**: `src/lib/orders/order-released-date.ts:6-27` — **서버 액션이 아닌 내부 헬퍼**(TASK-B-372 / DEF-150 §1.2로 `'use server'` 파일에서 이동)
 - **설명**: `order_status_history`에서 오더(`orderId`)가 `RELEASED` 상태로 전환된 최신 시각(없으면 `fallbackCreatedAt` 또는 당일)을 `YYYY-MM-DD` 문자열로 반환합니다.
-- **권한**: **없음 (누락됨)** — `'use server'` 파일에서 `export`되어 있으나 내부 헬퍼 용도로 작성되어 `validateUserAction()` 등 인증/역할 가드가 없음 (`DEF-150` 참조)
+- **권한**: 서버 액션 export가 아니므로 클라이언트에서 직접 호출할 수 없습니다. 호출자(`ups-actual-cost.ts`·오더정산 상세 서버 페이지)가 `validateUserAction()`/`requireAuth()`로 인증한 뒤 전달한 `supabase`(사용자 세션)로 실행됩니다.
 - **Input**: `supabase: any` (SupabaseClient), `orderId: string`, `fallbackCreatedAt?: string`
-- **Output**: `Promise<string>` (`YYYY-MM-DD`, `ups-actual-cost.ts:68`)
-- **오류**: 별도 에러 throw 없이 조회 결과가 없으면 `fallbackCreatedAt` 또는 현재 UTC 날짜(`YYYY-MM-DD`) 반환 (`L66-68`)
+- **Output**: `Promise<string>` (`YYYY-MM-DD`)
+- **오류**: 별도 에러 throw 없이 조회 결과가 없으면 `fallbackCreatedAt` 또는 현재 UTC 날짜(`YYYY-MM-DD`) 반환
 
 #### getUpsActualCost(orderId)
 - **Path**: `src/app/actions/finance/ups-actual-cost.ts:72-91`
