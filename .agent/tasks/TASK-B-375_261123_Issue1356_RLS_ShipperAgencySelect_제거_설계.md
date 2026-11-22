@@ -5,7 +5,7 @@
 | **Issue** | [#1356](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1356) (DEF-150 후속, PR #1440 Jaison 지시) |
 | **담당(Worker)** | Dave (Team B) |
 | **검증(Auditor)** | Jaison |
-| **상태** | 📝 설계 의견 (`status:draft`) — **구현 전 Aiden/Jaison 확정 필요** |
+| **상태** | 🔔 리뷰 대기 (`status:review`) — Jaison 설계 승인 반영 |
 | **브랜치** | `feature/teamb-task-b375-iss1356-rls-shipper-agency-select` (base `origin/TeamB_Dev` 4d01f7327) |
 | **채번** | 로컬 `.agent/tasks`·`origin/TeamB_Dev`에 B-373(설계 대기)·B-374(Mike #1349)·B-375 없음 → **TASK-B-375** |
 
@@ -70,6 +70,41 @@ DROP POLICY IF EXISTS shipper_agency_select ON public.zen_ups_actual_charges;
 2. `admin_manager_all`에 `ZENITH_SUPER_ADMIN` 추가 여부(같은 PR 포함 vs 별도).
 3. 화주·대리점이 실비를 **조회**해야 하는 업무 요구가 없는지 최종 확인(PR #1440에서 폼·4함수 차단 완료).
 
-## 6. [작업 결과]
+## 6. 구현 (설계 승인 반영)
 
-- 설계 의견 PR (코드·마이그레이션 없음). 확정 후 구현 PR에서 마이그레이션·실DB 테스트·R-17 절차 진행.
+Jaison 승인(2026-11-23): `shipper_agency_select` 제거만, `admin_manager_all`에 SUPER_ADMIN 추가는 하지 않음.
+
+| # | 파일 | 변경 |
+|:--|:--|:--|
+| 1 | `supabase/migrations/20261123100000_task_b375_drop_shipper_agency_select_rls.sql` (신규) | `DROP POLICY IF EXISTS shipper_agency_select ON zen_ups_actual_charges` (멱등) + `NOTIFY pgrst` |
+| 2 | `tests/integration/task-b375-rls-shipper-agency-select.test.ts` (신규) | 실제 세션·실DB — 화주/대리점/OPERATOR/anon 0건, 정책 재생성 시 복구(되돌리기), ADMIN `zen_order_costs` 읽기, 관리자 3역할 4함수 |
+| 3 | `docs/08_Self_Audit/Checklists/regression-items/TASK-B-375_Issue1356_rls-shipper-agency-select.md` (신규) | R-09 회귀 항목 |
+
+### 구현 후 실측 (로컬 DB)
+
+```sql
+-- 정책: admin_manager_all만 남음
+SELECT policyname, cmd FROM pg_policies WHERE tablename='zen_ups_actual_charges';
+-- admin_manager_all | ALL
+
+-- 참조 전수: 함수 본문(prosrc) 0건
+SELECT n.nspname||'.'||p.proname FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
+WHERE p.prosrc ILIKE '%zen_ups_actual_charges%';
+-- (0 rows)
+
+-- 뷰 의존 0건 / 트리거 0건
+```
+
+## 7. [작업 결과]
+
+- 검증: 실DB 세션 6/6 PASS, 되돌리기(정책 재생성) 실측, 전체 회귀 **295 files / 2,261 tests PASS**, build **EXIT=0**, 오류 로그 0건
+- 코드(마이그레이션)·테스트 커밋: `44fffd116`
+- 문서 커밋: 본 task file
+- `git diff --numstat origin/TeamB_Dev...HEAD`:
+```text
+75	0	.agent/tasks/TASK-B-375_261123_Issue1356_RLS_ShipperAgencySelect_제거_설계.md
+11	0	docs/08_Self_Audit/Checklists/regression-items/TASK-B-375_Issue1356_rls-shipper-agency-select.md
+11	0	supabase/migrations/20261123100000_task_b375_drop_shipper_agency_select_rls.sql
+206	0	tests/integration/task-b375-rls-shipper-agency-select.test.ts
+```
+- PR: #1441 (draft → ready), **`Refs #1356`**
