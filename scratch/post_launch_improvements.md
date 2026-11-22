@@ -2221,7 +2221,7 @@ UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류
 
 ---
 
-## [IMP-196] `exceljs@4.4.0` 유지 저하 대비 — 대체 검토 및 `WorkbookWriter` 미사용 가드 (조건부 수용 후속)
+## [IMP-201] `exceljs@4.4.0` 유지 저하 대비 — 대체 검토 및 `WorkbookWriter` 미사용 가드 (조건부 수용 후속)
 
 - **발견 경위**: TASK-B-360(Issue #1366) ⒝에서 Team B가 Excel 출력을 위해 `exceljs@4.4.0`을 `dependencies`에 추가(JSJung 결정 2026-11-21, 병합 PR #1411). Aiden이 2026-11-22 의존 경로를 검증하고 Edward 승인으로 **조건부 수용**했다.
 - **현재 상태**: exceljs 마지막 publish는 2024-12(유지 저하). `package-lock.json` 검증 결과 `brace-expansion@1.1.14`가 개발 전용에서 **운영 의존성**으로 바뀌었고 `audit-baseline`이 12→15건(`brace-expansion:high`·`exceljs:moderate`·`uuid:moderate` 추가). 단 Team B 코드는 `new ExcelJS.Workbook()` + `wb.xlsx.writeBuffer()`(jszip 경로)만 사용하며, archiver·glob·brace-expansion이 실행되는 `WorkbookWriter`(스트리밍) 경로는 쓰지 않는다(exceljs 패키지 소스 확인: archiver는 `lib/stream/xlsx/workbook-writer.js`에서만 사용, `.glob()`·`.directory()` 호출 없음). `uuid`는 인자 없는 `uuidv4()`만 호출.
